@@ -1,0 +1,234 @@
+﻿return {
+	keys = {
+		"id",
+		"name",
+		"dialog",
+		"position",
+		"l_img",
+		"r_img",
+		"expression",
+		"bg"
+	},
+	rows = {
+		{
+			"1",
+			"Caitlyn",
+			"Can't stand you anymore!!!",
+			"1",
+			"10002049",
+			"10002086",
+			"",
+			""
+		},
+		{
+			"2",
+			"Lisa",
+			"Huh?",
+			"2",
+			"10002049",
+			"10002086",
+			"",
+			""
+		},
+		{
+			"3",
+			"Caitlyn",
+			"You smashed my console every time I fixed it, took my place in the club and now you even trying to rob me of this place?",
+			"1",
+			"10002049",
+			"10002086",
+			"7",
+			""
+		},
+		{
+			"4",
+			"Lisa",
+			"Dude, you're supposed to study at this age. Your inner beauty can't be developed by ill temper.",
+			"2",
+			"10002049",
+			"10002086",
+			"",
+			""
+		},
+		{
+			"5",
+			"Caitlyn",
+			"I do what I want! Just go away!",
+			"1",
+			"10002049",
+			"10002086",
+			"",
+			""
+		},
+		{
+			"6",
+			"Lisa",
+			"Huh? Is there any label saying this place belongs to you? ",
+			"2",
+			"10002049",
+			"10002086",
+			"",
+			""
+		},
+		{
+			"7",
+			"Caitlyn",
+			"This is a place for video game club!",
+			"1",
+			"10002049",
+			"10002086",
+			"",
+			""
+		},
+		{
+			"8",
+			"Lisa",
+			"It suddenly occurs to me that your club has been cancelled. Oh, and that's because someone is offensive towards the Supervisory Board.",
+			"2",
+			"10002049",
+			"10002086",
+			"6",
+			""
+		},
+		{
+			"9",
+			"Caitlyn",
+			"No way! As long as there are video games, here we'll stand!",
+			"1",
+			"10002049",
+			"10002086",
+			"",
+			""
+		},
+		{
+			"10",
+			"Lisa",
+			"Ohhh, sounds cool! But it still won't be a problem to get rid of you at once.",
+			"2",
+			"10002049",
+			"10002086",
+			"",
+			""
+		},
+		{
+			"11",
+			"Caitlyn",
+			"That's impossible. You will have to compensate for your recklessness if you break anything here.",
+			"1",
+			"10002049",
+			"10002086",
+			"7",
+			""
+		},
+		{
+			"12",
+			"Lisa",
+			"Oh. I'm gonna leave.",
+			"2",
+			"10002049",
+			"10002086",
+			"",
+			""
+		},
+		{
+			"13",
+			"Caitlyn",
+			"I finally let her go off.. Video games! Video games!",
+			"1",
+			"10002049",
+			"",
+			"9",
+			""
+		},
+		{
+			"14",
+			"",
+			"Later...",
+			"",
+			"",
+			"",
+			"",
+			""
+		},
+		{
+			"15",
+			"Sonya",
+			"Boss..",
+			"1",
+			"10002035",
+			"10002049",
+			"8",
+			""
+		},
+		{
+			"16",
+			"Caitlyn",
+			"What's the problem?",
+			"2",
+			"10002035",
+			"10002049",
+			"1",
+			""
+		},
+		{
+			"17",
+			"Sonya",
+			"The power was out and the network broken… just now.",
+			"1",
+			"10002035",
+			"10002049",
+			"",
+			""
+		},
+		{
+			"18",
+			"Caitlyn",
+			"What!!! What happened!",
+			"2",
+			"10002035",
+			"10002049",
+			"2",
+			""
+		},
+		{
+			"19",
+			"",
+			"…",
+			"",
+			"",
+			"",
+			"",
+			""
+		},
+		{
+			"20",
+			"Nagia",
+			"Ms. President, I've melted their wires with my solvents.",
+			"1",
+			"10002063",
+			"10002048",
+			"",
+			""
+		},
+		{
+			"21",
+			"Lin. AI",
+			"Break… Internet… System…",
+			"2",
+			"10002063",
+			"10002048",
+			"",
+			""
+		},
+		{
+			"22",
+			"Lisa",
+			"Hmph! Time for them to know the power of knowledge!",
+			"1",
+			"10002086",
+			"",
+			"9",
+			""
+		}
+	}
+}

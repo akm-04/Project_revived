@@ -1,0 +1,204 @@
+﻿return {
+	keys = {
+		"id",
+		"name",
+		"img",
+		"position",
+		"dialog",
+		"time",
+		"trends",
+		"expression"
+	},
+	rows = {
+		{
+			"1",
+			"=playername=",
+			"images/home_card/10001001.png",
+			"1",
+			"At the end of the day, our clues lead to nowhere...",
+			"-1",
+			"0",
+			"0"
+		},
+		{
+			"2",
+			"Rocky",
+			"images/home_card/10001003.png",
+			"2",
+			"(It's not because some main character let a dark little girl run away.)",
+			"-1",
+			"0",
+			"0"
+		},
+		{
+			"3",
+			"=playername=",
+			"images/home_card/10001001.png",
+			"1",
+			"What should I do next...",
+			"-1",
+			"0",
+			"0"
+		},
+		{
+			"4",
+			"Rocky",
+			"images/home_card/10001003.png",
+			"2",
+			"(I still want to take credit for being the supporting role)!",
+			"-1",
+			"0",
+			"0"
+		},
+		{
+			"5",
+			"=playername=",
+			"images/home_card/10001001.png",
+			"1",
+			"...You really thought I can't hear you whisper?",
+			"-1",
+			"0",
+			"0"
+		},
+		{
+			"6",
+			"=playername=",
+			"images/home_card/10001001.png",
+			"1",
+			"...Wait....",
+			"-1",
+			"0",
+			"0"
+		},
+		{
+			"7",
+			"=playername=",
+			"images/home_card/10001001.png",
+			"1",
+			"When you interrupt like this, I suddenly think of this.",
+			"-1",
+			"0",
+			"0"
+		},
+		{
+			"8",
+			"=playername=",
+			"images/home_card/10001001.png",
+			"1",
+			"You already said that. Is someone trying to instigate you to come looking for trouble?",
+			"-1",
+			"0",
+			"0"
+		},
+		{
+			"9",
+			"Aquaris",
+			"images/home_card/10002001.png",
+			"2",
+			"...Right! Obviously, Rocky is the biggest clue!",
+			"-1",
+			"0",
+			"0"
+		},
+		{
+			"10",
+			"Rocky",
+			"images/home_card/10001003.png",
+			"2",
+			"It's \"hire\"! What \"Instigation?\" I simply provide a fee when I help others get rid of trouble? Are you questioning my professionalism?",
+			"-1",
+			"0",
+			"0"
+		},
+		{
+			"11",
+			"=playername=",
+			"images/home_card/10001001.png",
+			"1",
+			"Yes yes! You're very professional. It's just that people are too weak.",
+			"-1",
+			"0",
+			"0"
+		},
+		{
+			"12",
+			"Rocky",
+			"images/home_card/10001003.png",
+			"2",
+			"You！",
+			"-1",
+			"0",
+			"7"
+		},
+		{
+			"13",
+			"=playername=",
+			"images/home_card/10001001.png",
+			"1",
+			"\"You!?\" What? I'm asking you. Who is that person?",
+			"-1",
+			"0",
+			"0"
+		},
+		{
+			"14",
+			"Rocky",
+			"images/home_card/10001003.png",
+			"2",
+			".... Shut it. Honestly, I don't know her.",
+			"-1",
+			"0",
+			"0"
+		},
+		{
+			"15",
+			"Hoder",
+			"images/home_card/11001.png",
+			"2",
+			"Really? You don't even recognize her?",
+			"-1",
+			"0",
+			"0"
+		},
+		{
+			"16",
+			"Rocky",
+			"images/home_card/10001003.png",
+			"2",
+			"She was wearing a large hood, and there wasn't enough light in the alley.",
+			"-1",
+			"0",
+			"0"
+		},
+		{
+			"17",
+			"Aquaris",
+			"images/home_card/10002001.png",
+			"2",
+			"Even this \"clue\" is unreliable.",
+			"-1",
+			"0",
+			"0"
+		},
+		{
+			"18",
+			"=playername=",
+			"images/home_card/10001001.png",
+			"1",
+			"Hmm! Even if Rocky is reliable, we can't even get to KongMing's place.",
+			"-1",
+			"0",
+			"0"
+		},
+		{
+			"19",
+			"Rocky",
+			"images/home_card/10001003.png",
+			"2",
+			"Hey!",
+			"-1",
+			"0",
+			"0"
+		}
+	}
+}

@@ -1,0 +1,82 @@
+﻿return {
+	keys = {
+		"id",
+		"name",
+		"image",
+		"scale"
+	},
+	rows = {
+		{
+			"1",
+			"Bus Station",
+			"images/campaign/bus.png",
+			"0.66"
+		},
+		{
+			"2",
+			"Cafe",
+			"images/campaign/cafe.png",
+			"0.62"
+		},
+		{
+			"3",
+			"Square",
+			"images/campaign/caochang.png",
+			"0.79"
+		},
+		{
+			"4",
+			"Building",
+			"images/campaign/jiaoshi.png",
+			"0.53"
+		},
+		{
+			"5",
+			"Practical Center",
+			"images/campaign/lishiceyan.png",
+			"0.58"
+		},
+		{
+			"6",
+			"Restaurant",
+			"images/campaign/meishi.png",
+			"0.61"
+		},
+		{
+			"7",
+			"Canteen",
+			"images/campaign/shangdian.png",
+			"0.76"
+		},
+		{
+			"8",
+			"Dorm",
+			"images/campaign/sushe.png",
+			"0.64"
+		},
+		{
+			"9",
+			"Theater",
+			"images/campaign/xiaojudan.png",
+			"0.57"
+		},
+		{
+			"10",
+			"School Gate",
+			"images/campaign/xiaomen.png",
+			"0.57"
+		},
+		{
+			"11",
+			"Playground",
+			"images/campaign/xiaoyaojin.png",
+			"0.53"
+		},
+		{
+			"12",
+			"Sakura Lane",
+			"images/campaign/yinghua.png",
+			"0.64"
+		}
+	}
+}

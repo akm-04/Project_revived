@@ -1,0 +1,3 @@
+﻿return {
+	SocketTCP = import(".SocketTCP")
+}

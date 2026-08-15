@@ -1,0 +1,274 @@
+﻿return {
+	keys = {
+		"id",
+		"name",
+		"dialog",
+		"position",
+		"l_img",
+		"r_img",
+		"expression",
+		"bg"
+	},
+	rows = {
+		{
+			"1",
+			"Blowie",
+			"Sister, wake up, sister!",
+			"1",
+			"10002036",
+			"10002098",
+			"",
+			""
+		},
+		{
+			"2",
+			"Magician",
+			"Ah……my head hurts……",
+			"2",
+			"10002036",
+			"10002098",
+			"4",
+			""
+		},
+		{
+			"3",
+			"Magician",
+			"Where am I……I remember I was practicing new spell……",
+			"2",
+			"10002036",
+			"10002098",
+			"",
+			""
+		},
+		{
+			"4",
+			"Quinie",
+			"Maybe，sister Magician failed in the practice and suffered its side effect?",
+			"1",
+			"10002022",
+			"10002098",
+			"",
+			""
+		},
+		{
+			"5",
+			"",
+			"Hahaha…",
+			"0",
+			"10002022",
+			"10002098",
+			"",
+			""
+		},
+		{
+			"6",
+			"Magician",
+			"Ah…",
+			"1",
+			"10002098",
+			"",
+			"2",
+			""
+		},
+		{
+			"7",
+			"Magician",
+			"I know, I should have cast the wrong spell and got possessed!!",
+			"1",
+			"10002098",
+			"",
+			"",
+			""
+		},
+		{
+			"8",
+			"Magician",
+			"Time to do this!",
+			"1",
+			"10002098",
+			"",
+			"",
+			""
+		},
+		{
+			"9",
+			"",
+			"Magician took out a bag of white powder and sprayed it into the air.",
+			"0",
+			"10002098",
+			"",
+			"",
+			""
+		},
+		{
+			"10",
+			"",
+			"Everyone in the sight was covered by this white powder, even Quinie's kanto food can't avoid it.",
+			"0",
+			"10002098",
+			"",
+			"",
+			""
+		},
+		{
+			"11",
+			"Quinie",
+			"What are you doing to my kanto food!!!!!",
+			"1",
+			"10002022",
+			"10002098",
+			"7",
+			""
+		},
+		{
+			"12",
+			"Magician",
+			"Exorcism spell!",
+			"2",
+			"10002022",
+			"10002098",
+			"",
+			""
+		},
+		{
+			"13",
+			"Blowie",
+			"Magician surely knows how to cast this spell well…",
+			"1",
+			"10002036",
+			"10002098",
+			"",
+			""
+		},
+		{
+			"14",
+			"",
+			"When her voice dies down, a crimson smoke flies out of her body and gathers to a human shape.",
+			"0",
+			"10002036",
+			"10002098",
+			"",
+			""
+		},
+		{
+			"15",
+			"",
+			"Hehehe……the real show begins.",
+			"0",
+			"10002066",
+			"",
+			"",
+			""
+		},
+		{
+			"16",
+			"Sakura",
+			"This is the one who possessed you?",
+			"1",
+			"10002131",
+			"",
+			"2",
+			""
+		},
+		{
+			"17",
+			"Dracula",
+			"What a weak body~I thought the summoner can inherit my power, but I was too wrong I think.",
+			"2",
+			"10002131",
+			"10002066",
+			"",
+			""
+		},
+		{
+			"18",
+			"Magician",
+			"The summon spell was an utter mistake, but saying so is so rude!",
+			"1",
+			"10002098",
+			"10002066",
+			"7",
+			""
+		},
+		{
+			"19",
+			"Dracula",
+			"Hahaha……Looks like there is no proper candidate for me to possess, so tragic……",
+			"2",
+			"10002098",
+			"10002066",
+			"",
+			""
+		},
+		{
+			"20",
+			"Dracula",
+			"I don't come often, can't leave with my hands empty, take my small gift.",
+			"2",
+			"10002098",
+			"10002066",
+			"9",
+			""
+		},
+		{
+			"21",
+			"Dracula",
+			"Goodbye~haha~",
+			"2",
+			"10002098",
+			"10002066",
+			"",
+			""
+		},
+		{
+			"22",
+			"",
+			"Dracula vanishes within the smoke.",
+			"0",
+			"10002098",
+			"",
+			"",
+			""
+		},
+		{
+			"23",
+			"Sakura",
+			"She leaves? What a strange person.",
+			"1",
+			"10002131",
+			"",
+			"6",
+			""
+		},
+		{
+			"24",
+			"Blowie",
+			"My head, is so dizzy.",
+			"1",
+			"10002036",
+			"",
+			"4",
+			""
+		},
+		{
+			"25",
+			"Blowie",
+			"Let me rest a while.",
+			"1",
+			"10002036",
+			"",
+			"",
+			""
+		},
+		{
+			"26",
+			"Magician",
+			"What's wrong with Blowie? Frightened?",
+			"2",
+			"10002036",
+			"10002098",
+			"1",
+			""
+		}
+	}
+}

@@ -1,0 +1,184 @@
+﻿return {
+	keys = {
+		"id",
+		"name",
+		"img",
+		"position",
+		"dialog",
+		"time",
+		"trends",
+		"expression"
+	},
+	rows = {
+		{
+			"1",
+			"Balder",
+			"images/home_card/11002.png",
+			"2",
+			"Yeah, I got it. KongMing disappeared again, and the prisoner was a man with a tail...",
+			"-1",
+			"0",
+			"0"
+		},
+		{
+			"2",
+			"Hoder",
+			"images/home_card/11001.png",
+			"2",
+			"Sister, my vague memory seems to have such a man with... long tail. But that's all about it...",
+			"-1",
+			"0",
+			"0"
+		},
+		{
+			"3",
+			"Aquaris",
+			"images/home_card/10002001.png",
+			"2",
+			"So what do you know about this man?",
+			"-1",
+			"0",
+			"0"
+		},
+		{
+			"4",
+			"=playername=",
+			"images/home_card/10001001.png",
+			"1",
+			"(Aquaris also looks anxious...)",
+			"-1",
+			"0",
+			"0"
+		},
+		{
+			"5",
+			"Balder",
+			"images/home_card/11002.png",
+			"2",
+			"A man with a tail and a deep, husky voice...",
+			"-1",
+			"0",
+			"0"
+		},
+		{
+			"6",
+			"Balder",
+			"images/home_card/11002.png",
+			"2",
+			"I'm not sure, but if it's that man...",
+			"-1",
+			"0",
+			"0"
+		},
+		{
+			"7",
+			"Rocky",
+			"images/home_card/10001003.png",
+			"2",
+			"Hey, why do all of you look so heavy! Could it be a monster?",
+			"-1",
+			"0",
+			"0"
+		},
+		{
+			"8",
+			"=playername=",
+			"images/home_card/10001001.png",
+			"1",
+			"(Oh, my god! Can someone shut this guy up?)",
+			"-1",
+			"0",
+			"0"
+		},
+		{
+			"9",
+			"Balder",
+			"images/home_card/11002.png",
+			"2",
+			"...That's right.",
+			"-1",
+			"0",
+			"0"
+		},
+		{
+			"10",
+			"Rocky",
+			"images/home_card/10001003.png",
+			"2",
+			"What? \"Right\"?",
+			"-1",
+			"0",
+			"0"
+		},
+		{
+			"11",
+			"Aquaris",
+			"images/home_card/10002001.png",
+			"2",
+			"No......",
+			"-1",
+			"0",
+			"0"
+		},
+		{
+			"12",
+			"=playername=",
+			"images/home_card/10001001.png",
+			"1",
+			"\"Monster\"?",
+			"-1",
+			"0",
+			"0"
+		},
+		{
+			"13",
+			"Balder",
+			"images/home_card/11002.png",
+			"2",
+			"HMM...In the legend, the giant wolf \"Fenrir\".",
+			"-1",
+			"0",
+			"0"
+		},
+		{
+			"14",
+			"Rocky",
+			"images/home_card/10001003.png",
+			"2",
+			"What? What giant wolf?",
+			"-1",
+			"0",
+			"0"
+		},
+		{
+			"15",
+			"Hoder",
+			"images/home_card/11001.png",
+			"2",
+			"...",
+			"-1",
+			"0",
+			"0"
+		},
+		{
+			"16",
+			"Aquaris",
+			"images/home_card/10002001.png",
+			"2",
+			"Giant, giant Wolf?!",
+			"-1",
+			"0",
+			"2"
+		},
+		{
+			"17",
+			"=playername=",
+			"images/home_card/10001001.png",
+			"1",
+			"Yeah...Looks like things are getting complicated...",
+			"-1",
+			"0",
+			"0"
+		}
+	}
+}

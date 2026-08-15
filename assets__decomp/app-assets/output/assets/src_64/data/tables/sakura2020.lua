@@ -1,0 +1,434 @@
+﻿return {
+	keys = {
+		"id",
+		"name",
+		"dialog",
+		"position",
+		"l_img",
+		"r_img",
+		"expression",
+		"bg"
+	},
+	rows = {
+		{
+			"1",
+			"",
+			"The battle lasted long…",
+			"0",
+			"",
+			"",
+			"",
+			"1"
+		},
+		{
+			"2",
+			"",
+			"A line of enemies retreated, another came. ",
+			"0",
+			"",
+			"",
+			"",
+			"1"
+		},
+		{
+			"3",
+			"",
+			"Beset by enemies, there were many new wounds on Sakura.",
+			"0",
+			"",
+			"",
+			"",
+			"1"
+		},
+		{
+			"4",
+			"",
+			"The girl fought like a marionette with no feeling.",
+			"0",
+			"",
+			"",
+			"",
+			"1"
+		},
+		{
+			"5",
+			"",
+			"She did her best to guard the dying young man. ",
+			"0",
+			"",
+			"",
+			"",
+			"1"
+		},
+		{
+			"6",
+			"Sakura",
+			"I'm not letting you anywhere near master——!",
+			"1",
+			"10001011",
+			"",
+			"7",
+			"1"
+		},
+		{
+			"7",
+			"",
+			"That's the only meaning of her existence. ",
+			"0",
+			"10001011",
+			"",
+			"",
+			"1"
+		},
+		{
+			"8",
+			"",
+			"…",
+			"0",
+			"",
+			"",
+			"",
+			"1"
+		},
+		{
+			"9",
+			"",
+			"The young man, watched silently. ",
+			"0",
+			"",
+			"",
+			"",
+			"1"
+		},
+		{
+			"10",
+			"",
+			"Although the same scene had been seen many times. But this time, there was grief in young man's eyes.",
+			"0",
+			"",
+			"",
+			"",
+			"1"
+		},
+		{
+			"11",
+			"",
+			"… ",
+			"0",
+			"",
+			"",
+			"",
+			"1"
+		},
+		{
+			"12",
+			"",
+			"Finally, the last enemy fell.",
+			"0",
+			"",
+			"",
+			"",
+			"1"
+		},
+		{
+			"13",
+			"",
+			"Looking at baddly scarred girl, the young man made up his mind.",
+			"0",
+			"",
+			"",
+			"",
+			"1"
+		},
+		{
+			"14",
+			"Young man",
+			"Kill me, with your sword. Skura.",
+			"1",
+			"10001012",
+			"",
+			"",
+			"1"
+		},
+		{
+			"15",
+			"",
+			"Sacrificing his own soul to let the girl get his『Soul』——",
+			"0",
+			"10001012",
+			"",
+			"",
+			"1"
+		},
+		{
+			"16",
+			"",
+			"This was the only way he knew.",
+			"0",
+			"",
+			"",
+			"",
+			"1"
+		},
+		{
+			"17",
+			"Sakura",
+			"Master, how can I…?!",
+			"1",
+			"10001011",
+			"",
+			"2",
+			"1"
+		},
+		{
+			"18",
+			"Young man",
+			"It's an order. Kill me!",
+			"1",
+			"10001012",
+			"",
+			"",
+			"1"
+		},
+		{
+			"19",
+			"",
+			"With no hesitation, the young man gave his last order.",
+			"0",
+			"10001012",
+			"",
+			"",
+			"1"
+		},
+		{
+			"20",
+			"",
+			"——",
+			"0",
+			"",
+			"",
+			"",
+			"1"
+		},
+		{
+			"21",
+			"",
+			"—— You are an unmatched battle girl. My best work.",
+			"0",
+			"10001012",
+			"",
+			"",
+			"1"
+		},
+		{
+			"22",
+			"",
+			"—— Once and henceforth. ",
+			"0",
+			"10001012",
+			"",
+			"",
+			"1"
+		},
+		{
+			"23",
+			"",
+			"—— From now on, you'll live for your own sake. ",
+			"0",
+			"10001012",
+			"",
+			"",
+			"1"
+		},
+		{
+			"24",
+			"",
+			"—— Forget me, Sakura.",
+			"0",
+			"10001012",
+			"",
+			"",
+			"1"
+		},
+		{
+			"25",
+			"",
+			"The young man's last thoughts faded like cherry blossoms. ",
+			"0",
+			"",
+			"",
+			"",
+			"1"
+		},
+		{
+			"26",
+			"Sakura",
+			"…",
+			"1",
+			"10001011",
+			"",
+			"",
+			"1"
+		},
+		{
+			"27",
+			"Sakura",
+			"Eh…",
+			"1",
+			"10002131",
+			"",
+			"",
+			"1"
+		},
+		{
+			"28",
+			"Sakura",
+			"This is… tear…? My tear…?",
+			"1",
+			"10002131",
+			"",
+			"",
+			"1"
+		},
+		{
+			"29",
+			"",
+			"Don't know since when, tears streamed down of Sakura's face like flood.",
+			"0",
+			"10002131",
+			"",
+			"",
+			"1"
+		},
+		{
+			"30",
+			"Sakura",
+			"Oooh…",
+			"1",
+			"10002131",
+			"",
+			"",
+			"1"
+		},
+		{
+			"31",
+			"Sakura",
+			"Master… ",
+			"1",
+			"10002131",
+			"",
+			"",
+			"1"
+		},
+		{
+			"32",
+			"Sakura",
+			"Ma… ster… ",
+			"1",
+			"10002131",
+			"",
+			"",
+			""
+		},
+		{
+			"33",
+			"Blowie",
+			"Ah… Sakura. What happened?",
+			"2",
+			"10002131",
+			"10002036",
+			"8",
+			""
+		},
+		{
+			"34",
+			"Quinie",
+			"Not happy? Here is the apple candy !",
+			"2",
+			"10002131",
+			"10002022",
+			"",
+			""
+		},
+		{
+			"35",
+			"Sakura",
+			"Hmm… I, I'm fine… I'm just too touched.",
+			"1",
+			"10002131",
+			"10002022",
+			"",
+			""
+		},
+		{
+			"36",
+			"",
+			"Skura smiles, wiping away some tears.",
+			"0",
+			"10002131",
+			"10002022",
+			"",
+			""
+		},
+		{
+			"37",
+			"Sakura",
+			"Hum… Thank you, Wraith, and thank you all… for helping me retrieve the most precious memories.",
+			"1",
+			"10002131",
+			"10002022",
+			"",
+			""
+		},
+		{
+			"38",
+			"Wraith",
+			"Hee-hee-hee~~ Don't lose it again~",
+			"2",
+			"10002131",
+			"10002095",
+			"",
+			""
+		},
+		{
+			"39",
+			"Sakura",
+			"I will cherish it ",
+			"1",
+			"10002131",
+			"10002095",
+			"",
+			""
+		},
+		{
+			"40",
+			"Sakura",
+			"(Thank you, master.)",
+			"1",
+			"10002131",
+			"",
+			"",
+			""
+		},
+		{
+			"41",
+			"Sakura",
+			"(Thank you for creating me, making me a real battle girl with 『Soul』)",
+			"1",
+			"10002131",
+			"",
+			"",
+			""
+		},
+		{
+			"42",
+			"Sakura",
+			"(I am your unique Sakura, forever.)",
+			"1",
+			"10002131",
+			"",
+			"",
+			""
+		}
+	}
+}

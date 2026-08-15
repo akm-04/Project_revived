@@ -1,0 +1,17 @@
+﻿xyd = xyd or {}
+xyd.state = {}
+xyd.state.IS_HAS_NEW_NOTICE = "is_has_new_notice"
+xyd.state.NOTICE_COUNT = "notice_count"
+xyd.state.LAST_FELLOW_ID = "last_fellow_id"
+xyd.state.LAST_FELLOW_NAME = "last_fellow_name"
+xyd.state.REMOVE_APPLY_STATE = "remove_apply_state"
+xyd.state.ADD_FELLOW_TIP_STATE = "add_fellow_tip_state"
+xyd.state.SAKURA_PRE_HEROS_FORMATION = "skaura_pre_heros_formation"
+xyd.state.SAKURA_PRE_PET_FORMATION = "skaura_pre_pet_formation"
+xyd.state.DRAGON_BOAT2017_BOATID = "dragon_boat2017_boatid"
+xyd.state.FRIEND_INVERTED_ORDER = "friend_inverted_order"
+xyd.state.CHANGE_AVATAR_ORDER = "change_avatar_order"
+xyd.state.IS_SECOND_CHAPTER_GUIDE = "is_second_chapter_guide"
+xyd.state.CHOCOLATE_FRUIT_ALREADY_PLAYED = "chocolate_fruit_already_played"
+xyd.state.LAST_RECALL_TIME = "last_recall_time"
+xyd.state.LVBU_DOOR_OPEN_TIME = "lvbu_door_open_time"

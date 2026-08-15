@@ -1,0 +1,46 @@
+﻿return {
+	keys = {
+		"id",
+		"gift",
+		"icon",
+		"cost"
+	},
+	rows = {
+		{
+			"1",
+			"90001576",
+			"windows/activities/spring_dial/shop/1.png",
+			"1"
+		},
+		{
+			"2",
+			"90001577",
+			"windows/activities/spring_dial/shop/2.png",
+			"2"
+		},
+		{
+			"3",
+			"90001578",
+			"windows/activities/spring_dial/shop/3.png",
+			"2"
+		},
+		{
+			"4",
+			"99000001",
+			"windows/activities/spring_dial/shop/4.png",
+			"8"
+		},
+		{
+			"5",
+			"99000002",
+			"windows/activities/spring_dial/shop/5.png",
+			"10"
+		},
+		{
+			"6",
+			"99000003",
+			"windows/activities/spring_dial/shop/6.png",
+			"12"
+		}
+	}
+}

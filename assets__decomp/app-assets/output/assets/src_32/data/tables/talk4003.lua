@@ -1,0 +1,284 @@
+﻿return {
+	keys = {
+		"id",
+		"name",
+		"dialog",
+		"position",
+		"l_img",
+		"r_img",
+		"expression",
+		"bg"
+	},
+	rows = {
+		{
+			"1",
+			"Revolver",
+			"Ah.. So hot.. Why must Summer Festival be held in such a hot summer… ",
+			"1",
+			"10002061",
+			"",
+			"4",
+			""
+		},
+		{
+			"2",
+			"Revolver",
+			"Wait.. Isn't it Guan Yin? Gosh, she's fishing goldfish! Haha, what a little child!",
+			"1",
+			"10002061",
+			"",
+			"1",
+			""
+		},
+		{
+			"3",
+			"Shopkeeper:",
+			"Hey, girls. Come and play! So much fun here..",
+			"2",
+			"10002061",
+			"10001007",
+			"",
+			""
+		},
+		{
+			"4",
+			"Revolver",
+			"Shoot balloons? Nah.. Seems a game for little kids.",
+			"1",
+			"10002061",
+			"10001007",
+			"",
+			""
+		},
+		{
+			"5",
+			"Shopkeeper:",
+			"Hey, girls~ Come and play~ So much fun here~",
+			"2",
+			"10002061",
+			"10001007",
+			"",
+			""
+		},
+		{
+			"6",
+			"Revolver",
+			"Well, if you insist. I am sure that I'll shoot all of your balloons into pieces.   ",
+			"1",
+			"10002061",
+			"10001007",
+			"6",
+			""
+		},
+		{
+			"7",
+			"Shopkeeper:",
+			"Hey, girls. Come and play! So much fun here..",
+			"2",
+			"10002061",
+			"10001007",
+			"",
+			""
+		},
+		{
+			"8",
+			"Revolver",
+			"Hello, five bullets, please!",
+			"1",
+			"10002061",
+			"10001007",
+			"",
+			""
+		},
+		{
+			"9",
+			"",
+			"……",
+			"",
+			"",
+			"",
+			"",
+			""
+		},
+		{
+			"10",
+			"Caitlyn",
+			"Oh, old friend. Are you going to pop balloons? Haha, I thought only kids like to do that.",
+			"1",
+			"10002049",
+			"",
+			"2",
+			""
+		},
+		{
+			"11",
+			"Revolver",
+			"It's not like that..",
+			"2",
+			"10002049",
+			"10002061",
+			"8",
+			""
+		},
+		{
+			"12",
+			"Caitlyn",
+			"Wow.. So many bullets. You must have played for a good while.",
+			"1",
+			"10002049",
+			"10002061",
+			"",
+			""
+		},
+		{
+			"13",
+			"Revolver",
+			"Hey, it's not that easy, okay? ",
+			"2",
+			"10002049",
+			"10002061",
+			"",
+			""
+		},
+		{
+			"14",
+			"Caitlyn",
+			"I understand, hahaha.. Because it's not easy for a baga!",
+			"1",
+			"10002049",
+			"10002061",
+			"",
+			""
+		},
+		{
+			"15",
+			"Revolver",
+			"Trust me! You should try it, too!",
+			"2",
+			"10002049",
+			"10002061",
+			"8",
+			""
+		},
+		{
+			"16",
+			"Caitlyn",
+			"Ahhh. Don't lump me in with you. Watch me! Five bullets, please. ",
+			"1",
+			"10002049",
+			"10002061",
+			"",
+			""
+		},
+		{
+			"17",
+			"",
+			"biubiu~",
+			"",
+			"",
+			"",
+			"",
+			""
+		},
+		{
+			"18",
+			"Caitlyn",
+			"See? Easy-peasy.",
+			"1",
+			"10002049",
+			"10002061",
+			"9",
+			""
+		},
+		{
+			"19",
+			"Revolver",
+			"Hmph! You must be cheating! ",
+			"2",
+			"10002049",
+			"10002061",
+			"7",
+			""
+		},
+		{
+			"20",
+			"Caitlyn",
+			"Oh, why would I? Do you want me to teach you? ",
+			"1",
+			"10002049",
+			"10002061",
+			"",
+			""
+		},
+		{
+			"21",
+			"Revolver",
+			"No..no way... ",
+			"2",
+			"10002049",
+			"10002061",
+			"",
+			""
+		},
+		{
+			"22",
+			"Caitlyn",
+			"Of course there is a way. As long as you are as powerful as me. ",
+			"1",
+			"10002049",
+			"10002061",
+			"",
+			""
+		},
+		{
+			"23",
+			"Revolver",
+			"Let me show you! Another five bullets, please!",
+			"2",
+			"10002049",
+			"10002061",
+			"7",
+			""
+		},
+		{
+			"24",
+			"Revolver",
+			"I will take seriously this time.",
+			"1",
+			"10002061",
+			"",
+			"",
+			""
+		},
+		{
+			"25",
+			"Revolver",
+			"Eat this!",
+			"1",
+			"10002061",
+			"",
+			"",
+			""
+		},
+		{
+			"26",
+			"",
+			"*boom！！！！*",
+			"",
+			"",
+			"",
+			"",
+			""
+		},
+		{
+			"27",
+			"Shopkeeper:",
+			"Hey, you two!! I'm gonna kill you both..",
+			"1",
+			"10001007",
+			"",
+			"4",
+			""
+		}
+	}
+}

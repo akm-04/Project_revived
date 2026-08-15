@@ -1,0 +1,95 @@
+﻿return {
+	keys = {
+		"id",
+		"name",
+		"type",
+		"desc",
+		"resources_id",
+		"resources_num",
+		"time",
+		"type_request",
+		"function_request_level",
+		"item_level",
+		"cut_time"
+	},
+	rows = {
+		{
+			"1",
+			"Cabinet",
+			"1",
+			"",
+			"11|12|13",
+			"25000|25000|150",
+			"43200",
+			"3",
+			"1",
+			"1",
+			"0"
+		},
+		{
+			"2",
+			"Cabinet",
+			"1",
+			"Unlock 2-star textbook|Reduce 30 min of |researching time",
+			"11|12|13",
+			"50000|50000|400",
+			"86400",
+			"3",
+			"2",
+			"2",
+			"1800"
+		},
+		{
+			"3",
+			"Cabinet",
+			"1",
+			"Unlock 3-star textbook|Reduce 60 min of |researching time",
+			"11|12|13",
+			"75000|75000|1000",
+			"129600",
+			"3",
+			"3",
+			"3",
+			"3600"
+		},
+		{
+			"4",
+			"Cabinet",
+			"1",
+			"Unlock 4-star textbook|Reduce 90 min of |researching time",
+			"11|12|13",
+			"100000|100000|2500",
+			"172800",
+			"3",
+			"4",
+			"4",
+			"5400"
+		},
+		{
+			"5",
+			"Cabinet",
+			"1",
+			"Unlock 5-star textbook|Reduce 120 min of |researching time",
+			"11|12|13",
+			"150000|150000|3750",
+			"216000",
+			"3",
+			"5",
+			"5",
+			"7200"
+		},
+		{
+			"6",
+			"Cabinet",
+			"1",
+			"Unlock 6-star textbook|Reduce 150 min of |researching time",
+			"0",
+			"0",
+			"0",
+			"0",
+			"0",
+			"6",
+			"9000"
+		}
+	}
+}

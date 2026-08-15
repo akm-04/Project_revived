@@ -1,0 +1,12 @@
+﻿xyd = xyd or {}
+xyd.config = {}
+xyd.config.FuncShopMap = {}
+xyd.config.FuncShopMap[xyd.FunctionID.ID_ARENA] = xyd.ShopType.ARENA
+xyd.config.FuncShopMap[xyd.FunctionID.ID_SHOP] = xyd.ShopType.NORMAL
+xyd.config.FuncShopMap[xyd.FunctionID.ID_MARCH] = xyd.ShopType.MARCH
+xyd.config.FuncShopMap[xyd.FunctionID.ID_GNOME_SHOP] = xyd.ShopType.GNOME
+xyd.config.FuncShopMap[xyd.FunctionID.ID_BLACK_SHOP] = xyd.ShopType.BLACK
+xyd.config.FuncShopMap[xyd.FunctionID.ID_TMP_GNOME_SHOP] = xyd.ShopType.GNOME
+xyd.config.FuncShopMap[xyd.FunctionID.ID_TMP_BLACK_SHOP] = xyd.ShopType.BLACK
+xyd.config.FuncShopMap[xyd.FunctionID.ID_TMP_SPACE] = xyd.ShopType.SPACE
+xyd.config.FuncShopMap[xyd.FunctionID.ID_SPACE] = xyd.ShopType.SPACE

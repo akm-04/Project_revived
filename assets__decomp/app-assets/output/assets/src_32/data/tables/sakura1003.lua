@@ -1,0 +1,154 @@
+﻿return {
+	keys = {
+		"id",
+		"name",
+		"dialog",
+		"position",
+		"l_img",
+		"r_img",
+		"expression",
+		"bg"
+	},
+	rows = {
+		{
+			"1",
+			"Blowie",
+			"Room of Trial lies behind this door. Let me check…Hey, is anyone here?",
+			"1",
+			"10002036",
+			"",
+			"",
+			""
+		},
+		{
+			"2",
+			"Sakura",
+			"……No one responds.",
+			"2",
+			"10002036",
+			"10002131",
+			"6",
+			""
+		},
+		{
+			"3",
+			"Quinie",
+			"Let's open it then…",
+			"1",
+			"10002022",
+			"10002131",
+			"",
+			""
+		},
+		{
+			"4",
+			"",
+			"[Creak——]",
+			"0",
+			"10002044",
+			"",
+			"",
+			""
+		},
+		{
+			"5",
+			"Celeste",
+			"……",
+			"1",
+			"10002044",
+			"",
+			"",
+			""
+		},
+		{
+			"6",
+			"Quinie",
+			"Eh, she is here! Celes~~",
+			"1",
+			"10002022",
+			"",
+			"2",
+			""
+		},
+		{
+			"7",
+			"Sakura",
+			"Oops, we are totally ignored, she is so obssessed with practice.",
+			"2",
+			"10002022",
+			"10002131",
+			"",
+			""
+		},
+		{
+			"8",
+			"Quinie",
+			"Celeste, Celeste, Celes! Only fool pretends they can't hear!(Pa)",
+			"1",
+			"10002022",
+			"10002044",
+			"4",
+			""
+		},
+		{
+			"9",
+			"Celeste",
+			"What……！",
+			"2",
+			"10002022",
+			"10002044",
+			"2",
+			""
+		},
+		{
+			"10",
+			"Celeste",
+			"…… ",
+			"2",
+			"10002022",
+			"10002044",
+			"",
+			""
+		},
+		{
+			"11",
+			"Blowie",
+			"Ah，Celeste，sorry to interrupt your practice, but we…",
+			"1",
+			"10002036",
+			"10002044",
+			"",
+			""
+		},
+		{
+			"12",
+			"Celeste",
+			"I get it……finally，my practices have reached this level…",
+			"2",
+			"10002036",
+			"10002044",
+			"",
+			""
+		},
+		{
+			"13",
+			"Celeste",
+			"I shall try my best to pass this! Prepare yourself!",
+			"2",
+			"10002036",
+			"10002044",
+			"",
+			""
+		},
+		{
+			"14",
+			"Sakura",
+			"It seems she is mistaken us as enemies, it's not a good time for explanation, watch out! ",
+			"1",
+			"10002131",
+			"10002044",
+			"2",
+			""
+		}
+	}
+}

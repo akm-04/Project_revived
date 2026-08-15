@@ -1,0 +1,94 @@
+﻿return {
+	keys = {
+		"id",
+		"name",
+		"dialog",
+		"position",
+		"l_img",
+		"r_img",
+		"expression",
+		"bg"
+	},
+	rows = {
+		{
+			"1",
+			"Quinie",
+			"Sonya is so brutal, she never listens! Who on earth wants to fight all the time!",
+			"1",
+			"10002022",
+			"10002131",
+			"7",
+			""
+		},
+		{
+			"2",
+			"Sakura",
+			"Well, actually we have fought our way up here……",
+			"2",
+			"10002022",
+			"10002131",
+			"5",
+			""
+		},
+		{
+			"3",
+			"",
+			"*Footsteps*",
+			"0",
+			"10002022",
+			"10002131",
+			"",
+			""
+		},
+		{
+			"4",
+			"Fanny",
+			"…You",
+			"2",
+			"10002022",
+			"10002023",
+			"",
+			""
+		},
+		{
+			"5",
+			"Fanny",
+			"Disobeyed rules, elimination is what you will face.",
+			"2",
+			"10002022",
+			"10002023",
+			"",
+			""
+		},
+		{
+			"6",
+			"Quinie",
+			"No～Master Fanny. We are on the side with justice! It's those ones who are causing trouble!",
+			"1",
+			"10002022",
+			"10002023",
+			"4",
+			""
+		},
+		{
+			"7",
+			"Fanny",
+			"Eliminate、Cleanse、Kill",
+			"2",
+			"10002022",
+			"10002023",
+			"",
+			""
+		},
+		{
+			"8",
+			"Quinie",
+			"Not again please! ",
+			"1",
+			"10002022",
+			"10002023",
+			"8",
+			""
+		}
+	}
+}

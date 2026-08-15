@@ -1,0 +1,39 @@
+﻿return {
+	keys = {
+		"name",
+		"desc",
+		"class",
+		"res",
+		"can_touch"
+	},
+	rows = {
+		{
+			"wnd_top_sidebar",
+			"窗口顶边栏",
+			"WndTopSidebar",
+			"windows/common_widgets/wnd_top_sidebar.csb",
+			"0"
+		},
+		{
+			"wnd_left_sidebar",
+			"窗口左边栏",
+			"WndLeftSidebar",
+			"windows/common_widgets/wnd_left_sidebar.csb",
+			"0"
+		},
+		{
+			"eco_sidebar",
+			"普通财富栏（金币钻石体力）",
+			"EcoSidebar",
+			"windows/common_widgets/eco_sidebar.csb",
+			"0"
+		},
+		{
+			"eco_display_sidebar",
+			"显示用财富栏",
+			"EcoDisplaySidebar",
+			"windows/common_widgets/eco_display_sidebar.csb",
+			"0"
+		}
+	}
+}

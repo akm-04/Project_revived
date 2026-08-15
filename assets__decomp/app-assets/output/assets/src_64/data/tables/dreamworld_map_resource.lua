@@ -1,0 +1,54 @@
+﻿return {
+	keys = {
+		"id",
+		"desc",
+		"png_path"
+	},
+	rows = {
+		{
+			"1",
+			"Door",
+			"windows/dream_world/explore/door.png"
+		},
+		{
+			"2",
+			"Forest",
+			"windows/dream_world/explore/grass_bottom.png"
+		},
+		{
+			"3",
+			"Ground",
+			"windows/dream_world/explore/floor_1.png|windows/dream_world/explore/floor_2.png|windows/dream_world/explore/floor_3.png|windows/dream_world/explore/floor_4.png|windows/dream_world/explore/floor_5.png|windows/dream_world/explore/floor_6.png"
+		},
+		{
+			"4",
+			"Ruin",
+			"windows/dream_world/explore/resource_1.png|windows/dream_world/explore/resource_2.png"
+		},
+		{
+			"5",
+			"Chest",
+			"windows/dream_world/explore/resource_3.png|windows/dream_world/explore/resource_4.png"
+		},
+		{
+			"6",
+			"Deluxe Chest",
+			"windows/dream_world/explore/resource_5.png|windows/dream_world/explore/resource_6.png"
+		},
+		{
+			"7",
+			"Collection",
+			"windows/dream_world/explore/collection.png"
+		},
+		{
+			"8",
+			"Diary",
+			"windows/dream_world/explore/diary.png"
+		},
+		{
+			"9",
+			"Forest(upper)",
+			"windows/dream_world/explore/grass_1.png|windows/dream_world/explore/grass_2.png|windows/dream_world/explore/grass_3.png|windows/dream_world/explore/grass_4.png"
+		}
+	}
+}

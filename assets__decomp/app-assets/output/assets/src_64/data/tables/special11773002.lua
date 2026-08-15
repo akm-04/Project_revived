@@ -1,0 +1,43 @@
+﻿return {
+	keys = {
+		"id",
+		"name",
+		"l_img",
+		"r_img",
+		"position",
+		"choose",
+		"choose_id",
+		"dialog",
+		"bg",
+		"next_id",
+		"result"
+	},
+	rows = {
+		{
+			"1",
+			"薛瑩",
+			"images/home_card/10002215.png",
+			"",
+			"1",
+			"-1",
+			"-1",
+			"（那個人是？！）",
+			"0",
+			"2",
+			"-1"
+		},
+		{
+			"2",
+			"？？？",
+			"",
+			"images/home_card/11001215.png",
+			"1",
+			"-1",
+			"-1",
+			"……",
+			"0",
+			"-1",
+			"-1"
+		}
+	}
+}

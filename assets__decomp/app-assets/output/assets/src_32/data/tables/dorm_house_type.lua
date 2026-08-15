@@ -1,0 +1,44 @@
+﻿return {
+	keys = {
+		"id",
+		"name",
+		"hero_num",
+		"icon",
+		"expand",
+		"new_icon"
+	},
+	rows = {
+		{
+			"1",
+			"Restroom",
+			"5",
+			"",
+			"0",
+			""
+		},
+		{
+			"2",
+			"Dorm",
+			"1",
+			"images/dorm/choose/green.png",
+			"0",
+			"images/dorm/choose/new_green.png"
+		},
+		{
+			"3",
+			"House",
+			"1",
+			"images/dorm/choose/blue.png",
+			"0",
+			"images/dorm/choose/new_blue.png"
+		},
+		{
+			"4",
+			"Villa",
+			"1",
+			"images/dorm/choose/purple.png",
+			"3",
+			"images/dorm/choose/new_purple.png"
+		}
+	}
+}

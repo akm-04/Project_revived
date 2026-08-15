@@ -1,0 +1,42 @@
+﻿return {
+	keys = {
+		"id",
+		"slot1_drop",
+		"slot1_rate",
+		"slot2_drop",
+		"slot2_rate",
+		"slot3_drop",
+		"slot3_rate",
+		"slot4_drop",
+		"slot4_rate",
+		"slot5_drop",
+		"slot5_rate",
+		"slot6_drop",
+		"slot6_rate",
+		"slot7_drop",
+		"slot7_rate",
+		"slot8_drop",
+		"slot8_rate"
+	},
+	rows = {
+		{
+			"1",
+			"230701",
+			"10000",
+			"230702",
+			"10000",
+			"230703",
+			"10000",
+			"230704",
+			"10000",
+			"230705",
+			"10000",
+			"230706",
+			"10000",
+			"230707",
+			"10000",
+			"230708",
+			"10000"
+		}
+	}
+}

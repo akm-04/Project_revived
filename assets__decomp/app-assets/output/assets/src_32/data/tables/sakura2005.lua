@@ -1,0 +1,304 @@
+﻿return {
+	keys = {
+		"id",
+		"name",
+		"dialog",
+		"position",
+		"l_img",
+		"r_img",
+		"expression",
+		"bg"
+	},
+	rows = {
+		{
+			"1",
+			"Blowie",
+			"Gasp…",
+			"1",
+			"10002036",
+			"",
+			"",
+			""
+		},
+		{
+			"2",
+			"Blowie",
+			"Stupid couple! Can you listen to us or not!",
+			"1",
+			"10002036",
+			"",
+			"7",
+			""
+		},
+		{
+			"3",
+			"Quinie",
+			"So scary…Sister Blowie is angry…",
+			"2",
+			"10002036",
+			"10002022",
+			"",
+			""
+		},
+		{
+			"4",
+			"Blowie",
+			"We are real human! Human! Not heart demon!!!!!",
+			"1",
+			"10002036",
+			"10002022",
+			"",
+			""
+		},
+		{
+			"5",
+			"Boxer",
+			"She is even more scary than angry Sapphire*whispering*",
+			"2",
+			"10002036",
+			"10002012",
+			"8",
+			""
+		},
+		{
+			"6",
+			"Sapphire",
+			"Honey, what did you say?",
+			"1",
+			"10002077",
+			"10002012",
+			"9",
+			""
+		},
+		{
+			"7",
+			"Boxer",
+			"Nothing!",
+			"2",
+			"10002077",
+			"10002012",
+			"",
+			""
+		},
+		{
+			"8",
+			"Sapphire",
+			"（Bend brow）Not heart demons? Then what is all these?",
+			"1",
+			"10002077",
+			"",
+			"",
+			""
+		},
+		{
+			"9",
+			"Celeste",
+			"They are guests who came to ask me about this sword.",
+			"2",
+			"10002077",
+			"10002044",
+			"",
+			""
+		},
+		{
+			"10",
+			"Boxer",
+			"Forgive my rudeness!",
+			"1",
+			"10002012",
+			"10002044",
+			"2",
+			""
+		},
+		{
+			"11",
+			"Sapphire",
+			"Now I understand.",
+			"1",
+			"10002077",
+			"10002044",
+			"6",
+			""
+		},
+		{
+			"12",
+			"Sapphire",
+			"This fool has caused you a huge problem then…I am sorry, is there anything else we can do to help too?",
+			"1",
+			"10002077",
+			"10002044",
+			"",
+			""
+		},
+		{
+			"13",
+			"Celeste",
+			"This sword……",
+			"2",
+			"10002077",
+			"10002044",
+			"",
+			""
+		},
+		{
+			"14",
+			"Boxer",
+			"I'd advise if it's a boxing glove……but a sword……",
+			"1",
+			"10002012",
+			"10002044",
+			"4",
+			""
+		},
+		{
+			"15",
+			"Sapphire",
+			"I don't know much either……",
+			"2",
+			"10002012",
+			"10002077",
+			"",
+			""
+		},
+		{
+			"16",
+			"Boxer",
+			"I doubt anyone knows more about sword than Celeste does…Who has more knowledge than Celeste in sword?",
+			"1",
+			"10002012",
+			"10002077",
+			"",
+			""
+		},
+		{
+			"17",
+			"Sapphire",
+			"Knowledge……knowledge……speaking of knowledge……Librarian!",
+			"2",
+			"10002012",
+			"10002077",
+			"",
+			""
+		},
+		{
+			"18",
+			"Celeste",
+			"Yup! How could I miss this! You can go to library and ask Librarian to help!",
+			"1",
+			"10002044",
+			"10002077",
+			"2",
+			""
+		},
+		{
+			"19",
+			"Blowie",
+			"Finally we have some valuable information…Let's go.",
+			"2",
+			"10002044",
+			"10002036",
+			"4",
+			""
+		},
+		{
+			"20",
+			"Sakura",
+			"Still……thank you for your help.……",
+			"2",
+			"10002044",
+			"10002131",
+			"",
+			""
+		},
+		{
+			"21",
+			"Sapphire",
+			"You are welcome, go fast, her work shift is very weird.",
+			"1",
+			"10002077",
+			"10002131",
+			"",
+			""
+		},
+		{
+			"22",
+			"Quinie",
+			"Leaving again QAQ, I want to eat some food.",
+			"1",
+			"10002022",
+			"10002131",
+			"5",
+			""
+		},
+		{
+			"23",
+			"",
+			"（After Blowie and others left……）",
+			"0",
+			"",
+			"",
+			"",
+			""
+		},
+		{
+			"24",
+			"Sapphire",
+			"Honey……that girl……she is very strange, I sensed something different about her in the battle……",
+			"1",
+			"10002077",
+			"10002012",
+			"",
+			""
+		},
+		{
+			"25",
+			"Boxer",
+			"Strange? Where?",
+			"2",
+			"10002077",
+			"10002012",
+			"1",
+			""
+		},
+		{
+			"26",
+			"Sapphire",
+			"Hmm……I can't tell specifically……but……she is different from us……",
+			"1",
+			"10002077",
+			"10002012",
+			"",
+			""
+		},
+		{
+			"27",
+			"Boxer",
+			"Huh?",
+			"2",
+			"10002077",
+			"10002012",
+			"",
+			""
+		},
+		{
+			"28",
+			"Sapphire",
+			"Forget it, they shall know what it is when they meet Librarian, let her deal with it…Let's go for some snacks, honey.",
+			"1",
+			"10002077",
+			"10002012",
+			"",
+			""
+		},
+		{
+			"29",
+			"Boxer",
+			"No problem!",
+			"2",
+			"10002077",
+			"10002012",
+			"3",
+			""
+		}
+	}
+}
