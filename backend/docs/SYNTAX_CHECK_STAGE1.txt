@@ -1,0 +1,9 @@
+# Syntax Check — Stage 1 Modular Backend
+
+Command run:
+
+```text
+find . -name '*.py' -print0 | xargs -0 python -m py_compile
+```
+
+Result: passed with no syntax errors.
