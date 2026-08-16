@@ -1,0 +1,10 @@
+Stage 3 syntax-only validation
+Date: 2026-08-16
+
+Command:
+  find . -name '*.py' -print0 | xargs -0 python3 -m py_compile
+
+Result:
+  OK — all Python files compiled successfully.
+
+No Flask runtime, network smoke test, or APK/client test was performed by ChatGPT.

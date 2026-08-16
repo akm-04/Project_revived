@@ -23,11 +23,18 @@ def _run_flask(app, port: int) -> None:
 def main() -> None:
     app = create_app(SETTINGS)
     print("==================================================")
-    print(" GXB modular Stage 1 backend")
+    print(" GXB modular Stage 3.1.7 auto-sign/building-fix backend")
     print(f" SDK    : http://{SETTINGS.bind_host}:{SETTINGS.sdk_port}")
     print(f" ENGINE : http://{SETTINGS.bind_host}:{SETTINGS.engine_port}")
     print(f" SELF_URL = {SETTINGS.self_url}")
     print(f" CHAT advertised = {SETTINGS.chat_host}:{SETTINGS.chat_port}")
+    print(f" BOOT_DETAIL_MODE = {SETTINGS.bootstrap_detail_mode}")
+    print(f" FUNC_MODE = {SETTINGS.func_mode}")
+    print(f" PROFILE = {SETTINGS.profile}")
+    print(f" PLAYER_DB = {SETTINGS.player_db_path}")
+    print(f" CLIENT_LOG_URL = {SETTINGS.client_log_url}")
+    print(f" RESOURCE_PROBE = {SETTINGS.resource_probe_enabled}")
+    print(f" RES_DOWNLOAD_URL = {SETTINGS.res_download_url if SETTINGS.resource_probe_enabled else '(disabled)'}")
     print("==================================================")
 
     if SETTINGS.enable_chat_stub:

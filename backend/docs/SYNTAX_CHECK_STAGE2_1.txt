@@ -1,0 +1,7 @@
+Stage 2.1 hotfix syntax check
+
+Command:
+find . -name '*.py' -print0 | xargs -0 python -m py_compile
+
+Result:
+OK

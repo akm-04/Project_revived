@@ -21,6 +21,9 @@ class SDKRoutes:
         self.state = state
 
     def handle(self):
+        # Keep SDK identity/cookies sourced from the same editable player DB as
+        # the engine-side account/session state.
+        self.state.refresh()
         body = decode_sdk_body(request)
         if not isinstance(body, dict):
             print("[SDK] malformed/non-JSON request")

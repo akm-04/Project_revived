@@ -1,0 +1,8 @@
+Stage 3.1.6 syntax validation
+Date: 2026-08-16
+
+Command:
+find . -name '*.py' -print0 | xargs -0 python3 -m py_compile
+
+Result: OK (55 Python files compiled successfully)
+Runtime/APK/ADB/HTTP tests: NOT RUN

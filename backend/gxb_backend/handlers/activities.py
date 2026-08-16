@@ -29,7 +29,7 @@ class ActivityHandlers:
     def load_sign_info(self, req: dict) -> dict:
         return {
             "awards": [],
-            "is_signed": 0,
+            "is_signed": 1,
             "partner_id": 0,
             "sign_times": 0,
             "month": 1,

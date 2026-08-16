@@ -14,7 +14,7 @@ class CenterHandlers:
             "url": self.ctx.settings.self_url,
             "server_id": 1,
             "back_domain": "",
-            "res_download_url": "",
+            "res_download_url": self.ctx.settings.res_download_url if self.ctx.settings.resource_probe_enabled else "",
         }
 
     def version_check(self, req: dict) -> dict:

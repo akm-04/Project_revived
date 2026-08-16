@@ -1,0 +1,7 @@
+Stage 3.1 syntax check — 2026-08-16
+
+Command:
+find . -name '*.py' -print0 | xargs -0 python3 -m py_compile
+
+Result: OK (53 Python files compiled)
+Runtime/APK tests: NOT RUN
