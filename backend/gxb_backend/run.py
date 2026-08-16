@@ -8,6 +8,7 @@ import time
 from gxb_backend.app_factory import create_app
 from gxb_backend.chat.stub import ChatStubServer
 from gxb_backend.config import SETTINGS
+from gxb_backend.updates.local_update import load_manifest
 
 
 def _run_flask(app, port: int) -> None:
@@ -23,7 +24,7 @@ def _run_flask(app, port: int) -> None:
 def main() -> None:
     app = create_app(SETTINGS)
     print("==================================================")
-    print(" GXB modular Stage 4A.9 hot-assets / undecoded-probe backend")
+    print(" GXB modular v0.7.0 stable live-assets + safe MID2 hot-update backend")
     print(f" SDK bind    : http://{SETTINGS.bind_host}:{SETTINGS.sdk_port}")
     print(f" ENGINE bind : http://{SETTINGS.bind_host}:{SETTINGS.engine_port}")
     print(f" ADVERTISE_HOST = {SETTINGS.advertise_host}")
@@ -41,6 +42,15 @@ def main() -> None:
     print(f" ASSET_SEARCH_ROOTS = {', '.join(str(p) for p in SETTINGS.asset_roots)}")
     print(f" ASSET_DISCOVERY_DEPTH = {SETTINGS.asset_discovery_depth}")
     print(f" RESOURCE_MD5_VERIFY = {SETTINGS.resource_verify_md5}")
+    update_manifest = load_manifest(SETTINGS)
+    print(f" LOCAL_UPDATE_MANIFEST = {SETTINGS.local_update_manifest_path}")
+    if update_manifest is None:
+        print(" LOCAL_UPDATE = disabled/not-built")
+    else:
+        print(
+            f" LOCAL_UPDATE = enabled target={update_manifest['version']} "
+            f"volumes={update_manifest['volume']} silent={update_manifest['silent']}"
+        )
     print("==================================================")
 
     if SETTINGS.enable_chat_stub:

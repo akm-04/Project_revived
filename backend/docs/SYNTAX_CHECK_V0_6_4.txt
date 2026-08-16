@@ -1,0 +1,44 @@
+v0.6.4 skill-regeneration sync + MID2 hot-update probe validation
+Date: 2026-08-17
+
+Python syntax:
+  python3 -m py_compile over every packaged .py file
+  79 Python files PASS
+
+Targeted offline skill-state reconstruction:
+  Source-derived policy inputs:
+    skill_point_incr_time = 300
+    VIP 15 skill_max = 80
+  Captured-style state:
+    skill_point=10
+    skill_time ~9144 seconds old
+    Joan partner_id=10002 skills=[1,1,1,1,1,1]
+  Result:
+    timed recovery -> 40 points
+    MID39 skill_colors=1 skill_counts=20 -> skills[1]=21
+    remaining skill_point=20
+  PASS
+
+MID2 marker package offline validation:
+  volume size = 506 bytes
+  md5 = 5b8864ee07999172305a5ddbc8ccc4df
+  manifest MD5 matches volume
+  ZIP entries exactly:
+    src_32/gxb_hotupdate_probe.lua
+    src_64/gxb_hotupdate_probe.lua
+  shipped manifest enabled=false
+  manifest on/off toggle tool exercised successfully
+  PASS
+
+Lua provenance catalog generation from uploaded all-assest-rechecked.zip:
+  APK baseline relative files = 4370
+  recovered writable overrides = 62
+  APK src_32/src_64 mismatches = 0
+  writable src_32/src_64 mismatches = 0
+  writable overrides changed from APK baseline = 62
+  PASS
+
+Not run by assistant:
+  Flask/HTTP server runtime
+  APK/device/ADB update runtime
+  emulator/gameplay runtime

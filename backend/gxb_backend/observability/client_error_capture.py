@@ -184,6 +184,23 @@ class ClientErrorCapture:
 
         if entries:
             for entry in entries:
+                if isinstance(entry, dict) and entry.get("__gxb_probe") == "resource_pipeline_v061":
+                    # v0.6.1 packaged-Lua resource probe.  It deliberately uses
+                    # the source-defined Backend:log() transport, but it is
+                    # observability rather than a client error.
+                    self._append("resource_client_probe.jsonl", {"kind": "resource_probe", **entry})
+                    event = str(entry.get("event", "unknown"))[:120]
+                    path = str(entry.get("path", ""))[:300]
+                    url = str(entry.get("url", ""))[:500]
+                    details = []
+                    if path:
+                        details.append(f"path={path}")
+                    if url:
+                        details.append(f"url={url}")
+                    suffix = " " + " ".join(details) if details else ""
+                    print(f"[RESOURCE CLIENT PROBE] event={event}{suffix}")
+                    continue
+
                 if isinstance(entry, dict):
                     record = {"kind": "client_error", **entry}
                     message = str(entry.get("log", ""))

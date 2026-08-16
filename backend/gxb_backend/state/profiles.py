@@ -57,7 +57,8 @@ def apply_established_profile(player: PlayerState) -> PlayerState:
     }
 
     # Source-backed starter roster. 10001001 is the first real row in
-    # data/tables/partner.lua (Aquaris, initial star 3). partner_id is a
+    # data/tables/partner.lua identifies Aquaris; source ini_star is 1.
+    # The established compatibility profile retains star=3 as current state. partner_id is a
     # deterministic local entity id, while table_id is the source table id.
     if not player.heroes:
         hero = {

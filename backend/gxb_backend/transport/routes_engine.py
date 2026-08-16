@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from flask import make_response, request
+from flask import make_response, request, send_file
 
 from gxb_backend.dispatch.engine_dispatcher import EngineDispatcher
 from gxb_backend.observability.client_error_capture import ClientErrorCapture
@@ -11,6 +11,7 @@ from gxb_backend.observability.undecoded_request_capture import UndecodedRequest
 from gxb_backend.config import Settings
 from gxb_backend.transport.decoder import decode_payload, extract_engine_payload
 from gxb_backend.transport.responses import engine_ok, json_response
+from gxb_backend.updates.local_update import log_update_event, resolve_volume
 
 
 def _handle_engine_request(dispatcher: EngineDispatcher, label: str, undecoded: UndecodedRequestCapture | None = None):
@@ -52,6 +53,22 @@ def register_engine_routes(
     @app.route("/res/<path:asset>", methods=["GET", "POST"])
     def resource_gateway_route(asset: str):
         return resource_gateway.capture(request, asset)
+
+    @app.route("/updates/<path:asset>", methods=["GET"])
+    def local_update_volume_route(asset: str):
+        path = resolve_volume(settings, asset)
+        if path is None:
+            print(f"[UPDATE] missing/unsafe volume request: {asset!r}")
+            return make_response("", 404)
+        range_header = request.headers.get("Range", "")
+        print(f"[UPDATE] serve {path.name} range={range_header!r}")
+        log_update_event(
+            settings, "serve_volume", asset=path.name, range=range_header,
+            size=path.stat().st_size, remote=request.remote_addr or "",
+        )
+        # conditional=True lets Werkzeug honor Range requests used by resumed
+        # FileDownloader volumes while retaining a normal full-file response.
+        return send_file(path, mimetype="application/octet-stream", conditional=True)
 
     @app.route("/", methods=["GET", "POST"])
     @app.route("/<path:path>", methods=["GET", "POST"])

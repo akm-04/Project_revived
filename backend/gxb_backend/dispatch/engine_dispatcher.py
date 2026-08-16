@@ -208,6 +208,7 @@ class EngineDispatcher:
             "RESET_CAMPAIGN": self.world.reset_campaign,
             "GET_BONUS_AWARD": self.world.get_bonus_award,
             "FIGHT": self.world.fight,
+            "GET_STORY_DROP_PARTNER": self.world.get_story_drop_partner,
             "FIGHT_RESULT": self.world.fight_result,
         }
         for name, handler in extra.items():
@@ -421,7 +422,12 @@ class EngineDispatcher:
         return {mid: func for mid, func in h.items() if mid != -1}
 
     def album_special_collect_info(self, req: dict[str, Any]) -> dict[str, Any]:
-        return {"is_award": 0}
+        # SelfPlayer:getAlbumAttrInfo() assigns response.is_award directly to
+        # albumSpecialCollect, then calculateWhiteAlbumAttr()/checkAlbumSpecial()
+        # iterate it with # and numeric indexes. Authoritative collect_special.lua
+        # has contiguous IDs 1..23, so a fresh account needs a 23-slot zero list,
+        # not the old scalar 0 compatibility placeholder.
+        return {"is_award": [0] * 23}
 
     def red_point(self, req: dict[str, Any]) -> list[dict[str, Any]]:
         return self.state.get_player().redmark_payload()

@@ -13,9 +13,11 @@ normalizes fields whose shapes are directly consumed by the supplied Lua.
 from __future__ import annotations
 
 from collections.abc import Callable
+from pathlib import Path
 from typing import Any
 
 from .player_state import PlayerState
+from .skill_point_policy import SkillPointPolicy
 
 
 class HeroRepository:
@@ -24,9 +26,15 @@ class HeroRepository:
     _SIX_ONES = (1, 1, 1, 1, 1, 1)
     _SIX_ZEROES = (0, 0, 0, 0, 0, 0)
 
-    def __init__(self, player: PlayerState, save_callback: Callable[[], None] | None = None) -> None:
+    def __init__(
+        self,
+        player: PlayerState,
+        save_callback: Callable[[], None] | None = None,
+        data_dir: Path | None = None,
+    ) -> None:
         self.player = player
         self._save_callback = save_callback
+        self._data_dir = Path(data_dir or "data")
 
     @staticmethod
     def _int(value: Any, default: int = 0) -> int:
@@ -258,6 +266,10 @@ class HeroRepository:
                 return []
         return result
 
+    def recover_skill_points(self, *, persist: bool = False) -> bool:
+        """Mirror the client timed skill-point recovery against canonical state."""
+        return SkillPointPolicy(self.player, self._data_dir, self._save_callback).recover(persist=persist)
+
     def buy_skill_points(self) -> dict[str, int]:
         """Persist MID99 BUY_SKILL_POINT's source-observed player fields.
 
@@ -267,6 +279,7 @@ class HeroRepository:
         has no proven economy-sync response path for MID99.
         """
         player = self.player
+        SkillPointPolicy(player, self._data_dir, self._save_callback).recover()
         player.buy_skill_times = max(0, self._int(player.buy_skill_times)) + 1
         player.skill_point = max(0, self._int(player.skill_point)) + 10
         if self._int(player.skill_time) <= 0:
@@ -306,17 +319,20 @@ class HeroRepository:
                     requested.append((index, count))
 
         total_requested = sum(count for _, count in requested)
+        policy = SkillPointPolicy(self.player, self._data_dir, self._save_callback)
+        policy.recover(persist=True)
         available = max(0, self._int(self.player.skill_point))
+        before_time = max(0, self._int(self.player.skill_time))
 
-        # A normal client only sends increments it already spent locally.  If a
-        # hand-crafted request asks for more points than the canonical player has,
-        # keep state unchanged rather than inventing an unverified error code.
+        # The client performs the same timed recovery before each local click.
+        # After mirroring that recovery, the batch can be validated against the
+        # same point pool the player actually saw.
         if requested and total_requested <= available:
             for index, count in requested:
                 skills[index - 1] += count
             hero["skills"] = skills
             self.player.skill_point = available - total_requested
-            self.player.skill_time = self.player.now()
+            policy.begin_recovery_if_full_spent(available, before_time)
             self._save()
 
         return {
@@ -406,7 +422,9 @@ class HeroRepository:
             "board_model_id": model_id,
         }
 
-    def add_owned_hero(self, hero: dict[str, Any]) -> dict[str, Any]:
+    def add_owned_hero(
+        self, hero: dict[str, Any], *, persist: bool = True
+    ) -> dict[str, Any]:
         """Persist one source-valid owned hero and return its normalized record.
 
         Callers must provide at least ``table_id`` and ``star``.  A local
@@ -436,7 +454,8 @@ class HeroRepository:
         record["player_id"] = str(self.player.player_id)
         self.player.heroes[str(partner_id)] = record
         self.normalize()
-        self._save()
+        if persist:
+            self._save()
         return dict(self.player.heroes[str(partner_id)])
 
     def update_owned_hero(self, partner_id: Any, changes: dict[str, Any]) -> dict[str, Any] | None:

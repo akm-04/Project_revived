@@ -15,6 +15,7 @@ from typing import Any
 from .hero_repository import HeroRepository
 from .inventory_repository import InventoryRepository
 from .player_state import PlayerState
+from .skill_point_policy import SkillPointPolicy
 
 
 class HeroProgressionRepository:
@@ -102,6 +103,7 @@ class HeroProgressionRepository:
         meta = self._item_meta(item_id)
         per_item = max(0, self._int(meta.get("skill_point"), 0))
         if count > 0 and per_item > 0:
+            SkillPointPolicy(self.player, self.data_dir, self._save_callback).recover()
             remaining = self.inventory.consume_item(item_id, count, persist=False)
             if remaining is not None:
                 self.player.skill_point = max(0, self._int(self.player.skill_point)) + per_item * count

@@ -1,0 +1,15 @@
+v0.7.0 stable live-assets + safe MID2 hot-update validation
+Date: 2026-08-17
+
+Python syntax compilation:
+- 80 Python files PASS via python3 -m py_compile.
+
+Offline targeted checks:
+- build_local_lua_update.py rejects unsafe version `1.631.0-local1`: PASS.
+- shipped update_manifest.json is disabled and target is numeric `1.631.1`: PASS.
+- prebuilt one-volume MID2 probe MD5 equals manifest MD5: PASS.
+- probe ZIP contains exactly src_32/gxb_hotupdate_probe.lua and src_64/gxb_hotupdate_probe.lua: PASS.
+- both marker modules contain gxb_mid2_hotupdate_probe and version 1.631.1: PASS.
+- recover_resource_version_adb.py parses/prints help: PASS; ADB mutation not executed.
+
+Per standing project rule, no Flask/HTTP/APK/ADB/emulator/gameplay runtime test was performed by the assistant.

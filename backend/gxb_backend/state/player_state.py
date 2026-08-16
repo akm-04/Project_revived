@@ -450,6 +450,12 @@ class PlayerState:
             "offline_msg_list": self.friends.get("offline_msg_list", []),
             "send_gift_count": self.friends.get("send_gift_count", 0),
             "receive_gift_count": self.friends.get("receive_gift_count", 0),
+            # SocialSystem immediately reads these as arrays while refreshing
+            # recall red-points. Missing done_recall caused a live Lua #nil error.
+            "got_recall": self.friends.get("got_recall", []),
+            "doing_recall": self.friends.get("doing_recall", []),
+            "done_recall": self.friends.get("done_recall", []),
+            "recall_awarded": self.friends.get("recall_awarded", []),
         }
 
     @staticmethod

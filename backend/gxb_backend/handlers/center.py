@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from .context import HandlerContext
+from gxb_backend.updates.local_update import version_check_payload
 
 
 class CenterHandlers:
@@ -18,9 +19,4 @@ class CenterHandlers:
         }
 
     def version_check(self, req: dict) -> dict:
-        return {
-            "is_appstore": 0,
-            "is_inapp": 0,
-            "is_review": 0,
-            "need_restart": 0,
-        }
+        return version_check_payload(self.ctx.settings, req)

@@ -33,6 +33,7 @@ class WorldRepository:
         self.inventory = inventory
         self._campaigns = self._load_campaign_meta()
         self._campaign_rewards = self._load_campaign_reward_meta()
+        self._story_drop_campaigns, self._story_drop_partners = self._load_story_drop_meta()
 
     @staticmethod
     def _int(value: Any, default: int = 0) -> int:
@@ -61,8 +62,123 @@ class WorldRepository:
             print(f"[WORLD] could not load campaign reward metadata {path}: {exc}")
             return {}
 
+    def _load_story_drop_meta(
+        self,
+    ) -> tuple[dict[str, dict[str, Any]], dict[str, dict[str, Any]]]:
+        path = self.data_dir / "campaign_story_drop_meta.json"
+        try:
+            data = json.loads(path.read_text(encoding="utf-8"))
+            campaigns = data.get("campaigns") or {}
+            partners = data.get("partners") or {}
+            if not isinstance(campaigns, dict) or not isinstance(partners, dict):
+                raise ValueError("campaigns/partners must be objects")
+            return campaigns, partners
+        except Exception as exc:
+            print(f"[WORLD] could not load story-drop metadata {path}: {exc}")
+            return {}, {}
+
     def meta(self, campaign_id: Any) -> dict[str, int] | None:
         return self._campaigns.get(str(self._int(campaign_id, -1)))
+
+    def story_drop_options(self, campaign_id: Any) -> list[int]:
+        meta = self._story_drop_campaigns.get(str(self._int(campaign_id, -1))) or {}
+        raw = meta.get("story_drop_partner") or []
+        if not isinstance(raw, list):
+            return []
+        return [self._int(value) for value in raw if self._int(value) > 0]
+
+    def story_drop_initial_star(self, table_id: Any) -> int:
+        meta = self._story_drop_partners.get(str(self._int(table_id, -1))) or {}
+        return max(0, self._int(meta.get("ini_star"), 0))
+
+    def prepare_story_drop_claim(
+        self, campaign_id: Any, table_id: Any, campaign_type: Any
+    ) -> dict[str, Any]:
+        """Validate MID2064 against source options and the pending MID113 session.
+
+        BattleSpecialStory runs before MID114.  The current MID113 session is
+        therefore the strongest source-compatible guard we have against an
+        arbitrary story reward request.  A previously recorded claim in the
+        same pending session is returned for idempotent same-choice retries.
+        """
+        self.normalize()
+        cid = self._int(campaign_id, 0)
+        selected = self._int(table_id, 0)
+        ctype = self._int(campaign_type, 1)
+        options = self.story_drop_options(cid)
+        if selected <= 0 or selected not in options:
+            return {"status": "invalid"}
+
+        current = self._find_row(cid)
+        if current is None:
+            return {"status": "invalid"}
+
+        pending = (
+            self.player.active_campaign_battle
+            if isinstance(self.player.active_campaign_battle, dict)
+            else {}
+        )
+        if self._int(pending.get("campaign_id"), 0) != cid:
+            return {"status": "invalid"}
+        if self._int(pending.get("campaign_type"), 1) != ctype:
+            return {"status": "invalid"}
+
+        existing = pending.get("story_drop_claim")
+        if isinstance(existing, dict):
+            # Recovery-idempotency: the first successful MID2064 claim is the
+            # authoritative choice for this pending battle. If the client-side
+            # reward callback crashes and the user taps either choice again,
+            # return the already-owned reward so BattleSpecialStory can finish
+            # rather than wedging on an empty story_drop_awards response.
+            existing_table = self._int(existing.get("table_id"), 0)
+            existing_partner = self._int(existing.get("partner_id"), 0)
+            if existing_table in options and existing_partner > 0:
+                return {
+                    "status": "existing",
+                    "table_id": existing_table,
+                    "partner_id": existing_partner,
+                }
+            return {"status": "already_claimed"}
+
+        if self._int(current.get("is_partner_drop"), 0) == 1:
+            return {"status": "already_claimed"}
+
+        star = self.story_drop_initial_star(selected)
+        if star <= 0:
+            return {"status": "invalid"}
+        return {"status": "new", "table_id": selected, "star": star}
+
+    def record_story_drop_claim(
+        self, campaign_id: Any, table_id: Any, partner_id: Any, *, persist: bool = True
+    ) -> bool:
+        """Persist the source-consumed partner-drop marker and pending claim."""
+        self.normalize()
+        cid = self._int(campaign_id, 0)
+        selected = self._int(table_id, 0)
+        owned_partner_id = self._int(partner_id, 0)
+        current = self._find_row(cid)
+        pending = (
+            self.player.active_campaign_battle
+            if isinstance(self.player.active_campaign_battle, dict)
+            else {}
+        )
+        if (
+            current is None
+            or selected <= 0
+            or owned_partner_id <= 0
+            or selected not in self.story_drop_options(cid)
+            or self._int(pending.get("campaign_id"), 0) != cid
+        ):
+            return False
+        current["is_partner_drop"] = 1
+        pending["story_drop_claim"] = {
+            "table_id": selected,
+            "partner_id": owned_partner_id,
+        }
+        self.player.active_campaign_battle = pending
+        if persist:
+            self._save()
+        return True
 
     def _guaranteed_first_awards(self, campaign_id: int) -> list[dict[str, int]]:
         """Return the conservative source-derived first-clear award subset.

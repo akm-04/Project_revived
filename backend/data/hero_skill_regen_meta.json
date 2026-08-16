@@ -1,0 +1,31 @@
+{
+  "_meta": {
+    "generated_from": [
+      "src_64/data/tables/misc.lua",
+      "src_64/data/tables/vip.lua",
+      "src_64/data/tables/monthly_privilege.lua"
+    ],
+    "client_consumer": "src_64/app/model/SelfPlayer.lua:getSkillPoint/recoverByTime",
+    "provenance": "source-confirmed"
+  },
+  "skill_point_incr_time": 300,
+  "vip_skill_max": {
+    "0": 10,
+    "1": 10,
+    "2": 10,
+    "3": 10,
+    "4": 10,
+    "5": 20,
+    "6": 20,
+    "7": 30,
+    "8": 30,
+    "9": 40,
+    "10": 40,
+    "11": 50,
+    "12": 50,
+    "13": 60,
+    "14": 60,
+    "15": 80
+  },
+  "monthly_privilege_skill_max": 10
+}

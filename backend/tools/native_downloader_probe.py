@@ -1,0 +1,148 @@
+#!/usr/bin/env python3
+"""Inventory APK native libraries for downloader/network binding evidence.
+
+Evidence-only helper: it does not patch binaries.  Give --apk PATH, or --adb to
+pull the installed package APK(s), then inspect native .so string references.
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import os
+import re
+import shlex
+import subprocess
+import sys
+import tempfile
+import time
+import zipfile
+from pathlib import Path
+from typing import Any, Iterable
+
+
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+OUT_DEFAULT = PROJECT_ROOT / "runtime_logs" / "native_downloader_probe.json"
+DEFAULT_PACKAGE = "com.carolgames.gxb"
+KEYWORDS = (
+    "FileDownloader", "Downloader", "download", "curl", "libcurl", "http://",
+    "https://", "CURLOPT", "timeout", "Range:", "Content-Range", "SSL",
+    "asset_tmp", "resDownloadUrl",
+)
+
+
+def run(cmd: list[str], *, check: bool = True) -> subprocess.CompletedProcess[bytes]:
+    proc = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    if check and proc.returncode != 0:
+        raise RuntimeError(
+            f"command failed ({proc.returncode}): {' '.join(shlex.quote(x) for x in cmd)}\n"
+            f"stdout: {proc.stdout.decode('utf-8', 'replace')}\n"
+            f"stderr: {proc.stderr.decode('utf-8', 'replace')}"
+        )
+    return proc
+
+
+def printable_strings(data: bytes, minimum: int = 5) -> Iterable[str]:
+    # ASCII is enough for symbol/url evidence and avoids depending on host `strings`.
+    pattern = re.compile(rb"[\x20-\x7e]{%d,}" % minimum)
+    for match in pattern.finditer(data):
+        yield match.group().decode("ascii", "replace")
+
+
+def inspect_apk(apk: Path) -> dict[str, Any]:
+    result: dict[str, Any] = {"apk": str(apk), "native_libraries": []}
+    with zipfile.ZipFile(apk) as zf:
+        members = [n for n in zf.namelist() if n.startswith("lib/") and n.endswith(".so")]
+        for member in members:
+            data = zf.read(member)
+            matches: list[str] = []
+            seen: set[str] = set()
+            for text in printable_strings(data):
+                lower = text.lower()
+                if any(k.lower() in lower for k in KEYWORDS):
+                    clipped = text[:500]
+                    if clipped not in seen:
+                        seen.add(clipped)
+                        matches.append(clipped)
+                    if len(matches) >= 250:
+                        break
+            result["native_libraries"].append({
+                "member": member,
+                "bytes": len(data),
+                "matches": matches,
+            })
+    return result
+
+
+def pull_apks(adb: str, package: str, target: Path) -> list[Path]:
+    proc = run([adb, "shell", "pm", "path", package])
+    remote_paths = []
+    for line in proc.stdout.decode("utf-8", "replace").splitlines():
+        line = line.strip()
+        if line.startswith("package:"):
+            remote_paths.append(line[len("package:"):])
+    if not remote_paths:
+        raise RuntimeError(f"pm path returned no APKs for {package}")
+    target.mkdir(parents=True, exist_ok=True)
+    pulled: list[Path] = []
+    for idx, remote in enumerate(remote_paths):
+        name = Path(remote).name or f"package-{idx}.apk"
+        local = target / f"{idx:02d}-{name}"
+        run([adb, "pull", remote, str(local)])
+        pulled.append(local)
+    return pulled
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--apk", type=Path, action="append", default=[], help="APK to inspect (repeatable)")
+    parser.add_argument("--adb", action="store_true", help="pull installed package APK(s) via adb")
+    parser.add_argument("--adb-bin", default=os.environ.get("ADB", "adb"))
+    parser.add_argument("--package", default=DEFAULT_PACKAGE)
+    parser.add_argument("--out", type=Path, default=OUT_DEFAULT)
+    args = parser.parse_args()
+
+    apks = [p.expanduser().resolve() for p in args.apk]
+    temp_ctx: tempfile.TemporaryDirectory[str] | None = None
+    try:
+        if args.adb:
+            temp_ctx = tempfile.TemporaryDirectory(prefix="gxb_apk_probe_")
+            apks.extend(pull_apks(args.adb_bin, args.package, Path(temp_ctx.name)))
+        if not apks:
+            parser.error("provide at least one --apk PATH or use --adb")
+        for apk in apks:
+            if not apk.is_file():
+                raise RuntimeError(f"APK not found: {apk}")
+
+        report = {
+            "generated_at": int(time.time()),
+            "package": args.package,
+            "keywords": list(KEYWORDS),
+            "apks": [inspect_apk(apk) for apk in apks],
+            "note": (
+                "String matches are evidence for candidate native libraries only; "
+                "absence of a symbol does not prove the downloader is absent because "
+                "symbols may be stripped or names generated by bindings."
+            ),
+        }
+        out = args.out.expanduser().resolve()
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
+        total_libs = sum(len(row["native_libraries"]) for row in report["apks"])
+        hit_libs = sum(
+            1 for row in report["apks"] for lib in row["native_libraries"] if lib["matches"]
+        )
+        print(f"[NATIVE-DOWNLOADER-PROBE] APKs={len(apks)} libs={total_libs} libs_with_matches={hit_libs}")
+        print(f"[NATIVE-DOWNLOADER-PROBE] report -> {out}")
+        return 0
+    finally:
+        if temp_ctx is not None:
+            temp_ctx.cleanup()
+
+
+if __name__ == "__main__":
+    try:
+        raise SystemExit(main())
+    except Exception as exc:
+        print(f"[NATIVE-DOWNLOADER-PROBE][ERROR] {type(exc).__name__}: {exc}", file=sys.stderr)
+        raise SystemExit(1)

@@ -1,0 +1,15 @@
+{
+  "enabled": false,
+  "version": "1.631.1",
+  "package": "gxb-local-1.631.1.zip",
+  "volume": 1,
+  "size": 492,
+  "md5": "b64d2066708736e61a223f661f2352e8",
+  "silent": false,
+  "files": [
+    "src_32/gxb_hotupdate_probe.lua",
+    "src_64/gxb_hotupdate_probe.lua"
+  ],
+  "probe_only": true,
+  "note": "Generated from sparse backend-local src_32/src_64 overrides. Runtime lazy res files use /res/ separately."
+}

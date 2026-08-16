@@ -167,7 +167,7 @@ class JsonPlayerDatabase:
         return {
             "_meta": {
                 "schema": cls.SCHEMA_VERSION,
-                "format": "GXB Stage 4A.6 human-editable player database",
+                "format": "GXB v0.7.0 human-editable player database",
                 "notes": [
                     "Stage 3.1.4 keeps SDK account UID, SDK/login SID, and game player ID distinct using the known-good region-125 client snapshot.",
                     "The backend re-reads this file before every request.",
@@ -177,7 +177,9 @@ class JsonPlayerDatabase:
                     "Use valid source table IDs for heroes/items. Unknown IDs can crash client table lookups.",
                     "world.world_map is authoritative Campaign progress; MID113 starts a pending session and MID114 commits stars/unlocks atomically.",
                     "progression.guide_function_ids is a string-keyed completion map because xyd.checkFirstInGuide indexes tostring(id).",
-                    "inventory.backpack_items is canonical persisted Backpack state; Campaign first-clear awards mutate this same list.",
+                    "inventory.backpack_items is canonical persisted Backpack state; Campaign first-clear and Sweep rewards mutate this same list.",
+                    "MID2064 story partner claims add one canonical owned Hero and persist world-map is_partner_drop before MID114.",
+                    "v0.7.0 preserves source-timed skill-point regeneration and the live-confirmed story/resource baseline; safe MID2 versions are transport metadata and do not alter player schema.",
                 ],
             },
             "account": asdict(account),

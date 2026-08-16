@@ -1,0 +1,10 @@
+{
+  "enabled": false,
+  "version": "SET_A_RESOURCE_VERSION",
+  "package": "gxb-local-SET_A_RESOURCE_VERSION.zip",
+  "volume": 1,
+  "size": 0,
+  "md5": "00000000000000000000000000000000",
+  "silent": false,
+  "note": "Use tools/build_local_lua_update.py instead of editing this example."
+}

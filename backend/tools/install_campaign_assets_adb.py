@@ -124,10 +124,14 @@ def lazy_key(catalog_path: str) -> str:
 
 
 def physical_relative_path(catalog_path: str) -> str:
-    normalized = catalog_path.replace("\\", "/").lstrip("/")
-    if normalized.startswith("res/web/"):
-        return "res/" + normalized[len("res/web/"):]
-    return normalized
+    """Return the runtime AssetDownload destination relative to update root.
+
+    AssetDownload:downloadFile() writes the original catalog path verbatim
+    (for example res/web/skeletons/...), even though UpdateScene's startup
+    validator also understands a legacy res/... alias.  The installer should
+    emulate the runtime downloader, not the startup alias.
+    """
+    return catalog_path.replace("\\", "/").lstrip("/")
 
 
 def load_campaign(summary_path: Path, campaign_id: int) -> dict[str, Any]:

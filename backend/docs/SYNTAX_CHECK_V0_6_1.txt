@@ -1,0 +1,11 @@
+v0.6.1 packaged resource-probe syntax-only validation
+Date: 2026-08-17
+
+Command policy:
+- Python syntax compilation only.
+- local_assets/ and runtime_logs/ pruned from traversal because they are payload/runtime data, not Python source.
+
+Result:
+- 69 Python files compiled successfully with python3 -m py_compile.
+- No Flask/API/HTTP/APK/ADB/emulator/gameplay runtime test was performed.
+- __pycache__ and .pyc files were removed after validation.

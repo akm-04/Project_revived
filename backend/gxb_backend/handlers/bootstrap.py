@@ -24,6 +24,10 @@ class BootstrapHandlers:
         player = self.ctx.state.get_player()
         self._trace_identity(req, account, player)
 
+        # SelfPlayer:getSkillPoint() performs timed recovery locally before the
+        # UI spends points. Hydrate the same canonical recovery so client/server
+        # do not diverge across long idle periods.
+        self.ctx.state.get_hero_repository().recover_skill_points(persist=True)
         detail = self.build_detail()
         return {
             "token": account.token,

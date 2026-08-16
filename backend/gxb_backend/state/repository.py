@@ -174,7 +174,7 @@ class StateRepository:
         the current PlayerState after refresh(), while mutations reuse the
         repository's atomic save path.
         """
-        return HeroRepository(self.player, self.save)
+        return HeroRepository(self.player, self.save, self._data_dir())
 
     def get_inventory_repository(self) -> InventoryRepository:
         """Return the canonical ordinary Backpack item state owner."""

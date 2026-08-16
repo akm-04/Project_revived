@@ -450,6 +450,13 @@ class ResourceGateway:
                     "method": req.method,
                     "remote_addr": req.remote_addr or "",
                     "user_agent": req.headers.get("User-Agent", ""),
+                    # Keep the downloader-facing transport hints needed for
+                    # protocol reconstruction without dumping unrelated HTTP
+                    # headers or credentials.
+                    "range": req.headers.get("Range", ""),
+                    "accept": req.headers.get("Accept", ""),
+                    "accept_encoding": req.headers.get("Accept-Encoding", ""),
+                    "connection": req.headers.get("Connection", ""),
                     "first_seen": now,
                     "last_seen": now,
                     "count": 1,

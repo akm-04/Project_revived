@@ -107,6 +107,17 @@ class Settings:
         "GXB_STATIC_ASSET_ROOT",
         str(_DEFAULT_STATIC_ASSET_ROOT),
     )).expanduser()
+    # Optional backend-local MID2 hot-update package manifest. This is separate
+    # from the runtime /res/ lazy CDN: Lua files are force=1 and are installed
+    # by UpdateScene's ZIP-volume pipeline into the writable support path.
+    local_update_manifest_path: Path = Path(os.getenv(
+        "GXB_LOCAL_UPDATE_MANIFEST",
+        str(_DEFAULT_STATIC_ASSET_ROOT / "update_manifest.json"),
+    )).expanduser()
+    local_update_dir: Path = Path(os.getenv(
+        "GXB_LOCAL_UPDATE_DIR",
+        str(_DEFAULT_STATIC_ASSET_ROOT / "updates"),
+    )).expanduser()
     asset_root_spec: str = (
         os.getenv("GXB_ASSET_ROOTS", "").strip()
         or os.getenv("GXB_ASSET_ROOT", "").strip()
@@ -125,6 +136,13 @@ class Settings:
     bootstrap_detail_mode: str = os.getenv("GXB_BOOTSTRAP_DETAIL_MODE", "stage3").lower()
     func_mode: str = os.getenv("GXB_FUNC_MODE", "all").lower()
     profile: str = os.getenv("GXB_PROFILE", "established").lower()
+
+    @property
+    def engine_base_url(self) -> str:
+        base = self.self_url
+        if base.endswith("/api/v1"):
+            base = base[:-len("/api/v1")]
+        return base.rstrip("/")
 
     @property
     def asset_roots(self) -> tuple[Path, ...]:

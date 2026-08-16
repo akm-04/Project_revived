@@ -1,7 +1,7 @@
 {
   "_meta": {
     "schema": 4,
-    "format": "GXB Stage 4A.6 human-editable player database",
+    "format": "GXB v0.7.0 human-editable player database",
     "notes": [
       "Stage 4A.3 normalizes ordinary HeroMain illusion_skin_id to 0 so the Skin-tab selector cannot become Lua index 0.",
       "Stage 4A.3 persists MID99 skill-point purchases and MID39/MID53 hero skill mutations; crystal/mana charging remains deferred to full Hero/Economy progression.",
@@ -12,7 +12,10 @@
       "Stage 4A.2 keeps Hero ownership canonical for Girls/formation/battle and normalizes four explicit zero element-equipment slots required by HeroMainWindow.",
       "heroes.save_team/save_team_name/save_pet remain serialized strings consumed by Lua string split helpers.",
       "The backend re-reads this file before each stateful request and writes mutations atomically under a request-scoped lock.",
-      "Do not invent hero/item table IDs; use source-confirmed IDs. Campaign rewards remain empty until their drop/economy contracts are implemented."
+      "Campaign first-clear and Sweep rewards use source-derived metadata and canonical Backpack state; lower-rate normal dropbox RNG remains deferred.",
+      "v0.6.3 corrects MID2784 is_award to a source-sized 23-slot array, makes pending MID2064 story-claim retries recovery-idempotent, and supplies source-consumed Social recall arrays.",
+      "v0.6.4 mirrors source-timed skill-point regeneration before bootstrap/skill mutations so MID39 validates the same effective point pool as the client.",
+      "v0.7.0 promotes the live asset/CDN and MID2 update transport milestone; client resource versions used by MID2 must be strict numeric N.N.N and do not change player schema."
     ]
   },
   "account": {

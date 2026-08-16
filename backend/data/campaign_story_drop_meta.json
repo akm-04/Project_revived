@@ -1,0 +1,22 @@
+{
+  "campaigns": {
+    "200002": {
+      "story_drop_partner": [
+        10001005,
+        10001008
+      ]
+    }
+  },
+  "partners": {
+    "10001005": {
+      "ini_star": 1
+    },
+    "10001008": {
+      "ini_star": 1
+    }
+  },
+  "source": {
+    "campaign": "src_64/data/tables/campaign.lua: story_drop_partner",
+    "partner": "src_64/data/tables/partner.lua: ini_star"
+  }
+}

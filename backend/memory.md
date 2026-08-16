@@ -1,3 +1,769 @@
+# v0.7.0 update — stable live-assets milestone + safe MID2 hot updates
+
+Current version: **v0.7.0-stable-live-assets-safe-hotupdate**  
+Stable gameplay/resource baseline: **v0.6.4 gameplay + live-confirmed lazy CDN + v0.7 MID2 version safety**  
+Date: 2026-08-17
+
+## Latest user runtime results
+
+The user reports the restored on-demand resource system is much more powerful than the
+original Chapter-2 use case suggested. After rebuilding the APK with the packaged Lua
+resource probe and restoring the writable asset metadata/state, previously inert
+asset-gated surfaces now open and load seamlessly, including observed Institute-family
+submenus such as Institute, Emblem, Vows, Alchemy and Workshop. Treat **UI/asset
+availability as user-runtime-confirmed**; do not claim the underlying domain APIs are
+complete until their actual MIDs are traced.
+
+The user then tested the v0.6.4 MID2 marker update. Runtime evidence from
+`update-fail.zip` proves the update transport itself worked:
+
+- MID2 returned `is_inapp=1` with one resource descriptor.
+- client requested `/updates/gxb-local-1.631.0-local1.zip.001`; backend served HTTP 200.
+- after install, ADB `cat` confirmed writable `src_64/gxb_hotupdate_probe.lua` exists.
+- therefore prompt -> FileDownloader -> volume -> MD5/unzip/install is live-confirmed.
+
+However, after the update the client stopped at the login background with no login UI.
+Disabling the update manifest did not repair it. The next startup reached CENTER/SDK but
+did not issue MID2.
+
+## Root cause of the v0.6.4 update-startup wedge
+
+The v0.6.4 probe used resource version `1.631.0-local1`. This is invalid for the
+authoritative launcher. `UpdateScene.compareVersion()` splits versions by `.` and
+performs arithmetic on `tonumber(parts[1..3])`. On the next boot it compares APK
+`1.631.0` with stored `1.631.0-local1`; `tonumber("0-local1")` is nil, causing a Lua
+error in `pkgVersionCheck()` before normal MID2/login. This exactly matches the runtime
+sequence.
+
+This is a **metadata/version grammar bug in our first probe**, not a failure of the MID2
+transport or ZIP contents.
+
+## v0.7.0 hot-update safety changes
+
+`tools/build_local_lua_update.py` now accepts only exactly three numeric version
+components: `N.N.N` (for example `1.631.1`). Suffixes such as `-local1` are rejected.
+
+`gxb_backend/updates/local_update.py` also validates an enabled manifest and refuses to
+advertise non-numeric versions even if an operator edits JSON manually. For a valid
+numeric client `v`, the backend advertises only when current < target; same/newer
+versions return the normal no-update MID2 response. Thus a successful update does not
+require manually disabling the manifest afterward.
+
+v0.7.0 ships a disabled one-volume harmless marker probe targeting numeric
+`1.631.1`. Use `tools/set_local_update_enabled.py on` only after recovering the wedged
+client.
+
+## Recovery for clients that installed `1.631.0-local1`
+
+New `tools/recover_resource_version_adb.py` force-stops GXB, locates the Cocos shared
+preference XML containing `__version__`, changes only that key to a safe numeric value
+(default `1.631.0`), preserves owner/group/mode, and leaves the app stopped. The old
+unreferenced marker Lua file may remain. This tool is provided for the user's rooted test
+device workflow; the assistant did not execute it.
+
+Recommended recovery/test sequence:
+
+1. Start from v0.7.0 with its update manifest disabled.
+2. `python3 tools/recover_resource_version_adb.py --version 1.631.0`
+3. launch GXB and confirm normal login.
+4. stop server; `python3 tools/set_local_update_enabled.py on`; restart server.
+5. accept numeric `1.631.1` marker update.
+6. after restart MID2 should report `v=1.631.1` and backend log
+   `version_current_or_newer` instead of re-advertising.
+
+## Project milestone / documentation policy
+
+Treat v0.7.0 as the first stable baseline after the major resource restoration. Preserve:
+Girls/Hero detail, Skin/Affinity, timed skill sync, Campaign local battles and story claim,
+Backpack/Sweep/EXP progression, guide persistence, live lazy `/res/` CDN, and the now
+live-confirmed MID2 package transport.
+
+Primary new docs:
+
+- `docs/V0_7_0_STABLE_LIVE_ASSETS_SAFE_HOTUPDATE.md`
+- `docs/ROADMAP_V0_7.md`
+- updated `docs/RESOURCE_DOWNLOAD_PROTOCOL_RE.md`
+
+Roadmap order from this stable baseline:
+Formation -> Campaign completeness -> Hero progression -> Vending/Summon/Shop ->
+Institute-family domains as exercised -> Activities -> Voyage/subdomains ->
+**Competitive/Arena last**. Payment remains permanently out of scope.
+
+## Validation
+
+v0.7.0 validation: **80 Python files PASS** syntax compilation. Offline checks also PASS
+for rejection of the exact unsafe `1.631.0-local1` label, the disabled numeric `1.631.1`
+probe manifest, whole-volume MD5, ZIP member set, and marker contents. The ADB recovery
+helper was syntax/help-checked only and was not executed. No Flask/HTTP/APK/ADB/emulator/
+gameplay runtime test was performed by the assistant.
+
+---
+
+# v0.6.4 update — skill regeneration parity + MID2 hot-update probe
+
+Current version: **v0.6.4-skill-regen-hotupdate-probe**  
+Stable gameplay baseline: **v0.6.3 story/album recovery + live-confirmed resource gateway**  
+Date: 2026-08-17
+
+## Latest user runtime result
+
+The user reports v0.6.3 fixed Campaign `200002` special-story progression. The latest
+`debug.zip` confirms the successful sequence:
+
+- MID2064 `GET_STORY_DROP_PARTNER` returned Joan (`table_id=10001008`, `partner_id=10002`).
+- the client continued instead of freezing;
+- MID114 `FIGHT_RESULT` followed;
+- response persisted `campaign_id=200002`, `star=3`, `is_partner_drop=1`;
+- next Campaign `200003` was unlocked.
+
+Thus v0.6.3 story partner claim/album recovery is **user-runtime-confirmed**. Preserve it.
+
+## New live issue: Joan skill levels appear to upgrade, then revert
+
+The log shows repeated MID39 requests:
+
+`partner_id=10002, skill_colors=1, skill_counts=20`
+
+The v0.6.3 server returned `skills=1|1|1|1|1|1`, `skill_point=10`, so it never
+committed the 20-point batch. This is NOT a Hero/MID49 rehydration bug.
+
+Root cause is source-confirmed timed skill recovery:
+
+- `SelfPlayer:getSkillPoint()` calls `recoverByTime("skillPoint", "lastSkillPoint", ...)`.
+- `misc.lua`: `skill_point_incr_time=300`.
+- `vip.lua`: VIP15 `skill_max=80`.
+- `monthly_privilege.lua`: active privilege row1 adds `skill_max=10`.
+- Captured bootstrap had `skill_point=10` and `skill_time` about 9,144 seconds old,
+  which is 30 whole recovery ticks plus remainder. The client therefore saw about 40
+  usable points and legitimately queued a 20-point upgrade while the server still saw 10.
+
+## v0.6.4 skill implementation
+
+New `gxb_backend/state/skill_point_policy.py` mirrors `SelfPlayer:recoverByTime` from
+generated source metadata `data/hero_skill_regen_meta.json`. Recovery is applied before:
+
+- MID1/MID17 bootstrap hydration;
+- MID39 batched skill upgrades;
+- MID53 single skill path via the same HeroRepository;
+- MID99 skill-point purchases;
+- MID90 skill-point-item mutation.
+
+The server preserves the partial recovery timer rather than resetting it after every
+upgrade. If the pool was full (`skill_time=0`) and the first spend drops it below max,
+the timer starts at server-now, matching HeroMainWindow behavior.
+
+Targeted offline reproduction of the user's captured case passes:
+
+`10 stale points -> timed recovery 40 -> MID39 count 20 -> skills[1]=21 -> 20 points remain`.
+
+`tools/build_hero_skill_regen_meta.py` derives the timer/max values directly from the
+authoritative src_64 tables.
+
+## Uploaded Lua asset archive findings
+
+User uploaded `all-assest-rechecked.zip` containing:
+
+- `app-assets/output/assets/src_32` + `src_64`: APK baseline;
+- `downloaded-assets/output/src_32` + `src_64`: recovered writable update layer.
+
+Generated `data/lua_asset_catalog.json` establishes:
+
+- 4,370 APK files per architecture;
+- all 4,370 APK src_32/src_64 pairs byte-identical;
+- 62 recovered writable overrides per architecture;
+- all 62 writable src_32/src_64 pairs byte-identical;
+- all 62 recovered overrides differ from their APK baseline copies.
+
+Treat `downloaded-assets` as a historically applied hot-update layer. Keep future
+`local_assets/src_32` and `src_64` sparse and mirrored rather than copying the full
+4,370-file baseline. `tools/import_lua_override.py` can stage a selected source file
+from the archive into both override trees.
+
+## MID2 hot-update probe
+
+The source-mapped MID2 plane remains distinct from lazy `/res/` downloads:
+
+`MID2 is_inapp/res descriptors -> UpdateScene -> FileDownloader resource.001... ->
+whole-ZIP MD5 -> unzip to xyd.versionUpdatePath -> set resource version -> restart`.
+
+`tools/build_local_lua_update.py` now supports `--probe-only`. It creates exactly two
+harmless, unreferenced valid Lua modules:
+
+- `src_32/gxb_hotupdate_probe.lua`
+- `src_64/gxb_hotupdate_probe.lua`
+
+Offline package test passed: one 506-byte volume, ZIP contains only those two paths, and
+manifest MD5 exactly matches the generated volume. The shipped manifest is disabled.
+Enable/rebuild for the user test with:
+
+`[HISTORICAL/UNSAFE] python3 tools/build_local_lua_update.py --version 1.631.0-local1 --probe-only`
+
+New `runtime_logs/local_update_events.jsonl` records MID2 advertisement and update-volume
+serving. `tools/set_local_update_enabled.py off` disables an already-built manifest.
+
+At v0.6.4 handoff, MID2 is **source-confirmed and offline-package-validated but not yet
+user-runtime-confirmed**. First device test should only verify marker installation under
+`/data/data/com.carolgames.gxb/files/com.carolgames.gxb/src_32|src_64/`; do not replace a
+loaded gameplay Lua module until that transport is proven.
+
+## Roadmap
+
+After MID2 probe validation, resume gameplay architecture while preserving the stable core:
+
+1. Formation MID208/209 canonicalization.
+2. Campaign completeness: energy/economy/real dropbox RNG/chapter rewards/session checks.
+3. Hero progression: MID51/52, equipment, pieces, collection; awakening only with valid
+   source prerequisites.
+4. Vending/Summon/Shop.
+5. Activities.
+6. Voyage/subdomains.
+7. Competitive/Arena last.
+
+Payment remains permanently out of scope.
+
+## Validation
+
+v0.6.4 validation: **79 Python files PASS** syntax compilation. Targeted offline checks also PASS for the captured-style timed skill recovery/MID39 mutation, Lua asset catalog generation, 506-byte two-file MID2 probe ZIP/MD5 verification, and manifest on/off toggling. No Flask/HTTP/APK/ADB/emulator/gameplay runtime test was performed by the assistant.
+
+---
+
+# v0.6.2 update — Campaign special-story partner claim
+
+Current version: **v0.6.2-story-partner-claim**  
+Stable gameplay baseline: **Stage 4A.9 / v0.5 milestone**, plus live-confirmed v0.6 resource gateway  
+Date: 2026-08-17
+
+## Latest user runtime result: resource protocol milestone achieved
+
+The user rebuilt the APK with the v0.6.1 packaged Lua-only resource probe in both
+`src_32` and `src_64`. Campaign `200002` no longer stalls on a static jellyfish: the
+jellyfish displays a progress bar and the runtime per-file downloader completes.
+
+Latest `debug.zip` live evidence:
+
+- `resource_client_probe.jsonl`: 739 probe events.
+- 164 `download_file_before_native` events.
+- 164 Lua-visible native-call returns.
+- 164 `download_file_native_finish` callbacks; observed callbacks report
+  `result=0`, `code=0`.
+- `resource_requests.jsonl`: 163 HTTP `/res/` requests, all status `served`.
+- All six formerly blocking Campaign-200002 `zhuankuai` resources were requested and
+  served from the backend static resource store with the catalog path/MD5 mapping.
+- The client then ran the battle and reached its post-battle `BattleSpecialStory`.
+
+This is now **user-runtime-confirmed** end to end:
+
+`CENTER res_download_url -> lazy metadata -> AssetDownload -> xyd.FileDownloader ->
+GET /res/<basename>.<md5> -> backend resource catalog/gateway -> exact bytes -> native
+finish callback`.
+
+Do not resume speculative MID113 resource fields. Runtime lazy CDN delivery is a
+separate, now-proven transport plane. Keep the packaged probe as reusable observability.
+Do not claim the probe itself was necessarily the original root-cause fix; the rebuilt
+client with the probe is the run in which the real pipeline became observable and
+functional.
+
+## New live blocker: MID2064 GET_STORY_DROP_PARTNER
+
+After winning Campaign `200002`, the client displays a special story with a choice of
+two girls. Repeated taps generated live requests:
+
+- `story_drop_partner=10001005`, `campaign_id=200002`, `campaign_type=1`
+- `story_drop_partner=10001008`, `campaign_id=200002`, `campaign_type=1`
+
+v0.6.1 had no semantic handler and returned only `{"error_code":0}`. No MID114 followed.
+
+Authoritative `src_64/app/windows/BattleSpecialStory.lua:329-345` proves why: the MID2064
+callback advances only when `response.story_drop_awards` exists and is non-empty. It
+then calls `SelfPlayer:handleRewards(story_drop_awards, callback)`. Only that callback
+advances the special story.
+
+Pass 19 independently maps MID2064's immediately consumed response field as:
+`story_drop_awards`.
+
+Important ordering is source/live-confirmed:
+
+`MID113 -> local battle -> BattleSpecialStory -> MID2064 claim -> reward presentation /
+story continuation -> MID114 FIGHT_RESULT`.
+
+Therefore the absence of MID114 while the choice is stuck is expected.
+
+## Source-derived special-story choices
+
+A new generated runtime file ships:
+`data/campaign_story_drop_meta.json`.
+
+It is derived from authoritative:
+
+- `src_64/data/tables/campaign.lua` field `story_drop_partner`
+- encoded `src_64/data/tables/partner.lua` field `ini_star`
+
+The supplied 1.631.0 campaign table has exactly ONE non-zero story-drop Campaign row:
+
+- Campaign `200002`: `[10001005, 10001008]`
+
+Partner source confirms:
+
+- `10001005` (Geisha): `ini_star=1`
+- `10001008` (Joan): `ini_star=1`
+
+Do not invent alternative story choices or stars. The metadata builder is:
+`tools/build_campaign_story_drop_meta.py` and parses Lua as data without executing it.
+
+## Source-confirmed reward semantics
+
+`SelfPlayer:handleRewardsWithoutShow()` treats an award with `is_partner == true` as an
+owned Hero reward:
+
+- sets `item_num=1` locally;
+- creates `NormalHero`;
+- calls `NormalHero:populate(reward)`;
+- adds the hero to local `selfPlayer.heros_`;
+- `handleRewards()` opens `summonHeroWnd` using `reward.table_id`;
+- when that window closes, it invokes the callback that lets BattleSpecialStory proceed.
+
+Thus MID2064 must return a coherent Hero-shaped award, not merely a table ID.
+
+## v0.6.2 implementation
+
+`gxb_backend/state/hero_repository.py`
+- `add_owned_hero(..., persist=True)` now supports `persist=False` for a single
+  cross-domain save while preserving all existing callers/default behavior.
+
+`gxb_backend/state/world_repository.py`
+- loads `campaign_story_drop_meta.json`;
+- exposes source-backed story choice / initial-star lookup;
+- validates MID2064 against the source choice list, unlocked world row, matching pending
+  MID113 campaign/type, and unclaimed `is_partner_drop` state;
+- stores an internal `story_drop_claim={table_id, partner_id}` inside the pending battle
+  for same-choice request idempotence;
+- marks the current world row `is_partner_drop=1` before MID114.
+
+`gxb_backend/handlers/world.py`
+- new semantic `get_story_drop_partner`:
+  - validates via WorldRepository;
+  - allocates a canonical owned Hero via HeroRepository using source `ini_star`;
+  - saves Hero + world marker together;
+  - returns `story_drop_awards=[<normalized owned hero + is_partner:true>]`;
+  - identical retry in the same pending session reuses the same canonical Hero rather
+    than minting another persistent copy;
+  - invalid/already-claimed/different-choice manual requests return an empty
+    `story_drop_awards` without inventing an error code.
+
+`gxb_backend/dispatch/engine_dispatcher.py`
+- maps `GET_STORY_DROP_PARTNER` to the new world handler.
+
+MID114 already returns the touched current Campaign row, so once special story
+continues it naturally propagates the already-persisted `is_partner_drop=1` to the
+client and then clears the pending battle session.
+
+No PlayerState schema bump was required; schema remains 4. Packaged DB format label is
+updated to v0.6.2 and stale Stage-4A.6 reward notes were corrected.
+
+## Runtime validation requested next
+
+Preserve the progressed `player_db.json` and `local_assets/res`, run v0.6.2, and replay
+or re-enter Campaign `200002` until the special story appears. Choose one candidate.
+
+Expected:
+
+1. MID2064 response has non-empty `story_drop_awards`.
+2. Summon Hero presentation appears for the selected girl.
+3. Closing/finishing the reward presentation advances the special story.
+4. Client finally sends MID114.
+5. Campaign progression completes normally.
+6. Selected girl appears in Girls and survives relog.
+7. `world_map` row 200002 persists `is_partner_drop=1` so replay does not offer the
+   one-time choice again.
+
+If MID2064 succeeds but the Summon Hero presentation itself stalls, inspect the new
+resource-probe/CDN records first; do not invent more Hero fields.
+
+## Roadmap after v0.6.2 validates
+
+Resource protocol research exit criteria are achieved. Resume gameplay architecture:
+
+1. Formation MID208/209 canonicalization.
+2. Campaign completeness: energy/economy/real dropbox RNG/chapter rewards.
+3. Hero progression 51/52/equipment/pieces/collection; awakening later with valid
+   prerequisites.
+4. Vending/Summon/Shop.
+5. Activities.
+6. Voyage/subdomains.
+7. Competitive/Arena last.
+
+Payment remains permanently out of scope.
+
+## Validation
+
+v0.6.2 was checked with Python syntax compilation only: **70 Python files PASS**.
+No Flask/HTTP/APK/ADB/emulator/gameplay runtime test was performed by the assistant.
+Caches are removed before packaging.
+
+---
+
+# v0.6.1 update — packaged Lua resource probe
+
+Current version: **v0.6.1-packaged-resource-probe**  
+Stable gameplay baseline: **Stage 4A.9 / v0.5 milestone**  
+Date: 2026-08-17
+
+## Why v0.6.1 exists
+
+The v0.6.0 writable-hot-overlay resource probe did not load: after reproducing
+Campaign `200002`, the expected writable `resource_pipeline_trace.log` did not exist.
+This result is **non-evidence** about `AssetDownload` / `xyd.FileDownloader`; it only
+proves that the diagnostic override itself was not active.
+
+The user supplied their actual APK workshop and packaged source archives. The proven
+safe-enough client-edit boundary is plaintext Lua inside the decoded APK. Heavy smali
+or native changes previously made the game unstable, so v0.6.1 deliberately uses only
+minimal Lua instrumentation and otherwise preserves the stable backend/gameplay state.
+
+## Corrections from the latest debug capture
+
+1. `tools/resource_lua_probe_adb.py pull` in v0.6.0 calls `am force-stop` before
+   reading files. The app disappearing immediately after the user ran `pull` was
+   caused by the tool, not a demonstrated client crash.
+2. The writable overlay was installed only under `src_64`. The APK source archive has
+   both `UpdateScene.lua` (which later selects `src_32`) and `UpdateScene_64.lua`
+   (which selects `src_64`). The supplied archive does not establish which tiny launch
+   selector is active on this installation, so single-tree override instrumentation is
+   unreliable.
+3. A root-created writable override can also differ from normal app-created files in
+   ownership/SELinux metadata. Do not infer execution from Unix mode alone.
+4. The captured writable `lazyFile.json` still contains all six `zhuankuai` lazy
+   keys. Neither writable `res/web/skeletons/npc/zhuankuai` nor legacy
+   `res/skeletons/npc/zhuankuai` exists in the capture. Therefore this latest test did
+   **not** prove or disprove the corrected direct resource installer; it tested the
+   failed tracer only.
+5. `log.db` exists but its `errorlog` table is empty. This is consistent with the
+   user's long-standing observation that ordinary Lua failures are not useful in adb
+   logcat / local error logging for this release client.
+
+## User APK workshop evidence
+
+The uploaded workshop scripts show an established process:
+
+- apktool decode;
+- LuaJIT decompile to plaintext;
+- overwrite packaged Lua with plaintext;
+- patch known SDK/engine URLs;
+- rebuild/sign APK.
+
+The uploaded `app_src_archives.zip` contains both full `src_32` and `src_64` trees.
+The workshop upload itself contains scripts, not the full decoded `lib/` or `smali/`
+tree, so native `xyd.FileDownloader` implementation cannot yet be inspected from this
+upload.
+
+## Deeper server-driven download mapping
+
+MID2 is now mapped more precisely from authoritative `UpdateScene_64.lua`. When
+`is_inapp != 0`, each `response.res` package descriptor directly consumes:
+
+- `version`
+- `volume`
+- `size`
+- `md5`
+- `resource`
+
+The updater creates `<versionUpdatePath>/<version>.zip`, downloads sequential
+`<resource>.001`, `.002`, ... through the same native
+`xyd.FileDownloader:download()`, validates the whole ZIP against descriptor `md5`,
+and unzips into `versionUpdatePath`.
+
+This is the source-confirmed mechanism closest to “server tells client to download.”
+It is separate from the jellyfish per-file CDN path. Crucially, it does **not** bypass
+the uncertain native FileDownloader layer, so fabricating MID2 packages is not a safe
+next fix. The current backend continues to return `is_inapp=0`.
+
+Also, source post-update catalog processing does not show a general mechanism that
+clears already-existing lazy keys merely because a package contains matching bytes.
+Do not assume a MID2 resource ZIP alone would repair current `lazyFile.json`.
+
+## v0.6.1 packaged resource probe
+
+New tool:
+`tools/patch_decoded_assetdownload_probe.py`
+
+It patches only packaged plaintext Lua, in both source trees:
+
+- `assets/src_32/app/common/AssetDownload.lua`
+- `assets/src_64/app/common/AssetDownload.lua`
+- `assets/src_32/app/common/ui/LoadingProxy.lua`
+- `assets/src_64/app/common/ui/LoadingProxy.lua`
+
+It does not touch smali/native code and does not change MIDs, URLs, lazy keys,
+FileDownloader arguments, or game state. It writes synchronous JSONL to
+`<versionUpdatePath>/resource_pipeline_trace.log`. Once login has populated
+`Backend.logURL_`, AssetDownload events also use the source-defined
+`Backend:log(0, ...)` path.
+
+Backend `ClientErrorCapture` now recognizes marker
+`__gxb_probe=resource_pipeline_v061` and writes those events separately to:
+`runtime_logs/resource_client_probe.jsonl`. They are not classified as client errors.
+
+Probe events include:
+
+- `assetdownload_module_loaded`
+- `preload_battle_enter`
+- `preload_battle_queue`
+- `preload_battle_add_loading`
+- `loadingproxy_add_new` with Lua traceback
+- `download_files_enter`
+- `insert_to_stack`
+- `download_file_before_native` with exact URL/tmp path/MD5/size
+- `download_file_native_call_returned`
+- `download_file_native_finish`
+- `loadingproxy_remove`
+
+New pull helper:
+`tools/pull_packaged_resource_probe_adb.py`
+
+Unlike v0.6.0, it does **not** force-stop the app by default. Server-side
+`resource_client_probe.jsonl` is preferred; the ADB pull is fallback.
+
+Exact integration instructions: `docs/PACKAGED_RESOURCE_PROBE_V0_6_1.md`.
+Full protocol map: `docs/RESOURCE_DOWNLOAD_PROTOCOL_RE.md`.
+
+## Next runtime test
+
+The user should integrate the packaged probe into their decoded-APK workshop after
+plaintext Lua merge and before apktool rebuild, launch v0.6.1, reproduce campaign
+`200002`, then return `runtime_logs/resource_client_probe.jsonl` (or pull the device
+trace without force-stopping).
+
+Interpretation priority:
+
+- if jellyfish traceback is not from `AssetDownload`, follow the actual caller;
+- if `download_file_before_native` is last, native binding call itself blocks/throws;
+- if native call returns but no finish and no `/res/`, native downloader does not
+  reach HTTP;
+- if finish reports failure, use the direct result/code;
+- if `/res/` appears, reconstruct actual HTTP/resume requirements from that request.
+
+## Validation
+
+v0.6.1 was checked with Python syntax compilation only: **69 Python files PASS**.
+`local_assets/` and `runtime_logs/` were pruned because they are resource/runtime data,
+not Python source. No Flask/HTTP/APK/ADB/emulator/gameplay runtime test was performed.
+Caches were removed before packaging.
+
+---
+
+# v0.6.0 update — resource/download protocol reverse engineering
+
+Current version: **v0.6.0-resource-protocol-re**  
+Stable gameplay baseline preserved from: **Stage 4A.9 / v0.5 milestone**  
+Date: 2026-08-17
+
+## Versioning / scope decision
+
+The user considers the current reconstructed gameplay a major stable milestone and asked
+to stop treating every deeper subsystem as another Girls patch. Stage 4A.9 remains the
+stable baseline; v0.6.0 is a dedicated **resource/download protocol research branch**.
+This branch must preserve gameplay behavior and avoid speculative MID113/Campaign changes.
+
+User-requested roadmap ordering after resource research:
+
+1. Formation canonicalization (MID208/209).
+2. Campaign completeness (economy/energy/drop RNG/chapter rewards).
+3. Hero progression (51/52/equipment/pieces/collection); awakening later within this
+   domain because valid test states require specific girl prerequisites.
+4. Vending/Summon/Shop.
+5. Activities, one source-defined type at a time.
+6. Voyage subdomains.
+7. **Competitive/Arena last.**
+
+Payment remains permanently out of scope.
+
+## Stable user-runtime-confirmed gameplay entering v0.6.0
+
+- Girls list and Aquaris detail work.
+- Skin and Affinity tabs work.
+- Hero skill upgrades and diamond skill-point interaction work.
+- Normal Chapter-1 Campaign team selection, client battle, MID114 progression, unlocks
+  and relog persistence work.
+- Backpack persistence works.
+- Conservative first-clear Campaign item awards work.
+- Sweep/Raid Mini Juice awards work.
+- EXP consumables and persisted Hero leveling work.
+- Guide-function completion persistence works.
+
+Chapter-2 `200002` remains the one current normal-Campaign blocker: MID2768 succeeds,
+MID113 succeeds, the jellyfish/NewLoadingWindow appears, no MID114 follows.
+
+## Latest Archive.zip runtime evidence
+
+The supplied v0.6 investigation capture confirms:
+
+- CENTER advertises a dynamically derived device-reachable host and `/res/` base.
+- MID113 for `200002` completes successfully.
+- Campaign asset audit reports `required=16`, `present=15`, `lazy_snapshot=6`,
+  `unresolved_lazy=0`.
+- All six `zhuankuai` lazy resources are recovered in the backend static store and
+  match the exact current 1.631.0 catalog MD5.
+- The only remaining audit miss is an informational/non-lazy battle sound catalog miss.
+- **No `/res/` HTTP request reaches the backend while the jellyfish is stuck.**
+- The earlier mysterious undecoded engine request is now captured as literal
+  URL-encoded `payload=nil`; treat it as noise, not a hidden compressed MID.
+
+Therefore Chapter 2 is no longer an asset-availability or unknown-MID problem. The
+unresolved boundary is inside the client between Lua preloading and the native file
+downloader/scene continuation.
+
+## Source-confirmed resource/download protocol
+
+Authoritative complete `src_64` and Pass19 were re-read deeply. Pass19 is primarily an
+engine/MID transport map; runtime lazy CDN traffic is outside ordinary `/api/v1` MIDs
+and needs its own protocol map. Full write-up: `docs/RESOURCE_DOWNLOAD_PROTOCOL_RE.md`.
+
+### Plane A — CENTER / MID20480
+
+`UpdateScene_64.lua` sends MID20480 to CENTER. Its flat response assigns:
+
+- `response.url -> xyd.serverUrl`
+- `response.server_id -> xyd.serverID`
+- `response.back_domain -> xyd.back_domain`
+- `response.res_download_url -> xyd.resDownloadUrl`
+
+`res_download_url` is the base location for later resource fetches. It is not a
+per-battle instruction or list of files.
+
+### Plane B — startup full-version update / MID2
+
+`UpdateScene:checkUpdate_()` sends MID2 with platform/app version/resource version/clean/full.
+Its response consumes `is_appstore`, `is_inapp`, `need_restart`, `is_review`, and `res`.
+When `is_inapp != 0`, `res` describes whole resource update ZIP/volume packages. This is
+separate from jellyfish per-file lazy downloading. Do not invent package descriptors.
+
+### Plane C — local version/lazy metadata
+
+`version.json` is the current resource catalog. `UpdateScene` initializes writable
+`lazyFile.json` keys of the form `__lazy__<path joined by ___>` for non-force resources
+that are absent or MD5-wrong. Startup validation aliases catalog `res/web/X` to writable
+`res/X`.
+
+`AssetDownload:isFileExist(path)` does **not** stat the file system; it checks whether
+that lazy key exists. Thus local lazy metadata is authoritative for runtime selection.
+
+### Plane D — runtime lazy/on-demand download
+
+After MID113 succeeds, `xyd.pushBattleScene()` derives battle models/maps/sounds locally
+and invokes `AssetDownload:preloadBattleInfos()`. If missing lazy entries exist it calls
+`LoadingProxy:addNewLoading(1.5)`, builds a queue, then `downloadFiles -> insertToStack ->
+downloadFile`.
+
+`AssetDownload:getDownloadInfo_()` constructs the HTTP URL as:
+
+`xyd.resDownloadUrl .. basename .. "." .. expected_md5`
+
+The directory is intentionally omitted. Backend `/res/` must reverse-map basename+MD5
+to the original current-client catalog path.
+
+`AssetDownload:downloadFile()` calls native:
+
+`xyd.FileDownloader:download(url, tmp_path, 0, 10, progress_cb, finish_cb)`
+
+The runtime temporary/final path uses the **original catalog path** under the writable
+update root: `res/web/X.asset_tmp -> res/web/X`. After native success Lua independently
+verifies `MD5File(tmp)==expected`, renames the file, removes the exact lazy key and
+continues callbacks. Failure requeues.
+
+### Search paths
+
+`boot_64.lua` Android resource search order is:
+
+1. `<versionUpdatePath>/res/web`
+2. `<versionUpdatePath>/res`
+3. packaged `res`
+
+This explains why both modern runtime `res/web/...` and legacy/startup `res/...` layouts
+can be loadable. For fidelity, any direct runtime install should prefer `res/web/...`.
+
+### No gameplay MID commands per-file downloads
+
+There is no source evidence that MID113, MID114, or another ordinary Campaign MID tells
+the client which battle files to download. The server control points are CENTER
+(resource base URL) and MID2 (whole startup update packages). Runtime battle asset
+selection is client-local and direct HTTP through the native downloader.
+
+## Correction to Stage 4A.9 direct-install experiment
+
+Stage 4A.9 `install_campaign_assets_adb.py` copied current catalog `res/web/X` only to
+legacy/startup alias `res/X`, then removed the lazy key. Source review now proves the
+actual runtime downloader writes `res/web/X`. Because boot search paths include both,
+the old experiment was not necessarily fatal, but it was not faithful and the user's
+continued jellyfish does not prove the recovered bytes were wrong. v0.6.0 changes the
+helper destination to exact `res/web/X`.
+
+Prefer the new trace probe before another direct-install experiment.
+
+## New v0.6.0 Lua/native boundary probe
+
+`tools/client_probe_payload/xinyoudi.lua` is the authoritative packaged `app/xinyoudi.lua`
+plus diagnostic wrappers. `tools/resource_lua_probe_adb.py` installs/pulls/removes that
+writable override. The backend itself never invokes ADB.
+
+The overlay logs to `<versionUpdatePath>/resource_pipeline_trace.log`:
+
+- `LoadingProxy:addNewLoading/removeLoading/reset` plus traceback;
+- `AssetDownload:preloadBattleInfos`;
+- `isFileExist` lazy-key decisions;
+- `getDownloadVersionInfo`;
+- `downloadFiles`, `insertToStack`, and exact `downloadFile BEFORE_NATIVE` URL/path/MD5;
+- the Lua-visible `xyd.FileDownloader:download()` entry/return itself;
+- native progress/finish callback values if returned;
+- `dealCallbacks` and preloader completion.
+
+Operator sequence:
+
+`python3 tools/resource_lua_probe_adb.py install`
+`# launch client, reproduce 200002 once`
+`python3 tools/resource_lua_probe_adb.py pull`
+`python3 tools/resource_lua_probe_adb.py remove`
+
+The helper supports adb-root, `su -c`, and `run-as`, backs up any pre-existing writable
+`xinyoudi.lua`, and leaves the app stopped after each operation.
+
+Interpretation target:
+
+`preloadBattleInfos -> downloadFiles -> downloadFile BEFORE_NATIVE ->`
+`FileDownloader.download ENTER -> native callbacks -> dealCallbacks -> preload callback`
+
+If native ENTER occurs but no `/res/` GET and no finish callback, the leading blocker
+is below Lua in native downloader/network code. If no `preloadBattleInfos` appears, the
+jellyfish is coming from a different LoadingProxy caller; the traceback will identify it.
+
+## Native APK research helper
+
+`tools/native_downloader_probe.py` can inspect local APKs or pull installed APK(s) via
+ADB and inventory native `.so` strings related to downloader/HTTP/libcurl/range/resume.
+It is evidence-only and does not patch binaries. Release binaries may be stripped, so
+absence of a string is not proof of absence.
+
+## Backend resource gateway research instrumentation
+
+The existing gateway remains catalog/MD5 based and serves only exact recovered bytes.
+Resource request records now also retain selected downloader-facing headers (`Range`,
+`Accept`, `Accept-Encoding`, `Connection`) so native resume behavior can be reconstructed
+if an HTTP request finally reaches Flask. Dummy/hash spoof remains disabled: the client
+performs its own MD5 check.
+
+## Network rule
+
+Never hard-code a LAN/private IP. Current default host discovery uses the local Linux
+default-route interface from `/proc/net/route` plus kernel interface IPv4 lookup;
+`GXB_ADVERTISE_HOST` is only an explicit override for unusual multi-interface setups.
+
+## Validation
+
+v0.6.0 syntax-only validation PASS: **67 Python files compiled successfully** with
+`py_compile`. No Flask/HTTP/APK/ADB/emulator/gameplay runtime test was performed by the
+assistant. The Lua diagnostic overlay was source-reviewed but not executed; runtime
+validation is intentionally user-operated and reversible.
+
+---
 # Stage 4A.9 update — hot-asset client repair + undecoded-request probe
 
 Current stage: **Stage 4A.9 Girls-adjacent progression + EOL client-resource repair**  
