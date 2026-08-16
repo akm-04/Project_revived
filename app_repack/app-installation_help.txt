@@ -1,0 +1,14 @@
+===
+# 1. Manually create the missing files directory
+mkdir -p /data/data/com.carolgames.gxb/files/
+
+#assuming we previously copied the assets to tab...
+# 2. Copy your 1.3GB of decompiled assets and data
+cp -r /sdcard/Download/gxb_data/* /data/data/com.carolgames.gxb/files/
+
+# 3. Assign ownership using the NEW UID from your logcat
+chown -R u0_a338:u0_a338 /data/data/com.carolgames.gxb/files/
+
+# 4. Set the correct read/write/execute permissions
+chmod -R 775 /data/data/com.carolgames.gxb/files/
+====

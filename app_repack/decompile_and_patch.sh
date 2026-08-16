@@ -1,11 +1,13 @@
 #!/usr/bin/env bash
 set -e
 
-DECODE_DIR="decoded_gxb"
-OUTPUT_DIR="output"
-WORKDIR="/home/akm/Miscallaneus/recovery/gxb/workdir"
+# Dynamically determine the directory where this script is located
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-# Zrok endpoints (Corrected)
+DECODE_DIR="$SCRIPT_DIR/decoded_gxb"
+OUTPUT_DIR="$SCRIPT_DIR/output"
+
+# Zrok endpoints
 ZROK_SDK_URL="https://gxbsdk.shares.zrok.io/"
 ZROK_SDK_HOST="gxbsdk.shares.zrok.io"
 ZROK_ENGINE_CENTER="https://gxbengine.shares.zrok.io/center/v1"
@@ -13,10 +15,9 @@ ZROK_ENGINE_API="https://gxbengine.shares.zrok.io/api/v1"
 
 echo "  -> [A] Running LuaJIT Decompiler via Wine..."
 rm -rf "$OUTPUT_DIR"
-wine luajit-decompiler-v2.exe "$WORKDIR/$DECODE_DIR" -e lua -s
+wine "$SCRIPT_DIR/luajit-decompiler-v2.exe" "$DECODE_DIR" -e lua -s
 
 echo "  -> [B] Merging ALL decompiled plaintext Lua over bytecode..."
-# This overwrites every compiled .lua binary file with the human-readable plaintext version
 cp -rv "$OUTPUT_DIR/assets/"* "$DECODE_DIR/assets/"
 
 echo "  -> [C] Patching Java Smali..."
@@ -89,5 +90,13 @@ for file in "${FILES_TO_PATCH[@]}"; do
         echo "    [+] Patched URLs in $file"
     fi
 done
+
+echo "  -> [E-Sub] Injecting AssetDownload Probe..."
+PROBE_SCRIPT="$SCRIPT_DIR/patch_decoded_assetdownload_probe.py"
+if [ -f "$PROBE_SCRIPT" ]; then
+    python3 "$PROBE_SCRIPT" "$DECODE_DIR"
+else
+    echo "    [!] Probe script not found at $PROBE_SCRIPT, skipping..."
+fi
 
 echo "  -> [E] Logic processing complete. Handing control back to main script..."
