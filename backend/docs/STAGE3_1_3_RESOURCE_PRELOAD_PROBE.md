@@ -50,7 +50,7 @@ so the window resource directory itself is the relevant preload source.
 Center discovery now advertises, by default:
 
 ```text
-http://172.20.0.21:9000/res/
+http://<backend-host>:9000/res/
 ```
 
 as `res_download_url`.

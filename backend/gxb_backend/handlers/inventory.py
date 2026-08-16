@@ -10,7 +10,7 @@ class InventoryHandlers:
         self.ctx = ctx
 
     def load_backpack(self, req: dict) -> dict:
-        return self.ctx.state.get_player().backpack_payload()
+        return self.ctx.state.get_inventory_repository().payload()
 
     def load_rune(self, req: dict) -> dict:
         return self.ctx.state.get_player().rune_payload()
@@ -38,6 +38,15 @@ class InventoryHandlers:
         player.energy = min(player.max_energy, player.energy + 1)
         self.ctx.state.save()
         return {"energy": player.energy}
+
+    def use_skill_point_item(self, req: dict) -> dict:
+        return self.ctx.state.get_hero_progression_repository().use_skill_point_item(req)
+
+    def use_exp_item(self, req: dict) -> dict:
+        return self.ctx.state.get_hero_progression_repository().use_exp_item(req)
+
+    def use_exp_items(self, req: dict) -> dict:
+        return self.ctx.state.get_hero_progression_repository().use_exp_items(req)
 
     def sort_type(self, req: dict) -> dict:
         return {}

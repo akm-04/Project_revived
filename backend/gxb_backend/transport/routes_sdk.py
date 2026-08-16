@@ -21,30 +21,30 @@ class SDKRoutes:
         self.state = state
 
     def handle(self):
-        # Keep SDK identity/cookies sourced from the same editable player DB as
-        # the engine-side account/session state.
-        self.state.refresh()
-        body = decode_sdk_body(request)
-        if not isinstance(body, dict):
-            print("[SDK] malformed/non-JSON request")
+        # Keep SDK identity/cookies sourced from the same coherent text-DB
+        # snapshot as engine traffic.
+        with self.state.request_scope():
+            body = decode_sdk_body(request)
+            if not isinstance(body, dict):
+                print("[SDK] malformed/non-JSON request")
+                return json_response(sdk_success())
+
+            mid = str(body.get("mid", ""))
+            print(f"[SDK] mid={mid!r} body={body!r}")
+
+            if mid in IDENTITY_MIDS:
+                account = self.state.get_account()
+                identity = account.sdk_json()
+                print("[SDK] setting session cookies: " + ", ".join(f"{k}={v}" for k, v in account.cookies().items()))
+                return json_response(sdk_success(identity=identity), cookies=account.cookies())
+
+            if mid in LOG_MIDS:
+                return json_response(sdk_success())
+
+            if mid in PAYMENT_NAMES:
+                return json_response(sdk_success(data={"methods": [], "amounts": []}))
+
             return json_response(sdk_success())
-
-        mid = str(body.get("mid", ""))
-        print(f"[SDK] mid={mid!r} body={body!r}")
-
-        if mid in IDENTITY_MIDS:
-            account = self.state.get_account()
-            identity = account.sdk_json()
-            print("[SDK] setting session cookies: " + ", ".join(f"{k}={v}" for k, v in account.cookies().items()))
-            return json_response(sdk_success(identity=identity), cookies=account.cookies())
-
-        if mid in LOG_MIDS:
-            return json_response(sdk_success())
-
-        if mid in PAYMENT_NAMES:
-            return json_response(sdk_success(data={"methods": [], "amounts": []}))
-
-        return json_response(sdk_success())
 
 
 def register_sdk_routes(app, state: StateRepository) -> None:

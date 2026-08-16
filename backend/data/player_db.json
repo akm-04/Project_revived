@@ -1,14 +1,18 @@
 {
   "_meta": {
-    "schema": 1,
-    "format": "GXB Stage 3.1.4 human-editable player database",
+    "schema": 4,
+    "format": "GXB Stage 4A.6 human-editable player database",
     "notes": [
-      "Stage 3.1.4 separates SDK account UID (13371337), SDK/login SID (1993b58bfd1b93499ae19477b236d4a2), and game player_id (12525385) using the known-good official region-125 client snapshot.",
-      "The backend re-reads this file before every SDK/engine request.",
-      "For an established/non-tutorial account keep player.progression.guide_id at 101001 (GUIDE_CONQUER_SCHOOL_END) for the established test profile; 100197 is only the base GUIDE_END.",
-      "player.economy feeds MID 17 / EcoSidebar; player.heroes feeds MID 49; player.inventory feeds MID 81.",
-      "Use only source-valid hero/item table IDs. Unknown IDs can crash client table lookups.",
-      "Stage 3.1.1 fixes the hero-section loader collision; keep heroes under player.heroes.heroes in this file."
+      "Stage 4A.3 normalizes ordinary HeroMain illusion_skin_id to 0 so the Skin-tab selector cannot become Lua index 0.",
+      "Stage 4A.3 persists MID99 skill-point purchases and MID39/MID53 hero skill mutations; crystal/mana charging remains deferred to full Hero/Economy progression.",
+      "Stage 4A.2 normal Campaign progression is user-confirmed operational through repeated MID113/MID114 clears; rewards and energy accounting remain incomplete.",
+      "Stage 4A.2 persists normal Campaign progress and the MID113 -> MID114 battle session in player.world.",
+      "Campaign unlock links come from packaged source-derived data/campaign_meta.json; IDs are never guessed by arithmetic.",
+      "The initial normal campaign 100001 is unlocked but unbeaten (star 0); successful MID114 results persist stars and unlock the source-defined next campaign.",
+      "Stage 4A.2 keeps Hero ownership canonical for Girls/formation/battle and normalizes four explicit zero element-equipment slots required by HeroMainWindow.",
+      "heroes.save_team/save_team_name/save_pet remain serialized strings consumed by Lua string split helpers.",
+      "The backend re-reads this file before each stateful request and writes mutations atomically under a request-scoped lock.",
+      "Do not invent hero/item table IDs; use source-confirmed IDs. Campaign rewards remain empty until their drop/economy contracts are implemented."
     ]
   },
   "account": {
@@ -117,7 +121,7 @@
         97,
         99
       ],
-      "guide_function_ids": [],
+      "guide_function_ids": {},
       "arena_beat_flag": 0,
       "conquer_lev": 0,
       "conquer_loop_id": 1,
@@ -210,7 +214,56 @@
           "courses_quality": [],
           "courses_exp": [],
           "is_board": 1,
-          "board_card": 1
+          "board_card": 1,
+          "illusion_skin_id": 0,
+          "element_equips": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "element_levels": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "element_bak_equips": [],
+          "element_bak_levels": [],
+          "spirit_equip": {},
+          "spirit_item": [],
+          "inscript_items": {},
+          "feed_attrs": {},
+          "evo_attr_points": {},
+          "evo_stage": 1,
+          "is_like": 0,
+          "force": 0,
+          "skill_ids": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "favor_degree": 0,
+          "is_married": 0,
+          "twice_awake_stage": 0,
+          "region_arena_times": 0,
+          "book_shelf_lev": 0,
+          "conquer_lev": 0,
+          "conquer_loop_id": 1,
+          "house_id": 0,
+          "house_table_id": 0,
+          "house_comfort": 0,
+          "house_equips": {},
+          "house_expand_lev": 0,
+          "unlocked_dynamic_card": "",
+          "dynamic_card_state": "",
+          "collect_quality_stage": 0,
+          "collect_star_stage": 0,
+          "buffs": {},
+          "board_model_id": 0
         }
       },
       "collected_heros": {
@@ -220,13 +273,15 @@
           "is_collected": 1
         }
       },
-      "hero_pieces": [],
+      "hero_pieces": {},
       "formation": {
         "rep_partner_id": 10001
       },
-      "save_team": {},
-      "save_team_name": {},
-      "save_pet": {}
+      "save_team": "",
+      "save_team_name": "",
+      "save_pet": "",
+      "hero_sort_type": 0,
+      "hero_next_partner_id": 10002
     },
     "inventory": {
       "backpack_items": [],
@@ -252,7 +307,16 @@
       "comment_open": 0,
       "fbshare_open": 0,
       "friends": {},
-      "activities": [],
+      "activities": [
+        {
+          "table_id": 1032,
+          "is_open": 0,
+          "start_time": 0,
+          "end_time": 0,
+          "days": 0,
+          "details": {}
+        }
+      ],
       "board_contents": [],
       "redmarks": [],
       "pets": {},
@@ -261,6 +325,33 @@
       "shops": {},
       "shop_statuses": {}
     },
-    "domains": {}
+    "domains": {},
+    "world": {
+      "world_map": {
+        "normal": [
+          {
+            "campaign_id": 100001,
+            "star": 0,
+            "daily_limit": 0,
+            "reset_count": 0,
+            "is_partner_drop": 0
+          }
+        ],
+        "super": {},
+        "challenge": {},
+        "chapter_events": {},
+        "chapter_info": {
+          "normal_chapter_id": 1,
+          "normal_campaign_id": 100001,
+          "super_chapter_id": 0,
+          "super_campaign_id": 0,
+          "normal_stars": 0,
+          "normal_bonus_id": 0,
+          "super_stars": 0,
+          "super_bonus_id": 0
+        }
+      },
+      "active_campaign_battle": {}
+    }
   }
 }

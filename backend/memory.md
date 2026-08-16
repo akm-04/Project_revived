@@ -1,3 +1,752 @@
+# Stage 4A.9 update — hot-asset client repair + undecoded-request probe
+
+Current stage: **Stage 4A.9 Girls-adjacent progression + EOL client-resource repair**  
+Date: 2026-08-17
+
+## User-confirmed results entering Stage 4A.9
+
+- Stage 4A.3 Girls detail remains operational: Aquaris detail, Skin, Affinity, skill upgrades, and diamond skill-point purchase interaction.
+- Campaign progression/relog persistence remains operational.
+- Backpack persistence, Sweep/Raid Mini Juice rewards, EXP consumables, and persisted Hero leveling remain operational.
+- Stage 4A.8 login works on the second launch and advertises the current LAN host dynamically; never restore a baked-in LAN address.
+- One first Stage 4A.8 login reached lobby and then showed a loading popup that never disappeared. The same run contained one `/api/v1` request immediately after MID1056 that the backend logged as `source=form-payload decode=undecoded`; the second app launch did not reproduce it.
+- Campaign `200002` still stalls on `NewLoadingWindow` after successful MID113 and before MID114.
+
+## Chapter 2 resource status is now proven
+
+The user's Stage 4A.8 static-store build recovered **20,499** current-client catalog entries by exact MD5, with 9,437 still absent from the community captures. For campaign `200002`, `runtime_logs/campaign_asset_summary.json` now reports `required_count=16`, `present=15`, one informational non-lazy sound catalog miss, and **zero unresolved lazy paths**.
+
+All six previously suspected `zhuankuai` lazy resources are present in the backend-local static store with the exact MD5 expected by client 1.631.0:
+
+- `res/web/skeletons/npc/zhuankuai/zhuankuai.atlas`
+- `res/web/skeletons/npc/zhuankuai/zhuankuai.json`
+- `res/web/skeletons/npc/zhuankuai/zhuankuai.png`
+- `res/web/skeletons/npc/zhuankuai/zhuankuaidandao.atlas`
+- `res/web/skeletons/npc/zhuankuai/zhuankuaidandao.json`
+- `res/web/skeletons/npc/zhuankuai/zhuankuaidandao.png`
+
+The APK still issues zero `/res/` GETs at the jellyfish. Therefore this is no longer a server asset-availability problem. Do not change MID113/MID114 or invent another resource endpoint for this symptom.
+
+## Source-confirmed client-side lazy-state cause
+
+Authoritative `src_64/app/common/AssetDownload.lua` proves `AssetDownload:isFileExist(path)` does not stat the filesystem. It converts the catalog path with `parseXmlPath` and checks `xyd.lazyFileManager` key `__lazy__<parsed-path>`; absence of that key means "present".
+
+Authoritative `src_64/lazyFileManager.lua` loads/saves this map at `xyd.versionUpdatePath .. "lazyFile.json"`. `UpdateScene.lua` also proves the writable preinstalled/recovered physical mapping `res/web/X -> res/X` when validating update-tree files.
+
+Thus copying server files alone cannot clear the wait while the installed client's writable `lazyFile.json` still says those resources are lazy. A valid EOL bypass must both install exact bytes into the writable update tree and remove only the matching lazy keys while the app is stopped.
+
+## New operator-run ADB helper
+
+Stage 4A.9 adds `tools/install_campaign_assets_adb.py`. The backend never invokes ADB automatically. The user may run:
+
+`python3 tools/install_campaign_assets_adb.py --campaign 200002 --dry-run`
+`python3 tools/install_campaign_assets_adb.py --campaign 200002`
+
+The helper reads `campaign_asset_summary.json`, selects only lazy-snapshot paths currently resolved as exact-MD5 `present`, re-verifies local MD5s, force-stops the package, backs up device `lazyFile.json`, copies each `res/web/X` to writable `res/X`, removes only the exact `__lazy__res___web___...` keys, writes the patched lazy map, logs the install, and leaves the app stopped. It supports root ADB or Android `run-as`; it refuses to guess privilege escalation.
+
+No dummy/hash spoof is used. The client performs its own MD5 verification and the current blocker is a Spine `.json/.atlas/.png` set, so arbitrary placeholder bytes remain invalid.
+
+## No hard-coded network address
+
+Stage 4A.9 further removes the fixed external route-probe address from host detection. On Linux it reads the default-route interface from `/proc/net/route` and obtains that interface's IPv4 via `SIOCGIFADDR`, with local hostname/address enumeration as fallback. `GXB_ADVERTISE_HOST` remains the explicit override for unusual multi-interface hosts.
+
+## Intermittent first-login loading popup
+
+The exact MID of the Stage 4A.8 undecoded request is unknown. Do not invent it. Stage 4A.9 changes transport decoding so raw request bytes are cached before Flask form parsing and adds zlib/raw-DEFLATE/gzip decode attempts. Any still-undecodable request is captured to `runtime_logs/undecoded_engine_requests.jsonl` with bounded raw payload evidence. Generic OK behavior remains until the MID/consumer is source/live identified.
+
+Player DB schema remains **4**.
+
+## Validation
+
+Stage 4A.9 syntax-only validation PASS: **65 Python files compiled successfully** with `py_compile`. No Flask/HTTP/APK/ADB/emulator/gameplay runtime test was performed by the assistant.
+
+---
+# Stage 4A.8 update — automatic LAN host + fixed static asset store
+
+Current stage: **Stage 4A.8 Girls-adjacent progression + EOL static resource restoration**  
+Date: 2026-08-17
+
+## Immediate regression entering Stage 4A.8 — login failure
+
+The user's Stage 4A.7 startup log proves a configuration regression unrelated to game-state handlers. Flask bound on the machine's current LAN address `172.20.0.15`, but CENTER discovery still advertised the historical hard-coded `172.20.0.21` in both `SELF_URL` and `res_download_url`. The client therefore had no reachable engine endpoint after center/SDK startup and could not complete normal login.
+
+Stage 4A.8 removes `172.20.0.21` as the default device-facing host. Unless explicitly overridden, startup now derives the current LAN IPv4 address from the host routing table and uses it consistently for:
+
+- engine `SELF_URL`;
+- `RES_DOWNLOAD_URL`;
+- advertised TCP chat host;
+- derived client-log URL.
+
+Optional explicit override for multi-interface hosts is `GXB_ADVERTISE_HOST=<device-reachable-ip>`. Existing explicit `GXB_SELF_URL`, `GXB_CHAT_HOST`, and `GXB_RES_DOWNLOAD_URL` overrides remain supported.
+
+This diagnosis is user-log-confirmed; actual Stage 4A.8 login remains to be user-runtime-tested.
+
+## Resource deployment simplified
+
+The user prefers deterministic server-local assets rather than exporting a community archive parent on every run. Normal Stage 4A.8 deployment therefore uses the fixed backend-local store:
+
+`<backend>/local_assets/res/`
+
+No `GXB_ASSET_ROOT` export is required. The gateway accepts both current and legacy extracted layouts under that fixed store:
+
+- `local_assets/res/web/X`
+- `local_assets/res/X`
+
+The existing current-client catalog/MD5 remains authoritative; same-name old APK files are not accepted unless their bytes match the expected MD5. If the local static store is absent/unusable, startup prints an explicit warning and the gateway remains audit/log-only. Environment root discovery is retained only as an optional diagnostic/backwards-compatibility override.
+
+New helper: `tools/build_static_asset_store.py`. It discovers extracted `res` directories under one or more community archive parents, checks exact current/legacy catalog candidates, hashes only candidates that actually exist, accepts only exact expected MD5 matches, and builds normalized `local_assets/res/web/...`. Default placement hard-links where possible and falls back to copying; `--mode copy` and `--mode symlink` are supported. It writes `local_assets/static_asset_build_summary.json`.
+
+The user can also bypass the helper and manually copy a preferred `res` tree into `local_assets/res`; runtime MD5 validation remains in effect.
+
+## Chapter 2 status entering this pass
+
+Chapter-2 campaign `200002` still stalls on the jellyfish/NewLoadingWindow after successful MID113. Stage 4A.7 proved the previous multi-root discovery itself was not limited to one tree; the older capture's `res/skeletons/...` layout required the `res/web/X -> res/X` alias. The user's current note confirms the six `zhuankuai` files physically exist in the older capture. Stage 4A.8 does not claim the jellyfish fixed yet because Stage 4A.7 could not reach gameplay after the stale-host login regression.
+
+Next user test should first confirm login with the automatically advertised current LAN host, then retry `200002` using the fixed local asset store and inspect `runtime_logs/campaign_asset_summary.json` for `present` versus `md5_mismatch`.
+
+## Existing confirmed gameplay retained
+
+- Stage 4A.3 Girls detail: Aquaris detail, Skin, Affinity, skill upgrades, diamond MID99 purchases.
+- Campaign progression and relog persistence.
+- Backpack persistence.
+- Sweep/Raid source-defined Mini Juice rewards.
+- EXP consumable use and persisted Hero leveling.
+- Guide-function completion persistence.
+- Conservative first-clear Campaign item awards.
+
+Player DB schema remains **4**.
+
+## Validation
+
+Stage 4A.8 syntax-only validation PASS: **63 Python files compiled successfully** using `py_compile`. No Flask/HTTP/APK/ADB/emulator/gameplay runtime test was performed by the assistant.
+
+---
+# Stage 4A.7 update — legacy res alias + MID90 stability fallback
+
+Current stage: **Stage 4A.7 Girls-adjacent progression + EOL resource recovery**  
+Date: 2026-08-16
+
+## User-confirmed results entering Stage 4A.7
+
+- Stage 4A.3 Girls detail remains operational: Aquaris detail, Skin, Affinity, skill upgrades, and diamond MID99 skill-point purchases work.
+- Campaign progression/relog persistence remains operational.
+- Stage 4A.6 Backpack + Sweep + EXP consumable path is now user-confirmed: Sweep granted Mini Juice, MID63 bulk EXP use worked, and the next bootstrap showed Aquaris at level 30 with persisted cumulative EXP.
+- Chapter 2 campaign `200002` still stalls on the jellyfish/NewLoadingWindow after successful MID113 and before MID114.
+
+## Resource resolver bug proven by Stage 4A.6 logs
+
+Startup discovery was **not** stopping after one resource tree. It found both extracted roots under the configured community archive parent, including the older `gxb_v1.164.0-assets/.../res` tree and the newer `gxb_new_data_2/.../res` tree, plus ZIP/APK containers.
+
+The false missing result came from layout normalization. Current metadata asks for `res/web/skeletons/npc/zhuankuai/...`, but the user proved the older capture stores those files at `res/skeletons/npc/zhuankuai/...`. Stage 4A.6 only generated `<res>/web/...` candidates, so the six files were reported `local_file_missing` despite existing in the old capture.
+
+Stage 4A.7 adds a legacy alias for both filesystem and ZIP/APK lookup:
+
+`res/web/X` -> `res/X`
+
+MD5 verification remains mandatory and chooses whether an old copy is actually compatible. A same-name old file with the wrong bytes is logged as `md5_mismatch` and later roots are still tried.
+
+The supplied Stage 4A.6 run still contained zero `/res/` GETs from the APK, so even a newly `present` audit result does not yet prove the native downloader will pull it. Fix the false-negative resolver first; if exact-MD5 assets are found but the jellyfish remains with no GET, continue with the pre-download/client-side FileDownloader state rather than inventing another MID.
+
+## MID90 live regression
+
+Stage 4A.6 changed MID90 `USE_SKILL_POINT_ITEM` to persist the item and return the cross-cutting response `economy_={skill_point=...}`. Live evidence shows the request received `error_code=0`, then the client remained on a loading icon and issued no further meaningful request. `Backend:webRequest_()` runs `extraWebResponseCheck_()` before removing its loading proxy, so an exception in the global ECONOMY side-effect path is consistent with that symptom.
+
+The direct source callback in `SelfPlayer:useSkillPointItem()` consumes no MID90 response fields. No official/live MID90 capture proves the `economy_` envelope for this endpoint. Stage 4A.7 therefore removes that unproven global event from MID90 while keeping the source-defined +10-per-item mutation and canonical Backpack consumption. It returns a diagnostic/current `skill_point` scalar; persistence is authoritative and will hydrate on relog. Immediate in-session MID90 UI synchronization is not claimed solved.
+
+Diamond MID99 purchase behavior remains unchanged.
+
+## Other supplied-log lead
+
+The rapid-window-switch run recorded one fallback gap, MID1829 `GET_PLAYER_CARD_INFO`, returning bare success. That run ended with mostly hidden lobby UI. This is a plausible accidental-click lead, but player-card/profile reconstruction remains outside the present pass.
+
+## Schema and validation
+
+Player DB schema remains **4**; no migration is required from Stage 4A.6.
+
+Stage 4A.7 syntax-only validation PASS: **62 Python files compiled successfully**. No Flask/HTTP/APK/ADB/emulator runtime testing was performed by the assistant.
+
+# Stage 4A.5 update — resource discovery + Backpack rewards + guide persistence
+
+Current stage: **Stage 4A.5 Girls-adjacent state completion + EOL Campaign resource diagnostics**  
+Date: 2026-08-16
+
+## User-confirmed state entering Stage 4A.5
+
+- Stage 4A.3 Girls detail is now user-confirmed operational: Aquaris detail, Skin tab, Affinity tab, skill upgrades, and the diamond/skill-point purchase interaction all work.
+- Normal Campaign Chapter 1 progression and relog persistence remain user-confirmed operational.
+- The next blocker is Campaign Chapter 2: MID2768 succeeds, MID113 succeeds for campaign `200002`, then the client remains on the jellyfish/NewLoadingWindow and never sends MID114.
+- Workplace/building errors remain explicitly out of scope for this pass.
+
+## Latest Stage 4A.4 debug evidence — no resource HTTP GET
+
+The user ran Stage 4A.4 with two explicit asset roots. Startup showed the resource catalog and advertised:
+
+`RES_DOWNLOAD_URL = http://172.20.0.21:9000/res/`
+
+Center discovery returned that URL, but the supplied `server.txt` contains **zero `/res/` HTTP GETs** before/while campaign `200002` stalls. Therefore the current jellyfish happens before the native FileDownloader reaches Flask. The HTTP resource gateway remains useful, but request logging alone cannot diagnose this particular pre-download wait.
+
+Source-derived dependency comparison using the supplied `version.json` + `lazyFile.json` shows:
+
+- campaign `200001` / fight `20001`: zero dependencies marked lazy in this snapshot;
+- campaign `200002` / fight `20002`: exactly six lazy-marked dependencies, all in the `zhuankuai` Spine set:
+  - `res/web/skeletons/npc/zhuankuai/zhuankuai.atlas` — `e9c325a375378bf69fcedfd7e1b5f684`
+  - `res/web/skeletons/npc/zhuankuai/zhuankuai.json` — `283db29154ad6479d3c9d513f2d0e6f3`
+  - `res/web/skeletons/npc/zhuankuai/zhuankuai.png` — `87d6ffe66a54dfd41f7996e2ff47e1c7`
+  - `res/web/skeletons/npc/zhuankuai/zhuankuaidandao.atlas` — `6dce446cc828e3c6b3373511c371189b`
+  - `res/web/skeletons/npc/zhuankuai/zhuankuaidandao.json` — `93d40485345509bfb54f6a192967fe1e`
+  - `res/web/skeletons/npc/zhuankuai/zhuankuaidandao.png` — `4f35a8084831a5896b06be2d747fb143`
+
+These are current blocker candidates, not yet user-runtime-confirmed missing files.
+
+## Recursive multi-archive `res` discovery
+
+Stage 4A.4 supported multiple **explicit** roots through `GXB_ASSET_ROOTS`. Stage 4A.5 adds parent-archive discovery so the user can point once at a tree such as:
+
+`GXB_ASSET_ROOT=/home/akm/Miscallaneus/recovery/gxb/gxb-assets/zips`
+
+Behavior:
+
+- breadth-first walk of directory names only, max depth `GXB_ASSET_DISCOVERY_DEPTH` (default 10);
+- a child named exactly `res` is recorded as an effective resource root;
+- once a direct `res` child is found, that parent subtree is pruned so sibling `src_32/src_64` trees are not crawled;
+- resource files inside `res` are never enumerated/indexed/hashed at startup;
+- exact catalog paths are checked lazily only when requested or audited;
+- multiple discovered `res` roots are tried, and an MD5 mismatch in one root does not prevent trying later roots.
+
+Startup writes `runtime_logs/resource_root_discovery.json`. If no asset root is configured, startup explicitly warns and remains catalog/audit/log-only.
+
+## MID113 Campaign asset auditor
+
+Because the client can stall before issuing `/res/` GETs, Stage 4A.5 adds `CampaignAssetAuditor`. On every MID113 it uses `data/campaign_asset_requirements.json` (917 source-derived normal-Campaign rows) plus the shared ResourceGateway to check source-derived enemy-model/map/audio paths against all configured/discovered archives.
+
+Logs:
+
+- `runtime_logs/campaign_asset_requirements.jsonl`
+- `runtime_logs/campaign_asset_summary.json`
+
+Only paths marked lazy by the supplied snapshot are classified as `unresolved_lazy`; non-lazy/catalog-miss paths remain informational because they may be force-packed/local resources.
+
+## Dummy/hash-spoof rule
+
+Pure server-side hash spoofing is not a viable fallback. `AssetDownload` computes the MD5 of downloaded bytes locally and compares it to the client's own expected MD5. Disabling server-side MD5 verification cannot bypass that check, and generating arbitrary placeholder bytes for a chosen 128-bit MD5 is not practical.
+
+A future placeholder mode would require a controlled client metadata/validation patch **and** format-valid placeholder assets. The current six candidates are a Spine `.json/.atlas/.png` set, so a generic 1x1 PNG would not be a coherent replacement anyway. Do not silently dummy lazy resources.
+
+## Guide-function persistence — source-confirmed shape fix
+
+The repeated forced-click guide after restart is explained by a real wire/state-shape bug. Authoritative `xyd.checkFirstInGuide(window_name)` converts the guide ID with `tostring(id)` and indexes `SelfPlayer.guideFuncList[string_id]`. Therefore MID17/MID2865 `guide_function_ids` must behave as a string-keyed map such as:
+
+`{"13":1}`
+
+Stage 4A.4 persisted a list such as `[13]`, so after relog `guideFuncList["13"]` was nil and the one-time guide appeared again.
+
+Stage 4A.5:
+
+- changes canonical `PlayerState.guide_function_ids` to `dict[str,int]`;
+- automatically migrates legacy lists (`[13] -> {"13":1}`) when JSON is loaded;
+- MID2865 writes the string-keyed completion map;
+- applies generically to these function-guide overlays rather than hard-coding Pet/Skin.
+
+MID26 Story persistence remains unchanged.
+
+## Canonical InventoryRepository + conservative first-clear Campaign items
+
+New `InventoryRepository` owns ordinary Backpack stacks. Canonical Backpack rows remain source-consumed:
+
+`table_id`, `item_num`, `time`
+
+MID81 bootstrap/direct load now serialize from that repository.
+
+Authoritative `BattleCreate` consumes MID114 `items` rows as `item_id` + `item_num` and immediately adds them to the client Backpack. Stage 4A.5 mutates the same canonical server Backpack when committing those awards, so MID114, MID81, JSON persistence, and relog share one state graph.
+
+`data/campaign_reward_meta.json` is derived from authoritative `campaign.lua` + `campaign_dropbox.lua` for all 917 Campaign rows. Current intentionally conservative reward policy:
+
+- first-clear only;
+- only source `init_dropbox` rows with `increase_rate == 10000`;
+- source item IDs only;
+- `campaign_dropbox.lua` has no quantity column, so **one item per selected drop row is an explicit structural inference**, not a source-confirmed quantity rule;
+- lower-rate rows (including Chapter 2's 8000 rows) are retained in metadata but are not rolled until RNG semantics are source/live verified;
+- MID113 stages eligible guaranteed first-clear rows only for an already-unlocked star-0 campaign;
+- successful first MID114 commit adds those rows to InventoryRepository and returns the same award shape;
+- replaying an already-cleared stage does not re-grant first-clear items.
+
+No retroactive reward migration is applied to previously cleared stages. To test the reward path, use a fresh/unbeaten Campaign row.
+
+Still deliberately incomplete:
+
+- regular/lower-rate Campaign RNG;
+- mana/EXP Campaign economy gains;
+- energy consumption;
+- Sweep rewards/accounting.
+
+## Player DB schema
+
+Schema is now **4**. Existing Stage 4A.4/4A.3 JSON is accepted and normalized. New first-class conventions in this schema are the string-keyed guide completion map and canonical normalized Backpack stacks.
+
+## Validation status
+
+Stage 4A.5 syntax-only validation PASS: **61 Python files compiled successfully**.
+
+No Flask/HTTP/APK/ADB/emulator/gameplay runtime test was performed by the assistant.
+
+---
+# Stage 4A.4 update — EOL lazy-resource gateway
+
+Current stage: **Stage 4A.4 cross-cutting resource restoration while preserving Stage 4A Girls state**  
+Date: 2026-08-16
+
+## User-confirmed results entering this pass
+
+- Stage 4A.3 Aquaris detail is operational.
+- Skin tab works.
+- Affinity tab works.
+- Skill-up interaction works.
+- The diamond/skill-point purchase interaction is user-confirmed working at the UI/gameplay level. Do not reinterpret that as proof that every crystal economy debit is canonical until state/accounting is separately verified.
+- Normal Campaign Chapter 1 progression and relog persistence are user-confirmed operational.
+- Chapter 2 Start reaches the jellyfish `NewLoadingWindow`. Debug evidence shows MID2768 then successful MID113 for campaign `200002`, followed by no MID114; there is no new relevant unknown/fallback game MID at the stall.
+
+## Authoritative client resource pipeline
+
+The supplied complete `src_64` confirms:
+
+1. `UpdateScene_64.lua` receives center-discovery `res_download_url` and assigns `xyd.resDownloadUrl`.
+2. `version.json` is used to populate `lazyFile.json` for non-force resources that are absent or fail local MD5 verification.
+3. `AssetDownload:isFileExist()` treats a matching `__lazy__...` metadata entry as a missing resource.
+4. `AssetDownload:getDownloadInfo_()` constructs the HTTP URL as:
+
+   `xyd.resDownloadUrl .. basename .. "." .. expected_md5`
+
+   The original resource directory is NOT sent in the URL.
+5. Downloaded bytes go to `<original path>.asset_tmp`.
+6. The client requires `MD5File(temp) == expected_md5` before installing the file and deleting the lazy entry. Failure or mismatch is requeued.
+7. `preloadBattleInfos()` uses this path before removing `NewLoadingWindow` and entering the battle scene.
+
+Therefore Chapter 2 can stall after MID113 even though the backend battle API is correct.
+
+## Supplied runtime metadata
+
+User supplied `.revision`, `.download_infos`, `version.json`, and `lazyFile.json`. Observed metadata:
+
+- `.revision = 267088`
+- `version.json`: 43,764 rows
+- 29,936 `res/web/...` resource rows with real MD5 values
+- `lazyFile.json`: 10,014 current lazy/missing entries
+- `.download_infos`: empty plist in the supplied snapshot
+
+Stage 4A.4 packages a normalized metadata-only catalog:
+
+`data/resource_catalog/resource_catalog.json`
+
+It contains 29,936 entries derived from the supplied version catalog plus lazy snapshot flags. No 1.5 GB resource payload is bundled.
+
+## Stage 4A.4 backend resource gateway
+
+New/changed behavior:
+
+- resource service is advertised by center discovery by default;
+- default URL is the backend `/res/` prefix derived from `GXB_SELF_URL`;
+- request form `basename.md5` is reverse-mapped to original catalog path(s);
+- local resources are checked lazily only for the exact requested catalog entry;
+- configured roots support a directory containing `res/`, direct `res/`, or direct `res/web/`;
+- matching files are MD5-verified before serving;
+- successful files are streamed via Flask `send_file`;
+- missing/catalog-miss/mismatch requests return 404 and are logged;
+- no full-tree startup scan or hashing is performed.
+
+Configure a large local tree with:
+
+`GXB_ASSET_ROOT=/path/to/assets`
+
+or multiple Linux roots:
+
+`GXB_ASSET_ROOTS=/path/one:/path/two`
+
+Optional zero-config local names are `./asset_store`, `./assets`, and `./res` when they exist. A symlink is sufficient.
+
+Logs:
+
+- `runtime_logs/resource_requests.jsonl`
+- `runtime_logs/resource_gateway_summary.json`
+
+Statuses include:
+
+- `served`
+- `catalog_miss`
+- `asset_roots_unconfigured`
+- `local_file_missing`
+- `md5_mismatch`
+
+Repeated retries are de-duplicated while the summary tracks counts. Because lookup happens on every retry, a missing file can be copied/symlinked into the configured root while backend/client remain running; the next retry can serve it if MD5 matches.
+
+## Dummy-resource rule
+
+Do NOT silently serve arbitrary dummy images/files for this lazy-download path. The source client MD5-verifies every downloaded lazy resource. A dummy has the wrong hash and will be requeued forever.
+
+A future placeholder mode would require an explicit client patch or controlled expected-metadata rewrite to the dummy's MD5, with format-specific placeholders. That is separate work.
+
+## Catalog maintenance
+
+`tools/build_resource_catalog.py` rebuilds the metadata-only catalog from a local `version.json` and optional `lazyFile.json` without scanning the large asset tree.
+
+## Validation status
+
+Stage 4A.4 syntax-only validation PASS: **59 Python files compiled successfully**.
+
+No Flask/HTTP/APK/ADB/emulator/gameplay runtime test was performed by the assistant.
+
+---
+# Stage 4A.3 update — Girls Skin-tab + canonical skill synchronization
+
+Current stage: **Stage 4A.3 Girls detail stabilization**  
+Date: 2026-08-16
+
+## User-confirmed results entering this pass
+
+- Stage 4A.2 fixed the Aquaris detail-window open failure; owned Aquaris now opens normally.
+- Skin tab still appears to do nothing.
+- MID99 BUY_SKILL_POINT was observed three times with Stage 4A.2 compatibility-only bare success, so purchased points did not enter canonical player state.
+- MID39 SET_ALL_SKILL_LEVEL was observed repeatedly with Stage 4A.2 bare success, so upgraded skills did not enter canonical hero state.
+- Stage 4A.2 Campaign persistence is now **USER-CONFIRMED OPERATIONAL**. Repeated MID113/MID114 clears advanced along source-derived links through at least `100001 -> 100002 -> 100004 -> 100005 -> 100007 -> 100008 -> 100011 -> 100012` during the supplied session.
+- Workplace/building errors reported later in that log are explicitly out of scope for this pass.
+
+## Skin-tab source diagnosis and fix
+
+Stage 4A.2 emitted `illusion_skin_id=-1` for Aquaris. `NormalHero:populate_()` stores it directly.
+
+On first Skin click, `HeroMainWindow:clickSkinButton()` enables the Skin cache and calls `updateEquipInfoContainer()`. That function treats values `<=1` as a selector and computes:
+
+`skinSelect = illusionSkinId_ + 1`.
+
+Therefore `-1` becomes selector `0`; later the function reads `skinDatas[skinIllusionEquip].modelID`, so it can dereference `skinDatas[0]` and die synchronously without a network request.
+
+Stage 4A.3 normalizes absent/negative compatibility illusion values to `0`, the source normal-card selector for an ordinary/non-awakened hero. Packaged Aquaris now has `illusion_skin_id=0`.
+
+No skin IDs are invented. Actual skin acquisition/equip semantics remain later work.
+
+## Canonical skill-point and skill-level state
+
+MID99 BUY_SKILL_POINT source callback consumes `buy_skill_times`, `skill_point`, and `skill_time`. The client translation `SKILL_POINT_BUY` explicitly says each purchase grants 10 skill points. Stage 4A.3 persists and returns those fields.
+
+MID39 SET_ALL_SKILL_LEVEL is no longer status-only. HeroMain sends `partner_id`, pipe/int `skill_colors`, and pipe/int `skill_counts`; its callback consumes the full pipe-serialized `skills` vector plus `skill_point` and `skill_time`. Stage 4A.3 routes the mutation through `HeroRepository`, updates the canonical six-slot hero `skills`, deducts canonical skill points when sufficient, saves atomically, and returns the fields HeroMain consumes.
+
+MID53 SET_SKILL_LEVEL is routed through the same state owner for the older single-index path.
+
+Deliberate limit: Stage 4A.3 does **not** yet persist the crystal cost of MID99 or mana cost of skill upgrades. Those economy mutations remain part of the later full Hero/Economy progression pass rather than being half-wired without a proven response-sync contract.
+
+## Campaign status promotion
+
+Stage 4A.2 Campaign world synchronization is no longer "awaiting runtime confirmation". It is user-confirmed working for repeated normal Campaign clears and source-linked unlock persistence.
+
+Still incomplete:
+
+- campaign rewards/drop tables;
+- energy accounting;
+- sweep currency/ticket accounting;
+- stronger MID113/MID114 eligibility/session validation.
+
+These do not block the current Stage 4A Girls pass.
+
+## Aquaris star evidence correction
+
+Earlier memory described owned Aquaris `table_id=10001001` as "source-confirmed initial star 3". Corrected evidence classification:
+
+- authoritative `src_64/data/tables/partner.lua` row `10001001` is Aquaris;
+- its `ini_star` is 1, not 3;
+- the current backend profile still carries star=3;
+- without a located official capture proving that upgraded state, star=3 is **current-profile / unknown provenance**, not source-confirmed initial star.
+
+Do not silently change the user's current star=3 profile merely to match table initial-star data.
+
+## Validation status
+
+Stage 4A.3 was checked with Python syntax compilation only: **57 Python files PASS**.
+No assistant-side Flask/API/HTTP/APK/ADB/emulator/gameplay runtime test was performed.
+
+---
+# Stage 4A.2 update — HeroMain element slots + persistent Campaign world state
+
+Current stage: **Stage 4A.2 hero/campaign synchronization**  
+Date: 2026-08-16
+
+## User-confirmed results entering this pass
+
+- Stage 3 remains the first major milestone: stable login/server picker/lobby/HUD/core navigation.
+- Stage 4A is confirmed: Girls/HeroListWindow opens correctly with owned Aquaris.
+- Stage 4A.1 did **not** fix owned-girl detail: first Aquaris tap appears to do nothing; second tap hides/freezes the visible UI.
+- Both taps emit MID234 activity 1032 and then no further hero-specific request.
+- Normal single-player Campaign battle `100001` runs and completes client-side using formation `10001`.
+- MID114 currently returns stateless success, so the clear does not persist and the next campaign does not unlock.
+- Raid/Sweep was exposed before the first real clear because the old world seed incorrectly advertised `100001 star=3`; MID117 then returned an invalid shallow response and SweepWindow appeared blank.
+- MID2768 GET_RENT_HEROS was still compatibility fallback during team selection.
+
+## HeroMain first/second tap diagnosis
+
+`HeroListCell` sends MID234 for HalfPriceSkill then immediately opens `hero_main`; MID234 does not gate the open callback.
+
+`WindowManager:openWindow()` registers the newly constructed window in `windows_` before `loadRes()/willOpen()/layout()` complete. Therefore a synchronous first-open exception can leave an invisible half-open HeroMain registered. A second tap finds that registered window and can apply background/hide-window state even though the first open never became visible. This matches the observed first tap no-op / second tap UI disappearance.
+
+### Source-confirmed element-equipment nil hazard
+
+`HeroMainWindow:layout()` calls `updateElementEquip()` before `didOpen()`.
+
+The guard in supplied Lua is:
+
+```lua
+if not xyd.isSuperHero(hero) and not hero:getColor() == xyd.MAX_HERO_COLOR then
+    return
+end
+```
+
+Because of Lua precedence it does not reliably exclude ordinary Aquaris. `NormalHero:populate_()` stores `element_equips` directly. Stage4A/4A.1 sent `[]`. Empty Lua tables are truthy, while `elementEquips[i]` is nil; `nil ~= 0` is true, so HeroMain can execute `tonumber(nil)` and pass nil into element-equip table lookup.
+
+`xyd.MAX_ELEMENT_ITEM_NUM` is source-confirmed as 4. Stage4A.2 normalizes:
+
+```json
+"element_equips": [0,0,0,0],
+"element_levels": [0,0,0,0]
+```
+
+No element item IDs are invented.
+
+If HeroMain still fails, use `tools/adb_stage4a2_hero_probe.sh` after reproducing it. It pulls `log.db` plus targeted hot HeroMain Lua/CSB/effect files. Release logcat remains a poor Lua-crash source.
+
+## Campaign architecture confirmed by live run + source
+
+Normal Campaign combat is client-simulated. Live sequence:
+
+`MID112 -> MID2768 -> MID113 -> local battle -> MID114`.
+
+MID113 only needs to establish authoritative session/start state; SelectTeamWindow consumes optional `items` and builds enemies from local tables. MID114 is the authoritative commit boundary for stars/unlocks/rewards.
+
+New `WorldRepository` owns:
+
+- persisted `world_map`;
+- `active_campaign_battle` MID113 session;
+- MID114 best-star/update/unlock commit;
+- source-shaped MID117 sweep state;
+- packaged source campaign links via `data/campaign_meta.json`.
+
+`data/campaign_meta.json` is extracted from authoritative `src_64/data/tables/campaign.lua`, 917 rows, fields only `campaign_id/chapter/next_campaign_id/last_campaign_id`. First chain is `100001 -> 100002 -> 100004`; never guess `+1`.
+
+Player DB schema is now **3**, with:
+
+```text
+player.world.world_map
+player.world.active_campaign_battle
+```
+
+Existing request-scoped RLock + atomic JSON save gives MID113/MID114 the same refresh -> mutate -> save coherence already used by HeroRepository.
+
+## Initial Campaign correction
+
+Fresh state is now accessible-but-unbeaten:
+
+- 100001 star=0
+- normal_campaign_id=100001
+- normal_stars=0
+
+After a successful 100001 / star=3 MID114, backend persists/returns:
+
+- 100001 star3
+- newly unlocked source-next 100002 star0
+- chapter_info cursor to 100002
+- updated chapter stars
+- items=[] until reward/drop contracts are implemented.
+
+Only a newly created next row is returned as star0; replaying an older cleared campaign must not repeatedly trigger the client's new-campaign animation.
+
+## Sweep/Raid MID117
+
+`SweepWindow` consumes `items`, `economys`, `additional`, and `campaign`. Stage4A.2 returns those exact containers. Empty reward economy entries are explicit `{exp:0,mana:0}` because SweepWindow otherwise defaults omitted EXP to 12 client-side. No fake reward XP/mana is introduced.
+
+## Empty rental MID2768
+
+Source-consumed empty shape now includes:
+
+- `guild_rent_heroes.partners=[]`
+- `guild_rent_heroes.rent_type`
+- `guild_rent_heroes.rent_count=0`
+- `tutor_rent_heroes=[]`
+- root `rent_count=0`
+
+## Deliberate Stage4A.2 non-goals
+
+- no campaign drop rewards yet;
+- no energy/sweep-ticket/crystal accounting yet;
+- no hero level/skill/evolution semantics yet;
+- no server-side normal Campaign combat simulation;
+- no payment.
+
+## Validation rule
+
+Only `python -m py_compile`. **Stage 4A.2 validation PASS — 57 Python files compiled.** No Flask/HTTP/APK/ADB/emulator runtime test by assistant. User performs runtime testing.
+
+---
+# Stage 4A.1 update — Aquaris detail-window dependency fix
+
+Current stage: **Stage 4A.1 hero detail hotfix**  
+Date: 2026-08-16
+
+## User-confirmed Stage 4A result
+
+- Girls/HeroListWindow now opens correctly.
+- Owned Aquaris is visible/selectable in the list.
+- Pressing Aquaris freezes/bugs the client.
+- The live server log shows MID234 `LOAD_SINGLE_ACTIVITY` with `activity_id=1032` at each click and Stage 4A replies only `{"details":{}}`.
+
+## Source-confirmed MID234 crash path
+
+`HeroListCell` sends `LOAD_SINGLE_ACTIVITY` for `xyd.Activities.HalfPriceSkill` (1032) immediately before opening `hero_main`.
+
+`Activities:onLoadSingleActivity_()` inserts the successful response object into `activities`. Stage 4A boot MID229 is empty, so `#activities == 0`; because the old MID234 response has no `table_id`, no existing row can be replaced and the client can attempt `table.insert(activities, 0, response)`. After insertion, `checkHalfPriceOpen()` also requires numeric `start_time` / `end_time`.
+
+Stage 4A.1 therefore guarantees an inactive 1032 common envelope in MID229 and MID234: `table_id`, `is_open=0`, `start_time=0`, `end_time=0`, `days=0`, `details={}`. This is an inactive compatibility row, not historical event truth.
+
+## Source-confirmed HeroMain scalar hazard
+
+`NormalHero:populate_()` leaves absent house fields nil. `HeroMainWindow:updateFuncBtn()` evaluates `hero:getHouseInfo().house_id > 0`; Stage 4A Aquaris omitted `house_id`. Stage 4A.1 HeroRepository now normalizes explicit non-dorm/default values for house/favor/marriage/dynamic-card/collection-stage fields.
+
+No new hero IDs, activity rewards, or gameplay mechanics are introduced.
+
+## Validation rule
+
+Only `python -m py_compile`. **Stage 4A.1 validation PASS — 56 Python files compiled.** No Flask/HTTP/APK/ADB/emulator runtime tests. User performs runtime testing.
+
+---
+# Stage 4A update — canonical Girls/Hero state + request-scoped JSON sync
+
+Current stage: **Stage 4A hero foundation**  
+Date: 2026-08-16
+
+## User-confirmed Stage 3 milestone
+
+Stage 3.1.7 is the first major playable-shell milestone. User confirmed:
+
+- anonymous login works;
+- server-switch/RegionWindow works;
+- stable lobby no longer hides/disappears;
+- top economy HUD renders;
+- bottom navigation is live;
+- Backpack and Chat work;
+- MID176 `LOAD_FRIENDS` and MID2754 `CHECK_GAME_STAT` are present.
+
+Stage 3 is considered complete. Subsequent work is gameplay-domain vertical slices.
+
+## Stage 4 dependency order
+
+1. 4A Girls/Hero canonical state.
+2. 4B formation + Campaign team selection / MID2768.
+3. 4C Campaign fight MID113 -> client-local simulation -> MID114 progression/reward persistence.
+4. Hero progression/equipment.
+5. Arena.
+6. Summon/shop.
+7. Activities/Voyage later.
+
+Payment remains permanently out of scope.
+
+## Source-confirmed Girls failure path
+
+The current bootstrap already contains one owned hero in MID49:
+
+- partner/local entity ID `10001`
+- source table ID `10001001`
+- Aquaris
+- star 3
+- level 20
+
+`data/tables/partner.lua` contains source row `10001001` for Aquaris with initial star 3. Do not invent additional tutorial girls without source/capture evidence.
+
+Pressing Girls does **not** necessarily send MID49. `MainSceneBottomWindow` calls `SelfPlayer:loadHeros()`, but login bootstrap has already set `herosLoaded_=true`, so `Player:loadHeros()` can call success locally and immediately open `hero_list`.
+
+`HeroListWindow.ctor()` runs before layout and calls:
+
+```lua
+self.teams = selfPlayer:getSaveTeams()
+```
+
+`SelfPlayer:getSaveTeams()` parses MID17/player fields `save_team`, `save_team_name`, `save_pet` with `xyd.split` / `string.split`. Stage 3 stored these as JSON objects `{}`. Their real client contract is serialized strings. Passing `{}` can synchronously abort HeroListWindow without any new network request.
+
+Stage 4A canonical empty values:
+
+```json
+"save_team": "",
+"save_team_name": "",
+"save_pet": ""
+```
+
+The DB loader migrates legacy non-string values automatically and rewrites the JSON atomically.
+
+## Stage 4A HeroRepository
+
+New `gxb_backend/state/hero_repository.py` owns hero-related state.
+
+Responsibilities:
+
+- normalize legacy/current hero JSON to Lua-facing shapes;
+- keep `partner_id`, `table_id`, owner `player_id`, collection state and local allocator coherent;
+- normalize six-slot skill/equip/fumo arrays and source-consumed optional fields;
+- persist hero-list sort type;
+- persist serialized preset-team strings;
+- persist board/poster selection;
+- provide `add_owned_hero()` as the future summon/reward acquisition primitive;
+- never invent missing `table_id`, `partner_id`, or star values.
+
+Future summon/reward/battle paths must mutate canonical state through HeroRepository instead of returning isolated MID49 blobs.
+
+Final Stage 4A hardening:
+
+- `add_owned_hero()` allocates around occupied local partner IDs and refuses to overwrite an existing explicit `partner_id`; intentional mutations use `update_owned_hero()`.
+- MID835 board state mirrors the client's same-request set/reset behavior: re-sending the active partner/card/model clears the board and returns `board_partner=0`.
+- collected-hero serialization is deterministic for easier log/diff comparison.
+
+## Exact Stage 4A hero contracts
+
+- MID49 `LOAD_HEROS`: `sort_type`, `heros` direct partner-id -> hero-record map.
+- MID65 `LOAD_COLLECTED_HEROS`: `{"list":[table_ids...]}`.
+- MID67 `LOAD_HERO_PIECES`: callback iterates response itself as table-id -> count map. Old Stage3 `{pieces:[],list:[]}` wrapper was wrong.
+- MID89 `SAVA_SORT_TYPE`: request `sort_type`; no response fields consumed; now persisted.
+- MID1793 `SAVE_TEAM`: request carries `team_str`, `team_name_str` and may omit `pet_str`; absent fields are preserved. Response consumes exact `save_team`, `save_team_name`, `save_pet`; now persisted.
+- MID835 `SET_BOARD_HERO`: request `partner_id`, `card_status`, `board_model_id`; detail callback consumes `board_partner`, `board_card`, `board_model_id`; now persisted. Board/poster hero is kept separate from `formation.rep_partner_id`.
+- `SET_LOCK_HERO` and `SET_REP_HERO` remain symbolic/unresolved numeric MIDs; do not wire guessed values.
+
+## JSON save/sync boundary
+
+Stage 3.1 used atomic file replacement but request handling only locked individual `refresh()`/`save()` calls. With threaded Flask, another request could refresh/replace `PlayerState` between a mutation and save.
+
+Stage 4A adds `StateRepository.request_scope()` using the existing `RLock`. Engine and SDK stateful requests now keep refresh -> handler -> response on one coherent state snapshot; nested `save()` remains re-entrant. This is intentionally simpler than introducing SQL while gameplay schemas are still changing.
+
+The human-editable DB remains `data/player_db.json`, schema version 2. Unknown/new PlayerState fields continue to persist under `player.domains`, so the JSON structure remains forward-expandable.
+
+## Stage 4A deliberate non-goals
+
+Do not implement in this stage:
+
+- semantic summon reward grants;
+- hero powerup/evolve/equipment mutations;
+- battle formation semantics;
+- campaign result/reward progression;
+- Arena/Peak Arena;
+- Activities/Voyage;
+- payment.
+
+## Next APK test
+
+1. Stable Stage 3 lobby must remain intact.
+2. Press Girls. A new MID49 is not required after bootstrap.
+3. Hero list should open with owned Aquaris plus client-table-driven uncollected entries.
+4. Sort/filter can exercise MID89.
+5. Preset save can exercise MID1793 and must survive relog.
+6. If list opens but individual girl detail freezes/spins, capture that click's server log and trace the hero-detail window separately; do not widen Stage4A blindly.
+
+## Validation rule
+
+Only run `python -m py_compile`. Stage 4A final validation: **PASS — 56 Python files compiled**. No Flask/HTTP/APK/ADB/emulator runtime test. User performs runtime testing.
+
+Planned Stage 4A handoff artifact:
+
+`gxb-backend-stage4a-hero-foundation-2026-08-16.zip`
+
+---
 # Stage 3.1.7 update — automatic sign popup + EventCentre building contract
 
 Current stage: **Stage 3.1.7 auto-sign/building-fix**  
@@ -603,7 +1352,7 @@ User-confirmed baseline remains: anonymous SDK login -> server selection -> RETR
 - Default FunctionIDs: all source-derived IDs (`GXB_FUNC_MODE=all`).
 - New corrected bootstrap mode: `GXB_BOOTSTRAP_DETAIL_MODE=stage3`.
 - Proven minimal rollback remains `GXB_BOOTSTRAP_DETAIL_MODE=safe`.
-- Added source-valid starter hero: local `partner_id=10001`, source `table_id=10001001` (Aquaris, first row in `data/tables/partner.lua`, initial star 3).
+- Added source-valid starter hero: local `partner_id=10001`, source `table_id=10001001` (Aquaris). Historical Stage 3 text originally called star=3 the source initial star; later authoritative re-check corrected `ini_star` to 1. The current profile star=3 is preserved as unknown-provenance profile state.
 - Campaign state uses real source campaign `100001`.
 - Added canonical/domain handlers for practice 124-133, battle formation 208-213, arena 272-300 family, missions/tasks, social, guild/team, pet/pet-campaign, march/world-boss, market/cart/skin shop, and battle pass.
 - Added `runtime_logs/domain_gaps.jsonl` classification for future fallback promotion.

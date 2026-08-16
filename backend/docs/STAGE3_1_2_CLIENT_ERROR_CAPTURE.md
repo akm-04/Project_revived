@@ -52,7 +52,7 @@ Stage 3.1.1 returned `log_url=""`, so these hidden logs never reached our backen
   <GXB_SELF_URL origin>/client-log
   ```
 
-  With defaults this is `http://172.20.0.21:9000/client-log`.
+  With defaults this is `http://<backend-host>:9000/client-log`.
 
 - Override with `GXB_CLIENT_LOG_URL` when needed.
 - Added `POST /client-log`.

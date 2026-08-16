@@ -179,21 +179,27 @@ class PlayerState:
     invitation_time: int = 0
     skill_time: int = 0
 
+    # Stage 4A canonical hero ownership state. ``hero_next_partner_id`` is an
+    # internal local-entity allocator; table_id remains the source content ID.
     heroes: dict[str, Any] = field(default_factory=dict)
     collected_heros: dict[str, Any] = field(default_factory=dict)
-    hero_pieces: list[dict[str, Any]] = field(default_factory=list)
+    hero_pieces: dict[str, int] = field(default_factory=dict)
+    hero_sort_type: int = 0
+    hero_next_partner_id: int = 10001
     backpack_items: list[dict[str, Any]] = field(default_factory=list)
     spirit_list: list[dict[str, Any]] = field(default_factory=list)
     runes: dict[str, Any] = field(default_factory=dict)
     scrolls: list[dict[str, Any]] = field(default_factory=list)
     essences: list[dict[str, Any]] = field(default_factory=list)
     formation: dict[str, Any] = field(default_factory=dict)
-    save_team: dict[str, Any] = field(default_factory=dict)
-    save_team_name: dict[str, Any] = field(default_factory=dict)
-    save_pet: dict[str, Any] = field(default_factory=dict)
+    # These are serialized strings in the Lua client, not tables.
+    # Examples: team="1|2:3|4", names="A|||B", pets="0|0".
+    save_team: str = ""
+    save_team_name: str = ""
+    save_pet: str = ""
     message_pushes: dict[str, Any] = field(default_factory=dict)
     func_ids: list[int] = field(default_factory=default_function_ids)
-    guide_function_ids: list[int] = field(default_factory=list)
+    guide_function_ids: dict[str, int] = field(default_factory=dict)
     title_info: dict[str, Any] = field(default_factory=dict)
     vip_awards: list[Any] = field(default_factory=list)
     bubble_info: dict[str, Any] = field(default_factory=dict)
@@ -220,6 +226,7 @@ class PlayerState:
     shops: dict[str, list[dict[str, Any]]] = field(default_factory=dict)
     shop_statuses: dict[str, Any] = field(default_factory=dict)
     world_map: dict[str, Any] = field(default_factory=dict)
+    active_campaign_battle: dict[str, Any] = field(default_factory=dict)
     arena_info: dict[str, Any] = field(default_factory=dict)
     arena_mode_info: dict[str, Any] = field(default_factory=dict)
     battle_formation: dict[str, Any] = field(default_factory=dict)
@@ -377,7 +384,7 @@ class PlayerState:
         # params.heros to be the partner-id -> hero-record map directly.
         if isinstance(heroes, dict) and isinstance(heroes.get("heroes"), dict):
             heroes = heroes["heroes"]
-        return {"sort_type": 0, "heros": heroes}
+        return {"sort_type": int(self.hero_sort_type or 0), "heros": heroes}
 
     def collected_heros_payload(self) -> dict[str, Any]:
         # SelfPlayer:collectedHerosEvent_ iterates params.list and tonumber()s
@@ -386,7 +393,9 @@ class PlayerState:
         return {"list": [int(key) if str(key).isdigit() else key for key in self.collected_heros.keys()]}
 
     def hero_pieces_payload(self) -> dict[str, Any]:
-        return {"pieces": self.hero_pieces, "list": self.hero_pieces}
+        # SelfPlayer:heroPiecesEvent_ iterates response.params directly as
+        # hero-table-id -> count. Do not wrap this map in list/pieces.
+        return {str(key): int(value) for key, value in self.hero_pieces.items()}
 
     def backpack_payload(self) -> dict[str, Any]:
         return {"sort_type": 0, "list": self.backpack_items, "spirit_list": self.spirit_list}
@@ -443,8 +452,55 @@ class PlayerState:
             "receive_gift_count": self.friends.get("receive_gift_count", 0),
         }
 
+    @staticmethod
+    def _inactive_activity_envelope(activity_id: int) -> dict[str, Any]:
+        """Return the common inactive activity shape consumed by Activities.lua.
+
+        LOAD_SINGLE_ACTIVITY replaces/inserts the returned object directly into
+        ``Activities.activities`` and later compares ``start_time`` /
+        ``end_time``.  Returning only ``details`` is therefore unsafe.
+        """
+        return {
+            "table_id": int(activity_id),
+            "is_open": 0,
+            "start_time": 0,
+            "end_time": 0,
+            "days": 0,
+            "details": {},
+        }
+
     def activities_payload(self) -> dict[str, Any]:
-        return {"list": self.activities}
+        # HeroListCell refreshes HalfPriceSkill (activity 1032) every time an
+        # owned girl is opened.  Activities:onLoadSingleActivity_ assumes its
+        # main list is non-empty; with the old Stage 4A empty list it can call
+        # table.insert(list, 0, response), which is a Lua error.  Keep a
+        # source-known inactive 1032 row in the canonical list until Stage 4G
+        # implements real activity scheduling.
+        rows = [dict(row) for row in self.activities if isinstance(row, dict)]
+        if not any(int(row.get("table_id", -1)) == 1032 for row in rows):
+            rows.append(self._inactive_activity_envelope(1032))
+        return {"list": rows}
+
+    def single_activity_payload(self, activity_id: Any) -> dict[str, Any]:
+        try:
+            target = int(activity_id)
+        except (TypeError, ValueError):
+            target = 0
+
+        for row in self.activities_payload()["list"]:
+            try:
+                if int(row.get("table_id", -1)) == target:
+                    # Ensure the common envelope remains complete even when a
+                    # hand-edited DB row only overrides a subset of fields.
+                    payload = self._inactive_activity_envelope(target)
+                    payload.update(row)
+                    payload["table_id"] = target
+                    payload.setdefault("details", {})
+                    return payload
+            except (TypeError, ValueError):
+                continue
+
+        return self._inactive_activity_envelope(target)
 
     def board_payload(self) -> dict[str, Any]:
         return {"contents": self.board_contents}
@@ -564,8 +620,11 @@ class PlayerState:
         return {"list": [], "statuses": self.shop_statuses}
 
     def world_map_payload(self) -> dict[str, Any]:
+        # Stage 4A.2 moves normal-Campaign initialization/advancement into
+        # WorldRepository. Keep this serializer as a conservative fallback for
+        # callers that have not yet been migrated to the repository.
         default = {
-            "normal": [{"campaign_id": 100001, "star": 3, "daily_limit": 0, "reset_count": 0, "is_partner_drop": 0}],
+            "normal": [{"campaign_id": 100001, "star": 0, "daily_limit": 0, "reset_count": 0, "is_partner_drop": 0}],
             "super": {},
             "challenge": {},
             "chapter_events": {},
@@ -574,7 +633,7 @@ class PlayerState:
                 "normal_campaign_id": 100001,
                 "super_chapter_id": 0,
                 "super_campaign_id": 0,
-                "normal_stars": 3,
+                "normal_stars": 0,
                 "normal_bonus_id": 0,
                 "super_stars": 0,
                 "super_bonus_id": 0,

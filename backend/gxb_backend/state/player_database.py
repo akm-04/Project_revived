@@ -1,12 +1,14 @@
 """Human-editable JSON player database.
 
-This is intentionally not SQLite. The restoration backend is still in a rapid
-client-compatibility phase, so a plain JSON document is easier to inspect,
-version, copy, and hand-edit while testing progression assumptions.
+This is intentionally not SQLite. Gameplay contracts are still being rebuilt,
+so a plain JSON document is easier to inspect, version, copy, and hand-edit.
+Stage 4A makes hero ownership a first-class section; Stage 4A.2 adds Campaign
+world/session state while preserving automatic forward persistence for newly
+added PlayerState fields.
 
-The database is re-read before every SDK/engine request by StateRepository.
-Mutating handlers write it atomically, so one canonical record feeds
-RETRIEVE_TOKEN, LOAD_PLAYER_INFO, heroes, backpack, economy, and domain APIs.
+StateRepository re-reads the database at each request boundary and writes
+mutations atomically. Stage 4A additionally serializes stateful requests so a
+concurrent refresh cannot replace PlayerState in the middle of a mutation.
 """
 
 from __future__ import annotations
@@ -50,8 +52,8 @@ ECONOMY_FIELDS = {
 }
 
 HERO_FIELDS = {
-    "heroes", "collected_heros", "hero_pieces", "formation", "save_team",
-    "save_team_name", "save_pet",
+    "heroes", "collected_heros", "hero_pieces", "hero_sort_type",
+    "hero_next_partner_id", "formation", "save_team", "save_team_name", "save_pet",
 }
 
 INVENTORY_FIELDS = {
@@ -61,6 +63,10 @@ INVENTORY_FIELDS = {
 LIBRARY_FIELDS = {
     "library_infos", "library_talk_infos", "library_cg_infos", "bg_main",
     "bg_room", "bg_has_buy",
+}
+
+WORLD_FIELDS = {
+    "world_map", "active_campaign_battle",
 }
 
 LOBBY_FIELDS = {
@@ -78,6 +84,7 @@ SECTION_FIELDS: dict[str, set[str]] = {
     "inventory": INVENTORY_FIELDS,
     "library": LIBRARY_FIELDS,
     "lobby": LOBBY_FIELDS,
+    "world": WORLD_FIELDS,
 }
 
 PLAYER_FIELD_NAMES = {field.name for field in fields(PlayerState)}
@@ -86,7 +93,7 @@ PLAYER_FIELD_NAMES = {field.name for field in fields(PlayerState)}
 class JsonPlayerDatabase:
     """Serialize AccountIdentity + PlayerState to a readable nested JSON file."""
 
-    SCHEMA_VERSION = 1
+    SCHEMA_VERSION = 4
 
     def __init__(self, path: Path) -> None:
         self.path = Path(path)
@@ -160,13 +167,17 @@ class JsonPlayerDatabase:
         return {
             "_meta": {
                 "schema": cls.SCHEMA_VERSION,
-                "format": "GXB Stage 3.1.4 human-editable player database",
+                "format": "GXB Stage 4A.6 human-editable player database",
                 "notes": [
                     "Stage 3.1.4 keeps SDK account UID, SDK/login SID, and game player ID distinct using the known-good region-125 client snapshot.",
                     "The backend re-reads this file before every request.",
                     "Edit progression.guide_id to test tutorial state; established default is 101001 (after later pet/cloud/conquer guide families).",
-                    "economy feeds MID 17 / EcoSidebar; heroes and inventory feed MID 49 / MID 81.",
+                    "economy feeds MID 17 / EcoSidebar; canonical hero ownership feeds MID 49 and later formation/battle/summon flows.",
+                    "heroes.save_team/save_team_name/save_pet are serialized strings because the Lua client splits them as strings.",
                     "Use valid source table IDs for heroes/items. Unknown IDs can crash client table lookups.",
+                    "world.world_map is authoritative Campaign progress; MID113 starts a pending session and MID114 commits stars/unlocks atomically.",
+                    "progression.guide_function_ids is a string-keyed completion map because xyd.checkFirstInGuide indexes tostring(id).",
+                    "inventory.backpack_items is canonical persisted Backpack state; Campaign first-clear awards mutate this same list.",
                 ],
             },
             "account": asdict(account),

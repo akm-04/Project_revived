@@ -1,3 +1,287 @@
+# Stage 4A.2 update — HeroMain element slots + persistent Campaign world state
+
+Current stage: **Stage 4A.2 hero/campaign synchronization**  
+Date: 2026-08-16
+
+## User-confirmed results entering this pass
+
+- Stage 3 remains the first major milestone: stable login/server picker/lobby/HUD/core navigation.
+- Stage 4A is confirmed: Girls/HeroListWindow opens correctly with owned Aquaris.
+- Stage 4A.1 did **not** fix owned-girl detail: first Aquaris tap appears to do nothing; second tap hides/freezes the visible UI.
+- Both taps emit MID234 activity 1032 and then no further hero-specific request.
+- Normal single-player Campaign battle `100001` runs and completes client-side using formation `10001`.
+- MID114 currently returns stateless success, so the clear does not persist and the next campaign does not unlock.
+- Raid/Sweep was exposed before the first real clear because the old world seed incorrectly advertised `100001 star=3`; MID117 then returned an invalid shallow response and SweepWindow appeared blank.
+- MID2768 GET_RENT_HEROS was still compatibility fallback during team selection.
+
+## HeroMain first/second tap diagnosis
+
+`HeroListCell` sends MID234 for HalfPriceSkill then immediately opens `hero_main`; MID234 does not gate the open callback.
+
+`WindowManager:openWindow()` registers the newly constructed window in `windows_` before `loadRes()/willOpen()/layout()` complete. Therefore a synchronous first-open exception can leave an invisible half-open HeroMain registered. A second tap finds that registered window and can apply background/hide-window state even though the first open never became visible. This matches the observed first tap no-op / second tap UI disappearance.
+
+### Source-confirmed element-equipment nil hazard
+
+`HeroMainWindow:layout()` calls `updateElementEquip()` before `didOpen()`.
+
+The guard in supplied Lua is:
+
+```lua
+if not xyd.isSuperHero(hero) and not hero:getColor() == xyd.MAX_HERO_COLOR then
+    return
+end
+```
+
+Because of Lua precedence it does not reliably exclude ordinary Aquaris. `NormalHero:populate_()` stores `element_equips` directly. Stage4A/4A.1 sent `[]`. Empty Lua tables are truthy, while `elementEquips[i]` is nil; `nil ~= 0` is true, so HeroMain can execute `tonumber(nil)` and pass nil into element-equip table lookup.
+
+`xyd.MAX_ELEMENT_ITEM_NUM` is source-confirmed as 4. Stage4A.2 normalizes:
+
+```json
+"element_equips": [0,0,0,0],
+"element_levels": [0,0,0,0]
+```
+
+No element item IDs are invented.
+
+If HeroMain still fails, use `tools/adb_stage4a2_hero_probe.sh` after reproducing it. It pulls `log.db` plus targeted hot HeroMain Lua/CSB/effect files. Release logcat remains a poor Lua-crash source.
+
+## Campaign architecture confirmed by live run + source
+
+Normal Campaign combat is client-simulated. Live sequence:
+
+`MID112 -> MID2768 -> MID113 -> local battle -> MID114`.
+
+MID113 only needs to establish authoritative session/start state; SelectTeamWindow consumes optional `items` and builds enemies from local tables. MID114 is the authoritative commit boundary for stars/unlocks/rewards.
+
+New `WorldRepository` owns:
+
+- persisted `world_map`;
+- `active_campaign_battle` MID113 session;
+- MID114 best-star/update/unlock commit;
+- source-shaped MID117 sweep state;
+- packaged source campaign links via `data/campaign_meta.json`.
+
+`data/campaign_meta.json` is extracted from authoritative `src_64/data/tables/campaign.lua`, 917 rows, fields only `campaign_id/chapter/next_campaign_id/last_campaign_id`. First chain is `100001 -> 100002 -> 100004`; never guess `+1`.
+
+Player DB schema is now **3**, with:
+
+```text
+player.world.world_map
+player.world.active_campaign_battle
+```
+
+Existing request-scoped RLock + atomic JSON save gives MID113/MID114 the same refresh -> mutate -> save coherence already used by HeroRepository.
+
+## Initial Campaign correction
+
+Fresh state is now accessible-but-unbeaten:
+
+- 100001 star=0
+- normal_campaign_id=100001
+- normal_stars=0
+
+After a successful 100001 / star=3 MID114, backend persists/returns:
+
+- 100001 star3
+- newly unlocked source-next 100002 star0
+- chapter_info cursor to 100002
+- updated chapter stars
+- items=[] until reward/drop contracts are implemented.
+
+Only a newly created next row is returned as star0; replaying an older cleared campaign must not repeatedly trigger the client's new-campaign animation.
+
+## Sweep/Raid MID117
+
+`SweepWindow` consumes `items`, `economys`, `additional`, and `campaign`. Stage4A.2 returns those exact containers. Empty reward economy entries are explicit `{exp:0,mana:0}` because SweepWindow otherwise defaults omitted EXP to 12 client-side. No fake reward XP/mana is introduced.
+
+## Empty rental MID2768
+
+Source-consumed empty shape now includes:
+
+- `guild_rent_heroes.partners=[]`
+- `guild_rent_heroes.rent_type`
+- `guild_rent_heroes.rent_count=0`
+- `tutor_rent_heroes=[]`
+- root `rent_count=0`
+
+## Deliberate Stage4A.2 non-goals
+
+- no campaign drop rewards yet;
+- no energy/sweep-ticket/crystal accounting yet;
+- no hero level/skill/evolution semantics yet;
+- no server-side normal Campaign combat simulation;
+- no payment.
+
+## Validation rule
+
+Only `python -m py_compile`. **Stage 4A.2 validation PASS — 57 Python files compiled.** No Flask/HTTP/APK/ADB/emulator runtime test by assistant. User performs runtime testing.
+
+---
+# Stage 4A.1 update — Aquaris detail-window dependency fix
+
+Current stage: **Stage 4A.1 hero detail hotfix**  
+Date: 2026-08-16
+
+## User-confirmed Stage 4A result
+
+- Girls/HeroListWindow now opens correctly.
+- Owned Aquaris is visible/selectable in the list.
+- Pressing Aquaris freezes/bugs the client.
+- The live server log shows MID234 `LOAD_SINGLE_ACTIVITY` with `activity_id=1032` at each click and Stage 4A replies only `{"details":{}}`.
+
+## Source-confirmed MID234 crash path
+
+`HeroListCell` sends `LOAD_SINGLE_ACTIVITY` for `xyd.Activities.HalfPriceSkill` (1032) immediately before opening `hero_main`.
+
+`Activities:onLoadSingleActivity_()` inserts the successful response object into `activities`. Stage 4A boot MID229 is empty, so `#activities == 0`; because the old MID234 response has no `table_id`, no existing row can be replaced and the client can attempt `table.insert(activities, 0, response)`. After insertion, `checkHalfPriceOpen()` also requires numeric `start_time` / `end_time`.
+
+Stage 4A.1 therefore guarantees an inactive 1032 common envelope in MID229 and MID234: `table_id`, `is_open=0`, `start_time=0`, `end_time=0`, `days=0`, `details={}`. This is an inactive compatibility row, not historical event truth.
+
+## Source-confirmed HeroMain scalar hazard
+
+`NormalHero:populate_()` leaves absent house fields nil. `HeroMainWindow:updateFuncBtn()` evaluates `hero:getHouseInfo().house_id > 0`; Stage 4A Aquaris omitted `house_id`. Stage 4A.1 HeroRepository now normalizes explicit non-dorm/default values for house/favor/marriage/dynamic-card/collection-stage fields.
+
+No new hero IDs, activity rewards, or gameplay mechanics are introduced.
+
+## Validation rule
+
+Only `python -m py_compile`. **Stage 4A.1 validation PASS — 56 Python files compiled.** No Flask/HTTP/APK/ADB/emulator runtime tests. User performs runtime testing.
+
+---
+# Stage 4A update — canonical Girls/Hero state + request-scoped JSON sync
+
+Current stage: **Stage 4A hero foundation**  
+Date: 2026-08-16
+
+## User-confirmed Stage 3 milestone
+
+Stage 3.1.7 is the first major playable-shell milestone. User confirmed:
+
+- anonymous login works;
+- server-switch/RegionWindow works;
+- stable lobby no longer hides/disappears;
+- top economy HUD renders;
+- bottom navigation is live;
+- Backpack and Chat work;
+- MID176 `LOAD_FRIENDS` and MID2754 `CHECK_GAME_STAT` are present.
+
+Stage 3 is considered complete. Subsequent work is gameplay-domain vertical slices.
+
+## Stage 4 dependency order
+
+1. 4A Girls/Hero canonical state.
+2. 4B formation + Campaign team selection / MID2768.
+3. 4C Campaign fight MID113 -> client-local simulation -> MID114 progression/reward persistence.
+4. Hero progression/equipment.
+5. Arena.
+6. Summon/shop.
+7. Activities/Voyage later.
+
+Payment remains permanently out of scope.
+
+## Source-confirmed Girls failure path
+
+The current bootstrap already contains one owned hero in MID49:
+
+- partner/local entity ID `10001`
+- source table ID `10001001`
+- Aquaris
+- star 3
+- level 20
+
+`data/tables/partner.lua` contains source row `10001001` for Aquaris with initial star 3. Do not invent additional tutorial girls without source/capture evidence.
+
+Pressing Girls does **not** necessarily send MID49. `MainSceneBottomWindow` calls `SelfPlayer:loadHeros()`, but login bootstrap has already set `herosLoaded_=true`, so `Player:loadHeros()` can call success locally and immediately open `hero_list`.
+
+`HeroListWindow.ctor()` runs before layout and calls:
+
+```lua
+self.teams = selfPlayer:getSaveTeams()
+```
+
+`SelfPlayer:getSaveTeams()` parses MID17/player fields `save_team`, `save_team_name`, `save_pet` with `xyd.split` / `string.split`. Stage 3 stored these as JSON objects `{}`. Their real client contract is serialized strings. Passing `{}` can synchronously abort HeroListWindow without any new network request.
+
+Stage 4A canonical empty values:
+
+```json
+"save_team": "",
+"save_team_name": "",
+"save_pet": ""
+```
+
+The DB loader migrates legacy non-string values automatically and rewrites the JSON atomically.
+
+## Stage 4A HeroRepository
+
+New `gxb_backend/state/hero_repository.py` owns hero-related state.
+
+Responsibilities:
+
+- normalize legacy/current hero JSON to Lua-facing shapes;
+- keep `partner_id`, `table_id`, owner `player_id`, collection state and local allocator coherent;
+- normalize six-slot skill/equip/fumo arrays and source-consumed optional fields;
+- persist hero-list sort type;
+- persist serialized preset-team strings;
+- persist board/poster selection;
+- provide `add_owned_hero()` as the future summon/reward acquisition primitive;
+- never invent missing `table_id`, `partner_id`, or star values.
+
+Future summon/reward/battle paths must mutate canonical state through HeroRepository instead of returning isolated MID49 blobs.
+
+Final Stage 4A hardening:
+
+- `add_owned_hero()` allocates around occupied local partner IDs and refuses to overwrite an existing explicit `partner_id`; intentional mutations use `update_owned_hero()`.
+- MID835 board state mirrors the client's same-request set/reset behavior: re-sending the active partner/card/model clears the board and returns `board_partner=0`.
+- collected-hero serialization is deterministic for easier log/diff comparison.
+
+## Exact Stage 4A hero contracts
+
+- MID49 `LOAD_HEROS`: `sort_type`, `heros` direct partner-id -> hero-record map.
+- MID65 `LOAD_COLLECTED_HEROS`: `{"list":[table_ids...]}`.
+- MID67 `LOAD_HERO_PIECES`: callback iterates response itself as table-id -> count map. Old Stage3 `{pieces:[],list:[]}` wrapper was wrong.
+- MID89 `SAVA_SORT_TYPE`: request `sort_type`; no response fields consumed; now persisted.
+- MID1793 `SAVE_TEAM`: request carries `team_str`, `team_name_str` and may omit `pet_str`; absent fields are preserved. Response consumes exact `save_team`, `save_team_name`, `save_pet`; now persisted.
+- MID835 `SET_BOARD_HERO`: request `partner_id`, `card_status`, `board_model_id`; detail callback consumes `board_partner`, `board_card`, `board_model_id`; now persisted. Board/poster hero is kept separate from `formation.rep_partner_id`.
+- `SET_LOCK_HERO` and `SET_REP_HERO` remain symbolic/unresolved numeric MIDs; do not wire guessed values.
+
+## JSON save/sync boundary
+
+Stage 3.1 used atomic file replacement but request handling only locked individual `refresh()`/`save()` calls. With threaded Flask, another request could refresh/replace `PlayerState` between a mutation and save.
+
+Stage 4A adds `StateRepository.request_scope()` using the existing `RLock`. Engine and SDK stateful requests now keep refresh -> handler -> response on one coherent state snapshot; nested `save()` remains re-entrant. This is intentionally simpler than introducing SQL while gameplay schemas are still changing.
+
+The human-editable DB remains `data/player_db.json`, schema version 2. Unknown/new PlayerState fields continue to persist under `player.domains`, so the JSON structure remains forward-expandable.
+
+## Stage 4A deliberate non-goals
+
+Do not implement in this stage:
+
+- semantic summon reward grants;
+- hero powerup/evolve/equipment mutations;
+- battle formation semantics;
+- campaign result/reward progression;
+- Arena/Peak Arena;
+- Activities/Voyage;
+- payment.
+
+## Next APK test
+
+1. Stable Stage 3 lobby must remain intact.
+2. Press Girls. A new MID49 is not required after bootstrap.
+3. Hero list should open with owned Aquaris plus client-table-driven uncollected entries.
+4. Sort/filter can exercise MID89.
+5. Preset save can exercise MID1793 and must survive relog.
+6. If list opens but individual girl detail freezes/spins, capture that click's server log and trace the hero-detail window separately; do not widen Stage4A blindly.
+
+## Validation rule
+
+Only run `python -m py_compile`. Stage 4A final validation: **PASS — 56 Python files compiled**. No Flask/HTTP/APK/ADB/emulator runtime test. User performs runtime testing.
+
+Planned Stage 4A handoff artifact:
+
+`gxb-backend-stage4a-hero-foundation-2026-08-16.zip`
+
+---
 # Stage 3.1.7 update — automatic sign popup + EventCentre building contract
 
 Current stage: **Stage 3.1.7 auto-sign/building-fix**  

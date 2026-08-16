@@ -21,7 +21,10 @@ class ActivityHandlers:
         return self.ctx.state.get_player().board_payload()
 
     def load_single_activity(self, req: dict) -> dict:
-        return {"details": {}}
+        # The client inserts this response into Activities.activities and does
+        # not wrap it itself.  Preserve the requested activity id as table_id
+        # and provide the common timing/open fields even for an inactive event.
+        return self.ctx.state.get_player().single_activity_payload(req.get("activity_id"))
 
     def get_activity_reward(self, req: dict) -> dict:
         return {"awards": [], "exchange_stone_num": 0}

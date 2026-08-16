@@ -1,0 +1,71 @@
+{
+  "_meta": {
+    "source": "src_64/data/tables/item.lua",
+    "policy": "Only source rows with exp>0 or skill_point>0 are included."
+  },
+  "items": {
+    "50001001": {
+      "item_id": 50001001,
+      "name": "Mini Juice",
+      "sub_type": 2,
+      "exp": 60,
+      "skill_point": 0
+    },
+    "50001002": {
+      "item_id": 50001002,
+      "name": "Small Juice",
+      "sub_type": 2,
+      "exp": 300,
+      "skill_point": 0
+    },
+    "50001004": {
+      "item_id": 50001004,
+      "name": "Medium Juice",
+      "sub_type": 2,
+      "exp": 1500,
+      "skill_point": 0
+    },
+    "50001005": {
+      "item_id": 50001005,
+      "name": "SX Juice",
+      "sub_type": 2,
+      "exp": 7500,
+      "skill_point": 0
+    },
+    "50001087": {
+      "item_id": 50001087,
+      "name": "Small Pet Rations",
+      "sub_type": 10,
+      "exp": 300,
+      "skill_point": 0
+    },
+    "50001088": {
+      "item_id": 50001088,
+      "name": "Med Pet Rations",
+      "sub_type": 10,
+      "exp": 1500,
+      "skill_point": 0
+    },
+    "50001089": {
+      "item_id": 50001089,
+      "name": "Large Pet Rations",
+      "sub_type": 10,
+      "exp": 7500,
+      "skill_point": 0
+    },
+    "50001538": {
+      "item_id": 50001538,
+      "name": "10 Skill Points",
+      "sub_type": 19,
+      "exp": 0,
+      "skill_point": 10
+    },
+    "50005182": {
+      "item_id": 50005182,
+      "name": "Magic Juice",
+      "sub_type": 2,
+      "exp": 10000,
+      "skill_point": 0
+    }
+  }
+}

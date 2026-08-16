@@ -103,8 +103,8 @@ class BootstrapHandlers:
         player = self.ctx.state.get_player()
         return {
             "17": player.player_info_payload(),
-            "49": player.heroes_payload(),
-            "81": player.backpack_payload(),
+            "49": self.ctx.state.get_hero_repository().payload(),
+            "81": self.ctx.state.get_inventory_repository().payload(),
             "836": player.library_payload(),
             "56": player.summon_payload(),
             "176": player.friends_payload(),

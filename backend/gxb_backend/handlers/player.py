@@ -49,11 +49,11 @@ class PlayerHandlers:
         if guide_id is not None:
             try:
                 guide_id = int(guide_id)
-                # Client code treats this collection as already-completed/skipped
-                # special guides. Preserve it as a list for the server payload;
-                # an empty default remains safe for established accounts.
-                if guide_id not in player.guide_function_ids:
-                    player.guide_function_ids.append(guide_id)
+                # xyd.checkFirstInGuide() indexes this collection with
+                # tostring(guide_id), so the wire/persisted shape is a map.
+                if not isinstance(player.guide_function_ids, dict):
+                    player.guide_function_ids = {}
+                player.guide_function_ids[str(guide_id)] = 1
             except (TypeError, ValueError):
                 pass
         self.ctx.state.save()

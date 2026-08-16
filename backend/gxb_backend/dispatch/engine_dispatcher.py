@@ -31,6 +31,7 @@ from gxb_backend.handlers.summon import SummonHandlers
 from gxb_backend.handlers.system import SystemHandlers
 from gxb_backend.handlers.tasks import TaskHandlers
 from gxb_backend.handlers.world import WorldHandlers
+from gxb_backend.observability.resource_gateway import ResourceGateway
 from gxb_backend.observability.runtime_logger import RuntimeLogger
 from gxb_backend.protocol.mids import MID, mid_name
 from gxb_backend.protocol.routing import RouteClass, classify_mid
@@ -44,10 +45,15 @@ class EngineDispatcher:
     CENTER_DISCOVERY_MID = 20480
     VERSION_CHECK_MID = 2
 
-    def __init__(self, state: StateRepository, settings: Settings) -> None:
+    def __init__(
+        self,
+        state: StateRepository,
+        settings: Settings,
+        resource_gateway: ResourceGateway | None = None,
+    ) -> None:
         self.state = state
         self.settings = settings
-        ctx = HandlerContext(state=state, settings=settings)
+        ctx = HandlerContext(state=state, settings=settings, resource_gateway=resource_gateway)
 
         self.center = CenterHandlers(ctx)
         self.system = SystemHandlers(ctx)
@@ -156,11 +162,19 @@ class EngineDispatcher:
             "COMPOSE_ITEM": self.inventory.compose_item,
             "USE_MAGIC_ITEMS": self.inventory.use_magic_items,
             "USE_ENERGY_ITEM": self.inventory.use_energy_item,
+            "USE_SKILL_POINT_ITEM": self.inventory.use_skill_point_item,
+            "USE_EXP_ITEM": self.inventory.use_exp_item,
+            "USE_EXP_ITEMS": self.inventory.use_exp_items,
             "BACKPACK_SORT_TYPE": self.inventory.sort_type,
-            "SAVA_SORT_TYPE": self.inventory.sort_type,
+            "SAVA_SORT_TYPE": self.heroes.save_sort_type,
             "LOAD_HERO": self.heroes.load_hero,
             "LOAD_COLLECTED_HEROS": self.heroes.load_collected_heros,
             "LOAD_HERO_PIECES": self.heroes.load_hero_pieces,
+            "SAVE_TEAM": self.heroes.save_team,
+            "SET_BOARD_HERO": self.heroes.set_board_hero,
+            "BUY_SKILL_POINT": self.heroes.buy_skill_point,
+            "SET_SKILL_LEVEL": self.heroes.set_skill_level,
+            "SET_ALL_SKILL_LEVEL": self.heroes.set_all_skill_level,
             "SUMMON_HERO": self.rewards.awards_empty,
             "STONE_SUMMON_HERO": self.rewards.awards_empty,
             "MAGIC_SUMMON_BUY": self.rewards.awards_empty,
@@ -190,6 +204,7 @@ class EngineDispatcher:
             "BATTLE_PASS_GET_INFO": self.rewards.battle_pass_get_info,
             "HUNQI_START_GAME_GET_INFO": self.rewards.hunqi_start_game_get_info,
             "SWEEP_CAMPAIGN": self.world.sweep_campaign,
+            "GET_RENT_HEROS": self.world.get_rent_heros,
             "RESET_CAMPAIGN": self.world.reset_campaign,
             "GET_BONUS_AWARD": self.world.get_bonus_award,
             "FIGHT": self.world.fight,
@@ -387,12 +402,8 @@ class EngineDispatcher:
             "HUNQI_GET_CAMPAIGN_INFO",
             "SET_HERO_EQUIP",
             "ONE_CLICK_EQUIP",
-            "USE_EXP_ITEM",
-            "USE_EXP_ITEMS",
             "POWERUP_HERO",
             "EVOLVE_HERO",
-            "SET_SKILL_LEVEL",
-            "SET_ALL_SKILL_LEVEL",
             "FUMO",
             "ONE_CLICK_JINJIE",
             "EXPAND_HERO_SLOTS",
@@ -422,9 +433,12 @@ class EngineDispatcher:
         return self.state.get_player().invite_payload()
 
     def dispatch(self, req: dict[str, Any]) -> Any:
-        # Stage 3.1 text DB: every engine request sees the latest hand-edited
-        # player values without requiring a server restart.
-        self.state.refresh()
+        # Stage 4A request scope keeps the human-editable JSON refresh and any
+        # handler mutation/save on one coherent PlayerState snapshot.
+        with self.state.request_scope():
+            return self._dispatch_scoped(req)
+
+    def _dispatch_scoped(self, req: dict[str, Any]) -> Any:
         try:
             req_mid = int(req.get("mid", 0))
         except Exception:

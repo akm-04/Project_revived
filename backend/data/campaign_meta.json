@@ -1,0 +1,5516 @@
+{
+  "_meta": {
+    "source": "src_64/data/tables/campaign.lua",
+    "fields": [
+      "campaign_id",
+      "chapter",
+      "next_campaign_id",
+      "last_campaign_id"
+    ],
+    "row_count": 917
+  },
+  "campaigns": {
+    "100001": {
+      "campaign_id": 100001,
+      "chapter": 1,
+      "next_campaign_id": 100002,
+      "last_campaign_id": 0
+    },
+    "100002": {
+      "campaign_id": 100002,
+      "chapter": 1,
+      "next_campaign_id": 100004,
+      "last_campaign_id": 100001
+    },
+    "100003": {
+      "campaign_id": 100003,
+      "chapter": 1,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "100004": {
+      "campaign_id": 100004,
+      "chapter": 1,
+      "next_campaign_id": 100005,
+      "last_campaign_id": 100002
+    },
+    "100005": {
+      "campaign_id": 100005,
+      "chapter": 1,
+      "next_campaign_id": 100007,
+      "last_campaign_id": 100004
+    },
+    "100006": {
+      "campaign_id": 100006,
+      "chapter": 1,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "100007": {
+      "campaign_id": 100007,
+      "chapter": 1,
+      "next_campaign_id": 100008,
+      "last_campaign_id": 100005
+    },
+    "100008": {
+      "campaign_id": 100008,
+      "chapter": 1,
+      "next_campaign_id": 100011,
+      "last_campaign_id": 100007
+    },
+    "100009": {
+      "campaign_id": 100009,
+      "chapter": 1,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "100010": {
+      "campaign_id": 100010,
+      "chapter": 1,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "100011": {
+      "campaign_id": 100011,
+      "chapter": 1,
+      "next_campaign_id": 100012,
+      "last_campaign_id": 100008
+    },
+    "100012": {
+      "campaign_id": 100012,
+      "chapter": 1,
+      "next_campaign_id": 100015,
+      "last_campaign_id": 100011
+    },
+    "100013": {
+      "campaign_id": 100013,
+      "chapter": 1,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "100014": {
+      "campaign_id": 100014,
+      "chapter": 1,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "100015": {
+      "campaign_id": 100015,
+      "chapter": 1,
+      "next_campaign_id": 100016,
+      "last_campaign_id": 100012
+    },
+    "100016": {
+      "campaign_id": 100016,
+      "chapter": 1,
+      "next_campaign_id": 100018,
+      "last_campaign_id": 100015
+    },
+    "100017": {
+      "campaign_id": 100017,
+      "chapter": 1,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "100018": {
+      "campaign_id": 100018,
+      "chapter": 1,
+      "next_campaign_id": 200001,
+      "last_campaign_id": 100016
+    },
+    "100019": {
+      "campaign_id": 100019,
+      "chapter": 1,
+      "next_campaign_id": 100020,
+      "last_campaign_id": 0
+    },
+    "100020": {
+      "campaign_id": 100020,
+      "chapter": 1,
+      "next_campaign_id": 100021,
+      "last_campaign_id": 100019
+    },
+    "100021": {
+      "campaign_id": 100021,
+      "chapter": 1,
+      "next_campaign_id": 100022,
+      "last_campaign_id": 100020
+    },
+    "100022": {
+      "campaign_id": 100022,
+      "chapter": 1,
+      "next_campaign_id": 100023,
+      "last_campaign_id": 100021
+    },
+    "100023": {
+      "campaign_id": 100023,
+      "chapter": 1,
+      "next_campaign_id": 100024,
+      "last_campaign_id": 100022
+    },
+    "100024": {
+      "campaign_id": 100024,
+      "chapter": 1,
+      "next_campaign_id": 200022,
+      "last_campaign_id": 100023
+    },
+    "200001": {
+      "campaign_id": 200001,
+      "chapter": 2,
+      "next_campaign_id": 200002,
+      "last_campaign_id": 100018
+    },
+    "200002": {
+      "campaign_id": 200002,
+      "chapter": 2,
+      "next_campaign_id": 200003,
+      "last_campaign_id": 200001
+    },
+    "200003": {
+      "campaign_id": 200003,
+      "chapter": 2,
+      "next_campaign_id": 200004,
+      "last_campaign_id": 200002
+    },
+    "200004": {
+      "campaign_id": 200004,
+      "chapter": 2,
+      "next_campaign_id": 200005,
+      "last_campaign_id": 200003
+    },
+    "200005": {
+      "campaign_id": 200005,
+      "chapter": 2,
+      "next_campaign_id": 200006,
+      "last_campaign_id": 200004
+    },
+    "200006": {
+      "campaign_id": 200006,
+      "chapter": 2,
+      "next_campaign_id": 200007,
+      "last_campaign_id": 200005
+    },
+    "200007": {
+      "campaign_id": 200007,
+      "chapter": 2,
+      "next_campaign_id": 200008,
+      "last_campaign_id": 200006
+    },
+    "200008": {
+      "campaign_id": 200008,
+      "chapter": 2,
+      "next_campaign_id": 200009,
+      "last_campaign_id": 200007
+    },
+    "200009": {
+      "campaign_id": 200009,
+      "chapter": 2,
+      "next_campaign_id": 200010,
+      "last_campaign_id": 200008
+    },
+    "200010": {
+      "campaign_id": 200010,
+      "chapter": 2,
+      "next_campaign_id": 200011,
+      "last_campaign_id": 200009
+    },
+    "200011": {
+      "campaign_id": 200011,
+      "chapter": 2,
+      "next_campaign_id": 200012,
+      "last_campaign_id": 200010
+    },
+    "200012": {
+      "campaign_id": 200012,
+      "chapter": 2,
+      "next_campaign_id": 200013,
+      "last_campaign_id": 200011
+    },
+    "200013": {
+      "campaign_id": 200013,
+      "chapter": 2,
+      "next_campaign_id": 200014,
+      "last_campaign_id": 200012
+    },
+    "200014": {
+      "campaign_id": 200014,
+      "chapter": 2,
+      "next_campaign_id": 200015,
+      "last_campaign_id": 200013
+    },
+    "200015": {
+      "campaign_id": 200015,
+      "chapter": 2,
+      "next_campaign_id": 200016,
+      "last_campaign_id": 200014
+    },
+    "200016": {
+      "campaign_id": 200016,
+      "chapter": 2,
+      "next_campaign_id": 200017,
+      "last_campaign_id": 200015
+    },
+    "200017": {
+      "campaign_id": 200017,
+      "chapter": 2,
+      "next_campaign_id": 200018,
+      "last_campaign_id": 200016
+    },
+    "200018": {
+      "campaign_id": 200018,
+      "chapter": 2,
+      "next_campaign_id": 200019,
+      "last_campaign_id": 200017
+    },
+    "200019": {
+      "campaign_id": 200019,
+      "chapter": 2,
+      "next_campaign_id": 200020,
+      "last_campaign_id": 200018
+    },
+    "200020": {
+      "campaign_id": 200020,
+      "chapter": 2,
+      "next_campaign_id": 200021,
+      "last_campaign_id": 200019
+    },
+    "200021": {
+      "campaign_id": 200021,
+      "chapter": 2,
+      "next_campaign_id": 300001,
+      "last_campaign_id": 200020
+    },
+    "200022": {
+      "campaign_id": 200022,
+      "chapter": 2,
+      "next_campaign_id": 200023,
+      "last_campaign_id": 100024
+    },
+    "200023": {
+      "campaign_id": 200023,
+      "chapter": 2,
+      "next_campaign_id": 200024,
+      "last_campaign_id": 200022
+    },
+    "200024": {
+      "campaign_id": 200024,
+      "chapter": 2,
+      "next_campaign_id": 200025,
+      "last_campaign_id": 200023
+    },
+    "200025": {
+      "campaign_id": 200025,
+      "chapter": 2,
+      "next_campaign_id": 200026,
+      "last_campaign_id": 200024
+    },
+    "200026": {
+      "campaign_id": 200026,
+      "chapter": 2,
+      "next_campaign_id": 200027,
+      "last_campaign_id": 200025
+    },
+    "200027": {
+      "campaign_id": 200027,
+      "chapter": 2,
+      "next_campaign_id": 200028,
+      "last_campaign_id": 200026
+    },
+    "200028": {
+      "campaign_id": 200028,
+      "chapter": 2,
+      "next_campaign_id": 300017,
+      "last_campaign_id": 200027
+    },
+    "300001": {
+      "campaign_id": 300001,
+      "chapter": 3,
+      "next_campaign_id": 300002,
+      "last_campaign_id": 200021
+    },
+    "300002": {
+      "campaign_id": 300002,
+      "chapter": 3,
+      "next_campaign_id": 300003,
+      "last_campaign_id": 300001
+    },
+    "300003": {
+      "campaign_id": 300003,
+      "chapter": 3,
+      "next_campaign_id": 300004,
+      "last_campaign_id": 300002
+    },
+    "300004": {
+      "campaign_id": 300004,
+      "chapter": 3,
+      "next_campaign_id": 300005,
+      "last_campaign_id": 300003
+    },
+    "300005": {
+      "campaign_id": 300005,
+      "chapter": 3,
+      "next_campaign_id": 300006,
+      "last_campaign_id": 300004
+    },
+    "300006": {
+      "campaign_id": 300006,
+      "chapter": 3,
+      "next_campaign_id": 300007,
+      "last_campaign_id": 300005
+    },
+    "300007": {
+      "campaign_id": 300007,
+      "chapter": 3,
+      "next_campaign_id": 300008,
+      "last_campaign_id": 300006
+    },
+    "300008": {
+      "campaign_id": 300008,
+      "chapter": 3,
+      "next_campaign_id": 300009,
+      "last_campaign_id": 300007
+    },
+    "300009": {
+      "campaign_id": 300009,
+      "chapter": 3,
+      "next_campaign_id": 300010,
+      "last_campaign_id": 300008
+    },
+    "300010": {
+      "campaign_id": 300010,
+      "chapter": 3,
+      "next_campaign_id": 300011,
+      "last_campaign_id": 300009
+    },
+    "300011": {
+      "campaign_id": 300011,
+      "chapter": 3,
+      "next_campaign_id": 300012,
+      "last_campaign_id": 300010
+    },
+    "300012": {
+      "campaign_id": 300012,
+      "chapter": 3,
+      "next_campaign_id": 300013,
+      "last_campaign_id": 300011
+    },
+    "300013": {
+      "campaign_id": 300013,
+      "chapter": 3,
+      "next_campaign_id": 300014,
+      "last_campaign_id": 300012
+    },
+    "300014": {
+      "campaign_id": 300014,
+      "chapter": 3,
+      "next_campaign_id": 300015,
+      "last_campaign_id": 300013
+    },
+    "300015": {
+      "campaign_id": 300015,
+      "chapter": 3,
+      "next_campaign_id": 300016,
+      "last_campaign_id": 300014
+    },
+    "300016": {
+      "campaign_id": 300016,
+      "chapter": 3,
+      "next_campaign_id": 400001,
+      "last_campaign_id": 300015
+    },
+    "300017": {
+      "campaign_id": 300017,
+      "chapter": 3,
+      "next_campaign_id": 300018,
+      "last_campaign_id": 200028
+    },
+    "300018": {
+      "campaign_id": 300018,
+      "chapter": 3,
+      "next_campaign_id": 300019,
+      "last_campaign_id": 300017
+    },
+    "300019": {
+      "campaign_id": 300019,
+      "chapter": 3,
+      "next_campaign_id": 300020,
+      "last_campaign_id": 300018
+    },
+    "300020": {
+      "campaign_id": 300020,
+      "chapter": 3,
+      "next_campaign_id": 300021,
+      "last_campaign_id": 300019
+    },
+    "300021": {
+      "campaign_id": 300021,
+      "chapter": 3,
+      "next_campaign_id": 300022,
+      "last_campaign_id": 300020
+    },
+    "300022": {
+      "campaign_id": 300022,
+      "chapter": 3,
+      "next_campaign_id": 400020,
+      "last_campaign_id": 300021
+    },
+    "400001": {
+      "campaign_id": 400001,
+      "chapter": 4,
+      "next_campaign_id": 400002,
+      "last_campaign_id": 300016
+    },
+    "400002": {
+      "campaign_id": 400002,
+      "chapter": 4,
+      "next_campaign_id": 400003,
+      "last_campaign_id": 400001
+    },
+    "400003": {
+      "campaign_id": 400003,
+      "chapter": 4,
+      "next_campaign_id": 400004,
+      "last_campaign_id": 400002
+    },
+    "400004": {
+      "campaign_id": 400004,
+      "chapter": 4,
+      "next_campaign_id": 400005,
+      "last_campaign_id": 400003
+    },
+    "400005": {
+      "campaign_id": 400005,
+      "chapter": 4,
+      "next_campaign_id": 400006,
+      "last_campaign_id": 400004
+    },
+    "400006": {
+      "campaign_id": 400006,
+      "chapter": 4,
+      "next_campaign_id": 400007,
+      "last_campaign_id": 400005
+    },
+    "400007": {
+      "campaign_id": 400007,
+      "chapter": 4,
+      "next_campaign_id": 400008,
+      "last_campaign_id": 400006
+    },
+    "400008": {
+      "campaign_id": 400008,
+      "chapter": 4,
+      "next_campaign_id": 400009,
+      "last_campaign_id": 400007
+    },
+    "400009": {
+      "campaign_id": 400009,
+      "chapter": 4,
+      "next_campaign_id": 400010,
+      "last_campaign_id": 400008
+    },
+    "400010": {
+      "campaign_id": 400010,
+      "chapter": 4,
+      "next_campaign_id": 400011,
+      "last_campaign_id": 400009
+    },
+    "400011": {
+      "campaign_id": 400011,
+      "chapter": 4,
+      "next_campaign_id": 400012,
+      "last_campaign_id": 400010
+    },
+    "400012": {
+      "campaign_id": 400012,
+      "chapter": 4,
+      "next_campaign_id": 400013,
+      "last_campaign_id": 400011
+    },
+    "400013": {
+      "campaign_id": 400013,
+      "chapter": 4,
+      "next_campaign_id": 400014,
+      "last_campaign_id": 400012
+    },
+    "400014": {
+      "campaign_id": 400014,
+      "chapter": 4,
+      "next_campaign_id": 400015,
+      "last_campaign_id": 400013
+    },
+    "400015": {
+      "campaign_id": 400015,
+      "chapter": 4,
+      "next_campaign_id": 400016,
+      "last_campaign_id": 400014
+    },
+    "400016": {
+      "campaign_id": 400016,
+      "chapter": 4,
+      "next_campaign_id": 400017,
+      "last_campaign_id": 400015
+    },
+    "400017": {
+      "campaign_id": 400017,
+      "chapter": 4,
+      "next_campaign_id": 400018,
+      "last_campaign_id": 400016
+    },
+    "400018": {
+      "campaign_id": 400018,
+      "chapter": 4,
+      "next_campaign_id": 400019,
+      "last_campaign_id": 400017
+    },
+    "400019": {
+      "campaign_id": 400019,
+      "chapter": 4,
+      "next_campaign_id": 500001,
+      "last_campaign_id": 400018
+    },
+    "400020": {
+      "campaign_id": 400020,
+      "chapter": 4,
+      "next_campaign_id": 400021,
+      "last_campaign_id": 300022
+    },
+    "400021": {
+      "campaign_id": 400021,
+      "chapter": 4,
+      "next_campaign_id": 400022,
+      "last_campaign_id": 400020
+    },
+    "400022": {
+      "campaign_id": 400022,
+      "chapter": 4,
+      "next_campaign_id": 400023,
+      "last_campaign_id": 400021
+    },
+    "400023": {
+      "campaign_id": 400023,
+      "chapter": 4,
+      "next_campaign_id": 400024,
+      "last_campaign_id": 400022
+    },
+    "400024": {
+      "campaign_id": 400024,
+      "chapter": 4,
+      "next_campaign_id": 400025,
+      "last_campaign_id": 400023
+    },
+    "400025": {
+      "campaign_id": 400025,
+      "chapter": 4,
+      "next_campaign_id": 400026,
+      "last_campaign_id": 400024
+    },
+    "400026": {
+      "campaign_id": 400026,
+      "chapter": 4,
+      "next_campaign_id": 500021,
+      "last_campaign_id": 400025
+    },
+    "500001": {
+      "campaign_id": 500001,
+      "chapter": 5,
+      "next_campaign_id": 500002,
+      "last_campaign_id": 400019
+    },
+    "500002": {
+      "campaign_id": 500002,
+      "chapter": 5,
+      "next_campaign_id": 500003,
+      "last_campaign_id": 500001
+    },
+    "500003": {
+      "campaign_id": 500003,
+      "chapter": 5,
+      "next_campaign_id": 500004,
+      "last_campaign_id": 500002
+    },
+    "500004": {
+      "campaign_id": 500004,
+      "chapter": 5,
+      "next_campaign_id": 500005,
+      "last_campaign_id": 500003
+    },
+    "500005": {
+      "campaign_id": 500005,
+      "chapter": 5,
+      "next_campaign_id": 500006,
+      "last_campaign_id": 500004
+    },
+    "500006": {
+      "campaign_id": 500006,
+      "chapter": 5,
+      "next_campaign_id": 500007,
+      "last_campaign_id": 500005
+    },
+    "500007": {
+      "campaign_id": 500007,
+      "chapter": 5,
+      "next_campaign_id": 500008,
+      "last_campaign_id": 500006
+    },
+    "500008": {
+      "campaign_id": 500008,
+      "chapter": 5,
+      "next_campaign_id": 500009,
+      "last_campaign_id": 500007
+    },
+    "500009": {
+      "campaign_id": 500009,
+      "chapter": 5,
+      "next_campaign_id": 500010,
+      "last_campaign_id": 500008
+    },
+    "500010": {
+      "campaign_id": 500010,
+      "chapter": 5,
+      "next_campaign_id": 500011,
+      "last_campaign_id": 500009
+    },
+    "500011": {
+      "campaign_id": 500011,
+      "chapter": 5,
+      "next_campaign_id": 500012,
+      "last_campaign_id": 500010
+    },
+    "500012": {
+      "campaign_id": 500012,
+      "chapter": 5,
+      "next_campaign_id": 500013,
+      "last_campaign_id": 500011
+    },
+    "500013": {
+      "campaign_id": 500013,
+      "chapter": 5,
+      "next_campaign_id": 500014,
+      "last_campaign_id": 500012
+    },
+    "500014": {
+      "campaign_id": 500014,
+      "chapter": 5,
+      "next_campaign_id": 500015,
+      "last_campaign_id": 500013
+    },
+    "500015": {
+      "campaign_id": 500015,
+      "chapter": 5,
+      "next_campaign_id": 500016,
+      "last_campaign_id": 500014
+    },
+    "500016": {
+      "campaign_id": 500016,
+      "chapter": 5,
+      "next_campaign_id": 500017,
+      "last_campaign_id": 500015
+    },
+    "500017": {
+      "campaign_id": 500017,
+      "chapter": 5,
+      "next_campaign_id": 500018,
+      "last_campaign_id": 500016
+    },
+    "500018": {
+      "campaign_id": 500018,
+      "chapter": 5,
+      "next_campaign_id": 500019,
+      "last_campaign_id": 500017
+    },
+    "500019": {
+      "campaign_id": 500019,
+      "chapter": 5,
+      "next_campaign_id": 500020,
+      "last_campaign_id": 500018
+    },
+    "500020": {
+      "campaign_id": 500020,
+      "chapter": 5,
+      "next_campaign_id": 600001,
+      "last_campaign_id": 500019
+    },
+    "500021": {
+      "campaign_id": 500021,
+      "chapter": 5,
+      "next_campaign_id": 500022,
+      "last_campaign_id": 400026
+    },
+    "500022": {
+      "campaign_id": 500022,
+      "chapter": 5,
+      "next_campaign_id": 500023,
+      "last_campaign_id": 500021
+    },
+    "500023": {
+      "campaign_id": 500023,
+      "chapter": 5,
+      "next_campaign_id": 500024,
+      "last_campaign_id": 500022
+    },
+    "500024": {
+      "campaign_id": 500024,
+      "chapter": 5,
+      "next_campaign_id": 500025,
+      "last_campaign_id": 500023
+    },
+    "500025": {
+      "campaign_id": 500025,
+      "chapter": 5,
+      "next_campaign_id": 500026,
+      "last_campaign_id": 500024
+    },
+    "500026": {
+      "campaign_id": 500026,
+      "chapter": 5,
+      "next_campaign_id": 500027,
+      "last_campaign_id": 500025
+    },
+    "500027": {
+      "campaign_id": 500027,
+      "chapter": 5,
+      "next_campaign_id": 600021,
+      "last_campaign_id": 500026
+    },
+    "600001": {
+      "campaign_id": 600001,
+      "chapter": 6,
+      "next_campaign_id": 600002,
+      "last_campaign_id": 500020
+    },
+    "600002": {
+      "campaign_id": 600002,
+      "chapter": 6,
+      "next_campaign_id": 600003,
+      "last_campaign_id": 600001
+    },
+    "600003": {
+      "campaign_id": 600003,
+      "chapter": 6,
+      "next_campaign_id": 600004,
+      "last_campaign_id": 600002
+    },
+    "600004": {
+      "campaign_id": 600004,
+      "chapter": 6,
+      "next_campaign_id": 600005,
+      "last_campaign_id": 600003
+    },
+    "600005": {
+      "campaign_id": 600005,
+      "chapter": 6,
+      "next_campaign_id": 600006,
+      "last_campaign_id": 600004
+    },
+    "600006": {
+      "campaign_id": 600006,
+      "chapter": 6,
+      "next_campaign_id": 600007,
+      "last_campaign_id": 600005
+    },
+    "600007": {
+      "campaign_id": 600007,
+      "chapter": 6,
+      "next_campaign_id": 600008,
+      "last_campaign_id": 600006
+    },
+    "600008": {
+      "campaign_id": 600008,
+      "chapter": 6,
+      "next_campaign_id": 600009,
+      "last_campaign_id": 600007
+    },
+    "600009": {
+      "campaign_id": 600009,
+      "chapter": 6,
+      "next_campaign_id": 600010,
+      "last_campaign_id": 600008
+    },
+    "600010": {
+      "campaign_id": 600010,
+      "chapter": 6,
+      "next_campaign_id": 600011,
+      "last_campaign_id": 600009
+    },
+    "600011": {
+      "campaign_id": 600011,
+      "chapter": 6,
+      "next_campaign_id": 600012,
+      "last_campaign_id": 600010
+    },
+    "600012": {
+      "campaign_id": 600012,
+      "chapter": 6,
+      "next_campaign_id": 600013,
+      "last_campaign_id": 600011
+    },
+    "600013": {
+      "campaign_id": 600013,
+      "chapter": 6,
+      "next_campaign_id": 600014,
+      "last_campaign_id": 600012
+    },
+    "600014": {
+      "campaign_id": 600014,
+      "chapter": 6,
+      "next_campaign_id": 600015,
+      "last_campaign_id": 600013
+    },
+    "600015": {
+      "campaign_id": 600015,
+      "chapter": 6,
+      "next_campaign_id": 600016,
+      "last_campaign_id": 600014
+    },
+    "600016": {
+      "campaign_id": 600016,
+      "chapter": 6,
+      "next_campaign_id": 600017,
+      "last_campaign_id": 600015
+    },
+    "600017": {
+      "campaign_id": 600017,
+      "chapter": 6,
+      "next_campaign_id": 600018,
+      "last_campaign_id": 600016
+    },
+    "600018": {
+      "campaign_id": 600018,
+      "chapter": 6,
+      "next_campaign_id": 600019,
+      "last_campaign_id": 600017
+    },
+    "600019": {
+      "campaign_id": 600019,
+      "chapter": 6,
+      "next_campaign_id": 600020,
+      "last_campaign_id": 600018
+    },
+    "600020": {
+      "campaign_id": 600020,
+      "chapter": 6,
+      "next_campaign_id": 700001,
+      "last_campaign_id": 600019
+    },
+    "600021": {
+      "campaign_id": 600021,
+      "chapter": 6,
+      "next_campaign_id": 600022,
+      "last_campaign_id": 500027
+    },
+    "600022": {
+      "campaign_id": 600022,
+      "chapter": 6,
+      "next_campaign_id": 600023,
+      "last_campaign_id": 600021
+    },
+    "600023": {
+      "campaign_id": 600023,
+      "chapter": 6,
+      "next_campaign_id": 600024,
+      "last_campaign_id": 600022
+    },
+    "600024": {
+      "campaign_id": 600024,
+      "chapter": 6,
+      "next_campaign_id": 600025,
+      "last_campaign_id": 600023
+    },
+    "600025": {
+      "campaign_id": 600025,
+      "chapter": 6,
+      "next_campaign_id": 600026,
+      "last_campaign_id": 600024
+    },
+    "600026": {
+      "campaign_id": 600026,
+      "chapter": 6,
+      "next_campaign_id": 600027,
+      "last_campaign_id": 600025
+    },
+    "600027": {
+      "campaign_id": 600027,
+      "chapter": 6,
+      "next_campaign_id": 600028,
+      "last_campaign_id": 600026
+    },
+    "600028": {
+      "campaign_id": 600028,
+      "chapter": 6,
+      "next_campaign_id": 700021,
+      "last_campaign_id": 600027
+    },
+    "700001": {
+      "campaign_id": 700001,
+      "chapter": 7,
+      "next_campaign_id": 700002,
+      "last_campaign_id": 600020
+    },
+    "700002": {
+      "campaign_id": 700002,
+      "chapter": 7,
+      "next_campaign_id": 700003,
+      "last_campaign_id": 700001
+    },
+    "700003": {
+      "campaign_id": 700003,
+      "chapter": 7,
+      "next_campaign_id": 700004,
+      "last_campaign_id": 700002
+    },
+    "700004": {
+      "campaign_id": 700004,
+      "chapter": 7,
+      "next_campaign_id": 700005,
+      "last_campaign_id": 700003
+    },
+    "700005": {
+      "campaign_id": 700005,
+      "chapter": 7,
+      "next_campaign_id": 700006,
+      "last_campaign_id": 700004
+    },
+    "700006": {
+      "campaign_id": 700006,
+      "chapter": 7,
+      "next_campaign_id": 700007,
+      "last_campaign_id": 700005
+    },
+    "700007": {
+      "campaign_id": 700007,
+      "chapter": 7,
+      "next_campaign_id": 700008,
+      "last_campaign_id": 700006
+    },
+    "700008": {
+      "campaign_id": 700008,
+      "chapter": 7,
+      "next_campaign_id": 700009,
+      "last_campaign_id": 700007
+    },
+    "700009": {
+      "campaign_id": 700009,
+      "chapter": 7,
+      "next_campaign_id": 700010,
+      "last_campaign_id": 700008
+    },
+    "700010": {
+      "campaign_id": 700010,
+      "chapter": 7,
+      "next_campaign_id": 700011,
+      "last_campaign_id": 700009
+    },
+    "700011": {
+      "campaign_id": 700011,
+      "chapter": 7,
+      "next_campaign_id": 700012,
+      "last_campaign_id": 700010
+    },
+    "700012": {
+      "campaign_id": 700012,
+      "chapter": 7,
+      "next_campaign_id": 700013,
+      "last_campaign_id": 700011
+    },
+    "700013": {
+      "campaign_id": 700013,
+      "chapter": 7,
+      "next_campaign_id": 700014,
+      "last_campaign_id": 700012
+    },
+    "700014": {
+      "campaign_id": 700014,
+      "chapter": 7,
+      "next_campaign_id": 700015,
+      "last_campaign_id": 700013
+    },
+    "700015": {
+      "campaign_id": 700015,
+      "chapter": 7,
+      "next_campaign_id": 700016,
+      "last_campaign_id": 700014
+    },
+    "700016": {
+      "campaign_id": 700016,
+      "chapter": 7,
+      "next_campaign_id": 700017,
+      "last_campaign_id": 700015
+    },
+    "700017": {
+      "campaign_id": 700017,
+      "chapter": 7,
+      "next_campaign_id": 700018,
+      "last_campaign_id": 700016
+    },
+    "700018": {
+      "campaign_id": 700018,
+      "chapter": 7,
+      "next_campaign_id": 700019,
+      "last_campaign_id": 700017
+    },
+    "700019": {
+      "campaign_id": 700019,
+      "chapter": 7,
+      "next_campaign_id": 700020,
+      "last_campaign_id": 700018
+    },
+    "700020": {
+      "campaign_id": 700020,
+      "chapter": 7,
+      "next_campaign_id": 800001,
+      "last_campaign_id": 700019
+    },
+    "700021": {
+      "campaign_id": 700021,
+      "chapter": 7,
+      "next_campaign_id": 700022,
+      "last_campaign_id": 600028
+    },
+    "700022": {
+      "campaign_id": 700022,
+      "chapter": 7,
+      "next_campaign_id": 700023,
+      "last_campaign_id": 700021
+    },
+    "700023": {
+      "campaign_id": 700023,
+      "chapter": 7,
+      "next_campaign_id": 700024,
+      "last_campaign_id": 700022
+    },
+    "700024": {
+      "campaign_id": 700024,
+      "chapter": 7,
+      "next_campaign_id": 700025,
+      "last_campaign_id": 700023
+    },
+    "700025": {
+      "campaign_id": 700025,
+      "chapter": 7,
+      "next_campaign_id": 700026,
+      "last_campaign_id": 700024
+    },
+    "700026": {
+      "campaign_id": 700026,
+      "chapter": 7,
+      "next_campaign_id": 700027,
+      "last_campaign_id": 700025
+    },
+    "700027": {
+      "campaign_id": 700027,
+      "chapter": 7,
+      "next_campaign_id": 800021,
+      "last_campaign_id": 700026
+    },
+    "800001": {
+      "campaign_id": 800001,
+      "chapter": 8,
+      "next_campaign_id": 800002,
+      "last_campaign_id": 700020
+    },
+    "800002": {
+      "campaign_id": 800002,
+      "chapter": 8,
+      "next_campaign_id": 800003,
+      "last_campaign_id": 800001
+    },
+    "800003": {
+      "campaign_id": 800003,
+      "chapter": 8,
+      "next_campaign_id": 800004,
+      "last_campaign_id": 800002
+    },
+    "800004": {
+      "campaign_id": 800004,
+      "chapter": 8,
+      "next_campaign_id": 800005,
+      "last_campaign_id": 800003
+    },
+    "800005": {
+      "campaign_id": 800005,
+      "chapter": 8,
+      "next_campaign_id": 800006,
+      "last_campaign_id": 800004
+    },
+    "800006": {
+      "campaign_id": 800006,
+      "chapter": 8,
+      "next_campaign_id": 800007,
+      "last_campaign_id": 800005
+    },
+    "800007": {
+      "campaign_id": 800007,
+      "chapter": 8,
+      "next_campaign_id": 800008,
+      "last_campaign_id": 800006
+    },
+    "800008": {
+      "campaign_id": 800008,
+      "chapter": 8,
+      "next_campaign_id": 800009,
+      "last_campaign_id": 800007
+    },
+    "800009": {
+      "campaign_id": 800009,
+      "chapter": 8,
+      "next_campaign_id": 800010,
+      "last_campaign_id": 800008
+    },
+    "800010": {
+      "campaign_id": 800010,
+      "chapter": 8,
+      "next_campaign_id": 800011,
+      "last_campaign_id": 800009
+    },
+    "800011": {
+      "campaign_id": 800011,
+      "chapter": 8,
+      "next_campaign_id": 800012,
+      "last_campaign_id": 800010
+    },
+    "800012": {
+      "campaign_id": 800012,
+      "chapter": 8,
+      "next_campaign_id": 800013,
+      "last_campaign_id": 800011
+    },
+    "800013": {
+      "campaign_id": 800013,
+      "chapter": 8,
+      "next_campaign_id": 800014,
+      "last_campaign_id": 800012
+    },
+    "800014": {
+      "campaign_id": 800014,
+      "chapter": 8,
+      "next_campaign_id": 800015,
+      "last_campaign_id": 800013
+    },
+    "800015": {
+      "campaign_id": 800015,
+      "chapter": 8,
+      "next_campaign_id": 800016,
+      "last_campaign_id": 800014
+    },
+    "800016": {
+      "campaign_id": 800016,
+      "chapter": 8,
+      "next_campaign_id": 800017,
+      "last_campaign_id": 800015
+    },
+    "800017": {
+      "campaign_id": 800017,
+      "chapter": 8,
+      "next_campaign_id": 800018,
+      "last_campaign_id": 800016
+    },
+    "800018": {
+      "campaign_id": 800018,
+      "chapter": 8,
+      "next_campaign_id": 800019,
+      "last_campaign_id": 800017
+    },
+    "800019": {
+      "campaign_id": 800019,
+      "chapter": 8,
+      "next_campaign_id": 800020,
+      "last_campaign_id": 800018
+    },
+    "800020": {
+      "campaign_id": 800020,
+      "chapter": 8,
+      "next_campaign_id": 900001,
+      "last_campaign_id": 800019
+    },
+    "800021": {
+      "campaign_id": 800021,
+      "chapter": 8,
+      "next_campaign_id": 800022,
+      "last_campaign_id": 700027
+    },
+    "800022": {
+      "campaign_id": 800022,
+      "chapter": 8,
+      "next_campaign_id": 800023,
+      "last_campaign_id": 800021
+    },
+    "800023": {
+      "campaign_id": 800023,
+      "chapter": 8,
+      "next_campaign_id": 800024,
+      "last_campaign_id": 800022
+    },
+    "800024": {
+      "campaign_id": 800024,
+      "chapter": 8,
+      "next_campaign_id": 800025,
+      "last_campaign_id": 800023
+    },
+    "800025": {
+      "campaign_id": 800025,
+      "chapter": 8,
+      "next_campaign_id": 800026,
+      "last_campaign_id": 800024
+    },
+    "800026": {
+      "campaign_id": 800026,
+      "chapter": 8,
+      "next_campaign_id": 800027,
+      "last_campaign_id": 800025
+    },
+    "800027": {
+      "campaign_id": 800027,
+      "chapter": 8,
+      "next_campaign_id": 900021,
+      "last_campaign_id": 800026
+    },
+    "900001": {
+      "campaign_id": 900001,
+      "chapter": 9,
+      "next_campaign_id": 900002,
+      "last_campaign_id": 800019
+    },
+    "900002": {
+      "campaign_id": 900002,
+      "chapter": 9,
+      "next_campaign_id": 900003,
+      "last_campaign_id": 900001
+    },
+    "900003": {
+      "campaign_id": 900003,
+      "chapter": 9,
+      "next_campaign_id": 900004,
+      "last_campaign_id": 900002
+    },
+    "900004": {
+      "campaign_id": 900004,
+      "chapter": 9,
+      "next_campaign_id": 900005,
+      "last_campaign_id": 900003
+    },
+    "900005": {
+      "campaign_id": 900005,
+      "chapter": 9,
+      "next_campaign_id": 900006,
+      "last_campaign_id": 900004
+    },
+    "900006": {
+      "campaign_id": 900006,
+      "chapter": 9,
+      "next_campaign_id": 900007,
+      "last_campaign_id": 900005
+    },
+    "900007": {
+      "campaign_id": 900007,
+      "chapter": 9,
+      "next_campaign_id": 900008,
+      "last_campaign_id": 900006
+    },
+    "900008": {
+      "campaign_id": 900008,
+      "chapter": 9,
+      "next_campaign_id": 900009,
+      "last_campaign_id": 900007
+    },
+    "900009": {
+      "campaign_id": 900009,
+      "chapter": 9,
+      "next_campaign_id": 900010,
+      "last_campaign_id": 900008
+    },
+    "900010": {
+      "campaign_id": 900010,
+      "chapter": 9,
+      "next_campaign_id": 900011,
+      "last_campaign_id": 900009
+    },
+    "900011": {
+      "campaign_id": 900011,
+      "chapter": 9,
+      "next_campaign_id": 900012,
+      "last_campaign_id": 900010
+    },
+    "900012": {
+      "campaign_id": 900012,
+      "chapter": 9,
+      "next_campaign_id": 900013,
+      "last_campaign_id": 900011
+    },
+    "900013": {
+      "campaign_id": 900013,
+      "chapter": 9,
+      "next_campaign_id": 900014,
+      "last_campaign_id": 900012
+    },
+    "900014": {
+      "campaign_id": 900014,
+      "chapter": 9,
+      "next_campaign_id": 900015,
+      "last_campaign_id": 900013
+    },
+    "900015": {
+      "campaign_id": 900015,
+      "chapter": 9,
+      "next_campaign_id": 900016,
+      "last_campaign_id": 900014
+    },
+    "900016": {
+      "campaign_id": 900016,
+      "chapter": 9,
+      "next_campaign_id": 900017,
+      "last_campaign_id": 900015
+    },
+    "900017": {
+      "campaign_id": 900017,
+      "chapter": 9,
+      "next_campaign_id": 900018,
+      "last_campaign_id": 900016
+    },
+    "900018": {
+      "campaign_id": 900018,
+      "chapter": 9,
+      "next_campaign_id": 900019,
+      "last_campaign_id": 900017
+    },
+    "900019": {
+      "campaign_id": 900019,
+      "chapter": 9,
+      "next_campaign_id": 900020,
+      "last_campaign_id": 900018
+    },
+    "900020": {
+      "campaign_id": 900020,
+      "chapter": 9,
+      "next_campaign_id": 1000001,
+      "last_campaign_id": 900019
+    },
+    "900021": {
+      "campaign_id": 900021,
+      "chapter": 9,
+      "next_campaign_id": 900022,
+      "last_campaign_id": 800027
+    },
+    "900022": {
+      "campaign_id": 900022,
+      "chapter": 9,
+      "next_campaign_id": 900023,
+      "last_campaign_id": 900021
+    },
+    "900023": {
+      "campaign_id": 900023,
+      "chapter": 9,
+      "next_campaign_id": 900024,
+      "last_campaign_id": 900022
+    },
+    "900024": {
+      "campaign_id": 900024,
+      "chapter": 9,
+      "next_campaign_id": 900025,
+      "last_campaign_id": 900023
+    },
+    "900025": {
+      "campaign_id": 900025,
+      "chapter": 9,
+      "next_campaign_id": 900026,
+      "last_campaign_id": 900024
+    },
+    "900026": {
+      "campaign_id": 900026,
+      "chapter": 9,
+      "next_campaign_id": 900027,
+      "last_campaign_id": 900025
+    },
+    "900027": {
+      "campaign_id": 900027,
+      "chapter": 9,
+      "next_campaign_id": 1000021,
+      "last_campaign_id": 900026
+    },
+    "1000001": {
+      "campaign_id": 1000001,
+      "chapter": 10,
+      "next_campaign_id": 1000002,
+      "last_campaign_id": 900020
+    },
+    "1000002": {
+      "campaign_id": 1000002,
+      "chapter": 10,
+      "next_campaign_id": 1000003,
+      "last_campaign_id": 1000001
+    },
+    "1000003": {
+      "campaign_id": 1000003,
+      "chapter": 10,
+      "next_campaign_id": 1000004,
+      "last_campaign_id": 1000002
+    },
+    "1000004": {
+      "campaign_id": 1000004,
+      "chapter": 10,
+      "next_campaign_id": 1000005,
+      "last_campaign_id": 1000003
+    },
+    "1000005": {
+      "campaign_id": 1000005,
+      "chapter": 10,
+      "next_campaign_id": 1000006,
+      "last_campaign_id": 1000004
+    },
+    "1000006": {
+      "campaign_id": 1000006,
+      "chapter": 10,
+      "next_campaign_id": 1000007,
+      "last_campaign_id": 1000005
+    },
+    "1000007": {
+      "campaign_id": 1000007,
+      "chapter": 10,
+      "next_campaign_id": 1000008,
+      "last_campaign_id": 1000006
+    },
+    "1000008": {
+      "campaign_id": 1000008,
+      "chapter": 10,
+      "next_campaign_id": 1000009,
+      "last_campaign_id": 1000007
+    },
+    "1000009": {
+      "campaign_id": 1000009,
+      "chapter": 10,
+      "next_campaign_id": 1000010,
+      "last_campaign_id": 1000008
+    },
+    "1000010": {
+      "campaign_id": 1000010,
+      "chapter": 10,
+      "next_campaign_id": 1000011,
+      "last_campaign_id": 1000009
+    },
+    "1000011": {
+      "campaign_id": 1000011,
+      "chapter": 10,
+      "next_campaign_id": 1000012,
+      "last_campaign_id": 1000010
+    },
+    "1000012": {
+      "campaign_id": 1000012,
+      "chapter": 10,
+      "next_campaign_id": 1000013,
+      "last_campaign_id": 1000011
+    },
+    "1000013": {
+      "campaign_id": 1000013,
+      "chapter": 10,
+      "next_campaign_id": 1000014,
+      "last_campaign_id": 1000012
+    },
+    "1000014": {
+      "campaign_id": 1000014,
+      "chapter": 10,
+      "next_campaign_id": 1000015,
+      "last_campaign_id": 1000013
+    },
+    "1000015": {
+      "campaign_id": 1000015,
+      "chapter": 10,
+      "next_campaign_id": 1000016,
+      "last_campaign_id": 1000014
+    },
+    "1000016": {
+      "campaign_id": 1000016,
+      "chapter": 10,
+      "next_campaign_id": 1000017,
+      "last_campaign_id": 1000015
+    },
+    "1000017": {
+      "campaign_id": 1000017,
+      "chapter": 10,
+      "next_campaign_id": 1000018,
+      "last_campaign_id": 1000016
+    },
+    "1000018": {
+      "campaign_id": 1000018,
+      "chapter": 10,
+      "next_campaign_id": 1000019,
+      "last_campaign_id": 1000017
+    },
+    "1000019": {
+      "campaign_id": 1000019,
+      "chapter": 10,
+      "next_campaign_id": 1000020,
+      "last_campaign_id": 1000018
+    },
+    "1000020": {
+      "campaign_id": 1000020,
+      "chapter": 10,
+      "next_campaign_id": 1100001,
+      "last_campaign_id": 1000019
+    },
+    "1000021": {
+      "campaign_id": 1000021,
+      "chapter": 10,
+      "next_campaign_id": 1000022,
+      "last_campaign_id": 900027
+    },
+    "1000022": {
+      "campaign_id": 1000022,
+      "chapter": 10,
+      "next_campaign_id": 1000023,
+      "last_campaign_id": 1000021
+    },
+    "1000023": {
+      "campaign_id": 1000023,
+      "chapter": 10,
+      "next_campaign_id": 1000024,
+      "last_campaign_id": 1000022
+    },
+    "1000024": {
+      "campaign_id": 1000024,
+      "chapter": 10,
+      "next_campaign_id": 1000025,
+      "last_campaign_id": 1000023
+    },
+    "1000025": {
+      "campaign_id": 1000025,
+      "chapter": 10,
+      "next_campaign_id": 1000026,
+      "last_campaign_id": 1000024
+    },
+    "1000026": {
+      "campaign_id": 1000026,
+      "chapter": 10,
+      "next_campaign_id": 1000027,
+      "last_campaign_id": 1000025
+    },
+    "1000027": {
+      "campaign_id": 1000027,
+      "chapter": 10,
+      "next_campaign_id": 1100021,
+      "last_campaign_id": 1000026
+    },
+    "1100001": {
+      "campaign_id": 1100001,
+      "chapter": 11,
+      "next_campaign_id": 1100002,
+      "last_campaign_id": 1000020
+    },
+    "1100002": {
+      "campaign_id": 1100002,
+      "chapter": 11,
+      "next_campaign_id": 1100003,
+      "last_campaign_id": 1100001
+    },
+    "1100003": {
+      "campaign_id": 1100003,
+      "chapter": 11,
+      "next_campaign_id": 1100004,
+      "last_campaign_id": 1100002
+    },
+    "1100004": {
+      "campaign_id": 1100004,
+      "chapter": 11,
+      "next_campaign_id": 1100005,
+      "last_campaign_id": 1100003
+    },
+    "1100005": {
+      "campaign_id": 1100005,
+      "chapter": 11,
+      "next_campaign_id": 1100006,
+      "last_campaign_id": 1100004
+    },
+    "1100006": {
+      "campaign_id": 1100006,
+      "chapter": 11,
+      "next_campaign_id": 1100007,
+      "last_campaign_id": 1100005
+    },
+    "1100007": {
+      "campaign_id": 1100007,
+      "chapter": 11,
+      "next_campaign_id": 1100008,
+      "last_campaign_id": 1100006
+    },
+    "1100008": {
+      "campaign_id": 1100008,
+      "chapter": 11,
+      "next_campaign_id": 1100009,
+      "last_campaign_id": 1100007
+    },
+    "1100009": {
+      "campaign_id": 1100009,
+      "chapter": 11,
+      "next_campaign_id": 1100010,
+      "last_campaign_id": 1100008
+    },
+    "1100010": {
+      "campaign_id": 1100010,
+      "chapter": 11,
+      "next_campaign_id": 1100011,
+      "last_campaign_id": 1100009
+    },
+    "1100011": {
+      "campaign_id": 1100011,
+      "chapter": 11,
+      "next_campaign_id": 1100012,
+      "last_campaign_id": 1100010
+    },
+    "1100012": {
+      "campaign_id": 1100012,
+      "chapter": 11,
+      "next_campaign_id": 1100013,
+      "last_campaign_id": 1100011
+    },
+    "1100013": {
+      "campaign_id": 1100013,
+      "chapter": 11,
+      "next_campaign_id": 1100014,
+      "last_campaign_id": 1100012
+    },
+    "1100014": {
+      "campaign_id": 1100014,
+      "chapter": 11,
+      "next_campaign_id": 1100015,
+      "last_campaign_id": 1100013
+    },
+    "1100015": {
+      "campaign_id": 1100015,
+      "chapter": 11,
+      "next_campaign_id": 1100016,
+      "last_campaign_id": 1100014
+    },
+    "1100016": {
+      "campaign_id": 1100016,
+      "chapter": 11,
+      "next_campaign_id": 1100017,
+      "last_campaign_id": 1100015
+    },
+    "1100017": {
+      "campaign_id": 1100017,
+      "chapter": 11,
+      "next_campaign_id": 1100018,
+      "last_campaign_id": 1100016
+    },
+    "1100018": {
+      "campaign_id": 1100018,
+      "chapter": 11,
+      "next_campaign_id": 1100019,
+      "last_campaign_id": 1100017
+    },
+    "1100019": {
+      "campaign_id": 1100019,
+      "chapter": 11,
+      "next_campaign_id": 1100020,
+      "last_campaign_id": 1100018
+    },
+    "1100020": {
+      "campaign_id": 1100020,
+      "chapter": 11,
+      "next_campaign_id": 1200001,
+      "last_campaign_id": 1100019
+    },
+    "1100021": {
+      "campaign_id": 1100021,
+      "chapter": 11,
+      "next_campaign_id": 1100022,
+      "last_campaign_id": 1000027
+    },
+    "1100022": {
+      "campaign_id": 1100022,
+      "chapter": 11,
+      "next_campaign_id": 1100023,
+      "last_campaign_id": 1100021
+    },
+    "1100023": {
+      "campaign_id": 1100023,
+      "chapter": 11,
+      "next_campaign_id": 1100024,
+      "last_campaign_id": 1100022
+    },
+    "1100024": {
+      "campaign_id": 1100024,
+      "chapter": 11,
+      "next_campaign_id": 1100025,
+      "last_campaign_id": 1100023
+    },
+    "1100025": {
+      "campaign_id": 1100025,
+      "chapter": 11,
+      "next_campaign_id": 1100026,
+      "last_campaign_id": 1100024
+    },
+    "1100026": {
+      "campaign_id": 1100026,
+      "chapter": 11,
+      "next_campaign_id": 1100027,
+      "last_campaign_id": 1100025
+    },
+    "1100027": {
+      "campaign_id": 1100027,
+      "chapter": 11,
+      "next_campaign_id": 1200021,
+      "last_campaign_id": 1100026
+    },
+    "1200001": {
+      "campaign_id": 1200001,
+      "chapter": 12,
+      "next_campaign_id": 1200002,
+      "last_campaign_id": 1100020
+    },
+    "1200002": {
+      "campaign_id": 1200002,
+      "chapter": 12,
+      "next_campaign_id": 1200003,
+      "last_campaign_id": 1200001
+    },
+    "1200003": {
+      "campaign_id": 1200003,
+      "chapter": 12,
+      "next_campaign_id": 1200004,
+      "last_campaign_id": 1200002
+    },
+    "1200004": {
+      "campaign_id": 1200004,
+      "chapter": 12,
+      "next_campaign_id": 1200005,
+      "last_campaign_id": 1200003
+    },
+    "1200005": {
+      "campaign_id": 1200005,
+      "chapter": 12,
+      "next_campaign_id": 1200006,
+      "last_campaign_id": 1200004
+    },
+    "1200006": {
+      "campaign_id": 1200006,
+      "chapter": 12,
+      "next_campaign_id": 1200007,
+      "last_campaign_id": 1200005
+    },
+    "1200007": {
+      "campaign_id": 1200007,
+      "chapter": 12,
+      "next_campaign_id": 1200008,
+      "last_campaign_id": 1200006
+    },
+    "1200008": {
+      "campaign_id": 1200008,
+      "chapter": 12,
+      "next_campaign_id": 1200009,
+      "last_campaign_id": 1200007
+    },
+    "1200009": {
+      "campaign_id": 1200009,
+      "chapter": 12,
+      "next_campaign_id": 1200010,
+      "last_campaign_id": 1200008
+    },
+    "1200010": {
+      "campaign_id": 1200010,
+      "chapter": 12,
+      "next_campaign_id": 1200011,
+      "last_campaign_id": 1200009
+    },
+    "1200011": {
+      "campaign_id": 1200011,
+      "chapter": 12,
+      "next_campaign_id": 1200012,
+      "last_campaign_id": 1200010
+    },
+    "1200012": {
+      "campaign_id": 1200012,
+      "chapter": 12,
+      "next_campaign_id": 1200013,
+      "last_campaign_id": 1200011
+    },
+    "1200013": {
+      "campaign_id": 1200013,
+      "chapter": 12,
+      "next_campaign_id": 1200014,
+      "last_campaign_id": 1200012
+    },
+    "1200014": {
+      "campaign_id": 1200014,
+      "chapter": 12,
+      "next_campaign_id": 1200015,
+      "last_campaign_id": 1200013
+    },
+    "1200015": {
+      "campaign_id": 1200015,
+      "chapter": 12,
+      "next_campaign_id": 1200016,
+      "last_campaign_id": 1200014
+    },
+    "1200016": {
+      "campaign_id": 1200016,
+      "chapter": 12,
+      "next_campaign_id": 1200017,
+      "last_campaign_id": 1200015
+    },
+    "1200017": {
+      "campaign_id": 1200017,
+      "chapter": 12,
+      "next_campaign_id": 1200018,
+      "last_campaign_id": 1200016
+    },
+    "1200018": {
+      "campaign_id": 1200018,
+      "chapter": 12,
+      "next_campaign_id": 1200019,
+      "last_campaign_id": 1200017
+    },
+    "1200019": {
+      "campaign_id": 1200019,
+      "chapter": 12,
+      "next_campaign_id": 1200020,
+      "last_campaign_id": 1200018
+    },
+    "1200020": {
+      "campaign_id": 1200020,
+      "chapter": 12,
+      "next_campaign_id": 1300001,
+      "last_campaign_id": 1200019
+    },
+    "1200021": {
+      "campaign_id": 1200021,
+      "chapter": 12,
+      "next_campaign_id": 1200022,
+      "last_campaign_id": 1100027
+    },
+    "1200022": {
+      "campaign_id": 1200022,
+      "chapter": 12,
+      "next_campaign_id": 1200023,
+      "last_campaign_id": 1200021
+    },
+    "1200023": {
+      "campaign_id": 1200023,
+      "chapter": 12,
+      "next_campaign_id": 1200024,
+      "last_campaign_id": 1200022
+    },
+    "1200024": {
+      "campaign_id": 1200024,
+      "chapter": 12,
+      "next_campaign_id": 1200025,
+      "last_campaign_id": 1200023
+    },
+    "1200025": {
+      "campaign_id": 1200025,
+      "chapter": 12,
+      "next_campaign_id": 1200026,
+      "last_campaign_id": 1200024
+    },
+    "1200026": {
+      "campaign_id": 1200026,
+      "chapter": 12,
+      "next_campaign_id": 1200027,
+      "last_campaign_id": 1200025
+    },
+    "1200027": {
+      "campaign_id": 1200027,
+      "chapter": 12,
+      "next_campaign_id": 1200028,
+      "last_campaign_id": 1200026
+    },
+    "1200028": {
+      "campaign_id": 1200028,
+      "chapter": 12,
+      "next_campaign_id": 1300017,
+      "last_campaign_id": 1200027
+    },
+    "1300001": {
+      "campaign_id": 1300001,
+      "chapter": 13,
+      "next_campaign_id": 1300002,
+      "last_campaign_id": 1200020
+    },
+    "1300002": {
+      "campaign_id": 1300002,
+      "chapter": 13,
+      "next_campaign_id": 1300003,
+      "last_campaign_id": 1300001
+    },
+    "1300003": {
+      "campaign_id": 1300003,
+      "chapter": 13,
+      "next_campaign_id": 1300004,
+      "last_campaign_id": 1300002
+    },
+    "1300004": {
+      "campaign_id": 1300004,
+      "chapter": 13,
+      "next_campaign_id": 1300005,
+      "last_campaign_id": 1300003
+    },
+    "1300005": {
+      "campaign_id": 1300005,
+      "chapter": 13,
+      "next_campaign_id": 1300006,
+      "last_campaign_id": 1300004
+    },
+    "1300006": {
+      "campaign_id": 1300006,
+      "chapter": 13,
+      "next_campaign_id": 1300007,
+      "last_campaign_id": 1300005
+    },
+    "1300007": {
+      "campaign_id": 1300007,
+      "chapter": 13,
+      "next_campaign_id": 1300008,
+      "last_campaign_id": 1300006
+    },
+    "1300008": {
+      "campaign_id": 1300008,
+      "chapter": 13,
+      "next_campaign_id": 1300009,
+      "last_campaign_id": 1300007
+    },
+    "1300009": {
+      "campaign_id": 1300009,
+      "chapter": 13,
+      "next_campaign_id": 1300010,
+      "last_campaign_id": 1300008
+    },
+    "1300010": {
+      "campaign_id": 1300010,
+      "chapter": 13,
+      "next_campaign_id": 1300011,
+      "last_campaign_id": 1300009
+    },
+    "1300011": {
+      "campaign_id": 1300011,
+      "chapter": 13,
+      "next_campaign_id": 1300012,
+      "last_campaign_id": 1300010
+    },
+    "1300012": {
+      "campaign_id": 1300012,
+      "chapter": 13,
+      "next_campaign_id": 1300013,
+      "last_campaign_id": 1300011
+    },
+    "1300013": {
+      "campaign_id": 1300013,
+      "chapter": 13,
+      "next_campaign_id": 1300014,
+      "last_campaign_id": 1300012
+    },
+    "1300014": {
+      "campaign_id": 1300014,
+      "chapter": 13,
+      "next_campaign_id": 1300015,
+      "last_campaign_id": 1300013
+    },
+    "1300015": {
+      "campaign_id": 1300015,
+      "chapter": 13,
+      "next_campaign_id": 1300016,
+      "last_campaign_id": 1300014
+    },
+    "1300016": {
+      "campaign_id": 1300016,
+      "chapter": 13,
+      "next_campaign_id": 1400001,
+      "last_campaign_id": 1300015
+    },
+    "1300017": {
+      "campaign_id": 1300017,
+      "chapter": 13,
+      "next_campaign_id": 1300018,
+      "last_campaign_id": 1200028
+    },
+    "1300018": {
+      "campaign_id": 1300018,
+      "chapter": 13,
+      "next_campaign_id": 1300019,
+      "last_campaign_id": 1300017
+    },
+    "1300019": {
+      "campaign_id": 1300019,
+      "chapter": 13,
+      "next_campaign_id": 1300020,
+      "last_campaign_id": 1300018
+    },
+    "1300020": {
+      "campaign_id": 1300020,
+      "chapter": 13,
+      "next_campaign_id": 1300021,
+      "last_campaign_id": 1300019
+    },
+    "1300021": {
+      "campaign_id": 1300021,
+      "chapter": 13,
+      "next_campaign_id": 1300022,
+      "last_campaign_id": 1300020
+    },
+    "1300022": {
+      "campaign_id": 1300022,
+      "chapter": 13,
+      "next_campaign_id": 1400019,
+      "last_campaign_id": 1300021
+    },
+    "1400001": {
+      "campaign_id": 1400001,
+      "chapter": 14,
+      "next_campaign_id": 1400002,
+      "last_campaign_id": 1300016
+    },
+    "1400002": {
+      "campaign_id": 1400002,
+      "chapter": 14,
+      "next_campaign_id": 1400003,
+      "last_campaign_id": 1400001
+    },
+    "1400003": {
+      "campaign_id": 1400003,
+      "chapter": 14,
+      "next_campaign_id": 1400004,
+      "last_campaign_id": 1400002
+    },
+    "1400004": {
+      "campaign_id": 1400004,
+      "chapter": 14,
+      "next_campaign_id": 1400005,
+      "last_campaign_id": 1400003
+    },
+    "1400005": {
+      "campaign_id": 1400005,
+      "chapter": 14,
+      "next_campaign_id": 1400006,
+      "last_campaign_id": 1400004
+    },
+    "1400006": {
+      "campaign_id": 1400006,
+      "chapter": 14,
+      "next_campaign_id": 1400007,
+      "last_campaign_id": 1400005
+    },
+    "1400007": {
+      "campaign_id": 1400007,
+      "chapter": 14,
+      "next_campaign_id": 1400008,
+      "last_campaign_id": 1400006
+    },
+    "1400008": {
+      "campaign_id": 1400008,
+      "chapter": 14,
+      "next_campaign_id": 1400009,
+      "last_campaign_id": 1400007
+    },
+    "1400009": {
+      "campaign_id": 1400009,
+      "chapter": 14,
+      "next_campaign_id": 1400010,
+      "last_campaign_id": 1400008
+    },
+    "1400010": {
+      "campaign_id": 1400010,
+      "chapter": 14,
+      "next_campaign_id": 1400011,
+      "last_campaign_id": 1400009
+    },
+    "1400011": {
+      "campaign_id": 1400011,
+      "chapter": 14,
+      "next_campaign_id": 1400012,
+      "last_campaign_id": 1400010
+    },
+    "1400012": {
+      "campaign_id": 1400012,
+      "chapter": 14,
+      "next_campaign_id": 1400013,
+      "last_campaign_id": 1400011
+    },
+    "1400013": {
+      "campaign_id": 1400013,
+      "chapter": 14,
+      "next_campaign_id": 1400014,
+      "last_campaign_id": 1400012
+    },
+    "1400014": {
+      "campaign_id": 1400014,
+      "chapter": 14,
+      "next_campaign_id": 1400015,
+      "last_campaign_id": 1400013
+    },
+    "1400015": {
+      "campaign_id": 1400015,
+      "chapter": 14,
+      "next_campaign_id": 1400016,
+      "last_campaign_id": 1400014
+    },
+    "1400016": {
+      "campaign_id": 1400016,
+      "chapter": 14,
+      "next_campaign_id": 1400017,
+      "last_campaign_id": 1400015
+    },
+    "1400017": {
+      "campaign_id": 1400017,
+      "chapter": 14,
+      "next_campaign_id": 1400018,
+      "last_campaign_id": 1400016
+    },
+    "1400018": {
+      "campaign_id": 1400018,
+      "chapter": 14,
+      "next_campaign_id": 1500001,
+      "last_campaign_id": 1400017
+    },
+    "1400019": {
+      "campaign_id": 1400019,
+      "chapter": 14,
+      "next_campaign_id": 1400020,
+      "last_campaign_id": 1300022
+    },
+    "1400020": {
+      "campaign_id": 1400020,
+      "chapter": 14,
+      "next_campaign_id": 1400021,
+      "last_campaign_id": 1400019
+    },
+    "1400021": {
+      "campaign_id": 1400021,
+      "chapter": 14,
+      "next_campaign_id": 1400022,
+      "last_campaign_id": 1400020
+    },
+    "1400022": {
+      "campaign_id": 1400022,
+      "chapter": 14,
+      "next_campaign_id": 1400023,
+      "last_campaign_id": 1400021
+    },
+    "1400023": {
+      "campaign_id": 1400023,
+      "chapter": 14,
+      "next_campaign_id": 1400024,
+      "last_campaign_id": 1400022
+    },
+    "1400024": {
+      "campaign_id": 1400024,
+      "chapter": 14,
+      "next_campaign_id": 1500020,
+      "last_campaign_id": 1400023
+    },
+    "1500001": {
+      "campaign_id": 1500001,
+      "chapter": 15,
+      "next_campaign_id": 1500002,
+      "last_campaign_id": 1400018
+    },
+    "1500002": {
+      "campaign_id": 1500002,
+      "chapter": 15,
+      "next_campaign_id": 1500003,
+      "last_campaign_id": 1500001
+    },
+    "1500003": {
+      "campaign_id": 1500003,
+      "chapter": 15,
+      "next_campaign_id": 1500004,
+      "last_campaign_id": 1500002
+    },
+    "1500004": {
+      "campaign_id": 1500004,
+      "chapter": 15,
+      "next_campaign_id": 1500005,
+      "last_campaign_id": 1500003
+    },
+    "1500005": {
+      "campaign_id": 1500005,
+      "chapter": 15,
+      "next_campaign_id": 1500006,
+      "last_campaign_id": 1500004
+    },
+    "1500006": {
+      "campaign_id": 1500006,
+      "chapter": 15,
+      "next_campaign_id": 1500007,
+      "last_campaign_id": 1500005
+    },
+    "1500007": {
+      "campaign_id": 1500007,
+      "chapter": 15,
+      "next_campaign_id": 1500008,
+      "last_campaign_id": 1500006
+    },
+    "1500008": {
+      "campaign_id": 1500008,
+      "chapter": 15,
+      "next_campaign_id": 1500009,
+      "last_campaign_id": 1500007
+    },
+    "1500009": {
+      "campaign_id": 1500009,
+      "chapter": 15,
+      "next_campaign_id": 1500010,
+      "last_campaign_id": 1500008
+    },
+    "1500010": {
+      "campaign_id": 1500010,
+      "chapter": 15,
+      "next_campaign_id": 1500011,
+      "last_campaign_id": 1500009
+    },
+    "1500011": {
+      "campaign_id": 1500011,
+      "chapter": 15,
+      "next_campaign_id": 1500012,
+      "last_campaign_id": 1500010
+    },
+    "1500012": {
+      "campaign_id": 1500012,
+      "chapter": 15,
+      "next_campaign_id": 1500013,
+      "last_campaign_id": 1500011
+    },
+    "1500013": {
+      "campaign_id": 1500013,
+      "chapter": 15,
+      "next_campaign_id": 1500014,
+      "last_campaign_id": 1500012
+    },
+    "1500014": {
+      "campaign_id": 1500014,
+      "chapter": 15,
+      "next_campaign_id": 1500015,
+      "last_campaign_id": 1500013
+    },
+    "1500015": {
+      "campaign_id": 1500015,
+      "chapter": 15,
+      "next_campaign_id": 1500016,
+      "last_campaign_id": 1500014
+    },
+    "1500016": {
+      "campaign_id": 1500016,
+      "chapter": 15,
+      "next_campaign_id": 1500017,
+      "last_campaign_id": 1500015
+    },
+    "1500017": {
+      "campaign_id": 1500017,
+      "chapter": 15,
+      "next_campaign_id": 1500018,
+      "last_campaign_id": 1500016
+    },
+    "1500018": {
+      "campaign_id": 1500018,
+      "chapter": 15,
+      "next_campaign_id": 1500019,
+      "last_campaign_id": 1500017
+    },
+    "1500019": {
+      "campaign_id": 1500019,
+      "chapter": 15,
+      "next_campaign_id": 1600001,
+      "last_campaign_id": 1500018
+    },
+    "1500020": {
+      "campaign_id": 1500020,
+      "chapter": 15,
+      "next_campaign_id": 1500021,
+      "last_campaign_id": 1400024
+    },
+    "1500021": {
+      "campaign_id": 1500021,
+      "chapter": 15,
+      "next_campaign_id": 1500022,
+      "last_campaign_id": 1500020
+    },
+    "1500022": {
+      "campaign_id": 1500022,
+      "chapter": 15,
+      "next_campaign_id": 1500023,
+      "last_campaign_id": 1500021
+    },
+    "1500023": {
+      "campaign_id": 1500023,
+      "chapter": 15,
+      "next_campaign_id": 1500024,
+      "last_campaign_id": 1500022
+    },
+    "1500024": {
+      "campaign_id": 1500024,
+      "chapter": 15,
+      "next_campaign_id": 1500025,
+      "last_campaign_id": 1500023
+    },
+    "1500025": {
+      "campaign_id": 1500025,
+      "chapter": 15,
+      "next_campaign_id": 1500026,
+      "last_campaign_id": 1500024
+    },
+    "1500026": {
+      "campaign_id": 1500026,
+      "chapter": 15,
+      "next_campaign_id": 1600017,
+      "last_campaign_id": 1500025
+    },
+    "1600001": {
+      "campaign_id": 1600001,
+      "chapter": 16,
+      "next_campaign_id": 1600002,
+      "last_campaign_id": 1500019
+    },
+    "1600002": {
+      "campaign_id": 1600002,
+      "chapter": 16,
+      "next_campaign_id": 1600003,
+      "last_campaign_id": 1600001
+    },
+    "1600003": {
+      "campaign_id": 1600003,
+      "chapter": 16,
+      "next_campaign_id": 1600004,
+      "last_campaign_id": 1600002
+    },
+    "1600004": {
+      "campaign_id": 1600004,
+      "chapter": 16,
+      "next_campaign_id": 1600005,
+      "last_campaign_id": 1600003
+    },
+    "1600005": {
+      "campaign_id": 1600005,
+      "chapter": 16,
+      "next_campaign_id": 1600006,
+      "last_campaign_id": 1600004
+    },
+    "1600006": {
+      "campaign_id": 1600006,
+      "chapter": 16,
+      "next_campaign_id": 1600007,
+      "last_campaign_id": 1600005
+    },
+    "1600007": {
+      "campaign_id": 1600007,
+      "chapter": 16,
+      "next_campaign_id": 1600008,
+      "last_campaign_id": 1600006
+    },
+    "1600008": {
+      "campaign_id": 1600008,
+      "chapter": 16,
+      "next_campaign_id": 1600009,
+      "last_campaign_id": 1600007
+    },
+    "1600009": {
+      "campaign_id": 1600009,
+      "chapter": 16,
+      "next_campaign_id": 1600010,
+      "last_campaign_id": 1600008
+    },
+    "1600010": {
+      "campaign_id": 1600010,
+      "chapter": 16,
+      "next_campaign_id": 1600011,
+      "last_campaign_id": 1600009
+    },
+    "1600011": {
+      "campaign_id": 1600011,
+      "chapter": 16,
+      "next_campaign_id": 1600012,
+      "last_campaign_id": 1600010
+    },
+    "1600012": {
+      "campaign_id": 1600012,
+      "chapter": 16,
+      "next_campaign_id": 1600013,
+      "last_campaign_id": 1600011
+    },
+    "1600013": {
+      "campaign_id": 1600013,
+      "chapter": 16,
+      "next_campaign_id": 1600014,
+      "last_campaign_id": 1600012
+    },
+    "1600014": {
+      "campaign_id": 1600014,
+      "chapter": 16,
+      "next_campaign_id": 1600015,
+      "last_campaign_id": 1600013
+    },
+    "1600015": {
+      "campaign_id": 1600015,
+      "chapter": 16,
+      "next_campaign_id": 1600016,
+      "last_campaign_id": 1600014
+    },
+    "1600016": {
+      "campaign_id": 1600016,
+      "chapter": 16,
+      "next_campaign_id": 1700001,
+      "last_campaign_id": 1600015
+    },
+    "1600017": {
+      "campaign_id": 1600017,
+      "chapter": 16,
+      "next_campaign_id": 1600018,
+      "last_campaign_id": 1500026
+    },
+    "1600018": {
+      "campaign_id": 1600018,
+      "chapter": 16,
+      "next_campaign_id": 1600019,
+      "last_campaign_id": 1600017
+    },
+    "1600019": {
+      "campaign_id": 1600019,
+      "chapter": 16,
+      "next_campaign_id": 1600020,
+      "last_campaign_id": 1600018
+    },
+    "1600020": {
+      "campaign_id": 1600020,
+      "chapter": 16,
+      "next_campaign_id": 1600021,
+      "last_campaign_id": 1600019
+    },
+    "1600021": {
+      "campaign_id": 1600021,
+      "chapter": 16,
+      "next_campaign_id": 1600022,
+      "last_campaign_id": 1600020
+    },
+    "1600022": {
+      "campaign_id": 1600022,
+      "chapter": 16,
+      "next_campaign_id": 1700021,
+      "last_campaign_id": 1600021
+    },
+    "1700001": {
+      "campaign_id": 1700001,
+      "chapter": 17,
+      "next_campaign_id": 1700002,
+      "last_campaign_id": 1600016
+    },
+    "1700002": {
+      "campaign_id": 1700002,
+      "chapter": 17,
+      "next_campaign_id": 1700003,
+      "last_campaign_id": 1700001
+    },
+    "1700003": {
+      "campaign_id": 1700003,
+      "chapter": 17,
+      "next_campaign_id": 1700004,
+      "last_campaign_id": 1700002
+    },
+    "1700004": {
+      "campaign_id": 1700004,
+      "chapter": 17,
+      "next_campaign_id": 1700005,
+      "last_campaign_id": 1700003
+    },
+    "1700005": {
+      "campaign_id": 1700005,
+      "chapter": 17,
+      "next_campaign_id": 1700006,
+      "last_campaign_id": 1700004
+    },
+    "1700006": {
+      "campaign_id": 1700006,
+      "chapter": 17,
+      "next_campaign_id": 1700007,
+      "last_campaign_id": 1700005
+    },
+    "1700007": {
+      "campaign_id": 1700007,
+      "chapter": 17,
+      "next_campaign_id": 1700008,
+      "last_campaign_id": 1700006
+    },
+    "1700008": {
+      "campaign_id": 1700008,
+      "chapter": 17,
+      "next_campaign_id": 1700009,
+      "last_campaign_id": 1700007
+    },
+    "1700009": {
+      "campaign_id": 1700009,
+      "chapter": 17,
+      "next_campaign_id": 1700010,
+      "last_campaign_id": 1700008
+    },
+    "1700010": {
+      "campaign_id": 1700010,
+      "chapter": 17,
+      "next_campaign_id": 1700011,
+      "last_campaign_id": 1700009
+    },
+    "1700011": {
+      "campaign_id": 1700011,
+      "chapter": 17,
+      "next_campaign_id": 1700012,
+      "last_campaign_id": 1700010
+    },
+    "1700012": {
+      "campaign_id": 1700012,
+      "chapter": 17,
+      "next_campaign_id": 1700013,
+      "last_campaign_id": 1700011
+    },
+    "1700013": {
+      "campaign_id": 1700013,
+      "chapter": 17,
+      "next_campaign_id": 1700014,
+      "last_campaign_id": 1700012
+    },
+    "1700014": {
+      "campaign_id": 1700014,
+      "chapter": 17,
+      "next_campaign_id": 1700015,
+      "last_campaign_id": 1700013
+    },
+    "1700015": {
+      "campaign_id": 1700015,
+      "chapter": 17,
+      "next_campaign_id": 1700016,
+      "last_campaign_id": 1700014
+    },
+    "1700016": {
+      "campaign_id": 1700016,
+      "chapter": 17,
+      "next_campaign_id": 1700017,
+      "last_campaign_id": 1700015
+    },
+    "1700017": {
+      "campaign_id": 1700017,
+      "chapter": 17,
+      "next_campaign_id": 1700018,
+      "last_campaign_id": 1700016
+    },
+    "1700018": {
+      "campaign_id": 1700018,
+      "chapter": 17,
+      "next_campaign_id": 1700019,
+      "last_campaign_id": 1700017
+    },
+    "1700019": {
+      "campaign_id": 1700019,
+      "chapter": 17,
+      "next_campaign_id": 1700020,
+      "last_campaign_id": 1700018
+    },
+    "1700020": {
+      "campaign_id": 1700020,
+      "chapter": 17,
+      "next_campaign_id": 1800001,
+      "last_campaign_id": 1700019
+    },
+    "1700021": {
+      "campaign_id": 1700021,
+      "chapter": 17,
+      "next_campaign_id": 1700022,
+      "last_campaign_id": 1600022
+    },
+    "1700022": {
+      "campaign_id": 1700022,
+      "chapter": 17,
+      "next_campaign_id": 1700023,
+      "last_campaign_id": 1700021
+    },
+    "1700023": {
+      "campaign_id": 1700023,
+      "chapter": 17,
+      "next_campaign_id": 1700024,
+      "last_campaign_id": 1700022
+    },
+    "1700024": {
+      "campaign_id": 1700024,
+      "chapter": 17,
+      "next_campaign_id": 1700025,
+      "last_campaign_id": 1700023
+    },
+    "1700025": {
+      "campaign_id": 1700025,
+      "chapter": 17,
+      "next_campaign_id": 1700026,
+      "last_campaign_id": 1700024
+    },
+    "1700026": {
+      "campaign_id": 1700026,
+      "chapter": 17,
+      "next_campaign_id": 1700027,
+      "last_campaign_id": 1700025
+    },
+    "1700027": {
+      "campaign_id": 1700027,
+      "chapter": 17,
+      "next_campaign_id": 1800021,
+      "last_campaign_id": 1700026
+    },
+    "1800001": {
+      "campaign_id": 1800001,
+      "chapter": 18,
+      "next_campaign_id": 1800002,
+      "last_campaign_id": 1700020
+    },
+    "1800002": {
+      "campaign_id": 1800002,
+      "chapter": 18,
+      "next_campaign_id": 1800003,
+      "last_campaign_id": 1800001
+    },
+    "1800003": {
+      "campaign_id": 1800003,
+      "chapter": 18,
+      "next_campaign_id": 1800004,
+      "last_campaign_id": 1800002
+    },
+    "1800004": {
+      "campaign_id": 1800004,
+      "chapter": 18,
+      "next_campaign_id": 1800005,
+      "last_campaign_id": 1800003
+    },
+    "1800005": {
+      "campaign_id": 1800005,
+      "chapter": 18,
+      "next_campaign_id": 1800006,
+      "last_campaign_id": 1800004
+    },
+    "1800006": {
+      "campaign_id": 1800006,
+      "chapter": 18,
+      "next_campaign_id": 1800007,
+      "last_campaign_id": 1800005
+    },
+    "1800007": {
+      "campaign_id": 1800007,
+      "chapter": 18,
+      "next_campaign_id": 1800008,
+      "last_campaign_id": 1800006
+    },
+    "1800008": {
+      "campaign_id": 1800008,
+      "chapter": 18,
+      "next_campaign_id": 1800009,
+      "last_campaign_id": 1800007
+    },
+    "1800009": {
+      "campaign_id": 1800009,
+      "chapter": 18,
+      "next_campaign_id": 1800010,
+      "last_campaign_id": 1800008
+    },
+    "1800010": {
+      "campaign_id": 1800010,
+      "chapter": 18,
+      "next_campaign_id": 1800011,
+      "last_campaign_id": 1800009
+    },
+    "1800011": {
+      "campaign_id": 1800011,
+      "chapter": 18,
+      "next_campaign_id": 1800012,
+      "last_campaign_id": 1800010
+    },
+    "1800012": {
+      "campaign_id": 1800012,
+      "chapter": 18,
+      "next_campaign_id": 1800013,
+      "last_campaign_id": 1800011
+    },
+    "1800013": {
+      "campaign_id": 1800013,
+      "chapter": 18,
+      "next_campaign_id": 1800014,
+      "last_campaign_id": 1800012
+    },
+    "1800014": {
+      "campaign_id": 1800014,
+      "chapter": 18,
+      "next_campaign_id": 1800015,
+      "last_campaign_id": 1800013
+    },
+    "1800015": {
+      "campaign_id": 1800015,
+      "chapter": 18,
+      "next_campaign_id": 1800016,
+      "last_campaign_id": 1800014
+    },
+    "1800016": {
+      "campaign_id": 1800016,
+      "chapter": 18,
+      "next_campaign_id": 1800017,
+      "last_campaign_id": 1800015
+    },
+    "1800017": {
+      "campaign_id": 1800017,
+      "chapter": 18,
+      "next_campaign_id": 1800018,
+      "last_campaign_id": 1800016
+    },
+    "1800018": {
+      "campaign_id": 1800018,
+      "chapter": 18,
+      "next_campaign_id": 1800019,
+      "last_campaign_id": 1800017
+    },
+    "1800019": {
+      "campaign_id": 1800019,
+      "chapter": 18,
+      "next_campaign_id": 1800020,
+      "last_campaign_id": 1800018
+    },
+    "1800020": {
+      "campaign_id": 1800020,
+      "chapter": 18,
+      "next_campaign_id": 1900001,
+      "last_campaign_id": 1800019
+    },
+    "1800021": {
+      "campaign_id": 1800021,
+      "chapter": 18,
+      "next_campaign_id": 1800022,
+      "last_campaign_id": 1700027
+    },
+    "1800022": {
+      "campaign_id": 1800022,
+      "chapter": 18,
+      "next_campaign_id": 1800023,
+      "last_campaign_id": 1800021
+    },
+    "1800023": {
+      "campaign_id": 1800023,
+      "chapter": 18,
+      "next_campaign_id": 1800024,
+      "last_campaign_id": 1800022
+    },
+    "1800024": {
+      "campaign_id": 1800024,
+      "chapter": 18,
+      "next_campaign_id": 1800025,
+      "last_campaign_id": 1800023
+    },
+    "1800025": {
+      "campaign_id": 1800025,
+      "chapter": 18,
+      "next_campaign_id": 1800026,
+      "last_campaign_id": 1800024
+    },
+    "1800026": {
+      "campaign_id": 1800026,
+      "chapter": 18,
+      "next_campaign_id": 1800027,
+      "last_campaign_id": 1800025
+    },
+    "1800027": {
+      "campaign_id": 1800027,
+      "chapter": 18,
+      "next_campaign_id": 1900020,
+      "last_campaign_id": 1800026
+    },
+    "1900001": {
+      "campaign_id": 1900001,
+      "chapter": 19,
+      "next_campaign_id": 1900002,
+      "last_campaign_id": 1800020
+    },
+    "1900002": {
+      "campaign_id": 1900002,
+      "chapter": 19,
+      "next_campaign_id": 1900003,
+      "last_campaign_id": 1900001
+    },
+    "1900003": {
+      "campaign_id": 1900003,
+      "chapter": 19,
+      "next_campaign_id": 1900004,
+      "last_campaign_id": 1900002
+    },
+    "1900004": {
+      "campaign_id": 1900004,
+      "chapter": 19,
+      "next_campaign_id": 1900005,
+      "last_campaign_id": 1900003
+    },
+    "1900005": {
+      "campaign_id": 1900005,
+      "chapter": 19,
+      "next_campaign_id": 1900006,
+      "last_campaign_id": 1900004
+    },
+    "1900006": {
+      "campaign_id": 1900006,
+      "chapter": 19,
+      "next_campaign_id": 1900007,
+      "last_campaign_id": 1900005
+    },
+    "1900007": {
+      "campaign_id": 1900007,
+      "chapter": 19,
+      "next_campaign_id": 1900008,
+      "last_campaign_id": 1900006
+    },
+    "1900008": {
+      "campaign_id": 1900008,
+      "chapter": 19,
+      "next_campaign_id": 1900009,
+      "last_campaign_id": 1900007
+    },
+    "1900009": {
+      "campaign_id": 1900009,
+      "chapter": 19,
+      "next_campaign_id": 1900010,
+      "last_campaign_id": 1900008
+    },
+    "1900010": {
+      "campaign_id": 1900010,
+      "chapter": 19,
+      "next_campaign_id": 1900011,
+      "last_campaign_id": 1900009
+    },
+    "1900011": {
+      "campaign_id": 1900011,
+      "chapter": 19,
+      "next_campaign_id": 1900012,
+      "last_campaign_id": 1900010
+    },
+    "1900012": {
+      "campaign_id": 1900012,
+      "chapter": 19,
+      "next_campaign_id": 1900013,
+      "last_campaign_id": 1900011
+    },
+    "1900013": {
+      "campaign_id": 1900013,
+      "chapter": 19,
+      "next_campaign_id": 1900014,
+      "last_campaign_id": 1900012
+    },
+    "1900014": {
+      "campaign_id": 1900014,
+      "chapter": 19,
+      "next_campaign_id": 1900015,
+      "last_campaign_id": 1900013
+    },
+    "1900015": {
+      "campaign_id": 1900015,
+      "chapter": 19,
+      "next_campaign_id": 1900016,
+      "last_campaign_id": 1900014
+    },
+    "1900016": {
+      "campaign_id": 1900016,
+      "chapter": 19,
+      "next_campaign_id": 1900017,
+      "last_campaign_id": 1900015
+    },
+    "1900017": {
+      "campaign_id": 1900017,
+      "chapter": 19,
+      "next_campaign_id": 1900018,
+      "last_campaign_id": 1900016
+    },
+    "1900018": {
+      "campaign_id": 1900018,
+      "chapter": 19,
+      "next_campaign_id": 1900019,
+      "last_campaign_id": 1900017
+    },
+    "1900019": {
+      "campaign_id": 1900019,
+      "chapter": 19,
+      "next_campaign_id": 2000001,
+      "last_campaign_id": 1900018
+    },
+    "1900020": {
+      "campaign_id": 1900020,
+      "chapter": 19,
+      "next_campaign_id": 1900021,
+      "last_campaign_id": 1800027
+    },
+    "1900021": {
+      "campaign_id": 1900021,
+      "chapter": 19,
+      "next_campaign_id": 1900022,
+      "last_campaign_id": 1900020
+    },
+    "1900022": {
+      "campaign_id": 1900022,
+      "chapter": 19,
+      "next_campaign_id": 1900023,
+      "last_campaign_id": 1900021
+    },
+    "1900023": {
+      "campaign_id": 1900023,
+      "chapter": 19,
+      "next_campaign_id": 1900024,
+      "last_campaign_id": 1900022
+    },
+    "1900024": {
+      "campaign_id": 1900024,
+      "chapter": 19,
+      "next_campaign_id": 1900025,
+      "last_campaign_id": 1900023
+    },
+    "1900025": {
+      "campaign_id": 1900025,
+      "chapter": 19,
+      "next_campaign_id": 1900026,
+      "last_campaign_id": 1900024
+    },
+    "1900026": {
+      "campaign_id": 1900026,
+      "chapter": 19,
+      "next_campaign_id": 2000021,
+      "last_campaign_id": 1900025
+    },
+    "2000001": {
+      "campaign_id": 2000001,
+      "chapter": 20,
+      "next_campaign_id": 2000002,
+      "last_campaign_id": 1900019
+    },
+    "2000002": {
+      "campaign_id": 2000002,
+      "chapter": 20,
+      "next_campaign_id": 2000003,
+      "last_campaign_id": 2000001
+    },
+    "2000003": {
+      "campaign_id": 2000003,
+      "chapter": 20,
+      "next_campaign_id": 2000004,
+      "last_campaign_id": 2000002
+    },
+    "2000004": {
+      "campaign_id": 2000004,
+      "chapter": 20,
+      "next_campaign_id": 2000005,
+      "last_campaign_id": 2000003
+    },
+    "2000005": {
+      "campaign_id": 2000005,
+      "chapter": 20,
+      "next_campaign_id": 2000006,
+      "last_campaign_id": 2000004
+    },
+    "2000006": {
+      "campaign_id": 2000006,
+      "chapter": 20,
+      "next_campaign_id": 2000007,
+      "last_campaign_id": 2000005
+    },
+    "2000007": {
+      "campaign_id": 2000007,
+      "chapter": 20,
+      "next_campaign_id": 2000008,
+      "last_campaign_id": 2000006
+    },
+    "2000008": {
+      "campaign_id": 2000008,
+      "chapter": 20,
+      "next_campaign_id": 2000009,
+      "last_campaign_id": 2000007
+    },
+    "2000009": {
+      "campaign_id": 2000009,
+      "chapter": 20,
+      "next_campaign_id": 2000010,
+      "last_campaign_id": 2000008
+    },
+    "2000010": {
+      "campaign_id": 2000010,
+      "chapter": 20,
+      "next_campaign_id": 2000011,
+      "last_campaign_id": 2000009
+    },
+    "2000011": {
+      "campaign_id": 2000011,
+      "chapter": 20,
+      "next_campaign_id": 2000012,
+      "last_campaign_id": 2000010
+    },
+    "2000012": {
+      "campaign_id": 2000012,
+      "chapter": 20,
+      "next_campaign_id": 2000013,
+      "last_campaign_id": 2000011
+    },
+    "2000013": {
+      "campaign_id": 2000013,
+      "chapter": 20,
+      "next_campaign_id": 2000014,
+      "last_campaign_id": 2000012
+    },
+    "2000014": {
+      "campaign_id": 2000014,
+      "chapter": 20,
+      "next_campaign_id": 2000015,
+      "last_campaign_id": 2000013
+    },
+    "2000015": {
+      "campaign_id": 2000015,
+      "chapter": 20,
+      "next_campaign_id": 2000016,
+      "last_campaign_id": 2000014
+    },
+    "2000016": {
+      "campaign_id": 2000016,
+      "chapter": 20,
+      "next_campaign_id": 2000017,
+      "last_campaign_id": 2000015
+    },
+    "2000017": {
+      "campaign_id": 2000017,
+      "chapter": 20,
+      "next_campaign_id": 2000018,
+      "last_campaign_id": 2000016
+    },
+    "2000018": {
+      "campaign_id": 2000018,
+      "chapter": 20,
+      "next_campaign_id": 2000019,
+      "last_campaign_id": 2000017
+    },
+    "2000019": {
+      "campaign_id": 2000019,
+      "chapter": 20,
+      "next_campaign_id": 2000020,
+      "last_campaign_id": 2000018
+    },
+    "2000020": {
+      "campaign_id": 2000020,
+      "chapter": 20,
+      "next_campaign_id": 2100001,
+      "last_campaign_id": 2000019
+    },
+    "2000021": {
+      "campaign_id": 2000021,
+      "chapter": 20,
+      "next_campaign_id": 2000022,
+      "last_campaign_id": 1900026
+    },
+    "2000022": {
+      "campaign_id": 2000022,
+      "chapter": 20,
+      "next_campaign_id": 2000023,
+      "last_campaign_id": 2000021
+    },
+    "2000023": {
+      "campaign_id": 2000023,
+      "chapter": 20,
+      "next_campaign_id": 2000024,
+      "last_campaign_id": 2000022
+    },
+    "2000024": {
+      "campaign_id": 2000024,
+      "chapter": 20,
+      "next_campaign_id": 2000025,
+      "last_campaign_id": 2000023
+    },
+    "2000025": {
+      "campaign_id": 2000025,
+      "chapter": 20,
+      "next_campaign_id": 2000026,
+      "last_campaign_id": 2000024
+    },
+    "2000026": {
+      "campaign_id": 2000026,
+      "chapter": 20,
+      "next_campaign_id": 2000027,
+      "last_campaign_id": 2000025
+    },
+    "2000027": {
+      "campaign_id": 2000027,
+      "chapter": 20,
+      "next_campaign_id": 2100019,
+      "last_campaign_id": 2000026
+    },
+    "2100001": {
+      "campaign_id": 2100001,
+      "chapter": 21,
+      "next_campaign_id": 2100002,
+      "last_campaign_id": 2000020
+    },
+    "2100002": {
+      "campaign_id": 2100002,
+      "chapter": 21,
+      "next_campaign_id": 2100003,
+      "last_campaign_id": 2100001
+    },
+    "2100003": {
+      "campaign_id": 2100003,
+      "chapter": 21,
+      "next_campaign_id": 2100004,
+      "last_campaign_id": 2100002
+    },
+    "2100004": {
+      "campaign_id": 2100004,
+      "chapter": 21,
+      "next_campaign_id": 2100005,
+      "last_campaign_id": 2100003
+    },
+    "2100005": {
+      "campaign_id": 2100005,
+      "chapter": 21,
+      "next_campaign_id": 2100006,
+      "last_campaign_id": 2100004
+    },
+    "2100006": {
+      "campaign_id": 2100006,
+      "chapter": 21,
+      "next_campaign_id": 2100007,
+      "last_campaign_id": 2100005
+    },
+    "2100007": {
+      "campaign_id": 2100007,
+      "chapter": 21,
+      "next_campaign_id": 2100008,
+      "last_campaign_id": 2100006
+    },
+    "2100008": {
+      "campaign_id": 2100008,
+      "chapter": 21,
+      "next_campaign_id": 2100009,
+      "last_campaign_id": 2100007
+    },
+    "2100009": {
+      "campaign_id": 2100009,
+      "chapter": 21,
+      "next_campaign_id": 2100010,
+      "last_campaign_id": 2100008
+    },
+    "2100010": {
+      "campaign_id": 2100010,
+      "chapter": 21,
+      "next_campaign_id": 2100011,
+      "last_campaign_id": 2100009
+    },
+    "2100011": {
+      "campaign_id": 2100011,
+      "chapter": 21,
+      "next_campaign_id": 2100012,
+      "last_campaign_id": 2100010
+    },
+    "2100012": {
+      "campaign_id": 2100012,
+      "chapter": 21,
+      "next_campaign_id": 2100013,
+      "last_campaign_id": 2100011
+    },
+    "2100013": {
+      "campaign_id": 2100013,
+      "chapter": 21,
+      "next_campaign_id": 2100014,
+      "last_campaign_id": 2100012
+    },
+    "2100014": {
+      "campaign_id": 2100014,
+      "chapter": 21,
+      "next_campaign_id": 2100015,
+      "last_campaign_id": 2100013
+    },
+    "2100015": {
+      "campaign_id": 2100015,
+      "chapter": 21,
+      "next_campaign_id": 2100016,
+      "last_campaign_id": 2100014
+    },
+    "2100016": {
+      "campaign_id": 2100016,
+      "chapter": 21,
+      "next_campaign_id": 2100017,
+      "last_campaign_id": 2100015
+    },
+    "2100017": {
+      "campaign_id": 2100017,
+      "chapter": 21,
+      "next_campaign_id": 2100018,
+      "last_campaign_id": 2100016
+    },
+    "2100018": {
+      "campaign_id": 2100018,
+      "chapter": 21,
+      "next_campaign_id": 2200001,
+      "last_campaign_id": 2100017
+    },
+    "2100019": {
+      "campaign_id": 2100019,
+      "chapter": 21,
+      "next_campaign_id": 2100020,
+      "last_campaign_id": 2000027
+    },
+    "2100020": {
+      "campaign_id": 2100020,
+      "chapter": 21,
+      "next_campaign_id": 2100021,
+      "last_campaign_id": 2100019
+    },
+    "2100021": {
+      "campaign_id": 2100021,
+      "chapter": 21,
+      "next_campaign_id": 2100022,
+      "last_campaign_id": 2100020
+    },
+    "2100022": {
+      "campaign_id": 2100022,
+      "chapter": 21,
+      "next_campaign_id": 2100023,
+      "last_campaign_id": 2100021
+    },
+    "2100023": {
+      "campaign_id": 2100023,
+      "chapter": 21,
+      "next_campaign_id": 2100024,
+      "last_campaign_id": 2100022
+    },
+    "2100024": {
+      "campaign_id": 2100024,
+      "chapter": 21,
+      "next_campaign_id": 2200019,
+      "last_campaign_id": 2100023
+    },
+    "2200001": {
+      "campaign_id": 2200001,
+      "chapter": 22,
+      "next_campaign_id": 2200002,
+      "last_campaign_id": 2100018
+    },
+    "2200002": {
+      "campaign_id": 2200002,
+      "chapter": 22,
+      "next_campaign_id": 2200003,
+      "last_campaign_id": 2200001
+    },
+    "2200003": {
+      "campaign_id": 2200003,
+      "chapter": 22,
+      "next_campaign_id": 2200004,
+      "last_campaign_id": 2200002
+    },
+    "2200004": {
+      "campaign_id": 2200004,
+      "chapter": 22,
+      "next_campaign_id": 2200005,
+      "last_campaign_id": 2200003
+    },
+    "2200005": {
+      "campaign_id": 2200005,
+      "chapter": 22,
+      "next_campaign_id": 2200006,
+      "last_campaign_id": 2200004
+    },
+    "2200006": {
+      "campaign_id": 2200006,
+      "chapter": 22,
+      "next_campaign_id": 2200007,
+      "last_campaign_id": 2200005
+    },
+    "2200007": {
+      "campaign_id": 2200007,
+      "chapter": 22,
+      "next_campaign_id": 2200008,
+      "last_campaign_id": 2200006
+    },
+    "2200008": {
+      "campaign_id": 2200008,
+      "chapter": 22,
+      "next_campaign_id": 2200009,
+      "last_campaign_id": 2200007
+    },
+    "2200009": {
+      "campaign_id": 2200009,
+      "chapter": 22,
+      "next_campaign_id": 2200010,
+      "last_campaign_id": 2200008
+    },
+    "2200010": {
+      "campaign_id": 2200010,
+      "chapter": 22,
+      "next_campaign_id": 2200011,
+      "last_campaign_id": 2200009
+    },
+    "2200011": {
+      "campaign_id": 2200011,
+      "chapter": 22,
+      "next_campaign_id": 2200012,
+      "last_campaign_id": 2200010
+    },
+    "2200012": {
+      "campaign_id": 2200012,
+      "chapter": 22,
+      "next_campaign_id": 2200013,
+      "last_campaign_id": 2200011
+    },
+    "2200013": {
+      "campaign_id": 2200013,
+      "chapter": 22,
+      "next_campaign_id": 2200014,
+      "last_campaign_id": 2200012
+    },
+    "2200014": {
+      "campaign_id": 2200014,
+      "chapter": 22,
+      "next_campaign_id": 2200015,
+      "last_campaign_id": 2200013
+    },
+    "2200015": {
+      "campaign_id": 2200015,
+      "chapter": 22,
+      "next_campaign_id": 2200016,
+      "last_campaign_id": 2200014
+    },
+    "2200016": {
+      "campaign_id": 2200016,
+      "chapter": 22,
+      "next_campaign_id": 2200017,
+      "last_campaign_id": 2200015
+    },
+    "2200017": {
+      "campaign_id": 2200017,
+      "chapter": 22,
+      "next_campaign_id": 2200018,
+      "last_campaign_id": 2200016
+    },
+    "2200018": {
+      "campaign_id": 2200018,
+      "chapter": 22,
+      "next_campaign_id": 2300001,
+      "last_campaign_id": 2200017
+    },
+    "2200019": {
+      "campaign_id": 2200019,
+      "chapter": 22,
+      "next_campaign_id": 2200020,
+      "last_campaign_id": 2100024
+    },
+    "2200020": {
+      "campaign_id": 2200020,
+      "chapter": 22,
+      "next_campaign_id": 2200021,
+      "last_campaign_id": 2200019
+    },
+    "2200021": {
+      "campaign_id": 2200021,
+      "chapter": 22,
+      "next_campaign_id": 2200022,
+      "last_campaign_id": 2200020
+    },
+    "2200022": {
+      "campaign_id": 2200022,
+      "chapter": 22,
+      "next_campaign_id": 2200023,
+      "last_campaign_id": 2200021
+    },
+    "2200023": {
+      "campaign_id": 2200023,
+      "chapter": 22,
+      "next_campaign_id": 2200024,
+      "last_campaign_id": 2200022
+    },
+    "2200024": {
+      "campaign_id": 2200024,
+      "chapter": 22,
+      "next_campaign_id": 2300019,
+      "last_campaign_id": 2200023
+    },
+    "2300001": {
+      "campaign_id": 2300001,
+      "chapter": 23,
+      "next_campaign_id": 2300002,
+      "last_campaign_id": 2200018
+    },
+    "2300002": {
+      "campaign_id": 2300002,
+      "chapter": 23,
+      "next_campaign_id": 2300003,
+      "last_campaign_id": 2300001
+    },
+    "2300003": {
+      "campaign_id": 2300003,
+      "chapter": 23,
+      "next_campaign_id": 2300004,
+      "last_campaign_id": 2300002
+    },
+    "2300004": {
+      "campaign_id": 2300004,
+      "chapter": 23,
+      "next_campaign_id": 2300005,
+      "last_campaign_id": 2300003
+    },
+    "2300005": {
+      "campaign_id": 2300005,
+      "chapter": 23,
+      "next_campaign_id": 2300006,
+      "last_campaign_id": 2300004
+    },
+    "2300006": {
+      "campaign_id": 2300006,
+      "chapter": 23,
+      "next_campaign_id": 2300007,
+      "last_campaign_id": 2300005
+    },
+    "2300007": {
+      "campaign_id": 2300007,
+      "chapter": 23,
+      "next_campaign_id": 2300008,
+      "last_campaign_id": 2300006
+    },
+    "2300008": {
+      "campaign_id": 2300008,
+      "chapter": 23,
+      "next_campaign_id": 2300009,
+      "last_campaign_id": 2300007
+    },
+    "2300009": {
+      "campaign_id": 2300009,
+      "chapter": 23,
+      "next_campaign_id": 2300010,
+      "last_campaign_id": 2300008
+    },
+    "2300010": {
+      "campaign_id": 2300010,
+      "chapter": 23,
+      "next_campaign_id": 2300011,
+      "last_campaign_id": 2300009
+    },
+    "2300011": {
+      "campaign_id": 2300011,
+      "chapter": 23,
+      "next_campaign_id": 2300012,
+      "last_campaign_id": 2300010
+    },
+    "2300012": {
+      "campaign_id": 2300012,
+      "chapter": 23,
+      "next_campaign_id": 2300013,
+      "last_campaign_id": 2300011
+    },
+    "2300013": {
+      "campaign_id": 2300013,
+      "chapter": 23,
+      "next_campaign_id": 2300014,
+      "last_campaign_id": 2300012
+    },
+    "2300014": {
+      "campaign_id": 2300014,
+      "chapter": 23,
+      "next_campaign_id": 2300015,
+      "last_campaign_id": 2300013
+    },
+    "2300015": {
+      "campaign_id": 2300015,
+      "chapter": 23,
+      "next_campaign_id": 2300016,
+      "last_campaign_id": 2300014
+    },
+    "2300016": {
+      "campaign_id": 2300016,
+      "chapter": 23,
+      "next_campaign_id": 2300017,
+      "last_campaign_id": 2300015
+    },
+    "2300017": {
+      "campaign_id": 2300017,
+      "chapter": 23,
+      "next_campaign_id": 2300018,
+      "last_campaign_id": 2300016
+    },
+    "2300018": {
+      "campaign_id": 2300018,
+      "chapter": 23,
+      "next_campaign_id": 0,
+      "last_campaign_id": 2300017
+    },
+    "2300019": {
+      "campaign_id": 2300019,
+      "chapter": 23,
+      "next_campaign_id": 2300020,
+      "last_campaign_id": 2200024
+    },
+    "2300020": {
+      "campaign_id": 2300020,
+      "chapter": 23,
+      "next_campaign_id": 2300021,
+      "last_campaign_id": 2300019
+    },
+    "2300021": {
+      "campaign_id": 2300021,
+      "chapter": 23,
+      "next_campaign_id": 2300022,
+      "last_campaign_id": 2300020
+    },
+    "2300022": {
+      "campaign_id": 2300022,
+      "chapter": 23,
+      "next_campaign_id": 2300023,
+      "last_campaign_id": 2300021
+    },
+    "2300023": {
+      "campaign_id": 2300023,
+      "chapter": 23,
+      "next_campaign_id": 2300024,
+      "last_campaign_id": 2300022
+    },
+    "2300024": {
+      "campaign_id": 2300024,
+      "chapter": 23,
+      "next_campaign_id": 0,
+      "last_campaign_id": 2300023
+    },
+    "1001": {
+      "campaign_id": 1001,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "1002": {
+      "campaign_id": 1002,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "1003": {
+      "campaign_id": 1003,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "1004": {
+      "campaign_id": 1004,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "1005": {
+      "campaign_id": 1005,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "1006": {
+      "campaign_id": 1006,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "1007": {
+      "campaign_id": 1007,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "1008": {
+      "campaign_id": 1008,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "1009": {
+      "campaign_id": 1009,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "1010": {
+      "campaign_id": 1010,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "1011": {
+      "campaign_id": 1011,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "1012": {
+      "campaign_id": 1012,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "2001": {
+      "campaign_id": 2001,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "2002": {
+      "campaign_id": 2002,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "2003": {
+      "campaign_id": 2003,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "2004": {
+      "campaign_id": 2004,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "2005": {
+      "campaign_id": 2005,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "2006": {
+      "campaign_id": 2006,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "2007": {
+      "campaign_id": 2007,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "2008": {
+      "campaign_id": 2008,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "2009": {
+      "campaign_id": 2009,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "2010": {
+      "campaign_id": 2010,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "2011": {
+      "campaign_id": 2011,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "2012": {
+      "campaign_id": 2012,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "3001": {
+      "campaign_id": 3001,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "3002": {
+      "campaign_id": 3002,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "3003": {
+      "campaign_id": 3003,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "3004": {
+      "campaign_id": 3004,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "3005": {
+      "campaign_id": 3005,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "3006": {
+      "campaign_id": 3006,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "3007": {
+      "campaign_id": 3007,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "3008": {
+      "campaign_id": 3008,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "3009": {
+      "campaign_id": 3009,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "3010": {
+      "campaign_id": 3010,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "3011": {
+      "campaign_id": 3011,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "3012": {
+      "campaign_id": 3012,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "4001": {
+      "campaign_id": 4001,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "4002": {
+      "campaign_id": 4002,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "4003": {
+      "campaign_id": 4003,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "4004": {
+      "campaign_id": 4004,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "4005": {
+      "campaign_id": 4005,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "4006": {
+      "campaign_id": 4006,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "4007": {
+      "campaign_id": 4007,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "4008": {
+      "campaign_id": 4008,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "4009": {
+      "campaign_id": 4009,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "4010": {
+      "campaign_id": 4010,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "5001": {
+      "campaign_id": 5001,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "5002": {
+      "campaign_id": 5002,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "5003": {
+      "campaign_id": 5003,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "5004": {
+      "campaign_id": 5004,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "5005": {
+      "campaign_id": 5005,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "5006": {
+      "campaign_id": 5006,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "5007": {
+      "campaign_id": 5007,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "5008": {
+      "campaign_id": 5008,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "5009": {
+      "campaign_id": 5009,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "5010": {
+      "campaign_id": 5010,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "6001": {
+      "campaign_id": 6001,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "6002": {
+      "campaign_id": 6002,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "6003": {
+      "campaign_id": 6003,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "6004": {
+      "campaign_id": 6004,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "6005": {
+      "campaign_id": 6005,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "6006": {
+      "campaign_id": 6006,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "6007": {
+      "campaign_id": 6007,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "6008": {
+      "campaign_id": 6008,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "16001": {
+      "campaign_id": 16001,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "16002": {
+      "campaign_id": 16002,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "16003": {
+      "campaign_id": 16003,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "16004": {
+      "campaign_id": 16004,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "16005": {
+      "campaign_id": 16005,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "16006": {
+      "campaign_id": 16006,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "16007": {
+      "campaign_id": 16007,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "16008": {
+      "campaign_id": 16008,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "16009": {
+      "campaign_id": 16009,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "16010": {
+      "campaign_id": 16010,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "16011": {
+      "campaign_id": 16011,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "17001": {
+      "campaign_id": 17001,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "17002": {
+      "campaign_id": 17002,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "17003": {
+      "campaign_id": 17003,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "17004": {
+      "campaign_id": 17004,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "17005": {
+      "campaign_id": 17005,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "17006": {
+      "campaign_id": 17006,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "17007": {
+      "campaign_id": 17007,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "17008": {
+      "campaign_id": 17008,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "17009": {
+      "campaign_id": 17009,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "17010": {
+      "campaign_id": 17010,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "17011": {
+      "campaign_id": 17011,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "18001": {
+      "campaign_id": 18001,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "18002": {
+      "campaign_id": 18002,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "18003": {
+      "campaign_id": 18003,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "18004": {
+      "campaign_id": 18004,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "18005": {
+      "campaign_id": 18005,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "18006": {
+      "campaign_id": 18006,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "18007": {
+      "campaign_id": 18007,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "18008": {
+      "campaign_id": 18008,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "18009": {
+      "campaign_id": 18009,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "18010": {
+      "campaign_id": 18010,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "18011": {
+      "campaign_id": 18011,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "19001": {
+      "campaign_id": 19001,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "19002": {
+      "campaign_id": 19002,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "19003": {
+      "campaign_id": 19003,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "19004": {
+      "campaign_id": 19004,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "19005": {
+      "campaign_id": 19005,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "19006": {
+      "campaign_id": 19006,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "19007": {
+      "campaign_id": 19007,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "19008": {
+      "campaign_id": 19008,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "19009": {
+      "campaign_id": 19009,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "19010": {
+      "campaign_id": 19010,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "19011": {
+      "campaign_id": 19011,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "20001": {
+      "campaign_id": 20001,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "20002": {
+      "campaign_id": 20002,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "20003": {
+      "campaign_id": 20003,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "20004": {
+      "campaign_id": 20004,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "20005": {
+      "campaign_id": 20005,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "20006": {
+      "campaign_id": 20006,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "20007": {
+      "campaign_id": 20007,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "20008": {
+      "campaign_id": 20008,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "20009": {
+      "campaign_id": 20009,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "20010": {
+      "campaign_id": 20010,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "20011": {
+      "campaign_id": 20011,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "21001": {
+      "campaign_id": 21001,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "21002": {
+      "campaign_id": 21002,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "21003": {
+      "campaign_id": 21003,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "21004": {
+      "campaign_id": 21004,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "21005": {
+      "campaign_id": 21005,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "21006": {
+      "campaign_id": 21006,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "21007": {
+      "campaign_id": 21007,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "21008": {
+      "campaign_id": 21008,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "21009": {
+      "campaign_id": 21009,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "21010": {
+      "campaign_id": 21010,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "21011": {
+      "campaign_id": 21011,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "22101": {
+      "campaign_id": 22101,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "22102": {
+      "campaign_id": 22102,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "22103": {
+      "campaign_id": 22103,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "22104": {
+      "campaign_id": 22104,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "22105": {
+      "campaign_id": 22105,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "22106": {
+      "campaign_id": 22106,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "22107": {
+      "campaign_id": 22107,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "22201": {
+      "campaign_id": 22201,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "22202": {
+      "campaign_id": 22202,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "22203": {
+      "campaign_id": 22203,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "22204": {
+      "campaign_id": 22204,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "22205": {
+      "campaign_id": 22205,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "22206": {
+      "campaign_id": 22206,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "22207": {
+      "campaign_id": 22207,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "22301": {
+      "campaign_id": 22301,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "22302": {
+      "campaign_id": 22302,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "22303": {
+      "campaign_id": 22303,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "22304": {
+      "campaign_id": 22304,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "22305": {
+      "campaign_id": 22305,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "22306": {
+      "campaign_id": 22306,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "22307": {
+      "campaign_id": 22307,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "22401": {
+      "campaign_id": 22401,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "22402": {
+      "campaign_id": 22402,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "22403": {
+      "campaign_id": 22403,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "22404": {
+      "campaign_id": 22404,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "22405": {
+      "campaign_id": 22405,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "22406": {
+      "campaign_id": 22406,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "22407": {
+      "campaign_id": 22407,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "22501": {
+      "campaign_id": 22501,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "22502": {
+      "campaign_id": 22502,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "22503": {
+      "campaign_id": 22503,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "22504": {
+      "campaign_id": 22504,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "22505": {
+      "campaign_id": 22505,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "22506": {
+      "campaign_id": 22506,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "22507": {
+      "campaign_id": 22507,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "22601": {
+      "campaign_id": 22601,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "22602": {
+      "campaign_id": 22602,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "22603": {
+      "campaign_id": 22603,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "22604": {
+      "campaign_id": 22604,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "22605": {
+      "campaign_id": 22605,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "22606": {
+      "campaign_id": 22606,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "22607": {
+      "campaign_id": 22607,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "22608": {
+      "campaign_id": 22608,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "24111": {
+      "campaign_id": 24111,
+      "chapter": 1,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "24112": {
+      "campaign_id": 24112,
+      "chapter": 1,
+      "next_campaign_id": 24113,
+      "last_campaign_id": 24111
+    },
+    "24113": {
+      "campaign_id": 24113,
+      "chapter": 1,
+      "next_campaign_id": 0,
+      "last_campaign_id": 24112
+    },
+    "24121": {
+      "campaign_id": 24121,
+      "chapter": 1,
+      "next_campaign_id": 0,
+      "last_campaign_id": 24111
+    },
+    "24122": {
+      "campaign_id": 24122,
+      "chapter": 1,
+      "next_campaign_id": 24123,
+      "last_campaign_id": 24121
+    },
+    "24123": {
+      "campaign_id": 24123,
+      "chapter": 1,
+      "next_campaign_id": 0,
+      "last_campaign_id": 24122
+    },
+    "24131": {
+      "campaign_id": 24131,
+      "chapter": 1,
+      "next_campaign_id": 0,
+      "last_campaign_id": 24121
+    },
+    "24132": {
+      "campaign_id": 24132,
+      "chapter": 1,
+      "next_campaign_id": 24133,
+      "last_campaign_id": 24131
+    },
+    "24133": {
+      "campaign_id": 24133,
+      "chapter": 1,
+      "next_campaign_id": 0,
+      "last_campaign_id": 24132
+    },
+    "24141": {
+      "campaign_id": 24141,
+      "chapter": 1,
+      "next_campaign_id": 0,
+      "last_campaign_id": 24131
+    },
+    "24142": {
+      "campaign_id": 24142,
+      "chapter": 1,
+      "next_campaign_id": 24143,
+      "last_campaign_id": 24141
+    },
+    "24143": {
+      "campaign_id": 24143,
+      "chapter": 1,
+      "next_campaign_id": 0,
+      "last_campaign_id": 24142
+    },
+    "24151": {
+      "campaign_id": 24151,
+      "chapter": 1,
+      "next_campaign_id": 0,
+      "last_campaign_id": 24141
+    },
+    "24152": {
+      "campaign_id": 24152,
+      "chapter": 1,
+      "next_campaign_id": 24153,
+      "last_campaign_id": 24151
+    },
+    "24153": {
+      "campaign_id": 24153,
+      "chapter": 1,
+      "next_campaign_id": 0,
+      "last_campaign_id": 24152
+    },
+    "24161": {
+      "campaign_id": 24161,
+      "chapter": 1,
+      "next_campaign_id": 24162,
+      "last_campaign_id": 24151
+    },
+    "24162": {
+      "campaign_id": 24162,
+      "chapter": 1,
+      "next_campaign_id": 24163,
+      "last_campaign_id": 24161
+    },
+    "24163": {
+      "campaign_id": 24163,
+      "chapter": 1,
+      "next_campaign_id": 0,
+      "last_campaign_id": 24162
+    },
+    "24211": {
+      "campaign_id": 24211,
+      "chapter": 2,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "24212": {
+      "campaign_id": 24212,
+      "chapter": 2,
+      "next_campaign_id": 24213,
+      "last_campaign_id": 24211
+    },
+    "24213": {
+      "campaign_id": 24213,
+      "chapter": 2,
+      "next_campaign_id": 0,
+      "last_campaign_id": 24212
+    },
+    "24221": {
+      "campaign_id": 24221,
+      "chapter": 2,
+      "next_campaign_id": 0,
+      "last_campaign_id": 24211
+    },
+    "24222": {
+      "campaign_id": 24222,
+      "chapter": 2,
+      "next_campaign_id": 24223,
+      "last_campaign_id": 24221
+    },
+    "24223": {
+      "campaign_id": 24223,
+      "chapter": 2,
+      "next_campaign_id": 0,
+      "last_campaign_id": 24222
+    },
+    "24231": {
+      "campaign_id": 24231,
+      "chapter": 2,
+      "next_campaign_id": 0,
+      "last_campaign_id": 24221
+    },
+    "24232": {
+      "campaign_id": 24232,
+      "chapter": 2,
+      "next_campaign_id": 24233,
+      "last_campaign_id": 24231
+    },
+    "24233": {
+      "campaign_id": 24233,
+      "chapter": 2,
+      "next_campaign_id": 0,
+      "last_campaign_id": 24232
+    },
+    "24241": {
+      "campaign_id": 24241,
+      "chapter": 2,
+      "next_campaign_id": 0,
+      "last_campaign_id": 24231
+    },
+    "24242": {
+      "campaign_id": 24242,
+      "chapter": 2,
+      "next_campaign_id": 24243,
+      "last_campaign_id": 24241
+    },
+    "24243": {
+      "campaign_id": 24243,
+      "chapter": 2,
+      "next_campaign_id": 0,
+      "last_campaign_id": 24242
+    },
+    "24251": {
+      "campaign_id": 24251,
+      "chapter": 2,
+      "next_campaign_id": 0,
+      "last_campaign_id": 24241
+    },
+    "24252": {
+      "campaign_id": 24252,
+      "chapter": 2,
+      "next_campaign_id": 24253,
+      "last_campaign_id": 24251
+    },
+    "24253": {
+      "campaign_id": 24253,
+      "chapter": 2,
+      "next_campaign_id": 0,
+      "last_campaign_id": 24252
+    },
+    "24261": {
+      "campaign_id": 24261,
+      "chapter": 2,
+      "next_campaign_id": 0,
+      "last_campaign_id": 24251
+    },
+    "24262": {
+      "campaign_id": 24262,
+      "chapter": 2,
+      "next_campaign_id": 24263,
+      "last_campaign_id": 24261
+    },
+    "24263": {
+      "campaign_id": 24263,
+      "chapter": 2,
+      "next_campaign_id": 0,
+      "last_campaign_id": 24262
+    },
+    "24271": {
+      "campaign_id": 24271,
+      "chapter": 2,
+      "next_campaign_id": 24272,
+      "last_campaign_id": 24261
+    },
+    "24272": {
+      "campaign_id": 24272,
+      "chapter": 2,
+      "next_campaign_id": 24273,
+      "last_campaign_id": 24271
+    },
+    "24273": {
+      "campaign_id": 24273,
+      "chapter": 2,
+      "next_campaign_id": 0,
+      "last_campaign_id": 24272
+    },
+    "24311": {
+      "campaign_id": 24311,
+      "chapter": 3,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "24312": {
+      "campaign_id": 24312,
+      "chapter": 3,
+      "next_campaign_id": 24313,
+      "last_campaign_id": 24311
+    },
+    "24313": {
+      "campaign_id": 24313,
+      "chapter": 3,
+      "next_campaign_id": 0,
+      "last_campaign_id": 24312
+    },
+    "24321": {
+      "campaign_id": 24321,
+      "chapter": 3,
+      "next_campaign_id": 0,
+      "last_campaign_id": 24311
+    },
+    "24322": {
+      "campaign_id": 24322,
+      "chapter": 3,
+      "next_campaign_id": 24323,
+      "last_campaign_id": 24321
+    },
+    "24323": {
+      "campaign_id": 24323,
+      "chapter": 3,
+      "next_campaign_id": 0,
+      "last_campaign_id": 24322
+    },
+    "24331": {
+      "campaign_id": 24331,
+      "chapter": 3,
+      "next_campaign_id": 0,
+      "last_campaign_id": 24321
+    },
+    "24332": {
+      "campaign_id": 24332,
+      "chapter": 3,
+      "next_campaign_id": 24333,
+      "last_campaign_id": 24331
+    },
+    "24333": {
+      "campaign_id": 24333,
+      "chapter": 3,
+      "next_campaign_id": 0,
+      "last_campaign_id": 24332
+    },
+    "24341": {
+      "campaign_id": 24341,
+      "chapter": 3,
+      "next_campaign_id": 0,
+      "last_campaign_id": 24331
+    },
+    "24342": {
+      "campaign_id": 24342,
+      "chapter": 3,
+      "next_campaign_id": 24343,
+      "last_campaign_id": 24341
+    },
+    "24343": {
+      "campaign_id": 24343,
+      "chapter": 3,
+      "next_campaign_id": 0,
+      "last_campaign_id": 24342
+    },
+    "24351": {
+      "campaign_id": 24351,
+      "chapter": 3,
+      "next_campaign_id": 0,
+      "last_campaign_id": 24341
+    },
+    "24352": {
+      "campaign_id": 24352,
+      "chapter": 3,
+      "next_campaign_id": 24353,
+      "last_campaign_id": 24351
+    },
+    "24353": {
+      "campaign_id": 24353,
+      "chapter": 3,
+      "next_campaign_id": 0,
+      "last_campaign_id": 24352
+    },
+    "24361": {
+      "campaign_id": 24361,
+      "chapter": 3,
+      "next_campaign_id": 24362,
+      "last_campaign_id": 24351
+    },
+    "24362": {
+      "campaign_id": 24362,
+      "chapter": 3,
+      "next_campaign_id": 24363,
+      "last_campaign_id": 24361
+    },
+    "24363": {
+      "campaign_id": 24363,
+      "chapter": 3,
+      "next_campaign_id": 0,
+      "last_campaign_id": 24362
+    },
+    "24411": {
+      "campaign_id": 24411,
+      "chapter": 4,
+      "next_campaign_id": 0,
+      "last_campaign_id": 0
+    },
+    "24412": {
+      "campaign_id": 24412,
+      "chapter": 4,
+      "next_campaign_id": 24413,
+      "last_campaign_id": 24411
+    },
+    "24413": {
+      "campaign_id": 24413,
+      "chapter": 4,
+      "next_campaign_id": 0,
+      "last_campaign_id": 24412
+    },
+    "24421": {
+      "campaign_id": 24421,
+      "chapter": 4,
+      "next_campaign_id": 0,
+      "last_campaign_id": 24411
+    },
+    "24422": {
+      "campaign_id": 24422,
+      "chapter": 4,
+      "next_campaign_id": 24423,
+      "last_campaign_id": 24421
+    },
+    "24423": {
+      "campaign_id": 24423,
+      "chapter": 4,
+      "next_campaign_id": 0,
+      "last_campaign_id": 24422
+    },
+    "24431": {
+      "campaign_id": 24431,
+      "chapter": 4,
+      "next_campaign_id": 0,
+      "last_campaign_id": 24421
+    },
+    "24432": {
+      "campaign_id": 24432,
+      "chapter": 4,
+      "next_campaign_id": 24433,
+      "last_campaign_id": 24431
+    },
+    "24433": {
+      "campaign_id": 24433,
+      "chapter": 4,
+      "next_campaign_id": 0,
+      "last_campaign_id": 24432
+    },
+    "24441": {
+      "campaign_id": 24441,
+      "chapter": 4,
+      "next_campaign_id": 0,
+      "last_campaign_id": 24431
+    },
+    "24442": {
+      "campaign_id": 24442,
+      "chapter": 4,
+      "next_campaign_id": 24443,
+      "last_campaign_id": 24441
+    },
+    "24443": {
+      "campaign_id": 24443,
+      "chapter": 4,
+      "next_campaign_id": 0,
+      "last_campaign_id": 24442
+    },
+    "24451": {
+      "campaign_id": 24451,
+      "chapter": 4,
+      "next_campaign_id": 0,
+      "last_campaign_id": 24441
+    },
+    "24452": {
+      "campaign_id": 24452,
+      "chapter": 4,
+      "next_campaign_id": 24453,
+      "last_campaign_id": 24451
+    },
+    "24453": {
+      "campaign_id": 24453,
+      "chapter": 4,
+      "next_campaign_id": 0,
+      "last_campaign_id": 24452
+    },
+    "24461": {
+      "campaign_id": 24461,
+      "chapter": 4,
+      "next_campaign_id": 0,
+      "last_campaign_id": 24451
+    },
+    "24462": {
+      "campaign_id": 24462,
+      "chapter": 4,
+      "next_campaign_id": 24463,
+      "last_campaign_id": 24461
+    },
+    "24463": {
+      "campaign_id": 24463,
+      "chapter": 4,
+      "next_campaign_id": 0,
+      "last_campaign_id": 24462
+    },
+    "24471": {
+      "campaign_id": 24471,
+      "chapter": 4,
+      "next_campaign_id": 24472,
+      "last_campaign_id": 24461
+    },
+    "24472": {
+      "campaign_id": 24472,
+      "chapter": 4,
+      "next_campaign_id": 24473,
+      "last_campaign_id": 24471
+    },
+    "24473": {
+      "campaign_id": 24473,
+      "chapter": 4,
+      "next_campaign_id": 0,
+      "last_campaign_id": 24472
+    },
+    "24511": {
+      "campaign_id": 24511,
+      "chapter": 5,
+      "next_campaign_id": 24512,
+      "last_campaign_id": 0
+    },
+    "24512": {
+      "campaign_id": 24512,
+      "chapter": 5,
+      "next_campaign_id": 24513,
+      "last_campaign_id": 24511
+    },
+    "24513": {
+      "campaign_id": 24513,
+      "chapter": 5,
+      "next_campaign_id": 24521,
+      "last_campaign_id": 24512
+    },
+    "24521": {
+      "campaign_id": 24521,
+      "chapter": 5,
+      "next_campaign_id": 24522,
+      "last_campaign_id": 24513
+    },
+    "24522": {
+      "campaign_id": 24522,
+      "chapter": 5,
+      "next_campaign_id": 24523,
+      "last_campaign_id": 24521
+    },
+    "24523": {
+      "campaign_id": 24523,
+      "chapter": 5,
+      "next_campaign_id": 24531,
+      "last_campaign_id": 24522
+    },
+    "24531": {
+      "campaign_id": 24531,
+      "chapter": 5,
+      "next_campaign_id": 24532,
+      "last_campaign_id": 24523
+    },
+    "24532": {
+      "campaign_id": 24532,
+      "chapter": 5,
+      "next_campaign_id": 24533,
+      "last_campaign_id": 24531
+    },
+    "24533": {
+      "campaign_id": 24533,
+      "chapter": 5,
+      "next_campaign_id": 24541,
+      "last_campaign_id": 24532
+    },
+    "24541": {
+      "campaign_id": 24541,
+      "chapter": 5,
+      "next_campaign_id": 24542,
+      "last_campaign_id": 24533
+    },
+    "24542": {
+      "campaign_id": 24542,
+      "chapter": 5,
+      "next_campaign_id": 24543,
+      "last_campaign_id": 24541
+    },
+    "24543": {
+      "campaign_id": 24543,
+      "chapter": 5,
+      "next_campaign_id": 24551,
+      "last_campaign_id": 24542
+    },
+    "24551": {
+      "campaign_id": 24551,
+      "chapter": 5,
+      "next_campaign_id": 24552,
+      "last_campaign_id": 24543
+    },
+    "24552": {
+      "campaign_id": 24552,
+      "chapter": 5,
+      "next_campaign_id": 24553,
+      "last_campaign_id": 24551
+    },
+    "24553": {
+      "campaign_id": 24553,
+      "chapter": 5,
+      "next_campaign_id": 24561,
+      "last_campaign_id": 24552
+    },
+    "24561": {
+      "campaign_id": 24561,
+      "chapter": 5,
+      "next_campaign_id": 24562,
+      "last_campaign_id": 24553
+    },
+    "24562": {
+      "campaign_id": 24562,
+      "chapter": 5,
+      "next_campaign_id": 24563,
+      "last_campaign_id": 24561
+    },
+    "24563": {
+      "campaign_id": 24563,
+      "chapter": 5,
+      "next_campaign_id": 24571,
+      "last_campaign_id": 24562
+    },
+    "24571": {
+      "campaign_id": 24571,
+      "chapter": 5,
+      "next_campaign_id": 24572,
+      "last_campaign_id": 24563
+    },
+    "24572": {
+      "campaign_id": 24572,
+      "chapter": 5,
+      "next_campaign_id": 24573,
+      "last_campaign_id": 24571
+    },
+    "24573": {
+      "campaign_id": 24573,
+      "chapter": 5,
+      "next_campaign_id": 0,
+      "last_campaign_id": 24572
+    },
+    "24611": {
+      "campaign_id": 24611,
+      "chapter": 6,
+      "next_campaign_id": 24612,
+      "last_campaign_id": 0
+    },
+    "24612": {
+      "campaign_id": 24612,
+      "chapter": 6,
+      "next_campaign_id": 24613,
+      "last_campaign_id": 24611
+    },
+    "24613": {
+      "campaign_id": 24613,
+      "chapter": 6,
+      "next_campaign_id": 24621,
+      "last_campaign_id": 24612
+    },
+    "24621": {
+      "campaign_id": 24621,
+      "chapter": 6,
+      "next_campaign_id": 24622,
+      "last_campaign_id": 24613
+    },
+    "24622": {
+      "campaign_id": 24622,
+      "chapter": 6,
+      "next_campaign_id": 24623,
+      "last_campaign_id": 24621
+    },
+    "24623": {
+      "campaign_id": 24623,
+      "chapter": 6,
+      "next_campaign_id": 24631,
+      "last_campaign_id": 24622
+    },
+    "24631": {
+      "campaign_id": 24631,
+      "chapter": 6,
+      "next_campaign_id": 24632,
+      "last_campaign_id": 24623
+    },
+    "24632": {
+      "campaign_id": 24632,
+      "chapter": 6,
+      "next_campaign_id": 24633,
+      "last_campaign_id": 24631
+    },
+    "24633": {
+      "campaign_id": 24633,
+      "chapter": 6,
+      "next_campaign_id": 24641,
+      "last_campaign_id": 24632
+    },
+    "24641": {
+      "campaign_id": 24641,
+      "chapter": 6,
+      "next_campaign_id": 24642,
+      "last_campaign_id": 24633
+    },
+    "24642": {
+      "campaign_id": 24642,
+      "chapter": 6,
+      "next_campaign_id": 24643,
+      "last_campaign_id": 24641
+    },
+    "24643": {
+      "campaign_id": 24643,
+      "chapter": 6,
+      "next_campaign_id": 24651,
+      "last_campaign_id": 24642
+    },
+    "24651": {
+      "campaign_id": 24651,
+      "chapter": 6,
+      "next_campaign_id": 24652,
+      "last_campaign_id": 24643
+    },
+    "24652": {
+      "campaign_id": 24652,
+      "chapter": 6,
+      "next_campaign_id": 24653,
+      "last_campaign_id": 24651
+    },
+    "24653": {
+      "campaign_id": 24653,
+      "chapter": 6,
+      "next_campaign_id": 24661,
+      "last_campaign_id": 24652
+    },
+    "24661": {
+      "campaign_id": 24661,
+      "chapter": 6,
+      "next_campaign_id": 24662,
+      "last_campaign_id": 24653
+    },
+    "24662": {
+      "campaign_id": 24662,
+      "chapter": 6,
+      "next_campaign_id": 24663,
+      "last_campaign_id": 24661
+    },
+    "24663": {
+      "campaign_id": 24663,
+      "chapter": 6,
+      "next_campaign_id": 24671,
+      "last_campaign_id": 24662
+    },
+    "24671": {
+      "campaign_id": 24671,
+      "chapter": 6,
+      "next_campaign_id": 24672,
+      "last_campaign_id": 24663
+    },
+    "24672": {
+      "campaign_id": 24672,
+      "chapter": 6,
+      "next_campaign_id": 24673,
+      "last_campaign_id": 24671
+    },
+    "24673": {
+      "campaign_id": 24673,
+      "chapter": 6,
+      "next_campaign_id": 24681,
+      "last_campaign_id": 24672
+    },
+    "24681": {
+      "campaign_id": 24681,
+      "chapter": 6,
+      "next_campaign_id": 24682,
+      "last_campaign_id": 24673
+    },
+    "24682": {
+      "campaign_id": 24682,
+      "chapter": 6,
+      "next_campaign_id": 24683,
+      "last_campaign_id": 24681
+    },
+    "24683": {
+      "campaign_id": 24683,
+      "chapter": 6,
+      "next_campaign_id": 0,
+      "last_campaign_id": 24682
+    },
+    "24711": {
+      "campaign_id": 24711,
+      "chapter": 7,
+      "next_campaign_id": 24712,
+      "last_campaign_id": 0
+    },
+    "24712": {
+      "campaign_id": 24712,
+      "chapter": 7,
+      "next_campaign_id": 24713,
+      "last_campaign_id": 24711
+    },
+    "24713": {
+      "campaign_id": 24713,
+      "chapter": 7,
+      "next_campaign_id": 24721,
+      "last_campaign_id": 24712
+    },
+    "24721": {
+      "campaign_id": 24721,
+      "chapter": 7,
+      "next_campaign_id": 24722,
+      "last_campaign_id": 24713
+    },
+    "24722": {
+      "campaign_id": 24722,
+      "chapter": 7,
+      "next_campaign_id": 24723,
+      "last_campaign_id": 24721
+    },
+    "24723": {
+      "campaign_id": 24723,
+      "chapter": 7,
+      "next_campaign_id": 24731,
+      "last_campaign_id": 24722
+    },
+    "24731": {
+      "campaign_id": 24731,
+      "chapter": 7,
+      "next_campaign_id": 24732,
+      "last_campaign_id": 24723
+    },
+    "24732": {
+      "campaign_id": 24732,
+      "chapter": 7,
+      "next_campaign_id": 24733,
+      "last_campaign_id": 24731
+    },
+    "24733": {
+      "campaign_id": 24733,
+      "chapter": 7,
+      "next_campaign_id": 24741,
+      "last_campaign_id": 24732
+    },
+    "24741": {
+      "campaign_id": 24741,
+      "chapter": 7,
+      "next_campaign_id": 24742,
+      "last_campaign_id": 24733
+    },
+    "24742": {
+      "campaign_id": 24742,
+      "chapter": 7,
+      "next_campaign_id": 24743,
+      "last_campaign_id": 24741
+    },
+    "24743": {
+      "campaign_id": 24743,
+      "chapter": 7,
+      "next_campaign_id": 24751,
+      "last_campaign_id": 24742
+    },
+    "24751": {
+      "campaign_id": 24751,
+      "chapter": 7,
+      "next_campaign_id": 24752,
+      "last_campaign_id": 24743
+    },
+    "24752": {
+      "campaign_id": 24752,
+      "chapter": 7,
+      "next_campaign_id": 24753,
+      "last_campaign_id": 24751
+    },
+    "24753": {
+      "campaign_id": 24753,
+      "chapter": 7,
+      "next_campaign_id": 24761,
+      "last_campaign_id": 24752
+    },
+    "24761": {
+      "campaign_id": 24761,
+      "chapter": 7,
+      "next_campaign_id": 24762,
+      "last_campaign_id": 24753
+    },
+    "24762": {
+      "campaign_id": 24762,
+      "chapter": 7,
+      "next_campaign_id": 24763,
+      "last_campaign_id": 24761
+    },
+    "24763": {
+      "campaign_id": 24763,
+      "chapter": 7,
+      "next_campaign_id": 24771,
+      "last_campaign_id": 24762
+    },
+    "24771": {
+      "campaign_id": 24771,
+      "chapter": 7,
+      "next_campaign_id": 24772,
+      "last_campaign_id": 24763
+    },
+    "24772": {
+      "campaign_id": 24772,
+      "chapter": 7,
+      "next_campaign_id": 24773,
+      "last_campaign_id": 24771
+    },
+    "24773": {
+      "campaign_id": 24773,
+      "chapter": 7,
+      "next_campaign_id": 0,
+      "last_campaign_id": 24772
+    },
+    "40001": {
+      "campaign_id": 40001,
+      "chapter": 0,
+      "next_campaign_id": 40002,
+      "last_campaign_id": 0
+    },
+    "40002": {
+      "campaign_id": 40002,
+      "chapter": 0,
+      "next_campaign_id": 40003,
+      "last_campaign_id": 40001
+    },
+    "40003": {
+      "campaign_id": 40003,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 40002
+    },
+    "41001": {
+      "campaign_id": 41001,
+      "chapter": 0,
+      "next_campaign_id": 41002,
+      "last_campaign_id": 0
+    },
+    "41002": {
+      "campaign_id": 41002,
+      "chapter": 0,
+      "next_campaign_id": 41003,
+      "last_campaign_id": 41001
+    },
+    "41003": {
+      "campaign_id": 41003,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 41002
+    },
+    "42001": {
+      "campaign_id": 42001,
+      "chapter": 0,
+      "next_campaign_id": 42002,
+      "last_campaign_id": 0
+    },
+    "42002": {
+      "campaign_id": 42002,
+      "chapter": 0,
+      "next_campaign_id": 42003,
+      "last_campaign_id": 42001
+    },
+    "42003": {
+      "campaign_id": 42003,
+      "chapter": 0,
+      "next_campaign_id": 0,
+      "last_campaign_id": 42002
+    }
+  }
+}
