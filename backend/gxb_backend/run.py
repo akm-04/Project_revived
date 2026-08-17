@@ -24,7 +24,7 @@ def _run_flask(app, port: int) -> None:
 def main() -> None:
     app = create_app(SETTINGS)
     print("==================================================")
-    print(" GXB modular v0.7.0 stable live-assets + safe MID2 hot-update backend")
+    print(" GXB modular v0.8.0 multi-user identity foundation + stable live assets")
     print(f" SDK bind    : http://{SETTINGS.bind_host}:{SETTINGS.sdk_port}")
     print(f" ENGINE bind : http://{SETTINGS.bind_host}:{SETTINGS.engine_port}")
     print(f" ADVERTISE_HOST = {SETTINGS.advertise_host}")
@@ -33,7 +33,8 @@ def main() -> None:
     print(f" BOOT_DETAIL_MODE = {SETTINGS.bootstrap_detail_mode}")
     print(f" FUNC_MODE = {SETTINGS.func_mode}")
     print(f" PROFILE = {SETTINGS.profile}")
-    print(f" PLAYER_DB = {SETTINGS.player_db_path}")
+    print(f" LEGACY_SANDBOX_DB = {SETTINGS.player_db_path}")
+    print(f" MULTIUSER_ROOT = {SETTINGS.multiuser_root}")
     print(f" CLIENT_LOG_URL = {SETTINGS.client_log_url}")
     print(f" RESOURCE_GATEWAY = {SETTINGS.resource_gateway_enabled}")
     print(f" RES_DOWNLOAD_URL = {SETTINGS.res_download_url if SETTINGS.resource_gateway_enabled else '(disabled)'}")

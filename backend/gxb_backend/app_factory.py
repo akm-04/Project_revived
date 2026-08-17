@@ -19,6 +19,7 @@ def create_app(settings: Settings = SETTINGS, state: StateRepository | None = No
         settings.player_db_path,
         profile=settings.profile,
         legacy_path=settings.state_path,
+        multiuser_root=settings.multiuser_root,
     )
     resource_gateway = ResourceGateway(settings)
     dispatcher = EngineDispatcher(repo, settings, resource_gateway)

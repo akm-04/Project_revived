@@ -114,6 +114,18 @@ class JsonPlayerDatabase:
         if isinstance(account_data, dict):
             account_values.update({k: v for k, v in account_data.items() if k in account_values})
 
+        player = self.deserialize_player(player_data, base_player)
+
+        return AccountIdentity(**account_values), player
+
+    @classmethod
+    def deserialize_player(cls, player_data: Any, base_player: PlayerState) -> PlayerState:
+        """Load a PlayerState from the nested human-editable player section.
+
+        v0.8.0 uses the same player serialization for player-scoped files under
+        ``data/server_state/players/<player_id>/player.json``.  Keeping the
+        parser here preserves every migration rule proven by the singleton DB.
+        """
         flat_player = asdict(base_player)
         if isinstance(player_data, dict):
             # Stage 3.1 nested sections must be recognized *before* legacy flat
@@ -135,8 +147,7 @@ class JsonPlayerDatabase:
                     for sub_key, sub_value in value.items():
                         if sub_key in PLAYER_FIELD_NAMES:
                             flat_player[sub_key] = sub_value
-
-        return AccountIdentity(**account_values), PlayerState(**flat_player)
+        return PlayerState(**flat_player)
 
     def save(self, account: AccountIdentity, player: PlayerState) -> None:
         payload = self.serialize(account, player)
@@ -149,7 +160,8 @@ class JsonPlayerDatabase:
         os.replace(temp_path, self.path)
 
     @classmethod
-    def serialize(cls, account: AccountIdentity, player: PlayerState) -> dict[str, Any]:
+    def serialize_player(cls, player: PlayerState) -> dict[str, Any]:
+        """Serialize only the player-owned state sections."""
         remaining = asdict(player)
         player_sections: dict[str, Any] = {}
 
@@ -163,11 +175,16 @@ class JsonPlayerDatabase:
         # Any newly added PlayerState field automatically remains persisted even
         # if the database grouping table has not been updated yet.
         player_sections["domains"] = remaining
+        return player_sections
+
+    @classmethod
+    def serialize(cls, account: AccountIdentity, player: PlayerState) -> dict[str, Any]:
+        player_sections = cls.serialize_player(player)
 
         return {
             "_meta": {
                 "schema": cls.SCHEMA_VERSION,
-                "format": "GXB v0.7.0 human-editable player database",
+                "format": "GXB v0.8.0 legacy/sandbox player database",
                 "notes": [
                     "Stage 3.1.4 keeps SDK account UID, SDK/login SID, and game player ID distinct using the known-good region-125 client snapshot.",
                     "The backend re-reads this file before every request.",

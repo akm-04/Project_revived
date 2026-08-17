@@ -1,1043 +1,1326 @@
-# Stage 4A.2 update — HeroMain element slots + persistent Campaign world state
+# v0.8.0 CURRENT STATE — MULTI-USER IDENTITY FOUNDATION — 2026-08-17
 
-Current stage: **Stage 4A.2 hero/campaign synchronization**  
-Date: 2026-08-16
+Read this section first. Pass 22 mapping was considered sufficient; no Pass 23 was needed before the first implementation slice.
 
-## User-confirmed results entering this pass
+## Scope of this release
 
-- Stage 3 remains the first major milestone: stable login/server picker/lobby/HUD/core navigation.
-- Stage 4A is confirmed: Girls/HeroListWindow opens correctly with owned Aquaris.
-- Stage 4A.1 did **not** fix owned-girl detail: first Aquaris tap appears to do nothing; second tap hides/freezes the visible UI.
-- Both taps emit MID234 activity 1032 and then no further hero-specific request.
-- Normal single-player Campaign battle `100001` runs and completes client-side using formation `10001`.
-- MID114 currently returns stateless success, so the clear does not persist and the next campaign does not unlock.
-- Raid/Sweep was exposed before the first real clear because the old world seed incorrectly advertised `100001 star=3`; MID117 then returned an invalid shallow response and SweepWindow appeared blank.
-- MID2768 GET_RENT_HEROS was still compatibility fallback during team selection.
+v0.8.0 rewrites the identity/storage spine only. It deliberately does **not** implement PvP/ranking behavior yet.
 
-## HeroMain first/second tap diagnosis
+Implemented:
+- persistent SDK credential accounts for MID65282 registration;
+- source-shaped MID65282 success fields `uid` + `login_email`;
+- MID65281 credential verification and unique SID/TOKEN issuance;
+- consistent QQWSID/QQWTOKEN/QQWUID/QQWUNAME cookies;
+- fixed anonymous MID65284 sandbox preserved;
+- account-scoped MID18 region/player directory;
+- atomic `(account_uid, region) -> player_id` resolve/create in MID1;
+- `is_new=1` on first credential character creation;
+- conservative level-1/empty-name fresh credential template;
+- request-scoped canonical gameplay repositories;
+- per-player JSON persistence under `data/server_state/players/<player_id>/player.json`;
+- automatic one-time import of the v0.7 `data/player_db.json` into the anonymous sandbox;
+- invalid/unknown MID1 sessions are rejected instead of silently falling back to the sandbox.
 
-`HeroListCell` sends MID234 for HalfPriceSkill then immediately opens `hero_main`; MID234 does not gate the open callback.
+## Storage
 
-`WindowManager:openWindow()` registers the newly constructed window in `windows_` before `loadRes()/willOpen()/layout()` complete. Therefore a synchronous first-open exception can leave an invisible half-open HeroMain registered. A second tap finds that registered window and can apply background/hide-window state even though the first open never became visible. This matches the observed first tap no-op / second tap UI disappearance.
+Canonical v0.8 storage:
+- `data/server_state/accounts/<uid>.json`
+- `data/server_state/sessions/<sid>.json`
+- `data/server_state/players/<player_id>/player.json`
+- `data/server_state/indexes/account_by_login.json`
+- `data/server_state/indexes/player_by_account_region.json`
+- `data/server_state/indexes/session_by_token.json`
+- `data/server_state/indexes/region_player_serial.json`
+- `data/server_state/indexes/counters.json`
 
-### Source-confirmed element-equipment nil hazard
+`data/player_db.json` is now migration input for the anonymous sandbox only. After the first v0.8 start, `data/server_state` is authoritative.
 
-`HeroMainWindow:layout()` calls `updateElementEquip()` before `didOpen()`.
+Passwords are not stored plaintext. v0.8 uses a local PBKDF2-SHA256 verifier. This verifier format/iteration policy is implementation policy, not a recovered original Xinyd credential schema.
 
-The guard in supplied Lua is:
+## Identity semantics
 
-```lua
-if not xyd.isSuperHero(hero) and not hero:getColor() == xyd.MAX_HERO_COLOR then
-    return
-end
-```
+Durable graph:
+`SDK uid -> SID/TOKEN session -> (uid,region) mapping -> stable game player_id -> canonical game state`.
 
-Because of Lua precedence it does not reliably exclude ordinary Aquaris. `NormalHero:populate_()` stores `element_equips` directly. Stage4A/4A.1 sent `[]`. Empty Lua tables are truthy, while `elementEquips[i]` is nil; `nil ~= 0` is true, so HeroMain can execute `tonumber(nil)` and pass nil into element-equip table lookup.
+Never key progress by device_id/client_id/SID/TOKEN.
 
-`xyd.MAX_ELEMENT_ITEM_NUM` is source-confirmed as 4. Stage4A.2 normalizes:
+Credential player IDs are allocated with the region encoded in high digits, e.g. first region-197 player `19700001`, matching the client-wide player-id region convention. Creation is retry-safe.
 
-```json
-"element_equips": [0,0,0,0],
-"element_levels": [0,0,0,0]
-```
+The anonymous sandbox retains UID `13371337`, SID `1993b58bfd1b93499ae19477b236d4a2`, TOKEN `local_token`, and imports the existing established Moppleton state/max-resource profile.
 
-No element item IDs are invented.
+## Fresh credential-player policy
 
-If HeroMain still fails, use `tools/adb_stage4a2_hero_probe.sh` after reproducing it. It pulls `log.db` plus targeted hot HeroMain Lua/CSB/effect files. Release logcat remains a poor Lua-crash source.
+Source-confirmed:
+- new character lifecycle is level-1/new-player oriented;
+- empty/unset name is valid;
+- MID1 `is_new=1` enters opening story;
+- StoryScene eventually opens EditNameScene;
+- MID23 sets the real name.
 
-## Campaign architecture confirmed by live run + source
+Still unknown:
+- exact official fresh mana/crystal/other starting numeric amounts;
+- exact session expiry policy;
+- official duplicate/wrong-password SDK error numbers.
 
-Normal Campaign combat is client-simulated. Live sequence:
+v0.8 therefore uses conservative zero values for unproven fresh currencies and a local generic nonzero SDK error code. Do not present those as official values.
 
-`MID112 -> MID2768 -> MID113 -> local battle -> MID114`.
+## Offline validation completed
 
-MID113 only needs to establish authoritative session/start state; SelectTeamWindow consumes optional `items` and builds enemies from local tables. MID114 is the authoritative commit boundary for stars/unlocks/rewards.
+Pure-Python state tests PASS:
+- two registrations allocate different SDK UIDs;
+- two logins allocate different SID/TOKEN pairs;
+- account A and B each create a different region-197 player;
+- A mutation does not appear in B;
+- repeated MID1 for A resolves the same player;
+- MID18 for A lists only A; MID18 for B lists only B;
+- anonymous sandbox still resolves existing Moppleton with 999999 mana/crystal;
+- MID18 -> MID1 lifecycle produces fresh `lev=1`, `player_name=''`, first `is_new=1`, later `is_new=0`;
+- invalid MID1 session is rejected.
 
-New `WorldRepository` owns:
+Python syntax validation: 83 files PASS via `python3 -m py_compile`. No Flask/HTTP/APK/ADB/emulator/gameplay runtime test was performed by the assistant.
 
-- persisted `world_map`;
-- `active_campaign_battle` MID113 session;
-- MID114 best-star/update/unlock commit;
-- source-shaped MID117 sweep state;
-- packaged source campaign links via `data/campaign_meta.json`.
+## First user runtime test
 
-`data/campaign_meta.json` is extracted from authoritative `src_64/data/tables/campaign.lua`, 917 rows, fields only `campaign_id/chapter/next_campaign_id/last_campaign_id`. First chain is `100001 -> 100002 -> 100004`; never guess `+1`.
+Before first v0.8 launch:
+1. copy latest v0.7 `data/player_db.json`;
+2. preserve/copy `local_assets/res` and any intentional Lua update files;
+3. start server once and confirm `[MULTIUSER] importing singleton sandbox ...`;
+4. register `testuser01/pass1234`; expected MID65282 -> automatic MID65281;
+5. fresh account should reach MID18 with `owned_players=0`, then MID1 region197 and create a new `197xxxxx` player with `is_new=1`;
+6. register a second account and verify different UID/session/player;
+7. verify anonymous still loads the old established sandbox.
 
-Player DB schema is now **3**, with:
+Useful inspection tool: `python3 tools/list_multiuser_state.py`. Offline isolation tool: `python3 tools/selftest_multiuser.py`.
 
-```text
-player.world.world_map
-player.world.active_campaign_battle
-```
+## Not yet implemented
 
-Existing request-scoped RLock + atomic JSON save gives MID113/MID114 the same refresh -> mutate -> save coherence already used by HeroRepository.
+- MID65285 anonymous-to-credential binding: intentionally deferred because the current anonymous identity is a shared fixed sandbox and must not be converted into one user's credential account.
+- exact fresh tutorial grants/function unlock progression; runtime test may expose the next new-account tutorial contracts.
+- public cross-player MID17/MID49/MID208 projections.
+- player-name uniqueness/index semantics.
+- social/guild shared entities.
+- rankings and PvP mode state.
+- immutable PvP report snapshots.
 
-## Initial Campaign correction
-
-Fresh state is now accessible-but-unbeaten:
-
-- 100001 star=0
-- normal_campaign_id=100001
-- normal_stars=0
-
-After a successful 100001 / star=3 MID114, backend persists/returns:
-
-- 100001 star3
-- newly unlocked source-next 100002 star0
-- chapter_info cursor to 100002
-- updated chapter stars
-- items=[] until reward/drop contracts are implemented.
-
-Only a newly created next row is returned as star0; replaying an older cleared campaign must not repeatedly trigger the client's new-campaign animation.
-
-## Sweep/Raid MID117
-
-`SweepWindow` consumes `items`, `economys`, `additional`, and `campaign`. Stage4A.2 returns those exact containers. Empty reward economy entries are explicit `{exp:0,mana:0}` because SweepWindow otherwise defaults omitted EXP to 12 client-side. No fake reward XP/mana is introduced.
-
-## Empty rental MID2768
-
-Source-consumed empty shape now includes:
-
-- `guild_rent_heroes.partners=[]`
-- `guild_rent_heroes.rent_type`
-- `guild_rent_heroes.rent_count=0`
-- `tutor_rent_heroes=[]`
-- root `rent_count=0`
-
-## Deliberate Stage4A.2 non-goals
-
-- no campaign drop rewards yet;
-- no energy/sweep-ticket/crystal accounting yet;
-- no hero level/skill/evolution semantics yet;
-- no server-side normal Campaign combat simulation;
-- no payment.
-
-## Validation rule
-
-Only `python -m py_compile`. **Stage 4A.2 validation PASS — 57 Python files compiled.** No Flask/HTTP/APK/ADB/emulator runtime test by assistant. User performs runtime testing.
+Next coding slice after runtime validation should migrate any tutorial/new-account gaps revealed by the first credential character, then build public cross-player projection + canonical formation before competitive systems. Competitive remains last.
 
 ---
-# Stage 4A.1 update — Aquaris detail-window dependency fix
 
-Current stage: **Stage 4A.1 hero detail hotfix**  
-Date: 2026-08-16
+# PASS 22 CURRENT STATE — 2026-08-17
 
-## User-confirmed Stage 4A result
+Read this section first. It is the final Lua + Android/Smali server architecture synthesis before multi-user backend coding.
 
-- Girls/HeroListWindow now opens correctly.
-- Owned Aquaris is visible/selectable in the list.
-- Pressing Aquaris freezes/bugs the client.
-- The live server log shows MID234 `LOAD_SINGLE_ACTIVITY` with `activity_id=1032` at each click and Stage 4A replies only `{"details":{}}`.
+Pass 22 is mapping/research only. No backend code was changed.
 
-## Source-confirmed MID234 crash path
+## New live registration confirmation
 
-`HeroListCell` sends `LOAD_SINGLE_ACTIVITY` for `xyd.Activities.HalfPriceSkill` (1032) immediately before opening `hero_main`.
+User tested source-valid credentials:
+- account `testuser01`
+- password `pass1234`.
 
-`Activities:onLoadSingleActivity_()` inserts the successful response object into `activities`. Stage 4A boot MID229 is empty, so `#activities == 0`; because the old MID234 response has no `table_id`, no existing row can be replaced and the client can attempt `table.insert(activities, 0, response)`. After insertion, `checkHalfPriceOpen()` also requires numeric `start_time` / `end_time`.
+Runtime confirmed:
+- MID65282 `register_platform` reached the SDK backend three times.
+- Present backend did not complete the register success contract; UI asked to retry.
+- Manual MID65281 credential login then occurred.
+- Present backend still issued the singleton development UID/session:
+  - UID 13371337
+  - development SID
+  - token `local_token`
+- engine MID1 then resolved the same canonical development player:
+  - player_id 12525385
+  - Moppleton.
 
-Stage 4A.1 therefore guarantees an inactive 1032 common envelope in MID229 and MID234: `table_id`, `is_open=0`, `start_time=0`, `end_time=0`, `days=0`, `details={}`. This is an inactive compatibility row, not historical event truth.
+Therefore the current backend has SDK-shaped auth routes but **no account/session/player isolation**.
 
-## Source-confirmed HeroMain scalar hazard
+## Final identity model
 
-`NormalHero:populate_()` leaves absent house fields nil. `HeroMainWindow:updateFuncBtn()` evaluates `hero:getHouseInfo().house_id > 0`; Stage 4A Aquaris omitted `house_id`. Stage 4A.1 HeroRepository now normalizes explicit non-dorm/default values for house/favor/marriage/dynamic-card/collection-stage fields.
+Keep five layers distinct:
 
-No new hero IDs, activity rewards, or gameplay mechanics are introduced.
+1. SDK Account — UID + credential/anonymous identity.
+2. SDK Session — SID/TOKEN/QQW cookies -> exactly one UID.
+3. AccountRegionIndex — `(uid, region_id) -> player_id`.
+4. Canonical game Player — stable `player_id`, owning/profile-projecting all game progress.
+5. Cross-player domains — social/PvP/ranking/report projections over stable player IDs.
 
-## Validation rule
+Never key progress by device_id/client_id or session ID.
 
-Only `python -m py_compile`. **Stage 4A.1 validation PASS — 56 Python files compiled.** No Flask/HTTP/APK/ADB/emulator runtime tests. User performs runtime testing.
+SDK UID is not game player_id.
 
----
-# Stage 4A update — canonical Girls/Hero state + request-scoped JSON sync
+## Register/login contracts
 
-Current stage: **Stage 4A hero foundation**  
-Date: 2026-08-16
+Pass 21 remains authoritative for Smali details:
+- MID65282 Register request: login_email/password/repassword/game_source.
+- source-valid local account syntax is alphanumeric 6–50; password alphanumeric 6–15.
+- MID65282 success requires `error_code=0`, `uid`, `login_email`; SDK then deliberately performs MID65281.
+- MID65281 success requires `error_code=0`, `uid` and session cookies QQWSID/QQWTOKEN/QQWUID/QQWUNAME.
+- GXB AppActivity swallows login fail/exception callbacks, which explains visually dead malformed login results.
+- SDK MID65288 create-player capability exists but GXB `xydCreatePlayer` bridge is no-op.
 
-## User-confirmed Stage 3 milestone
+## Game player lifecycle
 
-Stage 3.1.7 is the first major playable-shell milestone. User confirmed:
+Lua source:
+- successful SDK auth gives Lua TOKEN then SID;
+- LoginWindow sends MID18 LOAD_USER_REGIONS;
+- MID18 owns account-scoped character directory (`regions`, `players`, `recall_regions`);
+- if no player exists, LoginWindow immediately sends login for selected region;
+- LoadingScene sends MID1 RETRIEVE_TOKEN;
+- there is no active Lua CREATE_PLAYER in between.
 
-- anonymous login works;
-- server-switch/RegionWindow works;
-- stable lobby no longer hides/disappears;
-- top economy HUD renders;
-- bottom navigation is live;
-- Backpack and Chat work;
-- MID176 `LOAD_FRIENDS` and MID2754 `CHECK_GAME_STAT` are present.
+Strongest backend model:
+- MID1 atomically resolves or creates `(account_uid, region_id) -> player_id`.
+- fresh create returns `is_new=1`.
+- empty/unset player_name is source-supported.
+- opening StoryScene ends in EditNameScene.
+- MID23 sets player name; MID26 saves story progress.
+- `Guestxxx` remains unconfirmed recollection and must not be invented.
 
-Stage 3 is considered complete. Subsequent work is gameplay-domain vertical slices.
+One player per account per region is a strong source/UI-supported architecture inference, not a recovered official database constraint.
 
-## Stage 4 dependency order
+## Canonical player ownership
 
-1. 4A Girls/Hero canonical state.
-2. 4B formation + Campaign team selection / MID2768.
-3. 4C Campaign fight MID113 -> client-local simulation -> MID114 progression/reward persistence.
-4. Hero progression/equipment.
-5. Arena.
-6. Summon/shop.
-7. Activities/Voyage later.
+SelfPlayer root response consumes 93 mapped player fields plus story fields. The global `economy_` plane consumes 47 fields.
 
-Payment remains permanently out of scope.
+Do not store these as one giant authoritative response blob. Logical owners:
 
-## Source-confirmed Girls failure path
+- profile/public identity;
+- economy and timers;
+- tutorial/function gates;
+- Heroes;
+- Inventory;
+- Pets;
+- Formations/presets;
+- Campaign/world;
+- Social;
+- Guild membership reference;
+- Mail;
+- Dorm/Institute/Activities/other domains;
+- per-mode PvP state.
 
-The current bootstrap already contains one owned hero in MID49:
+MID1/MID17 should assemble source-shaped projections from repositories.
 
-- partner/local entity ID `10001`
-- source table ID `10001001`
-- Aquaris
-- star 3
-- level 20
+Regenerating resources include at least energy, spirit energy, skill points, arena invitations; server/client timer parity matters.
 
-`data/tables/partner.lua` contains source row `10001001` for Aquaris with initial star 3. Do not invent additional tutorial girls without source/capture evidence.
+Current maxed mana/crystal is an anonymous development-sandbox profile, not a source-valid fresh credential-player template.
 
-Pressing Girls does **not** necessarily send MID49. `MainSceneBottomWindow` calls `SelfPlayer:loadHeros()`, but login bootstrap has already set `herosLoaded_=true`, so `Player:loadHeros()` can call success locally and immediately open `hero_list`.
+## PvP / ranking final architecture
 
-`HeroListWindow.ctor()` runs before layout and calls:
+All mapped competitive/social systems pivot on stable game `player_id`.
 
-```lua
-self.teams = selfPlayer:getSaveTeams()
-```
-
-`SelfPlayer:getSaveTeams()` parses MID17/player fields `save_team`, `save_team_name`, `save_pet` with `xyd.split` / `string.split`. Stage 3 stored these as JSON objects `{}`. Their real client contract is serialized strings. Passing `{}` can synchronously abort HeroListWindow without any new network request.
-
-Stage 4A canonical empty values:
-
-```json
-"save_team": "",
-"save_team_name": "",
-"save_pet": ""
-```
-
-The DB loader migrates legacy non-string values automatically and rewrites the JSON atomically.
-
-## Stage 4A HeroRepository
-
-New `gxb_backend/state/hero_repository.py` owns hero-related state.
-
-Responsibilities:
-
-- normalize legacy/current hero JSON to Lua-facing shapes;
-- keep `partner_id`, `table_id`, owner `player_id`, collection state and local allocator coherent;
-- normalize six-slot skill/equip/fumo arrays and source-consumed optional fields;
-- persist hero-list sort type;
-- persist serialized preset-team strings;
-- persist board/poster selection;
-- provide `add_owned_hero()` as the future summon/reward acquisition primitive;
-- never invent missing `table_id`, `partner_id`, or star values.
-
-Future summon/reward/battle paths must mutate canonical state through HeroRepository instead of returning isolated MID49 blobs.
-
-Final Stage 4A hardening:
-
-- `add_owned_hero()` allocates around occupied local partner IDs and refuses to overwrite an existing explicit `partner_id`; intentional mutations use `update_owned_hero()`.
-- MID835 board state mirrors the client's same-request set/reset behavior: re-sending the active partner/card/model clears the board and returns `board_partner=0`.
-- collected-hero serialization is deterministic for easier log/diff comparison.
-
-## Exact Stage 4A hero contracts
-
-- MID49 `LOAD_HEROS`: `sort_type`, `heros` direct partner-id -> hero-record map.
-- MID65 `LOAD_COLLECTED_HEROS`: `{"list":[table_ids...]}`.
-- MID67 `LOAD_HERO_PIECES`: callback iterates response itself as table-id -> count map. Old Stage3 `{pieces:[],list:[]}` wrapper was wrong.
-- MID89 `SAVA_SORT_TYPE`: request `sort_type`; no response fields consumed; now persisted.
-- MID1793 `SAVE_TEAM`: request carries `team_str`, `team_name_str` and may omit `pet_str`; absent fields are preserved. Response consumes exact `save_team`, `save_team_name`, `save_pet`; now persisted.
-- MID835 `SET_BOARD_HERO`: request `partner_id`, `card_status`, `board_model_id`; detail callback consumes `board_partner`, `board_card`, `board_model_id`; now persisted. Board/poster hero is kept separate from `formation.rep_partner_id`.
-- `SET_LOCK_HERO` and `SET_REP_HERO` remain symbolic/unresolved numeric MIDs; do not wire guessed values.
-
-## JSON save/sync boundary
-
-Stage 3.1 used atomic file replacement but request handling only locked individual `refresh()`/`save()` calls. With threaded Flask, another request could refresh/replace `PlayerState` between a mutation and save.
-
-Stage 4A adds `StateRepository.request_scope()` using the existing `RLock`. Engine and SDK stateful requests now keep refresh -> handler -> response on one coherent state snapshot; nested `save()` remains re-entrant. This is intentionally simpler than introducing SQL while gameplay schemas are still changing.
-
-The human-editable DB remains `data/player_db.json`, schema version 2. Unknown/new PlayerState fields continue to persist under `player.domains`, so the JSON structure remains forward-expandable.
-
-## Stage 4A deliberate non-goals
-
-Do not implement in this stage:
-
-- semantic summon reward grants;
-- hero powerup/evolve/equipment mutations;
-- battle formation semantics;
-- campaign result/reward progression;
-- Arena/Peak Arena;
-- Activities/Voyage;
-- payment.
-
-## Next APK test
-
-1. Stable Stage 3 lobby must remain intact.
-2. Press Girls. A new MID49 is not required after bootstrap.
-3. Hero list should open with owned Aquaris plus client-table-driven uncollected entries.
-4. Sort/filter can exercise MID89.
-5. Preset save can exercise MID1793 and must survive relog.
-6. If list opens but individual girl detail freezes/spins, capture that click's server log and trace the hero-detail window separately; do not widen Stage4A blindly.
-
-## Validation rule
-
-Only run `python -m py_compile`. Stage 4A final validation: **PASS — 56 Python files compiled**. No Flask/HTTP/APK/ADB/emulator runtime test. User performs runtime testing.
-
-Planned Stage 4A handoff artifact:
-
-`gxb-backend-stage4a-hero-foundation-2026-08-16.zip`
-
----
-# Stage 3.1.7 update — automatic sign popup + EventCentre building contract
-
-Current stage: **Stage 3.1.7 auto-sign/building-fix**  
-Date: 2026-08-16
-
-## User-confirmed Stage 3.1.6 breakthrough
-
-Stage 3.1.6 root MID1 `server_time` was the correct MainScene prerequisite and produced a major improvement:
-
-- MID176 `LOAD_FRIENDS` now appears after MID612.
-- MID2754 `CHECK_GAME_STAT` now appears.
-- MID1302 `LOAD_ACHIEVEMENT_INFO` appears.
-- top mana/crystal/energy HUD renders.
-- bottom strip renders and Backpack + Chat are usable.
-- the lobby is no longer globally touch-locked.
-
-New symptom: poster girl, middle menu, and most top-left/player controls appear briefly, then vanish after roughly one second. Economy HUD + bottom strip remain. Girls button still does not work. Treat poster-girl randomization itself as low priority; functional lobby remains primary.
-
-## Source-confirmed reason the visible lobby hides
-
-`MainScene:openWindowInOrder()` automatically walks:
-
-`pic_notice -> sign_in -> walfare_activities -> seven_day_login -> gift_push`
-
-after the established guide threshold is met.
-
-Stage 3.1.6 bootstrap detail MID352 reports `is_signed=0`. Because that detail hydrates `SelfPlayer.signInfoLoaded_`, the later `loadSignInfo()` callback does not need another LOAD_SIGN_INFO request; it sees `isSigned == 0`, sends MID353 `SIGN`, and opens `sign_in` on success.
-
-The live Stage 3.1.6 trace confirms this timing: MID8193 `GET_PIC_NOTICE_INFO` and MID353 `SIGN` are emitted immediately after MainScene finishes its primary loads. MID353 currently returns only `{"awards":[]}`.
-
-`data/tables/window.lua` marks `sign_in` with `show_background=1`.
-
-`WindowManager:setBackground()` calls `main_scene_top:setBgVisible(isShowBackground())`. `MainSceneTopWindow:setBgVisible(true)` hides:
-
-- `left_container`
-- `player_container`
-- `extra_container`
-- `main_scene_middle`
-- `main_scene_left`
-
-but leaves the economy sidebar and bottom strip. This exactly matches the user's visual report.
-
-`SignInWindow:showSignInRes()` consumes `is_signed`, `sign_times`, and `award`; the current MID353 `{"awards":[]}` is not a complete real sign result. Do not invent an award/item ID just to fill it.
-
-### Stage 3.1.7 sign strategy
-
-The established-profile default now returns `is_signed=1` in both:
-
-- boot detail MID352;
-- explicit `LOAD_SIGN_INFO`.
-
-This makes the ordered popup chain skip `sign_in` instead of opening a malformed automatic modal. MID353 remains an intentionally incomplete compatibility stub for later deliberate sign-in work.
-
-MID8193 `GET_PIC_NOTICE_INFO` is also corrected to the exact fields MainScene consumes for a no-popup result:
-
-`{"has_read":1,"contents":[]}`.
-
-## Source-confirmed MID1056 request storm
-
-After the Stage 3.1.6 clock fix, the live server receives MID1056 `GET_BUILDING_LIST` approximately every second. The old backend responds `{"list":[]}`.
-
-Pass19 and `EventCentre.lua` prove the client expects:
-
-- `building_list`
-- `cabinet_info`
-- `desk_info`
-- `pet_cabin_info`
-
-and immediately dereferences building rows 1/4/5/6. `xyd.EventCentreBuildingType` defines IDs 1..7:
-
-1 CABINET, 2 DESK, 3 TRASH, 4 BOOKSHELF, 5 ADMIN, 6 BOARD, 7 PETROOM.
-
-`ServerTime:handleActCentreRedPoint()` calls `EventCentre:getBuildingList()` when `deskInfo` is absent. Because the Stage 3.1.6 response never populates `deskInfo`, the now-working one-second ServerTime tick continually requests MID1056.
-
-Stage 3.1.7 `building_list_payload()` therefore returns all seven building rows with source-consumed fields `lev`, `need_time`, `start_time`, `new_evolve`, plus idle `desk_info`, `pet_cabin_info`, and `cabinet_info`. Field names are source-confirmed; values are compatibility defaults (level 1 / zero timers/items). Compatible persisted custom rows are merged onto these defaults when present.
-
-Expected result: one/few MID1056 loads are acceptable, but the one-request-per-second loop should stop after a valid response hydrates `deskInfo`.
-
-## ADB/logcat classification for this run
-
-The supplied full.log does not show a useful Lua traceback or native crash at the ~17:53:39 disappearance point. It shows normal HTTP completions and repeated bitmap-font warnings for letters `M`/`q`. Use the exact source/UI state transition plus matching MID353 timing as the diagnosis; do not claim an ADB-visible Lua exception.
-
-## Girls button next discriminator
-
-Do not change hero-list logic in Stage 3.1.7. Source says an accepted Girls-button click calls `SelfPlayer:loadHeros()` and should send MID49 `LOAD_HEROS`, then load Backpack if needed and open `hero_list`.
-
-Stage 3.1.6 live request log did not show explicit MID49 after the reported failed click. First remove the broken automatic sign/background state and retest.
-
-After Stage 3.1.7:
-
-- if Girls works: continue per-window Stage 3 completion;
-- if Girls fails and MID49 appears: inspect hero response / `HeroListWindow` narrowly;
-- if Girls fails and MID49 does not appear: investigate click/window overlap/function gating, not backend hero payload.
-
-## Stage 3.1.7 expected markers
-
-Preserve:
-
-- MID176 `LOAD_FRIENDS`
-- MID2754 `CHECK_GAME_STAT`
-- top economy HUD
-- functional Backpack/Chat
-- working MID18 server picker
-
-New expectations:
-
-- MID353 `SIGN` should **not** auto-fire at login/lobby entry.
-- poster girl + middle + top-left/player lobby controls should remain visible after entry.
-- MID1056 should not repeat every second after a successful corrected response.
-
-## Validation rule
-
-Only run `python -m py_compile`. Stage 3.1.7 validation result: **PASS — 55 Python files compiled**. No Flask/HTTP/APK/ADB/emulator runtime test was run. User performs backend/APK/ADB runtime tests. Payment stays permanently out of scope. TCP chat stays minimal unless it becomes a proven blocker.
-
----
-# Stage 3.1.6 update — bootstrap `server_time` MainScene fix
-
-Current stage: **Stage 3.1.6 bootstrap-server-time**  
-Date: 2026-08-16
-
-## User-confirmed Stage 3.1.5 result
-
-- MID18 `LOAD_USER_REGIONS` / server-switch is now working correctly in the APK. The user can open the server picker and sees the generated local placeholder regions plus region 125 `Deep Valley`.
-- Normal login still reaches the lobby, but the same MainScene failure remains: bottom menu/buttons and the top economy/player HUD do not complete and touch-driven lobby actions do not work.
-- Live request boundary remains MID612 `GET_SELF_GUILD`, with MID56/836/1344 around the same point, followed by repeating MID192 chat discovery. MID176 `LOAD_FRIENDS` and MID2754 `CHECK_GAME_STAT` are still absent.
-- Keep the Stage 3.1.5 RegionWindow contract fix. The placeholder `Local-*` regions are compatibility data and are not a priority while the lobby is locked.
-
-## Runtime probe result
-
-The Stage 3.1.5 ADB probe successfully pulled current writable state from `/data/data/com.carolgames.gxb/files/com.carolgames.gxb`.
-
-Current identity is coherent on-device:
-
-- SDK/account UID: `13371337`
-- SDK/login SID: `1993b58bfd1b93499ae19477b236d4a2`
-- game player: `12525385 / Moppleton`
-- region: `125 / Deep Valley`
-
-The writable tree contains `src_32`, `src_64`, `res`, and version manifests, but the targeted pull found no hot-update copies of `MainScene*.lua`, `SelfPlayer.lua`, `ServerTime.lua`, `BattlePass.lua`, or the other files involved in the new diagnosis. It did find hot `LoginWindow.lua` and `eco_sidebar.csb`. Therefore the bundled complete `src_64` remains the best available runtime source for the specific MainScene/ServerTime path below.
-
-The current `game.db` still contains historical region-125 formations with partner IDs not present in our one-hero server state. Preserve this as a later consistency issue, but it is not on the synchronous pre-MID176 path and is not the current root-cause candidate.
-
-## Source-confirmed missing bootstrap clock
-
-`app/common/ServerTime.lua` initializes with:
-
-- `canGetServerTime_ = false`
-- `serverTime_ = 0`
-- `getServerTime()` returns `nil` until `resetServerTime()` is called.
-
-`app/common/network/Backend.lua:extraWebResponseCheck_()` calls `xyd.ServerTime.get():resetServerTime(response.server_time)` whenever a successful **top-level** response contains `server_time`. This happens before the MID event/callback dispatch.
-
-Stage 3.1.5 MID1 had no top-level `server_time`. Its boot detail does contain `detail[176].server_time`, but `SelfPlayer:loadGameStartInfoEvent_()` has no `LOAD_FRIENDS` boot-detail branch. The embedded 176 payload therefore does not run `SocialSystem:loadFriends()` and cannot initialize the global ServerTime clock.
-
-This creates two source-confirmed nil-clock failures that match both missing MainScene MIDs:
-
-1. **MainSceneBottomWindow**
-   - Guild-open path sends MID612 `GET_SELF_GUILD` first, matching live logs.
-   - Then `updateBackendRedmark()` loads `BattlePass`.
-   - `BattlePass:isOpen()` performs `season_start <= ServerTime:getServerTime() < season_end`.
-   - With ServerTime uninitialized, the comparison uses `nil` and can abort synchronously **before** unconditional `socialSystem:loadFriends()` (MID176).
-
-2. **MainSceneTopWindow**
-   - `willOpen()` calls `addEcoBar() -> regLeftButtons() -> updatePlayerInfo() -> initActList() -> onEnterAction() -> checkGameStat()`.
-   - `initActList()` reaches `updateButtonTable()`, which evaluates `adventureEventEarliestTime - ServerTime:getServerTime()`.
-   - With ServerTime uninitialized, subtraction uses `nil` and can abort **before** `onEnterAction()` and `checkGameStat()` (MID2754).
-
-This is the first single source-backed dependency found that explains **both** the exact live MID612→no-176 boundary and the independent no-2754/top-HUD failure.
-
-## Stage 3.1.6 implementation
-
-MID1 `RETRIEVE_TOKEN` now includes top-level:
-
-```json
-"server_time": <current unix seconds>
-```
-
-The value comes from canonical PlayerState `player.now()`.
-
-This field is intentionally added to authenticated MID1 only, not globally to all responses. Initializing ServerTime on pre-login MID2/center traffic would start its one-second scheduler before player/model hydration and could create unrelated early events. MID1 is the earliest safe authenticated response and `extraWebResponseCheck_()` initializes the clock before its TOKEN/bootstrap event is dispatched.
-
-Existing MID176 `server_time` remains and should refresh the clock again once the bottom window reaches `LOAD_FRIENDS`.
-
-No new MIDs, no payment changes, no fabricated formations, and no client patch are included in this stage. The Stage 3.1.5 RegionWindow and identity fixes are retained.
-
-## Stage 3.1.6 success markers
-
-On the next APK run:
-
-1. MID1 console response must show top-level `server_time` alongside `token` / `region`, not only nested inside detail payloads.
-2. After MID612, MID176 `LOAD_FRIENDS` should appear if the bottom window now gets past `updateBackendRedmark()`.
-3. MID2754 `CHECK_GAME_STAT` should appear if the top window now gets through `initActList()`.
-4. The top mana/crystal/energy + player HUD and bottom buttons should render/finish entry animation and become interactive.
-
-If both 176 and 2754 appear but a specific button/window later fails, handle that window one at a time using its exact request/consumer. If either remains absent, inspect the next synchronous source instruction after the newly crossed boundary rather than resuming broad mapping.
-
-## Validation
-
-Only `python -m py_compile` was run for this handoff. Result: **OK — 55 Python files compiled successfully**. No Flask, HTTP, APK, emulator, or ADB runtime test was run. User performs backend/APK/ADB runtime tests.
-
----
-# Stage 3.1.5 update — RegionWindow contract + runtime hot-Lua probe
-
-Current stage: **Stage 3.1.5 region-contract/runtime-probe**  
-Date: 2026-08-16
-
-## User-confirmed Stage 3.1.4 result
-
-- The identity-coherence experiment worked as designed: SDK/login SID `1993b58bfd1b93499ae19477b236d4a2` reached MID1; MID17 returned game player `12525385 / Moppleton`, region `125 / Deep Valley`.
-- This did **not** change the locked-lobby boundary. The run still reaches MID612 `GET_SELF_GUILD` and repeating MID192 chat discovery, but no MID176 `LOAD_FRIENDS` and no MID2754 `CHECK_GAME_STAT`.
-- Therefore SID/account/game-player identity mismatch is no longer the leading explanation for the missing HUD/bottom controls.
-
-## New server-selection bug is source-confirmed
-
-Clicking the login-screen region-change button sends MID18 `LOAD_USER_REGIONS` twice. Stage 3.1.4 returned `regions:[...]` and `players:{}` and the client window did not render/usefully respond.
-
-Pass 19 only indexed the immediate `LoginWindow` response fields (`regions`, `players`). Downstream `app/windows/RegionWindow.lua` proves a larger exact field contract:
-
-- `userRegions.recall_regions` is read and passed to `next()`, so it must be a table (empty array is safe).
-- `userRegions.players` is passed to `table.sort()` and `ipairs()`, so it must be an array, not an object/map.
-- each region row is later compared with `region.max_player_id <= region.cur_id`; both fields therefore must be numeric.
-- character rows consume `region`, `lev`, `vip`, `name`/`id`, `avatar_id`, `avatar_frame_id`, `conquer_lev`, `conquer_loop_id`.
-
-Stage 3.1.5 `SystemHandlers.load_user_regions()` now serializes that complete RegionWindow-safe shape from canonical PlayerState. Region field names are source-confirmed. Unobserved region capacity numbers remain compatibility defaults, not recovered official values.
-
-## Hot-update runtime tree is now first-class evidence
-
-The user's targeted ADB probe confirmed the writable root exists:
-
-`/data/data/com.carolgames.gxb/files/com.carolgames.gxb`
-
-with `.download_infos`, `.revision`, `lazyFile.json`, `res/`, `src_32/`, `src_64/`, and a ~4.9 MB `version.json`. Current `Cocos2dxPrefsFile.xml` only showed `__version_json_init__=success` and `__version_json_init_web_windows__=success`; it did not show the old official `__version__=1.667.0` value.
-
-Do not call this directory unrelated. Runtime writable Lua can override APK-bundled source.
-
-Strong archive proof: `all-assest-rechecked.zip` contains both bundled and downloaded copies of `src_64/app/windows/LoginWindow.lua`, and they differ. The bundled copy uses non-debug default region index `var_2_0[4]`; the downloaded copy uses `var_2_0[7]`. Thus hot-update Lua materially changes runtime behavior.
-
-## Stage 3.1.4 probe defects found
-
-The previous helper under-collected evidence because:
-
-1. it searched `*main_scene*`, but real Lua filenames are `MainScene*.lua`;
-2. `adb shell` inside the checksum `while read` loop inherited stdin and could consume the remaining filenames after the first iteration;
-3. `game_meta.txt` / `xinyd_user.txt` depended on Android having a `sqlite3` binary, which the target device apparently does not.
-
-Stage 3.1.5 adds `tools/adb_stage315_probe.sh` which:
-
-- matches/pulls CamelCase runtime Lua and targeted resources;
-- redirects ADB command stdin so the whole file list is processed;
-- pulls raw `game.db`, `Xinyd.db`, and `log.db` and queries them with host sqlite3;
-- captures `game_meta`, story-guide rows, formations, SDK session, and client errorlog;
-- pulls current `LoadingScene`, `LoginWindow`, `RegionWindow`, `SelfPlayer`, `Backend`, `AssetDownload`, `StoryData`, `WindowManager`, `MainScene*.lua`, `eco_sidebar.csb`, `skill_full*`, and targeted version manifests when present.
-
-## Next test priority
-
-1. Confirm clicking the server-change button now opens a usable RegionWindow and that selecting region 125 updates the login screen.
-2. Normal login/lobby should remain at least as stable as Stage 3.1.4.
-3. If lobby remains locked/no 176/no 2754, run `tools/adb_stage315_probe.sh` and compare the pulled hot/runtime Lua against complete bundled `src_64` before changing more backend state.
-4. Do not resume broad mapping. Narrow source/runtime-diff checks only around current MainScene failure.
-
-## Validation rule
-
-Only run `python -m py_compile`. User performs backend/APK/ADB runtime tests.
-
----
-# Stage 3.1.4 update — SDK / game identity coherence
-
-Current stage: **Stage 3.1.4 identity-coherence experiment**  
-Date: 2026-08-16
-
-## User-confirmed Stage 3.1.3 result
-
-- Client still logs in, enters region 125, and reaches the same incomplete/non-pressable lobby.
-- Live engine boundary remains MID612 `GET_SELF_GUILD`, then only repeating MID192 chat-room discovery; no MID176 `LOAD_FRIENDS`, no MID2754 `CHECK_GAME_STAT`, no unknown/fallback MID.
-- Stage 3.1.3 advertised `/res/`, but the supplied server trace contains no `/res/*` request. Treat the manifest-based resource probe as a negative result for that run.
-- Stage 3.1.2/3.1.3 also received no `/client-log` POST. Do not infer a missing `skill_full` resource without direct evidence.
-
-## New ADB filesystem evidence
-
-The user supplied both a known-good pre-EOL official-client dump and a fresh dump from the current reconstructed-client run.
-
-Both `files/game.db` dumps contain the same `meta` row:
-
-- `sid = 1993b58bfd1b93499ae19477b236d4a2`
-- `regionID = 125`
-- `regionName = Deep Valley`
-- `playerID = 12525385`
-- `playerName = Moppleton`
-
-The common client-side DB dumps (game/defaults/chat/friend/state/message DBs) are effectively the old official data. The fresh current tar includes `files/game.db`, so this row is likely a real current-device observation rather than only stale host extraction data. Still use `rm -rf gxb_app_data` before future extracts as hygiene.
-
-The fresh current native SDK DB instead shows local replacement identity:
-
-- SDK user/account UID `13371337`
-- session `SID=13371337`, `UID=13371337`, `UNAME=AdminRoot`, `TOKEN=local_token`
-
-ADB logcat independently shows native SDK response/session cookies using `QQWSID=13371337` and `QQWUID=13371337`.
-
-The official AppsFlyer prefs contain an `af_login` event value with `uid=1901244323`; preserve that as a possible historical SDK/account UID lead, but do **not** promote it to the backend default yet because it is indirect analytics evidence rather than an SDK session dump.
-
-## Authoritative Lua identity contract
-
-`LoadingScene:showLoginSdkWindow()` receives Android `xydNewLogin` token and SID callbacks separately. The SID callback is passed to `LoginWindow.sid`. `LoginWindow` dispatches that same SID in its LOGIN event. `LoadingScene:login_()` sends it unchanged in MID1 `RETRIEVE_TOKEN` request field `sid` and later `updateMeta_()` persists it to `xyd.db.meta.sid`.
-
-MID1 root `uid` is separately consumed by `SelfPlayer:loginEvent_()` as `SelfPlayer.uid`. MID1 detail `17` is consumed by `SelfPlayer:onPlayerInfo_()` / `Player.populate()` as the in-game `playerID`/`playerName`.
-
-Therefore SDK/account UID, SDK/login SID, and game player ID are distinct concepts. Stage 3.1.3 incorrectly collapsed all three to `13371337`.
-
-`LoadingScene:updateMeta_()` calls `xyd.db.clearGameData()` when persisted `meta.playerID` differs from hydrated `SelfPlayer.playerID`. `clearGameData()` deletes/reset formations, story guide rows, missions, view state, local guides, chat/friend caches and related per-player state before meta is rewritten. The fresh current dump still contains the old region-125 formation/state rows, so that clear path did not visibly persist during the run. This is a source-vs-live inconsistency and increases the value of matching the known-good identity before pursuing more MIDs.
-
-Do not overstate why the clear did not happen. APK-bundled `src_64` does not initialize SelfPlayer.playerID from meta before MID17, but downloaded/hot-updated Lua may differ and the current ADB script excluded the writable hot-update root.
-
-## Java/payment trace classification
-
-Current logcat has a Java stack ending at `AppActivity.java:658`, but the stack is `XinydPay.initXinydPay -> PayRequestUtils.initWXPay` failing to reflect `com.tencent.mm.opensdk.modelpay.PayReq` after login succeeds. It then continues to the already-known `query_pay_method_amounts` flow. Payment remains out of scope; do not treat this stack as the MainScene blocker.
-
-## Stage 3.1.4 implementation
-
-Default canonical identity now deliberately separates:
-
-- SDK account UID: `13371337` (kept as the already-working local SDK identity for isolation)
-- SDK/login SID / QQWSID: `1993b58bfd1b93499ae19477b236d4a2`
-- game player ID: `12525385`
-- game player name: `Moppleton`
-- region: `125`
-- region name: `Deep Valley`
-
-Starter hero ownership is updated to game player ID `12525385`. Do not copy official local formation rows into backend hero state: formation partner IDs are not sufficient to reconstruct source table IDs safely.
-
-`PlayerState.set_region()` now preserves a configured region name when the numeric region is unchanged, and knows observed region 125 as `Deep Valley`. `LOAD_USER_REGIONS` also names region125 `Deep Valley`; all unobserved region names remain compatibility placeholders.
-
-MID1 writes backend-only `runtime_logs/identity_trace.jsonl` and prints `[IDENTITY] ...`; no diagnostic protocol field is added.
-
-Stage 3.1.3 `/res/` probe is retained but disabled by default (`GXB_RESOURCE_PROBE=1` re-enables it).
-
-## Hot-update/download directory is now relevant
-
-The user's broad ADB script intentionally excludes `files/com.carolgames.gxb`. Do not call it unrelated anymore. Writable downloaded Lua/resources can affect the runtime source/search-path behavior and direct local loads that do not hit the `/res/` probe.
-
-Official `Cocos2dxPrefsFile.xml` snapshot shows:
-
-- `__version_json_init__ = success`
-- `__version_json_init_web_windows__ = success`
-- `__version__ = 1.667.0`
-- `skill_point = 10`
-- `skill_point_time_count = 300`
-
-The current client's Cocos prefs contents were not printed by the user's script (it only prints `.txt` dumps), so current `__version__` remains unknown. A targeted helper `tools/adb_stage314_probe.sh` now captures current Cocos prefs plus targeted hot-update/MainScene paths without pulling the whole asset tree.
-
-## Next APK test priority
-
-1. MID1 request itself should contain `sid=1993b58bfd1b93499ae19477b236d4a2`.
-2. `runtime_logs/identity_trace.jsonl` should show request SID matching SDK SID, account UID `13371337`, game player `12525385/Moppleton`, region `125/Deep Valley`.
-3. Watch for first appearance of MID176 and MID2754.
-4. Fresh ADB dump after the run: inspect `game.db.meta` and `Xinyd.db.user.session`.
-5. If lobby still locks with coherent identity and no 176/2754, run `tools/adb_stage314_probe.sh` and inspect the excluded hot-update/download root next. Do not resume broad MID waterfall.
-
-## Final Stage 3.1.4 validation
-
-- Code defaults were aligned with the packaged JSON identity tuple so regeneration does not silently fall back to SID/player `13371337`.
-- `JsonPlayerDatabase.serialize()` now labels regenerated files as Stage 3.1.4 and preserves the identity-separation note.
-- Final `python3 -m py_compile` succeeded for 55 Python files after these changes.
-- No Flask server, HTTP endpoint, APK, emulator, ADB command, or client runtime test was run by the assistant.
-
-## Validation rule
-
-Only run Python syntax compilation before handoff. User performs APK/runtime testing.
+Generic cross-player `Player.lua` supports:
+- MID17 LOAD_PLAYER_INFO;
+- MID49 other-player Hero load;
+- MID208 LOAD_BATTLE_FORMATION `{type,num,player_id}`, defense consumes `response.params.list`;
+- MID209 own formation save.
+
+### Classic Arena
+Per-player arena state includes:
+rank, best_rank, defense, left_time, buy_num, last_match_time, update_count,
+enemies, pet_id, server_time, ban_hero_id, is_ban_open, set_formation_time, fight_times.
+
+PvP result MID279 is zlib/form. Arena should own mode state/rating/tickets/defense/reports, not a cloned player DB.
+
+### Peak Arena
+Per-player rank/base state + multi-team serialized defense. Numeric `PEAK_FIGHT_RESULT` remains undefined in supplied source; never invent it.
+
+### Region Arena
+Per-player point/star/rank/defense/fight/missions/award/exchange state, with region/global matchup/rank indexes.
+
+### Region Casual and Friend Fight
+These prove historical replay records need immutable snapshots:
+A/B player IDs, A/B player info, A/B Hero/pet/team snapshots, battle count/report content.
+
+Current opponent views can project current canonical state; historical fight reports must NOT re-read mutable current Hero/profile state.
+
+### RankList
+`rank.lua` defines ranking catalog/type/subtype/realtime/show behavior, including:
+1v1 global/server, Peak, Arena, practice, AP/team force/Hero star, collection and other ranks.
+
+Rank indexes should reference player_id/guild_id + score/rank/minimal projection, not clone full player state.
+
+## Recommended storage topology (architecture inference)
+
+Suggested JSON-era layout:
+
+- `accounts/<uid>.json`
+- `sessions/<sid>.json`
+- indexes:
+  - account_by_login
+  - player_by_account_region
+  - player_name
+  - region player indexes
+- `players/<player_id>/`:
+  profile/economy/tutorial/heroes/inventory/pets/formations/campaign/social/mail/domain files
+- `guilds/<guild_id>.json`
+- `pvp/<mode>/<player_id>.json`
+- `pvp/reports/<report_key>.json`
+- `rankings/<subtype>.json`
+
+Physical layout is not claimed as original Carol Games schema. Repository ownership and stable IDs are the important part.
+
+## Authorization rule
+
+Self-state:
+`SID/TOKEN -> UID -> selected region -> self player_id`.
+
+Normal mutations must use self context, not caller-supplied player_id.
+
+Only source-defined cross-player endpoints may target other player IDs and must return public/battle projections, never private economy/tutorial/account data.
+
+## Two-user implementation exit criterion
+
+User A and User B can register/login on same device or different devices and get:
+- different SDK UIDs;
+- different sessions;
+- independent `(uid,region)->player_id`;
+- independent Heroes/Campaign/Inventory/economy/tutorial;
+- no cross-account state leakage.
+
+Then A/B can later discover/project each other by stable player_id for social/rank/PvP.
+
+## Implementation order after Pass 22
+
+1. AccountRepository: MID65282/65281/65284, unique UID + credential verifier.
+2. SessionRepository: unique SID/TOKEN/QQW cookies.
+3. AccountRegionIndex + globally unique player allocator.
+4. MID18 account-scoped region/player directory.
+5. MID1 atomic resolve-or-create.
+6. source-derived fresh-player template (separate from maxed anonymous sandbox).
+7. migrate working Hero/Inventory/Formation/Campaign/etc to selected player_id repositories.
+8. public cross-player projection.
+9. social/guild/ranking primitives.
+10. immutable PvP report snapshot primitive.
+11. continue noncompetitive roadmap.
+12. Competitive/Arena/Top last.
+
+Known unknowns that do NOT change architecture:
+- exact official duplicate-account/wrong-password error codes;
+- exact fresh-account starting numeric values;
+- session expiration policy;
+- PvP scoring formulas;
+- undefined Peak fight-result numeric MID.
+
+Key Pass 22 docs:
+- PASS22_INDEX.md
+- PASS22_FINAL_MAPPING_STATUS.md
+- LIVE_REGISTRATION_DELTA_PASS22.md
+- MULTIUSER_IDENTITY_AND_PLAYER_LIFECYCLE_PASS22.md
+- CANONICAL_PLAYER_DATA_MODEL_PASS22.md
+- SERVER_STORAGE_TOPOLOGY_PASS22.md
+- SERVER_OWNERSHIP_MATRIX_PASS22.md
+- REQUEST_AUTHORIZATION_AND_ISOLATION_PASS22.md
+- PVP_AND_RANKING_STATE_PASS22.md
+- CROSS_PLAYER_PROJECTION_AND_SNAPSHOTS_PASS22.md
+- IMPLEMENTATION_READINESS_AND_ORDER_PASS22.md
+- PASS22_SOURCE_FACTS.json
 
 ---
 
-# Stage 3.1.3 update — resource/preload probe
+# Pass 21 — Android/Smali SDK identity/account boundary
 
-Current stage: **Stage 3.1.3 MainScene resource preload probe**  
-Date: 2026-08-16
+Date: 2026-08-17
 
-## User-confirmed Stage 3.1.2 result
+Pass 21 is mapping/research only. No backend code was changed.
 
-- Login and server selection still work and the client reaches the lobby.
-- Top HUD and bottom menus remain absent/non-pressable.
-- Live request boundary still reaches MID612 but not MID176 or MID2754.
-- Stage 3.1.2 advertised a non-empty `/client-log`, but the user left the client running and **no `/client-log` POST and no client-error runtime file appeared**. Treat that as a negative diagnostic result; do not claim a missing `skill_full` resource is confirmed.
+## Source
+- `smali-packed.zip`
+- decoded workshop APK: `smali/` + `smali_classes2/`
+- 9,200 Smali files total (8,715 + 485)
+- primary SDK: `com/xyd/platform/android`
+- game Java/Lua bridge: `org/cocos2dx/lua/AppActivity`
 
-## Corrected MainScene window-order fact
+Important provenance: this decoded tree contains known workshop edits to `Constant.smali` and `XinydUtils.getGoogleDNS()`. Current patched platform/DNS endpoint values are not original-host evidence.
 
-The previous memory entry overstated that a synchronous bottom-window abort necessarily prevents the top window from opening. Source `WindowManager:openWindow()` constructs each requested window and then starts an independent asynchronous `AssetDownload:preloadWindowsByName()` callback. `MainScene:onEnterTransitionFinish()` calls left -> middle -> bottom -> touch -> top quickly; bottom and top can therefore independently fail/wait during preload/loadRes/willOpen.
+## Registration/login discoveries
+- Register account IDs are locally validated by `LoginManager.registerAccount()`:
+  - regex `^[A-Za-z0-9]*$`
+  - length 6–50.
+- Register passwords:
+  - `[A-Za-z0-9]{6,15}`
+  - length 6–15.
+- Therefore email-looking IDs containing `@`/`.` are rejected locally with “Account contains invalid character, please re-enter” and no HTTP request.
+- A source-valid registration probe is e.g. `testuser01` / `pass1234`.
+- Credential login accepts wider ID syntax: `[A-Za-z0-9]+[A-Za-z0-9-._@]*[A-Za-z0-9]`.
 
-Source-confirmed boundaries remain useful:
-- bottom `willOpen()` dispatches MID612 conditionally, later constructs `skill_full` SpineEffect, updates backend redmarks, optionally handles pets, then unconditionally calls MID176 LOAD_FRIENDS.
-- top `willOpen()` runs `addEcoBar -> regLeftButtons -> updatePlayerInfo -> initActList -> onEnterAction -> checkGameStat`; MID2754 is last in that chain.
+Active Xinyd MID map index 1:
+- 65281 platform_user_login
+- 65282 register_platform
+- 65283 tp_user_login
+- 65284 anony_login
+- 65285 anony_update
+- 65286 tp_anony_update
+- 65288 get_create_player
+- 65289 update_played_server
+- 65305 get_game_package_info
+- 65319 is_allowed_upload
+- 65323 auto_login
+plus other support/social/payment symbols in `SDK_MID_MAP_PASS21.md`.
 
-## Resource-preload hypothesis and probe
+Credential MID65281 success:
+- requires JSON `error_code=0`;
+- requires JSON `uid`;
+- session is carried by cookies QQWSID / QQWTOKEN / QQWUID / QQWUNAME;
+- if `uid` is omitted from a nominal success, `LoginManager$5` throws and GXB AppActivity's `onException()` is empty, explaining a visually dead Login button;
+- if SID is absent after otherwise valid auth, `getLoginSession()` can retry login.
 
-`AssetDownload:preloadWindowsByName()` uses the local `version.json`-derived manifest. Missing manifest-listed files are downloaded from `(xyd.resDownloadUrl or "") .. basename .. "." .. md5`. Until Stage 3.1.3 the backend returned `res_download_url=""`, making this path invisible/unusable if a MainScene resource were locally missing.
+Register MID65282 request:
+- login_email
+- password
+- repassword
+- game_source
+Success requires:
+- uid
+- login_email
+Then SDK intentionally sends MID65281 with login_email/password to acquire session cookies.
 
-Stage 3.1.3 defaults `res_download_url` to `<GXB_SELF_URL origin>/res/` and logs first-seen requests plus retry summaries:
-- `runtime_logs/resource_requests.jsonl`
-- `runtime_logs/resource_probe_summary.json`
+Anonymous→normal account upgrade:
+- MID65285 anony_update with login_email/password/repassword/current uid;
+- success requires uid/login_email;
+- then credential-login session acquisition.
 
-The probe returns 404 deliberately; it never fabricates resource bytes. Disable with `GXB_RESOURCE_PROBE=0`. Override with `GXB_RES_DOWNLOAD_URL`.
+## Transport
+Xinyd `makeRequest`:
+- POST JSON
+- normal endpoint suffix `server/mobile_api_new/`
+- customer endpoint suffix `server/customer_api/`
+- connect timeout 10s
+- read timeout 100s
+- Keep-Alive
+- envelope `{mid, payload}`
+- signature: common params + client_secret, sort keys, URL encode, URLDecoder.decode, MD5, remove client_secret, emit digest as `sign`.
 
-Important direct resources not guaranteed to pass through this preload probe:
-- `windows/common_widgets/eco_sidebar.csb` from MainSceneTopWindow -> EcoSidebar/BaseWidget.
-- `skeletons/ui_effect/skill_full/skill.json/.atlas` from MainSceneBottomWindow.
-Their absence remains unconfirmed.
+Session cache:
+- `Xinyd.db`, schema version 17.
+- `user` table stores SDK user_id, serialized session, unique_flag, current_user_type, visibility, last_login.
+- passwords are not user-table columns.
+- UserSession JSON keys: SID, UID, UNAME, TOKEN.
+- user types 0 anonymous, 1 Facebook, 2 Google, 3 normal, 4 Weibo, 5 Weixin, 6 Line, 7 Twitter, 8 VK, 9 Amazon, 10 Mobile.
 
-## Android rList warning
+## Java/Lua bridge
+`AppActivity` successful SDK login sends Lua:
+1. TOKEN
+2. SID
 
-Latest logcat contains `Resources$UpdateResourceList` EACCES for `/data/user/0/com.carolgames.gxb/files/rList` during SDK/login startup. This stack is Android framework resource bookkeeping, not the Lua `AssetDownload` implementation. Record it as observed noise unless stronger evidence links it to GXB window resources.
+`AppActivity.xydSelectServer(serverId)` calls SDK update_played_server with blank player_id.
 
-## Stage 3.1.3 validation
+SDK `XinydUtils.create_player()` exists and can send MID65288 with server_internal_id/uid/player_id/player_name, BUT:
+- `AppActivity.xydCreatePlayer(...)` is a literal no-op;
+- no Smali call site invokes `XinydUtils.create_player()`.
+Therefore current GXB runtime does not use SDK MID65288 as authoritative character creation. Pass 20 MID18→MID1 lifecycle remains the implementation model.
 
-`python3 -m py_compile` succeeded for 55 Python files. No Flask server, HTTP endpoint, APK, emulator, or client runtime test was run.
+## Additional SDK string-MID surface
+Besides the active numeric `XinydMid` map, auxiliary SDK methods call direct string request names through the String overload of `makeRequest`. Identity/recovery examples include `login`, `anony`, `reg`, `tp_login`, `mobile_login`, `mobile_bind`, and email bind/reset flows. See `SDK_STRING_API_SURFACE_PASS21.md`. These are contained SDK paths; reachability varies.
 
-## Validation rule
+## Architecture consequence
+Keep separate:
+1. SDK accounts/credentials;
+2. SDK sessions/cookies;
+3. account↔region player index;
+4. canonical game player state keyed by game `player_id`;
+5. Hero/Inventory/Formation/Campaign/etc repositories;
+6. future PvP/ranking/report snapshots over canonical `player_id`.
 
-Only run Python syntax compilation. User performs APK/runtime testing.
+Anonymous sandbox should remain distinct and may retain reconstruction-friendly max economy. Fresh credential players need a separate source/live-derived starting template.
+
+Key Pass 21 docs:
+- PASS21_INDEX.md
+- PASS21_ANDROID_SMALI_MAPPING_STATUS.md
+- SDK_AUTH_ACCOUNT_PROTOCOL_PASS21.md
+- SDK_MID_MAP_PASS21.md
+- SDK_HTTP_TRANSPORT_AND_SESSION_PASS21.md
+- SDK_LOCAL_ACCOUNT_DB_PASS21.md
+- APP_JAVA_LUA_BRIDGE_PASS21.md
+- SDK_STARTUP_PACKAGE_INFO_PASS21.md
+- ANDROID_NETWORK_BOUNDARIES_PASS21.md
+- PASS21_IMPLEMENTATION_IMPLICATIONS.md
+- PASS21_SOURCE_FACTS.json
+- SDK_REQUEST_SITE_INVENTORY_PASS21.json
 
 ---
 
-# GXB Backend Runtime Memory
+# PASS 20 CURRENT STATE — 2026-08-17
 
-Current stage: **Stage 3.1.2 client error capture**  
-Date: 2026-08-16
+Read this section first. It supersedes earlier “current state” assumptions while preserving the older memory below for history.
 
-## User-confirmed Stage 3.1.1 status
+## Pass purpose
 
-- Stage 3.1.1 fixed the malformed MID49 regression and the user again reaches the lobby.
-- The locked/incomplete MainScene symptom is unchanged: top economy/header and bottom menus do not complete.
-- Live request boundary is still 612 GET_SELF_GUILD followed by no 176 LOAD_FRIENDS and no 2754 CHECK_GAME_STAT.
-- No unknown/fallback engine MIDs appear.
+Pass 20 is mapping/research only. No backend code was changed. It folds the runtime reconstruction through v0.7.0 back into the original Pass 19 client map and expands the identity/account/player-state/update planes needed for a later robust multi-player/PvP backend.
 
-## Stronger MainScene ordering diagnosis
+## Stable runtime milestone entering Pass 20
 
-- Source `MainScene:onEnterTransitionFinish()` opens windows in order: left -> middle -> bottom -> touch -> top.
-- `MainSceneBottomWindow:willOpen()` dispatches GET_SELF_GUILD when guild is open, then performs synchronous local setup, and only later unconditionally calls `socialSystem:loadFriends()` (MID176).
-- Therefore reaching 612 but never 176 points to a synchronous client-side abort inside bottom-window setup. Because bottom is opened before top, the same abort also explains why top never reaches MID2754.
-- Bottom controls begin touch-disabled. Top's entry action eventually dispatches `MAIN_SCENE_ACTION_END`; if top never opens, the lobby remains globally locked-looking.
-- Do not respond by inventing more backend MIDs or currencies. Trace local dependencies between 612 dispatch and MID176.
+User/device confirmed working in the current reconstruction:
 
-## Hidden client error-log transport — Stage 3.1.2
+- anonymous SDK/login path into the game;
+- Girls and coherent owned Hero detail;
+- Skin and Affinity;
+- skill upgrades, including server/client timed skill-point recovery parity;
+- Campaign Chapter 1 and Chapter 2 progression;
+- live lazy asset download with visible progress;
+- special story partner claim (Joan/Geisha path) and subsequent MID114 progression;
+- Backpack persistence;
+- Sweep → EXP juice → Hero level progression;
+- tutorial function-guide persistence;
+- per-file `/res/<basename>.<md5>` resource serving;
+- MID2 numeric resource ZIP update through install/restart (`1.631.1` marker deployment).
 
-- Source `app/xinyoudi.lua` starts `ErrorLogPoster` automatically.
-- Engine/Lua errors are stored in `xyd.db.errorLog`; missing assets recorded through `xyd.assetDownloadErrorLog(path)` go to the same database.
-- ErrorLogPoster polls every 30s and uses `Backend:log(0, json_logs, ...)`.
-- `Backend:log` only runs when RETRIEVE_TOKEN `log_url` is non-empty. Stage 3.1.1 returned an empty URL, which hid these errors from the backend.
-- Type-0 client logs are zlib-deflated JSON posted as multipart field `payload`; HTTP 200 causes the client to delete those local rows.
-- Stage 3.1.2 advertises `<GXB_SELF_URL origin>/client-log` by default and captures these uploads. Override with `GXB_CLIENT_LOG_URL`.
-- Output files: `runtime_logs/client_error_logs.jsonl`, `client_error_uploads.jsonl`, fallback `client_error_raw.jsonl`, and optional `client_crash_uploads/`.
-- The first upload may include historical rows accumulated from earlier runs. Preserve and inspect all rows; prioritize errors timestamped around MainScene entry and asset paths such as `skeletons/ui_effect/skill_full/skill.*`.
-- The supplied `all-assest-rechecked.zip` / extracted source tree does not contain `skeletons/ui_effect/skill_full/skill.*`; this does **not** prove the installed APK/OBB lacks it, so wait for client error evidence before classifying this as a resource problem.
+Asset restoration also made previously inert Institute-family UI surfaces open/load. Their server-side mechanics are not assumed complete.
 
-## Current source candidate between MID612 and MID176
+## Resource/update architecture now confirmed
 
-`MainSceneBottomWindow:willOpen()` unconditionally constructs and plays a `SpineEffect` from `skeletons/ui_effect/skill_full/skill.json/.atlas` before calling LOAD_FRIENDS. `SpineEffect` invokes `xyd.assetDownloadErrorLog` on a missing resource. This is a **candidate**, not yet a confirmed root cause. Stage 3.1.2 is specifically designed to capture the hidden client evidence needed to confirm or reject it.
+1. CENTER MID20480 supplies both engine URL and `res_download_url`.
+2. Foreground `AssetDownload.lua` uses `version.json`/`lazyFile.json`, native `FileDownloader`, and `<basename>.<md5>` URLs.
+3. `SilenceDownloader.lua` is a background prefetch path using the same lazy CDN convention.
+4. MID2 is the startup ZIP/volume update path for writable resources/source. Numeric `N.N.N` resource versions are mandatory.
+5. Writable `src_64` is ahead of packaged source in package path. A new writable Lua module has been runtime-installed through MID2; a modified-existing-module precedence probe is still worth doing once.
+6. Recovered `downloaded-assets/src_64` has 62 files; all differ from APK counterparts. Its `LoginWindow.lua` only changes the default non-debug region index in the inspected diff, not the account lifecycle.
 
-## Validation rule
+## Authentication findings added in Pass 20
 
-Only run Python syntax compilation. User performs APK/runtime testing.
+Current credential/register test server log:
 
-## Stage 3.1.2 syntax validation
+- SDK 65305 ×1
+- SDK 65319 ×1
+- SDK 65284 ×1 (`tp_code=anonymous`)
+- SDK 65281 ×5 with `login_email` + `password`
+- `query_pay_method_amounts` ×1
+- no registration request reaches HTTP.
 
-`python3 -m py_compile` succeeded for 54 Python files. No Flask, endpoint, APK, or client runtime test was performed.
+Therefore:
 
----
+- credential Login **does reach** the server at SDK MID65281; current generic response does not complete the expected native/UI transition;
+- Register “account contains invalid character” is client/native SDK validation before HTTP in this test;
+- exact native registration MID and validation rules are still unknown from `src_64`.
 
-Current stage: **Stage 3.1.1 JSON player database hotfix**  
-Date: 2026-08-16
+## Account → player lifecycle source conclusions
 
-## User-confirmed Stage 3.1 regression and root cause
+Android `LoadingScene.lua` uses native `xydNewLogin`/`xydAutoLogin`, then Lua `LoginWindow` calls MID18 `LOAD_USER_REGIONS` with SID/token.
 
-- Stage 3.1 reaches MID1 RETRIEVE_TOKEN and MID2784 ALBUM_SPECIAL_COLLECT_INFO, then stalls before GET_BOARD_INFO/MainScene fanout.
-- The live MID1 response proves detail["49"] was malformed: `heros` contained the entire JSON organizational hero section (`heroes`, `collected_heros`, `formation`, etc.) instead of the direct partner-id -> hero-record map.
-- Root cause: `JsonPlayerDatabase.load()` checked `PLAYER_FIELD_NAMES` before nested section names. Because the organizational section is also named `heroes`, the whole section was assigned to `PlayerState.heroes`.
-- Source `Player:herosEvent_()` iterates every value under `params.heros` and calls `Hero:populate()` on it, so this malformed nesting can abort bootstrap before later detail keys and MainScene.
-- Stage 3.1.1 fixes loader precedence and adds a defensive one-level `heroes` unwrap in `heroes_payload()`.
-- Keep the player DB architecture. Do not roll it back because of this regression.
-- `guide_id=101001` remains the established-profile experiment; it was not actually tested in MainScene by Stage 3.1 because the MID49 shape aborted first.
+MID18 response model:
+- `regions`
+- `players`
+- `recall_regions`
 
-## Stage 3.1.1 validation rule
+Player briefs include region/vip/level/name/id/avatar/conquer summary. If name is empty, UI displays numeric player ID.
 
-Only run Python syntax compilation. User performs APK/runtime testing.
+If MID18 reports no players, LoginWindow immediately dispatches LOGIN and LoadingScene sends MID1 `RETRIEVE_TOKEN` for the selected region. No Lua CREATE_PLAYER request exists in between. Strongest source-backed future model: first MID1 for `(account_uid, region)` atomically creates/resolves the game player and returns `is_new=1` if newly created.
 
----
+For `is_new=1`, opening story eventually enters `EditNameScene`; initial naming uses MID23 `EDIT_PLAYER_NAME`, then MID26 `SAVE_STORY`. No `Guestxxx` pre-name scheme is source-confirmed. Empty `player_name` is supported.
 
+## Player/state contract expansion
 
-Current stage: **Stage 3.1 JSON player database / established-profile correction**  
-Date: 2026-08-16
+`SelfPlayer:onPlayerInfo_()` directly consumes 93 MID17 fields. `StoryData` consumes `story_id/story_state/guide_id` from the same payload. The global `economy_` event can update 47 fields.
 
-## User-confirmed live status entering Stage 3.1
+Timed client mirrors that a canonical server must keep consistent include at least:
+- energy,
+- spirit energy,
+- skill points,
+- arena invitation.
 
-- Anonymous SDK login, server selection, RETRIEVE_TOKEN, and lobby entry remain functional.
-- Stage 3 improved lobby character behavior: changing/tapping the visible character now changes dialogue.
-- Top HUD (mana/crystal/energy/header) and most bottom/middle lobby buttons still do not become usable/visible.
-- Latest Stage 3 request trace still reaches 192/56/1344/836/612 but **does not reach MID 176 LOAD_FRIENDS or MID 2754 CHECK_GAME_STAT**.
-- Latest live MID17 already returned mana=999999, crystal=999999, energy=100, level=99, VIP=15, all source FunctionIDs, and a starter hero. Therefore do not reduce the diagnosis to “currencies are zero/missing.”
+The existing 999999-like mana/crystal development values are sandbox defaults, not a completed economy model. Campaign energy, general spend/reward synchronization, and fresh-account initial economy remain to map/implement.
 
-## Stage 3.1 architecture committed
+## Future backend architecture direction
 
-The canonical state is now persisted in a small human-editable JSON database rather than only an in-memory object:
+Keep distinct:
 
-```text
-data/player_db.json
-```
+1. `accounts` — SDK credential/anonymous identity.
+2. `sessions` — SID/token/cookies/session lifetime.
+3. account-region player index — `(account_uid, region_id) -> player_id`.
+4. canonical player state — stable `player_id`, profile/economy/tutorial.
+5. domain repositories — Heroes, Inventory, Formation, Campaign, Social, etc.
+6. future PvP/Arena — rankings/reports over stable player IDs and snapshots/projections from canonical Hero/Formation state.
 
-Override path with `GXB_PLAYER_DB_PATH`.
+Do NOT equate SDK UID and game player ID.
 
-Implementation:
-- `gxb_backend/state/player_database.py` — nested JSON serializer/loader.
-- `gxb_backend/state/repository.py` — canonical repository, atomic writes, legacy migration.
-- repository `refresh()` re-reads JSON before every engine and SDK request.
-- handler mutations persist back to JSON.
-- malformed hand-edited JSON keeps last known-good in-memory state and logs an error.
+## Roadmap policy
 
-JSON sections:
-- account
-- player.identity
-- player.progression
-- player.economy
-- player.heroes
-- player.inventory
-- player.library
-- player.lobby
-- player.domains
+Competitive/Arena/Top is intentionally deferred until the identity/player/formation/snapshot spine is robust. Payment remains permanently out of scope. Anonymous sandbox behavior should remain available as a privileged reconstruction profile when credential accounts are later added.
 
-Protocol ownership:
-- progression/economy -> MID17 LOAD_PLAYER_INFO / RETRIEVE_TOKEN detail 17.
-- heroes -> MID49 LOAD_HEROS.
-- inventory -> MID81 LOAD_BACKPACK.
-- library -> MID836 GET_LIBRARY_INFOS.
-- story/guide mutations -> MID26 SAVE_STORY; guide function/return handlers also persist.
+## Key Pass 20 docs
 
-The text DB is authoritative for explicit values. In particular, an explicitly empty `func_ids` list remains empty instead of silently restoring defaults.
-
-## Source-confirmed tutorial correction
-
-This is the strongest new behavioral finding.
-
-Stage 3 live MID17 sent `guide_id=0`. Source `MainScene:onEnterGuide()` treats any guide ID below `GUIDE_START=100101` as tutorial state and opens the guided summon-hero path.
-
-Relevant source constants in `app/common/enums.lua`:
-- GUIDE_START = 100101
-- GUIDE_END = 100197
-- GUIDE_PET_ONE = 100501
-- GUIDE_PET_THREE = 100503
-- GUIDE_CONQUER_SCHOOL_END = 101001
-
-Default established Stage 3.1 profile therefore uses:
-
-```text
-guide_id = 101001
-```
-
-Reason: 100197 ends the base tutorial but later pet/cloud/chapter/conquer guide families continue. 101001 is the end of the known conquer-school guide family and is safer for the intentionally established local test profile. It is user-editable in JSON.
-
-MID26 SAVE_STORY source contract is `story_id`, `story_state`, `guide_id`; Stage 3.1 persists all three.
-
-## Function gates — remember the distinction
-
-- `SelfPlayer:isFuncOpen(id)` uses the server MID17 `func_ids` map.
-- global `xyd.isFunctionOpen(id)` checks `StoryData.stageID_` plus player level against `functionOpen` table.
-- `StoryData.stageID_` starts at 0 and supplied Lua only advances it via BATTLE_ENDED; it is not populated by MID17.
-
-Most principal MainScene button gates use `SelfPlayer:isFuncOpen`, so the established profile keeps all source-derived FunctionIDs. If a later subsystem still appears locked, check which helper it uses before changing server fields.
-
-## Economy / hero / inventory facts
-
-- `EcoSidebar.lua` reads `SelfPlayer.mana`, `SelfPlayer.crystal`, and `SelfPlayer.energy` directly. These are MID17 values.
-- Hero model is separately hydrated from MID49 but now shares the same JSON record.
-- Backpack is separately hydrated from MID81 but now shares the same JSON record.
-- Backpack items require source-valid IDs; consumer uses at least `table_id`, `item_num`, `time` and immediately performs local table lookups. Do not invent item IDs.
-- Default inventory remains empty intentionally.
-- Default source-valid starter hero remains `table_id=10001001` (Aquaris), local `partner_id=10001`.
-- MID65 LOAD_COLLECTED_HEROS serializer now emits source-consumer shape `{"list":[table_ids...]}`.
-
-## MainScene diagnostic invariant
-
-Keep the previous invariant:
-- `MainSceneBottomWindow.willOpen()` reaches `socialSystem:loadFriends()` late in setup -> MID176.
-- `MainSceneTopWindow.willOpen()` runs `addEcoBar -> regLeftButtons -> updatePlayerInfo -> initActList -> onEnterAction -> checkGameStat` -> MID2754.
-- Entry controls are re-enabled on `MAIN_SCENE_ACTION_END`.
-
-Next live test should specifically report whether guide_id=101001 causes MID176 and MID2754 to appear. If not, stop adding arbitrary state and trace the exact synchronous Lua line before those two boundaries.
-
-## Validation rule
-
-Only run Python syntax compilation before handoff. Do not run Flask/APK/runtime tests here unless user explicitly asks.
+- `PASS20_INDEX.md`
+- `AUTH_ACCOUNT_PLAYER_LIFECYCLE_PASS20.md`
+- `PLAYER_STATE_AND_PERSISTENCE_PASS20.md`
+- `UPDATE_DELIVERY_AND_GLOBAL_RESPONSE_PASS20.md`
+- `BACKEND_DESIGN_PASS20.md`
+- `LIVE_DISCOVERY_DELTA_PASS20.md`
+- `PASS20_SOURCE_FACTS.json`
 
 ---
 
+# GXB backend working memory / protocol map
 
-Current stage: **Stage 3 domain foundation**  
-Date: 2026-08-16
+Last updated: 2026-08-16 (review pass: backend archives + chat-history.txt + source asset archive)
 
-## Stage 3 directive
+## Scope
 
-User explicitly ended isolated Stage 2 lobby-button hotfixing. Do not restart full waterfall/static-analysis passes. Use Pass 19 as the protocol/domain compass and consult `all-assest-rechecked.zip -> src_64` only for implementation-critical response/consumer cross-checks. Build domain-owned backend state incrementally and let APK runtime traces drive later promotions.
+This file is the compact working memory for the backend build. Read it before continuing protocol work, and update it after each backend work pass.
 
-User-confirmed baseline remains: anonymous SDK login -> server selection -> RETRIEVE_TOKEN -> lobby. Stage 2.3 additionally allowed the visible lobby character to be changed, but most HUD/buttons remained absent/inert.
+Reviewed artifacts in this pass:
+- `all-assest-rechecked.zip` — unpacked and checked for conventional README filenames; none were present in the asset tree.
+- `gxb-backend-boot-skeleton-2026-08-16.zip` — unpacked and reviewed, including `AGENT_HANDOFF.md`, `PROTOCOL_NOTES.md`, `BOOT_FIX.md`, `PATCH_STATUS_2026-08-16.md`, `BOOT_MID_MAP.md`, `mids.py`, `game_logic.py`, `server.py`, tests, MID catalog and audit JSON.
+- `chat-history.txt` — reviewed through the latest findings, including EventDispatcher tracing, SDK cookie investigation, RETRIEVE_TOKEN/bootstrap fixes, and the post-`xydSelectServer` status.
 
-## Stage 3 implementation committed
+The source asset archive contains `src_64` with 4,370 Lua files. The backend archive does not contain the original README filenames; its consolidated `PROTOCOL_NOTES.md` replaces the earlier reconstruction READMEs and preserves the older subsystem appendix.
 
-- Default profile: `GXB_PROFILE=established`.
-- Default FunctionIDs: all source-derived IDs (`GXB_FUNC_MODE=all`).
-- New corrected bootstrap mode: `GXB_BOOTSTRAP_DETAIL_MODE=stage3`.
-- Proven minimal rollback remains `GXB_BOOTSTRAP_DETAIL_MODE=safe`.
-- Added source-valid starter hero: local `partner_id=10001`, source `table_id=10001001` (Aquaris, first row in `data/tables/partner.lua`, initial star 3).
-- Campaign state uses real source campaign `100001`.
-- Added canonical/domain handlers for practice 124-133, battle formation 208-213, arena 272-300 family, missions/tasks, social, guild/team, pet/pet-campaign, march/world-boss, market/cart/skin shop, and battle pass.
-- Added `runtime_logs/domain_gaps.jsonl` classification for future fallback promotion.
+## Source-of-truth hierarchy
 
-## Corrected bootstrap contracts
+1. Decompiled Lua source in `src_64` for actual client behavior and response consumption.
+2. `tools/api_audit.json` + `tools/MID_CATALOG.md` for request/response field extraction from all `Backend:request()` call sites.
+3. `AGENT_HANDOFF.md`, `PROTOCOL_NOTES.md`, `BOOT_FIX.md`, and `PATCH_STATUS_2026-08-16.md` for prior-agent history and already-applied changes.
+4. `chat-history.txt` for live-capture evidence and reasoning history. Treat its `[Inference]` statements as inference unless independently confirmed by source/logs.
+5. OpenCode/other agent analysis is useful as a lead only; do not treat its architectural claims as authoritative without source evidence.
 
-Old Stage 2 `wide` mode must remain experimental/deprecated because several payloads were malformed. Stage 3 source cross-check corrected these before broad hydration:
+## Authoritative client-side facts
 
-- MID 115 trial: `trial_info.{trials,campaigns}` + `challenge_info.{challenges,campaigns}`.
-- MID 336 march: `map_info`, `hero_status`, `enemies`, `rewards`.
-- MID 2416 adventure: `adventure_list.list`.
-- MID 2984 battle pass: `base_info` + `mission_info`.
-- MID 368 mail: `mail_list`, `total`, `new_mail_total`.
-- MID 384 invite: `missions`, `invite_players`, `invite_code`, `invitor_id`, `invitor_name`.
-- MID 624 world boss: numeric hurt/rank/times and nested `boss_info`; source-valid boss id 10011.
-- MID 112 world map: complete chapter-info scalar fields and source campaign 100001.
+- Numeric MID definitions: `src_64/app/common/network/mid.lua`.
+- HTTP request/response transport: `src_64/app/common/network/Backend.lua`.
+- Boot/login scene: `src_64/app/scenes/LoadingScene.lua`.
+- Player bootstrap consumer: `src_64/app/model/SelfPlayer.lua`.
+- Library bootstrap consumer: `src_64/app/model/Library.lua`.
+- Main scene entry: `src_64/app/scenes/MainScene.lua`.
+- Message/chat bootstrap: `src_64/app/model/MessageManager.lua`.
+- Event dispatcher: `src_64/framework/cc/components/behavior/EventProtocol.lua` (the reviewed chat trace reports `dispatchEvent` has no `pcall`).
+- `tools/api_audit.json` records request sites and response fields consumed by the Lua client.
 
-Stage 3 bootstrap currently hydrates the safe baseline plus selected corrected domain entries: 112, 115, 289, 336, 352, 368, 384, 612, 624, 2416, 2485, 2984. If boot regresses, switch only the bootstrap mode back to `safe`; keep Stage 3 direct handlers.
+## Exact boot-critical path mapped from source
 
-## MainScene diagnostic invariant
+1. `UpdateScene` reaches `LoadingScene`.
+2. `LoadingScene.login_()` sends MID `1` (`RETRIEVE_TOKEN`).
+3. `Backend.lua` dispatches the successful MID 1 response as `xyd.event.TOKEN` before invoking LoadingScene's inline callback.
+4. `SelfPlayer:loginEvent_()` receives TOKEN, stores root `uid`, then calls `loadGameStartInfoEvent_()`.
+5. `loadGameStartInfoEvent_()` executes `pairs(params.detail)` unconditionally. Therefore `detail` itself must be a table; individual keys are guarded and may be absent.
+6. Verified useful `detail` entries:
+   - `17` `LOAD_PLAYER_INFO`
+   - `49` `LOAD_HEROS`
+   - `81` `LOAD_BACKPACK`
+   - `836` `GET_LIBRARY_INFOS`
+7. `SelfPlayer:onPlayerInfo_()` requests MID `2784` (`ALBUM_SPECIAL_COLLECT_INFO`) asynchronously and consumes `is_award`.
+8. LoadingScene's MID 1 callback reaches `selectServer()` / native `xydSelectServer(region_id)`, then proceeds through:
+   `updateMeta_()` → `StoryData.updateDataFromStorage()` → `loadModel(MESSAGE_MANAGER)` → `audio.stopMusic(true)` → `MainScene.new()`.
+9. `MessageManager.ctor()` enters world/service chat using MID `192` (`LOAD_CHAT_ROOM_INFO`) asynchronously. The response needs `host`, `port`, and `room_id`; TCP chat itself is not implemented in this backend.
+10. The reviewed chat history reports that `EventProtocol.lua`'s `dispatchEvent` has no `pcall`, so a listener exception can abort the shared backend success callback. This makes malformed bootstrap state especially important.
 
-Do not forget this when interpreting “buttons locked.” Source confirms MainScene bottom/middle controls are explicitly touch-disabled in their entry animation and only re-enabled on `xyd.event.MAIN_SCENE_ACTION_END`. MainScene top `willOpen()` runs:
+## Bootstrap detail contract
 
-`addEcoBar -> regLeftButtons -> updatePlayerInfo -> initActList -> onEnterAction -> checkGameStat`
+`RETRIEVE_TOKEN.detail` is a string-keyed MID batch. The source enumerates roughly 30 possible entries:
 
-`checkGameStat()` sends MID 2754. User Stage 2.3 logs never reached MID 2754. Therefore a top-window construction abort before `checkGameStat()` can globally leave the rest of the lobby touch-disabled even when their backend handlers exist. Do not fake `MAIN_SCENE_ACTION_END` server-side; keep correcting coherent model initialization and use client logs to identify the first failing local dependency.
+`17, 780, 49, 81, 112, 115, 2561, 229, 289, 336, 352, 384, 2485, 1408, 368, 56, 624, 612, 822, 530, 1056, 1152, 1808, 1304, 1856, 836, 2137, 2139, 2416, 2501, 2560, 2984, 3101`.
 
-## Transport invariants
+Do not blindly populate all of them. Missing individual keys are guarded no-ops; an invented malformed payload can create a later nil/type failure.
 
-- HTTP chat-room discovery is MID 192 and returns host/port/room_id.
-- 327xx / selected 3685x chat messages are TCP/chat-routed by Backend bitmask; do not expose them as ordinary Flask engine handlers.
-- zlib/form result MIDs remain handled by transport classification.
-- Payment initialization is intentionally ignored and will not be implemented unless user changes scope.
+Current targeted bootstrap:
+- `detail["17"]` = valid player payload.
+- `detail["49"]` = `{sort_type=0, heros={}}`; needed because `calculateWhiteAlbumAttr()` iterates `heros_` without a nil guard after player bootstrap.
+- `detail["81"]` = `{sort_type=0, list={}, spirit_list={}}`; needed because `MessageManager` synchronously reaches `SelfPlayer:getMyCurrentAvatarID()` and may call backpack lookup before `MainScene.new()`.
+- `detail["836"]` = valid empty library payload with `bg_main=1`, `bg_room=2`; needed because `MainScene:setupBackground()` reads `Library.bgMain`.
 
-## Validation rule
+These four are source-derived targeted fixes, not generic guesses.
 
-Only run Python syntax compilation before handoff. Do not run Flask/APK/runtime tests in this environment unless user explicitly asks.
+## Boot sequence observed in supplied live evidence
 
-## Next Stage 3 APK feedback priority
+A successful run progressed through:
 
-1. Confirm `stage3` bootstrap still reaches lobby; if not, retest with `GXB_BOOTSTRAP_DETAIL_MODE=safe` and compare.
-2. Look specifically for MID 2754. Its appearance is a useful marker that MainSceneTopWindow finished initial construction.
-3. Exercise Girls/Hero, Backpack, Campaign, Vending/Shop, Missions, Arena, Social, Guild, Pet.
-4. Send `all_requests.jsonl`, `unknown_mids.jsonl`, `fallback_responses.jsonl`, `domain_gaps.jsonl`, and logcat around any failed window.
-5. Promote failures by domain, not by isolated UI call site.
+`65305 → 65319 → 65284 → GET_PLAYER_GROUP_BY_KEY (2864) → LOAD_ANNOUNCE (7) → RETRIEVE_TOKEN (1) → ALBUM_SPECIAL_COLLECT_INFO (2784) → update_played_server → xydSelectServer SUCCESS`
 
----
+The backend/chat history also records successful engine handling of `RETRIEVE_TOKEN` with `login_token=local_token`, `sid=13371337`, and the `17/49/836` bootstrap, followed by `xydSelectServer SUCCESS`.
+
+Center discovery `20480`, version `2`, region `18`, and server-time `3` belong to the broader startup contract. Exact ordering should be derived from fresh captures when needed rather than assumed from older analysis.
+
+## SDK/session findings — confirmed history
+
+The supplied SDK smali showed that the session is populated from HTTP cookies named:
+- `QQWSID`
+- `QQWUID`
+- `QQWUNAME`
+- `QQWTOKEN`
+
+The backend was patched to emit these cookies. A supplied live capture then showed `cookies size:4`, all four cookie values, and a populated `UserSession` with `SID/UID/UNAME/TOKEN`; no further `no SID.` retry appeared in that successful session. Therefore the original cookie/session problem is considered fixed.
+
+There is a later `cookies size:0` observation around `xydSelectServer`; do not reinterpret that as proof that the original login cookie fix failed. The same capture already shows the engine authenticated and `xydSelectServer SUCCESS`. The empty local `XinydUser` session observed afterward is a separate SDK object in the supplied history.
+
+Engine token consistency was also corrected: SDK `QQWTOKEN` and `RETRIEVE_TOKEN.token` now both use `local_token` instead of the previous backend-only `local_admin_token`. The history explicitly says this mismatch is real but its causal relationship to the current stall is unverified.
+
+## Current post-login status
+
+The remaining problem is **after `xydSelectServer SUCCESS` and before the game is visibly usable**. The supplied history does not prove whether the failure is:
+- inside the synchronous `updateMeta_()` / StoryData / MessageManager / audio transition,
+- inside `MainScene.new()`,
+- a blank/broken scene rather than a failed transition,
+- or another missing client-state dependency.
+
+No `LUA ERROR` was found in the supplied ADB capture. The history also notes that the main `com.carolgames.gxb` process did not show the fatal exception seen in the separate `EmulatorCheckService` process. Do not treat that separate native emulator-check exception as the proven cause of the main loading issue.
+
+The client-side `isLoggingIn_` guard is read but, according to the reviewed full-tree grep in chat-history, never set to `true`. Consequently repeated taps can restart `login_()` and produce repeated `xydSelectServer` cycles. This is a client-side diagnostic nuisance, not a server timer.
+
+The payment SDK warning (`query_pay_method_amounts` returning empty methods/amounts and a restart toast) is separate evidence and is not currently proven to block MainScene.
+
+## Backend architecture decision
+
+Keep the current small `server.py` + `game_logic.py` architecture for the boot skeleton. Do not over-engineer into many service modules until the boot path is stable.
+
+Engine responses are flat JSON objects; `error_code=0` is top-level. SDK responses use the SDK envelope plus session cookies.
+
+MID-specific exceptions already implemented:
+- `20480` center discovery: flat `{url, server_id, back_domain, res_download_url}`.
+- `2` version check: flat update flags with `need_restart=0`.
+- `18` regions: `{regions, players}`.
+- `7` announce: `contents` is a JSON string.
+- `2864` AB-test group: bare scalar `"A"` (not an engine envelope).
+- `1` RETRIEVE_TOKEN: root identity/session fields plus non-empty `detail`.
+- `2784`: `{is_award=0}`.
+- `192`: `{host, port, room_id}` minimal HTTP contract; no TCP chat server.
+- `3`: server-time payload.
+
+Unknown engine MIDs remain generic successful responses for now. They are not declared semantically complete.
+
+## Transport / routing facts
+
+There are three request surfaces:
+1. SDK Java layer: its own JSON envelope and cookie behavior.
+2. Center discovery: form `payload`, flat JSON response.
+3. Engine/game API: form `payload`, flat JSON response; a few result MIDs use zlib/multipart.
+
+`UpdateScene.lua` first reaches center MID `20480`; its `response.url` becomes `xyd.serverUrl` for subsequent engine traffic. `server.py` therefore relies on this redirect/trampoline behavior.
+
+`server.py`'s payload decoder intentionally tries plain JSON, URL-decoding variants, and zlib variants because the decompiled client has inconsistent encoding paths.
+
+## Evidence / confidence rules
+
+- **Confirmed/source-derived:** exact field names and control flow when directly read from `src_64` or supported by concrete log output.
+- **Supported by supplied history:** findings repeated in `chat-history.txt` that quote concrete logs/source paths, but not independently re-read this pass.
+- **Unverified/inference:** any statement about the ultimate post-`xydSelectServer` blocker, gameplay semantics not rechecked this pass, or whether an optional response field is sufficient without a device run.
+
+Never promote the old battle/Arena/March/Treasure appendix from `PROTOCOL_NOTES.md` to confirmed protocol truth without re-reading the relevant Lua consumers.
+
+## Current known boot map
+
+| MID | Name | Phase | Minimal contract | Source consumer |
+|---:|---|---|---|---|
+| 20480 | center discovery | engine bootstrap | `url`, `server_id`, `back_domain`, `res_download_url` | center/server setup |
+| 2 | version check | engine bootstrap | `need_restart=0` plus flags | update/loading path |
+| 18 | LOAD_USER_REGIONS | login | `regions`, `players` | LoginWindow |
+| 7 | LOAD_ANNOUNCE | login | `contents` as JSON string | LoginWindow |
+| 2864 | GET_PLAYER_GROUP_BY_KEY | login | bare `"A"` | SelfPlayer AB-test group |
+| 1 | RETRIEVE_TOKEN | critical | token/session fields + `detail` | Backend TOKEN event + LoadingScene |
+| 17 | LOAD_PLAYER_INFO | detail | player state | SelfPlayer |
+| 49 | LOAD_HEROS | detail | `sort_type`, `heros` | Player/SelfPlayer |
+| 81 | LOAD_BACKPACK | detail | `sort_type`, `list`, `spirit_list` | SelfPlayer/MessageManager |
+| 836 | GET_LIBRARY_INFOS | detail | library fields + `library_bg_infos` | Library/MainScene |
+| 2784 | ALBUM_SPECIAL_COLLECT_INFO | post-player async | `is_award` | SelfPlayer |
+| 192 | LOAD_CHAT_ROOM_INFO | MessageManager ctor | `host`, `port`, `room_id` | Backend TCP chat setup |
+| 3 | QUERY_SERVER_TIME | startup/support | `server_time` | time consumers |
+
+## What is NOT proven
+
+- This does not prove that every one of the 1,125 unique MID expressions in the audit is implemented.
+- This does not prove the exact cause of the post-`xydSelectServer` visual stall.
+- This does not implement gameplay/chat/battle semantics.
+- The TCP chat server protocol is not mapped.
+- The payment SDK warning is not proven fatal.
+- The separate EmulatorCheckService native exception is not proven to block the main game process.
+
+## Next work order
+
+1. Read this file before every backend pass and update it after the pass.
+2. If a fresh device capture is available, capture the complete main-process Lua output around `LoadingScene.login_()` → `MainScene.new()` before inventing another response.
+3. Continue source mapping from `src_64`, prioritizing all requests reachable immediately before/after `MainScene.new()` and any nil-sensitive model initialization.
+4. Use `tools/MID_CATALOG.md` / `api_audit.json` to derive exact response fields from consumers.
+5. Promote additional MIDs from generic compatibility responses only when their source consumer has been inspected.
+6. Keep simple Python syntax checks; do not do extensive testing unless a concrete protocol failure requires it.
 
 
-Current stage: **Stage 2 modular lobby backend**  
-Date: 2026-08-16
+## Full src_64 recursive API-surface pass (2026-08-16)
 
-## Confirmed Stage 1 status
+A complete recursive scan of `/app-assets/output/assets/src_64` was performed. Important scope correction: the earlier 62-file `src_64` seen under `downloaded-assets/output/src_64` is only a partial extracted tree. The complete asset tree is `/app-assets/output/assets/src_64` and contains 4,370 Lua files. All recursive API mapping in this pass uses that complete tree.
 
-User confirmed Stage 1 boots the APK successfully:
+Generated companion reports in this backend:
+- `API_SURFACE_MAP.md` — every statically identifiable `Backend:request()` MID call site, plus unresolved dynamic request sites.
+- `PLAYER_BOOT_PROTOCOL.md` — source-derived login/player identity and boot sequence.
 
-`login popup -> anonymous login -> click to start -> lobby`
+Recursive request scan results:
+- 4,370 Lua files scanned.
+- 1,210 MID definitions in `app/common/network/mid.lua`.
+- 1,345 backend request call sites.
+- 1,035 unique numeric MIDs have direct/static request call sites.
+- 106 call sites select the MID dynamically; these need branch-level resolution before being marked semantically complete.
 
-The server log showed successful handling of center/version, SDK cookies, `RETRIEVE_TOKEN`, `ALBUM_SPECIAL_COLLECT_INFO`, `GET_BOARD_INFO`, `LOAD_CHAT_ROOM_INFO`, `ILLUSION_LOAD_INFO`, `GET_LIBRARY_INFOS`, and `LOAD_SUMMON_INFO`.
+### Important correction about pre-UpdateScene login
 
-Payment initialization warnings are intentionally ignored. No real purchase system will be implemented.
+The Lua source does **not** show the game asking the backend for a player ID before `UpdateScene`. The actual Lua startup is:
 
-## Stage 2 implementation goal
+`boot_64.lua -> UpdateScene_64 -> MID 20480 center discovery -> MID 2 version/resource check -> app.Game -> LoadingScene`.
 
-Do not return to waterfall static analysis. Stage 2 extends the backend so common lobby windows/panels can open without hard crashes and unknown MIDs are captured cleanly for future promotion.
+Only after `LoadingScene` is running does `showLoginSdkWindow()` invoke native `AppActivity.xydNewLogin`. The resulting Lua login event then sends MID `1` `RETRIEVE_TOKEN`. Native SDK traffic can exist outside the Lua asset tree, but this asset does not support a claim that a backend player-ID transaction occurs before `UpdateScene`.
 
-## Stage 2 additions
+### Player identity distinction
 
-- Root `memory.md` added as quick operational context.
-- Detailed docs remain in `docs/`.
-- Runtime JSONL logging added under `runtime_logs/`:
-  - `all_requests.jsonl`
-  - `unknown_mids.jsonl`
-  - `fallback_responses.jsonl`
-- Canonical `PlayerState` expanded with mail, tasks, shops, world/campaign, guild, inventory/runes, hero extras, battle-pass, study/gift/adventure, and auction skeleton state.
-- `RETRIEVE_TOKEN.detail` expanded with additional source-recognized safe hydration entries.
-- New domain handlers:
-  - `mail.py`
-  - `shop.py`
-  - `world.py`
-  - `guild.py`
-  - `rewards.py`
-- Existing handlers expanded for heroes, inventory, social, arena, tasks, and system/profile actions.
+The login request for MID 1 contains `sid`, `login_token`, `region`, `is_test`, `v_`, `app_v`, and `platform`; it does **not** contain `player_id`. `SelfPlayer:loginEvent_()` stores root-level `response.uid` as the account/session UID. The actual game player ID is taken from `detail["17"].player_id` by `Player.populate()`. Therefore backend state should map the authenticated account/session + selected region to a stable `player_id`, rather than expecting the client to provide one in the initial RETRIEVE_TOKEN request.
 
-## Design rules
+### RETRIEVE_TOKEN detail is larger than the old four-entry skeleton
 
-1. All endpoint responses should serialize from `PlayerState` where possible.
-2. Unknown MIDs remain successful but are logged in JSONL.
-3. Payment is ignored unless it blocks boot/lobby.
-4. TCP chat remains a keepalive/acceptor stub; real chat protocol is not implemented.
-5. No runtime APK testing is performed here; user runs the client.
-6. Only simple Python syntax checks are required before handoff.
+`SelfPlayer:loadGameStartInfoEvent_()` explicitly recognizes these detail MIDs:
+`17, PETS_GET, 49, 81, 112, 115, AWAKE_MISSION_LIST, 229, LOAD_ARENA_FIGHT_RECORDS, 336, 352, 384, 2485, REGION_GET_ARENA_INFO, 368, LOAD_SUMMON_INFO, WORLD_BOSS, GET_SELF_GUILD, PET_CAMPAIGN_RED_POINT, TREASURE_LOAD_INFO, GET_BUILDING_LIST, GUILD_WAR_RED_POINT, GET_TEA_TALK_INFO, GET_OFFLINE_INFO, GET_CLASS_INFO, 836, GET_STUDY_INFOS, GET_GIFT_BOX_INFO, GET_ADVENTURE_LIST, GET_HERO_RECOMMEND_SCORES, RED_POINT, BATTLE_PASS_GET_INFO, HUNQI_START_GAME_GET_INFO`.
 
-## Next likely work after Stage 2 client test
+Individual entries are guarded, but the `detail` table itself is required because the handler calls `pairs(detail)`. The backend should therefore treat the batch as a deliberate state hydration mechanism, not just a convenience for MID 17.
 
-- Review `runtime_logs/unknown_mids.jsonl` from the user's run.
-- Promote the most common unknown lobby MIDs into domain handlers.
-- If a UI panel crashes, identify its MID and exact request payload from `all_requests.jsonl`.
-- Start Stage 3 around whichever subsystem user opens first: heroes/backpack, mail, shop, world, arena, guild, etc.
+### Backend implementation priority from the complete scan
 
-## Stage 2.2 hotfix — bootstrap detail reverted to safe set
+1. Keep 20480/2 correct because they are the only Lua HTTP requests in `UpdateScene` before `app.Game`.
+2. Keep SDK cookie/session handling correct for native SDK traffic.
+3. Make MID 1 deterministic and populate a coherent player state.
+4. Populate shape-correct detail entries for the synchronous player/hero/backpack/library path; then progressively add the other recognized detail MIDs if their consumers need them for first-scene initialization.
+5. Keep MID 192 shape-correct for MessageManager's chat-room lookup.
+6. Promote the remaining 1,000+ MIDs from generic compatibility responses by subsystem, using the source consumer to derive exact request/response fields.
+7. Resolve the 106 dynamic request sites separately; do not label them missing endpoints merely because the call line does not contain a literal MID.
 
-Live Stage 2 client run regressed: login and RETRIEVE_TOKEN succeeded, then the client requested ALBUM_SPECIAL_COLLECT_INFO (2784) and stopped on the loading window. Backend runtime logs showed no unknown MID or fallback, which means the blocker happened inside client-side bootstrap/event processing before the usual MainScene fanout.
-
-The likely cause is Stage 2's widened RETRIEVE_TOKEN.detail bag. Optional detail entries are not harmless unless their event listener contracts are verified. A malformed early detail key can abort the Lua listener chain before GET_BOARD_INFO / chat / MainScene fanout.
-
-Default boot detail mode is now `safe` and returns the Stage 1 proven hydration set only:
-
-- 17 LOAD_PLAYER_INFO
-- 49 LOAD_HEROS
-- 81 LOAD_BACKPACK
-- 836 GET_LIBRARY_INFOS
-- 56 LOAD_SUMMON_INFO
-- 176 LOAD_FRIENDS
-- 229 ACTIVITIES
-- 2560 RED_POINT
-
-Stage 2 domain handlers remain wired for direct/later UI calls, but they are no longer injected into RETRIEVE_TOKEN.detail by default.
-
-Experimental wide bootstrap remains available only with:
-
-```bash
-GXB_BOOTSTRAP_DETAIL_MODE=wide python3 server.py
-```
-
-Do not use wide mode as the default until every added detail key has been verified by a client run.
+The complete API inventory is documented in `API_SURFACE_MAP.md`.
 
 
-## Stage 2.2 lobby UI completion
+## Complete app-assets/src_64 mapping pass 2 (2026-08-16)
 
-User confirmed Stage 2.1 reaches lobby again, but top HUD/resources/buttons are absent or inert. Runtime request logs show successful boot fanout through 1537/192/56/836/1344 and no unknown/fallback MIDs, while CHECK_GAME_STAT is absent, indicating the MainScene top-window path likely does not complete.
+The complete base-code tree was re-opened from `all-assest-rechecked.zip` at `app-assets/output/assets/src_64`. The user supplied an important runtime asset rule: `downloaded-assets/` is pushed into the game's private files directory and should take precedence over same-named packaged assets because it is treated as newer. This is recorded as a **user-supplied rule; not independently verified in this pass**. Core Lua protocol design continues to use `app-assets/output/assets/src_64`.
 
-Stage 2.2 keeps safe bootstrap detail, changes the default avatar from 0 to source avatar 110001001, advertises all known source FunctionID values in player_info.func_ids by default, and adds achievement handlers for LOAD_ACHIEVEMENT_INFO/GET_ACHIEVEMENT_AWARD.
+### Complete source inventory
+- 4,370 Lua files total.
+- 2,257 under `app/`.
+- 1,241 under `data/`.
+- 741 under `lib/`.
+- 90 under `framework/`.
+- 16 under `cocos/`.
+- Remaining 25 are root/bootstrap/support Lua files.
+- `src_32` is intentionally excluded per project instruction.
 
-## Stage 2.3 MainScene HUD completion attempt
+### API audit correction
+The bundled `tools/api_audit.json` contains **1,345 request records with zero parser errors** and **1,074 unique numeric MIDs**. **50 records** have unresolved/non-numeric MID expressions. `mid.lua` contains **1,210 numeric MID assignments**. Therefore the current static audit covers most but not all defined MIDs; the 136-definition gap must not be labeled dead code until dynamic/indirect reachability is resolved.
 
-User confirmed Stage 2.2 still reaches lobby but has no visible top HUD/resource/header bar and no usable lobby buttons. Runtime logs show no unknown/fallback MIDs. The important request pattern is:
+A simple regex scan produced slightly different site counts because of generated/decompiler syntax. For contract mapping, use `api_audit.json` as the primary request-site inventory and the source itself for semantics.
 
-- middle-window APIs fire: `LOAD_SUMMON_INFO`, `ILLUSION_LOAD_INFO`;
-- bottom-window guild branch fires: `GET_SELF_GUILD`;
-- bottom-window social branch does **not** fire: no `LOAD_FRIENDS`;
-- top-window status check does **not** fire: no `CHECK_GAME_STAT`.
+### New documentation added
+- `SRC64_COMPLETE_MAP.md` — complete static MID/API matrix plus dynamic sites and model inventory.
+- `LUA_FILE_INVENTORY.md` — every one of the 4,370 Lua files, line count, API calls/MIDs where present, role bucket, plus model/window API indexes.
+- `BACKEND_DESIGN_FROM_SRC64.md` — backend layering/state architecture and the complete mapping workflow.
 
-Source review narrowed the likely abort to `MainSceneBottomWindow.willOpen()` before `socialSystem:loadFriends()`, preventing later `main_scene_top` HUD construction.
+### Source-confirmed boot refinement
+`LoadingScene.login_()` sends MID 1 with `sid`, `login_token`, `region`, `is_test`, `v_`, `app_v`, `platform`; it does not send `player_id`. `SelfPlayer.loginEvent_()` stores root response `uid`, while `Player.populate()` receives `player_id` from detail[17]. The backend therefore needs account/session -> player-state resolution rather than a client-supplied player ID.
 
-Stage 2.3 changes:
+The exact normal-login transition after successful MID 1 is source-confirmed as:
+`selectServer(region) -> updateMeta_(sid, region) -> StoryData.updateDataFromStorage() -> loadModel(MESSAGE_MANAGER) -> audio.stopMusic(true) -> MainScene/start-story branch`.
+`StoryData.updateDataFromStorage()` is local storage only. `MessageManager.ctor()` synchronously reads SelfPlayer state and initiates MID 192 chat-room discovery. MainScene then reads Library `bgMain` and opens five main-scene windows.
 
-- Default `GXB_FUNC_MODE=core` now exposes only stable core lobby/HUD FunctionIDs instead of every source FunctionID.
-- `GXB_FUNC_MODE=all` restores Stage 2.2's full FunctionID list for experiments.
-- Safe `RETRIEVE_TOKEN.detail` now includes `780 PETS_GET` as `{"pets": {}}` to initialize `SelfPlayer.collectedPets` and avoid pet/global-timer nil hazards.
-- Previous persisted `state/gxb_state.json` no longer pins all FunctionIDs; repository reapplies the selected function mode on load.
+### Mapping priority going forward
+1. Finish all `app/common`, `app/model`, `app/scenes`, and `app/windows` request consumers.
+2. Resolve the 50 dynamic audit records by following their variable/table construction; several are conditional pairs rather than genuinely unknown MIDs.
+3. For each MID record request payload construction + callback fields + model mutation + follow-on requests.
+4. Then map feature modules and static data tables used by those consumers.
+5. Only after the protocol map is stable should the backend be overhauled into domain handlers/state repositories.
 
-Next client test should delete old `state/` and `runtime_logs/`, run default `python3 server.py`, and verify whether `LOAD_FRIENDS` then `CHECK_GAME_STAT` appear.
+### Backend design rule retained
+Keep one canonical player state. `RETRIEVE_TOKEN.detail[17]`, later MID 17, hero state, backpack, library, and other bootstrap/gameplay responses should be projections of that same state. Avoid independent fake payload stores.
+
+### Current confidence
+The complete file inventory and audit counts above are directly verified from the supplied archive/backend audit. The downloaded-assets precedence rule is user-supplied and unverified. The exact cause of the post-`xydSelectServer` visual stall remains unverified.
+
+## Event-consumer and bootstrap-contract pass 7 (2026-08-16)
+
+Read this file before continuing. This pass focused on the missing middle of the API dependency graph: MID -> event -> registered consumer -> model/state mutation, plus exact `RETRIEVE_TOKEN.detail` consumer contracts and the API surface reached by MainScene initialization.
+
+### Event system facts
+- `Backend.lua` contains 106 explicit numeric MID -> `xyd.event.*` mappings.
+- `BaseModel:registerEvent()` delegates to the global `xyd.EventDispatcher`.
+- The actual dispatcher implementation is `framework/cc/components/behavior/EventProtocol.lua` and invokes registered listeners synchronously in its `dispatchEvent()` loop.
+- A static scan found 198 event-listener registrations in `app/` for the mapped event names. This is a source inventory, not proof that every listener is instantiated in every runtime path.
+- New report: `EVENT_CONSUMER_MAP_PASS7.md`.
+
+### RETRIEVE_TOKEN detail is explicitly a state hydration batch
+`SelfPlayer:loadGameStartInfoEvent_()` first obtains `arg_221_1.params.detail`, enumerates and sorts its numeric keys, and then processes recognized detail MIDs individually. Each entry is ignored if absent or if it has `error_msg`. This means the root `detail` object is required, while most individual entries are conditionally optional.
+
+The recognized detail entries are:
+`17, PETS_GET, 49, 81, 112, 115, AWAKE_MISSION_LIST, 229, LOAD_ARENA_FIGHT_RECORDS, 336, 352, 384, 2485, REGION_GET_ARENA_INFO, 368, LOAD_SUMMON_INFO, WORLD_BOSS, GET_SELF_GUILD, PET_CAMPAIGN_RED_POINT, TREASURE_LOAD_INFO, GET_BUILDING_LIST, GUILD_WAR_RED_POINT, GET_TEA_TALK_INFO, GET_OFFLINE_INFO, GET_CLASS_INFO, 836, GET_STUDY_INFOS, GET_GIFT_BOX_INFO, GET_ADVENTURE_LIST, GET_HERO_RECOMMEND_SCORES, RED_POINT, BATTLE_PASS_GET_INFO, HUNQI_START_GAME_GET_INFO`.
+
+New report: `BOOTSTRAP_DETAIL_CONTRACT_PASS7.md` maps each entry to its exact consumer/model and records fields where the handler was directly inspected.
+
+### Exact source-confirmed critical detail shapes
+- `17 LOAD_PLAYER_INFO`: `SelfPlayer:onPlayerInfo_()` directly consumes many fields including `player_id`, `exp`, `boss_incr_exp`, `lev`, `uid`, `mana`, `region`, `region_name`, `crystal`, `lucky_coin`, `arena_coin`, `march_coin`, `top_coin`, `guild_coin`, `region_coin`, `king_coin`, `honor_coin`, `god_war_coin`, `friendship_coin`, `friend_medal`, `summon_coin`, `skin_fragment`, `glue`, `buy_glue_times`, `lvbu_coin`, `paradise_coin`, `team_dungeon_coin`, and many additional `params` consumed by the player model.
+- `49 LOAD_HEROS`: `Player:herosEvent_()` expects `params.sort_type` and `params.heros`; each hero entry is passed to `Hero:populate`. Event userdata must contain the correct `player_id` and `conquer_lev` for this path.
+- `81 LOAD_BACKPACK`: `SelfPlayer:onBackpackEvent_()` stores `params.sort_type` and passes the complete params object to `Backpack:populate`; earlier source inspection confirms `list` and `spirit_list` are part of the expected structure.
+- `112 LOAD_WORLD_MAP`: handler directly expects `normal`, `super`, `challenge`, `chapter_events`, and `chapter_info` structures.
+- `352 LOAD_SIGN_INFO`: handler directly consumes `awards`, `is_signed`, `partner_id`, `sign_times`, `month`, and `is_skin`.
+- `289 LOAD_ARENA_FIGHT_RECORDS`: handler directly consumes `records` and each record may contain `report_key`.
+- `836 GET_LIBRARY_INFOS`: `Library:updateLibraryInfos()` expects `library_infos`, `library_talk_infos`, `library_cg_infos`, and `library_bg_infos`; background data uses `bg_main`, `bg_room`, `has_buy`, `server_time`.
+- `GET_OFFLINE_INFO`: response is stored as `newAchievementIds`; non-empty data can trigger main-scene red-mark handling.
+- `HUNQI_START_GAME_GET_INFO`: response is stored as `SelfPlayer.spiritCampaignInfo`.
+
+### MainScene reachability
+After successful MID 1, `LoadingScene.login_()` does `selectServer()`, `updateMeta_()`, local `StoryData:updateDataFromStorage()`, loads `MESSAGE_MANAGER`, stops music, and conditionally replaces the scene with `MainScene` or opens the story path.
+
+`MessageManager` constructor reads from SelfPlayer: region/player ID/name/avatar/frame/level/player type; it immediately enters the player's chat room and service room `99999`, with guild chat conditional on guild ID. MID 192 therefore remains a real HTTP dependency during the transition, followed by TCP chat setup.
+
+`MainScene.lua` itself and models loaded by it expose a much larger conditional API surface. New report: `MAINSCENE_API_SURFACE_PASS7.md`. Direct MainScene requests observed include `LOAD_ARENA_FIGHT_RECORDS`, `PEAK_RECORDS`, `GET_PIC_NOTICE_INFO`, `SIGN`, and `HUNQI_GET_CAMPAIGN_INFO`; many more calls originate from model initialization (arena, region arena, activities, guild, event centre, anniversary/event models, etc.). These must be mapped by model rather than treating MainScene as a single API domain.
+
+### Important backend design rule strengthened
+The backend should not implement `RETRIEVE_TOKEN.detail` as unrelated canned blobs. It should project one canonical `PlayerState` into the detail entries. `detail[17]`, `detail[49]`, `detail[81]`, `detail[836]`, and later standalone MIDs must remain internally coherent.
+
+### What remains unverified
+- Static event registration does not prove runtime instantiation order.
+- Exact complete field lists for delegated model handlers are not yet extracted for every recognized detail MID.
+- The post-`xydSelectServer` visual stall is still not source-proven to be caused by a missing backend response.
+- TCP chat wire protocol remains unmapped.
+- Conditional MainScene feature calls are not all required for a minimal fresh-player boot; their exact reachability depends on state/config.
+
+### Next mapping priority
+1. Finish exact response field extraction for every recognized `RETRIEVE_TOKEN.detail` consumer by opening each target model handler.
+2. Build model-method -> MID maps for all `app/model` files, including request fields and callback consumers.
+3. Resolve the 50 dynamic MID request sites by tracing the variable/table construction.
+4. Continue into `app/windows` and `app/modules`, recording which MIDs each screen can trigger and which model state it requires.
+5. Keep all source-derived contracts separate from capture/inference.
+6. Only after these mappings stabilize should the backend be substantially rewritten.
+
+## Model/API contract expansion pass 8 (2026-08-16)
+
+Read this file before continuing. This pass moved from the global MID graph into the `app/model` API layer and created per-MID/per-model contract documents.
+
+### New generated documentation
+- `MODEL_API_CONTRACT_INDEX_PASS8.md` — index of every `app/model/*.lua` file with at least one audited Backend request.
+- `api_contracts/models_pass8/*.md` — one mini-contract file per model source path with audited calls.
+- `DYNAMIC_MODEL_API_PASS8.md` — 25 model request sites whose numeric MID could not be resolved by the audit.
+- `api_contracts/mids_pass8/*.md` — one mini-contract file for each of the 1,074 numeric MIDs represented in the supplied audit. Each file records audited call sites, explicitly extracted request fields, raw request expressions, and response fields observed being read.
+- `api_contracts/windows_index_pass8.md`, `api_contracts/scenes_index_pass8.md`, `api_contracts/common_index_pass8.md` — source-path API indexes for those areas.
+
+### Pass-8 counts
+- `app/model`: 98 source files with audited API calls.
+- `app/model`: 922 audited request records.
+- `app/model`: 25 unresolved/non-numeric MID request sites.
+- Numeric MID mini-docs: 1,074, matching the current audit's unique numeric MID coverage.
+- `app/windows`: 382 audited request records.
+- `app/modules`: no direct `Backend:request` call sites were found by the current audit; modules appear to rely on models/windows/backend callers rather than directly owning the HTTP API surface. This is an audit result, not proof that no indirect network behavior exists.
+
+### Contract interpretation rule strengthened
+The per-MID files are protocol evidence, not complete server schemas. A missing request field means the audit could not statically extract it; it does not prove the client sends no field. A response field listed is directly observed by the audit as read by the Lua client. Fields not listed remain unknown until source tracing/capture evidence supplies them.
+
+### High-value model surface now captured
+`SelfPlayer.lua` alone has 59 audited request call sites spanning player bootstrap and gameplay mutation APIs. The generated mini-doc records, among others:
+- 17 `LOAD_PLAYER_INFO`
+- 49 `LOAD_HEROS`
+- 81 `LOAD_BACKPACK`
+- 112 `LOAD_WORLD_MAP`
+- 115 `LOAD_TRIAL_INFOS`
+- 2784 `ALBUM_SPECIAL_COLLECT_INFO`
+- 2864 `GET_PLAYER_GROUP_BY_KEY`
+- 289 `LOAD_ARENA_FIGHT_RECORDS`
+- 352 `LOAD_SIGN_INFO`
+- 780 `PETS_GET`
+- 836 `GET_LIBRARY_INFOS`
+- plus player mutations such as hero power-up/evolution, skill changes, item use, summon, team save, etc.
+
+`Activities.lua` has 9 audited request records over 8 MIDs, including activity load/reward/fund/question/award operations. Similar mini-docs now exist for every other audited model file.
+
+### Dynamic model calls still requiring source tracing
+The current 25 include `CHECK_ACHIEVEMENT`, `LOAD_DUNGEON`, social friend operations, magic shop/market, peak arena, Ragnarok, rune power-up, Sakura fight, several SelfPlayer mutations, SingleDay, and SocialSystem. These are intentionally left unresolved in `DYNAMIC_MODEL_API_PASS8.md` rather than guessed.
+
+### Important design consequence
+The API dependency map should now be assembled from three linked artifacts:
+1. per-MID contract (`api_contracts/mids_pass8/`),
+2. per-source-path/model contract (`api_contracts/models_pass8/` and window/common indexes),
+3. event/state dependency maps from Pass 7.
+
+This gives the backend implementation a stable lookup chain:
+`MID -> call sites -> request fields/raw expression -> response fields consumed -> event/model consumer -> state mutation/follow-up calls`.
+
+### Still no backend overhaul
+No new semantic backend handlers were added in Pass 8. The purpose remains protocol mapping before implementation, per project instruction.
+
+## Undefined symbolic MID analysis pass 9 (2026-08-16)
+Read this before continuing. This pass traced the previously unresolved model request sites and compared every `xyd.mid.<NAME>` use in the complete packaged `src_64` tree against numeric assignments in `app/common/network/mid.lua`.
+
+### New source-confirmed finding: undefined MID symbols
+- `mid.lua` has **1,210 numeric MID assignments**.
+- Recursive `src_64` scan found **1,236 distinct `xyd.mid.<NAME>` symbols used**.
+- **26 symbols have no assignment anywhere in the supplied Lua tree**.
+- **24 are model-facing**; 2 are Backend-only special-routing comparisons (`CLOSE_GUILD_CHAT`, `GUILD_ALLY`); all 26 are documented in `UNDEFINED_MID_ANALYSIS_PASS9.md` and individual files under `api_contracts/undefined_mids_pass9/`.
+- Do not invent numeric values for these symbols. `tools/MID_CATALOG.md` and `tools/api_audit.json` can record symbolic request sites without supplying numeric assignments.
+
+### Model response contracts refined
+- `LOAD_DUNGEON`: `params.list` is required by `Dungeon:dungeonEvent_()`; list entries go to `DungeonItem:populate()`.
+- `LOAD_MAGIC_SHOP`: `params.left_time` and `params.items` are directly consumed; each item uses `table_id`.
+- `LOAD_MARKET`: `params.list` required; entries use `table_id`, optional `expire_time`.
+- `LOAD_SEND_REQUEST_PLAYERS`: `params.list` required; entries go to `NonFriendPlayer:populate()`.
+- `SEND_SOCIAL`: no response field read at immediate call site; success mutates target player's `socialTime_` and emits `FRIENDS_UPDATE`.
+- `SET_LOCK_HERO`: success mutates hero lock state and emits `HERO_UPDATE`; response fields themselves are not directly read.
+- Several symbolic endpoints have callbacks that merely forward `(status,response)`, so their schemas remain unknown until callers/listeners are traced.
+
+### Documentation added
+- `UNDEFINED_MID_ANALYSIS_PASS9.md`
+- `MODEL_RESPONSE_CONTRACTS_PASS9.md`
+- `PASS9_SOURCE_GAPS.md`
+- `api_contracts/undefined_mids_pass9/*.md` — one mini-doc per undefined symbolic MID.
+
+### Important implementation rule
+Do not assign numeric IDs to undefined symbols based on nearby numeric gaps or naming. We need stronger evidence (another source version, capture, native/resource data, or an authoritative mapping) before routing them numerically.
+
+### Next priority
+Continue end-to-end model tracing: for every request, locate all immediate callbacks and registered event consumers, extract direct response fields and state mutations, then resolve window callers. Keep resource/reference gaps separate from API gaps.
+
+## Response-consumer tracing pass 10 (2026-08-16)
+Read this file before continuing. This pass moved further from raw request inventory toward source-level callback/response semantics in `app/model` and revisited the previously undefined symbolic MID sites.
+
+### New generated documentation
+- `API_CALLBACK_CONSUMER_SCAN_PASS10.md` and `.json` — heuristic source scan of `app/model` Backend request callbacks, recording request expressions, directly visible request keys, directly visible response fields, userdata fields, and source files. This is a discovery aid, not a complete schema.
+- `SYMBOLIC_API_CONTRACT_INDEX_PASS10.md` — index of focused symbolic API mini-contracts.
+- `api_contracts/symbolic_pass10/*.md` — focused mini-docs for previously undefined symbolic MIDs inspected in this pass.
+- `UNDEFINED_SYMBOL_CONTRACT_REFINEMENTS_PASS10.md` — compact index of those source-derived symbolic contracts.
+
+### Pass-10 scan result
+- `app/model` request callback scan found **851 request records** across **598 symbolic/numeric MID names with no directly extracted response field in this heuristic** and **253 MID names with at least one directly extracted response field**. These counts are for the heuristic callback scan and must not be treated as protocol completeness.
+- The large `598` group is important: many client APIs only branch on `status` or forward `(status,response)` to another caller. Their real response schema must be found by tracing the caller/event/window, not by assuming the response is empty.
+
+### Source-confirmed symbolic contracts refined in this pass
+- `LOAD_DUNGEON`: request `{}`; response `params.list` is required and each entry is passed to `DungeonItem:populate()`.
+- `LOAD_MAGIC_SHOP`: request `{}`; response requires `left_time` and `items`; each item is indexed by `table_id`. `SHOP_MAGIC_BUY` success consumes `pos` and may consume `rune_id`, `partner_id` depending on item type.
+- `LOAD_MARKET`: request `{}`; response requires `list`; entries use `table_id` and optional `expire_time`; state is partitioned into glory/normal/special markets.
+- `LOAD_RECOMMEND_FRIENDS`: request `{}`; response requires `list` of `NonFriendPlayer` records.
+- `LOAD_SEND_REQUEST_PLAYERS`: request `{}`; response requires `list` of `NonFriendPlayer` records; `REQUEST_FRIEND` success itself returns a `NonFriendPlayer` record to this caller; `CANCEL_REQUEST_FRIEND` only needs success status at this immediate caller.
+- `POWERUP_RUNE`: request `{rune_id}`; immediate caller consumes no response fields beyond status.
+- `SELL_RUNES`: request `{rune_ids}`; success removes those rune IDs from the local rune bag; no response field is consumed here.
+- `AWAKE_HERO`: caller-provided request table; immediate response fields are not consumed; success mutates awakening-essence state and local hero/update state. Exact request keys and response schema remain to be traced.
+- `SET_REP_HERO`: request is caller-provided and includes `partner_id`; success updates representative hero and dispatches `HERO_UPDATE` with response params/userdata. Exact nested fields still require `heroUpdateEvent_` tracing.
+- `SET_LOCK_HERO`: request `{partner_id,is_lock}`; success changes the local hero lock flag and dispatches `HERO_UPDATE`; response params/userdata are forwarded but no scalar response field is directly consumed here.
+- `START_SAKURA_FIGHT` and `SINGLE_DAY_START_FIGHT`: request tables are caller-provided; immediate callers forward status/response and do not directly inspect response fields. Exact request keys and downstream consumers remain to be traced.
+- `CHECK_ACHIEVEMENT`: request table is caller-provided; immediate method forwards status/response without inspecting fields.
+
+### Important correction/discipline
+The absence of a direct response-field read in a callback is **not** evidence that the server can safely return `{}`. It may be forwarded to a window/caller or used by an event listener. We must trace outward before classifying an endpoint as status-only.
+
+### Next priority
+1. Trace all `598` no-direct-field callback APIs into their callers and event listeners.
+2. Resolve the exact request tables for symbolic/dynamic model APIs by backwards data-flow from the function arguments.
+3. Finish the recognized `RETRIEVE_TOKEN.detail` handlers by opening every delegated model/event target.
+4. Continue the same request -> response -> state mutation tracing into `app/windows`.
+5. Keep numeric MID gaps and undefined symbolic MIDs separate from actual API contracts.
+
+
+## Response propagation/state-boundary pass 11 (2026-08-16)
+Read this file before continuing. This pass remained protocol mapping only.
+
+### Main finding
+A request callback that does not directly inspect response fields is not an empty-response contract. The response may be forwarded to a caller, event, or window. The authoritative tracing chain is:
+`MID -> request callback -> caller/event/window -> response consumer -> state mutation`.
+
+### Source-supported immediate success mutations
+- SEND_SOCIAL: success updates target player's social timestamp and emits FRIENDS_UPDATE; no scalar response field is read at the immediate site.
+- SET_LOCK_HERO: request includes partner_id and is_lock; success changes local hero lock state and emits HERO_UPDATE; response fields are forwarded but not directly consumed at the immediate site.
+- SET_REP_HERO: request includes partner_id; success updates representative-hero state and emits HERO_UPDATE; exact nested response fields still require heroUpdateEvent_ tracing.
+- POWERUP_RUNE: request includes rune_id; immediate caller consumes no response fields beyond success.
+- SELL_RUNES: request includes rune_ids; success removes those rune IDs locally; no response field consumed at the immediate site.
+- CANCEL_REQUEST_FRIEND: immediate caller needs successful status; downstream response schema remains unresolved.
+
+### Boot boundary reaffirmed
+The supplied project history/capture establishes:
+SDK session -> RETRIEVE_TOKEN -> detail hydration -> ALBUM_SPECIAL_COLLECT_INFO -> xydSelectServer success.
+The Lua-side transition after server selection is:
+selectServer -> updateMeta_ -> StoryData.updateDataFromStorage -> loadModel(MESSAGE_MANAGER) -> audio.stopMusic -> MainScene.new.
+This does not imply that every transition is another HTTP MID.
+
+### Identity rule
+MID 1 does not take player_id as a request field. Session/login + region/version/platform context lead to response uid and detail[17].player_id. Backend should resolve a canonical account/session + region -> PlayerState and derive later responses from the same state.
+
+### Evidence discipline
+SDK cookie success is capture/history evidence, not a new Lua protocol discovery. Resource precedence is documented separately from API completeness. Missing art/resource files must not be treated as missing MIDs without source evidence.
+
+### New documentation
+- PASS11_RESPONSE_PROPAGATION_AND_STATE.md
+
+### Next priority
+Continue outward tracing of the no-direct-response-field callback set, then dynamic request-table resolution, bootstrap detail delegated consumers, and window-level response consumers. Keep unresolved symbolic MIDs and transport-special APIs separate.
+
+
+## Complete boot-to-MainScene dependency pass 12 (2026-08-16)
+
+This pass re-opened the actual `app-assets/output/assets/src_64` tree from `all-assest-rechecked.zip` and traced the post-MID-1 synchronous transition plus all `RETRIEVE_TOKEN.detail` consumers. No backend semantic implementation was added.
+
+### New source-confirmed findings
+- `LoadingScene.setupModels_()` loads `SELF_PLAYER`, `ARENA`, `TASK`, `ACTIVITIES`, and `INVITE_FRIENDS_INFOS` before SDK login; their inspected constructor/onRegister paths do not automatically send HTTP requests.
+- `StoryData.updateDataFromStorage()` is local DB synchronization only; it is not an API dependency.
+- `MessageManager` is instantiated synchronously before `MainScene.new()`, reads core SelfPlayer state, then asynchronously requests `LOAD_CHAT_ROOM_INFO` for world/service/guild rooms and attempts TCP sockets.
+- `MainScene` ctor synchronously reads `Library.bgMain`; the library bootstrap is therefore a genuine state dependency.
+- `MainSceneTopWindow:willOpen()` unconditionally calls `CHECK_GAME_STAT` with `{}`; this is the first clearly unconditional HTTP request after scene creation identified in this pass.
+- `MainScene.onEnterTransitionFinish()` opens five windows; many later API calls are feature/state gated and are not mandatory boot APIs without satisfying their conditions.
+- `Backend:webRequest_()` runs `extraWebResponseCheck_()` and the MID event dispatch **before** the inline request callback. Backend responses therefore have cross-cutting side-effect fields beyond endpoint-specific payloads.
+- Cross-cutting response fields confirmed: `v_`, `economy_`, `new_funcs_`, `flag_`, `server_time`, `gm_url`, `extra_drops_`, `act_item_change_`, task arrays, `redmarks_`, `twice_awake_stage_`.
+- `LOAD_CHAT_ROOM_INFO` uses HTTP only to discover a TCP endpoint; world/service/guild sockets are distinct channels.
+- MID 17 is substantially larger than the earlier minimal player payload. The source directly assigns dozens of player/economy/progression/session fields; the full list is in `PLAYER_INFO_CONTRACT_PASS12.md`.
+- `RETRIEVE_TOKEN.detail` is sorted numerically before consumption. Recognized entries are processed in ascending MID order, which matters when one entry initializes state later consumed by another.
+
+### Documentation added
+- `PLAYER_INFO_CONTRACT_PASS12.md`
+- `MAINSCENE_ENTRY_DEPENDENCIES_PASS12.md`
+- `BACKEND_EVENT_ORDER_AND_SIDE_EFFECTS_PASS12.md`
+- `PRE_UPDATE_SCENE_NETWORK_BOUNDARY_PASS12.md`
+- `CHAT_ROOM_PROTOCOL_PASS12.md`
+- `DYNAMIC_AND_UNRESOLVED_PASS12.md`
+- `api_contracts/boot_detail_pass12/*.md` — one mini-contract for every recognized RETRIEVE_TOKEN detail entry inspected in this pass.
+
+### Confidence
+All findings above are source-derived from the supplied `src_64`. Claims about the ultimate visual boot failure remain unverified because the current objective is protocol mapping, not device diagnosis.
+
+## Pass 13 — MainScene first-entry dependency graph (2026-08-16)
+
+Re-opened the complete `app-assets/output/assets/src_64` source and traced the boundary from successful MID 1 through `MainScene.new()` and the five MainScene windows.
+
+### Source-confirmed immediate first-entry graph
+- `MessageManager` starts `LOAD_CHAT_ROOM_INFO` MID 192 for `region`, `99999`, and `guildID` when applicable. Response fields consumed: `host`, `port`, `room_id`. This is HTTP discovery for a separate TCP chat connection.
+- `MainSceneLeftWindow` has no automatic HTTP request found in its open path.
+- `MainSceneMiddleWindow:didOpen()` unconditionally calls `LOAD_SUMMON_INFO`; response fields consumed include `mana_free_time`, `crystal_free_time`, `second_ids`, `main_ids`, `mana_id`, `pet_id`, `partner_id`, optional `directional_show_id`.
+- `MainSceneMiddleWindow:didOpen()` also unconditionally calls `ILLUSION_LOAD_INFO`; response fields consumed include `paradise_info.paradise_id`, `paradise_info.count`, `challenge_times`, `buy_times`, `hurt`, `rank`.
+- `MainSceneBottomWindow:willOpen()` unconditionally calls `LOAD_FRIENDS`; response fields consumed include `server_time`, `blacklist`, `friend_list`, `notice_list`, `request_list`, `offline_msg_list`, `send_gift_count`, `receive_gift_count`.
+- `MainSceneBottomWindow:willOpen()` conditionally calls `GET_SELF_GUILD` when the guild function is open; it consumes nested guild/self fields.
+- `MainSceneBottomWindow:willOpen()` conditionally calls `PETS_GET` when the pet function is open and local pets are not already loaded; it consumes `pets` and passes each record to `Pet:populate()`.
+- `MainSceneTouchWindow` has no automatic HTTP call; `FIRST_MAIN_TOUCH` is gesture-triggered when `firstMainTouch == 0`.
+- `MainSceneTopWindow:willOpen()` unconditionally calls `CHECK_GAME_STAT` with `{}` and no callback; immediate response fields are not consumed.
+
+### Optional post-entry APIs
+`MainScene` can enter `openWindowInOrder()` depending on guide state. This may invoke `GET_PIC_NOTICE_INFO`, `LOAD_SIGN_INFO`, `SIGN`, and activity-model APIs. Retained-window restoration can also invoke arena/peak/hunqi/etc. These are not part of the unconditional first-entry graph.
+
+### Important protocol distinction
+`StoryData.updateDataFromStorage()` between `xydSelectServer` and MainScene is local storage, not a backend dependency. Do not add a fake API for it.
+
+### Documentation
+- `PASS13_INDEX.md`
+- `MAINSCENE_FIRST_ENTRY_PROTOCOL_PASS13.md`
+- `api_contracts/pass13_main_scene/*.md`
+
+### Confidence
+All findings in this section are source-derived from the complete src_64 tree. The causal relationship between any of these requests and a visual startup stall remains unverified without a fresh device run.
+
+## Pass 14 — MainScene runtime, redmark, and conditional API surface (2026-08-16)
+Read this file before continuing. Protocol mapping only; no new backend semantic implementation.
+
+### Main findings
+- After MainScene opens its five windows, source-confirmed immediate network calls are: MessageManager `LOAD_CHAT_ROOM_INFO` (192) for region and 99999 plus guildID when applicable; middle-window `LOAD_SUMMON_INFO` (56) and `ILLUSION_LOAD_INFO`; bottom-window `LOAD_FRIENDS`, conditional `GET_SELF_GUILD`, conditional `PETS_GET`; top-window `CHECK_GAME_STAT` (2754). MainSceneTouchWindow has no automatic network request; `FIRST_MAIN_TOUCH` (1864) is user gesture triggered.
+- `LOAD_SUMMON_INFO` is duplicated: bootstrap detail hydration, MainSceneMiddleWindow.didOpen, and middle-window redmark checking can all invoke it. Backend should make this read endpoint idempotent and derive all instances from canonical state.
+- MainScene's ordered popup flow is conditional on guide/activity/local state. It can call `GET_PIC_NOTICE_INFO`, `LOAD_SIGN_INFO`, `SIGN`, `LOAD_SINGLE_ACTIVITY`, and `QUERY_CHARGE_DATA`. These are reachable immediately after login for eligible states but are not unconditional boot dependencies.
+- `GET_PIC_NOTICE_INFO` consumes `has_read` and `contents`.
+- `LOAD_SIGN_INFO` consumes `awards`, `is_signed`, `partner_id`, `sign_times`, `month`, `is_skin`; SelfPlayer caches the result.
+- `LOAD_SINGLE_ACTIVITY` receives caller-provided `{activity_id=...}` in the ordered popup path and source-confirmed fields are `is_open` and `details.award_id/details.login_day` depending on activity.
+- `QUERY_CHARGE_DATA` consumes `charges[]` (`charge_id`, `charge_count`, `last_buy_time`), `giftbags`, and optional `server_time`.
+- `CHECK_GAME_STAT` (2754) is an unconditional first-entry request with `{}` and no callback; response schema is not inferable from source.
+- Backend `extraWebResponseCheck_()` handles top-level `redmarks_` before event dispatch. `Redmark:onUpdate()` expects entries containing `function_id` and `redmark_list`; `BACKEND_REDMARK` is then dispatched. MID 2560 (`RED_POINT`) is also consumed from RETRIEVE_TOKEN.detail using the same Redmark model.
+- Several MainScene timers/random/live2d routines are local-only and must not be mistaken for backend dependencies.
+
+### Documentation added
+- `PASS14_INDEX.md`
+- `MAINSCENE_RUNTIME_API_PASS14.md`
+- `REDMARK_PROTOCOL_PASS14.md`
+- `PASS14_SOURCE_GAPS.md`
+- `api_contracts/pass14_main_scene_runtime/*.md`
+
+### Next priority
+1. Trace the full `LOAD_SINGLE_ACTIVITY` response into every relevant activity window/model.
+2. Map the automatic timers/event listeners that can trigger backend calls after MainScene entry, distinguishing local timers from network-triggering timers.
+3. Continue outward from `LOAD_FRIENDS`, `ILLUSION_LOAD_INFO`, guild/pet reads, and redmark consumers.
+4. Resolve remaining symbolic/dynamic request tables and numeric MID gaps without guessing.
+
+## Pass 15 — MainScene indirect API fan-out and server-time runtime mapping (2026-08-16)
+
+The complete `app-assets/output/assets/src_64` was re-opened for another source-only pass.
+
+### New source-confirmed finding: ACTIVITIES bootstrap has an HTTP fan-out
+
+`SelfPlayer:loadGameStartInfoEvent_()` can feed `RETRIEVE_TOKEN.detail[ACTIVITIES]` directly into `Activities:onLoadActivities_()`.
+`Activities:onLoadActivities_()` assigns `params.list`, sorts/recomputes local state, and then calls `loadBoardInfoList()`.
+`loadBoardInfoList()` sends `GET_BOARD_INFO` with no request payload and consumes `contents`, sorting the entries by descending `notice_id`.
+
+Therefore:
+
+`MID 1 detail[229] ACTIVITIES -> Activities:onLoadActivities_ -> GET_BOARD_INFO`
+
+This is a real secondary backend dependency. It is not safe to assume that the ACTIVITIES bootstrap entry is passive data.
+
+The directly inspected ACTIVITIES fields include `list`, with activity entries using `table_id`, `is_open`, `start_time`, `end_time`, and `details`. Activity-specific `details` fields remain a large separate tracing surface.
+
+### New source-confirmed finding: LOAD_FRIENDS initializes global server time
+
+`SocialSystem:loadFriends()` sends `LOAD_FRIENDS` and, on success, immediately calls `ServerTime:resetServerTime(response.server_time)`. It then stores `blacklist`, `friend_list`, `notice_list`, `request_list`, `offline_msg_list`, `send_gift_count`, and `receive_gift_count`.
+
+Therefore first-entry `LOAD_FRIENDS.server_time` can start the global server-time ticker. MID 3 (`QUERY_SERVER_TIME`) remains an explicit refresh path, but it is not the only way the ticker can be initialized.
+
+### New source-confirmed finding: server_time is a cross-cutting response field
+
+`Backend:extraWebResponseCheck_()` resets `ServerTime` whenever any successful response contains top-level `server_time`. This means the backend should treat `server_time` as a cross-cutting state field rather than an endpoint-specific field.
+
+### New source-confirmed finding: server-time ticker creates later API dependencies
+
+Once initialized, `ServerTime:start()` schedules once per second and dispatches timing events at fixed server-of-day values:
+- `UPDATE_MISSION_ONTIME` at 18001, 43201, 50401, 64801, 72001, 75601, 82801.
+- `UPDATE_ACTIVITIES_ONTIME` and `AUCTION_REFRESH_ONTIME` at 18001.
+- `UPDATE_SHOP_ONTIME` at 43201, 64801, 75601.
+- `AUCTION_REFRESH_ONTIME` at auctionEndTime + 1.
+
+`Task` listens to `UPDATE_MISSION_ONTIME` and loads tasks. `Activities` listens to `UPDATE_ACTIVITIES_ONTIME` and reloads activities. Other shop/auction listeners exist elsewhere in the source tree.
+
+This means a coherent server timestamp affects future API reachability even when the user performs no explicit action.
+
+### New source-confirmed conditional first-scene API: SET_BG
+
+`MainScene:setupBackground()` can call `Library:setLibraryBG()` -> `SET_BG` when a limited library background (`limit == 2`) has a timestamp newer than local `BGCanLoadTime`.
+Request shape is `{_type=1, bg_id=<selected id>}`. The caller consumes status only. This is conditional and not boot-critical.
+
+### MainScene first-entry window order
+
+`MainScene:onEnterTransitionFinish()` source order is:
+`main_scene_left -> main_scene_middle -> main_scene_bottom -> main_scene_touch -> main_scene_top`.
+
+The left window's first-entry work is local/live2d selection and no direct HTTP request was found in its `willOpen/didOpen`.
+The middle window refreshes summon info and redmark state.
+The bottom window's `didOpen` calls local hero-equipment/summon checks and mailbox redmark checks; these functions do not themselves issue HTTP.
+The top window issues `CHECK_GAME_STAT` with `{}` and no callback.
+
+### Documentation added in Pass 15
+
+- `PASS15_INDEX.md`
+- `ACTIVITY_BOOTSTRAP_FANOUT_PASS15.md`
+- `SERVER_TIME_RUNTIME_PROTOCOL_PASS15.md`
+- `MAINSCENE_WINDOW_ORDER_PASS15.md`
+- `api_contracts/pass15_runtime/GET_BOARD_INFO.md`
+- `api_contracts/pass15_runtime/LOAD_FRIENDS_server_time.md`
+- `api_contracts/pass15_runtime/ACTIVITIES_bootstrap.md`
+- `api_contracts/pass15_runtime/SET_BG.md`
+
+### Next mapping priorities
+
+1. Trace every automatic listener of `UPDATE_SHOP_ONTIME`, `AUCTION_REFRESH_ONTIME`, and `UPDATE_MISSION_ONTIME` to enumerate the subsequent API fan-out.
+2. Trace all activity-specific `details` consumers because `ACTIVITIES` is now known to be a high-fan-out bootstrap object.
+3. Continue mapping first-entry redmark consumers and any API requests they initiate.
+4. Continue unresolved/dynamic MID resolution and caller-to-response propagation.
+5. Keep source-confirmed, capture-confirmed, inferred, and unknown protocol facts separate.
+
+## Pass 16 — timed-event fan-out and refresh semantics
+
+Read memory first and traced the actual src_64 source for the four ServerTime events.
+
+### Source-confirmed timed graph
+- UPDATE_MISSION_ONTIME is emitted at 18001, 43201, 50401, 64801, 72001, 75601, 82801 seconds-of-day.
+- Task model listens and calls loadTaskByType(). Normal types issue TASK_LOAD_BY_TYPE with `{mission_type}` unless cached; challenge delegates to BattlePass.loadInfo().
+- TaskWindow also listens and forces DAILY task reload through the Task model.
+- UPDATE_ACTIVITIES_ONTIME is emitted at 18001 only. Activities listens; if logged in it calls ACTIVITIES `{}`. Its handler consumes `params.list`, performs activity/redmark work, then calls GET_BOARD_INFO.
+- UPDATE_SHOP_ONTIME is emitted at 43201/64801/75601. Shop only clears `statuses_`; it does not issue an immediate HTTP request.
+- AUCTION_REFRESH_ONTIME is emitted at 18001 and `auctionEndTime + 1`. AuctionRoomWindow listens and calls GET_AUCTION_INFO_BY_TYPE with `auction_type` when the window is open.
+- SelfPlayer's APP_ENTER_FOREGROUND_EVENT path separately calls QUERY_SERVER_TIME `{}` and dispatches UPDATE_MISSION_ONTIME when `playerID > 0`.
+
+### Important backend-design consequence
+Timed events are not equivalent to timed HTTP endpoints. Some only invalidate local caches; some fan out to one or more APIs; some are window-conditional. The backend should expose correct state so that later model calls succeed rather than inventing unsolicited server pushes.
+
+### Response contracts strengthened
+- TASK_LOAD_BY_TYPE: `mission_list`; partner task type is hero-keyed and assigns `hero_id` from the key.
+- ACTIVITIES: `params.list`; generic activity fields consumed include `table_id`, `is_open`, `start_time`, `end_time`, `details`.
+- GET_BOARD_INFO: `contents[]`, sorted by `notice_id`.
+- GET_AUCTION_INFO_BY_TYPE: `auction_list`; auction window consumes `is_done`, `now_buyer`, `now_price`, `item_id`, `currency_type`, `buyer_info`.
+- QUERY_SERVER_TIME has no callback at this call site and participates in the normal server-time response side-effect mechanism.
+
+### Explicit non-inferences
+- No new numeric MID was invented.
+- No assumption that UPDATE_SHOP_ONTIME itself requires a server request.
+- No claim that the observed auction fields constitute the complete original server response.
+
+## Pass 17R — recovery from trusted Pass 16 and high-fanout transport/API refinement (2026-08-16)
+
+This pass intentionally ignores the lost/invalid Pass 17 artifact and re-derives findings from the trusted Pass 16 archive plus freshly unpacked `all-assest-rechecked.zip` at `app-assets/output/assets/src_64`.
+
+### Process/state
+- Read this `memory.md` before working.
+- Audited the Pass 16 documentation tree: 1336 non-cache files, 1323 markdown docs, 1074 per-MID mini-contracts, 98 per-model mini-contracts.
+- Preserved the current backend implementation; no semantic handler rewrite was attempted.
+- Generated 33 high-fanout mini-contracts in `api_contracts/pass17r_high_fanout/`.
+
+### New source-confirmed transport finding
+`SEND_CHAT_MESSAGE` (`32782`) is not ordinary game HTTP despite appearing in many `Backend:request()` call sites. `Backend.request()` routes it to `tcpRequest_()` because `xyd.isChatRoomMessage(32782)` is true under the `bit.band(mid, 36864) == 32768` rule in `mid.lua`. Therefore the Flask rewrite should not spend time adding a normal HTTP handler for `32782`; it should keep HTTP `LOAD_CHAT_ROOM_INFO` (`192`) shape-correct and later implement/stub the TCP chat room protocol.
+
+### High-fanout API design warnings re-derived from source/audit
+- `LOAD_SINGLE_ACTIVITY` (`234`) has 11 call sites and is an activity-specific read surface. It needs an `activity_id` keyed registry and common activity envelope; `details` is per-activity.
+- `GET_ACTIVITY_REWARD` (`231`) has 8 call sites. Request fields include `activity_id`, `award_id`, and optionally `sub_award_id`; response can include `awards` and `exchange_stone_num`.
+- `LOAD_ARENA_FIGHT_RECORDS` (`289`) has 8 call sites across SelfPlayer/MainScene/MessageManager/Arena/Social/Jigsaw consumers and exposes `records`.
+- `TAKE_MISSION_AWARD` (`161`) has 6 call sites. It uses `table_id` and sometimes `hero_table_id`; response can include `awards`; model state mutates locally on success.
+- `DAILY_CONSUNME_LOAD` (`28`) and `DAILY_CONSUNME` (`29`) are shared daily-counter surfaces, not single-window endpoints.
+
+### New docs added
+- `PASS17R_INDEX.md`
+- `PASS17R_SOURCE_DERIVED_FINDINGS.md`
+- `TRANSPORT_ROUTING_REFINEMENT_PASS17R.md`
+- `HIGH_FANOUT_API_PROTOCOL_PASS17R.md`
+- `api_contracts/pass17r_high_fanout/*.md`
+
+### Next mapping priority
+1. Continue with high-fanout state families: activities/rewards, mission/task, arena/social records, daily counters, market/cart, fight/battle result surfaces.
+2. Resolve remaining dynamic/unresolved request expressions, but keep symbolic-only APIs numerically unresolved unless `mid.lua` assigns them.
+3. Map TCP chat socket payloads separately from HTTP endpoints.
+4. Only after this mapping phase, rewrite the backend around transport routers and canonical state services rather than the current outdated flat skeleton.
+
+
+
+## Pass 18 — completion assessment, transport matrix, and window API surface (2026-08-16)
+
+Read before pass: existing `memory.md`, Pass 17R docs, `tools/api_audit.json`, and fresh `app-assets/output/assets/src_64/app/common/network/Backend.lua` + `mid.lua` from `all-assest-rechecked.zip`.
+
+Conclusion: the full codebase/protocol is **not analyzed enough to start the backend rewrite safely**. The current backend structure is still considered outdated and will need to be rewritten, but the rewrite should wait until dynamic/window/high-fanout APIs are classified more completely.
+
+Pass 18 added:
+- `PASS18_INDEX.md`
+- `PASS18_COMPLETION_ASSESSMENT.md`
+- `TRANSPORT_MATRIX_PASS18.md`
+- `WINDOW_API_SURFACE_PASS18.md`
+- `HIGH_FANOUT_COMPLETION_PASS18.md`
+- `DYNAMIC_REQUEST_SITES_PASS18.md`
+- `api_contracts/pass18_windows/`
+- `api_contracts/pass18_high_fanout/`
+
+Source-derived metrics from this pass:
+- Parsed 1210 numeric MID definitions from supplied `mid.lua`.
+- Existing audit contains 1345 request records: 922 model, 382 window, 37 scene, 4 common.
+- 50 audited records remain dynamic/unresolved.
+- 36 MID groups have 3+ audited call sites and need canonical-state handlers, not one-off stubs.
+- 18 numeric MIDs satisfy the chat/TCP bitmask. These are not ordinary Flask HTTP game endpoints.
+- `Backend:sendAsFormData_()` zlib/form MIDs: ARENA_FIGHT_RESULT=279, PEAK_START_FIGHT=2484, TREASURE_SAVE_BATTLE_RESULT=535, REARENA_END_FIGHT=774, REGION_FIGHT_RESULT=1412, CONQUER_SCHOOL_FIGHT_RESULT=1570, SAVE_FURNITURES=2515.
+- `Backend:isUpload()` recognizes upload MID 1844.
+
+Important Pass 18 transport correction/refinement:
+- `LOAD_CHAT_ROOM_INFO` (MID 192) is ordinary HTTP discovery and returns `host`, `port`, `room_id`.
+- MIDs where `bit.band(mid, 36864) == 32768`, including `SEND_CHAT_MESSAGE=32782`, are TCP/chat-routed by `Backend:request()` and should not be implemented as ordinary `/api/v1` Flask handlers unless deliberately adding diagnostics.
+- `Backend:isGMOperation()` exists for `bit.band(mid, 36864) == 36864`; no numeric MID assignments in supplied `mid.lua` matched that exact GM route in this pass.
+
+Window-layer finding:
+- The audited window layer has 382 request records across 192 window files. Many are user-interaction or conditional feature paths, but they expose nested response contracts and high-fanout shared APIs. Continue mapping windows before the rewrite.
+
+Next pass recommendation:
+1. Resolve `DYNAMIC_REQUEST_SITES_PASS18.md` by opening each source file and tracing local MID variables/tables.
+2. Continue window subsystem mapping by domain: arena/battle reports, activity rewards, market/shop, hero wash/skin/summon, chat/social invites.
+3. Only after those are classified should the backend be rewritten into transport + canonical `PlayerState` services.
+
+
+## Pass 19 — dynamic request resolution and rewrite gate (2026-08-16)
+
+Read baseline `memory.md` first, then re-opened the complete `app-assets/output/assets/src_64` tree from `all-assest-rechecked.zip`. This pass continued documentation only; no backend rewrite or semantic handlers were implemented.
+
+Pass 19 added:
+- `PASS19_INDEX.md`
+- `PASS19_CLIENT_MAPPING_STATUS.md`
+- `DYNAMIC_REQUEST_RESOLUTION_PASS19.md`
+- `UNDEFINED_MID_SYMBOLS_PASS19.md`
+- `FINITE_DYNAMIC_DISPATCH_PASS19.md`
+- `DOMAIN_REWRITE_GATE_PASS19.md`
+- `api_contracts/pass19_dynamic_resolution/` mini-docs and JSON
+
+Conclusion: the frontend client is **not yet completely mapped** for a full backend rewrite. The boot/first-entry path is strong, but full gameplay/domain coverage still has gaps. Continue mapping rather than rewriting the whole backend.
+
+Important Pass 19 findings:
+- Recomputed undefined MID symbols: **26 `xyd.mid.*` names are referenced but not assigned in `mid.lua`**. These include `LOAD_DUNGEON`, `LOAD_MAGIC_SHOP`, `LOAD_MARKET`, `LOAD_RECOMMEND_FRIENDS`, `LOAD_SEND_REQUEST_PLAYERS`, `SEND_SOCIAL`, `CANCEL_REQUEST_FRIEND`, `AWAKE_HERO`, `SET_REP_HERO`, `SET_LOCK_HERO`, `POWERUP_RUNE`, `SELL_RUNES`, several `SINGLE_DAY_*` names, and `START_SAKURA_FIGHT`. Do not invent numeric IDs for them.
+- Resolved multiple finite dynamic branches:
+  - wash/practice: `GET_PRACTICE_INFO`/`PET_GET_PRACTICE_INFO`, `PRACTICE_SAVE`/`PET_PRACTICE_SAVE`, `WASH_BY_TICKET`/`PET_WASH_BY_TICKET`, `PRACTICE`/`PET_PRACTICE`, `PRACTICE_AUTO`/`PET_PRACTICE_AUTO`; auto-wash consumes `add_attrs[]` and `is_adds[]` in `WashProcessWindow`.
+  - arena/rank/records: `query_arena_formation`/`ARENA_MODE_QUERY_FORMATION`, `ARENA_GET_RCORD_PLAYER_INFO`/`ARENA_MODE_RECORD_PLAYER_INFO`, `LOAD_ARENA_FIGHT_REPORT`/`ARENA_MODE_RECORD_DETAIL`, `ARENA_PRE_FIGHT`/`ARENA_MODE_FIGHT_PRE`, `ILLUSION_RANK_HEROS`, `CHAMPIONS_GET_FIGHT_RECORD`.
+  - fishing equipment: `ACTIVITY_FISHING_CHANGE_ROD`, `ACTIVITY_FISHING_CHANGE_HOOK`, `ACTIVITY_FISHING_CHANGE_BAIT`.
+  - activity map star award: `CHOCOLATE_STAR_AWARD`; sweep path is campaign-type dependent and includes `CHOCOLATE_SWEEP`, `FOURTH_ANNI_MAP_SWEEP`, `POLAR_NIGHT_SWEEP` among others.
+- `ChatWindow` has a debug/runtime numeric command path that can call arbitrary numeric MIDs parsed from chat-like input. Treat it as developer/GM/debug behavior, not ordinary gameplay API architecture.
+- `PEAK_FIGHT_RESULT` is referenced via `var_0_7.mid.PEAK_FIGHT_RESULT` but remains undefined in supplied `mid.lua`; the call uses special battle/result request flags. It must not be assigned a guessed numeric MID.
+
+Next mapping priority:
+1. Continue with activity-specific `details` consumers and `LOAD_SINGLE_ACTIVITY` payload variants.
+2. Trace battle/result MIDs and compressed/form-data endpoints.
+3. Investigate whether undefined symbolic MIDs have numeric assignments in any downloaded override, capture, or non-Lua native table.
+4. Build domain-owned response contracts for practice, arena, activity, social/friends, shop/market, and battle-result before coding the backend rewrite.

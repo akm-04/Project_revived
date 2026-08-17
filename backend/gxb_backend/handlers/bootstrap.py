@@ -13,15 +13,24 @@ class BootstrapHandlers:
         self.ctx = ctx
 
     def retrieve_token(self, req: dict) -> dict:
-        player = self.ctx.state.get_player()
-        account = self.ctx.state.get_account()
+        if not self.ctx.state.has_authenticated_session():
+            # Exact official login/session error code was not recovered. This is
+            # a local compatibility rejection rather than silently binding an
+            # unknown credential request to the anonymous sandbox.
+            return {"error_code": 1, "error_msg": "Invalid or expired local session"}
         try:
-            region = int(req.get("region", player.region))
+            region = int(req.get("region", 197))
         except Exception:
-            region = player.region
-        self.ctx.state.set_region(region)
-        # Re-fetch after set_region(), which persists through the repository.
-        player = self.ctx.state.get_player()
+            region = 197
+
+        # Pass22: MID1 is the account-region character resolve/create boundary.
+        # Credential accounts get one stable player_id per region; the anonymous
+        # sandbox preserves its existing single-player compatibility behavior.
+        player, is_new = self.ctx.state.resolve_or_create_player(
+            region,
+            self.ctx.state.region_name(region),
+        )
+        account = self.ctx.state.get_account()
         self._trace_identity(req, account, player)
 
         # SelfPlayer:getSkillPoint() performs timed recovery locally before the
@@ -38,7 +47,7 @@ class BootstrapHandlers:
             # synchronous BattlePass/activity time comparisons.
             "server_time": player.now(),
             "log_url": self.ctx.settings.client_log_url,
-            "is_new": 0,
+            "is_new": 1 if is_new else 0,
             "story_type": 0,
             "is_debug": 0,
             "is_old_top": 0,

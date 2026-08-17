@@ -128,6 +128,12 @@ class Settings:
         str(_PROJECT_ROOT / "data/campaign_asset_requirements.json"),
     ))
     player_db_path: Path = Path(os.getenv("GXB_PLAYER_DB_PATH", str(_PROJECT_ROOT / "data/player_db.json")))
+    # v0.8.0 canonical multi-user store. player_db.json remains a one-time
+    # migration source for the proven anonymous sandbox profile.
+    multiuser_root: Path = Path(os.getenv(
+        "GXB_MULTIUSER_ROOT",
+        str(_PROJECT_ROOT / "data/server_state"),
+    ))
     state_path: Path = Path(os.getenv("GXB_STATE_PATH", str(_PROJECT_ROOT / "state/gxb_state.json")))
     enable_chat_stub: bool = os.getenv("GXB_ENABLE_CHAT_STUB", "1") not in {"0", "false", "False"}
     log_unknown_mids: bool = os.getenv("GXB_LOG_UNKNOWN_MIDS", "1") not in {"0", "false", "False"}

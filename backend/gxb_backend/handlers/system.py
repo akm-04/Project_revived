@@ -16,53 +16,50 @@ class SystemHandlers:
         return {"server_time": int(time.time())}
 
     def load_user_regions(self, req: dict) -> dict:
-        """Return the complete RegionWindow-safe MID18 shape.
+        """Return MID18 regions plus only the authenticated account's players.
 
-        LoginWindow itself only reads ``regions``/``players``, which is why the
-        earlier Pass 19 surface map stopped there.  RegionWindow consumes more:
-        ``recall_regions`` must be a table, each region needs ``max_player_id``
-        and ``cur_id`` for the full/hot/new indicator, and ``players`` is sorted
-        as an array of per-region character records.
-
-        The field names are source-confirmed.  Capacity values for unobserved
-        official regions are compatibility defaults, not recovered live data.
+        Pass22 establishes MID18 as the account→region character directory.
+        Region catalog rows remain shared; player briefs are account-scoped.
         """
-        player = self.ctx.state.get_player()
+        owned_players = self.ctx.state.list_account_players()
 
         regions = []
         for i in range(1, 201):
             regions.append({
                 "region_id": i,
-                "name": "Deep Valley" if i == 125 else f"Local-{i}",
+                "name": self.ctx.state.region_name(i),
                 "status": 1,
-                # RegionWindow.lua compares these numerically before rendering.
-                # Exact official counts were not present in the supplied dumps.
-                "cur_id": 1 if i == int(player.region) else 0,
+                # RegionWindow compares these numerically. Exact official
+                # capacity counters were not recovered, so max stays a local
+                # compatibility sentinel while cur_id reflects local population.
+                "cur_id": self.ctx.state.region_player_count(i),
                 "max_player_id": 999999999,
             })
 
-        try:
-            player_numeric_id = int(player.player_id)
-        except (TypeError, ValueError):
-            player_numeric_id = 0
+        players = []
+        for player in owned_players:
+            try:
+                player_numeric_id = int(player.player_id)
+            except (TypeError, ValueError):
+                player_numeric_id = 0
+            players.append({
+                "id": player_numeric_id,
+                "player_id": player_numeric_id,
+                "name": str(player.player_name or ""),
+                "region": int(player.region),
+                "lev": int(player.lev),
+                "vip": int(player.vip),
+                "avatar_id": int(player.avatar_id),
+                "avatar_frame_id": int(player.avatar_frame_id),
+                "conquer_lev": int(player.conquer_lev),
+                "conquer_loop_id": int(player.conquer_loop_id),
+            })
 
-        players = [{
-            "id": player_numeric_id,
-            "player_id": player_numeric_id,
-            "name": player.player_name,
-            "region": int(player.region),
-            "lev": int(player.lev),
-            "vip": int(player.vip),
-            "avatar_id": int(player.avatar_id),
-            "avatar_frame_id": int(player.avatar_frame_id),
-            "conquer_lev": int(player.conquer_lev),
-            "conquer_loop_id": int(player.conquer_loop_id),
-        }]
-
+        account = self.ctx.state.get_account()
         print(
             "[REGIONS] "
-            f"sid={req.get('sid')!r} regions={len(regions)} "
-            f"players={len(players)} current={player.region}/{player.player_name}"
+            f"sid={req.get('sid')!r} uid={account.uid} regions={len(regions)} "
+            f"owned_players={len(players)}"
         )
         return {
             "regions": regions,

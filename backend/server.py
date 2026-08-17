@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Compatibility launcher for the modular GXB v0.6.3 album/story recovery + local hot-update backend.
+"""Compatibility launcher for the modular GXB v0.8.0 multi-user identity backend.
 
 Existing workflows that run `python server.py` can keep doing so.
 """

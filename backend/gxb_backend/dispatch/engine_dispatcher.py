@@ -441,7 +441,7 @@ class EngineDispatcher:
     def dispatch(self, req: dict[str, Any]) -> Any:
         # Stage 4A request scope keeps the human-editable JSON refresh and any
         # handler mutation/save on one coherent PlayerState snapshot.
-        with self.state.request_scope():
+        with self.state.request_scope(req):
             return self._dispatch_scoped(req)
 
     def _dispatch_scoped(self, req: dict[str, Any]) -> Any:

@@ -94,3 +94,76 @@ def apply_profile(player: PlayerState, profile: str) -> PlayerState:
     if (profile or "").lower() in {"established", "stage3", "all"}:
         return apply_established_profile(player)
     return player
+
+
+def make_fresh_player(*, account_uid: str, player_id: str, region: int, region_name: str) -> PlayerState:
+    """Create a conservative first-login player for credential accounts.
+
+    Pass 22 source confirms the structural lifecycle (empty name, is_new=1,
+    tutorial naming later), but not every original starting currency.  Values
+    here are deliberately low/minimal local-server defaults and are documented
+    as compatibility policy rather than recovered official economics.
+    """
+    player = PlayerState()
+    player.account_uid = str(account_uid)
+    player.player_id = str(player_id)
+    player.player_name = ""
+    player.region = int(region)
+    player.region_name = str(region_name)
+    player.token = ""
+    player.player_type = 0
+    player.lev = 1
+    player.exp = 0
+    player.vip = 0
+    player.guild_id = 0
+
+    # Do not inherit the established sandbox's reconstruction currencies.
+    player.mana = 0
+    player.crystal = 0
+    player.lucky_coin = 0
+    player.arena_coin = 0
+    player.march_coin = 0
+    player.top_coin = 0
+    player.guild_coin = 0
+    player.region_coin = 0
+    player.king_coin = 0
+    player.honor_coin = 0
+    player.god_war_coin = 0
+    player.friendship_coin = 0
+    player.friend_medal = 0
+    player.summon_coin = 0
+    player.skin_fragment = 0
+    player.glue = 0
+    player.lvbu_coin = 0
+    player.paradise_coin = 0
+    player.team_dungeon_coin = 0
+    player.ice_core = 0
+    player.spirit_stone = 0
+    player.occult_ticket = 0
+    player.tutor_coin = 0
+    player.skin_coin = 0
+
+    player.skill_point = 0
+    player.first_main_touch = 0
+    player.main_scene_type = 0
+    player.story_id = 0
+    player.story_state = 0
+    player.guide_id = 0
+    player.guide_return_id = 0
+    player.func_ids = []
+    player.guide_function_ids = {}
+    player.is_commented = 0
+
+    # New-player ownership starts empty. The opening story/tutorial is the
+    # source-backed gate before normal roster progression.
+    player.heroes = {}
+    player.collected_heros = {}
+    player.hero_pieces = {}
+    player.hero_next_partner_id = 10001
+    player.formation = {}
+    player.backpack_items = []
+    player.spirit_list = []
+    player.pets = {}
+    player.world_map = {}
+    player.active_campaign_battle = {}
+    return player
