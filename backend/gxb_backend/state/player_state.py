@@ -124,8 +124,11 @@ class PlayerState:
     energy: int = 100
     max_energy: int = 100
     spirit_energy: int = 100
-    max_invitation: int = 10
-    invitation: int = 10
+    # Arena invitation is optional until the deferred PvP domain is restored.
+    # The shipped client has a latent invitation-table mismatch reached by
+    # economy_ events when this field is truthy.
+    max_invitation: int | None = 10
+    invitation: int | None = 10
     social: int = 0
     glory: int = 0
 
@@ -172,8 +175,9 @@ class PlayerState:
     comment_open: int = 0
     fbshare_open: int = 0
 
-    # Optional persisted timestamps. Zero means "use server now" when building
-    # a player-info response, which is convenient for hand-edited test data.
+    # Optional persisted timestamps. Energy/spirit zero may be materialized as
+    # server-now for compatibility, but Skill Point uses zero as a semantic
+    # full-pool/no-regeneration sentinel and must be preserved on the wire.
     energy_time: int = 0
     spirit_energy_time: int = 0
     invitation_time: int = 0
@@ -223,6 +227,9 @@ class PlayerState:
 
     mails: list[dict[str, Any]] = field(default_factory=list)
     missions: dict[str, list[dict[str, Any]]] = field(default_factory=dict)
+    # Canonical MissionRepository-owned state. ``missions`` above remains a
+    # transitional legacy/bootstrap payload for still-unimplemented families.
+    mission_state: dict[str, Any] = field(default_factory=dict)
     shops: dict[str, list[dict[str, Any]]] = field(default_factory=dict)
     shop_statuses: dict[str, Any] = field(default_factory=dict)
     world_map: dict[str, Any] = field(default_factory=dict)
@@ -278,7 +285,7 @@ class PlayerState:
         now = self.now()
         func_ids = self.func_ids
         avatar_id = self.avatar_id or DEFAULT_AVATAR_ID
-        return {
+        payload = {
             "player_id": self.player_id,
             "uid": self.account_uid,
             "player_name": self.player_name,
@@ -319,9 +326,6 @@ class PlayerState:
             "energy_time": self.energy_time or now,
             "spirit_energy": self.spirit_energy,
             "spirit_energy_time": self.spirit_energy_time or now,
-            "invitation": self.invitation,
-            "invitation_time": self.invitation_time or now,
-            "max_invitation": self.max_invitation,
             "social": self.social,
             "glory": self.glory,
             "vip": self.vip,
@@ -333,7 +337,7 @@ class PlayerState:
             "guide_function_ids": self.guide_function_ids,
             "guide_return_id": self.guide_return_id,
             "skill_point": self.skill_point,
-            "skill_time": self.skill_time or now,
+            "skill_time": max(0, int(self.skill_time or 0)),
             "formation": self.formation,
             "save_team": self.save_team,
             "save_team_name": self.save_team_name,
@@ -375,6 +379,15 @@ class PlayerState:
             "story_state": self.story_state,
             "guide_id": self.guide_id,
         }
+        # Runtime v0.8.2 exposed a shipped-client table mismatch: SelfPlayer.lua
+        # checks ``xyd.FunctionID.ARENA`` (the enum key is ID_ARENA) and then
+        # calls ``xyd.tables.player:invitation()``, while authoritative
+        # data/tables/player.lua has no invitation column. Any global economy_
+        # event can therefore crash when bootstrap has a truthy invitation.
+        # Arena/PvP remains deliberately deferred, so suppress the invitation
+        # projection for *all* profiles (including the AdminRoot sandbox) while
+        # retaining the stored fields for future competitive-domain restoration.
+        return payload
 
     def heroes_payload(self) -> dict[str, Any]:
         heroes = self.heroes
@@ -417,15 +430,20 @@ class PlayerState:
         }
 
     def summon_payload(self) -> dict[str, Any]:
-        now = self.now()
+        """Legacy direct projection; canonical callers use SummonRepository.
+
+        Kept for compatibility with external tooling. It deliberately mirrors
+        persisted state only and does not invent a future free timestamp.
+        """
         payload = {
-            "mana_free_time": self.summon.get("mana_free_time", now + 3600),
-            "crystal_free_time": self.summon.get("crystal_free_time", now + 3600),
+            "mana_free_time": self.summon.get("mana_free_time", 0),
+            "crystal_free_time": self.summon.get("crystal_free_time", 0),
             "second_ids": self.summon.get("second_ids", []),
             "main_ids": self.summon.get("main_ids", []),
             "mana_id": self.summon.get("mana_id", 0),
             "pet_id": self.summon.get("pet_id", 0),
             "partner_id": self.summon.get("partner_id", 0),
+            "mana_free_num": self.summon.get("mana_free_num", 0),
         }
         if "directional_show_id" in self.summon:
             payload["directional_show_id"] = self.summon["directional_show_id"]

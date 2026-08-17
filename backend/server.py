@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Compatibility launcher for the modular GXB v0.8.0 multi-user identity backend.
+"""Compatibility launcher for the modular GXB v0.8.7 Pass 30.1 Skill Point + Crystal purchase fix backend.
 
 Existing workflows that run `python server.py` can keep doing so.
 """

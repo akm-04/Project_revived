@@ -36,6 +36,7 @@ from gxb_backend.observability.runtime_logger import RuntimeLogger
 from gxb_backend.protocol.mids import MID, mid_name
 from gxb_backend.protocol.routing import RouteClass, classify_mid
 from gxb_backend.state.repository import StateRepository
+from gxb_backend.state.response_projector import ResponseProjector
 from gxb_backend.transport.responses import engine_ok
 
 Handler = Callable[[dict[str, Any]], Any]
@@ -175,7 +176,10 @@ class EngineDispatcher:
             "BUY_SKILL_POINT": self.heroes.buy_skill_point,
             "SET_SKILL_LEVEL": self.heroes.set_skill_level,
             "SET_ALL_SKILL_LEVEL": self.heroes.set_all_skill_level,
-            "SUMMON_HERO": self.rewards.awards_empty,
+            "SET_HERO_EQUIP": self.heroes.set_hero_equip,
+            "ONE_CLICK_EQUIP": self.heroes.one_click_equip,
+            "ONE_CLICK_JINJIE": self.heroes.one_click_promote,
+            "SUMMON_HERO": self.summon.summon_hero,
             "STONE_SUMMON_HERO": self.rewards.awards_empty,
             "MAGIC_SUMMON_BUY": self.rewards.awards_empty,
             "EDIT_PLAYER_NAME": self.system.edit_player_name,
@@ -401,12 +405,9 @@ class EngineDispatcher:
             "CONQUER_SCHOOL_FIGHT_RESULT",
             "SAVE_FURNITURES",
             "HUNQI_GET_CAMPAIGN_INFO",
-            "SET_HERO_EQUIP",
-            "ONE_CLICK_EQUIP",
             "POWERUP_HERO",
             "EVOLVE_HERO",
             "FUMO",
-            "ONE_CLICK_JINJIE",
             "EXPAND_HERO_SLOTS",
             "DISMISS_HERO",
             "UNLOCK_DYNAMIC_CARD",
@@ -455,14 +456,22 @@ class EngineDispatcher:
         name = mid_name(req_mid)
         print(f"[ENGINE IN] mid={name} ({req_mid}) route={route_class.value} data={json.dumps(req, ensure_ascii=False, default=str)}")
 
+        projector = ResponseProjector.capture(self.state.current_player_or_none())
+
         handler = self.handlers.get(req_mid)
         fallback_used = handler is None
         if fallback_used:
-            result = self.compat.fallback(req)
-            handler_name = "compat.fallback"
+            if self.compat.is_safe_fallback_mid(req_mid):
+                result = self.compat.fallback(req)
+                handler_name = "compat.safe_fallback"
+            else:
+                result = self.compat.blocked(req)
+                handler_name = "compat.blocked_unknown"
         else:
             result = handler(req)
             handler_name = getattr(handler, "__qualname__", repr(handler))
+
+        result = projector.project(result, self.state.current_player_or_none())
 
         self.runtime_logger.request(
             mid=req_mid,
@@ -479,8 +488,8 @@ class EngineDispatcher:
             return result
 
         response = engine_ok(result)
-        if route_class == RouteClass.ENGINE_ZLIB_FORM:
-            # Keep battle/result acknowledgements minimal but successful.
+        if route_class == RouteClass.ENGINE_ZLIB_FORM and int(response.get("error_code", 0)) == 0:
+            # Keep known/safe battle-result acknowledgements minimal but successful.
             response.setdefault("result", 1)
         print(f"[ENGINE OUT] {json.dumps(response, ensure_ascii=False, separators=(',', ':'), default=str)}")
         return response

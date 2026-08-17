@@ -8,9 +8,13 @@ from pathlib import Path
 from typing import Any
 
 from .account import AccountIdentity
+from .economy_repository import EconomyRepository
+from .function_unlock_repository import FunctionUnlockRepository
 from .hero_progression_repository import HeroProgressionRepository
+from .hero_equipment_repository import HeroEquipmentRepository
 from .hero_repository import HeroRepository
 from .inventory_repository import InventoryRepository
+from .mission_repository import MissionRepository
 from .multiuser_database import (
     MultiUserDatabase,
     SANDBOX_SID,
@@ -18,6 +22,7 @@ from .multiuser_database import (
     SANDBOX_UID,
 )
 from .player_state import PlayerState
+from .summon_repository import SummonRepository
 from .world_repository import WorldRepository
 
 
@@ -264,6 +269,14 @@ class StateRepository:
         session = self.store.ensure_sandbox_session()
         return self.store.identity_from_session(session)
 
+    def current_player_or_none(self) -> PlayerState | None:
+        """Return only the request-bound player, without sandbox fallback.
+
+        Response projection uses this to avoid diffing bootstrap/account-selection
+        requests against the implicit AdminRoot sandbox.
+        """
+        return getattr(self._local, "player", None)
+
     def get_player(self) -> PlayerState:
         player = getattr(self._local, "player", None)
         if player is not None:
@@ -285,21 +298,64 @@ class StateRepository:
             self.store.save_player(player)
 
     def get_hero_repository(self) -> HeroRepository:
-        return HeroRepository(self.get_player(), self.save, self._data_dir())
+        player = self.get_player()
+        functions = FunctionUnlockRepository(player, self._data_dir())
+        economy = EconomyRepository(
+            player, self._data_dir(), self.save,
+            function_unlocks=functions,
+        )
+        return HeroRepository(
+            player, self.save, self._data_dir(),
+            economy=economy,
+        )
 
     def get_inventory_repository(self) -> InventoryRepository:
         return InventoryRepository(self.get_player(), self.save)
 
+    def get_summon_repository(self) -> SummonRepository:
+        return SummonRepository(self.get_player(), self._data_dir(), self.save)
+
     def get_hero_progression_repository(self) -> HeroProgressionRepository:
         return HeroProgressionRepository(self.get_player(), self._data_dir(), self.save)
 
+    def get_hero_equipment_repository(self) -> HeroEquipmentRepository:
+        return HeroEquipmentRepository(self.get_player(), self._data_dir(), self.save)
+
+    def get_function_unlock_repository(self) -> FunctionUnlockRepository:
+        return FunctionUnlockRepository(self.get_player(), self._data_dir(), self.save)
+
+    def get_economy_repository(self) -> EconomyRepository:
+        player = self.get_player()
+        return EconomyRepository(
+            player, self._data_dir(), self.save,
+            function_unlocks=FunctionUnlockRepository(player, self._data_dir()),
+        )
+
+    def get_mission_repository(self) -> MissionRepository:
+        player = self.get_player()
+        functions = FunctionUnlockRepository(player, self._data_dir())
+        economy = EconomyRepository(player, self._data_dir(), function_unlocks=functions)
+        return MissionRepository(
+            player, self._data_dir(), self.save,
+            economy=economy, inventory=InventoryRepository(player),
+        )
+
     def get_world_repository(self) -> WorldRepository:
         player = self.get_player()
+        functions = FunctionUnlockRepository(player, self._data_dir())
+        economy = EconomyRepository(player, self._data_dir(), function_unlocks=functions)
+        inventory = InventoryRepository(player)
+        missions = MissionRepository(
+            player, self._data_dir(), economy=economy, inventory=inventory,
+        )
         return WorldRepository(
             player,
             self._data_dir(),
             self.save,
-            inventory=InventoryRepository(player),
+            inventory=inventory,
+            economy=economy,
+            hero_progression=HeroProgressionRepository(player, self._data_dir()),
+            missions=missions,
         )
 
     def set_region(self, region: int) -> None:

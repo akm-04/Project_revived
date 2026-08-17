@@ -1,0 +1,28 @@
+v0.8.2 validation — 2026-08-17
+
+Python syntax:
+PASS: 88 Python files compiled with python -m py_compile.
+
+Offline state tests:
+PASS: tools/selftest_multiuser.py
+PASS: tools/selftest_tutorial_summon.py
+PASS: tools/selftest_campaign_economy.py
+
+Metadata:
+PASS: campaign_economy_meta.json parse
+PASS: campaign_reward_meta.json parse
+PASS: tutorial_summon_meta.json parse
+PASS: campaign_economy_meta contains 917 Campaign rows, 100 player-level rows, getExpMulti=3.
+
+Campaign economy self-test covers:
+- 100001 MID113 staged Toy Hammer;
+- MID114 cumulative Mana 495;
+- cumulative player EXP 18 and level 4;
+- Aquaris/Lavia/Pandaria cumulative Hero EXP 75 each and level 3;
+- one-time first-clear item behavior;
+- duplicate MID114 idempotency;
+- real replay after a new MID113 grants repeat Mana/EXP without a second guaranteed item;
+- canonical multi-user JSON save/reload;
+- duplicate MID114 after reload does not re-grant rewards.
+
+No Flask/HTTP/APK/ADB/emulator/gameplay runtime test was performed by the assistant.

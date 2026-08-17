@@ -72,8 +72,13 @@ class SystemHandlers:
         return {"contents": json.dumps({})}
 
     def get_player_group_by_key(self, req: dict) -> str:
-        # Callback stores the response itself as a group value.
-        return "A"
+        # Source abtest.lua says MTSPY: A uses the extra weak/function guide,
+        # B disables it. The shipped strong story guide is active for fresh
+        # tutorial players, and v0.8.3 runtime proved hard-coded A can overlay
+        # guide_new on that path at level 7. Use local compatibility arm B for
+        # mtspy only; keep the previous A behavior for unrelated experiments.
+        key = str(req.get("unique_key") or "").strip().lower()
+        return "B" if key == "mtspy" else "A"
 
     def check_game_stat(self, req: dict) -> dict:
         return {}
@@ -87,7 +92,15 @@ class SystemHandlers:
         return {"charges": [], "first_pay": 0, "list": []}
 
     def generate_player_name(self, req: dict) -> dict:
-        return {"name": self.ctx.state.get_player().player_name}
+        # EditPlayerName:onGeneratePlayerName_ requires player_name_list. These
+        # values are source entries from data/tables/random_name.lua; exact old
+        # live-server sampling policy is not recovered, so keep deterministic.
+        return {
+            "player_name_list": [
+                "Hoper", "In Rui", "Trypan", "Huai", "Bao", "Bi",
+                "Zhao", "Zena", "Chang", "Cheng", "Dinge", "Feng",
+            ]
+        }
 
     def edit_player_name(self, req: dict) -> dict:
         name = req.get("player_name") or req.get("name")

@@ -78,6 +78,20 @@ class HeroHandlers:
     def load_pets(self, req: dict) -> dict:
         return self.ctx.state.get_player().pets_payload()
 
+    def set_hero_equip(self, req: dict) -> dict:
+        """MID54: consume the source current-color item and persist its slot."""
+        return self.ctx.state.get_hero_equipment_repository().set_hero_equip(
+            req.get("partner_id"), req.get("equip_index")
+        )
+
+    def one_click_equip(self, req: dict) -> dict:
+        """MID62: mirror the client source composition/potion/Mana planner."""
+        return self.ctx.state.get_hero_equipment_repository().one_click_equip(req.get("partner_id"))
+
+    def one_click_promote(self, req: dict) -> dict:
+        """MID57: atomically promote one early ordinary NormalHero color."""
+        return self.ctx.state.get_hero_equipment_repository().one_click_promote(req.get("partner_id"))
+
     # SET_LOCK_HERO and SET_REP_HERO remain symbolic/undefined in supplied
     # source. Keep the helpers for a future verified numeric mapping, but do not
     # wire a guessed MID.

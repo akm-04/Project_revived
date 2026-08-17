@@ -137,6 +137,10 @@ class Settings:
     state_path: Path = Path(os.getenv("GXB_STATE_PATH", str(_PROJECT_ROOT / "state/gxb_state.json")))
     enable_chat_stub: bool = os.getenv("GXB_ENABLE_CHAT_STUB", "1") not in {"0", "false", "False"}
     log_unknown_mids: bool = os.getenv("GXB_LOG_UNKNOWN_MIDS", "1") not in {"0", "false", "False"}
+    compatibility_safe_mids_path: Path = Path(os.getenv(
+        "GXB_COMPAT_SAFE_MIDS",
+        str(_PROJECT_ROOT / "data/compatibility_safe_mids.json"),
+    ))
     runtime_log_dir: Path = Path(os.getenv("GXB_RUNTIME_LOG_DIR", str(_PROJECT_ROOT / "runtime_logs")))
     log_all_requests: bool = os.getenv("GXB_LOG_ALL_REQUESTS", "1") not in {"0", "false", "False"}
     bootstrap_detail_mode: str = os.getenv("GXB_BOOTSTRAP_DETAIL_MODE", "stage3").lower()

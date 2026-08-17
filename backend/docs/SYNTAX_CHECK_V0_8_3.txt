@@ -1,0 +1,9 @@
+v0.8.3 validation — 2026-08-17
+
+Validation policy: syntax/static parsing only, per project rule.
+No Flask/HTTP server, selftest helper, APK, ADB, emulator, or gameplay runtime tests were executed by the assistant.
+
+Python AST syntax parse: PASS
+Python files parsed: 88
+
+Runtime validation remains the user's device test.

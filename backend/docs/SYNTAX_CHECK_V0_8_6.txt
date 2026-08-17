@@ -1,0 +1,8 @@
+GXB backend v0.8.6 / Pass 30 static validation
+
+Validation policy: syntax/static only. No Flask/HTTP integration tests, selftests, ADB/emulator, or gameplay runs.
+
+- Python py_compile: PASS (95 Python files)
+- JSON parse: PASS (20 JSON files)
+- Generated metadata provenance reviewed: campaign/function/story mission all stamp source_resolution=effective_merged
+- __pycache__ / .pyc removed before packaging

@@ -1,0 +1,11 @@
+v0.8.4 static validation — 2026-08-17
+
+90 Python files passed `python -m py_compile` after the v0.8.4 source changes.
+
+Validation boundary:
+- no Flask server run;
+- no HTTP/integration requests;
+- no selftest scripts;
+- no APK/ADB/emulator/gameplay run.
+
+User-device runtime testing remains authoritative.

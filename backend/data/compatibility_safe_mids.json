@@ -1,0 +1,29 @@
+{
+  "_meta": {
+    "schema_version": 1,
+    "policy": "Unknown ordinary engine MIDs are blocked unless explicitly listed here. Entries must come from retained audit/ownership evidence; never infer safety from MID names or request shape.",
+    "pass": 29,
+    "sources": [
+      "00_PASSMAP/MID_OWNERSHIP.json",
+      "api_contracts/pass14_main_scene_runtime/CHECK_GAME_STAT_2754.md",
+      "existing v0.8.4 status-only route audit"
+    ]
+  },
+  "safe_empty_ack_mids": {
+    "30": {
+      "symbol": "FUNCTION_CLICK",
+      "classification": "telemetry/status acknowledgement",
+      "evidence": "MID_OWNERSHIP.json -> self.system.status_only"
+    },
+    "121": {
+      "symbol": "SEND_OPERATION_LOG",
+      "classification": "telemetry/status acknowledgement",
+      "evidence": "MID_OWNERSHIP.json -> self.system.status_only"
+    },
+    "2754": {
+      "symbol": "CHECK_GAME_STAT",
+      "classification": "first-entry compatibility/telemetry; no callback response fields",
+      "evidence": "api_contracts/pass14_main_scene_runtime/CHECK_GAME_STAT_2754.md"
+    }
+  }
+}

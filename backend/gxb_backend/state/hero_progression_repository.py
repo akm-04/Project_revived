@@ -97,16 +97,100 @@ class HeroProgressionRepository:
                 break
         return level
 
+
+    def grant_battle_exp(
+        self,
+        partner_ids: Any,
+        per_hero_exp: Any,
+        *,
+        persist: bool = False,
+    ) -> list[dict[str, int]]:
+        """Grant source Campaign EXP to participating owned Heroes.
+
+        MID114 ``exps`` rows carry each Hero's new cumulative EXP, not a delta.
+        The player-level economy mutation should run before this method so the
+        source Hero-level cap reflects any level gained from the same battle.
+        """
+        gain = max(0, self._int(per_hero_exp, 0))
+        if gain <= 0:
+            return []
+
+        if isinstance(partner_ids, str):
+            raw_ids = partner_ids.split("|")
+        elif isinstance(partner_ids, (list, tuple)):
+            raw_ids = list(partner_ids)
+        else:
+            raw_ids = []
+
+        ordered: list[int] = []
+        seen: set[int] = set()
+        for value in raw_ids:
+            partner_id = self._int(value, 0)
+            if partner_id <= 0 or partner_id in seen:
+                continue
+            seen.add(partner_id)
+            ordered.append(partner_id)
+
+        cap = max(1, self._hero_cap())
+        cap_exp = self._total_exp(cap)
+        result: list[dict[str, int]] = []
+        for partner_id in ordered:
+            hero = self.heroes.get(partner_id)
+            if hero is None:
+                continue
+            start_level = max(1, self._int(hero.get("lev"), 1))
+            new_exp = self._normalized_total_exp(hero) + gain
+            if cap_exp > 0:
+                new_exp = min(new_exp, cap_exp)
+            hero["exp"] = new_exp
+            hero["lev"] = self._level_for_total_exp(new_exp, start_level, cap)
+            result.append({"partner_id": partner_id, "exp": new_exp})
+
+        if persist and result:
+            self._save()
+        return result
+
+    def total_exp_for_level(self, level: Any) -> int:
+        """Expose the source cumulative Hero EXP threshold to sibling domains."""
+        return self._total_exp(level)
+
+    def hero_level_cap(self) -> int:
+        """Expose the source player-level-derived Hero cap to sibling domains."""
+        return self._hero_cap()
+
+    def normalized_total_exp(self, hero: dict[str, Any]) -> int:
+        return self._normalized_total_exp(hero)
+
+    def grant_exp_amount(self, partner_id: Any, amount: Any, *, persist: bool = False) -> int | None:
+        """Grant arbitrary source-derived Hero EXP through the canonical owner."""
+        hero = self.heroes.get(partner_id)
+        gain = max(0, self._int(amount, 0))
+        if hero is None or gain <= 0:
+            return None
+        start_level = max(1, self._int(hero.get("lev"), 1))
+        cap = max(1, self._hero_cap())
+        new_exp = self._normalized_total_exp(hero) + gain
+        cap_exp = self._total_exp(cap)
+        if cap_exp > 0:
+            new_exp = min(new_exp, cap_exp)
+        hero["exp"] = new_exp
+        hero["lev"] = self._level_for_total_exp(new_exp, start_level, cap)
+        if persist:
+            self._save()
+        return new_exp
+
     def use_skill_point_item(self, req: dict[str, Any]) -> dict[str, Any]:
         item_id = self._int(req.get("item_id"), 0)
         count = max(0, self._int(req.get("item_num"), 0))
         meta = self._item_meta(item_id)
         per_item = max(0, self._int(meta.get("skill_point"), 0))
         if count > 0 and per_item > 0:
-            SkillPointPolicy(self.player, self.data_dir, self._save_callback).recover()
+            policy = SkillPointPolicy(self.player, self.data_dir, self._save_callback)
+            policy.recover()
             remaining = self.inventory.consume_item(item_id, count, persist=False)
             if remaining is not None:
                 self.player.skill_point = max(0, self._int(self.player.skill_point)) + per_item * count
+                policy.normalize_timer_after_gain()
                 self._save()
         # Stage 4A.6 used the cross-cutting ``economy_`` envelope here. Live
         # device evidence showed MID90 then leaving the client loading proxy

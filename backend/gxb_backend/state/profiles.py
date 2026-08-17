@@ -143,7 +143,23 @@ def make_fresh_player(*, account_uid: str, player_id: str, region: int, region_n
     player.tutor_coin = 0
     player.skin_coin = 0
 
+    # Source data/tables/player.lua level-1 row: Energy cap is 60.
+    # The previous fresh template inherited the established sandbox's 100.
+    player.energy = 60
+    player.max_energy = 60
+    player.energy_time = 0
+
+    # Arena invitation state is not part of the fresh single-player slice yet.
+    # Keep it absent on the wire to avoid the authoritative client's latent
+    # SelfPlayer/player.lua invitation mismatch during economy_ synchronization.
+    player.invitation = None
+    player.max_invitation = None
+    player.invitation_time = 0
+
+    # Filled to the effective-source natural cap by MultiUserDatabase at the
+    # canonical fresh-player creation boundary (Pass 30.1 compatibility policy).
     player.skill_point = 0
+    player.skill_time = 0
     player.first_main_touch = 0
     player.main_scene_type = 0
     player.story_id = 0
@@ -154,8 +170,9 @@ def make_fresh_player(*, account_uid: str, player_id: str, region: int, region_n
     player.guide_function_ids = {}
     player.is_commented = 0
 
-    # New-player ownership starts empty. The opening story/tutorial is the
-    # source-backed gate before normal roster progression.
+    # Base character construction stays minimal here. v0.8.1 immediately
+    # applies the Pass-23 tutorial seed during canonical normalization: Aquaris
+    # partner_id=1 is owned before the scripted Lavia/Pandaria summon guide.
     player.heroes = {}
     player.collected_heros = {}
     player.hero_pieces = {}

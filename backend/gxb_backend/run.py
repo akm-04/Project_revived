@@ -24,7 +24,7 @@ def _run_flask(app, port: int) -> None:
 def main() -> None:
     app = create_app(SETTINGS)
     print("==================================================")
-    print(" GXB modular v0.8.0 multi-user identity foundation + stable live assets")
+    print(" GXB modular v0.8.7 Pass30.1 Skill Point + Crystal purchase fix + stable live assets")
     print(f" SDK bind    : http://{SETTINGS.bind_host}:{SETTINGS.sdk_port}")
     print(f" ENGINE bind : http://{SETTINGS.bind_host}:{SETTINGS.engine_port}")
     print(f" ADVERTISE_HOST = {SETTINGS.advertise_host}")

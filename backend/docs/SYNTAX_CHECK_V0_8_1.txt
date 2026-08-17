@@ -1,0 +1,22 @@
+v0.8.1 validation — 2026-08-17
+
+python -m py_compile / equivalent compile sweep:
+85 Python files PASS
+
+Offline state test:
+python3 tools/selftest_tutorial_summon.py
+PASS: v0.8.1 tutorial summon offline state test
+
+Coverage:
+- fresh credential Aquaris partner_id 1 seed
+- source-scripted Mana -> Lavia partner_id 2
+- retry idempotency / free-count single decrement
+- post-guide Mana rejection
+- source-scripted CrystalFree -> Pandaria partner_id 3
+- retry idempotency
+- post-guide Crystal rejection
+- unsupported general Crystal pull rejected without mutation
+- anonymous sandbox roster unchanged
+- MultiUserDatabase fresh create + persisted reload
+
+No Flask/HTTP/APK/ADB/emulator/gameplay runtime test was run by the assistant.

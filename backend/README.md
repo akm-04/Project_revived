@@ -1,233 +1,122 @@
-# GXB backend v0.8.0 — Multi-user Identity Foundation
+# GXB backend v0.8.7 — Pass 30.1 Skill Point / Crystal Purchase Fix
 
-Private/local EOL restoration backend for Girls X Battle 1.631.0.
+v0.8.7 is a narrow runtime correction on top of v0.8.6. It does **not** add new MIDs or widen beyond the early Campaign→Skill tutorial boundary.
 
-This release is the first backend rewrite based on Pass 22's combined Lua + Android/Smali server map. It preserves the user-confirmed v0.7.0 gameplay/resource baseline while replacing the process-wide singleton identity with request-scoped SDK accounts, sessions, region characters, and per-player persistence.
+Pass 30 runtime proved Campaign Crystal grants and FunctionID33 unlocks work, then exposed two Skill Point state defects and one MID99 Economy omission:
 
-Payment remains permanently out of scope.
+1. **Fresh Skill Point pool.** New credential players now start at the effective-source natural cap for their current VIP (VIP0 => 10) with `skill_time=0`, the client's full-pool/no-regeneration sentinel. This is a runtime-informed compatibility policy using source-derived cap data; it is not claimed as a recovered historical account-creation row.
+2. **Skill timer sentinel/cap semantics.** `skill_time=0` is preserved on player-info responses instead of being replaced with server-now. Spending from a full natural pool starts the timer; gains at/above the natural cap stop it. Purchased points can exceed the natural cap because the cap governs timed recovery, not absolute inventory.
+3. **MID99 Crystal spend.** Skill Point purchase cost is now derived from effective `refresh_cost.lua`, VIP permission from effective `vip.lua`, and the +10 grant from effective `translation.lua`. The server repeats those validations, spends Crystal through `EconomyRepository`, increments `buy_skill_times`, grants the points, normalizes the timer, saves once, and lets `ResponseProjector` attach cumulative `economy_.crystal`.
+4. **Effective-source enforcement.** `hero_skill_regen_meta.json` now carries `source_resolution=effective_merged` and is rejected at runtime if that provenance stamp is absent.
 
-## What v0.8.0 changes
+No Story Mission, Campaign drop RNG/stamina, Skills pricing/level formulas, Institute, Guild or PvP semantics are expanded by this patch.
 
-### Real credential accounts
+See `docs/V0_8_7_PASS30_1_SKILL_POINT_CRYSTAL_FIX.md`. v0.8.6 Campaign Crystal/Function Unlock/Story Mission behavior remains the baseline and is documented in `docs/V0_8_6_PASS30_CAMPAIGN_CRYSTAL_FUNCTION_MISSION.md`.
 
-The source/live-confirmed Xinyd flow is now implemented:
+# GXB backend v0.8.5 — Pass 29 P0 Guardrails + Phase-1 Economy Spine
 
-```text
-Register UI
-  → SDK MID65282 register_platform
-  → response requires uid + login_email
-  → SDK automatically sends MID65281 platform_user_login
-  → backend verifies password and issues SID/TOKEN + QQW* cookies
-  → Java hands SID/TOKEN to Lua
-```
+v0.8.5 is an incremental architecture hardening release on top of v0.8.4. It does **not** add new gameplay MIDs.
 
-Credential records are persistent and passwords are stored as salted PBKDF2-SHA256 verifiers, not plaintext.
+Pass 29 changes four shared foundations:
 
-Exact historical duplicate-account/wrong-password Xinyd error numbers were not recovered. v0.8.0 therefore uses a documented local compatibility nonzero error code with `error_msg` for those failures.
+1. **Mutation-safe compatibility boundary.** Unknown engine MIDs no longer receive unconditional empty success. Empty fallback is permitted only for numeric MIDs in `data/compatibility_safe_mids.json`, whose entries are backed by retained audit/ownership evidence. Everything else returns a local nonzero unsupported response. Existing explicit handlers are unchanged.
+2. **Atomic Phase-1 Economy API.** `EconomyRepository` now supports validated single-commit Mana, Crystal, Energy and cumulative player-EXP mutations, including source-confirmed level/max-energy/level-up-energy side effects. Campaign Mana+EXP uses the same atomic delta transaction.
+3. **Request Response Projector.** `ResponseProjector` snapshots request-bound canonical state and automatically merges changed cumulative `economy_` (`mana`, `crystal`, `energy`, `exp`, `lev`) and Hero `exps` rows into ordinary handler payloads. Existing explicit projections are normalized/merged. Skill Point is intentionally outside this Phase-1 projector because of the known MID90 client-path exception.
+4. **Effective-source economy metadata.** `tools/build_campaign_economy_meta.py` now resolves each consumed source path through writable-hot-update-over-APK precedence. Runtime `EconomyRepository` refuses economy metadata not stamped `source_resolution=effective_merged`. The packaged metadata was regenerated from the supplied recovery tree using that resolver.
 
-### Anonymous sandbox is preserved
+No Campaign drop RNG, stamina timing, Mission rewards, new Shop/PvP/Guild behavior, or new MID mapping is introduced by this release.
 
-MID65284 still resolves the existing fixed development identity:
+See `docs/V0_8_5_PASS29_P0_ECONOMY_SPINE.md` and canonical Pass 29 for the implementation contract.
 
-```text
-uid   = 13371337
-sid   = 1993b58bfd1b93499ae19477b236d4a2
-token = local_token
-```
+# Historical v0.8.4 baseline — Tutorial Guide + Canonical Hero Gear Fix
 
-On the first v0.8.0 launch, the existing `data/player_db.json` is imported as that sandbox player's canonical state. This preserves the already-confirmed Moppleton/Girls/Campaign/Backpack/resource baseline and the intentionally large sandbox mana/crystal values.
+v0.8.4 is the next narrow runtime correction on top of the Pass 25 economy architecture and the user-runtime-confirmed v0.8.3 Campaign progression slice. It does **not** change the v0.8.3 Campaign Mana/player-EXP/Hero-EXP/Energy transaction.
 
-### MID18 is account-scoped
+The fresh v0.8.3 runtime proved that Campaign now advances smoothly past the former post-MID114 loading freeze, Mana accumulates, level-up presentation works, later stages open, and the original tutorial progresses substantially farther. That successful progression exposed three downstream client/server contract gaps.
 
-`LOAD_USER_REGIONS` now returns:
+## 1. Tutorial double-overlay compatibility
 
-- one shared region catalog;
-- only the characters owned by the authenticated SDK account;
-- empty `recall_regions` compatibility state.
+The stuck text `Let's get that letter!` is source guide **100135**, the Fight-3 Campaign-node guide. It is not the later Hero-scroll text; the explicit scroll guide is **100147** (`It's a battle girl's scroll!`).
 
-A credential account with no character in any region receives `players=[]`, which matches the Lua new-account path.
+The backend previously returned A for every MID2864 A/B key. Authoritative `abtest.lua` defines MTSPY as:
 
-### MID1 resolves or creates `(account, region) → player_id`
+- A: use the extra weak/function guide;
+- B: do not use the extra weak/function guide.
 
-For credential accounts:
+At player level 7, guide-function 17 becomes eligible. The runtime dump shows the old strong story guide and the weak/function-guide path colliding, followed by MID2865 for guide-function 17 after the user skips the overlay.
 
-```text
-MID1 RETRIEVE_TOKEN(region)
-  → authenticate SID/TOKEN
-  → find player_by_account_region[uid][region]
-  → if present: load it, is_new=0
-  → if absent: allocate player_id, create fresh state, is_new=1
-```
+v0.8.4 therefore returns **B only for `unique_key=mtspy`**. Other A/B keys keep the previous compatibility value A. This is a local compatibility policy selecting a source-defined client branch; it is not claimed to reproduce the historical live-server cohort assignment.
 
-Player IDs are allocated with the region encoded in the high digits (for example region 197 starts at `19700001`), matching the client-wide `player_id / 100000` region convention.
+## 2. Generated-name response shape
 
-Creation is retry-safe: another MID1 for the same account+region resolves the already-created player instead of minting a duplicate.
+MID119 `GENERATE_PLAYER_NAME` previously returned `{name=...}`. Source `EditPlayerName:onGeneratePlayerName_()` requires `player_name_list`, and the runtime showed a nil `nameList` Lua error.
 
-### Fresh credential-player template
+v0.8.4 returns a non-empty `player_name_list` populated with deterministic source entries from `random_name.lua`. Exact historical random sampling remains unknown.
 
-Pass 22 source proves:
+## 3. Canonical early Hero equipment / promotion
 
-- level-1/new-player lifecycle;
-- empty/unset name is valid;
-- `is_new=1` enters the opening story;
-- StoryScene later opens EditNameScene;
-- MID23 sets the chosen name.
+The v0.8.3 runtime exposed that three early Hero mutation MIDs were still status-only compatibility stubs:
 
-It does **not** prove every original starting currency. Therefore v0.8.0 deliberately creates credential players with a conservative local fresh template:
+- MID54 `SET_HERO_EQUIP`;
+- MID62 `ONE_CLICK_EQUIP`;
+- MID57 `ONE_CLICK_JINJIE`.
 
-- level 1;
-- VIP 0;
-- empty name;
-- tutorial/guide state at the beginning;
-- empty owned Hero/Inventory/Pet state;
-- zero mana/crystal and nonessential currencies;
-- normal base energy/timer containers.
+The source explains the different symptoms:
 
-Those numeric fresh-economy defaults are compatibility policy, not claimed official values. The anonymous sandbox is unchanged.
+- MID54 can look correct in-session because the client consumes the exact equipment and marks the slot locally after OK, even if the server persists nothing.
+- MID62 only updates the Hero if the response includes `equips`; status-only OK therefore plays the animation but leaves Aquaris/Pandaria visually unequipped.
+- MID57 locally increments color/clears gear after OK, so Lavia can appear promoted while canonical server Hero/Backpack state remains unchanged and would diverge on relog.
 
-## Canonical storage layout
+v0.8.4 adds a canonical `HeroEquipmentRepository` for the **early ordinary NormalHero** path. The requests carry only `partner_id` (and MID54's slot), so the server independently mirrors the supplied client source calculation using generated authoritative metadata:
 
-After first launch:
+- current-color six-slot equipment requirements from `partner.lua`;
+- equipment level/compose recipes/compose counts/compose Mana from `item.lua`;
+- source Hero EXP thresholds and the player-derived Hero level cap;
+- source EXP-juice order `50001001, 50001002, 50001004, 50001005, 50005182`.
 
-```text
-data/server_state/
-├── accounts/
-│   └── <sdk_uid>.json
-├── sessions/
-│   └── <sid>.json
-├── players/
-│   └── <player_id>/
-│       └── player.json
-└── indexes/
-    ├── account_by_login.json
-    ├── player_by_account_region.json
-    ├── session_by_token.json
-    ├── region_player_serial.json
-    └── counters.json
-```
+The transaction validates canonical state, consumes Backpack materials/potions, spends compose Mana through the shared `EconomyRepository`, grants canonical Hero EXP when potions are needed, persists equipment/color state, saves once, and projects the response fields the client actually consumes.
 
-Ownership rules:
+This preserves the Pass 25 ownership rule: Hero equipment does not keep a private Mana balance.
 
-```text
-SDK uid
-  → session SID/TOKEN
-  → account+region player mapping
-  → stable game player_id
-  → canonical gameplay state
-```
+## Deliberate v0.8.4 boundary
 
-Game progress is never keyed by `device_id`, SID, or TOKEN.
+Still not implemented here:
 
-`data/player_db.json` remains in the package only as the **one-time v0.7 anonymous-sandbox migration source**. After `data/server_state/` has been created, edit/copy the canonical player files there instead.
+- awakened/bloodline/Fumo restoration semantics beyond the safe fresh/early NormalHero path;
+- Story Mission MID2736/MID161 state/rewards;
+- MID59 Hero-contract/stone summon;
+- MID118 chapter-star rewards;
+- Campaign stamina deduction / defeat-cost semantics;
+- general `campaign_dropbox.increase_rate` RNG or repeat-clear random drops;
+- general post-tutorial Vending RNG/pity;
+- Arena/PvP invitation mechanics.
 
-## Existing gameplay compatibility
+The next authentic tutorial boundary is expected to expose one of the already-mapped Story Mission/equipment-adjacent systems; do not broaden those with guessed behavior.
 
-Existing Hero, Inventory, Campaign, Skill, Story, Activity, etc. handlers still call the same repository interface. The difference is that `get_player()` is now request-scoped to the authenticated account-region character.
+## Recommended runtime test
 
-Therefore a mutation such as:
+For the cleanest validation, use a **fresh credential account**. A v0.8.3 account can be copied forward, but any MID54/MID57/MID62 actions already performed under v0.8.3 may exist only in that old client's local session and were not canonically persisted.
 
-```text
-MID39 skill upgrade
-MID55/63 EXP juice
-MID113/114 Campaign
-MID81 Backpack
-```
-
-persists into the active player's own `players/<player_id>/player.json` rather than one global `player_db.json`.
-
-Cross-player PvP/public projections are intentionally **not** implemented in this release. Pass 22 already maps their architecture; this slice establishes the identity/storage spine they require.
-
-## First migration/test procedure
-
-Before the first v0.8.0 launch:
-
-1. Copy your latest v0.7.0 `data/player_db.json` into this backend.
-2. Preserve/copy your large `local_assets/res` tree as before.
-3. If you use Lua hot updates, preserve `local_assets/src_32`, `src_64`, `updates`, and `update_manifest.json` as appropriate.
-4. Start `python3 server.py`.
-
-The first startup should print a line similar to:
-
-```text
-[MULTIUSER] importing singleton sandbox from .../data/player_db.json
-```
-
-It then creates `data/server_state/`.
-
-### Credential account test
-
-Use source-valid registration syntax:
-
-```text
-Account:  testuser01
-Password: pass1234
-```
-
-Expected server sequence:
-
-```text
-MID65282
-[SDK AUTH] register created ... uid=<new uid>
-MID65281
-[SDK AUTH] login success ... uid=<same uid> sid=<new sid> token=<new token>
-MID18
-[REGIONS] ... owned_players=0
-MID1 region=197
-[MULTIUSER] created player uid=<uid> region=197 player_id=19700001 name=''
-[IDENTITY] ...
-```
-
-The client should enter its new-player opening flow because MID1 returns `is_new=1`.
-
-### Two-user isolation test
-
-Register a second account, e.g.:
-
-```text
-Account:  testuser02
-Password: pass5678
-```
-
-Expected:
-
-- different SDK UID;
-- different SID/TOKEN;
-- different region-197 `player_id`;
-- MID18 for account B does not list account A's player;
-- progress made by A remains in A's player JSON only.
-
-Useful inspection command:
+Preserve resources as usual if needed:
 
 ```bash
-python3 tools/list_multiuser_state.py
+cp -a /path/to/v0.8.3/local_assets/res/. \
+      /path/to/v0.8.4/local_assets/res/
 ```
 
-It intentionally redacts tokens and never prints password verifiers.
+For a clean fresh test, do not copy old credential `server_state`. If deliberately continuing an old account, copy it as usual and expect past status-only Hero mutations to reflect the old canonical state after relog.
 
-## Offline self-test
+Check specifically:
 
-The repository/state isolation logic can be tested without Flask/network/device runtime:
+1. Campaign `100001` still clears smoothly with the v0.8.3 economy behavior unchanged.
+2. The Fight-3 `Let's get that letter!` guide does not get a second weak-guide overlay.
+3. MID119 generated-name UI no longer throws the `nameList` nil error.
+4. Tutorial MID54 consumes the exact gear canonically and survives relog.
+5. MID62 one-click equip returns visible equipment and that equipment survives relog.
+6. MID57 one-click promotion persists color, consumed materials/potions, and any compose-Mana spend.
 
-```bash
-python3 tools/selftest_multiuser.py
-```
-
-It creates two temporary accounts and players, mutates only account A, checks retry-safe MID1 resolution and account-scoped MID18 ownership, and confirms the anonymous sandbox retains the established currency profile. It does not touch the real `data/server_state` tree.
-
-## Resource/update baseline retained
-
-v0.8.0 preserves the v0.7.0 live-confirmed content planes:
-
-```text
-runtime lazy assets:
-  AssetDownload → FileDownloader → /res/<basename>.<md5>
-
-Lua/data startup updates:
-  MID2 → update ZIP volumes → MD5 → unzip → writable src_32/src_64 → restart
-```
-
-Client resource versions must remain numeric `N.N.N` values such as `1.631.1`.
+See `docs/V0_8_4_RUNTIME_HERO_GUIDE_FIX.md`, root `memory.md`, and cumulative Pass 26 for provenance.
 
 ## Validation policy
 
-Assistant-side validation for this package is limited to Python syntax checks and offline repository/state tests. No Flask/HTTP/APK/ADB/emulator/gameplay runtime test is claimed.
+Assistant validation for this package is deliberately limited to Python static compilation. No Flask/HTTP, selftest, APK/ADB/emulator, or gameplay runtime test is executed by the assistant; user-device testing remains authoritative.

@@ -72,7 +72,7 @@ WORLD_FIELDS = {
 LOBBY_FIELDS = {
     "message_pushes", "title_info", "vip_awards", "bubble_info", "is_commented",
     "comment_open", "fbshare_open", "summon", "illusion", "friends", "activities",
-    "board_contents", "redmarks", "pets", "mails", "missions", "shops",
+    "board_contents", "redmarks", "pets", "mails", "missions", "mission_state", "shops",
     "shop_statuses",
 }
 

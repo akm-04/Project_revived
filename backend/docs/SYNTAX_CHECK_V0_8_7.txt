@@ -1,0 +1,14 @@
+GXB backend v0.8.7 / Pass 30.1 static validation
+Date: 2026-08-17
+
+Validation performed by assistant:
+- Python static compilation only: PASS (95 .py files)
+- JSON parse check: PASS (20 .json files)
+- __pycache__ / .pyc removed before packaging
+
+Not executed by assistant under standing project policy:
+- Flask/HTTP integration tests
+- selftest scripts
+- APK/ADB/emulator/gameplay runs
+
+User device/runtime testing remains authoritative.

@@ -1,12 +1,11 @@
-"""Source-derived skill-point regeneration policy.
+"""Source-derived skill-point regeneration and purchase policy.
 
-The 1.631.0 client does not treat ``skill_point`` as a static field. Every
-``SelfPlayer:getSkillPoint()`` calls ``recoverByTime('skillPoint',
-'lastSkillPoint', ...)``. The authoritative shipped tables establish:
+The authoritative client treats ``skill_point`` as a timed pool whose natural
+cap depends on VIP/monthly privilege.  MID99 purchases are a separate grant
+that can push the stored point count above that natural recovery cap.
 
-* ``misc.skill_point_incr_time`` = 300 seconds
-* ``vip.skill_max`` varies by VIP level
-* monthly privilege row 1 adds 10 to the maximum while active
+All constants are loaded from ``hero_skill_regen_meta.json`` generated from the
+effective writable-over-APK src_64 view.
 """
 from __future__ import annotations
 
@@ -35,10 +34,17 @@ class SkillPointPolicy:
         path = self.data_dir / "hero_skill_regen_meta.json"
         try:
             raw = json.loads(path.read_text(encoding="utf-8"))
-            return raw if isinstance(raw, dict) else {}
+            if not isinstance(raw, dict):
+                raise ValueError("metadata root must be an object")
+            meta = raw.get("_meta") or {}
+            if not isinstance(meta, dict) or meta.get("source_resolution") != "effective_merged":
+                raise ValueError(
+                    "skill-point metadata is not stamped effective_merged; regenerate with "
+                    "tools/build_hero_skill_regen_meta.py --apk-root ... --writable-root ..."
+                )
+            return raw
         except Exception as exc:
-            print(f"[SKILL] could not load {path}: {exc}")
-            return {}
+            raise RuntimeError(f"[SKILL] invalid source metadata {path}: {exc}") from exc
 
     def max_points(self) -> int | None:
         mapping = self._meta.get("vip_skill_max")
@@ -53,8 +59,48 @@ class SkillPointPolicy:
             maximum += max(0, self._int(self._meta.get("monthly_privilege_skill_max")))
         return maximum
 
+    def can_buy(self) -> bool:
+        mapping = self._meta.get("vip_skill_buy")
+        if not isinstance(mapping, dict):
+            return False
+        vip = str(max(0, self._int(self.player.vip)))
+        return self._int(mapping.get(vip), 0) == 1
+
+    def purchase_cost(self, purchase_number: Any) -> int | None:
+        mapping = self._meta.get("buy_skill_cost")
+        if not isinstance(mapping, dict) or not mapping:
+            return None
+        number = max(1, self._int(purchase_number, 1))
+        if str(number) in mapping:
+            return max(0, self._int(mapping[str(number)]))
+        max_times = max(0, self._int(self._meta.get("buy_skill_cost_max_times"), 0))
+        if max_times > 0 and str(max_times) in mapping:
+            # Mirrors RefreshCostTable:buySkillCost(): requests above the last
+            # configured row reuse the maxTimes price.
+            return max(0, self._int(mapping[str(max_times)]))
+        return None
+
+    def purchase_grant(self) -> int:
+        return max(0, self._int(self._meta.get("skill_point_purchase_grant"), 0))
+
+    def initialize_fresh_full_pool(self) -> bool:
+        """Runtime-informed compatibility policy for brand-new credential players.
+
+        The early Skill tutorial is written to spend a substantial pool before
+        any VIP purchase is available.  Start a new player at the source-derived
+        natural cap for its current VIP and keep ``skill_time=0`` (the client's
+        full-pool/no-regeneration sentinel).
+        """
+        maximum = self.max_points()
+        if maximum is None:
+            return False
+        changed = self._int(self.player.skill_point) != maximum or self._int(self.player.skill_time) != 0
+        self.player.skill_point = maximum
+        self.player.skill_time = 0
+        return changed
+
     def recover(self, *, persist: bool = False) -> bool:
-        """Mirror ``SelfPlayer:recoverByTime`` for skill points."""
+        """Mirror ``SelfPlayer:recoverByTime`` for Skill Points."""
         duration = max(0, self._int(self._meta.get("skill_point_incr_time")))
         maximum = self.max_points()
         if duration <= 0 or maximum is None:
@@ -90,9 +136,25 @@ class SkillPointPolicy:
         return changed
 
     def begin_recovery_if_full_spent(self, before_points: int, before_time: int) -> None:
-        """Mirror HeroMainWindow's timer start when spending from a full pool."""
+        """Start the recovery clock when spending from a naturally full pool."""
         maximum = self.max_points()
         if maximum is None:
             return
         if before_points >= maximum and before_time == 0 and self.player.skill_point < maximum:
+            self.player.skill_time = self.player.now()
+
+    def normalize_timer_after_gain(self) -> None:
+        """Keep the timer consistent after a purchase/item grant.
+
+        The natural cap is a regeneration cap, not an absolute inventory cap.
+        Purchased points may exceed it.  At/above the natural cap regeneration
+        is stopped (timestamp 0); below the cap an absent timer starts now.
+        """
+        maximum = self.max_points()
+        if maximum is None:
+            return
+        points = max(0, self._int(self.player.skill_point))
+        if points >= maximum:
+            self.player.skill_time = 0
+        elif self._int(self.player.skill_time) <= 0:
             self.player.skill_time = self.player.now()

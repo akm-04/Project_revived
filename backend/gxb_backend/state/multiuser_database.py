@@ -19,11 +19,14 @@ from typing import Any
 
 from .account import AccountIdentity
 from .defaults import default_account, default_player
+from .economy_repository import EconomyRepository
 from .hero_repository import HeroRepository
 from .inventory_repository import InventoryRepository
 from .player_database import JsonPlayerDatabase
 from .player_state import PlayerState
 from .profiles import apply_profile, make_fresh_player
+from .skill_point_policy import SkillPointPolicy
+from .summon_repository import SummonRepository
 from .world_repository import WorldRepository
 
 
@@ -375,11 +378,43 @@ class MultiUserDatabase:
 
     def normalize_player(self, player: PlayerState, *, persist: bool) -> bool:
         changed = False
+        # Runtime v0.8.2 exposed a latent client crash in the unused Arena
+        # invitation path whenever any economy_ event is processed. Migrate
+        # credential players created by v0.8.0-v0.8.2 to the deferred-PvP
+        # representation so existing server_state can be carried forward.
+        if str(getattr(player, "account_uid", "") or "") != SANDBOX_UID:
+            if player.invitation is not None or player.max_invitation is not None:
+                player.invitation = None
+                player.max_invitation = None
+                player.invitation_time = 0
+                changed = True
+
+            # v0.8.0-v0.8.2 fresh credential players inherited the sandbox's
+            # compatibility Energy=100. That value is a distinctive legacy
+            # signature because Campaign stamina spending has never been active
+            # for these accounts. Migrate it to source level-1 Energy=60 plus
+            # source award_energy for every already-crossed player level. This
+            # makes copied server_state coherent with SelfPlayer's level-up UI.
+            if int(getattr(player, "energy", 0) or 0) == 100:
+                economy = EconomyRepository(player, self.data_dir)
+                migrated_energy = 60
+                current_level = max(1, int(getattr(player, "lev", 1) or 1))
+                for level in range(1, current_level):
+                    migrated_energy += max(0, int(economy.player_level_meta(level).get("award_energy", 0) or 0))
+                player.energy = migrated_energy
+                level_meta = economy.player_level_meta(current_level)
+                source_max_energy = int(level_meta.get("energy", 0) or 0)
+                if source_max_energy > 0:
+                    player.max_energy = source_max_energy
+                player.energy_time = 0
+                changed = True
         if HeroRepository(player, data_dir=self.data_dir).normalize():
             changed = True
         if InventoryRepository(player).normalize():
             changed = True
         if WorldRepository(player, self.data_dir, inventory=InventoryRepository(player)).normalize():
+            changed = True
+        if SummonRepository(player, self.data_dir).normalize():
             changed = True
         raw_guides = player.guide_function_ids
         normalized_guides: dict[str, int] = {}
@@ -414,6 +449,11 @@ class MultiUserDatabase:
             region=int(region),
             region_name=str(region_name),
         )
+        # Pass 30.1 runtime-informed compatibility policy: the early Skill
+        # tutorial expects a spendable pool before VIP purchasing is available.
+        # Use the effective-source natural cap for the player's current VIP and
+        # keep skill_time=0 as the full-pool/no-regeneration sentinel.
+        SkillPointPolicy(player, self.data_dir).initialize_fresh_full_pool()
         self.normalize_player(player, persist=False)
         self.save_player(player)
         self.set_account_region_player(uid, region, player_id)

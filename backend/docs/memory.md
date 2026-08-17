@@ -1,108 +1,726 @@
-# v0.8.0 CURRENT STATE — MULTI-USER IDENTITY FOUNDATION — 2026-08-17
+# v0.8.7 / Pass 30.1 — SKILL POINT + MID99 CRYSTAL FIX — 2026-08-17
 
-Read this section first. Pass 22 mapping was considered sufficient; no Pass 23 was needed before the first implementation slice.
+Read this section first. Pass 30.1 is an implementation revision under planning Pass 30; it does not create a new integer planning pass and maps no new MID.
 
-## Scope of this release
+## Runtime evidence entering this patch
 
-v0.8.0 rewrites the identity/storage spine only. It deliberately does **not** implement PvP/ranking behavior yet.
+User device/server logs confirmed the Pass 30 Campaign Crystal increment and FunctionID33 unlock path, then stopped in the Skill tutorial because a fresh credential player hydrated with `skill_point=0`. A separate established VIP15 probe sent MID99 repeatedly and showed `buy_skill_times`/Skill Points changing while cumulative Crystal never decreased.
 
-Implemented:
-- persistent SDK credential accounts for MID65282 registration;
-- source-shaped MID65282 success fields `uid` + `login_email`;
-- MID65281 credential verification and unique SID/TOKEN issuance;
-- consistent QQWSID/QQWTOKEN/QQWUID/QQWUNAME cookies;
-- fixed anonymous MID65284 sandbox preserved;
-- account-scoped MID18 region/player directory;
-- atomic `(account_uid, region) -> player_id` resolve/create in MID1;
-- `is_new=1` on first credential character creation;
-- conservative level-1/empty-name fresh credential template;
-- request-scoped canonical gameplay repositories;
-- per-player JSON persistence under `data/server_state/players/<player_id>/player.json`;
-- automatic one-time import of the v0.7 `data/player_db.json` into the anonymous sandbox;
-- invalid/unknown MID1 sessions are rejected instead of silently falling back to the sandbox.
+## v0.8.7 behavior
 
-## Storage
+- Fresh credential creation initializes Skill Points to the effective-source natural cap for current VIP (VIP0 => 10) and persists `skill_time=0`. This is a runtime-informed compatibility policy chosen because the source tutorial spends a substantial pool before VIP2 purchasing is available.
+- `PlayerState.player_info_payload()` now preserves `skill_time=0`; zero is the client's full-pool/no-regeneration sentinel and must not be rewritten to server-now.
+- `SkillPointPolicy` now requires effective-merged metadata and owns source-derived natural cap, 300-second regeneration, VIP purchase permission, purchase-cost lookup, purchase grant, fresh full-pool initialization and post-gain timer normalization.
+- `tools/build_hero_skill_regen_meta.py` resolves each consumed path writable-over-APK and includes `misc.skill_point_incr_time`, `vip.skill_max`, `vip.skill_buy`, monthly privilege cap bonus, `refresh_cost.buy_skill_cost`, and the +10 purchase grant extracted from `SKILL_POINT_BUY`.
+- MID99 now atomically spends the source purchase cost through `EconomyRepository.spend_crystal()`, increments `buy_skill_times`, grants source +10 Skill Points, normalizes `skill_time`, and saves once. `ResponseProjector` observes the Crystal mutation and emits cumulative `economy_.crystal`.
+- Purchased/item-granted points may exceed the natural recovery cap; when at/above that cap, `skill_time=0`. When a spend crosses below cap from a full/over-cap pool, the recovery timer starts.
+- Insufficient Crystal / VIP-disallowed direct MID99 calls return the existing local nonzero error sentinel; the source UI normally pre-checks both before sending the request.
 
-Canonical v0.8 storage:
-- `data/server_state/accounts/<uid>.json`
-- `data/server_state/sessions/<sid>.json`
-- `data/server_state/players/<player_id>/player.json`
-- `data/server_state/indexes/account_by_login.json`
-- `data/server_state/indexes/player_by_account_region.json`
-- `data/server_state/indexes/session_by_token.json`
-- `data/server_state/indexes/region_player_serial.json`
-- `data/server_state/indexes/counters.json`
+## Deliberate boundaries
 
-`data/player_db.json` is now migration input for the anonymous sandbox only. After the first v0.8 start, `data/server_state` is authoritative.
+- no new MID mapping;
+- no Story Mission changes beyond v0.8.6;
+- no Campaign stamina/repeat-drop RNG changes;
+- no Skill level cost/formula expansion;
+- no Institute/Guild/PvP work.
 
-Passwords are not stored plaintext. v0.8 uses a local PBKDF2-SHA256 verifier. This verifier format/iteration policy is implementation policy, not a recovered original Xinyd credential schema.
+## Recommended device test
 
-## Identity semantics
+Use a fresh credential account for the tutorial check. Confirm bootstrap shows 10 Skill Points with no active recovery timer, Skill tutorial spends them normally, and after dropping below the natural cap the timer begins. For MID99 Crystal spending, use a profile/account where source VIP permission allows purchase; purchase #1 should cost 10 Crystal, #2 20, #3 20, #4 40, while each purchase grants 10 Skill Points and cumulative Crystal persists across relog. Then continue to Campaign100004/Story Mission80001 to validate the still-unreached v0.8.6 path.
 
-Durable graph:
-`SDK uid -> SID/TOKEN session -> (uid,region) mapping -> stable game player_id -> canonical game state`.
+## Validation policy
 
-Never key progress by device_id/client_id/SID/TOKEN.
+Assistant validation is syntax/static only. No Flask/HTTP integration, selftests, APK/ADB/emulator or gameplay execution. User device testing remains authoritative.
 
-Credential player IDs are allocated with the region encoded in high digits, e.g. first region-197 player `19700001`, matching the client-wide player-id region convention. Creation is retry-safe.
+---
 
-The anonymous sandbox retains UID `13371337`, SID `1993b58bfd1b93499ae19477b236d4a2`, TOKEN `local_token`, and imports the existing established Moppleton state/max-resource profile.
+# v0.8.6 / Pass 30 baseline
 
-## Fresh credential-player policy
+Campaign first-3-star Crystal, level-driven `new_funcs_`, and canonical Story Mission80001 were added in v0.8.6. See `docs/V0_8_6_PASS30_CAMPAIGN_CRYSTAL_FUNCTION_MISSION.md`; runtime has so far validated the Crystal increment and FunctionID33 unlock portions, while Mission80001 remains unreached because the Skill tutorial blocked progression.
 
-Source-confirmed:
-- new character lifecycle is level-1/new-player oriented;
-- empty/unset name is valid;
-- MID1 `is_new=1` enters opening story;
-- StoryScene eventually opens EditNameScene;
-- MID23 sets the real name.
+# v0.8.5 / Pass 29 — P0 Guardrails + Phase-1 Economy Spine
 
-Still unknown:
-- exact official fresh mana/crystal/other starting numeric amounts;
-- exact session expiry policy;
-- official duplicate/wrong-password SDK error numbers.
+- Unknown engine MIDs no longer receive unconditional empty success. Only numeric IDs in `data/compatibility_safe_mids.json`, backed by retained audit/ownership evidence, may use compatibility fallback; all other unknowns return a local nonzero unsupported sentinel. No name/payload heuristic is used.
+- `EconomyRepository.apply_deltas()` is the atomic Phase-1 owner for Mana, Crystal, Energy and cumulative player EXP/derived level+Energy side effects. Campaign Mana+EXP now uses one transaction. Campaign stamina spending remains unresolved/not enabled.
+- `ResponseProjector` automatically merges changed cumulative `economy_` (`mana`, `crystal`, `energy`, `exp`, `lev`) and changed Hero cumulative `exps` onto ordinary responses. `skill_point` remains excluded because of the known MID90 compatibility path.
+- `campaign_economy_meta.json` was regenerated through writable-over-APK effective source resolution. Runtime Economy loading requires `_meta.source_resolution=effective_merged`.
+- No new MID mapping or new Mission/Shop/Guild/PvP semantics were added. Assistant validation remains static/syntax only.
 
-v0.8 therefore uses conservative zero values for unproven fresh currencies and a local generic nonzero SDK error code. Do not present those as official values.
+# v0.8.4 CURRENT STATE — TUTORIAL GUIDE + CANONICAL HERO GEAR FIX — 2026-08-17
 
-## Offline validation completed
+Read this section first. v0.8.4 consumes the user's fresh v0.8.3 runtime dump and is a narrow downstream compatibility/progression patch. The Pass 25 EconomyRepository architecture and the v0.8.3 Campaign Mana/player-EXP/Hero-EXP/level-up-Energy transaction remain unchanged because the new runtime confirms them substantially farther.
 
-Pure-Python state tests PASS:
-- two registrations allocate different SDK UIDs;
-- two logins allocate different SID/TOKEN pairs;
-- account A and B each create a different region-197 player;
-- A mutation does not appear in B;
-- repeated MID1 for A resolves the same player;
-- MID18 for A lists only A; MID18 for B lists only B;
-- anonymous sandbox still resolves existing Moppleton with 999999 mana/crystal;
-- MID18 -> MID1 lifecycle produces fresh `lev=1`, `player_name=''`, first `is_new=1`, later `is_new=0`;
-- invalid MID1 session is rejected.
+## v0.8.3 runtime verdict
 
-Python syntax validation: 83 files PASS via `python3 -m py_compile`. No Flask/HTTP/APK/ADB/emulator/gameplay runtime test was performed by the assistant.
+Fresh registration/opening tutorial works. Campaign 100001 clears smoothly and the old post-MID114 loading overlay never appears. Mana accumulates, player level-up popups continue across later stages, naming is reached, and Campaign progression continues. Treat the v0.8.3 Campaign economy slice as runtime-confirmed for this boundary; do not change its math because of the bugs below.
 
-## First user runtime test
+## Guide 100135 double-overlay defect
 
-Before first v0.8 launch:
-1. copy latest v0.7 `data/player_db.json`;
-2. preserve/copy `local_assets/res` and any intentional Lua update files;
-3. start server once and confirm `[MULTIUSER] importing singleton sandbox ...`;
-4. register `testuser01/pass1234`; expected MID65282 -> automatic MID65281;
-5. fresh account should reach MID18 with `owned_players=0`, then MID1 region197 and create a new `197xxxxx` player with `is_new=1`;
-6. register a second account and verify different UID/session/player;
-7. verify anonymous still loads the old established sandbox.
+The stuck `Let's get that letter!` text is guide 100135 in the Fight-3 Campaign-node sequence. It is not the later Hero-scroll guide; source guide 100147 explicitly says `It's a battle girl's scroll!`.
 
-Useful inspection tool: `python3 tools/list_multiuser_state.py`. Offline isolation tool: `python3 tools/selftest_multiuser.py`.
+Runtime reaches guide 100134 and contains MapWindow's expected operation log 49 for the source transition into 100135. Therefore the story-guide checkpoint was not simply lost.
 
-## Not yet implemented
+The backend had hard-coded MID2864 `GET_PLAYER_GROUP_BY_KEY` to A for every experiment. Source `abtest.lua` states MTSPY A uses the extra weak/function guide while B does not. The player is level 7 after the early Campaign clears, making guide-function 17 eligible, and runtime sends MID2865 for function 17 immediately after the user skips the stuck double overlay.
 
-- MID65285 anonymous-to-credential binding: intentionally deferred because the current anonymous identity is a shared fixed sandbox and must not be converted into one user's credential account.
-- exact fresh tutorial grants/function unlock progression; runtime test may expose the next new-account tutorial contracts.
-- public cross-player MID17/MID49/MID208 projections.
-- player-name uniqueness/index semantics.
-- social/guild shared entities.
-- rankings and PvP mode state.
-- immutable PvP report snapshots.
+v0.8.4 returns **B only for MTSPY**, retaining A for unrelated A/B keys. This is a source-defined local compatibility branch, not a claim about historical production cohort assignment.
 
-Next coding slice after runtime validation should migrate any tutorial/new-account gaps revealed by the first credential character, then build public cross-player projection + canonical formation before competitive systems. Competitive remains last.
+## MID119 generated-name defect
+
+Runtime raises `EditPlayerNameWindow.lua:83 ... nameList ... nil`. Source `EditPlayerName:onGeneratePlayerName_()` requires `params.player_name_list`; v0.8.3 returned `{name=...}`.
+
+v0.8.4 returns a non-empty deterministic `player_name_list` using source entries from `random_name.lua`. Exact historical name RNG remains unknown.
+
+## Hero equipment/promotion defect
+
+Runtime shows:
+- MID54 `SET_HERO_EQUIP` for tutorial Aquaris;
+- MID62 `ONE_CLICK_EQUIP` for later Aquaris/Pandaria clicks;
+- MID57 `ONE_CLICK_JINJIE` for Lavia.
+
+All three were status-only in v0.8.3.
+
+Source explains the visible mismatch:
+- MID54 mutates the client's local slot/Backpack after OK, so it can look correct while canonical server state remains unchanged;
+- MID62 requires response `equips`, so status-only OK produces animation but no equipment;
+- MID57 locally advances early NormalHero color/clears gear after OK, so it can look successful while canonical Hero/Inventory state remains unchanged and would diverge after relog.
+
+v0.8.4 adds `HeroEquipmentRepository` for the early ordinary NormalHero path and routes MID54/MID62/MID57 to it.
+
+## Source-derived one-click transaction
+
+MID62/MID57 requests carry only `partner_id`; the client independently calculates costs. The backend now reproduces that calculation from authoritative supplied tables using generated `data/hero_equipment_meta.json`:
+- current-color six-slot gear from `partner.lua`;
+- item `level`, `compose`, `compose_num`, `compose_mana`, EXP, awaken/bloodline flags from `item.lua`;
+- source potion order `50001001,50001002,50001004,50001005,50005182`;
+- cumulative Hero EXP/player-derived Hero cap through existing HeroProgressionRepository metadata.
+
+The transaction prevalidates recursive materials, potions and Mana, consumes canonical Backpack resources, routes compose-Mana spend through EconomyRepository, grants canonical Hero EXP when required, persists equip/color state and saves once. MID62 returns `equips`; safe early MID57 returns `restore_items=[]`; cumulative `economy_.mana` is projected only when compose Mana changes.
+
+Awaken/bloodline/Fumo restoration remains deliberately outside this patch. The new repository fails closed outside the source-backed early ordinary NormalHero boundary.
+
+## v0.8.4 files added/changed
+
+- `gxb_backend/state/hero_equipment_repository.py` — canonical MID54/MID62/MID57 early NormalHero transactions.
+- `gxb_backend/state/economy_repository.py` — shared canonical Mana spend helper.
+- `gxb_backend/state/hero_progression_repository.py` — exposes source Hero thresholds/cap and arbitrary canonical EXP grant for potion planning.
+- `gxb_backend/state/repository.py` — wires HeroEquipmentRepository.
+- `gxb_backend/state/hero_repository.py` — normalizes six `fumo_levels` entries.
+- `gxb_backend/handlers/heroes.py`, `gxb_backend/dispatch/engine_dispatcher.py` — route MID54/MID62/MID57 to canonical handlers instead of status-only fallbacks.
+- `gxb_backend/handlers/system.py` — MTSPY B compatibility and source-shaped MID119 `player_name_list`.
+- `tools/build_hero_equipment_meta.py` — non-executing source-table metadata generator.
+- `data/hero_equipment_meta.json` — generated source metadata (555 partner rows, 5,838 item rows, 3,469 unique random-name entries).
+- `docs/V0_8_4_RUNTIME_HERO_GUIDE_FIX.md`, README, version banners and memory updated.
+
+## v0.8.4 boundaries
+
+Still deferred exactly as before:
+- Story Mission MID2736/MID161 state/rewards;
+- MID59 Hero-contract/stone summon;
+- MID118 chapter-star rewards;
+- Campaign stamina deduction / defeat-cost semantics;
+- general Campaign drop RNG / repeat drops;
+- general post-tutorial Vending RNG/pity;
+- advanced awakened/bloodline/Fumo Hero progression;
+- Arena/PvP invitation mechanics.
+
+## Validation policy for this deliverable
+
+Only Python syntax/static compilation is performed by the assistant. No Flask/HTTP, selftest scripts, APK/ADB/emulator, or gameplay runtime tests are run. User-device testing remains authoritative.
+
+---
+
+# v0.8.3 CURRENT STATE — CAMPAIGN PROGRESSION / LEVEL-UP SYNC FIX — 2026-08-17
+
+Read this section first. v0.8.3 is a focused correction based on the user's v0.8.2 runtime dump. The Pass 25 economy architecture and v0.8.2 MID113→MID114 Campaign transaction remain valid. The observed loading freeze occurred after the successful MID114 response inside the shipped client's global `economy_` listener.
+
+## v0.8.2 runtime verdict
+
+User runtime test `server-2.txt` confirmed Campaign 100001 with formation `1|2|3` returned the intended canonical transaction:
+- staged/committed Toy Hammer `20001001 x1`;
+- `economy_={mana=495,exp=18,lev=4}`;
+- cumulative Hero EXP `75` for partner IDs 1/2/3.
+
+Therefore Mana/player-EXP/Hero-EXP calculation and the MID114 transaction were not the cause of the freeze.
+
+The client then logged:
+`SelfPlayer.lua:1551: attempt to call method 'invitation' (a nil value)`
+with stack through `getInvitationLimit → economySyncEvent_ → Backend.extraWebResponseCheck_`.
+
+## Source-confirmed invitation compatibility defect
+
+Authoritative `src_64/app/model/SelfPlayer.lua` stores bootstrap `params.invitation`. During every global ECONOMY event, if `self.invitation` is truthy it enters invitation recovery and calls `getInvitationLimit()`. That method calls `xyd.tables.player:invitation(self.lev)`.
+
+Authoritative `src_64/data/tables/player.lua` contains only `lev, energy, exp, award_energy, total_exp, hero_lev, power, expedition_mana`; there is no `invitation` column/method. The same ECONOMY block checks `xyd.FunctionID.ARENA`, while authoritative enums define `ID_ARENA=4`, not `ARENA`.
+
+Arena/PvP remains deliberately deferred. v0.8.3 therefore suppresses `invitation`, `invitation_time`, and `max_invitation` from the player-info wire projection for **all profiles including AdminRoot**, while retaining internal fields for future competitive restoration. Credential players copied from v0.8.0-v0.8.2 are normalized to unavailable invitation state.
+
+## Source-confirmed fresh Energy + level-up Energy
+
+The old fresh credential template inherited sandbox `energy=100`. Authoritative `player.lua` level-1 row gives `energy=60`, `award_energy=6`.
+
+Authoritative `SelfPlayer:economySyncEvent_()` handles cumulative player EXP by:
+1. recording old current Energy;
+2. crossing cumulative `total_exp` thresholds;
+3. adding `player:awardEnergy(current_level)` for every level crossed;
+4. presenting old/new Energy in the level-up window;
+5. later accepting cumulative `economy_.energy` as authoritative current state.
+
+For Campaign 100001 from EXP0/level1:
+- player EXP gain = `energy_cost 6 * getExpMulti 3 = 18`;
+- thresholds 6/12/18 move level1→4;
+- level-up Energy awards = `6+6+6=18`;
+- correct fresh current Energy becomes `60→78`;
+- source level-4 normal Energy cap metadata is 64.
+
+Current Energy may exceed the normal cap after level-up; this matches the client's own level-up calculation.
+
+v0.8.3 `EconomyRepository.grant_player_exp()` now persists the source-derived level, refreshes source max-energy metadata, adds source `award_energy` for crossed levels, and emits cumulative `economy_.energy` when level-up Energy is awarded. **Campaign stamina/energy-cost deduction is still NOT implemented**; its authoritative MID113-vs-MID114 timing remains unresolved.
+
+Fresh credential creation now starts at Energy60/max60. For copied v0.8.0-v0.8.2 credential state, exact legacy `energy=100` is treated as the known old fresh-template signature (Campaign stamina spending never existed in those versions) and migrated on load to `60 + award_energy for already-crossed levels`, with max-energy refreshed from the current source row. Thus the runtime-test level4/EXP18 account migrates to Energy78.
+
+## Opening Skip/Skip run
+
+The user's separate `server-1.txt` run pressed both opening Skip controls. Runtime then sent MID26 `SAVE_STORY` with `story_id=10005`, `guide_id=100262`, `story_state=0`. The client was therefore intentionally persisting a later tutorial checkpoint. Reaching the lobby without the early forced guide afterward is not evidence that backend tutorial persistence failed. For tutorial progression validation, do not press those Skip controls.
+
+A later manual interaction in that run produced `SelfPlayer:summonHero` with nil `result`; no matching MID50 was present in that log. General non-tutorial gacha remains deferred, so do not treat that manual post-skip path as part of this fix unless it reproduces in the canonical tutorial.
+
+## v0.8.3 boundaries
+
+Still deferred exactly as before:
+- Campaign stamina deduction / defeat-cost semantics;
+- general `campaign_dropbox.increase_rate` RNG and random repeat drops;
+- Story Mission/MID161 state/rewards;
+- MID54 equipment persistence;
+- MID59 Hero-contract/stone summon;
+- MID118 chapter-star rewards;
+- general post-tutorial Vending RNG;
+- Arena/PvP invitation mechanics.
+
+## v0.8.3 files changed
+
+- `gxb_backend/state/player_state.py` — suppress deferred Arena invitation wire projection.
+- `gxb_backend/state/profiles.py` — fresh credential Energy60/max60 and no Arena invitation.
+- `gxb_backend/state/economy_repository.py` — source level-up Energy award + cumulative `economy_.energy`.
+- `gxb_backend/state/multiuser_database.py` — copied credential invitation/legacy Energy migration.
+- `gxb_backend/run.py`, `server.py` — v0.8.3 banner/docs.
+- `tools/selftest_campaign_economy.py` — expectations updated for Energy78/96; retained as offline helper but not executed in this deliverable under the standing validation rule.
+- `docs/V0_8_3_RUNTIME_LEVELUP_FIX.md`, README, memory updated.
+
+## Validation policy for this deliverable
+
+Only Python syntax/static compilation is performed by the assistant. No Flask/HTTP, selftest scripts, APK/ADB/emulator, or gameplay runtime tests are run. User device testing remains authoritative for runtime confirmation.
+
+---
+
+# v0.8.2 CURRENT STATE — CAMPAIGN ECONOMY + EXP FOUNDATION — 2026-08-17
+
+Read this section first. v0.8.2 preserves the user-runtime-confirmed v0.8.1 fresh-account tutorial baseline and begins implementing Pass 25's global economy architecture. This release is intentionally narrow: source-certain Normal Campaign first-clear items + Mana + player EXP/level + participating Hero EXP, with persisted MID114 retry protection.
+
+## Runtime baseline entering v0.8.2
+
+User runtime-confirmed v0.8.1:
+- credential multi-user registration/login and per-player isolation work;
+- fresh Aquaris partner 1, scripted Mana summon Lavia partner 2, scripted Crystal summon Pandaria partner 3 work;
+- tutorial proceeds through early Normal Campaign;
+- 100001/100002/100004/100005 clear successfully;
+- tutorial reaches MID54 equipment and MID2736 Story Missions, exposing the next progression gaps.
+
+Pass 24/25 runtime analysis proved the old MID114 returned first-clear items but omitted `economy_` and `exps`, so visible battle Mana/EXP could diverge from canonical persisted state.
+
+## v0.8.2 architecture
+
+New canonical `EconomyRepository` owns cumulative player-level scalar economy implemented so far. Domain repositories do not maintain duplicate Mana/EXP copies.
+
+For this release:
+- `WorldRepository` coordinates the Campaign transaction;
+- `EconomyRepository` mutates cumulative Mana + player EXP/level;
+- `HeroProgressionRepository` mutates cumulative Hero EXP/level;
+- `InventoryRepository` owns first-clear item quantities;
+- one final player save persists the transaction and the committed MID114 receipt.
+
+This is the dependency direction intended for later Mission/Shop/Arena currency work.
+
+## Source-certain Normal Campaign reward commit
+
+MID113 for runtime `campaign_type=1` stages:
+- the existing conservative guaranteed first-clear items (`init_dropbox` rows with `increase_rate == 10000` only);
+- source `campaign.mana_gain`;
+- source `campaign.partner_exp`;
+- ordinary player EXP gain `campaign.energy_cost * SelfPlayer:getExpMulti()`, with `getExpMulti() == 3`.
+
+MID114 win with the matching pending fight now commits:
+- cumulative `PlayerState.mana` and returns cumulative `economy_.mana`;
+- cumulative `PlayerState.exp`, source-derived canonical player level, and returns cumulative `economy_.exp` plus `economy_.lev` when level changes;
+- source `partner_exp` to each unique participating owned Hero in the pending pipe formation, returning cumulative `exps=[{partner_id,exp},...]`;
+- first-clear guaranteed items into canonical Backpack only once;
+- existing stars/unlocks/chapter state.
+
+Player EXP is not Hero EXP. Hero EXP is not a delta in MID114; each `exps[].exp` is the new cumulative Hero EXP.
+
+## First tutorial stage example
+
+Fresh zero-economy player, formation `1|2|3`, Campaign 100001:
+- source first-clear item: Toy Hammer `20001001 x1`;
+- Mana gain: 495;
+- player EXP gain: `6 * 3 = 18`, moving source level 1 -> 4;
+- Hero EXP gain: 75 to Aquaris/Lavia/Pandaria; each moves level 1 -> 3;
+- response projects `economy_={mana=495,exp=18,lev=4}` and `exps` with cumulative 75 for partners 1/2/3.
+
+Replay after a new MID113 grants source Mana/player/Hero EXP again but no second guaranteed Toy Hammer. General repeat drop RNG remains absent.
+
+## Retry/idempotency
+
+A valid MID114 commit replaces `active_campaign_battle` with a persisted committed receipt containing campaign/type/formation/star and the detached response. An identical MID114 received before the next MID113 returns that response without mutating state again. The receipt survives canonical JSON reload/backend restart. A new MID113 overwrites it and begins a new real transaction.
+
+This protects first-clear items, Mana, player EXP and Hero EXP from network retries.
+
+## Source metadata
+
+New `data/campaign_economy_meta.json` is generated from authoritative:
+- `src_64/data/tables/campaign.lua`;
+- `src_64/data/tables/player.lua`;
+- `src_64/app/model/SelfPlayer.lua:getExpMulti()`.
+
+It contains all 917 Campaign rows needed for deterministic scalar fields and all 100 supplied player-level rows. It does **not** define drop RNG.
+
+Generator: `tools/build_campaign_economy_meta.py` parses Lua table literals as data and never executes Lua.
+
+## Explicit v0.8.2 boundaries
+
+Still NOT implemented:
+- `campaign_dropbox.increase_rate` random algorithm;
+- random repeat-clear drops;
+- lower-rate first-clear rows;
+- Campaign energy/stamina deduction timing and defeat-cost behavior;
+- level-up energy award synchronization (current `max_energy` is source-updated with level, but current energy is not mutated by this slice);
+- complete Sweep economy/RNG;
+- Story Mission state/reward claims;
+- MID54 equipment persistence;
+- MID59 Hero-contract summon;
+- MID118 chapter-star Crystal rewards;
+- general post-tutorial Vending RNG/pity.
+
+Do not expand those by guessed policy. Pass 25 proved server ownership of Campaign RNG but not the official rate algorithm.
+
+## Validation performed by assistant
+
+Allowed offline/Python-only validation:
+- new Campaign economy metadata generated from authoritative supplied `src_64` files;
+- `tools/selftest_campaign_economy.py` passes in-memory first clear, duplicate MID114 idempotency, real replay behavior, canonical multi-user JSON save/reload, and duplicate retry after reload;
+- first 100001 expected test state: Mana 495, player EXP 18/level4, Heroes 1/2/3 each EXP75/level3, one Toy Hammer;
+- 88 Python files pass `py_compile`; existing multi-user/tutorial-summon self-tests and the new Campaign economy/persistence self-test pass;
+- no Flask/HTTP/APK/ADB/emulator/gameplay runtime test performed by assistant.
+
+## Files added/changed in v0.8.2
+
+- `gxb_backend/state/economy_repository.py` new;
+- `gxb_backend/state/hero_progression_repository.py` adds reusable battle EXP grant;
+- `gxb_backend/state/world_repository.py` stages/commits deterministic scalar rewards + persisted MID114 receipt;
+- `gxb_backend/state/repository.py` wires canonical EconomyRepository into request-scoped player state;
+- `data/campaign_economy_meta.json` new;
+- `tools/build_campaign_economy_meta.py` new;
+- `tools/selftest_campaign_economy.py` new;
+- `docs/V0_8_2_CAMPAIGN_ECONOMY_EXP.md` new;
+- README/version/memory updated.
+
+---
+
+# PASS 25 CURRENT STATE — 2026-08-17
+
+Read this section first. Pass 25 is a targeted **Global Economy Synchronization + Campaign/Mission reward ownership + drop RNG/sweep mapping pass** built cumulatively on Pass 24. It is mapping/research only; no backend behavior was changed.
+
+## Why Pass 25 exists
+
+The fresh v0.8.1 tutorial exposed a structural issue: the client can display Campaign Mana/items/equipment locally while canonical server economy/progression stays unchanged. Before implementing v0.8.2, Pass 25 maps the cross-domain response plane that must atomically synchronize Campaign, Economy, Hero EXP, Inventory and Missions.
+
+## Global economy plane — source-confirmed
+
+`Backend.extraWebResponseCheck_()` inspects ordinary backend responses globally. If `economy_` exists it dispatches the ECONOMY event; the same response may also carry mission deltas, `extra_drops_`, `new_funcs_`, redmarks, server_time and domain-specific state.
+
+`SelfPlayer:economySyncEvent_()` consumes **47 distinct keys**. These are generally cumulative current values, not reward deltas. Important early fields: `exp`, `mana`, `crystal`, `energy`, `skill_point`; later the same plane covers Arena/Top/Guild/region currencies, certificates, tickets and other player resources.
+
+`economy_.exp` is cumulative player EXP and can trigger multiple source-table level-ups, energy awards, function-open presentation and level-up UI. Energy/spirit-energy/invitation synchronization also changes local recharge-timer mirrors.
+
+## Campaign reward ownership — source-confirmed
+
+For NORMAL/SUPER/CHALLENGE:
+1. MID113 FIGHT is sent before local combat.
+2. MID113 response `items` determines which item drops actually exist.
+3. Client `Item:initDrop(campaign_id)` only chooses the enemy/wave where each already-selected item is visually dropped; it does not roll item existence.
+4. Local combat runs.
+5. MID114 FIGHT_RESULT commits Campaign/chapter/mode state and may return `economy_`, cumulative Hero `exps`, Pet EXP, mission deltas and other result state.
+
+Therefore Campaign item RNG is **server-owned**. The client only animates server-selected drops.
+
+Normal Campaign `mana_gain` is distributed locally across enemies for display, but normal BattleWinWindow does not locally commit that Mana. Persistent normal Campaign Mana must be synchronized by server `economy_.mana`.
+
+## Dropbox RNG — ownership known, exact algorithm unknown
+
+`campaign_dropbox.lua` contains 2,193 distinct dropboxes. Rate sums disprove a generic one-normalized-choice algorithm:
+- 60 sum exactly to 10,000;
+- 1,947 sum above 10,000;
+- 186 sum below 10,000.
+
+Examples:
+- repeat 301101: 29 rows, sum 33,900, with duplicated item blocks plus sweep-card row;
+- repeat 200102: 51 rows, sum 31,916;
+- first-clear 301001: one 10,000 row;
+- first-clear 200001: two 8,000 rows.
+
+Thus `init_dropbox` means first-clear-specific pool, **not globally guaranteed reward**. `increase_rate` exact official interpretation is not present in Lua. General repeat/first-clear RNG must not be invented yet.
+
+## Sweep ownership — source-confirmed
+
+MID117 SWEEP_CAMPAIGN returns per-run `items`, per-run `economys`, `additional`, updated `campaign`, optional mode state, and may also include global cumulative `economy_`. Sweep/random raid results are therefore server-generated. Current deterministic `sweep_reward` Juice support is only one incomplete component.
+
+## Normal / Super / Challenge
+
+Runtime CampaignType values are NORMAL=1, SUPER=2, CHALLENGE=24. All three converge on MID113/MID114, but state differs:
+- Normal/Super have chapter star totals and MID118 star bonuses.
+- Super uses related campaign IDs.
+- Challenge has separate challenge/attempt state and hides normal/super star-bonus UI.
+
+Do not confuse runtime CampaignType with `campaign.lua.campaign_type`, which is also used as node/presentation shape (SMALL/LARGE).
+
+## Mission coupling — source-confirmed
+
+Every ordinary response is passed to `Task:onTaskBackendEvent()`. It consumes `daily_mission_`, `mainline_mission_`, `partner_mission_`, `awake_mission_`, `twice_awake_mission_`, `story_mission_`, and `pet_awake_mission_` deltas. Campaign result can therefore advance missions in the same response as economy/Campaign mutations.
+
+MID2736 loads a mission type; Story is type 4. MID161 claims a mission. Function 84 reward-change mode is enabled, so active mission rewards come from `*_new` columns.
+
+Fresh Story Mission 80001 requires Campaign 100004 and actively rewards 15,000 Mana + `40001004 x10` Lightin contracts. Mana belongs in canonical economy; contracts belong in Inventory; mission state must transition atomically.
+
+## Star bonus
+
+MID118 returns updated `chapter_info` and `awards`. `campaign_star_bonus.lua` separately defines Crystal/Mana plus item rewards; the currency portion belongs on cumulative `economy_`. First normal row is 18 stars -> 20 Crystal + `50031001 x1` + Small Juice `50001002 x2`.
+
+## Architecture gate for v0.8.2
+
+Use one canonical EconomyRepository/transaction plane. Domain repositories own domain state but do not duplicate currencies. A Campaign win transaction should atomically validate/idempotently commit: energy policy, player EXP/Mana, Hero EXP, Inventory drops, Campaign state, and mission deltas, then project cumulative `economy_` and feature-specific payloads.
+
+General Campaign dropbox RNG remains deferred until its algorithm is reconstructed or calibrated; server ownership is proven, exact probabilities are not.
+
+New Pass 25 docs: `PASS25_INDEX.md`, `PASS25_GLOBAL_ECONOMY_MAPPING_STATUS.md`, `GLOBAL_ECONOMY_SYNC_PLANE_PASS25.md`, `CAMPAIGN_REWARD_OWNERSHIP_PASS25.md`, `CAMPAIGN_DROP_RNG_AND_SWEEP_PASS25.md`, `NORMAL_SUPER_CHALLENGE_ECONOMY_PASS25.md`, `MISSION_ECONOMY_AND_REWARD_PROPAGATION_PASS25.md`, `ECONOMY_TRANSACTION_ARCHITECTURE_PASS25.md`, `PASS25_SOURCE_REFERENCES.md`, `PASS25_ECONOMY_FACTS.json`.
+
+---
+
+# PASS 24 CURRENT STATE — 2026-08-17
+
+Read this section first. Pass 24 is a targeted **fresh Campaign progression / economy / equipment / Story Mission / Hero-stone mapping pass** built cumulatively on Pass 23 and the user-runtime-confirmed v0.8.1 tutorial-summon backend.
+
+Pass 24 is mapping/research only. No backend behavior was changed.
+
+## v0.8.1 fresh tutorial runtime milestone
+
+User runtime-confirmed a newly registered credential player now reaches substantially farther through the original tutorial:
+- starter Aquaris is present;
+- first Mana/small Vending pull correctly grants Lavia;
+- first CrystalFree/medium Vending pull correctly grants Pandaria;
+- all three starter Heroes fight in Campaign;
+- Campaign 100001, 100002, 100004 and 100005 complete;
+- the tutorial enters Girls/Aquaris and sends MID54 SET_HERO_EQUIP;
+- after 100004 the tutorial opens Story Missions and sends MID2736 mission_type=4.
+
+This confirms v0.8.1's scripted starter-summon slice. The current blockers are canonical early-game progression, not identity or Vending.
+
+## Live Pass 24 delta: current backend omissions
+
+Fresh runtime shows:
+- MID114 100001 -> `20001001 x1`;
+- MID114 100002 -> `20001011 x1`, `20001007 x1`;
+- MID114 100004 -> `20001005 x1`, `20001004 x1`, `50001538 x1`;
+- MID114 100005 -> `20001002 x1`, `20001005 x1`;
+- these successful MID114 responses omit `economy_` and `exps`;
+- MID54 `{partner_id=1,equip_index=5}` returns status-only OK;
+- MID2736 `{mission_type=4}` returns `mission_list=[]`.
+
+Therefore the client can display progression effects locally while canonical server state remains incomplete.
+
+## Campaign source economy
+
+Authoritative `data/tables/campaign.lua` directly defines `energy_cost`, `defeat_cost`, `partner_exp`, `init_dropbox`, repeat `dropbox`, `mana_gain`, sweep rewards and source campaign links.
+
+Early rows:
+
+| Campaign | energy_cost | defeat_cost | partner_exp | mana_gain | init_dropbox |
+|---|---:|---:|---:|---:|---:|
+| 100001 | 6 | 1 | 75 | 495 | 301001 |
+| 100002 | 9 | 1 | 90 | 515 | 301002 |
+| 100004 | 6 | 1 | 120 | 553 | 301004 |
+| 100005 | 9 | 1 | 240 | 542 | 301005 |
+| 100007 | 6 | 1 | 320 | 506 | 301007 |
+
+The backend already carries these fields in `campaign_reward_meta.json`, but v0.8.1 only commits conservative guaranteed first-clear items.
+
+## Normal Campaign Mana
+
+The client reads `campaign:gainMana(campaign_id)` and distributes that value across locally-created battle monsters as visible `dropMana`. `BattleWinWindow` shows the local drop counter. For NORMAL Campaign it explicitly does **not** dispatch the local ECONOMY mana event used by other campaign types.
+
+Therefore seeing +495 Mana on the result screen does not prove persistence. Normal Campaign canonical Mana must come back from server state, normally cumulative `economy_.mana`. v0.8.1 omits it, so backend/relog Mana remains unchanged.
+
+## Hero battle EXP
+
+`BattleCreate.finishBattle()` passes `response.exps or {}` to `BattleWinWindow`. For each matching `partner_id`, `BattleWinWindow` calls `hero:setExp(entry.exp, heroMaxLev)` and computes the displayed gain from the difference between new and old cumulative Hero EXP.
+
+Therefore MID114 `exps[]` is server-authoritative cumulative Hero EXP, at least `{partner_id, exp}`. `campaign.partner_exp` is the per-stage Hero EXP gain and is distinct from player/team EXP.
+
+## Player/team EXP
+
+Normal `BattleWinWindow` starts `groupExp_` from `campaign.energy_cost`, then calls `xyd.getStudentExp(groupExp_, selfPlayer:getExpMulti())`. `SelfPlayer:getExpMulti()` returns 3. With no mentor bonus, ordinary displayed player/team EXP is `energy_cost * 3` (6 -> 18, 9 -> 27).
+
+`campaign.lua` has no separate `player_exp` field. Canonical player EXP is cumulative `economy_.exp`. The ordinary no-mentor display formula is source-confirmed; exact original mentor/student and sweep semantics remain unresolved and must not be invented.
+
+`player.lua` defines cumulative level thresholds, max energy, level-up energy awards and Hero-level caps. Early rows include level1 total_exp6/hero cap10/max energy60/award energy6 through level7 total_exp48/hero cap13.
+
+## Energy
+
+Client team windows gate Fight on `selfPlayer.energy >= campaign.energyCost()`. No normal-Campaign client-side energy subtraction was found in the fight path. Energy is therefore server-owned.
+
+Exact historical synchronization timing (MID113 start/reservation versus MID114 final result) is not directly proven. `defeat_cost` is separately source-defined (1 in the early rows), so loss and win semantics must remain distinct.
+
+## Tutorial equipment
+
+Runtime sends MID54 `{partner_id=1,equip_index=5}`. `NormalHero:equipItems()` proves the client derives the exact expected item, verifies Backpack ownership, sends MID54, and on OK locally sets `equips_[index]=1` and removes one exact item from Backpack.
+
+Fresh Aquaris slot 5 is Toy Hammer `20001001`, exactly the guaranteed 100001 reward. v0.8.1 MID54 is status-only, so this visible equip is client-local. Canonical implementation must atomically validate Hero/item/slot, persist the equip flag and consume the Backpack item.
+
+Normal equipment-derived stats are computed client-side from tables; MID54 does not require an invented derived-stat payload.
+
+## Story Mission tutorial blocker
+
+`TaskType.STORY = 4`. Runtime sends MID2736 mission_type=4 immediately after 100004; v0.8.1 returns an empty list.
+
+Source chain:
+- 80001 requires cleared 100004; next 80003; rewards 15,000 Mana + `40001004 x10`;
+- 80003 requires 100007; rewards `50001538 x5`;
+- 80004 requires 100011; rewards 15,000 Mana + `40001004 x20`;
+- 80005 requires 100015; rewards `40001004 x50`;
+- 80006 requires 100018; rewards 15,000 Mana + `50005234 x1`;
+- 80007 requires 200002; rewards Raid Ticket `50001013 x3`.
+
+Task rows minimally consume `table_id`, `is_complete`, `is_reward`, `count`. MID161 TAKE_MISSION_AWARD requests `{table_id}` and consumes `awards`.
+
+Exact activation rules of every mission family remain server-owned/partially unresolved. For the tutorial, source + runtime strongly support 80001 being active/claimable once 100004 is cleared, then following its explicit `next_task_id` chain.
+
+## Hero contracts/stones — the user's “girl scrolls”
+
+The actual Girls-tab summon path is Backpack Hero stone/contract items + MID59, not MID67.
+
+`NormalHero` gets `stone_id` from HeroTable, reads its Backpack count, and allows summon when uncollected and count >= `TotalStarSuipian[star]`. Thresholds are `{10,30,80,180,330}` for 1..5 stars. MID59 sends `{table_id, stone, stone_num}`. SelfPlayer expects the MID59 response itself to be a full Hero payload, adds the Hero, then removes the stones.
+
+`40001004` is Lightin's contract/stone item. Lightin is 1-star, so Mission 80001's `40001004 x10` is exactly enough for Girls-tab summon.
+
+MID67 `LOAD_HERO_PIECES` is a separate `heroPieces_` UI/state map and must not be conflated with Backpack stone summoning. v0.8.1 MID59 is still an empty-awards fallback.
+
+## Crystal / diamonds
+
+Normal Campaign rows do not define per-fight `crystal_gain`. Do **not** grant Diamonds on every battle.
+
+`campaign_star_bonus.lua` defines chapter-star rewards. First normal bonus row: bonus_id1, requires 18 stars, gives 20 Crystal plus `50031001 x1` and `50001002 x2`, then bonus2. `MapWindow` claims via MID118 GET_BONUS_AWARD `{bonus_type}` and uses returned `chapter_info` + `awards`; currency should synchronize through global `economy_`.
+
+Current backend initializes `normal_bonus_id=0` and MID118 returns empty awards, so star bonuses are disabled. Starting normal bonus at source row 1 is a high-confidence source-derived initialization inference, not a direct live-server capture.
+
+## Recommended next implementation slice
+
+Implement **v0.8.2 Fresh Campaign Progression** as one coherent graph:
+1. canonical economy helper for cumulative Mana/EXP/Energy and level transitions;
+2. normal Campaign commit: energy, mana_gain, ordinary no-mentor player EXP, participating-Hero cumulative `exps`, existing first-clear items;
+3. MID54 equipment persistence + Backpack consume;
+4. Story Mission repository for the 80001 chain, MID2736 and MID161;
+5. MID59 source-shaped stone summon for a valid uncollected Hero with sufficient canonical stones;
+6. Campaign star bonus/MID118 when tutorial reaches it.
+
+Do not add general repeat-drop RNG, general gacha RNG, mentor/student EXP logic, or speculative Crystal-per-battle rewards in this slice.
+
+---
+
+# PASS 23 CURRENT STATE — 2026-08-17
+
+Read this section first. Pass 23 is a targeted **Summon/Vending + fresh tutorial mapping pass** built cumulatively on Pass 22 and the now user-runtime-confirmed v0.8.0 identity rewrite.
+
+Pass 23 is mapping/research only. No backend behavior was changed.
+
+## v0.8.0 multi-user runtime milestone
+
+User runtime-confirmed the new identity spine on one tablet:
+
+- anonymous sandbox UID 13371337 -> player 12525385 (Moppleton);
+- credential account #1 -> UID 20000001 -> region 197 player 19700001;
+- credential account #2 -> UID 20000002 -> region 197 player 19700002.
+
+Credential accounts used distinct SDK sessions/tokens, survived backend restart, rejected wrong credentials, and returned to their existing canonical player on later login (`is_new=0`). Guest account switching returned to Moppleton without starting the fresh tutorial.
+
+The first credential account was actually registered/logged as `testiser01` in the runtime log; `testuser01` was a distinct wrong credential attempt. Do not normalize the typo in historical evidence.
+
+Using **Bind Now** from guest emitted SDK MID65285 `anony_update`; it is not normal MID65282 registration. It remains deferred because AdminRoot/Moppleton is deliberately a shared reconstruction sandbox and must not be transferred to one credential account accidentally.
+
+Multi-user identity foundation v0.8.0 is therefore USER-RUNTIME-CONFIRMED. A later deliberate A/B gameplay divergence test is still useful as gold-standard proof of every repository's isolation, but identity/session/player routing itself is confirmed.
+
+## Fresh tutorial exposed a real Summon/Vending blocker
+
+Fresh credential players now follow substantially more of the original tutorial than the established sandbox.
+
+Mandatory Vending entry currently crashes in client Lua:
+
+`HeroTable:initialStar -> SummonWindow:smallMachineSetUp -> attempt to index a nil value`.
+
+Immediate cause: backend MID56 `LOAD_SUMMON_INFO` returns `mana_id=0`. `SummonWindow` treats `mana_id` as a real Hero table ID and immediately resolves star/name/description/model/dialog. MID56 also supplies `partner_id`, `pet_id`, hot lists, free timers, and optional `mana_free_num`; zero placeholders are not generally source-valid for an open SummonWindow.
+
+## MID56 source-consumed contract
+
+`SelfPlayer:loadSummonInfo()` consumes:
+
+- mana_free_time
+- crystal_free_time
+- second_ids
+- main_ids
+- mana_id
+- pet_id
+- partner_id
+- optional directional_show_id
+- optional mana_free_num
+
+`SummonWindow` maps them to server-driven featured/hot display state. Exact historical dynamic featured IDs are not static-source known. Do not label guessed IDs as official live values.
+
+## Core summon MIDs
+
+- MID50 SUMMON_HERO
+- MID56 LOAD_SUMMON_INFO
+- MID59 STONE_SUMMON_HERO
+- MID70 MAGIC_SUMMON_BUY
+- MID71 MAGIC_SUMMON_SWITCH_HERO
+- MID305 SUMMON_SUPER_HERO
+
+Fresh mandatory tutorial uses MID56 + MID50.
+
+## Critical discovery: opening tutorial pulls are deterministic
+
+The general Vending system is server-owned RNG/counter logic, but the first tutorial pulls are scripted by source tables.
+
+### First Mana tutorial pull
+
+`summon.lua` row 1:
+- special dropboxes: 200005|210002|210005|150001|150001|150001
+- special counts: 1|2|5|50|150|300
+- summon reward item id: 50001002 (Small Juice)
+
+`dropbox.lua` 200005:
+- source label = Mana first-pull pool
+- exactly one row
+- Hero table_id 10001002 Lavia
+- item_num 1
+- drop_rate 10000
+- roll_type 1
+
+Guide 100105 independently says: “Great, Lavia joins!”
+
+Therefore the first source-defined Mana tutorial pull is guaranteed Lavia and needs no guessed RNG.
+
+### First CrystalFree tutorial pull
+
+`summon.lua` row 3:
+- special dropboxes: 200006|200014|200004|200004|200004
+- special counts: 1|2|10|30|60
+- summon reward item id: 50001004 (Medium Juice)
+
+`dropbox.lua` 200006:
+- source label = Crystal first-pull pool
+- exactly one row
+- Hero table_id 10001003 Pandaria
+- item_num 1
+- drop_rate 10000
+- roll_type 1
+
+Guide 100108 independently says Pandaria is here.
+
+Therefore the first source-defined CrystalFree tutorial pull is guaranteed Pandaria.
+
+## Fresh Hero IDs 1 / 2 / 3 are tutorial-critical
+
+`SummonWindow:setIDBeforeGuideWnd()` checks owned `getHeroByID(2)` and `getHeroByID(3)` to decide whether Mana/Crystal tutorial pulls have completed.
+
+Later `SelectTeamWindow` and `SelectTeamNewWindow` explicitly preload `getHeroByID(1)`, `(2)`, `(3)`.
+
+Opening GUIDE_START shows Aquaris 10001001 through a temporary `Hero:populateWithTableID()` in `SummonHeroWindow`; that presentation path does NOT add the Hero to SelfPlayer.
+
+Strong source-backed canonical requirement for a fresh player:
+- partner_id 1 = Aquaris 10001001 already owned before later tutorial team selection;
+- first Mana pull creates partner_id 2 = Lavia 10001002;
+- first CrystalFree pull creates partner_id 3 = Pandaria 10001003.
+
+`partner.lua` source Aquaris `ini_star=1`; `populateWithTableID` defaults normal Hero presentation to level 1/color 1. These are the strongest source defaults for fresh Aquaris, not the established sandbox Aquaris's historical star/level.
+
+This corrects v0.8.0's deliberately conservative fresh template of “no Heroes”: it is insufficient for the source tutorial and should be revised in the tutorial implementation slice.
+
+## Free summon state
+
+`misc.lua` source:
+- summon_mana_free_period = 600 seconds
+- summon_crystal_free_period = 165600 seconds
+- summon_mana_free_num = 5
+
+Client considers free ready when corresponding time scalar is `<1`; Mana additionally needs positive `mana_free_num`.
+
+Current fresh placeholder future timers + missing mana_free_num are incompatible with mandatory tutorial. Initial exact official scalar is unobserved, but `0` is source-consistent with the client's explicit ready semantics.
+
+## MID50 response/mutation contract
+
+Request carries summon_type + summon_index.
+
+SelfPlayer success consumes:
+- result (required for normal success path)
+- reward
+- extra_reward
+- sakura_items
+- stick_items
+- summon_info
+
+Hero result entry with `is_partner=true` is populated as a real NormalHero and added to canonical Heroes. Non-Hero result uses table_id/item_num and is added to Backpack. SummonResultWindow also understands server-shaped `to_stone` and `is_pet` flags.
+
+Do not invent duplicate/full-slot conversion semantics yet; exact official `to_stone` decision rule is not recovered from client Lua.
+
+Paid summon UI distinguishes free vs paid through presence of root/global `economy_`. Paid summon implementation should therefore use the already-mapped canonical economy/global-response plane.
+
+## General summon RNG remains deliberately unresolved
+
+`SummonTable.lua` parses only cost_type + summon_cost. It does NOT implement selection from summon.lua fields:
+- dropbox
+- super_dropbox
+- special_dropbox
+- rate_bottom
+- rate_step
+- summon_special
+- is_reset
+- max_num
+- fix_rate
+- fix_max_num.
+
+Whole-tree search finds no client-side ordinary summon RNG algorithm using those fields. General result selection is server-owned.
+
+Examples:
+- Mana: base 200001, full-Hero 151001, multiple special-count pools, rate_step 0.4.
+- Crystal: normal 200003, high/full-Hero 200004, count-specific 220001/220004/220007 etc., rate_step 2285.
+- Crystal normal pool 200003 has 371 rows whose listed rates sum to 8560, while high pool 200004 separately sums to 10000. This is strong evidence that simply normalizing one dropbox is not the official algorithm.
+
+Do NOT invent how rate_bottom/rate_step/pity/special/reset/fixed-rate fields combine until more evidence or controlled runtime tests exist.
+
+## Summon catalogue distinction
+
+`summon_list.lua` type 1 contains 82 Hero IDs for `SummonListShowWindow`. It is a UI catalogue of obtainable/displayed Heroes, not a probability table.
+
+## Safe next implementation boundary after Pass 23
+
+Implement **Fresh Tutorial Summon**, not full gacha:
+
+1. source-shaped MID56 sufficient to construct Vending;
+2. fresh player canonical Aquaris partner_id 1;
+3. free-ready Mana and Crystal tutorial state;
+4. deterministic first Mana MID50 -> Lavia partner_id 2;
+5. deterministic first CrystalFree MID50 -> Pandaria partner_id 3;
+6. canonical Hero/free-timer persistence across relog;
+7. only afterward implement ordinary paid RNG/counters as a separate domain.
+
+This preserves evidence-first reconstruction while unblocking the mandatory tutorial.
 
 ---
 

@@ -1,0 +1,58 @@
+{
+  "_meta": {
+    "format": "GXB Pass30 source-derived Story Mission metadata",
+    "policy": [
+      "Pass30 implements only Story Mission 80001 semantics",
+      "reward columns follow MissionTable.lua ID_REWARD_CHANGE open_control selection",
+      "currency awards are persisted by EconomyRepository and represented in response.awards with effective asset pseudo IDs for client display"
+    ],
+    "resolved_inputs": {
+      "data/tables/asset.lua": {
+        "layer": "apk_baseline",
+        "relative_path": "data/tables/asset.lua"
+      },
+      "data/tables/function.lua": {
+        "layer": "apk_baseline",
+        "relative_path": "data/tables/function.lua"
+      },
+      "data/tables/mission.lua": {
+        "layer": "apk_baseline",
+        "relative_path": "data/tables/mission.lua"
+      }
+    },
+    "reward_change_function_id": 84,
+    "reward_change_open_control": 1,
+    "source_precedence": "writable_hot_update_over_apk_baseline",
+    "source_resolution": "effective_merged"
+  },
+  "story_missions": {
+    "80001": {
+      "display": 1,
+      "goto": "11|100004",
+      "new_type": 4,
+      "next_task_id": 80003,
+      "previous_task_id": 0,
+      "response_awards": [
+        {
+          "item_id": -2,
+          "item_num": 15000
+        },
+        {
+          "item_id": 40001004,
+          "item_num": 10
+        }
+      ],
+      "reward": {
+        "crystal": 0,
+        "item_id": 40001004,
+        "item_num": 10,
+        "mana": 15000,
+        "player_exp": 0
+      },
+      "table_id": 80001,
+      "task_num_raw": "100004|1",
+      "task_req": 15,
+      "task_target": 1
+    }
+  }
+}

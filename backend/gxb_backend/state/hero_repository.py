@@ -16,6 +16,7 @@ from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
+from .economy_repository import EconomyRepository
 from .player_state import PlayerState
 from .skill_point_policy import SkillPointPolicy
 
@@ -31,10 +32,13 @@ class HeroRepository:
         player: PlayerState,
         save_callback: Callable[[], None] | None = None,
         data_dir: Path | None = None,
+        *,
+        economy: EconomyRepository | None = None,
     ) -> None:
         self.player = player
         self._save_callback = save_callback
         self._data_dir = Path(data_dir or "data")
+        self._economy = economy
 
     @staticmethod
     def _int(value: Any, default: int = 0) -> int:
@@ -132,6 +136,7 @@ class HeroRepository:
             hero["skills"] = self._fixed_six(hero.get("skills"), self._SIX_ONES)
             hero["equips"] = self._fixed_six(hero.get("equips"), self._SIX_ZEROES)
             hero["fumos"] = self._fixed_six(hero.get("fumos"), self._SIX_ZEROES)
+            hero["fumo_levels"] = self._fixed_six(hero.get("fumo_levels"), self._SIX_ZEROES)
             hero.setdefault("skin_ids", [])
             hero.setdefault("current_skin_id", 0)
             # HeroMainWindow's Skin tab treats illusionSkinId_ <= 1 as a
@@ -270,21 +275,66 @@ class HeroRepository:
         """Mirror the client timed skill-point recovery against canonical state."""
         return SkillPointPolicy(self.player, self._data_dir, self._save_callback).recover(persist=persist)
 
-    def buy_skill_points(self) -> dict[str, int]:
-        """Persist MID99 BUY_SKILL_POINT's source-observed player fields.
+    def buy_skill_points(self) -> dict[str, Any]:
+        """Atomically commit MID99 BUY_SKILL_POINT + Crystal spend.
 
-        The client translation for SKILL_POINT_BUY explicitly states that one
-        purchase grants 10 skill points.  Crystal charging is intentionally left
-        for the later full Hero/Economy progression pass because this narrow pass
-        has no proven economy-sync response path for MID99.
+        Source client code pre-checks VIP permission and Crystal balance, then
+        relies on the global economy plane for the Crystal decrement.  The server
+        repeats those source-derived validations and commits both domains before
+        one save.  ``skill_point`` may exceed the natural timed-recovery cap.
         """
         player = self.player
-        SkillPointPolicy(player, self._data_dir, self._save_callback).recover()
-        player.buy_skill_times = max(0, self._int(player.buy_skill_times)) + 1
-        player.skill_point = max(0, self._int(player.skill_point)) + 10
-        if self._int(player.skill_time) <= 0:
-            player.skill_time = player.now()
-        self._save()
+        policy = SkillPointPolicy(player, self._data_dir, self._save_callback)
+        recovered = policy.recover(persist=False)
+
+        if not policy.can_buy():
+            if recovered:
+                self._save()
+            return {
+                "error_code": 1,
+                "msg": "skill point purchase is unavailable for current VIP",
+            }
+
+        purchase_number = max(0, self._int(player.buy_skill_times)) + 1
+        cost = policy.purchase_cost(purchase_number)
+        grant = policy.purchase_grant()
+        if cost is None or grant <= 0 or self._economy is None:
+            if recovered:
+                self._save()
+            return {
+                "error_code": 1,
+                "msg": "skill point purchase metadata unavailable",
+            }
+
+        # Snapshot after legitimate timed recovery. Purchase fields then mutate
+        # as one local transaction; no persistent write occurs before success.
+        snapshot = {
+            "crystal": self._int(player.crystal),
+            "buy_skill_times": self._int(player.buy_skill_times),
+            "skill_point": self._int(player.skill_point),
+            "skill_time": self._int(player.skill_time),
+        }
+
+        if not self._economy.spend_crystal(cost, persist=False):
+            if recovered:
+                self._save()
+            return {
+                "error_code": 1,
+                "msg": "insufficient crystal for skill point purchase",
+            }
+
+        try:
+            player.buy_skill_times = purchase_number
+            player.skill_point = max(0, self._int(player.skill_point)) + grant
+            policy.normalize_timer_after_gain()
+            self._save()
+        except Exception:
+            player.crystal = snapshot["crystal"]
+            player.buy_skill_times = snapshot["buy_skill_times"]
+            player.skill_point = snapshot["skill_point"]
+            player.skill_time = snapshot["skill_time"]
+            raise
+
         return {
             "buy_skill_times": player.buy_skill_times,
             "skill_point": player.skill_point,
@@ -305,7 +355,7 @@ class HeroRepository:
             return {
                 "skills": "",
                 "skill_point": max(0, self._int(self.player.skill_point)),
-                "skill_time": self._int(self.player.skill_time) or self.player.now(),
+                "skill_time": max(0, self._int(self.player.skill_time)),
             }
 
         indexes = self._pipe_ints(skill_colors)
@@ -338,7 +388,7 @@ class HeroRepository:
         return {
             "skills": "|".join(str(value) for value in skills),
             "skill_point": max(0, self._int(self.player.skill_point)),
-            "skill_time": self._int(self.player.skill_time) or self.player.now(),
+            "skill_time": max(0, self._int(self.player.skill_time)),
         }
 
     def upgrade_single_skill(self, partner_id: Any, skill_index: Any) -> dict[str, int]:

@@ -2,10 +2,10 @@
 
 The supplied client simulates normal Campaign combat locally.  The backend owns
 persistent map state around that simulation: the unlocked campaign rows, best
-stars, chapter cursor, the pending MID113 -> MID114 session, and the conservative
-source-derived first-clear item subset committed into canonical Backpack state.  Source-derived
-campaign links are packaged in ``data/campaign_meta.json``; no next campaign ID
-is guessed in handler code.
+stars, chapter cursor, the pending MID113 -> MID114 session, source-certain
+first-clear items, and v0.8.2's canonical Mana/player/Hero EXP transaction.
+Source-derived campaign links are packaged in ``data/campaign_meta.json``; no
+next campaign ID or repeat-drop RNG is guessed in handler code.
 """
 from __future__ import annotations
 
@@ -14,7 +14,10 @@ from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
+from .economy_repository import EconomyRepository
+from .hero_progression_repository import HeroProgressionRepository
 from .inventory_repository import InventoryRepository
+from .mission_repository import MissionRepository
 from .player_state import PlayerState
 
 
@@ -26,11 +29,17 @@ class WorldRepository:
         save_callback: Callable[[], None] | None = None,
         *,
         inventory: InventoryRepository | None = None,
+        economy: EconomyRepository | None = None,
+        hero_progression: HeroProgressionRepository | None = None,
+        missions: MissionRepository | None = None,
     ) -> None:
         self.player = player
         self.data_dir = Path(data_dir)
         self._save_callback = save_callback
         self.inventory = inventory
+        self.economy = economy or EconomyRepository(player, self.data_dir)
+        self.hero_progression = hero_progression or HeroProgressionRepository(player, self.data_dir)
+        self.missions = missions
         self._campaigns = self._load_campaign_meta()
         self._campaign_rewards = self._load_campaign_reward_meta()
         self._story_drop_campaigns, self._story_drop_partners = self._load_story_drop_meta()
@@ -344,32 +353,96 @@ class WorldRepository:
         self.normalize()
         return self.player.world_map
 
+    def _normal_campaign_reward_plan(self, campaign_id: int) -> dict[str, int]:
+        """Source-certain v0.8.2 reward plan for ordinary normal Campaign.
+
+        General item RNG is intentionally absent. The deterministic scalar
+        fields come from campaign.lua + SelfPlayer:getExpMulti().
+        """
+        meta = self.economy.campaign_meta(campaign_id)
+        energy_cost = max(0, self._int(meta.get("energy_cost"), 0))
+        multiplier = max(0, self.economy.player_exp_multiplier())
+        return {
+            "mana_gain": max(0, self._int(meta.get("mana_gain"), 0)),
+            "star_gift": max(0, self._int(meta.get("star_gift"), 0)),
+            "partner_exp": max(0, self._int(meta.get("partner_exp"), 0)),
+            "player_exp_gain": energy_cost * multiplier,
+        }
+
+    @staticmethod
+    def _same_formation(left: Any, right: Any) -> bool:
+        return str(left or "") == str(right or "")
+
+    def _committed_retry_response(self, req: dict[str, Any]) -> dict[str, Any] | None:
+        pending = self.player.active_campaign_battle
+        if not isinstance(pending, dict) or self._int(pending.get("committed"), 0) != 1:
+            return None
+        if self._int(pending.get("campaign_id"), 0) != self._int(req.get("campaign_id"), 0):
+            return None
+        if self._int(pending.get("campaign_type"), 1) != self._int(req.get("campaign_type"), 1):
+            return None
+        if not self._same_formation(pending.get("formation"), req.get("formation")):
+            return None
+        if self._int(pending.get("star"), 0) != max(0, min(3, self._int(req.get("star"), 0))):
+            return None
+        response = pending.get("response")
+        if not isinstance(response, dict):
+            return None
+        # JSON round-trip gives the caller a detached copy without importing a
+        # second serialization helper into this small repository.
+        return json.loads(json.dumps(response))
+
     def begin_fight(self, req: dict[str, Any]) -> dict[str, Any]:
         self.normalize()
         campaign_id = self._int(req.get("campaign_id"), 0)
+        campaign_type = self._int(req.get("campaign_type"), 1)
         current = self._find_row(campaign_id)
         first_clear_candidate = current is not None and self._int(current.get("star"), 0) <= 0
         staged_items = self._guaranteed_first_awards(campaign_id) if first_clear_candidate else []
+        reward_plan = self._normal_campaign_reward_plan(campaign_id) if campaign_type == 1 else {
+            "mana_gain": 0,
+            "star_gift": 0,
+            "partner_exp": 0,
+            "player_exp_gain": 0,
+        }
         self.player.active_campaign_battle = {
             "campaign_id": campaign_id,
-            "campaign_type": self._int(req.get("campaign_type"), 1),
+            "campaign_type": campaign_type,
             "formation": str(req.get("formation") or ""),
             "started_at": self.player.now(),
             "items": staged_items,
+            **reward_plan,
+            "committed": 0,
         }
         self._save()
         # SelectTeamWindow consumes ``items`` before building the local battle;
         # the same staged rows are committed to Backpack only after MID114 wins.
+        # Scalar economy/Hero EXP rewards stay server-side until the result.
         return {"battle_id": 1, "report": {}, "seed": 1, "enemy_info": {}, "items": staged_items}
 
     def commit_fight_result(self, req: dict[str, Any]) -> dict[str, Any]:
         self.normalize()
+
+        retry = self._committed_retry_response(req)
+        if retry is not None:
+            return retry
+
         cid = self._int(req.get("campaign_id"), 0)
         star = max(0, min(3, self._int(req.get("star"), 0)))
+        campaign_type = self._int(req.get("campaign_type"), 1)
         current = self._find_row(cid)
-        was_cleared = current is not None and self._int(current.get("star"), 0) > 0
+        previous_star = self._int(current.get("star"), 0) if current is not None else 0
+        was_cleared = current is not None and previous_star > 0
+        first_three_star = previous_star < 3 and star >= 3
         pending = self.player.active_campaign_battle if isinstance(self.player.active_campaign_battle, dict) else {}
-        staged_items = pending.get("items") if self._int(pending.get("campaign_id"), 0) == cid else None
+        has_pending = (
+            self._int(pending.get("committed"), 0) == 0
+            and self._int(pending.get("campaign_id"), 0) == cid
+            and self._int(pending.get("campaign_type"), 1) == campaign_type
+            and self._same_formation(pending.get("formation"), req.get("formation"))
+        )
+        staged_items = pending.get("items") if has_pending else None
+
         if current is None:
             if self.meta(cid) is None:
                 self.player.active_campaign_battle = {}
@@ -411,20 +484,74 @@ class WorldRepository:
         self.player.world_map["chapter_info"] = chapter_info
 
         awarded_items: list[dict[str, int]] = []
-        if star > 0 and not was_cleared:
+        economy_projection: dict[str, int] = {}
+        hero_exps: list[dict[str, int]] = []
+        story_mission_delta: list[dict[str, int]] = []
+        star_crystal = 0
+
+        # v0.8.2 commits source-certain rewards only when there is a matching
+        # MID113 session. This prevents an arbitrary/retried MID114 from minting
+        # Mana/EXP without a battle. General repeat item RNG remains deferred.
+        if star > 0 and has_pending and campaign_type == 1:
+            star_crystal = max(0, self._int(pending.get("star_gift"), 0)) if first_three_star else 0
+            economy_projection = self.economy.apply_campaign_win(
+                mana_gain=pending.get("mana_gain", 0),
+                crystal_gain=star_crystal,
+                player_exp_gain=pending.get("player_exp_gain", 0),
+                persist=False,
+            )
+            # Economy first: BattleWinWindow observes the post-battle player
+            # level when applying Hero EXP and therefore the resulting Hero cap.
+            hero_exps = self.hero_progression.grant_battle_exp(
+                pending.get("formation", ""),
+                pending.get("partner_exp", 0),
+                persist=False,
+            )
+
+        if star > 0 and not was_cleared and has_pending:
             candidate_awards = staged_items if isinstance(staged_items, list) else self._guaranteed_first_awards(cid)
             if self.inventory is not None:
                 awarded_items = self.inventory.add_items(candidate_awards, persist=False)
 
-        self.player.active_campaign_battle = {}
-        self._save()
-        return {
+        if star > 0 and has_pending and campaign_type == 1 and self.missions is not None:
+            story_mission_delta = self.missions.record_campaign_clear(cid)
+
+        response: dict[str, Any] = {
             "is_win": 1 if star > 0 else 0,
             "result": 1 if star > 0 else 0,
             "chapter_info": chapter_info,
             "campaigns": touched,
             "items": awarded_items,
         }
+        if economy_projection:
+            response["economy_"] = economy_projection
+        if hero_exps:
+            response["exps"] = hero_exps
+        if star_crystal > 0:
+            # BattleCreate/BattleWin consume the per-result scalar while the
+            # global projector/economy_ carries the canonical cumulative total.
+            response["star_crystal"] = star_crystal
+        if story_mission_delta:
+            response["story_mission_"] = story_mission_delta
+
+        if has_pending:
+            # Keep the committed response as a one-request receipt until the
+            # next MID113 overwrites it. A duplicate MID114 therefore returns
+            # the same cumulative values/items without applying rewards twice.
+            self.player.active_campaign_battle = {
+                "campaign_id": cid,
+                "campaign_type": campaign_type,
+                "formation": str(pending.get("formation") or ""),
+                "star": star,
+                "committed": 1,
+                "committed_at": self.player.now(),
+                "response": json.loads(json.dumps(response)),
+            }
+        else:
+            self.player.active_campaign_battle = {}
+
+        self._save()
+        return response
 
     def sweep(self, req: dict[str, Any]) -> dict[str, Any]:
         self.normalize()

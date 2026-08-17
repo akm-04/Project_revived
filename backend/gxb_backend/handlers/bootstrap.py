@@ -119,7 +119,7 @@ class BootstrapHandlers:
             "49": self.ctx.state.get_hero_repository().payload(),
             "81": self.ctx.state.get_inventory_repository().payload(),
             "836": player.library_payload(),
-            "56": player.summon_payload(),
+            "56": self.ctx.state.get_summon_repository().payload(),
             "176": player.friends_payload(),
             # Source-backed MainScene safety hydration. SelfPlayer.loadCollectedPets
             # normally initializes collectedPets before PETS_GET; however

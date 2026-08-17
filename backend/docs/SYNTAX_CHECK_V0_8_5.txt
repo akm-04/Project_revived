@@ -1,0 +1,10 @@
+GXB backend v0.8.5 / Pass 29 static validation
+2026-08-17
+
+PASS: Python AST syntax parse across backend/tool Python sources.
+PASS: backend data JSON parse.
+PASS: campaign_economy_meta effective-source provenance stamp present.
+PASS: source-known Campaign 100001 Mana row and player level-1 Energy row retained.
+PASS: compatibility fallback allow-list is the intended explicit numeric set.
+
+No Flask/HTTP integration tests, selftests, APK/ADB/emulator, or gameplay runtime tests were executed by the assistant.
