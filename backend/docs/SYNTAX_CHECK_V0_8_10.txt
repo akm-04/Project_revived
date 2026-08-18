@@ -1,0 +1,7 @@
+Pass32.8 / v0.8.10 static validation
+- Python AST parse: PASS
+- Python compileall: PASS
+- JSON parse: PASS
+- MID59 dispatcher mapping: PASS (SummonHandlers.stone_summon_hero)
+- typed catalog Lightin contract: PASS (Partner10001004 <-> Item40001004, star1)
+- no Flask/HTTP/selftest/ADB/emulator/gameplay executed by assistant

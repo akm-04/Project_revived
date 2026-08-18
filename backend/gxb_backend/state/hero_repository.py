@@ -16,9 +16,12 @@ from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
+from gxb_backend.content import CatalogNamespace, ContentRef, GameDataCatalog
+
 from .economy_repository import EconomyRepository
 from .player_state import PlayerState
 from .skill_point_policy import SkillPointPolicy
+from .unit_of_work import OperationContext, UnitOfWork
 
 
 class HeroRepository:
@@ -34,11 +37,15 @@ class HeroRepository:
         data_dir: Path | None = None,
         *,
         economy: EconomyRepository | None = None,
+        catalog: GameDataCatalog | None = None,
+        uow: UnitOfWork | None = None,
     ) -> None:
         self.player = player
         self._save_callback = save_callback
         self._data_dir = Path(data_dir or "data")
         self._economy = economy
+        self._catalog = catalog
+        self._uow = uow
 
     @staticmethod
     def _int(value: Any, default: int = 0) -> int:
@@ -276,6 +283,20 @@ class HeroRepository:
         return SkillPointPolicy(self.player, self._data_dir, self._save_callback).recover(persist=persist)
 
     def buy_skill_points(self) -> dict[str, Any]:
+        """MID99 purchase under the shared Pass32.6 one-player UnitOfWork."""
+        if self._uow is None:
+            return self._buy_skill_points_mutation()
+        context = OperationContext(
+            actor_player_id=str(self.player.player_id),
+            protocol_mid=99,
+            domain="hero",
+            operation_name="buy_skill_point",
+            idempotency_key=f"skill-point-buy:{max(0, self._int(self.player.buy_skill_times)) + 1}",
+        )
+        with self._uow.transaction(context):
+            return self._buy_skill_points_mutation()
+
+    def _buy_skill_points_mutation(self) -> dict[str, Any]:
         """Atomically commit MID99 BUY_SKILL_POINT + Crystal spend.
 
         Source client code pre-checks VIP permission and Crystal balance, then
@@ -341,13 +362,37 @@ class HeroRepository:
             "skill_time": player.skill_time,
         }
 
-    def upgrade_skills(self, partner_id: Any, skill_colors: Any, skill_counts: Any) -> dict[str, Any]:
-        """Persist MID39 SET_ALL_SKILL_LEVEL against the canonical hero record.
+    _SKILL_EXTRA = (0, 0, 20, 40, 60, 60)
 
-        HeroMainWindow batches changed skill indexes in ``skill_colors`` and the
-        per-index increment counts in ``skill_counts``.  Its callback consumes a
-        pipe-serialized full ``skills`` vector plus player ``skill_point`` and
-        ``skill_time``.
+    def _skill_price(self, client_skill_level: int) -> int | None:
+        if self._catalog is None or client_skill_level <= 0:
+            return None
+        row = self._catalog.maybe_get(ContentRef(CatalogNamespace.SKILL_PRICE, client_skill_level))
+        if row is None:
+            return None
+        price = self._int(row.get("mana"), -1)
+        return price if price >= 0 else None
+
+    def _skill_price_multiplier(self, hero: dict[str, Any]) -> int | None:
+        """Resolve ordinary vs Super by explicit table membership, never digits."""
+        if self._catalog is None:
+            return None
+        table_id = self._int(hero.get("table_id"), 0)
+        normal = self._catalog.exists(ContentRef(CatalogNamespace.PARTNER, table_id))
+        super_hero = self._catalog.exists(ContentRef(CatalogNamespace.SUPER_PARTNER, table_id))
+        if normal == super_hero:
+            return None
+        return 10 if super_hero else 1
+
+    def upgrade_skills(self, partner_id: Any, skill_colors: Any, skill_counts: Any) -> dict[str, Any]:
+        """Atomically persist MID39 Skill Points, skill levels, and source Mana.
+
+        HeroMainWindow prices each click with ``skill_price.lua`` at the current
+        client skill level, applies a x10 multiplier for SuperHero, subtracts
+        Mana locally, then batches only indexes/counts to MID39.  The current
+        backend has no canonical Activity1032 half-price scheduler, so this
+        implementation uses the source normal-price path rather than inventing
+        an active discount state.
         """
         self.normalize()
         hero = self.get(partner_id)
@@ -361,42 +406,94 @@ class HeroRepository:
         indexes = self._pipe_ints(skill_colors)
         counts = self._pipe_ints(skill_counts)
         skills = self._fixed_six(hero.get("skills"), self._SIX_ONES)
-
         requested: list[tuple[int, int]] = []
         if len(indexes) == len(counts):
             for index, count in zip(indexes, counts):
                 if 1 <= index <= 6 and count > 0:
                     requested.append((index, count))
 
-        total_requested = sum(count for _, count in requested)
+        context = OperationContext(
+            actor_player_id=str(self.player.player_id),
+            protocol_mid=39,
+            domain="hero",
+            operation_name="set_all_skill_level",
+            idempotency_key=f"hero:{self._int(partner_id, 0)}",
+        )
+
+        def mutate() -> dict[str, Any]:
+            policy = SkillPointPolicy(self.player, self._data_dir, self._save_callback)
+            policy.recover(persist=False)
+            available = max(0, self._int(self.player.skill_point))
+            before_time = max(0, self._int(self.player.skill_time))
+            total_requested = sum(count for _, count in requested)
+            multiplier = self._skill_price_multiplier(hero)
+
+            total_mana = 0
+            valid_prices = multiplier is not None
+            if requested and total_requested <= available and valid_prices:
+                for index, count in requested:
+                    client_level = self._int(skills[index - 1], 1) + self._SKILL_EXTRA[index - 1]
+                    for step in range(count):
+                        price = self._skill_price(client_level + step)
+                        if price is None:
+                            valid_prices = False
+                            break
+                        total_mana += price * int(multiplier)
+                    if not valid_prices:
+                        break
+
+            can_apply = (
+                bool(requested)
+                and total_requested <= available
+                and valid_prices
+                and self._economy is not None
+                and self._int(self.player.mana, 0) >= total_mana
+            )
+            if can_apply and self._economy.spend_mana(total_mana, persist=False):
+                for index, count in requested:
+                    skills[index - 1] += count
+                hero["skills"] = skills
+                self.player.skill_point = available - total_requested
+                policy.begin_recovery_if_full_spent(available, before_time)
+                self._save()
+
+            return {
+                "skills": "|".join(str(value) for value in skills),
+                "skill_point": max(0, self._int(self.player.skill_point)),
+                "skill_time": max(0, self._int(self.player.skill_time)),
+            }
+
+        if self._uow is None:
+            return mutate()
+        with self._uow.transaction(context):
+            return mutate()
+
+    def upgrade_single_skill(self, partner_id: Any, skill_index: Any) -> dict[str, int]:
+        """Preserve the pre-Pass32.6 MID53 behavior without widening MID39 rules.
+
+        Pass 32.6 source-mapped Mana pricing is intentionally scoped to MID39.
+        The older MID53 path therefore keeps the v0.8.7 point/skill mutation
+        until that protocol is separately source-mapped.
+        """
+        self.normalize()
+        hero = self.get(partner_id)
         policy = SkillPointPolicy(self.player, self._data_dir, self._save_callback)
         policy.recover(persist=True)
-        available = max(0, self._int(self.player.skill_point))
         before_time = max(0, self._int(self.player.skill_time))
+        available = max(0, self._int(self.player.skill_point))
+        index = self._int(skill_index, 0)
 
-        # The client performs the same timed recovery before each local click.
-        # After mirroring that recovery, the batch can be validated against the
-        # same point pool the player actually saw.
-        if requested and total_requested <= available:
-            for index, count in requested:
-                skills[index - 1] += count
+        if hero is not None and 1 <= index <= 6 and available > 0:
+            skills = self._fixed_six(hero.get("skills"), self._SIX_ONES)
+            skills[index - 1] += 1
             hero["skills"] = skills
-            self.player.skill_point = available - total_requested
+            self.player.skill_point = available - 1
             policy.begin_recovery_if_full_spent(available, before_time)
             self._save()
 
         return {
-            "skills": "|".join(str(value) for value in skills),
             "skill_point": max(0, self._int(self.player.skill_point)),
             "skill_time": max(0, self._int(self.player.skill_time)),
-        }
-
-    def upgrade_single_skill(self, partner_id: Any, skill_index: Any) -> dict[str, int]:
-        """Persist the older MID53 single-skill path using the same state owner."""
-        result = self.upgrade_skills(partner_id, skill_index, 1)
-        return {
-            "skill_point": self._int(result.get("skill_point")),
-            "skill_time": self._int(result.get("skill_time")),
         }
 
     def set_sort_type(self, sort_type: Any) -> None:

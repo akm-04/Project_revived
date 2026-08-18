@@ -24,7 +24,7 @@ def _run_flask(app, port: int) -> None:
 def main() -> None:
     app = create_app(SETTINGS)
     print("==================================================")
-    print(" GXB modular v0.8.7 Pass30.1 Skill Point + Crystal purchase fix + stable live assets")
+    print(" GXB modular v0.8.14 Pass35.3 MID90 duplicate guard + explicit Skill Point sync + validated update/operator hardening + shared UoW/catalog")
     print(f" SDK bind    : http://{SETTINGS.bind_host}:{SETTINGS.sdk_port}")
     print(f" ENGINE bind : http://{SETTINGS.bind_host}:{SETTINGS.engine_port}")
     print(f" ADVERTISE_HOST = {SETTINGS.advertise_host}")
@@ -45,6 +45,7 @@ def main() -> None:
     print(f" RESOURCE_MD5_VERIFY = {SETTINGS.resource_verify_md5}")
     update_manifest = load_manifest(SETTINGS)
     print(f" LOCAL_UPDATE_MANIFEST = {SETTINGS.local_update_manifest_path}")
+    print(f" PROTOCOL_REGISTRY = {SETTINGS.protocol_registry_path}")
     if update_manifest is None:
         print(" LOCAL_UPDATE = disabled/not-built")
     else:

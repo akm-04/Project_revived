@@ -11,8 +11,15 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 import re
 from pathlib import Path
+
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
+from gxb_backend.content.source_resolver import EffectiveSourceResolver
 from typing import Any
 
 
@@ -197,14 +204,9 @@ def _exp_multiplier(path: Path) -> int:
 
 
 def _resolve_effective(apk_root: Path, writable_root: Path | None, relative: str) -> tuple[Path, str]:
-    if writable_root is not None:
-        candidate = writable_root / relative
-        if candidate.is_file():
-            return candidate, "writable_hot_update"
-    candidate = apk_root / relative
-    if candidate.is_file():
-        return candidate, "apk_baseline"
-    raise FileNotFoundError(f"effective source file not found: {relative}")
+    """Compatibility wrapper over the shared Pass32.6 effective-source resolver."""
+    source = EffectiveSourceResolver(apk_root, writable_root).resolve(relative)
+    return source.path, source.layer
 
 
 def main() -> int:

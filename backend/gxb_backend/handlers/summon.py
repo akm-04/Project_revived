@@ -17,3 +17,6 @@ class SummonHandlers:
 
     def summon_hero(self, req: dict) -> dict:
         return self.ctx.state.get_summon_repository().summon_hero(req)
+
+    def stone_summon_hero(self, req: dict) -> dict:
+        return self.ctx.state.get_summon_repository().stone_summon_hero(req)

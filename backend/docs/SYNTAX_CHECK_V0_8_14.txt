@@ -1,0 +1,9 @@
+GXB backend v0.8.14 / Pass35.3 static validation
+Date: 2026-08-18
+
+- 108 Python files compile successfully.
+- 22 JSON files parse successfully.
+- All pre-existing backend data/*.json files are byte-identical to v0.8.13.
+- compatibility_safe_mids.json SHA-256 unchanged: e2c7788f9380db16bc29f1e0d6db79fae5ba2747725e1a5987d68f2de10839e5
+- Prepared update remains disabled and byte-identical: 1,859,658 bytes; MD5 b10010f6d63938327b7245abe04df851; 124 ZIP entries; integrity OK.
+- No Flask/HTTP/selftests/ADB/emulator/gameplay executed by assistant.

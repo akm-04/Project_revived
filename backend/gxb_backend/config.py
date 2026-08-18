@@ -141,6 +141,10 @@ class Settings:
         "GXB_COMPAT_SAFE_MIDS",
         str(_PROJECT_ROOT / "data/compatibility_safe_mids.json"),
     ))
+    protocol_registry_path: Path = Path(os.getenv(
+        "GXB_PROTOCOL_REGISTRY",
+        str(_PROJECT_ROOT / "data/protocol_registry.json"),
+    ))
     runtime_log_dir: Path = Path(os.getenv("GXB_RUNTIME_LOG_DIR", str(_PROJECT_ROOT / "runtime_logs")))
     log_all_requests: bool = os.getenv("GXB_LOG_ALL_REQUESTS", "1") not in {"0", "false", "False"}
     bootstrap_detail_mode: str = os.getenv("GXB_BOOTSTRAP_DETAIL_MODE", "stage3").lower()

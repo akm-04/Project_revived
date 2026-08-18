@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+from gxb_backend.protocol.mids import MID
+from gxb_backend.state.unit_of_work import OperationContext
+
 from .context import HandlerContext
 
 
@@ -22,23 +25,33 @@ class PlayerHandlers:
         return {}
 
     def save_story(self, req: dict) -> dict:
-        """Persist the StoryData fields sent by MID 26.
+        """Persist client-attested StoryData continuity only.
 
-        Pass 19 confirms the request contract is story_id, story_state, guide_id
-        and the immediate caller consumes no response fields.
+        Pass33 proves story_id/story_state/guide_id can be promoted from local
+        device storage and therefore cannot authorize rewards, deterministic
+        tutorial mutations, or Function announcements.  Server-authoritative
+        tutorial policy is driven by canonical domain milestones instead.
         """
-        player = self.ctx.state.get_player()
-        for request_key, attr in (
-            ("story_id", "story_id"),
-            ("story_state", "story_state"),
-            ("guide_id", "guide_id"),
-        ):
-            if request_key in req:
-                try:
-                    setattr(player, attr, int(req[request_key]))
-                except (TypeError, ValueError):
-                    pass
-        self.ctx.state.save()
+        services = self.ctx.state.get_services()
+        player = services.player
+        context = OperationContext(
+            actor_player_id=str(player.player_id),
+            protocol_mid=MID.SAVE_STORY,
+            domain="story",
+            operation_name="save_story",
+        )
+        with services.uow.transaction(context):
+            for request_key, attr in (
+                ("story_id", "story_id"),
+                ("story_state", "story_state"),
+                ("guide_id", "guide_id"),
+            ):
+                if request_key in req:
+                    try:
+                        setattr(player, attr, int(req[request_key]))
+                    except (TypeError, ValueError):
+                        pass
+            self.ctx.state.save()
         return {}
 
     def set_player_guide_function(self, req: dict) -> dict:

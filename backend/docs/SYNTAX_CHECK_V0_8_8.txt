@@ -1,0 +1,24 @@
+GXB backend v0.8.8 / Pass 32.6 static validation
+Date: 2026-08-18
+
+Validation policy: static/syntax/JSON/source-contract/archive checks only.
+No Flask/HTTP/selftests/ADB/emulator/gameplay execution performed.
+
+Python files AST-parsed: 103
+JSON files parsed: 21
+python -m compileall: PASS
+compatibility_safe_mids.json unchanged from v0.8.7: PASS
+all pre-existing data/*.json artifacts byte-identical to v0.8.7: PASS
+game_data_catalog.json effective_merged/current_implemented provenance: PASS
+catalog item subset=156 and excludes known writable-only additions 51100032..51100038: PASS
+catalog/source early skill prices level1=100, level2=500: PASS
+HeroMainWindow source uses skillPrice:gold and SuperHero x10: PASS
+NormalHero/enums source uses SKILL_EXTRA offsets: PASS
+ResponseProjector does not derive new_funcs_ from func_ids: PASS
+no global type_of_id function in GameDataCatalog: PASS
+RewardTransactionService requires active request UoW: PASS
+MID39 static path contains source-price Mana spend and one staged save boundary: PASS
+MID53 explicitly preserves pre-Pass32.6 non-Mana behavior: PASS
+
+Catalog reproducibility was separately verified byte-for-byte using build_game_data_catalog.py
+with canonical Pass28/32 no-override/additive-item proofs.

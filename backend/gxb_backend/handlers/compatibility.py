@@ -10,7 +10,7 @@ client-only durable state.
 from __future__ import annotations
 
 import json
-from typing import Any
+from typing import Any, Callable
 
 from gxb_backend.config import Settings
 from gxb_backend.protocol.mids import mid_name
@@ -18,8 +18,9 @@ from gxb_backend.protocol.routing import RouteClass, classify_mid
 
 
 class CompatibilityHandlers:
-    def __init__(self, settings: Settings) -> None:
+    def __init__(self, settings: Settings, name_lookup: Callable[[int], str] | None = None) -> None:
         self.settings = settings
+        self._name_lookup = name_lookup or mid_name
         self._safe_mids = self._load_safe_mids()
 
     def _load_safe_mids(self) -> set[int]:
@@ -46,7 +47,7 @@ class CompatibilityHandlers:
         except Exception:
             mid = 0
         route_class = classify_mid(mid)
-        name = mid_name(mid) if mid else "UNKNOWN"
+        name = self._name_lookup(mid) if mid else "UNKNOWN"
         if mid not in self._safe_mids:
             return self.blocked(req)
         if self.settings.log_unknown_mids:
@@ -67,7 +68,7 @@ class CompatibilityHandlers:
         except Exception:
             mid = 0
         route_class = classify_mid(mid)
-        name = mid_name(mid) if mid else "UNKNOWN"
+        name = self._name_lookup(mid) if mid else "UNKNOWN"
         if self.settings.log_unknown_mids:
             print(
                 f"[COMPAT BLOCK] no semantic handler and MID is not on the audited safe allow-list: "

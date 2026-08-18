@@ -14,7 +14,17 @@ from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
+from gxb_backend.content import (
+    AmbiguousContentReference,
+    CatalogNamespace,
+    GameDataCatalog,
+    ResolveContext,
+    UnknownContentReference,
+)
+
 from .hero_repository import HeroRepository
+from .inventory_repository import InventoryRepository
+from .unit_of_work import OperationContext, UnitOfWork
 from .player_state import PlayerState
 
 
@@ -31,10 +41,19 @@ class SummonRepository:
         player: PlayerState,
         data_dir: Path | None = None,
         save_callback: Callable[[], None] | None = None,
+        *,
+        heroes: HeroRepository | None = None,
+        inventory: InventoryRepository | None = None,
+        catalog: GameDataCatalog | None = None,
+        uow: UnitOfWork | None = None,
     ) -> None:
         self.player = player
         self.data_dir = Path(data_dir or "data")
         self._save_callback = save_callback
+        self.heroes = heroes
+        self.inventory = inventory
+        self.catalog = catalog
+        self.uow = uow
         self.meta = self._load_meta()
 
     def _load_meta(self) -> dict[str, Any]:
@@ -73,7 +92,9 @@ class SummonRepository:
         return guide_id <= guide_end
 
     def _hero_repo(self) -> HeroRepository:
-        return HeroRepository(self.player, data_dir=self.data_dir)
+        if self.heroes is not None:
+            return self.heroes
+        return HeroRepository(self.player, self._save_callback, self.data_dir)
 
     def _ensure_aquaris(self) -> bool:
         """Ensure the fresh tutorial's canonical partner_id=1 Aquaris.
@@ -317,6 +338,111 @@ class SummonRepository:
             "result": [self._hero_result("pandaria")],
             "summon_info": self.payload(),
         }
+
+
+    _STONE_REQUIRED_BY_STAR = {1: 10, 2: 30, 3: 80, 4: 180, 5: 330}
+
+    @staticmethod
+    def _blocked_stone_summon(reason: str) -> dict[str, Any]:
+        # Pass29 local compatibility sentinel: fail closed instead of returning
+        # a fake OK for a rejected mutating request. This is not asserted to be
+        # an official GXB error-code assignment.
+        return {"error_code": 1, "msg": f"stone_summon_rejected:{reason}"}
+
+    def stone_summon_hero(self, req: dict[str, Any]) -> dict[str, Any]:
+        """Source-mapped MID59 Backpack contract -> owned NormalHero transaction.
+
+        NormalHero:stoneSummonHero sends ``table_id``, ``stone`` and
+        ``stone_num``. SelfPlayer:stoneSummonHero treats the successful MID59
+        response itself as the full NormalHero payload and removes the submitted
+        stone count locally. Canonical mutation therefore validates the typed
+        Partner<->Item relationship, source star threshold and Backpack balance,
+        consumes the contracts, creates one unique owned hero, and commits once.
+        """
+        if self.catalog is None or self.inventory is None or self.uow is None:
+            return self._blocked_stone_summon("request_services_unavailable")
+
+        table_id = self._int(req.get("table_id"), 0)
+        stone_id = self._int(req.get("stone"), 0)
+        stone_num = self._int(req.get("stone_num"), 0)
+        if table_id <= 0 or stone_id <= 0 or stone_num <= 0:
+            return self._blocked_stone_summon("invalid_request_fields")
+
+        try:
+            partner_ref = self.catalog.resolve(
+                ResolveContext.create(
+                    field_name="table_id",
+                    source_domain="hero_stone_summon",
+                    expected_namespaces=(CatalogNamespace.PARTNER,),
+                    protocol_mid=59,
+                    source_path="app/model/NormalHero.lua",
+                ),
+                table_id,
+            )
+            stone_ref = self.catalog.resolve(
+                ResolveContext.create(
+                    field_name="stone",
+                    source_domain="hero_stone_summon",
+                    expected_namespaces=(CatalogNamespace.ITEM,),
+                    protocol_mid=59,
+                    source_path="app/model/NormalHero.lua",
+                ),
+                stone_id,
+            )
+            partner_row = self.catalog.get(partner_ref)
+            stone_row = self.catalog.get(stone_ref)
+        except (UnknownContentReference, AmbiguousContentReference):
+            return self._blocked_stone_summon("unknown_typed_content")
+
+        # Two-way explicit source cross-reference. Numeric prefix is never used.
+        if self._int(partner_row.get("stone_id"), 0) != stone_id:
+            return self._blocked_stone_summon("partner_stone_mismatch")
+        if self._int(stone_row.get("type"), 0) != 3:
+            return self._blocked_stone_summon("item_is_not_partner_contract")
+        if self._int(stone_row.get("partner_id"), 0) != table_id:
+            return self._blocked_stone_summon("stone_partner_mismatch")
+
+        star = self._int(partner_row.get("star"), 0)
+        required = self._STONE_REQUIRED_BY_STAR.get(star)
+        if required is None or stone_num != required:
+            return self._blocked_stone_summon("stone_count_mismatch")
+
+        repo = self._hero_repo()
+        repo.normalize()
+        for hero in self.player.heroes.values():
+            if isinstance(hero, dict) and self._int(hero.get("table_id"), 0) == table_id:
+                return self._blocked_stone_summon("partner_already_owned")
+        if self.inventory.get_item_num(stone_id) < required:
+            return self._blocked_stone_summon("insufficient_contracts")
+
+        context = OperationContext(
+            actor_player_id=str(self.player.player_id),
+            domain="hero_summon",
+            operation_name="stone_summon_hero",
+            protocol_mid=59,
+        )
+        try:
+            with self.uow.transaction(context):
+                remaining = self.inventory.consume_item(stone_id, required, persist=False)
+                if remaining is None:
+                    raise RuntimeError("canonical Backpack changed during MID59 transaction")
+                hero = repo.add_owned_hero(
+                    {
+                        "table_id": table_id,
+                        "star": star,
+                        "lev": 1,
+                        "exp": 0,
+                        "color": 1,
+                        "skills": [1, 1, 1, 1, 1, 1],
+                        "equips": [0, 0, 0, 0, 0, 0],
+                        "fumos": [0, 0, 0, 0, 0, 0],
+                    },
+                    persist=False,
+                )
+                self.uow.mark_changed()
+                return dict(hero)
+        except (RuntimeError, ValueError):
+            return self._blocked_stone_summon("transaction_rejected")
 
     def _save(self) -> None:
         if self._save_callback:

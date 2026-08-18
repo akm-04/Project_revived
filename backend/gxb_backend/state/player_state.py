@@ -203,6 +203,12 @@ class PlayerState:
     save_pet: str = ""
     message_pushes: dict[str, Any] = field(default_factory=dict)
     func_ids: list[int] = field(default_factory=default_function_ids)
+    # Pass32.6 canonical Function eligibility/announcement state. func_ids remains
+    # a compatibility projection of announced_ids during migration.
+    function_state: dict[str, Any] = field(default_factory=dict)
+    # Pass33.1 server-authored tutorial milestones. Unlike guide_id/story_id,
+    # this state may only be written from successful canonical domain commits.
+    tutorial_state: dict[str, Any] = field(default_factory=dict)
     guide_function_ids: dict[str, int] = field(default_factory=dict)
     title_info: dict[str, Any] = field(default_factory=dict)
     vip_awards: list[Any] = field(default_factory=list)

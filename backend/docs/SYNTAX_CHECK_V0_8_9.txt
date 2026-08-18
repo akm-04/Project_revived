@@ -1,0 +1,16 @@
+GXB backend v0.8.9 / Pass 32.7 static validation
+Date: 2026-08-18
+
+Scope: Pass32.7 fresh-player bootstrap hotfix only.
+
+- Python compileall over package/tree: PASS
+- Python AST parse over all .py files: PASS
+- JSON parse over all .json files: PASS
+- Repository grep for remaining `self.save_callback` under gxb_backend: PASS (none)
+- SummonRepository constructor call-site positional ordering audit: PASS
+- Static self-attribute audit found no additional callback-name mismatch: PASS
+- Pass32.7 code delta vs v0.8.8: one runtime line in summon_repository.py; launcher/version docs only otherwise
+- No data/*.json metadata changed: PASS
+- No compatibility allow-list change: PASS
+
+Not run by assistant: Flask/HTTP, selftests, ADB, emulator, APK/gameplay. User runtime remains authoritative.

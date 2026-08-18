@@ -1,0 +1,17 @@
+GXB backend v0.8.11 / Pass33.1 static validation
+Date: 2026-08-18
+
+Validation policy honored:
+- Python compileall: PASS
+- Python AST parse: PASS (104 .py files)
+- JSON parse: PASS (21 .json files)
+- Trust-boundary static check: PASS; no release_for_story_checkpoint / guide_checkpoint remains in gxb_backend
+- New tutorial milestone wiring: PASS by static source inspection
+- Pre-existing data/*.json byte identity vs v0.8.10: PASS (19/19 unchanged)
+- compatibility_safe_mids.json unchanged SHA-256:
+  e2c7788f9380db16bc29f1e0d6db79fae5ba2747725e1a5987d68f2de10839e5
+- No Flask/HTTP integration tests
+- No selftests
+- No ADB/emulator/gameplay execution
+
+Runtime validation remains the user's device responsibility. Mandatory fresh tutorial rule: Clear App Data before every fresh-account test.

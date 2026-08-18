@@ -33,7 +33,8 @@ from gxb_backend.handlers.tasks import TaskHandlers
 from gxb_backend.handlers.world import WorldHandlers
 from gxb_backend.observability.resource_gateway import ResourceGateway
 from gxb_backend.observability.runtime_logger import RuntimeLogger
-from gxb_backend.protocol.mids import MID, mid_name
+from gxb_backend.protocol.mids import MID
+from gxb_backend.protocol.registry import ProtocolRegistry
 from gxb_backend.protocol.routing import RouteClass, classify_mid
 from gxb_backend.state.repository import StateRepository
 from gxb_backend.state.response_projector import ResponseProjector
@@ -78,7 +79,8 @@ class EngineDispatcher:
         self.shop = ShopHandlers(ctx)
         self.world = WorldHandlers(ctx)
         self.rewards = RewardHandlers(ctx)
-        self.compat = CompatibilityHandlers(settings)
+        self.protocol_registry = ProtocolRegistry.load(settings.protocol_registry_path)
+        self.compat = CompatibilityHandlers(settings, self.protocol_registry.label)
         self.runtime_logger = RuntimeLogger(settings)
 
         self.handlers: dict[int, Handler] = self._build_handlers()
@@ -180,7 +182,7 @@ class EngineDispatcher:
             "ONE_CLICK_EQUIP": self.heroes.one_click_equip,
             "ONE_CLICK_JINJIE": self.heroes.one_click_promote,
             "SUMMON_HERO": self.summon.summon_hero,
-            "STONE_SUMMON_HERO": self.rewards.awards_empty,
+            "STONE_SUMMON_HERO": self.summon.stone_summon_hero,
             "MAGIC_SUMMON_BUY": self.rewards.awards_empty,
             "EDIT_PLAYER_NAME": self.system.edit_player_name,
             "GENERATE_PLAYER_NAME": self.system.generate_player_name,
@@ -453,7 +455,7 @@ class EngineDispatcher:
             return engine_ok()
 
         route_class = classify_mid(req_mid)
-        name = mid_name(req_mid)
+        name = self.protocol_registry.label(req_mid)
         print(f"[ENGINE IN] mid={name} ({req_mid}) route={route_class.value} data={json.dumps(req, ensure_ascii=False, default=str)}")
 
         projector = ResponseProjector.capture(self.state.current_player_or_none())
@@ -471,6 +473,9 @@ class EngineDispatcher:
             result = handler(req)
             handler_name = getattr(handler, "__qualname__", repr(handler))
 
+        services = self.state.current_services_or_none()
+        if services is not None:
+            result = services.apply_semantic_deltas(result)
         result = projector.project(result, self.state.current_player_or_none())
 
         self.runtime_logger.request(

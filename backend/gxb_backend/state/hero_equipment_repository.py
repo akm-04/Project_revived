@@ -33,14 +33,21 @@ class HeroEquipmentRepository:
         player: PlayerState,
         data_dir: Path,
         save_callback: Callable[[], None] | None = None,
+        *,
+        inventory: InventoryRepository | None = None,
+        heroes: HeroRepository | None = None,
+        progression: HeroProgressionRepository | None = None,
+        economy: EconomyRepository | None = None,
     ) -> None:
         self.player = player
         self.data_dir = Path(data_dir)
         self._save_callback = save_callback
-        self.inventory = InventoryRepository(player)
-        self.heroes = HeroRepository(player)
-        self.progression = HeroProgressionRepository(player, self.data_dir)
-        self.economy = EconomyRepository(player, self.data_dir)
+        self.inventory = inventory or InventoryRepository(player, save_callback)
+        self.heroes = heroes or HeroRepository(player, save_callback, self.data_dir)
+        self.progression = progression or HeroProgressionRepository(
+            player, self.data_dir, save_callback, inventory=self.inventory, heroes=self.heroes
+        )
+        self.economy = economy or EconomyRepository(player, self.data_dir, save_callback)
         self.meta = self._load_meta()
         self.partners = self.meta.get("partners") or {}
         self.items = self.meta.get("items") or {}

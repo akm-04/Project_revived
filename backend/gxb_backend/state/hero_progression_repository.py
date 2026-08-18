@@ -12,10 +12,12 @@ from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
+from .global_response_semantics import GlobalResponseSemantics
 from .hero_repository import HeroRepository
 from .inventory_repository import InventoryRepository
 from .player_state import PlayerState
 from .skill_point_policy import SkillPointPolicy
+from .unit_of_work import OperationContext, UnitOfWork
 
 
 class HeroProgressionRepository:
@@ -24,12 +26,19 @@ class HeroProgressionRepository:
         player: PlayerState,
         data_dir: Path,
         save_callback: Callable[[], None] | None = None,
+        *,
+        inventory: InventoryRepository | None = None,
+        heroes: HeroRepository | None = None,
+        uow: UnitOfWork | None = None,
+        response_semantics: GlobalResponseSemantics | None = None,
     ) -> None:
         self.player = player
         self.data_dir = Path(data_dir)
         self._save_callback = save_callback
-        self.inventory = InventoryRepository(player)
-        self.heroes = HeroRepository(player)
+        self.inventory = inventory or InventoryRepository(player, save_callback)
+        self.heroes = heroes or HeroRepository(player, save_callback, self.data_dir)
+        self.uow = uow
+        self.response_semantics = response_semantics
         self.items = self._load_rows("item_progression_meta.json", "items")
         self.exp_levels = self._load_rows("partner_exp_meta.json", "levels")
         self.player_levels = self._load_rows("player_hero_level_meta.json", "levels")
@@ -180,27 +189,65 @@ class HeroProgressionRepository:
         return new_exp
 
     def use_skill_point_item(self, req: dict[str, Any]) -> dict[str, Any]:
+        """Consume a source Skill Point item and explicitly sync the global pool.
+
+        MID90's endpoint-local Lua callback removes the Backpack item but reads
+        no Skill Point response field.  The successful web-response path runs
+        ``Backend.extraWebResponseCheck_()`` before LoadingProxy cleanup and the
+        inline callback; that global path dispatches ``economy_`` and
+        ``SelfPlayer.economySyncEvent_()`` consumes ``skill_point``.
+
+        Therefore this operation stages exactly one cumulative
+        ``economy_.skill_point`` semantic after the canonical mutation is marked
+        for commit.  Skill Point remains excluded from generic diff projection.
+        """
         item_id = self._int(req.get("item_id"), 0)
         count = max(0, self._int(req.get("item_num"), 0))
         meta = self._item_meta(item_id)
         per_item = max(0, self._int(meta.get("skill_point"), 0))
-        if count > 0 and per_item > 0:
+        if count <= 0 or per_item <= 0:
+            return {"error_code": 1}
+        if self.inventory.get_item_num(item_id) < count:
+            return {"error_code": 1}
+
+        mutated = False
+
+        def mutate() -> None:
+            nonlocal mutated
             policy = SkillPointPolicy(self.player, self.data_dir, self._save_callback)
             policy.recover()
             remaining = self.inventory.consume_item(item_id, count, persist=False)
-            if remaining is not None:
-                self.player.skill_point = max(0, self._int(self.player.skill_point)) + per_item * count
-                policy.normalize_timer_after_gain()
-                self._save()
-        # Stage 4A.6 used the cross-cutting ``economy_`` envelope here. Live
-        # device evidence showed MID90 then leaving the client loading proxy
-        # stuck before its inline callback/cleanup path completed. The direct
-        # MID90 source callback consumes no response fields, so keep the +N
-        # mutation canonical/persistent but avoid forcing that global ECONOMY
-        # event on this endpoint until an official/live MID90 envelope proves it.
-        # ``skill_point`` is included as a harmless diagnostic/current-state
-        # field; the authoritative benefit is persisted and will hydrate on relog.
-        return {"skill_point": max(0, self._int(self.player.skill_point))}
+            if remaining is None:
+                return
+            self.player.skill_point = max(0, self._int(self.player.skill_point)) + per_item * count
+            policy.normalize_timer_after_gain()
+            self._save()
+            mutated = True
+            if self.response_semantics is not None:
+                self.response_semantics.stage_skill_point()
+
+        if self.uow is not None:
+            with self.uow.transaction(OperationContext(
+                actor_player_id=str(self.player.player_id),
+                domain="hero_progression",
+                operation_name="use_skill_point_item",
+                protocol_mid=90,
+            )):
+                mutate()
+        else:
+            # Compatibility construction outside RequestServices keeps the old
+            # canonical mutation semantics but has no request response bus.
+            mutate()
+
+        if not mutated:
+            # error.lua defines xyd.error.ERROR = 1.  Returning a non-zero
+            # result is essential here: the endpoint-local callback removes the
+            # Backpack item only on xyd.error.OK, so a duplicate/insufficient
+            # request must never receive fabricated success.
+            return {"error_code": 1}
+
+        # Source MID90 callback consumes no endpoint-local resource field.
+        return {}
 
     def use_exp_item(self, req: dict[str, Any]) -> dict[str, Any]:
         item_id = self._int(req.get("item_id"), 0)

@@ -15,7 +15,13 @@ from typing import Any
 
 from .economy_repository import EconomyRepository
 from .inventory_repository import InventoryRepository
+from gxb_backend.content import CatalogNamespace, ContentRef, GameDataCatalog
+
 from .player_state import PlayerState
+from .reward_transaction_service import (
+    EconomyGrant, InventoryGrant, RewardOrigin, RewardPlan, RewardTransactionService,
+)
+from .unit_of_work import OperationContext, UnitOfWork
 
 
 class MissionRepository:
@@ -30,12 +36,18 @@ class MissionRepository:
         *,
         economy: EconomyRepository | None = None,
         inventory: InventoryRepository | None = None,
+        catalog: GameDataCatalog | None = None,
+        rewards: RewardTransactionService | None = None,
+        uow: UnitOfWork | None = None,
     ) -> None:
         self.player = player
         self.data_dir = Path(data_dir)
         self._save_callback = save_callback
         self.economy = economy or EconomyRepository(player, self.data_dir)
-        self.inventory = inventory or InventoryRepository(player)
+        self.inventory = inventory or InventoryRepository(player, save_callback)
+        self.catalog = catalog
+        self.rewards = rewards
+        self.uow = uow
         self.meta = self._load_meta()
         self.story_missions = self.meta.get("story_missions") or {}
 
@@ -183,47 +195,50 @@ class MissionRepository:
         reward = meta.get("reward") if isinstance(meta.get("reward"), dict) else {}
         response_awards = meta.get("response_awards") if isinstance(meta.get("response_awards"), list) else []
 
-        # Cross-domain atomicity: preserve all touched canonical structures until
-        # the single final save succeeds.
-        before_mission = copy.deepcopy(self.player.mission_state)
-        before_backpack = copy.deepcopy(self.player.backpack_items)
-        before_economy = {
-            "mana": self._int(self.player.mana),
-            "crystal": self._int(self.player.crystal),
-            "energy": self._int(self.player.energy),
-            "exp": self._int(self.player.exp),
-            "lev": self._int(self.player.lev, 1),
-            "max_energy": self._int(self.player.max_energy),
-            "func_ids": copy.deepcopy(self.player.func_ids),
-        }
-        try:
-            economy_projection = self.economy.apply_deltas(
-                mana_delta=max(0, self._int(reward.get("mana"))),
-                crystal_delta=max(0, self._int(reward.get("crystal"))),
-                player_exp_gain=max(0, self._int(reward.get("player_exp"))),
-                persist=False,
+        if self.rewards is None or self.catalog is None or self.uow is None:
+            raise RuntimeError("Mission80001 claim requires Pass32.6 reward/catalog/UoW services")
+
+        economy_grants: list[EconomyGrant] = []
+        for field in ("mana", "crystal", "player_exp"):
+            amount = max(0, self._int(reward.get(field)))
+            if amount > 0:
+                economy_grants.append(EconomyGrant(field, amount))
+
+        inventory_grants: list[InventoryGrant] = []
+        item_id = self._int(reward.get("item_id"))
+        item_num = self._int(reward.get("item_num"))
+        if item_id > 0 and item_num > 0:
+            # Namespace is determined by the reward field contract, then explicit
+            # table membership is validated by RewardTransactionService.
+            inventory_grants.append(
+                InventoryGrant(ContentRef(CatalogNamespace.ITEM, item_id), item_num)
             )
-            item_awards: list[dict[str, int]] = []
-            item_id = self._int(reward.get("item_id"))
-            item_num = self._int(reward.get("item_num"))
-            if item_id > 0 and item_num > 0:
-                item_awards = self.inventory.add_items(
-                    [{"item_id": item_id, "item_num": item_num}],
-                    persist=False,
-                )
+
+        plan = RewardPlan(
+            origin=RewardOrigin("mission", "claim_story_80001", protocol_mid=161, source_table="data/tables/mission.lua", source_id=tid, field_path="reward"),
+            economy=tuple(economy_grants),
+            inventory=tuple(inventory_grants),
+        )
+        context = OperationContext(
+            actor_player_id=str(self.player.player_id),
+            protocol_mid=161,
+            domain="mission",
+            operation_name="claim_story_80001",
+            idempotency_key=f"story:{tid}",
+        )
+        with self.uow.transaction(context):
+            reward_result = self.rewards.apply(plan)
 
             # The client expects response.awards in display/reward format. Keep
             # source-derived currency pseudo IDs while canonical persistence is
-            # handled by EconomyRepository above.
+            # delegated to Economy/Inventory through the shared reward service.
             awards = [
                 {"table_id": self._int(award.get("item_id")), "item_num": self._int(award.get("item_num"))}
                 for award in response_awards
                 if isinstance(award, dict) and self._int(award.get("item_id")) != 0 and self._int(award.get("item_num")) > 0
             ]
-            # Ensure the persisted ordinary item is represented even if metadata
-            # was hand-edited incorrectly.
-            for award in item_awards:
-                if not any(self._int(row.get("table_id")) == award["item_id"] for row in awards):
+            for award in reward_result.inventory_awards:
+                if not any(self._int(existing.get("table_id")) == award["item_id"] for existing in awards):
                     awards.append({"table_id": award["item_id"], "item_num": award["item_num"]})
 
             story["missions"].pop(str(tid), None)
@@ -231,21 +246,13 @@ class MissionRepository:
             claimed.add(tid)
             story["claimed"] = sorted(value for value in claimed if value > 0)
             result: dict[str, Any] = {"awards": awards}
-            if economy_projection:
-                result["economy_"] = economy_projection
-            # Explicit empty delta tells Task:onTaskBackendEvent nothing new;
-            # Task:getTaskReward removes the claimed row locally on OK.
+            if reward_result.economy:
+                result["economy_"] = reward_result.economy
             result["story_mission_"] = []
             receipts[str(tid)] = copy.deepcopy(result)
             if persist:
                 self._save()
             return result
-        except Exception:
-            self.player.mission_state = before_mission
-            self.player.backpack_items = before_backpack
-            for field, value in before_economy.items():
-                setattr(self.player, field, value)
-            raise
 
     def _save(self) -> None:
         if self._save_callback:

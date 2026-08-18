@@ -5,7 +5,9 @@ Normal layout:
   local_assets/src_32/    sparse 32-bit Lua/data hot-update overrides
   local_assets/src_64/    sparse 64-bit Lua/data hot-update overrides
   local_assets/updates/   generated MID2 ZIP volumes
-  local_assets/update_manifest.json  generated MID2 advertisement (optional)
+  local_assets/update_manifest.json  MID2 advertisement (optional)
+
+Read ../UPDATE_README.md for the complete operator workflow and Pass35.1 test package.
 
 RESOURCES
 ---------
@@ -26,19 +28,22 @@ Stage a recovered source file into BOTH architecture trees with:
       --layer downloaded \
       --path app/windows/LoginWindow.lua
 
-Build an intentional update:
-  python3 tools/build_local_lua_update.py --version <resource-version>
+Build an intentional update with a STRICTLY NUMERIC resource version:
+  python3 tools/build_local_lua_update.py --version 1.631.3 --disable
 
-SAFE FIRST PROBE
-----------------
-Build only two harmless marker modules and enable their MID2 package:
-  python3 tools/build_local_lua_update.py \
-      --version 1.631.0-local1 \
-      --probe-only
+PASS35.1 PREPARED RETEST
+------------------------
+The backend ships the exact 62 recovered writable overrides mirrored into both
+src trees and a prepared 1.631.2 package. Advertisement is disabled by default.
 
-The packaged v0.6.4 manifest is disabled by default. After the tablet test, disable an
-already-built manifest with:
+Enable it deliberately with:
+  python3 tools/set_local_update_enabled.py on
+
+Disable it after testing with:
   python3 tools/set_local_update_enabled.py off
+
+Do NOT use labels such as 1.631.0-local1. UpdateScene.compareVersion() requires
+exactly three numeric components N.N.N.
 
 Runtime server evidence:
   runtime_logs/local_update_events.jsonl

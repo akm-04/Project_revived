@@ -14,11 +14,18 @@ from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
+from gxb_backend.content import CatalogNamespace, ContentRef, GameDataCatalog
+
 from .economy_repository import EconomyRepository
 from .hero_progression_repository import HeroProgressionRepository
 from .inventory_repository import InventoryRepository
 from .mission_repository import MissionRepository
 from .player_state import PlayerState
+from .reward_transaction_service import (
+    EconomyGrant, InventoryGrant, RewardOrigin, RewardPlan, RewardTransactionService,
+)
+from .tutorial_milestone_repository import TutorialMilestoneRepository
+from .unit_of_work import OperationContext, UnitOfWork
 
 
 class WorldRepository:
@@ -32,6 +39,10 @@ class WorldRepository:
         economy: EconomyRepository | None = None,
         hero_progression: HeroProgressionRepository | None = None,
         missions: MissionRepository | None = None,
+        catalog: GameDataCatalog | None = None,
+        rewards: RewardTransactionService | None = None,
+        tutorial: TutorialMilestoneRepository | None = None,
+        uow: UnitOfWork | None = None,
     ) -> None:
         self.player = player
         self.data_dir = Path(data_dir)
@@ -40,6 +51,10 @@ class WorldRepository:
         self.economy = economy or EconomyRepository(player, self.data_dir)
         self.hero_progression = hero_progression or HeroProgressionRepository(player, self.data_dir)
         self.missions = missions
+        self.catalog = catalog
+        self.rewards = rewards
+        self.tutorial = tutorial
+        self.uow = uow
         self._campaigns = self._load_campaign_meta()
         self._campaign_rewards = self._load_campaign_reward_meta()
         self._story_drop_campaigns, self._story_drop_partners = self._load_story_drop_meta()
@@ -393,6 +408,19 @@ class WorldRepository:
         return json.loads(json.dumps(response))
 
     def begin_fight(self, req: dict[str, Any]) -> dict[str, Any]:
+        if self.uow is None:
+            return self._begin_fight_mutation(req)
+        context = OperationContext(
+            actor_player_id=str(self.player.player_id),
+            protocol_mid=113,
+            domain="campaign",
+            operation_name="begin_fight",
+            idempotency_key=f"fight:{self._int(req.get('campaign_id'), 0)}",
+        )
+        with self.uow.transaction(context):
+            return self._begin_fight_mutation(req)
+
+    def _begin_fight_mutation(self, req: dict[str, Any]) -> dict[str, Any]:
         self.normalize()
         campaign_id = self._int(req.get("campaign_id"), 0)
         campaign_type = self._int(req.get("campaign_type"), 1)
@@ -421,6 +449,24 @@ class WorldRepository:
         return {"battle_id": 1, "report": {}, "seed": 1, "enemy_info": {}, "items": staged_items}
 
     def commit_fight_result(self, req: dict[str, Any]) -> dict[str, Any]:
+        # Idempotent committed-receipt retries are read-only and should not
+        # create another durability transaction.
+        retry = self._committed_retry_response(req)
+        if retry is not None:
+            return retry
+        if self.uow is None:
+            return self._commit_fight_result_mutation(req)
+        context = OperationContext(
+            actor_player_id=str(self.player.player_id),
+            protocol_mid=114,
+            domain="campaign",
+            operation_name="commit_fight_result",
+            idempotency_key=f"result:{self._int(req.get('campaign_id'), 0)}:{self._int(req.get('star'), 0)}",
+        )
+        with self.uow.transaction(context):
+            return self._commit_fight_result_mutation(req)
+
+    def _commit_fight_result_mutation(self, req: dict[str, Any]) -> dict[str, Any]:
         self.normalize()
 
         retry = self._committed_retry_response(req)
@@ -487,19 +533,48 @@ class WorldRepository:
         economy_projection: dict[str, int] = {}
         hero_exps: list[dict[str, int]] = []
         story_mission_delta: list[dict[str, int]] = []
+        tutorial_new_funcs: list[int] = []
         star_crystal = 0
 
         # v0.8.2 commits source-certain rewards only when there is a matching
         # MID113 session. This prevents an arbitrary/retried MID114 from minting
         # Mana/EXP without a battle. General repeat item RNG remains deferred.
+        candidate_awards: list[dict[str, int]] = []
+        if star > 0 and not was_cleared and has_pending:
+            candidate_awards = staged_items if isinstance(staged_items, list) else self._guaranteed_first_awards(cid)
+
         if star > 0 and has_pending and campaign_type == 1:
             star_crystal = max(0, self._int(pending.get("star_gift"), 0)) if first_three_star else 0
-            economy_projection = self.economy.apply_campaign_win(
-                mana_gain=pending.get("mana_gain", 0),
-                crystal_gain=star_crystal,
-                player_exp_gain=pending.get("player_exp_gain", 0),
-                persist=False,
+            if self.rewards is None or self.catalog is None:
+                raise RuntimeError("Campaign reward commit requires Pass32.6 reward/catalog services")
+            economy_grants: list[EconomyGrant] = []
+            for field, raw in (
+                ("mana", pending.get("mana_gain", 0)),
+                ("crystal", star_crystal),
+                ("player_exp", pending.get("player_exp_gain", 0)),
+            ):
+                amount = max(0, self._int(raw, 0))
+                if amount > 0:
+                    economy_grants.append(EconomyGrant(field, amount))
+            inventory_grants = tuple(
+                InventoryGrant(
+                    ContentRef(CatalogNamespace.ITEM, self._int(award.get("item_id"), 0)),
+                    self._int(award.get("item_num"), 0),
+                )
+                for award in candidate_awards
+                if isinstance(award, dict)
+                and self._int(award.get("item_id"), 0) > 0
+                and self._int(award.get("item_num"), 0) > 0
             )
+            reward_result = self.rewards.apply(
+                RewardPlan(
+                    origin=RewardOrigin("campaign", "fight_result", protocol_mid=114, source_table="data/tables/campaign.lua", source_id=cid, field_path="fight_result"),
+                    economy=tuple(economy_grants),
+                    inventory=inventory_grants,
+                )
+            )
+            economy_projection = reward_result.economy
+            awarded_items = reward_result.inventory_awards
             # Economy first: BattleWinWindow observes the post-battle player
             # level when applying Hero EXP and therefore the resulting Hero cap.
             hero_exps = self.hero_progression.grant_battle_exp(
@@ -507,14 +582,43 @@ class WorldRepository:
                 pending.get("partner_exp", 0),
                 persist=False,
             )
-
-        if star > 0 and not was_cleared and has_pending:
-            candidate_awards = staged_items if isinstance(staged_items, list) else self._guaranteed_first_awards(cid)
-            if self.inventory is not None:
-                awarded_items = self.inventory.add_items(candidate_awards, persist=False)
+        elif candidate_awards:
+            # Preserve the pre-Pass32.6 non-normal behavior: deterministic
+            # first-clear items can still persist without scalar economy grants.
+            if self.rewards is None or self.catalog is None:
+                raise RuntimeError("Campaign item commit requires Pass32.6 reward/catalog services")
+            reward_result = self.rewards.apply(
+                RewardPlan(
+                    origin=RewardOrigin("campaign", "first_clear_items", protocol_mid=114),
+                    inventory=tuple(
+                        InventoryGrant(
+                            ContentRef(CatalogNamespace.ITEM, self._int(award.get("item_id"), 0)),
+                            self._int(award.get("item_num"), 0),
+                        )
+                        for award in candidate_awards
+                        if isinstance(award, dict)
+                        and self._int(award.get("item_id"), 0) > 0
+                        and self._int(award.get("item_num"), 0) > 0
+                    ),
+                )
+            )
+            awarded_items = reward_result.inventory_awards
 
         if star > 0 and has_pending and campaign_type == 1 and self.missions is not None:
             story_mission_delta = self.missions.record_campaign_clear(cid)
+
+        # Pass33.1 trust boundary: authoritative tutorial milestones are emitted
+        # from the successful canonical Campaign transaction, never from MID26's
+        # client-attested guide/story cursor.  The policy service owns the
+        # Function33 release decision; Campaign supplies only its committed fact.
+        if self.tutorial is not None:
+            tutorial_new_funcs = self.tutorial.record_campaign_clear(
+                cid,
+                campaign_type,
+                star,
+                canonical_session=has_pending,
+                persist=False,
+            )
 
         response: dict[str, Any] = {
             "is_win": 1 if star > 0 else 0,
@@ -533,6 +637,10 @@ class WorldRepository:
             response["star_crystal"] = star_crystal
         if story_mission_delta:
             response["story_mission_"] = story_mission_delta
+        if tutorial_new_funcs:
+            # Keep the semantic transition in the committed MID114 receipt as
+            # well as the UoW semantic bus so a result retry cannot lose it.
+            response["new_funcs_"] = sorted({int(value) for value in tutorial_new_funcs if int(value) > 0})
 
         if has_pending:
             # Keep the committed response as a one-request receipt until the

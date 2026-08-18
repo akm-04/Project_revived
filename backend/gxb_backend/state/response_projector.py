@@ -2,7 +2,7 @@
 
 Pass 30 extends the narrow, source-backed global response projector for the Phase-1
 Economy/progression spine. It projects established cumulative semantics for
-Mana, Crystal, Energy, player EXP/level, Hero EXP, and newly added FunctionIDs.
+Mana, Crystal, Energy, player EXP/level, and Hero EXP.
 
 The projector snapshots canonical state before a handler runs, compares the
 same player after the handler finishes, and merges only changed cumulative
@@ -10,9 +10,9 @@ values into ``economy_`` / ``exps``. Existing explicit handler projections are
 preserved and normalized to the current canonical values.
 
 This is deliberately narrower than SelfPlayer:economySyncEvent_()'s full field
-set. In particular, skill_point is excluded because the known MID90 runtime
-path must not be forced through a global ECONOMY event until its envelope is
-confirmed.
+set. In particular, ``skill_point`` remains excluded from automatic diff
+projection. Source-confirmed operations may stage it explicitly through the
+request-scoped ``GlobalResponseSemantics`` boundary.
 """
 from __future__ import annotations
 
@@ -27,7 +27,6 @@ class _PlayerSnapshot:
     player_id: str
     economy: dict[str, int]
     hero_exp: dict[int, int]
-    func_ids: tuple[int, ...]
 
 
 class ResponseProjector:
@@ -47,7 +46,6 @@ class ResponseProjector:
             player_id=str(player.player_id),
             economy=economy,
             hero_exp=cls._hero_exp_map(player),
-            func_ids=cls._func_ids(player),
         ))
 
     @staticmethod
@@ -57,12 +55,6 @@ class ResponseProjector:
         except (TypeError, ValueError):
             return default
 
-
-    @classmethod
-    def _func_ids(cls, player: PlayerState) -> tuple[int, ...]:
-        raw = player.func_ids if isinstance(player.func_ids, list) else []
-        values = {cls._int(value) for value in raw if cls._int(value) > 0}
-        return tuple(sorted(values))
 
     @classmethod
     def _hero_exp_map(cls, player: PlayerState) -> dict[int, int]:
@@ -117,15 +109,8 @@ class ResponseProjector:
         elif changed_economy:
             result["economy_"] = changed_economy
 
-        before_funcs = set(self.before.func_ids)
-        current_funcs = set(self._func_ids(player))
-        added_funcs = sorted(current_funcs - before_funcs)
-        explicit_funcs = result.get("new_funcs_")
-        merged_funcs: set[int] = set(added_funcs)
-        if isinstance(explicit_funcs, list):
-            merged_funcs.update(self._int(value) for value in explicit_funcs if self._int(value) > 0)
-        if merged_funcs:
-            result["new_funcs_"] = sorted(merged_funcs)
+        # Guide-sensitive semantic channels such as new_funcs_ are explicit
+        # domain outputs; the cumulative projector never derives them from diffs.
 
         before_hero_exp = self.before.hero_exp
         current_hero_exp = self._hero_exp_map(player)

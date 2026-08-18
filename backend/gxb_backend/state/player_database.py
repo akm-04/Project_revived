@@ -31,7 +31,7 @@ IDENTITY_FIELDS = {
 PROGRESSION_FIELDS = {
     "lev", "exp", "max_lev", "max_color", "vip", "skill_point",
     "first_main_touch", "main_scene_type", "story_id", "story_state", "guide_id",
-    "guide_return_id", "func_ids", "guide_function_ids", "boss_incr_exp",
+    "guide_return_id", "func_ids", "function_state", "tutorial_state", "guide_function_ids", "boss_incr_exp",
     "arena_beat_flag", "conquer_lev", "conquer_loop_id", "conquer_region",
     "degree_cer", "graduate_cer", "patent_cer", "crab_times",
 }

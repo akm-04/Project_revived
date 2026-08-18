@@ -19,15 +19,11 @@ from typing import Any
 
 from .account import AccountIdentity
 from .defaults import default_account, default_player
-from .economy_repository import EconomyRepository
-from .hero_repository import HeroRepository
-from .inventory_repository import InventoryRepository
 from .player_database import JsonPlayerDatabase
 from .player_state import PlayerState
 from .profiles import apply_profile, make_fresh_player
 from .skill_point_policy import SkillPointPolicy
-from .summon_repository import SummonRepository
-from .world_repository import WorldRepository
+from .maintenance_services import PlayerMaintenanceServices
 
 
 SANDBOX_UID = "13371337"
@@ -378,6 +374,7 @@ class MultiUserDatabase:
 
     def normalize_player(self, player: PlayerState, *, persist: bool) -> bool:
         changed = False
+        maintenance = PlayerMaintenanceServices(player, self.data_dir)
         # Runtime v0.8.2 exposed a latent client crash in the unused Arena
         # invitation path whenever any economy_ event is processed. Migrate
         # credential players created by v0.8.0-v0.8.2 to the deferred-PvP
@@ -396,7 +393,7 @@ class MultiUserDatabase:
             # source award_energy for every already-crossed player level. This
             # makes copied server_state coherent with SelfPlayer's level-up UI.
             if int(getattr(player, "energy", 0) or 0) == 100:
-                economy = EconomyRepository(player, self.data_dir)
+                economy = maintenance.economy
                 migrated_energy = 60
                 current_level = max(1, int(getattr(player, "lev", 1) or 1))
                 for level in range(1, current_level):
@@ -408,13 +405,13 @@ class MultiUserDatabase:
                     player.max_energy = source_max_energy
                 player.energy_time = 0
                 changed = True
-        if HeroRepository(player, data_dir=self.data_dir).normalize():
+        if maintenance.heroes.normalize():
             changed = True
-        if InventoryRepository(player).normalize():
+        if maintenance.inventory.normalize():
             changed = True
-        if WorldRepository(player, self.data_dir, inventory=InventoryRepository(player)).normalize():
+        if maintenance.world.normalize():
             changed = True
-        if SummonRepository(player, self.data_dir).normalize():
+        if maintenance.summon.normalize():
             changed = True
         raw_guides = player.guide_function_ids
         normalized_guides: dict[str, int] = {}

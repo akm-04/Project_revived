@@ -12,12 +12,13 @@ changed ``economy_`` block.
 """
 from __future__ import annotations
 
+import copy
 import json
 from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
-from .function_unlock_repository import FunctionUnlockRepository
+from .function_state_repository import FunctionStateRepository
 from .player_state import PlayerState
 
 
@@ -34,7 +35,7 @@ class EconomyRepository:
         data_dir: Path,
         save_callback: Callable[[], None] | None = None,
         *,
-        function_unlocks: FunctionUnlockRepository | None = None,
+        function_unlocks: FunctionStateRepository | None = None,
     ) -> None:
         self.player = player
         self.data_dir = Path(data_dir)
@@ -109,6 +110,7 @@ class EconomyRepository:
             "lev": self._int(self.player.lev, 1),
             "max_energy": self._int(self.player.max_energy, 0),
             "func_ids": list(self.player.func_ids) if isinstance(self.player.func_ids, list) else [],
+            "function_state": copy.deepcopy(self.player.function_state) if isinstance(self.player.function_state, dict) else {},
         }
 
     def _restore(self, snapshot: dict[str, Any]) -> None:

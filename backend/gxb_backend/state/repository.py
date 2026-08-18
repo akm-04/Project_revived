@@ -7,9 +7,11 @@ from contextlib import contextmanager
 from pathlib import Path
 from typing import Any
 
+from gxb_backend.content import GameDataCatalog
+
 from .account import AccountIdentity
 from .economy_repository import EconomyRepository
-from .function_unlock_repository import FunctionUnlockRepository
+from .function_state_repository import FunctionStateRepository
 from .hero_progression_repository import HeroProgressionRepository
 from .hero_equipment_repository import HeroEquipmentRepository
 from .hero_repository import HeroRepository
@@ -24,6 +26,7 @@ from .multiuser_database import (
 from .player_state import PlayerState
 from .summon_repository import SummonRepository
 from .world_repository import WorldRepository
+from .request_services import RequestServices
 
 
 class _RequestBinding(threading.local):
@@ -31,6 +34,7 @@ class _RequestBinding(threading.local):
     session: dict[str, Any] | None = None
     player: PlayerState | None = None
     is_new_player: bool = False
+    services: RequestServices | None = None
 
 
 class StateRepository:
@@ -53,6 +57,8 @@ class StateRepository:
         self.profile = profile
         self._lock = threading.RLock()
         self._local = _RequestBinding()
+        # Immutable source/config meaning is shared across request service graphs.
+        self._catalog = GameDataCatalog.load(self._data_dir() / "game_data_catalog.json")
         root = Path(multiuser_root or ((self.path.parent if self.path else Path("data")) / "server_state"))
         self.store = MultiUserDatabase(root, self._data_dir())
 
@@ -80,6 +86,7 @@ class StateRepository:
         self._local.session = None
         self._local.player = None
         self._local.is_new_player = False
+        self._local.services = None
 
     def _bind_session(self, session: dict[str, Any] | None) -> None:
         self._local.session = session
@@ -141,12 +148,13 @@ class StateRepository:
                 getattr(self._local, "session", None),
                 getattr(self._local, "player", None),
                 getattr(self._local, "is_new_player", False),
+                getattr(self._local, "services", None),
             )
             self._bind_engine_request(req)
             try:
                 yield
             finally:
-                self._local.account, self._local.session, self._local.player, self._local.is_new_player = previous
+                self._local.account, self._local.session, self._local.player, self._local.is_new_player, self._local.services = previous
 
     def refresh(self) -> None:
         """Reload the currently bound player from disk."""
@@ -156,6 +164,7 @@ class StateRepository:
                 loaded = self.store.load_player(str(player.player_id))
                 if loaded is not None:
                     self._local.player = loaded
+                    self._local.services = None
 
     # ------------------------------------------------------------------
     # SDK account/session service
@@ -233,6 +242,7 @@ class StateRepository:
             if old_region != region:
                 self.store.move_account_region_player(SANDBOX_UID, old_region, region, str(player.player_id))
             self._local.player = player
+            self._local.services = None
             self._local.is_new_player = False
             return player, False
 
@@ -243,11 +253,13 @@ class StateRepository:
                 raise RuntimeError(f"player index points to missing player {player_id}")
             player.account_uid = uid
             self._local.player = player
+            self._local.services = None
             self._local.is_new_player = False
             return player, False
 
         player = self.store.create_fresh_player(uid=uid, region=region, region_name=region_name)
         self._local.player = player
+        self._local.services = None
         self._local.is_new_player = True
         print(
             "[MULTIUSER] created player "
@@ -290,73 +302,68 @@ class StateRepository:
         with self._lock:
             return self.store.load_player(str(player_id))
 
+    def current_services_or_none(self) -> RequestServices | None:
+        services = getattr(self._local, "services", None)
+        player = getattr(self._local, "player", None)
+        return services if services is not None and services.player is player else None
+
+    def get_services(self) -> RequestServices:
+        player = getattr(self._local, "player", None)
+        if player is None:
+            raise RuntimeError("request-scoped services require a bound canonical player")
+        services = getattr(self._local, "services", None)
+        if services is None or services.player is not player:
+            services = RequestServices(
+                player,
+                self._data_dir(),
+                lambda: self.store.save_player(player),
+                catalog=self._catalog,
+            )
+            self._local.services = services
+        return services
+
     def save(self) -> None:
         with self._lock:
             player = getattr(self._local, "player", None)
             if player is None:
                 return
-            self.store.save_player(player)
+            services = getattr(self._local, "services", None)
+            if services is not None and services.player is player:
+                services.uow.request_save()
+            else:
+                self.store.save_player(player)
 
+    # Compatibility façades: callers keep their old repository accessors while
+    # every accessor now resolves to the same memoized request service graph.
     def get_hero_repository(self) -> HeroRepository:
-        player = self.get_player()
-        functions = FunctionUnlockRepository(player, self._data_dir())
-        economy = EconomyRepository(
-            player, self._data_dir(), self.save,
-            function_unlocks=functions,
-        )
-        return HeroRepository(
-            player, self.save, self._data_dir(),
-            economy=economy,
-        )
+        return self.get_services().heroes
 
     def get_inventory_repository(self) -> InventoryRepository:
-        return InventoryRepository(self.get_player(), self.save)
+        return self.get_services().inventory
 
     def get_summon_repository(self) -> SummonRepository:
-        return SummonRepository(self.get_player(), self._data_dir(), self.save)
+        return self.get_services().summon
 
     def get_hero_progression_repository(self) -> HeroProgressionRepository:
-        return HeroProgressionRepository(self.get_player(), self._data_dir(), self.save)
+        return self.get_services().hero_progression
 
     def get_hero_equipment_repository(self) -> HeroEquipmentRepository:
-        return HeroEquipmentRepository(self.get_player(), self._data_dir(), self.save)
+        return self.get_services().hero_equipment
 
-    def get_function_unlock_repository(self) -> FunctionUnlockRepository:
-        return FunctionUnlockRepository(self.get_player(), self._data_dir(), self.save)
+    def get_function_state_repository(self) -> FunctionStateRepository:
+        return self.get_services().function_state
+
+    def get_function_unlock_repository(self) -> FunctionStateRepository:
+        return self.get_services().function_state
 
     def get_economy_repository(self) -> EconomyRepository:
-        player = self.get_player()
-        return EconomyRepository(
-            player, self._data_dir(), self.save,
-            function_unlocks=FunctionUnlockRepository(player, self._data_dir()),
-        )
+        return self.get_services().economy
 
     def get_mission_repository(self) -> MissionRepository:
-        player = self.get_player()
-        functions = FunctionUnlockRepository(player, self._data_dir())
-        economy = EconomyRepository(player, self._data_dir(), function_unlocks=functions)
-        return MissionRepository(
-            player, self._data_dir(), self.save,
-            economy=economy, inventory=InventoryRepository(player),
-        )
+        return self.get_services().missions
 
     def get_world_repository(self) -> WorldRepository:
-        player = self.get_player()
-        functions = FunctionUnlockRepository(player, self._data_dir())
-        economy = EconomyRepository(player, self._data_dir(), function_unlocks=functions)
-        inventory = InventoryRepository(player)
-        missions = MissionRepository(
-            player, self._data_dir(), economy=economy, inventory=inventory,
-        )
-        return WorldRepository(
-            player,
-            self._data_dir(),
-            self.save,
-            inventory=inventory,
-            economy=economy,
-            hero_progression=HeroProgressionRepository(player, self._data_dir()),
-            missions=missions,
-        )
+        return self.get_services().world
 
     def set_region(self, region: int) -> None:
         """Compatibility shim.
@@ -380,3 +387,4 @@ class StateRepository:
                 player = self.store.load_player(player_id)
                 if player is not None:
                     self._local.player = player
+                    self._local.services = None
