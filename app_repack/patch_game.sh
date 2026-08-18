@@ -4,6 +4,9 @@ set -e
 # Dynamically determine the directory where this script is located
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+# Ensure the local tools directory is used first for commands like apktool
+export PATH="$SCRIPT_DIR/tools:$PATH"
+
 # Safely check for APKs in the app/ directory
 shopt -s nullglob
 APK_FILES=("$SCRIPT_DIR/app/"*.apk)
@@ -26,7 +29,8 @@ fi
 APK_PATH="${APK_FILES[0]}"
 DECODE_DIR="$SCRIPT_DIR/decoded_gxb"
 OUTPUT_APK="gxb_plaintext_standalone.apk"
-UBER_SIGNER="/usr/local/bin/uber-apk-signer.jar"
+# Updated to use the local tools folder
+UBER_SIGNER="$SCRIPT_DIR/tools/uber-apk-signer.jar"
 
 echo "==> [1/3] Decompiling $(basename "$APK_PATH") into $DECODE_DIR..."
 rm -rf "$DECODE_DIR"

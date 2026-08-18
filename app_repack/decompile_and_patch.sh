@@ -5,7 +5,9 @@ set -e
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 DECODE_DIR="$SCRIPT_DIR/decoded_gxb"
-OUTPUT_DIR="$SCRIPT_DIR/output"
+
+# FIX: Point OUTPUT_DIR to where the .exe actually generates the files
+OUTPUT_DIR="$SCRIPT_DIR/tools/output"
 
 # Zrok endpoints
 ZROK_SDK_URL="https://gxbsdk.shares.zrok.io/"
@@ -15,7 +17,7 @@ ZROK_ENGINE_API="https://gxbengine.shares.zrok.io/api/v1"
 
 echo "  -> [A] Running LuaJIT Decompiler via Wine..."
 rm -rf "$OUTPUT_DIR"
-wine "$SCRIPT_DIR/luajit-decompiler-v2.exe" "$DECODE_DIR" -e lua -s
+wine "$SCRIPT_DIR/tools/luajit-decompiler-v2.exe" "$DECODE_DIR" -e lua -s
 
 echo "  -> [B] Merging ALL decompiled plaintext Lua over bytecode..."
 cp -rv "$OUTPUT_DIR/assets/"* "$DECODE_DIR/assets/"
@@ -87,7 +89,7 @@ for file in "${FILES_TO_PATCH[@]}"; do
         sed -i 's|http://www.game168.tw|https://gxbengine.shares.zrok.io|g' "$file"
         sed -i 's|https://girls.game168.com.tw|https://gxbengine.shares.zrok.io|g' "$file"
         
-        echo "    [+] Patched URLs in $file"
+        echo "    [+] Patched URLs in $(basename "$file")"
     fi
 done
 
@@ -99,4 +101,6 @@ else
     echo "    [!] Probe script not found at $PROBE_SCRIPT, skipping..."
 fi
 
-echo "  -> [E] Logic processing complete. Handing control back to main script..."
+# Cleanup raw output workspace
+rm -rf "$OUTPUT_DIR"
+echo "  -> [E] Temporary output directory cleaned."
