@@ -1,0 +1,2 @@
+local_assets/res/       runtime lazy CDN source (served through /res/)
+# must have the res assets's real folder be here with real assets required by the client
