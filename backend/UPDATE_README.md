@@ -1,7 +1,5 @@
-# Update notes — v0.8.33 / Pass42.12
+# Update notes — v0.8.34 / Pass42.14
 
-Adds the self-contained `gacha_control.py` operator utility, changes the shipped development featured mode to `startup_debug`, and adds an opt-in classic Small/Medium Item/Scroll/Girl + native-star balance overlay.
+Final narrow gacha hotfix. Small Vending 100x was source-present but still intentionally fail-closed in the old operation catalog. Pass42.14 activates MID50 `(type=1,index=4)` using the existing 900,000 Mana / 100-pull cost plan and classic private planner.
 
-Existing classic math remains active when the overlay is disabled. Fixed Small/Medium x10 guarantees and the SX 25-purchase selected-hotspot guarantee remain unchanged. Recovered pool catalogs remain evidence and are not rewritten for balancing.
-
-Run `python3 gacha_control.py --check` before/after operator edits. Any future critical gacha schema/topology change must update this tool in the same pass.
+The x100 operation uses the same configurable Small rates as x1/x10 and retains the fixed Small x10 item guarantee independently in each of its ten 10-result blocks. No Medium, SX, Magic/Gachapon, featured rotation, duplicate conversion, or Pass42.12 gacha-control semantics were changed.

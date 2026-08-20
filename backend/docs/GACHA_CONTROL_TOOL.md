@@ -59,7 +59,7 @@ When explicitly enabled, the tool accepts an exact 100.00% split among Item / Gi
 
 The Small full-Girl source pool currently contains only native-1★ Girls. The tool therefore rejects nonzero 2★/3★ full-Girl rates.
 
-The Small x10 item-class guarantee remains fixed and is not exposed as a balance knob.
+The Small x10 item-class guarantee remains fixed and is not exposed as a balance knob. Pass42.14 also applies that same fixed guarantee to each 10-result block of Small x100; the tool validates x100 as 100 pulls / 900,000 Mana but does not expose its cost/count as tunable rates.
 
 ## Medium Vending controls
 

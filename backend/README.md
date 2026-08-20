@@ -1,4 +1,20 @@
-# GXB backend v0.8.33 — Pass42.12 gacha control + classic balance overlay
+# GXB backend v0.8.34 — Pass42.14 Small x100 hotfix
+
+Pass42.14 is the final narrow gacha hotfix on top of v0.8.33/Pass42.12. A fresh runtime trace proved that the stock Small result window sends MID50 `summon_type=1, summon_index=4` for the 100x button, while the backend still carried the old Pass41 `deferred_fail_closed` marker. Effective Lua independently confirms `ManaHundred = 4`, cost 900000 Mana, pull count 100, and a dedicated >10-result scroll/aggregation UI.
+
+## Pass42.14 changes
+
+- Activates `small_paid_100` through the same Custom Private Server classic planner already used by Small x1/x10.
+- Activates the existing `small_paid_hundred` cost plan: exactly 900,000 Mana for 100 result slots.
+- Preserves all classic counter/milestone, duplicate 7/14/30 conversion, explicit Pass42.12 rate overrides, transaction, replay, and result-wire behavior.
+- Preserves the Small x10 `at_least_one_item` guarantee by applying it independently to each consecutive 10-result block in an x100 purchase; recovered special milestone slots continue to win and are never replaced.
+- Returns 100 ordinary classic result rows; the stock `SummonResultWindow` handles >10 rows by aggregating identical table IDs into its scrolling list.
+- Ticket/coupon/discount variants remain fail closed. No Medium/SX/Magic/Gachapon rates or rotation behavior changed.
+
+## Evidence boundary
+
+The 2026-08-20 user debug trace runtime-confirms the x100 request topology and the v0.8.33 rejection. Effective `src_64` confirms enum/index, 900000-Mana cost, 100-pull count, and client >10 display handling. v0.8.34 is repository/static-confirmed here and should receive one final client x100 smoke before being promoted to runtime-confirmed.
+
 
 Pass42.12 builds on v0.8.32/Pass42.11 and the runtime-confirmed Pass42.10 summon/progression baseline. It adds a separate validated operator utility for Small / Medium / SX / Gachapon configuration and introduces an optional classic Item/Scroll/Girl + native-star balance layer.
 

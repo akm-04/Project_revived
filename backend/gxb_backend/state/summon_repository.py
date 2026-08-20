@@ -1,12 +1,12 @@
 """Canonical Summon state with classic/private Vending activation.
 
 Recovered MID50 operation/cost/pool/client contracts remain source authority.
-The deterministic tutorial pulls stay intact, the four runtime-mapped classic
+The deterministic tutorial pulls stay intact, the runtime-mapped classic
 paid operations execute under Custom Private Server Policy v1, and Pass41.9
 adds the source/runtime-confirmed post-tutorial Small free-pull state split for
 the same MID50 (type=1,index=1) protocol tuple. Pass42.6 corrects SX/Soul Box content classification and dynamic reward planning
-through a dedicated private planner while Small100 and ticket/coupon variants remain
-fail closed; private policy is never represented as historical official RNG.
+through a dedicated private planner while ticket/coupon variants remain
+fail closed; Pass42.14 activates the source/runtime-confirmed Small x100 topology; private policy is never represented as historical official RNG.
 """
 
 from __future__ import annotations
@@ -984,16 +984,29 @@ class SummonRepository:
             )
             selections.append((pool, row, False))
 
-        # Source UI exposes a guarantee for both classic 10x buttons. The exact
+        # Source UI exposes a guarantee for classic 10x behavior. The exact
         # historical server formula is unavailable, so Private Policy v1 enforces
         # only the documented semantic class while never replacing a recovered
-        # milestone-selected special slot.
-        if max(1, self._int(desc.pull_count, 1)) == 10:
+        # milestone-selected special slot. Pass42.14 treats Small x100 as ten
+        # consecutive 10-result guarantee blocks, preserving the already-active
+        # Small x10 contract instead of weakening it for the bulk client button.
+        pull_count = max(1, self._int(desc.pull_count, 1))
+        if pull_count >= 10 and pull_count % 10 == 0:
             family_policy = self.private_policy.family(family)
             required_kind = "item" if family_policy.ten_pull_guarantee == "at_least_one_item" else "hero"
-            if not any(pool.result_kind == required_kind for pool, _, _ in selections):
+            for block_start in range(0, pull_count, 10):
+                block_end = block_start + 10
+                if any(
+                    pool.result_kind == required_kind
+                    for pool, _, _ in selections[block_start:block_end]
+                ):
+                    continue
                 replacement_index = next(
-                    (i for i in range(len(selections) - 1, -1, -1) if not selections[i][2]),
+                    (
+                        i
+                        for i in range(block_end - 1, block_start - 1, -1)
+                        if not selections[i][2]
+                    ),
                     None,
                 )
                 if replacement_index is None:
@@ -1072,7 +1085,7 @@ class SummonRepository:
         return result_rows
 
     def _classic_paid(self, desc: SummonOperationDescriptor) -> dict[str, Any]:
-        """Execute the four mapped classic paid buttons under Private Policy v1."""
+        """Execute mapped classic paid buttons under Private Policy v1."""
         if (
             self.uow is None
             or self.inventory is None

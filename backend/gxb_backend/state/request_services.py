@@ -121,7 +121,7 @@ class RequestServices:
         # Pass41.7 Summon composition. Recovered operation/state/cost/pool facts
         # remain separate from explicitly authorized private-server policy.
         # Classic Small/Medium stays active; Magic MID70/MID71 now has its own
-        # source catalog + policy/planner. Tickets/coupons/Small100 defer; SX has its own dedicated Pass42.6 corrected planner.
+        # source catalog + policy/planner. Tickets/coupons defer; Pass42.14 activates Small x100 through the same classic planner; SX has its own dedicated Pass42.6 corrected planner.
         self.summon_operation_catalog = SummonOperationCatalog(self.data_dir)
         self.summon_operation_registry = SummonOperationRegistry(self.summon_operation_catalog)
         self.summon_state_contract = SummonStateContract(self.data_dir)

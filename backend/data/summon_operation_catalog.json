@@ -1,8 +1,8 @@
 {
   "_meta": {
     "schema_version": 1,
-    "generated_by": "Pass42.9",
-    "purpose": "Recovered MID50 topology with active Classic/Magic/SX plus separate deterministic Medium Legacy featured/ordinary-extension policy.",
+    "generated_by": "Pass42.14",
+    "purpose": "Recovered MID50 topology with active Classic/Magic/SX; Pass42.14 activates source/runtime-confirmed Small x100 request/cost topology under the existing Custom Private Server classic RNG policy.",
     "key": [
       "protocol_mid",
       "summon_type",
@@ -18,7 +18,7 @@
     "guardrails": [
       "MID50 operation identity is protocol_mid + summon_type + summon_index; numeric fields are not globally typed.",
       "Pass41.1 enriches descriptors with state/cost/counter references but only the two previously supported tutorial operations remain active.",
-      "Cost/counter metadata never authorizes result RNG. Deferred paid/discount/SX operations remain fail closed.",
+      "Cost/counter metadata never authorizes result RNG. Deferred ticket/coupon/discount operations remain fail closed; Small x100 is active from Pass42.14.",
       "50001002 x10 remains source-corroborated for tutorial Small free-first only; it is not a general pull reward formula."
     ],
     "private_policy_boundary": "Custom Private Server Policy v1 supplies unrecoverable classic server RNG/counter/duplicate/retry behavior; it is not historical official math."
@@ -119,8 +119,8 @@
       "summon_type": 1,
       "summon_index": 4,
       "semantic": "small_paid_100",
-      "support_status": "deferred_fail_closed",
-      "strategy": null,
+      "support_status": "private_policy_supported",
+      "strategy": "classic_paid_private_policy",
       "source_summon_row": 1,
       "source_family": "small_vending",
       "special_dropbox_id": null,
@@ -132,13 +132,18 @@
       "reward_item_num": null,
       "receipt_name": null,
       "evidence": {
-        "deferred_to": "Pass41 general vending/gacha"
+        "request_topology": "runtime debug 2026-08-20 confirms MID50 summon_type=1 summon_index=4 from the Small x100 result-window button",
+        "runtime_debug_observed_response_before_fix": "v0.8.33 returned error_code=1,result=[] because this descriptor was still deferred_fail_closed",
+        "source_enum": "effective app/common/enums.lua: SummonType.ManaHundred = 4",
+        "cost_and_pull_count": "effective summon.lua row1: summon_cost 0|10000|90000|900000 and summon_num 1|1|10|100; SummonTable.manaHundred selects cost slot4",
+        "client_result_support": "effective SummonResultWindow.lua explicitly routes x100 via summonAgain(true) and uses the >10-result scroll/aggregation view",
+        "server_math": "Custom Private Server Policy v1 (same Small ordinary RNG/counter/duplicate logic as x1/x10; private server policy, not claimed historical official RNG)"
       },
       "pull_count": 100,
       "cost_plan_id": "small_paid_hundred",
       "counter_policy_id": "small_classic",
       "state_family": "small",
-      "rng_status": "unrecovered_fail_closed"
+      "rng_status": "private_server_policy_v1"
     },
     {
       "protocol_mid": 50,

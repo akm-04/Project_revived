@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""GXB Pass42.12 self-contained Vending/Gacha operator control tool.
+"""GXB Pass42.14 self-contained Vending/Gacha operator control tool.
 
 No third-party dependencies and no imports from gxb_backend.  The tool edits
 only versioned private policy files, validates cohort/rate/guardrail invariants,
@@ -35,6 +35,9 @@ FILES = {
     "magic_source": "magic_summon_source_catalog.json",
     "pools": "summon_pool_catalog.json",
     "game": "game_data_catalog.json",
+    "operations": "summon_operation_catalog.json",
+    "costs": "summon_cost_policy.json",
+    "results": "summon_result_policy.json",
 }
 
 CATEGORY_KEYS = ("item", "scroll", "girl")
@@ -212,6 +215,39 @@ class Store:
                 errors.append(f"{family} scroll_candidate_mode must remain flat_equal")
             if bool(star.get("enabled")) and family == "small" and (stars[1] or stars[2]):
                 errors.append("Small has no native-2★/3★ candidates in its configured full-Girl pool")
+        # Pass42.14 Small x100 is a fixed source/client topology, not an operator rate knob.
+        op100 = next(
+            (row for row in self.docs["operations"].get("operations", []) if row.get("semantic") == "small_paid_100"),
+            None,
+        )
+        if not isinstance(op100, dict):
+            errors.append("Small x100 operation descriptor is missing")
+        else:
+            if (int(op100.get("protocol_mid") or 0), int(op100.get("summon_type") or 0), int(op100.get("summon_index") or 0)) != (50, 1, 4):
+                errors.append("Small x100 MID50 tuple drift: expected (50,1,4)")
+            if str(op100.get("support_status") or "") != "private_policy_supported" or int(op100.get("pull_count") or 0) != 100:
+                errors.append("Small x100 operation must remain active with pull_count=100")
+        cost100 = next(
+            (row for row in self.docs["costs"].get("plans", []) if row.get("id") == "small_paid_hundred"),
+            None,
+        )
+        if not isinstance(cost100, dict):
+            errors.append("Small x100 cost plan is missing")
+        else:
+            components = cost100.get("components") or []
+            expected = [{"kind": "economy", "field": "mana", "amount": 900000}]
+            if int(cost100.get("pull_count") or 0) != 100 or components != expected or str(cost100.get("execution_status") or "") != "private_policy_active":
+                errors.append("Small x100 cost plan must remain 100 pulls / 900000 Mana / active")
+        result100 = next(
+            (row for row in self.docs["results"].get("semantic_policies", []) if row.get("semantic") == "small_paid_100"),
+            None,
+        )
+        if not isinstance(result100, dict) or int(result100.get("expected_rows") or 0) != 100:
+            errors.append("Small x100 result policy must remain active with expected_rows=100")
+        active_semantics = {str(v) for v in classic.get("_meta", {}).get("active_semantics", [])}
+        if "small_paid_100" not in active_semantics:
+            errors.append("Small x100 must remain in classic active_semantics")
+
         # Explicit scroll classification must be grounded in partner.stone_id, not ID prefixes.
         game_partner = ((self.docs["game"].get("namespaces") or {}).get("partner") or {})
         stones = {
@@ -372,7 +408,7 @@ class Store:
     def summary(self) -> str:
         r = self.docs["rotation"]
         lines = [
-            "GXB Pass42.12 Gacha Control summary",
+            "GXB Pass42.14 Gacha Control summary",
             f"Rotation mode: {r['selection_mode']} | debug_seed={r.get('debug_seed')} | timezone={r.get('timezone')}",
             "SX Current: " + ", ".join("AUTO" if int(v) == 0 else self.girl_label(int(v)) for v in r["sx"]["week_manual_ids"]),
             "SX Daily:   " + ", ".join("AUTO" if int(v) == 0 else self.girl_label(int(v)) for v in r["sx"]["day_manual_ids"]),
@@ -486,6 +522,8 @@ class UI:
         while True:
             print("\n=== Small Vending ===")
             print(self.s.summary().split("Medium ordinary categories:")[0].rstrip())
+            print("  x1=10,000 Mana | x10=90,000 Mana | x100=900,000 Mana")
+            print(f"  x10 item guarantee: LOCKED ({FIXED_SMALL_TEN_GUARANTEE}); x100 applies it to each 10-result block")
             print("  1. Set ordinary Item / Scroll / Girl rates")
             print("  2. Set Girl native-star split (Small supports only 1★)")
             print("  3. Reset Small explicit balance overrides to legacy math")
@@ -689,7 +727,7 @@ class UI:
     def run(self) -> None:
         while True:
             print("\n========================================")
-            print(" GXB Vending / Gacha Control — Pass42.12")
+            print(" GXB Vending / Gacha Control — Pass42.14")
             print("========================================")
             r=self.s.docs["rotation"]
             print(f"Featured mode: {r['selection_mode']} | seed={r.get('debug_seed')} | tz={r.get('timezone')}")
@@ -721,7 +759,7 @@ def main(argv: list[str] | None = None) -> int:
     try:
         store=Store(ROOT)
         if args.check:
-            print("PASS: Pass42.12 gacha operator validation succeeded")
+            print("PASS: Pass42.14 gacha operator validation succeeded")
             return 0
         if args.summary:
             print(store.summary())

@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "pass": "42.14",
+  "backend": "v0.8.34",
+  "validation_type": "repository/static hotfix validation; no Flask/client gameplay",
+  "status": "pass",
+  "checks": {
+    "operation_topology": {
+      "mid": 50,
+      "summon_type": 1,
+      "summon_index": 4,
+      "pull_count": 100
+    },
+    "cost_plan": {
+      "mana": 900000,
+      "pull_count": 100,
+      "status": "active"
+    },
+    "result_policy": {
+      "expected_rows": 100,
+      "allowed": [
+        "hero",
+        "item",
+        "to_stone"
+      ]
+    },
+    "x100_ten_block_guarantee": [
+      2,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+    ],
+    "repository_x100": {
+      "rows": 100,
+      "mana_debit": 900000,
+      "counter_delta": 100,
+      "wire_kind_counts_sample_run": {
+        "hero": 2,
+        "item": 98
+      },
+      "immediate_retry_replayed_without_second_debit": true
+    },
+    "small_regression": {
+      "x1": "1 row / 10000 Mana",
+      "x10": "10 rows / 90000 Mana"
+    },
+    "gacha_control_sync": "PASS: Pass42.14 gacha operator validation succeeded"
+  },
+  "runtime_boundary": "Fresh debug.zip proves the v0.8.33 x100 request and rejection. v0.8.34 x100 success remains repository-confirmed until a new client smoke is supplied."
+}

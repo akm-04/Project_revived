@@ -1,7 +1,7 @@
 {
   "_meta": {
     "schema_version": 1,
-    "generated_by": "Pass42.6",
+    "generated_by": "Pass42.14",
     "source_resolution": "effective_merged",
     "purpose": "Typed source-backed summon CostPlans. Classic paid currency plans and SX Crystal purchase are executable under versioned Custom Private Server policies; deferred ticket/coupon/discount and Small100 plans remain descriptive/fail closed.",
     "client_delta_warning": "Ticket/coupon items are removed locally by the stock MID50 callback after success; future canonical spend must not also project a second local-removal award/delta channel.",
@@ -74,7 +74,7 @@
       ],
       "state_gates": [],
       "vip_min": 0,
-      "execution_status": "deferred_fail_closed"
+      "execution_status": "private_policy_active"
     },
     {
       "id": "medium_free_single",

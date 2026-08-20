@@ -3,7 +3,7 @@
 This is the operator-facing guide for the private-server Vending/Gacha implementation.
 It separates **recovered client/source facts** from **explicit private-server balancing policy**. Do not present private rates below as historical official GXB server rates.
 
-Pass42.12 adds the standalone validated `gacha_control.py` operator utility and an optional classic Item/Scroll/Girl + native-star balance overlay. Existing private math remains unchanged when the new classic override is disabled. Fixed Small/Medium x10 guarantees and the SX 25-purchase selected-hotspot guarantee are preserved.
+Pass42.12 added the standalone validated `gacha_control.py` operator utility and an optional classic Item/Scroll/Girl + native-star balance overlay. Existing private math remains unchanged when the new classic override is disabled. Fixed Small/Medium x10 guarantees and the SX 25-purchase selected-hotspot guarantee are preserved.
 
 ## Pass42.12 operator tool (preferred)
 
@@ -192,7 +192,7 @@ Active paid operations:
 
 - Paid x1: `10,000 Mana`.
 - Paid x10: `90,000 Mana`.
-- Paid x100: currently deferred/fail-closed.
+- Paid x100: `900,000 Mana` for 100 results (activated in Pass42.14 from the stock `(type=1,index=4)` client path).
 
 Post-tutorial free Small:
 
@@ -205,6 +205,7 @@ Ordinary private rate:
 - Full-Hero/super-pool chance: `40 / 10,000 = 0.40%`.
 - Otherwise the configured base item pool is used.
 - x10 private guarantee: at least one item-class result, without overriding a recovered milestone/special slot.
+- x100 preserves that guarantee independently across each of its ten consecutive 10-result blocks.
 
 Small counter special milestones are source topology at result slots:
 

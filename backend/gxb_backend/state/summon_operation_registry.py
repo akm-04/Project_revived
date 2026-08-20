@@ -1,7 +1,6 @@
 """Typed MID50 dispatch registry.
 
-Pass41.4 keeps operation identity source-derived while allowing only the four
-runtime-mapped classic paid button topologies under the explicit Custom Private
+Pass41.4 keeps operation identity source-derived while allowing only the source/runtime-mapped classic paid button topologies under the explicit Custom Private
 Server Policy v1. Deferred operations remain fail closed.
 """
 from __future__ import annotations
@@ -33,6 +32,7 @@ class SummonOperationRegistry:
         "tutorial_medium_free_first": "_tutorial_crystal",
         "small_paid_1": "_classic_paid",
         "small_paid_10": "_classic_paid",
+        "small_paid_100": "_classic_paid",
         "medium_paid_1": "_classic_paid",
         "medium_paid_10": "_classic_paid",
         "sx_soul_box_selector_1": "_sx_private",

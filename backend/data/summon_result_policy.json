@@ -1,14 +1,14 @@
 {
   "_meta": {
     "schema_version": 1,
-    "generated_by": "Pass42.6",
-    "purpose": "Typed Summon result-row activation policy. Pass42.6 keeps SX six-row wire semantics active through the corrected mixed-class private planner.",
+    "generated_by": "Pass42.14",
+    "purpose": "Typed Summon result-row activation policy. Pass42.14 adds source/runtime-confirmed Small x100 transport while preserving existing private classic RNG and client wire kinds.",
     "guardrails": [
       "Recovered Hero/item/to_stone wire kinds remain canonical client contracts.",
       "Classic RNG probabilities/counters remain Custom Private Server Policy v1.",
       "Duplicate conversion quantities are global evidence-backed native-star policy: 1/2/3 -> 7/14/30; unsupported native stars fail closed.",
       "Magic result contains only recovered pool700008 byproducts; selected-target fragments are credited exactly once through stick_items.",
-      "Small100 and ticket/coupon/discount variants remain outside activation; SX selector1/2 are active only through Pass42.6 corrected private policy.",
+      "Ticket/coupon/discount variants remain outside activation; Small x100 is active from Pass42.14 and returns 100 standard classic result rows; SX selector1/2 remain active through the corrected private policy.",
       "MID50 (type=1,index=1) is stateful: tutorial pull #1 stays deterministic; later eligible free pulls use small_free_post_tutorial.",
       "Post-tutorial Small free pulls do not repeat the tutorial 50001002 x10 side reward."
     ]
@@ -62,6 +62,17 @@
       ],
       "expected_rows": 10,
       "policy_provenance": "Custom Private Server Policy v1"
+    },
+    {
+      "semantic": "small_paid_100",
+      "activation_status": "private_policy_active",
+      "allowed_row_kinds": [
+        "hero",
+        "item",
+        "to_stone"
+      ],
+      "expected_rows": 100,
+      "policy_provenance": "Recovered client x100 topology/cost + Custom Private Server Policy v1 result RNG; Pass42.14 applies the Small x10 item guarantee to each 10-result block."
     },
     {
       "semantic": "medium_paid_1",
