@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "pass": "42.7",
+  "backend": "gxb-backend-v0.8.29-pass42.7-sx-counter-status-gate-fix-2026-08-19",
+  "validation_scope": "static_only",
+  "python_ast_files": 126,
+  "backend_data_json_files": 33,
+  "backend_data_tree_byte_identical_to_v0_8_28": true,
+  "runtime_executed_by_agent": false,
+  "source_change": {
+    "file": "gxb_backend/state/summon_counter_policy.py",
+    "semantic": "add implemented_private_sx_policy_v2 to explicit transition_supported allow-list"
+  },
+  "protected_policy_note": "No data/*.json policy/content file changed; Pass42.6 SX rates/content and other domain policies are unchanged."
+}

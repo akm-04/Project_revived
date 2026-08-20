@@ -1,0 +1,84 @@
+SX Girl Hero IDs (73)
+=====================
+
+Canonical SX feature-selection cohort. Runtime authority: data/summon_featured_catalog.json -> sx_eligible.
+Every automatic/manual SX Current or Daily featured slot must resolve inside this set.
+Non-SX event/Legacy Girls are never injected into SX.
+
+Count: 73
+
+HeroID     | Name                              | Native★ | StoneID    | Group/Evidence
+-----------+-----------------------------------+---------+------------+----------------------------------------------
+10001032   | Guan Yin                          |    3    | 40001032   | SX / partner.is_sx
+10001035   | Sonya                             |    3    | 40001035   | SX / partner.is_sx
+10001037   | Psychic                           |    3    | 40001037   | SX / partner.is_sx
+10001045   | Javelin                           |    3    | 40001045   | SX / partner.is_sx
+10001052   | Wu Kong                           |    3    | 40001052   | SX / partner.is_sx
+10001056   | Capt.Sun                          |    3    | 40001056   | SX / partner.is_sx
+10001059   | Fencer                            |    3    | 40001059   | SX / partner.is_sx
+10001061   | Revolver                          |    3    | 40001061   | SX / partner.is_sx
+10001064   | Priestess                         |    3    | 40001064   | SX / partner.is_sx
+10001067   | Werewolf                          |    3    | 40001067   | SX / partner.is_sx
+10001071   | Elisa                             |    3    | 40001071   | SX / partner.is_sx
+10001074   | Librarian                         |    3    | 40001074   | SX / partner.is_sx
+10001076   | Hypatia                           |    3    | 40001076   | SX / partner.is_sx
+10001077   | Sapphire                          |    3    | 40001077   | SX / partner.is_sx
+10001079   | Amber                             |    3    | 40001079   | SX / partner.is_sx
+10001084   | Selene                            |    3    | 40001084   | SX / partner.is_sx
+10001087   | Phoenix                           |    3    | 40001087   | SX / partner.is_sx
+10001092   | Amelia                            |    3    | 40001092   | SX / partner.is_sx
+10001095   | Wraith                            |    3    | 40001095   | SX / partner.is_sx
+10001100   | Alice                             |    3    | 40001100   | SX / partner.is_sx
+10001103   | Ennmaya                           |    3    | 40001103   | SX / partner.is_sx
+10001109   | Hexa                              |    3    | 40001109   | SX / partner.is_sx
+10001113   | Nobunaga                          |    3    | 40001113   | SX / partner.is_sx
+10001117   | Nona                              |    3    | 40001117   | SX / partner.is_sx
+10001121   | Diva                              |    3    | 40001121   | SX / partner.is_sx
+10001126   | Caitlin                           |    3    | 40001126   | SX / partner.is_sx
+10001130   | Medusa                            |    3    | 40001130   | SX / partner.is_sx
+10001134   | Kaylee                            |    3    | 40001134   | SX / partner.is_sx
+10001137   | Ashely                            |    3    | 40001137   | SX / partner.is_sx
+10001139   | Cayla                             |    3    | 40001139   | SX / partner.is_sx
+10001140   | Liz                               |    3    | 40001140   | SX / partner.is_sx
+10001143   | Sophia                            |    3    | 40001143   | SX / partner.is_sx
+10001148   | Nani                              |    3    | 40001148   | SX / partner.is_sx
+10001152   | Gabriel                           |    3    | 40001152   | SX / partner.is_sx
+10001156   | Toyo                              |    3    | 40001156   | SX / partner.is_sx
+10001162   | Giana                             |    3    | 40001162   | SX / partner.is_sx
+10001167   | Raphael                           |    3    | 40001167   | SX / partner.is_sx
+10001171   | Masamune                          |    3    | 40001171   | SX / partner.is_sx
+10001176   | Ilian                             |    3    | 40001176   | SX / partner.is_sx
+10001181   | Nia                               |    3    | 40001181   | SX / partner.is_sx
+10001185   | Mitsuhide                         |    3    | 40001185   | SX / partner.is_sx
+10001190   | Tokugawa                          |    3    | 40001190   | SX / partner.is_sx
+10001197   | Himiko                            |    3    | 40001197   | SX / partner.is_sx
+10001203   | Ophelia                           |    3    | 40001203   | SX / partner.is_sx
+10001205   | Gramin                            |    3    | 40001205   | SX / partner.is_sx
+10001211   | Tiffany                           |    3    | 40001211   | SX / partner.is_sx
+10001215   | Zeta                              |    3    | 40001215   | SX / partner.is_sx
+10001218   | Cerberus                          |    3    | 40001218   | SX / partner.is_sx
+10001221   | Yilia                             |    3    | 40001221   | SX / partner.is_sx
+10001224   | CapsuGirl                         |    3    | 40001224   | SX / partner.is_sx
+10001228   | Karaxes                           |    3    | 40001228   | SX / partner.is_sx
+10001230   | Jeanne                            |    3    | 40001230   | SX / partner.is_sx
+10001234   | Kristin                           |    3    | 40001234   | SX / partner.is_sx
+10001238   | Angelina                          |    3    | 40001238   | SX / partner.is_sx
+10001241   | Tang                              |    3    | 40001241   | SX / partner.is_sx
+10001245   | Lancelot                          |    3    | 40001245   | SX / partner.is_sx
+10001248   | Alexa                             |    3    | 40001248   | SX / partner.is_sx
+10001251   | Hilda                             |    3    | 40001251   | SX / partner.is_sx
+10001253   | Selina                            |    3    | 40001253   | SX / partner.is_sx
+10001256   | SP Sonya                          |    3    | 40001256   | SX / partner.is_sx
+10001260   | SP Nobunaga                       |    3    | 40001260   | SX / partner.is_sx
+10001262   | Syndra                            |    3    | 40001262   | SX / partner.is_sx
+10001264   | SP Ennmaya                        |    3    | 40001264   | SX / partner.is_sx
+10001266   | Lilith                            |    3    | 40001266   | SX / partner.is_sx
+10001267   | SP Hottie                         |    3    | 40001267   | SX / partner.is_sx
+10001268   | SP CapsuGirl                      |    3    | 40001268   | SX / partner.is_sx
+10001269   | SP Muppet                         |    3    | 40001269   | SX / partner.is_sx
+10001270   | SP Librarian                      |    3    | 40001270   | SX / partner.is_sx
+10001271   | Rubearl                           |    3    | 40001271   | SX / partner.is_sx
+10001272   | SP Pandaria                       |    3    | 40001272   | SX / partner.is_sx
+10001273   | Finlil                            |    3    | 40001273   | SX / partner.is_sx
+10001274   | SP Priestess                      |    3    | 40001274   | SX / partner.is_sx
+10001275   | SP Sapphire                       |    3    | 40001275   | SX / partner.is_sx

@@ -1,0 +1,1504 @@
+{
+  "_meta": {
+    "generated_by": "Pass42.9 from canonical Pass42.8 Girl catalogue",
+    "girl_catalog_parent_sha256": "daa4beebdc14c85a1dbd995e2d088bee72a3fa3548e22c6aec86daddb35c930f",
+    "purpose": "Runtime-authoritative featured/Legacy candidate cohorts; never use numeric-prefix classification.",
+    "rules": [
+      "SX eligible set is current GirlsGuide-visible partner.is_sx=1.",
+      "Medium legacy ordinary extension is limited_or_unmapped non-SX native1..3 with positive Soul-Casket type2/type5 fragment evidence.",
+      "Medium featured-only rotation is limited_or_unmapped non-SX native1..3 without positive Soul-Casket type2/type5 evidence.",
+      "Zhi Yao native5 cumulative-recharge direct acquisition is excluded."
+    ],
+    "schema_version": 1,
+    "source_resolution": "effective_merged"
+  },
+  "medium_legacy_featured_only": [
+    {
+      "hero_id": 10001034,
+      "is_sx": false,
+      "name": "Tennese",
+      "native_star": 1,
+      "stone_id": 40001034
+    },
+    {
+      "hero_id": 10001041,
+      "is_sx": false,
+      "name": "Kratos",
+      "native_star": 3,
+      "stone_id": 40001041
+    },
+    {
+      "hero_id": 10001042,
+      "is_sx": false,
+      "name": "Luna",
+      "native_star": 1,
+      "stone_id": 40001042
+    },
+    {
+      "hero_id": 10001054,
+      "is_sx": false,
+      "name": "Xmas Elf",
+      "native_star": 1,
+      "stone_id": 40001054
+    },
+    {
+      "hero_id": 10001065,
+      "is_sx": false,
+      "name": "Springy",
+      "native_star": 1,
+      "stone_id": 40001065
+    },
+    {
+      "hero_id": 10001068,
+      "is_sx": false,
+      "name": "Fleur",
+      "native_star": 2,
+      "stone_id": 40001068
+    },
+    {
+      "hero_id": 10001069,
+      "is_sx": false,
+      "name": "Himoto",
+      "native_star": 1,
+      "stone_id": 40001069
+    },
+    {
+      "hero_id": 10001082,
+      "is_sx": false,
+      "name": "Silvia",
+      "native_star": 3,
+      "stone_id": 40001082
+    },
+    {
+      "hero_id": 10001089,
+      "is_sx": false,
+      "name": "Samurai",
+      "native_star": 3,
+      "stone_id": 40001089
+    },
+    {
+      "hero_id": 10001090,
+      "is_sx": false,
+      "name": "Roselle",
+      "native_star": 3,
+      "stone_id": 40001090
+    },
+    {
+      "hero_id": 10001097,
+      "is_sx": false,
+      "name": "Matador",
+      "native_star": 3,
+      "stone_id": 40001097
+    },
+    {
+      "hero_id": 10001101,
+      "is_sx": false,
+      "name": "Liah",
+      "native_star": 1,
+      "stone_id": 40001101
+    },
+    {
+      "hero_id": 10001104,
+      "is_sx": false,
+      "name": "Jade",
+      "native_star": 1,
+      "stone_id": 40001104
+    },
+    {
+      "hero_id": 10001114,
+      "is_sx": false,
+      "name": "Sasuke",
+      "native_star": 2,
+      "stone_id": 40001114
+    },
+    {
+      "hero_id": 10001122,
+      "is_sx": false,
+      "name": "Linky",
+      "native_star": 3,
+      "stone_id": 40001122
+    },
+    {
+      "hero_id": 10001129,
+      "is_sx": false,
+      "name": "Max",
+      "native_star": 3,
+      "stone_id": 40001129
+    },
+    {
+      "hero_id": 10001131,
+      "is_sx": false,
+      "name": "Sakura",
+      "native_star": 1,
+      "stone_id": 40001131
+    },
+    {
+      "hero_id": 10001133,
+      "is_sx": false,
+      "name": "Nancy",
+      "native_star": 3,
+      "stone_id": 40001133
+    },
+    {
+      "hero_id": 10001136,
+      "is_sx": false,
+      "name": "Ruby",
+      "native_star": 3,
+      "stone_id": 40001136
+    },
+    {
+      "hero_id": 10001142,
+      "is_sx": false,
+      "name": "Omega",
+      "native_star": 3,
+      "stone_id": 40001142
+    },
+    {
+      "hero_id": 10001144,
+      "is_sx": false,
+      "name": "KongMing",
+      "native_star": 2,
+      "stone_id": 40001144
+    },
+    {
+      "hero_id": 10001150,
+      "is_sx": false,
+      "name": "Veila",
+      "native_star": 1,
+      "stone_id": 40001150
+    },
+    {
+      "hero_id": 10001151,
+      "is_sx": false,
+      "name": "Wandy",
+      "native_star": 3,
+      "stone_id": 40001151
+    },
+    {
+      "hero_id": 10001157,
+      "is_sx": false,
+      "name": "Mira",
+      "native_star": 1,
+      "stone_id": 40001157
+    },
+    {
+      "hero_id": 10001158,
+      "is_sx": false,
+      "name": "Lucifer",
+      "native_star": 1,
+      "stone_id": 40001158
+    },
+    {
+      "hero_id": 10001160,
+      "is_sx": false,
+      "name": "Katie",
+      "native_star": 3,
+      "stone_id": 40001160
+    },
+    {
+      "hero_id": 10001161,
+      "is_sx": false,
+      "name": "Tula",
+      "native_star": 3,
+      "stone_id": 40001161
+    },
+    {
+      "hero_id": 10001165,
+      "is_sx": false,
+      "name": "Boro",
+      "native_star": 1,
+      "stone_id": 40001165
+    },
+    {
+      "hero_id": 10001166,
+      "is_sx": false,
+      "name": "Reo",
+      "native_star": 3,
+      "stone_id": 40001166
+    },
+    {
+      "hero_id": 10001169,
+      "is_sx": false,
+      "name": "Yonky",
+      "native_star": 1,
+      "stone_id": 40001169
+    },
+    {
+      "hero_id": 10001180,
+      "is_sx": false,
+      "name": "King",
+      "native_star": 3,
+      "stone_id": 40001180
+    },
+    {
+      "hero_id": 10001182,
+      "is_sx": false,
+      "name": "Ursula",
+      "native_star": 3,
+      "stone_id": 40001182
+    },
+    {
+      "hero_id": 10001184,
+      "is_sx": false,
+      "name": "Camila",
+      "native_star": 3,
+      "stone_id": 40001184
+    },
+    {
+      "hero_id": 10001192,
+      "is_sx": false,
+      "name": "Liklis",
+      "native_star": 3,
+      "stone_id": 40001192
+    },
+    {
+      "hero_id": 10001193,
+      "is_sx": false,
+      "name": "Feran",
+      "native_star": 2,
+      "stone_id": 40001193
+    },
+    {
+      "hero_id": 10001194,
+      "is_sx": false,
+      "name": "Fear",
+      "native_star": 3,
+      "stone_id": 40001194
+    },
+    {
+      "hero_id": 10001195,
+      "is_sx": false,
+      "name": "Isabella",
+      "native_star": 3,
+      "stone_id": 40001195
+    },
+    {
+      "hero_id": 10001196,
+      "is_sx": false,
+      "name": "Katy",
+      "native_star": 3,
+      "stone_id": 40001196
+    },
+    {
+      "hero_id": 10001198,
+      "is_sx": false,
+      "name": "Claudia",
+      "native_star": 3,
+      "stone_id": 40001198
+    },
+    {
+      "hero_id": 10001199,
+      "is_sx": false,
+      "name": "Shirley",
+      "native_star": 3,
+      "stone_id": 40001199
+    },
+    {
+      "hero_id": 10001200,
+      "is_sx": false,
+      "name": "KM-Moe",
+      "native_star": 2,
+      "stone_id": 40001200
+    },
+    {
+      "hero_id": 10001201,
+      "is_sx": false,
+      "name": "Lydia",
+      "native_star": 3,
+      "stone_id": 40001201
+    },
+    {
+      "hero_id": 10001202,
+      "is_sx": false,
+      "name": "Catherine",
+      "native_star": 3,
+      "stone_id": 40001202
+    },
+    {
+      "hero_id": 10001204,
+      "is_sx": false,
+      "name": "Stephanie",
+      "native_star": 3,
+      "stone_id": 40001204
+    },
+    {
+      "hero_id": 10001206,
+      "is_sx": false,
+      "name": "Vivian",
+      "native_star": 3,
+      "stone_id": 40001206
+    },
+    {
+      "hero_id": 10001225,
+      "is_sx": false,
+      "name": "Reindeer",
+      "native_star": 1,
+      "stone_id": 40001225
+    },
+    {
+      "hero_id": 10001229,
+      "is_sx": false,
+      "name": "SugarMom",
+      "native_star": 1,
+      "stone_id": 40001229
+    },
+    {
+      "hero_id": 10001232,
+      "is_sx": false,
+      "name": "Kratos·Lily",
+      "native_star": 3,
+      "stone_id": 40001232
+    },
+    {
+      "hero_id": 10001242,
+      "is_sx": false,
+      "name": "The K.",
+      "native_star": 3,
+      "stone_id": 40001242
+    },
+    {
+      "hero_id": 10001250,
+      "is_sx": false,
+      "name": "Tessa",
+      "native_star": 1,
+      "stone_id": 40001250
+    },
+    {
+      "hero_id": 10001258,
+      "is_sx": false,
+      "name": "Odin",
+      "native_star": 3,
+      "stone_id": 40001258
+    },
+    {
+      "hero_id": 10001261,
+      "is_sx": false,
+      "name": "SP Lightin",
+      "native_star": 3,
+      "stone_id": 40001261
+    },
+    {
+      "hero_id": 10001263,
+      "is_sx": false,
+      "name": "Flora",
+      "native_star": 3,
+      "stone_id": 40001263
+    },
+    {
+      "hero_id": 10001265,
+      "is_sx": false,
+      "name": "SP Lily",
+      "native_star": 3,
+      "stone_id": 40001265
+    },
+    {
+      "hero_id": 10001276,
+      "is_sx": false,
+      "name": "SP Kratos",
+      "native_star": 3,
+      "stone_id": 40001276
+    },
+    {
+      "hero_id": 10001277,
+      "is_sx": false,
+      "name": "SP Geisha",
+      "native_star": 3,
+      "stone_id": 40001277
+    }
+  ],
+  "medium_legacy_ordinary_extension": [
+    {
+      "hero_id": 10001044,
+      "is_sx": false,
+      "name": "Celeste",
+      "native_star": 3,
+      "soul_casket_fragment_types": [
+        2
+      ],
+      "stone_id": 40001044
+    },
+    {
+      "hero_id": 10001047,
+      "is_sx": false,
+      "name": "Karatine",
+      "native_star": 2,
+      "soul_casket_fragment_types": [
+        5
+      ],
+      "stone_id": 40001047
+    },
+    {
+      "hero_id": 10001048,
+      "is_sx": false,
+      "name": "Lin ﹒AI",
+      "native_star": 3,
+      "soul_casket_fragment_types": [
+        2
+      ],
+      "stone_id": 40001048
+    },
+    {
+      "hero_id": 10001049,
+      "is_sx": false,
+      "name": "Caitlyn",
+      "native_star": 3,
+      "soul_casket_fragment_types": [
+        2
+      ],
+      "stone_id": 40001049
+    },
+    {
+      "hero_id": 10001073,
+      "is_sx": false,
+      "name": "Beary",
+      "native_star": 3,
+      "soul_casket_fragment_types": [
+        2
+      ],
+      "stone_id": 40001073
+    },
+    {
+      "hero_id": 10001080,
+      "is_sx": false,
+      "name": "Nun",
+      "native_star": 2,
+      "soul_casket_fragment_types": [
+        5
+      ],
+      "stone_id": 40001080
+    },
+    {
+      "hero_id": 10001086,
+      "is_sx": false,
+      "name": "Lisa",
+      "native_star": 2,
+      "soul_casket_fragment_types": [
+        5
+      ],
+      "stone_id": 40001086
+    },
+    {
+      "hero_id": 10001093,
+      "is_sx": false,
+      "name": "Sisha",
+      "native_star": 3,
+      "soul_casket_fragment_types": [
+        2
+      ],
+      "stone_id": 40001093
+    },
+    {
+      "hero_id": 10001094,
+      "is_sx": false,
+      "name": "Octagirl",
+      "native_star": 3,
+      "soul_casket_fragment_types": [
+        2
+      ],
+      "stone_id": 40001094
+    },
+    {
+      "hero_id": 10001096,
+      "is_sx": false,
+      "name": "Robin",
+      "native_star": 2,
+      "soul_casket_fragment_types": [
+        5
+      ],
+      "stone_id": 40001096
+    },
+    {
+      "hero_id": 10001099,
+      "is_sx": false,
+      "name": "Meimi",
+      "native_star": 2,
+      "soul_casket_fragment_types": [
+        5
+      ],
+      "stone_id": 40001099
+    },
+    {
+      "hero_id": 10001106,
+      "is_sx": false,
+      "name": "Jelly",
+      "native_star": 3,
+      "soul_casket_fragment_types": [
+        2
+      ],
+      "stone_id": 40001106
+    },
+    {
+      "hero_id": 10001107,
+      "is_sx": false,
+      "name": "Kitty",
+      "native_star": 2,
+      "soul_casket_fragment_types": [
+        5
+      ],
+      "stone_id": 40001107
+    },
+    {
+      "hero_id": 10001110,
+      "is_sx": false,
+      "name": "Sailor",
+      "native_star": 2,
+      "soul_casket_fragment_types": [
+        5
+      ],
+      "stone_id": 40001110
+    },
+    {
+      "hero_id": 10001115,
+      "is_sx": false,
+      "name": "Marynari",
+      "native_star": 3,
+      "soul_casket_fragment_types": [
+        2
+      ],
+      "stone_id": 40001115
+    },
+    {
+      "hero_id": 10001118,
+      "is_sx": false,
+      "name": "Susan",
+      "native_star": 3,
+      "soul_casket_fragment_types": [
+        2
+      ],
+      "stone_id": 40001118
+    },
+    {
+      "hero_id": 10001119,
+      "is_sx": false,
+      "name": "Shamoke",
+      "native_star": 2,
+      "soul_casket_fragment_types": [
+        5
+      ],
+      "stone_id": 40001119
+    },
+    {
+      "hero_id": 10001120,
+      "is_sx": false,
+      "name": "Stella",
+      "native_star": 3,
+      "soul_casket_fragment_types": [
+        2
+      ],
+      "stone_id": 40001120
+    },
+    {
+      "hero_id": 10001127,
+      "is_sx": false,
+      "name": "Elloi",
+      "native_star": 2,
+      "soul_casket_fragment_types": [
+        5
+      ],
+      "stone_id": 40001127
+    },
+    {
+      "hero_id": 10001132,
+      "is_sx": false,
+      "name": "Dolly",
+      "native_star": 3,
+      "soul_casket_fragment_types": [
+        2
+      ],
+      "stone_id": 40001132
+    },
+    {
+      "hero_id": 10001135,
+      "is_sx": false,
+      "name": "Nasha",
+      "native_star": 2,
+      "soul_casket_fragment_types": [
+        5
+      ],
+      "stone_id": 40001135
+    },
+    {
+      "hero_id": 10001145,
+      "is_sx": false,
+      "name": "Nono",
+      "native_star": 2,
+      "soul_casket_fragment_types": [
+        5
+      ],
+      "stone_id": 40001145
+    },
+    {
+      "hero_id": 10001154,
+      "is_sx": false,
+      "name": "Vanees",
+      "native_star": 2,
+      "soul_casket_fragment_types": [
+        5
+      ],
+      "stone_id": 40001154
+    },
+    {
+      "hero_id": 10001163,
+      "is_sx": false,
+      "name": "Nir",
+      "native_star": 2,
+      "soul_casket_fragment_types": [
+        5
+      ],
+      "stone_id": 40001163
+    },
+    {
+      "hero_id": 10001173,
+      "is_sx": false,
+      "name": "Donna",
+      "native_star": 2,
+      "soul_casket_fragment_types": [
+        5
+      ],
+      "stone_id": 40001173
+    },
+    {
+      "hero_id": 10001179,
+      "is_sx": false,
+      "name": "Poppi",
+      "native_star": 2,
+      "soul_casket_fragment_types": [
+        5
+      ],
+      "stone_id": 40001179
+    },
+    {
+      "hero_id": 10001207,
+      "is_sx": false,
+      "name": "Ryoma",
+      "native_star": 3,
+      "soul_casket_fragment_types": [
+        2
+      ],
+      "stone_id": 40001207
+    },
+    {
+      "hero_id": 10001208,
+      "is_sx": false,
+      "name": "Irene",
+      "native_star": 3,
+      "soul_casket_fragment_types": [
+        2
+      ],
+      "stone_id": 40001208
+    },
+    {
+      "hero_id": 10001209,
+      "is_sx": false,
+      "name": "Cersei",
+      "native_star": 3,
+      "soul_casket_fragment_types": [
+        2
+      ],
+      "stone_id": 40001209
+    },
+    {
+      "hero_id": 10001210,
+      "is_sx": false,
+      "name": "Yolanda",
+      "native_star": 3,
+      "soul_casket_fragment_types": [
+        2
+      ],
+      "stone_id": 40001210
+    },
+    {
+      "hero_id": 10001212,
+      "is_sx": false,
+      "name": "Barbara",
+      "native_star": 3,
+      "soul_casket_fragment_types": [
+        2
+      ],
+      "stone_id": 40001212
+    },
+    {
+      "hero_id": 10001213,
+      "is_sx": false,
+      "name": "Zashiki",
+      "native_star": 3,
+      "soul_casket_fragment_types": [
+        2
+      ],
+      "stone_id": 40001213
+    },
+    {
+      "hero_id": 10001214,
+      "is_sx": false,
+      "name": "Titania",
+      "native_star": 3,
+      "soul_casket_fragment_types": [
+        2
+      ],
+      "stone_id": 40001214
+    },
+    {
+      "hero_id": 10001216,
+      "is_sx": false,
+      "name": "Amira",
+      "native_star": 3,
+      "soul_casket_fragment_types": [
+        2
+      ],
+      "stone_id": 40001216
+    },
+    {
+      "hero_id": 10001217,
+      "is_sx": false,
+      "name": "Jyaku",
+      "native_star": 3,
+      "soul_casket_fragment_types": [
+        2
+      ],
+      "stone_id": 40001217
+    },
+    {
+      "hero_id": 10001219,
+      "is_sx": false,
+      "name": "Froslass",
+      "native_star": 3,
+      "soul_casket_fragment_types": [
+        2
+      ],
+      "stone_id": 40001219
+    },
+    {
+      "hero_id": 10001220,
+      "is_sx": false,
+      "name": "Sandra",
+      "native_star": 3,
+      "soul_casket_fragment_types": [
+        2
+      ],
+      "stone_id": 40001220
+    },
+    {
+      "hero_id": 10001222,
+      "is_sx": false,
+      "name": "Caroline",
+      "native_star": 3,
+      "soul_casket_fragment_types": [
+        2
+      ],
+      "stone_id": 40001222
+    },
+    {
+      "hero_id": 10001223,
+      "is_sx": false,
+      "name": "Lecia",
+      "native_star": 3,
+      "soul_casket_fragment_types": [
+        2
+      ],
+      "stone_id": 40001223
+    },
+    {
+      "hero_id": 10001226,
+      "is_sx": false,
+      "name": "Collins",
+      "native_star": 3,
+      "soul_casket_fragment_types": [
+        2
+      ],
+      "stone_id": 40001226
+    },
+    {
+      "hero_id": 10001227,
+      "is_sx": false,
+      "name": "Shiki",
+      "native_star": 3,
+      "soul_casket_fragment_types": [
+        2
+      ],
+      "stone_id": 40001227
+    },
+    {
+      "hero_id": 10001231,
+      "is_sx": false,
+      "name": "Amanda",
+      "native_star": 3,
+      "soul_casket_fragment_types": [
+        2
+      ],
+      "stone_id": 40001231
+    },
+    {
+      "hero_id": 10001233,
+      "is_sx": false,
+      "name": "Campanula",
+      "native_star": 3,
+      "soul_casket_fragment_types": [
+        2
+      ],
+      "stone_id": 40001233
+    },
+    {
+      "hero_id": 10001235,
+      "is_sx": false,
+      "name": "Siren",
+      "native_star": 3,
+      "soul_casket_fragment_types": [
+        2
+      ],
+      "stone_id": 40001235
+    },
+    {
+      "hero_id": 10001236,
+      "is_sx": false,
+      "name": "Margaret",
+      "native_star": 3,
+      "soul_casket_fragment_types": [
+        2
+      ],
+      "stone_id": 40001236
+    },
+    {
+      "hero_id": 10001237,
+      "is_sx": false,
+      "name": "Serpent",
+      "native_star": 3,
+      "soul_casket_fragment_types": [
+        2
+      ],
+      "stone_id": 40001237
+    },
+    {
+      "hero_id": 10001239,
+      "is_sx": false,
+      "name": "Chily",
+      "native_star": 3,
+      "soul_casket_fragment_types": [
+        2
+      ],
+      "stone_id": 40001239
+    },
+    {
+      "hero_id": 10001240,
+      "is_sx": false,
+      "name": "Temari",
+      "native_star": 3,
+      "soul_casket_fragment_types": [
+        2
+      ],
+      "stone_id": 40001240
+    },
+    {
+      "hero_id": 10001243,
+      "is_sx": false,
+      "name": "DJ.Du",
+      "native_star": 3,
+      "soul_casket_fragment_types": [
+        2
+      ],
+      "stone_id": 40001243
+    },
+    {
+      "hero_id": 10001244,
+      "is_sx": false,
+      "name": "Durandal",
+      "native_star": 3,
+      "soul_casket_fragment_types": [
+        2
+      ],
+      "stone_id": 40001244
+    },
+    {
+      "hero_id": 10001246,
+      "is_sx": false,
+      "name": "Lauren",
+      "native_star": 3,
+      "soul_casket_fragment_types": [
+        2
+      ],
+      "stone_id": 40001246
+    },
+    {
+      "hero_id": 10001247,
+      "is_sx": false,
+      "name": "Deirdre",
+      "native_star": 3,
+      "soul_casket_fragment_types": [
+        2
+      ],
+      "stone_id": 40001247
+    },
+    {
+      "hero_id": 10001249,
+      "is_sx": false,
+      "name": "SP Aquaris",
+      "native_star": 3,
+      "soul_casket_fragment_types": [
+        2
+      ],
+      "stone_id": 40001249
+    },
+    {
+      "hero_id": 10001252,
+      "is_sx": false,
+      "name": "Sami",
+      "native_star": 3,
+      "soul_casket_fragment_types": [
+        2
+      ],
+      "stone_id": 40001252
+    },
+    {
+      "hero_id": 10001254,
+      "is_sx": false,
+      "name": "Kagetora",
+      "native_star": 3,
+      "soul_casket_fragment_types": [
+        2
+      ],
+      "stone_id": 40001254
+    },
+    {
+      "hero_id": 10001255,
+      "is_sx": false,
+      "name": "SP Gambler",
+      "native_star": 3,
+      "soul_casket_fragment_types": [
+        2
+      ],
+      "stone_id": 40001255
+    },
+    {
+      "hero_id": 10001257,
+      "is_sx": false,
+      "name": "SP Lavia",
+      "native_star": 3,
+      "soul_casket_fragment_types": [
+        2
+      ],
+      "stone_id": 40001257
+    },
+    {
+      "hero_id": 10001259,
+      "is_sx": false,
+      "name": "SP Xmas Elf",
+      "native_star": 3,
+      "soul_casket_fragment_types": [
+        2
+      ],
+      "stone_id": 40001259
+    }
+  ],
+  "sx_eligible": [
+    {
+      "hero_id": 10001032,
+      "is_sx": true,
+      "name": "Guan Yin",
+      "native_star": 3,
+      "stone_id": 40001032
+    },
+    {
+      "hero_id": 10001035,
+      "is_sx": true,
+      "name": "Sonya",
+      "native_star": 3,
+      "stone_id": 40001035
+    },
+    {
+      "hero_id": 10001037,
+      "is_sx": true,
+      "name": "Psychic",
+      "native_star": 3,
+      "stone_id": 40001037
+    },
+    {
+      "hero_id": 10001045,
+      "is_sx": true,
+      "name": "Javelin",
+      "native_star": 3,
+      "stone_id": 40001045
+    },
+    {
+      "hero_id": 10001052,
+      "is_sx": true,
+      "name": "Wu Kong",
+      "native_star": 3,
+      "stone_id": 40001052
+    },
+    {
+      "hero_id": 10001056,
+      "is_sx": true,
+      "name": "Capt.Sun",
+      "native_star": 3,
+      "stone_id": 40001056
+    },
+    {
+      "hero_id": 10001059,
+      "is_sx": true,
+      "name": "Fencer",
+      "native_star": 3,
+      "stone_id": 40001059
+    },
+    {
+      "hero_id": 10001061,
+      "is_sx": true,
+      "name": "Revolver",
+      "native_star": 3,
+      "stone_id": 40001061
+    },
+    {
+      "hero_id": 10001064,
+      "is_sx": true,
+      "name": "Priestess",
+      "native_star": 3,
+      "stone_id": 40001064
+    },
+    {
+      "hero_id": 10001067,
+      "is_sx": true,
+      "name": "Werewolf",
+      "native_star": 3,
+      "stone_id": 40001067
+    },
+    {
+      "hero_id": 10001071,
+      "is_sx": true,
+      "name": "Elisa",
+      "native_star": 3,
+      "stone_id": 40001071
+    },
+    {
+      "hero_id": 10001074,
+      "is_sx": true,
+      "name": "Librarian",
+      "native_star": 3,
+      "stone_id": 40001074
+    },
+    {
+      "hero_id": 10001076,
+      "is_sx": true,
+      "name": "Hypatia",
+      "native_star": 3,
+      "stone_id": 40001076
+    },
+    {
+      "hero_id": 10001077,
+      "is_sx": true,
+      "name": "Sapphire",
+      "native_star": 3,
+      "stone_id": 40001077
+    },
+    {
+      "hero_id": 10001079,
+      "is_sx": true,
+      "name": "Amber",
+      "native_star": 3,
+      "stone_id": 40001079
+    },
+    {
+      "hero_id": 10001084,
+      "is_sx": true,
+      "name": "Selene",
+      "native_star": 3,
+      "stone_id": 40001084
+    },
+    {
+      "hero_id": 10001087,
+      "is_sx": true,
+      "name": "Phoenix",
+      "native_star": 3,
+      "stone_id": 40001087
+    },
+    {
+      "hero_id": 10001092,
+      "is_sx": true,
+      "name": "Amelia",
+      "native_star": 3,
+      "stone_id": 40001092
+    },
+    {
+      "hero_id": 10001095,
+      "is_sx": true,
+      "name": "Wraith",
+      "native_star": 3,
+      "stone_id": 40001095
+    },
+    {
+      "hero_id": 10001100,
+      "is_sx": true,
+      "name": "Alice",
+      "native_star": 3,
+      "stone_id": 40001100
+    },
+    {
+      "hero_id": 10001103,
+      "is_sx": true,
+      "name": "Ennmaya",
+      "native_star": 3,
+      "stone_id": 40001103
+    },
+    {
+      "hero_id": 10001109,
+      "is_sx": true,
+      "name": "Hexa",
+      "native_star": 3,
+      "stone_id": 40001109
+    },
+    {
+      "hero_id": 10001113,
+      "is_sx": true,
+      "name": "Nobunaga",
+      "native_star": 3,
+      "stone_id": 40001113
+    },
+    {
+      "hero_id": 10001117,
+      "is_sx": true,
+      "name": "Nona",
+      "native_star": 3,
+      "stone_id": 40001117
+    },
+    {
+      "hero_id": 10001121,
+      "is_sx": true,
+      "name": "Diva",
+      "native_star": 3,
+      "stone_id": 40001121
+    },
+    {
+      "hero_id": 10001126,
+      "is_sx": true,
+      "name": "Caitlin",
+      "native_star": 3,
+      "stone_id": 40001126
+    },
+    {
+      "hero_id": 10001130,
+      "is_sx": true,
+      "name": "Medusa",
+      "native_star": 3,
+      "stone_id": 40001130
+    },
+    {
+      "hero_id": 10001134,
+      "is_sx": true,
+      "name": "Kaylee",
+      "native_star": 3,
+      "stone_id": 40001134
+    },
+    {
+      "hero_id": 10001137,
+      "is_sx": true,
+      "name": "Ashely",
+      "native_star": 3,
+      "stone_id": 40001137
+    },
+    {
+      "hero_id": 10001139,
+      "is_sx": true,
+      "name": "Cayla",
+      "native_star": 3,
+      "stone_id": 40001139
+    },
+    {
+      "hero_id": 10001140,
+      "is_sx": true,
+      "name": "Liz",
+      "native_star": 3,
+      "stone_id": 40001140
+    },
+    {
+      "hero_id": 10001143,
+      "is_sx": true,
+      "name": "Sophia",
+      "native_star": 3,
+      "stone_id": 40001143
+    },
+    {
+      "hero_id": 10001148,
+      "is_sx": true,
+      "name": "Nani",
+      "native_star": 3,
+      "stone_id": 40001148
+    },
+    {
+      "hero_id": 10001152,
+      "is_sx": true,
+      "name": "Gabriel",
+      "native_star": 3,
+      "stone_id": 40001152
+    },
+    {
+      "hero_id": 10001156,
+      "is_sx": true,
+      "name": "Toyo",
+      "native_star": 3,
+      "stone_id": 40001156
+    },
+    {
+      "hero_id": 10001162,
+      "is_sx": true,
+      "name": "Giana",
+      "native_star": 3,
+      "stone_id": 40001162
+    },
+    {
+      "hero_id": 10001167,
+      "is_sx": true,
+      "name": "Raphael",
+      "native_star": 3,
+      "stone_id": 40001167
+    },
+    {
+      "hero_id": 10001171,
+      "is_sx": true,
+      "name": "Masamune",
+      "native_star": 3,
+      "stone_id": 40001171
+    },
+    {
+      "hero_id": 10001176,
+      "is_sx": true,
+      "name": "Ilian",
+      "native_star": 3,
+      "stone_id": 40001176
+    },
+    {
+      "hero_id": 10001181,
+      "is_sx": true,
+      "name": "Nia",
+      "native_star": 3,
+      "stone_id": 40001181
+    },
+    {
+      "hero_id": 10001185,
+      "is_sx": true,
+      "name": "Mitsuhide",
+      "native_star": 3,
+      "stone_id": 40001185
+    },
+    {
+      "hero_id": 10001190,
+      "is_sx": true,
+      "name": "Tokugawa",
+      "native_star": 3,
+      "stone_id": 40001190
+    },
+    {
+      "hero_id": 10001197,
+      "is_sx": true,
+      "name": "Himiko",
+      "native_star": 3,
+      "stone_id": 40001197
+    },
+    {
+      "hero_id": 10001203,
+      "is_sx": true,
+      "name": "Ophelia",
+      "native_star": 3,
+      "stone_id": 40001203
+    },
+    {
+      "hero_id": 10001205,
+      "is_sx": true,
+      "name": "Gramin",
+      "native_star": 3,
+      "stone_id": 40001205
+    },
+    {
+      "hero_id": 10001211,
+      "is_sx": true,
+      "name": "Tiffany",
+      "native_star": 3,
+      "stone_id": 40001211
+    },
+    {
+      "hero_id": 10001215,
+      "is_sx": true,
+      "name": "Zeta",
+      "native_star": 3,
+      "stone_id": 40001215
+    },
+    {
+      "hero_id": 10001218,
+      "is_sx": true,
+      "name": "Cerberus",
+      "native_star": 3,
+      "stone_id": 40001218
+    },
+    {
+      "hero_id": 10001221,
+      "is_sx": true,
+      "name": "Yilia",
+      "native_star": 3,
+      "stone_id": 40001221
+    },
+    {
+      "hero_id": 10001224,
+      "is_sx": true,
+      "name": "CapsuGirl",
+      "native_star": 3,
+      "stone_id": 40001224
+    },
+    {
+      "hero_id": 10001228,
+      "is_sx": true,
+      "name": "Karaxes",
+      "native_star": 3,
+      "stone_id": 40001228
+    },
+    {
+      "hero_id": 10001230,
+      "is_sx": true,
+      "name": "Jeanne",
+      "native_star": 3,
+      "stone_id": 40001230
+    },
+    {
+      "hero_id": 10001234,
+      "is_sx": true,
+      "name": "Kristin",
+      "native_star": 3,
+      "stone_id": 40001234
+    },
+    {
+      "hero_id": 10001238,
+      "is_sx": true,
+      "name": "Angelina",
+      "native_star": 3,
+      "stone_id": 40001238
+    },
+    {
+      "hero_id": 10001241,
+      "is_sx": true,
+      "name": "Tang",
+      "native_star": 3,
+      "stone_id": 40001241
+    },
+    {
+      "hero_id": 10001245,
+      "is_sx": true,
+      "name": "Lancelot",
+      "native_star": 3,
+      "stone_id": 40001245
+    },
+    {
+      "hero_id": 10001248,
+      "is_sx": true,
+      "name": "Alexa",
+      "native_star": 3,
+      "stone_id": 40001248
+    },
+    {
+      "hero_id": 10001251,
+      "is_sx": true,
+      "name": "Hilda",
+      "native_star": 3,
+      "stone_id": 40001251
+    },
+    {
+      "hero_id": 10001253,
+      "is_sx": true,
+      "name": "Selina",
+      "native_star": 3,
+      "stone_id": 40001253
+    },
+    {
+      "hero_id": 10001256,
+      "is_sx": true,
+      "name": "SP Sonya",
+      "native_star": 3,
+      "stone_id": 40001256
+    },
+    {
+      "hero_id": 10001260,
+      "is_sx": true,
+      "name": "SP Nobunaga",
+      "native_star": 3,
+      "stone_id": 40001260
+    },
+    {
+      "hero_id": 10001262,
+      "is_sx": true,
+      "name": "Syndra",
+      "native_star": 3,
+      "stone_id": 40001262
+    },
+    {
+      "hero_id": 10001264,
+      "is_sx": true,
+      "name": "SP Ennmaya",
+      "native_star": 3,
+      "stone_id": 40001264
+    },
+    {
+      "hero_id": 10001266,
+      "is_sx": true,
+      "name": "Lilith",
+      "native_star": 3,
+      "stone_id": 40001266
+    },
+    {
+      "hero_id": 10001267,
+      "is_sx": true,
+      "name": "SP Hottie",
+      "native_star": 3,
+      "stone_id": 40001267
+    },
+    {
+      "hero_id": 10001268,
+      "is_sx": true,
+      "name": "SP CapsuGirl",
+      "native_star": 3,
+      "stone_id": 40001268
+    },
+    {
+      "hero_id": 10001269,
+      "is_sx": true,
+      "name": "SP Muppet",
+      "native_star": 3,
+      "stone_id": 40001269
+    },
+    {
+      "hero_id": 10001270,
+      "is_sx": true,
+      "name": "SP Librarian",
+      "native_star": 3,
+      "stone_id": 40001270
+    },
+    {
+      "hero_id": 10001271,
+      "is_sx": true,
+      "name": "Rubearl",
+      "native_star": 3,
+      "stone_id": 40001271
+    },
+    {
+      "hero_id": 10001272,
+      "is_sx": true,
+      "name": "SP Pandaria",
+      "native_star": 3,
+      "stone_id": 40001272
+    },
+    {
+      "hero_id": 10001273,
+      "is_sx": true,
+      "name": "Finlil",
+      "native_star": 3,
+      "stone_id": 40001273
+    },
+    {
+      "hero_id": 10001274,
+      "is_sx": true,
+      "name": "SP Priestess",
+      "native_star": 3,
+      "stone_id": 40001274
+    },
+    {
+      "hero_id": 10001275,
+      "is_sx": true,
+      "name": "SP Sapphire",
+      "native_star": 3,
+      "stone_id": 40001275
+    }
+  ]
+}

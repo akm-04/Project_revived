@@ -1,0 +1,4526 @@
+{
+  "_meta": {
+    "schema_version": 2,
+    "generated_by": "Pass42.6",
+    "purpose": "Corrected SX/Soul Box source catalog: five recovered static item slots, complete orphan soul_casket partitions, and current partner.is_sx roster.",
+    "effective_source_rule": "downloaded writable src_64 overrides APK src_64",
+    "evidence_boundary": "Static dropbox slots and current partner.is_sx classifier are source authority. soul_casket partitions are orphan server-like configuration evidence; top-level class probabilities remain private policy.",
+    "source_sha256": {
+      "dropbox.lua": "b423d06766402e275340d0d5717adaa9f3af481cea5b2d9f8c25c3170eaafd70",
+      "soul_casket.lua": "ce7022526f6fe234dee67fe584c92ac18c0814c009401ca45dc254a74c9d08d6",
+      "summon.lua": "e34ac8b360d0a623b4c846251e71db939d3920e9769ab40889c656904a39183d",
+      "misc.lua": "8f110f305d79fd49146fbdf49f47e9cfee4bbf2e3553061086db118596adc433"
+    },
+    "girl_catalog_source": "Pass42.5.1 self-healed GIRL_CATALOG built from effective partner/GirlsGuide source",
+    "guardrails": [
+      "partner.is_sx is current SX identity authority; never infer SX from soul_casket type6.",
+      "type1 is historical full-SX snapshot; current SX eligibility is all current is_sx Girls.",
+      "type2/type5 fragment semantics are strong inference, not recovered executable server math.",
+      "type6 is ordinary/non-SX full Girl class.",
+      "types3/4 are zero-positive-weight legacy classes and remain disabled.",
+      "Limited/event non-SX Girls are not SX candidates."
+    ]
+  },
+  "source_summon_row": 4,
+  "configured_result_count": 6,
+  "static_pool_ids": [
+    200007,
+    200008,
+    200009,
+    200010,
+    200011
+  ],
+  "static_item_pools": [
+    {
+      "dropbox_id": 200007,
+      "result_kind": "item",
+      "rate_sum": 10000,
+      "rows": [
+        {
+          "row_id": 200007001,
+          "item_id": 50001002,
+          "item_num": 1,
+          "drop_rate": 1500,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200007002,
+          "item_id": 50001004,
+          "item_num": 1,
+          "drop_rate": 1000,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200007003,
+          "item_id": 50001003,
+          "item_num": 1,
+          "drop_rate": 1000,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200007004,
+          "item_id": 50001006,
+          "item_num": 1,
+          "drop_rate": 700,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200007005,
+          "item_id": 50001007,
+          "item_num": 1,
+          "drop_rate": 300,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200007006,
+          "item_id": 50001012,
+          "item_num": 1,
+          "drop_rate": 1200,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200007007,
+          "item_id": 50001010,
+          "item_num": 1,
+          "drop_rate": 900,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200007008,
+          "item_id": 50001011,
+          "item_num": 1,
+          "drop_rate": 400,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200007009,
+          "item_id": 50001002,
+          "item_num": 2,
+          "drop_rate": 700,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200007010,
+          "item_id": 50001004,
+          "item_num": 2,
+          "drop_rate": 400,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200007011,
+          "item_id": 50001003,
+          "item_num": 2,
+          "drop_rate": 400,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200007012,
+          "item_id": 50001006,
+          "item_num": 2,
+          "drop_rate": 275,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200007013,
+          "item_id": 50001007,
+          "item_num": 2,
+          "drop_rate": 125,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200007014,
+          "item_id": 50001012,
+          "item_num": 2,
+          "drop_rate": 500,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200007015,
+          "item_id": 50001010,
+          "item_num": 2,
+          "drop_rate": 450,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200007016,
+          "item_id": 50001011,
+          "item_num": 2,
+          "drop_rate": 150,
+          "roll_type": 1
+        }
+      ]
+    },
+    {
+      "dropbox_id": 200008,
+      "result_kind": "item",
+      "rate_sum": 10000,
+      "rows": [
+        {
+          "row_id": 200008001,
+          "item_id": 50001002,
+          "item_num": 1,
+          "drop_rate": 1500,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200008002,
+          "item_id": 50001004,
+          "item_num": 1,
+          "drop_rate": 1000,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200008003,
+          "item_id": 50001003,
+          "item_num": 1,
+          "drop_rate": 1000,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200008004,
+          "item_id": 50001006,
+          "item_num": 1,
+          "drop_rate": 700,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200008005,
+          "item_id": 50001007,
+          "item_num": 1,
+          "drop_rate": 300,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200008006,
+          "item_id": 50001012,
+          "item_num": 1,
+          "drop_rate": 1200,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200008007,
+          "item_id": 50001010,
+          "item_num": 1,
+          "drop_rate": 900,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200008008,
+          "item_id": 50001011,
+          "item_num": 1,
+          "drop_rate": 400,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200008009,
+          "item_id": 50001002,
+          "item_num": 2,
+          "drop_rate": 700,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200008010,
+          "item_id": 50001004,
+          "item_num": 2,
+          "drop_rate": 400,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200008011,
+          "item_id": 50001003,
+          "item_num": 2,
+          "drop_rate": 400,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200008012,
+          "item_id": 50001006,
+          "item_num": 2,
+          "drop_rate": 275,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200008013,
+          "item_id": 50001007,
+          "item_num": 2,
+          "drop_rate": 125,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200008014,
+          "item_id": 50001012,
+          "item_num": 2,
+          "drop_rate": 500,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200008015,
+          "item_id": 50001010,
+          "item_num": 2,
+          "drop_rate": 450,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200008016,
+          "item_id": 50001011,
+          "item_num": 2,
+          "drop_rate": 150,
+          "roll_type": 1
+        }
+      ]
+    },
+    {
+      "dropbox_id": 200009,
+      "result_kind": "item",
+      "rate_sum": 10000,
+      "rows": [
+        {
+          "row_id": 200009001,
+          "item_id": 50001002,
+          "item_num": 1,
+          "drop_rate": 1500,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200009002,
+          "item_id": 50001004,
+          "item_num": 1,
+          "drop_rate": 1000,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200009003,
+          "item_id": 50001003,
+          "item_num": 1,
+          "drop_rate": 1000,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200009004,
+          "item_id": 50001006,
+          "item_num": 1,
+          "drop_rate": 700,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200009005,
+          "item_id": 50001007,
+          "item_num": 1,
+          "drop_rate": 300,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200009006,
+          "item_id": 50001012,
+          "item_num": 1,
+          "drop_rate": 1200,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200009007,
+          "item_id": 50001010,
+          "item_num": 1,
+          "drop_rate": 900,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200009008,
+          "item_id": 50001011,
+          "item_num": 1,
+          "drop_rate": 400,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200009009,
+          "item_id": 50001002,
+          "item_num": 2,
+          "drop_rate": 700,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200009010,
+          "item_id": 50001004,
+          "item_num": 2,
+          "drop_rate": 400,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200009011,
+          "item_id": 50001003,
+          "item_num": 2,
+          "drop_rate": 400,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200009012,
+          "item_id": 50001006,
+          "item_num": 2,
+          "drop_rate": 275,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200009013,
+          "item_id": 50001007,
+          "item_num": 2,
+          "drop_rate": 125,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200009014,
+          "item_id": 50001012,
+          "item_num": 2,
+          "drop_rate": 500,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200009015,
+          "item_id": 50001010,
+          "item_num": 2,
+          "drop_rate": 450,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200009016,
+          "item_id": 50001011,
+          "item_num": 2,
+          "drop_rate": 150,
+          "roll_type": 1
+        }
+      ]
+    },
+    {
+      "dropbox_id": 200010,
+      "result_kind": "item",
+      "rate_sum": 10000,
+      "rows": [
+        {
+          "row_id": 200010001,
+          "item_id": 50001002,
+          "item_num": 1,
+          "drop_rate": 1500,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200010002,
+          "item_id": 50001004,
+          "item_num": 1,
+          "drop_rate": 1000,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200010003,
+          "item_id": 50001003,
+          "item_num": 1,
+          "drop_rate": 1000,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200010004,
+          "item_id": 50001006,
+          "item_num": 1,
+          "drop_rate": 700,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200010005,
+          "item_id": 50001007,
+          "item_num": 1,
+          "drop_rate": 300,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200010006,
+          "item_id": 50001012,
+          "item_num": 1,
+          "drop_rate": 1200,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200010007,
+          "item_id": 50001010,
+          "item_num": 1,
+          "drop_rate": 900,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200010008,
+          "item_id": 50001011,
+          "item_num": 1,
+          "drop_rate": 400,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200010009,
+          "item_id": 50001002,
+          "item_num": 2,
+          "drop_rate": 700,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200010010,
+          "item_id": 50001004,
+          "item_num": 2,
+          "drop_rate": 400,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200010011,
+          "item_id": 50001003,
+          "item_num": 2,
+          "drop_rate": 400,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200010012,
+          "item_id": 50001006,
+          "item_num": 2,
+          "drop_rate": 275,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200010013,
+          "item_id": 50001007,
+          "item_num": 2,
+          "drop_rate": 125,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200010014,
+          "item_id": 50001012,
+          "item_num": 2,
+          "drop_rate": 500,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200010015,
+          "item_id": 50001010,
+          "item_num": 2,
+          "drop_rate": 450,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200010016,
+          "item_id": 50001011,
+          "item_num": 2,
+          "drop_rate": 150,
+          "roll_type": 1
+        }
+      ]
+    },
+    {
+      "dropbox_id": 200011,
+      "result_kind": "item",
+      "rate_sum": 10000,
+      "rows": [
+        {
+          "row_id": 200011001,
+          "item_id": 50001002,
+          "item_num": 1,
+          "drop_rate": 1500,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200011002,
+          "item_id": 50001004,
+          "item_num": 1,
+          "drop_rate": 1000,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200011003,
+          "item_id": 50001003,
+          "item_num": 1,
+          "drop_rate": 1000,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200011004,
+          "item_id": 50001006,
+          "item_num": 1,
+          "drop_rate": 700,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200011005,
+          "item_id": 50001007,
+          "item_num": 1,
+          "drop_rate": 300,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200011006,
+          "item_id": 50001012,
+          "item_num": 1,
+          "drop_rate": 1200,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200011007,
+          "item_id": 50001010,
+          "item_num": 1,
+          "drop_rate": 900,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200011008,
+          "item_id": 50001011,
+          "item_num": 1,
+          "drop_rate": 400,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200011009,
+          "item_id": 50001002,
+          "item_num": 2,
+          "drop_rate": 700,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200011010,
+          "item_id": 50001004,
+          "item_num": 2,
+          "drop_rate": 400,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200011011,
+          "item_id": 50001003,
+          "item_num": 2,
+          "drop_rate": 400,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200011012,
+          "item_id": 50001006,
+          "item_num": 2,
+          "drop_rate": 275,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200011013,
+          "item_id": 50001007,
+          "item_num": 2,
+          "drop_rate": 125,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200011014,
+          "item_id": 50001012,
+          "item_num": 2,
+          "drop_rate": 500,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200011015,
+          "item_id": 50001010,
+          "item_num": 2,
+          "drop_rate": 450,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200011016,
+          "item_id": 50001011,
+          "item_num": 2,
+          "drop_rate": 150,
+          "roll_type": 1
+        }
+      ]
+    }
+  ],
+  "current_sx_roster": {
+    "authority": "partner.is_sx==1",
+    "candidate_count": 73,
+    "native_star_counts": {
+      "3": 73
+    },
+    "historical_type1_positive_covered": 60,
+    "newer_fallback_count": 13,
+    "rows": [
+      {
+        "hero_table_id": 10001032,
+        "name": "Guan Yin",
+        "stone_id": 40001032,
+        "native_star": 3,
+        "historical_type1_positive_weight": 166,
+        "historical_type1_source_row_id": 1,
+        "post_orphan_snapshot": false
+      },
+      {
+        "hero_table_id": 10001035,
+        "name": "Sonya",
+        "stone_id": 40001035,
+        "native_star": 3,
+        "historical_type1_positive_weight": 166,
+        "historical_type1_source_row_id": 17,
+        "post_orphan_snapshot": false
+      },
+      {
+        "hero_table_id": 10001037,
+        "name": "Psychic",
+        "stone_id": 40001037,
+        "native_star": 3,
+        "historical_type1_positive_weight": 166,
+        "historical_type1_source_row_id": 15,
+        "post_orphan_snapshot": false
+      },
+      {
+        "hero_table_id": 10001045,
+        "name": "Javelin",
+        "stone_id": 40001045,
+        "native_star": 3,
+        "historical_type1_positive_weight": 166,
+        "historical_type1_source_row_id": 22,
+        "post_orphan_snapshot": false
+      },
+      {
+        "hero_table_id": 10001052,
+        "name": "Wu Kong",
+        "stone_id": 40001052,
+        "native_star": 3,
+        "historical_type1_positive_weight": 166,
+        "historical_type1_source_row_id": 25,
+        "post_orphan_snapshot": false
+      },
+      {
+        "hero_table_id": 10001056,
+        "name": "Capt.Sun",
+        "stone_id": 40001056,
+        "native_star": 3,
+        "historical_type1_positive_weight": 166,
+        "historical_type1_source_row_id": 26,
+        "post_orphan_snapshot": false
+      },
+      {
+        "hero_table_id": 10001059,
+        "name": "Fencer",
+        "stone_id": 40001059,
+        "native_star": 3,
+        "historical_type1_positive_weight": 166,
+        "historical_type1_source_row_id": 27,
+        "post_orphan_snapshot": false
+      },
+      {
+        "hero_table_id": 10001061,
+        "name": "Revolver",
+        "stone_id": 40001061,
+        "native_star": 3,
+        "historical_type1_positive_weight": 166,
+        "historical_type1_source_row_id": 29,
+        "post_orphan_snapshot": false
+      },
+      {
+        "hero_table_id": 10001064,
+        "name": "Priestess",
+        "stone_id": 40001064,
+        "native_star": 3,
+        "historical_type1_positive_weight": 166,
+        "historical_type1_source_row_id": 35,
+        "post_orphan_snapshot": false
+      },
+      {
+        "hero_table_id": 10001067,
+        "name": "Werewolf",
+        "stone_id": 40001067,
+        "native_star": 3,
+        "historical_type1_positive_weight": 166,
+        "historical_type1_source_row_id": 45,
+        "post_orphan_snapshot": false
+      },
+      {
+        "hero_table_id": 10001071,
+        "name": "Elisa",
+        "stone_id": 40001071,
+        "native_star": 3,
+        "historical_type1_positive_weight": 166,
+        "historical_type1_source_row_id": 46,
+        "post_orphan_snapshot": false
+      },
+      {
+        "hero_table_id": 10001074,
+        "name": "Librarian",
+        "stone_id": 40001074,
+        "native_star": 3,
+        "historical_type1_positive_weight": 166,
+        "historical_type1_source_row_id": 47,
+        "post_orphan_snapshot": false
+      },
+      {
+        "hero_table_id": 10001076,
+        "name": "Hypatia",
+        "stone_id": 40001076,
+        "native_star": 3,
+        "historical_type1_positive_weight": 167,
+        "historical_type1_source_row_id": 218,
+        "post_orphan_snapshot": false
+      },
+      {
+        "hero_table_id": 10001077,
+        "name": "Sapphire",
+        "stone_id": 40001077,
+        "native_star": 3,
+        "historical_type1_positive_weight": 166,
+        "historical_type1_source_row_id": 90,
+        "post_orphan_snapshot": false
+      },
+      {
+        "hero_table_id": 10001079,
+        "name": "Amber",
+        "stone_id": 40001079,
+        "native_star": 3,
+        "historical_type1_positive_weight": 166,
+        "historical_type1_source_row_id": 91,
+        "post_orphan_snapshot": false
+      },
+      {
+        "hero_table_id": 10001084,
+        "name": "Selene",
+        "stone_id": 40001084,
+        "native_star": 3,
+        "historical_type1_positive_weight": 166,
+        "historical_type1_source_row_id": 95,
+        "post_orphan_snapshot": false
+      },
+      {
+        "hero_table_id": 10001087,
+        "name": "Phoenix",
+        "stone_id": 40001087,
+        "native_star": 3,
+        "historical_type1_positive_weight": 166,
+        "historical_type1_source_row_id": 94,
+        "post_orphan_snapshot": false
+      },
+      {
+        "hero_table_id": 10001092,
+        "name": "Amelia",
+        "stone_id": 40001092,
+        "native_star": 3,
+        "historical_type1_positive_weight": 166,
+        "historical_type1_source_row_id": 97,
+        "post_orphan_snapshot": false
+      },
+      {
+        "hero_table_id": 10001095,
+        "name": "Wraith",
+        "stone_id": 40001095,
+        "native_star": 3,
+        "historical_type1_positive_weight": 166,
+        "historical_type1_source_row_id": 111,
+        "post_orphan_snapshot": false
+      },
+      {
+        "hero_table_id": 10001100,
+        "name": "Alice",
+        "stone_id": 40001100,
+        "native_star": 3,
+        "historical_type1_positive_weight": 166,
+        "historical_type1_source_row_id": 112,
+        "post_orphan_snapshot": false
+      },
+      {
+        "hero_table_id": 10001103,
+        "name": "Ennmaya",
+        "stone_id": 40001103,
+        "native_star": 3,
+        "historical_type1_positive_weight": 166,
+        "historical_type1_source_row_id": 113,
+        "post_orphan_snapshot": false
+      },
+      {
+        "hero_table_id": 10001109,
+        "name": "Hexa",
+        "stone_id": 40001109,
+        "native_star": 3,
+        "historical_type1_positive_weight": 167,
+        "historical_type1_source_row_id": 125,
+        "post_orphan_snapshot": false
+      },
+      {
+        "hero_table_id": 10001113,
+        "name": "Nobunaga",
+        "stone_id": 40001113,
+        "native_star": 3,
+        "historical_type1_positive_weight": 167,
+        "historical_type1_source_row_id": 130,
+        "post_orphan_snapshot": false
+      },
+      {
+        "hero_table_id": 10001117,
+        "name": "Nona",
+        "stone_id": 40001117,
+        "native_star": 3,
+        "historical_type1_positive_weight": 167,
+        "historical_type1_source_row_id": 245,
+        "post_orphan_snapshot": false
+      },
+      {
+        "hero_table_id": 10001121,
+        "name": "Diva",
+        "stone_id": 40001121,
+        "native_star": 3,
+        "historical_type1_positive_weight": 167,
+        "historical_type1_source_row_id": 222,
+        "post_orphan_snapshot": false
+      },
+      {
+        "hero_table_id": 10001126,
+        "name": "Caitlin",
+        "stone_id": 40001126,
+        "native_star": 3,
+        "historical_type1_positive_weight": 167,
+        "historical_type1_source_row_id": 246,
+        "post_orphan_snapshot": false
+      },
+      {
+        "hero_table_id": 10001130,
+        "name": "Medusa",
+        "stone_id": 40001130,
+        "native_star": 3,
+        "historical_type1_positive_weight": 167,
+        "historical_type1_source_row_id": 221,
+        "post_orphan_snapshot": false
+      },
+      {
+        "hero_table_id": 10001134,
+        "name": "Kaylee",
+        "stone_id": 40001134,
+        "native_star": 3,
+        "historical_type1_positive_weight": 167,
+        "historical_type1_source_row_id": 247,
+        "post_orphan_snapshot": false
+      },
+      {
+        "hero_table_id": 10001137,
+        "name": "Ashely",
+        "stone_id": 40001137,
+        "native_star": 3,
+        "historical_type1_positive_weight": 167,
+        "historical_type1_source_row_id": 220,
+        "post_orphan_snapshot": false
+      },
+      {
+        "hero_table_id": 10001139,
+        "name": "Cayla",
+        "stone_id": 40001139,
+        "native_star": 3,
+        "historical_type1_positive_weight": 167,
+        "historical_type1_source_row_id": 248,
+        "post_orphan_snapshot": false
+      },
+      {
+        "hero_table_id": 10001140,
+        "name": "Liz",
+        "stone_id": 40001140,
+        "native_star": 3,
+        "historical_type1_positive_weight": 167,
+        "historical_type1_source_row_id": 249,
+        "post_orphan_snapshot": false
+      },
+      {
+        "hero_table_id": 10001143,
+        "name": "Sophia",
+        "stone_id": 40001143,
+        "native_star": 3,
+        "historical_type1_positive_weight": 167,
+        "historical_type1_source_row_id": 250,
+        "post_orphan_snapshot": false
+      },
+      {
+        "hero_table_id": 10001148,
+        "name": "Nani",
+        "stone_id": 40001148,
+        "native_star": 3,
+        "historical_type1_positive_weight": 167,
+        "historical_type1_source_row_id": 251,
+        "post_orphan_snapshot": false
+      },
+      {
+        "hero_table_id": 10001152,
+        "name": "Gabriel",
+        "stone_id": 40001152,
+        "native_star": 3,
+        "historical_type1_positive_weight": 167,
+        "historical_type1_source_row_id": 252,
+        "post_orphan_snapshot": false
+      },
+      {
+        "hero_table_id": 10001156,
+        "name": "Toyo",
+        "stone_id": 40001156,
+        "native_star": 3,
+        "historical_type1_positive_weight": 167,
+        "historical_type1_source_row_id": 253,
+        "post_orphan_snapshot": false
+      },
+      {
+        "hero_table_id": 10001162,
+        "name": "Giana",
+        "stone_id": 40001162,
+        "native_star": 3,
+        "historical_type1_positive_weight": 167,
+        "historical_type1_source_row_id": 254,
+        "post_orphan_snapshot": false
+      },
+      {
+        "hero_table_id": 10001167,
+        "name": "Raphael",
+        "stone_id": 40001167,
+        "native_star": 3,
+        "historical_type1_positive_weight": 167,
+        "historical_type1_source_row_id": 255,
+        "post_orphan_snapshot": false
+      },
+      {
+        "hero_table_id": 10001171,
+        "name": "Masamune",
+        "stone_id": 40001171,
+        "native_star": 3,
+        "historical_type1_positive_weight": 167,
+        "historical_type1_source_row_id": 256,
+        "post_orphan_snapshot": false
+      },
+      {
+        "hero_table_id": 10001176,
+        "name": "Ilian",
+        "stone_id": 40001176,
+        "native_star": 3,
+        "historical_type1_positive_weight": 167,
+        "historical_type1_source_row_id": 216,
+        "post_orphan_snapshot": false
+      },
+      {
+        "hero_table_id": 10001181,
+        "name": "Nia",
+        "stone_id": 40001181,
+        "native_star": 3,
+        "historical_type1_positive_weight": 167,
+        "historical_type1_source_row_id": 217,
+        "post_orphan_snapshot": false
+      },
+      {
+        "hero_table_id": 10001185,
+        "name": "Mitsuhide",
+        "stone_id": 40001185,
+        "native_star": 3,
+        "historical_type1_positive_weight": 167,
+        "historical_type1_source_row_id": 257,
+        "post_orphan_snapshot": false
+      },
+      {
+        "hero_table_id": 10001190,
+        "name": "Tokugawa",
+        "stone_id": 40001190,
+        "native_star": 3,
+        "historical_type1_positive_weight": 167,
+        "historical_type1_source_row_id": 258,
+        "post_orphan_snapshot": false
+      },
+      {
+        "hero_table_id": 10001197,
+        "name": "Himiko",
+        "stone_id": 40001197,
+        "native_star": 3,
+        "historical_type1_positive_weight": 167,
+        "historical_type1_source_row_id": 259,
+        "post_orphan_snapshot": false
+      },
+      {
+        "hero_table_id": 10001203,
+        "name": "Ophelia",
+        "stone_id": 40001203,
+        "native_star": 3,
+        "historical_type1_positive_weight": 167,
+        "historical_type1_source_row_id": 260,
+        "post_orphan_snapshot": false
+      },
+      {
+        "hero_table_id": 10001205,
+        "name": "Gramin",
+        "stone_id": 40001205,
+        "native_star": 3,
+        "historical_type1_positive_weight": 167,
+        "historical_type1_source_row_id": 261,
+        "post_orphan_snapshot": false
+      },
+      {
+        "hero_table_id": 10001211,
+        "name": "Tiffany",
+        "stone_id": 40001211,
+        "native_star": 3,
+        "historical_type1_positive_weight": 167,
+        "historical_type1_source_row_id": 262,
+        "post_orphan_snapshot": false
+      },
+      {
+        "hero_table_id": 10001215,
+        "name": "Zeta",
+        "stone_id": 40001215,
+        "native_star": 3,
+        "historical_type1_positive_weight": 167,
+        "historical_type1_source_row_id": 263,
+        "post_orphan_snapshot": false
+      },
+      {
+        "hero_table_id": 10001218,
+        "name": "Cerberus",
+        "stone_id": 40001218,
+        "native_star": 3,
+        "historical_type1_positive_weight": 167,
+        "historical_type1_source_row_id": 264,
+        "post_orphan_snapshot": false
+      },
+      {
+        "hero_table_id": 10001221,
+        "name": "Yilia",
+        "stone_id": 40001221,
+        "native_star": 3,
+        "historical_type1_positive_weight": 167,
+        "historical_type1_source_row_id": 265,
+        "post_orphan_snapshot": false
+      },
+      {
+        "hero_table_id": 10001224,
+        "name": "CapsuGirl",
+        "stone_id": 40001224,
+        "native_star": 3,
+        "historical_type1_positive_weight": 167,
+        "historical_type1_source_row_id": 266,
+        "post_orphan_snapshot": false
+      },
+      {
+        "hero_table_id": 10001228,
+        "name": "Karaxes",
+        "stone_id": 40001228,
+        "native_star": 3,
+        "historical_type1_positive_weight": 167,
+        "historical_type1_source_row_id": 267,
+        "post_orphan_snapshot": false
+      },
+      {
+        "hero_table_id": 10001230,
+        "name": "Jeanne",
+        "stone_id": 40001230,
+        "native_star": 3,
+        "historical_type1_positive_weight": 167,
+        "historical_type1_source_row_id": 268,
+        "post_orphan_snapshot": false
+      },
+      {
+        "hero_table_id": 10001234,
+        "name": "Kristin",
+        "stone_id": 40001234,
+        "native_star": 3,
+        "historical_type1_positive_weight": 167,
+        "historical_type1_source_row_id": 269,
+        "post_orphan_snapshot": false
+      },
+      {
+        "hero_table_id": 10001238,
+        "name": "Angelina",
+        "stone_id": 40001238,
+        "native_star": 3,
+        "historical_type1_positive_weight": 167,
+        "historical_type1_source_row_id": 270,
+        "post_orphan_snapshot": false
+      },
+      {
+        "hero_table_id": 10001241,
+        "name": "Tang",
+        "stone_id": 40001241,
+        "native_star": 3,
+        "historical_type1_positive_weight": 167,
+        "historical_type1_source_row_id": 271,
+        "post_orphan_snapshot": false
+      },
+      {
+        "hero_table_id": 10001245,
+        "name": "Lancelot",
+        "stone_id": 40001245,
+        "native_star": 3,
+        "historical_type1_positive_weight": 167,
+        "historical_type1_source_row_id": 272,
+        "post_orphan_snapshot": false
+      },
+      {
+        "hero_table_id": 10001248,
+        "name": "Alexa",
+        "stone_id": 40001248,
+        "native_star": 3,
+        "historical_type1_positive_weight": 167,
+        "historical_type1_source_row_id": 273,
+        "post_orphan_snapshot": false
+      },
+      {
+        "hero_table_id": 10001251,
+        "name": "Hilda",
+        "stone_id": 40001251,
+        "native_star": 3,
+        "historical_type1_positive_weight": 167,
+        "historical_type1_source_row_id": 274,
+        "post_orphan_snapshot": false
+      },
+      {
+        "hero_table_id": 10001253,
+        "name": "Selina",
+        "stone_id": 40001253,
+        "native_star": 3,
+        "historical_type1_positive_weight": 167,
+        "historical_type1_source_row_id": 275,
+        "post_orphan_snapshot": false
+      },
+      {
+        "hero_table_id": 10001256,
+        "name": "SP Sonya",
+        "stone_id": 40001256,
+        "native_star": 3,
+        "historical_type1_positive_weight": 167,
+        "historical_type1_source_row_id": 276,
+        "post_orphan_snapshot": false
+      },
+      {
+        "hero_table_id": 10001260,
+        "name": "SP Nobunaga",
+        "stone_id": 40001260,
+        "native_star": 3,
+        "historical_type1_positive_weight": null,
+        "historical_type1_source_row_id": null,
+        "post_orphan_snapshot": true
+      },
+      {
+        "hero_table_id": 10001262,
+        "name": "Syndra",
+        "stone_id": 40001262,
+        "native_star": 3,
+        "historical_type1_positive_weight": null,
+        "historical_type1_source_row_id": null,
+        "post_orphan_snapshot": true
+      },
+      {
+        "hero_table_id": 10001264,
+        "name": "SP Ennmaya",
+        "stone_id": 40001264,
+        "native_star": 3,
+        "historical_type1_positive_weight": null,
+        "historical_type1_source_row_id": null,
+        "post_orphan_snapshot": true
+      },
+      {
+        "hero_table_id": 10001266,
+        "name": "Lilith",
+        "stone_id": 40001266,
+        "native_star": 3,
+        "historical_type1_positive_weight": null,
+        "historical_type1_source_row_id": null,
+        "post_orphan_snapshot": true
+      },
+      {
+        "hero_table_id": 10001267,
+        "name": "SP Hottie",
+        "stone_id": 40001267,
+        "native_star": 3,
+        "historical_type1_positive_weight": null,
+        "historical_type1_source_row_id": null,
+        "post_orphan_snapshot": true
+      },
+      {
+        "hero_table_id": 10001268,
+        "name": "SP CapsuGirl",
+        "stone_id": 40001268,
+        "native_star": 3,
+        "historical_type1_positive_weight": null,
+        "historical_type1_source_row_id": null,
+        "post_orphan_snapshot": true
+      },
+      {
+        "hero_table_id": 10001269,
+        "name": "SP Muppet",
+        "stone_id": 40001269,
+        "native_star": 3,
+        "historical_type1_positive_weight": null,
+        "historical_type1_source_row_id": null,
+        "post_orphan_snapshot": true
+      },
+      {
+        "hero_table_id": 10001270,
+        "name": "SP Librarian",
+        "stone_id": 40001270,
+        "native_star": 3,
+        "historical_type1_positive_weight": null,
+        "historical_type1_source_row_id": null,
+        "post_orphan_snapshot": true
+      },
+      {
+        "hero_table_id": 10001271,
+        "name": "Rubearl",
+        "stone_id": 40001271,
+        "native_star": 3,
+        "historical_type1_positive_weight": null,
+        "historical_type1_source_row_id": null,
+        "post_orphan_snapshot": true
+      },
+      {
+        "hero_table_id": 10001272,
+        "name": "SP Pandaria",
+        "stone_id": 40001272,
+        "native_star": 3,
+        "historical_type1_positive_weight": null,
+        "historical_type1_source_row_id": null,
+        "post_orphan_snapshot": true
+      },
+      {
+        "hero_table_id": 10001273,
+        "name": "Finlil",
+        "stone_id": 40001273,
+        "native_star": 3,
+        "historical_type1_positive_weight": null,
+        "historical_type1_source_row_id": null,
+        "post_orphan_snapshot": true
+      },
+      {
+        "hero_table_id": 10001274,
+        "name": "SP Priestess",
+        "stone_id": 40001274,
+        "native_star": 3,
+        "historical_type1_positive_weight": null,
+        "historical_type1_source_row_id": null,
+        "post_orphan_snapshot": true
+      },
+      {
+        "hero_table_id": 10001275,
+        "name": "SP Sapphire",
+        "stone_id": 40001275,
+        "native_star": 3,
+        "historical_type1_positive_weight": null,
+        "historical_type1_source_row_id": null,
+        "post_orphan_snapshot": true
+      }
+    ]
+  },
+  "soul_casket_classes": {
+    "1": {
+      "soul_casket_type": 1,
+      "row_count": 70,
+      "positive_row_count": 60,
+      "positive_weight_sum": 10000,
+      "rows": [
+        {
+          "source_row_id": 1,
+          "hero_table_id": 10001032,
+          "source_name": "關羽",
+          "soul_casket_type": 1,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 166
+        },
+        {
+          "source_row_id": 15,
+          "hero_table_id": 10001037,
+          "source_name": "黃月英",
+          "soul_casket_type": 1,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 166
+        },
+        {
+          "source_row_id": 17,
+          "hero_table_id": 10001035,
+          "source_name": "張飛",
+          "soul_casket_type": 1,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 166
+        },
+        {
+          "source_row_id": 22,
+          "hero_table_id": 10001045,
+          "source_name": "趙雲",
+          "soul_casket_type": 1,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 166
+        },
+        {
+          "source_row_id": 25,
+          "hero_table_id": 10001052,
+          "source_name": "孫悟空",
+          "soul_casket_type": 1,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 166
+        },
+        {
+          "source_row_id": 26,
+          "hero_table_id": 10001056,
+          "source_name": "孫權",
+          "soul_casket_type": 1,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 166
+        },
+        {
+          "source_row_id": 27,
+          "hero_table_id": 10001059,
+          "source_name": "鄧艾",
+          "soul_casket_type": 1,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 166
+        },
+        {
+          "source_row_id": 28,
+          "hero_table_id": 10001077,
+          "source_name": "周瑜",
+          "soul_casket_type": 1,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 0
+        },
+        {
+          "source_row_id": 29,
+          "hero_table_id": 10001061,
+          "source_name": "陸遜",
+          "soul_casket_type": 1,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 166
+        },
+        {
+          "source_row_id": 35,
+          "hero_table_id": 10001064,
+          "source_name": "左慈",
+          "soul_casket_type": 1,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 166
+        },
+        {
+          "source_row_id": 45,
+          "hero_table_id": 10001067,
+          "source_name": "馬超",
+          "soul_casket_type": 1,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 166
+        },
+        {
+          "source_row_id": 46,
+          "hero_table_id": 10001071,
+          "source_name": "袁紹",
+          "soul_casket_type": 1,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 166
+        },
+        {
+          "source_row_id": 47,
+          "hero_table_id": 10001074,
+          "source_name": "曹植",
+          "soul_casket_type": 1,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 166
+        },
+        {
+          "source_row_id": 90,
+          "hero_table_id": 10001077,
+          "source_name": "周瑜",
+          "soul_casket_type": 1,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 166
+        },
+        {
+          "source_row_id": 91,
+          "hero_table_id": 10001079,
+          "source_name": "曹丕",
+          "soul_casket_type": 1,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 166
+        },
+        {
+          "source_row_id": 92,
+          "hero_table_id": 10001082,
+          "source_name": "姜維",
+          "soul_casket_type": 1,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 0
+        },
+        {
+          "source_row_id": 93,
+          "hero_table_id": 10001067,
+          "source_name": "馬超",
+          "soul_casket_type": 1,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 0
+        },
+        {
+          "source_row_id": 94,
+          "hero_table_id": 10001087,
+          "source_name": "龐統",
+          "soul_casket_type": 1,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 166
+        },
+        {
+          "source_row_id": 95,
+          "hero_table_id": 10001084,
+          "source_name": "水鏡",
+          "soul_casket_type": 1,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 166
+        },
+        {
+          "source_row_id": 96,
+          "hero_table_id": 10001089,
+          "source_name": "孫堅",
+          "soul_casket_type": 1,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 0
+        },
+        {
+          "source_row_id": 97,
+          "hero_table_id": 10001092,
+          "source_name": "司馬昭",
+          "soul_casket_type": 1,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 166
+        },
+        {
+          "source_row_id": 98,
+          "hero_table_id": 10001087,
+          "source_name": "龐統",
+          "soul_casket_type": 1,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 0
+        },
+        {
+          "source_row_id": 99,
+          "hero_table_id": 10001084,
+          "source_name": "水鏡",
+          "soul_casket_type": 1,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 0
+        },
+        {
+          "source_row_id": 100,
+          "hero_table_id": 10001089,
+          "source_name": "孫堅",
+          "soul_casket_type": 1,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 0
+        },
+        {
+          "source_row_id": 101,
+          "hero_table_id": 10001092,
+          "source_name": "司馬昭",
+          "soul_casket_type": 1,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 0
+        },
+        {
+          "source_row_id": 110,
+          "hero_table_id": 10001071,
+          "source_name": "袁紹",
+          "soul_casket_type": 1,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 0
+        },
+        {
+          "source_row_id": 111,
+          "hero_table_id": 10001095,
+          "source_name": "郭嘉",
+          "soul_casket_type": 1,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 166
+        },
+        {
+          "source_row_id": 112,
+          "hero_table_id": 10001100,
+          "source_name": "偃月",
+          "soul_casket_type": 1,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 166
+        },
+        {
+          "source_row_id": 113,
+          "hero_table_id": 10001103,
+          "source_name": "司馬懿",
+          "soul_casket_type": 1,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 166
+        },
+        {
+          "source_row_id": 124,
+          "hero_table_id": 10001059,
+          "source_name": "鄧艾",
+          "soul_casket_type": 1,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 0
+        },
+        {
+          "source_row_id": 125,
+          "hero_table_id": 10001109,
+          "source_name": "方天畫姬",
+          "soul_casket_type": 1,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 167
+        },
+        {
+          "source_row_id": 130,
+          "hero_table_id": 10001113,
+          "source_name": "織田信長",
+          "soul_casket_type": 1,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 167
+        },
+        {
+          "source_row_id": 216,
+          "hero_table_id": 10001176,
+          "source_name": "愛麗兒",
+          "soul_casket_type": 1,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 167
+        },
+        {
+          "source_row_id": 217,
+          "hero_table_id": 10001181,
+          "source_name": "漢靈帝",
+          "soul_casket_type": 1,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 167
+        },
+        {
+          "source_row_id": 218,
+          "hero_table_id": 10001076,
+          "source_name": "曹沖",
+          "soul_casket_type": 1,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 167
+        },
+        {
+          "source_row_id": 220,
+          "hero_table_id": 10001137,
+          "source_name": "禰衡",
+          "soul_casket_type": 1,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 167
+        },
+        {
+          "source_row_id": 221,
+          "hero_table_id": 10001130,
+          "source_name": "何太后",
+          "soul_casket_type": 1,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 167
+        },
+        {
+          "source_row_id": 222,
+          "hero_table_id": 10001121,
+          "source_name": "曹休",
+          "soul_casket_type": 1,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 167
+        },
+        {
+          "source_row_id": 245,
+          "hero_table_id": 10001117,
+          "source_name": "楊修",
+          "soul_casket_type": 1,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 167
+        },
+        {
+          "source_row_id": 246,
+          "hero_table_id": 10001126,
+          "source_name": "夏侯霸",
+          "soul_casket_type": 1,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 167
+        },
+        {
+          "source_row_id": 247,
+          "hero_table_id": 10001134,
+          "source_name": "蔣琬",
+          "soul_casket_type": 1,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 167
+        },
+        {
+          "source_row_id": 248,
+          "hero_table_id": 10001139,
+          "source_name": "阮籍",
+          "soul_casket_type": 1,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 167
+        },
+        {
+          "source_row_id": 249,
+          "hero_table_id": 10001140,
+          "source_name": "王允",
+          "soul_casket_type": 1,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 167
+        },
+        {
+          "source_row_id": 250,
+          "hero_table_id": 10001143,
+          "source_name": "愛麗絲",
+          "soul_casket_type": 1,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 167
+        },
+        {
+          "source_row_id": 251,
+          "hero_table_id": 10001148,
+          "source_name": "蔡文姬",
+          "soul_casket_type": 1,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 167
+        },
+        {
+          "source_row_id": 252,
+          "hero_table_id": 10001152,
+          "source_name": "加百列",
+          "soul_casket_type": 1,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 167
+        },
+        {
+          "source_row_id": 253,
+          "hero_table_id": 10001156,
+          "source_name": "豐臣秀吉",
+          "soul_casket_type": 1,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 167
+        },
+        {
+          "source_row_id": 254,
+          "hero_table_id": 10001162,
+          "source_name": "甘夫人",
+          "soul_casket_type": 1,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 167
+        },
+        {
+          "source_row_id": 255,
+          "hero_table_id": 10001167,
+          "source_name": "拉斐爾",
+          "soul_casket_type": 1,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 167
+        },
+        {
+          "source_row_id": 256,
+          "hero_table_id": 10001171,
+          "source_name": "伊達政宗",
+          "soul_casket_type": 1,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 167
+        },
+        {
+          "source_row_id": 257,
+          "hero_table_id": 10001185,
+          "source_name": "明智光秀",
+          "soul_casket_type": 1,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 167
+        },
+        {
+          "source_row_id": 258,
+          "hero_table_id": 10001190,
+          "source_name": "德川家康",
+          "soul_casket_type": 1,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 167
+        },
+        {
+          "source_row_id": 259,
+          "hero_table_id": 10001197,
+          "source_name": "卑彌呼",
+          "soul_casket_type": 1,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 167
+        },
+        {
+          "source_row_id": 260,
+          "hero_table_id": 10001203,
+          "source_name": "馬騰",
+          "soul_casket_type": 1,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 167
+        },
+        {
+          "source_row_id": 261,
+          "hero_table_id": 10001205,
+          "source_name": "何晏",
+          "soul_casket_type": 1,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 167
+        },
+        {
+          "source_row_id": 262,
+          "hero_table_id": 10001211,
+          "source_name": "張星彩",
+          "soul_casket_type": 1,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 167
+        },
+        {
+          "source_row_id": 263,
+          "hero_table_id": 10001215,
+          "source_name": "薛瑩",
+          "soul_casket_type": 1,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 167
+        },
+        {
+          "source_row_id": 264,
+          "hero_table_id": 10001218,
+          "source_name": "犬神",
+          "soul_casket_type": 1,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 167
+        },
+        {
+          "source_row_id": 265,
+          "hero_table_id": 10001221,
+          "source_name": "陳壽",
+          "soul_casket_type": 1,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 167
+        },
+        {
+          "source_row_id": 266,
+          "hero_table_id": 10001224,
+          "source_name": "薛綜",
+          "soul_casket_type": 1,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 167
+        },
+        {
+          "source_row_id": 267,
+          "hero_table_id": 10001228,
+          "source_name": "薛珝",
+          "soul_casket_type": 1,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 167
+        },
+        {
+          "source_row_id": 268,
+          "hero_table_id": 10001230,
+          "source_name": "朱靈",
+          "soul_casket_type": 1,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 167
+        },
+        {
+          "source_row_id": 269,
+          "hero_table_id": 10001234,
+          "source_name": "董和",
+          "soul_casket_type": 1,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 167
+        },
+        {
+          "source_row_id": 270,
+          "hero_table_id": 10001238,
+          "source_name": "喬玄",
+          "soul_casket_type": 1,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 167
+        },
+        {
+          "source_row_id": 271,
+          "hero_table_id": 10001241,
+          "source_name": "唐咨",
+          "soul_casket_type": 1,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 167
+        },
+        {
+          "source_row_id": 272,
+          "hero_table_id": 10001245,
+          "source_name": "郭淮",
+          "soul_casket_type": 1,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 167
+        },
+        {
+          "source_row_id": 273,
+          "hero_table_id": 10001248,
+          "source_name": "朱桓",
+          "soul_casket_type": 1,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 167
+        },
+        {
+          "source_row_id": 274,
+          "hero_table_id": 10001251,
+          "source_name": "漢少帝",
+          "soul_casket_type": 1,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 167
+        },
+        {
+          "source_row_id": 275,
+          "hero_table_id": 10001253,
+          "source_name": "曹真",
+          "soul_casket_type": 1,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 167
+        },
+        {
+          "source_row_id": 276,
+          "hero_table_id": 10001256,
+          "source_name": "SP張飛",
+          "soul_casket_type": 1,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 167
+        }
+      ]
+    },
+    "2": {
+      "soul_casket_type": 2,
+      "row_count": 110,
+      "positive_row_count": 93,
+      "positive_weight_sum": 10000,
+      "rows": [
+        {
+          "source_row_id": 2,
+          "hero_table_id": 10001009,
+          "source_name": "于吉",
+          "soul_casket_type": 2,
+          "roll_num": "3|5",
+          "num_rate": "5500|4500",
+          "weight": 107
+        },
+        {
+          "source_row_id": 3,
+          "hero_table_id": 10001014,
+          "source_name": "張春華",
+          "soul_casket_type": 2,
+          "roll_num": "3|5",
+          "num_rate": "5500|4500",
+          "weight": 107
+        },
+        {
+          "source_row_id": 4,
+          "hero_table_id": 10001015,
+          "source_name": "黃忠",
+          "soul_casket_type": 2,
+          "roll_num": "3|5",
+          "num_rate": "5500|4500",
+          "weight": 107
+        },
+        {
+          "source_row_id": 5,
+          "hero_table_id": 10001016,
+          "source_name": "典韋",
+          "soul_casket_type": 2,
+          "roll_num": "3|5",
+          "num_rate": "5500|4500",
+          "weight": 107
+        },
+        {
+          "source_row_id": 6,
+          "hero_table_id": 10001017,
+          "source_name": "張遼",
+          "soul_casket_type": 2,
+          "roll_num": "3|5",
+          "num_rate": "5500|4500",
+          "weight": 107
+        },
+        {
+          "source_row_id": 7,
+          "hero_table_id": 10001018,
+          "source_name": "程昱",
+          "soul_casket_type": 2,
+          "roll_num": "3|5",
+          "num_rate": "5500|4500",
+          "weight": 107
+        },
+        {
+          "source_row_id": 8,
+          "hero_table_id": 10001025,
+          "source_name": "夏侯惇",
+          "soul_casket_type": 2,
+          "roll_num": "3|5",
+          "num_rate": "5500|4500",
+          "weight": 107
+        },
+        {
+          "source_row_id": 9,
+          "hero_table_id": 10001027,
+          "source_name": "徐晃",
+          "soul_casket_type": 2,
+          "roll_num": "3|5",
+          "num_rate": "5500|4500",
+          "weight": 107
+        },
+        {
+          "source_row_id": 10,
+          "hero_table_id": 10001029,
+          "source_name": "張郃",
+          "soul_casket_type": 2,
+          "roll_num": "3|5",
+          "num_rate": "5500|4500",
+          "weight": 107
+        },
+        {
+          "source_row_id": 11,
+          "hero_table_id": 10001030,
+          "source_name": "太史慈",
+          "soul_casket_type": 2,
+          "roll_num": "3|5",
+          "num_rate": "5500|4500",
+          "weight": 107
+        },
+        {
+          "source_row_id": 12,
+          "hero_table_id": 10001033,
+          "source_name": "曹操",
+          "soul_casket_type": 2,
+          "roll_num": "3|5",
+          "num_rate": "5500|4500",
+          "weight": 0
+        },
+        {
+          "source_row_id": 13,
+          "hero_table_id": 10001036,
+          "source_name": "荀彧",
+          "soul_casket_type": 2,
+          "roll_num": "3|5",
+          "num_rate": "5500|4500",
+          "weight": 0
+        },
+        {
+          "source_row_id": 14,
+          "hero_table_id": 10001039,
+          "source_name": "董卓",
+          "soul_casket_type": 2,
+          "roll_num": "3|5",
+          "num_rate": "5500|4500",
+          "weight": 107
+        },
+        {
+          "source_row_id": 16,
+          "hero_table_id": 10001034,
+          "source_name": "關興",
+          "soul_casket_type": 2,
+          "roll_num": "3|5",
+          "num_rate": "5500|4500",
+          "weight": 0
+        },
+        {
+          "source_row_id": 18,
+          "hero_table_id": 10001042,
+          "source_name": "嫦娥",
+          "soul_casket_type": 2,
+          "roll_num": "3|5",
+          "num_rate": "5500|4500",
+          "weight": 0
+        },
+        {
+          "source_row_id": 19,
+          "hero_table_id": 10001038,
+          "source_name": "馬謖",
+          "soul_casket_type": 2,
+          "roll_num": "3|5",
+          "num_rate": "5500|4500",
+          "weight": 107
+        },
+        {
+          "source_row_id": 20,
+          "hero_table_id": 10001040,
+          "source_name": "法正",
+          "soul_casket_type": 2,
+          "roll_num": "3|5",
+          "num_rate": "5500|4500",
+          "weight": 0
+        },
+        {
+          "source_row_id": 21,
+          "hero_table_id": 10001043,
+          "source_name": "貂蟬",
+          "soul_casket_type": 2,
+          "roll_num": "3|5",
+          "num_rate": "5500|4500",
+          "weight": 107
+        },
+        {
+          "source_row_id": 23,
+          "hero_table_id": 10001044,
+          "source_name": "于禁",
+          "soul_casket_type": 2,
+          "roll_num": "3|5",
+          "num_rate": "5500|4500",
+          "weight": 107
+        },
+        {
+          "source_row_id": 24,
+          "hero_table_id": 10001046,
+          "source_name": "萬聖巫女",
+          "soul_casket_type": 2,
+          "roll_num": "3|5",
+          "num_rate": "5500|4500",
+          "weight": 0
+        },
+        {
+          "source_row_id": 30,
+          "hero_table_id": 10001053,
+          "source_name": "孟獲",
+          "soul_casket_type": 2,
+          "roll_num": "3|5",
+          "num_rate": "5500|4500",
+          "weight": 0
+        },
+        {
+          "source_row_id": 31,
+          "hero_table_id": 10001058,
+          "source_name": "漢獻帝",
+          "soul_casket_type": 2,
+          "roll_num": "3|5",
+          "num_rate": "5500|4500",
+          "weight": 107
+        },
+        {
+          "source_row_id": 32,
+          "hero_table_id": 10001050,
+          "source_name": "顏良",
+          "soul_casket_type": 2,
+          "roll_num": "3|5",
+          "num_rate": "5500|4500",
+          "weight": 107
+        },
+        {
+          "source_row_id": 33,
+          "hero_table_id": 10001051,
+          "source_name": "文醜",
+          "soul_casket_type": 2,
+          "roll_num": "3|5",
+          "num_rate": "5500|4500",
+          "weight": 107
+        },
+        {
+          "source_row_id": 34,
+          "hero_table_id": 10001047,
+          "source_name": "樂進",
+          "soul_casket_type": 2,
+          "roll_num": "3|5",
+          "num_rate": "5500|4500",
+          "weight": 0
+        },
+        {
+          "source_row_id": 36,
+          "hero_table_id": 10001032,
+          "source_name": "關羽",
+          "soul_casket_type": 2,
+          "roll_num": "3|5",
+          "num_rate": "6000|4000",
+          "weight": 0
+        },
+        {
+          "source_row_id": 37,
+          "hero_table_id": 10001037,
+          "source_name": "黃月英",
+          "soul_casket_type": 2,
+          "roll_num": "3|5",
+          "num_rate": "6000|4000",
+          "weight": 0
+        },
+        {
+          "source_row_id": 38,
+          "hero_table_id": 10001035,
+          "source_name": "張飛",
+          "soul_casket_type": 2,
+          "roll_num": "3|5",
+          "num_rate": "6000|4000",
+          "weight": 0
+        },
+        {
+          "source_row_id": 39,
+          "hero_table_id": 10001045,
+          "source_name": "趙雲",
+          "soul_casket_type": 2,
+          "roll_num": "3|5",
+          "num_rate": "6000|4000",
+          "weight": 0
+        },
+        {
+          "source_row_id": 40,
+          "hero_table_id": 10001052,
+          "source_name": "孫悟空",
+          "soul_casket_type": 2,
+          "roll_num": "3|5",
+          "num_rate": "6000|4000",
+          "weight": 0
+        },
+        {
+          "source_row_id": 41,
+          "hero_table_id": 10001056,
+          "source_name": "孫權",
+          "soul_casket_type": 2,
+          "roll_num": "3|5",
+          "num_rate": "6000|4000",
+          "weight": 0
+        },
+        {
+          "source_row_id": 42,
+          "hero_table_id": 10001059,
+          "source_name": "鄧艾",
+          "soul_casket_type": 2,
+          "roll_num": "3|5",
+          "num_rate": "6000|4000",
+          "weight": 0
+        },
+        {
+          "source_row_id": 43,
+          "hero_table_id": 10001061,
+          "source_name": "陸遜",
+          "soul_casket_type": 2,
+          "roll_num": "3|5",
+          "num_rate": "6000|4000",
+          "weight": 0
+        },
+        {
+          "source_row_id": 44,
+          "hero_table_id": 10001064,
+          "source_name": "左慈",
+          "soul_casket_type": 2,
+          "roll_num": "3|5",
+          "num_rate": "6000|4000",
+          "weight": 0
+        },
+        {
+          "source_row_id": 277,
+          "hero_table_id": 10001012,
+          "source_name": "孫策",
+          "soul_casket_type": 2,
+          "roll_num": "3|5",
+          "num_rate": "6000|4000",
+          "weight": 107
+        },
+        {
+          "source_row_id": 278,
+          "hero_table_id": 10001048,
+          "source_name": "凌統",
+          "soul_casket_type": 2,
+          "roll_num": "3|5",
+          "num_rate": "6000|4000",
+          "weight": 107
+        },
+        {
+          "source_row_id": 279,
+          "hero_table_id": 10001049,
+          "source_name": "夏侯淵",
+          "soul_casket_type": 2,
+          "roll_num": "3|5",
+          "num_rate": "6000|4000",
+          "weight": 107
+        },
+        {
+          "source_row_id": 280,
+          "hero_table_id": 10001057,
+          "source_name": "周泰",
+          "soul_casket_type": 2,
+          "roll_num": "3|5",
+          "num_rate": "6000|4000",
+          "weight": 107
+        },
+        {
+          "source_row_id": 281,
+          "hero_table_id": 10001060,
+          "source_name": "孫乾",
+          "soul_casket_type": 2,
+          "roll_num": "3|5",
+          "num_rate": "6000|4000",
+          "weight": 107
+        },
+        {
+          "source_row_id": 282,
+          "hero_table_id": 10001066,
+          "source_name": "德古拉",
+          "soul_casket_type": 2,
+          "roll_num": "3|5",
+          "num_rate": "6000|4000",
+          "weight": 107
+        },
+        {
+          "source_row_id": 283,
+          "hero_table_id": 10001073,
+          "source_name": "袁術",
+          "soul_casket_type": 2,
+          "roll_num": "3|5",
+          "num_rate": "6000|4000",
+          "weight": 107
+        },
+        {
+          "source_row_id": 284,
+          "hero_table_id": 10001078,
+          "source_name": "廖化",
+          "soul_casket_type": 2,
+          "roll_num": "3|5",
+          "num_rate": "6000|4000",
+          "weight": 107
+        },
+        {
+          "source_row_id": 285,
+          "hero_table_id": 10001081,
+          "source_name": "李典",
+          "soul_casket_type": 2,
+          "roll_num": "3|5",
+          "num_rate": "6000|4000",
+          "weight": 107
+        },
+        {
+          "source_row_id": 286,
+          "hero_table_id": 10001083,
+          "source_name": "赤兔",
+          "soul_casket_type": 2,
+          "roll_num": "3|5",
+          "num_rate": "6000|4000",
+          "weight": 107
+        },
+        {
+          "source_row_id": 287,
+          "hero_table_id": 10001085,
+          "source_name": "華雄",
+          "soul_casket_type": 2,
+          "roll_num": "3|5",
+          "num_rate": "6000|4000",
+          "weight": 107
+        },
+        {
+          "source_row_id": 288,
+          "hero_table_id": 10001088,
+          "source_name": "田豐",
+          "soul_casket_type": 2,
+          "roll_num": "3|5",
+          "num_rate": "6000|4000",
+          "weight": 107
+        },
+        {
+          "source_row_id": 289,
+          "hero_table_id": 10001093,
+          "source_name": "徐盛",
+          "soul_casket_type": 2,
+          "roll_num": "3|5",
+          "num_rate": "6000|4000",
+          "weight": 107
+        },
+        {
+          "source_row_id": 290,
+          "hero_table_id": 10001094,
+          "source_name": "丁奉",
+          "soul_casket_type": 2,
+          "roll_num": "3|5",
+          "num_rate": "6000|4000",
+          "weight": 107
+        },
+        {
+          "source_row_id": 291,
+          "hero_table_id": 10001098,
+          "source_name": "司馬師",
+          "soul_casket_type": 2,
+          "roll_num": "3|5",
+          "num_rate": "6000|4000",
+          "weight": 107
+        },
+        {
+          "source_row_id": 292,
+          "hero_table_id": 10001102,
+          "source_name": "步練師",
+          "soul_casket_type": 2,
+          "roll_num": "3|5",
+          "num_rate": "6000|4000",
+          "weight": 107
+        },
+        {
+          "source_row_id": 293,
+          "hero_table_id": 10001105,
+          "source_name": "紀靈",
+          "soul_casket_type": 2,
+          "roll_num": "3|5",
+          "num_rate": "6000|4000",
+          "weight": 107
+        },
+        {
+          "source_row_id": 294,
+          "hero_table_id": 10001106,
+          "source_name": "步騭",
+          "soul_casket_type": 2,
+          "roll_num": "3|5",
+          "num_rate": "6000|4000",
+          "weight": 107
+        },
+        {
+          "source_row_id": 295,
+          "hero_table_id": 10001108,
+          "source_name": "諸葛瑾",
+          "soul_casket_type": 2,
+          "roll_num": "3|5",
+          "num_rate": "6000|4000",
+          "weight": 107
+        },
+        {
+          "source_row_id": 296,
+          "hero_table_id": 10001111,
+          "source_name": "沮授",
+          "soul_casket_type": 2,
+          "roll_num": "3|5",
+          "num_rate": "6000|4000",
+          "weight": 107
+        },
+        {
+          "source_row_id": 297,
+          "hero_table_id": 10001112,
+          "source_name": "張昭",
+          "soul_casket_type": 2,
+          "roll_num": "3|5",
+          "num_rate": "6000|4000",
+          "weight": 107
+        },
+        {
+          "source_row_id": 298,
+          "hero_table_id": 10001115,
+          "source_name": "毛利元就",
+          "soul_casket_type": 2,
+          "roll_num": "3|5",
+          "num_rate": "6000|4000",
+          "weight": 107
+        },
+        {
+          "source_row_id": 299,
+          "hero_table_id": 10001116,
+          "source_name": "鍾會",
+          "soul_casket_type": 2,
+          "roll_num": "3|5",
+          "num_rate": "6000|4000",
+          "weight": 107
+        },
+        {
+          "source_row_id": 300,
+          "hero_table_id": 10001118,
+          "source_name": "郭嬛",
+          "soul_casket_type": 2,
+          "roll_num": "3|5",
+          "num_rate": "6000|4000",
+          "weight": 107
+        },
+        {
+          "source_row_id": 301,
+          "hero_table_id": 10001120,
+          "source_name": "馬雲騄",
+          "soul_casket_type": 2,
+          "roll_num": "3|5",
+          "num_rate": "6000|4000",
+          "weight": 107
+        },
+        {
+          "source_row_id": 302,
+          "hero_table_id": 10001124,
+          "source_name": "侯成",
+          "soul_casket_type": 2,
+          "roll_num": "3|5",
+          "num_rate": "6000|4000",
+          "weight": 107
+        },
+        {
+          "source_row_id": 303,
+          "hero_table_id": 10001125,
+          "source_name": "陸抗",
+          "soul_casket_type": 2,
+          "roll_num": "3|5",
+          "num_rate": "6000|4000",
+          "weight": 107
+        },
+        {
+          "source_row_id": 304,
+          "hero_table_id": 10001128,
+          "source_name": "向寵",
+          "soul_casket_type": 2,
+          "roll_num": "3|5",
+          "num_rate": "6000|4000",
+          "weight": 108
+        },
+        {
+          "source_row_id": 305,
+          "hero_table_id": 10001132,
+          "source_name": "張道陵",
+          "soul_casket_type": 2,
+          "roll_num": "3|5",
+          "num_rate": "6000|4000",
+          "weight": 108
+        },
+        {
+          "source_row_id": 306,
+          "hero_table_id": 10001138,
+          "source_name": "關銀屏",
+          "soul_casket_type": 2,
+          "roll_num": "3|5",
+          "num_rate": "6000|4000",
+          "weight": 108
+        },
+        {
+          "source_row_id": 307,
+          "hero_table_id": 10001141,
+          "source_name": "愛德華",
+          "soul_casket_type": 2,
+          "roll_num": "3|5",
+          "num_rate": "6000|4000",
+          "weight": 108
+        },
+        {
+          "source_row_id": 308,
+          "hero_table_id": 10001146,
+          "source_name": "韓當",
+          "soul_casket_type": 2,
+          "roll_num": "3|5",
+          "num_rate": "6000|4000",
+          "weight": 108
+        },
+        {
+          "source_row_id": 309,
+          "hero_table_id": 10001147,
+          "source_name": "沖田總司",
+          "soul_casket_type": 2,
+          "roll_num": "3|5",
+          "num_rate": "6000|4000",
+          "weight": 108
+        },
+        {
+          "source_row_id": 310,
+          "hero_table_id": 10001149,
+          "source_name": "夏侯玄",
+          "soul_casket_type": 2,
+          "roll_num": "3|5",
+          "num_rate": "6000|4000",
+          "weight": 108
+        },
+        {
+          "source_row_id": 311,
+          "hero_table_id": 10001153,
+          "source_name": "梅鶯毒",
+          "soul_casket_type": 2,
+          "roll_num": "3|5",
+          "num_rate": "6000|4000",
+          "weight": 108
+        },
+        {
+          "source_row_id": 312,
+          "hero_table_id": 10001155,
+          "source_name": "張仲景",
+          "soul_casket_type": 2,
+          "roll_num": "3|5",
+          "num_rate": "6000|4000",
+          "weight": 108
+        },
+        {
+          "source_row_id": 313,
+          "hero_table_id": 10001159,
+          "source_name": "袁渙",
+          "soul_casket_type": 2,
+          "roll_num": "3|5",
+          "num_rate": "6000|4000",
+          "weight": 108
+        },
+        {
+          "source_row_id": 314,
+          "hero_table_id": 10001164,
+          "source_name": "張梁",
+          "soul_casket_type": 2,
+          "roll_num": "3|5",
+          "num_rate": "6000|4000",
+          "weight": 108
+        },
+        {
+          "source_row_id": 315,
+          "hero_table_id": 10001168,
+          "source_name": "韓遂",
+          "soul_casket_type": 2,
+          "roll_num": "3|5",
+          "num_rate": "6000|4000",
+          "weight": 108
+        },
+        {
+          "source_row_id": 316,
+          "hero_table_id": 10001172,
+          "source_name": "龐會",
+          "soul_casket_type": 2,
+          "roll_num": "3|5",
+          "num_rate": "6000|4000",
+          "weight": 108
+        },
+        {
+          "source_row_id": 317,
+          "hero_table_id": 10001174,
+          "source_name": "黃承彥",
+          "soul_casket_type": 2,
+          "roll_num": "3|5",
+          "num_rate": "6000|4000",
+          "weight": 108
+        },
+        {
+          "source_row_id": 318,
+          "hero_table_id": 10001175,
+          "source_name": "織田信奈",
+          "soul_casket_type": 2,
+          "roll_num": "3|5",
+          "num_rate": "6000|4000",
+          "weight": 108
+        },
+        {
+          "source_row_id": 319,
+          "hero_table_id": 10001177,
+          "source_name": "公孫瓚",
+          "soul_casket_type": 2,
+          "roll_num": "3|5",
+          "num_rate": "6000|4000",
+          "weight": 108
+        },
+        {
+          "source_row_id": 320,
+          "hero_table_id": 10001187,
+          "source_name": "薛靈蕓",
+          "soul_casket_type": 2,
+          "roll_num": "3|5",
+          "num_rate": "6000|4000",
+          "weight": 108
+        },
+        {
+          "source_row_id": 321,
+          "hero_table_id": 10001207,
+          "source_name": "坂本龍馬",
+          "soul_casket_type": 2,
+          "roll_num": "3|5",
+          "num_rate": "6000|4000",
+          "weight": 108
+        },
+        {
+          "source_row_id": 322,
+          "hero_table_id": 10001208,
+          "source_name": "滿寵",
+          "soul_casket_type": 2,
+          "roll_num": "3|5",
+          "num_rate": "6000|4000",
+          "weight": 108
+        },
+        {
+          "source_row_id": 323,
+          "hero_table_id": 10001209,
+          "source_name": "黃祖",
+          "soul_casket_type": 2,
+          "roll_num": "3|5",
+          "num_rate": "6000|4000",
+          "weight": 108
+        },
+        {
+          "source_row_id": 324,
+          "hero_table_id": 10001210,
+          "source_name": "十常侍",
+          "soul_casket_type": 2,
+          "roll_num": "3|5",
+          "num_rate": "6000|4000",
+          "weight": 108
+        },
+        {
+          "source_row_id": 325,
+          "hero_table_id": 10001212,
+          "source_name": "鄧芝",
+          "soul_casket_type": 2,
+          "roll_num": "3|5",
+          "num_rate": "6000|4000",
+          "weight": 108
+        },
+        {
+          "source_row_id": 326,
+          "hero_table_id": 10001213,
+          "source_name": "座敷童子",
+          "soul_casket_type": 2,
+          "roll_num": "3|5",
+          "num_rate": "6000|4000",
+          "weight": 108
+        },
+        {
+          "source_row_id": 327,
+          "hero_table_id": 10001214,
+          "source_name": "楊儀",
+          "soul_casket_type": 2,
+          "roll_num": "3|5",
+          "num_rate": "6000|4000",
+          "weight": 108
+        },
+        {
+          "source_row_id": 328,
+          "hero_table_id": 10001216,
+          "source_name": "張嶷",
+          "soul_casket_type": 2,
+          "roll_num": "3|5",
+          "num_rate": "6000|4000",
+          "weight": 108
+        },
+        {
+          "source_row_id": 329,
+          "hero_table_id": 10001217,
+          "source_name": "天邪鬼",
+          "soul_casket_type": 2,
+          "roll_num": "3|5",
+          "num_rate": "6000|4000",
+          "weight": 108
+        },
+        {
+          "source_row_id": 330,
+          "hero_table_id": 10001219,
+          "source_name": "雪魔女",
+          "soul_casket_type": 2,
+          "roll_num": "3|5",
+          "num_rate": "6000|4000",
+          "weight": 108
+        },
+        {
+          "source_row_id": 331,
+          "hero_table_id": 10001220,
+          "source_name": "孫英",
+          "soul_casket_type": 2,
+          "roll_num": "3|5",
+          "num_rate": "6000|4000",
+          "weight": 108
+        },
+        {
+          "source_row_id": 332,
+          "hero_table_id": 10001222,
+          "source_name": "管寧",
+          "soul_casket_type": 2,
+          "roll_num": "3|5",
+          "num_rate": "6000|4000",
+          "weight": 108
+        },
+        {
+          "source_row_id": 333,
+          "hero_table_id": 10001223,
+          "source_name": "劉曄",
+          "soul_casket_type": 2,
+          "roll_num": "3|5",
+          "num_rate": "6000|4000",
+          "weight": 108
+        },
+        {
+          "source_row_id": 334,
+          "hero_table_id": 10001226,
+          "source_name": "裴玄",
+          "soul_casket_type": 2,
+          "roll_num": "3|5",
+          "num_rate": "6000|4000",
+          "weight": 108
+        },
+        {
+          "source_row_id": 335,
+          "hero_table_id": 10001227,
+          "source_name": "是儀",
+          "soul_casket_type": 2,
+          "roll_num": "3|5",
+          "num_rate": "6000|4000",
+          "weight": 108
+        },
+        {
+          "source_row_id": 336,
+          "hero_table_id": 10001231,
+          "source_name": "司馬徽",
+          "soul_casket_type": 2,
+          "roll_num": "3|5",
+          "num_rate": "6000|4000",
+          "weight": 108
+        },
+        {
+          "source_row_id": 337,
+          "hero_table_id": 10001233,
+          "source_name": "楊戲",
+          "soul_casket_type": 2,
+          "roll_num": "3|5",
+          "num_rate": "6000|4000",
+          "weight": 108
+        },
+        {
+          "source_row_id": 338,
+          "hero_table_id": 10001235,
+          "source_name": "蔡瑁",
+          "soul_casket_type": 2,
+          "roll_num": "3|5",
+          "num_rate": "6000|4000",
+          "weight": 108
+        },
+        {
+          "source_row_id": 339,
+          "hero_table_id": 10001236,
+          "source_name": "嚴顏",
+          "soul_casket_type": 2,
+          "roll_num": "3|5",
+          "num_rate": "6000|4000",
+          "weight": 108
+        },
+        {
+          "source_row_id": 340,
+          "hero_table_id": 10001237,
+          "source_name": "邢道榮",
+          "soul_casket_type": 2,
+          "roll_num": "3|5",
+          "num_rate": "6000|4000",
+          "weight": 108
+        },
+        {
+          "source_row_id": 341,
+          "hero_table_id": 10001239,
+          "source_name": "李通",
+          "soul_casket_type": 2,
+          "roll_num": "3|5",
+          "num_rate": "6000|4000",
+          "weight": 108
+        },
+        {
+          "source_row_id": 342,
+          "hero_table_id": 10001240,
+          "source_name": "郭修",
+          "soul_casket_type": 2,
+          "roll_num": "3|5",
+          "num_rate": "6000|4000",
+          "weight": 108
+        },
+        {
+          "source_row_id": 343,
+          "hero_table_id": 10001243,
+          "source_name": "杜微",
+          "soul_casket_type": 2,
+          "roll_num": "3|5",
+          "num_rate": "6000|4000",
+          "weight": 108
+        },
+        {
+          "source_row_id": 344,
+          "hero_table_id": 10001244,
+          "source_name": "青釭",
+          "soul_casket_type": 2,
+          "roll_num": "3|5",
+          "num_rate": "6000|4000",
+          "weight": 108
+        },
+        {
+          "source_row_id": 345,
+          "hero_table_id": 10001246,
+          "source_name": "吳范",
+          "soul_casket_type": 2,
+          "roll_num": "3|5",
+          "num_rate": "6000|4000",
+          "weight": 108
+        },
+        {
+          "source_row_id": 346,
+          "hero_table_id": 10001247,
+          "source_name": "李嚴",
+          "soul_casket_type": 2,
+          "roll_num": "3|5",
+          "num_rate": "6000|4000",
+          "weight": 108
+        },
+        {
+          "source_row_id": 347,
+          "hero_table_id": 10001249,
+          "source_name": "SP呂萌",
+          "soul_casket_type": 2,
+          "roll_num": "3|5",
+          "num_rate": "6000|4000",
+          "weight": 108
+        },
+        {
+          "source_row_id": 348,
+          "hero_table_id": 10001252,
+          "source_name": "郝萌",
+          "soul_casket_type": 2,
+          "roll_num": "3|5",
+          "num_rate": "6000|4000",
+          "weight": 108
+        },
+        {
+          "source_row_id": 349,
+          "hero_table_id": 10001254,
+          "source_name": "上杉謙信",
+          "soul_casket_type": 2,
+          "roll_num": "3|5",
+          "num_rate": "6000|4000",
+          "weight": 108
+        },
+        {
+          "source_row_id": 350,
+          "hero_table_id": 10001255,
+          "source_name": "SP張郃",
+          "soul_casket_type": 2,
+          "roll_num": "3|5",
+          "num_rate": "6000|4000",
+          "weight": 108
+        },
+        {
+          "source_row_id": 351,
+          "hero_table_id": 10001257,
+          "source_name": "SP祝融",
+          "soul_casket_type": 2,
+          "roll_num": "3|5",
+          "num_rate": "6000|4000",
+          "weight": 108
+        },
+        {
+          "source_row_id": 352,
+          "hero_table_id": 10001259,
+          "source_name": "SP聖誕精靈",
+          "soul_casket_type": 2,
+          "roll_num": "3|5",
+          "num_rate": "6000|4000",
+          "weight": 108
+        }
+      ]
+    },
+    "3": {
+      "soul_casket_type": 3,
+      "row_count": 8,
+      "positive_row_count": 0,
+      "positive_weight_sum": 0,
+      "rows": [
+        {
+          "source_row_id": 48,
+          "hero_table_id": 10001072,
+          "source_name": "艾琳娜",
+          "soul_casket_type": 3,
+          "roll_num": "0",
+          "num_rate": "0",
+          "weight": 0
+        },
+        {
+          "source_row_id": 49,
+          "hero_table_id": 10001042,
+          "source_name": "嫦娥",
+          "soul_casket_type": 3,
+          "roll_num": "0",
+          "num_rate": "0",
+          "weight": 0
+        },
+        {
+          "source_row_id": 50,
+          "hero_table_id": 10001046,
+          "source_name": "萬聖巫女",
+          "soul_casket_type": 3,
+          "roll_num": "0",
+          "num_rate": "0",
+          "weight": 0
+        },
+        {
+          "source_row_id": 51,
+          "hero_table_id": 10001054,
+          "source_name": "聖誕精靈",
+          "soul_casket_type": 3,
+          "roll_num": "0",
+          "num_rate": "0",
+          "weight": 0
+        },
+        {
+          "source_row_id": 52,
+          "hero_table_id": 10001065,
+          "source_name": "春紅",
+          "soul_casket_type": 3,
+          "roll_num": "0",
+          "num_rate": "0",
+          "weight": 0
+        },
+        {
+          "source_row_id": 53,
+          "hero_table_id": 10001069,
+          "source_name": "劉表",
+          "soul_casket_type": 3,
+          "roll_num": "0",
+          "num_rate": "0",
+          "weight": 0
+        },
+        {
+          "source_row_id": 54,
+          "hero_table_id": 10001072,
+          "source_name": "艾琳娜",
+          "soul_casket_type": 3,
+          "roll_num": "0",
+          "num_rate": "0",
+          "weight": 0
+        },
+        {
+          "source_row_id": 131,
+          "hero_table_id": 10001104,
+          "source_name": "玉兔",
+          "soul_casket_type": 3,
+          "roll_num": "0",
+          "num_rate": "0",
+          "weight": 0
+        }
+      ]
+    },
+    "4": {
+      "soul_casket_type": 4,
+      "row_count": 57,
+      "positive_row_count": 0,
+      "positive_weight_sum": 0,
+      "rows": [
+        {
+          "source_row_id": 55,
+          "hero_table_id": 10001034,
+          "source_name": "關興",
+          "soul_casket_type": 4,
+          "roll_num": "0",
+          "num_rate": "0",
+          "weight": 0
+        },
+        {
+          "source_row_id": 56,
+          "hero_table_id": 10001036,
+          "source_name": "荀彧",
+          "soul_casket_type": 4,
+          "roll_num": "0",
+          "num_rate": "0",
+          "weight": 0
+        },
+        {
+          "source_row_id": 57,
+          "hero_table_id": 10001038,
+          "source_name": "馬謖",
+          "soul_casket_type": 4,
+          "roll_num": "0",
+          "num_rate": "0",
+          "weight": 0
+        },
+        {
+          "source_row_id": 58,
+          "hero_table_id": 10001039,
+          "source_name": "董卓",
+          "soul_casket_type": 4,
+          "roll_num": "0",
+          "num_rate": "0",
+          "weight": 0
+        },
+        {
+          "source_row_id": 59,
+          "hero_table_id": 10001040,
+          "source_name": "法正",
+          "soul_casket_type": 4,
+          "roll_num": "0",
+          "num_rate": "0",
+          "weight": 0
+        },
+        {
+          "source_row_id": 60,
+          "hero_table_id": 10001041,
+          "source_name": "呂布",
+          "soul_casket_type": 4,
+          "roll_num": "0",
+          "num_rate": "0",
+          "weight": 0
+        },
+        {
+          "source_row_id": 61,
+          "hero_table_id": 10001042,
+          "source_name": "嫦娥",
+          "soul_casket_type": 4,
+          "roll_num": "0",
+          "num_rate": "0",
+          "weight": 0
+        },
+        {
+          "source_row_id": 62,
+          "hero_table_id": 10001043,
+          "source_name": "貂蟬",
+          "soul_casket_type": 4,
+          "roll_num": "0",
+          "num_rate": "0",
+          "weight": 0
+        },
+        {
+          "source_row_id": 63,
+          "hero_table_id": 10001044,
+          "source_name": "于禁",
+          "soul_casket_type": 4,
+          "roll_num": "0",
+          "num_rate": "0",
+          "weight": 0
+        },
+        {
+          "source_row_id": 64,
+          "hero_table_id": 10001046,
+          "source_name": "萬聖巫女",
+          "soul_casket_type": 4,
+          "roll_num": "0",
+          "num_rate": "0",
+          "weight": 0
+        },
+        {
+          "source_row_id": 65,
+          "hero_table_id": 10001047,
+          "source_name": "樂進",
+          "soul_casket_type": 4,
+          "roll_num": "0",
+          "num_rate": "0",
+          "weight": 0
+        },
+        {
+          "source_row_id": 66,
+          "hero_table_id": 10001048,
+          "source_name": "凌統",
+          "soul_casket_type": 4,
+          "roll_num": "0",
+          "num_rate": "0",
+          "weight": 0
+        },
+        {
+          "source_row_id": 67,
+          "hero_table_id": 10001049,
+          "source_name": "夏侯淵",
+          "soul_casket_type": 4,
+          "roll_num": "0",
+          "num_rate": "0",
+          "weight": 0
+        },
+        {
+          "source_row_id": 68,
+          "hero_table_id": 10001050,
+          "source_name": "顏良",
+          "soul_casket_type": 4,
+          "roll_num": "0",
+          "num_rate": "0",
+          "weight": 0
+        },
+        {
+          "source_row_id": 69,
+          "hero_table_id": 10001051,
+          "source_name": "文醜",
+          "soul_casket_type": 4,
+          "roll_num": "0",
+          "num_rate": "0",
+          "weight": 0
+        },
+        {
+          "source_row_id": 70,
+          "hero_table_id": 10001053,
+          "source_name": "孟獲",
+          "soul_casket_type": 4,
+          "roll_num": "0",
+          "num_rate": "0",
+          "weight": 0
+        },
+        {
+          "source_row_id": 71,
+          "hero_table_id": 10001054,
+          "source_name": "聖誕精靈",
+          "soul_casket_type": 4,
+          "roll_num": "0",
+          "num_rate": "0",
+          "weight": 0
+        },
+        {
+          "source_row_id": 72,
+          "hero_table_id": 10001055,
+          "source_name": "小喬",
+          "soul_casket_type": 4,
+          "roll_num": "0",
+          "num_rate": "0",
+          "weight": 0
+        },
+        {
+          "source_row_id": 73,
+          "hero_table_id": 10001057,
+          "source_name": "周泰",
+          "soul_casket_type": 4,
+          "roll_num": "0",
+          "num_rate": "0",
+          "weight": 0
+        },
+        {
+          "source_row_id": 74,
+          "hero_table_id": 10001058,
+          "source_name": "漢獻帝",
+          "soul_casket_type": 4,
+          "roll_num": "0",
+          "num_rate": "0",
+          "weight": 0
+        },
+        {
+          "source_row_id": 75,
+          "hero_table_id": 10001060,
+          "source_name": "孫乾",
+          "soul_casket_type": 4,
+          "roll_num": "0",
+          "num_rate": "0",
+          "weight": 0
+        },
+        {
+          "source_row_id": 76,
+          "hero_table_id": 10001062,
+          "source_name": "子龍",
+          "soul_casket_type": 4,
+          "roll_num": "0",
+          "num_rate": "0",
+          "weight": 0
+        },
+        {
+          "source_row_id": 77,
+          "hero_table_id": 10001063,
+          "source_name": "荀攸",
+          "soul_casket_type": 4,
+          "roll_num": "0",
+          "num_rate": "0",
+          "weight": 0
+        },
+        {
+          "source_row_id": 78,
+          "hero_table_id": 10001065,
+          "source_name": "春紅",
+          "soul_casket_type": 4,
+          "roll_num": "0",
+          "num_rate": "0",
+          "weight": 0
+        },
+        {
+          "source_row_id": 79,
+          "hero_table_id": 10001066,
+          "source_name": "德古拉",
+          "soul_casket_type": 4,
+          "roll_num": "0",
+          "num_rate": "0",
+          "weight": 0
+        },
+        {
+          "source_row_id": 80,
+          "hero_table_id": 10001068,
+          "source_name": "黃蓋",
+          "soul_casket_type": 4,
+          "roll_num": "0",
+          "num_rate": "0",
+          "weight": 0
+        },
+        {
+          "source_row_id": 81,
+          "hero_table_id": 10001069,
+          "source_name": "劉表",
+          "soul_casket_type": 4,
+          "roll_num": "0",
+          "num_rate": "0",
+          "weight": 0
+        },
+        {
+          "source_row_id": 82,
+          "hero_table_id": 10001070,
+          "source_name": "服部半藏",
+          "soul_casket_type": 4,
+          "roll_num": "0",
+          "num_rate": "0",
+          "weight": 0
+        },
+        {
+          "source_row_id": 83,
+          "hero_table_id": 10001072,
+          "source_name": "艾琳娜",
+          "soul_casket_type": 4,
+          "roll_num": "0",
+          "num_rate": "0",
+          "weight": 0
+        },
+        {
+          "source_row_id": 84,
+          "hero_table_id": 10001073,
+          "source_name": "袁術",
+          "soul_casket_type": 4,
+          "roll_num": "0",
+          "num_rate": "0",
+          "weight": 0
+        },
+        {
+          "source_row_id": 85,
+          "hero_table_id": 10001075,
+          "source_name": "潘鳳",
+          "soul_casket_type": 4,
+          "roll_num": "0",
+          "num_rate": "0",
+          "weight": 0
+        },
+        {
+          "source_row_id": 86,
+          "hero_table_id": 10001076,
+          "source_name": "曹沖",
+          "soul_casket_type": 4,
+          "roll_num": "0",
+          "num_rate": "0",
+          "weight": 0
+        },
+        {
+          "source_row_id": 87,
+          "hero_table_id": 10001078,
+          "source_name": "廖化",
+          "soul_casket_type": 4,
+          "roll_num": "0",
+          "num_rate": "0",
+          "weight": 0
+        },
+        {
+          "source_row_id": 88,
+          "hero_table_id": 10001080,
+          "source_name": "魯肅",
+          "soul_casket_type": 4,
+          "roll_num": "0",
+          "num_rate": "0",
+          "weight": 0
+        },
+        {
+          "source_row_id": 89,
+          "hero_table_id": 10001081,
+          "source_name": "李典",
+          "soul_casket_type": 4,
+          "roll_num": "0",
+          "num_rate": "0",
+          "weight": 0
+        },
+        {
+          "source_row_id": 102,
+          "hero_table_id": 10001083,
+          "source_name": "赤兔",
+          "soul_casket_type": 4,
+          "roll_num": "0",
+          "num_rate": "0",
+          "weight": 0
+        },
+        {
+          "source_row_id": 103,
+          "hero_table_id": 10001085,
+          "source_name": "華雄",
+          "soul_casket_type": 4,
+          "roll_num": "0",
+          "num_rate": "0",
+          "weight": 0
+        },
+        {
+          "source_row_id": 104,
+          "hero_table_id": 10001086,
+          "source_name": "王朗",
+          "soul_casket_type": 4,
+          "roll_num": "0",
+          "num_rate": "0",
+          "weight": 0
+        },
+        {
+          "source_row_id": 105,
+          "hero_table_id": 10001088,
+          "source_name": "田豐",
+          "soul_casket_type": 4,
+          "roll_num": "0",
+          "num_rate": "0",
+          "weight": 0
+        },
+        {
+          "source_row_id": 106,
+          "hero_table_id": 10001090,
+          "source_name": "馬良",
+          "soul_casket_type": 4,
+          "roll_num": "0",
+          "num_rate": "0",
+          "weight": 0
+        },
+        {
+          "source_row_id": 107,
+          "hero_table_id": 10001091,
+          "source_name": "蔣幹",
+          "soul_casket_type": 4,
+          "roll_num": "0",
+          "num_rate": "0",
+          "weight": 0
+        },
+        {
+          "source_row_id": 108,
+          "hero_table_id": 10001093,
+          "source_name": "徐盛",
+          "soul_casket_type": 4,
+          "roll_num": "0",
+          "num_rate": "0",
+          "weight": 0
+        },
+        {
+          "source_row_id": 109,
+          "hero_table_id": 10001094,
+          "source_name": "丁奉",
+          "soul_casket_type": 4,
+          "roll_num": "0",
+          "num_rate": "0",
+          "weight": 0
+        },
+        {
+          "source_row_id": 114,
+          "hero_table_id": 10001096,
+          "source_name": "曹性",
+          "soul_casket_type": 4,
+          "roll_num": "0",
+          "num_rate": "0",
+          "weight": 0
+        },
+        {
+          "source_row_id": 115,
+          "hero_table_id": 10001097,
+          "source_name": "馬岱",
+          "soul_casket_type": 4,
+          "roll_num": "0",
+          "num_rate": "0",
+          "weight": 0
+        },
+        {
+          "source_row_id": 116,
+          "hero_table_id": 10001098,
+          "source_name": "司馬師",
+          "soul_casket_type": 4,
+          "roll_num": "0",
+          "num_rate": "0",
+          "weight": 0
+        },
+        {
+          "source_row_id": 117,
+          "hero_table_id": 10001099,
+          "source_name": "胡車兒",
+          "soul_casket_type": 4,
+          "roll_num": "0",
+          "num_rate": "0",
+          "weight": 0
+        },
+        {
+          "source_row_id": 118,
+          "hero_table_id": 10001101,
+          "source_name": "糜竺",
+          "soul_casket_type": 4,
+          "roll_num": "0",
+          "num_rate": "0",
+          "weight": 0
+        },
+        {
+          "source_row_id": 119,
+          "hero_table_id": 10001102,
+          "source_name": "步練師",
+          "soul_casket_type": 4,
+          "roll_num": "0",
+          "num_rate": "0",
+          "weight": 0
+        },
+        {
+          "source_row_id": 120,
+          "hero_table_id": 10001104,
+          "source_name": "玉兔",
+          "soul_casket_type": 4,
+          "roll_num": "0",
+          "num_rate": "0",
+          "weight": 0
+        },
+        {
+          "source_row_id": 121,
+          "hero_table_id": 10001105,
+          "source_name": "紀靈",
+          "soul_casket_type": 4,
+          "roll_num": "0",
+          "num_rate": "0",
+          "weight": 0
+        },
+        {
+          "source_row_id": 122,
+          "hero_table_id": 10001106,
+          "source_name": "步騭",
+          "soul_casket_type": 4,
+          "roll_num": "0",
+          "num_rate": "0",
+          "weight": 0
+        },
+        {
+          "source_row_id": 123,
+          "hero_table_id": 10001107,
+          "source_name": "王雙",
+          "soul_casket_type": 4,
+          "roll_num": "0",
+          "num_rate": "0",
+          "weight": 0
+        },
+        {
+          "source_row_id": 126,
+          "hero_table_id": 10001110,
+          "source_name": "張紘",
+          "soul_casket_type": 4,
+          "roll_num": "0",
+          "num_rate": "0",
+          "weight": 0
+        },
+        {
+          "source_row_id": 127,
+          "hero_table_id": 10001111,
+          "source_name": "沮授",
+          "soul_casket_type": 4,
+          "roll_num": "0",
+          "num_rate": "0",
+          "weight": 0
+        },
+        {
+          "source_row_id": 128,
+          "hero_table_id": 10001112,
+          "source_name": "張昭",
+          "soul_casket_type": 4,
+          "roll_num": "0",
+          "num_rate": "0",
+          "weight": 0
+        },
+        {
+          "source_row_id": 129,
+          "hero_table_id": 10001108,
+          "source_name": "諸葛瑾",
+          "soul_casket_type": 4,
+          "roll_num": "0",
+          "num_rate": "0",
+          "weight": 0
+        }
+      ]
+    },
+    "5": {
+      "soul_casket_type": 5,
+      "row_count": 21,
+      "positive_row_count": 21,
+      "positive_weight_sum": 10500,
+      "rows": [
+        {
+          "source_row_id": 132,
+          "hero_table_id": 10001033,
+          "source_name": "曹操",
+          "soul_casket_type": 5,
+          "roll_num": "10",
+          "num_rate": "10000",
+          "weight": 500
+        },
+        {
+          "source_row_id": 133,
+          "hero_table_id": 10001047,
+          "source_name": "樂進",
+          "soul_casket_type": 5,
+          "roll_num": "10",
+          "num_rate": "10000",
+          "weight": 500
+        },
+        {
+          "source_row_id": 134,
+          "hero_table_id": 10001055,
+          "source_name": "小喬",
+          "soul_casket_type": 5,
+          "roll_num": "10",
+          "num_rate": "10000",
+          "weight": 500
+        },
+        {
+          "source_row_id": 135,
+          "hero_table_id": 10001063,
+          "source_name": "荀彧",
+          "soul_casket_type": 5,
+          "roll_num": "10",
+          "num_rate": "10000",
+          "weight": 500
+        },
+        {
+          "source_row_id": 136,
+          "hero_table_id": 10001075,
+          "source_name": "潘鳳",
+          "soul_casket_type": 5,
+          "roll_num": "10",
+          "num_rate": "10000",
+          "weight": 500
+        },
+        {
+          "source_row_id": 137,
+          "hero_table_id": 10001080,
+          "source_name": "魯肅",
+          "soul_casket_type": 5,
+          "roll_num": "10",
+          "num_rate": "10000",
+          "weight": 500
+        },
+        {
+          "source_row_id": 138,
+          "hero_table_id": 10001086,
+          "source_name": "王朗",
+          "soul_casket_type": 5,
+          "roll_num": "10",
+          "num_rate": "10000",
+          "weight": 500
+        },
+        {
+          "source_row_id": 139,
+          "hero_table_id": 10001091,
+          "source_name": "蔣幹",
+          "soul_casket_type": 5,
+          "roll_num": "10",
+          "num_rate": "10000",
+          "weight": 500
+        },
+        {
+          "source_row_id": 140,
+          "hero_table_id": 10001099,
+          "source_name": "胡車兒",
+          "soul_casket_type": 5,
+          "roll_num": "10",
+          "num_rate": "10000",
+          "weight": 500
+        },
+        {
+          "source_row_id": 141,
+          "hero_table_id": 10001107,
+          "source_name": "王雙",
+          "soul_casket_type": 5,
+          "roll_num": "10",
+          "num_rate": "10000",
+          "weight": 500
+        },
+        {
+          "source_row_id": 142,
+          "hero_table_id": 10001096,
+          "source_name": "曹性",
+          "soul_casket_type": 5,
+          "roll_num": "10",
+          "num_rate": "10000",
+          "weight": 500
+        },
+        {
+          "source_row_id": 143,
+          "hero_table_id": 10001110,
+          "source_name": "張紘",
+          "soul_casket_type": 5,
+          "roll_num": "10",
+          "num_rate": "10000",
+          "weight": 500
+        },
+        {
+          "source_row_id": 145,
+          "hero_table_id": 10001119,
+          "source_name": "沙摩柯",
+          "soul_casket_type": 5,
+          "roll_num": "10",
+          "num_rate": "10000",
+          "weight": 500
+        },
+        {
+          "source_row_id": 146,
+          "hero_table_id": 10001123,
+          "source_name": "高順",
+          "soul_casket_type": 5,
+          "roll_num": "10",
+          "num_rate": "10000",
+          "weight": 500
+        },
+        {
+          "source_row_id": 147,
+          "hero_table_id": 10001127,
+          "source_name": "管輅",
+          "soul_casket_type": 5,
+          "roll_num": "10",
+          "num_rate": "10000",
+          "weight": 500
+        },
+        {
+          "source_row_id": 148,
+          "hero_table_id": 10001135,
+          "source_name": "程普",
+          "soul_casket_type": 5,
+          "roll_num": "10",
+          "num_rate": "10000",
+          "weight": 500
+        },
+        {
+          "source_row_id": 149,
+          "hero_table_id": 10001145,
+          "source_name": "曹芳",
+          "soul_casket_type": 5,
+          "roll_num": "10",
+          "num_rate": "10000",
+          "weight": 500
+        },
+        {
+          "source_row_id": 150,
+          "hero_table_id": 10001154,
+          "source_name": "王平",
+          "soul_casket_type": 5,
+          "roll_num": "10",
+          "num_rate": "10000",
+          "weight": 500
+        },
+        {
+          "source_row_id": 214,
+          "hero_table_id": 10001163,
+          "source_name": "許靖",
+          "soul_casket_type": 5,
+          "roll_num": "10",
+          "num_rate": "10000",
+          "weight": 500
+        },
+        {
+          "source_row_id": 215,
+          "hero_table_id": 10001173,
+          "source_name": "陳登",
+          "soul_casket_type": 5,
+          "roll_num": "10",
+          "num_rate": "10000",
+          "weight": 500
+        },
+        {
+          "source_row_id": 219,
+          "hero_table_id": 10001179,
+          "source_name": "朱然",
+          "soul_casket_type": 5,
+          "roll_num": "10",
+          "num_rate": "10000",
+          "weight": 500
+        }
+      ]
+    },
+    "6": {
+      "soul_casket_type": 6,
+      "row_count": 85,
+      "positive_row_count": 85,
+      "positive_weight_sum": 10000,
+      "rows": [
+        {
+          "source_row_id": 151,
+          "hero_table_id": 10001001,
+          "source_name": "呂萌",
+          "soul_casket_type": 6,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 118
+        },
+        {
+          "source_row_id": 152,
+          "hero_table_id": 10001002,
+          "source_name": "祝融",
+          "soul_casket_type": 6,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 118
+        },
+        {
+          "source_row_id": 153,
+          "hero_table_id": 10001003,
+          "source_name": "孫尚香",
+          "soul_casket_type": 6,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 118
+        },
+        {
+          "source_row_id": 154,
+          "hero_table_id": 10001004,
+          "source_name": "張角",
+          "soul_casket_type": 6,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 118
+        },
+        {
+          "source_row_id": 155,
+          "hero_table_id": 10001005,
+          "source_name": "大喬",
+          "soul_casket_type": 6,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 118
+        },
+        {
+          "source_row_id": 156,
+          "hero_table_id": 10001006,
+          "source_name": "魏延",
+          "soul_casket_type": 6,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 118
+        },
+        {
+          "source_row_id": 157,
+          "hero_table_id": 10001007,
+          "source_name": "賈詡",
+          "soul_casket_type": 6,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 118
+        },
+        {
+          "source_row_id": 158,
+          "hero_table_id": 10001008,
+          "source_name": "劉備",
+          "soul_casket_type": 6,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 118
+        },
+        {
+          "source_row_id": 159,
+          "hero_table_id": 10001009,
+          "source_name": "于吉",
+          "soul_casket_type": 6,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 118
+        },
+        {
+          "source_row_id": 160,
+          "hero_table_id": 10001010,
+          "source_name": "龐德",
+          "soul_casket_type": 6,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 118
+        },
+        {
+          "source_row_id": 161,
+          "hero_table_id": 10001011,
+          "source_name": "許褚",
+          "soul_casket_type": 6,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 118
+        },
+        {
+          "source_row_id": 162,
+          "hero_table_id": 10001012,
+          "source_name": "孫策",
+          "soul_casket_type": 6,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 118
+        },
+        {
+          "source_row_id": 163,
+          "hero_table_id": 10001013,
+          "source_name": "李儒",
+          "soul_casket_type": 6,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 118
+        },
+        {
+          "source_row_id": 164,
+          "hero_table_id": 10001014,
+          "source_name": "張春華",
+          "soul_casket_type": 6,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 118
+        },
+        {
+          "source_row_id": 165,
+          "hero_table_id": 10001015,
+          "source_name": "黃忠",
+          "soul_casket_type": 6,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 118
+        },
+        {
+          "source_row_id": 166,
+          "hero_table_id": 10001016,
+          "source_name": "典韋",
+          "soul_casket_type": 6,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 118
+        },
+        {
+          "source_row_id": 167,
+          "hero_table_id": 10001017,
+          "source_name": "張遼",
+          "soul_casket_type": 6,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 118
+        },
+        {
+          "source_row_id": 168,
+          "hero_table_id": 10001018,
+          "source_name": "程昱",
+          "soul_casket_type": 6,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 118
+        },
+        {
+          "source_row_id": 169,
+          "hero_table_id": 10001019,
+          "source_name": "馬忠",
+          "soul_casket_type": 6,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 118
+        },
+        {
+          "source_row_id": 170,
+          "hero_table_id": 10001020,
+          "source_name": "陳宮",
+          "soul_casket_type": 6,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 118
+        },
+        {
+          "source_row_id": 171,
+          "hero_table_id": 10001021,
+          "source_name": "曹仁",
+          "soul_casket_type": 6,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 118
+        },
+        {
+          "source_row_id": 172,
+          "hero_table_id": 10001022,
+          "source_name": "劉禪",
+          "soul_casket_type": 6,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 118
+        },
+        {
+          "source_row_id": 173,
+          "hero_table_id": 10001023,
+          "source_name": "徐庶",
+          "soul_casket_type": 6,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 118
+        },
+        {
+          "source_row_id": 174,
+          "hero_table_id": 10001024,
+          "source_name": "華佗",
+          "soul_casket_type": 6,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 118
+        },
+        {
+          "source_row_id": 175,
+          "hero_table_id": 10001025,
+          "source_name": "夏侯惇",
+          "soul_casket_type": 6,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 118
+        },
+        {
+          "source_row_id": 176,
+          "hero_table_id": 10001026,
+          "source_name": "曹洪",
+          "soul_casket_type": 6,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 118
+        },
+        {
+          "source_row_id": 177,
+          "hero_table_id": 10001027,
+          "source_name": "徐晃",
+          "soul_casket_type": 6,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 118
+        },
+        {
+          "source_row_id": 178,
+          "hero_table_id": 10001028,
+          "source_name": "甄姬",
+          "soul_casket_type": 6,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 118
+        },
+        {
+          "source_row_id": 179,
+          "hero_table_id": 10001029,
+          "source_name": "張郃",
+          "soul_casket_type": 6,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 118
+        },
+        {
+          "source_row_id": 180,
+          "hero_table_id": 10001030,
+          "source_name": "太史慈",
+          "soul_casket_type": 6,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 118
+        },
+        {
+          "source_row_id": 181,
+          "hero_table_id": 10001031,
+          "source_name": "甘寧",
+          "soul_casket_type": 6,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 118
+        },
+        {
+          "source_row_id": 182,
+          "hero_table_id": 10001033,
+          "source_name": "曹操",
+          "soul_casket_type": 6,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 118
+        },
+        {
+          "source_row_id": 183,
+          "hero_table_id": 10001036,
+          "source_name": "荀彧",
+          "soul_casket_type": 6,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 118
+        },
+        {
+          "source_row_id": 184,
+          "hero_table_id": 10001038,
+          "source_name": "馬謖",
+          "soul_casket_type": 6,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 118
+        },
+        {
+          "source_row_id": 185,
+          "hero_table_id": 10001039,
+          "source_name": "董卓",
+          "soul_casket_type": 6,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 118
+        },
+        {
+          "source_row_id": 186,
+          "hero_table_id": 10001040,
+          "source_name": "法正",
+          "soul_casket_type": 6,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 118
+        },
+        {
+          "source_row_id": 187,
+          "hero_table_id": 10001043,
+          "source_name": "貂蟬",
+          "soul_casket_type": 6,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 118
+        },
+        {
+          "source_row_id": 188,
+          "hero_table_id": 10001046,
+          "source_name": "萬聖巫女",
+          "soul_casket_type": 6,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 118
+        },
+        {
+          "source_row_id": 189,
+          "hero_table_id": 10001050,
+          "source_name": "顏良",
+          "soul_casket_type": 6,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 118
+        },
+        {
+          "source_row_id": 190,
+          "hero_table_id": 10001053,
+          "source_name": "孟獲",
+          "soul_casket_type": 6,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 118
+        },
+        {
+          "source_row_id": 191,
+          "hero_table_id": 10001055,
+          "source_name": "小喬",
+          "soul_casket_type": 6,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 118
+        },
+        {
+          "source_row_id": 192,
+          "hero_table_id": 10001058,
+          "source_name": "漢獻帝",
+          "soul_casket_type": 6,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 118
+        },
+        {
+          "source_row_id": 193,
+          "hero_table_id": 10001063,
+          "source_name": "荀攸",
+          "soul_casket_type": 6,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 118
+        },
+        {
+          "source_row_id": 194,
+          "hero_table_id": 10001066,
+          "source_name": "德古拉",
+          "soul_casket_type": 6,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 118
+        },
+        {
+          "source_row_id": 195,
+          "hero_table_id": 10001060,
+          "source_name": "孫乾",
+          "soul_casket_type": 6,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 118
+        },
+        {
+          "source_row_id": 196,
+          "hero_table_id": 10001075,
+          "source_name": "潘鳳",
+          "soul_casket_type": 6,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 118
+        },
+        {
+          "source_row_id": 197,
+          "hero_table_id": 10001083,
+          "source_name": "華雄",
+          "soul_casket_type": 6,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 118
+        },
+        {
+          "source_row_id": 198,
+          "hero_table_id": 10001051,
+          "source_name": "文醜",
+          "soul_casket_type": 6,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 118
+        },
+        {
+          "source_row_id": 199,
+          "hero_table_id": 10001057,
+          "source_name": "周泰",
+          "soul_casket_type": 6,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 118
+        },
+        {
+          "source_row_id": 200,
+          "hero_table_id": 10001078,
+          "source_name": "廖化",
+          "soul_casket_type": 6,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 118
+        },
+        {
+          "source_row_id": 201,
+          "hero_table_id": 10001091,
+          "source_name": "蔣幹",
+          "soul_casket_type": 6,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 118
+        },
+        {
+          "source_row_id": 202,
+          "hero_table_id": 10001081,
+          "source_name": "李典",
+          "soul_casket_type": 6,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 118
+        },
+        {
+          "source_row_id": 203,
+          "hero_table_id": 10001085,
+          "source_name": "華雄",
+          "soul_casket_type": 6,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 118
+        },
+        {
+          "source_row_id": 204,
+          "hero_table_id": 10001105,
+          "source_name": "紀靈",
+          "soul_casket_type": 6,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 118
+        },
+        {
+          "source_row_id": 205,
+          "hero_table_id": 10001098,
+          "source_name": "司馬師",
+          "soul_casket_type": 6,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 118
+        },
+        {
+          "source_row_id": 206,
+          "hero_table_id": 10001108,
+          "source_name": "諸葛瑾",
+          "soul_casket_type": 6,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 118
+        },
+        {
+          "source_row_id": 207,
+          "hero_table_id": 10001111,
+          "source_name": "沮授",
+          "soul_casket_type": 6,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 118
+        },
+        {
+          "source_row_id": 208,
+          "hero_table_id": 10001112,
+          "source_name": "張昭",
+          "soul_casket_type": 6,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 118
+        },
+        {
+          "source_row_id": 209,
+          "hero_table_id": 10001116,
+          "source_name": "鐘會",
+          "soul_casket_type": 6,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 118
+        },
+        {
+          "source_row_id": 210,
+          "hero_table_id": 10001128,
+          "source_name": "向寵",
+          "soul_casket_type": 6,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 118
+        },
+        {
+          "source_row_id": 211,
+          "hero_table_id": 10001138,
+          "source_name": "關銀屏",
+          "soul_casket_type": 6,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 118
+        },
+        {
+          "source_row_id": 212,
+          "hero_table_id": 10001146,
+          "source_name": "韓當",
+          "soul_casket_type": 6,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 118
+        },
+        {
+          "source_row_id": 213,
+          "hero_table_id": 10001141,
+          "source_name": "愛德華",
+          "soul_casket_type": 6,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 118
+        },
+        {
+          "source_row_id": 223,
+          "hero_table_id": 10001147,
+          "source_name": "沖田總司",
+          "soul_casket_type": 6,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 118
+        },
+        {
+          "source_row_id": 224,
+          "hero_table_id": 10001149,
+          "source_name": "夏侯玄",
+          "soul_casket_type": 6,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 118
+        },
+        {
+          "source_row_id": 225,
+          "hero_table_id": 10001153,
+          "source_name": "梅鶯毒",
+          "soul_casket_type": 6,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 118
+        },
+        {
+          "source_row_id": 226,
+          "hero_table_id": 10001155,
+          "source_name": "張仲景",
+          "soul_casket_type": 6,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 118
+        },
+        {
+          "source_row_id": 227,
+          "hero_table_id": 10001164,
+          "source_name": "張梁",
+          "soul_casket_type": 6,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 118
+        },
+        {
+          "source_row_id": 228,
+          "hero_table_id": 10001159,
+          "source_name": "袁渙",
+          "soul_casket_type": 6,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 118
+        },
+        {
+          "source_row_id": 229,
+          "hero_table_id": 10001175,
+          "source_name": "織田信奈",
+          "soul_casket_type": 6,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 118
+        },
+        {
+          "source_row_id": 230,
+          "hero_table_id": 10001168,
+          "source_name": "韓遂",
+          "soul_casket_type": 6,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 118
+        },
+        {
+          "source_row_id": 231,
+          "hero_table_id": 10001178,
+          "source_name": "蔣欽",
+          "soul_casket_type": 6,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 118
+        },
+        {
+          "source_row_id": 232,
+          "hero_table_id": 10001172,
+          "source_name": "龐會",
+          "soul_casket_type": 6,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 118
+        },
+        {
+          "source_row_id": 233,
+          "hero_table_id": 10001177,
+          "source_name": "公孫瓚",
+          "soul_casket_type": 6,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 118
+        },
+        {
+          "source_row_id": 234,
+          "hero_table_id": 10001183,
+          "source_name": "鍾繇",
+          "soul_casket_type": 6,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 118
+        },
+        {
+          "source_row_id": 235,
+          "hero_table_id": 10001188,
+          "source_name": "張魯",
+          "soul_casket_type": 6,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 118
+        },
+        {
+          "source_row_id": 236,
+          "hero_table_id": 10001191,
+          "source_name": "諸葛恪",
+          "soul_casket_type": 6,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 118
+        },
+        {
+          "source_row_id": 237,
+          "hero_table_id": 10001189,
+          "source_name": "高覽",
+          "soul_casket_type": 6,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 118
+        },
+        {
+          "source_row_id": 238,
+          "hero_table_id": 10001187,
+          "source_name": "薛靈蕓",
+          "soul_casket_type": 6,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 88
+        },
+        {
+          "source_row_id": 239,
+          "hero_table_id": 10001088,
+          "source_name": "田豐",
+          "soul_casket_type": 6,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 118
+        },
+        {
+          "source_row_id": 240,
+          "hero_table_id": 10001174,
+          "source_name": "黃承彥",
+          "soul_casket_type": 6,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 118
+        },
+        {
+          "source_row_id": 241,
+          "hero_table_id": 10001170,
+          "source_name": "費禕",
+          "soul_casket_type": 6,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 118
+        },
+        {
+          "source_row_id": 242,
+          "hero_table_id": 10001186,
+          "source_name": "真田幸村",
+          "soul_casket_type": 6,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 118
+        },
+        {
+          "source_row_id": 243,
+          "hero_table_id": 10001124,
+          "source_name": "侯成",
+          "soul_casket_type": 6,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 118
+        },
+        {
+          "source_row_id": 244,
+          "hero_table_id": 10001125,
+          "source_name": "陸抗",
+          "soul_casket_type": 6,
+          "roll_num": "-1",
+          "num_rate": "10000",
+          "weight": 118
+        }
+      ]
+    }
+  },
+  "default_hotspots": {
+    "policy_status": "private_initial_featured_set_source_validated",
+    "main_ids": [
+      10001067,
+      10001076
+    ],
+    "second_ids": [
+      10001077,
+      10001079,
+      10001092
+    ],
+    "names": [
+      "Werewolf",
+      "Hypatia",
+      "Sapphire",
+      "Amber",
+      "Amelia"
+    ]
+  }
+}

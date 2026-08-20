@@ -1,0 +1,6059 @@
+{
+  "_meta": {
+    "schema_version": 1,
+    "generated_by": "Pass41.6",
+    "source_resolution": "effective_merged",
+    "purpose": "Source-derived result rows used by the Custom Private Server Policy v1 for classic MID50 Vending. Pass41.6 adds recovered Magic byproduct pool 700008; activation/multiplicity remain private-policy-owned.",
+    "source_assets_sha256": "89f0f830508b92e5fff6ad53c6a9dae961a14042dbfdf5649008efb8353f5608",
+    "source_map": "00_PASSMAP/VENDING_POOL_TOPOLOGY.json",
+    "classification_rule": "Pool-level result_kind is field-scoped from summon/dropbox topology: Hero pools produce partner rows; ordinary/soul-stone pools produce non-partner Backpack item rows.",
+    "guardrails": [
+      "This catalog preserves source pool membership and row weights only; it does not claim to recover the historical server pool-selection formula.",
+      "dropbox 200001 is absent from the recovered effective source and is not fabricated here."
+    ]
+  },
+  "pools": [
+    {
+      "dropbox_id": 150001,
+      "result_kind": "item",
+      "source_name": "金幣抽取靈魂石庫1",
+      "row_count": 23,
+      "rate_sum": 10000,
+      "rows": [
+        {
+          "row_id": 150001001,
+          "item_id": 40001001,
+          "item_num": 1,
+          "drop_rate": 728,
+          "roll_type": 1
+        },
+        {
+          "row_id": 150001002,
+          "item_id": 40001002,
+          "item_num": 1,
+          "drop_rate": 728,
+          "roll_type": 1
+        },
+        {
+          "row_id": 150001003,
+          "item_id": 40001003,
+          "item_num": 1,
+          "drop_rate": 728,
+          "roll_type": 1
+        },
+        {
+          "row_id": 150001004,
+          "item_id": 40001004,
+          "item_num": 1,
+          "drop_rate": 727,
+          "roll_type": 1
+        },
+        {
+          "row_id": 150001005,
+          "item_id": 40001005,
+          "item_num": 1,
+          "drop_rate": 727,
+          "roll_type": 1
+        },
+        {
+          "row_id": 150001006,
+          "item_id": 40001008,
+          "item_num": 1,
+          "drop_rate": 727,
+          "roll_type": 1
+        },
+        {
+          "row_id": 150001007,
+          "item_id": 40001019,
+          "item_num": 1,
+          "drop_rate": 727,
+          "roll_type": 1
+        },
+        {
+          "row_id": 150001008,
+          "item_id": 40001020,
+          "item_num": 1,
+          "drop_rate": 727,
+          "roll_type": 1
+        },
+        {
+          "row_id": 150001009,
+          "item_id": 40001021,
+          "item_num": 1,
+          "drop_rate": 727,
+          "roll_type": 1
+        },
+        {
+          "row_id": 150001010,
+          "item_id": 40001022,
+          "item_num": 1,
+          "drop_rate": 727,
+          "roll_type": 1
+        },
+        {
+          "row_id": 150001011,
+          "item_id": 40001072,
+          "item_num": 1,
+          "drop_rate": 727,
+          "roll_type": 1
+        },
+        {
+          "row_id": 150001012,
+          "item_id": 40001001,
+          "item_num": 2,
+          "drop_rate": 166,
+          "roll_type": 1
+        },
+        {
+          "row_id": 150001013,
+          "item_id": 40001002,
+          "item_num": 2,
+          "drop_rate": 166,
+          "roll_type": 1
+        },
+        {
+          "row_id": 150001014,
+          "item_id": 40001003,
+          "item_num": 2,
+          "drop_rate": 166,
+          "roll_type": 1
+        },
+        {
+          "row_id": 150001015,
+          "item_id": 40001004,
+          "item_num": 2,
+          "drop_rate": 166,
+          "roll_type": 1
+        },
+        {
+          "row_id": 150001016,
+          "item_id": 40001005,
+          "item_num": 2,
+          "drop_rate": 167,
+          "roll_type": 1
+        },
+        {
+          "row_id": 150001017,
+          "item_id": 40001008,
+          "item_num": 2,
+          "drop_rate": 167,
+          "roll_type": 1
+        },
+        {
+          "row_id": 150001018,
+          "item_id": 40001019,
+          "item_num": 2,
+          "drop_rate": 167,
+          "roll_type": 1
+        },
+        {
+          "row_id": 150001019,
+          "item_id": 40001020,
+          "item_num": 2,
+          "drop_rate": 167,
+          "roll_type": 1
+        },
+        {
+          "row_id": 150001020,
+          "item_id": 40001021,
+          "item_num": 2,
+          "drop_rate": 167,
+          "roll_type": 1
+        },
+        {
+          "row_id": 150001021,
+          "item_id": 40001022,
+          "item_num": 2,
+          "drop_rate": 167,
+          "roll_type": 1
+        },
+        {
+          "row_id": 150001022,
+          "item_id": 40001046,
+          "item_num": 2,
+          "drop_rate": 167,
+          "roll_type": 1
+        },
+        {
+          "row_id": 150001023,
+          "item_id": 40001072,
+          "item_num": 2,
+          "drop_rate": 167,
+          "roll_type": 1
+        }
+      ]
+    },
+    {
+      "dropbox_id": 151001,
+      "result_kind": "hero",
+      "source_name": "金幣抽取整卡庫",
+      "row_count": 12,
+      "rate_sum": 10000,
+      "rows": [
+        {
+          "row_id": 151001001,
+          "item_id": 10001001,
+          "item_num": 1,
+          "drop_rate": 834,
+          "roll_type": 1
+        },
+        {
+          "row_id": 151001002,
+          "item_id": 10001002,
+          "item_num": 1,
+          "drop_rate": 834,
+          "roll_type": 1
+        },
+        {
+          "row_id": 151001003,
+          "item_id": 10001003,
+          "item_num": 1,
+          "drop_rate": 834,
+          "roll_type": 1
+        },
+        {
+          "row_id": 151001004,
+          "item_id": 10001004,
+          "item_num": 1,
+          "drop_rate": 834,
+          "roll_type": 1
+        },
+        {
+          "row_id": 151001005,
+          "item_id": 10001005,
+          "item_num": 1,
+          "drop_rate": 833,
+          "roll_type": 1
+        },
+        {
+          "row_id": 151001006,
+          "item_id": 10001008,
+          "item_num": 1,
+          "drop_rate": 833,
+          "roll_type": 1
+        },
+        {
+          "row_id": 151001007,
+          "item_id": 10001019,
+          "item_num": 1,
+          "drop_rate": 833,
+          "roll_type": 1
+        },
+        {
+          "row_id": 151001008,
+          "item_id": 10001020,
+          "item_num": 1,
+          "drop_rate": 833,
+          "roll_type": 1
+        },
+        {
+          "row_id": 151001009,
+          "item_id": 10001021,
+          "item_num": 1,
+          "drop_rate": 833,
+          "roll_type": 1
+        },
+        {
+          "row_id": 151001010,
+          "item_id": 10001022,
+          "item_num": 1,
+          "drop_rate": 833,
+          "roll_type": 1
+        },
+        {
+          "row_id": 151001011,
+          "item_id": 10001046,
+          "item_num": 1,
+          "drop_rate": 833,
+          "roll_type": 1
+        },
+        {
+          "row_id": 151001012,
+          "item_id": 10001072,
+          "item_num": 1,
+          "drop_rate": 833,
+          "roll_type": 1
+        }
+      ]
+    },
+    {
+      "dropbox_id": 200003,
+      "result_kind": "item",
+      "source_name": "钻石普通库",
+      "row_count": 371,
+      "rate_sum": 8560,
+      "rows": [
+        {
+          "row_id": 200003001,
+          "item_id": 20001080,
+          "item_num": 1,
+          "drop_rate": 60,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003002,
+          "item_id": 20001081,
+          "item_num": 1,
+          "drop_rate": 60,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003003,
+          "item_id": 20001082,
+          "item_num": 1,
+          "drop_rate": 60,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003004,
+          "item_id": 20001083,
+          "item_num": 1,
+          "drop_rate": 60,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003005,
+          "item_id": 20001084,
+          "item_num": 1,
+          "drop_rate": 60,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003006,
+          "item_id": 20001085,
+          "item_num": 1,
+          "drop_rate": 60,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003007,
+          "item_id": 20001086,
+          "item_num": 1,
+          "drop_rate": 60,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003008,
+          "item_id": 20001088,
+          "item_num": 1,
+          "drop_rate": 60,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003009,
+          "item_id": 20001089,
+          "item_num": 1,
+          "drop_rate": 60,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003010,
+          "item_id": 20001093,
+          "item_num": 1,
+          "drop_rate": 60,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003011,
+          "item_id": 30001016,
+          "item_num": 1,
+          "drop_rate": 60,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003012,
+          "item_id": 30001017,
+          "item_num": 1,
+          "drop_rate": 60,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003013,
+          "item_id": 30001018,
+          "item_num": 1,
+          "drop_rate": 60,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003014,
+          "item_id": 30001019,
+          "item_num": 1,
+          "drop_rate": 60,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003015,
+          "item_id": 30001020,
+          "item_num": 1,
+          "drop_rate": 60,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003016,
+          "item_id": 30001021,
+          "item_num": 1,
+          "drop_rate": 60,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003017,
+          "item_id": 30001022,
+          "item_num": 1,
+          "drop_rate": 60,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003018,
+          "item_id": 30001023,
+          "item_num": 1,
+          "drop_rate": 60,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003019,
+          "item_id": 30001024,
+          "item_num": 1,
+          "drop_rate": 60,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003020,
+          "item_id": 30001025,
+          "item_num": 1,
+          "drop_rate": 60,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003021,
+          "item_id": 30001026,
+          "item_num": 1,
+          "drop_rate": 60,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003022,
+          "item_id": 30001027,
+          "item_num": 1,
+          "drop_rate": 60,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003023,
+          "item_id": 30001028,
+          "item_num": 1,
+          "drop_rate": 60,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003024,
+          "item_id": 50001004,
+          "item_num": 1,
+          "drop_rate": 60,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003025,
+          "item_id": 50001006,
+          "item_num": 1,
+          "drop_rate": 60,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003026,
+          "item_id": 50001010,
+          "item_num": 1,
+          "drop_rate": 60,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003027,
+          "item_id": 50001012,
+          "item_num": 1,
+          "drop_rate": 60,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003028,
+          "item_id": 20001050,
+          "item_num": 2,
+          "drop_rate": 25,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003029,
+          "item_id": 20001051,
+          "item_num": 2,
+          "drop_rate": 25,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003030,
+          "item_id": 20001052,
+          "item_num": 2,
+          "drop_rate": 25,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003031,
+          "item_id": 20001053,
+          "item_num": 2,
+          "drop_rate": 25,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003032,
+          "item_id": 20001054,
+          "item_num": 2,
+          "drop_rate": 25,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003033,
+          "item_id": 20001055,
+          "item_num": 2,
+          "drop_rate": 25,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003034,
+          "item_id": 20001056,
+          "item_num": 2,
+          "drop_rate": 25,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003035,
+          "item_id": 20001057,
+          "item_num": 2,
+          "drop_rate": 25,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003036,
+          "item_id": 20001058,
+          "item_num": 2,
+          "drop_rate": 25,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003037,
+          "item_id": 20001062,
+          "item_num": 2,
+          "drop_rate": 25,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003038,
+          "item_id": 20001063,
+          "item_num": 2,
+          "drop_rate": 25,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003039,
+          "item_id": 20001064,
+          "item_num": 2,
+          "drop_rate": 25,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003040,
+          "item_id": 20001065,
+          "item_num": 2,
+          "drop_rate": 25,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003041,
+          "item_id": 20001067,
+          "item_num": 2,
+          "drop_rate": 25,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003042,
+          "item_id": 20001068,
+          "item_num": 2,
+          "drop_rate": 25,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003043,
+          "item_id": 20001071,
+          "item_num": 2,
+          "drop_rate": 25,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003044,
+          "item_id": 20001072,
+          "item_num": 2,
+          "drop_rate": 25,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003045,
+          "item_id": 20001073,
+          "item_num": 2,
+          "drop_rate": 25,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003046,
+          "item_id": 20001074,
+          "item_num": 2,
+          "drop_rate": 25,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003047,
+          "item_id": 20001075,
+          "item_num": 2,
+          "drop_rate": 25,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003048,
+          "item_id": 20001076,
+          "item_num": 2,
+          "drop_rate": 25,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003049,
+          "item_id": 20001077,
+          "item_num": 2,
+          "drop_rate": 25,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003050,
+          "item_id": 20001078,
+          "item_num": 2,
+          "drop_rate": 25,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003051,
+          "item_id": 20001079,
+          "item_num": 2,
+          "drop_rate": 25,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003052,
+          "item_id": 20001080,
+          "item_num": 2,
+          "drop_rate": 25,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003053,
+          "item_id": 20001081,
+          "item_num": 2,
+          "drop_rate": 25,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003054,
+          "item_id": 20001082,
+          "item_num": 2,
+          "drop_rate": 25,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003055,
+          "item_id": 20001083,
+          "item_num": 2,
+          "drop_rate": 25,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003056,
+          "item_id": 20001084,
+          "item_num": 2,
+          "drop_rate": 25,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003057,
+          "item_id": 20001085,
+          "item_num": 2,
+          "drop_rate": 25,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003058,
+          "item_id": 20001086,
+          "item_num": 2,
+          "drop_rate": 25,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003059,
+          "item_id": 20001088,
+          "item_num": 2,
+          "drop_rate": 25,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003060,
+          "item_id": 20001089,
+          "item_num": 2,
+          "drop_rate": 25,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003061,
+          "item_id": 20001093,
+          "item_num": 2,
+          "drop_rate": 25,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003062,
+          "item_id": 30001016,
+          "item_num": 2,
+          "drop_rate": 25,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003063,
+          "item_id": 30001017,
+          "item_num": 2,
+          "drop_rate": 25,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003064,
+          "item_id": 30001018,
+          "item_num": 2,
+          "drop_rate": 25,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003065,
+          "item_id": 30001019,
+          "item_num": 2,
+          "drop_rate": 25,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003066,
+          "item_id": 30001020,
+          "item_num": 2,
+          "drop_rate": 25,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003067,
+          "item_id": 30001021,
+          "item_num": 2,
+          "drop_rate": 25,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003068,
+          "item_id": 30001022,
+          "item_num": 2,
+          "drop_rate": 25,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003069,
+          "item_id": 30001023,
+          "item_num": 2,
+          "drop_rate": 25,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003070,
+          "item_id": 30001024,
+          "item_num": 2,
+          "drop_rate": 25,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003071,
+          "item_id": 30001025,
+          "item_num": 2,
+          "drop_rate": 23,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003072,
+          "item_id": 30001026,
+          "item_num": 2,
+          "drop_rate": 23,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003073,
+          "item_id": 30001027,
+          "item_num": 2,
+          "drop_rate": 23,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003074,
+          "item_id": 30001028,
+          "item_num": 2,
+          "drop_rate": 23,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003075,
+          "item_id": 50001004,
+          "item_num": 2,
+          "drop_rate": 23,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003076,
+          "item_id": 50001006,
+          "item_num": 2,
+          "drop_rate": 23,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003077,
+          "item_id": 50001010,
+          "item_num": 2,
+          "drop_rate": 23,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003078,
+          "item_id": 50001012,
+          "item_num": 2,
+          "drop_rate": 23,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003079,
+          "item_id": 20001050,
+          "item_num": 3,
+          "drop_rate": 8,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003080,
+          "item_id": 20001051,
+          "item_num": 3,
+          "drop_rate": 8,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003081,
+          "item_id": 20001052,
+          "item_num": 3,
+          "drop_rate": 8,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003082,
+          "item_id": 20001053,
+          "item_num": 3,
+          "drop_rate": 8,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003083,
+          "item_id": 20001054,
+          "item_num": 3,
+          "drop_rate": 8,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003084,
+          "item_id": 20001055,
+          "item_num": 3,
+          "drop_rate": 8,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003085,
+          "item_id": 20001056,
+          "item_num": 3,
+          "drop_rate": 8,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003086,
+          "item_id": 20001057,
+          "item_num": 3,
+          "drop_rate": 8,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003087,
+          "item_id": 20001058,
+          "item_num": 3,
+          "drop_rate": 8,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003088,
+          "item_id": 20001062,
+          "item_num": 3,
+          "drop_rate": 8,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003089,
+          "item_id": 20001063,
+          "item_num": 3,
+          "drop_rate": 8,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003090,
+          "item_id": 20001064,
+          "item_num": 3,
+          "drop_rate": 8,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003091,
+          "item_id": 20001065,
+          "item_num": 3,
+          "drop_rate": 8,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003092,
+          "item_id": 20001067,
+          "item_num": 3,
+          "drop_rate": 8,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003093,
+          "item_id": 20001068,
+          "item_num": 3,
+          "drop_rate": 8,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003094,
+          "item_id": 20001071,
+          "item_num": 3,
+          "drop_rate": 8,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003095,
+          "item_id": 20001072,
+          "item_num": 3,
+          "drop_rate": 8,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003096,
+          "item_id": 20001073,
+          "item_num": 3,
+          "drop_rate": 8,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003097,
+          "item_id": 20001074,
+          "item_num": 3,
+          "drop_rate": 8,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003098,
+          "item_id": 20001075,
+          "item_num": 3,
+          "drop_rate": 8,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003099,
+          "item_id": 20001076,
+          "item_num": 3,
+          "drop_rate": 8,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003100,
+          "item_id": 20001077,
+          "item_num": 3,
+          "drop_rate": 8,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003101,
+          "item_id": 20001078,
+          "item_num": 3,
+          "drop_rate": 8,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003102,
+          "item_id": 20001079,
+          "item_num": 3,
+          "drop_rate": 8,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003103,
+          "item_id": 20001080,
+          "item_num": 3,
+          "drop_rate": 8,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003104,
+          "item_id": 20001081,
+          "item_num": 3,
+          "drop_rate": 8,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003105,
+          "item_id": 20001082,
+          "item_num": 3,
+          "drop_rate": 8,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003106,
+          "item_id": 20001083,
+          "item_num": 3,
+          "drop_rate": 8,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003107,
+          "item_id": 20001084,
+          "item_num": 3,
+          "drop_rate": 8,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003108,
+          "item_id": 20001085,
+          "item_num": 3,
+          "drop_rate": 8,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003109,
+          "item_id": 20001086,
+          "item_num": 3,
+          "drop_rate": 8,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003110,
+          "item_id": 20001088,
+          "item_num": 3,
+          "drop_rate": 8,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003111,
+          "item_id": 20001089,
+          "item_num": 3,
+          "drop_rate": 8,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003112,
+          "item_id": 20001093,
+          "item_num": 3,
+          "drop_rate": 8,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003113,
+          "item_id": 30001016,
+          "item_num": 3,
+          "drop_rate": 8,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003114,
+          "item_id": 30001017,
+          "item_num": 3,
+          "drop_rate": 8,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003115,
+          "item_id": 30001018,
+          "item_num": 3,
+          "drop_rate": 8,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003116,
+          "item_id": 30001019,
+          "item_num": 3,
+          "drop_rate": 8,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003117,
+          "item_id": 30001020,
+          "item_num": 3,
+          "drop_rate": 8,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003118,
+          "item_id": 30001021,
+          "item_num": 3,
+          "drop_rate": 8,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003119,
+          "item_id": 30001022,
+          "item_num": 3,
+          "drop_rate": 8,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003120,
+          "item_id": 30001023,
+          "item_num": 3,
+          "drop_rate": 8,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003121,
+          "item_id": 30001024,
+          "item_num": 3,
+          "drop_rate": 8,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003122,
+          "item_id": 30001025,
+          "item_num": 3,
+          "drop_rate": 8,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003123,
+          "item_id": 30001026,
+          "item_num": 3,
+          "drop_rate": 8,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003124,
+          "item_id": 30001027,
+          "item_num": 3,
+          "drop_rate": 8,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003125,
+          "item_id": 30001028,
+          "item_num": 3,
+          "drop_rate": 8,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003126,
+          "item_id": 50001004,
+          "item_num": 3,
+          "drop_rate": 8,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003127,
+          "item_id": 50001006,
+          "item_num": 3,
+          "drop_rate": 8,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003128,
+          "item_id": 50001010,
+          "item_num": 3,
+          "drop_rate": 8,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003129,
+          "item_id": 50001012,
+          "item_num": 3,
+          "drop_rate": 8,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003130,
+          "item_id": 20001087,
+          "item_num": 1,
+          "drop_rate": 30,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003131,
+          "item_id": 20001090,
+          "item_num": 1,
+          "drop_rate": 30,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003132,
+          "item_id": 20001091,
+          "item_num": 1,
+          "drop_rate": 30,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003133,
+          "item_id": 20001092,
+          "item_num": 1,
+          "drop_rate": 30,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003134,
+          "item_id": 20001094,
+          "item_num": 1,
+          "drop_rate": 30,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003135,
+          "item_id": 20001095,
+          "item_num": 1,
+          "drop_rate": 30,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003136,
+          "item_id": 20001096,
+          "item_num": 1,
+          "drop_rate": 30,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003137,
+          "item_id": 20001097,
+          "item_num": 1,
+          "drop_rate": 30,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003138,
+          "item_id": 20001098,
+          "item_num": 1,
+          "drop_rate": 30,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003139,
+          "item_id": 20001099,
+          "item_num": 1,
+          "drop_rate": 30,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003140,
+          "item_id": 20001100,
+          "item_num": 1,
+          "drop_rate": 30,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003141,
+          "item_id": 20001101,
+          "item_num": 1,
+          "drop_rate": 30,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003142,
+          "item_id": 20001102,
+          "item_num": 1,
+          "drop_rate": 30,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003143,
+          "item_id": 20001103,
+          "item_num": 1,
+          "drop_rate": 30,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003144,
+          "item_id": 20001104,
+          "item_num": 1,
+          "drop_rate": 30,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003145,
+          "item_id": 20001105,
+          "item_num": 1,
+          "drop_rate": 30,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003146,
+          "item_id": 20001106,
+          "item_num": 1,
+          "drop_rate": 30,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003147,
+          "item_id": 20001107,
+          "item_num": 1,
+          "drop_rate": 30,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003148,
+          "item_id": 20001108,
+          "item_num": 1,
+          "drop_rate": 30,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003149,
+          "item_id": 20001109,
+          "item_num": 1,
+          "drop_rate": 30,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003150,
+          "item_id": 20001110,
+          "item_num": 1,
+          "drop_rate": 30,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003151,
+          "item_id": 20001111,
+          "item_num": 1,
+          "drop_rate": 30,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003152,
+          "item_id": 20001112,
+          "item_num": 1,
+          "drop_rate": 30,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003153,
+          "item_id": 20001113,
+          "item_num": 1,
+          "drop_rate": 30,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003154,
+          "item_id": 20001114,
+          "item_num": 1,
+          "drop_rate": 30,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003155,
+          "item_id": 20001115,
+          "item_num": 1,
+          "drop_rate": 30,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003156,
+          "item_id": 20001116,
+          "item_num": 1,
+          "drop_rate": 30,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003157,
+          "item_id": 20001117,
+          "item_num": 1,
+          "drop_rate": 30,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003158,
+          "item_id": 20001118,
+          "item_num": 1,
+          "drop_rate": 30,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003159,
+          "item_id": 20001119,
+          "item_num": 1,
+          "drop_rate": 30,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003160,
+          "item_id": 20001120,
+          "item_num": 1,
+          "drop_rate": 30,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003161,
+          "item_id": 20001121,
+          "item_num": 1,
+          "drop_rate": 30,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003162,
+          "item_id": 20001122,
+          "item_num": 1,
+          "drop_rate": 30,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003163,
+          "item_id": 20001123,
+          "item_num": 1,
+          "drop_rate": 30,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003164,
+          "item_id": 20001124,
+          "item_num": 1,
+          "drop_rate": 30,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003165,
+          "item_id": 20001125,
+          "item_num": 1,
+          "drop_rate": 30,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003166,
+          "item_id": 30001029,
+          "item_num": 1,
+          "drop_rate": 30,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003167,
+          "item_id": 30001030,
+          "item_num": 1,
+          "drop_rate": 30,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003168,
+          "item_id": 30001031,
+          "item_num": 1,
+          "drop_rate": 30,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003169,
+          "item_id": 30001032,
+          "item_num": 1,
+          "drop_rate": 30,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003170,
+          "item_id": 30001033,
+          "item_num": 1,
+          "drop_rate": 30,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003171,
+          "item_id": 30001034,
+          "item_num": 1,
+          "drop_rate": 30,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003172,
+          "item_id": 30001035,
+          "item_num": 1,
+          "drop_rate": 30,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003173,
+          "item_id": 30001036,
+          "item_num": 1,
+          "drop_rate": 30,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003174,
+          "item_id": 30001037,
+          "item_num": 1,
+          "drop_rate": 30,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003175,
+          "item_id": 30001038,
+          "item_num": 1,
+          "drop_rate": 30,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003176,
+          "item_id": 30001039,
+          "item_num": 1,
+          "drop_rate": 30,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003177,
+          "item_id": 30001040,
+          "item_num": 1,
+          "drop_rate": 30,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003178,
+          "item_id": 30001041,
+          "item_num": 1,
+          "drop_rate": 30,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003179,
+          "item_id": 30001042,
+          "item_num": 1,
+          "drop_rate": 30,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003180,
+          "item_id": 50001005,
+          "item_num": 1,
+          "drop_rate": 30,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003181,
+          "item_id": 50001007,
+          "item_num": 1,
+          "drop_rate": 30,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003182,
+          "item_id": 50001011,
+          "item_num": 1,
+          "drop_rate": 30,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003183,
+          "item_id": 20001087,
+          "item_num": 2,
+          "drop_rate": 9,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003184,
+          "item_id": 20001090,
+          "item_num": 2,
+          "drop_rate": 9,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003185,
+          "item_id": 20001091,
+          "item_num": 2,
+          "drop_rate": 9,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003186,
+          "item_id": 20001092,
+          "item_num": 2,
+          "drop_rate": 9,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003187,
+          "item_id": 20001094,
+          "item_num": 2,
+          "drop_rate": 9,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003188,
+          "item_id": 20001095,
+          "item_num": 2,
+          "drop_rate": 9,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003189,
+          "item_id": 20001096,
+          "item_num": 2,
+          "drop_rate": 9,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003190,
+          "item_id": 20001097,
+          "item_num": 2,
+          "drop_rate": 9,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003191,
+          "item_id": 20001098,
+          "item_num": 2,
+          "drop_rate": 9,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003192,
+          "item_id": 20001099,
+          "item_num": 2,
+          "drop_rate": 9,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003193,
+          "item_id": 20001100,
+          "item_num": 2,
+          "drop_rate": 9,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003194,
+          "item_id": 20001101,
+          "item_num": 2,
+          "drop_rate": 9,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003195,
+          "item_id": 20001102,
+          "item_num": 2,
+          "drop_rate": 9,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003196,
+          "item_id": 20001103,
+          "item_num": 2,
+          "drop_rate": 9,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003197,
+          "item_id": 20001104,
+          "item_num": 2,
+          "drop_rate": 9,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003198,
+          "item_id": 20001105,
+          "item_num": 2,
+          "drop_rate": 9,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003199,
+          "item_id": 20001106,
+          "item_num": 2,
+          "drop_rate": 9,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003200,
+          "item_id": 20001107,
+          "item_num": 2,
+          "drop_rate": 9,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003201,
+          "item_id": 20001108,
+          "item_num": 2,
+          "drop_rate": 9,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003202,
+          "item_id": 20001109,
+          "item_num": 2,
+          "drop_rate": 9,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003203,
+          "item_id": 20001110,
+          "item_num": 2,
+          "drop_rate": 9,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003204,
+          "item_id": 20001111,
+          "item_num": 2,
+          "drop_rate": 9,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003205,
+          "item_id": 20001112,
+          "item_num": 2,
+          "drop_rate": 9,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003206,
+          "item_id": 20001113,
+          "item_num": 2,
+          "drop_rate": 9,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003207,
+          "item_id": 20001114,
+          "item_num": 2,
+          "drop_rate": 9,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003208,
+          "item_id": 20001115,
+          "item_num": 2,
+          "drop_rate": 9,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003209,
+          "item_id": 20001116,
+          "item_num": 2,
+          "drop_rate": 9,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003210,
+          "item_id": 20001117,
+          "item_num": 2,
+          "drop_rate": 9,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003211,
+          "item_id": 20001118,
+          "item_num": 2,
+          "drop_rate": 9,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003212,
+          "item_id": 20001119,
+          "item_num": 2,
+          "drop_rate": 9,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003213,
+          "item_id": 20001120,
+          "item_num": 2,
+          "drop_rate": 9,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003214,
+          "item_id": 20001121,
+          "item_num": 2,
+          "drop_rate": 9,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003215,
+          "item_id": 20001122,
+          "item_num": 2,
+          "drop_rate": 9,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003216,
+          "item_id": 20001123,
+          "item_num": 2,
+          "drop_rate": 9,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003217,
+          "item_id": 20001124,
+          "item_num": 2,
+          "drop_rate": 9,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003218,
+          "item_id": 20001125,
+          "item_num": 2,
+          "drop_rate": 9,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003219,
+          "item_id": 30001029,
+          "item_num": 2,
+          "drop_rate": 9,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003220,
+          "item_id": 30001030,
+          "item_num": 2,
+          "drop_rate": 9,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003221,
+          "item_id": 30001031,
+          "item_num": 2,
+          "drop_rate": 9,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003222,
+          "item_id": 30001032,
+          "item_num": 2,
+          "drop_rate": 9,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003223,
+          "item_id": 30001033,
+          "item_num": 2,
+          "drop_rate": 9,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003224,
+          "item_id": 30001034,
+          "item_num": 2,
+          "drop_rate": 9,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003225,
+          "item_id": 30001035,
+          "item_num": 2,
+          "drop_rate": 9,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003226,
+          "item_id": 30001036,
+          "item_num": 2,
+          "drop_rate": 9,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003227,
+          "item_id": 30001037,
+          "item_num": 2,
+          "drop_rate": 9,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003228,
+          "item_id": 30001038,
+          "item_num": 2,
+          "drop_rate": 9,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003229,
+          "item_id": 30001039,
+          "item_num": 2,
+          "drop_rate": 9,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003230,
+          "item_id": 30001040,
+          "item_num": 2,
+          "drop_rate": 9,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003231,
+          "item_id": 30001041,
+          "item_num": 2,
+          "drop_rate": 9,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003232,
+          "item_id": 30001042,
+          "item_num": 2,
+          "drop_rate": 9,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003233,
+          "item_id": 50001005,
+          "item_num": 2,
+          "drop_rate": 9,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003234,
+          "item_id": 50001007,
+          "item_num": 2,
+          "drop_rate": 9,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003235,
+          "item_id": 50001011,
+          "item_num": 2,
+          "drop_rate": 9,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003236,
+          "item_id": 20001087,
+          "item_num": 3,
+          "drop_rate": 4,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003237,
+          "item_id": 20001090,
+          "item_num": 3,
+          "drop_rate": 4,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003238,
+          "item_id": 20001091,
+          "item_num": 3,
+          "drop_rate": 3,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003239,
+          "item_id": 20001092,
+          "item_num": 3,
+          "drop_rate": 4,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003240,
+          "item_id": 20001094,
+          "item_num": 3,
+          "drop_rate": 4,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003241,
+          "item_id": 20001095,
+          "item_num": 3,
+          "drop_rate": 4,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003242,
+          "item_id": 20001096,
+          "item_num": 3,
+          "drop_rate": 4,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003243,
+          "item_id": 20001097,
+          "item_num": 3,
+          "drop_rate": 4,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003244,
+          "item_id": 20001098,
+          "item_num": 3,
+          "drop_rate": 4,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003245,
+          "item_id": 20001099,
+          "item_num": 3,
+          "drop_rate": 4,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003246,
+          "item_id": 20001100,
+          "item_num": 3,
+          "drop_rate": 4,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003247,
+          "item_id": 20001101,
+          "item_num": 3,
+          "drop_rate": 4,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003248,
+          "item_id": 20001102,
+          "item_num": 3,
+          "drop_rate": 4,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003249,
+          "item_id": 20001103,
+          "item_num": 3,
+          "drop_rate": 4,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003250,
+          "item_id": 20001104,
+          "item_num": 3,
+          "drop_rate": 4,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003251,
+          "item_id": 20001105,
+          "item_num": 3,
+          "drop_rate": 4,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003252,
+          "item_id": 20001106,
+          "item_num": 3,
+          "drop_rate": 4,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003253,
+          "item_id": 20001107,
+          "item_num": 3,
+          "drop_rate": 4,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003254,
+          "item_id": 20001108,
+          "item_num": 3,
+          "drop_rate": 4,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003255,
+          "item_id": 20001109,
+          "item_num": 3,
+          "drop_rate": 4,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003256,
+          "item_id": 20001110,
+          "item_num": 3,
+          "drop_rate": 4,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003257,
+          "item_id": 20001111,
+          "item_num": 3,
+          "drop_rate": 4,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003258,
+          "item_id": 20001112,
+          "item_num": 3,
+          "drop_rate": 4,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003259,
+          "item_id": 20001113,
+          "item_num": 3,
+          "drop_rate": 4,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003260,
+          "item_id": 20001114,
+          "item_num": 3,
+          "drop_rate": 4,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003261,
+          "item_id": 20001115,
+          "item_num": 3,
+          "drop_rate": 4,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003262,
+          "item_id": 20001116,
+          "item_num": 3,
+          "drop_rate": 4,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003263,
+          "item_id": 20001117,
+          "item_num": 3,
+          "drop_rate": 4,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003264,
+          "item_id": 20001118,
+          "item_num": 3,
+          "drop_rate": 4,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003265,
+          "item_id": 20001119,
+          "item_num": 3,
+          "drop_rate": 4,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003266,
+          "item_id": 20001120,
+          "item_num": 3,
+          "drop_rate": 4,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003267,
+          "item_id": 20001121,
+          "item_num": 3,
+          "drop_rate": 3,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003268,
+          "item_id": 20001122,
+          "item_num": 3,
+          "drop_rate": 3,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003269,
+          "item_id": 20001123,
+          "item_num": 3,
+          "drop_rate": 3,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003270,
+          "item_id": 20001124,
+          "item_num": 3,
+          "drop_rate": 3,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003271,
+          "item_id": 20001125,
+          "item_num": 3,
+          "drop_rate": 3,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003272,
+          "item_id": 30001029,
+          "item_num": 3,
+          "drop_rate": 4,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003273,
+          "item_id": 30001030,
+          "item_num": 3,
+          "drop_rate": 4,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003274,
+          "item_id": 30001031,
+          "item_num": 3,
+          "drop_rate": 4,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003275,
+          "item_id": 30001032,
+          "item_num": 3,
+          "drop_rate": 4,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003276,
+          "item_id": 30001033,
+          "item_num": 3,
+          "drop_rate": 4,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003277,
+          "item_id": 30001034,
+          "item_num": 3,
+          "drop_rate": 4,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003278,
+          "item_id": 30001035,
+          "item_num": 3,
+          "drop_rate": 4,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003279,
+          "item_id": 30001036,
+          "item_num": 3,
+          "drop_rate": 4,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003280,
+          "item_id": 30001037,
+          "item_num": 3,
+          "drop_rate": 4,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003281,
+          "item_id": 30001038,
+          "item_num": 3,
+          "drop_rate": 4,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003282,
+          "item_id": 30001039,
+          "item_num": 3,
+          "drop_rate": 4,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003283,
+          "item_id": 30001040,
+          "item_num": 3,
+          "drop_rate": 4,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003284,
+          "item_id": 30001041,
+          "item_num": 3,
+          "drop_rate": 4,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003285,
+          "item_id": 30001042,
+          "item_num": 3,
+          "drop_rate": 4,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003286,
+          "item_id": 50001005,
+          "item_num": 3,
+          "drop_rate": 4,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003287,
+          "item_id": 50001007,
+          "item_num": 3,
+          "drop_rate": 4,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003288,
+          "item_id": 50001011,
+          "item_num": 3,
+          "drop_rate": 4,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003289,
+          "item_id": 40001001,
+          "item_num": 3,
+          "drop_rate": 36,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003290,
+          "item_id": 40001002,
+          "item_num": 3,
+          "drop_rate": 36,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003291,
+          "item_id": 40001003,
+          "item_num": 3,
+          "drop_rate": 36,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003292,
+          "item_id": 40001004,
+          "item_num": 3,
+          "drop_rate": 36,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003293,
+          "item_id": 40001005,
+          "item_num": 3,
+          "drop_rate": 36,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003294,
+          "item_id": 40001006,
+          "item_num": 3,
+          "drop_rate": 36,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003295,
+          "item_id": 40001007,
+          "item_num": 3,
+          "drop_rate": 36,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003296,
+          "item_id": 40001008,
+          "item_num": 3,
+          "drop_rate": 36,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003297,
+          "item_id": 40001009,
+          "item_num": 3,
+          "drop_rate": 36,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003298,
+          "item_id": 40001010,
+          "item_num": 3,
+          "drop_rate": 36,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003299,
+          "item_id": 40001011,
+          "item_num": 3,
+          "drop_rate": 36,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003300,
+          "item_id": 40001012,
+          "item_num": 3,
+          "drop_rate": 36,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003301,
+          "item_id": 40001013,
+          "item_num": 3,
+          "drop_rate": 36,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003302,
+          "item_id": 40001014,
+          "item_num": 3,
+          "drop_rate": 36,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003303,
+          "item_id": 40001015,
+          "item_num": 3,
+          "drop_rate": 36,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003304,
+          "item_id": 40001016,
+          "item_num": 3,
+          "drop_rate": 36,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003305,
+          "item_id": 40001017,
+          "item_num": 3,
+          "drop_rate": 36,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003306,
+          "item_id": 40001018,
+          "item_num": 3,
+          "drop_rate": 36,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003307,
+          "item_id": 40001019,
+          "item_num": 3,
+          "drop_rate": 36,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003308,
+          "item_id": 40001020,
+          "item_num": 3,
+          "drop_rate": 36,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003309,
+          "item_id": 40001021,
+          "item_num": 3,
+          "drop_rate": 36,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003310,
+          "item_id": 40001022,
+          "item_num": 3,
+          "drop_rate": 36,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003311,
+          "item_id": 40001023,
+          "item_num": 3,
+          "drop_rate": 36,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003312,
+          "item_id": 40001024,
+          "item_num": 3,
+          "drop_rate": 36,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003313,
+          "item_id": 40001025,
+          "item_num": 3,
+          "drop_rate": 36,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003314,
+          "item_id": 40001026,
+          "item_num": 3,
+          "drop_rate": 36,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003315,
+          "item_id": 40001027,
+          "item_num": 3,
+          "drop_rate": 36,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003316,
+          "item_id": 40001028,
+          "item_num": 3,
+          "drop_rate": 36,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003317,
+          "item_id": 40001029,
+          "item_num": 3,
+          "drop_rate": 36,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003318,
+          "item_id": 40001030,
+          "item_num": 3,
+          "drop_rate": 36,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003319,
+          "item_id": 40001031,
+          "item_num": 3,
+          "drop_rate": 36,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003320,
+          "item_id": 40001036,
+          "item_num": 3,
+          "drop_rate": 36,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003321,
+          "item_id": 40001038,
+          "item_num": 3,
+          "drop_rate": 36,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003322,
+          "item_id": 40001040,
+          "item_num": 3,
+          "drop_rate": 36,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003323,
+          "item_id": 40001043,
+          "item_num": 3,
+          "drop_rate": 36,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003324,
+          "item_id": 40001046,
+          "item_num": 3,
+          "drop_rate": 36,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003325,
+          "item_id": 40001050,
+          "item_num": 3,
+          "drop_rate": 36,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003326,
+          "item_id": 40001053,
+          "item_num": 3,
+          "drop_rate": 36,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003327,
+          "item_id": 40001055,
+          "item_num": 3,
+          "drop_rate": 36,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003328,
+          "item_id": 40001058,
+          "item_num": 3,
+          "drop_rate": 36,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003329,
+          "item_id": 40001063,
+          "item_num": 3,
+          "drop_rate": 36,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003330,
+          "item_id": 40001066,
+          "item_num": 3,
+          "drop_rate": 36,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003331,
+          "item_id": 40001060,
+          "item_num": 3,
+          "drop_rate": 36,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003332,
+          "item_id": 40001075,
+          "item_num": 3,
+          "drop_rate": 36,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003333,
+          "item_id": 40001083,
+          "item_num": 3,
+          "drop_rate": 36,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003334,
+          "item_id": 40001051,
+          "item_num": 3,
+          "drop_rate": 36,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003335,
+          "item_id": 40001057,
+          "item_num": 3,
+          "drop_rate": 36,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003336,
+          "item_id": 40001078,
+          "item_num": 3,
+          "drop_rate": 36,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003337,
+          "item_id": 40001091,
+          "item_num": 3,
+          "drop_rate": 36,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003338,
+          "item_id": 40001081,
+          "item_num": 3,
+          "drop_rate": 36,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003339,
+          "item_id": 40001085,
+          "item_num": 3,
+          "drop_rate": 36,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003340,
+          "item_id": 40001105,
+          "item_num": 3,
+          "drop_rate": 36,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003341,
+          "item_id": 40001098,
+          "item_num": 3,
+          "drop_rate": 36,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003342,
+          "item_id": 40001108,
+          "item_num": 3,
+          "drop_rate": 36,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003343,
+          "item_id": 40001111,
+          "item_num": 3,
+          "drop_rate": 36,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003344,
+          "item_id": 40001112,
+          "item_num": 3,
+          "drop_rate": 36,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003345,
+          "item_id": 40001116,
+          "item_num": 3,
+          "drop_rate": 36,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003346,
+          "item_id": 40001128,
+          "item_num": 3,
+          "drop_rate": 36,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003347,
+          "item_id": 40001138,
+          "item_num": 3,
+          "drop_rate": 36,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003348,
+          "item_id": 40001146,
+          "item_num": 3,
+          "drop_rate": 36,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003349,
+          "item_id": 40001141,
+          "item_num": 3,
+          "drop_rate": 36,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003350,
+          "item_id": 40001147,
+          "item_num": 3,
+          "drop_rate": 36,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003351,
+          "item_id": 40001149,
+          "item_num": 3,
+          "drop_rate": 36,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003352,
+          "item_id": 40001153,
+          "item_num": 3,
+          "drop_rate": 36,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003353,
+          "item_id": 40001155,
+          "item_num": 3,
+          "drop_rate": 36,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003354,
+          "item_id": 40001164,
+          "item_num": 3,
+          "drop_rate": 36,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003355,
+          "item_id": 40001159,
+          "item_num": 3,
+          "drop_rate": 36,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003356,
+          "item_id": 40001175,
+          "item_num": 3,
+          "drop_rate": 36,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003357,
+          "item_id": 40001168,
+          "item_num": 3,
+          "drop_rate": 36,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003358,
+          "item_id": 40001178,
+          "item_num": 3,
+          "drop_rate": 36,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003359,
+          "item_id": 40001172,
+          "item_num": 3,
+          "drop_rate": 36,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003360,
+          "item_id": 40001177,
+          "item_num": 3,
+          "drop_rate": 36,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003361,
+          "item_id": 40001183,
+          "item_num": 3,
+          "drop_rate": 36,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003362,
+          "item_id": 40001188,
+          "item_num": 3,
+          "drop_rate": 36,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003363,
+          "item_id": 40001191,
+          "item_num": 3,
+          "drop_rate": 36,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003364,
+          "item_id": 40001189,
+          "item_num": 3,
+          "drop_rate": 36,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003365,
+          "item_id": 40001187,
+          "item_num": 3,
+          "drop_rate": 36,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003366,
+          "item_id": 40001088,
+          "item_num": 3,
+          "drop_rate": 36,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003367,
+          "item_id": 40001174,
+          "item_num": 3,
+          "drop_rate": 36,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003368,
+          "item_id": 40001170,
+          "item_num": 3,
+          "drop_rate": 36,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003369,
+          "item_id": 40001186,
+          "item_num": 3,
+          "drop_rate": 48,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003370,
+          "item_id": 40001125,
+          "item_num": 3,
+          "drop_rate": 36,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200003371,
+          "item_id": 40001124,
+          "item_num": 3,
+          "drop_rate": 36,
+          "roll_type": 1
+        }
+      ]
+    },
+    {
+      "dropbox_id": 200004,
+      "result_kind": "hero",
+      "source_name": "钻石高级库",
+      "row_count": 85,
+      "rate_sum": 10000,
+      "rows": [
+        {
+          "row_id": 200004001,
+          "item_id": 10001001,
+          "item_num": 1,
+          "drop_rate": 118,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200004002,
+          "item_id": 10001002,
+          "item_num": 1,
+          "drop_rate": 118,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200004003,
+          "item_id": 10001003,
+          "item_num": 1,
+          "drop_rate": 118,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200004004,
+          "item_id": 10001004,
+          "item_num": 1,
+          "drop_rate": 118,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200004005,
+          "item_id": 10001005,
+          "item_num": 1,
+          "drop_rate": 118,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200004006,
+          "item_id": 10001006,
+          "item_num": 1,
+          "drop_rate": 118,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200004007,
+          "item_id": 10001007,
+          "item_num": 1,
+          "drop_rate": 118,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200004008,
+          "item_id": 10001008,
+          "item_num": 1,
+          "drop_rate": 118,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200004009,
+          "item_id": 10001009,
+          "item_num": 1,
+          "drop_rate": 118,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200004010,
+          "item_id": 10001010,
+          "item_num": 1,
+          "drop_rate": 118,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200004011,
+          "item_id": 10001011,
+          "item_num": 1,
+          "drop_rate": 118,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200004012,
+          "item_id": 10001012,
+          "item_num": 1,
+          "drop_rate": 118,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200004013,
+          "item_id": 10001013,
+          "item_num": 1,
+          "drop_rate": 118,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200004014,
+          "item_id": 10001014,
+          "item_num": 1,
+          "drop_rate": 118,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200004015,
+          "item_id": 10001015,
+          "item_num": 1,
+          "drop_rate": 118,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200004016,
+          "item_id": 10001016,
+          "item_num": 1,
+          "drop_rate": 118,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200004017,
+          "item_id": 10001017,
+          "item_num": 1,
+          "drop_rate": 118,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200004018,
+          "item_id": 10001018,
+          "item_num": 1,
+          "drop_rate": 118,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200004019,
+          "item_id": 10001019,
+          "item_num": 1,
+          "drop_rate": 118,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200004020,
+          "item_id": 10001020,
+          "item_num": 1,
+          "drop_rate": 118,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200004021,
+          "item_id": 10001021,
+          "item_num": 1,
+          "drop_rate": 118,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200004022,
+          "item_id": 10001022,
+          "item_num": 1,
+          "drop_rate": 118,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200004023,
+          "item_id": 10001023,
+          "item_num": 1,
+          "drop_rate": 118,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200004024,
+          "item_id": 10001024,
+          "item_num": 1,
+          "drop_rate": 118,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200004025,
+          "item_id": 10001025,
+          "item_num": 1,
+          "drop_rate": 118,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200004026,
+          "item_id": 10001026,
+          "item_num": 1,
+          "drop_rate": 118,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200004027,
+          "item_id": 10001027,
+          "item_num": 1,
+          "drop_rate": 118,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200004028,
+          "item_id": 10001028,
+          "item_num": 1,
+          "drop_rate": 118,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200004029,
+          "item_id": 10001029,
+          "item_num": 1,
+          "drop_rate": 118,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200004030,
+          "item_id": 10001030,
+          "item_num": 1,
+          "drop_rate": 118,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200004031,
+          "item_id": 10001031,
+          "item_num": 1,
+          "drop_rate": 118,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200004032,
+          "item_id": 10001033,
+          "item_num": 1,
+          "drop_rate": 118,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200004033,
+          "item_id": 10001036,
+          "item_num": 1,
+          "drop_rate": 118,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200004034,
+          "item_id": 10001038,
+          "item_num": 1,
+          "drop_rate": 118,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200004035,
+          "item_id": 10001039,
+          "item_num": 1,
+          "drop_rate": 118,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200004036,
+          "item_id": 10001040,
+          "item_num": 1,
+          "drop_rate": 118,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200004037,
+          "item_id": 10001043,
+          "item_num": 1,
+          "drop_rate": 118,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200004038,
+          "item_id": 10001046,
+          "item_num": 1,
+          "drop_rate": 118,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200004039,
+          "item_id": 10001050,
+          "item_num": 1,
+          "drop_rate": 118,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200004040,
+          "item_id": 10001053,
+          "item_num": 1,
+          "drop_rate": 118,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200004041,
+          "item_id": 10001055,
+          "item_num": 1,
+          "drop_rate": 118,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200004042,
+          "item_id": 10001058,
+          "item_num": 1,
+          "drop_rate": 118,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200004043,
+          "item_id": 10001063,
+          "item_num": 1,
+          "drop_rate": 118,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200004044,
+          "item_id": 10001066,
+          "item_num": 1,
+          "drop_rate": 118,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200004045,
+          "item_id": 10001060,
+          "item_num": 1,
+          "drop_rate": 118,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200004046,
+          "item_id": 10001075,
+          "item_num": 1,
+          "drop_rate": 118,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200004047,
+          "item_id": 10001083,
+          "item_num": 1,
+          "drop_rate": 118,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200004048,
+          "item_id": 10001051,
+          "item_num": 1,
+          "drop_rate": 118,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200004049,
+          "item_id": 10001057,
+          "item_num": 1,
+          "drop_rate": 118,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200004050,
+          "item_id": 10001078,
+          "item_num": 1,
+          "drop_rate": 118,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200004051,
+          "item_id": 10001091,
+          "item_num": 1,
+          "drop_rate": 118,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200004052,
+          "item_id": 10001081,
+          "item_num": 1,
+          "drop_rate": 118,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200004053,
+          "item_id": 10001085,
+          "item_num": 1,
+          "drop_rate": 118,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200004054,
+          "item_id": 10001105,
+          "item_num": 1,
+          "drop_rate": 118,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200004055,
+          "item_id": 10001098,
+          "item_num": 1,
+          "drop_rate": 118,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200004056,
+          "item_id": 10001108,
+          "item_num": 1,
+          "drop_rate": 118,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200004057,
+          "item_id": 10001111,
+          "item_num": 1,
+          "drop_rate": 118,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200004058,
+          "item_id": 10001112,
+          "item_num": 1,
+          "drop_rate": 118,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200004059,
+          "item_id": 10001116,
+          "item_num": 1,
+          "drop_rate": 118,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200004060,
+          "item_id": 10001128,
+          "item_num": 1,
+          "drop_rate": 118,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200004061,
+          "item_id": 10001138,
+          "item_num": 1,
+          "drop_rate": 118,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200004062,
+          "item_id": 10001146,
+          "item_num": 1,
+          "drop_rate": 118,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200004063,
+          "item_id": 10001141,
+          "item_num": 1,
+          "drop_rate": 118,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200004064,
+          "item_id": 10001147,
+          "item_num": 1,
+          "drop_rate": 118,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200004065,
+          "item_id": 10001149,
+          "item_num": 1,
+          "drop_rate": 118,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200004066,
+          "item_id": 10001153,
+          "item_num": 1,
+          "drop_rate": 118,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200004067,
+          "item_id": 10001155,
+          "item_num": 1,
+          "drop_rate": 118,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200004068,
+          "item_id": 10001164,
+          "item_num": 1,
+          "drop_rate": 118,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200004069,
+          "item_id": 10001159,
+          "item_num": 1,
+          "drop_rate": 118,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200004070,
+          "item_id": 10001175,
+          "item_num": 1,
+          "drop_rate": 118,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200004071,
+          "item_id": 10001168,
+          "item_num": 1,
+          "drop_rate": 118,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200004072,
+          "item_id": 10001178,
+          "item_num": 1,
+          "drop_rate": 118,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200004073,
+          "item_id": 10001172,
+          "item_num": 1,
+          "drop_rate": 118,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200004074,
+          "item_id": 10001177,
+          "item_num": 1,
+          "drop_rate": 118,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200004075,
+          "item_id": 10001183,
+          "item_num": 1,
+          "drop_rate": 118,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200004076,
+          "item_id": 10001188,
+          "item_num": 1,
+          "drop_rate": 118,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200004077,
+          "item_id": 10001191,
+          "item_num": 1,
+          "drop_rate": 118,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200004078,
+          "item_id": 10001189,
+          "item_num": 1,
+          "drop_rate": 118,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200004079,
+          "item_id": 10001187,
+          "item_num": 1,
+          "drop_rate": 88,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200004080,
+          "item_id": 10001088,
+          "item_num": 1,
+          "drop_rate": 118,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200004081,
+          "item_id": 10001174,
+          "item_num": 1,
+          "drop_rate": 118,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200004082,
+          "item_id": 10001170,
+          "item_num": 1,
+          "drop_rate": 118,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200004083,
+          "item_id": 10001186,
+          "item_num": 1,
+          "drop_rate": 118,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200004084,
+          "item_id": 10001125,
+          "item_num": 1,
+          "drop_rate": 118,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200004085,
+          "item_id": 10001124,
+          "item_num": 1,
+          "drop_rate": 118,
+          "roll_type": 1
+        }
+      ]
+    },
+    {
+      "dropbox_id": 200005,
+      "result_kind": "hero",
+      "source_name": "金币首抽库",
+      "row_count": 1,
+      "rate_sum": 10000,
+      "rows": [
+        {
+          "row_id": 200005001,
+          "item_id": 10001002,
+          "item_num": 1,
+          "drop_rate": 10000,
+          "roll_type": 1
+        }
+      ]
+    },
+    {
+      "dropbox_id": 210002,
+      "result_kind": "item",
+      "source_name": "金币第2抽库",
+      "row_count": 1,
+      "rate_sum": 10000,
+      "rows": [
+        {
+          "row_id": 210002001,
+          "item_id": 40001005,
+          "item_num": 1,
+          "drop_rate": 10000,
+          "roll_type": 1
+        }
+      ]
+    },
+    {
+      "dropbox_id": 210005,
+      "result_kind": "item",
+      "source_name": "金币第5抽库",
+      "row_count": 11,
+      "rate_sum": 10000,
+      "rows": [
+        {
+          "row_id": 210005001,
+          "item_id": 40001006,
+          "item_num": 1,
+          "drop_rate": 909,
+          "roll_type": 1
+        },
+        {
+          "row_id": 210005002,
+          "item_id": 40001007,
+          "item_num": 1,
+          "drop_rate": 909,
+          "roll_type": 1
+        },
+        {
+          "row_id": 210005003,
+          "item_id": 40001010,
+          "item_num": 1,
+          "drop_rate": 909,
+          "roll_type": 1
+        },
+        {
+          "row_id": 210005004,
+          "item_id": 40001011,
+          "item_num": 1,
+          "drop_rate": 909,
+          "roll_type": 1
+        },
+        {
+          "row_id": 210005005,
+          "item_id": 40001013,
+          "item_num": 1,
+          "drop_rate": 909,
+          "roll_type": 1
+        },
+        {
+          "row_id": 210005006,
+          "item_id": 40001023,
+          "item_num": 1,
+          "drop_rate": 909,
+          "roll_type": 1
+        },
+        {
+          "row_id": 210005007,
+          "item_id": 40001024,
+          "item_num": 1,
+          "drop_rate": 909,
+          "roll_type": 1
+        },
+        {
+          "row_id": 210005008,
+          "item_id": 40001026,
+          "item_num": 1,
+          "drop_rate": 909,
+          "roll_type": 1
+        },
+        {
+          "row_id": 210005009,
+          "item_id": 40001028,
+          "item_num": 1,
+          "drop_rate": 909,
+          "roll_type": 1
+        },
+        {
+          "row_id": 210005010,
+          "item_id": 40001031,
+          "item_num": 1,
+          "drop_rate": 909,
+          "roll_type": 1
+        },
+        {
+          "row_id": 210005011,
+          "item_id": 40001036,
+          "item_num": 1,
+          "drop_rate": 910,
+          "roll_type": 1
+        }
+      ]
+    },
+    {
+      "dropbox_id": 220001,
+      "result_kind": "hero",
+      "source_name": "钻石第1抽库",
+      "row_count": 11,
+      "rate_sum": 10000,
+      "rows": [
+        {
+          "row_id": 220001001,
+          "item_id": 10001009,
+          "item_num": 1,
+          "drop_rate": 910,
+          "roll_type": 1
+        },
+        {
+          "row_id": 220001002,
+          "item_id": 10001012,
+          "item_num": 1,
+          "drop_rate": 909,
+          "roll_type": 1
+        },
+        {
+          "row_id": 220001003,
+          "item_id": 10001014,
+          "item_num": 1,
+          "drop_rate": 909,
+          "roll_type": 1
+        },
+        {
+          "row_id": 220001004,
+          "item_id": 10001015,
+          "item_num": 1,
+          "drop_rate": 909,
+          "roll_type": 1
+        },
+        {
+          "row_id": 220001005,
+          "item_id": 10001016,
+          "item_num": 1,
+          "drop_rate": 909,
+          "roll_type": 1
+        },
+        {
+          "row_id": 220001006,
+          "item_id": 10001017,
+          "item_num": 1,
+          "drop_rate": 909,
+          "roll_type": 1
+        },
+        {
+          "row_id": 220001007,
+          "item_id": 10001018,
+          "item_num": 1,
+          "drop_rate": 909,
+          "roll_type": 1
+        },
+        {
+          "row_id": 220001008,
+          "item_id": 10001025,
+          "item_num": 1,
+          "drop_rate": 909,
+          "roll_type": 1
+        },
+        {
+          "row_id": 220001009,
+          "item_id": 10001027,
+          "item_num": 1,
+          "drop_rate": 909,
+          "roll_type": 1
+        },
+        {
+          "row_id": 220001010,
+          "item_id": 10001029,
+          "item_num": 1,
+          "drop_rate": 909,
+          "roll_type": 1
+        },
+        {
+          "row_id": 220001011,
+          "item_id": 10001030,
+          "item_num": 1,
+          "drop_rate": 909,
+          "roll_type": 1
+        }
+      ]
+    },
+    {
+      "dropbox_id": 220004,
+      "result_kind": "hero",
+      "source_name": "钻石第4抽库",
+      "row_count": 10,
+      "rate_sum": 10000,
+      "rows": [
+        {
+          "row_id": 220004001,
+          "item_id": 10001001,
+          "item_num": 1,
+          "drop_rate": 1000,
+          "roll_type": 1
+        },
+        {
+          "row_id": 220004002,
+          "item_id": 10001002,
+          "item_num": 1,
+          "drop_rate": 1000,
+          "roll_type": 1
+        },
+        {
+          "row_id": 220004003,
+          "item_id": 10001003,
+          "item_num": 1,
+          "drop_rate": 1000,
+          "roll_type": 1
+        },
+        {
+          "row_id": 220004004,
+          "item_id": 10001004,
+          "item_num": 1,
+          "drop_rate": 1000,
+          "roll_type": 1
+        },
+        {
+          "row_id": 220004005,
+          "item_id": 10001005,
+          "item_num": 1,
+          "drop_rate": 1000,
+          "roll_type": 1
+        },
+        {
+          "row_id": 220004006,
+          "item_id": 10001008,
+          "item_num": 1,
+          "drop_rate": 1000,
+          "roll_type": 1
+        },
+        {
+          "row_id": 220004007,
+          "item_id": 10001019,
+          "item_num": 1,
+          "drop_rate": 1000,
+          "roll_type": 1
+        },
+        {
+          "row_id": 220004008,
+          "item_id": 10001020,
+          "item_num": 1,
+          "drop_rate": 1000,
+          "roll_type": 1
+        },
+        {
+          "row_id": 220004009,
+          "item_id": 10001021,
+          "item_num": 1,
+          "drop_rate": 1000,
+          "roll_type": 1
+        },
+        {
+          "row_id": 220004010,
+          "item_id": 10001022,
+          "item_num": 1,
+          "drop_rate": 1000,
+          "roll_type": 1
+        }
+      ]
+    },
+    {
+      "dropbox_id": 220007,
+      "result_kind": "hero",
+      "source_name": "钻石第7抽库",
+      "row_count": 12,
+      "rate_sum": 10000,
+      "rows": [
+        {
+          "row_id": 220007001,
+          "item_id": 10001006,
+          "item_num": 1,
+          "drop_rate": 833,
+          "roll_type": 1
+        },
+        {
+          "row_id": 220007002,
+          "item_id": 10001007,
+          "item_num": 1,
+          "drop_rate": 833,
+          "roll_type": 1
+        },
+        {
+          "row_id": 220007003,
+          "item_id": 10001010,
+          "item_num": 1,
+          "drop_rate": 833,
+          "roll_type": 1
+        },
+        {
+          "row_id": 220007004,
+          "item_id": 10001011,
+          "item_num": 1,
+          "drop_rate": 833,
+          "roll_type": 1
+        },
+        {
+          "row_id": 220007005,
+          "item_id": 10001013,
+          "item_num": 1,
+          "drop_rate": 833,
+          "roll_type": 1
+        },
+        {
+          "row_id": 220007006,
+          "item_id": 10001023,
+          "item_num": 1,
+          "drop_rate": 833,
+          "roll_type": 1
+        },
+        {
+          "row_id": 220007007,
+          "item_id": 10001024,
+          "item_num": 1,
+          "drop_rate": 833,
+          "roll_type": 1
+        },
+        {
+          "row_id": 220007008,
+          "item_id": 10001026,
+          "item_num": 1,
+          "drop_rate": 833,
+          "roll_type": 1
+        },
+        {
+          "row_id": 220007009,
+          "item_id": 10001028,
+          "item_num": 1,
+          "drop_rate": 834,
+          "roll_type": 1
+        },
+        {
+          "row_id": 220007010,
+          "item_id": 10001031,
+          "item_num": 1,
+          "drop_rate": 834,
+          "roll_type": 1
+        },
+        {
+          "row_id": 220007011,
+          "item_id": 10001033,
+          "item_num": 1,
+          "drop_rate": 834,
+          "roll_type": 1
+        },
+        {
+          "row_id": 220007012,
+          "item_id": 10001036,
+          "item_num": 1,
+          "drop_rate": 834,
+          "roll_type": 1
+        }
+      ]
+    },
+    {
+      "dropbox_id": 700008,
+      "result_kind": "item",
+      "source_name": "魔法販賣機副產物掉落庫",
+      "rate_sum": 10000,
+      "rows": [
+        {
+          "row_id": 700008001,
+          "item_id": 20001050,
+          "item_num": 1,
+          "drop_rate": 80,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008002,
+          "item_id": 20001051,
+          "item_num": 1,
+          "drop_rate": 80,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008003,
+          "item_id": 20001052,
+          "item_num": 1,
+          "drop_rate": 80,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008004,
+          "item_id": 20001053,
+          "item_num": 1,
+          "drop_rate": 80,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008005,
+          "item_id": 20001054,
+          "item_num": 1,
+          "drop_rate": 80,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008006,
+          "item_id": 20001055,
+          "item_num": 1,
+          "drop_rate": 80,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008007,
+          "item_id": 20001056,
+          "item_num": 1,
+          "drop_rate": 80,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008008,
+          "item_id": 20001057,
+          "item_num": 1,
+          "drop_rate": 80,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008009,
+          "item_id": 20001058,
+          "item_num": 1,
+          "drop_rate": 80,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008010,
+          "item_id": 20001062,
+          "item_num": 1,
+          "drop_rate": 80,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008011,
+          "item_id": 20001063,
+          "item_num": 1,
+          "drop_rate": 80,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008012,
+          "item_id": 20001064,
+          "item_num": 1,
+          "drop_rate": 80,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008013,
+          "item_id": 20001065,
+          "item_num": 1,
+          "drop_rate": 80,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008014,
+          "item_id": 20001067,
+          "item_num": 1,
+          "drop_rate": 80,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008015,
+          "item_id": 20001068,
+          "item_num": 1,
+          "drop_rate": 80,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008016,
+          "item_id": 20001071,
+          "item_num": 1,
+          "drop_rate": 80,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008017,
+          "item_id": 20001072,
+          "item_num": 1,
+          "drop_rate": 80,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008018,
+          "item_id": 20001073,
+          "item_num": 1,
+          "drop_rate": 80,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008019,
+          "item_id": 20001074,
+          "item_num": 1,
+          "drop_rate": 80,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008020,
+          "item_id": 20001075,
+          "item_num": 1,
+          "drop_rate": 80,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008021,
+          "item_id": 20001076,
+          "item_num": 1,
+          "drop_rate": 80,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008022,
+          "item_id": 20001077,
+          "item_num": 1,
+          "drop_rate": 80,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008023,
+          "item_id": 20001078,
+          "item_num": 1,
+          "drop_rate": 80,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008024,
+          "item_id": 20001079,
+          "item_num": 1,
+          "drop_rate": 80,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008025,
+          "item_id": 20001080,
+          "item_num": 1,
+          "drop_rate": 80,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008026,
+          "item_id": 20001081,
+          "item_num": 1,
+          "drop_rate": 80,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008027,
+          "item_id": 20001082,
+          "item_num": 1,
+          "drop_rate": 80,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008028,
+          "item_id": 20001083,
+          "item_num": 1,
+          "drop_rate": 80,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008029,
+          "item_id": 20001084,
+          "item_num": 1,
+          "drop_rate": 80,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008030,
+          "item_id": 20001085,
+          "item_num": 1,
+          "drop_rate": 80,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008031,
+          "item_id": 20001086,
+          "item_num": 1,
+          "drop_rate": 80,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008032,
+          "item_id": 20001088,
+          "item_num": 1,
+          "drop_rate": 80,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008033,
+          "item_id": 20001089,
+          "item_num": 1,
+          "drop_rate": 80,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008034,
+          "item_id": 20001093,
+          "item_num": 1,
+          "drop_rate": 80,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008035,
+          "item_id": 30001016,
+          "item_num": 1,
+          "drop_rate": 80,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008036,
+          "item_id": 30001017,
+          "item_num": 1,
+          "drop_rate": 80,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008037,
+          "item_id": 30001018,
+          "item_num": 1,
+          "drop_rate": 80,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008038,
+          "item_id": 30001019,
+          "item_num": 1,
+          "drop_rate": 80,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008039,
+          "item_id": 30001020,
+          "item_num": 1,
+          "drop_rate": 80,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008040,
+          "item_id": 30001021,
+          "item_num": 1,
+          "drop_rate": 80,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008041,
+          "item_id": 30001022,
+          "item_num": 1,
+          "drop_rate": 80,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008042,
+          "item_id": 30001023,
+          "item_num": 1,
+          "drop_rate": 80,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008043,
+          "item_id": 30001024,
+          "item_num": 1,
+          "drop_rate": 80,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008044,
+          "item_id": 30001025,
+          "item_num": 1,
+          "drop_rate": 80,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008045,
+          "item_id": 30001026,
+          "item_num": 1,
+          "drop_rate": 80,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008046,
+          "item_id": 30001027,
+          "item_num": 1,
+          "drop_rate": 80,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008047,
+          "item_id": 30001028,
+          "item_num": 1,
+          "drop_rate": 80,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008048,
+          "item_id": 50001004,
+          "item_num": 1,
+          "drop_rate": 80,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008049,
+          "item_id": 50001006,
+          "item_num": 1,
+          "drop_rate": 80,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008050,
+          "item_id": 50001010,
+          "item_num": 1,
+          "drop_rate": 80,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008051,
+          "item_id": 50001012,
+          "item_num": 1,
+          "drop_rate": 80,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008052,
+          "item_id": 20001050,
+          "item_num": 2,
+          "drop_rate": 35,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008053,
+          "item_id": 20001051,
+          "item_num": 2,
+          "drop_rate": 35,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008054,
+          "item_id": 20001052,
+          "item_num": 2,
+          "drop_rate": 35,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008055,
+          "item_id": 20001053,
+          "item_num": 2,
+          "drop_rate": 35,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008056,
+          "item_id": 20001054,
+          "item_num": 2,
+          "drop_rate": 35,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008057,
+          "item_id": 20001055,
+          "item_num": 2,
+          "drop_rate": 35,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008058,
+          "item_id": 20001056,
+          "item_num": 2,
+          "drop_rate": 35,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008059,
+          "item_id": 20001057,
+          "item_num": 2,
+          "drop_rate": 35,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008060,
+          "item_id": 20001058,
+          "item_num": 2,
+          "drop_rate": 35,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008061,
+          "item_id": 20001062,
+          "item_num": 2,
+          "drop_rate": 35,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008062,
+          "item_id": 20001063,
+          "item_num": 2,
+          "drop_rate": 35,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008063,
+          "item_id": 20001064,
+          "item_num": 2,
+          "drop_rate": 35,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008064,
+          "item_id": 20001065,
+          "item_num": 2,
+          "drop_rate": 35,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008065,
+          "item_id": 20001067,
+          "item_num": 2,
+          "drop_rate": 35,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008066,
+          "item_id": 20001068,
+          "item_num": 2,
+          "drop_rate": 35,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008067,
+          "item_id": 20001071,
+          "item_num": 2,
+          "drop_rate": 35,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008068,
+          "item_id": 20001072,
+          "item_num": 2,
+          "drop_rate": 35,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008069,
+          "item_id": 20001073,
+          "item_num": 2,
+          "drop_rate": 35,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008070,
+          "item_id": 20001074,
+          "item_num": 2,
+          "drop_rate": 35,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008071,
+          "item_id": 20001075,
+          "item_num": 2,
+          "drop_rate": 35,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008072,
+          "item_id": 20001076,
+          "item_num": 2,
+          "drop_rate": 35,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008073,
+          "item_id": 20001077,
+          "item_num": 2,
+          "drop_rate": 35,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008074,
+          "item_id": 20001078,
+          "item_num": 2,
+          "drop_rate": 35,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008075,
+          "item_id": 20001079,
+          "item_num": 2,
+          "drop_rate": 35,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008076,
+          "item_id": 20001080,
+          "item_num": 2,
+          "drop_rate": 35,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008077,
+          "item_id": 20001081,
+          "item_num": 2,
+          "drop_rate": 35,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008078,
+          "item_id": 20001082,
+          "item_num": 2,
+          "drop_rate": 35,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008079,
+          "item_id": 20001083,
+          "item_num": 2,
+          "drop_rate": 35,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008080,
+          "item_id": 20001084,
+          "item_num": 2,
+          "drop_rate": 35,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008081,
+          "item_id": 20001085,
+          "item_num": 2,
+          "drop_rate": 35,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008082,
+          "item_id": 20001086,
+          "item_num": 2,
+          "drop_rate": 35,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008083,
+          "item_id": 20001088,
+          "item_num": 2,
+          "drop_rate": 35,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008084,
+          "item_id": 20001089,
+          "item_num": 2,
+          "drop_rate": 35,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008085,
+          "item_id": 20001093,
+          "item_num": 2,
+          "drop_rate": 35,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008086,
+          "item_id": 30001016,
+          "item_num": 2,
+          "drop_rate": 35,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008087,
+          "item_id": 30001017,
+          "item_num": 2,
+          "drop_rate": 35,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008088,
+          "item_id": 30001018,
+          "item_num": 2,
+          "drop_rate": 35,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008089,
+          "item_id": 30001019,
+          "item_num": 2,
+          "drop_rate": 35,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008090,
+          "item_id": 30001020,
+          "item_num": 2,
+          "drop_rate": 35,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008091,
+          "item_id": 30001021,
+          "item_num": 2,
+          "drop_rate": 35,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008092,
+          "item_id": 30001022,
+          "item_num": 2,
+          "drop_rate": 35,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008093,
+          "item_id": 30001023,
+          "item_num": 2,
+          "drop_rate": 35,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008094,
+          "item_id": 30001024,
+          "item_num": 2,
+          "drop_rate": 35,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008095,
+          "item_id": 30001025,
+          "item_num": 2,
+          "drop_rate": 35,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008096,
+          "item_id": 30001026,
+          "item_num": 2,
+          "drop_rate": 35,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008097,
+          "item_id": 30001027,
+          "item_num": 2,
+          "drop_rate": 35,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008098,
+          "item_id": 30001028,
+          "item_num": 2,
+          "drop_rate": 35,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008099,
+          "item_id": 50001004,
+          "item_num": 2,
+          "drop_rate": 35,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008100,
+          "item_id": 50001006,
+          "item_num": 2,
+          "drop_rate": 35,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008101,
+          "item_id": 50001010,
+          "item_num": 2,
+          "drop_rate": 35,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008102,
+          "item_id": 50001012,
+          "item_num": 2,
+          "drop_rate": 35,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008103,
+          "item_id": 20001050,
+          "item_num": 3,
+          "drop_rate": 15,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008104,
+          "item_id": 20001051,
+          "item_num": 3,
+          "drop_rate": 15,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008105,
+          "item_id": 20001052,
+          "item_num": 3,
+          "drop_rate": 15,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008106,
+          "item_id": 20001053,
+          "item_num": 3,
+          "drop_rate": 15,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008107,
+          "item_id": 20001054,
+          "item_num": 3,
+          "drop_rate": 15,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008108,
+          "item_id": 20001055,
+          "item_num": 3,
+          "drop_rate": 15,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008109,
+          "item_id": 20001056,
+          "item_num": 3,
+          "drop_rate": 15,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008110,
+          "item_id": 20001057,
+          "item_num": 3,
+          "drop_rate": 15,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008111,
+          "item_id": 20001058,
+          "item_num": 3,
+          "drop_rate": 15,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008112,
+          "item_id": 20001062,
+          "item_num": 3,
+          "drop_rate": 15,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008113,
+          "item_id": 20001063,
+          "item_num": 3,
+          "drop_rate": 15,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008114,
+          "item_id": 20001064,
+          "item_num": 3,
+          "drop_rate": 15,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008115,
+          "item_id": 20001065,
+          "item_num": 3,
+          "drop_rate": 15,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008116,
+          "item_id": 20001067,
+          "item_num": 3,
+          "drop_rate": 15,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008117,
+          "item_id": 20001068,
+          "item_num": 3,
+          "drop_rate": 15,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008118,
+          "item_id": 20001071,
+          "item_num": 3,
+          "drop_rate": 15,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008119,
+          "item_id": 20001072,
+          "item_num": 3,
+          "drop_rate": 15,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008120,
+          "item_id": 20001073,
+          "item_num": 3,
+          "drop_rate": 15,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008121,
+          "item_id": 20001074,
+          "item_num": 3,
+          "drop_rate": 15,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008122,
+          "item_id": 20001075,
+          "item_num": 3,
+          "drop_rate": 15,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008123,
+          "item_id": 20001076,
+          "item_num": 3,
+          "drop_rate": 15,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008124,
+          "item_id": 20001077,
+          "item_num": 3,
+          "drop_rate": 15,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008125,
+          "item_id": 20001078,
+          "item_num": 3,
+          "drop_rate": 15,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008126,
+          "item_id": 20001079,
+          "item_num": 3,
+          "drop_rate": 15,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008127,
+          "item_id": 20001080,
+          "item_num": 3,
+          "drop_rate": 15,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008128,
+          "item_id": 20001081,
+          "item_num": 3,
+          "drop_rate": 15,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008129,
+          "item_id": 20001082,
+          "item_num": 3,
+          "drop_rate": 15,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008130,
+          "item_id": 20001083,
+          "item_num": 3,
+          "drop_rate": 15,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008131,
+          "item_id": 20001084,
+          "item_num": 3,
+          "drop_rate": 15,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008132,
+          "item_id": 20001085,
+          "item_num": 3,
+          "drop_rate": 15,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008133,
+          "item_id": 20001086,
+          "item_num": 3,
+          "drop_rate": 15,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008134,
+          "item_id": 20001088,
+          "item_num": 3,
+          "drop_rate": 15,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008135,
+          "item_id": 20001089,
+          "item_num": 3,
+          "drop_rate": 15,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008136,
+          "item_id": 20001093,
+          "item_num": 3,
+          "drop_rate": 15,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008137,
+          "item_id": 30001016,
+          "item_num": 3,
+          "drop_rate": 15,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008138,
+          "item_id": 30001017,
+          "item_num": 3,
+          "drop_rate": 15,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008139,
+          "item_id": 30001018,
+          "item_num": 3,
+          "drop_rate": 15,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008140,
+          "item_id": 30001019,
+          "item_num": 3,
+          "drop_rate": 15,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008141,
+          "item_id": 30001020,
+          "item_num": 3,
+          "drop_rate": 15,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008142,
+          "item_id": 30001021,
+          "item_num": 3,
+          "drop_rate": 15,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008143,
+          "item_id": 30001022,
+          "item_num": 3,
+          "drop_rate": 15,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008144,
+          "item_id": 30001023,
+          "item_num": 3,
+          "drop_rate": 15,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008145,
+          "item_id": 30001024,
+          "item_num": 3,
+          "drop_rate": 15,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008146,
+          "item_id": 30001025,
+          "item_num": 3,
+          "drop_rate": 15,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008147,
+          "item_id": 30001026,
+          "item_num": 3,
+          "drop_rate": 15,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008148,
+          "item_id": 30001027,
+          "item_num": 3,
+          "drop_rate": 15,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008149,
+          "item_id": 30001028,
+          "item_num": 3,
+          "drop_rate": 15,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008150,
+          "item_id": 50001004,
+          "item_num": 3,
+          "drop_rate": 15,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008151,
+          "item_id": 50001006,
+          "item_num": 3,
+          "drop_rate": 15,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008152,
+          "item_id": 50001010,
+          "item_num": 3,
+          "drop_rate": 15,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008153,
+          "item_id": 50001012,
+          "item_num": 3,
+          "drop_rate": 15,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008154,
+          "item_id": 20001087,
+          "item_num": 1,
+          "drop_rate": 35,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008155,
+          "item_id": 20001090,
+          "item_num": 1,
+          "drop_rate": 35,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008156,
+          "item_id": 20001091,
+          "item_num": 1,
+          "drop_rate": 35,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008157,
+          "item_id": 20001092,
+          "item_num": 1,
+          "drop_rate": 35,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008158,
+          "item_id": 20001094,
+          "item_num": 1,
+          "drop_rate": 35,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008159,
+          "item_id": 20001095,
+          "item_num": 1,
+          "drop_rate": 35,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008160,
+          "item_id": 20001096,
+          "item_num": 1,
+          "drop_rate": 35,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008161,
+          "item_id": 20001097,
+          "item_num": 1,
+          "drop_rate": 35,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008162,
+          "item_id": 20001098,
+          "item_num": 1,
+          "drop_rate": 35,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008163,
+          "item_id": 20001099,
+          "item_num": 1,
+          "drop_rate": 35,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008164,
+          "item_id": 20001100,
+          "item_num": 1,
+          "drop_rate": 35,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008165,
+          "item_id": 20001101,
+          "item_num": 1,
+          "drop_rate": 35,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008166,
+          "item_id": 20001102,
+          "item_num": 1,
+          "drop_rate": 35,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008167,
+          "item_id": 20001103,
+          "item_num": 1,
+          "drop_rate": 35,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008168,
+          "item_id": 20001104,
+          "item_num": 1,
+          "drop_rate": 35,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008169,
+          "item_id": 20001105,
+          "item_num": 1,
+          "drop_rate": 35,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008170,
+          "item_id": 20001106,
+          "item_num": 1,
+          "drop_rate": 35,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008171,
+          "item_id": 20001107,
+          "item_num": 1,
+          "drop_rate": 35,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008172,
+          "item_id": 20001108,
+          "item_num": 1,
+          "drop_rate": 35,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008173,
+          "item_id": 20001109,
+          "item_num": 1,
+          "drop_rate": 35,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008174,
+          "item_id": 20001110,
+          "item_num": 1,
+          "drop_rate": 35,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008175,
+          "item_id": 20001111,
+          "item_num": 1,
+          "drop_rate": 35,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008176,
+          "item_id": 20001112,
+          "item_num": 1,
+          "drop_rate": 35,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008177,
+          "item_id": 20001113,
+          "item_num": 1,
+          "drop_rate": 35,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008178,
+          "item_id": 20001114,
+          "item_num": 1,
+          "drop_rate": 35,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008179,
+          "item_id": 20001115,
+          "item_num": 1,
+          "drop_rate": 35,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008180,
+          "item_id": 20001116,
+          "item_num": 1,
+          "drop_rate": 35,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008181,
+          "item_id": 20001117,
+          "item_num": 1,
+          "drop_rate": 35,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008182,
+          "item_id": 20001118,
+          "item_num": 1,
+          "drop_rate": 35,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008183,
+          "item_id": 20001119,
+          "item_num": 1,
+          "drop_rate": 35,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008184,
+          "item_id": 20001120,
+          "item_num": 1,
+          "drop_rate": 35,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008185,
+          "item_id": 20001121,
+          "item_num": 1,
+          "drop_rate": 35,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008186,
+          "item_id": 20001122,
+          "item_num": 1,
+          "drop_rate": 35,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008187,
+          "item_id": 20001123,
+          "item_num": 1,
+          "drop_rate": 35,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008188,
+          "item_id": 20001124,
+          "item_num": 1,
+          "drop_rate": 35,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008189,
+          "item_id": 20001125,
+          "item_num": 1,
+          "drop_rate": 35,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008190,
+          "item_id": 30001029,
+          "item_num": 1,
+          "drop_rate": 35,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008191,
+          "item_id": 30001030,
+          "item_num": 1,
+          "drop_rate": 35,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008192,
+          "item_id": 30001031,
+          "item_num": 1,
+          "drop_rate": 35,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008193,
+          "item_id": 30001032,
+          "item_num": 1,
+          "drop_rate": 35,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008194,
+          "item_id": 30001033,
+          "item_num": 1,
+          "drop_rate": 35,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008195,
+          "item_id": 30001034,
+          "item_num": 1,
+          "drop_rate": 35,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008196,
+          "item_id": 30001035,
+          "item_num": 1,
+          "drop_rate": 35,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008197,
+          "item_id": 30001036,
+          "item_num": 1,
+          "drop_rate": 35,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008198,
+          "item_id": 30001037,
+          "item_num": 1,
+          "drop_rate": 35,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008199,
+          "item_id": 30001038,
+          "item_num": 1,
+          "drop_rate": 35,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008200,
+          "item_id": 30001039,
+          "item_num": 1,
+          "drop_rate": 35,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008201,
+          "item_id": 30001040,
+          "item_num": 1,
+          "drop_rate": 35,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008202,
+          "item_id": 30001041,
+          "item_num": 1,
+          "drop_rate": 35,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008203,
+          "item_id": 30001042,
+          "item_num": 1,
+          "drop_rate": 35,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008204,
+          "item_id": 50001005,
+          "item_num": 1,
+          "drop_rate": 35,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008205,
+          "item_id": 50001007,
+          "item_num": 1,
+          "drop_rate": 35,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008206,
+          "item_id": 50001011,
+          "item_num": 1,
+          "drop_rate": 35,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008207,
+          "item_id": 20001087,
+          "item_num": 2,
+          "drop_rate": 15,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008208,
+          "item_id": 20001090,
+          "item_num": 2,
+          "drop_rate": 15,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008209,
+          "item_id": 20001091,
+          "item_num": 2,
+          "drop_rate": 15,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008210,
+          "item_id": 20001092,
+          "item_num": 2,
+          "drop_rate": 15,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008211,
+          "item_id": 20001094,
+          "item_num": 2,
+          "drop_rate": 15,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008212,
+          "item_id": 20001095,
+          "item_num": 2,
+          "drop_rate": 15,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008213,
+          "item_id": 20001096,
+          "item_num": 2,
+          "drop_rate": 15,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008214,
+          "item_id": 20001097,
+          "item_num": 2,
+          "drop_rate": 15,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008215,
+          "item_id": 20001098,
+          "item_num": 2,
+          "drop_rate": 15,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008216,
+          "item_id": 20001099,
+          "item_num": 2,
+          "drop_rate": 15,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008217,
+          "item_id": 20001100,
+          "item_num": 2,
+          "drop_rate": 15,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008218,
+          "item_id": 20001101,
+          "item_num": 2,
+          "drop_rate": 15,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008219,
+          "item_id": 20001102,
+          "item_num": 2,
+          "drop_rate": 15,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008220,
+          "item_id": 20001103,
+          "item_num": 2,
+          "drop_rate": 15,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008221,
+          "item_id": 20001104,
+          "item_num": 2,
+          "drop_rate": 15,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008222,
+          "item_id": 20001105,
+          "item_num": 2,
+          "drop_rate": 15,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008223,
+          "item_id": 20001106,
+          "item_num": 2,
+          "drop_rate": 15,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008224,
+          "item_id": 20001107,
+          "item_num": 2,
+          "drop_rate": 15,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008225,
+          "item_id": 20001108,
+          "item_num": 2,
+          "drop_rate": 15,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008226,
+          "item_id": 20001109,
+          "item_num": 2,
+          "drop_rate": 15,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008227,
+          "item_id": 20001110,
+          "item_num": 2,
+          "drop_rate": 15,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008228,
+          "item_id": 20001111,
+          "item_num": 2,
+          "drop_rate": 15,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008229,
+          "item_id": 20001112,
+          "item_num": 2,
+          "drop_rate": 15,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008230,
+          "item_id": 20001113,
+          "item_num": 2,
+          "drop_rate": 15,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008231,
+          "item_id": 20001114,
+          "item_num": 2,
+          "drop_rate": 15,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008232,
+          "item_id": 20001115,
+          "item_num": 2,
+          "drop_rate": 15,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008233,
+          "item_id": 20001116,
+          "item_num": 2,
+          "drop_rate": 15,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008234,
+          "item_id": 20001117,
+          "item_num": 2,
+          "drop_rate": 15,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008235,
+          "item_id": 20001118,
+          "item_num": 2,
+          "drop_rate": 15,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008236,
+          "item_id": 20001119,
+          "item_num": 2,
+          "drop_rate": 15,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008237,
+          "item_id": 20001120,
+          "item_num": 2,
+          "drop_rate": 15,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008238,
+          "item_id": 20001121,
+          "item_num": 2,
+          "drop_rate": 14,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008239,
+          "item_id": 20001122,
+          "item_num": 2,
+          "drop_rate": 14,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008240,
+          "item_id": 20001123,
+          "item_num": 2,
+          "drop_rate": 14,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008241,
+          "item_id": 20001124,
+          "item_num": 2,
+          "drop_rate": 14,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008242,
+          "item_id": 20001125,
+          "item_num": 2,
+          "drop_rate": 14,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008243,
+          "item_id": 30001029,
+          "item_num": 2,
+          "drop_rate": 14,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008244,
+          "item_id": 30001030,
+          "item_num": 2,
+          "drop_rate": 14,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008245,
+          "item_id": 30001031,
+          "item_num": 2,
+          "drop_rate": 14,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008246,
+          "item_id": 30001032,
+          "item_num": 2,
+          "drop_rate": 14,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008247,
+          "item_id": 30001033,
+          "item_num": 2,
+          "drop_rate": 14,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008248,
+          "item_id": 30001034,
+          "item_num": 2,
+          "drop_rate": 14,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008249,
+          "item_id": 30001035,
+          "item_num": 2,
+          "drop_rate": 14,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008250,
+          "item_id": 30001036,
+          "item_num": 2,
+          "drop_rate": 14,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008251,
+          "item_id": 30001037,
+          "item_num": 2,
+          "drop_rate": 14,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008252,
+          "item_id": 30001038,
+          "item_num": 2,
+          "drop_rate": 14,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008253,
+          "item_id": 30001039,
+          "item_num": 2,
+          "drop_rate": 14,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008254,
+          "item_id": 30001040,
+          "item_num": 2,
+          "drop_rate": 14,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008255,
+          "item_id": 30001041,
+          "item_num": 2,
+          "drop_rate": 14,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008256,
+          "item_id": 30001042,
+          "item_num": 2,
+          "drop_rate": 14,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008257,
+          "item_id": 50001005,
+          "item_num": 2,
+          "drop_rate": 14,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008258,
+          "item_id": 50001007,
+          "item_num": 2,
+          "drop_rate": 14,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008259,
+          "item_id": 50001011,
+          "item_num": 2,
+          "drop_rate": 14,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008260,
+          "item_id": 20001087,
+          "item_num": 3,
+          "drop_rate": 14,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008261,
+          "item_id": 20001090,
+          "item_num": 3,
+          "drop_rate": 14,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008262,
+          "item_id": 20001091,
+          "item_num": 3,
+          "drop_rate": 14,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008263,
+          "item_id": 20001092,
+          "item_num": 3,
+          "drop_rate": 14,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008264,
+          "item_id": 20001094,
+          "item_num": 3,
+          "drop_rate": 14,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008265,
+          "item_id": 20001095,
+          "item_num": 3,
+          "drop_rate": 14,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008266,
+          "item_id": 20001096,
+          "item_num": 3,
+          "drop_rate": 14,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008267,
+          "item_id": 20001097,
+          "item_num": 3,
+          "drop_rate": 14,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008268,
+          "item_id": 20001098,
+          "item_num": 3,
+          "drop_rate": 14,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008269,
+          "item_id": 20001099,
+          "item_num": 3,
+          "drop_rate": 14,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008270,
+          "item_id": 20001100,
+          "item_num": 3,
+          "drop_rate": 14,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008271,
+          "item_id": 20001101,
+          "item_num": 3,
+          "drop_rate": 14,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008272,
+          "item_id": 20001102,
+          "item_num": 3,
+          "drop_rate": 14,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008273,
+          "item_id": 20001103,
+          "item_num": 3,
+          "drop_rate": 14,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008274,
+          "item_id": 20001104,
+          "item_num": 3,
+          "drop_rate": 14,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008275,
+          "item_id": 20001105,
+          "item_num": 3,
+          "drop_rate": 14,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008276,
+          "item_id": 20001106,
+          "item_num": 3,
+          "drop_rate": 14,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008277,
+          "item_id": 20001107,
+          "item_num": 3,
+          "drop_rate": 14,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008278,
+          "item_id": 20001108,
+          "item_num": 3,
+          "drop_rate": 14,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008279,
+          "item_id": 20001109,
+          "item_num": 3,
+          "drop_rate": 14,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008280,
+          "item_id": 20001110,
+          "item_num": 3,
+          "drop_rate": 14,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008281,
+          "item_id": 20001111,
+          "item_num": 3,
+          "drop_rate": 14,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008282,
+          "item_id": 20001112,
+          "item_num": 3,
+          "drop_rate": 14,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008283,
+          "item_id": 20001113,
+          "item_num": 3,
+          "drop_rate": 14,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008284,
+          "item_id": 20001114,
+          "item_num": 3,
+          "drop_rate": 14,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008285,
+          "item_id": 20001115,
+          "item_num": 3,
+          "drop_rate": 14,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008286,
+          "item_id": 20001116,
+          "item_num": 3,
+          "drop_rate": 14,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008287,
+          "item_id": 20001117,
+          "item_num": 3,
+          "drop_rate": 14,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008288,
+          "item_id": 20001118,
+          "item_num": 3,
+          "drop_rate": 14,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008289,
+          "item_id": 20001119,
+          "item_num": 3,
+          "drop_rate": 14,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008290,
+          "item_id": 20001120,
+          "item_num": 3,
+          "drop_rate": 14,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008291,
+          "item_id": 20001121,
+          "item_num": 3,
+          "drop_rate": 14,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008292,
+          "item_id": 20001122,
+          "item_num": 3,
+          "drop_rate": 14,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008293,
+          "item_id": 20001123,
+          "item_num": 3,
+          "drop_rate": 14,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008294,
+          "item_id": 20001124,
+          "item_num": 3,
+          "drop_rate": 14,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008295,
+          "item_id": 20001125,
+          "item_num": 3,
+          "drop_rate": 14,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008296,
+          "item_id": 30001029,
+          "item_num": 3,
+          "drop_rate": 14,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008297,
+          "item_id": 30001030,
+          "item_num": 3,
+          "drop_rate": 14,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008298,
+          "item_id": 30001031,
+          "item_num": 3,
+          "drop_rate": 14,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008299,
+          "item_id": 30001032,
+          "item_num": 3,
+          "drop_rate": 14,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008300,
+          "item_id": 30001033,
+          "item_num": 3,
+          "drop_rate": 14,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008301,
+          "item_id": 30001034,
+          "item_num": 3,
+          "drop_rate": 14,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008302,
+          "item_id": 30001035,
+          "item_num": 3,
+          "drop_rate": 14,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008303,
+          "item_id": 30001036,
+          "item_num": 3,
+          "drop_rate": 14,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008304,
+          "item_id": 30001037,
+          "item_num": 3,
+          "drop_rate": 14,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008305,
+          "item_id": 30001038,
+          "item_num": 3,
+          "drop_rate": 14,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008306,
+          "item_id": 30001039,
+          "item_num": 3,
+          "drop_rate": 14,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008307,
+          "item_id": 30001040,
+          "item_num": 3,
+          "drop_rate": 14,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008308,
+          "item_id": 30001041,
+          "item_num": 3,
+          "drop_rate": 14,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008309,
+          "item_id": 30001042,
+          "item_num": 3,
+          "drop_rate": 14,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008310,
+          "item_id": 50001005,
+          "item_num": 3,
+          "drop_rate": 14,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008311,
+          "item_id": 50001007,
+          "item_num": 3,
+          "drop_rate": 14,
+          "roll_type": 1
+        },
+        {
+          "row_id": 700008312,
+          "item_id": 50001011,
+          "item_num": 3,
+          "drop_rate": 14,
+          "roll_type": 1
+        }
+      ],
+      "source_status": "recovered_effective_dropbox"
+    }
+  ]
+}

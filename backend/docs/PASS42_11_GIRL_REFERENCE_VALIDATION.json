@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "pass": "42.11",
+  "status": "pass",
+  "canonical_map_girl_catalog": "00_PASSMAP/GIRL_CATALOG.jsonl",
+  "canonical_map_girl_catalog_sha256": "c286680f2d48a50fa49b49b2f0b00ce53b235eda93427d11c69ea700a40cf97e",
+  "source_assets_sha256": "89f0f830508b92e5fff6ad53c6a9dae961a14042dbfdf5649008efb8353f5608",
+  "runtime_featured_catalog_sha256": "38456f9c7013ea63c268589817ea646373531518a539bd28050e28426426578c",
+  "compact_reference_catalog_sha256": "79ebe697776495f7eb0a8ea4b71eb1463adc3f7b2af0d9235bdcf2878d588530",
+  "counts": {
+    "all": 291,
+    "normal_partner": 277,
+    "vow_super_partner": 14,
+    "sx": 73,
+    "medium_extended": 58,
+    "medium_featured": 56
+  },
+  "compact_projection_field_mismatches": [],
+  "effective_lua_source_checks": {
+    "data/tables/partner.lua": {
+      "effective_path": "app-assets/output/assets/src_64/data/tables/partner.lua",
+      "expected_ids": 277,
+      "decoded_row_ids": 555,
+      "missing_ids": []
+    },
+    "data/tables/super_partner.lua": {
+      "effective_path": "app-assets/output/assets/src_64/data/tables/super_partner.lua",
+      "expected_ids": 14,
+      "decoded_row_ids": 14,
+      "missing_ids": []
+    }
+  },
+  "generated_docs_exact_set_checks": {
+    "GIRLS_SX_73.txt": true,
+    "GIRLS_MEDIUM_FEATURED_56.txt": true,
+    "GIRLS_MEDIUM_EXTENDED_58.txt": true,
+    "ALL_GIRLS_ID.txt": true,
+    "GIRL_IDS_alias_identical": true
+  }
+}

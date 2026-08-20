@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Compatibility launcher for the modular GXB v0.8.14 Pass 35.3 backend.
+"""Compatibility launcher for the modular GXB v0.8.29 Pass 42.7 backend.
 
 No-argument behavior remains the historical launcher: ``python3 server.py``
 starts the backend.  ``-h`` / ``--help`` is operator documentation only.

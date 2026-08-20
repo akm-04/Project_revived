@@ -12,6 +12,14 @@ from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
+from gxb_backend.content import (
+    AmbiguousContentReference,
+    CatalogNamespace,
+    GameDataCatalog,
+    ResolveContext,
+    UnknownContentReference,
+)
+
 from .global_response_semantics import GlobalResponseSemantics
 from .hero_repository import HeroRepository
 from .inventory_repository import InventoryRepository
@@ -31,6 +39,7 @@ class HeroProgressionRepository:
         heroes: HeroRepository | None = None,
         uow: UnitOfWork | None = None,
         response_semantics: GlobalResponseSemantics | None = None,
+        catalog: GameDataCatalog | None = None,
     ) -> None:
         self.player = player
         self.data_dir = Path(data_dir)
@@ -39,6 +48,7 @@ class HeroProgressionRepository:
         self.heroes = heroes or HeroRepository(player, save_callback, self.data_dir)
         self.uow = uow
         self.response_semantics = response_semantics
+        self.catalog = catalog
         self.items = self._load_rows("item_progression_meta.json", "items")
         self.exp_levels = self._load_rows("partner_exp_meta.json", "levels")
         self.player_levels = self._load_rows("player_hero_level_meta.json", "levels")
@@ -247,6 +257,99 @@ class HeroProgressionRepository:
             return {"error_code": 1}
 
         # Source MID90 callback consumes no endpoint-local resource field.
+        return {}
+
+    _NORMAL_HERO_MAX_STAR = 5
+    _EVOLUTION_STONE_REQUIRED_BY_NEXT_STAR = {2: 20, 3: 50, 4: 100, 5: 150}
+
+    def evolve_hero(self, req: dict[str, Any]) -> dict[str, Any]:
+        """MID52: canonically consume the owned Girl's scrolls and raise star.
+
+        ``SelfPlayer:evolveHero`` sends only the runtime ``partner_id``.  On an
+        OK callback the stock client removes ``StarLevelSuipian[next_star]`` of
+        that Girl's own ``stone_id`` and ``NormalHero:evolution`` increments the
+        visible star locally.  The endpoint consumes no response fields, so the
+        server must persist the same mutation and return an empty success object.
+
+        All identity checks are typed/source-backed.  No numeric-prefix rule is
+        used: the owned Hero resolves to PARTNER, its explicit ``stone_id`` must
+        resolve to an ITEM row of type 3 whose ``partner_id`` points back to the
+        same Girl, and only ordinary 1->5 evolution is activated here.
+        """
+        partner_id = self._int(req.get("partner_id"), 0)
+        hero = self.heroes.get(partner_id)
+        if hero is None or self.catalog is None:
+            return {"error_code": 1}
+
+        table_id = self._int(hero.get("table_id"), 0)
+        current_star = self._int(hero.get("star"), 0)
+        next_star = current_star + 1
+        required = self._EVOLUTION_STONE_REQUIRED_BY_NEXT_STAR.get(next_star)
+        if table_id <= 0 or current_star <= 0 or current_star >= self._NORMAL_HERO_MAX_STAR or required is None:
+            return {"error_code": 1}
+
+        try:
+            partner_ref = self.catalog.resolve(
+                ResolveContext.create(
+                    field_name="owned_hero.table_id",
+                    source_domain="hero_evolution",
+                    expected_namespaces=(CatalogNamespace.PARTNER,),
+                    protocol_mid=52,
+                    source_path="app/model/SelfPlayer.lua",
+                ),
+                table_id,
+            )
+            partner_row = self.catalog.get(partner_ref)
+            stone_id = self._int(partner_row.get("stone_id"), 0)
+            stone_ref = self.catalog.resolve(
+                ResolveContext.create(
+                    field_name="partner.stone_id",
+                    source_domain="hero_evolution",
+                    expected_namespaces=(CatalogNamespace.ITEM,),
+                    protocol_mid=52,
+                    source_path="app/model/SelfPlayer.lua",
+                ),
+                stone_id,
+            )
+            stone_row = self.catalog.get(stone_ref)
+        except (UnknownContentReference, AmbiguousContentReference):
+            return {"error_code": 1}
+
+        if (
+            stone_id <= 0
+            or self._int(stone_row.get("type"), 0) != 3
+            or self._int(stone_row.get("partner_id"), 0) != table_id
+            or self.inventory.get_item_num(stone_id) < required
+        ):
+            return {"error_code": 1}
+
+        def mutate() -> None:
+            remaining = self.inventory.consume_item(stone_id, required, persist=False)
+            if remaining is None:
+                raise RuntimeError("canonical Backpack changed during MID52 transaction")
+            hero["star"] = next_star
+            collected = self.player.collected_heros.get(str(table_id))
+            if isinstance(collected, dict):
+                collected["star"] = max(self._int(collected.get("star"), 0), next_star)
+                collected["is_collected"] = 1
+            self._save()
+
+        if self.uow is not None:
+            try:
+                with self.uow.transaction(OperationContext(
+                    actor_player_id=str(self.player.player_id),
+                    domain="hero_progression",
+                    operation_name="evolve_hero",
+                    protocol_mid=52,
+                )):
+                    mutate()
+            except RuntimeError:
+                return {"error_code": 1}
+        else:
+            try:
+                mutate()
+            except RuntimeError:
+                return {"error_code": 1}
         return {}
 
     def use_exp_item(self, req: dict[str, Any]) -> dict[str, Any]:

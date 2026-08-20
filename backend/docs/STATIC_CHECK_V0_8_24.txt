@@ -1,0 +1,7 @@
+Pass41.7 / v0.8.24 static validation
+Python AST files: 124
+JSON files: 34
+Hero-pool refs: 131; distinct Hero IDs: 86; native stars: [1, 2, 3]
+Recovered duplicate quantities: 1*=7, 2*=14, 3*=30; unsupported native stars fail closed.
+Magic/Classic RNG policy files listed in validation were byte-identical to v0.8.23 except intended duplicate ownership metadata/result-policy references.
+No Flask/HTTP/ADB/emulator/gameplay executed by assistant.

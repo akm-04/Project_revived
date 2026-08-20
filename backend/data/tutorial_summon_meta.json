@@ -13,7 +13,8 @@
     "notes": [
       "Tutorial first pulls are source-deterministic; general post-tutorial RNG/pity is intentionally not reconstructed here.",
       "display_policy values are source-valid local banner IDs chosen only so every SummonWindow machine can render safely; they are not claimed as historical official live banner values.",
-      "The MID56 field named pet_id is consumed by SummonWindow through hero/model table functions, so the local compatibility value is deliberately a source-valid Hero table_id."
+      "The MID56 field named pet_id is consumed by SummonWindow through hero/model table functions, so the local compatibility value is deliberately a source-valid Hero table_id.",
+      "Pass42.6 self-heals SX display pointers: main_ids/second_ids are private source-valid current partner.is_sx defaults, not historical live rotation values."
     ]
   },
   "guide_ids": {
@@ -27,9 +28,21 @@
     "summon_end": 100109
   },
   "heroes": {
-    "aquaris": {"table_id": 10001001, "partner_id": 1, "star": 1},
-    "lavia": {"table_id": 10001002, "partner_id": 2, "star": 1},
-    "pandaria": {"table_id": 10001003, "partner_id": 3, "star": 1}
+    "aquaris": {
+      "table_id": 10001001,
+      "partner_id": 1,
+      "star": 1
+    },
+    "lavia": {
+      "table_id": 10001002,
+      "partner_id": 2,
+      "star": 1
+    },
+    "pandaria": {
+      "table_id": 10001003,
+      "partner_id": 3,
+      "star": 1
+    }
   },
   "tutorial_pulls": {
     "mana": {
@@ -58,7 +71,14 @@
     "mana_id": 10001002,
     "partner_id": 10001003,
     "pet_id": 10001001,
-    "main_ids": [10001005, 10001008],
-    "second_ids": [10001001, 10001002, 10001003]
+    "main_ids": [
+      10001067,
+      10001076
+    ],
+    "second_ids": [
+      10001077,
+      10001079,
+      10001092
+    ]
   }
 }

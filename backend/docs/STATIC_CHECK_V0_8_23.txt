@@ -1,0 +1,9 @@
+Pass41.6 / v0.8.23 static validation
+- Python AST parse: 123 files, 0 errors
+- backend data JSON parse: 31 files, 0 errors
+- Magic source targets: 49 unique, all resolve to matching GameDataCatalog partner/super_partner star/stone/awaken metadata
+- Magic pool700008: 312 rows, effective row-weight sum 10000, source metadata sum 10000
+- selected-fragment source table: 5/10/25/50 weights sum 100
+- Pass29 compatibility_safe_mids.json unchanged from v0.8.22
+- Classic private policy/cost/counter/operation/state registries unchanged from v0.8.22
+- No Flask/HTTP/ADB/emulator/gameplay execution by assistant

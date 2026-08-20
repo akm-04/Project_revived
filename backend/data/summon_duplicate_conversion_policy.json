@@ -1,0 +1,34 @@
+{
+  "_meta": {
+    "schema_version": 1,
+    "generated_by": "Pass41.7",
+    "policy_name": "Recovered Vending Duplicate Conversion v1",
+    "historical_claim": true,
+    "evidence": "User-observed historical GXB gameplay video reported native 1-star/2-star/3-star duplicate Girls converting to 7/14/30 corresponding Girl fragments on 2026-08-19.",
+    "evidence_limit": "The video itself is not retained inside the artifact set; exact values are recorded as user-observed historical evidence. No 4-star native duplicate quantity was observed.",
+    "scope": "Shared server-directed duplicate conversion for Hero-producing Vending/Summon families unless newer family-specific evidence supersedes it.",
+    "source_fields": [
+      "partner.ini_star",
+      "partner.stone_id"
+    ],
+    "guardrail": "Use native/initial star, not the player's current evolved star. Unsupported native-star classes fail closed rather than guessing."
+  },
+  "activation_condition": "Summoned Hero table_id is already canonically owned before that result row is applied; same-multipull ordering remains the existing private-server execution rule until historical evidence says otherwise.",
+  "fragment_id_source": "partner.stone_id",
+  "quantity_by_initial_star": {
+    "1": 7,
+    "2": 14,
+    "3": 30
+  },
+  "unsupported_initial_star_behavior": "fail_closed",
+  "active_pool_coverage": {
+    "classic_active_distinct_hero_ids": 86,
+    "native_star_distribution": {
+      "1": 36,
+      "2": 30,
+      "3": 65
+    },
+    "native_4_or_5_star_active_refs": 0,
+    "note": "Counts are pool references from the active recovered classic pool catalog; 86 distinct Hero IDs are covered and every active Hero native star is 1-3."
+  }
+}

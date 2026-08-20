@@ -131,7 +131,7 @@
       "conquer_region": 0
     },
     "economy": {
-      "mana": 999999,
+      "mana": 999999999,
       "crystal": 999999,
       "energy": 100,
       "max_energy": 100,

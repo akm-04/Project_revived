@@ -1,0 +1,68 @@
+{
+  "schema_version": 1,
+  "pass": "42.12",
+  "backend": "v0.8.33",
+  "validation_type": "pure/static repository/tool validation; no Flask/client gameplay",
+  "status": "pass",
+  "checks": {
+    "operator_tool_validation": "pass",
+    "operator_summary": [
+      "GXB Pass42.12 Gacha Control summary",
+      "Rotation mode: startup_debug | debug_seed=0 | timezone=Asia/Dhaka",
+      "SX Current: AUTO, AUTO",
+      "SX Daily:   AUTO, AUTO, AUTO",
+      "Medium New Add: AUTO",
+      "Small ordinary categories: Item 64.693%, Scroll 34.907%, Girl 0.400% [legacy baseline]"
+    ],
+    "development_default": {
+      "selection_mode": "startup_debug",
+      "debug_seed": 0
+    },
+    "calendar_compatibility": {
+      "sx_week_ids": [
+        10001197,
+        10001248
+      ],
+      "sx_day_ids": [
+        10001100,
+        10001171,
+        10001167
+      ],
+      "medium_featured_id": 10001089
+    },
+    "startup_debug_reproducible": {
+      "sx_week_ids": [
+        10001113,
+        10001269
+      ],
+      "sx_day_ids": [
+        10001092,
+        10001203,
+        10001271
+      ],
+      "medium_featured_id": 10001082
+    },
+    "classic_scroll_partition": {
+      "scroll_rows": 83,
+      "non_scroll_item_rows": 288,
+      "explicit_scroll_mode": "flat_equal"
+    },
+    "medium_ordinary_143_native_stars": {
+      "1": 13,
+      "2": 33,
+      "3": 97
+    },
+    "explicit_medium_tuning": {
+      "category": "girl",
+      "native_star": 3,
+      "candidate_rows": 97
+    },
+    "operator_atomic_backup_write": true,
+    "fixed_guarantees": {
+      "small_x10": "at_least_one_item",
+      "medium_x10": "at_least_one_hero",
+      "sx_selected_hotspot_purchases": 25,
+      "medium_new_add_pity_slots": 20
+    }
+  }
+}

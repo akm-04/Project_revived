@@ -1,0 +1,302 @@
+All Canonical Girl Hero IDs (291)
+=================================
+
+Merged operator reference: 277 normal Partner Girls + 14 Vow/super-partner Girls.
+Generated from data/girl_reference_catalog.json, which is a compact projection of the canonical Pass42.10 GIRL_CATALOG.jsonl.
+Runtime summon eligibility is NOT inferred from this file; use data/summon_featured_catalog.json and the cohort sheets above.
+
+Count: 291
+
+HeroID     | Name                              | Native★ | StoneID    | SX | Vow | Acquisition              | Legacy group
+-----------+-----------------------------------+---------+------------+----+-----+--------------------------+---------------------------
+11001      | Hoder                             |    1    | 41001      | 0  |  1  | vow_system               | 
+11002      | Balder                            |    1    | 41002      | 0  |  1  | vow_system               | 
+11003      | Vider                             |    1    | 41003      | 0  |  1  | vow_system               | 
+11004      | Heimdall                          |    1    | 41004      | 0  |  1  | vow_system               | 
+11005      | Loki                              |    1    | 41005      | 0  |  1  | vow_system               | 
+11006      | Freya                             |    1    | 41006      | 0  |  1  | vow_system               | 
+11007      | Eden                              |    1    | 41007      | 0  |  1  | vow_system               | 
+11008      | Sif                               |    1    | 41008      | 0  |  1  | vow_system               | 
+11009      | Tyr                               |    1    | 41009      | 0  |  1  | vow_system               | 
+11010      | Frega                             |    1    | 41010      | 0  |  1  | vow_system               | 
+11011      | Thor                              |    1    | 41011      | 0  |  1  | vow_system               | 
+11012      | Forseti                           |    1    | 41012      | 0  |  1  | vow_system               | 
+11013      | Bragi                             |    1    | 41013      | 0  |  1  | vow_system               | 
+11014      | Frey                              |    1    | 41014      | 0  |  1  | vow_system               | 
+10001001   | Aquaris                           |    1    | 40001001   | 0  |  0  | ordinary_vending         | 
+10001002   | Lavia                             |    1    | 40001002   | 0  |  0  | ordinary_vending         | 
+10001003   | Pandaria                          |    1    | 40001003   | 0  |  0  | ordinary_vending         | 
+10001004   | Lightin                           |    1    | 40001004   | 0  |  0  | ordinary_vending         | 
+10001005   | Geisha                            |    1    | 40001005   | 0  |  0  | ordinary_vending         | 
+10001006   | Iron Fist                         |    2    | 40001006   | 0  |  0  | ordinary_vending         | 
+10001007   | Toys Girl                         |    2    | 40001007   | 0  |  0  | ordinary_vending         | 
+10001008   | Joan                              |    1    | 40001008   | 0  |  0  | ordinary_vending         | 
+10001009   | Scythe                            |    3    | 40001009   | 0  |  0  | ordinary_vending         | 
+10001010   | Rosie                             |    2    | 40001010   | 0  |  0  | ordinary_vending         | 
+10001011   | Bud Elf                           |    2    | 40001011   | 0  |  0  | ordinary_vending         | 
+10001012   | Boxer                             |    3    | 40001012   | 0  |  0  | ordinary_vending         | 
+10001013   | Annie                             |    2    | 40001013   | 0  |  0  | ordinary_vending         | 
+10001014   | Cynthia                           |    3    | 40001014   | 0  |  0  | ordinary_vending         | 
+10001015   | Amazon                            |    3    | 40001015   | 0  |  0  | ordinary_vending         | 
+10001016   | Bidenty                           |    3    | 40001016   | 0  |  0  | ordinary_vending         | 
+10001017   | Smartie                           |    3    | 40001017   | 0  |  0  | ordinary_vending         | 
+10001018   | Androi                            |    3    | 40001018   | 0  |  0  | ordinary_vending         | 
+10001019   | Archie                            |    1    | 40001019   | 0  |  0  | ordinary_vending         | 
+10001020   | Jinx                              |    1    | 40001020   | 0  |  0  | ordinary_vending         | 
+10001021   | Leona                             |    1    | 40001021   | 0  |  0  | ordinary_vending         | 
+10001022   | Quinie                            |    1    | 40001022   | 0  |  0  | ordinary_vending         | 
+10001023   | Fanny                             |    2    | 40001023   | 0  |  0  | ordinary_vending         | 
+10001024   | Dr. Hua                           |    2    | 40001024   | 0  |  0  | ordinary_vending         | 
+10001025   | Chevalir                          |    3    | 40001025   | 0  |  0  | ordinary_vending         | 
+10001026   | Maidam                            |    2    | 40001026   | 0  |  0  | ordinary_vending         | 
+10001027   | Haxie                             |    3    | 40001027   | 0  |  0  | ordinary_vending         | 
+10001028   | Lily                              |    2    | 40001028   | 0  |  0  | ordinary_vending         | 
+10001029   | Gambler                           |    3    | 40001029   | 0  |  0  | ordinary_vending         | 
+10001030   | Wild Girl                         |    3    | 40001030   | 0  |  0  | ordinary_vending         | 
+10001031   | Fortune                           |    2    | 40001031   | 0  |  0  | ordinary_vending         | 
+10001032   | Guan Yin                          |    3    | 40001032   | 1  |  0  | sx_family                | 
+10001033   | Saint                             |    2    | 40001033   | 0  |  0  | ordinary_vending         | 
+10001034   | Tennese                           |    1    | 40001034   | 0  |  0  | limited_or_unmapped      | medium_featured_only
+10001035   | Sonya                             |    3    | 40001035   | 1  |  0  | sx_family                | 
+10001036   | Blowie                            |    2    | 40001036   | 0  |  0  | ordinary_vending         | 
+10001037   | Psychic                           |    3    | 40001037   | 1  |  0  | sx_family                | 
+10001038   | Elvis                             |    3    | 40001038   | 0  |  0  | ordinary_vending         | 
+10001039   | Succuba                           |    3    | 40001039   | 0  |  0  | ordinary_vending         | 
+10001040   | Angel                             |    2    | 40001040   | 0  |  0  | ordinary_vending         | 
+10001041   | Kratos                            |    3    | 40001041   | 0  |  0  | limited_or_unmapped      | medium_featured_only
+10001042   | Luna                              |    1    | 40001042   | 0  |  0  | limited_or_unmapped      | medium_featured_only
+10001043   | Hottie                            |    3    | 40001043   | 0  |  0  | ordinary_vending         | 
+10001044   | Celeste                           |    3    | 40001044   | 0  |  0  | limited_or_unmapped      | medium_ordinary_extension
+10001045   | Javelin                           |    3    | 40001045   | 1  |  0  | sx_family                | 
+10001046   | Witch                             |    1    | 40001046   | 0  |  0  | ordinary_vending         | 
+10001047   | Karatine                          |    2    | 40001047   | 0  |  0  | limited_or_unmapped      | medium_ordinary_extension
+10001048   | Lin ﹒AI                           |    3    | 40001048   | 0  |  0  | limited_or_unmapped      | medium_ordinary_extension
+10001049   | Caitlyn                           |    3    | 40001049   | 0  |  0  | limited_or_unmapped      | medium_ordinary_extension
+10001050   | Assassin                          |    3    | 40001050   | 0  |  0  | ordinary_vending         | 
+10001051   | Ninja                             |    3    | 40001051   | 0  |  0  | ordinary_vending         | 
+10001052   | Wu Kong                           |    3    | 40001052   | 1  |  0  | sx_family                | 
+10001053   | Wildtress                         |    2    | 40001053   | 0  |  0  | ordinary_vending         | 
+10001054   | Xmas Elf                          |    1    | 40001054   | 0  |  0  | limited_or_unmapped      | medium_featured_only
+10001055   | Nurse                             |    2    | 40001055   | 0  |  0  | ordinary_vending         | 
+10001056   | Capt.Sun                          |    3    | 40001056   | 1  |  0  | sx_family                | 
+10001057   | Zombia                            |    3    | 40001057   | 0  |  0  | ordinary_vending         | 
+10001058   | Muppet                            |    3    | 40001058   | 0  |  0  | ordinary_vending         | 
+10001059   | Fencer                            |    3    | 40001059   | 1  |  0  | sx_family                | 
+10001060   | Phancy                            |    3    | 40001060   | 0  |  0  | ordinary_vending         | 
+10001061   | Revolver                          |    3    | 40001061   | 1  |  0  | sx_family                | 
+10001062   | Zhi Yao                           |    5    | 40001062   | 0  |  0  | recharge_direct_full_her | 
+10001063   | Nagia                             |    2    | 40001063   | 0  |  0  | ordinary_vending         | 
+10001064   | Priestess                         |    3    | 40001064   | 1  |  0  | sx_family                | 
+10001065   | Springy                           |    1    | 40001065   | 0  |  0  | limited_or_unmapped      | medium_featured_only
+10001066   | Dracula                           |    3    | 40001066   | 0  |  0  | ordinary_vending         | 
+10001067   | Werewolf                          |    3    | 40001067   | 1  |  0  | sx_family                | 
+10001068   | Fleur                             |    2    | 40001068   | 0  |  0  | limited_or_unmapped      | medium_featured_only
+10001069   | Himoto                            |    1    | 40001069   | 0  |  0  | limited_or_unmapped      | medium_featured_only
+10001070   | Hanzo                             |    3    | 40001070   | 0  |  0  | campaign_scroll_path_pre | 
+10001071   | Elisa                             |    3    | 40001071   | 1  |  0  | sx_family                | 
+10001072   | Elina                             |    1    | 40001072   | 0  |  0  | ordinary_vending         | 
+10001073   | Beary                             |    3    | 40001073   | 0  |  0  | limited_or_unmapped      | medium_ordinary_extension
+10001074   | Librarian                         |    3    | 40001074   | 1  |  0  | sx_family                | 
+10001075   | Litana                            |    2    | 40001075   | 0  |  0  | ordinary_vending         | 
+10001076   | Hypatia                           |    3    | 40001076   | 1  |  0  | sx_family                | 
+10001077   | Sapphire                          |    3    | 40001077   | 1  |  0  | sx_family                | 
+10001078   | Skarivine                         |    3    | 40001078   | 0  |  0  | ordinary_vending         | 
+10001079   | Amber                             |    3    | 40001079   | 1  |  0  | sx_family                | 
+10001080   | Nun                               |    2    | 40001080   | 0  |  0  | limited_or_unmapped      | medium_ordinary_extension
+10001081   | Chainsaw                          |    3    | 40001081   | 0  |  0  | ordinary_vending         | 
+10001082   | Silvia                            |    3    | 40001082   | 0  |  0  | limited_or_unmapped      | medium_featured_only
+10001083   | Flash                             |    3    | 40001083   | 0  |  0  | ordinary_vending         | 
+10001084   | Selene                            |    3    | 40001084   | 1  |  0  | sx_family                | 
+10001085   | Aeris                             |    3    | 40001085   | 0  |  0  | ordinary_vending         | 
+10001086   | Lisa                              |    2    | 40001086   | 0  |  0  | limited_or_unmapped      | medium_ordinary_extension
+10001087   | Phoenix                           |    3    | 40001087   | 1  |  0  | sx_family                | 
+10001088   | Yuri                              |    3    | 40001088   | 0  |  0  | ordinary_vending         | 
+10001089   | Samurai                           |    3    | 40001089   | 0  |  0  | limited_or_unmapped      | medium_featured_only
+10001090   | Roselle                           |    3    | 40001090   | 0  |  0  | limited_or_unmapped      | medium_featured_only
+10001091   | Harley                            |    2    | 40001091   | 0  |  0  | ordinary_vending         | 
+10001092   | Amelia                            |    3    | 40001092   | 1  |  0  | sx_family                | 
+10001093   | Sisha                             |    3    | 40001093   | 0  |  0  | limited_or_unmapped      | medium_ordinary_extension
+10001094   | Octagirl                          |    3    | 40001094   | 0  |  0  | limited_or_unmapped      | medium_ordinary_extension
+10001095   | Wraith                            |    3    | 40001095   | 1  |  0  | sx_family                | 
+10001096   | Robin                             |    2    | 40001096   | 0  |  0  | limited_or_unmapped      | medium_ordinary_extension
+10001097   | Matador                           |    3    | 40001097   | 0  |  0  | limited_or_unmapped      | medium_featured_only
+10001098   | Magician                          |    3    | 40001098   | 0  |  0  | ordinary_vending         | 
+10001099   | Meimi                             |    2    | 40001099   | 0  |  0  | limited_or_unmapped      | medium_ordinary_extension
+10001100   | Alice                             |    3    | 40001100   | 1  |  0  | sx_family                | 
+10001101   | Liah                              |    1    | 40001101   | 0  |  0  | limited_or_unmapped      | medium_featured_only
+10001102   | Anna                              |    3    | 40001102   | 0  |  0  | campaign_scroll_path_pre | 
+10001103   | Ennmaya                           |    3    | 40001103   | 1  |  0  | sx_family                | 
+10001104   | Jade                              |    1    | 40001104   | 0  |  0  | limited_or_unmapped      | medium_featured_only
+10001105   | Aegis                             |    3    | 40001105   | 0  |  0  | ordinary_vending         | 
+10001106   | Jelly                             |    3    | 40001106   | 0  |  0  | limited_or_unmapped      | medium_ordinary_extension
+10001107   | Kitty                             |    2    | 40001107   | 0  |  0  | limited_or_unmapped      | medium_ordinary_extension
+10001108   | Ada                               |    3    | 40001108   | 0  |  0  | ordinary_vending         | 
+10001109   | Hexa                              |    3    | 40001109   | 1  |  0  | sx_family                | 
+10001110   | Sailor                            |    2    | 40001110   | 0  |  0  | limited_or_unmapped      | medium_ordinary_extension
+10001111   | Rhea                              |    3    | 40001111   | 0  |  0  | ordinary_vending         | 
+10001112   | Calista                           |    3    | 40001112   | 0  |  0  | ordinary_vending         | 
+10001113   | Nobunaga                          |    3    | 40001113   | 1  |  0  | sx_family                | 
+10001114   | Sasuke                            |    2    | 40001114   | 0  |  0  | limited_or_unmapped      | medium_featured_only
+10001115   | Marynari                          |    3    | 40001115   | 0  |  0  | limited_or_unmapped      | medium_ordinary_extension
+10001116   | Annabelle                         |    3    | 40001116   | 0  |  0  | ordinary_vending         | 
+10001117   | Nona                              |    3    | 40001117   | 1  |  0  | sx_family                | 
+10001118   | Susan                             |    3    | 40001118   | 0  |  0  | limited_or_unmapped      | medium_ordinary_extension
+10001119   | Shamoke                           |    2    | 40001119   | 0  |  0  | limited_or_unmapped      | medium_ordinary_extension
+10001120   | Stella                            |    3    | 40001120   | 0  |  0  | limited_or_unmapped      | medium_ordinary_extension
+10001121   | Diva                              |    3    | 40001121   | 1  |  0  | sx_family                | 
+10001122   | Linky                             |    3    | 40001122   | 0  |  0  | limited_or_unmapped      | medium_featured_only
+10001123   | Athena                            |    2    | 40001123   | 0  |  0  | campaign_scroll_path_pre | 
+10001124   | Fangirl                           |    3    | 40001124   | 0  |  0  | ordinary_vending         | 
+10001125   | Nikita                            |    3    | 40001125   | 0  |  0  | ordinary_vending         | 
+10001126   | Caitlin                           |    3    | 40001126   | 1  |  0  | sx_family                | 
+10001127   | Elloi                             |    2    | 40001127   | 0  |  0  | limited_or_unmapped      | medium_ordinary_extension
+10001128   | Exorcist                          |    3    | 40001128   | 0  |  0  | ordinary_vending         | 
+10001129   | Max                               |    3    | 40001129   | 0  |  0  | limited_or_unmapped      | medium_featured_only
+10001130   | Medusa                            |    3    | 40001130   | 1  |  0  | sx_family                | 
+10001131   | Sakura                            |    1    | 40001131   | 0  |  0  | limited_or_unmapped      | medium_featured_only
+10001132   | Dolly                             |    3    | 40001132   | 0  |  0  | limited_or_unmapped      | medium_ordinary_extension
+10001133   | Nancy                             |    3    | 40001133   | 0  |  0  | limited_or_unmapped      | medium_featured_only
+10001134   | Kaylee                            |    3    | 40001134   | 1  |  0  | sx_family                | 
+10001135   | Nasha                             |    2    | 40001135   | 0  |  0  | limited_or_unmapped      | medium_ordinary_extension
+10001136   | Ruby                              |    3    | 40001136   | 0  |  0  | limited_or_unmapped      | medium_featured_only
+10001137   | Ashely                            |    3    | 40001137   | 1  |  0  | sx_family                | 
+10001138   | Yasuna                            |    3    | 40001138   | 0  |  0  | ordinary_vending         | 
+10001139   | Cayla                             |    3    | 40001139   | 1  |  0  | sx_family                | 
+10001140   | Liz                               |    3    | 40001140   | 1  |  0  | sx_family                | 
+10001141   | Edward                            |    3    | 40001141   | 0  |  0  | ordinary_vending         | 
+10001142   | Omega                             |    3    | 40001142   | 0  |  0  | limited_or_unmapped      | medium_featured_only
+10001143   | Sophia                            |    3    | 40001143   | 1  |  0  | sx_family                | 
+10001144   | KongMing                          |    2    | 40001144   | 0  |  0  | limited_or_unmapped      | medium_featured_only
+10001145   | Nono                              |    2    | 40001145   | 0  |  0  | limited_or_unmapped      | medium_ordinary_extension
+10001146   | Handana                           |    3    | 40001146   | 0  |  0  | ordinary_vending         | 
+10001147   | Okita                             |    3    | 40001147   | 0  |  0  | ordinary_vending         | 
+10001148   | Nani                              |    3    | 40001148   | 1  |  0  | sx_family                | 
+10001149   | Talia                             |    3    | 40001149   | 0  |  0  | ordinary_vending         | 
+10001150   | Veila                             |    1    | 40001150   | 0  |  0  | limited_or_unmapped      | medium_featured_only
+10001151   | Wandy                             |    3    | 40001151   | 0  |  0  | limited_or_unmapped      | medium_featured_only
+10001152   | Gabriel                           |    3    | 40001152   | 1  |  0  | sx_family                | 
+10001153   | Kenshin                           |    3    | 40001153   | 0  |  0  | ordinary_vending         | 
+10001154   | Vanees                            |    2    | 40001154   | 0  |  0  | limited_or_unmapped      | medium_ordinary_extension
+10001155   | Zoe                               |    3    | 40001155   | 0  |  0  | ordinary_vending         | 
+10001156   | Toyo                              |    3    | 40001156   | 1  |  0  | sx_family                | 
+10001157   | Mira                              |    1    | 40001157   | 0  |  0  | limited_or_unmapped      | medium_featured_only
+10001158   | Lucifer                           |    1    | 40001158   | 0  |  0  | limited_or_unmapped      | medium_featured_only
+10001159   | Huni                              |    3    | 40001159   | 0  |  0  | ordinary_vending         | 
+10001160   | Katie                             |    3    | 40001160   | 0  |  0  | limited_or_unmapped      | medium_featured_only
+10001161   | Tula                              |    3    | 40001161   | 0  |  0  | limited_or_unmapped      | medium_featured_only
+10001162   | Giana                             |    3    | 40001162   | 1  |  0  | sx_family                | 
+10001163   | Nir                               |    2    | 40001163   | 0  |  0  | limited_or_unmapped      | medium_ordinary_extension
+10001164   | Lana                              |    3    | 40001164   | 0  |  0  | ordinary_vending         | 
+10001165   | Boro                              |    1    | 40001165   | 0  |  0  | limited_or_unmapped      | medium_featured_only
+10001166   | Reo                               |    3    | 40001166   | 0  |  0  | limited_or_unmapped      | medium_featured_only
+10001167   | Raphael                           |    3    | 40001167   | 1  |  0  | sx_family                | 
+10001168   | Hancer                            |    3    | 40001168   | 0  |  0  | ordinary_vending         | 
+10001169   | Yonky                             |    1    | 40001169   | 0  |  0  | limited_or_unmapped      | medium_featured_only
+10001170   | Faye                              |    3    | 40001170   | 0  |  0  | ordinary_vending         | 
+10001171   | Masamune                          |    3    | 40001171   | 1  |  0  | sx_family                | 
+10001172   | Hynel                             |    3    | 40001172   | 0  |  0  | ordinary_vending         | 
+10001173   | Donna                             |    2    | 40001173   | 0  |  0  | limited_or_unmapped      | medium_ordinary_extension
+10001174   | Yenn                              |    3    | 40001174   | 0  |  0  | ordinary_vending         | 
+10001175   | Nobuna                            |    3    | 40001175   | 0  |  0  | ordinary_vending         | 
+10001176   | Ilian                             |    3    | 40001176   | 1  |  0  | sx_family                | 
+10001177   | Pyra                              |    3    | 40001177   | 0  |  0  | ordinary_vending         | 
+10001178   | Mythra                            |    1    | 40001178   | 0  |  0  | ordinary_vending         | 
+10001179   | Poppi                             |    2    | 40001179   | 0  |  0  | limited_or_unmapped      | medium_ordinary_extension
+10001180   | King                              |    3    | 40001180   | 0  |  0  | limited_or_unmapped      | medium_featured_only
+10001181   | Nia                               |    3    | 40001181   | 1  |  0  | sx_family                | 
+10001182   | Ursula                            |    3    | 40001182   | 0  |  0  | limited_or_unmapped      | medium_featured_only
+10001183   | Puny                              |    3    | 40001183   | 0  |  0  | ordinary_vending         | 
+10001184   | Camila                            |    3    | 40001184   | 0  |  0  | limited_or_unmapped      | medium_featured_only
+10001185   | Mitsuhide                         |    3    | 40001185   | 1  |  0  | sx_family                | 
+10001186   | Yukimura                          |    3    | 40001186   | 0  |  0  | ordinary_vending         | 
+10001187   | Revali                            |    3    | 40001187   | 0  |  0  | ordinary_vending         | 
+10001188   | Zanny                             |    1    | 40001188   | 0  |  0  | ordinary_vending         | 
+10001189   | Golian                            |    3    | 40001189   | 0  |  0  | ordinary_vending         | 
+10001190   | Tokugawa                          |    3    | 40001190   | 1  |  0  | sx_family                | 
+10001191   | Kong Ke                           |    3    | 40001191   | 0  |  0  | ordinary_vending         | 
+10001192   | Liklis                            |    3    | 40001192   | 0  |  0  | limited_or_unmapped      | medium_featured_only
+10001193   | Feran                             |    2    | 40001193   | 0  |  0  | limited_or_unmapped      | medium_featured_only
+10001194   | Fear                              |    3    | 40001194   | 0  |  0  | limited_or_unmapped      | medium_featured_only
+10001195   | Isabella                          |    3    | 40001195   | 0  |  0  | limited_or_unmapped      | medium_featured_only
+10001196   | Katy                              |    3    | 40001196   | 0  |  0  | limited_or_unmapped      | medium_featured_only
+10001197   | Himiko                            |    3    | 40001197   | 1  |  0  | sx_family                | 
+10001198   | Claudia                           |    3    | 40001198   | 0  |  0  | limited_or_unmapped      | medium_featured_only
+10001199   | Shirley                           |    3    | 40001199   | 0  |  0  | limited_or_unmapped      | medium_featured_only
+10001200   | KM-Moe                            |    2    | 40001200   | 0  |  0  | limited_or_unmapped      | medium_featured_only
+10001201   | Lydia                             |    3    | 40001201   | 0  |  0  | limited_or_unmapped      | medium_featured_only
+10001202   | Catherine                         |    3    | 40001202   | 0  |  0  | limited_or_unmapped      | medium_featured_only
+10001203   | Ophelia                           |    3    | 40001203   | 1  |  0  | sx_family                | 
+10001204   | Stephanie                         |    3    | 40001204   | 0  |  0  | limited_or_unmapped      | medium_featured_only
+10001205   | Gramin                            |    3    | 40001205   | 1  |  0  | sx_family                | 
+10001206   | Vivian                            |    3    | 40001206   | 0  |  0  | limited_or_unmapped      | medium_featured_only
+10001207   | Ryoma                             |    3    | 40001207   | 0  |  0  | limited_or_unmapped      | medium_ordinary_extension
+10001208   | Irene                             |    3    | 40001208   | 0  |  0  | limited_or_unmapped      | medium_ordinary_extension
+10001209   | Cersei                            |    3    | 40001209   | 0  |  0  | limited_or_unmapped      | medium_ordinary_extension
+10001210   | Yolanda                           |    3    | 40001210   | 0  |  0  | limited_or_unmapped      | medium_ordinary_extension
+10001211   | Tiffany                           |    3    | 40001211   | 1  |  0  | sx_family                | 
+10001212   | Barbara                           |    3    | 40001212   | 0  |  0  | limited_or_unmapped      | medium_ordinary_extension
+10001213   | Zashiki                           |    3    | 40001213   | 0  |  0  | limited_or_unmapped      | medium_ordinary_extension
+10001214   | Titania                           |    3    | 40001214   | 0  |  0  | limited_or_unmapped      | medium_ordinary_extension
+10001215   | Zeta                              |    3    | 40001215   | 1  |  0  | sx_family                | 
+10001216   | Amira                             |    3    | 40001216   | 0  |  0  | limited_or_unmapped      | medium_ordinary_extension
+10001217   | Jyaku                             |    3    | 40001217   | 0  |  0  | limited_or_unmapped      | medium_ordinary_extension
+10001218   | Cerberus                          |    3    | 40001218   | 1  |  0  | sx_family                | 
+10001219   | Froslass                          |    3    | 40001219   | 0  |  0  | limited_or_unmapped      | medium_ordinary_extension
+10001220   | Sandra                            |    3    | 40001220   | 0  |  0  | limited_or_unmapped      | medium_ordinary_extension
+10001221   | Yilia                             |    3    | 40001221   | 1  |  0  | sx_family                | 
+10001222   | Caroline                          |    3    | 40001222   | 0  |  0  | limited_or_unmapped      | medium_ordinary_extension
+10001223   | Lecia                             |    3    | 40001223   | 0  |  0  | limited_or_unmapped      | medium_ordinary_extension
+10001224   | CapsuGirl                         |    3    | 40001224   | 1  |  0  | sx_family                | 
+10001225   | Reindeer                          |    1    | 40001225   | 0  |  0  | limited_or_unmapped      | medium_featured_only
+10001226   | Collins                           |    3    | 40001226   | 0  |  0  | limited_or_unmapped      | medium_ordinary_extension
+10001227   | Shiki                             |    3    | 40001227   | 0  |  0  | limited_or_unmapped      | medium_ordinary_extension
+10001228   | Karaxes                           |    3    | 40001228   | 1  |  0  | sx_family                | 
+10001229   | SugarMom                          |    1    | 40001229   | 0  |  0  | limited_or_unmapped      | medium_featured_only
+10001230   | Jeanne                            |    3    | 40001230   | 1  |  0  | sx_family                | 
+10001231   | Amanda                            |    3    | 40001231   | 0  |  0  | limited_or_unmapped      | medium_ordinary_extension
+10001232   | Kratos·Lily                       |    3    | 40001232   | 0  |  0  | limited_or_unmapped      | medium_featured_only
+10001233   | Campanula                         |    3    | 40001233   | 0  |  0  | limited_or_unmapped      | medium_ordinary_extension
+10001234   | Kristin                           |    3    | 40001234   | 1  |  0  | sx_family                | 
+10001235   | Siren                             |    3    | 40001235   | 0  |  0  | limited_or_unmapped      | medium_ordinary_extension
+10001236   | Margaret                          |    3    | 40001236   | 0  |  0  | limited_or_unmapped      | medium_ordinary_extension
+10001237   | Serpent                           |    3    | 40001237   | 0  |  0  | limited_or_unmapped      | medium_ordinary_extension
+10001238   | Angelina                          |    3    | 40001238   | 1  |  0  | sx_family                | 
+10001239   | Chily                             |    3    | 40001239   | 0  |  0  | limited_or_unmapped      | medium_ordinary_extension
+10001240   | Temari                            |    3    | 40001240   | 0  |  0  | limited_or_unmapped      | medium_ordinary_extension
+10001241   | Tang                              |    3    | 40001241   | 1  |  0  | sx_family                | 
+10001242   | The K.                            |    3    | 40001242   | 0  |  0  | limited_or_unmapped      | medium_featured_only
+10001243   | DJ.Du                             |    3    | 40001243   | 0  |  0  | limited_or_unmapped      | medium_ordinary_extension
+10001244   | Durandal                          |    3    | 40001244   | 0  |  0  | limited_or_unmapped      | medium_ordinary_extension
+10001245   | Lancelot                          |    3    | 40001245   | 1  |  0  | sx_family                | 
+10001246   | Lauren                            |    3    | 40001246   | 0  |  0  | limited_or_unmapped      | medium_ordinary_extension
+10001247   | Deirdre                           |    3    | 40001247   | 0  |  0  | limited_or_unmapped      | medium_ordinary_extension
+10001248   | Alexa                             |    3    | 40001248   | 1  |  0  | sx_family                | 
+10001249   | SP Aquaris                        |    3    | 40001249   | 0  |  0  | limited_or_unmapped      | medium_ordinary_extension
+10001250   | Tessa                             |    1    | 40001250   | 0  |  0  | limited_or_unmapped      | medium_featured_only
+10001251   | Hilda                             |    3    | 40001251   | 1  |  0  | sx_family                | 
+10001252   | Sami                              |    3    | 40001252   | 0  |  0  | limited_or_unmapped      | medium_ordinary_extension
+10001253   | Selina                            |    3    | 40001253   | 1  |  0  | sx_family                | 
+10001254   | Kagetora                          |    3    | 40001254   | 0  |  0  | limited_or_unmapped      | medium_ordinary_extension
+10001255   | SP Gambler                        |    3    | 40001255   | 0  |  0  | limited_or_unmapped      | medium_ordinary_extension
+10001256   | SP Sonya                          |    3    | 40001256   | 1  |  0  | sx_family                | 
+10001257   | SP Lavia                          |    3    | 40001257   | 0  |  0  | limited_or_unmapped      | medium_ordinary_extension
+10001258   | Odin                              |    3    | 40001258   | 0  |  0  | limited_or_unmapped      | medium_featured_only
+10001259   | SP Xmas Elf                       |    3    | 40001259   | 0  |  0  | limited_or_unmapped      | medium_ordinary_extension
+10001260   | SP Nobunaga                       |    3    | 40001260   | 1  |  0  | sx_family                | 
+10001261   | SP Lightin                        |    3    | 40001261   | 0  |  0  | limited_or_unmapped      | medium_featured_only
+10001262   | Syndra                            |    3    | 40001262   | 1  |  0  | sx_family                | 
+10001263   | Flora                             |    3    | 40001263   | 0  |  0  | limited_or_unmapped      | medium_featured_only
+10001264   | SP Ennmaya                        |    3    | 40001264   | 1  |  0  | sx_family                | 
+10001265   | SP Lily                           |    3    | 40001265   | 0  |  0  | limited_or_unmapped      | medium_featured_only
+10001266   | Lilith                            |    3    | 40001266   | 1  |  0  | sx_family                | 
+10001267   | SP Hottie                         |    3    | 40001267   | 1  |  0  | sx_family                | 
+10001268   | SP CapsuGirl                      |    3    | 40001268   | 1  |  0  | sx_family                | 
+10001269   | SP Muppet                         |    3    | 40001269   | 1  |  0  | sx_family                | 
+10001270   | SP Librarian                      |    3    | 40001270   | 1  |  0  | sx_family                | 
+10001271   | Rubearl                           |    3    | 40001271   | 1  |  0  | sx_family                | 
+10001272   | SP Pandaria                       |    3    | 40001272   | 1  |  0  | sx_family                | 
+10001273   | Finlil                            |    3    | 40001273   | 1  |  0  | sx_family                | 
+10001274   | SP Priestess                      |    3    | 40001274   | 1  |  0  | sx_family                | 
+10001275   | SP Sapphire                       |    3    | 40001275   | 1  |  0  | sx_family                | 
+10001276   | SP Kratos                         |    3    | 40001276   | 0  |  0  | limited_or_unmapped      | medium_featured_only
+10001277   | SP Geisha                         |    3    | 40001277   | 0  |  0  | limited_or_unmapped      | medium_featured_only

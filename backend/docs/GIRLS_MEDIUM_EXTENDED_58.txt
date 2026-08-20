@@ -1,0 +1,69 @@
+Medium Soul-Casket-Backed Extension Girl IDs (58)
+=================================================
+
+Limited/unmapped non-SX Girls with positive Soul-Casket type2/type5 fragment-route evidence.
+They extend only the ordinary Medium full-Hero candidate pool after that Hero result class is selected.
+This 58-Girl extension does not change Medium's top-level ordinary Hero-vs-item probability.
+
+Count: 58
+
+HeroID     | Name                              | Native★ | StoneID    | Group/Evidence
+-----------+-----------------------------------+---------+------------+----------------------------------------------
+10001044   | Celeste                           |    3    | 40001044   | Medium ordinary extension / Soul-Casket type 2
+10001047   | Karatine                          |    2    | 40001047   | Medium ordinary extension / Soul-Casket type 5
+10001048   | Lin ﹒AI                           |    3    | 40001048   | Medium ordinary extension / Soul-Casket type 2
+10001049   | Caitlyn                           |    3    | 40001049   | Medium ordinary extension / Soul-Casket type 2
+10001073   | Beary                             |    3    | 40001073   | Medium ordinary extension / Soul-Casket type 2
+10001080   | Nun                               |    2    | 40001080   | Medium ordinary extension / Soul-Casket type 5
+10001086   | Lisa                              |    2    | 40001086   | Medium ordinary extension / Soul-Casket type 5
+10001093   | Sisha                             |    3    | 40001093   | Medium ordinary extension / Soul-Casket type 2
+10001094   | Octagirl                          |    3    | 40001094   | Medium ordinary extension / Soul-Casket type 2
+10001096   | Robin                             |    2    | 40001096   | Medium ordinary extension / Soul-Casket type 5
+10001099   | Meimi                             |    2    | 40001099   | Medium ordinary extension / Soul-Casket type 5
+10001106   | Jelly                             |    3    | 40001106   | Medium ordinary extension / Soul-Casket type 2
+10001107   | Kitty                             |    2    | 40001107   | Medium ordinary extension / Soul-Casket type 5
+10001110   | Sailor                            |    2    | 40001110   | Medium ordinary extension / Soul-Casket type 5
+10001115   | Marynari                          |    3    | 40001115   | Medium ordinary extension / Soul-Casket type 2
+10001118   | Susan                             |    3    | 40001118   | Medium ordinary extension / Soul-Casket type 2
+10001119   | Shamoke                           |    2    | 40001119   | Medium ordinary extension / Soul-Casket type 5
+10001120   | Stella                            |    3    | 40001120   | Medium ordinary extension / Soul-Casket type 2
+10001127   | Elloi                             |    2    | 40001127   | Medium ordinary extension / Soul-Casket type 5
+10001132   | Dolly                             |    3    | 40001132   | Medium ordinary extension / Soul-Casket type 2
+10001135   | Nasha                             |    2    | 40001135   | Medium ordinary extension / Soul-Casket type 5
+10001145   | Nono                              |    2    | 40001145   | Medium ordinary extension / Soul-Casket type 5
+10001154   | Vanees                            |    2    | 40001154   | Medium ordinary extension / Soul-Casket type 5
+10001163   | Nir                               |    2    | 40001163   | Medium ordinary extension / Soul-Casket type 5
+10001173   | Donna                             |    2    | 40001173   | Medium ordinary extension / Soul-Casket type 5
+10001179   | Poppi                             |    2    | 40001179   | Medium ordinary extension / Soul-Casket type 5
+10001207   | Ryoma                             |    3    | 40001207   | Medium ordinary extension / Soul-Casket type 2
+10001208   | Irene                             |    3    | 40001208   | Medium ordinary extension / Soul-Casket type 2
+10001209   | Cersei                            |    3    | 40001209   | Medium ordinary extension / Soul-Casket type 2
+10001210   | Yolanda                           |    3    | 40001210   | Medium ordinary extension / Soul-Casket type 2
+10001212   | Barbara                           |    3    | 40001212   | Medium ordinary extension / Soul-Casket type 2
+10001213   | Zashiki                           |    3    | 40001213   | Medium ordinary extension / Soul-Casket type 2
+10001214   | Titania                           |    3    | 40001214   | Medium ordinary extension / Soul-Casket type 2
+10001216   | Amira                             |    3    | 40001216   | Medium ordinary extension / Soul-Casket type 2
+10001217   | Jyaku                             |    3    | 40001217   | Medium ordinary extension / Soul-Casket type 2
+10001219   | Froslass                          |    3    | 40001219   | Medium ordinary extension / Soul-Casket type 2
+10001220   | Sandra                            |    3    | 40001220   | Medium ordinary extension / Soul-Casket type 2
+10001222   | Caroline                          |    3    | 40001222   | Medium ordinary extension / Soul-Casket type 2
+10001223   | Lecia                             |    3    | 40001223   | Medium ordinary extension / Soul-Casket type 2
+10001226   | Collins                           |    3    | 40001226   | Medium ordinary extension / Soul-Casket type 2
+10001227   | Shiki                             |    3    | 40001227   | Medium ordinary extension / Soul-Casket type 2
+10001231   | Amanda                            |    3    | 40001231   | Medium ordinary extension / Soul-Casket type 2
+10001233   | Campanula                         |    3    | 40001233   | Medium ordinary extension / Soul-Casket type 2
+10001235   | Siren                             |    3    | 40001235   | Medium ordinary extension / Soul-Casket type 2
+10001236   | Margaret                          |    3    | 40001236   | Medium ordinary extension / Soul-Casket type 2
+10001237   | Serpent                           |    3    | 40001237   | Medium ordinary extension / Soul-Casket type 2
+10001239   | Chily                             |    3    | 40001239   | Medium ordinary extension / Soul-Casket type 2
+10001240   | Temari                            |    3    | 40001240   | Medium ordinary extension / Soul-Casket type 2
+10001243   | DJ.Du                             |    3    | 40001243   | Medium ordinary extension / Soul-Casket type 2
+10001244   | Durandal                          |    3    | 40001244   | Medium ordinary extension / Soul-Casket type 2
+10001246   | Lauren                            |    3    | 40001246   | Medium ordinary extension / Soul-Casket type 2
+10001247   | Deirdre                           |    3    | 40001247   | Medium ordinary extension / Soul-Casket type 2
+10001249   | SP Aquaris                        |    3    | 40001249   | Medium ordinary extension / Soul-Casket type 2
+10001252   | Sami                              |    3    | 40001252   | Medium ordinary extension / Soul-Casket type 2
+10001254   | Kagetora                          |    3    | 40001254   | Medium ordinary extension / Soul-Casket type 2
+10001255   | SP Gambler                        |    3    | 40001255   | Medium ordinary extension / Soul-Casket type 2
+10001257   | SP Lavia                          |    3    | 40001257   | Medium ordinary extension / Soul-Casket type 2
+10001259   | SP Xmas Elf                       |    3    | 40001259   | Medium ordinary extension / Soul-Casket type 2

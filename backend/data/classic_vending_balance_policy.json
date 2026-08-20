@@ -1,0 +1,66 @@
+{
+  "_meta": {
+    "schema_version": 1,
+    "generated_by": "Pass42.12",
+    "policy_name": "Classic Vending Operator Balance Overlay v1",
+    "authorization": "User authorized a validated operator tool for Small/Medium category and rarity tuning on 2026-08-20.",
+    "historical_claim": false,
+    "boundary": "Recovered summon_pool_catalog.json stays immutable evidence. This overlay only changes private-server selection when the corresponding override is enabled.",
+    "guardrails": [
+      "Special/milestone slots keep precedence.",
+      "Small x10 item-class guarantee and Medium x10 full-Girl guarantee remain unchanged.",
+      "Medium featured-only New Add overlay remains separate and is evaluated before ordinary category selection.",
+      "Scroll classification is explicit: an item row is a Girl scroll only when its item_id equals partner.stone_id in the effective GameDataCatalog.",
+      "When explicit Scroll category tuning is enabled, scroll candidates are split flat/equally across all eligible scroll rows in the configured base pool.",
+      "Girl rarity tuning selects native partner.ini_star 1/2/3 first, then preserves source/extension row weighting within the selected star bucket."
+    ]
+  },
+  "families": {
+    "small": {
+      "category_override": {
+        "enabled": false,
+        "weights_per_10000": {
+          "item": 6469,
+          "scroll": 3491,
+          "girl": 40
+        },
+        "note": "Disabled by default to preserve the exact pre-Pass42.12 two-stage Small math. Values are a rounded display baseline only until enabled."
+      },
+      "girl_star_override": {
+        "enabled": false,
+        "weights_per_10000": {
+          "1": 10000,
+          "2": 0,
+          "3": 0
+        },
+        "note": "Small pool151001 currently contains only native-1-star Girls. Nonzero 2/3-star weights are invalid."
+      },
+      "scroll_candidate_mode": "flat_equal",
+      "item_candidate_mode": "source_weighted",
+      "girl_candidate_mode": "source_weighted_within_native_star"
+    },
+    "medium": {
+      "category_override": {
+        "enabled": false,
+        "weights_per_10000": {
+          "item": 5560,
+          "scroll": 3000,
+          "girl": 1440
+        },
+        "note": "These values exactly match the current ordinary non-special Medium class split implied by 200003 rate_sum=8560 plus 14.40% Hero selection. Disabled means legacy two-stage math is used."
+      },
+      "girl_star_override": {
+        "enabled": false,
+        "weights_per_10000": {
+          "1": 911,
+          "2": 2312,
+          "3": 6777
+        },
+        "note": "Rounded display baseline for the effective 143-Girl weighted pool (source rows plus 58 extensions). Disabled preserves exact source/extension candidate weights."
+      },
+      "scroll_candidate_mode": "flat_equal",
+      "item_candidate_mode": "source_weighted",
+      "girl_candidate_mode": "source_weighted_within_native_star"
+    }
+  }
+}

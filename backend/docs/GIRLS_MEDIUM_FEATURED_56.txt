@@ -1,0 +1,67 @@
+Medium New Add Featured-Only Girl IDs (56)
+==========================================
+
+Exact cohort eligible for Medium SUMMON_LIST_NEW_ADD / rate-up target selection.
+These limited/unmapped non-SX Girls have no positive Soul-Casket type2/type5 acquisition route under the Pass42 classifier.
+Only IDs in this list are valid nonzero medium.manual_hero_id overrides.
+
+Count: 56
+
+HeroID     | Name                              | Native★ | StoneID    | Group/Evidence
+-----------+-----------------------------------+---------+------------+----------------------------------------------
+10001034   | Tennese                           |    1    | 40001034   | Medium featured-only Legacy / no positive type2/type5 route
+10001041   | Kratos                            |    3    | 40001041   | Medium featured-only Legacy / no positive type2/type5 route
+10001042   | Luna                              |    1    | 40001042   | Medium featured-only Legacy / no positive type2/type5 route
+10001054   | Xmas Elf                          |    1    | 40001054   | Medium featured-only Legacy / no positive type2/type5 route
+10001065   | Springy                           |    1    | 40001065   | Medium featured-only Legacy / no positive type2/type5 route
+10001068   | Fleur                             |    2    | 40001068   | Medium featured-only Legacy / no positive type2/type5 route
+10001069   | Himoto                            |    1    | 40001069   | Medium featured-only Legacy / no positive type2/type5 route
+10001082   | Silvia                            |    3    | 40001082   | Medium featured-only Legacy / no positive type2/type5 route
+10001089   | Samurai                           |    3    | 40001089   | Medium featured-only Legacy / no positive type2/type5 route
+10001090   | Roselle                           |    3    | 40001090   | Medium featured-only Legacy / no positive type2/type5 route
+10001097   | Matador                           |    3    | 40001097   | Medium featured-only Legacy / no positive type2/type5 route
+10001101   | Liah                              |    1    | 40001101   | Medium featured-only Legacy / no positive type2/type5 route
+10001104   | Jade                              |    1    | 40001104   | Medium featured-only Legacy / no positive type2/type5 route
+10001114   | Sasuke                            |    2    | 40001114   | Medium featured-only Legacy / no positive type2/type5 route
+10001122   | Linky                             |    3    | 40001122   | Medium featured-only Legacy / no positive type2/type5 route
+10001129   | Max                               |    3    | 40001129   | Medium featured-only Legacy / no positive type2/type5 route
+10001131   | Sakura                            |    1    | 40001131   | Medium featured-only Legacy / no positive type2/type5 route
+10001133   | Nancy                             |    3    | 40001133   | Medium featured-only Legacy / no positive type2/type5 route
+10001136   | Ruby                              |    3    | 40001136   | Medium featured-only Legacy / no positive type2/type5 route
+10001142   | Omega                             |    3    | 40001142   | Medium featured-only Legacy / no positive type2/type5 route
+10001144   | KongMing                          |    2    | 40001144   | Medium featured-only Legacy / no positive type2/type5 route
+10001150   | Veila                             |    1    | 40001150   | Medium featured-only Legacy / no positive type2/type5 route
+10001151   | Wandy                             |    3    | 40001151   | Medium featured-only Legacy / no positive type2/type5 route
+10001157   | Mira                              |    1    | 40001157   | Medium featured-only Legacy / no positive type2/type5 route
+10001158   | Lucifer                           |    1    | 40001158   | Medium featured-only Legacy / no positive type2/type5 route
+10001160   | Katie                             |    3    | 40001160   | Medium featured-only Legacy / no positive type2/type5 route
+10001161   | Tula                              |    3    | 40001161   | Medium featured-only Legacy / no positive type2/type5 route
+10001165   | Boro                              |    1    | 40001165   | Medium featured-only Legacy / no positive type2/type5 route
+10001166   | Reo                               |    3    | 40001166   | Medium featured-only Legacy / no positive type2/type5 route
+10001169   | Yonky                             |    1    | 40001169   | Medium featured-only Legacy / no positive type2/type5 route
+10001180   | King                              |    3    | 40001180   | Medium featured-only Legacy / no positive type2/type5 route
+10001182   | Ursula                            |    3    | 40001182   | Medium featured-only Legacy / no positive type2/type5 route
+10001184   | Camila                            |    3    | 40001184   | Medium featured-only Legacy / no positive type2/type5 route
+10001192   | Liklis                            |    3    | 40001192   | Medium featured-only Legacy / no positive type2/type5 route
+10001193   | Feran                             |    2    | 40001193   | Medium featured-only Legacy / no positive type2/type5 route
+10001194   | Fear                              |    3    | 40001194   | Medium featured-only Legacy / no positive type2/type5 route
+10001195   | Isabella                          |    3    | 40001195   | Medium featured-only Legacy / no positive type2/type5 route
+10001196   | Katy                              |    3    | 40001196   | Medium featured-only Legacy / no positive type2/type5 route
+10001198   | Claudia                           |    3    | 40001198   | Medium featured-only Legacy / no positive type2/type5 route
+10001199   | Shirley                           |    3    | 40001199   | Medium featured-only Legacy / no positive type2/type5 route
+10001200   | KM-Moe                            |    2    | 40001200   | Medium featured-only Legacy / no positive type2/type5 route
+10001201   | Lydia                             |    3    | 40001201   | Medium featured-only Legacy / no positive type2/type5 route
+10001202   | Catherine                         |    3    | 40001202   | Medium featured-only Legacy / no positive type2/type5 route
+10001204   | Stephanie                         |    3    | 40001204   | Medium featured-only Legacy / no positive type2/type5 route
+10001206   | Vivian                            |    3    | 40001206   | Medium featured-only Legacy / no positive type2/type5 route
+10001225   | Reindeer                          |    1    | 40001225   | Medium featured-only Legacy / no positive type2/type5 route
+10001229   | SugarMom                          |    1    | 40001229   | Medium featured-only Legacy / no positive type2/type5 route
+10001232   | Kratos·Lily                       |    3    | 40001232   | Medium featured-only Legacy / no positive type2/type5 route
+10001242   | The K.                            |    3    | 40001242   | Medium featured-only Legacy / no positive type2/type5 route
+10001250   | Tessa                             |    1    | 40001250   | Medium featured-only Legacy / no positive type2/type5 route
+10001258   | Odin                              |    3    | 40001258   | Medium featured-only Legacy / no positive type2/type5 route
+10001261   | SP Lightin                        |    3    | 40001261   | Medium featured-only Legacy / no positive type2/type5 route
+10001263   | Flora                             |    3    | 40001263   | Medium featured-only Legacy / no positive type2/type5 route
+10001265   | SP Lily                           |    3    | 40001265   | Medium featured-only Legacy / no positive type2/type5 route
+10001276   | SP Kratos                         |    3    | 40001276   | Medium featured-only Legacy / no positive type2/type5 route
+10001277   | SP Geisha                         |    3    | 40001277   | Medium featured-only Legacy / no positive type2/type5 route

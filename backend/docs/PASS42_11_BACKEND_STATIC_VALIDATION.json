@@ -1,0 +1,85 @@
+{
+  "schema_version": 1,
+  "pass": "42.11",
+  "backend": "v0.8.32",
+  "validation_type": "pure/static repository validation; no Flask/live gameplay",
+  "status": "pass",
+  "checks": {
+    "calendar_pass42_10_known_snapshot": {
+      "sx_week_ids": [
+        10001197,
+        10001248
+      ],
+      "sx_day_ids": [
+        10001100,
+        10001171,
+        10001167
+      ],
+      "medium_featured_id": 10001089
+    },
+    "partial_zero_case_1": [
+      10001218,
+      10001228,
+      10001167
+    ],
+    "partial_zero_case_2": [
+      10001171,
+      10001228,
+      10001167
+    ],
+    "startup_debug_reproducible": {
+      "seed": "pass42.11-repro-seed",
+      "run_id": "450688b56512",
+      "sx_week_ids": [
+        10001266,
+        10001035
+      ],
+      "sx_day_ids": [
+        10001117,
+        10001248,
+        10001245
+      ],
+      "medium_featured_id": 10001042
+    },
+    "startup_debug_manual_overlay": {
+      "sx_week_ids": [
+        10001045,
+        10001035
+      ],
+      "sx_day_ids": [
+        10001117,
+        10001228,
+        10001245
+      ],
+      "medium_featured_id": 10001144
+    },
+    "invalid_manual_warn_fallback": {
+      "warning_count": 4,
+      "sx_week_ids": [
+        10001266,
+        10001045
+      ],
+      "sx_day_ids": [
+        10001117,
+        10001228,
+        10001245
+      ],
+      "medium_featured_id": 10001042
+    },
+    "startup_debug_fresh_seed": {
+      "distinct_boot_seeds": true,
+      "seed_lengths": [
+        32,
+        32
+      ]
+    },
+    "invalid_mode_fallback": true,
+    "shared_process_rotation_injection": true,
+    "catalog_counts": {
+      "all": 291,
+      "sx": 73,
+      "medium_extended": 58,
+      "medium_featured": 56
+    }
+  }
+}

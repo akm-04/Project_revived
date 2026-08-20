@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "policy_registry_version": "pass40.1-v1",
+  "purpose": "Executable compatibility policy is separate from immutable source facts. Raw increase_rate is never treated as a universal probability.",
+  "wire_campaign_type_labels": {
+    "1": "normal",
+    "2": "super",
+    "24": "challenge"
+  },
+  "policies": [
+    {
+      "policy_id": "legacy_first_clear_rate_10000_v1",
+      "version": 1,
+      "enabled": true,
+      "scope": {
+        "wire_campaign_types": [
+          1,
+          2,
+          24
+        ],
+        "channel": "first_clear",
+        "pool_ids": null
+      },
+      "strategy": "deterministic_rows_matching_rate",
+      "parameters": {
+        "required_increase_rate": 10000,
+        "quantity_per_occurrence": 1
+      },
+      "duplicate_policy": "preserve_source_occurrences_then_aggregate_canonical_totals",
+      "evidence": "compatibility",
+      "notes": "Migrates the pre-Pass40.1 _guaranteed_first_awards behavior only. Does not claim historical probability semantics."
+    },
+    {
+      "policy_id": "repeat_rng_disabled_unknown_v1",
+      "version": 1,
+      "enabled": false,
+      "scope": {
+        "wire_campaign_types": [
+          1,
+          2,
+          24
+        ],
+        "channel": "repeat",
+        "pool_ids": null
+      },
+      "strategy": "disabled_unknown",
+      "parameters": {},
+      "duplicate_policy": "not_applicable",
+      "evidence": "unknown",
+      "notes": "Repeat Campaign RNG remains disabled until evidence supports a formula/policy. Planner returns no repeat item awards rather than guessing."
+    }
+  ]
+}

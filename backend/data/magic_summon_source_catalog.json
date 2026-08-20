@@ -1,0 +1,463 @@
+{
+  "_meta": {
+    "schema_version": 1,
+    "generated_by": "Pass41.6",
+    "source_resolution": "effective_merged",
+    "purpose": "Recovered client/source facts for Magic/Gachapon MID70/MID71. No private probability or multiplicity choices live here.",
+    "source_files": {
+      "app/model/SelfPlayer.lua": "APK src_64 (no writable override)",
+      "app/windows/SummonWindow.lua": "APK src_64 (no writable override)",
+      "app/windows/MagicSummonResultWindow.lua": "APK src_64 (no writable override)",
+      "app/windows/MagicSummonSwitchHeroWindow.lua": "APK src_64 (no writable override)",
+      "data/tables/summon.lua": "APK src_64 (no writable override)",
+      "data/tables/magic_summon_list.lua": "APK src_64 (no writable override)",
+      "data/tables/magic_drop_rate.lua": "APK src_64 (no writable override)",
+      "data/tables/dropbox.lua": "downloaded writable src_64 overrides APK",
+      "data/game_data_catalog.json": "effective_merged backend catalog for target stone/awaken metadata"
+    },
+    "guardrails": [
+      "MID70 and MID71 are a separate protocol plane from MID50.",
+      "partner_id in the Magic request is a target Hero table ID from magic_summon_list, not an owned instance partner_id.",
+      "The stock switch UI permits only owned target Heroes, including their awakened table form.",
+      "Recovered dropbox weights and fragment crit table are source facts; private policy decides operation multiplicity and response placement."
+    ]
+  },
+  "protocol": {
+    "buy_mid": 70,
+    "switch_mid": 71,
+    "single_request": {
+      "summon_time": 1
+    },
+    "ten_request": {
+      "summon_time": 10
+    },
+    "target_field": "partner_id"
+  },
+  "costs": {
+    "currency": "crystal",
+    "single": 500,
+    "ten": 5000,
+    "summon_config_reward_item": 50005182,
+    "summon_config_reward_name": "Magic Juice"
+  },
+  "targets": [
+    {
+      "hero_table_id": 11001,
+      "namespace": "super_partner",
+      "name": "Hoder",
+      "fragment_item_id": 41001,
+      "initial_star": 1,
+      "awaken_table_id": 0
+    },
+    {
+      "hero_table_id": 11002,
+      "namespace": "super_partner",
+      "name": "Balder",
+      "fragment_item_id": 41002,
+      "initial_star": 1,
+      "awaken_table_id": 0
+    },
+    {
+      "hero_table_id": 11003,
+      "namespace": "super_partner",
+      "name": "Vider",
+      "fragment_item_id": 41003,
+      "initial_star": 1,
+      "awaken_table_id": 0
+    },
+    {
+      "hero_table_id": 11004,
+      "namespace": "super_partner",
+      "name": "Heimdall",
+      "fragment_item_id": 41004,
+      "initial_star": 1,
+      "awaken_table_id": 0
+    },
+    {
+      "hero_table_id": 11005,
+      "namespace": "super_partner",
+      "name": "Loki",
+      "fragment_item_id": 41005,
+      "initial_star": 1,
+      "awaken_table_id": 0
+    },
+    {
+      "hero_table_id": 11006,
+      "namespace": "super_partner",
+      "name": "Freya",
+      "fragment_item_id": 41006,
+      "initial_star": 1,
+      "awaken_table_id": 0
+    },
+    {
+      "hero_table_id": 11007,
+      "namespace": "super_partner",
+      "name": "Eden",
+      "fragment_item_id": 41007,
+      "initial_star": 1,
+      "awaken_table_id": 0
+    },
+    {
+      "hero_table_id": 11008,
+      "namespace": "super_partner",
+      "name": "Sif",
+      "fragment_item_id": 41008,
+      "initial_star": 1,
+      "awaken_table_id": 0
+    },
+    {
+      "hero_table_id": 11009,
+      "namespace": "super_partner",
+      "name": "Tyr",
+      "fragment_item_id": 41009,
+      "initial_star": 1,
+      "awaken_table_id": 0
+    },
+    {
+      "hero_table_id": 11010,
+      "namespace": "super_partner",
+      "name": "Frega",
+      "fragment_item_id": 41010,
+      "initial_star": 1,
+      "awaken_table_id": 0
+    },
+    {
+      "hero_table_id": 11011,
+      "namespace": "super_partner",
+      "name": "Thor",
+      "fragment_item_id": 41011,
+      "initial_star": 1,
+      "awaken_table_id": 0
+    },
+    {
+      "hero_table_id": 10001002,
+      "namespace": "partner",
+      "name": "Lavia",
+      "fragment_item_id": 40001002,
+      "initial_star": 1,
+      "awaken_table_id": 11001002
+    },
+    {
+      "hero_table_id": 10001001,
+      "namespace": "partner",
+      "name": "Aquaris",
+      "fragment_item_id": 40001001,
+      "initial_star": 1,
+      "awaken_table_id": 11001001
+    },
+    {
+      "hero_table_id": 10001005,
+      "namespace": "partner",
+      "name": "Geisha",
+      "fragment_item_id": 40001005,
+      "initial_star": 1,
+      "awaken_table_id": 11001005
+    },
+    {
+      "hero_table_id": 10001003,
+      "namespace": "partner",
+      "name": "Pandaria",
+      "fragment_item_id": 40001003,
+      "initial_star": 1,
+      "awaken_table_id": 11001003
+    },
+    {
+      "hero_table_id": 10001004,
+      "namespace": "partner",
+      "name": "Lightin",
+      "fragment_item_id": 40001004,
+      "initial_star": 1,
+      "awaken_table_id": 11001004
+    },
+    {
+      "hero_table_id": 10001008,
+      "namespace": "partner",
+      "name": "Joan",
+      "fragment_item_id": 40001008,
+      "initial_star": 1,
+      "awaken_table_id": 11001008
+    },
+    {
+      "hero_table_id": 10001022,
+      "namespace": "partner",
+      "name": "Quinie",
+      "fragment_item_id": 40001022,
+      "initial_star": 1,
+      "awaken_table_id": 11001022
+    },
+    {
+      "hero_table_id": 10001015,
+      "namespace": "partner",
+      "name": "Amazon",
+      "fragment_item_id": 40001015,
+      "initial_star": 3,
+      "awaken_table_id": 11001015
+    },
+    {
+      "hero_table_id": 10001029,
+      "namespace": "partner",
+      "name": "Gambler",
+      "fragment_item_id": 40001029,
+      "initial_star": 3,
+      "awaken_table_id": 11001029
+    },
+    {
+      "hero_table_id": 10001030,
+      "namespace": "partner",
+      "name": "Wild Girl",
+      "fragment_item_id": 40001030,
+      "initial_star": 3,
+      "awaken_table_id": 11001030
+    },
+    {
+      "hero_table_id": 10001017,
+      "namespace": "partner",
+      "name": "Smartie",
+      "fragment_item_id": 40001017,
+      "initial_star": 3,
+      "awaken_table_id": 11001017
+    },
+    {
+      "hero_table_id": 10001019,
+      "namespace": "partner",
+      "name": "Archie",
+      "fragment_item_id": 40001019,
+      "initial_star": 1,
+      "awaken_table_id": 11001019
+    },
+    {
+      "hero_table_id": 10001006,
+      "namespace": "partner",
+      "name": "Iron Fist",
+      "fragment_item_id": 40001006,
+      "initial_star": 2,
+      "awaken_table_id": 11001006
+    },
+    {
+      "hero_table_id": 10001024,
+      "namespace": "partner",
+      "name": "Dr. Hua",
+      "fragment_item_id": 40001024,
+      "initial_star": 2,
+      "awaken_table_id": 11001024
+    },
+    {
+      "hero_table_id": 10001051,
+      "namespace": "partner",
+      "name": "Ninja",
+      "fragment_item_id": 40001051,
+      "initial_star": 3,
+      "awaken_table_id": 11001051
+    },
+    {
+      "hero_table_id": 10001031,
+      "namespace": "partner",
+      "name": "Fortune",
+      "fragment_item_id": 40001031,
+      "initial_star": 2,
+      "awaken_table_id": 11001031
+    },
+    {
+      "hero_table_id": 10001009,
+      "namespace": "partner",
+      "name": "Scythe",
+      "fragment_item_id": 40001009,
+      "initial_star": 3,
+      "awaken_table_id": 11001009
+    },
+    {
+      "hero_table_id": 10001080,
+      "namespace": "partner",
+      "name": "Nun",
+      "fragment_item_id": 40001080,
+      "initial_star": 2,
+      "awaken_table_id": 11001080
+    },
+    {
+      "hero_table_id": 10001028,
+      "namespace": "partner",
+      "name": "Lily",
+      "fragment_item_id": 40001028,
+      "initial_star": 2,
+      "awaken_table_id": 11001028
+    },
+    {
+      "hero_table_id": 10001063,
+      "namespace": "partner",
+      "name": "Nagia",
+      "fragment_item_id": 40001063,
+      "initial_star": 2,
+      "awaken_table_id": 11001063
+    },
+    {
+      "hero_table_id": 10001013,
+      "namespace": "partner",
+      "name": "Annie",
+      "fragment_item_id": 40001013,
+      "initial_star": 2,
+      "awaken_table_id": 11001013
+    },
+    {
+      "hero_table_id": 10001007,
+      "namespace": "partner",
+      "name": "Toys Girl",
+      "fragment_item_id": 40001007,
+      "initial_star": 2,
+      "awaken_table_id": 11001007
+    },
+    {
+      "hero_table_id": 10001014,
+      "namespace": "partner",
+      "name": "Cynthia",
+      "fragment_item_id": 40001014,
+      "initial_star": 3,
+      "awaken_table_id": 11001014
+    },
+    {
+      "hero_table_id": 10001018,
+      "namespace": "partner",
+      "name": "Androi",
+      "fragment_item_id": 40001018,
+      "initial_star": 3,
+      "awaken_table_id": 11001018
+    },
+    {
+      "hero_table_id": 10001011,
+      "namespace": "partner",
+      "name": "Bud Elf",
+      "fragment_item_id": 40001011,
+      "initial_star": 2,
+      "awaken_table_id": 11001011
+    },
+    {
+      "hero_table_id": 10001012,
+      "namespace": "partner",
+      "name": "Boxer",
+      "fragment_item_id": 40001012,
+      "initial_star": 3,
+      "awaken_table_id": 11001012
+    },
+    {
+      "hero_table_id": 10001020,
+      "namespace": "partner",
+      "name": "Jinx",
+      "fragment_item_id": 40001020,
+      "initial_star": 1,
+      "awaken_table_id": 11001020
+    },
+    {
+      "hero_table_id": 10001053,
+      "namespace": "partner",
+      "name": "Wildtress",
+      "fragment_item_id": 40001053,
+      "initial_star": 2,
+      "awaken_table_id": 11001053
+    },
+    {
+      "hero_table_id": 10001090,
+      "namespace": "partner",
+      "name": "Roselle",
+      "fragment_item_id": 40001090,
+      "initial_star": 3,
+      "awaken_table_id": 11001090
+    },
+    {
+      "hero_table_id": 10001040,
+      "namespace": "partner",
+      "name": "Angel",
+      "fragment_item_id": 40001040,
+      "initial_star": 2,
+      "awaken_table_id": 11001040
+    },
+    {
+      "hero_table_id": 10001036,
+      "namespace": "partner",
+      "name": "Blowie",
+      "fragment_item_id": 40001036,
+      "initial_star": 2,
+      "awaken_table_id": 11001036
+    },
+    {
+      "hero_table_id": 10001034,
+      "namespace": "partner",
+      "name": "Tennese",
+      "fragment_item_id": 40001034,
+      "initial_star": 1,
+      "awaken_table_id": 11001034
+    },
+    {
+      "hero_table_id": 10001060,
+      "namespace": "partner",
+      "name": "Phancy",
+      "fragment_item_id": 40001060,
+      "initial_star": 3,
+      "awaken_table_id": 11001060
+    },
+    {
+      "hero_table_id": 10001033,
+      "namespace": "partner",
+      "name": "Saint",
+      "fragment_item_id": 40001033,
+      "initial_star": 2,
+      "awaken_table_id": 11001033
+    },
+    {
+      "hero_table_id": 10001047,
+      "namespace": "partner",
+      "name": "Karatine",
+      "fragment_item_id": 40001047,
+      "initial_star": 2,
+      "awaken_table_id": 11001047
+    },
+    {
+      "hero_table_id": 10001057,
+      "namespace": "partner",
+      "name": "Zombia",
+      "fragment_item_id": 40001057,
+      "initial_star": 3,
+      "awaken_table_id": 11001057
+    },
+    {
+      "hero_table_id": 10001039,
+      "namespace": "partner",
+      "name": "Succuba",
+      "fragment_item_id": 40001039,
+      "initial_star": 3,
+      "awaken_table_id": 11001039
+    },
+    {
+      "hero_table_id": 10001050,
+      "namespace": "partner",
+      "name": "Assassin",
+      "fragment_item_id": 40001050,
+      "initial_star": 3,
+      "awaken_table_id": 11001050
+    }
+  ],
+  "selected_fragment_rate_table": [
+    {
+      "num": 5,
+      "rate": 87
+    },
+    {
+      "num": 10,
+      "rate": 10
+    },
+    {
+      "num": 25,
+      "rate": 2
+    },
+    {
+      "num": 50,
+      "rate": 1
+    }
+  ],
+  "byproduct_dropbox_id": 700008,
+  "byproduct_rate_sum": 10000,
+  "byproduct_row_count": 312,
+  "client_channels": {
+    "result": "same Hero/item list pattern as MID50; SelfPlayer.magicSummonHero adds heroes or Backpack items",
+    "reward": "optional single item added directly to Backpack",
+    "stick_items": "optional list added directly to Backpack and separately presented by MagicSummonResultWindow"
+  }
+}

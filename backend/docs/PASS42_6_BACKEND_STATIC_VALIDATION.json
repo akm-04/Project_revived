@@ -1,0 +1,74 @@
+{
+  "schema_version": 1,
+  "pass": "42.6",
+  "backend": "gxb-backend-v0.8.28-pass42.6-corrected-sx-content-planner-2026-08-19",
+  "runtime_executed_by_agent": false,
+  "checks": {
+    "python_ast_files": 126,
+    "python_ast_errors": 0,
+    "data_json_files": 33,
+    "data_json_errors": 0,
+    "current_sx_candidates": 73,
+    "current_sx_native_star_distribution": {
+      "3": 73
+    },
+    "historical_type1_positive_rows": 60,
+    "type2_positive_rows": 93,
+    "type5_positive_rows": 21,
+    "type6_positive_rows": 85,
+    "type3_positive_rows": 0,
+    "type4_positive_rows": 0,
+    "static_item_pools": 5,
+    "static_pool_weight_sums": {
+      "200007": 10000,
+      "200008": 10000,
+      "200009": 10000,
+      "200010": 10000,
+      "200011": 10000
+    },
+    "default_main_hotspots_all_current_sx": true,
+    "default_second_hotspots_all_current_sx": true,
+    "protected_files_unchanged": {
+      "data/compatibility_safe_mids.json": true,
+      "data/magic_summon_private_policy.json": true,
+      "data/magic_summon_source_catalog.json": true,
+      "data/summon_duplicate_conversion_policy.json": true,
+      "data/summon_private_server_policy.json": true,
+      "data/campaign_drop_policy.json": true,
+      "data/campaign_drop_source_catalog.json": true
+    },
+    "campaign_rng_unchanged": true,
+    "classic_private_policy_unchanged": true,
+    "magic_policy_unchanged": true,
+    "duplicate_policy_unchanged": true,
+    "pass29_allowlist_unchanged": true,
+    "planner_branch_static_tests": "sx_full_hero + normal3 fragments + normal2 fragments + ordinary full hero + forced 25th selected-hotspot guarantee passed"
+  },
+  "changed_files": {
+    "added": [
+      "docs/V0_8_28_PASS42_6_CORRECTED_SX_CONTENT_PLANNER.md"
+    ],
+    "modified": [
+      "README.md",
+      "UPDATE_README.md",
+      "data/summon_cost_policy.json",
+      "data/summon_counter_policy.json",
+      "data/summon_operation_catalog.json",
+      "data/summon_result_policy.json",
+      "data/summon_state_policy.json",
+      "data/sx_soul_box_private_policy.json",
+      "data/sx_soul_box_source_catalog.json",
+      "data/tutorial_summon_meta.json",
+      "docs/memory.md",
+      "gxb_backend/content/sx_soul_box_source_catalog.py",
+      "gxb_backend/run.py",
+      "gxb_backend/state/request_services.py",
+      "gxb_backend/state/summon_repository.py",
+      "gxb_backend/state/sx_soul_box_private_policy.py",
+      "memory.md",
+      "server.py"
+    ],
+    "removed": []
+  },
+  "result": "clean static validation; Pass42.7 user runtime required."
+}

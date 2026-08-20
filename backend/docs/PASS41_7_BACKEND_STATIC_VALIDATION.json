@@ -1,0 +1,31 @@
+{
+  "pass": "41.7",
+  "backend": "v0.8.24",
+  "validation_mode": "static_only",
+  "python_ast_files": 124,
+  "json_files": 34,
+  "duplicate_policy": {
+    "native_star_quantities": {
+      "1": 7,
+      "2": 14,
+      "3": 30
+    },
+    "unsupported": "fail_closed",
+    "hero_pool_refs": 131,
+    "distinct_hero_ids": 86,
+    "active_native_stars": [
+      1,
+      2,
+      3
+    ]
+  },
+  "protected_unchanged": [
+    "data/magic_summon_private_policy.json",
+    "data/magic_summon_source_catalog.json",
+    "data/summon_pool_catalog.json",
+    "data/summon_counter_policy.json",
+    "data/summon_operation_catalog.json"
+  ],
+  "runtime_executed_by_agent": false,
+  "user_runtime_debug_sha256": "2f0563f736e3aa386e73c5d09a188c4f20c290c98a3d543ae37ca21a19189c98"
+}

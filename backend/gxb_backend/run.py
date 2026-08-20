@@ -24,7 +24,7 @@ def _run_flask(app, port: int) -> None:
 def main() -> None:
     app = create_app(SETTINGS)
     print("==================================================")
-    print(" GXB modular v0.8.14 Pass35.3 MID90 duplicate guard + explicit Skill Point sync + validated update/operator hardening + shared UoW/catalog")
+    print(" GXB modular v0.8.33 Pass42.12 gacha-control + classic balance overlay")
     print(f" SDK bind    : http://{SETTINGS.bind_host}:{SETTINGS.sdk_port}")
     print(f" ENGINE bind : http://{SETTINGS.bind_host}:{SETTINGS.engine_port}")
     print(f" ADVERTISE_HOST = {SETTINGS.advertise_host}")

@@ -16,6 +16,7 @@ from typing import Any
 
 from gxb_backend.content import CatalogNamespace, ContentRef, GameDataCatalog
 
+from .campaign_drop_planner import CampaignDropPlanner
 from .economy_repository import EconomyRepository
 from .hero_progression_repository import HeroProgressionRepository
 from .inventory_repository import InventoryRepository
@@ -42,6 +43,7 @@ class WorldRepository:
         catalog: GameDataCatalog | None = None,
         rewards: RewardTransactionService | None = None,
         tutorial: TutorialMilestoneRepository | None = None,
+        drop_planner: CampaignDropPlanner | None = None,
         uow: UnitOfWork | None = None,
     ) -> None:
         self.player = player
@@ -54,6 +56,7 @@ class WorldRepository:
         self.catalog = catalog
         self.rewards = rewards
         self.tutorial = tutorial
+        self.drop_planner = drop_planner
         self.uow = uow
         self._campaigns = self._load_campaign_meta()
         self._campaign_rewards = self._load_campaign_reward_meta()
@@ -203,25 +206,6 @@ class WorldRepository:
         if persist:
             self._save()
         return True
-
-    def _guaranteed_first_awards(self, campaign_id: int) -> list[dict[str, int]]:
-        """Return the conservative source-derived first-clear award subset.
-
-        campaign_dropbox.lua has no quantity column. A selected drop row maps to
-        one item in MID114. Stage 4A.5 only enables rows whose increase_rate is
-        exactly 10000; lower-rate rows are retained in metadata but are not
-        rolled until their RNG semantics are verified.
-        """
-        meta = self._campaign_rewards.get(str(campaign_id)) or {}
-        rows = meta.get("init_dropbox_rows") or []
-        awards: list[dict[str, int]] = []
-        for row in rows:
-            if not isinstance(row, dict) or self._int(row.get("increase_rate"), 0) != 10000:
-                continue
-            item_id = self._int(row.get("item_id"), 0)
-            if item_id > 0:
-                awards.append({"item_id": item_id, "item_num": 1})
-        return awards
 
     @staticmethod
     def _campaign_row(campaign_id: int, star: int) -> dict[str, int]:
@@ -426,7 +410,14 @@ class WorldRepository:
         campaign_type = self._int(req.get("campaign_type"), 1)
         current = self._find_row(campaign_id)
         first_clear_candidate = current is not None and self._int(current.get("star"), 0) <= 0
-        staged_items = self._guaranteed_first_awards(campaign_id) if first_clear_candidate else []
+        if self.drop_planner is None:
+            raise RuntimeError("Campaign MID113 requires Pass40.1 CampaignDropPlanner")
+        drop_plan = self.drop_planner.plan(
+            campaign_id=campaign_id,
+            wire_campaign_type=campaign_type,
+            first_clear=first_clear_candidate,
+        )
+        staged_items = drop_plan.battle_items()
         reward_plan = self._normal_campaign_reward_plan(campaign_id) if campaign_type == 1 else {
             "mana_gain": 0,
             "star_gift": 0,
@@ -438,7 +429,11 @@ class WorldRepository:
             "campaign_type": campaign_type,
             "formation": str(req.get("formation") or ""),
             "started_at": self.player.now(),
+            # ``items`` remains the exact battle-visible MID113 occurrence
+            # projection. ``drop_plan.canonical_awards`` is the frozen aggregate
+            # committed by MID114; the planner is never invoked at result time.
             "items": staged_items,
+            "drop_plan": drop_plan.persisted(),
             **reward_plan,
             "committed": 0,
         }
@@ -487,7 +482,17 @@ class WorldRepository:
             and self._int(pending.get("campaign_type"), 1) == campaign_type
             and self._same_formation(pending.get("formation"), req.get("formation"))
         )
-        staged_items = pending.get("items") if has_pending else None
+        staged_items: list[dict[str, int]] = []
+        if has_pending:
+            pending_drop_plan = pending.get("drop_plan")
+            if isinstance(pending_drop_plan, dict) and isinstance(
+                pending_drop_plan.get("canonical_awards"), list
+            ):
+                staged_items = pending_drop_plan.get("canonical_awards") or []
+            elif isinstance(pending.get("items"), list):
+                # Upgrade compatibility for an in-flight pre-Pass40.1 MID113
+                # session: reuse the already-frozen battle items; never reroll.
+                staged_items = pending.get("items") or []
 
         if current is None:
             if self.meta(cid) is None:
@@ -529,7 +534,15 @@ class WorldRepository:
         })
         self.player.world_map["chapter_info"] = chapter_info
 
-        awarded_items: list[dict[str, int]] = []
+        # Pass36.1 response-channel split:
+        # - committed_drop_items are the pending MID113 DropPlan rows whose
+        #   canonical Inventory mutation is committed by RewardTransactionService;
+        # - result_only_items belong exclusively to MID114's independent
+        #   result-award wire channel. No distinct result-only item award is
+        #   source-proven for the currently mapped early Campaign slice, so the
+        #   shape-preserving wire value remains an empty list.
+        committed_drop_items: list[dict[str, int]] = []
+        result_only_items: list[dict[str, int]] = []
         economy_projection: dict[str, int] = {}
         hero_exps: list[dict[str, int]] = []
         story_mission_delta: list[dict[str, int]] = []
@@ -539,9 +552,8 @@ class WorldRepository:
         # v0.8.2 commits source-certain rewards only when there is a matching
         # MID113 session. This prevents an arbitrary/retried MID114 from minting
         # Mana/EXP without a battle. General repeat item RNG remains deferred.
-        candidate_awards: list[dict[str, int]] = []
         if star > 0 and not was_cleared and has_pending:
-            candidate_awards = staged_items if isinstance(staged_items, list) else self._guaranteed_first_awards(cid)
+            committed_drop_items = staged_items if isinstance(staged_items, list) else []
 
         if star > 0 and has_pending and campaign_type == 1:
             star_crystal = max(0, self._int(pending.get("star_gift"), 0)) if first_three_star else 0
@@ -561,7 +573,7 @@ class WorldRepository:
                     ContentRef(CatalogNamespace.ITEM, self._int(award.get("item_id"), 0)),
                     self._int(award.get("item_num"), 0),
                 )
-                for award in candidate_awards
+                for award in committed_drop_items
                 if isinstance(award, dict)
                 and self._int(award.get("item_id"), 0) > 0
                 and self._int(award.get("item_num"), 0) > 0
@@ -574,7 +586,10 @@ class WorldRepository:
                 )
             )
             economy_projection = reward_result.economy
-            awarded_items = reward_result.inventory_awards
+            # The canonical grant result is intentionally not reused as MID114
+            # ``items``. Those rows already belong to the MID113 battle-drop
+            # delivery channel and are credited client-side by BattleWinWindow.
+            committed_drop_items = reward_result.inventory_awards
             # Economy first: BattleWinWindow observes the post-battle player
             # level when applying Hero EXP and therefore the resulting Hero cap.
             hero_exps = self.hero_progression.grant_battle_exp(
@@ -582,7 +597,7 @@ class WorldRepository:
                 pending.get("partner_exp", 0),
                 persist=False,
             )
-        elif candidate_awards:
+        elif committed_drop_items:
             # Preserve the pre-Pass32.6 non-normal behavior: deterministic
             # first-clear items can still persist without scalar economy grants.
             if self.rewards is None or self.catalog is None:
@@ -595,14 +610,16 @@ class WorldRepository:
                             ContentRef(CatalogNamespace.ITEM, self._int(award.get("item_id"), 0)),
                             self._int(award.get("item_num"), 0),
                         )
-                        for award in candidate_awards
+                        for award in committed_drop_items
                         if isinstance(award, dict)
                         and self._int(award.get("item_id"), 0) > 0
                         and self._int(award.get("item_num"), 0) > 0
                     ),
                 )
             )
-            awarded_items = reward_result.inventory_awards
+            # Preserve the committed DropPlan identity without projecting it
+            # through MID114's independent result-only item channel.
+            committed_drop_items = reward_result.inventory_awards
 
         if star > 0 and has_pending and campaign_type == 1 and self.missions is not None:
             story_mission_delta = self.missions.record_campaign_clear(cid)
@@ -625,7 +642,7 @@ class WorldRepository:
             "result": 1 if star > 0 else 0,
             "chapter_info": chapter_info,
             "campaigns": touched,
-            "items": awarded_items,
+            "items": result_only_items,
         }
         if economy_projection:
             response["economy_"] = economy_projection
@@ -645,7 +662,7 @@ class WorldRepository:
         if has_pending:
             # Keep the committed response as a one-request receipt until the
             # next MID113 overwrites it. A duplicate MID114 therefore returns
-            # the same cumulative values/items without applying rewards twice.
+            # the same response-shaped receipt without applying rewards twice.
             self.player.active_campaign_battle = {
                 "campaign_id": cid,
                 "campaign_type": campaign_type,

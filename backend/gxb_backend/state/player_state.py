@@ -96,7 +96,9 @@ class PlayerState:
     vip: int = 15
     guild_id: int = 0
 
-    mana: int = 999_999
+    # Private-server established/guest sandbox seed: deliberately generous for
+    # repeated Vending validation while remaining below signed 32-bit range.
+    mana: int = 999_999_999
     crystal: int = 999_999
     lucky_coin: int = 0
     arena_coin: int = 0

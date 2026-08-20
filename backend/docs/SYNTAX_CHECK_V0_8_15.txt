@@ -1,0 +1,24 @@
+PASS36.1 STATIC REGRESSION CHECKLIST
+[PASS] 4.1 Campaign100004 MID113 three source-backed first-clear rows — init_dropbox_rows=[(20001005, 10000), (20001004, 10000), (50001538, 10000)]
+[PASS] 4.1 MID113 begin_fight path unchanged from v0.8.14 — AST identical; staged DropPlan still returned as MID113 items
+[PASS] 4.2 explicit committed_drop_items/result_only_items split exists — both semantic locals declared
+[PASS] 4.2 pending MID113 DropPlan becomes committed_drop_items — matching first-clear pending rows retained
+[PASS] 4.2 normal RewardTransaction consumes committed_drop_items — normal campaign branch applies one RewardPlan on its control-flow path
+[PASS] 4.3 MID114 no longer mirrors committed DropPlan through items — wire items points only to result_only_items
+[PASS] 4.3 result_only_items remains shape-preserving empty list — single initialization; no reward_result reuse
+[PASS] 4.4 _committed_retry_response unchanged from v0.8.14 — AST identical
+[PASS] 4.4 commit_fight_result unchanged from v0.8.14 — AST identical
+[PASS] 4.4 mutation retry guard still precedes RewardTransaction — duplicate committed receipt returns before reward apply
+[PASS] 4.5 protected Campaign projection/semantic block unchanged — if star > 0 and has_pending and campaign_type == 1 and self.missions is not None:
+[PASS] 4.5 protected Campaign projection/semantic block unchanged — if self.tutorial is not None:
+[PASS] 4.5 protected Campaign projection/semantic block unchanged — if economy_projection:
+[PASS] 4.5 protected Campaign projection/semantic block unchanged — if hero_exps:
+[PASS] 4.5 protected Campaign projection/semantic block unchanged — if star_crystal > 0:
+[PASS] 4.5 protected Campaign projection/semantic block unchanged — if story_mission_delta:
+[PASS] 4.5 protected Campaign projection/semantic block unchanged — if tutorial_new_funcs:
+[PASS] 4.6 Python syntax/static compile — 108 Python files compiled without import/execution
+[PASS] 4.6 JSON parse — 22 JSON files parsed
+[PASS] 4.7 no unrelated backend data files changed — 20 data files byte-identical
+[PASS] 4.7 implementation change surface limited to authorized code + revision identity/docs — changed=['README.md', 'docs/memory.md', 'gxb_backend/run.py', 'gxb_backend/state/world_repository.py', 'memory.md', 'server.py']; added=['docs/SYNTAX_CHECK_V0_8_15.txt', 'docs/V0_8_15_PASS36_1_CAMPAIGN_REWARD_PROJECTION.md']
+
+TOTAL: 21 checks passed; 0 failed.

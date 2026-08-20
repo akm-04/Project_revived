@@ -1,7 +1,15 @@
-# Current backend revision: Pass 35.3 / v0.8.14
+# Current backend revision — Pass42.12 / v0.8.33
 
-Pass35.3 preserves Pass35.2 explicit global Skill Point synchronization and fixes one runtime validation boundary only. A clean device trace proved the first MID90 use projected `economy_.skill_point=10`, confirming the source-backed response channel. The same run contained two back-to-back MID90 requests even though Campaign100004 had granted exactly one canonical `50001538`; the second request therefore had no canonical item. v0.8.13 incorrectly returned success for that no-op, allowing the client callback to remove another item locally. Pass35.3 returns `error_code=1` for invalid/insufficient MID90 requests, matching `xyd.error.ERROR` and preserving the mutation-safe rule that a failed canonical mutation must not receive fake success.
+Canonical predecessor: v0.8.32 / Pass42.11. The user-supplied `startup_debug.txt` confirms Pass42.11 startup-debug fresh-seed behavior and fixed-seed reproducibility in repeated real server starts.
 
-Skill Point stacking itself was not capped. Source `BuyTiLiWindow.lua` batches multiple items through `item_num`, and the canonical mutation adds `10 * item_num`; natural VIP cap controls timed regeneration only. A true canonical two-item stack can therefore produce 20/10.
+Pass42.12 adds root `gacha_control.py`, a self-contained stdlib operator utility with exactly four machine menus: Small, Medium, SX, Gachapon. It validates all relevant private policy files before writing, selects hotspot/New-Add Girls by canonical name/ID cohorts, creates timestamped backups, and writes atomically.
 
-Standing rules: no ground-up rewrite; effective writable src_64 overrides APK src_64; source-derived metadata uses effective merged source; numeric IDs are field/table scoped; unknown mutating MIDs remain fail-closed except the explicit Pass29 allow-list; no payment; PvP/Guild remain deferred; assistant validation remains static/syntax/JSON/archive only unless the user explicitly requests runtime execution.
+Shipped development default is now `selection_mode=startup_debug`, `debug_seed=0`; `calendar_deterministic` remains supported and retains the known Pass42.10 calendar snapshot.
+
+New `data/classic_vending_balance_policy.json` is opt-in. Disabled means the exact pre-Pass42.12 classic two-stage math remains active. Enabled allows explicit Item/Girl-scroll/Full-Girl class rates and native 1★/2★/3★ full-Girl rates. Girl scrolls are identified only through effective `partner.stone_id`; explicit Scroll category candidates are flat/equal. Medium ordinary effective pool remains 143 Girls (13 native1★ / 33 native2★ / 97 native3★).
+
+Guardrails stay fixed: Small x10 item-class guarantee, Medium x10 full-Girl guarantee, SX selected-hotspot guarantee=25, Medium New-Add pity=20. The tool can tune Medium New-Add chance/identity, SX private class/hotspot/candidate/static-item weights, and Magic x10 scroll-quantity/byproduct weights.
+
+Critical maintenance contract: any later core gacha drop-class/policy-schema/cohort/guarantee/classification change must update `gacha_control.py`, its docs and validation in the same pass.
+
+Pass43–45 remain reserved pure RNG/drop research.

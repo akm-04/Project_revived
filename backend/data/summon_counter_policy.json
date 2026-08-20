@@ -1,0 +1,134 @@
+{
+  "_meta": {
+    "schema_version": 1,
+    "generated_by": "Pass42.6",
+    "source_resolution": "effective_merged",
+    "purpose": "Recovered milestone topology plus explicit Custom Private Server Policy v1 result-slot transitions for classic paid Small/Medium only.",
+    "guardrails": [
+      "Milestone/dropbox arrays are recovered source facts; result-slot advancement is private-server policy, not historical proof.",
+      "Small tutorial milestone1 is migrated into the shared private Small result-slot counter before paid pulls.",
+      "Medium free and SX counters remain fail closed."
+    ]
+  },
+  "policies": [
+    {
+      "id": "small_classic",
+      "family": "small",
+      "source_summon_row": 1,
+      "special_milestones": [
+        1,
+        2,
+        5,
+        50,
+        150,
+        300
+      ],
+      "special_dropboxes": [
+        200005,
+        210002,
+        210005,
+        150001,
+        150001,
+        150001
+      ],
+      "raw": {
+        "rate_bottom": 0,
+        "rate_step": 0.4
+      },
+      "transition_status": "implemented_private_policy",
+      "persistence_key": "private_small_result_counter_v1",
+      "unknowns": [
+        "historical official transition math remains unrecovered; private v1 advances one result slot and does not reset"
+      ]
+    },
+    {
+      "id": "medium_paid",
+      "family": "medium",
+      "source_summon_row": 2,
+      "special_milestones": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11
+      ],
+      "special_dropboxes": [
+        220001,
+        200003,
+        200003,
+        220004,
+        200003,
+        200003,
+        220007,
+        200003,
+        200003,
+        220001,
+        200003
+      ],
+      "raw": {
+        "rate_bottom": 0,
+        "rate_step": 2285
+      },
+      "transition_status": "implemented_private_policy",
+      "persistence_key": "private_medium_paid_result_counter_v1",
+      "unknowns": [
+        "historical official transition math remains unrecovered; private v1 advances one paid result slot and does not reset"
+      ]
+    },
+    {
+      "id": "medium_free",
+      "family": "medium",
+      "source_summon_row": 3,
+      "special_milestones": [
+        1,
+        2,
+        10,
+        30,
+        60
+      ],
+      "special_dropboxes": [
+        200006,
+        200014,
+        200004,
+        200004,
+        200004
+      ],
+      "raw": {
+        "rate_bottom": 0,
+        "rate_step": 77
+      },
+      "transition_status": "unknown_fail_closed",
+      "persistence_key": null,
+      "unknowns": [
+        "counter persistence/reset",
+        "rate_step unit"
+      ]
+    },
+    {
+      "id": "sx_soul_box",
+      "family": "sx",
+      "source_summon_row": 4,
+      "special_milestones": [],
+      "special_dropboxes": [],
+      "raw": {
+        "rate_bottom": 0,
+        "rate_step": 15,
+        "is_reset": 1,
+        "max_num": 29,
+        "guarantee_times": 25,
+        "configured_result_count": 6
+      },
+      "transition_status": "implemented_private_sx_policy_v2",
+      "persistence_key": "sx_hotspot_pity_count",
+      "unknowns": [
+        "historical exact rate_step/max_num algorithm remains unrecovered; Pass42.6 scopes private 25-purchase guarantee to the selected full-SX hotspot class only"
+      ]
+    }
+  ]
+}

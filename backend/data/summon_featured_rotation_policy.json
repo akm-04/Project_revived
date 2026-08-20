@@ -1,0 +1,34 @@
+{
+  "schema_version": 2,
+  "selection_mode": "startup_debug",
+  "rotation_seed": "gxb-private-server-featured-v1",
+  "debug_seed": 0,
+  "timezone": "Asia/Dhaka",
+  "sx": {
+    "week_manual_ids": [
+      0,
+      0
+    ],
+    "day_manual_ids": [
+      0,
+      0,
+      0
+    ]
+  },
+  "medium": {
+    "manual_hero_id": 0
+  },
+  "invalid_override_behavior": "warn_and_deterministic_fallback",
+  "notes": [
+    "Pass42.12 development default is startup_debug; use gacha_control.py to switch back to calendar_deterministic.",
+    "selection_mode=calendar_deterministic uses the configured IANA timezone and deterministic calendar cycle.",
+    "selection_mode=startup_debug selects one process-frozen random-looking automatic set at server startup.",
+    "debug_seed=0 or omitted generates and logs a fresh boot seed; a nonzero/string debug_seed reproduces the same startup_debug automatic set.",
+    "0 means automatic for that individual manual slot in either mode.",
+    "SX weekly slots accept only current SX Girl Hero IDs.",
+    "SX daily slots accept only current SX Girl Hero IDs and may not duplicate weekly slots.",
+    "Medium manual Hero ID accepts only the 56 featured-only Legacy cohort.",
+    "Invalid/ineligible/duplicate manual values warn and fall back rather than crashing.",
+    "Runtime validates against data/summon_featured_catalog.json; docs files are operator references only."
+  ]
+}

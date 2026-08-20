@@ -1,0 +1,218 @@
+{
+  "_meta": {
+    "schema_version": 1,
+    "generated_by": "Pass42.6",
+    "source_resolution": "effective_merged",
+    "purpose": "Typed source-backed summon CostPlans. Classic paid currency plans and SX Crystal purchase are executable under versioned Custom Private Server policies; deferred ticket/coupon/discount and Small100 plans remain descriptive/fail closed.",
+    "client_delta_warning": "Ticket/coupon items are removed locally by the stock MID50 callback after success; future canonical spend must not also project a second local-removal award/delta channel.",
+    "guardrails": [
+      "CostPlan remains separate from result selection and never implies historical RNG.",
+      "Classic small_paid_single/small_paid_ten/medium_paid_single/medium_paid_ten remain private_policy_active.",
+      "SX sx_purchase is private_policy_active only through the dedicated Pass42.6 corrected SX planner.",
+      "Ticket/coupon/discount and Small100 variants remain deferred/fail closed."
+    ]
+  },
+  "plans": [
+    {
+      "id": "small_free_single",
+      "family": "small",
+      "pull_count": 1,
+      "components": [],
+      "state_gates": [
+        {
+          "kind": "timer_ready",
+          "field": "mana_free_time"
+        },
+        {
+          "kind": "counter_positive",
+          "field": "mana_free_num"
+        }
+      ],
+      "vip_min": 0,
+      "execution_status": "tutorial_active_free_only"
+    },
+    {
+      "id": "small_paid_single",
+      "family": "small",
+      "pull_count": 1,
+      "components": [
+        {
+          "kind": "economy",
+          "field": "mana",
+          "amount": 10000
+        }
+      ],
+      "state_gates": [],
+      "vip_min": 0,
+      "execution_status": "private_policy_active"
+    },
+    {
+      "id": "small_paid_ten",
+      "family": "small",
+      "pull_count": 10,
+      "components": [
+        {
+          "kind": "economy",
+          "field": "mana",
+          "amount": 90000
+        }
+      ],
+      "state_gates": [],
+      "vip_min": 0,
+      "execution_status": "private_policy_active"
+    },
+    {
+      "id": "small_paid_hundred",
+      "family": "small",
+      "pull_count": 100,
+      "components": [
+        {
+          "kind": "economy",
+          "field": "mana",
+          "amount": 900000
+        }
+      ],
+      "state_gates": [],
+      "vip_min": 0,
+      "execution_status": "deferred_fail_closed"
+    },
+    {
+      "id": "medium_free_single",
+      "family": "medium",
+      "pull_count": 1,
+      "components": [],
+      "state_gates": [
+        {
+          "kind": "timer_ready",
+          "field": "crystal_free_time"
+        }
+      ],
+      "vip_min": 0,
+      "execution_status": "tutorial_active_free_only"
+    },
+    {
+      "id": "medium_paid_single",
+      "family": "medium",
+      "pull_count": 1,
+      "components": [
+        {
+          "kind": "economy",
+          "field": "crystal",
+          "amount": 288
+        }
+      ],
+      "state_gates": [],
+      "vip_min": 0,
+      "execution_status": "private_policy_active"
+    },
+    {
+      "id": "medium_paid_ten",
+      "family": "medium",
+      "pull_count": 10,
+      "components": [
+        {
+          "kind": "economy",
+          "field": "crystal",
+          "amount": 2590
+        }
+      ],
+      "state_gates": [],
+      "vip_min": 0,
+      "execution_status": "private_policy_active"
+    },
+    {
+      "id": "medium_ticket_single",
+      "family": "medium",
+      "pull_count": 1,
+      "components": [
+        {
+          "kind": "inventory",
+          "item_id": 50001024,
+          "amount": 1,
+          "client_local_post_success_remove": true
+        }
+      ],
+      "state_gates": [],
+      "vip_min": 0,
+      "execution_status": "type_known_index_unresolved_fail_closed"
+    },
+    {
+      "id": "medium_ticket_ten",
+      "family": "medium",
+      "pull_count": 10,
+      "components": [
+        {
+          "kind": "inventory",
+          "item_id": 50001039,
+          "amount": 1,
+          "client_local_post_success_remove": true
+        }
+      ],
+      "state_gates": [],
+      "vip_min": 0,
+      "execution_status": "type_known_index_unresolved_fail_closed"
+    },
+    {
+      "id": "medium_discount_single",
+      "family": "medium",
+      "pull_count": 1,
+      "components": [
+        {
+          "kind": "inventory",
+          "item_id": 50001046,
+          "amount": 1,
+          "client_local_post_success_remove": true
+        },
+        {
+          "kind": "economy",
+          "field": "crystal",
+          "amount": 88
+        }
+      ],
+      "state_gates": [],
+      "vip_min": 0,
+      "execution_status": "deferred_fail_closed"
+    },
+    {
+      "id": "medium_discount_ten",
+      "family": "medium",
+      "pull_count": 10,
+      "components": [
+        {
+          "kind": "inventory",
+          "item_id": 50001047,
+          "amount": 1,
+          "client_local_post_success_remove": true
+        },
+        {
+          "kind": "economy",
+          "field": "crystal",
+          "amount": 1388
+        }
+      ],
+      "state_gates": [],
+      "vip_min": 0,
+      "execution_status": "deferred_fail_closed"
+    },
+    {
+      "id": "sx_purchase",
+      "family": "sx",
+      "pull_count": 6,
+      "components": [
+        {
+          "kind": "economy",
+          "field": "crystal",
+          "amount": 388
+        }
+      ],
+      "state_gates": [
+        {
+          "kind": "hotspot_selector",
+          "field": "main_ids"
+        }
+      ],
+      "vip_min": 9,
+      "execution_status": "private_policy_active"
+    }
+  ]
+}

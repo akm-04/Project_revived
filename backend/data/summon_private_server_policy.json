@@ -1,0 +1,87 @@
+{
+  "_meta": {
+    "schema_version": 1,
+    "generated_by": "Pass42.9 metadata sync; Classic v1 numeric behavior unchanged; Medium Legacy overlay is separate policy file",
+    "policy_name": "Custom Private Server Policy v1",
+    "authorization": "User explicitly authorized rebuilding unrecoverable EOL server-only Summon mechanics from scratch on 2026-08-19.",
+    "boundary": "Recovered client/source protocol facts remain canonical; values in this file are intentional private-server policy and must never be relabeled as official historical GXB server math.",
+    "runtime_evidence_sha256": "727b5ee2176cd8e460f5c22ae941905949d8c6cdccfaa8684f88483bb82c32ac",
+    "active_semantics": [
+      "small_free_post_tutorial",
+      "small_paid_1",
+      "small_paid_10",
+      "medium_paid_1",
+      "medium_paid_10"
+    ],
+    "deferred": [
+      "small_paid_100",
+      "medium_ticket_single",
+      "medium_ticket_ten",
+      "medium_discount_single",
+      "medium_discount_ten"
+    ],
+    "separate_active_policy_families": {
+      "magic": "magic_summon_private_policy.json (MID70/MID71)",
+      "sx": "sx_soul_box_private_policy.json (MID50 type4)",
+      "medium_legacy": "medium_legacy_private_policy.json + summon_featured_rotation_policy.json"
+    }
+  },
+  "retry_policy": {
+    "mode": "same-operation short replay window",
+    "window_ms": 1500,
+    "reason": "Stock MID50 paid requests expose no unique operation token. A short replay window favors at-most-once charging for immediate transport retries while allowing normal subsequent purchases after the result UI round-trip.",
+    "tradeoff": "A deliberate identical purchase repeated within the window is treated as a retry."
+  },
+  "small": {
+    "counter_policy_id": "small_classic",
+    "ordinary_policy": {
+      "missing_source_pool": 200001,
+      "custom_base_pool_id": 200003,
+      "custom_base_reason": "Recovered Small base pool 200001 is absent. Private v1 reuses the source-valid non-partner pool 200003 rather than inventing item IDs.",
+      "super_pool_id": 151001,
+      "super_chance_per_10000": 40,
+      "super_chance_note": "0.40% is an explicit private interpretation inspired by row1 rate_step=0.4, not recovered server math."
+    },
+    "ten_pull_guarantee": {
+      "mode": "at_least_one_item",
+      "source_ui": "Blue Item Guaranteed",
+      "limitation": "Exact historical blue-quality resolver is not recovered in the backend catalog; private v1 guarantees at least one non-partner item without claiming exact color-grade equivalence.",
+      "special_milestones_win": true
+    },
+    "paid_side_reward": null,
+    "post_tutorial_free_policy": {
+      "status": "active_private_result_policy_with_recovered_state_gates",
+      "protocol_mid": 50,
+      "summon_type": 1,
+      "summon_index": 1,
+      "eligible_after": "completed tutorial Small one-shot receipt / post-guide state",
+      "free_count_field": "mana_free_num",
+      "free_period_seconds": 600,
+      "timer_field_semantics": "mana_free_time is the last successful Small free-pull timestamp; readiness is last+600s",
+      "result_policy": "one normal Small classic private-policy result; no tutorial x10 Small EXP Juice side reward",
+      "counter_policy": "shares small_classic result-slot counter with tutorial/paid Small pulls",
+      "retry_policy": "same short replay window as repeatable private summon operations",
+      "reset_rule": "unknown; do not replenish mana_free_num when it reaches zero without new evidence/policy"
+    }
+  },
+  "medium": {
+    "counter_policy_id": "medium_paid",
+    "ordinary_policy": {
+      "base_pool_id": 200003,
+      "super_pool_id": 200004,
+      "super_chance_per_10000": 1440,
+      "super_chance_note": "Private v1 uses the 14.40% gap between base pool200003 source rate_sum=8560 and 10000 as the ordinary super-Hero chance. This is a private policy inference, not historical server proof."
+    },
+    "ten_pull_guarantee": {
+      "mode": "at_least_one_hero",
+      "source_ui": "Battle Girl Guaranteed",
+      "special_milestones_win": true
+    },
+    "paid_side_reward": null
+  },
+  "global_duplicate_conversion_policy": {
+    "policy_file": "summon_duplicate_conversion_policy.json",
+    "status": "recovered_historical_evidence",
+    "note": "Duplicate quantities are no longer private balance values; Pass41.7 recovered native-star 1/2/3 quantities 7/14/30."
+  }
+}

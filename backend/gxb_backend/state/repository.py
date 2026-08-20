@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Any
 
 from gxb_backend.content import GameDataCatalog
+from gxb_backend.content.summon_featured_catalog import SummonFeaturedCatalog
 
 from .account import AccountIdentity
 from .economy_repository import EconomyRepository
@@ -27,6 +28,7 @@ from .player_state import PlayerState
 from .summon_repository import SummonRepository
 from .world_repository import WorldRepository
 from .request_services import RequestServices
+from .summon_featured_rotation import SummonFeaturedRotationPolicy
 
 
 class _RequestBinding(threading.local):
@@ -59,8 +61,14 @@ class StateRepository:
         self._local = _RequestBinding()
         # Immutable source/config meaning is shared across request service graphs.
         self._catalog = GameDataCatalog.load(self._data_dir() / "game_data_catalog.json")
+        self._featured_catalog = SummonFeaturedCatalog(self._data_dir())
+        self._featured_rotation = SummonFeaturedRotationPolicy(
+            self._data_dir(), self._featured_catalog, emit_startup_log=True
+        )
         root = Path(multiuser_root or ((self.path.parent if self.path else Path("data")) / "server_state"))
-        self.store = MultiUserDatabase(root, self._data_dir())
+        self.store = MultiUserDatabase(
+            root, self._data_dir(), featured_rotation=self._featured_rotation
+        )
 
         with self._lock:
             sandbox_player = self.store.import_legacy_sandbox(
@@ -318,6 +326,7 @@ class StateRepository:
                 self._data_dir(),
                 lambda: self.store.save_player(player),
                 catalog=self._catalog,
+                featured_rotation=self._featured_rotation,
             )
             self._local.services = services
         return services

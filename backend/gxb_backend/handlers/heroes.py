@@ -78,6 +78,10 @@ class HeroHandlers:
     def load_pets(self, req: dict) -> dict:
         return self.ctx.state.get_player().pets_payload()
 
+    def evolve_hero(self, req: dict) -> dict:
+        """MID52: persist the source-backed normal-Hero scroll evolution."""
+        return self.ctx.state.get_hero_progression_repository().evolve_hero(req)
+
     def set_hero_equip(self, req: dict) -> dict:
         """MID54: consume the source current-color item and persist its slot."""
         return self.ctx.state.get_hero_equipment_repository().set_hero_equip(

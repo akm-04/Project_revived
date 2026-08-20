@@ -1,0 +1,104 @@
+{
+  "_meta": {
+    "schema_version": 2,
+    "generated_by": "Pass42.6",
+    "policy_name": "Custom Private Server SX/Soul Box Policy v2",
+    "authorization": "User explicitly authorized rebuilding unrecoverable EOL server-only Summon mechanics from scratch.",
+    "historical_claim": false,
+    "boundary": "MID50 type4 protocol/cost/VIP/result-count, five static item pools, current partner.is_sx classification, and orphan Soul-Casket partitions are evidence. Top-level class rates, current-roster fallback weights, hotspot share, pity interpretation and rotation defaults are private policy.",
+    "active_semantics": [
+      "sx_soul_box_selector_1",
+      "sx_soul_box_selector_2"
+    ]
+  },
+  "operation": {
+    "protocol_mid": 50,
+    "summon_type": 4,
+    "selectors": [1, 2],
+    "crystal_cost": 388,
+    "vip_min": 9,
+    "result_count": 6,
+    "static_item_slots": 5,
+    "dynamic_reward_slots": 1
+  },
+  "static_slots": {
+    "pool_ids": [200007, 200008, 200009, 200010, 200011],
+    "selection": "one literal-weight row independently from each corresponding recovered pool"
+  },
+  "dynamic_reward_slot": {
+    "class_weight_total": 10000,
+    "class_weights": {
+      "sx_full_hero": 500,
+      "normal_three_star_fragments": 5500,
+      "normal_two_star_fragments": 3000,
+      "ordinary_full_hero": 1000
+    },
+    "class_weight_provenance": "Custom Private Server Policy v2. Historical server top-level class probabilities are unrecovered.",
+    "classes": {
+      "sx_full_hero": {
+        "eligibility": "current partner.is_sx==1 roster",
+        "historical_weight_source": "positive soul_casket type1 weight when present",
+        "newer_candidate_fallback_weight": 167,
+        "newer_candidate_fallback_provenance": "Private equal-style fallback chosen to match historical type1 166/167 scale for the 13 post-snapshot SX Girls."
+      },
+      "normal_three_star_fragments": {
+        "candidate_source": "positive soul_casket type2 rows",
+        "quantity_source": "row roll_num alternatives selected by row num_rate",
+        "semantic_status": "strong orphan-source inference; private activation"
+      },
+      "normal_two_star_fragments": {
+        "candidate_source": "positive soul_casket type5 rows",
+        "quantity_source": "row roll_num (currently 10)",
+        "semantic_status": "strong orphan-source inference; private activation"
+      },
+      "ordinary_full_hero": {
+        "candidate_source": "positive soul_casket type6 rows",
+        "semantic_status": "strong source cross-correlation to ordinary full-Girl population; private top-level activation rate"
+      }
+    }
+  },
+  "hotspot_policy": {
+    "selected_hotspot_source": "player.summon.main_ids[selector-1]",
+    "selected_hotspot_share_within_sx_class_per_10000": 5000,
+    "rate_up_provenance": "Private v2 rate-up within the rare full-SX-Girl class only.",
+    "guarantee_purchases": 25,
+    "guarantee_provenance": "misc.sx_summon_guarantee_times=25 is recovered; forcing the selected hotspot after 25 consecutive misses is private policy.",
+    "pity_counter_key": "sx_hotspot_pity_count",
+    "counter_target_key": "sx_hotspot_pity_target_id",
+    "reset_rule": "reset to 0 whenever selected hotspot full SX Girl is produced; reset/rebind when selected hotspot changes",
+    "source_is_reset": 1,
+    "source_max_num": 29,
+    "source_max_num_use": "preserved as unrecovered constant; no extra behavior in v2 because selected-hotspot guarantee fires at 25"
+  },
+  "duplicate_conversion": {
+    "mode": "shared_global_recovered_policy",
+    "policy_file": "summon_duplicate_conversion_policy.json"
+  },
+  "retry_policy": {
+    "window_ms": 1500,
+    "identity": "type4 selector + selected main_id + policy version",
+    "reason": "Protect immediate transport retries while preventing replay across hotspot selection changes."
+  },
+  "summon_reward_50001005": {
+    "status": "not_awarded",
+    "reason": "source ownership/quantity semantics remain unproven; private v2 does not invent an extra channel"
+  },
+  "limited_event_non_sx": {
+    "status": "excluded_from_sx",
+    "reason": "Pass42.5/42.5.1 classify legacy/event access as a separate acquisition-overlay problem; SX identity remains partner.is_sx."
+  },
+  "policy_version": "sx_private_v2",
+  "balance_overrides": {
+    "class_weight_overrides": {},
+    "static_item_row_weight_overrides": {},
+    "sx_candidate_weight_overrides": {},
+    "soul_casket_row_weight_overrides": {},
+    "notes": [
+      "Future balancing should modify only this private policy, not recovered source catalogs.",
+      "Class override shape: {\"sx_full_hero\": 500, ...}; effective class weights must remain nonnegative and sum positive.",
+      "Static item override shape: {\"<dropbox_id>\": {\"<source_row_id>\": <nonnegative_weight>}}.",
+      "SX candidate override shape: {\"<hero_table_id>\": <nonnegative_weight>}.",
+      "Soul-Casket row override shape: {\"<type>\": {\"<source_row_id>\": <nonnegative_weight>}}."
+    ]
+  }
+}

@@ -4,7 +4,7 @@
       "campaign": 917,
       "dropbox": 0,
       "function": 99,
-      "item": 156,
+      "item": 428,
       "mission": 1,
       "model": 0,
       "partner": 555,
@@ -18,39 +18,37 @@
       "numeric IDs are table/context scoped; no global type_of_id exists",
       "asset paths and decimal prefixes are diagnostics only",
       "skill_price is a typed config namespace added for source-backed MID39 pricing",
-      "Pass32.6 current scope catalogs only content consumed by implemented domains; deferred namespaces remain empty"
+      "current scope catalogs only content consumed by implemented domains; normal partner stone items are included for implemented MID59/MID52 progression"
     ],
     "schema_version": 1,
     "scope": "current_implemented",
     "source_files": {
       "data/tables/campaign.lua": {
-        "layer": "apk_baseline_effective_equivalent_verified",
+        "layer": "apk_baseline",
         "sha256": "7a58e878a7171839342a856cd74b512037528438259d036009a7249472504683"
       },
       "data/tables/function.lua": {
-        "layer": "apk_baseline_effective_equivalent_verified",
+        "layer": "apk_baseline",
         "sha256": "a240254e79ccfd41862f3d6289f4f5fd09280ac3e197f51bc14b896a62c10010"
       },
       "data/tables/item.lua": {
-        "full_table_complete": false,
-        "layer": "apk_baseline_effective_equivalent_row_subset",
-        "proof": "Pass28/Pass32 canonical audit: writable item.lua only adds IDs 51100032,51100033,51100034,51100035,51100036,51100037,51100038; the current implemented reward-item subset excludes those additions.",
-        "sha256": "59b668c28a372543da0c36d7a8d84291cc5b93fa0d92b7cc389a645e96e7b7cc"
+        "layer": "writable_hot_update",
+        "sha256": "3d26da6005e27b283de4d637034a4b76c2c2aea7406e8c0379482083315ead9e"
       },
       "data/tables/mission.lua": {
-        "layer": "apk_baseline_effective_equivalent_verified",
+        "layer": "apk_baseline",
         "sha256": "337cb2a66ac6963e7d2e24dcc293df02d24fca8cbb6a40d838915f60ebc436bd"
       },
       "data/tables/partner.lua": {
-        "layer": "apk_baseline_effective_equivalent_verified",
+        "layer": "apk_baseline",
         "sha256": "a1d3d11e308140e57ed861a2dc0031f562420881405a5ba6f62987df8952bc49"
       },
       "data/tables/skill_price.lua": {
-        "layer": "apk_baseline_effective_equivalent_verified",
+        "layer": "apk_baseline",
         "sha256": "dcbd6c381d7a96489dd9c3efee69c9a6a199b5a12f269b0f7540a5134e6d3200"
       },
       "data/tables/super_partner.lua": {
-        "layer": "apk_baseline_effective_equivalent_verified",
+        "layer": "apk_baseline",
         "sha256": "ddee186ee41361a3674d4764be68efec01fad32d288c9dc84c552df6f1b770ea"
       }
     },
@@ -32587,6 +32585,84 @@
         "sub_type": 0,
         "type": 2
       },
+      "40001001": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001001,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Aquaris",
+        "partner_id": 10001001,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001002": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001002,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Lavia",
+        "partner_id": 10001002,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001003": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001003,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Pandaria",
+        "partner_id": 10001003,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
       "40001004": {
         "compose": [
           0
@@ -32613,6 +32689,32 @@
         "sub_type": 0,
         "type": 3
       },
+      "40001005": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001005,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Geisha",
+        "partner_id": 10001005,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
       "40001006": {
         "compose": [
           0
@@ -32632,6 +32734,32 @@
         "mana": 4000,
         "name": "Iron Fist",
         "partner_id": 10001006,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001007": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001007,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Toys Girl",
+        "partner_id": 10001007,
         "pet_id": 0,
         "skill_point": 0,
         "skin_model": 0,
@@ -32691,6 +32819,266 @@
         "sub_type": 0,
         "type": 3
       },
+      "40001010": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001010,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Rosie",
+        "partner_id": 10001010,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001011": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001011,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Bud Elf",
+        "partner_id": 10001011,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001012": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001012,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Boxer",
+        "partner_id": 10001012,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001013": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001013,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Annie",
+        "partner_id": 10001013,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001014": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001014,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Cynthia",
+        "partner_id": 10001014,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001015": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001015,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Amazon",
+        "partner_id": 10001015,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001016": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001016,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Bidenty",
+        "partner_id": 10001016,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001017": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001017,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Smartie",
+        "partner_id": 10001017,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001018": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001018,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Androi",
+        "partner_id": 10001018,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001019": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001019,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Archie",
+        "partner_id": 10001019,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
       "40001020": {
         "compose": [
           0
@@ -32710,6 +33098,6688 @@
         "mana": 4000,
         "name": "Jinx",
         "partner_id": 10001020,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001021": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001021,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Leona",
+        "partner_id": 10001021,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001022": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001022,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Quinie",
+        "partner_id": 10001022,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001023": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001023,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Fanny",
+        "partner_id": 10001023,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001024": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001024,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Dr. Hua",
+        "partner_id": 10001024,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001025": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001025,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Chevalir ",
+        "partner_id": 10001025,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001026": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001026,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Maidam",
+        "partner_id": 10001026,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001027": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001027,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Haxie",
+        "partner_id": 10001027,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001028": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001028,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Lily",
+        "partner_id": 10001028,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001029": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001029,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Gambler",
+        "partner_id": 10001029,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001030": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001030,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Wild Girl",
+        "partner_id": 10001030,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001031": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001031,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Fortune",
+        "partner_id": 10001031,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001032": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001032,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Guan Yin",
+        "partner_id": 10001032,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001033": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001033,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Saint",
+        "partner_id": 10001033,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001034": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001034,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Tennese",
+        "partner_id": 10001034,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001035": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001035,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Sonya",
+        "partner_id": 10001035,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001036": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001036,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Blowie",
+        "partner_id": 10001036,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001037": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001037,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Psychic",
+        "partner_id": 10001037,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001038": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001038,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Elvis",
+        "partner_id": 10001038,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001039": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001039,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Succuba",
+        "partner_id": 10001039,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001040": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001040,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Angel",
+        "partner_id": 10001040,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001041": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001041,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Kratos scroll",
+        "partner_id": 10001041,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001042": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001042,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Luna",
+        "partner_id": 10001042,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001043": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001043,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Hottie",
+        "partner_id": 10001043,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001044": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001044,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Celeste",
+        "partner_id": 10001044,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001045": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001045,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Javelin",
+        "partner_id": 10001045,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001046": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001046,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Witch",
+        "partner_id": 10001046,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001047": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001047,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Karatine",
+        "partner_id": 10001047,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001048": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001048,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Lin \ufe52AI",
+        "partner_id": 10001048,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001049": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001049,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Caitlyn",
+        "partner_id": 10001049,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001050": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001050,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Assassin",
+        "partner_id": 10001050,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001051": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001051,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Ninja",
+        "partner_id": 10001051,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001052": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001052,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Wu Kong",
+        "partner_id": 10001052,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001053": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001053,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Wildtress",
+        "partner_id": 10001053,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001054": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001054,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Xmas Elf",
+        "partner_id": 10001054,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001055": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001055,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Nurse",
+        "partner_id": 10001055,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001056": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001056,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Capt.Sun",
+        "partner_id": 10001056,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001057": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001057,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Zombia",
+        "partner_id": 10001057,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001058": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001058,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Muppet",
+        "partner_id": 10001058,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001059": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001059,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Fencer",
+        "partner_id": 10001059,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001060": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001060,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Phancy",
+        "partner_id": 10001060,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001061": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001061,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Revolver",
+        "partner_id": 10001061,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001062": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001062,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Zhi Yao",
+        "partner_id": 10001062,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001063": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001063,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Nagia",
+        "partner_id": 10001063,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001064": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001064,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Priestess",
+        "partner_id": 10001064,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001065": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001065,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Springy",
+        "partner_id": 10001065,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001066": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001066,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Dracula",
+        "partner_id": 10001066,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001067": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001067,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Werewolf",
+        "partner_id": 10001067,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001068": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001068,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Fleur",
+        "partner_id": 10001068,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001069": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001069,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Himoto",
+        "partner_id": 10001069,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001070": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001070,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Hanzo",
+        "partner_id": 10001070,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001071": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001071,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Elisa",
+        "partner_id": 10001071,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001072": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001072,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Elina",
+        "partner_id": 10001072,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001073": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001073,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Beary",
+        "partner_id": 10001073,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001074": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001074,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Librarian's Scroll",
+        "partner_id": 10001074,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001075": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001075,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Litana",
+        "partner_id": 10001075,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001076": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001076,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Hypatia",
+        "partner_id": 10001076,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001077": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001077,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Sapphire",
+        "partner_id": 10001077,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001078": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001078,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Skarivine",
+        "partner_id": 10001078,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001079": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001079,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Amber",
+        "partner_id": 10001079,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001080": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001080,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Nun",
+        "partner_id": 10001080,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001081": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001081,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Chainsaw",
+        "partner_id": 10001081,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001082": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001082,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Silvia",
+        "partner_id": 10001082,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001083": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001083,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Flash",
+        "partner_id": 10001083,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001084": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001084,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Selene",
+        "partner_id": 10001084,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001085": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001085,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Aeris",
+        "partner_id": 10001085,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001086": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001086,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Lisa",
+        "partner_id": 10001086,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001087": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001087,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Phoenix",
+        "partner_id": 10001087,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001088": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001088,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Yuri",
+        "partner_id": 10001088,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001089": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001089,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Samurai",
+        "partner_id": 10001089,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001090": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001090,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Roselle",
+        "partner_id": 10001090,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001091": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001091,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Harley",
+        "partner_id": 10001091,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001092": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001092,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Amelia",
+        "partner_id": 10001092,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001093": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001093,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Sisha",
+        "partner_id": 10001093,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001094": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001094,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Octagirl",
+        "partner_id": 10001094,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001095": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001095,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Wraith",
+        "partner_id": 10001095,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001096": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001096,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Robin",
+        "partner_id": 10001096,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001097": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001097,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Matador",
+        "partner_id": 10001097,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001098": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001098,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Magician",
+        "partner_id": 10001098,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001099": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001099,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Meimi",
+        "partner_id": 10001099,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001100": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001100,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Alice",
+        "partner_id": 10001100,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001101": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001101,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Liah",
+        "partner_id": 10001101,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001102": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001102,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Anna",
+        "partner_id": 10001102,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001103": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001103,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Ennmaya",
+        "partner_id": 10001103,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001104": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001104,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Jade",
+        "partner_id": 10001104,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001105": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001105,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Aegis",
+        "partner_id": 10001105,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001106": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001106,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Jelly",
+        "partner_id": 10001106,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001107": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001107,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Kitty",
+        "partner_id": 10001107,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001108": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001108,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Ada",
+        "partner_id": 10001108,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001109": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001109,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Hexa",
+        "partner_id": 10001109,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001110": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001110,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Sailor",
+        "partner_id": 10001110,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001111": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001111,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Rhea",
+        "partner_id": 10001111,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001112": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001112,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Calista",
+        "partner_id": 10001112,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001113": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001113,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Nobunaga",
+        "partner_id": 10001113,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001114": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001114,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Sasuke",
+        "partner_id": 10001114,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001115": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001115,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Marynari",
+        "partner_id": 10001115,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001116": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001116,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Annabelle",
+        "partner_id": 10001116,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001117": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001117,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Nona",
+        "partner_id": 10001117,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001118": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001118,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Susan",
+        "partner_id": 10001118,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001119": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001119,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Shamoke",
+        "partner_id": 10001119,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001120": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001120,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Stella",
+        "partner_id": 10001120,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001121": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001121,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Diva",
+        "partner_id": 10001121,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001122": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001122,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Linky",
+        "partner_id": 10001122,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001123": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001123,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Athena",
+        "partner_id": 10001123,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001124": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001124,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Fangirl",
+        "partner_id": 10001124,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001125": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001125,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Nikita",
+        "partner_id": 10001125,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001126": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001126,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Caitlin",
+        "partner_id": 10001126,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001127": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001127,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Elloi",
+        "partner_id": 10001127,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001128": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001128,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Exorcist",
+        "partner_id": 10001128,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001129": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001129,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Max",
+        "partner_id": 10001129,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001130": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001130,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Medusa",
+        "partner_id": 10001130,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001131": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001131,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Sakura",
+        "partner_id": 10001131,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001132": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001132,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Dolly",
+        "partner_id": 10001132,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001133": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001133,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Nancy",
+        "partner_id": 10001133,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001134": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001134,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Kaylee",
+        "partner_id": 10001134,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001135": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001135,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Nasha",
+        "partner_id": 10001135,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001136": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001136,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Ruby",
+        "partner_id": 10001136,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001137": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001137,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Ashely",
+        "partner_id": 10001137,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001138": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001138,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Yasuna",
+        "partner_id": 10001138,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001139": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001139,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Cayla",
+        "partner_id": 10001139,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001140": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001140,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Liz",
+        "partner_id": 10001140,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001141": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001141,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Edward",
+        "partner_id": 10001141,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001142": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001142,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Omega",
+        "partner_id": 10001142,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001143": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001143,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Sophia",
+        "partner_id": 10001143,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001144": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001144,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "KongMing",
+        "partner_id": 10001144,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001145": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001145,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Nono",
+        "partner_id": 10001145,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001146": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001146,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Handana",
+        "partner_id": 10001146,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001147": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001147,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Okita",
+        "partner_id": 10001147,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001148": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001148,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Nani",
+        "partner_id": 10001148,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001149": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001149,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Talia",
+        "partner_id": 10001149,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001150": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001150,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Veila",
+        "partner_id": 10001150,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001151": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001151,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Wandy",
+        "partner_id": 10001151,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001152": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001152,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Gabriel",
+        "partner_id": 10001152,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001153": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001153,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Kenshin",
+        "partner_id": 10001153,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001154": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001154,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Vanees ",
+        "partner_id": 10001154,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001155": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001155,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Zoe",
+        "partner_id": 10001155,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001156": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001156,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Toyo",
+        "partner_id": 10001156,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001157": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001157,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Mira",
+        "partner_id": 10001157,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001158": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001158,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Lucifer",
+        "partner_id": 10001158,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001159": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001159,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Huni",
+        "partner_id": 10001159,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001160": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001160,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Katie",
+        "partner_id": 10001160,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001161": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001161,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Tula",
+        "partner_id": 10001161,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001162": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001162,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Giana",
+        "partner_id": 10001162,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001163": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001163,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Nir",
+        "partner_id": 10001163,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001164": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001164,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Lana",
+        "partner_id": 10001164,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001165": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001165,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Boro",
+        "partner_id": 10001165,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001166": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001166,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Reo",
+        "partner_id": 10001166,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001167": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001167,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Raphael",
+        "partner_id": 10001167,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001168": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001168,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Hancer",
+        "partner_id": 10001168,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001169": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001169,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Yonky",
+        "partner_id": 10001169,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001170": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001170,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Faye",
+        "partner_id": 10001170,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001171": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001171,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Masamune",
+        "partner_id": 10001171,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001172": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001172,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Hynel",
+        "partner_id": 10001172,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001173": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001173,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Donna ",
+        "partner_id": 10001173,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001174": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001174,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Yenn",
+        "partner_id": 10001174,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001175": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001175,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Nobuna",
+        "partner_id": 10001175,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001176": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001176,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Ilian",
+        "partner_id": 10001176,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001177": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001177,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Pyra",
+        "partner_id": 10001177,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001178": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001178,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Mythra",
+        "partner_id": 10001178,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001179": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001179,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Poppi",
+        "partner_id": 10001179,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001180": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001180,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "King",
+        "partner_id": 10001180,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001181": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001181,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Nia",
+        "partner_id": 10001181,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001182": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001182,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Ursula",
+        "partner_id": 10001182,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001183": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001183,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Puny",
+        "partner_id": 10001183,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001184": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001184,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Camila",
+        "partner_id": 10001184,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001185": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001185,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Mitsuhide",
+        "partner_id": 10001185,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001186": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001186,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Yukimura",
+        "partner_id": 10001186,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001187": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001187,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Revali",
+        "partner_id": 10001187,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001188": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001188,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Zanny",
+        "partner_id": 10001188,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001189": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001189,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Golian",
+        "partner_id": 10001189,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001190": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001190,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Tokugawa",
+        "partner_id": 10001190,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001191": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001191,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Kong Ke",
+        "partner_id": 10001191,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001192": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001192,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Liklis",
+        "partner_id": 10001192,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001193": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001193,
+        "item_num": 0,
+        "mana": 4000,
+        "name": " Feran",
+        "partner_id": 10001193,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001194": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001194,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Fear",
+        "partner_id": 10001194,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001195": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001195,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Isabella",
+        "partner_id": 10001195,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001196": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001196,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Katy",
+        "partner_id": 10001196,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001197": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001197,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Himiko",
+        "partner_id": 10001197,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001198": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001198,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Claudia",
+        "partner_id": 10001198,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001199": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001199,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Shirley",
+        "partner_id": 10001199,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001200": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001200,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "KM-Moe",
+        "partner_id": 10001200,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001201": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001201,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Lydia",
+        "partner_id": 10001201,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001202": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001202,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Catherine",
+        "partner_id": 10001202,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001203": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001203,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Ophelia",
+        "partner_id": 10001203,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001204": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001204,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Stephanie",
+        "partner_id": 10001204,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001205": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001205,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Gramin",
+        "partner_id": 10001205,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001206": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001206,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Vivian",
+        "partner_id": 10001206,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001207": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001207,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Ryoma",
+        "partner_id": 10001207,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001208": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001208,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Irene",
+        "partner_id": 10001208,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001209": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001209,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Cersei",
+        "partner_id": 10001209,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001210": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001210,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Yolanda",
+        "partner_id": 10001210,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001211": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001211,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Tiffany",
+        "partner_id": 10001211,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001212": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001212,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Barbara",
+        "partner_id": 10001212,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001213": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001213,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Zashiki",
+        "partner_id": 10001213,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001214": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001214,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Titania",
+        "partner_id": 10001214,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001215": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001215,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Zeta",
+        "partner_id": 10001215,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001216": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001216,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Amira",
+        "partner_id": 10001216,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001217": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001217,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Jyaku",
+        "partner_id": 10001217,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001218": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001218,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Cerberus",
+        "partner_id": 10001218,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001219": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001219,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Froslass",
+        "partner_id": 10001219,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001220": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001220,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Sandra",
+        "partner_id": 10001220,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001221": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001221,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Yilia",
+        "partner_id": 10001221,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001222": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001222,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Caroline",
+        "partner_id": 10001222,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001223": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001223,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Lecia",
+        "partner_id": 10001223,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001224": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001224,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "CapsuGirl",
+        "partner_id": 10001224,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001225": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001225,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Reindeer",
+        "partner_id": 10001225,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001226": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001226,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Collins",
+        "partner_id": 10001226,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001227": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001227,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Shiki",
+        "partner_id": 10001227,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001228": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001228,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Karaxes",
+        "partner_id": 10001228,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001229": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001229,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "SugarMom",
+        "partner_id": 10001229,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001230": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001230,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Jeanne",
+        "partner_id": 10001230,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001231": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001231,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Amanda",
+        "partner_id": 10001231,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001232": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001232,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Kratos\u00b7Lily",
+        "partner_id": 10001232,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001233": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001233,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Campanula",
+        "partner_id": 10001233,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001234": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001234,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Kristin",
+        "partner_id": 10001234,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001235": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001235,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Siren",
+        "partner_id": 10001235,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001236": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001236,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Margaret",
+        "partner_id": 10001236,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001237": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001237,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Serpent",
+        "partner_id": 10001237,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001238": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001238,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Angelina",
+        "partner_id": 10001238,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001239": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001239,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Chily",
+        "partner_id": 10001239,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001240": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001240,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Temari",
+        "partner_id": 10001240,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001241": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001241,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Tang",
+        "partner_id": 10001241,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001242": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001242,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "The K.",
+        "partner_id": 10001242,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001243": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001243,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "DJ.Du",
+        "partner_id": 10001243,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001244": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001244,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Durandal",
+        "partner_id": 10001244,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001245": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001245,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Lancelot",
+        "partner_id": 10001245,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001246": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001246,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Lauren",
+        "partner_id": 10001246,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001247": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001247,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Deirdre",
+        "partner_id": 10001247,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001248": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001248,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Alexa",
+        "partner_id": 10001248,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001249": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001249,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "SP Aquaris",
+        "partner_id": 10001249,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001250": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001250,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Tessa",
+        "partner_id": 10001250,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001251": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001251,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Hilda",
+        "partner_id": 10001251,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001252": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001252,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Sami",
+        "partner_id": 10001252,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001253": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001253,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Selina",
+        "partner_id": 10001253,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001254": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001254,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Kagetora",
+        "partner_id": 10001254,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001255": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001255,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "SP Gambler",
+        "partner_id": 10001255,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001256": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001256,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "SP Sonya",
+        "partner_id": 10001256,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001257": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001257,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "SP Lavia",
+        "partner_id": 10001257,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001258": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001258,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Odin",
+        "partner_id": 10001258,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001259": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001259,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "SP Xmas Elf",
+        "partner_id": 10001259,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001260": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001260,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "SP Nobunaga",
+        "partner_id": 10001260,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001261": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001261,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "\u00a0SP\u00a0Lightin",
+        "partner_id": 10001261,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001262": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001262,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Syndra",
+        "partner_id": 10001262,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001263": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001263,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Flora",
+        "partner_id": 10001263,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001264": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001264,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "SP Ennmaya",
+        "partner_id": 10001264,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001265": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001265,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "SP Lily",
+        "partner_id": 10001265,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001266": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001266,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Lilith",
+        "partner_id": 10001266,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001267": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001267,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "SP Hottie",
+        "partner_id": 10001267,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001268": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001268,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "SP CapsuGirl",
+        "partner_id": 10001268,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001269": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001269,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "SP Muppet",
+        "partner_id": 10001269,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001270": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001270,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "SP Librarian",
+        "partner_id": 10001270,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001271": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001271,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Rubearl",
+        "partner_id": 10001271,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001272": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001272,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "SP Pandaria",
+        "partner_id": 10001272,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001273": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001273,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "Finlil",
+        "partner_id": 10001273,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001274": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001274,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "SP Priestess",
+        "partner_id": 10001274,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001275": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001275,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "SP Sapphire",
+        "partner_id": 10001275,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001276": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001276,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "SP Kratos",
+        "partner_id": 10001276,
+        "pet_id": 0,
+        "skill_point": 0,
+        "skin_model": 0,
+        "skin_partner": 0,
+        "sub_type": 0,
+        "type": 3
+      },
+      "40001277": {
+        "compose": [
+          0
+        ],
+        "compose_item": [
+          0
+        ],
+        "compose_mana": 0,
+        "compose_num": [
+          0
+        ],
+        "crystal": 0,
+        "energy": 0,
+        "exp": 0,
+        "id": 40001277,
+        "item_num": 0,
+        "mana": 4000,
+        "name": "SP Geisha",
+        "partner_id": 10001277,
         "pet_id": 0,
         "skill_point": 0,
         "skin_model": 0,

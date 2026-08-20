@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "revision": "41.9",
+  "backend_version": "v0.8.26",
+  "validation_mode": "static_only_no_Flask_HTTP_ADB_emulator_gameplay",
+  "runtime_evidence_sha256": "727b5ee2176cd8e460f5c22ae941905949d8c6cdccfaa8684f88483bb82c32ac",
+  "python_ast_files": 124,
+  "json_files": 37,
+  "changed_data_files_vs_v0.8.25": [
+    "summon_operation_catalog.json",
+    "summon_private_server_policy.json",
+    "summon_result_policy.json"
+  ],
+  "expected_changed_data_files": [
+    "summon_operation_catalog.json",
+    "summon_private_server_policy.json",
+    "summon_result_policy.json"
+  ],
+  "assertions": {
+    "all_python_ast_parse": true,
+    "all_json_parse": true,
+    "pass29_compatibility_unchanged": true,
+    "duplicate_policy_unchanged": true,
+    "magic_policy_unchanged": true,
+    "counter_policy_unchanged": true,
+    "state_policy_unchanged": true,
+    "cost_policy_unchanged": true,
+    "sx_activation": false,
+    "rng_rate_changes": false
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "_meta": {
+    "schema_version": 1,
+    "generated_by": "Pass41.6",
+    "policy_name": "Custom Private Server Magic Policy v1",
+    "authorization": "User explicitly authorized rebuilding unrecoverable EOL server-only Summon mechanics from scratch on 2026-08-19.",
+    "historical_claim": false,
+    "boundary": "Recovered MID70/MID71 request shapes, costs, target allow-list, owned-target gate, source fragment rate table, pool700008 membership/weights, and client mutation channels remain source authority. Multiplicity, response placement and retry behavior below are explicit private-server choices.",
+    "active": true
+  },
+  "operations": {
+    "1": {
+      "crystal_cost": 500,
+      "byproduct_rolls": 1,
+      "selected_fragment_mode": "fixed_5",
+      "selected_fragment_bundles": 1
+    },
+    "10": {
+      "crystal_cost": 5000,
+      "byproduct_rolls": 10,
+      "selected_fragment_mode": "source_weighted_crit_table",
+      "selected_fragment_bundles": 1
+    }
+  },
+  "response_channels": {
+    "result": "Exactly the random byproduct rows from recovered dropbox700008; one row per private-policy byproduct roll.",
+    "stick_items": "Exactly one selected-target fragment bundle. This uses the client's separate extra-award channel and avoids double-crediting through result/reward.",
+    "reward": null,
+    "summon_config_reward_50005182": "Not granted in private v1. summon.lua labels/configures Magic Juice, but source does not prove it should be an additional Backpack award after the purchase action."
+  },
+  "retry_policy": {
+    "mode": "same-target same-pull-count short replay window",
+    "window_ms": 1500,
+    "reason": "Stock MID70 request has no unique operation token. Private v1 favors at-most-once Crystal charging and result mutation for immediate transport retries.",
+    "tradeoff": "A deliberate identical purchase for the same selected target repeated within the window is treated as a retry."
+  },
+  "balance_overrides": {
+    "byproduct_row_weight_overrides": {},
+    "fragment_quantity_rate_overrides": {},
+    "notes": [
+      "Leave empty to use recovered dropbox700008 row weights and recovered magic_drop_rate quantities/rates.",
+      "Future balancing may override a dropbox row_id weight or a fragment quantity rate here without changing transaction or response code.",
+      "Zero is allowed to disable a candidate/rate in a future private balance revision; the planner fails closed if all effective weights become zero."
+    ]
+  }
+}

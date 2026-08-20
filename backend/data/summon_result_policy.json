@@ -1,0 +1,144 @@
+{
+  "_meta": {
+    "schema_version": 1,
+    "generated_by": "Pass42.6",
+    "purpose": "Typed Summon result-row activation policy. Pass42.6 keeps SX six-row wire semantics active through the corrected mixed-class private planner.",
+    "guardrails": [
+      "Recovered Hero/item/to_stone wire kinds remain canonical client contracts.",
+      "Classic RNG probabilities/counters remain Custom Private Server Policy v1.",
+      "Duplicate conversion quantities are global evidence-backed native-star policy: 1/2/3 -> 7/14/30; unsupported native stars fail closed.",
+      "Magic result contains only recovered pool700008 byproducts; selected-target fragments are credited exactly once through stick_items.",
+      "Small100 and ticket/coupon/discount variants remain outside activation; SX selector1/2 are active only through Pass42.6 corrected private policy.",
+      "MID50 (type=1,index=1) is stateful: tutorial pull #1 stays deterministic; later eligible free pulls use small_free_post_tutorial.",
+      "Post-tutorial Small free pulls do not repeat the tutorial 50001002 x10 side reward."
+    ]
+  },
+  "semantic_policies": [
+    {
+      "semantic": "tutorial_small_free_first",
+      "activation_status": "tutorial_deterministic_active",
+      "allowed_row_kinds": [
+        "hero"
+      ],
+      "expected_rows": 1
+    },
+    {
+      "semantic": "small_free_post_tutorial",
+      "activation_status": "private_policy_active",
+      "allowed_row_kinds": [
+        "hero",
+        "item",
+        "to_stone"
+      ],
+      "expected_rows": 1,
+      "policy_provenance": "Recovered free-count/timer protocol + Custom Private Server Small result policy v1"
+    },
+    {
+      "semantic": "tutorial_medium_free_first",
+      "activation_status": "tutorial_deterministic_active",
+      "allowed_row_kinds": [
+        "hero"
+      ],
+      "expected_rows": 1
+    },
+    {
+      "semantic": "small_paid_1",
+      "activation_status": "private_policy_active",
+      "allowed_row_kinds": [
+        "hero",
+        "item",
+        "to_stone"
+      ],
+      "expected_rows": 1,
+      "policy_provenance": "Custom Private Server Policy v1"
+    },
+    {
+      "semantic": "small_paid_10",
+      "activation_status": "private_policy_active",
+      "allowed_row_kinds": [
+        "hero",
+        "item",
+        "to_stone"
+      ],
+      "expected_rows": 10,
+      "policy_provenance": "Custom Private Server Policy v1"
+    },
+    {
+      "semantic": "medium_paid_1",
+      "activation_status": "private_policy_active",
+      "allowed_row_kinds": [
+        "hero",
+        "item",
+        "to_stone"
+      ],
+      "expected_rows": 1,
+      "policy_provenance": "Custom Private Server Policy v1"
+    },
+    {
+      "semantic": "medium_paid_10",
+      "activation_status": "private_policy_active",
+      "allowed_row_kinds": [
+        "hero",
+        "item",
+        "to_stone"
+      ],
+      "expected_rows": 10,
+      "policy_provenance": "Custom Private Server Policy v1"
+    },
+    {
+      "semantic": "magic_paid_1",
+      "activation_status": "private_policy_active",
+      "allowed_row_kinds": [
+        "item"
+      ],
+      "expected_rows": 1,
+      "policy_provenance": "Custom Private Server Magic Policy v1"
+    },
+    {
+      "semantic": "magic_paid_10",
+      "activation_status": "private_policy_active",
+      "allowed_row_kinds": [
+        "item"
+      ],
+      "expected_rows": 10,
+      "policy_provenance": "Custom Private Server Magic Policy v1"
+    },
+    {
+      "semantic": "sx_soul_box_selector_1",
+      "activation_status": "private_policy_active",
+      "allowed_row_kinds": [
+        "hero",
+        "item",
+        "to_stone"
+      ],
+      "expected_rows": 6,
+      "policy_provenance": "Pass42.6 corrected five static item slots + mixed current-SX/fragment/ordinary-full dynamic class planner; class probabilities are Custom Private Server Policy v2."
+    },
+    {
+      "semantic": "sx_soul_box_selector_2",
+      "activation_status": "private_policy_active",
+      "allowed_row_kinds": [
+        "hero",
+        "item",
+        "to_stone"
+      ],
+      "expected_rows": 6,
+      "policy_provenance": "Pass42.6 corrected five static item slots + mixed current-SX/fragment/ordinary-full dynamic class planner; class probabilities are Custom Private Server Policy v2."
+    }
+  ],
+  "duplicate_conversion": {
+    "activation_status": "recovered_evidence_active",
+    "wire_kind": "to_stone",
+    "policy_file": "summon_duplicate_conversion_policy.json",
+    "ownership_rule": "Converts when Hero table_id is already owned before that result row; same-multipull row ordering remains the current private execution rule.",
+    "fragment_id_source": "partner.stone_id",
+    "star_basis": "partner.ini_star/native initial star, not evolved current star",
+    "quantity_by_initial_star": {
+      "1": 7,
+      "2": 14,
+      "3": 30
+    },
+    "unsupported_initial_star_behavior": "fail_closed",
+    "historical_status": "User-observed historical gameplay video recovered 1-star=7, 2-star=14, 3-star=30 duplicate fragments. No 4/5 native-star quantity is asserted."
+  }
+}

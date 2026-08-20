@@ -15,7 +15,7 @@ import secrets
 import time
 from dataclasses import asdict
 from pathlib import Path
-from typing import Any
+from typing import Any, TYPE_CHECKING
 
 from .account import AccountIdentity
 from .defaults import default_account, default_player
@@ -24,6 +24,9 @@ from .player_state import PlayerState
 from .profiles import apply_profile, make_fresh_player
 from .skill_point_policy import SkillPointPolicy
 from .maintenance_services import PlayerMaintenanceServices
+
+if TYPE_CHECKING:
+    from .summon_featured_rotation import SummonFeaturedRotationPolicy
 
 
 SANDBOX_UID = "13371337"
@@ -86,9 +89,16 @@ def _verify_password(record: dict[str, Any], password: str) -> bool:
 class MultiUserDatabase:
     SCHEMA_VERSION = 1
 
-    def __init__(self, root: Path, data_dir: Path) -> None:
+    def __init__(
+        self,
+        root: Path,
+        data_dir: Path,
+        *,
+        featured_rotation: "SummonFeaturedRotationPolicy | None" = None,
+    ) -> None:
         self.root = Path(root)
         self.data_dir = Path(data_dir)
+        self.featured_rotation = featured_rotation
         self.accounts_dir = self.root / "accounts"
         self.sessions_dir = self.root / "sessions"
         self.players_dir = self.root / "players"
@@ -374,7 +384,9 @@ class MultiUserDatabase:
 
     def normalize_player(self, player: PlayerState, *, persist: bool) -> bool:
         changed = False
-        maintenance = PlayerMaintenanceServices(player, self.data_dir)
+        maintenance = PlayerMaintenanceServices(
+            player, self.data_dir, featured_rotation=self.featured_rotation
+        )
         # Runtime v0.8.2 exposed a latent client crash in the unused Arena
         # invitation path whenever any economy_ event is processed. Migrate
         # credential players created by v0.8.0-v0.8.2 to the deferred-PvP

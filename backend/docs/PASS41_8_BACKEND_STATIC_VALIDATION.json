@@ -1,0 +1,13 @@
+{
+  "pass": "41.8",
+  "backend": "v0.8.25",
+  "validation_mode": "static_only_no_flask_http_adb_emulator",
+  "python_ast_files": 124,
+  "backend_json_files_total": 36,
+  "backend_data_json_files": 32,
+  "startup_regression": "SummonResultPolicyRegistry now accepts recovered_evidence_active with explicit policy_file and quantity_by_initial_star guardrails",
+  "data_tree_changed_from_v0.8.24": false,
+  "gameplay_policy_changed": false,
+  "runtime_executed_by_agent": false,
+  "result": "clean"
+}

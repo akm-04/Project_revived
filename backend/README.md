@@ -1,11 +1,48 @@
-# GXB backend v0.8.14 — Pass 35.3 MID90 Duplicate Guard
+# GXB backend v0.8.33 — Pass42.12 gacha control + classic balance overlay
 
-Pass35.3 is a narrow runtime hotfix on top of Pass35.2. The Pass35.2 explicit `economy_.skill_point` synchronization is runtime-confirmed by the first successful MID90 use. This revision does **not** change Skill Point cap/timer semantics or the amount granted by item `50001538`.
+Pass42.12 builds on v0.8.32/Pass42.11 and the runtime-confirmed Pass42.10 summon/progression baseline. It adds a separate validated operator utility for Small / Medium / SX / Gachapon configuration and introduces an optional classic Item/Scroll/Girl + native-star balance layer.
 
-The clean Pass35.2 device trace proved Campaign100004 granted exactly one `50001538`, but the client submitted two MID90 requests back-to-back. The first request consumed the canonical item and projected Skill Points 0 -> 10. The second request found no canonical item; v0.8.13 returned an empty dict which the dispatcher wrapped as `error_code=0`, so the client treated the duplicate as success and locally removed another item.
+## Pass42.12 changes
 
-Pass35.3 changes only that validation boundary: invalid/insufficient MID90 requests return the source-defined generic `xyd.error.ERROR = 1`. The client removes Backpack items only on `xyd.error.OK`, so duplicate/insufficient requests no longer receive fabricated success.
+- Adds root `gacha_control.py` (stdlib only, does not start/import Flask):
+  - exact four-machine menu: Small, Medium, SX, Gachapon;
+  - validated `startup_debug` / `calendar_deterministic`, debug-seed and timezone controls;
+  - name-driven SX Current/Daily and Medium New-Add selection with cohort validation;
+  - rate editors for machine-specific supported private balance surfaces;
+  - timestamped backups + atomic JSON writes;
+  - `--check` and `--summary` modes.
+- Shipped development default changes to `selection_mode: startup_debug`, `debug_seed: 0`. Calendar mode remains fully supported and preserves the Pass42.10 deterministic snapshot.
+- Adds `data/classic_vending_balance_policy.json`:
+  - optional explicit Small/Medium Item / Girl Scroll / Full Girl class split;
+  - optional native 1★ / 2★ / 3★ full-Girl split;
+  - explicit Girl-scroll classification through effective `partner.stone_id`;
+  - flat/equal scroll candidate split when explicit Scroll category tuning is enabled;
+  - source/extension weighting preserved within a selected native-star Girl bucket.
+- Keeps classic pre-Pass42.12 math exactly active when the new override is disabled.
+- Keeps fixed guarantee semantics out of the tool: Small x10 item-class, Medium x10 full-Girl, SX selected-hotspot at 25 purchases.
+- Medium New Add remains a separate featured-only56 overlay; the tool can change its chance and target but keeps its 20 eligible-slot pity locked.
+- SX and Magic/Gachapon continue using their existing modular override seams rather than being rewritten into a fake universal gacha algorithm.
 
-Stacking remains supported. `BuyTiLiWindow.lua` can batch multiple items into one MID90 request through `item_num`, and the backend adds `10 * item_num` without clamping to the natural regeneration cap. The natural VIP cap remains a regeneration cap, not an absolute stored-point cap; 20/10, 30/10, etc. remain valid when the canonical Backpack actually owns the corresponding items.
+## Operator use
 
-All Pass35.1 update/operator hardening, Pass33.1 tutorial authority, Campaign/Mission/Summon/MID39 behavior, ProtocolRegistry and the Pass29 compatibility boundary remain unchanged.
+```bash
+python3 gacha_control.py
+python3 gacha_control.py --check
+python3 gacha_control.py --summary
+```
+
+See `docs/GACHA_CONTROL_TOOL.md` and `docs/SUMMON_FEATURED_OPERATOR_README.md`.
+
+## Important maintenance contract
+
+If a later pass changes critical gacha/drop-class topology, private policy schemas/filenames, cohort definitions, fixed guarantees, or candidate classification, that same pass must audit and update `gacha_control.py` and its validation. Do not leave the operator tool stale after a core gacha change.
+
+## Validation
+
+```bash
+PYTHONPATH=. python3 tools/validate_pass42_12.py
+```
+
+Pass42.12 validation is static/repository/tool validation. The attached user startup trace runtime-confirms the Pass42.11 `startup_debug` boot/fresh-seed/fixed-seed behavior, but v0.8.33 rate edits still require a future client smoke if runtime promotion is desired.
+
+Pass43–45 remain reserved pure cross-mode RNG/drop research/planning.

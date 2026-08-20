@@ -1,0 +1,90 @@
+{
+  "_meta": {
+    "schema_version": 1,
+    "generated_by": "Pass42.6",
+    "source_resolution": "effective_merged",
+    "purpose": "Authoritative server-owned MID56/MID50 summon-state projection contract. Client timer math is presentation only; unknown reset calendars remain unknown.",
+    "guardrails": [
+      "Do not derive summon authorization from guide_id.",
+      "Do not invent Small free-count reset/replenishment calendar.",
+      "Do not invent SX hotspot rotation or guarantee counter fields.",
+      "Only fields explicitly listed in mid56_fields may be projected by this contract."
+    ]
+  },
+  "mid56_fields": [
+    {
+      "name": "mana_free_time",
+      "kind": "nonnegative_int",
+      "required": true
+    },
+    {
+      "name": "crystal_free_time",
+      "kind": "nonnegative_int",
+      "required": true
+    },
+    {
+      "name": "second_ids",
+      "kind": "positive_int_list",
+      "required": true
+    },
+    {
+      "name": "main_ids",
+      "kind": "positive_int_list",
+      "required": true
+    },
+    {
+      "name": "mana_id",
+      "kind": "positive_int",
+      "required": true
+    },
+    {
+      "name": "pet_id",
+      "kind": "positive_int",
+      "required": true
+    },
+    {
+      "name": "partner_id",
+      "kind": "positive_int",
+      "required": true
+    },
+    {
+      "name": "mana_free_num",
+      "kind": "nonnegative_int",
+      "required": true
+    },
+    {
+      "name": "directional_show_id",
+      "kind": "positive_int",
+      "required": false
+    }
+  ],
+  "families": {
+    "small": {
+      "free_time_field": "mana_free_time",
+      "free_count_field": "mana_free_num",
+      "period_seconds": 600,
+      "configured_free_count": 5,
+      "server_reset_rule": "unknown"
+    },
+    "medium": {
+      "free_time_field": "crystal_free_time",
+      "period_seconds": 165600,
+      "configured_free_count": 1,
+      "server_reset_rule": "unknown"
+    },
+    "sx": {
+      "weekly_hotspot_fields": [
+        "main_ids"
+      ],
+      "daily_hotspot_fields": [
+        "second_ids"
+      ],
+      "server_rotation_rule": "unknown_private_defaults_must_be_current_is_sx"
+    },
+    "magic": {
+      "display_target_field": "directional_show_id",
+      "protocol_plane": "MID70/MID71",
+      "server_rotation_rule": "not_applicable_to_mid50"
+    }
+  }
+}

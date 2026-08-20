@@ -1,0 +1,26 @@
+{
+  "_meta": {
+    "schema_version": 1,
+    "generated_by": "Pass42.9",
+    "policy_name": "Custom Private Server Medium Legacy Policy v1",
+    "authorization": "User authorized deterministic featured rotation and permanent acquisition for otherwise-unobtainable Girls.",
+    "boundary": "This is hobby-server balancing policy, not historical official GXB server math.",
+    "active_semantics": ["medium_paid_1", "medium_paid_10"]
+  },
+  "featured_daily_overlay": {
+    "eligible_cohort": "medium_legacy_featured_only (56 Girls)",
+    "chance_per_10000": 500,
+    "pity_eligible_slots": 20,
+    "counter_key": "medium_legacy_featured_pity_count",
+    "target_key": "medium_legacy_featured_pity_target_id",
+    "scope": "ordinary paid Medium result slots only; recovered milestone/special slots are never replaced"
+  },
+  "ordinary_hero_extension": {
+    "eligible_cohort": "medium_legacy_ordinary_extension (58 Girls with Soul-Casket fragment evidence)",
+    "enabled": true,
+    "source_hero_pool_id": 200004,
+    "default_candidate_weight": 118,
+    "hero_weight_overrides": {},
+    "note": "118 matches the common recovered row weight in pool200004; merging 58 rows yields approximately equal per-candidate access without changing Medium's Hero-vs-item class chance."
+  }
+}

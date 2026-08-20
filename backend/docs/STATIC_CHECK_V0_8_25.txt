@@ -1,0 +1,7 @@
+Pass41.8 / v0.8.25 static validation
+Python AST files: 124
+Backend JSON files total: 36
+Backend data JSON files: 32
+Backend data tree vs v0.8.24: byte-identical
+Flask/HTTP/ADB/emulator/gameplay: not executed by agent
+Result: clean

@@ -442,6 +442,17 @@ def main() -> int:
 
     if args.scope == "current-implemented":
         selected_item_ids = _current_reward_item_ids(args.metadata_dir)
+        # MID59 STONE_SUMMON_HERO is already an implemented normal-Hero
+        # acquisition surface.  Its client request carries each Girl's exact
+        # source ``stone_id`` and the handler validates the two-way
+        # partner<->item relationship.  Keep every normal-partner stone row in
+        # the typed Item namespace so valid source Girls do not fail merely
+        # because the older Pass32.6 reward-only subset predated MID59.
+        selected_item_ids.update(
+            _int(row.get("stone_id"), 0)
+            for row in partner_rows.values()
+            if _int(row.get("stone_id"), 0) > 0
+        )
         overlap = selected_item_ids & additive_item_ids
         if overlap and resolved["item"].layer == "apk_baseline":
             raise ValueError(
@@ -521,7 +532,7 @@ def main() -> int:
                 "numeric IDs are table/context scoped; no global type_of_id exists",
                 "asset paths and decimal prefixes are diagnostics only",
                 "skill_price is a typed config namespace added for source-backed MID39 pricing",
-                "Pass32.6 current scope catalogs only content consumed by implemented domains; deferred namespaces remain empty",
+                "current scope catalogs only content consumed by implemented domains; normal partner stone items are included for implemented MID59/MID52 progression",
             ],
         },
         "namespaces": namespaces,
