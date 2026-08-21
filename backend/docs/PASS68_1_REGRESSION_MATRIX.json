@@ -1,0 +1,74 @@
+{
+  "schema_version": 1,
+  "pass": "68.1",
+  "status": "PASS_STATIC_HOTFIX_RUNTIME_RETEST_PENDING",
+  "checks": [
+    {
+      "name": "compileall",
+      "result": "PASS",
+      "note": "gxb_backend + tools"
+    },
+    {
+      "name": "pass68_foundation_selftest",
+      "result": "PASS",
+      "note": "merge preservation, state_version/receipt, rollback, 47-key registry"
+    },
+    {
+      "name": "pass68_1_medium_free_selftest",
+      "result": "PASS",
+      "note": "ready pull + state_version commit + replay + cooldown fail-closed"
+    },
+    {
+      "name": "pass42_14_validator",
+      "result": "PASS",
+      "note": "Small x100 and classic gacha regression surface"
+    },
+    {
+      "name": "pass42_12_validator",
+      "result": "PASS",
+      "note": "gacha control/policy validation"
+    },
+    {
+      "name": "validate_pass42_11",
+      "result": "BASELINE_FAIL_UNCHANGED",
+      "note": "startup_debug rotation snapshot stale; also fails on canonical Pass68.0"
+    },
+    {
+      "name": "selftest_multiuser",
+      "result": "BASELINE_FAIL_UNCHANGED",
+      "note": "legacy expectation stale; also fails on canonical Pass68.0"
+    },
+    {
+      "name": "selftest_campaign_economy",
+      "result": "BASELINE_FAIL_UNCHANGED",
+      "note": "legacy tutorial summon expectation stale; also fails on canonical Pass68.0"
+    },
+    {
+      "name": "selftest_tutorial_summon",
+      "result": "BASELINE_FAIL_UNCHANGED",
+      "note": "legacy tutorial summon expectation stale; also fails on canonical Pass68.0"
+    },
+    {
+      "name": "src64_phase2_assertions",
+      "result": "PASS",
+      "note": "48/48"
+    },
+    {
+      "name": "src64_medium_free_assertions",
+      "result": "PASS",
+      "note": "9/9"
+    },
+    {
+      "name": "resource_registry_exact",
+      "result": "PASS",
+      "note": "47/47 exact Pass65 descriptors"
+    },
+    {
+      "name": "economy_backbone_core_files_unchanged",
+      "result": "PASS",
+      "note": "PlayerState/UoW/ResourceRegistry/projection/transport byte-identical to Pass68.0"
+    }
+  ],
+  "new_regressions": 0,
+  "runtime_acceptance": "PENDING_USER_PASS68_1_DEBUG_ZIP"
+}

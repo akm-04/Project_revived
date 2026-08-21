@@ -47,10 +47,7 @@ def _normalize_login(value: Any) -> str:
 
 
 def _atomic_write_json(path: Path, payload: Any) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    tmp = path.with_suffix(path.suffix + ".tmp")
-    tmp.write_text(json.dumps(payload, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
-    os.replace(tmp, path)
+    JsonPlayerDatabase.atomic_write_json(path, payload)
 
 
 def _load_json(path: Path, default: Any) -> Any:
@@ -356,8 +353,8 @@ class MultiUserDatabase:
         path = self.player_path(str(player.player_id))
         payload = {
             "_meta": {
-                "schema": 1,
-                "format": "GXB v0.8.0 canonical per-player state",
+                "schema": 2,
+                "format": "GXB v0.9.0 canonical per-player state",
                 "player_id": str(player.player_id),
                 "account_uid": str(player.account_uid),
                 "region": int(player.region),
@@ -369,6 +366,9 @@ class MultiUserDatabase:
             },
             "player": JsonPlayerDatabase.serialize_player(player),
         }
+        existing = _load_json(path, None)
+        if isinstance(existing, dict):
+            payload = JsonPlayerDatabase.merge_preserving_extensions(existing, payload)
         _atomic_write_json(path, payload)
 
     def load_player(self, player_id: str) -> PlayerState | None:

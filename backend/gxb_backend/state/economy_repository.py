@@ -20,6 +20,7 @@ from typing import Any
 
 from .function_state_repository import FunctionStateRepository
 from .player_state import PlayerState
+from .resource_registry import ResourceRegistry
 
 
 class EconomyMutationError(ValueError):
@@ -27,6 +28,11 @@ class EconomyMutationError(ValueError):
 
 
 class EconomyRepository:
+    """Legacy five-field economy compatibility facade over ResourceRegistry.
+
+    Pass68 intentionally preserves the existing public methods. Generalized
+    30-field EconomyLedger mutation is a later migration wave.
+    """
     PHASE1_FIELDS = ("mana", "crystal", "energy", "exp", "lev")
 
     def __init__(
@@ -36,11 +42,16 @@ class EconomyRepository:
         save_callback: Callable[[], None] | None = None,
         *,
         function_unlocks: FunctionStateRepository | None = None,
+        resource_registry: ResourceRegistry | None = None,
     ) -> None:
         self.player = player
         self.data_dir = Path(data_dir)
         self._save_callback = save_callback
         self.function_unlocks = function_unlocks
+        self.resource_registry = resource_registry
+        if self.resource_registry is not None:
+            for field in self.PHASE1_FIELDS:
+                self.resource_registry.assert_legacy_economy_field(field)
         self.meta = self._load_meta()
         self.player_levels = self.meta.get("player_levels") or {}
 

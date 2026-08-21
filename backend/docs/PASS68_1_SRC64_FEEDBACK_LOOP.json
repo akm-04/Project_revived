@@ -1,0 +1,127 @@
+{
+  "schema_version": 1,
+  "pass": "68.1",
+  "status": "PASS",
+  "effective_source": {
+    "files": 4370,
+    "downloaded_winners": 62,
+    "app_winners": 4308,
+    "expected": 4370,
+    "missing": 0,
+    "extra": 0,
+    "hash_mismatch": 0,
+    "exact_pass57_match": true
+  },
+  "phase2_direct_assertions": {
+    "passed": 48,
+    "total": 48,
+    "failures": []
+  },
+  "medium_free_specific_assertions": {
+    "passed": 9,
+    "total": 9,
+    "rows": [
+      {
+        "id": "medium_free_enum_type3",
+        "source": "app/common/enums.lua",
+        "needle": "xyd.SummonType.CrystalFree = 3",
+        "status": "PASS"
+      },
+      {
+        "id": "medium_one_enum_index1",
+        "source": "app/common/enums.lua",
+        "needle": "xyd.SummonType.CrystalOne = 1",
+        "status": "PASS"
+      },
+      {
+        "id": "medium_free_request_type",
+        "source": "app/windows/SummonWindow.lua",
+        "needle": "var_108_0.summon_type = xyd.SummonType.CrystalFree",
+        "status": "PASS"
+      },
+      {
+        "id": "medium_free_request_index",
+        "source": "app/windows/SummonWindow.lua",
+        "needle": "var_108_0.summon_index = xyd.SummonType.CrystalOne",
+        "status": "PASS"
+      },
+      {
+        "id": "rolling_free_model",
+        "source": "app/model/SelfPlayer.lua",
+        "needle": "xyd.tables.misc.freeCrystalSummonDuration",
+        "status": "PASS"
+      },
+      {
+        "id": "cooldown_value",
+        "source": "data/tables/misc.lua",
+        "needle": "\"165600\"",
+        "status": "PASS"
+      },
+      {
+        "id": "summon_row_special_pools",
+        "source": "data/tables/summon.lua",
+        "needle": "\"200006|200014|200004|200004|200004\"",
+        "status": "PASS"
+      },
+      {
+        "id": "pandaria_pool",
+        "source": "data/tables/dropbox.lua",
+        "needle": "\"200006001\"",
+        "status": "PASS"
+      },
+      {
+        "id": "post_tutorial_free_pool",
+        "source": "data/tables/dropbox.lua",
+        "needle": "\"200014001\"",
+        "status": "PASS"
+      }
+    ]
+  },
+  "resource_registry": {
+    "descriptor_count": 47,
+    "exact_pass65_match": true
+  },
+  "economy_backbone_files": [
+    {
+      "path": "gxb_backend/transport/routes_engine.py",
+      "unchanged_from_pass68_0": true,
+      "sha256": "7aef189dd41df8ea8c49fdd3c4b8e7d2683243a90f7a76dfa0a9933ad079b8ac"
+    },
+    {
+      "path": "gxb_backend/transport/routes_sdk.py",
+      "unchanged_from_pass68_0": true,
+      "sha256": "e939d824594cc08f5bf03e2de673a216cf3b933217435314697f1460d6712856"
+    },
+    {
+      "path": "gxb_backend/dispatch/engine_dispatcher.py",
+      "unchanged_from_pass68_0": true,
+      "sha256": "ddca6e4a063af2a77711ff4620bb3d64c30ea22174cbb3f36e5c378f83d9fe2e"
+    },
+    {
+      "path": "gxb_backend/state/response_projector.py",
+      "unchanged_from_pass68_0": true,
+      "sha256": "6ee6ab071e5c8b825d57e30cbe08f48e51f03a10a1ed924b1ed88af98889b4bb"
+    },
+    {
+      "path": "gxb_backend/state/global_response_semantics.py",
+      "unchanged_from_pass68_0": true,
+      "sha256": "1257bec195feb6cab04b57c7649d1404e96c82da530cc95f20ce0d6d203bd224"
+    },
+    {
+      "path": "gxb_backend/state/player_state.py",
+      "unchanged_from_pass68_0": true,
+      "sha256": "e7806bbc0a96222a2fc4755d1c6a5ed3e0ad3e093059a9b838ad023343b5c589"
+    },
+    {
+      "path": "gxb_backend/state/unit_of_work.py",
+      "unchanged_from_pass68_0": true,
+      "sha256": "f7268d78910e142864df64defce7b7a1cc56a1698a4eb428ac1aa1a08b3319f1"
+    },
+    {
+      "path": "gxb_backend/state/resource_registry.py",
+      "unchanged_from_pass68_0": true,
+      "sha256": "9243dfa57d2edd256941369b3b18e171c6324bcbada1eb34d61c91dcc6c12171"
+    }
+  ],
+  "conclusion": "Pass68.1 fixes the inherited post-tutorial Medium free route while leaving Pass68 economy-backbone and client-facing transport/projection contracts unchanged."
+}

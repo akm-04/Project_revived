@@ -1,0 +1,134 @@
+{
+  "schema_version": 1,
+  "pass": "68.1",
+  "base": "v0.9.0-pass68.0",
+  "status": "NARROW_RUNTIME_HOTFIX",
+  "changed_file_count": 20,
+  "files": [
+    {
+      "path": "README.md",
+      "status": "MODIFIED",
+      "sha256": "9cdb1dc8606761dc3a31711c27870c39d919fd2142bd08d51a62a880b3aa19a4",
+      "bytes": 5413
+    },
+    {
+      "path": "UPDATE_README.md",
+      "status": "MODIFIED",
+      "sha256": "af5111a6aeaaff659997c689cb33d47dc9100afe04ef1f7a2ad42863d556423c",
+      "bytes": 1142
+    },
+    {
+      "path": "VERSION.json",
+      "status": "MODIFIED",
+      "sha256": "cb406a40d37aaaa1b1415a05974f69cd9780e396338cfd67ef81a5ec40fa1b66",
+      "bytes": 262
+    },
+    {
+      "path": "data/summon_cost_policy.json",
+      "status": "MODIFIED",
+      "sha256": "87f69a1d3a7d2d9020d06429b7c932d27f86a776150938d3c5b1beeb1f1cf784",
+      "bytes": 5785
+    },
+    {
+      "path": "data/summon_counter_policy.json",
+      "status": "MODIFIED",
+      "sha256": "246ffe49c39921c2f4290dd52c0fe176140a5d3653a18b1dbc4a066693b6039d",
+      "bytes": 3970
+    },
+    {
+      "path": "data/summon_operation_catalog.json",
+      "status": "MODIFIED",
+      "sha256": "fa67a40e902ba7667e1f20340defacad40b1ac09b6e3c55fabe586147f838e7a",
+      "bytes": 16903
+    },
+    {
+      "path": "data/summon_pool_catalog.json",
+      "status": "MODIFIED",
+      "sha256": "31702401c8be6dfc3029df8c95a4462850692ea82c12a864f7e6531109e4d718",
+      "bytes": 142623
+    },
+    {
+      "path": "data/summon_private_server_policy.json",
+      "status": "MODIFIED",
+      "sha256": "4e419ca4bddb3255c8e5f4aba5537e3d7315f6d6b8574da16ebe0764fa58bed2",
+      "bytes": 5838
+    },
+    {
+      "path": "data/summon_result_policy.json",
+      "status": "MODIFIED",
+      "sha256": "f642bfa52c52196c45d5b99902a15a6785e2d332adc5e773eff75fca90323824",
+      "bytes": 6230
+    },
+    {
+      "path": "docs/PASS68_1_CLIENT_RETEST_PLAN.md",
+      "status": "ADDED",
+      "sha256": "b5bd30eec3f06c47057510beb87207507f6c8a0eae3ab0a65ffa1651cd5ee744",
+      "bytes": 2609
+    },
+    {
+      "path": "docs/PASS68_1_MEDIUM_FREE_SELFTEST.json",
+      "status": "ADDED",
+      "sha256": "57f13cc8113a9a967687ebe8d3b1a631a5db2a72c175773062df3ebc62ee2b05",
+      "bytes": 337
+    },
+    {
+      "path": "docs/PASS68_1_REGRESSION_MATRIX.json",
+      "status": "ADDED",
+      "sha256": "d02a181f1edeb658f9121dbb77055a0af57a74d01f9a65920f7304fdf590abb5",
+      "bytes": 2138
+    },
+    {
+      "path": "docs/PASS68_1_RUNTIME_ACCEPTANCE_AND_MEDIUM_FREE_HOTFIX.md",
+      "status": "ADDED",
+      "sha256": "31810a7791404c551a974df7414f42e429c068a905d9b585f10d1864bd878b8b",
+      "bytes": 2122
+    },
+    {
+      "path": "docs/PASS68_1_RUNTIME_DEBUG_FINDINGS.json",
+      "status": "ADDED",
+      "sha256": "d3a8d52afbf7be95783e873b09b8dcae7468e89c6af392c4f3191208ac2d55fc",
+      "bytes": 1434
+    },
+    {
+      "path": "docs/PASS68_1_SRC64_FEEDBACK_LOOP.json",
+      "status": "ADDED",
+      "sha256": "664e6e88625f90963450abf3bfe6754cd0f491407d82e5928fde74470cb167be",
+      "bytes": 3896
+    },
+    {
+      "path": "docs/memory.md",
+      "status": "MODIFIED",
+      "sha256": "060cb4423bb1a1b75b2c484db53d06f86c59e403d28cefdcdf186748f6cee2a1",
+      "bytes": 1563
+    },
+    {
+      "path": "gxb_backend/run.py",
+      "status": "MODIFIED",
+      "sha256": "da17c64008e730bf696638b5cee96fe9462756220e06df1a50f5bd6c8bb059cd",
+      "bytes": 3009
+    },
+    {
+      "path": "gxb_backend/state/summon_repository.py",
+      "status": "MODIFIED",
+      "sha256": "520a3d9eac98ce01f95321ab07bbd4e692f63e5256699af46694f5dd6c3b08fc",
+      "bytes": 86537
+    },
+    {
+      "path": "memory.md",
+      "status": "MODIFIED",
+      "sha256": "060cb4423bb1a1b75b2c484db53d06f86c59e403d28cefdcdf186748f6cee2a1",
+      "bytes": 1563
+    },
+    {
+      "path": "tools/selftest_pass68_1_medium_free.py",
+      "status": "ADDED",
+      "sha256": "82259d7312eb3060d061bd675571bdf7b1f34863ff5f0bc45a67bac8bd7cf64c",
+      "bytes": 4889
+    }
+  ],
+  "economy_backbone_core_changed": false,
+  "manifest_excludes": [
+    "docs/PASS68_1_IMPLEMENTATION_FILE_MANIFEST.json",
+    "__pycache__/*.pyc"
+  ]
+}

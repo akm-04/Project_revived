@@ -27,6 +27,7 @@ from .inventory_repository import InventoryRepository
 from .mission_repository import MissionRepository
 from .player_state import PlayerState
 from .reward_transaction_service import RewardTransactionService
+from .resource_registry import ResourceRegistry
 from .summon_operation_registry import SummonOperationRegistry
 from .summon_cost_plan import SummonCostPlanRegistry
 from .summon_counter_policy import SummonCounterPolicyRegistry, PrivateServerSummonCounterEngine
@@ -63,13 +64,15 @@ class RequestServices:
         self.data_dir = Path(data_dir)
         self.catalog = catalog
         self.uow = UnitOfWork(player, commit_callback)
+        self.resource_registry = ResourceRegistry.load(self.data_dir / "resource_registry.json")
         self.response_semantics = GlobalResponseSemantics(player, self.uow)
         save = self.uow.request_save
 
         self.function_state = FunctionStateRepository(player, self.catalog, save, self.uow.stage_semantic)
         self.tutorial = TutorialMilestoneRepository(player, self.function_state, save)
         self.economy = EconomyRepository(
-            player, self.data_dir, save, function_unlocks=self.function_state
+            player, self.data_dir, save, function_unlocks=self.function_state,
+            resource_registry=self.resource_registry,
         )
         self.inventory = InventoryRepository(player, save)
         self.heroes = HeroRepository(

@@ -1,7 +1,7 @@
 {
   "_meta": {
     "schema_version": 1,
-    "generated_by": "Pass42.14",
+    "generated_by": "Pass68.1 runtime hotfix over Pass42.14 result policy",
     "purpose": "Typed Summon result-row activation policy. Pass42.14 adds source/runtime-confirmed Small x100 transport while preserving existing private classic RNG and client wire kinds.",
     "guardrails": [
       "Recovered Hero/item/to_stone wire kinds remain canonical client contracts.",
@@ -10,7 +10,8 @@
       "Magic result contains only recovered pool700008 byproducts; selected-target fragments are credited exactly once through stick_items.",
       "Ticket/coupon/discount variants remain outside activation; Small x100 is active from Pass42.14 and returns 100 standard classic result rows; SX selector1/2 remain active through the corrected private policy.",
       "MID50 (type=1,index=1) is stateful: tutorial pull #1 stays deterministic; later eligible free pulls use small_free_post_tutorial.",
-      "Post-tutorial Small free pulls do not repeat the tutorial 50001002 x10 side reward."
+      "Post-tutorial Small free pulls do not repeat the tutorial 50001002 x10 side reward.",
+      "MID50 (type=3,index=1) is stateful: tutorial Pandaria remains deterministic; later cooldown-ready pulls use medium_free_post_tutorial under the source row3 topology + private RNG/counter policy."
     ]
   },
   "semantic_policies": [
@@ -40,6 +41,17 @@
         "hero"
       ],
       "expected_rows": 1
+    },
+    {
+      "semantic": "medium_free_post_tutorial",
+      "activation_status": "private_policy_active",
+      "allowed_row_kinds": [
+        "hero",
+        "item",
+        "to_stone"
+      ],
+      "expected_rows": 1,
+      "policy_provenance": "Recovered 46h CrystalFree timer + summon.lua row3 pools/milestones; counter persistence and ordinary RNG are explicit Custom Private Server Policy."
     },
     {
       "semantic": "small_paid_1",

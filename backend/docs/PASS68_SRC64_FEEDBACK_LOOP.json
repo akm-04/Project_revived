@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "pass": "68.0",
+  "status": "PASS",
+  "canonical_assets_sha256": "89f0f830508b92e5fff6ad53c6a9dae961a14042dbfdf5649008efb8353f5608",
+  "effective_source": {
+    "files": 4370,
+    "downloaded_winners": 62,
+    "app_winners": 4308,
+    "pass57_expected_files": 4370,
+    "missing": 0,
+    "extra": 0,
+    "hash_mismatch": 0,
+    "exact_pass57_match": true
+  },
+  "direct_architecture_assertions": {
+    "passed": 48,
+    "total": 48,
+    "failures": []
+  },
+  "resource_registry": {
+    "descriptor_count": 47,
+    "exact_pass65_descriptor_match": true
+  },
+  "wire_compatibility_files": [
+    {
+      "path": "gxb_backend/transport/routes_engine.py",
+      "sha256": "7aef189dd41df8ea8c49fdd3c4b8e7d2683243a90f7a76dfa0a9933ad079b8ac",
+      "unchanged": true
+    },
+    {
+      "path": "gxb_backend/transport/routes_sdk.py",
+      "sha256": "e939d824594cc08f5bf03e2de673a216cf3b933217435314697f1460d6712856",
+      "unchanged": true
+    },
+    {
+      "path": "gxb_backend/dispatch/engine_dispatcher.py",
+      "sha256": "ddca6e4a063af2a77711ff4620bb3d64c30ea22174cbb3f36e5c378f83d9fe2e",
+      "unchanged": true
+    },
+    {
+      "path": "gxb_backend/state/response_projector.py",
+      "sha256": "6ee6ab071e5c8b825d57e30cbe08f48e51f03a10a1ed924b1ed88af98889b4bb",
+      "unchanged": true
+    },
+    {
+      "path": "gxb_backend/state/global_response_semantics.py",
+      "sha256": "1257bec195feb6cab04b57c7649d1404e96c82da530cc95f20ce0d6d203bd224",
+      "unchanged": true
+    }
+  ],
+  "conclusion": "Pass68 changes persistence/UoW/resource-routing internals only; effective src_64 expectations and existing wire projection/transport adapters remain unchanged."
+}

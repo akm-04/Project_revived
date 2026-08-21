@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "pass": "68.1",
+  "source_debug_zip": "user debug.zip 2026-08-21",
+  "status": "HOTFIX_REQUIRED",
+  "request_records": 331,
+  "runtime_summary": {
+    "login_lobby": "PASS",
+    "girls_tab": "PASS",
+    "hero_summons_shamoke_donna": "PASS",
+    "hero_evolutions": "PASS",
+    "hero_skill_spend_and_mana_projection": "PASS",
+    "skill_point_upgrade": "PASS",
+    "sx_summon": "PASS",
+    "medium_paid_x10_after_restart": "PASS",
+    "small_summon": "PASS",
+    "campaign_battles_rewards": "PASS",
+    "skill_point_item": "PASS",
+    "python_tracebacks": 0,
+    "http_500_responses": 0
+  },
+  "isolated_failure": {
+    "mid": 50,
+    "name": "SUMMON_HERO",
+    "summon_type": 3,
+    "summon_index": 1,
+    "server_response": {
+      "error_code": 1,
+      "result": []
+    },
+    "client_symptom": "empty popup / client stuck until restart",
+    "classification": "INHERITED_GACHA_BUG_NOT_ECONOMY_BACKBONE_REGRESSION"
+  },
+  "source_confirmation": {
+    "semantic": "Medium/CrystalFree remains a post-tutorial rolling free summon",
+    "cooldown_seconds": 165600,
+    "cooldown_hours": 46,
+    "request_tuple": "MID50 summon_type=3 summon_index=1",
+    "special_pool_topology": "200006|200014|200004|200004|200004"
+  },
+  "acceptance_decision": "Pass68 foundation is runtime-healthy except isolated inherited Medium-free route; apply Pass68.1 hotfix and repeat targeted smoke before closing runtime gate."
+}

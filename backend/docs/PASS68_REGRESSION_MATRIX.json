@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "pass": "68.0",
+  "backend": "v0.9.0",
+  "status": "PASS_WITH_BASELINE_KNOWN_STALE_SELFTESTS",
+  "checks": [
+    {"name": "python_compileall", "result": "PASS"},
+    {"name": "validate_pass42_14", "result": "PASS", "note": "Existing canonical Pass42.14 static/repository validator remains green; historical output file restored after execution."},
+    {"name": "selftest_pass68_foundation", "result": "PASS", "note": "Unknown JSON preservation, state_version, slice revision, atomic receipt persistence, commit-failure rollback, expected-version fail-closed, 47-key registry."},
+    {"name": "selftest_multiuser", "result": "BASELINE_FAIL_UNCHANGED", "note": "Stale assertion expects sandbox Mana 999999 while both canonical v0.8.34 and v0.9.0 import the current 999999999 sandbox seed."},
+    {"name": "selftest_campaign_economy", "result": "BASELINE_FAIL_UNCHANGED", "note": "Fails at the same legacy tutorial summon assumption on both canonical v0.8.34 and v0.9.0."},
+    {"name": "selftest_tutorial_summon", "result": "BASELINE_FAIL_UNCHANGED", "note": "Fails at the same legacy first-Mana-pull assumption on both canonical v0.8.34 and v0.9.0."}
+  ],
+  "runtime_client_smoke": "PENDING_USER_DEBUG_ZIP",
+  "conclusion": "No new regression detected by the available offline characterization suite. Three older selftests are already stale/failing in the canonical predecessor and were not altered in Pass68."
+}

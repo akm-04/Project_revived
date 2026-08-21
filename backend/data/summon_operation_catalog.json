@@ -1,7 +1,7 @@
 {
   "_meta": {
     "schema_version": 1,
-    "generated_by": "Pass42.14",
+    "generated_by": "Pass68.1 runtime hotfix over Pass42.14 operation catalog",
     "purpose": "Recovered MID50 topology with active Classic/Magic/SX; Pass42.14 activates source/runtime-confirmed Small x100 request/cost topology under the existing Custom Private Server classic RNG policy.",
     "key": [
       "protocol_mid",
@@ -224,7 +224,10 @@
       "receipt_name": null,
       "evidence": {
         "hero": "summon.lua row3 special first pool200006 -> deterministic Pandaria topology mapped in Pass40",
-        "reward_guardrail": "configured reward item50001004 exists but historical quantity is unresolved; no reward is projected in Pass40.2"
+        "reward_guardrail": "configured reward item50001004 exists but historical quantity is unresolved; no reward is projected in Pass40.2",
+        "stateful_protocol_tuple": "Effective SummonWindow.lua sends MID50 (3,1) whenever CrystalFree is ready; SelfPlayer:getNextFreeCrystalSummonTime recovers one free use every 165600s. Pass68 runtime debug confirmed an established post-guide (3,1) request.",
+        "post_tutorial_behavior": "Descriptor tutorial hero metadata applies only to the first source milestone. Later cooldown-ready pulls route statefully to medium_free_post_tutorial.",
+        "runtime_evidence_2026_08_21": "Pass68 debug: server_time 1787311380, stored crystal_free_time 1787127887 (>165600s elapsed), request MID50 type3/index1 returned error_code=1 under the old tutorial-only handler."
       },
       "pull_count": 1,
       "cost_plan_id": "medium_free_single",

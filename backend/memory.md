@@ -1,3 +1,9 @@
+# Current backend revision — Pass68.1 / v0.9.0
+
+Phase 3 Economy Backbone Part1 is installed. First runtime smoke was healthy except for an inherited tutorial-only Medium-free routing bug; Pass68.1 fixes that one MID50 type3/index1 path. Runtime re-smoke is required before closing Pass68 acceptance and starting Economy Backbone Part2. Preserve existing server/player data for that test.
+
+---
+
 # Current backend revision — Pass42.14 / v0.8.34
 
 Pass42.14 is a narrow Small Vending x100 hotfix. Fresh runtime evidence showed the client sends MID50 `(summon_type=1,summon_index=4)` after pressing the result-window 100x button; v0.8.33 returned `error_code=1,result=[]` because the operation remained `deferred_fail_closed`. Effective Lua confirms `ManaHundred=4`, Small cost slot4=900000 Mana, pull slot4=100, and a >10-result scrolling/aggregation UI.

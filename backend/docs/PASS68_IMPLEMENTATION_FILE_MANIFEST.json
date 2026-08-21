@@ -1,0 +1,110 @@
+{
+  "schema_version": 1,
+  "pass": "68.0",
+  "backend": "v0.9.0",
+  "changed_file_count": 17,
+  "files": [
+    {
+      "path": "VERSION.json",
+      "status": "ADDED",
+      "sha256": "efded19fa90229c172e59db71cac6dfd567ca150723788087642697d4b7cbf0c",
+      "bytes": 223
+    },
+    {
+      "path": "data/resource_registry.json",
+      "status": "ADDED",
+      "sha256": "57902abb6648ecd7688e564b125f6583ec5f3da6e122a4443f7fc11c22d1ece4",
+      "bytes": 42873
+    },
+    {
+      "path": "docs/PASS68_FOUNDATION_SELFTEST.json",
+      "status": "ADDED",
+      "sha256": "a896502d4940e2918b84a5670cc318d4ecd4b6d96f7702fccee9d09dd6ecddcc",
+      "bytes": 600
+    },
+    {
+      "path": "docs/PASS68_REGRESSION_MATRIX.json",
+      "status": "ADDED",
+      "sha256": "db90fb62524fb6d7ef991fc762480f8d9664bfe1d31ac49728ffce9f599458a3",
+      "bytes": 1439
+    },
+    {
+      "path": "docs/PASS68_SRC64_FEEDBACK_LOOP.json",
+      "status": "ADDED",
+      "sha256": "e99e59af8b162ab25fb32a3c8b8b0d8199265ab5e94e134f7360b95154867a09",
+      "bytes": 1694
+    },
+    {
+      "path": "docs/V0_9_0_PASS68_ECONOMY_BACKBONE_PART1.md",
+      "status": "ADDED",
+      "sha256": "84091dabf5c651a3df85d2f63c73153421c582aa76fba16bcddc97c5b2ade2a1",
+      "bytes": 1188
+    },
+    {
+      "path": "gxb_backend/__init__.py",
+      "status": "MODIFIED",
+      "sha256": "81aba0fc94aa39db458fac447a856d31e37bd9d09c67c8cf93caab4a4048c9fd",
+      "bytes": 493
+    },
+    {
+      "path": "gxb_backend/state/economy_repository.py",
+      "status": "MODIFIED",
+      "sha256": "2758b5f31bd0d01da809a8c309a875ccff9807f7cf1396ca35903216044fb624",
+      "bytes": 11519
+    },
+    {
+      "path": "gxb_backend/state/multiuser_database.py",
+      "status": "MODIFIED",
+      "sha256": "3371772e2ced01fb65afbdb45b6b1b0102fdd315a0fb0a88aa8dde8f8690c9d7",
+      "bytes": 22781
+    },
+    {
+      "path": "gxb_backend/state/persistence_state.py",
+      "status": "ADDED",
+      "sha256": "d2d975eada626bac2e411b17bb1ed3e29e803a4ffe9333c785ed17ab06688803",
+      "bytes": 1873
+    },
+    {
+      "path": "gxb_backend/state/player_database.py",
+      "status": "MODIFIED",
+      "sha256": "d87055be007ccef8ee60b87efb4af645b2e31e3e26037ec5b9e0bb0892cf2a72",
+      "bytes": 11809
+    },
+    {
+      "path": "gxb_backend/state/player_state.py",
+      "status": "MODIFIED",
+      "sha256": "e7806bbc0a96222a2fc4755d1c6a5ed3e0ad3e093059a9b838ad023343b5c589",
+      "bytes": 34310
+    },
+    {
+      "path": "gxb_backend/state/request_services.py",
+      "status": "MODIFIED",
+      "sha256": "b89b8bb4f77159fcdc9f88b16e39893f81f3fe1723e13adf45735ca790220be9",
+      "bytes": 12966
+    },
+    {
+      "path": "gxb_backend/state/resource_registry.py",
+      "status": "ADDED",
+      "sha256": "9243dfa57d2edd256941369b3b18e171c6324bcbada1eb34d61c91dcc6c12171",
+      "bytes": 4203
+    },
+    {
+      "path": "gxb_backend/state/unit_of_work.py",
+      "status": "MODIFIED",
+      "sha256": "f7268d78910e142864df64defce7b7a1cc56a1698a4eb428ac1aa1a08b3319f1",
+      "bytes": 10509
+    },
+    {
+      "path": "gxb_backend/version.py",
+      "status": "ADDED",
+      "sha256": "28b496df04fff90b2058fe7159d178c59e67d79d5072a214784a5da0690460a2",
+      "bytes": 97
+    },
+    {
+      "path": "tools/selftest_pass68_foundation.py",
+      "status": "ADDED",
+      "sha256": "263e35089c04676f40731e15405a303a608d9ff81f6f1aaae062e8c46eecbcce",
+      "bytes": 7755
+    }
+  ]
+}

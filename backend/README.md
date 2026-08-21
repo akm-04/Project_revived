@@ -1,3 +1,13 @@
+# GXB backend v0.9.0 — Pass68.1
+
+Current Phase 3 foundation build. Pass68.0 installed persistence-state metadata, merge-preserving atomic JSON writes, PlayerUnitOfWork/state-version/receipt infrastructure, and the frozen 47-key ResourceRegistry while retaining legacy feature behavior.
+
+Pass68.1 is a narrow runtime hotfix from the first client smoke: post-tutorial Medium/CrystalFree MID50 `(summon_type=3, summon_index=1)` now honors the source-backed 165600-second rolling cooldown instead of being rejected as tutorial-only. Its unrecovered result-counter/RNG semantics remain explicitly inside `PRIVATE_SERVER_POLICY`; paid Medium and the Economy Backbone are unchanged.
+
+See `docs/PASS68_1_RUNTIME_ACCEPTANCE_AND_MEDIUM_FREE_HOTFIX.md` for test scope and provenance. Historical Pass42.14 documentation remains under `docs/`.
+
+---
+
 # GXB backend v0.8.34 — Pass42.14 Small x100 hotfix
 
 Pass42.14 is the final narrow gacha hotfix on top of v0.8.33/Pass42.12. A fresh runtime trace proved that the stock Small result window sends MID50 `summon_type=1, summon_index=4` for the 100x button, while the backend still carried the old Pass41 `deferred_fail_closed` marker. Effective Lua independently confirms `ManaHundred = 4`, cost 900000 Mana, pull count 100, and a dedicated >10-result scroll/aggregation UI.

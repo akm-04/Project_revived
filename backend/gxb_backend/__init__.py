@@ -6,7 +6,9 @@ backwards-compatible lazy export for callers that import it from the package.
 
 from __future__ import annotations
 
-__all__ = ["create_app"]
+from .version import BACKEND_VERSION as __version__
+
+__all__ = ["create_app", "__version__"]
 
 
 def __getattr__(name: str):

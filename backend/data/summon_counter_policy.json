@@ -1,13 +1,13 @@
 {
   "_meta": {
     "schema_version": 1,
-    "generated_by": "Pass42.6",
+    "generated_by": "Pass68.1 runtime hotfix over Pass42.14 policy",
     "source_resolution": "effective_merged",
-    "purpose": "Recovered milestone topology plus explicit Custom Private Server Policy v1 result-slot transitions for classic paid Small/Medium only.",
+    "purpose": "Recovered milestone topology plus explicit Custom Private Server Policy result-slot transitions for classic Small/Medium paid and rolling Medium free.",
     "guardrails": [
       "Milestone/dropbox arrays are recovered source facts; result-slot advancement is private-server policy, not historical proof.",
       "Small tutorial milestone1 is migrated into the shared private Small result-slot counter before paid pulls.",
-      "Medium free and SX counters remain fail closed."
+      "Medium free row3 uses the recovered 1/2/10/30/60 milestone topology; Pass68.1 private policy persists one monotonic free-result counter because the original server counter carrier is unrecovered."
     ]
   },
   "policies": [
@@ -103,12 +103,13 @@
         "rate_bottom": 0,
         "rate_step": 77
       },
-      "transition_status": "unknown_fail_closed",
-      "persistence_key": null,
+      "transition_status": "implemented_private_policy",
+      "persistence_key": "private_medium_free_result_counter_v1",
       "unknowns": [
-        "counter persistence/reset",
-        "rate_step unit"
-      ]
+        "Historical official counter carrier remains unrecovered; Pass68.1 private policy persists one monotonic result counter.",
+        "rate_step=77 unit/official transition math remains unrecovered and is not universalized."
+      ],
+      "private_policy_note": "Source row3 supplies milestones 1/2/10/30/60 and special pools 200006/200014/200004/200004/200004. Pass68.1 advances one slot per accepted free pull and does not reset this private counter."
     },
     {
       "id": "sx_soul_box",

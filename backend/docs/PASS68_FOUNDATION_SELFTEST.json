@@ -1,0 +1,30 @@
+{
+  "pass": "68.0",
+  "backend": "0.9.0",
+  "status": "PASS",
+  "singleton": {
+    "unknown_extensions_preserved": true,
+    "state_version": 1,
+    "slice_revision": 1,
+    "receipt_status": "COMMITTED"
+  },
+  "rollback": {
+    "rollback_restored_state": true,
+    "version_conflict_fail_closed": true
+  },
+  "multiuser": {
+    "unknown_extensions_preserved": true,
+    "schema": 2
+  },
+  "resource_registry": {
+    "descriptors": 47,
+    "scalar": 30,
+    "regenerating": [
+      "energy",
+      "invitation",
+      "skill_point",
+      "spirit_energy"
+    ],
+    "unknown_fail_closed": true
+  }
+}

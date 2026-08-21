@@ -1,7 +1,7 @@
 {
   "_meta": {
     "schema_version": 1,
-    "generated_by": "Pass42.14",
+    "generated_by": "Pass68.1 runtime hotfix over Pass42.14 CostPlans",
     "source_resolution": "effective_merged",
     "purpose": "Typed source-backed summon CostPlans. Classic paid currency plans and SX Crystal purchase are executable under versioned Custom Private Server policies; deferred ticket/coupon/discount and Small100 plans remain descriptive/fail closed.",
     "client_delta_warning": "Ticket/coupon items are removed locally by the stock MID50 callback after success; future canonical spend must not also project a second local-removal award/delta channel.",
@@ -88,7 +88,8 @@
         }
       ],
       "vip_min": 0,
-      "execution_status": "tutorial_active_free_only"
+      "execution_status": "tutorial_active_free_only",
+      "runtime_note": "Pass68.1: descriptor remains the stateful tutorial/free transport tuple; after tutorial the handler routes to medium_free_post_tutorial whenever the source 165600-second cooldown is ready."
     },
     {
       "id": "medium_paid_single",

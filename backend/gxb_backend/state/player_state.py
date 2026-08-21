@@ -216,6 +216,10 @@ class PlayerState:
     vip_awards: list[Any] = field(default_factory=list)
     bubble_info: dict[str, Any] = field(default_factory=dict)
 
+    # Phase 3 Pass68 additive persistence-control envelope. Kept under
+    # player.domains.persistence_state on disk; never projected to the Lua client.
+    persistence_state: dict[str, Any] = field(default_factory=dict)
+
     library_infos: dict[str, Any] = field(default_factory=dict)
     library_talk_infos: dict[str, Any] = field(default_factory=dict)
     library_cg_infos: list[Any] = field(default_factory=list)

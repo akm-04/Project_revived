@@ -1,0 +1,3 @@
+BACKEND_VERSION = "0.9.0"
+PASS_VERSION = "68.0"
+ARTIFACT_VERSION = "gxb-backend-v0.9.0-pass68.0"

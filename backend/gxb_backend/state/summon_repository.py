@@ -4,7 +4,9 @@ Recovered MID50 operation/cost/pool/client contracts remain source authority.
 The deterministic tutorial pulls stay intact, the runtime-mapped classic
 paid operations execute under Custom Private Server Policy v1, and Pass41.9
 adds the source/runtime-confirmed post-tutorial Small free-pull state split for
-the same MID50 (type=1,index=1) protocol tuple. Pass42.6 corrects SX/Soul Box content classification and dynamic reward planning
+the same MID50 (type=1,index=1) protocol tuple. Pass68.1 adds the matching
+source/runtime-confirmed rolling Medium free path for MID50 (type=3,index=1)
+after the deterministic Pandaria tutorial milestone. Pass42.6 corrects SX/Soul Box content classification and dynamic reward planning
 through a dedicated private planner while ticket/coupon variants remain
 fail closed; Pass42.14 activates the source/runtime-confirmed Small x100 topology; private policy is never represented as historical official RNG.
 """
@@ -261,6 +263,25 @@ class SummonRepository:
         state[policy.persistence_key] = 1
         return True
 
+    def _mark_medium_free_counter_after_tutorial(self) -> bool:
+        """Adopt the deterministic Pandaria pull as source row3 result slot 1.
+
+        The client exposes the rolling 46-hour CrystalFree timer but not the
+        original server counter carrier behind summon.lua row3's 1/2/10/30/60
+        special topology. Pass68.1 uses an explicit private monotonic counter;
+        existing tutorial-complete players are migrated to slot 1 so their next
+        legitimate free pull reaches source milestone 2 instead of replaying
+        Pandaria.
+        """
+        policy = self.counter_policies.get("medium_free")
+        if policy is None or not policy.transition_supported or not policy.persistence_key:
+            return False
+        state = self.player.summon
+        if self._int(state.get(policy.persistence_key), 0) >= 1:
+            return False
+        state[policy.persistence_key] = 1
+        return True
+
     def normalize(self, *, fresh_credential: bool | None = None) -> bool:
         """Normalize MID56 state and migrate v0.8 tutorial credentials."""
         changed = False
@@ -357,6 +378,15 @@ class SummonRepository:
         if (
             (self._int(state.get("tutorial_mana_done"), 0) == 1 or self._has_expected_hero("lavia"))
             and self._mark_small_counter_after_tutorial()
+        ):
+            changed = True
+
+        # Pass68.1: the deterministic Pandaria tutorial pull is source row3
+        # milestone 1. Established/tutorial-complete players adopt that slot so
+        # the rolling CrystalFree tuple can continue at milestone 2.
+        if (
+            (self._int(state.get("tutorial_crystal_done"), 0) == 1 or self._has_expected_hero("pandaria"))
+            and self._mark_medium_free_counter_after_tutorial()
         ):
             changed = True
 
@@ -626,6 +656,32 @@ class SummonRepository:
                 return False
         return True
 
+    def _stateful_free_tuple_allowed_without_tutorial_flag(
+        self, desc: SummonOperationDescriptor
+    ) -> bool:
+        """Allow proven free tuples to outlive the backend-only tutorial flag.
+
+        The client keeps reusing MID50 (1,1) and (3,1) after the tutorial.
+        ``tutorial_enabled`` is a local migration marker, not client authority,
+        so an established player must not be rejected solely because an older
+        JSON profile lacks that marker. The actual free-count/cooldown gates are
+        still enforced by the stateful handlers.
+        """
+        guide_id = self._int(self.player.guide_id, 0)
+        if desc.semantic == "tutorial_small_free_first":
+            return (
+                self.private_policy is not None
+                and self.private_policy.active("small_free_post_tutorial")
+                and guide_id >= self._int(self.meta["guide_ids"]["mana_three"], 100105)
+            )
+        if desc.semantic == "tutorial_medium_free_first":
+            return (
+                self.private_policy is not None
+                and self.private_policy.active("medium_free_post_tutorial")
+                and guide_id >= self._int(self.meta["guide_ids"]["crystal_three"], 100108)
+            )
+        return False
+
     def summon_hero(self, req: dict[str, Any]) -> dict[str, Any]:
         """Dispatch only explicitly registered active MID50 operation semantics."""
         if self.normalize():
@@ -642,6 +698,7 @@ class SummonRepository:
         if (
             desc.support_status == "tutorial_supported"
             and self._int(self.player.summon.get("tutorial_enabled"), 0) != 1
+            and not self._stateful_free_tuple_allowed_without_tutorial_flag(desc)
         ):
             return self._blocked_mid50()
         if not self._validate_dispatch_infrastructure(desc):
@@ -1573,6 +1630,108 @@ class SummonRepository:
         except (RuntimeError, ValueError, RewardValidationError, UnknownContentReference, AmbiguousContentReference):
             return self._blocked_mid50()
 
+    def _medium_free_after_tutorial(self, desc: SummonOperationDescriptor) -> dict[str, Any]:
+        """Execute a cooldown-ready post-tutorial Medium/CrystalFree pull.
+
+        Effective SummonWindow.lua reuses MID50 ``summon_type=3,index=1``
+        whenever ``getNextFreeCrystalSummonTime()`` reports ready. The source
+        period is 165600 seconds and summon.lua row3 provides the ordinary/super
+        pools plus 1/2/10/30/60 special topology. Exact historical counter
+        storage and RNG are server-only, so Pass68.1 keeps them inside the
+        explicitly authorized private-policy seam instead of blocking a proven
+        client operation.
+        """
+        if (
+            self.uow is None
+            or self.inventory is None
+            or self.catalog is None
+            or self.private_policy is None
+            or self.private_planner is None
+            or not self.private_policy.active("medium_free_post_tutorial")
+        ):
+            return self._blocked_mid50()
+
+        cost_plan = self.cost_plans.get(desc.cost_plan_id)
+        counter = self.counter_policies.get(desc.counter_policy_id)
+        timer_policy = self.state_contract.timer_policy("medium")
+        if (
+            cost_plan is None
+            or not cost_plan.is_free
+            or cost_plan.family != "medium"
+            or counter is None
+            or not counter.transition_supported
+            or not counter.persistence_key
+            or timer_policy is None
+            or not timer_policy.free_time_field
+            or not timer_policy.period_seconds
+        ):
+            return self._blocked_mid50()
+
+        now_ms = int(time.time() * 1000)
+        repeat_receipts = PaidSummonOperationReceiptStore(self.player.summon)
+        replay = repeat_receipts.replay(
+            semantic="medium_free_post_tutorial",
+            now_ms=now_ms,
+            window_ms=self.private_policy.retry_window_ms,
+        )
+        if replay is not None:
+            return replay
+
+        state = self.player.summon
+        now = now_ms // 1000
+        last_free = max(0, self._int(state.get(timer_policy.free_time_field), 0))
+        if last_free > 0 and now < last_free + int(timer_policy.period_seconds):
+            return self._blocked_mid50()
+
+        context = OperationContext(
+            actor_player_id=str(self.player.player_id),
+            domain="summon",
+            operation_name="medium_free_post_tutorial",
+            protocol_mid=50,
+            idempotency_key=f"private:medium_free_post_tutorial:{now_ms}",
+        )
+        try:
+            with self.uow.transaction(context):
+                selections, counter_after = self._classic_select_results(desc)
+                result_rows = self._classic_materialize_results(desc, selections)
+                state[timer_policy.free_time_field] = now
+                state[counter.persistence_key] = counter_after
+                plan = SummonResultPlan.create(
+                    semantic="medium_free_post_tutorial",
+                    rows=result_rows,
+                    planner_status="private_medium_free_policy_v1",
+                    source_reference=(
+                        "SummonWindow.lua:CrystalFree+SelfPlayer.lua:freeCrystalSummonDuration"
+                        "+summon.lua:3+dropbox.lua/private-medium-free-v1"
+                    ),
+                )
+                self.result_policy.validate_active_plan(plan)
+                response: dict[str, Any] = {
+                    "result": self._render_result_plan(plan),
+                    "summon_info": self._payload_from_state(),
+                }
+                repeat_receipts.store(
+                    semantic="medium_free_post_tutorial",
+                    protocol_mid=desc.key.protocol_mid,
+                    summon_type=desc.key.summon_type,
+                    summon_index=desc.key.summon_index,
+                    committed_at_ms=now_ms,
+                    response=response,
+                )
+                self.uow.mark_changed()
+            return response
+        except (
+            AmbiguousContentReference,
+            KeyError,
+            RuntimeError,
+            SummonCounterTransitionUnavailable,
+            SummonDuplicateConversionUnavailable,
+            SummonResultPlanUnavailable,
+            UnknownContentReference,
+            ValueError,
+        ):
+            return self._blocked_mid50()
+
     def _tutorial_crystal(self, desc: SummonOperationDescriptor) -> dict[str, Any]:
         # Pass40.2 intentionally preserves the established deterministic Pandaria
         # path. The configured Medium Juice reward identity is known, but its
@@ -1594,10 +1753,14 @@ class SummonRepository:
                     "result": self._render_result_plan(result_plan),
                     "summon_info": self.payload(),
                 }
-            return self._blocked_mid50()
+            return self._medium_free_after_tutorial(desc)
 
+        # Established/post-guide characters still use the same CrystalFree
+        # protocol tuple. If their tutorial Pandaria is absent, the private
+        # row3 counter begins at zero and the first accepted free pull follows
+        # source milestone 1 instead of failing the proven client request.
         if self._int(self.player.guide_id, 0) >= guide_after:
-            return self._blocked_mid50()
+            return self._medium_free_after_tutorial(desc)
         if not (state.get("tutorial_mana_done") or self._has_expected_hero("lavia")):
             return self._blocked_mid50()
         if self._int(state.get("crystal_free_time"), 0) >= 1:
@@ -1608,6 +1771,7 @@ class SummonRepository:
         state["crystal_free_time"] = now
         state["tutorial_crystal_done"] = 1
         state["tutorial_crystal_claimed_at"] = now
+        self._mark_medium_free_counter_after_tutorial()
         self._save()
         return {
             "result": self._render_result_plan(result_plan),

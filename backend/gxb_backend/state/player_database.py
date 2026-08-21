@@ -13,6 +13,7 @@ concurrent refresh cannot replace PlayerState in the middle of a mutation.
 
 from __future__ import annotations
 
+import copy
 import json
 import os
 from dataclasses import asdict, fields
@@ -21,6 +22,7 @@ from typing import Any
 
 from .account import AccountIdentity
 from .player_state import PlayerState
+from .persistence_state import normalize_persistence_state
 
 
 IDENTITY_FIELDS = {
@@ -93,7 +95,7 @@ PLAYER_FIELD_NAMES = {field.name for field in fields(PlayerState)}
 class JsonPlayerDatabase:
     """Serialize AccountIdentity + PlayerState to a readable nested JSON file."""
 
-    SCHEMA_VERSION = 4
+    SCHEMA_VERSION = 5
 
     def __init__(self, path: Path) -> None:
         self.path = Path(path)
@@ -147,17 +149,62 @@ class JsonPlayerDatabase:
                     for sub_key, sub_value in value.items():
                         if sub_key in PLAYER_FIELD_NAMES:
                             flat_player[sub_key] = sub_value
-        return PlayerState(**flat_player)
+        flat_player["persistence_state"] = normalize_persistence_state(flat_player.get("persistence_state"))
+        player = PlayerState(**flat_player)
+        if isinstance(player_data, dict):
+            setattr(player, "_json_source_player", copy.deepcopy(player_data))
+        return player
 
     def save(self, account: AccountIdentity, player: PlayerState) -> None:
         payload = self.serialize(account, player)
-        self.path.parent.mkdir(parents=True, exist_ok=True)
-        temp_path = self.path.with_suffix(self.path.suffix + ".tmp")
-        temp_path.write_text(
-            json.dumps(payload, indent=2, sort_keys=False, ensure_ascii=False) + "\n",
-            encoding="utf-8",
-        )
-        os.replace(temp_path, self.path)
+        existing = self._read_existing_document()
+        if isinstance(existing, dict):
+            payload = self.merge_preserving_extensions(existing, payload)
+        self.atomic_write_json(self.path, payload)
+
+    def _read_existing_document(self) -> dict[str, Any] | None:
+        if not self.path.exists():
+            return None
+        try:
+            value = json.loads(self.path.read_text(encoding="utf-8"))
+        except Exception:
+            return None
+        return value if isinstance(value, dict) else None
+
+    @staticmethod
+    def merge_preserving_extensions(existing: Any, canonical: Any) -> Any:
+        """Canonical values win while unknown sibling/nested keys survive."""
+        if isinstance(existing, dict) and isinstance(canonical, dict):
+            out = copy.deepcopy(existing)
+            for key, value in canonical.items():
+                if key in out and isinstance(out[key], dict) and isinstance(value, dict):
+                    out[key] = JsonPlayerDatabase.merge_preserving_extensions(out[key], value)
+                else:
+                    out[key] = copy.deepcopy(value)
+            return out
+        return copy.deepcopy(canonical)
+
+    @staticmethod
+    def atomic_write_json(path: Path, payload: Any) -> None:
+        """Durable same-directory temp + fsync + replace commit boundary."""
+        path = Path(path)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        temp_path = path.with_suffix(path.suffix + ".tmp")
+        with temp_path.open("w", encoding="utf-8") as handle:
+            json.dump(payload, handle, indent=2, sort_keys=False, ensure_ascii=False)
+            handle.write("\n")
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.replace(temp_path, path)
+        try:
+            dir_fd = os.open(str(path.parent), os.O_RDONLY)
+            try:
+                os.fsync(dir_fd)
+            finally:
+                os.close(dir_fd)
+        except OSError:
+            # Directory fsync is not available on every supported platform.
+            pass
 
     @classmethod
     def serialize_player(cls, player: PlayerState) -> dict[str, Any]:
@@ -174,7 +221,13 @@ class JsonPlayerDatabase:
 
         # Any newly added PlayerState field automatically remains persisted even
         # if the database grouping table has not been updated yet.
+        if "persistence_state" in remaining:
+            remaining["persistence_state"] = normalize_persistence_state(remaining["persistence_state"])
         player_sections["domains"] = remaining
+        source = getattr(player, "_json_source_player", None)
+        if isinstance(source, dict):
+            player_sections = cls.merge_preserving_extensions(source, player_sections)
+        setattr(player, "_json_source_player", copy.deepcopy(player_sections))
         return player_sections
 
     @classmethod
@@ -184,7 +237,7 @@ class JsonPlayerDatabase:
         return {
             "_meta": {
                 "schema": cls.SCHEMA_VERSION,
-                "format": "GXB v0.8.0 legacy/sandbox player database",
+                "format": "GXB v0.9.0 additive persistence-control player database",
                 "notes": [
                     "Stage 3.1.4 keeps SDK account UID, SDK/login SID, and game player ID distinct using the known-good region-125 client snapshot.",
                     "The backend re-reads this file before every request.",

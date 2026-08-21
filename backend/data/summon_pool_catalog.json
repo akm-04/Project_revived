@@ -1,15 +1,16 @@
 {
   "_meta": {
     "schema_version": 1,
-    "generated_by": "Pass41.6",
+    "generated_by": "Pass68.1 runtime hotfix; extends Pass41.6 catalog with source row3 free-special pools 200006/200014",
     "source_resolution": "effective_merged",
-    "purpose": "Source-derived result rows used by the Custom Private Server Policy v1 for classic MID50 Vending. Pass41.6 adds recovered Magic byproduct pool 700008; activation/multiplicity remain private-policy-owned.",
+    "purpose": "Source-derived result rows used by classic/Magic summon policies. Pass68.1 adds the previously unneeded but source-proven CrystalFree special pools 200006 and 200014 so post-tutorial MID50 type3/index1 can follow summon.lua row3 topology.",
     "source_assets_sha256": "89f0f830508b92e5fff6ad53c6a9dae961a14042dbfdf5649008efb8353f5608",
     "source_map": "00_PASSMAP/VENDING_POOL_TOPOLOGY.json",
     "classification_rule": "Pool-level result_kind is field-scoped from summon/dropbox topology: Hero pools produce partner rows; ordinary/soul-stone pools produce non-partner Backpack item rows.",
     "guardrails": [
       "This catalog preserves source pool membership and row weights only; it does not claim to recover the historical server pool-selection formula.",
-      "dropbox 200001 is absent from the recovered effective source and is not fabricated here."
+      "dropbox 200001 is absent from the recovered effective source and is not fabricated here.",
+      "Pools 200006 and 200014 are copied exactly from effective dropbox.lua; their inclusion does not recover or claim historical server counter/RNG math."
     ]
   },
   "pools": [
@@ -3498,6 +3499,157 @@
           "item_id": 10001002,
           "item_num": 1,
           "drop_rate": 10000,
+          "roll_type": 1
+        }
+      ]
+    },
+    {
+      "dropbox_id": 200006,
+      "result_kind": "hero",
+      "source_name": "钻石首抽库",
+      "row_count": 1,
+      "rate_sum": 10000,
+      "rows": [
+        {
+          "row_id": 200006001,
+          "item_id": 10001003,
+          "item_num": 1,
+          "drop_rate": 10000,
+          "roll_type": 1
+        }
+      ]
+    },
+    {
+      "dropbox_id": 200014,
+      "result_kind": "hero",
+      "source_name": "钻石免费次抽库",
+      "row_count": 18,
+      "rate_sum": 10000,
+      "rows": [
+        {
+          "row_id": 200014001,
+          "item_id": 10001006,
+          "item_num": 1,
+          "drop_rate": 556,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200014002,
+          "item_id": 10001007,
+          "item_num": 1,
+          "drop_rate": 556,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200014003,
+          "item_id": 10001008,
+          "item_num": 1,
+          "drop_rate": 556,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200014004,
+          "item_id": 10001010,
+          "item_num": 1,
+          "drop_rate": 556,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200014005,
+          "item_id": 10001011,
+          "item_num": 1,
+          "drop_rate": 556,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200014006,
+          "item_id": 10001013,
+          "item_num": 1,
+          "drop_rate": 556,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200014007,
+          "item_id": 10001019,
+          "item_num": 1,
+          "drop_rate": 556,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200014008,
+          "item_id": 10001020,
+          "item_num": 1,
+          "drop_rate": 556,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200014009,
+          "item_id": 10001021,
+          "item_num": 1,
+          "drop_rate": 556,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200014010,
+          "item_id": 10001022,
+          "item_num": 1,
+          "drop_rate": 556,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200014011,
+          "item_id": 10001023,
+          "item_num": 1,
+          "drop_rate": 555,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200014012,
+          "item_id": 10001024,
+          "item_num": 1,
+          "drop_rate": 555,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200014013,
+          "item_id": 10001026,
+          "item_num": 1,
+          "drop_rate": 555,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200014014,
+          "item_id": 10001028,
+          "item_num": 1,
+          "drop_rate": 555,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200014015,
+          "item_id": 10001031,
+          "item_num": 1,
+          "drop_rate": 555,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200014016,
+          "item_id": 10001033,
+          "item_num": 1,
+          "drop_rate": 555,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200014017,
+          "item_id": 10001036,
+          "item_num": 1,
+          "drop_rate": 555,
+          "roll_type": 1
+        },
+        {
+          "row_id": 200014018,
+          "item_id": 10001040,
+          "item_num": 1,
+          "drop_rate": 555,
           "roll_type": 1
         }
       ]
