@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "pass": "89.0",
+  "input_debug_sha256": "fd6b98e2b5cf6e9828d5a79a03e473ad0eed94c6d57584e7839151f4d3368baa",
+  "pass88_runtime_acceptance": {
+    "settlement": "ACCEPTED",
+    "observed_crystal_delta": 200,
+    "observed_vip_progression_delta": 100,
+    "observed_status": "COMMITTED",
+    "client_ui_no_change": "EXPECTED_WITH_CURL_NO_INJECTION"
+  },
+  "token_diagnosis": {
+    "new_login_account_uid": "20000002",
+    "new_login_region": 197,
+    "new_login_token_prefix": "yKqj",
+    "manual_curl_token": "local_token",
+    "manual_curl_region": 125,
+    "resolved_legacy_account_uid": "13371337",
+    "resolved_legacy_player_id": "12525385",
+    "classification": "CALLER_CREDENTIAL_MISMATCH_PLUS_UNSAFE_EXAMPLE_NOT_TOKEN_RESOLVER_RANDOMNESS"
+  },
+  "initial_update_request": {
+    "client_resource_version": "",
+    "app_version": "1.631.0",
+    "old_backend_response_is_inapp": 0
+  },
+  "decision": "Activate existing MID2 OTA and eliminate manual client editing/curl for normal purchase smoke."
+}

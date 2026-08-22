@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "pass": "89.0",
+  "resource_version": "1.631.3",
+  "enabled": true,
+  "silent": true,
+  "file_count": 126,
+  "package": "gxb-local-1.631.3.zip",
+  "volume": "gxb-local-1.631.3.zip.001",
+  "size": 1961280,
+  "md5": "d883c1fabfd1ff46d6561be62d996787",
+  "sha256": "317f2bd816ff42dd611dd24568d07f1c570fc70d52731aae3f95616d81dae6e0",
+  "transport": "existing source-confirmed MID2 UpdateScene pipeline",
+  "server_routes": [
+    "MID2 /api/v1",
+    "GET /updates/<asset>"
+  ],
+  "new_override_files": [
+    "src_32/app/common/utils.lua",
+    "src_64/app/common/utils.lua"
+  ],
+  "cumulative_previous_override_count": 124,
+  "client_bridge": {
+    "intercepts": [
+      80001002,
+      80001003,
+      80001004,
+      80001005,
+      80001006,
+      80001007,
+      80001030
+    ],
+    "platform": "lua_preservation",
+    "uses_live_fields": [
+      "Backend.token_",
+      "Backend.region_",
+      "SelfPlayer.playerID"
+    ],
+    "intent_storage": "cc.UserDefault per charge_id",
+    "success_projection": "xyd.event.RECHARGE with committed MID36857 payload",
+    "fallback": "original native purchase functions"
+  },
+  "auth_hardening": {
+    "legacy_credential": "local_token / fixed sandbox SID",
+    "legacy_account_uid": "13371337",
+    "legacy_player_id": "12525385",
+    "default": "409 unless allow_legacy_sandbox=1",
+    "player_assertion": "expected_player_id optional but OTA always supplies it"
+  }
+}

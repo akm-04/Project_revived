@@ -1,14 +1,9 @@
-# Update notes — v0.9.0 / Pass68.1
+# Update notes — v0.10.2 / Pass89.0
 
-- Phase 3 Economy Backbone Part1 from Pass68.0 retained unchanged.
-- Runtime smoke accepted for login/Girls/evolution/skills/paid summons/Campaign/restart persistence.
-- Fixed post-tutorial Medium free summon: MID50 type3/index1 now follows the recovered 46-hour cooldown and row3 pool topology under explicit private counter/RNG policy.
-- No client-data clear and no server-data reset is required for the follow-up smoke; preserving the existing player database is preferred to validate migration continuity.
+Pass89 runtime-accepts the Pass88 cURL settlement math and activates the game's existing source-confirmed MID2 / `UpdateScene` in-app resource updater. The backend now serves a cumulative resource update (`1.631.3`) containing all 124 previously validated `1.631.2` override files plus `src_32/app/common/utils.lua` and `src_64/app/common/utils.lua`. The new `utils.lua` override is the effective canonical `utils.lua` plus a preservation-only bridge that intercepts the seven direct Crystal Recharge SKUs and sends them to the existing exactly-once Pass88 PurchaseIntent endpoint. Unsupported purchase types continue to the original native functions.
 
----
+The bridge uses the **currently logged-in** `xyd.Backend` token and region and supplies the current player ID as an authentication assertion. A persistent client-side intent ID is reused after an indeterminate transport failure, preserving server exactly-once semantics. On a committed/replayed response, the already-committed source-shaped MID36857 event is injected into `xyd.event.RECHARGE`, so `SelfPlayer:onRecharge_()` updates Crystal/VIP/charge and the normal Recharge UI path.
 
-# Update notes — v0.8.34 / Pass42.14
+Pass89 also hardens the manual preservation endpoint: `local_token` is the fixed compatibility credential for legacy account uid `13371337` (in-game player `12525385`), not a wildcard. Money-like requests using that credential now require explicit `allow_legacy_sandbox=1`; callers may additionally bind `expected_player_id` to fail closed on account mismatch.
 
-Final narrow gacha hotfix. Small Vending 100x was source-present but still intentionally fail-closed in the old operation catalog. Pass42.14 activates MID50 `(type=1,index=4)` using the existing 900,000 Mana / 100-pull cost plan and classic private planner.
-
-The x100 operation uses the same configurable Small rates as x1/x10 and retains the fixed Small x10 item guarantee independently in each of its ten 10-result blocks. No Medium, SX, Magic/Gachapon, featured rotation, duplicate conversion, or Pass42.12 gacha-control semantics were changed.
+No MID657, cards, Skin Mall, ordinary Store, native payment verification, inferred TCP framing, or MID116/117/118 is implemented. See `docs/PASS89_TECHNICAL_CHANGELOG.md`, `docs/PASS89_SRC64_FEEDBACK_LOOP.json`, `docs/PASS89_OTA_CONTRACT.json`, and `docs/PASS89_CLIENT_TEST_PLAN.md`.

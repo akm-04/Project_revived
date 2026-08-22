@@ -1,0 +1,115 @@
+{
+  "pass": "88.0",
+  "status": "PASS",
+  "source_resolution": "effective_merged",
+  "canonical_source_bundle_sha256": "89f0f830508b92e5fff6ad53c6a9dae961a14042dbfdf5649008efb8353f5608",
+  "files": [
+    {
+      "path": "data/tables/charge.lua",
+      "sha256": "abfd3d35090fd10508dd1ec9c37ed576bcd15a0f6d5528c3a77b42d4f428b7f9",
+      "backend_changes_supported": [
+        "seven direct Crystal products and first/repeat bonus metadata"
+      ]
+    },
+    {
+      "path": "data/tables/charge_list.lua",
+      "sha256": "d60517c91b812eb4a026efa03cce9507ead8f704c2ea2926833248a8f862d1c3",
+      "backend_changes_supported": [
+        "vip_exp and diamond are independent fields in the wider commerce plane; total Crystal cannot be a universal VIP progression proxy"
+      ]
+    },
+    {
+      "path": "data/tables/vip.lua",
+      "sha256": "18b76d7fa82964f57082aeb2092a80c231f69e86958b4b567aebabf30d626270",
+      "backend_changes_supported": [
+        "VIP0-VIP15 cumulative charge thresholds used by VipProgressionPolicy"
+      ]
+    },
+    {
+      "path": "app/windows/VipRechargeWindow.lua",
+      "sha256": "3fac657db32f5cf8804ff37d581758977cfce951aad2ec5008d878a6395ae717",
+      "backend_changes_supported": [
+        "direct purchase crosses xyd.androidPurchase/xyd.sdkPurchase; charge_id is passed as argument 3",
+        "iOS filters direct charge_id 80001030"
+      ]
+    },
+    {
+      "path": "app/common/utils.lua",
+      "sha256": "6e56c7342e889d7ae8d41fe47cb06f66832227efe702f3863f693ee7ba84ffad",
+      "backend_changes_supported": [
+        "xyd.androidPurchase crosses JNI/native AppActivity methods; historical native callback implementation is absent from canonical bundle"
+      ]
+    },
+    {
+      "path": "app/common/network/Backend.lua",
+      "sha256": "95378e2b0be8180df6de27e9e430c630bcfe46c080e1f91ef5f6d74bdbb1b840",
+      "backend_changes_supported": [
+        "MID36857 RECHARGE maps to xyd.event.RECHARGE"
+      ]
+    },
+    {
+      "path": "app/model/SelfPlayer.lua",
+      "sha256": "163d5893c9522ada412c2b9c4748a80757660fccdf03c8f72cb6edf0838b8eb4",
+      "backend_changes_supported": [
+        "onRecharge_ consumes nested completion params delta/total/vip/charge/charge_id and card-day fields",
+        "queryChargeData consumes charge_id/charge_count/last_buy_time from MID354"
+      ]
+    }
+  ],
+  "line_evidence": [
+    {
+      "path": "app/windows/VipRechargeWindow.lua",
+      "lines": "390",
+      "fact": "iOS omits charge_id 80001030 from direct Recharge rows"
+    },
+    {
+      "path": "app/windows/VipRechargeWindow.lua",
+      "lines": "1169-1171",
+      "fact": "Android purchase call passes charge_id as xyd.androidPurchase argument 3"
+    },
+    {
+      "path": "app/windows/VipRechargeWindow.lua",
+      "lines": "1193-1204",
+      "fact": "iOS purchase call passes charge_id as xyd.sdkPurchase argument 3"
+    },
+    {
+      "path": "app/common/utils.lua",
+      "lines": "996-1077",
+      "fact": "Android purchase leaves Lua through JNI calls to AppActivity.xydPurchases/xydNewPurchase/xydNPurchase"
+    },
+    {
+      "path": "app/common/network/Backend.lua",
+      "lines": "310",
+      "fact": "MID RECHARGE maps to xyd.event.RECHARGE"
+    },
+    {
+      "path": "app/model/SelfPlayer.lua",
+      "lines": "2826-2908",
+      "fact": "RECHARGE is a completion event whose nested params update cumulative Crystal/VIP/charge/card state and refresh/query Recharge UI"
+    },
+    {
+      "path": "app/model/SelfPlayer.lua",
+      "lines": "3577-3603",
+      "fact": "MID354 response rows provide charge_id, charge_count, last_buy_time and optional server_time"
+    }
+  ],
+  "source_backed_runtime_rules": [
+    "Only the seven direct Crystal products already advertised by Pass87 are auto-authorizable.",
+    "First/repeat Crystal payout comes from generated charge.lua metadata.",
+    "Canonical VIP is derived from cumulative charge using raw vip.lua thresholds.",
+    "Completion payload is shaped for effective SelfPlayer:onRecharge_ and is treated as MID36857 server completion, never a historical client request.",
+    "charge_id 80001030 is rejected for platform=ios as defense-in-depth matching effective Recharge UI eligibility."
+  ],
+  "private_server_policy": [
+    "POST /preservation/v1/purchase-intents is a preservation transport adapter because the native SDK callback protocol is not recovered.",
+    "AutoAuthorizePurchaseProvider approves valid direct packs locally; no Google/Apple receipt verification is claimed.",
+    "For direct charge.lua packs, vip_progression_delta equals base_crystal only; this remains PRIVATE_SERVER_POLICY_SOURCE_BOUNDED because original server settlement code is absent.",
+    "Completion delivery in Pass88 is BRIDGE_RESPONSE_POST_COMMIT; the included Lua shim injects the committed event because historical native/TCP push framing is unrecovered."
+  ],
+  "negative_checks": [
+    "MID36857 was not implemented as a normal client game request.",
+    "No native Google Play/App Store callback format or receipt validation was guessed.",
+    "No TCP push framing was guessed.",
+    "No MID657, cards, Skin Mall MID2981, ordinary Store, cash-skin SKU, MID116, MID117, or MID118 was implemented."
+  ]
+}

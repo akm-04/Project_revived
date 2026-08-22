@@ -1,0 +1,133 @@
+{
+  "schema_version": 1,
+  "research": "Awakening and Blood Awakening lifecycle",
+  "timestamp": "2026-08-22T06:35:00+06:00",
+  "implementation_status": "RESEARCH_ONLY_NOT_IMPLEMENTED",
+  "scope": "Hero ordinary Awakening + Hero Twice/Blood Awakening mission lifecycle. Pet awakening excluded.",
+  "core_correction": {
+    "old_assumption": "Missing numeric xyd.mid.AWAKE_HERO blocks awakening.",
+    "reality": "The active UI/task flow does not use AWAKE_HERO for finalization. TASK_AWAKE_OPEN starts mission state, qualifying battle result reports mission completion, and TAKE_MISSION_AWARD finalizes. SelfPlayer.awakeHero appears stale/dead/version-drift."
+  },
+  "protocol": {
+    "TAKE_MISSION_AWARD": 161,
+    "OPEN_AWAKE_MISSION_legacy": 163,
+    "GIVE_UP_AWAKE_MISSION_legacy": 164,
+    "OPEN_AWAKE_TWICE_MISSION_legacy": 167,
+    "GIVE_UP_AWAKE_TWICE_MISSION_legacy": 168,
+    "GET_AWAKE_ITEM": 171,
+    "AWAKE_MISSION_LIST": 2561,
+    "TASK_LOAD_BY_TYPE": 2736,
+    "TASK_AWAKE_GIVE_UP": 2737,
+    "TASK_AWAKE_OPEN": 2738,
+    "campaign_start": "FIGHT",
+    "campaign_result": "FIGHT_RESULT",
+    "bloodline_start": "UNLIMIT_START_FIGHT",
+    "bloodline_result": "UNLIMIT_FIGHT_RESULT"
+  },
+  "ordinary_awaken": {
+    "mission_rows": 465,
+    "heroes": 164,
+    "stage_distribution": {
+      "1": 164,
+      "-1": 137,
+      "2": 164
+    },
+    "stage1_rows": 164,
+    "stage2_rows": 164,
+    "auxiliary_stage_minus1_rows": 137,
+    "open_requirements": {
+      "hero_level": 90,
+      "special_awaken_item_equipped_or_present_in_awaken_slot": true,
+      "hero_source_can_awaken": true,
+      "only_one_active_awake_type_HERO_task": true
+    },
+    "stage1": "Exclusive-awaken gear/material requirement. Opening is initiated from the Hero gear slot/UI and persisted as TaskType.AWAKE mission state.",
+    "auxiliary_stage_minus1": "137 source rows represent extra/parallel mode objectives. TaskAwakeCell only renders stages 1/2; treat -1 as auxiliary server-tracked task records until runtime contract is characterized.",
+    "stage2": "Hero-specific Campaign objective. SelectTeam preselects the awakening Hero and BattleCreate evaluates the special condition locally.",
+    "stage2_objective_types": {
+      "1_SELF_KILL": 20,
+      "2_DAMAGE_ACHIEVE": 3,
+      "3_ALONE_KILL": 15,
+      "4_ALL_ALIVE": 126
+    },
+    "battle_completion_signal": "BattleCreate adds awake_mission=<mission_id> to FIGHT_RESULT only when getAwakeMissionResult() is true. Sweep requests can also carry awake_mission.",
+    "final_claim": "TaskAwakeCell calls TAKE_MISSION_AWARD. On final mission success, client locally changes Hero table_id beforeAwakenID->afterAwakenID and enables Awake skill. Future server must persist equivalent canonical Hero state atomically without generic double projection."
+  },
+  "blood_awaken": {
+    "mission_rows": 162,
+    "heroes": 81,
+    "stage1_rows": 81,
+    "stage2_rows": 81,
+    "open_requirements": {
+      "already_awakened": true,
+      "hero_level": 100,
+      "hero_color_quality": 15,
+      "awake_twice_stage": "UNSTART",
+      "source_can_awake_twice": true
+    },
+    "stage1": "Bloodline exclusive gear requirement; 75/81 source rows route to campaign 1300003, with special-case routes for six heroes.",
+    "stage2": "Dedicated AwakeTwiceSelectTeamWindow. Requires at least two selected heroes and starts UNLIMIT_START_FIGHT with twice_awake_mission and incubus_id equal to mission id.",
+    "result_signal": "On win BattleUnlimit sends UNLIMIT_FIGHT_RESULT with twice_awake_mission=<mission_id>. On loss it does not mark mission success.",
+    "final_claim": "TAKE_MISSION_AWARD; client enables AwakeTwice skill. twice_awake_stage progresses 0 UNSTART -> 1 -> 2 -> 3 COMPLETE and must become server-canonical Hero state."
+  },
+  "client_task_shape_required": [
+    "table_id",
+    "awake_type",
+    "is_going",
+    "is_complete",
+    "is_open",
+    "count"
+  ],
+  "give_up": {
+    "mid": 2737,
+    "server_state_required": true,
+    "client_side_effects": "For HERO_TWICE client resets twice_awake_stage=0; delete_item entries are removed locally after successful give-up. Server must persist matching state/inventory atomically and avoid double projection."
+  },
+  "runtime_evidence_pass72": {
+    "TASK_AWAKE_OPEN_requests": 5,
+    "mission_ids": [
+      1067001,
+      1001001
+    ],
+    "current_handler": "TaskHandlers.mission_status",
+    "finding": "legacy stub returns superficial success without creating awake mission state; failure is expected and becomes next dedicated mission-domain migration target"
+  },
+  "future_architecture": {
+    "owner": "Dedicated AwakeningMissionService/mission aggregate coordinated with HeroEntityMutationService and Campaign/Battle result handling",
+    "not_a_simple_hero_mid": "Awakening is a cross-domain mission lifecycle: Task state + Campaign/special battle proof + inventory/equipment + final Hero state.",
+    "transaction_boundaries": [
+      "TASK_AWAKE_OPEN mission creation",
+      "TASK_AWAKE_GIVE_UP cleanup",
+      "FIGHT_RESULT/UNLIMIT_FIGHT_RESULT mission progress/complete",
+      "TAKE_MISSION_AWARD stage transition/final Hero mutation"
+    ],
+    "campaign_dependency": "Ordinary Awakening completion is coupled to Campaign FIGHT_RESULT. Campaign Energy settlement remains a separate Campaign migration but should be designed in the same campaign transaction seam."
+  },
+  "negative_memory": [
+    "Do not implement the stale undefined AWAKE_HERO path as a guessed numeric MID.",
+    "Do not mark Campaign awakening objectives complete from FIGHT start alone; client sends awake_mission only on qualifying FIGHT_RESULT.",
+    "Do not trust arbitrary awake_mission supplied by clients without validating active mission, expected campaign, required Hero/condition and result semantics.",
+    "Do not model Blood Awakening stage2 as ordinary Campaign; it uses UNLIMIT_START_FIGHT/UNLIMIT_FIGHT_RESULT.",
+    "Do not treat auxiliary stage=-1 records as ordinary visible stages without runtime characterization."
+  ],
+  "authority_files": [
+    "app/model/Task.lua",
+    "app/windows/HeroMainWindow.lua",
+    "app/windows/HeroEquipItem.lua",
+    "app/windows/TaskAwakeCell.lua",
+    "app/windows/MapDetailWindow.lua",
+    "app/windows/SelectTeamWindow.lua",
+    "app/scenes/BattleCreate.lua",
+    "app/windows/AwakeTwiceSelectTeamWindow.lua",
+    "app/scenes/BattleUnlimit.lua",
+    "app/common/tables/MissionTable.lua",
+    "app/common/tables/CampaignTable.lua",
+    "app/common/tables/HeroTable.lua",
+    "app/model/NormalHero.lua",
+    "data/tables/awaken_mission.lua",
+    "data/tables/bloodline_mission.lua",
+    "data/tables/campaign.lua",
+    "data/tables/misc.lua",
+    "app/common/network/mid.lua"
+  ]
+}

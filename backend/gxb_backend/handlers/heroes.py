@@ -79,22 +79,80 @@ class HeroHandlers:
         return self.ctx.state.get_player().pets_payload()
 
     def evolve_hero(self, req: dict) -> dict:
-        """MID52: persist the source-backed normal-Hero scroll evolution."""
+        """MID52: source-distinguish ordinary and post-5 SuperHero evolution."""
+        hero = self.ctx.state.get_hero_repository().get(req.get("partner_id"))
+        advanced = self.ctx.state.get_hero_advanced_progression_repository()
+        if advanced.is_super(hero):
+            return advanced.super_evolve(req)
         return self.ctx.state.get_hero_progression_repository().evolve_hero(req)
 
     def set_hero_equip(self, req: dict) -> dict:
-        """MID54: consume the source current-color item and persist its slot."""
+        """MID54: ordinary equipment or source-distinct SuperHero fixed gear."""
+        hero = self.ctx.state.get_hero_repository().get(req.get("partner_id"))
+        advanced = self.ctx.state.get_hero_advanced_progression_repository()
+        if advanced.is_super(hero):
+            return advanced.super_set_equip(req.get("partner_id"), req.get("equip_index"))
         return self.ctx.state.get_hero_equipment_repository().set_hero_equip(
             req.get("partner_id"), req.get("equip_index")
         )
 
     def one_click_equip(self, req: dict) -> dict:
-        """MID62: mirror the client source composition/potion/Mana planner."""
+        """MID62: ordinary planner or source-distinct SuperHero fixed gear."""
+        hero = self.ctx.state.get_hero_repository().get(req.get("partner_id"))
+        advanced = self.ctx.state.get_hero_advanced_progression_repository()
+        if advanced.is_super(hero):
+            return advanced.super_one_click_equip(req.get("partner_id"))
         return self.ctx.state.get_hero_equipment_repository().one_click_equip(req.get("partner_id"))
 
     def one_click_promote(self, req: dict) -> dict:
         """MID57: atomically promote one early ordinary NormalHero color."""
         return self.ctx.state.get_hero_equipment_repository().one_click_promote(req.get("partner_id"))
+
+    def powerup_hero(self, req: dict) -> dict:
+        """MID51: promote after all ordinary current-color gear is collected."""
+        return self.ctx.state.get_hero_equipment_repository().powerup_hero(req.get("partner_id"))
+
+
+    def upgrade_super_equip(self, req: dict) -> dict:
+        return self.ctx.state.get_hero_advanced_progression_repository().super_enhance_equip(req)
+
+    def fumo(self, req: dict) -> dict:
+        return self.ctx.state.get_hero_advanced_progression_repository().fumo(req)
+
+    def element_equip(self, req: dict) -> dict:
+        return self.ctx.state.get_hero_advanced_progression_repository().element_equip(req)
+
+    def element_strengthen(self, req: dict) -> dict:
+        return self.ctx.state.get_hero_advanced_progression_repository().element_strengthen(req)
+
+    def element_unload(self, req: dict) -> dict:
+        return self.ctx.state.get_hero_advanced_progression_repository().element_unload(req)
+
+    def element_destroy_on_hero(self, req: dict) -> dict:
+        return self.ctx.state.get_hero_advanced_progression_repository().element_destroy_on_hero(req)
+
+    def element_destroy_backpack(self, req: dict) -> dict:
+        return self.ctx.state.get_hero_advanced_progression_repository().element_destroy_backpack(req)
+
+    def inscription_insert(self, req: dict) -> dict:
+        return self.ctx.state.get_hero_advanced_progression_repository().inscription_insert(req)
+
+    def inscription_remove(self, req: dict) -> dict:
+        return self.ctx.state.get_hero_advanced_progression_repository().inscription_remove(req)
+
+    def inscription_resolve(self, req: dict) -> dict:
+        return self.ctx.state.get_hero_advanced_progression_repository().inscription_resolve(req)
+
+    def breach_stone_add(self, req: dict) -> dict:
+        return self.ctx.state.get_hero_advanced_progression_repository().breach_stone_add(req)
+
+    def breach_stone_evolve(self, req: dict) -> dict:
+        return self.ctx.state.get_hero_advanced_progression_repository().breach_stone_evolve(req)
+
+    def advanced_hidden_fail_closed(self, req: dict) -> dict:
+        # PRIVATE_SERVER_POLICY sentinel. Effective src_64 exposes these request
+        # surfaces but not the server-side random/instance-generation algorithm.
+        return {"error_code": 1, "msg": "advanced_progression_server_algorithm_unresolved"}
 
     # SET_LOCK_HERO and SET_REP_HERO remain symbolic/undefined in supplied
     # source. Keep the helpers for a future verified numeric mapping, but do not

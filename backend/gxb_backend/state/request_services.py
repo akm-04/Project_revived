@@ -5,29 +5,42 @@ from pathlib import Path
 from typing import Callable
 
 from gxb_backend.content import GameDataCatalog
+from gxb_backend.content.item_sale_catalog import ItemSaleCatalog
 from gxb_backend.content.campaign_drop_source_catalog import CampaignDropSourceCatalog
 from gxb_backend.content.magic_summon_source_catalog import MagicSummonSourceCatalog
 from gxb_backend.content.summon_operation_catalog import SummonOperationCatalog
 from gxb_backend.content.summon_pool_catalog import SummonPoolCatalog
 from gxb_backend.content.sx_soul_box_source_catalog import SXSoulBoxSourceCatalog
+from gxb_backend.content.recharge_catalog import RechargeSourceCatalog
 from gxb_backend.content.summon_featured_catalog import SummonFeaturedCatalog
 
+from .awakening_mission_service import AwakeningMissionService
+from .commerce_service import CommerceEntitlementService, RechargeCatalogService
+from .commerce_purchase import CommerceSettlementService
+from .vip_policy import VipPrivilegeResolver, VipProgressionPolicy
 from .campaign_drop_planner import (
     CampaignDropPlanner,
     CampaignDropPolicyRegistry,
     SystemRandomSource,
 )
+from .economy_ledger import EconomyLedger
 from .economy_repository import EconomyRepository
 from .function_state_repository import FunctionStateRepository
 from .global_response_semantics import GlobalResponseSemantics
+from .hero_entity_mutation_service import HeroEntityMutationService
+from .hero_advanced_progression_repository import HeroAdvancedProgressionRepository
 from .hero_equipment_repository import HeroEquipmentRepository
 from .hero_progression_repository import HeroProgressionRepository
 from .hero_repository import HeroRepository
 from .inventory_repository import InventoryRepository
+from .inventory_sale_service import InventorySaleService
 from .mission_repository import MissionRepository
+from .mutation_settlement_service import MutationSettlementService
 from .player_state import PlayerState
 from .reward_transaction_service import RewardTransactionService
 from .resource_registry import ResourceRegistry
+from .server_clock import ServerClock
+from .temporal_policy_service import TemporalPolicyService
 from .summon_operation_registry import SummonOperationRegistry
 from .summon_cost_plan import SummonCostPlanRegistry
 from .summon_counter_policy import SummonCounterPolicyRegistry, PrivateServerSummonCounterEngine
@@ -59,6 +72,7 @@ class RequestServices:
         *,
         catalog: GameDataCatalog,
         featured_rotation: SummonFeaturedRotationPolicy | None = None,
+        server_clock: ServerClock | None = None,
     ) -> None:
         self.player = player
         self.data_dir = Path(data_dir)
@@ -67,16 +81,54 @@ class RequestServices:
         self.resource_registry = ResourceRegistry.load(self.data_dir / "resource_registry.json")
         self.response_semantics = GlobalResponseSemantics(player, self.uow)
         save = self.uow.request_save
+        self.server_clock = server_clock or ServerClock()
+        # Pass87 Commerce/VIP policy is request-scoped and source-generated.
+        # charge/vip remain Commerce-owned; Crystal remains EconomyLedger-owned.
+        self.vip_progression = VipProgressionPolicy(self.data_dir)
+        self.vip_privileges = VipPrivilegeResolver(player, self.vip_progression)
+        self.recharge_source_catalog = RechargeSourceCatalog(self.data_dir)
+        self.commerce = CommerceEntitlementService(
+            player, self.vip_progression, save, uow=self.uow
+        )
+        self.recharge_catalog = RechargeCatalogService(
+            player, self.recharge_source_catalog, self.commerce, clock=self.server_clock
+        )
+        self.temporal = TemporalPolicyService(
+            player, self.data_dir, save, clock=self.server_clock, uow=self.uow,
+            vip_privileges=self.vip_privileges,
+        )
 
         self.function_state = FunctionStateRepository(player, self.catalog, save, self.uow.stage_semantic)
         self.tutorial = TutorialMilestoneRepository(player, self.function_state, save)
+        self.economy_ledger = EconomyLedger(
+            player, self.resource_registry, save, uow=self.uow
+        )
+        self.commerce_settlement = CommerceSettlementService(
+            player,
+            self.recharge_source_catalog,
+            self.commerce,
+            self.economy_ledger,
+            self.vip_progression,
+            self.uow,
+            clock=self.server_clock,
+        )
         self.economy = EconomyRepository(
             player, self.data_dir, save, function_unlocks=self.function_state,
-            resource_registry=self.resource_registry,
+            resource_registry=self.resource_registry, ledger=self.economy_ledger, uow=self.uow,
+            temporal=self.temporal,
         )
-        self.inventory = InventoryRepository(player, save)
+        self.inventory = InventoryRepository(player, save, uow=self.uow)
+        self.stack_inventory = self.inventory
+        self.mutation_settlement = MutationSettlementService(
+            catalog=self.catalog,
+            ledger=self.economy_ledger,
+            stacks=self.stack_inventory,
+            uow=self.uow,
+            temporal=self.temporal,
+        )
         self.heroes = HeroRepository(
-            player, save, self.data_dir, economy=self.economy, catalog=self.catalog, uow=self.uow
+            player, save, self.data_dir, economy=self.economy, catalog=self.catalog, uow=self.uow,
+            temporal=self.temporal, settlement=self.mutation_settlement,
         )
         self.hero_progression = HeroProgressionRepository(
             player,
@@ -87,7 +139,13 @@ class RequestServices:
             uow=self.uow,
             response_semantics=self.response_semantics,
             catalog=self.catalog,
+            temporal=self.temporal,
+            settlement=self.mutation_settlement,
         )
+        self.hero_entities = HeroEntityMutationService(
+            self.heroes, self.hero_progression, self.uow
+        )
+        self.mutation_settlement.register_entity_owner("HERO", self.hero_entities)
         self.hero_equipment = HeroEquipmentRepository(
             player,
             self.data_dir,
@@ -96,9 +154,20 @@ class RequestServices:
             heroes=self.heroes,
             progression=self.hero_progression,
             economy=self.economy,
+            uow=self.uow,
+            settlement=self.mutation_settlement,
+        )
+        self.hero_advanced = HeroAdvancedProgressionRepository(
+            player, self.data_dir, save, inventory=self.inventory, heroes=self.heroes,
+            uow=self.uow, settlement=self.mutation_settlement,
+        )
+        self.item_sale_catalog = ItemSaleCatalog.load(self.data_dir / "item_sale_catalog.json")
+        self.inventory_sales = InventorySaleService(
+            player, self.item_sale_catalog, self.mutation_settlement, self.uow
         )
         self.rewards = RewardTransactionService(
-            self.catalog, self.economy, self.inventory, self.heroes, self.uow
+            self.catalog, self.economy, self.inventory, self.heroes, self.uow,
+            resource_registry=self.resource_registry, settlement=self.mutation_settlement,
         )
         self.missions = MissionRepository(
             player,
@@ -109,6 +178,10 @@ class RequestServices:
             catalog=self.catalog,
             rewards=self.rewards,
             uow=self.uow,
+        )
+        self.awakening_missions = AwakeningMissionService(
+            player, self.data_dir, save, heroes=self.heroes, inventory=self.inventory,
+            uow=self.uow, settlement=self.mutation_settlement,
         )
         # Pass40.1 Campaign planning seam. Effective-source facts, executable
         # policy and randomness remain separate; RequestServices only composes
@@ -211,6 +284,7 @@ class RequestServices:
             sx_source=self.sx_soul_box_source,
             sx_policy=self.sx_soul_box_policy,
             sx_planner=self.sx_soul_box_planner,
+            vip_privileges=self.vip_privileges,
             uow=self.uow,
         )
         self.world = WorldRepository(
@@ -221,10 +295,12 @@ class RequestServices:
             economy=self.economy,
             hero_progression=self.hero_progression,
             missions=self.missions,
+            awakening_missions=self.awakening_missions,
             catalog=self.catalog,
             rewards=self.rewards,
             tutorial=self.tutorial,
             drop_planner=self.campaign_drop_planner,
+            settlement=self.mutation_settlement,
             uow=self.uow,
         )
 

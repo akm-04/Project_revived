@@ -41,8 +41,8 @@
       "mana_debit": 900000,
       "counter_delta": 100,
       "wire_kind_counts_sample_run": {
-        "hero": 2,
-        "item": 98
+        "hero": 3,
+        "item": 97
       },
       "immediate_retry_replayed_without_second_debit": true
     },

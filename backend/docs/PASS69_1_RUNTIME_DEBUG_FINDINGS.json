@@ -1,0 +1,57 @@
+{
+  "distinct_mids": 34,
+  "engine_error_code_nonzero": 0,
+  "fallback_requests": 0,
+  "http_5xx": 0,
+  "input_debug": "user Pass69.0 runtime debug.zip",
+  "observed_sell_items": [
+    {
+      "app_v": "1.631.0",
+      "item_id": 50001011,
+      "item_num": 1,
+      "mid": 82,
+      "platform": 3,
+      "region": 197,
+      "token": "local_token",
+      "v_": "1.631.0"
+    },
+    {
+      "app_v": "1.631.0",
+      "item_id": 50001011,
+      "item_num": 1,
+      "mid": 82,
+      "platform": 3,
+      "region": 197,
+      "token": "local_token",
+      "v_": "1.631.0"
+    },
+    {
+      "app_v": "1.631.0",
+      "item_id": 50001011,
+      "item_num": 1,
+      "mid": 82,
+      "platform": 3,
+      "region": 197,
+      "token": "local_token",
+      "v_": "1.631.0"
+    },
+    {
+      "app_v": "1.631.0",
+      "item_id": 50001012,
+      "item_num": 1,
+      "mid": 82,
+      "platform": 3,
+      "region": 197,
+      "token": "local_token",
+      "v_": "1.631.0"
+    }
+  ],
+  "other_runtime_scope": "No traceback/5xx/nonzero engine error observed; user reported neighboring summon/Campaign/skill/restart probes otherwise positive.",
+  "pass": "69.1",
+  "python_tracebacks": 0,
+  "release_metadata_issue": "Pass69.0 runtime banner incorrectly identified itself as Pass68.1; corrected in Pass69.1.",
+  "requests": 300,
+  "root_cause": "MID82/MID86 InventoryHandlers were legacy success stubs returning awards=[]; client removed stack locally on success but backend never credited item mana/crystal sale value.",
+  "sell_item_requests": 4,
+  "sell_items_requests": 0
+}

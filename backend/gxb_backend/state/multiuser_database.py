@@ -23,6 +23,8 @@ from .player_database import JsonPlayerDatabase
 from .player_state import PlayerState
 from .profiles import apply_profile, make_fresh_player
 from .skill_point_policy import SkillPointPolicy
+from .commerce_service import CommerceEntitlementService
+from .vip_policy import VipProgressionPolicy
 from .maintenance_services import PlayerMaintenanceServices
 
 if TYPE_CHECKING:
@@ -382,8 +384,210 @@ class MultiUserDatabase:
             self.save_player(player)
         return player
 
+    def _apply_pass72_debug_inventory_seed(self, player: PlayerState) -> bool:
+        """One-shot PRIVATE_SERVER_POLICY seed for the anonymous debug account.
+
+        This is deliberately not a default-player rule and never applies to
+        credential accounts. The migration marker prevents consumed test gear
+        from being replenished on every load, so runtime probes still exercise
+        real StackInventory deductions.
+        """
+        if str(getattr(player, "account_uid", "") or "") != SANDBOX_UID:
+            return False
+        path = self.data_dir / "debug_guest_inventory_seed.json"
+        try:
+            payload = json.loads(path.read_text(encoding="utf-8"))
+        except Exception:
+            return False
+        if not isinstance(payload, dict):
+            return False
+        meta = payload.get("_meta") if isinstance(payload.get("_meta"), dict) else {}
+        marker = str(meta.get("migration_marker") or "pass72_debug_hero_inventory_seed_v1")
+        state = player.persistence_state if isinstance(player.persistence_state, dict) else {}
+        if state is not player.persistence_state:
+            player.persistence_state = state
+        migrations = state.setdefault("migrations", {})
+        if not isinstance(migrations, dict):
+            migrations = {}
+            state["migrations"] = migrations
+        if migrations.get(marker):
+            return False
+
+        minimum = max(1, int(payload.get("minimum_quantity", 1000) or 1000))
+        ids = []
+        for raw in payload.get("item_ids") or []:
+            try:
+                item_id = int(raw)
+            except (TypeError, ValueError):
+                continue
+            if item_id > 0:
+                ids.append(item_id)
+        if not ids:
+            return False
+
+        if not isinstance(player.backpack_items, list):
+            player.backpack_items = []
+        by_id: dict[int, dict[str, Any]] = {}
+        for row in player.backpack_items:
+            if not isinstance(row, dict):
+                continue
+            try:
+                item_id = int(row.get("table_id", 0) or 0)
+            except (TypeError, ValueError):
+                continue
+            if item_id > 0:
+                by_id[item_id] = row
+        seeded = 0
+        for item_id in sorted(set(ids)):
+            row = by_id.get(item_id)
+            if row is None:
+                row = {"table_id": item_id, "item_num": minimum, "time": 0}
+                player.backpack_items.append(row)
+                by_id[item_id] = row
+                seeded += 1
+            else:
+                try:
+                    current = int(row.get("item_num", 0) or 0)
+                except (TypeError, ValueError):
+                    current = 0
+                if current < minimum:
+                    row["item_num"] = minimum
+                    seeded += 1
+        migrations[marker] = {
+            "applied": 1,
+            "minimum_quantity": minimum,
+            "source_item_count": len(set(ids)),
+            "rows_added_or_raised": seeded,
+        }
+        return True
+
+    def _apply_pass73_debug_advanced_seed(self, player: PlayerState) -> bool:
+        """One-shot Pass73 advanced-progression sandbox inventory seed."""
+        if str(getattr(player, "account_uid", "") or "") != SANDBOX_UID:
+            return False
+        path = self.data_dir / "debug_guest_advanced_inventory_seed.json"
+        try:
+            payload = json.loads(path.read_text(encoding="utf-8"))
+        except Exception:
+            return False
+        if not isinstance(payload, dict):
+            return False
+        meta = payload.get("_meta") if isinstance(payload.get("_meta"), dict) else {}
+        marker = str(meta.get("migration_marker") or "pass73_debug_advanced_progression_seed_v1")
+        state = player.persistence_state if isinstance(player.persistence_state, dict) else {}
+        if state is not player.persistence_state:
+            player.persistence_state = state
+        migrations = state.setdefault("migrations", {})
+        if not isinstance(migrations, dict):
+            migrations = {}; state["migrations"] = migrations
+        if migrations.get(marker):
+            return False
+        minimum = max(1, int(payload.get("minimum_quantity", 1000) or 1000))
+        ids=[]
+        for raw in payload.get("item_ids") or []:
+            try: item_id=int(raw)
+            except (TypeError,ValueError): continue
+            if item_id>0: ids.append(item_id)
+        if not ids: return False
+        if not isinstance(player.backpack_items, list): player.backpack_items=[]
+        by_id={}
+        for row in player.backpack_items:
+            if not isinstance(row,dict): continue
+            try: item_id=int(row.get("table_id",0) or 0)
+            except (TypeError,ValueError): continue
+            if item_id>0: by_id[item_id]=row
+        seeded=0
+        for item_id in sorted(set(ids)):
+            row=by_id.get(item_id)
+            if row is None:
+                row={"table_id":item_id,"item_num":minimum,"time":0}; player.backpack_items.append(row); by_id[item_id]=row; seeded+=1
+            else:
+                try: current=int(row.get("item_num",0) or 0)
+                except (TypeError,ValueError): current=0
+                if current<minimum: row["item_num"]=minimum; seeded+=1
+        migrations[marker]={"applied":1,"minimum_quantity":minimum,"source_item_count":len(set(ids)),"rows_added_or_raised":seeded}
+        return True
+
+
+    def _apply_pass75_debug_campaign_unlock(self, player: PlayerState) -> bool:
+        """One-shot source-graph Campaign unlock for anonymous QA only."""
+        if str(getattr(player, "account_uid", "") or "") != SANDBOX_UID:
+            return False
+        policy_path = self.data_dir / "debug_guest_campaign_unlock_pass75.json"
+        source_path = self.data_dir / "pass75_campaign_ownership_meta.json"
+        try:
+            policy = json.loads(policy_path.read_text(encoding="utf-8"))
+            source = json.loads(source_path.read_text(encoding="utf-8"))
+        except Exception:
+            return False
+        if not isinstance(policy, dict) or not isinstance(source, dict):
+            return False
+        meta = policy.get("_meta") if isinstance(policy.get("_meta"), dict) else {}
+        marker = str(meta.get("migration_marker") or "pass75_debug_campaign_unlock_v1")
+        state = player.persistence_state if isinstance(player.persistence_state, dict) else {}
+        if state is not player.persistence_state:
+            player.persistence_state = state
+        migrations = state.setdefault("migrations", {})
+        if not isinstance(migrations, dict):
+            migrations = {}; state["migrations"] = migrations
+        if migrations.get(marker):
+            return False
+
+        if not isinstance(player.world_map, dict):
+            player.world_map = {}
+        campaigns = source.get("campaigns") if isinstance(source.get("campaigns"), dict) else {}
+        counts = {}
+        for key, ids_key, seed_star in (
+            ("normal", "normal_campaign_ids", int(policy.get("normal_missing_stage_star", 1) or 1)),
+            ("super", "super_campaign_ids", int(policy.get("super_missing_stage_star", 0) or 0)),
+        ):
+            raw_rows = player.world_map.get(key)
+            rows = raw_rows if isinstance(raw_rows, list) else []
+            by_id = {}
+            for row in rows:
+                if not isinstance(row, dict):
+                    continue
+                try: cid = int(row.get("campaign_id", 0) or 0)
+                except (TypeError, ValueError): cid = 0
+                if cid > 0: by_id[cid] = row
+            added = 0
+            for raw_id in source.get(ids_key) or []:
+                try: cid = int(raw_id)
+                except (TypeError, ValueError): continue
+                if cid <= 0: continue
+                source_row = campaigns.get(str(cid)) if isinstance(campaigns, dict) else {}
+                daily = max(0, int((source_row or {}).get("daily_limit", 0) or 0))
+                row = by_id.get(cid)
+                if row is None:
+                    row = {"campaign_id":cid,"star":max(0,min(3,seed_star)),"daily_limit":daily,"reset_count":0,"is_partner_drop":0}
+                    rows.append(row); by_id[cid]=row; added += 1
+                else:
+                    # Unlock policy never reduces progress. NORMAL prerequisites
+                    # need star>0 for MapWindow's Super gate; Super itself may
+                    # remain unbeaten while still being present/clickable.
+                    current = int(row.get("star", 0) or 0)
+                    row["star"] = max(current, max(0,min(3,seed_star)))
+                    if key == "super" and int(row.get("daily_limit", 0) or 0) <= 0:
+                        row["daily_limit"] = daily
+            player.world_map[key] = rows
+            counts[key] = {"source_rows":len(source.get(ids_key) or []),"added":added}
+        migrations[marker] = {"applied":1,"policy":"PRIVATE_SERVER_POLICY","counts":counts}
+        return True
+
     def normalize_player(self, player: PlayerState, *, persist: bool) -> bool:
         changed = False
+        if self._apply_pass72_debug_inventory_seed(player):
+            changed = True
+        if self._apply_pass73_debug_advanced_seed(player):
+            changed = True
+        if self._apply_pass75_debug_campaign_unlock(player):
+            changed = True
+        # Pass87 Commerce authority normalization runs at the durable player-load
+        # maintenance boundary. It is explicitly not a purchase transaction.
+        commerce_policy = VipProgressionPolicy(self.data_dir)
+        commerce = CommerceEntitlementService(player, commerce_policy)
+        if commerce.maintenance_normalize():
+            changed = True
         maintenance = PlayerMaintenanceServices(
             player, self.data_dir, featured_rotation=self.featured_rotation
         )

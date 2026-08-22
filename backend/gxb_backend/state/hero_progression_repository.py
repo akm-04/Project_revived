@@ -24,6 +24,12 @@ from .global_response_semantics import GlobalResponseSemantics
 from .hero_repository import HeroRepository
 from .inventory_repository import InventoryRepository
 from .player_state import PlayerState
+from .mutation_plan import (
+    ActorRef, EntityMutation, IdempotencySpec, MutationOrigin, MutationPlan,
+    ResourceMutation, StackMutation, TemporalTransition,
+)
+from .mutation_settlement_service import MutationSettlementError, MutationSettlementService
+from .temporal_policy_service import TemporalPolicyService
 from .skill_point_policy import SkillPointPolicy
 from .unit_of_work import OperationContext, UnitOfWork
 
@@ -40,6 +46,8 @@ class HeroProgressionRepository:
         uow: UnitOfWork | None = None,
         response_semantics: GlobalResponseSemantics | None = None,
         catalog: GameDataCatalog | None = None,
+        temporal: TemporalPolicyService | None = None,
+        settlement: MutationSettlementService | None = None,
     ) -> None:
         self.player = player
         self.data_dir = Path(data_dir)
@@ -49,9 +57,17 @@ class HeroProgressionRepository:
         self.uow = uow
         self.response_semantics = response_semantics
         self.catalog = catalog
+        self.temporal = temporal
+        self.settlement = settlement
         self.items = self._load_rows("item_progression_meta.json", "items")
         self.exp_levels = self._load_rows("partner_exp_meta.json", "levels")
         self.player_levels = self._load_rows("player_hero_level_meta.json", "levels")
+        self.star_progression = self._load_rows("hero_progression_meta.json", "stars")
+        try:
+            raw_progression = json.loads((self.data_dir / "hero_progression_meta.json").read_text(encoding="utf-8"))
+            self.normal_max_star = max(1, self._int(raw_progression.get("normal_max_star"), 5))
+        except Exception:
+            self.normal_max_star = 5
 
     @staticmethod
     def _int(value: Any, default: int = 0) -> int:
@@ -199,82 +215,80 @@ class HeroProgressionRepository:
         return new_exp
 
     def use_skill_point_item(self, req: dict[str, Any]) -> dict[str, Any]:
-        """Consume a source Skill Point item and explicitly sync the global pool.
+        """MID90: atomic Backpack debit + timed Skill Point credit.
 
-        MID90's endpoint-local Lua callback removes the Backpack item but reads
-        no Skill Point response field.  The successful web-response path runs
-        ``Backend.extraWebResponseCheck_()`` before LoadingProxy cleanup and the
-        inline callback; that global path dispatches ``economy_`` and
-        ``SelfPlayer.economySyncEvent_()`` consumes ``skill_point``.
-
-        Therefore this operation stages exactly one cumulative
-        ``economy_.skill_point`` semantic after the canonical mutation is marked
-        for commit.  Skill Point remains excluded from generic diff projection.
+        The client removes the submitted item locally after OK; Pass70/71 therefore
+        projects only the committed cumulative ``economy_.skill_point`` value and
+        never synthesizes an ``awards`` stack row for this debit.
         """
         item_id = self._int(req.get("item_id"), 0)
         count = max(0, self._int(req.get("item_num"), 0))
         meta = self._item_meta(item_id)
         per_item = max(0, self._int(meta.get("skill_point"), 0))
-        if count <= 0 or per_item <= 0:
-            return {"error_code": 1}
-        if self.inventory.get_item_num(item_id) < count:
+        if count <= 0 or per_item <= 0 or self.inventory.get_item_num(item_id) < count:
             return {"error_code": 1}
 
-        mutated = False
-
-        def mutate() -> None:
-            nonlocal mutated
-            policy = SkillPointPolicy(self.player, self.data_dir, self._save_callback)
-            policy.recover()
-            remaining = self.inventory.consume_item(item_id, count, persist=False)
-            if remaining is None:
-                return
-            self.player.skill_point = max(0, self._int(self.player.skill_point)) + per_item * count
-            policy.normalize_timer_after_gain()
-            self._save()
-            mutated = True
-            if self.response_semantics is not None:
-                self.response_semantics.stage_skill_point()
-
-        if self.uow is not None:
-            with self.uow.transaction(OperationContext(
+        if self.uow is not None and self.settlement is not None:
+            context = OperationContext(
                 actor_player_id=str(self.player.player_id),
                 domain="hero_progression",
                 operation_name="use_skill_point_item",
                 protocol_mid=90,
-            )):
-                mutate()
-        else:
-            # Compatibility construction outside RequestServices keeps the old
-            # canonical mutation semantics but has no request response bus.
-            mutate()
+            )
+            try:
+                with self.uow.transaction(context):
+                    plan = MutationPlan(
+                        schema_version=1,
+                        plan_id=f"skill-item:{item_id}:{count}:{self.uow.current_state_version}",
+                        origin=MutationOrigin(
+                            domain="hero_progression", operation="use_skill_point_item", protocol_mid=90
+                        ),
+                        actor=ActorRef(player_id=str(self.player.player_id)),
+                        expected_state_version=None,
+                        idempotency=IdempotencySpec(),
+                        preconditions=(),
+                        operations=(
+                            StackMutation(item_id, "DEBIT", count),
+                            TemporalTransition("skill_point", "CREDIT", per_item * count),
+                        ),
+                    )
+                    self.settlement.apply(plan)
+            except MutationSettlementError:
+                return {"error_code": 1}
+            return {}
 
-        if not mutated:
-            # error.lua defines xyd.error.ERROR = 1.  Returning a non-zero
-            # result is essential here: the endpoint-local callback removes the
-            # Backpack item only on xyd.error.OK, so a duplicate/insufficient
-            # request must never receive fabricated success.
+        # Compatibility-only fallback for direct repository construction.
+        policy = SkillPointPolicy(
+            self.player, self.data_dir, self._save_callback, temporal=self.temporal
+        )
+        policy.recover()
+        remaining = self.inventory.consume_item(item_id, count, persist=False)
+        if remaining is None:
             return {"error_code": 1}
-
-        # Source MID90 callback consumes no endpoint-local resource field.
+        if self.temporal is not None:
+            self.temporal.credit("skill_point", per_item * count, persist=False, publish=True)
+        else:
+            self.player.skill_point = max(0, self._int(self.player.skill_point)) + per_item * count
+            policy.normalize_timer_after_gain()
+        self._save()
         return {}
 
-    _NORMAL_HERO_MAX_STAR = 5
-    _EVOLUTION_STONE_REQUIRED_BY_NEXT_STAR = {2: 20, 3: 50, 4: 100, 5: 150}
+    def _normal_evolution_cost(self, next_star: int) -> tuple[int, int] | None:
+        row = self.star_progression.get(str(self._int(next_star, 0))) or {}
+        fragments = max(0, self._int(row.get("evolve_num"), 0))
+        mana = max(0, self._int(row.get("evolve_price"), 0))
+        if fragments <= 0 or mana <= 0:
+            return None
+        return fragments, mana
 
     def evolve_hero(self, req: dict[str, Any]) -> dict[str, Any]:
-        """MID52: canonically consume the owned Girl's scrolls and raise star.
+        """MID52: atomically debit source scroll+Mana cost and persist Hero star.
 
-        ``SelfPlayer:evolveHero`` sends only the runtime ``partner_id``.  On an
-        OK callback the stock client removes ``StarLevelSuipian[next_star]`` of
-        that Girl's own ``stone_id`` and ``NormalHero:evolution`` increments the
-        visible star locally.  The endpoint consumes no response fields, so the
-        server must persist the same mutation and return an empty success object.
-
-        All identity checks are typed/source-backed.  No numeric-prefix rule is
-        used: the owned Hero resolves to PARTNER, its explicit ``stone_id`` must
-        resolve to an ITEM row of type 3 whose ``partner_id`` points back to the
-        same Girl, and only ordinary 1->5 evolution is activated here.
+        HeroMainWindow gates evolution on ``star:evolvePrice(next_star)`` and
+        SelfPlayer removes ``StarLevelSuipian[next_star]`` of the Girl's own
+        scroll locally after OK. The server therefore settles both debits plus
+        the canonical Hero ENTITY transition under one PlayerUnitOfWork while
+        projecting only cumulative Mana; it never synthesizes a scroll award.
         """
         partner_id = self._int(req.get("partner_id"), 0)
         hero = self.heroes.get(partner_id)
@@ -284,9 +298,17 @@ class HeroProgressionRepository:
         table_id = self._int(hero.get("table_id"), 0)
         current_star = self._int(hero.get("star"), 0)
         next_star = current_star + 1
-        required = self._EVOLUTION_STONE_REQUIRED_BY_NEXT_STAR.get(next_star)
-        if table_id <= 0 or current_star <= 0 or current_star >= self._NORMAL_HERO_MAX_STAR or required is None:
+        cost = self._normal_evolution_cost(next_star)
+        if (
+            table_id <= 0
+            or current_star <= 0
+            or current_star >= self.normal_max_star
+            or cost is None
+        ):
+            # SuperHero post-5 evolution is source-visible but has distinct
+            # scroll semantics. Pass72 does not guess that boundary.
             return {"error_code": 1}
+        required, mana_cost = cost
 
         try:
             partner_ref = self.catalog.resolve(
@@ -323,36 +345,49 @@ class HeroProgressionRepository:
         ):
             return {"error_code": 1}
 
-        def mutate() -> None:
-            remaining = self.inventory.consume_item(stone_id, required, persist=False)
-            if remaining is None:
-                raise RuntimeError("canonical Backpack changed during MID52 transaction")
-            hero["star"] = next_star
-            collected = self.player.collected_heros.get(str(table_id))
-            if isinstance(collected, dict):
-                collected["star"] = max(self._int(collected.get("star"), 0), next_star)
-                collected["is_collected"] = 1
-            self._save()
+        if self.uow is not None and self.settlement is not None:
+            context = OperationContext(
+                actor_player_id=str(self.player.player_id),
+                domain="hero_progression",
+                operation_name="evolve_hero",
+                protocol_mid=52,
+            )
+            try:
+                with self.uow.transaction(context):
+                    self.settlement.apply(MutationPlan(
+                        schema_version=1,
+                        plan_id=f"hero-evolve:{partner_id}:{next_star}:{self.uow.current_state_version}",
+                        origin=MutationOrigin(domain="hero_progression", operation="evolve_hero", protocol_mid=52),
+                        actor=ActorRef(player_id=str(self.player.player_id)),
+                        expected_state_version=None,
+                        idempotency=IdempotencySpec(),
+                        preconditions=(),
+                        operations=(
+                            StackMutation(stone_id, "DEBIT", required),
+                            ResourceMutation("mana", "DEBIT", mana_cost),
+                            EntityMutation("HERO", partner_id, "EVOLVE_STAR", amount=1),
+                        ),
+                    ))
+            except MutationSettlementError:
+                return {"error_code": 1}
+            return {}
 
-        if self.uow is not None:
-            try:
-                with self.uow.transaction(OperationContext(
-                    actor_player_id=str(self.player.player_id),
-                    domain="hero_progression",
-                    operation_name="evolve_hero",
-                    protocol_mid=52,
-                )):
-                    mutate()
-            except RuntimeError:
-                return {"error_code": 1}
-        else:
-            try:
-                mutate()
-            except RuntimeError:
-                return {"error_code": 1}
+        # Compatibility-only fallback for direct repository construction.
+        if self.inventory.get_item_num(stone_id) < required or self._int(self.player.mana, 0) < mana_cost:
+            return {"error_code": 1}
+        if self.inventory.consume_item(stone_id, required, persist=False) is None:
+            return {"error_code": 1}
+        self.player.mana = self._int(self.player.mana, 0) - mana_cost
+        hero["star"] = next_star
+        collected = self.player.collected_heros.get(str(table_id))
+        if isinstance(collected, dict):
+            collected["star"] = max(self._int(collected.get("star"), 0), next_star)
+            collected["is_collected"] = 1
+        self._save()
         return {}
 
     def use_exp_item(self, req: dict[str, Any]) -> dict[str, Any]:
+        """MID55: atomic source EXP-item debit + canonical Hero EXP transition."""
         item_id = self._int(req.get("item_id"), 0)
         count = max(0, self._int(req.get("item_num"), 0))
         partner_id = self._int(req.get("partner_id"), 0)
@@ -362,32 +397,57 @@ class HeroProgressionRepository:
 
         if hero is None or count <= 0 or per_item <= 0:
             return {}
+        if self.inventory.get_item_num(item_id) < count:
+            return {}
+
+        gain = per_item * count
+        if self.uow is not None and self.settlement is not None:
+            context = OperationContext(
+                actor_player_id=str(self.player.player_id), domain="hero_progression",
+                operation_name="use_exp_item", protocol_mid=55,
+            )
+            try:
+                with self.uow.transaction(context):
+                    self.settlement.apply(MutationPlan(
+                        schema_version=1,
+                        plan_id=f"hero-exp-item:{partner_id}:{item_id}:{count}:{self.uow.current_state_version}",
+                        origin=MutationOrigin(domain="hero_progression", operation="use_exp_item", protocol_mid=55),
+                        actor=ActorRef(player_id=str(self.player.player_id)),
+                        expected_state_version=None,
+                        idempotency=IdempotencySpec(),
+                        preconditions=(),
+                        operations=(
+                            StackMutation(item_id, "DEBIT", count),
+                            EntityMutation("HERO", partner_id, "ADD_EXP", amount=gain),
+                        ),
+                    ))
+            except MutationSettlementError:
+                return {}
+            hero = self.heroes.get(partner_id) or hero
+            return {
+                "item_id": item_id,
+                "partner_exp": max(0, self._int(hero.get("exp"), 0)),
+                "total_num": self.inventory.get_item_num(item_id),
+            }
+
         consumed = self.inventory.consume_item(item_id, count, persist=False)
         if consumed is None:
             return {}
-
-        start_level = max(1, self._int(hero.get("lev"), 1))
-        cap = max(1, self._hero_cap())
-        current_exp = self._normalized_total_exp(hero)
-        cap_exp = self._total_exp(cap)
-        new_exp = current_exp + per_item * count
-        if cap_exp > 0:
-            new_exp = min(new_exp, cap_exp)
-        hero["exp"] = new_exp
-        hero["lev"] = self._level_for_total_exp(new_exp, start_level, cap)
+        new_exp = self.grant_exp_amount(partner_id, gain, persist=False)
+        if new_exp is None:
+            return {}
         self._save()
-
-        # AddExpWindow/UseExpWindow directly consume these exact three fields.
         return {"item_id": item_id, "partner_exp": new_exp, "total_num": max(0, consumed)}
 
     def use_exp_items(self, req: dict[str, Any]) -> dict[str, Any]:
+        """MID63: atomic multi-stack debit + one canonical Hero EXP transition."""
         partner_id = self._int(req.get("partner_id"), 0)
         hero = self.heroes.get(partner_id)
         rows = req.get("items") if isinstance(req.get("items"), list) else []
         if hero is None or not rows:
             return {}
 
-        valid: list[dict[str, int]] = []
+        counts: dict[int, int] = {}
         add_exp = 0
         for row in rows:
             if not isinstance(row, dict):
@@ -396,23 +456,44 @@ class HeroProgressionRepository:
             item_num = max(0, self._int(row.get("item_num"), 0))
             per_item = max(0, self._int(self._item_meta(item_id).get("exp"), 0))
             if item_id > 0 and item_num > 0 and per_item > 0:
-                valid.append({"item_id": item_id, "item_num": item_num})
+                counts[item_id] = counts.get(item_id, 0) + item_num
                 add_exp += per_item * item_num
-
-        if not valid or not self.inventory.consume_items(valid, persist=False):
+        if not counts or add_exp <= 0:
+            return {}
+        if any(self.inventory.get_item_num(item_id) < count for item_id, count in counts.items()):
             return {}
 
-        start_level = max(1, self._int(hero.get("lev"), 1))
-        cap = max(1, self._hero_cap())
-        new_exp = self._normalized_total_exp(hero) + add_exp
-        cap_exp = self._total_exp(cap)
-        if cap_exp > 0:
-            new_exp = min(new_exp, cap_exp)
-        hero["exp"] = new_exp
-        hero["lev"] = self._level_for_total_exp(new_exp, start_level, cap)
+        if self.uow is not None and self.settlement is not None:
+            context = OperationContext(
+                actor_player_id=str(self.player.player_id), domain="hero_progression",
+                operation_name="use_exp_items", protocol_mid=63,
+            )
+            operations = [StackMutation(item_id, "DEBIT", count) for item_id, count in sorted(counts.items())]
+            operations.append(EntityMutation("HERO", partner_id, "ADD_EXP", amount=add_exp))
+            try:
+                with self.uow.transaction(context):
+                    self.settlement.apply(MutationPlan(
+                        schema_version=1,
+                        plan_id=f"hero-exp-items:{partner_id}:{self.uow.current_state_version}",
+                        origin=MutationOrigin(domain="hero_progression", operation="use_exp_items", protocol_mid=63),
+                        actor=ActorRef(player_id=str(self.player.player_id)),
+                        expected_state_version=None,
+                        idempotency=IdempotencySpec(),
+                        preconditions=(),
+                        operations=tuple(operations),
+                    ))
+            except MutationSettlementError:
+                return {}
+            # AddExpWindow's MID63 callback updates Hero and Backpack locally
+            # from the submitted item list and consumes no response fields.
+            return {}
+
+        valid = [{"item_id": item_id, "item_num": count} for item_id, count in counts.items()]
+        if not self.inventory.consume_items(valid, persist=False):
+            return {}
+        if self.grant_exp_amount(partner_id, add_exp, persist=False) is None:
+            return {}
         self._save()
-        # AddExpWindow's MID63 callback updates the hero locally from the exact
-        # selected source item values and does not consume response fields.
         return {}
 
     def _save(self) -> None:

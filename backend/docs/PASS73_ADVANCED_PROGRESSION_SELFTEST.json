@@ -1,0 +1,19 @@
+{
+  "pass": "73.0",
+  "status": "PASS",
+  "super_post5_evolve": true,
+  "super_equipment_enhancement": true,
+  "fumo_atomic": true,
+  "element_equipment_deterministic_plane": true,
+  "inscription_insert_remove": true,
+  "stone_evolution_mid2608_2609": true,
+  "hidden_random_fail_closed": true,
+  "debug_advanced_seed_items": 1225,
+  "deferred_hidden_server_policy": [
+    "Practice candidate generation",
+    "Inscription make/rebuild candidate generation",
+    "Horcrux instance generation",
+    "mission-driven Awakening/Blood Awakening deferred to dedicated mission research/implementation; undefined AWAKE_HERO is legacy/version-drift",
+    "Campaign Energy settlement"
+  ]
+}

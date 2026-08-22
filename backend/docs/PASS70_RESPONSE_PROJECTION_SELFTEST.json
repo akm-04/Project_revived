@@ -1,0 +1,16 @@
+{
+  "commit_callbacks": 3,
+  "cumulative_not_delta": true,
+  "journal_primary": true,
+  "legacy_five_field_fallback_preserved": true,
+  "nonlegacy_scalar_journal_projection": true,
+  "pass": "70.0",
+  "profiles": 8,
+  "recharge_nested_profile_preserved": true,
+  "rollback_journal_silent": true,
+  "shop_local_reconciliation_protected": true,
+  "stack_awards_synthesized": false,
+  "state_version": 3,
+  "status": "PASS",
+  "zero_filled_47_field_envelope": false
+}

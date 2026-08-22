@@ -7,7 +7,7 @@
   "checks": {
     "operator_tool_validation": "pass",
     "operator_summary": [
-      "GXB Pass42.12 Gacha Control summary",
+      "GXB Pass42.14 Gacha Control summary",
       "Rotation mode: startup_debug | debug_seed=0 | timezone=Asia/Dhaka",
       "SX Current: AUTO, AUTO",
       "SX Daily:   AUTO, AUTO, AUTO",

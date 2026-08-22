@@ -1,0 +1,24 @@
+{
+  "debug_seed": {
+    "minimum_quantity": 1000,
+    "one_shot": true,
+    "sandbox_only": true,
+    "unique_item_ids": 839
+  },
+  "deferred": [
+    "AWAKE_HERO numeric MID unresolved in effective mid.lua",
+    "SuperHero/post-5 evolution semantics",
+    "advanced awakened/bloodline/Fumo restoration",
+    "Campaign stamina debit"
+  ],
+  "entity_projection_tags_suppressed": true,
+  "mid51_entity_only_powerup": true,
+  "mid52_atomic_fragment_mana_entity": true,
+  "mid52_cumulative_mana_projection": true,
+  "mid53_temporal_entity_skill": true,
+  "mid54_stack_entity_equipment": true,
+  "mid55_stack_entity_exp": true,
+  "mid57_atomic_gear_promotion": true,
+  "pass": "72.0",
+  "status": "PASS"
+}

@@ -1,0 +1,93 @@
+{
+  "pass": "88.0",
+  "status": "IMPLEMENTED_SOURCE_BOUNDED_PRIVATE_BRIDGE",
+  "route": {
+    "method": "POST",
+    "path": "/preservation/v1/purchase-intents",
+    "default_engine_port": 9000
+  },
+  "authentication": {
+    "accepted": [
+      "token/access_token",
+      "sid",
+      "QQWTOKEN cookie",
+      "QQWSID cookie"
+    ],
+    "binding": [
+      "region",
+      "authenticated session"
+    ],
+    "client_forbidden_authority": [
+      "player_id",
+      "price",
+      "crystal_delta",
+      "vip",
+      "charge",
+      "first_buy_status"
+    ]
+  },
+  "intent": {
+    "required": [
+      "intent_id",
+      "charge_id",
+      "region",
+      "authentication"
+    ],
+    "platforms": [
+      "android",
+      "ios",
+      "preservation_manual",
+      "lua_preservation"
+    ],
+    "intent_id_rule": "Caller-supplied stable <=128-char id; reuse for identical fingerprint replays, incompatible reuse rejects.",
+    "fingerprint_fields": [
+      "authenticated player_id",
+      "region",
+      "charge_id",
+      "platform"
+    ]
+  },
+  "authorization": {
+    "provider": "AutoAuthorizePurchaseProvider",
+    "catalog": "RechargeSourceCatalog direct products only",
+    "ios_hidden_charge_ids": [
+      80001030
+    ]
+  },
+  "daily_reset_ordering": "Route evaluates DailyResetCoordinator after authenticated player binding and before Commerce mutation; failure returns 503 DAILY_RESET_UNDECIDED.",
+  "settlement": {
+    "transaction_owner": "PlayerUnitOfWork",
+    "crystal_owner": "EconomyLedger",
+    "commerce_owner": [
+      "charge",
+      "derived vip",
+      "product charge_count",
+      "product last_buy_time"
+    ],
+    "receipt_domain": "commerce_purchase",
+    "receipt_retention": "PERMANENT_NO_EVICTION",
+    "outbox": "player.commerce_state.completion_outbox[intent_id]"
+  },
+  "completion": {
+    "mid": 36857,
+    "mode": "BRIDGE_RESPONSE_POST_COMMIT",
+    "client_injection_required": true,
+    "params": [
+      "delta",
+      "total",
+      "vip",
+      "charge",
+      "charge_id",
+      "left_card_day",
+      "left_week_card_day",
+      "left_month_tili_day",
+      "privilege_left_card_day",
+      "privilege_month_card_end"
+    ],
+    "delivery_semantics": "Game-state mutation exactly-once; completion response safely replayable/at-least-once."
+  },
+  "manual_curl": "curl -sS -X POST \"http://127.0.0.1:9000/preservation/v1/purchase-intents\" \\\n  -H 'Content-Type: application/json' \\\n  -d '{\"intent_id\":\"manual-pass88-001\",\"charge_id\":80001007,\"platform\":\"preservation_manual\",\"token\":\"local_token\",\"region\":125}' ",
+  "lua_helper": "tools/pass88_purchase_bridge.lua",
+  "lua_manual": "xyd.pass88Purchase(80001007)",
+  "lua_intercept": "xyd.installPass88PurchaseBridge()"
+}

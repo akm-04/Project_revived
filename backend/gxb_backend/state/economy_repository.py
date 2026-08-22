@@ -18,9 +18,12 @@ from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
+from .economy_ledger import EconomyLedger, EconomyLedgerError
 from .function_state_repository import FunctionStateRepository
 from .player_state import PlayerState
 from .resource_registry import ResourceRegistry
+from .temporal_policy_service import TemporalPolicyError, TemporalPolicyService
+from .unit_of_work import PlayerUnitOfWork
 
 
 class EconomyMutationError(ValueError):
@@ -43,15 +46,25 @@ class EconomyRepository:
         *,
         function_unlocks: FunctionStateRepository | None = None,
         resource_registry: ResourceRegistry | None = None,
+        ledger: EconomyLedger | None = None,
+        uow: PlayerUnitOfWork | None = None,
+        temporal: TemporalPolicyService | None = None,
     ) -> None:
         self.player = player
         self.data_dir = Path(data_dir)
         self._save_callback = save_callback
         self.function_unlocks = function_unlocks
         self.resource_registry = resource_registry
+        self.ledger = ledger
+        self.uow = uow
+        self.temporal = temporal
         if self.resource_registry is not None:
             for field in self.PHASE1_FIELDS:
                 self.resource_registry.assert_legacy_economy_field(field)
+        if self.ledger is not None:
+            for field in ("mana", "crystal"):
+                if self.ledger.descriptor(field).owner_service != "EconomyLedger":
+                    raise RuntimeError(f"legacy scalar facade owner drift: {field}")
         self.meta = self._load_meta()
         self.player_levels = self.meta.get("player_levels") or {}
 
@@ -117,6 +130,7 @@ class EconomyRepository:
             "mana": self._int(self.player.mana, 0),
             "crystal": self._int(self.player.crystal, 0),
             "energy": self._int(self.player.energy, 0),
+            "energy_time": self._int(self.player.energy_time, 0),
             "exp": self._int(self.player.exp, 0),
             "lev": self._int(self.player.lev, 1),
             "max_energy": self._int(self.player.max_energy, 0),
@@ -156,9 +170,16 @@ class EconomyRepository:
             changed["lev"] = after_level
         if energy_award > 0:
             # Source client level-up flow allows current Energy above the normal
-            # regeneration cap, so do not clamp this award to max_energy.
-            self.player.energy = max(0, self._int(self.player.energy, 0)) + energy_award
-            changed["energy"] = self._int(self.player.energy, 0)
+            # regeneration cap. Pass71 delegates the timed pool and its anchor to
+            # TemporalPolicyService instead of mutating the compatibility field.
+            if self.temporal is not None:
+                change = self.temporal.credit(
+                    "energy", energy_award, persist=False, publish=True
+                )
+                changed["energy"] = change.after.balance
+            else:
+                self.player.energy = max(0, self._int(self.player.energy, 0)) + energy_award
+                changed["energy"] = self._int(self.player.energy, 0)
 
     def apply_deltas(
         self,
@@ -169,45 +190,81 @@ class EconomyRepository:
         player_exp_gain: Any = 0,
         persist: bool = False,
     ) -> dict[str, int]:
-        """Validate and atomically apply a Phase-1 economy transaction.
+        """Compatibility transaction over typed scalar + legacy temporal/progression owners.
 
-        Mana/Crystal/Energy use signed deltas. Player EXP is cumulative progress
-        and therefore accepts grants only. All insufficient-balance checks occur
-        before any field is changed. Any unexpected failure restores the local
-        snapshot before propagating the error.
+        Mana/Crystal route through EconomyLedger. Pass71 delegates Energy to
+        TemporalPolicyService while player EXP/level intentionally remains on its
+        pre-progression migration path.  The facade keeps one local snapshot so a
+        mixed legacy call remains all-or-nothing inside the outer PlayerUoW.
         """
         mana_delta = self._int(mana_delta, 0)
         crystal_delta = self._int(crystal_delta, 0)
         energy_delta = self._int(energy_delta, 0)
         player_exp_gain = self._int(player_exp_gain, 0)
         if player_exp_gain < 0:
-            raise EconomyMutationError("player EXP cannot be spent through the Phase-1 economy API")
+            raise EconomyMutationError("player EXP cannot be spent through the compatibility economy API")
 
         before = self._snapshot()
-        proposed = {
-            "mana": before["mana"] + mana_delta,
-            "crystal": before["crystal"] + crystal_delta,
-            "energy": before["energy"] + energy_delta,
-        }
-        for field, value in proposed.items():
-            if value < 0:
-                raise EconomyMutationError(f"insufficient {field}: would become {value}")
+        if energy_delta:
+            if self.temporal is not None:
+                try:
+                    self.temporal.preview(
+                        "energy", "CREDIT" if energy_delta > 0 else "DEBIT", abs(energy_delta)
+                    )
+                except TemporalPolicyError as exc:
+                    raise EconomyMutationError(str(exc)) from exc
+            else:
+                proposed_energy = before["energy"] + energy_delta
+                if proposed_energy < 0:
+                    raise EconomyMutationError(f"insufficient energy: would become {proposed_energy}")
+
+        scalar_deltas = {"mana": mana_delta, "crystal": crystal_delta}
+        if self.ledger is not None:
+            try:
+                self.ledger.validate_deltas(scalar_deltas)
+            except EconomyLedgerError as exc:
+                raise EconomyMutationError(str(exc)) from exc
+        else:
+            for field, delta in scalar_deltas.items():
+                if before[field] + delta < 0:
+                    raise EconomyMutationError(f"insufficient {field}: would become {before[field] + delta}")
 
         changed: dict[str, int] = {}
         try:
-            if mana_delta:
-                self.player.mana = proposed["mana"]
-                changed["mana"] = proposed["mana"]
-            if crystal_delta:
-                self.player.crystal = proposed["crystal"]
-                changed["crystal"] = proposed["crystal"]
+            if self.ledger is not None:
+                for record in self.ledger.apply_deltas(scalar_deltas, persist=False):
+                    changed[record.key] = record.after
+            else:
+                if mana_delta:
+                    self.player.mana = before["mana"] + mana_delta
+                    changed["mana"] = self._int(self.player.mana, 0)
+                if crystal_delta:
+                    self.player.crystal = before["crystal"] + crystal_delta
+                    changed["crystal"] = self._int(self.player.crystal, 0)
+
             if energy_delta:
-                self.player.energy = proposed["energy"]
-                changed["energy"] = proposed["energy"]
+                if self.temporal is not None:
+                    change = self.temporal.apply_transition(
+                        "energy", "CREDIT" if energy_delta > 0 else "DEBIT", abs(energy_delta),
+                        persist=False, publish=True,
+                        origin_ref="EconomyRepository:compatibility_energy",
+                    )
+                    changed["energy"] = change.after.balance
+                else:
+                    proposed_energy = before["energy"] + energy_delta
+                    self.player.energy = proposed_energy
+                    changed["energy"] = proposed_energy
+                    if self.uow is not None and self.uow.active:
+                        self.uow.mark_changed("temporal_resources")
 
+            before_level = self._int(self.player.lev, 1)
+            before_exp = self._int(self.player.exp, 0)
             self._apply_player_exp_gain(player_exp_gain, changed)
+            if (self._int(self.player.exp, 0), self._int(self.player.lev, 1)) != (before_exp, before_level):
+                if self.uow is not None and self.uow.active:
+                    self.uow.mark_changed("player_progression")
 
-            if persist and changed:
+            if persist and changed and not (self.uow is not None and self.uow.active):
                 self._save()
             return changed
         except Exception:

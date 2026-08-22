@@ -1,0 +1,49 @@
+{
+  "pass": "88.0",
+  "status": "PASS",
+  "focused": [
+    "tools/selftest_pass88_commerce_purchase.py",
+    "tools/selftest_pass88_purchase_route_contract.py"
+  ],
+  "regressions": [
+    "pass68_foundation",
+    "pass68_1_medium_free",
+    "pass69_economy_backbone_part2",
+    "pass69_1_item_sale",
+    "pass70_response_projection",
+    "pass70_1_stone_summon_mana",
+    "pass71_temporal_resources",
+    "pass72_hero_progression",
+    "pass73_advanced_progression",
+    "pass74_awakening",
+    "pass75_campaign_ownership",
+    "pass79_daily_reset",
+    "pass81_daily_reset_campaign_corrections",
+    "pass83_mid1_temporal_hygiene",
+    "pass87_commerce_vip_phase1",
+    "pass88_commerce_purchase",
+    "pass88_purchase_route_contract"
+  ],
+  "focused_checks": [
+    "first_buy_atomic_source_shaped",
+    "permanent_receipt_and_outbox_committed",
+    "same_intent_retry_exactly_once",
+    "repeat_buy_no_first_bonus",
+    "cumulative_charge_derives_vip2",
+    "intent_reuse_with_different_sku_rejected",
+    "unadvertised_sku_rejected",
+    "ios_30000_pack_source_hidden",
+    "purchase_state_persistence_roundtrip",
+    "commit_failure_rolls_back_all_planes",
+    "vip15_purchase_stays_capped",
+    "authenticated_route_commits",
+    "route_retry_replays",
+    "unknown_session_rejected"
+  ],
+  "notes": [
+    "All listed tests passed after final replay-before-authorization and read-only history hardening.",
+    "The combined historical suite was run in two bounded groups to avoid command timeout; both groups completed green.",
+    "Flask is not installed in the build environment. The actual route function was exercised with a minimal fake Flask surface and a real StateRepository/request-scoped service graph.",
+    "Generated Commerce/VIP metadata was regenerated from effective src_64 for Pass88."
+  ]
+}

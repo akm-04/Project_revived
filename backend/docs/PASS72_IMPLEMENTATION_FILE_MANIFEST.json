@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "pass": "72.0",
+  "baseline_artifact": "gxb-backend-v0.9.3-pass71.0",
+  "target_artifact": "gxb-backend-v0.9.4-pass72.0",
+  "counts": {
+    "added": 12,
+    "modified": 13,
+    "removed": 0
+  },
+  "added": [
+    "data/debug_guest_inventory_seed.json",
+    "data/hero_progression_meta.json",
+    "docs/PASS71_RUNTIME_ACCEPTANCE_20260822.json",
+    "docs/PASS72_CLIENT_TEST_PLAN.md",
+    "docs/PASS72_HERO_PROGRESSION_SELFTEST.json",
+    "docs/PASS72_REGRESSION_MATRIX.json",
+    "docs/PASS72_SRC64_FEEDBACK_LOOP.json",
+    "docs/V0_9_4_PASS72_HERO_GIRLS_PROGRESSION.md",
+    "gxb_backend/state/hero_entity_mutation_service.py",
+    "tools/build_hero_progression_meta.py",
+    "tools/selftest_pass72_hero_progression.py",
+    "docs/PASS72_IMPLEMENTATION_FILE_MANIFEST.json"
+  ],
+  "modified": [
+    "README.md",
+    "VERSION.json",
+    "gxb_backend/dispatch/engine_dispatcher.py",
+    "gxb_backend/handlers/heroes.py",
+    "gxb_backend/run.py",
+    "gxb_backend/state/hero_equipment_repository.py",
+    "gxb_backend/state/hero_progression_repository.py",
+    "gxb_backend/state/hero_repository.py",
+    "gxb_backend/state/multiuser_database.py",
+    "gxb_backend/state/mutation_plan.py",
+    "gxb_backend/state/mutation_settlement_service.py",
+    "gxb_backend/state/request_services.py",
+    "gxb_backend/version.py"
+  ],
+  "removed": [],
+  "compatibility_note": "Strangler-Fig migration; transports, one-player UoW boundary, 30-scalar EconomyLedger and Pass70 projector/profile contracts remain intact.",
+  "deferred": [
+    "Campaign Energy debit",
+    "AWAKE_HERO numeric MID unresolved",
+    "SuperHero/post-5 evolution",
+    "advanced awakened/bloodline/Fumo restoration"
+  ]
+}

@@ -29,6 +29,13 @@ from .summon_repository import SummonRepository
 from .world_repository import WorldRepository
 from .request_services import RequestServices
 from .summon_featured_rotation import SummonFeaturedRotationPolicy
+from .server_clock import ServerClock, ServerDayClock
+from .daily_reset import (
+    DailyResetCoordinator,
+    DailyResetOutcome,
+    build_default_daily_reset_registry,
+)
+from .unit_of_work import UnitOfWork
 
 
 class _RequestBinding(threading.local):
@@ -53,18 +60,22 @@ class StateRepository:
         profile: str = "established",
         legacy_path: Path | None = None,
         multiuser_root: Path | None = None,
+        server_clock: ServerClock | None = None,
     ) -> None:
         self.path = Path(path) if path else None  # v0.7 singleton migration source
         self.legacy_path = Path(legacy_path) if legacy_path else None
         self.profile = profile
         self._lock = threading.RLock()
         self._local = _RequestBinding()
+        self.server_clock = server_clock or ServerClock()
+        self.server_day_clock = ServerDayClock(self.server_clock)
         # Immutable source/config meaning is shared across request service graphs.
         self._catalog = GameDataCatalog.load(self._data_dir() / "game_data_catalog.json")
         self._featured_catalog = SummonFeaturedCatalog(self._data_dir())
         self._featured_rotation = SummonFeaturedRotationPolicy(
             self._data_dir(), self._featured_catalog, emit_startup_log=True
         )
+        self._daily_reset_registry = build_default_daily_reset_registry(self._data_dir())
         root = Path(multiuser_root or ((self.path.parent if self.path else Path("data")) / "server_state"))
         self.store = MultiUserDatabase(
             root, self._data_dir(), featured_rotation=self._featured_rotation
@@ -327,6 +338,7 @@ class StateRepository:
                 lambda: self.store.save_player(player),
                 catalog=self._catalog,
                 featured_rotation=self._featured_rotation,
+                server_clock=self.server_clock,
             )
             self._local.services = services
         return services
@@ -341,6 +353,30 @@ class StateRepository:
                 services.uow.request_save()
             else:
                 self.store.save_player(player)
+
+    def evaluate_daily_reset(self, trigger_mid: int | None = None) -> DailyResetOutcome | None:
+        """Materialize one bound player's source day before domain handling.
+
+        This stays lightweight and independent from the full RequestServices
+        graph so bootstrap/player-info requests do not load every gameplay
+        catalog merely to enforce a day boundary. Participant failure rolls the
+        whole reset back and is retried on the next request.
+        """
+        player = getattr(self._local, "player", None)
+        if player is None:
+            return None
+        uow = UnitOfWork(player, lambda: self.store.save_player(player))
+        coordinator = DailyResetCoordinator(
+            player, uow, self.server_day_clock, self._daily_reset_registry
+        )
+        try:
+            return coordinator.evaluate(trigger_mid)
+        except Exception as exc:
+            print(
+                f"[DAILY_RESET] rollback/retry player={player.player_id} "
+                f"mid={trigger_mid} error={exc}"
+            )
+            return None
 
     # Compatibility façades: callers keep their old repository accessors while
     # every accessor now resolves to the same memoized request service graph.
@@ -359,6 +395,9 @@ class StateRepository:
     def get_hero_equipment_repository(self) -> HeroEquipmentRepository:
         return self.get_services().hero_equipment
 
+    def get_hero_advanced_progression_repository(self):
+        return self.get_services().hero_advanced
+
     def get_function_state_repository(self) -> FunctionStateRepository:
         return self.get_services().function_state
 
@@ -370,6 +409,9 @@ class StateRepository:
 
     def get_mission_repository(self) -> MissionRepository:
         return self.get_services().missions
+
+    def get_awakening_mission_service(self):
+        return self.get_services().awakening_missions
 
     def get_world_repository(self) -> WorldRepository:
         return self.get_services().world

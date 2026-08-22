@@ -1,0 +1,42 @@
+{
+  "checks": [
+    {
+      "check": "compileall",
+      "log": null,
+      "status": "PASS"
+    },
+    {
+      "check": "validate_pass42_14",
+      "log": "{\n  \"schema_version\": 1,\n  \"pass\": \"42.14\",\n  \"backend\": \"v0.8.34\",\n  \"validation_type\": \"repository/static hotfix validation; no Flask/client gameplay\",\n  \"status\": \"pass\",\n  \"checks\": {\n    \"operation_topology\": {\n      \"mid\": 50,\n      \"summon_type\": 1,\n      \"summon_index\": 4,\n      \"pull_count\": 100\n    },\n    \"cost_plan\": {\n      \"mana\": 900000,\n      \"pull_count\": 100,\n      \"status\": \"active\"\n    },\n    \"result_policy\": {\n      \"expected_rows\": 100,\n      \"allowed\": [\n        \"hero\",\n        \"item\",\n        \"to_stone\"\n      ]\n    },\n    \"x100_ten_block_guarantee\": [\n      2,\n      1,\n      1,\n      1,\n      1,\n      1,\n      1,\n      1,\n      1,\n      1\n    ],\n    \"repository_x100\": {\n      \"rows\": 100,\n      \"mana_debit\": 900000,\n      \"counter_delta\": 100,\n      \"wire_kind_counts_sample_run\": {\n        \"hero\": 1,\n        \"item\": 99\n      },\n      \"immediate_retry_replayed_without_second_debit\": true\n    },\n    \"small_regression\": {\n      \"x1\": \"1 row / 10000 Mana\",\n      \"x10\": \"10 rows / 90000 Mana\"\n    },\n    \"gacha_control_sync\": \"PASS: Pass42.14 gacha operator validation succeeded\"\n  },\n  \"runtime_boundary\": \"Fresh debug.zip proves the v0.8.33 x100 request and rejection. v0.8.34 x100 success remains repository-confirmed until a new client smoke is supplied.\"\n}\n",
+      "status": "PASS"
+    },
+    {
+      "check": "validate_pass42_12",
+      "log": "{\n  \"schema_version\": 1,\n  \"pass\": \"42.12\",\n  \"backend\": \"v0.8.33\",\n  \"validation_type\": \"pure/static repository/tool validation; no Flask/client gameplay\",\n  \"status\": \"pass\",\n  \"checks\": {\n    \"operator_tool_validation\": \"pass\",\n    \"operator_summary\": [\n      \"GXB Pass42.14 Gacha Control summary\",\n      \"Rotation mode: startup_debug | debug_seed=0 | timezone=Asia/Dhaka\",\n      \"SX Current: AUTO, AUTO\",\n      \"SX Daily:   AUTO, AUTO, AUTO\",\n      \"Medium New Add: AUTO\",\n      \"Small ordinary categories: Item 64.693%, Scroll 34.907%, Girl 0.400% [legacy baseline]\"\n    ],\n    \"development_default\": {\n      \"selection_mode\": \"startup_debug\",\n      \"debug_seed\": 0\n    },\n    \"calendar_compatibility\": {\n      \"sx_week_ids\": [\n        10001197,\n        10001248\n      ],\n      \"sx_day_ids\": [\n        10001100,\n        10001171,\n        10001167\n      ],\n      \"medium_featured_id\": 10001089\n    },\n    \"startup_debug_reproducible\": {\n      \"sx_week_ids\": [\n        10001113,\n        10001269\n      ],\n      \"sx_day_ids\": [\n        10001092,\n        10001203,\n        10001271\n      ],\n      \"medium_featured_id\": 10001082\n    },\n    \"classic_scroll_partition\": {\n      \"scroll_rows\": 83,\n      \"non_scroll_item_rows\": 288,\n      \"explicit_scroll_mode\": \"flat_equal\"\n    },\n    \"medium_ordinary_143_native_stars\": {\n      \"1\": 13,\n      \"2\": 33,\n      \"3\": 97\n    },\n    \"explicit_medium_tuning\": {\n      \"category\": \"girl\",\n      \"native_star\": 3,\n      \"candidate_rows\": 97\n    },\n    \"operator_atomic_backup_write\": true,\n    \"fixed_guarantees\": {\n      \"small_x10\": \"at_least_one_item\",\n      \"medium_x10\": \"at_least_one_hero\",\n      \"sx_selected_hotspot_purchases\": 25,\n      \"medium_new_add_pity_slots\": 20\n    }\n  }\n}\n",
+      "status": "PASS"
+    },
+    {
+      "check": "selftest_pass68_foundation",
+      "log": "{\n  \"pass\": \"68.0\",\n  \"backend\": \"0.9.0\",\n  \"status\": \"PASS\",\n  \"singleton\": {\n    \"unknown_extensions_preserved\": true,\n    \"state_version\": 1,\n    \"slice_revision\": 1,\n    \"receipt_status\": \"COMMITTED\"\n  },\n  \"rollback\": {\n    \"rollback_restored_state\": true,\n    \"version_conflict_fail_closed\": true\n  },\n  \"multiuser\": {\n    \"unknown_extensions_preserved\": true,\n    \"schema\": 2\n  },\n  \"resource_registry\": {\n    \"descriptors\": 47,\n    \"scalar\": 30,\n    \"regenerating\": [\n      \"energy\",\n      \"invitation\",\n      \"skill_point\",\n      \"spirit_energy\"\n    ],\n    \"unknown_fail_closed\": true\n  }\n}\n",
+      "status": "PASS"
+    },
+    {
+      "check": "selftest_pass68_1_medium_free",
+      "log": "{\n  \"pass\": \"68.1\",\n  \"status\": \"PASS\",\n  \"protocol\": {\n    \"mid\": 50,\n    \"summon_type\": 3,\n    \"summon_index\": 1\n  },\n  \"cooldown_seconds\": 165600,\n  \"existing_tutorial_counter_adoption\": 1,\n  \"accepted_counter_after\": 2,\n  \"accepted_state_version\": 1,\n  \"retry_replayed_without_second_commit\": true,\n  \"not_ready_fail_closed\": true\n}\n",
+      "status": "PASS"
+    },
+    {
+      "check": "selftest_pass69_economy_backbone_part2",
+      "log": "{\n  \"commit_callbacks\": 4,\n  \"economy_ledger\": {\n    \"all_30_scalar_credit\": true,\n    \"insufficient_multi_resource_atomic\": true,\n    \"legacy_mana_crystal_facade\": true\n  },\n  \"mutation_plan\": {\n    \"committed_journal_rows_seen\": 6,\n    \"resource_stack_settlement\": true,\n    \"reward_plan_adapter\": true\n  },\n  \"pass\": \"69.0\",\n  \"resource_registry\": {\n    \"descriptors\": 47,\n    \"scalar\": 30\n  },\n  \"stack_inventory\": {\n    \"slice_revision\": 2,\n    \"typed_credit\": true,\n    \"typed_debit\": true\n  },\n  \"state_version\": 4,\n  \"status\": \"PASS\"\n}\n",
+      "status": "PASS"
+    },
+    {
+      "check": "selftest_pass69_1_item_sale",
+      "log": "[INVENTORY SALE] rejected operation=sell_item: item 250001001 has no recovered generic sale metadata\n[INVENTORY SALE] rejected operation=sell_item: insufficient item 50001011: current=0 delta=-99\n{\n  \"commits\": 3,\n  \"compact_catalog_missing_debit_supported\": true,\n  \"crystal_fallback\": true,\n  \"final_state_version\": 3,\n  \"insufficient_stack_fail_closed\": true,\n  \"mana_price_primary\": true,\n  \"mid82_stack_resource_atomic\": true,\n  \"mid86_aggregate_atomic\": true,\n  \"pass\": \"69.1\",\n  \"sell_catalog_rows\": 4564,\n  \"specialized_sale_fail_closed\": true,\n  \"status\": \"PASS\"\n}\n",
+      "status": "PASS"
+    }
+  ],
+  "new_regressions": 0,
+  "pass": "69.1",
+  "status": "PASS"
+}

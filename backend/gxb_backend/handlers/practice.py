@@ -13,7 +13,10 @@ class PracticeHandlers:
         return self.ctx.state.get_player().practice_payload(True)
 
     def hero_mutation(self, req: dict) -> dict:
-        return {**self.hero_info(req), "awards": []}
+        # Effective src_64 does not reveal the authoritative random candidate
+        # generation / roll algorithm. A false OK lets the client create local-
+        # only Hero practice state, so Hero Practice remains explicitly closed.
+        return {"error_code": 1, "msg": "hero_practice_server_algorithm_unresolved"}
 
     def pet_mutation(self, req: dict) -> dict:
         return {**self.pet_info(req), "awards": []}

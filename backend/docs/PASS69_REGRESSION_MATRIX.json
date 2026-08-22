@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "pass": "69.0",
+  "backend": "v0.9.1-pass69.0",
+  "status": "PASS",
+  "gates": [
+    {
+      "name": "compileall",
+      "status": "PASS"
+    },
+    {
+      "name": "validate_pass42_12",
+      "status": "PASS"
+    },
+    {
+      "name": "validate_pass42_14",
+      "status": "PASS"
+    },
+    {
+      "name": "selftest_pass68_foundation",
+      "status": "PASS"
+    },
+    {
+      "name": "selftest_pass68_1_medium_free",
+      "status": "PASS"
+    },
+    {
+      "name": "selftest_pass69_economy_backbone_part2",
+      "status": "PASS"
+    }
+  ],
+  "known_predecessor_baselines": [
+    {
+      "name": "selftest_multiuser",
+      "pass68_1": "FAIL_STALE_EXPECTATION",
+      "pass69": "FAIL_IDENTICAL_ASSERTION",
+      "new_regression": false
+    },
+    {
+      "name": "selftest_campaign_economy",
+      "pass68_1": "FAIL_STALE_EXPECTATION",
+      "pass69": "FAIL_IDENTICAL_ASSERTION",
+      "new_regression": false
+    },
+    {
+      "name": "selftest_tutorial_summon",
+      "pass68_1": "FAIL_STALE_EXPECTATION",
+      "pass69": "FAIL_IDENTICAL_ASSERTION",
+      "new_regression": false
+    }
+  ],
+  "new_static_regressions": 0,
+  "runtime_gate": "PENDING_USER_DEBUG_ZIP"
+}

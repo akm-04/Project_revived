@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "pass": "70.1",
+  "status": "RUNTIME_ACCEPTED",
+  "evidence_date": "2026-08-22",
+  "debug": {
+    "requests": 41,
+    "distinct_mids": 22,
+    "fallbacks": 0,
+    "python_tracebacks": 0,
+    "http_5xx": 0,
+    "nonzero_engine_errors": 0
+  },
+  "mid59": {
+    "count": 2,
+    "stone_num_each": 30,
+    "source_star": 2,
+    "source_mana_cost_each": 50000,
+    "login_mana": 999887894,
+    "first_cumulative_mana": 999837894,
+    "second_cumulative_mana": 999787894,
+    "exact_total_debit": 100000,
+    "accepted": true
+  },
+  "neighbor_probe": {
+    "mid": 52,
+    "name": "EVOLVE_HERO",
+    "count": 2,
+    "success": true,
+    "response_keys": [],
+    "observed_issue": "source Mana cost not deducted/projected by current legacy Hero Evolve path",
+    "classification": "KNOWN_DEFERRED_HERO_PROGRESSION_BUG",
+    "pass71_action": "DO_NOT_LEAPFROG"
+  }
+}

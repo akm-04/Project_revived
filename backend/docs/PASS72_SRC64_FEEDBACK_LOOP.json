@@ -1,0 +1,65 @@
+{
+  "schema_version": 1,
+  "pass": "72.0",
+  "status": "PASS",
+  "timestamp": "2026-08-22T05:26:00+06:00",
+  "source_precedence": "downloaded-assets/output/src_64 overrides app-assets/output/assets/src_64 path-by-path",
+  "effective_tree": {
+    "files": 4370,
+    "downloaded_winners": 62,
+    "app_winners": 4308,
+    "pass57_fingerprint_files": 4370,
+    "missing": 0,
+    "extra": 0,
+    "sha256_mismatches": 0,
+    "exact_pass57_match": true
+  },
+  "audit": {
+    "mids": {
+      "SET_ALL_SKILL_LEVEL": 39,
+      "POWERUP_HERO": 51,
+      "EVOLVE_HERO": 52,
+      "SET_SKILL_LEVEL": 53,
+      "SET_HERO_EQUIP": 54,
+      "USE_EXP_ITEM": 55,
+      "ONE_CLICK_JINJIE": 57,
+      "ONE_CLICK_EQUIP": 62,
+      "USE_EXP_ITEMS": 63
+    },
+    "evolve_cost_source": "data/tables/star.lua + app/common/tables/StarTable.lua + HeroMainWindow.lua:evolvePrice(next_star) + enums.lua:StarLevelSuipian",
+    "ordinary_evolution": {
+      "1": {
+        "fragments": 10,
+        "mana": 1000
+      },
+      "2": {
+        "fragments": 20,
+        "mana": 35000
+      },
+      "3": {
+        "fragments": 50,
+        "mana": 120000
+      },
+      "4": {
+        "fragments": 100,
+        "mana": 300000
+      },
+      "5": {
+        "fragments": 150,
+        "mana": 800000
+      }
+    },
+    "client_reconciliation": [
+      "SelfPlayer:evolveHero removes submitted Girl fragments locally on OK; server must not synthesize a fragment award.",
+      "SelfPlayer:addPartnerExp/addPartnerExps removes EXP item stacks locally on OK.",
+      "NormalHero:equipItems marks the slot and removes the equipment item locally on OK.",
+      "Hero progression callbacks update visible Hero state locally or consume operation-specific response fields; generic ENTITY projection is suppressed."
+    ],
+    "negative_facts": [
+      "SelfPlayer.lua references xyd.mid.AWAKE_HERO but effective app/common/network/mid.lua has no numeric AWAKE_HERO definition.",
+      "Post-5 SuperHero evolution has distinct source semantics and is not generalized from ordinary 1->5 evolution.",
+      "Advanced awakened/bloodline/Fumo restoration is outside the ordinary NormalHero boundary.",
+      "Campaign Energy debit is intentionally deferred to Campaign ownership migration."
+    ]
+  }
+}

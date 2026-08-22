@@ -1,0 +1,39 @@
+{
+  "added": [
+    "docs/PASS69_ECONOMY_BACKBONE_PART2_SELFTEST.json",
+    "docs/PASS69_IMPLEMENTATION_FILE_MANIFEST.json",
+    "docs/PASS69_REGRESSION_MATRIX.json",
+    "docs/PASS69_SRC64_FEEDBACK_LOOP.json",
+    "docs/PASS69_TECHNICAL_CHANGELOG.md",
+    "docs/V0_9_1_PASS69_ECONOMY_BACKBONE_PART2.md",
+    "gxb_backend/state/economy_ledger.py",
+    "gxb_backend/state/mutation_plan.py",
+    "gxb_backend/state/mutation_settlement_service.py",
+    "gxb_backend/state/stack_inventory.py",
+    "tools/selftest_pass69_economy_backbone_part2.py"
+  ],
+  "base_artifact": "gxb-backend-v0.9.0-pass68.1.zip",
+  "base_sha256": "75740eae144d40d8b313d6e0543549699fb4f39aab4807a6f9908d0b8301754f",
+  "changed": [
+    "README.md",
+    "UPDATE_README.md",
+    "VERSION.json",
+    "docs/memory.md",
+    "gxb_backend/state/__init__.py",
+    "gxb_backend/state/economy_repository.py",
+    "gxb_backend/state/inventory_repository.py",
+    "gxb_backend/state/request_services.py",
+    "gxb_backend/state/reward_transaction_service.py",
+    "gxb_backend/state/unit_of_work.py",
+    "memory.md"
+  ],
+  "counts": {
+    "added": 11,
+    "changed": 11,
+    "removed": 0
+  },
+  "pass": "69.0",
+  "removed": [],
+  "schema_version": 1,
+  "target_artifact": "gxb-backend-v0.9.1-pass69.0.zip"
+}

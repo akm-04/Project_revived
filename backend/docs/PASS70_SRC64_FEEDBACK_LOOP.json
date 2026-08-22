@@ -1,0 +1,502 @@
+{
+  "schema_version": 1,
+  "pass": "70.0",
+  "status": "PASS",
+  "effective_source": {
+    "files": 4370,
+    "downloaded_winners": 62,
+    "app_winners": 4308,
+    "missing": 0,
+    "extra": 0,
+    "hash_mismatch": 0,
+    "exact_pass57_match": true
+  },
+  "pass67_architecture_assertions": {
+    "passed": 48,
+    "total": 48,
+    "failures": []
+  },
+  "pass70_projection_contract_assertions": {
+    "passed": 28,
+    "total": 28,
+    "rows": [
+      {
+        "id": "backend_economy_optional",
+        "source": "app/common/network/Backend.lua",
+        "status": "PASS"
+      },
+      {
+        "id": "backend_new_funcs_optional",
+        "source": "app/common/network/Backend.lua",
+        "status": "PASS"
+      },
+      {
+        "id": "backend_server_time_optional",
+        "source": "app/common/network/Backend.lua",
+        "status": "PASS"
+      },
+      {
+        "id": "backend_extra_drops_optional",
+        "source": "app/common/network/Backend.lua",
+        "status": "PASS"
+      },
+      {
+        "id": "selfplayer_cumulative_mana",
+        "source": "app/model/SelfPlayer.lua",
+        "status": "PASS"
+      },
+      {
+        "id": "selfplayer_cumulative_crystal",
+        "source": "app/model/SelfPlayer.lua",
+        "status": "PASS"
+      },
+      {
+        "id": "selfplayer_sell_mid82_local_remove",
+        "source": "app/model/SelfPlayer.lua",
+        "status": "PASS"
+      },
+      {
+        "id": "selfplayer_sell_mid86_local_remove",
+        "source": "app/model/SelfPlayer.lua",
+        "status": "PASS"
+      },
+      {
+        "id": "campaign_chapter_body",
+        "source": "app/scenes/BattleCreate.lua",
+        "status": "PASS"
+      },
+      {
+        "id": "campaign_campaigns_body",
+        "source": "app/scenes/BattleCreate.lua",
+        "status": "PASS"
+      },
+      {
+        "id": "campaign_trial_body",
+        "source": "app/scenes/BattleCreate.lua",
+        "status": "PASS"
+      },
+      {
+        "id": "sky_city_counter_request",
+        "source": "app/windows/SelectCloudDifficultWindow.lua",
+        "status": "PASS"
+      },
+      {
+        "id": "sky_city_trial_info_body",
+        "source": "app/windows/MapDetailWindow.lua",
+        "status": "PASS"
+      },
+      {
+        "id": "petcampaign_load",
+        "source": "app/model/PetCampaign.lua",
+        "status": "PASS"
+      },
+      {
+        "id": "petcampaign_result",
+        "source": "app/model/PetCampaign.lua",
+        "status": "PASS"
+      },
+      {
+        "id": "petcampaign_local_add",
+        "source": "app/model/PetCampaign.lua",
+        "status": "PASS"
+      },
+      {
+        "id": "illusion_team_create",
+        "source": "app/model/Illusion.lua",
+        "status": "PASS"
+      },
+      {
+        "id": "illusion_team_partner",
+        "source": "app/model/Illusion.lua",
+        "status": "PASS"
+      },
+      {
+        "id": "illusion_team_start",
+        "source": "app/model/Illusion.lua",
+        "status": "PASS"
+      },
+      {
+        "id": "illusion_team_report",
+        "source": "app/model/Illusion.lua",
+        "status": "PASS"
+      },
+      {
+        "id": "shop_load",
+        "source": "app/model/Shop.lua",
+        "status": "PASS"
+      },
+      {
+        "id": "shop_buy",
+        "source": "app/model/Shop.lua",
+        "status": "PASS"
+      },
+      {
+        "id": "shop_local_add",
+        "source": "app/model/Shop.lua",
+        "status": "PASS"
+      },
+      {
+        "id": "recharge_handler",
+        "source": "app/model/SelfPlayer.lua",
+        "status": "PASS"
+      },
+      {
+        "id": "recharge_nested_total",
+        "source": "app/model/SelfPlayer.lua",
+        "status": "PASS"
+      },
+      {
+        "id": "recharge_nested_vip",
+        "source": "app/model/SelfPlayer.lua",
+        "status": "PASS"
+      },
+      {
+        "id": "recharge_nested_charge",
+        "source": "app/model/SelfPlayer.lua",
+        "status": "PASS"
+      },
+      {
+        "id": "recharge_nested_economy",
+        "source": "app/model/SelfPlayer.lua",
+        "status": "PASS"
+      }
+    ]
+  },
+  "projection_profile_registry": {
+    "profile_count": 8,
+    "frozen_profile_ids_match": true,
+    "profile_ids": [
+      "WEB_GLOBAL_ENVELOPE",
+      "CAMPAIGN_RESULT",
+      "SKY_CITY_COUNTER",
+      "PET_CAMPAIGN",
+      "ILLUSION_SOLO",
+      "ILLUSION_TEAM",
+      "SHOP",
+      "RECHARGE_PUSH"
+    ],
+    "profiles": [
+      {
+        "profile_id": "WEB_GLOBAL_ENVELOPE",
+        "transport_count": 4,
+        "mid_label_checks": [],
+        "status": "PASS"
+      },
+      {
+        "profile_id": "CAMPAIGN_RESULT",
+        "transport_count": 3,
+        "mid_label_checks": [
+          {
+            "mid": 114,
+            "expected_label": "FIGHT_RESULT",
+            "actual_label": "FIGHT_RESULT",
+            "status": "PASS"
+          }
+        ],
+        "status": "PASS"
+      },
+      {
+        "profile_id": "SKY_CITY_COUNTER",
+        "transport_count": 2,
+        "mid_label_checks": [
+          {
+            "mid": 29,
+            "expected_label": "DAILY_CONSUNME",
+            "actual_label": "DAILY_CONSUNME",
+            "status": "PASS"
+          }
+        ],
+        "status": "PASS"
+      },
+      {
+        "profile_id": "PET_CAMPAIGN",
+        "transport_count": 2,
+        "mid_label_checks": [
+          {
+            "mid": 816,
+            "expected_label": "PET_CAMPAIGN_LOAD_INFO",
+            "actual_label": "PET_CAMPAIGN_LOAD_INFO",
+            "status": "PASS"
+          },
+          {
+            "mid": 817,
+            "expected_label": "PET_CAMPAIGN_SWEEP",
+            "actual_label": "PET_CAMPAIGN_SWEEP",
+            "status": "PASS"
+          },
+          {
+            "mid": 820,
+            "expected_label": "PET_CAMPAIGN_BATTLE_RESULT",
+            "actual_label": "PET_CAMPAIGN_BATTLE_RESULT",
+            "status": "PASS"
+          },
+          {
+            "mid": 823,
+            "expected_label": "PET_CAMPAIGN_AWAKE_SWEEP",
+            "actual_label": "PET_CAMPAIGN_AWAKE_SWEEP",
+            "status": "PASS"
+          },
+          {
+            "mid": 824,
+            "expected_label": "PET_CAMPAIGN_SWEEP_SUPER",
+            "actual_label": "PET_CAMPAIGN_SWEEP_SUPER",
+            "status": "PASS"
+          },
+          {
+            "mid": 825,
+            "expected_label": "PET_CAMPAIGN_BUY_SUPER",
+            "actual_label": "PET_CAMPAIGN_BUY_SUPER",
+            "status": "PASS"
+          },
+          {
+            "mid": 826,
+            "expected_label": "PET_CAMPAIGN_SAVE_SUPER",
+            "actual_label": "PET_CAMPAIGN_SAVE_SUPER",
+            "status": "PASS"
+          }
+        ],
+        "status": "PASS"
+      },
+      {
+        "profile_id": "ILLUSION_SOLO",
+        "transport_count": 2,
+        "mid_label_checks": [
+          {
+            "mid": 1344,
+            "expected_label": "ILLUSION_LOAD_INFO",
+            "actual_label": "ILLUSION_LOAD_INFO",
+            "status": "PASS"
+          },
+          {
+            "mid": 1345,
+            "expected_label": "ILLUSION_BUY_TIMES",
+            "actual_label": "ILLUSION_BUY_TIMES",
+            "status": "PASS"
+          },
+          {
+            "mid": 1347,
+            "expected_label": "ILLUSION_FIGHT_RESULT",
+            "actual_label": "ILLUSION_FIGHT_RESULT",
+            "status": "PASS"
+          },
+          {
+            "mid": 1348,
+            "expected_label": "ILLUSION_RANK_LIST",
+            "actual_label": "ILLUSION_RANK_LIST",
+            "status": "PASS"
+          }
+        ],
+        "status": "PASS"
+      },
+      {
+        "profile_id": "ILLUSION_TEAM",
+        "transport_count": 4,
+        "mid_label_checks": [
+          {
+            "mid": 1349,
+            "expected_label": "ILLUSION_CREATE_ROOM",
+            "actual_label": "ILLUSION_CREATE_ROOM",
+            "status": "PASS"
+          },
+          {
+            "mid": 1350,
+            "expected_label": "ILLUSION_GET_ROOM_INFO",
+            "actual_label": "ILLUSION_GET_ROOM_INFO",
+            "status": "PASS"
+          },
+          {
+            "mid": 1351,
+            "expected_label": "ILLUSION_PREPARE_ROOM",
+            "actual_label": "ILLUSION_PREPARE_ROOM",
+            "status": "PASS"
+          },
+          {
+            "mid": 1352,
+            "expected_label": "ILLUSION_ENTER_ROOM",
+            "actual_label": "ILLUSION_ENTER_ROOM",
+            "status": "PASS"
+          },
+          {
+            "mid": 1353,
+            "expected_label": "ILLUSION_REMOVE_PLAYER",
+            "actual_label": "ILLUSION_REMOVE_PLAYER",
+            "status": "PASS"
+          },
+          {
+            "mid": 1354,
+            "expected_label": "ILLUSION_EXIT_ROOM",
+            "actual_label": "ILLUSION_EXIT_ROOM",
+            "status": "PASS"
+          },
+          {
+            "mid": 1355,
+            "expected_label": "ILLUSION_CLEAR_ROOM",
+            "actual_label": "ILLUSION_CLEAR_ROOM",
+            "status": "PASS"
+          },
+          {
+            "mid": 1356,
+            "expected_label": "ILLUSION_SET_PARTNER",
+            "actual_label": "ILLUSION_SET_PARTNER",
+            "status": "PASS"
+          },
+          {
+            "mid": 1357,
+            "expected_label": "ILLUSION_PREPARE_FIGHT",
+            "actual_label": "ILLUSION_PREPARE_FIGHT",
+            "status": "PASS"
+          },
+          {
+            "mid": 1358,
+            "expected_label": "ILLUSION_START_TEAM_FIGHT",
+            "actual_label": "ILLUSION_START_TEAM_FIGHT",
+            "status": "PASS"
+          },
+          {
+            "mid": 1359,
+            "expected_label": "ILLUSION_GET_ROOM_LIST",
+            "actual_label": "ILLUSION_GET_ROOM_LIST",
+            "status": "PASS"
+          },
+          {
+            "mid": 1360,
+            "expected_label": "ILLUSION_INVITE_FRIEND",
+            "actual_label": "ILLUSION_INVITE_FRIEND",
+            "status": "PASS"
+          },
+          {
+            "mid": 1361,
+            "expected_label": "ILLUSION_INVITE_BROADCAST",
+            "actual_label": "ILLUSION_INVITE_BROADCAST",
+            "status": "PASS"
+          },
+          {
+            "mid": 1362,
+            "expected_label": "ILLUSION_GET_REPORT",
+            "actual_label": "ILLUSION_GET_REPORT",
+            "status": "PASS"
+          },
+          {
+            "mid": 1363,
+            "expected_label": "ILLUSION_CANCEL_PREPARE",
+            "actual_label": "ILLUSION_CANCEL_PREPARE",
+            "status": "PASS"
+          }
+        ],
+        "status": "PASS"
+      },
+      {
+        "profile_id": "SHOP",
+        "transport_count": 2,
+        "mid_label_checks": [
+          {
+            "mid": 32,
+            "expected_label": "LOAD_SHOP",
+            "actual_label": "LOAD_SHOP",
+            "status": "PASS"
+          },
+          {
+            "mid": 33,
+            "expected_label": "BUY_SHOP",
+            "actual_label": "BUY_SHOP",
+            "status": "PASS"
+          },
+          {
+            "mid": 34,
+            "expected_label": "REFRESH_SHOP",
+            "actual_label": "REFRESH_SHOP",
+            "status": "PASS"
+          }
+        ],
+        "status": "PASS"
+      },
+      {
+        "profile_id": "RECHARGE_PUSH",
+        "transport_count": 3,
+        "mid_label_checks": [
+          {
+            "mid": 36857,
+            "expected_label": "RECHARGE",
+            "actual_label": "RECHARGE",
+            "status": "PASS"
+          }
+        ],
+        "status": "PASS"
+      }
+    ]
+  },
+  "dispatcher_integration": [
+    {
+      "needle": "ProjectionProfileRegistry.load",
+      "status": "PASS"
+    },
+    {
+      "needle": "ResponseProjector.capture",
+      "status": "PASS"
+    },
+    {
+      "needle": "services.apply_semantic_deltas(result)",
+      "status": "PASS"
+    },
+    {
+      "needle": "services.uow.consume_journal()",
+      "status": "PASS"
+    },
+    {
+      "needle": "committed_journal=committed_journal",
+      "status": "PASS"
+    },
+    {
+      "needle": "profile=profile",
+      "status": "PASS"
+    }
+  ],
+  "compatibility_critical_unchanged": [
+    {
+      "path": "gxb_backend/transport/routes_engine.py",
+      "unchanged_from_pass69_1": true
+    },
+    {
+      "path": "gxb_backend/transport/routes_sdk.py",
+      "unchanged_from_pass69_1": true
+    },
+    {
+      "path": "gxb_backend/state/global_response_semantics.py",
+      "unchanged_from_pass69_1": true
+    },
+    {
+      "path": "gxb_backend/state/player_state.py",
+      "unchanged_from_pass69_1": true
+    },
+    {
+      "path": "gxb_backend/state/player_database.py",
+      "unchanged_from_pass69_1": true
+    },
+    {
+      "path": "gxb_backend/state/multiuser_database.py",
+      "unchanged_from_pass69_1": true
+    },
+    {
+      "path": "gxb_backend/state/economy_ledger.py",
+      "unchanged_from_pass69_1": true
+    },
+    {
+      "path": "gxb_backend/state/stack_inventory.py",
+      "unchanged_from_pass69_1": true
+    },
+    {
+      "path": "gxb_backend/state/unit_of_work.py",
+      "unchanged_from_pass69_1": true
+    },
+    {
+      "path": "gxb_backend/state/resource_registry.py",
+      "unchanged_from_pass69_1": true
+    }
+  ],
+  "evidence_boundary": [
+    "Lua source proves optional global envelope and callback-local reconciliation shapes.",
+    "Pass70 does not infer unrecovered reward/cost mechanics from profile metadata.",
+    "Projection profiles constrain projector-added output only; existing handler bodies remain compatibility-owned.",
+    "Runtime client behavior remains pending a fresh Pass70 debug.zip smoke."
+  ]
+}

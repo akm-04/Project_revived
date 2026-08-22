@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "pass": "83.0",
+  "status": "PASS",
+  "tests": [
+    {"test": "selftest_pass68_foundation", "status": "PASS"},
+    {"test": "selftest_pass68_1_medium_free", "status": "PASS"},
+    {"test": "selftest_pass69_economy_backbone_part2", "status": "PASS"},
+    {"test": "selftest_pass69_1_item_sale", "status": "PASS"},
+    {"test": "selftest_pass70_response_projection", "status": "PASS"},
+    {"test": "selftest_pass70_1_stone_summon_mana", "status": "PASS"},
+    {"test": "selftest_pass71_temporal_resources", "status": "PASS"},
+    {"test": "selftest_pass72_hero_progression", "status": "PASS"},
+    {"test": "selftest_pass73_advanced_progression", "status": "PASS"},
+    {"test": "selftest_pass74_awakening", "status": "PASS"},
+    {"test": "selftest_pass75_campaign_ownership", "status": "PASS"},
+    {"test": "selftest_pass79_daily_reset", "status": "PASS"},
+    {"test": "selftest_pass81_daily_reset_campaign_corrections", "status": "PASS"},
+    {"test": "selftest_pass83_mid1_temporal_hygiene", "status": "PASS"}
+  ],
+  "client_runtime_gate": "Pass83 cold-start monotonic rollover + rollback/high-water smoke pending"
+}

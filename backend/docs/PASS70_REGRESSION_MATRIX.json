@@ -1,0 +1,73 @@
+{
+  "schema_version": 1,
+  "pass": "70.0",
+  "backend": "v0.9.2-pass70.0",
+  "status": "PASS",
+  "required_gates": [
+    {
+      "name": "compileall",
+      "status": "PASS",
+      "note": "gxb_backend + tools"
+    },
+    {
+      "name": "validate_pass42_12",
+      "status": "PASS",
+      "note": "canonical predecessor validator"
+    },
+    {
+      "name": "validate_pass42_14",
+      "status": "PASS",
+      "note": "canonical predecessor validator"
+    },
+    {
+      "name": "selftest_pass68_foundation",
+      "status": "PASS",
+      "note": "persistence/UoW/47-key ResourceRegistry"
+    },
+    {
+      "name": "selftest_pass68_1_medium_free",
+      "status": "PASS",
+      "note": "runtime-accepted Medium free hotfix characterization"
+    },
+    {
+      "name": "selftest_pass69_economy_backbone_part2",
+      "status": "PASS",
+      "note": "30-scalar ledger + STACK/RESOURCE settlement"
+    },
+    {
+      "name": "selftest_pass69_1_item_sale",
+      "status": "PASS",
+      "note": "MID82/MID86 generic sale settlement"
+    },
+    {
+      "name": "selftest_pass70_response_projection",
+      "status": "PASS",
+      "note": "journal/profile projection semantics"
+    }
+  ],
+  "known_predecessor_baselines": [
+    {
+      "name": "selftest_multiuser",
+      "pass69_1": "FAIL_STALE_EXPECTATION",
+      "pass70": "FAIL_IDENTICAL_ASSERTION",
+      "assertion": "sandbox.mana == 999999 and sandbox.crystal == 999999",
+      "new_regression": false
+    },
+    {
+      "name": "selftest_campaign_economy",
+      "pass69_1": "FAIL_STALE_EXPECTATION",
+      "pass70": "FAIL_IDENTICAL_ASSERTION",
+      "assertion": "legacy summon.summon_hero type1/index1 result expectation",
+      "new_regression": false
+    },
+    {
+      "name": "selftest_tutorial_summon",
+      "pass69_1": "FAIL_STALE_EXPECTATION",
+      "pass70": "FAIL_IDENTICAL_ASSERTION",
+      "assertion": "first Mana pull should succeed",
+      "new_regression": false
+    }
+  ],
+  "new_static_regressions": 0,
+  "runtime_gate": "PENDING_USER_DEBUG_ZIP"
+}

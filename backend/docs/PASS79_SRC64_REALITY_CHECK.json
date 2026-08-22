@@ -1,0 +1,38 @@
+{
+  "pass": "79.0",
+  "status": "PASS",
+  "source_artifact": "all-assest-rechecked.zip",
+  "source_sha256": "89f0f830508b92e5fff6ad53c6a9dae961a14042dbfdf5649008efb8353f5608",
+  "facts": [
+    {
+      "fact": "canonical daily boundary is 18000 seconds-of-day = 05:00 GMT+8",
+      "source": "app-assets/output/assets/src_64/data/tables/misc.lua",
+      "evidence": "day_start_time = 18000"
+    },
+    {
+      "fact": "05:00:01 direct fanout includes mission, activities and auction",
+      "source": "app-assets/output/assets/src_64/app/common/ServerTime.lua",
+      "evidence": "second-of-day 18001 dispatches UPDATE_MISSION_ONTIME, UPDATE_ACTIVITIES_ONTIME, AUCTION_REFRESH_ONTIME"
+    },
+    {
+      "fact": "ordinary Shop is not a 05:00 participant",
+      "source": "app-assets/output/assets/src_64/app/common/ServerTime.lua",
+      "evidence": "UPDATE_SHOP_ONTIME occurs at 43201, 64801 and 75601"
+    },
+    {
+      "fact": "daily_updates invalidates Trial/WorldMap/Sign/March and synchronizes only mana/energy/skill purchase counters",
+      "source": "app-assets/output/assets/src_64/app/model/SelfPlayer.lua",
+      "evidence": "daily_updates branch reads updates.buy_mana_times, updates.buy_energy_times, updates.buy_skill_times; no buy_spirit_energy_times"
+    }
+  ],
+  "negative_scope": [
+    "MID116",
+    "MID117",
+    "MID118",
+    "Daily Mission generation",
+    "Sign ownership",
+    "ordinary Shop 05:00 reset",
+    "Arena reset ownership",
+    "card entitlement decrement"
+  ]
+}

@@ -1,0 +1,134 @@
+{
+  "pass": "88.0",
+  "backend_version": "0.10.1",
+  "base_backend": "v0.10.0-pass87.0",
+  "added": [
+    {
+      "path": "docs/PASS88_CLIENT_TEST_PLAN.md",
+      "sha256": "51c84e13beaee8e701536ecf9aa37ff2572232c9be32a680dd73a12bcf7bccfb"
+    },
+    {
+      "path": "docs/PASS88_COMMERCE_PURCHASE_SELFTEST.json",
+      "sha256": "3642cb172d6d247ab6c59a4de5845a1a12b899475db564fe491a76f0a6814a12"
+    },
+    {
+      "path": "docs/PASS88_PURCHASE_BRIDGE_CONTRACT.json",
+      "sha256": "f5beb60d18dad3a88b81b3e84394406a92204057de1ca889a8ac7e3153118006"
+    },
+    {
+      "path": "docs/PASS88_REGRESSION_MATRIX.json",
+      "sha256": "e0efbad7ae2b807903e67c6e0bf5f5d0f1dcf4d19e4223d33f99f16704b51fdb"
+    },
+    {
+      "path": "docs/PASS88_ROUTE_CONTRACT_SELFTEST.json",
+      "sha256": "287e3caa05770537fad3ed3eb2eafff3f371e734d03fd9ad69946c24db6cb260"
+    },
+    {
+      "path": "docs/PASS88_ROUTE_CONTRACT_VALIDATION.json",
+      "sha256": "3940131a2ff6b64a276c7e30028f1fb4515b33f2c9cb4f69cbef47b516f788c5"
+    },
+    {
+      "path": "docs/PASS88_SRC64_FEEDBACK_LOOP.json",
+      "sha256": "4473763eff5822892642a59ec42857c31741633587828f7d030adfe4bc1739ab"
+    },
+    {
+      "path": "docs/PASS88_TECHNICAL_CHANGELOG.md",
+      "sha256": "d4ae7b4d8d6439513f8e17465b2c9dbde6ea4aacf9bd859c7a6fa217f30387ee"
+    },
+    {
+      "path": "gxb_backend/state/commerce_purchase.py",
+      "sha256": "dcc53785aa0daa59667d7b0f20e1510c5615521e5bab877ed8db3b44b129015b"
+    },
+    {
+      "path": "gxb_backend/transport/routes_commerce.py",
+      "sha256": "a2787908182a4c3415e08eec664aea87461420dc7336835f0d11abdca0a48b4a"
+    },
+    {
+      "path": "tools/pass88_purchase_bridge.lua",
+      "sha256": "9c885907f8db97d5907c03d43071d96a54d5625bec9804c8f648418bd75788d8"
+    },
+    {
+      "path": "tools/selftest_pass88_commerce_purchase.py",
+      "sha256": "9171ca7f83d5af4dc8c794238da68c67569233071fdc34e74cf37a0ef0116097"
+    },
+    {
+      "path": "tools/selftest_pass88_purchase_route_contract.py",
+      "sha256": "e29c8e80d0d99c17a71aec5bf173dccfe3be937935af1a9f40a3990819c0d776"
+    }
+  ],
+  "modified": [
+    {
+      "path": "README.md",
+      "sha256": "522a255e561c5080ce5e57e7008fabacb1a40778b26243c201b62dec7c155619",
+      "base_sha256": "cd115c9a4c068c33b2f9cea3030cb184c61349e08d566195bef733bd40ed01dc"
+    },
+    {
+      "path": "UPDATE_README.md",
+      "sha256": "061da24b5daadf125150c24debcc80b5c5fa4238911eca03bf119965840e2690",
+      "base_sha256": "44e14fc22f7018392f1fbb7549b7d1e154f83e249065a4a59a773b5edaabc7e1"
+    },
+    {
+      "path": "VERSION.json",
+      "sha256": "6233a9292d620121ac3677c5c22bc10cf80e3bc90fb0706e83d70ad543f5e375",
+      "base_sha256": "4846adb8602dd69142d4bf048babf310b3ba2c4ce082b4d1499bd3074d155449"
+    },
+    {
+      "path": "data/commerce_source_meta.json",
+      "sha256": "a24eac1395a9ed9627f6b7c673dd66889c4616c9dc36ba9685ed200587109d3f",
+      "base_sha256": "e0ab4b5d201473526307608ede2434dce888d69e517ef4d1ea813debf244a9e7"
+    },
+    {
+      "path": "data/vip_source_meta.json",
+      "sha256": "290ccff1b061ec87959ba0c371fabf69eb5ada0574901aa7abc8aaadbbc9f827",
+      "base_sha256": "3267a3dba429dd99f877aff97f3972bebb7391eb9986a4389e3c31e7e75ee19c"
+    },
+    {
+      "path": "gxb_backend/app_factory.py",
+      "sha256": "1eef6639f99e01e3424efb1f3f9ddd5617da52a830b0c8144ae7cefb0395ce94",
+      "base_sha256": "7ffcec88363d5fb90fe2951054ab2999546774212320c248fdc213dababd2acd"
+    },
+    {
+      "path": "gxb_backend/state/commerce_service.py",
+      "sha256": "d829ef2aa581ba5964848c70dc3b894192bdd92295a277cf6055d50f4fdd39c8",
+      "base_sha256": "f9061f7a8f839ea7073cd1b057d506aa3d0611a3e276818d98cbe0424c64fc7c"
+    },
+    {
+      "path": "gxb_backend/state/player_database.py",
+      "sha256": "d9ddc4074ffafd76cbfba7a5f9b1b6e7f6e4b7937c35da374833ed0bf1787aef",
+      "base_sha256": "5fa23499e300153b0cd0b92149cf023b38150d8e7cd153a75130f54f7c98efad"
+    },
+    {
+      "path": "gxb_backend/state/request_services.py",
+      "sha256": "2e0abd54a964610b6e6c47af4417f9e70885c509d03a1b856b3fa9aa3801241a",
+      "base_sha256": "04f57a30fce0bded7be4aa8f82b991d8bdc36563f638454eadce8f6aebce4487"
+    },
+    {
+      "path": "gxb_backend/version.py",
+      "sha256": "e5d4d86caa2fc363d56b976ef3989b1754d41ad115ed51b9a67e85c4dcc0751c",
+      "base_sha256": "032edbcaf80ea0de3d5f8d6e400cf95fde06edac3707a97bf1121016671fb41c"
+    },
+    {
+      "path": "memory.md",
+      "sha256": "a0928a9a57ede5cd4aa2ba202b9ef81bcf43bc72887077a663fb1db43542ae87",
+      "base_sha256": "1f364cc846f8ecc1e9b09dd4f7d11ed4544a33ac4c521f78136dc2a599f3b8a8"
+    },
+    {
+      "path": "tools/build_commerce_vip_meta.py",
+      "sha256": "f3efd524b467c392d44213f4742f5e89c8d3b07751e2733bacd10e4175a213fe",
+      "base_sha256": "5052346fa1dafe3061b7e8cebe87f4dee172d5091425c38cfe442df18023de13"
+    }
+  ],
+  "removed": [],
+  "boundary": {
+    "purchase_intent_bridge": "IMPLEMENTED_DIRECT_CRYSTAL_ONLY",
+    "commerce_settlement": "IMPLEMENTED_EXACTLY_ONCE_DIRECT_CRYSTAL_ONLY",
+    "mid36857_completion": "SOURCE_SHAPED_BRIDGE_RESPONSE_POST_COMMIT",
+    "native_store_verification": "NOT_IMPLEMENTED",
+    "tcp_push_framing": "NOT_GUESSED",
+    "mid657": "DEFERRED",
+    "cards": "DEFERRED",
+    "skin_mall_mid2981": "DEFERRED",
+    "ordinary_store": "DEFERRED",
+    "mid116_117_118": "NOT_IMPLEMENTED"
+  }
+}

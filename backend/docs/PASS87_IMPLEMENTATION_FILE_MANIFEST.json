@@ -1,0 +1,130 @@
+{
+  "pass": "87.0",
+  "backend_version": "0.10.0",
+  "base_backend": "v0.9.12-pass83.0",
+  "added": [
+    {
+      "path": "data/commerce_source_meta.json",
+      "sha256": "e0ab4b5d201473526307608ede2434dce888d69e517ef4d1ea813debf244a9e7"
+    },
+    {
+      "path": "data/vip_source_meta.json",
+      "sha256": "3267a3dba429dd99f877aff97f3972bebb7391eb9986a4389e3c31e7e75ee19c"
+    },
+    {
+      "path": "docs/PASS87_CLIENT_TEST_PLAN.md",
+      "sha256": "fc6e0589c5315b3789f5375ef5fc771a89f73e17695eca120eeab15f95ef8a7d"
+    },
+    {
+      "path": "docs/PASS87_COMMERCE_VIP_PHASE1_SELFTEST.json",
+      "sha256": "fc8f79dffd011ee6097ed30168fc42a04b3fd443373f848bdad10b599336e536"
+    },
+    {
+      "path": "docs/PASS87_REGRESSION_MATRIX.json",
+      "sha256": "6e96d15fdfdfa49a0ddf2e6e91e22a618350a64b60672b5d44b2f2f4f2e35719"
+    },
+    {
+      "path": "docs/PASS87_SRC64_FEEDBACK_LOOP.json",
+      "sha256": "3a6804e1b2ba226ae6f79082ac35ad8cb8fdad96c215593a95905f21d84f8a98"
+    },
+    {
+      "path": "docs/PASS87_TECHNICAL_CHANGELOG.md",
+      "sha256": "ffbbac2499085611ed29e25ea419b42b9ad45364d910b43ed9bf168b4dcc2319"
+    },
+    {
+      "path": "gxb_backend/content/recharge_catalog.py",
+      "sha256": "bd57aff00b8de17a318bddf1ebf32aba25f40274d3ae27879084c235a45d452a"
+    },
+    {
+      "path": "gxb_backend/state/commerce_service.py",
+      "sha256": "f9061f7a8f839ea7073cd1b057d506aa3d0611a3e276818d98cbe0424c64fc7c"
+    },
+    {
+      "path": "gxb_backend/state/vip_policy.py",
+      "sha256": "051ecad85fcc7f0cd716331fffa1271d3622846fb6ef5d85dc9f747c5aa55dcf"
+    },
+    {
+      "path": "tools/build_commerce_vip_meta.py",
+      "sha256": "5052346fa1dafe3061b7e8cebe87f4dee172d5091425c38cfe442df18023de13"
+    },
+    {
+      "path": "tools/selftest_pass87_commerce_vip_phase1.py",
+      "sha256": "8495ab073430a941dedf48f88feccd8899a9638df2bf725b29691a4588b60bd0"
+    }
+  ],
+  "modified": [
+    {
+      "path": "README.md",
+      "sha256": "cd115c9a4c068c33b2f9cea3030cb184c61349e08d566195bef733bd40ed01dc",
+      "base_sha256": "ecd80aacf842a33469463dcec0c182b0183385a8de6f8509a737f4ea4ab8679c"
+    },
+    {
+      "path": "UPDATE_README.md",
+      "sha256": "44e14fc22f7018392f1fbb7549b7d1e154f83e249065a4a59a773b5edaabc7e1",
+      "base_sha256": "ea9ffd5db149da1daa2e8d2262277528f33a58a0ceac9a4d79b1cc2034a98e64"
+    },
+    {
+      "path": "VERSION.json",
+      "sha256": "4846adb8602dd69142d4bf048babf310b3ba2c4ce082b4d1499bd3074d155449",
+      "base_sha256": "19382729bd093526206bf9a2e6528b4ba4a66e61e558a4f8699ac1e7d3e30bdc"
+    },
+    {
+      "path": "gxb_backend/handlers/system.py",
+      "sha256": "3becda32a533ea3dc47824a5e8fdba1841f30b060f31d6fade336b2d0fbb9f34",
+      "base_sha256": "f405e57ec2266ea4bcca0cd20021abf475b286efb45fd2c27e951c95be6ebadc"
+    },
+    {
+      "path": "gxb_backend/state/multiuser_database.py",
+      "sha256": "db3566373422ceae8365b2ed3c23a391e7d67861b54d44bc2ac0c103a6152950",
+      "base_sha256": "8926a9fdffb08dfbac09a1ff2cdfd174a2a74c5bb1d7a833e527befd6d52ee00"
+    },
+    {
+      "path": "gxb_backend/state/player_database.py",
+      "sha256": "5fa23499e300153b0cd0b92149cf023b38150d8e7cd153a75130f54f7c98efad",
+      "base_sha256": "f413485a50bd5f20c211fa4d6f56c5efc95538ed7dbad3ca0b25c3e0d5654842"
+    },
+    {
+      "path": "gxb_backend/state/player_state.py",
+      "sha256": "2a92f94ebce04f90d2abf92e070b5b692fb511448df87972293d6c1c946ea695",
+      "base_sha256": "3815b711ecc3a1730e1e86f36a469d78ce4c1ea4aea087f4f946383850aa99d7"
+    },
+    {
+      "path": "gxb_backend/state/request_services.py",
+      "sha256": "04f57a30fce0bded7be4aa8f82b991d8bdc36563f638454eadce8f6aebce4487",
+      "base_sha256": "43eed5f5c3dca46976bd3f451ab665ff25e65bd23d3a559e5bc5a9318b28f129"
+    },
+    {
+      "path": "gxb_backend/state/skill_point_policy.py",
+      "sha256": "8032c8557d2d80c75a19f0d3c968b2e45097ae0eb1548534736b2033ff5f7307",
+      "base_sha256": "b13aeba2b8f18adb91dedde47612ff703646fd0a98a0ae33d69585419dc29bf2"
+    },
+    {
+      "path": "gxb_backend/state/summon_repository.py",
+      "sha256": "466f4af8e1914f788255d28e602548d98ad945837cd8306027c39dc7720c0038",
+      "base_sha256": "5e54bc3a44c7dce03844659e9def39f9b42214271b276ad696cfd124de586535"
+    },
+    {
+      "path": "gxb_backend/state/temporal_policy_service.py",
+      "sha256": "8533fa4cff041041fd8fdf2adcfbc9d7c6eff2822b4614d62ffa016658df457f",
+      "base_sha256": "9c7a8281fc0d9027efaccc10cc414a433b4a44f99db8ac050cc3cbc794cbdd0e"
+    },
+    {
+      "path": "gxb_backend/version.py",
+      "sha256": "032edbcaf80ea0de3d5f8d6e400cf95fde06edac3707a97bf1121016671fb41c",
+      "base_sha256": "06c39acd6890e6cb410103da4f6defe13ed6b6e001f40d6b3f0dc554af62605e"
+    },
+    {
+      "path": "memory.md",
+      "sha256": "1f364cc846f8ecc1e9b09dd4f7d11ed4544a33ac4c521f78136dc2a599f3b8a8",
+      "base_sha256": "61116cba8c1281be7ded32fa24f60b23f504182ae651635f2805fd2449a44f7f"
+    }
+  ],
+  "removed": [],
+  "boundary": {
+    "purchase_intent_bridge": "DEFERRED",
+    "commerce_settlement": "DEFERRED",
+    "mid36857_completion": "DEFERRED",
+    "mid657": "DEFERRED",
+    "mid116_117_118": "NOT_IMPLEMENTED"
+  }
+}

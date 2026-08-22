@@ -1,0 +1,152 @@
+{
+  "schema_version": 1,
+  "pass": "70.0",
+  "backend": "0.9.2",
+  "baseline": "gxb-backend-v0.9.1-pass69.1",
+  "manifest_self_excluded": "docs/PASS70_IMPLEMENTATION_FILE_MANIFEST.json",
+  "changed_files": 12,
+  "added_files": 8,
+  "removed_files": 0,
+  "files": [
+    {
+      "path": "README.md",
+      "change_type": "MODIFIED",
+      "predecessor_sha256": "f0b7697048712357530ae8432c4cd0a6cef6c45470036c6733397135f02009d0",
+      "pass70_sha256": "4cfc6dfd2445e91856ee8cb2402b3810020f78ff1743b747bf8f86c390f5d233",
+      "size": 7464
+    },
+    {
+      "path": "UPDATE_README.md",
+      "change_type": "MODIFIED",
+      "predecessor_sha256": "db0b7d281c27aa992bd86368854895c701897c8c303b474556746ba1b7486a90",
+      "pass70_sha256": "9b16b858ff1aead07b747a6d32fa455f5b8b4243d3bdc4f4ddecf4b15c35aee5",
+      "size": 3044
+    },
+    {
+      "path": "VERSION.json",
+      "change_type": "MODIFIED",
+      "predecessor_sha256": "e32af8190a21cf00a54d959bc82b884030c7a291304f05bf5c54908b4cb629c9",
+      "pass70_sha256": "e20904b3ec852897b2f51b74a963cafb5638c2956f633758295e4f2c3de58e76",
+      "size": 283
+    },
+    {
+      "path": "data/projection_profile_registry.json",
+      "change_type": "ADDED",
+      "predecessor_sha256": null,
+      "pass70_sha256": "fdb6730c9f7d7a719b9fe1eac155b499d8c8cff463a80866464ed1489c0a3817",
+      "size": 8000
+    },
+    {
+      "path": "docs/PASS70_CLIENT_RETEST_PLAN.md",
+      "change_type": "ADDED",
+      "predecessor_sha256": null,
+      "pass70_sha256": "5bed7540dd54dbb342466f894cda12b61cf3c4d266a6da4015f2b3a5e31c24b3",
+      "size": 1655
+    },
+    {
+      "path": "docs/PASS70_REGRESSION_MATRIX.json",
+      "change_type": "ADDED",
+      "predecessor_sha256": null,
+      "pass70_sha256": "c5d823b8ea3a0f9b0160d5c0de664a07aedbea761eb791aee44847b80e8687ee",
+      "size": 2022
+    },
+    {
+      "path": "docs/PASS70_RESPONSE_PROJECTION_SELFTEST.json",
+      "change_type": "ADDED",
+      "predecessor_sha256": null,
+      "pass70_sha256": "ce03fbb6eda96b1a650252d21c05714a40754bdff75ef5338cb1b99a2e53a2dc",
+      "size": 465
+    },
+    {
+      "path": "docs/PASS70_SRC64_FEEDBACK_LOOP.json",
+      "change_type": "ADDED",
+      "predecessor_sha256": null,
+      "pass70_sha256": "9e2516383cbba26acb3a323cff2d57a9c8adc41f590b54c7926dab9a7eecf1af",
+      "size": 13512
+    },
+    {
+      "path": "docs/PASS70_TECHNICAL_CHANGELOG.md",
+      "change_type": "ADDED",
+      "predecessor_sha256": null,
+      "pass70_sha256": "db89b05b517471d31838f30bd8c6b748634bdeb35ed666b744e2cc9b960c7048",
+      "size": 3642
+    },
+    {
+      "path": "docs/memory.md",
+      "change_type": "MODIFIED",
+      "predecessor_sha256": "cd257ea5efdf424b857d2e48c504dd4c3e37e472f11f9eb6408702edae143747",
+      "pass70_sha256": "4d8f49cb08e789228834b33909ae67e94dfe44ed704619bc6084c8307e30ea23",
+      "size": 1698
+    },
+    {
+      "path": "gxb_backend/config.py",
+      "change_type": "MODIFIED",
+      "predecessor_sha256": "99c506008cc012524ead132d750a1707f504a20fea198d83f38e1e72fc398962",
+      "pass70_sha256": "b528bb6077bd26cd587b22700a9479c7fb023e17bcca74679ca74cee88a47b17",
+      "size": 8975
+    },
+    {
+      "path": "gxb_backend/dispatch/engine_dispatcher.py",
+      "change_type": "MODIFIED",
+      "predecessor_sha256": "ddca6e4a063af2a77711ff4620bb3d64c30ea22174cbb3f36e5c378f83d9fe2e",
+      "pass70_sha256": "fc1327cf848bfb3379cfe6e077e8143a179ca1d4a96ebcba24ca0109928776fb",
+      "size": 26852
+    },
+    {
+      "path": "gxb_backend/run.py",
+      "change_type": "MODIFIED",
+      "predecessor_sha256": "04a7847f2d795ca24d1dd77d2a4369692e84123309428503bdd4ed0f75dc1c37",
+      "pass70_sha256": "93956da41d694e4a7b910e9603a8f3a4af614026070bac22971f25e5182e8f23",
+      "size": 3000
+    },
+    {
+      "path": "gxb_backend/state/inventory_sale_service.py",
+      "change_type": "MODIFIED",
+      "predecessor_sha256": "1e5ab7e5ff2f3d6a1d90adab112acb737417a837430ab29e1044befebda8be26",
+      "pass70_sha256": "93e0cc58841f0421f17dd5af6bb23d2a05b8000b601229825fc78f250e015bb3",
+      "size": 5755
+    },
+    {
+      "path": "gxb_backend/state/mutation_settlement_service.py",
+      "change_type": "MODIFIED",
+      "predecessor_sha256": "b0ce7c3f19c9327ea87f5b463bbb6e4b2a4a302c56c3a55491009bddba2b8bbe",
+      "pass70_sha256": "5fd16e64f1fa987daf0cbd0443ed938e590566556a4d3de36bf5926970dc6e71",
+      "size": 10984
+    },
+    {
+      "path": "gxb_backend/state/projection_profiles.py",
+      "change_type": "ADDED",
+      "predecessor_sha256": null,
+      "pass70_sha256": "19eddf7ece4bbf7fc18f93c8490eb9ff68c1cf79e3a8bcf10277b31efbb13aa1",
+      "size": 6904
+    },
+    {
+      "path": "gxb_backend/state/response_projector.py",
+      "change_type": "MODIFIED",
+      "predecessor_sha256": "6ee6ab071e5c8b825d57e30cbe08f48e51f03a10a1ed924b1ed88af98889b4bb",
+      "pass70_sha256": "4f4b0716a4a4297b0502699833393cc37dcc5f2bc545be6ec99a3c29b430a2d4",
+      "size": 9130
+    },
+    {
+      "path": "gxb_backend/version.py",
+      "change_type": "MODIFIED",
+      "predecessor_sha256": "6620366da6ce105be66381cfe42627a1cc63333ea2798aaa61b26c28a9ac6d30",
+      "pass70_sha256": "5eecabe09666bd4ba57e3d0d07730ceb72353ca611a79d5bd2defe818a99c80b",
+      "size": 97
+    },
+    {
+      "path": "memory.md",
+      "change_type": "MODIFIED",
+      "predecessor_sha256": "2364fb2d71b0e2c8e6736f3ac3d922567b426fc823b36064e14d0e8012e9f8f5",
+      "pass70_sha256": "4d8f49cb08e789228834b33909ae67e94dfe44ed704619bc6084c8307e30ea23",
+      "size": 1698
+    },
+    {
+      "path": "tools/selftest_pass70_response_projection.py",
+      "change_type": "ADDED",
+      "predecessor_sha256": null,
+      "pass70_sha256": "26e4252a9768185a5e0f21eff11fe2e6dc44b871065ad4947ec2296ad0e169eb",
+      "size": 9534
+    }
+  ]
+}

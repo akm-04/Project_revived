@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "pass": "70.1",
+  "status": "PASS",
+  "runtime": "PENDING_FOCUSED_USER_RESMOKE",
+  "checks": [
+    "compileall",
+    "validate_pass42_12",
+    "validate_pass42_14",
+    "selftest_pass68_foundation",
+    "selftest_pass68_1_medium_free",
+    "selftest_pass69_economy_backbone_part2",
+    "selftest_pass69_1_item_sale",
+    "selftest_pass70_response_projection",
+    "selftest_pass70_1_stone_summon_mana"
+  ],
+  "new_static_regressions": 0
+}

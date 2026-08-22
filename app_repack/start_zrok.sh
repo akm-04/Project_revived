@@ -1,4 +1,14 @@
 #!/bin/bash
+# Add the ports permanently to your active firewall zone
+#sudo firewall-cmd --permanent --add-port=5000/tcp
+#sudo firewall-cmd --permanent --add-port=9000/tcp
+#sudo firewall-cmd --permanent --add-port=9100/tcp
+
+# Reload the firewall to apply the changes immediately
+#sudo firewall-cmd --reload
+
+# Verify that the ports are now open
+#sudo firewall-cmd --list-ports
 
 echo "Cleaning up any old zrok processes..."
 killall zrok2 2>/dev/null

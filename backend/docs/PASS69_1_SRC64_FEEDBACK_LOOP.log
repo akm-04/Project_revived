@@ -1,0 +1,124 @@
+{
+  "schema_version": 1,
+  "pass": "69.1",
+  "status": "PASS",
+  "effective_source": {
+    "files": 4370,
+    "downloaded_winners": 62,
+    "app_winners": 4308,
+    "missing": 0,
+    "extra": 0,
+    "hash_mismatch": 0,
+    "exact_pass57_match": true
+  },
+  "pass67_architecture_assertions": {
+    "passed": 48,
+    "total": 48,
+    "failures": []
+  },
+  "sell_contract_assertions": {
+    "passed": 9,
+    "total": 9,
+    "rows": [
+      {
+        "id": "selfplayer_sell_mid82",
+        "source": "app/model/SelfPlayer.lua",
+        "status": "PASS"
+      },
+      {
+        "id": "selfplayer_sell_removes_stack",
+        "source": "app/model/SelfPlayer.lua",
+        "status": "PASS"
+      },
+      {
+        "id": "selfplayer_sellitems_mid86",
+        "source": "app/model/SelfPlayer.lua",
+        "status": "PASS"
+      },
+      {
+        "id": "selldetail_mana_primary",
+        "source": "app/windows/SellDetailWindow.lua",
+        "status": "PASS"
+      },
+      {
+        "id": "selldetail_crystal_fallback",
+        "source": "app/windows/SellDetailWindow.lua",
+        "status": "PASS"
+      },
+      {
+        "id": "sellwindow_multi_mana",
+        "source": "app/windows/SellWindow.lua",
+        "status": "PASS"
+      },
+      {
+        "id": "global_economy_envelope",
+        "source": "app/common/network/Backend.lua",
+        "status": "PASS"
+      },
+      {
+        "id": "inscription_override",
+        "source": "app/windows/SellDetailWindow.lua",
+        "status": "PASS"
+      },
+      {
+        "id": "dorm_key_override",
+        "source": "app/windows/SellDetailWindow.lua",
+        "status": "PASS"
+      }
+    ]
+  },
+  "resource_registry": {
+    "descriptors": 47,
+    "exact_pass65_match": true
+  },
+  "item_sale_catalog": {
+    "rows": 4564,
+    "psp": 500000,
+    "cushion": 20000,
+    "generic_allowed": 4172,
+    "specialized_blocked": 392
+  },
+  "compatibility_unchanged": [
+    {
+      "path": "gxb_backend/transport/routes_engine.py",
+      "unchanged_from_69_0": true
+    },
+    {
+      "path": "gxb_backend/transport/routes_sdk.py",
+      "unchanged_from_69_0": true
+    },
+    {
+      "path": "gxb_backend/dispatch/engine_dispatcher.py",
+      "unchanged_from_69_0": true
+    },
+    {
+      "path": "gxb_backend/state/response_projector.py",
+      "unchanged_from_69_0": true
+    },
+    {
+      "path": "gxb_backend/state/global_response_semantics.py",
+      "unchanged_from_69_0": true
+    },
+    {
+      "path": "gxb_backend/state/player_state.py",
+      "unchanged_from_69_0": true
+    },
+    {
+      "path": "gxb_backend/state/player_database.py",
+      "unchanged_from_69_0": true
+    },
+    {
+      "path": "gxb_backend/state/multiuser_database.py",
+      "unchanged_from_69_0": true
+    },
+    {
+      "path": "gxb_backend/state/economy_ledger.py",
+      "unchanged_from_69_0": true
+    },
+    {
+      "path": "gxb_backend/state/stack_inventory.py",
+      "unchanged_from_69_0": true
+    }
+  ],
+  "conclusion": "MID82/MID86 now use the Part2 stack+scalar settlement backbone while preserving client response conventions: client-side sold-stack removal after success and server economy_ synchronization."
+}

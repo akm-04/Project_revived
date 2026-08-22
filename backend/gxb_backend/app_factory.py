@@ -9,6 +9,7 @@ from gxb_backend.dispatch.engine_dispatcher import EngineDispatcher
 from gxb_backend.observability.resource_gateway import ResourceGateway
 from gxb_backend.state.repository import StateRepository
 from gxb_backend.transport.routes_engine import register_engine_routes
+from gxb_backend.transport.routes_commerce import register_commerce_routes
 from gxb_backend.transport.routes_sdk import register_sdk_routes
 
 
@@ -24,6 +25,7 @@ def create_app(settings: Settings = SETTINGS, state: StateRepository | None = No
     resource_gateway = ResourceGateway(settings)
     dispatcher = EngineDispatcher(repo, settings, resource_gateway)
     register_sdk_routes(app, repo)
+    register_commerce_routes(app, repo)
     register_engine_routes(app, dispatcher, settings, resource_gateway)
     app.extensions["gxb_state"] = repo
     app.extensions["gxb_dispatcher"] = dispatcher

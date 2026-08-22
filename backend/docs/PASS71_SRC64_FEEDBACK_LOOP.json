@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "pass": "71.0",
+  "status": "PASS",
+  "source_precedence": "downloaded-assets/output/src_64 overrides app-assets/output/assets/src_64 path-by-path",
+  "effective_tree": {
+    "files": 4370,
+    "downloaded_winners": 62,
+    "app_winners": 4308,
+    "pass57_fingerprint_files": 4370,
+    "missing": 0,
+    "extra": 0,
+    "sha256_mismatches": 0,
+    "exact_pass57_match": true
+  },
+  "facts": [
+    {"resource":"energy","interval_seconds":300,"cap":"data/tables/player.lua level energy column","projection":"economy_.energy","evidence":"app/model/SelfPlayer.lua getEnergy/getEnergyLimit/recoverByTime + effective misc/player tables"},
+    {"resource":"spirit_energy","interval_seconds":360,"natural_cap":180,"projection":"economy_.spirit_energy","evidence":"SelfPlayer.lua getSpiritEnergy + misc.lua spirit_energy_minute/spirit_energy_up_limit"},
+    {"resource":"skill_point","interval_seconds":300,"cap":"VIP skillPoint + monthly privilege bonus","projection":"economy_.skill_point","evidence":"SelfPlayer.lua getSkillPoint/getSkillPointLimit/recoverByTime"},
+    {"resource":"invitation","interval_seconds":1800,"enabled":false,"projection":"SUPPRESSED","evidence":"SelfPlayer.lua calls xyd.tables.player:invitation(level), but effective data/tables/player.lua keys contain no invitation field"},
+    {"path":"MID27 USE_ENERGY_ITEM","client_reconciliation":"SelfPlayer.lua removes Backpack item locally after OK; server must not synthesize duplicate stack award"},
+    {"path":"MID90 USE_SKILL_POINT_ITEM","client_reconciliation":"SelfPlayer.lua removes Backpack item locally after OK; server must not synthesize duplicate stack award"},
+    {"constraint":"spirit_energy_purchase","status":"NOT_ACTIVATED","evidence":"misc.lua spirit_energy_buy_limit note says front-end currently suppresses the function"},
+    {"constraint":"natural_caps","status":"REGENERATION_STOP_NOT_HARD_INVENTORY_MAX","evidence":"SelfPlayer.lua recoverByTime and frozen Pass61/Pass65 contracts"}
+  ],
+  "architecture_decision": "Temporal resources use specialized owners/TEMPORAL transitions; EconomyLedger remains exactly 30 scalar resources."
+}

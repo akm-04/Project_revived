@@ -1,6 +1,6 @@
-"""Canonical normal-Campaign progression and commit helpers.
+"""Canonical Normal/Super Campaign progression and commit helpers.
 
-The supplied client simulates normal Campaign combat locally.  The backend owns
+The supplied client simulates Campaign combat locally. The backend owns
 persistent map state around that simulation: the unlocked campaign rows, best
 stars, chapter cursor, the pending MID113 -> MID114 session, source-certain
 first-clear items, and v0.8.2's canonical Mana/player/Hero EXP transaction.
@@ -16,11 +16,14 @@ from typing import Any
 
 from gxb_backend.content import CatalogNamespace, ContentRef, GameDataCatalog
 
+from .awakening_mission_service import AwakeningMissionService
 from .campaign_drop_planner import CampaignDropPlanner
 from .economy_repository import EconomyRepository
 from .hero_progression_repository import HeroProgressionRepository
 from .inventory_repository import InventoryRepository
 from .mission_repository import MissionRepository
+from .mutation_plan import ActorRef, IdempotencySpec, MutationOrigin, MutationPlan, TemporalTransition
+from .mutation_settlement_service import MutationPreconditionError, MutationSettlementError, MutationSettlementService
 from .player_state import PlayerState
 from .reward_transaction_service import (
     EconomyGrant, InventoryGrant, RewardOrigin, RewardPlan, RewardTransactionService,
@@ -40,10 +43,12 @@ class WorldRepository:
         economy: EconomyRepository | None = None,
         hero_progression: HeroProgressionRepository | None = None,
         missions: MissionRepository | None = None,
+        awakening_missions: AwakeningMissionService | None = None,
         catalog: GameDataCatalog | None = None,
         rewards: RewardTransactionService | None = None,
         tutorial: TutorialMilestoneRepository | None = None,
         drop_planner: CampaignDropPlanner | None = None,
+        settlement: MutationSettlementService | None = None,
         uow: UnitOfWork | None = None,
     ) -> None:
         self.player = player
@@ -53,12 +58,15 @@ class WorldRepository:
         self.economy = economy or EconomyRepository(player, self.data_dir)
         self.hero_progression = hero_progression or HeroProgressionRepository(player, self.data_dir)
         self.missions = missions
+        self.awakening_missions = awakening_missions
         self.catalog = catalog
         self.rewards = rewards
         self.tutorial = tutorial
         self.drop_planner = drop_planner
+        self.settlement = settlement
         self.uow = uow
         self._campaigns = self._load_campaign_meta()
+        self._campaign_ownership = self._load_campaign_ownership_meta()
         self._campaign_rewards = self._load_campaign_reward_meta()
         self._story_drop_campaigns, self._story_drop_partners = self._load_story_drop_meta()
 
@@ -68,6 +76,66 @@ class WorldRepository:
             return int(value)
         except (TypeError, ValueError):
             return default
+
+
+    def _load_campaign_ownership_meta(self) -> dict[str, Any]:
+        path = self.data_dir / "pass75_campaign_ownership_meta.json"
+        try:
+            data = json.loads(path.read_text(encoding="utf-8"))
+            if not isinstance(data, dict):
+                raise ValueError("ownership metadata root must be object")
+            meta = data.get("_meta") if isinstance(data.get("_meta"), dict) else {}
+            if str(meta.get("source_resolution") or "") != "effective_merged":
+                raise ValueError("ownership metadata is not stamped effective_merged")
+            return data
+        except Exception as exc:
+            print(f"[WORLD] could not load Pass75 Campaign ownership metadata {path}: {exc}")
+            return {}
+
+    def ownership_meta(self, campaign_id: Any) -> dict[str, Any] | None:
+        rows = self._campaign_ownership.get("campaigns") if isinstance(self._campaign_ownership, dict) else {}
+        row = rows.get(str(self._int(campaign_id, -1))) if isinstance(rows, dict) else None
+        return dict(row) if isinstance(row, dict) else None
+
+    def _source_mode_ids(self, campaign_type: Any) -> list[int]:
+        key = "normal_campaign_ids" if self._int(campaign_type, 1) == 1 else "super_campaign_ids"
+        raw = self._campaign_ownership.get(key) if isinstance(self._campaign_ownership, dict) else []
+        return [self._int(v) for v in raw if self._int(v) > 0] if isinstance(raw, list) else []
+
+    def _source_mode_set(self, campaign_type: Any) -> set[int]:
+        return set(self._source_mode_ids(campaign_type))
+
+    def _mode_key(self, campaign_type: Any) -> str:
+        return "super" if self._int(campaign_type, 1) == 2 else "normal"
+
+    def _mode_rows(self, campaign_type: Any) -> list[dict[str, Any]]:
+        key = self._mode_key(campaign_type)
+        wm = self.player.world_map if isinstance(self.player.world_map, dict) else {}
+        rows = wm.get(key)
+        return rows if isinstance(rows, list) else []
+
+    def _find_mode_row(self, campaign_id: int, campaign_type: Any) -> dict[str, Any] | None:
+        for row in self._mode_rows(campaign_type):
+            if self._int(row.get("campaign_id"), 0) == campaign_id:
+                return row
+        return None
+
+    def _next_mode_campaign(self, campaign_id: int, campaign_type: Any) -> int:
+        ordered = self._source_mode_ids(campaign_type)
+        try:
+            idx = ordered.index(int(campaign_id))
+        except ValueError:
+            return 0
+        return ordered[idx + 1] if idx + 1 < len(ordered) else 0
+
+    def _mode_frontier(self, campaign_type: Any) -> int:
+        ordered = self._source_mode_ids(campaign_type)
+        unlocked = {self._int(row.get("campaign_id"), 0) for row in self._mode_rows(campaign_type)}
+        frontier = 0
+        for cid in ordered:
+            if cid in unlocked:
+                frontier = cid
+        return frontier
 
     def _load_campaign_meta(self) -> dict[str, dict[str, int]]:
         path = self.data_dir / "campaign_meta.json"
@@ -218,59 +286,77 @@ class WorldRepository:
         }
 
     def normalize(self) -> bool:
-        """Migrate old hard-coded map defaults into explicit JSON state."""
+        """Normalize source-mode Campaign state without inventing unlocked rows."""
         changed = False
         if not isinstance(self.player.world_map, dict):
             self.player.world_map = {}
             changed = True
         wm = self.player.world_map
-        normal = wm.get("normal")
-        if not isinstance(normal, list) or not normal:
-            # Accessible but unbeaten.  Stage 3 incorrectly seeded star=3,
-            # which exposed Raid before the first real clear.
-            normal = [self._campaign_row(100001, 0)]
-            wm["normal"] = normal
-            changed = True
-        else:
-            cleaned = []
-            for row in normal:
+
+        def clean_rows(raw: Any, *, seed_normal: bool = False) -> list[dict[str, Any]]:
+            nonlocal changed
+            if not isinstance(raw, list):
+                raw = []
+                changed = True
+            cleaned: list[dict[str, Any]] = []
+            seen: set[int] = set()
+            for row in raw:
                 if not isinstance(row, dict):
+                    changed = True
                     continue
                 cid = self._int(row.get("campaign_id"), 0)
-                if cid <= 0:
+                if cid <= 0 or cid in seen:
+                    changed = True
                     continue
-                cleaned.append({
+                seen.add(cid)
+                item = {
                     "campaign_id": cid,
                     "star": max(0, min(3, self._int(row.get("star"), 0))),
                     "daily_limit": self._int(row.get("daily_limit"), 0),
                     "reset_count": self._int(row.get("reset_count"), 0),
                     "is_partner_drop": self._int(row.get("is_partner_drop"), 0),
-                })
-            if cleaned != normal:
-                wm["normal"] = cleaned
-                normal = cleaned
+                }
+                cleaned.append(item)
+                if item != row:
+                    changed = True
+            if seed_normal and not cleaned:
+                first = next(iter(self._source_mode_ids(1)), 100001)
+                cleaned = [self._campaign_row(first, 0)]
                 changed = True
-        for key, default in (("super", {}), ("challenge", {}), ("chapter_events", {})):
-            if not isinstance(wm.get(key), type(default)):
-                wm[key] = default
+            return cleaned
+
+        normal = clean_rows(wm.get("normal"), seed_normal=True)
+        super_rows = clean_rows(wm.get("super"), seed_normal=False)
+        if wm.get("normal") != normal:
+            wm["normal"] = normal
+            changed = True
+        if wm.get("super") != super_rows:
+            wm["super"] = super_rows
+            changed = True
+        for key in ("challenge", "chapter_events"):
+            if not isinstance(wm.get(key), dict):
+                wm[key] = {}
                 changed = True
+
         chapter = wm.get("chapter_info")
         if not isinstance(chapter, dict):
             chapter = {}
-            wm["chapter_info"] = chapter
             changed = True
-        highest = self._frontier_campaign(normal) or 100001
-        meta = self.meta(highest) or {}
-        chapter_id = self._int(meta.get("chapter"), 1) or 1
+        normal_frontier = self._frontier_campaign(normal) or self._mode_frontier(1) or 100001
+        normal_meta = self.meta(normal_frontier) or {}
+        normal_chapter = self._int(normal_meta.get("chapter"), 1) or 1
+        super_frontier = self._mode_frontier(2)
+        super_meta = self.meta(super_frontier) or {}
+        super_chapter = self._int(super_meta.get("chapter"), 0) if super_frontier else 0
         normalized_chapter = {
             **chapter,
-            "normal_chapter_id": chapter_id,
-            "normal_campaign_id": highest,
-            "normal_stars": self._chapter_star_sum(normal, chapter_id),
+            "normal_chapter_id": normal_chapter,
+            "normal_campaign_id": normal_frontier,
+            "normal_stars": self._chapter_star_sum(normal, normal_chapter),
             "normal_bonus_id": self._int(chapter.get("normal_bonus_id"), 0),
-            "super_chapter_id": self._int(chapter.get("super_chapter_id"), 0),
-            "super_campaign_id": self._int(chapter.get("super_campaign_id"), 0),
-            "super_stars": self._int(chapter.get("super_stars"), 0),
+            "super_chapter_id": super_chapter,
+            "super_campaign_id": super_frontier,
+            "super_stars": self._chapter_star_sum(super_rows, super_chapter) if super_chapter else 0,
             "super_bonus_id": self._int(chapter.get("super_bonus_id"), 0),
         }
         if normalized_chapter != chapter:
@@ -285,9 +371,12 @@ class WorldRepository:
         self.normalize()
         return self.player.world_map["normal"]
 
-    def _find_row(self, campaign_id: int) -> dict[str, Any] | None:
-        for row in self._normal_rows():
-            if self._int(row.get("campaign_id"), 0) == campaign_id:
+    def _find_row(self, campaign_id: int, campaign_type: Any | None = None) -> dict[str, Any] | None:
+        if campaign_type is not None:
+            return self._find_mode_row(campaign_id, campaign_type)
+        for wire_type in (1, 2):
+            row = self._find_mode_row(campaign_id, wire_type)
+            if row is not None:
                 return row
         return None
 
@@ -352,8 +441,8 @@ class WorldRepository:
         self.normalize()
         return self.player.world_map
 
-    def _normal_campaign_reward_plan(self, campaign_id: int) -> dict[str, int]:
-        """Source-certain v0.8.2 reward plan for ordinary normal Campaign.
+    def _campaign_reward_plan(self, campaign_id: int) -> dict[str, int]:
+        """Source-certain scalar/progression reward plan for NORMAL/SUPER Campaign.
 
         General item RNG is intentionally absent. The deterministic scalar
         fields come from campaign.lua + SelfPlayer:getExpMulti().
@@ -368,9 +457,72 @@ class WorldRepository:
             "player_exp_gain": energy_cost * multiplier,
         }
 
+    def _campaign_result_energy_cost(self, campaign_id: int, star: int) -> int:
+        meta = self.ownership_meta(campaign_id) or self.economy.campaign_meta(campaign_id)
+        field = "energy_cost" if int(star) > 0 else "defeat_cost"
+        return max(0, self._int((meta or {}).get(field), 0))
+
+    def _campaign_entry_energy_cost(self, campaign_id: int) -> int:
+        meta = self.ownership_meta(campaign_id) or self.economy.campaign_meta(campaign_id)
+        return max(0, self._int((meta or {}).get("energy_cost"), 0))
+
+    def _settle_campaign_energy(self, campaign_id: int, star: int) -> dict[str, int]:
+        cost = self._campaign_result_energy_cost(campaign_id, star)
+        if cost <= 0:
+            return {}
+        if self.settlement is None or self.uow is None:
+            raise RuntimeError("Campaign Energy settlement requires Pass71 MutationSettlementService")
+        plan = MutationPlan(
+            schema_version=1,
+            plan_id=f"campaign-energy:{campaign_id}:{self.uow.current_state_version}",
+            origin=MutationOrigin(
+                domain="campaign", operation="fight_result_energy", protocol_mid=114,
+                source_table="data/tables/campaign.lua", source_id=int(campaign_id),
+                field_path="energy_cost" if int(star) > 0 else "defeat_cost",
+            ),
+            actor=ActorRef(
+                player_id=str(self.player.player_id),
+                account_uid=str(getattr(self.player, "account_uid", "") or "") or None,
+            ),
+            expected_state_version=self.uow.current_state_version,
+            idempotency=IdempotencySpec(mode="NONE"),
+            preconditions=(),
+            operations=(TemporalTransition("energy", "DEBIT", cost),),
+            semantic_events=(),
+            metadata={"pass":"75.0","campaign_id":int(campaign_id),"result":"win" if int(star)>0 else "defeat"},
+        )
+        draft = self.settlement.apply(plan)
+        return dict(draft.projection.economy)
+
     @staticmethod
     def _same_formation(left: Any, right: Any) -> bool:
         return str(left or "") == str(right or "")
+
+    def _active_campaign_session_matches(self, req: dict[str, Any]) -> bool:
+        pending = self.player.active_campaign_battle
+        if not isinstance(pending, dict) or self._int(pending.get("committed"), 0) != 0:
+            return False
+        return (
+            self._int(pending.get("campaign_id"), 0) == self._int(req.get("campaign_id"), 0)
+            and self._int(pending.get("campaign_type"), 1) == self._int(req.get("campaign_type"), 1)
+            and self._same_formation(pending.get("formation"), req.get("formation"))
+        )
+
+    def _campaign_session_reject(self, message: str) -> dict[str, Any]:
+        # Backend.lua treats HTTP 200 as nominal transport success before the
+        # application error body is interpreted. Keep rejected FIGHT_RESULT
+        # responses source-shaped enough that a nominal callback cannot nil-
+        # dereference while still applying no Campaign mutation or reward.
+        self.normalize()
+        return {
+            "error_code": 1,
+            "msg": str(message),
+            "is_win": 0,
+            "result": 0,
+            "chapter_info": dict(self.player.world_map.get("chapter_info") or {}),
+            "campaigns": [],
+            "items": [],
+        }
 
     def _committed_retry_response(self, req: dict[str, Any]) -> dict[str, Any] | None:
         pending = self.player.active_campaign_battle
@@ -408,7 +560,26 @@ class WorldRepository:
         self.normalize()
         campaign_id = self._int(req.get("campaign_id"), 0)
         campaign_type = self._int(req.get("campaign_type"), 1)
-        current = self._find_row(campaign_id)
+        current = self._find_row(campaign_id, campaign_type) if campaign_type in (1, 2) else self._find_row(campaign_id)
+        if campaign_type in (1, 2):
+            if campaign_id not in self._source_mode_set(campaign_type):
+                return {"error_code": 1, "msg": "campaign_mode_mismatch", "items": []}
+            if current is None:
+                return {"error_code": 1, "msg": "campaign_locked", "items": []}
+            # NewMapDetailWindow blocks Super entry when its server-sourced
+            # remaining ``dailyLimit`` is exhausted.  Mirror that UI guard at
+            # the authority boundary so direct/modified clients cannot stage a
+            # battle after the daily allowance reaches zero.
+            if campaign_type == 2 and self._int(current.get("daily_limit"), 0) <= 0:
+                return {"error_code": 1, "msg": "campaign_daily_limit_exhausted", "items": []}
+            # Client MapDetailWindow performs this same full-cost entry check.
+            # Actual settlement waits for MID114 so defeats can use defeat_cost.
+            temporal = getattr(self.settlement, "temporal", None) if self.settlement is not None else None
+            if temporal is not None:
+                try:
+                    temporal.preview("energy", "DEBIT", self._campaign_entry_energy_cost(campaign_id))
+                except Exception:
+                    return {"error_code": 1, "msg": "energy_insufficient", "items": []}
         first_clear_candidate = current is not None and self._int(current.get("star"), 0) <= 0
         if self.drop_planner is None:
             raise RuntimeError("Campaign MID113 requires Pass40.1 CampaignDropPlanner")
@@ -418,7 +589,7 @@ class WorldRepository:
             first_clear=first_clear_candidate,
         )
         staged_items = drop_plan.battle_items()
-        reward_plan = self._normal_campaign_reward_plan(campaign_id) if campaign_type == 1 else {
+        reward_plan = self._campaign_reward_plan(campaign_id) if campaign_type in (1, 2) else {
             "mana_gain": 0,
             "star_gift": 0,
             "partner_exp": 0,
@@ -449,6 +620,20 @@ class WorldRepository:
         retry = self._committed_retry_response(req)
         if retry is not None:
             return retry
+        campaign_type = self._int(req.get("campaign_type"), 1)
+        # Pass75 authority boundary: Normal/Super Campaign state and rewards may
+        # only be committed from the exact currently staged MID113 session.
+        # Reject before opening a UoW so a spoofed/orphan MID114 cannot advance
+        # stars/unlocks or even consume a state_version.
+        if campaign_type in (1, 2) and not self._active_campaign_session_matches(req):
+            return self._campaign_session_reject("campaign_session_mismatch")
+        # Pass81 Super ownership: successful settlement consumes a server-owned
+        # remaining attempt. Reject before opening a UoW when no attempt remains
+        # so a stale/direct client cannot progress or consume a state version.
+        if campaign_type == 2 and max(0, min(3, self._int(req.get("star"), 0))) > 0:
+            current = self._find_row(self._int(req.get("campaign_id"), 0), 2)
+            if current is None or self._int(current.get("daily_limit"), 0) <= 0:
+                return self._campaign_session_reject("campaign_daily_limit_exhausted")
         if self.uow is None:
             return self._commit_fight_result_mutation(req)
         context = OperationContext(
@@ -471,17 +656,12 @@ class WorldRepository:
         cid = self._int(req.get("campaign_id"), 0)
         star = max(0, min(3, self._int(req.get("star"), 0)))
         campaign_type = self._int(req.get("campaign_type"), 1)
-        current = self._find_row(cid)
+        current = self._find_row(cid, campaign_type) if campaign_type in (1, 2) else self._find_row(cid)
         previous_star = self._int(current.get("star"), 0) if current is not None else 0
         was_cleared = current is not None and previous_star > 0
         first_three_star = previous_star < 3 and star >= 3
         pending = self.player.active_campaign_battle if isinstance(self.player.active_campaign_battle, dict) else {}
-        has_pending = (
-            self._int(pending.get("committed"), 0) == 0
-            and self._int(pending.get("campaign_id"), 0) == cid
-            and self._int(pending.get("campaign_type"), 1) == campaign_type
-            and self._same_formation(pending.get("formation"), req.get("formation"))
-        )
+        has_pending = self._active_campaign_session_matches(req)
         staged_items: list[dict[str, int]] = []
         if has_pending:
             pending_drop_plan = pending.get("drop_plan")
@@ -495,41 +675,66 @@ class WorldRepository:
                 staged_items = pending.get("items") or []
 
         if current is None:
+            # NORMAL/SUPER results require an actually unlocked source row and
+            # matching MID113 session; an arbitrary MID114 cannot create map state.
+            if campaign_type in (1, 2):
+                self.player.active_campaign_battle = {}
+                self._save()
+                return {"error_code": 1, "msg": "campaign_not_unlocked", "items": []}
             if self.meta(cid) is None:
                 self.player.active_campaign_battle = {}
                 self._save()
                 return {"is_win": 1 if star > 0 else 0, "result": 1 if star > 0 else 0, "items": []}
             current = self._campaign_row(cid, 0)
             self._normal_rows().append(current)
+        if campaign_type == 2 and star > 0 and has_pending and self._int(current.get("daily_limit"), 0) <= 0:
+            # Defensive mirror of commit_fight_result()'s pre-UoW gate for
+            # direct repository callers. No Campaign/reward mutation has
+            # occurred yet, so returning here is fail-closed.
+            return self._campaign_session_reject("campaign_daily_limit_exhausted")
+
         if star > 0:
             current["star"] = max(self._int(current.get("star"), 0), star)
+            if campaign_type == 2 and has_pending:
+                # src_64 treats response.daily_limit as the mutable remaining
+                # attempts and never decrements it locally after MID114. The
+                # source table's daily_limit remains the reset baseline owned
+                # by DailyResetCoordinator. Defeat consumption stays deferred
+                # until source/runtime evidence resolves star=0 semantics.
+                current["daily_limit"] = max(0, self._int(current.get("daily_limit"), 0) - 1)
 
         touched = [current]
         meta = self.meta(cid) or {}
-        next_id = self._int(meta.get("next_campaign_id"), 0)
+        mode_rows = self._mode_rows(campaign_type) if campaign_type in (1, 2) else self._normal_rows()
+        next_id = self._next_mode_campaign(cid, campaign_type) if campaign_type in (1, 2) else self._int(meta.get("next_campaign_id"), 0)
         if star > 0 and next_id > 0 and self.meta(next_id) is not None:
-            nxt = self._find_row(next_id)
+            nxt = self._find_row(next_id, campaign_type) if campaign_type in (1, 2) else self._find_row(next_id)
             if nxt is None:
+                source_daily = self._int((self.ownership_meta(next_id) or {}).get("daily_limit"), 0)
                 nxt = self._campaign_row(next_id, 0)
-                self._normal_rows().append(nxt)
-                # BattleCreate treats a *different* returned campaign with
-                # star=0 as a newly opened node. Only return that row when it
-                # was actually unlocked by this result; replaying an older
-                # stage must not repeatedly trigger the unlock animation.
+                nxt["daily_limit"] = max(0, source_daily)
+                mode_rows.append(nxt)
+                # BattleCreate treats a different returned campaign with star=0
+                # as a newly opened node. Replays never synthesize it again.
                 touched.append(nxt)
 
-        highest = self._frontier_campaign(self._normal_rows()) or cid
-        highest_meta = self.meta(highest) or meta
-        chapter_id = self._int(highest_meta.get("chapter"), 1) or 1
         chapter_info = dict(self.player.world_map.get("chapter_info") or {})
+        normal_rows = self._mode_rows(1)
+        super_rows = self._mode_rows(2)
+        normal_frontier = self._frontier_campaign(normal_rows) or self._mode_frontier(1) or cid
+        normal_meta = self.meta(normal_frontier) or meta
+        normal_chapter = self._int(normal_meta.get("chapter"), 1) or 1
+        super_frontier = self._mode_frontier(2)
+        super_meta = self.meta(super_frontier) or {}
+        super_chapter = self._int(super_meta.get("chapter"), 0) if super_frontier else 0
         chapter_info.update({
-            "normal_chapter_id": chapter_id,
-            "normal_campaign_id": highest,
-            "normal_stars": self._chapter_star_sum(self._normal_rows(), chapter_id),
+            "normal_chapter_id": normal_chapter,
+            "normal_campaign_id": normal_frontier,
+            "normal_stars": self._chapter_star_sum(normal_rows, normal_chapter),
             "normal_bonus_id": self._int(chapter_info.get("normal_bonus_id"), 0),
-            "super_chapter_id": self._int(chapter_info.get("super_chapter_id"), 0),
-            "super_campaign_id": self._int(chapter_info.get("super_campaign_id"), 0),
-            "super_stars": self._int(chapter_info.get("super_stars"), 0),
+            "super_chapter_id": super_chapter,
+            "super_campaign_id": super_frontier,
+            "super_stars": self._chapter_star_sum(super_rows, super_chapter) if super_chapter else 0,
             "super_bonus_id": self._int(chapter_info.get("super_bonus_id"), 0),
         })
         self.player.world_map["chapter_info"] = chapter_info
@@ -544,6 +749,8 @@ class WorldRepository:
         committed_drop_items: list[dict[str, int]] = []
         result_only_items: list[dict[str, int]] = []
         economy_projection: dict[str, int] = {}
+        if has_pending and campaign_type in (1, 2):
+            economy_projection.update(self._settle_campaign_energy(cid, star))
         hero_exps: list[dict[str, int]] = []
         story_mission_delta: list[dict[str, int]] = []
         tutorial_new_funcs: list[int] = []
@@ -555,7 +762,7 @@ class WorldRepository:
         if star > 0 and not was_cleared and has_pending:
             committed_drop_items = staged_items if isinstance(staged_items, list) else []
 
-        if star > 0 and has_pending and campaign_type == 1:
+        if star > 0 and has_pending and campaign_type in (1, 2):
             star_crystal = max(0, self._int(pending.get("star_gift"), 0)) if first_three_star else 0
             if self.rewards is None or self.catalog is None:
                 raise RuntimeError("Campaign reward commit requires Pass32.6 reward/catalog services")
@@ -585,7 +792,7 @@ class WorldRepository:
                     inventory=inventory_grants,
                 )
             )
-            economy_projection = reward_result.economy
+            economy_projection.update(reward_result.economy)
             # The canonical grant result is intentionally not reused as MID114
             # ``items``. Those rows already belong to the MID113 battle-drop
             # delivery channel and are credited client-side by BattleWinWindow.
@@ -637,6 +844,10 @@ class WorldRepository:
                 persist=False,
             )
 
+        awake_delta: dict[str, Any] = {}
+        if self.awakening_missions is not None:
+            awake_delta = self.awakening_missions.record_campaign_result(req)
+
         response: dict[str, Any] = {
             "is_win": 1 if star > 0 else 0,
             "result": 1 if star > 0 else 0,
@@ -654,6 +865,8 @@ class WorldRepository:
             response["star_crystal"] = star_crystal
         if story_mission_delta:
             response["story_mission_"] = story_mission_delta
+        if awake_delta:
+            response.update(awake_delta)
         if tutorial_new_funcs:
             # Keep the semantic transition in the committed MID114 receipt as
             # well as the UoW semantic bus so a result retry cannot lose it.

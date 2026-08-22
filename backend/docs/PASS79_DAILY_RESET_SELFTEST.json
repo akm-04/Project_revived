@@ -1,0 +1,27 @@
+{
+  "pass": "79.0",
+  "status": "PASS",
+  "checks": 11,
+  "boundary": "05:00 GMT+8",
+  "source_day_formula": "floor((unix_timestamp + 10800) / 86400)",
+  "notification_mids": [229, 2736],
+  "participants": [
+    "quick_enchant_daily_consume",
+    "global_purchase_counters",
+    "campaign_super_daily_limits",
+    "task_daily_cache_invalidation"
+  ],
+  "assertions": [
+    "04:59:59 and 05:00:00 GMT+8 are adjacent source days",
+    "ACTIVITIES-triggered rollover commits once and emits one daily_updates projection",
+    "same-day reevaluation is inert",
+    "non-source trigger rollover suppresses stale later notification",
+    "TASK_LOAD_BY_TYPE is an allowed fallback notification trigger",
+    "first-upgrade migration does not grant extra use without durable stale evidence",
+    "prior-source-day last UoW commit authorizes full migration reset",
+    "Quick Enchant repository no longer performs local UTC-midnight rollover",
+    "daily_reset_state survives JSON persistence round-trip",
+    "daily_updates and updates merge as siblings inside economy_",
+    "StateRepository evaluates reset request-bound using the shared server clock"
+  ]
+}

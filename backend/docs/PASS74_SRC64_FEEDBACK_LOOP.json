@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "pass": "74.0",
+  "status": "SOURCE_DERIVED_AND_BOUNDED",
+  "effective_source_rule": "downloaded-assets/output/src_64 overrides app-assets/output/assets/src_64 path-by-path",
+  "expected_effective_files": 4370,
+  "expected_downloaded_winners": 62,
+  "expected_app_winners": 4308,
+  "source_contracts": {
+    "awakening": "mission-driven via MIDs 2738/2737/2736/2561/161 and fight proof seams 114/866/867; do not invent AWAKE_HERO numeric MID",
+    "emblem_resolve": "inscription material IDs 19/20/21 map to degree_cer/graduate_cer/patent_cer scalar resources",
+    "quick_fumo": "daily consume type 2 = 20 Crystals, 150 Fumo, once/day; response requires buy_times/fumo fields",
+    "stone_rejection": "HTTP 200 invokes nominal callback before body error handling; rejected responses must include authoritative evo_info"
+  },
+  "deferred": [
+    "general Campaign ownership and 6-Energy settlement",
+    "debug-seed bag-cap policy",
+    "hidden-random/server-generated progression algorithms"
+  ]
+}

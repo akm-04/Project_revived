@@ -1,0 +1,171 @@
+{
+  "completion_assessment": {
+    "all_47_wire_keys_fully_owned_by_generalized_services": false,
+    "economy_backbone_parts_68_to_70": "CORE_COMPLETE_AFTER_PASS70_1_STATIC",
+    "literal_global_economy_fully_implemented": false,
+    "next_required_wave": "Temporal resources: energy, spirit_energy, skill_point, invitation; then progression/Girls Gear dependency migration before dependent feature domains.",
+    "reason": "30 true scalar resources are generalized in EconomyLedger; 17 economy_ keys are intentionally temporal/progression/entitlement/reset/mode/social/unresolved owners and are not all implemented as their final owner services."
+  },
+  "effective_src64": {
+    "app_winners": 4308,
+    "downloaded_winners": 62,
+    "exact_match_to_pass57": true,
+    "extra_vs_pass57": 0,
+    "files": 4370,
+    "hash_mismatches": 0,
+    "missing_vs_pass57": 0,
+    "pass57_rows": 4370
+  },
+  "global_economy_wire_contract": {
+    "economy_ledger_owned_scalar_keys": 30,
+    "nonledger_keys": [
+      "exp",
+      "charge",
+      "vip",
+      "energy",
+      "spirit_energy",
+      "skill_point",
+      "conquer_lev",
+      "conquer_loop_id",
+      "conquer_region",
+      "occult_ticket",
+      "daily_updates",
+      "updates",
+      "invitation",
+      "social",
+      "lev",
+      "glory",
+      "point"
+    ],
+    "owner_counts": {
+      "ArenaAggregate": 1,
+      "ArenaInvitationResourceOwner": 1,
+      "CommerceEntitlementService": 2,
+      "ConquestAggregate": 3,
+      "DailyResetCoordinator": 2,
+      "EconomyLedger": 30,
+      "EnergyResourceOwner": 1,
+      "PlayerProgressionService": 2,
+      "SkillPointResourceOwner": 1,
+      "SocialResourceOwner": 1,
+      "SorceryWarAggregate": 1,
+      "SpiritEnergyResourceOwner": 1,
+      "UNKNOWN": 1
+    },
+    "registry_exact_key_set_match": true,
+    "resource_registry_descriptors": 47,
+    "selfplayer_economy_sync_keys": 47,
+    "source_keys": [
+      "exp",
+      "charge",
+      "mana",
+      "crystal",
+      "vip",
+      "arena_coin",
+      "march_coin",
+      "top_coin",
+      "guild_coin",
+      "region_coin",
+      "honor_coin",
+      "king_coin",
+      "lucky_coin",
+      "paradise_coin",
+      "god_war_coin",
+      "spirit_stone",
+      "energy",
+      "spirit_energy",
+      "skill_point",
+      "magic_dust",
+      "magic_liquid",
+      "magic_energy",
+      "friendship_coin",
+      "friend_medal",
+      "summon_coin",
+      "lvbu_coin",
+      "magic_exp",
+      "degree_cer",
+      "graduate_cer",
+      "patent_cer",
+      "conquer_lev",
+      "conquer_loop_id",
+      "conquer_region",
+      "team_dungeon_coin",
+      "occult_ticket",
+      "ice_core",
+      "skin_fragment",
+      "tutor_coin",
+      "skin_coin",
+      "daily_updates",
+      "updates",
+      "invitation",
+      "social",
+      "lev",
+      "glory",
+      "point",
+      "glue"
+    ]
+  },
+  "mid59_fragment_summon": {
+    "hero_collect_checks_star_summon_price": true,
+    "hero_list_checks_star_summon_price": true,
+    "normalhero_mid59_fields": true,
+    "pass70_1_backend_price_map": {
+      "1": 1000,
+      "2": 50000,
+      "3": 200000,
+      "4": 500000,
+      "5": 1300000
+    },
+    "selfplayer_locally_removes_fragment": true,
+    "star_rows": [
+      {
+        "evolve_num": 10,
+        "evolve_price": 1000,
+        "star": 1,
+        "summon_num": 10,
+        "summon_price": 1000
+      },
+      {
+        "evolve_num": 20,
+        "evolve_price": 35000,
+        "star": 2,
+        "summon_num": 30,
+        "summon_price": 50000
+      },
+      {
+        "evolve_num": 50,
+        "evolve_price": 120000,
+        "star": 3,
+        "summon_num": 80,
+        "summon_price": 200000
+      },
+      {
+        "evolve_num": 100,
+        "evolve_price": 300000,
+        "star": 4,
+        "summon_num": 180,
+        "summon_price": 500000
+      },
+      {
+        "evolve_num": 150,
+        "evolve_price": 800000,
+        "star": 5,
+        "summon_num": 330,
+        "summon_price": 1300000
+      }
+    ]
+  },
+  "pass": "70.1",
+  "pass70_projection": {
+    "backend_global_economy_dispatch_present": true,
+    "journal_aware_projector_present": true,
+    "projection_profiles": 8
+  },
+  "schema_version": 1,
+  "source_assertions": {
+    "count": 12,
+    "failed": 0,
+    "passed": 12
+  },
+  "status": "REALITY_CHECK_PASS"
+}

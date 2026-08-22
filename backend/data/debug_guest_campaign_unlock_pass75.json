@@ -1,0 +1,14 @@
+{
+  "_meta": {
+    "pass": "75.0",
+    "policy": "PRIVATE_SERVER_POLICY",
+    "applies_only_to_account_uid": "13371337",
+    "migration_marker": "pass75_debug_campaign_unlock_v1",
+    "source_catalog": "pass75_campaign_ownership_meta.json",
+    "rationale": "Unlock every source-active Normal and Super/Elite Campaign stage for Awakening/Campaign runtime QA without changing credential accounts."
+  },
+  "normal_missing_stage_star": 1,
+  "super_missing_stage_star": 0,
+  "preserve_existing_higher_star": true,
+  "source_daily_limits": true
+}

@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "pass": "74.0",
+  "baseline_artifact": "gxb-backend-v0.9.5-pass73.0",
+  "target_artifact": "gxb-backend-v0.9.6-pass74.0",
+  "counts": {
+    "added": 9,
+    "modified": 15,
+    "removed": 0
+  },
+  "added": [
+    "data/awakening_mission_meta.json",
+    "docs/PASS74_AWAKENING_SELFTEST.json",
+    "docs/PASS74_BACKEND_FILE_MANIFEST.json",
+    "docs/PASS74_CLIENT_TEST_PLAN.md",
+    "docs/PASS74_RUNTIME_DEBUG_FINDINGS.json",
+    "docs/PASS74_SRC64_FEEDBACK_LOOP.json",
+    "docs/V0_9_6_PASS74_AWAKENING_MISSION_OWNERSHIP.md",
+    "gxb_backend/state/awakening_mission_service.py",
+    "tools/selftest_pass74_awakening.py"
+  ],
+  "modified": [
+    "VERSION.json",
+    "data/hero_advanced_progression_meta.json",
+    "docs/PASS42_14_BACKEND_STATIC_VALIDATION.json",
+    "gxb_backend/dispatch/engine_dispatcher.py",
+    "gxb_backend/handlers/activities.py",
+    "gxb_backend/handlers/heroes.py",
+    "gxb_backend/handlers/tasks.py",
+    "gxb_backend/handlers/world.py",
+    "gxb_backend/state/hero_advanced_progression_repository.py",
+    "gxb_backend/state/hero_entity_mutation_service.py",
+    "gxb_backend/state/player_state.py",
+    "gxb_backend/state/repository.py",
+    "gxb_backend/state/request_services.py",
+    "gxb_backend/state/world_repository.py",
+    "gxb_backend/version.py"
+  ],
+  "removed": [],
+  "compatibility_note": "Strangler-Fig migration; transport contracts, one-player UoW boundary, 30-scalar EconomyLedger, temporal ownership, Pass70 journal/projector profiles, and Pass72/73 Hero ENTITY ownership remain intact.",
+  "runtime_baseline": "Pass72.0 is last clean runtime accepted; Pass73.0 runtime-characterized with four Lua response-contract defects corrected in Pass74.0.",
+  "deferred": [
+    "general Campaign ownership and 6-Energy settlement",
+    "debug-seed bag/capacity policy",
+    "hidden-random Practice/Inscription generation",
+    "unresolved Horcrux unique-instance generation",
+    "dependent Vows/Workshop/Pet domains"
+  ]
+}

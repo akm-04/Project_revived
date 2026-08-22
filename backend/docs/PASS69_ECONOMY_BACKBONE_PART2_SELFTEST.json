@@ -1,0 +1,25 @@
+{
+  "commit_callbacks": 4,
+  "economy_ledger": {
+    "all_30_scalar_credit": true,
+    "insufficient_multi_resource_atomic": true,
+    "legacy_mana_crystal_facade": true
+  },
+  "mutation_plan": {
+    "committed_journal_rows_seen": 6,
+    "resource_stack_settlement": true,
+    "reward_plan_adapter": true
+  },
+  "pass": "69.0",
+  "resource_registry": {
+    "descriptors": 47,
+    "scalar": 30
+  },
+  "stack_inventory": {
+    "slice_revision": 2,
+    "typed_credit": true,
+    "typed_debit": true
+  },
+  "state_version": 4,
+  "status": "PASS"
+}

@@ -1,4 +1,4 @@
-"""Typed reward transaction coordinator for source-confirmed rewards."""
+"""Typed reward adapter over the Pass69 MutationPlan settlement foundation."""
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -9,6 +9,17 @@ from gxb_backend.content import CatalogNamespace, ContentRef, GameDataCatalog
 from .economy_repository import EconomyRepository
 from .hero_repository import HeroRepository
 from .inventory_repository import InventoryRepository
+from .mutation_plan import (
+    ActorRef,
+    IdempotencySpec,
+    MutationOrigin,
+    MutationPlan,
+    ResourceMutation,
+    StackMutation,
+    TemporalTransition,
+)
+from .mutation_settlement_service import MutationSettlementService, SettlementDraft
+from .resource_registry import ResourceRegistry
 from .unit_of_work import UnitOfWork
 
 
@@ -57,12 +68,21 @@ class RewardResult:
     economy: dict[str, int]
     inventory_awards: list[dict[str, int]]
     partners: list[dict[str, Any]]
+    mutation_plan_id: str | None = None
+    mutation_journal: tuple[dict[str, Any], ...] = ()
 
 
 class RewardTransactionService:
-    """Resolve typed content, then delegate mutation to canonical owners."""
+    """Compatibility RewardPlan adapter that now emits typed MutationPlans.
 
-    ECONOMY_FIELDS = {"mana", "crystal", "energy", "player_exp"}
+    Scalar-ledger grants and Backpack stack grants route through MutationSettlementService.
+    Pass71 additionally routes Energy grants through the specialized TEMPORAL
+    operation family; player EXP remains progression-owned and deferred.
+    Partner/entity grants remain aggregate-owned but share the same outer UoW.
+    """
+
+    TEMPORAL_FIELDS = frozenset({"energy"})
+    COMPATIBILITY_NON_SCALAR_FIELDS = frozenset({"player_exp"})
 
     def __init__(
         self,
@@ -71,12 +91,18 @@ class RewardTransactionService:
         inventory: InventoryRepository,
         heroes: HeroRepository,
         uow: UnitOfWork,
+        *,
+        resource_registry: ResourceRegistry,
+        settlement: MutationSettlementService,
     ) -> None:
         self.catalog = catalog
         self.economy = economy
         self.inventory = inventory
         self.heroes = heroes
         self.uow = uow
+        self.resource_registry = resource_registry
+        self.settlement = settlement
+        self._plan_sequence = 0
 
     @staticmethod
     def _positive(value: Any, label: str) -> int:
@@ -88,9 +114,17 @@ class RewardTransactionService:
             raise RewardValidationError(f"{label} must be positive")
         return amount
 
+    def _is_scalar_reward(self, field: str) -> bool:
+        desc = self.resource_registry.get(field)
+        return bool(desc and desc.legacy_adapter_class == "scalar_ledger" and desc.owner_service == "EconomyLedger")
+
     def validate(self, plan: RewardPlan) -> RewardPlan:
         for grant in plan.economy:
-            if grant.field not in self.ECONOMY_FIELDS:
+            if (
+                not self._is_scalar_reward(grant.field)
+                and grant.field not in self.TEMPORAL_FIELDS
+                and grant.field not in self.COMPATIBILITY_NON_SCALAR_FIELDS
+            ):
                 raise RewardValidationError(f"unsupported economy reward field {grant.field!r}")
             self._positive(grant.amount, f"economy.{grant.field}")
         for grant in plan.inventory:
@@ -98,9 +132,6 @@ class RewardTransactionService:
             if CatalogNamespace(grant.content.namespace) is not CatalogNamespace.ITEM:
                 raise RewardValidationError("InventoryGrant must use the item namespace")
             row = self.catalog.get(grant.content)
-            # Pass32 proves item.lua also contains non-stack display rows. A
-            # typed InventoryGrant is the domain adapter's ownership assertion,
-            # but known type=-1 display-only rows are still rejected here.
             item_type = int(row.get("type", 0) or 0)
             if item_type == -1:
                 raise RewardValidationError("item type=-1 is not a stackable InventoryGrant")
@@ -119,28 +150,62 @@ class RewardTransactionService:
                 raise RewardValidationError("partner catalog row lacks source star")
         return plan
 
+    def _next_plan_id(self, origin: RewardOrigin) -> str:
+        self._plan_sequence += 1
+        return f"reward:{origin.domain}:{origin.operation}:{self._plan_sequence}"
+
+    def _mutation_plan(self, plan: RewardPlan) -> MutationPlan | None:
+        operations = []
+        for grant in plan.economy:
+            if self._is_scalar_reward(grant.field):
+                operations.append(ResourceMutation(grant.field, "CREDIT", int(grant.amount)))
+            elif grant.field in self.TEMPORAL_FIELDS:
+                operations.append(TemporalTransition(grant.field, "CREDIT", int(grant.amount)))
+        for grant in plan.inventory:
+            operations.append(StackMutation(int(grant.content.table_id), "CREDIT", int(grant.amount)))
+        if not operations:
+            return None
+        return MutationPlan(
+            schema_version=1,
+            plan_id=self._next_plan_id(plan.origin),
+            origin=MutationOrigin(
+                domain=plan.origin.domain,
+                operation=plan.origin.operation,
+                protocol_mid=plan.origin.protocol_mid,
+                source_table=plan.origin.source_table,
+                source_id=plan.origin.source_id,
+                field_path=plan.origin.field_path,
+            ),
+            actor=ActorRef(
+                player_id=str(self.uow.player.player_id),
+                account_uid=str(getattr(self.uow.player, "account_uid", "") or "") or None,
+            ),
+            expected_state_version=self.uow.current_state_version,
+            idempotency=IdempotencySpec(mode="NONE"),
+            preconditions=(),
+            operations=tuple(operations),
+            semantic_events=(),
+            metadata={"adapter": "RewardPlan", "pass": "69.0"},
+        )
+
     def apply(self, plan: RewardPlan) -> RewardResult:
         if not self.uow.active:
             raise RewardValidationError("reward mutation requires an active request UnitOfWork")
         self.validate(plan)
-        deltas = {"mana_delta": 0, "crystal_delta": 0, "energy_delta": 0, "player_exp_gain": 0}
-        for grant in plan.economy:
-            amount = int(grant.amount)
-            if grant.field == "mana":
-                deltas["mana_delta"] += amount
-            elif grant.field == "crystal":
-                deltas["crystal_delta"] += amount
-            elif grant.field == "energy":
-                deltas["energy_delta"] += amount
-            elif grant.field == "player_exp":
-                deltas["player_exp_gain"] += amount
 
-        economy_projection = self.economy.apply_deltas(persist=False, **deltas) if any(deltas.values()) else {}
-        item_rows = [
-            {"item_id": grant.content.table_id, "item_num": int(grant.amount)}
-            for grant in plan.inventory
-        ]
-        inventory_awards = self.inventory.add_items(item_rows, persist=False) if item_rows else []
+        mutation_plan = self._mutation_plan(plan)
+        draft: SettlementDraft | None = self.settlement.apply(mutation_plan) if mutation_plan is not None else None
+        economy_projection = dict(draft.projection.economy) if draft is not None else {}
+        inventory_awards = list(draft.projection.inventory_awards) if draft is not None else []
+
+        # Compatibility owners that are explicitly *not* scalar-ledger fields.
+        player_exp_gain = sum(int(g.amount) for g in plan.economy if g.field == "player_exp")
+        if player_exp_gain:
+            compatibility_projection = self.economy.apply_deltas(
+                player_exp_gain=player_exp_gain,
+                persist=False,
+            )
+            economy_projection.update(compatibility_projection)
 
         partner_rows: list[dict[str, Any]] = []
         for grant in plan.partners:
@@ -151,4 +216,11 @@ class RewardTransactionService:
                     persist=False,
                 )
             )
-        return RewardResult(economy_projection, inventory_awards, partner_rows)
+
+        return RewardResult(
+            economy=economy_projection,
+            inventory_awards=inventory_awards,
+            partners=partner_rows,
+            mutation_plan_id=draft.plan_id if draft is not None else None,
+            mutation_journal=tuple(entry.as_dict() for entry in draft.journal) if draft is not None else (),
+        )

@@ -1,0 +1,93 @@
+{
+  "schema_version": 1,
+  "pass": "83.0",
+  "backend_version": "0.9.12",
+  "artifact": "gxb-backend-v0.9.12-pass83.0.zip",
+  "base_artifact": "gxb-backend-v0.9.10-pass81.0.zip",
+  "base_sha256": "832caf3eafed087fbb84f32a8794fda39207d384e7013e3a1e390e72467fa56e",
+  "source_artifact": "all-assest-rechecked.zip",
+  "source_sha256": "89f0f830508b92e5fff6ad53c6a9dae961a14042dbfdf5649008efb8353f5608",
+  "changed_or_added_files": [
+    {
+      "path": "gxb_backend/handlers/bootstrap.py",
+      "sha256": "525fca2397d3a092e688b4cae01c3ede5dbf7ee6528bff1211dc7f4b5ae1365d"
+    },
+    {
+      "path": "gxb_backend/dispatch/engine_dispatcher.py",
+      "sha256": "d15f424ae876f0f198b2bf0339075eee3b5ea99d6186c12d1cd7f8117d075327"
+    },
+    {
+      "path": "gxb_backend/state/temporal_policy_service.py",
+      "sha256": "9c7a8281fc0d9027efaccc10cc414a433b4a44f99db8ac050cc3cbc794cbdd0e"
+    },
+    {
+      "path": "gxb_backend/state/daily_reset.py",
+      "sha256": "8b272c42cd1c6fb0df15e45e9a847d14a6dd45899507260c98527cf318e4cccd"
+    },
+    {
+      "path": "gxb_backend/version.py",
+      "sha256": "06c39acd6890e6cb410103da4f6defe13ed6b6e001f40d6b3f0dc554af62605e"
+    },
+    {
+      "path": "VERSION.json",
+      "sha256": "19382729bd093526206bf9a2e6528b4ba4a66e61e558a4f8699ac1e7d3e30bdc"
+    },
+    {
+      "path": "README.md",
+      "sha256": "ecd80aacf842a33469463dcec0c182b0183385a8de6f8509a737f4ea4ab8679c"
+    },
+    {
+      "path": "UPDATE_README.md",
+      "sha256": "ea9ffd5db149da1daa2e8d2262277528f33a58a0ceac9a4d79b1cc2034a98e64"
+    },
+    {
+      "path": "memory.md",
+      "sha256": "61116cba8c1281be7ded32fa24f60b23f504182ae651635f2805fd2449a44f7f"
+    },
+    {
+      "path": "tools/selftest_pass83_mid1_temporal_hygiene.py",
+      "sha256": "2669166bbfb0fc44d0db9de37ad36e9bc918d61a311c4754661ef52d1136b5ea"
+    },
+    {
+      "path": "docs/PASS83_DAILY_RESET_TEMPORAL_SELFTEST.json",
+      "sha256": "59095515d8ee082465bc637f681b6c411067814f39a32f3fd0a5d0b6df6a4cce"
+    },
+    {
+      "path": "docs/PASS83_SRC64_FEEDBACK_LOOP.json",
+      "sha256": "870215eaffabe0012f539aa10a2f81bc2d5c69b022d9ef18939f36c12cb24458"
+    },
+    {
+      "path": "docs/PASS83_TECHNICAL_CHANGELOG.md",
+      "sha256": "3b82a766fd32bea0ac09557f8ba4098a41f57f4bd615c12dc768258273598387"
+    },
+    {
+      "path": "docs/PASS83_CLIENT_TEST_PLAN.md",
+      "sha256": "b3806f3596adf472de6d6efeb56806a2560ec3ca75751d0a029cf791a31579f4"
+    },
+    {
+      "path": "docs/PASS83_REGRESSION_MATRIX.json",
+      "sha256": "a1b2b3fcfccb2449ec8674a1a073c999bae763dc46328e0402d8f819dc46519c"
+    }
+  ],
+  "code_changes": [
+    "gxb_backend/handlers/bootstrap.py",
+    "gxb_backend/state/temporal_policy_service.py",
+    "gxb_backend/state/daily_reset.py"
+  ],
+  "comment_only_code": [
+    "gxb_backend/dispatch/engine_dispatcher.py"
+  ],
+  "strict_non_scope": [
+    "MID116",
+    "MID117",
+    "MID118",
+    "Task/Activities generation",
+    "Sign",
+    "ordinary Shops",
+    "Arena reset ownership",
+    "cards",
+    "Vows",
+    "Workshop",
+    "Pet"
+  ]
+}

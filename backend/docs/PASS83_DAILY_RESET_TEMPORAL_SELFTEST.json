@@ -1,0 +1,43 @@
+{
+  "cold_mid1_existing_marker": {
+    "bootstrap_detail_current": true,
+    "existing_marker_previous_to_current": true,
+    "post_login_no_duplicate_or_stale_pulse": true
+  },
+  "hard_boundary": "MID116/117/118 and new domains not implemented",
+  "high_water": {
+    "catchup_same_day_inert": true,
+    "diagnostic_fields": [
+      "stored_day_id",
+      "observed_day_id",
+      "resume_at_or_after"
+    ],
+    "high_water_plus_one_exactly_once": true,
+    "rollback_ignored": true
+  },
+  "mid1": {
+    "authoritative_server_clock_projection": true,
+    "detail112_current": true,
+    "detail17_current": true,
+    "mid1_daily_updates_suppressed": true,
+    "migration_reset_before_temporal": true
+  },
+  "mid1_reset_failure": {
+    "last_commit_preserved": true,
+    "login_fail_closed": true,
+    "temporal_not_run": true
+  },
+  "pass": "83.0",
+  "scope": "MID1 ordering + temporal future-anchor hygiene + high-water observability only",
+  "status": "PASS",
+  "temporal": {
+    "balance_neutral": true,
+    "full_pool_zero_sentinel": true,
+    "rebase_to_now": true,
+    "resources": [
+      "energy",
+      "spirit_energy",
+      "skill_point"
+    ]
+  }
+}

@@ -1,0 +1,53 @@
+{
+  "pass": "79.0",
+  "backend_version": "0.9.9",
+  "artifact": "gxb-backend-v0.9.9-pass79.0.zip",
+  "status": "IMPLEMENTATION_COMPLETE_CLIENT_SMOKE_PENDING",
+  "modified_files": [
+    "README.md",
+    "UPDATE_README.md",
+    "VERSION.json",
+    "gxb_backend/version.py",
+    "gxb_backend/state/__init__.py",
+    "gxb_backend/state/server_clock.py",
+    "gxb_backend/state/player_state.py",
+    "gxb_backend/state/repository.py",
+    "gxb_backend/state/request_services.py",
+    "gxb_backend/state/hero_advanced_progression_repository.py",
+    "gxb_backend/dispatch/engine_dispatcher.py"
+  ],
+  "added_files": [
+    "gxb_backend/state/daily_reset.py",
+    "tools/selftest_pass79_daily_reset.py",
+    "docs/PASS79_TECHNICAL_CHANGELOG.md",
+    "docs/PASS79_CLIENT_TEST_PLAN.md",
+    "docs/PASS79_DAILY_RESET_SELFTEST.json",
+    "docs/PASS79_SRC64_REALITY_CHECK.json",
+    "docs/PASS79_REGRESSION_MATRIX.json",
+    "docs/PASS79_IMPLEMENTATION_FILE_MANIFEST.json"
+  ],
+  "implementation_scope": [
+    "ServerDayClock canonical source-day math",
+    "registry-driven DailyResetCoordinator",
+    "durable PlayerState.daily_reset_state",
+    "Quick Enchant daily-consume rollover ownership migration",
+    "buy_mana_times / buy_energy_times / buy_skill_times rollover",
+    "Super Campaign source daily_limit restore and reset_count=0",
+    "Task daily-cache metadata invalidation only",
+    "one-shot economy_.daily_updates projection on MID229/MID2736 reset-trigger path"
+  ],
+  "explicit_non_scope": [
+    "MID116",
+    "MID117",
+    "MID118",
+    "Daily Mission generation",
+    "Sign domain implementation",
+    "ordinary Shop daily scheduling",
+    "Arena reset ownership",
+    "Monthly/Weekly/Privilege card entitlement decrement",
+    "Vows",
+    "Workshop",
+    "Pet",
+    "buy_spirit_energy_times reset"
+  ]
+}

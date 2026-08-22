@@ -1,0 +1,58 @@
+{
+  "schema_version": 1,
+  "pass": "75.0",
+  "timestamp": "2026-08-22T18:11:00+06:00",
+  "status": "PASS",
+  "artifact": "all-assest-rechecked.zip",
+  "sha256": "89f0f830508b92e5fff6ad53c6a9dae961a14042dbfdf5649008efb8353f5608",
+  "effective_rule": "downloaded-assets/output/src_64 overrides app-assets/output/assets/src_64 path-by-path",
+  "counts": {
+    "effective": 4370,
+    "downloaded_winners": 62,
+    "app_winners": 4308,
+    "pass57_fingerprint": 4370
+  },
+  "comparison": {
+    "missing": 0,
+    "extra": 0,
+    "sha256_or_size_mismatches": 0,
+    "exact_pass57_match": true
+  },
+  "campaign_audit": {
+    "campaign_rows": 917,
+    "chapters": 23,
+    "normal_source_rows": 429,
+    "super_source_rows": 155,
+    "normal_super_relation_mismatches": 0,
+    "source_examples": {
+      "100001": {
+        "win_energy": 6,
+        "defeat_energy": 1
+      },
+      "100002": {
+        "win_energy": 9,
+        "defeat_energy": 1
+      },
+      "100019_super": {
+        "win_energy": 12,
+        "defeat_energy": 2
+      }
+    }
+  },
+  "touched_contracts": [
+    "Campaign MID113 entry session + Energy availability",
+    "Campaign MID114 authoritative result/session settlement",
+    "Normal/Super wire-mode and relate_campaign_id graph",
+    "World Map super list serialization",
+    "Task DAILY huoyue bootstrap required by TaskWindow",
+    "Stone Evolution evo_attr_points canonical empty-map persistence",
+    "Awakening mission persistence tombstone",
+    "Inscription resolve certificate-family source mapping"
+  ],
+  "negative_source_facts": [
+    "Do not hardcode Campaign Energy as 6; use per-row energy_cost/defeat_cost.",
+    "Do not unlock arbitrary campaign.lua rows; use chapter Normal graph and source relate_campaign_id Super graph.",
+    "Do not classify 160200711/160200712 as Inscription emblems; they are outside inscription.lua archetypes.",
+    "Do not use extension-preserving recursive merge for domain-owned evo_attr_points when canonical value is an empty map."
+  ]
+}

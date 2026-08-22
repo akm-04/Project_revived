@@ -1,0 +1,108 @@
+{
+  "schema_version": 1,
+  "pass": "89.0",
+  "backend_version": "0.10.2",
+  "base_backend": "gxb-backend-v0.10.1-pass88.0",
+  "changed": [
+    {
+      "path": "README.md",
+      "sha256": "c93233071468c49aec007fbe11a9536a548113a606f6a49ed3d462d757c42d2a"
+    },
+    {
+      "path": "UPDATE_README.md",
+      "sha256": "9bb6d1e3abb90464c31af32c23fef1c4ee4b02a4addb64a5594b548656f29444"
+    },
+    {
+      "path": "VERSION.json",
+      "sha256": "c0eab51e30b1116d6691116ce9a576ed0d5884d9be4032775acd808c3be4b157"
+    },
+    {
+      "path": "gxb_backend/run.py",
+      "sha256": "acebb1289d5b77b3380c1fb31881f7d5419796fdcd38b76efbffc570f4ffe947"
+    },
+    {
+      "path": "gxb_backend/state/player_database.py",
+      "sha256": "71350cc5005935ad4609c3e9e678fbf9bd6824d1415af3615f2f2626ebd3fce9"
+    },
+    {
+      "path": "gxb_backend/transport/routes_commerce.py",
+      "sha256": "c5b454ffa10278443eb1b91f49e6d4eaca2734b53d606fc980717a765e837306"
+    },
+    {
+      "path": "gxb_backend/version.py",
+      "sha256": "b34a3842c9246ea531ac4ae0986f3f45dd29705c02ed86ddf485640454c0d4ed"
+    },
+    {
+      "path": "local_assets/update_manifest.json",
+      "sha256": "5dd3c03c9313e1c4464c7141858c25f4cf8f8660a03ef89ad70657d36e81627c"
+    },
+    {
+      "path": "memory.md",
+      "sha256": "e7b6ccb73af7efe142ac71336117a76f7158b4de38d1b274d78b190bc9b27ce2"
+    },
+    {
+      "path": "tools/selftest_pass88_purchase_route_contract.py",
+      "sha256": "6124b656508ae1db1c9b5d6a33e89529e773a72877b06edfd587b1a1fd232dd0"
+    }
+  ],
+  "added": [
+    {
+      "path": "docs/PASS89_CLIENT_TEST_PLAN.md",
+      "sha256": "de4e34164b2885446621f67725e2f82fe051e55cfd9ca2ab0c8a424ae52387f5"
+    },
+    {
+      "path": "docs/PASS89_DEBUG_ACCEPTANCE.json",
+      "sha256": "ede1b8fdaadf996ae6dec319d6a0275af4a1caa1de9b06a7e99884fcd91626ca"
+    },
+    {
+      "path": "docs/PASS89_OTA_CONTRACT.json",
+      "sha256": "835dcf187812838bc0671d2e315bc98edf1d5c0d195c8ea75254b0d01f834ea2"
+    },
+    {
+      "path": "docs/PASS89_OTA_CUMULATIVE_HASHES.json",
+      "sha256": "ba1792965417756b1651245809c59d648ff9de1413370731f2c60b6f6e68beb8"
+    },
+    {
+      "path": "docs/PASS89_OTA_TOKEN_SELFTEST.json",
+      "sha256": "771af8461232f13303313ed6839574ba7faabdc979efa4752df622c806228d74"
+    },
+    {
+      "path": "docs/PASS89_SRC64_FEEDBACK_LOOP.json",
+      "sha256": "9a9003d0b6fe697fbc87e89a05f7f799b362a7e0e3fd126b356ad50714b08986"
+    },
+    {
+      "path": "docs/PASS89_TECHNICAL_CHANGELOG.md",
+      "sha256": "32dc3763a07d70416b620bf649bcf502d52f22e67afde411fae16be2418607a6"
+    },
+    {
+      "path": "local_assets/src_32/app/common/utils.lua",
+      "sha256": "02825645114984e049e1be614f719e7dd8d4dd20c8da8551705bbd38c2c06fcf"
+    },
+    {
+      "path": "local_assets/src_64/app/common/utils.lua",
+      "sha256": "02825645114984e049e1be614f719e7dd8d4dd20c8da8551705bbd38c2c06fcf"
+    },
+    {
+      "path": "local_assets/updates/gxb-local-1.631.3.zip.001",
+      "sha256": "317f2bd816ff42dd611dd24568d07f1c570fc70d52731aae3f95616d81dae6e0"
+    },
+    {
+      "path": "tools/pass89_purchase_bridge.lua",
+      "sha256": "f72b2488ed0d565aab886a6c6c21b9d1aba9c882d06b89a038a9614a39682171"
+    },
+    {
+      "path": "tools/selftest_pass89_ota_token_bridge.py",
+      "sha256": "4e44ee4302a2e03ccf0737daddeed82b152edd40457e546eb7c4f24785695212"
+    }
+  ],
+  "removed": [
+    {
+      "path": "local_assets/updates/gxb-local-1.631.2.zip.001",
+      "base_sha256": "e11ff3b446122887a291f170a79ae5daba28da2ba150795d2ea70cce619163e4"
+    }
+  ],
+  "notes": [
+    "Previous 124 local_assets src_32/src_64 overrides are preserved byte-exact; the old generated 1.631.2 volume is replaced by cumulative 1.631.3.",
+    "MID657 and unrelated game features remain untouched."
+  ]
+}

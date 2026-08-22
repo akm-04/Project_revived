@@ -14,13 +14,27 @@ from pathlib import Path
 from typing import Any, Callable
 
 from .player_state import PlayerState
+from .temporal_policy_service import TemporalPolicyService
+from .vip_policy import VipPrivilegeResolver, VipProgressionPolicy
 
 
 class SkillPointPolicy:
-    def __init__(self, player: PlayerState, data_dir: Path, save_callback: Callable[[], None] | None = None) -> None:
+    def __init__(
+        self,
+        player: PlayerState,
+        data_dir: Path,
+        save_callback: Callable[[], None] | None = None,
+        *,
+        temporal: TemporalPolicyService | None = None,
+        vip_privileges: VipPrivilegeResolver | None = None,
+    ) -> None:
         self.player = player
         self.data_dir = Path(data_dir)
         self._save_callback = save_callback
+        self.temporal = temporal
+        self.vip_privileges = vip_privileges or VipPrivilegeResolver(
+            player, VipProgressionPolicy(self.data_dir)
+        )
         self._meta = self._load_meta()
 
     @staticmethod
@@ -47,24 +61,15 @@ class SkillPointPolicy:
             raise RuntimeError(f"[SKILL] invalid source metadata {path}: {exc}") from exc
 
     def max_points(self) -> int | None:
-        mapping = self._meta.get("vip_skill_max")
-        if not isinstance(mapping, dict):
-            return None
-        vip = str(max(0, self._int(self.player.vip)))
-        if vip not in mapping:
-            print(f"[SKILL] no source skill_max row for vip={vip}; skipping timed recovery")
-            return None
-        maximum = max(0, self._int(mapping.get(vip)))
+        if self.temporal is not None:
+            return self.temporal.natural_cap("skill_point")
+        maximum = self.vip_privileges.skill_point_natural_cap()
         if self._int(self.player.privilege_left_card_day) > 0:
             maximum += max(0, self._int(self._meta.get("monthly_privilege_skill_max")))
         return maximum
 
     def can_buy(self) -> bool:
-        mapping = self._meta.get("vip_skill_buy")
-        if not isinstance(mapping, dict):
-            return False
-        vip = str(max(0, self._int(self.player.vip)))
-        return self._int(mapping.get(vip), 0) == 1
+        return self.vip_privileges.skill_point_purchase_enabled()
 
     def purchase_cost(self, purchase_number: Any) -> int | None:
         mapping = self._meta.get("buy_skill_cost")
@@ -100,7 +105,11 @@ class SkillPointPolicy:
         return changed
 
     def recover(self, *, persist: bool = False) -> bool:
-        """Mirror ``SelfPlayer:recoverByTime`` for Skill Points."""
+        """Compatibility facade over the Pass71 temporal owner."""
+        if self.temporal is not None:
+            return self.temporal.materialize(
+                "skill_point", persist=persist, publish=True
+            ).changed
         duration = max(0, self._int(self._meta.get("skill_point_incr_time")))
         maximum = self.max_points()
         if duration <= 0 or maximum is None:

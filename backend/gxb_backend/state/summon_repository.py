@@ -79,6 +79,7 @@ from .summon_result_policy import SummonResultPolicyRegistry
 from .summon_state_contract import SummonStateContract
 from .unit_of_work import OperationContext, UnitOfWork
 from .player_state import PlayerState
+from .vip_policy import VipPrivilegeResolver, VipProgressionPolicy
 
 
 SANDBOX_UID = "13371337"
@@ -120,6 +121,7 @@ class SummonRepository:
         sx_source: SXSoulBoxSourceCatalog | None = None,
         sx_policy: SXSoulBoxPrivatePolicy | None = None,
         sx_planner: SXSoulBoxPrivatePlanner | None = None,
+        vip_privileges: VipPrivilegeResolver | None = None,
         uow: UnitOfWork | None = None,
     ) -> None:
         self.player = player
@@ -152,6 +154,9 @@ class SummonRepository:
         self.sx_source = sx_source
         self.sx_policy = sx_policy
         self.sx_planner = sx_planner
+        self.vip_privileges = vip_privileges or VipPrivilegeResolver(
+            player, VipProgressionPolicy(self.data_dir)
+        )
         self._validate_state_policy_alignment()
 
     def _validate_state_policy_alignment(self) -> None:
@@ -617,7 +622,7 @@ class SummonRepository:
             return False
         if desc.vip_min != plan.vip_min:
             return False
-        if self._int(getattr(self.player, "vip", 0), 0) < plan.vip_min:
+        if not self.vip_privileges.meets_level(plan.vip_min):
             return False
 
         if desc.support_status == "tutorial_supported":
@@ -1779,7 +1784,15 @@ class SummonRepository:
         }
 
 
+    # Effective src_64 authority:
+    #   data/tables/star.lua rows[star].summon_num / summon_price
+    #   HeroListCell.lua + HeroCollectWindow.lua both gate fragment summons on
+    #   star:summonPrice(star), while NormalHero:stoneSummonHero sends only the
+    #   fragment identity/count.  Therefore MID59 owns *both* the fragment
+    #   debit and the Mana debit; SelfPlayer.lua reconciles the fragment stack
+    #   locally and Backend.lua consumes the returned cumulative economy_.mana.
     _STONE_REQUIRED_BY_STAR = {1: 10, 2: 30, 3: 80, 4: 180, 5: 330}
+    _STONE_MANA_BY_STAR = {1: 1_000, 2: 50_000, 3: 200_000, 4: 500_000, 5: 1_300_000}
 
     @staticmethod
     def _blocked_stone_summon(reason: str) -> dict[str, Any]:
@@ -1798,7 +1811,12 @@ class SummonRepository:
         Partner<->Item relationship, source star threshold and Backpack balance,
         consumes the contracts, creates one unique owned hero, and commits once.
         """
-        if self.catalog is None or self.inventory is None or self.uow is None:
+        if (
+            self.catalog is None
+            or self.inventory is None
+            or self.economy is None
+            or self.uow is None
+        ):
             return self._blocked_stone_summon("request_services_unavailable")
 
         table_id = self._int(req.get("table_id"), 0)
@@ -1843,7 +1861,8 @@ class SummonRepository:
 
         star = self._int(partner_row.get("star"), 0)
         required = self._STONE_REQUIRED_BY_STAR.get(star)
-        if required is None or stone_num != required:
+        mana_cost = self._STONE_MANA_BY_STAR.get(star)
+        if required is None or mana_cost is None or stone_num != required:
             return self._blocked_stone_summon("stone_count_mismatch")
 
         repo = self._hero_repo()
@@ -1862,6 +1881,11 @@ class SummonRepository:
         )
         try:
             with self.uow.transaction(context):
+                # One-player atomic boundary: the source-defined Mana price and
+                # fragment debit commit with Hero creation or all roll back.
+                # Pass70's journal-aware ResponseProjector publishes the
+                # committed cumulative Mana value at top-level economy_.mana.
+                self.economy.apply_deltas(mana_delta=-int(mana_cost), persist=False)
                 remaining = self.inventory.consume_item(stone_id, required, persist=False)
                 if remaining is None:
                     raise RuntimeError("canonical Backpack changed during MID59 transaction")
@@ -1880,7 +1904,7 @@ class SummonRepository:
                 )
                 self.uow.mark_changed()
                 return dict(hero)
-        except (RuntimeError, ValueError):
+        except (EconomyMutationError, RuntimeError, ValueError):
             return self._blocked_stone_summon("transaction_rejected")
 
     def _save(self) -> None:

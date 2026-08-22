@@ -22,7 +22,18 @@ from .economy_repository import EconomyRepository
 from .hero_progression_repository import HeroProgressionRepository
 from .hero_repository import HeroRepository
 from .inventory_repository import InventoryRepository
+from .mutation_plan import (
+    ActorRef,
+    EntityMutation,
+    IdempotencySpec,
+    MutationOrigin,
+    MutationPlan,
+    ResourceMutation,
+    StackMutation,
+)
+from .mutation_settlement_service import MutationSettlementError, MutationSettlementService
 from .player_state import PlayerState
+from .unit_of_work import OperationContext, UnitOfWork
 
 
 class HeroEquipmentRepository:
@@ -38,6 +49,8 @@ class HeroEquipmentRepository:
         heroes: HeroRepository | None = None,
         progression: HeroProgressionRepository | None = None,
         economy: EconomyRepository | None = None,
+        uow: UnitOfWork | None = None,
+        settlement: MutationSettlementService | None = None,
     ) -> None:
         self.player = player
         self.data_dir = Path(data_dir)
@@ -48,6 +61,8 @@ class HeroEquipmentRepository:
             player, self.data_dir, save_callback, inventory=self.inventory, heroes=self.heroes
         )
         self.economy = economy or EconomyRepository(player, self.data_dir, save_callback)
+        self._uow = uow
+        self._settlement = settlement
         self.meta = self._load_meta()
         self.partners = self.meta.get("partners") or {}
         self.items = self.meta.get("items") or {}
@@ -220,8 +235,44 @@ class HeroEquipmentRepository:
             self.progression.grant_exp_amount(hero.get("partner_id"), potion_exp, persist=False)
         return True
 
+    def _apply_typed_plan(
+        self,
+        *,
+        mid: int,
+        operation: str,
+        partner_id: int,
+        operations: tuple[Any, ...],
+    ) -> bool:
+        """Settle one Hero aggregate command inside the request-scoped UoW."""
+        if self._uow is None or self._settlement is None:
+            return False
+        context = OperationContext(
+            actor_player_id=str(self.player.player_id),
+            protocol_mid=int(mid),
+            domain="hero",
+            operation_name=str(operation),
+            idempotency_key=f"hero:{int(partner_id)}:{operation}",
+        )
+        try:
+            with self._uow.transaction(context):
+                plan = MutationPlan(
+                    schema_version=1,
+                    plan_id=f"hero-equip:{int(mid)}:{int(partner_id)}:{self._uow.current_state_version}",
+                    origin=MutationOrigin(domain="hero", operation=str(operation), protocol_mid=int(mid)),
+                    actor=ActorRef(player_id=str(self.player.player_id)),
+                    expected_state_version=None,
+                    idempotency=IdempotencySpec(),
+                    preconditions=(),
+                    operations=operations,
+                )
+                self._settlement.apply(plan)
+            return True
+        except MutationSettlementError:
+            return False
+
     def set_hero_equip(self, partner_id: Any, equip_index: Any) -> dict[str, Any]:
         hero = self.heroes.get(partner_id)
+        pid = self._int(partner_id, 0)
         index = self._int(equip_index, 0)
         if hero is None or not self._normal_early_boundary(hero) or not (1 <= index <= 6):
             return {"error_code": 1}
@@ -233,9 +284,21 @@ class HeroEquipmentRepository:
         while len(equips) < 6:
             equips.append(0)
         if self._int(equips[index - 1], 0) == 1:
-            # Defensive duplicate acknowledgement. The normal UI does not send
-            # MID54 for an already-collected slot.
             return {}
+
+        if self._uow is not None and self._settlement is not None:
+            ok = self._apply_typed_plan(
+                mid=54,
+                operation="set_hero_equip",
+                partner_id=pid,
+                operations=(
+                    StackMutation(item_id, "DEBIT", 1),
+                    EntityMutation("HERO", pid, "SET_EQUIP_SLOTS", indices=(index,)),
+                ),
+            )
+            return {} if ok else {"error_code": 1}
+
+        # Compatibility-only construction outside RequestServices.
         if self.inventory.consume_item(item_id, 1, persist=False) is None:
             return {"error_code": 1}
         equips[index - 1] = 1
@@ -243,8 +306,10 @@ class HeroEquipmentRepository:
         self._save()
         return {}
 
+
     def one_click_equip(self, partner_id: Any) -> dict[str, Any]:
         hero = self.heroes.get(partner_id)
+        pid = self._int(partner_id, 0)
         if hero is None or not self._normal_early_boundary(hero):
             return {"error_code": 1}
         equip_ids = self._equip_ids(hero)
@@ -269,7 +334,6 @@ class HeroEquipmentRepository:
             item_level = max(0, self._int(item.get("level"), 0))
             if not self._is_normal_equipment(item_id) or item_level > max_level:
                 continue
-
             candidate: dict[int, int] = {}
             candidate_mana = self._reserve_item(item_id, candidate, base_reserved=reserved)
             if candidate_mana is None:
@@ -279,7 +343,6 @@ class HeroEquipmentRepository:
                 continue
             if not self._materials_available(combined):
                 continue
-
             needed_exp = self._exp_needed_for_level(hero, item_level) if current_level < item_level else 0
             if needed_exp > all_potion_exp:
                 continue
@@ -294,9 +357,30 @@ class HeroEquipmentRepository:
         if potion is None:
             return {"error_code": 1}
         potion_items, potion_exp = potion
+
+        if self._uow is not None and self._settlement is not None:
+            combined = self._merge_counts(reserved, potion_items)
+            ops: list[Any] = [
+                StackMutation(item_id, "DEBIT", count)
+                for item_id, count in sorted(combined.items()) if count > 0
+            ]
+            if total_mana > 0:
+                ops.append(ResourceMutation("mana", "DEBIT", total_mana))
+            if potion_exp > 0:
+                ops.append(EntityMutation("HERO", pid, "ADD_EXP", amount=potion_exp))
+            ops.append(EntityMutation("HERO", pid, "SET_EQUIP_SLOTS", indices=tuple(indexes)))
+            if not self._apply_typed_plan(
+                mid=62,
+                operation="one_click_equip",
+                partner_id=pid,
+                operations=tuple(ops),
+            ):
+                return {"error_code": 1}
+            refreshed = self.heroes.get(pid) or hero
+            return {"equips": list(refreshed.get("equips") or [0] * 6)[:6]}
+
         if not self._consume_plan(reserved, potion_items, total_mana, hero, potion_exp):
             return {"error_code": 1}
-
         for slot in indexes:
             equips[slot - 1] = 1
         hero["equips"] = equips
@@ -306,8 +390,10 @@ class HeroEquipmentRepository:
             result["economy_"] = {"mana": max(0, self._int(self.player.mana, 0))}
         return result
 
+
     def one_click_promote(self, partner_id: Any) -> dict[str, Any]:
         hero = self.heroes.get(partner_id)
+        pid = self._int(partner_id, 0)
         if hero is None or not self._normal_early_boundary(hero):
             return {"error_code": 1}
         color = self._int(hero.get("color"), 1)
@@ -320,8 +406,6 @@ class HeroEquipmentRepository:
         while len(equips) < 6:
             equips.append(0)
 
-        # The UI only exposes ONE_CLICK_JINJIE when at least one ordinary slot
-        # is missing; already-equipped slots were consumed by earlier MID54/62.
         missing = [
             (slot, item_id)
             for slot, item_id in enumerate(equip_ids, start=1)
@@ -350,9 +434,29 @@ class HeroEquipmentRepository:
         if potion is None:
             return {"error_code": 1}
         potion_items, potion_exp = potion
+
+        if self._uow is not None and self._settlement is not None:
+            combined = self._merge_counts(reserved, potion_items)
+            ops: list[Any] = [
+                StackMutation(item_id, "DEBIT", count)
+                for item_id, count in sorted(combined.items()) if count > 0
+            ]
+            if total_mana > 0:
+                ops.append(ResourceMutation("mana", "DEBIT", total_mana))
+            if potion_exp > 0:
+                ops.append(EntityMutation("HERO", pid, "ADD_EXP", amount=potion_exp))
+            ops.append(EntityMutation("HERO", pid, "PROMOTE_COLOR", amount=1))
+            if not self._apply_typed_plan(
+                mid=57,
+                operation="one_click_promote",
+                partner_id=pid,
+                operations=tuple(ops),
+            ):
+                return {"error_code": 1}
+            return {"restore_items": []}
+
         if not self._consume_plan(reserved, potion_items, total_mana, hero, potion_exp):
             return {"error_code": 1}
-
         hero["color"] = color + 1
         hero["equips"] = [0, 0, 0, 0, 0, 0]
         hero["fumos"] = [0, 0, 0, 0, 0, 0]
@@ -362,6 +466,45 @@ class HeroEquipmentRepository:
         if total_mana > 0:
             result["economy_"] = {"mana": max(0, self._int(self.player.mana, 0))}
         return result
+
+    def powerup_hero(self, partner_id: Any) -> dict[str, Any]:
+        """MID51 ordinary color promotion after all six gear slots are owned.
+
+        Gear was already consumed by MID54/MID62. NormalHero:powerUp performs
+        only the aggregate color transition here; SuperHero's corresponding
+        source methods are no-ops and are excluded by the normal boundary.
+        """
+        hero = self.heroes.get(partner_id)
+        pid = self._int(partner_id, 0)
+        if hero is None or not self._normal_early_boundary(hero):
+            return {"error_code": 1}
+        color = self._int(hero.get("color"), 1)
+        if color >= self.MAX_COLOR:
+            return {"error_code": 1}
+        equip_ids = self._equip_ids(hero)
+        equips = list(hero.get("equips") or [0] * 6)[:6]
+        while len(equips) < 6:
+            equips.append(0)
+        required_slots = [idx for idx, item_id in enumerate(equip_ids, start=1) if item_id > 0]
+        if not required_slots or any(self._int(equips[idx - 1], 0) != 1 for idx in required_slots):
+            return {"error_code": 1}
+
+        if self._uow is not None and self._settlement is not None:
+            ok = self._apply_typed_plan(
+                mid=51,
+                operation="powerup_hero",
+                partner_id=pid,
+                operations=(EntityMutation("HERO", pid, "PROMOTE_COLOR", amount=1),),
+            )
+            return {} if ok else {"error_code": 1}
+
+        hero["color"] = color + 1
+        hero["equips"] = [0, 0, 0, 0, 0, 0]
+        hero["fumos"] = [0, 0, 0, 0, 0, 0]
+        hero["fumo_levels"] = [0, 0, 0, 0, 0, 0]
+        self._save()
+        return {}
+
 
     def _save(self) -> None:
         if self._save_callback:

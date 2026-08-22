@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "pass": "75.0",
+  "baseline_artifact": "gxb-backend-v0.9.6-pass74.0",
+  "target_artifact": "gxb-backend-v0.9.7-pass75.0",
+  "counts": {
+    "added": 10,
+    "modified": 10,
+    "removed": 0
+  },
+  "added": [
+    "data/debug_guest_campaign_unlock_pass75.json",
+    "data/pass75_campaign_ownership_meta.json",
+    "docs/PASS75_BACKEND_FILE_MANIFEST.json",
+    "docs/PASS75_CAMPAIGN_OWNERSHIP_SELFTEST.json",
+    "docs/PASS75_CLIENT_TEST_PLAN.md",
+    "docs/PASS75_RUNTIME_DEBUG_FINDINGS.json",
+    "docs/PASS75_SRC64_FEEDBACK_LOOP.json",
+    "docs/V0_9_7_PASS75_CAMPAIGN_OWNERSHIP.md",
+    "tools/build_pass75_campaign_ownership_meta.py",
+    "tools/selftest_pass75_campaign_ownership.py"
+  ],
+  "modified": [
+    "VERSION.json",
+    "docs/PASS42_14_BACKEND_STATIC_VALIDATION.json",
+    "gxb_backend/state/awakening_mission_service.py",
+    "gxb_backend/state/hero_advanced_progression_repository.py",
+    "gxb_backend/state/multiuser_database.py",
+    "gxb_backend/state/player_database.py",
+    "gxb_backend/state/player_state.py",
+    "gxb_backend/state/request_services.py",
+    "gxb_backend/state/world_repository.py",
+    "gxb_backend/version.py"
+  ],
+  "removed": [],
+  "compatibility_note": "Strangler-Fig migration; ports/session/cookie contracts, one-player UoW boundary, 30-scalar EconomyLedger, Pass71 temporal ownership, Pass70 journal/projector, and Pass72-74 HERO/Awakening ownership remain intact.",
+  "runtime_baseline": "Pass72.0 remains last clean runtime accepted. Pass74 client smoke is runtime-characterized with one TaskWindow Lua error and state/Campaign defects corrected in Pass75.0.",
+  "deferred": [
+    "Campaign Sweep settlement",
+    "Super/Elite daily-attempt decrement/reset ownership",
+    "repeat Campaign drop RNG without authoritative policy",
+    "debug-seed bag/capacity policy",
+    "dependent Vows/Workshop/Pet domains"
+  ]
+}

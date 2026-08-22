@@ -1,0 +1,90 @@
+{
+  "schema_version": 1,
+  "pass": "81.0",
+  "source_artifact": "all-assest-rechecked.zip",
+  "source_sha256": "89f0f830508b92e5fff6ad53c6a9dae961a14042dbfdf5649008efb8353f5608",
+  "resolution": "effective src_64; all cited winners are app-assets/output/assets/src_64",
+  "backend_modifications_checked": [
+    {
+      "backend_change": "daily_consume_state.counts becomes an authoritative replacement dictionary so {} survives persistence",
+      "source_path": "src_64/app/windows/FumoWindow.lua",
+      "source_sha256": "663f941fd19293ab253af8647ff828f7432d80af4addd85e98330c5a6f47d2e6",
+      "source_lines": [
+        83,
+        84,
+        86,
+        197,
+        200,
+        202,
+        220,
+        221
+      ],
+      "finding": "MID28 buy_times is direct client authority for quickTimes; Quick Enchant uses DailyConsumeType.Magicka through MID29; stale persisted slot 2 therefore directly blocks the source UI. Persistence must allow coordinator-owned empty counts to remain empty."
+    },
+    {
+      "backend_change": "mission_state.daily_cache becomes an authoritative replacement dictionary so coordinator invalidation can persist",
+      "source_path": "server-internal cache only; no new wire/domain semantics introduced",
+      "finding": "This correction changes persistence ownership only. It does not generate Daily Missions, Activities, or alter any source response contract; Pass79/80 strict domain boundary is preserved."
+    },
+    {
+      "backend_change": "successful Super MID114 decrements runtime daily_limit exactly once",
+      "source_path": "src_64/app/scenes/BattleCreate.lua",
+      "source_sha256": "bb9ae19c20ec165eeb7ba5b81a4ce85b6b7fea3a3a7eb278123bb8c0af0bbef9",
+      "source_lines": [
+        2735,
+        2736,
+        2737,
+        2738,
+        2739
+      ],
+      "finding": "After FIGHT_RESULT the client replaces local worldMaps_[campaign_id].dailyLimit from response.daily_limit. It does not locally decrement that field, so successful MID114 must return the authoritative remaining count."
+    },
+    {
+      "backend_change": "Super MID113 rejects when runtime daily_limit <= 0",
+      "source_path": "src_64/app/windows/NewMapDetailWindow.lua",
+      "source_sha256": "88b97be8577828f478360c25fd51674e2ed8291b2a590976b3530c91396d07bf",
+      "source_lines": [
+        340,
+        341,
+        345,
+        346,
+        356,
+        357,
+        565,
+        571,
+        572,
+        573,
+        576
+      ],
+      "finding": "The source UI displays params.dailyLimit as remaining attempts and blocks Super START_BUTTON when sweepNum/dailyLimit is exhausted. Backend now mirrors that source gate so direct clients cannot bypass it."
+    },
+    {
+      "backend_change": "source campaign daily_limit remains reset baseline; runtime row daily_limit is mutable remaining count",
+      "source_path": "src_64/data/tables/campaign.lua",
+      "source_sha256": "7a58e878a7171839342a856cd74b512037528438259d036009a7249472504683",
+      "source_lines": [
+        1,
+        31,
+        935,
+        965
+      ],
+      "finding": "campaign.lua declares daily_limit as a source field and the representative Super relation row 100019 carries value 3. Pass79 remains the daily restore owner; Pass81 consumes the runtime copy on successful settlement."
+    },
+    {
+      "backend_change": "wire campaign_type=2 remains bounded to Super logic",
+      "source_path": "src_64/app/common/enums.lua",
+      "source_sha256": "15340bd89fe7c6f150ccfd4a5cd2a2f0e8e73c89dfae9ac3388376a4799901f3",
+      "source_lines": [
+        1511
+      ],
+      "finding": "xyd.CampaignType.SUPER = 2. Normal Campaign behavior remains outside the new decrement/zero guard."
+    }
+  ],
+  "explicit_non_changes": [
+    "No MID116 implementation.",
+    "No MID117 or MID118 implementation.",
+    "No Daily Mission or Activities generation.",
+    "No Super star=0/defeat attempt decrement; semantics remain unresolved.",
+    "No change to Pass79 05:00 GMT+8 ServerDayClock or DailyResetCoordinator notification behavior."
+  ]
+}

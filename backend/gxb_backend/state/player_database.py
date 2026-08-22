@@ -91,11 +91,22 @@ SECTION_FIELDS: dict[str, set[str]] = {
 
 PLAYER_FIELD_NAMES = {field.name for field in fields(PlayerState)}
 
+# Canonical replacement policy for dictionary-valued fields that are complete
+# domain-owned values rather than extension bags.  Unknown sibling/nested keys
+# continue to survive everywhere else.  Paths are rooted at the serialized
+# document (``player`` is explicitly included); ``*`` matches one dictionary
+# key such as a dynamic partner_id.
+CANONICAL_REPLACE_DICT_PATHS: tuple[tuple[str, ...], ...] = (
+    ("player", "domains", "daily_consume_state", "counts"),
+    ("player", "lobby", "mission_state", "daily_cache"),
+    ("player", "heroes", "heroes", "*", "evo_attr_points"),
+)
+
 
 class JsonPlayerDatabase:
     """Serialize AccountIdentity + PlayerState to a readable nested JSON file."""
 
-    SCHEMA_VERSION = 5
+    SCHEMA_VERSION = 6
 
     def __init__(self, path: Path) -> None:
         self.path = Path(path)
@@ -172,13 +183,42 @@ class JsonPlayerDatabase:
         return value if isinstance(value, dict) else None
 
     @staticmethod
-    def merge_preserving_extensions(existing: Any, canonical: Any) -> Any:
-        """Canonical values win while unknown sibling/nested keys survive."""
+    def _path_matches(pattern: tuple[str, ...], path: tuple[str, ...]) -> bool:
+        return len(pattern) == len(path) and all(
+            expected == "*" or expected == actual
+            for expected, actual in zip(pattern, path)
+        )
+
+    @classmethod
+    def _canonical_replaces_dict(cls, path: tuple[str, ...]) -> bool:
+        return any(cls._path_matches(pattern, path) for pattern in CANONICAL_REPLACE_DICT_PATHS)
+
+    @classmethod
+    def merge_preserving_extensions(
+        cls,
+        existing: Any,
+        canonical: Any,
+        *,
+        path: tuple[str, ...] = (),
+    ) -> Any:
+        """Canonical values win while unknown sibling/nested keys survive.
+
+        Most dictionaries are extension bags and merge recursively.  A small
+        explicit set of path-owned containers instead uses replacement
+        semantics so an authoritative ``{}`` acts as a real clear/tombstone.
+        """
         if isinstance(existing, dict) and isinstance(canonical, dict):
+            if cls._canonical_replaces_dict(path):
+                return copy.deepcopy(canonical)
             out = copy.deepcopy(existing)
             for key, value in canonical.items():
+                child_path = path + (str(key),)
                 if key in out and isinstance(out[key], dict) and isinstance(value, dict):
-                    out[key] = JsonPlayerDatabase.merge_preserving_extensions(out[key], value)
+                    out[key] = cls.merge_preserving_extensions(
+                        out[key],
+                        value,
+                        path=child_path,
+                    )
                 else:
                     out[key] = copy.deepcopy(value)
             return out
@@ -226,7 +266,7 @@ class JsonPlayerDatabase:
         player_sections["domains"] = remaining
         source = getattr(player, "_json_source_player", None)
         if isinstance(source, dict):
-            player_sections = cls.merge_preserving_extensions(source, player_sections)
+            player_sections = cls.merge_preserving_extensions(source, player_sections, path=("player",))
         setattr(player, "_json_source_player", copy.deepcopy(player_sections))
         return player_sections
 
@@ -237,7 +277,7 @@ class JsonPlayerDatabase:
         return {
             "_meta": {
                 "schema": cls.SCHEMA_VERSION,
-                "format": "GXB v0.9.0 additive persistence-control player database",
+                "format": "GXB v0.10.2 additive Commerce/VIP + OTA bridge player database",
                 "notes": [
                     "Stage 3.1.4 keeps SDK account UID, SDK/login SID, and game player ID distinct using the known-good region-125 client snapshot.",
                     "The backend re-reads this file before every request.",

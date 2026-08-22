@@ -1,0 +1,95 @@
+{
+  "schema_version": 1,
+  "pass": "73.0",
+  "status": "PASS",
+  "timestamp": "2026-08-22T06:35:00+06:00",
+  "source_precedence": "downloaded-assets/output/src_64 overrides app-assets/output/assets/src_64 path-by-path",
+  "effective_tree": {
+    "files": 4370,
+    "downloaded_winners": 62,
+    "app_winners": 4308,
+    "pass57_fingerprint_files": 4370,
+    "missing": 0,
+    "extra": 0,
+    "sha256_mismatches": 0,
+    "exact_pass57_match": true
+  },
+  "advanced_progression": {
+    "superhero_post5": {
+      "live_cap_star": 8,
+      "evolution_costs": {
+        "5_to_6": {
+          "mana": 80000000,
+          "own_fragments": 0
+        },
+        "6_to_7": {
+          "mana": 90000000,
+          "own_fragments": 300
+        },
+        "7_to_8": {
+          "mana": 100000000,
+          "own_fragments": 800
+        }
+      },
+      "mids": [
+        52,
+        54,
+        62,
+        304
+      ]
+    },
+    "fumo": {
+      "mid": 58,
+      "rule": "actual_fumo_gain * target_equipment.fumo_mana = Mana cost; materials use source moneng"
+    },
+    "element_equipment": {
+      "mids": [
+        2849,
+        2850,
+        2851,
+        2852,
+        2853
+      ],
+      "templates": 80,
+      "max_strengthen_rank": 10
+    },
+    "inscription_deterministic": {
+      "mids": [
+        1402,
+        1403
+      ],
+      "replacement_or_removal_crystal": 20
+    },
+    "stone_evolution": {
+      "mids": [
+        2608,
+        2609
+      ],
+      "partner_stones": 555,
+      "stages": 3,
+      "eligible_attrs": [
+        4,
+        7,
+        8,
+        11,
+        26
+      ],
+      "limits": {
+        "1": 20,
+        "2": 20,
+        "3": 40
+      },
+      "tickets": {
+        "low": 50005148,
+        "high": 50005149
+      }
+    },
+    "hidden_random_fail_closed": [
+      "Hero Practice candidate generation",
+      "Inscription make/rebuild/resolve candidate generation",
+      "Horcrux unique-instance generation"
+    ]
+  },
+  "awakening_research_appendix": "PASS73_AWAKENING_BLOOD_AWAKENING_RESEARCH.json",
+  "corrected_negative_fact": "xyd.mid.AWAKE_HERO remains undefined, but active mission-driven awakening is not blocked by it; treat SelfPlayer.awakeHero as stale/version-drift, not protocol authority."
+}

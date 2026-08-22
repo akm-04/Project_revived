@@ -1,0 +1,26 @@
+{
+  "pass": "87.0",
+  "status": "PASS",
+  "focused": "tools/selftest_pass87_commerce_vip_phase1.py",
+  "regressions": [
+    "pass68_foundation",
+    "pass68_1_medium_free",
+    "pass69_economy_backbone_part2",
+    "pass69_1_item_sale",
+    "pass70_response_projection",
+    "pass70_1_stone_summon_mana",
+    "pass71_temporal_resources",
+    "pass72_hero_progression",
+    "pass73_advanced_progression",
+    "pass74_awakening",
+    "pass75_campaign_ownership",
+    "pass79_daily_reset",
+    "pass81_daily_reset_campaign_corrections",
+    "pass83_mid1_temporal_hygiene",
+    "pass87_commerce_vip_phase1"
+  ],
+  "notes": [
+    "All listed self-tests passed after VIP resolver migration.",
+    "Generated commerce/vip metadata was regenerated from effective src_64 and byte-compared equal to packaged JSON."
+  ]
+}

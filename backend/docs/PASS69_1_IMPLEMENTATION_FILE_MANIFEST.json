@@ -1,0 +1,140 @@
+{
+  "changed_file_count": 19,
+  "files": [
+    {
+      "change": "MODIFIED",
+      "pass69_1_sha256": "f0b7697048712357530ae8432c4cd0a6cef6c45470036c6733397135f02009d0",
+      "path": "README.md",
+      "predecessor_sha256": "df25eecd1867e041572df9a0d2284701eea3f3967de2c136fdea3f7a15f15e6d",
+      "size": 6206
+    },
+    {
+      "change": "MODIFIED",
+      "pass69_1_sha256": "db0b7d281c27aa992bd86368854895c701897c8c303b474556746ba1b7486a90",
+      "path": "UPDATE_README.md",
+      "predecessor_sha256": "0febbd6cbe7bf5aec083b5c67828bf24e7b926a9222f6dfaaefe021db011b6e1",
+      "size": 2112
+    },
+    {
+      "change": "MODIFIED",
+      "pass69_1_sha256": "e32af8190a21cf00a54d959bc82b884030c7a291304f05bf5c54908b4cb629c9",
+      "path": "VERSION.json",
+      "predecessor_sha256": "8f66f5daf7823c495acd9d1b2d2242db80ae32834d9b751b0eee137763efec1b",
+      "size": 291
+    },
+    {
+      "change": "ADDED",
+      "pass69_1_sha256": "f47bceb84c1b51c61826ca3005dfa9da131e706e2a3aa158b9dd42b782b9aee8",
+      "path": "data/item_sale_catalog.json",
+      "predecessor_sha256": null,
+      "size": 2055452
+    },
+    {
+      "change": "MODIFIED",
+      "pass69_1_sha256": "5f7bab2726c54868d8cd01aa01c0e08adf5466f8ff457da8d42aa37d26053139",
+      "path": "docs/PASS42_12_BACKEND_STATIC_VALIDATION.json",
+      "predecessor_sha256": "3132aa242018d85a6d4cac5c2e6860547864eae4a038d2a3019e52e8b3e6f4c1",
+      "size": 1731
+    },
+    {
+      "change": "MODIFIED",
+      "pass69_1_sha256": "c470b44ada5945777e8b07a3be201c556772f611fa92a246a5017ad9a76e3d16",
+      "path": "docs/PASS42_14_BACKEND_STATIC_VALIDATION.json",
+      "predecessor_sha256": "508723ef24d4901294221d4e892ea79e0f67bac7f5dd51b188b4eef64fc3af8b",
+      "size": 1295
+    },
+    {
+      "change": "ADDED",
+      "pass69_1_sha256": "9406bde5e18d5806b7b14648f2b6b6137cdd563f06d18f64022d33e0214bb67f",
+      "path": "docs/PASS69_1_CLIENT_RETEST_PLAN.md",
+      "predecessor_sha256": null,
+      "size": 1437
+    },
+    {
+      "change": "ADDED",
+      "pass69_1_sha256": "a8af017b019c1dabbac6062d286cce02360270c22ee729cdfec1604509fd51f4",
+      "path": "docs/PASS69_1_SRC64_FEEDBACK_LOOP.json",
+      "predecessor_sha256": null,
+      "size": 3149
+    },
+    {
+      "change": "ADDED",
+      "pass69_1_sha256": "a8af017b019c1dabbac6062d286cce02360270c22ee729cdfec1604509fd51f4",
+      "path": "docs/PASS69_1_SRC64_FEEDBACK_LOOP.log",
+      "predecessor_sha256": null,
+      "size": 3149
+    },
+    {
+      "change": "ADDED",
+      "pass69_1_sha256": "591f2b0e5e6a1f01da2585357df231120e8f563a6abb54b236a4fa336377f430",
+      "path": "docs/V0_9_1_PASS69_1_ITEM_SALE_HOTFIX.md",
+      "predecessor_sha256": null,
+      "size": 1876
+    },
+    {
+      "change": "ADDED",
+      "pass69_1_sha256": "dd38a0811eb615628304d0990e96be5b04b726cd0c805600629f6350ffcc036d",
+      "path": "gxb_backend/content/item_sale_catalog.py",
+      "predecessor_sha256": null,
+      "size": 4620
+    },
+    {
+      "change": "MODIFIED",
+      "pass69_1_sha256": "6503618b29e7ac0e3bce74a97fd5397e330cf9b0a11a209df5e9e7b65d096525",
+      "path": "gxb_backend/handlers/inventory.py",
+      "predecessor_sha256": "362789e06a43bf98a02c87d2e6f09405f83e5ce258c5f8740c1e44a47ca9c01e",
+      "size": 1760
+    },
+    {
+      "change": "MODIFIED",
+      "pass69_1_sha256": "04a7847f2d795ca24d1dd77d2a4369692e84123309428503bdd4ed0f75dc1c37",
+      "path": "gxb_backend/run.py",
+      "predecessor_sha256": "da17c64008e730bf696638b5cee96fe9462756220e06df1a50f5bd6c8bb059cd",
+      "size": 3010
+    },
+    {
+      "change": "ADDED",
+      "pass69_1_sha256": "1e5ab7e5ff2f3d6a1d90adab112acb737417a837430ab29e1044befebda8be26",
+      "path": "gxb_backend/state/inventory_sale_service.py",
+      "predecessor_sha256": null,
+      "size": 5700
+    },
+    {
+      "change": "MODIFIED",
+      "pass69_1_sha256": "b0ce7c3f19c9327ea87f5b463bbb6e4b2a4a302c56c3a55491009bddba2b8bbe",
+      "path": "gxb_backend/state/mutation_settlement_service.py",
+      "predecessor_sha256": "efb97885a22717285cd31c26797c50c51ff838392082a089ab4ae08973e1228d",
+      "size": 10826
+    },
+    {
+      "change": "MODIFIED",
+      "pass69_1_sha256": "eb1135e5381251869d342013fff0a5cb5172566c6a4d071fe035aa139ca05180",
+      "path": "gxb_backend/state/request_services.py",
+      "predecessor_sha256": "601f4c64352332a0b7b3bda174b818816f6aad1032d0958482a04cdd38bcf3d9",
+      "size": 13961
+    },
+    {
+      "change": "MODIFIED",
+      "pass69_1_sha256": "6620366da6ce105be66381cfe42627a1cc63333ea2798aaa61b26c28a9ac6d30",
+      "path": "gxb_backend/version.py",
+      "predecessor_sha256": "28b496df04fff90b2058fe7159d178c59e67d79d5072a214784a5da0690460a2",
+      "size": 97
+    },
+    {
+      "change": "MODIFIED",
+      "pass69_1_sha256": "2364fb2d71b0e2c8e6736f3ac3d922567b426fc823b36064e14d0e8012e9f8f5",
+      "path": "memory.md",
+      "predecessor_sha256": "1c6a2c3edd7d7fe795416033e1ddd1078b7d165ff7b51c6372691e8ac493dcae",
+      "size": 1089
+    },
+    {
+      "change": "ADDED",
+      "pass69_1_sha256": "ef71ebbed319f611c22624c84163ba82b99305f7ec9219c0ec292b2db5dbdb50",
+      "path": "tools/selftest_pass69_1_item_sale.py",
+      "predecessor_sha256": null,
+      "size": 5775
+    }
+  ],
+  "pass": "69.1",
+  "predecessor": "v0.9.1-pass69.0"
+}

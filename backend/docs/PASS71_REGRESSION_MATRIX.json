@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "pass": "71.0",
+  "status": "STATIC_ACCEPTED_RUNTIME_PENDING",
+  "required_gates": [
+    "python compileall",
+    "Pass42.12 validator",
+    "Pass42.14 validator",
+    "Pass68 foundation selftest",
+    "Pass68.1 Medium-free selftest",
+    "Pass69 Economy Backbone Part2 selftest",
+    "Pass69.1 item-sale selftest",
+    "Pass70 response-projection selftest",
+    "Pass70.1 MID59 Mana selftest",
+    "Pass71 temporal-resources selftest"
+  ],
+  "pass71_characterization": [
+    "whole-interval offline catch-up",
+    "partial interval preservation",
+    "natural cap is not a hard inventory ceiling",
+    "below-cap debit rearms zero anchor",
+    "Invitation source-drift fails closed",
+    "TEMPORAL MutationPlan journal and state_version",
+    "cumulative response projection",
+    "mixed STACK+TEMPORAL atomic settlement",
+    "rollback leaks no committed journal",
+    "MID17 preserves zero anchor sentinel"
+  ],
+  "known_stale_non_gate": {
+    "test": "tools/selftest_campaign_economy.py",
+    "status": "PRE_EXISTING_IDENTICAL_FAILURE_IN_UNTOUCHED_PASS70_1",
+    "classification": "not a Pass71 regression"
+  },
+  "new_static_regressions": 0,
+  "results": {
+    "compileall": "PASS",
+    "pass42_12": "PASS",
+    "pass42_14": "PASS",
+    "pass68": "PASS",
+    "pass68_1": "PASS",
+    "pass69": "PASS",
+    "pass69_1": "PASS",
+    "pass70": "PASS",
+    "pass70_1": "PASS",
+    "pass71": "PASS"
+  },
+  "packaging_note": "Pass42.14 validator rewrites a nondeterministic sample-count evidence file; the Pass70.1 baseline copy is restored before packaging because this is test output, not a Pass71 code change."
+}

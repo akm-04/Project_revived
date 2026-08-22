@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "pass": "75.0",
+  "timestamp": "2026-08-22T18:11:00+06:00",
+  "status": "RUNTIME_CHARACTERIZED_PASS74_WITH_DEFECTS_FIXED_IN_PASS75",
+  "debug_artifact": "debug.zip",
+  "debug_sha256": "5ece363da58ad81e1d9b4ae06729a894987d68d8a79fdf6d637c84346c71a7fb",
+  "engine_requests": 196,
+  "distinct_mids": 41,
+  "backend_fallbacks": 0,
+  "python_tracebacks": 0,
+  "http_5xx": 0,
+  "client_lua_errors": 1,
+  "confirmed_successes": [
+    "Quick Enchant no-freeze and daily limit",
+    "Hero level/promote/evolve paths",
+    "manual Fumo/Institute enchant",
+    "Emblem dissolve produced cumulative certificate projections across source families"
+  ],
+  "findings": [
+    {
+      "id": "TASK_WINDOW_DAILY_BOOTSTRAP_NIL",
+      "severity": "client_blocking",
+      "detail": "TASK_AWAKE_OPEN (MID2738) returned awake_mission_ correctly, but subsequent TASK_LOAD_BY_TYPE daily loader returned mission_list only. TaskWindow:updateDaily divided by nil dayHuoyue before the Awaken tab could be used.",
+      "pass75_fix": "mission_payload(TaskType.DAILY) now includes source-shaped zero daily_left_time + huoyue_info day/week counters and award maps."
+    },
+    {
+      "id": "STONE_EVOLUTION_EMPTY_MAP_RESURRECTION",
+      "severity": "state_persistence",
+      "detail": "MID2609 projected evo_stage=2 with empty evo_attr_points, but merge-preserving JSON save recursively retained prior completed stage-1 point entries.",
+      "pass75_fix": "evo_attr_points is a bounded canonical-replacement dictionary so authoritative empty maps can clear stale persisted entries."
+    },
+    {
+      "id": "AWAKENING_TOMBSTONE_MERGE",
+      "severity": "state_persistence",
+      "detail": "Removing active awakening mission ownership with a pop could be undone by extension-preserving nested merge.",
+      "pass75_fix": "Awakening active mission deletion persists an explicit null tombstone."
+    },
+    {
+      "id": "CAMPAIGN_ENERGY_OWNERSHIP_MISSING",
+      "severity": "domain_gap",
+      "detail": "Campaign result paths were not settling source-defined Energy costs.",
+      "pass75_fix": "Normal/Super MID113/MID114 Campaign ownership now validates entry Energy and settles result-specific energy_cost/defeat_cost via TEMPORAL MutationPlan."
+    },
+    {
+      "id": "CERTIFICATE_FAMILY_AUDIT",
+      "severity": "clarification",
+      "detail": "Source Inscription dissolve material 19/20/21 maps to degree_cer/graduate_cer/patent_cer. New smoke contains successful cumulative projections for all three families; fishing/activity IDs 160200711/160200712 are not Inscription archetypes and remain fail-closed.",
+      "pass75_fix": "No forced remap; added all-family characterization and negative boundary."
+    }
+  ],
+  "runtime_acceptance": "Pass74 is not promoted to clean runtime acceptance because the smoke contained a real TaskWindow Lua error and persistence/Campaign defects. Pass72 remains last clean runtime-accepted baseline pending Pass75 smoke."
+}

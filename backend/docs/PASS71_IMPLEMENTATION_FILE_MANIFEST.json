@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "pass": "71.0",
+  "baseline_artifact": "gxb-backend-v0.9.2-pass70.1",
+  "target_artifact": "gxb-backend-v0.9.3-pass71.0",
+  "counts": {
+    "added": 10,
+    "modified": 17,
+    "removed": 0
+  },
+  "added": [
+    "data/temporal_resource_meta.json",
+    "docs/PASS70_1_RUNTIME_ACCEPTANCE_20260822.json",
+    "docs/PASS71_CLIENT_TEST_PLAN.md",
+    "docs/PASS71_IMPLEMENTATION_FILE_MANIFEST.json",
+    "docs/PASS71_REGRESSION_MATRIX.json",
+    "docs/PASS71_SRC64_FEEDBACK_LOOP.json",
+    "docs/V0_9_3_PASS71_TEMPORAL_RESOURCES.md",
+    "gxb_backend/state/server_clock.py",
+    "gxb_backend/state/temporal_policy_service.py",
+    "tools/selftest_pass71_temporal_resources.py"
+  ],
+  "modified": [
+    "README.md",
+    "VERSION.json",
+    "gxb_backend/handlers/bootstrap.py",
+    "gxb_backend/handlers/inventory.py",
+    "gxb_backend/run.py",
+    "gxb_backend/state/__init__.py",
+    "gxb_backend/state/economy_repository.py",
+    "gxb_backend/state/hero_progression_repository.py",
+    "gxb_backend/state/hero_repository.py",
+    "gxb_backend/state/mutation_plan.py",
+    "gxb_backend/state/mutation_settlement_service.py",
+    "gxb_backend/state/player_state.py",
+    "gxb_backend/state/request_services.py",
+    "gxb_backend/state/response_projector.py",
+    "gxb_backend/state/reward_transaction_service.py",
+    "gxb_backend/state/skill_point_policy.py",
+    "gxb_backend/version.py"
+  ],
+  "removed": [],
+  "compatibility_note": "No full rewrite. Existing transport/persistence/scalar-ledger interfaces are retained; temporal ownership is additive and request-scoped.",
+  "hero_evolve_scope": "MID52 Mana omission observed in runtime debug is deliberately not changed in Pass71."
+}

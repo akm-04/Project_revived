@@ -1,0 +1,17 @@
+{
+  "pass": "88.0",
+  "status": "PASS",
+  "validation_type": "actual route function + real StateRepository/service graph with minimal fake Flask module",
+  "flask_package_available_in_build_environment": false,
+  "reason": "No Flask package in offline build environment; internet/package installation unavailable. Full app socket dispatch remains a client/runtime acceptance item.",
+  "checks": [
+    "authenticated_route_commits",
+    "route_retry_replays",
+    "unknown_session_rejected"
+  ],
+  "observed_log_excerpt": [
+    "[DAILY_RESET] materialized player=12525385 mid=36857 now=1787434758 previous_day_id=None current_day_id=20688 mode=SEED_CURRENT_SOURCE_DAY_NO_STALE_EVIDENCE reset=0 emitted=0 participants=-",
+    "[COMMERCE] purchase player=12525385 intent=route-contract-001 status=COMMITTED charge_id=80001007 crystal_delta=200 vip=15 charge=500100",
+    "[COMMERCE] purchase player=12525385 intent=route-contract-001 status=REPLAYED charge_id=80001007 crystal_delta=200 vip=15 charge=500100"
+  ]
+}

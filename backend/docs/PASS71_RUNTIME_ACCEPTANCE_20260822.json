@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "pass": "71.0",
+  "status": "RUNTIME_ACCEPTED",
+  "evidence_date": "2026-08-22",
+  "debug_zip_sha256": "a006299a9d40dbd710a8eb92a9018a7f1095fb3008bf65a33e57cd96f686c25d",
+  "requests": 122,
+  "distinct_mids": 29,
+  "fallbacks": 0,
+  "nonzero_engine_errors": 0,
+  "python_tracebacks": 0,
+  "http_5xx": 0,
+  "user_observations": [
+    "Girl skill upgrade succeeded",
+    "10x Skill Point item succeeded",
+    "fragment Hero summon succeeded",
+    "online Energy regeneration observed 100 -> 101",
+    "after ~5 minutes offline, login Energy observed 101 -> 102",
+    "after the same offline interval Skill Points observed 0 -> 1"
+  ],
+  "known_deferred_neighbor": "Campaign clear did not debit 6 Energy; Campaign remains intentionally unmigrated and deferred."
+}

@@ -53,6 +53,8 @@ class PlayerUnitOfWork:
         self._contexts: list[OperationContext] = []
         self._staged_semantic: dict[str, list[object]] = {}
         self._committed_semantic: dict[str, list[object]] = {}
+        self._staged_journal: list[dict[str, Any]] = []
+        self._committed_journal: list[dict[str, Any]] = []
         self._touched_slices: set[str] = set()
         self._staged_receipts: list[dict[str, Any]] = []
         ensure_persistence_state(self.player)
@@ -99,6 +101,18 @@ class PlayerUnitOfWork:
     def consume_semantic(self) -> dict[str, list[object]]:
         out = copy.deepcopy(self._committed_semantic)
         self._committed_semantic.clear()
+        return out
+
+    def stage_journal(self, entry: dict[str, Any]) -> None:
+        """Stage one typed MutationPlan journal row for publication after commit."""
+        if not self.active:
+            raise RuntimeError("mutation journal rows may only be staged inside PlayerUnitOfWork")
+        self._staged_journal.append(copy.deepcopy(dict(entry)))
+
+    def consume_journal(self) -> list[dict[str, Any]]:
+        """Return committed journal rows; staged/rolled-back rows are never visible."""
+        out = copy.deepcopy(self._committed_journal)
+        self._committed_journal.clear()
         return out
 
     def get_receipt(self, domain: str, key: str) -> dict[str, Any] | None:
@@ -227,6 +241,7 @@ class PlayerUnitOfWork:
             self._rollback_only = False
             self._save_requested = False
             self._staged_semantic = {}
+            self._staged_journal = []
             self._touched_slices = set()
             self._staged_receipts = []
         self._depth += 1
@@ -244,6 +259,7 @@ class PlayerUnitOfWork:
                     if self._rollback_only:
                         self._restore_snapshot()
                         self._staged_semantic = {}
+                        self._staged_journal = []
                     elif self._save_requested:
                         try:
                             self._prepare_persistence_commit(context)
@@ -251,18 +267,23 @@ class PlayerUnitOfWork:
                         except Exception:
                             self._restore_snapshot()
                             self._staged_semantic = {}
+                            self._staged_journal = []
                             raise
                         for channel, values in self._staged_semantic.items():
                             self._committed_semantic.setdefault(channel, []).extend(copy.deepcopy(values))
                         self._staged_semantic = {}
+                        self._committed_journal.extend(copy.deepcopy(self._staged_journal))
+                        self._staged_journal = []
                     else:
                         self._staged_semantic = {}
+                        self._staged_journal = []
                 finally:
                     self._snapshot = None
                     self._rollback_only = False
                     self._save_requested = False
                     self._touched_slices = set()
                     self._staged_receipts = []
+                    self._staged_journal = []
 
 
 # Compatibility alias: existing repositories continue importing UnitOfWork.

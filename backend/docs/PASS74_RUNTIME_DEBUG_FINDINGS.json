@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "source_pass": "73.0",
+  "target_fix_pass": "74.0",
+  "debug_date": "2026-08-22",
+  "engine_requests": 184,
+  "distinct_mids": 37,
+  "fallbacks": 0,
+  "python_tracebacks": 0,
+  "http_5xx": 0,
+  "nonzero_engine_response_bodies": 17,
+  "client_lua_errors": 4,
+  "lua_errors": [
+    "NormalHero.lua:2711 nil evo_info after an HTTP-200 rejected Stone Evolution response",
+    "FumoWindow.lua:86 string.sub nil because MID28 omitted buy_times",
+    "Item.lua:189 comparison with nil in malformed Fumo state",
+    "FumoWindow.lua:799 comparison with nil in malformed Quick Enchant state"
+  ],
+  "user_confirmed_successes": [
+    "ordinary Hero evolution through 5-star",
+    "breakthrough/level-100 gate",
+    "scroll summons",
+    "bulk item sale",
+    "manual Institute gear enchant"
+  ],
+  "reported_neighbor_findings": [
+    "Emblem Dissolve consumed the emblem but did not project the scalar resolve reward",
+    "debug test inventory triggered a bag/capacity mail warning",
+    "Quick Enchant froze the client after a nominal success popup",
+    "Awakening gear did nothing because mission ownership was missing"
+  ],
+  "acceptance": "RUNTIME_CHARACTERIZED_WITH_RESPONSE_CONTRACT_DEFECTS",
+  "last_clean_runtime_accepted": "PASS72"
+}

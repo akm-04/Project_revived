@@ -1,0 +1,81 @@
+{
+  "pass": "88.0",
+  "status": "PASS",
+  "checks": [
+    {
+      "name": "first_buy_atomic_source_shaped",
+      "status": "PASS",
+      "details": {
+        "event": {
+          "mid": 36857,
+          "params": {
+            "delta": 200,
+            "total": 200,
+            "vip": 1,
+            "charge": 100,
+            "charge_id": 80001007,
+            "left_card_day": 0,
+            "left_week_card_day": 0,
+            "left_month_tili_day": 0,
+            "privilege_left_card_day": 0,
+            "privilege_month_card_end": 0
+          }
+        },
+        "history": {
+          "charge_count": 1,
+          "last_buy_time": 1788000000
+        }
+      }
+    },
+    {
+      "name": "permanent_receipt_and_outbox_committed",
+      "status": "PASS",
+      "details": {}
+    },
+    {
+      "name": "same_intent_retry_exactly_once",
+      "status": "PASS",
+      "details": {}
+    },
+    {
+      "name": "repeat_buy_no_first_bonus",
+      "status": "PASS",
+      "details": {}
+    },
+    {
+      "name": "cumulative_charge_derives_vip2",
+      "status": "PASS",
+      "details": {}
+    },
+    {
+      "name": "intent_reuse_with_different_sku_rejected",
+      "status": "PASS",
+      "details": {}
+    },
+    {
+      "name": "unadvertised_sku_rejected",
+      "status": "PASS",
+      "details": {}
+    },
+    {
+      "name": "ios_30000_pack_source_hidden",
+      "status": "PASS",
+      "details": {}
+    },
+    {
+      "name": "purchase_state_persistence_roundtrip",
+      "status": "PASS",
+      "details": {}
+    },
+    {
+      "name": "commit_failure_rolls_back_all_planes",
+      "status": "PASS",
+      "details": {}
+    },
+    {
+      "name": "vip15_purchase_stays_capped",
+      "status": "PASS",
+      "details": {}
+    }
+  ]
+}

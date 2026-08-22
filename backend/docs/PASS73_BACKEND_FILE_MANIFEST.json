@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "pass": "73.0",
+  "baseline_artifact": "gxb-backend-v0.9.4-pass72.0",
+  "target_artifact": "gxb-backend-v0.9.5-pass73.0",
+  "counts": {
+    "added": 13,
+    "modified": 11,
+    "removed": 0
+  },
+  "added": [
+    "data/debug_guest_advanced_inventory_seed.json",
+    "data/hero_advanced_progression_meta.json",
+    "docs/PASS72_RUNTIME_ACCEPTANCE_20260822.json",
+    "docs/PASS73_ADVANCED_PROGRESSION_SELFTEST.json",
+    "docs/PASS73_AWAKENING_BLOOD_AWAKENING_RESEARCH.json",
+    "docs/PASS73_AWAKENING_BLOOD_AWAKENING_RESEARCH.md",
+    "docs/PASS73_BACKEND_FILE_MANIFEST.json",
+    "docs/PASS73_CLIENT_TEST_PLAN.md",
+    "docs/PASS73_SRC64_FEEDBACK_LOOP.json",
+    "docs/V0_9_5_PASS73_ADVANCED_HERO_PROGRESSION.md",
+    "gxb_backend/state/hero_advanced_progression_repository.py",
+    "tools/build_hero_advanced_meta.py",
+    "tools/selftest_pass73_advanced_progression.py"
+  ],
+  "modified": [
+    "VERSION.json",
+    "data/game_data_catalog.json",
+    "docs/memory.md",
+    "gxb_backend/dispatch/engine_dispatcher.py",
+    "gxb_backend/handlers/heroes.py",
+    "gxb_backend/handlers/practice.py",
+    "gxb_backend/state/hero_entity_mutation_service.py",
+    "gxb_backend/state/multiuser_database.py",
+    "gxb_backend/state/repository.py",
+    "gxb_backend/state/request_services.py",
+    "memory.md"
+  ],
+  "removed": [],
+  "compatibility_note": "Strangler-Fig migration; transports, one-player UoW boundary, 30-scalar EconomyLedger, temporal ownership, and Pass70 journal/projector contracts remain intact.",
+  "runtime_baseline": "Pass72.0 runtime accepted",
+  "deferred": [
+    "Awakening/Blood Awakening mission implementation (Pass73 research complete)",
+    "Campaign Energy settlement",
+    "Horcrux hidden unique-instance generation",
+    "dependent Campaign/Vows/Workshop/Pet feature implementation"
+  ]
+}

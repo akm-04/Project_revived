@@ -1,0 +1,27 @@
+{
+  "checks": {
+    "normal_campaign": {
+      "daily_limit": 0,
+      "normal_campaign_unchanged": true
+    },
+    "persistence": {
+      "daily_consume_counts_clear_persists": true,
+      "mission_daily_cache_clear_persists": true,
+      "unknown_extension_siblings_preserved": true
+    },
+    "super_campaign": {
+      "daily_reset_restores": 3,
+      "defeat_consumption": "DEFERRED_UNRESOLVED",
+      "duplicate_mid114_idempotent": true,
+      "mid113_zero_guard": true,
+      "successful_mid114_sequence": [
+        2,
+        1,
+        0
+      ]
+    }
+  },
+  "pass": "81.0",
+  "scope": "Pass79 correction only; MID116/117/118 not implemented",
+  "status": "PASS"
+}

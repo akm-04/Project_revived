@@ -1,0 +1,62 @@
+{
+  "_meta": {
+    "format": "GXB v0.9.4 Pass72 source-derived Hero progression metadata",
+    "policy": [
+      "rows are source facts, not private-server balance policy",
+      "ordinary 1->5 evolution is activated; post-5 SuperHero evolution remains separate/source-bounded"
+    ],
+    "source": [
+      "effective src_64/data/tables/star.lua",
+      "effective src_64/app/common/enums.lua: StarLevelSuipian",
+      "effective src_64/app/windows/HeroMainWindow.lua: evolvePrice(next_star)"
+    ]
+  },
+  "normal_max_star": 5,
+  "star_level_fragments": [
+    10,
+    20,
+    50,
+    100,
+    150,
+    0,
+    300,
+    800
+  ],
+  "stars": {
+    "1": {
+      "evolve_num": 10,
+      "evolve_price": 1000,
+      "star": 1,
+      "summon_num": 10,
+      "summon_price": 1000
+    },
+    "2": {
+      "evolve_num": 20,
+      "evolve_price": 35000,
+      "star": 2,
+      "summon_num": 30,
+      "summon_price": 50000
+    },
+    "3": {
+      "evolve_num": 50,
+      "evolve_price": 120000,
+      "star": 3,
+      "summon_num": 80,
+      "summon_price": 200000
+    },
+    "4": {
+      "evolve_num": 100,
+      "evolve_price": 300000,
+      "star": 4,
+      "summon_num": 180,
+      "summon_price": 500000
+    },
+    "5": {
+      "evolve_num": 150,
+      "evolve_price": 800000,
+      "star": 5,
+      "summon_num": 330,
+      "summon_price": 1300000
+    }
+  }
+}

@@ -48,6 +48,12 @@ class WorldHandlers:
     def fight_result(self, req: dict) -> dict:
         return self.ctx.state.get_world_repository().commit_fight_result(req)
 
+    def unlimited_start_fight(self, req: dict) -> dict:
+        return self.ctx.state.get_awakening_mission_service().unlimited_start(req)
+
+    def unlimited_fight_result(self, req: dict) -> dict:
+        return self.ctx.state.get_awakening_mission_service().unlimited_result(req)
+
     def get_story_drop_partner(self, req: dict) -> dict:
         """Grant the source-selected special-story partner for MID2064.
 

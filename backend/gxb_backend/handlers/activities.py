@@ -43,7 +43,10 @@ class ActivityHandlers:
         return {"awards": []}
 
     def daily_consume_load(self, req: dict) -> dict:
-        return {"awards": [], "point": 0, "items": []}
+        return self.ctx.state.get_hero_advanced_progression_repository().daily_consume_load()
 
     def daily_consume(self, req: dict) -> dict:
+        if int(req.get("consume_id") or 0) == 2:
+            return self.ctx.state.get_hero_advanced_progression_repository().quick_fumo(req)
+        # Other DailyConsume families remain under their legacy domain owners.
         return {"awards": []}

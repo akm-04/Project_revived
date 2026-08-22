@@ -37,7 +37,10 @@ from gxb_backend.protocol.mids import MID
 from gxb_backend.protocol.registry import ProtocolRegistry
 from gxb_backend.protocol.routing import RouteClass, classify_mid
 from gxb_backend.state.repository import StateRepository
+from gxb_backend.state.projection_profiles import ProjectionProfileRegistry
+from gxb_backend.state.resource_registry import ResourceRegistry
 from gxb_backend.state.response_projector import ResponseProjector
+from gxb_backend.state.daily_reset import merge_daily_reset_projection
 from gxb_backend.transport.responses import engine_ok
 
 Handler = Callable[[dict[str, Any]], Any]
@@ -80,6 +83,21 @@ class EngineDispatcher:
         self.world = WorldHandlers(ctx)
         self.rewards = RewardHandlers(ctx)
         self.protocol_registry = ProtocolRegistry.load(settings.protocol_registry_path)
+        self.resource_registry = ResourceRegistry.load(settings.resource_registry_path)
+        try:
+            self.projection_profiles = ProjectionProfileRegistry.load(
+                settings.projection_profile_registry_path
+            )
+        except Exception as exc:
+            # Projection metadata should not make an otherwise-compatible EOL
+            # backend unbootable. The fallback adds only the proven optional
+            # global envelope and never synthesizes STACK awards.
+            print(
+                f"[PROJECTION] registry unavailable at "
+                f"{settings.projection_profile_registry_path}: {exc}; "
+                "using safe global-envelope fallback"
+            )
+            self.projection_profiles = ProjectionProfileRegistry.safe_default()
         self.compat = CompatibilityHandlers(settings, self.protocol_registry.label)
         self.runtime_logger = RuntimeLogger(settings)
 
@@ -141,6 +159,7 @@ class EngineDispatcher:
             "PEAK_RECORDS": self.arena.peak_records,
             "TASK_LOAD_BY_TYPE": self.tasks.task_load_by_type,
             "TAKE_MISSION_AWARD": self.tasks.take_mission_award,
+            "AWAKE_MISSION_LIST": self.tasks.awake_mission_list,
             "RED_POINT": self.red_point,
         }
         for name, handler in direct.items():
@@ -181,7 +200,24 @@ class EngineDispatcher:
             "SET_HERO_EQUIP": self.heroes.set_hero_equip,
             "ONE_CLICK_EQUIP": self.heroes.one_click_equip,
             "ONE_CLICK_JINJIE": self.heroes.one_click_promote,
+            "POWERUP_HERO": self.heroes.powerup_hero,
             "EVOLVE_HERO": self.heroes.evolve_hero,
+            "UPGRADE_SUPER_EQUIP": self.heroes.upgrade_super_equip,
+            "FUMO": self.heroes.fumo,
+            "ELEMENT_EQUIP": self.heroes.element_equip,
+            "ELEMENT_LEV_UP": self.heroes.element_strengthen,
+            "ELEMENT_UNLOAD": self.heroes.element_unload,
+            "ELEMENT_DESTORY_ON_PARTNER": self.heroes.element_destroy_on_hero,
+            "ELEMENT_DESTORY_IN_BACKPACK": self.heroes.element_destroy_backpack,
+            "INSCRIPTION_INSERT": self.heroes.inscription_insert,
+            "INSCRIPTION_REMOVE": self.heroes.inscription_remove,
+            "BREACH_STONE_ADD": self.heroes.breach_stone_add,
+            "BREACH_STONE_EVOLVE": self.heroes.breach_stone_evolve,
+            "INSCRIPTION_MAKE": self.heroes.advanced_hidden_fail_closed,
+            "INSCRIPTION_REBUILD": self.heroes.advanced_hidden_fail_closed,
+            "INSCRIPTION_RESOLVE": self.heroes.inscription_resolve,
+            "INSCRIPTION_SAVE_REBUILD": self.heroes.advanced_hidden_fail_closed,
+            "INSCRIPTION_ABANDON_REBUILD": self.heroes.advanced_hidden_fail_closed,
             "SUMMON_HERO": self.summon.summon_hero,
             "STONE_SUMMON_HERO": self.summon.stone_summon_hero,
             "MAGIC_SUMMON_BUY": self.summon.magic_summon,
@@ -250,17 +286,19 @@ class EngineDispatcher:
             # missions / tasks
             "LOAD_MISSION": self.tasks.load_mission,
             "COMPLETE_MISSION": self.tasks.mission_status,
-            "OPEN_AWAKE_MISSION": self.tasks.mission_status,
-            "GIVE_UP_AWAKE_MISSION": self.tasks.mission_status,
+            "OPEN_AWAKE_MISSION": self.tasks.awake_open,
+            "GIVE_UP_AWAKE_MISSION": self.tasks.awake_give_up,
             "OPEN_PET_AWAKE_MISSION": self.tasks.mission_status,
             "GIVE_UP_PET_AWAKE_MISSION": self.tasks.mission_status,
-            "OPEN_AWAKE_TWICE_MISSION": self.tasks.mission_status,
-            "GIVE_UP_AWAKE_TWICE_MISSION": self.tasks.mission_status,
+            "OPEN_AWAKE_TWICE_MISSION": self.tasks.awake_open,
+            "GIVE_UP_AWAKE_TWICE_MISSION": self.tasks.awake_give_up,
             "GET_DAY_HUOYUE_AWARD": self.tasks.huoyue_award,
             "GET_WEEK_HUOYUE_AWARD": self.tasks.huoyue_award,
             "GET_AWAKE_ITEM": self.tasks.mission_status,
-            "TASK_AWAKE_GIVE_UP": self.tasks.mission_status,
-            "TASK_AWAKE_OPEN": self.tasks.mission_status,
+            "TASK_AWAKE_GIVE_UP": self.tasks.awake_give_up,
+            "TASK_AWAKE_OPEN": self.tasks.awake_open,
+            "UNLIMIT_START_FIGHT": self.world.unlimited_start_fight,
+            "UNLIMIT_FIGHT_RESULT": self.world.unlimited_fight_result,
 
             # social
             "DENY_FRIEND_REQUEST": self.social.social_status_only,
@@ -410,7 +448,6 @@ class EngineDispatcher:
             "SAVE_FURNITURES",
             "HUNQI_GET_CAMPAIGN_INFO",
             "POWERUP_HERO",
-            "FUMO",
             "EXPAND_HERO_SLOTS",
             "DISMISS_HERO",
             "UNLOCK_DYNAMIC_CARD",
@@ -458,7 +495,24 @@ class EngineDispatcher:
         name = self.protocol_registry.label(req_mid)
         print(f"[ENGINE IN] mid={name} ({req_mid}) route={route_class.value} data={json.dumps(req, ensure_ascii=False, default=str)}")
 
-        projector = ResponseProjector.capture(self.state.current_player_or_none())
+        # Pass79 lazy source-day materialization happens before the response
+        # snapshot and endpoint logic for requests whose canonical player is
+        # already bound. Pass83 keeps MID1 as the deliberate exception: MID1 is
+        # account-scoped here, then BootstrapHandlers evaluates the reset
+        # immediately after resolve_or_create_player() binds the game player.
+        # Only a source-compatible 05:00 trigger that actually materializes the
+        # rollover receives the one-shot daily_updates projection.
+        daily_reset = self.state.evaluate_daily_reset(req_mid)
+
+        projector = ResponseProjector.capture(
+            self.state.current_player_or_none(),
+            resource_registry=self.resource_registry,
+        )
+        profile = self.projection_profiles.resolve(
+            mid=req_mid,
+            label=name,
+            transport=self.protocol_registry.plane(req_mid) or route_class.value,
+        )
 
         handler = self.handlers.get(req_mid)
         fallback_used = handler is None
@@ -474,9 +528,22 @@ class EngineDispatcher:
             handler_name = getattr(handler, "__qualname__", repr(handler))
 
         services = self.state.current_services_or_none()
+        committed_journal = []
         if services is not None:
+            # Explicit semantic channels remain the compatibility bridge for
+            # unmigrated owners. Typed journal projection runs afterwards and
+            # wins on collision because it represents committed canonical state.
             result = services.apply_semantic_deltas(result)
-        result = projector.project(result, self.state.current_player_or_none())
+            committed_journal = services.uow.consume_journal()
+        result = projector.project(
+            result,
+            self.state.current_player_or_none(),
+            committed_journal=committed_journal,
+            profile=profile,
+        )
+        result = merge_daily_reset_projection(
+            result, daily_reset.projection if daily_reset is not None else None
+        )
 
         self.runtime_logger.request(
             mid=req_mid,

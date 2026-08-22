@@ -1,0 +1,78 @@
+{
+  "schema_version": 1,
+  "pass": "89.0",
+  "status": "SOURCE_CHECKED",
+  "effective_source": "src_64",
+  "source_bundle_sha256": "89f0f830508b92e5fff6ad53c6a9dae961a14042dbfdf5649008efb8353f5608",
+  "evidence": [
+    {
+      "path": "UpdateScene_64.lua",
+      "sha256": "9ef3c8bcf3bad26111ca218f596c34d04f2d5433218e0b5c7ae30b78975a2286",
+      "facts": [
+        "MID2 request carries platform/app_v/v/clean/full",
+        "is_inapp activates in-app resources",
+        "is_review suppresses update confirmation",
+        "resource URL is downloaded as .001/.002 volumes",
+        "resource version is persisted and successful update restarts client"
+      ]
+    },
+    {
+      "path": "main_64.lua",
+      "sha256": "48163c6099329992b06566a4af86f330d3e66bc814c80ed078ba793b39dd0b2e",
+      "facts": [
+        "versionUpdatePath/src_64 is searched before packaged src_64 so OTA Lua overrides win after restart"
+      ]
+    },
+    {
+      "path": "app/xinyoudi.lua",
+      "sha256": "da977493f39878f401ae24b67772413d19aec82403180505f43d0fb3fe9ce95a",
+      "facts": [
+        "framework.json is loaded globally before app.common.utils",
+        "app.common.utils is required during application startup"
+      ]
+    },
+    {
+      "path": "app/common/utils.lua",
+      "sha256": "6e56c7342e889d7ae8d41fe47cb06f66832227efe702f3863f693ee7ba84ffad",
+      "facts": [
+        "xyd.androidPurchase and xyd.sdkPurchase own native purchase handoff",
+        "Android native method family includes xydPurchases/xydNewPurchase/xydNPurchase"
+      ]
+    },
+    {
+      "path": "app/windows/VipRechargeWindow.lua",
+      "sha256": "3fac657db32f5cf8804ff37d581758977cfce951aad2ec5008d878a6395ae717",
+      "facts": [
+        "direct Recharge tap passes charge_id as the third argument to xyd.androidPurchase / xyd.sdkPurchase"
+      ]
+    },
+    {
+      "path": "app/common/network/Backend.lua",
+      "sha256": "95378e2b0be8180df6de27e9e430c630bcfe46c080e1f91ef5f6d74bdbb1b840",
+      "facts": [
+        "getWebAPIURL_ returns active server URL",
+        "network form requests use token/region",
+        "MID36857 maps to xyd.event.RECHARGE"
+      ]
+    },
+    {
+      "path": "app/model/SelfPlayer.lua",
+      "sha256": "163d5893c9522ada412c2b9c4748a80757660fccdf03c8f72cb6edf0838b8eb4",
+      "facts": [
+        "onRecharge_ consumes event.params.params",
+        "updates crystal from cumulative total, vip, charge and card-day fields",
+        "normal recharge success UI is emitted from this event"
+      ]
+    }
+  ],
+  "private_server_policy": [
+    "PurchaseIntent HTTP endpoint is preservation-only because native SDK callback implementation is absent from recovered bundle.",
+    "OTA bridge interception is limited to the seven Pass87/88 server-advertised direct Crystal products.",
+    "No historical TCP framing is inferred; committed MID36857 is injected locally into the source event dispatcher."
+  ],
+  "invariants": [
+    "canonical utils.lua remains exact byte prefix of each OTA override",
+    "unsupported purchase methods fall through to original functions",
+    "all 124 prior OTA override files preserved byte-for-byte in cumulative 1.631.3 package"
+  ]
+}

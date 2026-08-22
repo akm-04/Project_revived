@@ -1,0 +1,61 @@
+{
+  "pass": "87.0",
+  "status": "PASS",
+  "source_resolution": "effective_merged",
+  "canonical_source_bundle_sha256": "89f0f830508b92e5fff6ad53c6a9dae961a14042dbfdf5649008efb8353f5608",
+  "files": [
+    {
+      "path": "data/tables/charge.lua",
+      "sha256": "abfd3d35090fd10508dd1ec9c37ed576bcd15a0f6d5528c3a77b42d4f428b7f9",
+      "backend_changes_supported": [
+        "seven direct Crystal SKUs",
+        "first/repeat Crystal bonus metadata",
+        "cards separable from direct packs"
+      ]
+    },
+    {
+      "path": "data/tables/vip.lua",
+      "sha256": "18b76d7fa82964f57082aeb2092a80c231f69e86958b4b567aebabf30d626270",
+      "backend_changes_supported": [
+        "VIP0-15 charge_req thresholds",
+        "skill_buy",
+        "skill_max",
+        "sweep_card",
+        "num_energy",
+        "num_midas",
+        "num_elite",
+        "soul_box and other privilege fields"
+      ]
+    },
+    {
+      "path": "app/model/SelfPlayer.lua",
+      "sha256": "163d5893c9522ada412c2b9c4748a80757660fccdf03c8f72cb6edf0838b8eb4",
+      "backend_changes_supported": [
+        "MID1 consumes vip and charge",
+        "queryChargeData consumes charges charge_id/charge_count/last_buy_time and optional server_time",
+        "VIP progression is cumulative charge-facing client state"
+      ]
+    },
+    {
+      "path": "app/windows/VipRechargeWindow.lua",
+      "sha256": "3fac657db32f5cf8804ff37d581758977cfce951aad2ec5008d878a6395ae717",
+      "backend_changes_supported": [
+        "MID354 server advertisement drives visible Recharge rows",
+        "diamond tab filters isPrivilege=0/showType=0",
+        "iOS excludes charge_id 80001030",
+        "native purchase remains outside game MID path"
+      ]
+    }
+  ],
+  "private_server_policy": [
+    "Direct charge.lua Crystal pack VIP progression delta uses the base diamond amount because historical server settlement formula is absent; this is explicitly not promoted to recovered source fact.",
+    "Pass87 does not implement purchase authorization or MID36857 settlement."
+  ],
+  "negative_checks": [
+    "No MID116/117/118 added",
+    "No card lifecycle added",
+    "No ordinary Shop logic added",
+    "No cash-skin SKU invented",
+    "No native SDK purchase callback guessed"
+  ]
+}

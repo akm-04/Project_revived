@@ -1,0 +1,139 @@
+{
+  "pass": "87.0",
+  "status": "PASS",
+  "checks": [
+    {
+      "name": "source_vip_thresholds_exact",
+      "status": "PASS",
+      "details": {
+        "thresholds": {
+          "0": 0,
+          "1": 30,
+          "2": 300,
+          "3": 900,
+          "4": 1500,
+          "5": 3000,
+          "6": 6000,
+          "7": 9000,
+          "8": 15000,
+          "9": 20000,
+          "10": 30000,
+          "11": 45000,
+          "12": 60000,
+          "13": 100000,
+          "14": 250000,
+          "15": 500000
+        }
+      }
+    },
+    {
+      "name": "charge_derives_vip_boundary_exact",
+      "status": "PASS",
+      "details": {
+        "cases": {
+          "0": 0,
+          "29": 0,
+          "30": 1,
+          "299": 1,
+          "300": 2,
+          "899": 2,
+          "900": 3,
+          "499999": 14,
+          "500000": 15,
+          "999999999": 15
+        }
+      }
+    },
+    {
+      "name": "direct_crystal_catalog_exact",
+      "status": "PASS",
+      "details": {
+        "ids": [
+          80001002,
+          80001003,
+          80001004,
+          80001005,
+          80001006,
+          80001007,
+          80001030
+        ]
+      }
+    },
+    {
+      "name": "direct_product_source_values",
+      "status": "PASS",
+      "details": {}
+    },
+    {
+      "name": "vip_privilege_resolver_representative",
+      "status": "PASS",
+      "details": {
+        "vip": 2
+      }
+    },
+    {
+      "name": "skill_policy_autowired_to_vip_resolver",
+      "status": "PASS",
+      "details": {
+        "max_points": 10,
+        "can_buy": true
+      }
+    },
+    {
+      "name": "sandbox_vip15_charge0_normalization",
+      "status": "PASS",
+      "details": {
+        "vip": 15,
+        "charge": 500000,
+        "crystal": 777777,
+        "marker": {
+          "applied": 1,
+          "classification": "STATE_NORMALIZATION_NOT_PURCHASE",
+          "from": {
+            "vip": 15,
+            "charge": 0
+          },
+          "to": {
+            "vip": 15,
+            "charge": 500000
+          },
+          "crystal_delta": 0,
+          "product_history_created": 0
+        }
+      }
+    },
+    {
+      "name": "mid354_projection_contract",
+      "status": "PASS",
+      "details": {
+        "charge_count": 7,
+        "server_time": 1788000000
+      }
+    },
+    {
+      "name": "commerce_state_persistence_roundtrip",
+      "status": "PASS",
+      "details": {}
+    },
+    {
+      "name": "repository_import_executes_sandbox_normalization",
+      "status": "PASS",
+      "details": {}
+    },
+    {
+      "name": "system_mid354_uses_recharge_catalog_service",
+      "status": "PASS",
+      "details": {}
+    }
+  ],
+  "direct_crystal_ids": [
+    80001002,
+    80001003,
+    80001004,
+    80001005,
+    80001006,
+    80001007,
+    80001030
+  ],
+  "backend_phase": "Commerce/VIP Phase 1; purchase intent/settlement deferred"
+}

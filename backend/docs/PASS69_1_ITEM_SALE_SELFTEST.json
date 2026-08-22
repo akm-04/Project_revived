@@ -1,0 +1,14 @@
+{
+  "commits": 3,
+  "compact_catalog_missing_debit_supported": true,
+  "crystal_fallback": true,
+  "final_state_version": 3,
+  "insufficient_stack_fail_closed": true,
+  "mana_price_primary": true,
+  "mid82_stack_resource_atomic": true,
+  "mid86_aggregate_atomic": true,
+  "pass": "69.1",
+  "sell_catalog_rows": 4564,
+  "specialized_sale_fail_closed": true,
+  "status": "PASS"
+}

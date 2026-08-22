@@ -177,9 +177,9 @@ class PlayerState:
     comment_open: int = 0
     fbshare_open: int = 0
 
-    # Optional persisted timestamps. Energy/spirit zero may be materialized as
-    # server-now for compatibility, but Skill Point uses zero as a semantic
-    # full-pool/no-regeneration sentinel and must be preserved on the wire.
+    # Optional persisted temporal anchors. Pass71 preserves zero as the
+    # full/naturally-paused sentinel on the wire; below-cap zero anchors are
+    # safely rearmed from server time by TemporalPolicyService.
     energy_time: int = 0
     spirit_energy_time: int = 0
     invitation_time: int = 0
@@ -219,6 +219,10 @@ class PlayerState:
     # Phase 3 Pass68 additive persistence-control envelope. Kept under
     # player.domains.persistence_state on disk; never projected to the Lua client.
     persistence_state: dict[str, Any] = field(default_factory=dict)
+    # Pass87 Commerce-owned server-only state: direct recharge product history,
+    # migration markers and future exactly-once purchase receipts/outbox metadata.
+    # charge/vip remain first-class PlayerState fields for source wire projection.
+    commerce_state: dict[str, Any] = field(default_factory=dict)
 
     library_infos: dict[str, Any] = field(default_factory=dict)
     library_talk_infos: dict[str, Any] = field(default_factory=dict)
@@ -242,6 +246,13 @@ class PlayerState:
     # Canonical MissionRepository-owned state. ``missions`` above remains a
     # transitional legacy/bootstrap payload for still-unimplemented families.
     mission_state: dict[str, Any] = field(default_factory=dict)
+    # Pass74 dedicated cross-domain task ownership. These remain server-only
+    # persistence fields and are not projected in player_info.
+    awakening_state: dict[str, Any] = field(default_factory=dict)
+    daily_consume_state: dict[str, Any] = field(default_factory=dict)
+    # Pass79 canonical 05:00 GMT+8 day marker + rollover audit. This is
+    # server-only durable control state and is never projected in player_info.
+    daily_reset_state: dict[str, Any] = field(default_factory=dict)
     shops: dict[str, list[dict[str, Any]]] = field(default_factory=dict)
     shop_statuses: dict[str, Any] = field(default_factory=dict)
     world_map: dict[str, Any] = field(default_factory=dict)
@@ -335,9 +346,12 @@ class PlayerState:
             "spirit_stone": self.spirit_stone,
             "energy": self.energy,
             "max_energy": self.max_energy,
-            "energy_time": self.energy_time or now,
+            # Zero is the source full-pool/no-regeneration sentinel for all
+            # Pass71 temporal anchors. Below-cap zero anchors are rearmed by the
+            # server materialization pass before this payload is built.
+            "energy_time": max(0, int(self.energy_time or 0)),
             "spirit_energy": self.spirit_energy,
-            "spirit_energy_time": self.spirit_energy_time or now,
+            "spirit_energy_time": max(0, int(self.spirit_energy_time or 0)),
             "social": self.social,
             "glory": self.glory,
             "vip": self.vip,
@@ -629,7 +643,23 @@ class PlayerState:
 
     def mission_payload(self, mission_type: Any = None) -> dict[str, Any]:
         key = str(mission_type or 0)
-        return {"mission_list": self.missions.get(key, [])}
+        payload: dict[str, Any] = {"mission_list": self.missions.get(key, [])}
+        # TaskWindow opens on DAILY and immediately divides by dayHuoyue. The
+        # effective Task:initData contract only initializes that value when the
+        # loader supplies extra_info.huoyue_info. Keep the unimplemented daily
+        # family at a source-shaped zero baseline instead of returning a
+        # malformed empty skeleton that crashes before the Awaken tab is usable.
+        if key == "1":
+            payload["extra_info"] = {
+                "daily_left_time": 0,
+                "huoyue_info": {
+                    "week_huoyue": 0,
+                    "week_award": {},
+                    "day_huoyue": 0,
+                    "day_award": {},
+                },
+            }
+        return payload
 
     def task_bootstrap_payload(self) -> dict[str, Any]:
         # Task:onTaskBackendEvent() reads these named task buckets when present.
@@ -661,7 +691,7 @@ class PlayerState:
         # callers that have not yet been migrated to the repository.
         default = {
             "normal": [{"campaign_id": 100001, "star": 0, "daily_limit": 0, "reset_count": 0, "is_partner_drop": 0}],
-            "super": {},
+            "super": [],
             "challenge": {},
             "chapter_events": {},
             "chapter_info": {

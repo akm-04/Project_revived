@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "pass": "71.0",
+  "source_resolution": "effective_merged",
+  "provenance": "Pass54/Pass61 frozen direct src_64 facts rechecked against effective source for Pass71",
+  "policies": {
+    "energy": {
+      "amount_field": "energy",
+      "anchor_field": "energy_time",
+      "interval_seconds": 300,
+      "cap_source": "campaign_economy_meta.player_levels[level].energy",
+      "projection": "economy_.energy",
+      "enabled": true,
+      "cap_is_hard_inventory_ceiling": false,
+      "source": "app/model/SelfPlayer.lua:getEnergy/recoverByTime + data/tables/misc.lua energy_incr_time + data/tables/player.lua maxEnergy"
+    },
+    "spirit_energy": {
+      "amount_field": "spirit_energy",
+      "anchor_field": "spirit_energy_time",
+      "interval_seconds": 360,
+      "natural_cap": 180,
+      "projection": "economy_.spirit_energy",
+      "enabled": true,
+      "cap_is_hard_inventory_ceiling": false,
+      "source": "app/model/SelfPlayer.lua:getSpiritEnergy/recoverByTime + data/tables/misc.lua spirit_energy_minute/spirit_energy_up_limit"
+    },
+    "skill_point": {
+      "amount_field": "skill_point",
+      "anchor_field": "skill_time",
+      "interval_seconds": 300,
+      "cap_source": "hero_skill_regen_meta.vip_skill_max + monthly_privilege_skill_max",
+      "projection": "economy_.skill_point",
+      "enabled": true,
+      "cap_is_hard_inventory_ceiling": false,
+      "source": "app/model/SelfPlayer.lua:getSkillPoint/recoverByTime + data/tables/vip.lua + data/tables/monthly_privilege.lua"
+    },
+    "invitation": {
+      "amount_field": "invitation",
+      "anchor_field": "invitation_time",
+      "interval_seconds": 1800,
+      "cap_source": "intended data/tables/player.lua invitation(level)",
+      "projection": "SUPPRESSED",
+      "enabled": false,
+      "cap_is_hard_inventory_ceiling": false,
+      "source_drift": "SelfPlayer.lua calls xyd.tables.player:invitation(level), but effective data/tables/player.lua has no invitation column/accessor. Preserve deferred Arena fail-closed policy."
+    }
+  }
+}

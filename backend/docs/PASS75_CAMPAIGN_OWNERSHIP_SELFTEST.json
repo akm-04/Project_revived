@@ -1,0 +1,42 @@
+{
+  "campaign": {
+    "normal_defeat_energy": 1,
+    "normal_source_rows": 429,
+    "normal_win_energy": 6,
+    "orphan_result_fail_closed": true,
+    "result_retry_idempotent": true,
+    "second_stage_energy": 9,
+    "source_campaign_rows": 917,
+    "super_energy": 12,
+    "super_source_rows": 155
+  },
+  "debug_unlock": {
+    "credential_isolated": true,
+    "debug_uid": "13371337",
+    "normal_unlocked": 429,
+    "one_shot": true,
+    "super_unlocked": 155
+  },
+  "deferred": [
+    "Campaign sweep Energy/scalar ownership remains a separate source-contract migration",
+    "Elite/Super daily attempt decrement/reset ownership remains deferred until its reset contract is explicitly migrated",
+    "repeat Campaign drop RNG remains disabled until source/server policy authority exists",
+    "debug advanced-item bag-cap/mail warning remains PRIVATE_SERVER_POLICY test-side effect"
+  ],
+  "pass": "75.0",
+  "runtime_neighbor_fixes": {
+    "certificate_material_families": {
+      "19": "degree_cer",
+      "20": "graduate_cer",
+      "21": "patent_cer"
+    },
+    "certificate_source_archetypes": {
+      "degree": 7,
+      "graduate": 7,
+      "patent": 9
+    },
+    "daily_task_window_shape_safe": true,
+    "stone_stage_empty_points_persist": true
+  },
+  "status": "PASS"
+}

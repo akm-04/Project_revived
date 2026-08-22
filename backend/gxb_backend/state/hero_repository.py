@@ -20,6 +20,11 @@ from gxb_backend.content import CatalogNamespace, ContentRef, GameDataCatalog
 
 from .economy_repository import EconomyRepository
 from .player_state import PlayerState
+from .mutation_plan import (
+    ActorRef, EntityMutation, IdempotencySpec, MutationOrigin, MutationPlan, ResourceMutation, TemporalTransition
+)
+from .mutation_settlement_service import MutationSettlementError, MutationSettlementService
+from .temporal_policy_service import TemporalPolicyService
 from .skill_point_policy import SkillPointPolicy
 from .unit_of_work import OperationContext, UnitOfWork
 
@@ -39,6 +44,8 @@ class HeroRepository:
         economy: EconomyRepository | None = None,
         catalog: GameDataCatalog | None = None,
         uow: UnitOfWork | None = None,
+        temporal: TemporalPolicyService | None = None,
+        settlement: MutationSettlementService | None = None,
     ) -> None:
         self.player = player
         self._save_callback = save_callback
@@ -46,6 +53,8 @@ class HeroRepository:
         self._economy = economy
         self._catalog = catalog
         self._uow = uow
+        self._temporal = temporal
+        self._settlement = settlement
 
     @staticmethod
     def _int(value: Any, default: int = 0) -> int:
@@ -280,7 +289,9 @@ class HeroRepository:
 
     def recover_skill_points(self, *, persist: bool = False) -> bool:
         """Mirror the client timed skill-point recovery against canonical state."""
-        return SkillPointPolicy(self.player, self._data_dir, self._save_callback).recover(persist=persist)
+        return SkillPointPolicy(
+            self.player, self._data_dir, self._save_callback, temporal=self._temporal
+        ).recover(persist=persist)
 
     def buy_skill_points(self) -> dict[str, Any]:
         """MID99 purchase under the shared Pass32.6 one-player UnitOfWork."""
@@ -299,13 +310,14 @@ class HeroRepository:
     def _buy_skill_points_mutation(self) -> dict[str, Any]:
         """Atomically commit MID99 BUY_SKILL_POINT + Crystal spend.
 
-        Source client code pre-checks VIP permission and Crystal balance, then
-        relies on the global economy plane for the Crystal decrement.  The server
-        repeats those source-derived validations and commits both domains before
-        one save.  ``skill_point`` may exceed the natural timed-recovery cap.
+        Pass71 routes the timed Skill Point pool through TemporalPolicyService
+        and settles the purchase as RESOURCE debit + TEMPORAL credit. The
+        natural recovery cap remains a regeneration stop, not a grant ceiling.
         """
         player = self.player
-        policy = SkillPointPolicy(player, self._data_dir, self._save_callback)
+        policy = SkillPointPolicy(
+            player, self._data_dir, self._save_callback, temporal=self._temporal
+        )
         recovered = policy.recover(persist=False)
 
         if not policy.can_buy():
@@ -319,47 +331,57 @@ class HeroRepository:
         purchase_number = max(0, self._int(player.buy_skill_times)) + 1
         cost = policy.purchase_cost(purchase_number)
         grant = policy.purchase_grant()
-        if cost is None or grant <= 0 or self._economy is None:
+        if cost is None or grant <= 0:
             if recovered:
                 self._save()
-            return {
-                "error_code": 1,
-                "msg": "skill point purchase metadata unavailable",
-            }
+            return {"error_code": 1, "msg": "skill point purchase metadata unavailable"}
 
-        # Snapshot after legitimate timed recovery. Purchase fields then mutate
-        # as one local transaction; no persistent write occurs before success.
-        snapshot = {
-            "crystal": self._int(player.crystal),
-            "buy_skill_times": self._int(player.buy_skill_times),
-            "skill_point": self._int(player.skill_point),
-            "skill_time": self._int(player.skill_time),
-        }
-
-        if not self._economy.spend_crystal(cost, persist=False):
-            if recovered:
-                self._save()
-            return {
-                "error_code": 1,
-                "msg": "insufficient crystal for skill point purchase",
-            }
-
-        try:
+        if self._settlement is not None and self._uow is not None and self._uow.active:
+            operations = []
+            if cost > 0:
+                operations.append(ResourceMutation("crystal", "DEBIT", int(cost)))
+            operations.append(TemporalTransition("skill_point", "CREDIT", int(grant)))
+            plan = MutationPlan(
+                schema_version=1,
+                plan_id=f"skill-point-buy:{purchase_number}:{self._uow.current_state_version}",
+                origin=MutationOrigin(domain="hero", operation="buy_skill_point", protocol_mid=99),
+                actor=ActorRef(player_id=str(player.player_id)),
+                expected_state_version=None,
+                idempotency=IdempotencySpec(),
+                preconditions=(),
+                operations=tuple(operations),
+            )
+            try:
+                self._settlement.apply(plan)
+            except MutationSettlementError as exc:
+                if recovered:
+                    self._save()
+                return {"error_code": 1, "msg": str(exc)}
             player.buy_skill_times = purchase_number
+            self._save()
+            return {
+                "buy_skill_times": player.buy_skill_times,
+                "skill_point": max(0, self._int(player.skill_point)),
+                "skill_time": max(0, self._int(player.skill_time)),
+            }
+
+        # Compatibility construction outside RequestServices retains the old
+        # facade behavior, but request-scoped runtime traffic uses the plan path.
+        if self._economy is None or not self._economy.spend_crystal(cost, persist=False):
+            if recovered:
+                self._save()
+            return {"error_code": 1, "msg": "insufficient crystal for skill point purchase"}
+        player.buy_skill_times = purchase_number
+        if self._temporal is not None:
+            self._temporal.credit("skill_point", grant, persist=False, publish=True)
+        else:
             player.skill_point = max(0, self._int(player.skill_point)) + grant
             policy.normalize_timer_after_gain()
-            self._save()
-        except Exception:
-            player.crystal = snapshot["crystal"]
-            player.buy_skill_times = snapshot["buy_skill_times"]
-            player.skill_point = snapshot["skill_point"]
-            player.skill_time = snapshot["skill_time"]
-            raise
-
+        self._save()
         return {
             "buy_skill_times": player.buy_skill_times,
-            "skill_point": player.skill_point,
-            "skill_time": player.skill_time,
+            "skill_point": max(0, self._int(player.skill_point)),
+            "skill_time": max(0, self._int(player.skill_time)),
         }
 
     _SKILL_EXTRA = (0, 0, 20, 40, 60, 60)
@@ -385,15 +407,7 @@ class HeroRepository:
         return 10 if super_hero else 1
 
     def upgrade_skills(self, partner_id: Any, skill_colors: Any, skill_counts: Any) -> dict[str, Any]:
-        """Atomically persist MID39 Skill Points, skill levels, and source Mana.
-
-        HeroMainWindow prices each click with ``skill_price.lua`` at the current
-        client skill level, applies a x10 multiplier for SuperHero, subtracts
-        Mana locally, then batches only indexes/counts to MID39.  The current
-        backend has no canonical Activity1032 half-price scheduler, so this
-        implementation uses the source normal-price path rather than inventing
-        an active discount state.
-        """
+        """MID39: settle source Mana + timed Skill Points in one PlayerUnitOfWork."""
         self.normalize()
         hero = self.get(partner_id)
         if hero is None:
@@ -421,10 +435,11 @@ class HeroRepository:
         )
 
         def mutate() -> dict[str, Any]:
-            policy = SkillPointPolicy(self.player, self._data_dir, self._save_callback)
+            policy = SkillPointPolicy(
+                self.player, self._data_dir, self._save_callback, temporal=self._temporal
+            )
             policy.recover(persist=False)
             available = max(0, self._int(self.player.skill_point))
-            before_time = max(0, self._int(self.player.skill_time))
             total_requested = sum(count for _, count in requested)
             multiplier = self._skill_price_multiplier(hero)
 
@@ -442,20 +457,55 @@ class HeroRepository:
                     if not valid_prices:
                         break
 
-            can_apply = (
-                bool(requested)
-                and total_requested <= available
-                and valid_prices
-                and self._economy is not None
-                and self._int(self.player.mana, 0) >= total_mana
-            )
-            if can_apply and self._economy.spend_mana(total_mana, persist=False):
-                for index, count in requested:
-                    skills[index - 1] += count
-                hero["skills"] = skills
-                self.player.skill_point = available - total_requested
-                policy.begin_recovery_if_full_spent(available, before_time)
-                self._save()
+            can_apply = bool(requested) and total_requested <= available and valid_prices
+            if can_apply and self._settlement is not None and self._uow is not None and self._uow.active:
+                operations = []
+                if total_mana > 0:
+                    operations.append(ResourceMutation("mana", "DEBIT", total_mana))
+                operations.append(TemporalTransition("skill_point", "DEBIT", total_requested))
+                operations.append(
+                    EntityMutation(
+                        "HERO",
+                        self._int(partner_id, 0),
+                        "UPGRADE_SKILLS",
+                        indices=tuple(index for index, _count in requested),
+                        counts=tuple(count for _index, count in requested),
+                    )
+                )
+                plan = MutationPlan(
+                    schema_version=1,
+                    plan_id=f"hero-skill-batch:{self._int(partner_id,0)}:{self._uow.current_state_version}",
+                    origin=MutationOrigin(domain="hero", operation="set_all_skill_level", protocol_mid=39),
+                    actor=ActorRef(player_id=str(self.player.player_id)),
+                    expected_state_version=None,
+                    idempotency=IdempotencySpec(),
+                    preconditions=(),
+                    operations=tuple(operations),
+                )
+                try:
+                    self._settlement.apply(plan)
+                except MutationSettlementError:
+                    can_apply = False
+                else:
+                    # ENTITY owns the canonical Hero mutation. Re-read the
+                    # aggregate after settlement so the legacy MID39 response
+                    # preserves its source-facing skill string without a second
+                    # direct state mutation.
+                    refreshed = self.get(partner_id) or hero
+                    skills[:] = self._fixed_six(refreshed.get("skills"), self._SIX_ONES)
+            elif can_apply and self._economy is not None:
+                # Compatibility-only construction outside RequestServices.
+                if self._economy.spend_mana(total_mana, persist=False):
+                    for index, count in requested:
+                        skills[index - 1] += count
+                    hero["skills"] = skills
+                    if self._temporal is not None:
+                        self._temporal.debit("skill_point", total_requested, persist=False, publish=True)
+                    else:
+                        before_time = max(0, self._int(self.player.skill_time))
+                        self.player.skill_point = available - total_requested
+                        policy.begin_recovery_if_full_spent(available, before_time)
+                    self._save()
 
             return {
                 "skills": "|".join(str(value) for value in skills),
@@ -469,32 +519,80 @@ class HeroRepository:
             return mutate()
 
     def upgrade_single_skill(self, partner_id: Any, skill_index: Any) -> dict[str, int]:
-        """Preserve the pre-Pass32.6 MID53 behavior without widening MID39 rules.
-
-        Pass 32.6 source-mapped Mana pricing is intentionally scoped to MID39.
-        The older MID53 path therefore keeps the v0.8.7 point/skill mutation
-        until that protocol is separately source-mapped.
-        """
+        """MID53 keeps its frozen hero rule but delegates the timed point spend."""
         self.normalize()
         hero = self.get(partner_id)
-        policy = SkillPointPolicy(self.player, self._data_dir, self._save_callback)
-        policy.recover(persist=True)
-        before_time = max(0, self._int(self.player.skill_time))
-        available = max(0, self._int(self.player.skill_point))
         index = self._int(skill_index, 0)
+        context = OperationContext(
+            actor_player_id=str(self.player.player_id),
+            protocol_mid=53,
+            domain="hero",
+            operation_name="set_skill_level",
+            idempotency_key=f"hero:{self._int(partner_id,0)}:skill:{index}",
+        )
 
-        if hero is not None and 1 <= index <= 6 and available > 0:
-            skills = self._fixed_six(hero.get("skills"), self._SIX_ONES)
-            skills[index - 1] += 1
-            hero["skills"] = skills
-            self.player.skill_point = available - 1
-            policy.begin_recovery_if_full_spent(available, before_time)
-            self._save()
+        def mutate() -> dict[str, int]:
+            policy = SkillPointPolicy(
+                self.player, self._data_dir, self._save_callback, temporal=self._temporal
+            )
+            policy.recover(persist=False)
+            available = max(0, self._int(self.player.skill_point))
+            if hero is not None and 1 <= index <= 6 and available > 0:
+                applied = False
+                if self._settlement is not None and self._uow is not None and self._uow.active:
+                    plan = MutationPlan(
+                        schema_version=1,
+                        plan_id=f"hero-skill-single:{self._int(partner_id,0)}:{index}:{self._uow.current_state_version}",
+                        origin=MutationOrigin(domain="hero", operation="set_skill_level", protocol_mid=53),
+                        actor=ActorRef(player_id=str(self.player.player_id)),
+                        expected_state_version=None,
+                        idempotency=IdempotencySpec(),
+                        preconditions=(),
+                        operations=(
+                            TemporalTransition("skill_point", "DEBIT", 1),
+                            EntityMutation(
+                                "HERO",
+                                self._int(partner_id, 0),
+                                "UPGRADE_SKILLS",
+                                indices=(index,),
+                                counts=(1,),
+                            ),
+                        ),
+                    )
+                    try:
+                        self._settlement.apply(plan)
+                        applied = True
+                    except MutationSettlementError:
+                        applied = False
+                elif self._temporal is not None:
+                    self._temporal.debit("skill_point", 1, persist=False, publish=True)
+                    applied = True
+                else:
+                    before_time = max(0, self._int(self.player.skill_time))
+                    self.player.skill_point = available - 1
+                    policy.begin_recovery_if_full_spent(available, before_time)
+                    applied = True
 
-        return {
-            "skill_point": max(0, self._int(self.player.skill_point)),
-            "skill_time": max(0, self._int(self.player.skill_time)),
-        }
+                if applied and not (
+                    self._settlement is not None and self._uow is not None and self._uow.active
+                ):
+                    # Compatibility-only construction outside RequestServices
+                    # still applies the old direct Hero mutation. Runtime
+                    # request traffic uses the typed ENTITY operation above.
+                    skills = self._fixed_six(hero.get("skills"), self._SIX_ONES)
+                    skills[index - 1] += 1
+                    hero["skills"] = skills
+                    self._save()
+
+            return {
+                "skill_point": max(0, self._int(self.player.skill_point)),
+                "skill_time": max(0, self._int(self.player.skill_time)),
+            }
+
+        if self._uow is None:
+            return mutate()
+        with self._uow.transaction(context):
+            return mutate()
 
     def set_sort_type(self, sort_type: Any) -> None:
         self.player.hero_sort_type = self._int(sort_type)

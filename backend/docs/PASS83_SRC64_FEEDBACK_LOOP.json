@@ -1,0 +1,58 @@
+{
+  "schema_version": 1,
+  "pass": "83.0",
+  "source_artifact": "all-assest-rechecked.zip",
+  "source_sha256": "89f0f830508b92e5fff6ad53c6a9dae961a14042dbfdf5649008efb8353f5608",
+  "resolution": "effective src_64; cited winners are app-assets/output/assets/src_64",
+  "backend_modifications_checked": [
+    {
+      "backend_change": "MID1 evaluates DailyResetCoordinator after player resolution and before temporal materialization/bootstrap detail",
+      "source_path": "src_64/app/model/SelfPlayer.lua",
+      "source_sha256": "163d5893c9522ada412c2b9c4748a80757660fccdf03c8f72cb6edf0838b8eb4",
+      "source_lines": [3684, 3687, 3874, 3900, 3902, 3906, 3962, 3968],
+      "finding": "TOKEN immediately consumes the bundled login detail; detail[17] is applied as PlayerInfo and detail[112] as WorldMap. Daily state therefore must be current before MID1 returns, not repaired by a later request."
+    },
+    {
+      "backend_change": "MID1 uses the repository authoritative ServerClock for response.server_time",
+      "source_path": "src_64/app/common/network/Backend.lua",
+      "source_sha256": "95378e2b0be8180df6de27e9e430c630bcfe46c080e1f91ef5f6d74bdbb1b840",
+      "source_lines": [716, 737, 754, 755],
+      "finding": "extraWebResponseCheck_ resets xyd.ServerTime from response.server_time before normal TOKEN model processing. One backend clock must therefore drive reset, temporal materialization, and the projected client epoch."
+    },
+    {
+      "backend_change": "MID1 detail[17] must contain reset purchase counters and non-future temporal anchors",
+      "source_path": "src_64/app/model/SelfPlayer.lua",
+      "source_sha256": "163d5893c9522ada412c2b9c4748a80757660fccdf03c8f72cb6edf0838b8eb4",
+      "source_lines": [153, 158, 164, 167, 172, 173],
+      "finding": "PlayerInfo directly assigns Energy/Spirit anchors, daily purchase counters, Skill Point balance and skill_time from server payload. Stale/future values are immediately authoritative to the client."
+    },
+    {
+      "backend_change": "future Energy, Spirit Energy and Skill Point anchors below cap are rebased to now without changing balances",
+      "source_path": "src_64/app/model/SelfPlayer.lua",
+      "source_sha256": "163d5893c9522ada412c2b9c4748a80757660fccdf03c8f72cb6edf0838b8eb4",
+      "source_lines": [1309, 1320, 1453, 1572, 1578, 1584, 1592, 1593],
+      "finding": "All three enabled pools call recoverByTime. The function computes floor((serverTime-anchor)/interval) without a lower clamp, so anchor>serverTime produces negative ticks and can subtract client-local balance. Rebase-to-now makes elapsed zero and is balance-neutral."
+    },
+    {
+      "backend_change": "Super daily-limit restoration must occur before MID1 detail[112]",
+      "source_path": "src_64/app/model/SelfPlayer.lua",
+      "source_sha256": "163d5893c9522ada412c2b9c4748a80757660fccdf03c8f72cb6edf0838b8eb4",
+      "source_lines": [304, 321, 327, 328, 3962, 3968],
+      "finding": "WorldMap login directly assigns each Super row's dailyLimit/resetCount from the bundled LOAD_WORLD_MAP payload; stale 0/3 in MID1 would remain authoritative until explicitly replaced."
+    },
+    {
+      "backend_change": "clock regression remains no-grant; logging only adds server-side observability",
+      "source_path": "src_64/app/common/ServerTime.lua",
+      "source_sha256": "c7a7ce8aca24fb2e832cebadea24c22e2b283c74efe404c4ee4ff1058d1560fb",
+      "source_lines": [42, 43, 54, 57, 64, 71],
+      "finding": "Client time is server-seeded and daily timer fanout depends on the server-time model. No source evidence authorizes reopening an already-materialized daily entitlement after server clock regression; Pass79 high-water behavior remains unchanged."
+    }
+  ],
+  "explicit_non_changes": [
+    "No change to the 05:00 GMT+8 ServerDayClock formula.",
+    "No change to Pass79 reset participants or one-shot source notification MIDs.",
+    "No MID116, MID117, or MID118 implementation.",
+    "No Task/Activities generation, Sign, Shop, Arena reset, card, Vows, Workshop, or Pet implementation.",
+    "Arena Invitation temporal policy remains disabled/fail-closed."
+  ]
+}

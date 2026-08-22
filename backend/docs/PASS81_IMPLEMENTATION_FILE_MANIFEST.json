@@ -1,0 +1,76 @@
+{
+  "schema_version": 1,
+  "pass": "81.0",
+  "backend_version": "0.9.10",
+  "artifact": "gxb-backend-v0.9.10-pass81.0.zip",
+  "base_artifact": "gxb-backend-v0.9.9-pass79.0.zip",
+  "base_sha256": "9ba93e85337366dddc940a94ed2c9d849f79eae2a53eb57c4cec91ebc2ed6dd9",
+  "source_artifact": "all-assest-rechecked.zip",
+  "source_sha256": "89f0f830508b92e5fff6ad53c6a9dae961a14042dbfdf5649008efb8353f5608",
+  "changed_or_added_files": [
+    {
+      "path": "gxb_backend/state/player_database.py",
+      "sha256": "f413485a50bd5f20c211fa4d6f56c5efc95538ed7dbad3ca0b25c3e0d5654842"
+    },
+    {
+      "path": "gxb_backend/state/world_repository.py",
+      "sha256": "2c5fb721fa64c4423e5e2f33433f8cf8cfe0dc418d18dbda7bb883892e424414"
+    },
+    {
+      "path": "gxb_backend/version.py",
+      "sha256": "c7a62d147c0c08ad633b81afbc13249f2af5bc97eea6100f6a4ab4edf7c07ec9"
+    },
+    {
+      "path": "VERSION.json",
+      "sha256": "d3030e3bd271d019fe1454477c102ee5f35cc6d4c6c6bcf83e221bf185860585"
+    },
+    {
+      "path": "README.md",
+      "sha256": "b0499572e1ff101c8e228178eb97b24abb2f8e0ea3a72d3938c3681c260794d5"
+    },
+    {
+      "path": "UPDATE_README.md",
+      "sha256": "fd90d98eacc49b38fe54d3c654d7d21bd89d216ba59cf56f050e67f3daffd361"
+    },
+    {
+      "path": "memory.md",
+      "sha256": "56c2e3fb811b44c9a7831b205f33dfec6fe5802a2548b83fbf60889bfd6efd11"
+    },
+    {
+      "path": "tools/selftest_pass81_daily_reset_campaign_corrections.py",
+      "sha256": "5a9846f4ecf044316bebe159ed0f49e3e945a588280f8b7bb3ff483e106df15a"
+    },
+    {
+      "path": "docs/PASS81_DAILY_RESET_CAMPAIGN_CORRECTION_SELFTEST.json",
+      "sha256": "f1194b308250dee606c89abcbfe2c970c1691f710480090cb213f5ee0e83558a"
+    },
+    {
+      "path": "docs/PASS81_SRC64_FEEDBACK_LOOP.json",
+      "sha256": "2f4e26f06bdbd85e3c4d13754ee368da0672ea17ac835a4c7641d863e09bd5c6"
+    },
+    {
+      "path": "docs/PASS81_TECHNICAL_CHANGELOG.md",
+      "sha256": "1fe704450e323dc69c9bfd9c57cbdab0d4e007563d6c3cf009abed5db04ab543"
+    },
+    {
+      "path": "docs/PASS81_CLIENT_TEST_PLAN.md",
+      "sha256": "33db973e301a7986e64c91d3d8ccbe429bd316c2f79b30873c72076af6e6e0cd"
+    },
+    {
+      "path": "docs/PASS81_REGRESSION_MATRIX.json",
+      "sha256": "d4bd35cc17fc051d5675d3fa574914987dd50b2063829f5f99788c4451eed2ca"
+    }
+  ],
+  "code_changes": [
+    "gxb_backend/state/player_database.py",
+    "gxb_backend/state/world_repository.py"
+  ],
+  "strict_non_scope": [
+    "MID116",
+    "MID117",
+    "MID118",
+    "Daily Mission generation",
+    "Activities implementation",
+    "Super defeat-attempt inference"
+  ]
+}

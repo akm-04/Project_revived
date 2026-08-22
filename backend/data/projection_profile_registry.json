@@ -1,0 +1,322 @@
+{
+  "schema_version": 1,
+  "pass": "70.0",
+  "source_contract": "Pass67 frozen ProjectionProfileRegistry",
+  "default_profile_id": "WEB_GLOBAL_ENVELOPE",
+  "profiles": [
+    {
+      "profile_id": "WEB_GLOBAL_ENVELOPE",
+      "transports": [
+        "engine_web",
+        "engine-http-urlencoded-payload",
+        "engine-http-zlib-form-payload",
+        "engine-http-upload-multipart"
+      ],
+      "mids": [],
+      "labels": [],
+      "global_fields": [
+        "economy_",
+        "new_funcs_",
+        "server_time",
+        "flag_",
+        "extra_drops_",
+        "act_item_change_",
+        "redmarks_"
+      ],
+      "project_journal_resources": true,
+      "project_journal_stack_credits": false,
+      "local_inventory_reconciliation": false,
+      "preserve_handler_body": true,
+      "notes": "Default engine-web profile. Optional global fields only; absent fields stay absent."
+    },
+    {
+      "profile_id": "CAMPAIGN_RESULT",
+      "transports": [
+        "engine_web",
+        "engine-http-urlencoded-payload",
+        "engine-http-zlib-form-payload"
+      ],
+      "mids": [
+        114
+      ],
+      "labels": [
+        "FIGHT_RESULT"
+      ],
+      "global_fields": [
+        "economy_",
+        "new_funcs_",
+        "server_time",
+        "flag_",
+        "extra_drops_",
+        "act_item_change_",
+        "redmarks_"
+      ],
+      "domain_fields": [
+        "chapter_info",
+        "campaigns",
+        "trial",
+        "challenge"
+      ],
+      "project_journal_resources": true,
+      "project_journal_stack_credits": false,
+      "local_inventory_reconciliation": false,
+      "preserve_handler_body": true,
+      "notes": "Campaign result body plus optional global envelope."
+    },
+    {
+      "profile_id": "SKY_CITY_COUNTER",
+      "transports": [
+        "engine_web",
+        "engine-http-urlencoded-payload"
+      ],
+      "mids": [
+        29
+      ],
+      "labels": [
+        "DAILY_CONSUNME"
+      ],
+      "global_fields": [
+        "economy_",
+        "new_funcs_",
+        "server_time",
+        "flag_",
+        "extra_drops_",
+        "act_item_change_",
+        "redmarks_"
+      ],
+      "domain_fields": [
+        "trial_info"
+      ],
+      "project_journal_resources": true,
+      "project_journal_stack_credits": false,
+      "local_inventory_reconciliation": false,
+      "preserve_handler_body": true,
+      "notes": "Attempt purchase returns trial state; counter is not an economy scalar."
+    },
+    {
+      "profile_id": "PET_CAMPAIGN",
+      "transports": [
+        "engine_web",
+        "engine-http-urlencoded-payload"
+      ],
+      "mids": [
+        816,
+        817,
+        820,
+        823,
+        824,
+        825,
+        826
+      ],
+      "labels": [
+        "PET_CAMPAIGN_LOAD_INFO",
+        "PET_CAMPAIGN_SWEEP",
+        "PET_CAMPAIGN_BATTLE_RESULT",
+        "PET_CAMPAIGN_AWAKE_SWEEP",
+        "PET_CAMPAIGN_SWEEP_SUPER",
+        "PET_CAMPAIGN_BUY_SUPER",
+        "PET_CAMPAIGN_SAVE_SUPER"
+      ],
+      "global_fields": [
+        "economy_",
+        "new_funcs_",
+        "server_time",
+        "flag_",
+        "extra_drops_",
+        "act_item_change_",
+        "redmarks_"
+      ],
+      "domain_fields": [
+        "normal",
+        "super",
+        "now_floor",
+        "max_floor",
+        "info",
+        "sweep_info",
+        "buy_info"
+      ],
+      "project_journal_resources": true,
+      "project_journal_stack_credits": false,
+      "local_inventory_reconciliation": true,
+      "preserve_handler_body": true,
+      "notes": "PetCampaign callbacks can add returned awards to Backpack locally; never synthesize generic awards from journal stacks."
+    },
+    {
+      "profile_id": "ILLUSION_SOLO",
+      "transports": [
+        "engine_web",
+        "engine-http-urlencoded-payload"
+      ],
+      "mids": [
+        1344,
+        1345,
+        1347,
+        1348
+      ],
+      "labels": [
+        "ILLUSION_LOAD_INFO",
+        "ILLUSION_BUY_TIMES",
+        "ILLUSION_FIGHT_RESULT",
+        "ILLUSION_RANK_LIST"
+      ],
+      "global_fields": [
+        "economy_",
+        "new_funcs_",
+        "server_time",
+        "flag_",
+        "extra_drops_",
+        "act_item_change_",
+        "redmarks_"
+      ],
+      "domain_fields": [
+        "paradise_info",
+        "challenge_times",
+        "buy_times",
+        "hurt",
+        "rank",
+        "result"
+      ],
+      "project_journal_resources": true,
+      "project_journal_stack_credits": false,
+      "local_inventory_reconciliation": false,
+      "preserve_handler_body": true,
+      "notes": "Solo Illusion player-mode body plus optional global envelope."
+    },
+    {
+      "profile_id": "ILLUSION_TEAM",
+      "transports": [
+        "engine_web",
+        "engine-http-urlencoded-payload",
+        "tcp_chat_or_push",
+        "tcp/chat-routed"
+      ],
+      "mids": [
+        1349,
+        1350,
+        1351,
+        1352,
+        1353,
+        1354,
+        1355,
+        1356,
+        1357,
+        1358,
+        1359,
+        1360,
+        1361,
+        1362,
+        1363
+      ],
+      "labels": [
+        "ILLUSION_CREATE_ROOM",
+        "ILLUSION_GET_ROOM_INFO",
+        "ILLUSION_PREPARE_ROOM",
+        "ILLUSION_ENTER_ROOM",
+        "ILLUSION_REMOVE_PLAYER",
+        "ILLUSION_EXIT_ROOM",
+        "ILLUSION_CLEAR_ROOM",
+        "ILLUSION_SET_PARTNER",
+        "ILLUSION_PREPARE_FIGHT",
+        "ILLUSION_START_TEAM_FIGHT",
+        "ILLUSION_GET_ROOM_LIST",
+        "ILLUSION_INVITE_FRIEND",
+        "ILLUSION_INVITE_BROADCAST",
+        "ILLUSION_GET_REPORT",
+        "ILLUSION_CANCEL_PREPARE"
+      ],
+      "global_fields": [
+        "economy_",
+        "new_funcs_",
+        "server_time",
+        "flag_",
+        "extra_drops_",
+        "act_item_change_",
+        "redmarks_"
+      ],
+      "domain_fields": [
+        "room",
+        "master",
+        "mates",
+        "status",
+        "partner",
+        "report"
+      ],
+      "project_journal_resources": true,
+      "project_journal_stack_credits": false,
+      "local_inventory_reconciliation": false,
+      "preserve_handler_body": true,
+      "notes": "Shared room/report shape remains domain-owned; PlayerUnitOfWork never becomes a shared-room transaction."
+    },
+    {
+      "profile_id": "SHOP",
+      "transports": [
+        "engine_web",
+        "engine-http-urlencoded-payload"
+      ],
+      "mids": [
+        32,
+        33,
+        34
+      ],
+      "labels": [
+        "LOAD_SHOP",
+        "BUY_SHOP",
+        "REFRESH_SHOP"
+      ],
+      "global_fields": [
+        "economy_",
+        "new_funcs_",
+        "server_time",
+        "flag_",
+        "extra_drops_",
+        "act_item_change_",
+        "redmarks_"
+      ],
+      "domain_fields": [
+        "shop_type",
+        "items",
+        "refresh_times",
+        "open_time",
+        "is_open",
+        "count_down",
+        "index",
+        "isbuy",
+        "buy_times"
+      ],
+      "project_journal_resources": true,
+      "project_journal_stack_credits": false,
+      "local_inventory_reconciliation": true,
+      "preserve_handler_body": true,
+      "notes": "Shop callback derives purchased stack locally from stock/buy_times; generic journal awards would double-apply."
+    },
+    {
+      "profile_id": "RECHARGE_PUSH",
+      "transports": [
+        "server_event/native completion",
+        "tcp_chat_or_push",
+        "tcp/chat-routed"
+      ],
+      "mids": [
+        36857
+      ],
+      "labels": [
+        "RECHARGE"
+      ],
+      "global_fields": [],
+      "domain_fields": [
+        "params.params.items",
+        "params.params.delta",
+        "params.params.total",
+        "params.params.vip",
+        "params.params.charge",
+        "params.params.economy",
+        "params.params.charge_id"
+      ],
+      "project_journal_resources": false,
+      "project_journal_stack_credits": false,
+      "local_inventory_reconciliation": true,
+      "preserve_handler_body": true,
+      "notes": "Nested native/server-event completion shape. Never force it into ordinary web economy_."
+    }
+  ]
+}

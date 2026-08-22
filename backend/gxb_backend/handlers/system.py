@@ -89,7 +89,9 @@ class SystemHandlers:
         return {"has_read": 1, "contents": []}
 
     def query_charge_data(self, req: dict) -> dict:
-        return {"charges": [], "first_pay": 0, "list": []}
+        # Pass87: effective SelfPlayer.lua consumes charges/giftbags/server_time.
+        # RechargeCatalogService advertises only supported direct Crystal SKUs.
+        return self.ctx.state.get_services().recharge_catalog.query_charge_data()
 
     def generate_player_name(self, req: dict) -> dict:
         # EditPlayerName:onGeneratePlayerName_ requires player_name_list. These

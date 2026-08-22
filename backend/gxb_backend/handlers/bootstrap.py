@@ -33,10 +33,24 @@ class BootstrapHandlers:
         account = self.ctx.state.get_account()
         self._trace_identity(req, account, player)
 
-        # SelfPlayer:getSkillPoint() performs timed recovery locally before the
-        # UI spends points. Hydrate the same canonical recovery so client/server
-        # do not diverge across long idle periods.
-        self.ctx.state.get_hero_repository().recover_skill_points(persist=True)
+        # Pass83: MID1 begins account-scoped and therefore cannot use the generic
+        # dispatcher pre-hook: the canonical game player is not bound until the
+        # resolve/create call above. Materialize the source day immediately after
+        # binding and *before* any temporal UoW can freshen persistence.last_commit
+        # or build_detail() can snapshot yesterday's daily state. MID1 projects the
+        # reset through its full bootstrap detail; it never fabricates the
+        # source-only economy_.daily_updates pulse.
+        daily_reset = self.ctx.state.evaluate_daily_reset(1)
+        if daily_reset is None:
+            # A bound-player reset failure must not be followed by a temporal
+            # persistence commit, otherwise first-upgrade migration evidence could
+            # be destroyed before the coordinator reaches a decision.
+            return {"error_code": 1, "error_msg": "Daily reset initialization failed"}
+
+        # Pass71/83 materializes all source-proven active temporal pools against
+        # the same authoritative server clock only after the daily-reset decision.
+        # Invitation remains source-drifted and deliberately fail-closed.
+        self.ctx.state.get_services().temporal.materialize_all(persist=True, publish=False)
         detail = self.build_detail()
         return {
             "token": account.token,
@@ -45,7 +59,7 @@ class BootstrapHandlers:
             # consumes this before dispatching the TOKEN event, which guarantees
             # xyd.ServerTime is initialized before MainSceneBottom/Top perform
             # synchronous BattlePass/activity time comparisons.
-            "server_time": player.now(),
+            "server_time": self.ctx.state.server_clock.now(),
             "log_url": self.ctx.settings.client_log_url,
             "is_new": 1 if is_new else 0,
             "story_type": 0,
