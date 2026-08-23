@@ -6,18 +6,25 @@ from typing import Callable
 
 from gxb_backend.content import GameDataCatalog
 from gxb_backend.content.item_sale_catalog import ItemSaleCatalog
+from gxb_backend.content.consumable_effect_catalog import ConsumableEffectCatalog
 from gxb_backend.content.campaign_drop_source_catalog import CampaignDropSourceCatalog
 from gxb_backend.content.magic_summon_source_catalog import MagicSummonSourceCatalog
 from gxb_backend.content.summon_operation_catalog import SummonOperationCatalog
 from gxb_backend.content.summon_pool_catalog import SummonPoolCatalog
 from gxb_backend.content.sx_soul_box_source_catalog import SXSoulBoxSourceCatalog
 from gxb_backend.content.recharge_catalog import RechargeSourceCatalog
+from gxb_backend.content.vip_award_catalog import VipAwardSourceCatalog
+from gxb_backend.content.campaign_reset_catalog import CampaignResetSourceCatalog
+from gxb_backend.content.energy_purchase_catalog import EnergyPurchaseSourceCatalog
 from gxb_backend.content.summon_featured_catalog import SummonFeaturedCatalog
 
 from .awakening_mission_service import AwakeningMissionService
 from .commerce_service import CommerceEntitlementService, RechargeCatalogService
 from .commerce_purchase import CommerceSettlementService
 from .vip_policy import VipPrivilegeResolver, VipProgressionPolicy
+from .vip_award_service import VipAwardService
+from .campaign_reset_policy import CampaignResetPolicy
+from .energy_purchase_service import EnergyPurchaseService
 from .campaign_drop_planner import (
     CampaignDropPlanner,
     CampaignDropPolicyRegistry,
@@ -36,6 +43,7 @@ from .inventory_repository import InventoryRepository
 from .inventory_sale_service import InventorySaleService
 from .mission_repository import MissionRepository
 from .mutation_settlement_service import MutationSettlementService
+from .player_progression_service import PlayerProgressionService
 from .player_state import PlayerState
 from .reward_transaction_service import RewardTransactionService
 from .resource_registry import ResourceRegistry
@@ -77,6 +85,7 @@ class RequestServices:
         self.player = player
         self.data_dir = Path(data_dir)
         self.catalog = catalog
+        self.consumable_effects = ConsumableEffectCatalog(self.data_dir)
         self.uow = UnitOfWork(player, commit_callback)
         self.resource_registry = ResourceRegistry.load(self.data_dir / "resource_registry.json")
         self.response_semantics = GlobalResponseSemantics(player, self.uow)
@@ -93,6 +102,13 @@ class RequestServices:
         self.recharge_catalog = RechargeCatalogService(
             player, self.recharge_source_catalog, self.commerce, clock=self.server_clock
         )
+        # Pass92 source-bounded Super Campaign reset policy. VIP remains the
+        # canonical base privilege owner; active Monthly Privilege contributes
+        # only its source num_elite addend. Campaign owns the actual mutation.
+        self.campaign_reset_source = CampaignResetSourceCatalog(self.data_dir)
+        self.campaign_reset_policy = CampaignResetPolicy(
+            player, self.vip_privileges, self.campaign_reset_source
+        )
         self.temporal = TemporalPolicyService(
             player, self.data_dir, save, clock=self.server_clock, uow=self.uow,
             vip_privileges=self.vip_privileges,
@@ -103,6 +119,13 @@ class RequestServices:
         self.economy_ledger = EconomyLedger(
             player, self.resource_registry, save, uow=self.uow
         )
+        # Pass100 MID97 source-day/expected-ordinal bridge. Crystal remains
+        # EconomyLedger-owned; Energy remains TemporalPolicyService-owned.
+        self.energy_purchase_source = EnergyPurchaseSourceCatalog(self.data_dir)
+        self.energy_purchase = EnergyPurchaseService(
+            player, self.energy_purchase_source, self.vip_privileges,
+            self.economy_ledger, self.temporal, self.uow, clock=self.server_clock,
+        )
         self.commerce_settlement = CommerceSettlementService(
             player,
             self.recharge_source_catalog,
@@ -112,12 +135,18 @@ class RequestServices:
             self.uow,
             clock=self.server_clock,
         )
+        self.player_progression = PlayerProgressionService(
+            player, self.data_dir, save, function_unlocks=self.function_state,
+            resource_registry=self.resource_registry, uow=self.uow, temporal=self.temporal,
+            allow_legacy_direct_energy_mutation=False,
+        )
         self.economy = EconomyRepository(
             player, self.data_dir, save, function_unlocks=self.function_state,
             resource_registry=self.resource_registry, ledger=self.economy_ledger, uow=self.uow,
-            temporal=self.temporal,
+            temporal=self.temporal, progression=self.player_progression,
+            allow_legacy_direct_mutation=False,
         )
-        self.inventory = InventoryRepository(player, save, uow=self.uow)
+        self.inventory = InventoryRepository(player, save, data_dir=self.data_dir, uow=self.uow)
         self.stack_inventory = self.inventory
         self.mutation_settlement = MutationSettlementService(
             catalog=self.catalog,
@@ -129,6 +158,7 @@ class RequestServices:
         self.heroes = HeroRepository(
             player, save, self.data_dir, economy=self.economy, catalog=self.catalog, uow=self.uow,
             temporal=self.temporal, settlement=self.mutation_settlement,
+            vip_privileges=self.vip_privileges,
         )
         self.hero_progression = HeroProgressionRepository(
             player,
@@ -166,8 +196,15 @@ class RequestServices:
             player, self.item_sale_catalog, self.mutation_settlement, self.uow
         )
         self.rewards = RewardTransactionService(
-            self.catalog, self.economy, self.inventory, self.heroes, self.uow,
+            self.catalog, self.player_progression, self.inventory, self.heroes, self.uow,
             resource_registry=self.resource_registry, settlement=self.mutation_settlement,
+        )
+        # Pass91 finalizes the core VIP lifecycle: source VIP reward_item ->
+        # gift.lua metadata settles through the existing typed reward/UoW spine,
+        # while VipAwardService owns one-time eligibility/claim state.
+        self.vip_award_source = VipAwardSourceCatalog(self.data_dir)
+        self.vip_awards = VipAwardService(
+            player, self.vip_award_source, self.vip_privileges, self.rewards, self.uow
         )
         self.missions = MissionRepository(
             player,
@@ -302,6 +339,8 @@ class RequestServices:
             drop_planner=self.campaign_drop_planner,
             settlement=self.mutation_settlement,
             uow=self.uow,
+            campaign_reset_policy=self.campaign_reset_policy,
+            vip_privileges=self.vip_privileges,
         )
 
     def apply_semantic_deltas(self, payload):

@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "pass": "100.0",
+  "status": "STATIC_SELFTEST_FRESH_EXTRACTION_ACCEPTED_RUNTIME_PENDING",
+  "checks": {
+    "python_compileall": "PASS",
+    "pass100_focused_mid97": "PASS",
+    "historical_regression_spine_pass68_through_pass99": "PASS",
+    "pass89_ota_historical_test": "SUPERSEDED_BY_PASS100_OTA_CUMULATIVE_VALIDATION",
+    "source_metadata_regeneration": "PASS_BYTE_EXACT",
+    "ota_bridge_regeneration": "PASS_BYTE_EXACT",
+    "pass99_ota_prior_overrides": "126_OF_126_BYTE_EXACT",
+    "ota_manifest": "1.631.4 / 128 cumulative files / silent",
+    "backend_fresh_extraction": "PASS_COMPILE_PASS100_PASS99_PASS98_PASS96",
+    "client_runtime": "PENDING"
+  },
+  "focused_invariants": [
+    "exactly-once receipt replay",
+    "legitimate next purchase remains distinct",
+    "VIP and Monthly Privilege allowance",
+    "source Crystal cost scaling",
+    "Energy 500 pre-purchase threshold",
+    "atomic Crystal/Energy/counter/receipt rollback",
+    "old-day committed replay precedence",
+    "new-day ordinal-zero noncollision",
+    "unpatched empty MID97 fail closed"
+  ]
+}

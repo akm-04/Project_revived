@@ -1,0 +1,20 @@
+{
+  "pass": "104.0",
+  "status": "PASS",
+  "contracts": {
+    "contracts": 95,
+    "phase1_block": 79,
+    "phase2_session": 8,
+    "terminal_deferred": 8
+  },
+  "checks": [
+    "95 audited contracts route/MID validation",
+    "79 phase1 HTTP409 blocks",
+    "16 session contracts explicitly deferred",
+    "no error_msg",
+    "firewall before mutation paths",
+    "unknown blocked path HTTP409",
+    "transport status propagation",
+    "src64 Backend.lua/Shop/BattlePass error-success semantics"
+  ]
+}

@@ -1,0 +1,58 @@
+{
+  "schema_version": 1,
+  "pass": "98.0",
+  "mandatory": true,
+  "source_artifact": "all-assest-rechecked.zip",
+  "source_sha256": "89f0f830508b92e5fff6ad53c6a9dae961a14042dbfdf5649008efb8353f5608",
+  "effective_src64": "app-assets/output/assets/src_64",
+  "files": 4370,
+  "checked_files": [
+    {
+      "path": "data/tables/item.lua",
+      "sha256": "59b668c28a372543da0c36d7a8d84291cc5b93fa0d92b7cc389a645e96e7b7cc",
+      "finding": "5838 item rows; 2034 consumables; 22 Energy items; 12 magic items; authoritative energy/magic/inscript_id columns"
+    },
+    {
+      "path": "app/model/SelfPlayer.lua",
+      "sha256": "163d5893c9522ada412c2b9c4748a80757660fccdf03c8f72cb6edf0838b8eb4",
+      "finding": "MID27 and MID87 remove submitted Backpack items locally only after error.OK"
+    },
+    {
+      "path": "app/windows/EventCentreSellWindow.lua",
+      "sha256": "20ec5c471f73306a5633f31d25994f14cd0b6a7a0ea6b0b30cc3372f61611ce4",
+      "finding": "MID87 effect selection priority is magic_energy elseif magic_dust elseif magic_liquid"
+    },
+    {
+      "path": "app/common/enums.lua",
+      "sha256": "15340bd89fe7c6f150ccfd4a5cd2a2f0e8e73c89dfae9ac3388376a4799901f3",
+      "finding": "CONSUMABLES type=4; Energy subtype=5; activity-center/magic subtype=12"
+    },
+    {
+      "path": "app/common/tables/ItemTable.lua",
+      "sha256": "1f846972f29a55ee2dbb90f2cb9b0124eaeaa90646c3c66644ab66e231c37f00",
+      "finding": "client reads energy and magic effect columns directly from item.lua"
+    },
+    {
+      "path": "data/tables/inscription.lua",
+      "sha256": "dc0d5d8b0de66b9495665cb6a300aa9bdb5979065f28c565ede35e447adce23c",
+      "finding": "MID1404 resolve policy remains resolve_material + resolve_num certificate settlement"
+    },
+    {
+      "path": "app/model/Pet.lua",
+      "sha256": "214f4dcd93d0e494408d14a225810134c2e72a0dedd18a935a27dc62e0c00660",
+      "finding": "PET_USE_EXP_ITEMS removes submitted stacks after successful response; unresolved backend must fail close"
+    },
+    {
+      "path": "app/windows/GiftbagUseWindow.lua",
+      "sha256": "cbc1c0cb373adc68a0c74b42d2aa3d5e28a96f536c80729e22be8fd03c5af600",
+      "finding": "MID241 removes gift item on success and processes awards; random gift outcomes remain downstream of shared RNG"
+    }
+  ],
+  "decisions": [
+    "Consumable effects are operation-scoped, never inferred by blindly applying every nonzero item.lua column.",
+    "MID27 uses source subtype=5 energy and keeps StackInventory + TemporalPolicyService atomic ownership.",
+    "MID87 validates the full request before one UoW and credits only the client-selected magic resource through EconomyLedger.",
+    "MID1404 concrete item mapping is derived from item.lua.inscript_id while inscription.lua owns resolve reward policy.",
+    "MID134 fails closed until Pet EXP settlement is reconstructed; MID241 remains fail closed until retry-safe random outcomes exist."
+  ]
+}

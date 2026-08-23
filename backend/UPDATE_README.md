@@ -1,9 +1,7 @@
-# Update notes — v0.10.2 / Pass89.0
+# Update notes — v0.13.1 / Pass105.0
 
-Pass89 runtime-accepts the Pass88 cURL settlement math and activates the game's existing source-confirmed MID2 / `UpdateScene` in-app resource updater. The backend now serves a cumulative resource update (`1.631.3`) containing all 124 previously validated `1.631.2` override files plus `src_32/app/common/utils.lua` and `src_64/app/common/utils.lua`. The new `utils.lua` override is the effective canonical `utils.lua` plus a preservation-only bridge that intercepts the seven direct Crystal Recharge SKUs and sends them to the existing exactly-once Pass88 PurchaseIntent endpoint. Unsupported purchase types continue to the original native functions.
-
-The bridge uses the **currently logged-in** `xyd.Backend` token and region and supplies the current player ID as an authentication assertion. A persistent client-side intent ID is reused after an indeterminate transport failure, preserving server exactly-once semantics. On a committed/replayed response, the already-committed source-shaped MID36857 event is injected into `xyd.event.RECHARGE`, so `SelfPlayer:onRecharge_()` updates Crystal/VIP/charge and the normal Recharge UI path.
-
-Pass89 also hardens the manual preservation endpoint: `local_token` is the fixed compatibility credential for legacy account uid `13371337` (in-game player `12525385`), not a wildcard. Money-like requests using that credential now require explicit `allow_legacy_sandbox=1`; callers may additionally bind `expected_player_id` to fail closed on account mismatch.
-
-No MID657, cards, Skin Mall, ordinary Store, native payment verification, inferred TCP framing, or MID116/117/118 is implemented. See `docs/PASS89_TECHNICAL_CHANGELOG.md`, `docs/PASS89_SRC64_FEEDBACK_LOOP.json`, `docs/PASS89_OTA_CONTRACT.json`, and `docs/PASS89_CLIENT_TEST_PLAN.md`.
+- Runtime-reconciled Pass104 without reopening Store/Sky Tower UI work.
+- Promoted eight session entry contracts from `DEFER_PHASE2` to `BLOCK_PHASE2`.
+- `START_FIGHT`, `ARENA_MODE_FIGHT_PRE`, `ARENA_MODE_FIGHT`, `ARENA_PRE_FIGHT`, `MARCH_START_FIGHT`, `WORLD_BOSS_START_FIGHT`, `PET_CAMPAIGN_FIGHT`, and `PEAK_START_FIGHT` now fail closed with canonical HTTP409 before battle/session entry.
+- Terminal result contracts remain deferred; no generic 30005 drain was activated.
+- No RNG, Summon probability, Campaign reward, Store, Arena, Pet, March, or World Boss feature behavior was implemented.

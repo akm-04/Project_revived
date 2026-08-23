@@ -277,7 +277,7 @@ class JsonPlayerDatabase:
         return {
             "_meta": {
                 "schema": cls.SCHEMA_VERSION,
-                "format": "GXB v0.10.2 additive Commerce/VIP + OTA bridge player database",
+                "format": "GXB v0.11.1 Commerce/VIP + MID657 + MID116 campaign reset player database",
                 "notes": [
                     "Stage 3.1.4 keeps SDK account UID, SDK/login SID, and game player ID distinct using the known-good region-125 client snapshot.",
                     "The backend re-reads this file before every request.",

@@ -1,0 +1,18 @@
+{
+  "pass": "105.0",
+  "status": "PASS",
+  "contracts": {
+    "contracts": 95,
+    "phase1_block": 79,
+    "phase2_block": 8,
+    "terminal_deferred": 8
+  },
+  "checks": [
+    "8 source-proven session entry MIDs HTTP409",
+    "79 Phase1 blocks preserved",
+    "8 terminal contracts remain deferred",
+    "canonical no-error_msg body preserved",
+    "firewall before DailyReset/handler/UoW",
+    "src64 transport + session callback evidence"
+  ]
+}

@@ -1,0 +1,43 @@
+{
+  "_meta": {
+    "schema_version": 1,
+    "pass": "92.0",
+    "source_resolution": "effective_merged",
+    "refresh_cost_source": "data/tables/refresh_cost.lua",
+    "refresh_cost_source_sha256": "53e3bd5efb3981513a0987be7f1cf9758679fedfaa6400e72c1fc9d6942bfa06",
+    "monthly_privilege_source": "data/tables/monthly_privilege.lua",
+    "monthly_privilege_source_sha256": "4fdc9d5b743c530bca9e943b64a96a87f5502243653c5abdb466a39090ade77b",
+    "runtime_rule": "MID116 cost is refreshEliteCost(reset_count+1); active Monthly Privilege contributes row1 num_elite. VIP num_elite remains VipPrivilegeResolver-owned."
+  },
+  "monthly_privilege_num_elite": 3,
+  "refresh_elite_cost_by_ordinal": {
+    "1": 20,
+    "2": 50,
+    "3": 50,
+    "4": 100,
+    "5": 100,
+    "6": 200,
+    "7": 200,
+    "8": 400,
+    "9": 400,
+    "10": 600,
+    "11": 600,
+    "12": 800,
+    "13": 800,
+    "14": 1000,
+    "15": 1000,
+    "16": 1000,
+    "17": 1000,
+    "18": 1000,
+    "19": 1000,
+    "20": 1000,
+    "21": 1000,
+    "22": 1000,
+    "23": 1000,
+    "24": 1000,
+    "25": 1000,
+    "26": 1000,
+    "27": 1000,
+    "28": 1000
+  }
+}

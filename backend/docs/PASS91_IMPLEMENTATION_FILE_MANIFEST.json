@@ -1,0 +1,110 @@
+{
+  "pass": "91.0",
+  "backend_version": "0.11.0",
+  "base_artifact": "gxb-backend-v0.10.2-pass89.0",
+  "added": [
+    {
+      "path": "data/vip_award_meta.json",
+      "sha256": "b9f4ae8dff5fb769bc0eba57fd0fd2789a6f9fa25c1b172fe3e4dbb4554a5859"
+    },
+    {
+      "path": "docs/PASS91_CLIENT_TEST_PLAN.md",
+      "sha256": "0beb9a1e3cf7517481834def0bee148b72c563566d1497968c018aee99e04547"
+    },
+    {
+      "path": "docs/PASS91_REGRESSION_MATRIX.json",
+      "sha256": "b63e3761fe77aef9912ab5778223fb8c23a3bab89c51342be2f4fad3ea8ea1a5"
+    },
+    {
+      "path": "docs/PASS91_SRC64_FEEDBACK_LOOP.json",
+      "sha256": "c37033a289b4c91e8bcddaa005cbe7a8bd1e8c5a51aed2f72a8a365f4db53d77"
+    },
+    {
+      "path": "docs/PASS91_TECHNICAL_CHANGELOG.md",
+      "sha256": "87c30eafb5178b81d64195d6dd8377a6a82e9179a0710f42d398508caffa65bb"
+    },
+    {
+      "path": "docs/PASS91_VIP_AWARD_CONTRACT.json",
+      "sha256": "fc66f7ded9fb3b116a549b8c9916f4b5160e7e6645866e7253c5ae468b5094dd"
+    },
+    {
+      "path": "docs/PASS91_VIP_AWARD_SELFTEST.json",
+      "sha256": "8d0564d3f854281d7541e8fbf010f2c19c40a2155da49dd22807bcc00c69d648"
+    },
+    {
+      "path": "gxb_backend/content/vip_award_catalog.py",
+      "sha256": "0ac26e952e87f079661ca2d089f1f0a81bc6013b506c65cf7bc5725f45b54ed5"
+    },
+    {
+      "path": "gxb_backend/state/vip_award_service.py",
+      "sha256": "02271145179dd24b8bc3ec5bf8ebf826b94268e146542fe59b4b5412c9883d21"
+    },
+    {
+      "path": "tools/selftest_pass91_vip_awards.py",
+      "sha256": "d665c8c9d9da1282891a16accf517b4c2edd4e69339e1ff27b2933e527f9204a"
+    }
+  ],
+  "modified": [
+    {
+      "path": "README.md",
+      "sha256_before": "c93233071468c49aec007fbe11a9536a548113a606f6a49ed3d462d757c42d2a",
+      "sha256_after": "fa88692fb7de5d952c1f64ca00edd01ac3a335e72ff9a9778bcf1c2dcfe3c5c6"
+    },
+    {
+      "path": "UPDATE_README.md",
+      "sha256_before": "9bb6d1e3abb90464c31af32c23fef1c4ee4b02a4addb64a5594b548656f29444",
+      "sha256_after": "187771f284f494552da5976d16d0d3b4a08ba8ef5ef3c0a5319f48cf104062c4"
+    },
+    {
+      "path": "VERSION.json",
+      "sha256_before": "c0eab51e30b1116d6691116ce9a576ed0d5884d9be4032775acd808c3be4b157",
+      "sha256_after": "8e46285e348c0c1b1fc28346aea3049c7ce06c7b47ee8e570da054f74c12a166"
+    },
+    {
+      "path": "gxb_backend/dispatch/engine_dispatcher.py",
+      "sha256_before": "d15f424ae876f0f198b2bf0339075eee3b5ea99d6186c12d1cd7f8117d075327",
+      "sha256_after": "30a3b7600b044c30f009436fe2fc38ed877ff37c5826736634e838856207868f"
+    },
+    {
+      "path": "gxb_backend/handlers/system.py",
+      "sha256_before": "3becda32a533ea3dc47824a5e8fdba1841f30b060f31d6fade336b2d0fbb9f34",
+      "sha256_after": "46bde16831a9e15e4fb325d26db247784eaa932d05e1db494aeec39e5ccc1347"
+    },
+    {
+      "path": "gxb_backend/run.py",
+      "sha256_before": "acebb1289d5b77b3380c1fb31881f7d5419796fdcd38b76efbffc570f4ffe947",
+      "sha256_after": "d433c6386763b7ca58101955fb095ee19dd0c567e8154ec510b9028e99a7bc07"
+    },
+    {
+      "path": "gxb_backend/state/multiuser_database.py",
+      "sha256_before": "db3566373422ceae8365b2ed3c23a391e7d67861b54d44bc2ac0c103a6152950",
+      "sha256_after": "c44231e4e32c4a9bfef15bbe147a81c4558f9fd401a4e21a47fab84307b159cc"
+    },
+    {
+      "path": "gxb_backend/state/player_database.py",
+      "sha256_before": "71350cc5005935ad4609c3e9e678fbf9bd6824d1415af3615f2f2626ebd3fce9",
+      "sha256_after": "dba378371d40e68cf0f2a24c2540c4b2724692e11f544a9fff35fd25dea61619"
+    },
+    {
+      "path": "gxb_backend/state/request_services.py",
+      "sha256_before": "2e0abd54a964610b6e6c47af4417f9e70885c509d03a1b856b3fa9aa3801241a",
+      "sha256_after": "c89504d519095d0deb9821630acc3f097ca5d8b670d69e0c755fd48e3efc4465"
+    },
+    {
+      "path": "gxb_backend/version.py",
+      "sha256_before": "b34a3842c9246ea531ac4ae0986f3f45dd29705c02ed86ddf485640454c0d4ed",
+      "sha256_after": "1b953267643d831dab9e12a1c7fde208c59296b487c5be5e4bb1969e0e95f9b5"
+    },
+    {
+      "path": "memory.md",
+      "sha256_before": "e7b6ccb73af7efe142ac71336117a76f7158b4de38d1b274d78b190bc9b27ce2",
+      "sha256_after": "d4a815eaba20b01d3bcf4f06c676314853d66c587fa7975e0d79f46184864379"
+    },
+    {
+      "path": "tools/build_commerce_vip_meta.py",
+      "sha256_before": "f3efd524b467c392d44213f4742f5e89c8d3b07751e2733bacd10e4175a213fe",
+      "sha256_after": "840a98fab456dfc008f63b23919a8f69272e15167fc433762cffde52fc1598be"
+    }
+  ],
+  "removed": []
+}

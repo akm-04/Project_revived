@@ -2,6 +2,7 @@
 
 from .economy_ledger import EconomyLedger
 from .economy_repository import EconomyRepository
+from .player_progression_service import PlayerProgressionService
 from .inventory_repository import InventoryRepository
 from .mutation_plan import MutationPlan, MutationResult
 from .mutation_settlement_service import MutationSettlementService

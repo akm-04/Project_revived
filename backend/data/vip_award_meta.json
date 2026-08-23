@@ -1,0 +1,315 @@
+{
+  "_meta": {
+    "schema_version": 1,
+    "pass": "91.0",
+    "source_resolution": "effective_merged",
+    "vip_source": "data/tables/vip.lua",
+    "vip_source_sha256": "18b76d7fa82964f57082aeb2092a80c231f69e86958b4b567aebabf30d626270",
+    "gift_source": "data/tables/gift.lua",
+    "gift_source_sha256": "8c87dfdc116242afcdebd011cf898d61b08e2cf54ea7d0a11a5f69fabade2ac7",
+    "asset_crystal_table_id": -1,
+    "runtime_rule": "MID657 one-time VIP1..VIP15 gifts; items settle as Backpack stacks, Crystal through EconomyLedger, and vip_awards claim marker in the same PlayerUnitOfWork."
+  },
+  "tiers": {
+    "1": {
+      "vip_level": 1,
+      "gift_id": 90001099,
+      "items": [
+        {
+          "item_id": 50001009,
+          "item_num": 6
+        },
+        {
+          "item_id": 50001013,
+          "item_num": 10
+        },
+        {
+          "item_id": 50001015,
+          "item_num": 2
+        }
+      ],
+      "crystal": 5,
+      "response_crystal_table_id": -1
+    },
+    "2": {
+      "vip_level": 2,
+      "gift_id": 90001100,
+      "items": [
+        {
+          "item_id": 50001009,
+          "item_num": 10
+        },
+        {
+          "item_id": 50001013,
+          "item_num": 20
+        },
+        {
+          "item_id": 50001015,
+          "item_num": 3
+        }
+      ],
+      "crystal": 15,
+      "response_crystal_table_id": -1
+    },
+    "3": {
+      "vip_level": 3,
+      "gift_id": 90001101,
+      "items": [
+        {
+          "item_id": 50001012,
+          "item_num": 4
+        },
+        {
+          "item_id": 40001069,
+          "item_num": 10
+        },
+        {
+          "item_id": 50001015,
+          "item_num": 4
+        }
+      ],
+      "crystal": 25,
+      "response_crystal_table_id": -1
+    },
+    "4": {
+      "vip_level": 4,
+      "gift_id": 90001102,
+      "items": [
+        {
+          "item_id": 50001012,
+          "item_num": 5
+        },
+        {
+          "item_id": 50001059,
+          "item_num": 1
+        },
+        {
+          "item_id": 50001004,
+          "item_num": 5
+        }
+      ],
+      "crystal": 35,
+      "response_crystal_table_id": -1
+    },
+    "5": {
+      "vip_level": 5,
+      "gift_id": 90001103,
+      "items": [
+        {
+          "item_id": 50001010,
+          "item_num": 3
+        },
+        {
+          "item_id": 50001061,
+          "item_num": 1
+        },
+        {
+          "item_id": 50001004,
+          "item_num": 8
+        }
+      ],
+      "crystal": 55,
+      "response_crystal_table_id": -1
+    },
+    "6": {
+      "vip_level": 6,
+      "gift_id": 90001104,
+      "items": [
+        {
+          "item_id": 50001010,
+          "item_num": 4
+        },
+        {
+          "item_id": 40001069,
+          "item_num": 20
+        },
+        {
+          "item_id": 50001004,
+          "item_num": 10
+        }
+      ],
+      "crystal": 75,
+      "response_crystal_table_id": -1
+    },
+    "7": {
+      "vip_level": 7,
+      "gift_id": 90001105,
+      "items": [
+        {
+          "item_id": 50001010,
+          "item_num": 6
+        },
+        {
+          "item_id": 50001060,
+          "item_num": 1
+        },
+        {
+          "item_id": 50001006,
+          "item_num": 2
+        }
+      ],
+      "crystal": 100,
+      "response_crystal_table_id": -1
+    },
+    "8": {
+      "vip_level": 8,
+      "gift_id": 90001106,
+      "items": [
+        {
+          "item_id": 50001010,
+          "item_num": 10
+        },
+        {
+          "item_id": 50001062,
+          "item_num": 1
+        },
+        {
+          "item_id": 50001006,
+          "item_num": 4
+        }
+      ],
+      "crystal": 125,
+      "response_crystal_table_id": -1
+    },
+    "9": {
+      "vip_level": 9,
+      "gift_id": 90001107,
+      "items": [
+        {
+          "item_id": 50001010,
+          "item_num": 15
+        },
+        {
+          "item_id": 40001069,
+          "item_num": 50
+        },
+        {
+          "item_id": 50001063,
+          "item_num": 1
+        }
+      ],
+      "crystal": 150,
+      "response_crystal_table_id": -1
+    },
+    "10": {
+      "vip_level": 10,
+      "gift_id": 90001108,
+      "items": [
+        {
+          "item_id": 50001010,
+          "item_num": 18
+        },
+        {
+          "item_id": 50001064,
+          "item_num": 1
+        },
+        {
+          "item_id": 50001004,
+          "item_num": 15
+        }
+      ],
+      "crystal": 180,
+      "response_crystal_table_id": -1
+    },
+    "11": {
+      "vip_level": 11,
+      "gift_id": 90001109,
+      "items": [
+        {
+          "item_id": 50001010,
+          "item_num": 20
+        },
+        {
+          "item_id": 40001069,
+          "item_num": 100
+        },
+        {
+          "item_id": 50001065,
+          "item_num": 1
+        }
+      ],
+      "crystal": 220,
+      "response_crystal_table_id": -1
+    },
+    "12": {
+      "vip_level": 12,
+      "gift_id": 90001110,
+      "items": [
+        {
+          "item_id": 50001010,
+          "item_num": 24
+        },
+        {
+          "item_id": 50001066,
+          "item_num": 1
+        },
+        {
+          "item_id": 50001005,
+          "item_num": 6
+        }
+      ],
+      "crystal": 280,
+      "response_crystal_table_id": -1
+    },
+    "13": {
+      "vip_level": 13,
+      "gift_id": 90001111,
+      "items": [
+        {
+          "item_id": 50001011,
+          "item_num": 3
+        },
+        {
+          "item_id": 40001069,
+          "item_num": 150
+        },
+        {
+          "item_id": 50001067,
+          "item_num": 1
+        }
+      ],
+      "crystal": 350,
+      "response_crystal_table_id": -1
+    },
+    "14": {
+      "vip_level": 14,
+      "gift_id": 90001112,
+      "items": [
+        {
+          "item_id": 50001011,
+          "item_num": 4
+        },
+        {
+          "item_id": 50001068,
+          "item_num": 1
+        },
+        {
+          "item_id": 50001007,
+          "item_num": 10
+        }
+      ],
+      "crystal": 500,
+      "response_crystal_table_id": -1
+    },
+    "15": {
+      "vip_level": 15,
+      "gift_id": 90001113,
+      "items": [
+        {
+          "item_id": 50001011,
+          "item_num": 5
+        },
+        {
+          "item_id": 50001069,
+          "item_num": 1
+        },
+        {
+          "item_id": 50001007,
+          "item_num": 20
+        }
+      ],
+      "crystal": 700,
+      "response_crystal_table_id": -1
+    }
+  }
+}

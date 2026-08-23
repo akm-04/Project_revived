@@ -6,7 +6,7 @@ from typing import Any
 
 from gxb_backend.content import CatalogNamespace, ContentRef, GameDataCatalog
 
-from .economy_repository import EconomyRepository
+from .player_progression_service import PlayerProgressionService
 from .hero_repository import HeroRepository
 from .inventory_repository import InventoryRepository
 from .mutation_plan import (
@@ -76,18 +76,19 @@ class RewardTransactionService:
     """Compatibility RewardPlan adapter that now emits typed MutationPlans.
 
     Scalar-ledger grants and Backpack stack grants route through MutationSettlementService.
-    Pass71 additionally routes Energy grants through the specialized TEMPORAL
-    operation family; player EXP remains progression-owned and deferred.
-    Partner/entity grants remain aggregate-owned but share the same outer UoW.
+    Energy routes through the specialized TEMPORAL operation family. Pass94 routes
+    player EXP directly through PlayerProgressionService instead of the legacy
+    EconomyRepository facade. Partner/entity grants remain aggregate-owned but
+    share the same outer UoW.
     """
 
     TEMPORAL_FIELDS = frozenset({"energy"})
-    COMPATIBILITY_NON_SCALAR_FIELDS = frozenset({"player_exp"})
+    PROGRESSION_FIELDS = frozenset({"player_exp"})
 
     def __init__(
         self,
         catalog: GameDataCatalog,
-        economy: EconomyRepository,
+        progression: PlayerProgressionService,
         inventory: InventoryRepository,
         heroes: HeroRepository,
         uow: UnitOfWork,
@@ -96,7 +97,7 @@ class RewardTransactionService:
         settlement: MutationSettlementService,
     ) -> None:
         self.catalog = catalog
-        self.economy = economy
+        self.progression = progression
         self.inventory = inventory
         self.heroes = heroes
         self.uow = uow
@@ -123,7 +124,7 @@ class RewardTransactionService:
             if (
                 not self._is_scalar_reward(grant.field)
                 and grant.field not in self.TEMPORAL_FIELDS
-                and grant.field not in self.COMPATIBILITY_NON_SCALAR_FIELDS
+                and grant.field not in self.PROGRESSION_FIELDS
             ):
                 raise RewardValidationError(f"unsupported economy reward field {grant.field!r}")
             self._positive(grant.amount, f"economy.{grant.field}")
@@ -198,14 +199,14 @@ class RewardTransactionService:
         economy_projection = dict(draft.projection.economy) if draft is not None else {}
         inventory_awards = list(draft.projection.inventory_awards) if draft is not None else []
 
-        # Compatibility owners that are explicitly *not* scalar-ledger fields.
+        # Non-scalar progression owner remains in the same outer PlayerUoW.
         player_exp_gain = sum(int(g.amount) for g in plan.economy if g.field == "player_exp")
         if player_exp_gain:
-            compatibility_projection = self.economy.apply_deltas(
-                player_exp_gain=player_exp_gain,
+            progression_projection = self.progression.grant_exp(
+                player_exp_gain,
                 persist=False,
             )
-            economy_projection.update(compatibility_projection)
+            economy_projection.update(progression_projection)
 
         partner_rows: list[dict[str, Any]] = []
         for grant in plan.partners:

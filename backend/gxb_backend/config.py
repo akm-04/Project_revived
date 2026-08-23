@@ -145,6 +145,10 @@ class Settings:
         "GXB_PROTOCOL_REGISTRY",
         str(_PROJECT_ROOT / "data/protocol_registry.json"),
     ))
+    mutation_contract_registry_path: Path = Path(os.getenv(
+        "GXB_MUTATION_CONTRACT_REGISTRY",
+        str(_PROJECT_ROOT / "data/mutation_contract_registry.json"),
+    ))
     resource_registry_path: Path = Path(os.getenv(
         "GXB_RESOURCE_REGISTRY",
         str(_PROJECT_ROOT / "data/resource_registry.json"),

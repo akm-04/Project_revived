@@ -140,3 +140,13 @@ class VipPrivilegeResolver:
 
     def soul_box_policy_value(self) -> int:
         return max(0, self.int_value("soul_box"))
+
+    def campaign_multi_sweep_enabled(self) -> bool:
+        """Source gate: VIP quick_sweep OR active Monthly Privilege."""
+        return self.enabled("quick_sweep") or self._int(
+            getattr(self.player, "privilege_left_card_day", 0), 0
+        ) > 0
+
+    def hero_preset_limit(self) -> int:
+        """Source ``vip.lua.preset_num`` limit for saved Hero teams."""
+        return max(0, self.int_value("preset_num"))

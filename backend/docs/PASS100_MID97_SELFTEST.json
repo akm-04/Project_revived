@@ -1,0 +1,23 @@
+{
+  "pass": "100.0",
+  "status": "PASS",
+  "mid": 97,
+  "checks": [
+    "source_energy_purchase_contract",
+    "ota_source_day_expected_ordinal_uuid_identity",
+    "exactly_once_receipt_replay",
+    "legitimate_next_purchase_not_suppressed",
+    "vip_plus_monthly_allowance",
+    "energy_500_pre_purchase_threshold",
+    "source_cost_scaling",
+    "atomic_crystal_energy_counter_receipt",
+    "durable_failure_rollback",
+    "old_day_receipt_replay_precedes_day_guard",
+    "new_day_ordinal_zero_identity_noncollision",
+    "unpatched_mid97_fail_closed",
+    "source_metadata_reproducible",
+    "ota_bridge_reproducible",
+    "pass99_126_ota_overrides_byte_exact",
+    "mid2_1.631.4_cumulative_128_volume_and_advertisement"
+  ]
+}

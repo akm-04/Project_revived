@@ -1,9 +1,9 @@
 {
-  "backend_version": "0.10.2",
-  "pass": "89.0",
-  "phase": "Commerce/VIP Phase 2.1 - OTA client bridge + authentication hardening",
-  "runtime_client_smoke": "Pass88 curl settlement runtime accepted; Pass89 OTA/client-tap smoke pending.",
-  "scope": "Reuse source-confirmed MID2/UpdateScene OTA transport to deploy a sparse app/common/utils.lua purchase interceptor for the seven direct Crystal SKUs. Harden PurchaseIntent legacy-token authentication with explicit opt-in and expected-player binding. Pass88 UoW settlement semantics remain unchanged. MID657/cards/skins/ordinary Store/MID116+ remain deferred.",
-  "version": "0.10.2",
-  "artifact": "gxb-backend-v0.10.2-pass89.0"
+  "backend_version": "0.13.1",
+  "version": "0.13.1",
+  "pass": "105.0",
+  "artifact": "gxb-backend-v0.13.1-pass105.0",
+  "phase": "Mutation Safety Firewall Phase 2",
+  "scope": "Runtime-accept Pass104 core firewall behavior and quarantine the eight source-proven unsupported SESSION_PREFLIGHT/SESSION_START routes with canonical HTTP409 before battle entry. Terminal battle-result policy remains deferred.",
+  "runtime_client_smoke": "Pass104 core firewall/no-regression behavior accepted from debug evidence; Pass105 Phase2 is static/self-test accepted pending client smoke."
 }

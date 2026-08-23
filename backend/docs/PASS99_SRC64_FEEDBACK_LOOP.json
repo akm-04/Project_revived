@@ -1,0 +1,77 @@
+{
+  "schema_version": 1,
+  "pass": "99.0",
+  "mandatory": true,
+  "source_artifact": "all-assest-rechecked.zip",
+  "source_sha256": "89f0f830508b92e5fff6ad53c6a9dae961a14042dbfdf5649008efb8353f5608",
+  "effective_src64": "app-assets/output/assets/src_64",
+  "files": 4370,
+  "checked_files": [
+    {
+      "path": "app/windows/MapDetailWindow.lua",
+      "sha256": "5a137edc609f9d2082c5df6bf50ef05b6ef54642a7ba5bf6dca8fe0f1c4c3898",
+      "finding": "Normal map checks Energy >= campaign energyCost * sweepNum; insufficient Raid Tickets offer Crystal sweep only when sweepNum <= current Crystal."
+    },
+    {
+      "path": "app/windows/NewMapDetailWindow.lua",
+      "sha256": "88b97be8577828f478360c25fd51674e2ed8291b2a590976b3530c91396d07bf",
+      "finding": "Same source-native sweep Energy/ticket/Crystal gating as MapDetailWindow."
+    },
+    {
+      "path": "app/windows/SweepWindow.lua",
+      "sha256": "8548611ec6bb778433a234f3bdecf452fcde1522c64e8ca9eac5d9a84579fce5",
+      "finding": "MID117 sends sweep_type and removes Raid Ticket 50001013 x sweep_num locally after successful ITEM_SWEEP; server must persist the debit."
+    },
+    {
+      "path": "app/common/enums.lua",
+      "sha256": "15340bd89fe7c6f150ccfd4a5cd2a2f0e8e73c89dfae9ac3388376a4799901f3",
+      "finding": "SweepType.ITEM_SWEEP=1 and CRYSTAL_SWEEP=2."
+    },
+    {
+      "path": "app/model/AddEnergy.lua",
+      "sha256": "0ccde9a11ea1d146e98787064218c4f50e72eb2da390fce2d882818f9b977474",
+      "finding": "ADD_ENERGY request payload is empty {}; success response supplies buy_energy_times."
+    },
+    {
+      "path": "app/common/network/Backend.lua",
+      "sha256": "95378e2b0be8180df6de27e9e430c630bcfe46c080e1f91ef5f6d74bdbb1b840",
+      "finding": "All web MIDs except chat are retryable; failure prompt re-invokes webRequest_ with the same mid and params, so MID97's empty payload is replay-ambiguous."
+    },
+    {
+      "path": "app/common/ui/EcoSidebar.lua",
+      "sha256": "f4fd60f64f0542739f93d647a29528d3a3ce54951e5fb411f666838388f76c3d",
+      "finding": "ADD_ENERGY nth price uses buyEnergyCost(times+1); allowance uses VIP numEnergy plus active Monthly Privilege numEnergy; client checks energyMaxLimit."
+    },
+    {
+      "path": "data/tables/refresh_cost.lua",
+      "sha256": "53e3bd5efb3981513a0987be7f1cf9758679fedfaa6400e72c1fc9d6942bfa06",
+      "finding": "Source nth stamina-purchase Crystal costs; ordinals begin 50,50,100,100,100,100,200,200,200,400..."
+    },
+    {
+      "path": "data/tables/vip.lua",
+      "sha256": "18b76d7fa82964f57082aeb2092a80c231f69e86958b4b567aebabf30d626270",
+      "finding": "num_energy is source daily purchase allowance (VIP0=1 through VIP15=16)."
+    },
+    {
+      "path": "data/tables/monthly_privilege.lua",
+      "sha256": "4fdc9d5b743c530bca9e943b64a96a87f5502243653c5abdb466a39090ade77b",
+      "finding": "Active Monthly Privilege contributes num_energy=4."
+    },
+    {
+      "path": "data/tables/misc.lua",
+      "sha256": "058cf5719421ed71a12083a8c95b0ccded7204bedb5fa1263d508e2fa4257f9a",
+      "finding": "Global energy_max_limit is 500."
+    },
+    {
+      "path": "data/tables/item.lua",
+      "sha256": "59b668c28a372543da0c36d7a8d84291cc5b93fa0d92b7cc389a645e96e7b7cc",
+      "finding": "QA seed remains subject to source per-item stack ceilings; foods cap at 99, Raid Ticket at 9999, magic consumables at 999."
+    }
+  ],
+  "decisions": [
+    "Do not alter MID114: runtime and backend evidence show its Energy debit already works.",
+    "MID117 live settlement must atomically persist source Energy plus the selected ticket/Crystal input and deterministic rewards.",
+    "Developer QA seed is source-stack-bounded and one-shot/non-replenishing.",
+    "Do not implement MID97 with invented retry semantics: empty request payload cannot distinguish lost-response replay from a legitimate next purchase."
+  ]
+}

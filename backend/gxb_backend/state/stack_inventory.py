@@ -8,7 +8,10 @@ from __future__ import annotations
 
 import copy
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Any, Callable, Iterable, Mapping
+
+from gxb_backend.content.item_stack_limit_catalog import ItemStackLimitCatalog
 
 from .player_state import PlayerState
 from .unit_of_work import PlayerUnitOfWork
@@ -20,6 +23,18 @@ class StackInventoryError(ValueError):
 
 class InsufficientStackQuantity(StackInventoryError):
     pass
+
+
+class StackCapacityExceeded(StackInventoryError):
+    def __init__(self, item_id: int, current: int, delta: int, limit: int) -> None:
+        self.item_id = int(item_id)
+        self.current = int(current)
+        self.delta = int(delta)
+        self.limit = int(limit)
+        super().__init__(
+            f"item {self.item_id} exceeds source stack ceiling: "
+            f"current={self.current} delta={self.delta} limit={self.limit}"
+        )
 
 
 @dataclass(frozen=True)
@@ -38,11 +53,16 @@ class StackInventory:
         player: PlayerState,
         save_callback: Callable[[], None] | None = None,
         *,
+        data_dir: Path | None = None,
+        stack_limits: ItemStackLimitCatalog | None = None,
         uow: PlayerUnitOfWork | None = None,
     ) -> None:
         self.player = player
         self._save_callback = save_callback
         self.uow = uow
+        self.stack_limits = stack_limits
+        if self.stack_limits is None and data_dir is not None:
+            self.stack_limits = ItemStackLimitCatalog(Path(data_dir))
 
     @staticmethod
     def _int(value: Any, default: int = 0) -> int:
@@ -116,10 +136,19 @@ class StackInventory:
                 normalized[item_id] = normalized.get(item_id, 0) + delta
         for item_id, delta in normalized.items():
             current = self.quantity(item_id)
-            if current + delta < 0:
+            after = current + delta
+            if after < 0:
                 raise InsufficientStackQuantity(
                     f"insufficient item {item_id}: current={current} delta={delta}"
                 )
+            # Pass96: source item.stack is a hard ceiling for NEW positive
+            # settlement. If an old save is already above the ceiling, negative
+            # deltas remain legal so the player can consume/craft back toward a
+            # valid state instead of being trapped by the new invariant.
+            if delta > 0 and self.stack_limits is not None:
+                limit = self.stack_limits.limit(item_id)
+                if limit is not None and after > limit:
+                    raise StackCapacityExceeded(item_id, current, delta, limit)
         return normalized
 
     def apply_deltas(

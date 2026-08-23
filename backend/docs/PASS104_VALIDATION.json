@@ -1,0 +1,26 @@
+{
+  "pass": "104.0",
+  "status": "PASS",
+  "backend_version": "0.13.0",
+  "checks": [
+    "python compileall",
+    "Pass104 focused mutation firewall self-test",
+    "95/95 audited contracts resolve to current MID constants and routed dispatcher entries",
+    "79/79 non-session contracts canonical HTTP409 block",
+    "8 session preflight/start + 8 terminal contracts explicitly deferred",
+    "firewall executes before DailyReset/handler/projection/UoW",
+    "unknown/unallowlisted MID transport block is HTTP409",
+    "Pass83 temporal regression",
+    "Pass91 VIP award regression",
+    "Pass92 MID116 regression",
+    "Pass94 progression regression",
+    "Pass96 Economy/VIP regression",
+    "Pass98 consumables regression",
+    "Pass99 Campaign sweep/QA seed regression",
+    "Pass100 OTA1.631.4/MID97 regression"
+  ],
+  "historical_test_drift": [
+    "selftest_pass89_ota_token_bridge.py still hard-codes OTA 1.631.3 and therefore fails on the already-accepted Pass100 1.631.4 baseline; current Pass100 OTA validation passes."
+  ],
+  "runtime_status": "CLIENT_SMOKE_PENDING"
+}

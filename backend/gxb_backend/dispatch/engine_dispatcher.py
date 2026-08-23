@@ -35,12 +35,14 @@ from gxb_backend.observability.resource_gateway import ResourceGateway
 from gxb_backend.observability.runtime_logger import RuntimeLogger
 from gxb_backend.protocol.mids import MID
 from gxb_backend.protocol.registry import ProtocolRegistry
+from gxb_backend.protocol.mutation_contracts import MutationContractRegistry, MutationSafetyFirewall
 from gxb_backend.protocol.routing import RouteClass, classify_mid
 from gxb_backend.state.repository import StateRepository
 from gxb_backend.state.projection_profiles import ProjectionProfileRegistry
 from gxb_backend.state.resource_registry import ResourceRegistry
 from gxb_backend.state.response_projector import ResponseProjector
 from gxb_backend.state.daily_reset import merge_daily_reset_projection
+from gxb_backend.transport.result import EngineTransportResult
 from gxb_backend.transport.responses import engine_ok
 
 Handler = Callable[[dict[str, Any]], Any]
@@ -102,6 +104,9 @@ class EngineDispatcher:
         self.runtime_logger = RuntimeLogger(settings)
 
         self.handlers: dict[int, Handler] = self._build_handlers()
+        self.mutation_contracts = MutationContractRegistry.load(settings.mutation_contract_registry_path)
+        self.mutation_firewall = MutationSafetyFirewall(self.mutation_contracts)
+        self.mutation_firewall.validate_routes(self.handlers, self.protocol_registry.label)
         self.scalar_handlers: set[int] = {getattr(MID, "GET_PLAYER_GROUP_BY_KEY", -999999)}
 
     @staticmethod
@@ -147,6 +152,8 @@ class EngineDispatcher:
             "SET_PLAYER_RETURN_ID": self.player.set_player_return_id,
             "GET_PIC_NOTICE_INFO": self.system.get_pic_notice_info,
             "QUERY_CHARGE_DATA": self.system.query_charge_data,
+            "GET_VIP_AWARD": self.system.get_vip_award,
+            "ADD_ENERGY": self.system.add_energy,
             "GET_BOARD_INFO": self.activities.get_board_info,
             "LOAD_ACHIEVEMENT_INFO": self.achievement.load_achievement_info,
             "GET_ACHIEVEMENT_AWARD": self.achievement.get_achievement_award,
@@ -273,7 +280,7 @@ class EngineDispatcher:
             "PET_PRACTICE_SAVE": self.practice.pet_mutation,
             "PET_PRACTICE_AUTO": self.practice.pet_mutation,
             "PET_WASH_BY_TICKET": self.practice.pet_mutation,
-            "PET_USE_EXP_ITEMS": self.practice.pet_mutation,
+            "PET_USE_EXP_ITEMS": self.practice.pet_use_exp_items_fail_closed,
 
             # battle formation/session
             "LOAD_BATTLE_FORMATION": self.battle.load_formation,
@@ -495,6 +502,20 @@ class EngineDispatcher:
         name = self.protocol_registry.label(req_mid)
         print(f"[ENGINE IN] mid={name} ({req_mid}) route={route_class.value} data={json.dumps(req, ensure_ascii=False, default=str)}")
 
+        # Pass105 Firewall Phase 2: source-audited non-session mutations plus
+        # unsupported session preflight/start commands that do not yet have
+        # durable backend/session ownership are blocked before *any* handler,
+        # projector, or UoW path can run. Backend.lua derives xyd.error from
+        # HTTP status, so this transport-aware result must remain non-200.
+        blocked = self.mutation_firewall.evaluate(req_mid, name)
+        if blocked is not None:
+            self.runtime_logger.request(
+                mid=req_mid, name=name, route=route_class.value, req=req,
+                handler="mutation_safety_firewall", response=blocked.body, fallback=False,
+            )
+            print(f"[ENGINE BLOCK] status={blocked.status_code} {json.dumps(blocked.body, ensure_ascii=False, separators=(',', ':'))}")
+            return blocked
+
         # Pass79 lazy source-day materialization happens before the response
         # snapshot and endpoint logic for requests whose canonical player is
         # already bound. Pass83 keeps MID1 as the deliberate exception: MID1 is
@@ -523,6 +544,13 @@ class EngineDispatcher:
             else:
                 result = self.compat.blocked(req)
                 handler_name = "compat.blocked_unknown"
+                blocked_unknown = EngineTransportResult(body=result, status_code=409)
+                self.runtime_logger.request(
+                    mid=req_mid, name=name, route=route_class.value, req=req,
+                    handler=handler_name, response=result, fallback=True,
+                )
+                print(f"[ENGINE BLOCK] status=409 {json.dumps(result, ensure_ascii=False, separators=(',', ':'))}")
+                return blocked_unknown
         else:
             result = handler(req)
             handler_name = getattr(handler, "__qualname__", repr(handler))

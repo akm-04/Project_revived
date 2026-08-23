@@ -1,0 +1,27 @@
+{
+  "pass": "91.0",
+  "status": "PASS",
+  "tests": [
+    "selftest_pass68_1_medium_free.py",
+    "selftest_pass68_foundation.py",
+    "selftest_pass69_1_item_sale.py",
+    "selftest_pass69_economy_backbone_part2.py",
+    "selftest_pass70_1_stone_summon_mana.py",
+    "selftest_pass70_response_projection.py",
+    "selftest_pass71_temporal_resources.py",
+    "selftest_pass72_hero_progression.py",
+    "selftest_pass73_advanced_progression.py",
+    "selftest_pass74_awakening.py",
+    "selftest_pass75_campaign_ownership.py",
+    "selftest_pass79_daily_reset.py",
+    "selftest_pass81_daily_reset_campaign_corrections.py",
+    "selftest_pass83_mid1_temporal_hygiene.py",
+    "selftest_pass87_commerce_vip_phase1.py",
+    "selftest_pass88_commerce_purchase.py",
+    "selftest_pass88_purchase_route_contract.py",
+    "selftest_pass89_ota_token_bridge.py",
+    "selftest_pass91_vip_awards.py"
+  ],
+  "count": 19,
+  "note": "All historical selftest_pass*.py tests passed; first aggregate invocation timed out after Pass79, remaining Pass81..Pass91 were rerun separately and passed."
+}

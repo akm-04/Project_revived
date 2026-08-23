@@ -91,7 +91,8 @@ class PlayerState:
     avatar_frame_id: int = 0
     lev: int = 99
     exp: int = 0
-    max_lev: int = 200
+    # Pass96: effective player.lua contains exactly levels 1..100.
+    max_lev: int = 100
     max_color: int = 5
     vip: int = 15
     guild_id: int = 0

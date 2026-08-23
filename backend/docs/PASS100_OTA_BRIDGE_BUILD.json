@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "pass": "100.0",
+  "status": "GENERATED_FROM_CANONICAL_SOURCE",
+  "bridge": "MID97 source-day + expected purchase ordinal + source-native xyd.generateUUID operation id",
+  "retry_invariant": "Backend.lua retries the same params table, preserving the exact operation identity after a lost response.",
+  "source_day_formula": "floor((server_time + 10800) / 86400)",
+  "operation_id_formula": "p100-energy-{energy_day_id}-{expected_buy_energy_times}-{xyd.generateUUID()}",
+  "files": [
+    {
+      "arch": "src_32",
+      "source": "src_32/app/model/AddEnergy.lua",
+      "source_sha256": "0ccde9a11ea1d146e98787064218c4f50e72eb2da390fce2d882818f9b977474",
+      "override": "src_32/app/model/AddEnergy.lua",
+      "override_sha256": "cab37f98c3cbd85a1386542d853c168ec38f0b0c1d4e2e9f7f4698e243af54f9",
+      "source_size": 1339,
+      "override_size": 1779
+    },
+    {
+      "arch": "src_64",
+      "source": "src_64/app/model/AddEnergy.lua",
+      "source_sha256": "0ccde9a11ea1d146e98787064218c4f50e72eb2da390fce2d882818f9b977474",
+      "override": "src_64/app/model/AddEnergy.lua",
+      "override_sha256": "cab37f98c3cbd85a1386542d853c168ec38f0b0c1d4e2e9f7f4698e243af54f9",
+      "source_size": 1339,
+      "override_size": 1779
+    }
+  ]
+}

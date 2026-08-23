@@ -38,9 +38,9 @@
       "guild_id": 0
     },
     "progression": {
-      "lev": 99,
-      "exp": 0,
-      "max_lev": 200,
+      "lev": 100,
+      "exp": 579615,
+      "max_lev": 100,
       "max_color": 5,
       "vip": 15,
       "skill_point": 0,
@@ -134,7 +134,7 @@
       "mana": 999999999,
       "crystal": 999999,
       "energy": 100,
-      "max_energy": 100,
+      "max_energy": 160,
       "spirit_energy": 100,
       "invitation": 10,
       "max_invitation": 10,

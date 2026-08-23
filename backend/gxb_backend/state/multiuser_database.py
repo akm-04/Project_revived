@@ -25,7 +25,9 @@ from .profiles import apply_profile, make_fresh_player
 from .skill_point_policy import SkillPointPolicy
 from .commerce_service import CommerceEntitlementService
 from .vip_policy import VipProgressionPolicy
+from .vip_award_service import VipAwardService
 from .maintenance_services import PlayerMaintenanceServices
+from gxb_backend.content.item_stack_limit_catalog import ItemStackLimitCatalog
 
 if TYPE_CHECKING:
     from .summon_featured_rotation import SummonFeaturedRotationPolicy
@@ -509,6 +511,171 @@ class MultiUserDatabase:
         return True
 
 
+    def _apply_pass99_debug_qa_consumables_seed(self, player: PlayerState) -> bool:
+        """One-shot source-bounded QA seed for deterministic economy testing.
+
+        This intentionally *may* add/raise the explicitly authorized QA rows,
+        unlike Pass96's normalization-only repair. The migration marker makes
+        it non-replenishing after the first successful load. Source item.stack
+        remains the hard upper bound, so cap-99 foods seed to 90 rather than
+        violating the inventory invariant with a requested 900.
+        """
+        if str(getattr(player, "account_uid", "") or "") != SANDBOX_UID:
+            return False
+        path = self.data_dir / "debug_guest_qa_consumables_pass99.json"
+        try:
+            payload = json.loads(path.read_text(encoding="utf-8"))
+        except Exception:
+            return False
+        if not isinstance(payload, dict):
+            return False
+        meta = payload.get("_meta") if isinstance(payload.get("_meta"), dict) else {}
+        marker = str(meta.get("migration_marker") or "pass99_debug_qa_consumables_seed_v1")
+        state = player.persistence_state if isinstance(player.persistence_state, dict) else {}
+        if state is not player.persistence_state:
+            player.persistence_state = state
+        migrations = state.setdefault("migrations", {})
+        if not isinstance(migrations, dict):
+            migrations = {}
+            state["migrations"] = migrations
+        if migrations.get(marker):
+            return False
+
+        limits = ItemStackLimitCatalog(self.data_dir)
+        if not isinstance(player.backpack_items, list):
+            player.backpack_items = []
+        by_id: dict[int, dict[str, Any]] = {}
+        for row in player.backpack_items:
+            if not isinstance(row, dict):
+                continue
+            try:
+                item_id = int(row.get("table_id", 0) or 0)
+            except (TypeError, ValueError):
+                continue
+            if item_id > 0:
+                by_id[item_id] = row
+
+        changed = 0
+        seeded: dict[str, int] = {}
+        for spec in payload.get("items") or []:
+            if not isinstance(spec, dict):
+                continue
+            try:
+                item_id = int(spec.get("item_id", 0) or 0)
+                requested = max(0, int(spec.get("target_quantity", 0) or 0))
+            except (TypeError, ValueError):
+                continue
+            if item_id <= 0 or requested <= 0:
+                continue
+            limit = limits.limit(item_id)
+            if limit is None or limit <= 0:
+                continue
+            target = min(requested, limit)
+            row = by_id.get(item_id)
+            if row is None:
+                row = {"table_id": item_id, "item_num": target, "time": 0}
+                player.backpack_items.append(row)
+                by_id[item_id] = row
+                changed += 1
+            else:
+                try:
+                    current = max(0, int(row.get("item_num", 0) or 0))
+                except (TypeError, ValueError):
+                    current = 0
+                if current < target:
+                    row["item_num"] = target
+                    changed += 1
+            seeded[str(item_id)] = target
+
+        migrations[marker] = {
+            "applied": 1,
+            "policy": "one_shot_source_stack_bounded_qa_seed",
+            "rows_added_or_raised": changed,
+            "seeded_targets": seeded,
+        }
+        return True
+
+    def _apply_pass96_debug_account_normalization(self, player: PlayerState) -> bool:
+        """One-shot source-aware sandbox repair for end-game economy QA.
+
+        Historical Pass72/73 seed markers are intentionally left untouched.
+        This migration only lowers invalid persisted quantities; it never
+        replenishes already-consumed items.
+        """
+        if str(getattr(player, "account_uid", "") or "") != SANDBOX_UID:
+            return False
+        path = self.data_dir / "debug_guest_normalization_pass96.json"
+        try:
+            payload = json.loads(path.read_text(encoding="utf-8"))
+        except Exception:
+            return False
+        if not isinstance(payload, dict):
+            return False
+        meta = payload.get("_meta") if isinstance(payload.get("_meta"), dict) else {}
+        marker = str(meta.get("migration_marker") or "pass96_debug_account_normalization_v1")
+        state = player.persistence_state if isinstance(player.persistence_state, dict) else {}
+        if state is not player.persistence_state:
+            player.persistence_state = state
+        migrations = state.setdefault("migrations", {})
+        if not isinstance(migrations, dict):
+            migrations = {}
+            state["migrations"] = migrations
+        if migrations.get(marker):
+            return False
+
+        academy = payload.get("academy") if isinstance(payload.get("academy"), dict) else {}
+        player.lev = max(1, int(academy.get("lev", 100) or 100))
+        player.exp = max(0, int(academy.get("exp", 579615) or 579615))
+        player.max_lev = max(1, int(academy.get("max_lev", 100) or 100))
+        player.max_energy = max(0, int(academy.get("max_energy", 160) or 160))
+
+        headroom = payload.get("inventory_headroom") if isinstance(payload.get("inventory_headroom"), dict) else {}
+        target_large = max(1, int(headroom.get("stack_at_least_999", 900) or 900))
+        target_99 = max(1, int(headroom.get("stack_99", 90) or 90))
+        ratio = max(1, min(100, int(headroom.get("other_positive_cap_ratio_percent", 90) or 90)))
+        limits = ItemStackLimitCatalog(self.data_dir)
+        changed_rows = 0
+        examined_rows = 0
+        if not isinstance(player.backpack_items, list):
+            player.backpack_items = []
+        for row in player.backpack_items:
+            if not isinstance(row, dict):
+                continue
+            try:
+                item_id = int(row.get("table_id", 0) or 0)
+                current = int(row.get("item_num", 0) or 0)
+            except (TypeError, ValueError):
+                continue
+            if item_id <= 0 or current <= 0:
+                continue
+            limit = limits.limit(item_id)
+            if limit is None:
+                continue
+            examined_rows += 1
+            if limit >= 999:
+                target = min(limit, target_large)
+            elif limit == 99:
+                target = min(limit, target_99)
+            else:
+                target = max(1, min(limit, (limit * ratio) // 100))
+            if current > target:
+                row["item_num"] = target
+                changed_rows += 1
+
+        migrations[marker] = {
+            "applied": 1,
+            "academy": {
+                "lev": player.lev,
+                "exp": player.exp,
+                "max_lev": player.max_lev,
+                "max_energy": player.max_energy,
+            },
+            "inventory_rows_examined": examined_rows,
+            "inventory_rows_lowered": changed_rows,
+            "policy": "source_stack_headroom_no_replenish",
+        }
+        return True
+
     def _apply_pass75_debug_campaign_unlock(self, player: PlayerState) -> bool:
         """One-shot source-graph Campaign unlock for anonymous QA only."""
         if str(getattr(player, "account_uid", "") or "") != SANDBOX_UID:
@@ -582,6 +749,16 @@ class MultiUserDatabase:
             changed = True
         if self._apply_pass75_debug_campaign_unlock(player):
             changed = True
+        if self._apply_pass96_debug_account_normalization(player):
+            changed = True
+        if self._apply_pass99_debug_qa_consumables_seed(player):
+            changed = True
+        # Pass91: source SelfPlayer/VipRechargeWindow require a non-empty
+        # one-based VIP1..VIP15 0/1 claim vector. The backend never implemented
+        # MID657 before Pass91, so empty/missing legacy state safely means
+        # "nothing claimed" rather than "unknown history".
+        if VipAwardService.normalize_player_claims(player):
+            changed = True
         # Pass87 Commerce authority normalization runs at the durable player-load
         # maintenance boundary. It is explicitly not a purchase transaction.
         commerce_policy = VipProgressionPolicy(self.data_dir)
@@ -591,6 +768,8 @@ class MultiUserDatabase:
         maintenance = PlayerMaintenanceServices(
             player, self.data_dir, featured_rotation=self.featured_rotation
         )
+        if maintenance.player_progression.normalize_source_authority():
+            changed = True
         # Runtime v0.8.2 exposed a latent client crash in the unused Arena
         # invitation path whenever any economy_ event is processed. Migrate
         # credential players created by v0.8.0-v0.8.2 to the deferred-PvP

@@ -1,0 +1,47 @@
+{
+  "_meta": {
+    "schema_version": 1,
+    "pass": "100.0",
+    "source_resolution": "effective_merged",
+    "refresh_cost_source": "data/tables/refresh_cost.lua",
+    "refresh_cost_source_sha256": "53e3bd5efb3981513a0987be7f1cf9758679fedfaa6400e72c1fc9d6942bfa06",
+    "monthly_privilege_source": "data/tables/monthly_privilege.lua",
+    "monthly_privilege_source_sha256": "4fdc9d5b743c530bca9e943b64a96a87f5502243653c5abdb466a39090ade77b",
+    "misc_source": "data/tables/misc.lua",
+    "misc_source_sha256": "058cf5719421ed71a12083a8c95b0ccded7204bedb5fa1263d508e2fa4257f9a",
+    "energy_ui_sources": [
+      "app/common/ui/EcoSidebar.lua",
+      "app/common/ui/EcoDisplaySidebar.lua"
+    ],
+    "energy_ui_source_sha256": {
+      "EcoSidebar.lua": "f4fd60f64f0542739f93d647a29528d3a3ce54951e5fb411f666838388f76c3d",
+      "EcoDisplaySidebar.lua": "a1ab7a004b3ec0f4830096be7d7c088625c4edb5a248abc2285594c9bcc8a414"
+    },
+    "runtime_rule": "MID97: nth Crystal cost from buyEnergyCost(counter+1), +120 Energy, reject new purchase at materialized Energy >= energy_max_limit, allowance VIP num_energy plus active Monthly Privilege row1 num_energy."
+  },
+  "energy_grant": 120,
+  "energy_purchase_threshold": 500,
+  "monthly_privilege_num_energy": 4,
+  "buy_energy_cost_by_ordinal": {
+    "1": 50,
+    "2": 50,
+    "3": 100,
+    "4": 100,
+    "5": 100,
+    "6": 100,
+    "7": 200,
+    "8": 200,
+    "9": 200,
+    "10": 400,
+    "11": 400,
+    "12": 400,
+    "13": 400,
+    "14": 1000,
+    "15": 1000,
+    "16": 1000,
+    "17": 1000,
+    "18": 1000,
+    "19": 1000,
+    "20": 1000
+  }
+}

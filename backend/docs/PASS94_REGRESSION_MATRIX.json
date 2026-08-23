@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "pass": "94.0",
+  "status": "PASS_WITH_ONE_PREEXISTING_BASELINE_TEST_DRIFT",
+  "protected_boundaries": {
+    "resource_registry_and_uow": "PASS",
+    "economy_backbone_part2": "PASS",
+    "response_projection": "PASS",
+    "campaign_ownership": "PASS",
+    "daily_reset_temporal_hygiene": "PASS",
+    "ota_commerce_vip": "PASS",
+    "vip_rewards_mid657": "PASS",
+    "super_campaign_mid116": "PASS",
+    "player_progression_new_owner": "PASS"
+  },
+  "baseline_drift": {
+    "test": "tools/selftest_campaign_economy.py",
+    "failure": "existing Summon result assertion",
+    "pass92_baseline": "FAIL_SAME_ASSERTION",
+    "pass94": "FAIL_SAME_ASSERTION",
+    "classification": "NOT_INTRODUCED_BY_PASS94"
+  }
+}

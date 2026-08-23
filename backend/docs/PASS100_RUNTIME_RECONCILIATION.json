@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "pass": "100.0",
+  "reconciles": "Pass99.0 client smoke",
+  "status": "RUNTIME_ACCEPTED",
+  "debug_zip_sha256": "29b1295c0d5cee4daf4fba9b7afa4583c0d488cf91f446724e314a8625b4b443",
+  "observations": [
+    "UID 13371337 QA consumable seed was present and usable.",
+    "MID27 Fries, Kanto Food, and Tonkatsu were consumed successfully; representative cumulative Energy responses were 93, 111, and 141.",
+    "MID87 Magic Liquid consumables settled successfully; server responses projected cumulative magic_liquid (for example 80000, 170000, 212000) while the Backpack quantity decreased.",
+    "MID117 10x ITEM_SWEEP on campaign 1300009 returned cumulative Energy 9 and client QA confirmed Raid Tickets also decreased.",
+    "MID117 1x ITEM_SWEEP subsequently returned cumulative Energy 27 and then 16 on another sweep, confirming the Energy cost path remained active.",
+    "Cold restart preserved consumptions and Campaign sweep debits.",
+    "The stamina '+' control remained unusable because MID97 ADD_ENERGY was intentionally fail-closed in Pass99; this is the explicit Pass100 target."
+  ],
+  "authority": "Pass99.0 is fully runtime accepted. Pass100 may build on v0.12.3-pass99.0 without reopening Pass99 economy fixes."
+}

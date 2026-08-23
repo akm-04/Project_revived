@@ -1,0 +1,244 @@
+{
+  "pass": "91.0",
+  "status": "PASS",
+  "mid": 657,
+  "checks": [
+    {
+      "name": "source_tiers_complete",
+      "status": "PASS",
+      "details": {
+        "levels": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15
+        ]
+      }
+    },
+    {
+      "name": "source_representative_rewards_exact",
+      "status": "PASS",
+      "details": {
+        "vip1": [
+          {
+            "table_id": 50001009,
+            "item_num": 6
+          },
+          {
+            "table_id": 50001013,
+            "item_num": 10
+          },
+          {
+            "table_id": 50001015,
+            "item_num": 2
+          },
+          {
+            "table_id": -1,
+            "item_num": 5
+          }
+        ],
+        "vip15": [
+          {
+            "table_id": 50001011,
+            "item_num": 5
+          },
+          {
+            "table_id": 50001069,
+            "item_num": 1
+          },
+          {
+            "table_id": 50001007,
+            "item_num": 20
+          },
+          {
+            "table_id": -1,
+            "item_num": 700
+          }
+        ]
+      }
+    },
+    {
+      "name": "legacy_empty_claim_state_migrates_to_15_zeroes",
+      "status": "PASS",
+      "details": {}
+    },
+    {
+      "name": "legacy_object_claim_state_preserves_explicit_claims",
+      "status": "PASS",
+      "details": {
+        "claims": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1
+        ]
+      }
+    },
+    {
+      "name": "claim_vector_is_literal_integer_zero_one",
+      "status": "PASS",
+      "details": {
+        "claims": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "name": "vip0_cannot_claim_vip1",
+      "status": "PASS",
+      "details": {
+        "response": {
+          "error_code": 1,
+          "msg": "vip_award_level_not_reached",
+          "awards": []
+        }
+      }
+    },
+    {
+      "name": "vip1_claims_vip1_atomically",
+      "status": "PASS",
+      "details": {
+        "response": {
+          "awards": [
+            {
+              "table_id": 50001009,
+              "item_num": 6
+            },
+            {
+              "table_id": 50001013,
+              "item_num": 10
+            },
+            {
+              "table_id": 50001015,
+              "item_num": 2
+            },
+            {
+              "table_id": -1,
+              "item_num": 5
+            }
+          ]
+        },
+        "crystal": 105,
+        "claims": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "name": "duplicate_claim_grants_nothing",
+      "status": "PASS",
+      "details": {
+        "response": {
+          "awards": []
+        }
+      }
+    },
+    {
+      "name": "vip15_can_claim_unclaimed_lower_tier",
+      "status": "PASS",
+      "details": {}
+    },
+    {
+      "name": "durable_failure_rolls_back_reward_and_claim_marker",
+      "status": "PASS",
+      "details": {}
+    },
+    {
+      "name": "repository_mid657_hydrates_claims_and_survives_restart",
+      "status": "PASS",
+      "details": {
+        "response": {
+          "awards": [
+            {
+              "table_id": 50001009,
+              "item_num": 6
+            },
+            {
+              "table_id": 50001013,
+              "item_num": 10
+            },
+            {
+              "table_id": 50001015,
+              "item_num": 2
+            },
+            {
+              "table_id": -1,
+              "item_num": 5
+            }
+          ]
+        },
+        "duplicate": {
+          "awards": []
+        },
+        "claims": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    }
+  ],
+  "scope": "VIP one-time award lifecycle only; MID116 remains deferred"
+}

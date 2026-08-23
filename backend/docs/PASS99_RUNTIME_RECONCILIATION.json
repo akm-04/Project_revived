@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "pass": "99.0",
+  "input_debug_sha256": "f4b0a22c21e13bd10ca1ffaa029c14da92be7090ad7264663e3be57189ea61b2",
+  "findings": [
+    {
+      "mid": 27,
+      "status": "RUNTIME_OBSERVED_OK",
+      "evidence": "Kanto Food 50001015 successful responses show cumulative Energy 105, 123, 141, 159, i.e. +18 each."
+    },
+    {
+      "mid": 1404,
+      "status": "RUNTIME_OBSERVED_OK",
+      "evidence": "User QA confirms Emblem/Inscription dissolution grants source certificate currency."
+    },
+    {
+      "mid": 87,
+      "status": "STATIC_ACCEPTED_RUNTIME_NOT_DIRECTLY_OBSERVED",
+      "evidence": "User could not test because legacy dev account lacked the magic consumables; Pass99 QA seed supplies them."
+    },
+    {
+      "mid": 114,
+      "status": "NO_STAMINA_LEAK",
+      "evidence": "After observed cumulative Energy 159, FIGHT_RESULT stage 1300016 returns Energy 148; source energy_cost is 12, confirming the existing temporal debit path is active."
+    },
+    {
+      "mid": 117,
+      "status": "RUNTIME_BUG_CONFIRMED_AND_FIXED_STATICALLY",
+      "evidence": "Successful 10x and 1x sweep responses before Pass99 had rewards but no persisted Energy/ticket/Crystal input settlement."
+    }
+  ],
+  "release_interpretation": "Pass98 deterministic code is accepted for the runtime-observed MID27/MID1404 paths; MID87 direct client coverage remains an explicit carry-forward gate rather than being falsely marked observed."
+}

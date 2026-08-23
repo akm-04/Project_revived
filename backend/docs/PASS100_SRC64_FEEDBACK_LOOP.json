@@ -1,0 +1,79 @@
+{
+  "schema_version": 1,
+  "pass": "100.0",
+  "status": "SOURCE_CHECKED",
+  "effective_source": "src_64",
+  "source_bundle_sha256": "89f0f830508b92e5fff6ad53c6a9dae961a14042dbfdf5649008efb8353f5608",
+  "evidence": [
+    {
+      "path": "app/model/AddEnergy.lua",
+      "sha256": "0ccde9a11ea1d146e98787064218c4f50e72eb2da390fce2d882818f9b977474",
+      "facts": [
+        "MID97 ADD_ENERGY is constructed in one function and the original request body is an empty table.",
+        "Successful response supplies buy_energy_times and updates selfPlayer.buyEnergyTimes.",
+        "Pass100 OTA patches only the request parameters; the response/event handling remains source-native."
+      ]
+    },
+    {
+      "path": "app/common/network/Backend.lua",
+      "sha256": "95378e2b0be8180df6de27e9e430c630bcfe46c080e1f91ef5f6d74bdbb1b840",
+      "facts": [
+        "Failed non-chat web requests are retained in pendingRequests with the same params table.",
+        "Retry invokes webRequest_ with the same MID and same params table, so an OTA-injected operation identity survives automatic retry unchanged."
+      ]
+    },
+    {
+      "path": "app/common/utils.lua",
+      "sha256": "6e56c7342e889d7ae8d41fe47cb06f66832227efe702f3863f693ee7ba84ffad",
+      "facts": [
+        "xyd.generateUUID() exists in the effective source and returns a UUID-shaped random identifier.",
+        "Existing client systems already use xyd.generateUUID() for message/object identity, making it the source-native nonce primitive for the preservation bridge."
+      ]
+    },
+    {
+      "path": "app/common/ui/EcoSidebar.lua",
+      "sha256": "f4fd60f64f0542739f93d647a29528d3a3ce54951e5fb411f666838388f76c3d",
+      "facts": [
+        "Energy purchase grant constant is 120.",
+        "The purchase UI reads selfPlayer.buyEnergyTimes, prices ordinal buyEnergyTimes+1, checks VIP/Monthly allowance, and blocks initiating a new purchase when current Energy reaches the source energyMaxLimit."
+      ]
+    },
+    {
+      "path": "app/common/ui/EcoDisplaySidebar.lua",
+      "sha256": "a1ab7a004b3ec0f4830096be7d7c088625c4edb5a248abc2285594c9bcc8a414",
+      "facts": [
+        "Independent Energy UI path confirms the same 120-Energy purchase grant and purchase-count semantics."
+      ]
+    },
+    {
+      "path": "data/tables/refresh_cost.lua",
+      "sha256": "53e3bd5efb3981513a0987be7f1cf9758679fedfaa6400e72c1fc9d6942bfa06",
+      "facts": [
+        "buy_energy_cost is indexed by purchase ordinal.",
+        "Reachable ordinal costs through VIP15 plus Monthly Privilege are source-generated into energy_purchase_source_meta.json."
+      ]
+    },
+    {
+      "path": "data/tables/monthly_privilege.lua",
+      "sha256": "4fdc9d5b743c530bca9e943b64a96a87f5502243653c5abdb466a39090ade77b",
+      "facts": ["Active Monthly Privilege row 1 contributes num_energy=4 additional purchases; MID97 reads this entitlement but does not own its lifecycle."]
+    },
+    {
+      "path": "data/tables/misc.lua",
+      "sha256": "058cf5719421ed71a12083a8c95b0ccded7204bedb5fa1263d508e2fa4257f9a",
+      "facts": ["energy_max_limit is 500; source UI treats it as a pre-purchase threshold, not a hard post-credit cap."]
+    },
+    {
+      "path": "data/tables/vip.lua",
+      "sha256": "18b76d7fa82964f57082aeb2092a80c231f69e86958b4b567aebabf30d626270",
+      "facts": ["VIP num_energy supplies the base daily paid-Energy purchase allowance; existing VipPrivilegeResolver is the canonical backend reader."]
+    }
+  ],
+  "bridge_contract": {
+    "request_fields": ["expected_buy_energy_times", "energy_day_id", "energy_op_id"],
+    "energy_op_id": "p100-energy-{source_day_id}-{expected_buy_energy_times}-{xyd.generateUUID()}",
+    "source_day_formula": "floor((server_time + 10800) / 86400)",
+    "reason_for_uuid": "A per-click UUID prevents operation-key reuse across daily ordinal resets or deliberate host-clock rollback while Backend.lua still preserves the same UUID for a network retry.",
+    "unpatched_behavior": "Empty/unidentified MID97 requests fail closed instead of risking an ambiguous charge."
+  }
+}

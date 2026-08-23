@@ -1,0 +1,28 @@
+{
+  "_meta": {
+    "schema_version": 1,
+    "pass": "99.0",
+    "migration_marker": "pass99_debug_qa_consumables_seed_v1",
+    "applies_only_to_account_uid": "13371337",
+    "source_resolution": "effective_merged",
+    "source_rule": "One-shot QA seed. Respect item.lua stack ceilings; do not replenish after marker is recorded."
+  },
+  "items": [
+    {"item_id": 50001013, "name": "Raid Ticket", "target_quantity": 900, "source_stack": 9999},
+    {"item_id": 50001014, "name": "Fries", "target_quantity": 90, "source_stack": 99},
+    {"item_id": 50001015, "name": "Kanto Food", "target_quantity": 90, "source_stack": 99},
+    {"item_id": 50001016, "name": "Tonkatsu", "target_quantity": 90, "source_stack": 99},
+    {"item_id": 50001120, "name": "20 Magic Energy", "target_quantity": 900, "source_stack": 999},
+    {"item_id": 50001121, "name": "100 Energy", "target_quantity": 900, "source_stack": 999},
+    {"item_id": 50001122, "name": "400 Magic Energy", "target_quantity": 900, "source_stack": 999},
+    {"item_id": 50001123, "name": "800 Magic Energy", "target_quantity": 900, "source_stack": 999},
+    {"item_id": 50001124, "name": "2k Magic Powder", "target_quantity": 900, "source_stack": 999},
+    {"item_id": 50001125, "name": "10k Powder", "target_quantity": 900, "source_stack": 999},
+    {"item_id": 50001126, "name": "40k Magic Powder", "target_quantity": 900, "source_stack": 999},
+    {"item_id": 50001127, "name": "80k Magic Powder", "target_quantity": 900, "source_stack": 999},
+    {"item_id": 50001128, "name": "2k Magic Liquid", "target_quantity": 900, "source_stack": 999},
+    {"item_id": 50001129, "name": "10k Liquid", "target_quantity": 900, "source_stack": 999},
+    {"item_id": 50001130, "name": "40k Magic Liquid", "target_quantity": 900, "source_stack": 999},
+    {"item_id": 50001131, "name": "80k Magic Liquid", "target_quantity": 900, "source_stack": 999}
+  ]
+}

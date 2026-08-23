@@ -18,11 +18,16 @@ from gxb_backend.content import CatalogNamespace, ContentRef, GameDataCatalog
 
 from .awakening_mission_service import AwakeningMissionService
 from .campaign_drop_planner import CampaignDropPlanner
+from .campaign_reset_policy import CampaignResetPolicy
 from .economy_repository import EconomyRepository
+from .economy_ledger import InsufficientScalarBalance
 from .hero_progression_repository import HeroProgressionRepository
 from .inventory_repository import InventoryRepository
+from .stack_inventory import StackInventoryError
 from .mission_repository import MissionRepository
-from .mutation_plan import ActorRef, IdempotencySpec, MutationOrigin, MutationPlan, TemporalTransition
+from .mutation_plan import (
+    ActorRef, IdempotencySpec, MutationOrigin, MutationPlan, ResourceMutation, StackMutation, TemporalTransition,
+)
 from .mutation_settlement_service import MutationPreconditionError, MutationSettlementError, MutationSettlementService
 from .player_state import PlayerState
 from .reward_transaction_service import (
@@ -30,6 +35,7 @@ from .reward_transaction_service import (
 )
 from .tutorial_milestone_repository import TutorialMilestoneRepository
 from .unit_of_work import OperationContext, UnitOfWork
+from .vip_policy import VipPrivilegeResolver, VipProgressionPolicy
 
 
 class WorldRepository:
@@ -50,6 +56,8 @@ class WorldRepository:
         drop_planner: CampaignDropPlanner | None = None,
         settlement: MutationSettlementService | None = None,
         uow: UnitOfWork | None = None,
+        campaign_reset_policy: CampaignResetPolicy | None = None,
+        vip_privileges: VipPrivilegeResolver | None = None,
     ) -> None:
         self.player = player
         self.data_dir = Path(data_dir)
@@ -65,6 +73,10 @@ class WorldRepository:
         self.drop_planner = drop_planner
         self.settlement = settlement
         self.uow = uow
+        self.campaign_reset_policy = campaign_reset_policy
+        self.vip_privileges = vip_privileges or VipPrivilegeResolver(
+            player, VipProgressionPolicy(self.data_dir)
+        )
         self._campaigns = self._load_campaign_meta()
         self._campaign_ownership = self._load_campaign_ownership_meta()
         self._campaign_rewards = self._load_campaign_reward_meta()
@@ -891,10 +903,158 @@ class WorldRepository:
         self._save()
         return response
 
+    def reset_campaign(self, req: dict[str, Any]) -> dict[str, Any]:
+        """MID116: buy one new Super Campaign attempt block atomically.
+
+        Effective src_64 exposes the button only when ``dailyLimit <= 0`` and
+        prices ordinal ``reset_count + 1``.  A repeated request received after
+        a committed reset but before those refreshed attempts are consumed is
+        treated as a read-only postcondition replay: this reconciles a lost HTTP
+        response without inventing a request nonce or charging twice.
+        """
+        campaign_id = self._int(req.get("campaign_id"), 0)
+        campaign_type = self._int(req.get("campaign_type"), 0)
+        if campaign_type != 2:
+            return {"error_code": 1, "msg": "campaign_reset_super_only"}
+        if campaign_id not in self._source_mode_set(2):
+            return {"error_code": 1, "msg": "campaign_mode_mismatch"}
+        current = self._find_row(campaign_id, 2)
+        if current is None:
+            return {"error_code": 1, "msg": "campaign_locked"}
+
+        # Natural source-state reconciliation for a lost successful response.
+        # The UI cannot legitimately request a paid reset while attempts remain;
+        # returning the already-committed row is therefore mutation-free and
+        # restores the client's dailyLimit/resetCount view. Initial/non-reset
+        # state (reset_count==0) still fails closed.
+        if self._int(current.get("daily_limit"), 0) > 0:
+            if self._int(current.get("reset_count"), 0) > 0:
+                return self._reset_campaign_response(current)
+            return {"error_code": 1, "msg": "campaign_daily_limit_not_exhausted"}
+
+        if self.campaign_reset_policy is None:
+            return {"error_code": 1, "msg": "campaign_reset_policy_unavailable"}
+        reset_count = max(0, self._int(current.get("reset_count"), 0))
+        allowance = max(0, self.campaign_reset_policy.total_allowance())
+        if reset_count >= allowance:
+            return {"error_code": 1, "msg": "campaign_reset_limit_exhausted"}
+        try:
+            cost = max(0, self.campaign_reset_policy.next_cost(reset_count))
+        except Exception as exc:
+            return {"error_code": 1, "msg": f"campaign_reset_cost_unavailable:{exc}"}
+
+        if self.uow is None:
+            try:
+                return self._reset_campaign_mutation(current, cost)
+            except InsufficientScalarBalance:
+                return {"error_code": 1, "msg": "crystal_insufficient"}
+        context = OperationContext(
+            actor_player_id=str(self.player.player_id),
+            protocol_mid=116,
+            domain="campaign",
+            operation_name="reset_super_campaign",
+            idempotency_key=None,
+        )
+        try:
+            with self.uow.transaction(context):
+                # Re-resolve inside the rollback snapshot in case a direct test
+                # mutates state between preflight and transaction entry.
+                row = self._find_row(campaign_id, 2)
+                if row is None:
+                    return {"error_code": 1, "msg": "campaign_locked"}
+                if self._int(row.get("daily_limit"), 0) > 0:
+                    if self._int(row.get("reset_count"), 0) > 0:
+                        return self._reset_campaign_response(row)
+                    return {"error_code": 1, "msg": "campaign_daily_limit_not_exhausted"}
+                current_count = max(0, self._int(row.get("reset_count"), 0))
+                current_allowance = max(0, self.campaign_reset_policy.total_allowance())
+                if current_count >= current_allowance:
+                    return {"error_code": 1, "msg": "campaign_reset_limit_exhausted"}
+                current_cost = max(0, self.campaign_reset_policy.next_cost(current_count))
+                return self._reset_campaign_mutation(row, current_cost)
+        except InsufficientScalarBalance:
+            return {"error_code": 1, "msg": "crystal_insufficient"}
+
+    def _reset_campaign_mutation(self, row: dict[str, Any], cost: int) -> dict[str, Any]:
+        ownership = self.ownership_meta(row.get("campaign_id")) or {}
+        source_limit = max(0, self._int(ownership.get("daily_limit"), 0))
+        if source_limit <= 0:
+            return {"error_code": 1, "msg": "campaign_source_daily_limit_unavailable"}
+        ledger = getattr(self.economy, "ledger", None)
+        if ledger is None:
+            return {"error_code": 1, "msg": "campaign_crystal_ledger_unavailable"}
+        # ``EconomyLedger.debit`` intentionally returns None on insufficient
+        # balance; use apply_deltas so the typed exception reaches the UoW and
+        # no campaign field is staged first.
+        ledger.apply_deltas({"crystal": -max(0, int(cost))}, persist=False)
+        row["daily_limit"] = source_limit
+        row["reset_count"] = max(0, self._int(row.get("reset_count"), 0)) + 1
+        # ``star`` and ``is_partner_drop`` are deliberately untouched.
+        self._save()
+        return self._reset_campaign_response(row)
+
+    @staticmethod
+    def _reset_campaign_response(row: dict[str, Any]) -> dict[str, int]:
+        def as_int(value: Any, default: int = 0) -> int:
+            try:
+                return int(value)
+            except (TypeError, ValueError):
+                return default
+        return {
+            "campaign_id": as_int(row.get("campaign_id"), 0),
+            "star": max(0, min(3, as_int(row.get("star"), 0))),
+            "daily_limit": max(0, as_int(row.get("daily_limit"), 0)),
+            "reset_count": max(0, as_int(row.get("reset_count"), 0)),
+        }
+
     def sweep(self, req: dict[str, Any]) -> dict[str, Any]:
+        # Historical repository-only tests construct WorldRepository without the
+        # request-scoped settlement graph. Preserve that non-runtime seam; live
+        # RequestServices always supplies both UoW and MutationSettlementService.
+        if self.uow is None or self.settlement is None:
+            return self._sweep_compatibility_read_model(req)
+        context = OperationContext(
+            actor_player_id=str(self.player.player_id),
+            protocol_mid=117,
+            domain="campaign",
+            operation_name="sweep_campaign",
+            idempotency_key=None,
+        )
+        with self.uow.transaction(context):
+            return self._sweep_mutation(req)
+
+    def _sweep_compatibility_read_model(self, req: dict[str, Any]) -> dict[str, Any]:
         self.normalize()
         cid = self._int(req.get("campaign_id"), 0)
         count = max(1, min(100, self._int(req.get("sweep_num"), 1)))
+        if count > 1 and self.vip_privileges is not None and not self.vip_privileges.campaign_multi_sweep_enabled():
+            return {"error_code": 1, "msg": "campaign_multi_sweep_privilege_required"}
+        row = self._find_row(cid) or self._campaign_row(cid, 0)
+        return {
+            "items": [[] for _ in range(count)],
+            "economys": [{"exp": 0, "mana": 0} for _ in range(count)],
+            "additional": [],
+            "campaign": row,
+        }
+
+    def _sweep_mutation(self, req: dict[str, Any]) -> dict[str, Any]:
+        self.normalize()
+        cid = self._int(req.get("campaign_id"), 0)
+        count = max(1, min(100, self._int(req.get("sweep_num"), 1)))
+        sweep_type = self._int(req.get("sweep_type"), 0)
+        # src_64 enums.lua: ITEM_SWEEP=1, CRYSTAL_SWEEP=2. The client checks
+        # campaign.energyCost * sweep_num before opening SweepWindow, then
+        # removes one Raid Ticket (50001013) per successful ITEM_SWEEP locally.
+        # CRYSTAL_SWEEP instead costs one Crystal per sweep. The server must
+        # durably own the same debits or reloads resurrect spent resources.
+        if sweep_type not in (1, 2):
+            return {"error_code": 1, "msg": "campaign_sweep_type_invalid"}
+        # Source MapDetail/NewMapDetail behavior: ordinary single sweep remains
+        # available, while a multi-sweep requires VIP quick_sweep OR an active
+        # Monthly Privilege card. Monthly Privilege lifecycle itself is not
+        # implemented here; this path only reads the existing entitlement.
+        if count > 1 and self.vip_privileges is not None and not self.vip_privileges.campaign_multi_sweep_enabled():
+            return {"error_code": 1, "msg": "campaign_multi_sweep_privilege_required"}
         row = self._find_row(cid) or self._campaign_row(cid, 0)
         reward_meta = self._campaign_rewards.get(str(cid)) or {}
         source_sweep = reward_meta.get("sweep_rewards") or []
@@ -914,13 +1074,50 @@ class WorldRepository:
                     per_sweep.append({"item_id": item_id, "item_num": item_num})
 
         item_rows = [[dict(award) for award in per_sweep] for _ in range(count)]
-        if per_sweep and self.inventory is not None:
-            aggregate = [
-                {"item_id": award["item_id"], "item_num": award["item_num"] * count}
-                for award in per_sweep
-            ]
-            self.inventory.add_items(aggregate, persist=False)
-            self._save()
+        if self.settlement is None or self.uow is None:
+            raise RuntimeError("Campaign MID117 sweep settlement requires PlayerUnitOfWork")
+
+        energy_cost = self._campaign_entry_energy_cost(cid)
+        if energy_cost <= 0:
+            return {"error_code": 1, "msg": "campaign_energy_cost_unavailable"}
+        operations = [
+            TemporalTransition("energy", "DEBIT", energy_cost * count),
+        ]
+        if sweep_type == 1:
+            operations.append(StackMutation(50001013, "DEBIT", count))
+        else:
+            operations.append(ResourceMutation("crystal", "DEBIT", count))
+        for award in per_sweep:
+            operations.append(StackMutation(award["item_id"], "CREDIT", award["item_num"] * count))
+
+        plan = MutationPlan(
+            schema_version=1,
+            plan_id=f"campaign-sweep:{cid}:{self.uow.current_state_version}",
+            origin=MutationOrigin(
+                domain="campaign", operation="sweep_campaign", protocol_mid=117,
+                source_table="data/tables/campaign.lua", source_id=cid, field_path="energy_cost",
+            ),
+            actor=ActorRef(
+                player_id=str(self.player.player_id),
+                account_uid=str(getattr(self.player, "account_uid", "") or "") or None,
+            ),
+            expected_state_version=self.uow.current_state_version,
+            idempotency=IdempotencySpec(mode="NONE"),
+            preconditions=(),
+            operations=tuple(operations),
+            semantic_events=(),
+            metadata={
+                "pass": "99.0",
+                "campaign_id": cid,
+                "sweep_num": count,
+                "sweep_type": sweep_type,
+                "raid_ticket_item_id": 50001013,
+            },
+        )
+        try:
+            self.settlement.apply(plan)
+        except (MutationSettlementError, StackInventoryError, InsufficientScalarBalance) as exc:
+            return {"error_code": 1, "msg": str(exc)}
 
         return {
             "items": item_rows,

@@ -1,0 +1,38 @@
+{
+  "pass": "91.0",
+  "mid": 657,
+  "name": "GET_VIP_AWARD",
+  "request": {
+    "id": "vip_level integer 1..15"
+  },
+  "success_response": {
+    "awards": "array of {table_id,item_num}; Crystal uses table_id=-1"
+  },
+  "bootstrap": {
+    "field": "detail[17].vip_awards",
+    "shape": "15 literal integer 0/1 entries; position 0 => VIP1"
+  },
+  "validation": [
+    "level in 1..15",
+    "current canonical VIP >= requested level"
+  ],
+  "claim_semantics": {
+    "unclaimed": 0,
+    "claimed": 1,
+    "duplicate": "awards=[]; no second grant or durable mutation"
+  },
+  "source_resolution": "vip.lua.reward_item -> gift.lua",
+  "transaction": [
+    "EconomyLedger Crystal credit",
+    "Backpack item stack credit",
+    "vip_awards claim marker",
+    "single PlayerUnitOfWork commit"
+  ],
+  "failure": "durable commit failure rolls back reward and claim marker",
+  "deferred": [
+    "MID116",
+    "MID117",
+    "MID118",
+    "weekly/card/activity VIP rewards"
+  ]
+}

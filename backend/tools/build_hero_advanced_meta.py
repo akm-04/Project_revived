@@ -147,9 +147,20 @@ def main()->int:
         iid=_int(r.get('id'),0)
         if iid<=0: continue
         item_ids=_split_ints(r.get('item_id'))
-        row={'id':iid,'item_ids':item_ids,'level':_int(r.get('level'),0),'item_type':_int(r.get('item_type'),0),'item_pos':_int(r.get('item_pos'),0),'special':_int(r.get('special'),0),'change_gold':_int(r.get('change_gold'),0),'change_crystal':_int(r.get('change_crystal'),0)}
+        row={'id':iid,'item_ids':item_ids,'level':_int(r.get('level'),0),'item_type':_int(r.get('item_type'),0),'item_pos':_int(r.get('item_pos'),0),'special':_int(r.get('special'),0),'resolve_material':_int(r.get('resolve_material'),0),'resolve_num':_int(r.get('resolve_num'),0),'change_gold':_int(r.get('change_gold'),0),'change_crystal':_int(r.get('change_crystal'),0)}
         inscriptions[str(iid)]=row
         for concrete in item_ids: inscription_item_to_type[str(concrete)]=iid
+    # Pass98: inscription.lua.item_id omits 14 source-valid Honor variants, while
+    # effective item.lua carries their authoritative inscript_id.  Use that
+    # per-item relationship as the complete concrete-item mapping and require
+    # every referenced inscription type to exist in inscription.lua.
+    for concrete, item_row in items.items():
+        mapped=_int(item_row.get('inscript_id'),0)
+        if mapped<=0:
+            continue
+        if str(mapped) not in inscriptions:
+            raise ValueError(f'item.lua inscription item {concrete} references unknown inscription {mapped}')
+        inscription_item_to_type[str(concrete)]=mapped
     misc=_misc(t/'misc.lua')
     stone_evolution={}
     for r in _flat(t/'stone_evolution.lua'):
@@ -175,7 +186,7 @@ def main()->int:
         for typ in (1,2,3): advanced_test_items.update(r[f'strth_mtrs{typ}']); advanced_test_items.update(r[f'dec_mtrs{typ}'])
     advanced_test_items.discard(0)
     payload={
-      '_meta':{'format':'GXB Pass73 source-derived advanced Hero/Girls progression metadata','source_authority':'effective src_64','hidden_randomness':'excluded / PRIVATE_SERVER_POLICY boundary'},
+      '_meta':{'format':'GXB Pass73/Pass98 source-derived advanced Hero/Girls progression metadata','source_authority':'effective src_64','hidden_randomness':'excluded / PRIVATE_SERVER_POLICY boundary','pass98_inscription_mapping':'item.lua.inscript_id completes concrete mapping; inscription.lua owns resolve policy'},
       'live_super_max_star':8,
       'partner_stones':partner_stones,'super_partners':super_partners,'super_stars':super_stars,'super_equip_enhance':super_enhance,
       'stone_evolution':stone_evolution,'stone_tickets':stone_tickets,

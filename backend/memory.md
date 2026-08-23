@@ -1,5 +1,7 @@
-# Current memory — Pass89.0
+# Pass105 memory
 
-Canonical implementation: `gxb-backend-v0.10.2-pass89.0`. Pass88 direct-Crystal UoW settlement remains unchanged. Pass89 adds the source-confirmed MID2 OTA deployment of a narrow purchase bridge and hardens legacy sandbox token use. The OTA bridge uses the current logged-in `xyd.Backend.get().token_` and `region_`, returns/injects the committed MID36857 completion, and falls through to original native purchase code for every unsupported SKU.
+Canonical implementation: `gxb-backend-v0.13.1-pass105.0`. Pass100 MID97 is runtime accepted. Pass104 core firewall/no-regression behavior is runtime reconciled and accepted for roadmap continuation; Store/Sky Tower read-model glitches remain parked.
 
-Runtime gate: start the backend, cold-start the client, observe MID2 advertising resource version 1.631.3, download/unzip/restart, then tap a direct Crystal pack on a fresh account and verify correct player/VIP progression.
+Mutation Safety Firewall now blocks 79 audited non-session unowned mutations plus 8 source-proven unsupported session preflight/start routes using HTTP409 before DailyReset/handler/projection/UoW. Eight terminal settlement contracts remain explicitly deferred; generic 30005 is forbidden outside the source-proven allowlist and is not activated by Pass105.
+
+Next architectural gate: `RandomOutcomeService` foundation. Summon migration must add source-native per-click UUID identity and remove the old short-window retry heuristic without changing probabilities.

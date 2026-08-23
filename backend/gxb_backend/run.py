@@ -9,6 +9,7 @@ from gxb_backend.app_factory import create_app
 from gxb_backend.chat.stub import ChatStubServer
 from gxb_backend.config import SETTINGS
 from gxb_backend.updates.local_update import load_manifest
+from gxb_backend.version import ARTIFACT_VERSION
 
 
 def _run_flask(app, port: int) -> None:
@@ -24,7 +25,7 @@ def _run_flask(app, port: int) -> None:
 def main() -> None:
     app = create_app(SETTINGS)
     print("==================================================")
-    print(" GXB modular v0.10.2 Pass89.0 Commerce/VIP OTA Bridge")
+    print(f" GXB modular {ARTIFACT_VERSION}")
     print(f" SDK bind    : http://{SETTINGS.bind_host}:{SETTINGS.sdk_port}")
     print(f" ENGINE bind : http://{SETTINGS.bind_host}:{SETTINGS.engine_port}")
     print(f" ADVERTISE_HOST = {SETTINGS.advertise_host}")

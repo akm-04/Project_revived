@@ -119,12 +119,15 @@ def main() -> int:
     ap.add_argument('source_root', type=Path, help='effective src_64 root containing data/tables')
     ap.add_argument('--commerce-output', type=Path, default=Path('data/commerce_source_meta.json'))
     ap.add_argument('--vip-output', type=Path, default=Path('data/vip_source_meta.json'))
+    ap.add_argument('--vip-award-output', type=Path, default=Path('data/vip_award_meta.json'))
     args = ap.parse_args()
 
     charge_path = args.source_root / 'data/tables/charge.lua'
     vip_path = args.source_root / 'data/tables/vip.lua'
+    gift_path = args.source_root / 'data/tables/gift.lua'
     charge_rows = rows_as_dicts(charge_path)
     vip_rows = rows_as_dicts(vip_path)
+    gift_rows = rows_as_dicts(gift_path)
 
     direct = []
     for row in charge_rows:
@@ -188,7 +191,56 @@ def main() -> int:
         ],
     }
 
-    for path, payload in ((args.commerce_output, commerce), (args.vip_output, vip)):
+    gift_by_id = {int(row.get('id') or 0): row for row in gift_rows if int(row.get('id') or 0) > 0}
+    vip_award_tiers: dict[str, dict[str, Any]] = {}
+    supported_gift_scalar_fields = {'crystal'}
+    ignored_identity_fields = {'id', 'desc', 'items', 'item_nums'}
+    for level in range(1, 16):
+        vip_row = vip_by_id.get(str(level))
+        if not isinstance(vip_row, dict):
+            raise RuntimeError(f'missing VIP{level} row')
+        gift_id = int(vip_row.get('reward_item') or 0)
+        gift = gift_by_id.get(gift_id)
+        if not isinstance(gift, dict):
+            raise RuntimeError(f'VIP{level} reward_item {gift_id} missing from gift.lua')
+        item_ids = [int(v) for v in str(gift.get('items') or '').split('|') if str(v).strip()]
+        item_nums = [int(v) for v in str(gift.get('item_nums') or '').split('|') if str(v).strip()]
+        if len(item_ids) != len(item_nums):
+            raise RuntimeError(f'VIP{level} gift {gift_id} item/item_num length mismatch')
+        unsupported_nonzero = {}
+        for key, value in gift.items():
+            if key in ignored_identity_fields or key in supported_gift_scalar_fields:
+                continue
+            if value not in ('', 0, '0', None):
+                unsupported_nonzero[key] = value
+        if unsupported_nonzero:
+            raise RuntimeError(f'VIP{level} gift {gift_id} has unsupported nonzero fields: {unsupported_nonzero}')
+        vip_award_tiers[str(level)] = {
+            'vip_level': level,
+            'gift_id': gift_id,
+            'items': [
+                {'item_id': item_id, 'item_num': item_num}
+                for item_id, item_num in zip(item_ids, item_nums)
+            ],
+            'crystal': max(0, int(gift.get('crystal') or 0)),
+            'response_crystal_table_id': -1,
+        }
+    vip_awards = {
+        '_meta': {
+            'schema_version': 1,
+            'pass': '91.0',
+            'source_resolution': 'effective_merged',
+            'vip_source': 'data/tables/vip.lua',
+            'vip_source_sha256': sha256(vip_path),
+            'gift_source': 'data/tables/gift.lua',
+            'gift_source_sha256': sha256(gift_path),
+            'asset_crystal_table_id': -1,
+            'runtime_rule': 'MID657 one-time VIP1..VIP15 gifts; items settle as Backpack stacks, Crystal through EconomyLedger, and vip_awards claim marker in the same PlayerUnitOfWork.',
+        },
+        'tiers': vip_award_tiers,
+    }
+
+    for path, payload in ((args.commerce_output, commerce), (args.vip_output, vip), (args.vip_award_output, vip_awards)):
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(json.dumps(payload, indent=2, ensure_ascii=False) + '\n', encoding='utf-8')
         print(f'wrote {path}')

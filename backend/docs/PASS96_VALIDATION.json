@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "pass": "96.0",
+  "backend": "0.12.1",
+  "status": "STATIC_SELFTEST_ACCEPTED_RUNTIME_PENDING",
+  "checks": [
+    {
+      "name": "compileall",
+      "result": "PASS"
+    },
+    {
+      "name": "pass96_focused_economy_vip_cleanup",
+      "result": "PASS",
+      "covers": [
+        "5838-row stack catalog",
+        "UoW stack overflow rollback",
+        "legacy-overfull downward consumption",
+        "Academy100/max-level EXP hygiene",
+        "one-shot non-replenishing sandbox normalization",
+        "VIP resolver boundaries",
+        "multi-sweep gating",
+        "Hero preset gating"
+      ]
+    },
+    {
+      "name": "historical_regression_sweep",
+      "result": "PASS",
+      "passes": [
+        "Pass68",
+        "Pass69",
+        "Pass70",
+        "Pass72",
+        "Pass73",
+        "Pass75",
+        "Pass83",
+        "Pass87",
+        "Pass89",
+        "Pass91",
+        "Pass92",
+        "Pass94"
+      ]
+    },
+    {
+      "name": "selftest_campaign_economy",
+      "result": "KNOWN_BASELINE_DRIFT",
+      "detail": "same Summon assertion failure reproduced byte-for-behavior on untouched Pass94; not introduced by Pass96"
+    }
+  ],
+  "runtime_gate": "Focused client smoke required before Pass96 runtime acceptance."
+}

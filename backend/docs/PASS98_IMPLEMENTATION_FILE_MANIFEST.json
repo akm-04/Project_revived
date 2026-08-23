@@ -1,0 +1,91 @@
+{
+  "schema_version": 1,
+  "pass": "98.0",
+  "artifact": "gxb-backend-v0.12.2-pass98.0",
+  "changed_files": [
+    {
+      "path": "README.md",
+      "sha256": "314d59073e58ab873c6f834b475a91e89370527479ef69a94c73c00b70644b9f"
+    },
+    {
+      "path": "UPDATE_README.md",
+      "sha256": "8f2348530eaf3839df8654857e3c2162bd03cd4ee2e0bca6d48a72116cadb7aa"
+    },
+    {
+      "path": "VERSION.json",
+      "sha256": "d0762f173b69867d04a7c75b29d433019aaf7a49f55198e58d8dd3f94259fab4"
+    },
+    {
+      "path": "memory.md",
+      "sha256": "43da3612252e0d6ce5a2c0ec2dc176da8d5fa8bac8e4c8394f44a45aa2b4016e"
+    },
+    {
+      "path": "docs/memory.md",
+      "sha256": "43da3612252e0d6ce5a2c0ec2dc176da8d5fa8bac8e4c8394f44a45aa2b4016e"
+    },
+    {
+      "path": "data/consumable_effect_meta.json",
+      "sha256": "1e0ba6b34b276054c41cb221f03f4c71f420c9bec8ab3e268ab283b96a1bea67"
+    },
+    {
+      "path": "data/hero_advanced_progression_meta.json",
+      "sha256": "a02606cc209b5f02ee89560a0cdd0975a0ac4468b456c1e566346b9cf80a9b4f"
+    },
+    {
+      "path": "docs/PASS98_CLIENT_TEST_PLAN.md",
+      "sha256": "40d1ecba39d17183dd17bffb593eb410f31a3c2d42ffad1b5645f8b1f3ac81df"
+    },
+    {
+      "path": "docs/PASS98_SRC64_FEEDBACK_LOOP.json",
+      "sha256": "df33e19d792a4dd58459f5318ac81f9a6f9f80046740b167cebf25a6e92663f8"
+    },
+    {
+      "path": "docs/PASS98_TECHNICAL_CHANGELOG.md",
+      "sha256": "11d8772ee3aee5f04cde29ddcc4f1d329ae04a54a4e939a5a8f6093d259e12c2"
+    },
+    {
+      "path": "docs/PASS98_VALIDATION.json",
+      "sha256": "91890fb320a041c9d52126dc09dbe71d10504ac8350f5325142c9886bd693774"
+    },
+    {
+      "path": "gxb_backend/content/__init__.py",
+      "sha256": "291f17f60bd4d03164e861e80fc61f9f0ef40acd97e9129331dff31497da8e98"
+    },
+    {
+      "path": "gxb_backend/content/consumable_effect_catalog.py",
+      "sha256": "daa0e76e52505cba53a722fa7bf2c94e654feaa487372037ac7b017f24779345"
+    },
+    {
+      "path": "gxb_backend/dispatch/engine_dispatcher.py",
+      "sha256": "57e609e3025d5800de7c83c40e063ff83a8ebe42a97cca6b56733654f3a48f3b"
+    },
+    {
+      "path": "gxb_backend/handlers/inventory.py",
+      "sha256": "43966765f1f9dd388dd4090968662993e64f1759ff9550344b555bb6d3c47765"
+    },
+    {
+      "path": "gxb_backend/handlers/practice.py",
+      "sha256": "1845c3318a4fabacabed00ffc069b1d0f274bf769257391b21f70597003e924f"
+    },
+    {
+      "path": "gxb_backend/state/request_services.py",
+      "sha256": "bbf9416094527f78b9b52c66ccd3211e0c70795a7bda0e05d2fa71d7f1adddfa"
+    },
+    {
+      "path": "gxb_backend/version.py",
+      "sha256": "cbde388a753540519cfb1439cddf6d5484cdd31fa2ca83449068f662018d56a1"
+    },
+    {
+      "path": "tools/build_consumable_effect_meta.py",
+      "sha256": "3d3c441f8c235c9f8eee630b10e96ead75f5869b68254cc34b538572e284e636"
+    },
+    {
+      "path": "tools/build_hero_advanced_meta.py",
+      "sha256": "4655e6fd399d37f7ef06cd90a17094657c78625ad9c7d8a4914a2f3bf1c9ca7b"
+    },
+    {
+      "path": "tools/selftest_pass98_deterministic_consumables.py",
+      "sha256": "2eabad4c575b275a4dfd3cbaa2ef81b4cb1996d7dba66f385859df7414051539"
+    }
+  ]
+}

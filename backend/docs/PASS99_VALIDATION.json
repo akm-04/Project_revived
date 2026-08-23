@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "pass": "99.0",
+  "backend": "0.12.3",
+  "status": "STATIC_SELFTEST_ACCEPTED_RUNTIME_PENDING",
+  "checks": [
+    {"name":"compileall","result":"PASS"},
+    {"name":"pass99_focused_campaign_sweep_qa_seed","result":"PASS","covers":["source stage 1300016 energy_cost=12","10x ITEM_SWEEP Energy 200->80","Raid Ticket 20->10","1x CRYSTAL_SWEEP Energy 50->38 and Crystal 9->8","insufficient Energy atomic rollback","one-shot 16-row QA seed","cap-99 foods seed to 90","magic and Raid Ticket seed to 900"]},
+    {"name":"historical_regression_spine","result":"PASS","passes":["Pass68","Pass68.1","Pass69","Pass69.1","Pass70","Pass70.1","Pass71","Pass72","Pass73","Pass74","Pass75","Pass79","Pass81","Pass83","Pass87","Pass88","Pass89","Pass91","Pass92","Pass94","Pass96","Pass98"]}
+  ],
+  "known_boundary": "MID97 remains fail-closed; exact retry reconciliation is impossible from the source-native empty request without a client operation identity.",
+  "runtime_gate": "Focused client smoke required for MID117 costs/persistence and newly seeded MID87 consumables."
+}

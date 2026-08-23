@@ -112,7 +112,7 @@ class WorldHandlers:
         return self.ctx.state.get_world_repository().sweep(req)
 
     def reset_campaign(self, req: dict) -> dict:
-        return self.load_world_map(req)
+        return self.ctx.state.get_world_repository().reset_campaign(req)
 
     def get_bonus_award(self, req: dict) -> dict:
         return {"awards": []}

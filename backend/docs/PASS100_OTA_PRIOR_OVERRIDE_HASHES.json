@@ -1,0 +1,638 @@
+{
+  "schema_version": 1,
+  "pass": "100.0",
+  "basis": "Pass99 cumulative OTA manifest 1.631.3",
+  "count": 126,
+  "files": [
+    {
+      "path": "src_32/app/common/utils.lua",
+      "sha256": "02825645114984e049e1be614f719e7dd8d4dd20c8da8551705bbd38c2c06fcf",
+      "size": 256239
+    },
+    {
+      "path": "src_32/app/windows/DragonBoat2017SelectTeamWindow.lua",
+      "sha256": "2df48aef36de7188711a9e6d42e89ba7cb109538e7f3addd084e24ea9843869b",
+      "size": 11812
+    },
+    {
+      "path": "src_32/app/windows/DragonBoat2017ShopWindow.lua",
+      "sha256": "be88f9ac7f189ce83062872c32a49f43b859550c3489d4a13273502d5b5e2c6f",
+      "size": 6702
+    },
+    {
+      "path": "src_32/app/windows/LoginWindow.lua",
+      "sha256": "f6fb06e51dca4e16ecd8755c7ae67c8000da1cc6b728d3e44f1bb3ed230eeb2e",
+      "size": 8162
+    },
+    {
+      "path": "src_32/app/windows/activities/Activity1124.lua",
+      "sha256": "7024218825300bb340d0c26948092c6103133259351bd8a3c1b04b501bcb6d7d",
+      "size": 17466
+    },
+    {
+      "path": "src_32/app/windows/activities/Activity1149.lua",
+      "sha256": "354d88ebc7e8634450b1e3b4c05f498f07fa51066dfa572df64e1d6fa2f31308",
+      "size": 12604
+    },
+    {
+      "path": "src_32/app/windows/activities/Activity1231.lua",
+      "sha256": "429a465c314d3d14a28f3116b18f18eddd575d0fdea4a75ebb43e52e2e3daa87",
+      "size": 17374
+    },
+    {
+      "path": "src_32/data/tables/activity_anni4_campaign_shop.lua",
+      "sha256": "c03f5d1b934c4e23243b2d044d076f0634adcba2e423a345285c4dd422272f13",
+      "size": 940
+    },
+    {
+      "path": "src_32/data/tables/activity_anni_4th_gold_shop.lua",
+      "sha256": "9dc75cbd96a39b11b760aaaa97e35d0b21542d719a791b164c0ba11796d094d3",
+      "size": 772
+    },
+    {
+      "path": "src_32/data/tables/activity_anniversary_gacha.lua",
+      "sha256": "6d46aa8d5226ecc156b966072c816b5dec399af8f0f6615e3fedb3ba3d4f815f",
+      "size": 2123
+    },
+    {
+      "path": "src_32/data/tables/activity_balloon_dropbox.lua",
+      "sha256": "24db6d5c49947f53f3ccb88b24926f6fc4eaa8362d4ef7d03a4d286ee8e4b3c2",
+      "size": 18405
+    },
+    {
+      "path": "src_32/data/tables/activity_card_match.lua",
+      "sha256": "0a0224d5168108c5e47bbb5cf3a0e63152ba8620ecb12e217cded91651263c53",
+      "size": 1154
+    },
+    {
+      "path": "src_32/data/tables/activity_card_match_shop.lua",
+      "sha256": "7a1d3b8a0d5e916c4fb1ead15a1e805e02259baeac659188f0dd383ca3d834b0",
+      "size": 551
+    },
+    {
+      "path": "src_32/data/tables/activity_charge.lua",
+      "sha256": "708c9bbe55848cad8e9ecf67a630af2219d40e17d969ea664c292c60e715f3e8",
+      "size": 805
+    },
+    {
+      "path": "src_32/data/tables/activity_charge_gift.lua",
+      "sha256": "efbdeaeadbbbc9e6350350a3cd309da198b835ff5ca196eaed392d1413be5662",
+      "size": 413
+    },
+    {
+      "path": "src_32/data/tables/activity_chest.lua",
+      "sha256": "4f2bca5ae0334566b988bc60524ec5d12ee21a78df193646b749d890c298f080",
+      "size": 2191
+    },
+    {
+      "path": "src_32/data/tables/activity_chest2.lua",
+      "sha256": "5c299935a33b13e41563924f84599c69ce660e019d063576422dddd7f1558129",
+      "size": 2191
+    },
+    {
+      "path": "src_32/data/tables/activity_chest_us.lua",
+      "sha256": "9e33ab410108c4976c493c4556795c5b87d539ed280c9d164d8f7d2bb2ac8b51",
+      "size": 2283
+    },
+    {
+      "path": "src_32/data/tables/activity_chocolate_pool_award.lua",
+      "sha256": "8b31feae130bbf3fd7713b8fcab7311dbf370af4c47430b8b495acff409975f1",
+      "size": 16697
+    },
+    {
+      "path": "src_32/data/tables/activity_consume_gift.lua",
+      "sha256": "b27e1d7d4f4215f3d865a7a487469a38bde301e3eb4edb63b27a8706931188e6",
+      "size": 415
+    },
+    {
+      "path": "src_32/data/tables/activity_consume_pool_exchange.lua",
+      "sha256": "81190cbf713a34fa884b82d8130fe9527290ee04939814fbf349d873568925d5",
+      "size": 808
+    },
+    {
+      "path": "src_32/data/tables/activity_decode_reward.lua",
+      "sha256": "8c2ea07957294eda1cd5944487c7dab92097d979e54af3e8157a15cd097078bb",
+      "size": 1533
+    },
+    {
+      "path": "src_32/data/tables/activity_dragonship2_reward.lua",
+      "sha256": "08140d0b841213a20c3cec068d98a9541048d861e8e79c8b8498047f2c85edc7",
+      "size": 1258
+    },
+    {
+      "path": "src_32/data/tables/activity_dragonship_shop.lua",
+      "sha256": "bf8991302f8045b188e06463fa11a80b7e9286f0a48002e0ab8233cd3a0f96e6",
+      "size": 1762
+    },
+    {
+      "path": "src_32/data/tables/activity_firework_shop.lua",
+      "sha256": "16837182a2773df2b0b74c294d605c119f577366cf60c12452cb854fea264ba8",
+      "size": 1799
+    },
+    {
+      "path": "src_32/data/tables/activity_fish_shop.lua",
+      "sha256": "16aed42750948e1687a90d9df403f0cc038731ec591021ee6c15fb0b2cc641c3",
+      "size": 2113
+    },
+    {
+      "path": "src_32/data/tables/activity_flappy_gift.lua",
+      "sha256": "9d05ead347daeb16167f83aa1719b168a746ec239d0941a3392fa31c11ae2c58",
+      "size": 1714
+    },
+    {
+      "path": "src_32/data/tables/activity_fruit_shop.lua",
+      "sha256": "74cda8a16fd2f24e01d6257f45f0c33cc108f08dfecc6463133101d93cce4e47",
+      "size": 637
+    },
+    {
+      "path": "src_32/data/tables/activity_garden_shop.lua",
+      "sha256": "0a7eae8a415ea44309d4b075782147a3bd32f293d01842966d1056574f05dfe1",
+      "size": 1883
+    },
+    {
+      "path": "src_32/data/tables/activity_lukang_cost.lua",
+      "sha256": "ed7e482641ab4206307c21d634f534a2c160133d6fc9d92071cc17348b9fcc1d",
+      "size": 377
+    },
+    {
+      "path": "src_32/data/tables/activity_lvbu_shop_item.lua",
+      "sha256": "9670959e6d18e0e20d154fe7ba2cfeb5d0b6b4a6357477a25c45af9079d6149e",
+      "size": 2575
+    },
+    {
+      "path": "src_32/data/tables/activity_market_item.lua",
+      "sha256": "ca650e7d73f82a59a0c8b349fc9448ad97cc46f9379ab593918ed8bbb9b23b12",
+      "size": 2452
+    },
+    {
+      "path": "src_32/data/tables/activity_party_mission.lua",
+      "sha256": "25cc6a01e6710bae83635e056d326382ab05a3c5134fcf23653adea089b9c2d3",
+      "size": 1890
+    },
+    {
+      "path": "src_32/data/tables/activity_party_timeline.lua",
+      "sha256": "10e848d87e82ab9e8ee8821353db73e9d3b8aada7b685736ccf45aa725b5b76f",
+      "size": 648
+    },
+    {
+      "path": "src_32/data/tables/activity_polar_night_gacha.lua",
+      "sha256": "d632e4059493a617b394858b725b4dba7f4519c00329c00f960d0de6b32c3645",
+      "size": 1151
+    },
+    {
+      "path": "src_32/data/tables/activity_polar_night_gacha2.lua",
+      "sha256": "dd86411a5b8c7b56ea2fddb94c9fe673a64a58726a3914027b76ee681cdcefa6",
+      "size": 1151
+    },
+    {
+      "path": "src_32/data/tables/activity_polar_night_pool_award.lua",
+      "sha256": "52e0bcf827b44d8d2101d4a534de158dc56584f05ce52ff01500771b12467ae3",
+      "size": 41606
+    },
+    {
+      "path": "src_32/data/tables/activity_ragnarok_campaign.lua",
+      "sha256": "416ce698d0bf0b9a050b4c588a79e9550bffd8d1216f51f22507ea6f588930b1",
+      "size": 3348
+    },
+    {
+      "path": "src_32/data/tables/activity_ragnarok_gacha.lua",
+      "sha256": "825ab539af175928765bb3a7f50cf4fb1cf21321614a521e1222a77b22b57b5c",
+      "size": 1172
+    },
+    {
+      "path": "src_32/data/tables/activity_ragnarok_shop.lua",
+      "sha256": "d93c011f2706fb649e12e9fd738a39e4e3da13bbb65c4a61b19abac1f158c3ac",
+      "size": 1138
+    },
+    {
+      "path": "src_32/data/tables/activity_ragnarok_shop2.lua",
+      "sha256": "5362791e76502c21f88b13b97c87d7f4c606653cc7fd3ea2a7e071a0c8d538a4",
+      "size": 624
+    },
+    {
+      "path": "src_32/data/tables/activity_skin_charge.lua",
+      "sha256": "ae9394da96814a0c71314a5e437f54aec48da28729ea6f56d78aa60f69854082",
+      "size": 159
+    },
+    {
+      "path": "src_32/data/tables/activity_skin_charge2.lua",
+      "sha256": "1ccb86e7e25e94b569bb97d48c98c7b703992161f3f5705faa7667c7cdf709b6",
+      "size": 159
+    },
+    {
+      "path": "src_32/data/tables/activity_skin_consume_set.lua",
+      "sha256": "c69e2569f1b640b5e477eeed14ae32dbbe51dc0a1a5ff71f7e12e01f99f1459c",
+      "size": 364
+    },
+    {
+      "path": "src_32/data/tables/activity_skin_set.lua",
+      "sha256": "bd7ed05046794ed3409b73e5389e7b829ea046411ac3c2ddef136965bf28bc98",
+      "size": 342
+    },
+    {
+      "path": "src_32/data/tables/activity_skin_set2.lua",
+      "sha256": "afa282e4375891d3d00bbfbce05d363c2054c17034f6a0228f203ac5204020f3",
+      "size": 345
+    },
+    {
+      "path": "src_32/data/tables/activity_square_turntable.lua",
+      "sha256": "862e11f9a8f4237435b07df12b16012ac840d4e6d546d3a93babc73c1baba00c",
+      "size": 1416
+    },
+    {
+      "path": "src_32/data/tables/activity_square_turntable_shop.lua",
+      "sha256": "92bba9c91bfe8ea64f0ba6c4a84707cc2843e432924da74749008a85d9b8d61d",
+      "size": 757
+    },
+    {
+      "path": "src_32/data/tables/activity_sticker_shop.lua",
+      "sha256": "3cf699702c4a69137bdfb8f2dbd40b8984a43ab1c6ef64581a93f771a5b781ef",
+      "size": 1774
+    },
+    {
+      "path": "src_32/data/tables/activity_summer_goldfish_shop.lua",
+      "sha256": "02f9528590e66b45ac2d303ea1fc5a47b46cd113ec5aca1f23c86403303cf007",
+      "size": 1774
+    },
+    {
+      "path": "src_32/data/tables/activity_zhanghe_doll_shop.lua",
+      "sha256": "d0528f29cd32b3efe2facf14ca6c600666a487958fe7b7cc5b45c8dc61671cac",
+      "size": 1538
+    },
+    {
+      "path": "src_32/data/tables/avatar.lua",
+      "sha256": "a7c6ab96b448ead9a2351c47dff824a00ba5d9440a5cf2d4764c849968e0364a",
+      "size": 263397
+    },
+    {
+      "path": "src_32/data/tables/battle.lua",
+      "sha256": "9eb04452436fd7dbeb275f9c6fe275d2df3fc8deb5c39fd8426f560a735705ce",
+      "size": 1105603
+    },
+    {
+      "path": "src_32/data/tables/dropbox.lua",
+      "sha256": "b423d06766402e275340d0d5717adaa9f3af481cea5b2d9f8c25c3170eaafd70",
+      "size": 1730463
+    },
+    {
+      "path": "src_32/data/tables/gift.lua",
+      "sha256": "395afc45a42d5c7f23164d743f01b23997b905a7438e0c07706096d45d2234a5",
+      "size": 1636322
+    },
+    {
+      "path": "src_32/data/tables/giftbag.lua",
+      "sha256": "16e48e74244d816a43ac7ab3ac3a8abaa511061a34c8c1a874af15cc6891972d",
+      "size": 203875
+    },
+    {
+      "path": "src_32/data/tables/item.lua",
+      "sha256": "3d26da6005e27b283de4d637034a4b76c2c2aea7406e8c0379482083315ead9e",
+      "size": 2262750
+    },
+    {
+      "path": "src_32/data/tables/misc.lua",
+      "sha256": "8f110f305d79fd49146fbdf49f47e9cfee4bbf2e3553061086db118596adc433",
+      "size": 176008
+    },
+    {
+      "path": "src_32/data/tables/playoff_time.lua",
+      "sha256": "4ef8449b1ad83afa3dfa3f3ca57a9e2582f7de9982c5031187095be80e312327",
+      "size": 918
+    },
+    {
+      "path": "src_32/data/tables/region_arena_notice.lua",
+      "sha256": "af9638c1d38ce62fc1d9fdadd4f7e1a8bac46c170b299d6ff82cd59130ccaadc",
+      "size": 300
+    },
+    {
+      "path": "src_32/data/tables/region_arena_reward.lua",
+      "sha256": "6acb3ee2859b0754e36c6dbc3f26dc78e5e524d801058a2d1ba2407a6e9a2934",
+      "size": 3041
+    },
+    {
+      "path": "src_32/data/tables/shop_config.lua",
+      "sha256": "be6672ca73342375204015ebc1b18fa2a1c865d3c96d6a48bb6179c1f3bbf116",
+      "size": 35276
+    },
+    {
+      "path": "src_32/data/tables/translation.lua",
+      "sha256": "fc3610d45ae7966b12509ce35e5b1699ce05ce10c5dc5ad58405e562f018bfd3",
+      "size": 668869
+    },
+    {
+      "path": "src_64/app/common/utils.lua",
+      "sha256": "02825645114984e049e1be614f719e7dd8d4dd20c8da8551705bbd38c2c06fcf",
+      "size": 256239
+    },
+    {
+      "path": "src_64/app/windows/DragonBoat2017SelectTeamWindow.lua",
+      "sha256": "2df48aef36de7188711a9e6d42e89ba7cb109538e7f3addd084e24ea9843869b",
+      "size": 11812
+    },
+    {
+      "path": "src_64/app/windows/DragonBoat2017ShopWindow.lua",
+      "sha256": "be88f9ac7f189ce83062872c32a49f43b859550c3489d4a13273502d5b5e2c6f",
+      "size": 6702
+    },
+    {
+      "path": "src_64/app/windows/LoginWindow.lua",
+      "sha256": "f6fb06e51dca4e16ecd8755c7ae67c8000da1cc6b728d3e44f1bb3ed230eeb2e",
+      "size": 8162
+    },
+    {
+      "path": "src_64/app/windows/activities/Activity1124.lua",
+      "sha256": "7024218825300bb340d0c26948092c6103133259351bd8a3c1b04b501bcb6d7d",
+      "size": 17466
+    },
+    {
+      "path": "src_64/app/windows/activities/Activity1149.lua",
+      "sha256": "354d88ebc7e8634450b1e3b4c05f498f07fa51066dfa572df64e1d6fa2f31308",
+      "size": 12604
+    },
+    {
+      "path": "src_64/app/windows/activities/Activity1231.lua",
+      "sha256": "429a465c314d3d14a28f3116b18f18eddd575d0fdea4a75ebb43e52e2e3daa87",
+      "size": 17374
+    },
+    {
+      "path": "src_64/data/tables/activity_anni4_campaign_shop.lua",
+      "sha256": "c03f5d1b934c4e23243b2d044d076f0634adcba2e423a345285c4dd422272f13",
+      "size": 940
+    },
+    {
+      "path": "src_64/data/tables/activity_anni_4th_gold_shop.lua",
+      "sha256": "9dc75cbd96a39b11b760aaaa97e35d0b21542d719a791b164c0ba11796d094d3",
+      "size": 772
+    },
+    {
+      "path": "src_64/data/tables/activity_anniversary_gacha.lua",
+      "sha256": "6d46aa8d5226ecc156b966072c816b5dec399af8f0f6615e3fedb3ba3d4f815f",
+      "size": 2123
+    },
+    {
+      "path": "src_64/data/tables/activity_balloon_dropbox.lua",
+      "sha256": "24db6d5c49947f53f3ccb88b24926f6fc4eaa8362d4ef7d03a4d286ee8e4b3c2",
+      "size": 18405
+    },
+    {
+      "path": "src_64/data/tables/activity_card_match.lua",
+      "sha256": "0a0224d5168108c5e47bbb5cf3a0e63152ba8620ecb12e217cded91651263c53",
+      "size": 1154
+    },
+    {
+      "path": "src_64/data/tables/activity_card_match_shop.lua",
+      "sha256": "7a1d3b8a0d5e916c4fb1ead15a1e805e02259baeac659188f0dd383ca3d834b0",
+      "size": 551
+    },
+    {
+      "path": "src_64/data/tables/activity_charge.lua",
+      "sha256": "708c9bbe55848cad8e9ecf67a630af2219d40e17d969ea664c292c60e715f3e8",
+      "size": 805
+    },
+    {
+      "path": "src_64/data/tables/activity_charge_gift.lua",
+      "sha256": "efbdeaeadbbbc9e6350350a3cd309da198b835ff5ca196eaed392d1413be5662",
+      "size": 413
+    },
+    {
+      "path": "src_64/data/tables/activity_chest.lua",
+      "sha256": "4f2bca5ae0334566b988bc60524ec5d12ee21a78df193646b749d890c298f080",
+      "size": 2191
+    },
+    {
+      "path": "src_64/data/tables/activity_chest2.lua",
+      "sha256": "5c299935a33b13e41563924f84599c69ce660e019d063576422dddd7f1558129",
+      "size": 2191
+    },
+    {
+      "path": "src_64/data/tables/activity_chest_us.lua",
+      "sha256": "9e33ab410108c4976c493c4556795c5b87d539ed280c9d164d8f7d2bb2ac8b51",
+      "size": 2283
+    },
+    {
+      "path": "src_64/data/tables/activity_chocolate_pool_award.lua",
+      "sha256": "8b31feae130bbf3fd7713b8fcab7311dbf370af4c47430b8b495acff409975f1",
+      "size": 16697
+    },
+    {
+      "path": "src_64/data/tables/activity_consume_gift.lua",
+      "sha256": "b27e1d7d4f4215f3d865a7a487469a38bde301e3eb4edb63b27a8706931188e6",
+      "size": 415
+    },
+    {
+      "path": "src_64/data/tables/activity_consume_pool_exchange.lua",
+      "sha256": "81190cbf713a34fa884b82d8130fe9527290ee04939814fbf349d873568925d5",
+      "size": 808
+    },
+    {
+      "path": "src_64/data/tables/activity_decode_reward.lua",
+      "sha256": "8c2ea07957294eda1cd5944487c7dab92097d979e54af3e8157a15cd097078bb",
+      "size": 1533
+    },
+    {
+      "path": "src_64/data/tables/activity_dragonship2_reward.lua",
+      "sha256": "08140d0b841213a20c3cec068d98a9541048d861e8e79c8b8498047f2c85edc7",
+      "size": 1258
+    },
+    {
+      "path": "src_64/data/tables/activity_dragonship_shop.lua",
+      "sha256": "bf8991302f8045b188e06463fa11a80b7e9286f0a48002e0ab8233cd3a0f96e6",
+      "size": 1762
+    },
+    {
+      "path": "src_64/data/tables/activity_firework_shop.lua",
+      "sha256": "16837182a2773df2b0b74c294d605c119f577366cf60c12452cb854fea264ba8",
+      "size": 1799
+    },
+    {
+      "path": "src_64/data/tables/activity_fish_shop.lua",
+      "sha256": "16aed42750948e1687a90d9df403f0cc038731ec591021ee6c15fb0b2cc641c3",
+      "size": 2113
+    },
+    {
+      "path": "src_64/data/tables/activity_flappy_gift.lua",
+      "sha256": "9d05ead347daeb16167f83aa1719b168a746ec239d0941a3392fa31c11ae2c58",
+      "size": 1714
+    },
+    {
+      "path": "src_64/data/tables/activity_fruit_shop.lua",
+      "sha256": "74cda8a16fd2f24e01d6257f45f0c33cc108f08dfecc6463133101d93cce4e47",
+      "size": 637
+    },
+    {
+      "path": "src_64/data/tables/activity_garden_shop.lua",
+      "sha256": "0a7eae8a415ea44309d4b075782147a3bd32f293d01842966d1056574f05dfe1",
+      "size": 1883
+    },
+    {
+      "path": "src_64/data/tables/activity_lukang_cost.lua",
+      "sha256": "ed7e482641ab4206307c21d634f534a2c160133d6fc9d92071cc17348b9fcc1d",
+      "size": 377
+    },
+    {
+      "path": "src_64/data/tables/activity_lvbu_shop_item.lua",
+      "sha256": "9670959e6d18e0e20d154fe7ba2cfeb5d0b6b4a6357477a25c45af9079d6149e",
+      "size": 2575
+    },
+    {
+      "path": "src_64/data/tables/activity_market_item.lua",
+      "sha256": "ca650e7d73f82a59a0c8b349fc9448ad97cc46f9379ab593918ed8bbb9b23b12",
+      "size": 2452
+    },
+    {
+      "path": "src_64/data/tables/activity_party_mission.lua",
+      "sha256": "25cc6a01e6710bae83635e056d326382ab05a3c5134fcf23653adea089b9c2d3",
+      "size": 1890
+    },
+    {
+      "path": "src_64/data/tables/activity_party_timeline.lua",
+      "sha256": "10e848d87e82ab9e8ee8821353db73e9d3b8aada7b685736ccf45aa725b5b76f",
+      "size": 648
+    },
+    {
+      "path": "src_64/data/tables/activity_polar_night_gacha.lua",
+      "sha256": "d632e4059493a617b394858b725b4dba7f4519c00329c00f960d0de6b32c3645",
+      "size": 1151
+    },
+    {
+      "path": "src_64/data/tables/activity_polar_night_gacha2.lua",
+      "sha256": "dd86411a5b8c7b56ea2fddb94c9fe673a64a58726a3914027b76ee681cdcefa6",
+      "size": 1151
+    },
+    {
+      "path": "src_64/data/tables/activity_polar_night_pool_award.lua",
+      "sha256": "52e0bcf827b44d8d2101d4a534de158dc56584f05ce52ff01500771b12467ae3",
+      "size": 41606
+    },
+    {
+      "path": "src_64/data/tables/activity_ragnarok_campaign.lua",
+      "sha256": "416ce698d0bf0b9a050b4c588a79e9550bffd8d1216f51f22507ea6f588930b1",
+      "size": 3348
+    },
+    {
+      "path": "src_64/data/tables/activity_ragnarok_gacha.lua",
+      "sha256": "825ab539af175928765bb3a7f50cf4fb1cf21321614a521e1222a77b22b57b5c",
+      "size": 1172
+    },
+    {
+      "path": "src_64/data/tables/activity_ragnarok_shop.lua",
+      "sha256": "d93c011f2706fb649e12e9fd738a39e4e3da13bbb65c4a61b19abac1f158c3ac",
+      "size": 1138
+    },
+    {
+      "path": "src_64/data/tables/activity_ragnarok_shop2.lua",
+      "sha256": "5362791e76502c21f88b13b97c87d7f4c606653cc7fd3ea2a7e071a0c8d538a4",
+      "size": 624
+    },
+    {
+      "path": "src_64/data/tables/activity_skin_charge.lua",
+      "sha256": "ae9394da96814a0c71314a5e437f54aec48da28729ea6f56d78aa60f69854082",
+      "size": 159
+    },
+    {
+      "path": "src_64/data/tables/activity_skin_charge2.lua",
+      "sha256": "1ccb86e7e25e94b569bb97d48c98c7b703992161f3f5705faa7667c7cdf709b6",
+      "size": 159
+    },
+    {
+      "path": "src_64/data/tables/activity_skin_consume_set.lua",
+      "sha256": "c69e2569f1b640b5e477eeed14ae32dbbe51dc0a1a5ff71f7e12e01f99f1459c",
+      "size": 364
+    },
+    {
+      "path": "src_64/data/tables/activity_skin_set.lua",
+      "sha256": "bd7ed05046794ed3409b73e5389e7b829ea046411ac3c2ddef136965bf28bc98",
+      "size": 342
+    },
+    {
+      "path": "src_64/data/tables/activity_skin_set2.lua",
+      "sha256": "afa282e4375891d3d00bbfbce05d363c2054c17034f6a0228f203ac5204020f3",
+      "size": 345
+    },
+    {
+      "path": "src_64/data/tables/activity_square_turntable.lua",
+      "sha256": "862e11f9a8f4237435b07df12b16012ac840d4e6d546d3a93babc73c1baba00c",
+      "size": 1416
+    },
+    {
+      "path": "src_64/data/tables/activity_square_turntable_shop.lua",
+      "sha256": "92bba9c91bfe8ea64f0ba6c4a84707cc2843e432924da74749008a85d9b8d61d",
+      "size": 757
+    },
+    {
+      "path": "src_64/data/tables/activity_sticker_shop.lua",
+      "sha256": "3cf699702c4a69137bdfb8f2dbd40b8984a43ab1c6ef64581a93f771a5b781ef",
+      "size": 1774
+    },
+    {
+      "path": "src_64/data/tables/activity_summer_goldfish_shop.lua",
+      "sha256": "02f9528590e66b45ac2d303ea1fc5a47b46cd113ec5aca1f23c86403303cf007",
+      "size": 1774
+    },
+    {
+      "path": "src_64/data/tables/activity_zhanghe_doll_shop.lua",
+      "sha256": "d0528f29cd32b3efe2facf14ca6c600666a487958fe7b7cc5b45c8dc61671cac",
+      "size": 1538
+    },
+    {
+      "path": "src_64/data/tables/avatar.lua",
+      "sha256": "a7c6ab96b448ead9a2351c47dff824a00ba5d9440a5cf2d4764c849968e0364a",
+      "size": 263397
+    },
+    {
+      "path": "src_64/data/tables/battle.lua",
+      "sha256": "9eb04452436fd7dbeb275f9c6fe275d2df3fc8deb5c39fd8426f560a735705ce",
+      "size": 1105603
+    },
+    {
+      "path": "src_64/data/tables/dropbox.lua",
+      "sha256": "b423d06766402e275340d0d5717adaa9f3af481cea5b2d9f8c25c3170eaafd70",
+      "size": 1730463
+    },
+    {
+      "path": "src_64/data/tables/gift.lua",
+      "sha256": "395afc45a42d5c7f23164d743f01b23997b905a7438e0c07706096d45d2234a5",
+      "size": 1636322
+    },
+    {
+      "path": "src_64/data/tables/giftbag.lua",
+      "sha256": "16e48e74244d816a43ac7ab3ac3a8abaa511061a34c8c1a874af15cc6891972d",
+      "size": 203875
+    },
+    {
+      "path": "src_64/data/tables/item.lua",
+      "sha256": "3d26da6005e27b283de4d637034a4b76c2c2aea7406e8c0379482083315ead9e",
+      "size": 2262750
+    },
+    {
+      "path": "src_64/data/tables/misc.lua",
+      "sha256": "8f110f305d79fd49146fbdf49f47e9cfee4bbf2e3553061086db118596adc433",
+      "size": 176008
+    },
+    {
+      "path": "src_64/data/tables/playoff_time.lua",
+      "sha256": "4ef8449b1ad83afa3dfa3f3ca57a9e2582f7de9982c5031187095be80e312327",
+      "size": 918
+    },
+    {
+      "path": "src_64/data/tables/region_arena_notice.lua",
+      "sha256": "af9638c1d38ce62fc1d9fdadd4f7e1a8bac46c170b299d6ff82cd59130ccaadc",
+      "size": 300
+    },
+    {
+      "path": "src_64/data/tables/region_arena_reward.lua",
+      "sha256": "6acb3ee2859b0754e36c6dbc3f26dc78e5e524d801058a2d1ba2407a6e9a2934",
+      "size": 3041
+    },
+    {
+      "path": "src_64/data/tables/shop_config.lua",
+      "sha256": "be6672ca73342375204015ebc1b18fa2a1c865d3c96d6a48bb6179c1f3bbf116",
+      "size": 35276
+    },
+    {
+      "path": "src_64/data/tables/translation.lua",
+      "sha256": "fc3610d45ae7966b12509ce35e5b1699ce05ce10c5dc5ad58405e562f018bfd3",
+      "size": 668869
+    }
+  ]
+}

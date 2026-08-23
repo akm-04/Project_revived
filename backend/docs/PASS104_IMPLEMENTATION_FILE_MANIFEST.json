@@ -1,0 +1,3507 @@
+{
+  "pass": "104.0",
+  "artifact": "gxb-backend-v0.13.0-pass104.0",
+  "file_count": 700,
+  "files": [
+    {
+      "path": "README.md",
+      "sha256": "c5b8481f409e59c26d19b0f74623da99f2318e44a747a7977df81c1b69cc0872",
+      "size": 1144
+    },
+    {
+      "path": "SUMMON_FEATURED_OPERATOR_README.md",
+      "sha256": "96072bf0f5afa72130a04656da9f716d7f5f930b2baa760efa0630e3f88f61cf",
+      "size": 17319
+    },
+    {
+      "path": "UPDATE_README.md",
+      "sha256": "e9d79067e5c53b9eed4d9a8b53bf38ef04cb317c4fbabf8868d272a2a6ed6294",
+      "size": 568
+    },
+    {
+      "path": "VERSION.json",
+      "sha256": "2dd1d4aaac8c8ea7b911fa23620d2370217fc0d762bf6d8be856b9aed9a9b7e5",
+      "size": 635
+    },
+    {
+      "path": "data/album_special_collect_meta.json",
+      "sha256": "d9fe0fefca1d0e11e7088d2de9fc6688d8d5b6481da0cc96a3ed070709f01f16",
+      "size": 419
+    },
+    {
+      "path": "data/awakening_mission_meta.json",
+      "sha256": "d8b456ab9e8ee9ea9eda8452bb6e973e3332a78a28f283e632291782ef64cbe2",
+      "size": 362734
+    },
+    {
+      "path": "data/campaign_asset_requirements.json",
+      "sha256": "01621e2fb8d016e88f6cb859904dc09b642e481a063802f55e2e0b669df779c5",
+      "size": 3796439
+    },
+    {
+      "path": "data/campaign_drop_policy.json",
+      "sha256": "dffda0e69f365e1e17175999d49c95750976ba71890fd5853f4f1b155bdb2b72",
+      "size": 1601
+    },
+    {
+      "path": "data/campaign_drop_source_catalog.json",
+      "sha256": "7d080d3b0ed52a4645fc719a19762e16964db4f6869d5f0aea1441f467f821f4",
+      "size": 2729091
+    },
+    {
+      "path": "data/campaign_economy_meta.json",
+      "sha256": "91544acbb8149d5c33f0903e6ffb08a325fe22ab0635afebc2613952f29d0519",
+      "size": 272826
+    },
+    {
+      "path": "data/campaign_meta.json",
+      "sha256": "ff8444dcda5304cdf93183be494a485d1a89bb0e755d1723eb487e37f01e53a4",
+      "size": 126298
+    },
+    {
+      "path": "data/campaign_reset_meta.json",
+      "sha256": "0525d6cff9506a5f16c54499f0fce5873a0000fac667fe22b1d06de329c90be1",
+      "size": 1121
+    },
+    {
+      "path": "data/campaign_reward_meta.json",
+      "sha256": "f780166c5cc825f7a89ebf48a1d25bac8e7a78781fb89d6eb96412ab2dffca49",
+      "size": 741328
+    },
+    {
+      "path": "data/campaign_story_drop_meta.json",
+      "sha256": "888f875d84a5aaf3c407f07939f1a2e073022ff3cad8a30ab0546c2c1a513e9b",
+      "size": 378
+    },
+    {
+      "path": "data/classic_vending_balance_policy.json",
+      "sha256": "6a4afdb42262502c8e034e2b8301e57aad32e882730c4fabebbb17f17e601d52",
+      "size": 2950
+    },
+    {
+      "path": "data/commerce_source_meta.json",
+      "sha256": "a24eac1395a9ed9627f6b7c673dd66889c4616c9dc36ba9685ed200587109d3f",
+      "size": 3934
+    },
+    {
+      "path": "data/compatibility_safe_mids.json",
+      "sha256": "e2c7788f9380db16bc29f1e0d6db79fae5ba2747725e1a5987d68f2de10839e5",
+      "size": 1070
+    },
+    {
+      "path": "data/consumable_effect_meta.json",
+      "sha256": "1e0ba6b34b276054c41cb221f03f4c71f420c9bec8ab3e268ab283b96a1bea67",
+      "size": 845329
+    },
+    {
+      "path": "data/debug_guest_advanced_inventory_seed.json",
+      "sha256": "40a7769813587f457a5ba67c5122e4d1bfca58247b40a9267f83a242320c8194",
+      "size": 17824
+    },
+    {
+      "path": "data/debug_guest_campaign_unlock_pass75.json",
+      "sha256": "aa0fb9cf639461b5107d06a3b3150945eeda7782a660188f28e7cc9e5a167fcb",
+      "size": 542
+    },
+    {
+      "path": "data/debug_guest_inventory_seed.json",
+      "sha256": "97827aeb59938b483dbfe78b0d23ba6011f8d2915993254b2b22a3dc2373c5f8",
+      "size": 12486
+    },
+    {
+      "path": "data/debug_guest_normalization_pass96.json",
+      "sha256": "e78503b44256c593e109dfff730accb127f0545b33db2f34ff8e7e6802ccf460",
+      "size": 583
+    },
+    {
+      "path": "data/debug_guest_qa_consumables_pass99.json",
+      "sha256": "219828cd5f4d865c569e7c4e1a0a6199ef0e783ccf93a5ed46d6fcc66fb682cd",
+      "size": 1897
+    },
+    {
+      "path": "data/energy_purchase_source_meta.json",
+      "sha256": "be2410b717e88527e76799d8d46c1f0f303a0818a5740d08dd1c781cd3387e38",
+      "size": 1588
+    },
+    {
+      "path": "data/function_unlock_meta.json",
+      "sha256": "bca381b4afec988f50fad8d3368136d784fde6d26f7b171d70f0e0322fe4c1a7",
+      "size": 27716
+    },
+    {
+      "path": "data/game_data_catalog.json",
+      "sha256": "3e29842204cfaf899bac2f1ac2095d2ef1dce84b57b9f2b2a18fed9066acaf40",
+      "size": 3019532
+    },
+    {
+      "path": "data/girl_reference_catalog.json",
+      "sha256": "79ebe697776495f7eb0a8ea4b71eb1463adc3f7b2af0d9235bdcf2878d588530",
+      "size": 80935
+    },
+    {
+      "path": "data/hero_advanced_progression_meta.json",
+      "sha256": "a02606cc209b5f02ee89560a0cdd0975a0ac4468b456c1e566346b9cf80a9b4f",
+      "size": 1593017
+    },
+    {
+      "path": "data/hero_equipment_meta.json",
+      "sha256": "e726e5cda0fa97727e634bd27cca841b547a5ddfe96269938dda3c0392b8b82d",
+      "size": 2698594
+    },
+    {
+      "path": "data/hero_progression_meta.json",
+      "sha256": "f755a1919132273582b68735809ee5e3d04802570f4c6b96407a2c1335314bc6",
+      "size": 1354
+    },
+    {
+      "path": "data/hero_skill_regen_meta.json",
+      "sha256": "72e0d7356f8c4e3f2b652e8bb07416e69a507f9b107ad364e4012b14909ab0d9",
+      "size": 7154
+    },
+    {
+      "path": "data/item_progression_meta.json",
+      "sha256": "2027e57867748d1f150c03833d83728b352d3b3047202dec7ae7491856afb90b",
+      "size": 1470
+    },
+    {
+      "path": "data/item_sale_catalog.json",
+      "sha256": "f47bceb84c1b51c61826ca3005dfa9da131e706e2a3aa158b9dd42b782b9aee8",
+      "size": 2055452
+    },
+    {
+      "path": "data/item_stack_limit_meta.json",
+      "sha256": "bce29bf19c8dac6e0e42faadc52590b943c8d96d1f471eecdcfc8756b1b67e83",
+      "size": 432460
+    },
+    {
+      "path": "data/lua_asset_catalog.json",
+      "sha256": "a4786832f5623438ffee5ff37a5391a744405d6945e41fb074ef3abc495b5354",
+      "size": 632766
+    },
+    {
+      "path": "data/magic_summon_private_policy.json",
+      "sha256": "997589319b04ab296e6ad1830cde79a40ea383b2890bf3b2b9da4ceb41dc6856",
+      "size": 2486
+    },
+    {
+      "path": "data/magic_summon_source_catalog.json",
+      "sha256": "725084492853db2aea5483d34eb8849d59af130fe909daa56ad47c65b28f5ff1",
+      "size": 11992
+    },
+    {
+      "path": "data/medium_legacy_private_policy.json",
+      "sha256": "42a69eb73a6c984fbded1e46a09c5efd0928cce578359095e45506a71ec84030",
+      "size": 1277
+    },
+    {
+      "path": "data/mutation_contract_registry.json",
+      "sha256": "1b07e1660e437a77f616c497e1bbfbd7bdbd98c02db777e8133ad037087a4feb",
+      "size": 54650
+    },
+    {
+      "path": "data/partner_exp_meta.json",
+      "sha256": "fea730fff50c89f719f81b3ac210393d5566a8791f1c2689ebc9f09ea6fc163d",
+      "size": 7996
+    },
+    {
+      "path": "data/pass75_campaign_ownership_meta.json",
+      "sha256": "ddcb41cb4e55c8b1ca081f9c4dc9a60a2b03e883b945aa4061832bb9c1499830",
+      "size": 410957
+    },
+    {
+      "path": "data/player_db.json",
+      "sha256": "528a072a472dfae13439fc743ab21ec207a33e9bd10584f49386ae5d10b073bc",
+      "size": 8980
+    },
+    {
+      "path": "data/player_hero_level_meta.json",
+      "sha256": "00622ab805583743b4d75f6eb7bc699ecb97a01d3f27c3727763afae9b941f94",
+      "size": 5770
+    },
+    {
+      "path": "data/projection_profile_registry.json",
+      "sha256": "fdb6730c9f7d7a719b9fe1eac155b499d8c8cff463a80866464ed1489c0a3817",
+      "size": 8000
+    },
+    {
+      "path": "data/protocol_registry.json",
+      "sha256": "8a78dbefd32be0886c2c31582cda53dba07e497cebfa1acf630bcdcf244beafa",
+      "size": 391733
+    },
+    {
+      "path": "data/resource_catalog/resource_catalog.json",
+      "sha256": "6fac549df3cfd096ccbd3df1b201a58cb22c1434c27a02152b30ef43a567cb31",
+      "size": 4312310
+    },
+    {
+      "path": "data/resource_registry.json",
+      "sha256": "57902abb6648ecd7688e564b125f6583ec5f3da6e122a4443f7fc11c22d1ece4",
+      "size": 42873
+    },
+    {
+      "path": "data/story_mission_meta.json",
+      "sha256": "8464c5e5d33448c94454b66808b88e9c56fd9db9a3b1ccb3bdd2e0d293aec355",
+      "size": 1615
+    },
+    {
+      "path": "data/summon_cost_policy.json",
+      "sha256": "87f69a1d3a7d2d9020d06429b7c932d27f86a776150938d3c5b1beeb1f1cf784",
+      "size": 5785
+    },
+    {
+      "path": "data/summon_counter_policy.json",
+      "sha256": "246ffe49c39921c2f4290dd52c0fe176140a5d3653a18b1dbc4a066693b6039d",
+      "size": 3970
+    },
+    {
+      "path": "data/summon_duplicate_conversion_policy.json",
+      "sha256": "807c694dbb9fdd1c82c8fe435bf05a74e82d65dbaca66462c2cfd8e6cb4c21a8",
+      "size": 1709
+    },
+    {
+      "path": "data/summon_featured_catalog.json",
+      "sha256": "38456f9c7013ea63c268589817ea646373531518a539bd28050e28426426578c",
+      "size": 29856
+    },
+    {
+      "path": "data/summon_featured_rotation_policy.json",
+      "sha256": "88d28ea090558ef467fd40356378f274db3749786b4902089737cf5a7e531d7c",
+      "size": 1404
+    },
+    {
+      "path": "data/summon_operation_catalog.json",
+      "sha256": "fa67a40e902ba7667e1f20340defacad40b1ac09b6e3c55fabe586147f838e7a",
+      "size": 16903
+    },
+    {
+      "path": "data/summon_pool_catalog.json",
+      "sha256": "31702401c8be6dfc3029df8c95a4462850692ea82c12a864f7e6531109e4d718",
+      "size": 142623
+    },
+    {
+      "path": "data/summon_private_server_policy.json",
+      "sha256": "4e419ca4bddb3255c8e5f4aba5537e3d7315f6d6b8574da16ebe0764fa58bed2",
+      "size": 5838
+    },
+    {
+      "path": "data/summon_result_policy.json",
+      "sha256": "f642bfa52c52196c45d5b99902a15a6785e2d332adc5e773eff75fca90323824",
+      "size": 6230
+    },
+    {
+      "path": "data/summon_state_policy.json",
+      "sha256": "ce850ac4df6bcaa899b30f3398caff3d4dffe8f18fa93f555525e32157d9870b",
+      "size": 2305
+    },
+    {
+      "path": "data/sx_soul_box_private_policy.json",
+      "sha256": "088da7102b4978eb96904f05135098e8435e4ab6990e953653745eb352a09d8d",
+      "size": 4982
+    },
+    {
+      "path": "data/sx_soul_box_source_catalog.json",
+      "sha256": "7e2cb5b0af7827e73223d1a62cb5227d919deec0ba2381d74b9dbf1242550c77",
+      "size": 121291
+    },
+    {
+      "path": "data/temporal_resource_meta.json",
+      "sha256": "9955f8a86641e71fe8c8d5e1a0cce243ad833c043344a0193c40ce152b2c5018",
+      "size": 2058
+    },
+    {
+      "path": "data/tutorial_summon_meta.json",
+      "sha256": "8915118892611349a49f625e2c6efde43a0bbd073a07bc008baa3276d23f63b8",
+      "size": 2267
+    },
+    {
+      "path": "data/vip_award_meta.json",
+      "sha256": "b9f4ae8dff5fb769bc0eba57fd0fd2789a6f9fa25c1b172fe3e4dbb4554a5859",
+      "size": 6336
+    },
+    {
+      "path": "data/vip_source_meta.json",
+      "sha256": "290ccff1b061ec87959ba0c371fabf69eb5ada0574901aa7abc8aaadbbc9f827",
+      "size": 27827
+    },
+    {
+      "path": "docs/ALL_GIRLS_ID.txt",
+      "sha256": "326bc69ef025cfa87fcbdf68912255b35cb07365265df8bacf5ff08ced01b1e0",
+      "size": 35552
+    },
+    {
+      "path": "docs/DOMAIN_REWRITE_GATE_PASS19.md",
+      "sha256": "2b317fafcaa957af3bc33cffee18e83892360802a4d6cb39c5c78992f16c6fdc",
+      "size": 1789
+    },
+    {
+      "path": "docs/GACHA_CONTROL_TOOL.md",
+      "sha256": "9501b3409d09daee31b786b5e49691de6bf38d239d95d3dc2933b63656f746c7",
+      "size": 5680
+    },
+    {
+      "path": "docs/GIRLS_MEDIUM_EXTENDED_58.txt",
+      "sha256": "b55417d090b924aa3555ed2916e3da640cff821a9a730cf952cb7eca7609dbce",
+      "size": 7514
+    },
+    {
+      "path": "docs/GIRLS_MEDIUM_FEATURED_56.txt",
+      "sha256": "4db8585c8f6b45a018d3800ec56a5924bf9f519e8d8ae078313255c8ac6b9ec0",
+      "size": 7977
+    },
+    {
+      "path": "docs/GIRLS_MEDIUM_ORDINARY_143.txt",
+      "sha256": "184ab57f7a576b64564ad0abade29a4c6f6f69d7c062398ae3e26473ce5a7b51",
+      "size": 14896
+    },
+    {
+      "path": "docs/GIRLS_SX_73.txt",
+      "sha256": "d866f099a85e9416dc55e41055bbcf0e24746ebe7160c0f9488b5b1a2d7d52ee",
+      "size": 7156
+    },
+    {
+      "path": "docs/GIRL_IDS.txt",
+      "sha256": "326bc69ef025cfa87fcbdf68912255b35cb07365265df8bacf5ff08ced01b1e0",
+      "size": 35552
+    },
+    {
+      "path": "docs/KNOWN_GAPS_STAGE1.md",
+      "sha256": "0b02247d43e367d3193f1b98344a2f7d7fc04d7af153be38d523973429e5dd3f",
+      "size": 1147
+    },
+    {
+      "path": "docs/KNOWN_GAPS_STAGE2.md",
+      "sha256": "77a29fc6449893b3f295a741885336bb588db7d1f47b1af7955d4d4c028207db",
+      "size": 778
+    },
+    {
+      "path": "docs/KNOWN_GAPS_STAGE3.md",
+      "sha256": "4921592c91b8ec0ef8d6cc14ab5ead851f66de7f5853ca8b5ceba91cf0755c0b",
+      "size": 1196
+    },
+    {
+      "path": "docs/MAINSCENE_FIRST_ENTRY_PROTOCOL_PASS13.md",
+      "sha256": "a7a43bd61054eea11f8cc7569d5ba60097693f2c360a9fa21ef3fc63604a872d",
+      "size": 1579
+    },
+    {
+      "path": "docs/PACKAGED_RESOURCE_PROBE_V0_6_1.md",
+      "sha256": "9bfba986b89c68047f9ea331119128a2893059f56b84c87afbb8772a740fe740",
+      "size": 4567
+    },
+    {
+      "path": "docs/PASS100_CLIENT_TEST_PLAN.md",
+      "sha256": "de33e8eea04794a23e3ce1225e1a209cde051b13cebc810e0d1c94d6eb60c2fd",
+      "size": 1669
+    },
+    {
+      "path": "docs/PASS100_IMPLEMENTATION_FILE_MANIFEST.json",
+      "sha256": "1ed8d05e8341e68efbaef308275ce27ef43b37ab325eaa0331190718559ea3f6",
+      "size": 5905
+    },
+    {
+      "path": "docs/PASS100_MID97_SELFTEST.json",
+      "sha256": "eeea549fc7b53c27a25d27b314d7e4318dbfca72e1a60ad566d31b15cdec9ac2",
+      "size": 730
+    },
+    {
+      "path": "docs/PASS100_OTA_BRIDGE_BUILD.json",
+      "sha256": "dcfd0c6e6e35d0bea4549e42adfec303527ab206767073d49c3d4a99e812f38a",
+      "size": 1271
+    },
+    {
+      "path": "docs/PASS100_OTA_PRIOR_OVERRIDE_HASHES.json",
+      "sha256": "b15f15544c7287dfa9555f177688f265de51502fae9216ed31241753b0d7ec43",
+      "size": 22429
+    },
+    {
+      "path": "docs/PASS100_RUNTIME_RECONCILIATION.json",
+      "sha256": "629b9b766d5c2b71a6b248ee37a6d3fbd0b6e2adf17603517dcf6a543c40ca26",
+      "size": 1255
+    },
+    {
+      "path": "docs/PASS100_SRC64_FEEDBACK_LOOP.json",
+      "sha256": "775a5cacaac1f0cd5bd5e0f5e6050e9887b3c35a36d2881deec5525c3d1aa416",
+      "size": 4074
+    },
+    {
+      "path": "docs/PASS100_TECHNICAL_CHANGELOG.md",
+      "sha256": "7c214f253757f323cb61bc9511d7e80a8379070bb86d0187ed1c4ddddac58fb5",
+      "size": 3100
+    },
+    {
+      "path": "docs/PASS100_VALIDATION.json",
+      "sha256": "ab6a80ae53501b3e7e40e0a51657670b50f2dea27e02d70106edb3fe8de34804",
+      "size": 1105
+    },
+    {
+      "path": "docs/PASS104_CLIENT_TEST_PLAN.md",
+      "sha256": "ae4f6e8bb22813be912a8acd932ee152a415c2c45caf61061fbf859c94cc4b4e",
+      "size": 716
+    },
+    {
+      "path": "docs/PASS104_MUTATION_FIREWALL_SELFTEST.json",
+      "sha256": "b6e2bc62f8caae3cd8be536bc60f15ddb894ae48876075364ade4891d0001c2b",
+      "size": 503
+    },
+    {
+      "path": "docs/PASS104_SRC64_FEEDBACK_LOOP.json",
+      "sha256": "028d0fc840fe6e74ca395d980c7b5368c7bd881130f13a3d90e2e5f9241f972f",
+      "size": 1332
+    },
+    {
+      "path": "docs/PASS104_TECHNICAL_CHANGELOG.md",
+      "sha256": "1634c0000632b426252487b02b0be8a09c858f7cbd8ad815f10619c3162faea1",
+      "size": 932
+    },
+    {
+      "path": "docs/PASS104_VALIDATION.json",
+      "sha256": "1b1c6e2ab29b3671bb14901643f92c5d93236f36046bfcdbb2856e966d988d56",
+      "size": 1083
+    },
+    {
+      "path": "docs/PASS41_7_BACKEND_STATIC_VALIDATION.json",
+      "sha256": "1a700dc64e68b64f0b05b886ced0702d364c65337f1e3e63c6d34e22e0b0965f",
+      "size": 766
+    },
+    {
+      "path": "docs/PASS41_8_BACKEND_STATIC_VALIDATION.json",
+      "sha256": "df050e3737b99f4446d497a504d3499b9c4cb087d4dc35a19eb5888e8c2bda6a",
+      "size": 498
+    },
+    {
+      "path": "docs/PASS41_9_BACKEND_STATIC_VALIDATION.json",
+      "sha256": "4174a01cc6f3a5ee7384499612c80d6f2de4e62de445c122789cf8494f426d1a",
+      "size": 970
+    },
+    {
+      "path": "docs/PASS42_11_BACKEND_STATIC_VALIDATION.json",
+      "sha256": "e9a93b8e59383076c30b857aec800747f3f50266875dcd3d31f230011619f9cf",
+      "size": 1721
+    },
+    {
+      "path": "docs/PASS42_11_GIRL_REFERENCE_VALIDATION.json",
+      "sha256": "9ec7ccad1cb653c08a95525c27776d84c167dabbbf4d56d6ff7ddf99ab8daa73",
+      "size": 1426
+    },
+    {
+      "path": "docs/PASS42_12_BACKEND_STATIC_VALIDATION.json",
+      "sha256": "5f7bab2726c54868d8cd01aa01c0e08adf5466f8ff457da8d42aa37d26053139",
+      "size": 1731
+    },
+    {
+      "path": "docs/PASS42_14_BACKEND_STATIC_VALIDATION.json",
+      "sha256": "12127320124840317af219ba12828bcfc05ff77a5ce2d688c6750a7754265e30",
+      "size": 1295
+    },
+    {
+      "path": "docs/PASS42_2_BACKEND_STATIC_VALIDATION.json",
+      "sha256": "5f8c46a95e4d4ad4a3f39ca9712d8812bc0f6bd11ac4eae51e83d3ff89eb06e4",
+      "size": 1285
+    },
+    {
+      "path": "docs/PASS42_6_BACKEND_STATIC_VALIDATION.json",
+      "sha256": "3742671c2f3b86cde973b034ccdfe2fef8069c40804a1b954468f0c9cc97da36",
+      "size": 2546
+    },
+    {
+      "path": "docs/PASS42_7_BACKEND_STATIC_VALIDATION.json",
+      "sha256": "75903c9f9c800f1b9dd2d1850644963bb7052abe1e3722f9965b1e60b2e7c605",
+      "size": 641
+    },
+    {
+      "path": "docs/PASS68_1_CLIENT_RETEST_PLAN.md",
+      "sha256": "b5bd30eec3f06c47057510beb87207507f6c8a0eae3ab0a65ffa1651cd5ee744",
+      "size": 2609
+    },
+    {
+      "path": "docs/PASS68_1_IMPLEMENTATION_FILE_MANIFEST.json",
+      "sha256": "b161b8bbd82acd42a3573199116e5da7ddfe88a4056184aee3f813c9ac1f44d8",
+      "size": 4138
+    },
+    {
+      "path": "docs/PASS68_1_MEDIUM_FREE_SELFTEST.json",
+      "sha256": "57f13cc8113a9a967687ebe8d3b1a631a5db2a72c175773062df3ebc62ee2b05",
+      "size": 337
+    },
+    {
+      "path": "docs/PASS68_1_REGRESSION_MATRIX.json",
+      "sha256": "d02a181f1edeb658f9121dbb77055a0af57a74d01f9a65920f7304fdf590abb5",
+      "size": 2138
+    },
+    {
+      "path": "docs/PASS68_1_RUNTIME_ACCEPTANCE_AND_MEDIUM_FREE_HOTFIX.md",
+      "sha256": "31810a7791404c551a974df7414f42e429c068a905d9b585f10d1864bd878b8b",
+      "size": 2122
+    },
+    {
+      "path": "docs/PASS68_1_RUNTIME_DEBUG_FINDINGS.json",
+      "sha256": "d3a8d52afbf7be95783e873b09b8dcae7468e89c6af392c4f3191208ac2d55fc",
+      "size": 1434
+    },
+    {
+      "path": "docs/PASS68_1_SRC64_FEEDBACK_LOOP.json",
+      "sha256": "664e6e88625f90963450abf3bfe6754cd0f491407d82e5928fde74470cb167be",
+      "size": 3896
+    },
+    {
+      "path": "docs/PASS68_FOUNDATION_SELFTEST.json",
+      "sha256": "a896502d4940e2918b84a5670cc318d4ecd4b6d96f7702fccee9d09dd6ecddcc",
+      "size": 600
+    },
+    {
+      "path": "docs/PASS68_IMPLEMENTATION_FILE_MANIFEST.json",
+      "sha256": "18665df8b3b29b68fa69e0141265094f4b28a210b4bd8b522da3d78a1acd1179",
+      "size": 3417
+    },
+    {
+      "path": "docs/PASS68_REGRESSION_MATRIX.json",
+      "sha256": "db90fb62524fb6d7ef991fc762480f8d9664bfe1d31ac49728ffce9f599458a3",
+      "size": 1439
+    },
+    {
+      "path": "docs/PASS68_SRC64_FEEDBACK_LOOP.json",
+      "sha256": "e99e59af8b162ab25fb32a3c8b8b0d8199265ab5e94e134f7360b95154867a09",
+      "size": 1694
+    },
+    {
+      "path": "docs/PASS69_1_CLIENT_RETEST_PLAN.md",
+      "sha256": "9406bde5e18d5806b7b14648f2b6b6137cdd563f06d18f64022d33e0214bb67f",
+      "size": 1437
+    },
+    {
+      "path": "docs/PASS69_1_IMPLEMENTATION_FILE_MANIFEST.json",
+      "sha256": "76676b865eecbb3f9f58ac332b6292916a297416b408aae766bb52d5457f9634",
+      "size": 5247
+    },
+    {
+      "path": "docs/PASS69_1_ITEM_SALE_SELFTEST.json",
+      "sha256": "377b98800db97d78e529f76f55b7da4de639de4456461d6a28bedad009061f14",
+      "size": 378
+    },
+    {
+      "path": "docs/PASS69_1_REGRESSION_MATRIX.json",
+      "sha256": "3b2a622f8032e67e75b3e24847fdc05701d48ec2d7a3bec76ac19dc833db027f",
+      "size": 6392
+    },
+    {
+      "path": "docs/PASS69_1_RUNTIME_DEBUG_FINDINGS.json",
+      "sha256": "24d096394a9722ed92ad0a18838bd9760d44d7318362a56369ce7bf213c1613a",
+      "size": 1569
+    },
+    {
+      "path": "docs/PASS69_1_SRC64_FEEDBACK_LOOP.json",
+      "sha256": "a8af017b019c1dabbac6062d286cce02360270c22ee729cdfec1604509fd51f4",
+      "size": 3149
+    },
+    {
+      "path": "docs/PASS69_1_SRC64_FEEDBACK_LOOP.log",
+      "sha256": "a8af017b019c1dabbac6062d286cce02360270c22ee729cdfec1604509fd51f4",
+      "size": 3149
+    },
+    {
+      "path": "docs/PASS69_ECONOMY_BACKBONE_PART2_SELFTEST.json",
+      "sha256": "043e957c3dbd98219903d1283eefe79428375f67c731cd8a28db914bdb9abb81",
+      "size": 544
+    },
+    {
+      "path": "docs/PASS69_IMPLEMENTATION_FILE_MANIFEST.json",
+      "sha256": "68866ba1c589741d8ea0a211d4c4bc71a980bee3284511bc2f4850aa558447b1",
+      "size": 1267
+    },
+    {
+      "path": "docs/PASS69_REGRESSION_MATRIX.json",
+      "sha256": "4c42b769cd2dd2fc576c1ec9621a6d945323eefb5bd628c8318d115187358f9c",
+      "size": 1204
+    },
+    {
+      "path": "docs/PASS69_SRC64_FEEDBACK_LOOP.json",
+      "sha256": "f8de5bd9ec9a8aa700dde627e3bc8632d0a2623a5c19bd85285317158afe5b49",
+      "size": 2694
+    },
+    {
+      "path": "docs/PASS69_TECHNICAL_CHANGELOG.md",
+      "sha256": "14bdd4e150c288bcfb76c52b497aa3acbc5a24f07ad5c7dc53c302b49b01efd5",
+      "size": 1505
+    },
+    {
+      "path": "docs/PASS70_1_REGRESSION_MATRIX.json",
+      "sha256": "f7312d09b2b60c679889757b87e04c3ceb342ea3066680a496033bff162fb67b",
+      "size": 466
+    },
+    {
+      "path": "docs/PASS70_1_RUNTIME_ACCEPTANCE_20260822.json",
+      "sha256": "5ee23a09cdcfba94764024606d472f30dd3b64dbdbb286a1c988d64e8290349e",
+      "size": 883
+    },
+    {
+      "path": "docs/PASS70_1_SRC64_REALITY_CHECK.json",
+      "sha256": "84074727ff21ac706605a55a437ff84a6cda613fa48e18b3dbdd616a1bfb998a",
+      "size": 4295
+    },
+    {
+      "path": "docs/PASS70_CLIENT_RETEST_PLAN.md",
+      "sha256": "5bed7540dd54dbb342466f894cda12b61cf3c4d266a6da4015f2b3a5e31c24b3",
+      "size": 1655
+    },
+    {
+      "path": "docs/PASS70_IMPLEMENTATION_FILE_MANIFEST.json",
+      "sha256": "f75c0949f800708a6d1b206518b70ae59cc036e7ba55b67cce98ba0182e0eb4b",
+      "size": 5744
+    },
+    {
+      "path": "docs/PASS70_REGRESSION_MATRIX.json",
+      "sha256": "c5d823b8ea3a0f9b0160d5c0de664a07aedbea761eb791aee44847b80e8687ee",
+      "size": 2022
+    },
+    {
+      "path": "docs/PASS70_RESPONSE_PROJECTION_SELFTEST.json",
+      "sha256": "ce03fbb6eda96b1a650252d21c05714a40754bdff75ef5338cb1b99a2e53a2dc",
+      "size": 465
+    },
+    {
+      "path": "docs/PASS70_SRC64_FEEDBACK_LOOP.json",
+      "sha256": "9e2516383cbba26acb3a323cff2d57a9c8adc41f590b54c7926dab9a7eecf1af",
+      "size": 13512
+    },
+    {
+      "path": "docs/PASS70_TECHNICAL_CHANGELOG.md",
+      "sha256": "db89b05b517471d31838f30bd8c6b748634bdeb35ed666b744e2cc9b960c7048",
+      "size": 3642
+    },
+    {
+      "path": "docs/PASS71_CLIENT_TEST_PLAN.md",
+      "sha256": "ffc950b091f43a90a41bd2092c0b6f49f5f7ba9dd8de42748397399319c0c585",
+      "size": 1411
+    },
+    {
+      "path": "docs/PASS71_IMPLEMENTATION_FILE_MANIFEST.json",
+      "sha256": "1f77b71602f7ac2dfb3cff9c1f6bef3e3be416afafada79a5867356aa5ffd312",
+      "size": 1709
+    },
+    {
+      "path": "docs/PASS71_REGRESSION_MATRIX.json",
+      "sha256": "2eb082da761921333401d578949dbc74e5259f0dfca5f3a4d9f5fbfd34309e5a",
+      "size": 1640
+    },
+    {
+      "path": "docs/PASS71_RUNTIME_ACCEPTANCE_20260822.json",
+      "sha256": "c75723eba24267096423fab1dab3b6b23f2b7b91f9cab7e71799d6dede33705f",
+      "size": 788
+    },
+    {
+      "path": "docs/PASS71_SRC64_FEEDBACK_LOOP.json",
+      "sha256": "4af9f3d9913ac3de3d393fca5f0e9ab49ae1954672ad2aee1a48375a44c1b83e",
+      "size": 2151
+    },
+    {
+      "path": "docs/PASS72_CLIENT_TEST_PLAN.md",
+      "sha256": "30f846bbaeba7bad1d99f98a65f0ecd861d4427d7a94d1fb6ea48eb34cee60c3",
+      "size": 1337
+    },
+    {
+      "path": "docs/PASS72_HERO_PROGRESSION_SELFTEST.json",
+      "sha256": "420ad82d4860e69e42047d16192885bcdcd7b9b5ad34db2eaced4d1fb99087c1",
+      "size": 700
+    },
+    {
+      "path": "docs/PASS72_IMPLEMENTATION_FILE_MANIFEST.json",
+      "sha256": "5b282df6a7600f492fda80845c563daa65cfae182112f4fba9edf6be7b50b1f5",
+      "size": 1709
+    },
+    {
+      "path": "docs/PASS72_REGRESSION_MATRIX.json",
+      "sha256": "36042f98cd5b265896d82320bcc77d198b4440f85c32996015d1b2caecd8181f",
+      "size": 1172
+    },
+    {
+      "path": "docs/PASS72_RUNTIME_ACCEPTANCE_20260822.json",
+      "sha256": "c5da3f460cf2c5a46d07b75de323a236a6bdc8cb1dbcaf5749f72badef686539",
+      "size": 1022
+    },
+    {
+      "path": "docs/PASS72_SRC64_FEEDBACK_LOOP.json",
+      "sha256": "600713dacb88c45df805618122d9da0deabfff86d4e1ad0382fa616c52566f86",
+      "size": 2253
+    },
+    {
+      "path": "docs/PASS73_ADVANCED_PROGRESSION_SELFTEST.json",
+      "sha256": "f27284e60010db7f38b6eb22d6cd8b75eda33fcacaf6962abf2e25171191e4a5",
+      "size": 681
+    },
+    {
+      "path": "docs/PASS73_AWAKENING_BLOOD_AWAKENING_RESEARCH.json",
+      "sha256": "0f55d163103c4e6f86f40f7ea433233bb8ce4643767e2ffed9e1707ac4ffd7c9",
+      "size": 6719
+    },
+    {
+      "path": "docs/PASS73_AWAKENING_BLOOD_AWAKENING_RESEARCH.md",
+      "sha256": "77dacf3a10ed0ca3e101af407cdc02decb953e0ed305df7f58fc24fa92a6e9ae",
+      "size": 2734
+    },
+    {
+      "path": "docs/PASS73_BACKEND_FILE_MANIFEST.json",
+      "sha256": "19fdacd6bdfc42190cc0601d49fb8444b17172fe371624a07672c179eaba1935",
+      "size": 1844
+    },
+    {
+      "path": "docs/PASS73_CLIENT_TEST_PLAN.md",
+      "sha256": "0fb174a7213942a63739041845fb2218cbbd2e345ae34ac40b3b25d27951cce2",
+      "size": 1729
+    },
+    {
+      "path": "docs/PASS73_SRC64_FEEDBACK_LOOP.json",
+      "sha256": "76d8fae277a3af0d922412ca3c9800873100392bf57e78cb9db3a38dbc2b630c",
+      "size": 2235
+    },
+    {
+      "path": "docs/PASS74_AWAKENING_SELFTEST.json",
+      "sha256": "d150dac8746717fea4dcc9552a08dbe821aad9df8890ca5a3262f24d963311ab",
+      "size": 336
+    },
+    {
+      "path": "docs/PASS74_BACKEND_FILE_MANIFEST.json",
+      "sha256": "18e040a374cf96565c2826263e43606542f0b83d6f2d9fd8c97b01fcb4125bc5",
+      "size": 1988
+    },
+    {
+      "path": "docs/PASS74_CLIENT_TEST_PLAN.md",
+      "sha256": "1bf8beabeb7c137baab76602023bada456b3888bda9137f96eb4eb0f76270311",
+      "size": 2198
+    },
+    {
+      "path": "docs/PASS74_RUNTIME_DEBUG_FINDINGS.json",
+      "sha256": "daea8943ea6e38faecce652e3fcd76f72ed55f29ad59ecc0807cb12ce73668de",
+      "size": 1261
+    },
+    {
+      "path": "docs/PASS74_SRC64_FEEDBACK_LOOP.json",
+      "sha256": "d2ad463ab6597842c7f01ced9ec0fc48c4451ef2f5ce422854f9043340156670",
+      "size": 1026
+    },
+    {
+      "path": "docs/PASS75_BACKEND_FILE_MANIFEST.json",
+      "sha256": "a055d51dad4daa34b048c7ef428f7b74ec72212d3547c413541a5f7585d4e82d",
+      "size": 1892
+    },
+    {
+      "path": "docs/PASS75_CAMPAIGN_OWNERSHIP_SELFTEST.json",
+      "sha256": "f07441b3d953a35939a55c6c4bd5d5df24f11ea03fd706004ac15a1101380e4e",
+      "size": 1281
+    },
+    {
+      "path": "docs/PASS75_CLIENT_TEST_PLAN.md",
+      "sha256": "b052434af37c4652d722601ce85094f0aa57e5325eee2e3f2c740c4c2ff0c3b0",
+      "size": 2143
+    },
+    {
+      "path": "docs/PASS75_RUNTIME_DEBUG_FINDINGS.json",
+      "sha256": "209ff3e99c4a287605418104ddfefdfc62ca5e9f1e7c8ba70b894b36c797d656",
+      "size": 2973
+    },
+    {
+      "path": "docs/PASS75_SRC64_FEEDBACK_LOOP.json",
+      "sha256": "f91c964d0176fd5c0eaf28a2d0760fe1ec4a7284556663b89408323ca0b51ec7",
+      "size": 2003
+    },
+    {
+      "path": "docs/PASS79_CLIENT_TEST_PLAN.md",
+      "sha256": "3372e6ff0effa299ea2690a4b6c447d71ca91194815feacfdb9ff70a156f3330",
+      "size": 3292
+    },
+    {
+      "path": "docs/PASS79_DAILY_RESET_SELFTEST.json",
+      "sha256": "0b879d29ca43b20f72fcd3b8912d4a2d90322a3de71fa90a8aa66a5e059865a0",
+      "size": 1151
+    },
+    {
+      "path": "docs/PASS79_IMPLEMENTATION_FILE_MANIFEST.json",
+      "sha256": "37f1bb9e98c6d24ad22aaa1cf98124b0e43424c5140a90dd6b01e96a39bbbd72",
+      "size": 1813
+    },
+    {
+      "path": "docs/PASS79_REGRESSION_MATRIX.json",
+      "sha256": "9bf12a20a029a38c85d305e652a1c2dd7de34057bb55c38c21f8bb8b232553a1",
+      "size": 848
+    },
+    {
+      "path": "docs/PASS79_SRC64_REALITY_CHECK.json",
+      "sha256": "2d07ae7bdf93ffab7f02d46df98eba06d1e47cf57b488bf35adf7a369b07fec6",
+      "size": 1499
+    },
+    {
+      "path": "docs/PASS79_TECHNICAL_CHANGELOG.md",
+      "sha256": "05f7efd28524851bbec1499ef63ba9b3d40f08e830d73c84fa5284168b9f1cbd",
+      "size": 6501
+    },
+    {
+      "path": "docs/PASS81_CLIENT_TEST_PLAN.md",
+      "sha256": "33db973e301a7986e64c91d3d8ccbe429bd316c2f79b30873c72076af6e6e0cd",
+      "size": 2136
+    },
+    {
+      "path": "docs/PASS81_DAILY_RESET_CAMPAIGN_CORRECTION_SELFTEST.json",
+      "sha256": "f1194b308250dee606c89abcbfe2c970c1691f710480090cb213f5ee0e83558a",
+      "size": 673
+    },
+    {
+      "path": "docs/PASS81_IMPLEMENTATION_FILE_MANIFEST.json",
+      "sha256": "f7cd8951a435865f39fc0d1cd2e00f3997e2c217211d98666b6ae023180cfa45",
+      "size": 2592
+    },
+    {
+      "path": "docs/PASS81_REGRESSION_MATRIX.json",
+      "sha256": "d4bd35cc17fc051d5675d3fa574914987dd50b2063829f5f99788c4451eed2ca",
+      "size": 1530
+    },
+    {
+      "path": "docs/PASS81_SRC64_FEEDBACK_LOOP.json",
+      "sha256": "2f4e26f06bdbd85e3c4d13754ee368da0672ea17ac835a4c7641d863e09bd5c6",
+      "size": 4047
+    },
+    {
+      "path": "docs/PASS81_TECHNICAL_CHANGELOG.md",
+      "sha256": "1fe704450e323dc69c9bfd9c57cbdab0d4e007563d6c3cf009abed5db04ab543",
+      "size": 2534
+    },
+    {
+      "path": "docs/PASS83_CLIENT_TEST_PLAN.md",
+      "sha256": "b3806f3596adf472de6d6efeb56806a2560ec3ca75751d0a029cf791a31579f4",
+      "size": 2385
+    },
+    {
+      "path": "docs/PASS83_DAILY_RESET_TEMPORAL_SELFTEST.json",
+      "sha256": "59095515d8ee082465bc637f681b6c411067814f39a32f3fd0a5d0b6df6a4cce",
+      "size": 1162
+    },
+    {
+      "path": "docs/PASS83_IMPLEMENTATION_FILE_MANIFEST.json",
+      "sha256": "6ebbe58c1db65ae8122f1b55566c579d07c909ac3266b34b9ee632c5729141d2",
+      "size": 3044
+    },
+    {
+      "path": "docs/PASS83_REGRESSION_MATRIX.json",
+      "sha256": "a1b2b3fcfccb2449ec8674a1a073c999bae763dc46328e0402d8f819dc46519c",
+      "size": 1149
+    },
+    {
+      "path": "docs/PASS83_SRC64_FEEDBACK_LOOP.json",
+      "sha256": "870215eaffabe0012f539aa10a2f81bc2d5c69b022d9ef18939f36c12cb24458",
+      "size": 4145
+    },
+    {
+      "path": "docs/PASS83_TECHNICAL_CHANGELOG.md",
+      "sha256": "3b82a766fd32bea0ac09557f8ba4098a41f57f4bd615c12dc768258273598387",
+      "size": 4194
+    },
+    {
+      "path": "docs/PASS87_CLIENT_TEST_PLAN.md",
+      "sha256": "fc6e0589c5315b3789f5375ef5fc771a89f73e17695eca120eeab15f95ef8a7d",
+      "size": 1494
+    },
+    {
+      "path": "docs/PASS87_COMMERCE_VIP_PHASE1_SELFTEST.json",
+      "sha256": "fc8f79dffd011ee6097ed30168fc42a04b3fd443373f848bdad10b599336e536",
+      "size": 2854
+    },
+    {
+      "path": "docs/PASS87_IMPLEMENTATION_FILE_MANIFEST.json",
+      "sha256": "e5836992d9d5c21efc2dc91e3db163f0b73e05ffe683b3cb0b7a1c5a6b3d8c78",
+      "size": 5140
+    },
+    {
+      "path": "docs/PASS87_REGRESSION_MATRIX.json",
+      "sha256": "6e96d15fdfdfa49a0ddf2e6e91e22a618350a64b60672b5d44b2f2f4f2e35719",
+      "size": 810
+    },
+    {
+      "path": "docs/PASS87_SRC64_FEEDBACK_LOOP.json",
+      "sha256": "3a6804e1b2ba226ae6f79082ac35ad8cb8fdad96c215593a95905f21d84f8a98",
+      "size": 2243
+    },
+    {
+      "path": "docs/PASS87_TECHNICAL_CHANGELOG.md",
+      "sha256": "ffbbac2499085611ed29e25ea419b42b9ad45364d910b43ed9bf168b4dcc2319",
+      "size": 3407
+    },
+    {
+      "path": "docs/PASS88_CLIENT_TEST_PLAN.md",
+      "sha256": "51c84e13beaee8e701536ecf9aa37ff2572232c9be32a680dd73a12bcf7bccfb",
+      "size": 3624
+    },
+    {
+      "path": "docs/PASS88_COMMERCE_PURCHASE_SELFTEST.json",
+      "sha256": "3642cb172d6d247ab6c59a4de5845a1a12b899475db564fe491a76f0a6814a12",
+      "size": 1749
+    },
+    {
+      "path": "docs/PASS88_IMPLEMENTATION_FILE_MANIFEST.json",
+      "sha256": "3b35f395aa3acc513d1856faeb16152ba220dab051c90b2f89d871ec22d09f8f",
+      "size": 5340
+    },
+    {
+      "path": "docs/PASS88_PURCHASE_BRIDGE_CONTRACT.json",
+      "sha256": "f5beb60d18dad3a88b81b3e84394406a92204057de1ca889a8ac7e3153118006",
+      "size": 2731
+    },
+    {
+      "path": "docs/PASS88_REGRESSION_MATRIX.json",
+      "sha256": "e0efbad7ae2b807903e67c6e0bf5f5d0f1dcf4d19e4223d33f99f16704b51fdb",
+      "size": 1814
+    },
+    {
+      "path": "docs/PASS88_ROUTE_CONTRACT_SELFTEST.json",
+      "sha256": "287e3caa05770537fad3ed3eb2eafff3f371e734d03fd9ad69946c24db6cb260",
+      "size": 153
+    },
+    {
+      "path": "docs/PASS88_ROUTE_CONTRACT_VALIDATION.json",
+      "sha256": "3940131a2ff6b64a276c7e30028f1fb4515b33f2c9cb4f69cbef47b516f788c5",
+      "size": 1012
+    },
+    {
+      "path": "docs/PASS88_SRC64_FEEDBACK_LOOP.json",
+      "sha256": "4473763eff5822892642a59ec42857c31741633587828f7d030adfe4bc1739ab",
+      "size": 5205
+    },
+    {
+      "path": "docs/PASS88_TECHNICAL_CHANGELOG.md",
+      "sha256": "d4ae7b4d8d6439513f8e17465b2c9dbde6ea4aacf9bd859c7a6fa217f30387ee",
+      "size": 3272
+    },
+    {
+      "path": "docs/PASS89_CLIENT_TEST_PLAN.md",
+      "sha256": "de4e34164b2885446621f67725e2f82fe051e55cfd9ca2ab0c8a424ae52387f5",
+      "size": 2260
+    },
+    {
+      "path": "docs/PASS89_DEBUG_ACCEPTANCE.json",
+      "sha256": "ede1b8fdaadf996ae6dec319d6a0275af4a1caa1de9b06a7e99884fcd91626ca",
+      "size": 1030
+    },
+    {
+      "path": "docs/PASS89_IMPLEMENTATION_FILE_MANIFEST.json",
+      "sha256": "8dcb571f6ce73f6090326f371c9d6895a0558531045bb1e5870789e4bf69a083",
+      "size": 3759
+    },
+    {
+      "path": "docs/PASS89_OTA_CONTRACT.json",
+      "sha256": "835dcf187812838bc0671d2e315bc98edf1d5c0d195c8ea75254b0d01f834ea2",
+      "size": 1437
+    },
+    {
+      "path": "docs/PASS89_OTA_CUMULATIVE_HASHES.json",
+      "sha256": "ba1792965417756b1651245809c59d648ff9de1413370731f2c60b6f6e68beb8",
+      "size": 19619
+    },
+    {
+      "path": "docs/PASS89_OTA_TOKEN_SELFTEST.json",
+      "sha256": "771af8461232f13303313ed6839574ba7faabdc979efa4752df622c806228d74",
+      "size": 516
+    },
+    {
+      "path": "docs/PASS89_REGRESSION_MATRIX.json",
+      "sha256": "1030abdd4e0114e119b75c48321c0f5a9c1c48f1d5d20f4a2073cbc816284299",
+      "size": 1453
+    },
+    {
+      "path": "docs/PASS89_SRC64_FEEDBACK_LOOP.json",
+      "sha256": "9a9003d0b6fe697fbc87e89a05f7f799b362a7e0e3fd126b356ad50714b08986",
+      "size": 3169
+    },
+    {
+      "path": "docs/PASS89_TECHNICAL_CHANGELOG.md",
+      "sha256": "32dc3763a07d70416b620bf649bcf502d52f22e67afde411fae16be2418607a6",
+      "size": 4270
+    },
+    {
+      "path": "docs/PASS91_CLIENT_TEST_PLAN.md",
+      "sha256": "0beb9a1e3cf7517481834def0bee148b72c563566d1497968c018aee99e04547",
+      "size": 1290
+    },
+    {
+      "path": "docs/PASS91_IMPLEMENTATION_FILE_MANIFEST.json",
+      "sha256": "2eb40fa899baf5910c243a2eea73969aff4acfb7bfe77e786a1615c7612e03e5",
+      "size": 4472
+    },
+    {
+      "path": "docs/PASS91_REGRESSION_MATRIX.json",
+      "sha256": "b63e3761fe77aef9912ab5778223fb8c23a3bab89c51342be2f4fad3ea8ea1a5",
+      "size": 1080
+    },
+    {
+      "path": "docs/PASS91_SRC64_FEEDBACK_LOOP.json",
+      "sha256": "c37033a289b4c91e8bcddaa005cbe7a8bd1e8c5a51aed2f72a8a365f4db53d77",
+      "size": 2586
+    },
+    {
+      "path": "docs/PASS91_TECHNICAL_CHANGELOG.md",
+      "sha256": "87c30eafb5178b81d64195d6dd8377a6a82e9179a0710f42d398508caffa65bb",
+      "size": 2966
+    },
+    {
+      "path": "docs/PASS91_VIP_AWARD_CONTRACT.json",
+      "sha256": "fc66f7ded9fb3b116a549b8c9916f4b5160e7e6645866e7253c5ae468b5094dd",
+      "size": 964
+    },
+    {
+      "path": "docs/PASS91_VIP_AWARD_SELFTEST.json",
+      "sha256": "231db346115efdb09fc9605114b34265883ece7cee8752d796b9ec2a2785f74c",
+      "size": 4425
+    },
+    {
+      "path": "docs/PASS92_CLIENT_TEST_PLAN.md",
+      "sha256": "4aead13dd6c6ce9fe2d5c49a9794ff68dbc6dd15d20a8883cafdc854ee9a22cf",
+      "size": 1500
+    },
+    {
+      "path": "docs/PASS92_IMPLEMENTATION_FILE_MANIFEST.json",
+      "sha256": "b0d2a4db5412244755ec234c1913e91a5db47d8cf55fcc9faa2d4e06b743e9aa",
+      "size": 4290
+    },
+    {
+      "path": "docs/PASS92_MID116_CONTRACT.json",
+      "sha256": "fc28430350da503cb9f69029c19bb57a7796825e616550f28bf0a2579d3bf079",
+      "size": 1216
+    },
+    {
+      "path": "docs/PASS92_MID116_SELFTEST.json",
+      "sha256": "cb2a646526db0da5ffec2bb501b18838e6d16149a16848e62b9315af4fcbcebe",
+      "size": 4370
+    },
+    {
+      "path": "docs/PASS92_REGRESSION_MATRIX.json",
+      "sha256": "acb1482987d243e0f9ea5ff6ed0b9406ade271a5da402e59661e48457a580615",
+      "size": 1077
+    },
+    {
+      "path": "docs/PASS92_RUNTIME_ACCEPTANCE.json",
+      "sha256": "d90bf84ce5f6747e039030410aff096bc5eb454ebec583393e5a75964c4d8534",
+      "size": 1080
+    },
+    {
+      "path": "docs/PASS92_SRC64_FEEDBACK_LOOP.json",
+      "sha256": "b142708b292353cd3dfe9c76804b81539abbde5df1419857c18c11b4ace05646",
+      "size": 1886
+    },
+    {
+      "path": "docs/PASS92_TECHNICAL_CHANGELOG.md",
+      "sha256": "19eb644d4f6c18d780e6cb674067abdc06b425d7a4c492ef3032d8db5bf6f799",
+      "size": 2488
+    },
+    {
+      "path": "docs/PASS94_CLIENT_TEST_PLAN.md",
+      "sha256": "58d8a6700f05f9a375edd978c6e57309f0566cb677661409a715ac8b69009dab",
+      "size": 1453
+    },
+    {
+      "path": "docs/PASS94_IMPLEMENTATION_FILE_MANIFEST.json",
+      "sha256": "1d85ba0b313dafdb5964827dcdb5d998718bc3f1104841e75e0dd4b53c07e28a",
+      "size": 3777
+    },
+    {
+      "path": "docs/PASS94_PLAYER_PROGRESSION_SELFTEST.json",
+      "sha256": "4272d199fbba24317f358b7bb53fc58e02a79f456ed7e8cccd67aff5588a76c8",
+      "size": 766
+    },
+    {
+      "path": "docs/PASS94_REGRESSION_MATRIX.json",
+      "sha256": "c5e4590152366c6bd3fcbaa0e0f205448484f540816ba9fe077a129ded3a3e0c",
+      "size": 736
+    },
+    {
+      "path": "docs/PASS94_SRC64_FEEDBACK_LOOP.json",
+      "sha256": "6766b8a5a88367dcdf811b0f07a4b71763d416cf4c4ddba4d5b81176927cb03a",
+      "size": 2138
+    },
+    {
+      "path": "docs/PASS94_TECHNICAL_CHANGELOG.md",
+      "sha256": "8992c33216dc7d1f1a92fa18858c1d82e7c48a27b1342f50f0596dfe2733a85d",
+      "size": 2484
+    },
+    {
+      "path": "docs/PASS94_VALIDATION.json",
+      "sha256": "7ff77cf28ef924e237c04def06ff611faadac6cd0a172097f7932b69a84ae445",
+      "size": 1409
+    },
+    {
+      "path": "docs/PASS96_CLIENT_TEST_PLAN.md",
+      "sha256": "cab73ce02d9452b75c525e404cdedd502f078b9c8d0c98198f03927ec0827d2e",
+      "size": 1359
+    },
+    {
+      "path": "docs/PASS96_SRC64_FEEDBACK_LOOP.json",
+      "sha256": "48cd50fbf2b5df6a281bd0d075020e1db9d1c81870c119b32738700c1f74f11a",
+      "size": 2846
+    },
+    {
+      "path": "docs/PASS96_TECHNICAL_CHANGELOG.md",
+      "sha256": "a177362f74d165d359c2e31467a39c1a1d29f94ca90c80069ad121d42d3f980b",
+      "size": 2526
+    },
+    {
+      "path": "docs/PASS96_VALIDATION.json",
+      "sha256": "cf1bfdd3555f1ba4608e6ed61b0c87530cc2f44f7caba0d9e1c2921c5ca4d7d7",
+      "size": 1265
+    },
+    {
+      "path": "docs/PASS98_CLIENT_TEST_PLAN.md",
+      "sha256": "40d1ecba39d17183dd17bffb593eb410f31a3c2d42ffad1b5645f8b1f3ac81df",
+      "size": 1396
+    },
+    {
+      "path": "docs/PASS98_IMPLEMENTATION_FILE_MANIFEST.json",
+      "sha256": "1fe8a8a019bdf8a8cd69349d09b604b3a375978ee411ffd345341037d530d6f9",
+      "size": 3133
+    },
+    {
+      "path": "docs/PASS98_SRC64_FEEDBACK_LOOP.json",
+      "sha256": "df33e19d792a4dd58459f5318ac81f9a6f9f80046740b167cebf25a6e92663f8",
+      "size": 2930
+    },
+    {
+      "path": "docs/PASS98_TECHNICAL_CHANGELOG.md",
+      "sha256": "11d8772ee3aee5f04cde29ddcc4f1d329ae04a54a4e939a5a8f6093d259e12c2",
+      "size": 2953
+    },
+    {
+      "path": "docs/PASS98_VALIDATION.json",
+      "sha256": "91890fb320a041c9d52126dc09dbe71d10504ac8350f5325142c9886bd693774",
+      "size": 1326
+    },
+    {
+      "path": "docs/PASS99_CLIENT_TEST_PLAN.md",
+      "sha256": "46745419b54c6c31e21bf4c6eef502369bd38b052f49dc69dd524913418188fc",
+      "size": 1830
+    },
+    {
+      "path": "docs/PASS99_IMPLEMENTATION_FILE_MANIFEST.json",
+      "sha256": "e82a6464a780e16c2d3bf70a9b6016abf8ad63deaaf1a23b120ebfd93a721360",
+      "size": 2625
+    },
+    {
+      "path": "docs/PASS99_RUNTIME_RECONCILIATION.json",
+      "sha256": "5d253875e533792e8ccf92c30a509639b6db34e1d3526953ed6d7b219ebb0888",
+      "size": 1453
+    },
+    {
+      "path": "docs/PASS99_SRC64_FEEDBACK_LOOP.json",
+      "sha256": "9af6df3abf5b8bf6da24efbeefab13f17a36bd3b8f280a3f550f5768d880e815",
+      "size": 3871
+    },
+    {
+      "path": "docs/PASS99_TECHNICAL_CHANGELOG.md",
+      "sha256": "6f2f26a3960394ffc2167986f87144f1ebff4aaf12dba7d3c0bf1644e705ff74",
+      "size": 4715
+    },
+    {
+      "path": "docs/PASS99_VALIDATION.json",
+      "sha256": "414c1a06a9ae5a03c6c3f2c9bb4ff21b86262994d954bc5ed544c1d7f592723e",
+      "size": 1088
+    },
+    {
+      "path": "docs/PLAYER_BOOT_PROTOCOL.md",
+      "sha256": "f9e02a395330cba4d44a2d24ff11ff6a8c8277926078dda8dc1887978bc5df1f",
+      "size": 5309
+    },
+    {
+      "path": "docs/RESOURCE_DOWNLOAD_PROTOCOL_RE.md",
+      "sha256": "1b2f902ebb1915958f5d479edc7028e3019069a5641598dd07d4c7c85a6b3b82",
+      "size": 25247
+    },
+    {
+      "path": "docs/ROADMAP_V0_6.md",
+      "sha256": "b8596e0e6a0a7d718e4bc725f370ab53723ea2db75c1ccc5ec86ebf84b68ab4a",
+      "size": 3586
+    },
+    {
+      "path": "docs/ROADMAP_V0_7.md",
+      "sha256": "83bf06cb28457eb50146ad8226cf78f55f5316c64578f0012f6fa08ddad8b4fe",
+      "size": 1365
+    },
+    {
+      "path": "docs/STAGE1_IMPLEMENTATION_NOTES.md",
+      "sha256": "bb52a5acfc3222cdb19191c1126578775f6b305743cea96a5e478a10f395f09b",
+      "size": 2416
+    },
+    {
+      "path": "docs/STAGE2_1_HOTFIX_NOTES.md",
+      "sha256": "6379d06cf177aafab97c88402d1231815fbc26b9611d190f19b68ee83b003c5d",
+      "size": 1592
+    },
+    {
+      "path": "docs/STAGE2_2_LOBBY_UI_COMPLETION_NOTES.md",
+      "sha256": "1521d3317fab290261a076c041d54ee74af4be31044b2aa075d4a774485f4f29",
+      "size": 1175
+    },
+    {
+      "path": "docs/STAGE2_3_MAINSCENE_HUD_FIX_NOTES.md",
+      "sha256": "8a35b075b49e7b22b686b12d84434afaaa03ceecc93390638fa6884cad61dc5a",
+      "size": 3508
+    },
+    {
+      "path": "docs/STAGE2_IMPLEMENTATION_NOTES.md",
+      "sha256": "1ccebf1c6ba92733e0c51418f5d58d92e4a00a16319e94c10d6689f9ce24c94e",
+      "size": 2004
+    },
+    {
+      "path": "docs/STAGE3_1_1_PLAYERDB_HOTFIX.md",
+      "sha256": "d8b48299d803b535637f91186a39331d4e2e55707a040248bd94f5f4498d9442",
+      "size": 1574
+    },
+    {
+      "path": "docs/STAGE3_1_2_CLIENT_ERROR_CAPTURE.md",
+      "sha256": "3adbc073e1537f3d9fd346b4e7d82a5593007be18f3851dbf3fe2a22f7170594",
+      "size": 3127
+    },
+    {
+      "path": "docs/STAGE3_1_3_RESOURCE_PRELOAD_PROBE.md",
+      "sha256": "6ccd55998ba7b6a522271bc1966bf2f2e9932a6aad048811650398f2c29331c9",
+      "size": 4530
+    },
+    {
+      "path": "docs/STAGE3_1_4_IDENTITY_COHERENCE.md",
+      "sha256": "a8adf0847e588525c214b61dedddfb1d5d12daa18be5ec7ec4d999b39db95919",
+      "size": 3592
+    },
+    {
+      "path": "docs/STAGE3_1_5_REGION_RUNTIME_NOTES.md",
+      "sha256": "f91bb98b49a3161314e8a1949ec25aa275152b49ea0c9110fcce151350ca111a",
+      "size": 2794
+    },
+    {
+      "path": "docs/STAGE3_1_6_BOOTSTRAP_SERVER_TIME.md",
+      "sha256": "93f0879b528abf425c3e513fcd2b546012bcd947bdf7adc9a409b779ba202aff",
+      "size": 2377
+    },
+    {
+      "path": "docs/STAGE3_1_7_AUTO_SIGN_BUILDING_FIX.md",
+      "sha256": "bf4191505446719e4c371c372b446958a33426900ac9b25e1de3411a96ce394a",
+      "size": 3792
+    },
+    {
+      "path": "docs/STAGE3_1_PLAYER_DATABASE.md",
+      "sha256": "9e943ba27b520e4a6e458a9e548f903c368ccd71393e932b217f5b1a0d2f00da",
+      "size": 5352
+    },
+    {
+      "path": "docs/STAGE3_DOMAIN_FOUNDATION.md",
+      "sha256": "c3c3ac7c50fa3cdedaa2c35705d7569d37b0c83ad2c17acd2904b57acecf2769",
+      "size": 3069
+    },
+    {
+      "path": "docs/STAGE3_MAINSCENE_DIAGNOSTIC.md",
+      "sha256": "d18f363a7618b1221e199e868eab0a9b0b75c493d01a757d56d8e061bf060f7d",
+      "size": 1326
+    },
+    {
+      "path": "docs/STAGE4A_1_HERO_DETAIL_HOTFIX.md",
+      "sha256": "a568658d75cfa69fec4c5f7cc0cdda4536474916846812a9780b5582c789adef",
+      "size": 2334
+    },
+    {
+      "path": "docs/STAGE4A_2_HERO_CAMPAIGN_SYNC.md",
+      "sha256": "61c29396cec0fcb38a5c08071d6ee6895ca368b5990d726e93cd317da3b0234c",
+      "size": 6412
+    },
+    {
+      "path": "docs/STAGE4A_3_GIRLS_SKIN_SKILL_SYNC.md",
+      "sha256": "17f7e7a2cab7e72a5a2b971b5f5aa59193a65de066e68524f812ca81a7bf7d9e",
+      "size": 5410
+    },
+    {
+      "path": "docs/STAGE4A_4_EOL_RESOURCE_GATEWAY.md",
+      "sha256": "1136408ea7264d14a3631638184b10bc9dfd415599ee6428cd125ae3f27c17fd",
+      "size": 5909
+    },
+    {
+      "path": "docs/STAGE4A_5_RESOURCE_INVENTORY_GUIDE_SYNC.md",
+      "sha256": "42161686f0b08fcbe0b75fb33fc564e24bc90c78970a8c5509089e82a83e04b7",
+      "size": 696
+    },
+    {
+      "path": "docs/STAGE4A_6_HERO_CONSUMABLES_SWEEP_ZIP_ASSETS.md",
+      "sha256": "4f582f94fa105cde227e7cb8b3d36210afec984b62fccb85f92311e85d28e76a",
+      "size": 987
+    },
+    {
+      "path": "docs/STAGE4A_HERO_FOUNDATION.md",
+      "sha256": "b2fc0c4844ad2d9fd0a088f94f521fc6c84f9d95ed6c34604c187ff6f3f5e966",
+      "size": 6212
+    },
+    {
+      "path": "docs/STATE_SYNC_CONVENTIONS.md",
+      "sha256": "9aa2d1cc88695f4a6744987610fd925dc0597152b316698d4d4019c0ce39ff38",
+      "size": 2554
+    },
+    {
+      "path": "docs/STATIC_CHECK_V0_8_23.txt",
+      "sha256": "f535139450edf0da9b2b781103a1f743cb1e0dd1c0959b074810de756fb6a0bc",
+      "size": 606
+    },
+    {
+      "path": "docs/STATIC_CHECK_V0_8_24.txt",
+      "sha256": "3229765b31ab6409031ac3cc7a627b1284c11f90927c735bd4656861b6992c75",
+      "size": 445
+    },
+    {
+      "path": "docs/STATIC_CHECK_V0_8_25.txt",
+      "sha256": "3442db28240178f1259bdb0c63bc3773f0fa4ad01b4412260833c5f5db792b10",
+      "size": 231
+    },
+    {
+      "path": "docs/SUMMON_BALANCE_TUNING_GUIDE.md",
+      "sha256": "b14d7563f1d6c5fcdacbdb23ebb0e6c3917c16242362be9fb251d829f42d0230",
+      "size": 6709
+    },
+    {
+      "path": "docs/SUMMON_FEATURED_OPERATOR_README.md",
+      "sha256": "96072bf0f5afa72130a04656da9f716d7f5f930b2baa760efa0630e3f88f61cf",
+      "size": 17319
+    },
+    {
+      "path": "docs/SUMMON_RNG_TUNING_BLUEPRINT.md",
+      "sha256": "d566673eb7adbdbf9970348d1ba28827d26f497f70298e92663794f218198570",
+      "size": 1473
+    },
+    {
+      "path": "docs/SYNTAX_CHECK_STAGE1.txt",
+      "sha256": "b991d9a1d6a34bb328df6f62af2d6377926f924d6e992ef1a08d4291a7d3b764",
+      "size": 169
+    },
+    {
+      "path": "docs/SYNTAX_CHECK_STAGE2.txt",
+      "sha256": "39e8204ba0b4817ab18c1d9f08c04cc4f4d415d87841414404f8eec0970bf04e",
+      "size": 202
+    },
+    {
+      "path": "docs/SYNTAX_CHECK_STAGE2_1.txt",
+      "sha256": "9fe6593c0002bfebc4512fc5ad88ea4f2b7de03382c47718e123404736d1cd2f",
+      "size": 112
+    },
+    {
+      "path": "docs/SYNTAX_CHECK_STAGE2_2.txt",
+      "sha256": "4ffe69019f7be2c08f9e62242bacd0421b1c486941ee53ab1c7fb949c0451b37",
+      "size": 71
+    },
+    {
+      "path": "docs/SYNTAX_CHECK_STAGE2_3.txt",
+      "sha256": "6562ae2c01eb632b23279bb4ff7c981ee8db16ab21263b4848430351b7b1ca35",
+      "size": 128
+    },
+    {
+      "path": "docs/SYNTAX_CHECK_STAGE3.txt",
+      "sha256": "99a0614f8bef29bf1136306f7c581c7e74bb5d593e42d9ce18530d6aff6d9225",
+      "size": 263
+    },
+    {
+      "path": "docs/SYNTAX_CHECK_STAGE3_1.txt",
+      "sha256": "4f234c5652da6610b2a33d5028741a47dddf8b1f2066ae5bdca17e51b65c6fde",
+      "size": 175
+    },
+    {
+      "path": "docs/SYNTAX_CHECK_STAGE3_1_1.txt",
+      "sha256": "371ff4b1929ad21c17d08231a5e773122d66edcaaf7c192adcfd42a86531312b",
+      "size": 126
+    },
+    {
+      "path": "docs/SYNTAX_CHECK_STAGE3_1_2.txt",
+      "sha256": "77418bd4655422e29e340541552004e06d8a952a03193e874e556437bd37095d",
+      "size": 177
+    },
+    {
+      "path": "docs/SYNTAX_CHECK_STAGE3_1_3.txt",
+      "sha256": "afff50cb83362d891abaa3f5a77620dfacc519d77a9bc6cef4caafd1cb143e7d",
+      "size": 257
+    },
+    {
+      "path": "docs/SYNTAX_CHECK_STAGE3_1_4.txt",
+      "sha256": "cb7834eaf854cf1fef9f0be5b4c7fef83618029a40ff39d5b6309d5704360936",
+      "size": 132
+    },
+    {
+      "path": "docs/SYNTAX_CHECK_STAGE3_1_5.txt",
+      "sha256": "1da798ec53a6fb50aa6abc11fec26c4799ae6b069f25d4dca5e6115ad1e2d81f",
+      "size": 180
+    },
+    {
+      "path": "docs/SYNTAX_CHECK_STAGE3_1_6.txt",
+      "sha256": "1f6d973797748dc84f6bb07bae67dab02bba202aa1453f8cf4dddf53d40a52f6",
+      "size": 206
+    },
+    {
+      "path": "docs/SYNTAX_CHECK_STAGE3_1_7.txt",
+      "sha256": "d63f12850b6cf79955426234b783c6603440cbb8d5aefd9bf190cb4b6353c143",
+      "size": 222
+    },
+    {
+      "path": "docs/SYNTAX_CHECK_STAGE4A.txt",
+      "sha256": "ffafd3ca4ec7ede5338acf7378983bb65cbe65dd22c15b56f497a77d7945d33f",
+      "size": 254
+    },
+    {
+      "path": "docs/SYNTAX_CHECK_STAGE4A_1.txt",
+      "sha256": "207ddd954642a45cdebb33af8b563ece7d987e1839296993bf98e93b7f8fcff5",
+      "size": 240
+    },
+    {
+      "path": "docs/SYNTAX_CHECK_STAGE4A_2.txt",
+      "sha256": "c649a38f71b41bcf2a98b4527eae5923f1c0bbb86cf472634193757471836155",
+      "size": 151
+    },
+    {
+      "path": "docs/SYNTAX_CHECK_STAGE4A_3.txt",
+      "sha256": "c69ba63a8c70b96d3d36b80e292b3a2c52a581b59b3d37e05538d5d401175208",
+      "size": 232
+    },
+    {
+      "path": "docs/SYNTAX_CHECK_STAGE4A_9.txt",
+      "sha256": "1e2c68804365bcf53df946fe5b705db1b7c0bae910503554f2d536b02258ae09",
+      "size": 221
+    },
+    {
+      "path": "docs/SYNTAX_CHECK_V0_6.txt",
+      "sha256": "e92095d143cc3639d357f5a14088e308405d045ab2074f81838f9f17a179072a",
+      "size": 200
+    },
+    {
+      "path": "docs/SYNTAX_CHECK_V0_6_1.txt",
+      "sha256": "725d3be3801b5d9b9899db35f7c84d0b5a9696af0bce1b69babdaf970f925f71",
+      "size": 447
+    },
+    {
+      "path": "docs/SYNTAX_CHECK_V0_6_2.txt",
+      "sha256": "8e9d11acc4514ce73e172defdb8b1fd514ee543d033fffe7b0c911d885ccaea6",
+      "size": 226
+    },
+    {
+      "path": "docs/SYNTAX_CHECK_V0_6_3.txt",
+      "sha256": "03ad7fb7a301ed87ad690dc5b72ab8f7d803919b280da04b9f02a2625f3d7a47",
+      "size": 277
+    },
+    {
+      "path": "docs/SYNTAX_CHECK_V0_6_4.txt",
+      "sha256": "99324acf170c94bb09494df84edc7ff1ea9ec2e10d25f5f84421517b68846dae",
+      "size": 1286
+    },
+    {
+      "path": "docs/SYNTAX_CHECK_V0_7_0.txt",
+      "sha256": "ef319de2c787645c88f777fa23f5d8dc625a5daeb1ad51ea3dfa6b377b86c7ab",
+      "size": 786
+    },
+    {
+      "path": "docs/SYNTAX_CHECK_V0_8_0.txt",
+      "sha256": "5239d5202413c396428a6d3b29572be1a600b35ee912e6729d90e13771add14c",
+      "size": 189
+    },
+    {
+      "path": "docs/SYNTAX_CHECK_V0_8_1.txt",
+      "sha256": "0fe8dd14a456fba102979b7357cd6974f4b7b7970a27c3614007a3adfc4221e5",
+      "size": 730
+    },
+    {
+      "path": "docs/SYNTAX_CHECK_V0_8_10.txt",
+      "sha256": "457f9b212f625d44c9529c94c4a06bf55c407ee29e66f3cf105872db059e7cb7",
+      "size": 325
+    },
+    {
+      "path": "docs/SYNTAX_CHECK_V0_8_11.txt",
+      "sha256": "b1d90bbddf8f4d63a73b407c36b009afbc9ecb5a8faf5a95082a86f557e729bc",
+      "size": 794
+    },
+    {
+      "path": "docs/SYNTAX_CHECK_V0_8_14.txt",
+      "sha256": "f7bbe26343ae8bf460019d04d3d30cd0336483ced55f2a85b92277e6f0ae60be",
+      "size": 547
+    },
+    {
+      "path": "docs/SYNTAX_CHECK_V0_8_15.txt",
+      "sha256": "b3688d6a0c5511e30aeb2d01ac32e963be2f3b511165752ba0064aad82f55b55",
+      "size": 2467
+    },
+    {
+      "path": "docs/SYNTAX_CHECK_V0_8_2.txt",
+      "sha256": "f052c702463fd62cf75472946cadcc4a63ca8a7308857381e037bfd23a409222",
+      "size": 1017
+    },
+    {
+      "path": "docs/SYNTAX_CHECK_V0_8_3.txt",
+      "sha256": "0215ee20530d72c2616000d6d9fa7dc7d779628207f647fb7d8cee3dc96ce2da",
+      "size": 323
+    },
+    {
+      "path": "docs/SYNTAX_CHECK_V0_8_4.txt",
+      "sha256": "e0189cb803df7639df84a29b60ac312ffa5f88c8722a94f2200bebfa0725c727",
+      "size": 308
+    },
+    {
+      "path": "docs/SYNTAX_CHECK_V0_8_5.txt",
+      "sha256": "1c26ceb2c2c57470959b90532b03b2513a7af87c3a7a95904b6f0ed868b54e8d",
+      "size": 510
+    },
+    {
+      "path": "docs/SYNTAX_CHECK_V0_8_6.txt",
+      "sha256": "8ef9359d0cc7fa8d560ac7ed48fe50af4864c13f6bf10ba98d7be9e1393a4814",
+      "size": 408
+    },
+    {
+      "path": "docs/SYNTAX_CHECK_V0_8_7.txt",
+      "sha256": "14542a769c5ec8a7964e88acd0f9253c1b90a30fc0ec90a30611924b971ef936",
+      "size": 437
+    },
+    {
+      "path": "docs/SYNTAX_CHECK_V0_8_8.txt",
+      "sha256": "bcf9535f86dcbafae2156e81c4ff13e72caff8350a89d9071c783137dec37f58",
+      "size": 1253
+    },
+    {
+      "path": "docs/SYNTAX_CHECK_V0_8_9.txt",
+      "sha256": "e64362a9be6332a64d9a6e17db755f48927178555bcb5bf1e7c197e0587a043e",
+      "size": 790
+    },
+    {
+      "path": "docs/TRANSPORT_MATRIX_PASS18.md",
+      "sha256": "789dc9d89d35ab33d9b5f0c9599a41308ac3f24ae606edfcf0e57cd431b9015c",
+      "size": 3001
+    },
+    {
+      "path": "docs/V0_6_2_STORY_PARTNER_CLAIM.md",
+      "sha256": "424cc50b85e1fff78d70f0d6905bf7c5d95a89f5634813806cf3ee55167f6cff",
+      "size": 4561
+    },
+    {
+      "path": "docs/V0_6_3_ALBUM_STORY_AND_LOCAL_UPDATE.md",
+      "sha256": "5b0df7859eb176b5aa619c5f67d55d6d9614e3aa1050c44eceef9b783cb73850",
+      "size": 6000
+    },
+    {
+      "path": "docs/V0_6_4_SKILL_REGEN_AND_HOTUPDATE_PROBE.md",
+      "sha256": "6a053985acaa51f648e3035d38794a5f0dfb2fd6be28ff76306f9407046f9bec",
+      "size": 4584
+    },
+    {
+      "path": "docs/V0_7_0_STABLE_LIVE_ASSETS_SAFE_HOTUPDATE.md",
+      "sha256": "b42406352a1aa6453661559e80223b5edc70e6ded721b1772ab40273cc2d61fb",
+      "size": 7359
+    },
+    {
+      "path": "docs/V0_8_0_MULTIUSER_IDENTITY_FOUNDATION.md",
+      "sha256": "38b43924edd030fb54c97dfc2a9ea5af1838f36f0b61863eb1fb51c8e6253047",
+      "size": 3084
+    },
+    {
+      "path": "docs/V0_8_10_PASS32_8_STONE_SUMMON.md",
+      "sha256": "6a04e13d53dccd6d02a0b7e0cf5907bd9cb5cdea3a9f0ec94812ec87225b25bd",
+      "size": 2884
+    },
+    {
+      "path": "docs/V0_8_11_PASS33_1_TUTORIAL_AUTHORITY.md",
+      "sha256": "55cb210df6e3fa6913a5a26681553602163f4c2808993d359da83f8aff42501c",
+      "size": 4205
+    },
+    {
+      "path": "docs/V0_8_12_PASS35_1_UPDATE_OPERATOR_HARDENING.md",
+      "sha256": "931b7b8e737d8b59fc993594957715d21f3bba45799713da90641f0d0f5ba699",
+      "size": 2408
+    },
+    {
+      "path": "docs/V0_8_13_PASS35_2_SKILL_POINT_SYNC.md",
+      "sha256": "55c3cf2feba0bd8be3457dade8d2f1b4658dd477218626aaea14b31b021d8c0b",
+      "size": 1986
+    },
+    {
+      "path": "docs/V0_8_14_PASS35_3_MID90_DUPLICATE_GUARD.md",
+      "sha256": "3bf1dae9433e093352c47160b3d7c90dfbc3a8a7eb3bcdd4203f6457d5d6be40",
+      "size": 1978
+    },
+    {
+      "path": "docs/V0_8_15_PASS36_1_CAMPAIGN_REWARD_PROJECTION.md",
+      "sha256": "94e4d47c365c218aa52ebb1f850de22ef8818661a3c5ae6767fbbb9ff928097e",
+      "size": 1369
+    },
+    {
+      "path": "docs/V0_8_16_PASS40_1_CAMPAIGN_DROP_PLANNER.md",
+      "sha256": "397b4ba280b79dc0aec288b203f78e714bcfed1f9b939f9d55e1a8f415ac567c",
+      "size": 1000
+    },
+    {
+      "path": "docs/V0_8_17_PASS40_2_TUTORIAL_SUMMON_DISPATCH.md",
+      "sha256": "268e8d206c9e428e00b87324f5a8b79f73a86f818f3ab2e6009d15350afde86a",
+      "size": 2193
+    },
+    {
+      "path": "docs/V0_8_18_PASS41_1_SUMMON_STATE_COST_COUNTER.md",
+      "sha256": "974d5585941f2c9ae7ade80f9b28053f82c0e93320ff2a2697a5c57af4f628b7",
+      "size": 1342
+    },
+    {
+      "path": "docs/V0_8_19_PASS41_2_SUMMON_RESULT_PLAN.md",
+      "sha256": "72785f50ada96e8a8fea0457872c5125492aa9297900fba85d1ec81328c0b929",
+      "size": 1472
+    },
+    {
+      "path": "docs/V0_8_1_FRESH_TUTORIAL_SUMMON.md",
+      "sha256": "0963f7ff759b391a7595b38f2ee8edd6adae242824963d5250391e7c5fb01157",
+      "size": 3649
+    },
+    {
+      "path": "docs/V0_8_20_PASS41_3_FAILCLOSED_SUMMON_SHAPE.md",
+      "sha256": "49001dfc178843ad3eb713ae183e70e26e75bff00cfafdcf100fe1ca4bd814b8",
+      "size": 1385
+    },
+    {
+      "path": "docs/V0_8_21_PASS41_4_PRIVATE_CLASSIC_VENDING.md",
+      "sha256": "52b406297eec45e9154265e3870d9ab7debb04a728faaf6cc391da9f759c2720",
+      "size": 1693
+    },
+    {
+      "path": "docs/V0_8_22_PASS41_5_CLASSIC_RUNTIME_RECONCILIATION.md",
+      "sha256": "e97fe38a716737cb0957c0438099897044424ef5ff9661e209021a091e9f267d",
+      "size": 1279
+    },
+    {
+      "path": "docs/V0_8_23_PASS41_6_PRIVATE_MAGIC_GACHAPON.md",
+      "sha256": "119554a837e90a5b117f87e23a9864e8fea90ef55252ed9b7da61581d9df40f1",
+      "size": 2124
+    },
+    {
+      "path": "docs/V0_8_24_PASS41_7_MAGIC_RUNTIME_DUPLICATE_RECONCILE.md",
+      "sha256": "e487346320107bedad66c06eeae91fad2ee79323d97fa1f0d3fc039d76f88d82",
+      "size": 1410
+    },
+    {
+      "path": "docs/V0_8_25_PASS41_8_DUPLICATE_POLICY_STARTUP_FIX.md",
+      "sha256": "38e470fc580f06e7a670312d3ed2bd291e80cd6363cea5932f8b3e50800fd0b5",
+      "size": 1319
+    },
+    {
+      "path": "docs/V0_8_26_PASS41_9_SMALL_RECURRING_FREE_FIX.md",
+      "sha256": "a75aec17e0b3cc3e02fd52b3350b456bf8abcd8506c63ac59aae1f22b38d1311",
+      "size": 1909
+    },
+    {
+      "path": "docs/V0_8_27_PASS42_2_PRIVATE_SX_SOUL_BOX.md",
+      "sha256": "0659a5ab1be740d8214f3064c9ca786637a9247f52b67ef9022b49225537bc4f",
+      "size": 1960
+    },
+    {
+      "path": "docs/V0_8_28_PASS42_6_CORRECTED_SX_CONTENT_PLANNER.md",
+      "sha256": "647818dc010ecb6b3f0a811eacc88099aaf343c65c3ec356be76c435fb4b407c",
+      "size": 1116
+    },
+    {
+      "path": "docs/V0_8_29_PASS42_7_SX_COUNTER_STATUS_GATE_FIX.md",
+      "sha256": "d27fbe1a2ab6fa6ddc28bb8f56c12a832d1fcd7360ee653b8852ba03243fdbb1",
+      "size": 1404
+    },
+    {
+      "path": "docs/V0_8_2_CAMPAIGN_ECONOMY_EXP.md",
+      "sha256": "2433d33995236587566cdfe6da215fb95e256c2e7616d33e48d2a0bfc333d537",
+      "size": 3559
+    },
+    {
+      "path": "docs/V0_8_34_PASS42_14_SMALL100_HOTFIX.md",
+      "sha256": "34c8bfc70b63215103e826cd96d27cc5d7fd729d0617dc8af5ed9981209b38d9",
+      "size": 2800
+    },
+    {
+      "path": "docs/V0_8_3_RUNTIME_LEVELUP_FIX.md",
+      "sha256": "8f431bbd7ca21d89d7b02f59846770ba5ce9a666ca48d71c6a2a2265eca39a4b",
+      "size": 4285
+    },
+    {
+      "path": "docs/V0_8_4_RUNTIME_HERO_GUIDE_FIX.md",
+      "sha256": "6927da8467381eb4533fd317be2403535683786f4a8b0cc893337951b9f472fd",
+      "size": 4752
+    },
+    {
+      "path": "docs/V0_8_5_PASS29_P0_ECONOMY_SPINE.md",
+      "sha256": "309a1b4c20432d6ca636ad7401c23def31bad2f7b6300c81562b0506d51f51c8",
+      "size": 3154
+    },
+    {
+      "path": "docs/V0_8_6_PASS30_CAMPAIGN_CRYSTAL_FUNCTION_MISSION.md",
+      "sha256": "44a9ef046d5e602de889cda2955e14c417b8eeb7aa73060c6aa5a9638c92240e",
+      "size": 4330
+    },
+    {
+      "path": "docs/V0_8_7_PASS30_1_SKILL_POINT_CRYSTAL_FIX.md",
+      "sha256": "ffa05656e3dff77003644a1f6ec48410f886b4dac940c3db342e4da5017c2def",
+      "size": 3601
+    },
+    {
+      "path": "docs/V0_8_8_PASS32_6_INFRASTRUCTURE_TUTORIAL_FIXES.md",
+      "sha256": "f878bfa35486fde467b7aa02bb3634ac54c4404c345f6d2ad30ebed4a1a0ed8a",
+      "size": 8095
+    },
+    {
+      "path": "docs/V0_8_9_PASS32_7_BOOTSTRAP_HOTFIX.md",
+      "sha256": "95f438e07e9d25612c3a550827d8441c653e2c364942b6469231484c65a69a43",
+      "size": 1606
+    },
+    {
+      "path": "docs/V0_9_0_PASS68_ECONOMY_BACKBONE_PART1.md",
+      "sha256": "84091dabf5c651a3df85d2f63c73153421c582aa76fba16bcddc97c5b2ade2a1",
+      "size": 1188
+    },
+    {
+      "path": "docs/V0_9_1_PASS69_1_ITEM_SALE_HOTFIX.md",
+      "sha256": "591f2b0e5e6a1f01da2585357df231120e8f563a6abb54b236a4fa336377f430",
+      "size": 1876
+    },
+    {
+      "path": "docs/V0_9_1_PASS69_ECONOMY_BACKBONE_PART2.md",
+      "sha256": "14bdd4e150c288bcfb76c52b497aa3acbc5a24f07ad5c7dc53c302b49b01efd5",
+      "size": 1505
+    },
+    {
+      "path": "docs/V0_9_2_PASS70_1_STONE_SUMMON_MANA_HOTFIX.md",
+      "sha256": "80ec6187b20bb1da9314aad5ec32b3093a80064714007e4e3d5866fd633f928d",
+      "size": 1582
+    },
+    {
+      "path": "docs/V0_9_3_PASS71_TEMPORAL_RESOURCES.md",
+      "sha256": "70b8d96495a6b8128d0dbd2b7fc0c999997df4acd29f2db64fa56677f803363c",
+      "size": 5858
+    },
+    {
+      "path": "docs/V0_9_4_PASS72_HERO_GIRLS_PROGRESSION.md",
+      "sha256": "9ebb9551f165eba78c4d3059aa4f2feab12e95e17e66bfd1b38b02c377f25293",
+      "size": 2890
+    },
+    {
+      "path": "docs/V0_9_5_PASS73_ADVANCED_HERO_PROGRESSION.md",
+      "sha256": "14fc7fb84dd04d83ebb521c641d3f022495ecd34777773669ea488e416dabeac",
+      "size": 1384
+    },
+    {
+      "path": "docs/V0_9_6_PASS74_AWAKENING_MISSION_OWNERSHIP.md",
+      "sha256": "5223127b48eb948b5553a6dcf71325dd2d808c381641d9a28034803f0c1b5574",
+      "size": 4057
+    },
+    {
+      "path": "docs/V0_9_7_PASS75_CAMPAIGN_OWNERSHIP.md",
+      "sha256": "ddfc89c3d40889453e73baa2c3c2a3764909dbffa5b6ed8bf0482a723bd0d883",
+      "size": 4890
+    },
+    {
+      "path": "docs/memory.md",
+      "sha256": "51966e4918eb5998a35db51c4029b76c16c379dc794fb5731d5ee214f17bd31a",
+      "size": 2933
+    },
+    {
+      "path": "gacha_control.py",
+      "sha256": "7f26a4f627a5d9148511c1adff703a3b88b1891c28a8165eb2d721be6abd2907",
+      "size": 41267
+    },
+    {
+      "path": "gxb_backend/__init__.py",
+      "sha256": "81aba0fc94aa39db458fac447a856d31e37bd9d09c67c8cf93caab4a4048c9fd",
+      "size": 493
+    },
+    {
+      "path": "gxb_backend/app_factory.py",
+      "sha256": "1eef6639f99e01e3424efb1f3f9ddd5617da52a830b0c8144ae7cefb0395ce94",
+      "size": 1341
+    },
+    {
+      "path": "gxb_backend/chat/__init__.py",
+      "sha256": "2d218ae39dc7eae2d8bbd9c31f242d9b5e301c1b2f636662b5b36fba8526cb08",
+      "size": 34
+    },
+    {
+      "path": "gxb_backend/chat/stub.py",
+      "sha256": "33413b19dbd2148ef06d32413084bfdec69ce924686a57a5fe37038cfa819b8e",
+      "size": 2829
+    },
+    {
+      "path": "gxb_backend/config.py",
+      "sha256": "aac554d1d989db804456666f7aaf141b057f0c9a9d7350772af07cb60070a52b",
+      "size": 9153
+    },
+    {
+      "path": "gxb_backend/content/__init__.py",
+      "sha256": "291f17f60bd4d03164e861e80fc61f9f0ef40acd97e9129331dff31497da8e98",
+      "size": 683
+    },
+    {
+      "path": "gxb_backend/content/campaign_drop_source_catalog.py",
+      "sha256": "a7eb85b35bd6e8268acf13f6408b1d2fa56611dda8ac4c0a66817fabd512197d",
+      "size": 4534
+    },
+    {
+      "path": "gxb_backend/content/campaign_reset_catalog.py",
+      "sha256": "5235bee7f802185ff0fea7bca1b6010e9026e98c8de49e351181768e432a9330",
+      "size": 2958
+    },
+    {
+      "path": "gxb_backend/content/consumable_effect_catalog.py",
+      "sha256": "daa0e76e52505cba53a722fa7bf2c94e654feaa487372037ac7b017f24779345",
+      "size": 3582
+    },
+    {
+      "path": "gxb_backend/content/energy_purchase_catalog.py",
+      "sha256": "8d0bad644bf51aad0e37973069e7502671e2a516350642ddbc6492d9314c6c24",
+      "size": 1778
+    },
+    {
+      "path": "gxb_backend/content/game_data_catalog.py",
+      "sha256": "a5915b45ebc34a82ae128cf309be794ae5b43a7310cfd1b8ba1816d04db746f9",
+      "size": 8076
+    },
+    {
+      "path": "gxb_backend/content/item_sale_catalog.py",
+      "sha256": "dd38a0811eb615628304d0990e96be5b04b726cd0c805600629f6350ffcc036d",
+      "size": 4620
+    },
+    {
+      "path": "gxb_backend/content/item_stack_limit_catalog.py",
+      "sha256": "bfd081822f1b3277e68b7aec18121026b479d42f2b0e39f2edeb14ffade619b8",
+      "size": 2969
+    },
+    {
+      "path": "gxb_backend/content/magic_summon_source_catalog.py",
+      "sha256": "8d44639cd0069fb3d2f9c5c5d90072065b744d7b232f113ff2bd850440520383",
+      "size": 4945
+    },
+    {
+      "path": "gxb_backend/content/recharge_catalog.py",
+      "sha256": "bd57aff00b8de17a318bddf1ebf32aba25f40274d3ae27879084c235a45d452a",
+      "size": 4348
+    },
+    {
+      "path": "gxb_backend/content/source_resolver.py",
+      "sha256": "9bac8f5f72d7bbaff9d8d990c06c777c40afed25bf29178149dda5beaf5f37e2",
+      "size": 2418
+    },
+    {
+      "path": "gxb_backend/content/summon_featured_catalog.py",
+      "sha256": "a7291173a19ee8819571d79e92abae14b83e008fa71513a3f09fa3711066b1be",
+      "size": 4216
+    },
+    {
+      "path": "gxb_backend/content/summon_operation_catalog.py",
+      "sha256": "256f31a1790d8b7d1293d995aaeb7293806f12bfe3c9a5db0348a39f0b4931d3",
+      "size": 5790
+    },
+    {
+      "path": "gxb_backend/content/summon_pool_catalog.py",
+      "sha256": "4f4b6e6a397fecdb32655f159b7c310adb22062043a0733b4b0660b6f30a097b",
+      "size": 3295
+    },
+    {
+      "path": "gxb_backend/content/sx_soul_box_source_catalog.py",
+      "sha256": "9b8a8ba73f160f453c2c46bcbbb2806904c2c09140b5a052bc4c335efc311ca6",
+      "size": 10711
+    },
+    {
+      "path": "gxb_backend/content/vip_award_catalog.py",
+      "sha256": "0ac26e952e87f079661ca2d089f1f0a81bc6013b506c65cf7bc5725f45b54ed5",
+      "size": 4429
+    },
+    {
+      "path": "gxb_backend/dispatch/__init__.py",
+      "sha256": "523425992e783146cf1f29bf0546c0ca243c0bd1214bf3a8e36a9c6364e07bbe",
+      "size": 26
+    },
+    {
+      "path": "gxb_backend/dispatch/engine_dispatcher.py",
+      "sha256": "472afec36a63cc0e051ba50f1ca16db126a7e3bd5d4d4c4401864f738717713f",
+      "size": 30777
+    },
+    {
+      "path": "gxb_backend/handlers/__init__.py",
+      "sha256": "18cc7c8183337343c2fefed9b2ec02f93f459e6b82e85b36bc0c72925be02364",
+      "size": 33
+    },
+    {
+      "path": "gxb_backend/handlers/achievement.py",
+      "sha256": "634cf8626758d4bf0198988a54b641843737b23b0a9acbe0be98571890e81f66",
+      "size": 506
+    },
+    {
+      "path": "gxb_backend/handlers/activities.py",
+      "sha256": "9e3996106a33e70ecb66fe32791f82f1e2616c8ae961dba50b365f1af57bdeed",
+      "size": 1853
+    },
+    {
+      "path": "gxb_backend/handlers/arena.py",
+      "sha256": "bc890d8856a4f9e2af1b50d867b708f63cc627a9a365ddda53828692144705d4",
+      "size": 2133
+    },
+    {
+      "path": "gxb_backend/handlers/battle.py",
+      "sha256": "220b945ecaeb4962f7973c1dc83bd1cb041f730553ed976c7854a748601a07e8",
+      "size": 1079
+    },
+    {
+      "path": "gxb_backend/handlers/bootstrap.py",
+      "sha256": "525fca2397d3a092e688b4cae01c3ede5dbf7ee6528bff1211dc7f4b5ae1365d",
+      "size": 9754
+    },
+    {
+      "path": "gxb_backend/handlers/center.py",
+      "sha256": "1be06df5b8b2913c7033d64be3d56dad4eb7999e43052819df98dcf3319e84fa",
+      "size": 687
+    },
+    {
+      "path": "gxb_backend/handlers/chat.py",
+      "sha256": "732873862af292d16d4d552adf2e35b55d6d70d1ac18bb0f6e70e8b1ecfff223",
+      "size": 687
+    },
+    {
+      "path": "gxb_backend/handlers/compatibility.py",
+      "sha256": "686a8b23597ac6e57bb4ba6bca8aeef7e46accff33b02d75de392c075a1c5ae8",
+      "size": 3563
+    },
+    {
+      "path": "gxb_backend/handlers/context.py",
+      "sha256": "aa1b55bb7bb25e1bcd2914becd9351cf8527d26c983fe36358a9687d543009ef",
+      "size": 465
+    },
+    {
+      "path": "gxb_backend/handlers/guild.py",
+      "sha256": "c7e36de0bc08a0982c66b6f2988b2489a9341bbc48a2602fb54b2245092f6c2c",
+      "size": 2185
+    },
+    {
+      "path": "gxb_backend/handlers/heroes.py",
+      "sha256": "324c6f5e94eadbe50ae9a67527ad33d0c1d2c17705c279e1910bbe8ed4907a51",
+      "size": 8723
+    },
+    {
+      "path": "gxb_backend/handlers/illusion.py",
+      "sha256": "98d6a7a80c3c190e9610e1b294a200b478639ae9eedcef0afe58bfce60652d0b",
+      "size": 316
+    },
+    {
+      "path": "gxb_backend/handlers/inventory.py",
+      "sha256": "43966765f1f9dd388dd4090968662993e64f1759ff9550344b555bb6d3c47765",
+      "size": 6515
+    },
+    {
+      "path": "gxb_backend/handlers/library.py",
+      "sha256": "8948cba069a3f1a3e09393d0343fc6ba3c178e1dd4b6de874cdf1022d9bd62d7",
+      "size": 746
+    },
+    {
+      "path": "gxb_backend/handlers/mail.py",
+      "sha256": "489923e6b4cdff0696590f7b8b95bd3a203b4f627968ef538f76e1c42d04684a",
+      "size": 1173
+    },
+    {
+      "path": "gxb_backend/handlers/player.py",
+      "sha256": "6f2367a6966e414f1f403188d2f03cbc2202ab86b3ef5a2c80eeefddb3b464c7",
+      "size": 3287
+    },
+    {
+      "path": "gxb_backend/handlers/practice.py",
+      "sha256": "1845c3318a4fabacabed00ffc069b1d0f274bf769257391b21f70597003e924f",
+      "size": 1306
+    },
+    {
+      "path": "gxb_backend/handlers/rewards.py",
+      "sha256": "e5931847b08a9e96a06eb2786f1d1b69300b22f879615526874b104632284057",
+      "size": 1446
+    },
+    {
+      "path": "gxb_backend/handlers/shop.py",
+      "sha256": "fb43af659a013fdff0ed76099343bb2ba93de847dd9ef3fa3ee41392d06f152c",
+      "size": 1264
+    },
+    {
+      "path": "gxb_backend/handlers/social.py",
+      "sha256": "dbc5f14f11b5ce1fc2b7f85ca3afd5c1113b29fa28cfd37898fa4584cb23f10d",
+      "size": 1162
+    },
+    {
+      "path": "gxb_backend/handlers/summon.py",
+      "sha256": "299c6012f65e4cee9689f1805cc10888093e97141aa896d1a658c9454fc98f77",
+      "size": 1033
+    },
+    {
+      "path": "gxb_backend/handlers/system.py",
+      "sha256": "51daf32e74ba80a7a04dd7f38fe966550e021d5e0401cd8666766448c7dc2c73",
+      "size": 6074
+    },
+    {
+      "path": "gxb_backend/handlers/tasks.py",
+      "sha256": "94c88f372989cc2203e9790e4dd75f3e483e5aa613aa8fc30488d5524d7ec92f",
+      "size": 1814
+    },
+    {
+      "path": "gxb_backend/handlers/world.py",
+      "sha256": "ea3fb4fce979e2f2b95d36f875e2ec2fabe747d306a00d5e6271a8c0b7acd3d6",
+      "size": 5028
+    },
+    {
+      "path": "gxb_backend/observability/__init__.py",
+      "sha256": "edf1072f59cbd45d03184acf4213148b16caf5885d4d465dc1e173b46caa6e90",
+      "size": 37
+    },
+    {
+      "path": "gxb_backend/observability/campaign_asset_auditor.py",
+      "sha256": "2575cb768d6929ea9b161f858a7f0ee44dbca293d88e37b0b69abd7bd78916b6",
+      "size": 4371
+    },
+    {
+      "path": "gxb_backend/observability/client_error_capture.py",
+      "sha256": "53854983d78ef2c358b10e5024913c51aee0ab112b96e6a229c0e92f9e4dd63c",
+      "size": 9958
+    },
+    {
+      "path": "gxb_backend/observability/resource_gateway.py",
+      "sha256": "df5ec85274675a86cbd090008ecd4593ad702729c6ee02de899ab47bcc91c76e",
+      "size": 30352
+    },
+    {
+      "path": "gxb_backend/observability/resource_probe.py",
+      "sha256": "63eedd1ca670adf56c672ee4c64f4390432451106bcfa33235fbd2413474eb80",
+      "size": 303
+    },
+    {
+      "path": "gxb_backend/observability/runtime_logger.py",
+      "sha256": "be6296c48a039108b3699c7b54400ee07121c8779e67200c03c631006f15d780",
+      "size": 2829
+    },
+    {
+      "path": "gxb_backend/observability/undecoded_request_capture.py",
+      "sha256": "94a9f737bcf240c94019efc379370964d7d92c7457282303d3027d5bb9cebf22",
+      "size": 2183
+    },
+    {
+      "path": "gxb_backend/protocol/__init__.py",
+      "sha256": "23afad464083f5a0b02f1102995d1899ea938e172380122b712d1dbfb2bd56af",
+      "size": 46
+    },
+    {
+      "path": "gxb_backend/protocol/errors.py",
+      "sha256": "9acebcb54221437c2a0957e0318492fd96b003127c5dc218284290cc4ad13669",
+      "size": 307
+    },
+    {
+      "path": "gxb_backend/protocol/mids.py",
+      "sha256": "71888f4aaea2921c1af91cce4b458915d354b8a004b9bf2dce2b79b92fe139a0",
+      "size": 78816
+    },
+    {
+      "path": "gxb_backend/protocol/mutation_contracts.py",
+      "sha256": "929cf3c9a3b5a6a4d6565611c4cee3a3a4ffd6ef99b29ced87b642f0560695a7",
+      "size": 4274
+    },
+    {
+      "path": "gxb_backend/protocol/registry.py",
+      "sha256": "6d933235109c5d7d374aaa5953db4fceb67afb06b7991986e7dc843da9143dc4",
+      "size": 1791
+    },
+    {
+      "path": "gxb_backend/protocol/routing.py",
+      "sha256": "c669bf23e423cc080c690255fb5ade6f8bcd3d3167818bf37306f719e5aeaa0d",
+      "size": 1938
+    },
+    {
+      "path": "gxb_backend/run.py",
+      "sha256": "049f7be387f99343b8a5c45633ed42b74df2beb28ad141c740b2dc214fe26d72",
+      "size": 3010
+    },
+    {
+      "path": "gxb_backend/state/__init__.py",
+      "sha256": "e147dc65c9eb8cab848fb42477eb22a6509e190ec6317df907dd126ee5401d7a",
+      "size": 607
+    },
+    {
+      "path": "gxb_backend/state/account.py",
+      "sha256": "b0f8c4afdfedd7bd69a6bacd928535e5e52044b8d4244759f0fc949ac4498d22",
+      "size": 1166
+    },
+    {
+      "path": "gxb_backend/state/awakening_mission_service.py",
+      "sha256": "4484a43733a2fd96d7cf1b3cd7422ed289e08af12520366f7244f3ecc113d835",
+      "size": 15530
+    },
+    {
+      "path": "gxb_backend/state/campaign_drop_planner.py",
+      "sha256": "9afce5494387dc27a9505d7ac44f6db74b232dcb02c9aa568d17d245e14e2490",
+      "size": 9557
+    },
+    {
+      "path": "gxb_backend/state/campaign_reset_policy.py",
+      "sha256": "c0d97614a76d06004db6e051bbe73cd199c407b9a4e05425771f428c341895a8",
+      "size": 1769
+    },
+    {
+      "path": "gxb_backend/state/classic_vending_balance_policy.py",
+      "sha256": "d5464c74c2b956383cfe33b51c02c2d5b7d2b31190b8e25e52e2b351adfdd8d1",
+      "size": 10690
+    },
+    {
+      "path": "gxb_backend/state/commerce_purchase.py",
+      "sha256": "dcc53785aa0daa59667d7b0f20e1510c5615521e5bab877ed8db3b44b129015b",
+      "size": 14701
+    },
+    {
+      "path": "gxb_backend/state/commerce_service.py",
+      "sha256": "d829ef2aa581ba5964848c70dc3b894192bdd92295a277cf6055d50f4fdd39c8",
+      "size": 8946
+    },
+    {
+      "path": "gxb_backend/state/daily_reset.py",
+      "sha256": "8b272c42cd1c6fb0df15e45e9a847d14a6dd45899507260c98527cf318e4cccd",
+      "size": 20986
+    },
+    {
+      "path": "gxb_backend/state/defaults.py",
+      "sha256": "fa2b04f17b9841d93d1cfb6b0bd5500ee0b3c4c576fbf5b79a486ce27c02f5dd",
+      "size": 304
+    },
+    {
+      "path": "gxb_backend/state/economy_ledger.py",
+      "sha256": "97478983edeb39337518bd5616b9fe9bf5fc7c21cd505a6705515ca283404354",
+      "size": 6786
+    },
+    {
+      "path": "gxb_backend/state/economy_repository.py",
+      "sha256": "01865922ef6d3033864d30345bdf5e17798730559f4bfdd7dafb28d5fca6a736",
+      "size": 12820
+    },
+    {
+      "path": "gxb_backend/state/energy_purchase_service.py",
+      "sha256": "fe5678c9cfce50d4e94a2ec6a72041846938cc2b777dd49c4cac9efd02b330ec",
+      "size": 8005
+    },
+    {
+      "path": "gxb_backend/state/function_state_repository.py",
+      "sha256": "9332b2959786bec367111ae3871053a5ef072f02577eea82a6c5a0dcd8c99aa2",
+      "size": 7926
+    },
+    {
+      "path": "gxb_backend/state/function_unlock_repository.py",
+      "sha256": "c414e0260da30e5bd0bf0f83d0bc4db7bc5f336ab0c02d1629a24511a9a46735",
+      "size": 3374
+    },
+    {
+      "path": "gxb_backend/state/global_response_semantics.py",
+      "sha256": "1257bec195feb6cab04b57c7649d1404e96c82da530cc95f20ce0d6d203bd224",
+      "size": 1604
+    },
+    {
+      "path": "gxb_backend/state/hero_advanced_progression_repository.py",
+      "sha256": "6860388ef6a92f74361590ae4318916627e158fb75dda26dea9719ea6207a1bb",
+      "size": 31566
+    },
+    {
+      "path": "gxb_backend/state/hero_entity_mutation_service.py",
+      "sha256": "8f93cd4fc94bbbfe45874348b2f0f45a6d5e688a3a5654f0bc671c21f67893c1",
+      "size": 15820
+    },
+    {
+      "path": "gxb_backend/state/hero_equipment_repository.py",
+      "sha256": "a10fc45f78b3a09a703d07b821449cc1b62994c2432ff1b388dbbdaed626d1a2",
+      "size": 21285
+    },
+    {
+      "path": "gxb_backend/state/hero_progression_repository.py",
+      "sha256": "a4ab2b4f9aa7846507b09f0e0c90c2f98c2fef7a2e567a1cde140e117e8a3377",
+      "size": 22174
+    },
+    {
+      "path": "gxb_backend/state/hero_repository.py",
+      "sha256": "2cc1f9c9accbf9d9fabc76bb9fa30d01edf19615ce1da0d75e31f4ae10687f3e",
+      "size": 34111
+    },
+    {
+      "path": "gxb_backend/state/inventory_repository.py",
+      "sha256": "aaf113c71206c392068690b9ca74f8c2d16f2d3452ea20860a458fb6d87f8ced",
+      "size": 928
+    },
+    {
+      "path": "gxb_backend/state/inventory_sale_service.py",
+      "sha256": "93e0cc58841f0421f17dd5af6bb23d2a05b8000b601229825fc78f250e015bb3",
+      "size": 5755
+    },
+    {
+      "path": "gxb_backend/state/magic_summon_private_policy.py",
+      "sha256": "53b064287b72a67d0fdc6eb6318a390684369f59a372b0f0c3372cfbd736731e",
+      "size": 7412
+    },
+    {
+      "path": "gxb_backend/state/maintenance_services.py",
+      "sha256": "fb74763ef0e522d67b47e781b3c5a495d95f84384f3220f46e627547fe7846b5",
+      "size": 3630
+    },
+    {
+      "path": "gxb_backend/state/medium_legacy_private_policy.py",
+      "sha256": "2e45bbd54b344d53f6bcc0ba0ff4b5fa85ed24e91888aeded5f81d9052faaf83",
+      "size": 5765
+    },
+    {
+      "path": "gxb_backend/state/mission_repository.py",
+      "sha256": "0e9fe6918801556db5440b6c425d1e2ed302c69aac12e92ee48e640d83e75440",
+      "size": 11320
+    },
+    {
+      "path": "gxb_backend/state/multiuser_database.py",
+      "sha256": "5b1131cf3ff6bc835d9dda7438e7a4e4bcecd5c537cdbcd35f03183d03e70ec2",
+      "size": 40436
+    },
+    {
+      "path": "gxb_backend/state/mutation_plan.py",
+      "sha256": "5d9fd62bc744ceb28466dcba018292566cc75465bb63959c7a15db9919e3fa54",
+      "size": 3631
+    },
+    {
+      "path": "gxb_backend/state/mutation_settlement_service.py",
+      "sha256": "edd18ba466613ab79be890bd0fc3430e6bd35271a71dc18d7f869ee3860852ed",
+      "size": 16254
+    },
+    {
+      "path": "gxb_backend/state/persistence_state.py",
+      "sha256": "d2d975eada626bac2e411b17bb1ed3e29e803a4ffe9333c785ed17ab06688803",
+      "size": 1873
+    },
+    {
+      "path": "gxb_backend/state/player_database.py",
+      "sha256": "272ef74a118c7b898077fe1030755080c40e9f2d49911c085c10762ba7891e7f",
+      "size": 13442
+    },
+    {
+      "path": "gxb_backend/state/player_progression_service.py",
+      "sha256": "6b050a2715c04f9daf9781532d9c67728000981b3512c885bd23bce68fac7501",
+      "size": 10738
+    },
+    {
+      "path": "gxb_backend/state/player_state.py",
+      "sha256": "08281b4e2306ccccdd82bc55552dfa9dd594cacd3517133b4aad9eaea3de4aaf",
+      "size": 36164
+    },
+    {
+      "path": "gxb_backend/state/profiles.py",
+      "sha256": "614b2a61fb02e17a15f6240c712ae272881211b2e81982a138f49022dd8c7d77",
+      "size": 6999
+    },
+    {
+      "path": "gxb_backend/state/projection_profiles.py",
+      "sha256": "19eddf7ece4bbf7fc18f93c8490eb9ff68c1cf79e3a8bcf10277b31efbb13aa1",
+      "size": 6904
+    },
+    {
+      "path": "gxb_backend/state/repository.py",
+      "sha256": "d0fa0b5e05f50456edab6bc2d6ddbc0b07d8b8f9791de8c8ed70f622e4ee985c",
+      "size": 18575
+    },
+    {
+      "path": "gxb_backend/state/request_services.py",
+      "sha256": "400c2a5c0b1396388855a765df980d72cceb32d218f1b81f0736c6dc4af514d8",
+      "size": 19426
+    },
+    {
+      "path": "gxb_backend/state/resource_registry.py",
+      "sha256": "9243dfa57d2edd256941369b3b18e171c6324bcbada1eb34d61c91dcc6c12171",
+      "size": 4203
+    },
+    {
+      "path": "gxb_backend/state/response_projector.py",
+      "sha256": "d70ffcee61dd339e62d67463796b4759a8d27c277763ea370809d10d753a8bc5",
+      "size": 9381
+    },
+    {
+      "path": "gxb_backend/state/reward_transaction_service.py",
+      "sha256": "45e0a9dabc0125f306a3a29b97c81ee07fbf1e0963ccd01873fdef3f4f4bc4f3",
+      "size": 8744
+    },
+    {
+      "path": "gxb_backend/state/server_clock.py",
+      "sha256": "d66af429405307d7b25ef6c719c34419c33feaa5e3074c3be4ad3b99ef198733",
+      "size": 1403
+    },
+    {
+      "path": "gxb_backend/state/skill_point_policy.py",
+      "sha256": "8032c8557d2d80c75a19f0d3c968b2e45097ae0eb1548534736b2033ff5f7307",
+      "size": 7015
+    },
+    {
+      "path": "gxb_backend/state/stack_inventory.py",
+      "sha256": "6a9d9a89376ed7460a640cf549a7e15971bb8252229f1b23a4cc086a2941aff2",
+      "size": 9076
+    },
+    {
+      "path": "gxb_backend/state/summon_cost_plan.py",
+      "sha256": "b5c0310567de031b10bf5c81bdc6907a98c688dcb100c6a1c855689daee9da5e",
+      "size": 5157
+    },
+    {
+      "path": "gxb_backend/state/summon_counter_policy.py",
+      "sha256": "c318db32a22024817482ed9e56bdd10082c2eb939907efbd167a390835a1458d",
+      "size": 5835
+    },
+    {
+      "path": "gxb_backend/state/summon_duplicate_conversion.py",
+      "sha256": "91df74a2fb4ea302d52ecd19c03644a79d046d9116a612fd3a11220e8833089c",
+      "size": 2493
+    },
+    {
+      "path": "gxb_backend/state/summon_duplicate_policy.py",
+      "sha256": "e660cab8a715170918c4b57b5d5ba52b74346610960ccf792245f99e887e843c",
+      "size": 2094
+    },
+    {
+      "path": "gxb_backend/state/summon_featured_rotation.py",
+      "sha256": "f38bffad2a4f398db1bbdd9ef20e5f116132eb26ddfa9b2d265db77c2b74be6c",
+      "size": 14014
+    },
+    {
+      "path": "gxb_backend/state/summon_operation_receipt.py",
+      "sha256": "e3db6475069bee3f898ced03a36dcda13dd7e284d7cab2f660dd644068dba50a",
+      "size": 5442
+    },
+    {
+      "path": "gxb_backend/state/summon_operation_registry.py",
+      "sha256": "8b7511cc0cef7a11c3723b91794410eff5d54f150a03cca90be1d0d1d923f436",
+      "size": 2036
+    },
+    {
+      "path": "gxb_backend/state/summon_private_policy.py",
+      "sha256": "45b0cccabfbfa701f97fb1db92443d2b3d36b7a8e22ce3a2c826bf118f79b937",
+      "size": 6144
+    },
+    {
+      "path": "gxb_backend/state/summon_repository.py",
+      "sha256": "466f4af8e1914f788255d28e602548d98ad945837cd8306027c39dc7720c0038",
+      "size": 87944
+    },
+    {
+      "path": "gxb_backend/state/summon_result_plan.py",
+      "sha256": "b3e12f041e3d650e32d3f54d6c5a969185505cdf48d0fdb9f816ed5f73525822",
+      "size": 5858
+    },
+    {
+      "path": "gxb_backend/state/summon_result_policy.py",
+      "sha256": "74bf114f1b964b42915c8c402b7bbd3f86cd21b26db48758a474d79980c8cf0d",
+      "size": 4509
+    },
+    {
+      "path": "gxb_backend/state/summon_state_contract.py",
+      "sha256": "8d2358ddb0402f932c0142b1b4cc59defd49ed4dc3b30a095c0ca67bd23ad1d2",
+      "size": 4356
+    },
+    {
+      "path": "gxb_backend/state/sx_soul_box_private_policy.py",
+      "sha256": "a4d501416dd565a4ac64c015f4f8c294d411b56b6943217d88da87c3d7809baa",
+      "size": 14859
+    },
+    {
+      "path": "gxb_backend/state/temporal_policy_service.py",
+      "sha256": "8533fa4cff041041fd8fdf2adcfbc9d7c6eff2822b4614d62ffa016658df457f",
+      "size": 13064
+    },
+    {
+      "path": "gxb_backend/state/tutorial_milestone_repository.py",
+      "sha256": "a6c8af7a3bc3fb3f1efc676410ff65327810ab66360e906d0c3c83b260faf171",
+      "size": 4437
+    },
+    {
+      "path": "gxb_backend/state/unit_of_work.py",
+      "sha256": "0b0c6187c1b9135361aac4ba860aa0584f57bc146cbdf839e2d34a1a278ad2de",
+      "size": 11597
+    },
+    {
+      "path": "gxb_backend/state/vip_award_service.py",
+      "sha256": "02271145179dd24b8bc3ec5bf8ebf826b94268e146542fe59b4b5412c9883d21",
+      "size": 5228
+    },
+    {
+      "path": "gxb_backend/state/vip_policy.py",
+      "sha256": "ff1d5d3e8101494639cb455e1525a642e80d474d89841551fd831c1e57a18eec",
+      "size": 5886
+    },
+    {
+      "path": "gxb_backend/state/world_repository.py",
+      "sha256": "e434550cb6db77c17b50b17b25dc2886262a742c1d1628700cce6f4f27920752",
+      "size": 56044
+    },
+    {
+      "path": "gxb_backend/transport/__init__.py",
+      "sha256": "de2effcd0f5fb2a3cc18b4d23f42d6648233cfe5da1e85958d1e82333ec0c554",
+      "size": 45
+    },
+    {
+      "path": "gxb_backend/transport/decoder.py",
+      "sha256": "5f05198a40fd286f6a82777a09a91edf52991784c5ad7e6c5aafe59e5155bfb3",
+      "size": 4471
+    },
+    {
+      "path": "gxb_backend/transport/responses.py",
+      "sha256": "37cc49df3ed96b00fe8dd13032fe91c23438c4fcaafc8cbe80011646a6f8439a",
+      "size": 1749
+    },
+    {
+      "path": "gxb_backend/transport/result.py",
+      "sha256": "076cfbea205000f3241e5212ad4099bd28ab0165fbe89484af6785aea44c6913",
+      "size": 245
+    },
+    {
+      "path": "gxb_backend/transport/routes_commerce.py",
+      "sha256": "c5b454ffa10278443eb1b91f49e6d4eaca2734b53d606fc980717a765e837306",
+      "size": 5303
+    },
+    {
+      "path": "gxb_backend/transport/routes_engine.py",
+      "sha256": "a98e442a5aefd7af3d90cecd54f3cdad2b47eef24e591f9c4c63136a27846024",
+      "size": 4093
+    },
+    {
+      "path": "gxb_backend/transport/routes_sdk.py",
+      "sha256": "e939d824594cc08f5bf03e2de673a216cf3b933217435314697f1460d6712856",
+      "size": 5693
+    },
+    {
+      "path": "gxb_backend/updates/__init__.py",
+      "sha256": "831e3f37931505ac4c39bc54164ef7957dda0e27551c9c9b8d720bc0a6855735",
+      "size": 50
+    },
+    {
+      "path": "gxb_backend/updates/local_update.py",
+      "sha256": "4ca3a421dd91d2dece80f969656408ee09fead0f958fb0266c909449499367f1",
+      "size": 5909
+    },
+    {
+      "path": "gxb_backend/version.py",
+      "sha256": "276c87d8f0925ee32df168a3d472f30b110859190b7ebacbf5026b817439780f",
+      "size": 101
+    },
+    {
+      "path": "local_assets/README.txt",
+      "sha256": "cc5db1745d993a652f39137aa65b26c3202b62c6e1c800997adb9353796b9249",
+      "size": 2093
+    },
+    {
+      "path": "local_assets/src_32/app/common/utils.lua",
+      "sha256": "02825645114984e049e1be614f719e7dd8d4dd20c8da8551705bbd38c2c06fcf",
+      "size": 256239
+    },
+    {
+      "path": "local_assets/src_32/app/model/AddEnergy.lua",
+      "sha256": "cab37f98c3cbd85a1386542d853c168ec38f0b0c1d4e2e9f7f4698e243af54f9",
+      "size": 1779
+    },
+    {
+      "path": "local_assets/src_32/app/windows/DragonBoat2017SelectTeamWindow.lua",
+      "sha256": "2df48aef36de7188711a9e6d42e89ba7cb109538e7f3addd084e24ea9843869b",
+      "size": 11812
+    },
+    {
+      "path": "local_assets/src_32/app/windows/DragonBoat2017ShopWindow.lua",
+      "sha256": "be88f9ac7f189ce83062872c32a49f43b859550c3489d4a13273502d5b5e2c6f",
+      "size": 6702
+    },
+    {
+      "path": "local_assets/src_32/app/windows/LoginWindow.lua",
+      "sha256": "f6fb06e51dca4e16ecd8755c7ae67c8000da1cc6b728d3e44f1bb3ed230eeb2e",
+      "size": 8162
+    },
+    {
+      "path": "local_assets/src_32/app/windows/activities/Activity1124.lua",
+      "sha256": "7024218825300bb340d0c26948092c6103133259351bd8a3c1b04b501bcb6d7d",
+      "size": 17466
+    },
+    {
+      "path": "local_assets/src_32/app/windows/activities/Activity1149.lua",
+      "sha256": "354d88ebc7e8634450b1e3b4c05f498f07fa51066dfa572df64e1d6fa2f31308",
+      "size": 12604
+    },
+    {
+      "path": "local_assets/src_32/app/windows/activities/Activity1231.lua",
+      "sha256": "429a465c314d3d14a28f3116b18f18eddd575d0fdea4a75ebb43e52e2e3daa87",
+      "size": 17374
+    },
+    {
+      "path": "local_assets/src_32/data/tables/activity_anni4_campaign_shop.lua",
+      "sha256": "c03f5d1b934c4e23243b2d044d076f0634adcba2e423a345285c4dd422272f13",
+      "size": 940
+    },
+    {
+      "path": "local_assets/src_32/data/tables/activity_anni_4th_gold_shop.lua",
+      "sha256": "9dc75cbd96a39b11b760aaaa97e35d0b21542d719a791b164c0ba11796d094d3",
+      "size": 772
+    },
+    {
+      "path": "local_assets/src_32/data/tables/activity_anniversary_gacha.lua",
+      "sha256": "6d46aa8d5226ecc156b966072c816b5dec399af8f0f6615e3fedb3ba3d4f815f",
+      "size": 2123
+    },
+    {
+      "path": "local_assets/src_32/data/tables/activity_balloon_dropbox.lua",
+      "sha256": "24db6d5c49947f53f3ccb88b24926f6fc4eaa8362d4ef7d03a4d286ee8e4b3c2",
+      "size": 18405
+    },
+    {
+      "path": "local_assets/src_32/data/tables/activity_card_match.lua",
+      "sha256": "0a0224d5168108c5e47bbb5cf3a0e63152ba8620ecb12e217cded91651263c53",
+      "size": 1154
+    },
+    {
+      "path": "local_assets/src_32/data/tables/activity_card_match_shop.lua",
+      "sha256": "7a1d3b8a0d5e916c4fb1ead15a1e805e02259baeac659188f0dd383ca3d834b0",
+      "size": 551
+    },
+    {
+      "path": "local_assets/src_32/data/tables/activity_charge.lua",
+      "sha256": "708c9bbe55848cad8e9ecf67a630af2219d40e17d969ea664c292c60e715f3e8",
+      "size": 805
+    },
+    {
+      "path": "local_assets/src_32/data/tables/activity_charge_gift.lua",
+      "sha256": "efbdeaeadbbbc9e6350350a3cd309da198b835ff5ca196eaed392d1413be5662",
+      "size": 413
+    },
+    {
+      "path": "local_assets/src_32/data/tables/activity_chest.lua",
+      "sha256": "4f2bca5ae0334566b988bc60524ec5d12ee21a78df193646b749d890c298f080",
+      "size": 2191
+    },
+    {
+      "path": "local_assets/src_32/data/tables/activity_chest2.lua",
+      "sha256": "5c299935a33b13e41563924f84599c69ce660e019d063576422dddd7f1558129",
+      "size": 2191
+    },
+    {
+      "path": "local_assets/src_32/data/tables/activity_chest_us.lua",
+      "sha256": "9e33ab410108c4976c493c4556795c5b87d539ed280c9d164d8f7d2bb2ac8b51",
+      "size": 2283
+    },
+    {
+      "path": "local_assets/src_32/data/tables/activity_chocolate_pool_award.lua",
+      "sha256": "8b31feae130bbf3fd7713b8fcab7311dbf370af4c47430b8b495acff409975f1",
+      "size": 16697
+    },
+    {
+      "path": "local_assets/src_32/data/tables/activity_consume_gift.lua",
+      "sha256": "b27e1d7d4f4215f3d865a7a487469a38bde301e3eb4edb63b27a8706931188e6",
+      "size": 415
+    },
+    {
+      "path": "local_assets/src_32/data/tables/activity_consume_pool_exchange.lua",
+      "sha256": "81190cbf713a34fa884b82d8130fe9527290ee04939814fbf349d873568925d5",
+      "size": 808
+    },
+    {
+      "path": "local_assets/src_32/data/tables/activity_decode_reward.lua",
+      "sha256": "8c2ea07957294eda1cd5944487c7dab92097d979e54af3e8157a15cd097078bb",
+      "size": 1533
+    },
+    {
+      "path": "local_assets/src_32/data/tables/activity_dragonship2_reward.lua",
+      "sha256": "08140d0b841213a20c3cec068d98a9541048d861e8e79c8b8498047f2c85edc7",
+      "size": 1258
+    },
+    {
+      "path": "local_assets/src_32/data/tables/activity_dragonship_shop.lua",
+      "sha256": "bf8991302f8045b188e06463fa11a80b7e9286f0a48002e0ab8233cd3a0f96e6",
+      "size": 1762
+    },
+    {
+      "path": "local_assets/src_32/data/tables/activity_firework_shop.lua",
+      "sha256": "16837182a2773df2b0b74c294d605c119f577366cf60c12452cb854fea264ba8",
+      "size": 1799
+    },
+    {
+      "path": "local_assets/src_32/data/tables/activity_fish_shop.lua",
+      "sha256": "16aed42750948e1687a90d9df403f0cc038731ec591021ee6c15fb0b2cc641c3",
+      "size": 2113
+    },
+    {
+      "path": "local_assets/src_32/data/tables/activity_flappy_gift.lua",
+      "sha256": "9d05ead347daeb16167f83aa1719b168a746ec239d0941a3392fa31c11ae2c58",
+      "size": 1714
+    },
+    {
+      "path": "local_assets/src_32/data/tables/activity_fruit_shop.lua",
+      "sha256": "74cda8a16fd2f24e01d6257f45f0c33cc108f08dfecc6463133101d93cce4e47",
+      "size": 637
+    },
+    {
+      "path": "local_assets/src_32/data/tables/activity_garden_shop.lua",
+      "sha256": "0a7eae8a415ea44309d4b075782147a3bd32f293d01842966d1056574f05dfe1",
+      "size": 1883
+    },
+    {
+      "path": "local_assets/src_32/data/tables/activity_lukang_cost.lua",
+      "sha256": "ed7e482641ab4206307c21d634f534a2c160133d6fc9d92071cc17348b9fcc1d",
+      "size": 377
+    },
+    {
+      "path": "local_assets/src_32/data/tables/activity_lvbu_shop_item.lua",
+      "sha256": "9670959e6d18e0e20d154fe7ba2cfeb5d0b6b4a6357477a25c45af9079d6149e",
+      "size": 2575
+    },
+    {
+      "path": "local_assets/src_32/data/tables/activity_market_item.lua",
+      "sha256": "ca650e7d73f82a59a0c8b349fc9448ad97cc46f9379ab593918ed8bbb9b23b12",
+      "size": 2452
+    },
+    {
+      "path": "local_assets/src_32/data/tables/activity_party_mission.lua",
+      "sha256": "25cc6a01e6710bae83635e056d326382ab05a3c5134fcf23653adea089b9c2d3",
+      "size": 1890
+    },
+    {
+      "path": "local_assets/src_32/data/tables/activity_party_timeline.lua",
+      "sha256": "10e848d87e82ab9e8ee8821353db73e9d3b8aada7b685736ccf45aa725b5b76f",
+      "size": 648
+    },
+    {
+      "path": "local_assets/src_32/data/tables/activity_polar_night_gacha.lua",
+      "sha256": "d632e4059493a617b394858b725b4dba7f4519c00329c00f960d0de6b32c3645",
+      "size": 1151
+    },
+    {
+      "path": "local_assets/src_32/data/tables/activity_polar_night_gacha2.lua",
+      "sha256": "dd86411a5b8c7b56ea2fddb94c9fe673a64a58726a3914027b76ee681cdcefa6",
+      "size": 1151
+    },
+    {
+      "path": "local_assets/src_32/data/tables/activity_polar_night_pool_award.lua",
+      "sha256": "52e0bcf827b44d8d2101d4a534de158dc56584f05ce52ff01500771b12467ae3",
+      "size": 41606
+    },
+    {
+      "path": "local_assets/src_32/data/tables/activity_ragnarok_campaign.lua",
+      "sha256": "416ce698d0bf0b9a050b4c588a79e9550bffd8d1216f51f22507ea6f588930b1",
+      "size": 3348
+    },
+    {
+      "path": "local_assets/src_32/data/tables/activity_ragnarok_gacha.lua",
+      "sha256": "825ab539af175928765bb3a7f50cf4fb1cf21321614a521e1222a77b22b57b5c",
+      "size": 1172
+    },
+    {
+      "path": "local_assets/src_32/data/tables/activity_ragnarok_shop.lua",
+      "sha256": "d93c011f2706fb649e12e9fd738a39e4e3da13bbb65c4a61b19abac1f158c3ac",
+      "size": 1138
+    },
+    {
+      "path": "local_assets/src_32/data/tables/activity_ragnarok_shop2.lua",
+      "sha256": "5362791e76502c21f88b13b97c87d7f4c606653cc7fd3ea2a7e071a0c8d538a4",
+      "size": 624
+    },
+    {
+      "path": "local_assets/src_32/data/tables/activity_skin_charge.lua",
+      "sha256": "ae9394da96814a0c71314a5e437f54aec48da28729ea6f56d78aa60f69854082",
+      "size": 159
+    },
+    {
+      "path": "local_assets/src_32/data/tables/activity_skin_charge2.lua",
+      "sha256": "1ccb86e7e25e94b569bb97d48c98c7b703992161f3f5705faa7667c7cdf709b6",
+      "size": 159
+    },
+    {
+      "path": "local_assets/src_32/data/tables/activity_skin_consume_set.lua",
+      "sha256": "c69e2569f1b640b5e477eeed14ae32dbbe51dc0a1a5ff71f7e12e01f99f1459c",
+      "size": 364
+    },
+    {
+      "path": "local_assets/src_32/data/tables/activity_skin_set.lua",
+      "sha256": "bd7ed05046794ed3409b73e5389e7b829ea046411ac3c2ddef136965bf28bc98",
+      "size": 342
+    },
+    {
+      "path": "local_assets/src_32/data/tables/activity_skin_set2.lua",
+      "sha256": "afa282e4375891d3d00bbfbce05d363c2054c17034f6a0228f203ac5204020f3",
+      "size": 345
+    },
+    {
+      "path": "local_assets/src_32/data/tables/activity_square_turntable.lua",
+      "sha256": "862e11f9a8f4237435b07df12b16012ac840d4e6d546d3a93babc73c1baba00c",
+      "size": 1416
+    },
+    {
+      "path": "local_assets/src_32/data/tables/activity_square_turntable_shop.lua",
+      "sha256": "92bba9c91bfe8ea64f0ba6c4a84707cc2843e432924da74749008a85d9b8d61d",
+      "size": 757
+    },
+    {
+      "path": "local_assets/src_32/data/tables/activity_sticker_shop.lua",
+      "sha256": "3cf699702c4a69137bdfb8f2dbd40b8984a43ab1c6ef64581a93f771a5b781ef",
+      "size": 1774
+    },
+    {
+      "path": "local_assets/src_32/data/tables/activity_summer_goldfish_shop.lua",
+      "sha256": "02f9528590e66b45ac2d303ea1fc5a47b46cd113ec5aca1f23c86403303cf007",
+      "size": 1774
+    },
+    {
+      "path": "local_assets/src_32/data/tables/activity_zhanghe_doll_shop.lua",
+      "sha256": "d0528f29cd32b3efe2facf14ca6c600666a487958fe7b7cc5b45c8dc61671cac",
+      "size": 1538
+    },
+    {
+      "path": "local_assets/src_32/data/tables/avatar.lua",
+      "sha256": "a7c6ab96b448ead9a2351c47dff824a00ba5d9440a5cf2d4764c849968e0364a",
+      "size": 263397
+    },
+    {
+      "path": "local_assets/src_32/data/tables/battle.lua",
+      "sha256": "9eb04452436fd7dbeb275f9c6fe275d2df3fc8deb5c39fd8426f560a735705ce",
+      "size": 1105603
+    },
+    {
+      "path": "local_assets/src_32/data/tables/dropbox.lua",
+      "sha256": "b423d06766402e275340d0d5717adaa9f3af481cea5b2d9f8c25c3170eaafd70",
+      "size": 1730463
+    },
+    {
+      "path": "local_assets/src_32/data/tables/gift.lua",
+      "sha256": "395afc45a42d5c7f23164d743f01b23997b905a7438e0c07706096d45d2234a5",
+      "size": 1636322
+    },
+    {
+      "path": "local_assets/src_32/data/tables/giftbag.lua",
+      "sha256": "16e48e74244d816a43ac7ab3ac3a8abaa511061a34c8c1a874af15cc6891972d",
+      "size": 203875
+    },
+    {
+      "path": "local_assets/src_32/data/tables/item.lua",
+      "sha256": "3d26da6005e27b283de4d637034a4b76c2c2aea7406e8c0379482083315ead9e",
+      "size": 2262750
+    },
+    {
+      "path": "local_assets/src_32/data/tables/misc.lua",
+      "sha256": "8f110f305d79fd49146fbdf49f47e9cfee4bbf2e3553061086db118596adc433",
+      "size": 176008
+    },
+    {
+      "path": "local_assets/src_32/data/tables/playoff_time.lua",
+      "sha256": "4ef8449b1ad83afa3dfa3f3ca57a9e2582f7de9982c5031187095be80e312327",
+      "size": 918
+    },
+    {
+      "path": "local_assets/src_32/data/tables/region_arena_notice.lua",
+      "sha256": "af9638c1d38ce62fc1d9fdadd4f7e1a8bac46c170b299d6ff82cd59130ccaadc",
+      "size": 300
+    },
+    {
+      "path": "local_assets/src_32/data/tables/region_arena_reward.lua",
+      "sha256": "6acb3ee2859b0754e36c6dbc3f26dc78e5e524d801058a2d1ba2407a6e9a2934",
+      "size": 3041
+    },
+    {
+      "path": "local_assets/src_32/data/tables/shop_config.lua",
+      "sha256": "be6672ca73342375204015ebc1b18fa2a1c865d3c96d6a48bb6179c1f3bbf116",
+      "size": 35276
+    },
+    {
+      "path": "local_assets/src_32/data/tables/translation.lua",
+      "sha256": "fc3610d45ae7966b12509ce35e5b1699ce05ce10c5dc5ad58405e562f018bfd3",
+      "size": 668869
+    },
+    {
+      "path": "local_assets/src_64/app/common/utils.lua",
+      "sha256": "02825645114984e049e1be614f719e7dd8d4dd20c8da8551705bbd38c2c06fcf",
+      "size": 256239
+    },
+    {
+      "path": "local_assets/src_64/app/model/AddEnergy.lua",
+      "sha256": "cab37f98c3cbd85a1386542d853c168ec38f0b0c1d4e2e9f7f4698e243af54f9",
+      "size": 1779
+    },
+    {
+      "path": "local_assets/src_64/app/windows/DragonBoat2017SelectTeamWindow.lua",
+      "sha256": "2df48aef36de7188711a9e6d42e89ba7cb109538e7f3addd084e24ea9843869b",
+      "size": 11812
+    },
+    {
+      "path": "local_assets/src_64/app/windows/DragonBoat2017ShopWindow.lua",
+      "sha256": "be88f9ac7f189ce83062872c32a49f43b859550c3489d4a13273502d5b5e2c6f",
+      "size": 6702
+    },
+    {
+      "path": "local_assets/src_64/app/windows/LoginWindow.lua",
+      "sha256": "f6fb06e51dca4e16ecd8755c7ae67c8000da1cc6b728d3e44f1bb3ed230eeb2e",
+      "size": 8162
+    },
+    {
+      "path": "local_assets/src_64/app/windows/activities/Activity1124.lua",
+      "sha256": "7024218825300bb340d0c26948092c6103133259351bd8a3c1b04b501bcb6d7d",
+      "size": 17466
+    },
+    {
+      "path": "local_assets/src_64/app/windows/activities/Activity1149.lua",
+      "sha256": "354d88ebc7e8634450b1e3b4c05f498f07fa51066dfa572df64e1d6fa2f31308",
+      "size": 12604
+    },
+    {
+      "path": "local_assets/src_64/app/windows/activities/Activity1231.lua",
+      "sha256": "429a465c314d3d14a28f3116b18f18eddd575d0fdea4a75ebb43e52e2e3daa87",
+      "size": 17374
+    },
+    {
+      "path": "local_assets/src_64/data/tables/activity_anni4_campaign_shop.lua",
+      "sha256": "c03f5d1b934c4e23243b2d044d076f0634adcba2e423a345285c4dd422272f13",
+      "size": 940
+    },
+    {
+      "path": "local_assets/src_64/data/tables/activity_anni_4th_gold_shop.lua",
+      "sha256": "9dc75cbd96a39b11b760aaaa97e35d0b21542d719a791b164c0ba11796d094d3",
+      "size": 772
+    },
+    {
+      "path": "local_assets/src_64/data/tables/activity_anniversary_gacha.lua",
+      "sha256": "6d46aa8d5226ecc156b966072c816b5dec399af8f0f6615e3fedb3ba3d4f815f",
+      "size": 2123
+    },
+    {
+      "path": "local_assets/src_64/data/tables/activity_balloon_dropbox.lua",
+      "sha256": "24db6d5c49947f53f3ccb88b24926f6fc4eaa8362d4ef7d03a4d286ee8e4b3c2",
+      "size": 18405
+    },
+    {
+      "path": "local_assets/src_64/data/tables/activity_card_match.lua",
+      "sha256": "0a0224d5168108c5e47bbb5cf3a0e63152ba8620ecb12e217cded91651263c53",
+      "size": 1154
+    },
+    {
+      "path": "local_assets/src_64/data/tables/activity_card_match_shop.lua",
+      "sha256": "7a1d3b8a0d5e916c4fb1ead15a1e805e02259baeac659188f0dd383ca3d834b0",
+      "size": 551
+    },
+    {
+      "path": "local_assets/src_64/data/tables/activity_charge.lua",
+      "sha256": "708c9bbe55848cad8e9ecf67a630af2219d40e17d969ea664c292c60e715f3e8",
+      "size": 805
+    },
+    {
+      "path": "local_assets/src_64/data/tables/activity_charge_gift.lua",
+      "sha256": "efbdeaeadbbbc9e6350350a3cd309da198b835ff5ca196eaed392d1413be5662",
+      "size": 413
+    },
+    {
+      "path": "local_assets/src_64/data/tables/activity_chest.lua",
+      "sha256": "4f2bca5ae0334566b988bc60524ec5d12ee21a78df193646b749d890c298f080",
+      "size": 2191
+    },
+    {
+      "path": "local_assets/src_64/data/tables/activity_chest2.lua",
+      "sha256": "5c299935a33b13e41563924f84599c69ce660e019d063576422dddd7f1558129",
+      "size": 2191
+    },
+    {
+      "path": "local_assets/src_64/data/tables/activity_chest_us.lua",
+      "sha256": "9e33ab410108c4976c493c4556795c5b87d539ed280c9d164d8f7d2bb2ac8b51",
+      "size": 2283
+    },
+    {
+      "path": "local_assets/src_64/data/tables/activity_chocolate_pool_award.lua",
+      "sha256": "8b31feae130bbf3fd7713b8fcab7311dbf370af4c47430b8b495acff409975f1",
+      "size": 16697
+    },
+    {
+      "path": "local_assets/src_64/data/tables/activity_consume_gift.lua",
+      "sha256": "b27e1d7d4f4215f3d865a7a487469a38bde301e3eb4edb63b27a8706931188e6",
+      "size": 415
+    },
+    {
+      "path": "local_assets/src_64/data/tables/activity_consume_pool_exchange.lua",
+      "sha256": "81190cbf713a34fa884b82d8130fe9527290ee04939814fbf349d873568925d5",
+      "size": 808
+    },
+    {
+      "path": "local_assets/src_64/data/tables/activity_decode_reward.lua",
+      "sha256": "8c2ea07957294eda1cd5944487c7dab92097d979e54af3e8157a15cd097078bb",
+      "size": 1533
+    },
+    {
+      "path": "local_assets/src_64/data/tables/activity_dragonship2_reward.lua",
+      "sha256": "08140d0b841213a20c3cec068d98a9541048d861e8e79c8b8498047f2c85edc7",
+      "size": 1258
+    },
+    {
+      "path": "local_assets/src_64/data/tables/activity_dragonship_shop.lua",
+      "sha256": "bf8991302f8045b188e06463fa11a80b7e9286f0a48002e0ab8233cd3a0f96e6",
+      "size": 1762
+    },
+    {
+      "path": "local_assets/src_64/data/tables/activity_firework_shop.lua",
+      "sha256": "16837182a2773df2b0b74c294d605c119f577366cf60c12452cb854fea264ba8",
+      "size": 1799
+    },
+    {
+      "path": "local_assets/src_64/data/tables/activity_fish_shop.lua",
+      "sha256": "16aed42750948e1687a90d9df403f0cc038731ec591021ee6c15fb0b2cc641c3",
+      "size": 2113
+    },
+    {
+      "path": "local_assets/src_64/data/tables/activity_flappy_gift.lua",
+      "sha256": "9d05ead347daeb16167f83aa1719b168a746ec239d0941a3392fa31c11ae2c58",
+      "size": 1714
+    },
+    {
+      "path": "local_assets/src_64/data/tables/activity_fruit_shop.lua",
+      "sha256": "74cda8a16fd2f24e01d6257f45f0c33cc108f08dfecc6463133101d93cce4e47",
+      "size": 637
+    },
+    {
+      "path": "local_assets/src_64/data/tables/activity_garden_shop.lua",
+      "sha256": "0a7eae8a415ea44309d4b075782147a3bd32f293d01842966d1056574f05dfe1",
+      "size": 1883
+    },
+    {
+      "path": "local_assets/src_64/data/tables/activity_lukang_cost.lua",
+      "sha256": "ed7e482641ab4206307c21d634f534a2c160133d6fc9d92071cc17348b9fcc1d",
+      "size": 377
+    },
+    {
+      "path": "local_assets/src_64/data/tables/activity_lvbu_shop_item.lua",
+      "sha256": "9670959e6d18e0e20d154fe7ba2cfeb5d0b6b4a6357477a25c45af9079d6149e",
+      "size": 2575
+    },
+    {
+      "path": "local_assets/src_64/data/tables/activity_market_item.lua",
+      "sha256": "ca650e7d73f82a59a0c8b349fc9448ad97cc46f9379ab593918ed8bbb9b23b12",
+      "size": 2452
+    },
+    {
+      "path": "local_assets/src_64/data/tables/activity_party_mission.lua",
+      "sha256": "25cc6a01e6710bae83635e056d326382ab05a3c5134fcf23653adea089b9c2d3",
+      "size": 1890
+    },
+    {
+      "path": "local_assets/src_64/data/tables/activity_party_timeline.lua",
+      "sha256": "10e848d87e82ab9e8ee8821353db73e9d3b8aada7b685736ccf45aa725b5b76f",
+      "size": 648
+    },
+    {
+      "path": "local_assets/src_64/data/tables/activity_polar_night_gacha.lua",
+      "sha256": "d632e4059493a617b394858b725b4dba7f4519c00329c00f960d0de6b32c3645",
+      "size": 1151
+    },
+    {
+      "path": "local_assets/src_64/data/tables/activity_polar_night_gacha2.lua",
+      "sha256": "dd86411a5b8c7b56ea2fddb94c9fe673a64a58726a3914027b76ee681cdcefa6",
+      "size": 1151
+    },
+    {
+      "path": "local_assets/src_64/data/tables/activity_polar_night_pool_award.lua",
+      "sha256": "52e0bcf827b44d8d2101d4a534de158dc56584f05ce52ff01500771b12467ae3",
+      "size": 41606
+    },
+    {
+      "path": "local_assets/src_64/data/tables/activity_ragnarok_campaign.lua",
+      "sha256": "416ce698d0bf0b9a050b4c588a79e9550bffd8d1216f51f22507ea6f588930b1",
+      "size": 3348
+    },
+    {
+      "path": "local_assets/src_64/data/tables/activity_ragnarok_gacha.lua",
+      "sha256": "825ab539af175928765bb3a7f50cf4fb1cf21321614a521e1222a77b22b57b5c",
+      "size": 1172
+    },
+    {
+      "path": "local_assets/src_64/data/tables/activity_ragnarok_shop.lua",
+      "sha256": "d93c011f2706fb649e12e9fd738a39e4e3da13bbb65c4a61b19abac1f158c3ac",
+      "size": 1138
+    },
+    {
+      "path": "local_assets/src_64/data/tables/activity_ragnarok_shop2.lua",
+      "sha256": "5362791e76502c21f88b13b97c87d7f4c606653cc7fd3ea2a7e071a0c8d538a4",
+      "size": 624
+    },
+    {
+      "path": "local_assets/src_64/data/tables/activity_skin_charge.lua",
+      "sha256": "ae9394da96814a0c71314a5e437f54aec48da28729ea6f56d78aa60f69854082",
+      "size": 159
+    },
+    {
+      "path": "local_assets/src_64/data/tables/activity_skin_charge2.lua",
+      "sha256": "1ccb86e7e25e94b569bb97d48c98c7b703992161f3f5705faa7667c7cdf709b6",
+      "size": 159
+    },
+    {
+      "path": "local_assets/src_64/data/tables/activity_skin_consume_set.lua",
+      "sha256": "c69e2569f1b640b5e477eeed14ae32dbbe51dc0a1a5ff71f7e12e01f99f1459c",
+      "size": 364
+    },
+    {
+      "path": "local_assets/src_64/data/tables/activity_skin_set.lua",
+      "sha256": "bd7ed05046794ed3409b73e5389e7b829ea046411ac3c2ddef136965bf28bc98",
+      "size": 342
+    },
+    {
+      "path": "local_assets/src_64/data/tables/activity_skin_set2.lua",
+      "sha256": "afa282e4375891d3d00bbfbce05d363c2054c17034f6a0228f203ac5204020f3",
+      "size": 345
+    },
+    {
+      "path": "local_assets/src_64/data/tables/activity_square_turntable.lua",
+      "sha256": "862e11f9a8f4237435b07df12b16012ac840d4e6d546d3a93babc73c1baba00c",
+      "size": 1416
+    },
+    {
+      "path": "local_assets/src_64/data/tables/activity_square_turntable_shop.lua",
+      "sha256": "92bba9c91bfe8ea64f0ba6c4a84707cc2843e432924da74749008a85d9b8d61d",
+      "size": 757
+    },
+    {
+      "path": "local_assets/src_64/data/tables/activity_sticker_shop.lua",
+      "sha256": "3cf699702c4a69137bdfb8f2dbd40b8984a43ab1c6ef64581a93f771a5b781ef",
+      "size": 1774
+    },
+    {
+      "path": "local_assets/src_64/data/tables/activity_summer_goldfish_shop.lua",
+      "sha256": "02f9528590e66b45ac2d303ea1fc5a47b46cd113ec5aca1f23c86403303cf007",
+      "size": 1774
+    },
+    {
+      "path": "local_assets/src_64/data/tables/activity_zhanghe_doll_shop.lua",
+      "sha256": "d0528f29cd32b3efe2facf14ca6c600666a487958fe7b7cc5b45c8dc61671cac",
+      "size": 1538
+    },
+    {
+      "path": "local_assets/src_64/data/tables/avatar.lua",
+      "sha256": "a7c6ab96b448ead9a2351c47dff824a00ba5d9440a5cf2d4764c849968e0364a",
+      "size": 263397
+    },
+    {
+      "path": "local_assets/src_64/data/tables/battle.lua",
+      "sha256": "9eb04452436fd7dbeb275f9c6fe275d2df3fc8deb5c39fd8426f560a735705ce",
+      "size": 1105603
+    },
+    {
+      "path": "local_assets/src_64/data/tables/dropbox.lua",
+      "sha256": "b423d06766402e275340d0d5717adaa9f3af481cea5b2d9f8c25c3170eaafd70",
+      "size": 1730463
+    },
+    {
+      "path": "local_assets/src_64/data/tables/gift.lua",
+      "sha256": "395afc45a42d5c7f23164d743f01b23997b905a7438e0c07706096d45d2234a5",
+      "size": 1636322
+    },
+    {
+      "path": "local_assets/src_64/data/tables/giftbag.lua",
+      "sha256": "16e48e74244d816a43ac7ab3ac3a8abaa511061a34c8c1a874af15cc6891972d",
+      "size": 203875
+    },
+    {
+      "path": "local_assets/src_64/data/tables/item.lua",
+      "sha256": "3d26da6005e27b283de4d637034a4b76c2c2aea7406e8c0379482083315ead9e",
+      "size": 2262750
+    },
+    {
+      "path": "local_assets/src_64/data/tables/misc.lua",
+      "sha256": "8f110f305d79fd49146fbdf49f47e9cfee4bbf2e3553061086db118596adc433",
+      "size": 176008
+    },
+    {
+      "path": "local_assets/src_64/data/tables/playoff_time.lua",
+      "sha256": "4ef8449b1ad83afa3dfa3f3ca57a9e2582f7de9982c5031187095be80e312327",
+      "size": 918
+    },
+    {
+      "path": "local_assets/src_64/data/tables/region_arena_notice.lua",
+      "sha256": "af9638c1d38ce62fc1d9fdadd4f7e1a8bac46c170b299d6ff82cd59130ccaadc",
+      "size": 300
+    },
+    {
+      "path": "local_assets/src_64/data/tables/region_arena_reward.lua",
+      "sha256": "6acb3ee2859b0754e36c6dbc3f26dc78e5e524d801058a2d1ba2407a6e9a2934",
+      "size": 3041
+    },
+    {
+      "path": "local_assets/src_64/data/tables/shop_config.lua",
+      "sha256": "be6672ca73342375204015ebc1b18fa2a1c865d3c96d6a48bb6179c1f3bbf116",
+      "size": 35276
+    },
+    {
+      "path": "local_assets/src_64/data/tables/translation.lua",
+      "sha256": "fc3610d45ae7966b12509ce35e5b1699ce05ce10c5dc5ad58405e562f018bfd3",
+      "size": 668869
+    },
+    {
+      "path": "local_assets/update_manifest.example.json",
+      "sha256": "e023c2f1c9a74461f1b05e8272316792a14424e677763382873c6b008542af66",
+      "size": 289
+    },
+    {
+      "path": "local_assets/update_manifest.json",
+      "sha256": "d8b85bd41f50013ac1317ea9a90dc3e94efa0c0be2920cef0e18ead06989f216",
+      "size": 6816
+    },
+    {
+      "path": "local_assets/updates/gxb-local-1.631.4.zip.001",
+      "sha256": "197600fbe6bcfbe22fe139643be48209a47bdf29df5c9d6492c0f64c0928e356",
+      "size": 1962886
+    },
+    {
+      "path": "memory.md",
+      "sha256": "6c9b9cb44e9a0bbd94bc1053093659597bcef33862b6330ca54369d0837e4c8b",
+      "size": 1321
+    },
+    {
+      "path": "requirements.txt",
+      "sha256": "2a1a661c4e3e6faadab5d001bc10cc3acccf648921aad7c279d94f138eaaf833",
+      "size": 6
+    },
+    {
+      "path": "run.py",
+      "sha256": "cf40a79c84e82634b1aa54e61d5c31701e73fe204257c5896a407c75eb7bff0b",
+      "size": 123
+    },
+    {
+      "path": "runtime_logs/local_update_events.jsonl",
+      "sha256": "2904b5cd9ef6d01d794d6ef07ba342f3d3de5c6699911b6728d14f3c52a4a8e5",
+      "size": 936
+    },
+    {
+      "path": "server.py",
+      "sha256": "499ab4c1024f89e468a097128b08debbc7063e91aa589bbbcefd59bf68f1cb1e",
+      "size": 2302
+    },
+    {
+      "path": "tools/adb_stage314_probe.sh",
+      "sha256": "b949f28bdb92de88a63b9224d9bbd10ea31c2d7a924c09f773928146e381162a",
+      "size": 1949
+    },
+    {
+      "path": "tools/adb_stage315_probe.sh",
+      "sha256": "60e4a0b383126950fd06df4a66a391a8233eab761480567c9206407ffb614c3d",
+      "size": 4057
+    },
+    {
+      "path": "tools/adb_stage4a2_hero_probe.sh",
+      "sha256": "aeceacc660c4f5021d2674073442e00a91122e25a84bbb5eb2e400f2173bd846",
+      "size": 2354
+    },
+    {
+      "path": "tools/build_album_special_collect_meta.py",
+      "sha256": "bc90ccbb3310c5b330d27d60d44b12d380d3e1f6c8b275080fe3567fd4f0e119",
+      "size": 1093
+    },
+    {
+      "path": "tools/build_campaign_economy_meta.py",
+      "sha256": "598b55cbd2df65ab63794316a0ee56ae8c6c5a224cd7a747a376251f43bec94a",
+      "size": 9198
+    },
+    {
+      "path": "tools/build_campaign_reset_meta.py",
+      "sha256": "8a827d775f4c6c1ce9c295485a8eb72acb75914f294ee8b8e166fe6f14f19be7",
+      "size": 5512
+    },
+    {
+      "path": "tools/build_campaign_story_drop_meta.py",
+      "sha256": "f0ee80c513ce6fcd037ee9639150a1c716f1cd43da1686a63bd8f50d531442ef",
+      "size": 7608
+    },
+    {
+      "path": "tools/build_commerce_vip_meta.py",
+      "sha256": "840a98fab456dfc008f63b23919a8f69272e15167fc433762cffde52fc1598be",
+      "size": 9602
+    },
+    {
+      "path": "tools/build_consumable_effect_meta.py",
+      "sha256": "3d3c441f8c235c9f8eee630b10e96ead75f5869b68254cc34b538572e284e636",
+      "size": 5778
+    },
+    {
+      "path": "tools/build_energy_purchase_meta.py",
+      "sha256": "f9599b3ce7af630045ef741511b4c10c83dc43023bf97b460aadc03ac3addcd2",
+      "size": 6646
+    },
+    {
+      "path": "tools/build_function_unlock_meta.py",
+      "sha256": "60e2a677f323e6d28757030cb8ae7d5219913e6ba11edc43aeffec2afbe29f0e",
+      "size": 3049
+    },
+    {
+      "path": "tools/build_game_data_catalog.py",
+      "sha256": "ed78ca2be03417249b1059c544ed7a26ed3849ad0ea46072b5af1c5db8bf2571",
+      "size": 22022
+    },
+    {
+      "path": "tools/build_hero_advanced_meta.py",
+      "sha256": "4655e6fd399d37f7ef06cd90a17094657c78625ad9c7d8a4914a2f3bf1c9ca7b",
+      "size": 10384
+    },
+    {
+      "path": "tools/build_hero_equipment_meta.py",
+      "sha256": "81b188a9dad34e7df03752f663d924d4549a8d6e083cb12b5c63bd05efc114ae",
+      "size": 10131
+    },
+    {
+      "path": "tools/build_hero_progression_meta.py",
+      "sha256": "7509844d5fad891b4098b54f905d24a613e44832d9f9660700b785314dc3fef1",
+      "size": 3158
+    },
+    {
+      "path": "tools/build_hero_skill_regen_meta.py",
+      "sha256": "0f962f08a97a114b80ad9dd09633d057f26d5c9decb711af221759a2617f36ba",
+      "size": 6474
+    },
+    {
+      "path": "tools/build_item_stack_limit_meta.py",
+      "sha256": "ad872b5866fa1df248f5b0d8d7aee0470840e65896e38a31dd6ab9c0002e3fbe",
+      "size": 3262
+    },
+    {
+      "path": "tools/build_local_lua_update.py",
+      "sha256": "c89534dbd0dae5a7e3b03459a5beceadc86b5f095fb3e4154d76c50341eded53",
+      "size": 5643
+    },
+    {
+      "path": "tools/build_lua_asset_catalog.py",
+      "sha256": "6997705662fda540c0aa8727e6c280773fdc6fbca23bbb53aebc1d6ef427aef2",
+      "size": 3829
+    },
+    {
+      "path": "tools/build_pass100_add_energy_bridge.py",
+      "sha256": "c0ea1c42ac64f613475860a01fa5d13a6c5fe30c4f9825af4f1680f6fc80aa93",
+      "size": 4069
+    },
+    {
+      "path": "tools/build_pass75_campaign_ownership_meta.py",
+      "sha256": "ffea2cff466f07c0fa876fee0ce7fcab905fa5b5759f5138891ad286699e5991",
+      "size": 5565
+    },
+    {
+      "path": "tools/build_protocol_registry.py",
+      "sha256": "76d103f137f85b7ef02030e341efbf8a0dd1aff9266e16496360ffa48a4e0c5c",
+      "size": 3027
+    },
+    {
+      "path": "tools/build_resource_catalog.py",
+      "sha256": "1364d299c3ae96ca245d9988bbd2d816f6dd00aa6793ae1c02089337881238cf",
+      "size": 3171
+    },
+    {
+      "path": "tools/build_static_asset_store.py",
+      "sha256": "3cb15092eb8b9d23556bd51a06a6b480419913bd283b686ac19f83c72acab299",
+      "size": 6519
+    },
+    {
+      "path": "tools/build_story_mission_meta.py",
+      "sha256": "f7d467c2a482ec4056115e7b714a5a607f031768993b65928b2c373f0ae18124",
+      "size": 5699
+    },
+    {
+      "path": "tools/client_probe_payload/xinyoudi.lua",
+      "sha256": "9a3dbad401e2dbdf32645db88de1dd23e9d642df3975ad0aaa7af352ac19e9f7",
+      "size": 11129
+    },
+    {
+      "path": "tools/generate_summon_girl_docs.py",
+      "sha256": "ca94e7103e0e4e128abb2a801b41a4c1ce25b26b6baa50d708ddf296e95ab403",
+      "size": 6612
+    },
+    {
+      "path": "tools/import_lua_override.py",
+      "sha256": "d7dfc1cda5f18923a0880064707736e67b66d13a1f9bb6e6ae94dc0d9ca0ba10",
+      "size": 2266
+    },
+    {
+      "path": "tools/install_campaign_assets_adb.py",
+      "sha256": "61af54e069c7e507e1671f1dd7e941762cd63476ce280acbf73d08187ebb7812",
+      "size": 11248
+    },
+    {
+      "path": "tools/list_multiuser_state.py",
+      "sha256": "e7c4aa56332b2d674f9961e95ad179f5171d95eb305033de02f26348a57349e0",
+      "size": 1494
+    },
+    {
+      "path": "tools/native_downloader_probe.py",
+      "sha256": "fd10242431ee3214b1c4ac75dd9f2d5dd377c478ae0c1f784ae9dd774ca030e4",
+      "size": 5793
+    },
+    {
+      "path": "tools/pass88_purchase_bridge.lua",
+      "sha256": "9c885907f8db97d5907c03d43071d96a54d5625bec9804c8f648418bd75788d8",
+      "size": 4436
+    },
+    {
+      "path": "tools/pass89_purchase_bridge.lua",
+      "sha256": "f72b2488ed0d565aab886a6c6c21b9d1aba9c882d06b89a038a9614a39682171",
+      "size": 5412
+    },
+    {
+      "path": "tools/patch_decoded_assetdownload_probe.py",
+      "sha256": "56be1213053a5ce3037441cbd3c0a6dc37b705d1d56669c43d65a36e1466e1f8",
+      "size": 12356
+    },
+    {
+      "path": "tools/pull_packaged_resource_probe_adb.py",
+      "sha256": "7ab11be1764f43dd930e236202351de277c6e715704a871e9097f32346b43766",
+      "size": 3491
+    },
+    {
+      "path": "tools/recover_resource_version_adb.py",
+      "sha256": "e615e8dcd876c4efbbf12655608515482482aa104cef31a5e42af3aaa6a8642c",
+      "size": 4645
+    },
+    {
+      "path": "tools/resource_lua_probe_adb.py",
+      "sha256": "195ad3f44398d1d72bc2c3cb94e30b253f9f2dcde4d15e5722db65e1ca6a9061",
+      "size": 11805
+    },
+    {
+      "path": "tools/selftest_campaign_economy.py",
+      "sha256": "349b80ddde26ee4422a8c4b2cb4b8b289bea9dd0fac2933d1316c753d03c2439",
+      "size": 6311
+    },
+    {
+      "path": "tools/selftest_multiuser.py",
+      "sha256": "6086ade469008c971da64b20da94c3434b37ed400fa03c92ac6d78f7ad1a3b58",
+      "size": 3018
+    },
+    {
+      "path": "tools/selftest_pass100_mid97_energy_purchase.py",
+      "sha256": "ba3e482cb01c4b07faa174cf30fc36d3c392ceb564f3733eb7103948cc6dcfc9",
+      "size": 13275
+    },
+    {
+      "path": "tools/selftest_pass104_mutation_firewall.py",
+      "sha256": "e33f5f02be572cae72eceb43edbd62dce8e9ff47cc9cc513201f7cd80c591a40",
+      "size": 5305
+    },
+    {
+      "path": "tools/selftest_pass68_1_medium_free.py",
+      "sha256": "82259d7312eb3060d061bd675571bdf7b1f34863ff5f0bc45a67bac8bd7cf64c",
+      "size": 4889
+    },
+    {
+      "path": "tools/selftest_pass68_foundation.py",
+      "sha256": "263e35089c04676f40731e15405a303a608d9ff81f6f1aaae062e8c46eecbcce",
+      "size": 7755
+    },
+    {
+      "path": "tools/selftest_pass69_1_item_sale.py",
+      "sha256": "ef71ebbed319f611c22624c84163ba82b99305f7ec9219c0ec292b2db5dbdb50",
+      "size": 5775
+    },
+    {
+      "path": "tools/selftest_pass69_economy_backbone_part2.py",
+      "sha256": "aebb9db1e90c78a2362d41afe893ecc2d49b6f3e47ddc675ffeda7dd92a0a123",
+      "size": 9151
+    },
+    {
+      "path": "tools/selftest_pass70_1_stone_summon_mana.py",
+      "sha256": "a34a5052320a6bdf3f85cde3289c797ba6cd4a8f9f51cd96aea8bc84a9803831",
+      "size": 4402
+    },
+    {
+      "path": "tools/selftest_pass70_response_projection.py",
+      "sha256": "26e4252a9768185a5e0f21eff11fe2e6dc44b871065ad4947ec2296ad0e169eb",
+      "size": 9534
+    },
+    {
+      "path": "tools/selftest_pass71_temporal_resources.py",
+      "sha256": "ab48d6f99f995a1a01018d8effdcc293bf82fd986659b6eba8c7e278a4f106c6",
+      "size": 9530
+    },
+    {
+      "path": "tools/selftest_pass72_hero_progression.py",
+      "sha256": "d265134963df0d635df4bcfab3cb6296304d98866186a75ecd1041ca02cd36be",
+      "size": 12570
+    },
+    {
+      "path": "tools/selftest_pass73_advanced_progression.py",
+      "sha256": "1943153a27cf11674e159a58cb2331f2ed76c5004b52738815292de8c8157b96",
+      "size": 12876
+    },
+    {
+      "path": "tools/selftest_pass74_awakening.py",
+      "sha256": "c2059bb45e51b8c9ec5263ccb326a10d682d17b3c9f8dd8c99ab5aa82cd055ca",
+      "size": 8231
+    },
+    {
+      "path": "tools/selftest_pass75_campaign_ownership.py",
+      "sha256": "bbc252dd264b484d0364315916ed4f6ce7112573871f1c2716e46f0a5bd91a22",
+      "size": 13358
+    },
+    {
+      "path": "tools/selftest_pass79_daily_reset.py",
+      "sha256": "58bdf604cb703e1d1242eaf9bc0ef19550e7bd67deed9e7ea15878c371446467",
+      "size": 12070
+    },
+    {
+      "path": "tools/selftest_pass81_daily_reset_campaign_corrections.py",
+      "sha256": "5a9846f4ecf044316bebe159ed0f49e3e945a588280f8b7bb3ff483e106df15a",
+      "size": 8790
+    },
+    {
+      "path": "tools/selftest_pass83_mid1_temporal_hygiene.py",
+      "sha256": "2669166bbfb0fc44d0db9de37ad36e9bc918d61a311c4754661ef52d1136b5ea",
+      "size": 16926
+    },
+    {
+      "path": "tools/selftest_pass87_commerce_vip_phase1.py",
+      "sha256": "8495ab073430a941dedf48f88feccd8899a9638df2bf725b29691a4588b60bd0",
+      "size": 8916
+    },
+    {
+      "path": "tools/selftest_pass88_commerce_purchase.py",
+      "sha256": "9171ca7f83d5af4dc8c794238da68c67569233071fdc34e74cf37a0ef0116097",
+      "size": 8170
+    },
+    {
+      "path": "tools/selftest_pass88_purchase_route_contract.py",
+      "sha256": "6124b656508ae1db1c9b5d6a33e89529e773a72877b06edfd587b1a1fd232dd0",
+      "size": 3180
+    },
+    {
+      "path": "tools/selftest_pass89_ota_token_bridge.py",
+      "sha256": "4e44ee4302a2e03ccf0737daddeed82b152edd40457e546eb7c4f24785695212",
+      "size": 6167
+    },
+    {
+      "path": "tools/selftest_pass91_vip_awards.py",
+      "sha256": "d665c8c9d9da1282891a16accf517b4c2edd4e69339e1ff27b2933e527f9204a",
+      "size": 9825
+    },
+    {
+      "path": "tools/selftest_pass92_mid116_campaign_reset.py",
+      "sha256": "91eb411aa1c4c731e527041876931d4513e15b77d6e2814a8022eeb3f91f89be",
+      "size": 12576
+    },
+    {
+      "path": "tools/selftest_pass94_player_progression.py",
+      "sha256": "cabba8ad08ae512e2d01bd0eff854ed1a1df55ad3c433334f50fed1c5eea1182",
+      "size": 7378
+    },
+    {
+      "path": "tools/selftest_pass96_economy_vip_cleanup.py",
+      "sha256": "bf855ac6d6299fa2f18601f74c576a415341a277671374678acdcf41c5358a1a",
+      "size": 8126
+    },
+    {
+      "path": "tools/selftest_pass98_deterministic_consumables.py",
+      "sha256": "2eabad4c575b275a4dfd3cbaa2ef81b4cb1996d7dba66f385859df7414051539",
+      "size": 8227
+    },
+    {
+      "path": "tools/selftest_pass99_campaign_sweep_qa_seed.py",
+      "sha256": "8f3264c8add110c78a5c64d9d5e02d6a3cd3bbd0fcca82c82433dc76d597b05b",
+      "size": 7134
+    },
+    {
+      "path": "tools/selftest_tutorial_summon.py",
+      "sha256": "9dc27053f6955a3caf31ae952662385c883d59ef0bf09abde3b911844cf0dc0d",
+      "size": 5721
+    },
+    {
+      "path": "tools/set_local_update_enabled.py",
+      "sha256": "48d87c37c0c9369c294f5491e2af854f28a44ddbf1595ffa4cd1e20a2a89c745",
+      "size": 853
+    },
+    {
+      "path": "tools/validate_pass42_11.py",
+      "sha256": "6b47fa65b54fe193faf8e65e1a8480a66d523505ce97be3ce17b42d38db355a7",
+      "size": 8772
+    },
+    {
+      "path": "tools/validate_pass42_12.py",
+      "sha256": "9006bfeea94c99d71d45793ee0a43f3621262553a8504eee9685f41d29d275ae",
+      "size": 8510
+    },
+    {
+      "path": "tools/validate_pass42_14.py",
+      "sha256": "b10c97338e51fb7ed7006bacb7ee4b696e306f5fbcb40a312be43e7ddca0f49b",
+      "size": 7754
+    }
+  ]
+}

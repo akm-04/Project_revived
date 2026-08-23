@@ -1,0 +1,63 @@
+{
+  "schema_version": 1,
+  "pass": "96.0",
+  "mandatory": true,
+  "source_artifact": "all-assest-rechecked.zip",
+  "source_sha256": "89f0f830508b92e5fff6ad53c6a9dae961a14042dbfdf5649008efb8353f5608",
+  "effective_src64": "app-assets/output/assets/src_64",
+  "files": 4370,
+  "checked_files": [
+    {
+      "path": "data/tables/item.lua",
+      "sha256": "59b668c28a372543da0c36d7a8d84291cc5b93fa0d92b7cc389a645e96e7b7cc",
+      "finding": "source item.stack / stack_exceed_mail rows; generated stack catalog authority"
+    },
+    {
+      "path": "app/model/Backpack.lua",
+      "sha256": "953999f81fc43ecd00e587d884c88b6a1ba066e35ff75a20dd698b6cb950af7a",
+      "finding": "client stack clamp/overflow-tip behavior; no server overflow-mail behavior inferred"
+    },
+    {
+      "path": "data/tables/player.lua",
+      "sha256": "1b6b6b0557b0d2cb33b34dc37c25e4a12ae4fbd71f1476d6ac463267a1278345",
+      "finding": "Academy levels 1..100; level100 total_exp=613615 and energy=160"
+    },
+    {
+      "path": "app/model/SelfPlayer.lua",
+      "sha256": "163d5893c9522ada412c2b9c4748a80757660fccdf03c8f72cb6edf0838b8eb4",
+      "finding": "EXP loop increments lev before maxTeamLev check; saved-team serialization parser"
+    },
+    {
+      "path": "app/windows/MapDetailWindow.lua",
+      "sha256": "5a137edc609f9d2082c5df6bf50ef05b6ef54642a7ba5bf6dca8fe0f1c4c3898",
+      "finding": "legacy multi-sweep VIP quick_sweep gate"
+    },
+    {
+      "path": "app/windows/NewMapDetailWindow.lua",
+      "sha256": "88b97be8577828f478360c25fd51674e2ed8291b2a590976b3530c91396d07bf",
+      "finding": "multi-sweep VIP quick_sweep OR active Monthly Privilege gate"
+    },
+    {
+      "path": "app/windows/HeroPresetWindow.lua",
+      "sha256": "5c969bd32cb1c3a16316e7c49539acd562601dd8ec3a938ea2fe57358c6d9244",
+      "finding": "preset creation bounded by vip:presetNum"
+    },
+    {
+      "path": "data/tables/vip.lua",
+      "sha256": "18b76d7fa82964f57082aeb2092a80c231f69e86958b4b567aebabf30d626270",
+      "finding": "quick_sweep and preset_num progression rows"
+    },
+    {
+      "path": "data/tables/monthly_privilege.lua",
+      "sha256": "4fdc9d5b743c530bca9e943b64a96a87f5502243653c5abdb466a39090ade77b",
+      "finding": "existing Monthly Privilege authority; lifecycle remains separate"
+    }
+  ],
+  "decisions": [
+    "Academy max authority is 100; max-level EXP must remain below total_exp(100) to avoid source client level101 transient.",
+    "Positive ordinary stack settlement is bounded by positive item.stack; legacy-overfull consumption remains legal.",
+    "Campaign multi-sweep reads VIP quick_sweep or existing active Monthly Privilege; no card lifecycle mutation is introduced.",
+    "Hero preset count is bounded by VIP preset_num.",
+    "SX/Soul Box unchanged after client QA confirmed existing VIP9 purchase authorization."
+  ]
+}

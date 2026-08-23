@@ -1,0 +1,82 @@
+{
+  "schema_version": 1,
+  "pass": "99.0",
+  "artifact": "gxb-backend-v0.12.3-pass99.0",
+  "changed_files": [
+    {
+      "path": "README.md",
+      "sha256": "b44ed20164967f6faad00c0b70e9bde8f4091f49e3241b300ced95ba1702fc12",
+      "change": "MODIFIED"
+    },
+    {
+      "path": "UPDATE_README.md",
+      "sha256": "574a3fbea78496dfa77c9e8f23b28e194a59c64392e89c8fd70453790cc20230",
+      "change": "MODIFIED"
+    },
+    {
+      "path": "VERSION.json",
+      "sha256": "a4f00d77d270cd4a4fdb42ee3f1b722b9f5c32dca9d33c7c4df0157b484af7d6",
+      "change": "MODIFIED"
+    },
+    {
+      "path": "data/debug_guest_qa_consumables_pass99.json",
+      "sha256": "219828cd5f4d865c569e7c4e1a0a6199ef0e783ccf93a5ed46d6fcc66fb682cd",
+      "change": "NEW"
+    },
+    {
+      "path": "docs/PASS99_CLIENT_TEST_PLAN.md",
+      "sha256": "46745419b54c6c31e21bf4c6eef502369bd38b052f49dc69dd524913418188fc",
+      "change": "NEW"
+    },
+    {
+      "path": "docs/PASS99_RUNTIME_RECONCILIATION.json",
+      "sha256": "5d253875e533792e8ccf92c30a509639b6db34e1d3526953ed6d7b219ebb0888",
+      "change": "NEW"
+    },
+    {
+      "path": "docs/PASS99_SRC64_FEEDBACK_LOOP.json",
+      "sha256": "9af6df3abf5b8bf6da24efbeefab13f17a36bd3b8f280a3f550f5768d880e815",
+      "change": "NEW"
+    },
+    {
+      "path": "docs/PASS99_TECHNICAL_CHANGELOG.md",
+      "sha256": "6f2f26a3960394ffc2167986f87144f1ebff4aaf12dba7d3c0bf1644e705ff74",
+      "change": "NEW"
+    },
+    {
+      "path": "docs/PASS99_VALIDATION.json",
+      "sha256": "414c1a06a9ae5a03c6c3f2c9bb4ff21b86262994d954bc5ed544c1d7f592723e",
+      "change": "NEW"
+    },
+    {
+      "path": "docs/memory.md",
+      "sha256": "51966e4918eb5998a35db51c4029b76c16c379dc794fb5731d5ee214f17bd31a",
+      "change": "MODIFIED"
+    },
+    {
+      "path": "gxb_backend/state/multiuser_database.py",
+      "sha256": "5b1131cf3ff6bc835d9dda7438e7a4e4bcecd5c537cdbcd35f03183d03e70ec2",
+      "change": "MODIFIED"
+    },
+    {
+      "path": "gxb_backend/state/world_repository.py",
+      "sha256": "e434550cb6db77c17b50b17b25dc2886262a742c1d1628700cce6f4f27920752",
+      "change": "MODIFIED"
+    },
+    {
+      "path": "gxb_backend/version.py",
+      "sha256": "4595a355379de473385c6911a62248f2bb7b7748955d96aee735c7dbb48cfe1b",
+      "change": "MODIFIED"
+    },
+    {
+      "path": "memory.md",
+      "sha256": "51966e4918eb5998a35db51c4029b76c16c379dc794fb5731d5ee214f17bd31a",
+      "change": "MODIFIED"
+    },
+    {
+      "path": "tools/selftest_pass99_campaign_sweep_qa_seed.py",
+      "sha256": "8f3264c8add110c78a5c64d9d5e02d6a3cd3bbd0fcca82c82433dc76d597b05b",
+      "change": "NEW"
+    }
+  ]
+}

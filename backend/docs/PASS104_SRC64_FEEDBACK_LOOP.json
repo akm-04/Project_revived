@@ -1,0 +1,16 @@
+{
+  "pass": "104.0",
+  "status": "SOURCE_CROSSCHECK_COMPLETE",
+  "effective_src64": "app-assets/output/assets/src_64",
+  "source_asset_sha256": "89f0f830508b92e5fff6ad53c6a9dae961a14042dbfdf5649008efb8353f5608",
+  "facts": [
+    "Backend.lua maps completed HTTP status != 200 to xyd.error.ERROR; HTTP 200 maps to xyd.error.OK regardless of JSON error_code.",
+    "Backend.lua removes LoadingProxy on completed responses and only uses network retry prompt for request event 'failed', not completed HTTP409.",
+    "Backend.lua error_msg path opens a restart/exit alert; firewall body must omit error_msg.",
+    "Shop.lua BUY_SHOP success event mutates buy state, adds purchased Backpack item, and may remove purchase material locally.",
+    "BattlePass.lua buy/claim callbacks mutate points, purchase counters and claim state only when callback status is xyd.error.OK.",
+    "Arena preflight/start callbacks enter selection/battle only when transport status is xyd.error.OK; those session routes remain deferred to Phase2.",
+    "message.lua has no recovered message row for error_code 1; private-server sentinel remains non-impersonating."
+  ],
+  "implementation_scope": "Phase1 blocks only Pass102/103 audited non-session unowned mutations. Session preflight/start and terminal settlement are registered but not yet intercepted."
+}

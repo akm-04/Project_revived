@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "pass": "92.0",
+  "mid": 116,
+  "name": "RESET_CAMPAIGN",
+  "request": {
+    "campaign_id": "source-known unlocked Super Campaign id",
+    "campaign_type": 2
+  },
+  "success_response": ["campaign_id", "star", "daily_limit", "reset_count"],
+  "eligibility": {
+    "stage_exhausted": "daily_limit <= 0",
+    "allowance": "VipPrivilegeResolver.super_campaign_paid_reset_limit() + 3 when privilege_left_card_day > 0",
+    "limit_rule": "reset_count < allowance"
+  },
+  "cost": "refreshEliteCost(reset_count + 1)",
+  "transaction": [
+    "debit exact Crystal through EconomyLedger",
+    "restore source campaign daily_limit",
+    "increment reset_count",
+    "preserve star and is_partner_drop",
+    "commit in one PlayerUnitOfWork"
+  ],
+  "retry": "If reset_count>0 and daily_limit>0, return current committed row read-only. No debit or state-version increment. This reconciles a lost successful response; a new purchase is possible only after attempts are exhausted again.",
+  "daily_reset": "05:00 GMT+8 DailyResetCoordinator restores source daily_limit and reset_count=0 independently of VIP.",
+  "out_of_scope": ["MID117", "MID118", "Monthly Privilege lifecycle", "Campaign repeat RNG"]
+}

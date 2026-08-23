@@ -1,0 +1,105 @@
+{
+  "pass": "105.0",
+  "status": "SOURCE_FEEDBACK_LOOP_VERIFIED",
+  "effective_src64": "/mnt/data/pass100_assets/app-assets/output/assets/src_64",
+  "backend_transport": {
+    "source": "app/common/network/Backend.lua",
+    "sha256": "95378e2b0be8180df6de27e9e430c630bcfe46c080e1f91ef5f6d74bdbb1b840",
+    "proof": "completed non-200 -> xyd.error.ERROR; normal callback path removes LoadingProxy"
+  },
+  "session_entries": [
+    {
+      "name": "START_FIGHT",
+      "source": "app/windows/ArenaSelectTeamNewWindow.lua",
+      "sha256": "2a047948d1126120dbe4c65bc2a98c1d7cf01a2f57bf99dc489eb99d15140f36",
+      "proof_patterns": [
+        "xyd.mid.START_FIGHT",
+        "if arg_15_0 == xyd.error.OK",
+        "arg_12_0.battleBegan = false"
+      ],
+      "conclusion": "HTTP non-200 does not advance the unsupported session; source success-only path opens/enters battle or mutates pre-battle state, with explicit battleBegan reset where applicable."
+    },
+    {
+      "name": "ARENA_MODE_FIGHT_PRE",
+      "source": "app/windows/ArenaWindow.lua",
+      "sha256": "647a2ff5892ffc455d6f5c0e514b5cea561ce0d5924c1fe477be35eaf3879ff4",
+      "proof_patterns": [
+        "xyd.mid.ARENA_MODE_FIGHT_PRE",
+        "xyd.mid.ARENA_PRE_FIGHT",
+        "if arg_22_0 == xyd.error.OK",
+        "openWindow(\"arena_select_team\""
+      ],
+      "conclusion": "HTTP non-200 does not advance the unsupported session; source success-only path opens/enters battle or mutates pre-battle state, with explicit battleBegan reset where applicable."
+    },
+    {
+      "name": "ARENA_MODE_FIGHT",
+      "source": "app/windows/ArenaSelectTeamNewWindow.lua",
+      "sha256": "2a047948d1126120dbe4c65bc2a98c1d7cf01a2f57bf99dc489eb99d15140f36",
+      "proof_patterns": [
+        "xyd.mid.ARENA_MODE_FIGHT",
+        "if arg_22_0 == xyd.error.OK",
+        "arg_19_0.battleBegan = false"
+      ],
+      "conclusion": "HTTP non-200 does not advance the unsupported session; source success-only path opens/enters battle or mutates pre-battle state, with explicit battleBegan reset where applicable."
+    },
+    {
+      "name": "ARENA_PRE_FIGHT",
+      "source": "app/windows/ArenaWindow.lua",
+      "sha256": "647a2ff5892ffc455d6f5c0e514b5cea561ce0d5924c1fe477be35eaf3879ff4",
+      "proof_patterns": [
+        "xyd.mid.ARENA_PRE_FIGHT",
+        "if arg_22_0 == xyd.error.OK",
+        "openWindow(\"arena_select_team\""
+      ],
+      "conclusion": "HTTP non-200 does not advance the unsupported session; source success-only path opens/enters battle or mutates pre-battle state, with explicit battleBegan reset where applicable."
+    },
+    {
+      "name": "MARCH_START_FIGHT",
+      "source": "app/windows/SelectTeamNewWindow.lua",
+      "sha256": "0fabc7b70c2acf48765c41b414e3cae7504f567cb6fbe344b0f98456ed18667a",
+      "proof_patterns": [
+        "xyd.mid.MARCH_START_FIGHT",
+        "if arg_168_0 == xyd.error.OK",
+        "xyd.pushBattleScene(var_167_0)",
+        "arg_167_0.battleBegan = false"
+      ],
+      "conclusion": "HTTP non-200 does not advance the unsupported session; source success-only path opens/enters battle or mutates pre-battle state, with explicit battleBegan reset where applicable."
+    },
+    {
+      "name": "WORLD_BOSS_START_FIGHT",
+      "source": "app/windows/SelectTeamNewWindow.lua",
+      "sha256": "0fabc7b70c2acf48765c41b414e3cae7504f567cb6fbe344b0f98456ed18667a",
+      "proof_patterns": [
+        "xyd.mid.WORLD_BOSS_START_FIGHT",
+        "if arg_152_0 == xyd.error.OK",
+        "xyd.pushBattleScene(var_151_1)",
+        "arg_151_0.battleBegan = false"
+      ],
+      "conclusion": "HTTP non-200 does not advance the unsupported session; source success-only path opens/enters battle or mutates pre-battle state, with explicit battleBegan reset where applicable."
+    },
+    {
+      "name": "PET_CAMPAIGN_FIGHT",
+      "source": "app/windows/SelectTeamNewWindow.lua",
+      "sha256": "0fabc7b70c2acf48765c41b414e3cae7504f567cb6fbe344b0f98456ed18667a",
+      "proof_patterns": [
+        "xyd.mid.PET_CAMPAIGN_FIGHT",
+        "if arg_150_0 == xyd.error.OK",
+        "xyd.pushBattleScene(var_148_1)",
+        "arg_148_0.battleBegan = false"
+      ],
+      "conclusion": "HTTP non-200 does not advance the unsupported session; source success-only path opens/enters battle or mutates pre-battle state, with explicit battleBegan reset where applicable."
+    },
+    {
+      "name": "PEAK_START_FIGHT",
+      "source": "app/windows/SelectPeakTeamWindow.lua",
+      "sha256": "11389e8daa7c9e6f350b1579352fac0037961b34c29a4355220a5ffc0ecd99f0",
+      "proof_patterns": [
+        "arg_107_0.peakArena:startFight",
+        "if arg_108_0 == xyd.error.OK",
+        "arg_107_0.battleBegan = false"
+      ],
+      "conclusion": "HTTP non-200 does not advance the unsupported session; source success-only path opens/enters battle or mutates pre-battle state, with explicit battleBegan reset where applicable."
+    }
+  ],
+  "terminal_policy": "UNCHANGED_DEFERRED; no 30005 activated"
+}

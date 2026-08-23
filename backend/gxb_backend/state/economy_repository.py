@@ -1,14 +1,14 @@
-"""Canonical cumulative player economy mutations.
+"""Legacy five-field economy compatibility facade over canonical owners.
 
-Pass 30 extends the Pass-29 Phase-1 transaction spine with source-driven level FunctionID side effects and Campaign Crystal rewards.
-The repository owns safe atomic mutations for Mana, Crystal, Energy and
-cumulative player EXP/level. Source-derived player level/Energy constants are
-loaded only from metadata stamped as generated through the effective merged
-writable-over-APK source resolver.
+Pass94 completes the Player EXP/level strangler step.  ``EconomyRepository`` no
+longer owns progression behavior: EXP/level delegates to
+``PlayerProgressionService``; Mana/Crystal delegate to ``EconomyLedger``; and
+Energy delegates to ``TemporalPolicyService``.  The old direct-write paths are
+retained only for explicitly legacy/incomplete construction and are fenced off
+in live RequestServices and maintenance composition.
 
-All response values are cumulative current totals. Endpoint handlers should
-mutate canonical state here and let the request ResponseProjector attach the
-changed ``economy_`` block.
+Campaign reward *facts* remain available here for compatibility while callers
+migrate toward narrower source catalogs.
 """
 from __future__ import annotations
 
@@ -20,6 +20,7 @@ from typing import Any
 
 from .economy_ledger import EconomyLedger, EconomyLedgerError
 from .function_state_repository import FunctionStateRepository
+from .player_progression_service import PlayerProgressionError, PlayerProgressionService
 from .player_state import PlayerState
 from .resource_registry import ResourceRegistry
 from .temporal_policy_service import TemporalPolicyError, TemporalPolicyService
@@ -31,11 +32,8 @@ class EconomyMutationError(ValueError):
 
 
 class EconomyRepository:
-    """Legacy five-field economy compatibility facade over ResourceRegistry.
+    """Compatibility API that routes the historical five fields to typed owners."""
 
-    Pass68 intentionally preserves the existing public methods. Generalized
-    30-field EconomyLedger mutation is a later migration wave.
-    """
     PHASE1_FIELDS = ("mana", "crystal", "energy", "exp", "lev")
 
     def __init__(
@@ -49,6 +47,8 @@ class EconomyRepository:
         ledger: EconomyLedger | None = None,
         uow: PlayerUnitOfWork | None = None,
         temporal: TemporalPolicyService | None = None,
+        progression: PlayerProgressionService | None = None,
+        allow_legacy_direct_mutation: bool = True,
     ) -> None:
         self.player = player
         self.data_dir = Path(data_dir)
@@ -58,6 +58,7 @@ class EconomyRepository:
         self.ledger = ledger
         self.uow = uow
         self.temporal = temporal
+        self.allow_legacy_direct_mutation = bool(allow_legacy_direct_mutation)
         if self.resource_registry is not None:
             for field in self.PHASE1_FIELDS:
                 self.resource_registry.assert_legacy_economy_field(field)
@@ -65,8 +66,17 @@ class EconomyRepository:
             for field in ("mana", "crystal"):
                 if self.ledger.descriptor(field).owner_service != "EconomyLedger":
                     raise RuntimeError(f"legacy scalar facade owner drift: {field}")
+        self.progression = progression or PlayerProgressionService(
+            player,
+            self.data_dir,
+            save_callback,
+            function_unlocks=function_unlocks,
+            resource_registry=resource_registry,
+            uow=uow,
+            temporal=temporal,
+            allow_legacy_direct_energy_mutation=self.allow_legacy_direct_mutation,
+        )
         self.meta = self._load_meta()
-        self.player_levels = self.meta.get("player_levels") or {}
 
     @staticmethod
     def _int(value: Any, default: int = 0) -> int:
@@ -101,29 +111,9 @@ class EconomyRepository:
     def player_exp_multiplier(self) -> int:
         return max(0, self._int(self.meta.get("player_exp_multiplier"), 0))
 
+    # Compatibility readers now delegate to the canonical progression owner.
     def player_level_meta(self, level: Any) -> dict[str, int]:
-        row = self.player_levels.get(str(max(1, self._int(level, 1)))) if isinstance(self.player_levels, dict) else None
-        if not isinstance(row, dict):
-            return {}
-        return {str(key): self._int(value) for key, value in row.items()}
-
-    def _highest_source_level(self) -> int:
-        if not isinstance(self.player_levels, dict):
-            return 1
-        values = [self._int(key, 0) for key in self.player_levels.keys()]
-        return max((value for value in values if value > 0), default=1)
-
-    def _level_after_exp(self, total_exp: int) -> int:
-        """Mirror SelfPlayer's cumulative EXP threshold loop without demotion."""
-        level = max(1, self._int(self.player.lev, 1))
-        ceiling = min(max(level, self._int(self.player.max_lev, level)), self._highest_source_level())
-        while level < ceiling:
-            row = self.player_level_meta(level)
-            threshold = self._int(row.get("total_exp"), 0)
-            if threshold <= 0 or total_exp < threshold:
-                break
-            level += 1
-        return level
+        return self.progression.player_level_meta(level)
 
     def _snapshot(self) -> dict[str, Any]:
         return {
@@ -142,44 +132,13 @@ class EconomyRepository:
         for field, value in snapshot.items():
             setattr(self.player, field, value)
 
-    def _apply_player_exp_gain(self, gain: int, changed: dict[str, int]) -> None:
-        if gain <= 0:
-            return
-        self.player.exp = max(0, self._int(self.player.exp, 0)) + gain
-        before_level = max(1, self._int(self.player.lev, 1))
-        after_level = self._level_after_exp(self.player.exp)
+    def _require_scalar_owner(self, field: str) -> None:
+        if self.ledger is None and not self.allow_legacy_direct_mutation:
+            raise EconomyMutationError(f"{field} mutation requires canonical EconomyLedger")
 
-        energy_award = 0
-        if after_level > before_level:
-            for level in range(before_level, after_level):
-                row = self.player_level_meta(level)
-                energy_award += max(0, self._int(row.get("award_energy"), 0))
-
-        self.player.lev = after_level
-        if after_level > before_level and self.function_unlocks is not None:
-            self.function_unlocks.unlock_crossed_levels(
-                before_level, after_level, persist=False
-            )
-        level_meta = self.player_level_meta(after_level)
-        source_max_energy = self._int(level_meta.get("energy"), 0)
-        if source_max_energy > 0:
-            self.player.max_energy = source_max_energy
-
-        changed["exp"] = self._int(self.player.exp, 0)
-        if after_level != before_level:
-            changed["lev"] = after_level
-        if energy_award > 0:
-            # Source client level-up flow allows current Energy above the normal
-            # regeneration cap. Pass71 delegates the timed pool and its anchor to
-            # TemporalPolicyService instead of mutating the compatibility field.
-            if self.temporal is not None:
-                change = self.temporal.credit(
-                    "energy", energy_award, persist=False, publish=True
-                )
-                changed["energy"] = change.after.balance
-            else:
-                self.player.energy = max(0, self._int(self.player.energy, 0)) + energy_award
-                changed["energy"] = self._int(self.player.energy, 0)
+    def _require_energy_owner(self) -> None:
+        if self.temporal is None and not self.allow_legacy_direct_mutation:
+            raise EconomyMutationError("energy mutation requires canonical TemporalPolicyService")
 
     def apply_deltas(
         self,
@@ -190,12 +149,12 @@ class EconomyRepository:
         player_exp_gain: Any = 0,
         persist: bool = False,
     ) -> dict[str, int]:
-        """Compatibility transaction over typed scalar + legacy temporal/progression owners.
+        """Route a historical mixed transaction through canonical typed owners.
 
-        Mana/Crystal route through EconomyLedger. Pass71 delegates Energy to
-        TemporalPolicyService while player EXP/level intentionally remains on its
-        pre-progression migration path.  The facade keeps one local snapshot so a
-        mixed legacy call remains all-or-nothing inside the outer PlayerUoW.
+        The compatibility facade remains for old repositories/callers, but live
+        composition supplies every canonical owner and disables direct fallback.
+        Player EXP is now delegated to PlayerProgressionService rather than
+        mutated here.
         """
         mana_delta = self._int(mana_delta, 0)
         crystal_delta = self._int(crystal_delta, 0)
@@ -203,6 +162,12 @@ class EconomyRepository:
         player_exp_gain = self._int(player_exp_gain, 0)
         if player_exp_gain < 0:
             raise EconomyMutationError("player EXP cannot be spent through the compatibility economy API")
+        if mana_delta:
+            self._require_scalar_owner("mana")
+        if crystal_delta:
+            self._require_scalar_owner("crystal")
+        if energy_delta:
+            self._require_energy_owner()
 
         before = self._snapshot()
         if energy_delta:
@@ -257,12 +222,11 @@ class EconomyRepository:
                     if self.uow is not None and self.uow.active:
                         self.uow.mark_changed("temporal_resources")
 
-            before_level = self._int(self.player.lev, 1)
-            before_exp = self._int(self.player.exp, 0)
-            self._apply_player_exp_gain(player_exp_gain, changed)
-            if (self._int(self.player.exp, 0), self._int(self.player.lev, 1)) != (before_exp, before_level):
-                if self.uow is not None and self.uow.active:
-                    self.uow.mark_changed("player_progression")
+            if player_exp_gain:
+                try:
+                    changed.update(self.progression.grant_exp(player_exp_gain, persist=False))
+                except PlayerProgressionError as exc:
+                    raise EconomyMutationError(str(exc)) from exc
 
             if persist and changed and not (self.uow is not None and self.uow.active):
                 self._save()
@@ -309,7 +273,7 @@ class EconomyRepository:
 
     def grant_player_exp(self, amount: Any, *, persist: bool = False) -> dict[str, int]:
         gain = max(0, self._int(amount, 0))
-        return self.apply_deltas(player_exp_gain=gain, persist=persist) if gain else {}
+        return self.progression.grant_exp(gain, persist=persist) if gain else {}
 
     def apply_campaign_win(
         self,
@@ -319,7 +283,7 @@ class EconomyRepository:
         player_exp_gain: Any,
         persist: bool = False,
     ) -> dict[str, int]:
-        """Commit source-confirmed normal-Campaign scalar rewards atomically."""
+        """Compatibility wrapper for source-confirmed normal-Campaign rewards."""
         return self.apply_deltas(
             mana_delta=max(0, self._int(mana_gain, 0)),
             crystal_delta=max(0, self._int(crystal_gain, 0)),

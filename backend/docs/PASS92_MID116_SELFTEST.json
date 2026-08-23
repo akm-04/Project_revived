@@ -1,0 +1,201 @@
+{
+  "pass": "92.0",
+  "status": "PASS",
+  "mid": 116,
+  "checks": [
+    {
+      "name": "source_reset_contract_exact",
+      "status": "PASS",
+      "details": {
+        "monthly_bonus": 3,
+        "first8": [
+          20,
+          50,
+          50,
+          100,
+          100,
+          200,
+          200,
+          400
+        ],
+        "cost28": 1000
+      }
+    },
+    {
+      "name": "vip1_without_monthly_has_no_reset",
+      "status": "PASS",
+      "details": {
+        "response": {
+          "error_code": 1,
+          "msg": "campaign_reset_limit_exhausted"
+        }
+      }
+    },
+    {
+      "name": "vip2_first_reset_atomic",
+      "status": "PASS",
+      "details": {
+        "response": {
+          "campaign_id": 100019,
+          "star": 3,
+          "daily_limit": 3,
+          "reset_count": 1
+        },
+        "crystal": 80,
+        "row": {
+          "campaign_id": 100019,
+          "star": 3,
+          "daily_limit": 3,
+          "reset_count": 1,
+          "is_partner_drop": 1
+        }
+      }
+    },
+    {
+      "name": "mid116_projects_cumulative_crystal",
+      "status": "PASS",
+      "details": {
+        "projected": {
+          "campaign_id": 100019,
+          "star": 3,
+          "daily_limit": 3,
+          "reset_count": 1,
+          "economy_": {
+            "crystal": 80
+          }
+        }
+      }
+    },
+    {
+      "name": "postcommit_retry_reconciles_without_second_charge",
+      "status": "PASS",
+      "details": {
+        "response": {
+          "campaign_id": 100019,
+          "star": 3,
+          "daily_limit": 3,
+          "reset_count": 1
+        }
+      }
+    },
+    {
+      "name": "vip2_second_paid_reset_rejected",
+      "status": "PASS",
+      "details": {
+        "response": {
+          "error_code": 1,
+          "msg": "campaign_reset_limit_exhausted"
+        }
+      }
+    },
+    {
+      "name": "monthly_privilege_adds_three_without_card_lifecycle_mutation",
+      "status": "PASS",
+      "details": {
+        "allowance": 3,
+        "response": {
+          "campaign_id": 100019,
+          "star": 3,
+          "daily_limit": 3,
+          "reset_count": 1
+        }
+      }
+    },
+    {
+      "name": "vip15_plus_monthly_reaches_source_max_28",
+      "status": "PASS",
+      "details": {
+        "out25": {
+          "campaign_id": 100019,
+          "star": 3,
+          "daily_limit": 3,
+          "reset_count": 25
+        },
+        "out26": {
+          "campaign_id": 100019,
+          "star": 3,
+          "daily_limit": 3,
+          "reset_count": 26
+        },
+        "out28": {
+          "campaign_id": 100019,
+          "star": 3,
+          "daily_limit": 3,
+          "reset_count": 28
+        },
+        "denied29": {
+          "error_code": 1,
+          "msg": "campaign_reset_limit_exhausted"
+        }
+      }
+    },
+    {
+      "name": "insufficient_crystal_is_atomic",
+      "status": "PASS",
+      "details": {
+        "response": {
+          "error_code": 1,
+          "msg": "crystal_insufficient"
+        }
+      }
+    },
+    {
+      "name": "fail_closed_domain_and_initial_nonexhausted_guards",
+      "status": "PASS",
+      "details": {
+        "normal": {
+          "error_code": 1,
+          "msg": "campaign_reset_super_only"
+        },
+        "nonexhausted": {
+          "error_code": 1,
+          "msg": "campaign_daily_limit_not_exhausted"
+        }
+      }
+    },
+    {
+      "name": "durable_failure_rolls_back_crystal_and_campaign",
+      "status": "PASS",
+      "details": {}
+    },
+    {
+      "name": "daily_reset_still_restores_baseline_and_reset_count",
+      "status": "PASS",
+      "details": {
+        "row": {
+          "campaign_id": 100019,
+          "star": 3,
+          "daily_limit": 3,
+          "reset_count": 0,
+          "is_partner_drop": 1
+        }
+      }
+    },
+    {
+      "name": "request_scoped_mid116_persists_source_shaped_row",
+      "status": "PASS",
+      "details": {
+        "response": {
+          "campaign_id": 100019,
+          "star": 3,
+          "daily_limit": 3,
+          "reset_count": 1
+        },
+        "crystal": 80,
+        "row": {
+          "campaign_id": 100019,
+          "star": 3,
+          "daily_limit": 3,
+          "reset_count": 1,
+          "is_partner_drop": 0
+        }
+      }
+    },
+    {
+      "name": "effective_src64_regenerates_reset_metadata_byte_exact",
+      "status": "PASS",
+      "details": {}
+    }
+  ],
+  "scope": "Super Campaign paid resets only; MID117/118 and Monthly Privilege lifecycle remain deferred"
+}

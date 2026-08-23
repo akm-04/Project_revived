@@ -1,8 +1,8 @@
 {
   "_meta": {
-    "format": "GXB Pass73 source-derived advanced Hero/Girls progression metadata",
+    "format": "GXB Pass73/Pass98 source-derived advanced Hero/Girls progression metadata",
     "hidden_randomness": "excluded / PRIVATE_SERVER_POLICY boundary",
-    "pass74_inscription_resolve_source": "data/tables/inscription.lua",
+    "pass98_inscription_mapping": "item.lua.inscript_id completes concrete mapping; inscription.lua owns resolve policy",
     "source_authority": "effective src_64"
   },
   "advanced_items": {
@@ -68605,97 +68605,6 @@
       "sub_type": 1,
       "type": 4
     },
-    "51100032": {
-      "fumo_mana": 0,
-      "fumo_thresholds": [
-        0
-      ],
-      "id": 51100032,
-      "inscript_id": 0,
-      "inscript_suit_id": 0,
-      "moneng": 0,
-      "partner_id": 0,
-      "sub_type": 1,
-      "type": 4
-    },
-    "51100033": {
-      "fumo_mana": 0,
-      "fumo_thresholds": [
-        0
-      ],
-      "id": 51100033,
-      "inscript_id": 0,
-      "inscript_suit_id": 0,
-      "moneng": 0,
-      "partner_id": 0,
-      "sub_type": 1,
-      "type": 4
-    },
-    "51100034": {
-      "fumo_mana": 0,
-      "fumo_thresholds": [
-        0
-      ],
-      "id": 51100034,
-      "inscript_id": 0,
-      "inscript_suit_id": 0,
-      "moneng": 0,
-      "partner_id": 0,
-      "sub_type": 1,
-      "type": 4
-    },
-    "51100035": {
-      "fumo_mana": 0,
-      "fumo_thresholds": [
-        0
-      ],
-      "id": 51100035,
-      "inscript_id": 0,
-      "inscript_suit_id": 0,
-      "moneng": 0,
-      "partner_id": 0,
-      "sub_type": 1,
-      "type": 4
-    },
-    "51100036": {
-      "fumo_mana": 0,
-      "fumo_thresholds": [
-        0
-      ],
-      "id": 51100036,
-      "inscript_id": 0,
-      "inscript_suit_id": 0,
-      "moneng": 0,
-      "partner_id": 0,
-      "sub_type": 1,
-      "type": 4
-    },
-    "51100037": {
-      "fumo_mana": 0,
-      "fumo_thresholds": [
-        0
-      ],
-      "id": 51100037,
-      "inscript_id": 0,
-      "inscript_suit_id": 0,
-      "moneng": 0,
-      "partner_id": 0,
-      "sub_type": 1,
-      "type": 4
-    },
-    "51100038": {
-      "fumo_mana": 0,
-      "fumo_thresholds": [
-        0
-      ],
-      "id": 51100038,
-      "inscript_id": 0,
-      "inscript_suit_id": 0,
-      "moneng": 0,
-      "partner_id": 0,
-      "sub_type": 1,
-      "type": 4
-    },
     "52100004": {
       "fumo_mana": 0,
       "fumo_thresholds": [
@@ -80056,6 +79965,8 @@
     "160200108": 20001,
     "160200109": 20001,
     "160200110": 20001,
+    "160200111": 20001,
+    "160200112": 20001,
     "160200201": 20002,
     "160200202": 20002,
     "160200203": 20002,
@@ -80066,6 +79977,8 @@
     "160200208": 20002,
     "160200209": 20002,
     "160200210": 20002,
+    "160200211": 20002,
+    "160200212": 20002,
     "160200301": 20003,
     "160200302": 20003,
     "160200303": 20003,
@@ -80076,6 +79989,8 @@
     "160200308": 20003,
     "160200309": 20003,
     "160200310": 20003,
+    "160200311": 20003,
+    "160200312": 20003,
     "160200401": 20004,
     "160200402": 20004,
     "160200403": 20004,
@@ -80086,6 +80001,8 @@
     "160200408": 20004,
     "160200409": 20004,
     "160200410": 20004,
+    "160200411": 20004,
+    "160200412": 20004,
     "160200501": 20005,
     "160200502": 20005,
     "160200503": 20005,
@@ -80096,6 +80013,8 @@
     "160200508": 20005,
     "160200509": 20005,
     "160200510": 20005,
+    "160200511": 20005,
+    "160200512": 20005,
     "160200601": 20006,
     "160200602": 20006,
     "160200603": 20006,
@@ -80106,6 +80025,8 @@
     "160200608": 20006,
     "160200609": 20006,
     "160200610": 20006,
+    "160200611": 20006,
+    "160200612": 20006,
     "160200701": 20007,
     "160200702": 20007,
     "160200703": 20007,
@@ -80116,6 +80037,8 @@
     "160200708": 20007,
     "160200709": 20007,
     "160200710": 20007,
+    "160200711": 20007,
+    "160200712": 20007,
     "160300101": 30001,
     "160300102": 30001,
     "160300103": 30001,

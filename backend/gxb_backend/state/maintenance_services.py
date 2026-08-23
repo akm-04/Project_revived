@@ -17,7 +17,9 @@ from .economy_repository import EconomyRepository
 from .hero_progression_repository import HeroProgressionRepository
 from .hero_repository import HeroRepository
 from .inventory_repository import InventoryRepository
+from .player_progression_service import PlayerProgressionService
 from .player_state import PlayerState
+from .resource_registry import ResourceRegistry
 from .summon_repository import SummonRepository
 from .summon_featured_rotation import SummonFeaturedRotationPolicy
 from .world_repository import WorldRepository
@@ -42,9 +44,19 @@ class PlayerMaintenanceServices:
         )
 
         # No save callback here: MultiUserDatabase.normalize_player() owns the
-        # single persistence decision after all normalizers have run.
-        self.economy = EconomyRepository(player, self.data_dir)
-        self.inventory = InventoryRepository(player)
+        # single persistence decision after all normalizers have run. Maintenance
+        # composition is read/normalize-only for economy resources, so legacy
+        # direct mutation fallbacks are explicitly disabled.
+        self.resource_registry = ResourceRegistry.load(self.data_dir / "resource_registry.json")
+        self.player_progression = PlayerProgressionService(
+            player, self.data_dir, resource_registry=self.resource_registry,
+            allow_legacy_direct_energy_mutation=False,
+        )
+        self.economy = EconomyRepository(
+            player, self.data_dir, resource_registry=self.resource_registry,
+            progression=self.player_progression, allow_legacy_direct_mutation=False,
+        )
+        self.inventory = InventoryRepository(player, data_dir=self.data_dir)
         self.heroes = HeroRepository(
             player,
             data_dir=self.data_dir,

@@ -1,0 +1,57 @@
+{
+  "schema_version": 1,
+  "pass": "98.0",
+  "backend": "0.12.2",
+  "status": "STATIC_SELFTEST_ACCEPTED_RUNTIME_PENDING",
+  "checks": [
+    {
+      "name": "compileall",
+      "result": "PASS"
+    },
+    {
+      "name": "pass98_focused_deterministic_consumables",
+      "result": "PASS",
+      "covers": [
+        "source catalog SHA/counts",
+        "all 22 MID27 Energy items",
+        "Kanto Food +18",
+        "Tonkatsu +30",
+        "Energy overflow source behavior",
+        "all 12 MID87 magic items",
+        "MID87 invalid-request atomic rollback",
+        "254 MID1404 item mappings",
+        "missing Honor variant certificate settlement",
+        "MID134 fail-close/no mutation",
+        "MID241 fail-closed boundary"
+      ]
+    },
+    {
+      "name": "historical_regression_spine",
+      "result": "PASS",
+      "passes": [
+        "Pass68",
+        "Pass68.1",
+        "Pass69",
+        "Pass69.1",
+        "Pass70",
+        "Pass70.1",
+        "Pass71",
+        "Pass72",
+        "Pass73",
+        "Pass74",
+        "Pass75",
+        "Pass79",
+        "Pass81",
+        "Pass83",
+        "Pass87",
+        "Pass88",
+        "Pass89",
+        "Pass91",
+        "Pass92",
+        "Pass94",
+        "Pass96"
+      ]
+    }
+  ],
+  "runtime_gate": "Focused client smoke required before Pass98 runtime acceptance."
+}

@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "pass": "94.0",
+  "backend": "0.12.0",
+  "status": "STATIC_SELFTEST_ACCEPTED_RUNTIME_PENDING",
+  "checks": [
+    {"check": "python compileall gxb_backend tools", "result": "PASS"},
+    {"check": "selftest_pass68_foundation.py", "result": "PASS"},
+    {"check": "selftest_pass69_economy_backbone_part2.py", "result": "PASS"},
+    {"check": "selftest_pass70_response_projection.py", "result": "PASS"},
+    {"check": "selftest_pass75_campaign_ownership.py", "result": "PASS"},
+    {"check": "selftest_pass83_mid1_temporal_hygiene.py", "result": "PASS"},
+    {"check": "selftest_pass89_ota_token_bridge.py", "result": "PASS"},
+    {"check": "selftest_pass91_vip_awards.py", "result": "PASS"},
+    {"check": "selftest_pass92_mid116_campaign_reset.py", "result": "PASS"},
+    {"check": "selftest_pass94_player_progression.py", "result": "PASS"},
+    {"check": "selftest_campaign_economy.py", "result": "BASELINE_KNOWN_FAILURE_NOT_PASS94_REGRESSION", "details": "Assertion at existing Summon smoke line 98 fails identically on untouched v0.11.1-pass92.0 and v0.12.0-pass94.0."}
+  ],
+  "source_feedback_loop": "PASS94_SRC64_FEEDBACK_LOOP.json",
+  "runtime_acceptance": "PENDING_FOCUSED_CLIENT_SMOKE",
+  "backend_change_scope": "Player EXP/level ownership strangler only; no probability, reward amount, MID97, MID117/118, Store, VIP, Daily Reset, or Monthly Privilege behavioral changes."
+}

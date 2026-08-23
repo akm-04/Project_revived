@@ -1,0 +1,53 @@
+{
+  "pass": "91.0",
+  "effective_src64_bundle_sha256": "89f0f830508b92e5fff6ad53c6a9dae961a14042dbfdf5649008efb8353f5608",
+  "evidence": [
+    {
+      "path": "app/common/network/mid.lua",
+      "sha256": "026a20b29d97624979777a68c64c749254031604057ff42aa8f8254c3e35b5af",
+      "finding": "GET_VIP_AWARD numeric MID is 657."
+    },
+    {
+      "path": "app/windows/VipRechargeWindow.lua",
+      "sha256": "3fac657db32f5cf8804ff37d581758977cfce951aad2ec5008d878a6395ae717",
+      "finding": "VIP award UI reads selfPlayer.vipAwards; 1 means claimed; sends MID657 {id=level}; on successful awards calls SelfPlayer:handleRewards and marks vipAwards[level]=1 locally."
+    },
+    {
+      "path": "app/windows/PlayerInfoWindow.lua",
+      "sha256": "661f721c2eb3d1ce37aa23269b86315be10b57246a930faba76f628d55e975bd",
+      "finding": "VIP gift/red-point selection scans vipAwards for eligible zero-valued claim states."
+    },
+    {
+      "path": "app/model/SelfPlayer.lua",
+      "sha256": "163d5893c9522ada412c2b9c4748a80757660fccdf03c8f72cb6edf0838b8eb4",
+      "finding": "PlayerInfo hydration assigns params.vip_awards; handleRewards consumes award rows with table_id/item_num."
+    },
+    {
+      "path": "data/tables/vip.lua",
+      "sha256": "18b76d7fa82964f57082aeb2092a80c231f69e86958b4b567aebabf30d626270",
+      "finding": "VIP1..VIP15 each expose reward_item gift IDs."
+    },
+    {
+      "path": "data/tables/gift.lua",
+      "sha256": "8c87dfdc116242afcdebd011cf898d61b08e2cf54ea7d0a11a5f69fabade2ac7",
+      "finding": "Referenced VIP reward gifts resolve to item stacks plus Crystal values."
+    },
+    {
+      "path": "data/tables/asset.lua",
+      "sha256": "6d113c94d9ff57dfd4d209720ff0f597a418f13e5f49bc3b1aba4594a59d5b96",
+      "finding": "Crystal backend asset/table ID is -1."
+    },
+    {
+      "path": "app/model/Backpack.lua",
+      "sha256": "953999f81fc43ecd00e587d884c88b6a1ba066e35ff75a20dd698b6cb950af7a",
+      "finding": "Client reward handling routes table_id/item_num through Backpack display/update conventions; scalar currency remains represented by asset IDs in award UI."
+    }
+  ],
+  "backend_decisions": [
+    "Canonical vip_awards is exactly 15 literal integer 0/1 values, indexed VIP1..VIP15.",
+    "MID657 uses source gift tables; no invented reward contents.",
+    "Crystal commits through EconomyLedger and stack items through typed RewardTransactionService in the same UoW as the claim marker.",
+    "Duplicate claim returns awards=[] without a second reward commit.",
+    "No MID116 or unrelated VIP domain implementation in Pass91."
+  ]
+}

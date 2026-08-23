@@ -1,0 +1,118 @@
+{
+  "schema_version": 1,
+  "pass": "94.0",
+  "backend": "0.12.0",
+  "baseline_artifact": "gxb-backend-v0.11.1-pass92.0.zip",
+  "baseline_sha256": "6d6e447ef5a78e2d965e97d6832ade0ce41afa39197b9d433c4fafa8b94f4eaf",
+  "scope": "Player EXP/level ownership strangler; docs/tests/version metadata",
+  "entries": [
+    {
+      "path": "README.md",
+      "status": "modified",
+      "sha256": "5afb775951e4a0595682e0c57002be0fbd8037c2478e932ccd5da771d89703e3",
+      "bytes": 1589
+    },
+    {
+      "path": "UPDATE_README.md",
+      "status": "modified",
+      "sha256": "d1ce0fdbda8a8378db89513ce845603e016165ca1704a9fdf53749daa70cb08f",
+      "bytes": 1029
+    },
+    {
+      "path": "VERSION.json",
+      "status": "modified",
+      "sha256": "99c9c14be99ec393bbee9aa1716bbf6756b8f1d8126172e9df7a9ec01132f88a",
+      "bytes": 853
+    },
+    {
+      "path": "docs/PASS94_CLIENT_TEST_PLAN.md",
+      "status": "added",
+      "sha256": "58d8a6700f05f9a375edd978c6e57309f0566cb677661409a715ac8b69009dab",
+      "bytes": 1453
+    },
+    {
+      "path": "docs/PASS94_PLAYER_PROGRESSION_SELFTEST.json",
+      "status": "added",
+      "sha256": "4272d199fbba24317f358b7bb53fc58e02a79f456ed7e8cccd67aff5588a76c8",
+      "bytes": 766
+    },
+    {
+      "path": "docs/PASS94_REGRESSION_MATRIX.json",
+      "status": "added",
+      "sha256": "c5e4590152366c6bd3fcbaa0e0f205448484f540816ba9fe077a129ded3a3e0c",
+      "bytes": 736
+    },
+    {
+      "path": "docs/PASS94_SRC64_FEEDBACK_LOOP.json",
+      "status": "added",
+      "sha256": "6766b8a5a88367dcdf811b0f07a4b71763d416cf4c4ddba4d5b81176927cb03a",
+      "bytes": 2138
+    },
+    {
+      "path": "docs/PASS94_TECHNICAL_CHANGELOG.md",
+      "status": "added",
+      "sha256": "8992c33216dc7d1f1a92fa18858c1d82e7c48a27b1342f50f0596dfe2733a85d",
+      "bytes": 2484
+    },
+    {
+      "path": "docs/PASS94_VALIDATION.json",
+      "status": "added",
+      "sha256": "7ff77cf28ef924e237c04def06ff611faadac6cd0a172097f7932b69a84ae445",
+      "bytes": 1409
+    },
+    {
+      "path": "gxb_backend/state/__init__.py",
+      "status": "modified",
+      "sha256": "e147dc65c9eb8cab848fb42477eb22a6509e190ec6317df907dd126ee5401d7a",
+      "bytes": 607
+    },
+    {
+      "path": "gxb_backend/state/economy_repository.py",
+      "status": "modified",
+      "sha256": "01865922ef6d3033864d30345bdf5e17798730559f4bfdd7dafb28d5fca6a736",
+      "bytes": 12820
+    },
+    {
+      "path": "gxb_backend/state/maintenance_services.py",
+      "status": "modified",
+      "sha256": "6b905f14aa097dd225839981bc82ac021ba2b707cf89b6a42db20f732c32bb9c",
+      "bytes": 3606
+    },
+    {
+      "path": "gxb_backend/state/player_progression_service.py",
+      "status": "added",
+      "sha256": "31682c6ca52263c330ea1676943fd83c221b51a98ba4b11c2ef32edc1e7c5585",
+      "bytes": 9078
+    },
+    {
+      "path": "gxb_backend/state/request_services.py",
+      "status": "modified",
+      "sha256": "e2a18740d390e4fa6ad2ef33b782414f904e05bec29053c4504d8d7a485eae01",
+      "bytes": 18559
+    },
+    {
+      "path": "gxb_backend/state/reward_transaction_service.py",
+      "status": "modified",
+      "sha256": "45e0a9dabc0125f306a3a29b97c81ee07fbf1e0963ccd01873fdef3f4f4bc4f3",
+      "bytes": 8744
+    },
+    {
+      "path": "gxb_backend/version.py",
+      "status": "modified",
+      "sha256": "cd8043eba36b4555d0066d654b5ec2cd7f75b3a3322730cb5c90987ea50181ca",
+      "bytes": 99
+    },
+    {
+      "path": "memory.md",
+      "status": "modified",
+      "sha256": "d8e888919c1d636d9c90da867e2627723502e495a7dffbed778ead5ff6d1ae6e",
+      "bytes": 1775
+    },
+    {
+      "path": "tools/selftest_pass94_player_progression.py",
+      "status": "added",
+      "sha256": "cabba8ad08ae512e2d01bd0eff854ed1a1df55ad3c433334f50fed1c5eea1182",
+      "bytes": 7378
+    }
+  ]
+}

@@ -7,6 +7,7 @@ from typing import Any
 from flask import jsonify, make_response
 
 
+
 def engine_ok(data: Any | None = None) -> Any:
     """Return the flat JSON shape consumed by Backend.lua.
 
@@ -40,8 +41,8 @@ def sdk_success(*, identity: dict[str, Any] | None = None, data: dict[str, Any] 
     return body
 
 
-def json_response(data: Any, cookies: dict[str, str] | None = None):
-    response = make_response(jsonify(data))
+def json_response(data: Any, cookies: dict[str, str] | None = None, status_code: int = 200):
+    response = make_response(jsonify(data), int(status_code))
     response.headers["Content-Type"] = "application/json; charset=utf-8"
     response.headers["Cache-Control"] = "no-cache, no-store"
     response.headers["Connection"] = "keep-alive"

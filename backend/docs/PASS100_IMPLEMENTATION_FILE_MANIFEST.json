@@ -1,0 +1,160 @@
+{
+  "schema_version": 1,
+  "pass": "100.0",
+  "basis_backend": "gxb-backend-v0.12.3-pass99.0",
+  "basis_sha256": "325eeb2e763a26cc5c01242b3f63d9a361055c9790e31707ec6d14b3fa6cd369",
+  "modified": [
+    {
+      "path": "README.md",
+      "before_sha256": "b44ed20164967f6faad00c0b70e9bde8f4091f49e3241b300ced95ba1702fc12",
+      "after_sha256": "cca65376641508d544a5bf25950962263851d8c60d9621dea6b5b6654659b57a",
+      "size": 1434
+    },
+    {
+      "path": "UPDATE_README.md",
+      "before_sha256": "574a3fbea78496dfa77c9e8f23b28e194a59c64392e89c8fd70453790cc20230",
+      "after_sha256": "2d703738aa482263113b64a9dbfc67b95c76ec322549f80936a277f13bd7c608",
+      "size": 1272
+    },
+    {
+      "path": "gxb_backend/dispatch/engine_dispatcher.py",
+      "before_sha256": "57e609e3025d5800de7c83c40e063ff83a8ebe42a97cca6b56733654f3a48f3b",
+      "after_sha256": "a5d4a8f7dae1537389bd19c04c9019f8206df9f08676ad385045bbd5f5830d87",
+      "size": 29090
+    },
+    {
+      "path": "gxb_backend/handlers/system.py",
+      "before_sha256": "46bde16831a9e15e4fb325d26db247784eaa932d05e1db494aeec39e5ccc1347",
+      "after_sha256": "51daf32e74ba80a7a04dd7f38fe966550e021d5e0401cd8666766448c7dc2c73",
+      "size": 6074
+    },
+    {
+      "path": "gxb_backend/run.py",
+      "before_sha256": "c50dd55b3ec671d6fcce5c8d592d0413f43f575181fdf5c1ade0fa94af3e6ffc",
+      "after_sha256": "049f7be387f99343b8a5c45633ed42b74df2beb28ad141c740b2dc214fe26d72",
+      "size": 3010
+    },
+    {
+      "path": "gxb_backend/state/request_services.py",
+      "before_sha256": "bbf9416094527f78b9b52c66ccd3211e0c70795a7bda0e05d2fa71d7f1adddfa",
+      "after_sha256": "400c2a5c0b1396388855a765df980d72cceb32d218f1b81f0736c6dc4af514d8",
+      "size": 19426
+    },
+    {
+      "path": "gxb_backend/version.py",
+      "before_sha256": "4595a355379de473385c6911a62248f2bb7b7748955d96aee735c7dbb48cfe1b",
+      "after_sha256": "c5bd58e56c79760122ee7fe5dd3f822c36b5e9704ea6238b3c3f5d1d80951929",
+      "size": 101
+    },
+    {
+      "path": "local_assets/update_manifest.json",
+      "before_sha256": "5dd3c03c9313e1c4464c7141858c25f4cf8f8660a03ef89ad70657d36e81627c",
+      "after_sha256": "d8b85bd41f50013ac1317ea9a90dc3e94efa0c0be2920cef0e18ead06989f216",
+      "size": 6816
+    },
+    {
+      "path": "memory.md",
+      "before_sha256": "51966e4918eb5998a35db51c4029b76c16c379dc794fb5731d5ee214f17bd31a",
+      "after_sha256": "4faac6de46f95c42ae21e78f40e0a0c0a30f36a8456b6803f5943dea8110ac20",
+      "size": 2073
+    }
+  ],
+  "added": [
+    {
+      "path": "data/energy_purchase_source_meta.json",
+      "sha256": "be2410b717e88527e76799d8d46c1f0f303a0818a5740d08dd1c781cd3387e38",
+      "size": 1588
+    },
+    {
+      "path": "docs/PASS100_CLIENT_TEST_PLAN.md",
+      "sha256": "de33e8eea04794a23e3ce1225e1a209cde051b13cebc810e0d1c94d6eb60c2fd",
+      "size": 1669
+    },
+    {
+      "path": "docs/PASS100_MID97_SELFTEST.json",
+      "sha256": "eeea549fc7b53c27a25d27b314d7e4318dbfca72e1a60ad566d31b15cdec9ac2",
+      "size": 730
+    },
+    {
+      "path": "docs/PASS100_OTA_BRIDGE_BUILD.json",
+      "sha256": "dcfd0c6e6e35d0bea4549e42adfec303527ab206767073d49c3d4a99e812f38a",
+      "size": 1271
+    },
+    {
+      "path": "docs/PASS100_OTA_PRIOR_OVERRIDE_HASHES.json",
+      "sha256": "b15f15544c7287dfa9555f177688f265de51502fae9216ed31241753b0d7ec43",
+      "size": 22429
+    },
+    {
+      "path": "docs/PASS100_RUNTIME_RECONCILIATION.json",
+      "sha256": "629b9b766d5c2b71a6b248ee37a6d3fbd0b6e2adf17603517dcf6a543c40ca26",
+      "size": 1255
+    },
+    {
+      "path": "docs/PASS100_SRC64_FEEDBACK_LOOP.json",
+      "sha256": "775a5cacaac1f0cd5bd5e0f5e6050e9887b3c35a36d2881deec5525c3d1aa416",
+      "size": 4074
+    },
+    {
+      "path": "docs/PASS100_TECHNICAL_CHANGELOG.md",
+      "sha256": "7c214f253757f323cb61bc9511d7e80a8379070bb86d0187ed1c4ddddac58fb5",
+      "size": 3100
+    },
+    {
+      "path": "docs/PASS100_VALIDATION.json",
+      "sha256": "ab6a80ae53501b3e7e40e0a51657670b50f2dea27e02d70106edb3fe8de34804",
+      "size": 1105
+    },
+    {
+      "path": "gxb_backend/content/energy_purchase_catalog.py",
+      "sha256": "8d0bad644bf51aad0e37973069e7502671e2a516350642ddbc6492d9314c6c24",
+      "size": 1778
+    },
+    {
+      "path": "gxb_backend/state/energy_purchase_service.py",
+      "sha256": "fe5678c9cfce50d4e94a2ec6a72041846938cc2b777dd49c4cac9efd02b330ec",
+      "size": 8005
+    },
+    {
+      "path": "local_assets/src_32/app/model/AddEnergy.lua",
+      "sha256": "cab37f98c3cbd85a1386542d853c168ec38f0b0c1d4e2e9f7f4698e243af54f9",
+      "size": 1779
+    },
+    {
+      "path": "local_assets/src_64/app/model/AddEnergy.lua",
+      "sha256": "cab37f98c3cbd85a1386542d853c168ec38f0b0c1d4e2e9f7f4698e243af54f9",
+      "size": 1779
+    },
+    {
+      "path": "local_assets/updates/gxb-local-1.631.4.zip.001",
+      "sha256": "197600fbe6bcfbe22fe139643be48209a47bdf29df5c9d6492c0f64c0928e356",
+      "size": 1962886
+    },
+    {
+      "path": "tools/build_energy_purchase_meta.py",
+      "sha256": "f9599b3ce7af630045ef741511b4c10c83dc43023bf97b460aadc03ac3addcd2",
+      "size": 6646
+    },
+    {
+      "path": "tools/build_pass100_add_energy_bridge.py",
+      "sha256": "c0ea1c42ac64f613475860a01fa5d13a6c5fe30c4f9825af4f1680f6fc80aa93",
+      "size": 4069
+    },
+    {
+      "path": "tools/selftest_pass100_mid97_energy_purchase.py",
+      "sha256": "ba3e482cb01c4b07faa174cf30fc36d3c392ceb564f3733eb7103948cc6dcfc9",
+      "size": 13275
+    }
+  ],
+  "deleted": [
+    {
+      "path": "local_assets/updates/gxb-local-1.631.3.zip.001",
+      "before_sha256": "317f2bd816ff42dd611dd24568d07f1c570fc70d52731aae3f95616d81dae6e0",
+      "size": 1961280
+    }
+  ],
+  "notes": [
+    "Deletion of gxb-local-1.631.3.zip.001 is intentional; cumulative OTA replacement is gxb-local-1.631.4.zip.001.",
+    "All 126 Pass99 OTA overrides are byte-exact; Pass100 adds only AddEnergy.lua for src_32/src_64."
+  ]
+}

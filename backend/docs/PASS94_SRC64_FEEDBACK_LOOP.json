@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "pass": "94.0",
+  "status": "CROSS_CHECKED_EFFECTIVE_SRC64_BEFORE_IMPLEMENTATION",
+  "source_artifact": "all-assest-rechecked.zip",
+  "source_artifact_sha256": "89f0f830508b92e5fff6ad53c6a9dae961a14042dbfdf5649008efb8353f5608",
+  "source_root": "app-assets/output/assets/src_64",
+  "source_files": 4370,
+  "evidence": [
+    {
+      "path": "app/model/SelfPlayer.lua",
+      "facts": [
+        "economySyncEvent_ assigns server cumulative economy_.exp to selfPlayer.exp",
+        "while exp >= getExpLimit(), the client adds player:awardEnergy(current lev) and increments lev",
+        "the loop stops at maxTeamLev",
+        "PLAYER_LEVEL_UP is dispatched after one or more crossings",
+        "getExpLimit() returns player:totalExp(current lev)",
+        "getEnergyLimit() returns player:maxEnergy(current lev)"
+      ]
+    },
+    {
+      "path": "app/common/tables/PlayerTable.lua",
+      "facts": [
+        "player.lua energy -> maxEnergy(level)",
+        "player.lua award_energy -> awardEnergy(level)",
+        "player.lua total_exp -> cumulative level threshold"
+      ]
+    },
+    {
+      "path": "data/tables/player.lua",
+      "facts": [
+        "level 1 total_exp=6, award_energy=6, energy cap=60",
+        "level 2 total_exp=12, award_energy=6, energy cap=62",
+        "level 3 total_exp=18, award_energy=6, energy cap=63",
+        "level 4 energy cap=64",
+        "therefore cumulative EXP 18 from level1 reaches level4 and awards 18 Energy"
+      ]
+    },
+    {
+      "path": "app/model/SelfPlayer.lua",
+      "fact": "getExpMulti() returns 3; existing Campaign player EXP calculation remains unchanged"
+    }
+  ],
+  "implementation_constraints": [
+    "Do not change EXP thresholds or convert cumulative EXP to per-level EXP.",
+    "Do not cap level-up awarded current Energy to the normal regeneration cap.",
+    "Do not move Energy ownership into PlayerProgressionService; delegate the award to TemporalPolicyService.",
+    "Do not change Campaign reward math or RNG in Pass94.",
+    "Do not change Function unlock/announcement policy; only preserve the existing level-crossing callback."
+  ]
+}

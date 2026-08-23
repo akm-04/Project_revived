@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "pass": "92.0",
+  "accepted_prior_pass": "91.0",
+  "debug_observations": {
+    "fresh_account_uid": "20000001",
+    "fresh_player_id": "19700001",
+    "region": 197,
+    "mid657_requests_observed": 12,
+    "unique_claim_levels_observed": [1, 2, 3, 4, 5, 7, 8, 11, 13, 14, 15],
+    "duplicate_level_14_observed": true,
+    "duplicate_second_response_has_no_economy_projection": true,
+    "later_bootstrap_vip": 15,
+    "later_bootstrap_claim_vector": [1, 1, 1, 1, 1, 0, 1, 1, 0, 0, 1, 0, 1, 1, 1]
+  },
+  "legacy_account_reality_check": "Legacy MID1 in the supplied log already hydrates vip_awards as fifteen zeroes; absence of a visible legacy reward button is therefore not evidence of server migration failure.",
+  "user_reported_runtime_evidence": "User reports organic claims through VIP15 and cold-boot persistence/greyed claimed rewards; the debug bundle independently proves many tier claims, a duplicate no-grant, and persisted claimed-state bootstrap.",
+  "decision": "Pass91 accepted; no speculative legacy vip_awards code change in Pass92."
+}

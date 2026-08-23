@@ -2,6 +2,9 @@
 from __future__ import annotations
 
 from collections.abc import Callable
+from pathlib import Path
+
+from gxb_backend.content.item_stack_limit_catalog import ItemStackLimitCatalog
 
 from .player_state import PlayerState
 from .stack_inventory import StackInventory
@@ -16,6 +19,10 @@ class InventoryRepository(StackInventory):
         player: PlayerState,
         save_callback: Callable[[], None] | None = None,
         *,
+        data_dir: Path | None = None,
+        stack_limits: ItemStackLimitCatalog | None = None,
         uow: PlayerUnitOfWork | None = None,
     ) -> None:
-        super().__init__(player, save_callback, uow=uow)
+        super().__init__(
+            player, save_callback, data_dir=data_dir, stack_limits=stack_limits, uow=uow
+        )

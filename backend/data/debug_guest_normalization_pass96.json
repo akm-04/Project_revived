@@ -1,0 +1,21 @@
+{
+  "_meta": {
+    "schema_version": 1,
+    "pass": "96.0",
+    "policy": "PRIVATE_SERVER_POLICY",
+    "migration_marker": "pass96_debug_account_normalization_v1",
+    "source_rule": "Only UID13371337; one-shot; lower oversized existing Backpack stacks without replenishing consumed items; Academy target is source level100."
+  },
+  "account_uid": "13371337",
+  "academy": {
+    "lev": 100,
+    "exp": 579615,
+    "max_lev": 100,
+    "max_energy": 160
+  },
+  "inventory_headroom": {
+    "stack_at_least_999": 900,
+    "stack_99": 90,
+    "other_positive_cap_ratio_percent": 90
+  }
+}

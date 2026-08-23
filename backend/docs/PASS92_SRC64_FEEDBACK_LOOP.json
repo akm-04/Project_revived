@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "pass": "92.0",
+  "status": "CROSS_CHECKED_EFFECTIVE_SRC64",
+  "source_artifact_sha256": "89f0f830508b92e5fff6ad53c6a9dae961a14042dbfdf5649008efb8353f5608",
+  "evidence": [
+    {
+      "path": "app/common/network/mid.lua",
+      "fact": "RESET_CAMPAIGN = 116"
+    },
+    {
+      "path": "app/windows/NewMapDetailWindow.lua",
+      "facts": [
+        "buy button visible when Super dailyLimit <= 0",
+        "allowance = vip.resetFuben(player.vip) + monthlyPrivilege:numElite(1) when privilegeLeftCardDay > 0",
+        "request = {campaign_id,campaign_type}",
+        "response replaces star/daily_limit/reset_count",
+        "price = refreshCost:refreshEliteCost(resetCount + 1)"
+      ]
+    },
+    {
+      "path": "app/windows/MapDetailWindow.lua",
+      "fact": "same MID116 allowance/cost/response contract as NewMapDetailWindow"
+    },
+    {
+      "path": "app/common/tables/VipTable.lua + data/tables/vip.lua",
+      "fact": "resetFuben(vip) returns num_elite; VIP15 source maximum is 25"
+    },
+    {
+      "path": "app/common/tables/MonthlyPrivilegeTable.lua + data/tables/monthly_privilege.lua",
+      "fact": "active privilege contributes row1 num_elite=3"
+    },
+    {
+      "path": "app/common/tables/RefreshCostTable.lua + data/tables/refresh_cost.lua",
+      "fact": "refreshEliteCost(n) is source nth Crystal price; ordinals 1..28 are present for the maximum VIP15+Privilege allowance"
+    },
+    {
+      "path": "app/model/SelfPlayer.lua",
+      "fact": "worldMaps dailyLimit/resetCount are server-hydrated mutable values"
+    }
+  ],
+  "negative_rules": [
+    "Do not derive Campaign reset allowance directly from charge or Crystal.",
+    "Do not decrement Monthly Privilege lifetime in MID116.",
+    "Do not invent an operation-id field in the source MID116 request.",
+    "Do not implement MID117/118 or Campaign repeat RNG in Pass92."
+  ]
+}

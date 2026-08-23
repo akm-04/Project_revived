@@ -88,10 +88,21 @@ class SystemHandlers:
         # Established-profile default: nothing unread, so do not open a modal.
         return {"has_read": 1, "contents": []}
 
+    def add_energy(self, req: dict) -> dict:
+        # Pass100: patched AddEnergy.lua supplies source-day + expected ordinal
+        # identity so retries reconcile without suppressing a legitimate next buy.
+        return self.ctx.state.get_services().energy_purchase.purchase(req)
+
     def query_charge_data(self, req: dict) -> dict:
         # Pass87: effective SelfPlayer.lua consumes charges/giftbags/server_time.
         # RechargeCatalogService advertises only supported direct Crystal SKUs.
         return self.ctx.state.get_services().recharge_catalog.query_charge_data()
+
+    def get_vip_award(self, req: dict) -> dict:
+        # Pass91 / effective VipRechargeWindow.lua: request is {id=vip_level};
+        # response.awards is fed into SelfPlayer:handleRewards(), after which the
+        # client marks vipAwards[level]=1. Canonical claim state remains server-owned.
+        return self.ctx.state.get_services().vip_awards.claim(req.get("id"))
 
     def generate_player_name(self, req: dict) -> dict:
         # EditPlayerName:onGeneratePlayerName_ requires player_name_list. These

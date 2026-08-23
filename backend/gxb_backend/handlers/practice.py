@@ -20,3 +20,9 @@ class PracticeHandlers:
 
     def pet_mutation(self, req: dict) -> dict:
         return {**self.pet_info(req), "awards": []}
+
+    def pet_use_exp_items_fail_closed(self, req: dict) -> dict:
+        # Effective Pet:selfDrink removes every submitted Backpack item on
+        # PET_USE_EXP_ITEMS success.  Pet EXP settlement is not reconstructed
+        # yet, so a false OK would destroy consumables client-side.
+        return {"error_code": 1, "msg": "pet_exp_item_settlement_unresolved"}

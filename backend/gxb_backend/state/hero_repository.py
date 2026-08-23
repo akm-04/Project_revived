@@ -27,6 +27,7 @@ from .mutation_settlement_service import MutationSettlementError, MutationSettle
 from .temporal_policy_service import TemporalPolicyService
 from .skill_point_policy import SkillPointPolicy
 from .unit_of_work import OperationContext, UnitOfWork
+from .vip_policy import VipPrivilegeResolver, VipProgressionPolicy
 
 
 class HeroRepository:
@@ -46,6 +47,7 @@ class HeroRepository:
         uow: UnitOfWork | None = None,
         temporal: TemporalPolicyService | None = None,
         settlement: MutationSettlementService | None = None,
+        vip_privileges: VipPrivilegeResolver | None = None,
     ) -> None:
         self.player = player
         self._save_callback = save_callback
@@ -55,6 +57,9 @@ class HeroRepository:
         self._uow = uow
         self._temporal = temporal
         self._settlement = settlement
+        self._vip_privileges = vip_privileges or VipPrivilegeResolver(
+            player, VipProgressionPolicy(self._data_dir)
+        )
 
     @staticmethod
     def _int(value: Any, default: int = 0) -> int:
@@ -598,8 +603,40 @@ class HeroRepository:
         self.player.hero_sort_type = self._int(sort_type)
         self._save()
 
-    def save_presets(self, team_str: Any, team_name_str: Any, pet_str: Any) -> dict[str, str]:
-        self.player.save_team = self._string_or_empty(team_str)
+    @classmethod
+    def _preset_team_count(cls, team_str: Any) -> int:
+        """Mirror SelfPlayer:getSaveTeamIDs() for the server-side VIP ceiling."""
+        raw = cls._string_or_empty(team_str)
+        if not raw:
+            return 0
+        count = 0
+        for team in raw.split(":"):
+            values: list[int] = []
+            for token in team.split("|"):
+                try:
+                    value = int(token)
+                except (TypeError, ValueError):
+                    continue
+                if value > 0:
+                    values.append(value)
+            if values:
+                count += 1
+        return count
+
+    def save_presets(self, team_str: Any, team_name_str: Any, pet_str: Any) -> dict[str, Any]:
+        new_team = self._string_or_empty(team_str)
+        if self._vip_privileges is not None:
+            limit = self._vip_privileges.hero_preset_limit()
+            if limit > 0 and self._preset_team_count(new_team) > limit:
+                return {
+                    "error_code": 1,
+                    "msg": "hero_preset_vip_limit",
+                    "preset_num": limit,
+                    "save_team": self.player.save_team,
+                    "save_team_name": self.player.save_team_name,
+                    "save_pet": self.player.save_pet,
+                }
+        self.player.save_team = new_team
         self.player.save_team_name = self._string_or_empty(team_name_str)
         self.player.save_pet = self._string_or_empty(pet_str)
         self._save()

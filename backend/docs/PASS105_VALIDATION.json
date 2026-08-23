@@ -1,0 +1,48 @@
+{
+  "pass": "105.0",
+  "backend_version": "0.13.1",
+  "status": "STATIC_SELFTEST_FRESH_EXTRACTION_ACCEPTED_CLIENT_RUNTIME_PENDING",
+  "runtime_reconciliation": {
+    "pass104": "ACCEPTED_FOR_ROADMAP_CONTINUATION",
+    "evidence": [
+      "accepted Stamina MID97 still works",
+      "Hero skill/Skill Point mutations still work",
+      "Top-up still works",
+      "unimplemented Arena/PvE/Conquest halted rather than mutating"
+    ],
+    "non_gating_ui_gaps": [
+      "Store read-model callback error/loading freeze",
+      "Sky Tower/Pet Campaign read-model UI glitch"
+    ],
+    "policy": "Do not reopen parked UI/read-model domains in Pass105."
+  },
+  "phase2": {
+    "phase1_block": 79,
+    "phase2_block": 8,
+    "terminal_deferred": 8,
+    "contracts": 95
+  },
+  "tests": [
+    "python compileall",
+    "Pass105 focused firewall source/self-test",
+    "historical regression spine Pass68..100 except superseded Pass104 exact-count assertion",
+    "Pass98/99/100 current boundary tests"
+  ],
+  "known_test_drift": [
+    "tools/selftest_pass104_mutation_firewall.py asserts DEFER_PHASE2 count=8; Pass105 intentionally promotes those eight to BLOCK_PHASE2. The new Pass105 test supersedes this assertion."
+  ],
+  "terminal_policy": "unchanged/deferred; no 30005 activation",
+  "next": "RandomOutcomeService architecture/implementation foundation after Pass105 client smoke/reconciliation.",
+  "fresh_extraction": {
+    "status": "PASS",
+    "tests": [
+      "compileall",
+      "selftest_pass105_session_firewall.py",
+      "selftest_pass100_mid97_energy_purchase.py",
+      "selftest_pass99_campaign_sweep_qa_seed.py",
+      "selftest_pass98_deterministic_consumables.py",
+      "selftest_pass96_economy_vip_cleanup.py"
+    ],
+    "manifest_note": "Embedded implementation manifest verified on untouched fresh extraction. MID97 self-test writes runtime_logs/local_update_events.jsonl during execution, so manifest verification is performed before mutable runtime tests."
+  }
+}

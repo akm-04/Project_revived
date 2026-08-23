@@ -10,6 +10,7 @@ from gxb_backend.observability.resource_gateway import ResourceGateway
 from gxb_backend.observability.undecoded_request_capture import UndecodedRequestCapture
 from gxb_backend.config import Settings
 from gxb_backend.transport.decoder import decode_payload, extract_engine_payload
+from gxb_backend.transport.result import EngineTransportResult
 from gxb_backend.transport.responses import engine_ok, json_response
 from gxb_backend.updates.local_update import log_update_event, resolve_volume
 
@@ -24,6 +25,8 @@ def _handle_engine_request(dispatcher: EngineDispatcher, label: str, undecoded: 
         print(f"[{label}] could not decode payload; returning generic OK; raw capture logged")
         return json_response(engine_ok())
     response = dispatcher.dispatch(req_data)
+    if isinstance(response, EngineTransportResult):
+        return json_response(response.body, status_code=response.status_code)
     return json_response(response)
 
 
@@ -79,5 +82,8 @@ def register_engine_routes(
         req_data, method = decode_payload(raw)
         if req_data:
             print(f"[HTTP] catch-all decode={method}")
-            return json_response(dispatcher.dispatch(req_data))
+            response = dispatcher.dispatch(req_data)
+            if isinstance(response, EngineTransportResult):
+                return json_response(response.body, status_code=response.status_code)
+            return json_response(response)
         return json_response(engine_ok())

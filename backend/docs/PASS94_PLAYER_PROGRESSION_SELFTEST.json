@@ -1,0 +1,42 @@
+{
+  "pass": "94.0",
+  "backend": "0.12.0",
+  "status": "PASS",
+  "checks": [
+    {
+      "name": "owner_graph",
+      "status": "PASS"
+    },
+    {
+      "name": "source_progression_semantics",
+      "status": "PASS",
+      "projection": {
+        "exp": 18,
+        "lev": 4,
+        "energy": 78
+      },
+      "state": {
+        "exp": 18,
+        "lev": 4,
+        "energy": 78,
+        "max_energy": 64
+      }
+    },
+    {
+      "name": "compatibility_delegates_not_owns",
+      "status": "PASS"
+    },
+    {
+      "name": "durable_failure_atomic_rollback",
+      "status": "PASS"
+    },
+    {
+      "name": "maintenance_mutation_fence",
+      "status": "PASS"
+    },
+    {
+      "name": "no_runtime_dual_progression_owner",
+      "status": "PASS"
+    }
+  ]
+}
