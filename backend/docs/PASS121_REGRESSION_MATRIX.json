@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "pass": "121.0",
+  "status": "PASS",
+  "checks": [
+    {
+      "name": "pass121_super_mid117_daily_limit",
+      "result": "PASS",
+      "covers": [
+        "3->2",
+        "3->1",
+        "3->0",
+        "insufficient before entropy/cost/receipt",
+        "UUID replay no second decrement",
+        "zero remaining fail",
+        "strict Super membership",
+        "Normal unchanged"
+      ]
+    },
+    {
+      "name": "pass117_campaign_reconciliation",
+      "result": "PASS",
+      "covers": [
+        "manual Super MID114 still decrements same daily_limit row exactly once",
+        "battle first-clear/replay contracts unchanged",
+        "OTA 1.631.7 unchanged"
+      ]
+    },
+    {
+      "name": "pass92_mid116_campaign_reset",
+      "result": "PASS",
+      "covers": [
+        "MID116 restores source baseline=3",
+        "daily reset restores baseline=3/reset_count=0",
+        "reset atomic rollback"
+      ]
+    },
+    {
+      "name": "pass79_daily_reset",
+      "result": "PASS",
+      "covers": [
+        "campaign_super_daily_limits reset participant remains active at 05:00 GMT+8 boundary"
+      ]
+    },
+    {
+      "name": "compileall",
+      "result": "PASS",
+      "covers": [
+        "gxb_backend + tools syntax/import compilation"
+      ]
+    }
+  ],
+  "historical_note": "Pass114 monolithic selftest has a stale assertion requiring OTA 1.631.6 and is superseded by Pass117/Pass121 regression coverage; its MID117 runtime logic was independently covered by Pass121 and Pass117 tests."
+}

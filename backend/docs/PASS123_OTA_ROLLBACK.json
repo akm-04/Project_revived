@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "pass": "123.0",
+  "version": "1.631.8",
+  "package": "gxb-local-1.631.8.zip",
+  "volume": "gxb-local-1.631.8.zip.001",
+  "entries": 138,
+  "size": 2303136,
+  "md5": "234fd4add049bf29d1f663bee6ba74d2",
+  "sha256": "825e2064d139ac13dd343a1b5231c67767028e33eb9c64d2e69e849d1afe438c",
+  "rollback_files": [
+    "src_32/app/windows/SelectTeamWindow.lua",
+    "src_32/app/windows/SelectTeamNewWindow.lua",
+    "src_32/app/scenes/BattleCreate.lua",
+    "src_64/app/windows/SelectTeamWindow.lua",
+    "src_64/app/windows/SelectTeamNewWindow.lua",
+    "src_64/app/scenes/BattleCreate.lua"
+  ],
+  "verification": "All six files are byte-identical to effective source; exactly these six entries differ from cumulative OTA 1.631.7.",
+  "preserved_bridges": [
+    "src_32/app/model/SelfPlayer.lua MID50 UUID bridge",
+    "src_64/app/model/SelfPlayer.lua MID50 UUID bridge",
+    "src_32/app/windows/SweepWindow.lua MID117 UUID bridge",
+    "src_64/app/windows/SweepWindow.lua MID117 UUID bridge"
+  ],
+  "old_volume_policy": "Backend ships cumulative 1.631.8 volume; local 1.631.7 volume removed from current update directory to avoid ambiguous serving."
+}

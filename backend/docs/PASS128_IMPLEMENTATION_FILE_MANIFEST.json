@@ -1,0 +1,171 @@
+{
+  "schema_version": 1,
+  "pass": "128.0",
+  "base": "gxb-backend-v0.15.4-pass123.0",
+  "artifact": "gxb-backend-v0.15.5-pass128.0",
+  "changes": [
+    {
+      "path": "README.md",
+      "before_sha256": "802c9caf0246ff56052820838c6e49df91fe207448cc5c127ae3785478867646",
+      "after_sha256": "82a447edbbee5a0ad0a16a865939781b6f3478c5b8b000941babdf8089faee40",
+      "kind": "modified"
+    },
+    {
+      "path": "UPDATE_README.md",
+      "before_sha256": "981a14378ab97bf11abc1bb31a9ab2f7af168648629bebb73fff7587c2e9a726",
+      "after_sha256": "1881fa397b33f8be96972d72c23c4d5965879f0482507a9bcb2c6912893638fe",
+      "kind": "modified"
+    },
+    {
+      "path": "VERSION.json",
+      "before_sha256": "0a247a6e9363e19b712c3b653eb5b0b09f559f9b66fbe4df8d638a7a138c98b8",
+      "after_sha256": "66f8dd19df6c9c8cc877af634ccd2477e2c135021458dc4946536ef1cc9765e2",
+      "kind": "modified"
+    },
+    {
+      "path": "docs/PASS128_IMPLEMENTATION.json",
+      "before_sha256": null,
+      "after_sha256": "a560bc3e9436c3ae712e86fd9ae3b8fddeabcb49a62edef9cc769e02657b83c5",
+      "kind": "added"
+    },
+    {
+      "path": "docs/PASS128_REGRESSION_MATRIX.json",
+      "before_sha256": null,
+      "after_sha256": "aa6a125d63403c090c3859feac2f80ad56fa01420b81722162dad68bb4317f8b",
+      "kind": "added"
+    },
+    {
+      "path": "docs/PASS128_SRC64_FEEDBACK_LOOP.json",
+      "before_sha256": null,
+      "after_sha256": "a729a5a4a6b44394692a9d60a194d27eef6c555ee0605f7edfffcf7bcc5c45df",
+      "kind": "added"
+    },
+    {
+      "path": "docs/PASS128_SUPER_PROGRESSION_GATES_SELFTEST.json",
+      "before_sha256": null,
+      "after_sha256": "dff9c603b39e0df4a7b899be0b14412c0c8d00aabf6fceff9a2adea853124fa2",
+      "kind": "added"
+    },
+    {
+      "path": "docs/PASS128_TECHNICAL_CHANGELOG.md",
+      "before_sha256": null,
+      "after_sha256": "12d6e8c51f0755f18d0621a5a8d7fe0866c456e774a1d28ac27a726d0027f708",
+      "kind": "added"
+    },
+    {
+      "path": "docs/PASS128_VALIDATION.json",
+      "before_sha256": null,
+      "after_sha256": "64bdd1d52422e2053aa332abf1ca98944d97a222322c06fee290ca7ce5651956",
+      "kind": "added"
+    },
+    {
+      "path": "docs/memory.md",
+      "before_sha256": "3f6ccdac1cd6540e299fb4ab4449b5813ce033b929dc9895655e6ab43f907262",
+      "after_sha256": "825aec11c39290cdea64b16622ca870e9820edfa3c038a151d32f8935657c074",
+      "kind": "modified"
+    },
+    {
+      "path": "gxb_backend/content/__init__.py",
+      "before_sha256": "5df02c19ee6aac22c750dd7b0750f58c673d820d89cc17eab8cd6e866635f17a",
+      "after_sha256": "9565d51a82860ff126c01e9f12117455e0390a6f27a4f942bedcfc2cb616f6c7",
+      "kind": "modified"
+    },
+    {
+      "path": "gxb_backend/content/super_campaign_catalog.py",
+      "before_sha256": null,
+      "after_sha256": "112650de25be330f1dd3b10f4446bed8fa79d6e3b3d2856a3051c32bd198997d",
+      "kind": "added"
+    },
+    {
+      "path": "gxb_backend/state/elite_campaign_unlock_coordinator.py",
+      "before_sha256": null,
+      "after_sha256": "b845829841c11c6ff2cb768b76303d24855a7baa7c6df2dc6d70a5f60406ad5c",
+      "kind": "added"
+    },
+    {
+      "path": "gxb_backend/state/function_state_repository.py",
+      "before_sha256": "9332b2959786bec367111ae3871053a5ef072f02577eea82a6c5a0dcd8c99aa2",
+      "after_sha256": "fc4ebac96d5601e5c0929acdefc745c93bd97f9186620982e796d7de0c00abfb",
+      "kind": "modified"
+    },
+    {
+      "path": "gxb_backend/state/maintenance_services.py",
+      "before_sha256": "fb74763ef0e522d67b47e781b3c5a495d95f84384f3220f46e627547fe7846b5",
+      "after_sha256": "7cc37540984044f9ce405f213597dc6c856ee3d93b85fad4884f8e454488a85b",
+      "kind": "modified"
+    },
+    {
+      "path": "gxb_backend/state/multiuser_database.py",
+      "before_sha256": "5b1131cf3ff6bc835d9dda7438e7a4e4bcecd5c537cdbcd35f03183d03e70ec2",
+      "after_sha256": "aa96cf5ec151bfa6021d9cd64fd9b94d957221035d6df482a794a2f0c1ab9268",
+      "kind": "modified"
+    },
+    {
+      "path": "gxb_backend/state/player_progression_service.py",
+      "before_sha256": "6b050a2715c04f9daf9781532d9c67728000981b3512c885bd23bce68fac7501",
+      "after_sha256": "323ed102efd5e404de7e501aae66afccf84be19df25d32fd226d5db89520c8ce",
+      "kind": "modified"
+    },
+    {
+      "path": "gxb_backend/state/request_services.py",
+      "before_sha256": "ff560208ded68efb920f87d72625c64cfe6c19ce495e37cd451c12552139a529",
+      "after_sha256": "558c746a87da053761cb81d126b4df36dbf28f45ee36a0818077b0af8d01d4b0",
+      "kind": "modified"
+    },
+    {
+      "path": "gxb_backend/state/super_campaign_access_policy.py",
+      "before_sha256": null,
+      "after_sha256": "f1877442e6c416eef8bcdadb06811de44705ccdee1aee0451c7cbdd57ef030b9",
+      "kind": "added"
+    },
+    {
+      "path": "gxb_backend/state/super_campaign_projection_service.py",
+      "before_sha256": null,
+      "after_sha256": "390f3753b80a9170331632d61f196b7232db1de061cdb886167a30e9319e3c71",
+      "kind": "added"
+    },
+    {
+      "path": "gxb_backend/state/world_repository.py",
+      "before_sha256": "b3b561dff17184a56b2c87e2667cffcff53475793cd8372d3ab908e468126b3e",
+      "after_sha256": "83e0987ae02cf33663c2986a8a8ec29215acd6cd654021c741ad27b6bcb33843",
+      "kind": "modified"
+    },
+    {
+      "path": "memory.md",
+      "before_sha256": "3f6ccdac1cd6540e299fb4ab4449b5813ce033b929dc9895655e6ab43f907262",
+      "after_sha256": "825aec11c39290cdea64b16622ca870e9820edfa3c038a151d32f8935657c074",
+      "kind": "modified"
+    },
+    {
+      "path": "tools/selftest_pass121_super_mid117_daily_limit.py",
+      "before_sha256": "33f8a667757ccc244a369f8eeeb491e4494ea119a052413ef233892848b25bc4",
+      "after_sha256": "cd627551a28b98730fc445aa2b257475f254f10b724e30e3a65060532f23cbf0",
+      "kind": "modified"
+    },
+    {
+      "path": "tools/selftest_pass123_manual_battle_session.py",
+      "before_sha256": "f4edd60bd7189717f10ffb49a973dbcb54c8b559f460d93c06f9437ccf4d2293",
+      "after_sha256": "5181516f5414651dc6c8bf4572bdb89069443d6169c5f131bb8264a84eb3ddaf",
+      "kind": "modified"
+    },
+    {
+      "path": "tools/selftest_pass128_super_progression_gates.py",
+      "before_sha256": null,
+      "after_sha256": "81914901b6dbf0cdbc091c6725163a368d76b690a764b8063cc4ac29ed987aad",
+      "kind": "added"
+    },
+    {
+      "path": "tools/selftest_pass75_campaign_ownership.py",
+      "before_sha256": "41b358cf1250ca42268ef0515d4cc94e5fe06c198aba48d7b7f1a4698f0ed6cb",
+      "after_sha256": "b66e7c793844408f5f45f9e7a888ed01e646045c0527a09c5337ec4b4aed3c04",
+      "kind": "modified"
+    },
+    {
+      "path": "tools/selftest_pass81_daily_reset_campaign_corrections.py",
+      "before_sha256": "36bdf31aa4a581d70735dcc4286beac03f40c0b0f31afb2f8c38efc5362bc9e1",
+      "after_sha256": "375f084239743f3f7f4779b78c96bac225d424d83348158fb2d6c47e814159b9",
+      "kind": "modified"
+    }
+  ],
+  "manifest_self_excluded": true
+}

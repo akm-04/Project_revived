@@ -13,7 +13,9 @@ from pathlib import Path
 from gxb_backend.content import GameDataCatalog
 from gxb_backend.content.summon_featured_catalog import SummonFeaturedCatalog
 
+from .campaign_composition import CampaignComposition
 from .economy_repository import EconomyRepository
+from .function_state_repository import FunctionStateRepository
 from .hero_progression_repository import HeroProgressionRepository
 from .hero_repository import HeroRepository
 from .inventory_repository import InventoryRepository
@@ -48,8 +50,20 @@ class PlayerMaintenanceServices:
         # composition is read/normalize-only for economy resources, so legacy
         # direct mutation fallbacks are explicitly disabled.
         self.resource_registry = ResourceRegistry.load(self.data_dir / "resource_registry.json")
+        self.function_state = FunctionStateRepository(player, self.catalog)
+        self.campaign_composition = CampaignComposition.build(
+            player, self.data_dir, self.function_state
+        )
+        self.challenge_campaign_catalog = self.campaign_composition.challenge_catalog
+        self.challenge_campaign_projection = self.campaign_composition.challenge_projection
+        self.super_campaign_catalog = self.campaign_composition.super_catalog
+        self.super_campaign_projection = self.campaign_composition.super_projection
+        self.super_campaign_access = self.campaign_composition.super_access
+        self.elite_campaign_unlock = self.campaign_composition.elite_campaign_unlock
         self.player_progression = PlayerProgressionService(
-            player, self.data_dir, resource_registry=self.resource_registry,
+            player, self.data_dir, function_unlocks=self.function_state,
+            elite_campaign_unlock=self.elite_campaign_unlock,
+            resource_registry=self.resource_registry,
             allow_legacy_direct_energy_mutation=False,
         )
         self.economy = EconomyRepository(
@@ -77,6 +91,13 @@ class PlayerMaintenanceServices:
             economy=self.economy,
             hero_progression=self.hero_progression,
             catalog=self.catalog,
+            challenge_catalog=self.challenge_campaign_catalog,
+            challenge_projection=self.challenge_campaign_projection,
+            super_catalog=self.super_campaign_catalog,
+            super_access_policy=self.super_campaign_access,
+            super_projection=self.super_campaign_projection,
+            elite_campaign_unlock=self.elite_campaign_unlock,
+            strict_campaign_collaborators=True,
         )
         self.summon = SummonRepository(
             player,

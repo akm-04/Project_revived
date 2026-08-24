@@ -1,0 +1,24 @@
+{
+  "pass": "113.0",
+  "status": "PASS",
+  "scope": "Campaign MID117 RNG Phase C1 inert foundation",
+  "checks": [
+    "versioned campaign_repeat_rate_decomposition_v1 policy registry contract",
+    "guaranteed quantity + residual Bernoulli decomposition",
+    "strict campaign.repeat.residual namespace and draw topology",
+    "boundary hit/miss semantics",
+    "zero and exact-multiple rates consume zero entropy",
+    "first-source-order canonical aggregation",
+    "positive missing pools fail before entropy",
+    "repeat_dropbox_id=0 remains deterministic-only",
+    "invalid negative rate fails before entropy",
+    "effective-source 24 missing positive pools / 372 zero pools invariant",
+    "RequestServices Campaign adapter uses request-scoped RandomOutcomeService",
+    "WorldRepository MID117 live path remains byte-identical to Pass111",
+    "OTA/resource version remains 1.631.5 and SweepWindow override is absent",
+    "MID117 UUIDv4 validation and semantic fingerprint",
+    "UI compose hints excluded from fingerprint",
+    "split exact static response vs live projection descriptor",
+    "receipt audit metadata and replay validation"
+  ]
+}

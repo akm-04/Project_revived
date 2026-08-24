@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "pass": "129.0",
+  "mode": "BEHAVIOR_NEUTRAL_ARCHITECTURE_HYGIENE_STRANGLER_PREPARATION",
+  "base": "gxb-backend-v0.15.6-pass128.2",
+  "result": "gxb-backend-v0.15.7-pass129.0",
+  "implementation_decisions": [
+    {
+      "id": "P129-COMPOSITION-001",
+      "change": "Add CampaignComposition as a construction-only bundle/factory for ChallengeCampaignCatalog, ChallengeProjectionService, SuperCampaignCatalog, SuperCampaignProjectionService, SuperCampaignAccessPolicy and EliteCampaignUnlockCoordinator.",
+      "reason": "RequestServices and PlayerMaintenanceServices previously constructed overlapping Super graphs independently while WorldRepository constructed Challenge collaborators through hidden fallbacks.",
+      "behavior_change": false
+    },
+    {
+      "id": "P129-COMPOSITION-002",
+      "change": "RequestServices and PlayerMaintenanceServices now consume the same CampaignComposition.build() contract and expose aliases to the same existing collaborator types.",
+      "reason": "Reduce constructor drift without merging domain authorities.",
+      "behavior_change": false
+    },
+    {
+      "id": "P129-STRICT-001",
+      "change": "Production roots pass explicit Challenge/Super collaborators into WorldRepository with strict_campaign_collaborators=True.",
+      "reason": "Fail fast if a live root omits or mixes canonical Campaign collaborators instead of silently creating a parallel graph.",
+      "behavior_change": false
+    },
+    {
+      "id": "P129-LEGACY-001",
+      "change": "WorldRepository legacy fallback construction remains available only when strict mode is not requested, preserving direct compatibility/tool callers during the strangler migration.",
+      "reason": "Facade-preserving incremental migration; no broad rewrite.",
+      "behavior_change": false
+    }
+  ],
+  "identity_invariants": [
+    "ChallengeProjectionService.catalog is the injected ChallengeCampaignCatalog.",
+    "SuperCampaignProjectionService and SuperCampaignAccessPolicy share the injected SuperCampaignCatalog.",
+    "SuperCampaignAccessPolicy and EliteCampaignUnlockCoordinator share one FunctionStateRepository.",
+    "EliteCampaignUnlockCoordinator.projection is the injected SuperCampaignProjectionService.",
+    "Request graph Super projection/coordinator share the request UnitOfWork; maintenance graph uses None for both.",
+    "WorldRepository receives the exact same Challenge/Super collaborator objects as the root."
+  ],
+  "preserved_authorities": [
+    "SuperCampaignCatalog source facts",
+    "SuperCampaignAccessPolicy read-only authorization",
+    "SuperCampaignProjectionService Super world-map mutation/cursors",
+    "EliteCampaignUnlockCoordinator Function31/projection ordering",
+    "ChallengeCampaignCatalog raw topology",
+    "ChallengeProjectionService Challenge projection",
+    "PlayerUnitOfWork atomicity/receipts",
+    "WorldRepository public facade and all existing Campaign use-case methods"
+  ],
+  "deliberately_not_done": [
+    "No MID113/MID114 CampaignBattleService extraction yet; they must move together in a later byte-equivalent strangler step.",
+    "No MID117 CampaignSweepService extraction yet; schedule with Campaign EXP/Mana reconciliation.",
+    "No MID112 reconcile-vs-serialization split yet; retain accepted Pass128.2 wire self-heal until a dedicated safe pass.",
+    "No merge of the four Super modules.",
+    "No PlayerState/UoW/economy rewrite.",
+    "No orphan historical runtime module removal in this pass."
+  ],
+  "architecture_verdict": "SOUND_STRANGLER_ARCHITECTURE_WITH_REDUCED_CAMPAIGN_COMPOSITION_DRIFT_AND_REMAINING_WORLD_ORCHESTRATION_DEBT"
+}

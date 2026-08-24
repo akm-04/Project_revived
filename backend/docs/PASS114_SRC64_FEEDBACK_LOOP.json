@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "pass": "114.0",
+  "status": "PASS",
+  "effective_src64": "app-assets/output/assets/src_64",
+  "source_artifact_sha256": "89f0f830508b92e5fff6ad53c6a9dae961a14042dbfdf5649008efb8353f5608",
+  "files": {
+    "app/windows/SweepWindow.lua": {
+      "sha256": "8548611ec6bb778433a234f3bdecf452fcde1522c64e8ca9eac5d9a84579fce5",
+      "bytes": 25451
+    },
+    "app/windows/MapDetailWindow.lua": {
+      "sha256": "5a137edc609f9d2082c5df6bf50ef05b6ef54642a7ba5bf6dca8fe0f1c4c3898",
+      "bytes": 40567
+    },
+    "app/windows/NewMapDetailWindow.lua": {
+      "sha256": "88b97be8577828f478360c25fd51674e2ed8291b2a590976b3530c91396d07bf",
+      "bytes": 43944
+    },
+    "app/common/network/Backend.lua": {
+      "sha256": "95378e2b0be8180df6de27e9e430c630bcfe46c080e1f91ef5f6d74bdbb1b840",
+      "bytes": 36252
+    },
+    "app/common/network/mid.lua": {
+      "sha256": "026a20b29d97624979777a68c64c749254031604057ff42aa8f8254c3e35b5af",
+      "bytes": 43121
+    },
+    "app/common/enums.lua": {
+      "sha256": "15340bd89fe7c6f150ccfd4a5cd2a2f0e8e73c89dfae9ac3388376a4799901f3",
+      "bytes": 80531
+    },
+    "data/tables/campaign.lua": {
+      "sha256": "7a58e878a7171839342a856cd74b512037528438259d036009a7249472504683",
+      "bytes": 969307
+    },
+    "data/tables/campaign_dropbox.lua": {
+      "sha256": "374b6b13bae56e2f5ac8d6b884821d2fb448d239871d1992b84bcf365e90404e",
+      "bytes": 1223455
+    }
+  },
+  "findings": [
+    "SweepWindow.willOpen resolves ordinary SWEEP_CAMPAIGN first, then replaces the MID for Sakura/Chocolate/Fourth Anniversary/Polar Night before Backend.request.",
+    "MapDetailWindow/NewMapDetailWindow construct ordinary sweep params with campaign_id, campaign_type, sweep_num and sweep_type; awake_mission is also supplied for single sweep where applicable.",
+    "Backend.lua failed-request queue stores the same params table and reuses it on retry, making a once-injected campaign_sweep_op_id transport-stable.",
+    "SweepWindow success callback locally removes Raid Ticket 50001013 for ITEM_SWEEP and adds returned items to Backpack; application-error callbacks therefore need the Pass114 ordinary-MID117 guard to avoid local-only corruption.",
+    "enums.lua defines ITEM_SWEEP=1 and CRYSTAL_SWEEP=2.",
+    "campaign.lua remains source authority for deterministic sweep_reward and energy_cost; campaign_dropbox.lua remains raw increase_rate source data only.",
+    "No official server repeat-drop probability algorithm was recovered; campaign_repeat_rate_decomposition_v1 remains the accepted source-bounded private-server compatibility policy."
+  ],
+  "guards": [
+    "UUID bridge executes only when resolved request MID equals xyd.mid.SWEEP_CAMPAIGN.",
+    "Event-specific sweep MIDs receive no campaign_sweep_op_id.",
+    "Ordinary MID117 body error_code suppresses SweepWindow local Ticket/reward mutation.",
+    "MID113 uses legacy CampaignDropPlanner.plan(first_clear=False) and remains disabled_unknown."
+  ]
+}

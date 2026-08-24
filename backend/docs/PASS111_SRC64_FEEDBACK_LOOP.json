@@ -1,0 +1,52 @@
+{
+  "effective_src64": "app-assets/output/assets/src_64",
+  "effective_src64_file_count": 4370,
+  "evidence": {
+    "app/common/network/Backend.lua": {
+      "role": "Failed requests retain params table in pendingRequests and retry with same table.",
+      "sha256": "95378e2b0be8180df6de27e9e430c630bcfe46c080e1f91ef5f6d74bdbb1b840"
+    },
+    "app/common/network/mid.lua": {
+      "role": "MID50 protocol authority: SUMMON_HERO = 50.",
+      "sha256": "026a20b29d97624979777a68c64c749254031604057ff42aa8f8254c3e35b5af"
+    },
+    "app/common/utils.lua": {
+      "role": "xyd.generateUUID() source-native UUIDv4-shaped identity helper; remains outside gameplay ROS.",
+      "sha256": "6e56c7342e889d7ae8d41fe47cb06f66832227efe702f3863f693ee7ba84ffad"
+    },
+    "app/model/SelfPlayer.lua": {
+      "role": "Single direct MID50 Backend.request choke point; Pass111 OTA injects operation identity here.",
+      "sha256": "163d5893c9522ada412c2b9c4748a80757660fccdf03c8f72cb6edf0838b8eb4"
+    },
+    "app/windows/BackpackWindow.lua": {
+      "role": "Recovered item-triggered Summon caller routes through SelfPlayer:summonHero().",
+      "sha256": "48b18493fed4186541fc989a8ef60d6338d444c4e8a0fc986903a57e52ff19c1"
+    },
+    "app/windows/SummonResultWindow.lua": {
+      "role": "Recovered repeat Summon caller also routes through SelfPlayer:summonHero().",
+      "sha256": "f58f8d8b314d730b91c2f168f1844e302f9345648f21990e2b7e6a6a6eb42a49"
+    },
+    "app/windows/SummonWindow.lua": {
+      "role": "Recovered MID50 UI caller path through SelfPlayer:summonHero().",
+      "sha256": "ff7a49683fa9d47bd031f9f2625d2901a652a4ae305486ad6c2f481f9aa214af"
+    }
+  },
+  "implementation_constraints": [
+    "Do not overwrite an existing summon_op_id.",
+    "Do not change MID50 result shape expected by SelfPlayer:summonHero().",
+    "Do not infer Summon rates/pools/pity from client-local RNG helpers.",
+    "Keep Campaign/MID117 and MID70/MID305 outside this bounded migration."
+  ],
+  "pass": "111.0",
+  "schema_version": 1,
+  "source_artifact_sha256": "89f0f830508b92e5fff6ad53c6a9dae961a14042dbfdf5649008efb8353f5608",
+  "status": "PASS",
+  "type": "SRC64_ARCHITECTURAL_FEEDBACK_LOOP",
+  "verified_facts": [
+    "SUMMON_HERO is MID50; MID305 Super Summon and MID70 Magic remain separate protocol planes.",
+    "SelfPlayer:summonHero() is the single direct MID50 network choke point in effective src_64.",
+    "xyd.generateUUID() emits lowercase UUIDv4-shaped text and is identity entropy, not gameplay outcome entropy.",
+    "Backend.lua pendingRequests stores params = original request params and retry passes iter_30_1.params back to webRequest_.",
+    "Therefore an ID injected once into the params table before the initial MID50 request survives transport retries."
+  ]
+}

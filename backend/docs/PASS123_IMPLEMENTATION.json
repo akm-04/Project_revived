@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "pass": "123.0",
+  "backend_version": "0.15.4",
+  "status": "IMPLEMENTED_STATIC_REGRESSION_PASS_CLIENT_SMOKE_PENDING_PASS124",
+  "components": [
+    "gxb_backend/state/world_repository.py",
+    "gxb_backend/state/campaign_battle_operation_receipt.py (historical/inert documentation only)",
+    "tools/selftest_pass123_manual_battle_session.py",
+    "local_assets/update_manifest.json",
+    "local_assets/updates/gxb-local-1.631.8.zip.001",
+    "six source-restored Campaign battle Lua files"
+  ],
+  "session_contract": {
+    "authority": "player.active_campaign_battle",
+    "schema_version": 2,
+    "states": [
+      "EMPTY",
+      "STAGED",
+      "SETTLED_WIN",
+      "SETTLED_LOSS"
+    ],
+    "identity": "campaign_id + campaign_type only; formation is audit snapshot, legacy campaign_battle_op_id ignored",
+    "mid113": "after source membership/unlock/attempt/energy guards, freeze staged response/reward plan; repeated same campaign/type STAGED replays frozen response with zero RNG/state mutation",
+    "supersede": "different valid campaign/type may replace STAGED only after guards pass",
+    "mid114": "consume matching STAGED session once inside existing UoW settlement; victory commits staged reward/progression/cost once; loss follows source-family loss behavior",
+    "terminal": "matching terminal duplicate returns error_code 30005 with stored terminal/static state rendered against current projections; no matching active session also drains via family-bounded 30005 with zero mutation",
+    "legacy": "Pass117 Campaign battle receipt rows remain inert; no destructive migration"
+  },
+  "protocol_limitation": "Without a source wire token, a very late old MID114 for the same campaign/type after a new same-stage MID113 cannot be distinguished. Pass123 does not fabricate a hidden UUID to solve an unrecoverable ambiguity.",
+  "preserved": [
+    "MID50 UUID/UoW exactly-once",
+    "MID117 UUID/UoW exactly-once + Pass121 attempt atomicity",
+    "Pass122 Challenge raw graph/projection/deterministic rewards",
+    "Campaign Player EXP/Mana sweep economy remains deferred"
+  ]
+}

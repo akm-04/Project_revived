@@ -26,7 +26,7 @@ class FunctionStateRepository:
     SCHEMA_VERSION = 1
     GUIDE_SENSITIVE_POLICIES = {
         33: {"policy": "tutorial_milestone", "milestone": "normal_pre_skill_terminal_fight_committed"},
-        31: {"policy": "guide_sensitive_unresolved"},
+        31: {"policy": "campaign_projection_coordinated"},
     }
 
     def __init__(
@@ -92,17 +92,20 @@ class FunctionStateRepository:
             root["pending"] = pending
             changed = True
 
-        # Pass33.1 trust-boundary migration: an eligible-but-unannounced
-        # Function33 must wait on a server-authored tutorial milestone. Replace
-        # any persisted Pass32.6 raw-guide checkpoint policy in place.
-        if 33 in eligible and 33 not in announced:
-            policy = dict(self.GUIDE_SENSITIVE_POLICIES[33])
-            if pending.get("33") != policy:
-                pending["33"] = policy
+        # Guide-sensitive Functions remain eligible-but-unannounced until their
+        # authoritative domain coordinator supplies the corresponding milestone.
+        # Pass128 replaces Function31's historical unresolved placeholder with
+        # an explicit Campaign projection coordinator while preserving Pass33.
+        for function_id, policy_spec in self.GUIDE_SENSITIVE_POLICIES.items():
+            key = str(function_id)
+            if function_id in eligible and function_id not in announced:
+                policy = dict(policy_spec)
+                if pending.get(key) != policy:
+                    pending[key] = policy
+                    changed = True
+            elif key in pending and function_id in announced:
+                pending.pop(key, None)
                 changed = True
-        elif "33" in pending and 33 in announced:
-            pending.pop("33", None)
-            changed = True
 
         if legacy_announced != announced:
             self.player.func_ids = list(announced)
@@ -116,6 +119,51 @@ class FunctionStateRepository:
     def announced_ids(self) -> list[int]:
         self.normalize()
         return list(self._root()["announced_ids"])
+
+
+    def is_eligible(self, function_id: Any) -> bool:
+        return self._int(function_id, 0) in set(self.eligible_ids())
+
+    def is_announced(self, function_id: Any) -> bool:
+        return self._int(function_id, 0) in set(self.announced_ids())
+
+    def ensure_level_eligible(
+        self,
+        function_id: Any,
+        player_level: Any,
+        *,
+        persist: bool = False,
+    ) -> bool:
+        """Promote one source level-gated Function to eligible, without announcement.
+
+        This narrow helper exists for domain coordinators and legacy maintenance;
+        it deliberately does not scan/announce unrelated Functions.
+        """
+        fid = self._int(function_id, 0)
+        level = max(1, self._int(player_level, 1))
+        if fid <= 0:
+            return False
+        ref = ContentRef(CatalogNamespace.FUNCTION, fid)
+        if not self.catalog.exists(ref):
+            return False
+        row = dict(self.catalog.get(ref))
+        required = self._int(row.get("eligibility_value", row.get("player_level")), 0)
+        kind = self._int(row.get("eligibility_kind", row.get("level_spec_kind")), 0)
+        if kind not in {1, 6, 7} or required <= 0 or level < required:
+            return False
+
+        root = self._root()
+        eligible = set(self.eligible_ids())
+        if fid in eligible:
+            return False
+        eligible.add(fid)
+        root["eligible_ids"] = sorted(eligible)
+        policy = self.GUIDE_SENSITIVE_POLICIES.get(fid)
+        if policy and fid not in set(self.announced_ids()):
+            root["pending"][str(fid)] = dict(policy)
+        if persist:
+            self._save()
+        return True
 
     def _function_rows(self) -> Iterable[tuple[int, dict[str, Any]]]:
         # GameDataCatalog deliberately has no global numeric classifier.  The

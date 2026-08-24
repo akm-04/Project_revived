@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "pass": "121.0",
+  "status": "PASS",
+  "effective_src64": "app-assets/output/assets/src_64",
+  "source_artifact_sha256": "89f0f830508b92e5fff6ad53c6a9dae961a14042dbfdf5649008efb8353f5608",
+  "files": {
+    "app/windows/SweepWindow.lua": {
+      "sha256": "8548611ec6bb778433a234f3bdecf452fcde1522c64e8ca9eac5d9a84579fce5",
+      "bytes": 25451
+    },
+    "app/windows/MapDetailWindow.lua": {
+      "sha256": "5a137edc609f9d2082c5df6bf50ef05b6ef54642a7ba5bf6dca8fe0f1c4c3898",
+      "bytes": 40567
+    },
+    "app/windows/NewMapDetailWindow.lua": {
+      "sha256": "88b97be8577828f478360c25fd51674e2ed8291b2a590976b3530c91396d07bf",
+      "bytes": 43944
+    },
+    "app/common/network/mid.lua": {
+      "sha256": "026a20b29d97624979777a68c64c749254031604057ff42aa8f8254c3e35b5af",
+      "bytes": 43121
+    },
+    "app/common/enums.lua": {
+      "sha256": "15340bd89fe7c6f150ccfd4a5cd2a2f0e8e73c89dfae9ac3388376a4799901f3",
+      "bytes": 80531
+    },
+    "data/tables/campaign.lua": {
+      "sha256": "7a58e878a7171839342a856cd74b512037528438259d036009a7249472504683",
+      "bytes": 969307
+    },
+    "data/tables/chapter.lua": {
+      "sha256": "845e255f90abdd3b9e92ab558ac84bd766f868b300f7ca2992bdce933e0ae844",
+      "bytes": 13828
+    }
+  },
+  "findings": [
+    "mid.lua maps SWEEP_CAMPAIGN to MID117.",
+    "NewMapDetailWindow/MapDetailWindow set non-Normal multi-sweep count from params.dailyLimit and submit it as sweep_num.",
+    "Both detail windows prevent Super sweep when the remaining count is zero and use MID116 RESET_CAMPAIGN to replace dailyLimit/resetCount from the server response.",
+    "SweepWindow ordinary MID117 success replaces SelfPlayer worldMaps_[campaign_id].dailyLimit and the open map-detail params.dailyLimit from response.campaign.daily_limit; it does not locally subtract the Super batch count.",
+    "Direct parsing of effective campaign.lua + chapter.lua yields exactly 155 unique chapter Super campaign ids; every one has source daily_limit=3.",
+    "CampaignType.SUPER=2 and SweepType ITEM_SWEEP=1 / CRYSTAL_SWEEP=2 remain the relevant source enums."
+  ],
+  "implementation_consequence": "Keep MID117 UUID/UoW exactly-once. For campaign_type=2, source membership must be strict; preflight sweep_num<=current daily_limit before cost validation or entropy; decrement exactly sweep_num on the same persisted Super world-map row before receipt commit.",
+  "ota_change": false
+}

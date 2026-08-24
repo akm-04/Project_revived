@@ -1,9 +1,9 @@
 {
-  "backend_version": "0.13.1",
-  "version": "0.13.1",
-  "pass": "105.0",
-  "artifact": "gxb-backend-v0.13.1-pass105.0",
-  "phase": "Mutation Safety Firewall Phase 2",
-  "scope": "Runtime-accept Pass104 core firewall behavior and quarantine the eight source-proven unsupported SESSION_PREFLIGHT/SESSION_START routes with canonical HTTP409 before battle entry. Terminal battle-result policy remains deferred.",
-  "runtime_client_smoke": "Pass104 core firewall/no-regression behavior accepted from debug evidence; Pass105 Phase2 is static/self-test accepted pending client smoke."
+  "backend_version": "0.15.8",
+  "version": "0.15.8",
+  "pass": "131.0",
+  "artifact": "gxb-backend-v0.15.8-pass131.0",
+  "phase": "Campaign Player EXP + Mana Implementation",
+  "scope": "Implement source-bounded MID117 per-run EXP/Mana and cumulative player EXP/Mana settlement using existing progression/economy/UoW/receipt owners; preserve Campaign authorization, RNG/drop policy, MID113/MID114, persistence schema and OTA.",
+  "runtime_client_smoke": "Static/regression accepted; targeted MID117 client smoke required before roadmap advances to RNG backbone closure."
 }

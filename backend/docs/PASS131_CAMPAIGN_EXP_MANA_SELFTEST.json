@@ -1,0 +1,29 @@
+{
+  "pass": "131.0",
+  "status": "PASS",
+  "scope": "Campaign MID117 player EXP + Mana settlement",
+  "checks": [
+    "test_policy_level10_crossing",
+    "test_normal_one_sweep_level_gt10",
+    "test_normal_ten_sweep_level_gt10",
+    "test_level10_crossing_uses_progression_owner_and_levelup_energy",
+    "test_super_sweep_exp_mana_and_attempts_are_exactly_once",
+    "test_replay_refreshes_current_cumulative_exp_and_mana",
+    "test_crystal_sweep_projects_all_cumulative_fields",
+    "test_reward_validation_fails_before_entropy_or_cost",
+    "test_post_rng_progression_failure_rolls_back_all_mutation",
+    "test_mentor_social_plane_is_not_part_of_core_policy"
+  ],
+  "source_contract": {
+    "normal_100001": {
+      "energy_cost": 6,
+      "mana_gain": 495
+    },
+    "super_100019": {
+      "energy_cost": 12,
+      "mana_gain": 930
+    },
+    "low_level_policy": "1x while simulated pre-run level<=10; 3x after crossing; raw wire EXP remains energy_cost",
+    "mentor_student": "deferred non-core social vertical"
+  }
+}

@@ -1,0 +1,51 @@
+{
+  "added": [
+    "docs/PASS117_BACKEND_DIFF.json",
+    "docs/PASS117_CAMPAIGN_RECONCILIATION_SELFTEST.json",
+    "docs/PASS117_CLIENT_TEST_PLAN.md",
+    "docs/PASS117_IMPLEMENTATION.json",
+    "docs/PASS117_OTA_BRIDGE_BUILD.json",
+    "docs/PASS117_OTA_PRIOR_OVERRIDE_HASHES.json",
+    "docs/PASS117_REGRESSION_MATRIX.json",
+    "docs/PASS117_SRC64_FEEDBACK_LOOP.json",
+    "docs/PASS117_TECHNICAL_CHANGELOG.md",
+    "docs/PASS117_VALIDATION.json",
+    "gxb_backend/state/campaign_battle_operation_receipt.py",
+    "local_assets/src_32/app/scenes/BattleCreate.lua",
+    "local_assets/src_32/app/windows/SelectTeamNewWindow.lua",
+    "local_assets/src_32/app/windows/SelectTeamWindow.lua",
+    "local_assets/src_64/app/scenes/BattleCreate.lua",
+    "local_assets/src_64/app/windows/SelectTeamNewWindow.lua",
+    "local_assets/src_64/app/windows/SelectTeamWindow.lua",
+    "local_assets/updates/gxb-local-1.631.7.zip.001",
+    "tools/selftest_pass117_campaign_reconciliation.py"
+  ],
+  "added_count": 19,
+  "baseline_artifact": "gxb-backend-v0.15.0-pass114.0",
+  "changed": [
+    "README.md",
+    "UPDATE_README.md",
+    "VERSION.json",
+    "data/campaign_drop_policy.json",
+    "docs/memory.md",
+    "gxb_backend/state/campaign_drop_planner.py",
+    "gxb_backend/state/player_state.py",
+    "gxb_backend/state/request_services.py",
+    "gxb_backend/state/world_repository.py",
+    "gxb_backend/version.py",
+    "local_assets/update_manifest.json"
+  ],
+  "changed_count": 11,
+  "pass": "117.0",
+  "preserved_boundaries": {
+    "data/campaign_drop_source_catalog.json": "7d080d3b0ed52a4645fc719a19762e16964db4f6869d5f0aea1441f467f821f4",
+    "data/campaign_repeat_rng_policy.json": "3cdfe70dd9d9e7dc4bab2fb2b66eecbd2e5a0bea5c4b3951ca2907d61b049c16",
+    "gxb_backend/state/mid117_operation_receipt.py": "4483d93377cfc7659e0b0fe084d5607a547d347190773762e5c286a0239a12f3"
+  },
+  "removed": [
+    "local_assets/updates/gxb-local-1.631.6.zip.001"
+  ],
+  "removed_count": 1,
+  "schema_version": 1,
+  "target_artifact": "gxb-backend-v0.15.1-pass117.0"
+}

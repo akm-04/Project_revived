@@ -1,0 +1,75 @@
+{
+  "schema_version": 1,
+  "pass": "128.2",
+  "base": "gxb-backend-v0.15.5-pass128.0",
+  "artifact": "gxb-backend-v0.15.6-pass128.2",
+  "changes": [
+    {
+      "path": "README.md",
+      "before_sha256": "82a447edbbee5a0ad0a16a865939781b6f3478c5b8b000941babdf8089faee40",
+      "after_sha256": "2bc07ea9f091ad723fd912edccce39a9ca4b4c0b77976b82af546aa667229e83",
+      "kind": "modified"
+    },
+    {
+      "path": "UPDATE_README.md",
+      "before_sha256": "1881fa397b33f8be96972d72c23c4d5965879f0482507a9bcb2c6912893638fe",
+      "after_sha256": "51af4fa5b9d24013f1e70420676233957746837f89fd9340e31510bda1ae34d0",
+      "kind": "modified"
+    },
+    {
+      "path": "VERSION.json",
+      "before_sha256": "66f8dd19df6c9c8cc877af634ccd2477e2c135021458dc4946536ef1cc9765e2",
+      "after_sha256": "264886a836bc993f407b5b51ce1910485b944b50435137eedfa80257208e9bd4",
+      "kind": "modified"
+    },
+    {
+      "path": "docs/PASS128_2_HOTFIX.json",
+      "before_sha256": null,
+      "after_sha256": "20d0c25f9f7222eb42ab885bf43540cf33e4aa7b7c1abc6c412c741b4f36283f",
+      "kind": "added"
+    },
+    {
+      "path": "docs/PASS128_2_MID112_WIRE_CONTRACT_SELFTEST.json",
+      "before_sha256": null,
+      "after_sha256": "93b414aab2373695529c45c84a8eacc7887f31997fc0578d079392144eb2842c",
+      "kind": "added"
+    },
+    {
+      "path": "docs/PASS128_2_SRC64_FEEDBACK_LOOP.json",
+      "before_sha256": null,
+      "after_sha256": "eb8b7166cc9dea737ddb79b6815806c700c6377d6a4c633c6b4602ea486f9fe8",
+      "kind": "added"
+    },
+    {
+      "path": "docs/PASS128_2_TECHNICAL_CHANGELOG.md",
+      "before_sha256": null,
+      "after_sha256": "2ad824a76fac80e4aececb0db62362c16d79912ca73efafa116d30120c4966d4",
+      "kind": "added"
+    },
+    {
+      "path": "docs/PASS128_2_VALIDATION.json",
+      "before_sha256": null,
+      "after_sha256": "ad18ab56522739212ed478c2e7bc01f1072468cbca4ca73dc236dd5a2b8f186d",
+      "kind": "added"
+    },
+    {
+      "path": "docs/memory.md",
+      "before_sha256": "825aec11c39290cdea64b16622ca870e9820edfa3c038a151d32f8935657c074",
+      "after_sha256": "aed244232400acbff6b10272bb17f7863e13fea6c8d75a7d4dfbb3c412afb89c",
+      "kind": "modified"
+    },
+    {
+      "path": "gxb_backend/state/super_campaign_projection_service.py",
+      "before_sha256": "390f3753b80a9170331632d61f196b7232db1de061cdb886167a30e9319e3c71",
+      "after_sha256": "8e884f574a918641def9bccb4de2107549bdc92acb5a26d429c5b4d772e1b178",
+      "kind": "modified"
+    },
+    {
+      "path": "tools/selftest_pass128_2_mid112_wire_contract.py",
+      "before_sha256": null,
+      "after_sha256": "5b58fe557fa66416b7c99fee44d01e0db0e4813f475c03517fcc296387aabcf9",
+      "kind": "added"
+    }
+  ],
+  "note": "Manifest intentionally excludes itself to avoid self-hash recursion. No local_assets/OTA file is changed."
+}

@@ -770,6 +770,12 @@ class MultiUserDatabase:
         )
         if maintenance.player_progression.normalize_source_authority():
             changed = True
+        # Pass128 legacy bridge: historical credential accounts could already be
+        # level>=11 while Function31 remained guide_sensitive_unresolved. Repair
+        # Function31 + first Super frontier coherently at player-load time, where
+        # no NEW_FUNC_OPEN semantic event is emitted.
+        if maintenance.elite_campaign_unlock.maintenance_reconcile():
+            changed = True
         # Runtime v0.8.2 exposed a latent client crash in the unused Arena
         # invitation path whenever any economy_ event is processed. Migrate
         # credential players created by v0.8.0-v0.8.2 to the deferred-PvP

@@ -1,0 +1,7 @@
+{
+  "schema_version": 1,
+  "pass": "122.0",
+  "message": "feat(campaign): restore source Challenge graph settlement",
+  "scope": "Accept Pass121 runtime; implement Challenge raw topology/projection/deterministic first-clear settlement; preserve OTA and Normal/Super manual battle behavior",
+  "next": "Pass123 manual MID113/MID114 simplification + cumulative OTA 1.631.8"
+}

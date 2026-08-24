@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "pass": "128.0",
+  "backend_version": "0.15.5",
+  "timestamp": "2026-08-24T14:05:12+06:00",
+  "status": "IMPLEMENTED_STATIC_ACCEPTED_RUNTIME_SMOKE_PENDING",
+  "modules": [
+    "gxb_backend/content/super_campaign_catalog.py",
+    "gxb_backend/state/super_campaign_access_policy.py",
+    "gxb_backend/state/super_campaign_projection_service.py",
+    "gxb_backend/state/elite_campaign_unlock_coordinator.py"
+  ],
+  "wiring": [
+    "FunctionStateRepository Function31 policy -> campaign_projection_coordinated",
+    "PlayerProgressionService level transition -> EliteCampaignUnlockCoordinator",
+    "RequestServices/MaintenanceServices compose shared catalog/policy/projection/coordinator",
+    "WorldRepository delegates Super projection and entry authorization"
+  ],
+  "ordering": {
+    "level11": [
+      "Function31 eligible/pending",
+      "materialize 100019 source-shaped",
+      "derive cursors",
+      "announce Function31",
+      "atomic UoW commit"
+    ],
+    "mid113_new_super": [
+      "same-stage STAGED replay first",
+      "source/access bouncer",
+      "daily attempt guard",
+      "Energy preflight",
+      "RNG/stage",
+      "active_campaign_battle"
+    ],
+    "mid117_new_uuid": [
+      "committed receipt replay first",
+      "source identity",
+      "access bouncer",
+      "attempts",
+      "cost preflight",
+      "RNG/rewards",
+      "costs/rewards",
+      "attempt decrement",
+      "receipt",
+      "atomic commit"
+    ]
+  },
+  "sequential_progression": "Super win materializes raw next source node immediately; related Normal star>0 gates later entry.",
+  "qa_policy": "Pass75 preseed retained; no bouncer bypass.",
+  "ota": "1.631.8 unchanged"
+}

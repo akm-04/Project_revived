@@ -102,7 +102,7 @@ def main() -> int:
     checks["x100_ten_block_guarantee"] = block_item_counts
 
     # End-to-end request-scoped repository execution: atomic cost, 100 wire rows,
-    # counter progression, and short-window replay with no second charge.
+    # counter progression, and durable UUID replay with no second charge.
     services = make_services("R")
     player = services.player
     repo = services.summon
@@ -110,7 +110,8 @@ def main() -> int:
     counter = services.summon_counter_policies.require("small_classic")
     before_mana = player.mana
     before_counter = int(player.summon.get(counter.persistence_key, 0) or 0)
-    response = repo.summon_hero({"summon_type": 1, "summon_index": 4})
+    op100 = "mid50-00000000-0000-4000-8000-000000004214"
+    response = repo.summon_hero({"summon_type": 1, "summon_index": 4, "summon_op_id": op100})
     assert response.get("error_code", 0) == 0
     assert len(response.get("result") or []) == 100
     assert player.mana == before_mana - 900000
@@ -123,7 +124,7 @@ def main() -> int:
     )
     after_mana = player.mana
     after_counter = int(player.summon[counter.persistence_key])
-    replay = repo.summon_hero({"summon_type": 1, "summon_index": 4})
+    replay = repo.summon_hero({"summon_type": 1, "summon_index": 4, "summon_op_id": op100})
     assert replay == response
     assert player.mana == after_mana
     assert int(player.summon[counter.persistence_key]) == after_counter
@@ -139,7 +140,8 @@ def main() -> int:
     for tag, index, expected_rows, expected_cost in (("1", 2, 1, 10000), ("10", 3, 10, 90000)):
         svc = make_services(tag)
         before = svc.player.mana
-        out = svc.summon.summon_hero({"summon_type": 1, "summon_index": index})
+        op_id = f"mid50-00000000-0000-4000-8000-0000000042{index:02d}"
+        out = svc.summon.summon_hero({"summon_type": 1, "summon_index": index, "summon_op_id": op_id})
         assert out.get("error_code", 0) == 0
         assert len(out.get("result") or []) == expected_rows
         assert svc.player.mana == before - expected_cost

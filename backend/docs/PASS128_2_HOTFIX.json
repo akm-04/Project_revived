@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "pass": "128.2",
+  "backend_version": "0.15.6",
+  "timestamp": "2026-08-24T14:30:00+06:00",
+  "status": "IMPLEMENTED_STATIC_ACCEPTED_RUNTIME_SMOKE_REQUIRED",
+  "root_cause": "Pass128 recompute_cursors coerced a missing Super chapter_info key to 0 before comparison. For Function31-closed accounts desired value is also 0, so mandatory keys were never inserted and explicit MID112 returned nil fields to src_64.",
+  "implementation": {
+    "file": "gxb_backend/state/super_campaign_projection_service.py",
+    "semantic_change": "write each Super cursor key when key not in chapter OR normalized current value != desired value",
+    "mandatory_keys": [
+      "super_chapter_id",
+      "super_campaign_id",
+      "super_stars",
+      "super_bonus_id"
+    ],
+    "persistence": "existing WorldRepository.normalize()/payload save path persists repair once; canonical repeated loads do not save again"
+  },
+  "preserved": [
+    "Pass127/128 four-module architecture",
+    "Function31 level11 bootstrap ordering",
+    "related-Normal MID113/MID117 bouncer",
+    "MID113 STAGED replay first",
+    "MID117 committed receipt replay first",
+    "sequential Super next-stage exposure",
+    "Pass75 QA separation",
+    "Challenge graph/rewards",
+    "OTA 1.631.8"
+  ]
+}

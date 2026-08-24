@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "pass": "122.0",
+  "status": "PASS",
+  "checks": [
+    {
+      "name": "pass122_challenge_mode",
+      "result": "PASS",
+      "covers": [
+        "144 rows / 137 edges / seven roots / 22 fan-out catalog contract",
+        "raw branch 24111 -> 24112 and 24121 preserved",
+        "fixpoint projection without star-zero grandchild over-open",
+        "LOAD_WORLD_MAP self-heal persists once and is stable/no ghost save on reload",
+        "deterministic MID113 first-clear staging with zero entropy",
+        "MID114 victory commits staged items exactly once and returns items=[]",
+        "source Energy 24 victory / 2 defeat",
+        "terminal duplicate does not double debit/grant",
+        "loss discards staged first-clear items",
+        "locked/arbitrary result fail-close",
+        "Challenge MID117 sweep explicitly rejected"
+      ]
+    },
+    {
+      "name": "pass121_super_mid117_daily_limit",
+      "result": "PASS",
+      "covers": ["Super attempt atomicity and zero/over-limit hard block remain intact"]
+    },
+    {
+      "name": "pass117_campaign_reconciliation_updated_for_pass122",
+      "result": "PASS",
+      "covers": ["Normal/Super battle UUID behavior unchanged", "seven-root Challenge gate supersedes old one-root assertion", "OTA 1.631.7 remains intact"]
+    },
+    {
+      "name": "pass92_mid116_campaign_reset",
+      "result": "PASS",
+      "covers": ["Super reset semantics and rollback remain intact"]
+    },
+    {
+      "name": "pass79_daily_reset",
+      "result": "PASS",
+      "covers": ["05:00 GMT+8 Super reset participant remains intact"]
+    },
+    {
+      "name": "compileall",
+      "result": "PASS",
+      "covers": ["gxb_backend and tools syntax/import compilation"]
+    },
+    {
+      "name": "challenge_catalog_regeneration",
+      "result": "PASS",
+      "covers": ["effective src_64 generator output is byte-identical to packaged challenge_campaign_catalog.json"]
+    }
+  ],
+  "historical_harness_note": "The old Pass114 monolithic selftest still hardcodes OTA 1.631.6 and is intentionally superseded by Pass117/Pass121/Pass122 coverage. It is not a Pass122 backend failure. Pass92 requires PYTHONPATH=. when invoked directly from this checkout."
+}

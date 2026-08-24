@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "pass": "117.0",
+  "version": "1.631.7",
+  "volume": "gxb-local-1.631.7.zip.001",
+  "package": "gxb-local-1.631.7.zip",
+  "override_count": 138,
+  "prior_override_count": 132,
+  "prior_override_mismatches": [],
+  "added_overrides": [
+    "src_32/app/scenes/BattleCreate.lua",
+    "src_32/app/windows/SelectTeamNewWindow.lua",
+    "src_32/app/windows/SelectTeamWindow.lua",
+    "src_64/app/scenes/BattleCreate.lua",
+    "src_64/app/windows/SelectTeamNewWindow.lua",
+    "src_64/app/windows/SelectTeamWindow.lua"
+  ],
+  "size": 2215296,
+  "md5": "8ee83eb148a27885c0b5d3b31b012013",
+  "sha256": "ce722d9fc9fddefd5845d533d3e3356c4d2d91b530c7b6ca16df82cc4c064d18",
+  "source_native_identity": {
+    "field": "campaign_battle_op_id",
+    "format": "mid113-<UUIDv4>",
+    "injection": "Normal/Super startCampaignBattle only, preserve existing ID",
+    "carry": "BattleCreate retains operation ID and submits it to MID114",
+    "application_error_guard": "MID113 team callbacks and MID114 campaignResult reject nonzero application errors before local battle/reward mirror"
+  }
+}

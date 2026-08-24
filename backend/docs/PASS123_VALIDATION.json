@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "pass": "123.0",
+  "backend_version": "0.15.4",
+  "status": "PASS",
+  "source_feedback_loop": "PASS",
+  "pass122_runtime_smoke": "ACCEPTED",
+  "static_compile": "PASS",
+  "focused_selftest": "PASS",
+  "neighbor_regressions": "PASS",
+  "ota_version": "1.631.8",
+  "ota_entries": 138,
+  "ota_six_file_source_byte_match": "PASS",
+  "mid50_bridge_preserved": true,
+  "mid117_bridge_preserved": true,
+  "pass123_client_smoke": "PENDING_PASS124",
+  "boundaries": [
+    "No Campaign Player EXP/Mana sweep economy reconciliation",
+    "No RNG backbone expansion",
+    "No Generated/Unique settlement",
+    "No Girls/Equipment economy closure",
+    "No unrelated vertical slice implementation"
+  ]
+}

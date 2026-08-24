@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "pass": "123.0",
+  "message": "refactor(campaign): restore server-owned manual battle sessions",
+  "scope": [
+    "retire Pass117 cross-request MID113/MID114 UUID/receipt authority",
+    "implement active_campaign_battle v2 staged/terminal semantics",
+    "use source-family 30005 terminal drain without extra mutation",
+    "publish cumulative OTA 1.631.8 six-file rollback",
+    "preserve MID50/MID117 UUID bridges"
+  ],
+  "timestamp": "2026-08-24T11:52:35+06:00"
+}

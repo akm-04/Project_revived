@@ -1,0 +1,43 @@
+{
+  "backend_boundary": {
+    "new_service": "gxb_backend/state/random_outcome_service.py",
+    "unmigrated": [
+      "ClassicVendingPrivatePlanner",
+      "CampaignDropPlanner",
+      "MediumLegacyPrivatePlanner",
+      "SXSoulBoxPrivatePlanner",
+      "MagicSummonPrivatePlanner"
+    ],
+    "wiring": "RequestServices.random_outcomes only"
+  },
+  "backend_modified": true,
+  "evidence": {
+    "app/common/network/mid.lua": {
+      "role": "Confirms SUMMON_HERO=50, SUMMON_SUPER_HERO=305, MAGIC_SUMMON_BUY=70, PET_SUMMON=781; Pass110 adds no protocol changes.",
+      "sha256": "026a20b29d97624979777a68c64c749254031604057ff42aa8f8254c3e35b5af"
+    },
+    "app/common/utils.lua": {
+      "role": "Confirms xyd.generateUUID and local weighted/random helpers exist. UUID identity entropy remains outside ROS; helper existence does not define unrecovered server probability policy.",
+      "sha256": "6e56c7342e889d7ae8d41fe47cb06f66832227efe702f3863f693ee7ba84ffad"
+    },
+    "app/model/SelfPlayer.lua": {
+      "role": "Confirms the existing MID50 result handling/network choke point remains unchanged; Pass110 does not inject summon_op_id or migrate Summon.",
+      "sha256": "163d5893c9522ada412c2b9c4748a80757660fccdf03c8f72cb6edf0838b8eb4"
+    }
+  },
+  "implementation_decision": [
+    "Introduce policy-free request-scoped entropy mechanics only; source audit shows many distinct RNG domains and therefore does not justify moving policy into the shared service.",
+    "Do not alter MID50/MID117 wire contracts or behavior in Pass110.",
+    "Keep xyd.generateUUID outside gameplay ROS.",
+    "Do not infer historical server weighted algorithms from client-local xyd.weightedChoise implementation."
+  ],
+  "pass": "110.0",
+  "schema_version": 1,
+  "source": {
+    "artifact": "all-assest-rechecked.zip",
+    "effective_src64": "app-assets/output/assets/src_64",
+    "files": 4370,
+    "sha256": "89f0f830508b92e5fff6ad53c6a9dae961a14042dbfdf5649008efb8353f5608"
+  },
+  "type": "SRC64_ARCHITECTURAL_FEEDBACK_LOOP"
+}

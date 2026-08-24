@@ -1,0 +1,28 @@
+{
+  "pass": "122.0",
+  "backend_version": "0.15.3",
+  "status": "IMPLEMENTED_STATIC_REGRESSION_PASS_CLIENT_SMOKE_PENDING",
+  "components": [
+    "data/challenge_campaign_catalog.json",
+    "gxb_backend/content/challenge_campaign_catalog.py",
+    "gxb_backend/state/challenge_projection_service.py",
+    "gxb_backend/state/world_repository.py Challenge integration",
+    "tools/build_challenge_campaign_catalog.py",
+    "tools/selftest_pass122_challenge_mode.py"
+  ],
+  "challenge_contract": {
+    "topology": "raw src_64 graph, never generic normalized next_campaign_id",
+    "projection": "seven-root gate plus cleared-node child fixpoint",
+    "rewards": "MID113 deterministic first-clear staging; quantity=increase_rate//10000; MID114 victory commit; MID114 items=[]",
+    "rng": "none",
+    "sweep": "unsupported",
+    "energy": {"victory":24,"defeat":2}
+  },
+  "preserved": [
+    "MID50 UUID/UoW exactly-once",
+    "MID117 UUID/UoW exactly-once and Pass121 daily-limit atomicity",
+    "Pass117 Normal/Super manual-battle UUID architecture until Pass123",
+    "OTA 1.631.7 byte-identical",
+    "Campaign EXP/Mana sweep economy deferred"
+  ]
+}

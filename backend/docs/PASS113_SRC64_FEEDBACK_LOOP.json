@@ -1,0 +1,49 @@
+{
+  "conclusions": [
+    "MID117 remains ordinary SWEEP_CAMPAIGN=117 and event sweep protocols remain separate.",
+    "Pass112 rate-decomposition compatibility policy remains source-bounded and not recovered official-server code.",
+    "Pass113 must not modify SweepWindow or advance OTA because live identity/settlement activation is deferred to Pass114.",
+    "Existing MID113 CampaignDropPlanner repeat path is also used for battle staging, so Pass113 adds a distinct plan_repeat_sweep() entry point instead of enabling legacy plan(first_clear=False)."
+  ],
+  "effective_src64": "app-assets/output/assets/src_64",
+  "evidence": [
+    {
+      "path": "app/windows/SweepWindow.lua",
+      "role": "MID117 ordinary request routing and per-sweep items/economys/additional/campaign callback contract; event sweep MIDs branch away before request",
+      "sha256": "8548611ec6bb778433a234f3bdecf452fcde1522c64e8ca9eac5d9a84579fce5"
+    },
+    {
+      "path": "app/windows/MapDetailWindow.lua",
+      "role": "ordinary sweep request includes campaign_id,campaign_type,sweep_num,sweep_type and optional awake_mission/UI compose hints",
+      "sha256": "5a137edc609f9d2082c5df6bf50ef05b6ef54642a7ba5bf6dca8fe0f1c4c3898"
+    },
+    {
+      "path": "app/windows/NewMapDetailWindow.lua",
+      "role": "same ordinary sweep request construction in newer Campaign UI",
+      "sha256": "88b97be8577828f478360c25fd51674e2ed8291b2a590976b3530c91396d07bf"
+    },
+    {
+      "path": "app/common/network/mid.lua",
+      "role": "SWEEP_CAMPAIGN=117; event sweep MIDs distinct",
+      "sha256": "026a20b29d97624979777a68c64c749254031604057ff42aa8f8254c3e35b5af"
+    },
+    {
+      "path": "app/common/network/Backend.lua",
+      "role": "failed-request queue retains same params table; cumulative economy_ is absolute projection",
+      "sha256": "95378e2b0be8180df6de27e9e430c630bcfe46c080e1f91ef5f6d74bdbb1b840"
+    },
+    {
+      "path": "data/tables/campaign.lua",
+      "role": "repeat_dropbox_id and deterministic sweep_reward source data",
+      "sha256": "7a58e878a7171839342a856cd74b512037528438259d036009a7249472504683"
+    },
+    {
+      "path": "data/tables/campaign_dropbox.lua",
+      "role": "raw dropbox_id,item_id,increase_rate rows with no quantity column",
+      "sha256": "374b6b13bae56e2f5ac8d6b884821d2fb448d239871d1992b84bcf365e90404e"
+    }
+  ],
+  "pass": "113.0",
+  "source_files": 4370,
+  "status": "PASS"
+}

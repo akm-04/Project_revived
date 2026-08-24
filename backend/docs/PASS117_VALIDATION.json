@@ -1,0 +1,31 @@
+{
+  "backend_version": "0.15.1",
+  "client_runtime_smoke": "PENDING",
+  "focused_reconciliation_selftest": "PASS_9_OF_9",
+  "fresh_extraction": {
+    "checks": [
+      "selftest_pass117_campaign_reconciliation.py",
+      "selftest_pass110_random_outcome_service.py",
+      "selftest_pass105_session_firewall.py with canonical GXB_SRC64",
+      "selftest_pass98_deterministic_consumables.py",
+      "selftest_pass96_economy_vip_cleanup.py",
+      "selftest_pass92_mid116_campaign_reset.py",
+      "selftest_pass94_player_progression.py"
+    ],
+    "implementation_manifest": "PASS_770_FILES_PRE_VALIDATION_DOC",
+    "python_compileall": "PASS"
+  },
+  "historical_superseded_assertions": "see docs/PASS117_REGRESSION_MATRIX.json",
+  "ota": {
+    "build_doc": "docs/PASS117_OTA_BRIDGE_BUILD.json",
+    "override_count": 138,
+    "prior_1_631_6_overrides_preserved": 132,
+    "prior_override_mismatches": [],
+    "version": "1.631.7"
+  },
+  "pass": "117.0",
+  "schema_version": 1,
+  "source_feedback_loop": "PASS",
+  "source_feedback_loop_doc": "docs/PASS117_SRC64_FEEDBACK_LOOP.json",
+  "status": "PASS_STATIC_FRESH_EXTRACTION_RUNTIME_SMOKE_PENDING"
+}

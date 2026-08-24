@@ -1,0 +1,117 @@
+{
+  "schema_version": 1,
+  "pass": "122.0",
+  "scope": "Pass122 explicitly changed/added implementation and authority files; this manifest intentionally does not recursively include itself.",
+  "files": [
+    {
+      "path": "data/challenge_campaign_catalog.json",
+      "bytes": 143616,
+      "sha256": "e4f3076beca80ae461d47ead5bef7cabd5729b7f2982830d291ca332a6b8c9c2"
+    },
+    {
+      "path": "gxb_backend/content/__init__.py",
+      "bytes": 837,
+      "sha256": "5df02c19ee6aac22c750dd7b0750f58c673d820d89cc17eab8cd6e866635f17a"
+    },
+    {
+      "path": "gxb_backend/content/challenge_campaign_catalog.py",
+      "bytes": 5554,
+      "sha256": "5ebbeeeab15f28aaf885cbf0b3340e89a101819fc568c4bf9fe26a04200597c0"
+    },
+    {
+      "path": "gxb_backend/state/challenge_projection_service.py",
+      "bytes": 2816,
+      "sha256": "24fbdd1d98397ce358c1d99b3767198cc73eb63ab86eca0df14055ebf106ccd2"
+    },
+    {
+      "path": "gxb_backend/state/player_state.py",
+      "bytes": 37589,
+      "sha256": "2904e0155314629c94b4fd247c2998de6a13255a8b12bb187a1e0fca3ab86070"
+    },
+    {
+      "path": "gxb_backend/state/world_repository.py",
+      "bytes": 94179,
+      "sha256": "3d4f243746f197b6944b41f32bf4b77bea414a0dc1d142c85d95c18ff811841d"
+    },
+    {
+      "path": "tools/build_challenge_campaign_catalog.py",
+      "bytes": 7356,
+      "sha256": "439a6d8160cab1569853d1c436b8ec09029d18ef012bc7e725a2e1c01a26a87a"
+    },
+    {
+      "path": "tools/selftest_pass117_campaign_reconciliation.py",
+      "bytes": 19925,
+      "sha256": "279893f24b7cd687fe275cbf4b97566a0c5b764fceca7307cad405d40115c55e"
+    },
+    {
+      "path": "tools/selftest_pass122_challenge_mode.py",
+      "bytes": 8065,
+      "sha256": "825a0567361fb43eedbe4ad2a89e0b65fa0a3d31b5ae5a6b089a8dc579d2b9a6"
+    },
+    {
+      "path": "gxb_backend/version.py",
+      "bytes": 101,
+      "sha256": "4f4d43d488e9aeb83da273b744df9cac9452473c246c72212b2fd878fe82f92b"
+    },
+    {
+      "path": "VERSION.json",
+      "bytes": 620,
+      "sha256": "4b193ff4805078e38b4c2e73325f6d2a5cd59b483e705223e2924bb4de4965e3"
+    },
+    {
+      "path": "README.md",
+      "bytes": 3014,
+      "sha256": "53e22465de56e3d86ae7551c59ac7bcac9bb4167f6aab57985640fe9314a7513"
+    },
+    {
+      "path": "memory.md",
+      "bytes": 3197,
+      "sha256": "ea986608c187dcdd15af3e5e5499ebcc9dc98225bce9cf5be1aa11fd0620790c"
+    },
+    {
+      "path": "docs/memory.md",
+      "bytes": 3183,
+      "sha256": "e2ec167688eb844f1262bd7931cf93d9a7fee809bef1fe3522ef2346971208b1"
+    },
+    {
+      "path": "docs/PASS122_RUNTIME_LOG_REVIEW.json",
+      "bytes": 1144,
+      "sha256": "72a190baa3464a0a22e9084269984659789ca1bf3de921e3ad576faf6bd42f00"
+    },
+    {
+      "path": "docs/PASS122_SRC64_FEEDBACK_LOOP.json",
+      "bytes": 1853,
+      "sha256": "63c45ba5f9776183513f98292eb4f3a1485fc0aef6af81f43adcc5091e6fb145"
+    },
+    {
+      "path": "docs/PASS122_IMPLEMENTATION.json",
+      "bytes": 1147,
+      "sha256": "f9236ba59e97f88e45b2f207f806b6a879580a22536381280f4c8c5603b942ca"
+    },
+    {
+      "path": "docs/PASS122_VALIDATION.json",
+      "bytes": 640,
+      "sha256": "432686b0f928fdee5f789501db5d23581c66e530a1cbc48f476b284e3df5f583"
+    },
+    {
+      "path": "docs/PASS122_REGRESSION_MATRIX.json",
+      "bytes": 2224,
+      "sha256": "886063ea4de6254dfd0bbd9a008ead9cdac52d0d7ee7237d16b4404a84d22ba3"
+    },
+    {
+      "path": "docs/PASS122_TECHNICAL_CHANGELOG.md",
+      "bytes": 4885,
+      "sha256": "2dd42f2aea5e2734066258aeb2a658ec775ad6a6ced59d0253db489e8e99cb2e"
+    },
+    {
+      "path": "UPDATE_README.md",
+      "bytes": 889,
+      "sha256": "277ea85558034ffa57f89af3a9cf9fcfb0fc5613dd551a741cb4bb8c3b17e5a5"
+    },
+    {
+      "path": "docs/PASS122_COMMIT.json",
+      "bytes": 374,
+      "sha256": "be0e391d155a6d94bc7607c2cdc4476e6b763a4d7eb3496bcabcebac9e61d623"
+    }
+  ]
+}

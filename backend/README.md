@@ -1,7 +1,13 @@
-# GXB backend v0.13.1 — Pass105.0
+# GXB backend v0.15.8 — Pass131.0
 
-Pass105 completes the Mutation Safety Firewall session-entry quarantine. The 79 Pass104 non-session mutation blocks remain unchanged, and the eight source-proven unsupported `SESSION_PREFLIGHT`/`SESSION_START` MIDs now also return canonical HTTP409 before handler/DailyReset/UoW execution. The eight terminal battle-result contracts remain deliberately deferred and are not assigned a generic 30005 policy.
+Pass131.0 implements **Campaign MID117 player EXP + Mana settlement** from the source-bounded Pass130 design. Effective `src_64` was rechecked before implementation.
 
-The effective `src_64` feedback loop was repeated for Arena, March, World Boss, Pet Campaign, and Peak Arena entry callbacks. Each quarantined route only advances into selection/battle or mutates pre-battle state on transport `OK`; the non-200 path either does nothing or clears `battleBegan`, making HTTP409 the source-safe boundary.
+Normal/Super sweep responses now emit one source-shaped `economys` row per run (`exp = energy_cost`, `mana = mana_gain`) and settle cumulative account EXP/Mana atomically through the existing canonical owners. `CampaignSweepEconomyPolicy` is deliberately stateless: `PlayerProgressionService` still owns account EXP/level/function unlocks, `EconomyLedger` still owns Mana/Crystal, and the existing PlayerUnitOfWork + MID117 receipt remains the exactly-once transaction boundary.
 
-Pass104 core firewall/no-regression behavior is accepted from the supplied runtime smoke. Store/Sky Tower read-model UI glitches are explicitly non-gating and remain parked with their unimplemented domains.
+For low-level sweep compatibility, cumulative account EXP mirrors recovered `SweepWindow` behavior: 1× base while the simulated pre-run level is `<=10`, then 3× for later rows after crossing above level 10. This is a client-backed **compatibility implementation decision**, not recovered official-server settlement code. Mentor/Student bonus EXP is deliberately deferred with the non-core Social vertical.
+
+MID117 receipt replay still freezes static per-run rows while refreshing cumulative fields from their current canonical owners. Reward-plan validation occurs before entropy; forced post-RNG progression failure rolls back tested EXP, Mana, Energy, Crystal, inventory, receipt and persistence state.
+
+No Lua/OTA, persistence schema, MID113/MID114, Campaign access/progression, Super daily-limit policy, Challenge topology, drop pool, or RNG policy was changed. OTA remains **1.631.8**.
+
+Static/focused validation is accepted. A targeted real-client MID117 smoke is required before advancing to **RNG backbone closure**. See `docs/PASS131_CLIENT_TEST_PLAN.md`.

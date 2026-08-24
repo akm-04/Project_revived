@@ -96,12 +96,11 @@ class SummonOperationReceiptStore:
 
 
 class PaidSummonOperationReceiptStore:
-    """Short-window replay boundary for repeatable private Summon operations.
+    """Legacy short-window retry store for protocols without operation IDs.
 
-    The historical class/storage name is retained for compatibility. Stock MID50/MID70
-    requests have no operation token, so active private paid operations and the Pass41.9
-    recurring Small free operation treat an identical semantic request inside a very short
-    window as a transport retry. Only the latest repeatable-operation receipt is retained.
+    Pass111 retired this heuristic for repeatable MID50.  It remains in active
+    use only for MID70 Magic Summon until that separate protocol plane receives
+    a source-native operation identity.
     """
 
     STORE_KEY = "paid_operation_receipt_v1"

@@ -1,0 +1,20 @@
+{
+  "pass": "114.0",
+  "status": "PASS",
+  "scope": "Campaign MID117 RNG Phase C2 activation",
+  "checks": [
+    "missing source-native UUID fails before spend/entropy",
+    "first MID117 request atomically commits deterministic+repeat stacks+costs+receipt",
+    "receipt retry replays exact static items/economys/additional with current Energy projection",
+    "same UUID with changed request tuple fails before spend/entropy",
+    "insufficient cost fails before Campaign entropy",
+    "multi-sweep preserves independent per-sweep array-of-arrays outcomes",
+    "24-class positive missing pool hard-fails before cost/entropy/receipt",
+    "repeat_dropbox_id=0 remains valid deterministic-only",
+    "CRYSTAL_SWEEP receipt replays current Energy+Crystal projection",
+    "legacy MID113 repeat RNG remains disabled_unknown",
+    "OTA 1.631.6 contains 132 cumulative overrides",
+    "SweepWindow UUID injection occurs only after actual MID resolution",
+    "ordinary MID117 app-error callback guard prevents local Ticket/reward mutation"
+  ]
+}

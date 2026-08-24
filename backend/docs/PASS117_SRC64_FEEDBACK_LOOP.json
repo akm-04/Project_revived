@@ -1,0 +1,69 @@
+{
+  "schema_version": 1,
+  "pass": "117.0",
+  "status": "PASS",
+  "effective_source_root": "app-assets/output/assets/src_64",
+  "source_hashes": {
+    "app/common/network/mid.lua": {
+      "sha256": "026a20b29d97624979777a68c64c749254031604057ff42aa8f8254c3e35b5af",
+      "bytes": 43121
+    },
+    "app/common/network/Backend.lua": {
+      "sha256": "95378e2b0be8180df6de27e9e430c630bcfe46c080e1f91ef5f6d74bdbb1b840",
+      "bytes": 36252
+    },
+    "app/windows/SelectTeamNewWindow.lua": {
+      "sha256": "0fabc7b70c2acf48765c41b414e3cae7504f567cb6fbe344b0f98456ed18667a",
+      "bytes": 309437
+    },
+    "app/windows/SelectTeamWindow.lua": {
+      "sha256": "6d57e6bc7251060184190f7be14dcc9a277251673493a5b27e6c67c71cb96561",
+      "bytes": 244013
+    },
+    "app/scenes/BattleCreate.lua": {
+      "sha256": "bb9ae19c20ec165eeb7ba5b81a4ce85b6b7fea3a3a7eb278123bb8c0af0bbef9",
+      "bytes": 255277
+    },
+    "app/windows/BattleWinWindow.lua": {
+      "sha256": "f3a362765adea6fc5cbd239c8a9801cfef762146ddb1c48c854f0266c7a06096",
+      "bytes": 38042
+    },
+    "app/model/SelfPlayer.lua": {
+      "sha256": "163d5893c9522ada412c2b9c4748a80757660fccdf03c8f72cb6edf0838b8eb4",
+      "bytes": 156513
+    },
+    "app/windows/MapWindow.lua": {
+      "sha256": "8e8048d2be0ddb17894b3357fad8f5c4e992df136c6d8e6215f1db568d42cbb8",
+      "bytes": 73285
+    },
+    "data/tables/campaign.lua": {
+      "sha256": "7a58e878a7171839342a856cd74b512037528438259d036009a7249472504683",
+      "bytes": 969307
+    },
+    "data/tables/campaign_dropbox.lua": {
+      "sha256": "374b6b13bae56e2f5ac8d6b884821d2fb448d239871d1992b84bcf365e90404e",
+      "bytes": 1223455
+    },
+    "data/tables/chapter.lua": {
+      "sha256": "845e255f90abdd3b9e92ab558ac84bd766f868b300f7ca2992bdce933e0ae844",
+      "bytes": 13828
+    }
+  },
+  "confirmed_contracts": [
+    "FIGHT=113 and FIGHT_RESULT=114 in effective mid.lua",
+    "SelectTeamNewWindow.lua and SelectTeamWindow.lua have distinct startChallengeBattle and startCampaignBattle paths; only startCampaignBattle sends ordinary Normal/Super MID113",
+    "MID113 response items are converted into battle scene drops; BattleCreate stores them as dropItems",
+    "BattleWinWindow adds BattleCreate dropItems to Backpack only after the battle win flow",
+    "BattleCreate.campaignResult sends MID114 and independently credits MID114 response.items, therefore staged first-clear drops must remain absent from MID114 items",
+    "Backend.lua transport retry retains the original params table, allowing one injected campaign_battle_op_id to survive retries",
+    "SelfPlayer.worldMapEvent_ consumes LOAD_WORLD_MAP challenge as Campaign rows keyed by campaign_id",
+    "MapWindow.changeToChallenge gates on concrete Campaign 24111 in selfPlayer.worldMaps_",
+    "campaign.lua init_dropbox and campaign_dropbox.lua increase_rate remain the first-clear source plane accepted in Pass116"
+  ],
+  "implementation_boundaries": {
+    "mid113_repeat_rng": "disabled_unknown preserved",
+    "challenge_battle_lifecycle": "parked",
+    "mid117_repeat_policy": "unchanged from Pass114",
+    "first_clear_policy": "source-bounded compatibility policy, not recovered official server sampler"
+  }
+}

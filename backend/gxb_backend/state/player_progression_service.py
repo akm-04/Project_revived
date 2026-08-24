@@ -24,6 +24,7 @@ from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
+from .elite_campaign_unlock_coordinator import EliteCampaignUnlockCoordinator
 from .function_state_repository import FunctionStateRepository
 from .player_state import PlayerState
 from .resource_registry import ResourceRegistry
@@ -47,6 +48,7 @@ class PlayerProgressionService:
         save_callback: Callable[[], None] | None = None,
         *,
         function_unlocks: FunctionStateRepository | None = None,
+        elite_campaign_unlock: EliteCampaignUnlockCoordinator | None = None,
         resource_registry: ResourceRegistry | None = None,
         uow: PlayerUnitOfWork | None = None,
         temporal: TemporalPolicyService | None = None,
@@ -56,6 +58,7 @@ class PlayerProgressionService:
         self.data_dir = Path(data_dir)
         self._save_callback = save_callback
         self.function_unlocks = function_unlocks
+        self.elite_campaign_unlock = elite_campaign_unlock
         self.resource_registry = resource_registry
         self.uow = uow
         self.temporal = temporal
@@ -149,6 +152,8 @@ class PlayerProgressionService:
             "energy_time": self._int(self.player.energy_time, 0),
             "func_ids": list(self.player.func_ids) if isinstance(self.player.func_ids, list) else [],
             "function_state": copy.deepcopy(self.player.function_state) if isinstance(self.player.function_state, dict) else {},
+            "world_map": copy.deepcopy(self.player.world_map) if isinstance(self.player.world_map, dict) else {},
+            "persistence_state": copy.deepcopy(self.player.persistence_state) if isinstance(self.player.persistence_state, dict) else {},
         }
 
     def _restore(self, snapshot: dict[str, Any]) -> None:
@@ -182,6 +187,8 @@ class PlayerProgressionService:
             self.player.lev = after_level
             if after_level > before_level and self.function_unlocks is not None:
                 self.function_unlocks.observe_level_progress(before_level, after_level, persist=False)
+            if after_level > before_level and self.elite_campaign_unlock is not None:
+                self.elite_campaign_unlock.on_level_progress(before_level, after_level)
 
             source_max_energy = self._int(self.player_level_meta(after_level).get("energy"), 0)
             if source_max_energy > 0:

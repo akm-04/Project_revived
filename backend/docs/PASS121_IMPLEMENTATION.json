@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "pass": "121.0",
+  "status": "IMPLEMENTED_STATIC_ACCEPTED_RUNTIME_SMOKE_PENDING",
+  "backend_version": "0.15.2",
+  "scope": "Super Campaign MID117 mutable daily-limit atomicity only",
+  "changes": [
+    "Preserved existing campaign_sweep_op_id UUIDv4 identity, permanent MID117 receipt domain, RandomOutcomeService policy, and PlayerUnitOfWork transaction boundary.",
+    "Added a pre-transaction Super source-membership gate so campaign_type=2 cannot fall back to a Normal/fabricated row.",
+    "Added an in-UoW mutable attempt preflight after receipt replay and request/VIP validation but before cost validation and Campaign entropy.",
+    "Successful Super batches decrement daily_limit by exactly sweep_num after cost/reward settlement and before response/receipt staging, so the decrement shares the same atomic commit.",
+    "MID117 response.campaign now carries the decremented Super row; receipt replay continues rendering the current live campaign projection and consumes zero additional attempts.",
+    "Normal MID117 behavior and all OTA files are unchanged."
+  ],
+  "failure_contract": {
+    "message": "campaign_daily_limit_insufficient",
+    "timing": "before entropy/cost/state mutation",
+    "receipt": "none"
+  },
+  "preserved": {
+    "mid117_receipt_sha256": "4483d93377cfc7659e0b0fe084d5607a547d347190773762e5c286a0239a12f3",
+    "ota_manifest_sha256": "07aefdcb1c2f3400ae745504b7eb62d503aeeb6fe090d6f32b97cb31842def6c",
+    "ota_version": "1.631.7"
+  },
+  "deferred": [
+    "Challenge Pass122",
+    "manual MID113/MID114 simplification + OTA 1.631.8 Pass123",
+    "Campaign Player EXP/Mana sweep economy",
+    "Generated/Unique"
+  ]
+}

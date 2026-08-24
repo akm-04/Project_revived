@@ -24,11 +24,13 @@ from .commerce_purchase import CommerceSettlementService
 from .vip_policy import VipPrivilegeResolver, VipProgressionPolicy
 from .vip_award_service import VipAwardService
 from .campaign_reset_policy import CampaignResetPolicy
+from .campaign_composition import CampaignComposition
 from .energy_purchase_service import EnergyPurchaseService
 from .campaign_drop_planner import (
     CampaignDropPlanner,
     CampaignDropPolicyRegistry,
-    SystemRandomSource,
+    CampaignRepeatPolicyRegistry,
+    CampaignRandomOutcomeAdapter,
 )
 from .economy_ledger import EconomyLedger
 from .economy_repository import EconomyRepository
@@ -46,6 +48,11 @@ from .mutation_settlement_service import MutationSettlementService
 from .player_progression_service import PlayerProgressionService
 from .player_state import PlayerState
 from .reward_transaction_service import RewardTransactionService
+from .random_outcome_service import (
+    EntropyProvider,
+    NamespacedRandbelowAdapter,
+    RandomOutcomeService,
+)
 from .resource_registry import ResourceRegistry
 from .server_clock import ServerClock
 from .temporal_policy_service import TemporalPolicyService
@@ -81,12 +88,17 @@ class RequestServices:
         catalog: GameDataCatalog,
         featured_rotation: SummonFeaturedRotationPolicy | None = None,
         server_clock: ServerClock | None = None,
+        entropy_provider: EntropyProvider | None = None,
     ) -> None:
         self.player = player
         self.data_dir = Path(data_dir)
         self.catalog = catalog
         self.consumable_effects = ConsumableEffectCatalog(self.data_dir)
         self.uow = UnitOfWork(player, commit_callback)
+        # Pass110 RNG foundation remains request-scoped mechanics only. Pass111
+        # injects namespaced adapters into MID50 planners below; Campaign remains
+        # deliberately unmigrated until its separate bounded pass.
+        self.random_outcomes = RandomOutcomeService(entropy_provider)
         self.resource_registry = ResourceRegistry.load(self.data_dir / "resource_registry.json")
         self.response_semantics = GlobalResponseSemantics(player, self.uow)
         save = self.uow.request_save
@@ -115,6 +127,19 @@ class RequestServices:
         )
 
         self.function_state = FunctionStateRepository(player, self.catalog, save, self.uow.stage_semantic)
+        # Pass129: request and maintenance roots share one construction contract
+        # for Challenge/Super Campaign collaborators.  The bundle constructs but
+        # does not own policy; each catalog/projection/access/coordinator keeps
+        # its distinct Pass128 authority.
+        self.campaign_composition = CampaignComposition.build(
+            player, self.data_dir, self.function_state, uow=self.uow
+        )
+        self.challenge_campaign_catalog = self.campaign_composition.challenge_catalog
+        self.challenge_campaign_projection = self.campaign_composition.challenge_projection
+        self.super_campaign_catalog = self.campaign_composition.super_catalog
+        self.super_campaign_projection = self.campaign_composition.super_projection
+        self.super_campaign_access = self.campaign_composition.super_access
+        self.elite_campaign_unlock = self.campaign_composition.elite_campaign_unlock
         self.tutorial = TutorialMilestoneRepository(player, self.function_state, save)
         self.economy_ledger = EconomyLedger(
             player, self.resource_registry, save, uow=self.uow
@@ -137,6 +162,7 @@ class RequestServices:
         )
         self.player_progression = PlayerProgressionService(
             player, self.data_dir, save, function_unlocks=self.function_state,
+            elite_campaign_unlock=self.elite_campaign_unlock,
             resource_registry=self.resource_registry, uow=self.uow, temporal=self.temporal,
             allow_legacy_direct_energy_mutation=False,
         )
@@ -220,16 +246,24 @@ class RequestServices:
             player, self.data_dir, save, heroes=self.heroes, inventory=self.inventory,
             uow=self.uow, settlement=self.mutation_settlement,
         )
-        # Pass40.1 Campaign planning seam. Effective-source facts, executable
-        # policy and randomness remain separate; RequestServices only composes
-        # the request-scoped graph and owns no drop business logic.
+        # Pass113/114 Campaign RNG plane. Effective-source facts and domain
+        # policy remain separate from entropy mechanics. Ordinary MID117 alone
+        # calls plan_repeat_sweep(); MID113 retains its legacy disabled policy.
         self.campaign_drop_source = CampaignDropSourceCatalog(self.data_dir)
         self.campaign_drop_policy = CampaignDropPolicyRegistry(self.data_dir)
-        self.campaign_random = SystemRandomSource()
+        self.campaign_repeat_policy = CampaignRepeatPolicyRegistry(self.data_dir)
+        self.campaign_random = CampaignRandomOutcomeAdapter(
+            self.random_outcomes, "campaign.repeat.residual"
+        )
+        self.campaign_first_clear_random = CampaignRandomOutcomeAdapter(
+            self.random_outcomes, "campaign.first_clear.row"
+        )
         self.campaign_drop_planner = CampaignDropPlanner(
             self.campaign_drop_source,
             self.campaign_drop_policy,
             self.campaign_random,
+            repeat_policy_registry=self.campaign_repeat_policy,
+            first_clear_random_source=self.campaign_first_clear_random,
         )
         # Pass41.7 Summon composition. Recovered operation/state/cost/pool facts
         # remain separate from explicitly authorized private-server policy.
@@ -250,16 +284,27 @@ class RequestServices:
             self.data_dir, self.summon_featured_catalog
         )
         self.medium_legacy_planner = MediumLegacyPrivatePlanner(
-            self.summon_featured_catalog, self.medium_legacy_policy
+            self.summon_featured_catalog,
+            self.medium_legacy_policy,
+            random_source=NamespacedRandbelowAdapter(
+                self.random_outcomes, "summon.medium_legacy"
+            ),
         )
         self.summon_private_policy = SummonPrivateServerPolicy(self.data_dir)
         self.classic_vending_balance_policy = ClassicVendingBalancePolicy(self.data_dir)
         self.classic_vending_balance_planner = ClassicVendingBalancePlanner(
-            self.classic_vending_balance_policy, self.catalog
+            self.classic_vending_balance_policy,
+            self.catalog,
+            random_source=NamespacedRandbelowAdapter(
+                self.random_outcomes, "summon.classic.balance"
+            ),
         )
         self.summon_private_planner = ClassicVendingPrivatePlanner(
             self.summon_pool_catalog,
             self.summon_private_policy,
+            random_source=NamespacedRandbelowAdapter(
+                self.random_outcomes, "summon.classic.pool"
+            ),
             balance_planner=self.classic_vending_balance_planner,
         )
         self.summon_result_policy = SummonResultPolicyRegistry(self.data_dir)
@@ -290,7 +335,11 @@ class RequestServices:
             self.data_dir, self.sx_soul_box_source
         )
         self.sx_soul_box_planner = SXSoulBoxPrivatePlanner(
-            self.sx_soul_box_source, self.sx_soul_box_policy
+            self.sx_soul_box_source,
+            self.sx_soul_box_policy,
+            random_source=NamespacedRandbelowAdapter(
+                self.random_outcomes, "summon.sx"
+            ),
         )
         self.summon = SummonRepository(
             player,
@@ -341,6 +390,13 @@ class RequestServices:
             uow=self.uow,
             campaign_reset_policy=self.campaign_reset_policy,
             vip_privileges=self.vip_privileges,
+            challenge_catalog=self.challenge_campaign_catalog,
+            challenge_projection=self.challenge_campaign_projection,
+            super_catalog=self.super_campaign_catalog,
+            super_access_policy=self.super_campaign_access,
+            super_projection=self.super_campaign_projection,
+            elite_campaign_unlock=self.elite_campaign_unlock,
+            strict_campaign_collaborators=True,
         )
 
     def apply_semantic_deltas(self, payload):

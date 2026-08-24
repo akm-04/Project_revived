@@ -693,7 +693,7 @@ class PlayerState:
         default = {
             "normal": [{"campaign_id": 100001, "star": 0, "daily_limit": 0, "reset_count": 0, "is_partner_drop": 0}],
             "super": [],
-            "challenge": {},
+            "challenge": [],
             "chapter_events": {},
             "chapter_info": {
                 "normal_chapter_id": 1,
@@ -708,6 +708,38 @@ class PlayerState:
         }
         out = {**default, **self.world_map}
         out["chapter_info"] = {**default["chapter_info"], **(self.world_map.get("chapter_info") or {})}
+        challenge_raw = out.get("challenge")
+        if isinstance(challenge_raw, dict):
+            challenge_raw = [value for value in challenge_raw.values() if isinstance(value, dict)]
+        if not isinstance(challenge_raw, list):
+            challenge_raw = []
+        challenge: list[dict[str, int]] = []
+        seen: set[int] = set()
+        for row in challenge_raw:
+            if not isinstance(row, dict):
+                continue
+            try:
+                cid = int(row.get("campaign_id", 0) or 0)
+            except (TypeError, ValueError):
+                cid = 0
+            if cid <= 0 or cid in seen:
+                continue
+            seen.add(cid)
+            challenge.append({
+                "campaign_id": cid,
+                "star": max(0, min(3, int(row.get("star", 0) or 0))),
+                "daily_limit": max(0, int(row.get("daily_limit", 0) or 0)),
+                "reset_count": max(0, int(row.get("reset_count", 0) or 0)),
+            })
+        # Pass122: Challenge graph projection is owned exclusively by
+        # WorldRepository/ChallengeProjectionService, which runs at durable
+        # player-load maintenance and LOAD_WORLD_MAP. This serializer must not
+        # independently invent a partial one-root topology.
+        challenge = [
+            {**row, "daily_limit": 0, "reset_count": 0}
+            for row in challenge
+        ]
+        out["challenge"] = challenge
         return out
 
     def trial_infos_payload(self) -> dict[str, Any]:

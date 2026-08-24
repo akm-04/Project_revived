@@ -1,0 +1,56 @@
+{
+  "pass": "111.0",
+  "backend_version": "0.14.1",
+  "status": "STATIC_SELFTEST_FRESH_EXTRACTION_ACCEPTED_CLIENT_RUNTIME_PENDING",
+  "scope": "MID50 UUID/UoW/ROS migration only; Summon policy unchanged; Campaign unmigrated",
+  "source_feedback_loop": "PASS",
+  "focused_mid50_selftest": "PASS",
+  "applicable_regression_spine": {
+    "passed": 8,
+    "failed": 0,
+    "passed_tests": [
+      "selftest_pass111_mid50_rng_migration.py",
+      "validate_pass42_14.py",
+      "selftest_pass68_1_medium_free.py",
+      "selftest_pass105_session_firewall.py",
+      "selftest_pass99_campaign_sweep_qa_seed.py",
+      "selftest_pass98_deterministic_consumables.py",
+      "selftest_pass96_economy_vip_cleanup.py",
+      "selftest_pass70_1_stone_summon_mana.py"
+    ],
+    "superseded_historical_assertions": [
+      "selftest_pass104_mutation_firewall.py expects the pre-Pass105 count key phase2_session; accepted Pass105 authority uses phase2_block.",
+      "selftest_pass100_mid97_energy_purchase.py contains exact OTA package-version assertions for 1.631.4; Pass111 intentionally advances the cumulative OTA to 1.631.5 while preserving the Pass100 AddEnergy override byte-for-byte.",
+      "selftest_tutorial_summon.py was already documented as pre-existing drift on untouched Pass105/Pass110."
+    ]
+  },
+  "invariants": {
+    "missing_repeatable_mid50_uuid_fail_closed_before_entropy_or_spend": true,
+    "committed_retry_consumes_zero_entropy": true,
+    "committed_retry_consumes_zero_cost": true,
+    "committed_retry_exact_static_outcome": true,
+    "committed_retry_uses_current_economy_projection": true,
+    "uuid_tuple_conflict_fail_closed": true,
+    "fresh_uuid_executes_new_pull": true,
+    "legacy_paid_window_mid50_retired": true,
+    "legacy_paid_window_mid70_preserved": true,
+    "campaign_rng_migrated": false,
+    "summon_policy_hashes_unchanged": true
+  },
+  "fresh_extraction": {
+    "status": "PASS",
+    "checks": [
+      "implementation manifest hash/size verification",
+      "python compileall",
+      "selftest_pass111_mid50_rng_migration.py",
+      "validate_pass42_14.py",
+      "selftest_pass68_1_medium_free.py",
+      "selftest_pass105_session_firewall.py with canonical GXB_SRC64",
+      "selftest_pass99_campaign_sweep_qa_seed.py",
+      "selftest_pass98_deterministic_consumables.py",
+      "selftest_pass96_economy_vip_cleanup.py",
+      "selftest_pass70_1_stone_summon_mana.py",
+      "embedded OTA manifest/version/file-set/ZIP integrity"
+    ]
+  }
+}

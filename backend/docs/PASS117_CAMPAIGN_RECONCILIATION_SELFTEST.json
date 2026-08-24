@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "pass": "117.0",
+  "status": "PASS",
+  "focused_tests": 9,
+  "checks": [
+    "first-clear Bernoulli deterministic scripted entropy and 0/10000 no-draw boundaries",
+    "MID113 permanent staging receipt and exact no-reroll replay",
+    "new MID113 operation supersedes older active stage; stale stage cannot resurrect",
+    "MID114 victory commits frozen first-clear awards exactly once and returns items=[] for staged battle drops",
+    "MID114 loss commits no staged first-clear items and terminalizes SETTLED_LOSS",
+    "Super MID113/MID114 preserves daily_limit staging and decrements victory exactly once",
+    "missing MID113 identity fails before first-clear entropy",
+    "Challenge eligibility primary/fallback rules and exact 24111 payload",
+    "live MID114 terminal clear emits 24111 immediately",
+    "OTA 1.631.7 identity bridge/carry and application-error guard"
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "pass": "128.0",
+  "timestamp": "2026-08-24T14:05:12+06:00",
+  "effective_src64": "app-assets/output/assets/src_64",
+  "source_files": {
+    "data/tables/function.lua": "a240254e79ccfd41862f3d6289f4f5fd09280ac3e197f51bc14b896a62c10010",
+    "data/tables/campaign.lua": "7a58e878a7171839342a856cd74b512037528438259d036009a7249472504683",
+    "app/common/tables/CampaignTable.lua": "e27c0e43d0b630102653699d7ed8b1735071090be027c99cc415a4308dc45ce4",
+    "app/model/SelfPlayer.lua": "163d5893c9522ada412c2b9c4748a80757660fccdf03c8f72cb6edf0838b8eb4",
+    "app/windows/MapWindow.lua": "8e8048d2be0ddb17894b3357fad8f5c4e992df136c6d8e6215f1db568d42cbb8",
+    "app/windows/SelectTeamWindow.lua": "6d57e6bc7251060184190f7be14dcc9a277251673493a5b27e6c67c71cb96561",
+    "app/windows/SelectTeamNewWindow.lua": "0fabc7b70c2acf48765c41b414e3cae7504f567cb6fbe344b0f98456ed18667a",
+    "app/scenes/BattleCreate.lua": "bb9ae19c20ec165eeb7ba5b81a4ce85b6b7fea3a3a7eb278123bb8c0af0bbef9",
+    "lib/battle/battleConfig.lua": "5f89b765bd7326ebd2600a5a3feb4e593aa2bfa4cd283c8918eb593e21053727"
+  },
+  "confirmed_before_behavioral_modification": [
+    "FunctionID31 Elite Campaign source condition is 1|11.",
+    "SelfPlayer.onNewFuncOpen(31) invalidates cached world map and reloads LOAD_WORLD_MAP.",
+    "CampaignTable.relateCampaign() returns campaign.lua.relate_campaign_id; no arithmetic mapping is used.",
+    "Super nodes require a materialized server world-map row before battle click behavior is attached.",
+    "MapWindow.checkNomalCampaignThrough() separately gates non-Normal entry using Normal progression.",
+    "The 155 Super rows form one source-authored next/last chain ending at 2300024.",
+    "MID113/MID114 stock protocol has no cross-request operation UUID; Pass123 active_campaign_battle authority remains.",
+    "30005 remains errorIdFightExist/result-compatible semantics and is not a prerequisite denial code."
+  ],
+  "source_boundary": [
+    "Exact original prerequisite application error code unrecovered; compatibility error_code=1 retained.",
+    "Exact original server persistence schema/engine unrecovered."
+  ]
+}

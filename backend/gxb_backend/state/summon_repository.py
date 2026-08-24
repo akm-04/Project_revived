@@ -63,6 +63,15 @@ from .summon_operation_receipt import (
     SummonOperationReceiptStore,
     SummonReceiptIdentity,
 )
+from .mid50_operation_receipt import (
+    RECEIPT_DOMAIN as MID50_RECEIPT_DOMAIN,
+    RECEIPT_MODE as MID50_RECEIPT_MODE,
+    RETENTION_POLICY as MID50_RETENTION_POLICY,
+    Mid50OperationIdentity,
+    Mid50OperationIdentityError,
+    build_mid50_replay_payload,
+    validate_mid50_replay_payload,
+)
 from .summon_private_policy import ClassicVendingPrivatePlanner, SummonPrivateServerPolicy
 from .summon_featured_rotation import SummonFeaturedRotationPolicy
 from .medium_legacy_private_policy import MediumLegacyPrivatePlanner, MediumLegacyPrivatePolicy
@@ -467,6 +476,91 @@ class SummonRepository:
         # empty collection so rejected paid/RNG operations cannot reach pairs(nil).
         return {"error_code": 1, "result": []}
 
+    def _mid50_identity_from_request(
+        self, req: dict[str, Any], desc: SummonOperationDescriptor
+    ) -> Mid50OperationIdentity | None:
+        return Mid50OperationIdentity.from_request(
+            req,
+            summon_type=desc.key.summon_type,
+            summon_index=desc.key.summon_index,
+        )
+
+    def _mid50_replay(
+        self, identity: Mid50OperationIdentity
+    ) -> dict[str, Any] | None:
+        if self.uow is None:
+            raise RuntimeError("MID50 durable replay requires PlayerUnitOfWork")
+        receipt = self.uow.get_receipt(MID50_RECEIPT_DOMAIN, identity.operation_id)
+        if receipt is None:
+            return None
+        if str(receipt.get("status") or "") != "COMMITTED":
+            raise Mid50OperationIdentityError("MID50 receipt is not committed")
+        if str(receipt.get("mode") or "") != MID50_RECEIPT_MODE:
+            raise Mid50OperationIdentityError("MID50 receipt mode mismatch")
+        old_fingerprint = str(receipt.get("request_fingerprint") or "")
+        if old_fingerprint != identity.fingerprint:
+            raise Mid50OperationIdentityError("MID50 receipt fingerprint conflict")
+        payload = validate_mid50_replay_payload(
+            receipt.get("replay_payload"), identity=identity
+        )
+        response = copy.deepcopy(payload["static_response"])
+        projection = payload["projection"]
+        economy_keys = projection.get("economy_keys") or []
+        if economy_keys:
+            current: dict[str, int] = {}
+            for key in economy_keys:
+                if not hasattr(self.player, key):
+                    raise ValueError(f"MID50 replay economy projection has no player field: {key}")
+                current[str(key)] = max(0, self._int(getattr(self.player, key), 0))
+            response["economy_"] = current
+        if projection.get("summon_info") is True:
+            response["summon_info"] = self._payload_from_state()
+        return response
+
+    def _require_repeatable_mid50_identity(
+        self, identity: Mid50OperationIdentity | None
+    ) -> Mid50OperationIdentity:
+        if identity is None:
+            raise Mid50OperationIdentityError("repeatable MID50 requires summon_op_id")
+        if self.uow is None:
+            raise RuntimeError("repeatable MID50 requires PlayerUnitOfWork")
+        return identity
+
+    def _mid50_context(
+        self, identity: Mid50OperationIdentity, semantic: str, *, server_time: int | None = None
+    ) -> OperationContext:
+        return OperationContext(
+            actor_player_id=str(self.player.player_id),
+            domain="summon",
+            operation_name=str(semantic),
+            protocol_mid=50,
+            idempotency_key=identity.operation_id,
+            idempotency_mode=MID50_RECEIPT_MODE,
+            request_fingerprint=identity.fingerprint,
+            server_time=server_time,
+        )
+
+    def _stage_mid50_receipt(
+        self,
+        *,
+        identity: Mid50OperationIdentity,
+        semantic: str,
+        response: dict[str, Any],
+    ) -> None:
+        if self.uow is None:
+            raise RuntimeError("MID50 receipt staging requires PlayerUnitOfWork")
+        self.uow.stage_receipt(
+            domain=MID50_RECEIPT_DOMAIN,
+            operation=str(semantic),
+            key=identity.operation_id,
+            mode=MID50_RECEIPT_MODE,
+            request_fingerprint=identity.fingerprint,
+            replay_payload=build_mid50_replay_payload(
+                semantic=semantic, identity=identity, response=response
+            ),
+            retention_policy=MID50_RETENTION_POLICY,
+        )
+
     @staticmethod
     def _receipt_key(desc: SummonOperationDescriptor) -> str:
         return f"mid{desc.key.protocol_mid}:type{desc.key.summon_type}:index{desc.key.summon_index}"
@@ -688,10 +782,7 @@ class SummonRepository:
         return False
 
     def summon_hero(self, req: dict[str, Any]) -> dict[str, Any]:
-        """Dispatch only explicitly registered active MID50 operation semantics."""
-        if self.normalize():
-            self._save()
-
+        """Dispatch explicitly registered MID50 operations with UUID replay first."""
         decision = self.operation_registry.resolve(
             50,
             req.get("summon_type"),
@@ -700,6 +791,26 @@ class SummonRepository:
         if not decision.supported or decision.descriptor is None or not decision.strategy:
             return self._blocked_mid50()
         desc = decision.descriptor
+
+        try:
+            identity = self._mid50_identity_from_request(req, desc)
+            # Paid/repeatable MID50 operations require source-native operation identity
+            # before any normalization can persist unrelated state. Tutorial tuples keep
+            # their historical one-shot receipt path until they transition into the
+            # post-tutorial repeatable handlers below.
+            if decision.strategy in {"_classic_paid", "_sx_private"} and identity is None:
+                return self._blocked_mid50()
+            # A committed UUID receipt outranks current mutable eligibility. This is
+            # the no-reroll/no-double-spend retry boundary frozen in Pass109.
+            if identity is not None:
+                replay = self._mid50_replay(identity)
+                if replay is not None:
+                    return replay
+        except (Mid50OperationIdentityError, RuntimeError, ValueError):
+            return self._blocked_mid50()
+
+        if self.normalize():
+            self._save()
         if (
             desc.support_status == "tutorial_supported"
             and self._int(self.player.summon.get("tutorial_enabled"), 0) != 1
@@ -711,7 +822,7 @@ class SummonRepository:
         handler = getattr(self, decision.strategy, None)
         if not callable(handler):
             return self._blocked_mid50()
-        return handler(desc)
+        return handler(desc, identity)
 
     @staticmethod
     def _blocked_magic() -> dict[str, Any]:
@@ -1146,44 +1257,43 @@ class SummonRepository:
                 )
         return result_rows
 
-    def _classic_paid(self, desc: SummonOperationDescriptor) -> dict[str, Any]:
-        """Execute mapped classic paid buttons under Private Policy v1."""
+    def _classic_paid(
+        self,
+        desc: SummonOperationDescriptor,
+        identity: Mid50OperationIdentity | None,
+    ) -> dict[str, Any]:
+        """Execute mapped repeatable classic MID50 under durable UUID receipts."""
         if (
             self.uow is None
             or self.inventory is None
+            or self.economy is None
             or self.catalog is None
             or self.private_policy is None
             or self.private_planner is None
             or not self.private_policy.active(desc.semantic)
         ):
             return self._blocked_mid50()
-
-        now_ms = int(time.time() * 1000)
-        paid_receipts = PaidSummonOperationReceiptStore(self.player.summon)
-        replay = paid_receipts.replay(
-            semantic=desc.semantic,
-            now_ms=now_ms,
-            window_ms=self.private_policy.retry_window_ms,
-        )
-        if replay is not None:
-            return replay
+        try:
+            identity = self._require_repeatable_mid50_identity(identity)
+            replay = self._mid50_replay(identity)
+            if replay is not None:
+                return replay
+        except (Mid50OperationIdentityError, RuntimeError, ValueError):
+            return self._blocked_mid50()
 
         counter = self.counter_policies.get(desc.counter_policy_id)
         if counter is None or not counter.persistence_key:
             return self._blocked_mid50()
 
-        context = OperationContext(
-            actor_player_id=str(self.player.player_id),
-            domain="summon",
-            operation_name=desc.semantic,
-            protocol_mid=50,
-            idempotency_key=f"private:{desc.semantic}:{now_ms}",
-        )
+        now = int(time.time())
+        context = self._mid50_context(identity, desc.semantic, server_time=now)
         try:
             with self.uow.transaction(context):
+                replay = self._mid50_replay(identity)
+                if replay is not None:
+                    return replay
                 economy_projection = self._classic_spend(desc)
                 selections, counter_after = self._classic_select_results(desc)
-
                 result_rows = self._classic_materialize_results(desc, selections)
 
                 self.player.summon[counter.persistence_key] = counter_after
@@ -1194,7 +1304,11 @@ class SummonRepository:
                 plan = SummonResultPlan.create(
                     semantic=desc.semantic,
                     rows=result_rows,
-                    planner_status=("private_server_policy_v2_medium_legacy" if medium_legacy_active else "private_server_policy_v1"),
+                    planner_status=(
+                        "private_server_policy_v2_medium_legacy"
+                        if medium_legacy_active
+                        else "private_server_policy_v1"
+                    ),
                     source_reference=(
                         f"summon.lua:{desc.source_summon_row}+dropbox.lua+private-medium-legacy-v1"
                         if medium_legacy_active
@@ -1207,13 +1321,8 @@ class SummonRepository:
                     "economy_": dict(economy_projection),
                     "summon_info": self._payload_from_state(),
                 }
-                paid_receipts.store(
-                    semantic=desc.semantic,
-                    protocol_mid=desc.key.protocol_mid,
-                    summon_type=desc.key.summon_type,
-                    summon_index=desc.key.summon_index,
-                    committed_at_ms=now_ms,
-                    response=response,
+                self._stage_mid50_receipt(
+                    identity=identity, semantic=desc.semantic, response=response
                 )
                 self.uow.mark_changed()
             return response
@@ -1221,6 +1330,7 @@ class SummonRepository:
             AmbiguousContentReference,
             EconomyMutationError,
             KeyError,
+            Mid50OperationIdentityError,
             RuntimeError,
             SummonCounterTransitionUnavailable,
             SummonDuplicateConversionUnavailable,
@@ -1309,16 +1419,12 @@ class SummonRepository:
             raise RuntimeError("SX fragment class did not produce one Backpack award")
         return SummonResultRowPlan.item(item_id=int(fragment_item_id), item_num=quantity)
 
-    def _sx_private(self, desc: SummonOperationDescriptor) -> dict[str, Any]:
-        """MID50 type4: execute corrected Custom Private Server SX Policy v2.
-
-        Five item rows remain independently selected from recovered pools
-        200007..200011.  The sixth row is a mixed Soul-Casket reward class:
-        current SX full Hero, normal 3-star fragments, normal 2-star fragments,
-        or ordinary full Hero.  Only the rare full-SX class receives hotspot
-        rate-up/pity.  Duplicate full Heroes reuse the global recovered 7/14/30
-        conversion resolver.
-        """
+    def _sx_private(
+        self,
+        desc: SummonOperationDescriptor,
+        identity: Mid50OperationIdentity | None,
+    ) -> dict[str, Any]:
+        """MID50 type4 with durable UUID receipt/replay and unchanged SX policy."""
         if (
             self.uow is None
             or self.inventory is None
@@ -1331,32 +1437,21 @@ class SummonRepository:
         ):
             return self._blocked_mid50()
         try:
+            identity = self._require_repeatable_mid50_identity(identity)
+            replay = self._mid50_replay(identity)
+            if replay is not None:
+                return replay
             selected_hotspot = self._sx_selected_hotspot(desc)
-        except (KeyError, RuntimeError, ValueError):
+        except (KeyError, Mid50OperationIdentityError, RuntimeError, ValueError):
             return self._blocked_mid50()
 
-        now_ms = int(time.time() * 1000)
-        semantic = (
-            f"{desc.semantic}:target:{selected_hotspot}:policy:{self.sx_policy.policy_version}"
-        )
-        receipts = PaidSummonOperationReceiptStore(self.player.summon)
-        replay = receipts.replay(
-            semantic=semantic,
-            now_ms=now_ms,
-            window_ms=self.sx_policy.retry_window_ms,
-        )
-        if replay is not None:
-            return replay
-
-        context = OperationContext(
-            actor_player_id=str(self.player.player_id),
-            domain="summon",
-            operation_name=desc.semantic,
-            protocol_mid=50,
-            idempotency_key=f"private-sx:{desc.key.summon_index}:{selected_hotspot}:{now_ms}",
-        )
+        now = int(time.time())
+        context = self._mid50_context(identity, desc.semantic, server_time=now)
         try:
             with self.uow.transaction(context):
+                replay = self._mid50_replay(identity)
+                if replay is not None:
+                    return replay
                 economy_projection = self._sx_spend(desc)
                 result_rows: list[SummonResultRowPlan] = []
                 for pool_id in self.sx_policy.static_pool_ids:
@@ -1410,13 +1505,8 @@ class SummonRepository:
                     "economy_": dict(economy_projection),
                     "summon_info": self._payload_from_state(),
                 }
-                receipts.store(
-                    semantic=semantic,
-                    protocol_mid=desc.key.protocol_mid,
-                    summon_type=desc.key.summon_type,
-                    summon_index=desc.key.summon_index,
-                    committed_at_ms=now_ms,
-                    response=response,
+                self._stage_mid50_receipt(
+                    identity=identity, semantic=desc.semantic, response=response
                 )
                 self.uow.mark_changed()
             return response
@@ -1424,6 +1514,7 @@ class SummonRepository:
             AmbiguousContentReference,
             EconomyMutationError,
             KeyError,
+            Mid50OperationIdentityError,
             RuntimeError,
             SummonDuplicateConversionUnavailable,
             SummonResultPlanUnavailable,
@@ -1432,15 +1523,12 @@ class SummonRepository:
         ):
             return self._blocked_mid50()
 
-    def _small_free_after_tutorial(self, desc: SummonOperationDescriptor) -> dict[str, Any]:
-        """Execute eligible Small free pulls #2-#5 for the stateful MID50 (1,1) tuple.
-
-        The client sends the same protocol tuple for every free Small pull.  Pull #1
-        remains the deterministic tutorial Lavia operation; after the tutorial receipt
-        is complete, remaining free pulls use the normal Small private planner.  The
-        source-backed 600-second timer and server-projected ``mana_free_num`` gate the
-        operation.  No reset/replenishment calendar is invented here.
-        """
+    def _small_free_after_tutorial(
+        self,
+        desc: SummonOperationDescriptor,
+        identity: Mid50OperationIdentity | None,
+    ) -> dict[str, Any]:
+        """Execute source-confirmed repeatable Small free MID50 with UUID replay."""
         if (
             self.uow is None
             or self.inventory is None
@@ -1449,6 +1537,13 @@ class SummonRepository:
             or self.private_planner is None
             or not self.private_policy.active("small_free_post_tutorial")
         ):
+            return self._blocked_mid50()
+        try:
+            identity = self._require_repeatable_mid50_identity(identity)
+            replay = self._mid50_replay(identity)
+            if replay is not None:
+                return replay
+        except (Mid50OperationIdentityError, RuntimeError, ValueError):
             return self._blocked_mid50()
 
         cost_plan = self.cost_plans.get(desc.cost_plan_id)
@@ -1468,18 +1563,8 @@ class SummonRepository:
         ):
             return self._blocked_mid50()
 
-        now_ms = int(time.time() * 1000)
-        repeat_receipts = PaidSummonOperationReceiptStore(self.player.summon)
-        replay = repeat_receipts.replay(
-            semantic="small_free_post_tutorial",
-            now_ms=now_ms,
-            window_ms=self.private_policy.retry_window_ms,
-        )
-        if replay is not None:
-            return replay
-
         state = self.player.summon
-        now = now_ms // 1000
+        now = int(time.time())
         remaining = max(0, self._int(state.get(timer_policy.free_count_field), 0))
         last_free = max(0, self._int(state.get(timer_policy.free_time_field), 0))
         if remaining <= 0:
@@ -1487,15 +1572,14 @@ class SummonRepository:
         if last_free > 0 and now < last_free + int(timer_policy.period_seconds):
             return self._blocked_mid50()
 
-        context = OperationContext(
-            actor_player_id=str(self.player.player_id),
-            domain="summon",
-            operation_name="small_free_post_tutorial",
-            protocol_mid=50,
-            idempotency_key=f"private:small_free_post_tutorial:{now_ms}",
+        context = self._mid50_context(
+            identity, "small_free_post_tutorial", server_time=now
         )
         try:
             with self.uow.transaction(context):
+                replay = self._mid50_replay(identity)
+                if replay is not None:
+                    return replay
                 selections, counter_after = self._classic_select_results(desc)
                 result_rows = self._classic_materialize_results(desc, selections)
                 state[timer_policy.free_time_field] = now
@@ -1515,12 +1599,9 @@ class SummonRepository:
                     "result": self._render_result_plan(plan),
                     "summon_info": self._payload_from_state(),
                 }
-                repeat_receipts.store(
+                self._stage_mid50_receipt(
+                    identity=identity,
                     semantic="small_free_post_tutorial",
-                    protocol_mid=desc.key.protocol_mid,
-                    summon_type=desc.key.summon_type,
-                    summon_index=desc.key.summon_index,
-                    committed_at_ms=now_ms,
                     response=response,
                 )
                 self.uow.mark_changed()
@@ -1528,6 +1609,7 @@ class SummonRepository:
         except (
             AmbiguousContentReference,
             KeyError,
+            Mid50OperationIdentityError,
             RuntimeError,
             SummonCounterTransitionUnavailable,
             SummonDuplicateConversionUnavailable,
@@ -1537,7 +1619,9 @@ class SummonRepository:
         ):
             return self._blocked_mid50()
 
-    def _tutorial_mana(self, desc: SummonOperationDescriptor) -> dict[str, Any]:
+    def _tutorial_mana(
+        self, desc: SummonOperationDescriptor, identity: Mid50OperationIdentity | None
+    ) -> dict[str, Any]:
         if not self._validate_tutorial_descriptor(desc, "lavia"):
             return self._blocked_mid50()
         if self.uow is None or self.rewards is None or self.catalog is None:
@@ -1554,7 +1638,7 @@ class SummonRepository:
         if receipt is not None:
             if guide_id < guide_after:
                 return copy.deepcopy(receipt["response"])
-            return self._small_free_after_tutorial(desc)
+            return self._small_free_after_tutorial(desc, identity)
 
         has_lavia = self._has_expected_hero("lavia")
         if has_lavia:
@@ -1564,7 +1648,7 @@ class SummonRepository:
             # authorizes this one-time missing reward migration.  guide_id only
             # limits whether replay is still useful to the tutorial client.
             if guide_id >= guide_after:
-                return self._small_free_after_tutorial(desc)
+                return self._small_free_after_tutorial(desc, identity)
             if self._int(state.get("tutorial_mana_done"), 0) != 1:
                 return self._blocked_mid50()
             context = OperationContext(
@@ -1635,17 +1719,12 @@ class SummonRepository:
         except (RuntimeError, ValueError, RewardValidationError, UnknownContentReference, AmbiguousContentReference):
             return self._blocked_mid50()
 
-    def _medium_free_after_tutorial(self, desc: SummonOperationDescriptor) -> dict[str, Any]:
-        """Execute a cooldown-ready post-tutorial Medium/CrystalFree pull.
-
-        Effective SummonWindow.lua reuses MID50 ``summon_type=3,index=1``
-        whenever ``getNextFreeCrystalSummonTime()`` reports ready. The source
-        period is 165600 seconds and summon.lua row3 provides the ordinary/super
-        pools plus 1/2/10/30/60 special topology. Exact historical counter
-        storage and RNG are server-only, so Pass68.1 keeps them inside the
-        explicitly authorized private-policy seam instead of blocking a proven
-        client operation.
-        """
+    def _medium_free_after_tutorial(
+        self,
+        desc: SummonOperationDescriptor,
+        identity: Mid50OperationIdentity | None,
+    ) -> dict[str, Any]:
+        """Execute repeatable CrystalFree MID50 with durable UUID replay."""
         if (
             self.uow is None
             or self.inventory is None
@@ -1654,6 +1733,13 @@ class SummonRepository:
             or self.private_planner is None
             or not self.private_policy.active("medium_free_post_tutorial")
         ):
+            return self._blocked_mid50()
+        try:
+            identity = self._require_repeatable_mid50_identity(identity)
+            replay = self._mid50_replay(identity)
+            if replay is not None:
+                return replay
+        except (Mid50OperationIdentityError, RuntimeError, ValueError):
             return self._blocked_mid50()
 
         cost_plan = self.cost_plans.get(desc.cost_plan_id)
@@ -1672,31 +1758,20 @@ class SummonRepository:
         ):
             return self._blocked_mid50()
 
-        now_ms = int(time.time() * 1000)
-        repeat_receipts = PaidSummonOperationReceiptStore(self.player.summon)
-        replay = repeat_receipts.replay(
-            semantic="medium_free_post_tutorial",
-            now_ms=now_ms,
-            window_ms=self.private_policy.retry_window_ms,
-        )
-        if replay is not None:
-            return replay
-
         state = self.player.summon
-        now = now_ms // 1000
+        now = int(time.time())
         last_free = max(0, self._int(state.get(timer_policy.free_time_field), 0))
         if last_free > 0 and now < last_free + int(timer_policy.period_seconds):
             return self._blocked_mid50()
 
-        context = OperationContext(
-            actor_player_id=str(self.player.player_id),
-            domain="summon",
-            operation_name="medium_free_post_tutorial",
-            protocol_mid=50,
-            idempotency_key=f"private:medium_free_post_tutorial:{now_ms}",
+        context = self._mid50_context(
+            identity, "medium_free_post_tutorial", server_time=now
         )
         try:
             with self.uow.transaction(context):
+                replay = self._mid50_replay(identity)
+                if replay is not None:
+                    return replay
                 selections, counter_after = self._classic_select_results(desc)
                 result_rows = self._classic_materialize_results(desc, selections)
                 state[timer_policy.free_time_field] = now
@@ -1715,12 +1790,9 @@ class SummonRepository:
                     "result": self._render_result_plan(plan),
                     "summon_info": self._payload_from_state(),
                 }
-                repeat_receipts.store(
+                self._stage_mid50_receipt(
+                    identity=identity,
                     semantic="medium_free_post_tutorial",
-                    protocol_mid=desc.key.protocol_mid,
-                    summon_type=desc.key.summon_type,
-                    summon_index=desc.key.summon_index,
-                    committed_at_ms=now_ms,
                     response=response,
                 )
                 self.uow.mark_changed()
@@ -1728,6 +1800,7 @@ class SummonRepository:
         except (
             AmbiguousContentReference,
             KeyError,
+            Mid50OperationIdentityError,
             RuntimeError,
             SummonCounterTransitionUnavailable,
             SummonDuplicateConversionUnavailable,
@@ -1737,7 +1810,9 @@ class SummonRepository:
         ):
             return self._blocked_mid50()
 
-    def _tutorial_crystal(self, desc: SummonOperationDescriptor) -> dict[str, Any]:
+    def _tutorial_crystal(
+        self, desc: SummonOperationDescriptor, identity: Mid50OperationIdentity | None
+    ) -> dict[str, Any]:
         # Pass40.2 intentionally preserves the established deterministic Pandaria
         # path. The configured Medium Juice reward identity is known, but its
         # historical quantity is not, so no reward field is invented here.
@@ -1758,14 +1833,14 @@ class SummonRepository:
                     "result": self._render_result_plan(result_plan),
                     "summon_info": self.payload(),
                 }
-            return self._medium_free_after_tutorial(desc)
+            return self._medium_free_after_tutorial(desc, identity)
 
         # Established/post-guide characters still use the same CrystalFree
         # protocol tuple. If their tutorial Pandaria is absent, the private
         # row3 counter begins at zero and the first accepted free pull follows
         # source milestone 1 instead of failing the proven client request.
         if self._int(self.player.guide_id, 0) >= guide_after:
-            return self._medium_free_after_tutorial(desc)
+            return self._medium_free_after_tutorial(desc, identity)
         if not (state.get("tutorial_mana_done") or self._has_expected_hero("lavia")):
             return self._blocked_mid50()
         if self._int(state.get("crystal_free_time"), 0) >= 1:

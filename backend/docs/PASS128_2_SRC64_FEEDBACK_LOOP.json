@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "pass": "128.2",
+  "timestamp": "2026-08-24T14:30:00+06:00",
+  "effective_src64": "app-assets/output/assets/src_64",
+  "source_files": {
+    "app/model/SelfPlayer.lua": "163d5893c9522ada412c2b9c4748a80757660fccdf03c8f72cb6edf0838b8eb4",
+    "app/windows/MapWindow.lua": "8e8048d2be0ddb17894b3357fad8f5c4e992df136c6d8e6215f1db568d42cbb8"
+  },
+  "confirmed_before_behavioral_modification": [
+    "SelfPlayer.worldMapEvent_() directly assigns super_chapter_id, super_campaign_id, super_stars and super_bonus_id from MID112 chapter_info with no defaults.",
+    "MapWindow.updateChapterTypeBtnShowInfo() computes SUPER visibility with maxSuperChapter > 0 and therefore cannot tolerate nil super_chapter_id.",
+    "Numeric zero is the source-compatible closed-Elite wire value; field omission is observably different.",
+    "The runtime failure is serialization/schema completeness, not evidence against Function31 level11 bootstrap, sequential Super projection, related-Normal authorization, MID113 STAGED replay, or MID117 receipt replay ordering."
+  ],
+  "design_preserved": [
+    "SuperCampaignProjectionService remains sole Super cursor owner.",
+    "No duplicate cursor ownership is reintroduced into WorldRepository.",
+    "No OTA or Lua modifications."
+  ]
+}

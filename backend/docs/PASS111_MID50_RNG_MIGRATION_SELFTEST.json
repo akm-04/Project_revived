@@ -1,0 +1,47 @@
+{
+  "boundaries": {
+    "Campaign_unmigrated": true,
+    "MID50_probability_pool_pity_unchanged": true,
+    "legacy_short_window_store_remaining_plane": "MID70 Magic Summon only",
+    "tutorial_one_shot_receipts_preserved": true
+  },
+  "exactly_once": {
+    "fingerprint_conflict_fail_closed": true,
+    "first_draw_count": 1,
+    "first_draws": [
+      {
+        "namespace": "summon.classic.pool",
+        "ordinal": 0,
+        "upper_exclusive": 10000
+      }
+    ],
+    "fresh_uuid_executes_again": true,
+    "receipt_domain": "mid50_summon",
+    "receipt_mode": "CLIENT_UUID_V4",
+    "replay_live_economy": true,
+    "replay_static_exact": true,
+    "retention": "CLIENT_UUID_PERMANENT",
+    "retry_entropy_delta": 0
+  },
+  "ota": {
+    "files": 130,
+    "prior_overrides_preserved": 128,
+    "resource_version": "1.631.5"
+  },
+  "pass": "111.0",
+  "policy_files_verified_unchanged": {
+    "data/summon_cost_policy.json": "87f69a1d3a7d2d9020d06429b7c932d27f86a776150938d3c5b1beeb1f1cf784",
+    "data/summon_counter_policy.json": "246ffe49c39921c2f4290dd52c0fe176140a5d3653a18b1dbc4a066693b6039d",
+    "data/summon_operation_catalog.json": "fa67a40e902ba7667e1f20340defacad40b1ac09b6e3c55fabe586147f838e7a",
+    "data/summon_pool_catalog.json": "31702401c8be6dfc3029df8c95a4462850692ea82c12a864f7e6531109e4d718",
+    "data/summon_private_server_policy.json": "4e419ca4bddb3255c8e5f4aba5537e3d7315f6d6b8574da16ebe0764fa58bed2",
+    "data/summon_result_policy.json": "f642bfa52c52196c45d5b99902a15a6785e2d332adc5e773eff75fca90323824",
+    "gxb_backend/state/classic_vending_balance_policy.py": "d5464c74c2b956383cfe33b51c02c2d5b7d2b31190b8e25e52e2b351adfdd8d1",
+    "gxb_backend/state/medium_legacy_private_policy.py": "2e45bbd54b344d53f6bcc0ba0ff4b5fa85ed24e91888aeded5f81d9052faaf83",
+    "gxb_backend/state/summon_private_policy.py": "45b0cccabfbfa701f97fb1db92443d2b3d36b7a8e22ce3a2c826bf118f79b937",
+    "gxb_backend/state/sx_soul_box_private_policy.py": "a4d501416dd565a4ac64c015f4f8c294d411b56b6943217d88da87c3d7809baa"
+  },
+  "schema_version": 1,
+  "scope": "MID50 UUID + UoW receipt/replay + RandomOutcomeService adapter migration only",
+  "status": "PASS"
+}

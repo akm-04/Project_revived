@@ -1,0 +1,127 @@
+{
+  "backend_version": "0.14.2",
+  "changed_files": [
+    {
+      "bytes": 1497,
+      "change": "modified",
+      "path": "README.md",
+      "prior_sha256": "da784e50fe9be69939db7dbf33ed2d51cc4cbd5523f479390ba10e43f59845b7",
+      "sha256": "8e6e65ab391e2791815a71c201eda63e18902077ef4302546494d73628039e79"
+    },
+    {
+      "bytes": 696,
+      "change": "modified",
+      "path": "UPDATE_README.md",
+      "prior_sha256": "98e87d501444dd2826e9ce6f56caafc15de874cfa649e05f6e0bb6ffadc2c6a8",
+      "sha256": "ea7da2c1f656ecfe0def49622388685ed98ec2e04c9eb59e917009330d8eae3b"
+    },
+    {
+      "bytes": 617,
+      "change": "modified",
+      "path": "VERSION.json",
+      "prior_sha256": "7b30102e74cc33ec769e9103274e2fbc286409bd192a1bd0e60a655324bd3f9d",
+      "sha256": "b96e1cf72f67ebe5dfcc325e0622ada6d5eceb570ad91b9dc0ee01e942db39a6"
+    },
+    {
+      "bytes": 101,
+      "change": "modified",
+      "path": "gxb_backend/version.py",
+      "prior_sha256": "376efb69e0cb3dfa18d7a4b6998733fce332eda50960ccdd003bb239a4f9389d",
+      "sha256": "0114c6a62020332c29dcc78479f65dd705a5b3686a019d2c281d1304f64ed725"
+    },
+    {
+      "bytes": 19955,
+      "change": "modified",
+      "path": "gxb_backend/state/campaign_drop_planner.py",
+      "prior_sha256": "9afce5494387dc27a9505d7ac44f6db74b232dcb02c9aa568d17d245e14e2490",
+      "sha256": "dbf295ded45ba8cb2c8a42f646772d4e59d933d5be0c22acc3f25b611afe377b"
+    },
+    {
+      "bytes": 20757,
+      "change": "modified",
+      "path": "gxb_backend/state/request_services.py",
+      "prior_sha256": "a5a5f94c23eab265dc6f85f07ac1755bf161e67ce6ee36a8262ce0c96be53488",
+      "sha256": "0fc8f24543375f13d7fd89d36c369447dcd5baf1944caa0aa4fa2f69f82534e4"
+    },
+    {
+      "bytes": 10452,
+      "change": "added",
+      "path": "gxb_backend/state/mid117_operation_receipt.py",
+      "prior_sha256": null,
+      "sha256": "a360b8aeecea28113ffdf9a162aa23ae42c2028309076289a6678e6016517ce0"
+    },
+    {
+      "bytes": 792,
+      "change": "added",
+      "path": "data/campaign_repeat_rng_policy.json",
+      "prior_sha256": null,
+      "sha256": "3cdfe70dd9d9e7dc4bab2fb2b66eecbd2e5a0bea5c4b3951ca2907d61b049c16"
+    },
+    {
+      "bytes": 15913,
+      "change": "added",
+      "path": "tools/selftest_pass113_campaign_rng_foundation.py",
+      "prior_sha256": null,
+      "sha256": "f91abcf79d201d2789c2e7fedb45e604691c571a234762eaba27764c2b80c3ab"
+    },
+    {
+      "bytes": 1159,
+      "change": "added",
+      "path": "docs/PASS113_CAMPAIGN_RNG_FOUNDATION_SELFTEST.json",
+      "prior_sha256": null,
+      "sha256": "dacb10aef19e6462e691aad10e688cf8bc936deb1b9682b7082e07462590d43a"
+    },
+    {
+      "bytes": 2415,
+      "change": "added",
+      "path": "docs/PASS113_SRC64_FEEDBACK_LOOP.json",
+      "prior_sha256": null,
+      "sha256": "da5642c00543652cca3cb7697dea9cf58bde5a0058e7475499e83b2bdd15b514"
+    }
+  ],
+  "ota_version": "1.631.5",
+  "pass": "113.0",
+  "unchanged_safety_surfaces": [
+    {
+      "matches_pass111": true,
+      "path": "gxb_backend/state/world_repository.py",
+      "sha256": "e434550cb6db77c17b50b17b25dc2886262a742c1d1628700cce6f4f27920752"
+    },
+    {
+      "matches_pass111": true,
+      "path": "data/campaign_drop_policy.json",
+      "sha256": "dffda0e69f365e1e17175999d49c95750976ba71890fd5853f4f1b155bdb2b72"
+    },
+    {
+      "matches_pass111": true,
+      "path": "local_assets/update_manifest.json",
+      "sha256": "b61128f869bb630882ff87fda318a7d23c97985f16d6c3a45b9dad8c3718af0c"
+    },
+    {
+      "matches_pass111": true,
+      "path": "gxb_backend/state/random_outcome_service.py",
+      "sha256": "350f8f158ff08492a0a3db3dd1c6e17f4664cbb703d3eac955249788491e2b1c"
+    },
+    {
+      "matches_pass111": true,
+      "path": "gxb_backend/state/mid50_operation_receipt.py",
+      "sha256": "5857094cb248e0f67632ea310b92eb273615a7a6d9027fae15e025291fd16a75"
+    },
+    {
+      "matches_pass111": true,
+      "path": "gxb_backend/state/summon_private_policy.py",
+      "sha256": "45b0cccabfbfa701f97fb1db92443d2b3d36b7a8e22ce3a2c826bf118f79b937"
+    },
+    {
+      "matches_pass111": true,
+      "path": "gxb_backend/state/medium_legacy_private_policy.py",
+      "sha256": "2e45bbd54b344d53f6bcc0ba0ff4b5fa85ed24e91888aeded5f81d9052faaf83"
+    },
+    {
+      "matches_pass111": true,
+      "path": "gxb_backend/state/sx_soul_box_private_policy.py",
+      "sha256": "a4d501416dd565a4ac64c015f4f8c294d411b56b6943217d88da87c3d7809baa"
+    }
+  ],
+  "world_repository_live_mid117_changed": false
+}

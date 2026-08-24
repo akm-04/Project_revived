@@ -1,0 +1,160 @@
+{
+  "added": [
+    {
+      "bytes": 1410,
+      "path": "docs/PASS111_CLIENT_TEST_PLAN.md",
+      "sha256": "0aa6de369b88d6a4fe9d4d35e5e071e8e19be45c07b551cbf287d6df2ef5335c"
+    },
+    {
+      "bytes": 2170,
+      "path": "docs/PASS111_MID50_RNG_MIGRATION_SELFTEST.json",
+      "sha256": "2531de794b3c9d4cef237bc6c9f5e36abba8cbf98467f25bc17ec701dfc6e0ac"
+    },
+    {
+      "bytes": 16528,
+      "path": "docs/PASS111_OTA_BRIDGE_BUILD.json",
+      "sha256": "4a1fdac7d8afc4ff93eee26168be81c972a4299833e20a9ff550f66491803156"
+    },
+    {
+      "bytes": 2772,
+      "path": "docs/PASS111_SRC64_FEEDBACK_LOOP.json",
+      "sha256": "4c653bd89a3548abf9a04026530dd00accffb97e956c7fcebeaa9b8bfc678830"
+    },
+    {
+      "bytes": 4274,
+      "path": "docs/PASS111_TECHNICAL_CHANGELOG.md",
+      "sha256": "1a33d8e6a84aceddc548db3655f21c5e07089557234d1a427aa8dd71bb4ed0cc"
+    },
+    {
+      "bytes": 1951,
+      "path": "docs/PASS111_VALIDATION.json",
+      "sha256": "734b1da24c6fb6df6dda7b3609cd2a6e451b5b130e27ff295fcb7b8bc8af5666"
+    },
+    {
+      "bytes": 5312,
+      "path": "gxb_backend/state/mid50_operation_receipt.py",
+      "sha256": "5857094cb248e0f67632ea310b92eb273615a7a6d9027fae15e025291fd16a75"
+    },
+    {
+      "bytes": 156746,
+      "path": "local_assets/src_32/app/model/SelfPlayer.lua",
+      "sha256": "712f8152386dc7e0665613cc56b36206892bea771e3e34a7e9b7cac314af9d41"
+    },
+    {
+      "bytes": 156746,
+      "path": "local_assets/src_64/app/model/SelfPlayer.lua",
+      "sha256": "712f8152386dc7e0665613cc56b36206892bea771e3e34a7e9b7cac314af9d41"
+    },
+    {
+      "bytes": 2022108,
+      "path": "local_assets/updates/gxb-local-1.631.5.zip.001",
+      "sha256": "61933c81db6e0d59a1bade662b1c8d4a148f1f13dbaaaada85c4904853824832"
+    },
+    {
+      "bytes": 3834,
+      "path": "tools/build_pass111_mid50_summon_bridge.py",
+      "sha256": "83248562f45105304802ee98814531066078b59b9a03550ecc02045decf12950"
+    },
+    {
+      "bytes": 12847,
+      "path": "tools/selftest_pass111_mid50_rng_migration.py",
+      "sha256": "bf8388f4d2b1b516b980cdf6ae9440ee8b584071de8e5edd17ad3dc6316aafdb"
+    }
+  ],
+  "baseline": "gxb-backend-v0.14.0-pass110.0",
+  "changed": [
+    {
+      "after_bytes": 1404,
+      "after_sha256": "da784e50fe9be69939db7dbf33ed2d51cc4cbd5523f479390ba10e43f59845b7",
+      "before_bytes": 1199,
+      "before_sha256": "c257473580c47fe9ea6209f78aa3058368593ebb7d5df2c127ab95ad97132503",
+      "path": "README.md"
+    },
+    {
+      "after_bytes": 808,
+      "after_sha256": "98e87d501444dd2826e9ce6f56caafc15de874cfa649e05f6e0bb6ffadc2c6a8",
+      "before_bytes": 830,
+      "before_sha256": "0648641e8a6e425a3a3cf6a040194ce2cfe90c29f3d578aa2cd2f50d0461ede3",
+      "path": "UPDATE_README.md"
+    },
+    {
+      "after_bytes": 629,
+      "after_sha256": "7b30102e74cc33ec769e9103274e2fbc286409bd192a1bd0e60a655324bd3f9d",
+      "before_bytes": 620,
+      "before_sha256": "6ab534367123c40ef6e10d9a8718bf871677a3ed219bdf6b6209448e1a1ee927",
+      "path": "VERSION.json"
+    },
+    {
+      "after_bytes": 1467,
+      "after_sha256": "bd9bdc3ba952cdfad7958b30a9e1245e920fa1fa2ff7f649e5490a41e4292b52",
+      "before_bytes": 2933,
+      "before_sha256": "51966e4918eb5998a35db51c4029b76c16c379dc794fb5731d5ee214f17bd31a",
+      "path": "docs/memory.md"
+    },
+    {
+      "after_bytes": 20450,
+      "after_sha256": "a5a5f94c23eab265dc6f85f07ac1755bf161e67ce6ee36a8262ce0c96be53488",
+      "before_bytes": 19851,
+      "before_sha256": "9371949f4fea30b11521821758685fa146792d186a2693fc04434b9fc37423fd",
+      "path": "gxb_backend/state/request_services.py"
+    },
+    {
+      "after_bytes": 5281,
+      "after_sha256": "d5e7e268148bd0bd0fbfbd49e553a814503f19ef26617203b44fde3865320f87",
+      "before_bytes": 5442,
+      "before_sha256": "e3db6475069bee3f898ced03a36dcda13dd7e284d7cab2f660dd644068dba50a",
+      "path": "gxb_backend/state/summon_operation_receipt.py"
+    },
+    {
+      "after_bytes": 90942,
+      "after_sha256": "7c3f601e3c44570eb0da54f9faa56906a79270ecba6b1198d4a85ab479df5de6",
+      "before_bytes": 87944,
+      "before_sha256": "466f4af8e1914f788255d28e602548d98ad945837cd8306027c39dc7720c0038",
+      "path": "gxb_backend/state/summon_repository.py"
+    },
+    {
+      "after_bytes": 101,
+      "after_sha256": "376efb69e0cb3dfa18d7a4b6998733fce332eda50960ccdd003bb239a4f9389d",
+      "before_bytes": 101,
+      "before_sha256": "0d6a7582ad452c273e454224b2989823d4c30473680dc2c78184ade01708a197",
+      "path": "gxb_backend/version.py"
+    },
+    {
+      "after_bytes": 6894,
+      "after_sha256": "b61128f869bb630882ff87fda318a7d23c97985f16d6c3a45b9dad8c3718af0c",
+      "before_bytes": 6816,
+      "before_sha256": "d8b85bd41f50013ac1317ea9a90dc3e94efa0c0be2920cef0e18ead06989f216",
+      "path": "local_assets/update_manifest.json"
+    },
+    {
+      "after_bytes": 1467,
+      "after_sha256": "bd9bdc3ba952cdfad7958b30a9e1245e920fa1fa2ff7f649e5490a41e4292b52",
+      "before_bytes": 832,
+      "before_sha256": "95b5dd31fa75bc980a2aa328021ba6e7831ed19b504f26fe59a3c062f143b139",
+      "path": "memory.md"
+    },
+    {
+      "after_bytes": 5054,
+      "after_sha256": "0c9bbfea0967de516a4f7a3bb8d7f834fdb780705d447edb54bd15f1819b29eb",
+      "before_bytes": 4889,
+      "before_sha256": "82259d7312eb3060d061bd675571bdf7b1f34863ff5f0bc45a67bac8bd7cf64c",
+      "path": "tools/selftest_pass68_1_medium_free.py"
+    },
+    {
+      "after_bytes": 7951,
+      "after_sha256": "c31c873c0b734d6a084896289cb30f302e1476d7f0b3932fdb60e9e3a263858e",
+      "before_bytes": 7754,
+      "before_sha256": "b10c97338e51fb7ed7006bacb7ee4b696e306f5fbcb40a312be43e7ddca0f49b",
+      "path": "tools/validate_pass42_14.py"
+    }
+  ],
+  "pass": "111.0",
+  "removed": [
+    {
+      "bytes": 1962886,
+      "path": "local_assets/updates/gxb-local-1.631.4.zip.001",
+      "sha256": "197600fbe6bcfbe22fe139643be48209a47bdf29df5c9d6492c0f64c0928e356"
+    }
+  ],
+  "schema_version": 1
+}

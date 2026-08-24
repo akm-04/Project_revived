@@ -1,0 +1,27 @@
+{
+  "pass": "128.0",
+  "status": "PASS",
+  "scope": "Super Campaign projection/Function31/access gates",
+  "checks": [
+    "test_catalog_source_relationships",
+    "test_level11_bootstrap_projection_before_announcement",
+    "test_level11_bootstrap_rolls_back_atomically_on_commit_failure",
+    "test_legacy_level11_self_heal_is_idempotent",
+    "test_announced_function_world_map_self_heals_missing_first_row",
+    "test_mid113_bouncer_blocks_before_attempt_energy_rng_or_session",
+    "test_mid113_sticky_stage_replay_precedes_new_bouncer",
+    "test_mid117_bouncer_precedes_attempt_cost_rng_receipt",
+    "test_mid117_receipt_replay_precedes_current_prerequisite",
+    "test_super_win_materializes_next_but_next_normal_still_gates_entry",
+    "test_terminal_super_win_keeps_terminal_frontier_without_phantom_row",
+    "test_qa_visibility_never_bypasses_authorization"
+  ],
+  "source": {
+    "super_rows": 155,
+    "first_super": 100019,
+    "first_normal_anchor": 100001,
+    "second_super": 100020,
+    "second_normal_anchor": 100004,
+    "terminal_super": 2300024
+  }
+}

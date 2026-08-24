@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "pass": "128.2",
+  "status": "PASS",
+  "checks": "4/4",
+  "tests": [
+    "fresh level1 explicit MID112 materializes zero-valued Super cursor keys and persists exactly once",
+    "level10 Function31-closed explicit MID112 materializes zero-valued Super cursor keys without exposing a Super row",
+    "bootstrap PlayerState.world_map_payload and explicit WorldRepository.payload chapter_info key sets are equal for a fresh account",
+    "already canonical numeric-zero state is idempotent and does not ghost-save"
+  ],
+  "mandatory_chapter_info_keys": [
+    "normal_chapter_id",
+    "normal_campaign_id",
+    "super_chapter_id",
+    "super_campaign_id",
+    "normal_stars",
+    "normal_bonus_id",
+    "super_stars",
+    "super_bonus_id"
+  ]
+}

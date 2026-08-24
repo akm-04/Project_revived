@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "pass": "117.0",
+  "backend_version": "0.15.1",
+  "status": "IMPLEMENTED_STATIC_ACCEPTED_RUNTIME_SMOKE_PENDING",
+  "scope": "Campaign first-clear MID113->MID114 exactly-once reconciliation + Challenge 24111 projection",
+  "first_clear": {
+    "policy_id": "campaign_first_clear_bernoulli_v1",
+    "namespace": "campaign.first_clear.row",
+    "wire_types": [
+      1,
+      2
+    ],
+    "semantics": "independent per-source-row Bernoulli base 10000; rate 0/10000 consume zero entropy",
+    "mid113_repeat_rng": "disabled_unknown"
+  },
+  "battle_operation": {
+    "identity_field": "campaign_battle_op_id",
+    "format": "mid113-<UUIDv4>",
+    "stage_receipt_domain": "mid113_campaign_battle_stage",
+    "result_receipt_domain": "mid114_campaign_battle_result",
+    "receipt_mode": "CLIENT_UUID_V4",
+    "retention": "CLIENT_UUID_PERMANENT",
+    "states": [
+      "STAGED",
+      "SETTLED_WIN",
+      "SETTLED_LOSS"
+    ],
+    "supersede": "new legitimate MID113 stage supersedes older uncommitted active session"
+  },
+  "challenge": {
+    "unlock_campaign_id": 24111,
+    "normal_terminal_campaign_id": 1600016,
+    "primary_eligibility": "Normal 1600016 exists with star>0",
+    "fallback": "normal_chapter_id>16 only when terminal row is unavailable",
+    "minimum_row": {
+      "campaign_id": 24111,
+      "star": 0,
+      "daily_limit": 0,
+      "reset_count": 0
+    }
+  },
+  "ota_version": "1.631.7",
+  "client_runtime_smoke": "PENDING",
+  "deferred": [
+    "MID113 repeat RNG",
+    "Challenge battles/progression",
+    "Campaign sweep EXP/Mana economys",
+    "additional rewards",
+    "Generated/Unique Instance settlement"
+  ]
+}

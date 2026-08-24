@@ -1,0 +1,15 @@
+{
+  "pass": "121.0",
+  "status": "PASS",
+  "scope": "Super Campaign MID117 daily-limit atomicity only",
+  "checks": [
+    "remaining3 count1 -> remaining2",
+    "remaining3 count2 -> remaining1",
+    "remaining3 count3 -> remaining0",
+    "remaining2 count3 fails before entropy/cost/receipt",
+    "same UUID retry consumes zero additional attempts and zero entropy",
+    "fresh UUID at remaining0 fails before entropy/cost/receipt",
+    "Super campaign_type=2 cannot borrow a Normal row",
+    "Normal MID117 behavior remains unaffected"
+  ]
+}

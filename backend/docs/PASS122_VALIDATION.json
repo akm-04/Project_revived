@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "pass": "122.0",
+  "backend_version": "0.15.3",
+  "status": "PASS",
+  "source_feedback_loop": "PASS",
+  "catalog_regeneration": "BYTE_EXACT_PASS",
+  "static_compile": "PASS",
+  "focused_selftest": "PASS",
+  "neighbor_regressions": "PASS",
+  "pass121_runtime_review": "ACCEPTED",
+  "challenge_client_smoke": "PENDING_PASS124",
+  "ota_changed": false,
+  "ota_version": "1.631.7",
+  "boundaries": [
+    "No Pass123 MID113/MID114 UUID retirement",
+    "No OTA 1.631.8 rollback yet",
+    "No Campaign Player EXP/Mana sweep economy reconciliation",
+    "No RNG backbone expansion",
+    "No Generated/Unique work"
+  ]
+}

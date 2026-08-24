@@ -1,0 +1,6422 @@
+{
+  "_meta": {
+    "authority": "effective src_64 raw Challenge topology + campaign_dropbox.lua deterministic init pools",
+    "campaign_type": 24,
+    "deterministic_award_row_count": 539,
+    "edge_count": 137,
+    "fanout_count": 22,
+    "pass": "122.0",
+    "reward_formula": "quantity = increase_rate // 10000",
+    "root_count": 7,
+    "row_count": 144,
+    "schema_version": 1,
+    "source_resolution": "effective_merged",
+    "source_sha256": {
+      "data/tables/campaign.lua": "7a58e878a7171839342a856cd74b512037528438259d036009a7249472504683",
+      "data/tables/campaign_dropbox.lua": "374b6b13bae56e2f5ac8d6b884821d2fb448d239871d1992b84bcf365e90404e",
+      "data/tables/chapter.lua": "845e255f90abdd3b9e92ab558ac84bd766f868b300f7ca2992bdce933e0ae844"
+    }
+  },
+  "campaigns": {
+    "24111": {
+      "campaign_id": 24111,
+      "chapter": 1,
+      "children": [
+        24112,
+        24121
+      ],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001121,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001125,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001129,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924111,
+      "is_root": true,
+      "last_campaign_id_raw": "0",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "24112|24121",
+      "parents": [],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 100001,
+      "source_order": 0,
+      "sweep_reward": 0
+    },
+    "24112": {
+      "campaign_id": 24112,
+      "chapter": 1,
+      "children": [
+        24113
+      ],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001122,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001126,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001130,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924112,
+      "is_root": false,
+      "last_campaign_id_raw": "24111",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "24113",
+      "parents": [
+        24111
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 100001,
+      "source_order": 1,
+      "sweep_reward": 0
+    },
+    "24113": {
+      "campaign_id": 24113,
+      "chapter": 1,
+      "children": [],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001123,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001127,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001131,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924113,
+      "is_root": false,
+      "last_campaign_id_raw": "24112",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "0",
+      "parents": [
+        24112
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 100001,
+      "source_order": 2,
+      "sweep_reward": 0
+    },
+    "24121": {
+      "campaign_id": 24121,
+      "chapter": 1,
+      "children": [
+        24122,
+        24131
+      ],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001121,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001125,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001129,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924121,
+      "is_root": false,
+      "last_campaign_id_raw": "24111",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "24122|24131",
+      "parents": [
+        24111
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 100004,
+      "source_order": 3,
+      "sweep_reward": 0
+    },
+    "24122": {
+      "campaign_id": 24122,
+      "chapter": 1,
+      "children": [
+        24123
+      ],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001122,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001126,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001130,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924122,
+      "is_root": false,
+      "last_campaign_id_raw": "24121",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "24123",
+      "parents": [
+        24121
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 100004,
+      "source_order": 4,
+      "sweep_reward": 0
+    },
+    "24123": {
+      "campaign_id": 24123,
+      "chapter": 1,
+      "children": [],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001123,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001127,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001131,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924123,
+      "is_root": false,
+      "last_campaign_id_raw": "24122",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "0",
+      "parents": [
+        24122
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 100004,
+      "source_order": 5,
+      "sweep_reward": 0
+    },
+    "24131": {
+      "campaign_id": 24131,
+      "chapter": 1,
+      "children": [
+        24132,
+        24141
+      ],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001121,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001125,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001129,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924131,
+      "is_root": false,
+      "last_campaign_id_raw": "24121",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "24132|24141",
+      "parents": [
+        24121
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 100007,
+      "source_order": 6,
+      "sweep_reward": 0
+    },
+    "24132": {
+      "campaign_id": 24132,
+      "chapter": 1,
+      "children": [
+        24133
+      ],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001122,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001126,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001130,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924132,
+      "is_root": false,
+      "last_campaign_id_raw": "24131",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "24133",
+      "parents": [
+        24131
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 100007,
+      "source_order": 7,
+      "sweep_reward": 0
+    },
+    "24133": {
+      "campaign_id": 24133,
+      "chapter": 1,
+      "children": [],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001123,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001127,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001131,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924133,
+      "is_root": false,
+      "last_campaign_id_raw": "24132",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "0",
+      "parents": [
+        24132
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 100007,
+      "source_order": 8,
+      "sweep_reward": 0
+    },
+    "24141": {
+      "campaign_id": 24141,
+      "chapter": 1,
+      "children": [
+        24142,
+        24151
+      ],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001121,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001125,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001129,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924141,
+      "is_root": false,
+      "last_campaign_id_raw": "24131",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "24142|24151",
+      "parents": [
+        24131
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 100011,
+      "source_order": 9,
+      "sweep_reward": 0
+    },
+    "24142": {
+      "campaign_id": 24142,
+      "chapter": 1,
+      "children": [
+        24143
+      ],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001122,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001126,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001130,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924142,
+      "is_root": false,
+      "last_campaign_id_raw": "24141",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "24143",
+      "parents": [
+        24141
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 100011,
+      "source_order": 10,
+      "sweep_reward": 0
+    },
+    "24143": {
+      "campaign_id": 24143,
+      "chapter": 1,
+      "children": [],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001123,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001127,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001131,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924143,
+      "is_root": false,
+      "last_campaign_id_raw": "24142",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "0",
+      "parents": [
+        24142
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 100011,
+      "source_order": 11,
+      "sweep_reward": 0
+    },
+    "24151": {
+      "campaign_id": 24151,
+      "chapter": 1,
+      "children": [
+        24152,
+        24161
+      ],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001121,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001125,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001129,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924151,
+      "is_root": false,
+      "last_campaign_id_raw": "24141",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "24152|24161",
+      "parents": [
+        24141
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 100015,
+      "source_order": 12,
+      "sweep_reward": 0
+    },
+    "24152": {
+      "campaign_id": 24152,
+      "chapter": 1,
+      "children": [
+        24153
+      ],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001122,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001126,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001130,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924152,
+      "is_root": false,
+      "last_campaign_id_raw": "24151",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "24153",
+      "parents": [
+        24151
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 100015,
+      "source_order": 13,
+      "sweep_reward": 0
+    },
+    "24153": {
+      "campaign_id": 24153,
+      "chapter": 1,
+      "children": [],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001123,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001127,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001131,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924153,
+      "is_root": false,
+      "last_campaign_id_raw": "24152",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "0",
+      "parents": [
+        24152
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 100015,
+      "source_order": 14,
+      "sweep_reward": 0
+    },
+    "24161": {
+      "campaign_id": 24161,
+      "chapter": 1,
+      "children": [
+        24162
+      ],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001121,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001125,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001129,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924161,
+      "is_root": false,
+      "last_campaign_id_raw": "24151",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "24162",
+      "parents": [
+        24151
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 100018,
+      "source_order": 15,
+      "sweep_reward": 0
+    },
+    "24162": {
+      "campaign_id": 24162,
+      "chapter": 1,
+      "children": [
+        24163
+      ],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001122,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001126,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001130,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924162,
+      "is_root": false,
+      "last_campaign_id_raw": "24161",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "24163",
+      "parents": [
+        24161
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 100018,
+      "source_order": 16,
+      "sweep_reward": 0
+    },
+    "24163": {
+      "campaign_id": 24163,
+      "chapter": 1,
+      "children": [],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001123,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001127,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 130001020,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924163,
+      "is_root": false,
+      "last_campaign_id_raw": "24162",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "0",
+      "parents": [
+        24162
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 100018,
+      "source_order": 17,
+      "sweep_reward": 0
+    },
+    "24211": {
+      "campaign_id": 24211,
+      "chapter": 2,
+      "children": [
+        24212,
+        24221
+      ],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001121,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001125,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001129,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924211,
+      "is_root": true,
+      "last_campaign_id_raw": "0",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "24212|24221",
+      "parents": [],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 200002,
+      "source_order": 18,
+      "sweep_reward": 0
+    },
+    "24212": {
+      "campaign_id": 24212,
+      "chapter": 2,
+      "children": [
+        24213
+      ],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001122,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001126,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001130,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924212,
+      "is_root": false,
+      "last_campaign_id_raw": "24211",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "24213",
+      "parents": [
+        24211
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 200002,
+      "source_order": 19,
+      "sweep_reward": 0
+    },
+    "24213": {
+      "campaign_id": 24213,
+      "chapter": 2,
+      "children": [],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001123,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001127,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001131,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924213,
+      "is_root": false,
+      "last_campaign_id_raw": "24212",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "0",
+      "parents": [
+        24212
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 200002,
+      "source_order": 20,
+      "sweep_reward": 0
+    },
+    "24221": {
+      "campaign_id": 24221,
+      "chapter": 2,
+      "children": [
+        24222,
+        24231
+      ],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001121,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001125,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001129,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924221,
+      "is_root": false,
+      "last_campaign_id_raw": "24211",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "24222|24231",
+      "parents": [
+        24211
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 200005,
+      "source_order": 21,
+      "sweep_reward": 0
+    },
+    "24222": {
+      "campaign_id": 24222,
+      "chapter": 2,
+      "children": [
+        24223
+      ],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001122,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001126,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001130,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924222,
+      "is_root": false,
+      "last_campaign_id_raw": "24221",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "24223",
+      "parents": [
+        24221
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 200005,
+      "source_order": 22,
+      "sweep_reward": 0
+    },
+    "24223": {
+      "campaign_id": 24223,
+      "chapter": 2,
+      "children": [],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001123,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001127,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001131,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924223,
+      "is_root": false,
+      "last_campaign_id_raw": "24222",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "0",
+      "parents": [
+        24222
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 200005,
+      "source_order": 23,
+      "sweep_reward": 0
+    },
+    "24231": {
+      "campaign_id": 24231,
+      "chapter": 2,
+      "children": [
+        24232,
+        24241
+      ],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001121,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001125,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001129,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924231,
+      "is_root": false,
+      "last_campaign_id_raw": "24221",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "24232|24241",
+      "parents": [
+        24221
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 200009,
+      "source_order": 24,
+      "sweep_reward": 0
+    },
+    "24232": {
+      "campaign_id": 24232,
+      "chapter": 2,
+      "children": [
+        24233
+      ],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001122,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001126,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001130,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924232,
+      "is_root": false,
+      "last_campaign_id_raw": "24231",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "24233",
+      "parents": [
+        24231
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 200009,
+      "source_order": 25,
+      "sweep_reward": 0
+    },
+    "24233": {
+      "campaign_id": 24233,
+      "chapter": 2,
+      "children": [],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001123,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001127,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001131,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924233,
+      "is_root": false,
+      "last_campaign_id_raw": "24232",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "0",
+      "parents": [
+        24232
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 200009,
+      "source_order": 26,
+      "sweep_reward": 0
+    },
+    "24241": {
+      "campaign_id": 24241,
+      "chapter": 2,
+      "children": [
+        24242,
+        24251
+      ],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001121,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001125,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001129,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924241,
+      "is_root": false,
+      "last_campaign_id_raw": "24231",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "24242|24251",
+      "parents": [
+        24231
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 200012,
+      "source_order": 27,
+      "sweep_reward": 0
+    },
+    "24242": {
+      "campaign_id": 24242,
+      "chapter": 2,
+      "children": [
+        24243
+      ],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001122,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001126,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001130,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924242,
+      "is_root": false,
+      "last_campaign_id_raw": "24241",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "24243",
+      "parents": [
+        24241
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 200012,
+      "source_order": 28,
+      "sweep_reward": 0
+    },
+    "24243": {
+      "campaign_id": 24243,
+      "chapter": 2,
+      "children": [],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001123,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001127,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001131,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924243,
+      "is_root": false,
+      "last_campaign_id_raw": "24242",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "0",
+      "parents": [
+        24242
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 200012,
+      "source_order": 29,
+      "sweep_reward": 0
+    },
+    "24251": {
+      "campaign_id": 24251,
+      "chapter": 2,
+      "children": [
+        24252,
+        24261
+      ],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001121,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001125,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001129,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924251,
+      "is_root": false,
+      "last_campaign_id_raw": "24241",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "24252|24261",
+      "parents": [
+        24241
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 200015,
+      "source_order": 30,
+      "sweep_reward": 0
+    },
+    "24252": {
+      "campaign_id": 24252,
+      "chapter": 2,
+      "children": [
+        24253
+      ],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001122,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001126,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001130,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924252,
+      "is_root": false,
+      "last_campaign_id_raw": "24251",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "24253",
+      "parents": [
+        24251
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 200015,
+      "source_order": 31,
+      "sweep_reward": 0
+    },
+    "24253": {
+      "campaign_id": 24253,
+      "chapter": 2,
+      "children": [],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001123,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001127,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001131,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924253,
+      "is_root": false,
+      "last_campaign_id_raw": "24252",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "0",
+      "parents": [
+        24252
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 200015,
+      "source_order": 32,
+      "sweep_reward": 0
+    },
+    "24261": {
+      "campaign_id": 24261,
+      "chapter": 2,
+      "children": [
+        24262,
+        24271
+      ],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001121,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001125,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001129,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924261,
+      "is_root": false,
+      "last_campaign_id_raw": "24251",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "24262|24271",
+      "parents": [
+        24251
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 200018,
+      "source_order": 33,
+      "sweep_reward": 0
+    },
+    "24262": {
+      "campaign_id": 24262,
+      "chapter": 2,
+      "children": [
+        24263
+      ],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001122,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001126,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001130,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924262,
+      "is_root": false,
+      "last_campaign_id_raw": "24261",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "24263",
+      "parents": [
+        24261
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 200018,
+      "source_order": 34,
+      "sweep_reward": 0
+    },
+    "24263": {
+      "campaign_id": 24263,
+      "chapter": 2,
+      "children": [],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001123,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001127,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001131,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924263,
+      "is_root": false,
+      "last_campaign_id_raw": "24262",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "0",
+      "parents": [
+        24262
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 200018,
+      "source_order": 35,
+      "sweep_reward": 0
+    },
+    "24271": {
+      "campaign_id": 24271,
+      "chapter": 2,
+      "children": [
+        24272
+      ],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001121,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001125,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001129,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924271,
+      "is_root": false,
+      "last_campaign_id_raw": "24261",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "24272",
+      "parents": [
+        24261
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 200021,
+      "source_order": 36,
+      "sweep_reward": 0
+    },
+    "24272": {
+      "campaign_id": 24272,
+      "chapter": 2,
+      "children": [
+        24273
+      ],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001122,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001126,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001130,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924272,
+      "is_root": false,
+      "last_campaign_id_raw": "24271",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "24273",
+      "parents": [
+        24271
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 200021,
+      "source_order": 37,
+      "sweep_reward": 0
+    },
+    "24273": {
+      "campaign_id": 24273,
+      "chapter": 2,
+      "children": [],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001123,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001127,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 130001021,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924273,
+      "is_root": false,
+      "last_campaign_id_raw": "24272",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "0",
+      "parents": [
+        24272
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 200021,
+      "source_order": 38,
+      "sweep_reward": 0
+    },
+    "24311": {
+      "campaign_id": 24311,
+      "chapter": 3,
+      "children": [
+        24312,
+        24321
+      ],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001121,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001125,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001129,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001011,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924311,
+      "is_root": true,
+      "last_campaign_id_raw": "0",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "24312|24321",
+      "parents": [],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 300003,
+      "source_order": 39,
+      "sweep_reward": 0
+    },
+    "24312": {
+      "campaign_id": 24312,
+      "chapter": 3,
+      "children": [
+        24313
+      ],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001122,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001126,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001130,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001011,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924312,
+      "is_root": false,
+      "last_campaign_id_raw": "24311",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "24313",
+      "parents": [
+        24311
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 300003,
+      "source_order": 40,
+      "sweep_reward": 0
+    },
+    "24313": {
+      "campaign_id": 24313,
+      "chapter": 3,
+      "children": [],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001123,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001127,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001131,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001011,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924313,
+      "is_root": false,
+      "last_campaign_id_raw": "24312",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "0",
+      "parents": [
+        24312
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 300003,
+      "source_order": 41,
+      "sweep_reward": 0
+    },
+    "24321": {
+      "campaign_id": 24321,
+      "chapter": 3,
+      "children": [
+        24322,
+        24331
+      ],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001121,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001125,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001129,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001011,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924321,
+      "is_root": false,
+      "last_campaign_id_raw": "24311",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "24322|24331",
+      "parents": [
+        24311
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 300006,
+      "source_order": 42,
+      "sweep_reward": 0
+    },
+    "24322": {
+      "campaign_id": 24322,
+      "chapter": 3,
+      "children": [
+        24323
+      ],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001122,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001126,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001130,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001011,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924322,
+      "is_root": false,
+      "last_campaign_id_raw": "24321",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "24323",
+      "parents": [
+        24321
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 300006,
+      "source_order": 43,
+      "sweep_reward": 0
+    },
+    "24323": {
+      "campaign_id": 24323,
+      "chapter": 3,
+      "children": [],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001123,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001127,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001131,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001011,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924323,
+      "is_root": false,
+      "last_campaign_id_raw": "24322",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "0",
+      "parents": [
+        24322
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 300006,
+      "source_order": 44,
+      "sweep_reward": 0
+    },
+    "24331": {
+      "campaign_id": 24331,
+      "chapter": 3,
+      "children": [
+        24332,
+        24341
+      ],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001121,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001125,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001129,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001011,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924331,
+      "is_root": false,
+      "last_campaign_id_raw": "24321",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "24332|24341",
+      "parents": [
+        24321
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 300009,
+      "source_order": 45,
+      "sweep_reward": 0
+    },
+    "24332": {
+      "campaign_id": 24332,
+      "chapter": 3,
+      "children": [
+        24333
+      ],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001122,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001126,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001130,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001011,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924332,
+      "is_root": false,
+      "last_campaign_id_raw": "24331",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "24333",
+      "parents": [
+        24331
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 300009,
+      "source_order": 46,
+      "sweep_reward": 0
+    },
+    "24333": {
+      "campaign_id": 24333,
+      "chapter": 3,
+      "children": [],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001123,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001127,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001131,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001011,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924333,
+      "is_root": false,
+      "last_campaign_id_raw": "24332",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "0",
+      "parents": [
+        24332
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 300009,
+      "source_order": 47,
+      "sweep_reward": 0
+    },
+    "24341": {
+      "campaign_id": 24341,
+      "chapter": 3,
+      "children": [
+        24342,
+        24351
+      ],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001121,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001125,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001129,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001011,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924341,
+      "is_root": false,
+      "last_campaign_id_raw": "24331",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "24342|24351",
+      "parents": [
+        24331
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 300012,
+      "source_order": 48,
+      "sweep_reward": 0
+    },
+    "24342": {
+      "campaign_id": 24342,
+      "chapter": 3,
+      "children": [
+        24343
+      ],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001122,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001126,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001130,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001011,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924342,
+      "is_root": false,
+      "last_campaign_id_raw": "24341",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "24343",
+      "parents": [
+        24341
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 300012,
+      "source_order": 49,
+      "sweep_reward": 0
+    },
+    "24343": {
+      "campaign_id": 24343,
+      "chapter": 3,
+      "children": [],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001123,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001127,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001131,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001011,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924343,
+      "is_root": false,
+      "last_campaign_id_raw": "24342",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "0",
+      "parents": [
+        24342
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 300012,
+      "source_order": 50,
+      "sweep_reward": 0
+    },
+    "24351": {
+      "campaign_id": 24351,
+      "chapter": 3,
+      "children": [
+        24352,
+        24361
+      ],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001121,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001125,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001129,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001011,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924351,
+      "is_root": false,
+      "last_campaign_id_raw": "24341",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "24352|24361",
+      "parents": [
+        24341
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 300014,
+      "source_order": 51,
+      "sweep_reward": 0
+    },
+    "24352": {
+      "campaign_id": 24352,
+      "chapter": 3,
+      "children": [
+        24353
+      ],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001122,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001126,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001130,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001011,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924352,
+      "is_root": false,
+      "last_campaign_id_raw": "24351",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "24353",
+      "parents": [
+        24351
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 300014,
+      "source_order": 52,
+      "sweep_reward": 0
+    },
+    "24353": {
+      "campaign_id": 24353,
+      "chapter": 3,
+      "children": [],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001123,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001127,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001131,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001011,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924353,
+      "is_root": false,
+      "last_campaign_id_raw": "24352",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "0",
+      "parents": [
+        24352
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 300014,
+      "source_order": 53,
+      "sweep_reward": 0
+    },
+    "24361": {
+      "campaign_id": 24361,
+      "chapter": 3,
+      "children": [
+        24362
+      ],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001121,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001125,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001129,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001011,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924361,
+      "is_root": false,
+      "last_campaign_id_raw": "24351",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "24362",
+      "parents": [
+        24351
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 300016,
+      "source_order": 54,
+      "sweep_reward": 0
+    },
+    "24362": {
+      "campaign_id": 24362,
+      "chapter": 3,
+      "children": [
+        24363
+      ],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001122,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001126,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001130,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001011,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924362,
+      "is_root": false,
+      "last_campaign_id_raw": "24361",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "24363",
+      "parents": [
+        24361
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 300016,
+      "source_order": 55,
+      "sweep_reward": 0
+    },
+    "24363": {
+      "campaign_id": 24363,
+      "chapter": 3,
+      "children": [],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001123,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001127,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001131,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001011,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 130001041,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924363,
+      "is_root": false,
+      "last_campaign_id_raw": "24362",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "0",
+      "parents": [
+        24362
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 300016,
+      "source_order": 56,
+      "sweep_reward": 0
+    },
+    "24411": {
+      "campaign_id": 24411,
+      "chapter": 4,
+      "children": [
+        24412,
+        24421
+      ],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001121,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001125,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001129,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001011,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924411,
+      "is_root": true,
+      "last_campaign_id_raw": "0",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "24412|24421",
+      "parents": [],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 400003,
+      "source_order": 57,
+      "sweep_reward": 0
+    },
+    "24412": {
+      "campaign_id": 24412,
+      "chapter": 4,
+      "children": [
+        24413
+      ],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001122,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001126,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001130,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001011,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924412,
+      "is_root": false,
+      "last_campaign_id_raw": "24411",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "24413",
+      "parents": [
+        24411
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 400003,
+      "source_order": 58,
+      "sweep_reward": 0
+    },
+    "24413": {
+      "campaign_id": 24413,
+      "chapter": 4,
+      "children": [],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001123,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001127,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001131,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001011,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924413,
+      "is_root": false,
+      "last_campaign_id_raw": "24412",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "0",
+      "parents": [
+        24412
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 400003,
+      "source_order": 59,
+      "sweep_reward": 0
+    },
+    "24421": {
+      "campaign_id": 24421,
+      "chapter": 4,
+      "children": [
+        24422,
+        24431
+      ],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001121,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001125,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001129,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001011,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924421,
+      "is_root": false,
+      "last_campaign_id_raw": "24411",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "24422|24431",
+      "parents": [
+        24411
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 400005,
+      "source_order": 60,
+      "sweep_reward": 0
+    },
+    "24422": {
+      "campaign_id": 24422,
+      "chapter": 4,
+      "children": [
+        24423
+      ],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001122,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001126,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001130,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001011,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924422,
+      "is_root": false,
+      "last_campaign_id_raw": "24421",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "24423",
+      "parents": [
+        24421
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 400005,
+      "source_order": 61,
+      "sweep_reward": 0
+    },
+    "24423": {
+      "campaign_id": 24423,
+      "chapter": 4,
+      "children": [],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001123,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001127,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001131,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001011,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924423,
+      "is_root": false,
+      "last_campaign_id_raw": "24422",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "0",
+      "parents": [
+        24422
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 400005,
+      "source_order": 62,
+      "sweep_reward": 0
+    },
+    "24431": {
+      "campaign_id": 24431,
+      "chapter": 4,
+      "children": [
+        24432,
+        24441
+      ],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001121,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001125,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001129,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001011,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924431,
+      "is_root": false,
+      "last_campaign_id_raw": "24421",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "24432|24441",
+      "parents": [
+        24421
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 400008,
+      "source_order": 63,
+      "sweep_reward": 0
+    },
+    "24432": {
+      "campaign_id": 24432,
+      "chapter": 4,
+      "children": [
+        24433
+      ],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001122,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001126,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001130,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001011,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924432,
+      "is_root": false,
+      "last_campaign_id_raw": "24431",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "24433",
+      "parents": [
+        24431
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 400008,
+      "source_order": 64,
+      "sweep_reward": 0
+    },
+    "24433": {
+      "campaign_id": 24433,
+      "chapter": 4,
+      "children": [],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001123,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001127,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001131,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001011,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924433,
+      "is_root": false,
+      "last_campaign_id_raw": "24432",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "0",
+      "parents": [
+        24432
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 400008,
+      "source_order": 65,
+      "sweep_reward": 0
+    },
+    "24441": {
+      "campaign_id": 24441,
+      "chapter": 4,
+      "children": [
+        24442,
+        24451
+      ],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001121,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001125,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001129,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001011,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924441,
+      "is_root": false,
+      "last_campaign_id_raw": "24431",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "24442|24451",
+      "parents": [
+        24431
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 400011,
+      "source_order": 66,
+      "sweep_reward": 0
+    },
+    "24442": {
+      "campaign_id": 24442,
+      "chapter": 4,
+      "children": [
+        24443
+      ],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001122,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001126,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001130,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001011,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924442,
+      "is_root": false,
+      "last_campaign_id_raw": "24441",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "24443",
+      "parents": [
+        24441
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 400011,
+      "source_order": 67,
+      "sweep_reward": 0
+    },
+    "24443": {
+      "campaign_id": 24443,
+      "chapter": 4,
+      "children": [],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001123,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001127,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001131,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001011,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924443,
+      "is_root": false,
+      "last_campaign_id_raw": "24442",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "0",
+      "parents": [
+        24442
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 400011,
+      "source_order": 68,
+      "sweep_reward": 0
+    },
+    "24451": {
+      "campaign_id": 24451,
+      "chapter": 4,
+      "children": [
+        24452,
+        24461
+      ],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001121,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001125,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001129,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001011,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924451,
+      "is_root": false,
+      "last_campaign_id_raw": "24441",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "24452|24461",
+      "parents": [
+        24441
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 400014,
+      "source_order": 69,
+      "sweep_reward": 0
+    },
+    "24452": {
+      "campaign_id": 24452,
+      "chapter": 4,
+      "children": [
+        24453
+      ],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001122,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001126,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001130,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001011,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924452,
+      "is_root": false,
+      "last_campaign_id_raw": "24451",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "24453",
+      "parents": [
+        24451
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 400014,
+      "source_order": 70,
+      "sweep_reward": 0
+    },
+    "24453": {
+      "campaign_id": 24453,
+      "chapter": 4,
+      "children": [],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001123,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001127,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001131,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001011,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924453,
+      "is_root": false,
+      "last_campaign_id_raw": "24452",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "0",
+      "parents": [
+        24452
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 400014,
+      "source_order": 71,
+      "sweep_reward": 0
+    },
+    "24461": {
+      "campaign_id": 24461,
+      "chapter": 4,
+      "children": [
+        24462,
+        24471
+      ],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001121,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001125,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001129,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001011,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924461,
+      "is_root": false,
+      "last_campaign_id_raw": "24451",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "24462|24471",
+      "parents": [
+        24451
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 400016,
+      "source_order": 72,
+      "sweep_reward": 0
+    },
+    "24462": {
+      "campaign_id": 24462,
+      "chapter": 4,
+      "children": [
+        24463
+      ],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001122,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001126,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001130,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001011,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924462,
+      "is_root": false,
+      "last_campaign_id_raw": "24461",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "24463",
+      "parents": [
+        24461
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 400016,
+      "source_order": 73,
+      "sweep_reward": 0
+    },
+    "24463": {
+      "campaign_id": 24463,
+      "chapter": 4,
+      "children": [],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001123,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001127,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001131,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001011,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924463,
+      "is_root": false,
+      "last_campaign_id_raw": "24462",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "0",
+      "parents": [
+        24462
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 400016,
+      "source_order": 74,
+      "sweep_reward": 0
+    },
+    "24471": {
+      "campaign_id": 24471,
+      "chapter": 4,
+      "children": [
+        24472
+      ],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001121,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001125,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001129,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001011,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924471,
+      "is_root": false,
+      "last_campaign_id_raw": "24461",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "24472",
+      "parents": [
+        24461
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 400019,
+      "source_order": 75,
+      "sweep_reward": 0
+    },
+    "24472": {
+      "campaign_id": 24472,
+      "chapter": 4,
+      "children": [
+        24473
+      ],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001122,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001126,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001130,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001011,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924472,
+      "is_root": false,
+      "last_campaign_id_raw": "24471",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "24473",
+      "parents": [
+        24471
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 400019,
+      "source_order": 76,
+      "sweep_reward": 0
+    },
+    "24473": {
+      "campaign_id": 24473,
+      "chapter": 4,
+      "children": [],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001123,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001127,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001131,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001011,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 130001042,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924473,
+      "is_root": false,
+      "last_campaign_id_raw": "24472",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "0",
+      "parents": [
+        24472
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 400019,
+      "source_order": 77,
+      "sweep_reward": 0
+    },
+    "24511": {
+      "campaign_id": 24511,
+      "chapter": 5,
+      "children": [
+        24512
+      ],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 20000,
+          "item_id": 50010001,
+          "item_num": 2
+        },
+        {
+          "increase_rate": 40000,
+          "item_id": 50010002,
+          "item_num": 4
+        },
+        {
+          "increase_rate": 20000,
+          "item_id": 50010010,
+          "item_num": 2
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001011,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924511,
+      "is_root": true,
+      "last_campaign_id_raw": "0",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "24512",
+      "parents": [],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 500002,
+      "source_order": 78,
+      "sweep_reward": 0
+    },
+    "24512": {
+      "campaign_id": 24512,
+      "chapter": 5,
+      "children": [
+        24513
+      ],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 40000,
+          "item_id": 50010001,
+          "item_num": 4
+        },
+        {
+          "increase_rate": 60000,
+          "item_id": 50010002,
+          "item_num": 6
+        },
+        {
+          "increase_rate": 40000,
+          "item_id": 50010010,
+          "item_num": 4
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001011,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924512,
+      "is_root": false,
+      "last_campaign_id_raw": "24511",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "24513",
+      "parents": [
+        24511
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 500002,
+      "source_order": 79,
+      "sweep_reward": 0
+    },
+    "24513": {
+      "campaign_id": 24513,
+      "chapter": 5,
+      "children": [
+        24521
+      ],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 60000,
+          "item_id": 50010001,
+          "item_num": 6
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50020001,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 60000,
+          "item_id": 50010010,
+          "item_num": 6
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001011,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924513,
+      "is_root": false,
+      "last_campaign_id_raw": "24512",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "24521",
+      "parents": [
+        24512
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 500002,
+      "source_order": 80,
+      "sweep_reward": 0
+    },
+    "24521": {
+      "campaign_id": 24521,
+      "chapter": 5,
+      "children": [
+        24522
+      ],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 20000,
+          "item_id": 50010001,
+          "item_num": 2
+        },
+        {
+          "increase_rate": 40000,
+          "item_id": 50010002,
+          "item_num": 4
+        },
+        {
+          "increase_rate": 20000,
+          "item_id": 50010010,
+          "item_num": 2
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001011,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924521,
+      "is_root": false,
+      "last_campaign_id_raw": "24513",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "24522",
+      "parents": [
+        24513
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 500005,
+      "source_order": 81,
+      "sweep_reward": 0
+    },
+    "24522": {
+      "campaign_id": 24522,
+      "chapter": 5,
+      "children": [
+        24523
+      ],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 40000,
+          "item_id": 50010001,
+          "item_num": 4
+        },
+        {
+          "increase_rate": 60000,
+          "item_id": 50010002,
+          "item_num": 6
+        },
+        {
+          "increase_rate": 40000,
+          "item_id": 50010010,
+          "item_num": 4
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001011,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924522,
+      "is_root": false,
+      "last_campaign_id_raw": "24521",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "24523",
+      "parents": [
+        24521
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 500005,
+      "source_order": 82,
+      "sweep_reward": 0
+    },
+    "24523": {
+      "campaign_id": 24523,
+      "chapter": 5,
+      "children": [
+        24531
+      ],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 60000,
+          "item_id": 50010001,
+          "item_num": 6
+        },
+        {
+          "increase_rate": 80000,
+          "item_id": 50010002,
+          "item_num": 8
+        },
+        {
+          "increase_rate": 60000,
+          "item_id": 50010010,
+          "item_num": 6
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001011,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924523,
+      "is_root": false,
+      "last_campaign_id_raw": "24522",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "24531",
+      "parents": [
+        24522
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 500005,
+      "source_order": 83,
+      "sweep_reward": 0
+    },
+    "24531": {
+      "campaign_id": 24531,
+      "chapter": 5,
+      "children": [
+        24532
+      ],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 20000,
+          "item_id": 50010001,
+          "item_num": 2
+        },
+        {
+          "increase_rate": 40000,
+          "item_id": 50010002,
+          "item_num": 4
+        },
+        {
+          "increase_rate": 20000,
+          "item_id": 50010010,
+          "item_num": 2
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001011,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924531,
+      "is_root": false,
+      "last_campaign_id_raw": "24523",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "24532",
+      "parents": [
+        24523
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 500008,
+      "source_order": 84,
+      "sweep_reward": 0
+    },
+    "24532": {
+      "campaign_id": 24532,
+      "chapter": 5,
+      "children": [
+        24533
+      ],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 40000,
+          "item_id": 50010001,
+          "item_num": 4
+        },
+        {
+          "increase_rate": 60000,
+          "item_id": 50010002,
+          "item_num": 6
+        },
+        {
+          "increase_rate": 40000,
+          "item_id": 50010010,
+          "item_num": 4
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001011,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924532,
+      "is_root": false,
+      "last_campaign_id_raw": "24531",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "24533",
+      "parents": [
+        24531
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 500008,
+      "source_order": 85,
+      "sweep_reward": 0
+    },
+    "24533": {
+      "campaign_id": 24533,
+      "chapter": 5,
+      "children": [
+        24541
+      ],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 60000,
+          "item_id": 50010001,
+          "item_num": 6
+        },
+        {
+          "increase_rate": 80000,
+          "item_id": 50010002,
+          "item_num": 8
+        },
+        {
+          "increase_rate": 60000,
+          "item_id": 50010010,
+          "item_num": 6
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001011,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924533,
+      "is_root": false,
+      "last_campaign_id_raw": "24532",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "24541",
+      "parents": [
+        24532
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 500008,
+      "source_order": 86,
+      "sweep_reward": 0
+    },
+    "24541": {
+      "campaign_id": 24541,
+      "chapter": 5,
+      "children": [
+        24542
+      ],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 20000,
+          "item_id": 50010001,
+          "item_num": 2
+        },
+        {
+          "increase_rate": 40000,
+          "item_id": 50010002,
+          "item_num": 4
+        },
+        {
+          "increase_rate": 20000,
+          "item_id": 50010010,
+          "item_num": 2
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001011,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924541,
+      "is_root": false,
+      "last_campaign_id_raw": "24533",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "24542",
+      "parents": [
+        24533
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 500011,
+      "source_order": 87,
+      "sweep_reward": 0
+    },
+    "24542": {
+      "campaign_id": 24542,
+      "chapter": 5,
+      "children": [
+        24543
+      ],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 40000,
+          "item_id": 50010001,
+          "item_num": 4
+        },
+        {
+          "increase_rate": 60000,
+          "item_id": 50010002,
+          "item_num": 6
+        },
+        {
+          "increase_rate": 40000,
+          "item_id": 50010010,
+          "item_num": 4
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001011,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924542,
+      "is_root": false,
+      "last_campaign_id_raw": "24541",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "24543",
+      "parents": [
+        24541
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 500011,
+      "source_order": 88,
+      "sweep_reward": 0
+    },
+    "24543": {
+      "campaign_id": 24543,
+      "chapter": 5,
+      "children": [
+        24551
+      ],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 60000,
+          "item_id": 50010001,
+          "item_num": 6
+        },
+        {
+          "increase_rate": 80000,
+          "item_id": 50010002,
+          "item_num": 8
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50020020,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001011,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924543,
+      "is_root": false,
+      "last_campaign_id_raw": "24542",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "24551",
+      "parents": [
+        24542
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 500011,
+      "source_order": 89,
+      "sweep_reward": 0
+    },
+    "24551": {
+      "campaign_id": 24551,
+      "chapter": 5,
+      "children": [
+        24552
+      ],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 20000,
+          "item_id": 50010001,
+          "item_num": 2
+        },
+        {
+          "increase_rate": 40000,
+          "item_id": 50010002,
+          "item_num": 4
+        },
+        {
+          "increase_rate": 20000,
+          "item_id": 50010010,
+          "item_num": 2
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001011,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924551,
+      "is_root": false,
+      "last_campaign_id_raw": "24543",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "24552",
+      "parents": [
+        24543
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 500014,
+      "source_order": 90,
+      "sweep_reward": 0
+    },
+    "24552": {
+      "campaign_id": 24552,
+      "chapter": 5,
+      "children": [
+        24553
+      ],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 40000,
+          "item_id": 50010001,
+          "item_num": 4
+        },
+        {
+          "increase_rate": 60000,
+          "item_id": 50010002,
+          "item_num": 6
+        },
+        {
+          "increase_rate": 40000,
+          "item_id": 50010010,
+          "item_num": 4
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001011,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924552,
+      "is_root": false,
+      "last_campaign_id_raw": "24551",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "24553",
+      "parents": [
+        24551
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 500014,
+      "source_order": 91,
+      "sweep_reward": 0
+    },
+    "24553": {
+      "campaign_id": 24553,
+      "chapter": 5,
+      "children": [
+        24561
+      ],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 60000,
+          "item_id": 50010001,
+          "item_num": 6
+        },
+        {
+          "increase_rate": 80000,
+          "item_id": 50010002,
+          "item_num": 8
+        },
+        {
+          "increase_rate": 60000,
+          "item_id": 50010010,
+          "item_num": 6
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001011,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924553,
+      "is_root": false,
+      "last_campaign_id_raw": "24552",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "24561",
+      "parents": [
+        24552
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 500014,
+      "source_order": 92,
+      "sweep_reward": 0
+    },
+    "24561": {
+      "campaign_id": 24561,
+      "chapter": 5,
+      "children": [
+        24562
+      ],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 20000,
+          "item_id": 50010001,
+          "item_num": 2
+        },
+        {
+          "increase_rate": 40000,
+          "item_id": 50010002,
+          "item_num": 4
+        },
+        {
+          "increase_rate": 20000,
+          "item_id": 50010010,
+          "item_num": 2
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001011,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924561,
+      "is_root": false,
+      "last_campaign_id_raw": "24553",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "24562",
+      "parents": [
+        24553
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 500017,
+      "source_order": 93,
+      "sweep_reward": 0
+    },
+    "24562": {
+      "campaign_id": 24562,
+      "chapter": 5,
+      "children": [
+        24563
+      ],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 40000,
+          "item_id": 50010001,
+          "item_num": 4
+        },
+        {
+          "increase_rate": 60000,
+          "item_id": 50010002,
+          "item_num": 6
+        },
+        {
+          "increase_rate": 40000,
+          "item_id": 50010010,
+          "item_num": 4
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001011,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924562,
+      "is_root": false,
+      "last_campaign_id_raw": "24561",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "24563",
+      "parents": [
+        24561
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 500017,
+      "source_order": 94,
+      "sweep_reward": 0
+    },
+    "24563": {
+      "campaign_id": 24563,
+      "chapter": 5,
+      "children": [
+        24571
+      ],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 60000,
+          "item_id": 50010001,
+          "item_num": 6
+        },
+        {
+          "increase_rate": 80000,
+          "item_id": 50010002,
+          "item_num": 8
+        },
+        {
+          "increase_rate": 60000,
+          "item_id": 50010010,
+          "item_num": 6
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001011,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924563,
+      "is_root": false,
+      "last_campaign_id_raw": "24562",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "24571",
+      "parents": [
+        24562
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 500017,
+      "source_order": 95,
+      "sweep_reward": 0
+    },
+    "24571": {
+      "campaign_id": 24571,
+      "chapter": 5,
+      "children": [
+        24572
+      ],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 20000,
+          "item_id": 50010001,
+          "item_num": 2
+        },
+        {
+          "increase_rate": 40000,
+          "item_id": 50010002,
+          "item_num": 4
+        },
+        {
+          "increase_rate": 20000,
+          "item_id": 50010010,
+          "item_num": 2
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001011,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924571,
+      "is_root": false,
+      "last_campaign_id_raw": "24563",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "24572",
+      "parents": [
+        24563
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 500020,
+      "source_order": 96,
+      "sweep_reward": 0
+    },
+    "24572": {
+      "campaign_id": 24572,
+      "chapter": 5,
+      "children": [
+        24573
+      ],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 40000,
+          "item_id": 50010001,
+          "item_num": 4
+        },
+        {
+          "increase_rate": 60000,
+          "item_id": 50010002,
+          "item_num": 6
+        },
+        {
+          "increase_rate": 40000,
+          "item_id": 50010010,
+          "item_num": 4
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001011,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924572,
+      "is_root": false,
+      "last_campaign_id_raw": "24571",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "24573",
+      "parents": [
+        24571
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 500020,
+      "source_order": 97,
+      "sweep_reward": 0
+    },
+    "24573": {
+      "campaign_id": 24573,
+      "chapter": 5,
+      "children": [],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 60000,
+          "item_id": 50010001,
+          "item_num": 6
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50020013,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 60000,
+          "item_id": 50010010,
+          "item_num": 6
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001011,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924573,
+      "is_root": false,
+      "last_campaign_id_raw": "24572",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "0",
+      "parents": [
+        24572
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 500020,
+      "source_order": 98,
+      "sweep_reward": 0
+    },
+    "24611": {
+      "campaign_id": 24611,
+      "chapter": 6,
+      "children": [
+        24612
+      ],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001125,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001129,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001121,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001011,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924611,
+      "is_root": true,
+      "last_campaign_id_raw": "0",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "24612",
+      "parents": [],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 600001,
+      "source_order": 99,
+      "sweep_reward": 0
+    },
+    "24612": {
+      "campaign_id": 24612,
+      "chapter": 6,
+      "children": [
+        24613
+      ],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001126,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001130,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001122,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001011,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924612,
+      "is_root": false,
+      "last_campaign_id_raw": "24611",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "24613",
+      "parents": [
+        24611
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 600001,
+      "source_order": 100,
+      "sweep_reward": 0
+    },
+    "24613": {
+      "campaign_id": 24613,
+      "chapter": 6,
+      "children": [
+        24621
+      ],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001127,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001131,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001123,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001011,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924613,
+      "is_root": false,
+      "last_campaign_id_raw": "24612",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "24621",
+      "parents": [
+        24612
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 600001,
+      "source_order": 101,
+      "sweep_reward": 0
+    },
+    "24621": {
+      "campaign_id": 24621,
+      "chapter": 6,
+      "children": [
+        24622
+      ],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001125,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001129,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001121,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001011,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924621,
+      "is_root": false,
+      "last_campaign_id_raw": "24613",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "24622",
+      "parents": [
+        24613
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 600004,
+      "source_order": 102,
+      "sweep_reward": 0
+    },
+    "24622": {
+      "campaign_id": 24622,
+      "chapter": 6,
+      "children": [
+        24623
+      ],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001126,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001130,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001122,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001011,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924622,
+      "is_root": false,
+      "last_campaign_id_raw": "24621",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "24623",
+      "parents": [
+        24621
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 600004,
+      "source_order": 103,
+      "sweep_reward": 0
+    },
+    "24623": {
+      "campaign_id": 24623,
+      "chapter": 6,
+      "children": [
+        24631
+      ],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001127,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001131,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001123,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001011,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924623,
+      "is_root": false,
+      "last_campaign_id_raw": "24622",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "24631",
+      "parents": [
+        24622
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 600004,
+      "source_order": 104,
+      "sweep_reward": 0
+    },
+    "24631": {
+      "campaign_id": 24631,
+      "chapter": 6,
+      "children": [
+        24632
+      ],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001125,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001129,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001121,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001011,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924631,
+      "is_root": false,
+      "last_campaign_id_raw": "24623",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "24632",
+      "parents": [
+        24623
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 600007,
+      "source_order": 105,
+      "sweep_reward": 0
+    },
+    "24632": {
+      "campaign_id": 24632,
+      "chapter": 6,
+      "children": [
+        24633
+      ],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001126,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001130,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001122,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001011,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924632,
+      "is_root": false,
+      "last_campaign_id_raw": "24631",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "24633",
+      "parents": [
+        24631
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 600007,
+      "source_order": 106,
+      "sweep_reward": 0
+    },
+    "24633": {
+      "campaign_id": 24633,
+      "chapter": 6,
+      "children": [
+        24641
+      ],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001127,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001131,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001123,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001011,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924633,
+      "is_root": false,
+      "last_campaign_id_raw": "24632",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "24641",
+      "parents": [
+        24632
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 600007,
+      "source_order": 107,
+      "sweep_reward": 0
+    },
+    "24641": {
+      "campaign_id": 24641,
+      "chapter": 6,
+      "children": [
+        24642
+      ],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001125,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001129,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001121,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001011,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924641,
+      "is_root": false,
+      "last_campaign_id_raw": "24633",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "24642",
+      "parents": [
+        24633
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 600010,
+      "source_order": 108,
+      "sweep_reward": 0
+    },
+    "24642": {
+      "campaign_id": 24642,
+      "chapter": 6,
+      "children": [
+        24643
+      ],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001126,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001130,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001122,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001011,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924642,
+      "is_root": false,
+      "last_campaign_id_raw": "24641",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "24643",
+      "parents": [
+        24641
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 600010,
+      "source_order": 109,
+      "sweep_reward": 0
+    },
+    "24643": {
+      "campaign_id": 24643,
+      "chapter": 6,
+      "children": [
+        24651
+      ],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001127,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001131,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001123,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001011,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924643,
+      "is_root": false,
+      "last_campaign_id_raw": "24642",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "24651",
+      "parents": [
+        24642
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 600010,
+      "source_order": 110,
+      "sweep_reward": 0
+    },
+    "24651": {
+      "campaign_id": 24651,
+      "chapter": 6,
+      "children": [
+        24652
+      ],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001125,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001129,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001121,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001011,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924651,
+      "is_root": false,
+      "last_campaign_id_raw": "24643",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "24652",
+      "parents": [
+        24643
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 600013,
+      "source_order": 111,
+      "sweep_reward": 0
+    },
+    "24652": {
+      "campaign_id": 24652,
+      "chapter": 6,
+      "children": [
+        24653
+      ],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001126,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001130,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001122,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001011,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924652,
+      "is_root": false,
+      "last_campaign_id_raw": "24651",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "24653",
+      "parents": [
+        24651
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 600013,
+      "source_order": 112,
+      "sweep_reward": 0
+    },
+    "24653": {
+      "campaign_id": 24653,
+      "chapter": 6,
+      "children": [
+        24661
+      ],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001127,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001131,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001123,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001011,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924653,
+      "is_root": false,
+      "last_campaign_id_raw": "24652",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "24661",
+      "parents": [
+        24652
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 600013,
+      "source_order": 113,
+      "sweep_reward": 0
+    },
+    "24661": {
+      "campaign_id": 24661,
+      "chapter": 6,
+      "children": [
+        24662
+      ],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001125,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001129,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001121,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001011,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924661,
+      "is_root": false,
+      "last_campaign_id_raw": "24653",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "24662",
+      "parents": [
+        24653
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 600015,
+      "source_order": 114,
+      "sweep_reward": 0
+    },
+    "24662": {
+      "campaign_id": 24662,
+      "chapter": 6,
+      "children": [
+        24663
+      ],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001126,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001130,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001122,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001011,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924662,
+      "is_root": false,
+      "last_campaign_id_raw": "24661",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "24663",
+      "parents": [
+        24661
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 600015,
+      "source_order": 115,
+      "sweep_reward": 0
+    },
+    "24663": {
+      "campaign_id": 24663,
+      "chapter": 6,
+      "children": [
+        24671
+      ],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001127,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001131,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001123,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001011,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924663,
+      "is_root": false,
+      "last_campaign_id_raw": "24662",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "24671",
+      "parents": [
+        24662
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 600015,
+      "source_order": 116,
+      "sweep_reward": 0
+    },
+    "24671": {
+      "campaign_id": 24671,
+      "chapter": 6,
+      "children": [
+        24672
+      ],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001125,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001129,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001121,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001011,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924671,
+      "is_root": false,
+      "last_campaign_id_raw": "24663",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "24672",
+      "parents": [
+        24663
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 600018,
+      "source_order": 117,
+      "sweep_reward": 0
+    },
+    "24672": {
+      "campaign_id": 24672,
+      "chapter": 6,
+      "children": [
+        24673
+      ],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001126,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001130,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001122,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001011,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924672,
+      "is_root": false,
+      "last_campaign_id_raw": "24671",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "24673",
+      "parents": [
+        24671
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 600018,
+      "source_order": 118,
+      "sweep_reward": 0
+    },
+    "24673": {
+      "campaign_id": 24673,
+      "chapter": 6,
+      "children": [
+        24681
+      ],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001127,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001131,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001123,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001011,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924673,
+      "is_root": false,
+      "last_campaign_id_raw": "24672",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "24681",
+      "parents": [
+        24672
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 600018,
+      "source_order": 119,
+      "sweep_reward": 0
+    },
+    "24681": {
+      "campaign_id": 24681,
+      "chapter": 6,
+      "children": [
+        24682
+      ],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001125,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001129,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001121,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001011,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924681,
+      "is_root": false,
+      "last_campaign_id_raw": "24673",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "24682",
+      "parents": [
+        24673
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 600020,
+      "source_order": 120,
+      "sweep_reward": 0
+    },
+    "24682": {
+      "campaign_id": 24682,
+      "chapter": 6,
+      "children": [
+        24683
+      ],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001126,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001130,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001122,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001011,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924682,
+      "is_root": false,
+      "last_campaign_id_raw": "24681",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "24683",
+      "parents": [
+        24681
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 600020,
+      "source_order": 121,
+      "sweep_reward": 0
+    },
+    "24683": {
+      "campaign_id": 24683,
+      "chapter": 6,
+      "children": [],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001127,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001131,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001123,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 130001043,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924683,
+      "is_root": false,
+      "last_campaign_id_raw": "24682",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "0",
+      "parents": [
+        24682
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 600020,
+      "source_order": 122,
+      "sweep_reward": 0
+    },
+    "24711": {
+      "campaign_id": 24711,
+      "chapter": 7,
+      "children": [
+        24712
+      ],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001125,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001129,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001121,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001011,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924711,
+      "is_root": true,
+      "last_campaign_id_raw": "0",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "24712",
+      "parents": [],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 700003,
+      "source_order": 123,
+      "sweep_reward": 0
+    },
+    "24712": {
+      "campaign_id": 24712,
+      "chapter": 7,
+      "children": [
+        24713
+      ],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001126,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001130,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001122,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001011,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924712,
+      "is_root": false,
+      "last_campaign_id_raw": "24711",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "24713",
+      "parents": [
+        24711
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 700003,
+      "source_order": 124,
+      "sweep_reward": 0
+    },
+    "24713": {
+      "campaign_id": 24713,
+      "chapter": 7,
+      "children": [
+        24721
+      ],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001127,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001131,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001123,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001011,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924713,
+      "is_root": false,
+      "last_campaign_id_raw": "24712",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "24721",
+      "parents": [
+        24712
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 700003,
+      "source_order": 125,
+      "sweep_reward": 0
+    },
+    "24721": {
+      "campaign_id": 24721,
+      "chapter": 7,
+      "children": [
+        24722
+      ],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001125,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001129,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001121,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001011,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924721,
+      "is_root": false,
+      "last_campaign_id_raw": "24713",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "24722",
+      "parents": [
+        24713
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 700006,
+      "source_order": 126,
+      "sweep_reward": 0
+    },
+    "24722": {
+      "campaign_id": 24722,
+      "chapter": 7,
+      "children": [
+        24723
+      ],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001126,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001130,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001122,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001011,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924722,
+      "is_root": false,
+      "last_campaign_id_raw": "24721",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "24723",
+      "parents": [
+        24721
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 700006,
+      "source_order": 127,
+      "sweep_reward": 0
+    },
+    "24723": {
+      "campaign_id": 24723,
+      "chapter": 7,
+      "children": [
+        24731
+      ],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001127,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001131,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001123,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001011,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924723,
+      "is_root": false,
+      "last_campaign_id_raw": "24722",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "24731",
+      "parents": [
+        24722
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 700006,
+      "source_order": 128,
+      "sweep_reward": 0
+    },
+    "24731": {
+      "campaign_id": 24731,
+      "chapter": 7,
+      "children": [
+        24732
+      ],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001125,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001129,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001121,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001011,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924731,
+      "is_root": false,
+      "last_campaign_id_raw": "24723",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "24732",
+      "parents": [
+        24723
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 700009,
+      "source_order": 129,
+      "sweep_reward": 0
+    },
+    "24732": {
+      "campaign_id": 24732,
+      "chapter": 7,
+      "children": [
+        24733
+      ],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001126,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001130,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001122,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001011,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924732,
+      "is_root": false,
+      "last_campaign_id_raw": "24731",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "24733",
+      "parents": [
+        24731
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 700009,
+      "source_order": 130,
+      "sweep_reward": 0
+    },
+    "24733": {
+      "campaign_id": 24733,
+      "chapter": 7,
+      "children": [
+        24741
+      ],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001127,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001131,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001123,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001011,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924733,
+      "is_root": false,
+      "last_campaign_id_raw": "24732",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "24741",
+      "parents": [
+        24732
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 700009,
+      "source_order": 131,
+      "sweep_reward": 0
+    },
+    "24741": {
+      "campaign_id": 24741,
+      "chapter": 7,
+      "children": [
+        24742
+      ],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001125,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001129,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001121,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001011,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924741,
+      "is_root": false,
+      "last_campaign_id_raw": "24733",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "24742",
+      "parents": [
+        24733
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 700012,
+      "source_order": 132,
+      "sweep_reward": 0
+    },
+    "24742": {
+      "campaign_id": 24742,
+      "chapter": 7,
+      "children": [
+        24743
+      ],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001126,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001130,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001122,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001011,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924742,
+      "is_root": false,
+      "last_campaign_id_raw": "24741",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "24743",
+      "parents": [
+        24741
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 700012,
+      "source_order": 133,
+      "sweep_reward": 0
+    },
+    "24743": {
+      "campaign_id": 24743,
+      "chapter": 7,
+      "children": [
+        24751
+      ],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001127,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001131,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001123,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001011,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924743,
+      "is_root": false,
+      "last_campaign_id_raw": "24742",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "24751",
+      "parents": [
+        24742
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 700012,
+      "source_order": 134,
+      "sweep_reward": 0
+    },
+    "24751": {
+      "campaign_id": 24751,
+      "chapter": 7,
+      "children": [
+        24752
+      ],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001125,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001129,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001121,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001011,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924751,
+      "is_root": false,
+      "last_campaign_id_raw": "24743",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "24752",
+      "parents": [
+        24743
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 700015,
+      "source_order": 135,
+      "sweep_reward": 0
+    },
+    "24752": {
+      "campaign_id": 24752,
+      "chapter": 7,
+      "children": [
+        24753
+      ],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001126,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001130,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001122,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001011,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924752,
+      "is_root": false,
+      "last_campaign_id_raw": "24751",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "24753",
+      "parents": [
+        24751
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 700015,
+      "source_order": 136,
+      "sweep_reward": 0
+    },
+    "24753": {
+      "campaign_id": 24753,
+      "chapter": 7,
+      "children": [
+        24761
+      ],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001127,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001131,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001123,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001011,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924753,
+      "is_root": false,
+      "last_campaign_id_raw": "24752",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "24761",
+      "parents": [
+        24752
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 700015,
+      "source_order": 137,
+      "sweep_reward": 0
+    },
+    "24761": {
+      "campaign_id": 24761,
+      "chapter": 7,
+      "children": [
+        24762
+      ],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001125,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001129,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001121,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001011,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924761,
+      "is_root": false,
+      "last_campaign_id_raw": "24753",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "24762",
+      "parents": [
+        24753
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 700018,
+      "source_order": 138,
+      "sweep_reward": 0
+    },
+    "24762": {
+      "campaign_id": 24762,
+      "chapter": 7,
+      "children": [
+        24763
+      ],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001126,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001130,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001122,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001011,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924762,
+      "is_root": false,
+      "last_campaign_id_raw": "24761",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "24763",
+      "parents": [
+        24761
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 700018,
+      "source_order": 139,
+      "sweep_reward": 0
+    },
+    "24763": {
+      "campaign_id": 24763,
+      "chapter": 7,
+      "children": [
+        24771
+      ],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001127,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001131,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001123,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001011,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924763,
+      "is_root": false,
+      "last_campaign_id_raw": "24762",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "24771",
+      "parents": [
+        24762
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 700018,
+      "source_order": 140,
+      "sweep_reward": 0
+    },
+    "24771": {
+      "campaign_id": 24771,
+      "chapter": 7,
+      "children": [
+        24772
+      ],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001125,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001129,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001121,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001011,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924771,
+      "is_root": false,
+      "last_campaign_id_raw": "24763",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "24772",
+      "parents": [
+        24763
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 700020,
+      "source_order": 141,
+      "sweep_reward": 0
+    },
+    "24772": {
+      "campaign_id": 24772,
+      "chapter": 7,
+      "children": [
+        24773
+      ],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001126,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001130,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001122,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001011,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924772,
+      "is_root": false,
+      "last_campaign_id_raw": "24771",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "24773",
+      "parents": [
+        24771
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 700020,
+      "source_order": 142,
+      "sweep_reward": 0
+    },
+    "24773": {
+      "campaign_id": 24773,
+      "chapter": 7,
+      "children": [],
+      "daily_limit": 0,
+      "defeat_cost": 2,
+      "deterministic_init_awards": [
+        {
+          "increase_rate": 10000,
+          "item_id": 50001127,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001131,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001123,
+          "item_num": 1
+        },
+        {
+          "increase_rate": 10000,
+          "item_id": 50001011,
+          "item_num": 1
+        }
+      ],
+      "dropbox_id": 0,
+      "energy_cost": 24,
+      "init_dropbox_id": 924773,
+      "is_root": false,
+      "last_campaign_id_raw": "24772",
+      "mana_gain": 0,
+      "next_campaign_id_raw": "0",
+      "parents": [
+        24772
+      ],
+      "partner_exp": 60,
+      "relate_normal_campaign_id": 700020,
+      "source_order": 143,
+      "sweep_reward": 0
+    }
+  },
+  "ordered_campaign_ids": [
+    24111,
+    24112,
+    24113,
+    24121,
+    24122,
+    24123,
+    24131,
+    24132,
+    24133,
+    24141,
+    24142,
+    24143,
+    24151,
+    24152,
+    24153,
+    24161,
+    24162,
+    24163,
+    24211,
+    24212,
+    24213,
+    24221,
+    24222,
+    24223,
+    24231,
+    24232,
+    24233,
+    24241,
+    24242,
+    24243,
+    24251,
+    24252,
+    24253,
+    24261,
+    24262,
+    24263,
+    24271,
+    24272,
+    24273,
+    24311,
+    24312,
+    24313,
+    24321,
+    24322,
+    24323,
+    24331,
+    24332,
+    24333,
+    24341,
+    24342,
+    24343,
+    24351,
+    24352,
+    24353,
+    24361,
+    24362,
+    24363,
+    24411,
+    24412,
+    24413,
+    24421,
+    24422,
+    24423,
+    24431,
+    24432,
+    24433,
+    24441,
+    24442,
+    24443,
+    24451,
+    24452,
+    24453,
+    24461,
+    24462,
+    24463,
+    24471,
+    24472,
+    24473,
+    24511,
+    24512,
+    24513,
+    24521,
+    24522,
+    24523,
+    24531,
+    24532,
+    24533,
+    24541,
+    24542,
+    24543,
+    24551,
+    24552,
+    24553,
+    24561,
+    24562,
+    24563,
+    24571,
+    24572,
+    24573,
+    24611,
+    24612,
+    24613,
+    24621,
+    24622,
+    24623,
+    24631,
+    24632,
+    24633,
+    24641,
+    24642,
+    24643,
+    24651,
+    24652,
+    24653,
+    24661,
+    24662,
+    24663,
+    24671,
+    24672,
+    24673,
+    24681,
+    24682,
+    24683,
+    24711,
+    24712,
+    24713,
+    24721,
+    24722,
+    24723,
+    24731,
+    24732,
+    24733,
+    24741,
+    24742,
+    24743,
+    24751,
+    24752,
+    24753,
+    24761,
+    24762,
+    24763,
+    24771,
+    24772,
+    24773
+  ],
+  "roots": [
+    24111,
+    24211,
+    24311,
+    24411,
+    24511,
+    24611,
+    24711
+  ]
+}

@@ -22,7 +22,7 @@ def require(cond: bool, message: str) -> None:
         raise AssertionError(message)
 
 
-def services(*, uid: str = "997501", energy: int = 100) -> tuple[PlayerState, RequestServices, list[int]]:
+def services(*, uid: str = "997501", energy: int = 100, elite_open: bool = False) -> tuple[PlayerState, RequestServices, list[int]]:
     p = PlayerState(player_id="997501", account_uid=uid, player_name="Pass75")
     # Keep Campaign EXP from introducing level-up Energy awards into the Energy
     # ownership assertions below. This is a test isolation choice, not a policy.
@@ -34,6 +34,8 @@ def services(*, uid: str = "997501", energy: int = 100) -> tuple[PlayerState, Re
     p.energy = int(energy)
     p.energy_time = 0
     p.max_energy = 100
+    if elite_open:
+        p.func_ids = [31]
     commits: list[int] = []
     s = RequestServices(p, DATA, lambda: commits.append(int(p.persistence_state.get("state_version", 0))), catalog=CATALOG)
     s.world.normalize()
@@ -60,7 +62,7 @@ def campaign_test() -> dict[str, object]:
     fight = {"campaign_id": 100001, "campaign_type": 1, "formation": ""}
     version_before_orphan = s.uow.current_state_version
     orphan = s.world.commit_fight_result({**fight, "star": 3})
-    require(orphan.get("error_code") == 1 and orphan.get("msg") == "campaign_session_mismatch", "orphan MID114 did not fail closed")
+    require(orphan.get("error_code") == 30005 and orphan.get("msg") == "campaign_battle_not_active", "orphan MID114 did not use Pass123 source-family terminal drain")
     require(s.world._find_row(100001, 1).get("star") == 0 and p.energy == 100 and s.uow.current_state_version == version_before_orphan, "orphan MID114 mutated Campaign state/resource/version")
     start = s.world.begin_fight(fight)
     require(start.get("error_code") is None, f"Normal MID113 unexpectedly rejected: {start}")
@@ -73,7 +75,7 @@ def campaign_test() -> dict[str, object]:
     require(s.world._find_row(100002, 1) is not None, "Normal clear did not unlock source next campaign")
     version_after = s.uow.current_state_version
     retry = s.world.commit_fight_result({**fight, "star": 3})
-    require(retry == out and p.energy == 94 and s.uow.current_state_version == version_after, "MID114 retry duplicated Campaign settlement")
+    require(retry.get("error_code") == 30005 and retry.get("is_win") == out.get("is_win") and p.energy == 94 and s.uow.current_state_version == version_after, "MID114 terminal retry duplicated Campaign settlement or lost source 30005")
 
     # A real loss uses source defeat_cost, not full entry Energy.
     loss_start = s.world.begin_fight(fight)
@@ -96,14 +98,24 @@ def campaign_test() -> dict[str, object]:
     require(low.energy == 5 and not low.active_campaign_battle, "rejected MID113 mutated Energy/session")
 
     # Super/Elite is an independent wire list but source-related to Normal.
-    sp, ss, _ = services(uid="997503", energy=50)
-    ss.world._mode_rows(2).append({"campaign_id": 100019, "star": 0, "daily_limit": 3, "reset_count": 0, "is_partner_drop": 0})
+    sp, ss, _ = services(uid="997503", energy=50, elite_open=True)
+    normal_anchor = ss.world._find_row(100001, 1)
+    require(normal_anchor is not None, "Super fixture missing related Normal 100001")
+    normal_anchor["star"] = 3
+    super_row = ss.world._find_row(100019, 2)
+    require(super_row is not None, "Function31 projection did not expose first Super row")
+    super_row["star"] = 0
+    super_row["daily_limit"] = 3
     sfight = {"campaign_id": 100019, "campaign_type": 2, "formation": ""}
     require(ss.world.begin_fight(sfight).get("error_code") is None, "source-related Super campaign rejected")
     sout = ss.world.commit_fight_result({**sfight, "star": 1})
     require(sp.energy == 38 and (sout.get("economy_") or {}).get("energy") == 38, "Super source Energy settlement drift")
     require((sout.get("economy_") or {}).get("mana") == 930, "Super source Mana reward drift")
-    require(ss.world.begin_fight({"campaign_id": 100001, "campaign_type": 2, "formation": ""}).get("msg") == "campaign_mode_mismatch", "wire Campaign mode validation missing")
+    require(
+        ss.world.begin_fight({"campaign_id": 100001, "campaign_type": 2, "formation": ""}).get("msg")
+        == "campaign_super_source_membership_invalid",
+        "wire Super source-membership validation missing",
+    )
 
     return {
         "source_campaign_rows": 917,

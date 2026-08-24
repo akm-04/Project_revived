@@ -1,17 +1,22 @@
 {
   "enabled": true,
-  "version": "1.631.4",
-  "package": "gxb-local-1.631.4.zip",
+  "version": "1.631.8",
+  "package": "gxb-local-1.631.8.zip",
   "volume": 1,
-  "size": 1962886,
-  "md5": "71f8c8bf25a599218994a55c14f447db",
+  "size": 2303136,
+  "md5": "234fd4add049bf29d1f663bee6ba74d2",
   "silent": true,
   "files": [
     "src_32/app/common/utils.lua",
     "src_32/app/model/AddEnergy.lua",
+    "src_32/app/model/SelfPlayer.lua",
+    "src_32/app/scenes/BattleCreate.lua",
     "src_32/app/windows/DragonBoat2017SelectTeamWindow.lua",
     "src_32/app/windows/DragonBoat2017ShopWindow.lua",
     "src_32/app/windows/LoginWindow.lua",
+    "src_32/app/windows/SelectTeamNewWindow.lua",
+    "src_32/app/windows/SelectTeamWindow.lua",
+    "src_32/app/windows/SweepWindow.lua",
     "src_32/app/windows/activities/Activity1124.lua",
     "src_32/app/windows/activities/Activity1149.lua",
     "src_32/app/windows/activities/Activity1231.lua",
@@ -73,9 +78,14 @@
     "src_32/data/tables/translation.lua",
     "src_64/app/common/utils.lua",
     "src_64/app/model/AddEnergy.lua",
+    "src_64/app/model/SelfPlayer.lua",
+    "src_64/app/scenes/BattleCreate.lua",
     "src_64/app/windows/DragonBoat2017SelectTeamWindow.lua",
     "src_64/app/windows/DragonBoat2017ShopWindow.lua",
     "src_64/app/windows/LoginWindow.lua",
+    "src_64/app/windows/SelectTeamNewWindow.lua",
+    "src_64/app/windows/SelectTeamWindow.lua",
+    "src_64/app/windows/SweepWindow.lua",
     "src_64/app/windows/activities/Activity1124.lua",
     "src_64/app/windows/activities/Activity1149.lua",
     "src_64/app/windows/activities/Activity1231.lua",
@@ -137,5 +147,5 @@
     "src_64/data/tables/translation.lua"
   ],
   "probe_only": false,
-  "note": "Generated from sparse backend-local src_32/src_64 overrides. Runtime lazy res files use /res/ separately."
+  "note": "Pass123 cumulative OTA: preserves prior overrides and explicitly restores stock-shaped MID113/MID114 Campaign battle files while keeping MID50/MID117 UUID bridges."
 }

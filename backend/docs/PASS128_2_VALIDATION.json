@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "pass": "128.2",
+  "timestamp": "2026-08-24T14:30:00+06:00",
+  "status": "PASS_STATIC_AND_REGRESSION_CLIENT_SMOKE_PENDING",
+  "checks": {
+    "pass128_2_mid112_wire_contract": "4/4 PASS",
+    "pass128_progression": "12/12 PASS",
+    "pass121_mid117": "PASS",
+    "pass122_challenge": "PASS",
+    "pass123_manual_session_ota": "PASS",
+    "pass94_progression": "PASS",
+    "pass92_mid116": "PASS",
+    "pass81_campaign_reset": "PASS",
+    "pass79_daily_reset": "PASS",
+    "pass75_campaign_ownership": "PASS",
+    "compileall": "PASS",
+    "ota_local_assets_vs_pass128_0": "BYTE_IDENTICAL"
+  },
+  "historical_harness_note": "Pass94 and several older scripts require project root on PYTHONPATH; this is a test harness assumption, not a backend regression.",
+  "runtime_gate": "MANDATORY_FRESH_ACCOUNT_CLIENT_SMOKE_BEFORE_ROADMAP_RESUME"
+}

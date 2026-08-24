@@ -1,0 +1,37 @@
+{
+  "pass": "114.0",
+  "pass111_behavioral_checks": [
+    "identity_and_fingerprint",
+    "policy_hashes_unchanged",
+    "adapter_wiring_and_campaign_boundary",
+    "exactly_once_paid_mid50_and_live_projection",
+    "legacy_paid_store_is_mid70_only"
+  ],
+  "passed": [
+    "tools/selftest_pass114_campaign_mid117_activation.py",
+    "python -m compileall -q gxb_backend tools",
+    "tools/selftest_pass110_random_outcome_service.py",
+    "tools/selftest_pass98_deterministic_consumables.py",
+    "tools/selftest_pass96_economy_vip_cleanup.py",
+    "tools/selftest_pass75_campaign_ownership.py",
+    "tools/selftest_pass70_1_stone_summon_mana.py",
+    "tools/selftest_pass105_session_firewall.py with canonical GXB_SRC64",
+    "Pass111 MID50 behavioral functions excluding obsolete exact OTA-version assertion"
+  ],
+  "schema_version": 1,
+  "status": "PASS_WITH_EXPLICIT_SUPERSEDED_HISTORICAL_ASSERTIONS",
+  "superseded_historical_assertions": [
+    {
+      "reason": "hard-codes OTA 1.631.5; Pass114 intentionally advances cumulative OTA to 1.631.6; all non-version behavioral functions pass",
+      "test": "tools/selftest_pass111_mid50_rng_migration.py"
+    },
+    {
+      "reason": "asserts MID117 is inert and OTA stays 1.631.5; intentionally superseded by Pass114 activation",
+      "test": "tools/selftest_pass113_campaign_mid117_foundation.py"
+    },
+    {
+      "reason": "predates source-native campaign_sweep_op_id requirement and therefore is superseded for live MID117 request shape; Pass114 focused suite covers current costs and no-spend/no-entropy failure boundaries",
+      "test": "tools/selftest_pass99_campaign_sweep_qa_seed.py"
+    }
+  ]
+}

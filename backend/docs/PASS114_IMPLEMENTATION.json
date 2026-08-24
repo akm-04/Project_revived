@@ -1,0 +1,30 @@
+{
+  "activation": {
+    "operation_id_field": "campaign_sweep_op_id",
+    "operation_id_format": "mid117-<UUIDv4>",
+    "ota_override_count": 132,
+    "ota_version": "1.631.6",
+    "planner_entrypoint": "CampaignDropPlanner.plan_repeat_sweep()",
+    "random_namespace": "campaign.repeat.residual",
+    "receipt_domain": "mid117_campaign_sweep",
+    "receipt_mode": "CLIENT_UUID_V4",
+    "receipt_retention": "CLIENT_UUID_PERMANENT"
+  },
+  "atomicity": "costs + deterministic sweep_reward + repeat stacks + durable receipt commit in one PlayerUnitOfWork",
+  "backend_version": "0.15.0",
+  "client_runtime_smoke": "PENDING",
+  "deferred": [
+    "Campaign EXP/Mana economys",
+    "awakening additional rewards",
+    "event-specific sweep MIDs",
+    "MID113 repeat RNG",
+    "generated/unique-instance settlement"
+  ],
+  "missing_pool_policy": "24 positive referenced pools with zero recovered rows fail before cost and entropy; repeat_dropbox_id=0 remains valid deterministic-only",
+  "pass": "114.0",
+  "replay": "exact static items/economys/additional plus current cumulative economy and campaign projections; no cost/RNG/mutation on replay",
+  "schema_version": 1,
+  "scope": "ordinary MID117 Campaign sweep repeat-stack activation",
+  "source_feedback_loop": "effective src_64 re-audited before backend and OTA modification",
+  "status": "IMPLEMENTED_STATIC_ACCEPTED_RUNTIME_SMOKE_PENDING"
+}

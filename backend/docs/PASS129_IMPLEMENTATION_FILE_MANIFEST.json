@@ -1,0 +1,117 @@
+{
+  "schema_version": 1,
+  "pass": "129.0",
+  "base": "gxb-backend-v0.15.6-pass128.2",
+  "artifact": "gxb-backend-v0.15.7-pass129.0",
+  "changes": [
+    {
+      "path": "README.md",
+      "before_sha256": "2bc07ea9f091ad723fd912edccce39a9ca4b4c0b77976b82af546aa667229e83",
+      "after_sha256": "8acd4f46b2c84f5b95ad4801d964bb9026372b5bb9b3aef5982d67fd986acfd0",
+      "kind": "modified"
+    },
+    {
+      "path": "UPDATE_README.md",
+      "before_sha256": "51af4fa5b9d24013f1e70420676233957746837f89fd9340e31510bda1ae34d0",
+      "after_sha256": "b408ee437bc0a60e56afe94cb58eca27fe6b0f57aa33a74c98661e67661efd17",
+      "kind": "modified"
+    },
+    {
+      "path": "VERSION.json",
+      "before_sha256": "264886a836bc993f407b5b51ce1910485b944b50435137eedfa80257208e9bd4",
+      "after_sha256": "4d54b8a626047461aba2cc1e6c1a16cee9c513f9e3a4e37e1055c014f5438c7e",
+      "kind": "modified"
+    },
+    {
+      "path": "docs/PASS129_ARCHITECTURE_HYGIENE.json",
+      "before_sha256": null,
+      "after_sha256": "3c73800bc10305272fc81deff66e22c4b9ad30684de55e9f91adac6c5724d2bb",
+      "kind": "added"
+    },
+    {
+      "path": "docs/PASS129_ARCHITECTURE_SELFTEST.json",
+      "before_sha256": null,
+      "after_sha256": "dc5b3ce0eb2daadd0808de94301d619aa56667769e360acc4efd2c89dff4ff23",
+      "kind": "added"
+    },
+    {
+      "path": "docs/PASS129_CLIENT_TEST_PLAN.md",
+      "before_sha256": null,
+      "after_sha256": "7b9e5b2c1a0c777a667cc3343c52ba0366776b8e2368eb940c1a80ef7ddd28df",
+      "kind": "added"
+    },
+    {
+      "path": "docs/PASS129_IMPLEMENTATION.json",
+      "before_sha256": null,
+      "after_sha256": "1263fd6c392efa8d890f15a90820907fbc364d756b516b57c9e2640ff023efa1",
+      "kind": "added"
+    },
+    {
+      "path": "docs/PASS129_ROADMAP.json",
+      "before_sha256": null,
+      "after_sha256": "2073d2545946634522f26820840717fcfda2deef4a100d09e57da674b5e6596e",
+      "kind": "added"
+    },
+    {
+      "path": "docs/PASS129_SRC64_FEEDBACK_LOOP.json",
+      "before_sha256": null,
+      "after_sha256": "b5c31cb0b194200e5df057b94d64438e0d2e50ceab9e47510608100ec4ee42ef",
+      "kind": "added"
+    },
+    {
+      "path": "docs/PASS129_TECHNICAL_CHANGELOG.md",
+      "before_sha256": null,
+      "after_sha256": "90c6673b364ca0962a75e8592a1d374a2f8818f4f00613b6f1893bfbcef3ae6a",
+      "kind": "added"
+    },
+    {
+      "path": "docs/PASS129_VALIDATION.json",
+      "before_sha256": null,
+      "after_sha256": "48790a6510dfbd7192deeca5f1c7f3a00b11bcafa7ff2777c4c3eb5cfb883327",
+      "kind": "added"
+    },
+    {
+      "path": "docs/memory.md",
+      "before_sha256": "aed244232400acbff6b10272bb17f7863e13fea6c8d75a7d4dfbb3c412afb89c",
+      "after_sha256": "6dc2d8635a74426f64d602fc0b553f253a4f006cd7a361dce7ca33f3917f020c",
+      "kind": "modified"
+    },
+    {
+      "path": "gxb_backend/state/campaign_composition.py",
+      "before_sha256": null,
+      "after_sha256": "9e209a45e15dbc11ebf1e51d0920ca461bb135af4bdaba1ce343b80ddf3e0f01",
+      "kind": "added"
+    },
+    {
+      "path": "gxb_backend/state/maintenance_services.py",
+      "before_sha256": "7cc37540984044f9ce405f213597dc6c856ee3d93b85fad4884f8e454488a85b",
+      "after_sha256": "0586b2b09145f268509da2d7722ed5a2ccb5dc62f1cceb56c08f9da3e67b235d",
+      "kind": "modified"
+    },
+    {
+      "path": "gxb_backend/state/request_services.py",
+      "before_sha256": "558c746a87da053761cb81d126b4df36dbf28f45ee36a0818077b0af8d01d4b0",
+      "after_sha256": "083ae94b3d1a4bf8e7a7a09c41dd31e10c5cc4bab6e4599eb3c54eadd80b385f",
+      "kind": "modified"
+    },
+    {
+      "path": "gxb_backend/state/world_repository.py",
+      "before_sha256": "83e0987ae02cf33663c2986a8a8ec29215acd6cd654021c741ad27b6bcb33843",
+      "after_sha256": "2d86a74031b0a0d3a8012f5ce716ce8284242273935485f0df68d5b9374f7c81",
+      "kind": "modified"
+    },
+    {
+      "path": "memory.md",
+      "before_sha256": "825aec11c39290cdea64b16622ca870e9820edfa3c038a151d32f8935657c074",
+      "after_sha256": "afaec9a0861b9e7dd0b99d3dbcc84adc617f313af67bfb6c7395fcf4670d57d7",
+      "kind": "modified"
+    },
+    {
+      "path": "tools/selftest_pass129_architecture_hygiene.py",
+      "before_sha256": null,
+      "after_sha256": "03ba8ab3b71f8ad5a6ce60d46797c89cb7f8c14e70332c0b4e7c9935924b2c30",
+      "kind": "added"
+    }
+  ],
+  "note": "Manifest intentionally excludes itself to avoid self-hash recursion. No local_assets/OTA bytes changed."
+}

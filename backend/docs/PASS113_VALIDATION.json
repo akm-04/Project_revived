@@ -1,0 +1,30 @@
+{
+  "backend_version": "0.14.2",
+  "focused": [
+    "selftest_pass113_campaign_rng_foundation.py PASS"
+  ],
+  "historical_superseded": [
+    "Pass104 mutation-firewall selftest expects pre-Pass105 count-key name phase2_session; Pass105 current firewall selftest passes and is authoritative."
+  ],
+  "inert_guards": {
+    "legacy_campaign_drop_policy_sha256": "dffda0e69f365e1e17175999d49c95750976ba71890fd5853f4f1b155bdb2b72",
+    "matches_pass111_campaign_drop_policy": true,
+    "matches_pass111_world_repository": true,
+    "ota_version": "1.631.5",
+    "sweepwindow_override_present": false,
+    "world_repository_sha256": "e434550cb6db77c17b50b17b25dc2886262a742c1d1628700cce6f4f27920752"
+  },
+  "pass": "113.0",
+  "regression_passed": [
+    "Pass110 ROS foundation",
+    "Pass111 MID50 migration",
+    "Pass105 session firewall",
+    "Pass99 Campaign sweep cost QA",
+    "Pass98 deterministic consumables",
+    "Pass96 economy/VIP cleanup",
+    "Pass75 Campaign ownership"
+  ],
+  "scope": "Campaign MID117 RNG Phase C1 inert foundation",
+  "source_catalog_sha256": "7d080d3b0ed52a4645fc719a19762e16964db4f6869d5f0aea1441f467f821f4",
+  "status": "PASS"
+}

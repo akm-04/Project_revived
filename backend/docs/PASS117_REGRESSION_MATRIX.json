@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "pass": "117.0",
+  "status": "PASS_WITH_SUPERSEDED_HISTORICAL_ASSERTIONS",
+  "passed": [
+    "Pass117 focused Campaign reconciliation (9 tests)",
+    "Pass114 MID117 current behavioral suite (9 tests; exact OTA 1.631.6 assertion excluded as superseded)",
+    "Pass111 MID50 identity/policy/exactly-once/legacy-store behavioral suite",
+    "Pass110 RandomOutcomeService foundation",
+    "Pass105 Mutation Safety Firewall with canonical effective src_64",
+    "Pass98 deterministic consumables",
+    "Pass96 Economy/VIP cleanup",
+    "Pass92 Super Campaign paid reset",
+    "Pass94 player progression"
+  ],
+  "superseded_historical_tests": [
+    {
+      "test": "Pass99 Campaign sweep QA",
+      "reason": "predates mandatory MID117 campaign_sweep_op_id introduced/accepted in Pass114"
+    },
+    {
+      "test": "Pass81 Daily Reset Campaign correction Super MID113 fixture",
+      "reason": "predates mandatory Normal/Super MID113 campaign_battle_op_id introduced in Pass117"
+    },
+    {
+      "test": "Pass75 Campaign ownership orphan MID114 exact error fixture",
+      "reason": "predates mandatory Normal/Super MID114 campaign_battle_op_id and durable stage receipt contract introduced in Pass117"
+    },
+    {
+      "test": "legacy selftest_campaign_economy",
+      "reason": "predates mandatory MID50 summon_op_id introduced/accepted in Pass111"
+    },
+    {
+      "test": "Pass111/Pass114 exact OTA version assertions",
+      "reason": "resource version intentionally advanced cumulatively to 1.631.7"
+    }
+  ],
+  "compileall": "PASS"
+}

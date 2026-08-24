@@ -1,0 +1,106 @@
+{
+  "schema_version": 1,
+  "pass": "131.0",
+  "timestamp": "2026-08-24T19:11:02+06:00",
+  "effective_src64": "app-assets/output/assets/src_64",
+  "source_artifact_sha256": "89f0f830508b92e5fff6ad53c6a9dae961a14042dbfdf5649008efb8353f5608",
+  "files": [
+    {
+      "path": "app/windows/SweepWindow.lua",
+      "sha256": "8548611ec6bb778433a234f3bdecf452fcde1522c64e8ca9eac5d9a84579fce5",
+      "bytes": 25451
+    },
+    {
+      "path": "app/windows/BattleWinWindow.lua",
+      "sha256": "f3a362765adea6fc5cbd239c8a9801cfef762146ddb1c48c854f0266c7a06096",
+      "bytes": 38042
+    },
+    {
+      "path": "app/model/SelfPlayer.lua",
+      "sha256": "163d5893c9522ada412c2b9c4748a80757660fccdf03c8f72cb6edf0838b8eb4",
+      "bytes": 156513
+    },
+    {
+      "path": "app/common/network/Backend.lua",
+      "sha256": "95378e2b0be8180df6de27e9e430c630bcfe46c080e1f91ef5f6d74bdbb1b840",
+      "bytes": 36252
+    },
+    {
+      "path": "app/common/tables/CampaignTable.lua",
+      "sha256": "e27c0e43d0b630102653699d7ed8b1735071090be027c99cc415a4308dc45ce4",
+      "bytes": 9552
+    },
+    {
+      "path": "app/windows/NewMapDetailWindow.lua",
+      "sha256": "88b97be8577828f478360c25fd51674e2ed8291b2a590976b3530c91396d07bf",
+      "bytes": 43944
+    },
+    {
+      "path": "data/tables/campaign.lua",
+      "sha256": "7a58e878a7171839342a856cd74b512037528438259d036009a7249472504683",
+      "bytes": 969307
+    },
+    {
+      "path": "data/tables/chapter.lua",
+      "sha256": "845e255f90abdd3b9e92ab558ac84bd766f868b300f7ca2992bdce933e0ae844",
+      "bytes": 13828
+    },
+    {
+      "path": "data/tables/player.lua",
+      "sha256": "1b6b6b0557b0d2cb33b34dc37c25e4a12ae4fbd71f1476d6ac463267a1278345",
+      "bytes": 10330
+    },
+    {
+      "path": "data/tables/function.lua",
+      "sha256": "a240254e79ccfd41862f3d6289f4f5fd09280ac3e197f51bc14b896a62c10010",
+      "bytes": 18606
+    }
+  ],
+  "source_contract_confirmed": [
+    "SweepWindow consumes economys[i].exp as raw/base Campaign EXP and economys[i].mana directly.",
+    "SweepWindow begins from the pre-request lev/exp snapshot, applies 1x while simulated level <=10, and switches subsequent rows to SelfPlayer:getExpMulti() after crossing above 10.",
+    "SelfPlayer:getExpMulti() returns 3 in effective src_64.",
+    "BattleWinWindow uses campaign energy_cost as ordinary Campaign account EXP base; partner_exp is a different plane.",
+    "CampaignTable reads mana_gain for Campaign Mana.",
+    "Backend/SelfPlayer treat top-level economy_ as cumulative player synchronization and process exp/level/new_funcs/energy/mana through existing generic economy flow.",
+    "Normal/Super sweep visibility is independently gated by 3 stars; this pass does not alter sweep authorization."
+  ],
+  "official_server_unknowns_preserved": [
+    "Exact original-server MID117 settlement implementation is unavailable.",
+    "The <=10 1x-to-3x cumulative settlement rule remains a client-backed compatibility implementation decision rather than recovered server code."
+  ],
+  "project_scope": {
+    "mentor_student_exp": "DEFERRED_NON_CORE_SOCIAL_VERTICAL"
+  },
+  "backend_campaign_metadata_crosscheck": {
+    "canonical_rows_checked": 584,
+    "fields_checked": [
+      "energy_cost",
+      "mana_gain",
+      "partner_exp",
+      "daily_limit",
+      "relate_campaign_id"
+    ],
+    "missing_rows": 0,
+    "mismatches": 0,
+    "status": "PASS"
+  },
+  "implementation_files": [
+    {
+      "path": "gxb_backend/state/campaign_sweep_economy_policy.py",
+      "sha256": "cc77aed55b1be2de48914a093dd1227b393cd0eeea7928ea46294189560b7e7e",
+      "bytes": 5028
+    },
+    {
+      "path": "gxb_backend/state/world_repository.py",
+      "sha256": "759c6e0584ee9125fc0973941869fe8775198833d6fc32abbf277f68b9060854",
+      "bytes": 97532
+    },
+    {
+      "path": "tools/selftest_pass131_campaign_exp_mana.py",
+      "sha256": "d834344eef0e7cbd628aff12a316b150014ffde05e31263374304cc72b25af08",
+      "bytes": 18129
+    }
+  ],
+  "ota": "1.631.8 unchanged"
+}

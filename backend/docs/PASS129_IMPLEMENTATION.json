@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "pass": "129.0",
+  "backend": "0.15.7",
+  "behavior_change": false,
+  "files_of_interest": [
+    "gxb_backend/state/campaign_composition.py",
+    "gxb_backend/state/request_services.py",
+    "gxb_backend/state/maintenance_services.py",
+    "gxb_backend/state/world_repository.py",
+    "tools/selftest_pass129_architecture_hygiene.py"
+  ],
+  "summary": "Shared Campaign construction plus strict live object-identity invariants; no Campaign gameplay semantics modified.",
+  "world_repository_strangler_state": "Facade retained. Campaign composition seam established. MID113/MID114 extraction and MID117 extraction deferred to bounded future passes.",
+  "ota": "1.631.8 unchanged"
+}

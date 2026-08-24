@@ -77,13 +77,15 @@ def persistence_replacement_test() -> dict[str, object]:
     }
 
 
-def services(*, uid: str = "810010", energy: int = 100) -> tuple[PlayerState, RequestServices, list[int]]:
+def services(*, uid: str = "810010", energy: int = 100, elite_open: bool = False) -> tuple[PlayerState, RequestServices, list[int]]:
     p = PlayerState(player_id=uid, account_uid=uid, player_name="Pass81")
     p.lev = 100
     p.max_lev = 100
     p.energy = int(energy)
     p.max_energy = 100
     p.energy_time = 0
+    if elite_open:
+        p.func_ids = [31]
     commits: list[int] = []
     s = RequestServices(
         p,
@@ -103,10 +105,18 @@ def response_campaign(response: dict, campaign_id: int) -> dict:
 
 
 def super_campaign_attempt_test() -> dict[str, object]:
-    p, s, _ = services(energy=100)
+    p, s, _ = services(energy=100, elite_open=True)
     cid = 100019
-    row = {"campaign_id": cid, "star": 0, "daily_limit": 3, "reset_count": 0, "is_partner_drop": 0}
-    s.world._mode_rows(2).append(row)
+    # Pass128 source-authentic authority: an already-unlocked Super fixture also
+    # requires its related Normal anchor to be cleared. Function31 projection
+    # may have self-healed 100019 during normalize(), so reuse that row.
+    normal = s.world._find_row(100001, 1)
+    require(normal is not None, "Pass81 fixture missing Normal 100001")
+    normal["star"] = 3
+    row = s.world._find_row(cid, 2)
+    require(row is not None, "Pass128 Function31 projection did not expose Super 100019")
+    row["star"] = 0
+    row["daily_limit"] = 3
     fight = {"campaign_id": cid, "campaign_type": 2, "formation": ""}
 
     # First successful canonical settlement consumes one remaining attempt.
@@ -118,7 +128,7 @@ def super_campaign_attempt_test() -> dict[str, object]:
     # Duplicate result receipt must remain exactly-once: no second debit.
     version_after_first = s.uow.current_state_version
     retry = s.world.commit_fight_result({**fight, "star": 1})
-    require(retry == first, "duplicate MID114 did not return committed receipt")
+    require(retry.get("error_code") == 30005 and retry.get("is_win") == first.get("is_win"), "duplicate MID114 did not use Pass123 source terminal replay")
     require(row["daily_limit"] == 2, "duplicate MID114 consumed a second Super attempt")
     require(s.uow.current_state_version == version_after_first, "duplicate MID114 consumed a state version")
 

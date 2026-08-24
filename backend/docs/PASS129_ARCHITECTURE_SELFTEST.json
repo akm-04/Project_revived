@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "pass": "129.0",
+  "status": "PASS",
+  "checks": [
+    "RequestServices -> WorldRepository shares exact Challenge/Super collaborator identities.",
+    "PlayerMaintenanceServices -> WorldRepository shares exact Challenge/Super collaborator identities with no request UoW.",
+    "Strict WorldRepository rejects omitted Campaign collaborators.",
+    "Strict WorldRepository rejects a mixed parallel Challenge owner graph.",
+    "Internal gxb_backend import graph remains acyclic."
+  ],
+  "count": "5/5"
+}

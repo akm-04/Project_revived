@@ -1,0 +1,20 @@
+{
+  "pass": "110.0",
+  "status": "PASS",
+  "scope": "RandomOutcomeService foundation only",
+  "checks": [
+    "strict namespace and positive-bound validation",
+    "request-scoped namespace ordinals",
+    "validation failures consume zero draws",
+    "provider failures do not advance ordinals",
+    "choose_index exactly one draw",
+    "weighted_index integer cumulative selection exactly one draw",
+    "zero/invalid weights fail before entropy",
+    "strict scripted missing/unexpected/mismatched/out-of-range failure",
+    "script exhaustion detects skipped expected draws",
+    "namespaced randbelow adapter compatibility",
+    "SystemEntropyProvider bounded OS entropy",
+    "RequestServices request-scoped composition/injection",
+    "MID50 and Campaign planners deliberately remain unmigrated"
+  ]
+}

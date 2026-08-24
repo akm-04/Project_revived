@@ -1,0 +1,97 @@
+{
+  "schema_version": 1,
+  "pass": "123.0",
+  "status": "PASS",
+  "checks": [
+    {
+      "name": "pass123_manual_battle_session",
+      "result": "PASS",
+      "covers": [
+        "stock-shape sticky MID113 stage replay; legacy UUID ignored",
+        "invalid supersede preserves stage; valid other stage replaces",
+        "MID114 terminal duplicate 30005 + live projection + no new Campaign battle receipts",
+        "unmatched MID114 family drain 30005/no mutation",
+        "Super attempt consumed once; terminal duplicate zero extra",
+        "OTA 1.631.8 six-file stock rollback + MID50/MID117 bridge preservation"
+      ]
+    },
+    {
+      "name": "pass122_challenge_mode_updated",
+      "result": "PASS",
+      "covers": [
+        "Challenge deterministic rewards/projection survive session rewrite",
+        "terminal Challenge duplicate now source-family 30005, no double grant/debit"
+      ]
+    },
+    {
+      "name": "pass121_super_mid117_daily_limit",
+      "result": "PASS",
+      "covers": [
+        "MID117 UUID/UoW and Super daily-limit atomicity unchanged"
+      ]
+    },
+    {
+      "name": "pass75_campaign_ownership_updated",
+      "result": "PASS",
+      "covers": [
+        "orphan/terminal MID114 use family-bounded 30005 without mutation"
+      ]
+    },
+    {
+      "name": "pass81_daily_reset_campaign_corrections_updated",
+      "result": "PASS",
+      "covers": [
+        "manual Super terminal retry does not consume a second attempt"
+      ]
+    },
+    {
+      "name": "pass79_daily_reset",
+      "result": "PASS",
+      "covers": [
+        "05:00 GMT+8 reset participant intact"
+      ]
+    },
+    {
+      "name": "pass92_mid116_campaign_reset",
+      "result": "PASS",
+      "covers": [
+        "Super reset semantics intact"
+      ]
+    },
+    {
+      "name": "pass114_mid117_activation_updated",
+      "result": "PASS",
+      "covers": [
+        "OTA 1.631.8 remains cumulative and MID117 SweepWindow UUID bridge remains"
+      ]
+    },
+    {
+      "name": "pass117_campaign_reconciliation_historical_subset",
+      "result": "PASS",
+      "covers": [
+        "still-valid first-clear/Challenge projection assertions; obsolete Pass117 UUID/receipt assertions explicitly superseded"
+      ]
+    },
+    {
+      "name": "compileall",
+      "result": "PASS",
+      "covers": [
+        "gxb_backend and tools syntax/import compilation"
+      ]
+    }
+  ],
+  "historical_stale_harnesses": [
+    {
+      "test": "tools/selftest_campaign_economy.py",
+      "reason": "fails in unrelated summon setup before Campaign assertions"
+    },
+    {
+      "test": "tools/selftest_pass99_campaign_sweep_qa_seed.py",
+      "reason": "predates mandatory MID117 UUID and sends no operation identity"
+    },
+    {
+      "test": "tools/selftest_pass113_campaign_rng_foundation.py",
+      "reason": "intentionally pins pre-Pass114 WorldRepository hash and is superseded by later repository changes"
+    }
+  ]
+}

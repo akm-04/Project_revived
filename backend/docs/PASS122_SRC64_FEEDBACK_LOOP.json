@@ -1,0 +1,36 @@
+{
+  "pass": "122.0",
+  "effective_src64": "app-assets/output/assets/src_64",
+  "status": "PASS",
+  "source_files": {
+    "data/tables/campaign.lua": "7a58e878a7171839342a856cd74b512037528438259d036009a7249472504683",
+    "data/tables/chapter.lua": "845e255f90abdd3b9e92ab558ac84bd766f868b300f7ca2992bdce933e0ae844",
+    "data/tables/campaign_dropbox.lua": "374b6b13bae56e2f5ac8d6b884821d2fb448d239871d1992b84bcf365e90404e",
+    "app/windows/MapWindow.lua": "8e8048d2be0ddb17894b3357fad8f5c4e992df136c6d8e6215f1db568d42cbb8",
+    "app/model/SelfPlayer.lua": "163d5893c9522ada412c2b9c4748a80757660fccdf03c8f72cb6edf0838b8eb4",
+    "app/windows/SelectTeamWindow.lua": "6d57e6bc7251060184190f7be14dcc9a277251673493a5b27e6c67c71cb96561",
+    "app/windows/SelectTeamNewWindow.lua": "0fabc7b70c2acf48765c41b414e3cae7504f567cb6fbe344b0f98456ed18667a",
+    "app/scenes/BattleCreate.lua": "bb9ae19c20ec165eeb7ba5b81a4ce85b6b7fea3a3a7eb278123bb8c0af0bbef9",
+    "app/common/enums.lua": "15340bd89fe7c6f150ccfd4a5cd2a2f0e8e73c89dfae9ac3388376a4799901f3"
+  },
+  "facts": {
+    "campaign_type_challenge": 24,
+    "rows": 144,
+    "edges": 137,
+    "roots": [24111,24211,24311,24411,24511,24611,24711],
+    "fan_out_nodes": 22,
+    "deterministic_init_award_rows": 539,
+    "all_positive_init_rates_multiple_of_10000": true,
+    "all_daily_limit_zero": true,
+    "all_repeat_dropbox_zero": true,
+    "all_sweep_reward_zero": true,
+    "energy_cost_values": [24],
+    "defeat_cost_values": [2]
+  },
+  "client_contract": [
+    "stock Challenge MID113/MID114 do not carry Pass117 campaign_battle_op_id",
+    "BattleCreate merges response.campaigns into world map and separately consumes result items",
+    "MapWindow.getTrueCampaignInfo directly dereferences Challenge variants so missing branch children can nil-crash"
+  ],
+  "catalog_regeneration": "BYTE_EXACT_PASS"
+}

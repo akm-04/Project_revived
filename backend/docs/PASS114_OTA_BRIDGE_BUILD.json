@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "pass": "114.0",
+  "status": "PASS",
+  "prior_version": "1.631.5",
+  "new_version": "1.631.6",
+  "prior_override_count": 130,
+  "new_override_count": 132,
+  "preserved_prior_override_count": 130,
+  "prior_override_mismatches": [],
+  "added_overrides": [
+    "src_32/app/windows/SweepWindow.lua",
+    "src_64/app/windows/SweepWindow.lua"
+  ],
+  "volume": "local_assets/updates/gxb-local-1.631.6.zip.001",
+  "volume_sha256": "a98e8f92addd8f5b6bf8c86f7e9a9d8de22bfe1a7937c12b7d5936ae61d194c9",
+  "volume_md5": "eb231bf3e7dbbd9162fb88909e4e3600",
+  "volume_size": 2033972,
+  "src32_sweepwindow_sha256": "2bc718a3afc24c91b8f6fe365a00961e5ef3a37450da258a02a8e7bca887e192",
+  "src64_sweepwindow_sha256": "2bc718a3afc24c91b8f6fe365a00961e5ef3a37450da258a02a8e7bca887e192",
+  "bridge": "campaign_sweep_op_id = mid117-<xyd.generateUUID()> only after resolved MID==SWEEP_CAMPAIGN",
+  "callback_guard": "ordinary MID117 local sweep mutation executes only when body error_code is absent/zero",
+  "retry_invariant": "Backend.lua pendingRequests reuses the same params table."
+}

@@ -1,0 +1,160 @@
+{
+  "schema_version": 1,
+  "pass": "123.0",
+  "files": [
+    {
+      "path": "README.md",
+      "bytes": 2139,
+      "sha256": "802c9caf0246ff56052820838c6e49df91fe207448cc5c127ae3785478867646"
+    },
+    {
+      "path": "UPDATE_README.md",
+      "bytes": 1069,
+      "sha256": "981a14378ab97bf11abc1bb31a9ab2f7af168648629bebb73fff7587c2e9a726"
+    },
+    {
+      "path": "VERSION.json",
+      "bytes": 566,
+      "sha256": "0a247a6e9363e19b712c3b653eb5b0b09f559f9b66fbe4df8d638a7a138c98b8"
+    },
+    {
+      "path": "memory.md",
+      "bytes": 6126,
+      "sha256": "3f6ccdac1cd6540e299fb4ab4449b5813ce033b929dc9895655e6ab43f907262"
+    },
+    {
+      "path": "docs/memory.md",
+      "bytes": 6126,
+      "sha256": "3f6ccdac1cd6540e299fb4ab4449b5813ce033b929dc9895655e6ab43f907262"
+    },
+    {
+      "path": "gxb_backend/state/world_repository.py",
+      "bytes": 88298,
+      "sha256": "b3b561dff17184a56b2c87e2667cffcff53475793cd8372d3ab908e468126b3e"
+    },
+    {
+      "path": "gxb_backend/state/campaign_battle_operation_receipt.py",
+      "bytes": 14212,
+      "sha256": "3b40641ac000104cca32fa3d2ac8521a66334efca9f76e87d970683cd1c5ff72"
+    },
+    {
+      "path": "local_assets/update_manifest.json",
+      "bytes": 7314,
+      "sha256": "4740f2debd5ebce41794ff708287f96f6fe4101190efefdd29baa3fe0f07bb9b"
+    },
+    {
+      "path": "local_assets/updates/gxb-local-1.631.8.zip.001",
+      "bytes": 2303136,
+      "sha256": "825e2064d139ac13dd343a1b5231c67767028e33eb9c64d2e69e849d1afe438c"
+    },
+    {
+      "path": "local_assets/src_32/app/windows/SelectTeamWindow.lua",
+      "bytes": 244013,
+      "sha256": "6d57e6bc7251060184190f7be14dcc9a277251673493a5b27e6c67c71cb96561"
+    },
+    {
+      "path": "local_assets/src_32/app/windows/SelectTeamNewWindow.lua",
+      "bytes": 309437,
+      "sha256": "0fabc7b70c2acf48765c41b414e3cae7504f567cb6fbe344b0f98456ed18667a"
+    },
+    {
+      "path": "local_assets/src_32/app/scenes/BattleCreate.lua",
+      "bytes": 255277,
+      "sha256": "bb9ae19c20ec165eeb7ba5b81a4ce85b6b7fea3a3a7eb278123bb8c0af0bbef9"
+    },
+    {
+      "path": "local_assets/src_64/app/windows/SelectTeamWindow.lua",
+      "bytes": 244013,
+      "sha256": "6d57e6bc7251060184190f7be14dcc9a277251673493a5b27e6c67c71cb96561"
+    },
+    {
+      "path": "local_assets/src_64/app/windows/SelectTeamNewWindow.lua",
+      "bytes": 309437,
+      "sha256": "0fabc7b70c2acf48765c41b414e3cae7504f567cb6fbe344b0f98456ed18667a"
+    },
+    {
+      "path": "local_assets/src_64/app/scenes/BattleCreate.lua",
+      "bytes": 255277,
+      "sha256": "bb9ae19c20ec165eeb7ba5b81a4ce85b6b7fea3a3a7eb278123bb8c0af0bbef9"
+    },
+    {
+      "path": "tools/selftest_pass123_manual_battle_session.py",
+      "bytes": 15534,
+      "sha256": "f4edd60bd7189717f10ffb49a973dbcb54c8b559f460d93c06f9437ccf4d2293"
+    },
+    {
+      "path": "tools/selftest_pass122_challenge_mode.py",
+      "bytes": 8259,
+      "sha256": "affa3f05fd1b91891a6b305efe5c0eb736f2456d1541e8145f266429f9e8f65e"
+    },
+    {
+      "path": "tools/selftest_pass121_super_mid117_daily_limit.py",
+      "bytes": 10080,
+      "sha256": "33f8a667757ccc244a369f8eeeb491e4494ea119a052413ef233892848b25bc4"
+    },
+    {
+      "path": "tools/selftest_pass117_campaign_reconciliation.py",
+      "bytes": 19897,
+      "sha256": "ea1c3e68f9123929c3eea6dcf50651faef460deabe4b3167378f43a878edf236"
+    },
+    {
+      "path": "tools/selftest_pass114_campaign_mid117_activation.py",
+      "bytes": 16754,
+      "sha256": "719c45cb76027ef8debd87adc23e90741b41e54a14bd7564b9165d522ba29795"
+    },
+    {
+      "path": "tools/selftest_pass75_campaign_ownership.py",
+      "bytes": 13487,
+      "sha256": "41b358cf1250ca42268ef0515d4cc94e5fe06c198aba48d7b7f1a4698f0ed6cb"
+    },
+    {
+      "path": "tools/selftest_pass81_daily_reset_campaign_corrections.py",
+      "bytes": 8865,
+      "sha256": "36bdf31aa4a581d70735dcc4286beac03f40c0b0f31afb2f8c38efc5362bc9e1"
+    },
+    {
+      "path": "docs/PASS123_RUNTIME_LOG_REVIEW.json",
+      "bytes": 1385,
+      "sha256": "dba324edb5feb28b747a037dc64814adf3622ed4b0364a6ec9f01b481ab45e9b"
+    },
+    {
+      "path": "docs/PASS123_SRC64_FEEDBACK_LOOP.json",
+      "bytes": 2325,
+      "sha256": "28b5a94f29ba8e9d3c334fb35d2bf4c9830bbcb1ca761e1c3a87ed7858374a6c"
+    },
+    {
+      "path": "docs/PASS123_IMPLEMENTATION.json",
+      "bytes": 2121,
+      "sha256": "ec52c0099b3c90bb7048f48ec02596690275b18e1d3be71577cbf5434cb38c2a"
+    },
+    {
+      "path": "docs/PASS123_OTA_ROLLBACK.json",
+      "bytes": 1170,
+      "sha256": "b7383c29a91687f6074f6950e09dcdf906841b016874b5b0388542b7f0089d2d"
+    },
+    {
+      "path": "docs/PASS123_REGRESSION_MATRIX.json",
+      "bytes": 2923,
+      "sha256": "df50e4ebb78ba087eadaf2e0af31f8ecc5ed7dbc7e0cc81e451849ecd7fde3a7"
+    },
+    {
+      "path": "docs/PASS123_VALIDATION.json",
+      "bytes": 718,
+      "sha256": "83bca5618dc5f7fed55c55dbf5b7e8d38fb3362a6e9c1cd8e2e90abef0201b13"
+    },
+    {
+      "path": "docs/PASS123_COMMIT.json",
+      "bytes": 495,
+      "sha256": "c0ed286aa651c14d56c90eb804d4a371ba17d6d0ff674790f4af25bf1b682c4b"
+    },
+    {
+      "path": "docs/PASS123_TECHNICAL_CHANGELOG.md",
+      "bytes": 4354,
+      "sha256": "29f8da3144cc8cf7d102d1f08b96ee49efabaa8b3d968047bfe76d186dd8b60b"
+    }
+  ],
+  "removed": [
+    "local_assets/updates/gxb-local-1.631.7.zip.001"
+  ],
+  "note": "Intentional Pass123 implementation/documentation scope; not a complete archive inventory."
+}

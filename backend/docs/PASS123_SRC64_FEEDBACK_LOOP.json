@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "pass": "123.0",
+  "effective_src64": "app-assets/output/assets/src_64",
+  "status": "PASS",
+  "source_files": {
+    "app/windows/SelectTeamWindow.lua": "6d57e6bc7251060184190f7be14dcc9a277251673493a5b27e6c67c71cb96561",
+    "app/windows/SelectTeamNewWindow.lua": "0fabc7b70c2acf48765c41b414e3cae7504f567cb6fbe344b0f98456ed18667a",
+    "app/scenes/BattleCreate.lua": "bb9ae19c20ec165eeb7ba5b81a4ce85b6b7fea3a3a7eb278123bb8c0af0bbef9",
+    "app/model/SelfPlayer.lua": "163d5893c9522ada412c2b9c4748a80757660fccdf03c8f72cb6edf0838b8eb4",
+    "app/windows/SweepWindow.lua": "8548611ec6bb778433a234f3bdecf452fcde1522c64e8ca9eac5d9a84579fce5",
+    "lib/battle/battleConfig.lua": "source_checked"
+  },
+  "facts": [
+    "Stock Campaign MID113 payload contains campaign_id, campaign_type, formation plus optional source-native pet/rent fields; no operation UUID.",
+    "Stock Campaign MID114 payload contains campaign_id, star, campaign_type, formation plus optional source-native fields; it does not echo MID113 battle_id and carries no operation UUID.",
+    "BattleCreate accepts errorIdFightExist as result-compatible for Campaign FIGHT_RESULT.",
+    "battleConfig defines errorIdFightExist = 30005.",
+    "SelfPlayer persists/project worldMaps_ entries by campaign_id with star/dailyLimit/resetCount and separately keeps normal/super campaign/chapter summary cursors.",
+    "Pass123 OTA rollback target is therefore source-shaped six-file Campaign battle behavior; MID50/MID117 UUID bridges are separate and must remain."
+  ],
+  "architectural_feedback": "Supports server-owned active_campaign_battle session and family-bounded terminal 30005 handling; contradicts Pass117 cross-request UUID requirement.",
+  "official_server_persistence_inference": {
+    "confidence": "HIGH on shape, UNKNOWN on exact storage technology/schema",
+    "inference": "Durable per-player Campaign projection (database/document rows keyed by campaign/stage) plus summary/frontier cursors is more plausible than a lone current-stage pointer.",
+    "why": "Client receives per-stage star/limit/reset state and Challenge is branching; a single pointer cannot represent branch clears, per-stage stars, or Super daily counters.",
+    "not_claimed": "No recovered official SQL schema/table layout or exact database engine."
+  }
+}

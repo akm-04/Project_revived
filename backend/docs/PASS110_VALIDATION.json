@@ -1,0 +1,37 @@
+{
+  "pass": "110.0",
+  "backend_version": "0.14.0",
+  "status": "STATIC_SELFTEST_FRESH_EXTRACTION_ACCEPTED_CLIENT_RUNTIME_PENDING",
+  "scope": "RandomOutcomeService foundation only; no MID50 or Campaign migration",
+  "source_feedback_loop": "PASS",
+  "focused_rng_selftest": "PASS",
+  "applicable_regression_spine": {
+    "passed": 26,
+    "failed": 0,
+    "notes": [
+      "A later full rerun reached 16 consecutive passes before the harness wall-clock timeout; no assertion failed in that rerun.",
+      "Pass89 OTA self-test is superseded because it hard-codes resource version 1.631.3; accepted Pass100 authority is 1.631.4 and Pass100 current self-test passes.",
+      "tools/selftest_tutorial_summon.py fails identically on untouched Pass105 and Pass110, so it is pre-existing historical drift and not a Pass110 regression."
+    ]
+  },
+  "foundation_boundary": {
+    "request_services_random_outcomes": true,
+    "mid50_migrated": false,
+    "campaign_migrated": false,
+    "client_protocol_changed": false,
+    "persisted_rng_state_added": false
+  },
+  "fresh_extraction": {
+    "status": "PASS",
+    "checks": [
+      "implementation manifest hash/size verification",
+      "python compileall",
+      "selftest_pass110_random_outcome_service.py",
+      "selftest_pass105_session_firewall.py",
+      "selftest_pass100_mid97_energy_purchase.py",
+      "selftest_pass99_campaign_sweep_qa_seed.py",
+      "selftest_pass98_deterministic_consumables.py",
+      "selftest_pass96_economy_vip_cleanup.py"
+    ]
+  }
+}

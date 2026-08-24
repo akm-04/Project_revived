@@ -9,26 +9,24 @@
   },
   "policies": [
     {
-      "policy_id": "legacy_first_clear_rate_10000_v1",
+      "policy_id": "campaign_first_clear_bernoulli_v1",
       "version": 1,
       "enabled": true,
       "scope": {
         "wire_campaign_types": [
           1,
-          2,
-          24
+          2
         ],
         "channel": "first_clear",
         "pool_ids": null
       },
-      "strategy": "deterministic_rows_matching_rate",
+      "strategy": "independent_bernoulli_10000",
       "parameters": {
-        "required_increase_rate": 10000,
-        "quantity_per_occurrence": 1
+        "rate_base": 10000
       },
       "duplicate_policy": "preserve_source_occurrences_then_aggregate_canonical_totals",
-      "evidence": "compatibility",
-      "notes": "Migrates the pre-Pass40.1 _guaranteed_first_awards behavior only. Does not claim historical probability semantics."
+      "evidence": "private_server_compatibility_source_bounded_not_recovered_official_server_code",
+      "notes": "Pass116/117: each Normal/Super init_dropbox source row is an independent 10,000-scale Bernoulli; Challenge remains parked."
     },
     {
       "policy_id": "repeat_rng_disabled_unknown_v1",

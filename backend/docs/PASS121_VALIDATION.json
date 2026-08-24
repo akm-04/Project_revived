@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "pass": "121.0",
+  "status": "PASS",
+  "backend_version": "0.15.2",
+  "source_feedback_loop": "PASS",
+  "static_compile": "PASS",
+  "focused_selftest": "PASS",
+  "neighbor_regressions": "PASS",
+  "runtime_client_smoke": "PENDING Pass124 / user debug cycle",
+  "ota_changed": false,
+  "boundaries": [
+    "No Challenge implementation",
+    "No MID113/MID114 architecture change",
+    "No Campaign EXP/Mana sweep economy work",
+    "No Generated/Unique work"
+  ]
+}

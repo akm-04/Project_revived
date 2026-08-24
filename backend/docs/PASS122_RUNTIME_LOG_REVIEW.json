@@ -1,0 +1,22 @@
+{
+  "pass": "122.0",
+  "reviewed_artifact": "debug.zip",
+  "pass121_runtime_status": "ACCEPTED",
+  "campaign_id": 1600017,
+  "observed_sequence": [
+    {"operation":"MID114_manual_super_win","daily_limit_after":2},
+    {"operation":"MID117","sweep_num":1,"daily_limit_after":1,"uuid":"mid117-4d70e8c1-cf21-419f-86f4-eebb82540b3f"},
+    {"operation":"MID117","sweep_num":1,"daily_limit_after":0,"uuid":"mid117-92dc56bd-10bf-435c-bfb7-45e2fed684b8"},
+    {"operation":"MID116_reset","daily_limit_after":3,"reset_count":1},
+    {"operation":"MID117","sweep_num":3,"daily_limit_after":0,"uuid":"mid117-b383ffb1-c714-4d16-bc9c-6dd278a0072e"}
+  ],
+  "mid117_requests": 3,
+  "distinct_mid117_uuids": 3,
+  "post_zero_mid117_requests": 0,
+  "receipt_conflicts": 0,
+  "rollback_markers": 0,
+  "campaign_lua_errors": 0,
+  "ghost_attempt_evidence": false,
+  "zero_attempt_conclusion": "runtime client emitted no MID117 after 0/3; direct server zero/over-limit rejection is separately covered by Pass121 focused tests",
+  "clock_regression_note": "clock_regression_ignored is expected DailyResetCoordinator fail-safe behavior and did not mutate attempts"
+}

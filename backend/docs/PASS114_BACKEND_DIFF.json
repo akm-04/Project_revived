@@ -1,0 +1,40 @@
+{
+  "added": [
+    "docs/PASS114_CAMPAIGN_MID117_ACTIVATION_SELFTEST.json",
+    "docs/PASS114_CLIENT_TEST_PLAN.md",
+    "docs/PASS114_OTA_BRIDGE_BUILD.json",
+    "docs/PASS114_OTA_PRIOR_OVERRIDE_HASHES.json",
+    "docs/PASS114_SRC64_FEEDBACK_LOOP.json",
+    "docs/PASS114_TECHNICAL_CHANGELOG.md",
+    "local_assets/src_32/app/windows/SweepWindow.lua",
+    "local_assets/src_64/app/windows/SweepWindow.lua",
+    "local_assets/updates/gxb-local-1.631.6.zip.001",
+    "tools/selftest_pass114_campaign_mid117_activation.py"
+  ],
+  "added_count": 10,
+  "baseline_artifact": "gxb-backend-v0.14.2-pass113.0",
+  "changed": [
+    "README.md",
+    "UPDATE_README.md",
+    "VERSION.json",
+    "docs/memory.md",
+    "gxb_backend/state/mid117_operation_receipt.py",
+    "gxb_backend/state/request_services.py",
+    "gxb_backend/state/world_repository.py",
+    "gxb_backend/version.py",
+    "local_assets/update_manifest.json"
+  ],
+  "changed_count": 9,
+  "pass": "114.0",
+  "policy_immutability": {
+    "data/campaign_drop_policy.json": "dffda0e69f365e1e17175999d49c95750976ba71890fd5853f4f1b155bdb2b72",
+    "data/campaign_repeat_rng_policy.json": "3cdfe70dd9d9e7dc4bab2fb2b66eecbd2e5a0bea5c4b3951ca2907d61b049c16",
+    "gxb_backend/state/campaign_drop_planner.py": "dbf295ded45ba8cb2c8a42f646772d4e59d933d5be0c22acc3f25b611afe377b"
+  },
+  "removed": [
+    "local_assets/updates/gxb-local-1.631.5.zip.001"
+  ],
+  "removed_count": 1,
+  "schema_version": 1,
+  "target_artifact": "gxb-backend-v0.15.0-pass114.0"
+}

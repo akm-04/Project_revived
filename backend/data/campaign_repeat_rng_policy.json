@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "policy_registry_version": "pass113-mid117-repeat-v1",
+  "purpose": "MID117-only executable private-server compatibility policy. This file is not consulted by legacy Campaign MID113 planning.",
+  "policy": {
+    "policy_id": "campaign_repeat_rate_decomposition_v1",
+    "version": 1,
+    "enabled": true,
+    "wire_campaign_types": [
+      1,
+      2,
+      24
+    ],
+    "strategy": "rate_decomposition_10000_residual",
+    "parameters": {
+      "rate_base": 10000
+    },
+    "evidence": "private_server_compatibility_source_bounded_not_recovered_official_server_code",
+    "notes": "Per row q,r=divmod(increase_rate,10000); q guaranteed, residual uses one campaign.repeat.residual draw. Positive missing pool fails closed; pool id 0 is deterministic-only."
+  }
+}

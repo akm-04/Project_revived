@@ -1,0 +1,25 @@
+{
+  "backend_version": "0.15.0",
+  "compileall": "PASS",
+  "focused_activation_selftest": "PASS",
+  "ota": {
+    "added_overrides": [
+      "src_32/app/windows/SweepWindow.lua",
+      "src_64/app/windows/SweepWindow.lua"
+    ],
+    "override_count": 132,
+    "prior_override_mismatches": [],
+    "version": "1.631.6",
+    "volume_sha256": "a98e8f92addd8f5b6bf8c86f7e9a9d8de22bfe1a7937c12b7d5936ae61d194c9",
+    "zip_entries": 132,
+    "zip_test": "PASS"
+  },
+  "pass": "114.0",
+  "policy_files_unchanged_from_pass113": true,
+  "regression_matrix": "docs/PASS114_REGRESSION_MATRIX.json",
+  "runtime_client_smoke": "PENDING",
+  "schema_version": 1,
+  "source_feedback_loop_doc": "docs/PASS114_SRC64_FEEDBACK_LOOP.json",
+  "status": "PASS",
+  "world_repository_changed": true
+}

@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "pass": "129.0",
+  "timestamp": "2026-08-24T17:01:00+06:00",
+  "effective_src64": "app-assets/output/assets/src_64",
+  "source_artifact_sha256": "89f0f830508b92e5fff6ad53c6a9dae961a14042dbfdf5649008efb8353f5608",
+  "source_files": {
+    "app/model/SelfPlayer.lua": "163d5893c9522ada412c2b9c4748a80757660fccdf03c8f72cb6edf0838b8eb4",
+    "app/windows/MapWindow.lua": "8e8048d2be0ddb17894b3357fad8f5c4e992df136c6d8e6215f1db568d42cbb8",
+    "app/common/tables/CampaignTable.lua": "e27c0e43d0b630102653699d7ed8b1735071090be027c99cc415a4308dc45ce4",
+    "app/windows/SelectTeamWindow.lua": "6d57e6bc7251060184190f7be14dcc9a277251673493a5b27e6c67c71cb96561",
+    "app/windows/SelectTeamNewWindow.lua": "0fabc7b70c2acf48765c41b414e3cae7504f567cb6fbe344b0f98456ed18667a",
+    "app/scenes/BattleCreate.lua": "bb9ae19c20ec165eeb7ba5b81a4ce85b6b7fea3a3a7eb278123bb8c0af0bbef9",
+    "data/tables/function.lua": "a240254e79ccfd41862f3d6289f4f5fd09280ac3e197f51bc14b896a62c10010"
+  },
+  "confirmed_before_modification": [
+    "LOAD_WORLD_MAP remains server-issued client-visible Normal/Super/Challenge row state plus chapter_info cursors; SelfPlayer assigns the chapter_info fields directly.",
+    "Function31 announcement invalidates and reloads the world map, so Function31 and Super projection ordering remains a client-visible contract.",
+    "Super row visibility and related-Normal entry authorization remain distinct client concepts; CampaignTable.relateCampaign() remains the direct source relation.",
+    "Stock Campaign MID113/MID114 request shapes remain source-shaped and expose no cross-request operation UUID; Pass123 server-owned active_campaign_battle compatibility semantics must remain untouched.",
+    "These source facts constrain observable behavior and ownership boundaries, not Python file count or composition-root implementation."
+  ],
+  "pass129_conclusion": "A construction-only CampaignComposition helper and strict production object-identity checks are source-compatible because they change no wire payload, progression rule, settlement rule, persistence schema, or Lua/OTA behavior.",
+  "no_behavioral_changes": true,
+  "ota_changed": false
+}

@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "pass": "129.0",
+  "status": "STATIC_ACCEPTED_CLIENT_SMOKE_PENDING",
+  "sequence": [
+    "Pass129 client smoke/reconciliation",
+    "Campaign Player EXP + Mana sweep economy reconciliation",
+    "RNG backbone closure against Pass108 matrix",
+    "Generated/Unique instance settlement",
+    "Girls/Equipment economy closure",
+    "deferred source-bounded verticals"
+  ],
+  "future_architecture_seams": [
+    "Move MID113 and MID114 together behind CampaignBattleService while preserving WorldRepository facade and active_campaign_battle semantics.",
+    "Move MID117 orchestration behind CampaignSweepService during EXP/Mana reconciliation.",
+    "Make MID112 reconciliation explicit under UoW before pure serialization only in a dedicated later pass."
+  ],
+  "no_full_rewrite": true
+}

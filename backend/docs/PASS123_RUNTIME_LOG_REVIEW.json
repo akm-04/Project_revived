@@ -1,0 +1,57 @@
+{
+  "schema_version": 1,
+  "pass": "123.0",
+  "reviewed_artifact": "debug.zip",
+  "review_scope": "Pass122 Challenge client smoke before Pass123 implementation",
+  "status": "ACCEPTED",
+  "observed_requests": [
+    {
+      "mid": 113,
+      "campaign_id": 24111,
+      "campaign_type": 24,
+      "formation": "10083|10059|10076|10077",
+      "operation_uuid_present": false
+    },
+    {
+      "mid": 114,
+      "campaign_id": 24111,
+      "campaign_type": 24,
+      "star": 3,
+      "formation": "10083|10059|10076|10077",
+      "operation_uuid_present": false
+    }
+  ],
+  "mid113_items": [
+    {
+      "item_id": 50001121,
+      "item_num": 1
+    },
+    {
+      "item_id": 50001125,
+      "item_num": 1
+    },
+    {
+      "item_id": 50001129,
+      "item_num": 1
+    }
+  ],
+  "mid114_projection": [
+    {
+      "campaign_id": 24111,
+      "star": 3
+    },
+    {
+      "campaign_id": 24112,
+      "star": 0
+    },
+    {
+      "campaign_id": 24121,
+      "star": 0
+    }
+  ],
+  "mid114_energy_after": 62,
+  "campaign_or_challenge_client_errors": 0,
+  "nil_crash_evidence": false,
+  "clock_regression_note": "Repeated clock_regression_ignored lines are DailyResetCoordinator fail-safe behavior; no Campaign state mutation/ghosting observed.",
+  "conclusion": "Pass122 Challenge graph/projection/deterministic reward settlement is runtime accepted for the observed stock client flow."
+}

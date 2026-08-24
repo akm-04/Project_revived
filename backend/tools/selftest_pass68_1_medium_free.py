@@ -62,7 +62,8 @@ def main() -> int:
     commits.clear()
     old_time = int(player.summon["crystal_free_time"])
 
-    response = services.summon.summon_hero({"summon_type": 3, "summon_index": 1})
+    op_id = "mid50-00000000-0000-4000-8000-000000006801"
+    response = services.summon.summon_hero({"summon_type": 3, "summon_index": 1, "summon_op_id": op_id})
     assert response.get("error_code", 0) == 0, response
     assert isinstance(response.get("result"), list) and len(response["result"]) == 1, response
     assert player.summon[counter_key] == 2
@@ -75,7 +76,7 @@ def main() -> int:
     # counter/timestamp/state-version change or another durable commit.
     saved_result = json.loads(json.dumps(response["result"]))
     saved_time = int(player.summon["crystal_free_time"])
-    retry = services.summon.summon_hero({"summon_type": 3, "summon_index": 1})
+    retry = services.summon.summon_hero({"summon_type": 3, "summon_index": 1, "summon_op_id": op_id})
     assert retry.get("error_code", 0) == 0, retry
     assert retry["result"] == saved_result
     assert player.summon[counter_key] == 2
@@ -90,7 +91,7 @@ def main() -> int:
     assert blocked_player.summon[counter_key] == 1
     blocked_commits.clear()
     before = json.loads(json.dumps(blocked_player.summon))
-    blocked = blocked_services.summon.summon_hero({"summon_type": 3, "summon_index": 1})
+    blocked = blocked_services.summon.summon_hero({"summon_type": 3, "summon_index": 1, "summon_op_id": "mid50-00000000-0000-4000-8000-000000006802"})
     assert blocked.get("error_code") == 1, blocked
     assert blocked_player.summon == before
     assert blocked_commits == []

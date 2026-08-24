@@ -1,7 +1,10 @@
-# Update notes — v0.13.1 / Pass105.0
+# Update notes — v0.15.8 / Pass131.0
 
-- Runtime-reconciled Pass104 without reopening Store/Sky Tower UI work.
-- Promoted eight session entry contracts from `DEFER_PHASE2` to `BLOCK_PHASE2`.
-- `START_FIGHT`, `ARENA_MODE_FIGHT_PRE`, `ARENA_MODE_FIGHT`, `ARENA_PRE_FIGHT`, `MARCH_START_FIGHT`, `WORLD_BOSS_START_FIGHT`, `PET_CAMPAIGN_FIGHT`, and `PEAK_START_FIGHT` now fail closed with canonical HTTP409 before battle/session entry.
-- Terminal result contracts remain deferred; no generic 30005 drain was activated.
-- No RNG, Summon probability, Campaign reward, Store, Arena, Pet, March, or World Boss feature behavior was implemented.
+- Implemented Normal/Super MID117 per-run `economys.exp` and `economys.mana`.
+- Added cumulative player EXP + Mana settlement through existing `RewardTransactionService` owners.
+- Added source-bounded low-level sweep EXP compatibility policy (1× through simulated level 10, then 3×).
+- Preserved Mentor/Student EXP as deferred non-core Social scope.
+- Extended MID117 replay projection to refresh PlayerState-owned EXP/level/Energy and EconomyLedger-owned Mana/Crystal from current canonical state.
+- Preserved existing UoW/UUID receipt exactly-once behavior and Super daily-limit semantics.
+- No OTA/Lua, schema, MID113/MID114, Campaign RNG/drop or authorization changes. OTA remains **1.631.8**.
+- Static/regression accepted; targeted client MID117 smoke required before RNG roadmap work.
