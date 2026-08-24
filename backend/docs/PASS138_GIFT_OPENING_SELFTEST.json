@@ -1,0 +1,18 @@
+{
+  "pass": "138.0",
+  "phase": 2,
+  "status": "STATIC_REGRESSION_ACCEPTED",
+  "tests": 13,
+  "phase2_active_operations": 1431,
+  "phase2_active_source_items": 382,
+  "pass136_superseded_counts": {
+    "operations": 1637,
+    "source_items": 583
+  },
+  "source_corrections": {
+    "raw_gift_equip": 199,
+    "deterministic_generated_hunqi": 7
+  },
+  "entropy_draws_for_deterministic_and_rejected_phase2_operations": 0,
+  "mid241_uuid_receipt_added": false
+}

@@ -33,6 +33,10 @@ class InventoryHandlers:
     def sell_items(self, req: dict) -> dict:
         return self.ctx.state.get_services().inventory_sales.sell_many(req)
 
+    def open_gift(self, req: dict) -> dict:
+        """MID241: source-bounded deterministic ordinary Gift Opening."""
+        return self.ctx.state.get_services().gift_opening.open(req)
+
     def compose_item(self, req: dict) -> dict:
         return {"awards": []}
 

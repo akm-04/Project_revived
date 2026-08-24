@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "pass": "141.0",
+  "status": "PASS_STATIC_QA_PREP_RUNTIME_PENDING",
+  "checks": {
+    "pass141_phase4_qa_prep": "PASS (103 seeded source packages; 100 random; 96 pools; 134 ordered occurrences)",
+    "pass140_phase3_random": "PASS 9/9",
+    "pass138_phase2_deterministic": "PASS 13/13",
+    "pass137_magic_ros": "PASS 5/5",
+    "pass129_architecture": "PASS 5/5",
+    "pass131_campaign_exp_mana": "PASS 10/10",
+    "pass128_2_mid112": "PASS 4/4",
+    "pass128_super_progression": "PASS 12/12",
+    "pass121_super_mid117": "PASS",
+    "pass123_manual_battle": "PASS 6/6",
+    "compileall": "PASS"
+  },
+  "qa_seed": {
+    "sandbox_uid": "13371337",
+    "one_shot": true,
+    "non_replenishing": true,
+    "random_source_items": 100,
+    "deterministic_smoke_items": 3,
+    "unique_dropbox_ids": 96,
+    "ordered_drop_occurrences": 134,
+    "target_quantity": 20,
+    "stack_bounded": true
+  },
+  "runtime_acceptance": "PENDING_PHASE4_CLIENT_DEBUG",
+  "ota": "1.631.8 unchanged"
+}

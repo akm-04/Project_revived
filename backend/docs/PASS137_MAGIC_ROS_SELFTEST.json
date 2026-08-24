@@ -1,0 +1,11 @@
+{
+  "pass": "137.0",
+  "phase": 1,
+  "status": "STATIC_REGRESSION_ACCEPTED",
+  "tests": 5,
+  "magic_namespace": "summon.magic",
+  "mid71_entropy_draws": 0,
+  "mid70_x1_entropy_draws": 1,
+  "mid70_x10_entropy_draws": 11,
+  "behavior_policy_hashes_unchanged": true
+}

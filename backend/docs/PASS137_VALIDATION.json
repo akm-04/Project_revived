@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "pass": "137.0",
+  "phase": 1,
+  "status": "STATIC_REGRESSION_ACCEPTED",
+  "focused": {
+    "suite": "tools/selftest_pass137_magic_ros_integration.py",
+    "result": "5/5 PASS",
+    "checks": [
+      "Magic behavior/policy/source/repository hashes unchanged",
+      "production Magic planner uses request ROS identity under summon.magic",
+      "MID71 consumes zero gameplay entropy",
+      "MID70 x1 consumes one summon.magic draw",
+      "MID70 x10 consumes eleven summon.magic draws under unchanged Magic private policy"
+    ]
+  },
+  "neighbors": [
+    {"suite": "Pass110 RandomOutcomeService foundation", "result": "PASS"},
+    {"suite": "Pass117 Campaign reconciliation", "result": "PASS"},
+    {"suite": "Pass121 Super MID117 daily limit", "result": "PASS"},
+    {"suite": "Pass122 Challenge", "result": "5/5 PASS"},
+    {"suite": "Pass123 manual battle session", "result": "6/6 PASS"},
+    {"suite": "Pass128.2 MID112 wire contract", "result": "4/4 PASS"},
+    {"suite": "Pass128 Super progression gates", "result": "12/12 PASS"},
+    {"suite": "Pass129 architecture hygiene", "result": "5/5 PASS"},
+    {"suite": "Pass131 Campaign EXP/Mana", "result": "10/10 PASS"}
+  ],
+  "historical_harness_debt": [
+    {"suite": "Pass111", "reason": "pins obsolete OTA 1.631.5 and therefore fails after later accepted OTA revisions"},
+    {"suite": "Pass114", "reason": "pins pre-Pass131 MID117 energy-only replay projection and is intentionally superseded"}
+  ],
+  "compileall": "PASS",
+  "client_runtime": "Deferred to consolidated Phase 4 Magic/MID241 smoke per approved roadmap",
+  "ota": "1.631.8 unchanged"
+}

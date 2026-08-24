@@ -1,0 +1,11 @@
+# Pass138.0 — Phase 2 MID241 deterministic Gift Opening
+
+Pass138 implements the approved MID241 Gift Opening foundation after a mandatory fresh effective `src_64` feedback loop. The source check corrected the Pass136 capability census before behavior was activated: 199 deterministic operations carry raw `gift.equip` metadata whose materialization is not exposed by `GiftTable.lua`, and seven more deterministic operations are type-24 Horcrux/HUNQI outputs with absent `item_nums`. Those 206 operations remain fail-closed. The safe deterministic ordinary activation is therefore **1,431 effective `(item_id,gift_id)` operations across 382 source items**, superseding the earlier 1,637/583 planning estimate.
+
+`GiftOpeningSourceCatalog` is generated from effective `item.lua`, `gift.lua`, `dropbox.lua`, `misc.lua` and client routing windows. It preserves exact route, `num` support, fixed item/scalar payloads, raw `gift.equip`, and ordered/repeated dropbox occurrences/candidate metadata. Raw random metadata receives no probability semantics in Phase2.
+
+`GiftOpeningPlanner` is stateless and deliberately has no ROS dependency. `GiftOpeningService` reuses the canonical `StackInventory`, `RewardTransactionService`, `MutationSettlementService`, `PlayerProgressionService`/`EconomyLedger` owners and the existing request `PlayerUnitOfWork`. Unsupported/random/generated/source-incomplete operations reject before mutation. Successful deterministic opens debit the source stack and settle rewards in one UoW. Award rows use the recovered `table_id`/`item_num` wire shape; scalar rewards remain cumulative `economy_` through existing projection.
+
+For `num` routes, scaling/aggregation is an explicit compatibility decision; the exact original-server batching loop remains unknown. No MID241 UUID/receipt was fabricated. No random-gift activation, generated-instance materialization, economy/inventory/UoW redesign, or OTA/Lua modification is included.
+
+Focused Pass138 tests pass 13/13, including byte-identical catalog regeneration from effective `src_64`, exhaustive validation of all 1,431 active operations, zero entropy for deterministic/rejected Phase2 paths, atomic rollback, exact pair/route gates, scalar projection and MID241 routing. Current RNG/Campaign/architecture neighbor suites also pass. Runtime acceptance is not claimed until Phase4 client smoke.

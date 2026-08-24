@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "pass": "137.0",
+  "phase": 1,
+  "purpose": "Mandatory fresh effective-src_64 feedback-loop check immediately before the Magic ROS production-composition modification.",
+  "effective_src64": "app-assets/output/assets/src_64",
+  "effective_file_count": 4370,
+  "source_facts": [
+    {
+      "epistemic_class": "SOURCE_FACT",
+      "path": "app/common/network/mid.lua",
+      "lines": "986-987",
+      "fact": "MAGIC_SUMMON_BUY is MID70 and MAGIC_SUMMON_SWITCH_HERO is MID71.",
+      "sha256": "026a20b29d97624979777a68c64c749254031604057ff42aa8f8254c3e35b5af"
+    },
+    {
+      "epistemic_class": "SOURCE_FACT",
+      "path": "app/model/SelfPlayer.lua",
+      "lines": "2362-2406",
+      "fact": "magicSummonHero sends the MID70 request and consumes result/stick_items as returned awards.",
+      "sha256": "163d5893c9522ada412c2b9c4748a80757660fccdf03c8f72cb6edf0838b8eb4"
+    },
+    {
+      "epistemic_class": "SOURCE_FACT",
+      "path": "app/windows/SummonWindow.lua",
+      "lines": "1030-1055,1207-1258",
+      "fact": "MID71 submits only the player-selected partner_id; MID70 submits partner_id plus summon_time 1 or 10.",
+      "sha256": "ff7a49683fa9d47bd031f9f2625d2901a652a4ae305486ad6c2f481f9aa214af"
+    },
+    {
+      "epistemic_class": "SOURCE_FACT",
+      "path": "app/windows/activities/Activity1175.lua",
+      "lines": "60-102,132-182",
+      "fact": "The activity mirror independently uses deterministic MID71 selected-target switching and MID70 buy requests with summon_time 1/10.",
+      "sha256": "db72fcdc190b6e5bdb3c92bc9694861f6e4c441a36a329d175b351c356b7a974"
+    }
+  ],
+  "implementation_decision": "Inject the existing request-scoped RandomOutcomeService through NamespacedRandbelowAdapter(namespace=summon.magic) into MagicSummonPrivatePlanner production composition only.",
+  "nonchanges": [
+    "MagicSummonPrivatePlanner algorithm",
+    "Magic private probability/policy data",
+    "MID70 request/response shape",
+    "costs/byproducts/fragments",
+    "retry receipt/persistence semantics",
+    "MID71 deterministic behavior",
+    "OTA/Lua"
+  ]
+}

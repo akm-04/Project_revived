@@ -1,0 +1,72 @@
+{
+  "schema_version": 1,
+  "pass": "138.0",
+  "phase": 2,
+  "timestamp": "2026-08-25T01:05:00+06:00",
+  "scope": "MID241 foundation + deterministic ordinary gifts",
+  "implementation_decisions": [
+    {
+      "class": "IMPLEMENTATION_COMPATIBILITY_DECISION",
+      "decision": "Introduce GiftOpeningSourceCatalog generated from effective src_64 and exact effective (item_id,gift_id) keys; preserve raw ordered drop occurrences/candidates for future Phase3 but assign no probability semantics."
+    },
+    {
+      "class": "IMPLEMENTATION_COMPATIBILITY_DECISION",
+      "decision": "GiftOpeningPlanner is stateless and entropy-free in Phase2; only capability ORDINARY_CURRENT_OWNERS is executable."
+    },
+    {
+      "class": "IMPLEMENTATION_COMPATIBILITY_DECISION",
+      "decision": "GiftOpeningService reuses StackInventory, RewardTransactionService and PlayerUnitOfWork; one request transaction debits source stack and settles rewards atomically."
+    },
+    {
+      "class": "IMPLEMENTATION_COMPATIBILITY_DECISION",
+      "decision": "For source routes supporting num, deterministic compatibility batching repeats/scales the selected gift operation num times and aggregates ordinary stack/scalar rewards. Exact official loop remains UNKNOWN."
+    },
+    {
+      "class": "IMPLEMENTATION_COMPATIBILITY_DECISION",
+      "decision": "MID241 awards are explicitly projected as table_id/item_num reward rows; scalar/progression rewards remain cumulative economy_ through existing typed journal projection."
+    }
+  ],
+  "activated": {
+    "capability": "ORDINARY_CURRENT_OWNERS",
+    "operations": 1431,
+    "source_items": 382,
+    "entropy_draws": 0
+  },
+  "fail_closed": [
+    "RANDOM including 100 ordinary random operations until Phase3",
+    "HERO_ENTITY/generated Hero outputs",
+    "GENERATED_HUNQI_DEPENDENCY",
+    "SOURCE_INCOMPLETE_EQUIP_FIELD (199 deterministic operations)",
+    "TEMPORAL_SPIRIT_ENERGY_GAP (3 operations)",
+    "missing gift/dropbox/item source",
+    "invalid exact pair/num/insufficient source quantity"
+  ],
+  "reused_owners": [
+    "StackInventory",
+    "EconomyLedger",
+    "PlayerProgressionService",
+    "RewardTransactionService",
+    "MutationSettlementService",
+    "PlayerUnitOfWork",
+    "InventoryHandlers",
+    "EngineDispatcher"
+  ],
+  "not_added": [
+    "parallel economy owner",
+    "parallel inventory owner",
+    "parallel UnitOfWork",
+    "MID241 UUID/receipt",
+    "Gift RNG adapter",
+    "OTA/Lua change"
+  ],
+  "files": [
+    "data/gift_opening_source_catalog.json",
+    "gxb_backend/content/gift_opening_source_catalog.py",
+    "gxb_backend/state/gift_opening_service.py",
+    "gxb_backend/state/request_services.py",
+    "gxb_backend/handlers/inventory.py",
+    "gxb_backend/dispatch/engine_dispatcher.py",
+    "tools/build_gift_opening_source_catalog.py",
+    "tools/selftest_pass138_gift_opening_foundation.py"
+  ]
+}

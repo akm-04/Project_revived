@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "pass": "141.0",
+  "scope": "Phase4 client-test preparation only",
+  "changed_gameplay_policy": false,
+  "changes": [
+    "add debug_guest_mid241_qa_seed_pass141.json",
+    "add sandbox one-shot seed application in MultiUserDatabase.normalize_player",
+    "add complete random operation QA map",
+    "add frontend route map and client test plan"
+  ],
+  "nonchanges": [
+    "Magic MID70 policy/wire/cost/ROS topology",
+    "MID241 deterministic/random policy",
+    "Gift Opening settlement/UoW",
+    "generated Hero/HUNQI/Horcrux lanes",
+    "gift.equip activation",
+    "Pet lifecycle",
+    "OTA"
+  ],
+  "epistemic_note": "QA seed is PRIVATE_SERVER_POLICY/IMPLEMENTATION_DECISION, not recovered original behavior."
+}

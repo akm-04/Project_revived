@@ -1,0 +1,75 @@
+{
+  "schema_version": 1,
+  "pass": "141.0",
+  "mid70": {
+    "network": "MID70 / MAGIC_SUMMON_BUY",
+    "frontend_identification": "Summon/Vending Machine screen -> fourth machine (machine4) -> MAGIC state",
+    "source_backup_label": "魔法販賣機",
+    "english_gloss": "Magic Vending Machine",
+    "visible_controls": [
+      "Switch",
+      "Buy 1",
+      "Buy 10"
+    ],
+    "result_title": "Purchased Magic Juice successfully",
+    "rule_excerpt_summary": "Purchasing Magic Juice gives 5 selected girl scrolls plus something else; Buy 10 may crit 2x/5x/10x; Buy 1 does not crit.",
+    "costs": {
+      "buy_1_crystal": 500,
+      "buy_10_crystal": 5000
+    },
+    "alternate_surface": "Activity1175 reproduces the same Magic summon UI."
+  },
+  "gift_equip": {
+    "frontend_route": "Backpack -> Consumables/common gift package -> Spend -> giftbag_use",
+    "separate_equipment_menu": false,
+    "route_shape": "AUTO_FIRST_GIFT / one gift id; no selection UI",
+    "common_icon_note": "Many recovered packs use images/icon/50001054_icon.png.",
+    "samples": [
+      {
+        "item_id": 50001190,
+        "raw_name": "呂萌大禮包",
+        "resolved_hero": "Aquaris",
+        "selector": 16,
+        "quality": "Red+1",
+        "raw_desc": "包含呂萌大禮包進階至紅色+1階段的所有裝備的大禮包"
+      },
+      {
+        "item_id": 50002156,
+        "raw_name": "SP左慈紫裝禮包",
+        "resolved_hero": "SP Priestess",
+        "selector": 10,
+        "quality": "Purple+3",
+        "raw_desc": "包含SP左慈進階至紫色+4階段所需的所有裝備"
+      },
+      {
+        "item_id": 50005258,
+        "raw_name": "SP孫尚香紫裝大禮包",
+        "resolved_hero": "SP Pandaria",
+        "selector": 10,
+        "quality": "Purple+3",
+        "raw_desc": "禮包包含SP孫尚香進階到紫色+4所需的所有裝備。"
+      },
+      {
+        "item_id": 50005259,
+        "raw_name": "芬莉兒紫裝禮包",
+        "resolved_hero": "Finlil",
+        "selector": 10,
+        "quality": "Purple+3",
+        "raw_desc": "禮包包含芬莉兒進階到紫色+4所需的所有裝備。"
+      },
+      {
+        "item_id": 50007018,
+        "raw_name": "韓語蔣琬大禮包",
+        "resolved_hero": "Kaylee",
+        "selector": 6,
+        "quality": "Blue+2",
+        "raw_desc": "韓語蔣琬大禮包"
+      }
+    ],
+    "epistemic_note": "The frontend route is source fact. Exact server expansion of gift.equip remains UNKNOWN and deferred to Girls/Equipment Economy Closure."
+  },
+  "hunqi": {
+    "terminology": "HUNQI is the source/internal term used for the Horcrux/Spirit unique-instance lane in this project. In the Phase2/3 capability gates, generated HUNQI means generated Horcrux-style outputs, not ordinary Backpack stacks."
+  },
+  "pet_note": "Pet-named MID241 packs are valid Gift Opening tests for source debit/random stack rewards only. Passing them does not claim Pet lifecycle/summon/progression implementation."
+}

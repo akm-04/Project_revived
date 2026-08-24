@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "pass": "137.0",
+  "phase": 1,
+  "status": "IMPLEMENTED_STATIC_REGRESSION_ACCEPTED",
+  "scope": "Magic ROS integration only",
+  "behavior_change": {
+    "path": "gxb_backend/state/request_services.py",
+    "before_sha256": "083ae94b3d1a4bf8e7a7a09c41dd31e10c5cc4bab6e4599eb3c54eadd80b385f",
+    "after_sha256": "42691cb019cb46e4297a7f5a221f9419230de57d5e55232a31e037bd752e1366",
+    "change": "Inject NamespacedRandbelowAdapter(request RandomOutcomeService, summon.magic) into the existing MagicSummonPrivatePlanner production composition."
+  },
+  "preserved_hashes": {
+    "gxb_backend/state/magic_summon_private_policy.py": "53b064287b72a67d0fdc6eb6318a390684369f59a372b0f0c3372cfbd736731e",
+    "gxb_backend/state/summon_repository.py": "7c3f601e3c44570eb0da54f9faa56906a79270ecba6b1198d4a85ab479df5de6",
+    "data/magic_summon_private_policy.json": "997589319b04ab296e6ad1830cde79a40ea383b2890bf3b2b9da4ceb41dc6856",
+    "data/magic_summon_source_catalog.json": "725084492853db2aea5483d34eb8849d59af130fe909daa56ad47c65b28f5ff1"
+  },
+  "nonchanges": [
+    "Magic probability/private policy",
+    "MID70 wire response",
+    "Crystal costs and byproduct/fragment policy",
+    "retry receipt/persistence semantics",
+    "MID71 deterministic target switching",
+    "RandomOutcomeService mechanics",
+    "persistence schema",
+    "OTA/Lua"
+  ],
+  "next": "Phase 2 - MID241 foundation + deterministic ordinary gifts"
+}

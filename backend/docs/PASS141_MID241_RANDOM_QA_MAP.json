@@ -1,0 +1,1962 @@
+{
+  "schema_version": 1,
+  "pass": "141.0",
+  "phase3_random_operations": 100,
+  "unique_dropbox_ids": [
+    430001,
+    430002,
+    430003,
+    430004,
+    430005,
+    600001,
+    600003,
+    600004,
+    680001,
+    680002,
+    680004,
+    680005,
+    680006,
+    680007,
+    680008,
+    700001,
+    700006,
+    700007,
+    700009,
+    700014,
+    700015,
+    700019,
+    700020,
+    700021,
+    700022,
+    700023,
+    700024,
+    700025,
+    700027,
+    700036,
+    720001,
+    999928,
+    999933,
+    999944,
+    999988,
+    999989,
+    999990,
+    999991,
+    999992,
+    999993,
+    999997,
+    999999,
+    9199002,
+    9199003,
+    9199005,
+    9199009,
+    9199011,
+    9199013,
+    9199016,
+    9199036,
+    9199038,
+    9199039,
+    9999038,
+    9999040,
+    9999046,
+    9999048,
+    9999050,
+    9999053,
+    9999055,
+    9999059,
+    9999061,
+    9999063,
+    9999064,
+    9999067,
+    9999068,
+    9999071,
+    9999073,
+    9999075,
+    9999085,
+    9999088,
+    9999090,
+    9999094,
+    9999097,
+    9999105,
+    9999106,
+    9999109,
+    9999111,
+    9999112,
+    9999130,
+    9999132,
+    9999134,
+    9999136,
+    9999138,
+    9999140,
+    9999141,
+    9999142,
+    9999143,
+    9999145,
+    9999147,
+    9999148,
+    9999150,
+    9999152,
+    9999155,
+    9999158,
+    9999159,
+    9999161
+  ],
+  "operations": [
+    {
+      "item_id": 50001097,
+      "item_name": "Freshmen Pet Pack",
+      "item_desc": "A pack for warriors who survive the Sky Tower. Contains plenty of items for pet.",
+      "source_stack": 999,
+      "gift_id": 90001256,
+      "dropbox_ids_ordered": [
+        430001,
+        430002,
+        430002,
+        430002,
+        430002,
+        430002
+      ],
+      "ordered_draw_count": 6,
+      "unique_dropbox_ids": [
+        430001,
+        430002
+      ],
+      "candidate_count": 188,
+      "candidate_item_types": [
+        4,
+        6,
+        7
+      ]
+    },
+    {
+      "item_id": 50001098,
+      "item_name": "Junior Pet Pack",
+      "item_desc": "A pack for warriors who survive the Sky Tower. Contains plenty of items for pet.",
+      "source_stack": 999,
+      "gift_id": 90001257,
+      "dropbox_ids_ordered": [
+        430001,
+        430002,
+        430003,
+        430002,
+        430002,
+        430003
+      ],
+      "ordered_draw_count": 6,
+      "unique_dropbox_ids": [
+        430001,
+        430002,
+        430003
+      ],
+      "candidate_count": 140,
+      "candidate_item_types": [
+        4,
+        6,
+        7
+      ]
+    },
+    {
+      "item_id": 50001099,
+      "item_name": "Senior Pet Pack",
+      "item_desc": "A pack for warriors who survive the Sky Tower. Contains plenty of items for pet.",
+      "source_stack": 999,
+      "gift_id": 90001258,
+      "dropbox_ids_ordered": [
+        430001,
+        430002,
+        430002,
+        430002,
+        430003,
+        430004
+      ],
+      "ordered_draw_count": 6,
+      "unique_dropbox_ids": [
+        430001,
+        430002,
+        430003,
+        430004
+      ],
+      "candidate_count": 146,
+      "candidate_item_types": [
+        4,
+        6,
+        7
+      ]
+    },
+    {
+      "item_id": 50001100,
+      "item_name": "Master Pet Pack",
+      "item_desc": "A pack for warriors who survive the Sky Tower. Contains plenty of items for pet.",
+      "source_stack": 999,
+      "gift_id": 90001259,
+      "dropbox_ids_ordered": [
+        430001,
+        430002,
+        430002,
+        430003,
+        430004,
+        430004
+      ],
+      "ordered_draw_count": 6,
+      "unique_dropbox_ids": [
+        430001,
+        430002,
+        430003,
+        430004
+      ],
+      "candidate_count": 128,
+      "candidate_item_types": [
+        4,
+        6,
+        7
+      ]
+    },
+    {
+      "item_id": 50001101,
+      "item_name": "Champion Pet Pack",
+      "item_desc": "A pack for warriors who survive the Sky Tower. Contains plenty of items for pet.",
+      "source_stack": 999,
+      "gift_id": 90001260,
+      "dropbox_ids_ordered": [
+        430001,
+        430002,
+        430003,
+        430004,
+        430004,
+        430004,
+        430005
+      ],
+      "ordered_draw_count": 7,
+      "unique_dropbox_ids": [
+        430001,
+        430002,
+        430003,
+        430004,
+        430005
+      ],
+      "candidate_count": 125,
+      "candidate_item_types": [
+        4,
+        6,
+        7
+      ]
+    },
+    {
+      "item_id": 50001407,
+      "item_name": "Random Application",
+      "item_desc": "Gives you a random application. Application can be used in the lv90 feature Subject Selection",
+      "source_stack": 999,
+      "gift_id": 90061001,
+      "dropbox_ids_ordered": [
+        600001
+      ],
+      "ordered_draw_count": 1,
+      "unique_dropbox_ids": [
+        600001
+      ],
+      "candidate_count": 12,
+      "candidate_item_types": [
+        4
+      ]
+    },
+    {
+      "item_id": 50001418,
+      "item_name": "Daily Magazine",
+      "item_desc": "Contains 5 books, has a chance to give you Encyclopedia ",
+      "source_stack": 99,
+      "gift_id": 90060006,
+      "dropbox_ids_ordered": [
+        600003,
+        600003,
+        600003,
+        600003,
+        600003
+      ],
+      "ordered_draw_count": 5,
+      "unique_dropbox_ids": [
+        600003
+      ],
+      "candidate_count": 20,
+      "candidate_item_types": [
+        4
+      ]
+    },
+    {
+      "item_id": 50001419,
+      "item_name": "Special Magazine",
+      "item_desc": "Contains 5 books, has a chance to give you Syllabus",
+      "source_stack": 99,
+      "gift_id": 90060007,
+      "dropbox_ids_ordered": [
+        600004,
+        600004,
+        600004,
+        600004,
+        600004
+      ],
+      "ordered_draw_count": 5,
+      "unique_dropbox_ids": [
+        600004
+      ],
+      "candidate_count": 20,
+      "candidate_item_types": [
+        4
+      ]
+    },
+    {
+      "item_id": 50001475,
+      "item_name": "Basic Furniture Coupon",
+      "item_desc": "Gives you a random basic furniture.",
+      "source_stack": 999,
+      "gift_id": 90001742,
+      "dropbox_ids_ordered": [
+        680001
+      ],
+      "ordered_draw_count": 1,
+      "unique_dropbox_ids": [
+        680001
+      ],
+      "candidate_count": 43,
+      "candidate_item_types": [
+        18
+      ]
+    },
+    {
+      "item_id": 50001476,
+      "item_name": "Adv Furniture Coupon",
+      "item_desc": "Gives you a random advance furniture.",
+      "source_stack": 999,
+      "gift_id": 90001743,
+      "dropbox_ids_ordered": [
+        680002
+      ],
+      "ordered_draw_count": 1,
+      "unique_dropbox_ids": [
+        680002
+      ],
+      "candidate_count": 36,
+      "candidate_item_types": [
+        18
+      ]
+    },
+    {
+      "item_id": 50001560,
+      "item_name": "Love Confession",
+      "item_desc": "Open it and give you a random sticker from Girl Idols, Rock Idol, Sweet Idol, Elegant Lady, Tsundere Cutemon, Azure Moon, Hottie, Kitty, Zanny, Nono.",
+      "source_stack": 999,
+      "gift_id": 90067001,
+      "dropbox_ids_ordered": [
+        680004
+      ],
+      "ordered_draw_count": 1,
+      "unique_dropbox_ids": [
+        680004
+      ],
+      "candidate_count": 10,
+      "candidate_item_types": [
+        19
+      ]
+    },
+    {
+      "item_id": 50001566,
+      "item_name": "Random Scrolls",
+      "item_desc": "Open it and you will get 10 scrolls for a random girl.",
+      "source_stack": 999,
+      "gift_id": 90001818,
+      "dropbox_ids_ordered": [
+        720001
+      ],
+      "ordered_draw_count": 1,
+      "unique_dropbox_ids": [
+        720001
+      ],
+      "candidate_count": 31,
+      "candidate_item_types": [
+        3
+      ]
+    },
+    {
+      "item_id": 50001567,
+      "item_name": "Idol Furniture",
+      "item_desc": "Open it and get a random furniture of Idol theme!",
+      "source_stack": 999,
+      "gift_id": 90001825,
+      "dropbox_ids_ordered": [
+        680005
+      ],
+      "ordered_draw_count": 1,
+      "unique_dropbox_ids": [
+        680005
+      ],
+      "candidate_count": 18,
+      "candidate_item_types": [
+        18
+      ]
+    },
+    {
+      "item_id": 50001656,
+      "item_name": "隨機掛件禮包",
+      "item_desc": "開啟後可以隨機獲得一個偵探活動的掛件。",
+      "source_stack": 999,
+      "gift_id": 90001993,
+      "dropbox_ids_ordered": [
+        700006
+      ],
+      "ordered_draw_count": 1,
+      "unique_dropbox_ids": [
+        700006
+      ],
+      "candidate_count": 5,
+      "candidate_item_types": [
+        4
+      ]
+    },
+    {
+      "item_id": 50001670,
+      "item_name": "隨機掛件禮包",
+      "item_desc": "開啟後可以隨機獲得一個碰碰扭蛋機活動內的掛件。",
+      "source_stack": 999,
+      "gift_id": 90003041,
+      "dropbox_ids_ordered": [
+        700007
+      ],
+      "ordered_draw_count": 1,
+      "unique_dropbox_ids": [
+        700007
+      ],
+      "candidate_count": 5,
+      "candidate_item_types": [
+        4
+      ]
+    },
+    {
+      "item_id": 50001707,
+      "item_name": "隨機掛件禮包",
+      "item_desc": "開啟後可以隨機獲得一個碰碰扭蛋機活動內的掛件。",
+      "source_stack": 999,
+      "gift_id": 90003075,
+      "dropbox_ids_ordered": [
+        700009
+      ],
+      "ordered_draw_count": 1,
+      "unique_dropbox_ids": [
+        700009
+      ],
+      "candidate_count": 5,
+      "candidate_item_types": [
+        4
+      ]
+    },
+    {
+      "item_id": 50001745,
+      "item_name": "隨機掛件禮包",
+      "item_desc": "開啟後可以隨機獲得一個碰碰扭蛋機活動內的掛件。",
+      "source_stack": 999,
+      "gift_id": 90003075,
+      "dropbox_ids_ordered": [
+        700009
+      ],
+      "ordered_draw_count": 1,
+      "unique_dropbox_ids": [
+        700009
+      ],
+      "candidate_count": 5,
+      "candidate_item_types": [
+        4
+      ]
+    },
+    {
+      "item_id": 50001815,
+      "item_name": "隨機掛件禮包",
+      "item_desc": "開啟後可以隨機獲得一個碰碰扭蛋機活動內的掛件。",
+      "source_stack": 999,
+      "gift_id": 90009945,
+      "dropbox_ids_ordered": [
+        700014
+      ],
+      "ordered_draw_count": 1,
+      "unique_dropbox_ids": [
+        700014
+      ],
+      "candidate_count": 5,
+      "candidate_item_types": [
+        4
+      ]
+    },
+    {
+      "item_id": 50001961,
+      "item_name": "解碼掛件寶箱",
+      "item_desc": "使用後可在燼燃靈息掛件、不良校霸掛件、符咒少女掛件、晚楓天香掛件、黑火代行掛件中隨機獲得一個挂件。",
+      "source_stack": 99,
+      "gift_id": 99002239,
+      "dropbox_ids_ordered": [
+        700022
+      ],
+      "ordered_draw_count": 1,
+      "unique_dropbox_ids": [
+        700022
+      ],
+      "candidate_count": 5,
+      "candidate_item_types": [
+        4
+      ]
+    },
+    {
+      "item_id": 50001975,
+      "item_name": "聖誕節表情寶箱",
+      "item_desc": "打開後隨機獲得一個聖誕節限定表情，重複獲得則消失。",
+      "source_stack": 99,
+      "gift_id": 91199315,
+      "dropbox_ids_ordered": [
+        700023
+      ],
+      "ordered_draw_count": 1,
+      "unique_dropbox_ids": [
+        700023
+      ],
+      "candidate_count": 8,
+      "candidate_item_types": [
+        19
+      ]
+    },
+    {
+      "item_id": 50001982,
+      "item_name": "聖誕家具卡片",
+      "item_desc": "可隨機開出一件聖誕節主題家具或裝飾喔~",
+      "source_stack": 999,
+      "gift_id": 90002122,
+      "dropbox_ids_ordered": [
+        680006
+      ],
+      "ordered_draw_count": 1,
+      "unique_dropbox_ids": [
+        680006
+      ],
+      "candidate_count": 11,
+      "candidate_item_types": [
+        18
+      ]
+    },
+    {
+      "item_id": 50001983,
+      "item_name": "和風家具卡片",
+      "item_desc": "可隨機開出一件和風家具或裝飾喔~",
+      "source_stack": 999,
+      "gift_id": 90002123,
+      "dropbox_ids_ordered": [
+        680007
+      ],
+      "ordered_draw_count": 1,
+      "unique_dropbox_ids": [
+        680007
+      ],
+      "candidate_count": 9,
+      "candidate_item_types": [
+        18
+      ]
+    },
+    {
+      "item_id": 50001984,
+      "item_name": "Classic Furniture Coupon",
+      "item_desc": "You will get a random Classic furniture after openning it.",
+      "source_stack": 999,
+      "gift_id": 90002124,
+      "dropbox_ids_ordered": [
+        680008
+      ],
+      "ordered_draw_count": 1,
+      "unique_dropbox_ids": [
+        680008
+      ],
+      "candidate_count": 13,
+      "candidate_item_types": [
+        18
+      ]
+    },
+    {
+      "item_id": 50001993,
+      "item_name": "新春福袋",
+      "item_desc": "春節期間掉落的福袋。打開後會獲得一定學院經驗，並會額外獲得年粿、元寶或者萬能福等道具。最多攜帶999個。",
+      "source_stack": 999,
+      "gift_id": 91199341,
+      "dropbox_ids_ordered": [
+        700024
+      ],
+      "ordered_draw_count": 1,
+      "unique_dropbox_ids": [
+        700024
+      ],
+      "candidate_count": 7,
+      "candidate_item_types": [
+        4
+      ]
+    },
+    {
+      "item_id": 50002002,
+      "item_name": "春紅的大禮",
+      "item_desc": "打開後，可以獲得1-10個春紅的紅包，每個紅包可以出售給商店換取66鑽石~",
+      "source_stack": 99,
+      "gift_id": 91199347,
+      "dropbox_ids_ordered": [
+        700025
+      ],
+      "ordered_draw_count": 1,
+      "unique_dropbox_ids": [
+        700025
+      ],
+      "candidate_count": 5,
+      "candidate_item_types": [
+        4
+      ]
+    },
+    {
+      "item_id": 50002074,
+      "item_name": "掛件隨機禮包",
+      "item_desc": "可以佳人知音掛件、賞櫻時節掛件、落櫻飛羽掛件和相映成趣掛件中隨機一項獎勵！",
+      "source_stack": 99,
+      "gift_id": 90040373,
+      "dropbox_ids_ordered": [
+        700027
+      ],
+      "ordered_draw_count": 1,
+      "unique_dropbox_ids": [
+        700027
+      ],
+      "candidate_count": 4,
+      "candidate_item_types": [
+        4
+      ]
+    },
+    {
+      "item_id": 50002169,
+      "item_name": "掛件隨機寶箱",
+      "item_desc": "開啟後可以從遊園夜話、無垢纖華、情熱誓約、檸檬微甜和白色月光掛件中隨機獲得一個掛件。",
+      "source_stack": 999,
+      "gift_id": 90040456,
+      "dropbox_ids_ordered": [
+        700036
+      ],
+      "ordered_draw_count": 1,
+      "unique_dropbox_ids": [
+        700036
+      ],
+      "candidate_count": 5,
+      "candidate_item_types": [
+        4
+      ]
+    },
+    {
+      "item_id": 50005130,
+      "item_name": "造型隨機寶箱",
+      "item_desc": "可隨機獲得千金小姐、夏日風情、世外神醫、踏浪少女、花之精靈、魔術天才、深海少女、清涼夏夜、花開之戀和暖冬之戀10個造型中其中一個！",
+      "source_stack": 99,
+      "gift_id": 90001759,
+      "dropbox_ids_ordered": [
+        700001
+      ],
+      "ordered_draw_count": 1,
+      "unique_dropbox_ids": [
+        700001
+      ],
+      "candidate_count": 10,
+      "candidate_item_types": [
+        4
+      ]
+    },
+    {
+      "item_id": 50005227,
+      "item_name": "海灘契約書禮包",
+      "item_desc": "可獲得5張隨機1~3星的戰姬契約書（SX戰姬，活動戰姬除外）",
+      "source_stack": 999,
+      "gift_id": 99002093,
+      "dropbox_ids_ordered": [
+        700015
+      ],
+      "ordered_draw_count": 1,
+      "unique_dropbox_ids": [
+        700015
+      ],
+      "candidate_count": 159,
+      "candidate_item_types": [
+        3
+      ]
+    },
+    {
+      "item_id": 50005237,
+      "item_name": "Nor-Elemental Gear",
+      "item_desc": "Open it and you will get a random gear from: Netherworld Jewelry, Natural Amber, Magic Graphite, Energy Crystal, Magic Crystal and Elemental Jade.",
+      "source_stack": 99,
+      "gift_id": 90050179,
+      "dropbox_ids_ordered": [
+        700020
+      ],
+      "ordered_draw_count": 1,
+      "unique_dropbox_ids": [
+        700020
+      ],
+      "candidate_count": 18,
+      "candidate_item_types": [
+        21
+      ]
+    },
+    {
+      "item_id": 50005240,
+      "item_name": "隨機掛件寶箱",
+      "item_desc": "可從紙牌女郎掛件、黑夜行者掛件、時鐘少女掛件、占星術士掛件、森林使者掛件中隨機獲得一種掛件。",
+      "source_stack": 999,
+      "gift_id": 99002209,
+      "dropbox_ids_ordered": [
+        700021
+      ],
+      "ordered_draw_count": 1,
+      "unique_dropbox_ids": [
+        700021
+      ],
+      "candidate_count": 5,
+      "candidate_item_types": [
+        4
+      ]
+    },
+    {
+      "item_id": 50007007,
+      "item_name": "Random Pet Gear ",
+      "item_desc": "Open it and you will get a random pet gear.",
+      "source_stack": 999,
+      "gift_id": 90002119,
+      "dropbox_ids_ordered": [
+        700019
+      ],
+      "ordered_draw_count": 1,
+      "unique_dropbox_ids": [
+        700019
+      ],
+      "candidate_count": 80,
+      "candidate_item_types": [
+        8
+      ]
+    },
+    {
+      "item_id": 50009000,
+      "item_name": "Pets Essence Pack",
+      "item_desc": "Each grants you 2 essence of a random pet. ",
+      "source_stack": 999,
+      "gift_id": 99060006,
+      "dropbox_ids_ordered": [
+        999999
+      ],
+      "ordered_draw_count": 1,
+      "unique_dropbox_ids": [
+        999999
+      ],
+      "candidate_count": 4,
+      "candidate_item_types": [
+        7
+      ]
+    },
+    {
+      "item_id": 50009001,
+      "item_name": "Pets Essence Pack",
+      "item_desc": "Each grants you 2 essence of a random pet. ",
+      "source_stack": 999,
+      "gift_id": 99060006,
+      "dropbox_ids_ordered": [
+        999999
+      ],
+      "ordered_draw_count": 1,
+      "unique_dropbox_ids": [
+        999999
+      ],
+      "candidate_count": 4,
+      "candidate_item_types": [
+        7
+      ]
+    },
+    {
+      "item_id": 50009002,
+      "item_name": "Pets Essence Pack",
+      "item_desc": "Each grants you 2 essence of a random pet. ",
+      "source_stack": 999,
+      "gift_id": 99060006,
+      "dropbox_ids_ordered": [
+        999999
+      ],
+      "ordered_draw_count": 1,
+      "unique_dropbox_ids": [
+        999999
+      ],
+      "candidate_count": 4,
+      "candidate_item_types": [
+        7
+      ]
+    },
+    {
+      "item_id": 50009003,
+      "item_name": "Pets Essence Pack",
+      "item_desc": "Each grants you 2 essence of a random pet. ",
+      "source_stack": 999,
+      "gift_id": 99060006,
+      "dropbox_ids_ordered": [
+        999999
+      ],
+      "ordered_draw_count": 1,
+      "unique_dropbox_ids": [
+        999999
+      ],
+      "candidate_count": 4,
+      "candidate_item_types": [
+        7
+      ]
+    },
+    {
+      "item_id": 50009024,
+      "item_name": "Rare Skin Pack ",
+      "item_desc": "Open it and you will get 1 skin from 20 famous skins in GXB! (20 skins list could be checked on the Event Board and Facebook)",
+      "source_stack": 99,
+      "gift_id": 99990038,
+      "dropbox_ids_ordered": [
+        9999038
+      ],
+      "ordered_draw_count": 1,
+      "unique_dropbox_ids": [
+        9999038
+      ],
+      "candidate_count": 20,
+      "candidate_item_types": [
+        4
+      ]
+    },
+    {
+      "item_id": 50009031,
+      "item_name": "Xmas Skin Pack",
+      "item_desc": "Open it and you will gain a skill skin from all the skins released before 2018/12/12",
+      "source_stack": 99,
+      "gift_id": 99990045,
+      "dropbox_ids_ordered": [
+        9999040
+      ],
+      "ordered_draw_count": 1,
+      "unique_dropbox_ids": [
+        9999040
+      ],
+      "candidate_count": 87,
+      "candidate_item_types": [
+        4
+      ]
+    },
+    {
+      "item_id": 50009053,
+      "item_name": "Summer skin Pack",
+      "item_desc": "Open it and you will gain a random skin from Beach Doctor, Mercury Pilot, Beach Party, Orange Summer, Arrogant Goddess, Queen of Surf, Tide Rider and Chopping Summer.",
+      "source_stack": 99,
+      "gift_id": 99990067,
+      "dropbox_ids_ordered": [
+        9999046
+      ],
+      "ordered_draw_count": 1,
+      "unique_dropbox_ids": [
+        9999046
+      ],
+      "candidate_count": 9,
+      "candidate_item_types": [
+        4
+      ]
+    },
+    {
+      "item_id": 50009061,
+      "item_name": "Loli skin Pack",
+      "item_desc": "Open this pack and you may get a random skin from Voyage Adventurer-King, Lotus Girl-Bud Elf, Dream Beach-Pandaria, Bunny Doll-Elvis, Soccer Babe-Zombia, Moegirl-Nona, Custom Camerist-Rhea, Candy Bunny-Jade, Mushroom Princess-Yuri.",
+      "source_stack": 99,
+      "gift_id": 99990080,
+      "dropbox_ids_ordered": [
+        9999048
+      ],
+      "ordered_draw_count": 1,
+      "unique_dropbox_ids": [
+        9999048
+      ],
+      "candidate_count": 9,
+      "candidate_item_types": [
+        4
+      ]
+    },
+    {
+      "item_id": 50009066,
+      "item_name": "M-Academy Skin Pack",
+      "item_desc": "Open it and you will get a random skin from Flipped Idol-Nun, Tide Rider-Sisha, Prison of Love-Fleur, Dream Beach-Pandaria, Shadow Cat-Poppi, Warming Heart-Sailor, Insects Catching-Anna, Loving Heart- Calista, Frozen-Sapphire.",
+      "source_stack": 99,
+      "gift_id": 99990087,
+      "dropbox_ids_ordered": [
+        9999050
+      ],
+      "ordered_draw_count": 1,
+      "unique_dropbox_ids": [
+        9999050
+      ],
+      "candidate_count": 9,
+      "candidate_item_types": [
+        4
+      ]
+    },
+    {
+      "item_id": 50009073,
+      "item_name": "P-Academy Skin Pack",
+      "item_desc": "Open it and you will get a random skin from Beach Cheerleader-Fangirl, Mushroom Princess-Yuri, Beach Doctor-Zoe, Winter's Love-Ninja, Blossoming Love-Assassin, Custom Camerist-Rhea, Chinese Cook-Aegis, Candy Bunny- Jade, Octopus Cuisine-Selene.",
+      "source_stack": 99,
+      "gift_id": 99990094,
+      "dropbox_ids_ordered": [
+        9999053
+      ],
+      "ordered_draw_count": 1,
+      "unique_dropbox_ids": [
+        9999053
+      ],
+      "candidate_count": 9,
+      "candidate_item_types": [
+        4
+      ]
+    },
+    {
+      "item_id": 50009076,
+      "item_name": "Bride Skin Pack",
+      "item_desc": "Open it and you will get a random skin from Splendid Fragrance-Reo,Sleepy Sweety-Cayla,Heart Seeker-Shirley,Flower Poetry-Tula,Ennmaya-Chaste Bride,Muppet-Manjusaka,Faithful Vows-Kratos.",
+      "source_stack": 99,
+      "gift_id": 99990097,
+      "dropbox_ids_ordered": [
+        9999055
+      ],
+      "ordered_draw_count": 1,
+      "unique_dropbox_ids": [
+        9999055
+      ],
+      "candidate_count": 7,
+      "candidate_item_types": [
+        4
+      ]
+    },
+    {
+      "item_id": 50009079,
+      "item_name": "Pet Lucky Pack",
+      "item_desc": "Open it and you will randomly gain 10 essences from one of the following pets: Merlin, Tudu, Ollie, Fluffy, Dodo and Yoyo.",
+      "source_stack": 99,
+      "gift_id": 99990100,
+      "dropbox_ids_ordered": [
+        999928
+      ],
+      "ordered_draw_count": 1,
+      "unique_dropbox_ids": [
+        999928
+      ],
+      "candidate_count": 6,
+      "candidate_item_types": [
+        7
+      ]
+    },
+    {
+      "item_id": 50009082,
+      "item_name": "X-Skin Pack",
+      "item_desc": "Open it and you will get a random skin from Wild Girl-Future Tech, Mercury Pilot- Fanny, Chinese Cook- Aegis, Magical Girl- Tennese, Bloody Night- Dracula, Bunny Doll- Elvis, Terrors King- Scythe, Beach Saber-Celeste.",
+      "source_stack": 99,
+      "gift_id": 99990103,
+      "dropbox_ids_ordered": [
+        9999059
+      ],
+      "ordered_draw_count": 1,
+      "unique_dropbox_ids": [
+        9999059
+      ],
+      "candidate_count": 8,
+      "candidate_item_types": [
+        4
+      ]
+    },
+    {
+      "item_id": 50009084,
+      "item_name": "19.99 Skin Pack",
+      "item_desc": "Open it and you will get a random skin from Lotus Girl- Bud Elf, Dream Beach- Pandaria, Bunny Doll- Elvis, Courier- Talia, Gallant- Androi, Custom Camerist- Rhea, Candy Bunny- Jade, Mushroom Pricess- Yuri, Moegirl- Nona.",
+      "source_stack": 99,
+      "gift_id": 99990105,
+      "dropbox_ids_ordered": [
+        9999061
+      ],
+      "ordered_draw_count": 1,
+      "unique_dropbox_ids": [
+        9999061
+      ],
+      "candidate_count": 9,
+      "candidate_item_types": [
+        4
+      ]
+    },
+    {
+      "item_id": 50009086,
+      "item_name": "19.99 Skin PackⅡ",
+      "item_desc": "Open it and you will get a random skin from Beach Saber-Celeste, Lotus Girl-Bud Elf, Mushroom Princess-Yuri, Beach Doctor-Zoe, Custom Camerist-Rhea, Candy Bunny- Jade, Dream Beach-Pandaria, Courier-Talia, Gallant-Androi.",
+      "source_stack": 99,
+      "gift_id": 99990108,
+      "dropbox_ids_ordered": [
+        9999063
+      ],
+      "ordered_draw_count": 1,
+      "unique_dropbox_ids": [
+        9999063
+      ],
+      "candidate_count": 9,
+      "candidate_item_types": [
+        4
+      ]
+    },
+    {
+      "item_id": 50009090,
+      "item_name": "19.99 Skin Pack Ⅲ",
+      "item_desc": "Open it and you will get a random skin from Shining Idol-Priestess, Lotus Girl-Bud Elf, Mushroom Princess-Yuri, Beach Doctor-Zoe, Custom Camerist-Rhea, Candy Bunny- Jade, Dream Beach-Pandaria, Courier-Talia, Gallant-Androi.",
+      "source_stack": 99,
+      "gift_id": 99990118,
+      "dropbox_ids_ordered": [
+        9999064
+      ],
+      "ordered_draw_count": 1,
+      "unique_dropbox_ids": [
+        9999064
+      ],
+      "candidate_count": 9,
+      "candidate_item_types": [
+        4
+      ]
+    },
+    {
+      "item_id": 50009095,
+      "item_name": "19.99 Skin Pack Ⅳ",
+      "item_desc": "Open this pack and you will get a random skin from Azure Moon- Wildtress, Lotus Girl- Bud Elf, Dream Beach- Pandaria, Beach Doctor- Zoe, Courier- Talia, Helper- Yenn, Custom Camerist- Rhea, Candy Bunny- Jade, Mushroom Princess- Yuri.",
+      "source_stack": 99,
+      "gift_id": 99990123,
+      "dropbox_ids_ordered": [
+        9999067
+      ],
+      "ordered_draw_count": 1,
+      "unique_dropbox_ids": [
+        9999067
+      ],
+      "candidate_count": 9,
+      "candidate_item_types": [
+        4
+      ]
+    },
+    {
+      "item_id": 50009096,
+      "item_name": "19.99 Skin Pack Ⅴ",
+      "item_desc": "Open it and you will get a random skin from Lotus Queen-Boxer, Lotus Girl-Bud Elf, Mushroom Princess-Yuri, Beach Doctor-Zoe, Custom Camerist-Rhea, Candy Bunny-Jade, Dream Beach-Pandaria, Courier-Talia, Helper-Yenn.",
+      "source_stack": 99,
+      "gift_id": 99990124,
+      "dropbox_ids_ordered": [
+        9999068
+      ],
+      "ordered_draw_count": 1,
+      "unique_dropbox_ids": [
+        9999068
+      ],
+      "candidate_count": 9,
+      "candidate_item_types": [
+        4
+      ]
+    },
+    {
+      "item_id": 50009099,
+      "item_name": "Special Skin Pack",
+      "item_desc": "Super-valued pack, open it and you will gain a random skill skin from all the skill skins we released before 2019/4/13. ",
+      "source_stack": 99,
+      "gift_id": 99990127,
+      "dropbox_ids_ordered": [
+        999933
+      ],
+      "ordered_draw_count": 1,
+      "unique_dropbox_ids": [
+        999933
+      ],
+      "candidate_count": 130,
+      "candidate_item_types": [
+        4
+      ]
+    },
+    {
+      "item_id": 50009102,
+      "item_name": "19.99 Skin Pack Ⅵ",
+      "item_desc": "Open it and you will get a random skin from Reo- Splendid- Fragrance, Katie- Elegant Lady, Tula- Flower Poetry, Lotus Girl- Bud Elf, Courier- Talia, Helper- Yenn, Custom Camerist- Rhea, Candy Bunny- Jade, Mushroom Pricess- Yuri",
+      "source_stack": 99,
+      "gift_id": 99990130,
+      "dropbox_ids_ordered": [
+        9999071
+      ],
+      "ordered_draw_count": 1,
+      "unique_dropbox_ids": [
+        9999071
+      ],
+      "candidate_count": 9,
+      "candidate_item_types": [
+        4
+      ]
+    },
+    {
+      "item_id": 50009109,
+      "item_name": "19.99 Skin Pack Ⅶ",
+      "item_desc": "Open it and you will get a random skin from Boxer- Lotus Queen, Katie- Elegant Lady, Tula- Flower Poetry, Talia- Courier, Yenn- Helper, Beary-  Xmas Princess, Puny- Freehand Girl, Jinx- Detective, Phancy- Summer Love",
+      "source_stack": 99,
+      "gift_id": 99990161,
+      "dropbox_ids_ordered": [
+        9999073
+      ],
+      "ordered_draw_count": 1,
+      "unique_dropbox_ids": [
+        9999073
+      ],
+      "candidate_count": 9,
+      "candidate_item_types": [
+        4
+      ]
+    },
+    {
+      "item_id": 50009111,
+      "item_name": "19.99 Skin Pack Ⅷ",
+      "item_desc": "Open it and you will get a random skin from Wraith- Sleeping Girl, Katie- Elegant Lady, Tula- Flower Poetry, Talia- Courier, Yenn- Helper, Beary-  Xmas Princess, Puny- Freehand Girl, Jinx- Detective, Phancy- Summer Love",
+      "source_stack": 99,
+      "gift_id": 99990167,
+      "dropbox_ids_ordered": [
+        9999075
+      ],
+      "ordered_draw_count": 1,
+      "unique_dropbox_ids": [
+        9999075
+      ],
+      "candidate_count": 9,
+      "candidate_item_types": [
+        4
+      ]
+    },
+    {
+      "item_id": 50009119,
+      "item_name": "19.99 Skin Pack Ⅳ",
+      "item_desc": "Open it and you will get a random skin from Boxer-Lotus Queen, Katie- Elegant Lady, Tula- Flower Poetry, Lily-Rose Bride, Yolanda-Sweet Cake, Caroline-Fan Loli, Puny-Freehand Girl, Jinx- Detective, Phancy- Summer Love.",
+      "source_stack": 99,
+      "gift_id": 99990181,
+      "dropbox_ids_ordered": [
+        9999085
+      ],
+      "ordered_draw_count": 1,
+      "unique_dropbox_ids": [
+        9999085
+      ],
+      "candidate_count": 9,
+      "candidate_item_types": [
+        4
+      ]
+    },
+    {
+      "item_id": 50009126,
+      "item_name": "19.99 Skin Pack Ⅴ",
+      "item_desc": "Open it and you will get a random skin from Muppet-Manjusaka, Katie- Elegant Lady, Tula- Flower Poetry, Lily-Rose Bride, Yolanda-Sweet Cake, Caroline-Fan Loli, Puny-Freehand Girl, Jinx- Detective, Phancy- Summer Love.",
+      "source_stack": 99,
+      "gift_id": 99990188,
+      "dropbox_ids_ordered": [
+        9999088
+      ],
+      "ordered_draw_count": 1,
+      "unique_dropbox_ids": [
+        9999088
+      ],
+      "candidate_count": 9,
+      "candidate_item_types": [
+        4
+      ]
+    },
+    {
+      "item_id": 50009128,
+      "item_name": "Frame Bag",
+      "item_desc": "Open it and you will get a random Frame from: Veila's Frame, Watermelon Frame, Sweet Zongzi, Sweet Idol Frame, BBQ King Frame, Candy Girl Frame, BBQ Popularity Frame, Flower Elf Frame, Rabbit on Moon, Midsummer Frame.",
+      "source_stack": 99,
+      "gift_id": 99990190,
+      "dropbox_ids_ordered": [
+        999944
+      ],
+      "ordered_draw_count": 1,
+      "unique_dropbox_ids": [
+        999944
+      ],
+      "candidate_count": 10,
+      "candidate_item_types": [
+        12
+      ]
+    },
+    {
+      "item_id": 50009129,
+      "item_name": "19.99 Skin Pack Ⅵ",
+      "item_desc": "Open it and you will get a random skin from Wildtress-Azure Moon, Katie- Elegant Lady, Tula- Flower Poetry, Lily-Rose Bride, Yolanda-Sweet Cake, Caroline-Fan Loli, Puny-Freehand Girl, Jinx- Detective, Phancy- Summer Love.",
+      "source_stack": 99,
+      "gift_id": 99990191,
+      "dropbox_ids_ordered": [
+        9999090
+      ],
+      "ordered_draw_count": 1,
+      "unique_dropbox_ids": [
+        9999090
+      ],
+      "candidate_count": 9,
+      "candidate_item_types": [
+        4
+      ]
+    },
+    {
+      "item_id": 50009133,
+      "item_name": "19.99 Skin Pack Ⅶ",
+      "item_desc": "Open it and you will get a random skin from Hexa-Cats' Party, Katie- Elegant Lady, Tula- Flower Poetry, Lily-Rose Bride, Yolanda-Sweet Cake, Caroline-Fan Loli, Puny-Freehand Girl, Jinx- Detective, Phancy- Summer Love.",
+      "source_stack": 99,
+      "gift_id": 99990195,
+      "dropbox_ids_ordered": [
+        9999094
+      ],
+      "ordered_draw_count": 1,
+      "unique_dropbox_ids": [
+        9999094
+      ],
+      "candidate_count": 9,
+      "candidate_item_types": [
+        4
+      ]
+    },
+    {
+      "item_id": 50009142,
+      "item_name": "19.99 Skin Pack Ⅷ",
+      "item_desc": "Open it and you will get a random skin from Capt. Sun-Lantern Girl, Saint-Mech Sword, Fangirl-Beach Cheerleader, King-Voyage Adventurer, Selene-Octopus Cuisine, Smartie-Sweet Idol, Ninja-Winter's Love, Assassin-Blossoming Love, Caroline-Fan Loli.",
+      "source_stack": 99,
+      "gift_id": 99990204,
+      "dropbox_ids_ordered": [
+        9999097
+      ],
+      "ordered_draw_count": 1,
+      "unique_dropbox_ids": [
+        9999097
+      ],
+      "candidate_count": 9,
+      "candidate_item_types": [
+        4
+      ]
+    },
+    {
+      "item_id": 50009148,
+      "item_name": "Frame Bag Ⅱ",
+      "item_desc": "Open it and you will get a random frame from: Shiny Cutie Frame, Sleeping Girl Frame, Black Veil Beauty, Jingle Bells, Soccer Babe Frame, Come on~ , Forest Smash Frame, Queen's Crown, April Fool, Single Dog.",
+      "source_stack": 99,
+      "gift_id": 99990210,
+      "dropbox_ids_ordered": [
+        9999105
+      ],
+      "ordered_draw_count": 1,
+      "unique_dropbox_ids": [
+        9999105
+      ],
+      "candidate_count": 10,
+      "candidate_item_types": [
+        12
+      ]
+    },
+    {
+      "item_id": 50009154,
+      "item_name": "19.99 Skin Pack Ⅸ",
+      "item_desc": "Open it and you will get a random skin from Sapphire-Frozen, Saint-Mech Sword, Fangirl-Beach Cheerleader, King-Voyage Adventurer, Selene-Octopus Cuisine, Smartie-Sweet Idol, Ninja-Winter's Love, Assassin-Blossoming Love, Caroline-Fan Loli.",
+      "source_stack": 99,
+      "gift_id": 99990225,
+      "dropbox_ids_ordered": [
+        9999106
+      ],
+      "ordered_draw_count": 1,
+      "unique_dropbox_ids": [
+        9999106
+      ],
+      "candidate_count": 9,
+      "candidate_item_types": [
+        4
+      ]
+    },
+    {
+      "item_id": 50009158,
+      "item_name": "19.99 Skin Pack Ⅹ",
+      "item_desc": "Open it and you will get a random skin from Raphael-Red Rose, Saint-Mech Sword, Fangirl-Beach Cheerleader, King-Voyage Adventurer, Selene-Octopus Cuisine, Smartie-Sweet Idol, Ninja-Winter's Love, Assassin-Blossoming Love, Caroline-Fan Loli.",
+      "source_stack": 99,
+      "gift_id": 99990229,
+      "dropbox_ids_ordered": [
+        9999109
+      ],
+      "ordered_draw_count": 1,
+      "unique_dropbox_ids": [
+        9999109
+      ],
+      "candidate_count": 9,
+      "candidate_item_types": [
+        4
+      ]
+    },
+    {
+      "item_id": 50009160,
+      "item_name": "Frame Bag Ⅲ",
+      "item_desc": "Open it and you will get a random frame from: Rooster Year Frame, Sakura Rain Frame, Race Champion Frame, Midsummer Frame,  Dragon Boat Frame, Cool Summer Frame, Spring Festival, Blue Shadow, Frozen Frame, Snow Queen Frame.",
+      "source_stack": 99,
+      "gift_id": 99990231,
+      "dropbox_ids_ordered": [
+        9999111
+      ],
+      "ordered_draw_count": 1,
+      "unique_dropbox_ids": [
+        9999111
+      ],
+      "candidate_count": 10,
+      "candidate_item_types": [
+        12
+      ]
+    },
+    {
+      "item_id": 50009164,
+      "item_name": "19.99 Skin Pack ⅰ",
+      "item_desc": "Open it and you will get a random skin from Priestess- Shining Idol, Nun- Flipped Idol, Zoe- Beach Doctor, Nagia- Genius Magician, King- Voyage Adventurer, Caroline- Fan Loli, Selene- Octopus Cuisine, Smartie- Sweet Idol, Wandy- Chopping Summer.",
+      "source_stack": 99,
+      "gift_id": 99990234,
+      "dropbox_ids_ordered": [
+        9999112
+      ],
+      "ordered_draw_count": 1,
+      "unique_dropbox_ids": [
+        9999112
+      ],
+      "candidate_count": 9,
+      "candidate_item_types": [
+        4
+      ]
+    },
+    {
+      "item_id": 50009192,
+      "item_name": "Festival Frame Bag",
+      "item_desc": "Open it to get a random festival frame: Kite Festival Frame, Lantern Festival Frame, Rooster Year Frame, Sakura Rain Frame, Xmas Frame, Thanksgiving Frame, Spring Festival Frame, New Year Frame, April Fool's Frame.",
+      "source_stack": 99,
+      "gift_id": 99990270,
+      "dropbox_ids_ordered": [
+        9999130
+      ],
+      "ordered_draw_count": 1,
+      "unique_dropbox_ids": [
+        9999130
+      ],
+      "candidate_count": 9,
+      "candidate_item_types": [
+        12
+      ]
+    },
+    {
+      "item_id": 50009197,
+      "item_name": "Nor-Elemental Gear",
+      "item_desc": "Open it and you will get a random gear from: Netherworld Jewelry, Natural Amber, Magic Graphite, Energy Crystal, Magic Crystal and Elemental Jade.",
+      "source_stack": 99,
+      "gift_id": 99990275,
+      "dropbox_ids_ordered": [
+        9999132
+      ],
+      "ordered_draw_count": 1,
+      "unique_dropbox_ids": [
+        9999132
+      ],
+      "candidate_count": 18,
+      "candidate_item_types": [
+        21
+      ]
+    },
+    {
+      "item_id": 50009199,
+      "item_name": "Halloween Skin Sale ",
+      "item_desc": "Open it and you will get a random skill skin which released before 2019/10/24.",
+      "source_stack": 99,
+      "gift_id": 99990277,
+      "dropbox_ids_ordered": [
+        9999134
+      ],
+      "ordered_draw_count": 1,
+      "unique_dropbox_ids": [
+        9999134
+      ],
+      "candidate_count": 169,
+      "candidate_item_types": [
+        4
+      ]
+    },
+    {
+      "item_id": 50009201,
+      "item_name": "Adv-Elemental Gear ",
+      "item_desc": "Open it and you will get a random gear from: Spear of Thunder, Golden Flash, Flameheart, Scorching Sun, Noah's Ark and Morning Dew.",
+      "source_stack": 99,
+      "gift_id": 99990279,
+      "dropbox_ids_ordered": [
+        9999136
+      ],
+      "ordered_draw_count": 1,
+      "unique_dropbox_ids": [
+        9999136
+      ],
+      "candidate_count": 6,
+      "candidate_item_types": [
+        21
+      ]
+    },
+    {
+      "item_id": 50009208,
+      "item_name": "Summer Memory",
+      "item_desc": "Open it and you will get a random skin from: Hexa- Shade Edge; Chevalir- Surfer's Got Talent; Celeste- Beach Saber; Zoe- Beach Doctor; Himoto- Beach Party; Pandaria- Dream Beach; Iron Fist- Orange Summer; Fangirl- Beach Cheerleader; Joan- Lifebuoy Queen.",
+      "source_stack": 99,
+      "gift_id": 99990295,
+      "dropbox_ids_ordered": [
+        9999138
+      ],
+      "ordered_draw_count": 1,
+      "unique_dropbox_ids": [
+        9999138
+      ],
+      "candidate_count": 9,
+      "candidate_item_types": [
+        4
+      ]
+    },
+    {
+      "item_id": 50009214,
+      "item_name": "Prom Pack",
+      "item_desc": "Open it and you will get a random skin from: Giana-Evening Maple, Muppet-Manjusaka, Lily-Rose Bride, Dracula-Rose Whisper, Iron Fist-Flower Praise, Saint-Dear Rose, Shirley-Heart Seeker, Tula-Flower Poetry.",
+      "source_stack": 99,
+      "gift_id": 99990303,
+      "dropbox_ids_ordered": [
+        9999140
+      ],
+      "ordered_draw_count": 1,
+      "unique_dropbox_ids": [
+        9999140
+      ],
+      "candidate_count": 9,
+      "candidate_item_types": [
+        4
+      ]
+    },
+    {
+      "item_id": 50009219,
+      "item_name": "Lucky Pack",
+      "item_desc": "Open it and you will get a random item from: 10 diamonds, 50 diamonds, Fries, Kanto Food, Tonkatsu, Elemental stone, Manga, Manga Toy, PSP, Cushion.",
+      "source_stack": 99,
+      "gift_id": 99990311,
+      "dropbox_ids_ordered": [
+        9999141
+      ],
+      "ordered_draw_count": 1,
+      "unique_dropbox_ids": [
+        9999141
+      ],
+      "candidate_count": 10,
+      "candidate_item_types": [
+        4
+      ]
+    },
+    {
+      "item_id": 50009231,
+      "item_name": "Skin Lucky Pack I",
+      "item_desc": "Open it and you will get a random skin of Fencer(Wonder), Androi(Gallant), Alice, Chevalir(Modern), Fear, or Fleur.",
+      "source_stack": 99,
+      "gift_id": 99990318,
+      "dropbox_ids_ordered": [
+        9999142
+      ],
+      "ordered_draw_count": 1,
+      "unique_dropbox_ids": [
+        9999142
+      ],
+      "candidate_count": 6,
+      "candidate_item_types": [
+        4
+      ]
+    },
+    {
+      "item_id": 50009236,
+      "item_name": "Luck-Pack Ⅱ",
+      "item_desc": "Open it and you will get a random item from: 10 diamonds, 50 diamonds,300 diamonds,Fries, Kanto Food, Tonkatsu, Manga, Manga Toy, PSP, Cushion.",
+      "source_stack": 999,
+      "gift_id": 99990344,
+      "dropbox_ids_ordered": [
+        9999143
+      ],
+      "ordered_draw_count": 1,
+      "unique_dropbox_ids": [
+        9999143
+      ],
+      "candidate_count": 10,
+      "candidate_item_types": [
+        4
+      ]
+    },
+    {
+      "item_id": 50009239,
+      "item_name": "Girls Skin Pack Ⅱ",
+      "item_desc": "Open it and you will get a random skin from Rose Whisper-Dracula; Pumpkin Pie-Dracula; Insects Catching-Anna; Beach Shooter-Revoler; Crimson Sun-Lavia; Lifebuoy Queen-Joan; Guardian's Wing-Angel; Queen of Hearts-Nikita.",
+      "source_stack": 99,
+      "gift_id": 99990346,
+      "dropbox_ids_ordered": [
+        9999145
+      ],
+      "ordered_draw_count": 1,
+      "unique_dropbox_ids": [
+        9999145
+      ],
+      "candidate_count": 8,
+      "candidate_item_types": [
+        4
+      ]
+    },
+    {
+      "item_id": 50009245,
+      "item_name": "Girls Skin Pack Ⅲ",
+      "item_desc": "Open it and you will get a random skin from: Illusory Flame-Amelia, Sleepy Sweety-Cayla, Violence Angel-Hancer, Crime&Punish-Vivian, Bunny Doll-Elvis, Beach Cheerleader-Fangirl, Snow Princess-Androi, Sea's Daughter-Jelly.",
+      "source_stack": 99,
+      "gift_id": 99990353,
+      "dropbox_ids_ordered": [
+        9999147
+      ],
+      "ordered_draw_count": 1,
+      "unique_dropbox_ids": [
+        9999147
+      ],
+      "candidate_count": 8,
+      "candidate_item_types": [
+        4
+      ]
+    },
+    {
+      "item_id": 50009246,
+      "item_name": "Rich Pack",
+      "item_desc": "Open it and you will get a random item: Avoid Card*1, Cheat Dice*1, VIP Card*1, 50 diamonds*2, Toy*1, PSP*1, Cushion*1.",
+      "source_stack": 999,
+      "gift_id": 99990354,
+      "dropbox_ids_ordered": [
+        9999148
+      ],
+      "ordered_draw_count": 1,
+      "unique_dropbox_ids": [
+        9999148
+      ],
+      "candidate_count": 7,
+      "candidate_item_types": [
+        4
+      ]
+    },
+    {
+      "item_id": 50009251,
+      "item_name": "Adv-Ele Lightning",
+      "item_desc": "Open it and you will get a random advance lighting elemental gear.",
+      "source_stack": 999,
+      "gift_id": 99990368,
+      "dropbox_ids_ordered": [
+        999988
+      ],
+      "ordered_draw_count": 1,
+      "unique_dropbox_ids": [
+        999988
+      ],
+      "candidate_count": 2,
+      "candidate_item_types": [
+        21
+      ]
+    },
+    {
+      "item_id": 50009252,
+      "item_name": "Adv-Ele Fire",
+      "item_desc": "Open it and you will get a random advance fire elemental gear.",
+      "source_stack": 999,
+      "gift_id": 99990369,
+      "dropbox_ids_ordered": [
+        999989
+      ],
+      "ordered_draw_count": 1,
+      "unique_dropbox_ids": [
+        999989
+      ],
+      "candidate_count": 2,
+      "candidate_item_types": [
+        21
+      ]
+    },
+    {
+      "item_id": 50009253,
+      "item_name": "Adv-Ele Water",
+      "item_desc": "Open it and you will get a random advance water elemental gear.",
+      "source_stack": 999,
+      "gift_id": 99990370,
+      "dropbox_ids_ordered": [
+        999990
+      ],
+      "ordered_draw_count": 1,
+      "unique_dropbox_ids": [
+        999990
+      ],
+      "candidate_count": 2,
+      "candidate_item_types": [
+        21
+      ]
+    },
+    {
+      "item_id": 50009254,
+      "item_name": "Nor-Ele Lightning",
+      "item_desc": "Open it and you will get a random normal lighting elemental gear.",
+      "source_stack": 999,
+      "gift_id": 99990371,
+      "dropbox_ids_ordered": [
+        999991
+      ],
+      "ordered_draw_count": 1,
+      "unique_dropbox_ids": [
+        999991
+      ],
+      "candidate_count": 6,
+      "candidate_item_types": [
+        21
+      ]
+    },
+    {
+      "item_id": 50009255,
+      "item_name": "Nor-Ele Fire",
+      "item_desc": "Open it and you will get a random normal fire elemental gear.",
+      "source_stack": 999,
+      "gift_id": 99990372,
+      "dropbox_ids_ordered": [
+        999992
+      ],
+      "ordered_draw_count": 1,
+      "unique_dropbox_ids": [
+        999992
+      ],
+      "candidate_count": 6,
+      "candidate_item_types": [
+        21
+      ]
+    },
+    {
+      "item_id": 50009256,
+      "item_name": "Nor-Ele Water",
+      "item_desc": "Open it and you will get a random normal water elemental gear.",
+      "source_stack": 999,
+      "gift_id": 99990373,
+      "dropbox_ids_ordered": [
+        999993
+      ],
+      "ordered_draw_count": 1,
+      "unique_dropbox_ids": [
+        999993
+      ],
+      "candidate_count": 6,
+      "candidate_item_types": [
+        21
+      ]
+    },
+    {
+      "item_id": 50009263,
+      "item_name": "Xmas Stamina Bag",
+      "item_desc": "Item from Xmas Party, you can open it and get 1-5 stamina item from: Xmas Cookie, Xmas Cake, Xmas Ham. Can carry up to 99 max.",
+      "source_stack": 99,
+      "gift_id": 99990377,
+      "dropbox_ids_ordered": [
+        999997
+      ],
+      "ordered_draw_count": 1,
+      "unique_dropbox_ids": [
+        999997
+      ],
+      "candidate_count": 15,
+      "candidate_item_types": [
+        4
+      ]
+    },
+    {
+      "item_id": 50009266,
+      "item_name": "Girls Skin Pack Ⅳ",
+      "item_desc": "Open it and you will get a random skin from Rock Idol-Matador, Sweet Idol-Smartie, Flipped Idol-Nun, Shining Idol-Priestess, Elegant Lady-Katie, Evening Maple-Giana, Sea Breeze-Collins, Fan Loli-Caroline.",
+      "source_stack": 99,
+      "gift_id": 99990387,
+      "dropbox_ids_ordered": [
+        9999150
+      ],
+      "ordered_draw_count": 1,
+      "unique_dropbox_ids": [
+        9999150
+      ],
+      "candidate_count": 8,
+      "candidate_item_types": [
+        4
+      ]
+    },
+    {
+      "item_id": 50009268,
+      "item_name": "Memoir Skin pack",
+      "item_desc": "Open it and you will get a random skin from: Shade Edge-Hexa, Tipsy Beauty-Javelin, Caged Sparrow-Lydia, Summer Love-Phancy, Sunlight SPA-Camila, Splendid Fragrance-Reo, Bubble Illusion-Jelly, Shark Bento-Sisha.",
+      "source_stack": 99,
+      "gift_id": 99990389,
+      "dropbox_ids_ordered": [
+        9999152
+      ],
+      "ordered_draw_count": 1,
+      "unique_dropbox_ids": [
+        9999152
+      ],
+      "candidate_count": 8,
+      "candidate_item_types": [
+        4
+      ]
+    },
+    {
+      "item_id": 50009280,
+      "item_name": "Memoir Skin pack Ⅱ",
+      "item_desc": "Open it and you will get a random skin from: Faye-Prison, Zanny-Midsummer Spark, Ninja-Maid Trainee, Assassin-Graceful Maid, Priestess-Mundane World, Nobunaga-Slaughter Bride, Aegis-Chinese Cook, Hottie-Beach Phantom.",
+      "source_stack": 99,
+      "gift_id": 99990418,
+      "dropbox_ids_ordered": [
+        9999155
+      ],
+      "ordered_draw_count": 1,
+      "unique_dropbox_ids": [
+        9999155
+      ],
+      "candidate_count": 8,
+      "candidate_item_types": [
+        4
+      ]
+    },
+    {
+      "item_id": 50009287,
+      "item_name": "Memoir Skin pack Ⅲ",
+      "item_desc": "Open it and you will get a random skin from:Trainee Maid（Ninja), Summer Bikini(Caitlyn), Beach Phantom(Hottie), Arrogant Goddess(Hottie), Thor(Sonya), Snow Queen(Amazon), Beach Saber(Celeste), Bubble Illusion(Jelly) ",
+      "source_stack": 99,
+      "gift_id": 99990425,
+      "dropbox_ids_ordered": [
+        9999158
+      ],
+      "ordered_draw_count": 1,
+      "unique_dropbox_ids": [
+        9999158
+      ],
+      "candidate_count": 8,
+      "candidate_item_types": [
+        4
+      ]
+    },
+    {
+      "item_id": 50009292,
+      "item_name": "Vows Girl Scroll Box",
+      "item_desc": "Open it and you will get a random scroll from: Hoder, Balder, Vider, Heimdall, Loki, Freya, Eden, Sif, Tyr, Frega, Thor.",
+      "source_stack": 99,
+      "gift_id": 99990438,
+      "dropbox_ids_ordered": [
+        9999159
+      ],
+      "ordered_draw_count": 1,
+      "unique_dropbox_ids": [
+        9999159
+      ],
+      "candidate_count": 11,
+      "candidate_item_types": [
+        3
+      ]
+    },
+    {
+      "item_id": 50009300,
+      "item_name": "Memoir Skin pack Ⅳ",
+      "item_desc": "Open it and you will get a random skin from: Toyo-Parasol Tree, Werewolf-Tsundere Cutemon, Sapphire-Frozen, Wild Girl-Future Tech, War Machine-Fear, Celeste-Beach Saber, Faye-Prison, Scythe-Terrors King.",
+      "source_stack": 99,
+      "gift_id": 99990446,
+      "dropbox_ids_ordered": [
+        9999161
+      ],
+      "ordered_draw_count": 1,
+      "unique_dropbox_ids": [
+        9999161
+      ],
+      "candidate_count": 8,
+      "candidate_item_types": [
+        4
+      ]
+    },
+    {
+      "item_id": 50009414,
+      "item_name": "Random Ele. Pack",
+      "item_desc": "Open it and you will get a random elemental gear from: Moon Spirit, Win Chess, Hot Jade, Aeolus's Breath, Daytime Firework, Light Feather, Butterfly Amber.",
+      "source_stack": 99,
+      "gift_id": 99990741,
+      "dropbox_ids_ordered": [
+        9199036
+      ],
+      "ordered_draw_count": 1,
+      "unique_dropbox_ids": [
+        9199036
+      ],
+      "candidate_count": 7,
+      "candidate_item_types": [
+        21
+      ]
+    },
+    {
+      "item_id": 50009423,
+      "item_name": "Random Ele. Pack Ⅱ",
+      "item_desc": "Open it you will get a random elemental gear from: Barbarian Horn, Supreme Fist, Sea Spirit's Call, Neon Lights,  Bloodstone.",
+      "source_stack": 99,
+      "gift_id": 99990758,
+      "dropbox_ids_ordered": [
+        9199038
+      ],
+      "ordered_draw_count": 1,
+      "unique_dropbox_ids": [
+        9199038
+      ],
+      "candidate_count": 5,
+      "candidate_item_types": [
+        21
+      ]
+    },
+    {
+      "item_id": 50009428,
+      "item_name": "Random Ele. Pack Ⅲ",
+      "item_desc": "Open it you will get a random elemental gear from: Holy Wings, Demon Horns, Dark Seed, Light Seed, Oracle Stone.",
+      "source_stack": 99,
+      "gift_id": 99990768,
+      "dropbox_ids_ordered": [
+        9199039
+      ],
+      "ordered_draw_count": 1,
+      "unique_dropbox_ids": [
+        9199039
+      ],
+      "candidate_count": 5,
+      "candidate_item_types": [
+        21
+      ]
+    },
+    {
+      "item_id": 51009002,
+      "item_name": "Memoir Skin pack Ⅳ",
+      "item_desc": "Open it and you will get a random skin from: Sonya(Thor), Susan(Love Envoy), Mira(Sunrise Angel), Lucifer(Twilight Devil), Ninja(Maid Trainee), Celeste(Beach Saber), Selene(Octopus Cuisine), Jyaku(Arcane Talent).",
+      "source_stack": 99,
+      "gift_id": 91990002,
+      "dropbox_ids_ordered": [
+        9199002
+      ],
+      "ordered_draw_count": 1,
+      "unique_dropbox_ids": [
+        9199002
+      ],
+      "candidate_count": 8,
+      "candidate_item_types": [
+        4
+      ]
+    },
+    {
+      "item_id": 51009009,
+      "item_name": "Memoir Skin pack Ⅴ",
+      "item_desc": "Open it and you will get a random skin from: Yukimula\"Green Hand\",  Exorcist \"Helm Knight\", Puny\"Freehand Girl\", Lydia \"Caged Sparrow\", Yasuna\"Mech Shield\", Liz \"Blood Phobia\", Amber\"Winter Amour\", Librarian\"Xmas Prayer\" ",
+      "source_stack": 99,
+      "gift_id": 91990070,
+      "dropbox_ids_ordered": [
+        9199003
+      ],
+      "ordered_draw_count": 1,
+      "unique_dropbox_ids": [
+        9199003
+      ],
+      "candidate_count": 8,
+      "candidate_item_types": [
+        4
+      ]
+    },
+    {
+      "item_id": 51009011,
+      "item_name": "Memoir Skin pack Ⅵ",
+      "item_desc": "Open it and you will get a random skin from:  Sisha\"Shark Bento\",  Elvis\"Bunny Doll\", Fangirl\"Beach cheerleader\",  Fear\"War Machine\", King\"Voyage Adventurer\",  Revolver\"Beach Shooter\", Sonya\"Thor\",  Guan Yin\"Sunshine Girl \".  ",
+      "source_stack": 99,
+      "gift_id": 91990072,
+      "dropbox_ids_ordered": [
+        9199005
+      ],
+      "ordered_draw_count": 1,
+      "unique_dropbox_ids": [
+        9199005
+      ],
+      "candidate_count": 8,
+      "candidate_item_types": [
+        4
+      ]
+    },
+    {
+      "item_id": 51009013,
+      "item_name": "Memoir Skin pack Ⅶ",
+      "item_desc": "Open it and you will get a random skin from Flower Praise-Iron Fist, Beach Doctor-Zoe, Gentle Wife skin-Revali, Priory Deacon for Magician, Young & Rebellious-Claudia, Parasol Tree-Toyo, Chaste Bride-Ennmaya, Night Walker-Wu Kong.",
+      "source_stack": 99,
+      "gift_id": 91990100,
+      "dropbox_ids_ordered": [
+        9199009
+      ],
+      "ordered_draw_count": 1,
+      "unique_dropbox_ids": [
+        9199009
+      ],
+      "candidate_count": 8,
+      "candidate_item_types": [
+        4
+      ]
+    },
+    {
+      "item_id": 51009017,
+      "item_name": "Memoir Skin pack Ⅶ",
+      "item_desc": "Open it and you will get a random skin from: Yukimura-Green Hand, Exorcist -Helm Knight, Fangirl-Beach Cheerleader, Cynthia -Pretty Butterfly, Werewolf-Tsundere Cutemon.",
+      "source_stack": 99,
+      "gift_id": 91990102,
+      "dropbox_ids_ordered": [
+        9199011
+      ],
+      "ordered_draw_count": 1,
+      "unique_dropbox_ids": [
+        9199011
+      ],
+      "candidate_count": 5,
+      "candidate_item_types": [
+        4
+      ]
+    },
+    {
+      "item_id": 51009023,
+      "item_name": "Memoir Skin pack Ⅸ",
+      "item_desc": "Open it and you will get a random skin from: Rhea-Custom Camerist, Faye-Prison, Reo-Splendid Fragrance, Liz-Blood Phobia, Ennmaya-Chaste Bride.",
+      "source_stack": 99,
+      "gift_id": 91990108,
+      "dropbox_ids_ordered": [
+        9199013
+      ],
+      "ordered_draw_count": 1,
+      "unique_dropbox_ids": [
+        9199013
+      ],
+      "candidate_count": 5,
+      "candidate_item_types": [
+        4
+      ]
+    },
+    {
+      "item_id": 51009029,
+      "item_name": "Memoir Skin pack Ⅹ",
+      "item_desc": "Open it and you can get a random skin from: Claudia-Young & Rebellious, Androi-Gallant, Shirley-Heart Seeker, Javelin-Tipsy Beauty, Revolver-Beach Shooter.",
+      "source_stack": 99,
+      "gift_id": 91990161,
+      "dropbox_ids_ordered": [
+        9199016
+      ],
+      "ordered_draw_count": 1,
+      "unique_dropbox_ids": [
+        9199016
+      ],
+      "candidate_count": 5,
+      "candidate_item_types": [
+        4
+      ]
+    }
+  ]
+}

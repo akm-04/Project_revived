@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "pass": "141.0",
+  "phase": "Phase4 QA preparation",
+  "effective_src64": "app-assets/output/assets/src_64",
+  "effective_file_count": 4370,
+  "source_hashes": {
+    "app/common/network/mid.lua": "026a20b29d97624979777a68c64c749254031604057ff42aa8f8254c3e35b5af",
+    "app/windows/SummonWindow.lua": "ff7a49683fa9d47bd031f9f2625d2901a652a4ae305486ad6c2f481f9aa214af",
+    "app/windows/activities/Activity1175.lua": "db72fcdc190b6e5bdb3c92bc9694861f6e4c441a36a329d175b351c356b7a974",
+    "app/windows/BackpackWindow.lua": "48b18493fed4186541fc989a8ef60d6338d444c4e8a0fc986903a57e52ff19c1",
+    "app/windows/GiftbagUseWindow.lua": "cbc1c0cb373adc68a0c74b42d2aa3d5e28a96f536c80729e22be8fd03c5af600",
+    "app/common/tables/GiftTable.lua": "da47e59046f50fe96c82c0f92631ab8a3d1ef306ffb9a9a48c606cde0437a657",
+    "data/tables/summon.lua": "e34ac8b360d0a623b4c846251e71db939d3920e9769ab40889c656904a39183d",
+    "data/tables/translation.lua": "734790d99e4022575ebb3bb3e229cac21ffcf26c84d22dee28c76082dcaf8a36",
+    "data/tables/item.lua": "59b668c28a372543da0c36d7a8d84291cc5b93fa0d92b7cc389a645e96e7b7cc",
+    "data/tables/gift.lua": "8c87dfdc116242afcdebd011cf898d61b08e2cf54ea7d0a11a5f69fabade2ac7",
+    "data/tables/dropbox.lua": "82bcde6486b711f393bf74e54c6ac28239c04fb2d78adf3fd23ff56c1183e2cb"
+  },
+  "facts": [
+    {
+      "class": "SOURCE_FACT",
+      "claim": "MID70 is xyd.mid.MAGIC_SUMMON_BUY; MID71 is MAGIC_SUMMON_SWITCH_HERO."
+    },
+    {
+      "class": "SOURCE_FACT",
+      "claim": "Summon table id 33 is the Magic summon type, source backup label 魔法販賣機, cost_type crystal, costs 500|5000 for summon_num 1|10."
+    },
+    {
+      "class": "SOURCE_FACT",
+      "claim": "SummonWindow machine4 enters MAGIC state; visible translated controls are Switch, Buy 1, Buy 10; rule text describes Purchasing Magic Juice. Activity1175 carries the same flow."
+    },
+    {
+      "class": "SOURCE_FACT",
+      "claim": "Pass140 ordinary random MID241 boundary revalidates as 100 source items, 134 ordered drop occurrences, 96 unique dropbox ids."
+    },
+    {
+      "class": "SOURCE_FACT",
+      "claim": "gift.equip source packages are item type 4 consumables, common subtype 1, single-gift AUTO_FIRST_GIFT routes. BackpackWindow isOpenGiftPakage opens giftbag_use for them; GiftTable.lua still does not expose raw gift.equip."
+    },
+    {
+      "class": "IMPLEMENTATION_COMPATIBILITY_DECISION",
+      "claim": "Pass141 QA seed grants owning Backpack source package item ids, not dropbox pool ids, because dropbox ids are table pool identifiers and are not Backpack items."
+    }
+  ],
+  "behavioral_boundary": "No gameplay policy change. Pass141 changes only sandbox QA inventory seeding and operator/debug documentation; Phase4 runtime acceptance remains open."
+}

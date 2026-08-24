@@ -1,0 +1,1178 @@
+{
+  "_meta": {
+    "schema_version": 1,
+    "pass": "141.0",
+    "migration_marker": "pass141_debug_mid241_qa_seed_v1",
+    "applies_only_to_account_uid": "13371337",
+    "not_original_game_rule": true,
+    "source_resolution": "effective_src64",
+    "source_rule": "One-shot sandbox QA seed. Seed every Phase3 ordinary-random MID241 source package plus Orange Gear Pack, Purple Gear Pack and Optional Gift Box. Respect item.lua stack ceilings; never replenish after migration marker.",
+    "phase3_random_source_item_count": 100,
+    "phase2_smoke_item_count": 3,
+    "phase3_unique_dropbox_count": 96,
+    "phase3_ordered_drop_occurrence_count": 134
+  },
+  "items": [
+    {
+      "item_id": 50001097,
+      "name": "Freshmen Pet Pack",
+      "target_quantity": 20,
+      "source_stack": 999,
+      "qa_role": "PHASE3_RANDOM_ALL",
+      "gift_id": 90001256,
+      "dropbox_ids": [
+        430001,
+        430002,
+        430002,
+        430002,
+        430002,
+        430002
+      ]
+    },
+    {
+      "item_id": 50001098,
+      "name": "Junior Pet Pack",
+      "target_quantity": 20,
+      "source_stack": 999,
+      "qa_role": "PHASE3_RANDOM_ALL",
+      "gift_id": 90001257,
+      "dropbox_ids": [
+        430001,
+        430002,
+        430003,
+        430002,
+        430002,
+        430003
+      ]
+    },
+    {
+      "item_id": 50001099,
+      "name": "Senior Pet Pack",
+      "target_quantity": 20,
+      "source_stack": 999,
+      "qa_role": "PHASE3_RANDOM_ALL",
+      "gift_id": 90001258,
+      "dropbox_ids": [
+        430001,
+        430002,
+        430002,
+        430002,
+        430003,
+        430004
+      ]
+    },
+    {
+      "item_id": 50001100,
+      "name": "Master Pet Pack",
+      "target_quantity": 20,
+      "source_stack": 999,
+      "qa_role": "PHASE3_RANDOM_ALL",
+      "gift_id": 90001259,
+      "dropbox_ids": [
+        430001,
+        430002,
+        430002,
+        430003,
+        430004,
+        430004
+      ]
+    },
+    {
+      "item_id": 50001101,
+      "name": "Champion Pet Pack",
+      "target_quantity": 20,
+      "source_stack": 999,
+      "qa_role": "PHASE3_RANDOM_ALL",
+      "gift_id": 90001260,
+      "dropbox_ids": [
+        430001,
+        430002,
+        430003,
+        430004,
+        430004,
+        430004,
+        430005
+      ]
+    },
+    {
+      "item_id": 50001172,
+      "name": "Orange Gear Pack",
+      "target_quantity": 20,
+      "source_stack": 999,
+      "qa_role": "PHASE2_DETERMINISTIC_SMOKE",
+      "gift_id": 90041001,
+      "dropbox_ids": []
+    },
+    {
+      "item_id": 50001173,
+      "name": "Purple Gear Pack",
+      "target_quantity": 20,
+      "source_stack": 999,
+      "qa_role": "PHASE2_DETERMINISTIC_SMOKE",
+      "gift_id": 90043001,
+      "dropbox_ids": []
+    },
+    {
+      "item_id": 50001407,
+      "name": "Random Application",
+      "target_quantity": 20,
+      "source_stack": 999,
+      "qa_role": "PHASE3_RANDOM_ALL",
+      "gift_id": 90061001,
+      "dropbox_ids": [
+        600001
+      ]
+    },
+    {
+      "item_id": 50001418,
+      "name": "Daily Magazine",
+      "target_quantity": 20,
+      "source_stack": 99,
+      "qa_role": "PHASE3_RANDOM_ALL",
+      "gift_id": 90060006,
+      "dropbox_ids": [
+        600003,
+        600003,
+        600003,
+        600003,
+        600003
+      ]
+    },
+    {
+      "item_id": 50001419,
+      "name": "Special Magazine",
+      "target_quantity": 20,
+      "source_stack": 99,
+      "qa_role": "PHASE3_RANDOM_ALL",
+      "gift_id": 90060007,
+      "dropbox_ids": [
+        600004,
+        600004,
+        600004,
+        600004,
+        600004
+      ]
+    },
+    {
+      "item_id": 50001475,
+      "name": "Basic Furniture Coupon",
+      "target_quantity": 20,
+      "source_stack": 999,
+      "qa_role": "PHASE3_RANDOM_ALL",
+      "gift_id": 90001742,
+      "dropbox_ids": [
+        680001
+      ]
+    },
+    {
+      "item_id": 50001476,
+      "name": "Adv Furniture Coupon",
+      "target_quantity": 20,
+      "source_stack": 999,
+      "qa_role": "PHASE3_RANDOM_ALL",
+      "gift_id": 90001743,
+      "dropbox_ids": [
+        680002
+      ]
+    },
+    {
+      "item_id": 50001560,
+      "name": "Love Confession",
+      "target_quantity": 20,
+      "source_stack": 999,
+      "qa_role": "PHASE3_RANDOM_ALL",
+      "gift_id": 90067001,
+      "dropbox_ids": [
+        680004
+      ]
+    },
+    {
+      "item_id": 50001566,
+      "name": "Random Scrolls",
+      "target_quantity": 20,
+      "source_stack": 999,
+      "qa_role": "PHASE3_RANDOM_ALL",
+      "gift_id": 90001818,
+      "dropbox_ids": [
+        720001
+      ]
+    },
+    {
+      "item_id": 50001567,
+      "name": "Idol Furniture",
+      "target_quantity": 20,
+      "source_stack": 999,
+      "qa_role": "PHASE3_RANDOM_ALL",
+      "gift_id": 90001825,
+      "dropbox_ids": [
+        680005
+      ]
+    },
+    {
+      "item_id": 50001656,
+      "name": "隨機掛件禮包",
+      "target_quantity": 20,
+      "source_stack": 999,
+      "qa_role": "PHASE3_RANDOM_ALL",
+      "gift_id": 90001993,
+      "dropbox_ids": [
+        700006
+      ]
+    },
+    {
+      "item_id": 50001670,
+      "name": "隨機掛件禮包",
+      "target_quantity": 20,
+      "source_stack": 999,
+      "qa_role": "PHASE3_RANDOM_ALL",
+      "gift_id": 90003041,
+      "dropbox_ids": [
+        700007
+      ]
+    },
+    {
+      "item_id": 50001707,
+      "name": "隨機掛件禮包",
+      "target_quantity": 20,
+      "source_stack": 999,
+      "qa_role": "PHASE3_RANDOM_ALL",
+      "gift_id": 90003075,
+      "dropbox_ids": [
+        700009
+      ]
+    },
+    {
+      "item_id": 50001745,
+      "name": "隨機掛件禮包",
+      "target_quantity": 20,
+      "source_stack": 999,
+      "qa_role": "PHASE3_RANDOM_ALL",
+      "gift_id": 90003075,
+      "dropbox_ids": [
+        700009
+      ]
+    },
+    {
+      "item_id": 50001815,
+      "name": "隨機掛件禮包",
+      "target_quantity": 20,
+      "source_stack": 999,
+      "qa_role": "PHASE3_RANDOM_ALL",
+      "gift_id": 90009945,
+      "dropbox_ids": [
+        700014
+      ]
+    },
+    {
+      "item_id": 50001961,
+      "name": "解碼掛件寶箱",
+      "target_quantity": 20,
+      "source_stack": 99,
+      "qa_role": "PHASE3_RANDOM_ALL",
+      "gift_id": 99002239,
+      "dropbox_ids": [
+        700022
+      ]
+    },
+    {
+      "item_id": 50001975,
+      "name": "聖誕節表情寶箱",
+      "target_quantity": 20,
+      "source_stack": 99,
+      "qa_role": "PHASE3_RANDOM_ALL",
+      "gift_id": 91199315,
+      "dropbox_ids": [
+        700023
+      ]
+    },
+    {
+      "item_id": 50001982,
+      "name": "聖誕家具卡片",
+      "target_quantity": 20,
+      "source_stack": 999,
+      "qa_role": "PHASE3_RANDOM_ALL",
+      "gift_id": 90002122,
+      "dropbox_ids": [
+        680006
+      ]
+    },
+    {
+      "item_id": 50001983,
+      "name": "和風家具卡片",
+      "target_quantity": 20,
+      "source_stack": 999,
+      "qa_role": "PHASE3_RANDOM_ALL",
+      "gift_id": 90002123,
+      "dropbox_ids": [
+        680007
+      ]
+    },
+    {
+      "item_id": 50001984,
+      "name": "Classic Furniture Coupon",
+      "target_quantity": 20,
+      "source_stack": 999,
+      "qa_role": "PHASE3_RANDOM_ALL",
+      "gift_id": 90002124,
+      "dropbox_ids": [
+        680008
+      ]
+    },
+    {
+      "item_id": 50001993,
+      "name": "新春福袋",
+      "target_quantity": 20,
+      "source_stack": 999,
+      "qa_role": "PHASE3_RANDOM_ALL",
+      "gift_id": 91199341,
+      "dropbox_ids": [
+        700024
+      ]
+    },
+    {
+      "item_id": 50002002,
+      "name": "春紅的大禮",
+      "target_quantity": 20,
+      "source_stack": 99,
+      "qa_role": "PHASE3_RANDOM_ALL",
+      "gift_id": 91199347,
+      "dropbox_ids": [
+        700025
+      ]
+    },
+    {
+      "item_id": 50002074,
+      "name": "掛件隨機禮包",
+      "target_quantity": 20,
+      "source_stack": 99,
+      "qa_role": "PHASE3_RANDOM_ALL",
+      "gift_id": 90040373,
+      "dropbox_ids": [
+        700027
+      ]
+    },
+    {
+      "item_id": 50002169,
+      "name": "掛件隨機寶箱",
+      "target_quantity": 20,
+      "source_stack": 999,
+      "qa_role": "PHASE3_RANDOM_ALL",
+      "gift_id": 90040456,
+      "dropbox_ids": [
+        700036
+      ]
+    },
+    {
+      "item_id": 50005130,
+      "name": "造型隨機寶箱",
+      "target_quantity": 20,
+      "source_stack": 99,
+      "qa_role": "PHASE3_RANDOM_ALL",
+      "gift_id": 90001759,
+      "dropbox_ids": [
+        700001
+      ]
+    },
+    {
+      "item_id": 50005206,
+      "name": "Optional Gift Box",
+      "target_quantity": 20,
+      "source_stack": 999,
+      "qa_role": "PHASE2_DETERMINISTIC_SMOKE",
+      "gift_id": 90040083,
+      "dropbox_ids": []
+    },
+    {
+      "item_id": 50005227,
+      "name": "海灘契約書禮包",
+      "target_quantity": 20,
+      "source_stack": 999,
+      "qa_role": "PHASE3_RANDOM_ALL",
+      "gift_id": 99002093,
+      "dropbox_ids": [
+        700015
+      ]
+    },
+    {
+      "item_id": 50005237,
+      "name": "Nor-Elemental Gear",
+      "target_quantity": 20,
+      "source_stack": 99,
+      "qa_role": "PHASE3_RANDOM_ALL",
+      "gift_id": 90050179,
+      "dropbox_ids": [
+        700020
+      ]
+    },
+    {
+      "item_id": 50005240,
+      "name": "隨機掛件寶箱",
+      "target_quantity": 20,
+      "source_stack": 999,
+      "qa_role": "PHASE3_RANDOM_ALL",
+      "gift_id": 99002209,
+      "dropbox_ids": [
+        700021
+      ]
+    },
+    {
+      "item_id": 50007007,
+      "name": "Random Pet Gear ",
+      "target_quantity": 20,
+      "source_stack": 999,
+      "qa_role": "PHASE3_RANDOM_ALL",
+      "gift_id": 90002119,
+      "dropbox_ids": [
+        700019
+      ]
+    },
+    {
+      "item_id": 50009000,
+      "name": "Pets Essence Pack",
+      "target_quantity": 20,
+      "source_stack": 999,
+      "qa_role": "PHASE3_RANDOM_ALL",
+      "gift_id": 99060006,
+      "dropbox_ids": [
+        999999
+      ]
+    },
+    {
+      "item_id": 50009001,
+      "name": "Pets Essence Pack",
+      "target_quantity": 20,
+      "source_stack": 999,
+      "qa_role": "PHASE3_RANDOM_ALL",
+      "gift_id": 99060006,
+      "dropbox_ids": [
+        999999
+      ]
+    },
+    {
+      "item_id": 50009002,
+      "name": "Pets Essence Pack",
+      "target_quantity": 20,
+      "source_stack": 999,
+      "qa_role": "PHASE3_RANDOM_ALL",
+      "gift_id": 99060006,
+      "dropbox_ids": [
+        999999
+      ]
+    },
+    {
+      "item_id": 50009003,
+      "name": "Pets Essence Pack",
+      "target_quantity": 20,
+      "source_stack": 999,
+      "qa_role": "PHASE3_RANDOM_ALL",
+      "gift_id": 99060006,
+      "dropbox_ids": [
+        999999
+      ]
+    },
+    {
+      "item_id": 50009024,
+      "name": "Rare Skin Pack ",
+      "target_quantity": 20,
+      "source_stack": 99,
+      "qa_role": "PHASE3_RANDOM_ALL",
+      "gift_id": 99990038,
+      "dropbox_ids": [
+        9999038
+      ]
+    },
+    {
+      "item_id": 50009031,
+      "name": "Xmas Skin Pack",
+      "target_quantity": 20,
+      "source_stack": 99,
+      "qa_role": "PHASE3_RANDOM_ALL",
+      "gift_id": 99990045,
+      "dropbox_ids": [
+        9999040
+      ]
+    },
+    {
+      "item_id": 50009053,
+      "name": "Summer skin Pack",
+      "target_quantity": 20,
+      "source_stack": 99,
+      "qa_role": "PHASE3_RANDOM_ALL",
+      "gift_id": 99990067,
+      "dropbox_ids": [
+        9999046
+      ]
+    },
+    {
+      "item_id": 50009061,
+      "name": "Loli skin Pack",
+      "target_quantity": 20,
+      "source_stack": 99,
+      "qa_role": "PHASE3_RANDOM_ALL",
+      "gift_id": 99990080,
+      "dropbox_ids": [
+        9999048
+      ]
+    },
+    {
+      "item_id": 50009066,
+      "name": "M-Academy Skin Pack",
+      "target_quantity": 20,
+      "source_stack": 99,
+      "qa_role": "PHASE3_RANDOM_ALL",
+      "gift_id": 99990087,
+      "dropbox_ids": [
+        9999050
+      ]
+    },
+    {
+      "item_id": 50009073,
+      "name": "P-Academy Skin Pack",
+      "target_quantity": 20,
+      "source_stack": 99,
+      "qa_role": "PHASE3_RANDOM_ALL",
+      "gift_id": 99990094,
+      "dropbox_ids": [
+        9999053
+      ]
+    },
+    {
+      "item_id": 50009076,
+      "name": "Bride Skin Pack",
+      "target_quantity": 20,
+      "source_stack": 99,
+      "qa_role": "PHASE3_RANDOM_ALL",
+      "gift_id": 99990097,
+      "dropbox_ids": [
+        9999055
+      ]
+    },
+    {
+      "item_id": 50009079,
+      "name": "Pet Lucky Pack",
+      "target_quantity": 20,
+      "source_stack": 99,
+      "qa_role": "PHASE3_RANDOM_ALL",
+      "gift_id": 99990100,
+      "dropbox_ids": [
+        999928
+      ]
+    },
+    {
+      "item_id": 50009082,
+      "name": "X-Skin Pack",
+      "target_quantity": 20,
+      "source_stack": 99,
+      "qa_role": "PHASE3_RANDOM_ALL",
+      "gift_id": 99990103,
+      "dropbox_ids": [
+        9999059
+      ]
+    },
+    {
+      "item_id": 50009084,
+      "name": "19.99 Skin Pack",
+      "target_quantity": 20,
+      "source_stack": 99,
+      "qa_role": "PHASE3_RANDOM_ALL",
+      "gift_id": 99990105,
+      "dropbox_ids": [
+        9999061
+      ]
+    },
+    {
+      "item_id": 50009086,
+      "name": "19.99 Skin PackⅡ",
+      "target_quantity": 20,
+      "source_stack": 99,
+      "qa_role": "PHASE3_RANDOM_ALL",
+      "gift_id": 99990108,
+      "dropbox_ids": [
+        9999063
+      ]
+    },
+    {
+      "item_id": 50009090,
+      "name": "19.99 Skin Pack Ⅲ",
+      "target_quantity": 20,
+      "source_stack": 99,
+      "qa_role": "PHASE3_RANDOM_ALL",
+      "gift_id": 99990118,
+      "dropbox_ids": [
+        9999064
+      ]
+    },
+    {
+      "item_id": 50009095,
+      "name": "19.99 Skin Pack Ⅳ",
+      "target_quantity": 20,
+      "source_stack": 99,
+      "qa_role": "PHASE3_RANDOM_ALL",
+      "gift_id": 99990123,
+      "dropbox_ids": [
+        9999067
+      ]
+    },
+    {
+      "item_id": 50009096,
+      "name": "19.99 Skin Pack Ⅴ",
+      "target_quantity": 20,
+      "source_stack": 99,
+      "qa_role": "PHASE3_RANDOM_ALL",
+      "gift_id": 99990124,
+      "dropbox_ids": [
+        9999068
+      ]
+    },
+    {
+      "item_id": 50009099,
+      "name": "Special Skin Pack",
+      "target_quantity": 20,
+      "source_stack": 99,
+      "qa_role": "PHASE3_RANDOM_ALL",
+      "gift_id": 99990127,
+      "dropbox_ids": [
+        999933
+      ]
+    },
+    {
+      "item_id": 50009102,
+      "name": "19.99 Skin Pack Ⅵ",
+      "target_quantity": 20,
+      "source_stack": 99,
+      "qa_role": "PHASE3_RANDOM_ALL",
+      "gift_id": 99990130,
+      "dropbox_ids": [
+        9999071
+      ]
+    },
+    {
+      "item_id": 50009109,
+      "name": "19.99 Skin Pack Ⅶ",
+      "target_quantity": 20,
+      "source_stack": 99,
+      "qa_role": "PHASE3_RANDOM_ALL",
+      "gift_id": 99990161,
+      "dropbox_ids": [
+        9999073
+      ]
+    },
+    {
+      "item_id": 50009111,
+      "name": "19.99 Skin Pack Ⅷ",
+      "target_quantity": 20,
+      "source_stack": 99,
+      "qa_role": "PHASE3_RANDOM_ALL",
+      "gift_id": 99990167,
+      "dropbox_ids": [
+        9999075
+      ]
+    },
+    {
+      "item_id": 50009119,
+      "name": "19.99 Skin Pack Ⅳ",
+      "target_quantity": 20,
+      "source_stack": 99,
+      "qa_role": "PHASE3_RANDOM_ALL",
+      "gift_id": 99990181,
+      "dropbox_ids": [
+        9999085
+      ]
+    },
+    {
+      "item_id": 50009126,
+      "name": "19.99 Skin Pack Ⅴ",
+      "target_quantity": 20,
+      "source_stack": 99,
+      "qa_role": "PHASE3_RANDOM_ALL",
+      "gift_id": 99990188,
+      "dropbox_ids": [
+        9999088
+      ]
+    },
+    {
+      "item_id": 50009128,
+      "name": "Frame Bag",
+      "target_quantity": 20,
+      "source_stack": 99,
+      "qa_role": "PHASE3_RANDOM_ALL",
+      "gift_id": 99990190,
+      "dropbox_ids": [
+        999944
+      ]
+    },
+    {
+      "item_id": 50009129,
+      "name": "19.99 Skin Pack Ⅵ",
+      "target_quantity": 20,
+      "source_stack": 99,
+      "qa_role": "PHASE3_RANDOM_ALL",
+      "gift_id": 99990191,
+      "dropbox_ids": [
+        9999090
+      ]
+    },
+    {
+      "item_id": 50009133,
+      "name": "19.99 Skin Pack Ⅶ",
+      "target_quantity": 20,
+      "source_stack": 99,
+      "qa_role": "PHASE3_RANDOM_ALL",
+      "gift_id": 99990195,
+      "dropbox_ids": [
+        9999094
+      ]
+    },
+    {
+      "item_id": 50009142,
+      "name": "19.99 Skin Pack Ⅷ",
+      "target_quantity": 20,
+      "source_stack": 99,
+      "qa_role": "PHASE3_RANDOM_ALL",
+      "gift_id": 99990204,
+      "dropbox_ids": [
+        9999097
+      ]
+    },
+    {
+      "item_id": 50009148,
+      "name": "Frame Bag Ⅱ",
+      "target_quantity": 20,
+      "source_stack": 99,
+      "qa_role": "PHASE3_RANDOM_ALL",
+      "gift_id": 99990210,
+      "dropbox_ids": [
+        9999105
+      ]
+    },
+    {
+      "item_id": 50009154,
+      "name": "19.99 Skin Pack Ⅸ",
+      "target_quantity": 20,
+      "source_stack": 99,
+      "qa_role": "PHASE3_RANDOM_ALL",
+      "gift_id": 99990225,
+      "dropbox_ids": [
+        9999106
+      ]
+    },
+    {
+      "item_id": 50009158,
+      "name": "19.99 Skin Pack Ⅹ",
+      "target_quantity": 20,
+      "source_stack": 99,
+      "qa_role": "PHASE3_RANDOM_ALL",
+      "gift_id": 99990229,
+      "dropbox_ids": [
+        9999109
+      ]
+    },
+    {
+      "item_id": 50009160,
+      "name": "Frame Bag Ⅲ",
+      "target_quantity": 20,
+      "source_stack": 99,
+      "qa_role": "PHASE3_RANDOM_ALL",
+      "gift_id": 99990231,
+      "dropbox_ids": [
+        9999111
+      ]
+    },
+    {
+      "item_id": 50009164,
+      "name": "19.99 Skin Pack ⅰ",
+      "target_quantity": 20,
+      "source_stack": 99,
+      "qa_role": "PHASE3_RANDOM_ALL",
+      "gift_id": 99990234,
+      "dropbox_ids": [
+        9999112
+      ]
+    },
+    {
+      "item_id": 50009192,
+      "name": "Festival Frame Bag",
+      "target_quantity": 20,
+      "source_stack": 99,
+      "qa_role": "PHASE3_RANDOM_ALL",
+      "gift_id": 99990270,
+      "dropbox_ids": [
+        9999130
+      ]
+    },
+    {
+      "item_id": 50009197,
+      "name": "Nor-Elemental Gear",
+      "target_quantity": 20,
+      "source_stack": 99,
+      "qa_role": "PHASE3_RANDOM_ALL",
+      "gift_id": 99990275,
+      "dropbox_ids": [
+        9999132
+      ]
+    },
+    {
+      "item_id": 50009199,
+      "name": "Halloween Skin Sale ",
+      "target_quantity": 20,
+      "source_stack": 99,
+      "qa_role": "PHASE3_RANDOM_ALL",
+      "gift_id": 99990277,
+      "dropbox_ids": [
+        9999134
+      ]
+    },
+    {
+      "item_id": 50009201,
+      "name": "Adv-Elemental Gear ",
+      "target_quantity": 20,
+      "source_stack": 99,
+      "qa_role": "PHASE3_RANDOM_ALL",
+      "gift_id": 99990279,
+      "dropbox_ids": [
+        9999136
+      ]
+    },
+    {
+      "item_id": 50009208,
+      "name": "Summer Memory",
+      "target_quantity": 20,
+      "source_stack": 99,
+      "qa_role": "PHASE3_RANDOM_ALL",
+      "gift_id": 99990295,
+      "dropbox_ids": [
+        9999138
+      ]
+    },
+    {
+      "item_id": 50009214,
+      "name": "Prom Pack",
+      "target_quantity": 20,
+      "source_stack": 99,
+      "qa_role": "PHASE3_RANDOM_ALL",
+      "gift_id": 99990303,
+      "dropbox_ids": [
+        9999140
+      ]
+    },
+    {
+      "item_id": 50009219,
+      "name": "Lucky Pack",
+      "target_quantity": 20,
+      "source_stack": 99,
+      "qa_role": "PHASE3_RANDOM_ALL",
+      "gift_id": 99990311,
+      "dropbox_ids": [
+        9999141
+      ]
+    },
+    {
+      "item_id": 50009231,
+      "name": "Skin Lucky Pack I",
+      "target_quantity": 20,
+      "source_stack": 99,
+      "qa_role": "PHASE3_RANDOM_ALL",
+      "gift_id": 99990318,
+      "dropbox_ids": [
+        9999142
+      ]
+    },
+    {
+      "item_id": 50009236,
+      "name": "Luck-Pack Ⅱ",
+      "target_quantity": 20,
+      "source_stack": 999,
+      "qa_role": "PHASE3_RANDOM_ALL",
+      "gift_id": 99990344,
+      "dropbox_ids": [
+        9999143
+      ]
+    },
+    {
+      "item_id": 50009239,
+      "name": "Girls Skin Pack Ⅱ",
+      "target_quantity": 20,
+      "source_stack": 99,
+      "qa_role": "PHASE3_RANDOM_ALL",
+      "gift_id": 99990346,
+      "dropbox_ids": [
+        9999145
+      ]
+    },
+    {
+      "item_id": 50009245,
+      "name": "Girls Skin Pack Ⅲ",
+      "target_quantity": 20,
+      "source_stack": 99,
+      "qa_role": "PHASE3_RANDOM_ALL",
+      "gift_id": 99990353,
+      "dropbox_ids": [
+        9999147
+      ]
+    },
+    {
+      "item_id": 50009246,
+      "name": "Rich Pack",
+      "target_quantity": 20,
+      "source_stack": 999,
+      "qa_role": "PHASE3_RANDOM_ALL",
+      "gift_id": 99990354,
+      "dropbox_ids": [
+        9999148
+      ]
+    },
+    {
+      "item_id": 50009251,
+      "name": "Adv-Ele Lightning",
+      "target_quantity": 20,
+      "source_stack": 999,
+      "qa_role": "PHASE3_RANDOM_ALL",
+      "gift_id": 99990368,
+      "dropbox_ids": [
+        999988
+      ]
+    },
+    {
+      "item_id": 50009252,
+      "name": "Adv-Ele Fire",
+      "target_quantity": 20,
+      "source_stack": 999,
+      "qa_role": "PHASE3_RANDOM_ALL",
+      "gift_id": 99990369,
+      "dropbox_ids": [
+        999989
+      ]
+    },
+    {
+      "item_id": 50009253,
+      "name": "Adv-Ele Water",
+      "target_quantity": 20,
+      "source_stack": 999,
+      "qa_role": "PHASE3_RANDOM_ALL",
+      "gift_id": 99990370,
+      "dropbox_ids": [
+        999990
+      ]
+    },
+    {
+      "item_id": 50009254,
+      "name": "Nor-Ele Lightning",
+      "target_quantity": 20,
+      "source_stack": 999,
+      "qa_role": "PHASE3_RANDOM_ALL",
+      "gift_id": 99990371,
+      "dropbox_ids": [
+        999991
+      ]
+    },
+    {
+      "item_id": 50009255,
+      "name": "Nor-Ele Fire",
+      "target_quantity": 20,
+      "source_stack": 999,
+      "qa_role": "PHASE3_RANDOM_ALL",
+      "gift_id": 99990372,
+      "dropbox_ids": [
+        999992
+      ]
+    },
+    {
+      "item_id": 50009256,
+      "name": "Nor-Ele Water",
+      "target_quantity": 20,
+      "source_stack": 999,
+      "qa_role": "PHASE3_RANDOM_ALL",
+      "gift_id": 99990373,
+      "dropbox_ids": [
+        999993
+      ]
+    },
+    {
+      "item_id": 50009263,
+      "name": "Xmas Stamina Bag",
+      "target_quantity": 20,
+      "source_stack": 99,
+      "qa_role": "PHASE3_RANDOM_ALL",
+      "gift_id": 99990377,
+      "dropbox_ids": [
+        999997
+      ]
+    },
+    {
+      "item_id": 50009266,
+      "name": "Girls Skin Pack Ⅳ",
+      "target_quantity": 20,
+      "source_stack": 99,
+      "qa_role": "PHASE3_RANDOM_ALL",
+      "gift_id": 99990387,
+      "dropbox_ids": [
+        9999150
+      ]
+    },
+    {
+      "item_id": 50009268,
+      "name": "Memoir Skin pack",
+      "target_quantity": 20,
+      "source_stack": 99,
+      "qa_role": "PHASE3_RANDOM_ALL",
+      "gift_id": 99990389,
+      "dropbox_ids": [
+        9999152
+      ]
+    },
+    {
+      "item_id": 50009280,
+      "name": "Memoir Skin pack Ⅱ",
+      "target_quantity": 20,
+      "source_stack": 99,
+      "qa_role": "PHASE3_RANDOM_ALL",
+      "gift_id": 99990418,
+      "dropbox_ids": [
+        9999155
+      ]
+    },
+    {
+      "item_id": 50009287,
+      "name": "Memoir Skin pack Ⅲ",
+      "target_quantity": 20,
+      "source_stack": 99,
+      "qa_role": "PHASE3_RANDOM_ALL",
+      "gift_id": 99990425,
+      "dropbox_ids": [
+        9999158
+      ]
+    },
+    {
+      "item_id": 50009292,
+      "name": "Vows Girl Scroll Box",
+      "target_quantity": 20,
+      "source_stack": 99,
+      "qa_role": "PHASE3_RANDOM_ALL",
+      "gift_id": 99990438,
+      "dropbox_ids": [
+        9999159
+      ]
+    },
+    {
+      "item_id": 50009300,
+      "name": "Memoir Skin pack Ⅳ",
+      "target_quantity": 20,
+      "source_stack": 99,
+      "qa_role": "PHASE3_RANDOM_ALL",
+      "gift_id": 99990446,
+      "dropbox_ids": [
+        9999161
+      ]
+    },
+    {
+      "item_id": 50009414,
+      "name": "Random Ele. Pack",
+      "target_quantity": 20,
+      "source_stack": 99,
+      "qa_role": "PHASE3_RANDOM_ALL",
+      "gift_id": 99990741,
+      "dropbox_ids": [
+        9199036
+      ]
+    },
+    {
+      "item_id": 50009423,
+      "name": "Random Ele. Pack Ⅱ",
+      "target_quantity": 20,
+      "source_stack": 99,
+      "qa_role": "PHASE3_RANDOM_ALL",
+      "gift_id": 99990758,
+      "dropbox_ids": [
+        9199038
+      ]
+    },
+    {
+      "item_id": 50009428,
+      "name": "Random Ele. Pack Ⅲ",
+      "target_quantity": 20,
+      "source_stack": 99,
+      "qa_role": "PHASE3_RANDOM_ALL",
+      "gift_id": 99990768,
+      "dropbox_ids": [
+        9199039
+      ]
+    },
+    {
+      "item_id": 51009002,
+      "name": "Memoir Skin pack Ⅳ",
+      "target_quantity": 20,
+      "source_stack": 99,
+      "qa_role": "PHASE3_RANDOM_ALL",
+      "gift_id": 91990002,
+      "dropbox_ids": [
+        9199002
+      ]
+    },
+    {
+      "item_id": 51009009,
+      "name": "Memoir Skin pack Ⅴ",
+      "target_quantity": 20,
+      "source_stack": 99,
+      "qa_role": "PHASE3_RANDOM_ALL",
+      "gift_id": 91990070,
+      "dropbox_ids": [
+        9199003
+      ]
+    },
+    {
+      "item_id": 51009011,
+      "name": "Memoir Skin pack Ⅵ",
+      "target_quantity": 20,
+      "source_stack": 99,
+      "qa_role": "PHASE3_RANDOM_ALL",
+      "gift_id": 91990072,
+      "dropbox_ids": [
+        9199005
+      ]
+    },
+    {
+      "item_id": 51009013,
+      "name": "Memoir Skin pack Ⅶ",
+      "target_quantity": 20,
+      "source_stack": 99,
+      "qa_role": "PHASE3_RANDOM_ALL",
+      "gift_id": 91990100,
+      "dropbox_ids": [
+        9199009
+      ]
+    },
+    {
+      "item_id": 51009017,
+      "name": "Memoir Skin pack Ⅶ",
+      "target_quantity": 20,
+      "source_stack": 99,
+      "qa_role": "PHASE3_RANDOM_ALL",
+      "gift_id": 91990102,
+      "dropbox_ids": [
+        9199011
+      ]
+    },
+    {
+      "item_id": 51009023,
+      "name": "Memoir Skin pack Ⅸ",
+      "target_quantity": 20,
+      "source_stack": 99,
+      "qa_role": "PHASE3_RANDOM_ALL",
+      "gift_id": 91990108,
+      "dropbox_ids": [
+        9199013
+      ]
+    },
+    {
+      "item_id": 51009029,
+      "name": "Memoir Skin pack Ⅹ",
+      "target_quantity": 20,
+      "source_stack": 99,
+      "qa_role": "PHASE3_RANDOM_ALL",
+      "gift_id": 91990161,
+      "dropbox_ids": [
+        9199016
+      ]
+    }
+  ]
+}

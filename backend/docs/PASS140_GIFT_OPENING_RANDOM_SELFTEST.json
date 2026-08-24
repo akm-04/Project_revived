@@ -1,0 +1,14 @@
+{
+  "pass": "140.0",
+  "phase": 3,
+  "status": "STATIC_REGRESSION_ACCEPTED",
+  "tests": 9,
+  "ordinary_random_operations": 100,
+  "ordinary_random_source_items": 100,
+  "drop_occurrences": 134,
+  "namespace": "gift.open",
+  "weight_policy": "positive raw drop_rate as relative integer weights; zero cannot win",
+  "batching_policy": "repeat operation num times; preserve ordered/repeated occurrences; aggregate first-seen awards",
+  "generated_unique_gift_equip": "FAIL_CLOSED",
+  "mid241_uuid_receipt_added": false
+}

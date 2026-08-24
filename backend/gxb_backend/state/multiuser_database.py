@@ -595,6 +595,94 @@ class MultiUserDatabase:
         }
         return True
 
+    def _apply_pass141_debug_mid241_qa_seed(self, player: PlayerState) -> bool:
+        """One-shot sandbox MID241 QA package seed for Phase4 client smoke.
+
+        PRIVATE_SERVER_POLICY only: seed all 100 source-bounded Phase3 random
+        package items plus three deterministic/elective smoke boxes.  The
+        migration marker makes this non-replenishing, and source item.stack
+        remains the hard upper bound.  Dropbox ids themselves are source table
+        pool identifiers, not Backpack items, so the seed grants their owning
+        package item ids instead.
+        """
+        if str(getattr(player, "account_uid", "") or "") != SANDBOX_UID:
+            return False
+        path = self.data_dir / "debug_guest_mid241_qa_seed_pass141.json"
+        try:
+            payload = json.loads(path.read_text(encoding="utf-8"))
+        except Exception:
+            return False
+        if not isinstance(payload, dict):
+            return False
+        meta = payload.get("_meta") if isinstance(payload.get("_meta"), dict) else {}
+        marker = str(meta.get("migration_marker") or "pass141_debug_mid241_qa_seed_v1")
+        state = player.persistence_state if isinstance(player.persistence_state, dict) else {}
+        if state is not player.persistence_state:
+            player.persistence_state = state
+        migrations = state.setdefault("migrations", {})
+        if not isinstance(migrations, dict):
+            migrations = {}
+            state["migrations"] = migrations
+        if migrations.get(marker):
+            return False
+
+        limits = ItemStackLimitCatalog(self.data_dir)
+        if not isinstance(player.backpack_items, list):
+            player.backpack_items = []
+        by_id: dict[int, dict[str, Any]] = {}
+        for row in player.backpack_items:
+            if not isinstance(row, dict):
+                continue
+            try:
+                item_id = int(row.get("table_id", 0) or 0)
+            except (TypeError, ValueError):
+                continue
+            if item_id > 0:
+                by_id[item_id] = row
+
+        changed = 0
+        seeded: dict[str, int] = {}
+        for spec in payload.get("items") or []:
+            if not isinstance(spec, dict):
+                continue
+            try:
+                item_id = int(spec.get("item_id", 0) or 0)
+                requested = max(0, int(spec.get("target_quantity", 0) or 0))
+            except (TypeError, ValueError):
+                continue
+            if item_id <= 0 or requested <= 0:
+                continue
+            limit = limits.limit(item_id)
+            if limit is None or limit <= 0:
+                continue
+            target = min(requested, limit)
+            row = by_id.get(item_id)
+            if row is None:
+                row = {"table_id": item_id, "item_num": target, "time": 0}
+                player.backpack_items.append(row)
+                by_id[item_id] = row
+                changed += 1
+            else:
+                try:
+                    current = max(0, int(row.get("item_num", 0) or 0))
+                except (TypeError, ValueError):
+                    current = 0
+                if current < target:
+                    row["item_num"] = target
+                    changed += 1
+            seeded[str(item_id)] = target
+
+        migrations[marker] = {
+            "applied": 1,
+            "policy": "one_shot_source_stack_bounded_mid241_phase4_qa_seed",
+            "rows_added_or_raised": changed,
+            "phase3_random_source_item_count": int(meta.get("phase3_random_source_item_count", 0) or 0),
+            "phase3_unique_dropbox_count": int(meta.get("phase3_unique_dropbox_count", 0) or 0),
+            "phase3_ordered_drop_occurrence_count": int(meta.get("phase3_ordered_drop_occurrence_count", 0) or 0),
+            "seeded_targets": seeded,
+        }
+        return True
+
     def _apply_pass96_debug_account_normalization(self, player: PlayerState) -> bool:
         """One-shot source-aware sandbox repair for end-game economy QA.
 
@@ -752,6 +840,8 @@ class MultiUserDatabase:
         if self._apply_pass96_debug_account_normalization(player):
             changed = True
         if self._apply_pass99_debug_qa_consumables_seed(player):
+            changed = True
+        if self._apply_pass141_debug_mid241_qa_seed(player):
             changed = True
         # Pass91: source SelfPlayer/VipRechargeWindow require a non-empty
         # one-based VIP1..VIP15 0/1 claim vector. The backend never implemented

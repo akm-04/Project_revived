@@ -1,3 +1,15 @@
+# Backend machine memory — Pass137.0
+
+Canonical implementation: `gxb-backend-v0.15.9-pass137.0`.
+
+Pass137 completes Phase 1 of the approved Pass136 RNG roadmap. A fresh effective `src_64` check reconfirmed MID70 as the Magic buy/random-result path (`partner_id` + `summon_time` 1/10) and MID71 as deterministic player-selected target switching. Production `RequestServices` now injects `NamespacedRandbelowAdapter(self.random_outcomes, "summon.magic")` into the existing `MagicSummonPrivatePlanner`. No Magic probability/policy, planner algorithm, MID70 wire/cost/byproduct/fragment/receipt behavior, MID71 semantics, persistence schema or OTA was changed.
+
+Validation: Pass137 focused suite 5/5 PASS; production adapter shares the request ROS identity; MID71 consumes 0 gameplay draws; MID70 x1 consumes 1 `summon.magic` draw; MID70 x10 consumes 11 under the unchanged private Magic policy. Pass110 ROS foundation and current Campaign/architecture neighbor suites pass. Historical Pass111/Pass114 contain superseded OTA/receipt assertions and are retained as historical harness debt. OTA remains 1.631.8.
+
+PHASE 1 STATUS: STATIC/REGRESSION ACCEPTED AND COMPLETE. NEXT: Phase 2 MID241 foundation + deterministic ordinary gifts. Phase 4 remains the consolidated client runtime acceptance gate for Magic/MID241.
+
+---
+
 # Backend machine memory — Pass131.0
 
 Canonical implementation: `gxb-backend-v0.15.8-pass131.0`.

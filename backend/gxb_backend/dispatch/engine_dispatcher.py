@@ -188,6 +188,7 @@ class EngineDispatcher:
             "LOAD_ESSENCES": self.inventory.load_essences,
             "SELL_ITEM": self.inventory.sell_item,
             "SELL_ITEMS": self.inventory.sell_items,
+            "EXCHAGE_CODE_HERO": self.inventory.open_gift,
             "COMPOSE_ITEM": self.inventory.compose_item,
             "USE_MAGIC_ITEMS": self.inventory.use_magic_items,
             "USE_ENERGY_ITEM": self.inventory.use_energy_item,

@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "pass": "138.0",
+  "phase": 2,
+  "timestamp": "2026-08-25T01:05:00+06:00",
+  "effective_src64": "app-assets/output/assets/src_64",
+  "effective_src64_file_count": 4370,
+  "source_hashes": {
+    "app/common/network/mid.lua": "026a20b29d97624979777a68c64c749254031604057ff42aa8f8254c3e35b5af",
+    "app/windows/GiftbagUseWindow.lua": "cbc1c0cb373adc68a0c74b42d2aa3d5e28a96f536c80729e22be8fd03c5af600",
+    "app/windows/SelectEquipWindow.lua": "1a9163609cc32f3bdb1d5241c14860521c141146588d754b422b6d3234de0737",
+    "app/windows/SelectSXHeroWindow.lua": "b429048f0c8f2496cba8f80c27e4ad43f0e1d1792a0d5ac60570eca4561593bf",
+    "app/windows/ExchangeCodeHeroReward.lua": "591f6ce6b3ee0facc4cba605eda74cee3c2435042cf46f9af8d144b2cf923579",
+    "app/windows/BackpackWindow.lua": "48b18493fed4186541fc989a8ef60d6338d444c4e8a0fc986903a57e52ff19c1",
+    "app/common/tables/GiftTable.lua": "da47e59046f50fe96c82c0f92631ab8a3d1ef306ffb9a9a48c606cde0437a657",
+    "data/tables/item.lua": "59b668c28a372543da0c36d7a8d84291cc5b93fa0d92b7cc389a645e96e7b7cc",
+    "data/tables/gift.lua": "8c87dfdc116242afcdebd011cf898d61b08e2cf54ea7d0a11a5f69fabade2ac7",
+    "data/tables/dropbox.lua": "82bcde6486b711f393bf74e54c6ac28239c04fb2d78adf3fd23ff56c1183e2cb",
+    "data/tables/misc.lua": "058cf5719421ed71a12083a8c95b0ccded7204bedb5fa1263d508e2fa4257f9a"
+  },
+  "source_facts": [
+    {
+      "id": "SF138-01",
+      "class": "SOURCE_FACT",
+      "fact": "xyd.mid.EXCHAGE_CODE_HERO = 241. GiftbagUseWindow and SelectEquipWindow submit item_id, gift_id and num; SelectSXHeroWindow submits num=1; ExchangeCodeHeroReward submits item_id and gift_id and consumes one source item."
+    },
+    {
+      "id": "SF138-02",
+      "class": "SOURCE_FACT",
+      "fact": "Successful client callbacks remove the submitted source Backpack quantity locally, then pass response.awards to SelfPlayer:handleRewards; GiftbagUseWindow also passes response.spirit_awards."
+    },
+    {
+      "id": "SF138-03",
+      "class": "SOURCE_FACT",
+      "fact": "BackpackWindow routes eight explicit item IDs to select_sx; select_equip routing comes from misc.select_equip_gift_ids; ordinary package opening uses the effective gift selection route."
+    },
+    {
+      "id": "SF138-04",
+      "class": "SOURCE_FACT",
+      "fact": "GiftTable exposes ordinary item/scalar/drop fields but no equip accessor, while raw gift.lua contains nonzero equip metadata."
+    },
+    {
+      "id": "SF138-05",
+      "class": "SOURCE_FACT",
+      "fact": "Fresh source census finds 199 previously ordinary-counted deterministic effective operations with nonzero raw gift.equip. Their materialization semantics are not source-bounded by the recovered client and therefore cannot safely be treated as empty/ordinary rewards."
+    },
+    {
+      "id": "SF138-06",
+      "class": "SOURCE_FACT",
+      "fact": "Seven deterministic effective operations (item 50002146 gifts 90040415..90040420 and item 50002147 gift 90040421) point at item type 24 Horcrux/HUNQI rows while gift.item_nums is absent; generated/unique materialization remains deferred."
+    },
+    {
+      "id": "SF138-07",
+      "class": "SOURCE_FACT",
+      "fact": "After correcting those two Pass136 modeling gaps, deterministic ordinary current-owner capability is 1,431 effective operations across 382 source items. The ordinary random lane remains 100 operations across 100 source items for Phase3."
+    }
+  ],
+  "superseded": {
+    "class": "DISPROVEN_SUPERSEDED",
+    "claim": "Pass136 Phase2 safe activation = 1,637 operations / 583 source items",
+    "replacement": "Pass138 fresh source-bounded safe activation = 1,431 operations / 382 source items",
+    "reason": "199 raw gift.equip operations plus 7 deterministic generated-HUNQI operations were not represented by the earlier capability census."
+  },
+  "unknowns": [
+    "Exact original-server meaning/materialization of raw gift.equip.",
+    "Exact original-server deterministic MID241 num batching loop/award aggregation shape.",
+    "Generated Hero/HUNQI/Spirit instance materialization semantics."
+  ],
+  "implementation_boundary": "Unsupported/random/generated/source-incomplete lanes fail closed in Phase2. No probability semantics are assigned to raw drop_rate metadata."
+}

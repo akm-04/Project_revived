@@ -9,6 +9,7 @@ from gxb_backend.content.item_sale_catalog import ItemSaleCatalog
 from gxb_backend.content.consumable_effect_catalog import ConsumableEffectCatalog
 from gxb_backend.content.campaign_drop_source_catalog import CampaignDropSourceCatalog
 from gxb_backend.content.magic_summon_source_catalog import MagicSummonSourceCatalog
+from gxb_backend.content.gift_opening_source_catalog import GiftOpeningSourceCatalog
 from gxb_backend.content.summon_operation_catalog import SummonOperationCatalog
 from gxb_backend.content.summon_pool_catalog import SummonPoolCatalog
 from gxb_backend.content.sx_soul_box_source_catalog import SXSoulBoxSourceCatalog
@@ -35,6 +36,11 @@ from .campaign_drop_planner import (
 from .economy_ledger import EconomyLedger
 from .economy_repository import EconomyRepository
 from .function_state_repository import FunctionStateRepository
+from .gift_opening_service import (
+    GiftOpeningPlanner,
+    GiftOpeningService,
+    GiftRandomOutcomeAdapter,
+)
 from .global_response_semantics import GlobalResponseSemantics
 from .hero_entity_mutation_service import HeroEntityMutationService
 from .hero_advanced_progression_repository import HeroAdvancedProgressionRepository
@@ -225,6 +231,23 @@ class RequestServices:
             self.catalog, self.player_progression, self.inventory, self.heroes, self.uow,
             resource_registry=self.resource_registry, settlement=self.mutation_settlement,
         )
+        # Pass138/140 MID241 Gift Opening. Source/table facts remain immutable;
+        # Pass140 binds only the ordinary random lane to request-scoped ROS under
+        # gift.open. Pool/rate/batching policy remains inside the Gift domain.
+        self.gift_opening_source = GiftOpeningSourceCatalog(self.data_dir)
+        self.gift_random_outcomes = GiftRandomOutcomeAdapter(
+            self.random_outcomes, "gift.open"
+        )
+        self.gift_opening_planner = GiftOpeningPlanner(
+            self.gift_opening_source, self.gift_random_outcomes
+        )
+        self.gift_opening = GiftOpeningService(
+            self.gift_opening_source,
+            self.gift_opening_planner,
+            self.stack_inventory,
+            self.rewards,
+            self.uow,
+        )
         # Pass91 finalizes the core VIP lifecycle: source VIP reward_item ->
         # gift.lua metadata settles through the existing typed reward/UoW spine,
         # while VipAwardService owns one-time eligibility/claim state.
@@ -326,6 +349,9 @@ class RequestServices:
             self.magic_summon_source,
             self.summon_pool_catalog,
             self.magic_summon_policy,
+            random_source=NamespacedRandbelowAdapter(
+                self.random_outcomes, "summon.magic"
+            ),
         )
         # Pass42.6 SX/Soul Box remains its own MID50 type4 planner. Five
         # item slots are recovered source; the sixth slot is a mixed Soul-Casket

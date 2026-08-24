@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "pass": "141.0",
+  "status": "PASS",
+  "tests": [
+    "seed exactly 100 Phase3 random source items plus 3 deterministic smoke boxes",
+    "all seed targets respect source stack caps",
+    "one-shot marker records 100 random / 96 unique pools / 134 ordered occurrences",
+    "consumed package is not replenished after marker",
+    "non-sandbox account receives no QA seed"
+  ]
+}

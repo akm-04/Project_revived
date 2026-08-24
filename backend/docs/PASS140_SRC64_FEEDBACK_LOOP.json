@@ -1,0 +1,17 @@
+{
+  "pass": "140.0",
+  "phase": 3,
+  "source": "effective app-assets/output/assets/src_64",
+  "source_files": 4370,
+  "catalog_rebuild": "BYTE_IDENTICAL",
+  "ordinary_random_operations": 100,
+  "ordinary_random_source_items": 100,
+  "drop_occurrences": 134,
+  "multi_or_repeated_operations": 7,
+  "zero_weight_candidates": 10,
+  "all_zero_recovered_ordinary_pools": 0,
+  "positive_pool_totals": [100, 310, 1000, 1200, 6800, 7150, 10000],
+  "source_fact": "GiftbagUseWindow submits item_id,gift_id,num to MID241 and removes num source items after OK; GiftTable preserves ordered drops; DropboxTable exposes candidate item_id/item_num while drop_rate/roll_type remain server-side table facts.",
+  "compatibility_decision": "Positive drop_rate values are denominator-free relative integer weights; zero cannot win; ordered/repeated drop occurrences execute once each per gift copy; num repeats operation then aggregates.",
+  "deferred": "generated/unique/gift.equip/source-incomplete lanes remain fail-closed"
+}
