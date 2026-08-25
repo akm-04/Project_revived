@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "pass": "151.0",
+  "status": "RUNTIME_ACCEPTED",
+  "debug_zip_sha256": "099c2efaf6e779cbe0eea4fe58fc4a21963cd1c9123a4a71a4f0b2400de915ab",
+  "observed": [
+    {
+      "mid": 2979,
+      "handler": "HeroHandlers.use_illusion_skin_item",
+      "fallback": false,
+      "item_id": 0,
+      "response": {
+        "illusion_skin_id": 0
+      }
+    },
+    {
+      "mid": 2979,
+      "handler": "HeroHandlers.use_illusion_skin_item",
+      "fallback": false,
+      "item_id": 50001541,
+      "response": {
+        "illusion_skin_id": 40001067
+      }
+    }
+  ],
+  "unrelated_fallback": {
+    "mid": 1407,
+    "name": "EXCHANGE_MATERIALS",
+    "classification": "OUT_OF_SCOPE_EXISTING_GAP"
+  },
+  "conclusion": "Pass151 MID2979 visual equip fix accepted at runtime; full Recharge/Skins runtime closure remains Phase D."
+}

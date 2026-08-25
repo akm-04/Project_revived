@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "pass": "152.0",
+  "compileall": "PASS",
+  "phase_c": "6/6 PASS",
+  "pass151_mid2979": "7/7 PASS",
+  "pass145_skin": "10/10 PASS",
+  "pass150_b1_b2": "9/9 PASS",
+  "pass150_b3": "9/9 PASS",
+  "pass150_b4": "4/4 PASS",
+  "pass88_commerce_purchase": "PASS",
+  "pass88_route_contract": "PASS",
+  "pass91_vip": "PASS",
+  "pass96_economy_vip": "PASS",
+  "historical_harness_debt": [
+    "Pass149 capability-partition assertion predates B3 activation and is superseded by Pass150 regression suite.",
+    "Pass87 MID354 projection assertion predates source-native giftbag advertising and is superseded by current Recharge suites."
+  ],
+  "ota": "1.631.9 cumulative, 138 entries, descriptor size/md5 verified",
+  "runtime": "PHASE_D_PENDING"
+}

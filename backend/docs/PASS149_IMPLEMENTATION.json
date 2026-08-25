@@ -1,0 +1,35 @@
+{
+  "pass": "149.0",
+  "status": "PHASE_B1_B2_STATIC_REGRESSION_ACCEPTED",
+  "scope": "Typed Recharge giftbag catalog + Commerce VIP progression primitive + fixed non-Hero source-native Pack settlement/MID354",
+  "added_or_extended": [
+    "tools/build_recharge_giftbag_meta.py",
+    "data/recharge_giftbag_source_meta.json",
+    "RechargeSourceCatalog typed page-2 giftbag records",
+    "CommerceEntitlementService.grant_vip_progression(delta)",
+    "RechargeGiftbagAvailabilityPolicy",
+    "RechargeGiftbagPolicy",
+    "CommerceSettlementService fixed giftbag branch using existing permanent purchase receipts/outbox/UoW",
+    "MID354 giftbag advertisement for currently eligible B2 fixed products",
+    "tools/selftest_pass149_recharge_b1_b2.py"
+  ],
+  "owners_reused": [
+    "CommerceEntitlementService",
+    "CommerceSettlementService",
+    "VipProgressionPolicy",
+    "EconomyLedger",
+    "RewardTransactionService",
+    "StackInventory",
+    "TemporalPolicyService",
+    "PlayerUnitOfWork"
+  ],
+  "vip_rule": "Only explicit positive gift.vip_exp calls Commerce-owned grant_vip_progression(delta); Pack price, authorization and gift Crystal imply zero additional VIP progression.",
+  "availability_rule": "B2_FIXED_NONHERO only; one-shot hides after purchase; require_charge predecessor must have purchase history; historical event windows/is_open are ignored for EOL visibility.",
+  "deferred": {
+    "B3": "90002112 random Recharge Pack via recharge.giftbag ROS",
+    "GeneratedUnique": "3 direct-Hero Pack products",
+    "MissingSource": "15 missing 9979... gift definitions",
+    "B4": "262 synthetic skin products + 10 synthetic elemental products",
+    "PhaseC": "OTA 1.631.9 purchase bridge/table additions"
+  }
+}

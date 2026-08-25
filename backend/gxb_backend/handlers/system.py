@@ -96,7 +96,7 @@ class SystemHandlers:
     def query_charge_data(self, req: dict) -> dict:
         # Pass87: effective SelfPlayer.lua consumes charges/giftbags/server_time.
         # RechargeCatalogService advertises only supported direct Crystal SKUs.
-        return self.ctx.state.get_services().recharge_catalog.query_charge_data()
+        return self.ctx.state.get_services().recharge_catalog.query_charge_data(req.get("v_"))
 
     def get_vip_award(self, req: dict) -> dict:
         # Pass91 / effective VipRechargeWindow.lua: request is {id=vip_level};

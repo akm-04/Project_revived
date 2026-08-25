@@ -9,6 +9,7 @@ from gxb_backend.content.item_sale_catalog import ItemSaleCatalog
 from gxb_backend.content.consumable_effect_catalog import ConsumableEffectCatalog
 from gxb_backend.content.campaign_drop_source_catalog import CampaignDropSourceCatalog
 from gxb_backend.content.magic_summon_source_catalog import MagicSummonSourceCatalog
+from gxb_backend.content.skin_source_catalog import SkinSourceCatalog
 from gxb_backend.content.gift_opening_source_catalog import GiftOpeningSourceCatalog
 from gxb_backend.content.summon_operation_catalog import SummonOperationCatalog
 from gxb_backend.content.summon_pool_catalog import SummonPoolCatalog
@@ -20,8 +21,12 @@ from gxb_backend.content.energy_purchase_catalog import EnergyPurchaseSourceCata
 from gxb_backend.content.summon_featured_catalog import SummonFeaturedCatalog
 
 from .awakening_mission_service import AwakeningMissionService
-from .commerce_service import CommerceEntitlementService, RechargeCatalogService
-from .commerce_purchase import CommerceSettlementService
+from .commerce_service import CommerceEntitlementService, RechargeCatalogService, RechargeEolAvailabilityPolicy
+from .commerce_purchase import (
+    CommerceSettlementService,
+    RechargeGiftbagPolicy,
+    RechargeGiftbagRandomOutcomeAdapter,
+)
 from .vip_policy import VipPrivilegeResolver, VipProgressionPolicy
 from .vip_award_service import VipAwardService
 from .campaign_reset_policy import CampaignResetPolicy
@@ -61,6 +66,7 @@ from .random_outcome_service import (
 )
 from .resource_registry import ResourceRegistry
 from .server_clock import ServerClock
+from .skin_ownership_service import SkinOwnershipService
 from .temporal_policy_service import TemporalPolicyService
 from .summon_operation_registry import SummonOperationRegistry
 from .summon_cost_plan import SummonCostPlanRegistry
@@ -157,15 +163,6 @@ class RequestServices:
             player, self.energy_purchase_source, self.vip_privileges,
             self.economy_ledger, self.temporal, self.uow, clock=self.server_clock,
         )
-        self.commerce_settlement = CommerceSettlementService(
-            player,
-            self.recharge_source_catalog,
-            self.commerce,
-            self.economy_ledger,
-            self.vip_progression,
-            self.uow,
-            clock=self.server_clock,
-        )
         self.player_progression = PlayerProgressionService(
             player, self.data_dir, save, function_unlocks=self.function_state,
             elite_campaign_unlock=self.elite_campaign_unlock,
@@ -192,6 +189,21 @@ class RequestServices:
             temporal=self.temporal, settlement=self.mutation_settlement,
             vip_privileges=self.vip_privileges,
         )
+        # Pass151 runtime reconciliation: permanent Girl skin ownership plus the
+        # source-distinct MID2979 cosmetic appearance selector. MID60/MID61/MID2979
+        # share the existing Hero/Stack/UoW owners; Pet MID60 overload and temporary
+        # skin lifecycle remain deliberately outside this service.
+        self.skin_source = SkinSourceCatalog(self.data_dir)
+        self.skin_ownership = SkinOwnershipService(
+            player, self.skin_source, self.heroes, self.stack_inventory, self.uow
+        )
+        # Pass152 Phase C: synthetic EOL Recharge visibility/authorization is
+        # attached only after canonical StackInventory + SkinOwnership owners
+        # exist. The catalog itself remains the earlier read-only source owner.
+        self.recharge_eol_availability = RechargeEolAvailabilityPolicy(
+            self.commerce, self.stack_inventory, self.skin_ownership
+        )
+        self.recharge_catalog.attach_eol_availability(self.recharge_eol_availability)
         self.hero_progression = HeroProgressionRepository(
             player,
             self.data_dir,
@@ -230,6 +242,30 @@ class RequestServices:
         self.rewards = RewardTransactionService(
             self.catalog, self.player_progression, self.inventory, self.heroes, self.uow,
             resource_registry=self.resource_registry, settlement=self.mutation_settlement,
+        )
+        # Pass149 B1/B2 + Pass150 B3: Recharge giftbags settle through the same
+        # Commerce receipt/UoW plane and canonical RewardTransaction owners.
+        # The single recovered random Pack binds only entropy mechanics to ROS
+        # under recharge.giftbag; Recharge retains pool/rate/settlement policy.
+        self.recharge_giftbag_random_outcomes = RechargeGiftbagRandomOutcomeAdapter(
+            self.random_outcomes
+        )
+        self.recharge_giftbag_policy = RechargeGiftbagPolicy(
+            self.recharge_giftbag_random_outcomes
+        )
+        self.commerce_settlement = CommerceSettlementService(
+            player,
+            self.recharge_source_catalog,
+            self.commerce,
+            self.economy_ledger,
+            self.vip_progression,
+            self.uow,
+            self.rewards,
+            clock=self.server_clock,
+            giftbag_availability=self.recharge_catalog.giftbag_availability,
+            giftbag_policy=self.recharge_giftbag_policy,
+            eol_availability=self.recharge_eol_availability,
+            skin_ownership=self.skin_ownership,
         )
         # Pass138/140 MID241 Gift Opening. Source/table facts remain immutable;
         # Pass140 binds only the ordinary random lane to request-scoped ROS under

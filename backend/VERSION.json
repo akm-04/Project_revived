@@ -1,9 +1,9 @@
 {
-  "backend_version": "0.16.2",
-  "version": "0.16.2",
-  "pass": "141.0",
-  "artifact": "gxb-backend-v0.16.2-pass141.0",
-  "phase": "Phase 4 - client test preparation",
-  "scope": "Sandbox-only QA preparation for consolidated Magic/MID241 runtime smoke. Adds one-shot UID13371337 inventory seed for all 100 supported ordinary-random MID241 source packages plus Orange/Purple/Optional deterministic boxes, preserves source stack caps, and adds source-grounded operator/frontend maps. No gameplay RNG/gift/economy policy changed.",
-  "runtime_client_smoke": "NOT YET ACCEPTED. Run PASS141_CLIENT_TEST_PLAN.md and return debug.zip; Phase4 remains open."
+  "backend_version": "0.16.8",
+  "version": "0.16.8",
+  "pass": "154.0",
+  "artifact": "gxb-backend-v0.16.8-pass154.0",
+  "status": "SKINS_RECHARGE_RUNTIME_ACCEPTED_DISPLAY_POLISH_OTA_1_631_10",
+  "runtime_client_smoke": "PASS153_PHASE_D_FUNCTIONAL_RUNTIME_ACCEPTED; PASS154_DISPLAY_ONLY_NO_RUNTIME_REQUIRED",
+  "ota": "1.631.10 cumulative active"
 }

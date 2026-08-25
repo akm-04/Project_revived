@@ -1,33 +1,13 @@
-# Backend machine memory — Pass140.0
+# Backend machine memory — Pass154.0
 
-Canonical implementation: `gxb-backend-v0.16.1-pass140.0`.
+Canonical implementation: `gxb-backend-v0.16.8-pass154.0`.
 
-## Current accepted state
-
-- Pass131 Campaign Player EXP + Mana is runtime accepted.
-- Pass137 Phase1 Magic ROS under `summon.magic`: static/regression accepted; runtime pending Phase4.
-- Pass138 Phase2 deterministic MID241 foundation: 1,431 operations / 382 source items static/regression accepted.
-- Pass139 research: 199 deterministic `gift.equip` rows are server-side hero-equipment expansion; exact expansion cardinality UNKNOWN; fail-closed and deferred into Girls/Equipment Economy Closure.
-- Pass140 Phase3 ordinary random MID241: 100 operations / 100 source items / 134 ordered drop occurrences activated under request ROS namespace `gift.open`; static/regression accepted; runtime pending Phase4.
-- OTA remains 1.631.8 unchanged.
-
-## Permanent source rule
-
-Before every backend behavioral modification, cross-check effective `app-assets/output/assets/src_64`. Keep SOURCE_FACT, RUNTIME_OBSERVED, INFERENCE, IMPLEMENTATION_COMPATIBILITY_DECISION, UNKNOWN and DISPROVEN/SUPERSEDED distinct. Recovered original behavior is not compatibility implementation.
-
-## Phase3 policy and architecture
-
-- Immutable Gift Opening catalog remains source facts only and byte-identical to fresh effective-source reconstruction.
-- `GiftRandomOutcomeAdapter` binds request `RandomOutcomeService` to namespace `gift.open`; it owns no pool/rate/batching/settlement policy.
-- Positive `drop_rate` values are relative integer weights; zero candidates cannot win; all-zero/invalid source fails before draw.
-- Every source `gift.drops` occurrence is executed in order, including duplicate pool IDs. `num` repeats the whole operation and aggregates first-seen awards. These are explicit compatibility decisions.
-- Exact operation, quantity, source shape and all possible reward owners are preflighted before entropy. Settlement remains one canonical PlayerUnitOfWork.
-- Generated Hero/HUNQI/unique, raw `gift.equip`, missing-source and unsupported lanes remain fail-closed. No MID241 UUID/receipt.
-
-## Roadmap
-
-Phase1 Magic ROS: COMPLETE static/regression.
-Phase2 deterministic MID241: COMPLETE static/regression.
-Phase3 ordinary random MID241: COMPLETE static/regression.
-NEXT Phase4: client smoke/debug and runtime acceptance for Magic/MID241.
-After Phase4: Generated/Unique Instance Settlement -> Girls/Equipment Economy Closure (including deferred gift.equip) -> deferred Store/Battle Pass/Arena/Pet/Guild/March/World Boss/Task-Sign/Monthly Privilege/events.
+- Skins + Recharge Phase A-D remains functionally runtime accepted from Pass153.
+- Pass154 changes presentation metadata only. OTA **1.631.10** is cumulative over 1.631.9 and preserves all 138 entries.
+- Synthetic skin Recharge names are `<Girl> <stable per-Girl ordinal>`; canonical skin names/model/skill IDs remain unchanged in source catalogs.
+- Synthetic elemental Recharge names are concise capability labels.
+- Synthetic activation/authorization remains >=1.631.9; OTA 1.631.10 is only a display update.
+- Product IDs, gift IDs, reward semantics, prices, Crystal/charge/VIP deltas, receipts, UoW, ROS, and ownership semantics are unchanged.
+- 3 direct-Hero Packs, 15 missing-gift Packs, temporary-skin lifecycle, and MID1407 remain deferred/fail-closed as previously recorded.
+- NEXT: Horcrux RNG research/cartography against effective src_64 for multiple passes as needed; only after sufficient evidence -> architecture/design -> bounded implementation -> tests/client reconciliation.
+- Permanent rule: cross-check effective `src_64` before every backend behavioral modification and preserve epistemic classes.

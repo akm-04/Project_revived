@@ -1,0 +1,4417 @@
+{
+  "_meta": {
+    "awakening_meta_sha256": "d8b456ab9e8ee9ea9eda8452bb6e973e3332a78a28f283e632291782ef64cbe2",
+    "epistemic_note": "catalog rows are source facts; runtime MID60 policy follows source-observed client branches",
+    "phase": "PASS145_PHASE_A",
+    "schema_version": 1,
+    "source_files": {
+      "app/model/NormalHero.lua": "125183556caeecc182bf0702dd1f95160c8ba1666a3b97fbb8a7261d30ae0ac9",
+      "app/model/SelfPlayer.lua": "163d5893c9522ada412c2b9c4748a80757660fccdf03c8f72cb6edf0838b8eb4",
+      "app/model/SuperHero.lua": "b127c2cbef327d3142031bf30daa0af1b45997c6da82fba946d641a86783d622",
+      "app/windows/BackpackWindow.lua": "48b18493fed4186541fc989a8ef60d6338d444c4e8a0fc986903a57e52ff19c1",
+      "app/windows/HeroMainWindow.lua": "473b72ec14a81d01d6dbdaa19f92c3d78900f40ca34fa5c8cf46585b76d65414",
+      "app/windows/PetAttributeWindow0.lua": "949a0d07d160f470a23e0d48285acfc279d4aae3ff268cae3f8fb02e7f956e43",
+      "app/windows/SkinSkillSelectWindow.lua": "a6ac7ecb7da0f441b7babb135c5e68e46ece4b2f4bbb60ce77b0ab7a4af614cd",
+      "data/tables/item.lua": "59b668c28a372543da0c36d7a8d84291cc5b93fa0d92b7cc389a645e96e7b7cc",
+      "data/tables/skin_skill.lua": "78e62be9bc8e08833b1e886b260cf1dee4c7c8b418a8ba40badde8b6ffaebe46"
+    },
+    "source_resolution": "effective_src64"
+  },
+  "deferred": {
+    "pet_mid60_overload": "source-observed; outside Girl Phase A and remains fail-closed",
+    "source_inconsistent_skin_item": [
+      50005191
+    ],
+    "temporary_skin_items": [
+      50001807,
+      50009163
+    ]
+  },
+  "skins": [
+    {
+      "accepted_hero_table_ids": [
+        10001144,
+        11001144
+      ],
+      "item_name": "Dark KongMing",
+      "model_id": 40001144,
+      "rare": 4,
+      "sell_crystal": 888,
+      "skill_id": 0,
+      "skin_item_id": 50000000,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001144,
+      "skin_skill_hero_id": 10001144,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001034,
+        11001034
+      ],
+      "item_name": "Stadium Star",
+      "model_id": 40001034,
+      "rare": 1,
+      "sell_crystal": 888,
+      "skill_id": 0,
+      "skin_item_id": 50001040,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001034,
+      "skin_skill_hero_id": 10001034,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001033,
+        11001033
+      ],
+      "item_name": "Heart of Rose",
+      "model_id": 40001033,
+      "rare": 1,
+      "sell_crystal": 888,
+      "skill_id": 0,
+      "skin_item_id": 50001051,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001033,
+      "skin_skill_hero_id": 10001033,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001036,
+        11001036
+      ],
+      "item_name": "Fury of Storm ",
+      "model_id": 40001036,
+      "rare": 1,
+      "sell_crystal": 888,
+      "skill_id": 0,
+      "skin_item_id": 50001081,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001036,
+      "skin_skill_hero_id": 10001036,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001055,
+        11001055
+      ],
+      "item_name": "Zombie Nurse",
+      "model_id": 40001055,
+      "rare": 1,
+      "sell_crystal": 888,
+      "skill_id": 0,
+      "skin_item_id": 50001082,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001055,
+      "skin_skill_hero_id": 10001055,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001031,
+        11001031
+      ],
+      "item_name": "Pirate of Caribbean",
+      "model_id": 40001031,
+      "rare": 1,
+      "sell_crystal": 888,
+      "skill_id": 0,
+      "skin_item_id": 50001085,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001031,
+      "skin_skill_hero_id": 10001031,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001012,
+        11001012
+      ],
+      "item_name": "Kaiser",
+      "model_id": 40001012,
+      "rare": 1,
+      "sell_crystal": 888,
+      "skill_id": 0,
+      "skin_item_id": 50001095,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001012,
+      "skin_skill_hero_id": 10001012,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001047,
+        11001047
+      ],
+      "item_name": "Steam Puck",
+      "model_id": 40001047,
+      "rare": 1,
+      "sell_crystal": 888,
+      "skill_id": 0,
+      "skin_item_id": 50001096,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001047,
+      "skin_skill_hero_id": 10001047,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001027,
+        11001027
+      ],
+      "item_name": "Queen of Surf",
+      "model_id": 40001027,
+      "rare": 2,
+      "sell_crystal": 888,
+      "skill_id": 80010027,
+      "skin_item_id": 50001114,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001027,
+      "skin_skill_hero_id": 10001027,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001002,
+        11001002
+      ],
+      "item_name": "Flame Goddess",
+      "model_id": 40001002,
+      "rare": 1,
+      "sell_crystal": 888,
+      "skill_id": 0,
+      "skin_item_id": 50001115,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001002,
+      "skin_skill_hero_id": 10001002,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001049,
+        11001049
+      ],
+      "item_name": "Summer Bikini",
+      "model_id": 40001049,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80010049,
+      "skin_item_id": 50001132,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001049,
+      "skin_skill_hero_id": 10001049,
+      "stack": 999
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001026,
+        11001026
+      ],
+      "item_name": "Swimsuit Maidam",
+      "model_id": 40001026,
+      "rare": 1,
+      "sell_crystal": 888,
+      "skill_id": 0,
+      "skin_item_id": 50001133,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001026,
+      "skin_skill_hero_id": 10001026,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001043,
+        11001043
+      ],
+      "item_name": "Arrogant Goddess",
+      "model_id": 40001043,
+      "rare": 2,
+      "sell_crystal": 888,
+      "skill_id": 80010043,
+      "skin_item_id": 50001134,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001043,
+      "skin_skill_hero_id": 10001043,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001053,
+        11001053
+      ],
+      "item_name": "Barbarian",
+      "model_id": 40001053,
+      "rare": 1,
+      "sell_crystal": 888,
+      "skill_id": 0,
+      "skin_item_id": 50001148,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001053,
+      "skin_skill_hero_id": 10001053,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001040,
+        11001040
+      ],
+      "item_name": "Guardian's Wing",
+      "model_id": 40001040,
+      "rare": 2,
+      "sell_crystal": 888,
+      "skill_id": 80120040,
+      "skin_item_id": 50001161,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001040,
+      "skin_skill_hero_id": 10001040,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001066,
+        11001066
+      ],
+      "item_name": "Bloody Night",
+      "model_id": 40001066,
+      "rare": 2,
+      "sell_crystal": 888,
+      "skill_id": 80010066,
+      "skin_item_id": 50001168,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001066,
+      "skin_skill_hero_id": 10001066,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001051,
+        11001051
+      ],
+      "item_name": "Trainee Maid",
+      "model_id": 40001051,
+      "rare": 2,
+      "sell_crystal": 888,
+      "skill_id": 80020051,
+      "skin_item_id": 50001189,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001051,
+      "skin_skill_hero_id": 10001051,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001058,
+        11001058
+      ],
+      "item_name": "Ice Doll",
+      "model_id": 40001058,
+      "rare": 1,
+      "sell_crystal": 888,
+      "skill_id": 0,
+      "skin_item_id": 50001306,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001058,
+      "skin_skill_hero_id": 10001058,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001050,
+        11001050
+      ],
+      "item_name": "Graceful Maid",
+      "model_id": 40001050,
+      "rare": 2,
+      "sell_crystal": 888,
+      "skill_id": 80020050,
+      "skin_item_id": 50001307,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001050,
+      "skin_skill_hero_id": 10001050,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001041,
+        11001041
+      ],
+      "item_name": "Campus Legend",
+      "model_id": 40001041,
+      "rare": 4,
+      "sell_crystal": 888,
+      "skill_id": 80010041,
+      "skin_item_id": 50001318,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001041,
+      "skin_skill_hero_id": 10001041,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001038,
+        11001038
+      ],
+      "item_name": "Bunny Doll",
+      "model_id": 40001038,
+      "rare": 2,
+      "sell_crystal": 888,
+      "skill_id": 80120038,
+      "skin_item_id": 50001319,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001038,
+      "skin_skill_hero_id": 10001038,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001045,
+        11001045
+      ],
+      "item_name": "Spine Assassin",
+      "model_id": 40001045,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80010045,
+      "skin_item_id": 50001320,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001045,
+      "skin_skill_hero_id": 10001045,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001021,
+        11001021
+      ],
+      "item_name": "Xmas Messenger",
+      "model_id": 40001021,
+      "rare": 2,
+      "sell_crystal": 888,
+      "skill_id": 80010021,
+      "skin_item_id": 50001333,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001021,
+      "skin_skill_hero_id": 10001021,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001019,
+        11001019
+      ],
+      "item_name": "Stadium Pioneer",
+      "model_id": 40001019,
+      "rare": 2,
+      "sell_crystal": 888,
+      "skill_id": 80010019,
+      "skin_item_id": 50001378,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001019,
+      "skin_skill_hero_id": 10001019,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001060,
+        11001060
+      ],
+      "item_name": "Summer Love",
+      "model_id": 40001060,
+      "rare": 2,
+      "sell_crystal": 888,
+      "skill_id": 80010060,
+      "skin_item_id": 50001379,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001060,
+      "skin_skill_hero_id": 10001060,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001024,
+        11001024
+      ],
+      "item_name": "Divine Doctor",
+      "model_id": 40001024,
+      "rare": 2,
+      "sell_crystal": 888,
+      "skill_id": 80010024,
+      "skin_item_id": 50001380,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001024,
+      "skin_skill_hero_id": 10001024,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001093,
+        11001093
+      ],
+      "item_name": "Tide Rider",
+      "model_id": 40001093,
+      "rare": 2,
+      "sell_crystal": 888,
+      "skill_id": 80010093,
+      "skin_item_id": 50001381,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001093,
+      "skin_skill_hero_id": 10001093,
+      "stack": 999
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001025,
+        11001025
+      ],
+      "item_name": "Modern Rider",
+      "model_id": 40001025,
+      "rare": 2,
+      "sell_crystal": 888,
+      "skill_id": 80010025,
+      "skin_item_id": 50001395,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001025,
+      "skin_skill_hero_id": 10001025,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001056,
+        11001056
+      ],
+      "item_name": "Police Queen",
+      "model_id": 40001056,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80010056,
+      "skin_item_id": 50001396,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001056,
+      "skin_skill_hero_id": 10001056,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001004,
+        11001004
+      ],
+      "item_name": "Pikachu",
+      "model_id": 40001004,
+      "rare": 2,
+      "sell_crystal": 888,
+      "skill_id": 81111004,
+      "skin_item_id": 50001403,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001004,
+      "skin_skill_hero_id": 10001004,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001001,
+        11001001
+      ],
+      "item_name": "Elf of Flower",
+      "model_id": 40001001,
+      "rare": 2,
+      "sell_crystal": 888,
+      "skill_id": 81111001,
+      "skin_item_id": 50001409,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001001,
+      "skin_skill_hero_id": 10001001,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001063,
+        11001063
+      ],
+      "item_name": "Genius Magician",
+      "model_id": 40001063,
+      "rare": 2,
+      "sell_crystal": 888,
+      "skill_id": 80010063,
+      "skin_item_id": 50001415,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001063,
+      "skin_skill_hero_id": 10001063,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001101,
+        11001101
+      ],
+      "item_name": "Wealthy Princess",
+      "model_id": 40001101,
+      "rare": 2,
+      "sell_crystal": 888,
+      "skill_id": 80010101,
+      "skin_item_id": 50001417,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001101,
+      "skin_skill_hero_id": 10001101,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001008,
+        11001008
+      ],
+      "item_name": "Lifebuoy Queen",
+      "model_id": 40001008,
+      "rare": 2,
+      "sell_crystal": 888,
+      "skill_id": 80010008,
+      "skin_item_id": 50001426,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001008,
+      "skin_skill_hero_id": 10001008,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001069,
+        11001069
+      ],
+      "item_name": "Beach Party",
+      "model_id": 40001069,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80010069,
+      "skin_item_id": 50001432,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001069,
+      "skin_skill_hero_id": 10001069,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001124,
+        11001124
+      ],
+      "item_name": "Beach Cheerleader",
+      "model_id": 40001124,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80010124,
+      "skin_item_id": 50001433,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001124,
+      "skin_skill_hero_id": 10001124,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001061,
+        11001061
+      ],
+      "item_name": "Beach Shooter",
+      "model_id": 40001061,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80010061,
+      "skin_item_id": 50001436,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001061,
+      "skin_skill_hero_id": 10001061,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001028,
+        11001028
+      ],
+      "item_name": "Rose Bride",
+      "model_id": 40001028,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80010028,
+      "skin_item_id": 50001437,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001028,
+      "skin_skill_hero_id": 10001028,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001015,
+        11001015
+      ],
+      "item_name": "Sacred Witch",
+      "model_id": 40001015,
+      "rare": 1,
+      "sell_crystal": 888,
+      "skill_id": 0,
+      "skin_item_id": 50001439,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001015,
+      "skin_skill_hero_id": 10001015,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001100,
+        11001100
+      ],
+      "item_name": "Dark Widow",
+      "model_id": 40001100,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80010100,
+      "skin_item_id": 50001441,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001100,
+      "skin_skill_hero_id": 10001100,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001033,
+        11001033
+      ],
+      "item_name": "Mech Sword",
+      "model_id": 40002033,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80010033,
+      "skin_item_id": 50001443,
+      "skin_last_time": 0,
+      "skin_numb": 2,
+      "skin_partner_id": 10001033,
+      "skin_skill_hero_id": 10001033,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001068,
+        11001068
+      ],
+      "item_name": "Prison of Love",
+      "model_id": 40001068,
+      "rare": 2,
+      "sell_crystal": 888,
+      "skill_id": 80010068,
+      "skin_item_id": 50001446,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001068,
+      "skin_skill_hero_id": 10001068,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001110,
+        11001110
+      ],
+      "item_name": "Cool Summer",
+      "model_id": 40001110,
+      "rare": 2,
+      "sell_crystal": 888,
+      "skill_id": 80010110,
+      "skin_item_id": 50001449,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001110,
+      "skin_skill_hero_id": 10001110,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001106,
+        11001106
+      ],
+      "item_name": "Sea's Daughter",
+      "model_id": 40001106,
+      "rare": 2,
+      "sell_crystal": 888,
+      "skill_id": 80010106,
+      "skin_item_id": 50001453,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001106,
+      "skin_skill_hero_id": 10001106,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001041,
+        11001041
+      ],
+      "item_name": "War God",
+      "model_id": 40011041,
+      "rare": 4,
+      "sell_crystal": 888,
+      "skill_id": 80120041,
+      "skin_item_id": 50001458,
+      "skin_last_time": 0,
+      "skin_numb": 2,
+      "skin_partner_id": 10001041,
+      "skin_skill_hero_id": 10001041,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001122,
+        11001122
+      ],
+      "item_name": "Working girlfriend",
+      "model_id": 40001122,
+      "rare": 4,
+      "sell_crystal": 888,
+      "skill_id": 80010122,
+      "skin_item_id": 50001460,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001122,
+      "skin_skill_hero_id": 10001122,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001016,
+        11001016
+      ],
+      "item_name": "Gymnastic Princess",
+      "model_id": 40001016,
+      "rare": 2,
+      "sell_crystal": 888,
+      "skill_id": 80010016,
+      "skin_item_id": 50001466,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001016,
+      "skin_skill_hero_id": 10001016,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001045,
+        11001045
+      ],
+      "item_name": "Tipsy Beauty",
+      "model_id": 40011045,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 81020045,
+      "skin_item_id": 50001471,
+      "skin_last_time": 0,
+      "skin_numb": 2,
+      "skin_partner_id": 10001045,
+      "skin_skill_hero_id": 10001045,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001039,
+        11001039
+      ],
+      "item_name": "Sweet Devil",
+      "model_id": 40001039,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80010039,
+      "skin_item_id": 50001472,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001039,
+      "skin_skill_hero_id": 10001039,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001040,
+        11001040
+      ],
+      "item_name": "Xmas Angel",
+      "model_id": 40011040,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80010040,
+      "skin_item_id": 50001473,
+      "skin_last_time": 0,
+      "skin_numb": 2,
+      "skin_partner_id": 10001040,
+      "skin_skill_hero_id": 10001040,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001118,
+        11001118
+      ],
+      "item_name": "Love Envoy",
+      "model_id": 40001118,
+      "rare": 2,
+      "sell_crystal": 888,
+      "skill_id": 80010118,
+      "skin_item_id": 50001477,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001118,
+      "skin_skill_hero_id": 10001118,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001079,
+        11001079
+      ],
+      "item_name": "Winter Amour",
+      "model_id": 40001079,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80010079,
+      "skin_item_id": 50001478,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001079,
+      "skin_skill_hero_id": 10001079,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001002,
+        11001002
+      ],
+      "item_name": "Crimson Sun",
+      "model_id": 40002002,
+      "rare": 2,
+      "sell_crystal": 888,
+      "skill_id": 80110002,
+      "skin_item_id": 50001483,
+      "skin_last_time": 0,
+      "skin_numb": 2,
+      "skin_partner_id": 10001002,
+      "skin_skill_hero_id": 10001002,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001053,
+        11001053
+      ],
+      "item_name": "Azure Moon",
+      "model_id": 40002053,
+      "rare": 2,
+      "sell_crystal": 888,
+      "skill_id": 80010053,
+      "skin_item_id": 50001484,
+      "skin_last_time": 0,
+      "skin_numb": 2,
+      "skin_partner_id": 10001053,
+      "skin_skill_hero_id": 10001053,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001075,
+        11001075
+      ],
+      "item_name": "Cowboy",
+      "model_id": 40001075,
+      "rare": 1,
+      "sell_crystal": 888,
+      "skill_id": 0,
+      "skin_item_id": 50001485,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001075,
+      "skin_skill_hero_id": 10001075,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001034,
+        11001034
+      ],
+      "item_name": "Magical Girl",
+      "model_id": 40011034,
+      "rare": 2,
+      "sell_crystal": 888,
+      "skill_id": 80010034,
+      "skin_item_id": 50001490,
+      "skin_last_time": 0,
+      "skin_numb": 2,
+      "skin_partner_id": 10001034,
+      "skin_skill_hero_id": 10001034,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001077,
+        11001077
+      ],
+      "item_name": "Frozen",
+      "model_id": 40001077,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80010077,
+      "skin_item_id": 50001492,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001077,
+      "skin_skill_hero_id": 10001077,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001049,
+        11001049
+      ],
+      "item_name": "Candy Girl",
+      "model_id": 40002049,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 81010049,
+      "skin_item_id": 50001514,
+      "skin_last_time": 0,
+      "skin_numb": 2,
+      "skin_partner_id": 10001049,
+      "skin_skill_hero_id": 10001049,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001160,
+        11001160
+      ],
+      "item_name": "Elegant Lady",
+      "model_id": 40001160,
+      "rare": 2,
+      "sell_crystal": 888,
+      "skill_id": 80010160,
+      "skin_item_id": 50001515,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001160,
+      "skin_skill_hero_id": 10001160,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001117,
+        11001117
+      ],
+      "item_name": "Moegirl",
+      "model_id": 40001117,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80010117,
+      "skin_item_id": 50001517,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001117,
+      "skin_skill_hero_id": 10001117,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001005,
+        11001005
+      ],
+      "item_name": "Minority Maid",
+      "model_id": 40001005,
+      "rare": 1,
+      "sell_crystal": 888,
+      "skill_id": 0,
+      "skin_item_id": 50001521,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001005,
+      "skin_skill_hero_id": 10001005,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001014,
+        11001014
+      ],
+      "item_name": "Pretty Butterfly",
+      "model_id": 40001014,
+      "rare": 2,
+      "sell_crystal": 888,
+      "skill_id": 80010014,
+      "skin_item_id": 50001522,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001014,
+      "skin_skill_hero_id": 10001014,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001058,
+        11001058
+      ],
+      "item_name": "Manjusaka",
+      "model_id": 40002058,
+      "rare": 4,
+      "sell_crystal": 888,
+      "skill_id": 80010058,
+      "skin_item_id": 50001529,
+      "skin_last_time": 0,
+      "skin_numb": 2,
+      "skin_partner_id": 10001058,
+      "skin_skill_hero_id": 10001058,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001067,
+        11001067
+      ],
+      "item_name": "Tsundere Cutemon",
+      "model_id": 40001067,
+      "rare": 4,
+      "sell_crystal": 888,
+      "skill_id": 80010067,
+      "skin_item_id": 50001541,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001067,
+      "skin_skill_hero_id": 10001067,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001080,
+        11001080
+      ],
+      "item_name": "Flipped Idol",
+      "model_id": 40001080,
+      "rare": 2,
+      "sell_crystal": 888,
+      "skill_id": 80010080,
+      "skin_item_id": 50001546,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001080,
+      "skin_skill_hero_id": 10001080,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001029,
+        11001029
+      ],
+      "item_name": "Scarlet Queen",
+      "model_id": 40002029,
+      "rare": 2,
+      "sell_crystal": 888,
+      "skill_id": 80010029,
+      "skin_item_id": 50001547,
+      "skin_last_time": 0,
+      "skin_numb": 2,
+      "skin_partner_id": 10001029,
+      "skin_skill_hero_id": 10001029,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001102,
+        11001102
+      ],
+      "item_name": "Insects Catching",
+      "model_id": 40001102,
+      "rare": 2,
+      "sell_crystal": 888,
+      "skill_id": 80010102,
+      "skin_item_id": 50001548,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001102,
+      "skin_skill_hero_id": 10001102,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001097,
+        11001097
+      ],
+      "item_name": "Rock Idol",
+      "model_id": 40001097,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80010097,
+      "skin_item_id": 50001555,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001097,
+      "skin_skill_hero_id": 10001097,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001017,
+        11001017
+      ],
+      "item_name": "Sweet Idol",
+      "model_id": 40001017,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80010017,
+      "skin_item_id": 50001556,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001017,
+      "skin_skill_hero_id": 10001017,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001009,
+        11001009
+      ],
+      "item_name": "Hades",
+      "model_id": 40001009,
+      "rare": 1,
+      "sell_crystal": 888,
+      "skill_id": 0,
+      "skin_item_id": 50001559,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001009,
+      "skin_skill_hero_id": 10001009,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001133
+      ],
+      "item_name": "Baseball Catcher",
+      "model_id": 40001133,
+      "rare": 1,
+      "sell_crystal": 888,
+      "skill_id": 0,
+      "skin_item_id": 50001561,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001133,
+      "skin_skill_hero_id": 10001133,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001036,
+        11001036
+      ],
+      "item_name": "Wind Fairy",
+      "model_id": 40011036,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80010036,
+      "skin_item_id": 50001563,
+      "skin_last_time": 0,
+      "skin_numb": 2,
+      "skin_partner_id": 10001036,
+      "skin_skill_hero_id": 10001036,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001064,
+        11001064
+      ],
+      "item_name": "Shining Idol",
+      "model_id": 40001064,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80010064,
+      "skin_item_id": 50001565,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001064,
+      "skin_skill_hero_id": 10001064,
+      "stack": 999
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001006,
+        11001006
+      ],
+      "item_name": "Orange Summer",
+      "model_id": 40001006,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80010006,
+      "skin_item_id": 50001578,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001006,
+      "skin_skill_hero_id": 10001006,
+      "stack": 999
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001044,
+        11001044
+      ],
+      "item_name": "Beach Saber",
+      "model_id": 40001044,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80010044,
+      "skin_item_id": 50001579,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001044,
+      "skin_skill_hero_id": 10001044,
+      "stack": 999
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001149,
+        11001149
+      ],
+      "item_name": "Courier",
+      "model_id": 40001149,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80010149,
+      "skin_item_id": 50001590,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001149,
+      "skin_skill_hero_id": 10001149,
+      "stack": 999
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001003,
+        11001003
+      ],
+      "item_name": "Dream Beach",
+      "model_id": 40001003,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80110003,
+      "skin_item_id": 50001592,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001003,
+      "skin_skill_hero_id": 10001003,
+      "stack": 999
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001057,
+        11001057
+      ],
+      "item_name": "Soccer Babe",
+      "model_id": 40001057,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80010057,
+      "skin_item_id": 50001593,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001057,
+      "skin_skill_hero_id": 10001057,
+      "stack": 999
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001140,
+        11001140
+      ],
+      "item_name": "Blood Phobia",
+      "model_id": 40001140,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80010140,
+      "skin_item_id": 50001595,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001140,
+      "skin_skill_hero_id": 10001140,
+      "stack": 999
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001150,
+        11001150
+      ],
+      "item_name": "Gifted Summoner",
+      "model_id": 40001150,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80010150,
+      "skin_item_id": 50001596,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001150,
+      "skin_skill_hero_id": 10001150,
+      "stack": 999
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001088
+      ],
+      "item_name": "Mushroom Princess",
+      "model_id": 40001088,
+      "rare": 2,
+      "sell_crystal": 888,
+      "skill_id": 80010088,
+      "skin_item_id": 50001599,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001088,
+      "skin_skill_hero_id": 10001088,
+      "stack": 999
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001022,
+        11001022
+      ],
+      "item_name": "Sweet Candy",
+      "model_id": 40001022,
+      "rare": 2,
+      "sell_crystal": 888,
+      "skill_id": 0,
+      "skin_item_id": 50001600,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001022,
+      "skin_skill_hero_id": 10001022,
+      "stack": 999
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001023,
+        11001023
+      ],
+      "item_name": "Mercury Pilot",
+      "model_id": 40001023,
+      "rare": 2,
+      "sell_crystal": 888,
+      "skill_id": 80010023,
+      "skin_item_id": 50001608,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001023,
+      "skin_skill_hero_id": 10001023,
+      "stack": 999
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001211,
+        11001211
+      ],
+      "item_name": "Sweet Envoy ",
+      "model_id": 40001211,
+      "rare": 4,
+      "sell_crystal": 888,
+      "skill_id": 80010211,
+      "skin_item_id": 50001623,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001211,
+      "skin_skill_hero_id": 10001211,
+      "stack": 999
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001180,
+        11001180
+      ],
+      "item_name": "Voyage Adventurer",
+      "model_id": 40001180,
+      "rare": 2,
+      "sell_crystal": 888,
+      "skill_id": 80010180,
+      "skin_item_id": 50001625,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001180,
+      "skin_skill_hero_id": 10001180,
+      "stack": 999
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001179
+      ],
+      "item_name": "Shadow Cat",
+      "model_id": 40001179,
+      "rare": 2,
+      "sell_crystal": 888,
+      "skill_id": 80010179,
+      "skin_item_id": 50001629,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001179,
+      "skin_skill_hero_id": 10001179,
+      "stack": 999
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001169
+      ],
+      "item_name": "Blazing Dragon",
+      "model_id": 40001169,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80010169,
+      "skin_item_id": 50001630,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001169,
+      "skin_skill_hero_id": 10001169,
+      "stack": 999
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001168,
+        11001168
+      ],
+      "item_name": "Violence Angel",
+      "model_id": 40001168,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80010168,
+      "skin_item_id": 50001631,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001168,
+      "skin_skill_hero_id": 10001168,
+      "stack": 999
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001041,
+        11001041
+      ],
+      "item_name": "Faithful Vows",
+      "model_id": 40012041,
+      "rare": 4,
+      "sell_crystal": 888,
+      "skill_id": 80220041,
+      "skin_item_id": 50001634,
+      "skin_last_time": 0,
+      "skin_numb": 3,
+      "skin_partner_id": 10001041,
+      "skin_skill_hero_id": 10001041,
+      "stack": 999
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001131
+      ],
+      "item_name": "Sakura Spirit",
+      "model_id": 40001131,
+      "rare": 2,
+      "sell_crystal": 888,
+      "skill_id": 80010131,
+      "skin_item_id": 50001635,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001131,
+      "skin_skill_hero_id": 10001131,
+      "stack": 999
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001186
+      ],
+      "item_name": "Green Hand",
+      "model_id": 40001186,
+      "rare": 2,
+      "sell_crystal": 888,
+      "skill_id": 80010186,
+      "skin_item_id": 50001637,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001186,
+      "skin_skill_hero_id": 10001186,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001174,
+        11001174
+      ],
+      "item_name": "Helper",
+      "model_id": 40001174,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80010174,
+      "skin_item_id": 50001643,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001174,
+      "skin_skill_hero_id": 10001174,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001020,
+        11001020
+      ],
+      "item_name": "Detective",
+      "model_id": 40011020,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80010020,
+      "skin_item_id": 50001644,
+      "skin_last_time": 0,
+      "skin_numb": 2,
+      "skin_partner_id": 10001020,
+      "skin_skill_hero_id": 10001020,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001018,
+        11001018
+      ],
+      "item_name": "Gallant",
+      "model_id": 40001018,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80010018,
+      "skin_item_id": 50001646,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001018,
+      "skin_skill_hero_id": 10001018,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001095,
+        11001095
+      ],
+      "item_name": "Sleeping Girl",
+      "model_id": 40001095,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80010095,
+      "skin_item_id": 50001647,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001095,
+      "skin_skill_hero_id": 10001095,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001013,
+        11001013
+      ],
+      "item_name": "Murderer",
+      "model_id": 40011013,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80110013,
+      "skin_item_id": 50001649,
+      "skin_last_time": 0,
+      "skin_numb": 2,
+      "skin_partner_id": 10001013,
+      "skin_skill_hero_id": 10001013,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001123
+      ],
+      "item_name": "Crusader",
+      "model_id": 40001123,
+      "rare": 2,
+      "sell_crystal": 888,
+      "skill_id": 80010123,
+      "skin_item_id": 50001657,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001123,
+      "skin_skill_hero_id": 10001123,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001066,
+        11001066
+      ],
+      "item_name": "Pumpkin Pie",
+      "model_id": 40002066,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80020066,
+      "skin_item_id": 50001658,
+      "skin_last_time": 0,
+      "skin_numb": 2,
+      "skin_partner_id": 10001066,
+      "skin_skill_hero_id": 10001066,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001137,
+        11001137
+      ],
+      "item_name": "Mountain Elf",
+      "model_id": 40001137,
+      "rare": 2,
+      "sell_crystal": 888,
+      "skill_id": 80010137,
+      "skin_item_id": 50001661,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001137,
+      "skin_skill_hero_id": 10001137,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001183
+      ],
+      "item_name": "Freehand Girl",
+      "model_id": 40001183,
+      "rare": 2,
+      "sell_crystal": 888,
+      "skill_id": 80010183,
+      "skin_item_id": 50001662,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001183,
+      "skin_skill_hero_id": 10001183,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001096
+      ],
+      "item_name": "Girl Next-door",
+      "model_id": 40001096,
+      "rare": 2,
+      "sell_crystal": 888,
+      "skill_id": 80010096,
+      "skin_item_id": 50001664,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001096,
+      "skin_skill_hero_id": 10001096,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001074,
+        11001074
+      ],
+      "item_name": "Xmas Prayer",
+      "model_id": 40001074,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80010074,
+      "skin_item_id": 50001669,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001074,
+      "skin_skill_hero_id": 10001074,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001192
+      ],
+      "item_name": "Xmas Dancer",
+      "model_id": 40001192,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80010192,
+      "skin_item_id": 50001679,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001192,
+      "skin_skill_hero_id": 10001192,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001076
+      ],
+      "item_name": "Xmas Beginner",
+      "model_id": 40001076,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80010076,
+      "skin_item_id": 50001680,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001076,
+      "skin_skill_hero_id": 10001076,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001073,
+        11001073
+      ],
+      "item_name": "Xmas Princess",
+      "model_id": 40001073,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80010073,
+      "skin_item_id": 50001682,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001073,
+      "skin_skill_hero_id": 10001073,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001187
+      ],
+      "item_name": "Gentle Wife",
+      "model_id": 40001187,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80010187,
+      "skin_item_id": 50001688,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001187,
+      "skin_skill_hero_id": 10001187,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001196
+      ],
+      "item_name": "Leisure Time ",
+      "model_id": 40001196,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80010196,
+      "skin_item_id": 50001689,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001196,
+      "skin_skill_hero_id": 10001196,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001103,
+        11001103
+      ],
+      "item_name": "Chaste Bride",
+      "model_id": 40001103,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80010103,
+      "skin_item_id": 50001690,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001103,
+      "skin_skill_hero_id": 10001103,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001018,
+        11001018
+      ],
+      "item_name": "Snow Princess",
+      "model_id": 40002018,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80110018,
+      "skin_item_id": 50001691,
+      "skin_last_time": 0,
+      "skin_numb": 2,
+      "skin_partner_id": 10001018,
+      "skin_skill_hero_id": 10001018,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001161
+      ],
+      "item_name": "Flower Poetry",
+      "model_id": 40001161,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80010161,
+      "skin_item_id": 50001698,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001161,
+      "skin_skill_hero_id": 10001161,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001199,
+        11001199
+      ],
+      "item_name": "Heart Seeker",
+      "model_id": 40001199,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80010199,
+      "skin_item_id": 50001708,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001199,
+      "skin_skill_hero_id": 10001199,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001139,
+        11001139
+      ],
+      "item_name": "Sleepy Sweety",
+      "model_id": 40001139,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80010139,
+      "skin_item_id": 50001710,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001139,
+      "skin_skill_hero_id": 10001139,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001166,
+        11001166
+      ],
+      "item_name": "Splendid Fragrance",
+      "model_id": 40001166,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80010166,
+      "skin_item_id": 50001713,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001166,
+      "skin_skill_hero_id": 10001166,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001195
+      ],
+      "item_name": "Fairy Tale",
+      "model_id": 40001195,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80010195,
+      "skin_item_id": 50001718,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001195,
+      "skin_skill_hero_id": 10001195,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001206
+      ],
+      "item_name": "Crime&Punish",
+      "model_id": 40001206,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80010206,
+      "skin_item_id": 50001720,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001206,
+      "skin_skill_hero_id": 10001206,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001129
+      ],
+      "item_name": "Purgatory Pioneer",
+      "model_id": 40001129,
+      "rare": 2,
+      "sell_crystal": 888,
+      "skill_id": 80010129,
+      "skin_item_id": 50001727,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001129,
+      "skin_skill_hero_id": 10001129,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001157,
+        11001157
+      ],
+      "item_name": "Sunrise Angel",
+      "model_id": 40001157,
+      "rare": 4,
+      "sell_crystal": 888,
+      "skill_id": 80010157,
+      "skin_item_id": 50001734,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001157,
+      "skin_skill_hero_id": 10001157,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001158,
+        11001158
+      ],
+      "item_name": "Twilight Devil",
+      "model_id": 40001158,
+      "rare": 4,
+      "sell_crystal": 888,
+      "skill_id": 80010158,
+      "skin_item_id": 50001735,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001158,
+      "skin_skill_hero_id": 10001158,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001200,
+        11001200
+      ],
+      "item_name": "Moe Vows",
+      "model_id": 40001200,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80010200,
+      "skin_item_id": 50001736,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001200,
+      "skin_skill_hero_id": 10001200,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001217
+      ],
+      "item_name": "Arcane Talent",
+      "model_id": 40001217,
+      "rare": 2,
+      "sell_crystal": 888,
+      "skill_id": 80010217,
+      "skin_item_id": 50001738,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001217,
+      "skin_skill_hero_id": 10001217,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001008,
+        11001008
+      ],
+      "item_name": "Spring Breeze",
+      "model_id": 40011008,
+      "rare": 1,
+      "sell_crystal": 888,
+      "skill_id": 0,
+      "skin_item_id": 50001746,
+      "skin_last_time": 0,
+      "skin_numb": 2,
+      "skin_partner_id": 10001008,
+      "skin_skill_hero_id": 10001008,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001077,
+        11001077
+      ],
+      "item_name": "Phantom Fox",
+      "model_id": 40002077,
+      "rare": 2,
+      "sell_crystal": 888,
+      "skill_id": 80020077,
+      "skin_item_id": 50001747,
+      "skin_last_time": 0,
+      "skin_numb": 2,
+      "skin_partner_id": 10001077,
+      "skin_skill_hero_id": 10001077,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001136
+      ],
+      "item_name": "Secret Garden",
+      "model_id": 40001136,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80010136,
+      "skin_item_id": 50001749,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001136,
+      "skin_skill_hero_id": 10001136,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001090,
+        11001090
+      ],
+      "item_name": "Forest Words",
+      "model_id": 40001090,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80010090,
+      "skin_item_id": 50001752,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001090,
+      "skin_skill_hero_id": 10001090,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001154
+      ],
+      "item_name": "Monster",
+      "model_id": 40001154,
+      "rare": 1,
+      "sell_crystal": 888,
+      "skill_id": 0,
+      "skin_item_id": 50001753,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001154,
+      "skin_skill_hero_id": 10001154,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001064,
+        11001064
+      ],
+      "item_name": "Mundane World",
+      "model_id": 40002064,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80020064,
+      "skin_item_id": 50001756,
+      "skin_last_time": 0,
+      "skin_numb": 2,
+      "skin_partner_id": 10001064,
+      "skin_skill_hero_id": 10001064,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001156,
+        11001156
+      ],
+      "item_name": "Parasol Tree",
+      "model_id": 40001156,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80010156,
+      "skin_item_id": 50001758,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001156,
+      "skin_skill_hero_id": 10001156,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001148,
+        11001148
+      ],
+      "item_name": "Dream Scroll",
+      "model_id": 40001148,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80010148,
+      "skin_item_id": 50001761,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001148,
+      "skin_skill_hero_id": 10001148,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001226
+      ],
+      "item_name": "Sea Breeze",
+      "model_id": 40001226,
+      "rare": 2,
+      "sell_crystal": 888,
+      "skill_id": 80010226,
+      "skin_item_id": 50001770,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001226,
+      "skin_skill_hero_id": 10001226,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001098
+      ],
+      "item_name": "Priory Deacon",
+      "model_id": 40001098,
+      "rare": 2,
+      "sell_crystal": 888,
+      "skill_id": 80010098,
+      "skin_item_id": 50001796,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001098,
+      "skin_skill_hero_id": 10001098,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001033,
+        11001033
+      ],
+      "item_name": "Dear Rose",
+      "model_id": 40003033,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80030033,
+      "skin_item_id": 50001797,
+      "skin_last_time": 0,
+      "skin_numb": 3,
+      "skin_partner_id": 10001033,
+      "skin_skill_hero_id": 10001033,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001066,
+        11001066
+      ],
+      "item_name": "Rose Whisper",
+      "model_id": 40003066,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80030066,
+      "skin_item_id": 50001798,
+      "skin_last_time": 0,
+      "skin_numb": 3,
+      "skin_partner_id": 10001066,
+      "skin_skill_hero_id": 10001066,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001092,
+        11001092
+      ],
+      "item_name": "Illusory Flame",
+      "model_id": 40001092,
+      "rare": 2,
+      "sell_crystal": 888,
+      "skill_id": 80010092,
+      "skin_item_id": 50001799,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001092,
+      "skin_skill_hero_id": 10001092,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001138
+      ],
+      "item_name": "Mech Shield",
+      "model_id": 40001138,
+      "rare": 2,
+      "sell_crystal": 888,
+      "skill_id": 80010138,
+      "skin_item_id": 50001802,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001138,
+      "skin_skill_hero_id": 10001138,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001209
+      ],
+      "item_name": "Summer Lemonade",
+      "model_id": 40001209,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80010209,
+      "skin_item_id": 50001803,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001209,
+      "skin_skill_hero_id": 10001209,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001006,
+        11001006
+      ],
+      "item_name": "Flower Praise",
+      "model_id": 40002006,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 81020006,
+      "skin_item_id": 50001806,
+      "skin_last_time": 0,
+      "skin_numb": 2,
+      "skin_partner_id": 10001006,
+      "skin_skill_hero_id": 10001006,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001114
+      ],
+      "item_name": "Fireman",
+      "model_id": 40001114,
+      "rare": 1,
+      "sell_crystal": 888,
+      "skill_id": 0,
+      "skin_item_id": 50001818,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001114,
+      "skin_skill_hero_id": 10001114,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001131
+      ],
+      "item_name": "Sakura Fubuki",
+      "model_id": 40002131,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80020131,
+      "skin_item_id": 50001819,
+      "skin_last_time": 0,
+      "skin_numb": 2,
+      "skin_partner_id": 10001131,
+      "skin_skill_hero_id": 10001131,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001037,
+        11001037
+      ],
+      "item_name": "Mechanical Love",
+      "model_id": 40001037,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80010037,
+      "skin_item_id": 50001821,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001037,
+      "skin_skill_hero_id": 10001037,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001059,
+        11001059
+      ],
+      "item_name": "Frost Rose",
+      "model_id": 40002059,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80020059,
+      "skin_item_id": 50001822,
+      "skin_last_time": 0,
+      "skin_numb": 2,
+      "skin_partner_id": 10001059,
+      "skin_skill_hero_id": 10001059,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001184
+      ],
+      "item_name": "Sunlight SPA",
+      "model_id": 40001184,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80010184,
+      "skin_item_id": 50001856,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001184,
+      "skin_skill_hero_id": 10001184,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001125,
+        11001125
+      ],
+      "item_name": "Queen of Hearts",
+      "model_id": 40001125,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80010125,
+      "skin_item_id": 50001857,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001125,
+      "skin_skill_hero_id": 10001125,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001109,
+        11001109
+      ],
+      "item_name": "Shade Edge",
+      "model_id": 40002109,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80020109,
+      "skin_item_id": 50001858,
+      "skin_last_time": 0,
+      "skin_numb": 2,
+      "skin_partner_id": 10001109,
+      "skin_skill_hero_id": 10001109,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001043,
+        11001043
+      ],
+      "item_name": "Beach Phantom",
+      "model_id": 40002043,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80110043,
+      "skin_item_id": 50001863,
+      "skin_last_time": 0,
+      "skin_numb": 2,
+      "skin_partner_id": 10001043,
+      "skin_skill_hero_id": 10001043,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001025,
+        11001025
+      ],
+      "item_name": "Surfer's Got Talent",
+      "model_id": 40002025,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80110025,
+      "skin_item_id": 50001864,
+      "skin_last_time": 0,
+      "skin_numb": 2,
+      "skin_partner_id": 10001025,
+      "skin_skill_hero_id": 10001025,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001171,
+        11001171
+      ],
+      "item_name": "Battlefront",
+      "model_id": 40001171,
+      "rare": 2,
+      "sell_crystal": 888,
+      "skill_id": 80010171,
+      "skin_item_id": 50001867,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001171,
+      "skin_skill_hero_id": 10001171,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001181,
+        11001181
+      ],
+      "item_name": "Love of My Life",
+      "model_id": 40001181,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80010181,
+      "skin_item_id": 50001870,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001181,
+      "skin_skill_hero_id": 10001181,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001198
+      ],
+      "item_name": "Young & Rebellious",
+      "model_id": 40001198,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80010198,
+      "skin_item_id": 50001875,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001198,
+      "skin_skill_hero_id": 10001198,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001188,
+        11001188
+      ],
+      "item_name": "Midsummer Spark",
+      "model_id": 40001188,
+      "rare": 2,
+      "sell_crystal": 888,
+      "skill_id": 80010188,
+      "skin_item_id": 50001878,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001188,
+      "skin_skill_hero_id": 11001188,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001072
+      ],
+      "item_name": "Hip-Hop Lead Singer",
+      "model_id": 40001072,
+      "rare": 1,
+      "sell_crystal": 888,
+      "skill_id": 0,
+      "skin_item_id": 50001879,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001072,
+      "skin_skill_hero_id": 10001072,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001170,
+        11001170
+      ],
+      "item_name": "Prison",
+      "model_id": 40001170,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80010170,
+      "skin_item_id": 50001880,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001170,
+      "skin_skill_hero_id": 10001170,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001194
+      ],
+      "item_name": "War Machine",
+      "model_id": 40001194,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80010194,
+      "skin_item_id": 50001882,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001194,
+      "skin_skill_hero_id": 10001194,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001201
+      ],
+      "item_name": "Caged Sparrow",
+      "model_id": 40001201,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80010201,
+      "skin_item_id": 50001883,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001201,
+      "skin_skill_hero_id": 10001201,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001095,
+        11001095
+      ],
+      "item_name": "Night Umbrella",
+      "model_id": 40002095,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80020095,
+      "skin_item_id": 50001887,
+      "skin_last_time": 0,
+      "skin_numb": 2,
+      "skin_partner_id": 10001095,
+      "skin_skill_hero_id": 10001095,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001052,
+        11001052
+      ],
+      "item_name": "Night Walker",
+      "model_id": 40001052,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80010052,
+      "skin_item_id": 50001889,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001052,
+      "skin_skill_hero_id": 10001052,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001088
+      ],
+      "item_name": "Night Fairy",
+      "model_id": 40002088,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80020088,
+      "skin_item_id": 50001891,
+      "skin_last_time": 0,
+      "skin_numb": 2,
+      "skin_partner_id": 10001088,
+      "skin_skill_hero_id": 10001088,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001162,
+        11001162
+      ],
+      "item_name": "Evening Maple",
+      "model_id": 40001162,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80010162,
+      "skin_item_id": 50001892,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001162,
+      "skin_skill_hero_id": 10001162,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001169
+      ],
+      "item_name": "Night Dragon",
+      "model_id": 40002169,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80020169,
+      "skin_item_id": 50001894,
+      "skin_last_time": 0,
+      "skin_numb": 2,
+      "skin_partner_id": 10001169,
+      "skin_skill_hero_id": 10001169,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001102,
+        11001102
+      ],
+      "item_name": "Life & Death",
+      "model_id": 40002102,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80020102,
+      "skin_item_id": 50001909,
+      "skin_last_time": 0,
+      "skin_numb": 2,
+      "skin_partner_id": 10001102,
+      "skin_skill_hero_id": 10001102,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001158,
+        11001158
+      ],
+      "item_name": "Dark Rose",
+      "model_id": 40002158,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80020158,
+      "skin_item_id": 50001910,
+      "skin_last_time": 0,
+      "skin_numb": 2,
+      "skin_partner_id": 10001158,
+      "skin_skill_hero_id": 10001158,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001042
+      ],
+      "item_name": "Moon Vows",
+      "model_id": 40001042,
+      "rare": 1,
+      "sell_crystal": 888,
+      "skill_id": 0,
+      "skin_item_id": 50001918,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001042,
+      "skin_skill_hero_id": 10001042,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001157,
+        11001157
+      ],
+      "item_name": "White Rose",
+      "model_id": 40002157,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80020157,
+      "skin_item_id": 50001919,
+      "skin_last_time": 0,
+      "skin_numb": 2,
+      "skin_partner_id": 10001157,
+      "skin_skill_hero_id": 10001157,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        11001
+      ],
+      "item_name": "Requiem",
+      "model_id": 41001,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 810001,
+      "skin_item_id": 50001920,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 11001,
+      "skin_skill_hero_id": 11001,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        11002
+      ],
+      "item_name": "Spiritual",
+      "model_id": 41002,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 810002,
+      "skin_item_id": 50001925,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 11002,
+      "skin_skill_hero_id": 11002,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        11005
+      ],
+      "item_name": "Screaming Night",
+      "model_id": 41005,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 810005,
+      "skin_item_id": 50001929,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 11005,
+      "skin_skill_hero_id": 11005,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        11004
+      ],
+      "item_name": "Hall of Heroes",
+      "model_id": 41004,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 810004,
+      "skin_item_id": 50001946,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 11004,
+      "skin_skill_hero_id": 11004,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001219
+      ],
+      "item_name": "Snow Elf",
+      "model_id": 40001219,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80010219,
+      "skin_item_id": 50001950,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001219,
+      "skin_skill_hero_id": 10001219,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001190,
+        11001190
+      ],
+      "item_name": "Sacred Angel",
+      "model_id": 40001190,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80010190,
+      "skin_item_id": 50001951,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001190,
+      "skin_skill_hero_id": 10001190,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001178,
+        11001178
+      ],
+      "item_name": "Gift Envoy",
+      "model_id": 40001178,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80010178,
+      "skin_item_id": 50001952,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001178,
+      "skin_skill_hero_id": 10001178,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001215,
+        11001215
+      ],
+      "item_name": "Xmas Deer",
+      "model_id": 40001215,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80010215,
+      "skin_item_id": 50001953,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001215,
+      "skin_skill_hero_id": 10001215,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001176,
+        11001176
+      ],
+      "item_name": "Atlantis",
+      "model_id": 40001176,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80010176,
+      "skin_item_id": 50001985,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001176,
+      "skin_skill_hero_id": 10001176,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001107,
+        11001107
+      ],
+      "item_name": "Cat Maid",
+      "model_id": 40001107,
+      "rare": 1,
+      "sell_crystal": 888,
+      "skill_id": 0,
+      "skin_item_id": 50001987,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001107,
+      "skin_skill_hero_id": 10001107,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001235
+      ],
+      "item_name": "Violet Mermaid",
+      "model_id": 40001235,
+      "rare": 2,
+      "sell_crystal": 888,
+      "skill_id": 80010235,
+      "skin_item_id": 50001992,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001235,
+      "skin_skill_hero_id": 10001235,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001224,
+        11001224
+      ],
+      "item_name": " Crystal Love",
+      "model_id": 40001224,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80010224,
+      "skin_item_id": 50002004,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001224,
+      "skin_skill_hero_id": 10001224,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001197,
+        11001197
+      ],
+      "item_name": "Black Wood",
+      "model_id": 40001197,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80010197,
+      "skin_item_id": 50002010,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001197,
+      "skin_skill_hero_id": 10001197,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001213
+      ],
+      "item_name": "Fan Light",
+      "model_id": 40001213,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80010213,
+      "skin_item_id": 50002011,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001213,
+      "skin_skill_hero_id": 10001213,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001203,
+        11001203
+      ],
+      "item_name": "Drizzle",
+      "model_id": 40001203,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80010203,
+      "skin_item_id": 50002026,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001203,
+      "skin_skill_hero_id": 10001203,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001081,
+        11001081
+      ],
+      "item_name": "Spirit Saw",
+      "model_id": 40001081,
+      "rare": 1,
+      "sell_crystal": 888,
+      "skill_id": 0,
+      "skin_item_id": 50002027,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001081,
+      "skin_skill_hero_id": 10001081,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001191
+      ],
+      "item_name": "Academy Walk",
+      "model_id": 40001191,
+      "rare": 2,
+      "sell_crystal": 888,
+      "skill_id": 80010191,
+      "skin_item_id": 50002028,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001191,
+      "skin_skill_hero_id": 10001191,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001230,
+        11001230
+      ],
+      "item_name": "Eternal Oath",
+      "model_id": 40001230,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80010230,
+      "skin_item_id": 50002031,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001230,
+      "skin_skill_hero_id": 10001230,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001062,
+        11001062
+      ],
+      "item_name": "Lazy Nap",
+      "model_id": 40001062,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80010062,
+      "skin_item_id": 50002039,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001062,
+      "skin_skill_hero_id": 10001062,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001212
+      ],
+      "item_name": "Sakura Feather",
+      "model_id": 40001212,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80010212,
+      "skin_item_id": 50002049,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001212,
+      "skin_skill_hero_id": 10001212,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001221,
+        11001221
+      ],
+      "item_name": "Sakura Season",
+      "model_id": 40001221,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80010221,
+      "skin_item_id": 50002051,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001221,
+      "skin_skill_hero_id": 10001221,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001236
+      ],
+      "item_name": "Double Joy",
+      "model_id": 40001236,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80010236,
+      "skin_item_id": 50002058,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001236,
+      "skin_skill_hero_id": 10001236,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001234,
+        11001234
+      ],
+      "item_name": "Beauty Bosom",
+      "model_id": 40001234,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80010234,
+      "skin_item_id": 50002065,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001234,
+      "skin_skill_hero_id": 10001234,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001147
+      ],
+      "item_name": "Sword Ambition",
+      "model_id": 40001147,
+      "rare": 1,
+      "sell_crystal": 888,
+      "skill_id": 0,
+      "skin_item_id": 50002069,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001147,
+      "skin_skill_hero_id": 10001147,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001223
+      ],
+      "item_name": "Street Trend",
+      "model_id": 40001223,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80010223,
+      "skin_item_id": 50002075,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001223,
+      "skin_skill_hero_id": 10001223,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001229
+      ],
+      "item_name": "Glimpse",
+      "model_id": 40001229,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80010229,
+      "skin_item_id": 50002076,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001229,
+      "skin_skill_hero_id": 10001229,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001218,
+        11001218
+      ],
+      "item_name": "Wild Whisper",
+      "model_id": 40001218,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80010218,
+      "skin_item_id": 50002077,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001218,
+      "skin_skill_hero_id": 10001218,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001249
+      ],
+      "item_name": "Summer Party",
+      "model_id": 40001249,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80010249,
+      "skin_item_id": 50002081,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001249,
+      "skin_skill_hero_id": 10001249,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001228,
+        11001228
+      ],
+      "item_name": "Dawn Charm",
+      "model_id": 40001228,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80010228,
+      "skin_item_id": 50002084,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001228,
+      "skin_skill_hero_id": 10001228,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001251,
+        11001251
+      ],
+      "item_name": "Covenant",
+      "model_id": 40001251,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80010251,
+      "skin_item_id": 50002088,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001251,
+      "skin_skill_hero_id": 10001251,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001192
+      ],
+      "item_name": "Hot Wave",
+      "model_id": 40002192,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80020192,
+      "skin_item_id": 50002101,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001192,
+      "skin_skill_hero_id": 10001192,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001146
+      ],
+      "item_name": "Charm Summer",
+      "model_id": 40001146,
+      "rare": 1,
+      "sell_crystal": 888,
+      "skill_id": 0,
+      "skin_item_id": 50002107,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001146,
+      "skin_skill_hero_id": 10001146,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001254
+      ],
+      "item_name": "Steam Revolution",
+      "model_id": 40001254,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80010254,
+      "skin_item_id": 50002111,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001254,
+      "skin_skill_hero_id": 10001254,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001247
+      ],
+      "item_name": "Cloud Dancer",
+      "model_id": 40001247,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80010247,
+      "skin_item_id": 50002113,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001247,
+      "skin_skill_hero_id": 10001247,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001258,
+        11001258
+      ],
+      "item_name": "Marshy Dream",
+      "model_id": 40001258,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80010258,
+      "skin_item_id": 50002114,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001258,
+      "skin_skill_hero_id": 10001258,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001245,
+        11001245
+      ],
+      "item_name": "Dragon Envoy",
+      "model_id": 40001245,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80010245,
+      "skin_item_id": 50002116,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001245,
+      "skin_skill_hero_id": 10001245,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001012,
+        11001012
+      ],
+      "item_name": "Rose Vow",
+      "model_id": 40002012,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 0,
+      "skin_item_id": 50002117,
+      "skin_last_time": 0,
+      "skin_numb": 3,
+      "skin_partner_id": 10001012,
+      "skin_skill_hero_id": 10001012,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001259
+      ],
+      "item_name": "Whirling Dream",
+      "model_id": 40001259,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80010259,
+      "skin_item_id": 50002123,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001259,
+      "skin_skill_hero_id": 10001259,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001261
+      ],
+      "item_name": "Colorful Childhood",
+      "model_id": 40001261,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80010261,
+      "skin_item_id": 50002124,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001261,
+      "skin_skill_hero_id": 10001261,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        11008
+      ],
+      "item_name": "Summer Fireworks",
+      "model_id": 41008,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 810008,
+      "skin_item_id": 50002137,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 11008,
+      "skin_skill_hero_id": 11008,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        11012
+      ],
+      "item_name": "Fleeting Smile",
+      "model_id": 41012,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 810012,
+      "skin_item_id": 50002138,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 11012,
+      "skin_skill_hero_id": 11012,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001159
+      ],
+      "item_name": "Valiance",
+      "model_id": 40001159,
+      "rare": 1,
+      "sell_crystal": 888,
+      "skill_id": 0,
+      "skin_item_id": 50002153,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001159,
+      "skin_skill_hero_id": 10001159,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001244
+      ],
+      "item_name": "White Moonlight",
+      "model_id": 40001244,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80010244,
+      "skin_item_id": 50002154,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001244,
+      "skin_skill_hero_id": 10001244,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001097,
+        11001097
+      ],
+      "item_name": "Charm Vows",
+      "model_id": 40002097,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 0,
+      "skin_item_id": 50002158,
+      "skin_last_time": 0,
+      "skin_numb": 2,
+      "skin_partner_id": 10001097,
+      "skin_skill_hero_id": 10001097,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001208
+      ],
+      "item_name": "Gaming Girl",
+      "model_id": 40001208,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80010208,
+      "skin_item_id": 50002159,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001208,
+      "skin_skill_hero_id": 10001208,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001209
+      ],
+      "item_name": "Sweet Lemon",
+      "model_id": 40002209,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 0,
+      "skin_item_id": 50002160,
+      "skin_last_time": 0,
+      "skin_numb": 2,
+      "skin_partner_id": 10001209,
+      "skin_skill_hero_id": 10001209,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001233
+      ],
+      "item_name": "Night Park",
+      "model_id": 40001233,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80010233,
+      "skin_item_id": 50002170,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001233,
+      "skin_skill_hero_id": 10001233,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001055,
+        11001055
+      ],
+      "item_name": "Pure Allure ",
+      "model_id": 40002055,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 0,
+      "skin_item_id": 50002173,
+      "skin_last_time": 0,
+      "skin_numb": 3,
+      "skin_partner_id": 10001055,
+      "skin_skill_hero_id": 10001055,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001238,
+        11001238
+      ],
+      "item_name": "Graffiti Art",
+      "model_id": 40001238,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80010238,
+      "skin_item_id": 50002174,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001238,
+      "skin_skill_hero_id": 10001238,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001260,
+        11001260
+      ],
+      "item_name": "Night Rose",
+      "model_id": 40001260,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80010260,
+      "skin_item_id": 50002177,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001260,
+      "skin_skill_hero_id": 10001260,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001265
+      ],
+      "item_name": "Mafia Beauty",
+      "model_id": 40001265,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80010265,
+      "skin_item_id": 50002178,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001265,
+      "skin_skill_hero_id": 10001265,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001255
+      ],
+      "item_name": "Poker Queen",
+      "model_id": 40001255,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80010255,
+      "skin_item_id": 50002180,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001255,
+      "skin_skill_hero_id": 10001255,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        11010
+      ],
+      "item_name": "Night Snipper",
+      "model_id": 41010,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 810010,
+      "skin_item_id": 50002181,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 11010,
+      "skin_skill_hero_id": 11010,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001070,
+        11001070
+      ],
+      "item_name": "Instant Firework",
+      "model_id": 40001070,
+      "rare": 1,
+      "sell_crystal": 888,
+      "skill_id": 0,
+      "skin_item_id": 50002185,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001070,
+      "skin_skill_hero_id": 10001070,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001013,
+        11001013
+      ],
+      "item_name": "Winter Elf",
+      "model_id": 40001013,
+      "rare": 2,
+      "sell_crystal": 888,
+      "skill_id": 80010013,
+      "skin_item_id": 50005020,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001013,
+      "skin_skill_hero_id": 10001013,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001035,
+        11001035
+      ],
+      "item_name": "Snow Shoveler",
+      "model_id": 40001035,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 81020035,
+      "skin_item_id": 50005021,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001035,
+      "skin_skill_hero_id": 10001035,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001029,
+        11001029
+      ],
+      "item_name": "Poker Maid",
+      "model_id": 40001029,
+      "rare": 1,
+      "sell_crystal": 888,
+      "skill_id": 0,
+      "skin_item_id": 50005022,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001029,
+      "skin_skill_hero_id": 10001029,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001030,
+        11001030
+      ],
+      "item_name": "Future Tech",
+      "model_id": 40001030,
+      "rare": 2,
+      "sell_crystal": 888,
+      "skill_id": 80010030,
+      "skin_item_id": 50005035,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001030,
+      "skin_skill_hero_id": 10001030,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001059,
+        11001059
+      ],
+      "item_name": "Wonder Heroine",
+      "model_id": 40001059,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80010059,
+      "skin_item_id": 50005038,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001059,
+      "skin_skill_hero_id": 10001059,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001087,
+        11001087
+      ],
+      "item_name": "Dark Flame",
+      "model_id": 40001087,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80010087,
+      "skin_item_id": 50005074,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001087,
+      "skin_skill_hero_id": 10001087,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001035,
+        11001035
+      ],
+      "item_name": "Thor",
+      "model_id": 40002035,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80010035,
+      "skin_item_id": 50005075,
+      "skin_last_time": 0,
+      "skin_numb": 2,
+      "skin_partner_id": 10001035,
+      "skin_skill_hero_id": 10001035,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001050,
+        11001050
+      ],
+      "item_name": "Blossoming Love",
+      "model_id": 40011050,
+      "rare": 2,
+      "sell_crystal": 888,
+      "skill_id": 80010050,
+      "skin_item_id": 50005078,
+      "skin_last_time": 0,
+      "skin_numb": 2,
+      "skin_partner_id": 10001050,
+      "skin_skill_hero_id": 10001050,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001051,
+        11001051
+      ],
+      "item_name": "Winter's Love",
+      "model_id": 40011051,
+      "rare": 2,
+      "sell_crystal": 888,
+      "skill_id": 80010051,
+      "skin_item_id": 50005079,
+      "skin_last_time": 0,
+      "skin_numb": 2,
+      "skin_partner_id": 10001051,
+      "skin_skill_hero_id": 10001051,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001020,
+        11001020
+      ],
+      "item_name": "Special Force",
+      "model_id": 40001020,
+      "rare": 1,
+      "sell_crystal": 888,
+      "skill_id": 0,
+      "skin_item_id": 50005080,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001020,
+      "skin_skill_hero_id": 10001020,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001038,
+        11001038
+      ],
+      "item_name": "Bathing Lass",
+      "model_id": 40011038,
+      "rare": 2,
+      "sell_crystal": 888,
+      "skill_id": 80010038,
+      "skin_item_id": 50005129,
+      "skin_last_time": 0,
+      "skin_numb": 2,
+      "skin_partner_id": 10001038,
+      "skin_skill_hero_id": 10001038,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001111,
+        11001111
+      ],
+      "item_name": "Custom Camerist",
+      "model_id": 40001111,
+      "rare": 2,
+      "sell_crystal": 888,
+      "skill_id": 80010111,
+      "skin_item_id": 50005132,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001111,
+      "skin_skill_hero_id": 10001111,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001015,
+        11001015
+      ],
+      "item_name": "Snow Queen",
+      "model_id": 40011015,
+      "rare": 2,
+      "sell_crystal": 888,
+      "skill_id": 80010015,
+      "skin_item_id": 50005133,
+      "skin_last_time": 0,
+      "skin_numb": 2,
+      "skin_partner_id": 10001015,
+      "skin_skill_hero_id": 10001015,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001056,
+        11001056
+      ],
+      "item_name": "Lantern Girl",
+      "model_id": 40011056,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80020056,
+      "skin_item_id": 50005134,
+      "skin_last_time": 0,
+      "skin_numb": 2,
+      "skin_partner_id": 10001056,
+      "skin_skill_hero_id": 10001056,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001086
+      ],
+      "item_name": "Detective Girl",
+      "model_id": 40001086,
+      "rare": 2,
+      "sell_crystal": 888,
+      "skill_id": 80010086,
+      "skin_item_id": 50005135,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001086,
+      "skin_skill_hero_id": 10001086,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001055,
+        11001055
+      ],
+      "item_name": "Tambourin",
+      "model_id": 40011055,
+      "rare": 2,
+      "sell_crystal": 888,
+      "skill_id": 80020055,
+      "skin_item_id": 50005136,
+      "skin_last_time": 0,
+      "skin_numb": 2,
+      "skin_partner_id": 10001055,
+      "skin_skill_hero_id": 10001055,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001011,
+        11001011
+      ],
+      "item_name": "Lotus Girl",
+      "model_id": 40001011,
+      "rare": 2,
+      "sell_crystal": 888,
+      "skill_id": 80010011,
+      "skin_item_id": 50005137,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001011,
+      "skin_skill_hero_id": 10001011,
+      "stack": 999
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001110,
+        11001110
+      ],
+      "item_name": "Warming Heart",
+      "model_id": 40002110,
+      "rare": 2,
+      "sell_crystal": 888,
+      "skill_id": 80020110,
+      "skin_item_id": 50005138,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001110,
+      "skin_skill_hero_id": 10001110,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001112,
+        11001112
+      ],
+      "item_name": "Loving Heart",
+      "model_id": 40001112,
+      "rare": 2,
+      "sell_crystal": 888,
+      "skill_id": 80010112,
+      "skin_item_id": 50005139,
+      "skin_last_time": 0,
+      "skin_numb": 2,
+      "skin_partner_id": 10001112,
+      "skin_skill_hero_id": 10001112,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001151,
+        11001151
+      ],
+      "item_name": "Chopping Summer",
+      "model_id": 40001151,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80010151,
+      "skin_item_id": 50005140,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001151,
+      "skin_skill_hero_id": 10001151,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001007,
+        11001007
+      ],
+      "item_name": "Sundae Girl",
+      "model_id": 40001007,
+      "rare": 2,
+      "sell_crystal": 888,
+      "skill_id": 80010007,
+      "skin_item_id": 50005141,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001007,
+      "skin_skill_hero_id": 10001007,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001012,
+        11001012
+      ],
+      "item_name": "Lotus Queen",
+      "model_id": 40011012,
+      "rare": 2,
+      "sell_crystal": 888,
+      "skill_id": 80010012,
+      "skin_item_id": 50005142,
+      "skin_last_time": 0,
+      "skin_numb": 2,
+      "skin_partner_id": 10001012,
+      "skin_skill_hero_id": 10001012,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001155,
+        11001155
+      ],
+      "item_name": "Beach Doctor",
+      "model_id": 40001155,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80010155,
+      "skin_item_id": 50005143,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001155,
+      "skin_skill_hero_id": 10001155,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001173
+      ],
+      "item_name": "Gamble Saint",
+      "model_id": 40001173,
+      "rare": 2,
+      "sell_crystal": 888,
+      "skill_id": 80010173,
+      "skin_item_id": 50005144,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001173,
+      "skin_skill_hero_id": 10001173,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001032,
+        11001032
+      ],
+      "item_name": "Sunshine Girl",
+      "model_id": 40001032,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80010032,
+      "skin_item_id": 50005145,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001032,
+      "skin_skill_hero_id": 10001032,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001071,
+        11001071
+      ],
+      "item_name": "Tea Millet",
+      "model_id": 40001071,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80010071,
+      "skin_item_id": 50005146,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001071,
+      "skin_skill_hero_id": 10001071,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001093,
+        11001093
+      ],
+      "item_name": "Shark Bento",
+      "model_id": 40002093,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80020093,
+      "skin_item_id": 50005147,
+      "skin_last_time": 0,
+      "skin_numb": 2,
+      "skin_partner_id": 10001093,
+      "skin_skill_hero_id": 10001093,
+      "stack": 999
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001010,
+        11001010
+      ],
+      "item_name": "Knight Beauty",
+      "model_id": 40001010,
+      "rare": 2,
+      "sell_crystal": 888,
+      "skill_id": 80010010,
+      "skin_item_id": 50005150,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001010,
+      "skin_skill_hero_id": 10001010,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001084,
+        11001084
+      ],
+      "item_name": "Octopus Cuisine",
+      "model_id": 40001084,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80010084,
+      "skin_item_id": 50005151,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001084,
+      "skin_skill_hero_id": 10001084,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001009,
+        11001009
+      ],
+      "item_name": "Terrors King",
+      "model_id": 40002009,
+      "rare": 2,
+      "sell_crystal": 888,
+      "skill_id": 80010009,
+      "skin_item_id": 50005152,
+      "skin_last_time": 0,
+      "skin_numb": 2,
+      "skin_partner_id": 10001009,
+      "skin_skill_hero_id": 10001009,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001104
+      ],
+      "item_name": "Candy Bunny",
+      "model_id": 40001104,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80010104,
+      "skin_item_id": 50005153,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001104,
+      "skin_skill_hero_id": 10001104,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001109,
+        11001109
+      ],
+      "item_name": "Cats' Party",
+      "model_id": 40001109,
+      "rare": 4,
+      "sell_crystal": 888,
+      "skill_id": 80010109,
+      "skin_item_id": 50005155,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001109,
+      "skin_skill_hero_id": 10001109,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001210
+      ],
+      "item_name": "Sweet Cake",
+      "model_id": 40001210,
+      "rare": 2,
+      "sell_crystal": 888,
+      "skill_id": 80010210,
+      "skin_item_id": 50005156,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001210,
+      "skin_skill_hero_id": 10001210,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001106,
+        11001106
+      ],
+      "item_name": "Bubble Illusion",
+      "model_id": 40002106,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80020106,
+      "skin_item_id": 50005157,
+      "skin_last_time": 0,
+      "skin_numb": 2,
+      "skin_partner_id": 10001106,
+      "skin_skill_hero_id": 10001106,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001099
+      ],
+      "item_name": "Slave Girl",
+      "model_id": 40001099,
+      "rare": 1,
+      "sell_crystal": 888,
+      "skill_id": 0,
+      "skin_item_id": 50005158,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001099,
+      "skin_skill_hero_id": 10001099,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001128,
+        11001128
+      ],
+      "item_name": "Helm Knight",
+      "model_id": 40001128,
+      "rare": 2,
+      "sell_crystal": 888,
+      "skill_id": 80010128,
+      "skin_item_id": 50005159,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001128,
+      "skin_skill_hero_id": 10001128,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001105,
+        11001105
+      ],
+      "item_name": "Chinese Cook",
+      "model_id": 40001105,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80010105,
+      "skin_item_id": 50005160,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001105,
+      "skin_skill_hero_id": 10001105,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001113,
+        11001113
+      ],
+      "item_name": "Slaughter Bride",
+      "model_id": 40001113,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80010113,
+      "skin_item_id": 50005161,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001113,
+      "skin_skill_hero_id": 10001113,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001091
+      ],
+      "item_name": "Xmas Clown",
+      "model_id": 40001091,
+      "rare": 2,
+      "sell_crystal": 888,
+      "skill_id": 80010091,
+      "skin_item_id": 50005173,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001091,
+      "skin_skill_hero_id": 10001091,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001141
+      ],
+      "item_name": "Intimate Secretary",
+      "model_id": 40001141,
+      "rare": 1,
+      "sell_crystal": 888,
+      "skill_id": 0,
+      "skin_item_id": 50005183,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001141,
+      "skin_skill_hero_id": 10001141,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001078
+      ],
+      "item_name": "Snowboarder",
+      "model_id": 40001078,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80010078,
+      "skin_item_id": 50005192,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001078,
+      "skin_skill_hero_id": 10001078,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001222
+      ],
+      "item_name": "Fan Loli",
+      "model_id": 40001222,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80010222,
+      "skin_item_id": 50005193,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001222,
+      "skin_skill_hero_id": 10001222,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001175,
+        11001175
+      ],
+      "item_name": "Gunfighter",
+      "model_id": 40001175,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80010175,
+      "skin_item_id": 50005194,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001175,
+      "skin_skill_hero_id": 10001175,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001167,
+        11001167
+      ],
+      "item_name": "Red Rose",
+      "model_id": 40001167,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80010167,
+      "skin_item_id": 50005195,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001167,
+      "skin_skill_hero_id": 10001167,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001207
+      ],
+      "item_name": "Last Dance",
+      "model_id": 40001207,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80010207,
+      "skin_item_id": 50005246,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001207,
+      "skin_skill_hero_id": 10001207,
+      "stack": 99
+    },
+    {
+      "accepted_hero_table_ids": [
+        10001240
+      ],
+      "item_name": "Smirk Dancer",
+      "model_id": 40001240,
+      "rare": 3,
+      "sell_crystal": 888,
+      "skill_id": 80010240,
+      "skin_item_id": 50005248,
+      "skin_last_time": 0,
+      "skin_numb": 1,
+      "skin_partner_id": 10001240,
+      "skin_skill_hero_id": 10001240,
+      "stack": 99
+    }
+  ],
+  "summary": {
+    "canonical_permanent_skins": 262,
+    "cosmetic_only": 37,
+    "girls": 212,
+    "skill_bearing": 225
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "pass": "145.0",
+  "status": "PHASE_A_STATIC_REGRESSION_ACCEPTED",
+  "scope": "Permanent Girl skin ownership/equip foundation only",
+  "added": [
+    "gxb_backend/content/skin_source_catalog.py",
+    "gxb_backend/state/skin_ownership_service.py",
+    "data/skin_source_catalog.json",
+    "tools/build_skin_source_catalog.py",
+    "tools/selftest_pass145_skin_ownership.py",
+    "MID60/MID61 bindings through existing HeroHandlers/EngineDispatcher"
+  ],
+  "owners_reused": ["HeroRepository", "StackInventory", "PlayerUnitOfWork"],
+  "behavior": {
+    "new_permanent_skin": "consume one item, append permanent model ownership, preserve current_skin_id",
+    "owned_permanent_skin": "equip/switch current_skin_id, consume zero items",
+    "skin_cancel": "set current_skin_id=0, preserve skin_ids"
+  },
+  "fail_closed": ["temporary skins", "temporary-to-permanent same-model conversion", "item 50005191", "Pet skin MID60/MID61 overload"]
+}

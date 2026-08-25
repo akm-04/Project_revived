@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "pass": "152.0",
+  "phase": "C",
+  "status": "STATIC_REGRESSION_ACCEPTED_RUNTIME_PENDING_PHASE_D",
+  "ota": {
+    "version": "1.631.9",
+    "package": "gxb-local-1.631.9.zip",
+    "volume": 1,
+    "entries": 138,
+    "volume_sha256": "bd578e5a0580f9cb0cfb3dfac0c6e61d29842ea169c5c5f7882b98ad0ae042ff",
+    "volume_md5": "f09762871d1a3bcb22e1a7b7ae9bb592"
+  },
+  "synthetic_catalog": {
+    "skin_products": 262,
+    "elemental_products": 10,
+    "total": 272,
+    "client_rows": "giftbag.lua + gift.lua in src_32/src_64"
+  },
+  "activation": {
+    "mid354_gate": "resource_version >= 1.631.9",
+    "purchase_gate": "resource_version >= 1.631.9",
+    "bridge": "direct products OR any charge_id currently advertised in SelfPlayer.vipGiftBoxData"
+  },
+  "skin_settlement": {
+    "owned_matching_girl": "SkinOwnershipService direct permanent ownership; transient client-facing item + skin_ids + remove_item=1",
+    "no_matching_girl": "RewardTransactionService -> StackInventory physical skin item",
+    "one_shot": true,
+    "temporary_same_model": "fail_closed"
+  },
+  "elemental_settlement": {
+    "repeatable": true,
+    "grant": "one source package item through RewardTransactionService"
+  },
+  "progression": {
+    "crystal_delta": 0,
+    "charge_delta": 0,
+    "vip_progression_delta": 0
+  },
+  "unchanged_gates": {
+    "direct_hero_packs": 3,
+    "missing_gift_packs": 15,
+    "temporary_skin_lifecycle": "fail_closed"
+  },
+  "architecture": {
+    "ros_changed": false,
+    "parallel_inventory_owner": false,
+    "parallel_economy_owner": false,
+    "parallel_uow_owner": false,
+    "receipt_identity_changed": false
+  }
+}

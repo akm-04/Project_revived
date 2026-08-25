@@ -1,3 +1,9 @@
+# Backend machine memory — Pass152.0
+
+Canonical implementation: `gxb-backend-v0.16.7-pass152.0`. Phase C is static/regression accepted with cumulative OTA 1.631.9 and resource-version-gated 272 synthetic EOL Recharge products. Pass151 MID2979 is runtime accepted. Next gate is Phase D client smoke/reconciliation; then Generated/Unique and Girls/Equipment. Existing canonical Commerce/Reward/Inventory/Skin/UoW owners are reused and ROS is unchanged.
+
+---
+
 # Backend machine memory — Pass137.0
 
 Canonical implementation: `gxb-backend-v0.15.9-pass137.0`.

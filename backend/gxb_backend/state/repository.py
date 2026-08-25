@@ -383,6 +383,9 @@ class StateRepository:
     def get_hero_repository(self) -> HeroRepository:
         return self.get_services().heroes
 
+    def get_skin_ownership_service(self):
+        return self.get_services().skin_ownership
+
     def get_inventory_repository(self) -> InventoryRepository:
         return self.get_services().inventory
 

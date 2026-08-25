@@ -38,3 +38,5 @@ __all__ = [
     "UnknownContentReference",
 ]
 
+
+from .skin_source_catalog import SkinSourceCatalog

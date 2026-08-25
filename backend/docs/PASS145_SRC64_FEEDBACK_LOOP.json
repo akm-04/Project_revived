@@ -1,0 +1,17 @@
+{
+  "pass": "145.0",
+  "phase": "Skins+Recharge Phase A - Permanent Skin Ownership Foundation",
+  "effective_src64": "app-assets/output/assets/src_64",
+  "effective_src64_file_count": 4370,
+  "source_facts": [
+    "MID60 SKIN_ON is dual-purpose for Girls: new permanent skin activation consumes one physical item and unlocks ownership while preserving the currently equipped skin; already-owned skin selection uses the same MID60 to equip/switch without item consumption.",
+    "MID61 SKIN_CANCEL unequips the active Girl skin without removing permanent ownership.",
+    "BackpackWindow blocks Spend for an already-owned permanent skin before sending MID60.",
+    "NormalHero/SuperHero serialize permanent skin ownership as model_id -> -1 when map-shaped and preserve timed skin expiries separately.",
+    "MID60/MID61 are also reused by PetAttributeWindow0 with a different Pet skin response contract; Pet skin handling is outside Girl Phase A and must fail closed here.",
+    "skin_skill.lua defines 262 canonical permanent Girl skins across 212 Girls; 225 have skin skills and 37 are cosmetic-only."
+  ],
+  "correction_to_pass144_plan": "New physical skin activation unlocks ownership but does NOT auto-equip; HeroMainWindow explicitly retains the existing current skin. Equip/switch is the already-owned MID60 branch.",
+  "deferred": ["two temporary 3-day skin items", "source-inconsistent item 50005191", "Pet MID60/MID61 skin overload"],
+  "epistemic": "SOURCE_FACT except fail-closed implementation boundaries, which are IMPLEMENTATION/COMPATIBILITY_DECISION"
+}

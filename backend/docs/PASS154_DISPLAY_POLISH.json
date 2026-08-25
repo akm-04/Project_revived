@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "pass": "154.0",
+  "classification": "IMPLEMENTATION_COMPATIBILITY_DECISION",
+  "scope": "SYNTHETIC_RECHARGE_DISPLAY_NAME_POLISH_ONLY",
+  "source_crosscheck": {
+    "effective_src64": "app-assets/output/assets/src_64",
+    "vip_recharge_item_contract": "VipRechargeItem.lua displays chargeName in txt_gift_desc; giftbag name/name_new are presentation fields",
+    "elemental_names_basis": "source item names/capabilities from item.lua + recovered MID241 operation matrix",
+    "skin_identity_basis": "canonical 262-skin plan/source catalog; display ordinal does not replace canonical skin_name/model_id/skin_skill_id"
+  },
+  "changes": {
+    "skin_products": 262,
+    "elemental_products": 10,
+    "ota_from": "1.631.9",
+    "ota_to": "1.631.10",
+    "ota_entries": 138,
+    "skin_name_policy": "<trimmed Girl display name> <1-based ordinal in canonical synthetic plan>",
+    "elemental_names": {
+      "97002001": "Adv Elem Pick",
+      "97002002": "Elem Pick",
+      "97002003": "Adv Elem Pack",
+      "97002004": "Elem Pack",
+      "97002005": "Adv Lightning",
+      "97002006": "Adv Fire",
+      "97002007": "Adv Water",
+      "97002008": "Lightning",
+      "97002009": "Fire",
+      "97002010": "Water"
+    }
+  },
+  "nonchanges": [
+    "charge_id",
+    "gift_id",
+    "source_item_id",
+    "model_id",
+    "skin_skill_id",
+    "pricing",
+    "availability semantics",
+    "settlement",
+    "VIP progression",
+    "Crystal/charge",
+    "ROS",
+    "receipt identity",
+    "UoW"
+  ],
+  "runtime_check": "NOT_REQUIRED_USER_AUTHORIZED_PRESENTATION_ONLY",
+  "ota": {
+    "package": "gxb-local-1.631.10.zip",
+    "size": 2236166,
+    "md5": "bd5b6df56309cbfef7d51c91a2d378aa",
+    "sha256": "b10215f5d4f8a83cc60ee1d1f3c15ac6a8ff1d946f7a0d0cd6c16df11cf2fa52"
+  }
+}

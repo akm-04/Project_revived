@@ -1,0 +1,18 @@
+{
+  "pass": "145.0",
+  "focused": "10/10 PASS",
+  "regressions": {
+    "pass72_hero_progression": "PASS",
+    "pass73_advanced_progression": "PASS",
+    "pass96_economy_vip_cleanup": "PASS",
+    "pass129_architecture_hygiene": "5/5 PASS",
+    "pass131_campaign_exp_mana": "PASS",
+    "pass137_magic_ros": "5/5 PASS",
+    "pass138_mid241_deterministic": "13/13 PASS",
+    "pass140_mid241_random": "9/9 PASS",
+    "pass141_phase4_qa": "PASS",
+    "compileall": "PASS"
+  },
+  "runtime": "NOT YET TESTED; Phase D later",
+  "ota": "1.631.8 unchanged"
+}

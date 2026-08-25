@@ -75,6 +75,22 @@ class HeroHandlers:
             req.get("board_model_id", 0),
         )
 
+    def skin_on(self, req: dict) -> dict:
+        """MID60: permanent Girl skin acquire-or-equip; temporary/Pet lanes fail closed."""
+        return self.ctx.state.get_skin_ownership_service().skin_on(
+            req.get("partner_id"), req.get("item_id")
+        )
+
+    def skin_cancel(self, req: dict) -> dict:
+        """MID61: unequip a Girl skin without removing permanent ownership."""
+        return self.ctx.state.get_skin_ownership_service().skin_cancel(req.get("partner_id"))
+
+    def use_illusion_skin_item(self, req: dict) -> dict:
+        """MID2979: select owned cosmetic appearance independently of skin skill."""
+        return self.ctx.state.get_skin_ownership_service().use_illusion_skin_item(
+            req.get("partner_id"), req.get("item_id")
+        )
+
     def load_pets(self, req: dict) -> dict:
         return self.ctx.state.get_player().pets_payload()
 

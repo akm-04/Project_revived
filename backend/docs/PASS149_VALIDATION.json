@@ -1,0 +1,30 @@
+{
+  "pass": "149.0",
+  "focused": "9/9 PASS",
+  "focused_checks": [
+    "fresh src_64 giftbag metadata rebuild is byte-identical",
+    "all 265 fixed B2 rewards preflight through canonical owners",
+    "MID354 chain visibility + source-complete is_open=1 EOL reactivation",
+    "Pack Crystal grants no implicit VIP progression",
+    "explicit gift.vip_exp increments cumulative charge and re-derives VIP",
+    "VIP primitive rejects out-of-UoW mutation",
+    "giftbag purchase receipt replay is exactly-once",
+    "B3 random/Hero-deferred products reject authorization",
+    "commit failure rolls back items/economy/VIP/history/receipt",
+    "production owner identity remains shared"
+  ],
+  "regressions": {
+    "pass88_direct_commerce": "PASS",
+    "pass88_purchase_route": "PASS",
+    "pass145_skin_ownership": "10/10 PASS",
+    "pass140_mid241_random": "9/9 PASS",
+    "pass138_mid241_deterministic": "13/13 PASS",
+    "pass137_magic_ros": "5/5 PASS",
+    "pass129_architecture_hygiene": "5/5 PASS",
+    "pass131_campaign_exp_mana": "10/10 PASS",
+    "compileall": "PASS"
+  },
+  "historical_test_note": "Pass87's old giftbags=[] assertion is intentionally superseded by Phase B2 and is preserved as historical provenance rather than rewritten.",
+  "runtime": "NOT YET CLIENT TESTED; Recharge runtime closure remains Phase D after Phase B/C.",
+  "ota": "1.631.8 unchanged"
+}

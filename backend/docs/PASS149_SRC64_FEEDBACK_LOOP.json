@@ -1,0 +1,21 @@
+{
+  "pass": "149.0",
+  "phase": "Skins+Recharge Phase B1/B2",
+  "effective_src64": "app-assets/output/assets/src_64",
+  "effective_src64_file_count": 4370,
+  "source_facts": [
+    "giftbag.lua has 284 page-2 Recharge Pack rows; 269 retain gift.lua definitions, 15 reference missing 9979... gift IDs.",
+    "Of the 269 source-complete Pack products: 265 are fixed item/scalar bundles, 3 directly grant Girl/Hero entities, and 1 uses a recovered random dropbox.",
+    "Fixed non-Hero Pack rewards use ordinary stack items plus only crystal, mana, energy, skin_coin and explicit vip_exp scalars; no fixed type-19 sticker or type-24/HUNQI materialization occurs in this B2 surface.",
+    "Effective SelfPlayer persists cumulative charge and vip; vip.lua defines charge thresholds; ordinary Pack purchases do not count toward VIP points by default while 13 gift definitions explicitly carry vip_exp.",
+    "VipRechargeWindow renders server-returned MID354 giftbags and looks up presentation by charge_id in local giftbag.lua; source is_open only affects GiftbagTable's default ID list.",
+    "SelfPlayer:onRecharge_ handles giftbag completion items through handleRewards and cumulative scalar changes through economy sync."
+  ],
+  "implementation_boundaries": [
+    "15 missing-gift rows remain permanently fail-closed by preservation decision.",
+    "3 direct-Hero Packs remain deferred to Generated/Unique Instance Settlement.",
+    "90002112 random Pack remains deferred to Phase B3.",
+    "Historical condition/start/time are preserved as metadata but ignored for EOL availability; source one-shot and require_charge progression remain enforced."
+  ],
+  "epistemic": "Source statements are SOURCE_FACT; EOL availability and fail-closed gates are IMPLEMENTATION/COMPATIBILITY_DECISION."
+}
