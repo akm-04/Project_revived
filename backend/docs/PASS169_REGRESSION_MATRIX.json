@@ -1,0 +1,16 @@
+{
+  "pass": "169.0",
+  "status": "PASS",
+  "dedicated_h4": "7/7",
+  "h1": "8/8",
+  "h2": "8/8",
+  "h3": "9/9",
+  "gift_phase2": "13/13",
+  "gift_phase3": "9/9",
+  "architecture": "5/5",
+  "skin": "10/10 + 7/7 illusion",
+  "recharge": "9/9 B1/B2 regression + 9/9 B3 + 4/4 B4",
+  "ota": "PASS 142 cumulative entries unchanged from Pass168",
+  "source_catalog_rebuild": "BYTE_IDENTICAL",
+  "note": "H4 has no OTA patch; historical tests remain provenance and current release retains OTA 1.631.12."
+}

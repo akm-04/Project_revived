@@ -185,8 +185,21 @@ class HeroRepository:
                 hero["element_levels"] = [self._int(v) for v in element_levels[:4]]
             hero.setdefault("element_bak_equips", [])
             hero.setdefault("element_bak_levels", [])
-            hero.setdefault("spirit_equip", {})
-            hero.setdefault("spirit_item", [])
+            # Pass166 H1 / src_64 HUNQI contract: this is a positional six-slot
+            # spirit_id vector. Empty Lua tables are not an authoritative shape.
+            hero["spirit_equip"] = [max(0, self._int(v)) for v in self._fixed_six(hero.get("spirit_equip"), self._SIX_ZEROES)]
+            # Pass171 H6 reconciliation / stock-client restart evidence:
+            # NormalHero:setInfo() assigns ``spiritItems_ = hero_info.spirit_item``.
+            # On the client, any present Lua table is truthy, so an empty
+            # ``spirit_item = {}`` forces getSpiritSuitID()/getSpiritEquipsAttr()
+            # down the slot-cache path and prevents the intended Backpack
+            # fallback by persistent spirit_id after relogin.  HeroRepository
+            # owns *self-player* heroes; their canonical unique instances live
+            # in Backpack/spirit_list, so do not persist/project a duplicate
+            # per-Hero spirit object cache here.  Battle/remote projections that
+            # genuinely own complete ``spirit_item`` snapshots must populate
+            # them explicitly outside this repository.
+            hero.pop("spirit_item", None)
             hero.setdefault("practice_attr", [0, 0, 0])
             hero.setdefault("skill_book_info", {})
             hero.setdefault("inscript_items", {})

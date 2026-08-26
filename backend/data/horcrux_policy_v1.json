@@ -1,0 +1,101 @@
+{
+  "_meta": {
+    "design": "Pass163-165 accepted planning",
+    "epistemic_class": "IMPLEMENTATION_COMPATIBILITY_DECISION",
+    "note": "Unrecovered original-server behavior. Do not relabel these values as source facts.",
+    "pass": "166.0",
+    "registry_version": "horcrux_policy_v1",
+    "source_research": "Pass162 canonical Horcrux truth",
+    "wave": "H1_FOUNDATION"
+  },
+  "allocator": {
+    "minimum_next_spirit_id": 1,
+    "reuse_deleted_ids": false
+  },
+  "anomaly_overlays": {
+    "dropbox_9199043": {
+      "effective_candidates": [
+        250000264,
+        250000265,
+        250000266,
+        250000464,
+        250000465,
+        250000466,
+        250000664,
+        250000665,
+        250000666,
+        250000864,
+        250000865,
+        250000866
+      ],
+      "effective_weights": [
+        84,
+        84,
+        84,
+        84,
+        83,
+        83,
+        83,
+        83,
+        83,
+        83,
+        83,
+        83
+      ],
+      "raw_source_mutated": false,
+      "weight_sum": 1000
+    },
+    "oath_family_1011": {
+      "equip_allowed": true,
+      "suit_bonus": false
+    },
+    "victory_vow_pack_50002146": {
+      "backend_award_plane": "spirit_awards",
+      "client_patch_required": true
+    }
+  },
+  "capacity": {
+    "gods_trial_soft_entry_limit": 2000,
+    "settled_rewards_may_overflow": true
+  },
+  "decisions": {
+    "HPD-001": "Use HorcruxRepository over PlayerState.spirit_list plus minimal server-only player.horcrux.horcrux_state; never StackInventory authority.",
+    "HPD-002": "Allocate positive per-player monotonically increasing spirit_id values. Initialize/repair next_spirit_id=max(1,persisted_cursor,max(existing spirit_id)+1). Allocate current cursor then increment inside the same PlayerUnitOfWork. Never reuse deleted IDs.",
+    "HPD-003": "Choose uniformly from the exact source main selector candidates for the Spirit model. If only one candidate exists, choose deterministically with no entropy draw.",
+    "HPD-004": "Interpret sub_num_rate positionally as counts 0..sub_num and draw using the exact source weights.",
+    "HPD-005": "For the drawn secondary count, select source secondary selectors uniformly without replacement, preserving draw order as sub-list order. Do not additionally exclude a secondary solely because its materialized attribute matches the main attribute.",
+    "HPD-006": "Fresh instances start lev=0, exp=0, is_equip=0, is_lock=0, collo_count=0. main/sub store 1-based source selector indices; main_attr/sub_attr use aligned source attribute IDs; initial main_attr_value/sub_attr_value use aligned source base values exactly with no hidden variance.",
+    "HPD-007": "Process each crossed milestone 3,6,9,12,15 in ascending order. If no secondary exists, ADD is forced. If current secondary count has reached model sub_num, IMPROVE is forced. Otherwise choose ADD vs IMPROVE 50/50. ADD selects uniformly from currently absent source secondary selectors and appends it at aligned base sub_value. IMPROVE selects one existing secondary entry uniformly and adds that selector's aligned sub_strth.",
+    "HPD-008": "Consume all client-selected valid fodder and charge Mana on the full gained-EXP preview, then clamp stored target EXP to the level15 cumulative maximum and discard excess. Final lev=15 and no banked post-cap EXP.",
+    "HPD-009": "Evaluate repeat-pool rows independently in stable source row order using base10000 rate decomposition: guaranteed=rate//10000 plus one Bernoulli for residual=rate%10000. Each successful quantity materializes that many unique Horcruxes. No normalized one-of-N draw and no artificial at-least-one fallback.",
+    "HPD-010": "Treat 2000 as a soft Gods Trial entry cap, not a destructive storage ceiling. Reject manual/auto Trial start when current owned count>=2000, matching client. If an already-authorized reward transaction crosses 2000, settle all generated rewards atomically and allow temporary overflow; subsequent Trial starts remain blocked until the player reduces count. MID241 source-authorized gifts are not truncated solely by the Trial cap.",
+    "HPD-011": "Keep backend MID241 settlement canonical: selected type24 choice becomes a generated unique Horcrux returned in spirit_awards, never an ordinary stack award. During implementation, ship a bounded OTA client patch to SelectEquipWindow so its success path calls handleRewards(awards,nil,spirit_awards), matching GiftbagUseWindow. Do not invent a special server award plane.",
+    "HPD-012": "Preserve raw corrupt source rows as provenance but expose an effective compatibility overlay for TOP Def Pack B with canonical ordered candidates [250000264,250000265,250000266,250000464,250000465,250000466,250000664,250000665,250000666,250000864,250000865,250000866] and sibling-consistent weights [84,84,84,84,83,83,83,83,83,83,83,83] (sum1000). Generic gift/dropbox weighted-selection semantics remain Gift-domain owned.",
+    "HPD-013": "Allow Oath family1011 to be equipped like other position-compatible Horcruxes. It contributes its normal generated attributes but no suit bonus. Keep its high base EXP/fodder role unchanged."
+  },
+  "policy_ids": {
+    "HPD-001": "horcrux_unique_instance_repository_v1",
+    "HPD-002": "horcrux_spirit_id_per_player_monotonic_v1",
+    "HPD-003": "horcrux_main_uniform_candidate_v1",
+    "HPD-004": "horcrux_subcount_source_rate_v1",
+    "HPD-005": "horcrux_subselector_uniform_distinct_v1",
+    "HPD-006": "horcrux_source_base_materialization_v1",
+    "HPD-007": "horcrux_milestone_add_or_improve_balanced_v1",
+    "HPD-008": "horcrux_exp_cap_discard_overflow_v1",
+    "HPD-009": "horcrux_trial_repeat_rate_decomposition_v1",
+    "HPD-010": "horcrux_soft_capacity_v1",
+    "HPD-011": "horcrux_victory_vow_client_bridge_v1",
+    "HPD-012": "horcrux_pool9199043_canonical_overlay_v1",
+    "HPD-013": "horcrux_oath_equip_allowed_v1"
+  },
+  "rng_namespaces": [
+    "horcrux.generate.main",
+    "horcrux.generate.sub_count",
+    "horcrux.generate.sub_selector",
+    "horcrux.enhance.action",
+    "horcrux.enhance.new_sub",
+    "horcrux.enhance.improve_target",
+    "horcrux.trial.repeat.residual"
+  ],
+  "schema_version": 1
+}

@@ -898,6 +898,11 @@ class MultiUserDatabase:
                 changed = True
         if maintenance.heroes.normalize():
             changed = True
+        # Pass166 H1: reconcile six-slot Hero refs, instance mirrors, allocator
+        # cursors and canonical server-only horcrux_state at the durable load
+        # maintenance boundary. No gameplay reward/RNG behavior runs here.
+        if maintenance.horcrux.normalize():
+            changed = True
         if maintenance.inventory.normalize():
             changed = True
         if maintenance.world.normalize():

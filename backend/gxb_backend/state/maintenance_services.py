@@ -11,6 +11,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from gxb_backend.content import GameDataCatalog
+from gxb_backend.content.horcrux_source_catalog import HorcruxSourceCatalog
 from gxb_backend.content.summon_featured_catalog import SummonFeaturedCatalog
 
 from .campaign_composition import CampaignComposition
@@ -18,6 +19,8 @@ from .economy_repository import EconomyRepository
 from .function_state_repository import FunctionStateRepository
 from .hero_progression_repository import HeroProgressionRepository
 from .hero_repository import HeroRepository
+from .horcrux_policy import HorcruxPolicyRegistry
+from .horcrux_repository import HorcruxRepository
 from .inventory_repository import InventoryRepository
 from .player_progression_service import PlayerProgressionService
 from .player_state import PlayerState
@@ -76,6 +79,13 @@ class PlayerMaintenanceServices:
             data_dir=self.data_dir,
             economy=self.economy,
             catalog=self.catalog,
+        )
+        # Pass166 H1: maintenance uses the same Horcrux source/policy/repository
+        # contracts as request services, but performs only load-time normalization.
+        self.horcrux_source = HorcruxSourceCatalog(self.data_dir, game_data=self.catalog)
+        self.horcrux_policy = HorcruxPolicyRegistry(self.data_dir)
+        self.horcrux = HorcruxRepository(
+            player, self.horcrux_source, heroes=self.heroes
         )
         self.hero_progression = HeroProgressionRepository(
             player,

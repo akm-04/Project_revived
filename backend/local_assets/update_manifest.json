@@ -1,10 +1,10 @@
 {
   "enabled": true,
-  "version": "1.631.10",
-  "package": "gxb-local-1.631.10.zip",
+  "version": "1.631.12",
+  "package": "gxb-local-1.631.12.zip",
   "volume": 1,
-  "size": 2236166,
-  "md5": "bd5b6df56309cbfef7d51c91a2d378aa",
+  "size": 2344662,
+  "md5": "82501bf22953f3e81e6eceb71ea37d60",
   "silent": true,
   "files": [
     "src_32/app/common/utils.lua",
@@ -13,7 +13,9 @@
     "src_32/app/scenes/BattleCreate.lua",
     "src_32/app/windows/DragonBoat2017SelectTeamWindow.lua",
     "src_32/app/windows/DragonBoat2017ShopWindow.lua",
+    "src_32/app/windows/HunqiCombEditorWindow.lua",
     "src_32/app/windows/LoginWindow.lua",
+    "src_32/app/windows/SelectEquipWindow.lua",
     "src_32/app/windows/SelectTeamNewWindow.lua",
     "src_32/app/windows/SelectTeamWindow.lua",
     "src_32/app/windows/SweepWindow.lua",
@@ -82,7 +84,9 @@
     "src_64/app/scenes/BattleCreate.lua",
     "src_64/app/windows/DragonBoat2017SelectTeamWindow.lua",
     "src_64/app/windows/DragonBoat2017ShopWindow.lua",
+    "src_64/app/windows/HunqiCombEditorWindow.lua",
     "src_64/app/windows/LoginWindow.lua",
+    "src_64/app/windows/SelectEquipWindow.lua",
     "src_64/app/windows/SelectTeamNewWindow.lua",
     "src_64/app/windows/SelectTeamWindow.lua",
     "src_64/app/windows/SweepWindow.lua",
@@ -147,5 +151,5 @@
     "src_64/data/tables/translation.lua"
   ],
   "probe_only": false,
-  "note": "Pass154 cumulative OTA display polish: preserves 1.631.9 behavior/catalog; synthetic skin names are <Girl> <ordinal> and elemental package names are shortened."
+  "note": "Generated from sparse backend-local src_32/src_64 overrides. Runtime lazy res files use /res/ separately."
 }

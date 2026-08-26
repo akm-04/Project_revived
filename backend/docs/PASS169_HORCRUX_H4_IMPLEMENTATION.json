@@ -1,0 +1,53 @@
+{
+  "pass": "169.0",
+  "backend_version": "0.17.2",
+  "phase": "H4_STRENGTHENING",
+  "status": "STATIC_REGRESSION_ACCEPTED_RUNTIME_PENDING",
+  "source_reality_check": {
+    "effective_src64_files": 4370,
+    "horcrux_templates": 378,
+    "horcrux_models": 54,
+    "strengthening_rows": 90,
+    "gods_trial_stages": 42,
+    "max_level": 15,
+    "fodder_exp_rate": 0.6,
+    "mana_per_transferred_exp": 25,
+    "milestones": [3, 6, 9, 12, 15],
+    "horcrux_catalog_rebuild": "BYTE_IDENTICAL"
+  },
+  "implementation": [
+    "HorcruxSourceCatalog schema v3 strengthening facts",
+    "HorcruxEnhancementPlanner pure source/policy planning",
+    "MID3089 HorcruxService orchestration inside existing PlayerUnitOfWork",
+    "Mana debit through existing EconomyLedger",
+    "fodder removal and complete target replacement through HorcruxRepository",
+    "permanent exactly-once receipt keyed by target plus sorted fodder identity set",
+    "fail-closed fodder validation and rollback/failure injection coverage"
+  ],
+  "rng": {
+    "milestone_order": [3, 6, 9, 12, 15],
+    "namespaces": [
+      "horcrux.enhance.action",
+      "horcrux.enhance.new_sub",
+      "horcrux.enhance.improve_target"
+    ],
+    "forced_or_single_choices_consume_entropy": false,
+    "policy": "horcrux_policy_v1 compatibility policy; original-server probabilities remain unrecovered"
+  },
+  "settlement": {
+    "fodder_exp": "source base EXP + 0.6 * stored fodder EXP",
+    "mana": "25 * full transferred fodder EXP",
+    "overflow": "stored target EXP clamps at level-15 cumulative maximum; excess discarded after full cost",
+    "response": "complete updated target Horcrux instance",
+    "receipt": "permanent exact replay; no second Mana debit/fodder removal/RNG"
+  },
+  "ota": {
+    "version": "1.631.12",
+    "entries": 142,
+    "changed_in_pass169": false
+  },
+  "deferred": [
+    "H5 Gods Trial gameplay",
+    "coherent Horcrux stock-client smoke"
+  ]
+}

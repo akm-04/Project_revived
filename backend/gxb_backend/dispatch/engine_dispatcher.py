@@ -17,7 +17,9 @@ from gxb_backend.handlers.chat import ChatHandlers
 from gxb_backend.handlers.compatibility import CompatibilityHandlers
 from gxb_backend.handlers.context import HandlerContext
 from gxb_backend.handlers.guild import GuildHandlers
+from gxb_backend.handlers.gods_trial import GodsTrialHandlers
 from gxb_backend.handlers.heroes import HeroHandlers
+from gxb_backend.handlers.horcrux import HorcruxHandlers
 from gxb_backend.handlers.illusion import IllusionHandlers
 from gxb_backend.handlers.inventory import InventoryHandlers
 from gxb_backend.handlers.library import LibraryHandlers
@@ -69,6 +71,7 @@ class EngineDispatcher:
         self.practice = PracticeHandlers(ctx)
         self.player = PlayerHandlers(ctx)
         self.heroes = HeroHandlers(ctx)
+        self.horcrux = HorcruxHandlers(ctx)
         self.inventory = InventoryHandlers(ctx)
         self.library = LibraryHandlers(ctx)
         self.chat = ChatHandlers(ctx)
@@ -76,6 +79,7 @@ class EngineDispatcher:
         self.illusion = IllusionHandlers(ctx)
         self.social = SocialHandlers(ctx)
         self.guild = GuildHandlers(ctx)
+        self.gods_trial = GodsTrialHandlers(ctx)
         self.activities = ActivityHandlers(ctx)
         self.achievement = AchievementHandlers(ctx)
         self.arena = ArenaHandlers(ctx)
@@ -107,7 +111,7 @@ class EngineDispatcher:
         self.mutation_contracts = MutationContractRegistry.load(settings.mutation_contract_registry_path)
         self.mutation_firewall = MutationSafetyFirewall(self.mutation_contracts)
         self.mutation_firewall.validate_routes(self.handlers, self.protocol_registry.label)
-        self.scalar_handlers: set[int] = {getattr(MID, "GET_PLAYER_GROUP_BY_KEY", -999999)}
+        self.scalar_handlers: set[int] = {getattr(MID, "GET_PLAYER_GROUP_BY_KEY", -999999), getattr(MID, "HUNQI_GET_COLLOCATION_INFOS", -999998)}
 
     @staticmethod
     def _put(h: dict[int, Handler], name: str, handler: Handler) -> None:
@@ -231,6 +235,8 @@ class EngineDispatcher:
             "INSCRIPTION_ABANDON_REBUILD": self.heroes.advanced_hidden_fail_closed,
             "SUMMON_HERO": self.summon.summon_hero,
             "STONE_SUMMON_HERO": self.summon.stone_summon_hero,
+            "SUMMON_SUPER_HERO": self.summon.summon_super_hero,
+            "SUPER_HERO_STONE_EXCHANGE": self.summon.super_hero_stone_exchange,
             "MAGIC_SUMMON_BUY": self.summon.magic_summon,
             "MAGIC_SUMMON_SWITCH_HERO": self.summon.magic_summon_switch,
             "EDIT_PLAYER_NAME": self.system.edit_player_name,
@@ -258,6 +264,20 @@ class EngineDispatcher:
             "GET_HERO_RECOMMEND_SCORES": self.rewards.get_hero_recommend_scores,
             "BATTLE_PASS_GET_INFO": self.rewards.battle_pass_get_info,
             "HUNQI_START_GAME_GET_INFO": self.rewards.hunqi_start_game_get_info,
+            "HUNQI_START_FIGHT": self.gods_trial.start_fight,
+            "HUNQI_FIGHT_RESULT": self.gods_trial.fight_result,
+            "HUNQI_GET_CAMPAIGN_INFO": self.gods_trial.get_campaign_info,
+            "HUNQI_AUTO_FIGHT": self.gods_trial.start_auto,
+            "HUNQI_GET_AUTO_AWRAD": self.gods_trial.collect_auto,
+            "HUNQI_ENHANCE": self.horcrux.strengthen,
+            "HUNQI_LOCK": self.horcrux.lock,
+            "HUNQI_UNLOCK": self.horcrux.unlock,
+            "HUNQI_EQUIP": self.horcrux.equip,
+            "HUNQI_ONE_KEY_UNEQUIP": self.horcrux.one_key_unequip,
+            "HUNQI_GET_COLLOCATION_INFOS": self.horcrux.get_collocation_infos,
+            "HUNQI_SAVE_COLLOCATION": self.horcrux.save_collocation,
+            "DEL_COLLOCATION": self.horcrux.delete_collocation,
+            "APPLY_COLLOCATION": self.horcrux.apply_collocation,
             "SWEEP_CAMPAIGN": self.world.sweep_campaign,
             "GET_RENT_HEROS": self.world.get_rent_heros,
             "RESET_CAMPAIGN": self.world.reset_campaign,
@@ -558,6 +578,17 @@ class EngineDispatcher:
         else:
             result = handler(req)
             handler_name = getattr(handler, "__qualname__", repr(handler))
+
+        # Domain handlers may fail closed with transport-aware non-200 results.
+        # Backend.lua derives callback success/failure from HTTP status, so never
+        # run a logical mutation failure through the normal HTTP-200 projector.
+        if isinstance(result, EngineTransportResult):
+            self.runtime_logger.request(
+                mid=req_mid, name=name, route=route_class.value, req=req,
+                handler=handler_name, response=result.body, fallback=fallback_used,
+            )
+            print(f"[ENGINE DOMAIN BLOCK] status={result.status_code} {json.dumps(result.body, ensure_ascii=False, separators=(',', ':'))}")
+            return result
 
         services = self.state.current_services_or_none()
         committed_journal = []

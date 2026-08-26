@@ -8900,6 +8900,27 @@ local function pass89PendingKey(chargeID)
     return "__gxb_pass89_purchase_pending_" .. tostring(chargeID)
 end
 
+-- PASS152 PHASE C: any Recharge product currently advertised by MID354 may
+-- use the preservation bridge. This keeps unsupported/unadvertised native
+-- purchase paths untouched while activating source-native Packs plus the
+-- OTA 1.631.9 synthetic EOL catalog.
+local function pass152ShouldBridge(chargeID)
+    chargeID = tonumber(chargeID)
+    if not chargeID then
+        return false
+    end
+    if pass89DirectCharge[chargeID] then
+        return true
+    end
+    local player = xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_PLAYER)
+    for _, row in ipairs(player and player.vipGiftBoxData or {}) do
+        if tonumber(row.charge_id) == chargeID then
+            return true
+        end
+    end
+    return false
+end
+
 local function pass89GetOrCreateIntent(chargeID)
     local defaults = cc.UserDefault:getInstance()
     local key = pass89PendingKey(chargeID)
@@ -8927,7 +8948,7 @@ end
 
 function xyd.pass89Purchase(chargeID)
     chargeID = tonumber(chargeID)
-    if not chargeID or not pass89DirectCharge[chargeID] then
+    if not chargeID or not pass152ShouldBridge(chargeID) then
         return nil
     end
     local intentID = pass89GetOrCreateIntent(chargeID)
@@ -8979,6 +9000,7 @@ function xyd.pass89Purchase(chargeID)
     form("intent_id", intentID)
     form("charge_id", chargeID)
     form("platform", "lua_preservation")
+    form("resource_version", xyd.version())
     form("token", token)
     form("region", region)
     local expectedPlayer = xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_PLAYER)
@@ -8997,7 +9019,7 @@ end
 
 xyd.androidPurchase = function(arg1, arg2, chargeID, arg4, arg5, arg6, arg7)
     local id = tonumber(chargeID)
-    if id and pass89DirectCharge[id] then
+    if id and pass152ShouldBridge(id) then
         return xyd.pass89Purchase(id)
     end
     return pass89OriginalAndroidPurchase(arg1, arg2, chargeID, arg4, arg5, arg6, arg7)
@@ -9005,10 +9027,10 @@ end
 
 xyd.sdkPurchase = function(productID, canBuy, chargeID, arg4, arg5, arg6)
     local id = tonumber(chargeID)
-    if id and pass89DirectCharge[id] then
+    if id and pass152ShouldBridge(id) then
         return xyd.pass89Purchase(id)
     end
     return pass89OriginalSdkPurchase(productID, canBuy, chargeID, arg4, arg5, arg6)
 end
 
-print("[PASS89 OTA] direct Crystal purchase bridge installed")
+print("[PASS152 OTA] advertised Recharge purchase bridge installed")

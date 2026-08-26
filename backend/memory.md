@@ -1,13 +1,14 @@
-# Backend machine memory — Pass154.0
+# Backend machine memory — Pass171.0
 
-Canonical implementation: `gxb-backend-v0.16.8-pass154.0`.
+Canonical implementation: `gxb-backend-v0.17.4-pass171.0`.
 
-- Skins + Recharge Phase A-D remains functionally runtime accepted from Pass153.
-- Pass154 changes presentation metadata only. OTA **1.631.10** is cumulative over 1.631.9 and preserves all 138 entries.
-- Synthetic skin Recharge names are `<Girl> <stable per-Girl ordinal>`; canonical skin names/model/skill IDs remain unchanged in source catalogs.
-- Synthetic elemental Recharge names are concise capability labels.
-- Synthetic activation/authorization remains >=1.631.9; OTA 1.631.10 is only a display update.
-- Product IDs, gift IDs, reward semantics, prices, Crystal/charge/VIP deltas, receipts, UoW, ROS, and ownership semantics are unchanged.
-- 3 direct-Hero Packs, 15 missing-gift Packs, temporary-skin lifecycle, and MID1407 remain deferred/fail-closed as previously recorded.
-- NEXT: Horcrux RNG research/cartography against effective src_64 for multiple passes as needed; only after sufficient evidence -> architecture/design -> bounded implementation -> tests/client reconciliation.
-- Permanent rule: cross-check effective `src_64` before every backend behavioral modification and preserve epistemic classes.
+- H1-H5 Horcrux implementation remains static/regression accepted.
+- Pass170 stock-client smoke was broadly positive through generated rewards, Gods Trial manual/auto, equip/collocation and strengthening, but exposed a restart-only Hero/Horcrux crash.
+- Debug source fact: KM-Moe partner_id 10073 persisted `spirit_equip=[7,4,12,1,5,15]`; MID81 simultaneously carried complete instances for all six IDs. MID49 also emitted `spirit_item=[]`.
+- Recovered `NormalHero.lua` sets `spiritItems_ = hero_info.spirit_item`; a present empty Lua table is truthy, so `getSpiritSuitID()` / `getSpiritEquipsAttr()` select the empty slot cache instead of Backpack fallback and dereference nil after relogin.
+- Pass171 fix: canonical self-player `HeroRepository` removes/omits `spirit_item`; unique Spirit objects remain owned only by Backpack `spirit_list`, while Hero `spirit_equip` remains six-slot ID authority. Durable load normalization self-heals stale cache fields.
+- Exact smoke fixture is protected by `tools/selftest_pass171_horcrux_restart_reconciliation.py`, including a numeric materialized-attribute lookup after restart.
+- Adv. Horcrux Pack `50002168` / gift `90040453` is source-defined Oath-only: six orange Oath position candidates, weights 1666/1666/1666/1666/1666/1670 = 10000. User observation is not an RNG bug.
+- OTA remains 1.631.12 / 142 cumulative entries; Pass171 is backend-only.
+- NEXT: targeted stock-client restart re-smoke on the preserved player state. H6 remains open; do not declare runtime closure until re-smoke and follow-up reconciliation pass.
+- Permanent rule: cross-check effective `src_64` before every backend behavioral modification and preserve source fact vs runtime observation vs compatibility decision.

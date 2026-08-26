@@ -1,0 +1,73 @@
+{
+  "pass": "170.0",
+  "authority": "effective src_64",
+  "status": "PASS",
+  "correction": {
+    "prior_value": 57,
+    "correct_value": 79,
+    "field": "xyd.CampaignType.HUNQI",
+    "reason": "57 is from another enum family; actual SelectTeam/BattleCreate campaign_type uses CampaignType.HUNQI=79"
+  },
+  "wire": {
+    "3092_request": [
+      "campaign_id",
+      "campaign_type",
+      "formation",
+      "pet_id",
+      "optional rental fields"
+    ],
+    "3093_request": [
+      "campaign_id",
+      "star",
+      "campaign_type",
+      "partner_ids",
+      "pet_id"
+    ],
+    "3093_response": [
+      "items",
+      "spirit_items"
+    ],
+    "3097_response": [
+      "base_info",
+      "campaign_infos",
+      "day",
+      "day_info"
+    ],
+    "3099_request": [
+      "campaign_id",
+      "times"
+    ],
+    "3099_response": "base_info itself",
+    "3100_response": [
+      "awards",
+      "spirit_awards",
+      "base_info"
+    ]
+  },
+  "tables": {
+    "spirit_campaign_rows": 42,
+    "referenced_first_repeat_pools": 84,
+    "campaign_dropbox_rows_for_trial": 3672
+  },
+  "misc": {
+    "spirit_num_limit": 2000,
+    "spirit_energy_minute": 360,
+    "spirit_energy_up_limit": 180,
+    "spirit_auto_limit": 10,
+    "spirit_auto_time": 5
+  },
+  "rules": [
+    "week cycle",
+    "previous-clear gate",
+    "level gate",
+    "20 LP challenge cost",
+    "1 LP/6 min recovery",
+    "natural cap 180",
+    "auto reward same as manual repeat after clear"
+  ],
+  "unrecovered": [
+    "original-server repeat random implementation beyond source rates",
+    "weekly reset behavior for per-stage win_count",
+    "combat verification/difficulty time reduction server implementation"
+  ]
+}

@@ -124,6 +124,10 @@ def test_all_1431_phase2_operations_plan_and_validate_without_entropy() -> None:
             # Pass140 activates this lane; Phase138 regression only proves the
             # deterministic foundation still plans without entropy.
             continue
+        elif operation.capability in {"GENERATED_HUNQI_DEPENDENCY", "HUNQI_WITH_MISSING_ITEM_DEFS"}:
+            # Pass168 H3 activates these generated unique-instance lanes. They
+            # are covered by the H3 suite, not the historical Phase2 rejection count.
+            continue
         else:
             try:
                 services.gift_opening_planner.plan(operation.item_id, operation.gift_id, 1)
@@ -132,7 +136,7 @@ def test_all_1431_phase2_operations_plan_and_validate_without_entropy() -> None:
             else:
                 raise AssertionError(f"unsupported capability planned: {operation.item_id}/{operation.gift_id}/{operation.capability}")
     require(accepted == 1431, f"exhaustive Phase2 accepted count drift: {accepted}")
-    require(rejected == 2736 - 1431 - 100, f"exhaustive non-Phase2/3 rejection count drift: {rejected}")
+    require(rejected == 2736 - 1431 - 100 - 20, f"exhaustive currently-unsupported rejection count drift: {rejected}")
     require(entropy.requests == [], "exhaustive deterministic planning consumed entropy")
 
 
@@ -185,7 +189,6 @@ def test_unsupported_lanes_fail_before_mutation_or_entropy() -> None:
     cases = [
         (50001052, 90001088, "hero_entity"),
         (50001190, 90050001, "raw_gift_equip"),
-        (50002146, 90040415, "generated_hunqi_missing_quantity"),
         (50002142, 90040410, "spirit_energy_temporal"),
         (50002184, 90040464, "missing_gift_source"),
     ]
@@ -266,7 +269,7 @@ def test_phase2_deterministic_path_remains_entropy_free_under_phase3_composition
     _player, services, _commits, entropy = make_services({50001172: 1})
     planner = services.gift_opening_planner
     attrs = vars(planner)
-    require(set(attrs) == {"source", "random_outcomes"}, f"Gift planner composition drift: {sorted(attrs)}")
+    require(set(attrs) == {"source", "random_outcomes", "generated_rewards"}, f"Gift planner composition drift: {sorted(attrs)}")
     out = services.gift_opening.open({"item_id": 50001172, "gift_id": 90041001, "num": 1})
     require(out == {"awards": [{"table_id": 20001154, "item_num": 1}]}, f"Phase2 deterministic regression drift: {out}")
     require(entropy.requests == [], "Phase2 deterministic path consumed entropy after Phase3 composition")

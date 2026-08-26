@@ -2259,7 +2259,14 @@ function var_0_0.deleteHero(arg_135_0, arg_135_1)
 	end
 end
 
+-- PASS111 PRESERVATION OTA MID50 OPERATION ID BRIDGE
 function var_0_0.summonHero(arg_137_0, arg_137_1, arg_137_2)
+	arg_137_1 = arg_137_1 or {}
+
+	if not arg_137_1.summon_op_id or arg_137_1.summon_op_id == "" then
+		arg_137_1.summon_op_id = "mid50-" .. tostring(xyd.generateUUID())
+	end
+
 	xyd.Backend.get():request(xyd.mid.SUMMON_HERO, arg_137_1, function(arg_138_0, arg_138_1, arg_138_2)
 		if arg_138_0 == xyd.error.OK then
 			if type(arg_138_1) ~= "table" then

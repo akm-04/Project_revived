@@ -40,4 +40,7 @@ class RewardHandlers:
         return self.ctx.state.get_player().battle_pass_payload()
 
     def hunqi_start_game_get_info(self, req: dict) -> dict:
-        return self.ctx.state.get_player().hunqi_start_payload()
+        # Pass166 H1: source SelfPlayer stores the whole MID3101 response as
+        # spiritCampaignInfo. Project the canonical Gods Trial base_info family
+        # rather than the historical arbitrary hunqi_start_info compatibility bag.
+        return self.ctx.state.get_services().gods_trial.startup_payload()

@@ -1,0 +1,61 @@
+{
+  "pass": "170.0",
+  "backend_version": "0.17.3",
+  "phase": "H5_GODS_TRIAL",
+  "status": "STATIC_REGRESSION_ACCEPTED_RUNTIME_PENDING",
+  "source_reality_check": {
+    "effective_src64_files": 4370,
+    "horcrux_templates": 378,
+    "horcrux_models": 54,
+    "strengthening_rows": 90,
+    "gods_trial_stages": 42,
+    "trial_drop_pools": 84,
+    "trial_drop_rows": 3672,
+    "campaign_type_hunqi": 79,
+    "corrected_prior_design_assumption": "57 belonged to a different enum family; actual xyd.CampaignType.HUNQI used on MID3092/MID3093 wire is 79",
+    "spirit_energy_interval_seconds": 360,
+    "spirit_energy_natural_cap": 180,
+    "auto_limit": 10,
+    "auto_minutes_per_attempt": 5,
+    "manual_win_cost": 20,
+    "manual_loss_cost": 2,
+    "horcrux_catalog_schema": 4,
+    "horcrux_catalog_rebuild": "BYTE_IDENTICAL"
+  },
+  "implementation": [
+    "HorcruxSourceCatalog schema v4 Trial timing/drop source facts",
+    "GodsTrialDropPlanner stable source-order first/repeat settlement policy",
+    "GodsTrialRandomOutcomeAdapter namespace horcrux.trial.repeat.residual",
+    "MID3097 campaign/base/day projection",
+    "MID3092/MID3093 staged manual battle settlement and terminal 30005 replay",
+    "MID3099 auto-start upfront Spirit Energy debit and server auto_run_id",
+    "MID3100 maturity-gated repeat settlement and terminal replay",
+    "ordinary Trial rewards via existing InventoryGrant and unique Horcrux rewards via H3 SPIRIT owner",
+    "Spirit Energy via existing TemporalPolicyService and all mutation through PlayerUnitOfWork",
+    "manual and auto post-reward fault injection proving UoW rollback; auto start debit remains committed across later collection rollback"
+  ],
+  "drop_policy": {
+    "first_clear": "current source rows must be exact multiples of 10000; settle deterministically with no entropy",
+    "repeat": "per source row in stable order: rate//10000 guaranteed copies plus one Bernoulli for rate%10000",
+    "repeat_namespace": "horcrux.trial.repeat.residual",
+    "normalized_one_of_n": false,
+    "guaranteed_one_fallback": false
+  },
+  "state_machine": {
+    "manual": "STAGED active_battle -> one terminal settlement; matching terminal retry returns stored payload with error_code 30005",
+    "auto": "RUNNING auto state debits full cost at start; collection at complete_at settles exactly times repeat attempts; terminal payload replays until next auto start",
+    "source_day": "ServerDayClock 05:00 GMT+8 boundary; ISO weekday 1..7 derived from source day id",
+    "campaign_progress": "persistent per campaign_id compatibility decision; no recovered source reset mechanism"
+  },
+  "capacity": "soft 2000-instance Gods Trial entry cap; authorized reward may cross 2000 atomically",
+  "ota": {
+    "version": "1.631.12",
+    "entries": 142,
+    "changed_in_pass170": false
+  },
+  "deferred": [
+    "MID3096 Spirit Energy purchase remains disabled/source frontend-blocked",
+    "MID3088/MID3098 remain inactive",
+    "H6 integrated anomaly/capacity/reconciliation + stock-client Horcrux smoke"
+  ]
+}

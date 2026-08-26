@@ -11,6 +11,8 @@ from gxb_backend.content.campaign_drop_source_catalog import CampaignDropSourceC
 from gxb_backend.content.magic_summon_source_catalog import MagicSummonSourceCatalog
 from gxb_backend.content.skin_source_catalog import SkinSourceCatalog
 from gxb_backend.content.gift_opening_source_catalog import GiftOpeningSourceCatalog
+from gxb_backend.content.horcrux_source_catalog import HorcruxSourceCatalog
+from gxb_backend.content.vow_source_catalog import VowSourceCatalog
 from gxb_backend.content.summon_operation_catalog import SummonOperationCatalog
 from gxb_backend.content.summon_pool_catalog import SummonPoolCatalog
 from gxb_backend.content.sx_soul_box_source_catalog import SXSoulBoxSourceCatalog
@@ -52,6 +54,18 @@ from .hero_advanced_progression_repository import HeroAdvancedProgressionReposit
 from .hero_equipment_repository import HeroEquipmentRepository
 from .hero_progression_repository import HeroProgressionRepository
 from .hero_repository import HeroRepository
+from .horcrux_policy import HorcruxPolicyRegistry
+from .horcrux_enhancement import HorcruxEnhancementPlanner
+from .horcrux_repository import HorcruxRepository
+from .horcrux_materializer import (
+    HorcruxGeneratedRewardOwner,
+    HorcruxGiftRewardAdapter,
+    HorcruxMaterializer,
+    HorcruxRandomOutcomeAdapter,
+)
+from .horcrux_service import HorcruxService
+from .gods_trial_service import GodsTrialService
+from .gods_trial_drop_planner import GodsTrialDropPlanner, GodsTrialRandomOutcomeAdapter
 from .inventory_repository import InventoryRepository
 from .inventory_sale_service import InventorySaleService
 from .mission_repository import MissionRepository
@@ -86,6 +100,7 @@ from .summon_repository import SummonRepository
 from .tutorial_milestone_repository import TutorialMilestoneRepository
 from .unit_of_work import UnitOfWork
 from .world_repository import WorldRepository
+from .vow_service import VowService
 
 
 class RequestServices:
@@ -189,6 +204,33 @@ class RequestServices:
             temporal=self.temporal, settlement=self.mutation_settlement,
             vip_privileges=self.vip_privileges,
         )
+        # Pass166 H1 Horcrux foundation. The repository owns unique instances
+        # over player.spirit_list plus server-only horcrux_state; existing Hero,
+        # Temporal, UoW and GameDataCatalog authorities remain canonical.
+        self.horcrux_source = HorcruxSourceCatalog(self.data_dir, game_data=self.catalog)
+        self.horcrux_policy = HorcruxPolicyRegistry(self.data_dir)
+        self.horcrux_repository = HorcruxRepository(
+            player, self.horcrux_source, heroes=self.heroes, uow=self.uow
+        )
+        # Pass168 H3 generated-instance bridge. ROS remains policy-free; these
+        # adapters bind only the frozen Horcrux namespaces/materialization rules.
+        self.horcrux_random_outcomes = HorcruxRandomOutcomeAdapter(self.random_outcomes)
+        self.horcrux_materializer = HorcruxMaterializer(
+            self.horcrux_source, self.horcrux_policy, self.horcrux_random_outcomes
+        )
+        self.horcrux_generated_rewards = HorcruxGeneratedRewardOwner(
+            self.horcrux_materializer, self.horcrux_repository
+        )
+        self.horcrux_gift_rewards = HorcruxGiftRewardAdapter(
+            self.horcrux_source, self.horcrux_policy
+        )
+        self.horcrux_enhancement = HorcruxEnhancementPlanner(
+            self.horcrux_source, self.horcrux_policy, self.horcrux_random_outcomes
+        )
+        self.horcrux = HorcruxService(
+            self.horcrux_repository, self.heroes, self.horcrux_policy, self.uow,
+            economy=self.economy_ledger, enhancement=self.horcrux_enhancement,
+        )
         # Pass151 runtime reconciliation: permanent Girl skin ownership plus the
         # source-distinct MID2979 cosmetic appearance selector. MID60/MID61/MID2979
         # share the existing Hero/Stack/UoW owners; Pet MID60 overload and temporary
@@ -235,6 +277,10 @@ class RequestServices:
             player, self.data_dir, save, inventory=self.inventory, heroes=self.heroes,
             uow=self.uow, settlement=self.mutation_settlement,
         )
+        # Pass172 Vows acquisition/tab closure: source prerequisites/exchange
+        # facts remain read-only; Hero/Stack/UoW stay canonical mutation owners.
+        self.vow_source = VowSourceCatalog(self.data_dir)
+        self.vows = VowService(player, self.vow_source, self.catalog, self.heroes, self.stack_inventory, self.uow)
         self.item_sale_catalog = ItemSaleCatalog.load(self.data_dir / "item_sale_catalog.json")
         self.inventory_sales = InventorySaleService(
             player, self.item_sale_catalog, self.mutation_settlement, self.uow
@@ -242,6 +288,21 @@ class RequestServices:
         self.rewards = RewardTransactionService(
             self.catalog, self.player_progression, self.inventory, self.heroes, self.uow,
             resource_registry=self.resource_registry, settlement=self.mutation_settlement,
+        )
+        self.rewards.register_specialized_owner(
+            HorcruxGeneratedRewardOwner.OWNER, self.horcrux_generated_rewards
+        )
+        # Pass170 H5 Gods Trial: Trial owns source-row/rate policy while the
+        # shared ROS and RewardTransactionService remain mechanics/settlement owners.
+        self.gods_trial_random_outcomes = GodsTrialRandomOutcomeAdapter(self.random_outcomes)
+        self.gods_trial_drops = GodsTrialDropPlanner(
+            self.horcrux_source, self.gods_trial_random_outcomes
+        )
+        self.gods_trial = GodsTrialService(
+            player, self.horcrux_source, self.horcrux_policy,
+            self.horcrux_repository, self.temporal, self.uow,
+            heroes=self.heroes, catalog=self.catalog, rewards=self.rewards,
+            drops=self.gods_trial_drops, server_clock=self.server_clock,
         )
         # Pass149 B1/B2 + Pass150 B3: Recharge giftbags settle through the same
         # Commerce receipt/UoW plane and canonical RewardTransaction owners.
@@ -275,7 +336,7 @@ class RequestServices:
             self.random_outcomes, "gift.open"
         )
         self.gift_opening_planner = GiftOpeningPlanner(
-            self.gift_opening_source, self.gift_random_outcomes
+            self.gift_opening_source, self.gift_random_outcomes, self.horcrux_gift_rewards
         )
         self.gift_opening = GiftOpeningService(
             self.gift_opening_source,

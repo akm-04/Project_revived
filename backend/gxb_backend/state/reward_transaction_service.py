@@ -1,8 +1,8 @@
 """Typed reward adapter over the Pass69 MutationPlan settlement foundation."""
 from __future__ import annotations
 
-from dataclasses import dataclass
-from typing import Any
+from dataclasses import dataclass, field
+from typing import Any, Protocol
 
 from gxb_backend.content import CatalogNamespace, ContentRef, GameDataCatalog
 
@@ -56,11 +56,31 @@ class PartnerGrant:
 
 
 @dataclass(frozen=True)
+class SpecializedGrant:
+    """One generated/non-stack reward delegated to a registered domain owner.
+
+    RewardTransactionService owns only routing + outer-UoW atomicity.  The
+    specialized owner owns schema, identity, materialization and persistence.
+    """
+
+    owner: str
+    content: ContentRef
+    amount: int = 1
+
+
+class SpecializedRewardOwner(Protocol):
+    def validate_grant(self, grant: SpecializedGrant) -> None: ...
+
+    def apply_grant(self, grant: SpecializedGrant) -> list[dict[str, Any]]: ...
+
+
+@dataclass(frozen=True)
 class RewardPlan:
     origin: RewardOrigin
     economy: tuple[EconomyGrant, ...] = ()
     inventory: tuple[InventoryGrant, ...] = ()
     partners: tuple[PartnerGrant, ...] = ()
+    specialized: tuple[SpecializedGrant, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -68,6 +88,7 @@ class RewardResult:
     economy: dict[str, int]
     inventory_awards: list[dict[str, int]]
     partners: list[dict[str, Any]]
+    specialized_awards: dict[str, list[dict[str, Any]]] = field(default_factory=dict)
     mutation_plan_id: str | None = None
     mutation_journal: tuple[dict[str, Any], ...] = ()
 
@@ -104,6 +125,23 @@ class RewardTransactionService:
         self.resource_registry = resource_registry
         self.settlement = settlement
         self._plan_sequence = 0
+        self._specialized_owners: dict[str, SpecializedRewardOwner] = {}
+
+    def register_specialized_owner(self, owner: str, handler: SpecializedRewardOwner) -> None:
+        """Register one narrow generated-reward domain owner.
+
+        Registration is composition-time only.  This intentionally does not
+        generalize MutationSettlementService or StackInventory.
+        """
+
+        key = str(owner or "").strip().upper()
+        if not key:
+            raise ValueError("specialized reward owner must be nonempty")
+        if key in self._specialized_owners:
+            raise ValueError(f"duplicate specialized reward owner {key}")
+        if not hasattr(handler, "validate_grant") or not hasattr(handler, "apply_grant"):
+            raise TypeError("specialized reward owner lacks required interface")
+        self._specialized_owners[key] = handler
 
     @staticmethod
     def _positive(value: Any, label: str) -> int:
@@ -136,6 +174,8 @@ class RewardTransactionService:
             item_type = int(row.get("type", 0) or 0)
             if item_type == -1:
                 raise RewardValidationError("item type=-1 is not a stackable InventoryGrant")
+            if item_type == 24:
+                raise RewardValidationError("item type=24 Horcrux requires a specialized generated reward owner")
             if item_type == 3 and int(row.get("partner_id", 0) or 0) <= 0:
                 raise RewardValidationError("partner-scroll item lacks explicit partner_id cross-reference")
         for grant in plan.partners:
@@ -149,6 +189,16 @@ class RewardTransactionService:
             row = self.catalog.get(grant.content)
             if int(row.get("star", 0) or 0) <= 0:
                 raise RewardValidationError("partner catalog row lacks source star")
+        for grant in plan.specialized:
+            self._positive(grant.amount, "specialized amount")
+            key = str(grant.owner or "").strip().upper()
+            owner = self._specialized_owners.get(key)
+            if owner is None:
+                raise RewardValidationError(f"unregistered specialized reward owner {key!r}")
+            try:
+                owner.validate_grant(grant)
+            except Exception as exc:
+                raise RewardValidationError(f"invalid specialized reward grant for {key}: {exc}") from exc
         return plan
 
     def _next_plan_id(self, origin: RewardOrigin) -> str:
@@ -218,10 +268,20 @@ class RewardTransactionService:
                 )
             )
 
+        specialized_awards: dict[str, list[dict[str, Any]]] = {}
+        for grant in plan.specialized:
+            key = str(grant.owner or "").strip().upper()
+            owner = self._specialized_owners[key]  # validate() proved registration.
+            rows = owner.apply_grant(grant)
+            if not isinstance(rows, list) or any(not isinstance(row, dict) for row in rows):
+                raise RewardValidationError(f"specialized reward owner {key} returned invalid award rows")
+            specialized_awards.setdefault(key, []).extend(rows)
+
         return RewardResult(
             economy=economy_projection,
             inventory_awards=inventory_awards,
             partners=partner_rows,
+            specialized_awards=specialized_awards,
             mutation_plan_id=draft.plan_id if draft is not None else None,
             mutation_journal=tuple(entry.as_dict() for entry in draft.journal) if draft is not None else (),
         )

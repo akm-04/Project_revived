@@ -224,6 +224,10 @@ class PlayerState:
     # migration markers and future exactly-once purchase receipts/outbox metadata.
     # charge/vip remain first-class PlayerState fields for source wire projection.
     commerce_state: dict[str, Any] = field(default_factory=dict)
+    # Pass166 H1: server-only Horcrux control state. Unique instances remain
+    # inventory.spirit_list; Spirit Energy and Hero equipment keep their existing
+    # canonical owners. JsonPlayerDatabase persists this under player.domains.
+    horcrux_state: dict[str, Any] = field(default_factory=dict)
 
     library_infos: dict[str, Any] = field(default_factory=dict)
     library_talk_infos: dict[str, Any] = field(default_factory=dict)

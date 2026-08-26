@@ -199,7 +199,7 @@ class BootstrapHandlers:
             "2485": player.peak_records_payload(),
             "2501": player.hero_recommend_payload(),
             "2984": player.battle_pass_payload(),
-            "3101": player.hunqi_start_payload(),
+            "3101": self.ctx.state.get_services().gods_trial.startup_payload(materialize_temporal=False),
         }
 
     @staticmethod

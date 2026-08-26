@@ -5,6 +5,7 @@ Normal layout:
   local_assets/src_32/    sparse 32-bit Lua/data hot-update overrides
   local_assets/src_64/    sparse 64-bit Lua/data hot-update overrides
   local_assets/updates/   generated MID2 ZIP volumes
+  ../source_evidence/      immutable recovered-source evidence (never packaged as OTA)
   local_assets/update_manifest.json  MID2 advertisement (optional)
 
 Read ../UPDATE_README.md for the complete operator workflow and Pass35.1 test package.
@@ -21,6 +22,7 @@ LUA / DATA OVERRIDES
 --------------------
 Force/Lua content uses the separate source-confirmed MID2 UpdateScene ZIP-volume path.
 Keep these directories sparse: only intentional overrides belong here.
+Recovered files used only for catalog/source validation belong under ../source_evidence/.
 
 Stage a recovered source file into BOTH architecture trees with:
   python3 tools/import_lua_override.py \

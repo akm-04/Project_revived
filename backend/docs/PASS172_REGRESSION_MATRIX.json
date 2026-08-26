@@ -1,0 +1,25 @@
+{
+  "pass": "172.0",
+  "dedicated_vow": "8/8 PASS",
+  "horcrux": {
+    "H1": "8/8 PASS",
+    "H2": "8/8 PASS",
+    "H3": "9/9 PASS",
+    "H4": "7/7 PASS",
+    "H5": "10/10 PASS",
+    "H6_restart": "4/4 PASS",
+    "runtime": "Pass171 restart re-smoke accepted; current Horcrux scope CLOSED"
+  },
+  "regressions": {
+    "architecture_hygiene": "5/5 PASS",
+    "hero_advanced_progression": "PASS",
+    "gift_phase2": "13/13 PASS",
+    "gift_phase3": "9/9 PASS",
+    "skin_illusion": "7/7 PASS",
+    "recharge_b1_b2": "9/9 PASS",
+    "recharge_b3": "9/9 PASS",
+    "recharge_b4": "4/4 PASS",
+    "ota_cumulative": "PASS 142 entries"
+  },
+  "historical_harness_note": "Pass152 Phase C and Pass154 display-polish harnesses hardcode old workspace/OTA versions; their current superseding Recharge/OTA regressions pass."
+}

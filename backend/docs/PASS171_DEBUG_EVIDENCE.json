@@ -1,0 +1,33 @@
+{
+  "pass": "171.0",
+  "source": "user-supplied Pass170 stock-client debug.zip",
+  "status": "ROOT_CAUSE_CONFIRMED",
+  "observed_sequence": [
+    "Horcrux packs opened successfully",
+    "Gods Trial manual/auto smoke successful",
+    "six Horcrux positions equipped successfully",
+    "collocation create/edit/apply successful",
+    "strengthening to level 13 successful",
+    "client restart/relogin",
+    "only equipped KM-Moe Hero window becomes abnormal",
+    "Horcrux tab then errors/stalls"
+  ],
+  "bootstrap_evidence": {
+    "partner_id": 10073,
+    "spirit_equip": [7, 4, 12, 1, 5, 15],
+    "spirit_item": [],
+    "mid81_matching_spirit_ids": [1, 4, 5, 7, 12, 15]
+  },
+  "client_errors": [
+    "NormalHero.lua:3227 attempt to index local var_253_2 (a nil value)",
+    "NormalHero.lua:3183 attempt to index local var_252_2 (a nil value)"
+  ],
+  "advanced_pack_observation": {
+    "item_id": 50002168,
+    "gift_id": 90040453,
+    "result": "SOURCE_EXPECTED",
+    "source_description": "orange Oath on random Position",
+    "candidate_ids": [250001151, 250001152, 250001153, 250001154, 250001155, 250001156],
+    "weights": [1666, 1666, 1666, 1666, 1666, 1670]
+  }
+}

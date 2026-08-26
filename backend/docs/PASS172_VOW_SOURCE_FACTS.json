@@ -1,0 +1,32 @@
+{
+  "pass": "172.0",
+  "domain": "Vows/Super Partner acquisition",
+  "source_authority": "effective src_64",
+  "runtime_evidence": {
+    "vow_zip_sha256": "9cc03f60dd5adec3b35586eced59a405f747eeb44aa7762773c87e613659b858",
+    "captured_failure": "MID305 SUMMON_SUPER_HERO table_id=11002 Balder reached backend and was rejected only because no semantic handler existed"
+  },
+  "facts": {
+    "vow_templates": 14,
+    "summon_mid": 305,
+    "exchange_mid": 306,
+    "summon_request": "table_id",
+    "summon_response": "partner_info",
+    "material_count": 5,
+    "ownership_rule": "each exact material table_id or its source awaken_table_id satisfies possession",
+    "initial_star_rule": "returned Vow star equals count of the five resolved prerequisites whose current star is exactly 5; at least one exactly-5 prerequisite is required",
+    "prerequisite_consumption": "current recovered client performs no prerequisite removal on successful MID305; private backend preserves prerequisite Girls",
+    "partner_type_super": 2,
+    "vows_essence_item_id": 50001666,
+    "vows_essence_per_scroll": 100,
+    "exchange_response": "awards[{table_id=<Vow stone/scroll id>, item_num=times}]"
+  },
+  "balder": {
+    "table_id": 11002,
+    "materials": [10001015,10001030,10001017,10001029,10001040],
+    "scroll_id": 41002,
+    "equipment": [20001368,20001376,20001373,20001374,20001372,20001369],
+    "stone_campaign": 2100024
+  },
+  "bounded_unknown": "Original hidden MID305 server-side error-code details and any unrecovered historical side effects remain unknown; current implementation follows recovered client behavior and preserves prerequisites."
+}

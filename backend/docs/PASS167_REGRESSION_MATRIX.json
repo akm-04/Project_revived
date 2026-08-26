@@ -1,0 +1,20 @@
+{
+  "pass": "167.0",
+  "result": "PASS",
+  "gates": {
+    "architecture_hygiene": "5/5",
+    "skin_ownership": "10/10",
+    "skin_illusion": "7/7",
+    "recharge_b1_b2_superseding_regression": "9/9",
+    "recharge_b3": "9/9",
+    "recharge_b4_hooks": "4/4",
+    "horcrux_h1_foundation": "8/8",
+    "horcrux_h2_lifecycle": "8/8",
+    "ota_1_631_11_cumulative": "PASS: 140 entries, 272 prior display names preserved"
+  },
+  "historical_harness_notes": [
+    "Pass149 original B1/B2 test expects B3/generated products to remain deferred and is superseded by Pass150 B1/B2 regression after later phase promotion.",
+    "Pass154 display test intentionally pins OTA 1.631.10 and is superseded for current-release validation by selftest_pass167_ota_cumulative.py.",
+    "Previously documented Pass152 harness remains environment-stale and is not a current release gate."
+  ]
+}

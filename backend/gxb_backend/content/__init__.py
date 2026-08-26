@@ -12,6 +12,7 @@ from .game_data_catalog import (
     UnknownContentReference,
 )
 from .source_resolver import EffectiveSourceResolver, ResolvedSource
+from .horcrux_source_catalog import HorcruxSourceCatalog
 from .super_campaign_catalog import (
     SUPER_CAMPAIGN_TYPE,
     SUPER_FUNCTION_ID,
@@ -28,6 +29,7 @@ __all__ = [
     "ContentRef",
     "EffectiveSourceResolver",
     "GameDataCatalog",
+    "HorcruxSourceCatalog",
     "InvalidCatalogProvenance",
     "ResolveContext",
     "ResolvedSource",
@@ -40,3 +42,5 @@ __all__ = [
 
 
 from .skin_source_catalog import SkinSourceCatalog
+
+from .vow_source_catalog import VowSourceCatalog

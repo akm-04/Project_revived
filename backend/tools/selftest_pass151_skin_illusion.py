@@ -4,7 +4,7 @@ import copy,sys
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path: sys.path.insert(0,str(ROOT))
-DATA=ROOT/'data'; SRC=ROOT/'local_assets/src_64'
+DATA=ROOT/'data'; SRC=ROOT/'source_evidence/src_64'
 from gxb_backend.content import GameDataCatalog
 from gxb_backend.content.skin_source_catalog import SkinSourceCatalog
 from gxb_backend.protocol.mids import MID

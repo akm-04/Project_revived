@@ -1,0 +1,20 @@
+{
+  "pass": "171.0",
+  "status": "PASS",
+  "dedicated_h6_restart": "4/4",
+  "h1": "8/8",
+  "h2": "8/8",
+  "h3": "9/9",
+  "h4": "7/7",
+  "h5": "10/10",
+  "gift_phase2": "13/13",
+  "gift_phase3": "9/9",
+  "architecture": "5/5",
+  "skin": "10/10 + 7/7 illusion",
+  "recharge": "9/9 B1/B2 regression + 9/9 B3 + 4/4 B4",
+  "ota": "PASS 142 cumulative entries; Pass171 no OTA change; payload byte-identical to Pass170",
+  "python_compile": "PASS",
+  "player_db_release_fixture": "byte-identical to accepted Pass170 after tests",
+  "runtime": "targeted restart re-smoke required before H6 closure",
+  "note": "Pass171 changes only self-player Hero spirit_item bootstrap semantics plus reconciliation tests/docs; H1-H5 behavior remains regression-clean."
+}

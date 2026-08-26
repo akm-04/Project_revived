@@ -1,0 +1,24 @@
+{
+  "pass": "172.0",
+  "subsystem": "Horcrux",
+  "classification": "RUNTIME_ACCEPTED_CLOSED_CURRENT_SCOPE",
+  "runtime_evidence": {
+    "debug_zip_sha256": "ae9c91c8a1e35c08f182afcc4aefddc019644a2770330f4a522d35a0a06d2fef",
+    "observed": [
+      "Pass171 restart fix re-smoke succeeded; KM-Moe Hero/Horcrux menu opens normally after restart",
+      "persisted Horcrux equipment survives restart",
+      "Gods Trial prior auto rewards collect successfully",
+      "Horcrux pack purchase/opening and bulk opening succeed",
+      "equipping on another Girl succeeds",
+      "strengthening to level 15 clamps correctly",
+      "unequip and additional strengthen succeed",
+      "normal Campaign battle succeeds"
+    ],
+    "unrelated_gap": "MID1407 EXCHANGE_MATERIALS remains outside Horcrux scope"
+  },
+  "stat_authority": {
+    "server": "owns unique instance identity/storage and materializes rolled main/sub selector IDs and numeric values",
+    "client": "reads persisted materialized values and aggregates them into Hero UI/client-side attribute calculations",
+    "future_authoritative_server_combat": "must consume the same persisted materialized Horcrux values; do not assume the client invents them"
+  }
+}

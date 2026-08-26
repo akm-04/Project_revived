@@ -1,0 +1,27 @@
+{
+  "pass": "172.0",
+  "backend_version": "0.17.5",
+  "scope": "close Institute/Vows acquisition tab after Horcrux runtime closure",
+  "architecture": [
+    "new immutable VowSourceCatalog generated from effective src_64",
+    "VowService owns acquisition/exchange policy only",
+    "HeroRepository remains owned-Hero persistence/partner_id authority",
+    "StackInventory remains Vows Essence and Vow scroll authority",
+    "PlayerUnitOfWork remains atomic commit/rollback authority",
+    "MID305/MID306 handlers are thin fail-closed protocol adapters"
+  ],
+  "implemented": [
+    "MID305 SUMMON_SUPER_HERO",
+    "MID306 SUPER_HERO_STONE_EXCHANGE",
+    "dynamic initial Vow star from exactly-5-star prerequisite count",
+    "awakened counterpart satisfies prerequisite ownership",
+    "natural duplicate retry returns existing Vow instead of creating a second partner_id",
+    "Vows Essence exchange atomically consumes 100 per selected scroll"
+  ],
+  "not_changed": [
+    "existing MID52 post-5 SuperHero evolution",
+    "existing MID54 Vow fixed-equipment path",
+    "existing MID304 Vow equipment enhancement",
+    "OTA 1.631.12"
+  ]
+}

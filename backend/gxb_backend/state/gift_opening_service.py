@@ -2,9 +2,11 @@
 
 Pass138 established deterministic ordinary Gift Opening over canonical owners.
 Pass140 activates the source-bounded ordinary random lane through a thin
-request-scoped ``gift.open`` RandomOutcomeService adapter.  Probability policy,
-pool ordering, batching, validation, settlement, and wire projection remain in
-this Gift domain; ROS owns entropy mechanics only.
+request-scoped ``gift.open`` RandomOutcomeService adapter. Pass168 H3 adds the
+source-bounded generated-Horcrux lane through a specialized reward owner while
+keeping template/dropbox selection in this Gift domain. Probability policy, pool
+ordering, batching, validation, settlement, and wire projection remain domain
+owned; ROS owns entropy mechanics only.
 """
 from __future__ import annotations
 
@@ -27,6 +29,7 @@ from .reward_transaction_service import (
     RewardTransactionService,
     RewardValidationError,
 )
+from .horcrux_materializer import HorcruxGiftRewardAdapter
 from .stack_inventory import StackInventory, StackInventoryError
 from .unit_of_work import OperationContext, PlayerUnitOfWork
 
@@ -90,9 +93,11 @@ class GiftOpeningPlanner:
         self,
         source: GiftOpeningSourceCatalog,
         random_outcomes: GiftRandomOutcomeAdapter | None = None,
+        generated_rewards: HorcruxGiftRewardAdapter | None = None,
     ) -> None:
         self.source = source
         self.random_outcomes = random_outcomes
+        self.generated_rewards = generated_rewards
 
     @staticmethod
     def _positive_int(value: Any, field: str) -> int:
@@ -124,6 +129,8 @@ class GiftOpeningPlanner:
             if self.random_outcomes is None:
                 raise GiftOpeningError("ordinary random Gift Opening is not composed with request entropy")
             self._validate_random_source(operation)
+        elif self.generated_rewards is not None and self.generated_rewards.supports(operation):
+            self._validate_generated_source(operation)
         else:
             raise GiftOpeningError(
                 f"MID241 operation is outside activated Gift Opening capability: {operation.capability}"
@@ -171,6 +178,32 @@ class GiftOpeningPlanner:
                 # Validate before calling ROS so an all-zero pool consumes no draw.
                 raise GiftOpeningError("ordinary random dropbox has no positive relative weight")
 
+    def _validate_generated_source(self, operation: GiftOpeningOperation) -> None:
+        if self.generated_rewards is None:
+            raise GiftOpeningError("generated Horcrux Gift Opening adapter is not composed")
+        if operation.raw_equip not in {"", "0"}:
+            raise GiftOpeningError("generated Horcrux Gift contains deferred gift.equip expansion")
+        # H3 activates only pure generated-Horcrux operations recovered in the
+        # current source corpus.  Hybrid ordinary+generated rows remain fail-closed
+        # until source evidence requires them.
+        if operation.fixed_items or operation.fixed_scalars:
+            raise GiftOpeningError("generated Horcrux Gift unexpectedly contains ordinary fixed rewards")
+        if operation.status == "DETERMINISTIC":
+            self.generated_rewards.deterministic_templates(operation)
+            return
+        if operation.status != "RANDOM":
+            raise GiftOpeningError("generated Horcrux Gift has unsupported source status")
+        if self.random_outcomes is None:
+            raise GiftOpeningError("generated random Gift Opening is not composed with request entropy")
+        if not operation.drop_occurrences:
+            raise GiftOpeningError("generated random Gift Opening contains no drop occurrences")
+        for occurrence in operation.drop_occurrences:
+            if occurrence.missing_source or occurrence.dropbox_id <= 0:
+                raise GiftOpeningError("generated random Gift references missing dropbox source")
+            candidates = self.generated_rewards.effective_candidates(occurrence)
+            if not candidates or not any(int(candidate.drop_rate) > 0 for candidate in candidates):
+                raise GiftOpeningError("generated random Gift dropbox has no positive relative weight")
+
     def _fixed_components(
         self,
         operation: GiftOpeningOperation,
@@ -216,14 +249,33 @@ class GiftOpeningPlanner:
     def preflight_rewards(self, resolved: GiftOpeningResolvedRequest) -> RewardPlan:
         """Return a mutation-free validation superset before any random draw.
 
-        Random operations include every possible ordinary candidate once so the
-        canonical RewardTransactionService can reject unsupported ownership before
-        entropy is consumed.  Amounts here are validation-only, not settlement.
+        Random operations include every possible candidate once so canonical
+        reward owners can reject unsupported settlement before entropy is
+        consumed.  Amounts here are validation-only, not settlement.
         """
 
         operation, num = resolved.operation, resolved.num
-        inv, order, economy, economy_order = self._fixed_components(operation, num)
+        generated_lane = self.generated_rewards is not None and self.generated_rewards.supports(operation)
         random_lane = operation.status == "RANDOM"
+        if generated_lane:
+            specialized = []
+            if operation.status == "DETERMINISTIC":
+                for item_id in self.generated_rewards.deterministic_templates(operation):
+                    specialized.append(self.generated_rewards.grant(item_id, 1))
+            else:
+                seen: set[int] = set()
+                for occurrence in operation.drop_occurrences:
+                    for candidate in self.generated_rewards.effective_candidates(occurrence):
+                        if candidate.item_id in seen:
+                            continue
+                        seen.add(candidate.item_id)
+                        specialized.append(self.generated_rewards.grant(candidate.item_id, 1))
+            return RewardPlan(
+                origin=self._origin(operation, random_lane=random_lane),
+                specialized=tuple(specialized),
+            )
+
+        inv, order, economy, economy_order = self._fixed_components(operation, num)
         if random_lane:
             for occurrence in operation.drop_occurrences:
                 for candidate in occurrence.candidates:
@@ -241,9 +293,42 @@ class GiftOpeningPlanner:
 
     def plan_resolved(self, resolved: GiftOpeningResolvedRequest) -> GiftOpeningPlan:
         operation, num = resolved.operation, resolved.num
-        inv, order, economy, economy_order = self._fixed_components(operation, num)
+        generated_lane = self.generated_rewards is not None and self.generated_rewards.supports(operation)
         random_lane = operation.status == "RANDOM"
 
+        if generated_lane:
+            specialized = []
+            if operation.status == "DETERMINISTIC":
+                for item_id in self.generated_rewards.deterministic_templates(operation):
+                    # Source type-24 deterministic rows encode one unique template
+                    # intent, not a stack quantity. ``num`` repeats that intent.
+                    specialized.append(self.generated_rewards.grant(item_id, num))
+            else:
+                if self.random_outcomes is None:
+                    raise GiftOpeningError("generated random Gift Opening has no entropy adapter")
+                for _copy in range(num):
+                    for occurrence in operation.drop_occurrences:
+                        candidates = self.generated_rewards.effective_candidates(occurrence)
+                        weights = tuple(int(candidate.drop_rate) for candidate in candidates)
+                        selected = self.random_outcomes.weighted_index(weights)
+                        candidate = candidates[selected]
+                        specialized.append(
+                            self.generated_rewards.grant(candidate.item_id, int(candidate.item_num))
+                        )
+            reward_plan = RewardPlan(
+                origin=self._origin(operation, random_lane=random_lane),
+                specialized=tuple(specialized),
+            )
+            if not reward_plan.specialized:
+                raise GiftOpeningError("generated Horcrux Gift resolves to no supported reward")
+            return GiftOpeningPlan(
+                operation=operation,
+                num=num,
+                rewards=reward_plan,
+                wire_awards=(),
+            )
+
+        inv, order, economy, economy_order = self._fixed_components(operation, num)
         if random_lane:
             if self.random_outcomes is None:  # resolve() normally prevents this.
                 raise GiftOpeningError("ordinary random Gift Opening has no entropy adapter")
@@ -337,7 +422,7 @@ class GiftOpeningService:
                 )
                 if remaining is None:
                     raise GiftOpeningError("insufficient source gift quantity during settlement")
-                self.rewards.apply(plan.rewards)
+                reward_result = self.rewards.apply(plan.rewards)
         except (
             GiftOpeningError,
             RewardValidationError,
@@ -350,9 +435,13 @@ class GiftOpeningService:
         # Client SelfPlayer removes the submitted source package locally after
         # error.OK.  Reward rows therefore contain reward amount, never net stack
         # deltas, and use the recovered table_id/item_num wire shape.
-        return {
+        response: dict[str, Any] = {
             "awards": [
                 {"table_id": item_id, "item_num": item_num}
                 for item_id, item_num in plan.wire_awards
             ]
         }
+        spirit_awards = list(reward_result.specialized_awards.get("SPIRIT", ()))
+        if spirit_awards:
+            response["spirit_awards"] = spirit_awards
+        return response

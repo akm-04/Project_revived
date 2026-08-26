@@ -1,0 +1,18 @@
+{
+  "pass": "170.0",
+  "status": "PASS",
+  "dedicated_h5": "10/10",
+  "h1": "8/8",
+  "h2": "8/8",
+  "h3": "9/9",
+  "h4": "7/7",
+  "gift_phase2": "13/13",
+  "gift_phase3": "9/9",
+  "architecture": "5/5",
+  "skin": "10/10 + 7/7 illusion",
+  "recharge": "9/9 B1/B2 regression + 9/9 B3 + 4/4 B4",
+  "ota": "PASS 142 cumulative entries unchanged from Pass169",
+  "source_catalog_rebuild": "BYTE_IDENTICAL",
+  "python_compile": "PASS",
+  "note": "H5 activates only Gods Trial MIDs 3092/3093/3097/3099/3100; OTA remains 1.631.12."
+}

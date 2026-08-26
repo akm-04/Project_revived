@@ -1,9 +1,9 @@
 {
-  "backend_version": "0.16.8",
-  "version": "0.16.8",
-  "pass": "154.0",
-  "artifact": "gxb-backend-v0.16.8-pass154.0",
-  "status": "SKINS_RECHARGE_RUNTIME_ACCEPTED_DISPLAY_POLISH_OTA_1_631_10",
-  "runtime_client_smoke": "PASS153_PHASE_D_FUNCTIONAL_RUNTIME_ACCEPTED; PASS154_DISPLAY_ONLY_NO_RUNTIME_REQUIRED",
-  "ota": "1.631.10 cumulative active"
+  "backend_version": "0.17.5",
+  "version": "0.17.5",
+  "pass": "172.0",
+  "artifact": "gxb-backend-v0.17.5-pass172.0",
+  "status": "HORCRUX_RUNTIME_ACCEPTED_CLOSED_VOW_ACQUISITION_TAB_STATIC_ACCEPTED_RUNTIME_RETEST_PENDING",
+  "runtime_client_smoke": "PASS171_HORCRUX_RESTART_RESMOKE_ACCEPTED; HORCRUX_CURRENT_SCOPE_CLOSED; VOW_MID305_FAILURE_CAPTURED_AND_FIXED; VOW_TARGETED_RESMOKE_PENDING",
+  "ota": "1.631.12 cumulative active; unchanged in Pass172"
 }

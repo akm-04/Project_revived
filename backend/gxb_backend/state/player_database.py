@@ -100,6 +100,13 @@ CANONICAL_REPLACE_DICT_PATHS: tuple[tuple[str, ...], ...] = (
     ("player", "domains", "daily_consume_state", "counts"),
     ("player", "lobby", "mission_state", "daily_cache"),
     ("player", "heroes", "heroes", "*", "evo_attr_points"),
+    # Pass166 H1 Horcrux complete domain-owned containers. These must support
+    # authoritative clears without recursive extension resurrection.
+    ("player", "domains", "horcrux_state", "collocations"),
+    ("player", "domains", "horcrux_state", "trial", "campaign_progress"),
+    ("player", "domains", "horcrux_state", "trial", "active_battle"),
+    ("player", "domains", "horcrux_state", "trial", "auto"),
+    ("player", "domains", "horcrux_state", "trial", "last_auto_collection"),
 )
 
 

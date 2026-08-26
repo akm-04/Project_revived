@@ -1,0 +1,36 @@
+{
+  "pass": "171.0",
+  "backend_version": "0.17.4",
+  "phase": "H6_RECONCILIATION_TRANCHE1_RESTART_BOOTSTRAP",
+  "status": "STATIC_REGRESSION_ACCEPTED_RUNTIME_RETEST_PENDING",
+  "runtime_observation": {
+    "player": "Moppleton",
+    "hero_partner_id": 10073,
+    "hero_table_id": 10001200,
+    "spirit_equip": [7, 4, 12, 1, 5, 15],
+    "all_equipped_ids_present_in_mid81_spirit_list": true,
+    "mid49_spirit_item": [],
+    "client_failures": [
+      "NormalHero.lua:3227 getSpiritEquipsAttr nil Spirit object",
+      "NormalHero.lua:3183 getSpiritSuitID nil Spirit object"
+    ],
+    "timing": "only after client restart/relogin; live-session equip path had populated the optional cache"
+  },
+  "source_contract": {
+    "file": "src_64/app/model/NormalHero.lua",
+    "assignment": "spiritItems_ = hero_info.spirit_item",
+    "client_resolution": "when spiritItems_ is present, use spiritItems_[slot]; when absent, use Backpack:getSpiritItemBySpiritID(spirit_id)",
+    "epistemic_class": "SOURCE_FACT"
+  },
+  "root_cause": "HeroRepository fabricated an empty self-Hero spirit_item cache. Empty Lua tables are truthy, so the client bypassed Backpack fallback after restart even though persistent spirit_equip IDs and spirit_list instances were correct.",
+  "fix": {
+    "owned_hero_persistence": "remove spirit_item",
+    "mid49_projection": "omit spirit_item",
+    "canonical_instance_owner": "MID81 Backpack spirit_list",
+    "canonical_equipment_owner": "Hero six-slot spirit_equip",
+    "load_migration": "remove stale spirit_item from self-player Hero records",
+    "ota_change": false
+  },
+  "scope_boundary": "Does not remove support for complete spirit_item snapshots in separate battle/remote-Hero projections that explicitly own them; HeroRepository only owns ordinary self-player Heroes.",
+  "next": "targeted stock-client restart re-smoke before further H6 closure"
+}

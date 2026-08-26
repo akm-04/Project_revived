@@ -1,0 +1,49 @@
+{
+  "pass": "168.0",
+  "backend_version": "0.17.1",
+  "phase": "H3_GENERATED_REWARD_BRIDGE",
+  "status": "STATIC_REGRESSION_ACCEPTED_RUNTIME_PENDING",
+  "source_reality_check": {
+    "effective_src64_files": 4370,
+    "horcrux_templates": 378,
+    "horcrux_models": 54,
+    "strengthening_rows": 90,
+    "gods_trial_stages": 42,
+    "generated_mid241_operations": 20,
+    "deterministic_generated_mid241_operations": 7,
+    "random_generated_mid241_operations": 13,
+    "gift_catalog_rebuild": "BYTE_IDENTICAL",
+    "horcrux_catalog_rebuild": "BYTE_IDENTICAL"
+  },
+  "implementation": [
+    "RewardTransactionService registered specialized generated-owner seam",
+    "SPIRIT owner -> HorcruxMaterializer + HorcruxRepository",
+    "MID241 generated type24 deterministic/random lanes",
+    "9199043 compatibility overlay without raw-source mutation",
+    "type24 rejected from ordinary InventoryGrant settlement",
+    "HOTA-001 SelectEquipWindow spirit_awards forwarding"
+  ],
+  "rng": {
+    "gift_template_selection": "gift.open",
+    "generation": [
+      "horcrux.generate.main",
+      "horcrux.generate.sub_count",
+      "horcrux.generate.sub_selector"
+    ],
+    "forced_choices_consume_entropy": false
+  },
+  "ota": {
+    "version": "1.631.12",
+    "entries": 142,
+    "pass167_inherited_entries_byte_identical": 140,
+    "new_entries": [
+      "src_32/app/windows/SelectEquipWindow.lua",
+      "src_64/app/windows/SelectEquipWindow.lua"
+    ]
+  },
+  "deferred": [
+    "H4 strengthening MID3089",
+    "H5 Gods Trial gameplay",
+    "coherent Horcrux stock-client smoke"
+  ]
+}

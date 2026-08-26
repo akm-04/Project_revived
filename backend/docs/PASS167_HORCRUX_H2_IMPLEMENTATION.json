@@ -1,0 +1,44 @@
+{
+  "pass": "167.0",
+  "backend_version": "0.17.0",
+  "phase": "H2_DETERMINISTIC_INSTANCE_LIFECYCLE",
+  "status": "STATIC_ACCEPTED_PENDING_CLIENT_SMOKE",
+  "scope": [
+    "MID3090 lock",
+    "MID3091 unlock",
+    "MID3094 direct equip/unequip",
+    "MID3095 one-key unequip",
+    "MID3112 collocation list",
+    "MID3113 collocation create/edit",
+    "MID3114 collocation delete",
+    "MID3115 collocation apply",
+    "HOTA-002 collocation edit bookkeeping",
+    "source-evidence versus OTA override ownership separation"
+  ],
+  "architecture": {
+    "transaction": "PlayerUnitOfWork",
+    "hero_authority": "HeroRepository.spirit_equip",
+    "instance_authority": "HorcruxRepository over PlayerState.spirit_list",
+    "instance_equip_mirror": "is_equip stores owning partner_id or 0",
+    "collocation_authority": "horcrux_state.collocations",
+    "collocation_count": "derived/rebuildable mirror",
+    "source_catalog_schema": 2,
+    "source_program_limit": 20
+  },
+  "ota": {
+    "version": "1.631.11",
+    "entry_count": 140,
+    "inherited_pass166_entries": 138,
+    "new_entries": [
+      "src_32/app/windows/HunqiCombEditorWindow.lua",
+      "src_64/app/windows/HunqiCombEditorWindow.lua"
+    ],
+    "hota_002": "on collocation edit decrement old Spirit membership before incrementing replacement membership"
+  },
+  "deferred": [
+    "H3 generated Horcrux reward/materialization bridge",
+    "H4 MID3089 strengthening",
+    "H5 Gods Trial battle/auto settlement",
+    "HOTA-001 Victory Vow Pack"
+  ]
+}

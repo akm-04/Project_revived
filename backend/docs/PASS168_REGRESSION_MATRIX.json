@@ -1,0 +1,14 @@
+{
+  "pass": "168.0",
+  "status": "PASS",
+  "dedicated_h3": "9/9",
+  "h1": "8/8",
+  "h2": "8/8",
+  "gift_phase2": "13/13",
+  "gift_phase3": "9/9",
+  "architecture": "5/5",
+  "skin": "10/10 + 7/7 illusion",
+  "recharge": "9/9 B1/B2 regression + 9/9 B3 + 4/4 B4",
+  "ota": "PASS 142 cumulative entries",
+  "note": "Historical tests that pin obsolete OTA versions remain provenance; current release uses selftest_pass168_ota_cumulative.py."
+}
