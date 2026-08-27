@@ -12,8 +12,7 @@ OUTPUT_DIR="$SCRIPT_DIR/tools/output"
 # Zrok endpoints
 ZROK_SDK_URL="https://gxbsdk.shares.zrok.io/"
 ZROK_SDK_HOST="gxbsdk.shares.zrok.io"
-ZROK_ENGINE_CENTER="https://gxbengine.shares.zrok.io/center/v1"
-ZROK_ENGINE_API="https://gxbengine.shares.zrok.io/api/v1"
+ZROK_ENGINE_URL="https://gxbengine.shares.zrok.io"
 
 echo "  -> [A] Running LuaJIT Decompiler via Wine..."
 rm -rf "$OUTPUT_DIR"
@@ -77,17 +76,17 @@ FILES_TO_PATCH=(
 for file in "${FILES_TO_PATCH[@]}"; do
     if [ -f "$file" ]; then
         # 1. Nuke the primary domain
-        sed -i 's|http://xuemeien.carolgames.com:9000|https://gxbengine.shares.zrok.io|g' "$file"
+        sed -i "s|http://xuemeien.carolgames.com:9000|$ZROK_ENGINE_URL|g" "$file"
         
         # 2. Nuke the UpdateScene hardcoded IP
-        sed -i 's|http://119.81.215.217:9000|https://gxbengine.shares.zrok.io|g' "$file"
+        sed -i "s|http://119.81.215.217:9000|$ZROK_ENGINE_URL|g" "$file"
         
         # 3. Nuke the misc table hardcoded IP
-        sed -i 's|http://203.74.199.17:9000|https://gxbengine.shares.zrok.io|g' "$file"
+        sed -i "s|http://203.74.199.17:9000|$ZROK_ENGINE_URL|g" "$file"
         
         # 4. Nuke the newly discovered CDN domains
-        sed -i 's|http://www.game168.tw|https://gxbengine.shares.zrok.io|g' "$file"
-        sed -i 's|https://girls.game168.com.tw|https://gxbengine.shares.zrok.io|g' "$file"
+        sed -i "s|http://www.game168.tw|$ZROK_ENGINE_URL|g" "$file"
+        sed -i "s|https://girls.game168.com.tw|$ZROK_ENGINE_URL|g" "$file"
         
         echo "    [+] Patched URLs in $(basename "$file")"
     fi

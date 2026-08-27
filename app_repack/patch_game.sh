@@ -32,15 +32,35 @@ OUTPUT_APK="gxb_plaintext_standalone.apk"
 # Updated to use the local tools folder
 UBER_SIGNER="$SCRIPT_DIR/tools/uber-apk-signer.jar"
 
-echo "==> [1/3] Decompiling $(basename "$APK_PATH") into $DECODE_DIR..."
+echo "==> [1/4] Decompiling $(basename "$APK_PATH") into $DECODE_DIR..."
 rm -rf "$DECODE_DIR"
 apktool d "$APK_PATH" -o "$DECODE_DIR" -f
 
-echo "==> [2/3] Handing over to decompiler and patching logic..."
+echo "==> [2/4] Handing over to decompiler and patching logic..."
 chmod +x "$SCRIPT_DIR/decompile_and_patch.sh"
 "$SCRIPT_DIR/decompile_and_patch.sh"
 
-echo "==> [3/3] Repacking and Signing APK..."
+echo "==> [3/4] Applying mods..."
+MODS_DIR="$SCRIPT_DIR/mods"
+if [ -d "$MODS_DIR" ]; then
+    mapfile -t MOD_FILES < <(find "$MODS_DIR" -type f)
+    if [ ${#MOD_FILES[@]} -eq 0 ]; then
+        echo "    [!] $MODS_DIR is empty, skipping"
+    fi
+    for mod_file in "${MOD_FILES[@]}"; do
+        rel_path="${mod_file#$MODS_DIR/}"
+        target="$DECODE_DIR/$rel_path"
+        if [ -f "$target" ]; then
+            cp -v "$mod_file" "$target"
+        else
+            echo "    [!] $rel_path has no matching decompiled file at $target, skipping (check the path)"
+        fi
+    done
+else
+    echo "    [!] $MODS_DIR not found, skipping"
+fi
+
+echo "==> [4/4] Repacking and Signing APK..."
 apktool b "$DECODE_DIR" -o "$SCRIPT_DIR/unsigned_$OUTPUT_APK"
 java -jar "$UBER_SIGNER" -a "$SCRIPT_DIR/unsigned_$OUTPUT_APK"
 
