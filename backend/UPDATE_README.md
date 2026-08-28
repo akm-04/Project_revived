@@ -20,3 +20,12 @@
 - No settlement/economy/RNG/ownership behavior changed.
 - No runtime smoke required for this presentation-only pass; Pass153 runtime acceptance remains authoritative.
 - Next: Horcrux RNG source research/cartography.
+
+## Pass224 clean-control reset
+Pass224 intentionally returns the client OTA surface to the Pass212 cumulative baseline plus only `TaskAwakeCell.lua` and `NormalHero.lua` reconciliations. Previous sparse OTAs may have left writable window/resource overrides; omission does not delete them. Before Pass224 client smoke run:
+
+```bash
+adb shell pm clear com.carolgames.gxb
+```
+
+Then relaunch the prepared APK and let MID2 install resource version `1.631.19`. This resets client-local writable update state; backend player state is server-side.

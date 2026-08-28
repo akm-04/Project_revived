@@ -21,6 +21,7 @@ from typing import Any
 
 from flask import Request
 
+from gxb_backend.observability.console_runtime import console_emit
 from gxb_backend.config import Settings
 
 
@@ -198,7 +199,7 @@ class ClientErrorCapture:
                     if url:
                         details.append(f"url={url}")
                     suffix = " " + " ".join(details) if details else ""
-                    print(f"[RESOURCE CLIENT PROBE] event={event}{suffix}")
+                    console_emit("window", f"[RESOURCE CLIENT PROBE] event={event}{suffix}")
                     continue
 
                 if isinstance(entry, dict):

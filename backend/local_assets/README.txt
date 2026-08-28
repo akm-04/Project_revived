@@ -52,3 +52,7 @@ Runtime server evidence:
 
 Writable src_32/src_64 take priority over APK Lua after UpdateScene unzips and restarts.
 Use --silent only when intentionally testing UpdateScene's source-defined is_review path.
+
+Pass225 operator note:
+- The distributed backend does not ship local_assets/res/. You may create/populate it with your recovered latest res tree.
+- build_local_lua_update.py packages only sparse src_32/src_64 overrides; it does not sweep local_assets/res/.

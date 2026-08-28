@@ -1,0 +1,29 @@
+{
+  "pass": "225.0",
+  "ordinary_awakening": "RUNTIME_ACCEPTED",
+  "blood_open": {
+    "mid": 2738,
+    "mission_id": 2200001,
+    "extra_drop_item": 50002078
+  },
+  "blood_mid54_after_open": false,
+  "mission_after_open": {
+    "table_id": 2200001,
+    "awake_type": 2,
+    "count": 0,
+    "is_complete": 0,
+    "is_going": 1
+  },
+  "root_cause": "Pass224 falsely projected ordinary equip-slot collected state onto Blood substitute before real MID54",
+  "correction": "Blood substitute collected marker becomes true only after successful real MID54; remove displayed Blood item ID locally; server lifecycle unchanged",
+  "logging": {
+    "default_debug_verbose": 1,
+    "auto_log": "runtime_logs/server.txt",
+    "levels": {
+      "1": "basic/errors/missing",
+      "2": "+window probes",
+      "3": "+HTTP downloads",
+      "4": "all"
+    }
+  }
+}

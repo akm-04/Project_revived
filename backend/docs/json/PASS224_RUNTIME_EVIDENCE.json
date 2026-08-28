@@ -1,0 +1,25 @@
+{
+  "pass": "224.0",
+  "epistemic_status": {
+    "ordinary_awakening_common_alert": "RUNTIME_ACCEPTED",
+    "blood_pass223_incubus_selector": "REJECTED_WRONG_UI_RUNTIME_OBSERVED",
+    "blood_pass212_stock_selector": "USER_RUNTIME_CONTROL_WORKED",
+    "blood_mid54_cache_bug": "SOURCE_FACT_PLUS_RUNTIME_REPRODUCED",
+    "blood_mid867_postbattle": "RUNTIME_RESEARCH_PENDING_CLEAN_CONTROL"
+  },
+  "current_debug": {
+    "blood_open": {"mid": 2738, "mission_id": 2200001, "awake_type": 2, "status": "SUCCESS"},
+    "blood_equip": {"mid": 54, "partner_id": 10073, "equip_index": 1, "count": 2, "status": "SERVER_SUCCESS_UI_STALE"},
+    "blood_stage1_claim": {"mid": 161, "table_id": 2200001, "status": "SUCCESS_WITH_TWICE_AWAKE_STAGE_PROJECTION"},
+    "blood_mid866_seen": false,
+    "blood_mid867_seen": false
+  },
+  "blood_ui_source": {
+    "class": "AwakeTwiceSelectTeamWindow",
+    "team_cap": 16,
+    "pass212_override": false,
+    "latest_lazy_awake_twice_rows": 0,
+    "historical_v1_164_physical_awake_twice_rows": 22,
+    "conclusion": "Use stock APK current-generation physical Blood UI; do not deliver historical donor CSBs."
+  }
+}

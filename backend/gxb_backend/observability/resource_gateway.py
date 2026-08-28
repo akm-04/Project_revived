@@ -31,6 +31,7 @@ from typing import Any, Iterable
 
 from flask import Request, make_response, send_file
 
+from gxb_backend.observability.console_runtime import console_emit
 from gxb_backend.config import Settings
 
 
@@ -591,7 +592,7 @@ class ResourceGateway:
                 "resolved_path": "",
             }
             self._record(req, requested_asset, outcome)
-            print(f"[RESOURCE] catalog miss: {requested_asset}")
+            console_emit("missing", f"[RESOURCE] catalog miss: {requested_asset}")
             return self._missing_response("catalog_miss", requested_asset)
 
         catalog_paths = [entry.path for entry in entries]
@@ -632,7 +633,7 @@ class ResourceGateway:
                         "candidate_paths": candidate_strings,
                     }
                     self._record(req, requested_asset, outcome)
-                    print(f"[RESOURCE] served {requested_asset} <- {candidate}")
+                    console_emit("http_download", f"[RESOURCE] served {requested_asset} <- {candidate}")
                     guessed_type, _encoding = mimetypes.guess_type(entry.path)
                     response = send_file(
                         candidate,
@@ -670,7 +671,7 @@ class ResourceGateway:
                     "archive_candidates": archive_candidates,
                 }
                 self._record(req, requested_asset, outcome)
-                print(f"[RESOURCE] served {requested_asset} <- {uri}")
+                console_emit("http_download", f"[RESOURCE] served {requested_asset} <- {uri}")
                 guessed_type, _encoding = mimetypes.guess_type(entry.path)
                 response = send_file(
                     io.BytesIO(data),
@@ -700,5 +701,5 @@ class ResourceGateway:
             "mismatches": mismatches,
         }
         self._record(req, requested_asset, outcome)
-        print(f"[RESOURCE] {status}: {requested_asset} -> {catalog_paths}")
+        console_emit("missing", f"[RESOURCE] {status}: {requested_asset} -> {catalog_paths}")
         return self._missing_response(status, requested_asset)

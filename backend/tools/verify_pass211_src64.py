@@ -53,6 +53,6 @@ def main():
         require(all(int(row[k])==int(a[k]) for k in ('chapter_id','chapter_table_id','fragment_item','awaken_num_raw')),f'Occult/Awakening row drift {mid}')
     report={'pass':'211.0','stage':'P2_STAGE_F_OCCULT_DEPENDENCY','effective_src64':str(SRC),'effective_src64_file_count':len(files),'source_hashes':hashes,'counts':catalog['counts'],'constants':catalog['constants'],'awaken_num_callers':uses,'evidence':{
       'ticket_threshold_cap':'SOURCE_FACT','raw_sweep_rate':'SOURCE_FACT_UI_TEXT_ONLY','raw_awaken_nums':'SOURCE_FACT_NO_EFFECTIVE_CALLER','deterministic_one_ticket_one_fragment':'COMPATIBILITY_POLICY','synthetic_max_points_active_chapter':'COMPATIBILITY_POLICY'}}
-    (ROOT/'PASS211_SRC64_REALITY_CHECK.json').write_text(json.dumps(report,indent=2,sort_keys=True)+'\n')
+    (ROOT/'docs/json/PASS211_SRC64_REALITY_CHECK.json').write_text(json.dumps(report,indent=2,sort_keys=True)+'\n')
     print('PASS Pass211 src_64 reality:',json.dumps({'files':len(files),'routes':len(routes),'chapters':sorted({int(v['chapter_id']) for v in routes.values()}),'awaken_num_callers':uses},sort_keys=True))
 if __name__=='__main__':main()

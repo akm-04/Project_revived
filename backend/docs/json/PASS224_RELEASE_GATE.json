@@ -1,0 +1,19 @@
+{
+  "pass": "224.0",
+  "backend_version": "0.33.0",
+  "ota": "1.631.19",
+  "status": "STATIC_GATE_PASS_CLEAN_RUNTIME_SMOKE_PENDING",
+  "control_base": "gxb-backend-v0.26.0-pass212.0",
+  "runtime_overrides_added_to_pass212": [
+    "src_32/app/model/NormalHero.lua",
+    "src_64/app/model/NormalHero.lua",
+    "src_32/app/windows/TaskAwakeCell.lua",
+    "src_64/app/windows/TaskAwakeCell.lua"
+  ],
+  "resource_members": 0,
+  "post_pass212_experimental_blood_ui": false,
+  "lazy_downloader_override": false,
+  "backend_loading_override": false,
+  "clean_app_data_required": true,
+  "next": "Clean app data, install OTA 1.631.19, verify Blood MID54 UI then stock 16-member selector, MID866, battle, MID867."
+}

@@ -1,0 +1,24 @@
+{
+  "pass": "225.0",
+  "status": "PASS",
+  "backend_version": "0.34.0",
+  "ota": "1.631.20",
+  "tests": {
+    "pass225_selftest": "PASS",
+    "p2_stage_c": "PASS",
+    "p2_stage_d": "PASS",
+    "p2_stage_e": "PASS",
+    "p2_stage_f": "PASS",
+    "p2_stage_g": "PASS",
+    "architecture_hygiene": "PASS"
+  },
+  "server_semantics_frozen": true,
+  "console_logging": {
+    "default_debug_verbose": 1,
+    "auto_log": "runtime_logs/server.txt",
+    "structured_jsonl_unfiltered": true
+  },
+  "blood_mid54_fix": "transient Blood-specific collected marker only after successful MID54; no pre-equip from ordinary slot",
+  "root_json_cleanup": "PASS*.json archived under docs/json; VERSION.json remains root",
+  "server_semantic_domain_changes": []
+}

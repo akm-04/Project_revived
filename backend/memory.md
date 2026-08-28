@@ -1,3 +1,13 @@
+# Pass224 current memory
+
+- Pass212 is restored as the clean client/runtime control baseline. Pass219-223 historical-CSB/window/downloader/loading/Incubus-adapter experiments are rejected for the next smoke.
+- Ordinary terminal Hero Awakening keeps exact current local Hero mutation but presents stock `common_alert`; runtime accepted (`awake_terminal_after_open_result`).
+- Reproduced Blood MID54 UI bug is a current-client cache/projection defect already predicted in Pass207: displayed Blood substitute did not inherit canonical slot collected state and callback removed the ordinary Awake item instead of the displayed Blood item. Pass224 fixes only that local cache/display behavior; server MID54 still keeps durable Blood stage=1 and MID161 advances stage2.
+- Stock current `AwakeTwiceSelectTeamWindow` is authoritative and supports 16 total Heroes. Pass212 had no Blood UI/resource override and user confirms its Blood battle UI worked. Historical 2.0.8 Blood CSBs must never shadow bundled stock physical resources.
+- Pass224 OTA 1.631.19 is Pass212 cumulative Lua + exactly two paired source overrides (`TaskAwakeCell`, `NormalHero`), 146 members, zero resource members. No LazyDownloader/Backend/window/preload/TaskAwake-art/Blood-adapter hacks.
+- CLEAN DEVICE STATE IS REQUIRED before runtime: sparse prior OTAs do not delete stale writable files. Use `adb shell pm clear com.carolgames.gxb`, then relaunch prepared APK and install OTA1.631.19.
+- Next gate: verify Blood gear UI, stock 16-Hero selector, MID866 and battle. Capture MID867 after battle before changing Stage E; Pass212 control reported post-battle task completion bug but clean wire evidence is still pending.
+
 # Pass192 current memory
 
 - First P1-I5 stock-client smoke is reconciled, but P1 is **not runtime closed**. Courses core lifecycle, normal White Album, and Common/Element paths produced positive runtime evidence; Workshop mutations were blocked by missing QA materials.
@@ -89,3 +99,12 @@ Canonical implementation: `gxb-backend-v0.17.4-pass171.0`.
 - OTA remains 1.631.12 / 142 cumulative entries; Pass171 is backend-only.
 - NEXT: targeted stock-client restart re-smoke on the preserved player state. H6 remains open; do not declare runtime closure until re-smoke and follow-up reconciliation pass.
 - Permanent rule: cross-check effective `src_64` before every backend behavioral modification and preserve source fact vs runtime observation vs compatibility decision.
+
+## Pass225 runtime/logging checkpoint
+- Fresh clean-data Pass224 smoke: ordinary Awakening remains runtime accepted.
+- Blood MID2738 opened mission 2200001 and granted item 50002078, but **no Blood MID54 was sent** before Awaken Task rejected battle with mission count=0/is_complete=0.
+- Root cause: Pass224 falsely treated the already-collected ordinary Awakening equip slot as proof the Blood substitute had been equipped. Reject that projection permanently.
+- Correct client rule: Blood substitute appears uncollected until a real MID54 succeeds; after successful MID54 only, mark a transient Blood-specific slot cache and remove the displayed Blood item ID from local Backpack. Do not advance twice_awake_stage_ client-side.
+- Pass212 control remains client authority for Blood UI/window/resources and global downloader/loading behavior.
+- Operator logging: server.py DEBUG_VERBOSE=1..4; automatic filtered runtime_logs/server.txt; structured JSONL remains unfiltered. Categories: basic/error/missing=1, window=2, http_download=3, full=4.
+- Historical root PASS*.json artifacts moved under docs/json; VERSION.json remains operational at root.

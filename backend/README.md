@@ -206,3 +206,6 @@ Pass170 activates Gods Trial manual and auto state machines, source-day progress
 
 Pass171 removes `spirit_item` from ordinary owned-Hero persistence and MID49 projection. In the recovered client, `spirit_item` is optional semantic cache data: if absent, equipped `spirit_id` values resolve through Backpack; if an empty table is supplied, the cache path is selected and nonzero slots dereference nil after restart. Durable load maintenance now self-heals stale self-Hero cache fields without changing six-slot equipment or unique instances. The regression reproduces KM-Moe's smoke fixture `[7,4,12,1,5,15]`, verifies all six IDs resolve through MID81 `spirit_list`, and verifies a materialized attribute sum remains numeric after restart. No OTA change is required.
 
+## Pass225 operator logging
+
+Run `python3 server.py`. Console output is automatically captured in `runtime_logs/server.txt`. Set `DEBUG_VERBOSE` near the top of `server.py` (1 basic/errors, 2 + window probes, 3 + successful resource HTTP, 4 all), or override once with `--debug-verbose`. Structured JSONL logs are never filtered. See `docs/OPERATOR_LOGGING.md`.

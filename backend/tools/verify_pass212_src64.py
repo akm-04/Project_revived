@@ -45,6 +45,6 @@ def main():
     for pmid in (165,166,823):
       row=next(r for r in contracts['contracts'] if int(r['mid'])==pmid);require(row['enforcement']=='BLOCK_PHASE1' and row['backend_capability']=='EXPLICIT_FAIL_CLOSED',f'Pet fence drift {pmid}')
     report={'pass':'212.0','stage':'P2_STAGE_G_FINAL_REALITY','status':'PASS','effective_src64':str(src),'effective_src64_file_count':len(files),'source_hashes':EXPECTED,'route_census':{'ordinary':164,'blood':81,'ordinary_campaign':131,'ordinary_occult':22,'ordinary_event':11,'blood_campaign':74,'blood_event':7},'giveup':{'no_list_ordinary':12,'no_list_blood':7,'source_anomalies':4},'fence_reality':{'mid171':'ALLOW_DURABLE','mid51_mid57':'ACTIVE_SOURCE_CALLERS_NO_P2_FIREWALL','pet_awake':'PRESERVE_FAIL_CLOSED','full_occult':'PRESERVE_MINIMAL_ONLY'},'evidence':{'mid171_callback':'SOURCE_FACT','giveup_full_stack':'SOURCE_FACT','nonce_less_mid171_exactly_once':'PROTOCOL_LIMIT','event_entitlements':'COMPATIBILITY_POLICY','occult_fragment_yield':'COMPATIBILITY_POLICY'}}
-    (ROOT/'PASS212_SRC64_REALITY_CHECK.json').write_text(json.dumps(report,indent=2,sort_keys=True)+'\n')
+    (ROOT/'docs/json/PASS212_SRC64_REALITY_CHECK.json').write_text(json.dumps(report,indent=2,sort_keys=True)+'\n')
     print('PASS Pass212 final src_64 reality:',json.dumps({'files':len(files),'ordinary':164,'blood':81,'no_delete':19,'mid171':'ALLOW_DURABLE'},sort_keys=True))
 if __name__=='__main__':main()

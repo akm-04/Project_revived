@@ -1,50 +1,60 @@
 #!/usr/bin/env python3
-"""Compatibility launcher for the modular GXB v0.8.29 Pass 42.7 backend.
+"""Compatibility launcher for the modular GXB EOL backend.
 
-No-argument behavior remains the historical launcher: ``python3 server.py``
-starts the backend.  ``-h`` / ``--help`` is operator documentation only.
+No-argument behavior starts the backend.  Human-facing console output is
+filtered by DEBUG_VERBOSE and automatically teed to runtime_logs/server.txt.
+Structured JSONL evidence under runtime_logs is never filtered.
 """
 from __future__ import annotations
 
 import argparse
+from pathlib import Path
+
+# Operator default.  Edit this one value for persistent local preference.
+# 1 = basic/gameplay + errors + missing assets/404
+# 2 = level 1 + client window/resource-probe events
+# 3 = level 2 + successful asset/update HTTP download traffic
+# 4 = all console/debug/access output
+DEBUG_VERBOSE = 1
 
 
 def build_parser() -> argparse.ArgumentParser:
-    return argparse.ArgumentParser(
+    parser = argparse.ArgumentParser(
         prog="server.py",
         description=(
-            "Start the local Girls X Battle EOL backend. With no options this launches "
-            "the SDK HTTP plane, engine HTTP plane, optional chat stub, resource gateway, "
-            "and the currently configured (disabled-by-default) MID2 update advertisement."
+            "Start the local Girls X Battle EOL backend. Console output is automatically "
+            "written to runtime_logs/server.txt; structured runtime logs remain separate."
         ),
         epilog=(
+            "Debug verbosity:\n"
+            "  1 basic/gameplay + errors + missing assets/404\n"
+            "  2 + client window/resource-probe events\n"
+            "  3 + successful /res and update download traffic\n"
+            "  4 all output including raw Flask/Werkzeug access lines\n\n"
             "Writable update quick start:\n"
-            "  1. Read UPDATE_README.md.\n"
-            "  2. Prepared/Pass35.1-runtime-validated package: local_assets/updates/gxb-local-1.631.2.zip.001\n"
-            "     (manifest is shipped enabled=false).\n"
-            "  3. Enable:  python3 tools/set_local_update_enabled.py on\n"
-            "  4. Disable: python3 tools/set_local_update_enabled.py off\n"
-            "  5. Rebuild: python3 tools/build_local_lua_update.py --version N.N.N --disable\n\n"
-            "Update layout:\n"
-            "  local_assets/res/       lazy exact-MD5 /res resources\n"
-            "  local_assets/src_32/    sparse writable 32-bit Lua/data overrides\n"
-            "  local_assets/src_64/    sparse writable 64-bit Lua/data overrides\n"
-            "  local_assets/updates/   generated MID2 ZIP volumes\n"
-            "  local_assets/update_manifest.json  MID2 advertisement control\n\n"
-            "Resource versions MUST be exactly numeric N.N.N (for example 1.631.2).\n"
-            "Update events are logged to runtime_logs/local_update_events.jsonl.\n"
-            "This launcher intentionally exposes no gameplay/admin mutation switches."
+            "  python3 tools/set_local_update_enabled.py on|off\n"
+            "  python3 tools/build_local_lua_update.py --version N.N.N --silent\n\n"
+            "local_assets/res/ may be populated by the operator as an asset search root; "
+            "the Pass212-style OTA builder packages only sparse src_32/src_64 overrides.\n"
+            "This launcher exposes no gameplay/admin mutation switches."
         ),
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
+    parser.add_argument(
+        "--debug-verbose", type=int, choices=(1, 2, 3, 4), default=None,
+        help="override server.py DEBUG_VERBOSE for this launch only",
+    )
+    return parser
 
 
 def main() -> None:
-    # argparse handles -h/--help and rejects unknown launcher options before the
-    # heavier backend runtime modules are imported.
-    build_parser().parse_args()
-    from gxb_backend.run import main as run_backend
+    args = build_parser().parse_args()
+    verbosity = args.debug_verbose if args.debug_verbose is not None else DEBUG_VERBOSE
 
+    from gxb_backend.observability.console_runtime import configure_console
+    configure_console(runtime_log_dir=Path(__file__).resolve().parent / "runtime_logs", verbosity=verbosity)
+
+    from gxb_backend.run import main as run_backend
     run_backend()
 
 

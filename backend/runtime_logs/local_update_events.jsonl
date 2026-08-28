@@ -1,8 +1,0 @@
-{"event":"advertise","current":"","target":"1.631.3","volumes":1,"size":1961280,"md5":"d883c1fabfd1ff46d6561be62d996787","resource":"http://172.26.36.18:9000/updates/gxb-local-1.631.3.zip","silent":true,"ts":1787456923}
-{"event":"version_current_or_newer","current":"1.631.3","target":"1.631.3","ts":1787456923}
-{"event":"advertise","current":"","target":"1.631.3","volumes":1,"size":1961280,"md5":"d883c1fabfd1ff46d6561be62d996787","resource":"http://172.26.36.18:9000/updates/gxb-local-1.631.3.zip","silent":true,"ts":1787456996}
-{"event":"version_current_or_newer","current":"1.631.3","target":"1.631.3","ts":1787456996}
-{"event":"advertise","current":"","target":"1.631.3","volumes":1,"size":1961280,"md5":"d883c1fabfd1ff46d6561be62d996787","resource":"http://172.26.36.18:9000/updates/gxb-local-1.631.3.zip","silent":true,"ts":1787457297}
-{"event":"version_current_or_newer","current":"1.631.3","target":"1.631.3","ts":1787457297}
-{"event":"advertise","current":"1.631.3","target":"1.631.4","volumes":1,"size":1962886,"md5":"71f8c8bf25a599218994a55c14f447db","resource":"http://172.26.36.48:9000/updates/gxb-local-1.631.4.zip","silent":true,"ts":1787483396}
-{"event":"version_current_or_newer","current":"1.631.4","target":"1.631.4","ts":1787483396}
