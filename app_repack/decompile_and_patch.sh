@@ -100,6 +100,15 @@ else
     echo "    [!] Probe script not found at $PROBE_SCRIPT, skipping..."
 fi
 
+
+echo "  -> [E-Sub2] Injecting Window/CSLoader Probe..."
+WINDOW_PROBE_SCRIPT="$SCRIPT_DIR/patch_decoded_window_pipeline_probe.py"
+if [ -f "$WINDOW_PROBE_SCRIPT" ]; then
+    python3 "$WINDOW_PROBE_SCRIPT" "$DECODE_DIR"
+else
+    echo "    [!] Window probe script not found at $WINDOW_PROBE_SCRIPT, skipping..."
+fi
+
 # Cleanup raw output workspace
 rm -rf "$OUTPUT_DIR"
 echo "  -> [E] Temporary output directory cleaned."
