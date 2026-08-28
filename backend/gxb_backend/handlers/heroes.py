@@ -47,6 +47,10 @@ class HeroHandlers:
             req.get("partner_id"), req.get("skill_index")
         )
 
+    def change_partner_skill(self, req: dict) -> dict:
+        """MID2144: KongMing persistent Awake-skill selection; Book-V is ownership-only."""
+        return self.ctx.state.get_kongming_awake_skill_service().change(req)
+
     def save_sort_type(self, req: dict) -> dict:
         """MID89 SAVA_SORT_TYPE: request consumes ``sort_type``; no response fields."""
         self.ctx.state.get_hero_repository().set_sort_type(req.get("sort_type", 0))
@@ -103,11 +107,16 @@ class HeroHandlers:
         return self.ctx.state.get_hero_progression_repository().evolve_hero(req)
 
     def set_hero_equip(self, req: dict) -> dict:
-        """MID54: ordinary equipment or source-distinct SuperHero fixed gear."""
+        """MID54: SuperHero, active Awakening-special, or ordinary equipment."""
         hero = self.ctx.state.get_hero_repository().get(req.get("partner_id"))
         advanced = self.ctx.state.get_hero_advanced_progression_repository()
         if advanced.is_super(hero):
             return advanced.super_set_equip(req.get("partner_id"), req.get("equip_index"))
+        awake = self.ctx.state.get_awakening_equipment_coordinator().set_hero_equip(
+            req.get("partner_id"), req.get("equip_index")
+        )
+        if awake is not None:
+            return awake
         return self.ctx.state.get_hero_equipment_repository().set_hero_equip(
             req.get("partner_id"), req.get("equip_index")
         )
@@ -120,12 +129,13 @@ class HeroHandlers:
             return advanced.super_one_click_equip(req.get("partner_id"))
         return self.ctx.state.get_hero_equipment_repository().one_click_equip(req.get("partner_id"))
 
-    def one_click_promote(self, req: dict) -> dict:
-        """MID57: atomically promote one early ordinary NormalHero color."""
+
+    def one_click_promote(self, req: dict):
+        """MID57: source-bounded promotion preserving Awake/Blood special slots/Fumo."""
         return self.ctx.state.get_hero_equipment_repository().one_click_promote(req.get("partner_id"))
 
-    def powerup_hero(self, req: dict) -> dict:
-        """MID51: promote after all ordinary current-color gear is collected."""
+    def powerup_hero(self, req: dict):
+        """MID51: promotion + ordinary Fumo restoration while preserving special slots/Fumo."""
         return self.ctx.state.get_hero_equipment_repository().powerup_hero(req.get("partner_id"))
 
 
@@ -158,6 +168,9 @@ class HeroHandlers:
 
     def inscription_resolve(self, req: dict) -> dict:
         return self.ctx.state.get_hero_advanced_progression_repository().inscription_resolve(req)
+
+    def inscription_exchange_materials(self, req: dict) -> dict:
+        return self.ctx.state.get_hero_advanced_progression_repository().inscription_exchange_materials_all(req)
 
     def breach_stone_add(self, req: dict) -> dict:
         return self.ctx.state.get_hero_advanced_progression_repository().breach_stone_add(req)

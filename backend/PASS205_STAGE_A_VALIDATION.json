@@ -1,0 +1,25 @@
+{
+  "baseline_stale_tests": "Historical tests with embedded counts/hashes that already fail on untouched Pass193 are not release gates and were not rewritten.",
+  "pass": "205.0",
+  "player_db_unchanged_from_pass193": true,
+  "release_state": "Stage A implemented; externally visible P2 behavior remains fenced; Stage B not started.",
+  "stage": "P2-A",
+  "status": "PASS",
+  "tests": [
+    "tools/verify_pass205_src64.py",
+    "tools/selftest_pass205_p2_stage_a_foundation.py",
+    "tools/selftest_pass68_foundation.py",
+    "tools/selftest_pass69_economy_backbone_part2.py",
+    "tools/selftest_pass70_response_projection.py",
+    "tools/selftest_pass71_temporal_resources.py",
+    "tools/selftest_pass72_hero_progression.py",
+    "tools/selftest_pass74_awakening.py",
+    "tools/selftest_pass179_p0_girls_gear.py",
+    "tools/selftest_pass187_p1_i2.py",
+    "tools/selftest_pass188_p1_i3_courses.py",
+    "tools/selftest_pass189_p1_i4a_workshop_buildings.py",
+    "tools/selftest_pass190_p1_i4b_cabinet.py",
+    "tools/selftest_pass192_p1_i5_runtime_reconciliation.py",
+    "tools/selftest_pass193_p1_i5_cabinet_wire_reconciliation.py"
+  ]
+}

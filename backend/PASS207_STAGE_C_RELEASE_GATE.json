@@ -1,0 +1,32 @@
+{
+  "backend_version": "0.22.0",
+  "baseline_backend": "gxb-backend-v0.21.0-pass206.0",
+  "p2_release_fences_preserved_except_stage_c_promotion_path_retired_as_planned": true,
+  "pass": "207.0",
+  "player_db_unchanged_from_pass206": true,
+  "regression_gates": {
+    "pass179_p0_non_superseded_tests": "PASS_4_OF_4",
+    "pass187_p1_i2": "PASS_7_OF_7",
+    "pass188_p1_i3_courses": "PASS_7_OF_7",
+    "pass189_p1_i4a_workshop": "PASS_7_OF_7",
+    "pass190_p1_i4b_cabinet": "PASS_7_OF_7",
+    "pass192_runtime_reconciliation": "PASS_6_OF_6",
+    "pass193_cabinet_wire": "PASS_3_OF_3"
+  },
+  "runtime_reconciliation_risks": [
+    "Blood MID54 immediate client Backpack/equipment-cache discrepancy before subsequent refresh/relog"
+  ],
+  "src64": {
+    "critical_hashes": 9,
+    "file_count": 4370,
+    "reality_check": "PASS"
+  },
+  "stage": "P2-C",
+  "stage_b_selftest": "PASS",
+  "stage_c_selftest": "PASS",
+  "stage_d_started": false,
+  "status": "PASS",
+  "superseded_characterizations": {
+    "pass179_awakening_promotion_http409": "SUPERSEDED_BY_STAGE_C_SELECTIVE_SPECIAL_SLOT_FUMO_PRESERVATION; historical test unchanged"
+  }
+}

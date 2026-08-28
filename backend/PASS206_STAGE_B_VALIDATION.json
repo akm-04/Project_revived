@@ -1,0 +1,17 @@
+{
+  "activation_incomplete": true,
+  "activation_replay_no_double_credit": true,
+  "blood_stage1_open_and_stage0_giveup": true,
+  "composition_provider": true,
+  "composition_provider_targets": 417,
+  "event_entitlements": 18,
+  "extra_drops_shape": "table_id,item_num",
+  "giveup_full_stack_tombstone_replay": true,
+  "mid83_generic_stack_projection": false,
+  "odin_restore": true,
+  "pass": "206.0",
+  "stage": "P2-B",
+  "status": "PASS",
+  "wish_blacklist": 11,
+  "wish_service_implemented_firewall_preserved": true
+}

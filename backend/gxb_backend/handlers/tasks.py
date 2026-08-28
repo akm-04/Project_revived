@@ -7,7 +7,11 @@ class TaskHandlers:
         self.ctx = ctx
 
     def load_mission(self, req: dict) -> dict:
-        return self.ctx.state.get_player().task_bootstrap_payload()
+        payload = dict(self.ctx.state.get_player().task_bootstrap_payload())
+        # Pass210 Stage E: legacy bootstrap may contain stale generic awake/twice
+        # buckets. AwakeningMissionService is the sole canonical mission owner.
+        payload.update(self.ctx.state.get_awakening_mission_service().bootstrap_channels())
+        return payload
 
     def task_load_by_type(self, req: dict) -> dict:
         mission_type = req.get("mission_type") or req.get("type")
@@ -37,6 +41,9 @@ class TaskHandlers:
 
     def awake_give_up(self, req: dict) -> dict:
         return self.ctx.state.get_awakening_mission_service().give_up(req)
+
+    def awake_get_item(self, req: dict) -> dict:
+        return self.ctx.state.get_awakening_mission_service().get_awake_item(req)
 
     def mission_status(self, req: dict) -> dict:
         return {"awards": []}

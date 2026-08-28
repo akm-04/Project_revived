@@ -1,0 +1,311 @@
+{
+  "_meta": {
+    "effective_src64_file_count": 4370,
+    "epistemic_class": "SOURCE_FACT_ONLY",
+    "notes": [
+      "awaken_nums_raw=30 and creats_sweep_reward_rate=0.6 are preserved source facts only; neither is treated as recovered server fragment quantity."
+    ],
+    "schema_version": 1,
+    "source_archive_sha256": "89f0f830508b92e5fff6ad53c6a9dae961a14042dbfdf5649008efb8353f5608",
+    "source_files": {
+      "app/common/network/mid.lua": "026a20b29d97624979777a68c64c749254031604057ff42aa8f8254c3e35b5af",
+      "app/model/Occult.lua": "748c6b2606fdbd0ee434f87b6761a8391df9c5236ccee110e302281651ab2b47",
+      "app/windows/OccultWindow.lua": "b26e7a420045e5e2ad3ebf1c7464fe312ce10b9813199367dd6b517f2a2e78d7",
+      "data/tables/creats_chapter_select.lua": "c4134b5ee3a9861d75f76f6c704e16345c0cb61d6b49adefcdf1f90549d26e3d",
+      "data/tables/misc.lua": "058cf5719421ed71a12083a8c95b0ccded7204bedb5fa1263d508e2fa4257f9a"
+    },
+    "source_resolution": "effective_src64"
+  },
+  "awakening_routes": {
+    "1171001": {
+      "awaken_num_raw": 30,
+      "chapter_id": 2,
+      "chapter_table_id": 10001158,
+      "fragment_item": 60001170,
+      "mission_id": 1171001
+    },
+    "1176001": {
+      "awaken_num_raw": 30,
+      "chapter_id": 2,
+      "chapter_table_id": 10001158,
+      "fragment_item": 60001174,
+      "mission_id": 1176001
+    },
+    "1181001": {
+      "awaken_num_raw": 30,
+      "chapter_id": 2,
+      "chapter_table_id": 10001158,
+      "fragment_item": 60001182,
+      "mission_id": 1181001
+    },
+    "1185001": {
+      "awaken_num_raw": 30,
+      "chapter_id": 3,
+      "chapter_table_id": 10001155,
+      "fragment_item": 60001193,
+      "mission_id": 1185001
+    },
+    "1190001": {
+      "awaken_num_raw": 30,
+      "chapter_id": 3,
+      "chapter_table_id": 10001155,
+      "fragment_item": 60001202,
+      "mission_id": 1190001
+    },
+    "1197001": {
+      "awaken_num_raw": 30,
+      "chapter_id": 3,
+      "chapter_table_id": 10001155,
+      "fragment_item": 60001210,
+      "mission_id": 1197001
+    },
+    "1203001": {
+      "awaken_num_raw": 30,
+      "chapter_id": 4,
+      "chapter_table_id": 10001187,
+      "fragment_item": 60001227,
+      "mission_id": 1203001
+    },
+    "1205001": {
+      "awaken_num_raw": 30,
+      "chapter_id": 4,
+      "chapter_table_id": 10001187,
+      "fragment_item": 60001242,
+      "mission_id": 1205001
+    },
+    "1211001": {
+      "awaken_num_raw": 30,
+      "chapter_id": 4,
+      "chapter_table_id": 10001187,
+      "fragment_item": 60001251,
+      "mission_id": 1211001
+    },
+    "1215001": {
+      "awaken_num_raw": 30,
+      "chapter_id": 4,
+      "chapter_table_id": 10001187,
+      "fragment_item": 60001268,
+      "mission_id": 1215001
+    },
+    "1218001": {
+      "awaken_num_raw": 30,
+      "chapter_id": 4,
+      "chapter_table_id": 10001187,
+      "fragment_item": 60001277,
+      "mission_id": 1218001
+    },
+    "1221001": {
+      "awaken_num_raw": 30,
+      "chapter_id": 2,
+      "chapter_table_id": 10001158,
+      "fragment_item": 60001288,
+      "mission_id": 1221001
+    },
+    "1224001": {
+      "awaken_num_raw": 30,
+      "chapter_id": 3,
+      "chapter_table_id": 10001155,
+      "fragment_item": 60001314,
+      "mission_id": 1224001
+    },
+    "1228001": {
+      "awaken_num_raw": 30,
+      "chapter_id": 2,
+      "chapter_table_id": 10001158,
+      "fragment_item": 60001334,
+      "mission_id": 1228001
+    },
+    "1230001": {
+      "awaken_num_raw": 30,
+      "chapter_id": 3,
+      "chapter_table_id": 10001155,
+      "fragment_item": 60001350,
+      "mission_id": 1230001
+    },
+    "1238001": {
+      "awaken_num_raw": 30,
+      "chapter_id": 3,
+      "chapter_table_id": 10001155,
+      "fragment_item": 60001373,
+      "mission_id": 1238001
+    },
+    "1241001": {
+      "awaken_num_raw": 30,
+      "chapter_id": 2,
+      "chapter_table_id": 10001158,
+      "fragment_item": 60001385,
+      "mission_id": 1241001
+    },
+    "1245001": {
+      "awaken_num_raw": 30,
+      "chapter_id": 4,
+      "chapter_table_id": 10001187,
+      "fragment_item": 60001395,
+      "mission_id": 1245001
+    },
+    "1248001": {
+      "awaken_num_raw": 30,
+      "chapter_id": 4,
+      "chapter_table_id": 10001187,
+      "fragment_item": 60001406,
+      "mission_id": 1248001
+    },
+    "1251001": {
+      "awaken_num_raw": 30,
+      "chapter_id": 3,
+      "chapter_table_id": 10001155,
+      "fragment_item": 60001415,
+      "mission_id": 1251001
+    },
+    "1253001": {
+      "awaken_num_raw": 30,
+      "chapter_id": 2,
+      "chapter_table_id": 10001158,
+      "fragment_item": 60001424,
+      "mission_id": 1253001
+    },
+    "1256001": {
+      "awaken_num_raw": 30,
+      "chapter_id": 2,
+      "chapter_table_id": 10001158,
+      "fragment_item": 60001435,
+      "mission_id": 1256001
+    }
+  },
+  "chapters": [
+    {
+      "awakening_items": [],
+      "awakening_mission_ids": [],
+      "awakening_nums_raw": [],
+      "chapter_id": 1,
+      "chapter_name": "Playground Fight",
+      "table_id": 10001138
+    },
+    {
+      "awakening_items": [
+        60001170,
+        60001174,
+        60001182,
+        60001288,
+        60001334,
+        60001385,
+        60001424,
+        60001435
+      ],
+      "awakening_mission_ids": [
+        1171001,
+        1176001,
+        1181001,
+        1221001,
+        1228001,
+        1241001,
+        1253001,
+        1256001
+      ],
+      "awakening_nums_raw": [
+        30,
+        30,
+        30,
+        30,
+        30,
+        30,
+        30,
+        30
+      ],
+      "chapter_id": 2,
+      "chapter_name": "Devil Arrival",
+      "table_id": 10001158
+    },
+    {
+      "awakening_items": [
+        60001193,
+        60001202,
+        60001210,
+        60001314,
+        60001350,
+        60001373,
+        60001415
+      ],
+      "awakening_mission_ids": [
+        1185001,
+        1190001,
+        1197001,
+        1224001,
+        1230001,
+        1238001,
+        1251001
+      ],
+      "awakening_nums_raw": [
+        30,
+        30,
+        30,
+        30,
+        30,
+        30,
+        30
+      ],
+      "chapter_id": 3,
+      "chapter_name": "Doctor's Treasure",
+      "table_id": 10001155
+    },
+    {
+      "awakening_items": [
+        60001227,
+        60001242,
+        60001251,
+        60001268,
+        60001277,
+        60001395,
+        60001406
+      ],
+      "awakening_mission_ids": [
+        1203001,
+        1205001,
+        1211001,
+        1215001,
+        1218001,
+        1245001,
+        1248001
+      ],
+      "awakening_nums_raw": [
+        30,
+        30,
+        30,
+        30,
+        30,
+        30,
+        30
+      ],
+      "chapter_id": 4,
+      "chapter_name": "Beach Park",
+      "table_id": 10001187
+    },
+    {
+      "awakening_items": [],
+      "awakening_mission_ids": [],
+      "awakening_nums_raw": [],
+      "chapter_id": 5,
+      "chapter_name": "Dorm Assembly",
+      "table_id": 11006
+    },
+    {
+      "awakening_items": [],
+      "awakening_mission_ids": [],
+      "awakening_nums_raw": [],
+      "chapter_id": 6,
+      "chapter_name": "Xue Mansion",
+      "table_id": 10001215
+    }
+  ],
+  "constants": {
+    "dispatch_hero_limit": 30,
+    "sweep_reward_rate_raw": 0.6,
+    "ticket_cap": 2,
+    "ticket_energy_threshold": 3000
+  },
+  "counts": {
+    "chapters": 6,
+    "ordinary_awakening_routes": 22
+  },
+  "schema_version": 1
+}

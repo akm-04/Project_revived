@@ -1,0 +1,41 @@
+{
+  "pass": "212.0",
+  "stage": "P2-G",
+  "status": "P2_SERVER_RELEASE_CANDIDATE_CLIENT_SMOKE_PENDING",
+  "baseline_backend": "gxb-backend-v0.25.0-pass211.0",
+  "backend_version": "0.26.0",
+  "stage_g_server_closure_complete": true,
+  "p2_runtime_release_accepted": false,
+  "stock_client_smoke_required": true,
+  "player_db_unchanged_from_pass211": true,
+  "src64": {
+    "file_count": 4370,
+    "reality_check": "PASS"
+  },
+  "closure_census": {
+    "ordinary": 164,
+    "blood": 81,
+    "giveup_no_delete": 19,
+    "giveup_anomalies": 4,
+    "event_entitlements": 18
+  },
+  "retired_fences": [
+    "MID171 GET_AWAKE_ITEM old mutation-contract firewall",
+    "dead MID51/MID57 awakening_equipment_promotion_deferred handler adapter"
+  ],
+  "preserved_fences": [
+    "Pet Awakening MIDs 165/166/823",
+    "full manual/co-op Occult beyond MID2362/MID2385",
+    "post-P2 systems not yet implemented"
+  ],
+  "protocol_limits": [
+    "MID171 is nonce-less; wire-identical legitimate repeats and transport retries cannot be universally distinguished",
+    "MID83 and MID2385 retain the same previously documented nonce-less limitation"
+  ],
+  "runtime_reconciliation_risks": [
+    "Blood MID54 immediate stock-client Backpack/equipment cache may resolve/remove ordinary Awake gear rather than newly consumed Blood gear until relog",
+    "client smoke must verify event entitlement extra_drops display does not diverge from durable inventory",
+    "client smoke must verify MID171 callback-local inventory mutation is not duplicated"
+  ],
+  "next": "Run the Pass212 stock-client smoke plan. Only after successful client reconciliation may P2 runtime release acceptance be recorded and the roadmap advance to Emblem forge/reforge."
+}

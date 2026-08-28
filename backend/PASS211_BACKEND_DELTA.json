@@ -1,0 +1,151 @@
+{
+  "artifact": "gxb-backend-v0.25.0-pass211.0",
+  "baseline": "gxb-backend-v0.24.0-pass210.0",
+  "changed_file_count": 21,
+  "files": [
+    {
+      "bytes": 5061,
+      "change": "added",
+      "path": "PASS211_P2_STAGE_F_IMPLEMENTATION_REPORT.md",
+      "sha256": "1f45e45a3a4345b457a93a658037dee810c36acbeaafa73346014b5a1f0332ef"
+    },
+    {
+      "bytes": 1713,
+      "change": "added",
+      "path": "PASS211_SRC64_REALITY_CHECK.json",
+      "sha256": "a436279f1d5e93fa7b3b029a6076898c0ab60932e2bcb5548fc6efe9a8847126"
+    },
+    {
+      "bytes": 1281,
+      "change": "added",
+      "path": "PASS211_STAGE_F_RELEASE_GATE.json",
+      "sha256": "88f592ff696f68092e415cc481d5c7ea0109599aa6a90b9111a028ea06d0d794"
+    },
+    {
+      "bytes": 739,
+      "change": "added",
+      "path": "PASS211_STAGE_F_VALIDATION.json",
+      "sha256": "47ae318466d1b69b3224a79844c7a7e35c211794c2c45c9cb5f6e981b3aa7f7d"
+    },
+    {
+      "baseline_bytes": 442,
+      "baseline_sha256": "a1449aef45a2b40e390d823ceef59776cc444988b10bc54625d2c0df71e6109a",
+      "bytes": 425,
+      "change": "modified",
+      "path": "VERSION.json",
+      "sha256": "51d3d69464ebd6523cd4def690db8b2880182e598f7fc7e20fb368e39c846180"
+    },
+    {
+      "bytes": 7339,
+      "change": "added",
+      "path": "data/occult_source_catalog.json",
+      "sha256": "08e84a69aaed14dfd8cc4e994be8c902c2ad9b7141e9ef3f5e551cc0e8b1a421"
+    },
+    {
+      "baseline_bytes": 42873,
+      "baseline_sha256": "57902abb6648ecd7688e564b125f6583ec5f3da6e122a4443f7fc11c22d1ece4",
+      "bytes": 42944,
+      "change": "modified",
+      "path": "data/resource_registry.json",
+      "sha256": "cf16056d3d43819d01eb5009d10d99ed78e2302814a34794740772d82b4dde69"
+    },
+    {
+      "bytes": 3443,
+      "change": "added",
+      "path": "gxb_backend/content/occult_source_catalog.py",
+      "sha256": "561ed9e1d6efa1d49ca4a359e9ffb6392f74c27c01bcfbfb4f3141b8c1a9e9dc"
+    },
+    {
+      "baseline_bytes": 34874,
+      "baseline_sha256": "828318535b5074d4027725930e0b313d9afb04fe69540ce81c039a0f1fff5c2b",
+      "bytes": 35219,
+      "change": "modified",
+      "path": "gxb_backend/dispatch/engine_dispatcher.py",
+      "sha256": "c7714cdf1ef45dd6fae5c3851cd31b6fc54ae3385801c9003582f197710a38df"
+    },
+    {
+      "bytes": 889,
+      "change": "added",
+      "path": "gxb_backend/handlers/occult.py",
+      "sha256": "e2a494ab09e00de7ccb4f193b95eb509d1ac1e3f5f9b640973a637eef275be4c"
+    },
+    {
+      "baseline_bytes": 2343,
+      "baseline_sha256": "8ac7f44b481417ffcd94809221a975af73742e046176a816735f13f21dec86a6",
+      "bytes": 2362,
+      "change": "modified",
+      "path": "gxb_backend/state/derived_mutation_rules.py",
+      "sha256": "9ce75e2bb644b128fb87c442526dd727a14006e6d761d213b797ef10a0fc9d8e"
+    },
+    {
+      "baseline_bytes": 3631,
+      "baseline_sha256": "5d9fd62bc744ceb28466dcba018292566cc75465bb63959c7a15db9919e3fa54",
+      "bytes": 3666,
+      "change": "modified",
+      "path": "gxb_backend/state/mutation_plan.py",
+      "sha256": "87c00637f0c37100a6f685ed1d89ee997fdb9c9da163bf16387312e50790a308"
+    },
+    {
+      "baseline_bytes": 16812,
+      "baseline_sha256": "96dd565527b2a316e7cf040fe1ab89118c67ee3439da671c5bbc8c42c000e198",
+      "bytes": 16787,
+      "change": "modified",
+      "path": "gxb_backend/state/mutation_settlement_service.py",
+      "sha256": "572a96a4db55d966efc0d88d58963ae3f6f9db5a5a66ca240d53535e14dd67a7"
+    },
+    {
+      "bytes": 4283,
+      "change": "added",
+      "path": "gxb_backend/state/occult_entity_mutation_service.py",
+      "sha256": "b0554638f599cd03a0607981bc3d35a585fc2fd5bb1658c588c4f159c1a9d119"
+    },
+    {
+      "bytes": 4608,
+      "change": "added",
+      "path": "gxb_backend/state/occult_service.py",
+      "sha256": "d47e56c2da9bc9fff306af674baccbdddaf172c04763351d47420b16a5539c87"
+    },
+    {
+      "bytes": 1053,
+      "change": "added",
+      "path": "gxb_backend/state/occult_stamina_accrual_rule.py",
+      "sha256": "48f340ab869ba917432849d269acd5d1f1e5af923fef00c4eac98342c984ff0a"
+    },
+    {
+      "baseline_bytes": 37582,
+      "baseline_sha256": "45fcf4e8df3cdd490e9941cb4d940920be3f980b8c6a5d7f1ae6b2a12281a742",
+      "bytes": 38759,
+      "change": "modified",
+      "path": "gxb_backend/state/request_services.py",
+      "sha256": "0f8391c21dec703d883333c908dc4371072d7842e3dd9faf9f97439eb79e5aed"
+    },
+    {
+      "baseline_bytes": 101,
+      "baseline_sha256": "26f97c55d4e63d101f62d0345db88b7119053c142c5d9ea9daa081de4d7b0853",
+      "bytes": 101,
+      "change": "modified",
+      "path": "gxb_backend/version.py",
+      "sha256": "27661503e60c0664f1271deba2dba657836181795c0256e14ababe2c3d97d3ff"
+    },
+    {
+      "bytes": 4378,
+      "change": "added",
+      "path": "tools/build_occult_source_catalog.py",
+      "sha256": "046e85ca0a6d968e23ebcfc11f421ee5d2455db7bbec08fa4ce85027420572d7"
+    },
+    {
+      "bytes": 8374,
+      "change": "added",
+      "path": "tools/selftest_pass211_p2_stage_f.py",
+      "sha256": "e229fe6a14fa339d82f930a5ab7442e543bf98b86352a19b262560c37e49f6fe"
+    },
+    {
+      "bytes": 5415,
+      "change": "added",
+      "path": "tools/verify_pass211_src64.py",
+      "sha256": "aee113e41f8aae7ccab50058daac07b2537778f5f2fe3bc9b7060639bee07186"
+    }
+  ],
+  "pass": "211.0",
+  "stage": "P2-F"
+}

@@ -13,6 +13,8 @@ from pathlib import Path
 from gxb_backend.content import GameDataCatalog
 from gxb_backend.content.horcrux_source_catalog import HorcruxSourceCatalog
 from gxb_backend.content.summon_featured_catalog import SummonFeaturedCatalog
+from gxb_backend.content.white_album_source_catalog import WhiteAlbumSourceCatalog
+from gxb_backend.content.workshop_source_catalog import WorkshopSourceCatalog
 
 from .campaign_composition import CampaignComposition
 from .economy_repository import EconomyRepository
@@ -28,6 +30,7 @@ from .resource_registry import ResourceRegistry
 from .summon_repository import SummonRepository
 from .summon_featured_rotation import SummonFeaturedRotationPolicy
 from .world_repository import WorldRepository
+from .p1_foundation_state import P1FoundationStateNormalizer
 
 
 class PlayerMaintenanceServices:
@@ -43,6 +46,12 @@ class PlayerMaintenanceServices:
         self.player = player
         self.data_dir = Path(data_dir)
         self.catalog = GameDataCatalog.load(self.data_dir / "game_data_catalog.json")
+        self.white_album_source = WhiteAlbumSourceCatalog(self.data_dir)
+        self.workshop_source = WorkshopSourceCatalog(self.data_dir)
+        self.p1_foundation = P1FoundationStateNormalizer(
+            player, album=self.white_album_source, workshop=self.workshop_source,
+            game_data=self.catalog,
+        )
         self.featured_catalog = SummonFeaturedCatalog(self.data_dir)
         self.featured_rotation = featured_rotation or SummonFeaturedRotationPolicy(
             self.data_dir, self.featured_catalog, emit_startup_log=False

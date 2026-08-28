@@ -13,6 +13,7 @@ from .game_data_catalog import (
 )
 from .source_resolver import EffectiveSourceResolver, ResolvedSource
 from .horcrux_source_catalog import HorcruxSourceCatalog
+from .awakening_source_catalog import AwakeningSourceCatalog
 from .super_campaign_catalog import (
     SUPER_CAMPAIGN_TYPE,
     SUPER_FUNCTION_ID,
@@ -22,6 +23,7 @@ from .super_campaign_catalog import (
 
 __all__ = [
     "AmbiguousContentReference",
+    "AwakeningSourceCatalog",
     "CatalogNamespace",
     "CHALLENGE_CAMPAIGN_TYPE",
     "ChallengeCampaignCatalog",

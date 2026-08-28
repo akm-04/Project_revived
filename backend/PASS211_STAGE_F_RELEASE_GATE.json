@@ -1,0 +1,20 @@
+{
+  "pass": "211.0",
+  "stage": "P2-F",
+  "status": "PASS",
+  "baseline_backend": "gxb-backend-v0.24.0-pass210.0",
+  "backend_version": "0.25.0",
+  "stage_f_complete": true,
+  "stage_g_started": false,
+  "broader_p2_release_fenced": true,
+  "player_db_unchanged_from_pass210": true,
+  "src64": {"file_count": 4370, "critical_hashes": 9, "reality_check": "PASS"},
+  "architecture_correction": "occult_ticket remains DOMAIN_GUARDED_CREDIT_DEBIT owned by SorceryWarAggregate; EconomyLedger ownership was not expanded",
+  "compatibility_policy": "3000 stamina -> 1 Scroll; held cap 2; capped progress pauses/discards overflow; active chapter synthetic max_points; MID2385 deterministic 1 Scroll -> 1 matching active Awakening fragment",
+  "protocol_limit": "MID2385 has no nonce; wire-identical legitimate repeated sweeps and transport retries cannot be universally distinguished",
+  "runtime_reconciliation_risks": [
+    "Blood MID54 immediate client Backpack/equipment-cache discrepancy remains a Stage-G stock-client smoke risk from Stage C",
+    "Occult manual/co-op flow remains intentionally fenced; Stage F implements only the Awakening dependency"
+  ],
+  "next": "Stage G exhaustive P2 closure/retry/relog/state-migration/src_64 reality/client-smoke gate after Pass211 seal"
+}

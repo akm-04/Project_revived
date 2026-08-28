@@ -1,0 +1,11 @@
+{
+  "event_entitlements": 18,
+  "extra_drops_table_id_shape_source_confirmed": true,
+  "mid83_local_stack_callback_confirmed": true,
+  "pass": "206.0",
+  "src64_file_count": 4370,
+  "stage": "P2-B",
+  "status": "PASS",
+  "verified_source_files": 10,
+  "wish_blacklist": 11
+}

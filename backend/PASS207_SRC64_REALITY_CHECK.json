@@ -1,0 +1,15 @@
+{
+  "blood_mid54_client_cache_anomaly_source_confirmed": true,
+  "blood_stage1_lineage_slot1_routes": 81,
+  "ordinary_stage1_slot1_routes": 164,
+  "pass": "207.0",
+  "promotion_selective_preserve_source_confirmed": true,
+  "reo_unflagged_blood_gear": [
+    2166001,
+    21001080
+  ],
+  "src64_file_count": 4370,
+  "stage": "P2-C",
+  "status": "PASS",
+  "verified_source_files": 9
+}

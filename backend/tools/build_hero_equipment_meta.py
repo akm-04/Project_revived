@@ -175,7 +175,7 @@ def _item_rows(path: Path) -> dict[str, dict[str, Any]]:
         raise ValueError("item.lua decoded TSV is empty")
     headers = rows[1]
     index = {name: i for i, name in enumerate(headers) if name}
-    required = ["id", "level", "compose", "compose_num", "compose_mana", "exp", "is_awaken_item", "is_bloodline_item"]
+    required = ["id", "level", "compose", "compose_num", "compose_mana", "exp", "quality", "is_awaken_item", "is_bloodline_item"]
     for key in required:
         if key not in index:
             raise ValueError(f"item.lua missing column {key}")
@@ -195,6 +195,7 @@ def _item_rows(path: Path) -> dict[str, dict[str, Any]]:
             "compose_num": _split_ints(row[index["compose_num"]]),
             "compose_mana": max(0, _int(row[index["compose_mana"]], 0)),
             "exp": max(0, _int(row[index["exp"]], 0)),
+            "quality": max(0, _int(row[index["quality"]], 0)),
             "is_awaken_item": max(0, _int(row[index["is_awaken_item"]], 0)),
             "is_bloodline_item": max(0, _int(row[index["is_bloodline_item"]], 0)),
         }
@@ -260,7 +261,7 @@ def main() -> int:
             "format": "GXB v0.8.4 source-derived normal-Hero equipment metadata",
             "source": [
                 "src_64/data/tables/partner.lua: white..red1 equipment lists",
-                "src_64/data/tables/item.lua: level/compose/compose_num/compose_mana/exp/awaken flags",
+                "src_64/data/tables/item.lua: level/compose/compose_num/compose_mana/exp/quality/awaken flags",
                 "src_64/data/tables/random_name.lua: generated-name source fragments",
                 "src_64/data/tables/misc.lua: partner_table_init_id",
             ],

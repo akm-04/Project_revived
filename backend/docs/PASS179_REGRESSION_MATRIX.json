@@ -1,0 +1,35 @@
+{
+  "pass": "179.0",
+  "dedicated_p0": "5/5 PASS; includes all 199 Gear Packs",
+  "source_rebuild": "4/4 generated catalogs byte-identical from effective src_64",
+  "regressions": {
+    "pass69_economy": "PASS",
+    "pass70_response_projection": "PASS",
+    "pass72_hero_progression": "PASS",
+    "pass73_advanced_progression": "PASS",
+    "pass129_architecture_hygiene": "5/5 PASS",
+    "pass137_ros": "5/5 PASS",
+    "pass140_gift_random": "9/9 PASS",
+    "pass141_gift_qa": "PASS",
+    "pass145_skin": "10/10 PASS",
+    "pass150_recharge_b1_b2": "9/9 PASS",
+    "pass150_recharge_b3": "9/9 PASS",
+    "pass150_recharge_b4": "4/4 PASS",
+    "pass151_skin_illusion": "7/7 PASS",
+    "ota_current": "PASS 1.631.12 / 142 entries",
+    "horcrux_h1": "8/8 PASS",
+    "horcrux_h2": "8/8 PASS",
+    "horcrux_h3": "9/9 PASS",
+    "horcrux_h4": "7/7 PASS",
+    "horcrux_h5": "10/10 PASS",
+    "horcrux_h6": "4/4 PASS",
+    "vows": "8/8 PASS",
+    "compileall": "PASS",
+    "baseline_player_db": "UNCHANGED"
+  },
+  "historical_harness_notes": [
+    "Pass138 Gift foundation intentionally asserts SOURCE_INCOMPLETE_EQUIP_FIELD remains unsupported and is superseded by Pass179 activation; Pass140 random Gift regression remains green.",
+    "Pass167 OTA cumulative intentionally asserts historical OTA 1.631.11 and is superseded by current Pass168 OTA 1.631.12 / 142-entry gate.",
+    "Other previously identified version-frozen firewall/OTA/pre-P0 expectations remain historical provenance and are not rewritten."
+  ]
+}

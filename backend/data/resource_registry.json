@@ -751,14 +751,14 @@
       "mutation_capability": "DOMAIN_GUARDED_CREDIT_DEBIT",
       "temporal_policy_key": "NONE",
       "reset_policy_key": "NONE_OR_DOMAIN_SCOPED",
-      "cap_policy": "MODE_CAP_UNKNOWN_FAIL_CLOSED",
+      "cap_policy": "SOURCE_CAP_2_SORCERY_WAR",
       "projection_strategy": "ECONOMY_CUMULATIVE_POST_COMMIT_VALUE",
       "projection_path": "economy_.occult_ticket",
       "insufficient_balance_policy": "REJECT_AT_VALIDATION",
       "direct_handler_write_allowed": false,
       "evidence_class": "HIGH_CONFIDENCE",
-      "migration_readiness": "REGISTER_METADATA_NOW_MUTATE_WHEN_DOMAIN_MIGRATES",
-      "notes": "Sorcery Scroll consumed for Occult/Sorcery entry; cap text exists but exact server cap not recovered here"
+      "migration_readiness": "DOMAIN_OWNER_ACTIVE_PASS211",
+      "notes": "Sorcery Scroll / Occult entry token. Effective src_64 fixes held cap=2 and accrual threshold=3000 stamina. Pass211 activates SorceryWarAggregate ownership; EconomyLedger remains intentionally non-owner."
     },
     {
       "ordinal": 36,

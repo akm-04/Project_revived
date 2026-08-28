@@ -103,6 +103,20 @@ def _misc(path:Path)->dict[str,str]:
         if r.get('key'): out[r['key']]=r.get('value','')
     return out
 
+def _inscription_exchange(path:Path, material_ids:list[int])->list[dict[str,int]]:
+    decoded=_decode_wrapped(path); rows=list(csv.reader(io.StringIO(decoded),delimiter='\t')); h=rows[1]; ix={n:i for i,n in enumerate(h) if n}
+    for k in ('id','economic_value'):
+        if k not in ix: raise ValueError(f'item.lua missing {k}')
+    wanted=set(material_ids); found={}
+    for r in rows[2:]:
+        if len(r)<len(h): r=r+['']*(len(h)-len(r))
+        iid=_int(r[ix['id']],0)
+        if iid not in wanted: continue
+        pair=_split_ints(r[ix['economic_value']])
+        if len(pair)!=2 or pair[0]<=0 or pair[1]<=0: raise ValueError(f'inscription exchange material {iid} lacks economic_value')
+        found[iid]={'item_id':iid,'currency_id':pair[0],'per_item':pair[1]}
+    if set(found)!=wanted: raise ValueError(f'inscription exchange material source incomplete: {sorted(wanted-set(found))}')
+    return [found[iid] for iid in material_ids]
 
 def main()->int:
     ap=argparse.ArgumentParser(); ap.add_argument('source_root',type=Path); ap.add_argument('--output',type=Path,required=True)
@@ -162,6 +176,8 @@ def main()->int:
             raise ValueError(f'item.lua inscription item {concrete} references unknown inscription {mapped}')
         inscription_item_to_type[str(concrete)]=mapped
     misc=_misc(t/'misc.lua')
+    inscript_cost_items=_split_ints(misc.get('inscript_cost_items',''))
+    inscription_exchange=_inscription_exchange(t/'item.lua',inscript_cost_items)
     stone_evolution={}
     for r in _flat(t/'stone_evolution.lua'):
         stage=_int(r.get('id'),0)
@@ -195,6 +211,7 @@ def main()->int:
       'element_max_rank':max(0,_int(misc.get('element_equip_str_max_rank'),10)),
       'inscriptions':inscriptions,'inscription_item_to_type':inscription_item_to_type,
       'remove_inscription_crystal':max(0,_int(misc.get('remove_inscript_cost'),20)),
+      'inscription_exchange_materials':inscription_exchange,
       'advanced_test_item_ids':sorted(advanced_test_items),
     }
     a.output.parent.mkdir(parents=True,exist_ok=True); a.output.write_text(json.dumps(payload,indent=2,sort_keys=True)+'\n',encoding='utf-8')

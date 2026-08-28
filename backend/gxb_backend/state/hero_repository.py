@@ -28,6 +28,7 @@ from .temporal_policy_service import TemporalPolicyService
 from .skill_point_policy import SkillPointPolicy
 from .unit_of_work import OperationContext, UnitOfWork
 from .vip_policy import VipPrivilegeResolver, VipProgressionPolicy
+from .hero_creation_initializers import HeroCreationInitializerRegistry
 
 
 class HeroRepository:
@@ -48,6 +49,7 @@ class HeroRepository:
         temporal: TemporalPolicyService | None = None,
         settlement: MutationSettlementService | None = None,
         vip_privileges: VipPrivilegeResolver | None = None,
+        creation_initializers: HeroCreationInitializerRegistry | None = None,
     ) -> None:
         self.player = player
         self._save_callback = save_callback
@@ -60,6 +62,7 @@ class HeroRepository:
         self._vip_privileges = vip_privileges or VipPrivilegeResolver(
             player, VipProgressionPolicy(self._data_dir)
         )
+        self._creation_initializers = creation_initializers or HeroCreationInitializerRegistry()
 
     @staticmethod
     def _int(value: Any, default: int = 0) -> int:
@@ -747,6 +750,9 @@ class HeroRepository:
         record = dict(hero)
         record["partner_id"] = partner_id
         record["player_id"] = str(self.player.player_id)
+        # Pass186 P1-I1: one narrow ordered projection seam for account-global
+        # defaults on newly owned Heroes. This is deliberately not an event bus.
+        self._creation_initializers.apply(record, self.player)
         self.player.heroes[str(partner_id)] = record
         self.normalize()
         if persist:

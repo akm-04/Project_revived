@@ -1,0 +1,91 @@
+{
+  "artifact": "gxb-backend-v0.26.0-pass212.0",
+  "baseline": "gxb-backend-v0.25.0-pass211.0",
+  "pass": "212.0",
+  "stage": "P2-G",
+  "changed_file_count": 12,
+  "files": [
+    {
+      "path": "PASS212_P2_STAGE_G_IMPLEMENTATION_REPORT.md",
+      "change": "added",
+      "bytes": 5323,
+      "sha256": "6073088b196ffe97cea77f661f25328422881f67c4fb5bfa24ed4df1d3015372"
+    },
+    {
+      "path": "PASS212_SRC64_REALITY_CHECK.json",
+      "change": "added",
+      "bytes": 1793,
+      "sha256": "c45322d5b37aaddc05e7bea9a574d8f7f9de9fa03efa6f592205a9b42ebd8064"
+    },
+    {
+      "path": "PASS212_STAGE_G_RELEASE_GATE.json",
+      "change": "added",
+      "bytes": 1728,
+      "sha256": "73676eeeed68913835e92f5025e5d09582b32ed4fc1501a85f49fff62b8c075b"
+    },
+    {
+      "path": "PASS212_STAGE_G_VALIDATION.json",
+      "change": "added",
+      "bytes": 1028,
+      "sha256": "e7192f2f4064f9aae3e260d105c032f724e513c79c3abf9dbcf77d62201363de"
+    },
+    {
+      "path": "VERSION.json",
+      "change": "modified",
+      "baseline_bytes": 425,
+      "baseline_sha256": "51d3d69464ebd6523cd4def690db8b2880182e598f7fc7e20fb368e39c846180",
+      "bytes": 412,
+      "sha256": "e21d0eea28bbef87711bda3886df863b902b36d8cfad0e9f03ceb5bb6e541826"
+    },
+    {
+      "path": "data/awakening_compatibility_policy.json",
+      "change": "modified",
+      "baseline_bytes": 3688,
+      "baseline_sha256": "48545d3a3f2424949b7df00adab5c751495598e52e6a0635bf2877c847939968",
+      "bytes": 3712,
+      "sha256": "88b0856192e45d437710a314945871f8a88ed4d19b0fffd5bd77ad3c22f17590"
+    },
+    {
+      "path": "data/mutation_contract_registry.json",
+      "change": "modified",
+      "baseline_bytes": 55661,
+      "baseline_sha256": "2457545ebc999fbed3d6d67ecce7c317adbdf783da42f82a8ce602c84137474a",
+      "bytes": 55989,
+      "sha256": "7d7de83418b67eecf554b9dbc4aa4ccc3beee0d33bab83455cfc9a403b9b9268"
+    },
+    {
+      "path": "docs/PASS212_P2_CLIENT_SMOKE_PLAN.md",
+      "change": "added",
+      "bytes": 9484,
+      "sha256": "420ca04e42c76a97177097f05815fc6ccf13dc29a98a171c6e9e45efe4f3a65d"
+    },
+    {
+      "path": "gxb_backend/handlers/heroes.py",
+      "change": "modified",
+      "baseline_bytes": 10918,
+      "baseline_sha256": "c967b566710fd07c0adc51183f70c87ba0bd8ecf7daf3000cbeb3c86c7fc569c",
+      "bytes": 10124,
+      "sha256": "8c94b58d5fde7551483a080f5c69c669f99bba423de6e62ab1932733839842c5"
+    },
+    {
+      "path": "gxb_backend/version.py",
+      "change": "modified",
+      "baseline_bytes": 101,
+      "baseline_sha256": "27661503e60c0664f1271deba2dba657836181795c0256e14ababe2c3d97d3ff",
+      "bytes": 101,
+      "sha256": "52bcec677f75b8277018bd456e4dace8f3f270ce08746f95337f73e1fc5f41e6"
+    },
+    {
+      "path": "tools/selftest_pass212_p2_stage_g.py",
+      "change": "added",
+      "bytes": 11708,
+      "sha256": "b5df99ed308e8c99ce44e63ee2ca87d9befd83887721b07eb47940960754b1e4"
+    },
+    {
+      "path": "tools/verify_pass212_src64.py",
+      "change": "added",
+      "bytes": 5853,
+      "sha256": "8871fd4ab90e88ae422a0fff15df840ae4b48f387710c26c139cdd9844943d11"
+    }
+  ]
+}

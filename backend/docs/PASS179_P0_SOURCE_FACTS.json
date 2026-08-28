@@ -1,0 +1,42 @@
+{
+  "pass": "179.0",
+  "domain": "Girls/Gear P0 economy and authority foundation",
+  "source_authority": "effective src_64 (4370 files)",
+  "generated_catalog_rebuilds": {
+    "fumo_restoration_source_catalog.json": "BYTE_IDENTICAL",
+    "hero_equipment_meta.json": "BYTE_IDENTICAL",
+    "hero_advanced_progression_meta.json": "BYTE_IDENTICAL",
+    "gift_opening_source_catalog.json": "BYTE_IDENTICAL"
+  },
+  "source_facts": {
+    "fumo_restoration_materials": [
+      {"item_id": 50001007, "enchant_value": 200},
+      {"item_id": 50001006, "enchant_value": 60},
+      {"item_id": 50001003, "enchant_value": 10}
+    ],
+    "quality_restore_fraction": {
+      "green_quality_2": "1/1",
+      "blue_quality_3": "3/8",
+      "purple_quality_4": "9/50",
+      "orange_quality_5": "9/100",
+      "red_quality_6": "9/200"
+    },
+    "mid1407_request": {},
+    "mid1407_material_exchange": [
+      {"item_id": 50001343, "currency_id": 19, "resource": "degree_cer", "economic_value": 5},
+      {"item_id": 50001344, "currency_id": 20, "resource": "graduate_cer", "economic_value": 5},
+      {"item_id": 50001345, "currency_id": 21, "resource": "patent_cer", "economic_value": 5}
+    ],
+    "gift_equip_operations": 199,
+    "gift_equip_selectors": {"16": 195, "10": 3, "6": 1},
+    "awakening_transition": "NormalHero promotion preserves Awakening/Blood-Awakening special equipment selectively instead of clearing it as ordinary gear"
+  },
+  "compatibility_policies": {
+    "fumo": "P0_FUMO_RESTORE_V1_AGGREGATE_FLOOR_GREEDY_SOURCE_ORDER",
+    "gift_equip": "P0_GIFT_EQUIP_V1_CUMULATIVE_SELECTOR_SPECIAL_DEDUP"
+  },
+  "bounded_unknowns": [
+    "original-server Fumo fractional rounding/material decomposition",
+    "original-server hidden gift.equip parser/cardinality algorithm"
+  ]
+}

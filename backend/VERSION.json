@@ -1,9 +1,9 @@
 {
-  "backend_version": "0.17.5",
-  "version": "0.17.5",
-  "pass": "172.0",
-  "artifact": "gxb-backend-v0.17.5-pass172.0",
-  "status": "HORCRUX_RUNTIME_ACCEPTED_CLOSED_VOW_ACQUISITION_TAB_STATIC_ACCEPTED_RUNTIME_RETEST_PENDING",
-  "runtime_client_smoke": "PASS171_HORCRUX_RESTART_RESMOKE_ACCEPTED; HORCRUX_CURRENT_SCOPE_CLOSED; VOW_MID305_FAILURE_CAPTURED_AND_FIXED; VOW_TARGETED_RESMOKE_PENDING",
-  "ota": "1.631.12 cumulative active; unchanged in Pass172"
+  "backend_version": "0.26.0",
+  "version": "0.26.0",
+  "pass": "212.0",
+  "artifact": "gxb-backend-v0.26.0-pass212.0",
+  "status": "P2_STAGE_G_SERVER_CLOSURE_COMPLETE_CLIENT_SMOKE_PENDING",
+  "implementation_wave": "P2 Stage G: exhaustive Awakening/Blood closure + surgical fence retirement + final src_64/retry/migration release-candidate gate",
+  "ota": "1.631.12 cumulative active; unchanged in Pass212"
 }

@@ -1,0 +1,32 @@
+{
+  "pass": "193.0",
+  "effective_src64_root": "app-assets/output/assets/src_64",
+  "effective_src64_file_census": 4370,
+  "source_files": {
+    "app/model/EventCentre.lua": "a74e8d057e5e520f302b5f4c5ece73b6e9d4eb934b9cbefa0447410c094e7596",
+    "data/tables/event_centre_bookshelf.lua": "2caa18336a1e8c7fab3521cefd8b261a7cc420bea594f684bbacc7e1221e50b0",
+    "data/tables/event_centre_cabinet.lua": "2bb59560151405d652f282a47276c7d31134866394259a328feeabc42022ae2b",
+    "data/tables/event_centre_recycle.lua": "8a60562844b71bd82e9b4e35061bfebdf32dc561c63f3b8aa54b19d0e0ae745e",
+    "data/tables/event_centre_cabinetbook.lua": "5a56863298b9ad883bbf684548d24c6e0124811b31d8447231d1415fc392b5b3",
+    "data/tables/event_centre_cabinetskill.lua": "dddaa9ff5889a2803b0b42330399fd8d10509c69e34efe6de19eade300a31365"
+  },
+  "source_facts": {
+    "mid1078_client_contract": "EventCentre:speedUpSkill iterates every cabinetBookTable:skillId(book_id) and directly dereferences response.book_info[tostring(skill_id)].lev; complete per-book response required.",
+    "introduction_book_id": 130001001,
+    "introduction_skill_ids": [
+      10010001,
+      10010002,
+      10010003,
+      10010004,
+      10010005,
+      10010006,
+      10010007
+    ],
+    "bookshelf_dependency": "event_centre_bookshelf type_request=1 (Cabinet), required level increases by progression band.",
+    "cabinet_dependency": "event_centre_cabinet type_request=3 (Recycle Bin).",
+    "recycle_dependency": "event_centre_recycle gates on Cabinet, forming reciprocal Cabinet/Recycle progression."
+  },
+  "runtime_debug_sha256": "f58d2011e603d20e84d5b7faf65f26f2a2fff97a039ad9291d39238509ec6cc5",
+  "implementation_boundary": "MID1078 response projection only; sparse durable workshop_state.book_info retained; no P2 or deferred-building implementation.",
+  "result": "PASS_NO_CONTRADICTION"
+}

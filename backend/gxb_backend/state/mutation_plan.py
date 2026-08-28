@@ -71,8 +71,8 @@ class TemporalTransition:
 class EntityMutation:
     """Typed aggregate-owned entity transition.
 
-    Pass72 activates only ``entity_type="HERO"``. ``action`` is a bounded
-    domain verb interpreted by the registered Hero aggregate owner; ``indices``
+    Pass72 first activated ``entity_type="HERO"``; Pass211 adds the bounded
+    ``OCCULT`` aggregate. ``action`` is a domain verb interpreted by the registered aggregate owner; ``indices``
     and ``counts`` carry fixed positional progression operations without
     permitting arbitrary dictionary patches.
     """

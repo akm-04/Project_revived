@@ -10,3 +10,6 @@ from .stack_inventory import StackInventory
 from .server_clock import ServerClock, ServerDayClock
 from .daily_reset import DailyResetCoordinator, DailyResetParticipantRegistry
 from .temporal_policy_service import TemporalPolicyService
+from .awakening_projection_builder import AwakeningProjectionBuilder
+from .awakening_state_v2 import AwakeningStateV2
+from .derived_mutation_rules import DerivedMutationRuleRegistry

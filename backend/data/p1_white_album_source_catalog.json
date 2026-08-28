@@ -1,0 +1,1596 @@
+{
+  "_meta": {
+    "schema_version": 1,
+    "source_resolution": "effective_src64",
+    "epistemic_class": "SOURCE_FACT_ONLY",
+    "source_archive_sha256": "89f0f830508b92e5fff6ad53c6a9dae961a14042dbfdf5649008efb8353f5608",
+    "effective_src64_root": "app-assets/output/assets/src_64",
+    "source_files": [
+      "data/tables/collect_normal.lua",
+      "data/tables/collect_special.lua"
+    ],
+    "source_file_sha256": {
+      "data/tables/collect_normal.lua": "bfd1a9312035cf430e882d1fcda742f334f089acc6d5438a34e938d3bb43f142",
+      "data/tables/collect_special.lua": "5c159c89f7ffcbfb698d9599539a897896ce0e9ab93e7d04875d012d59df509a"
+    }
+  },
+  "tables": {
+    "normal": [
+      {
+        "id": "10001001",
+        "name": "Aquaris",
+        "attr": "4",
+        "max_num": "300",
+        "quality": "1|2|4|7|12|15",
+        "num": "120|150|180|210|240|300",
+        "star": "4|5",
+        "star_attr": "40|100"
+      },
+      {
+        "id": "10001002",
+        "name": "Lavia",
+        "attr": "8",
+        "max_num": "5",
+        "quality": "1|4|7|15",
+        "num": "2|3|4|5",
+        "star": "4|5",
+        "star_attr": "1|3"
+      },
+      {
+        "id": "10001003",
+        "name": "Pandaria",
+        "attr": "5",
+        "max_num": "30",
+        "quality": "1|2|4|7|12|15",
+        "num": "12|15|18|21|24|30",
+        "star": "4|5",
+        "star_attr": "4|10"
+      },
+      {
+        "id": "10001004",
+        "name": "Lightin",
+        "attr": "10",
+        "max_num": "10",
+        "quality": "1|2|4|7|12|15",
+        "num": "4|5|6|7|8|10",
+        "star": "4|5",
+        "star_attr": "2|5"
+      },
+      {
+        "id": "10001005",
+        "name": "Geisha",
+        "attr": "11",
+        "max_num": "20",
+        "quality": "1|2|4|7|12|15",
+        "num": "8|10|12|14|16|20",
+        "star": "4|5",
+        "star_attr": "3|8"
+      },
+      {
+        "id": "10001006",
+        "name": "Iron Fist",
+        "attr": "4",
+        "max_num": "300",
+        "quality": "1|2|4|7|12|15",
+        "num": "120|150|180|210|240|300",
+        "star": "4|5",
+        "star_attr": "40|100"
+      },
+      {
+        "id": "10001007",
+        "name": "Toys Girl",
+        "attr": "10",
+        "max_num": "10",
+        "quality": "1|2|4|7|12|15",
+        "num": "4|5|6|7|8|10",
+        "star": "4|5",
+        "star_attr": "2|5"
+      },
+      {
+        "id": "10001008",
+        "name": "Joan ",
+        "attr": "4",
+        "max_num": "300",
+        "quality": "1|2|4|7|12|15",
+        "num": "120|150|180|210|240|300",
+        "star": "4|5",
+        "star_attr": "40|100"
+      },
+      {
+        "id": "10001010",
+        "name": "Rosie",
+        "attr": "7",
+        "max_num": "5",
+        "quality": "1|4|7|15",
+        "num": "2|3|4|5",
+        "star": "4|5",
+        "star_attr": "1|3"
+      },
+      {
+        "id": "10001012",
+        "name": "Boxer",
+        "attr": "14",
+        "max_num": "5",
+        "quality": "1|4|7|15",
+        "num": "2|3|4|5",
+        "star": "4|5",
+        "star_attr": "1|3"
+      },
+      {
+        "id": "10001013",
+        "name": "Annie",
+        "attr": "8",
+        "max_num": "5",
+        "quality": "1|4|7|15",
+        "num": "2|3|4|5",
+        "star": "4|5",
+        "star_attr": "1|3"
+      },
+      {
+        "id": "10001014",
+        "name": "Cynthia",
+        "attr": "15",
+        "max_num": "5",
+        "quality": "1|4|7|15",
+        "num": "2|3|4|5",
+        "star": "4|5",
+        "star_attr": "1|3"
+      },
+      {
+        "id": "10001019",
+        "name": "Archie",
+        "attr": "5",
+        "max_num": "30",
+        "quality": "1|2|4|7|12|15",
+        "num": "12|15|18|21|24|30",
+        "star": "4|5",
+        "star_attr": "4|10"
+      },
+      {
+        "id": "10001020",
+        "name": "Jinx",
+        "attr": "9",
+        "max_num": "10",
+        "quality": "1|2|4|7|12|15",
+        "num": "4|5|6|7|8|10",
+        "star": "4|5",
+        "star_attr": "2|5"
+      },
+      {
+        "id": "10001021",
+        "name": "Leona",
+        "attr": "4",
+        "max_num": "300",
+        "quality": "1|2|4|7|12|15",
+        "num": "120|150|180|210|240|300",
+        "star": "4|5",
+        "star_attr": "40|100"
+      },
+      {
+        "id": "10001022",
+        "name": "Quinie",
+        "attr": "12",
+        "max_num": "10",
+        "quality": "1|2|4|7|12|15",
+        "num": "4|5|6|7|8|10",
+        "star": "4|5",
+        "star_attr": "2|5"
+      },
+      {
+        "id": "10001023",
+        "name": "Fanny",
+        "attr": "7",
+        "max_num": "5",
+        "quality": "1|4|7|15",
+        "num": "2|3|4|5",
+        "star": "4|5",
+        "star_attr": "1|3"
+      },
+      {
+        "id": "10001024",
+        "name": "Dr. Hua",
+        "attr": "11",
+        "max_num": "20",
+        "quality": "1|2|4|7|12|15",
+        "num": "8|10|12|14|16|20",
+        "star": "4|5",
+        "star_attr": "3|8"
+      },
+      {
+        "id": "10001026",
+        "name": "Maidam",
+        "attr": "4",
+        "max_num": "300",
+        "quality": "1|2|4|7|12|15",
+        "num": "120|150|180|210|240|300",
+        "star": "4|5",
+        "star_attr": "40|100"
+      },
+      {
+        "id": "10001028",
+        "name": "Lily",
+        "attr": "6",
+        "max_num": "40",
+        "quality": "1|2|4|7|12|15",
+        "num": "16|20|24|28|32|40",
+        "star": "4|5",
+        "star_attr": "4|10"
+      },
+      {
+        "id": "10001029",
+        "name": "Gambler",
+        "attr": "5",
+        "max_num": "30",
+        "quality": "1|2|4|7|12|15",
+        "num": "12|15|18|21|24|30",
+        "star": "4|5",
+        "star_attr": "4|10"
+      },
+      {
+        "id": "10001032",
+        "name": "Guan Yin",
+        "attr": "5",
+        "max_num": "30",
+        "quality": "1|2|4|7|12|15",
+        "num": "12|15|18|21|24|30",
+        "star": "4|5",
+        "star_attr": "4|10"
+      },
+      {
+        "id": "10001033",
+        "name": "Saint",
+        "attr": "5",
+        "max_num": "30",
+        "quality": "1|2|4|7|12|15",
+        "num": "12|15|18|21|24|30",
+        "star": "4|5",
+        "star_attr": "4|10"
+      },
+      {
+        "id": "10001034",
+        "name": "Tennese",
+        "attr": "7",
+        "max_num": "5",
+        "quality": "1|4|7|15",
+        "num": "2|3|4|5",
+        "star": "4|5",
+        "star_attr": "1|3"
+      },
+      {
+        "id": "10001035",
+        "name": "Sonya",
+        "attr": "4",
+        "max_num": "300",
+        "quality": "1|2|4|7|12|15",
+        "num": "120|150|180|210|240|300",
+        "star": "4|5",
+        "star_attr": "40|100"
+      },
+      {
+        "id": "10001036",
+        "name": "Blowie",
+        "attr": "14",
+        "max_num": "5",
+        "quality": "1|4|7|15",
+        "num": "2|3|4|5",
+        "star": "4|5",
+        "star_attr": "1|3"
+      },
+      {
+        "id": "10001039",
+        "name": "Succuba",
+        "attr": "6",
+        "max_num": "40",
+        "quality": "1|2|4|7|12|15",
+        "num": "16|20|24|28|32|40",
+        "star": "4|5",
+        "star_attr": "4|10"
+      },
+      {
+        "id": "10001040",
+        "name": "Angel",
+        "attr": "6",
+        "max_num": "40",
+        "quality": "1|2|4|7|12|15",
+        "num": "16|20|24|28|32|40",
+        "star": "4|5",
+        "star_attr": "4|10"
+      },
+      {
+        "id": "10001041",
+        "name": "Kratos",
+        "attr": "14",
+        "max_num": "5",
+        "quality": "1|4|7|15",
+        "num": "2|3|4|5",
+        "star": "4|5",
+        "star_attr": "1|3"
+      },
+      {
+        "id": "10001042",
+        "name": "Luna",
+        "attr": "6",
+        "max_num": "40",
+        "quality": "1|2|4|7|12|15",
+        "num": "16|20|24|28|32|40",
+        "star": "4|5",
+        "star_attr": "4|10"
+      },
+      {
+        "id": "10001044",
+        "name": "Celeste",
+        "attr": "7",
+        "max_num": "5",
+        "quality": "1|4|7|15",
+        "num": "2|3|4|5",
+        "star": "4|5",
+        "star_attr": "1|3"
+      },
+      {
+        "id": "10001045",
+        "name": "Javelin",
+        "attr": "9",
+        "max_num": "10",
+        "quality": "1|2|4|7|12|15",
+        "num": "4|5|6|7|8|10",
+        "star": "4|5",
+        "star_attr": "2|5"
+      },
+      {
+        "id": "10001046",
+        "name": "Witch",
+        "attr": "6",
+        "max_num": "40",
+        "quality": "1|2|4|7|12|15",
+        "num": "16|20|24|28|32|40",
+        "star": "4|5",
+        "star_attr": "4|10"
+      },
+      {
+        "id": "10001047",
+        "name": "Karatine",
+        "attr": "7",
+        "max_num": "5",
+        "quality": "1|4|7|15",
+        "num": "2|3|4|5",
+        "star": "4|5",
+        "star_attr": "1|3"
+      },
+      {
+        "id": "10001048",
+        "name": "Lin ﹒AI",
+        "attr": "4",
+        "max_num": "300",
+        "quality": "1|2|4|7|12|15",
+        "num": "120|150|180|210|240|300",
+        "star": "4|5",
+        "star_attr": "40|100"
+      },
+      {
+        "id": "10001051",
+        "name": "Ninja",
+        "attr": "4",
+        "max_num": "300",
+        "quality": "1|2|4|7|12|15",
+        "num": "120|150|180|210|240|300",
+        "star": "4|5",
+        "star_attr": "40|100"
+      },
+      {
+        "id": "10001052",
+        "name": "Wu Kong",
+        "attr": "14",
+        "max_num": "5",
+        "quality": "1|4|7|15",
+        "num": "2|3|4|5",
+        "star": "4|5",
+        "star_attr": "1|3"
+      },
+      {
+        "id": "10001053",
+        "name": "Wildtress",
+        "attr": "4",
+        "max_num": "300",
+        "quality": "1|2|4|7|12|15",
+        "num": "120|150|180|210|240|300",
+        "star": "4|5",
+        "star_attr": "40|100"
+      },
+      {
+        "id": "10001054",
+        "name": "Xmas Elf",
+        "attr": "6",
+        "max_num": "40",
+        "quality": "1|2|4|7|12|15",
+        "num": "16|20|24|28|32|40",
+        "star": "4|5",
+        "star_attr": "4|10"
+      },
+      {
+        "id": "10001056",
+        "name": "Capt.Sun",
+        "attr": "5",
+        "max_num": "30",
+        "quality": "1|2|4|7|12|15",
+        "num": "12|15|18|21|24|30",
+        "star": "4|5",
+        "star_attr": "4|10"
+      },
+      {
+        "id": "10001058",
+        "name": "Muppet",
+        "attr": "6",
+        "max_num": "40",
+        "quality": "1|2|4|7|12|15",
+        "num": "16|20|24|28|32|40",
+        "star": "4|5",
+        "star_attr": "4|10"
+      },
+      {
+        "id": "10001061",
+        "name": "Revolver",
+        "attr": "5",
+        "max_num": "30",
+        "quality": "1|2|4|7|12|15",
+        "num": "12|15|18|21|24|30",
+        "star": "4|5",
+        "star_attr": "4|10"
+      },
+      {
+        "id": "10001062",
+        "name": "Zhi Yao",
+        "attr": "4",
+        "max_num": "300",
+        "quality": "1|2|4|7|12|15",
+        "num": "120|150|180|210|240|300",
+        "star": "4|5",
+        "star_attr": "40|100"
+      },
+      {
+        "id": "10001063",
+        "name": "Nagia",
+        "attr": "6",
+        "max_num": "40",
+        "quality": "1|2|4|7|12|15",
+        "num": "16|20|24|28|32|40",
+        "star": "4|5",
+        "star_attr": "4|10"
+      },
+      {
+        "id": "10001065",
+        "name": "Springy",
+        "attr": "8",
+        "max_num": "5",
+        "quality": "1|4|7|15",
+        "num": "2|3|4|5",
+        "star": "4|5",
+        "star_attr": "1|3"
+      },
+      {
+        "id": "10001066",
+        "name": "Dracula",
+        "attr": "6",
+        "max_num": "40",
+        "quality": "1|2|4|7|12|15",
+        "num": "16|20|24|28|32|40",
+        "star": "4|5",
+        "star_attr": "4|10"
+      },
+      {
+        "id": "10001069",
+        "name": "Himoto",
+        "attr": "7",
+        "max_num": "5",
+        "quality": "1|4|7|15",
+        "num": "2|3|4|5",
+        "star": "4|5",
+        "star_attr": "1|3"
+      },
+      {
+        "id": "10001072",
+        "name": "Elina",
+        "attr": "4",
+        "max_num": "300",
+        "quality": "1|2|4|7|12|15",
+        "num": "120|150|180|210|240|300",
+        "star": "4|5",
+        "star_attr": "40|100"
+      },
+      {
+        "id": "10001073",
+        "name": "Beary",
+        "attr": "6",
+        "max_num": "40",
+        "quality": "1|2|4|7|12|15",
+        "num": "16|20|24|28|32|40",
+        "star": "4|5",
+        "star_attr": "4|10"
+      },
+      {
+        "id": "10001077",
+        "name": "Sapphire",
+        "attr": "15",
+        "max_num": "5",
+        "quality": "1|4|7|15",
+        "num": "2|3|4|5",
+        "star": "4|5",
+        "star_attr": "1|3"
+      },
+      {
+        "id": "10001080",
+        "name": "Nun",
+        "attr": "11",
+        "max_num": "20",
+        "quality": "1|2|4|7|12|15",
+        "num": "8|10|12|14|16|20",
+        "star": "4|5",
+        "star_attr": "3|8"
+      },
+      {
+        "id": "10001088",
+        "name": "Yuri",
+        "attr": "7",
+        "max_num": "5",
+        "quality": "1|4|7|15",
+        "num": "2|3|4|5",
+        "star": "4|5",
+        "star_attr": "1|3"
+      },
+      {
+        "id": "10001090",
+        "name": "Roselle",
+        "attr": "8",
+        "max_num": "5",
+        "quality": "1|4|7|15",
+        "num": "2|3|4|5",
+        "star": "4|5",
+        "star_attr": "1|3"
+      },
+      {
+        "id": "10001092",
+        "name": "Amelia",
+        "attr": "10",
+        "max_num": "10",
+        "quality": "1|2|4|7|12|15",
+        "num": "4|5|6|7|8|10",
+        "star": "4|5",
+        "star_attr": "2|5"
+      },
+      {
+        "id": "10001098",
+        "name": "Magician",
+        "attr": "15",
+        "max_num": "5",
+        "quality": "1|4|7|15",
+        "num": "2|3|4|5",
+        "star": "4|5",
+        "star_attr": "1|3"
+      },
+      {
+        "id": "10001109",
+        "name": "Hexa",
+        "attr": "5",
+        "max_num": "30",
+        "quality": "1|2|4|7|12|15",
+        "num": "12|15|18|21|24|30",
+        "star": "4|5",
+        "star_attr": "4|10"
+      },
+      {
+        "id": "10001114",
+        "name": "Sasuke",
+        "attr": "4",
+        "max_num": "300",
+        "quality": "1|2|4|7|12|15",
+        "num": "120|150|180|210|240|300",
+        "star": "4|5",
+        "star_attr": "40|100"
+      },
+      {
+        "id": "10001122",
+        "name": "Linky",
+        "attr": "5",
+        "max_num": "30",
+        "quality": "1|2|4|7|12|15",
+        "num": "12|15|18|21|24|30",
+        "star": "4|5",
+        "star_attr": "4|10"
+      },
+      {
+        "id": "10001129",
+        "name": "Max",
+        "attr": "8",
+        "max_num": "5",
+        "quality": "1|4|7|15",
+        "num": "2|3|4|5",
+        "star": "4|5",
+        "star_attr": "1|3"
+      },
+      {
+        "id": "10001133",
+        "name": "Nancy",
+        "attr": "8",
+        "max_num": "5",
+        "quality": "1|4|7|15",
+        "num": "2|3|4|5",
+        "star": "4|5",
+        "star_attr": "1|3"
+      },
+      {
+        "id": "10001135",
+        "name": "Nasha",
+        "attr": "6",
+        "max_num": "40",
+        "quality": "1|2|4|7|12|15",
+        "num": "16|20|24|28|32|40",
+        "star": "4|5",
+        "star_attr": "4|10"
+      },
+      {
+        "id": "10001136",
+        "name": "Ruby",
+        "attr": "5",
+        "max_num": "30",
+        "quality": "1|2|4|7|12|15",
+        "num": "12|15|18|21|24|30",
+        "star": "4|5",
+        "star_attr": "4|10"
+      },
+      {
+        "id": "10001137",
+        "name": "Ashely",
+        "attr": "4",
+        "max_num": "300",
+        "quality": "1|2|4|7|12|15",
+        "num": "120|150|180|210|240|300",
+        "star": "4|5",
+        "star_attr": "40|100"
+      },
+      {
+        "id": "10001138",
+        "name": "Yasuna",
+        "attr": "4",
+        "max_num": "300",
+        "quality": "1|2|4|7|12|15",
+        "num": "120|150|180|210|240|300",
+        "star": "4|5",
+        "star_attr": "40|100"
+      },
+      {
+        "id": "10001140",
+        "name": "Liz",
+        "attr": "4",
+        "max_num": "300",
+        "quality": "1|2|4|7|12|15",
+        "num": "120|150|180|210|240|300",
+        "star": "4|5",
+        "star_attr": "40|100"
+      },
+      {
+        "id": "10001141",
+        "name": "Edward",
+        "attr": "4",
+        "max_num": "300",
+        "quality": "1|2|4|7|12|15",
+        "num": "120|150|180|210|240|300",
+        "star": "4|5",
+        "star_attr": "40|100"
+      },
+      {
+        "id": "10001142",
+        "name": "Omega",
+        "attr": "7",
+        "max_num": "5",
+        "quality": "1|4|7|15",
+        "num": "2|3|4|5",
+        "star": "4|5",
+        "star_attr": "1|3"
+      },
+      {
+        "id": "10001145",
+        "name": "Nono",
+        "attr": "8",
+        "max_num": "5",
+        "quality": "1|4|7|15",
+        "num": "2|3|4|5",
+        "star": "4|5",
+        "star_attr": "1|3"
+      },
+      {
+        "id": "10001146",
+        "name": "Handana",
+        "attr": "7",
+        "max_num": "5",
+        "quality": "1|4|7|15",
+        "num": "2|3|4|5",
+        "star": "4|5",
+        "star_attr": "1|3"
+      },
+      {
+        "id": "10001147",
+        "name": "Okita",
+        "attr": "4",
+        "max_num": "300",
+        "quality": "1|2|4|7|12|15",
+        "num": "120|150|180|210|240|300",
+        "star": "4|5",
+        "star_attr": "40|100"
+      },
+      {
+        "id": "10001149",
+        "name": "Talia",
+        "attr": "4",
+        "max_num": "300",
+        "quality": "1|2|4|7|12|15",
+        "num": "120|150|180|210|240|300",
+        "star": "4|5",
+        "star_attr": "40|100"
+      },
+      {
+        "id": "10001160",
+        "name": "Katie",
+        "attr": "10",
+        "max_num": "10",
+        "quality": "1|2|4|7|12|15",
+        "num": "4|5|6|7|8|10",
+        "star": "4|5",
+        "star_attr": "2|5"
+      },
+      {
+        "id": "10001165",
+        "name": "Boro",
+        "attr": "4",
+        "max_num": "300",
+        "quality": "1|2|4|7|12|15",
+        "num": "120|150|180|210|240|300",
+        "star": "4|5",
+        "star_attr": "40|100"
+      },
+      {
+        "id": "10001180",
+        "name": "King",
+        "attr": "9",
+        "max_num": "10",
+        "quality": "1|2|4|7|12|15",
+        "num": "4|5|6|7|8|10",
+        "star": "4|5",
+        "star_attr": "2|5"
+      },
+      {
+        "id": "10001181",
+        "name": "Nia",
+        "attr": "10",
+        "max_num": "10",
+        "quality": "1|2|4|7|12|15",
+        "num": "4|5|6|7|8|10",
+        "star": "4|5",
+        "star_attr": "2|5"
+      },
+      {
+        "id": "10001182",
+        "name": "Ursula",
+        "attr": "6",
+        "max_num": "40",
+        "quality": "1|2|4|7|12|15",
+        "num": "16|20|24|28|32|40",
+        "star": "4|5",
+        "star_attr": "4|10"
+      },
+      {
+        "id": "10001189",
+        "name": "Golian",
+        "attr": "10",
+        "max_num": "10",
+        "quality": "1|2|4|7|12|15",
+        "num": "4|5|6|7|8|10",
+        "star": "4|5",
+        "star_attr": "2|5"
+      },
+      {
+        "id": "10001191",
+        "name": "Kong Ke",
+        "attr": "8",
+        "max_num": "5",
+        "quality": "1|4|7|15",
+        "num": "2|3|4|5",
+        "star": "4|5",
+        "star_attr": "1|3"
+      },
+      {
+        "id": "10001192",
+        "name": "Liklis",
+        "attr": "5",
+        "max_num": "30",
+        "quality": "1|2|4|7|12|15",
+        "num": "12|15|18|21|24|30",
+        "star": "4|5",
+        "star_attr": "4|10"
+      },
+      {
+        "id": "10001193",
+        "name": "Feran",
+        "attr": "4",
+        "max_num": "300",
+        "quality": "1|2|4|7|12|15",
+        "num": "120|150|180|210|240|300",
+        "star": "4|5",
+        "star_attr": "40|100"
+      },
+      {
+        "id": "10001194",
+        "name": "Fear",
+        "attr": "4",
+        "max_num": "300",
+        "quality": "1|2|4|7|12|15",
+        "num": "120|150|180|210|240|300",
+        "star": "4|5",
+        "star_attr": "40|100"
+      },
+      {
+        "id": "10001196",
+        "name": "Katy",
+        "attr": "5",
+        "max_num": "30",
+        "quality": "1|2|4|7|12|15",
+        "num": "12|15|18|21|24|30",
+        "star": "4|5",
+        "star_attr": "4|10"
+      },
+      {
+        "id": "10001198",
+        "name": "Claudia",
+        "attr": "7",
+        "max_num": "5",
+        "quality": "1|4|7|15",
+        "num": "2|3|4|5",
+        "star": "4|5",
+        "star_attr": "1|3"
+      },
+      {
+        "id": "10001199",
+        "name": "Shirley",
+        "attr": "14",
+        "max_num": "5",
+        "quality": "1|4|7|15",
+        "num": "2|3|4|5",
+        "star": "4|5",
+        "star_attr": "1|3"
+      },
+      {
+        "id": "10001201",
+        "name": "Lydia",
+        "attr": "6",
+        "max_num": "40",
+        "quality": "1|2|4|7|12|15",
+        "num": "16|20|24|28|32|40",
+        "star": "4|5",
+        "star_attr": "4|10"
+      },
+      {
+        "id": "10001202",
+        "name": "Catherine",
+        "attr": "8",
+        "max_num": "5",
+        "quality": "1|4|7|15",
+        "num": "2|3|4|5",
+        "star": "4|5",
+        "star_attr": "1|3"
+      },
+      {
+        "id": "10001204",
+        "name": "Stephanie",
+        "attr": "7",
+        "max_num": "5",
+        "quality": "1|4|7|15",
+        "num": "2|3|4|5",
+        "star": "4|5",
+        "star_attr": "1|3"
+      },
+      {
+        "id": "10001205",
+        "name": "Gramin",
+        "attr": "4",
+        "max_num": "300",
+        "quality": "1|2|4|7|12|15",
+        "num": "120|150|180|210|240|300",
+        "star": "4|5",
+        "star_attr": "40|100"
+      },
+      {
+        "id": "10001206",
+        "name": "Vivian",
+        "attr": "5",
+        "max_num": "30",
+        "quality": "1|2|4|7|12|15",
+        "num": "12|15|18|21|24|30",
+        "star": "4|5",
+        "star_attr": "4|10"
+      },
+      {
+        "id": "10001208",
+        "name": "Irene",
+        "attr": "6",
+        "max_num": "40",
+        "quality": "1|2|4|7|12|15",
+        "num": "16|20|24|28|32|40",
+        "star": "4|5",
+        "star_attr": "4|10"
+      },
+      {
+        "id": "10001209",
+        "name": "Cersei",
+        "attr": "12",
+        "max_num": "10",
+        "quality": "1|2|4|7|12|15",
+        "num": "4|5|6|7|8|10",
+        "star": "4|5",
+        "star_attr": "2|5"
+      },
+      {
+        "id": "10001212",
+        "name": "Barbara",
+        "attr": "5",
+        "max_num": "30",
+        "quality": "1|2|4|7|12|15",
+        "num": "12|15|18|21|24|30",
+        "star": "4|5",
+        "star_attr": "4|10"
+      },
+      {
+        "id": "10001214",
+        "name": "Titania",
+        "attr": "11",
+        "max_num": "20",
+        "quality": "1|2|4|7|12|15",
+        "num": "8|10|12|14|16|20",
+        "star": "4|5",
+        "star_attr": "3|8"
+      },
+      {
+        "id": "10001216",
+        "name": "Amira",
+        "attr": "9",
+        "max_num": "10",
+        "quality": "1|2|4|7|12|15",
+        "num": "4|5|6|7|8|10",
+        "star": "4|5",
+        "star_attr": "2|5"
+      },
+      {
+        "id": "10001218",
+        "name": "Cerberus",
+        "attr": "8",
+        "max_num": "5",
+        "quality": "1|4|7|15",
+        "num": "2|3|4|5",
+        "star": "4|5",
+        "star_attr": "1|3"
+      },
+      {
+        "id": "10001220",
+        "name": "Sandra",
+        "attr": "4",
+        "max_num": "300",
+        "quality": "1|2|4|7|12|15",
+        "num": "120|150|180|210|240|300",
+        "star": "4|5",
+        "star_attr": "40|100"
+      },
+      {
+        "id": "10001221",
+        "name": "Yilia",
+        "attr": "5",
+        "max_num": "30",
+        "quality": "1|2|4|7|12|15",
+        "num": "12|15|18|21|24|30",
+        "star": "4|5",
+        "star_attr": "4|10"
+      },
+      {
+        "id": "10001223",
+        "name": "Lecia",
+        "attr": "11",
+        "max_num": "20",
+        "quality": "1|2|4|7|12|15",
+        "num": "8|10|12|14|16|20",
+        "star": "4|5",
+        "star_attr": "3|8"
+      },
+      {
+        "id": "10001224",
+        "name": "CapsuGirl",
+        "attr": "8",
+        "max_num": "5",
+        "quality": "1|4|7|15",
+        "num": "2|3|4|5",
+        "star": "4|5",
+        "star_attr": "1|3"
+      },
+      {
+        "id": "10001226",
+        "name": "Collins",
+        "attr": "12",
+        "max_num": "10",
+        "quality": "1|2|4|7|12|15",
+        "num": "4|5|6|7|8|10",
+        "star": "4|5",
+        "star_attr": "2|5"
+      },
+      {
+        "id": "10001228",
+        "name": "Karaxes",
+        "attr": "12",
+        "max_num": "10",
+        "quality": "1|2|4|7|12|15",
+        "num": "4|5|6|7|8|10",
+        "star": "4|5",
+        "star_attr": "2|5"
+      },
+      {
+        "id": "10001230",
+        "name": "Jeanne",
+        "attr": "5",
+        "max_num": "30",
+        "quality": "1|2|4|7|12|15",
+        "num": "12|15|18|21|24|30",
+        "star": "4|5",
+        "star_attr": "4|10"
+      },
+      {
+        "id": "10001231",
+        "name": "Amanda",
+        "attr": "9",
+        "max_num": "10",
+        "quality": "1|2|4|7|12|15",
+        "num": "4|5|6|7|8|10",
+        "star": "4|5",
+        "star_attr": "2|5"
+      },
+      {
+        "id": "10001232",
+        "name": "Kratos·Lily",
+        "attr": "4",
+        "max_num": "300",
+        "quality": "1|2|4|7|12|15",
+        "num": "120|150|180|210|240|300",
+        "star": "4|5",
+        "star_attr": "40|100"
+      },
+      {
+        "id": "10001233",
+        "name": "Campanula",
+        "attr": "6",
+        "max_num": "40",
+        "quality": "1|2|4|7|12|15",
+        "num": "16|20|24|28|32|40",
+        "star": "4|5",
+        "star_attr": "4|10"
+      },
+      {
+        "id": "10001234",
+        "name": "Kristin",
+        "attr": "15",
+        "max_num": "5",
+        "quality": "1|4|7|15",
+        "num": "2|3|4|5",
+        "star": "4|5",
+        "star_attr": "1|3"
+      },
+      {
+        "id": "10001235",
+        "name": "Siren",
+        "attr": "6",
+        "max_num": "40",
+        "quality": "1|2|4|7|12|15",
+        "num": "16|20|24|28|32|40",
+        "star": "4|5",
+        "star_attr": "4|10"
+      },
+      {
+        "id": "10001237",
+        "name": "Serpent",
+        "attr": "14",
+        "max_num": "5",
+        "quality": "1|4|7|15",
+        "num": "2|3|4|5",
+        "star": "4|5",
+        "star_attr": "1|3"
+      },
+      {
+        "id": "10001239",
+        "name": "Chily",
+        "attr": "15",
+        "max_num": "5",
+        "quality": "1|4|7|15",
+        "num": "2|3|4|5",
+        "star": "4|5",
+        "star_attr": "1|3"
+      },
+      {
+        "id": "10001240",
+        "name": "Temari",
+        "attr": "5",
+        "max_num": "30",
+        "quality": "1|2|4|7|12|15",
+        "num": "12|15|18|21|24|30",
+        "star": "4|5",
+        "star_attr": "4|10"
+      },
+      {
+        "id": "10001246",
+        "name": "Lauren",
+        "attr": "5",
+        "max_num": "30",
+        "quality": "1|2|4|7|12|15",
+        "num": "12|15|18|21|24|30",
+        "star": "4|5",
+        "star_attr": "4|10"
+      },
+      {
+        "id": "10001247",
+        "name": "Deirdre",
+        "attr": "6",
+        "max_num": "40",
+        "quality": "1|2|4|7|12|15",
+        "num": "16|20|24|28|32|40",
+        "star": "4|5",
+        "star_attr": "4|10"
+      },
+      {
+        "id": "10001248",
+        "name": "Alexa",
+        "attr": "9",
+        "max_num": "10",
+        "quality": "1|2|4|7|12|15",
+        "num": "4|5|6|7|8|10",
+        "star": "4|5",
+        "star_attr": "2|5"
+      },
+      {
+        "id": "10001249",
+        "name": "SP Aquaris",
+        "attr": "7",
+        "max_num": "5",
+        "quality": "1|4|7|15",
+        "num": "2|3|4|5",
+        "star": "4|5",
+        "star_attr": "1|3"
+      },
+      {
+        "id": "10001250",
+        "name": "Tessa",
+        "attr": "4",
+        "max_num": "300",
+        "quality": "1|2|4|7|12|15",
+        "num": "120|150|180|210|240|300",
+        "star": "4|5",
+        "star_attr": "40|100"
+      },
+      {
+        "id": "10001251",
+        "name": "Hilda",
+        "attr": "12",
+        "max_num": "10",
+        "quality": "1|2|4|7|12|15",
+        "num": "4|5|6|7|8|10",
+        "star": "4|5",
+        "star_attr": "2|5"
+      },
+      {
+        "id": "10001252",
+        "name": "Sami",
+        "attr": "6",
+        "max_num": "40",
+        "quality": "1|2|4|7|12|15",
+        "num": "16|20|24|28|32|40",
+        "star": "4|5",
+        "star_attr": "4|10"
+      },
+      {
+        "id": "10001253",
+        "name": "Selina",
+        "attr": "6",
+        "max_num": "40",
+        "quality": "1|2|4|7|12|15",
+        "num": "16|20|24|28|32|40",
+        "star": "4|5",
+        "star_attr": "4|10"
+      },
+      {
+        "id": "10001254",
+        "name": "Kagetora",
+        "attr": "8",
+        "max_num": "5",
+        "quality": "1|4|7|15",
+        "num": "2|3|4|5",
+        "star": "4|5",
+        "star_attr": "1|3"
+      },
+      {
+        "id": "10001255",
+        "name": "SP Gambler",
+        "attr": "5",
+        "max_num": "30",
+        "quality": "1|2|4|7|12|15",
+        "num": "12|15|18|21|24|30",
+        "star": "4|5",
+        "star_attr": "4|10"
+      },
+      {
+        "id": "10001256",
+        "name": "SP Sonya",
+        "attr": "9",
+        "max_num": "10",
+        "quality": "1|2|4|7|12|15",
+        "num": "4|5|6|7|8|10",
+        "star": "4|5",
+        "star_attr": "2|5"
+      },
+      {
+        "id": "10001258",
+        "name": "Odin",
+        "attr": "14",
+        "max_num": "5",
+        "quality": "1|4|7|15",
+        "num": "2|3|4|5",
+        "star": "4|5",
+        "star_attr": "1|3"
+      },
+      {
+        "id": "10001260",
+        "name": "SP Nobunaga",
+        "attr": "7",
+        "max_num": "5",
+        "quality": "1|4|7|15",
+        "num": "2|3|4|5",
+        "star": "4|5",
+        "star_attr": "1|3"
+      },
+      {
+        "id": "10001265",
+        "name": "SP Lily",
+        "attr": "6",
+        "max_num": "40",
+        "quality": "1|2|4|7|12|15",
+        "num": "16|20|24|28|32|40",
+        "star": "4|5",
+        "star_attr": "4|10"
+      },
+      {
+        "id": "10001266",
+        "name": "Lilith",
+        "attr": "4",
+        "max_num": "300",
+        "quality": "1|2|4|7|12|15",
+        "num": "120|150|180|210|240|300",
+        "star": "4|5",
+        "star_attr": "40|100"
+      },
+      {
+        "id": "10001267",
+        "name": "SP Hottie",
+        "attr": "11",
+        "max_num": "20",
+        "quality": "1|2|4|7|12|15",
+        "num": "8|10|12|14|16|20",
+        "star": "4|5",
+        "star_attr": "3|8"
+      },
+      {
+        "id": "10001268",
+        "name": "SP CapsuGirl",
+        "attr": "15",
+        "max_num": "5",
+        "quality": "1|4|7|15",
+        "num": "2|3|4|5",
+        "star": "4|5",
+        "star_attr": "1|3"
+      },
+      {
+        "id": "10001269",
+        "name": "SP Muppet",
+        "attr": "6",
+        "max_num": "40",
+        "quality": "1|2|4|7|12|15",
+        "num": "16|20|24|28|32|40",
+        "star": "4|5",
+        "star_attr": "4|10"
+      },
+      {
+        "id": "10001270",
+        "name": "SP Librarian",
+        "attr": "7",
+        "max_num": "5",
+        "quality": "1|4|7|15",
+        "num": "2|3|4|5",
+        "star": "4|5",
+        "star_attr": "1|3"
+      },
+      {
+        "id": "10001271",
+        "name": "Rubearl",
+        "attr": "10",
+        "max_num": "10",
+        "quality": "1|2|4|7|12|15",
+        "num": "4|5|6|7|8|10",
+        "star": "4|5",
+        "star_attr": "2|5"
+      },
+      {
+        "id": "10001272",
+        "name": "SP Pandaria",
+        "attr": "14",
+        "max_num": "5",
+        "quality": "1|4|7|15",
+        "num": "2|3|4|5",
+        "star": "4|5",
+        "star_attr": "1|3"
+      },
+      {
+        "id": "10001273",
+        "name": "Finlil",
+        "attr": "8",
+        "max_num": "5",
+        "quality": "1|4|7|15",
+        "num": "2|3|4|5",
+        "star": "4|5",
+        "star_attr": "1|3"
+      }
+    ],
+    "special": [
+      {
+        "id": "1",
+        "partner_id": "10001045|10001060|10001192|10001243",
+        "title": "Academy Idol",
+        "dec": "Academic supernova, assemble!",
+        "type": "1",
+        "content": "18",
+        "attr": "MP consumption REDTN",
+        "num": "5",
+        "image": "windows/white_album/xiezhu.png"
+      },
+      {
+        "id": "2",
+        "partner_id": "10001040|10001152|10001157|11001|11002",
+        "title": "Heaven Visitor",
+        "dec": "Angels are coming, with love and light.",
+        "type": "1",
+        "content": "35",
+        "attr": "Physical crit damage REDTN",
+        "num": "0.1",
+        "image": "windows/white_album/fangyu.png"
+      },
+      {
+        "id": "3",
+        "partner_id": "10001012|10001034|10001047|10001078|10001133|10001186|10001246",
+        "title": "Elite Athlete",
+        "dec": "Sweat is the symbol of youth.",
+        "type": "1",
+        "content": "21",
+        "attr": "Silence Immunity",
+        "num": "5",
+        "image": "windows/white_album/xiezhu.png"
+      },
+      {
+        "id": "4",
+        "partner_id": "10001018|10001087|10001092|10001098|10001238|11007",
+        "title": "Magic Master",
+        "dec": "Turning over the title page of magic, it is a taboo chapter.",
+        "type": "1",
+        "content": "20",
+        "attr": "Skill level cap",
+        "num": "2",
+        "image": "windows/white_album/xiezhu.png"
+      },
+      {
+        "id": "5",
+        "partner_id": "10001003|10001025|10001198|10001237|10001245",
+        "title": "Animal Friend Ⅰ",
+        "dec": "Animals are the best friends of human being.",
+        "type": "1",
+        "content": "37",
+        "attr": "Hit recovery",
+        "num": "10",
+        "image": "windows/white_album/fangyu.png"
+      },
+      {
+        "id": "6",
+        "partner_id": "10001010|10001053|10001218|11003",
+        "title": "Animal Friend Ⅱ",
+        "dec": "Animals are the best friends of human being.",
+        "type": "1",
+        "content": "37",
+        "attr": "Hit recovery",
+        "num": "10",
+        "image": "windows/white_album/fangyu.png"
+      },
+      {
+        "id": "7",
+        "partner_id": "10001050|10001051|10001070|10001114|10001115|10001119|10001241",
+        "title": "Assassin's Creed",
+        "dec": "Assassination is the perfect curtain for the dead.",
+        "type": "1",
+        "content": "5",
+        "attr": "Physical attack",
+        "num": "200",
+        "image": "windows/white_album/gongji.png"
+      },
+      {
+        "id": "8",
+        "partner_id": "10001008|10001053|10001084|10001146|10001223",
+        "title": "Academy Foodie Ⅰ",
+        "dec": "The world is so big that I want to have a taste.",
+        "type": "1",
+        "content": "19",
+        "attr": "Healing effect",
+        "num": "5",
+        "image": "windows/white_album/zhiliao.png"
+      },
+      {
+        "id": "9",
+        "partner_id": "10001022|10001069|10001143|10001220|10001239",
+        "title": "Academy Foodie Ⅱ",
+        "dec": "The world is so big that I want to have a taste.",
+        "type": "1",
+        "content": "19",
+        "attr": "Healing effect",
+        "num": "5",
+        "image": "windows/white_album/zhiliao.png"
+      },
+      {
+        "id": "10",
+        "partner_id": "10001039|10001066|10001184",
+        "title": "Vampire Interview",
+        "dec": "Sneak into the vampire castle. SHH... Don't make any noise...",
+        "type": "1",
+        "content": "11",
+        "attr": "HP Regen",
+        "num": "100",
+        "image": "windows/white_album/zhiliao.png"
+      },
+      {
+        "id": "11",
+        "partner_id": "10001042|10001054|10001072|10001131|10001229",
+        "title": "Festival WishesⅠ",
+        "dec": "I would like to send the most sincere wishes for masters!",
+        "type": "1",
+        "content": "4",
+        "attr": "Max HP",
+        "num": "1000",
+        "image": "windows/white_album/fangyu.png"
+      },
+      {
+        "id": "12",
+        "partner_id": "10001046|10001065|10001104|10001225",
+        "title": "Festival WishesⅡ",
+        "dec": "I would like to send the most sincere wishes for masters!",
+        "type": "1",
+        "content": "4",
+        "attr": "Max HP",
+        "num": "1000",
+        "image": "windows/white_album/fangyu.png"
+      },
+      {
+        "id": "13",
+        "partner_id": "10001148|10001161|10001167|10001234|10001243",
+        "title": "Music Festival",
+        "dec": "The first music festival of cute girls is in preparation!",
+        "type": "1",
+        "content": "22",
+        "attr": "Stunning effect REDTN",
+        "num": "5",
+        "image": "windows/white_album/fangyu.png"
+      },
+      {
+        "id": "14",
+        "partner_id": "10001160|10001162|10001240",
+        "title": "Fly in Dance",
+        "dec": "Graceful and beautiful dance.",
+        "type": "1",
+        "content": "13",
+        "attr": "Dodge",
+        "num": "10",
+        "image": "windows/white_album/fangyu.png"
+      },
+      {
+        "id": "15",
+        "partner_id": "10001028|10001037|10001127|10001174",
+        "title": "Goddess Blessing",
+        "dec": "I will purify your resentment and convey your wishes~",
+        "type": "1",
+        "content": "38",
+        "attr": "Halving kill reward",
+        "num": "5",
+        "image": "windows/white_album/xiezhu.png"
+      },
+      {
+        "id": "16",
+        "partner_id": "10001064|10001151|10001188",
+        "title": "Natural Taoist",
+        "dec": "The three begets all things of the world.",
+        "type": "1",
+        "content": "12",
+        "attr": "MP recovery",
+        "num": "50",
+        "image": "windows/white_album/xiezhu.png"
+      },
+      {
+        "id": "17",
+        "partner_id": "10001012|10001111|10001160|10001197|10001217",
+        "title": "Guild Elite Ⅰ",
+        "dec": "The annual hundred guild war will start again!",
+        "type": "1",
+        "content": "17",
+        "attr": "Hit rate",
+        "num": "5",
+        "image": "windows/white_album/gongji.png"
+      },
+      {
+        "id": "18",
+        "partner_id": "10001047|10001147|10001162|10001183|10001218",
+        "title": "Guild Elite Ⅱ",
+        "dec": "The annual hundred guild war will start again!",
+        "type": "1",
+        "content": "17",
+        "attr": "Hit rate",
+        "num": "5",
+        "image": "windows/white_album/gongji.png"
+      },
+      {
+        "id": "19",
+        "partner_id": "10001007|10001009|10001158",
+        "title": "Hell Echo",
+        "dec": "Ah... Empty hell, with echoes of each word.",
+        "type": "1",
+        "content": "6",
+        "attr": "Spell power",
+        "num": "200",
+        "image": "windows/white_album/gongji.png"
+      },
+      {
+        "id": "20",
+        "partner_id": "10001006|10001048|10001100|10001105|10001109|10001121|10001129",
+        "title": "Mechanical Era",
+        "dec": "Three, two, one. War mode on, kill program on.",
+        "type": "1",
+        "content": "26",
+        "attr": "MP Regen of HP loss",
+        "num": "500",
+        "image": "windows/white_album/xiezhu.png"
+      },
+      {
+        "id": "21",
+        "partner_id": "10001024|10001055|10001155",
+        "title": "School Infirmary",
+        "dec": "Here offers one-stop medical service~",
+        "type": "1",
+        "content": "11",
+        "attr": "HP Regen",
+        "num": "100",
+        "image": "windows/white_album/zhiliao.png"
+      },
+      {
+        "id": "22",
+        "partner_id": "10001041|10001122|10001232",
+        "title": "Kratos Family",
+        "dec": "With the honor of Kratos, fame the name of war god~",
+        "type": "1",
+        "content": "9",
+        "attr": "Physical crit",
+        "num": "50",
+        "image": "windows/white_album/gongji.png"
+      },
+      {
+        "id": "23",
+        "partner_id": "10001058|10001181|10001251",
+        "title": "Doll Family",
+        "dec": "Dolls keep the family together.",
+        "type": "1",
+        "content": "38",
+        "attr": "There is a chance of recovering to half after being killed.",
+        "num": "5",
+        "image": "windows/white_album/xiezhu.png"
+      }
+    ]
+  }
+}

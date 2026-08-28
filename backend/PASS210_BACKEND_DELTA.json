@@ -1,0 +1,123 @@
+{
+  "artifact": "gxb-backend-v0.24.0-pass210.0",
+  "baseline": "gxb-backend-v0.23.0-pass209.0",
+  "changed_file_count": 16,
+  "files": [
+    {
+      "bytes": 4964,
+      "change": "added",
+      "path": "PASS210_P2_STAGE_E_IMPLEMENTATION_REPORT.md",
+      "sha256": "8f93031a7d43dc7e383f72aa3509b0a0e3ef2c1dcdb2f3e0d627b5f1764872ad"
+    },
+    {
+      "bytes": 570,
+      "change": "added",
+      "path": "PASS210_SRC64_REALITY_CHECK.json",
+      "sha256": "7b107f83d670501a7bb6231f599fa49b7eed99d4ed9d3b77f10fbb757372191d"
+    },
+    {
+      "bytes": 792,
+      "change": "added",
+      "path": "PASS210_STAGE_E_RELEASE_GATE.json",
+      "sha256": "81c287500d4e39de58efddc2de44b5a4387e01f168966afd9f19b10c0b8c963a"
+    },
+    {
+      "bytes": 713,
+      "change": "added",
+      "path": "PASS210_STAGE_E_VALIDATION.json",
+      "sha256": "da59f2465fcc310143e641badd24b821c5c5aa276060f0ebff40c9a7ef201c34"
+    },
+    {
+      "baseline_bytes": 405,
+      "baseline_sha256": "5150d56bdcb0959cf60c9b88b258e4b1372de9022db6994fb7c375afa1af7e98",
+      "bytes": 442,
+      "change": "modified",
+      "path": "VERSION.json",
+      "sha256": "a1449aef45a2b40e390d823ceef59776cc444988b10bc54625d2c0df71e6109a"
+    },
+    {
+      "baseline_bytes": 34804,
+      "baseline_sha256": "5c924861ff3677e41efd4fe244379c24de384ce171adf049c58bf3137f225603",
+      "bytes": 34874,
+      "change": "modified",
+      "path": "gxb_backend/dispatch/engine_dispatcher.py",
+      "sha256": "828318535b5074d4027725930e0b313d9afb04fe69540ce81c039a0f1fff5c2b"
+    },
+    {
+      "baseline_bytes": 10693,
+      "baseline_sha256": "83c89cc1d846f82338f0964a486d4ad7dd7c6f3c1199581bd111c4a2b8b2f8d5",
+      "bytes": 10918,
+      "change": "modified",
+      "path": "gxb_backend/handlers/heroes.py",
+      "sha256": "c967b566710fd07c0adc51183f70c87ba0bd8ecf7daf3000cbeb3c86c7fc569c"
+    },
+    {
+      "baseline_bytes": 1946,
+      "baseline_sha256": "aaf38440be22524757f8d063d4263e3b1f7ce79458c05f7a4ecde4e268d35260",
+      "bytes": 2232,
+      "change": "modified",
+      "path": "gxb_backend/handlers/tasks.py",
+      "sha256": "33aea46eb2a32ed2ecfc42ea859f6c41773306924d52cc38dc64784793aa9f28"
+    },
+    {
+      "baseline_bytes": 23591,
+      "baseline_sha256": "89e2487d74d4b75e2d516b2b76109adf42e32c0ed0ab5d2b881589ab2d46884c",
+      "bytes": 30004,
+      "change": "modified",
+      "path": "gxb_backend/state/awakening_mission_service.py",
+      "sha256": "61acfc0a267c1fd1e3966543b8fccda8f612fc8e6cf327e94007aa3f12346dbb"
+    },
+    {
+      "baseline_bytes": 22180,
+      "baseline_sha256": "439f84b43ad1d9b8c8c8530d74b8f96a9b0d73bbe2dae2328788ddeb85f953eb",
+      "bytes": 22765,
+      "change": "modified",
+      "path": "gxb_backend/state/hero_entity_mutation_service.py",
+      "sha256": "dd0470be8dbdc2cc7c787a7c0c9cdb890ba5f7587c5a841c5712442204dc4f14"
+    },
+    {
+      "bytes": 4915,
+      "change": "added",
+      "path": "gxb_backend/state/kongming_awake_skill_service.py",
+      "sha256": "d6e2861fcfbb136742c6854cf45711d47cf94f05e5f4eae7464374eebde31764"
+    },
+    {
+      "baseline_bytes": 19137,
+      "baseline_sha256": "4efda6cf2bc389a96ddeb1e615b06b406f364f4c70de22409a57ee174ea04fa4",
+      "bytes": 19243,
+      "change": "modified",
+      "path": "gxb_backend/state/repository.py",
+      "sha256": "018b3e067edd1255f2002351517d976d3368b211684efc3992630d2462f3f687"
+    },
+    {
+      "baseline_bytes": 37178,
+      "baseline_sha256": "ec4616bd4757d0f9d37baa9e3d230a6fe9ed5f38b603a920a1caae3115a8017f",
+      "bytes": 37582,
+      "change": "modified",
+      "path": "gxb_backend/state/request_services.py",
+      "sha256": "45fcf4e8df3cdd490e9941cb4d940920be3f980b8c6a5d7f1ae6b2a12281a742"
+    },
+    {
+      "baseline_bytes": 101,
+      "baseline_sha256": "0a5930941846261abb08d6fc3761d77eea7ccbf5b17e7dfd96a1a71aeb98bbe8",
+      "bytes": 101,
+      "change": "modified",
+      "path": "gxb_backend/version.py",
+      "sha256": "26f97c55d4e63d101f62d0345db88b7119053c142c5d9ea9daa081de4d7b0853"
+    },
+    {
+      "bytes": 13726,
+      "change": "added",
+      "path": "tools/selftest_pass210_p2_stage_e.py",
+      "sha256": "b56e13228a221983294a71c8824b7e501eaccbd76ad3c1950e8c1b1e980215e3"
+    },
+    {
+      "bytes": 6925,
+      "change": "added",
+      "path": "tools/verify_pass210_src64.py",
+      "sha256": "635d00594eee4bca034f483ab339815e6669f970737c71f3f988254a996b27ea"
+    }
+  ],
+  "pass": "210.0",
+  "stage": "P2-E"
+}

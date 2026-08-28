@@ -401,6 +401,18 @@ class StateRepository:
     def get_hero_advanced_progression_repository(self):
         return self.get_services().hero_advanced
 
+    def get_white_album_service(self):
+        return self.get_services().white_album
+
+    def get_course_service(self):
+        return self.get_services().courses
+
+    def get_workshop_building_service(self):
+        return self.get_services().workshop_buildings
+
+    def get_cabinet_research_service(self):
+        return self.get_services().cabinet_research
+
     def get_function_state_repository(self) -> FunctionStateRepository:
         return self.get_services().function_state
 
@@ -415,6 +427,12 @@ class StateRepository:
 
     def get_awakening_mission_service(self):
         return self.get_services().awakening_missions
+
+    def get_awakening_equipment_coordinator(self):
+        return self.get_services().awakening_equipment
+
+    def get_kongming_awake_skill_service(self):
+        return self.get_services().kongming_awake_skills
 
     def get_world_repository(self) -> WorldRepository:
         return self.get_services().world

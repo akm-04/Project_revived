@@ -1,0 +1,127 @@
+{
+  "artifact": "gxb-backend-v0.21.0-pass206.0",
+  "baseline": "gxb-backend-v0.20.0-pass205.0",
+  "changed_file_count": 17,
+  "files": [
+    {
+      "bytes": 3556,
+      "change": "added",
+      "path": "PASS206_P2_STAGE_B_IMPLEMENTATION_REPORT.md",
+      "sha256": "606014c9b2adeae065c4f124c4064b75a8e8b31b08f43af86f7ff1004bf3d0e1"
+    },
+    {
+      "bytes": 275,
+      "change": "added",
+      "path": "PASS206_SRC64_REALITY_CHECK.json",
+      "sha256": "92a2ea3259e4f6cce0310c617a22c41bfb4d23cf9f17325834e8dbd84db1eb20"
+    },
+    {
+      "bytes": 1135,
+      "change": "added",
+      "path": "PASS206_STAGE_B_RELEASE_GATE.json",
+      "sha256": "8fbf817bef31d456bde6ab018dc92488312fc65e9edc7075bf9f15ed6e7bcc46"
+    },
+    {
+      "bytes": 522,
+      "change": "added",
+      "path": "PASS206_STAGE_B_VALIDATION.json",
+      "sha256": "89c425086c8ef414f0280231a9318234fdc46f381ed4a04e6202888bae4f2728"
+    },
+    {
+      "baseline_bytes": 395,
+      "baseline_sha256": "77c99fbdbb5f77d3cb66449c3030f045beb8c1be552fae88f16e3dcd16e3d07d",
+      "bytes": 439,
+      "change": "modified",
+      "path": "VERSION.json",
+      "sha256": "2b7e76a61e10da9b8f69c26338033ad7886b6cdff0775a1bfd479da6d5126658"
+    },
+    {
+      "bytes": 3688,
+      "change": "added",
+      "path": "data/awakening_compatibility_policy.json",
+      "sha256": "48545d3a3f2424949b7df00adab5c751495598e52e6a0635bf2877c847939968"
+    },
+    {
+      "bytes": 1936,
+      "change": "added",
+      "path": "gxb_backend/content/awakening_compatibility_policy.py",
+      "sha256": "468107c3ecaecc6ddd8308f9317dbd87b44d88ffc78f81ef2175ef4745ad9242"
+    },
+    {
+      "baseline_bytes": 34804,
+      "baseline_sha256": "34073541fb2b8d26d6a5da980d5f0dc6d86ccb5c46965a195e7d3fd72436be1d",
+      "bytes": 34804,
+      "change": "modified",
+      "path": "gxb_backend/dispatch/engine_dispatcher.py",
+      "sha256": "5c924861ff3677e41efd4fe244379c24de384ce171adf049c58bf3137f225603"
+    },
+    {
+      "baseline_bytes": 9412,
+      "baseline_sha256": "2dcc48866051a98d7fb834629c7c7c1a4cc8c0641f033816783c746a2a12916f",
+      "bytes": 7095,
+      "change": "modified",
+      "path": "gxb_backend/handlers/inventory.py",
+      "sha256": "9c418d78d16fe37af4431c8e99bd6b971945768c088ddd08103bd6d0cc783339"
+    },
+    {
+      "baseline_bytes": 1814,
+      "baseline_sha256": "94c88f372989cc2203e9790e4dd75f3e483e5aa613aa8fc30488d5524d7ec92f",
+      "bytes": 1946,
+      "change": "modified",
+      "path": "gxb_backend/handlers/tasks.py",
+      "sha256": "aaf38440be22524757f8d063d4263e3b1f7ce79458c05f7a4ecde4e268d35260"
+    },
+    {
+      "baseline_bytes": 14408,
+      "baseline_sha256": "76462d0838a4cb4c3d9593f00825f0e0cbcefdbfd1443f645169f3017132778d",
+      "bytes": 18505,
+      "change": "modified",
+      "path": "gxb_backend/state/awakening_mission_service.py",
+      "sha256": "dc42da400fc2991f49d039ba69121be7327c42a72a2cee6935f22479c62db758"
+    },
+    {
+      "baseline_bytes": 8829,
+      "baseline_sha256": "fde0f788c6464a7973e24a66e66099f123d223fc5364312a461edbea19dc3e62",
+      "bytes": 10797,
+      "change": "modified",
+      "path": "gxb_backend/state/awakening_state_v2.py",
+      "sha256": "347fb40a79f1aa3e3ffd42df36a4af1f312d7af2a0ba87a74a3f735c372aa538"
+    },
+    {
+      "bytes": 4647,
+      "change": "added",
+      "path": "gxb_backend/state/item_composition_service.py",
+      "sha256": "6406e0138b40090c03442efbee83c86ec262e87ec456a050b95ba482ff9b440a"
+    },
+    {
+      "baseline_bytes": 35475,
+      "baseline_sha256": "f4762cdfbadc3025454b87eaa994e7dda6bf83287cdb7f7ba41904235280f078",
+      "bytes": 36177,
+      "change": "modified",
+      "path": "gxb_backend/state/request_services.py",
+      "sha256": "02f054e077396882f9f03525413eb3e66fdb069882b2097cd478237a277606b4"
+    },
+    {
+      "baseline_bytes": 101,
+      "baseline_sha256": "bb6da0069ac837b8be90cc473ec7bc0dddf71e73b9cc366c6b9499a804509a3c",
+      "bytes": 101,
+      "change": "modified",
+      "path": "gxb_backend/version.py",
+      "sha256": "a5ef60bef91c7a0694937df8498e5ff90da893ca1ecde40091b6a19ddbfb8d03"
+    },
+    {
+      "bytes": 9042,
+      "change": "added",
+      "path": "tools/selftest_pass206_p2_stage_b.py",
+      "sha256": "e83811b9b15217d8ab27fc5a5c962f6e9dd2732b60d03339cf3fbb8286b82435"
+    },
+    {
+      "bytes": 3620,
+      "change": "added",
+      "path": "tools/verify_pass206_src64.py",
+      "sha256": "25ff5ab70b1a82ed594b6ec7eb95a08b924f7fa359811e70340df4cc3ee711e5"
+    }
+  ],
+  "pass": "206.0",
+  "stage": "P2-B"
+}

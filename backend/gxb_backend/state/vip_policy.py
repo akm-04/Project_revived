@@ -150,3 +150,7 @@ class VipPrivilegeResolver:
     def hero_preset_limit(self) -> int:
         """Source ``vip.lua.preset_num`` limit for saved Hero teams."""
         return max(0, self.int_value("preset_num"))
+
+    def study_room_limit(self) -> int:
+        """Source ``vip.lua.num_study`` parallel Electives study-room limit."""
+        return max(0, self.int_value("num_study"))

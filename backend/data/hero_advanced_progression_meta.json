@@ -79884,6 +79884,23 @@
       ]
     }
   },
+  "inscription_exchange_materials": [
+    {
+      "currency_id": 19,
+      "item_id": 50001343,
+      "per_item": 5
+    },
+    {
+      "currency_id": 20,
+      "item_id": 50001344,
+      "per_item": 5
+    },
+    {
+      "currency_id": 21,
+      "item_id": 50001345,
+      "per_item": 5
+    }
+  ],
   "inscription_item_to_type": {
     "160100101": 10001,
     "160100102": 10001,

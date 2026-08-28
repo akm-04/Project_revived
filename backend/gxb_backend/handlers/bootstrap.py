@@ -166,6 +166,10 @@ class BootstrapHandlers:
             "384": player.invite_payload(),
             "612": player.guild_payload(),
             "624": player.world_boss_payload(),
+            # Pass192/P1-I5 runtime reconciliation: SelfPlayer.loadGameStartInfoEvent_
+            # explicitly consumes GET_STUDY_INFOS (2137) and Course:setStudyInfos()
+            # initializes roomInfo.study_infos before Course.enterCourseWindow() sorts.
+            "2137": player.study_payload(),
             "2416": player.adventure_payload(),
             "2485": player.peak_records_payload(),
             "2984": player.battle_pass_payload(),

@@ -1,0 +1,29 @@
+{
+  "blood_ritual_configs": 81,
+  "blood_wave_rows": 1620,
+  "kongming_additional_source_valid_battle_skills": [
+    60040144,
+    60050144
+  ],
+  "kongming_awake_slot": 5,
+  "kongming_persistent_book_ids": [
+    50000005,
+    50000010,
+    50000015,
+    50000020,
+    50000025
+  ],
+  "kongming_stock_picker_skills": [
+    60010144,
+    60020144,
+    60030144
+  ],
+  "locked_files": 15,
+  "mid866_sends_roster": false,
+  "mid867_terminal_npc_ids": [],
+  "mid867_terminal_num": 20,
+  "pass": "210.0",
+  "src64_files": 4370,
+  "status": "PASS",
+  "waves_per_ritual": 20
+}

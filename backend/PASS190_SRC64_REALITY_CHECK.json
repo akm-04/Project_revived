@@ -1,0 +1,29 @@
+{
+  "pass": "190.0",
+  "scope": "P1-I4B Cabinet",
+  "result": "PASS_NO_CONTRADICTION",
+  "source_root": "app-assets/output/assets/src_64",
+  "source_file_count": 4370,
+  "source_facts": [
+    "GET_CABINET_INFO consumes nested book_info by book id and skill id",
+    "LEARN_SKILL request is skill_id and response updates cabinet_info",
+    "source UI requires owned book item and Cabinet level >= book star",
+    "prerequisites must be ahead of current target skill level",
+    "cost vectors are target-level/source-cost-family indexed and may contain Skill Page sentinel -1",
+    "duration is target-level skill time minus Cabinet cut_time",
+    "one active research is exposed by cabinet timer state",
+    "SPEED_UP_SKILL returns cabinet_info, book_id and book-specific book_info",
+    "GIVE_UP_LEARN_SKILL may return return_skillpage",
+    "CABINET_SKILL_CONFIRM is the acknowledgement step"
+  ],
+  "compatibility_policies": [
+    "ordinary cancellation refund floor(cost*remaining/total)",
+    "full Skill Page return only before READY",
+    "lazy server materialization of natural timer completion"
+  ],
+  "unknowns": [
+    "exact original-server ordinary-resource cancellation refund formula",
+    "exact original-server persistence/materialization moment when a Cabinet timer naturally expires"
+  ],
+  "architecture_verdict": "existing canonical Workshop/UoW/Hero/inventory owners remain appropriate; no redesign required"
+}

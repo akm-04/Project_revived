@@ -1,0 +1,30 @@
+{
+  "pass": "179.0",
+  "backend_version": "0.18.0",
+  "scope": "P0 Girls/Gear economy and authority foundation",
+  "architecture": [
+    "HeroEquipmentRepository remains ordinary Hero equipment/promotion owner",
+    "FumoRestorationPlanner is a pure reusable compatibility helper; awards settle through existing MutationSettlementService/PlayerUnitOfWork",
+    "HeroAdvancedProgressionRepository remains Inscription/Emblem deterministic owner and now owns MID1407",
+    "GearPackMaterializer is a stateless Gift planning helper that emits InventoryGrant objects",
+    "GiftOpeningService -> RewardTransactionService -> PlayerUnitOfWork remains Girl Gear Pack settlement path",
+    "StackInventory and existing scalar ResourceMutation ledgers remain inventory/economy authorities",
+    "RandomOutcomeService is not used by MID1407, Fumo restoration or gift.equip"
+  ],
+  "implemented": [
+    "ordinary equipment operations are no longer blocked merely by nonzero Fumo",
+    "MID51/MID57 ordinary-only promotion restores Fumo materials atomically with the Hero promotion",
+    "MID51 preserves historical empty response when no restore items exist",
+    "MID57 returns restore_items",
+    "Awakening/Blood-Awakening current promotion stages fail transport-safe HTTP 409 with zero mutation until P2",
+    "MID1407 exchanges all held 50001343/50001344/50001345 into degree_cer/graduate_cer/patent_cer at 5 per item",
+    "all 199 deterministic gift.equip Girl Gear Packs are materialized and settle through existing Gift reward ownership"
+  ],
+  "not_changed": [
+    "aggregate Girl ATK/HP authority remains client/static-table reconstructed",
+    "Awakening/Blood-Awakening lifecycle remains P2",
+    "Practice/Alchemy and Emblem forge/reforge RNG remain deferred",
+    "OTA remains 1.631.12 / 142 entries",
+    "player persistence schema requires no migration or backfill"
+  ]
+}

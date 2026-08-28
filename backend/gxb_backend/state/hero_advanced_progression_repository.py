@@ -23,6 +23,7 @@ from pathlib import Path
 from typing import Any
 
 from .hero_repository import HeroRepository
+from .element_equipment_eligibility_policy import ElementEquipmentEligibilityPolicy
 from .inventory_repository import InventoryRepository
 from .mutation_plan import ActorRef, EntityMutation, IdempotencySpec, MutationOrigin, MutationPlan, ResourceMutation, StackMutation
 from .mutation_settlement_service import MutationSettlementError, MutationSettlementService
@@ -41,6 +42,7 @@ class HeroAdvancedProgressionRepository:
         heroes: HeroRepository,
         uow: UnitOfWork | None,
         settlement: MutationSettlementService | None,
+        element_eligibility: ElementEquipmentEligibilityPolicy | None = None,
     ) -> None:
         self.player = player
         self.data_dir = Path(data_dir)
@@ -49,6 +51,7 @@ class HeroAdvancedProgressionRepository:
         self.heroes = heroes
         self.uow = uow
         self.settlement = settlement
+        self.element_eligibility = element_eligibility
         self.meta = self._load("hero_advanced_progression_meta.json")
         self.equip_meta = self._load("hero_equipment_meta.json")
         self.super_partners = self.meta.get("super_partners") or {}
@@ -58,6 +61,7 @@ class HeroAdvancedProgressionRepository:
         self.element_equips = self.meta.get("element_equips") or {}
         self.element_strength = self.meta.get("element_strength") or {}
         self.inscription_item_to_type = self.meta.get("inscription_item_to_type") or {}
+        self.inscription_exchange_materials = tuple(self.meta.get("inscription_exchange_materials") or ())
         self.partner_stones = self.meta.get("partner_stones") or {}
         self.stone_evolution = self.meta.get("stone_evolution") or {}
         self.stone_tickets = self.meta.get("stone_tickets") or {}
@@ -197,11 +201,21 @@ class HeroAdvancedProgressionRepository:
     def _element_payload(self, hero:dict[str,Any])->dict[str,Any]:
         return {"element_equips":self._pipe((list(hero.get("element_equips") or [])+[0]*4)[:4]),"element_levels":self._pipe((list(hero.get("element_levels") or [])+[0]*4)[:4]),"element_bak_equips":self._pipe(hero.get("element_bak_equips") or []),"element_bak_levels":self._pipe(hero.get("element_bak_levels") or [])}
 
+    def _element_hero_access(self, hero:dict[str,Any] | None)->bool:
+        if hero is None:
+            return False
+        if self.element_eligibility is None:
+            return True
+        return self.element_eligibility.normal_common_eligible(hero,is_super=self.is_super(hero))
+
     def element_equip(self, req:dict[str,Any])->dict[str,Any]:
         pid=self._int(req.get("partner_id"),0); eid=self._int(req.get("equip_id"),0); pos=self._int(req.get("equip_pos"),0); hero=self.heroes.get(pid); meta=self.element_equips.get(str(eid)) or {}
-        if hero is None or not meta or not 1<=pos<=4: return {"error_code":1}
-        restricted=self._int(meta.get("partner_id"),0); table_id=self._int(hero.get("table_id"),0)
-        if restricted and restricted!=table_id: return {"error_code":1}
+        if hero is None or not meta or not 1<=pos<=4 or not self._element_hero_access(hero): return {"error_code":1}
+        if self.element_eligibility is not None:
+            if not self.element_eligibility.position_accepts(hero,meta,pos): return {"error_code":1}
+        else:
+            restricted=self._int(meta.get("partner_id"),0); table_id=self._int(hero.get("table_id"),0)
+            if restricted and restricted!=table_id: return {"error_code":1}
         backups=list(hero.get("element_bak_equips") or []); from_backup=eid in [self._int(v,0) for v in backups]
         ops=[]
         if not from_backup:
@@ -227,7 +241,7 @@ class HeroAdvancedProgressionRepository:
 
     def element_strengthen(self, req:dict[str,Any])->dict[str,Any]:
         pid=self._int(req.get("partner_id"),0); eid=self._int(req.get("equip_id"),0); hero=self.heroes.get(pid); meta=self.element_equips.get(str(eid)) or {}
-        if hero is None or not meta: return {"error_code":1}
+        if hero is None or not meta or not self._element_hero_access(hero): return {"error_code":1}
         loc=self._element_location(hero,eid)
         if loc is None or loc[2]>=self.element_max_rank: return {"error_code":1}
         costs=self._element_costs(loc[2],self._int(meta.get("equip_type"),0),decompose=False)
@@ -238,7 +252,7 @@ class HeroAdvancedProgressionRepository:
 
     def element_unload(self,req:dict[str,Any])->dict[str,Any]:
         pid=self._int(req.get("partner_id"),0); pos=self._int(req.get("equip_pos"),0); hero=self.heroes.get(pid)
-        if hero is None or not 1<=pos<=4: return {"error_code":1}
+        if hero is None or not 1<=pos<=4 or not self._element_hero_access(hero): return {"error_code":1}
         eq=(list(hero.get("element_equips") or [])+[0]*4)[:4]
         if self._int(eq[pos-1],0)<=0: return {"error_code":1}
         if not self._apply(mid=2851,operation="element_unload",partner_id=pid,operations=(EntityMutation("HERO",pid,"ELEMENT_UNLOAD",indices=(pos,)),)): return {"error_code":1}
@@ -250,7 +264,7 @@ class HeroAdvancedProgressionRepository:
 
     def element_destroy_on_hero(self,req:dict[str,Any])->dict[str,Any]:
         pid=self._int(req.get("partner_id"),0); eid=self._int(req.get("equip_id"),0); hero=self.heroes.get(pid)
-        if hero is None: return {"error_code":1}
+        if hero is None or not self._element_hero_access(hero): return {"error_code":1}
         loc=self._element_location(hero,eid)
         if loc is None: return {"error_code":1}
         credits=self._decompose_ops(eid,loc[2])
@@ -339,6 +353,34 @@ class HeroAdvancedProgressionRepository:
         ops=(StackMutation(item,"DEBIT",count),ResourceMutation(resource_key,"CREDIT",total))
         if not self._apply(mid=1404,operation="inscription_resolve",partner_id=0,operations=ops): return {"error_code":1}
         return {}
+
+    def inscription_exchange_materials_all(self, req:dict[str,Any])->dict[str,Any]:
+        """MID1407: exchange all held source materials into certificate ledgers.
+
+        Effective Inscription.lua sends an empty request and snapshots every held
+        stack from misc.inscript_cost_items before the request. item.lua's
+        economic_value maps those three items to currency IDs 19/20/21 at 5 per
+        material.  The mutation is one atomic StackInventory + ResourceMutation
+        plan; the ordinary response projector emits cumulative economy_ balances.
+        """
+        if not isinstance(req,dict): return {"error_code":1}
+        resource_by_currency={19:"degree_cer",20:"graduate_cer",21:"patent_cer"}
+        ops=[]; changes=[]
+        for row in self.inscription_exchange_materials:
+            if not isinstance(row,dict): return {"error_code":1}
+            item_id=self._int(row.get("item_id"),0); currency=self._int(row.get("currency_id"),0); per=max(0,self._int(row.get("per_item"),0))
+            resource=resource_by_currency.get(currency)
+            if item_id<=0 or resource is None or per<=0: return {"error_code":1}
+            count=max(0,self.inventory.get_item_num(item_id))
+            if count<=0: continue
+            change=count*per
+            ops.extend((StackMutation(item_id,"DEBIT",count),ResourceMutation(resource,"CREDIT",change)))
+            changes.append({"currency":currency,"change":change})
+        if not ops:
+            return {"currency_change":[]}
+        if not self._apply(mid=1407,operation="inscription_exchange_materials",partner_id=0,operations=tuple(ops)):
+            return {"error_code":1}
+        return {"currency_change":changes}
 
     def _daily_consume_state(self)->dict[str,Any]:
         # Pass79: DailyResetCoordinator is the sole owner of source-day

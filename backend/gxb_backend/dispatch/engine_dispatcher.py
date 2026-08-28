@@ -16,6 +16,8 @@ from gxb_backend.handlers.center import CenterHandlers
 from gxb_backend.handlers.chat import ChatHandlers
 from gxb_backend.handlers.compatibility import CompatibilityHandlers
 from gxb_backend.handlers.context import HandlerContext
+from gxb_backend.handlers.courses import CourseHandlers
+from gxb_backend.handlers.workshop import WorkshopHandlers
 from gxb_backend.handlers.guild import GuildHandlers
 from gxb_backend.handlers.gods_trial import GodsTrialHandlers
 from gxb_backend.handlers.heroes import HeroHandlers
@@ -24,6 +26,7 @@ from gxb_backend.handlers.illusion import IllusionHandlers
 from gxb_backend.handlers.inventory import InventoryHandlers
 from gxb_backend.handlers.library import LibraryHandlers
 from gxb_backend.handlers.mail import MailHandlers
+from gxb_backend.handlers.occult import OccultHandlers
 from gxb_backend.handlers.player import PlayerHandlers
 from gxb_backend.handlers.practice import PracticeHandlers
 from gxb_backend.handlers.rewards import RewardHandlers
@@ -85,9 +88,12 @@ class EngineDispatcher:
         self.arena = ArenaHandlers(ctx)
         self.tasks = TaskHandlers(ctx)
         self.mail = MailHandlers(ctx)
+        self.occult = OccultHandlers(ctx)
         self.shop = ShopHandlers(ctx)
         self.world = WorldHandlers(ctx)
         self.rewards = RewardHandlers(ctx)
+        self.courses = CourseHandlers(ctx)
+        self.workshop = WorkshopHandlers(ctx)
         self.protocol_registry = ProtocolRegistry.load(settings.protocol_registry_path)
         self.resource_registry = ResourceRegistry.load(settings.resource_registry_path)
         try:
@@ -148,6 +154,8 @@ class EngineDispatcher:
             "GET_LIBRARY_INFOS": self.library.get_library_infos,
             "SET_BG": self.library.set_bg,
             "ALBUM_SPECIAL_COLLECT_INFO": self.album_special_collect_info,
+            "ALBUM_SPECIAL_COLLECT_REWARD": self.album_special_collect_reward,
+            "ALBUM_PARTNER_UNLOCK": self.album_partner_unlock,
             "LOAD_CHAT_ROOM_INFO": self.chat.load_chat_room_info,
             "ILLUSION_LOAD_INFO": self.illusion.load_info,
             "GET_SELF_GUILD": self.guild.get_self_guild,
@@ -212,6 +220,7 @@ class EngineDispatcher:
             "BUY_SKILL_POINT": self.heroes.buy_skill_point,
             "SET_SKILL_LEVEL": self.heroes.set_skill_level,
             "SET_ALL_SKILL_LEVEL": self.heroes.set_all_skill_level,
+            "CHANGE_PARTNER_SKILL": self.heroes.change_partner_skill,
             "SET_HERO_EQUIP": self.heroes.set_hero_equip,
             "ONE_CLICK_EQUIP": self.heroes.one_click_equip,
             "ONE_CLICK_JINJIE": self.heroes.one_click_promote,
@@ -231,6 +240,7 @@ class EngineDispatcher:
             "INSCRIPTION_MAKE": self.heroes.advanced_hidden_fail_closed,
             "INSCRIPTION_REBUILD": self.heroes.advanced_hidden_fail_closed,
             "INSCRIPTION_RESOLVE": self.heroes.inscription_resolve,
+            "EXCHANGE_MATERIALS": self.heroes.inscription_exchange_materials,
             "INSCRIPTION_SAVE_REBUILD": self.heroes.advanced_hidden_fail_closed,
             "INSCRIPTION_ABANDON_REBUILD": self.heroes.advanced_hidden_fail_closed,
             "SUMMON_HERO": self.summon.summon_hero,
@@ -255,11 +265,34 @@ class EngineDispatcher:
             "GET_INVITE_AWARD": self.rewards.awards_empty,
             "GET_AUCTION_INFO_BY_TYPE": self.arena.get_auction_info_by_type,
             "GET_OFFLINE_INFO": self.rewards.get_offline_info,
-            "GET_BUILDING_LIST": self.rewards.get_building_list,
+            "GET_BUILDING_LIST": self.workshop.get_building_list,
+            "UPGRADE_BUILDING": self.workshop.upgrade_building,
+            "CANCEL_EVOLVE_BUILDING": self.workshop.cancel_evolve_building,
+            "GET_CABINET_INFO": self.workshop.get_cabinet_info,
+            "LEARN_SKILL": self.workshop.learn_skill,
+            "GIVE_UP_LEARN_SKILL": self.workshop.give_up_learn_skill,
+            "SPEED_UP_BUILDING": self.workshop.speed_up_building,
+            "SPEED_UP_SKILL": self.workshop.speed_up_skill,
+            "CABINET_SKILL_CONFIRM": self.workshop.cabinet_skill_confirm,
+            "CONFIRM_BUILDING_UPGRADE": self.workshop.confirm_building_upgrade,
             "GET_TEA_TALK_INFO": self.rewards.get_tea_talk_info,
             "GET_CLASS_INFO": self.rewards.get_class_info,
-            "GET_STUDY_INFOS": self.rewards.get_study_infos,
-            "GET_GIFT_BOX_INFO": self.rewards.get_gift_box_info,
+            "APPLY_COURSE": self.courses.apply_course,
+            "GET_COURSE_INFO": self.courses.get_course_info,
+            "GET_STUDYROOM_INFO": self.courses.get_studyroom_info,
+            "STUDY": self.courses.study,
+            "SPEED_STUDY": self.courses.speed_study,
+            "ADD_SKILL": self.courses.add_skill,
+            "FORGET_COURSE": self.courses.forget_course,
+            "ENTER_ROOM": self.courses.enter_room,
+            "LEAVE_ROOM": self.courses.leave_room,
+            "GET_STUDY_INFOS": self.courses.get_study_infos,
+            "CANCEL_STUDY": self.courses.cancel_study,
+            "GET_GIFT_BOX_INFO": self.courses.get_gift_box_info,
+            "INCR_COURESE_EXP": self.courses.incr_course_exp,
+            "OPEN_GIFT_BOX": self.courses.open_gift_box,
+            "CONTINUE_STUDY": self.courses.continue_study,
+            "GET_COURSES_RECOMMEND": self.courses.get_courses_recommend,
             "GET_ADVENTURE_LIST": self.world.get_adventure_list,
             "GET_HERO_RECOMMEND_SCORES": self.rewards.get_hero_recommend_scores,
             "BATTLE_PASS_GET_INFO": self.rewards.battle_pass_get_info,
@@ -285,6 +318,10 @@ class EngineDispatcher:
             "FIGHT": self.world.fight,
             "GET_STORY_DROP_PARTNER": self.world.get_story_drop_partner,
             "FIGHT_RESULT": self.world.fight_result,
+            # Pass211 Stage F: deliberately minimal Occult dependency for the 22
+            # ordinary Awakening routes. Other Occult MIDs remain fenced.
+            "GET_INFO": self.occult.get_info,
+            "OCCULT_SWEEP": self.occult.sweep,
         }
         for name, handler in extra.items():
             self._put(h, name, handler)
@@ -325,7 +362,7 @@ class EngineDispatcher:
             "GIVE_UP_AWAKE_TWICE_MISSION": self.tasks.awake_give_up,
             "GET_DAY_HUOYUE_AWARD": self.tasks.huoyue_award,
             "GET_WEEK_HUOYUE_AWARD": self.tasks.huoyue_award,
-            "GET_AWAKE_ITEM": self.tasks.mission_status,
+            "GET_AWAKE_ITEM": self.tasks.awake_get_item,
             "TASK_AWAKE_GIVE_UP": self.tasks.awake_give_up,
             "TASK_AWAKE_OPEN": self.tasks.awake_open,
             "UNLIMIT_START_FIGHT": self.world.unlimited_start_fight,
@@ -483,7 +520,6 @@ class EngineDispatcher:
             "DISMISS_HERO",
             "UNLOCK_DYNAMIC_CARD",
             "SHOW_DYNAMIC_CARD",
-            "ALBUM_PARTNER_UNLOCK",
         ]
         for name in status_only_names:
             mid = getattr(MID, name, -1)
@@ -492,13 +528,14 @@ class EngineDispatcher:
 
         return {mid: func for mid, func in h.items() if mid != -1}
 
+    def album_partner_unlock(self, req: dict[str, Any]) -> dict[str, Any]:
+        return self.state.get_white_album_service().claim_normal(req.get("partner_id"))
+
     def album_special_collect_info(self, req: dict[str, Any]) -> dict[str, Any]:
-        # SelfPlayer:getAlbumAttrInfo() assigns response.is_award directly to
-        # albumSpecialCollect, then calculateWhiteAlbumAttr()/checkAlbumSpecial()
-        # iterate it with # and numeric indexes. Authoritative collect_special.lua
-        # has contiguous IDs 1..23, so a fresh account needs a 23-slot zero list,
-        # not the old scalar 0 compatibility placeholder.
-        return {"is_award": [0] * 23}
+        return self.state.get_white_album_service().special_info()
+
+    def album_special_collect_reward(self, req: dict[str, Any]) -> dict[str, Any]:
+        return self.state.get_white_album_service().claim_special(req.get("id"))
 
     def red_point(self, req: dict[str, Any]) -> list[dict[str, Any]]:
         return self.state.get_player().redmark_payload()

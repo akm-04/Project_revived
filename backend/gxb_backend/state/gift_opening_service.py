@@ -30,6 +30,7 @@ from .reward_transaction_service import (
     RewardValidationError,
 )
 from .horcrux_materializer import HorcruxGiftRewardAdapter
+from .gear_pack_materializer import GearPackMaterializer, GearPackMaterializationError
 from .stack_inventory import StackInventory, StackInventoryError
 from .unit_of_work import OperationContext, PlayerUnitOfWork
 
@@ -94,10 +95,12 @@ class GiftOpeningPlanner:
         source: GiftOpeningSourceCatalog,
         random_outcomes: GiftRandomOutcomeAdapter | None = None,
         generated_rewards: HorcruxGiftRewardAdapter | None = None,
+        gear_pack_materializer: GearPackMaterializer | None = None,
     ) -> None:
         self.source = source
         self.random_outcomes = random_outcomes
         self.generated_rewards = generated_rewards
+        self.gear_pack_materializer = gear_pack_materializer
 
     @staticmethod
     def _positive_int(value: Any, field: str) -> int:
@@ -123,7 +126,9 @@ class GiftOpeningPlanner:
         if not operation.supports_num and num != 1:
             raise GiftOpeningError(f"MID241 route {operation.route} supports exactly one source item")
 
-        if operation.status == "DETERMINISTIC" and operation.capability == self.source.PHASE2_CAPABILITY:
+        if self._is_gear_pack(operation):
+            self._validate_gear_pack_source(operation)
+        elif operation.status == "DETERMINISTIC" and operation.capability == self.source.PHASE2_CAPABILITY:
             self._validate_deterministic_source(operation)
         elif operation.status == "RANDOM" and operation.capability == self.source.PHASE3_CAPABILITY:
             if self.random_outcomes is None:
@@ -136,6 +141,28 @@ class GiftOpeningPlanner:
                 f"MID241 operation is outside activated Gift Opening capability: {operation.capability}"
             )
         return GiftOpeningResolvedRequest(operation=operation, num=num)
+
+
+    def _is_gear_pack(self, operation: GiftOpeningOperation) -> bool:
+        return (
+            self.gear_pack_materializer is not None
+            and operation.status == "DETERMINISTIC"
+            and operation.capability == "SOURCE_INCOMPLETE_EQUIP_FIELD"
+            and operation.raw_equip not in {"", "0"}
+        )
+
+    def _validate_gear_pack_source(self, operation: GiftOpeningOperation) -> None:
+        if self.gear_pack_materializer is None:
+            raise GiftOpeningError("Girl Gear Pack materializer is unavailable")
+        if operation.fixed_items or operation.fixed_scalars or operation.drop_occurrences:
+            raise GiftOpeningError("gift.equip compatibility lane must remain a pure deterministic Gear Pack")
+        if operation.raw_items or operation.raw_item_nums:
+            raise GiftOpeningError("gift.equip compatibility lane unexpectedly carries raw ordinary items")
+        try:
+            if not self.gear_pack_materializer.counts(operation.raw_equip, copies=1):
+                raise GiftOpeningError("Girl Gear Pack materializes to no equipment")
+        except GearPackMaterializationError as exc:
+            raise GiftOpeningError(str(exc)) from exc
 
     @staticmethod
     def _validate_common_fixed_source(operation: GiftOpeningOperation) -> None:
@@ -240,9 +267,11 @@ class GiftOpeningPlanner:
             source_table="gift.lua" if not random_lane else "gift.lua|dropbox.lua",
             source_id=operation.gift_id,
             field_path=(
-                "gift.items|gift.scalars"
-                if not random_lane
-                else "gift.items|gift.scalars|gift.drops->dropbox.drop_rate/item_id/item_num"
+                "gift.equip"
+                if operation.raw_equip not in {"", "0"}
+                else ("gift.items|gift.scalars"
+                    if not random_lane
+                    else "gift.items|gift.scalars|gift.drops->dropbox.drop_rate/item_id/item_num")
             ),
         )
 
@@ -257,6 +286,12 @@ class GiftOpeningPlanner:
         operation, num = resolved.operation, resolved.num
         generated_lane = self.generated_rewards is not None and self.generated_rewards.supports(operation)
         random_lane = operation.status == "RANDOM"
+        if self._is_gear_pack(operation):
+            try:
+                grants = self.gear_pack_materializer.grants(operation.raw_equip, copies=num)
+            except GearPackMaterializationError as exc:
+                raise GiftOpeningError(str(exc)) from exc
+            return RewardPlan(origin=self._origin(operation, random_lane=False), inventory=grants)
         if generated_lane:
             specialized = []
             if operation.status == "DETERMINISTIC":
@@ -295,6 +330,20 @@ class GiftOpeningPlanner:
         operation, num = resolved.operation, resolved.num
         generated_lane = self.generated_rewards is not None and self.generated_rewards.supports(operation)
         random_lane = operation.status == "RANDOM"
+
+        if self._is_gear_pack(operation):
+            try:
+                counts = self.gear_pack_materializer.counts(operation.raw_equip, copies=num)
+                grants = self.gear_pack_materializer.grants(operation.raw_equip, copies=num)
+            except GearPackMaterializationError as exc:
+                raise GiftOpeningError(str(exc)) from exc
+            reward_plan = RewardPlan(origin=self._origin(operation, random_lane=False), inventory=grants)
+            return GiftOpeningPlan(
+                operation=operation,
+                num=num,
+                rewards=reward_plan,
+                wire_awards=tuple((item_id, counts[item_id]) for item_id in sorted(counts)),
+            )
 
         if generated_lane:
             specialized = []

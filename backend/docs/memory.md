@@ -1,3 +1,18 @@
+# Backend machine memory — Pass179.0
+
+Canonical implementation: `gxb-backend-v0.18.0-pass179.0`.
+
+- P0 Girls/Gear research/planning Pass173–178 is now implemented and static/regression accepted; client runtime smoke remains the gate.
+- Reuse-only architecture: HeroEquipmentRepository remains ordinary gear/promotion owner; HeroAdvancedProgressionRepository owns MID1407; GiftOpeningService/RewardTransactionService own Girl Gear Pack settlement; PlayerUnitOfWork/MutationSettlementService remain atomic settlement owners. No parallel Girl economy, inventory, aggregate-stat or RNG system exists.
+- Fumo source facts: restoration materials 50001007/50001006/50001003 with values 200/60/10 and quality return fractions Green 1, Blue 3/8, Purple 9/50, Orange 9/100, Red 9/200. Exact original-server rounding/decomposition is unavailable; compatibility policy P0_FUMO_RESTORE_V1_AGGREGATE_FLOOR_GREEDY_SOURCE_ORDER is explicit.
+- Ordinary promotion with Fumo restores materials and promotes in the same UoW. Existing empty MID51 response remains `{}` when no restoration exists; MID57 retains `restore_items`. Ordinary equip itself is no longer blocked by pre-existing Fumo.
+- P2 boundary: if the current ordinary-promotion stage contains Awakening/Blood-Awakening equipment, MID51/MID57 return HTTP 409 with zero mutation. Do not pull selective special-equipment preservation into P0.
+- MID1407 empty request consumes all held 50001343/344/345 and credits degree_cer/graduate_cer/patent_cer at 5 per item; empty inventory is successful no-op. No invented durable idempotency receipts.
+- All 199 source `gift.equip` operations are active. GearPackMaterializer uses compatibility policy P0_GIFT_EQUIP_V1_CUMULATIVE_SELECTOR_SPECIAL_DEDUP and feeds ordinary InventoryGrant rewards to the existing Gift transaction. No ROS.
+- Generated source catalogs rebuild byte-identically from effective 4,370-file src_64. OTA remains 1.631.12 / 142 entries.
+- NEXT: targeted stock-client P0 smoke/reconciliation. Suggested focus: ordinary Fumo promotion + returned books, MID1407 with sufficient materials, representative Girl Gear Pack opening, and verify Awakening-stage promotion fails safely rather than clearing special gear. After runtime closure proceed to P1 deterministic missing stat systems (Subjects/Electives, White Album, Workshop Bookshelf/Cabinet, Element preconditions).
+- Permanent evidence rule: source facts, runtime observations, compatibility policy and implementation remain separately classified.
+
 # Backend machine memory — Pass152.0
 
 Canonical implementation: `gxb-backend-v0.16.7-pass152.0`. Phase C is static/regression accepted with cumulative OTA 1.631.9 and resource-version-gated 272 synthetic EOL Recharge products. Pass151 MID2979 is runtime accepted. Next gate is Phase D client smoke/reconciliation; then Generated/Unique and Girls/Equipment. Existing canonical Commerce/Reward/Inventory/Skin/UoW owners are reused and ROS is unchanged.

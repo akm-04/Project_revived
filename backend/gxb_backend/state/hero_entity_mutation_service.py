@@ -11,6 +11,7 @@ from typing import Any
 
 from .hero_progression_repository import HeroProgressionRepository
 from .hero_repository import HeroRepository
+from .hero_course_state_adapter import HeroCourseStateAdapter
 from .mutation_plan import EntityMutation
 from .unit_of_work import PlayerUnitOfWork
 
@@ -31,11 +32,13 @@ class HeroEntityChange:
 class HeroEntityMutationService:
     ENTITY_TYPE = "HERO"
     _ACTIONS = {
-        "EVOLVE_STAR", "ADD_EXP", "SET_EQUIP_SLOTS", "PROMOTE_COLOR", "UPGRADE_SKILLS",
+        "EVOLVE_STAR", "ADD_EXP", "SET_EQUIP_SLOTS", "PROMOTE_COLOR", "PROMOTE_COLOR_PRESERVE_SPECIAL", "UPGRADE_SKILLS",
         "SET_SUPER_EQUIP", "ENHANCE_SUPER_EQUIP", "APPLY_FUMO",
         "ELEMENT_EQUIP", "ELEMENT_STRENGTHEN", "ELEMENT_UNLOAD", "ELEMENT_DESTROY",
         "INSCRIPTION_INSERT", "INSCRIPTION_REMOVE",
-        "STONE_EVOLUTION_ADD", "STONE_EVOLUTION_STAGE_UP", "AWAKEN_TABLE_ID", "SET_TWICE_AWAKE_STAGE",
+        "STONE_EVOLUTION_ADD", "STONE_EVOLUTION_STAGE_UP", "AWAKEN_TABLE_ID", "SET_TWICE_AWAKE_STAGE", "SET_SKILL_ID_AT_INDEX",
+        "COURSE_ACQUIRE", "COURSE_SET_PROGRESS", "COURSE_BIND_SKILL", "COURSE_SET_EXP_QUALITY", "COURSE_FORGET",
+        "WHITE_ALBUM_SET_STAGES", "SET_BOOKSHELF_LEVEL", "SET_CABINET_SKILL_LEVEL",
     }
 
     def __init__(self, heroes: HeroRepository, progression: HeroProgressionRepository, uow: PlayerUnitOfWork) -> None:
@@ -78,8 +81,14 @@ class HeroEntityMutationService:
             if len(op.indices)!=1 or not 1<=self._int(op.indices[0],0)<=6 or self._int(op.amount,0)<=0: raise HeroEntityMutationError("ENHANCE_SUPER_EQUIP requires slot and positive amount")
         elif action=="APPLY_FUMO":
             if len(op.indices)!=1 or not 1<=self._int(op.indices[0],0)<=6 or self._int(op.amount,0)<=0 or len(op.counts)!=1 or self._int(op.counts[0],-1)<0: raise HeroEntityMutationError("APPLY_FUMO requires slot, positive gain, resulting level")
-        elif action=="PROMOTE_COLOR":
-            if self._int(op.amount,0)!=1 or self._int(hero.get("color"),0)<=0: raise HeroEntityMutationError("PROMOTE_COLOR requires amount=1 and positive color")
+        elif action in {"PROMOTE_COLOR","PROMOTE_COLOR_PRESERVE_SPECIAL"}:
+            if self._int(op.amount,0)!=1 or self._int(hero.get("color"),0)<=0: raise HeroEntityMutationError(f"{action} requires amount=1 and positive color")
+            if action=="PROMOTE_COLOR_PRESERVE_SPECIAL":
+                slots=tuple(self._int(v,0) for v in op.indices)
+                if not slots or any(v<1 or v>6 for v in slots) or len(set(slots))!=len(slots) or op.counts:
+                    raise HeroEntityMutationError("PROMOTE_COLOR_PRESERVE_SPECIAL requires unique preserved slots 1..6")
+            elif op.indices or op.counts:
+                raise HeroEntityMutationError("PROMOTE_COLOR accepts no indices/counts")
         elif action=="UPGRADE_SKILLS":
             idx=tuple(self._int(v,0) for v in op.indices); cnt=tuple(self._int(v,0) for v in op.counts)
             if not idx or len(idx)!=len(cnt) or any(v<1 or v>6 for v in idx) or any(v<=0 for v in cnt) or len(set(idx))!=len(idx): raise HeroEntityMutationError("UPGRADE_SKILLS requires unique indexes 1..6 with positive counts")
@@ -103,6 +112,29 @@ class HeroEntityMutationService:
             if len(op.indices)!=1 or self._int(op.indices[0],0)<=0 or op.counts: raise HeroEntityMutationError("AWAKEN_TABLE_ID requires target table id")
         elif action=="SET_TWICE_AWAKE_STAGE":
             if self._int(op.amount,-1) not in (0,1,2,3) or op.indices or op.counts: raise HeroEntityMutationError("SET_TWICE_AWAKE_STAGE requires stage 0..3")
+        elif action=="SET_SKILL_ID_AT_INDEX":
+            if len(op.indices)!=1 or not 1<=self._int(op.indices[0],0)<=6 or self._int(op.amount,0)<=0 or op.counts: raise HeroEntityMutationError("SET_SKILL_ID_AT_INDEX requires slot 1..6 and positive raw skill id")
+        elif action=="COURSE_ACQUIRE":
+            if len(op.indices)!=1 or self._int(op.indices[0],0)<=0 or op.counts: raise HeroEntityMutationError("COURSE_ACQUIRE requires course id")
+        elif action in {"COURSE_SET_PROGRESS","COURSE_BIND_SKILL","COURSE_SET_EXP_QUALITY","COURSE_FORGET"}:
+            if len(op.indices)!=1 or self._int(op.indices[0],0)<=0: raise HeroEntityMutationError(f"{action} requires course id")
+            course_id=self._int(op.indices[0],0)
+            if not any(r.course_id==course_id for r in HeroCourseStateAdapter.records(hero)): raise HeroEntityMutationError(f"Course {course_id} is not owned")
+            if action=="COURSE_SET_PROGRESS" and (self._int(op.amount,-1)<0 or self._int(op.amount,-1)>100 or op.counts): raise HeroEntityMutationError("COURSE_SET_PROGRESS requires absolute progress 0..100")
+            if action=="COURSE_BIND_SKILL" and (self._int(op.amount,-1)<0 or self._int(op.amount,-1)>6 or op.counts): raise HeroEntityMutationError("COURSE_BIND_SKILL requires skill index 0..6")
+            if action=="COURSE_SET_EXP_QUALITY" and (len(op.counts)!=2 or not 1<=self._int(op.counts[0],0)<=6 or self._int(op.counts[1],-1)<0): raise HeroEntityMutationError("COURSE_SET_EXP_QUALITY requires quality1..6 and nonnegative exp")
+            if action=="COURSE_FORGET" and (op.counts or self._int(op.amount,0)!=0): raise HeroEntityMutationError("COURSE_FORGET accepts course id only")
+        elif action=="WHITE_ALBUM_SET_STAGES":
+            if len(op.counts)!=2 or op.indices or self._int(op.amount,0)!=0: raise HeroEntityMutationError("WHITE_ALBUM_SET_STAGES requires quality/star stages")
+            q,s=(self._int(v,-1) for v in op.counts)
+            if q<self._int(hero.get("collect_quality_stage"),0) or s<self._int(hero.get("collect_star_stage"),0): raise HeroEntityMutationError("White Album stages are monotonic")
+        elif action=="SET_BOOKSHELF_LEVEL":
+            level=self._int(op.amount,-1)
+            if not 0<=level<=100 or op.indices or op.counts: raise HeroEntityMutationError("SET_BOOKSHELF_LEVEL requires level 0..100")
+        elif action=="SET_CABINET_SKILL_LEVEL":
+            if len(op.indices)!=1 or self._int(op.indices[0],0)<=0 or self._int(op.amount,-1)<0 or op.counts: raise HeroEntityMutationError("SET_CABINET_SKILL_LEVEL requires skill id and nonnegative level")
+            info=hero.get("skill_book_info") if isinstance(hero.get("skill_book_info"),dict) else {}
+            if self._int(op.amount,0)<self._int(info.get(str(self._int(op.indices[0],0)),info.get(self._int(op.indices[0],0),0)),0): raise HeroEntityMutationError("Cabinet learned level is monotonic")
         return op
 
     @classmethod
@@ -117,7 +149,16 @@ class HeroEntityMutationService:
             "inscript_items":[cls._int(v,0) for v in list(hero.get("inscript_items") or [])] if isinstance(hero.get("inscript_items"),(list,tuple)) else [],
             "evo_stage":cls._int(hero.get("evo_stage"),1),
             "twice_awake_stage":cls._int(hero.get("twice_awake_stage"),0),
+            "skill_ids":cls._fixed(hero.get("skill_ids"),6,0),
             "evo_attr_points":{str(k):cls._int(v,0) for k,v in dict(hero.get("evo_attr_points") or {}).items()} if isinstance(hero.get("evo_attr_points"),dict) else {},
+            "courses":[r.course_id for r in HeroCourseStateAdapter.records(hero)],
+            "courses_progress":[r.progress for r in HeroCourseStateAdapter.records(hero)],
+            "courses_skill":[r.skill for r in HeroCourseStateAdapter.records(hero)],
+            "courses_quality":[r.quality for r in HeroCourseStateAdapter.records(hero)],
+            "courses_exp":[r.exp for r in HeroCourseStateAdapter.records(hero)],
+            "collect_quality_stage":cls._int(hero.get("collect_quality_stage"),0),"collect_star_stage":cls._int(hero.get("collect_star_stage"),0),
+            "book_shelf_lev":cls._int(hero.get("book_shelf_lev"),0),
+            "skill_book_info":{str(k):cls._int(v,0) for k,v in dict(hero.get("skill_book_info") or {}).items()} if isinstance(hero.get("skill_book_info"),dict) else {},
         }
 
     def apply(self,op:EntityMutation)->HeroEntityChange:
@@ -143,8 +184,12 @@ class HeroEntityMutationService:
         elif action=="APPLY_FUMO":
             fumos=self._fixed_six(hero.get("fumos"),0); levels=self._fixed_six(hero.get("fumo_levels"),0); i=self._int(op.indices[0],0)-1
             fumos[i]+=self._int(op.amount,0); levels[i]=self._int(op.counts[0],0); hero["fumos"]=fumos; hero["fumo_levels"]=levels; delta=self._int(op.amount,0)
-        elif action=="PROMOTE_COLOR":
-            hero["color"]=self._int(hero.get("color"),0)+1; hero["equips"]=[0]*6; hero["fumos"]=[0]*6; hero["fumo_levels"]=[0]*6; delta=1
+        elif action in {"PROMOTE_COLOR","PROMOTE_COLOR_PRESERVE_SPECIAL"}:
+            preserve={self._int(v,0)-1 for v in op.indices} if action=="PROMOTE_COLOR_PRESERVE_SPECIAL" else set()
+            equips=self._fixed_six(hero.get("equips"),0); fumos=self._fixed_six(hero.get("fumos"),0); levels=self._fixed_six(hero.get("fumo_levels"),0)
+            for i in range(6):
+                if i not in preserve: equips[i]=0; fumos[i]=0; levels[i]=0
+            hero["color"]=self._int(hero.get("color"),0)+1; hero["equips"]=equips; hero["fumos"]=fumos; hero["fumo_levels"]=levels; delta=1
         elif action=="UPGRADE_SKILLS":
             skills=self._fixed_six(hero.get("skills"),1); total=0
             for index,count in zip(op.indices,op.counts): skills[self._int(index,0)-1]+=self._int(count,0); total+=self._int(count,0)
@@ -212,5 +257,23 @@ class HeroEntityMutationService:
             delta=target
         elif action=="SET_TWICE_AWAKE_STAGE":
             stage=self._int(op.amount,0); hero["twice_awake_stage"]=stage; delta=stage
+        elif action=="SET_SKILL_ID_AT_INDEX":
+            skills=self._fixed_six(hero.get("skill_ids"),0); i=self._int(op.indices[0],0)-1; old=skills[i]; skills[i]=self._int(op.amount,0); hero["skill_ids"]=skills; delta=skills[i]-old
+        elif action=="COURSE_ACQUIRE":
+            delta=1 if HeroCourseStateAdapter.acquire(hero,self._int(op.indices[0],0)) else 0
+        elif action=="COURSE_SET_PROGRESS":
+            before_progress=next(r.progress for r in HeroCourseStateAdapter.records(hero) if r.course_id==self._int(op.indices[0],0)); HeroCourseStateAdapter.set_progress(hero,self._int(op.indices[0],0),self._int(op.amount,0)); delta=self._int(op.amount,0)-before_progress
+        elif action=="COURSE_BIND_SKILL":
+            HeroCourseStateAdapter.bind_skill(hero,self._int(op.indices[0],0),self._int(op.amount,0)); delta=self._int(op.amount,0)
+        elif action=="COURSE_SET_EXP_QUALITY":
+            HeroCourseStateAdapter.set_exp_quality(hero,self._int(op.indices[0],0),self._int(op.counts[0],1),self._int(op.counts[1],0)); delta=self._int(op.counts[1],0)
+        elif action=="COURSE_FORGET":
+            HeroCourseStateAdapter.forget(hero,self._int(op.indices[0],0)); delta=-1
+        elif action=="WHITE_ALBUM_SET_STAGES":
+            hero["collect_quality_stage"]=self._int(op.counts[0],0); hero["collect_star_stage"]=self._int(op.counts[1],0); delta=1
+        elif action=="SET_BOOKSHELF_LEVEL":
+            old=self._int(hero.get("book_shelf_lev"),0); hero["book_shelf_lev"]=self._int(op.amount,0); delta=self._int(op.amount,0)-old
+        elif action=="SET_CABINET_SKILL_LEVEL":
+            info=dict(hero.get("skill_book_info") or {}) if isinstance(hero.get("skill_book_info"),dict) else {}; sid=self._int(op.indices[0],0); old=self._int(info.get(str(sid),info.get(sid,0)),0); info[str(sid)]=self._int(op.amount,0); hero["skill_book_info"]=info; delta=self._int(op.amount,0)-old
         else: raise HeroEntityMutationError(f"unsupported Hero action {action}")
         self.uow.request_save(); after=self._summary(hero); return HeroEntityChange(action,eid,before,after,delta)

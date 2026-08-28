@@ -1,14 +1,19 @@
 """Source-backed normal-Hero equipment and one-click promotion transactions.
 
-v0.8.4 intentionally implements the early ordinary NormalHero path only:
-MID54 SET_HERO_EQUIP, MID62 ONE_CLICK_EQUIP and MID57 ONE_CLICK_JINJIE.
+Pass182 reconciles the source-backed ordinary NormalHero equipment path:
+MID54 SET_HERO_EQUIP, MID62 ONE_CLICK_EQUIP, MID57 ONE_CLICK_JINJIE and
+MID51 ordinary color promotion with bounded Fumo restoration. MID57 now
+honors the server-projected max_color split: below it one-click promotes; at
+or above it one-click equips the current tier only and MID51 performs the
+actual promotion.
 The client sends only partner/slot identifiers while independently calculating
 recursive composition, EXP-juice and Mana costs.  This repository mirrors those
 source calculations against canonical Hero/Backpack/Economy state so relog does
 not undo the visible client mutation.
 
-Awakened/bloodline/Fumo restoration semantics remain deferred. Requests that
-leave this narrow source-backed boundary fail closed without mutating state.
+Pass207 Stage C extends the same owner for source-special Awakening/Blood gear.
+Special slots/Fumo survive promotion exactly as NormalHero.powerUp/oneKeyPowerUp do;
+ordinary slots retain the existing restoration/reset semantics.
 """
 from __future__ import annotations
 
@@ -19,6 +24,7 @@ from pathlib import Path
 from typing import Any
 
 from .economy_repository import EconomyRepository
+from .fumo_restoration_planner import FumoEquippedSlot, FumoRestorationPlanner, FumoRestorationPolicyError
 from .hero_progression_repository import HeroProgressionRepository
 from .hero_repository import HeroRepository
 from .inventory_repository import InventoryRepository
@@ -51,6 +57,7 @@ class HeroEquipmentRepository:
         economy: EconomyRepository | None = None,
         uow: UnitOfWork | None = None,
         settlement: MutationSettlementService | None = None,
+        fumo_restoration: FumoRestorationPlanner | None = None,
     ) -> None:
         self.player = player
         self.data_dir = Path(data_dir)
@@ -63,6 +70,7 @@ class HeroEquipmentRepository:
         self.economy = economy or EconomyRepository(player, self.data_dir, save_callback)
         self._uow = uow
         self._settlement = settlement
+        self._fumo_restoration = fumo_restoration
         self.meta = self._load_meta()
         self.partners = self.meta.get("partners") or {}
         self.items = self.meta.get("items") or {}
@@ -107,17 +115,103 @@ class HeroEquipmentRepository:
         color = self._int(hero.get("color"), 0)
         if table_id <= self.partner_table_init_id or not (1 <= color < self.MAX_COLOR + 1):
             return False
-        # Fumo restoration on one-click promotion is source-visible but its
-        # full award semantics have not been reconstructed yet. Fresh tutorial
-        # Heroes have no Fumo, so fail closed outside that boundary.
-        fumos = hero.get("fumos")
-        if isinstance(fumos, (list, tuple)) and any(self._int(value) != 0 for value in fumos):
-            return False
         return True
 
     def _is_normal_equipment(self, item_id: int) -> bool:
         row = self._item(item_id)
         return bool(row) and self._int(row.get("is_awaken_item"), 0) == 0 and self._int(row.get("is_bloodline_item"), 0) == 0
+
+    def promotion_uses_special_equipment(self, hero: dict[str, Any]) -> bool:
+        """True when the current source tier contains persistent Awake/Blood gear."""
+        return any(item_id > 0 and not self._is_normal_equipment(item_id) for item_id in self._equip_ids(hero))
+
+    def special_equipment_slots(self, hero: dict[str, Any]) -> tuple[int, ...]:
+        """Return source-special slot indexes for selective promotion preservation."""
+        return tuple(
+            index for index, item_id in enumerate(self._equip_ids(hero), start=1)
+            if item_id > 0 and not self._is_normal_equipment(item_id)
+        )
+
+    def plan_equip_operations(
+        self, partner_id: Any, equip_index: Any, *, authorized_special_item: Any | None = None,
+        authorized_blood_lineage: bool = False
+    ) -> tuple[int, tuple[Any, ...]] | None:
+        """Plan one canonical MID54 equipment mutation without opening a UoW.
+
+        Normal callers leave ``authorized_special_item`` unset.  The Stage-C
+        Awakening coordinator may authorize exactly the active mission's source
+        exclusive gear.  Blood stage1 intentionally reuses the already-collected
+        ordinary Awakening slot bit: source client display substitutes the Blood
+        item while durable identity changes only when stage2 is claimed.
+        """
+        hero=self.heroes.get(partner_id); pid=self._int(partner_id,0); index=self._int(equip_index,0)
+        if hero is None or not self._normal_early_boundary(hero) or not (1<=index<=6): return None
+        equip_ids=self._equip_ids(hero)
+        if len(equip_ids)<index: return None
+        canonical_item=self._int(equip_ids[index-1],0)
+        equips=(list(hero.get("equips") or [])+[0]*6)[:6]
+        special=self._int(authorized_special_item,0) if authorized_special_item is not None else 0
+        if special>0:
+            # The source slot itself must be the persistent ordinary-Awake slot.
+            # Ordinary Awakening consumes that canonical item. Blood consumes the
+            # active mission's authorized display substitute while preserving the
+            # already-collected lineage bit. Do not infer Blood identity solely
+            # from item flags: Reo mission 2166001 / gear 21001080 is a recovered
+            # source anomaly whose item row lacks is_bloodline_item.
+            if canonical_item<=0 or self._is_normal_equipment(canonical_item): return None
+            smeta=self._item(special)
+            if not smeta: return None
+            if authorized_blood_lineage:
+                if self._int(equips[index-1],0)!=1: return None
+            else:
+                if self._is_normal_equipment(special) or canonical_item!=special: return None
+            ops:list[Any]=[StackMutation(special,"DEBIT",1)]
+            if not authorized_blood_lineage and self._int(equips[index-1],0)==0:
+                ops.append(EntityMutation("HERO",pid,"SET_EQUIP_SLOTS",indices=(index,)))
+            return special,tuple(ops)
+        if canonical_item<=0 or not self._is_normal_equipment(canonical_item) or self._int(equips[index-1],0)==1: return None
+        return canonical_item,(StackMutation(canonical_item,"DEBIT",1),EntityMutation("HERO",pid,"SET_EQUIP_SLOTS",indices=(index,)))
+
+    def ordinary_required_slots_complete(self, hero: dict[str, Any]) -> bool:
+        """Read-only source predicate used by the Normal-Girl Common gate.
+
+        HeroMainWindow.CheckOneClickJinjie() ignores Awakening/Blood-Awakening
+        special items when deciding whether Element Equipment may open at color16.
+        Every ordinary required slot whose source item is nonzero must already be
+        collected in the Hero's six-slot ``equips`` vector.
+        """
+        required=self._equip_ids(hero)
+        if len(required)!=6:
+            return False
+        collected=(list(hero.get("equips") or [])+[0]*6)[:6]
+        for index,item_id in enumerate(required):
+            if item_id>0 and self._is_normal_equipment(item_id) and self._int(collected[index],0)==0:
+                return False
+        return True
+
+    def _fumo_restoration_plan(self, hero: dict[str, Any]):
+        fumos=list(hero.get("fumos") or [])[:6]
+        while len(fumos)<6: fumos.append(0)
+        if not any(self._int(v,0)>0 for v in fumos):
+            return None
+        if self._fumo_restoration is None:
+            raise FumoRestorationPolicyError("Fumo restoration planner is unavailable")
+        equip_ids=self._equip_ids(hero)
+        if len(equip_ids)!=6:
+            raise FumoRestorationPolicyError("Hero equipment source is incomplete")
+        slots=[]
+        for item_id,fumo in zip(equip_ids,fumos):
+            value=max(0,self._int(fumo,0))
+            if value<=0: continue
+            row=self._item(item_id); quality=self._int(row.get("quality"),0)
+            if item_id<=0:
+                raise FumoRestorationPolicyError("Hero equipment source is incomplete")
+            if not self._is_normal_equipment(item_id):
+                # Stock NormalHero promotion preserves special gear and Fumo;
+                # only ordinary slots are restored/reset.
+                continue
+            slots.append(FumoEquippedSlot(item_id=item_id,item_quality=quality,fumo_value=value))
+        return self._fumo_restoration.plan(slots)
 
     @staticmethod
     def _merge_counts(base: dict[int, int], extra: dict[int, int]) -> dict[int, int]:
@@ -271,40 +365,17 @@ class HeroEquipmentRepository:
             return False
 
     def set_hero_equip(self, partner_id: Any, equip_index: Any) -> dict[str, Any]:
-        hero = self.heroes.get(partner_id)
-        pid = self._int(partner_id, 0)
-        index = self._int(equip_index, 0)
-        if hero is None or not self._normal_early_boundary(hero) or not (1 <= index <= 6):
-            return {"error_code": 1}
-        equip_ids = self._equip_ids(hero)
-        item_id = equip_ids[index - 1] if len(equip_ids) >= index else 0
-        if item_id <= 0 or not self._is_normal_equipment(item_id):
-            return {"error_code": 1}
-        equips = list(hero.get("equips") or [0, 0, 0, 0, 0, 0])[:6]
-        while len(equips) < 6:
-            equips.append(0)
-        if self._int(equips[index - 1], 0) == 1:
-            return {}
-
+        pid=self._int(partner_id,0)
+        planned=self.plan_equip_operations(partner_id,equip_index)
+        if planned is None: return {"error_code":1}
+        _item_id,ops=planned
         if self._uow is not None and self._settlement is not None:
-            ok = self._apply_typed_plan(
-                mid=54,
-                operation="set_hero_equip",
-                partner_id=pid,
-                operations=(
-                    StackMutation(item_id, "DEBIT", 1),
-                    EntityMutation("HERO", pid, "SET_EQUIP_SLOTS", indices=(index,)),
-                ),
-            )
-            return {} if ok else {"error_code": 1}
-
+            ok=self._apply_typed_plan(mid=54,operation="set_hero_equip",partner_id=pid,operations=ops)
+            return {} if ok else {"error_code":1}
         # Compatibility-only construction outside RequestServices.
-        if self.inventory.consume_item(item_id, 1, persist=False) is None:
-            return {"error_code": 1}
-        equips[index - 1] = 1
-        hero["equips"] = equips
-        self._save()
-        return {}
+        item_id=self._int(planned[0]); index=self._int(equip_index,0); hero=self.heroes.get(pid)
+        if hero is None or self.inventory.consume_item(item_id,1,persist=False) is None: return {"error_code":1}
+        equips=(list(hero.get("equips") or [])+[0]*6)[:6]; equips[index-1]=1; hero["equips"]=equips; self._save(); return {}
 
 
     def one_click_equip(self, partner_id: Any) -> dict[str, Any]:
@@ -399,6 +470,20 @@ class HeroEquipmentRepository:
         color = self._int(hero.get("color"), 1)
         if color >= self.MAX_COLOR:
             return {"error_code": 1}
+        # Effective NormalHero.oneKeyPowerUp has two successful MID57 state
+        # transitions.  max_color is a server-projected one-click promotion
+        # boundary, not the absolute Hero color ceiling: below it MID57 really
+        # promotes; at/above it MID57 only collects the current ordinary gear
+        # and leaves MID51 to perform the promotion.  Preserve the inherited
+        # numeric max_color compatibility value until source evidence recovers
+        # the original-server policy.
+        promote_now = color < max(0, self._int(self.player.max_color, 0))
+        restore_plan = None
+        if promote_now:
+            try:
+                restore_plan = self._fumo_restoration_plan(hero)
+            except FumoRestorationPolicyError:
+                return {"error_code": 1}
         equip_ids = self._equip_ids(hero)
         if len(equip_ids) != 6:
             return {"error_code": 1}
@@ -445,24 +530,39 @@ class HeroEquipmentRepository:
                 ops.append(ResourceMutation("mana", "DEBIT", total_mana))
             if potion_exp > 0:
                 ops.append(EntityMutation("HERO", pid, "ADD_EXP", amount=potion_exp))
-            ops.append(EntityMutation("HERO", pid, "PROMOTE_COLOR", amount=1))
+            if promote_now:
+                if restore_plan is not None:
+                    ops.extend(StackMutation(row.item_id, "CREDIT", row.item_num) for row in restore_plan.awards)
+                special_slots=self.special_equipment_slots(hero)
+                action="PROMOTE_COLOR_PRESERVE_SPECIAL" if special_slots else "PROMOTE_COLOR"
+                ops.append(EntityMutation("HERO", pid, action, amount=1, indices=special_slots))
+            else:
+                ops.append(EntityMutation("HERO", pid, "SET_EQUIP_SLOTS", indices=tuple(slot for slot, _item_id in missing)))
             if not self._apply_typed_plan(
                 mid=57,
-                operation="one_click_promote",
+                operation="one_click_promote" if promote_now else "one_click_collect_at_max_color",
                 partner_id=pid,
                 operations=tuple(ops),
             ):
                 return {"error_code": 1}
-            return {"restore_items": []}
+            return {"restore_items": restore_plan.wire_rows() if restore_plan is not None else []}
 
         if not self._consume_plan(reserved, potion_items, total_mana, hero, potion_exp):
             return {"error_code": 1}
-        hero["color"] = color + 1
-        hero["equips"] = [0, 0, 0, 0, 0, 0]
-        hero["fumos"] = [0, 0, 0, 0, 0, 0]
-        hero["fumo_levels"] = [0, 0, 0, 0, 0, 0]
+        if promote_now:
+            if restore_plan is not None and restore_plan.awards:
+                self.inventory.add_items([{"item_id":row.item_id,"item_num":row.item_num} for row in restore_plan.awards],persist=False)
+            special_slots=set(self.special_equipment_slots(hero))
+            equips0=(list(hero.get("equips") or [])+[0]*6)[:6]; fumos0=(list(hero.get("fumos") or [])+[0]*6)[:6]; levels0=(list(hero.get("fumo_levels") or [])+[0]*6)[:6]
+            for i in range(6):
+                if i+1 not in special_slots: equips0[i]=0; fumos0[i]=0; levels0[i]=0
+            hero["color"] = color + 1; hero["equips"]=equips0; hero["fumos"]=fumos0; hero["fumo_levels"]=levels0
+        else:
+            for slot, _item_id in missing:
+                equips[slot - 1] = 1
+            hero["equips"] = equips
         self._save()
-        result: dict[str, Any] = {"restore_items": []}
+        result: dict[str, Any] = {"restore_items": restore_plan.wire_rows() if restore_plan is not None else []}
         if total_mana > 0:
             result["economy_"] = {"mana": max(0, self._int(self.player.mana, 0))}
         return result
@@ -481,6 +581,10 @@ class HeroEquipmentRepository:
         color = self._int(hero.get("color"), 1)
         if color >= self.MAX_COLOR:
             return {"error_code": 1}
+        try:
+            restore_plan = self._fumo_restoration_plan(hero)
+        except FumoRestorationPolicyError:
+            return {"error_code": 1}
         equip_ids = self._equip_ids(hero)
         equips = list(hero.get("equips") or [0] * 6)[:6]
         while len(equips) < 6:
@@ -490,20 +594,31 @@ class HeroEquipmentRepository:
             return {"error_code": 1}
 
         if self._uow is not None and self._settlement is not None:
+            ops: list[Any] = []
+            if restore_plan is not None:
+                ops.extend(StackMutation(row.item_id, "CREDIT", row.item_num) for row in restore_plan.awards)
+            special_slots=self.special_equipment_slots(hero)
+            action="PROMOTE_COLOR_PRESERVE_SPECIAL" if special_slots else "PROMOTE_COLOR"
+            ops.append(EntityMutation("HERO", pid, action, amount=1, indices=special_slots))
             ok = self._apply_typed_plan(
                 mid=51,
                 operation="powerup_hero",
                 partner_id=pid,
-                operations=(EntityMutation("HERO", pid, "PROMOTE_COLOR", amount=1),),
+                operations=tuple(ops),
             )
-            return {} if ok else {"error_code": 1}
+            if not ok:
+                return {"error_code": 1}
+            return {"restore_items": restore_plan.wire_rows()} if restore_plan is not None else {}
 
-        hero["color"] = color + 1
-        hero["equips"] = [0, 0, 0, 0, 0, 0]
-        hero["fumos"] = [0, 0, 0, 0, 0, 0]
-        hero["fumo_levels"] = [0, 0, 0, 0, 0, 0]
+        if restore_plan is not None and restore_plan.awards:
+            self.inventory.add_items([{"item_id":row.item_id,"item_num":row.item_num} for row in restore_plan.awards],persist=False)
+        special_slots=set(self.special_equipment_slots(hero))
+        equips0=(list(hero.get("equips") or [])+[0]*6)[:6]; fumos0=(list(hero.get("fumos") or [])+[0]*6)[:6]; levels0=(list(hero.get("fumo_levels") or [])+[0]*6)[:6]
+        for i in range(6):
+            if i+1 not in special_slots: equips0[i]=0; fumos0[i]=0; levels0[i]=0
+        hero["color"] = color + 1; hero["equips"]=equips0; hero["fumos"]=fumos0; hero["fumo_levels"]=levels0
         self._save()
-        return {}
+        return {"restore_items": restore_plan.wire_rows()} if restore_plan is not None else {}
 
 
     def _save(self) -> None:

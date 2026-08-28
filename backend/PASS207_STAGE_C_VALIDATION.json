@@ -1,0 +1,16 @@
+{
+  "blood_mid161_stage2_projection_replay": true,
+  "blood_mid54_client_cache_anomaly_source_confirmed": true,
+  "blood_mid54_stage1_complete_no_stage2": true,
+  "blood_stage1_lineage_slot1_routes": 81,
+  "normal_mid54_regression": true,
+  "ordinary_mid161_successor_replay": true,
+  "ordinary_mid54_replay_debit_safe": true,
+  "ordinary_mid54_stage1_complete": true,
+  "ordinary_stage1_slot1_routes": 164,
+  "pass": "207.0",
+  "promotion_preserves_special_slot_fumo": true,
+  "reo_unflagged_blood_gear_supported": true,
+  "stage": "P2-C",
+  "status": "PASS"
+}

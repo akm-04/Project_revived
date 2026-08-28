@@ -4,13 +4,14 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Callable
 
-from gxb_backend.content import GameDataCatalog
+from gxb_backend.content import CatalogNamespace, ContentRef, GameDataCatalog
 from gxb_backend.content.item_sale_catalog import ItemSaleCatalog
 from gxb_backend.content.consumable_effect_catalog import ConsumableEffectCatalog
 from gxb_backend.content.campaign_drop_source_catalog import CampaignDropSourceCatalog
 from gxb_backend.content.magic_summon_source_catalog import MagicSummonSourceCatalog
 from gxb_backend.content.skin_source_catalog import SkinSourceCatalog
 from gxb_backend.content.gift_opening_source_catalog import GiftOpeningSourceCatalog
+from gxb_backend.content.fumo_restoration_source_catalog import FumoRestorationSourceCatalog
 from gxb_backend.content.horcrux_source_catalog import HorcruxSourceCatalog
 from gxb_backend.content.vow_source_catalog import VowSourceCatalog
 from gxb_backend.content.summon_operation_catalog import SummonOperationCatalog
@@ -21,8 +22,19 @@ from gxb_backend.content.vip_award_catalog import VipAwardSourceCatalog
 from gxb_backend.content.campaign_reset_catalog import CampaignResetSourceCatalog
 from gxb_backend.content.energy_purchase_catalog import EnergyPurchaseSourceCatalog
 from gxb_backend.content.summon_featured_catalog import SummonFeaturedCatalog
+from gxb_backend.content.course_source_catalog import CourseSourceCatalog
+from gxb_backend.content.white_album_source_catalog import WhiteAlbumSourceCatalog
+from gxb_backend.content.workshop_source_catalog import WorkshopSourceCatalog
+from gxb_backend.content.element_equipment_source_catalog import ElementEquipmentSourceCatalog
+from gxb_backend.content.awakening_source_catalog import AwakeningSourceCatalog
+from gxb_backend.content.awakening_compatibility_policy import AwakeningCompatibilityPolicy
+from gxb_backend.content.occult_source_catalog import OccultSourceCatalog
 
 from .awakening_mission_service import AwakeningMissionService
+from .awakening_equipment_coordinator import AwakeningEquipmentCoordinator
+from .awakening_campaign_overlay_planner import AwakeningCampaignOverlayPlanner
+from .awakening_campaign_objective_validator import AwakeningCampaignObjectiveValidator
+from .kongming_awake_skill_service import KongMingAwakeSkillService
 from .commerce_service import CommerceEntitlementService, RechargeCatalogService, RechargeEolAvailabilityPolicy
 from .commerce_purchase import (
     CommerceSettlementService,
@@ -43,6 +55,8 @@ from .campaign_drop_planner import (
 from .economy_ledger import EconomyLedger
 from .economy_repository import EconomyRepository
 from .function_state_repository import FunctionStateRepository
+from .fumo_restoration_planner import FumoRestorationPlanner
+from .gear_pack_materializer import GearPackMaterializer
 from .gift_opening_service import (
     GiftOpeningPlanner,
     GiftOpeningService,
@@ -54,6 +68,16 @@ from .hero_advanced_progression_repository import HeroAdvancedProgressionReposit
 from .hero_equipment_repository import HeroEquipmentRepository
 from .hero_progression_repository import HeroProgressionRepository
 from .hero_repository import HeroRepository
+from .hero_creation_initializers import HeroCreationInitializerRegistry
+from .durable_timed_job import DurableTimedJobPolicy
+from .event_centre_acceleration_policy import EventCentreAccelerationPolicy
+from .event_centre_building_service import EventCentreBuildingService
+from .cabinet_research_service import CabinetResearchService
+from .p1_foundation_state import P1FoundationStateNormalizer
+from .white_album_service import WhiteAlbumService
+from .course_study_progress_policy import CourseStudyProgressPolicy
+from .course_service import CourseService
+from .element_equipment_eligibility_policy import ElementEquipmentEligibilityPolicy
 from .horcrux_policy import HorcruxPolicyRegistry
 from .horcrux_enhancement import HorcruxEnhancementPlanner
 from .horcrux_repository import HorcruxRepository
@@ -70,6 +94,12 @@ from .inventory_repository import InventoryRepository
 from .inventory_sale_service import InventorySaleService
 from .mission_repository import MissionRepository
 from .mutation_settlement_service import MutationSettlementService
+from .derived_mutation_rules import DerivedMutationRuleRegistry
+from .occult_entity_mutation_service import OccultEntityMutationService
+from .occult_stamina_accrual_rule import OccultStaminaAccrualRule
+from .occult_service import OccultService
+from .awakening_projection_builder import AwakeningProjectionBuilder
+from .item_composition_service import ItemCompositionService, CabinetCompositionProvider, AwakeningCompositionProvider
 from .player_progression_service import PlayerProgressionService
 from .player_state import PlayerState
 from .reward_transaction_service import RewardTransactionService
@@ -130,6 +160,36 @@ class RequestServices:
         self.response_semantics = GlobalResponseSemantics(player, self.uow)
         save = self.uow.request_save
         self.server_clock = server_clock or ServerClock()
+        # Pass186 P1-I1 source-only catalogs and shared mechanics. These are
+        # composed now so later P1 semantic owners reuse one request graph.
+        self.course_source = CourseSourceCatalog(self.data_dir)
+        self.white_album_source = WhiteAlbumSourceCatalog(self.data_dir)
+        self.workshop_source = WorkshopSourceCatalog(self.data_dir)
+        self.element_source = ElementEquipmentSourceCatalog(self.data_dir)
+        self.durable_jobs = DurableTimedJobPolicy()
+        self.event_centre_acceleration = EventCentreAccelerationPolicy()
+        self.hero_creation_initializers = HeroCreationInitializerRegistry()
+        # Pass189 P1-I4A: newly acquired Normal Girls inherit the account's
+        # canonical Bookshelf projection through the existing narrow creation seam.
+        def _bookshelf_initializer(hero, bound_player):
+            try:
+                table_id = int(hero.get("table_id", 0) or 0)
+            except (TypeError, ValueError):
+                table_id = 0
+            if table_id <= 0 or not self.catalog.exists(ContentRef(CatalogNamespace.PARTNER, table_id)):
+                return
+            rows = bound_player.building_list_payload().get("building_list", {})
+            shelf = rows.get(str(self.workshop_source.BOOKSHELF_BUILDING_TYPE), {})
+            try:
+                level = max(0, min(100, int(shelf.get("lev", 1) or 1)))
+            except (TypeError, ValueError):
+                level = 1
+            hero["book_shelf_lev"] = level
+        self.hero_creation_initializers.register("workshop_bookshelf_projection", _bookshelf_initializer)
+        self.p1_foundation_state = P1FoundationStateNormalizer(
+            player, album=self.white_album_source, workshop=self.workshop_source,
+            game_data=self.catalog,
+        )
         # Pass87 Commerce/VIP policy is request-scoped and source-generated.
         # charge/vip remain Commerce-owned; Crystal remains EconomyLedger-owned.
         self.vip_progression = VipProgressionPolicy(self.data_dir)
@@ -192,17 +252,30 @@ class RequestServices:
         )
         self.inventory = InventoryRepository(player, save, data_dir=self.data_dir, uow=self.uow)
         self.stack_inventory = self.inventory
+        # Pass205 P2 Stage A installed a generic derived-plan augmentation seam.
+        # Pass211 Stage F is its first authorized consumer; rules remain pure and
+        # actual state mutation still belongs to registered settlement owners.
+        self.derived_mutation_rules = DerivedMutationRuleRegistry()
         self.mutation_settlement = MutationSettlementService(
             catalog=self.catalog,
             ledger=self.economy_ledger,
             stacks=self.stack_inventory,
             uow=self.uow,
             temporal=self.temporal,
+            derived_rules=self.derived_mutation_rules,
         )
+        # Pass211 Stage F: occult_ticket is intentionally domain-owned by
+        # SorceryWarAggregate (resource_registry), not EconomyLedger. Ticket +
+        # stamina progress therefore settle through one typed OCCULT authority.
+        self.occult_source = OccultSourceCatalog(self.data_dir)
+        self.occult_entities = OccultEntityMutationService(player, self.occult_source, self.uow)
+        self.mutation_settlement.register_entity_owner("OCCULT", self.occult_entities)
+        self.derived_mutation_rules.register(OccultStaminaAccrualRule(self.occult_source))
         self.heroes = HeroRepository(
             player, save, self.data_dir, economy=self.economy, catalog=self.catalog, uow=self.uow,
             temporal=self.temporal, settlement=self.mutation_settlement,
             vip_privileges=self.vip_privileges,
+            creation_initializers=self.hero_creation_initializers,
         )
         # Pass166 H1 Horcrux foundation. The repository owns unique instances
         # over player.spirit_list plus server-only horcrux_state; existing Hero,
@@ -262,6 +335,36 @@ class RequestServices:
             self.heroes, self.hero_progression, self.uow
         )
         self.mutation_settlement.register_entity_owner("HERO", self.hero_entities)
+        # Pass187 P1-I2 White Album: client owns stat calculation; this service
+        # persists only validated monotonic normal stages + special claim state.
+        self.white_album = WhiteAlbumService(
+            player, self.white_album_source, self.catalog, self.heroes, self.hero_entities, self.uow
+        )
+        # Pass188 P1-I3 Courses: deterministic lifecycle over the existing
+        # Hero Course arrays + study_infos, with the unrecovered completion
+        # formula isolated behind an explicit compatibility policy.
+        self.course_study_progress = CourseStudyProgressPolicy()
+        self.courses = CourseService(
+            player, self.course_source, self.heroes, self.hero_entities, self.inventory,
+            self.mutation_settlement, self.vip_privileges, self.durable_jobs,
+            self.course_study_progress, self.server_clock, self.uow,
+        )
+        # Pass189 P1-I4A: shared Event Centre building lifecycle + Bookshelf
+        # projection. Cabinet skill research remains the next bounded Workshop slice.
+        self.workshop_buildings = EventCentreBuildingService(
+            player, self.workshop_source, self.catalog, self.heroes, self.hero_entities,
+            self.mutation_settlement, self.durable_jobs, self.event_centre_acceleration,
+            self.server_clock, self.uow,
+        )
+        # Pass190 P1-I4B: Cabinet global book_info/research lifecycle reuses
+        # the same source catalog, UoW, stack/economy owners and timed-job policy.
+        self.cabinet_research = CabinetResearchService(
+            player, self.workshop_source, self.catalog, self.heroes, self.hero_entities,
+            self.inventory, self.mutation_settlement, self.durable_jobs,
+            self.event_centre_acceleration, self.workshop_buildings, self.server_clock, self.uow,
+        )
+        self.fumo_restoration_source = FumoRestorationSourceCatalog(self.data_dir)
+        self.fumo_restoration = FumoRestorationPlanner(self.fumo_restoration_source)
         self.hero_equipment = HeroEquipmentRepository(
             player,
             self.data_dir,
@@ -272,10 +375,15 @@ class RequestServices:
             economy=self.economy,
             uow=self.uow,
             settlement=self.mutation_settlement,
+            fumo_restoration=self.fumo_restoration,
+        )
+        self.element_eligibility = ElementEquipmentEligibilityPolicy(
+            player, self.element_source, self.catalog, self.hero_equipment
         )
         self.hero_advanced = HeroAdvancedProgressionRepository(
             player, self.data_dir, save, inventory=self.inventory, heroes=self.heroes,
             uow=self.uow, settlement=self.mutation_settlement,
+            element_eligibility=self.element_eligibility,
         )
         # Pass172 Vows acquisition/tab closure: source prerequisites/exchange
         # facts remain read-only; Hero/Stack/UoW stay canonical mutation owners.
@@ -332,11 +440,13 @@ class RequestServices:
         # Pass140 binds only the ordinary random lane to request-scoped ROS under
         # gift.open. Pool/rate/batching policy remains inside the Gift domain.
         self.gift_opening_source = GiftOpeningSourceCatalog(self.data_dir)
+        self.gear_pack_materializer = GearPackMaterializer(self.data_dir)
         self.gift_random_outcomes = GiftRandomOutcomeAdapter(
             self.random_outcomes, "gift.open"
         )
         self.gift_opening_planner = GiftOpeningPlanner(
-            self.gift_opening_source, self.gift_random_outcomes, self.horcrux_gift_rewards
+            self.gift_opening_source, self.gift_random_outcomes, self.horcrux_gift_rewards,
+            self.gear_pack_materializer,
         )
         self.gift_opening = GiftOpeningService(
             self.gift_opening_source,
@@ -362,10 +472,46 @@ class RequestServices:
             rewards=self.rewards,
             uow=self.uow,
         )
+        # Pass205 Stage A source/persistence/projection foundation. These are
+        # wired into the existing AwakeningMissionService owner without changing
+        # its externally visible Pass74 lifecycle yet.
+        self.awakening_source = AwakeningSourceCatalog(self.data_dir)
+        self.awakening_projection = AwakeningProjectionBuilder()
+        self.awakening_compatibility = AwakeningCompatibilityPolicy(self.data_dir)
+        self.item_composition = ItemCompositionService(
+            player, inventory=self.inventory, settlement=self.mutation_settlement, uow=self.uow,
+            providers=(
+                CabinetCompositionProvider(self.workshop_source),
+                AwakeningCompositionProvider(self.data_dir, self.awakening_source),
+            ),
+        )
         self.awakening_missions = AwakeningMissionService(
             player, self.data_dir, save, heroes=self.heroes, inventory=self.inventory,
             uow=self.uow, settlement=self.mutation_settlement,
+            source=self.awakening_source, projection=self.awakening_projection,
+            compatibility=self.awakening_compatibility,
         )
+        # Pass211 Stage F: minimal Sorcery War dependency only. Full manual/co-op
+        # Occult remains fenced; MID2362/MID2385 reuse canonical Awakening/UoW owners.
+        self.occult = OccultService(
+            player, self.occult_source, self.awakening_missions, self.occult_entities,
+            self.mutation_settlement, self.uow,
+        )
+        # Pass210 Stage E: KongMing's permanent post-Awakening skill switch reuses
+        # canonical Hero/Stack/UoW owners; Book-V items gate ownership and are never consumed.
+        self.kongming_awake_skills = KongMingAwakeSkillService(
+            player, self.heroes, self.inventory, self.mutation_settlement, self.uow
+        )
+        self.awakening_equipment = AwakeningEquipmentCoordinator(
+            player, equipment=self.hero_equipment, awakening=self.awakening_missions,
+            settlement=self.mutation_settlement, uow=self.uow,
+        )
+        # Pass209 Stage D: source-special Awakening/Blood Campaign awards reuse
+        # the same request-scoped entropy mechanics and existing Campaign UoW.
+        self.awakening_campaign_overlay = AwakeningCampaignOverlayPlanner(
+            self.awakening_source, self.random_outcomes
+        )
+        self.awakening_campaign_objectives = AwakeningCampaignObjectiveValidator()
         # Pass113/114 Campaign RNG plane. Effective-source facts and domain
         # policy remain separate from entropy mechanics. Ordinary MID117 alone
         # calls plan_repeat_sweep(); MID113 retains its legacy disabled policy.
@@ -505,6 +651,8 @@ class RequestServices:
             hero_progression=self.hero_progression,
             missions=self.missions,
             awakening_missions=self.awakening_missions,
+            awakening_campaign_overlay=self.awakening_campaign_overlay,
+            awakening_campaign_objectives=self.awakening_campaign_objectives,
             catalog=self.catalog,
             rewards=self.rewards,
             tutorial=self.tutorial,

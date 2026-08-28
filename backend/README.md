@@ -1,4 +1,159 @@
-# GXB backend v0.17.5 — Pass172.0
+# GXB backend v0.20.0 — Pass205.0
+
+Pass205 begins **P2 Awakening/Blood-Awakening implementation** with the planning-frozen Stage A foundation only. It introduces an immutable effective-`src_64` Awakening source catalog, generation-aware `awakening_state` schema v2, pure stock-response projection helpers, bounded transition/terminal replay memory, canonical whole-aggregate persistence semantics for Awakening/future Occult state, and a generic side-effect-free derived-mutation-rule registry wired into canonical settlement. **No derived rules are registered and no P2 endpoint lifecycle is opened or corrected in this stage**; the old Pass74 outward behavior and existing mutation fences remain unchanged until their authorized implementation stages. OTA remains **1.631.12 / 142 entries**.
+
+## Pass205.0 — P2 Stage A Foundation
+
+- `data/awakening_source_catalog.json` is reproducibly generated from effective `src_64` and preserves the exact 465 ordinary / 162 Blood mission corpus plus the 131 Campaign + 22 Occult + 11 event ordinary and 74 Campaign + 7 event Blood route partitions.
+- `AwakeningSourceCatalog` recursively freezes all source rows and metadata; compatibility policy and mutable player state are deliberately excluded.
+- `AwakeningStateV2` lazily migrates Pass74 schema-v1 state, reserves Pet type 3 without implementing Pet behavior, allocates activation generations, and retains bounded recent transition/terminal replay payloads.
+- `awakening_state` and reserved `occult_state` are complete server-owned JSON aggregates with canonical replacement semantics, preventing stale nested state resurrection.
+- `AwakeningProjectionBuilder` centralizes the source-confirmed `awake_mission_`, `twice_awake_mission_`, `pet_awake_mission_`, `twice_awake_stage_`, and `extra_drops_` wire shapes without becoming persistence authority.
+- `DerivedMutationRuleRegistry` is invoked exactly once before MutationPlan validation/application. Stage A registers zero rules, so canonical settlement behavior is unchanged; the future Occult stamina rule is not activated early.
+- The existing `AwakeningMissionService` remains the single mission owner and now consumes the new source/state/projection foundation. Its known-stale Pass74 lifecycle is intentionally preserved for Stage A and will be corrected only in the authorized later stages.
+- `tools/verify_pass205_src64.py` validates all 4,370 effective-source files by census, the 26 planning-critical source/protocol hashes, and byte-equivalent regeneration of the source catalog. `tools/selftest_pass205_p2_stage_a_foundation.py` covers source immutability, state migration/generations/replay, persistence replacement, projection shapes, empty derived-rule wiring, and outward behavior neutrality.
+
+# GXB backend v0.19.6 — Pass193.0
+
+Pass193 reconciles the second **P1-I5 stock-client smoke**. Courses, Bookshelf progression, and restart persistence are runtime-clean after Pass192. Cabinet research itself persisted correctly, but MID1078 returned only learned sparse skills while the stock client dereferences every skill in the completed book. Pass193 fixes that wire contract only: durable Cabinet storage remains sparse, but MID1078 now returns the complete per-book skill map with explicit zero levels for unlearned nodes. P1 remains runtime-open for one focused Cabinet re-smoke. OTA remains **1.631.12 / 142 entries** and P2 Awakening/Blood-Awakening stays HTTP409 fail-closed.
+
+## Pass193.0 — P1-I5 Cabinet Wire Reconciliation
+
+- **RUNTIME_OBSERVED:** the second stock-client smoke produced exactly two Cabinet Lua errors and two subsequent HTTP409 retries for skills already persisted by the server; Courses and restart state were otherwise clean.
+- **SOURCE_FACT:** `EventCentre:speedUpSkill()` iterates every skill returned by `cabinetBookTable:skillId(book_id)` and directly reads `response.book_info[tostring(skill_id)].lev`. A missing zero-level entry therefore crashes the stock client.
+- MID1078 now emits the complete skill map for the affected book, including `{lev=0}` for unlearned nodes; replay uses the same complete wire shape.
+- Canonical `workshop_state.book_info` remains sparse and authoritative. GET_CABINET_INFO remains source-shaped/sparse, so no shadow persistence representation was introduced.
+- The observed `JunkChestWindow.lua` failure is a cascade from the same incomplete MID1078 response, not a second persistence defect.
+- Effective source also confirms the Workshop dependency spine observed at runtime: Bookshelf is Cabinet-gated, Cabinet is Recycle-Bin-gated, and Recycle Bin reciprocally gates on Cabinet. That broader building dependency chain is recorded for later research/design rather than silently expanded inside this bugfix.
+- `tools/selftest_pass193_p1_i5_cabinet_wire_reconciliation.py` covers complete-book MID1078 wire shape, idempotent replay, and preservation of sparse durable/GET state.
+
+# GXB backend v0.19.5 — Pass192.0
+
+Pass192 reconciles the first **P1-I5 stock-client smoke**. It fixes three runtime-proven Course/Shop compatibility defects, adds source-generated Cabinet ordinary-book composition needed for Workshop testing, and gives only the anonymous sandbox a one-shot source-bounded Workshop QA material seed. P1 remains runtime-open pending the patched Workshop/Course re-smoke. OTA remains **1.631.12 / 142 entries** and P2 Awakening/Blood-Awakening stays HTTP409 fail-closed.
+
+## Pass192.0 — P1-I5 Runtime Reconciliation
+
+- Stage3 bootstrap now includes MID2137 `GET_STUDY_INFOS`, matching `SelfPlayer.loadGameStartInfoEvent_()` → `Course:setStudyInfos()` and preventing first-entry `roomInfo.study_infos` nil crashes.
+- Shop payload now supplies the fields `Shop:onShopInfo_()` consumes for Course Shop type 29 while retaining legacy aliases.
+- Course proficiency keeps source max 1680. Stock runtime can submit a final whole item crossing the cap; compatibility policy now consumes it and clamps the durable result to 1680 instead of HTTP409. Exact original overflow semantics remain unrecovered.
+- The Workshop source catalog now reproducibly includes all 40 Cabinet ordinary-book fragment recipes extracted from effective encoded `item.lua`.
+- MID83 composition has a bounded Cabinet-book path through existing UoW/settlement/inventory/economy owners; Introduction is source-exact `140001001 x20 -> 130001001`, with no broad MID83 rewrite.
+- Anonymous sandbox only receives a one-shot minimum of 51,390 Magic EXP plus 20 Introduction fragments for P1-I5 Workshop QA. No building/research level is spoofed and consumed material is never replenished.
+- Existing P1/P0/Horcrux architecture regressions remain green. P1 runtime closure still requires stock-client re-smoke of the corrected Course entry/bookstore/proficiency surfaces and Workshop upgrade/research lifecycle.
+
+# GXB backend v0.19.4 — Pass190.0
+
+Pass190 completes **P1-I4 Workshop** by adding the Cabinet research lifecycle on top of Pass189's Event Centre building/Bookshelf foundation. MID1059/1060/1061/1078/1079 now use source-shaped nested Cabinet state, existing PlayerUnitOfWork/MutationSettlement/Economy/Inventory/Hero owners, and the Pass186 finite-job/acceleration utilities. No scheduler, parallel Workshop database, or new transaction framework is introduced. OTA remains **1.631.12 / 142 entries**.
+
+## Pass190.0 — P1-I4B Cabinet Research
+
+- `workshop_state.book_info` is normalized to the effective-client wire authority `book_info[book_id][skill_id].lev`; the unused older flat placeholder is migrated monotonically rather than shadowed.
+- MID1059 returns all 54 Cabinet book keys and canonical `cabinet_info` (`cur_learn_skill`, `need_time`, `start_time`, `recent_complete_skill`) while private cost snapshots remain server-only.
+- MID1060 validates source book ownership, book-star ≤ Cabinet level, target level bounds, the exact prerequisite graph, source cost family/target-level vector, Skill Page costs, and the one-running-research invariant.
+- Research duration comes from the source target-level time vector minus the current Cabinet `cut_time`; zero/negative duration completes immediately, otherwise the existing `DurableTimedJobPolicy` owns RUNNING/READY math.
+- Natural READY jobs are lazily materialized exactly once, then project the new level to an owned matching Girl through the existing typed `SET_CABINET_SKILL_LEVEL` Hero mutation. `recent_complete_skill` remains until MID1079 confirmation.
+- MID1078 uses the shared source-exact Event Centre acceleration curve, returns book-specific nested `book_info`, and uses state-based replay protection against duplicate Crystal charge while completion is pending confirmation.
+- MID1061 preserves the frozen Workshop compatibility policy: ordinary resources refund `floor(original_cost * remaining / total)` from an immutable start-time snapshot; a Skill Page is fully returned only when cancelling before completion. READY/completed work receives no refund.
+- The Skill Page refund is persisted through canonical inventory ownership while the response exposes `return_skillpage`, matching the client's explicit Backpack update path and avoiding generic reward projection.
+- Global Cabinet learning remains authoritative even if its Girl is not currently owned; Hero `skill_book_info` is only the projection. Existing flat/Hero state migrates monotonically into the nested global authority.
+- Effective-src_64 reality check found no architectural contradiction. The exact original ordinary-resource cancellation formula and original server timer-expiry materialization timing remain unrecovered and explicitly compatibility/implementation policy.
+- `tools/selftest_pass190_p1_i4b_cabinet.py` covers source catalog/wire shape, learn/prerequisite/single-job rules, speed, cancellation/Skill Page returns, READY completion, Hero projection, migration, restart persistence, building payload reconciliation and all five Cabinet routes.
+
+# GXB backend v0.19.3 — Pass189.0
+
+Pass189 begins **P1-I4 Workshop** with a deliberately bounded first slice: the shared Event Centre building lifecycle and Bookshelf projection. MID1056/1057/1058/1077/1080 now reuse the existing `building_list`, `PlayerUnitOfWork`, `MutationSettlementService`, scalar economy owner, typed Hero mutations, `DurableTimedJobPolicy`, and `EventCentreAccelerationPolicy`. Cabinet skill research MIDs remain deferred to the next Workshop pass. OTA remains **1.631.12 / 142 entries**.
+
+## Pass189.0 — P1-I4A Event Centre Buildings + Bookshelf
+
+- Mutable P1 building types are bounded to Cabinet (1) and Bookshelf (4); other Event Centre building mutations fail closed as deferred rather than receiving invented logic.
+- Upgrade costs, timers and prerequisites are read from the **current** source level row exactly as `EventCentreUpgradeWindow.lua` does. Building `lev` remains unchanged while a timer is running.
+- Natural READY completion is lazy on MID1056: level increments once, timer clears, `new_evolve=1`, and the persisted cost snapshot is retired. MID1080 confirms/clears `new_evolve`.
+- MID1077 uses the recovered Event Centre three-band Crystal acceleration curve and completes immediately. Replay against already-completed/pending-confirm state does not charge twice.
+- MID1058 uses the frozen Workshop cancellation compatibility seam `floor(original_cost * remaining / total)` against an immutable start-time cost snapshot. READY/completed jobs are not refundable.
+- Bookshelf completion projects the new level to every owned Normal Girl through existing typed Hero mutations. A newly acquired Normal Girl inherits the account Bookshelf level through the Pass186 ordered Hero-creation initializer; Super Girls do not.
+- Cabinet building upgrades honor the recovered Trash prerequisite exactly. Because Trash implementation is outside current P1 scope, the default account can source-correctly progress Cabinet 1→2 but further upgrades remain gated until the prerequisite exists.
+- `tools/selftest_pass189_p1_i4a_workshop_buildings.py` covers source rows, wire shape, cost/timer lifecycle, replay, speed, proportional cancellation, prerequisites/deferred building types, Bookshelf projections, restart persistence and routing.
+
+# GXB backend v0.19.2 — Pass188.0
+
+Pass188 completes **P1-I3 Courses/Electives** on top of the Pass186/187 P1 foundation. All deterministic Course lifecycle MIDs now use the existing Hero Course arrays, `study_infos`, PlayerUnitOfWork and MutationSettlementService. The unrecovered original study-progress formula remains isolated behind the frozen +20 compatibility policy; recommendation selection is safe-empty and Gift Box awards fail closed instead of inventing server RNG. OTA remains **1.631.12 / 142 entries**.
+
+## Pass188.0 — P1-I3 Courses
+
+- Source-generated Course data now also captures the effective 8-hour timer, 200-Crystal forget cost, 30 speed coefficient, four proficiency-item values, six quality thresholds and exact source-defined forgetting refunds.
+- MID2128 APPLY_COURSE consumes the class application item once and acquires the Course without starting a room timer. Duplicate retries are no-op successes.
+- MID2131 STUDY is the first-time acquire+8h study path; MID2142 CONTINUE_STUDY resumes an existing incomplete Course without a second application-item spend.
+- READY study jobs are lazily materialized by MID2129 GET_COURSE_INFO (or explicit completion action): exactly one +20 compatibility-policy increment, then the room row is removed. MID2130/2137 polling does not auto-complete.
+- MID2132 SPEED_STUDY uses the exact client Crystal formula `30 * ceil(remaining/1800) / 2`; replay after completion does not charge twice.
+- MID2133 binding enforces the source-open Course skill slots 1–4 and one Course per skill slot. MID2140 consumes source proficiency items and derives quality from recovered thresholds.
+- MID2134 forget charges 200 Crystal and returns the exact source `object_book_color.lua` book items atomically; duplicate forgetting is a no-op.
+- MID2135/2136/2138 room enter/leave/cancel and VIP `num_study` capacity are durable and restart-safe.
+- MID2500 recommendation returns a deliberate safe-empty list because original server selection is unrecovered. MID2139 exposes `is_has_gift=0`; MID2141 Gift Box award generation returns HTTP409 `course_gift_box_awards_deferred`.
+- `tools/selftest_pass188_p1_i3_courses.py` covers source constants, acquisition, five-step completion, speed/cancel/capacity, binding, proficiency/quality, forgetting/refunds, replay semantics, persistence, routing and safe unknowns.
+
+# GXB backend v0.19.1 — Pass187.0
+
+Pass187 completes **P1-I2 White Album + Element Equipment retrofit** on top of the Pass186 shared foundation. White Album MID72/2784/2785 now has durable source-shaped ownership without server-side stat invention; Normal-Girl Element Equipment now enforces the recovered Common gate, slot-type rules and SP-Core lineage while reusing the existing HeroAdvancedProgressionRepository/UoW implementation. The separate Super Element lane and the P2 Awakening/Blood-Awakening HTTP409 fence remain untouched. OTA remains **1.631.12 / 142 entries**.
+
+## Pass187.0 — P1-I2 White Album + Element Equipment
+
+- MID72 validates owned Hero lineage and monotonically persists all currently satisfied `collect_quality_stage` / `collect_star_stage` thresholds through the existing typed Hero mutation/UoW path. Duplicate retries are successful no-ops.
+- MID2784 returns the durable 23-slot special-collection vector; MID2785 validates all required owned Girl IDs and persists effective type-1 claims. Effective `collect_special.lua` has 23/23 type-1 rows, so no reward RNG is introduced.
+- Awakened Normal Girls resolve to their source origin for Album claims; Super IDs remain themselves so mixed special sets remain claimable.
+- Normal-Girl Common eligibility now requires player level at server `max_lev`, Hero color 16, and every ordinary non-Awakening/non-Blood-Awakening promotion slot collected.
+- Element slot 1 accepts Core/SP-Core only; slots 2–4 accept Normal only; SP-Core partner restriction resolves against the Girl's first/origin table ID.
+- MID2853 backpack decomposition remains outside the Hero/Common gate. The separate source Super Element path is preserved rather than narrowed in this Normal-Girl retrofit.
+- MID72's old mutation-firewall block is retired because the endpoint now has durable ownership.
+- `tools/selftest_pass187_p1_i2.py` covers Album lineage, special sets including Super IDs, restart persistence, Common gating, slot/SP-Core invariants, Super-lane preservation, dispatcher routes and firewall state.
+
+# GXB backend v0.19.0 — Pass186.0
+
+Pass186 begins the approved P1 implementation roadmap with **P1-I1 Shared foundation only**. It adds effective-`src_64` generated immutable source catalogs for Courses, White Album, Workshop and Element Equipment; shared finite-job and Event Centre acceleration policies; the semantic VIP Study-room limit; additive P1 state normalization/migration; typed Hero P1 mutations; and a deliberately narrow ordered Hero-creation initializer seam. Existing PlayerUnitOfWork, MutationSettlementService, HeroRepository and canonical wire-facing fields remain authoritative. No P1-I2/I3/I4 business lifecycle is activated yet, no new RNG/transaction framework is introduced, and the P2 Awakening/Blood-Awakening HTTP409 fence is untouched. OTA remains **1.631.12 / 142 entries**.
+
+## Pass186.0 — P1-I1 Shared Foundation
+
+- Four generated source-only JSON catalogs reproduce Pass184's effective-source corpora exactly: 4 subjects / 12 classes / 48 Courses / 6 quality rows; 132 normal + 23 special White Album rows; 100 Bookshelf / 6 Cabinet / 54 books / 399 Cabinet skills; and 80 Element Equipment rows / 11 strengthening rows.
+- `DurableTimedJobPolicy` provides stateless IDLE/RUNNING/READY, elapsed/remaining/progress mechanics for finite P1 jobs; no scheduler or persistence authority is introduced.
+- `EventCentreAccelerationPolicy` mirrors effective `EventCentre.getUpgradeCost()` exactly.
+- `VipPrivilegeResolver.study_room_limit()` exposes source `vip.lua.num_study` semantically.
+- `P1FoundationStateNormalizer` repairs the old `GET_STUDY_INFOS` compatibility shape to `study_infos`, adds only missing server-only White Album/Workshop slices, monotonically reconciles Bookshelf authority, and derives Cabinet global learned state only from source-valid Hero `skill_book_info`.
+- `HeroCourseStateAdapter` plus eight bounded Hero ENTITY verbs establish typed P1 mutations without arbitrary dictionary patching.
+- `HeroCreationInitializerRegistry` is an ordered new-Hero projection seam attached to `HeroRepository.add_owned_hero()`; it is intentionally not an event bus and has no registered domain initializer until the Workshop wave.
+- `RequestServices` and maintenance composition now share the P1 catalogs/state contracts. Business handlers remain deferred to P1-I2/I3/I4.
+- `tools/selftest_pass186_p1_i1_foundation.py` validates source census, finite-job math, VIP room limits, legacy migration idempotence, typed mutations, initializer behavior and request composition.
+
+# GXB backend v0.18.1 — Pass183.0
+
+Pass183 is the runtime-acceptance and release-identity closure for Girls/Gear P0. Stock-client smoke against Pass182 completed without observed gameplay issues: deterministic Girl Gear Pack settlement worked, MID57/MID51 promotion stayed synchronized at/above the server `max_color` boundary, Fumo persistence/restoration behaved correctly across restart, and Awakening/Blood-Awakening promotion attempts hit the intended HTTP409 fail-closed fence. No gameplay behavior changes are introduced in Pass183. The only backend edit is correcting the stale runtime version banner from Pass179 identity to this Pass183 artifact identity. OTA remains **1.631.12 / 142 entries**.
+
+## Pass183.0 — Girls/Gear P0 Runtime Closure
+
+- Runtime evidence SHA256: `3c79bf1d6cc2639060bc296b77d8623290f078c6d42c2fea72666d2385ed4bec`.
+- User smoke notes report Tiffany Gear Pack deterministic awards, further pack openings, synchronized two-step promotion when the client exposes Max, successful Fumo enhancement persistence across restart, and restoration on MID51.
+- Server logs show repeated successful MID57/MID51 sequences plus repeated HTTP409 `awakening_equipment_promotion_deferred` blocks for both MID57 and MID51 at the special-equipment boundary.
+- P0 is runtime accepted/closed. Next work is P1 research only: Subjects/Courses → White Album normal claim/persistence → Workshop Bookshelf/Cabinet → Element Equipment preconditions/runtime closure.
+- Runtime banner identity self-healed; gameplay code remains byte-identical to Pass182 outside `gxb_backend/version.py` and release documentation/metadata.
+
+Pass182 implements the source-shaped MID57/max_color reconciliation authorized after Pass181 research. Effective `NormalHero.oneKeyPowerUp` has two successful transitions: below server-fed `maxHeroColor`, MID57 performs the real promotion and bounded Fumo restoration; at/above that boundary, MID57 consumes/composes the same required ordinary gear atomically but only marks the current tier collected, preserving color/Fumo so MID51 performs the actual promotion. The inherited `max_color=5` remains an explicit compatibility value because the original numeric server policy is still unrecovered; the separate absolute Hero color ceiling remains 16. Pass179's Awakening/Blood-Awakening P2 HTTP409/no-mutation fence is preserved.
+
+For client QA only, the anonymous sandbox receives a one-shot exact-quantity normalization of all 199 source-derived Girl Gear Pack item stacks to quantity 7. This runs after older broad QA seeds and never replenishes consumed packs on later logins. No credential/production-account economy semantics are changed. OTA remains **1.631.12 / 142 entries**.
+
+## Pass182.0 — MID57/max_color Runtime Reconciliation
+
+- `HeroEquipmentRepository.one_click_promote()` now branches on `hero.color < player.max_color`. Below threshold it retains the existing `PROMOTE_COLOR` + Fumo restoration settlement. At/above threshold it uses the existing `SET_EQUIP_SLOTS` mutation for the current missing ordinary slots, returns successful `restore_items=[]`, leaves color/Fumo untouched, and relies on MID51 for the real promotion.
+- The existing absolute `MAX_COLOR=16` rejection and P2 special-equipment fence remain unchanged. No Awakening implementation was pulled forward.
+- `debug_guest_girl_gear_pack_seed_pass182.json` + `MultiUserDatabase._apply_pass182_debug_girl_gear_pack_seed()` implement the dev-only 199-pack quantity-7 convenience as a one-shot sandbox migration.
+- `tools/selftest_pass182_mid57_reconciliation.py` covers below/threshold/above MID57 branches, threshold MID51 restoration, 15→16 terminal behavior, color16 no-mutation rejection, P2 HTTP409 preservation, and exact/non-replenishing 199-pack dev normalization.
+
+Pass179 implements P0 of the Girls/Gear economy foundation after the Pass173–178 research/planning cycle. It extends existing canonical owners rather than creating a parallel Girl economy: ordinary NormalHero promotion can now restore source-shaped Fumo materials through the existing MutationSettlementService/PlayerUnitOfWork transaction; MID1407 exchanges all held Emblem materials into the existing certificate ledgers; and all 199 deterministic `gift.equip` Girl Gear Packs materialize into ordinary InventoryGrant rewards through GiftOpeningService → RewardTransactionService. Awakening/Blood-Awakening promotion remains explicitly deferred and is transport-blocked with HTTP 409 when the current stage contains persistent special equipment. OTA remains **1.631.12 / 142 entries**.
+
+## Pass179.0 — P0 Girls/Gear Economy Foundation
+
+The Fumo restoration source catalog is generated from effective `src_64` and keeps source facts (200/60/10 materials plus quality return coefficients) separate from compatibility policy. `FumoRestorationPlanner` applies the frozen V1 aggregate-rational → floor-once → source-order greedy decomposition policy. Ordinary equip is no longer incorrectly fenced merely because a Hero has nonzero Fumo; promotion itself performs restoration atomically with the Hero color transition.
+
+MID1407 `EXCHANGE_MATERIALS` is owned by the existing advanced/Inscription repository. It consumes all held source materials 50001343/50001344/50001345 and credits `degree_cer` / `graduate_cer` / `patent_cer` at the source-shaped 5-per-item mapping in one UoW transaction.
+
+The former 199-operation `SOURCE_INCOMPLETE_EQUIP_FIELD` Gift lane is now a deterministic compatibility-materialization seam. `GearPackMaterializer` builds the Girl-specific cumulative equipment corpus through the recovered selector, preserves ordinary multiplicity, deduplicates repeated persistent Awakening/Blood-Awakening item identities, and emits standard InventoryGrant objects. No ROS, new inventory ledger, or new reward authority is introduced.
 
 Pass172 records the successful Pass171 stock-client Horcrux restart re-smoke and marks the current Horcrux scope **runtime accepted / closed**. The backend remains authoritative for unique Horcrux identity/storage plus rolled/materialized main/sub stat IDs and values; the stock client consumes those persisted values for Hero attribute/UI calculations, while future authoritative server combat should consume the same values rather than treating them as client-invented. The same smoke sequence exposed a clean Vows gap: Institute → Vows sent source-correct MID305 for Balder and the backend blocked it only because no semantic handler existed. Pass172 adds source-generated Vow acquisition metadata plus MID305 summon and MID306 Vows Essence exchange, reusing HeroRepository, StackInventory and PlayerUnitOfWork. No prerequisite Girls are consumed on summon; initial Vow star equals the number of the five source prerequisites that resolve to a currently exactly-5-star Girl. Existing Vow MID52/MID54/MID304 progression/equipment remains unchanged. OTA remains **1.631.12 / 142 entries**.
 

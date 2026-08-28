@@ -1,0 +1,17 @@
+{
+  "pass": "210.0",
+  "stage": "P2-E",
+  "status": "PASS",
+  "baseline_backend": "gxb-backend-v0.23.0-pass209.0",
+  "backend_version": "0.24.0",
+  "stage_e_complete": true,
+  "stage_f_started": false,
+  "broader_p2_release_fenced": true,
+  "player_db_unchanged_from_pass209": true,
+  "src64": {"file_count": 4370, "critical_hashes": 15, "reality_check": "PASS"},
+  "runtime_reconciliation_risks": [
+    "Blood MID54 immediate client Backpack/equipment-cache discrepancy remains a Stage-G stock-client smoke risk from Stage C",
+    "KongMing stock slot-5 picker currently exposes 3 of 5 source-valid skill mappings; server preserves all 5 mappings and ownership tokens without claiming 5-choice stock UI"
+  ],
+  "next": "Stage F minimal Occult/Sorcery War P2 dependency after Pass210 seal"
+}

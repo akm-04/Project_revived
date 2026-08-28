@@ -190,11 +190,6 @@
           "is_partner_drop": 0
         }
       }
-    },
-    {
-      "name": "effective_src64_regenerates_reset_metadata_byte_exact",
-      "status": "PASS",
-      "details": {}
     }
   ],
   "scope": "Super Campaign paid resets only; MID117/118 and Monthly Privilege lifecycle remain deferred"

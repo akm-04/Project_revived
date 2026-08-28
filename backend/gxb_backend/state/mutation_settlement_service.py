@@ -7,6 +7,7 @@ from typing import Any
 from gxb_backend.content import CatalogNamespace, ContentRef, GameDataCatalog
 
 from .economy_ledger import EconomyLedger
+from .derived_mutation_rules import DerivedMutationRuleRegistry
 from .mutation_plan import (
     EntityMutation,
     JournalEntry,
@@ -71,12 +72,14 @@ class MutationSettlementService:
         stacks: StackInventory,
         uow: PlayerUnitOfWork,
         temporal: TemporalPolicyService | None = None,
+        derived_rules: DerivedMutationRuleRegistry | None = None,
     ) -> None:
         self.catalog = catalog
         self.ledger = ledger
         self.stacks = stacks
         self.uow = uow
         self.temporal = temporal
+        self.derived_rules = derived_rules if derived_rules is not None else DerivedMutationRuleRegistry()
         self._entity_owners: dict[str, Any] = {}
 
     def register_entity_owner(self, entity_type: str, owner: Any) -> None:
@@ -215,6 +218,10 @@ class MutationSettlementService:
                 raise UnsupportedMutationOperation(f"precondition not implemented in current settlement: {row.kind}")
 
     def apply(self, plan: MutationPlan) -> SettlementDraft:
+        # Pass205 Stage A: derived rules may only augment the immutable plan
+        # before canonical preflight. No rules are registered in Stage A, so
+        # this is intentionally behavior-neutral until a later authorized stage.
+        plan = self.derived_rules.augment(plan, player=self.uow.player, uow=self.uow)
         self.validate(plan)
         version_before = self.uow.current_state_version
         journal: list[JournalEntry] = []
@@ -323,9 +330,9 @@ class MutationSettlementService:
                 before=change.before,
                 after=change.after,
                 delta=change.delta,
-                # Hero callbacks already reconcile star/color/skills/equipment
-                # locally or consume explicit response fields. Do not synthesize
-                # a generic entity response channel and double-apply client state.
+                # ENTITY owners publish only their explicit domain semantic channels.
+                # Do not synthesize a generic entity response channel here and
+                # risk double-applying client state.
                 projection_tags=(),
                 origin_ref=origin_ref,
             ))

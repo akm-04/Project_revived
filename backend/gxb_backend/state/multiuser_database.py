@@ -683,6 +683,95 @@ class MultiUserDatabase:
         }
         return True
 
+    def _apply_pass182_debug_girl_gear_pack_seed(self, player: PlayerState) -> bool:
+        """One-shot exact-quantity Girl Gear Pack fixture for anonymous QA.
+
+        Pass179 activated all 199 deterministic gift.equip packages.  The
+        established sandbox already carries very large generic QA inventories,
+        which makes those packages awkward to locate in the stock client's
+        quantity sort.  Pass182 therefore normalizes exactly the source-derived
+        package item ids to quantity 7 once.  The migration marker is written
+        immediately, so subsequent consumption is real and never replenished.
+        This is dev/test convenience only, not production economy semantics.
+        """
+        if str(getattr(player, "account_uid", "") or "") != SANDBOX_UID:
+            return False
+        path = self.data_dir / "debug_guest_girl_gear_pack_seed_pass182.json"
+        try:
+            payload = json.loads(path.read_text(encoding="utf-8"))
+        except Exception:
+            return False
+        if not isinstance(payload, dict):
+            return False
+        meta = payload.get("_meta") if isinstance(payload.get("_meta"), dict) else {}
+        marker = str(meta.get("migration_marker") or "pass182_debug_girl_gear_pack_qty7_v1")
+        state = player.persistence_state if isinstance(player.persistence_state, dict) else {}
+        if state is not player.persistence_state:
+            player.persistence_state = state
+        migrations = state.setdefault("migrations", {})
+        if not isinstance(migrations, dict):
+            migrations = {}
+            state["migrations"] = migrations
+        if migrations.get(marker):
+            return False
+
+        try:
+            target = max(1, int(payload.get("target_quantity", 7) or 7))
+        except (TypeError, ValueError):
+            target = 7
+        limits = ItemStackLimitCatalog(self.data_dir)
+        ids: list[int] = []
+        for raw in payload.get("item_ids") or []:
+            try:
+                item_id = int(raw)
+            except (TypeError, ValueError):
+                continue
+            if item_id > 0 and item_id not in ids:
+                ids.append(item_id)
+        if len(ids) != 199:
+            return False
+        if not isinstance(player.backpack_items, list):
+            player.backpack_items = []
+        by_id: dict[int, dict[str, Any]] = {}
+        for row in player.backpack_items:
+            if not isinstance(row, dict):
+                continue
+            try:
+                item_id = int(row.get("table_id", 0) or 0)
+            except (TypeError, ValueError):
+                continue
+            if item_id > 0:
+                by_id[item_id] = row
+
+        changed = 0
+        for item_id in ids:
+            limit = limits.limit(item_id)
+            if limit is None or limit < target:
+                return False
+            row = by_id.get(item_id)
+            if row is None:
+                row = {"table_id": item_id, "item_num": target, "time": 0}
+                player.backpack_items.append(row)
+                by_id[item_id] = row
+                changed += 1
+                continue
+            try:
+                current = max(0, int(row.get("item_num", 0) or 0))
+            except (TypeError, ValueError):
+                current = 0
+            if current != target:
+                row["item_num"] = target
+                changed += 1
+
+        migrations[marker] = {
+            "applied": 1,
+            "policy": "DEV_TEST_PRIVATE_SERVER_POLICY_ONE_SHOT_EXACT_QUANTITY",
+            "target_quantity": target,
+            "source_item_count": len(ids),
+            "rows_added_or_normalized": changed,
+        }
+        return True
+
     def _apply_pass96_debug_account_normalization(self, player: PlayerState) -> bool:
         """One-shot source-aware sandbox repair for end-game economy QA.
 
@@ -829,6 +918,77 @@ class MultiUserDatabase:
         migrations[marker] = {"applied":1,"policy":"PRIVATE_SERVER_POLICY","counts":counts}
         return True
 
+    def _apply_pass192_debug_p1_i5_workshop_seed(self, player: PlayerState) -> bool:
+        """One-shot source-bounded Workshop fixture for the anonymous QA account.
+
+        This only raises missing QA materials; it never advances Bookshelf/Cabinet
+        levels, creates research state, or replenishes materials after consumption.
+        """
+        if str(getattr(player, "account_uid", "") or "") != SANDBOX_UID:
+            return False
+        path = self.data_dir / "debug_guest_p1_i5_workshop_seed_pass192.json"
+        try:
+            payload = json.loads(path.read_text(encoding="utf-8"))
+        except Exception:
+            return False
+        if not isinstance(payload, dict):
+            return False
+        meta = payload.get("_meta") if isinstance(payload.get("_meta"), dict) else {}
+        marker = str(meta.get("migration_marker") or "pass192_debug_p1_i5_workshop_seed_v1")
+        state = player.persistence_state if isinstance(player.persistence_state, dict) else {}
+        if state is not player.persistence_state:
+            player.persistence_state = state
+        migrations = state.setdefault("migrations", {})
+        if not isinstance(migrations, dict):
+            migrations = {}; state["migrations"] = migrations
+        if migrations.get(marker):
+            return False
+        try:
+            magic_exp_target = max(0, int(payload.get("magic_exp_target", 0) or 0))
+        except (TypeError, ValueError):
+            return False
+        if magic_exp_target != 51390:
+            return False
+        changed = 0
+        if int(getattr(player, "magic_exp", 0) or 0) < magic_exp_target:
+            player.magic_exp = magic_exp_target; changed += 1
+        if not isinstance(player.backpack_items, list):
+            player.backpack_items = []
+        by_id = {}
+        for row in player.backpack_items:
+            if not isinstance(row, dict): continue
+            try: item_id = int(row.get("table_id", 0) or 0)
+            except (TypeError, ValueError): continue
+            if item_id > 0: by_id[item_id] = row
+        targets = {}
+        for raw in payload.get("inventory_targets") or []:
+            if not isinstance(raw, dict): continue
+            try:
+                item_id = int(raw.get("item_id", 0) or 0); target = int(raw.get("target_quantity", 0) or 0)
+            except (TypeError, ValueError): continue
+            if item_id <= 0 or target <= 0: continue
+            targets[item_id] = target
+        if targets != {140001001: 20}:
+            return False
+        limits = ItemStackLimitCatalog(self.data_dir)
+        for item_id, target in targets.items():
+            limit = limits.limit(item_id)
+            if limit is not None: target = min(target, int(limit))
+            row = by_id.get(item_id)
+            if row is None:
+                player.backpack_items.append({"table_id": item_id, "item_num": target, "time": 0}); changed += 1
+            else:
+                try: current = max(0, int(row.get("item_num", 0) or 0))
+                except (TypeError, ValueError): current = 0
+                if current < target:
+                    row["item_num"] = target; changed += 1
+        migrations[marker] = {
+            "applied": 1, "policy": "one_shot_sandbox_only_source_bounded_p1_i5_workshop_qa",
+            "magic_exp_target": magic_exp_target, "inventory_targets": {str(k): v for k,v in targets.items()},
+            "rows_or_resources_raised": changed,
+        }
+        return True
+
     def normalize_player(self, player: PlayerState, *, persist: bool) -> bool:
         changed = False
         if self._apply_pass72_debug_inventory_seed(player):
@@ -842,6 +1002,14 @@ class MultiUserDatabase:
         if self._apply_pass99_debug_qa_consumables_seed(player):
             changed = True
         if self._apply_pass141_debug_mid241_qa_seed(player):
+            changed = True
+        # Pass182 dev-only convenience runs after older broad QA seeds so the
+        # 199 Girl Gear Pack stacks end at the requested low quantity 7.
+        if self._apply_pass182_debug_girl_gear_pack_seed(player):
+            changed = True
+        # Pass192 P1-I5: one-shot sandbox materials for Bookshelf/Cabinet runtime
+        # reconciliation. This does not advance Workshop state or replenish use.
+        if self._apply_pass192_debug_p1_i5_workshop_seed(player):
             changed = True
         # Pass91: source SelfPlayer/VipRechargeWindow require a non-empty
         # one-based VIP1..VIP15 0/1 claim vector. The backend never implemented
@@ -897,6 +1065,10 @@ class MultiUserDatabase:
                 player.energy_time = 0
                 changed = True
         if maintenance.heroes.normalize():
+            changed = True
+        # Pass186 P1-I1: additive, source-valid reconciliation for existing
+        # Course/Album/Workshop wire state before P1 business handlers exist.
+        if maintenance.p1_foundation.normalize():
             changed = True
         # Pass166 H1: reconcile six-slot Hero refs, instance mirrors, allocator
         # cursors and canonical server-only horcrux_state at the durable load

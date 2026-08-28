@@ -95,16 +95,16 @@
       "source_evidence": "Pass102 source callback audit: successful response mutates authoritative client/server state; current route lacks durable ownership."
     },
     {
-      "backend_capability": "EXPLICIT_FAIL_CLOSED",
-      "domain": "hero_dynamic_card",
-      "enforcement": "BLOCK_PHASE1",
-      "firewall_fallback": "HTTP_409_MUTATION_CONTRACT_UNIMPLEMENTED",
+      "backend_capability": "DURABLE_MUTATION",
+      "domain": "white_album",
+      "enforcement": "ALLOW_DURABLE",
+      "firewall_fallback": "NONE",
       "mid": 72,
       "name": "ALBUM_PARTNER_UNLOCK",
       "required_capability": "DURABLE_MUTATION_OR_EXPLICIT_FAIL_CLOSED",
       "risk_tier": "A",
       "source_effect_class": "SERVER_MUTATION_COMMAND",
-      "source_evidence": "Pass102 source callback audit: successful response mutates authoritative client/server state; current route lacks durable ownership."
+      "source_evidence": "Pass187 P1-I2: effective WhiteAlbumWindow.lua MID72 success advances source-defined collect_quality_stage/collect_star_stage; backend now persists validated monotonic stages through UoW."
     },
     {
       "backend_capability": "EXPLICIT_FAIL_CLOSED",
@@ -220,16 +220,17 @@
       "source_evidence": "Task.lua sends explicit award-claim request; synthetic success would acknowledge an unowned claim."
     },
     {
-      "backend_capability": "EXPLICIT_FAIL_CLOSED",
+      "backend_capability": "DURABLE_MUTATION",
       "domain": "mission_item",
-      "enforcement": "BLOCK_PHASE1",
-      "firewall_fallback": "HTTP_409_MUTATION_CONTRACT_UNIMPLEMENTED",
+      "enforcement": "ALLOW_DURABLE",
+      "firewall_fallback": "NONE_DURABLE_OWNER_ACTIVE",
       "mid": 171,
       "name": "GET_AWAKE_ITEM",
+      "notes": "Stage G surgical fence retirement. Nonce-less repeated requests remain a documented protocol limitation; do not claim universal exactly-once semantics.",
       "required_capability": "DURABLE_MUTATION_OR_EXPLICIT_FAIL_CLOSED",
       "risk_tier": "A",
       "source_effect_class": "SERVER_MUTATION_COMMAND",
-      "source_evidence": "Pass102 source callback audit: successful response mutates authoritative client/server state; current route lacks durable ownership."
+      "source_evidence": "Pass212 Stage G release gate: MID171 stock callback removes one Wish Bottle locally and consumes response item_id/item_num; Pass206+ durable AwakeningMissionService settles one server Wish Bottle debit + one active ordinary intermediate credit atomically. Effective src_64 blacklist remains source-validated."
     },
     {
       "backend_capability": "EXPLICIT_FAIL_CLOSED",
@@ -948,11 +949,11 @@
       "firewall_fallback": "HTTP_409_MUTATION_CONTRACT_UNIMPLEMENTED",
       "mid": 819,
       "name": "PET_CAMPAIGN_FIGHT",
+      "notes": "Pass105: source-safe session entry is quarantined before battle/preflight success can advance the client.",
       "required_capability": "SESSION_AUTHORITY_OR_EXPLICIT_FAIL_CLOSED",
       "risk_tier": "A",
       "source_effect_class": "SESSION_START",
-      "source_evidence": "Pass102 source callback audit: successful response mutates authoritative client/server state; current route lacks durable ownership.",
-      "notes": "Pass105: source-safe session entry is quarantined before battle/preflight success can advance the client."
+      "source_evidence": "Pass102 source callback audit: successful response mutates authoritative client/server state; current route lacks durable ownership."
     },
     {
       "backend_capability": "SESSION_TERMINAL_PENDING",
@@ -1070,11 +1071,11 @@
       "firewall_fallback": "HTTP_409_MUTATION_CONTRACT_UNIMPLEMENTED",
       "mid": 2484,
       "name": "PEAK_START_FIGHT",
+      "notes": "Pass105: source-safe session entry is quarantined before battle/preflight success can advance the client.",
       "required_capability": "SESSION_AUTHORITY_OR_EXPLICIT_FAIL_CLOSED",
       "risk_tier": "A",
       "source_effect_class": "SESSION_START",
-      "source_evidence": "Pass102 source callback audit: successful response mutates authoritative client/server state; current route lacks durable ownership.",
-      "notes": "Pass105: source-safe session entry is quarantined before battle/preflight success can advance the client."
+      "source_evidence": "Pass102 source callback audit: successful response mutates authoritative client/server state; current route lacks durable ownership."
     },
     {
       "backend_capability": "EXPLICIT_FAIL_CLOSED",
@@ -1202,11 +1203,11 @@
   ],
   "counts": {
     "contracts": 95,
-    "phase1_block": 79,
+    "phase1_block": 78,
     "phase2_block": 8,
     "terminal_deferred": 8
   },
-  "pass": "104.0",
+  "pass": "187.0",
   "phase1_scope": "All Pass102/103 audited non-session unowned mutation commands are blocked before handler invocation. Session preflight/start and terminal settlement remain explicitly registered but deferred to later phases.",
   "policy": "NO_SYNTHETIC_OK_FOR_UNOWNED_SOURCE_MUTATION",
   "schema_version": 2

@@ -1,0 +1,39 @@
+{
+  "pass": "192.0",
+  "scope": "P1-I5 runtime reconciliation defects + Workshop QA enablement",
+  "result": "PASS_BOUNDED_NO_P2_CONTRADICTION",
+  "source_root": "app-assets/output/assets/src_64",
+  "source_file_count": 4370,
+  "source_archive_sha256": "89f0f830508b92e5fff6ad53c6a9dae961a14042dbfdf5649008efb8353f5608",
+  "source_facts": [
+    "SelfPlayer bootstrap consumes GET_STUDY_INFOS(2137) and Course:setStudyInfos initializes roomInfo.study_infos",
+    "ShopType.COURSE is 29 and Shop:onShopInfo_ unconditionally consumes shop_type/refresh_times/open_time/is_open/count_down/items/hot_hero/cost_stone/is_awarded",
+    "Course maximum total proficiency is 1680",
+    "BOOK_FRAGMENT FragmentMake hides quantity controls, blocks already-owned target book, and composes via MID83 target item_id",
+    "Introduction 130001001 composes from 140001001 x20 with zero Mana",
+    "40 of 54 Cabinet books expose ordinary fragment compose recipes in effective item.lua",
+    "Bookshelf levels 1..99 cumulatively consume 51390 Magic EXP(resource14) to reach level100"
+  ],
+  "runtime_observations": [
+    "initial Electives entry crashed because roomInfo.study_infos was nil before a server Course-room hydration",
+    "Course bookstore load crashed in Shop.lua because Pass190 shop response omitted source-consumed fields",
+    "stock client submitted a +50 Course proficiency item from 1650 while source max is 1680",
+    "Workshop reads loaded but mutation paths were unexercised due insufficient QA materials"
+  ],
+  "compatibility_policies": [
+    "terminal Course proficiency crossing consumes the whole submitted source item and caps at 1680",
+    "existing Course completed-study +20 points capped100 remains unchanged",
+    "existing Workshop cancellation proportional refund remains unchanged"
+  ],
+  "implementation_boundaries": [
+    "MID83 semantic expansion is restricted to source-enumerated Cabinet ordinary-book recipes",
+    "Workshop QA seed is one-shot anonymous sandbox only and does not mutate progression state",
+    "P2 special-equipment progression remains HTTP409 fail-closed"
+  ],
+  "unknowns": [
+    "exact original-server Course proficiency overflow response",
+    "exact original-server Workshop cancellation ordinary-resource refund formula",
+    "exact original-server Workshop timer materialization timing",
+    "exact original-server max_color numeric schedule"
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "_meta": {
+    "schema_version": 1,
+    "migration_marker": "pass192_debug_p1_i5_workshop_seed_v1",
+    "policy": "one_shot_sandbox_only_source_bounded_p1_i5_workshop_qa",
+    "source_archive_sha256": "89f0f830508b92e5fff6ad53c6a9dae961a14042dbfdf5649008efb8353f5608",
+    "effective_src64_root": "app-assets/output/assets/src_64",
+    "source_facts": [
+      "Bookshelf current-level rows 1..99 consume cumulative magic_exp(resource14)=51390 to reach source max level100",
+      "item.lua book130001001 composes from fragment140001001 x20",
+      "fragment140001001 reverse compose_item=130001001 item_num=20"
+    ]
+  },
+  "magic_exp_target": 51390,
+  "inventory_targets": [
+    {
+      "item_id": 140001001,
+      "target_quantity": 20
+    }
+  ]
+}

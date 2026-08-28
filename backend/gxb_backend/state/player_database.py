@@ -97,6 +97,11 @@ PLAYER_FIELD_NAMES = {field.name for field in fields(PlayerState)}
 # document (``player`` is explicitly included); ``*`` matches one dictionary
 # key such as a dynamic partner_id.
 CANONICAL_REPLACE_DICT_PATHS: tuple[tuple[str, ...], ...] = (
+    # Pass205 P2 Stage A: these are complete server-owned aggregates. Whole-
+    # dictionary replacement prevents v1 nested state/replay tombstones from
+    # being resurrected by the extension-preserving persistence merger.
+    ("player", "domains", "awakening_state"),
+    ("player", "domains", "occult_state"),
     ("player", "domains", "daily_consume_state", "counts"),
     ("player", "lobby", "mission_state", "daily_cache"),
     ("player", "heroes", "heroes", "*", "evo_attr_points"),
@@ -107,6 +112,12 @@ CANONICAL_REPLACE_DICT_PATHS: tuple[tuple[str, ...], ...] = (
     ("player", "domains", "horcrux_state", "trial", "active_battle"),
     ("player", "domains", "horcrux_state", "trial", "auto"),
     ("player", "domains", "horcrux_state", "trial", "last_auto_collection"),
+    # Pass186 P1-I1 complete server-owned containers must support authoritative
+    # empty/replace semantics without resurrecting stale extension children.
+    ("player", "domains", "white_album_state", "special_claims"),
+    ("player", "domains", "workshop_state", "book_info"),
+    ("player", "domains", "workshop_state", "cabinet_info", "cost_snapshot"),
+    ("player", "domains", "workshop_state", "building_jobs"),
 )
 
 

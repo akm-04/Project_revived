@@ -1,0 +1,50 @@
+{
+  "_meta": {
+    "format": "GXB Pass179 P0 Fumo restoration source facts",
+    "original_server_rounding": "UNKNOWN_CLIENT_SOURCE_CEILING",
+    "source": [
+      "src_64/data/tables/misc.lua: enchant_items + enchant_restore_param2..6",
+      "src_64/data/tables/item.lua: enchant material moneng values"
+    ],
+    "source_resolution": "effective_src64"
+  },
+  "materials": [
+    {
+      "enchant_value": 200,
+      "item_id": 50001007,
+      "ordinal": 0
+    },
+    {
+      "enchant_value": 60,
+      "item_id": 50001006,
+      "ordinal": 1
+    },
+    {
+      "enchant_value": 10,
+      "item_id": 50001003,
+      "ordinal": 2
+    }
+  ],
+  "quality_restore_fraction": {
+    "2": [
+      1,
+      1
+    ],
+    "3": [
+      3,
+      8
+    ],
+    "4": [
+      9,
+      50
+    ],
+    "5": [
+      9,
+      100
+    ],
+    "6": [
+      9,
+      200
+    ]
+  }
+}

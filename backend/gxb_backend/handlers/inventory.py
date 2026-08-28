@@ -38,7 +38,14 @@ class InventoryHandlers:
         return self.ctx.state.get_services().gift_opening.open(req)
 
     def compose_item(self, req: dict) -> dict:
-        return {"awards": []}
+        """MID83 provider-based composition through canonical settlement.
+
+        Cabinet keeps its one-owned-book semantics; P2 Awakening/Blood recipes
+        use the same source item recipe authority. Stack mutations are not
+        returned as generic awards because SelfPlayer.makeItem applies them
+        locally after success.
+        """
+        return self.ctx.state.get_services().item_composition.compose(req)
 
     def use_magic_items(self, req: dict) -> dict:
         """MID87: atomically consume Event Centre items and credit magic resources.

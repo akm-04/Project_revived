@@ -22,6 +22,10 @@ from gxb_backend.content.challenge_campaign_catalog import CHALLENGE_CAMPAIGN_TY
 from gxb_backend.content.super_campaign_catalog import SUPER_CAMPAIGN_TYPE, SUPER_FUNCTION_ID, SuperCampaignCatalog
 
 from .awakening_mission_service import AwakeningMissionService
+from .awakening_campaign_overlay_planner import (
+    AwakeningCampaignOverlayError, AwakeningCampaignOverlayPlanner,
+)
+from .awakening_campaign_objective_validator import AwakeningCampaignObjectiveValidator
 from .campaign_drop_planner import (
     CAMPAIGN_REPEAT_POLICY_ID,
     CAMPAIGN_REPEAT_POLICY_VERSION,
@@ -77,6 +81,8 @@ class WorldRepository:
         hero_progression: HeroProgressionRepository | None = None,
         missions: MissionRepository | None = None,
         awakening_missions: AwakeningMissionService | None = None,
+        awakening_campaign_overlay: AwakeningCampaignOverlayPlanner | None = None,
+        awakening_campaign_objectives: AwakeningCampaignObjectiveValidator | None = None,
         catalog: GameDataCatalog | None = None,
         rewards: RewardTransactionService | None = None,
         tutorial: TutorialMilestoneRepository | None = None,
@@ -101,6 +107,8 @@ class WorldRepository:
         self.hero_progression = hero_progression or HeroProgressionRepository(player, self.data_dir)
         self.missions = missions
         self.awakening_missions = awakening_missions
+        self.awakening_campaign_overlay = awakening_campaign_overlay
+        self.awakening_campaign_objectives = awakening_campaign_objectives
         self.catalog = catalog
         self.rewards = rewards
         self.tutorial = tutorial
@@ -713,6 +721,60 @@ class WorldRepository:
     def _session_formation(session: dict[str, Any]) -> str:
         return str(session.get("formation_snapshot") or session.get("formation") or "")
 
+    def _awakening_active_snapshots(self) -> tuple[dict[str, Any] | None, dict[str, Any] | None]:
+        if self.awakening_missions is None:
+            return None, None
+        return (
+            self.awakening_missions.active_snapshot(AwakeningMissionService.HERO),
+            self.awakening_missions.active_snapshot(AwakeningMissionService.HERO_TWICE),
+        )
+
+    def _resolve_awakening_campaign_overlay(
+        self, *, campaign_id: int, campaign_type: int, ordinary_wire_mission: int = 0
+    ):
+        if self.awakening_campaign_overlay is None or self.awakening_missions is None:
+            return None
+        ordinary, blood = self._awakening_active_snapshots()
+        return self.awakening_campaign_overlay.resolve(
+            campaign_id=campaign_id, wire_campaign_type=campaign_type,
+            ordinary_active=ordinary, blood_active=blood,
+            ordinary_wire_mission=ordinary_wire_mission,
+        )
+
+    @staticmethod
+    def _session_awakening_overlay_awards(session: dict[str, Any]) -> list[dict[str, int]]:
+        overlay = session.get("awakening_overlay") if isinstance(session, dict) else None
+        rows = overlay.get("canonical_awards") if isinstance(overlay, dict) else None
+        if not isinstance(rows, list):
+            return []
+        out: list[dict[str, int]] = []
+        for row in rows:
+            if not isinstance(row, dict):
+                continue
+            try:
+                item_id = int(row.get("item_id", 0) or 0); item_num = int(row.get("item_num", 0) or 0)
+            except (TypeError, ValueError):
+                continue
+            if item_id > 0 and item_num > 0:
+                out.append({"item_id": item_id, "item_num": item_num})
+        return out
+
+    def _freeze_awakening_campaign_objective(
+        self, *, request: dict[str, Any], campaign_id: int, campaign_type: int
+    ) -> dict[str, Any] | None:
+        if self.awakening_missions is None or self.awakening_campaign_objectives is None:
+            return None
+        active = self.awakening_missions.active_snapshot(AwakeningMissionService.HERO)
+        if not active:
+            return None
+        row = self.awakening_missions.mission_source_row(
+            active.get("mission_id", 0), AwakeningMissionService.HERO
+        )
+        return self.awakening_campaign_objectives.freeze_context(
+            active=active, mission_row=row, campaign_id=campaign_id,
+            campaign_type=campaign_type, request=request,
+        )
+
     def _session_reward_value(self, session: dict[str, Any], key: str) -> int:
         reward_plan = session.get("reward_plan")
         if isinstance(reward_plan, dict) and key in reward_plan:
@@ -957,6 +1019,20 @@ class WorldRepository:
                 "partner_exp": 0,
                 "player_exp_gain": 0,
             }
+        awakening_overlay: dict[str, Any] = {}
+        awakening_objective = None
+        if campaign_type in (1, 2):
+            resolution = self._resolve_awakening_campaign_overlay(
+                campaign_id=campaign_id, campaign_type=campaign_type
+            )
+            if resolution is not None and self.awakening_campaign_overlay is not None:
+                overlay_plan = self.awakening_campaign_overlay.plan(resolution)
+                awakening_overlay = overlay_plan.persisted()
+                staged_items.extend(overlay_plan.battle_items())
+            awakening_objective = self._freeze_awakening_campaign_objective(
+                request=req, campaign_id=campaign_id, campaign_type=campaign_type
+            )
+
         stage_response = {
             "battle_id": 1,
             "report": {},
@@ -976,6 +1052,8 @@ class WorldRepository:
             # committed by MID114; the planner is never invoked at result time.
             "items": copy.deepcopy(staged_items),
             "drop_plan": copy.deepcopy(drop_plan_persisted),
+            "awakening_overlay": copy.deepcopy(awakening_overlay),
+            "awakening_objective": copy.deepcopy(awakening_objective),
             "reward_plan": copy.deepcopy(reward_plan),
             "stage_response": copy.deepcopy(stage_response),
         }
@@ -1191,6 +1269,7 @@ class WorldRepository:
         #   source-proven for the currently mapped early Campaign slice, so the
         #   shape-preserving wire value remains an empty list.
         committed_drop_items: list[dict[str, int]] = []
+        awakening_drop_items = self._session_awakening_overlay_awards(pending) if has_pending else []
         result_only_items: list[dict[str, int]] = []
         economy_projection: dict[str, int] = {}
         if has_pending and campaign_type in (1, 2, CHALLENGE_CAMPAIGN_TYPE):
@@ -1203,8 +1282,13 @@ class WorldRepository:
         # v0.8.2 commits source-certain rewards only when there is a matching
         # MID113 session. This prevents an arbitrary/retried MID114 from minting
         # Mana/EXP without a battle. General repeat item RNG remains deferred.
-        if star > 0 and not was_cleared and has_pending:
-            committed_drop_items = staged_items if isinstance(staged_items, list) else []
+        if star > 0 and has_pending:
+            # Base MID113 source drops remain first-clear-only.  Stage-D
+            # Awakening/Blood acquisition occurrences are a separate frozen
+            # overlay and must settle on every successful farming battle.
+            if not was_cleared:
+                committed_drop_items.extend(staged_items if isinstance(staged_items, list) else [])
+            committed_drop_items.extend(awakening_drop_items)
 
         if star > 0 and has_pending and campaign_type in (1, 2):
             star_crystal = self._session_reward_value(pending, "star_gift") if first_three_star else 0
@@ -1293,8 +1377,28 @@ class WorldRepository:
             )
 
         awake_delta: dict[str, Any] = {}
-        if self.awakening_missions is not None:
-            awake_delta = self.awakening_missions.record_campaign_result(req)
+        awakening_objective_result: dict[str, Any] = {}
+        if (
+            star > 0 and has_pending and self.awakening_missions is not None
+            and self.awakening_campaign_objectives is not None
+        ):
+            active_awake = self.awakening_missions.active_snapshot(AwakeningMissionService.HERO)
+            source_row = self.awakening_missions.mission_source_row(
+                (active_awake or {}).get("mission_id", 0), AwakeningMissionService.HERO
+            )
+            decision = self.awakening_campaign_objectives.validate(
+                request=req, session=pending, active=active_awake, mission_row=source_row
+            )
+            awakening_objective_result = {
+                "allowed": bool(decision.allowed),
+                "reason": str(decision.reason),
+                "evidence_class": str(decision.evidence_class),
+            }
+            if decision.allowed and active_awake is not None:
+                awake_delta = self.awakening_missions.complete_campaign_objective(
+                    mission_id=active_awake.get("mission_id", 0),
+                    generation=active_awake.get("generation", 0),
+                )
 
         response: dict[str, Any] = {
             "is_win": 1 if star > 0 else 0,
@@ -1333,6 +1437,9 @@ class WorldRepository:
                 "star": star,
                 "items": copy.deepcopy(pending.get("items") or []),
                 "drop_plan": copy.deepcopy(pending.get("drop_plan") or {}),
+                "awakening_overlay": copy.deepcopy(pending.get("awakening_overlay") or {}),
+                "awakening_objective": copy.deepcopy(pending.get("awakening_objective")),
+                "awakening_objective_result": copy.deepcopy(awakening_objective_result),
                 "reward_plan": copy.deepcopy(pending.get("reward_plan") or {
                     "mana_gain": self._session_reward_value(pending, "mana_gain"),
                     "star_gift": self._session_reward_value(pending, "star_gift"),
@@ -1547,6 +1654,7 @@ class WorldRepository:
         source_pool_id: int,
         repeat_policy_id: str,
         repeat_policy_version: int,
+        awakening_overlay_audit: dict[str, Any] | None = None,
     ) -> None:
         if self.uow is None:
             raise RuntimeError("MID117 receipt staging requires PlayerUnitOfWork")
@@ -1563,6 +1671,7 @@ class WorldRepository:
                 source_catalog_sha256=self._campaign_drop_source_sha256,
                 repeat_policy_id=repeat_policy_id,
                 repeat_policy_version=repeat_policy_version,
+                awakening_overlay_audit=awakening_overlay_audit,
             ),
             retention_policy=MID117_RETENTION_POLICY,
         )
@@ -1761,6 +1870,7 @@ class WorldRepository:
             or count != identity.sweep_num
             or sweep_type != identity.sweep_type
             or campaign_type != identity.campaign_type
+            or self._int(req.get("awake_mission"), 0) != identity.awake_mission
         ):
             raise Mid117OperationIdentityError("MID117 normalized request tuple drift")
         # src_64 enums.lua: ITEM_SWEEP=1, CRYSTAL_SWEEP=2.
@@ -1896,6 +2006,12 @@ class WorldRepository:
         except (MutationSettlementError, StackInventoryError, InsufficientScalarBalance) as exc:
             return self._blocked_mid117(str(exc), sweep_num=count, campaign=row)
 
+        awakening_resolution = self._resolve_awakening_campaign_overlay(
+            campaign_id=cid,
+            campaign_type=campaign_type,
+            ordinary_wire_mission=identity.awake_mission,
+        )
+
         if self.drop_planner is None:
             raise RuntimeError("campaign_repeat_planner_unavailable")
         repeat_plans = [
@@ -1920,11 +2036,35 @@ class WorldRepository:
         ):
             raise RuntimeError("campaign_repeat_policy_identity_drift")
 
+        awakening_plans = []
+        if (
+            awakening_resolution is not None
+            and self.awakening_campaign_overlay is not None
+            and awakening_resolution.resolved
+        ):
+            awakening_plans = [
+                self.awakening_campaign_overlay.plan(awakening_resolution)
+                for _ in range(count)
+            ]
+
         item_rows: list[list[dict[str, int]]] = []
-        for plan in repeat_plans:
+        for index, plan in enumerate(repeat_plans):
             rows = [dict(award) for award in deterministic_per_sweep]
             rows.extend(dict(award) for award in plan.canonical_awards)
+            if awakening_plans:
+                rows.extend(dict(award) for award in awakening_plans[index].canonical_awards)
             item_rows.append(rows)
+
+        awakening_overlay_audit: dict[str, Any] | None = None
+        if awakening_plans and awakening_resolution is not None:
+            awakening_overlay_audit = awakening_resolution.audit()
+            awakening_overlay_audit["sweeps"] = [
+                {
+                    "occurrences": [dict(row) for row in plan.occurrences],
+                    "canonical_awards": [dict(row) for row in plan.canonical_awards],
+                }
+                for plan in awakening_plans
+            ]
 
         operations = list(cost_operations)
         for award in self._aggregate_sweep_awards(item_rows):
@@ -1938,7 +2078,7 @@ class WorldRepository:
             origin=MutationOrigin(
                 domain="campaign", operation="sweep_campaign", protocol_mid=117,
                 source_table="data/tables/campaign.lua+campaign_dropbox.lua", source_id=cid,
-                field_path="energy_cost+sweep_reward+repeat_dropbox_id",
+                field_path="energy_cost+sweep_reward+repeat_dropbox_id+awakening_dropbox",
             ),
             actor=ActorRef(
                 player_id=str(self.player.player_id),
@@ -1963,6 +2103,7 @@ class WorldRepository:
                 "repeat_source_pool_id": source_pool_id,
                 "sweep_economy_policy_id": economy_plan.policy_id,
                 "sweep_economy_policy_version": economy_plan.policy_version,
+                "awakening_campaign_overlay": copy.deepcopy(awakening_overlay_audit),
             },
         )
         try:
@@ -2009,6 +2150,7 @@ class WorldRepository:
             source_pool_id=source_pool_id,
             repeat_policy_id=repeat_policy_id,
             repeat_policy_version=repeat_policy_version,
+            awakening_overlay_audit=awakening_overlay_audit,
         )
         self.uow.mark_changed()
         return response

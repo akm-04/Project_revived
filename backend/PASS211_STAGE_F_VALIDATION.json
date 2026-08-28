@@ -1,0 +1,23 @@
+{
+  "pass": "211.0",
+  "stage": "P2-F",
+  "status": "PASS",
+  "stage_f_selftest": "PASS_7_OF_7",
+  "stage_e_regression": "PASS_7_OF_7",
+  "stage_d_regression": "PASS_11_OF_11",
+  "stage_c_regression": "PASS",
+  "stage_b_regression": "PASS",
+  "source_verifiers_pass205_206_207_209_210_211": "PASS",
+  "architecture_hygiene_pass129": "PASS_5_OF_5",
+  "challenge_pass122": "PASS_5_OF_5",
+  "campaign_exp_mana_pass131": "PASS_10_OF_10",
+  "effective_src64_files": 4370,
+  "occult_chapters": 6,
+  "ordinary_awakening_occult_routes": 22,
+  "ticket_energy_threshold": 3000,
+  "ticket_cap": 2,
+  "deterministic_fragment_quantity": 1,
+  "raw_awaken_nums_effective_callers": 0,
+  "raw_sweep_reward_rate": 0.6,
+  "broader_p2_release_fenced": true
+}

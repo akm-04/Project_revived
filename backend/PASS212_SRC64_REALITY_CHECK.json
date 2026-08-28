@@ -1,0 +1,44 @@
+{
+  "effective_src64": "/mnt/data/pass212_work/assets/app-assets/output/assets/src_64",
+  "effective_src64_file_count": 4370,
+  "evidence": {
+    "event_entitlements": "COMPATIBILITY_POLICY",
+    "giveup_full_stack": "SOURCE_FACT",
+    "mid171_callback": "SOURCE_FACT",
+    "nonce_less_mid171_exactly_once": "PROTOCOL_LIMIT",
+    "occult_fragment_yield": "COMPATIBILITY_POLICY"
+  },
+  "fence_reality": {
+    "full_occult": "PRESERVE_MINIMAL_ONLY",
+    "mid171": "ALLOW_DURABLE",
+    "mid51_mid57": "ACTIVE_SOURCE_CALLERS_NO_P2_FIREWALL",
+    "pet_awake": "PRESERVE_FAIL_CLOSED"
+  },
+  "giveup": {
+    "no_list_blood": 7,
+    "no_list_ordinary": 12,
+    "source_anomalies": 4
+  },
+  "pass": "212.0",
+  "route_census": {
+    "blood": 81,
+    "blood_campaign": 74,
+    "blood_event": 7,
+    "ordinary": 164,
+    "ordinary_campaign": 131,
+    "ordinary_event": 11,
+    "ordinary_occult": 22
+  },
+  "source_hashes": {
+    "app/common/network/mid.lua": "026a20b29d97624979777a68c64c749254031604057ff42aa8f8254c3e35b5af",
+    "app/model/Occult.lua": "748c6b2606fdbd0ee434f87b6761a8391df9c5236ccee110e302281651ab2b47",
+    "app/model/SelfPlayer.lua": "163d5893c9522ada412c2b9c4748a80757660fccdf03c8f72cb6edf0838b8eb4",
+    "app/model/Task.lua": "d454ae7cb1e28d95d366aae30ba88d83432c974415f263991af6c4190d54bee5",
+    "app/windows/BackpackWindow.lua": "48b18493fed4186541fc989a8ef60d6338d444c4e8a0fc986903a57e52ff19c1",
+    "app/windows/ItemComposeWindow.lua": "ec5c0d3eb769b512e3bfa98db2f3c41a88c9c40d8a2eb85f146da53acf6b092e",
+    "app/windows/OccultWindow.lua": "b26e7a420045e5e2ad3ebf1c7464fe312ce10b9813199367dd6b517f2a2e78d7",
+    "app/windows/TaskAwakeCell.lua": "ff133e4afc528f2c5a31e2ec51a88f3ac9e1d3ab6b137f8ddbdff3dec7671ff6"
+  },
+  "stage": "P2_STAGE_G_FINAL_REALITY",
+  "status": "PASS"
+}

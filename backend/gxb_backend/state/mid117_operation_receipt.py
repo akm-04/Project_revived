@@ -135,6 +135,7 @@ def build_mid117_replay_payload(
     source_catalog_sha256: str,
     repeat_policy_id: str,
     repeat_policy_version: int,
+    awakening_overlay_audit: Mapping[str, Any] | None = None,
 ) -> dict[str, Any]:
     if not isinstance(response, Mapping):
         raise ValueError("MID117 committed response must be a mapping")
@@ -173,6 +174,17 @@ def build_mid117_replay_payload(
     if not policy_id:
         raise ValueError("repeat_policy_id must be nonempty")
 
+    audit: dict[str, Any] = {
+        "repeat_policy_id": policy_id,
+        "repeat_policy_version": policy_version,
+        "source_catalog_sha256": catalog_hash,
+        "source_pool_id": pool_id,
+    }
+    if awakening_overlay_audit is not None:
+        if not isinstance(awakening_overlay_audit, Mapping):
+            raise ValueError("awakening_overlay_audit must be a mapping")
+        audit["awakening_campaign_overlay"] = copy.deepcopy(dict(awakening_overlay_audit))
+
     return {
         "schema_version": REPLAY_SCHEMA_VERSION,
         "protocol_mid": PROTOCOL_MID,
@@ -190,12 +202,7 @@ def build_mid117_replay_payload(
             "trial": isinstance(response.get("trial"), Mapping),
             "challenge": isinstance(response.get("challenge"), Mapping),
         },
-        "audit": {
-            "repeat_policy_id": policy_id,
-            "repeat_policy_version": policy_version,
-            "source_catalog_sha256": catalog_hash,
-            "source_pool_id": pool_id,
-        },
+        "audit": audit,
     }
 
 
@@ -259,4 +266,24 @@ def validate_mid117_replay_payload(
         raise ValueError("MID117 receipt source_pool_id is invalid")
     if not re.fullmatch(r"[0-9a-f]{64}", str(audit.get("source_catalog_sha256") or "")):
         raise ValueError("MID117 receipt source_catalog_sha256 is invalid")
+    overlay = audit.get("awakening_campaign_overlay")
+    if overlay is not None:
+        if not isinstance(overlay, dict):
+            raise ValueError("MID117 receipt Awakening overlay audit is invalid")
+        if int(overlay.get("schema_version", 0) or 0) != 1:
+            raise ValueError("MID117 receipt Awakening overlay schema is invalid")
+        if not str(overlay.get("policy_id") or "").strip():
+            raise ValueError("MID117 receipt Awakening overlay policy is missing")
+        if int(overlay.get("policy_version", 0) or 0) <= 0:
+            raise ValueError("MID117 receipt Awakening overlay policy version is invalid")
+        if int(overlay.get("rate_base", 0) or 0) <= 0:
+            raise ValueError("MID117 receipt Awakening overlay rate base is invalid")
+        resolved = overlay.get("resolved")
+        sweeps = overlay.get("sweeps")
+        if not isinstance(resolved, list) or any(not isinstance(row, dict) for row in resolved):
+            raise ValueError("MID117 receipt Awakening overlay resolution is invalid")
+        if not isinstance(sweeps, list) or len(sweeps) != identity.sweep_num:
+            raise ValueError("MID117 receipt Awakening overlay sweeps are invalid")
+        if any(not isinstance(row, dict) for row in sweeps):
+            raise ValueError("MID117 receipt Awakening overlay sweep audit is invalid")
     return copy.deepcopy(payload)

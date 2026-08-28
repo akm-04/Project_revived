@@ -228,6 +228,12 @@ class PlayerState:
     # inventory.spirit_list; Spirit Energy and Hero equipment keep their existing
     # canonical owners. JsonPlayerDatabase persists this under player.domains.
     horcrux_state: dict[str, Any] = field(default_factory=dict)
+    # Pass186 P1-I1 additive server-only state. Normal White Album stages,
+    # Course arrays/study rooms, Event Centre buildings and Hero Workshop
+    # projections keep their existing canonical fields; these slices exist only
+    # for source state that had no prior durable home.
+    white_album_state: dict[str, Any] = field(default_factory=dict)
+    workshop_state: dict[str, Any] = field(default_factory=dict)
 
     library_infos: dict[str, Any] = field(default_factory=dict)
     library_talk_infos: dict[str, Any] = field(default_factory=dict)
@@ -254,6 +260,9 @@ class PlayerState:
     # Pass74 dedicated cross-domain task ownership. These remain server-only
     # persistence fields and are not projected in player_info.
     awakening_state: dict[str, Any] = field(default_factory=dict)
+    # Pass205 Stage A reserves the canonical future Sorcery War/Occult aggregate.
+    # No Occult gameplay behavior is enabled until the later authorized stage.
+    occult_state: dict[str, Any] = field(default_factory=dict)
     daily_consume_state: dict[str, Any] = field(default_factory=dict)
     # Pass79 canonical 05:00 GMT+8 day marker + rollover audit. This is
     # server-only durable control state and is never projected in player_info.
@@ -274,7 +283,7 @@ class PlayerState:
     tea_talk_info: dict[str, Any] = field(default_factory=dict)
     offline_info: dict[str, Any] = field(default_factory=dict)
     class_info: dict[str, Any] = field(default_factory=dict)
-    study_infos: dict[str, Any] = field(default_factory=dict)
+    study_infos: list[dict[str, Any]] = field(default_factory=list)
     gift_box_info: dict[str, Any] = field(default_factory=dict)
     adventure_list: list[dict[str, Any]] = field(default_factory=list)
     hero_recommend_scores: dict[str, Any] = field(default_factory=dict)
@@ -679,10 +688,25 @@ class PlayerState:
         }
 
     def shop_payload(self, shop_type: Any = None) -> dict[str, Any]:
-        key = str(shop_type if shop_type is not None else 0)
+        try:
+            numeric_type = int(shop_type if shop_type is not None else 0)
+        except (TypeError, ValueError):
+            numeric_type = 0
+        key = str(numeric_type)
+        items = self.shops.get(key, [])
+        # Effective Shop:onShopInfo_ indexes these fields unconditionally. Keep
+        # legacy aliases too because older backend surfaces consume list/statuses.
         return {
-            "items": self.shops.get(key, []),
-            "list": self.shops.get(key, []),
+            "shop_type": numeric_type,
+            "refresh_times": 0,
+            "open_time": 0,
+            "is_open": 1,
+            "count_down": 0,
+            "items": items,
+            "hot_hero": 0,
+            "cost_stone": 0,
+            "is_awarded": 0,
+            "list": items,
             "statuses": self.shop_statuses,
             "refresh_time": self.now() + 3600,
         }
@@ -841,10 +865,13 @@ class PlayerState:
         return {"class_id": 0, "students": [], **self.class_info}
 
     def study_payload(self) -> dict[str, Any]:
-        return {"infos": {}, **self.study_infos}
+        # Effective Course:setStudyInfos() consumes response.study_infos.
+        # Pass186 normalizes legacy dict/bootstrap shapes to the canonical list.
+        rows = self.study_infos if isinstance(self.study_infos, list) else []
+        return {"study_infos": rows}
 
     def gift_box_payload(self) -> dict[str, Any]:
-        return {"infos": {}, "list": [], **self.gift_box_info}
+        return {"is_has_gift": 0, "infos": {}, "list": [], **self.gift_box_info}
 
     def adventure_payload(self) -> dict[str, Any]:
         # AdventureEvent:initAdventureEventInfos() indexes adventure_list.list.
