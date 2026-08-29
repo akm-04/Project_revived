@@ -1,0 +1,14 @@
+{
+  "pass": "227.0",
+  "compare_to": "Pass225 v0.34.0",
+  "gxb_backend_python_files": 202,
+  "byte_identical": 200,
+  "different": [
+    "state/awakening_mission_service.py",
+    "version.py"
+  ],
+  "expected": [
+    "state/awakening_mission_service.py",
+    "version.py"
+  ]
+}

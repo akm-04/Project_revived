@@ -64,6 +64,26 @@ def classify_legacy_line(line: str) -> str:
     return "basic"
 
 
+def next_server_log_path(runtime_log_dir: Path) -> Path:
+    """Return the first unused human-console transcript path.
+
+    The first backend start uses ``server.txt``.  Later starts preserve prior
+    transcripts as ``server1.txt``, ``server2.txt``, ... rather than opening
+    the canonical name with truncation.
+    """
+    root = Path(runtime_log_dir)
+    root.mkdir(parents=True, exist_ok=True)
+    base = root / "server.txt"
+    if not base.exists():
+        return base
+    index = 1
+    while True:
+        candidate = root / f"server{index}.txt"
+        if not candidate.exists():
+            return candidate
+        index += 1
+
+
 class ConsoleRuntime:
     def __init__(self, *, verbosity: int, log_path: Path, stdout: TextIO, stderr: TextIO) -> None:
         if verbosity not in (1, 2, 3, 4):
@@ -73,7 +93,7 @@ class ConsoleRuntime:
         self.log_path.parent.mkdir(parents=True, exist_ok=True)
         self._stdout = stdout
         self._stderr = stderr
-        self._log = self.log_path.open("w", encoding="utf-8", buffering=1)
+        self._log = self.log_path.open("x", encoding="utf-8", buffering=1)
         self._lock = threading.RLock()
 
     def enabled(self, category: str) -> bool:
@@ -152,7 +172,7 @@ def configure_console(*, runtime_log_dir: Path, verbosity: int) -> ConsoleRuntim
         return _runtime
     runtime = ConsoleRuntime(
         verbosity=verbosity,
-        log_path=Path(runtime_log_dir) / "server.txt",
+        log_path=next_server_log_path(Path(runtime_log_dir)),
         stdout=sys.stdout,
         stderr=sys.stderr,
     )

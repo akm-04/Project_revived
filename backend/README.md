@@ -209,3 +209,8 @@ Pass171 removes `spirit_item` from ordinary owned-Hero persistence and MID49 pro
 ## Pass225 operator logging
 
 Run `python3 server.py`. Console output is automatically captured in `runtime_logs/server.txt`. Set `DEBUG_VERBOSE` near the top of `server.py` (1 basic/errors, 2 + window probes, 3 + successful resource HTTP, 4 all), or override once with `--debug-verbose`. Structured JSONL logs are never filtered. See `docs/OPERATOR_LOGGING.md`.
+
+
+## Pass227 Blood MID867 wire reconciliation
+
+Pass227 is a server-only compatibility correction based on clean stock-client runtime evidence. Blood MID867 now accepts the stock empty-Lua-table wire encoding `npc_ids={}` and the prior semantic-empty `[]` characterization, while still rejecting missing/null/scalar/nonempty values. The rule is scoped to Blood Awakening; ordinary Incubus shares MID867 and is not globally normalized. OTA remains `1.631.20`.

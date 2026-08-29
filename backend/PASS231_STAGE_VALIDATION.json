@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "pass": "231.0",
+  "classification": "BOUNDED_RUNTIME_RECONCILIATION_STATIC_VALIDATED_CLIENT_SMOKE_PENDING",
+  "checks": [
+    {"id":"BACKEND_COMPILE","status":"PASS","detail":"python compileall succeeded for backend/server and Pass230/Pass231 selftests."},
+    {"id":"PASS230_CLEANUP_SELFTEST","status":"PASS","detail":"sandbox-only one-shot 574-item P2 cleanup preserved exactly from Pass230."},
+    {"id":"PASS227_BLOOD_MID867_CONTROL","status":"PASS","detail":"stock npc_ids={} and compatibility [] accepted; malformed/nonempty rejected; terminal MID161 stage3 passes."},
+    {"id":"PASS231_FORWARD_POPUP_REVERT","status":"PASS","detail":"OTA 1.631.22 contains 146 accepted Pass227 payload entries byte-for-byte; both TaskAwakeCell ABIs are Pass227 hash and finishHeroTwiceAwake has no common_alert."},
+    {"id":"DEBUG_EVENT","status":"PASS_WITH_PRESENTATION_DEFECT_DIAGNOSED","detail":"KM-Moe ordinary+Blood core lifecycle clean; rejected Blood popup attributable to stale client OTA1.631.21."},
+    {"id":"DEBUG_ODIN","status":"PASS","detail":"Odin ordinary+Blood core lifecycle clean through MID867 npc_ids={} and terminal MID161 stage3."},
+    {"id":"DEBUG_OCCULT","status":"FENCED_DEFERRED","detail":"MID2362 info succeeds; stock/stub client did not issue MID2385 because Sorcery War Scroll requirement blocked raid."}
+  ],
+  "runtime_gate": "Install corrective OTA1.631.22, verify popup absent, then continue Aquaris/Nikita Campaign+Blood and Give-Up edge smoke."
+}

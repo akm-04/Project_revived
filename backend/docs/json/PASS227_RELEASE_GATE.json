@@ -1,0 +1,17 @@
+{
+  "pass": "227.0",
+  "backend_version": "0.35.0",
+  "ota": "1.631.20",
+  "status": "PASS_STATIC_RUNTIME_SMOKE_PENDING",
+  "dedicated_wire_selftest": true,
+  "p2_stage_c": true,
+  "p2_stage_d": true,
+  "p2_stage_e": true,
+  "p2_stage_f": true,
+  "p2_stage_g": true,
+  "architecture_hygiene": true,
+  "pass225_client_logging_gate": true,
+  "pass224_historical_gate": "EXPECTED_FAIL_ONLY_OTA_VERSION_ASSERTION_1.631.19_SUPERSEDED",
+  "client_delta": false,
+  "resource_delta": false
+}

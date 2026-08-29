@@ -1,0 +1,28 @@
+{
+  "pass": "226.0",
+  "status": "RESEARCH_ONLY_BLOOD_MID867_WIRE_SHAPE_IDENTIFIED",
+  "backend_authority": "gxb-backend-v0.34.0-pass225.0.zip",
+  "ota": "1.631.20",
+  "debug_sha256": "721426a87de739a12d1a5d216c75e673fb6251cd9e45929f626fffcff77fa3ad",
+  "ordinary_awakening": "RUNTIME_ACCEPTED",
+  "blood_stage1_gear": "RUNTIME_ACCEPTED",
+  "blood_stock_selector": "RUNTIME_ACCEPTED",
+  "blood_battle": "RUNTIME_ACCEPTED_TWICE",
+  "first_mid867": {
+    "twice_awake_mission": 2200002,
+    "incubus_id": 2200002,
+    "num": 20,
+    "npc_ids_wire": {},
+    "response": {"error_code": 1, "msg": "blood_awake_terminal_npc_mismatch"}
+  },
+  "second_mid867": {
+    "twice_awake_mission": 2200002,
+    "incubus_id": 2200002,
+    "num": 20,
+    "npc_ids_wire": {},
+    "response": {"error_code": 1, "msg": "blood_awake_terminal_npc_mismatch"}
+  },
+  "post_result_task": {"table_id": 2200002, "is_complete": 0, "count": 0},
+  "root_cause": "Pass210 server validator requires Python list [], while stock Lua cjson emits its empty deadHeros_ table as JSON object {}.",
+  "implementation": "NONE"
+}

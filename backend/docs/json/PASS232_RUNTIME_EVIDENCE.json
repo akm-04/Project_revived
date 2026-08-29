@@ -1,0 +1,30 @@
+{
+  "pass": "232.0",
+  "timestamp": "2026-08-29T16:41:51+06:00",
+  "status": "P2_EDGE_SMOKE_REVIEWED_BOUNDED_RECONCILIATION",
+  "debug_bundles": {
+    "nikita-normal_debug.zip": {
+      "sha256": "c784ba1d465fb46f58eb1f2d21e70372ed98c02a93d412eb8aca392b39f89c41",
+      "result": "PASS_WITH_NONBLOCKING_CLIENT_ERRORS"
+    },
+    "kingMing-stress_debug.zip": {
+      "sha256": "9034a5bf2946d818e3b430dc93a28e1514a78229f1f326d12d08e6dbcffd8dc2",
+      "result": "EDGE_BUG_REPRODUCED_KONGMING_MISSING_ENTITLEMENT_AFTER_SALE"
+    }
+  },
+  "runtime_observed": [
+    "Nikita ordinary Awakening completed from stage1 gear through terminal ordinary claim.",
+    "Nikita Blood Awakening completed MID54 -> MID161 stage2 -> MID866 -> MID867 npc_ids={} num=20 -> terminal MID161 stage3.",
+    "Give Up/reopen/relog task state behaved coherently across repeated ordinary mission switching.",
+    "KongMing mission 1144001 first open returned extra_drops_ 50001397 x1; after Give Up + MID82 sale of 50001397, later reopen returned no extra_drops_, stranding event-route progression."
+  ],
+  "nonblocking_client_observations": [
+    "ItemComposeWindow.lua:388 attempt to compare number with nil during one Blood compose interaction; subsequent compose/equip succeeded.",
+    "SelfPlayer.lua:4643 checkPracticeRedMark last_time=nil repeated known unrelated client error.",
+    "One MID83 50005001 error_code=1 occurred after an earlier successful 50005001 compose; not a lifecycle failure.",
+    "Intermittent long loading popup remains client-side/residual UX noise in stress sequence; no corresponding Awakening transport failure established."
+  ],
+  "source_fact": "Current source classifies KongMing 1144001 as ordinary event/no-navigation with intermediate 50001397 and exclusive gear 20001278.",
+  "compatibility_policy": "On new activation generation, a LIVE event ledger with neither intermediate nor derived exclusive gear owned/equipped is treated as stale player-visible entitlement state and restores exactly one intermediate.",
+  "occult": "Still fenced/deferred; no new MID2385 runtime evidence."
+}

@@ -142,16 +142,32 @@ class AwakeningMissionService:
     def _event_activation_grant(self, *, awake_type: int, mission_id: int, generation: int) -> tuple[list[Any], dict[str, Any] | None]:
         policy=self.compatibility.event(awake_type,mission_id)
         if policy is None:return [],None
-        item_id=self._int(policy.get("intermediate_item")); ent=self.state.event_entitlement(awake_type,mission_id)
-        should_grant=ent is None or str(ent.get("status") or "")=="RESTORABLE"
+        item_id=self._int(policy.get("intermediate_item")); gear_id=self._int(policy.get("exclusive_gear_item"))
+        ent=self.state.event_entitlement(awake_type,mission_id)
+        status=str((ent or {}).get("status") or "")
+        # EOL compatibility recovery: a LIVE ledger row must not strand a player
+        # after the one granted event intermediate was externally disposed of.
+        # Regrant only when neither the intermediate nor its derived exclusive
+        # gear is currently owned/equipped, so reopening cannot accumulate live
+        # copies.  Odin's source-Give-Up restoration remains a separate explicit
+        # RESTORABLE path.
+        hero=self._hero_by_table(self._int(policy.get("origin_table_id"),0))
+        equipped=any(self._int(v,0)==gear_id for v in ((hero or {}).get("equips") or [])) if gear_id>0 else False
+        missing_live_entitlement=(
+            isinstance(ent,dict) and status=="LIVE" and item_id>0
+            and self.inventory.get_item_num(item_id)<=0
+            and (gear_id<=0 or (self.inventory.get_item_num(gear_id)<=0 and not equipped))
+        )
+        should_grant=ent is None or status=="RESTORABLE" or missing_live_entitlement
         if not should_grant:return [],None
         prior_restores=self._int(ent.get("restoration_count"),0) if isinstance(ent,dict) else 0
         record={
             "mission_id":mission_id,"awake_type":awake_type,"intermediate_item":item_id,
-            "exclusive_gear_item":self._int(policy.get("exclusive_gear_item")),
+            "exclusive_gear_item":gear_id,
             "status":"LIVE","first_generation":self._int((ent or {}).get("first_generation"),generation),
             "last_generation":generation,"grant_count":1,"restoration_count":prior_restores+(1 if ent is not None else 0),
         }
+        if missing_live_entitlement: record["last_restore_reason"]="MISSING_LIVE_ENTITLEMENT"
         self.state.set_event_entitlement(awake_type,mission_id,record)
         return [StackMutation(item_id,"CREDIT",1)], self.projection.extra_drops(({"table_id":item_id,"item_num":1},))
 
@@ -455,12 +471,23 @@ class AwakeningMissionService:
             return {"error_code": 1, "msg": "blood_awake_result_not_active"}
         if self._int(req.get("incubus_id"), 0) != mid:
             return {"error_code": 1, "msg": "blood_awake_incubus_mismatch"}
-        # SOURCE_FACT: recovered winning Blood branch sends num=20,npc_ids=[];
-        # losses return locally and do not call MID867. No roster is available.
+        # SOURCE_FACT (Pass226 correction): both current and v1.164 BattleUnlimit
+        # build Blood npc_ids from an untouched empty Lua table.  The stock
+        # client's cjson transport serializes that semantic-empty table as {},
+        # while older Python characterizations used [].  Accept only those two
+        # explicit empty wire shapes inside the Blood branch; regular Incubus
+        # shares MID867 and may legitimately send non-empty npc_ids.
         if self._int(req.get("num"), -1) != 20:
             return {"error_code": 1, "msg": "blood_awake_terminal_num_mismatch"}
+        if "npc_ids" not in req:
+            return {"error_code": 1, "msg": "blood_awake_terminal_npc_mismatch"}
         npc_ids = req.get("npc_ids")
-        if not isinstance(npc_ids, list) or npc_ids:
+        npc_ids_semantically_empty = (
+            isinstance(npc_ids, list) and len(npc_ids) == 0
+        ) or (
+            isinstance(npc_ids, dict) and len(npc_ids) == 0
+        )
+        if not npc_ids_semantically_empty:
             return {"error_code": 1, "msg": "blood_awake_terminal_npc_mismatch"}
         generation = self._int(rec.get("generation"), 0)
         if bool(rec.get("complete")):

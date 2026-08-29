@@ -108,3 +108,20 @@ Canonical implementation: `gxb-backend-v0.17.4-pass171.0`.
 - Pass212 control remains client authority for Blood UI/window/resources and global downloader/loading behavior.
 - Operator logging: server.py DEBUG_VERBOSE=1..4; automatic filtered runtime_logs/server.txt; structured JSONL remains unfiltered. Categories: basic/error/missing=1, window=2, http_download=3, full=4.
 - Historical root PASS*.json artifacts moved under docs/json; VERSION.json remains operational at root.
+
+
+## Pass227 Blood MID867 wire reconciliation
+- RUNTIME_OBSERVED Pass226: stock Blood victory sends `npc_ids={}` because current Lua supplies an untouched empty table through cjson.
+- Pass210 Python `npc_ids=[]` was semantic-empty characterization, not literal stock-wire authority.
+- IMPLEMENTATION Pass227: Blood-only validator accepts present empty dict `{}` or empty list `[]`; missing/null/scalar/nonempty remains rejected.
+- Do NOT normalize MID867 globally: ordinary Incubus shares MID867 and may send nonempty dead-NPC arrays.
+- MID866 generation session, terminal `num=20`, replay/idempotency, and MID161 stage3 ownership remain unchanged.
+- OTA remains 1.631.20 because Pass227 changes server behavior only.
+
+
+## Pass232 P2 edge reconciliation + log preservation
+- RUNTIME_OBSERVED: Nikita ordinary+Blood smoke completed through Blood stage3 on OTA1.631.22.
+- RUNTIME_OBSERVED: KongMing mission 1144001 first activation grants 50001397, but after Give Up + external sale, Pass231 reopened without regrant and stranded progression.
+- COMPATIBILITY_POLICY/IMPLEMENTATION: event activation now restores exactly one intermediate when the entitlement ledger is LIVE but neither the intermediate nor derived exclusive gear is owned/equipped; existing live material/gear still suppresses duplicates. Odin source-Give-Up RESTORABLE policy remains intact.
+- IMPLEMENTATION: human console logs are non-destructive across backend restarts: server.txt, then server1.txt, server2.txt, ...; structured JSONL evidence remains unchanged.
+- OTA remains 1.631.22; no client payload change.

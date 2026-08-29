@@ -1,0 +1,31 @@
+{
+  "pass": "227.0",
+  "status": "IMPLEMENTED_STATIC_ACCEPTED_RUNTIME_PENDING",
+  "basis": "Pass226 stock-client Blood victory wire research",
+  "stock_mid867": {
+    "twice_awake_mission": 2200002,
+    "incubus_id": 2200002,
+    "num": 20,
+    "npc_ids": {}
+  },
+  "previous_rejection": "blood_awake_terminal_npc_mismatch",
+  "accepted_blood_npc_ids_wire_shapes": [
+    {},
+    []
+  ],
+  "rejected_classes": [
+    "missing",
+    "null",
+    "scalar",
+    "nonempty_list",
+    "nonempty_dict"
+  ],
+  "scope": "AwakeningMissionService Blood branch only; no global MID867/JSON normalization",
+  "shared_mid_warning": "ordinary Incubus also uses MID867 and may send nonempty npc_ids",
+  "lifecycle_unchanged": [
+    "MID866 generation-bound trial session",
+    "num=20 terminal gate",
+    "MID161 owns twice_awake_stage 2->3"
+  ],
+  "ota": "1.631.20 unchanged"
+}

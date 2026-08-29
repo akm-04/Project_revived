@@ -1,0 +1,13 @@
+{
+  "pass": "226.0",
+  "phase": "RESEARCH_GATE",
+  "implementation_authorized": false,
+  "proposed_future_change": {
+    "scope": "AwakeningMissionService.unlimited_result Blood branch only",
+    "accept_empty_npc_wire_shapes": ["empty JSON object {}", "empty JSON array []"],
+    "reject": ["missing npc_ids", "null", "scalar", "nonempty JSON object", "nonempty JSON array"],
+    "preserve": ["MID866 generation-bound session", "num=20", "mission/incubus equality", "trial source validation", "idempotent replay", "MID161 terminal stage=3 owner"]
+  },
+  "shared_mid_warning": "MID866/MID867 are also ordinary Incubus. Do not normalize globally or change dispatcher decoding.",
+  "next_gate": "User authorization for bounded server reconciliation after Pass226 research review"
+}

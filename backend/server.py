@@ -2,7 +2,7 @@
 """Compatibility launcher for the modular GXB EOL backend.
 
 No-argument behavior starts the backend.  Human-facing console output is
-filtered by DEBUG_VERBOSE and automatically teed to runtime_logs/server.txt.
+filtered by DEBUG_VERBOSE and automatically teed to the next unused runtime_logs/server*.txt transcript.
 Structured JSONL evidence under runtime_logs is never filtered.
 """
 from __future__ import annotations
@@ -23,7 +23,7 @@ def build_parser() -> argparse.ArgumentParser:
         prog="server.py",
         description=(
             "Start the local Girls X Battle EOL backend. Console output is automatically "
-            "written to runtime_logs/server.txt; structured runtime logs remain separate."
+            "written to the next unused runtime_logs/server*.txt; structured runtime logs remain separate."
         ),
         epilog=(
             "Debug verbosity:\n"

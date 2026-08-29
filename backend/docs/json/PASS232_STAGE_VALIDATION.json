@@ -1,0 +1,17 @@
+{
+  "pass": "232.0",
+  "timestamp": "2026-08-29T16:41:51+06:00",
+  "status": "PASS_STATIC_AND_REGRESSION",
+  "checks": {
+    "compileall": "PASS",
+    "pass232_event_recovery_and_log_rollover": "PASS",
+    "pass212_p2_stage_g": "PASS",
+    "pass227_blood_mid867_wire": "PASS",
+    "pass230_p2_smoke_cleanup": "PASS",
+    "pass231_forward_popup_revert": "PASS",
+    "pass206_historical_full_test": "BASELINE_STALE_UNCHANGED_MID171_FIREWALL_ASSERTION"
+  },
+  "ota": "1.631.22 unchanged",
+  "client_payload_changed": false,
+  "log_policy": "server.txt then first-unused serverN.txt, exclusive create; structured JSONL unchanged"
+}

@@ -1,0 +1,165 @@
+{
+  "schema_version": 1,
+  "pass": "231.0",
+  "classification": "RUNTIME_OBSERVED_PLUS_IMPLEMENTATION_DIAGNOSIS",
+  "backend_base": {
+    "artifact": "gxb-backend-v0.35.0-pass227.0.zip",
+    "sha256": "0f2a69aa5139613fa909329414f8bc35534016a5a070d77dc346dbba1d6443ac"
+  },
+  "debug_bundles": {
+    "event-debug.zip": {
+      "sha256": "6c2f82617fb9d6d95ef514ce2234c510c622cb0eab26109971c98a6761bc1314",
+      "info": [
+        "# Test case 1: Event girl route: KM-Moe",
+        "# the reason being, it gives the awakening and blood awakening gear. so way easier",
+        "# logged in, dropped into lobby. Goto girls --> KM-Moe --> click awakening gear to start || Auto gave me the awakening gear fragments --OK",
+        "# goto lobby --> missions --> awakening task, clear the campaign trial --OK",
+        "# goto lobby --> missions  --> awaken task, shows completed, tap that and awakening complete",
+        "# shows a popup saying awakening skill granted -- exactly as it should work",
+        "# now the blood awakening:, goto girls --> KM-Moe, tap on awakening gear to start blood awakening | got the awakening gear component, craft and equip --OK",
+        "# goto missions --> awaken task, tap on the banner-- it shows awakening task complete? popup (this is wrong and should've been reverted).",
+        "# do the battle, all OK, and blood awakening complete... completely normal run apart from the blood awakening popup-- that should've been removed."
+      ],
+      "mid_counts": {
+        "1": 1,
+        "2": 1,
+        "7": 1,
+        "54": 2,
+        "56": 3,
+        "83": 2,
+        "112": 1,
+        "113": 1,
+        "114": 1,
+        "161": 4,
+        "176": 3,
+        "192": 58,
+        "234": 3,
+        "354": 3,
+        "612": 3,
+        "836": 1,
+        "866": 1,
+        "867": 1,
+        "1056": 11,
+        "1302": 3,
+        "1344": 3,
+        "1537": 1,
+        "2736": 8,
+        "2738": 2,
+        "2754": 3,
+        "2768": 1,
+        "2784": 1,
+        "2864": 2,
+        "8193": 1,
+        "20480": 1
+      },
+      "http_status_counts": {
+        "404": 5
+      },
+      "nonzero_engine_error_count": 0,
+      "not_found_paths": [
+        "/res/kongmingdeng_icon.png.6a33586a34750432d4db30e1655e07be",
+        "/res/kongmingdeng.png.99e59c802642df78fc5a9164d2d8c971",
+        "/res/50002078_icon.png.eb92c41d73f751112d28f81363bedebc",
+        "/res/kongmingdeng_icon.png.dcecdb3ff0575fc8ed929195fc00b961",
+        "/res/kongmingdeng.png.eab8d44924f23fd19511e2b2cfc926c7"
+      ]
+    },
+    "occult-debug.zip": {
+      "sha256": "c28708280bf6e067a39c6322a9d952f8a147be7a4e3d371b0a348fdaaf7bf6b8",
+      "info": [
+        "# occult awakening check ",
+        "# decided to use these girls since i already have them: Karaxes, tokugawa, cerberus",
+        "# start karaxes awakening -- I need to get her dot...",
+        "# lobby --> missions --> awaken task --> click go (should take me to occult page)",
+        "# click on raid -- says i dont have sorcery war scrolls...",
+        "# this feature is stubbed. It passes the occult page load, sorcery war UI loaded... we can develop this feature later."
+      ],
+      "mid_counts": {
+        "192": 36,
+        "234": 1,
+        "2362": 1,
+        "2736": 2,
+        "2738": 1
+      },
+      "http_status_counts": {
+        "404": 3
+      },
+      "nonzero_engine_error_count": 0,
+      "not_found_paths": [
+        "/res/50001697_icon.png.0db82db4422f550931a8d773e90726fc",
+        "/res/xuexu_icon.png.991466089db1b6ae8a4523d4434319dd",
+        "/res/xuexu.png.14a26e7d83aa746f10e10a5b896fd354"
+      ]
+    },
+    "odin-event-debug.zip": {
+      "sha256": "6259fda0eaec52a5bf9159883a7f88d30c16295db7b77ca3d9b982b231168de2",
+      "info": [
+        "# event awakening path 2, Odin",
+        "# goto girls --> odin --> tap awakening gear and start, got the craft material --OK",
+        "# craft the gear and equip, then goto missions --> awakening task and click complete and complete campaign battle --OK",
+        "# goto mission --> awaken task, shows completed, click on it and shows popup awakening skill unlocked. Completely ok and awakening done",
+        "# blood awakening: goto girls --> odin --> click awakening gear to start ( i geared her up to red , i think that's a criteria). || got her blood awakening craft and crafted gear and equip",
+        "# goto missions --> awaken task --> click do battle --OK | from lobby --> mission --> awaken task --> shows completed, click on it and all OK"
+      ],
+      "mid_counts": {
+        "51": 3,
+        "54": 2,
+        "56": 2,
+        "57": 2,
+        "83": 2,
+        "113": 1,
+        "114": 1,
+        "161": 4,
+        "176": 2,
+        "192": 64,
+        "234": 2,
+        "354": 2,
+        "612": 2,
+        "866": 1,
+        "867": 1,
+        "1302": 2,
+        "1344": 2,
+        "2736": 8,
+        "2738": 2,
+        "2754": 2,
+        "2768": 1
+      },
+      "http_status_counts": {
+        "404": 3
+      },
+      "nonzero_engine_error_count": 0,
+      "not_found_paths": [
+        "/res/aoding_icon.png.861117ffcf6ec6e28d962e52356019f5",
+        "/res/aoding.png.c5d77d5e22760cc638b547a4e58d0d49",
+        "/res/11005.png.3dd95f34ff402e52e761e35c6585e0f7"
+      ]
+    }
+  },
+  "observations": [
+    {
+      "epistemic_class": "RUNTIME_OBSERVED",
+      "fact": "KM-Moe ordinary and Blood event route completed through MID866, MID867 npc_ids={}, and terminal MID161; user reports an incorrect Blood-stage awakening-skill popup."
+    },
+    {
+      "epistemic_class": "RUNTIME_OBSERVED",
+      "fact": "Odin ordinary and Blood event route completed through MID866, MID867 npc_ids={}, and terminal MID161 stage3 without nonzero engine responses."
+    },
+    {
+      "epistemic_class": "RUNTIME_OBSERVED",
+      "fact": "Occult Karaxes activation reached MID2362 successfully; no MID2385 request was emitted because stock/stub UI stopped at Sorcery War Scroll requirement."
+    },
+    {
+      "epistemic_class": "IMPLEMENTATION_DIAGNOSIS",
+      "fact": "Client resource version remained 1.631.21 while Pass227/Pass230 target was 1.631.20; updater logged version_current_or_newer, so rejected Pass228 TaskAwakeCell persisted on device."
+    },
+    {
+      "epistemic_class": "SOURCE_FACT",
+      "fact": "Current effective src_64 TaskAwakeCell.finishHeroTwiceAwake contains no common_alert; Pass229 provenance shows Pass228 inserted common_alert inside that generic callback."
+    },
+    {
+      "epistemic_class": "COMPATIBILITY_POLICY",
+      "fact": "Occult full runtime smoke remains fenced/deferred; do not invent Scroll/stamina shortcuts solely for acceptance."
+    }
+  ],
+  "clearance": "After corrective OTA1.631.22 installs and popup absence is confirmed, proceed with Aquaris/Nikita Campaign/Blood and Give-Up smoke; return logs before P2 closure."
+}

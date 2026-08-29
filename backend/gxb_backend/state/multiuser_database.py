@@ -772,6 +772,85 @@ class MultiUserDatabase:
         }
         return True
 
+    def _apply_pass230_debug_p2_awake_inventory_cleanup(self, player: PlayerState) -> bool:
+        """One-shot sandbox cleanup for the Pass212 P2 client smoke.
+
+        Pass72/73 deliberately seeded broad Hero-progression inventories for
+        earlier QA. Pass96 then normalized stack-999 rows to 900. That old
+        PRIVATE_SERVER_POLICY now masks the Awakening/Blood acquisition and
+        composition paths that P2 must exercise. Pass230 removes only the
+        source-derived P2 Awakening economic item family from UID13371337 once.
+
+        The migration marker is durable: after this cleanup, fragments,
+        materials, and exclusive gear obtained through legitimate gameplay are
+        never deleted or replenished by this policy on subsequent loads.
+        """
+        if str(getattr(player, "account_uid", "") or "") != SANDBOX_UID:
+            return False
+        path = self.data_dir / "debug_guest_p2_smoke_cleanup_pass230.json"
+        try:
+            payload = json.loads(path.read_text(encoding="utf-8"))
+        except Exception:
+            return False
+        if not isinstance(payload, dict):
+            return False
+        meta = payload.get("_meta") if isinstance(payload.get("_meta"), dict) else {}
+        marker = str(meta.get("migration_marker") or "pass230_debug_p2_awake_inventory_cleanup_v1")
+        state = player.persistence_state if isinstance(player.persistence_state, dict) else {}
+        if state is not player.persistence_state:
+            player.persistence_state = state
+        migrations = state.setdefault("migrations", {})
+        if not isinstance(migrations, dict):
+            migrations = {}
+            state["migrations"] = migrations
+        if migrations.get(marker):
+            return False
+
+        ids: set[int] = set()
+        for raw in payload.get("item_ids") or []:
+            try:
+                item_id = int(raw)
+            except (TypeError, ValueError):
+                continue
+            if item_id > 0:
+                ids.add(item_id)
+        expected = int(meta.get("total_unique_item_count", 574) or 574)
+        if len(ids) != expected or expected != 574:
+            return False
+
+        rows_removed = 0
+        quantity_removed = 0
+        kept: list[Any] = []
+        if not isinstance(player.backpack_items, list):
+            player.backpack_items = []
+        for row in player.backpack_items:
+            if not isinstance(row, dict):
+                kept.append(row)
+                continue
+            try:
+                item_id = int(row.get("table_id", 0) or 0)
+            except (TypeError, ValueError):
+                kept.append(row)
+                continue
+            if item_id not in ids:
+                kept.append(row)
+                continue
+            try:
+                quantity_removed += max(0, int(row.get("item_num", 0) or 0))
+            except (TypeError, ValueError):
+                pass
+            rows_removed += 1
+        player.backpack_items = kept
+        migrations[marker] = {
+            "applied": 1,
+            "policy": "DEV_TEST_PRIVATE_SERVER_POLICY_ONE_SHOT_P2_AWAKE_CLEANUP",
+            "source_item_count": len(ids),
+            "rows_removed": rows_removed,
+            "quantity_removed": quantity_removed,
+            "post_cleanup_reacquisition_persists": 1,
+        }
+        return True
+
     def _apply_pass96_debug_account_normalization(self, player: PlayerState) -> bool:
         """One-shot source-aware sandbox repair for end-game economy QA.
 
@@ -1010,6 +1089,11 @@ class MultiUserDatabase:
         # Pass192 P1-I5: one-shot sandbox materials for Bookshelf/Cabinet runtime
         # reconciliation. This does not advance Workshop state or replenish use.
         if self._apply_pass192_debug_p1_i5_workshop_seed(player):
+            changed = True
+        # Pass230 P2 smoke reset runs after all older sandbox inventory seeds.
+        # It removes only Awakening/Blood economic prerequisites once; later
+        # legitimate acquisition is preserved because the marker prevents rerun.
+        if self._apply_pass230_debug_p2_awake_inventory_cleanup(player):
             changed = True
         # Pass91: source SelfPlayer/VipRechargeWindow require a non-empty
         # one-based VIP1..VIP15 0/1 claim vector. The backend never implemented

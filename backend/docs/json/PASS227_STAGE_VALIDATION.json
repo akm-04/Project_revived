@@ -1,0 +1,26 @@
+{
+  "pass": "227.0",
+  "status": "PASS",
+  "backend": "0.35.0",
+  "ota": "1.631.20 unchanged",
+  "checks": {
+    "pass227_blood_mid867_wire": "PASS",
+    "p2_stage_c": "PASS",
+    "p2_stage_d": "PASS",
+    "p2_stage_e": "PASS",
+    "p2_stage_f": "PASS",
+    "p2_stage_g": "PASS",
+    "architecture_hygiene": "PASS",
+    "pass225_logging_and_blood_equip": "PASS"
+  },
+  "historical_pass224_test": "expected failure on frozen OTA 1.631.19 assertion only; superseded by Pass225/227",
+  "server_delta": {
+    "python_files": 202,
+    "byte_identical_to_pass225": 200,
+    "different": [
+      "state/awakening_mission_service.py",
+      "version.py"
+    ]
+  },
+  "client_ota_delta": false
+}

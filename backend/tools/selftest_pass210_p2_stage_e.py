@@ -87,14 +87,29 @@ def test_blood_trial_session_terminal_envelope_replay_and_claim() -> None:
     bad_npc = s.awakening_missions.unlimited_result({
         "twice_awake_mission": 2001002, "incubus_id": 2001002, "num": 20, "npc_ids": [1],
     })
-    require(bad_npc.get("error_code") == 1, "MID867 accepted nonempty Blood npc_ids")
+    require(bad_npc.get("error_code") == 1, "MID867 accepted nonempty Blood npc_ids array")
+    bad_npc_obj = s.awakening_missions.unlimited_result({
+        "twice_awake_mission": 2001002, "incubus_id": 2001002, "num": 20, "npc_ids": {"1": 1},
+    })
+    require(bad_npc_obj.get("error_code") == 1, "MID867 accepted nonempty Blood npc_ids object")
+    missing_npc = s.awakening_missions.unlimited_result({
+        "twice_awake_mission": 2001002, "incubus_id": 2001002, "num": 20,
+    })
+    require(missing_npc.get("error_code") == 1, "MID867 accepted missing Blood npc_ids")
+    null_npc = s.awakening_missions.unlimited_result({
+        "twice_awake_mission": 2001002, "incubus_id": 2001002, "num": 20, "npc_ids": None,
+    })
+    require(null_npc.get("error_code") == 1, "MID867 accepted null Blood npc_ids")
 
-    good_req = {"twice_awake_mission": 2001002, "incubus_id": 2001002, "num": 20, "npc_ids": []}
+    # RUNTIME_OBSERVED Pass226 stock-client wire: empty Lua table -> JSON {}.
+    good_req = {"twice_awake_mission": 2001002, "incubus_id": 2001002, "num": 20, "npc_ids": {}}
     result = s.awakening_missions.unlimited_result(good_req)
     require(result.get("items") == [], f"Blood result items shape drift: {result}")
     row = result.get("twice_awake_mission_", [{}])[0]
     require(row.get("table_id") == 2001002 and row.get("is_complete") == 1, f"Blood result mission projection drift: {result}")
-    require(s.awakening_missions.unlimited_result(good_req) == result, "MID867 completion replay mismatch")
+    require(s.awakening_missions.unlimited_result(good_req) == result, "MID867 completion replay mismatch for stock {} wire")
+    legacy_empty_array_req = {"twice_awake_mission": 2001002, "incubus_id": 2001002, "num": 20, "npc_ids": []}
+    require(s.awakening_missions.unlimited_result(legacy_empty_array_req) == result, "MID867 semantic-empty [] replay mismatch")
 
     claim = s.awakening_missions.claim(2001002)
     require(claim == {"twice_awake_stage_": {"table_id": 11001001, "stage": 3}}, f"Blood terminal claim projection drift: {claim}")
@@ -248,7 +263,7 @@ def main() -> int:
         "checks": checks,
         "blood_ritual_missions": 81,
         "blood_terminal_num": 20,
-        "blood_terminal_npc_ids": [],
+        "blood_terminal_npc_ids_semantics": {"stock_wire": {}, "semantic_empty_compat": []},
         "kongming_book_v_tokens": list(KongMingAwakeSkillService.ownership_books()),
         "kongming_server_skill_mappings": len(KongMingAwakeSkillService.SKILL_BY_BOOK),
         "kongming_stock_picker_visible_mappings": 3,
