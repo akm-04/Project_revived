@@ -1,0 +1,8 @@
+{
+  "schema_version":1,"pass":"278.0","backend_version":"0.43.0",
+  "status":"U4B_WAVE_F_WHOLE_SYNCHRONIZATION_FOUNDATION_INTEGRATION_REGRESSION_ACCEPTED",
+  "base":"gxb-backend-v0.42.0-pass277.0",
+  "scope":["whole A-E integration selftest","future-feature synchronization extension contract","controlling regression consolidation"],
+  "runtime_behavior_changed":false,"client_runtime_changed":false,
+  "next":"Passmap HOT+COLD self-heal, bounded stock-client test plan, then Wave G reconciliation"
+}

@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "pass": "280.0",
+  "classification": "WAVE_G_STOCK_CLIENT_RECONCILIATION_EVIDENCE",
+  "debug_zip_sha256": "1da6405b679636c3e9d8e9b535d1f595250e1c10c23094816134efbcd71da711",
+  "user_observed": {
+    "fresh_login_modal_loading_seconds": "20-30 in info.txt; user reports up to ~40",
+    "restart_modal_loading_seconds": "20+ repeatedly",
+    "bag_or_lobby_modal_loading_seconds": "~15 observed",
+    "campaign_post_battle_loading_seconds": "~10 observed"
+  },
+  "capture_facts": {
+    "normal_mid_requests": 246,
+    "client_error_upload_records": 18428,
+    "client_lua_error_records": 7,
+    "login_windows": 3,
+    "mid124_total": 43,
+    "mid1056_total": 44,
+    "per_login_first_60s": [
+      {"mid124": 10, "mid1056": 9, "normal_requests": 33},
+      {"mid124": 9, "mid1056": 9, "normal_requests": 32},
+      {"mid124": 10, "mid1056": 9, "normal_requests": 33}
+    ],
+    "server_responses": "MID124 and MID1056 return source-shaped success bodies in the server trace"
+  },
+  "source_proof": {
+    "current_backend_lua_sha256": "95378e2b0be8180df6de27e9e430c630bcfe46c080e1f91ef5f6d74bdbb1b840",
+    "create_request_stock_line": "arg_53_0.requests_ = arg_53_0.request_ or {}",
+    "backend_request_singular_assignment_elsewhere": false,
+    "normal_web_timeout_seconds": 20,
+    "loading_default": true,
+    "loading_add_before_request_start": true,
+    "loading_remove_on_completion_or_failure": true
+  },
+  "conclusion": {
+    "request_registry_gate": "MET",
+    "reason": "Every new Backend HTTP/log request necessarily replaces requests_ with a new table because request_ is never assigned in Backend. The stock capture proves overlapping requests and repeated source-shaped MID124/MID1056 requests while the backend is responding successfully. This demonstrates live handle-table clobbering, satisfying Pass269 Tier C.",
+    "causal_confidence_for_long_modal_delay": "HIGH_BUT_REQUIRES_PATCH_RETEST",
+    "timeout_correlation": "The user's 20-40s stalls overlap the stock normal HTTP timeout of 20s and repeated request churn.",
+    "hydration_coordinator": "DEFER_ONE_RETEST: do not add in the same patch; first determine whether stable request ownership naturally collapses repeated lazy requests.",
+    "loading_proxy_patch": "NOT_AUTHORIZED_BY_EVIDENCE_YET"
+  }
+}

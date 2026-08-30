@@ -1,0 +1,70 @@
+{
+  "pass": "242.0",
+  "wave": "Emblem I1",
+  "status": "PASS",
+  "ota": "1.631.22",
+  "checks": [
+    {
+      "id": "compileall",
+      "result": "PASS"
+    },
+    {
+      "id": "i1_selftest",
+      "result": "PASS",
+      "detail": "7/7"
+    },
+    {
+      "id": "src64_catalog_rebuild",
+      "result": "PASS",
+      "detail": "byte-exact"
+    },
+    {
+      "id": "architecture_hygiene",
+      "result": "PASS",
+      "detail": "Pass129 5/5"
+    },
+    {
+      "id": "response_projection",
+      "result": "PASS",
+      "detail": "Pass70; stack awards not synthesized"
+    },
+    {
+      "id": "p2_stage_g",
+      "result": "PASS"
+    },
+    {
+      "id": "blood_mid867",
+      "result": "PASS"
+    },
+    {
+      "id": "dev_cleanup",
+      "result": "PASS"
+    },
+    {
+      "id": "popup_correction",
+      "result": "PASS"
+    },
+    {
+      "id": "pass232_edges",
+      "result": "PASS"
+    },
+    {
+      "id": "pass241_i0_route_hash",
+      "result": "SUPERSEDED_EXPECTED",
+      "detail": "I1 intentionally changes deterministic Emblem route ownership"
+    },
+    {
+      "id": "historical_monolithic_tests",
+      "result": "NON_CONTROLLING_STALE",
+      "detail": "Pass73/179/104 contain unrelated pre-current assertions"
+    }
+  ],
+  "guards": {
+    "MID1400": "FENCED",
+    "MID1401": "FENCED",
+    "MID1405": "FENCED",
+    "MID1406": "FENCED",
+    "Function45": "UNCHANGED_I2",
+    "HeartMID83": "UNCHANGED_I2"
+  }
+}

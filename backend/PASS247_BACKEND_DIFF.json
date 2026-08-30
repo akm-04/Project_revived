@@ -1,0 +1,103 @@
+{
+  "pass": "247.0",
+  "base": "gxb-backend-v0.37.4-pass246.0",
+  "target": "gxb-backend-v0.37.5-pass247.0",
+  "added": [
+    {
+      "path": "PASS247_EMBLEM_I5_REFORGE_REPORT.md",
+      "sha256": "e16dd5f7e727784e538a25063f44d53a6fbed19b551594dc304db50c06b92f8b",
+      "size": 4349
+    },
+    {
+      "path": "PASS247_IMPLEMENTATION_COMMIT.json",
+      "sha256": "b2b370c2c6801d7fe7d8e2875c072dff7131c5e42ea6e88faef7acd541bb9d14",
+      "size": 811
+    },
+    {
+      "path": "PASS247_SRC64_TARGETED_REALITY_CHECK.json",
+      "sha256": "a8467a43dc461e18ffb79c5ab190d9023db10d0e4c9e21333e9dce3ed357f3ae",
+      "size": 1894
+    },
+    {
+      "path": "PASS247_STAGE_VALIDATION.json",
+      "sha256": "a259bcb6cef3b59852170293c89fec972ddd5889dbb409418cdb2893974f2579",
+      "size": 3553
+    },
+    {
+      "path": "tools/selftest_pass247_emblem_i5_reforge.py",
+      "sha256": "a95e98eb492e23c25b9375e2a8ec4f303fd3e13d39a5aacbb26d69462c1015ca",
+      "size": 21071
+    }
+  ],
+  "removed": [],
+  "changed": [
+    {
+      "path": "README.md",
+      "old_sha256": "2b3a7d22853c818a1e271c7d54cdd593d12c2638364db4aa8e6d055131ec0bcc",
+      "new_sha256": "ef8b2405bf7b5c5ec515b4ac3ff7e662ed90b4ef9aa5fca41a5bfbef7b98ea37",
+      "old_size": 34112,
+      "new_size": 36995
+    },
+    {
+      "path": "UPDATE_README.md",
+      "old_sha256": "410a5c47a3285f41deea40ae30a09e5f52ac5b8dbe2160dd9ca2bb37d3ed5d32",
+      "new_sha256": "976e4b17e03fe31cda79b0b2830fc0c1779641059ea2742064e520e56c84b5ab",
+      "old_size": 2796,
+      "new_size": 3697
+    },
+    {
+      "path": "VERSION.json",
+      "old_sha256": "2906c42e2b7676b5331581812ca6cc19c89c0a7fc33b704bfea09d5d246d1ae1",
+      "new_sha256": "0c80c42dab0c6078c259ca41c42fa877701cb90c28823a233b137abc11d99981",
+      "old_size": 523,
+      "new_size": 596
+    },
+    {
+      "path": "data/emblem_policy_v1.json",
+      "old_sha256": "354036424cafeadc6c090e3742dc73923e6a8f9d410d8eed4a983d71c7fb0c29",
+      "new_sha256": "5ac2a9e2140889853e24cf2ea039516ac0c98f3a2caca1f2f562ee605d789229",
+      "old_size": 1439,
+      "new_size": 1428
+    },
+    {
+      "path": "gxb_backend/dispatch/engine_dispatcher.py",
+      "old_sha256": "86f59c99069ee7f41a10f6b5fe38daaf5a4de291c606709e3de57bb91c66c09a",
+      "new_sha256": "84df898770707d077bb2b9ac0828c360a519d9a014664a0ddb95a02643810528",
+      "old_size": 35208,
+      "new_size": 35197
+    },
+    {
+      "path": "gxb_backend/handlers/heroes.py",
+      "old_sha256": "073a475750fe49f89bc0bae6bef7ffe02920ba4c7f3f5ee2181096fc6077a90b",
+      "new_sha256": "9f21a1a9a4ce37894a671ed87fa93ad05765270ea710b336cb3a342c7090295c",
+      "old_size": 10097,
+      "new_size": 10480
+    },
+    {
+      "path": "gxb_backend/state/emblem_policy.py",
+      "old_sha256": "db337f7ea9d433534debf2c8caedc673fced5b4112b4d9f1e05379d1b6b2597e",
+      "new_sha256": "7f696845c3eb3711f14744c7fc9f6890da3431080fd71f58f08f3e8a28c8b8d4",
+      "old_size": 7055,
+      "new_size": 7130
+    },
+    {
+      "path": "gxb_backend/state/emblem_service.py",
+      "old_sha256": "854a7eea95c9eae86e16ed136a275c71d3f05e18481286b0c49acb875b090683",
+      "new_sha256": "dad624417f16f94bd49754f2bbb7642917cc50bde94cfede0719ff9f461c4f02",
+      "old_size": 19976,
+      "new_size": 29034
+    },
+    {
+      "path": "memory.md",
+      "old_sha256": "dc5119ef5adeaa1f9137806197a711833cc2a3e72c7fb2961be5d91252b3cce6",
+      "new_sha256": "ca71394802cec692fbe8e9c09de0a27ac3132218aed6add45565afe5c5c6af4a",
+      "old_size": 24661,
+      "new_size": 27193
+    }
+  ],
+  "summary": {
+    "added": 5,
+    "removed": 0,
+    "changed": 9
+  }
+}

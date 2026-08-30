@@ -22,6 +22,27 @@ class CabinetCompositionProvider:
         if row is None:return None
         return CompositionRecipe(item_id,((int(row.get("fragment_id",0) or 0),int(row.get("fragment_num",0) or 0)),),int(row.get("compose_mana",0) or 0),"workshop_cabinet",True)
 
+class EmblemCompositionProvider:
+    """Exact current-src_64 Heart of Medal composition provider."""
+    def __init__(self, source) -> None:
+        self.source = source
+
+    def resolve(self, item_id: int) -> CompositionRecipe | None:
+        row = self.source.heart_recipe
+        target = int(row.get("item_id", 0) or 0)
+        if item_id != target or target <= 0:
+            return None
+        components = tuple(
+            (int(part.get("item_id", 0) or 0), int(part.get("count", 0) or 0))
+            for part in (row.get("components") or ())
+        )
+        if not components or any(item <= 0 or count <= 0 for item, count in components):
+            return None
+        return CompositionRecipe(
+            target, components, max(0, int(row.get("mana", 0) or 0)),
+            "emblem_heart"
+        )
+
 class AwakeningCompositionProvider:
     def __init__(self,data_dir:Path,source)->None:
         raw=json.loads((Path(data_dir)/"hero_equipment_meta.json").read_text(encoding="utf-8")); self.items=raw.get("items") or {}

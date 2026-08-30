@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "pass": "276.0",
+  "backend_version": "0.41.0",
+  "status": "U4B_WAVE_D_REALTIME_CODEC_IDENTITY_ADMISSION_AUTHENTICATED_SESSION_RUNTIME_STATIC_ACCEPTED",
+  "base": "gxb-backend-v0.40.0-pass275.0",
+  "scope": [
+    "exact recovered Xinyoudi realtime frame codec: u32be payload length + u16be MID + u32be sequence + bounded AMF3 Params",
+    "incremental fragmented/coalesced stream decode with 65536-byte payload ceiling and fail-closed unsupported markers",
+    "immutable canonical StateRepository.resolve_realtime_identity token+region resolver with no request-local binding reuse",
+    "pure WORLD/SERVICE/GUILD room admission over canonical region/guild facts",
+    "process-transient authenticated realtime session registry with multiple-session support and bounded serialized outbound queues",
+    "threaded realtime listener/connection lifecycle: TCP_LOGIN -> CHAT_ROOM_ENTERED, heartbeat health, disconnect cleanup",
+    "R5/R6 app-scoped non-listening RealtimeRuntime composition through AppFactory; run.main owns start/stop only"
+  ],
+  "source_rule": "Current effective src_64 and exact current-generation libcocos2dlua.so remained authoritative during implementation; historical evidence did not override current behavior.",
+  "explicit_non_goals": [
+    "Wave E typed realtime event publisher and post-commit topic binding",
+    "Wave E MID192 room-directory validation/integration",
+    "chat gameplay SEND_CHAT_MESSAGE/CHAT_MESSAGE business semantics",
+    "Mail/Arena/Guild/PvP business notices",
+    "client runtime changes"
+  ]
+}

@@ -55,6 +55,11 @@ class PlayerUnitOfWork:
         self._committed_semantic: dict[str, list[object]] = {}
         self._staged_journal: list[dict[str, Any]] = []
         self._committed_journal: list[dict[str, Any]] = []
+        # Wave A synchronization foundation: mutation-derived external effects
+        # use a strict post-commit topic buffer. Unlike legacy semantic staging,
+        # this API is transaction-only and is never published immediately.
+        self._staged_post_commit: dict[str, list[object]] = {}
+        self._committed_post_commit: dict[str, list[object]] = {}
         self._touched_slices: set[str] = set()
         self._staged_receipts: list[dict[str, Any]] = []
         ensure_persistence_state(self.player)
@@ -113,6 +118,41 @@ class PlayerUnitOfWork:
         """Return committed journal rows; staged/rolled-back rows are never visible."""
         out = copy.deepcopy(self._committed_journal)
         self._committed_journal.clear()
+        return out
+
+    def stage_post_commit(self, topic: str, value: object) -> None:
+        """Stage an external intent that becomes visible only after durable commit.
+
+        This is deliberately stricter than ``stage_semantic``: callers may not
+        stage a post-commit intent outside an active transaction.  The initial
+        synchronization consumer is ``realtime.transient``; future topics must
+        retain the same commit/rollback semantics.
+        """
+        if not self.active:
+            raise RuntimeError("post-commit intents may only be staged inside PlayerUnitOfWork")
+        key = str(topic).strip()
+        if not key:
+            raise ValueError("post-commit topic is required")
+        self._staged_post_commit.setdefault(key, []).append(copy.deepcopy(value))
+
+    def consume_post_commit(self, topic: str) -> list[object]:
+        """Drain one committed post-commit topic without exposing staged values."""
+        key = str(topic).strip()
+        if not key:
+            return []
+        out = copy.deepcopy(self._committed_post_commit.get(key, []))
+        self._committed_post_commit.pop(key, None)
+        return out
+
+    def drain_post_commit(self) -> dict[str, list[object]]:
+        """Drain every committed external-intent topic.
+
+        EngineDispatcher uses this on every request-scope exit so a committed
+        intent can never bleed into a later request, including when HTTP
+        projection raises after the durable transaction has already committed.
+        """
+        out = copy.deepcopy(self._committed_post_commit)
+        self._committed_post_commit.clear()
         return out
 
     def get_receipt(self, domain: str, key: str) -> dict[str, Any] | None:
@@ -242,6 +282,7 @@ class PlayerUnitOfWork:
             self._save_requested = False
             self._staged_semantic = {}
             self._staged_journal = []
+            self._staged_post_commit = {}
             self._touched_slices = set()
             self._staged_receipts = []
         self._depth += 1
@@ -260,6 +301,7 @@ class PlayerUnitOfWork:
                         self._restore_snapshot()
                         self._staged_semantic = {}
                         self._staged_journal = []
+                        self._staged_post_commit = {}
                     elif self._save_requested:
                         try:
                             self._prepare_persistence_commit(context)
@@ -268,15 +310,20 @@ class PlayerUnitOfWork:
                             self._restore_snapshot()
                             self._staged_semantic = {}
                             self._staged_journal = []
+                            self._staged_post_commit = {}
                             raise
                         for channel, values in self._staged_semantic.items():
                             self._committed_semantic.setdefault(channel, []).extend(copy.deepcopy(values))
                         self._staged_semantic = {}
                         self._committed_journal.extend(copy.deepcopy(self._staged_journal))
                         self._staged_journal = []
+                        for topic, values in self._staged_post_commit.items():
+                            self._committed_post_commit.setdefault(topic, []).extend(copy.deepcopy(values))
+                        self._staged_post_commit = {}
                     else:
                         self._staged_semantic = {}
                         self._staged_journal = []
+                        self._staged_post_commit = {}
                 finally:
                     self._snapshot = None
                     self._rollback_only = False
@@ -284,6 +331,7 @@ class PlayerUnitOfWork:
                     self._touched_slices = set()
                     self._staged_receipts = []
                     self._staged_journal = []
+                    self._staged_post_commit = {}
 
 
 # Compatibility alias: existing repositories continue importing UnitOfWork.

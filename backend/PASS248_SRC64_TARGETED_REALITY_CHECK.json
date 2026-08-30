@@ -1,0 +1,78 @@
+{
+  "pass": "248.0",
+  "status": "PASS",
+  "authority": "all-assest-rechecked-1.zip/app-assets/output/assets/src_64",
+  "source_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+  "effective_src64_file_count": 4370,
+  "targeted_files": [
+    {
+      "path": "app/common/network/mid.lua",
+      "sha256": "026a20b29d97624979777a68c64c749254031604057ff42aa8f8254c3e35b5af"
+    },
+    {
+      "path": "app/common/tables/InscriptionTable.lua",
+      "sha256": "643f1b935b3fa18c9b9289b527ed3f25a0c109e663c2b8b56a642b88695eced0"
+    },
+    {
+      "path": "app/model/NormalHero.lua",
+      "sha256": "125183556caeecc182bf0702dd1f95160c8ba1666a3b97fbb8a7261d30ae0ac9"
+    },
+    {
+      "path": "app/model/SuperHero.lua",
+      "sha256": "b127c2cbef327d3142031bf30daa0af1b45997c6da82fba946d641a86783d622"
+    },
+    {
+      "path": "app/windows/InscriptionTenTimesWindow.lua",
+      "sha256": "2dae5c579e44bd9a092ca534b6050c06f9718b4566ef1d9cdfb381ff97b480c1"
+    },
+    {
+      "path": "app/windows/InscriptionWindow.lua",
+      "sha256": "4ca0f6a8b6d70caf60205efe14a55665142acd1f3ac9b93d6dc014d5a8bd04e6"
+    },
+    {
+      "path": "data/tables/function.lua",
+      "sha256": "a240254e79ccfd41862f3d6289f4f5fd09280ac3e197f51bc14b896a62c10010"
+    },
+    {
+      "path": "data/tables/inscription.lua",
+      "sha256": "dc0d5d8b0de66b9495665cb6a300aa9bdb5979065f28c565ede35e447adce23c"
+    },
+    {
+      "path": "data/tables/inscription_pos.lua",
+      "sha256": "714644c260a86581d04880289dd6e36abdfd446fc0f7c25342b4fe870d6a10cf"
+    },
+    {
+      "path": "data/tables/inscription_rate.lua",
+      "sha256": "2bdb4a95b2bcd0850b6bd7661fdf047c95633a8c880a0b4cc8b5e85b0aa4a6e8"
+    },
+    {
+      "path": "data/tables/inscription_suit.lua",
+      "sha256": "cd5e0f6438d34a3d597c9d25175f7fee81f14eb4808439d60b272fa2a2e4ca25"
+    }
+  ],
+  "catalog_rebuild": {
+    "packaged_sha256": "083f3d70767d5a97e6bdfb2984480658184455d36e5c74e8d44fa2445fd5d6e4",
+    "rebuilt_sha256": "083f3d70767d5a97e6bdfb2984480658184455d36e5c74e8d44fa2445fd5d6e4",
+    "byte_identical": true,
+    "counts": {
+      "forge_rows": 23,
+      "ordinary_forge_rows": 21,
+      "special_family_rows": 2,
+      "concrete_items": 254,
+      "ordinary_candidates": 210,
+      "scholarship_items": 30,
+      "non_forge_orphans": 14,
+      "sets": 12,
+      "dynamic_scholarship_positions": 30
+    }
+  },
+  "source_facts_reconfirmed": [
+    "MIDs 1400-1407 remain current Emblem/Inscription protocol identities",
+    "Forge stock request contains inscript_id and make_num=1; stock callback converts raw inscript_items IDs locally",
+    "Reforge stock request contains item_id,rebuild_num=1|10,cost_type; Save sends only selected item_id; Abandon is empty request",
+    "NormalHero/SuperHero expose Emblem only for Blood-Awakened Hero at Function45 level threshold 100",
+    "concrete Scholarship item physical positions are source-owned; 14 extra Honor artifacts remain source-present non-forge content",
+    "Campaign source catalog supplies all three Stars and Heart fragment for core acquisition spine"
+  ],
+  "epistemic_guard": "inscription_rate.lua outer Scholarship interpretation remains compatibility policy; no claim of recovered official server probability"
+}

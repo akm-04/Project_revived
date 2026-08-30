@@ -27,6 +27,7 @@ class FunctionStateRepository:
     GUIDE_SENSITIVE_POLICIES = {
         33: {"policy": "tutorial_milestone", "milestone": "normal_pre_skill_terminal_fight_committed"},
         31: {"policy": "campaign_projection_coordinated"},
+        45: {"policy": "blood_awakened_hero_coordinated", "hero_level": 100},
     }
 
     def __init__(

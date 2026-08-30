@@ -9,6 +9,8 @@ from typing import Any
 
 from gxb_backend.content import GameDataCatalog
 from gxb_backend.content.summon_featured_catalog import SummonFeaturedCatalog
+from gxb_backend.synchronization import SynchronizationCatalogs
+from gxb_backend.realtime.contracts import AuthenticatedPlayerIdentity
 
 from .account import AccountIdentity
 from .economy_repository import EconomyRepository
@@ -27,7 +29,7 @@ from .multiuser_database import (
 from .player_state import PlayerState
 from .summon_repository import SummonRepository
 from .world_repository import WorldRepository
-from .request_services import RequestServices
+from .request_services import RequestServices, RequestServiceImmutableCatalogs
 from .summon_featured_rotation import SummonFeaturedRotationPolicy
 from .server_clock import ServerClock, ServerDayClock
 from .daily_reset import (
@@ -75,11 +77,26 @@ class StateRepository:
         self._featured_rotation = SummonFeaturedRotationPolicy(
             self._data_dir(), self._featured_catalog, emit_startup_log=True
         )
+        # U4B Wave A: immutable synchronization metadata is startup-fatal and
+        # loaded once. It owns no player state and enables no new wire behavior.
+        self._synchronization_catalogs = SynchronizationCatalogs.load(self._data_dir())
+        # Pass281 bounded performance reconciliation: immutable source/config
+        # catalogs are app-scoped. Player/UoW/services remain request-scoped.
+        self._immutable_request_catalogs = RequestServiceImmutableCatalogs.load(
+            self._data_dir(), game_data=self._catalog, featured_catalog=self._featured_catalog
+        )
         self._daily_reset_registry = build_default_daily_reset_registry(self._data_dir())
         root = Path(multiuser_root or ((self.path.parent if self.path else Path("data")) / "server_state"))
         self.store = MultiUserDatabase(
             root, self._data_dir(), featured_rotation=self._featured_rotation
         )
+        # One canonical in-memory PlayerState per player_id. The global request
+        # lock remains in force in Pass281, so this changes reconstruction cost
+        # without increasing mutation concurrency. refresh() is the explicit
+        # durable reload/invalidation boundary.
+        self._player_working_set: dict[str, PlayerState] = {}
+        self._player_fingerprints: dict[str, tuple[int, int] | None] = {}
+        self._sandbox_player_id: str | None = None
 
         with self._lock:
             sandbox_player = self.store.import_legacy_sandbox(
@@ -88,9 +105,61 @@ class StateRepository:
                 legacy_state_path=self.legacy_path,
             )
             sandbox_session = self.store.ensure_sandbox_session()
+            self._cache_player(sandbox_player)
+            self._sandbox_player_id = str(sandbox_player.player_id)
             self._bind_session(sandbox_session)
             self._local.player = sandbox_player
             self._local.is_new_player = False
+
+    def _player_disk_fingerprint(self, player_id: Any) -> tuple[int, int] | None:
+        try:
+            st = self.store.player_path(str(player_id)).stat()
+        except FileNotFoundError:
+            return None
+        return (int(st.st_mtime_ns), int(st.st_size))
+
+    def _cache_player(self, player: PlayerState) -> PlayerState:
+        key = str(player.player_id)
+        self._player_working_set[key] = player
+        self._player_fingerprints[key] = self._player_disk_fingerprint(key)
+        return player
+
+    def _save_player_canonical(self, player: PlayerState) -> None:
+        self.store.save_player(player)
+        self._cache_player(player)
+
+    def _load_player_canonical(self, player_id: Any) -> PlayerState | None:
+        key = str(player_id)
+        cached = self._player_working_set.get(key)
+        if cached is not None:
+            # Preserve the historical next-request visibility of out-of-band
+            # durable edits without rebuilding PlayerState on every request.
+            # Normal UoW saves update this fingerprint immediately.
+            if self._player_disk_fingerprint(key) == self._player_fingerprints.get(key):
+                return cached
+        loaded = self.store.load_player(key)
+        if loaded is not None:
+            self._cache_player(loaded)
+        return loaded
+
+    def _reload_player_from_disk(self, player_id: Any) -> PlayerState | None:
+        key = str(player_id)
+        loaded = self.store.load_player(key)
+        if loaded is None:
+            self._player_working_set.pop(key, None)
+            self._player_fingerprints.pop(key, None)
+            return None
+        return self._cache_player(loaded)
+
+    def _sandbox_player_canonical(self) -> PlayerState:
+        if self._sandbox_player_id is not None:
+            cached = self._load_player_canonical(self._sandbox_player_id)
+            if cached is not None:
+                return cached
+        player = self.store.sandbox_player()
+        self._cache_player(player)
+        self._sandbox_player_id = str(player.player_id)
+        return player
 
     # ------------------------------------------------------------------
     # Request binding
@@ -151,11 +220,11 @@ class StateRepository:
 
         player: PlayerState | None = None
         if uid == SANDBOX_UID:
-            player = self.store.sandbox_player()
+            player = self._sandbox_player_canonical()
         elif region > 0:
             player_id = self.store.player_id_for_account_region(uid, region)
             if player_id:
-                player = self.store.load_player(player_id)
+                player = self._load_player_canonical(player_id)
         self._local.player = player
 
     @contextmanager
@@ -180,7 +249,7 @@ class StateRepository:
         with self._lock:
             player = getattr(self._local, "player", None)
             if player is not None:
-                loaded = self.store.load_player(str(player.player_id))
+                loaded = self._reload_player_from_disk(str(player.player_id))
                 if loaded is not None:
                     self._local.player = loaded
                     self._local.services = None
@@ -200,6 +269,80 @@ class StateRepository:
                 return None
             session = self.store.resolve_session(sid=str(sid))
             return self.store.identity_from_session(session) if session else None
+
+    def resolve_realtime_identity(self, token: str, region: int) -> AuthenticatedPlayerIdentity | None:
+        """Resolve a TCP login through canonical session/player indexes.
+
+        This deliberately does not touch ``_local`` request bindings or build a
+        ``RequestServices`` graph.  The repository lock is held only while the
+        durable session/account/player identity is resolved; callers receive an
+        immutable snapshot and must release this method before acquiring any
+        realtime-session lock.
+        """
+        try:
+            token_s = str(token)
+            region_i = int(region)
+        except (TypeError, ValueError):
+            return None
+        if not token_s or region_i <= 0:
+            return None
+
+        with self._lock:
+            session = self.store.resolve_session(token=token_s)
+            if session is None and token_s == SANDBOX_TOKEN:
+                session = self.store.ensure_sandbox_session()
+            if session is None:
+                return None
+
+            uid = str(session.get("uid", ""))
+            if not uid:
+                return None
+            if uid == SANDBOX_UID:
+                player = self._sandbox_player_canonical()
+                if int(player.region) != region_i:
+                    return None
+            else:
+                player_id = self.store.player_id_for_account_region(uid, region_i)
+                if not player_id:
+                    return None
+                player = self._load_player_canonical(player_id)
+                if player is None or int(player.region) != region_i:
+                    return None
+
+            return AuthenticatedPlayerIdentity(
+                uid=uid,
+                sid=str(session.get("sid", "")),
+                player_id=str(player.player_id),
+                region=region_i,
+                guild_id=int(player.guild_id or 0),
+            )
+
+    def current_realtime_identity(self) -> AuthenticatedPlayerIdentity | None:
+        """Snapshot the already-authenticated HTTP-bound player for MID192.
+
+        This is deliberately request-scoped and read-only. It does not resolve a
+        second session, does not create a player, and is used only so HTTP room
+        discovery applies the exact same room-admission policy as TCP_LOGIN.
+        """
+        with self._lock:
+            session = getattr(self._local, "session", None)
+            player = getattr(self._local, "player", None)
+            if not isinstance(session, dict) or player is None:
+                return None
+            uid = str(session.get("uid", ""))
+            sid = str(session.get("sid", ""))
+            if not uid or not sid:
+                return None
+            account_uid = str(getattr(player, "account_uid", "") or "")
+            if uid != SANDBOX_UID and account_uid and account_uid != uid:
+                return None
+            return AuthenticatedPlayerIdentity(
+                uid=uid,
+                sid=sid,
+                player_id=str(player.player_id),
+                region=int(player.region),
+                guild_id=int(player.guild_id or 0),
+            )
 
     def sdk_register(self, login: str, password: str) -> tuple[dict[str, Any] | None, str]:
         with self._lock:
@@ -232,7 +375,7 @@ class StateRepository:
             return []
         players: list[PlayerState] = []
         for player_id in self.store.account_player_ids(str(account.uid)):
-            player = self.store.load_player(player_id)
+            player = self._load_player_canonical(player_id)
             if player is not None:
                 players.append(player)
         return players
@@ -252,12 +395,12 @@ class StateRepository:
         region_name = str(region_name or self.region_name(region))
 
         if uid == SANDBOX_UID:
-            player = self.store.sandbox_player()
+            player = self._sandbox_player_canonical()
             old_region = int(player.region)
             player.set_region(region)
             player.account_uid = SANDBOX_UID
             player.token = str(account.token)
-            self.store.save_player(player)
+            self._save_player_canonical(player)
             if old_region != region:
                 self.store.move_account_region_player(SANDBOX_UID, old_region, region, str(player.player_id))
             self._local.player = player
@@ -267,7 +410,7 @@ class StateRepository:
 
         player_id = self.store.player_id_for_account_region(uid, region)
         if player_id:
-            player = self.store.load_player(player_id)
+            player = self._load_player_canonical(player_id)
             if player is None:
                 raise RuntimeError(f"player index points to missing player {player_id}")
             player.account_uid = uid
@@ -277,6 +420,7 @@ class StateRepository:
             return player, False
 
         player = self.store.create_fresh_player(uid=uid, region=region, region_name=region_name)
+        self._cache_player(player)
         self._local.player = player
         self._local.services = None
         self._local.is_new_player = True
@@ -315,16 +459,20 @@ class StateRepository:
         # Public/pre-auth handlers historically assume a player object. Keep the
         # sandbox fallback, but authenticated credential mutations only bind an
         # actual player after MID1 has selected the account-region character.
-        return self.store.sandbox_player()
+        return self._sandbox_player_canonical()
 
     def get_player_by_id(self, player_id: Any) -> PlayerState | None:
         with self._lock:
-            return self.store.load_player(str(player_id))
+            return self._load_player_canonical(str(player_id))
 
     def current_services_or_none(self) -> RequestServices | None:
         services = getattr(self._local, "services", None)
         player = getattr(self._local, "player", None)
         return services if services is not None and services.player is player else None
+
+    @property
+    def synchronization_catalogs(self) -> SynchronizationCatalogs:
+        return self._synchronization_catalogs
 
     def get_services(self) -> RequestServices:
         player = getattr(self._local, "player", None)
@@ -335,10 +483,12 @@ class StateRepository:
             services = RequestServices(
                 player,
                 self._data_dir(),
-                lambda: self.store.save_player(player),
+                lambda: self._save_player_canonical(player),
                 catalog=self._catalog,
                 featured_rotation=self._featured_rotation,
                 server_clock=self.server_clock,
+                synchronization_catalogs=self._synchronization_catalogs,
+                immutable_catalogs=self._immutable_request_catalogs,
             )
             self._local.services = services
         return services
@@ -352,7 +502,7 @@ class StateRepository:
             if services is not None and services.player is player:
                 services.uow.request_save()
             else:
-                self.store.save_player(player)
+                self._save_player_canonical(player)
 
     def evaluate_daily_reset(self, trigger_mid: int | None = None) -> DailyResetOutcome | None:
         """Materialize one bound player's source day before domain handling.
@@ -365,7 +515,7 @@ class StateRepository:
         player = getattr(self._local, "player", None)
         if player is None:
             return None
-        uow = UnitOfWork(player, lambda: self.store.save_player(player))
+        uow = UnitOfWork(player, lambda: self._save_player_canonical(player))
         coordinator = DailyResetCoordinator(
             player, uow, self.server_day_clock, self._daily_reset_registry
         )
@@ -400,6 +550,9 @@ class StateRepository:
 
     def get_hero_advanced_progression_repository(self):
         return self.get_services().hero_advanced
+
+    def get_emblem_service(self):
+        return self.get_services().emblem
 
     def get_white_album_service(self):
         return self.get_services().white_album
@@ -450,13 +603,13 @@ class StateRepository:
                 player = self.get_player()
                 old_region = int(player.region)
                 player.set_region(int(region))
-                self.store.save_player(player)
+                self._save_player_canonical(player)
                 if old_region != int(region):
                     self.store.move_account_region_player(SANDBOX_UID, old_region, int(region), str(player.player_id))
                 return
             player_id = self.store.player_id_for_account_region(str(account.uid), int(region))
             if player_id:
-                player = self.store.load_player(player_id)
+                player = self._load_player_canonical(player_id)
                 if player is not None:
                     self._local.player = player
                     self._local.services = None

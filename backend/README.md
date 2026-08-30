@@ -1,3 +1,44 @@
+# GXB backend v0.37.6 — Pass248.0
+
+Pass248 completes **Emblem I6 integration/hardening** static/regression acceptance and prepares the exact I7 stock-client test plan. No new Emblem feature route is introduced. A sealed-design gap is corrected: MID1400 Forge and MID1401 Reforge now require at least one canonical Blood-stage-3, level-100 Hero before any catalog/cost/RNG/state work, while Function45 remains guide-sensitive state rather than authorization and already-paid MID1405/MID1406 proposal recovery remains available. OTA remains **1.631.22**.
+
+## Pass248.0 — Emblem I6 Integration & Hardening
+
+- Current effective 4,370-file `src_64` remains authoritative and regenerates `emblem_source_catalog.json` byte-identically (`083f3d70767d5a97e6bdfb2984480658184455d36e5c74e8d44fa2445fd5d6e4`).
+- Fixed the Pass240 global operational-gate requirement omitted by I4/I5: Forge/Reforge require at least one Blood-stage-3 Hero at level >=100. Function45 is not authorization. Save/Abandon stay recovery-safe for already-paid pending proposals if eligibility later disappears.
+- Durable player-load maintenance now normalizes server-only `emblem_state`; Hero `inscript_items` is normalized to the current dense concrete-ID array, historical position maps migrate without inventing ownership, and new inserts fail closed on unknown/duplicate physical positions while removal remains a recovery path.
+- Structured `runtime_logs/emblem_events.jsonl` records only aggregate policy/proposal/counter evidence for I7 and never leaks internal state into stock response payloads. MIDs 1400-1407 are classified as the `emblem` runtime domain.
+- Integration loops cover Campaign Star/Heart-fragment acquisition anchors, MID1407 exchange -> Forge -> equip -> remove/dissolve, exact Heart MID83 compose -> Lv7 Forge, Scholarship physical positions/set compatibility, and all 14 source-present non-forge Honor artifacts remaining excluded from generation pools.
+- Dedicated I6 validation is 11/11; controlling I5 12/12, I4 7/7, I3 6/6, I2 7/7, I1 6/6, architecture/ROS/P2/Blood/cleanup/popup-revert/edge regressions remain green. Historical route-fence assertions superseded by I4/I5 remain explicitly non-controlling.
+- Rejected Blood completion `common_alert` remains absent; Occult MID2385 stays fenced; no nonce/receipt retrofit is added; `emblem-v1` outer Lv7 Scholarship rate remains **STRONG_INFERENCE + COMPATIBILITY_POLICY**, never official-server math.
+- **Runtime status:** I6 is static/regression accepted. I7 has not been executed. See `PASS248_EMBLEM_I7_STOCK_CLIENT_TEST_PLAN.md`.
+- **Next:** I7 stock-client Emblem acceptance; after success, Institute Alchemy.
+
+# GXB backend v0.37.5 — Pass247.0
+
+Pass247 completes **Emblem I5 Reforge** static/regression implementation. Stock MID1401 proposal generation, MID1405 Save, and MID1406 Abandon now use the Pass244 `EmblemOutcomePlanner`, independent Reforge pity counter, frozen/latest-proposal state, canonical `MutationSettlementService`, and one `PlayerUnitOfWork`. Current effective `src_64` remains authoritative; the `emblem-v1` Lv7 Scholarship outer gate remains an explicitly replaceable **STRONG_INFERENCE + COMPATIBILITY_POLICY**, not recovered official server mathematics. OTA remains **1.631.22**.
+
+## Pass247.0 — Emblem I5 Reforge
+
+- **SOURCE_FACT:** MID1401 sends `{item_id, rebuild_num=1|10, cost_type=1|2}`; `cost_type=1` is Crystal and `cost_type=2` is Mana. Costs are the source row's `change_crystal` or `change_gold`, multiplied by the requested count.
+- Server preflights source-medal ownership and the complete Mana/Crystal cost before any RNG, Reforge pity mutation, or proposal replacement. This is authoritative even for the stock Crystal branch, whose client-side insufficient-funds alert does not prevent the request from being sent.
+- Accepted MID1401 is nonce-less: every repeated accepted request is another paid proposal. Generation is sequential for 10x, Reforge pity evolves across all ten outcomes, and the latest proposal atomically replaces the previous pending proposal. The original medal remains owned until Save.
+- MID1405 accepts only a candidate from the latest frozen proposal. It performs no entropy and does not reinterpret the candidate under a newer policy; it atomically debits one original medal, credits the selected candidate, clears pending state, and returns stock-shaped `rebuild_items=[{table_id,item_num}]` without generic stack-credit double projection.
+- If the original medal disappears before MID1405, the server rejects the Save and durably clears the stale proposal so reacquisition cannot resurrect it. Superseded candidates and repeated Save after success fail closed.
+- MID1406 clears the current pending proposal with no refund or inventory mutation; repeated abandon with no pending proposal is a successful no-op.
+- Current-source Emblem catalog rebuild remains byte-identical (`083f3d70767d5a97e6bdfb2984480658184455d36e5c74e8d44fa2445fd5d6e4`) across all 4,370 effective `src_64` files.
+- Static/regression validation: dedicated I5 12/12; still-controlling I4 7/7, I3 6/6, I2 7/7, I1 6/6; Pass129 architecture 5/5; Pass110 ROS; P2 Stage-G; Blood MID867; cleanup; popup-revert; Pass232 edge/recovery. Historical route-fence assertions superseded by I4/I5 are excluded explicitly, not reinterpreted as failures.
+- **Runtime status:** I5 is static/regression accepted only. Stock-client runtime acceptance remains I7 after I6 integration/hardening.
+- **Next:** I6 Emblem integration/hardening, then I7 stock-client acceptance.
+
+# GXB backend v0.37.3 — Pass244.0
+
+Pass244 completes **Emblem I3 RNG/policy/pending-proposal foundation**. The internal `emblem-v1` compatibility ladder, source-weighted generated-candidate planner, independent Forge/Reforge miss counters, reforge current-result exclusion, strict frozen-proposal validation and latest-proposal-wins persistence are active internally. Public MID1400/1401/1405/1406 remain fail-closed until I4/I5. OTA remains **1.631.22**.
+
+# GXB backend v0.37.1 — Pass242.0
+
+Pass242 completes **Emblem I1 deterministic reconciliation**. MID1402/1403/1404/1407 now route through the single `EmblemService` owner and use the current-source concrete medal position map, fixing Scholarship equip/remove while preserving existing ordinary dissolve/Star-exchange behavior. MID1400/1401/1405/1406 remain fail-closed. OTA remains **1.631.22**.
+
 # GXB backend v0.20.0 — Pass205.0
 
 Pass205 begins **P2 Awakening/Blood-Awakening implementation** with the planning-frozen Stage A foundation only. It introduces an immutable effective-`src_64` Awakening source catalog, generation-aware `awakening_state` schema v2, pure stock-response projection helpers, bounded transition/terminal replay memory, canonical whole-aggregate persistence semantics for Awakening/future Occult state, and a generic side-effect-free derived-mutation-rule registry wired into canonical settlement. **No derived rules are registered and no P2 endpoint lifecycle is opened or corrected in this stage**; the old Pass74 outward behavior and existing mutation fences remain unchanged until their authorized implementation stages. OTA remains **1.631.12 / 142 entries**.
@@ -214,3 +255,16 @@ Run `python3 server.py`. Console output is automatically captured in `runtime_lo
 ## Pass227 Blood MID867 wire reconciliation
 
 Pass227 is a server-only compatibility correction based on clean stock-client runtime evidence. Blood MID867 now accepts the stock empty-Lua-table wire encoding `npc_ids={}` and the prior semantic-empty `[]` characterization, while still rejecting missing/null/scalar/nonempty values. The rule is scoped to Blood Awakening; ordinary Incubus shares MID867 and is not globally normalized. OTA remains `1.631.20`.
+
+## Pass241.0 — Emblem I0 Foundation
+
+Pass241 starts the sealed Pass240 Emblem implementation roadmap without activating public forge/reforge RNG. It packages a deterministic current-src64 Emblem source catalog and composes `EmblemSourceCatalog`, `EmblemPolicyRegistry`, `EmblemOutcomePlanner`, durable `EmblemStateRepository`, and a cohesive `EmblemService` inside the existing `RequestServices`/`PlayerUnitOfWork` graph. `player.domains.emblem_state` is a canonical-replacement server-only aggregate; Hero `inscript_items` remains the sole equipped-medal authority. Public MID1402/1403/1404/1407 routing remains on the accepted Pass232 owner for I0, while MID1400/1401/1405/1406 remain fail-closed. OTA remains `1.631.22`.
+
+
+## Pass243.0 — Emblem I2 Eligibility + Function45 + Heart
+
+Pass243 adds source-correct Emblem eligibility and Function45 reconciliation without opening Forge/Reforge RNG. MID1402 Insert now requires canonical Blood stage3 + Hero level100; MID1403 Remove remains recovery-safe. Function45 is announced through normal `new_funcs_` only when a qualifying Hero exists and is repaired on maintenance for historical accounts. MID83 gains the exact source Heart recipe `50001347 x60 -> 50001346` with zero Mana through the existing provider seam. MID1400/1401/1405/1406 remain fail-closed. OTA remains 1.631.22.
+
+
+### Pass246 Emblem I4
+MID1400 Forge is now implemented server-side with source-defined certificate/Heart cost preflight before RNG/pity mutation and atomic UoW settlement. MID1401/MID1405/MID1406 remain fail-closed. OTA remains 1.631.22.

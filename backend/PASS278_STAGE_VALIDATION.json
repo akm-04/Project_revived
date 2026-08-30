@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "pass": "278.0",
+  "status": "PASS",
+  "wave": "F_WHOLE_SYNCHRONIZATION_FOUNDATION_INTEGRATION_REGRESSION",
+  "runtime_behavior_changed": false,
+  "client_runtime_changed": false,
+  "whole_stack": {
+    "stage3_exact": 22,
+    "deferred_adapter_bootstrap_leak": 0,
+    "message_push_restart": true,
+    "story_redmark_derived": 2704,
+    "legacy_redmark_authority": false,
+    "mid192_tcp_admission_shared": true,
+    "postcommit_realtime_after_scope": true,
+    "realtime_session_persistence": false
+  },
+  "extension_contract_planes": 11,
+  "regression": {
+    "waves_A_F": "PASS",
+    "pass68_68_1_69_69_1": "PASS",
+    "pass70_70_1_71_79_83": "PASS",
+    "pass88_route_91": "PASS",
+    "pass129": "PASS",
+    "pass212": "PASS",
+    "pass227": "PASS",
+    "pass248": "11/11 PASS",
+    "catalog_validator": "PASS"
+  }
+}

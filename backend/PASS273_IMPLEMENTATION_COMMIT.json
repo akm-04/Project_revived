@@ -1,0 +1,16 @@
+{
+  "pass": "273.0",
+  "status": "U4B_WAVE_A_SYNCHRONIZATION_CATALOGS_POSTCOMMIT_FOUNDATION_STATIC_ACCEPTED",
+  "backend": "gxb-backend-v0.38.0-pass273.0",
+  "ota": "1.631.22",
+  "wave": "U4B_A",
+  "commit": "Pass273: implement frozen U4B Wave A only: load and fail-close immutable synchronization catalogs, preserve the exact accepted Stage3 bootstrap allow-list including evidence-labeled MID176 compatibility extra, add generated current-src64 MessagePush metadata, add strict commit-only post-commit topic staging to PlayerUnitOfWork, and drain committed intents on every HTTP request-scope exit while delivering only after the repository scope/lock is released. No realtime listener/events, hydration adapters, redmark behavior, MessagePush mutation, or client patch is activated.",
+  "design_authority": "Pass272 final U4B design seal over Pass266-271 R1-R6",
+  "next": "U4B Wave B: typed HTTP semantics + Mission/BattlePass projection, only after user authorization",
+  "runtime_scope": {
+    "behavior_neutral_catalog_load": true,
+    "post_commit_sink_default_none": true,
+    "realtime_enabled": false,
+    "client_runtime_changed": false
+  }
+}

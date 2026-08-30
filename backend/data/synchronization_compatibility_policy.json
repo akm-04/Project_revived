@@ -1,0 +1,207 @@
+{
+  "schema_version": 1,
+  "classification": "U4B_FINAL_FROZEN_METADATA",
+  "policies": [
+    {
+      "policy_id": "PRACTICE_INACTIVE_BASELINE",
+      "classification": "COMPATIBILITY_POLICY",
+      "owner_component": "DeferredUiStatusAdapterService:Practice",
+      "decision": {
+        "last_time": "ServerClock.now() at response assembly; do not persist fabricated timestamp",
+        "practice_attr": [
+          0,
+          0,
+          0
+        ],
+        "lock": [],
+        "times": 0,
+        "base_crystal": 0,
+        "base_mana": 0,
+        "bless_value": 0
+      },
+      "source_constraints": [
+        "all seven current-source fields present",
+        "numeric arithmetic safe",
+        "do not imply immediate practice-ready state"
+      ],
+      "rationale": "now suppresses false ready timing while keeping absence non-durable; exact official inactive values unrecovered",
+      "acceptance_gates": [],
+      "replacement_trigger": "recover official MID124 inactive/default math or canonical practice owner gains exact fields"
+    },
+    {
+      "policy_id": "TREASURE_INACTIVE_BASELINE",
+      "classification": "COMPATIBILITY_POLICY",
+      "owner_component": "DeferredUiStatusAdapterService:Treasure",
+      "decision": {
+        "teams_info": [],
+        "sp_info": {
+          "sp": 0,
+          "sp_last_refresh_time": 0
+        }
+      },
+      "source_constraints": [],
+      "rationale": "source-shaped empty read state with no fabricated team readiness",
+      "acceptance_gates": [],
+      "replacement_trigger": "canonical Treasure domain implemented or stronger source/runtime evidence"
+    },
+    {
+      "policy_id": "GUILD_WAR_INACTIVE_BASELINE",
+      "classification": "COMPATIBILITY_POLICY",
+      "owner_component": "DeferredUiStatusAdapterService:GuildWar",
+      "decision": {
+        "is_enroll": 0,
+        "step_id": "OMIT"
+      },
+      "source_constraints": [],
+      "rationale": "nil step is guarded; omit semantic phase instead of inventing one",
+      "acceptance_gates": [],
+      "replacement_trigger": "canonical Guild War status implemented/recovered"
+    },
+    {
+      "policy_id": "PET_CAMPAIGN_INACTIVE_INFO",
+      "classification": "COMPATIBILITY_POLICY",
+      "owner_component": "DeferredUiStatusAdapterService:PetCampaign816",
+      "decision": {
+        "normal": {
+          "now_floor": 0,
+          "max_floor": 0,
+          "begin_sweep_time": 0,
+          "is_can_sweep": 0,
+          "mission_sweep_times": 0,
+          "can_sweep_times": 0,
+          "challenge_times": 0
+        },
+        "is_super_open": 0,
+        "super": "OMIT"
+      },
+      "source_constraints": [],
+      "rationale": "",
+      "acceptance_gates": [],
+      "replacement_trigger": "canonical Pet Campaign gameplay implemented"
+    },
+    {
+      "policy_id": "PET_CAMPAIGN_INACTIVE_RED",
+      "classification": "COMPATIBILITY_POLICY",
+      "owner_component": "DeferredUiStatusAdapterService:PetCampaign822",
+      "decision": {
+        "now_floor": 0,
+        "max_floor": 0,
+        "begin_sweep_time": 0,
+        "is_can_sweep": 0,
+        "mission_sweep_times": 0,
+        "can_sweep_times": 0,
+        "challenge_times": 0
+      },
+      "source_constraints": [],
+      "rationale": "",
+      "acceptance_gates": [],
+      "replacement_trigger": "canonical Pet Campaign gameplay implemented"
+    },
+    {
+      "policy_id": "MISSION_REDMARK_POLICY",
+      "classification": "COMPATIBILITY_POLICY_WITH_SOURCE_BACKED_PREDICATES",
+      "owner_component": "RedmarkProjectionService",
+      "decision": {
+        "2704_story": "emit iff canonical story mission row is complete and unrewarded",
+        "2705_awake": "emit iff canonical Awakening mission row is complete and unrewarded",
+        "2701_daily": "disabled until canonical daily mission ownership exists",
+        "2702_grow": "disabled until canonical grow mission ownership exists",
+        "2703_weekly": "disabled; no sufficient direct-consumer/server predicate evidence",
+        "2706_partner": "disabled until canonical partner mission ownership exists"
+      },
+      "source_constraints": [],
+      "rationale": "",
+      "acceptance_gates": [],
+      "replacement_trigger": "canonical mission-family ownership or recovered predicate evidence"
+    },
+    {
+      "policy_id": "BATTLEPASS_REDMARK_POLICY",
+      "classification": "COMPATIBILITY_POLICY_MIRROR_CURRENT_CLIENT",
+      "owner_component": "RedmarkProjectionService",
+      "decision": {
+        "2801_level": "mirror current client isRedMarkShow using canonical point/awarded levels/is_advanced plus source-generated reward metadata",
+        "2802_mission": "emit iff any canonical BP mission is unawarded and count >= source-required count",
+        "2803_add_count": "disabled as persistent/foundation dot; reserve future refresh-only signal"
+      },
+      "source_constraints": [],
+      "rationale": "",
+      "acceptance_gates": [],
+      "replacement_trigger": "recovered official server-side BP redmark predicate or canonical event evidence"
+    },
+    {
+      "policy_id": "REALTIME_SEQUENCE",
+      "classification": "COMPATIBILITY_POLICY",
+      "owner_component": "RealtimeFrameEncoder",
+      "decision": 0,
+      "source_constraints": [],
+      "rationale": "captured Lua/native outbound examples use zero and client consumers do not expose sequence",
+      "acceptance_gates": [],
+      "replacement_trigger": "recover server sequence semantics"
+    },
+    {
+      "policy_id": "REALTIME_ENTERED_EXTRAS",
+      "classification": "COMPATIBILITY_POLICY",
+      "owner_component": "RealtimeSession",
+      "decision": "emit only {room_id}",
+      "source_constraints": [],
+      "rationale": "room_id is the only current source-required field; avoid fabricated extras",
+      "acceptance_gates": [],
+      "replacement_trigger": "source/runtime reveals required extras"
+    },
+    {
+      "policy_id": "REALTIME_PREAUTH_TIMEOUT",
+      "classification": "OPERATIONAL_POLICY",
+      "owner_component": "RealtimeServer",
+      "decision": 15,
+      "source_constraints": [],
+      "rationale": "stock client self-closes at 10s; server resource guard should not beat healthy client timeout",
+      "acceptance_gates": [],
+      "replacement_trigger": "operational evidence"
+    },
+    {
+      "policy_id": "REALTIME_IDLE_TIMEOUT",
+      "classification": "OPERATIONAL_POLICY",
+      "owner_component": "RealtimeServer",
+      "decision": 1320,
+      "source_constraints": [],
+      "rationale": "two 600s heartbeat intervals plus 120s tolerance",
+      "acceptance_gates": [],
+      "replacement_trigger": "operational evidence"
+    },
+    {
+      "policy_id": "REALTIME_OUTBOUND_BACKPRESSURE",
+      "classification": "OPERATIONAL_POLICY",
+      "owner_component": "RealtimeSession",
+      "decision": {
+        "max_frames": 256,
+        "max_bytes": 4194304,
+        "coalesce": "eligible TRANSIENT_INVALIDATION by key",
+        "overflow": "disconnect slow session; never block domain commit"
+      },
+      "source_constraints": [],
+      "rationale": "",
+      "acceptance_gates": [],
+      "replacement_trigger": "load/operational evidence"
+    },
+    {
+      "policy_id": "REALTIME_DEFAULT_ROLE",
+      "classification": "COMPATIBILITY_POLICY",
+      "owner_component": "TypedRealtimeEventPublisher",
+      "decision": "WORLD for player-scoped generic notice unless domain schema explicitly selects GUILD/SERVICE",
+      "source_constraints": [],
+      "rationale": "avoid duplicate delivery across three roles",
+      "acceptance_gates": [],
+      "replacement_trigger": "recovered per-event role evidence"
+    },
+    {
+      "policy_id": "REALTIME_AMF3_NUMERIC_PROFILE",
+      "classification": "COMPATIBILITY_POLICY",
+      "owner_component": "XinyoudiAmf3Codec",
+      "decision": "encode ordinary Lua-semantic numbers as AMF3 double; decoder accepts integer and double; schema may override only with evidence",
+      "source_constraints": [],
+      "rationale": "",
+      "acceptance_gates": [],
+      "replacement_trigger": "native/server vectors prove alternative marker policy"
+    }
+  ]
+}

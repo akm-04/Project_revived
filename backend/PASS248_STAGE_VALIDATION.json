@@ -1,0 +1,124 @@
+{
+  "pass": "248.0",
+  "wave": "Emblem I6",
+  "status": "PASS_STATIC_REGRESSION",
+  "ota": "1.631.22",
+  "checks": [
+    {
+      "id": "compileall",
+      "result": "PASS"
+    },
+    {
+      "id": "i6_integration_selftest",
+      "result": "PASS",
+      "detail": "11/11"
+    },
+    {
+      "id": "i5_regression",
+      "result": "PASS",
+      "detail": "12/12"
+    },
+    {
+      "id": "i4_controlling_regression",
+      "result": "PASS",
+      "detail": "7/7; historical I4-only Reforge fence assertion superseded by I5"
+    },
+    {
+      "id": "i3_controlling_regression",
+      "result": "PASS",
+      "detail": "6/6; historical public RNG fence assertion superseded by I4/I5"
+    },
+    {
+      "id": "i2_controlling_regression",
+      "result": "PASS",
+      "detail": "7/7; historical RNG fence assertion superseded by I4/I5"
+    },
+    {
+      "id": "i1_controlling_regression",
+      "result": "PASS",
+      "detail": "6/6; historical route-fence handler assertion superseded by I4/I5"
+    },
+    {
+      "id": "architecture_hygiene",
+      "result": "PASS",
+      "detail": "Pass129 5/5"
+    },
+    {
+      "id": "random_outcome_service",
+      "result": "PASS",
+      "detail": "Pass110"
+    },
+    {
+      "id": "p2_stage_g",
+      "result": "PASS"
+    },
+    {
+      "id": "blood_mid867",
+      "result": "PASS",
+      "detail": "stock npc_ids={} retained"
+    },
+    {
+      "id": "dev_cleanup",
+      "result": "PASS"
+    },
+    {
+      "id": "popup_revert",
+      "result": "PASS",
+      "detail": "rejected Blood completion common_alert remains absent"
+    },
+    {
+      "id": "pass232_edges",
+      "result": "PASS"
+    },
+    {
+      "id": "src64_catalog_rebuild",
+      "result": "PASS",
+      "detail": "current 4370-file src_64 rebuild byte-identical to packaged Emblem source catalog"
+    },
+    {
+      "id": "global_operational_gate",
+      "result": "PASS",
+      "detail": "MID1400/MID1401 require any canonical Blood-stage3 level100 Hero before cost/RNG/state; Function45 not auth"
+    },
+    {
+      "id": "proposal_recovery_after_eligibility_loss",
+      "result": "PASS",
+      "detail": "Save/Abandon recovery remains available for already-paid pending state"
+    },
+    {
+      "id": "durable_emblem_state_normalization",
+      "result": "PASS"
+    },
+    {
+      "id": "dense_equipment_hardening",
+      "result": "PASS",
+      "detail": "dense array migration; malformed duplicate/unknown-position insert fail-closed; removal remains recovery path"
+    },
+    {
+      "id": "integration_loops",
+      "result": "PASS",
+      "detail": "Star exchange->Forge->equip->remove/dissolve; Heart compose->Lv7 Forge; Scholarship sets/artifacts"
+    },
+    {
+      "id": "state_version_topology",
+      "result": "PASS",
+      "detail": "each committed integrated mutation advances canonical state_version once"
+    },
+    {
+      "id": "runtime_audit",
+      "result": "PASS",
+      "detail": "emblem_events.jsonl bounded aggregate; no candidate IDs/wire mutation"
+    }
+  ],
+  "guards": {
+    "MID1400": "OPEN_I4_STATIC_ACCEPTED_I6_HARDENED",
+    "MID1401": "OPEN_I5_STATIC_ACCEPTED_I6_HARDENED",
+    "MID1405": "OPEN_I5_STATIC_ACCEPTED_RECOVERY_SAFE",
+    "MID1406": "OPEN_I5_STATIC_ACCEPTED_RECOVERY_SAFE",
+    "MID1402_1403_1404_1407": "OPEN_I1_STATIC_ACCEPTED_I6_HARDENED",
+    "Occult_MID2385": "DEFERRED_FENCED",
+    "Blood_common_alert": "REJECTED_ABSENT",
+    "ScholarshipPolicy": "emblem-v1 COMPATIBILITY_POLICY_NOT_OFFICIAL_MATH"
+  },
+  "runtime_gate": "NOT_YET_STOCK_CLIENT_ACCEPTED; I7 plan ready"
+}

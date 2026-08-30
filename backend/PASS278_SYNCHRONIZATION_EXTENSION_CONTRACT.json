@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "pass": "278.0",
+  "status": "FROZEN_EXTENSION_POLICY",
+  "purpose": "Mandatory synchronization-impact declaration for future feature implementation passes.",
+  "rule": "Every newly implemented or materially expanded domain must classify each synchronization plane as REGISTER_HOOK or NOT_APPLICABLE_WITH_EVIDENCE; silence is not acceptance.",
+  "planes": [
+    {"id":"CANONICAL_OWNER","question":"Which existing/new domain owns each fact and mutation?","required":"one canonical owner; no UiState/catch-all synchronization persistence"},
+    {"id":"HYDRATION","question":"Does current src_64 lazily/periodically/bootstrap-read this domain?","required":"register/extend hydration contract/provider and presentation/single-flight policy only when source-backed; bootstrap remains exact allow-list"},
+    {"id":"GLOBAL_SEMANTICS","question":"Does a mutation require economy_, new_funcs_, or generic Mission/BattlePass redmarks_?","required":"stage typed semantic dirtiness through UoW; do not hand-edit global response envelopes"},
+    {"id":"BADGES","question":"Does current client expose a badge/redmark for this domain?","required":"derive from canonical state; generic redmarks_ stays Mission/BattlePass unless new current-source evidence explicitly broadens it"},
+    {"id":"DEFERRED_ADAPTER","question":"Is the read surface implemented while gameplay remains fenced?","required":"exact-MID read-only adapter + startup mutation-fence proof; remove/replace adapter when canonical domain implementation takes over"},
+    {"id":"PREFERENCES","question":"Does the feature own durable user preferences such as MessagePush?","required":"canonical domain preference service + source-shaped serializer; never conflate preference mutation with realtime delivery"},
+    {"id":"REALTIME","question":"Does committed state need transient notice/invalidation/chat delivery?","required":"domain-owned typed event/notice schema + explicit audience/role + stage realtime.transient only after canonical mutation; publisher owns no business state"},
+    {"id":"DURABILITY","question":"Must notification/reward delivery survive disconnect/restart?","required":"domain-owned durable outbox/receipt semantics (e.g. Commerce/Mail); never use transient realtime publisher as durable queue"},
+    {"id":"IDENTITY_ROOM","question":"Does feature alter region/guild/room membership or authenticated identity?","required":"reuse canonical identity/RealtimeRoomAdmissionPolicy; no parallel account/session/room authority"},
+    {"id":"CLIENT_COMPAT","question":"Does stock-client reconciliation require a patch?","required":"server/source-shape correction first; networking-core client patches remain measured last-mile evidence-gated"},
+    {"id":"REGRESSION","question":"What synchronization acceptance gates can this feature affect?","required":"rerun directly affected Wave A-F tests + controlling lower foundations; add cross-user leakage/restart/response-loss tests where applicable"}
+  ],
+  "examples": {
+    "Mail":"canonical durable mailbox + optional typed notice/invalidation + domain-owned durable delivery; do not move rewards into realtime",
+    "Guild":"canonical guild state + guild room admission facts + replace deferred MID1152 adapter when implemented + typed guild notices if source-backed",
+    "Chat":"domain chat schema/routing on authenticated transport; transport remains session infrastructure, not chat history owner",
+    "Store":"Economy/Commerce settlement + global economy semantics; realtime only if current source proves push/invalidation",
+    "Arena_PvP":"canonical domain state + typed notices/refresh invalidation + cross-user concurrency tests before live multi-user expansion"
+  }
+}

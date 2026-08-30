@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "pass": "275.0",
+  "status": "PASS",
+  "wave": "C_SERVER_HYDRATION_DEFERRED_ADAPTERS_MESSAGE_PUSH",
+  "stage3_mids": 22,
+  "deferred_mids": [124, 530, 816, 822, 1152],
+  "message_push_ids": [1,2,3,4,5,6,7,8,9,10,11,12],
+  "message_push_storage": "sorted_unique_list",
+  "runtime_client_changed": false,
+  "realtime_started": false,
+  "controlling_regression": "PASS"
+}

@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "pass": "277.0",
+  "status": "PASS",
+  "current_src64": {
+    "archive": "all-assest-rechecked-1.zip",
+    "archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+    "Backend.lua_sha256": "95378e2b0be8180df6de27e9e430c630bcfe46c080e1f91ef5f6d74bdbb1b840",
+    "SocketTCP.lua_sha256": "814f9533590f0617637e3057df8975f3be4aba9a29a3a0355fa38209dabf853e",
+    "facts": [
+      "MID192 is authenticated HTTP discovery and its consumers require host, port and room_id.",
+      "WORLD, SERVICE and GUILD TCP login all reuse token, region and room_id.",
+      "PLAYER_NOTICE and WORLD_NOTICE are present in the generic socket MID-to-event mapping.",
+      "FORCE_RELOAD is special-cased only on the WORLD socket; it is not present in the generic MID-to-event mapping for service/guild sockets.",
+      "No current-source evidence authorizes Wave E to invent Mail/Arena/Guild business notice schemas."
+    ]
+  },
+  "native": {
+    "archive": "latest_apk-smali-full.zip",
+    "archive_sha256": "fcc0f03e5973dd41a190a4bd390a8c4c5185f5f7cf2d4eeb0bcad696cfee7517",
+    "libcocos2dlua_sha256": "c89c33e81466c0453213f65c67e0818a1581756ee0b45b89c0fc89a6d4f8e4c3",
+    "role": "Wave-D wire/framing authority remains unchanged; Wave E changes routing/publication ownership only."
+  },
+  "epistemic_boundary": "Default player publication to WORLD, sequence zero and server operational queue policies remain explicit compatibility/operational decisions rather than recovered original-server implementation facts."
+}

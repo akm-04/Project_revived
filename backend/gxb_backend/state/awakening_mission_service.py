@@ -23,6 +23,7 @@ from .mutation_settlement_service import MutationSettlementError, MutationSettle
 from .player_state import PlayerState
 from .awakening_state_v2 import AwakeningStateV2
 from .awakening_projection_builder import AwakeningProjectionBuilder
+from .emblem_eligibility_coordinator import EmblemEligibilityCoordinator
 from .unit_of_work import OperationContext, UnitOfWork
 
 
@@ -47,6 +48,7 @@ class AwakeningMissionService:
         source: AwakeningSourceCatalog | None = None,
         projection: AwakeningProjectionBuilder | None = None,
         compatibility: AwakeningCompatibilityPolicy | None = None,
+        emblem_eligibility: EmblemEligibilityCoordinator | None = None,
     ) -> None:
         self.player = player
         self.data_dir = Path(data_dir)
@@ -61,6 +63,7 @@ class AwakeningMissionService:
         self.source = source if source is not None else AwakeningSourceCatalog(self.data_dir)
         self.projection = projection if projection is not None else AwakeningProjectionBuilder()
         self.compatibility = compatibility if compatibility is not None else AwakeningCompatibilityPolicy(self.data_dir)
+        self.emblem_eligibility = emblem_eligibility
         self.state = AwakeningStateV2(player, uow)
         self._validate_compatibility_policy()
 
@@ -86,6 +89,21 @@ class AwakeningMissionService:
 
     def _set_active(self, awake_type: int, rec: dict[str, Any] | None) -> None:
         self.state.set_active(awake_type, rec)
+        # Mission Function 27 is a derived family. Only canonical ordinary/twice
+        # Awakening transitions dirty it; deferred Pet Awakening remains fenced.
+        if awake_type in (self.HERO, self.HERO_TWICE) and self.uow.active:
+            self.uow.stage_semantic("redmarks_", 27)
+
+    def _mark_redmark_dirty(self) -> None:
+        self.uow.stage_semantic("redmarks_", 27)
+
+    def has_claimable_awake(self) -> bool:
+        """Read-only readiness for the one current client AWAKE_TASK badge."""
+        for awake_type in (self.HERO, self.HERO_TWICE):
+            rec = self._active(awake_type)
+            if isinstance(rec, dict) and bool(rec.get("complete")):
+                return True
+        return False
 
     def active_snapshot(self, awake_type: Any) -> dict[str, Any] | None:
         """Return a detached canonical active-mission snapshot for collaborators."""
@@ -236,7 +254,9 @@ class AwakeningMissionService:
         if active:
             if self._int(active.get("mission_id"))==mission_id:
                 replay=self.state.find_replay(awake_type=awake_type,generation=self._int(active.get("generation")),mission_id=mission_id,operation="open")
-                if replay is not None:return replay
+                if replay is not None:
+                    self._mark_redmark_dirty()
+                    return replay
             return {"error_code":1,"msg":"awake_mission_already_active"}
         hero=self._hero_by_table(self._int(row.get("table_id"),0))
         if hero is None:return {"error_code":1,"msg":"awake_hero_not_owned"}
@@ -264,7 +284,10 @@ class AwakeningMissionService:
         mission_id=self._int(req.get("mission_id"),0); awake_type=self._int(req.get("awake_type"),0); rec=self._active(awake_type)
         if not rec:
             replay=self.state.find_latest_replay(awake_type=awake_type,mission_id=mission_id,operation="give_up")
-            return replay if replay is not None else {"error_code":1,"msg":"awake_mission_not_active"}
+            if replay is not None:
+                self._mark_redmark_dirty()
+                return replay
+            return {"error_code":1,"msg":"awake_mission_not_active"}
         if self._int(rec.get("mission_id"),0)!=mission_id:return {"error_code":1,"msg":"awake_mission_not_active"}
         row=self._row(mission_id,awake_type) or {}; generation=self._int(rec.get("generation"),1)
         def mutate():
@@ -341,9 +364,13 @@ class AwakeningMissionService:
             # response-loss recovery. Mission IDs are disjoint across types/stages.
             for candidate in (self.HERO,self.HERO_TWICE):
                 replay=self.state.find_latest_replay(awake_type=candidate,mission_id=mission_id,operation="claim_stage1")
-                if replay is not None: return replay
+                if replay is not None:
+                    self._mark_redmark_dirty()
+                    return replay
                 replay=self.state.find_latest_replay(awake_type=candidate,mission_id=mission_id,operation="claim_terminal",terminal=True)
-                if replay is not None: return replay
+                if replay is not None:
+                    self._mark_redmark_dirty()
+                    return replay
             return None
         if not rec.get("complete"):
             return {"error_code": 1, "msg": "awake_mission_incomplete"}
@@ -405,6 +432,18 @@ class AwakeningMissionService:
                 actor=ActorRef(player_id=str(self.player.player_id)),
                 expected_state_version=None,idempotency=IdempotencySpec(),preconditions=(),operations=tuple(ops),
             ))
+            # Pass243 I2: after the durable stage-3 Hero mutation, reconcile the
+            # normal Function45 guide state from canonical Hero/player state.
+            # Persist new_funcs_ in the replay payload as well as the semantic
+            # channel so a commit-then-response-loss retry can still deliver the
+            # stock Function Open event.
+            if awake_type == self.HERO_TWICE and self.emblem_eligibility is not None:
+                opened = self.emblem_eligibility.on_blood_terminal(pid)
+                if opened:
+                    response["new_funcs_"] = sorted({
+                        *[self._int(v, 0) for v in (response.get("new_funcs_") or []) if self._int(v, 0) > 0],
+                        *[self._int(v, 0) for v in opened if self._int(v, 0) > 0],
+                    })
             self._set_active(awake_type, None)
             self.state.remember_transition(
                 awake_type=awake_type,generation=generation,mission_id=mission_id,
@@ -495,7 +534,10 @@ class AwakeningMissionService:
                 awake_type=self.HERO_TWICE,generation=generation,mission_id=mid,
                 operation="blood_trial_complete",
             )
-            return replay if replay is not None else {"error_code":1,"msg":"blood_awake_result_already_complete"}
+            if replay is not None:
+                self._mark_redmark_dirty()
+                return replay
+            return {"error_code":1,"msg":"blood_awake_result_already_complete"}
         session = rec.get("trial_session") if isinstance(rec.get("trial_session"), dict) else None
         if not session or self._int(session.get("mission_id"),0)!=mid or self._int(session.get("incubus_id"),0)!=mid or self._int(session.get("generation"),0)!=generation:
             return {"error_code": 1, "msg": "blood_awake_trial_session_missing"}

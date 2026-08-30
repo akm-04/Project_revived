@@ -1,0 +1,77 @@
+{
+  "pass": "243.0",
+  "wave": "Emblem I2",
+  "status": "PASS",
+  "ota": "1.631.22",
+  "checks": [
+    {
+      "id": "compileall",
+      "result": "PASS"
+    },
+    {
+      "id": "i2_selftest",
+      "result": "PASS",
+      "detail": "8/8"
+    },
+    {
+      "id": "i1_regression",
+      "result": "PASS",
+      "detail": "Pass242 7/7"
+    },
+    {
+      "id": "architecture_hygiene",
+      "result": "PASS",
+      "detail": "Pass129 5/5"
+    },
+    {
+      "id": "p2_stage_g",
+      "result": "PASS"
+    },
+    {
+      "id": "blood_mid867",
+      "result": "PASS"
+    },
+    {
+      "id": "dev_cleanup",
+      "result": "PASS",
+      "detail": "Pass230; intended PYTHONPATH=. launcher"
+    },
+    {
+      "id": "popup_correction",
+      "result": "PASS"
+    },
+    {
+      "id": "pass232_edges",
+      "result": "PASS"
+    },
+    {
+      "id": "heart_mid83_projection",
+      "result": "PASS",
+      "detail": "empty wire body; no generic Stack award synthesis"
+    },
+    {
+      "id": "function45_replay",
+      "result": "PASS",
+      "detail": "terminal MID161 replay preserves stage3 + new_funcs_[45]"
+    },
+    {
+      "id": "multiuser_maintenance",
+      "result": "PASS",
+      "detail": "historical qualifier repaired; I2 state stable on second normalization"
+    }
+  ],
+  "guards": {
+    "MID1400": "FENCED",
+    "MID1401": "FENCED",
+    "MID1405": "FENCED",
+    "MID1406": "FENCED",
+    "ScholarshipPolicy": "INACTIVE_I3"
+  },
+  "source_facts": {
+    "function_id": 45,
+    "function_level": 100,
+    "hero_gate": "twice_awake_stage>=3 AND hero.level>=100",
+    "heart_recipe": "50001347 x60 -> 50001346",
+    "heart_mana": 0
+  }
+}

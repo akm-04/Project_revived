@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "classification": "U4B_FINAL_FROZEN_METADATA",
+  "channels": [
+    {
+      "channel": "economy_",
+      "canonical_owner": "Economy/Settlement/domain resource owners",
+      "stage_type": "partial cumulative map",
+      "merge": "MAP_MERGE_EXPLICIT_THEN_STAGED; canonical normalizer wins for registered cumulative keys",
+      "profile_gate": "economy_ in ProjectionProfile.global_fields",
+      "empty_policy": "omit when no values",
+      "classification": "EXISTING_IMPLEMENTATION_EXTENDED"
+    },
+    {
+      "channel": "new_funcs_",
+      "canonical_owner": "FunctionStateRepository",
+      "stage_type": "positive function id",
+      "merge": "SET_UNION_SORTED with explicit handler list",
+      "profile_gate": "new_funcs_ in ProjectionProfile.global_fields",
+      "empty_policy": "omit",
+      "classification": "EXISTING_IMPLEMENTATION_EXTENDED"
+    },
+    {
+      "channel": "redmarks_",
+      "canonical_owner": "Mission/BattlePass domain facts via RedmarkProjectionService",
+      "stage_type": "dirty family/function id only, never a persisted wire blob",
+      "merge": "FAMILY_REPLACE; post-commit canonical derived family wins; empty redmark_list is emitted for a dirty family when needed to clear client state",
+      "profile_gate": "redmarks_ in ProjectionProfile.global_fields",
+      "empty_policy": "omit if no family dirty",
+      "classification": "NEW_R2_DESIGN"
+    }
+  ]
+}

@@ -1,0 +1,34 @@
+{
+  "pass": "273.0",
+  "backend": "0.38.0",
+  "wave": "U4B_A",
+  "status": "PASS",
+  "catalogs": {
+    "hydration_contracts": 37,
+    "stage3_count": 22,
+    "deferred_mids": [
+      124,
+      530,
+      816,
+      822,
+      1152
+    ],
+    "message_push_count": 12,
+    "realtime_enabled": 0
+  },
+  "uow_postcommit": {
+    "strict_active_transaction": true,
+    "commit_only_visibility": true,
+    "rollback_drop": true,
+    "commit_failure_drop": true,
+    "no_save_drop": true,
+    "deep_copy": true,
+    "all_topic_drain": true
+  },
+  "dispatcher_exit": {
+    "normal_exit_drained_once": true,
+    "exception_exit_drained_once": true,
+    "delivery_after_request_scope": true,
+    "sink_failure_isolated": true
+  }
+}

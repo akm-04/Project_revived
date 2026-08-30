@@ -1,0 +1,97 @@
+{
+  "pass": "246.0",
+  "wave": "Emblem I4",
+  "status": "PASS_STATIC_REGRESSION",
+  "ota": "1.631.22",
+  "checks": [
+    {
+      "id": "compileall",
+      "result": "PASS"
+    },
+    {
+      "id": "i4_selftest",
+      "result": "PASS",
+      "detail": "8/8"
+    },
+    {
+      "id": "i3_controlling_regression",
+      "result": "PASS",
+      "detail": "6/6; historical four-way public fence assertion superseded only for MID1400"
+    },
+    {
+      "id": "i2_controlling_regression",
+      "result": "PASS",
+      "detail": "7/7; historical all-RNG-fenced assertion superseded only for MID1400"
+    },
+    {
+      "id": "i1_regression",
+      "result": "PASS",
+      "detail": "7/7"
+    },
+    {
+      "id": "architecture_hygiene",
+      "result": "PASS",
+      "detail": "Pass129 5/5"
+    },
+    {
+      "id": "random_outcome_service",
+      "result": "PASS",
+      "detail": "Pass110"
+    },
+    {
+      "id": "p2_stage_g",
+      "result": "PASS"
+    },
+    {
+      "id": "blood_mid867",
+      "result": "PASS",
+      "detail": "stock npc_ids={} boundary retained"
+    },
+    {
+      "id": "dev_cleanup",
+      "result": "PASS"
+    },
+    {
+      "id": "popup_revert",
+      "result": "PASS",
+      "detail": "rejected Blood completion common_alert remains absent"
+    },
+    {
+      "id": "pass232_edges",
+      "result": "PASS"
+    },
+    {
+      "id": "src64_catalog_rebuild",
+      "result": "PASS",
+      "detail": "current 4370-file src_64 rebuild byte-identical to packaged emblem_source_catalog.json"
+    },
+    {
+      "id": "preflight_before_entropy",
+      "result": "PASS",
+      "detail": "invalid/insufficient certificate or Heart consumes zero entropy and leaves Forge counter/inventory unchanged"
+    },
+    {
+      "id": "post_entropy_rollback",
+      "result": "PASS",
+      "detail": "forced final settlement failure rolls back costs, generated item, pity state and journal"
+    },
+    {
+      "id": "stock_projection",
+      "result": "PASS",
+      "detail": "raw inscript_items only for medal; stack journal not projected as generic award"
+    },
+    {
+      "id": "nonce_less_repeat",
+      "result": "PASS",
+      "detail": "wire-identical accepted repeat is another paid Forge; no receipt staged"
+    }
+  ],
+  "guards": {
+    "MID1400": "OPEN_I4_STATIC_ACCEPTED",
+    "MID1401": "FENCED",
+    "MID1405": "FENCED",
+    "MID1406": "FENCED",
+    "ScholarshipPolicy": "emblem-v1 COMPATIBILITY_POLICY_NOT_OFFICIAL_MATH"
+  },
+  "runtime_gate": "NOT_YET_STOCK_CLIENT_ACCEPTED; I7 remains runtime acceptance wave"
+}

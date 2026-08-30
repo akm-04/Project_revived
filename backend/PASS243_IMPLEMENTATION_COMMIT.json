@@ -1,0 +1,8 @@
+{
+  "pass": "243.0",
+  "status": "EMBLEM_I2_ELIGIBILITY_FUNCTION45_HEART_STATIC_ACCEPTED",
+  "backend": "gxb-backend-v0.37.2-pass243.0",
+  "ota": "1.631.22",
+  "commit": "Pass243: add guide-sensitive Function45 reconciliation and canonical Blood-stage3/level100 Emblem insert eligibility; preserve recovery-safe removal; add exact zero-Mana Heart MID83 provider and replay-safe terminal unlock; keep all Emblem RNG routes fenced.",
+  "next": "I3 RNG/policy/proposal foundation only; keep MID1400/1401/1405/1406 fail-closed."
+}

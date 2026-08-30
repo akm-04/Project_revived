@@ -1,0 +1,8 @@
+{
+  "pass": "244.0",
+  "status": "EMBLEM_I3_RNG_POLICY_PROPOSAL_FOUNDATION_STATIC_ACCEPTED",
+  "backend": "gxb-backend-v0.37.3-pass244.0",
+  "ota": "1.631.22",
+  "commit": "Pass244: activate internal versioned emblem-v1 fixed-point Scholarship policy; add source-weighted generated-candidate planner, reforge current-result exclusion, durable independent pity counters, strict frozen proposal validation and latest-proposal-wins staging; keep MID1400/1401/1405/1406 fail-closed.",
+  "next": "I4 MID1400 Forge release only; authoritative cost preflight before entropy; keep reforge/save/abandon fenced."
+}

@@ -14,11 +14,15 @@ from gxb_backend.content import GameDataCatalog
 from gxb_backend.content.horcrux_source_catalog import HorcruxSourceCatalog
 from gxb_backend.content.summon_featured_catalog import SummonFeaturedCatalog
 from gxb_backend.content.white_album_source_catalog import WhiteAlbumSourceCatalog
+from gxb_backend.content.emblem_source_catalog import EmblemSourceCatalog
 from gxb_backend.content.workshop_source_catalog import WorkshopSourceCatalog
 
 from .campaign_composition import CampaignComposition
 from .economy_repository import EconomyRepository
 from .function_state_repository import FunctionStateRepository
+from .emblem_eligibility_coordinator import EmblemEligibilityCoordinator
+from .emblem_policy import EmblemPolicyRegistry
+from .emblem_state_repository import EmblemStateRepository
 from .hero_progression_repository import HeroProgressionRepository
 from .hero_repository import HeroRepository
 from .horcrux_policy import HorcruxPolicyRegistry
@@ -88,6 +92,18 @@ class PlayerMaintenanceServices:
             data_dir=self.data_dir,
             economy=self.economy,
             catalog=self.catalog,
+        )
+        # Pass243 I2: maintenance repairs Function45 for already-qualified
+        # historical accounts without a request semantic callback / popup.
+        self.emblem_source = EmblemSourceCatalog(self.data_dir)
+        self.emblem_eligibility = EmblemEligibilityCoordinator(
+            player, self.emblem_source, self.function_state, self.heroes
+        )
+        # Pass248 I6: durable load-time normalization owns server-only Emblem
+        # pity/proposal schema repair just like request composition does.
+        self.emblem_policy = EmblemPolicyRegistry(self.data_dir)
+        self.emblem_state = EmblemStateRepository(
+            player, self.emblem_source, self.emblem_policy
         )
         # Pass166 H1: maintenance uses the same Horcrux source/policy/repository
         # contracts as request services, but performs only load-time normalization.

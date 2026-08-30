@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "pass": "275.0",
+  "backend_version": "0.40.0",
+  "status": "U4B_WAVE_C_SERVER_HYDRATION_DEFERRED_ADAPTERS_MESSAGE_PUSH_STATIC_ACCEPTED",
+  "base": "gxb-backend-v0.39.0-pass274.0",
+  "scope": [
+    "exact registry-driven Stage3 hydration snapshot assembly preserving the accepted 22-MID set",
+    "source-shaped read-only deferred status adapters for MIDs 124/530/816/822/1152",
+    "startup mutation-fence proof for every deferred adapter's adjacent gameplay routes",
+    "canonical durable MessagePush preference service with current-src_64 list/set semantics for MIDs 1025/1026",
+    "legacy MessagePush dict-to-list load normalization",
+    "explicit Hero Practice 125-128 fail-closed mutation contracts required by the deferred-adapter validator"
+  ],
+  "source_rule": "current effective src_64 continuously cross-checked; historical source never overrides current behavior",
+  "explicit_non_goals": [
+    "Wave D realtime codec/session runtime",
+    "Wave E typed realtime publisher/MID192 integration",
+    "gameplay implementation behind Treasure/Guild War/Pet Campaign/Hero Practice deferred status adapters",
+    "client hydration/request/loading patches"
+  ]
+}

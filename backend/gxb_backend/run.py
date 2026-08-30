@@ -6,7 +6,6 @@ import threading
 import time
 
 from gxb_backend.app_factory import create_app
-from gxb_backend.chat.stub import ChatStubServer
 from gxb_backend.config import SETTINGS
 from gxb_backend.updates.local_update import load_manifest
 from gxb_backend.version import ARTIFACT_VERSION
@@ -56,8 +55,9 @@ def main() -> None:
         )
     print("==================================================")
 
-    if SETTINGS.enable_chat_stub:
-        ChatStubServer(SETTINGS.chat_host, SETTINGS.chat_port).start()
+    realtime_runtime = app.extensions.get("gxb_realtime_runtime")
+    if SETTINGS.enable_realtime_server and realtime_runtime is not None:
+        realtime_runtime.start()
 
     t_sdk = threading.Thread(target=_run_flask, args=(app, SETTINGS.sdk_port), daemon=True, name="gxb-sdk-http")
     t_engine = threading.Thread(target=_run_flask, args=(app, SETTINGS.engine_port), daemon=True, name="gxb-engine-http")
@@ -69,6 +69,9 @@ def main() -> None:
             time.sleep(3600)
     except KeyboardInterrupt:
         print("\nStopping GXB backend.")
+    finally:
+        if realtime_runtime is not None:
+            realtime_runtime.stop()
 
 
 if __name__ == "__main__":

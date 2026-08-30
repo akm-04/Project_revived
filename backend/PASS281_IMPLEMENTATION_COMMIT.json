@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "pass": "281.0",
+  "status": "STATIC_ACCEPTED_RUNTIME_RETEST_REQUIRED",
+  "backend_version": "0.45.0",
+  "ota": "1.631.24",
+  "server_runtime_changed": true,
+  "client_runtime_changed": true,
+  "server_changes": [
+    "StateRepository canonical player working set with disk fingerprint invalidation",
+    "app-scoped immutable RequestServices catalog bundle"
+  ],
+  "client_change": "Pass280 request-registry line reverted to exact current stock source; cumulative OTA otherwise preserved",
+  "global_lock": "UNCHANGED; still a known structural concurrency ceiling",
+  "next": "Run clean stock-client lobby smoke without HTTP-uploading resource probe; compare lobby duration and MID124/MID1056 fanout. If backend drain is fast but duplicates remain, proceed to bounded HydrationCoordinator."
+}

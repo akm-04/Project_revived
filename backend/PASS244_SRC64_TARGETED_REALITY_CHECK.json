@@ -1,0 +1,48 @@
+{
+  "pass": "244.0",
+  "status": "PASS_WITH_SERVER_UNKNOWN",
+  "authority": "current src_64 packaged from all-assest-rechecked-1.zip",
+  "checks": {
+    "inscription_rate_rows": [
+      {
+        "id": 1,
+        "rate_suit": 0,
+        "rate_step": 0.1,
+        "max_num": 1000
+      },
+      {
+        "id": 2,
+        "rate_suit": 0,
+        "rate_step": 1,
+        "max_num": 100
+      }
+    ],
+    "literal_callers_excluding_table": [],
+    "caller_count": 0,
+    "outer_rate_classification": "STRONG_INFERENCE+COMPATIBILITY_POLICY",
+    "negative_claim": "not recovered official server math",
+    "wire_fact": "MID1401 has no proposal nonce/id; MID1405 sends selected item only; latest-proposal-wins remains source-shaped compatibility design"
+  },
+  "source_hashes": {
+    "inscription_rate": {
+      "path": "source_evidence/src_64/data/tables/inscription_rate.lua",
+      "sha256": "2bdb4a95b2bcd0850b6bd7661fdf047c95633a8c880a0b4cc8b5e85b0aa4a6e8"
+    },
+    "inscription": {
+      "path": "source_evidence/src_64/data/tables/inscription.lua",
+      "sha256": "dc0d5d8b0de66b9495665cb6a300aa9bdb5979065f28c565ede35e447adce23c"
+    },
+    "misc": {
+      "path": "source_evidence/src_64/data/tables/misc.lua",
+      "sha256": "058cf5719421ed71a12083a8c95b0ccded7204bedb5fa1263d508e2fa4257f9a"
+    },
+    "window": {
+      "path": "source_evidence/src_64/app/windows/InscriptionWindow.lua",
+      "sha256": "4ca0f6a8b6d70caf60205efe14a55665142acd1f3ac9b93d6dc014d5a8bd04e6"
+    },
+    "ten_window": {
+      "path": "source_evidence/src_64/app/windows/InscriptionTenTimesWindow.lua",
+      "sha256": "2dae5c579e44bd9a092ca534b6050c06f9718b4566ef1d9cdfb381ff97b480c1"
+    }
+  }
+}

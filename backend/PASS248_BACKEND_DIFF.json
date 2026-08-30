@@ -1,0 +1,141 @@
+{
+  "pass": "248.0",
+  "base": "gxb-backend-v0.37.5-pass247.0",
+  "target": "gxb-backend-v0.37.6-pass248.0",
+  "added": [
+    {
+      "path": "PASS248_EMBLEM_I6_INTEGRATION_HARDENING_REPORT.md",
+      "sha256": "0f686d318a7fb6d4caadb3b97aec84b555bf3c88f49e618aca50755ed4704503",
+      "size": 4333
+    },
+    {
+      "path": "PASS248_EMBLEM_I7_STOCK_CLIENT_TEST_PLAN.md",
+      "sha256": "556aa0a24ec9b40329dfad45ecae5723c0b34aba283d540d36d8464611a0bcc8",
+      "size": 9296
+    },
+    {
+      "path": "PASS248_I7_CLIENT_TEST_CHECKLIST.json",
+      "sha256": "15ef678cffc64403172bf2eeeb8189f67f8f1c609c40e46b98179bc9298d2ec0",
+      "size": 864
+    },
+    {
+      "path": "PASS248_IMPLEMENTATION_COMMIT.json",
+      "sha256": "cfff8380a4d69e3885598898ed26064afc7d2790c733ed7378914e565d84f714",
+      "size": 871
+    },
+    {
+      "path": "PASS248_SRC64_TARGETED_REALITY_CHECK.json",
+      "sha256": "c1e46212c4a64ea43f11f4400838a1a1e2cfe2331fd23f18d1b6a5cb5b5cb1e7",
+      "size": 3260
+    },
+    {
+      "path": "PASS248_STAGE_VALIDATION.json",
+      "sha256": "b8d6e0f522b4b2a43685933db660a951ab695c51da6dbe9a808b79b5a7141340",
+      "size": 3541
+    },
+    {
+      "path": "tools/selftest_pass248_emblem_i6_integration.py",
+      "sha256": "3a660e24bbc930765bbeed3337d2ba772741b99a1794d3b7d77c24d4941ee74b",
+      "size": 14805
+    }
+  ],
+  "removed": [],
+  "changed": [
+    {
+      "path": "README.md",
+      "old_sha256": "ef8b2405bf7b5c5ec515b4ac3ff7e662ed90b4ef9aa5fca41a5bfbef7b98ea37",
+      "new_sha256": "5a85fc3877f703104ab83dd02733ca574189217bc9431bb47fb980a9a055b8eb",
+      "old_size": 36995,
+      "new_size": 39661
+    },
+    {
+      "path": "UPDATE_README.md",
+      "old_sha256": "976e4b17e03fe31cda79b0b2830fc0c1779641059ea2742064e520e56c84b5ab",
+      "new_sha256": "140768f7a6875c6ead336ea64f93fd64c3d5004077a7d3ab441e93f21c1b8a5e",
+      "old_size": 3697,
+      "new_size": 1465
+    },
+    {
+      "path": "VERSION.json",
+      "old_sha256": "0c80c42dab0c6078c259ca41c42fa877701cb90c28823a233b137abc11d99981",
+      "new_sha256": "33cf6b7bf884faf97758845f68033d4698ca0395233090abab1f82b6d9a5b875",
+      "old_size": 596,
+      "new_size": 624
+    },
+    {
+      "path": "gxb_backend/dispatch/engine_dispatcher.py",
+      "old_sha256": "84df898770707d077bb2b9ac0828c360a519d9a014664a0ddb95a02643810528",
+      "new_sha256": "c4eb06512e804265288864c9560e05d23497d568f516e62f2dafcf9a89d4b742",
+      "old_size": 35197,
+      "new_size": 35591
+    },
+    {
+      "path": "gxb_backend/observability/runtime_logger.py",
+      "old_sha256": "be6296c48a039108b3699c7b54400ee07121c8779e67200c03c631006f15d780",
+      "new_sha256": "28d41abb7305d078439ef03e700ad3be37262b8e7a2ec0a849d97b4588323944",
+      "old_size": 2829,
+      "new_size": 3808
+    },
+    {
+      "path": "gxb_backend/state/emblem_eligibility_coordinator.py",
+      "old_sha256": "cdbfbf285e6450761a822669b76117c9dbe8ef47971ac60e6412c2d07801d0d5",
+      "new_sha256": "b6e8cc2097ed543024d230ab53e97914be5ef9e9a54e3bc7f7b6f93a674e4654",
+      "old_size": 4365,
+      "new_size": 4929
+    },
+    {
+      "path": "gxb_backend/state/emblem_service.py",
+      "old_sha256": "dad624417f16f94bd49754f2bbb7642917cc50bde94cfede0719ff9f461c4f02",
+      "new_sha256": "166b1a9c713f01db664b2b74c50d944543ebd7218615abf41f0d790524337f88",
+      "old_size": 29034,
+      "new_size": 31936
+    },
+    {
+      "path": "gxb_backend/state/hero_repository.py",
+      "old_sha256": "cb8bae9258d1b7f53f7f7c4f440cdfcc521237845887afd6bc7bfc8803d13831",
+      "new_sha256": "be7ed885f9e492933be5a051dd20bc52500cab0fd9f08bf655acfac6c2a169ae",
+      "old_size": 35651,
+      "new_size": 36454
+    },
+    {
+      "path": "gxb_backend/state/maintenance_services.py",
+      "old_sha256": "a7738e3b7fa592a2f5ca8c67719bcc69fa3ce27e70a5557f6358fd35d767b09e",
+      "new_sha256": "652322c8d58e3dda6df50d2c3ed8638c202a41d070e2590a098cd964de0abb31",
+      "old_size": 6649,
+      "new_size": 7093
+    },
+    {
+      "path": "gxb_backend/state/multiuser_database.py",
+      "old_sha256": "78abdbcec79f21f757da68d088ba7548a36a49a33bd8ac1a5184c232e89546c4",
+      "new_sha256": "ebd6e356462f9644e596919966718a2329e30c0672bfd45aa8e05bde706679eb",
+      "old_size": 57014,
+      "new_size": 57251
+    },
+    {
+      "path": "memory.md",
+      "old_sha256": "ca71394802cec692fbe8e9c09de0a27ac3132218aed6add45565afe5c5c6af4a",
+      "new_sha256": "b6f161a39ed59e5198e8c4e5ffc54c277a347acc9d14a946104c03ecbf23f623",
+      "old_size": 27193,
+      "new_size": 30184
+    },
+    {
+      "path": "tools/selftest_pass246_emblem_i4_forge.py",
+      "old_sha256": "3cfaa5176a1f5d7d897b0113b98a1c0c8d3b9cdad71cb4b900a6776624a78cf6",
+      "new_sha256": "27ff5e0c61e42aa6250ade6e80ff1d5d6ae920801cf450be039c3e4d7ea87602",
+      "old_size": 12594,
+      "new_size": 12764
+    },
+    {
+      "path": "tools/selftest_pass247_emblem_i5_reforge.py",
+      "old_sha256": "a95e98eb492e23c25b9375e2a8ec4f303fd3e13d39a5aacbb26d69462c1015ca",
+      "new_sha256": "e9dfe685e2f417e289d1b7744a7b3f0af169e9b7aa2861998b5e97c6b2fb4599",
+      "old_size": 21071,
+      "new_size": 21241
+    }
+  ],
+  "summary": {
+    "added": 7,
+    "removed": 0,
+    "changed": 13
+  }
+}

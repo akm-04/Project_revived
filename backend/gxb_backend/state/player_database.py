@@ -118,6 +118,10 @@ CANONICAL_REPLACE_DICT_PATHS: tuple[tuple[str, ...], ...] = (
     ("player", "domains", "workshop_state", "book_info"),
     ("player", "domains", "workshop_state", "cabinet_info", "cost_snapshot"),
     ("player", "domains", "workshop_state", "building_jobs"),
+    # Pass241 Emblem I0: this is a complete domain-owned aggregate. Whole-dict
+    # replacement is required so clearing a pending proposal cannot resurrect
+    # stale nested candidates through extension-preserving persistence merge.
+    ("player", "domains", "emblem_state"),
 )
 
 
@@ -179,10 +183,36 @@ class JsonPlayerDatabase:
                         if sub_key in PLAYER_FIELD_NAMES:
                             flat_player[sub_key] = sub_value
         flat_player["persistence_state"] = normalize_persistence_state(flat_player.get("persistence_state"))
+        flat_player["message_pushes"] = cls.normalize_message_pushes(flat_player.get("message_pushes"))
         player = PlayerState(**flat_player)
         if isinstance(player_data, dict):
             setattr(player, "_json_source_player", copy.deepcopy(player_data))
         return player
+
+
+    @staticmethod
+    def normalize_message_pushes(value: Any) -> list[int]:
+        """Normalize legacy MessagePush storage to current-source list semantics.
+
+        Current MessagePush.update consumes player_info.message_pushes with ipairs.
+        Older backend revisions persisted a dict; truthy numeric keys are migrated
+        conservatively while malformed/out-of-range values are discarded.
+        """
+        enabled: set[int] = set()
+        if isinstance(value, dict):
+            rows = [key for key, flag in value.items() if flag]
+        elif isinstance(value, (list, tuple, set)):
+            rows = list(value)
+        else:
+            rows = []
+        for raw in rows:
+            try:
+                message_type = int(raw)
+            except (TypeError, ValueError):
+                continue
+            if 1 <= message_type <= 12:
+                enabled.add(message_type)
+        return sorted(enabled)
 
     def save(self, account: AccountIdentity, player: PlayerState) -> None:
         payload = self.serialize(account, player)

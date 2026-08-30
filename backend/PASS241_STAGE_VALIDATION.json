@@ -1,0 +1,80 @@
+{
+  "pass": "241.0",
+  "wave": "Emblem I0",
+  "status": "PASS",
+  "base_backend": {
+    "artifact": "gxb-backend-v0.35.3-pass232.0.zip",
+    "sha256": "21494d9476d148ffb9a405c76d9cb824d8284a5cdfd319f1204e4e257794fb13"
+  },
+  "release_version": "0.37.0",
+  "ota": "1.631.22",
+  "client_payload_changed": false,
+  "source_authority": {
+    "artifact": "all-assest-rechecked-1.zip",
+    "sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+    "effective_src64": "app-assets/output/assets/src_64",
+    "source_evidence_hashes": {
+      "source_evidence/src_64/data/tables/inscription.lua": "dc0d5d8b0de66b9495665cb6a300aa9bdb5979065f28c565ede35e447adce23c",
+      "source_evidence/src_64/data/tables/inscription_pos.lua": "714644c260a86581d04880289dd6e36abdfd446fc0f7c25342b4fe870d6a10cf",
+      "source_evidence/src_64/data/tables/inscription_rate.lua": "2bdb4a95b2bcd0850b6bd7661fdf047c95633a8c880a0b4cc8b5e85b0aa4a6e8",
+      "source_evidence/src_64/data/tables/inscription_suit.lua": "cd5e0f6438d34a3d597c9d25175f7fee81f14eb4808439d60b272fa2a2e4ca25",
+      "source_evidence/src_64/data/tables/function.lua": "a240254e79ccfd41862f3d6289f4f5fd09280ac3e197f51bc14b896a62c10010",
+      "source_evidence/src_64/app/model/Inscription.lua": "d14a19472279d2eb911a824bbd4bd053f4d1cdede9c16e4080518488bd7b066f",
+      "source_evidence/src_64/app/common/tables/InscriptionTable.lua": "643f1b935b3fa18c9b9289b527ed3f25a0c109e663c2b8b56a642b88695eced0",
+      "source_evidence/src_64/app/common/tables/InscriptionSuitTable.lua": "cd315ed3116e1930cc1b371c5823a6a790784f19195b7563c2fd5db3132cf669",
+      "source_evidence/src_64/app/windows/InscriptionWindow.lua": "4ca0f6a8b6d70caf60205efe14a55665142acd1f3ac9b93d6dc014d5a8bd04e6",
+      "source_evidence/src_64/app/windows/InscriptionTenTimesWindow.lua": "2dae5c579e44bd9a092ca534b6050c06f9718b4566ef1d9cdfb381ff97b480c1"
+    }
+  },
+  "catalog_census": {
+    "forge_rows": 23,
+    "concrete_items": 254,
+    "ordinary_candidates": 210,
+    "scholarship_items": 30,
+    "non_forge_honor_artifacts": 14,
+    "sets": 12,
+    "dynamic_scholarship_positions": 30
+  },
+  "tests": [
+    {
+      "name": "python compileall",
+      "status": "PASS"
+    },
+    {
+      "name": "selftest_pass241_emblem_i0_foundation.py",
+      "status": "PASS"
+    },
+    {
+      "name": "selftest_pass129_architecture_hygiene.py",
+      "status": "PASS",
+      "cases": 5
+    },
+    {
+      "name": "selftest_pass212_p2_stage_g.py",
+      "status": "PASS"
+    },
+    {
+      "name": "selftest_pass227_blood_mid867_wire.py",
+      "status": "PASS"
+    },
+    {
+      "name": "selftest_pass230_p2_smoke_cleanup.py",
+      "status": "PASS"
+    },
+    {
+      "name": "selftest_pass231_forward_popup_revert.py",
+      "status": "PASS"
+    },
+    {
+      "name": "selftest_pass232_event_recovery_and_log_rollover.py",
+      "status": "PASS"
+    }
+  ],
+  "behavior_guards": {
+    "mid1400_1401_1405_1406": "UNCHANGED_FAIL_CLOSED_PUBLIC_ROUTING",
+    "mid1402_1403_1404_1407": "UNCHANGED_PASS232_PUBLIC_OWNER_UNTIL_I1",
+    "emblem_outer_scholarship_gate": "DISABLED_I0_NO_ENTROPY",
+    "blood_popup": "PASS231_ACCEPTED_NO_CUSTOM_POPUP_PRESERVED"
+  },
+  "next": "I1 deterministic ownership reconciliation; public RNG stays fenced."
+}

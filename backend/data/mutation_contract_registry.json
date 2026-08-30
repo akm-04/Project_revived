@@ -108,6 +108,54 @@
     },
     {
       "backend_capability": "EXPLICIT_FAIL_CLOSED",
+      "domain": "hero_practice",
+      "enforcement": "BLOCK_PHASE1",
+      "firewall_fallback": "HTTP_409_MUTATION_CONTRACT_UNIMPLEMENTED",
+      "mid": 125,
+      "name": "PRACTICE",
+      "required_capability": "DURABLE_MUTATION_OR_EXPLICIT_FAIL_CLOSED",
+      "risk_tier": "A",
+      "source_effect_class": "SERVER_MUTATION_COMMAND",
+      "source_evidence": "Pass269 R4 fence requirement + current src_64 Practice mutation callback family; authoritative roll/save algorithm remains unrecovered."
+    },
+    {
+      "backend_capability": "EXPLICIT_FAIL_CLOSED",
+      "domain": "hero_practice",
+      "enforcement": "BLOCK_PHASE1",
+      "firewall_fallback": "HTTP_409_MUTATION_CONTRACT_UNIMPLEMENTED",
+      "mid": 126,
+      "name": "PRACTICE_SAVE",
+      "required_capability": "DURABLE_MUTATION_OR_EXPLICIT_FAIL_CLOSED",
+      "risk_tier": "A",
+      "source_effect_class": "SERVER_MUTATION_COMMAND",
+      "source_evidence": "Pass269 R4 fence requirement + current src_64 Practice mutation callback family; authoritative roll/save algorithm remains unrecovered."
+    },
+    {
+      "backend_capability": "EXPLICIT_FAIL_CLOSED",
+      "domain": "hero_practice",
+      "enforcement": "BLOCK_PHASE1",
+      "firewall_fallback": "HTTP_409_MUTATION_CONTRACT_UNIMPLEMENTED",
+      "mid": 127,
+      "name": "PRACTICE_AUTO",
+      "required_capability": "DURABLE_MUTATION_OR_EXPLICIT_FAIL_CLOSED",
+      "risk_tier": "A",
+      "source_effect_class": "SERVER_MUTATION_COMMAND",
+      "source_evidence": "Pass269 R4 fence requirement + current src_64 Practice mutation callback family; authoritative roll/save algorithm remains unrecovered."
+    },
+    {
+      "backend_capability": "EXPLICIT_FAIL_CLOSED",
+      "domain": "hero_practice",
+      "enforcement": "BLOCK_PHASE1",
+      "firewall_fallback": "HTTP_409_MUTATION_CONTRACT_UNIMPLEMENTED",
+      "mid": 128,
+      "name": "WASH_BY_TICKET",
+      "required_capability": "DURABLE_MUTATION_OR_EXPLICIT_FAIL_CLOSED",
+      "risk_tier": "A",
+      "source_effect_class": "SERVER_MUTATION_COMMAND",
+      "source_evidence": "Pass269 R4 fence requirement + current src_64 Practice mutation callback family; authoritative roll/save algorithm remains unrecovered."
+    },
+    {
+      "backend_capability": "EXPLICIT_FAIL_CLOSED",
       "domain": "pet_practice",
       "enforcement": "BLOCK_PHASE1",
       "firewall_fallback": "HTTP_409_MUTATION_CONTRACT_UNIMPLEMENTED",
@@ -1038,6 +1086,30 @@
       "risk_tier": "A",
       "source_effect_class": "SERVER_MUTATION_COMMAND",
       "source_evidence": "Pass102 source callback audit: successful response mutates authoritative client/server state; current route lacks durable ownership."
+    },
+    {
+      "backend_capability": "CANONICAL_DURABLE_PREFERENCE",
+      "domain": "message_push_preferences",
+      "enforcement": "ALLOW_CANONICAL",
+      "firewall_fallback": "NONE",
+      "mid": 1025,
+      "name": "MESSAGE_PUSH_ADD",
+      "required_capability": "DURABLE_PREFERENCE_MUTATION",
+      "risk_tier": "B",
+      "source_effect_class": "PREFERENCE_MUTATION",
+      "source_evidence": "Current MessagePush.lua setState uses message_type and consumes success only; player_info.message_pushes is current-source list semantics."
+    },
+    {
+      "backend_capability": "CANONICAL_DURABLE_PREFERENCE",
+      "domain": "message_push_preferences",
+      "enforcement": "ALLOW_CANONICAL",
+      "firewall_fallback": "NONE",
+      "mid": 1026,
+      "name": "MESSAGE_PUSH_REMOVE",
+      "required_capability": "DURABLE_PREFERENCE_MUTATION",
+      "risk_tier": "B",
+      "source_effect_class": "PREFERENCE_MUTATION",
+      "source_evidence": "Current MessagePush.lua setState uses message_type and consumes success only; player_info.message_pushes is current-source list semantics."
     },
     {
       "backend_capability": "SESSION_TERMINAL_PENDING",

@@ -1,0 +1,483 @@
+{
+  "schema_version": 1,
+  "classification": "CURRENT_SRC64_GENERATED_SOURCE_CATALOG",
+  "source_metadata": {
+    "mission_table": {
+      "path": "data/tables/battlepass_mission.lua",
+      "sha256": "91a5fd2337b9959408eaf107f4f53317b88c102aa235b79b0da70c35153e420f"
+    },
+    "reward_table": {
+      "path": "data/tables/battlepass_reward.lua",
+      "sha256": "07cbf775cb09ffb9e4f15df5de0a23918b6d43297bca1d1fe3e913ea360d190b"
+    },
+    "misc_table": {
+      "path": "data/tables/misc.lua",
+      "sha256": "058cf5719421ed71a12083a8c95b0ccded7204bedb5fa1263d508e2fa4257f9a"
+    },
+    "model": {
+      "path": "app/model/BattlePass.lua",
+      "sha256": "b3522ac63ca7276b3aa71ea1b6eb64606dc7406cb77e159d27cdde98b5887cd8"
+    },
+    "mission_wrapper": {
+      "path": "app/common/tables/BattlePassMissionTable.lua",
+      "sha256": "611a1052d1b8634acd272001b4c7daa27859e1712b3ff08d203e70c8e5c3bc28"
+    },
+    "reward_wrapper": {
+      "path": "app/common/tables/BattlePassRewardTable.lua",
+      "sha256": "dce906b8f7bb23892b5a738728c2415c7bb20be07b403b032c8f45310980ed64"
+    }
+  },
+  "consumer_fact": "BattlePass.isRedMarkShow derives level-up readiness from point/awarded levels and reward gift availability; BattlePass.getTaskDatas derives mission readiness from positional mission_list/mission_counts/is_award and battlepass_mission.count.",
+  "constants": {
+    "point_per_level": 100,
+    "award_max_level": 100,
+    "award_loop_range": 10
+  },
+  "mission_required_counts": {
+    "1": 1,
+    "2": 1,
+    "3": 20,
+    "4": 100,
+    "5": 10,
+    "6": 10,
+    "7": 5,
+    "8": 3,
+    "9": 1000000,
+    "10": 3,
+    "11": 1,
+    "12": 1,
+    "13": 1,
+    "14": 1,
+    "15": 50,
+    "16": 4,
+    "17": 1,
+    "18": 4000,
+    "19": 20,
+    "20": 30,
+    "21": 3,
+    "22": 3,
+    "23": 100,
+    "24": 3,
+    "25": 5,
+    "26": 20,
+    "27": 1,
+    "28": 30,
+    "29": 10,
+    "30": 10,
+    "31": 20,
+    "32": 20,
+    "33": 10,
+    "34": 300,
+    "35": 3,
+    "36": 80,
+    "37": 100,
+    "38": 1,
+    "39": 10,
+    "40": 200,
+    "41": 10,
+    "42": 30,
+    "43": 40
+  },
+  "rewards": {
+    "1": {
+      "common_gift": 90036001,
+      "special_gift": 90036201
+    },
+    "2": {
+      "common_gift": 90036002,
+      "special_gift": 90036202
+    },
+    "3": {
+      "common_gift": 90036003,
+      "special_gift": 90036203
+    },
+    "4": {
+      "common_gift": 90036004,
+      "special_gift": 90036204
+    },
+    "5": {
+      "common_gift": 90036005,
+      "special_gift": 90036205
+    },
+    "6": {
+      "common_gift": 90036006,
+      "special_gift": 90036206
+    },
+    "7": {
+      "common_gift": 90036007,
+      "special_gift": 90036207
+    },
+    "8": {
+      "common_gift": 90036008,
+      "special_gift": 90036208
+    },
+    "9": {
+      "common_gift": 90036009,
+      "special_gift": 90036209
+    },
+    "10": {
+      "common_gift": 90036010,
+      "special_gift": 90036210
+    },
+    "11": {
+      "common_gift": 90036011,
+      "special_gift": 90036211
+    },
+    "12": {
+      "common_gift": 90036012,
+      "special_gift": 90036212
+    },
+    "13": {
+      "common_gift": 90036013,
+      "special_gift": 90036213
+    },
+    "14": {
+      "common_gift": 90036014,
+      "special_gift": 90036214
+    },
+    "15": {
+      "common_gift": 90036015,
+      "special_gift": 90036215
+    },
+    "16": {
+      "common_gift": 90036016,
+      "special_gift": 90036216
+    },
+    "17": {
+      "common_gift": 90036017,
+      "special_gift": 90036217
+    },
+    "18": {
+      "common_gift": 90036018,
+      "special_gift": 90036218
+    },
+    "19": {
+      "common_gift": 90036019,
+      "special_gift": 90036219
+    },
+    "20": {
+      "common_gift": 90036020,
+      "special_gift": 90036220
+    },
+    "21": {
+      "common_gift": 90036021,
+      "special_gift": 90036221
+    },
+    "22": {
+      "common_gift": 90036022,
+      "special_gift": 90036222
+    },
+    "23": {
+      "common_gift": 90036023,
+      "special_gift": 90036223
+    },
+    "24": {
+      "common_gift": 90036024,
+      "special_gift": 90036224
+    },
+    "25": {
+      "common_gift": 90036025,
+      "special_gift": 90036225
+    },
+    "26": {
+      "common_gift": 90036026,
+      "special_gift": 90036226
+    },
+    "27": {
+      "common_gift": 90036027,
+      "special_gift": 90036227
+    },
+    "28": {
+      "common_gift": 90036028,
+      "special_gift": 90036228
+    },
+    "29": {
+      "common_gift": 90036029,
+      "special_gift": 90036229
+    },
+    "30": {
+      "common_gift": 90036030,
+      "special_gift": 90036230
+    },
+    "31": {
+      "common_gift": 90036031,
+      "special_gift": 90036231
+    },
+    "32": {
+      "common_gift": 90036032,
+      "special_gift": 90036232
+    },
+    "33": {
+      "common_gift": 90036033,
+      "special_gift": 90036233
+    },
+    "34": {
+      "common_gift": 90036034,
+      "special_gift": 90036234
+    },
+    "35": {
+      "common_gift": 90036035,
+      "special_gift": 90036235
+    },
+    "36": {
+      "common_gift": 90036036,
+      "special_gift": 90036236
+    },
+    "37": {
+      "common_gift": 90036037,
+      "special_gift": 90036237
+    },
+    "38": {
+      "common_gift": 90036038,
+      "special_gift": 90036238
+    },
+    "39": {
+      "common_gift": 90036039,
+      "special_gift": 90036239
+    },
+    "40": {
+      "common_gift": 90036040,
+      "special_gift": 90036240
+    },
+    "41": {
+      "common_gift": 90036041,
+      "special_gift": 90036241
+    },
+    "42": {
+      "common_gift": 90036042,
+      "special_gift": 90036242
+    },
+    "43": {
+      "common_gift": 90036043,
+      "special_gift": 90036243
+    },
+    "44": {
+      "common_gift": 90036044,
+      "special_gift": 90036244
+    },
+    "45": {
+      "common_gift": 90036045,
+      "special_gift": 90036245
+    },
+    "46": {
+      "common_gift": 90036046,
+      "special_gift": 90036246
+    },
+    "47": {
+      "common_gift": 90036047,
+      "special_gift": 90036247
+    },
+    "48": {
+      "common_gift": 90036048,
+      "special_gift": 90036248
+    },
+    "49": {
+      "common_gift": 90036049,
+      "special_gift": 90036249
+    },
+    "50": {
+      "common_gift": 90036050,
+      "special_gift": 90036250
+    },
+    "51": {
+      "common_gift": 90036051,
+      "special_gift": 90036251
+    },
+    "52": {
+      "common_gift": 90036052,
+      "special_gift": 90036252
+    },
+    "53": {
+      "common_gift": 90036053,
+      "special_gift": 90036253
+    },
+    "54": {
+      "common_gift": 90036054,
+      "special_gift": 90036254
+    },
+    "55": {
+      "common_gift": 90036055,
+      "special_gift": 90036255
+    },
+    "56": {
+      "common_gift": 90036056,
+      "special_gift": 90036256
+    },
+    "57": {
+      "common_gift": 90036057,
+      "special_gift": 90036257
+    },
+    "58": {
+      "common_gift": 90036058,
+      "special_gift": 90036258
+    },
+    "59": {
+      "common_gift": 90036059,
+      "special_gift": 90036259
+    },
+    "60": {
+      "common_gift": 90036060,
+      "special_gift": 90036260
+    },
+    "61": {
+      "common_gift": 90036061,
+      "special_gift": 90036261
+    },
+    "62": {
+      "common_gift": 90036062,
+      "special_gift": 90036262
+    },
+    "63": {
+      "common_gift": 90036063,
+      "special_gift": 90036263
+    },
+    "64": {
+      "common_gift": 90036064,
+      "special_gift": 90036264
+    },
+    "65": {
+      "common_gift": 90036065,
+      "special_gift": 90036265
+    },
+    "66": {
+      "common_gift": 90036066,
+      "special_gift": 90036266
+    },
+    "67": {
+      "common_gift": 90036067,
+      "special_gift": 90036267
+    },
+    "68": {
+      "common_gift": 90036068,
+      "special_gift": 90036268
+    },
+    "69": {
+      "common_gift": 90036069,
+      "special_gift": 90036269
+    },
+    "70": {
+      "common_gift": 90036070,
+      "special_gift": 90036270
+    },
+    "71": {
+      "common_gift": 90036071,
+      "special_gift": 90036271
+    },
+    "72": {
+      "common_gift": 90036072,
+      "special_gift": 90036272
+    },
+    "73": {
+      "common_gift": 90036073,
+      "special_gift": 90036273
+    },
+    "74": {
+      "common_gift": 90036074,
+      "special_gift": 90036274
+    },
+    "75": {
+      "common_gift": 90036075,
+      "special_gift": 90036275
+    },
+    "76": {
+      "common_gift": 90036076,
+      "special_gift": 90036276
+    },
+    "77": {
+      "common_gift": 90036077,
+      "special_gift": 90036277
+    },
+    "78": {
+      "common_gift": 90036078,
+      "special_gift": 90036278
+    },
+    "79": {
+      "common_gift": 90036079,
+      "special_gift": 90036279
+    },
+    "80": {
+      "common_gift": 90036080,
+      "special_gift": 90036280
+    },
+    "81": {
+      "common_gift": 90036081,
+      "special_gift": 90036281
+    },
+    "82": {
+      "common_gift": 90036082,
+      "special_gift": 90036282
+    },
+    "83": {
+      "common_gift": 90036083,
+      "special_gift": 90036283
+    },
+    "84": {
+      "common_gift": 90036084,
+      "special_gift": 90036284
+    },
+    "85": {
+      "common_gift": 90036085,
+      "special_gift": 90036285
+    },
+    "86": {
+      "common_gift": 90036086,
+      "special_gift": 90036286
+    },
+    "87": {
+      "common_gift": 90036087,
+      "special_gift": 90036287
+    },
+    "88": {
+      "common_gift": 90036088,
+      "special_gift": 90036288
+    },
+    "89": {
+      "common_gift": 90036089,
+      "special_gift": 90036289
+    },
+    "90": {
+      "common_gift": 90036090,
+      "special_gift": 90036290
+    },
+    "91": {
+      "common_gift": 0,
+      "special_gift": 0
+    },
+    "92": {
+      "common_gift": 0,
+      "special_gift": 0
+    },
+    "93": {
+      "common_gift": 0,
+      "special_gift": 0
+    },
+    "94": {
+      "common_gift": 0,
+      "special_gift": 0
+    },
+    "95": {
+      "common_gift": 0,
+      "special_gift": 0
+    },
+    "96": {
+      "common_gift": 0,
+      "special_gift": 0
+    },
+    "97": {
+      "common_gift": 0,
+      "special_gift": 0
+    },
+    "98": {
+      "common_gift": 0,
+      "special_gift": 0
+    },
+    "99": {
+      "common_gift": 0,
+      "special_gift": 0
+    },
+    "100": {
+      "common_gift": 90036100,
+      "special_gift": 90036300
+    }
+  }
+}

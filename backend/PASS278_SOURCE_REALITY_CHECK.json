@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "pass": "278.0",
+  "status": "PASS",
+  "authority": "CURRENT_SRC64_AND_PASS277_EXECUTABLE",
+  "current_src64": {
+    "archive": "all-assest-rechecked-1.zip",
+    "archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+    "rule": "Wave F introduces no new source behavior; Waves A-E current-source decisions are regression-validated as one system."
+  },
+  "native": {
+    "archive": "latest_apk-smali-full.zip",
+    "archive_sha256": "fcc0f03e5973dd41a190a4bd390a8c4c5185f5f7cf2d4eeb0bcad696cfee7517",
+    "libcocos2dlua_sha256": "c89c33e81466c0453213f65c67e0818a1581756ee0b45b89c0fc89a6d4f8e4c3",
+    "rule": "Wave D framing authority unchanged."
+  },
+  "runtime_delta": "No gxb_backend/*.py runtime source differs from sealed Pass277; Wave F adds integration tests/policy/release metadata only."
+}

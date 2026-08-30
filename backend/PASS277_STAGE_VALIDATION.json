@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "pass": "277.0",
+  "status": "PASS",
+  "wave": "E_TYPED_REALTIME_PUBLISHER_MID192_HTTP_INTEGRATION",
+  "mid192": {
+    "valid_roles": ["WORLD", "SERVICE", "GUILD"],
+    "invalid_or_wrong_region_http_status": 409,
+    "success_shape": ["host", "port", "room_id"]
+  },
+  "publisher": {
+    "post_commit_topic": "realtime.transient",
+    "publication_enabled_mids": [32784, 36854, 36855],
+    "production_notice_schemas": 0,
+    "force_reload_roles": ["WORLD"],
+    "default_player_role": "WORLD",
+    "slow_consumer_isolation": true
+  },
+  "domain_business_state_added": false,
+  "client_runtime_changed": false,
+  "controlling_regression": "PASS"
+}

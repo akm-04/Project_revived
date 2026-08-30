@@ -7,7 +7,7 @@ class PracticeHandlers:
         self.ctx = ctx
 
     def hero_info(self, req: dict) -> dict:
-        return self.ctx.state.get_player().practice_payload(False)
+        return self.ctx.state.get_services().deferred_status.response(124)
 
     def pet_info(self, req: dict) -> dict:
         return self.ctx.state.get_player().practice_payload(True)

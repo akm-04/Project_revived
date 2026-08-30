@@ -1,0 +1,86 @@
+{
+  "pass": "244.0",
+  "wave": "Emblem I3",
+  "status": "PASS",
+  "ota": "1.631.22",
+  "checks": [
+    {
+      "id": "compileall",
+      "result": "PASS"
+    },
+    {
+      "id": "i3_selftest",
+      "result": "PASS",
+      "detail": "7/7"
+    },
+    {
+      "id": "i2_regression",
+      "result": "PASS",
+      "detail": "Pass243 8/8"
+    },
+    {
+      "id": "i1_regression",
+      "result": "PASS",
+      "detail": "Pass242 7/7"
+    },
+    {
+      "id": "architecture_hygiene",
+      "result": "PASS",
+      "detail": "Pass129 5/5"
+    },
+    {
+      "id": "random_outcome_service",
+      "result": "PASS",
+      "detail": "Pass110"
+    },
+    {
+      "id": "p2_stage_g",
+      "result": "PASS"
+    },
+    {
+      "id": "blood_mid867",
+      "result": "PASS"
+    },
+    {
+      "id": "dev_cleanup",
+      "result": "PASS"
+    },
+    {
+      "id": "popup_correction",
+      "result": "PASS"
+    },
+    {
+      "id": "pass232_edges",
+      "result": "PASS"
+    },
+    {
+      "id": "src64_rate_caller_scan",
+      "result": "PASS_WITH_SERVER_UNKNOWN",
+      "detail": "current inscription_rate rows unchanged; zero current callers; v1 remains compatibility policy"
+    },
+    {
+      "id": "ten_rebuild_topology",
+      "result": "PASS",
+      "detail": "miss -> hard hit(no gate draw) -> reset hit -> seven misses; final counter=7"
+    },
+    {
+      "id": "latest_proposal",
+      "result": "PASS",
+      "detail": "generation replacement + persistence + frozen policy version"
+    }
+  ],
+  "guards": {
+    "MID1400": "FENCED",
+    "MID1401": "FENCED",
+    "MID1405": "FENCED",
+    "MID1406": "FENCED",
+    "ScholarshipPolicy": "INTERNAL_I3_ONLY"
+  },
+  "policy": {
+    "version": "emblem-v1",
+    "classification": "STRONG_INFERENCE+COMPATIBILITY_POLICY",
+    "forge": "10bp step / hard by 1000",
+    "reforge": "100bp step / hard by 100",
+    "negative_claim": "not recovered official server math"
+  }
+}

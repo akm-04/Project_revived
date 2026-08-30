@@ -1,0 +1,105 @@
+{
+  "schema_version": 1,
+  "classification": "U4B_FINAL_FROZEN_METADATA",
+  "adapters": [
+    {
+      "mid": 124,
+      "name": "GET_PRACTICE_INFO",
+      "mode": "canonical_overlay",
+      "policy_id": "PRACTICE_INACTIVE_BASELINE",
+      "hydration_mid": 124,
+      "mutation_fence": "Practice mutation remains fenced",
+      "bootstrap": "NO",
+      "domain": "Practice/Institute",
+      "adjacent_mutation_mids": [
+        125,
+        126,
+        127,
+        128,
+        130,
+        131,
+        132,
+        133
+      ]
+    },
+    {
+      "mid": 530,
+      "name": "TREASURE_LOAD_INFO",
+      "mode": "inactive_baseline",
+      "policy_id": "TREASURE_INACTIVE_BASELINE",
+      "hydration_mid": 530,
+      "mutation_fence": "Treasure gameplay fenced",
+      "bootstrap": "NO",
+      "domain": "Treasure",
+      "adjacent_mutation_mids": [
+        529,
+        531,
+        532,
+        535,
+        540
+      ]
+    },
+    {
+      "mid": 816,
+      "name": "PET_CAMPAIGN_LOAD_INFO",
+      "mode": "inactive_baseline",
+      "policy_id": "PET_CAMPAIGN_INACTIVE_INFO",
+      "hydration_mid": 816,
+      "mutation_fence": "Pet Campaign gameplay fenced",
+      "bootstrap": "NO",
+      "domain": "Pet Campaign",
+      "adjacent_mutation_mids": [
+        817,
+        818,
+        819,
+        820,
+        821,
+        823,
+        824,
+        825,
+        826,
+        827
+      ]
+    },
+    {
+      "mid": 822,
+      "name": "PET_CAMPAIGN_RED_POINT",
+      "mode": "inactive_baseline",
+      "policy_id": "PET_CAMPAIGN_INACTIVE_RED",
+      "hydration_mid": 822,
+      "mutation_fence": "Pet Campaign gameplay fenced",
+      "bootstrap": "NO; do not re-add to Stage3 solely because shape is safe",
+      "domain": "Pet Campaign red status",
+      "adjacent_mutation_mids": [
+        817,
+        818,
+        819,
+        820,
+        821,
+        823,
+        824,
+        825,
+        826,
+        827
+      ]
+    },
+    {
+      "mid": 1152,
+      "name": "GUILD_WAR_RED_POINT",
+      "mode": "inactive_baseline",
+      "policy_id": "GUILD_WAR_INACTIVE_BASELINE",
+      "hydration_mid": 1152,
+      "mutation_fence": "Guild War gameplay fenced",
+      "bootstrap": "NO unless later canonical startup contract admits it",
+      "domain": "Guild War",
+      "adjacent_mutation_mids": [
+        1137,
+        1138,
+        1139,
+        1141,
+        1153,
+        1154
+      ]
+    }
+  ]
+}

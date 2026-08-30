@@ -1,0 +1,8 @@
+{
+  "pass": "242.0",
+  "status": "EMBLEM_I1_DETERMINISTIC_RECONCILIATION_STATIC_ACCEPTED",
+  "backend": "gxb-backend-v0.37.1-pass242.0",
+  "ota": "1.631.22",
+  "commit": "Pass242: move deterministic Emblem MIDs 1402/1403/1404/1407 to EmblemService; use current-src64 concrete positions so Scholarship medals equip/remove; preserve dissolve/Star exchange wire semantics; keep RNG MIDs fenced.",
+  "next": "I2 eligibility + Function45 + exact Heart MID83 provider; no RNG activation."
+}

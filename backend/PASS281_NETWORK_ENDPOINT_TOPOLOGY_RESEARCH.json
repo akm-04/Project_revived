@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "pass": "281.0",
+  "classification": "SOURCE_TOPOLOGY_RESEARCH",
+  "user_patch_script": {
+    "sha256": "f6f8f574af3591abf348b104cbde513487d847a6ac9d9d350737147589714892",
+    "facts": [
+      "SDK base replacement targets mhome.carolgames.com and points it at gxbsdk",
+      "engine/update replacements target xuemeien.carolgames.com:9000 plus historical engine IPs",
+      "web/CDN activity domains game168.tw/girls.game168.com.tw were also redirected to gxbengine"
+    ]
+  },
+  "current_src64": {
+    "UpdateScene.lua_sha256": "52c78a98002a27532343334360bd264af02700cbbda631d3b0cbf367e55516ac",
+    "Backend.lua_sha256": "95378e2b0be8180df6de27e9e430c630bcfe46c080e1f91ef5f6d74bdbb1b840",
+    "AssetDownload.lua_sha256": "78b5fe69e2989cd976ce1083b29f9679905f4970ea882ad21b38fdb2cc7ea616",
+    "facts": [
+      "UpdateScene calls a center/v1 endpoint with MID20480",
+      "center response sets xyd.serverUrl from response.url",
+      "same center response sets xyd.resDownloadUrl from response.res_download_url",
+      "normal gameplay HTTP uses xyd.serverUrl or misc.webAPIURL",
+      "lazy asset URLs are built from xyd.resDownloadUrl",
+      "TCP endpoint is dynamically discovered through MID192 rather than hardcoded in UpdateScene"
+    ]
+  },
+  "conclusion": "Original deployment exposed distinct SDK/auth, center/discovery, gameplay API, resource-download/CDN, and dynamically discovered TCP roles. Exact physical server/process separation is not recoverable, but collapsing these front doors onto one reconstruction host can create contention the original deployment may not have had.",
+  "bag_track": "Keep Bag/resource loading separate from lobby MID queue; investigate resource host/availability and missing hashed assets independently."
+}

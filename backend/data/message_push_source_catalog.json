@@ -1,0 +1,75 @@
+{
+  "schema_version": 1,
+  "classification": "CURRENT_SRC64_GENERATED_SOURCE_CATALOG",
+  "source_metadata": {
+    "source_archive": "all-assest-rechecked-1.zip",
+    "source_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+    "table_path": "app-assets/output/assets/src_64/data/tables/message_push.lua",
+    "table_sha256": "716316d7392f511572567d1b4ff65199cc11758fe39b59de0bd9e49d7d1c4aa7",
+    "model_path": "app-assets/output/assets/src_64/app/model/MessagePush.lua",
+    "model_sha256": "8c16bdd3be77aca49604d13d6bf1eadaa3dd62ba87725bb7309020691d727f7b",
+    "consumer_fact": "MessagePush.update iterates enabled message type IDs with ipairs; setState uses MID1025/1026 and message_type."
+  },
+  "message_types": [
+    {
+      "message_type": 1,
+      "title": "Free Stamina",
+      "tip": "Don't forget your lunch, master."
+    },
+    {
+      "message_type": 2,
+      "title": "Free Stamina",
+      "tip": "Don't forget your dinner, master."
+    },
+    {
+      "message_type": 3,
+      "title": "Full Stamina ",
+      "tip": "Your stamina is full, master."
+    },
+    {
+      "message_type": 4,
+      "title": "Alert in Top Floor",
+      "tip": "Master, someone attack you in Top Floor."
+    },
+    {
+      "message_type": 5,
+      "title": "Alert in 1 on 1",
+      "tip": "Master, someone attack you in 1 on 1."
+    },
+    {
+      "message_type": 6,
+      "title": "9:00 Store Update",
+      "tip": "Master, new goods are available in Store."
+    },
+    {
+      "message_type": 7,
+      "title": "21:00 Store Update",
+      "tip": "Master, new goods are available in Store."
+    },
+    {
+      "message_type": 8,
+      "title": "Full Skill Points",
+      "tip": "Your skill points are full, master."
+    },
+    {
+      "message_type": 9,
+      "title": "Unread message",
+      "tip": "You receive a new private message, master. "
+    },
+    {
+      "message_type": 10,
+      "title": "Income is ready",
+      "tip": "It's time to collect your payment in Work Place, master."
+    },
+    {
+      "message_type": 11,
+      "title": "Stamina Message",
+      "tip": "Dear master, your stamina is full~"
+    },
+    {
+      "message_type": 12,
+      "title": "Battle Message",
+      "tip": "Dear master, your auto battle has been compeleted~"
+    }
+  ]
+}

@@ -16,6 +16,8 @@ from gxb_backend.handlers.center import CenterHandlers
 from gxb_backend.handlers.chat import ChatHandlers
 from gxb_backend.handlers.compatibility import CompatibilityHandlers
 from gxb_backend.handlers.context import HandlerContext
+from gxb_backend.handlers.deferred_status import DeferredStatusHandlers
+from gxb_backend.handlers.message_push import MessagePushHandlers
 from gxb_backend.handlers.courses import CourseHandlers
 from gxb_backend.handlers.workshop import WorkshopHandlers
 from gxb_backend.handlers.guild import GuildHandlers
@@ -47,6 +49,7 @@ from gxb_backend.state.projection_profiles import ProjectionProfileRegistry
 from gxb_backend.state.resource_registry import ResourceRegistry
 from gxb_backend.state.response_projector import ResponseProjector
 from gxb_backend.state.daily_reset import merge_daily_reset_projection
+from gxb_backend.synchronization import DeferredStatusMutationFenceValidator
 from gxb_backend.transport.result import EngineTransportResult
 from gxb_backend.transport.responses import engine_ok
 
@@ -62,9 +65,17 @@ class EngineDispatcher:
         state: StateRepository,
         settings: Settings,
         resource_gateway: ResourceGateway | None = None,
+        post_commit_sink: Callable[[str, tuple[object, ...]], None] | None = None,
+        realtime_runtime: object | None = None,
     ) -> None:
         self.state = state
         self.settings = settings
+        # App-scoped transient runtime injection follows the frozen R5/R6
+        # composition. Wave E consumes only its room-directory/post-commit seams.
+        self.realtime_runtime = realtime_runtime
+        # Post-commit sink is always invoked after the repository request scope has
+        # exited. Wave E binds the realtime.transient topic through the typed runtime.
+        self._post_commit_sink = post_commit_sink
         ctx = HandlerContext(state=state, settings=settings, resource_gateway=resource_gateway)
 
         self.center = CenterHandlers(ctx)
@@ -72,12 +83,15 @@ class EngineDispatcher:
         self.bootstrap = BootstrapHandlers(ctx)
         self.battle = BattleHandlers(ctx)
         self.practice = PracticeHandlers(ctx)
+        self.deferred_status = DeferredStatusHandlers(ctx)
+        self.message_push = MessagePushHandlers(ctx)
         self.player = PlayerHandlers(ctx)
         self.heroes = HeroHandlers(ctx)
         self.horcrux = HorcruxHandlers(ctx)
         self.inventory = InventoryHandlers(ctx)
         self.library = LibraryHandlers(ctx)
-        self.chat = ChatHandlers(ctx)
+        room_directory = getattr(self.realtime_runtime, "room_directory", None)
+        self.chat = ChatHandlers(ctx, room_directory=room_directory)
         self.summon = SummonHandlers(ctx)
         self.illusion = IllusionHandlers(ctx)
         self.social = SocialHandlers(ctx)
@@ -117,6 +131,12 @@ class EngineDispatcher:
         self.mutation_contracts = MutationContractRegistry.load(settings.mutation_contract_registry_path)
         self.mutation_firewall = MutationSafetyFirewall(self.mutation_contracts)
         self.mutation_firewall.validate_routes(self.handlers, self.protocol_registry.label)
+        DeferredStatusMutationFenceValidator.validate(
+            self.state.synchronization_catalogs, handlers=self.handlers,
+            mutation_contracts=self.mutation_contracts,
+            safe_fallback_check=self.compat.is_safe_fallback_mid,
+            label_lookup=self.protocol_registry.label,
+        )
         self.scalar_handlers: set[int] = {getattr(MID, "GET_PLAYER_GROUP_BY_KEY", -999999), getattr(MID, "HUNQI_GET_COLLOCATION_INFOS", -999998)}
 
     @staticmethod
@@ -161,6 +181,10 @@ class EngineDispatcher:
             "GET_SELF_GUILD": self.guild.get_self_guild,
             "PETS_GET": self.heroes.load_pets,
             "PET_CAMPAIGN_RED_POINT": self.pet_campaign_red_point,
+            "TREASURE_LOAD_INFO": self.deferred_status.treasure_info,
+            "GUILD_WAR_RED_POINT": self.deferred_status.guild_war_red_point,
+            "MESSAGE_PUSH_ADD": self.message_push.add,
+            "MESSAGE_PUSH_REMOVE": self.message_push.remove,
             "CHECK_GAME_STAT": self.system.check_game_stat,
             "FIRST_MAIN_TOUCH": self.player.first_main_touch,
             "SET_PLAYER_GUIDE_FUNCTION": self.player.set_player_guide_function,
@@ -237,12 +261,12 @@ class EngineDispatcher:
             "INSCRIPTION_REMOVE": self.heroes.inscription_remove,
             "BREACH_STONE_ADD": self.heroes.breach_stone_add,
             "BREACH_STONE_EVOLVE": self.heroes.breach_stone_evolve,
-            "INSCRIPTION_MAKE": self.heroes.advanced_hidden_fail_closed,
-            "INSCRIPTION_REBUILD": self.heroes.advanced_hidden_fail_closed,
+            "INSCRIPTION_MAKE": self.heroes.inscription_make,
+            "INSCRIPTION_REBUILD": self.heroes.inscription_rebuild,
             "INSCRIPTION_RESOLVE": self.heroes.inscription_resolve,
             "EXCHANGE_MATERIALS": self.heroes.inscription_exchange_materials,
-            "INSCRIPTION_SAVE_REBUILD": self.heroes.advanced_hidden_fail_closed,
-            "INSCRIPTION_ABANDON_REBUILD": self.heroes.advanced_hidden_fail_closed,
+            "INSCRIPTION_SAVE_REBUILD": self.heroes.inscription_save_rebuild,
+            "INSCRIPTION_ABANDON_REBUILD": self.heroes.inscription_abandon_rebuild,
             "SUMMON_HERO": self.summon.summon_hero,
             "STONE_SUMMON_HERO": self.summon.stone_summon_hero,
             "SUMMON_SUPER_HERO": self.summon.summon_super_hero,
@@ -538,19 +562,63 @@ class EngineDispatcher:
         return self.state.get_white_album_service().claim_special(req.get("id"))
 
     def red_point(self, req: dict[str, Any]) -> list[dict[str, Any]]:
-        return self.state.get_player().redmark_payload()
+        # MID2560 is a read-only snapshot of the supported derived families.
+        return self.state.get_services().generic_redmarks.snapshot()
 
     def pet_campaign_red_point(self, req: dict[str, Any]) -> dict[str, Any]:
-        return self.state.get_player().pet_campaign_red_point_payload()
+        return self.state.get_services().deferred_status.response(822)
 
     def invite_infos(self, req: dict[str, Any]) -> dict[str, Any]:
         return self.state.get_player().invite_payload()
 
+    def _deliver_post_commit(self, pending: dict[str, list[object]]) -> None:
+        """Best-effort external-intent delivery outside StateRepository scope.
+
+        Wave E binds the realtime.transient topic to the typed publisher.
+        Delivery failure must never convert a durable gameplay commit into an
+        HTTP failure.
+        """
+        if not pending:
+            return
+        sink = self._post_commit_sink
+        if sink is None:
+            count = sum(len(values) for values in pending.values())
+            print(f"[POSTCOMMIT] no sink configured; dropped {count} committed intent(s)")
+            return
+        for topic in sorted(pending):
+            values = tuple(pending.get(topic) or ())
+            if not values:
+                continue
+            try:
+                sink(topic, values)
+            except Exception as exc:
+                print(f"[POSTCOMMIT] sink failure topic={topic!r} count={len(values)} error={exc}")
+
     def dispatch(self, req: dict[str, Any]) -> Any:
         # Stage 4A request scope keeps the human-editable JSON refresh and any
-        # handler mutation/save on one coherent PlayerState snapshot.
-        with self.state.request_scope(req):
-            return self._dispatch_scoped(req)
+        # handler mutation/save on one coherent PlayerState snapshot. Wave A
+        # strengthens the exit path: committed external intents are drained on
+        # every scoped exit, then delivered only after StateRepository releases
+        # its request-wide lock/thread-local binding.
+        pending_post_commit: dict[str, list[object]] = {}
+        try:
+            with self.state.request_scope(req):
+                try:
+                    result = self._dispatch_scoped(req)
+                finally:
+                    services = self.state.current_services_or_none()
+                    if services is not None:
+                        drained = services.uow.drain_post_commit()
+                        for topic, values in drained.items():
+                            if values:
+                                pending_post_commit.setdefault(topic, []).extend(values)
+        except BaseException:
+            # request_scope has already exited here. Preserve the original HTTP
+            # exception independently from best-effort committed intent delivery.
+            self._deliver_post_commit(pending_post_commit)
+            raise
+        self._deliver_post_commit(pending_post_commit)
+        return result
 
     def _dispatch_scoped(self, req: dict[str, Any]) -> Any:
         try:
@@ -633,7 +701,7 @@ class EngineDispatcher:
             # Explicit semantic channels remain the compatibility bridge for
             # unmigrated owners. Typed journal projection runs afterwards and
             # wins on collision because it represents committed canonical state.
-            result = services.apply_semantic_deltas(result)
+            result = services.apply_semantic_deltas(result, profile=profile)
             committed_journal = services.uow.consume_journal()
         result = projector.project(
             result,
@@ -644,6 +712,14 @@ class EngineDispatcher:
         result = merge_daily_reset_projection(
             result, daily_reset.projection if daily_reset is not None else None
         )
+
+        # Pass248 I6: structured Emblem runtime evidence for I7 without adding
+        # internal policy/proposal state to the stock wire response.
+        if services is not None and 1400 <= req_mid <= 1407:
+            self.runtime_logger.emblem_event(
+                mid=req_mid, name=name, response=result,
+                snapshot=services.emblem.runtime_audit_snapshot(),
+            )
 
         self.runtime_logger.request(
             mid=req_mid,

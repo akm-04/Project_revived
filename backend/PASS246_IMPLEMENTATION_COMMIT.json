@@ -1,0 +1,8 @@
+{
+  "pass": "246.0",
+  "status": "EMBLEM_I4_MID1400_FORGE_STATIC_ACCEPTED",
+  "backend": "gxb-backend-v0.37.4-pass246.0",
+  "ota": "1.631.22",
+  "commit": "Pass246: open MID1400 Forge only; preflight all source-defined scalar certificate and optional Heart costs before entropy; reuse Pass244 EmblemOutcomePlanner and independent Forge pity counter inside one PlayerUnitOfWork; atomically debit costs and credit exactly one generated medal; return stock raw inscript_items without duplicate generic award projection; retain nonce-less repeat-as-new-paid-forge semantics and keep MID1401/1405/1406 fail-closed.",
+  "next": "I5 Reforge lifecycle: MID1401/MID1405/MID1406, preserving frozen/latest-proposal machinery and current-source wire shape."
+}

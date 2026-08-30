@@ -1,0 +1,9 @@
+{
+  "pass": "248.0",
+  "status": "EMBLEM_I6_INTEGRATION_HARDENING_STATIC_ACCEPTED_I7_READY",
+  "backend": "gxb-backend-v0.37.6-pass248.0",
+  "ota": "1.631.22",
+  "commit": "Pass248: harden integrated Emblem lifecycle without widening feature scope; restore sealed global Blood3+Lv100 Forge/Reforge operational gate independent of Function45; preserve paid Save/Abandon recovery; normalize durable emblem_state and dense Hero inscript_items at load; fail closed on malformed equipped-position inserts while retaining removal recovery; add bounded wire-separate Emblem runtime evidence; verify acquisition/exchange/Heart/Forge/equip/set/remove/dissolve/Reforge/restart/state-version boundaries against current src_64.",
+  "i7_plan": "PASS248_EMBLEM_I7_STOCK_CLIENT_TEST_PLAN.md",
+  "next": "I7 stock-client Emblem smoke/runtime acceptance; on success Institute Alchemy."
+}

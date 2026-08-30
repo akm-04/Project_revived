@@ -143,38 +143,13 @@ class BootstrapHandlers:
             # a safe empty table even before the explicit PETS_GET call happens.
             "780": player.pets_payload(),
             "229": player.activities_payload(),
-            "2560": player.redmark_payload(),
+            "2560": self.ctx.state.get_services().generic_redmarks.snapshot(),
         }
 
 
     def _stage3_detail(self) -> dict[str, object]:
-        """Corrected broad hydration for the Stage 3 established-account profile.
-
-        Every entry here has a source-recognized RETRIEVE_TOKEN consumer and the
-        structurally sensitive payloads have been corrected against those model
-        consumers. `safe` remains available as an immediate rollback mode.
-        """
-        player = self.ctx.state.get_player()
-        detail = self._safe_detail()
-        detail.update({
-            "112": player.world_map_payload(),
-            "115": player.trial_infos_payload(),
-            "289": player.arena_records_payload(),
-            "336": player.march_payload(),
-            "352": self._sign_info_payload(),
-            "368": player.mail_payload(),
-            "384": player.invite_payload(),
-            "612": player.guild_payload(),
-            "624": player.world_boss_payload(),
-            # Pass192/P1-I5 runtime reconciliation: SelfPlayer.loadGameStartInfoEvent_
-            # explicitly consumes GET_STUDY_INFOS (2137) and Course:setStudyInfos()
-            # initializes roomInfo.study_infos before Course.enterCourseWindow() sorts.
-            "2137": player.study_payload(),
-            "2416": player.adventure_payload(),
-            "2485": player.peak_records_payload(),
-            "2984": player.battle_pass_payload(),
-        })
-        return detail
+        """Build exact accepted Stage3 hydration from the Wave-C registry."""
+        return self.ctx.state.get_services().hydration_snapshot.stage3_snapshot()
 
     def _wide_detail(self) -> dict[str, object]:
         player = self.ctx.state.get_player()

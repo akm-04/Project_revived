@@ -135,7 +135,13 @@ class Settings:
         str(_PROJECT_ROOT / "data/server_state"),
     ))
     state_path: Path = Path(os.getenv("GXB_STATE_PATH", str(_PROJECT_ROOT / "state/gxb_state.json")))
+    # Wave D replaces the old byte-draining chat stub with the authenticated
+    # realtime runtime. Preserve GXB_ENABLE_CHAT_STUB as a legacy deployment
+    # switch when the new variable is absent.
     enable_chat_stub: bool = os.getenv("GXB_ENABLE_CHAT_STUB", "1") not in {"0", "false", "False"}
+    enable_realtime_server: bool = os.getenv(
+        "GXB_ENABLE_REALTIME_SERVER", os.getenv("GXB_ENABLE_CHAT_STUB", "1")
+    ) not in {"0", "false", "False"}
     log_unknown_mids: bool = os.getenv("GXB_LOG_UNKNOWN_MIDS", "1") not in {"0", "false", "False"}
     compatibility_safe_mids_path: Path = Path(os.getenv(
         "GXB_COMPAT_SAFE_MIDS",

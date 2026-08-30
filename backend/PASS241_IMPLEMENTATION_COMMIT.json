@@ -1,0 +1,27 @@
+{
+  "pass": "241.0",
+  "type": "IMPLEMENTATION_COMMIT",
+  "domain": "Emblem/Inscription",
+  "wave": "I0 Foundation",
+  "status": "IMPLEMENTED_STATIC_REGRESSION_ACCEPTED_NO_PUBLIC_EMBLEM_ROUTE_CHANGE",
+  "base": "Pass232 v0.35.3 / OTA1.631.22",
+  "release": "v0.37.0-pass241.0 / OTA1.631.22",
+  "changes": [
+    "Package exact current-src64 Emblem evidence and deterministic generated source catalog.",
+    "Add EmblemSourceCatalog with strict source relationship validation and no private outer-rate fact.",
+    "Add versioned emblem-v1 compatibility policy registry; outer Scholarship gate remains disabled in I0.",
+    "Add EmblemOutcomePlanner over existing request-scoped RandomOutcomeService.",
+    "Add complete server-only emblem_state aggregate and EmblemStateRepository under PlayerUnitOfWork.",
+    "Add cohesive EmblemService skeleton and compose it in RequestServices without public MID rerouting.",
+    "Mark player.domains.emblem_state as canonical replacement persistence domain to prevent nested resurrection.",
+    "Preserve Hero inscript_items as sole equipped medal authority; no state migration."
+  ],
+  "negative_memory": [
+    "Do not activate MID1400/MID1401/MID1405/MID1406 in I0.",
+    "Do not move deterministic MID1402/MID1403/MID1404/MID1407 until I1.",
+    "Do not label emblem-v1 outer Scholarship ladder as recovered official server math.",
+    "Do not duplicate equipped medal state outside Hero.inscript_items.",
+    "Do not use historical v1.164 source to override current src_64."
+  ],
+  "next": "I1 deterministic ownership reconciliation."
+}

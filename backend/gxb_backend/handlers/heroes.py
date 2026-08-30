@@ -160,17 +160,29 @@ class HeroHandlers:
     def element_destroy_backpack(self, req: dict) -> dict:
         return self.ctx.state.get_hero_advanced_progression_repository().element_destroy_backpack(req)
 
+    def inscription_make(self, req: dict) -> dict:
+        return self.ctx.state.get_emblem_service().make(req)
+
+    def inscription_rebuild(self, req: dict) -> dict:
+        return self.ctx.state.get_emblem_service().rebuild(req)
+
+    def inscription_save_rebuild(self, req: dict) -> dict:
+        return self.ctx.state.get_emblem_service().save_rebuild(req)
+
+    def inscription_abandon_rebuild(self, req: dict) -> dict:
+        return self.ctx.state.get_emblem_service().abandon_rebuild(req)
+
     def inscription_insert(self, req: dict) -> dict:
-        return self.ctx.state.get_hero_advanced_progression_repository().inscription_insert(req)
+        return self.ctx.state.get_emblem_service().insert(req)
 
     def inscription_remove(self, req: dict) -> dict:
-        return self.ctx.state.get_hero_advanced_progression_repository().inscription_remove(req)
+        return self.ctx.state.get_emblem_service().remove(req)
 
     def inscription_resolve(self, req: dict) -> dict:
-        return self.ctx.state.get_hero_advanced_progression_repository().inscription_resolve(req)
+        return self.ctx.state.get_emblem_service().resolve(req)
 
     def inscription_exchange_materials(self, req: dict) -> dict:
-        return self.ctx.state.get_hero_advanced_progression_repository().inscription_exchange_materials_all(req)
+        return self.ctx.state.get_emblem_service().exchange_materials(req)
 
     def breach_stone_add(self, req: dict) -> dict:
         return self.ctx.state.get_hero_advanced_progression_repository().breach_stone_add(req)
@@ -205,7 +217,7 @@ class HeroHandlers:
         return {**self.ctx.state.get_player().pets_payload(), "awards": []}
 
     def pet_campaign_info(self, req: dict) -> dict:
-        return {"campaign_info": {}, "campaigns": [], "awards": [], "red_point": 0}
+        return self.ctx.state.get_services().deferred_status.response(816)
 
     def pet_campaign_action(self, req: dict) -> dict:
         return {**self.pet_campaign_info(req), "result": 1}

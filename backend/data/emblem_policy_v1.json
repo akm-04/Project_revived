@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "_meta": {
+    "registry_version": "emblem-v1",
+    "epistemic_class": "IMPLEMENTATION_COMPATIBILITY_DECISION",
+    "status": "I5_FORGE_AND_REFORGE_PUBLIC_ENABLED",
+    "source_authority": "emblem_source_catalog.json"
+  },
+  "rng_namespaces": [
+    "emblem.forge.ordinary",
+    "emblem.forge.scholarship_gate",
+    "emblem.forge.scholarship_family",
+    "emblem.forge.scholarship_item",
+    "emblem.reforge.ordinary",
+    "emblem.reforge.scholarship_gate",
+    "emblem.reforge.scholarship_family",
+    "emblem.reforge.scholarship_item"
+  ],
+  "decisions": {
+    "outer_scholarship": {
+      "classification": "STRONG_INFERENCE+COMPATIBILITY_POLICY",
+      "implementation_status": "I5_FORGE_AND_REFORGE_PUBLIC_ENABLED",
+      "forge": {
+        "rate_suit_bp": 0,
+        "rate_step_bp": 10,
+        "max_num": 1000
+      },
+      "reforge": {
+        "rate_suit_bp": 0,
+        "rate_step_bp": 100,
+        "max_num": 100
+      },
+      "negative_claim": "not recovered official server math"
+    },
+    "reforge_same_result": {
+      "classification": "SOURCE_SHAPED_COMPATIBILITY_POLICY",
+      "exclude_current_item": true
+    },
+    "pending_proposal": {
+      "classification": "SOURCE_SHAPED_COMPATIBILITY_POLICY",
+      "latest_proposal_wins": true,
+      "persist_across_restart": true,
+      "stale_source_save_clears_pending": true,
+      "abandon_without_pending_success": true
+    }
+  }
+}

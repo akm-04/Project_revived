@@ -1,0 +1,26 @@
+{
+  "pass": "247.0",
+  "status": "PASS_WITH_SERVER_UNKNOWN",
+  "authority": "all-assest-rechecked-1.zip effective app-assets/output/assets/src_64 (4370 files)",
+  "checks": {
+    "catalog_rebuild": "BYTE_IDENTICAL",
+    "catalog_sha256": "083f3d70767d5a97e6bdfb2984480658184455d36e5c74e8d44fa2445fd5d6e4",
+    "mid1401_request": "{item_id=currentSelectReoItemID, rebuild_num=1|10, cost_type=1 Crystal|2 Mana}",
+    "cost_topology": "single uses inscription.change_crystal/change_gold; ten-times uses exactly 10x selected source cost",
+    "crystal_precheck": "current client shows insufficient-Crystal alert but does not return before MID1401; server preflight is authoritative",
+    "proposal_callback": "MID1401 response inscript_items are candidates only; original medal remains until Save",
+    "mid1405_request": "{item_id=<selected candidate>} with no proposal token; client removes original locally and calls handleRewards(rebuild_items)",
+    "mid1406_request": "{}; client clears local candidate/original-selection state",
+    "nonce": "none on stock MID1401/MID1405/MID1406 wire",
+    "outer_rate_classification": "STRONG_INFERENCE+COMPATIBILITY_POLICY",
+    "negative_claim": "Lv7 Scholarship outer gate remains replaceable compatibility policy, not recovered official server math"
+  },
+  "source_hashes": {
+    "InscriptionWindow.lua": "4ca0f6a8b6d70caf60205efe14a55665142acd1f3ac9b93d6dc014d5a8bd04e6",
+    "InscriptionTenTimesWindow.lua": "2dae5c579e44bd9a092ca534b6050c06f9718b4566ef1d9cdfb381ff97b480c1",
+    "Inscription.lua": "d14a19472279d2eb911a824bbd4bd053f4d1cdede9c16e4080518488bd7b066f",
+    "SelfPlayer.lua": "163d5893c9522ada412c2b9c4748a80757660fccdf03c8f72cb6edf0838b8eb4",
+    "inscription.lua": "dc0d5d8b0de66b9495665cb6a300aa9bdb5979065f28c565ede35e447adce23c",
+    "inscription_rate.lua": "2bdb4a95b2bcd0850b6bd7661fdf047c95633a8c880a0b4cc8b5e85b0aa4a6e8"
+  }
+}

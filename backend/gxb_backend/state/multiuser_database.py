@@ -1150,6 +1150,15 @@ class MultiUserDatabase:
                 changed = True
         if maintenance.heroes.normalize():
             changed = True
+        # Pass243 I2: repair Function45 only when canonical level + a qualifying
+        # Blood-Awakened level-100 Hero already exist. Maintenance has no
+        # semantic callback, so this never fabricates an in-session unlock popup.
+        if maintenance.emblem_eligibility.maintenance_reconcile():
+            changed = True
+        # Pass248 I6: repair malformed/legacy server-only Emblem state at the
+        # durable player-load boundary. Future schema versions remain fail-closed.
+        if maintenance.emblem_state.normalize():
+            changed = True
         # Pass186 P1-I1: additive, source-valid reconciliation for existing
         # Course/Album/Workshop wire state before P1 business handlers exist.
         if maintenance.p1_foundation.normalize():

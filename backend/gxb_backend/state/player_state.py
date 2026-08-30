@@ -204,7 +204,7 @@ class PlayerState:
     save_team: str = ""
     save_team_name: str = ""
     save_pet: str = ""
-    message_pushes: dict[str, Any] = field(default_factory=dict)
+    message_pushes: list[int] = field(default_factory=list)
     func_ids: list[int] = field(default_factory=default_function_ids)
     # Pass32.6 canonical Function eligibility/announcement state. func_ids remains
     # a compatibility projection of announced_ids during migration.
@@ -234,6 +234,9 @@ class PlayerState:
     # for source state that had no prior durable home.
     white_album_state: dict[str, Any] = field(default_factory=dict)
     workshop_state: dict[str, Any] = field(default_factory=dict)
+    # Pass241 Emblem I0: complete server-only proposal/pity control aggregate.
+    # Concrete equipped medals remain Hero.inscript_items and are not duplicated here.
+    emblem_state: dict[str, Any] = field(default_factory=dict)
 
     library_infos: dict[str, Any] = field(default_factory=dict)
     library_talk_infos: dict[str, Any] = field(default_factory=dict)

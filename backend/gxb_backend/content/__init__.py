@@ -13,6 +13,7 @@ from .game_data_catalog import (
 )
 from .source_resolver import EffectiveSourceResolver, ResolvedSource
 from .horcrux_source_catalog import HorcruxSourceCatalog
+from .emblem_source_catalog import EmblemSourceCatalog
 from .awakening_source_catalog import AwakeningSourceCatalog
 from .super_campaign_catalog import (
     SUPER_CAMPAIGN_TYPE,
@@ -30,6 +31,7 @@ __all__ = [
     "ConsumableEffectCatalog",
     "ContentRef",
     "EffectiveSourceResolver",
+    "EmblemSourceCatalog",
     "GameDataCatalog",
     "HorcruxSourceCatalog",
     "InvalidCatalogProvenance",

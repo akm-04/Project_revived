@@ -1,0 +1,22 @@
+{
+  "pass": "246.0",
+  "status": "PASS_WITH_SERVER_UNKNOWN",
+  "authority": "all-assest-rechecked-1.zip effective app-assets/output/assets/src_64 (4370 files)",
+  "checks": {
+    "catalog_rebuild": "BYTE_IDENTICAL",
+    "catalog_sha256": "083f3d70767d5a97e6bdfb2984480658184455d36e5c74e8d44fa2445fd5d6e4",
+    "mid1400_request": "{inscript_id=currentSelectInscription, make_num=1}",
+    "source_cost_precheck": "InscriptionWindow checks scalar compound_material through Inscription:getMaterialNumByID and optional Backpack compound_item before request",
+    "resource_mapping": "19=degreeCer, 20=graduateCer, 21=patentCer",
+    "success_callback": "reads raw inscript_items IDs, builds item reward objects client-side, removes optional compound_item locally",
+    "nonce": "none on stock MID1400 wire",
+    "projection_boundary": "server returns raw inscript_items; generated medal is not additionally generic-award projected",
+    "outer_rate_classification": "STRONG_INFERENCE+COMPATIBILITY_POLICY",
+    "negative_claim": "Lv7 Scholarship outer gate remains replaceable compatibility policy, not recovered official server math"
+  },
+  "source_hashes": {
+    "InscriptionWindow.lua": "4ca0f6a8b6d70caf60205efe14a55665142acd1f3ac9b93d6dc014d5a8bd04e6",
+    "inscription.lua": "dc0d5d8b0de66b9495665cb6a300aa9bdb5979065f28c565ede35e447adce23c",
+    "inscription_rate.lua": "2bdb4a95b2bcd0850b6bd7661fdf047c95633a8c880a0b4cc8b5e85b0aa4a6e8"
+  }
+}

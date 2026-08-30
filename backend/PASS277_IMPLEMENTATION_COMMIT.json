@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "pass": "277.0",
+  "backend_version": "0.42.0",
+  "status": "U4B_WAVE_E_TYPED_REALTIME_PUBLISHER_MID192_HTTP_INTEGRATION_STATIC_ACCEPTED",
+  "base": "gxb-backend-v0.41.0-pass276.0",
+  "scope": [
+    "typed immutable realtime audience/event-intent contracts plus request-scoped UoW staging on realtime.transient",
+    "process-wide schema-validated best-effort realtime publisher over authenticated transient sessions",
+    "domain-owned typed-notice schema boundary; generic PLAYER_NOTICE/WORLD_NOTICE fail closed when no owning notice schema is registered",
+    "slow-consumer isolation via bounded session queues and disconnect without blocking committed gameplay transactions",
+    "RealtimeRoomDirectory reusing the exact Wave-D admission policy",
+    "MID192 authenticated HTTP room discovery using already-bound canonical HTTP player identity and the shared room admission policy",
+    "AppFactory binding of the realtime post-commit sink after StateRepository request scope exit"
+  ],
+  "source_rule": "Current effective src_64 remained behavioral authority during implementation. An implementation-time source check narrowed FORCE_RELOAD publication to WORLD because current Backend.lua special-cases it only on the world socket.",
+  "explicit_non_goals": [
+    "Mail/Arena/Guild/PvP canonical business state or domain notice schemas",
+    "SEND_CHAT_MESSAGE/CHAT_MESSAGE gameplay semantics",
+    "durable realtime outbox or delivery receipts",
+    "client runtime changes",
+    "Wave F whole-foundation integration/reconciliation work"
+  ]
+}

@@ -27,6 +27,8 @@ def infer_domain(mid: int) -> str:
     for lo, hi, name in ranges:
         if lo <= mid <= hi:
             return name
+    if 1400 <= mid <= 1407:
+        return "emblem"
     if 2400 <= mid <= 3199:
         return "late_game_activity"
     if mid >= 32768:
@@ -56,6 +58,29 @@ class RuntimeLogger:
         if isinstance(response, list):
             return "list"
         return type(response).__name__
+
+    def emblem_event(self, *, mid: int, name: str, response: Any, snapshot: dict[str, Any]) -> None:
+        """Always-on bounded Emblem runtime evidence for I7 acceptance.
+
+        This records only aggregate policy/proposal/counter state. Candidate IDs,
+        request costs and inventory are deliberately excluded, and nothing is
+        projected into the protocol response.
+        """
+        if not 1400 <= int(mid) <= 1407:
+            return
+        error_code = 0
+        if isinstance(response, dict):
+            try:
+                error_code = int(response.get("error_code", 0) or 0)
+            except (TypeError, ValueError):
+                error_code = 1
+        payload = {
+            "mid": int(mid),
+            "name": str(name),
+            "success": error_code == 0,
+            **{str(k): v for k, v in dict(snapshot or {}).items()},
+        }
+        self._append("emblem_events.jsonl", payload)
 
     def request(self, *, mid: int, name: str, route: str, req: dict[str, Any], handler: str, response: Any, fallback: bool) -> None:
         if not self.settings.log_all_requests and not fallback:

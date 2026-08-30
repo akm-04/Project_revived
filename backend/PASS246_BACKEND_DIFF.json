@@ -1,0 +1,81 @@
+{
+  "pass": "246.0",
+  "base": "gxb-backend-v0.37.3-pass244.0.zip",
+  "target": "gxb-backend-v0.37.4-pass246.0.zip",
+  "note": "Pass245 was migration-only; executable diff is against Pass244.",
+  "changed": [
+    {
+      "path": "README.md",
+      "old_sha256": "048ceda83debcd0e9fe1a2edfc662c9f0487ee7c807266dcb9f680c31abc90f8",
+      "new_sha256": "2b3a7d22853c818a1e271c7d54cdd593d12c2638364db4aa8e6d055131ec0bcc"
+    },
+    {
+      "path": "UPDATE_README.md",
+      "old_sha256": "faaa283f474c94212fb0353edad94d7cca11d81070874360f99596bc9784a574",
+      "new_sha256": "410a5c47a3285f41deea40ae30a09e5f52ac5b8dbe2160dd9ca2bb37d3ed5d32"
+    },
+    {
+      "path": "VERSION.json",
+      "old_sha256": "75aa15eff54d3822439d13a55957ca09f3ebbe3d3ff5dd78f4a45b1befcfe22a",
+      "new_sha256": "2906c42e2b7676b5331581812ca6cc19c89c0a7fc33b704bfea09d5d246d1ae1"
+    },
+    {
+      "path": "data/emblem_policy_v1.json",
+      "old_sha256": "890cc5f5aa98ae3fd6a49444124c09dd19ff0aa54b27105da39364d58e5f6795",
+      "new_sha256": "354036424cafeadc6c090e3742dc73923e6a8f9d410d8eed4a983d71c7fb0c29"
+    },
+    {
+      "path": "gxb_backend/dispatch/engine_dispatcher.py",
+      "old_sha256": "c7714cdf1ef45dd6fae5c3851cd31b6fc54ae3385801c9003582f197710a38df",
+      "new_sha256": "86f59c99069ee7f41a10f6b5fe38daaf5a4de291c606709e3de57bb91c66c09a"
+    },
+    {
+      "path": "gxb_backend/handlers/heroes.py",
+      "old_sha256": "7f895aec6ec6f167963311b6df36caab44a59075dc5228e85b2d82def7113d64",
+      "new_sha256": "073a475750fe49f89bc0bae6bef7ffe02920ba4c7f3f5ee2181096fc6077a90b"
+    },
+    {
+      "path": "gxb_backend/state/emblem_policy.py",
+      "old_sha256": "e1765ef99a18135db8fa6d789d5ac72af81d6a54c0d86c1604116e20f5fa2246",
+      "new_sha256": "db337f7ea9d433534debf2c8caedc673fced5b4112b4d9f1e05379d1b6b2597e"
+    },
+    {
+      "path": "gxb_backend/state/emblem_service.py",
+      "old_sha256": "392d17a6c1149b5306d13a7fb6020fb203cf7694024be8df464dc0307a55fad4",
+      "new_sha256": "854a7eea95c9eae86e16ed136a275c71d3f05e18481286b0c49acb875b090683"
+    },
+    {
+      "path": "memory.md",
+      "old_sha256": "af3d0e09738b9784fbb4164d91cb0c993535933e8eff74645054ec4aab3808cb",
+      "new_sha256": "dc5119ef5adeaa1f9137806197a711833cc2a3e72c7fb2961be5d91252b3cce6"
+    }
+  ],
+  "new": [
+    {
+      "path": "PASS246_EMBLEM_I4_FORGE_REPORT.md",
+      "sha256": "8bc08cc631df7f2d88fb7189e01b7a3e0f9a3a0553314598bac0255882f57de2"
+    },
+    {
+      "path": "PASS246_IMPLEMENTATION_COMMIT.json",
+      "sha256": "8ca91a594a8d43c2235474b27592825269f7453c05b381d4c4bd2d85147b85bf"
+    },
+    {
+      "path": "PASS246_SRC64_TARGETED_REALITY_CHECK.json",
+      "sha256": "04118770354efa0db925913e689c1cb371294e1cbd84eaa19f2b00ff1574ef02"
+    },
+    {
+      "path": "PASS246_STAGE_VALIDATION.json",
+      "sha256": "9cc065639ed6adb8362db47c2cb72c713fc33192ca6584d1690d5c99443b08fe"
+    },
+    {
+      "path": "tools/selftest_pass246_emblem_i4_forge.py",
+      "sha256": "3cfaa5176a1f5d7d897b0113b98a1c0c8d3b9cdad71cb4b900a6776624a78cf6"
+    }
+  ],
+  "removed": [],
+  "counts": {
+    "changed": 9,
+    "new": 5,
+    "removed": 0
+  }
+}

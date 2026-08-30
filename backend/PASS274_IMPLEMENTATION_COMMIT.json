@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "pass": "274.0",
+  "backend_version": "0.39.0",
+  "status": "U4B_WAVE_B_TYPED_HTTP_SEMANTICS_MISSION_BATTLEPASS_PROJECTION_STATIC_ACCEPTED",
+  "base": "gxb-backend-v0.38.0-pass273.0",
+  "scope": [
+    "typed semantic envelope assembler behind existing facade",
+    "Mission/BattlePass derived generic redmark projection",
+    "MID2560/bootstrap derived generic redmark authority",
+    "current-src_64 generated BattlePass predicate catalog",
+    "Story/Awakening dirty semantic staging including bounded replay clears"
+  ],
+  "source_rule": "current effective src_64 continuously cross-checked; historical client not allowed to override",
+  "explicit_non_goals": [
+    "Wave C hydration/deferred adapters/MessagePush mutation",
+    "Wave D/E realtime",
+    "client runtime patches"
+  ]
+}

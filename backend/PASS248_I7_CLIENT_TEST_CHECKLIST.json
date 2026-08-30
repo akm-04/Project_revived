@@ -1,0 +1,15 @@
+{
+  "pass": "248.0",
+  "next_wave": "I7 stock-client Emblem smoke and acceptance",
+  "status": "READY_NOT_EXECUTED",
+  "critical": ["T01", "T04", "T05", "T06", "T09", "T10", "T11", "T12", "T13", "T14", "T17"],
+  "visual_source_checks": ["T07", "T08"],
+  "capture": ["runtime_logs/server*.txt", "runtime_logs/emblem_events.jsonl", "runtime_logs/all_requests.jsonl", "client debug.zip on error"],
+  "acceptance": "No Lua exception/restart popup/unexpected 409/5xx; durable medal/proposal/economy/Hero state survives relog; client set/stat presentation matches current source; no duplicate reward application.",
+  "negative_memory": [
+    "Do not restore rejected Blood completion common_alert",
+    "Do not treat Function45 as authorization",
+    "Do not add Forge/Reforge nonce fields",
+    "Do not call emblem-v1 outer Scholarship rate official server math"
+  ]
+}

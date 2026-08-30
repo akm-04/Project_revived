@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "pass": "276.0",
+  "status": "PASS",
+  "current_src64": {
+    "archive": "all-assest-rechecked-1.zip",
+    "archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+    "Backend.lua_sha256": "95378e2b0be8180df6de27e9e430c630bcfe46c080e1f91ef5f6d74bdbb1b840",
+    "SocketTCP.lua_sha256": "814f9533590f0617637e3057df8975f3be4aba9a29a3a0355fa38209dabf853e",
+    "facts": [
+      "All three socket roles send TCP_LOGIN with token, region and room_id.",
+      "Client authentication timeout is 10 seconds.",
+      "Client reconnect delay after socket close is 5 seconds.",
+      "Client schedules SOCKET_HEARTBEAT every 600 seconds only after CHAT_ROOM_ENTERED.",
+      "No heartbeat echo is required by the recovered current Lua state machine."
+    ]
+  },
+  "native": {
+    "archive": "latest_apk-smali-full.zip",
+    "archive_sha256": "fcc0f03e5973dd41a190a4bd390a8c4c5185f5f7cf2d4eeb0bcad696cfee7517",
+    "libcocos2dlua_sha256": "c89c33e81466c0453213f65c67e0818a1581756ee0b45b89c0fc89a6d4f8e4c3",
+    "facts": [
+      "Frame header is exactly u32 big-endian payload length, u16 big-endian MID, u32 big-endian sequence.",
+      "Maximum payload length is 65536 bytes.",
+      "Payload is Xinyoudi Params encoded as AMF3.",
+      "Recovered Lua-number serialization uses AMF3 double.",
+      "Known 66-byte TCP_LOGIN and 14-byte heartbeat vectors are exactly reproduced by the implemented codec."
+    ]
+  },
+  "epistemic_boundary": "Server sequence=0, room_id-only CHAT_ROOM_ENTERED, 15s preauth timeout, 1320s idle timeout and queue limits remain explicit compatibility/operational policies rather than recovered original-server implementation facts."
+}

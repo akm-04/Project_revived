@@ -205,7 +205,22 @@ class HeroRepository:
             hero.pop("spirit_item", None)
             hero.setdefault("practice_attr", [0, 0, 0])
             hero.setdefault("skill_book_info", {})
-            hero.setdefault("inscript_items", {})
+            # Pass248 I6 / current src_64: inscript_items is a dense concrete-ID
+            # array. Migrate historical position maps without source-semantic
+            # deletion; EmblemService validates unique physical positions before
+            # any new insert and leaves MID1403 available for recovery.
+            raw_inscripts = hero.get("inscript_items")
+            if isinstance(raw_inscripts, dict):
+                raw_inscripts = [
+                    value for _, value in sorted(
+                        raw_inscripts.items(), key=lambda kv: self._int(kv[0])
+                    )
+                ]
+            elif not isinstance(raw_inscripts, (list, tuple)):
+                raw_inscripts = []
+            hero["inscript_items"] = [
+                self._int(value) for value in raw_inscripts if self._int(value) > 0
+            ]
             hero.setdefault("feed_attrs", {})
             hero.setdefault("evo_attr_points", {})
             hero.setdefault("evo_stage", 1)

@@ -1,0 +1,8 @@
+{
+  "pass": "247.0",
+  "status": "EMBLEM_I5_REFORGE_STATIC_ACCEPTED",
+  "backend": "gxb-backend-v0.37.5-pass247.0",
+  "ota": "1.631.22",
+  "commit": "Pass247: open MID1401/MID1405/MID1406 Reforge lifecycle; preflight source ownership and full source-defined Mana/Crystal cost before entropy; reuse Pass244 sequential planner, independent Reforge pity counter and latest frozen pending proposal inside one PlayerUnitOfWork; Save deterministically swaps original for selected latest candidate with no reroll/double projection; stale source clears pending; Abandon clears without refund; preserve nonce-less repeated MID1401 as a new paid latest-wins proposal; preserve I4 Forge and compatibility-policy epistemic boundary.",
+  "next": "I6 Emblem integration/hardening, then I7 stock-client runtime acceptance."
+}

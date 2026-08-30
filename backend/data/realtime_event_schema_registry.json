@@ -1,0 +1,128 @@
+{
+  "schema_version": 1,
+  "classification": "U4B_FINAL_FROZEN_METADATA",
+  "source_metadata": {
+    "design_authority": "PASS268 U4B R3 + PASS269 R4 policies + PASS271 R6 reality check",
+    "native_donor_sha256": "fcc0f03e5973dd41a190a4bd390a8c4c5185f5f7cf2d4eeb0bcad696cfee7517",
+    "wire": "u32_be payload length | u16_be MID | u32_be sequence | Xinyoudi AMF3 Params",
+    "wave_a_behavior": "metadata only; no socket/runtime enablement",
+    "wave_e_behavior": "Typed publisher active for generic typed notices only with an owning notice schema, plus WORLD-only FORCE_RELOAD. Session-control frames remain owned by RealtimeServer; domain-deferred events remain disabled.",
+    "wave_e_source_refinement": "Current Backend.lua special-cases FORCE_RELOAD only on WORLD socket; guild/service generic maps contain no FORCE_RELOAD event mapping."
+  },
+  "events": [
+    {
+      "mid": 32771,
+      "name": "TCP_LOGIN",
+      "direction": "client->server",
+      "owner_domain": "TRANSPORT_SESSION",
+      "allowed_roles": [
+        "WORLD",
+        "SERVICE",
+        "GUILD"
+      ],
+      "delivery_class": "SESSION_CONTROL",
+      "schema_key": "tcp_login",
+      "enabled_in_wave_a": false,
+      "publication_enabled": false
+    },
+    {
+      "mid": 32779,
+      "name": "CHAT_ROOM_ENTERED",
+      "direction": "server->client",
+      "owner_domain": "TRANSPORT_SESSION",
+      "allowed_roles": [
+        "WORLD",
+        "SERVICE",
+        "GUILD"
+      ],
+      "delivery_class": "SESSION_CONTROL",
+      "schema_key": "chat_room_entered",
+      "enabled_in_wave_a": false,
+      "publication_enabled": false
+    },
+    {
+      "mid": 32784,
+      "name": "WORLD_NOTICE",
+      "direction": "server->client",
+      "owner_domain": "GENERIC_ENVELOPE_DOMAIN_REGISTERED",
+      "allowed_roles": [
+        "WORLD",
+        "SERVICE",
+        "GUILD"
+      ],
+      "delivery_class": "TRANSIENT_INVALIDATION",
+      "schema_key": "typed_notice",
+      "enabled_in_wave_a": false,
+      "publication_enabled": true
+    },
+    {
+      "mid": 32797,
+      "name": "SOCKET_HEARTBEAT",
+      "direction": "client->server",
+      "owner_domain": "TRANSPORT_SESSION",
+      "allowed_roles": [
+        "WORLD",
+        "SERVICE",
+        "GUILD"
+      ],
+      "delivery_class": "SESSION_CONTROL",
+      "schema_key": "empty_params",
+      "enabled_in_wave_a": false,
+      "publication_enabled": false
+    },
+    {
+      "mid": 36853,
+      "name": "GUILD_FIGHT_NOTICE",
+      "direction": "server->client",
+      "owner_domain": "GUILD_WAR",
+      "allowed_roles": [
+        "GUILD"
+      ],
+      "delivery_class": "TRANSIENT_INVALIDATION",
+      "schema_key": "guild_fight_notice",
+      "enabled_in_wave_a": false,
+      "publication_enabled": false
+    },
+    {
+      "mid": 36854,
+      "name": "PLAYER_NOTICE",
+      "direction": "server->client",
+      "owner_domain": "GENERIC_ENVELOPE_DOMAIN_REGISTERED",
+      "allowed_roles": [
+        "WORLD",
+        "SERVICE",
+        "GUILD"
+      ],
+      "delivery_class": "TRANSIENT_INVALIDATION",
+      "schema_key": "typed_notice",
+      "enabled_in_wave_a": false,
+      "publication_enabled": true
+    },
+    {
+      "mid": 36855,
+      "name": "FORCE_RELOAD",
+      "direction": "server->client",
+      "owner_domain": "TRANSPORT_OPERATIONS",
+      "allowed_roles": [
+        "WORLD"
+      ],
+      "delivery_class": "TRANSIENT_PRESENTATION",
+      "schema_key": "force_reload",
+      "enabled_in_wave_a": false,
+      "publication_enabled": true
+    },
+    {
+      "mid": 36857,
+      "name": "RECHARGE",
+      "direction": "server->client",
+      "owner_domain": "COMMERCE",
+      "allowed_roles": [
+        "WORLD"
+      ],
+      "delivery_class": "DURABLE_DOMAIN_DELIVERY",
+      "schema_key": "commerce_recharge",
+      "enabled_in_wave_a": false,
+      "publication_enabled": false
+    }
+  ]
+}

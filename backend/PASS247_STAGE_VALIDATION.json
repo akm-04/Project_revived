@@ -1,0 +1,122 @@
+{
+  "pass": "247.0",
+  "wave": "Emblem I5",
+  "status": "PASS_STATIC_REGRESSION",
+  "ota": "1.631.22",
+  "checks": [
+    {
+      "id": "compileall",
+      "result": "PASS"
+    },
+    {
+      "id": "i5_selftest",
+      "result": "PASS",
+      "detail": "12/12"
+    },
+    {
+      "id": "i4_controlling_regression",
+      "result": "PASS",
+      "detail": "7/7; historical MID1401/1405/1406 fenced assertion superseded by I5"
+    },
+    {
+      "id": "i3_controlling_regression",
+      "result": "PASS",
+      "detail": "6/6; historical public RNG fence assertion superseded by I4/I5 only"
+    },
+    {
+      "id": "i2_controlling_regression",
+      "result": "PASS",
+      "detail": "7/7; historical all-RNG-fenced assertion superseded by I4/I5 only"
+    },
+    {
+      "id": "i1_controlling_regression",
+      "result": "PASS",
+      "detail": "6/6; historical route-fence test superseded by authorized I4/I5 openings"
+    },
+    {
+      "id": "architecture_hygiene",
+      "result": "PASS",
+      "detail": "Pass129 5/5"
+    },
+    {
+      "id": "random_outcome_service",
+      "result": "PASS",
+      "detail": "Pass110"
+    },
+    {
+      "id": "p2_stage_g",
+      "result": "PASS"
+    },
+    {
+      "id": "blood_mid867",
+      "result": "PASS",
+      "detail": "stock npc_ids={} boundary retained"
+    },
+    {
+      "id": "dev_cleanup",
+      "result": "PASS"
+    },
+    {
+      "id": "popup_revert",
+      "result": "PASS",
+      "detail": "rejected Blood completion common_alert remains absent"
+    },
+    {
+      "id": "pass232_edges",
+      "result": "PASS"
+    },
+    {
+      "id": "src64_catalog_rebuild",
+      "result": "PASS",
+      "detail": "current 4370-file src_64 rebuild byte-identical to packaged emblem_source_catalog.json"
+    },
+    {
+      "id": "rebuild_preflight_before_entropy",
+      "result": "PASS",
+      "detail": "invalid/insufficient/unowned/Scholarship proposals consume zero entropy and leave counter/pending/economy unchanged"
+    },
+    {
+      "id": "ten_rebuild_sequential_pity",
+      "result": "PASS",
+      "detail": "10x generated sequentially; pity hit/reset topology and aggregate cost verified"
+    },
+    {
+      "id": "save_frozen_no_reroll",
+      "result": "PASS",
+      "detail": "Save uses latest frozen candidate with zero entropy and atomic original->candidate swap"
+    },
+    {
+      "id": "stale_source_clear",
+      "result": "PASS",
+      "detail": "missing original rejects Save and durably clears pending without award"
+    },
+    {
+      "id": "abandon_no_refund",
+      "result": "PASS",
+      "detail": "clear pending only; repeated empty abandon is successful no-op"
+    },
+    {
+      "id": "restart_policy_freeze",
+      "result": "PASS",
+      "detail": "pending proposal survives restart and older proposal policy_version saves without reroll"
+    },
+    {
+      "id": "post_entropy_rollback",
+      "result": "PASS",
+      "detail": "forced settlement failure rolls back cost, inventory, Reforge counter, pending, journal and state version"
+    },
+    {
+      "id": "nonce_less_repeat",
+      "result": "PASS",
+      "detail": "wire-identical accepted MID1401 is a second paid latest-wins proposal; no receipt staged"
+    }
+  ],
+  "guards": {
+    "MID1400": "OPEN_I4_STATIC_ACCEPTED",
+    "MID1401": "OPEN_I5_STATIC_ACCEPTED",
+    "MID1405": "OPEN_I5_STATIC_ACCEPTED",
+    "MID1406": "OPEN_I5_STATIC_ACCEPTED",
+    "ScholarshipPolicy": "emblem-v1 COMPATIBILITY_POLICY_NOT_OFFICIAL_MATH"
+  },
+  "runtime_gate": "NOT_YET_STOCK_CLIENT_ACCEPTED; I7 remains runtime acceptance wave"
+}

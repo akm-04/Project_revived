@@ -138,6 +138,33 @@ class MissionRepository:
             changed = True
         return changed
 
+    def has_claimable_story(self) -> bool:
+        """Read-only Story redmark readiness owned by the Mission domain.
+
+        Do not materialize/normalize state as a side effect of badge projection.
+        When the supported root mission has not yet been materialized, derive its
+        readiness directly from the same canonical Campaign fact used by
+        ``normalize_story_80001``.
+        """
+        root = self.player.mission_state if isinstance(self.player.mission_state, dict) else {}
+        story = root.get("story") if isinstance(root.get("story"), dict) else {}
+        claimed = {self._int(value) for value in (story.get("claimed") or [])}
+        if self.FIRST_STORY_MISSION in claimed:
+            return False
+        missions = story.get("missions") if isinstance(story.get("missions"), dict) else {}
+        row = missions.get(str(self.FIRST_STORY_MISSION))
+        if isinstance(row, dict):
+            return self._int(row.get("is_complete")) == 1 and self._int(row.get("is_reward")) == 0
+        meta = self._meta_row(self.FIRST_STORY_MISSION)
+        task_raw = str(meta.get("task_num_raw") or "")
+        parts = [self._int(part) for part in task_raw.split("|") if str(part).strip()]
+        target_campaign = parts[0] if parts else 0
+        return target_campaign > 0 and self._campaign_star(target_campaign) > 0
+
+    def _mark_redmark_dirty(self) -> None:
+        if self.uow is not None:
+            self.uow.stage_semantic("redmarks_", 27)
+
     def load_by_type(self, mission_type: Any) -> dict[str, Any] | None:
         if self._int(mission_type) != self.STORY_TYPE:
             return None
@@ -175,7 +202,10 @@ class MissionRepository:
         row["count"] = min(target_count, max(self._int(row.get("count")), 1))
         row["is_complete"] = 1 if self._int(row.get("count")) >= target_count else 0
         row["is_reward"] = 0
-        return [dict(row)] if normalized_changed or row != old else []
+        changed = normalized_changed or row != old
+        if changed:
+            self._mark_redmark_dirty()
+        return [dict(row)] if changed else []
 
     def claim(self, table_id: Any, *, persist: bool = True) -> dict[str, Any] | None:
         tid = self._int(table_id)
@@ -186,6 +216,9 @@ class MissionRepository:
         receipts = story["claim_receipts"]
         receipt = receipts.get(str(tid))
         if isinstance(receipt, dict):
+            # Response-loss replay still replaces the Mission badge family from
+            # canonical state, even though no new mutation is committed.
+            self._mark_redmark_dirty()
             return copy.deepcopy(receipt)
 
         row = story["missions"].get(str(tid))
@@ -245,6 +278,7 @@ class MissionRepository:
             claimed = {self._int(value) for value in story.get("claimed", [])}
             claimed.add(tid)
             story["claimed"] = sorted(value for value in claimed if value > 0)
+            self._mark_redmark_dirty()
             result: dict[str, Any] = {"awards": awards}
             if reward_result.economy:
                 result["economy_"] = reward_result.economy

@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "pass": "276.0",
+  "status": "PASS",
+  "wave": "D_REALTIME_CODEC_IDENTITY_ADMISSION_AUTHENTICATED_SESSION_RUNTIME",
+  "native_vectors": {
+    "tcp_login_bytes": 66,
+    "chat_room_entered_bytes": 31,
+    "heartbeat_bytes": 14
+  },
+  "max_payload": 65536,
+  "roles": ["WORLD", "SERVICE", "GUILD"],
+  "session_policy": {
+    "multiple_connections_per_player": true,
+    "preauth_timeout_seconds": 15,
+    "idle_timeout_seconds": 1320,
+    "heartbeat_echo": false
+  },
+  "composition": "AppFactory constructs non-listening RealtimeRuntime and injects it into EngineDispatcher; run.main starts/stops it after graph construction.",
+  "mid192_changed": false,
+  "typed_publisher_enabled": false,
+  "client_runtime_changed": false,
+  "controlling_regression": "PASS"
+}

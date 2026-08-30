@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "pass": "281.0",
+  "status": "PASS_STATIC_RUNTIME_RETEST_REQUIRED",
+  "pass280_request_registry": {
+    "classification": "RUNTIME_REJECTED_AS_PRIMARY_LOBBY_FIX",
+    "reason": [
+      "same request_ pattern exists in historical v1.164",
+      "Pass280 produced no lobby improvement",
+      "callback ownership does not require table lookup in the assumed way"
+    ],
+    "action": "restore exact current stock Backend.lua in OTA1.631.24"
+  },
+  "debug_probe": {
+    "classification": "MATERIALLY_INVASIVE",
+    "facts": [
+      "15644 /client-log uploads matched 15644 resource_pipeline_v061 probe events",
+      "do not use one-HTTP-upload-per-probe instrumentation for performance acceptance"
+    ]
+  },
+  "lobby_root_cause_model": [
+    "global StateRepository RLock serializes authenticated requests",
+    "per-request durable PlayerState reconstruction was expensive",
+    "per-request immutable source catalog parsing dominated RequestServices construction",
+    "MID124/MID1056 no-single-flight loops amplify latency while first response is queued"
+  ],
+  "implemented": [
+    "app-scoped RequestServiceImmutableCatalogs for 30 statically read-only catalog/policy classes",
+    "canonical in-memory PlayerState working set per player_id",
+    "cheap player-file mtime/size fingerprint preserves next-request visibility of out-of-band durable edits",
+    "refresh() remains explicit forced reload boundary",
+    "normal UoW saves refresh cache fingerprint",
+    "global RLock deliberately unchanged"
+  ],
+  "deferred": [
+    "per-player locks",
+    "cross-player concurrent authenticated request execution",
+    "same-account multi-session policy",
+    "session expiration/revocation redesign",
+    "HydrationCoordinator until backend retest shows residual equivalent fanout",
+    "LoadingProxy repair",
+    "Bag/resource host reconciliation"
+  ],
+  "tests": [
+    "Pass281 working-set/catalog safety PASS",
+    "Pass79 out-of-band durable edit compatibility PASS",
+    "Pass68-71 PASS",
+    "Pass83/88/91 PASS",
+    "Pass129 5/5 PASS",
+    "Pass212 PASS",
+    "Pass227 PASS",
+    "Pass248 11/11 PASS",
+    "Waves A-F PASS",
+    "synchronization catalog validator PASS"
+  ]
+}

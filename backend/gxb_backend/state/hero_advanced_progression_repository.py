@@ -7,7 +7,7 @@ architecture:
 - SuperHero six-slot equipment + duplicate enhancement (MID54/MID304)
 - ordinary equipment Fumo refinement (MID58)
 - Element Equipment equip/strengthen/unload/decompose (MID2849-2853)
-- deterministic Inscription insert/remove (MID1402/MID1403)
+- legacy Inscription direct-call compatibility shims delegate to EmblemService
 - deterministic Stone Evolution point/stage transitions (MID2608/MID2609)
 
 Server-hidden candidate generation families (Practice rerolls, Inscription make/
@@ -43,6 +43,7 @@ class HeroAdvancedProgressionRepository:
         uow: UnitOfWork | None,
         settlement: MutationSettlementService | None,
         element_eligibility: ElementEquipmentEligibilityPolicy | None = None,
+        emblem_service: Any | None = None,
     ) -> None:
         self.player = player
         self.data_dir = Path(data_dir)
@@ -52,6 +53,11 @@ class HeroAdvancedProgressionRepository:
         self.uow = uow
         self.settlement = settlement
         self.element_eligibility = element_eligibility
+        # Pass242 I1: EmblemService is the sole semantic owner of deterministic
+        # Inscription MIDs. This optional delegate exists only so historical
+        # provenance self-tests that directly called hero_advanced.inscription_*
+        # continue exercising the live owner instead of a dead duplicate path.
+        self.emblem_service = emblem_service
         self.meta = self._load("hero_advanced_progression_meta.json")
         self.equip_meta = self._load("hero_equipment_meta.json")
         self.super_partners = self.meta.get("super_partners") or {}
@@ -60,12 +66,9 @@ class HeroAdvancedProgressionRepository:
         self.advanced_items = self.meta.get("advanced_items") or {}
         self.element_equips = self.meta.get("element_equips") or {}
         self.element_strength = self.meta.get("element_strength") or {}
-        self.inscription_item_to_type = self.meta.get("inscription_item_to_type") or {}
-        self.inscription_exchange_materials = tuple(self.meta.get("inscription_exchange_materials") or ())
         self.partner_stones = self.meta.get("partner_stones") or {}
         self.stone_evolution = self.meta.get("stone_evolution") or {}
         self.stone_tickets = self.meta.get("stone_tickets") or {}
-        self.remove_inscription_crystal = self._int(self.meta.get("remove_inscription_crystal"), 20)
         self.live_super_max_star = self._int(self.meta.get("live_super_max_star"), 8)
         self.element_max_rank = self._int(self.meta.get("element_max_rank"), 10)
 
@@ -281,106 +284,20 @@ class HeroAdvancedProgressionRepository:
         ops=tuple([StackMutation(base,"DEBIT",1),*credits])
         return {} if self._apply(mid=2853,operation="element_destroy_backpack",partner_id=0,operations=ops) else {"error_code":1}
 
-    def _inscription_pos(self, item_id: int) -> int:
-        inscription_id=self._int(self.inscription_item_to_type.get(str(item_id)),0)
-        return self._int((self.meta.get("inscriptions") or {}).get(str(inscription_id),{}).get("item_pos"),0) if inscription_id>0 else 0
+    # Pass242 I1 compatibility shims. Live handlers route directly to
+    # EmblemService; these methods remain only for historical direct-call tests.
+    def inscription_insert(self, req: dict[str, Any]) -> dict[str, Any]:
+        return self.emblem_service.insert(req) if self.emblem_service is not None else {"error_code": 1}
 
-    def _equipped_inscription_for_pos(self, hero: dict[str,Any], pos: int) -> int:
-        for value in self._inscription_response(hero):
-            if self._inscription_pos(value)==pos:
-                return value
-        return 0
+    def inscription_remove(self, req: dict[str, Any]) -> dict[str, Any]:
+        return self.emblem_service.remove(req) if self.emblem_service is not None else {"error_code": 1}
 
-    def inscription_insert(self,req:dict[str,Any])->dict[str,Any]:
-        pid=self._int(req.get("partner_id"),0); item=self._int(req.get("item_id"),0); replace=self._int(req.get("replace_item_id"),0); hero=self.heroes.get(pid)
-        if hero is None: return {"error_code":1}
-        item_pos=self._inscription_pos(item)
-        if item_pos<=0: return {"error_code":1}
-        current=self._equipped_inscription_for_pos(hero,item_pos)
-        if current>0 and replace<=0: return {"error_code":1}
-        if replace>0 and current!=replace: return {"error_code":1}
-        ops=[StackMutation(item,"DEBIT",1)]
-        if replace>0:
-            ops.extend((ResourceMutation("crystal","DEBIT",self.remove_inscription_crystal),StackMutation(replace,"CREDIT",1)))
-        ops.append(EntityMutation("HERO",pid,"INSCRIPTION_INSERT",indices=(item_pos,item,replace)))
-        if not self._apply(mid=1402,operation="inscription_insert",partner_id=pid,operations=tuple(ops)): return {"error_code":1}
-        return {"inscript_items":self._inscription_response(self.heroes.get(pid) or hero)}
+    def inscription_resolve(self, req: dict[str, Any]) -> dict[str, Any]:
+        return self.emblem_service.resolve(req) if self.emblem_service is not None else {"error_code": 1}
 
-    def _inscription_response(self,hero:dict[str,Any])->list[int]:
-        raw=hero.get("inscript_items") or []
-        if isinstance(raw,(list,tuple)):
-            return [self._int(v,0) for v in raw if self._int(v,0)>0]
-        if isinstance(raw,dict):
-            # Compatibility migration for any hand-edited older state. Values
-            # are emitted as the source expects: a dense item-id array.
-            return [self._int(v,0) for _,v in sorted(raw.items(),key=lambda kv:self._int(kv[0],0)) if self._int(v,0)>0]
-        return []
+    def inscription_exchange_materials_all(self, req: dict[str, Any]) -> dict[str, Any]:
+        return self.emblem_service.exchange_materials(req) if self.emblem_service is not None else {"error_code": 1}
 
-    def inscription_remove(self,req:dict[str,Any])->dict[str,Any]:
-        pid=self._int(req.get("partner_id"),0); item=self._int(req.get("item_id"),0); hero=self.heroes.get(pid)
-        if hero is None: return {"error_code":1}
-        pos=self._inscription_pos(item)
-        if pos<=0 or self._equipped_inscription_for_pos(hero,pos)!=item: return {"error_code":1}
-        ops=(ResourceMutation("crystal","DEBIT",self.remove_inscription_crystal),StackMutation(item,"CREDIT",1),EntityMutation("HERO",pid,"INSCRIPTION_REMOVE",indices=(pos,item)))
-        if not self._apply(mid=1403,operation="inscription_remove",partner_id=pid,operations=ops): return {"error_code":1}
-        return {"inscript_items":self._inscription_response(self.heroes.get(pid) or hero)}
-
-
-    def inscription_resolve(self, req:dict[str,Any])->dict[str,Any]:
-        """MID1404 deterministic emblem dissolve.
-
-        Inscription.lua removes the dissolved emblem locally on OK. The source
-        resolve-material identifiers 19/20/21 are scalar certificate balances,
-        not Backpack item IDs, so persist STACK debit + RESOURCE credit and let
-        the Pass70 journal-aware economy projector reconcile the new cumulative
-        certificate balance exactly once.
-        """
-        item=self._int(req.get("item_id"),0); count=self._int(req.get("resolve_num"),0)
-        ins_id=self._int(self.inscription_item_to_type.get(str(item)),0)
-        row=(self.meta.get("inscriptions") or {}).get(str(ins_id)) or {}
-        material=self._int(row.get("resolve_material"),0); per=max(0,self._int(row.get("resolve_num"),0))
-        if item<=0 or count<=0 or material<=0 or per<=0: return {"error_code":1}
-        total=per*count
-        # Inscription material IDs 19/20/21 are not Backpack item IDs.
-        # Inscription:getMaterialNumByID maps them to SelfPlayer degreeCer /
-        # graduateCer / patentCer, which are the scalar-ledger wire keys
-        # degree_cer / graduate_cer / patent_cer.  Let the Pass70 journal-aware
-        # projector emit the cumulative economy_ value; emitting extra_drops_
-        # would incorrectly create a Backpack item with table_id 19/20/21.
-        resource_by_material={19:"degree_cer",20:"graduate_cer",21:"patent_cer"}
-        resource_key=resource_by_material.get(material)
-        if resource_key is None: return {"error_code":1}
-        ops=(StackMutation(item,"DEBIT",count),ResourceMutation(resource_key,"CREDIT",total))
-        if not self._apply(mid=1404,operation="inscription_resolve",partner_id=0,operations=ops): return {"error_code":1}
-        return {}
-
-    def inscription_exchange_materials_all(self, req:dict[str,Any])->dict[str,Any]:
-        """MID1407: exchange all held source materials into certificate ledgers.
-
-        Effective Inscription.lua sends an empty request and snapshots every held
-        stack from misc.inscript_cost_items before the request. item.lua's
-        economic_value maps those three items to currency IDs 19/20/21 at 5 per
-        material.  The mutation is one atomic StackInventory + ResourceMutation
-        plan; the ordinary response projector emits cumulative economy_ balances.
-        """
-        if not isinstance(req,dict): return {"error_code":1}
-        resource_by_currency={19:"degree_cer",20:"graduate_cer",21:"patent_cer"}
-        ops=[]; changes=[]
-        for row in self.inscription_exchange_materials:
-            if not isinstance(row,dict): return {"error_code":1}
-            item_id=self._int(row.get("item_id"),0); currency=self._int(row.get("currency_id"),0); per=max(0,self._int(row.get("per_item"),0))
-            resource=resource_by_currency.get(currency)
-            if item_id<=0 or resource is None or per<=0: return {"error_code":1}
-            count=max(0,self.inventory.get_item_num(item_id))
-            if count<=0: continue
-            change=count*per
-            ops.extend((StackMutation(item_id,"DEBIT",count),ResourceMutation(resource,"CREDIT",change)))
-            changes.append({"currency":currency,"change":change})
-        if not ops:
-            return {"currency_change":[]}
-        if not self._apply(mid=1407,operation="inscription_exchange_materials",partner_id=0,operations=tuple(ops)):
-            return {"error_code":1}
-        return {"currency_change":changes}
 
     def _daily_consume_state(self)->dict[str,Any]:
         # Pass79: DailyResetCoordinator is the sole owner of source-day

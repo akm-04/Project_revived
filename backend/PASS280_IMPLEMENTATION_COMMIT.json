@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "pass": "280.0",
+  "backend_version": "0.44.0",
+  "ota": "1.631.23",
+  "status": "WAVE_G_REQUEST_REGISTRY_ONE_LINE_RECONCILIATION_PATCH_PENDING_RUNTIME_RETEST",
+  "runtime_backend_behavior_changed": false,
+  "client_runtime_changed": true,
+  "changed_client_file": "app/common/network/Backend.lua",
+  "change": "requests_ = requests_ or {} instead of request_ or {}",
+  "patch_scope": "exactly one source line in src_32/src_64; cumulative OTA rebuild only",
+  "hydration_coordinator_added": false,
+  "loading_proxy_changed": false,
+  "event_centre_changed": false,
+  "rollback": "Pass279 HOT + backend v0.43.0/Pass278 runtime + OTA1.631.22",
+  "next_gate": "stock-client retest and debug capture before any further reconciliation patch"
+}
