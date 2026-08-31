@@ -1,0 +1,160 @@
+{
+  "schema_version": 1,
+  "pass": "299.0",
+  "system_id": "OTA_RESOURCE_PROVISIONING",
+  "status": "RUNTIME_ACCEPTED_CLOSED_CURRENT_PHASE",
+  "entrypoint": "Read this file first for any OTA/MID2/Resource-CDN/lazyFile/update-version question.",
+  "current_contract": {
+    "base": "1.631.0",
+    "asset_first": "1.631.1 BULK_RESOURCE_BOOTSTRAP loud",
+    "code_start": "1.631.2 CODE_ONLY silent cumulative",
+    "later_code": "1.631.3+",
+    "ota_generation": "OTA_CANONICAL_V1_PASS299",
+    "git_cap_bytes": 99000000,
+    "bulk_lazy_state": "POST_BULK_RECONCILED",
+    "old_res": "DENY_BY_DEFAULT_NOT_BULK_SOURCE"
+  },
+  "critical_sequence": [
+    {
+      "pass": "283",
+      "role": "resource gap/source semantics research",
+      "files": [
+        "PASS283_RESOURCE_CDN_RESEARCH_REPORT.md",
+        "PASS283_RESOURCE_GAP_CENSUS.json"
+      ]
+    },
+    {
+      "pass": "284",
+      "role": "resource diagnostic tooling / evidence acquisition",
+      "files": [
+        "PASS284_RESOURCE_DIAGNOSTIC_TOOL_REPORT.md",
+        "PASS284_RESOURCE_DIAGNOSTIC_TOOL_CONTRACT.json"
+      ]
+    },
+    {
+      "pass": "285",
+      "role": "resource family recovery/census",
+      "files": [
+        "PASS285_RESOURCE_RECOVERY_REPORT.md",
+        "PASS285_RESOURCE_FAMILY_CENSUS.csv"
+      ]
+    },
+    {
+      "pass": "286",
+      "role": "resource update seam + MID2 catalog rewrite/merge behavior",
+      "files": [
+        "PASS286_RESOURCE_UPDATE_SEAM.json"
+      ]
+    },
+    {
+      "pass": "287",
+      "role": "changed-MD5 overlay research/simulation",
+      "files": [
+        "PASS287_RESOURCE_CATALOG_OVERLAY_RESEARCH.md",
+        "PASS287_10_ICON_OVERLAY_SIMULATION.json"
+      ]
+    },
+    {
+      "pass": "288",
+      "role": "Resource/CDN acceptance contract + design freeze",
+      "files": [
+        "PASS288_RESOURCE_CDN_DESIGN_FREEZE.json"
+      ]
+    },
+    {
+      "pass": "289",
+      "role": "Resource/CDN implementation + update controller seam",
+      "files": [
+        "PASS289_RESOURCE_CDN_COMPATIBILITY_IMPLEMENTATION_REPORT.md"
+      ]
+    },
+    {
+      "pass": "290",
+      "role": "MID2 updater archaeology / original protocol capabilities",
+      "files": [
+        "PASS290_MID2_UPDATER_ARCHAEOLOGY_REPORT.md",
+        "PASS290_MID2_UPDATER_ARCHAEOLOGY.json"
+      ]
+    },
+    {
+      "pass": "291",
+      "role": "version-aware separated-lane MID2 scheduler",
+      "files": [
+        "PASS291_MID2_SCHEDULER_SELF_HEAL_REPORT.md",
+        "PASS291_RELEASE_REGISTRY.json"
+      ]
+    },
+    {
+      "pass": "292",
+      "role": "Resource/CDN stock runtime acceptance + OBB bootstrap research",
+      "files": [
+        "PASS292_RESOURCE_CDN_RUNTIME_ACCEPTANCE_REPORT.md",
+        "PASS292_OBB_BOOTSTRAP_RESEARCH_REPORT.md"
+      ]
+    },
+    {
+      "pass": "293",
+      "role": "clean-data bulk resource bootstrap reset / initial asset barrier",
+      "files": [
+        "PASS293_RESOURCE_BOOTSTRAP_RESET_REPORT.md"
+      ]
+    },
+    {
+      "pass": "294",
+      "role": "auto-build/publish lanes; <=99MB retry evidence",
+      "files": [
+        "PASS294_UPDATE_LANE_SELF_HEAL_REPORT.md"
+      ]
+    },
+    {
+      "pass": "295",
+      "role": "failed update trace + migration/self-heal provenance",
+      "files": [
+        "PASS295_FAILED_UPDATE_QUICK_TRACE.md",
+        "PASS295_MIGRATION_HANDOFF.json"
+      ]
+    },
+    {
+      "pass": "296",
+      "role": "native float32 root-cause research + OTA compatibility design freeze",
+      "files": [
+        "PASS296_OTA_COMPATIBILITY_RESEARCH_REPORT.md",
+        "PASS296_OTA_COMPATIBILITY_DESIGN_EXTENSION.json"
+      ]
+    },
+    {
+      "pass": "297",
+      "role": "numeric compatibility implementation / direct barrier routing",
+      "files": [
+        "PASS297_OTA_COMPATIBILITY_IMPLEMENTATION_REPORT.md",
+        "PASS297_STOCK_CLIENT_RECONCILIATION.md"
+      ]
+    },
+    {
+      "pass": "298",
+      "role": "post-bulk lazyFile reconciliation implementation",
+      "files": [
+        "PASS298_POST_BULK_LAZY_RECONCILIATION_REPORT.md",
+        "PASS298_PASS293_LAZY_SELF_HEAL_CORRECTION.json"
+      ]
+    },
+    {
+      "pass": "299",
+      "role": "stock runtime acceptance + canonical version normalization / OTA closure",
+      "files": [
+        "PASS299_OTA_RUNTIME_ACCEPTANCE_AND_NORMALIZATION_REPORT.md",
+        "PASS299_RUNTIME_DEBUG_EVIDENCE.json",
+        "PASS299_OTA_SEQUENCE_GRAPH.json"
+      ]
+    }
+  ],
+  "negative_memory": [
+    "(7,0) is Lua RESULT_FAILED size mismatch, not curl error 7",
+    "Do not brute-force shard sizes; require float32-exact fragment accounting",
+    "Physical bulk files do not clear current v1.631.0 lazy markers; bulk must install reconciled lazyFile.json",
+    "Historical v1.164 writable-alias self-heal is not present in current v1.631.0",
+    "old_res never becomes generic current resource authority",
+    "Experimental 1.631.1-1.631.6 bytes/numbering are provenance; canonical runtime generation disambiguates reused 1.631.1/1.631.2"
+  ],
+  "next_major_phase": "Identity / Session / Concurrency Audit research"
+}

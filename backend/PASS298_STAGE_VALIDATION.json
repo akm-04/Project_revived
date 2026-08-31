@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "pass": "298.0",
+  "status": "POST_BULK_LAZY_RECONCILIATION_IMPLEMENTED_STATIC_ACCEPTED_STOCK_RETEST_PENDING",
+  "debug_zip_sha256": "22f9d0b27940289ed9ab86d7cb3582b6e7f562460bc275c7846ba44234c252be",
+  "runtime_evidence": {
+    "pass297_bulk_transport": "ACCEPTED_FROM_SUCCESSFUL_STOCK_TRACE",
+    "bulk_version": "1.631.3",
+    "bulk_volumes": 12,
+    "bulk_assembled_size": 1059535905,
+    "bulk_exact_files": 25420,
+    "bulk_missing_files": 4511,
+    "bulk_mismatch_files": 0,
+    "code_version": "1.631.4",
+    "post_update_resource_requests": 507,
+    "served_current": 489,
+    "local_file_missing": 18
+  },
+  "source_sha256": {
+    "current_src64_UpdateScene_lua": "52c78a98002a27532343334360bd264af02700cbbda631d3b0cbf367e55516ac",
+    "current_src64_lazyFileManager_lua": "4257bdfbb400417414aff2f138f199c35675c96c56ccdfdfe09a6b0a681e3686",
+    "current_src64_AssetDownload_lua": "78b5fe69e2989cd976ce1083b29f9679905f4970ea882ad21b38fdb2cc7ea616",
+    "historical_v1_164_AssetDownload_lua": "6ef74a258691492b374cd39a30e642412d5959a62644db5d26250ebf54d3bf02"
+  },
+  "checks": {
+    "current_src64_lazy_initialization_trace": "PASS",
+    "current_AssetDownload_marker_authority_trace": "PASS",
+    "historical_v1_164_local_alias_reconciliation_trace": "PASS",
+    "pass286_catalog_overlay_scope_reconciled": "PASS",
+    "old_res_deny_by_default_boundary": "PASS",
+    "pass289_resource_cdn_regression": "PASS",
+    "pass291_scheduler_regression": "PASS",
+    "pass293_resource_bootstrap_regression": "PASS",
+    "pass294_auto_update_regression": "PASS",
+    "pass297_mid2_compatibility_regression": "PASS",
+    "pass298_lazy_bootstrap_integration": "PASS",
+    "compileall": "PASS",
+    "stock_client_1_631_5_lazy_state_retest": "PENDING"
+  },
+  "active_target": {
+    "asset_barrier": "1.631.5",
+    "code_baseline": "1.631.6",
+    "bulk_lazy_state_mode": "POST_BULK_RECONCILED"
+  },
+  "implementation_sha256": {
+    "update_controller.py": "bd45ea4516a189ad7cb10932ac9f441d51710d9c40b2c3d22493b5d4f8f91ae5",
+    "gxb_backend/updates/lazy_bootstrap.py": "9111ce0e08d10aade8d256af2c515e3533cddfdb6d24c7c290092239a9bf0870",
+    "gxb_backend/updates/mid2_compat.py": "1cdd057354aedeca1de4d7d301df566ba0b9f7d58628e5beee266c8055eac405",
+    "gxb_backend/updates/local_update.py": "a80e2c993ba7686b8bf0f3be33beae83ae53c8fd72ce5baabf2d3115414c35ba",
+    "tools/selftest_pass298_lazy_bootstrap.py": "f1facc0f986075ee331cf4474c3e031a413787d95c4afcda2edeac4165d7ce47"
+  }
+}

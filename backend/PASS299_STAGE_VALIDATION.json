@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "pass": "299.0",
+  "status": "OTA_RUNTIME_ACCEPTED_CANONICAL_NORMALIZATION_STATIC_ACCEPTED",
+  "runtime_acceptance": {
+    "debug_zip_sha256": "78fb3e7ab14017286da2528d95afaadb204ab49c234a5904345cf14e9b5098e7",
+    "successful_asset_release": "1.631.5",
+    "successful_code_release": "1.631.6",
+    "post_update_resource_gateway_serves": 0,
+    "classification": "EXPERIMENTAL_NUMBERING_RUNTIME_EVIDENCE_ACCEPTS_MECHANISM"
+  },
+  "canonical_target": {
+    "ota_generation": "OTA_CANONICAL_V1_PASS299",
+    "asset_bootstrap": "1.631.1",
+    "code_baseline": "1.631.2",
+    "later_code": "1.631.3+"
+  },
+  "checks": {
+    "pass289_resource_cdn_regression": "PASS",
+    "pass291_scheduler_regression": "PASS",
+    "pass293_resource_bootstrap_regression": "PASS",
+    "pass294_auto_update_regression": "PASS",
+    "pass297_mid2_compatibility_regression": "PASS",
+    "pass298_lazy_bootstrap_regression": "PASS",
+    "pass299_ota_closure_regression": "PASS",
+    "compileall": "PASS",
+    "stale_same_version_archive_test": "PASS",
+    "generation_filter_test": "PASS",
+    "duplicate_update_staging_cache_removed": "REVERTED_PRESERVED_AS_PASS289_REGRESSION_FIXTURE"
+  },
+  "implementation_sha256": {
+    "update_controller.py": "7ba65851e93c248db73960ed257d0709c360e3d0bb0fee3bdd393cd7c8a5f99e",
+    "gxb_backend/updates/local_update.py": "56509666070977e76a807427771e0d8a3c4e8916cf317562573d5f22f1009c47",
+    "gxb_backend/updates/mid2_compat.py": "1cdd057354aedeca1de4d7d301df566ba0b9f7d58628e5beee266c8055eac405",
+    "gxb_backend/updates/lazy_bootstrap.py": "9111ce0e08d10aade8d256af2c515e3533cddfdb6d24c7c290092239a9bf0870",
+    "tools/selftest_pass299_ota_closure.py": "b53d9db7f59d568bf085afcf3db29d9b26042c1500bee037e73200379fbcb2e4",
+    "local_assets/settings.json": "31047cf529b07d3e3639b191c3ee6247843ee843ef69f95931ac5aa3a34bda41",
+    "local_assets/release_registry.json": "329e24149b172174aead150bd9137c555ba141316573a59897f3b49ee5c2922c"
+  },
+  "next_gate": "Begin Identity / Session / Concurrency Audit research; OTA closed unless reopen condition appears."
+}

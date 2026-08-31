@@ -1,0 +1,6 @@
+{
+  "schema_version": 1,
+  "status": "DEPRECATED_COMPATIBILITY_POINTER_PASS297",
+  "authority": "local_assets/settings.json",
+  "note": "Pass299 canonical OTA generation uses 1.631.1 assets first and 1.631.2+ cumulative Lua/code. Resource/CDN and catalog migration seams remain as previously accepted."
+}

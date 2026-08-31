@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "pass": "298.0",
+  "status": "LAZY_STATE_FIX_STATIC_ACCEPTED_STOCK_RETEST_PENDING",
+  "phase": "STOCK_CLIENT_POST_BULK_RECONCILIATION",
+  "sequence": [
+    {"order": 1, "work": "Deploy Pass298 with exact current local_assets/res; startup builds/publishes loud 1.631.5 containing exact assets plus generated root lazyFile.json", "gate": "1.631.5 installs and restarts without transport/unzip failure"},
+    {"order": 2, "work": "Allow silent cumulative 1.631.6 and restart", "gate": "client settles at 1.631.6 with no pending MID2 update"},
+    {"order": 3, "work": "Compare post-update /res traffic against 1.631.5 exact-supplied catalog set", "gate": "zero successful /res requests for exact-supplied resources; genuine unsupplied holes may remain"},
+    {"order": 4, "work": "If any exact-supplied resource is downloaded, capture writable lazyFile.json/version.json and targeted client logs before changing design", "gate": "return to source-backed research on the conflicting path"},
+    {"order": 5, "work": "Once stable, freeze OTA/resource provisioning runtime acceptance and begin Identity / Session / Concurrency Audit research", "gate": "asset provisioning no longer pollutes normal runtime measurements"}
+  ],
+  "hardening_policy": "Long-run hardening remains deferred; focused stock-client reconciliation remains mandatory."
+}

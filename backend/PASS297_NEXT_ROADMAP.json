@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "pass": "297.0",
+  "status": "OTA_IMPLEMENTATION_STATIC_ACCEPTED_RUNTIME_RECONCILIATION_PENDING",
+  "phase": "STOCK_CLIENT_RECONCILIATION",
+  "sequence": [
+    {
+      "order": 1,
+      "work": "Deploy Pass297 with exact current external local_assets/res and perform clear-data stock-client 1.631.0 -> 1.631.3 bulk smoke",
+      "gate": "No synthetic (7,0); truthful size/MD5/unzip/restart succeeds"
+    },
+    {
+      "order": 2,
+      "work": "Verify fresh cumulative silent CODE_ONLY 1.631.4 after restart",
+      "gate": "Client advances and settles with no pending update"
+    },
+    {
+      "order": 3,
+      "work": "If anomaly appears, run targeted src_64/current-native/backend research before modifying design",
+      "gate": "Source-backed explanation or bounded compatibility adaptation"
+    },
+    {
+      "order": 4,
+      "work": "Freeze OTA runtime acceptance",
+      "gate": "Only after successful real stock-client reconciliation"
+    },
+    {
+      "order": 5,
+      "work": "Begin dedicated Identity / Session / Concurrency Audit research",
+      "gate": "Updater provisioning runtime-stable"
+    }
+  ],
+  "identity_session_concurrency_scope_after_gate": [
+    "replace global authenticated-request RLock serialization with evidence-backed per-player atomicity",
+    "cross-player parallelism",
+    "same-account simultaneous sessions",
+    "session expiry and revocation",
+    "account/session persistence crash consistency",
+    "transient presence/device semantics",
+    "realtime lock ordering"
+  ],
+  "hardening_policy": "Full long-run hardening remains deferred by current project policy; focused regression and source/client reconciliation gates remain mandatory."
+}

@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "pass": "298.0",
+  "backend_version": "0.51.0",
+  "artifact": "gxb-backend-v0.51.0-pass298.0.zip",
+  "status": "IMPLEMENTED_STATIC_ACCEPTED_PENDING_STOCK_RETEST",
+  "changes": [
+    "new gxb_backend/updates/lazy_bootstrap.py shared stock lazy-state projection",
+    "BULK_RESOURCE_BOOTSTRAP includes generated root lazyFile.json from same exact-current catalog eligibility used by asset collector",
+    "release provenance records lazy marker counts and lazyFile SHA256",
+    "active routing barrier advanced monotonically to 1.631.5; cumulative silent code baseline to 1.631.6",
+    "Pass293 current-client self-heal inference superseded by current v1.631.0 source; historical Pass293 record retained",
+    "legacy old_res fallback remains deny-by-default and excluded from bulk build"
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "pass": "294.0",
+  "backend_version": "0.49.0",
+  "artifact": "gxb-backend-v0.49.0-pass294.0",
+  "commit": "Pass294: self-heal failed Pass293 bulk updater into separated auto-maintained asset/code/catalog lanes; cap shards at 99,000,000 bytes; add immutable release sidecars, startup auto-ensure/publish, operator settings/README, and cheap MID2 stat-fingerprint validation.",
+  "resource_cdn_phase": "ACCEPTED_CLOSED_DEPLOYMENT_REFINEMENT",
+  "runtime_status": "PASS293_256MIB_SHARDS_REJECTED; PASS294_99MB_RETRY_PENDING",
+  "next_major_foundation": "Identity / Session / Concurrency Audit after bootstrap retry"
+}

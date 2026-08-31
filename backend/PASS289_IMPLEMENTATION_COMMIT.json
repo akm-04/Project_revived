@@ -1,0 +1,15 @@
+{
+  "pass": "289.0",
+  "backend_version": "0.46.0",
+  "artifact": "gxb-backend-v0.46.0-pass289.0",
+  "status": "STATIC_ACCEPTED_RUNTIME_SMOKE_REQUIRED",
+  "scope": "Resource/CDN exact-whitelist historical donor seam + transactional operator update controller + prebuilt disabled loud OTA 1.631.25",
+  "runtime_mutation": true,
+  "client_patch": false,
+  "catalog_md5_bypass": false,
+  "historical_csb_transplant": false,
+  "first_rollout_legacy_icons": 10,
+  "ota_candidate": "1.631.25",
+  "ota_candidate_enabled": false,
+  "next": "operator places/symlinks res and old_res, activates candidate, restarts server, executes stock-client smoke"
+}

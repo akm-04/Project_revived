@@ -1,0 +1,13 @@
+{
+  "pass": "291.0",
+  "backend_version": "0.47.0",
+  "artifact": "gxb-backend-v0.47.0-pass291.0",
+  "status": "STATIC_ACCEPTED_RUNTIME_RESOURCE_SMOKE_REQUIRED",
+  "scope": "MID2 updater archaeology-driven self-heal: immutable version-aware release registry, app/platform gating, catalog barriers, multi-res and multi-volume support, safe candidate version coalescing",
+  "runtime_mutation": true,
+  "resource_gateway_policy_changed": false,
+  "client_patch": false,
+  "active_published_ota": "1.631.24 CODE_ONLY silent exact Pass281 package",
+  "catalog_candidate": "1.631.25 CATALOG_MIGRATION loud unpublished ten-icon overlay",
+  "next": "mount/symlink res+old_res -> validate staged donors -> publish/activate 1.631.25 -> restart -> stock ten-icon inventory smoke"
+}

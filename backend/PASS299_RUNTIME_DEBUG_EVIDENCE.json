@@ -1,0 +1,57 @@
+{
+  "schema_version": 1,
+  "pass": "299.0",
+  "classification": "STOCK_CLIENT_RUNTIME_ACCEPTED_OTA_RESOURCE_PROVISIONING",
+  "debug_artifact": {
+    "name": "debug(1).zip",
+    "sha256": "78fb3e7ab14017286da2528d95afaadb204ab49c234a5904345cf14e9b5098e7"
+  },
+  "successful_attempt": {
+    "asset_release": "1.631.5",
+    "asset_volumes": 12,
+    "asset_volume_sizes": [
+      99000000,
+      99000000,
+      99000000,
+      99000000,
+      99000000,
+      99000000,
+      99000000,
+      99000000,
+      99000000,
+      99000000,
+      62005060,
+      8388611
+    ],
+    "code_release": "1.631.6",
+    "code_volumes": 1,
+    "code_volume_size": 2411656,
+    "version_checks": [
+      {
+        "v": "",
+        "clean": true
+      },
+      {
+        "v": "1.631.5",
+        "clean": false
+      },
+      {
+        "v": "1.631.6",
+        "clean": false
+      }
+    ],
+    "settled_gameplay_version": "1.631.6",
+    "mid2_pending_after_code": false,
+    "resource_gateway_post_update_serves": 0,
+    "resource_probe_rows": 1354,
+    "resource_probe_summary": "CSB/window resources continued through local AssetLoader/CSLoader path; no AssetDownload/lazy/download events observed in probe."
+  },
+  "non_ota_noise": {
+    "emulator_check_subprocess_crash": true,
+    "process": "com.carolgames.gxb:EmulatorCheckService",
+    "pid": 11931,
+    "main_game_process_pid": 10506,
+    "classification": "UNRELATED_TO_OTA_MAIN_PROCESS_CONTINUED"
+  },
+  "conclusion": "Pass297 numeric MID2 transport + Pass298 lazyFile reconciliation are runtime accepted for the current stock-client OTA/resource provisioning path."
+}

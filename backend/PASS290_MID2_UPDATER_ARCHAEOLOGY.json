@@ -1,0 +1,49 @@
+{
+  "pass": "290.0",
+  "status": "RESEARCH_COMPLETE",
+  "runtime_mutation": false,
+  "source_proven": {
+    "ordered_res_descriptors": true,
+    "per_descriptor_multi_volume_001_to_NNN": true,
+    "assembled_zip_size_md5_validation": true,
+    "single_top_level_is_review_for_batch": true,
+    "silent_and_loud_share_installer": true,
+    "version_json_processed_after_either_mode": true,
+    "android_obb_bootstrap": true
+  },
+  "not_recovered": [
+    "official MID2 response with res length > 1",
+    "official descriptor with volume > 1",
+    "historical OBB payload",
+    "historical obbinfos.xml",
+    "server-side semantic meaning of full=true"
+  ],
+  "historical_v1_164": {
+    "catalog_rows": 30699,
+    "force_rows": 9401,
+    "lazy_rows": 21298,
+    "lazy_expected_mib": 651.6275672912598,
+    "recovered_lazy_payloads_exact": 21298,
+    "download_infos_empty": true
+  },
+  "current_pass281_mid2": {
+    "app_v": "1.631.0",
+    "platform": 3,
+    "full": true,
+    "before_v": "1.631.23",
+    "after_v": "1.631.24"
+  },
+  "accepted_ota_1_631_24": {
+    "bytes": 2409878,
+    "md5": "dd89797c446ed3562455f9929c0aad12",
+    "sha256": "9f9bcb3b118eea68ddc3dfc4e23cf8cd25aef7a9c0e4fe4db745137d9c727ec0",
+    "files": 148,
+    "contains_version_json": false,
+    "silent": true
+  },
+  "future_bulk_modes": {
+    "mid2_bulk_writable_res": "preferred stock-compatible research direction",
+    "obb_companion": "source-supported; packaging/recovered metadata research required",
+    "fat_apk_assets_res": "not drop-in because lazy init checks writable versionUpdatePath"
+  }
+}

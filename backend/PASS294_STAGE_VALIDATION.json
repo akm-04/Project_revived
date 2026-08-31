@@ -1,0 +1,29 @@
+{
+  "pass": "294.0",
+  "backend_version": "0.49.0",
+  "scope": "separated auto-maintained MID2 asset/code lanes and Git-safe bulk bootstrap self-heal",
+  "checks": {
+    "compileall": "PASS",
+    "pass291_generic_scheduler_regression": "PASS",
+    "pass293_bootstrap_regression": "PASS",
+    "pass289_legacy_fallback_regression": "PASS",
+    "pass294_auto_update_selftest": "PASS",
+    "settings_json_load": "PASS",
+    "startup_auto_build_publish": "PASS_SYNTHETIC",
+    "startup_idempotent_skip": "PASS_SYNTHETIC",
+    "committed_shards_without_res_restore": "PASS_SYNTHETIC",
+    "auto_publish_false_candidate_hold": "PASS_SYNTHETIC",
+    "required_initial_asset_barrier": "PASS",
+    "git_safe_99000000_byte_cap": "PASS",
+    "synthetic_multivolume_205000123_bytes": "PASS_3_SHARDS_99000000_99000000_7000123",
+    "assets_code_catalog_lane_resolution": "PASS",
+    "release_sidecar_per_shard_hashes": "PASS",
+    "mid2_stat_fingerprint_no_rehash": "PASS_SYNTHETIC",
+    "mid2_stat_change_reverify": "PASS_SYNTHETIC",
+    "legacy_fallback_default_disabled": "PASS",
+    "operator_local_assets_readme": "PASS"
+  },
+  "runtime_smoke": "PENDING_USER_RETRY_WITH_<=99000000_BYTE_SHARDS",
+  "negative_memory": "Pass293 256 MiB asset volumes reached all four URLs but stock client failed with 'Failed to load (7,0)'; exact native error-7 meaning remains unrecovered.",
+  "next": "Retry clean-data bulk bootstrap with Pass294 auto-built 99,000,000-byte shards. If accepted, freeze temporary bootstrap and begin Identity/Session/Concurrency Audit research."
+}

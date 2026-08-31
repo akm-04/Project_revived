@@ -7,7 +7,7 @@ import time
 
 from gxb_backend.app_factory import create_app
 from gxb_backend.config import SETTINGS
-from gxb_backend.updates.local_update import load_manifest
+from gxb_backend.updates.local_update import load_manifest, registry_summary, prime_release_integrity_cache
 from gxb_backend.version import ARTIFACT_VERSION
 
 
@@ -22,6 +22,19 @@ def _run_flask(app, port: int) -> None:
 
 
 def main() -> None:
+    # Pass298: maintain the two update lanes before accepting clients. Import the
+    # root operator controller lazily so the runtime package has one build logic.
+    if SETTINGS.auto_update_ensure:
+        try:
+            import update_controller
+            result = update_controller.ensure_auto_releases(policy_path=SETTINGS.local_update_policy_path)
+            print(f"[UPDATE-AUTO] ensure actions={result.get('actions', [])}")
+        except Exception as exc:
+            # Asset/update deployment is deliberately non-fatal to gameplay server
+            # startup. The MID2 scheduler still fails closed around missing barriers.
+            print(f"[UPDATE-AUTO][WARN] ensure failed: {exc}")
+    integrity = prime_release_integrity_cache(SETTINGS)
+    print(f"[UPDATE] startup release integrity verified={integrity['verified']} failed={integrity['failed']}")
     app = create_app(SETTINGS)
     print("==================================================")
     print(f" GXB modular {ARTIFACT_VERSION}")
@@ -43,16 +56,23 @@ def main() -> None:
     print(f" ASSET_SEARCH_ROOTS = {', '.join(str(p) for p in SETTINGS.asset_roots)}")
     print(f" ASSET_DISCOVERY_DEPTH = {SETTINGS.asset_discovery_depth}")
     print(f" RESOURCE_MD5_VERIFY = {SETTINGS.resource_verify_md5}")
+    print(f" LEGACY_FALLBACK = {SETTINGS.legacy_fallback_enabled}")
+    print(f" LEGACY_ALLOWLIST = {SETTINGS.legacy_fallback_allowlist_path}")
+    print(f" LEGACY_OLD_RES = {SETTINGS.legacy_asset_root}")
     update_manifest = load_manifest(SETTINGS)
     print(f" LOCAL_UPDATE_MANIFEST = {SETTINGS.local_update_manifest_path}")
+    print(f" LOCAL_UPDATE_REGISTRY = {SETTINGS.local_update_release_registry_path}")
+    print(f" LOCAL_UPDATE_POLICY = {SETTINGS.local_update_policy_path} auto_ensure={SETTINGS.auto_update_ensure}")
     print(f" PROTOCOL_REGISTRY = {SETTINGS.protocol_registry_path}")
+    update_summary = registry_summary(SETTINGS)
     if update_manifest is None:
-        print(" LOCAL_UPDATE = disabled/not-built")
+        print(" LOCAL_UPDATE = no published release")
     else:
         print(
-            f" LOCAL_UPDATE = enabled target={update_manifest['version']} "
-            f"volumes={update_manifest['volume']} silent={update_manifest['silent']}"
+            f" LOCAL_UPDATE = latest_published={update_manifest['version']} "
+            f"type={update_manifest.get('release_type')} volumes={update_manifest['volume']} silent={update_manifest['silent']}"
         )
+    print(f" UPDATE_REGISTRY = tracks={update_summary['tracks']} published={update_summary['published']} candidates={update_summary['candidates']}")
     print("==================================================")
 
     realtime_runtime = app.extensions.get("gxb_realtime_runtime")

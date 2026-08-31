@@ -11,6 +11,38 @@ from pathlib import Path
 _PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
 
+def _load_local_assets_settings() -> dict:
+    path = _PROJECT_ROOT / "local_assets" / "settings.json"
+    try:
+        import json
+        raw = json.loads(path.read_text(encoding="utf-8"))
+        return raw if isinstance(raw, dict) else {}
+    except FileNotFoundError:
+        return {}
+    except Exception as exc:
+        print(f"[CONFIG][WARN] invalid local_assets/settings.json: {exc}")
+        return {}
+
+
+def _json_setting(*keys: str, default=None):
+    node = _LOCAL_ASSETS_SETTINGS
+    for key in keys:
+        if not isinstance(node, dict) or key not in node:
+            return default
+        node = node[key]
+    return node
+
+
+def _env_bool(name: str, default: bool) -> bool:
+    raw = os.getenv(name)
+    if raw is None:
+        return bool(default)
+    return raw not in {"0", "false", "False", "no", "NO"}
+
+
+_LOCAL_ASSETS_SETTINGS = _load_local_assets_settings()
+
+
 def _detect_advertise_host() -> str:
     """Return a likely device-reachable local IPv4 address.
 
@@ -93,13 +125,20 @@ class Settings:
     # EOL resource gateway. The original client only attempts lazy downloads
     # when center discovery supplies res_download_url.
     resource_probe_enabled: bool = os.getenv("GXB_RESOURCE_PROBE", "0") not in {"0", "false", "False"}
-    resource_service_enabled: bool = os.getenv("GXB_RESOURCE_SERVICE", "1") not in {"0", "false", "False"}
+    resource_service_enabled: bool = _env_bool("GXB_RESOURCE_SERVICE", bool(_json_setting("resource_gateway", "enabled", default=True)))
     res_download_url_override: str = os.getenv("GXB_RES_DOWNLOAD_URL", "").strip()
     resource_catalog_path: Path = Path(os.getenv(
         "GXB_RESOURCE_CATALOG",
         str(_PROJECT_ROOT / "data/resource_catalog/resource_catalog.json"),
     ))
-    resource_verify_md5: bool = os.getenv("GXB_RESOURCE_VERIFY_MD5", "1") not in {"0", "false", "False"}
+    resource_verify_md5: bool = _env_bool("GXB_RESOURCE_VERIFY_MD5", bool(_json_setting("resource_gateway", "verify_md5", default=True)))
+    # Historical EOL donor assets are a separate, deny-by-default role. They
+    # are NEVER added to ordinary current-resource search roots.
+    legacy_fallback_enabled: bool = _env_bool("GXB_LEGACY_FALLBACK", bool(_json_setting("resource_gateway", "legacy_fallback_enabled", default=False)))
+    legacy_fallback_allowlist_path: Path = Path(os.getenv(
+        "GXB_LEGACY_FALLBACK_ALLOWLIST",
+        str(_PROJECT_ROOT / "data/resource_catalog/legacy_fallback_allowlist.json"),
+    )).expanduser()
     # Normal deployment is now deterministic: put recovered assets under
     # <backend>/local_assets/res.  Environment roots remain optional overrides
     # for diagnostics/backwards compatibility, not a requirement.
@@ -114,15 +153,31 @@ class Settings:
         "GXB_LOCAL_UPDATE_MANIFEST",
         str(_DEFAULT_STATIC_ASSET_ROOT / "update_manifest.json"),
     )).expanduser()
+    # Pass291 runtime scheduling authority: immutable, version-aware update
+    # release history. update_manifest.json remains operator/legacy metadata.
+    local_update_release_registry_path: Path = Path(os.getenv(
+        "GXB_LOCAL_UPDATE_REGISTRY",
+        str(_DEFAULT_STATIC_ASSET_ROOT / "release_registry.json"),
+    )).expanduser()
     local_update_dir: Path = Path(os.getenv(
         "GXB_LOCAL_UPDATE_DIR",
         str(_DEFAULT_STATIC_ASSET_ROOT / "updates"),
     )).expanduser()
+    # Pass298 stock-client-compatible startup maintenance. The server can ensure the
+    # configured loud asset bootstrap and silent cumulative Lua baseline before
+    # opening HTTP listeners. If prebuilt release sidecars/shards exist, it
+    # verifies and reuses them; missing res/ is warning-only when artifacts exist.
+    local_update_policy_path: Path = Path(os.getenv(
+        "GXB_LOCAL_UPDATE_POLICY",
+        str(_DEFAULT_STATIC_ASSET_ROOT / "settings.json"),
+    )).expanduser()
+    auto_update_ensure: bool = _env_bool("GXB_AUTO_UPDATE_ENSURE", bool(_json_setting("updates", "auto_ensure", default=True)))
     asset_root_spec: str = (
         os.getenv("GXB_ASSET_ROOTS", "").strip()
         or os.getenv("GXB_ASSET_ROOT", "").strip()
     )
-    asset_discovery_depth: int = int(os.getenv("GXB_ASSET_DISCOVERY_DEPTH", "10"))
+    asset_discovery_depth: int = int(os.getenv("GXB_ASSET_DISCOVERY_DEPTH", str(_json_setting("resource_gateway", "asset_discovery_depth", default=10))))
+    legacy_asset_root_override: str = os.getenv("GXB_LEGACY_ASSET_ROOT", "").strip()
     campaign_asset_requirements_path: Path = Path(os.getenv(
         "GXB_CAMPAIGN_ASSET_REQUIREMENTS",
         str(_PROJECT_ROOT / "data/campaign_asset_requirements.json"),
@@ -186,10 +241,16 @@ class Settings:
                 if raw:
                     roots.append(Path(raw).expanduser())
         else:
-            # Fixed normal path. It is returned even when absent so startup can
-            # clearly report exactly where the operator should place assets.
-            roots.append(self.static_asset_root)
+            # Normal current-resource authority is exactly local_assets/res.
+            # Keep historical local_assets/old_res out of this generic root list.
+            roots.append(self.static_asset_root / "res")
         return tuple(roots)
+
+    @property
+    def legacy_asset_root(self) -> Path:
+        if self.legacy_asset_root_override:
+            return Path(self.legacy_asset_root_override).expanduser()
+        return self.static_asset_root / "old_res"
 
     @property
     def asset_root_mode(self) -> str:

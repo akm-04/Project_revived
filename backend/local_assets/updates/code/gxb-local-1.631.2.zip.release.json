@@ -1,0 +1,40 @@
+{
+  "version": "1.631.2",
+  "ota_generation": "OTA_CANONICAL_V1_PASS299",
+  "status": "PUBLISHED",
+  "release_type": "CODE_ONLY",
+  "silent": true,
+  "package": "gxb-local-1.631.2.zip",
+  "lane": "code",
+  "volume": 1,
+  "volume_files": [
+    {
+      "index": 1,
+      "name": "gxb-local-1.631.2.zip.001",
+      "size": 2411656,
+      "md5": "7a90a5e229c5408fa858a1c77632cd97",
+      "sha256": "c7bf8425d1477f5e266bed1c7539bf9b81912e79c294d468f0d2e33a1e40ff75"
+    }
+  ],
+  "max_volume_bytes": 99000000,
+  "size": 2411656,
+  "md5": "7a90a5e229c5408fa858a1c77632cd97",
+  "sha256": "c7bf8425d1477f5e266bed1c7539bf9b81912e79c294d468f0d2e33a1e40ff75",
+  "client_compatibility_profile": "android_app_v_1.631.0_current_native_f32_progress_int32_offset",
+  "volume_size_float32_exact": true,
+  "client_accounted_size": 2411656,
+  "max_prefix_offset": 0,
+  "assembled_size_int32_safe": true,
+  "cumulative": true,
+  "contains_version_json": false,
+  "file_count": 148,
+  "asset_bootstrap": false,
+  "catalog_transaction": false,
+  "legacy_whitelist_changed": false,
+  "legacy_whitelist_entries": 0,
+  "candidate_allowlist_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+  "note": "Operator-built cumulative Lua/table CODE_ONLY candidate; contains no version.json.",
+  "source_fingerprint": "32c9823318e73dbe6884e5ca35ac4a4753996b58734b23fa0f2a15bd02aa64d9",
+  "sidecar_schema_version": 2,
+  "operator_note": "Immutable artifact provenance; filename alone is never sufficient authority."
+}

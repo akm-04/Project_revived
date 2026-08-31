@@ -1,0 +1,22 @@
+{
+  "pass": "289.0",
+  "status": "STATIC_PASS_RUNTIME_PENDING",
+  "checks": {
+    "python_compile": "PASS",
+    "resource_gateway_synthetic_selftest": "PASS",
+    "current_root_precedence": "PASS",
+    "unapproved_old_res_denied": "PASS",
+    "legacy_tamper_fails_closed": "PASS",
+    "missing_old_res_warns_and_fails_closed": "PASS",
+    "candidate_full_catalog_rows": 43759,
+    "candidate_changed_rows": 10,
+    "candidate_force_rows_changed": 0,
+    "candidate_changed_fields": ["md5", "size"],
+    "candidate_src32_src64_version_json_byte_identical": true,
+    "candidate_manifest_loud": true,
+    "candidate_manifest_enabled_before_activation": false,
+    "silent_whitelist_change_refused": true,
+    "generic_enable_before_activation_refused": true
+  },
+  "runtime_smoke": "PENDING"
+}

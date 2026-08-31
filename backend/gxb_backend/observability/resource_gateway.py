@@ -32,6 +32,9 @@ from typing import Any, Iterable
 from flask import Request, make_response, send_file
 
 from gxb_backend.observability.console_runtime import console_emit
+from gxb_backend.observability.legacy_resource_fallback import (
+    LegacyFallbackEntry, LegacyFallbackRegistry, hash_file,
+)
 from gxb_backend.config import Settings
 
 
@@ -255,12 +258,33 @@ def _discover_zip_archives(search_roots: Iterable[Path], max_depth: int) -> tupl
 
 
 class ResourceGateway:
+    @staticmethod
+    def _resolve_key(path: Path) -> str:
+        try:
+            return str(path.expanduser().resolve())
+        except Exception:
+            return str(path.expanduser())
+
     def __init__(self, settings: Settings) -> None:
         self.settings = settings
         self.log_root: Path = settings.runtime_log_dir
         self.log_root.mkdir(parents=True, exist_ok=True)
         self.catalog = ResourceCatalog(settings.resource_catalog_path)
-        self.configured_asset_roots = settings.asset_roots
+        self.legacy_registry = LegacyFallbackRegistry(settings.legacy_fallback_allowlist_path)
+        self.legacy_root = settings.legacy_asset_root
+        self.legacy_root_available = self.legacy_root.is_dir()
+
+        # Historical old_res is a distinct role and is forbidden from the generic
+        # current-resource search, even if an operator accidentally places it in
+        # GXB_ASSET_ROOTS.
+        legacy_resolved = self._resolve_key(self.legacy_root)
+        configured = []
+        for root in settings.asset_roots:
+            if self._resolve_key(root) == legacy_resolved:
+                print(f"[RESOURCE][WARN] refusing legacy root in ordinary asset roots: {root}")
+                continue
+            configured.append(root)
+        self.configured_asset_roots = tuple(configured)
         self.asset_roots = _discover_res_roots(
             self.configured_asset_roots,
             settings.asset_discovery_depth,
@@ -274,6 +298,7 @@ class ResourceGateway:
         self._lock = threading.RLock()
         self._seen: dict[str, dict[str, Any]] = {}
         self._md5_cache: dict[tuple[str, int, int], str] = {}
+        self._sha256_cache: dict[tuple[str, int, int], str] = {}
 
         if self.catalog.load_error:
             print(f"[RESOURCE] catalog load failed: {self.catalog.load_error}")
@@ -294,10 +319,30 @@ class ResourceGateway:
                 print(
                     "[RESOURCE][WARN] no usable asset store found. "
                     f"Normal path is {settings.static_asset_root / 'res'}; "
-                    "resource gateway will remain audit/log-only until files are placed there."
+                    "current-resource serving will remain unavailable until files are placed there; "
+                    "explicit legacy-whitelist serving may still operate if old_res is valid."
                 )
         else:
             print("[RESOURCE][WARN] no resource roots configured; gateway is log/audit-only")
+
+        if self.legacy_registry.load_error:
+            print(
+                f"[RESOURCE][WARN] legacy fallback policy invalid; fallback disabled: "
+                f"{self.legacy_registry.load_error}"
+            )
+        elif not settings.legacy_fallback_enabled:
+            print("[RESOURCE] legacy fallback disabled by GXB_LEGACY_FALLBACK")
+        elif not self.legacy_root_available:
+            print(
+                f"[RESOURCE][WARN] legacy old_res directory not present: {self.legacy_root}; "
+                "historical fallback will remain disabled (normal current resources are unaffected)."
+            )
+        else:
+            validation = self._validate_legacy_allowlist_startup()
+            print(
+                f"[RESOURCE] legacy old_res={self.legacy_root} allowlist={len(self.legacy_registry.entries)} "
+                f"valid={validation['valid']} invalid={validation['invalid']} policy=DENY_BY_DEFAULT"
+            )
         self._write_root_discovery()
 
     @staticmethod
@@ -411,6 +456,70 @@ class ResourceGateway:
         self._md5_cache[key] = value
         return value
 
+    def _verified_sha256(self, path: Path) -> str:
+        stat = path.stat()
+        key = (str(path.resolve()), stat.st_mtime_ns, stat.st_size)
+        cached = self._sha256_cache.get(key)
+        if cached:
+            return cached
+        value = hash_file(path, "sha256")
+        self._sha256_cache[key] = value
+        return value
+
+    def _legacy_candidate_path(self, rule: LegacyFallbackEntry) -> Path | None:
+        root = self.legacy_root.expanduser()
+        candidate = root.joinpath(*PurePosixPath(rule.fallback_relpath).parts)
+        try:
+            resolved = candidate.resolve()
+            resolved.relative_to(root.resolve())
+        except Exception:
+            return None
+        return candidate
+
+    def _verify_legacy_rule(self, rule: LegacyFallbackEntry) -> tuple[Path | None, dict[str, Any] | None]:
+        candidate = self._legacy_candidate_path(rule)
+        if candidate is None:
+            return None, {"reason": "unsafe_fallback_path", "fallback_relpath": rule.fallback_relpath}
+        if not candidate.is_file():
+            return None, {"reason": "legacy_file_missing", "path": str(candidate)}
+        try:
+            stat = candidate.stat()
+            if stat.st_size != rule.donor_size:
+                return None, {
+                    "reason": "legacy_size_mismatch", "path": str(candidate),
+                    "expected_size": rule.donor_size, "actual_size": stat.st_size,
+                }
+            actual_md5 = self._verified_md5(candidate)
+            if actual_md5 != rule.donor_md5:
+                return None, {
+                    "reason": "legacy_md5_mismatch", "path": str(candidate),
+                    "expected_md5": rule.donor_md5, "actual_md5": actual_md5,
+                }
+            actual_sha256 = self._verified_sha256(candidate)
+            if actual_sha256 != rule.donor_sha256:
+                return None, {
+                    "reason": "legacy_sha256_mismatch", "path": str(candidate),
+                    "expected_sha256": rule.donor_sha256, "actual_sha256": actual_sha256,
+                }
+        except Exception as exc:
+            return None, {"reason": "legacy_verify_error", "path": str(candidate), "error": f"{type(exc).__name__}: {exc}"}
+        return candidate, None
+
+    def _validate_legacy_allowlist_startup(self) -> dict[str, Any]:
+        result: dict[str, Any] = {"valid": 0, "invalid": 0, "errors": []}
+        if not self.settings.legacy_fallback_enabled or not self.legacy_root_available:
+            return result
+        for rule in self.legacy_registry.entries:
+            candidate, error = self._verify_legacy_rule(rule)
+            if candidate is not None:
+                result["valid"] += 1
+            else:
+                result["invalid"] += 1
+                result["errors"].append({
+                    "current_path": rule.current_path, "catalog_md5": rule.catalog_md5, **(error or {})
+                })
+        return result
+
     def _append_event(self, record: dict[str, Any]) -> None:
         path = self.log_root / "resource_requests.jsonl"
         with path.open("a", encoding="utf-8") as fh:
@@ -429,6 +538,12 @@ class ResourceGateway:
             "asset_roots": [str(path) for path in self.asset_roots],
             "asset_archives": [str(path) for path in self.asset_archives],
             "archive_index_paths": len(self._archive_index),
+            "legacy_fallback_enabled": bool(self.settings.legacy_fallback_enabled),
+            "legacy_allowlist_path": str(self.legacy_registry.path),
+            "legacy_allowlist_entries": len(self.legacy_registry.entries),
+            "legacy_allowlist_error": self.legacy_registry.load_error,
+            "legacy_root": str(self.legacy_root),
+            "legacy_root_available": bool(self.legacy_root_available),
             "unique_requests": len(self._seen),
             "requests": sorted(self._seen.values(), key=lambda item: (item["first_seen"], item["requested_asset"])),
         }
@@ -487,7 +602,16 @@ class ResourceGateway:
             "archive_index_paths": len(self._archive_index),
             "archive_errors": self._archive_errors,
             "discovery_depth": self.settings.asset_discovery_depth,
-            "note": "Directory discovery prunes res payload trees. Current res/web paths and legacy flat res paths are both tried; MD5 verification selects valid copies. ZIP/APK discovery indexes central-directory names only; member bytes are read/MD5-checked only for exact requested or audited catalog paths.",
+            "legacy_fallback": {
+                "enabled": bool(self.settings.legacy_fallback_enabled),
+                "allowlist": str(self.legacy_registry.path),
+                "allowlist_entries": len(self.legacy_registry.entries),
+                "allowlist_error": self.legacy_registry.load_error,
+                "old_res": str(self.legacy_root),
+                "old_res_available": bool(self.legacy_root_available),
+                "policy": "DENY_BY_DEFAULT_EXACT_ALLOWLIST_ONLY",
+            },
+            "note": "Current-resource discovery never searches old_res. Current res/web paths may still use current-store layout aliases. Historical old_res is consulted only after an exact current-path+MD5 allowlist match and exact donor provenance verification.",
         }
         tmp.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
         tmp.replace(path)
@@ -559,6 +683,39 @@ class ResourceGateway:
                 "archive_candidates": archive_candidates,
             }
 
+        rule = None
+        if self.settings.legacy_fallback_enabled and not self.legacy_registry.load_error:
+            rule = self.legacy_registry.lookup(entry.path, entry.md5)
+        if rule is not None:
+            if not self.legacy_root_available:
+                return {
+                    "path": entry.path, "status": "legacy_root_unavailable",
+                    "source_role": "legacy_whitelist", "expected_md5": entry.md5,
+                    "requested_asset": entry.request_asset, "expected_size": entry.size,
+                    "lazy_missing_snapshot": entry.lazy_missing_snapshot, "resolved_path": "",
+                    "candidate_paths": candidates, "archive_candidates": archive_candidates,
+                    "legacy_error": {"reason": "old_res_missing", "root": str(self.legacy_root)},
+                }
+            candidate, legacy_error = self._verify_legacy_rule(rule)
+            if candidate is not None:
+                return {
+                    "path": entry.path, "status": "present", "source_role": "legacy_whitelist",
+                    "expected_md5": entry.md5, "requested_asset": entry.request_asset,
+                    "expected_size": entry.size, "lazy_missing_snapshot": entry.lazy_missing_snapshot,
+                    "resolved_path": str(candidate), "actual_size": candidate.stat().st_size,
+                    "candidate_paths": candidates, "archive_candidates": archive_candidates,
+                    "legacy_fallback_relpath": rule.fallback_relpath,
+                    "legacy_donor_sha256": rule.donor_sha256,
+                }
+            return {
+                "path": entry.path, "status": "legacy_whitelist_mismatch",
+                "source_role": "legacy_whitelist", "expected_md5": entry.md5,
+                "requested_asset": entry.request_asset, "expected_size": entry.size,
+                "lazy_missing_snapshot": entry.lazy_missing_snapshot, "resolved_path": "",
+                "candidate_paths": candidates, "archive_candidates": archive_candidates,
+                "legacy_error": legacy_error,
+            }
+
         status = "roots_unconfigured" if not self.configured_asset_roots else ("md5_mismatch" if mismatches else "local_file_missing")
         return {
             "path": entry.path,
@@ -625,6 +782,7 @@ class ResourceGateway:
 
                     outcome = {
                         "status": "served",
+                        "source_role": "current",
                         "catalog_paths": catalog_paths,
                         "selected_catalog_path": entry.path,
                         "expected_size": entry.size,
@@ -643,6 +801,7 @@ class ResourceGateway:
                     )
                     response.headers["X-GXB-Resource-Gateway"] = "1"
                     response.headers["X-GXB-Resource-Status"] = "served"
+                    response.headers["X-GXB-Resource-Source"] = "current"
                     response.headers["X-GXB-Catalog-Path"] = entry.path
                     return response
 
@@ -662,6 +821,7 @@ class ResourceGateway:
                     continue
                 outcome = {
                     "status": "served",
+                    "source_role": "current_archive",
                     "catalog_paths": catalog_paths,
                     "selected_catalog_path": entry.path,
                     "expected_size": entry.size,
@@ -682,8 +842,73 @@ class ResourceGateway:
                 )
                 response.headers["X-GXB-Resource-Gateway"] = "1"
                 response.headers["X-GXB-Resource-Status"] = "served"
+                response.headers["X-GXB-Resource-Source"] = "current_archive"
                 response.headers["X-GXB-Catalog-Path"] = entry.path
                 return response
+
+        # Historical fallback is a separate deny-by-default role. Never scan
+        # old_res generically: an exact current path + requested MD5 must be
+        # explicitly approved first, then one exact donor path is verified.
+        legacy_matches: list[tuple[ResourceEntry, LegacyFallbackEntry]] = []
+        if self.settings.legacy_fallback_enabled and not self.legacy_registry.load_error:
+            for entry in entries:
+                rule = self.legacy_registry.lookup(entry.path, expected_md5)
+                if rule is not None:
+                    legacy_matches.append((entry, rule))
+
+        if legacy_matches:
+            if not self.legacy_root_available:
+                status = "legacy_root_unavailable"
+                legacy_error = {"reason": "old_res_missing", "root": str(self.legacy_root)}
+            else:
+                # A request asset can map to multiple catalog paths. The whitelist
+                # key remains exact, and we never search a second historical file
+                # after an approved row fails provenance verification.
+                entry, rule = legacy_matches[0]
+                candidate, legacy_error = self._verify_legacy_rule(rule)
+                if candidate is not None:
+                    stat = candidate.stat()
+                    outcome = {
+                        "status": "served",
+                        "source_role": "legacy_whitelist",
+                        "catalog_paths": catalog_paths,
+                        "selected_catalog_path": entry.path,
+                        "expected_size": entry.size,
+                        "actual_size": stat.st_size,
+                        "resolved_path": str(candidate),
+                        "legacy_fallback_relpath": rule.fallback_relpath,
+                        "legacy_donor_sha256": rule.donor_sha256,
+                        "candidate_paths": candidate_strings,
+                        "archive_candidates": archive_candidates,
+                    }
+                    self._record(req, requested_asset, outcome)
+                    console_emit("http_download", f"[RESOURCE][LEGACY] served {requested_asset} <- {candidate}")
+                    guessed_type, _encoding = mimetypes.guess_type(entry.path)
+                    response = send_file(
+                        candidate,
+                        mimetype=guessed_type or "application/octet-stream",
+                        conditional=True,
+                        max_age=0,
+                    )
+                    response.headers["X-GXB-Resource-Gateway"] = "1"
+                    response.headers["X-GXB-Resource-Status"] = "served"
+                    response.headers["X-GXB-Resource-Source"] = "legacy_whitelist"
+                    response.headers["X-GXB-Catalog-Path"] = entry.path
+                    return response
+                status = "legacy_whitelist_mismatch"
+            outcome = {
+                "status": status,
+                "source_role": "legacy_whitelist",
+                "catalog_paths": catalog_paths,
+                "resolved_path": "",
+                "candidate_paths": candidate_strings,
+                "archive_candidates": archive_candidates,
+                "mismatches": mismatches,
+                "legacy_error": legacy_error,
+            }
+            self._record(req, requested_asset, outcome)
+            console_emit("missing", f"[RESOURCE][LEGACY] {status}: {requested_asset} -> {legacy_error}")
+            return self._missing_response(status, requested_asset)
 
         if not self.asset_roots and not self.asset_archives:
             status = "asset_roots_unconfigured"

@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "pass": "297.0",
+  "status": "STATIC_REGRESSION_ACCEPTED_REAL_STOCK_CLIENT_SMOKE_PENDING",
+  "checks": {
+    "compileall": "PASS",
+    "pass289_resource_cdn_regression": "PASS",
+    "pass291_update_scheduler_regression": "PASS",
+    "pass293_resource_bootstrap_regression": "PASS",
+    "pass294_auto_update_regression": "PASS",
+    "pass297_mid2_compatibility": "PASS",
+    "planner_fuzz_20000": "PASS",
+    "current_src64_crosscheck": "PASS",
+    "current_native_crosscheck": "PASS",
+    "historical_v1_164_lua_corroboration": "PASS_WITH_NATIVE_NOT_PRESENT_BOUNDARY",
+    "real_clear_data_stock_client_bulk_smoke": "PENDING_EXTERNAL_RES_AND_CLIENT"
+  },
+  "known_current_payload_plan": {
+    "assembled_size": 1059535905,
+    "max_volume_bytes": 99000000,
+    "volume_sizes": [99000000,99000000,99000000,99000000,99000000,99000000,99000000,99000000,99000000,99000000,61147296,8388609],
+    "all_float32_exact": true,
+    "client_accounted_size": 1059535905,
+    "max_prefix_offset": 1051147296,
+    "signed_int32_safe": true
+  },
+  "source_sha256": {
+    "current_src64_UpdateScene_lua": "52c78a98002a27532343334360bd264af02700cbbda631d3b0cbf367e55516ac",
+    "historical_v1_164_UpdateScene_lua": "cd33fb742327b279fc7f5af776994e198170c77b293d80f98d2fa062618ae8a1",
+    "current_arm64_libcocos2dlua_so": "c89c33e81466c0453213f65c67e0818a1581756ee0b45b89c0fc89a6d4f8e4c3"
+  },
+  "implementation_sha256": {
+    "update_controller.py": "e814b34e9c3cffdd61e2bcbd31dcad2a0f1c69aa753d07249401174c5628af7a",
+    "gxb_backend/updates/local_update.py": "d3432a79151b3fc46f13d30ad8d3f38592ff3aae4f9416a7c644f786c774bc0f",
+    "gxb_backend/updates/mid2_compat.py": "1cdd057354aedeca1de4d7d301df566ba0b9f7d58628e5beee266c8055eac405",
+    "tools/selftest_pass297_mid2_compatibility.py": "91424012cbaedbc8099963b0548222ed0a6c569ee775382e7acfbb514cae9b75"
+  }
+}

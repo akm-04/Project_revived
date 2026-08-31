@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "pass": "297.0",
+  "type": "OTA_COMPATIBILITY_IMPLEMENTATION",
+  "status": "STATIC_ACCEPTED_PENDING_STOCK_CLIENT_RUNTIME_RECONCILIATION",
+  "backend_version": "0.50.0",
+  "artifact": "gxb-backend-v0.50.0-pass297.0.zip",
+  "base_runtime": "gxb-backend-v0.49.0-pass294.0.zip",
+  "base_runtime_sha256": "c0ca5de18a742e803544e352e8db636dd734415ef5fae6a665f0b5dbfc0182cf",
+  "changes": [
+    "shared MID2 numeric compatibility module",
+    "float32-exact Git-capped shard planner",
+    "signed-int32 assembled/prefix publication gate",
+    "publisher/runtime shared compatibility verification",
+    "required_initial_barrier direct routing anchor",
+    "persisted active-barrier policy reconciliation",
+    "corrected configured recovery chain 1.631.3 bulk -> 1.631.4 cumulative code"
+  ],
+  "non_changes": [
+    "no stock-client patch",
+    "no descriptor-size lie or padding workaround",
+    "no mutation/deletion of historical published 1.631.1/1.631.2 bytes",
+    "no Resource/CDN redesign",
+    "no OBB implementation",
+    "no Identity/Session/Concurrency work",
+    "no passmap COLD pruning/self-heal"
+  ]
+}

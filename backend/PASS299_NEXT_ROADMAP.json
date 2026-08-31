@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "pass": "299.0",
+  "status": "OTA_CLOSED_NEXT_IDENTITY_SESSION_CONCURRENCY_RESEARCH",
+  "sequence": [
+    {
+      "order": 1,
+      "work": "Begin dedicated Identity / Session / Concurrency Audit research from current src_64 + current backend + passmap evidence",
+      "gate": "source/backend contracts sufficiently exhausted for modular design"
+    },
+    {
+      "order": 2,
+      "work": "Design/freeze per-player atomic locking, cross-player parallelism, same-account concurrent sessions, expiry/revocation, persistence crash consistency, transient presence/device semantics, realtime lock ordering",
+      "gate": "final source/backend reality check passes"
+    },
+    {
+      "order": 3,
+      "work": "Implement only after explicit design acceptance",
+      "gate": "stock-client reconciliation of identity/session/concurrency behavior"
+    }
+  ],
+  "ota_reopen_if": [
+    "canonical stock client again fails MID2 transport/unzip/version advancement",
+    "bulk-supplied exact assets trigger ResourceGateway download again",
+    "new current-source/native evidence contradicts float32/lazyFile contracts"
+  ]
+}

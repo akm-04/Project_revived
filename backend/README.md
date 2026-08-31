@@ -1,3 +1,24 @@
+# GXB backend v0.52.0 — Pass299.0
+
+Pass299 closes the current OTA/resource-provisioning phase after a clean stock-client runtime trace. Pass297 solved the native float32/int32 MID2 volume contract; Pass298 added post-bulk stock `lazyFile.json` reconciliation; the supplied Pass298 client trace then completed the loud asset update and silent code update with **zero post-update `/res/` requests**. The OTA path is therefore runtime accepted for the current target client.
+
+Canonical runtime generation:
+
+```text
+1.631.0 APK/resource baseline
+  -> 1.631.1 BULK_RESOURCE_BOOTSTRAP (LOUD; always the first resource version; exact-current assets + reconciled lazyFile.json)
+  -> restart
+  -> 1.631.2 CODE_ONLY (SILENT cumulative Lua/tables)
+  -> restart
+  -> 1.631.3+ later cumulative Lua/table updates
+```
+
+The earlier 1.631.1-1.631.6 experimental/recovery publications remain passmap provenance only. Pass299 introduces `OTA_CANONICAL_V1_PASS299` as the active runtime generation so old same-number sidecars cannot be mistaken for canonical bytes. A deployment upgraded from an older generation archives/detaches its live release registry; stale same-version artifacts are moved under `local_assets/updates/history/` before canonical packages are built.
+
+For current Android app_v 1.631.0, every MID2 volume must remain float32-exact, the simulated client-accounted sum must equal the truthful descriptor size, and assembled/local-prefix offsets must remain signed-int32 safe. The Git-safe cap remains 99,000,000 decimal bytes. BULK_RESOURCE_BOOTSTRAP also regenerates the stock root `lazyFile.json` from exact-current catalog eligibility; `old_res` remains deny-by-default and is never consulted by bulk provisioning.
+
+See `PASS299_OTA_RUNTIME_ACCEPTANCE_AND_NORMALIZATION_REPORT.md`, `PASS299_OTA_MASTER_INDEX.json`, and `UPDATE_README.md`.
+
 # GXB backend v0.37.6 — Pass248.0
 
 Pass248 completes **Emblem I6 integration/hardening** static/regression acceptance and prepares the exact I7 stock-client test plan. No new Emblem feature route is introduced. A sealed-design gap is corrected: MID1400 Forge and MID1401 Reforge now require at least one canonical Blood-stage-3, level-100 Hero before any catalog/cost/RNG/state work, while Function45 remains guide-sensitive state rather than authorization and already-paid MID1405/MID1406 proposal recovery remains available. OTA remains **1.631.22**.
@@ -268,3 +289,7 @@ Pass243 adds source-correct Emblem eligibility and Function45 reconciliation wit
 
 ### Pass246 Emblem I4
 MID1400 Forge is now implemented server-side with source-defined certificate/Heart cost preflight before RNG/pity mutation and atomic UoW settlement. MID1401/MID1405/MID1406 remain fail-closed. OTA remains 1.631.22.
+
+### Pass294 local update deployment
+
+Client update deployment is documented in `local_assets/README.md`. Operator-tunable resource/update settings are centralized in `local_assets/settings.json`; MID2 runtime history remains `local_assets/release_registry.json`.

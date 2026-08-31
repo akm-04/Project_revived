@@ -1,0 +1,26 @@
+{
+  "pass": "291.0",
+  "status": "STATIC_PASS_RUNTIME_RESOURCE_SMOKE_PENDING",
+  "checks": {
+    "python_compile": "PASS",
+    "pass291_update_scheduler_selftest": "PASS",
+    "pass289_resource_gateway_regression_selftest": "PASS",
+    "release_registry_runtime_authority": "PASS",
+    "published_1_631_24_exact_pass281_bytes": "PASS",
+    "published_1_631_24_contains_version_json": false,
+    "candidate_1_631_25_status": "CANDIDATE",
+    "candidate_1_631_25_type": "CATALOG_MIGRATION",
+    "candidate_1_631_25_loud": true,
+    "historical_app_v_gated": "PASS",
+    "catalog_barrier_scheduling": "PASS",
+    "mode_homogeneous_batches": "PASS",
+    "source_shaped_multi_res_sequence": "PASS",
+    "multi_volume_split_reassembly": "PASS",
+    "published_package_deletion": "FORBIDDEN",
+    "code_only_version_json": "FORBIDDEN",
+    "catalog_migration_silent": "FORBIDDEN",
+    "unpublished_candidate_version_coalescing": "PASS",
+    "published_version_reuse": "FORBIDDEN"
+  },
+  "runtime_smoke": "PENDING_TEN_ICON_RESOURCE_CDN_GATE"
+}

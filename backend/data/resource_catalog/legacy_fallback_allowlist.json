@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "status": "ACTIVE_RUNTIME_POLICY_DISABLED_EMPTY",
+  "default_policy": "DENY_LEGACY_FALLBACK",
+  "current_root": "local_assets/res",
+  "legacy_root": "local_assets/old_res",
+  "lookup_key": [
+    "current_path",
+    "catalog_md5"
+  ],
+  "entries": []
+}

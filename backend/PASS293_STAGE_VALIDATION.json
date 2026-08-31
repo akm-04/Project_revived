@@ -1,0 +1,23 @@
+{
+  "pass": "293.0",
+  "backend_version": "0.48.0",
+  "scope": "resource bootstrap branch reset and operator tooling",
+  "checks": {
+    "compileall": "PASS",
+    "pass293_resource_bootstrap_selftest": "PASS",
+    "pass291_generic_scheduler_regression": "PASS",
+    "pass289_legacy_fallback_regression": "PASS",
+    "legacy_fallback_default_disabled": "PASS",
+    "active_allowlist_empty": "PASS",
+    "staged_allowlist_empty": "PASS",
+    "release_registry_base_1_631_0": "PASS",
+    "required_initial_barrier_1_631_1": "PASS",
+    "bulk_release_forbids_silent": "PASS",
+    "bulk_release_forbids_old_res": "PASS",
+    "bulk_web_path_alias": "PASS",
+    "bulk_multivolume_support": "PASS",
+    "code_only_version_json_fence": "PASS"
+  },
+  "runtime_smoke": "PENDING_USER_LOCAL_BUILD_OF_~1GiB_ASSET_PACKAGE",
+  "next": "Build/publish 1.631.1 asset bootstrap locally, publish 1.631.2 silent code baseline, clear client data, then begin Identity/Session/Concurrency research once bootstrap behavior is accepted."
+}

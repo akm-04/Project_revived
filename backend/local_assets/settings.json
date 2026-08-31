@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "status": "PASS299_OPERATOR_SETTINGS_OTA_CANONICALIZED",
+  "resource_gateway": {
+    "enabled": true,
+    "verify_md5": true,
+    "asset_discovery_depth": 10,
+    "legacy_fallback_enabled": false,
+    "note": "old_res stays deny-by-default and dormant until an explicit future asset-rebuild/catalog-migration cycle."
+  },
+  "updates": {
+    "enabled": true,
+    "auto_ensure": true,
+    "auto_publish": true,
+    "max_volume_bytes": 99000000,
+    "asset_bootstrap": {
+      "enabled": true,
+      "version": "1.631.1",
+      "release_type": "BULK_RESOURCE_BOOTSTRAP",
+      "silent": false,
+      "lane": "assets",
+      "min_exact_files": 25000,
+      "note": "Canonical first resource version. Exact-current recovered lazy assets plus generated stock-format root lazyFile.json; float32-exact Git-safe fragments; no Lua, version.json, or old_res."
+    },
+    "code_baseline": {
+      "enabled": true,
+      "version": "1.631.2",
+      "release_type": "CODE_ONLY",
+      "silent": true,
+      "lane": "code",
+      "note": "Canonical first cumulative Lua/table baseline after asset bootstrap 1.631.1. Ordinary Lua/table updates continue monotonically at 1.631.3 and above."
+    },
+    "canonical_generation": "OTA_CANONICAL_V1_PASS299",
+    "reset_active_registry_on_generation_mismatch": true
+  }
+}

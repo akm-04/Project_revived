@@ -1,0 +1,105 @@
+{
+  "schema_version": 1,
+  "pass": "299.0",
+  "graph_id": "OTA_RESOURCE_PROVISIONING_SEQUENCE",
+  "nodes": [
+    {
+      "id": "P283_289",
+      "state": "RESOURCE_CDN_RESEARCH_DESIGN_IMPLEMENTATION",
+      "depends_on": [],
+      "validated_by": [
+        "P292"
+      ]
+    },
+    {
+      "id": "P290_291",
+      "state": "MID2_ARCHAEOLOGY_AND_SCHEDULER",
+      "depends_on": [
+        "P283_289"
+      ],
+      "validated_by": [
+        "P292",
+        "P297",
+        "P299"
+      ]
+    },
+    {
+      "id": "P292",
+      "state": "RESOURCE_CDN_RUNTIME_ACCEPTED_OBB_RESEARCHED",
+      "depends_on": [
+        "P283_289",
+        "P290_291"
+      ]
+    },
+    {
+      "id": "P293_295",
+      "state": "BULK_BOOTSTRAP_EXPERIMENTS_FAILED_7_0",
+      "depends_on": [
+        "P290_291"
+      ],
+      "superseded_by": [
+        "P296",
+        "P297"
+      ]
+    },
+    {
+      "id": "P296",
+      "state": "FLOAT32_ROOT_CAUSE_AND_DESIGN_FREEZE",
+      "depends_on": [
+        "P293_295"
+      ],
+      "implemented_by": [
+        "P297"
+      ]
+    },
+    {
+      "id": "P297",
+      "state": "MID2_NUMERIC_FIX_IMPLEMENTED",
+      "depends_on": [
+        "P296"
+      ],
+      "runtime_validated_by": [
+        "P298_DEBUG",
+        "P299_DEBUG"
+      ]
+    },
+    {
+      "id": "P298",
+      "state": "LAZYFILE_POST_BULK_RECONCILIATION_IMPLEMENTED",
+      "depends_on": [
+        "P297",
+        "P286_SCOPE"
+      ],
+      "runtime_validated_by": [
+        "P299_DEBUG"
+      ]
+    },
+    {
+      "id": "P299",
+      "state": "OTA_RUNTIME_ACCEPTED_CANONICALIZED",
+      "depends_on": [
+        "P297",
+        "P298"
+      ],
+      "current_authority": true,
+      "next": [
+        "IDENTITY_SESSION_CONCURRENCY_RESEARCH"
+      ]
+    }
+  ],
+  "canonical_runtime_sequence": [
+    "1.631.0 BASE",
+    "1.631.1 BULK_RESOURCE_BOOTSTRAP LOUD",
+    "restart",
+    "1.631.2 CODE_ONLY SILENT CUMULATIVE",
+    "restart",
+    "1.631.3+ later cumulative code"
+  ],
+  "historical_runtime_acceptance_sequence": [
+    "1.631.0",
+    "1.631.5 loud x12",
+    "1.631.6 silent x1",
+    "no pending update",
+    "zero ResourceGateway asset serves"
+  ]
+}

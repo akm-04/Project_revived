@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "pass": "299.0",
+  "status": "IMPLEMENTED_RUNTIME_ACCEPTED_OTA_CLOSURE",
+  "changes": [
+    "accepted Pass298 stock runtime trace for OTA/resource provisioning",
+    "canonical runtime OTA generation reset to 1.631.1 assets then 1.631.2+ code",
+    "new ota_generation provenance on releases",
+    "older-generation registry snapshot/archive on upgrade",
+    "same-version stale sidecar/shard archival before canonical reuse",
+    "runtime scheduler filters releases by track ota_generation",
+    "canonical bulk releases with generation require reconciled lazyFile metadata",
+    "created OTA master retrieval index/sequence graph",
+    "preserved update_staging as an explicit Pass289 regression fixture; it is not runtime scheduling authority"
+  ],
+  "implementation_sha256": {
+    "update_controller.py": "7ba65851e93c248db73960ed257d0709c360e3d0bb0fee3bdd393cd7c8a5f99e",
+    "gxb_backend/updates/local_update.py": "56509666070977e76a807427771e0d8a3c4e8916cf317562573d5f22f1009c47",
+    "gxb_backend/updates/mid2_compat.py": "1cdd057354aedeca1de4d7d301df566ba0b9f7d58628e5beee266c8055eac405",
+    "gxb_backend/updates/lazy_bootstrap.py": "9111ce0e08d10aade8d256af2c515e3533cddfdb6d24c7c290092239a9bf0870",
+    "tools/selftest_pass299_ota_closure.py": "b53d9db7f59d568bf085afcf3db29d9b26042c1500bee037e73200379fbcb2e4",
+    "tools/selftest_pass298_lazy_bootstrap.py": "70ea04225f3ba0482f0051891392918ab4da9caa994eb73d4b4ee065ec787545",
+    "local_assets/settings.json": "31047cf529b07d3e3639b191c3ee6247843ee843ef69f95931ac5aa3a34bda41",
+    "local_assets/release_registry.json": "329e24149b172174aead150bd9137c555ba141316573a59897f3b49ee5c2922c"
+  },
+  "runtime_debug_sha256": "78fb3e7ab14017286da2528d95afaadb204ab49c234a5904345cf14e9b5098e7"
+}

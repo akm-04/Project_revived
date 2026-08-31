@@ -1,0 +1,10 @@
+PASS299.0 MACHINE CONTEXT
+CURRENT: OTA/resource provisioning runtime accepted and canonically normalized.
+BACKEND: gxb-backend-v0.52.0-pass299.0.zip (SHA filled at seal).
+OTA LIVE GENERATION: OTA_CANONICAL_V1_PASS299.
+CANONICAL TRACK: 1.631.0 base -> 1.631.1 BULK_RESOURCE_BOOTSTRAP loud -> 1.631.2 CODE_ONLY silent cumulative -> 1.631.3+ later Lua/code.
+FIRST OTA READ: 00_PASSMAP/PASS299_OTA_MASTER_INDEX.json.
+SECOND: 00_PASSMAP/PASS299_OTA_SEQUENCE_GRAPH.json.
+RUNTIME ACCEPTANCE: debug(1).zip proves 1.631.5/1.631.6 experimental success with zero post-update ResourceGateway asset serves. Experimental numbering is provenance only.
+DO NOT REINVESTIGATE: (7,0) as curl error; arbitrary shard caps; current-client v1.164-style local alias self-heal; generic old_res fallback.
+NEXT: Identity / Session / Concurrency Audit research.

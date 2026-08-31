@@ -1,0 +1,8 @@
+{
+  "pass": "293.0",
+  "backend_version": "0.48.0",
+  "artifact": "gxb-backend-v0.48.0-pass293.0",
+  "commit": "Pass293: disable dormant legacy fallback by default, reset clear-data OTA track to 1.631.0, add guarded loud exact-current bulk asset bootstrap for 1.631.1 and silent-code continuation from 1.631.2; no asset payload bundled.",
+  "resource_cdn_phase": "ACCEPTED_CLOSED",
+  "next_major_foundation": "Identity / Session / Concurrency Audit"
+}
