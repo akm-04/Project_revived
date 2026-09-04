@@ -1,0 +1,115 @@
+"""Routes for center discovery and engine/game API traffic."""
+
+from __future__ import annotations
+
+from flask import make_response, request, send_file
+
+from gxb_backend.dispatch.engine_dispatcher import EngineDispatcher
+from gxb_backend.observability.client_error_capture import ClientErrorCapture
+from gxb_backend.observability.resource_gateway import ResourceGateway
+from gxb_backend.observability.undecoded_request_capture import UndecodedRequestCapture
+from gxb_backend.config import Settings
+from gxb_backend.transport.decoder import decode_payload, extract_engine_payload, is_legacy_nil_payload
+from gxb_backend.transport.result import EngineTransportResult
+from gxb_backend.transport.responses import json_response
+from gxb_backend.updates.local_update import log_update_event, resolve_volume
+
+
+def _handle_engine_request(dispatcher: EngineDispatcher, label: str, undecoded: UndecodedRequestCapture | None = None):
+    raw, source = extract_engine_payload(request)
+    req_data, method = decode_payload(raw)
+    print(f"[{label}] source={source} decode={method}")
+    if not req_data:
+        # Stock v1.631 can emit the literal form sentinel ``payload=nil`` when
+        # Lua json.encode() cannot serialize an optional/lifecycle request table.
+        # There is no MID to authorize or dispatch, so treat only this exact
+        # source-proven sentinel as a logged no-op success.  Every other
+        # undecodable ingress remains fail-closed.
+        if is_legacy_nil_payload(raw):
+            if undecoded is not None:
+                undecoded.capture(request, label=label, source=source, decode_method="legacy-nil-noop")
+            print(f"[{label}] stock payload=nil sentinel ignored as compatibility no-op")
+            return json_response({"error_code": 0})
+        if undecoded is not None:
+            undecoded.capture(request, label=label, source=source, decode_method=method)
+        print(f"[{label}] could not decode payload; denying malformed ingress; raw capture logged")
+        return json_response(
+            {
+                "error_code": 1,
+                "error_class": "protocol",
+                "error_kind": "MALFORMED_ENGINE_REQUEST",
+                "error_msg": "Engine request payload could not be decoded",
+            },
+            status_code=400,
+        )
+    response = dispatcher.dispatch(req_data)
+    if isinstance(response, EngineTransportResult):
+        return json_response(response.body, status_code=response.status_code)
+    return json_response(response)
+
+
+def register_engine_routes(
+    app,
+    dispatcher: EngineDispatcher,
+    settings: Settings,
+    resource_gateway: ResourceGateway | None = None,
+) -> None:
+    client_errors = ClientErrorCapture(settings)
+    undecoded = UndecodedRequestCapture(settings)
+    resource_gateway = resource_gateway or ResourceGateway(settings)
+    @app.route("/center/v1", methods=["POST"])
+    def center_route():
+        return _handle_engine_request(dispatcher, "CENTER", undecoded)
+
+    @app.route("/api/v1", methods=["POST"])
+    def api_route():
+        return _handle_engine_request(dispatcher, "API", undecoded)
+
+    @app.route("/client-log", methods=["POST"])
+    def client_log_route():
+        # Backend.log() only checks HTTP status 200; response body is ignored.
+        client_errors.capture(request)
+        return make_response("", 200)
+
+    @app.route("/res/<path:asset>", methods=["GET", "POST"])
+    def resource_gateway_route(asset: str):
+        return resource_gateway.capture(request, asset)
+
+    @app.route("/updates/<path:asset>", methods=["GET"])
+    def local_update_volume_route(asset: str):
+        path = resolve_volume(settings, asset)
+        if path is None:
+            print(f"[UPDATE] missing/unsafe volume request: {asset!r}")
+            return make_response("", 404)
+        range_header = request.headers.get("Range", "")
+        print(f"[UPDATE] serve {path.name} range={range_header!r}")
+        log_update_event(
+            settings, "serve_volume", asset=path.name, range=range_header,
+            size=path.stat().st_size, remote=request.remote_addr or "",
+        )
+        # conditional=True lets Werkzeug honor Range requests used by resumed
+        # FileDownloader volumes while retaining a normal full-file response.
+        return send_file(path, mimetype="application/octet-stream", conditional=True)
+
+    @app.route("/", methods=["GET", "POST"])
+    @app.route("/<path:path>", methods=["GET", "POST"])
+    def catch_all(path=""):
+        port = request.environ.get("SERVER_PORT")
+        print(f"[HTTP] unmatched path=/{path} port={port}")
+        raw, _source = extract_engine_payload(request)
+        req_data, method = decode_payload(raw)
+        if req_data:
+            print(f"[HTTP] catch-all decode={method}")
+            response = dispatcher.dispatch(req_data)
+            if isinstance(response, EngineTransportResult):
+                return json_response(response.body, status_code=response.status_code)
+            return json_response(response)
+        return json_response(
+            {
+                "error_code": 1,
+                "error_class": "authorization",
+                "error_kind": "ROUTE_NOT_FOUND",
+                "error_msg": "HTTP ingress route is not recognized",
+            },
+            status_code=404,
+        )

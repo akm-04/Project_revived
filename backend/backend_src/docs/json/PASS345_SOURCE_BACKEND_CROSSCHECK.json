@@ -1,0 +1,88 @@
+{
+  "assessment": "Pass345 implements frozen I6 scheduler/finalization/projection/mail semantics while preserving current src_64, JSON PlayerState authority, Pass344 realtime/I4 StateRepository RLock seams, and later cutover/concurrency boundaries.",
+  "authorities": {
+    "baseline_backend_archive_sha256": "eccf3f78b9f4cb9ea3e047b51dcbf9ea79e470b080538a18636c82e5c5125843",
+    "formal_design": "Pass337",
+    "implementation_baseline": "sealed Pass344 I5",
+    "scheduler_mail_projection_design": "Pass333 + Pass336 consumer partition"
+  },
+  "backend_runtime_rechecked": [
+    {
+      "fact": "I4 StateRepository strangler and global RLock remain byte-identical to sealed Pass343.",
+      "path": "gxb_backend/state/repository.py",
+      "sha256": "af7ba15e484dd44e74e93c7b6f90cdc1de66f0c6e9a20d93f4e8d3b807818412"
+    },
+    {
+      "fact": "Legacy JSON gameplay authority remains byte-identical and canonical.",
+      "path": "gxb_backend/state/multiuser_database.py",
+      "sha256": "af43acc4a8e9d133f3c99fe65846459cab92aebb3f505b2d8725f947ee68fde3"
+    },
+    {
+      "fact": "Mature dispatcher remains byte-identical; dedicated gateway is not wired into gameplay dispatch.",
+      "path": "gxb_backend/dispatch/engine_dispatcher.py",
+      "sha256": "11a8aa7718d8d2abdc99d73b7653cdea4b81bf20518e867db14ff59608d42b07"
+    },
+    {
+      "fact": "I1 default-deny/auth scope perimeter remains byte-identical.",
+      "path": "gxb_backend/auth/perimeter.py",
+      "sha256": "685984f6b5723c465b42eee9fa4546083c28b74744eb644e1bf6e28d32a3b3bc"
+    }
+  ],
+  "bounded_source_refinement": "Mail protocol uniqueness is (player_id,is_region,protocol_mail_id), not Pass334 draft (player_id,protocol_mail_id), because exhaustive current src_64 proves two observable namespaces.",
+  "client_runtime_rechecked": [
+    {
+      "fact": "Pass340 contextEpoch stale-response/retry fence, logical client_op_id reuse and MID1 token installation remain unchanged.",
+      "path": "local_assets/src_64/app/common/network/Backend.lua",
+      "sha256": "79ebbb6452bc62e764142d4dc04e5d024ead78f54562c0144921143ca6ad5df4"
+    },
+    {
+      "fact": "MID1 single-flight behavior remains unchanged.",
+      "path": "local_assets/src_64/app/scenes/LoadingScene.lua",
+      "sha256": "06da664086d167fa6be0401defb59d27411716543a648fabe76f81d4d0de9e84"
+    },
+    {
+      "fact": "MID18 account-scope credential/request shape remains unchanged.",
+      "path": "local_assets/src_64/app/windows/LoginWindow.lua",
+      "sha256": "f6fb06e51dca4e16ecd8755c7ae67c8000da1cc6b728d3e44f1bb3ed230eeb2e"
+    },
+    {
+      "fact": "Context transition ordering remains unchanged.",
+      "path": "local_assets/src_64/app/windows/SwitchItem.lua",
+      "sha256": "5f423c19ea8d58119709ed60e812dc526093d754a300c16cc9c9e815457b6fa3"
+    },
+    {
+      "fact": "Private realtime control MID and stock MID constants remain unchanged.",
+      "path": "local_assets/src_64/app/common/network/mid.lua",
+      "sha256": "11d4036ef68cdce66810bc02d5dfc7226a9c4286388bfd5a6cb2bc1a21f96a18"
+    }
+  ],
+  "mail_source_rechecked": [
+    {
+      "fact": "SET_MAIL_READ preserves compound id + is_region identity; MAIL_ONEKEY authoritative snapshot/awards contract remains source-grounded.",
+      "path": "source_evidence/pass345_src64_mail/Mailbox.lua",
+      "sha256": "3232f5c4b7c8dc60bf2c76249813d684959e4970040890ea2d0a3f544516ba14"
+    },
+    {
+      "fact": "MAIL_ONEKEY sends separate normal_ids and region_ids namespaces.",
+      "path": "source_evidence/pass345_src64_mail/MailboxWindow.lua",
+      "sha256": "f53ec450208d799ba8954ba50ce4f6a92793664ea2f85190c281132bea2b7a7d"
+    },
+    {
+      "fact": "Client expiry is presentation state; server retention/deletion policy is not invented by I6.",
+      "path": "source_evidence/pass345_src64_mail/MailItem.lua",
+      "sha256": "c51de51edab94af4b02f45d84ffa64cbcbf4e611cbd3c28fba973cdd35a78b94"
+    }
+  ],
+  "pass": "345.0",
+  "runtime_preservation": {
+    "default_i6_runtime_wired": false,
+    "global_rlock_unchanged": true,
+    "json_playerstate_canonical": true,
+    "runtime_files": 495,
+    "runtime_root_sha256": "4a76b2101a70a5d95f2517496916223b42adf2c922295d968b8bae73ddc86039",
+    "src64_changed": false
+  },
+  "schema_version": 1,
+  "status": "PASS_NO_MATERIAL_DESIGN_CONTRADICTION",
+  "wave": "I6"
+}

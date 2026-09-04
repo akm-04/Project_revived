@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "pass": "347.0",
+  "status": "PASS",
+  "equivalence_verified": true,
+  "stock_client_ready": true,
+  "maintenance_active": true,
+  "json_writes_stopped": true,
+  "src64_crosschecked": true,
+  "context_epoch_fence_present": true,
+  "mid1_single_flight_present": true,
+  "logical_client_op_id_retry_present": true,
+  "private_realtime_control_mid_present": true,
+  "scope": "implementation and disposable-candidate cutover proof; deployment operator must assert maintenance/json-write gates again against the actual immutable source"
+}

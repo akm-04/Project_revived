@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "pass": "348.0",
+  "wave": "I9",
+  "artifact": "gxb-backend-v0.62.0-pass348.0",
+  "status": "SEALED_AFTER_GUARDS",
+  "baseline": {
+    "artifact": "gxb-backend-v0.61.1-pass347.1.zip",
+    "sha256": "ab6cfdaa9445d6d755eed7c266cdf7cde3c4371954bbddf03a2e02d96e0effea"
+  },
+  "implemented": [
+    "database race proof while the Pass347.1 PostgreSQL request RLock remained present",
+    "retirement of only the PostgreSQL runtime global authenticated-request RLock",
+    "retention of the legacy JSON repository RLock and subsystem-local locks",
+    "transaction-local relational PlayerState behavior and outer-transaction connection reuse",
+    "bounded mail uniqueness-race convergence and explicit concurrency/auth transport envelopes",
+    "actual Gunicorn gthread validation at one, two and four workers",
+    "read-only scale preflight with one-worker rollback"
+  ],
+  "gates": {
+    "i9_complete": true,
+    "i10_authorized": false,
+    "default_http_workers": 1,
+    "proven_worker_stages": [1, 2, 4],
+    "postgres_runtime_global_rlock_retained": false,
+    "legacy_json_rlock_retained": true,
+    "json_dual_write": false,
+    "postgresql_canonical": true
+  },
+  "next": "Pass349 I10 stock-client foundation reconciliation/close"
+}

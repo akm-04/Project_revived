@@ -1,0 +1,34 @@
+{
+  "candidate_decisions": [
+    "Do not move/clone account20000001/player19700001; reconcile client selection through account-scoped MID18.",
+    "Run shared durable PlayerState normalization at PostgreSQL fresh materialization and load repair boundaries.",
+    "Set GXB_STATIC_ASSET_ROOT to local_assets; config derives current res as local_assets/res.",
+    "SDK login always revalidates account-owned regions; one owned character is unambiguous, multiple requires explicit selection.",
+    "Regular update never invokes legacy migration; it preserves PostgreSQL, clears only runtime logs, and applies schema/runtime init.",
+    "Workspace backup/restore operates on canonical PostgreSQL logical dumps and never remigrates preserve JSON."
+  ],
+  "candidate_hashes": {
+    "VERSION.json": "694e6ce4867d6246028b4841c36b37a8da4c3238ca30957192d4c4327dc9fef9",
+    "gxb-dev.sh": "b8cd1c614fe38405d490df10dcc3dbc81c0c31acc7434c4736dbf6c025aab996",
+    "gxb_backend/runtime/state_repository.py": "b397622409a34e397b63651cdc11bd6afa87f6695fbdd126e8c679dd32203be4",
+    "gxb_backend/state/maintenance_services.py": "fec28ec8052a1a8f668f31b7e919ac789b7ebd61992f5ee20b3cc54166fb09e8",
+    "gxb_backend/state/multiuser_database.py": "54071a630aa65e260d6a8c7bdd96f900a8fc38925f4c87ee61c176e54dd881c2",
+    "local_assets/src_32/app/windows/LoginWindow.lua": "844348d15b9d3a0c6fcdaf179ad13c2857cec317d8df2805c8f123215821de2e",
+    "local_assets/src_64/app/windows/LoginWindow.lua": "844348d15b9d3a0c6fcdaf179ad13c2857cec317d8df2805c8f123215821de2e",
+    "tools/workspace/gxb_backend_workspace.sh": "7cb003e8bfe9e0be7eb18eeeca16310d7fc6b009ef2680f433dd79963951d215"
+  },
+  "pass": "352.0",
+  "runtime_evidence": {
+    "alpaca123_observed_player_id": 19425386,
+    "alpaca123_observed_region": 194,
+    "authority": "TRAFFIC_OPEN",
+    "fresh_mid1_observed_heroes": "empty",
+    "migration_runs_observed": 1,
+    "ota_effective_roots_observed": "none (configured local_assets/res/res)",
+    "preserved_migrated_player_id": 19700001,
+    "preserved_migrated_region": 197
+  },
+  "scope": "I10 stock-runtime reconciliation after support bundle gxb-support-20260903T231158Z",
+  "status": "CANDIDATE_PENDING_STOCK_RETEST",
+  "stock_runtime_acceptance": "PENDING"
+}

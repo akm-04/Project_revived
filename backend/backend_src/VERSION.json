@@ -1,0 +1,10 @@
+{
+  "backend_version": "0.65.2",
+  "version": "0.65.2",
+  "pass": "353.0",
+  "artifact": "gxb-backend-v0.65.2-pass353.0",
+  "status": "PASS353_I10_OTA_TOPOLOGY_RECONCILIATION_CANDIDATE",
+  "implementation_wave": "I10 stock-runtime reconciliation candidate: preserve Pass352 gameplay/client fixes; repair deployment topology by persisting MID2 publication state outside disposable current_backend, ensuring/publishing the canonical OTA baseline before production Gunicorn listeners open, and routing lazy /res requests through the catalog-aware backend gateway instead of an nginx flat-file alias.",
+  "ota": "1.631.0 BASE; canonical 1.631.1 BULK_RESOURCE_BOOTSTRAP loud first version with lazyFile.json; 1.631.2 CODE_ONLY silent cumulative baseline; later Lua/code 1.631.3+",
+  "implementation_pass": "353.0"
+}

@@ -1,0 +1,695 @@
+GXB BACKEND PORTABLE DEV COMMAND GUIDE
+======================================
+Current dev backend: Pass348 portable-dev4
+Workspace helper: ./gxb_backend_workspace_portable.sh
+
+This file is meant to be the simple operator cheat-sheet.
+Run commands from the WORKDIR, for example:
+
+  cd ~/Miscallaneus/recovery/gxb/tmp/backend/workdir
+
+
+======================================================================
+0. THE 4 DIRECTORIES TO REMEMBER
+======================================================================
+
+backend/
+  Put every new gxb-backend-v*-pass*.zip here.
+  Do not extract ZIPs manually.
+
+current_backend/
+  Disposable extracted backend code.
+  It can be deleted/replaced. Do NOT keep important state here.
+
+runtime/
+  IMPORTANT: this is the NEW live development state area.
+  It contains PostgreSQL data, logs, backups, migration evidence,
+  the Python venv, PID files, generated config, support bundles, etc.
+
+preserve/
+  OLD JSON state/evidence from the pre-PostgreSQL backend.
+  It is only used when migrating old accounts/players.
+  After migration, editing preserve/server_state DOES NOT edit the live server.
+
+SHORT VERSION:
+  backend/          = backend ZIPs
+  current_backend/  = disposable code
+  runtime/          = LIVE PostgreSQL dev state + logs/backups
+  preserve/         = OLD JSON migration source only
+
+
+======================================================================
+1. FASTEST PATH: I JUST WANT THE CLIENT SMOKE TEST RUNNING
+======================================================================
+
+Use this if you wiped current_backend/ and runtime/ and you WANT TO KEEP
+and migrate the old accounts/players from preserve/server_state.
+
+IMPORTANT:
+The old Moppleton sandbox has one known historical region inconsistency.
+DO NOT copy preserve/server_state directly into runtime/legacy_migration_input.
+Let the normalizer create the corrected migration COPY directly.
+The original preserve/server_state remains untouched.
+
+Run exactly:
+
+  chmod +x gxb_backend_workspace_portable.sh
+
+  ./gxb_backend_workspace_portable.sh setup
+  ./gxb_backend_workspace_portable.sh init
+
+  rm -rf runtime/legacy_migration_input
+
+  ./gxb_backend_workspace_portable.sh dev legacy-normalize-sandbox \
+    "$PWD/preserve/server_state" \
+    "$PWD/runtime/legacy_migration_input"
+
+  ./gxb_backend_workspace_portable.sh dev legacy-inventory \
+    "$PWD/runtime/legacy_migration_input"
+
+  ./gxb_backend_workspace_portable.sh dev legacy-migrate \
+    "$PWD/runtime/legacy_migration_input"
+
+  ./gxb_backend_workspace_portable.sh dev prepare-latest
+  ./gxb_backend_workspace_portable.sh dev cutover-status
+
+  ./gxb_backend_workspace_portable.sh dev cutover-open \
+    'OPEN POSTGRESQL TRAFFIC PERMANENTLY'
+
+  ./gxb_backend_workspace_portable.sh dev maintenance-off
+  ./gxb_backend_workspace_portable.sh start
+  ./gxb_backend_workspace_portable.sh status
+
+ZROK IS SEPARATE FROM THE BACKEND LIFECYCLE.
+
+Keep your existing start_zrok.sh as its own boot/login tunnel script. It only
+publishes localhost ports 5000 and 9000 and does not start/stop GXB. Start GXB
+with the backend wrapper, and let zrok remain independent.
+
+If backend status looks healthy, run the stock client smoke test.
+
+If anything fails, immediately create:
+
+  ./gxb_backend_workspace_portable.sh support-bundle
+
+Then upload the newest ZIP from runtime/support/ here.
+
+
+======================================================================
+2. NORMAL DAILY SERVER CONTROLS
+======================================================================
+
+Start application services:
+
+  ./gxb_backend_workspace_portable.sh start
+
+Stop application services but KEEP PostgreSQL running:
+
+  ./gxb_backend_workspace_portable.sh stop
+
+Restart application services:
+
+  ./gxb_backend_workspace_portable.sh restart
+
+Show status:
+
+  ./gxb_backend_workspace_portable.sh status
+
+Stop application services AND the local PostgreSQL process:
+
+  ./gxb_backend_workspace_portable.sh down
+
+Start PostgreSQL only:
+
+  ./gxb_backend_workspace_portable.sh dev db-start
+
+Stop PostgreSQL only:
+
+  ./gxb_backend_workspace_portable.sh dev db-stop
+
+
+======================================================================
+2A. ZROK / PUBLIC TUNNELS -- KEEP THIS PIPELINE SEPARATE
+======================================================================
+
+Your existing start_zrok.sh has one job:
+
+  localhost:5000 -> gxbsdk public share
+  localhost:9000 -> gxbengine public share
+
+It does NOT start PostgreSQL, Gunicorn, RealtimeGateway, Scheduler or nginx.
+That separation is intentional for your setup because start_zrok.sh is launched
+independently from .bashrc/on boot.
+
+Normal backend control remains:
+
+  ./gxb_backend_workspace_portable.sh start
+  ./gxb_backend_workspace_portable.sh status
+  ./gxb_backend_workspace_portable.sh stop
+
+Normal zrok control remains your existing start_zrok.sh / zrok process workflow.
+Do not use start_zrok_portable.sh from the previous package suggestion.
+
+The backend logs remain under runtime/logs/. Your original zrok script keeps its
+own zrok_sdk.log and zrok_engine.log wherever that script is launched; those are
+considered tunnel logs, not backend runtime logs.
+
+IMPORTANT: your zrok script exposes ports 5000 and 9000 only. It does not expose
+realtime TCP port 9100. This does not affect basic HTTP startup, but remote
+realtime testing may need a separate network path later.
+
+======================================================================
+3. FIRST-TIME SETUP ONLY
+======================================================================
+
+After putting the newest backend ZIP into backend/:
+
+  chmod +x gxb_backend_workspace_portable.sh
+  ./gxb_backend_workspace_portable.sh setup
+  ./gxb_backend_workspace_portable.sh init
+
+setup:
+  - selects latest backend ZIP
+  - extracts it into current_backend/
+  - wires resource paths
+  - links old preserve/ data only as migration input
+  - does NOT destroy runtime/
+
+init:
+  - creates/reuses runtime/venv
+  - creates/reuses the user-owned PostgreSQL cluster
+  - creates/reuses gxb_dev_test
+  - runs Alembic schema migrations
+
+NOTE:
+init alone does NOT make a new database ready for gameplay.
+You must either:
+  A) migrate legacy state, OR
+  B) create a fresh scratch candidate.
+Then PREPARE and OPEN PostgreSQL authority.
+
+
+======================================================================
+4. MIGRATE OLD preserve/server_state INTO POSTGRESQL
+======================================================================
+
+Use this only when you WANT the old accounts/players preserved.
+
+Step 1 - setup/init:
+
+  ./gxb_backend_workspace_portable.sh setup
+  ./gxb_backend_workspace_portable.sh init
+
+Step 2 - create the SAFE normalized migration copy:
+
+  rm -rf runtime/legacy_migration_input
+
+  ./gxb_backend_workspace_portable.sh dev legacy-normalize-sandbox \
+    "$PWD/preserve/server_state" \
+    "$PWD/runtime/legacy_migration_input"
+
+DO NOT run:
+
+  cp -a preserve/server_state runtime/legacy_migration_input
+
+That copies the ORIGINAL historical anomaly back in and defeats normalization.
+
+Step 3 - inspect migration source:
+
+  ./gxb_backend_workspace_portable.sh dev legacy-inventory \
+    "$PWD/runtime/legacy_migration_input"
+
+Expected result should contain:
+
+  "status": "DISCOVERED"
+
+Step 4 - migrate + validate:
+
+  ./gxb_backend_workspace_portable.sh dev legacy-migrate \
+    "$PWD/runtime/legacy_migration_input"
+
+Migration evidence is preserved under:
+
+  runtime/migration/
+
+Step 5 - prepare database authority:
+
+  ./gxb_backend_workspace_portable.sh dev prepare-latest
+
+Check:
+
+  ./gxb_backend_workspace_portable.sh dev cutover-status
+
+Step 6 - OPEN this development database:
+
+  ./gxb_backend_workspace_portable.sh dev cutover-open \
+    'OPEN POSTGRESQL TRAFFIC PERMANENTLY'
+
+Then:
+
+  ./gxb_backend_workspace_portable.sh dev maintenance-off
+  ./gxb_backend_workspace_portable.sh start
+
+IMPORTANT:
+"PERMANENTLY" means permanent for THAT PostgreSQL database authority.
+For development you can still deliberately factory-reset/drop the test DB.
+
+
+======================================================================
+5. FACTORY RESET: START A NEW PLAYABLE DEV SERVER FROM SCRATCH
+======================================================================
+
+Use this when you DO NOT want to migrate preserve/server_state and want a
+clean development baseline.
+
+This intentionally creates the packaged Moppleton/AdminRoot sandbox baseline.
+It does NOT import your old preserve/server_state players/accounts.
+
+If runtime does not exist yet:
+
+  ./gxb_backend_workspace_portable.sh setup
+  ./gxb_backend_workspace_portable.sh init
+
+Then reset to a fresh sandbox candidate:
+
+  ./gxb_backend_workspace_portable.sh dev scratch-candidate \
+    'RESET DEV DATABASE FROM SCRATCH'
+
+Then prepare/open it:
+
+  ./gxb_backend_workspace_portable.sh dev prepare-latest
+
+  ./gxb_backend_workspace_portable.sh dev cutover-open \
+    'OPEN POSTGRESQL TRAFFIC PERMANENTLY'
+
+  ./gxb_backend_workspace_portable.sh dev maintenance-off
+  ./gxb_backend_workspace_portable.sh start
+
+This is the recommended "factory reset and immediately use the client" path.
+
+
+======================================================================
+6. COMPLETELY EMPTY DATABASE - NO PLAYERS
+======================================================================
+
+This is DIFFERENT from factory reset.
+It creates the schema but NO gameplay player/account candidate.
+It is mainly for database/schema work and is NOT immediately client-playable.
+
+  ./gxb_backend_workspace_portable.sh dev db-reset-empty \
+    'RESET EMPTY DEV DATABASE'
+
+After this:
+  accounts = 0
+  players  = 0
+
+Do NOT expect normal gameplay start until you either:
+  - migrate a valid source, or
+  - run scratch-candidate.
+
+
+======================================================================
+7. HARD CLEAN INSTALL SIMULATION
+======================================================================
+
+Use this to simulate a completely new local installation while KEEPING the
+old preserve/ archive available for optional migration.
+
+First stop everything:
+
+  ./gxb_backend_workspace_portable.sh down || true
+
+Delete disposable/live development state:
+
+  rm -rf current_backend runtime
+
+DO NOT delete preserve/ unless you intentionally want to destroy old JSON
+migration evidence.
+
+Then choose ONE path:
+
+PATH A - migrate old players:
+  Follow Section 4.
+
+PATH B - completely fresh playable sandbox:
+  ./gxb_backend_workspace_portable.sh setup
+  ./gxb_backend_workspace_portable.sh init
+  ./gxb_backend_workspace_portable.sh dev scratch-candidate \
+    'RESET DEV DATABASE FROM SCRATCH'
+  ./gxb_backend_workspace_portable.sh dev prepare-latest
+  ./gxb_backend_workspace_portable.sh dev cutover-open \
+    'OPEN POSTGRESQL TRAFFIC PERMANENTLY'
+  ./gxb_backend_workspace_portable.sh dev maintenance-off
+  ./gxb_backend_workspace_portable.sh start
+
+
+======================================================================
+8. CLEAN/WIPE THE CURRENT PLAYER BASE BUT KEEP THE DEV ENVIRONMENT
+======================================================================
+
+Recommended way to throw away current players/accounts and return to the
+packaged clean sandbox baseline:
+
+  ./gxb_backend_workspace_portable.sh dev scratch-candidate \
+    'RESET DEV DATABASE FROM SCRATCH'
+
+Then:
+
+  ./gxb_backend_workspace_portable.sh dev prepare-latest
+  ./gxb_backend_workspace_portable.sh dev cutover-open \
+    'OPEN POSTGRESQL TRAFFIC PERMANENTLY'
+  ./gxb_backend_workspace_portable.sh dev maintenance-off
+  ./gxb_backend_workspace_portable.sh start
+
+A backup is taken before scratch reset when a database already exists.
+
+If you truly want ZERO accounts/players instead, see Section 6.
+
+
+======================================================================
+9. EDIT PLAYER DATA FOR DEVELOPMENT / QA
+======================================================================
+
+Old way:
+  edit server_state/players/.../player.json
+
+New way:
+  export live PostgreSQL PlayerState JSONB -> edit JSON -> import it back.
+
+Example: Moppleton player 12525385.
+
+Step 1 - stop application services:
+
+  ./gxb_backend_workspace_portable.sh stop
+
+Do NOT use down unless you specifically want PostgreSQL stopped too.
+
+Step 2 - export player:
+
+  ./gxb_backend_workspace_portable.sh dev player-export 12525385
+
+Default output:
+
+  runtime/dev-edit/player-12525385.json
+
+Step 3 - edit that JSON file in your editor.
+Examples of dev use:
+  - give test inventory/items
+  - change currencies/resources that live in PlayerState
+  - prepare Awakening/progression test state
+
+Step 4 - import it back:
+
+  ./gxb_backend_workspace_portable.sh dev player-import \
+    12525385 \
+    "$PWD/runtime/dev-edit/player-12525385.json" \
+    'IMPORT DEV PLAYER 12525385'
+
+Step 5 - start again:
+
+  ./gxb_backend_workspace_portable.sh start
+
+Safety notes:
+  - player-import works only on a *_test database
+  - app services must be stopped
+  - player/account/region relational identity cannot be silently changed
+  - stale exports are rejected by state-version checks
+
+IMPORTANT:
+Not all modern state is inside PlayerState JSONB.
+Sessions, relational mail, account-global authority, migration state, etc. are
+relational PostgreSQL data and are NOT edited through player-export/import.
+
+
+======================================================================
+10. UPDATE TO A NEW BACKEND ZIP
+======================================================================
+
+Normal update procedure:
+
+1. Put the new ZIP into:
+
+  backend/
+
+2. Run only:
+
+  ./gxb_backend_workspace_portable.sh update
+
+update will:
+  - detect whether app services were running
+  - stop app services if necessary
+  - create a pre-update PostgreSQL logical backup
+  - keep runtime/postgres intact
+  - atomically replace current_backend
+  - run new backend init/Alembic upgrades
+  - restart the application if it was running before
+
+Update records are kept under:
+
+  runtime/update-snapshots/
+
+DO NOT manually copy old server_state into a new backend after PostgreSQL
+migration. PostgreSQL is now canonical.
+
+
+======================================================================
+11. DATABASE BACKUPS
+======================================================================
+
+Make a logical PostgreSQL backup at any time:
+
+  ./gxb_backend_workspace_portable.sh dev db-backup manual
+
+Examples:
+
+  ./gxb_backend_workspace_portable.sh dev db-backup before-awakening-test
+  ./gxb_backend_workspace_portable.sh dev db-backup before-client-smoke
+  ./gxb_backend_workspace_portable.sh dev db-backup before-player-edit
+
+Backups are stored in:
+
+  runtime/backups/
+
+IMPORTANT:
+The current helper has a BACKUP command but does not yet expose a simple
+one-command RESTORE wrapper. Keep the .dump files; if restoration is needed,
+use the backup and ask for the exact restore procedure rather than guessing.
+
+
+======================================================================
+12. LOGS / DEBUGGING
+======================================================================
+
+Persistent log root:
+
+  runtime/logs/
+
+Important logs include:
+  http.log
+  realtime.log
+  scheduler.log
+  postgres.log
+  proxy-access.log
+  proxy-error.log
+  launcher.log
+  migration.log
+  cutover.log
+  backup.log
+  dev-state.log
+
+Backend/client uploaded runtime observations are also routed under runtime/
+so replacing current_backend does not discard debugging evidence.
+
+View recent logs:
+
+  ./gxb_backend_workspace_portable.sh dev logs http
+  ./gxb_backend_workspace_portable.sh dev logs realtime
+  ./gxb_backend_workspace_portable.sh dev logs scheduler
+  ./gxb_backend_workspace_portable.sh dev logs postgres
+  ./gxb_backend_workspace_portable.sh dev logs proxy
+  ./gxb_backend_workspace_portable.sh dev logs launcher
+  ./gxb_backend_workspace_portable.sh dev logs migration
+  ./gxb_backend_workspace_portable.sh dev logs cutover
+  ./gxb_backend_workspace_portable.sh dev logs backup
+  ./gxb_backend_workspace_portable.sh dev logs dev-state
+
+
+======================================================================
+13. CREATE ONE ZIP TO SEND FOR DEBUGGING
+======================================================================
+
+Run:
+
+  ./gxb_backend_workspace_portable.sh support-bundle
+
+Result:
+
+  runtime/support/gxb-support-YYYYMMDDTHHMMSSZ.zip
+
+Upload the newest support ZIP when asking for backend/client debugging.
+It includes useful logs/status/migration evidence and excludes the huge venv,
+raw PostgreSQL data directory, and raw legacy state.
+
+
+======================================================================
+14. HEALTH / ENVIRONMENT CHECKS
+======================================================================
+
+Show environment:
+
+  ./gxb_backend_workspace_portable.sh doctor
+
+Show required host packages:
+
+  ./gxb_backend_workspace_portable.sh deps
+
+Check service state:
+
+  ./gxb_backend_workspace_portable.sh status
+
+Check PostgreSQL cutover/authority state:
+
+  ./gxb_backend_workspace_portable.sh dev cutover-status
+
+Test nginx/OpenResty generated config:
+
+  ./gxb_backend_workspace_portable.sh dev proxy-test
+
+
+======================================================================
+15. HTTP WORKERS / CONCURRENCY TESTING
+======================================================================
+
+Default and rollback worker count remains 1.
+Proven opt-in stages are 2 and 4.
+
+Before deliberately selecting a stage:
+
+  ./gxb_backend_workspace_portable.sh dev scale-preflight 1
+  ./gxb_backend_workspace_portable.sh dev scale-preflight 2
+  ./gxb_backend_workspace_portable.sh dev scale-preflight 4
+
+Do not jump beyond 4 without a new accepted design/test pass.
+
+
+======================================================================
+16. WHAT NOT TO DO ANYMORE
+======================================================================
+
+DO NOT use this as normal runtime startup:
+
+  python3 server.py
+
+DO NOT restore live state by copying:
+
+  preserve/server_state -> current_backend/data/server_state
+
+DO NOT edit preserve/server_state expecting live PostgreSQL gameplay to change.
+
+DO NOT assume init means the database is already gameplay-authoritative.
+
+DO NOT copy the original preserve/server_state over a normalized migration copy.
+
+DO NOT delete runtime/ casually if you want to preserve the current live
+PostgreSQL player base.
+
+
+======================================================================
+17. IF SOMETHING GOES WRONG
+======================================================================
+
+1. Do not keep changing files randomly.
+2. Run:
+
+  ./gxb_backend_workspace_portable.sh status
+  ./gxb_backend_workspace_portable.sh dev cutover-status
+  ./gxb_backend_workspace_portable.sh support-bundle
+
+3. Upload the newest ZIP from runtime/support/ along with the terminal error.
+
+If the problem occurred during migration, also mention whether you chose:
+  - old preserve/server_state migration, OR
+  - scratch-candidate fresh server.
+
+
+======================================================================
+18. QUICK DECISION TABLE
+======================================================================
+
+I want to...                         Use...
+-----------------------------------------------------------------------
+Start server                         ./gxb_backend_workspace_portable.sh start
+Stop app but keep DB                 ./gxb_backend_workspace_portable.sh stop
+Stop everything                      ./gxb_backend_workspace_portable.sh down
+Check status                         ./gxb_backend_workspace_portable.sh status
+Update backend ZIP                   ./gxb_backend_workspace_portable.sh update
+Keep/migrate old players             Section 4
+Fresh playable dev server            scratch-candidate (Section 5)
+Zero-account empty schema            db-reset-empty (Section 6)
+Wipe current player base             scratch-candidate (Section 8)
+Edit Moppleton/items                 player-export/import (Section 9)
+Backup database                      db-backup (Section 11)
+View logs                            Section 12
+Send debug evidence                  support-bundle (Section 13)
+Hard clean-install simulation        Section 7
+
+
+======================================================================
+19. DEFERRED FUTURE OPERATOR GUI
+======================================================================
+
+ROADMAP NOTE - DEFERRED, NOT PART OF THE CURRENT I10 CLIENT SMOKE:
+
+Create a simple local GXB Development Control GUI/TUI so the operator does not
+need to remember shell commands. It should wrap the existing CLI rather than
+replace backend authority rules.
+
+Candidate controls:
+  - Setup / Init
+  - Start / Stop / Restart / Status
+  - Update backend
+  - PostgreSQL backup / restore
+  - Legacy migration wizard
+  - Fresh/scratch reset
+  - Player list/search
+  - Player export/edit/import helper
+  - Maintenance + cutover status
+  - Worker-stage selector/preflight
+  - Live log viewer
+  - Generate support bundle
+  - Runtime/database health indicators
+
+This is intentionally deferred until after the current foundational stock-client
+reconciliation work. The CLI remains the authority underneath the future GUI.
+
+
+======================================================================
+20. CURRENT RECOMMENDED NEXT ACTION FOR CLIENT SMOKE
+======================================================================
+
+Because your latest clean-install attempt already ran setup + init but then
+accidentally copied the ORIGINAL server_state back over the intended migration
+input, repair it with:
+
+  rm -rf runtime/legacy_migration_input
+
+  ./gxb_backend_workspace_portable.sh dev legacy-normalize-sandbox \
+    "$PWD/preserve/server_state" \
+    "$PWD/runtime/legacy_migration_input"
+
+  ./gxb_backend_workspace_portable.sh dev legacy-inventory \
+    "$PWD/runtime/legacy_migration_input"
+
+  ./gxb_backend_workspace_portable.sh dev legacy-migrate \
+    "$PWD/runtime/legacy_migration_input"
+
+  ./gxb_backend_workspace_portable.sh dev prepare-latest
+
+  ./gxb_backend_workspace_portable.sh dev cutover-open \
+    'OPEN POSTGRESQL TRAFFIC PERMANENTLY'
+
+  ./gxb_backend_workspace_portable.sh dev maintenance-off
+  ./gxb_backend_workspace_portable.sh start
+  ./gxb_backend_workspace_portable.sh status
+
+Then launch the stock client.

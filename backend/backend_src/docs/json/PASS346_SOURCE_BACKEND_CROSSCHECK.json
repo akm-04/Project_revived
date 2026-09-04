@@ -1,0 +1,63 @@
+{
+  "schema_version": 1,
+  "pass": "346.0",
+  "wave": "I7",
+  "status": "PASS_NO_MATERIAL_DESIGN_CONTRADICTION",
+  "formal_design": "Pass337",
+  "implementation_baseline": "gxb-backend-v0.59.0-pass345.0",
+  "source_facts_rechecked": [
+    {
+      "path": "local_assets/src_64/app/common/network/Backend.lua",
+      "sha256": "79ebbb6452bc62e764142d4dc04e5d024ead78f54562c0144921143ca6ad5df4",
+      "fact": "contextEpoch/retry/client_op_id compatibility patch remains unchanged"
+    },
+    {
+      "path": "local_assets/src_64/app/scenes/LoadingScene.lua",
+      "sha256": "06da664086d167fa6be0401defb59d27411716543a648fabe76f81d4d0de9e84",
+      "fact": "MID1 single-flight compatibility remains unchanged"
+    },
+    {
+      "path": "local_assets/src_64/app/windows/SwitchItem.lua",
+      "sha256": "5f423c19ea8d58119709ed60e812dc526093d754a300c16cc9c9e815457b6fa3",
+      "fact": "context transition ordering remains unchanged"
+    },
+    {
+      "path": "local_assets/src_64/app/common/network/mid.lua",
+      "sha256": "11d4036ef68cdce66810bc02d5dfc7226a9c4286388bfd5a6cb2bc1a21f96a18",
+      "fact": "private realtime control MID remains unchanged"
+    },
+    {
+      "path": "source_evidence/pass345_src64_mail/Mailbox.lua",
+      "sha256": "3232f5c4b7c8dc60bf2c76249813d684959e4970040890ea2d0a3f544516ba14",
+      "fact": "mail identity remains the compound is_region/id pair"
+    },
+    {
+      "path": "source_evidence/pass345_src64_mail/MailboxWindow.lua",
+      "sha256": "f53ec450208d799ba8954ba50ce4f6a92793664ea2f85190c281132bea2b7a7d",
+      "fact": "normal and region mail ID namespaces remain distinct"
+    }
+  ],
+  "mature_backend_rechecked": [
+    {
+      "path": "gxb_backend/state/repository.py",
+      "sha256": "af7ba15e484dd44e74e93c7b6f90cdc1de66f0c6e9a20d93f4e8d3b807818412",
+      "fact": "JSON StateRepository and process-global RLock remain unchanged"
+    },
+    {
+      "path": "gxb_backend/state/multiuser_database.py",
+      "sha256": "af43acc4a8e9d133f3c99fe65846459cab92aebb3f505b2d8725f947ee68fde3",
+      "fact": "Pass299 JSON source layout and runtime behavior remain unchanged"
+    },
+    {
+      "path": "gxb_backend/dispatch/engine_dispatcher.py",
+      "sha256": "11a8aa7718d8d2abdc99d73b7653cdea4b81bf20518e867db14ff59608d42b07",
+      "fact": "gameplay dispatcher remains unchanged and JSON-backed"
+    },
+    {
+      "path": "gxb_backend/auth/perimeter.py",
+      "sha256": "685984f6b5723c465b42eee9fa4546083c28b74744eb644e1bf6e28d32a3b3bc",
+      "fact": "I1 auth perimeter remains unchanged"
+    }
+  ],
+  "assessment": "I7 consumes Pass299 JSON as an immutable migration source and reuses the I4 pure codec; it does not replace src_64 as continuing implementation evidence and does not switch runtime authority."
+}

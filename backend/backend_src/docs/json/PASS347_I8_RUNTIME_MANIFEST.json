@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "pass": "347.0",
+  "wave": "I8",
+  "sha256_by_path": {
+    "gxb_backend/runtime/authority.py": "05f9a124ebe4d43cca4c18806f4279879dff9813ca60f576772b5d0bba1f2476",
+    "gxb_backend/runtime/config.py": "aa7c39319523f63581636c9513983ecc8ba0d48baf23ad5d9b31a8f732c10fb2",
+    "gxb_backend/runtime/composition.py": "57388f01cb3711b285cf2d27e0cb941a1ab80e3ef0b1c1af1b50cc51c63bb11d",
+    "gxb_backend/runtime/state_repository.py": "2d8bcf15159a3d6d6b1ec0b2152bc20bd329a1aa7e0ddd62f599c78a312e8781",
+    "migrations/versions/0008_pass347_i8_runtime_cutover.py": "1d18216ae0e8e0516afff7ea6d1fde0e05bdc2bbb5c465504d65a791080b7560",
+    "gxb_backend/state/repository.py": "d724ad4df3e8c949391e12814c347f78cc46ea22d18d2eb2bb59e9c848221f02",
+    "gxb_backend/persistence/repositories.py": "6cf9be5b3c956ad1eeb5574ccf1a425273d7615e70b4c390fb6576bc9beaa6b3",
+    "gxb_backend/persistence/store.py": "f54d00417e732860c45c8b1269f05117974732ba6e83beab462504bd80a4d984",
+    "gxb_backend/dispatch/engine_dispatcher.py": "8661d13b928a2b4bfa15536f1b87b5362d7a578c6cf731ea626ba78c089ec76c",
+    "gxb_backend/handlers/mail.py": "645b3a4441aa66ee0ed5db2831f7f700391be36188af0efcb4c73a2934a1ec38",
+    "deploy/gunicorn.conf.py": "4ba664ba105f1045581a1cf81de42279dc719319859555537c8f0027aa72c5cd",
+    "deploy/nginx/gxb.conf": "a0ca0992fdf6edfeb1f0d89addb1df7ac2f2adbf717462f3bdfd02eb7f2fb5fc",
+    "deploy/systemd/gxb-http.service": "88142184f7c06fda62bcc262434edfb276e166517c46401780242e209a090787",
+    "deploy/systemd/gxb-realtime.service": "3e0224408054e51fd57a3f62ddae1f856b3e05a2bac17f048e2feff9b1c98c79",
+    "deploy/systemd/gxb-scheduler.service": "5663db20a05e7bd76f437063ef6ba23fbd70b7d9bec02b02eb876809ab122348",
+    "tools/pass347_i8_cutover.py": "e8cbfbaa00d47a5f56028c2c3174723e35fb161f8f36da697e4dd6b56bbfc99c",
+    "tests/i8/test_runtime_authority.py": "914e61b902db735ec07892452777dd198684a7a3b7b6583cabf53bcc72097db8",
+    "tests/i8/test_source_and_mail_contract.py": "d8fe350e5aef4083f357d55dae4acdc02753b0c21e07c1160fa5f0085eefe290",
+    "tests/integration/test_postgresql_i8_runtime.py": "27dfc385be0a2722728af291462a2ddbd401eb8b8c2554fd300b869b741f2cfa"
+  }
+}

@@ -1,0 +1,18 @@
+[Unit]
+Description=Girls X Battle EOL scheduler and projection worker
+After=network-online.target postgresql.service
+Requires=postgresql.service
+
+[Service]
+Type=simple
+User=gxb
+Group=gxb
+WorkingDirectory=/opt/gxb/backend
+EnvironmentFile=/etc/gxb/gxb.env
+ExecStart=/opt/gxb/backend/.venv/bin/python -m gxb_backend.runtime.scheduler_main
+Restart=on-failure
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=gxb.target

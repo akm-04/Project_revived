@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "pass": "347.1",
+  "wave": "I8_OPERATIONAL_REPAIR",
+  "sha256_by_path": {
+    "gxb_backend/runtime/maintenance.py": "2a7b174cf959b1cb36b5ceec7daccf5f590eb1f2659a8ee41cca65d3591379e0",
+    "gxb_backend/runtime/authority.py": "3ee79a4f98aa82ca0626441db587863c6ce4a7267ec9d5b203e8c0c9f4d1b03b",
+    "gxb_backend/runtime/config.py": "d4d8cc28d8adc67f3bb11875e4aa60a26718132d14df1cacac830d2e688eb97b",
+    "gxb_backend/runtime/composition.py": "0f2b2b4b1acdad3fe16d47755847d166dddc3f99f8f437b0aeae5a3130d7b223",
+    "gxb_backend/runtime/state_repository.py": "73e91b485c061c46efc5d23f6314ae6778d684769e3662fb4a3aa36a88a5ed70",
+    "gxb_backend/realtime/gateway.py": "299c5b244ec19e6071bd77bd6bd77a46b0bdc7ee8b546c5b8741e6171131819c",
+    "deploy/gunicorn.conf.py": "fb6cb36ca5e58bcaf3659ae14e899b32b11fd81160d5f245bf62faa940b0b478",
+    "deploy/nginx/gxb.conf": "db01a93c2852383d3ffc34a1ef35d0d18b4353baff2b67b687d80215f0ad2e4e",
+    "deploy/gxb.env.example": "c31cb403a3f37030802987d6da2baefb0a0746adddc942c27aedb5cc30d68cd6",
+    "deploy/systemd/gxb-http.service": "5c13971ed220f1572e197a851de0e66c1b98c2479b4b6863fcb29a79519484c9",
+    "deploy/systemd/gxb-realtime.service": "3330031415d9edc10991d69332fc274d9aa4699790e26d3bd5939143df0f405d",
+    "deploy/systemd/gxb-scheduler.service": "fd4d221602f399420a267379fec1486309878072c0cd40d79e4f8eb396d9f5c2",
+    "deploy/systemd/gxb.target": "a3cd75d8214617cbfb4d028b1be9d984bee53e9ff386404fa6ebd6d1304596cc",
+    "bin/gxb-stack": "2708a1d378690f8676ec1e181d6307bade9646287f6ec7abe00681c41dc19501",
+    "tools/pass347_i8_cutover.py": "de17568b3ee29b49f1699f647966f35bc1709c12bce1fba155a6b63670cdeb7a",
+    "tests/i8/test_runtime_authority.py": "ffa24f21aa40148fc5ae7370eeddd82756b119a3cc59bb5bf0bb70bb11b8dbba",
+    "tests/integration/test_postgresql_i8_runtime.py": "162c2a17aa8f1fef4de8c26195ff597ca1633557245dca97c8bcad22739eb018",
+    "tests/integration/test_postgresql_i8_maintenance_runtime.py": "3c735fe6be6a0de45e22eeb272feff2612195d2f0957dafed9172a1d2e3b0e4e",
+    "pyproject.toml": "a0ca6887748584227f486d7bc5b95fc1ce811e67d294a98b6680daec4f768c89",
+    "PASS347_1_SOURCE_BACKEND_CROSSCHECK.json": "0ac40fb647691a92f39310b6f3c154c4ef30b12a35135540ea9c65c7b51c8c72"
+  }
+}

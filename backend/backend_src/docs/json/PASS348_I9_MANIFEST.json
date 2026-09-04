@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "pass": "348.0",
+  "wave": "I9_CONCURRENCY_PROOF_RLOCK_RETIREMENT_MULTIWORKER",
+  "baseline": {
+    "artifact": "gxb-backend-v0.61.1-pass347.1.zip",
+    "sha256": "ab6cfdaa9445d6d755eed7c266cdf7cde3c4371954bbddf03a2e02d96e0effea"
+  },
+  "alembic_schema_change": false,
+  "gameplay_behavior_change": false,
+  "client_change": false,
+  "sha256_by_path": {
+    "VERSION.json": "c5d617f5aac3349cdfc0c1b95bd0987f6996ce68f7187b571be566d5e36861bf",
+    "README.md": "2f62f3719a75bb4743b3bdf32149e2f66428f6d36b0989a8712d5d8df4e151c7",
+    "pyproject.toml": "e6a9985d5694ff634a3fca0ad6dda8dc29b70bc5ff255e0b20367683e8577246",
+    "bin/gxb-stack": "dacdf40a4ef9be70eb8a67ab385dca651962133c9437920b0087deba7ee1e3d6",
+    "deploy/README-I9.md": "f676c7ce6878ac9be3097f0a5420125f620ce472404345e05fdda5be305da051",
+    "deploy/gunicorn.conf.py": "ab85cbff924e23d86de9d599f5f272837a58c2567c4d4a30eecfa3f3ea610bed",
+    "deploy/gxb.env.example": "6d0723b9a89e34b0975e347f950e9411b4e9f2af21a597f18c9b70938bf073cb",
+    "gxb_backend/runtime/state_repository.py": "acf3bd455d1eabf8637b9de1883ecc801d73f6debd76d07fb1362d19c429a3a3",
+    "gxb_backend/runtime/config.py": "66075d2e9fa5d1be58ee4e0cdcd86f567cefaed10a13cb35bf68a97106d9c3c6",
+    "gxb_backend/runtime/composition.py": "49726af2c67c92cb2b48f60e5698d21cae4e5e3bfd3e74e77af33130f5d38b9d",
+    "gxb_backend/dispatch/engine_dispatcher.py": "6f0a61ed76ef78760037c22e67473e56018194831d7f00ea231b075c7192c26a",
+    "gxb_backend/mail/repository.py": "78e746f18c33af4de8d150564e380956a3741f505e42a6c1086572c8403266b1",
+    "tools/pass348_i9_scale_preflight.py": "3d430673b415f57939d3f5f373ac46efbb73c1fc1c7f83be7a0423a13e878939",
+    "tests/i8/test_runtime_authority.py": "eebe27cc4661a95c8cdc6d9a0b7d338be8186aab398d97c0cf651548fdd63939",
+    "tests/integration/test_postgresql_i8_runtime.py": "97802a5603e753874d6c1ed38a894df12461a9da0e557fe218c36996a4f7ed79",
+    "tests/i9/test_rlock_retirement_and_scaling.py": "eeb5be3c7e10b988df0896b41fa040e22b70a646a47b6a08daacc31f8a11e8aa",
+    "tests/integration/test_postgresql_i9_concurrency.py": "4a10bc6b6508d62ab6693555e3e804854673f4a88bd9664b084762da1a60e82e",
+    "tests/integration/test_postgresql_i9_gunicorn.py": "4ea9141b150e5c6feac456ddfb4c47756fb5f9172a0ae91048d30ad967a84250",
+    "PASS348_I9_PRE_RETIREMENT_PROOF.json": "825162529dc02da891f99ae090b280fb4552e093295dc90286a8f0e3a0437f10",
+    "PASS348_I9_POST_RETIREMENT_PROOF.json": "96d12cf7d286982f00afc81e4f6acec42c78f5059ce96ccb374b7dd1f7a5fcb0",
+    "PASS348_I9_IMPLEMENTATION_REPORT.md": "7e9683750b1fc84b83f1448d1c3981fe71db643f619901ed78d5474e5a3cb94f",
+    "PASS348_SOURCE_BACKEND_CROSSCHECK.json": "c4cc44f953832bb08bb057b9f7b42d08823fdf8e4c2fe63c2bf022e4ed5b7367",
+    "PASS348_NEXT_ROADMAP.json": "f24a9d48aac493485b2d7266b214440ba6913b2a6fd4bf5c037c639a55ffb01f",
+    "PASS348_STAGE_VALIDATION.json": "4290c9a81715c7474f887987f0e2360af8210f5c645057b65994307fe35e746d",
+    "PASS348_IMPLEMENTATION_COMMIT.json": "7d08d1f0db9af9a76280288ab80801d5421784d5ab9e3f1f17d6b47dcfb92915"
+  }
+}

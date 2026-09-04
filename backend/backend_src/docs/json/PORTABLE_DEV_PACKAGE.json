@@ -1,0 +1,22 @@
+{
+  "base_artifact": "gxb-backend-v0.62.0-pass348.0",
+  "classification": "packaging_and_dev_operator_overlay",
+  "runtime_architecture_changed": false,
+  "production_reference_changed": false,
+  "portable_dev": {
+    "root_owned_project_paths_required": false,
+    "systemd_required": false,
+    "workspace_local_postgresql_supported": true,
+    "workspace_local_venv_supported": true,
+    "workspace_local_logs_and_pids": true,
+    "proxy_optional_after_traffic_open": true,
+    "proxy_required_for_prepared_maintenance_gate": true,
+    "legacy_json_live_fallback": false
+  },
+  "root_cleanup": {
+    "pass_json": "docs/json/",
+    "pass_reports": "docs/pass-reports/",
+    "update_operator_guide": "docs/guides/UPDATE_README.md",
+    "memory": "docs/memory.md"
+  }
+}

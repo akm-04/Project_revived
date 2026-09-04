@@ -1,0 +1,21 @@
+{
+  "authorization": "This user turn explicitly scoped work to completing I6 and sealing Passmap; I7 is therefore recorded as next but is not started in Pass345.",
+  "continuing_constraints": [
+    "Start only from sealed Pass345 backend/HOT authority.",
+    "Continue current src_64/current backend cross-checks.",
+    "Do not retire global RLock or widen workers; I9 owns that.",
+    "No live PostgreSQL connection attempt unless explicitly safe/available and separately appropriate."
+  ],
+  "frozen_requirements": [
+    "Rehearse offline/quiesced JSON-to-PostgreSQL migration from immutable hashed runtime state; no dual canonical writes.",
+    "Validate semantic PlayerState/receipt/mail extraction, identity/allocator safety, counts/digests and cutover rollback boundary.",
+    "Validate backup/restore/PITR tooling as far as the available environment permits, distinguishing mocked/offline proof from any live PostgreSQL evidence.",
+    "Do not perform TRAFFIC_OPEN; I8 owns one-way runtime cutover."
+  ],
+  "next_pass": "346.0",
+  "next_wave": "I7",
+  "pass": "345.0",
+  "schema_version": 1,
+  "status": "I6_CLOSED_I7_NEXT_NOT_STARTED",
+  "work": "full migration rehearsal + backup/restore validation"
+}

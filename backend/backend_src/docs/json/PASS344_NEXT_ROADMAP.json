@@ -1,0 +1,24 @@
+{
+  "authorization": "User explicitly authorized continuation to I6 after Pass344 is fully sealed, if execution window permits.",
+  "continuing_constraints": [
+    "Start only from sealed Pass344 backend/HOT authority.",
+    "Do not perform TRAFFIC_OPEN or wire PostgreSQL PlayerState canonical runtime in I6; I8 owns cutover.",
+    "Do not retire/narrow global RLock or widen workers; I9 owns that.",
+    "Keep RealtimeGateway durable-user delivery excluded; I6 may stage transient notification only after durable mail/state authority.",
+    "Continue current src_64/current backend cross-checks.",
+    "Without safe disposable PostgreSQL, use mocks/fakes/offline SQL and make no live connection attempt."
+  ],
+  "frozen_requirements": [
+    "Dedicated SchedulerWorker executes autonomous durable work from scheduled_jobs; player-local regen/daily reset remains lazy/time-derived.",
+    "Relational mail becomes durable authority with deterministic delivery identity/uniqueness and no duplicate rewards.",
+    "Global projections derive from canonical resource ownership and never steal local write authority.",
+    "Use I2 ResourceTransaction/outbox/jobs primitives and preserve deterministic lock ordering/state-version conflicts.",
+    "Keep JSON PlayerState default canonical and global RLock until later cutover/concurrency gates."
+  ],
+  "next_pass": "345.0",
+  "next_wave": "I6",
+  "pass": "344.0",
+  "schema_version": 1,
+  "status": "I5_CLOSED_I6_AUTHORIZED_NOT_STARTED",
+  "work": "SchedulerWorker / global projections / relational mail"
+}

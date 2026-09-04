@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "pass": "348.0",
+  "status": "I9_COMPLETE_I10_NEXT_NOT_STARTED",
+  "formal_design_authority": "Pass337",
+  "next_wave": "I10 stock-client foundation reconciliation/close",
+  "i10_entry_gates": [
+    "begin from sealed Pass348 HOT/CURRENT and backend v0.62.0",
+    "keep PostgreSQL as sole canonical runtime authority",
+    "keep default/rollback HTTP worker count at one unless a proven 2/4 stage is deliberately selected",
+    "exercise a real stock client across login, MID18, MID1, bootstrap, gameplay, context switch, realtime control, mail and restart",
+    "capture explicit client/backend/PostgreSQL evidence for late responses, manual retry identity, and context supersession",
+    "cross-check every anomaly against current src_64 and the backend before changing behavior",
+    "reopen targeted research/design immediately if evidence threatens the frozen architecture"
+  ],
+  "not_i10": [
+    "broad unrelated gameplay completion",
+    "automatic scaling beyond four workers",
+    "JSON fallback or dual canonical writes",
+    "OpenResty gameplay-core rewrite",
+    "claiming official-server physical topology from private-server tests"
+  ],
+  "foundation_close_condition": "stock-client reconciliation is stable at the selected worker stage with no lost update, identity divergence, stale-context sideband, allocator collision, or durable-dispatch duplication"
+}

@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "candidate_version": null,
+  "candidate_release_type": null,
+  "last_published_version": null,
+  "active_allowlist_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+  "whitelist_changed": false,
+  "registry_authority": "local_assets/release_registry.json",
+  "baseline_resource_version": "1.631.0",
+  "recommended_asset_bootstrap_version": "1.631.1",
+  "recommended_code_version": "1.631.2",
+  "note": "Pass299 canonical OTA closure: 1.631.1 is permanently the first asset bootstrap; cumulative Lua/code begins at 1.631.2. Experimental recovery versions remain passmap provenance only.",
+  "ota_generation": "OTA_CANONICAL_V1_PASS299"
+}

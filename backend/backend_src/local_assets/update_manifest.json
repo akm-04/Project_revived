@@ -1,0 +1,16 @@
+{
+  "enabled": false,
+  "runtime_authority": "release_registry.json",
+  "deprecated_single_manifest": true,
+  "version": "1.631.0",
+  "package": "",
+  "volume": 0,
+  "size": 0,
+  "md5": "",
+  "silent": true,
+  "release_type": "NONE",
+  "contains_version_json": false,
+  "legacy_whitelist_changed": false,
+  "legacy_whitelist_entries": 0,
+  "note": "Pass299 operator summary only. Runtime authority is release_registry.json; canonical clean chain is loud 1.631.1 stock-client-compatible assets + reconciled lazyFile.json then silent cumulative 1.631.2 code; later Lua/code increments from there."
+}

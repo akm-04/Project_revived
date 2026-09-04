@@ -1,0 +1,83 @@
+{
+  "schema_version": 1,
+  "pass": "341.0",
+  "backend_version": "0.55.0",
+  "status": "I2_IMPLEMENTED_ACCEPTED",
+  "roadmap_authority": "Pass337 final Design; Pass340 I1 accepted baseline",
+  "scope": [
+    "ResourceTransaction coordinator with frozen resource order and registry-driven row lockers",
+    "bounded default-deny whole-transaction retry for PostgreSQL serialization/deadlock and configured state-version conflicts",
+    "semantic ReceiptRepository, durable outbox and scheduled-job primitives",
+    "Alembic 0002 transaction-kernel tables/constraints/indexes only",
+    "mock/offline/concurrency/fault-injection test harness with exact bundled Python libraries where loadable"
+  ],
+  "non_scope": [
+    "I3 account/session/context/region relational authority or credential issuance",
+    "I4 PlayerState JSONB canonical persistence",
+    "RealtimeGateway/outbox consumers",
+    "SchedulerWorker execution",
+    "global RLock retirement",
+    "multi-worker widening or production cutover"
+  ],
+  "baseline": {
+    "artifact": "gxb-backend-v0.54.0-pass340.0",
+    "archive_sha256": "837c6f015bf853adc6caf9624bfa21579ac39db8978dd2126bb8498e2c581547",
+    "legacy_runtime_root_sha256": "d90e6b6e73bf1bebb760a51762191e04e6d53ff55065e125cd1c989736e176f1",
+    "legacy_runtime_files": 495
+  },
+  "implementation_sha256": {
+    "gxb_backend/foundation/contracts.py": "9576dc9df64262a39abd4b2b0abdabc690c9a8d25d2e62c84f34f4b6497e49cd",
+    "gxb_backend/foundation/schema.py": "a7fead70aa581157d6ed77ec504959c6b2a9226ddb858ab56fb5afc59b68bc72",
+    "gxb_backend/transactions/__init__.py": "e36cd8b9ef09c395f40ce048640d872dc153a19d63653e3e80e9584dbb99b8cf",
+    "gxb_backend/transactions/coordinator.py": "53f19319940efd74d1bb203de90def50b1ddd9365b28c6065034aba4ccc33c26",
+    "gxb_backend/transactions/errors.py": "c413d8bc258a325f0d09454030d66fe9bb384d0f8ee956420275830360ba5f30",
+    "gxb_backend/transactions/jobs.py": "934086ea666235492728401bcb9535cc591daf8d8e082dd277917fb8aca66dc8",
+    "gxb_backend/transactions/locking.py": "e5b17c4c265b666a4005854828972f53c51f1689f33ac22f64b62b8b42eb0419",
+    "gxb_backend/transactions/models.py": "3e64be4a9d03f05f4c4ace1f054432dd456c68731c9afb72fc9deee07b46f590",
+    "gxb_backend/transactions/outbox.py": "80219815c905e3c92b85a67d4fbd68cf01d46e6e7c162adbc8bd88efd6f6adfe",
+    "gxb_backend/transactions/receipts.py": "b17f55f7f97e5c795b787afa41d831bd06610348cbb5b3e49702f8308ead4169",
+    "gxb_backend/transactions/schema.py": "ff24ed21a30e7abe46f59ed6890a579f2a202d7ff1ad766e4be863e3316e26d7",
+    "gxb_backend/transactions/state_version.py": "3560d5e1d1bd3340bc2d5dabc6d9c870ca6651121c6c68d2ab4666ef8e96f47b",
+    "migrations/env.py": "a213972e6a85a24f64a7de7ef25531b9a497d3dfed90fc1652fab1aeaa7282f1",
+    "migrations/versions/0002_pass341_i2_transaction_kernel.py": "9fd2343118b6e268c1c4c3f3ab239c044b25a6f3c406534671280bcdf7c1095a",
+    "tests/foundation/test_alembic_offline.py": "e2d770188c776b2feb0b64e05341150742ffa117a1afba2395cb0d1084bb23e8",
+    "tests/i2/test_concurrency_model.py": "0b15896a571e408ced5de2b0d7c7fcace9e548d05cc4bd13d01f62866f693784",
+    "tests/i2/test_locking_and_models.py": "a9cdf7e79dc36d517f4cd603fd9caf6ef52330b99f8ca2a4f8604ec10ca1ced2",
+    "tests/i2/test_psycopg_error_classes.py": "0385ca04ee2b192e58875385f959beb1546d5a8fbc1b33864d64d19eaa2d0c6c",
+    "tests/i2/test_receipts.py": "7503c7114dbfd3b759dcd98bcb8a93a53eb738ba9895f07bcfe580962056ebfa",
+    "tests/i2/test_sql_primitives.py": "00542742d8550b17b7657fd84cb6efaa246d99b7bee6802e29eb87a9464e419a",
+    "tests/i2/test_state_version.py": "7b198261b5b5275a0609dafc8bcefe57f08bb54eb67016b6f4df908fc0b1c614",
+    "tests/i2/test_transaction_coordinator.py": "c7fc234a518bfa4c0516775b8b1a8f03636c8185198a7c2386998f499103fd9f",
+    "tests/i2/test_transaction_intents.py": "1dc44ce839e68da1062f5b246aa67844f1905bbf142e284fc011087d7db326cc",
+    "tools/run_pass341_i2.py": "4e2ad77099a3af382683c37f4996370249f4cb973160161dc01350fc5d281f01",
+    "tools/verify_pass341_i2_invariants.py": "b931855e17fd63c82664dc002d23cb991d5cccd3ebb20b9e8150d898e2d8d923",
+    "PASS341_I2_KERNEL_MANIFEST.json": "308c2c274d70fd41858413cc462869b8a8482ccfa43ac959d3e03ee0dbe76887",
+    "PASS341_I2_TRANSACTION_KERNEL_IMPLEMENTATION_REPORT.md": "e9abf984dd713b08c38ab1203c2374f130c5db25112ded947cb0fd577d525a54",
+    "PASS341_STAGE_VALIDATION.json": "ea1d4b1ae3ef9d26fa267285836a8fde464f600f99b88403a983a838a0898320",
+    "PASS341_SOURCE_BACKEND_CROSSCHECK.json": "90f8bccc0dbb78733a6d0aaac3c15342c5569b7e96111dc97b2ecfb345b2f43e",
+    "PASS341_NEXT_ROADMAP.json": "04796b109898880b9379319b437bb5bb1163cbeb68f9b8ca9fd37a6a6c7e44be",
+    "VERSION.json": "484f45c6c7c5dd77c8c83c4bbd012bd5168a04581aa09067063cce750043ef07",
+    "gxb_backend/version.py": "012a99cd60519f3e69c71228c96026c47ef1629c59970d3512ac63273c128c54",
+    "pyproject.toml": "525b5cf5678122e648e2da4bd6cd78671dcfaedd91783f7afa1b9509d9d579fc"
+  },
+  "validation": {
+    "i2_tests": "39/39",
+    "i1_tests": "34/34",
+    "foundation_tests": "19/19",
+    "combined": "92/92",
+    "historical_controlling": "14/14 segmented",
+    "pass340_restart_auth_replacement": "PASS",
+    "i2_invariant_guard": "PASS",
+    "compileall": "PASS",
+    "postgresql_attempted": false
+  },
+  "preservation": {
+    "legacy_runtime_files": "495/495 byte-identical",
+    "legacy_runtime_root_sha256": "d90e6b6e73bf1bebb760a51762191e04e6d53ff55065e125cd1c989736e176f1",
+    "json_canonical": true,
+    "global_rlock_unchanged": true,
+    "client_runtime_changed": false,
+    "multiworker_changed": false
+  },
+  "next": "Pass342 I3 identity/session/context relational authority after explicit authorization"
+}

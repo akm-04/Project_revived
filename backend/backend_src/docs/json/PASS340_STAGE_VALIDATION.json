@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "pass": "340.0",
+  "wave": "I1",
+  "status": "CLIENT_COMPATIBILITY_AND_AUTH_PERIMETER_ACCEPTED",
+  "checks": {
+    "i1_pytest": "PASS_34_OF_34",
+    "foundation_pytest": "PASS_19_OF_19",
+    "combined_pytest": "PASS_53_OF_53",
+    "controlling_unchanged_regressions": "PASS_14_OF_14",
+    "pass278_replacement": "PASS",
+    "pass278_historical_final_restart_assertion": "EXPECTED_SUPERSEDED_FAIL_CONTEXT_STALE",
+    "runtime_delta": "PASS_486_BASELINE_TO_495_CURRENT_474_UNCHANGED_12_MODIFIED_9_ADDED_0_DELETED",
+    "compileall": "PASS",
+    "src32_src64_patch_symmetry": "PASS_4_OF_4_SHA_IDENTICAL",
+    "client_old_context_fence": "PASS",
+    "manual_retry_same_params_and_client_op_id": "PASS",
+    "mid1_single_flight": "PASS",
+    "private_realtime_control": "PASS",
+    "intentional_disconnect_reconnect_suppression": "PASS",
+    "auth_scope_default_deny": "PASS",
+    "invalid_credential_prehandler_rejection": "PASS",
+    "caller_region_actor_selection": "PASS_REGION_IS_CONSISTENCY_ONLY",
+    "secret_redaction": "PASS",
+    "malformed_engine_ingress_fail_closed": "PASS",
+    "postgresql_attempted": false,
+    "canonical_persistence_changed": false,
+    "global_rlock_changed": false,
+    "multiworker_changed": false
+  },
+  "postgresql_policy": "Per user authorization for this Standard Chat sandbox, Wave I1 used pure logic/static tests and unittest.mock for DB-facing seams; no live PostgreSQL startup, probe, URL, or connection was attempted.",
+  "superseded_regression": {
+    "path": "tools/selftest_pass278_u4b_wave_f.py",
+    "scope": "final restart assertion only",
+    "observed": "After fresh SDK login, direct MID17 now returns auth CONTEXT_STALE because no selected context is bound.",
+    "reason": "Pass278 assumed pre-I1 account-token + caller-region actor selection. I1 intentionally removes that authority shortcut.",
+    "replacement": "tools/selftest_pass340_i1_restart_auth.py",
+    "replacement_contract": "fresh login -> MID1 selects/binds context -> gameplay succeeds for bound actor; alternate caller region cannot switch actor."
+  },
+  "environment_note": "Tests ran under sandbox CPython 3.13 using an ephemeral import layer built only from the backend-bundled pure-Python Flask/Werkzeug/Blinker wheels. Production CPython 3.12 locks/wheelhouse were not changed.",
+  "next_gate": "Pass341 I2 PostgreSQL transaction kernel only after explicit user authorization; no live-PostgreSQL claim is made by Pass340."
+}

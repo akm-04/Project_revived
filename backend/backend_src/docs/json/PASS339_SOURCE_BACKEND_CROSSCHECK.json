@@ -1,0 +1,65 @@
+{
+  "schema_version": 1,
+  "pass": "339.0",
+  "status": "PASS_NO_DESIGN_THREAT_NO_GAMEPLAY_CHANGE",
+  "authorities": {
+    "pass337_final_design_decisions_sha256": "973d5416bff618036b735f2bb6350988469d25e70189a9615d16b436b677d9bc",
+    "pass337_implementation_roadmap_sha256": "8d53cd6c71fe14704581e1c0497423ecad8d3f922362535a0ba06cac16898c98",
+    "pass299_backend_archive_sha256": "e3130148e22c8ac8de2f555c563431f156f132c23d70d2aa9008c2afe5121580"
+  },
+  "backend_facts_rechecked": [
+    {
+      "path": "gxb_backend/state/repository.py",
+      "sha256": "45a723972b3c02cba0eb8e20055563d44301536f67d543a413b0c84d7e6bbdec",
+      "fact": "StateRepository.request_scope still holds one process-global RLock around request binding and execution."
+    },
+    {
+      "path": "gxb_backend/dispatch/engine_dispatcher.py",
+      "sha256": "6267eab225de34fa741203e3b5ed0bf13282fe05a78391ffbe69adb830ac0dc6",
+      "fact": "EngineDispatcher still owns the mature modular gameplay handler composition; Pass339 does not replace or rewire it."
+    },
+    {
+      "path": "gxb_backend/realtime/server.py",
+      "sha256": "09fb7a7e19347125e53e12a08af08a8602e470e236a09525a807273a3db2a3d5",
+      "fact": "The existing realtime implementation remains byte-identical and is not promoted to the future dedicated gateway in I0."
+    },
+    {
+      "path": "server.py",
+      "sha256": "0c2dd3d0ad37c6b2d3b8908d3c1bbe25be5c9c52c28d84ea8a9087e984549524",
+      "fact": "The Pass299 runtime entrypoint remains byte-identical."
+    }
+  ],
+  "current_src64_facts_rechecked": [
+    {
+      "path": "src_64/app/common/network/Backend.lua",
+      "sha256": "95378e2b0be8180df6de27e9e430c630bcfe46c080e1f91ef5f6d74bdbb1b840",
+      "fact": "Manual retry reuses the same parameter table; no contextEpoch fence exists before normal response processing."
+    },
+    {
+      "path": "src_64/app/scenes/LoadingScene.lua",
+      "sha256": "01c0e71ceee0f08f747552af66bd0f907ebfff1257be58ec480d3606a88f4a17",
+      "fact": "login_ tests isLoggingIn_ but this source file never assigns it, preserving the frozen I1 single-flight repair requirement."
+    }
+  ],
+  "historical_client_facts_rechecked": [
+    {
+      "path": "v1.164/src/app/common/network/Backend.lua",
+      "sha256": "06f481e9358e357019c42fbf7d2cd8e650ba7044a774b182d833aebc85458315"
+    },
+    {
+      "path": "v1.164/src/app/scenes/LoadingScene.lua",
+      "sha256": "b03953353d343e845bd31efe96a99d3264c63064ffd641506d1935174f4c8e87"
+    }
+  ],
+  "native_fact_rechecked": {
+    "path": "APK lib/arm64-v8a/libcocos2dlua.so",
+    "sha256": "c89c33e81466c0453213f65c67e0818a1581756ee0b45b89c0fc89a6d4f8e4c3",
+    "fact": "Native/current APK corpus remains external evidence; Pass339 changes no native/client bytes."
+  },
+  "runtime_invariant": {
+    "file_count": 486,
+    "content_bytes": 83403668,
+    "root_sha256": "224defa8d957ab3e10f6fcd4b0eb84939f84f2f6ca013033a23d9dd63d9d9f96"
+  },
+  "assessment": "I0's additive contracts and tooling match the frozen design. No new source/backend fact collides with the architecture, so no targeted research loopback or design repair is required."
+}

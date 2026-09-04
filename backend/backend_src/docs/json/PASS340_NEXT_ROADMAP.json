@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "pass": "340.0",
+  "status": "I1_CLOSED_I2_AWAITS_AUTHORIZATION",
+  "next_pass": "341.0",
+  "next_wave": "I2",
+  "work": "PostgreSQL transaction kernel",
+  "frozen_requirements": [
+    "Alembic foundational tables/constraints/indexes for transaction kernel only",
+    "ResourceTransaction with universal lock order SESSION -> CONTEXT -> ACCOUNT_GLOBAL -> REGION -> GENERATION -> SHARED/GROUP -> PLAYER(sorted numeric IDs) -> CHILD/SUBRESOURCE",
+    "state_version conflict checks",
+    "ReceiptRepository, outbox and scheduled_jobs primitives",
+    "bounded whole-transaction deadlock/serialization retry"
+  ],
+  "continuing_constraints": [
+    "Cross-check current src_64 and current backend before and during implementation.",
+    "Stop for targeted research/design if new evidence materially threatens Pass337.",
+    "Keep JSON canonical, one HTTP worker, and the legacy global RLock.",
+    "Do not pull I3 identity/session/context relational authority into I2.",
+    "In Standard Chat without a PostgreSQL daemon, use pure logic/mocks and clearly mark live PostgreSQL gates as not reproduced; do not attempt a connection unless the user/environment explicitly provides a safe disposable database."
+  ]
+}

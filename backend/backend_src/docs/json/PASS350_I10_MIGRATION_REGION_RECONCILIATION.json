@@ -1,0 +1,45 @@
+{
+  "pass": "350.0",
+  "wave": "I10",
+  "status": "CANDIDATE_PENDING_STOCK_RETEST",
+  "issue": "Legacy sandbox progress became unreachable after migration because portable normalizer relocated region 194 state to region 125 solely to satisfy region-encoded player-id invariant.",
+  "evidence": {
+    "stock_client_mid1_region_observed": 194,
+    "observed_new_player_id": "19400001",
+    "legacy_server_state_sandbox": {
+      "account_uid": "13371337",
+      "player_id": "12525385",
+      "region": 194
+    },
+    "legacy_registered_players": [
+      {
+        "account_uid": "20000001",
+        "player_id": "19700001",
+        "region": 197
+      },
+      {
+        "account_uid": "20000002",
+        "player_id": "19700002",
+        "region": 197
+      }
+    ],
+    "src_64_region_semantics": "LoginWindow reuses xyd.db.meta.regionID when present; without cached region it sorts descending region catalog and non-debug selects the fourth entry (197 for 1..200). Characters are account+region scoped."
+  },
+  "decision": {
+    "sandbox_active_region_authority": "later multi-user server_state",
+    "singleton_role": "corroborate legacy player-id namespace only",
+    "sandbox_id_remap": "preserve serial suffix: target_pid = active_region*100000 + old_pid%100000",
+    "example": "12525385@region194 -> 19425385@region194",
+    "normal_accounts": "no cross-region cloning or redirect"
+  },
+  "validation": {
+    "actual_preserve_inventory_status": "DISCOVERED",
+    "actual_preserve_target_sandbox_player_id": 19425385,
+    "actual_preserve_sandbox_crystal": 779570,
+    "actual_preserve_sandbox_mana": 551819888,
+    "actual_preserve_sandbox_level": 100,
+    "actual_preserve_sandbox_vip": 15,
+    "actual_preserve_sandbox_backpack_rows": 1481,
+    "bounded_tests": "8 passed (Pass350 reconciliation + I7 source inventory)"
+  }
+}

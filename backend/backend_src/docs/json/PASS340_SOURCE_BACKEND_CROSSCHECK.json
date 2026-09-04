@@ -1,0 +1,119 @@
+{
+  "schema_version": 1,
+  "pass": "340.0",
+  "wave": "I1",
+  "status": "PASS_NO_MATERIAL_DESIGN_CONTRADICTION",
+  "authorities": {
+    "pass337_final_design_decisions_sha256": "973d5416bff618036b735f2bb6350988469d25e70189a9615d16b436b677d9bc",
+    "pass337_implementation_roadmap_sha256": "8d53cd6c71fe14704581e1c0497423ecad8d3f922362535a0ba06cac16898c98",
+    "pass337_implementation_gates_sha256": "26bc50418b5df82ffc926afecebaef937f738bdae693a5ac9da43402e4249c54",
+    "pass339_backend_archive_sha256": "427531cb796c37bd01f40b14596a7923b33a631b65e781e26e8cdc0ad25333ff"
+  },
+  "current_src64_before_patch": [
+    {
+      "path": "src_64/app/common/network/Backend.lua",
+      "sha256": "95378e2b0be8180df6de27e9e430c630bcfe46c080e1f91ef5f6d74bdbb1b840",
+      "fact": "Manual retry reuses the original params table; no contextEpoch exists in the authoritative current source."
+    },
+    {
+      "path": "src_64/app/scenes/LoadingScene.lua",
+      "sha256": "01c0e71ceee0f08f747552af66bd0f907ebfff1257be58ec480d3606a88f4a17",
+      "fact": "login_ checks isLoggingIn_ but authoritative current source does not assign it."
+    },
+    {
+      "path": "src_64/app/windows/SwitchItem.lua",
+      "sha256": "f2267637840195814d7e526d80f4159ade02ebd6edca1048aa976434ae6c5a30",
+      "fact": "Manual server switch resets listeners/model/time without a stale-response epoch fence."
+    },
+    {
+      "path": "src_64/app/common/network/mid.lua",
+      "sha256": "026a20b29d97624979777a68c64c749254031604057ff42aa8f8254c3e35b5af",
+      "fact": "No private server-control MID exists in the authoritative current source."
+    }
+  ],
+  "patched_client": [
+    {
+      "path": "local_assets/src_64/app/common/network/Backend.lua",
+      "sha256": "79ebbb6452bc62e764142d4dc04e5d024ead78f54562c0144921143ca6ad5df4",
+      "src32_sha256": "79ebbb6452bc62e764142d4dc04e5d024ead78f54562c0144921143ca6ad5df4",
+      "fact": "Sparse compatibility patch adds context epoch/ready fencing, logical client_op_id, retry-epoch preservation, private control predispatch and intentional-close suppression while retaining the stock web/tcp request shapes."
+    },
+    {
+      "path": "local_assets/src_64/app/scenes/LoadingScene.lua",
+      "sha256": "06da664086d167fa6be0401defb59d27411716543a648fabe76f81d4d0de9e84",
+      "src32_sha256": "06da664086d167fa6be0401defb59d27411716543a648fabe76f81d4d0de9e84",
+      "fact": "MID1 login is single-flight by assigning and clearing isLoggingIn_ around RETRIEVE_TOKEN."
+    },
+    {
+      "path": "local_assets/src_64/app/windows/SwitchItem.lua",
+      "sha256": "5f423c19ea8d58119709ed60e812dc526093d754a300c16cc9c9e815457b6fa3",
+      "src32_sha256": "5f423c19ea8d58119709ed60e812dc526093d754a300c16cc9c9e815457b6fa3",
+      "fact": "Manual server switching increments context epoch before listener/model/server-time reset."
+    },
+    {
+      "path": "local_assets/src_64/app/common/network/mid.lua",
+      "sha256": "11d4036ef68cdce66810bc02d5dfc7226a9c4286388bfd5a6cb2bc1a21f96a18",
+      "src32_sha256": "11d4036ef68cdce66810bc02d5dfc7226a9c4286388bfd5a6cb2bc1a21f96a18",
+      "fact": "Private server control MID 65000 added as a private compatibility extension."
+    }
+  ],
+  "backend_facts_rechecked": [
+    {
+      "path": "gxb_backend/state/repository.py",
+      "sha256": "61853b02f839c1be193c45353152de256e73fc261db3c7877d3d569f2ebd8c8a",
+      "fact": "request_scope still holds the same process-global threading.RLock; ordinary gameplay resolves actor from the session selected-context binding and uses caller region only as a consistency check."
+    },
+    {
+      "path": "gxb_backend/state/multiuser_database.py",
+      "sha256": "af43acc4a8e9d133f3c99fe65846459cab92aebb3f505b2d8725f947ee68fde3",
+      "fact": "MID1-selected player/region is temporarily bound into the still-canonical JSON session; no PostgreSQL context row or credential issuance is introduced in I1."
+    },
+    {
+      "path": "gxb_backend/dispatch/engine_dispatcher.py",
+      "sha256": "11a8aa7718d8d2abdc99d73b7653cdea4b81bf20518e867db14ff59608d42b07",
+      "fact": "Explicit auth-scope/default-deny runs before mutation firewall/handler execution; mature gameplay composition remains in place."
+    },
+    {
+      "path": "gxb_backend/transport/routes_engine.py",
+      "sha256": "0be1716d0766dbf1469e1fc4b054ebb56f7f146efda0fee895b7cadaf3f8f8fe",
+      "fact": "Malformed engine ingress is HTTP 400 and unmatched undecodable catch-all is HTTP 404 instead of implicit generic success."
+    },
+    {
+      "path": "gxb_backend/auth/perimeter.py",
+      "sha256": "685984f6b5723c465b42eee9fa4546083c28b74744eb644e1bf6e28d32a3b3bc",
+      "fact": "Public/account/context/selected-player scopes are explicit; unknown HTTP engine routes default deny."
+    },
+    {
+      "path": "gxb_backend/realtime/control.py",
+      "sha256": "ab89cc41be58551ae779a7677f9abe2af2046c89ecb1ca15aa568203f1fa4fab",
+      "fact": "MID65000 accepts only CONNECTION_SUPERSEDED, ROOM_INVALIDATED, AUTH_CONTEXT_INVALIDATED private-control kinds; no durable realtime gateway is pulled forward."
+    }
+  ],
+  "historical_client_facts_rechecked": [
+    {
+      "path": "v1.164/src/app/common/network/Backend.lua",
+      "sha256": "06f481e9358e357019c42fbf7d2cd8e650ba7044a774b182d833aebc85458315"
+    },
+    {
+      "path": "v1.164/src/app/scenes/LoadingScene.lua",
+      "sha256": "b03953353d343e845bd31efe96a99d3264c63064ffd641506d1935174f4c8e87"
+    }
+  ],
+  "native_fact_rechecked": {
+    "path": "APK lib/arm64-v8a/libcocos2dlua.so",
+    "sha256": "c89c33e81466c0453213f65c67e0818a1581756ee0b45b89c0fc89a6d4f8e4c3",
+    "fact": "Native APK evidence remains external and unmodified; I1 is Lua/backend-only."
+  },
+  "mid2_20480_boundary": "Current UpdateScene evidence keeps MID2 and MID20480 on the separate pre-context update/bootstrap web path. Backend public classification therefore remains source-grounded; Backend.lua context bootstrap helper need not originate those MIDs.",
+  "runtime_delta": {
+    "baseline_files": 486,
+    "current_files": 495,
+    "unchanged": 474,
+    "modified": 12,
+    "added": 9,
+    "deleted": 0,
+    "root_sha256": "d90e6b6e73bf1bebb760a51762191e04e6d53ff55065e125cd1c989736e176f1",
+    "content_bytes": 83555607
+  },
+  "assessment": "No new source/backend fact requires a Pass337 Design loopback. I1 remains bounded: client compatibility plus ingress/auth perimeter only; I2/I3 responsibilities are not pulled forward."
+}

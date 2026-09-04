@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "pass": "339.0",
+  "baseline": "gxb-backend-v0.52.0-pass299.0",
+  "baseline_archive_sha256": "e3130148e22c8ac8de2f555c563431f156f132c23d70d2aa9008c2afe5121580",
+  "algorithm": "sha256(length-prefixed relative path + length-prefixed content), lexicographic relative-path order",
+  "scope": {
+    "roots": [
+      "gxb_backend",
+      "data",
+      "local_assets"
+    ],
+    "files": [
+      "server.py",
+      "update_controller.py"
+    ],
+    "excluded": [
+      "gxb_backend/foundation/**",
+      "gxb_backend/version.py",
+      "**/__pycache__/**",
+      "**/*.pyc"
+    ]
+  },
+  "file_count": 486,
+  "content_bytes": 83403668,
+  "root_sha256": "224defa8d957ab3e10f6fcd4b0eb84939f84f2f6ca013033a23d9dd63d9d9f96",
+  "meaning": "All pre-Pass339 gameplay, state, transport, current embedded client/assets, and OTA runtime authority remains byte-identical to frozen Pass299."
+}

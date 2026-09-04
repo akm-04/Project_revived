@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "pass": "339.0",
+  "backend_version": "0.53.0",
+  "status": "I0_IMPLEMENTED_ACCEPTED",
+  "roadmap_authority": "Pass337 final Design; Pass338 migration shifted the first implementation wave to Pass339",
+  "scope": [
+    "dependency and offline wheelhouse scaffold",
+    "PostgreSQL configuration and least-privilege role scaffold",
+    "Alembic schema-only initial revision",
+    "typed resource ordering and mechanism-neutral interfaces",
+    "explicit unwired Pass299 legacy adapter",
+    "secret-safe logging contract",
+    "bounded unit/live-PostgreSQL/regression harness"
+  ],
+  "non_scope": [
+    "gameplay handler or wire behavior change",
+    "client Lua/native modification",
+    "PostgreSQL gameplay tables or canonical writes",
+    "ResourceTransaction implementation",
+    "identity/session/context relational authority",
+    "RealtimeGateway or SchedulerWorker",
+    "global RLock retirement",
+    "additional HTTP workers or production cutover"
+  ],
+  "baseline": {
+    "artifact": "gxb-backend-v0.52.0-pass299.0",
+    "archive_sha256": "e3130148e22c8ac8de2f555c563431f156f132c23d70d2aa9008c2afe5121580",
+    "runtime_invariant_sha256": "224defa8d957ab3e10f6fcd4b0eb84939f84f2f6ca013033a23d9dd63d9d9f96"
+  },
+  "implementation_sha256": {
+    "gxb_backend/foundation/contracts.py": "2e7f35f50f8187e4faa9b02d87b5409facd4a1b34135544b7c9367f7ed00a868",
+    "gxb_backend/foundation/database.py": "488c8d8537c7095ac42add0bfe6d900a6003e74a05ec91fcd0f03cc7289d7624",
+    "gxb_backend/foundation/legacy_adapter.py": "c35f11f2538b43384ef7741081f8a8d9cf89bb65f6c6597da80576f8715299ae",
+    "gxb_backend/foundation/observability.py": "2e1d40b6ae0f2a8df83893c90cb3865ed551b3ff35b8b4f1b26468268cf76c39",
+    "gxb_backend/foundation/resource_keys.py": "410d0ce4054012c10916696dbc94d60432cce49f0c43c35d92e020c776a9fa84",
+    "gxb_backend/foundation/schema.py": "97849b5280cb3e7c30c271d9a789a54a2a94b19eb61bb92cd2df73e13ed7b03a",
+    "migrations/env.py": "4c075d2460f99ec9afd1e6007e388dc3b1ad20ea27cc2453d0b54b86ad7e05d9",
+    "migrations/versions/0001_pass339_i0_schema.py": "c87d1a48e6e39d09b202d97bb926818810741aa82785a80786f59d82cc805a41",
+    "deploy/postgresql/roles.sql": "353e539985837d77d6a686fc81a66c2b1382fdb29355d2bc2e2498f0c7fe7044",
+    "requirements/runtime.lock": "abec74c32c46d021eb17d669b5c40097816a8e5b75ea2f41081bc8c2188e6a03",
+    "requirements/test.lock": "fb899eed6d683ec04b790f87f467744918890bd674b351e109c30768771e0c1a",
+    "vendor/WHEELHOUSE.json": "79d0198405be5edbe2efa1ec8fa226ad73bada21462c0330826e607f8497529b",
+    "tools/bootstrap_python_env.py": "39b122c55bc98f28626d2778a1cf603f5df971124d81e01f63b5bb651b6163aa",
+    "tools/run_pass339_i0.py": "72dc57e1acfb8fe82982ae93d86bc8d96e65acc36205f936992cb8b4e0fc416f",
+    "tools/verify_pass339_runtime_invariants.py": "bccace1ae83268e3665f5a270b509e0f49bbef5414efe31d12a8fe2901d52da8"
+  },
+  "next": "Pass340 I1 client compatibility + ingress/auth perimeter after explicit authorization"
+}

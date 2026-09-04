@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "pass": "346.0",
+  "status": "I7_CLOSED",
+  "next_pass": "347.0",
+  "next_wave": "I8",
+  "scope": [
+    "runtime packaging and operator boot/stop/status orchestration",
+    "one-way PostgreSQL cutover under one Gunicorn gthread worker",
+    "retain process-global RLock",
+    "wire PostgreSQL StateRepository/identity/realtime/scheduler owners only after validated migration",
+    "enforce migration-run readiness and explicit TRAFFIC_OPEN point of no return",
+    "keep immutable JSON snapshot archival after traffic opens"
+  ],
+  "hard_gates": [
+    "explicit user authorization for I8",
+    "actual operator server_state inventory/snapshot/rehearsal when available",
+    "no JSON fallback after TRAFFIC_OPEN",
+    "no global RLock retirement or multi-worker widening before I9 concurrency proof",
+    "continue src_64/current-backend cross-checks and loop back on contradiction"
+  ],
+  "deferred": {
+    "I9": "concurrency proof, then RLock retirement, then gradual multi-worker scaling",
+    "I10": "stock-client foundation reconciliation/close"
+  }
+}

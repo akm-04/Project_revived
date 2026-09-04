@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "pass": "348.0",
+  "wave": "I9",
+  "status": "PASS",
+  "tests": {
+    "combined_passed": 309,
+    "combined_skipped": 1,
+    "skipped_reason": "dedicated PREPARED-maintenance smoke is intentionally gated",
+    "pre_retirement_database_suite": "5 passed",
+    "post_retirement_database_suite": "6 passed",
+    "live_integration": "12 passed, 1 skipped",
+    "gunicorn_worker_stages": {
+      "1": "PASS",
+      "2": "PASS",
+      "4": "PASS"
+    },
+    "scale_preflight_stages": {
+      "1": "PASS",
+      "2": "PASS",
+      "4": "PASS"
+    },
+    "compileall": "PASS",
+    "pass348_invariant_guard": "PASS"
+  },
+  "postgresql": {
+    "version": "16.15",
+    "isolation": "READ COMMITTED",
+    "alembic_head": "0008_pass347_i8",
+    "schema_change_in_i9": false,
+    "authority": "TRAFFIC_OPEN",
+    "usable_connections": 97
+  },
+  "concurrency": {
+    "postgres_runtime_global_request_rlock": "RETIRED",
+    "legacy_json_rlock": "RETAINED",
+    "default_http_workers": 1,
+    "proven_opt_in_http_workers": [2, 4],
+    "lost_updates": 0,
+    "allocator_collisions": 0,
+    "session_divergence": 0,
+    "deadlocks": 0,
+    "durable_claim_duplicates": 0
+  },
+  "source_backend_crosscheck": "PASS_NO_CONTRADICTION"
+}

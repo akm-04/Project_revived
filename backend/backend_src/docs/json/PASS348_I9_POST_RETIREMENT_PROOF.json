@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "pass": "348.0",
+  "gate": "RLOCK_RETIRED_AND_MULTIWORKER_PROVEN",
+  "status": "PASS",
+  "database_authority": "PostgreSQL TRAFFIC_OPEN",
+  "legacy_json_rlock": "UNCHANGED_AND_RETAINED_FOR_LEGACY_ONLY",
+  "postgres_runtime_request_rlock": "RETIRED",
+  "post_retirement_database_suite": {
+    "result": "6 passed",
+    "elapsed_seconds": 2.5
+  },
+  "gunicorn_stages": [
+    {
+      "workers": 1,
+      "result": "1 passed",
+      "elapsed_seconds": 9.17
+    },
+    {
+      "workers": 2,
+      "result": "1 passed",
+      "elapsed_seconds": 9.55
+    },
+    {
+      "workers": 4,
+      "result": "1 passed",
+      "elapsed_seconds": 9.59
+    }
+  ],
+  "gunicorn_proofs_per_stage": [
+    "every configured worker PID booted and the configured stage served HTTP health traffic",
+    "four stock-compatible SDK register/login -> MID18 -> MID1 -> MID17 flows succeeded",
+    "four independent accounts received four unique region-encoded player IDs",
+    "same-session concurrent MID1 transitions produced explicit 200/401/409 outcomes and exactly one live gameplay token",
+    "two concurrent same-player SAVE_STORY requests preserved both independent fields and advanced state_version at least twice",
+    "independent-player mutations completed successfully"
+  ],
+  "scale_preflight": {
+    "stages": [1, 2, 4],
+    "results": ["PASS", "PASS", "PASS"],
+    "postgresql_usable_connections": 97,
+    "required_connections": {
+      "1": 17,
+      "2": 21,
+      "4": 29
+    },
+    "rollback": "set GXB_HTTP_WORKERS=1 and restart gxb-http.service"
+  },
+  "bounded_runtime_repairs": [
+    "transaction-local relational PlayerState cache behavior",
+    "outer-transaction connection reuse for account projection",
+    "session/context IDs retained in request-local gameplay binding",
+    "explicit identity and transaction-conflict HTTP envelopes",
+    "mail dual-unique-index idempotency convergence"
+  ],
+  "full_live_integration": "12 passed, 1 PREPARED-only test intentionally skipped",
+  "final_combined_suite": "309 passed, 1 PREPARED-only test intentionally skipped",
+  "next": "Pass348 seal, then I10 stock-client foundation reconciliation"
+}

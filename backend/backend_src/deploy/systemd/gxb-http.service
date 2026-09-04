@@ -1,0 +1,22 @@
+[Unit]
+Description=Girls X Battle EOL HTTP backend
+After=network-online.target postgresql.service
+Requires=postgresql.service
+
+[Service]
+Type=simple
+User=gxb
+Group=gxb
+WorkingDirectory=/opt/gxb/backend
+EnvironmentFile=/etc/gxb/gxb.env
+RuntimeDirectory=gxb
+RuntimeDirectoryMode=0770
+RuntimeDirectoryPreserve=yes
+UMask=0007
+ExecStart=/opt/gxb/backend/.venv/bin/gunicorn -c deploy/gunicorn.conf.py gxb_backend.runtime.wsgi:app
+Restart=on-failure
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=gxb.target

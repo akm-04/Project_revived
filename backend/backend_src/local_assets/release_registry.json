@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "authority": "MID2_VERSION_AWARE_RELEASE_HISTORY",
+  "reset_generation": "Pass299 OTA runtime-success closure: canonical chain reset to 1.631.1 BULK_RESOURCE_BOOTSTRAP then 1.631.2+ cumulative Lua/code. Experimental 1.631.1-1.631.6 provenance remains in passmap, not active runtime history.",
+  "tracks": [
+    {
+      "track_id": "android-app-1.631.0",
+      "enabled": true,
+      "app_v": "1.631.0",
+      "platform": 3,
+      "accept_missing_platform": false,
+      "base_version": "1.631.0",
+      "policy": {
+        "catalog_migration_is_barrier": true,
+        "bulk_resource_bootstrap_is_barrier": true,
+        "published_releases_immutable": true,
+        "code_only_forbids_version_json": true,
+        "legacy_fallback_default": "DISABLED",
+        "required_initial_barrier": {
+          "version": "1.631.1",
+          "release_type": "BULK_RESOURCE_BOOTSTRAP"
+        }
+      },
+      "releases": [],
+      "ota_generation": "OTA_CANONICAL_V1_PASS299"
+    }
+  ],
+  "runtime_generation": "OTA_CANONICAL_V1_PASS299"
+}

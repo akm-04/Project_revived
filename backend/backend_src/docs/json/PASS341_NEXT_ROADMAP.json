@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "pass": "341.0",
+  "status": "I2_CLOSED_I3_AWAITS_AUTHORIZATION",
+  "next_pass": "342.0",
+  "next_wave": "I3",
+  "work": "Identity / session / context relational authority",
+  "frozen_requirements": [
+    "Account/credential/session/context repositories",
+    "SID/login/gameplay credential issuance, digest lookup, expiry and revocation",
+    "MID18/MID1 selected-context transaction under ResourceTransaction",
+    "region allocator/capacity plus unique (account, region) character creation",
+    "remove invalid-token sandbox path from the new auth adapter"
+  ],
+  "continuing_constraints": [
+    "Cross-check current src_64 and current backend before and during implementation.",
+    "Use Pass341 ResourceTransaction/receipt/outbox/job kernel rather than bypassing it.",
+    "Keep JSON gameplay PlayerState canonical; I3 does not perform the I4 PlayerState switch.",
+    "Keep one HTTP worker and the legacy global RLock.",
+    "Do not start RealtimeGateway/SchedulerWorker or consume outbox/jobs in I3.",
+    "In Standard Chat without a PostgreSQL daemon, use pure logic/mocks/offline DDL and clearly mark live PostgreSQL gates as not reproduced; do not attempt a connection unless a safe disposable database is explicitly available."
+  ]
+}

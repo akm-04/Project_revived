@@ -1,0 +1,46 @@
+{
+  "pass": "353.0",
+  "status": "CANDIDATE_PENDING_STOCK_RETEST",
+  "scope": "I10 OTA deployment-topology reconciliation after support bundle gxb-support-20260904T002903Z.zip",
+  "support_bundle_sha256": "f4b6e2138482a2853136bbce3fa6ec23b318d018c902845927cebf5feeec4aae",
+  "runtime_evidence": {
+    "authority": "TRAFFIC_OPEN",
+    "migration_runs_observed": 1,
+    "static_asset_root": "current_backend/local_assets",
+    "resource_effective_root": "current_backend/local_assets/res",
+    "required_initial_barrier": "1.631.1 BULK_RESOURCE_BOOTSTRAP",
+    "published_release_count": 0,
+    "mid2_clean_client_result": "no res/update payload; required_initial_barrier_unpublished logged four times",
+    "lazy_requests": [
+      "/res/10002001.png.2c677cd80519ccd42975806d73f4fe02 -> nginx 404",
+      "/res/120001001.png.cdff1bb76835e46908139033fd93d230 -> nginx 404",
+      "/res/10000.png.a4c453cc017c62fc37de6f75db3c359c -> nginx 404"
+    ]
+  },
+  "source_crosscheck": {
+    "current_src64_AssetDownload.lua_sha256": "78b5fe69e2989cd976ce1083b29f9679905f4970ea882ad21b38fdb2cc7ea616",
+    "current_src64_UpdateScene_64.lua_sha256": "9ef3c8bcf3bad26111ca218f596c34d04f2d5433218e0b5c7ae30b78975a2286",
+    "lazy_url_contract": "AssetDownload.getDownloadInfo_ constructs resDownloadUrl + basename + . + md5; directory path is not sent in URL.",
+    "mid2_contract": "UpdateScene_64 sends MID2 with app_v/platform/v/clean/full before gameplay and downloads returned volume resource URLs."
+  },
+  "root_causes": [
+    "Production portable start uses Gunicorn gxb_backend.runtime.wsgi:app; OTA auto-ensure existed only in gxb_backend.run.main(), which production never executes.",
+    "nginx /res alias assumes the requested basename+MD5 is a flat file under res/, bypassing ResourceGateway catalog mapping to res/web/... and therefore returns 404.",
+    "release_registry/update volumes lived below disposable current_backend/local_assets and could be erased by ordinary wrapper update."
+  ],
+  "candidate_decisions": [
+    "Run update_controller.py ensure once in the operator start path before any HTTP listener opens; failure is startup-fatal while the required barrier is missing/invalid.",
+    "Remove nginx /res flat-file alias so /res requests proxy to the catalog-aware backend ResourceGateway.",
+    "Wrapper v7 persists release_registry.json, update_manifest.json, update_controller_state.json and updates/ under runtime/ota and symlinks them into each disposable extraction.",
+    "No PostgreSQL remigration, no gameplay data change, no additional Lua modification in Pass353.",
+    "V2 design begins from control/session/shard/global authority, with Python V1 retained as behavioral oracle."
+  ],
+  "candidate_hashes": {
+    "VERSION.json": "735c7f6dac6bfee568402294fc5cbce1d53b6141ef63eabbb2dd0e03168c7f9f",
+    "gxb-dev.sh": "d5fbbfdc0f08454de194f4dd259fd67238cdd9ecf83db9b0abc1e45a36a93a85",
+    "tools/workspace/gxb_backend_workspace.sh": "8fb2751135e7669ce24d3f8719263283bc8a1540accce1fefb358edd69ab8f47",
+    "tests/i10/test_pass353_ota_topology.py": "2ca84d9602e1bdaa1ac07c23d6d35c62431141916e549f90dacc94ca5e8450ba",
+    "docs/architecture/GXB_V2_ARCHITECTURE_CHARTER_PASS353.md": "63ab0fd99b82d5360ded2472b794e0611f9f9c5ca25d8a57e38bc281bab7c59e"
+  },
+  "stock_runtime_acceptance": "PENDING"
+}

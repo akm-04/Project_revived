@@ -1,0 +1,127 @@
+{
+  "assessment": "Pass344 implements frozen I5 realtime/outbox/liveness semantics while preserving current src_64, JSON gameplay authority, Pass343 StateRepository/RLock, and later-wave boundaries.",
+  "authorities": {
+    "baseline_backend_archive_sha256": "c9a56c0b076be129c9a7c3b08936716f8414ec6424ba8075b148fde5fe9c3fd9",
+    "formal_design": "Pass337",
+    "implementation_baseline": "sealed Pass343 I4"
+  },
+  "backend_runtime_rechecked": [
+    {
+      "fact": "I4 StateRepository strangler and global RLock remain byte-identical to sealed Pass343.",
+      "path": "gxb_backend/state/repository.py",
+      "sha256": "af7ba15e484dd44e74e93c7b6f90cdc1de66f0c6e9a20d93f4e8d3b807818412"
+    },
+    {
+      "fact": "Legacy JSON gameplay authority remains byte-identical and canonical.",
+      "path": "gxb_backend/state/multiuser_database.py",
+      "sha256": "af43acc4a8e9d133f3c99fe65846459cab92aebb3f505b2d8725f947ee68fde3"
+    },
+    {
+      "fact": "Mature dispatcher remains byte-identical; dedicated gateway is not wired into gameplay dispatch.",
+      "path": "gxb_backend/dispatch/engine_dispatcher.py",
+      "sha256": "11a8aa7718d8d2abdc99d73b7653cdea4b81bf20518e867db14ff59608d42b07"
+    },
+    {
+      "fact": "I1 default-deny/auth scope perimeter remains byte-identical.",
+      "path": "gxb_backend/auth/perimeter.py",
+      "sha256": "685984f6b5723c465b42eee9fa4546083c28b74744eb644e1bf6e28d32a3b3bc"
+    }
+  ],
+  "bounded_adaptations": [
+    "bounded hard-close fallback after private control drain",
+    "realtime-only delivery-class outbox claiming",
+    "durable context+role+room invalidation replacing transient connection-id authority",
+    "restart/failure probes and historical I4 migration pin"
+  ],
+  "client_runtime_rechecked": [
+    {
+      "fact": "Pass340 contextEpoch stale-response/retry fence, logical client_op_id reuse and MID1 token installation remain unchanged.",
+      "path": "local_assets/src_64/app/common/network/Backend.lua",
+      "sha256": "79ebbb6452bc62e764142d4dc04e5d024ead78f54562c0144921143ca6ad5df4"
+    },
+    {
+      "fact": "MID1 single-flight behavior remains unchanged.",
+      "path": "local_assets/src_64/app/scenes/LoadingScene.lua",
+      "sha256": "06da664086d167fa6be0401defb59d27411716543a648fabe76f81d4d0de9e84"
+    },
+    {
+      "fact": "MID18 account-scope credential/request shape remains unchanged.",
+      "path": "local_assets/src_64/app/windows/LoginWindow.lua",
+      "sha256": "f6fb06e51dca4e16ecd8755c7ae67c8000da1cc6b728d3e44f1bb3ed230eeb2e"
+    },
+    {
+      "fact": "Context transition ordering remains unchanged.",
+      "path": "local_assets/src_64/app/windows/SwitchItem.lua",
+      "sha256": "5f423c19ea8d58119709ed60e812dc526093d754a300c16cc9c9e815457b6fa3"
+    },
+    {
+      "fact": "Private realtime control MID and stock MID constants remain unchanged.",
+      "path": "local_assets/src_64/app/common/network/mid.lua",
+      "sha256": "11d4036ef68cdce66810bc02d5dfc7226a9c4286388bfd5a6cb2bc1a21f96a18"
+    }
+  ],
+  "i5_boundary": {
+    "canonical_switch": false,
+    "default_gateway_runtime_wired": false,
+    "global_rlock_changed": false,
+    "json_playerstate_default_canonical": true,
+    "multiworker_changed": false,
+    "runtime_files": 495,
+    "runtime_modified_files": [
+      "gxb_backend/realtime/contracts.py",
+      "gxb_backend/realtime/control.py",
+      "gxb_backend/realtime/server.py",
+      "gxb_backend/realtime/session.py"
+    ],
+    "runtime_root_sha256": "4a76b2101a70a5d95f2517496916223b42adf2c922295d968b8bae73ddc86039",
+    "scheduler_or_mail_runtime_wired": false
+  },
+  "i5_kernel_and_new_modules": [
+    {
+      "path": "gxb_backend/transactions/outbox.py",
+      "sha256": "0bd772df90ef2c910a744255b8c3935b06382829130b4f973cba104be871f36e"
+    },
+    {
+      "path": "gxb_backend/realtime/durable.py",
+      "sha256": "9ee1f63658402fbc76e19ffb2d2282bb92b57673e287b902a67ede40169aee6f"
+    },
+    {
+      "path": "gxb_backend/realtime/gateway.py",
+      "sha256": "22b9079485192dc7bd439e4c83c0dc03491e0583b16e248e63ffb9f8ef636443"
+    },
+    {
+      "path": "gxb_backend/realtime/identity.py",
+      "sha256": "6fd62b1165a949eb8afcc29f93b08baa232a6294c72a6e5e9bdd3a28d9a616cf"
+    },
+    {
+      "path": "gxb_backend/realtime/liveness.py",
+      "sha256": "b40d06e75bd3c124ad75815a0ac62572162829a95a376ca29369d915eeaf22d1"
+    },
+    {
+      "path": "gxb_backend/realtime/wakeup.py",
+      "sha256": "3b29835cad5eea8bcd24e1e7d43b163776a159ac6391ed3bc0ea863f864a8a47"
+    }
+  ],
+  "i5_runtime_changed": [
+    {
+      "path": "gxb_backend/realtime/contracts.py",
+      "sha256": "be5821d94c6821de148ee552828fdf2929decb396d3f9c08d6fd8f7ddd87725e"
+    },
+    {
+      "path": "gxb_backend/realtime/control.py",
+      "sha256": "f91aadf089735a0152e0921287f1d7fdbf8ff20a3d6d94ced6d70fe64aa8b1e2"
+    },
+    {
+      "path": "gxb_backend/realtime/server.py",
+      "sha256": "cc30d1ef75a66e4d5e7f094f8b80cdd080d302286a17b6ab851c99abc78399e7"
+    },
+    {
+      "path": "gxb_backend/realtime/session.py",
+      "sha256": "c2cfaaafc76b394c686631cee8ca5022950c642ca0e1c650f1a1d3c5a85ef484"
+    }
+  ],
+  "pass": "344.0",
+  "schema_version": 1,
+  "status": "PASS_NO_MATERIAL_DESIGN_CONTRADICTION",
+  "wave": "I5"
+}

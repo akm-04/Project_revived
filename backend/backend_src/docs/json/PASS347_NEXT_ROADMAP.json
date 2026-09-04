@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "pass": "347.0",
+  "status": "I8_CLOSED",
+  "next_pass": "348.0",
+  "next_wave": "I9",
+  "scope": [
+    "prove independent-player parallelism without shared in-process mutation",
+    "prove same-player serialization and state_version conflict behavior",
+    "prove session/context transition races and stale-token rejection",
+    "prove receipt/outbox/job/mail idempotency under concurrent attempts",
+    "inject process crash/restart around commit and durable dispatch fences",
+    "exercise multiple HTTP processes against one PostgreSQL authority",
+    "retire the process-global RLock only after every proof is green",
+    "increase Gunicorn workers gradually with rollback-to-one-worker operational control"
+  ],
+  "hard_gates": [
+    "src_64 and current backend remain continuing evidence",
+    "no RLock retirement merely because one-worker I8 passed",
+    "no multi-worker widening before transaction/concurrency proof",
+    "targeted research/design loopback on any material contradiction",
+    "PostgreSQL remains sole canonical gameplay authority; no JSON fallback or dual writes"
+  ],
+  "deferred": {"I10":"stock-client foundation reconciliation and close"}
+}

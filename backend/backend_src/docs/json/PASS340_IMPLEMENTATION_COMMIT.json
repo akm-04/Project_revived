@@ -1,0 +1,78 @@
+{
+  "schema_version": 1,
+  "pass": "340.0",
+  "backend_version": "0.54.0",
+  "status": "I1_IMPLEMENTED_ACCEPTED",
+  "roadmap_authority": "Pass337 final Design; Pass339 I0 accepted baseline",
+  "scope": [
+    "stock-client context epoch/retry/single-flight/private-control compatibility patch",
+    "explicit ingress authentication scope registry and default deny",
+    "temporary legacy selected-context binding so caller region never chooses actor",
+    "credential-safe logging and fail-closed malformed ingress",
+    "bounded I1 unit/static/mocked auth/restart/regression harness"
+  ],
+  "non_scope": [
+    "PostgreSQL gameplay tables/canonical writes",
+    "ResourceTransaction/receipts/outbox/scheduled-job kernel",
+    "durable relational identity/session/context authority or rotated gameplay credential",
+    "dedicated RealtimeGateway/SchedulerWorker",
+    "global RLock retirement",
+    "additional HTTP workers or production cutover"
+  ],
+  "baseline": {
+    "artifact": "gxb-backend-v0.53.0-pass339.0",
+    "archive_sha256": "427531cb796c37bd01f40b14596a7923b33a631b65e781e26e8cdc0ad25333ff",
+    "runtime_root_sha256": "c38fd209b108fba88e2eb2024bc96b586b8a16d4ca521ca434e7b88e3eefea65"
+  },
+  "implementation_sha256": {
+    "gxb_backend/auth/__init__.py": "48ba2300bb8dc884d2f28ce67436e2ee670349c58b61b5a97caf52b1b5d7ea7a",
+    "gxb_backend/auth/perimeter.py": "685984f6b5723c465b42eee9fa4546083c28b74744eb644e1bf6e28d32a3b3bc",
+    "gxb_backend/realtime/control.py": "ab89cc41be58551ae779a7677f9abe2af2046c89ecb1ca15aa568203f1fa4fab",
+    "gxb_backend/dispatch/engine_dispatcher.py": "11a8aa7718d8d2abdc99d73b7653cdea4b81bf20518e867db14ff59608d42b07",
+    "gxb_backend/handlers/bootstrap.py": "b59f62036018810f2b998e1e2cb61d6bfef503b0eb1fa36618db60a2d906a12c",
+    "gxb_backend/handlers/compatibility.py": "293b50c9daedf11b1455f747982c4fd6aa01338a7adf397b10a9e39702649b44",
+    "gxb_backend/handlers/system.py": "65668f90680cef5a85a0e18518e1d994cf40c97432e05c101d2f8e0490dc2b86",
+    "gxb_backend/observability/runtime_logger.py": "ca7a4cbd07b5cb9297c0d8b2dac40a0e9d00fa29bac91764a63b701865257651",
+    "gxb_backend/observability/undecoded_request_capture.py": "5de0a7c93b0a6c61b7849c7577a299eecf86adf0d97aad172a96f509342616d9",
+    "gxb_backend/state/multiuser_database.py": "af43acc4a8e9d133f3c99fe65846459cab92aebb3f505b2d8725f947ee68fde3",
+    "gxb_backend/state/repository.py": "61853b02f839c1be193c45353152de256e73fc261db3c7877d3d569f2ebd8c8a",
+    "gxb_backend/transport/routes_engine.py": "0be1716d0766dbf1469e1fc4b054ebb56f7f146efda0fee895b7cadaf3f8f8fe",
+    "gxb_backend/transport/routes_sdk.py": "031d5b51b5c66ab447c6801a072a5b06bb78e377e597a851b5cf7d6a19423663",
+    "local_assets/src_32/app/common/network/Backend.lua": "79ebbb6452bc62e764142d4dc04e5d024ead78f54562c0144921143ca6ad5df4",
+    "local_assets/src_32/app/common/network/mid.lua": "11d4036ef68cdce66810bc02d5dfc7226a9c4286388bfd5a6cb2bc1a21f96a18",
+    "local_assets/src_32/app/scenes/LoadingScene.lua": "06da664086d167fa6be0401defb59d27411716543a648fabe76f81d4d0de9e84",
+    "local_assets/src_32/app/windows/SwitchItem.lua": "5f423c19ea8d58119709ed60e812dc526093d754a300c16cc9c9e815457b6fa3",
+    "local_assets/src_64/app/common/network/Backend.lua": "79ebbb6452bc62e764142d4dc04e5d024ead78f54562c0144921143ca6ad5df4",
+    "local_assets/src_64/app/common/network/mid.lua": "11d4036ef68cdce66810bc02d5dfc7226a9c4286388bfd5a6cb2bc1a21f96a18",
+    "local_assets/src_64/app/scenes/LoadingScene.lua": "06da664086d167fa6be0401defb59d27411716543a648fabe76f81d4d0de9e84",
+    "local_assets/src_64/app/windows/SwitchItem.lua": "5f423c19ea8d58119709ed60e812dc526093d754a300c16cc9c9e815457b6fa3",
+    "tests/i1/test_auth_perimeter.py": "d13f734b841f15cbc2bcdd9643522c0f768353ca5594a4d65289e77302fa8e18",
+    "tests/i1/test_client_patch.py": "1813840b2e753c309db177737715c86e6c9428a82263684205cf6843e996c85a",
+    "tests/i1/test_pass340_observability.py": "55f8d696808719551d20b93a0531bdcf510aa8d53a58287e79422eac19fb1b06",
+    "tests/i1/test_realtime_control.py": "19043b46892950bbe83b3da8ae34da98a7a0e665a0c7d9d5255a9d4a6e3f5e48",
+    "tools/run_pass340_i1.py": "5a66e40c30e32a20257f9df73cb80c99cf77c2f85d5737937dad51114622d89c",
+    "tools/selftest_pass340_i1_restart_auth.py": "d0cf7384aa08a594ecb0173f42ed352649b4b4e3e868fadb8492e7ec0c97d1fe",
+    "tools/verify_pass340_runtime_delta.py": "a0d4b1bda0331063a7eb4bc3b9ea777a578283f3135c0154447a3b63f817db2a",
+    "PASS340_RUNTIME_DELTA_MANIFEST.json": "c0c05f7edaa6c6b6f9e4e474af0306a119d763157b4cbec5515739a58b22a3f6",
+    "VERSION.json": "3e7502cebde8a634f123204cacf8923dd4e51221f2731625e7e177fc802be2e0",
+    "gxb_backend/version.py": "52a45131e71225830769dd66b3fdec50e983c4ef81382582704c2e9dfc438388",
+    "pyproject.toml": "50f65d3c82115352485c03b65ba599a5e5a7a56745e21444bb51ffce78d90c1d"
+  },
+  "runtime_delta": {
+    "manifest": "PASS340_RUNTIME_DELTA_MANIFEST.json",
+    "root_sha256": "d90e6b6e73bf1bebb760a51762191e04e6d53ff55065e125cd1c989736e176f1",
+    "content_bytes": 83555607,
+    "modified": 12,
+    "added": 9,
+    "deleted": 0
+  },
+  "validation": {
+    "i1_tests": "34/34",
+    "foundation_tests": "19/19",
+    "historical_controlling": "14/14",
+    "pass278_replacement": "PASS",
+    "compileall": "PASS",
+    "postgresql_attempted": false
+  },
+  "next": "Pass341 I2 PostgreSQL transaction kernel after explicit authorization"
+}

@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "pass": "347.1",
+  "wave": "I8_OPERATIONAL_REPAIR",
+  "status": "PASS_NO_MATERIAL_DESIGN_CONTRADICTION",
+  "formal_design": "Pass337",
+  "baseline": "gxb-backend-v0.61.0-pass347.0",
+  "source_facts": [
+    {"path":"local_assets/src_64/app/common/network/Backend.lua","sha256":"79ebbb6452bc62e764142d4dc04e5d024ead78f54562c0144921143ca6ad5df4","fact":"contextEpoch stale-response/retry fence and logical operation identity remain deployed"},
+    {"path":"local_assets/src_64/app/scenes/LoadingScene.lua","sha256":"06da664086d167fa6be0401defb59d27411716543a648fabe76f81d4d0de9e84","fact":"MID1 single-flight and context-token installation order remain deployed"},
+    {"path":"local_assets/src_64/app/windows/LoginWindow.lua","sha256":"f6fb06e51dca4e16ecd8755c7ae67c8000da1cc6b728d3e44f1bb3ed230eeb2e","fact":"account-to-gameplay transition remains MID18 then MID1"},
+    {"path":"local_assets/src_64/app/windows/SwitchItem.lua","sha256":"5f423c19ea8d58119709ed60e812dc526093d754a300c16cc9c9e815457b6fa3","fact":"region switch remains an account-scope context transition"},
+    {"path":"local_assets/src_64/app/common/network/mid.lua","sha256":"11d4036ef68cdce66810bc02d5dfc7226a9c4286388bfd5a6cb2bc1a21f96a18","fact":"TCP_LOGIN 32771 and private control MID 65000 remain compatible"},
+    {"path":"source_evidence/pass345_src64_mail/Mailbox.lua","sha256":"3232f5c4b7c8dc60bf2c76249813d684959e4970040890ea2d0a3f544516ba14","fact":"mail identity remains compound (is_region,id)"},
+    {"path":"source_evidence/pass345_src64_mail/MailboxWindow.lua","sha256":"f53ec450208d799ba8954ba50ce4f6a92793664ea2f85190c281132bea2b7a7d","fact":"one-key requests preserve separate normal_ids and region_ids"},
+    {"path":"source_evidence/pass345_src64_mail/MailItem.lua","sha256":"c51de51edab94af4b02f45d84ffa64cbcbf4e611cbd3c28fba973cdd35a78b94","fact":"read/claim projections remain server authoritative"}
+  ],
+  "assessment": "The repair changes admission/startup packaging only. It preserves the frozen relational ownership model, mature gameplay core, client compatibility patch, and every rechecked src_64 fact. No targeted research or design loopback was required."
+}

@@ -1,0 +1,93 @@
+{
+  "schema_version": 1,
+  "pass": "351.0",
+  "wave": "I10",
+  "status": "CANDIDATE_PENDING_STOCK_RETEST",
+  "parent": "Pass350 v0.64.0 migration-region reconciliation candidate",
+  "support_bundle": {
+    "name": "gxb-support-20260903T165423Z.zip",
+    "sha256": "6816cca728eb62dfedc82bf705782f9c724e2cf122a2f7f442be29fac8eda949"
+  },
+  "runtime_confirmations_before_fix": [
+    "Pass350 AdminRoot resolves migrated player 19425385 in region 194.",
+    "User spent resources and confirmed persistence across client restart and backend restart.",
+    "New registration account 20000003 triggered overlapping MID1 requests and player directory row 19425387 without materialized JSONB.",
+    "Normal migrated account 20000001 requested region 194 although preserved character 19700001 belongs to region 197; this remains a separate region-selection reconciliation item."
+  ],
+  "issue_a_nil_payload": {
+    "symptom": "Tip: Engine request payload could not be decoded; client logged out during lifecycle/account-switch activity.",
+    "captured_form_body_len": 11,
+    "captured_form_body_sha256": "6eb8670af47d3a5db66170fa08e2514d0e4c3f92ad6256d43e1844f502b4fba0",
+    "exact_body": "payload=nil",
+    "decision": "Only decoded raw payload value exactly 'nil' is a logged no-dispatch success. All other undecodable ingress remains MALFORMED_ENGINE_REQUEST HTTP400."
+  },
+  "issue_b_reentrant_mid1": {
+    "symptom": "Immediately after registration: gameplay credential was revoked; repeated PlayerAggregateNotMaterialized: 19425387.",
+    "evidence": "Two RETRIEVE_TOKEN MID1 requests arrived concurrently with the same SDK/account session and region 194.",
+    "root_cause": "Context/directory selection committed before mature PlayerState JSONB materialization. A second MID1 could supersede the first active context/credential while both observed an unmaterialized player directory row.",
+    "decision": [
+      "Derive gameplay bearer deterministically from the supplied account bearer digest + opaque context UUID, so same-context retry reconstructs the same raw bearer without storing raw secrets.",
+      "If the same account session already has an active context for the same region/player and its derived credential is live, return that context/bearer instead of superseding/revoking it.",
+      "Probe player JSONB materialization during selection so directory-only stubs retain first-login semantics.",
+      "During runtime.context_bootstrap, catch PlayerAggregateNotMaterialized under canonical player lock and materialize exactly once; this also repairs abandoned stubs on next MID1."
+    ]
+  },
+  "non_changes": [
+    "No PostgreSQL schema migration.",
+    "No change to Pass350 sandbox region194/player-id remap.",
+    "No relaxation of gameplay credential validation outside same-context re-entrant MID1.",
+    "No generic success for malformed payloads other than exact stock sentinel nil.",
+    "No cross-region cloning/redirect for normal accounts.",
+    "No JSON fallback, RLock restoration, realtime/scheduler/mail change."
+  ],
+  "validation": {
+    "focused": "32 passed before broad regression expansion",
+    "i3_i4_i10_controlling": "83 passed before current-test provenance self-heal",
+    "compileall": "PASS",
+    "flask_route_runtime": "Not executable in construction sandbox because system Python lacks Flask; exact decoder predicate and route policy are covered source-level, real stock retest remains acceptance gate.",
+    "nonintegration_full": "302 passed with packaged Flask/psycopg pure-Python dependencies loaded from wheelhouse where compatible with construction Python 3.13",
+    "historical_test_self_heal": "Current tests now accept only Pass349-recorded Backend.lua/auth-perimeter hashes; historical Pass340/343/344 manifests are unchanged."
+  },
+  "next": "Update existing TRAFFIC_OPEN dev database without wipe. Retest: account 20000003 should self-heal and login; account switch/logout should no longer popup on payload=nil. Capture support bundle. Then separately reconcile normal-account region selection if needed.",
+  "authorized_delta_from_pass350_files": [
+    "README.md",
+    "VERSION.json",
+    "docs/json/PASS351_I10_STOCK_LIFECYCLE_RECONCILIATION.json",
+    "docs/pass-reports/PASS351_I10_STOCK_LIFECYCLE_RECONCILIATION.md",
+    "gxb_backend/identity/credentials.py",
+    "gxb_backend/identity/service.py",
+    "gxb_backend/persistence/repositories.py",
+    "gxb_backend/runtime/composition.py",
+    "gxb_backend/runtime/state_repository.py",
+    "gxb_backend/transport/decoder.py",
+    "gxb_backend/transport/routes_engine.py",
+    "tests/i10_test_stock_nil_payload.py",
+    "tests/i3/test_credentials.py",
+    "tests/i3/test_identity_state_machine.py",
+    "tests/i3/test_src64_contract.py",
+    "tests/i4/test_repositories.py",
+    "tests/i5/test_i5_migration_and_scope.py",
+    "tests/i6/test_schema_migration_scope.py",
+    "tests/i8/test_source_and_mail_contract.py",
+    "tools/verify_pass351_i10_invariants.py",
+    "tools/verify_portable_dev_package.py"
+  ],
+  "candidate_hashes": {
+    "gxb_backend/identity/credentials.py": "76e2ce9b8ce45f1e9e7dd3e48ee6d40d0bd4a562061fc057a073afed2aa2c044",
+    "gxb_backend/identity/service.py": "c789965f62c658d53dd6f53be986d2de42787f8880e76c83464e0423de0ba23c",
+    "gxb_backend/persistence/repositories.py": "33c35f1e98fb1b31a6e73ad03302700beb2d14ccbf400ecf34ab100da70278f6",
+    "gxb_backend/runtime/composition.py": "7261bcebf4301442d3a277305e3332accc02f5bdc757024c47a2f00fb3c4c82a",
+    "gxb_backend/runtime/state_repository.py": "17bb4e692a0d26af5ce77a9767ec32f4ddba862499d1e6680037f52bdc7f8b8f",
+    "gxb_backend/transport/decoder.py": "a77b9e3c3971bb3b93b35ad538e089f42f83ef4b28d2ac749732cbe1ff8f627d",
+    "gxb_backend/transport/routes_engine.py": "a0e939ce761335de1b12424707da6713f3e35cc2fc9fcebb3531e4e333be45b8",
+    "tests/i10_test_stock_nil_payload.py": "742c1215a48a94ceb2ef9cd1a008980c9b7e4dffe8847e09122eceb6db6af5bc",
+    "tests/i3/test_credentials.py": "f6f3cb155f11336b6783076414fd953a0523ce8fe8d79ba963e518105e153429",
+    "tests/i3/test_identity_state_machine.py": "5c39e6eb1e31051ca3032a31052b0f3778a82bab1bc21a00d466a56d9c989a99",
+    "tests/i3/test_src64_contract.py": "167931db19d92a5d6cdd4e7810da55d2f0f2ea214981ff967abc169d36d24e04",
+    "tests/i4/test_repositories.py": "141b87a31fedb684f0c7acaee552772739b211a8a0af295146d3d76640472d57",
+    "tests/i5/test_i5_migration_and_scope.py": "4a86730e9177fd10a6af495911d3e2a4e24c4cdac96383917106e53aa8a53652",
+    "tests/i6/test_schema_migration_scope.py": "ff837c7d35f91bbf7a8ee936dfc798d8834e7db14f8e3b04e74728e90cdb1c6f",
+    "tests/i8/test_source_and_mail_contract.py": "d1dacef50598f4ae1ca5b68f2db6c05e642c9036234d3e62f60705a06d71ac08",
+    "tools/verify_pass351_i10_invariants.py": "103d62810bb988c13d0d20d18ab6e0614b21016de18e8c5247a468c23354cdb3"
+  }
+}

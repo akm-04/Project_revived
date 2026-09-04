@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "pass": "351.0",
+  "scope": "portable packaging / operator workspace only",
+  "status": "REPAIRED",
+  "problem": "portable-dev1 ZIP stored executable launchers such as gxb-dev.sh and bin/gxb-stack with mode 0644, causing Permission denied after workspace extraction",
+  "repair": [
+    "portable-dev2 stores shell/Python scripts and bin launchers with executable mode bits",
+    "companion workspace wrapper auto-heals executable permissions after every extraction/update"
+  ],
+  "runtime_semantics_changed": false,
+  "zrok_pipeline_changed": false
+}

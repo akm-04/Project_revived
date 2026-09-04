@@ -1,0 +1,24 @@
+{
+  "authorization": "User explicitly authorized continuation to the next phase after Pass343 sealing.",
+  "continuing_constraints": [
+    "Start only from sealed Pass343 backend/HOT authority.",
+    "Do not switch PostgreSQL gameplay canonical authority in I5; cutover remains I8.",
+    "Keep default JSON gameplay runtime and legacy global RLock; retirement/multiworker remain I9.",
+    "Do not start SchedulerWorker/projection/relational-mail execution early; I6 owns those.",
+    "Continue current src_64/current backend cross-checks during implementation.",
+    "Without a safe disposable PostgreSQL server, use mocks/fakes/offline SQL and do not attempt a live connection."
+  ],
+  "frozen_requirements": [
+    "Dedicated Python RealtimeGateway owns custom AMF3 TCP sockets; mature gameplay services do not move into the gateway.",
+    "Authenticate TCP_LOGIN against the context/session-aware authority and enforce newest context + connection role wins.",
+    "Consume durable PostgreSQL outbox intent with polling as correctness path and LISTEN/NOTIFY only as wakeup optimization.",
+    "Implement liveness sweeper, context/session revocation invalidation and private realtime control/rebootstrap path.",
+    "Durable business state must never depend on socket presence or successful publication; postcommit delivery is outside canonical mutation transaction."
+  ],
+  "next_pass": "344.0",
+  "next_wave": "I5",
+  "pass": "343.0",
+  "schema_version": 1,
+  "status": "I4_CLOSED_I5_AUTHORIZED_NOT_STARTED",
+  "work": "RealtimeGateway / durable postcommit / liveness integration"
+}

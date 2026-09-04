@@ -1,0 +1,7 @@
+[Unit]
+Description=Girls X Battle EOL private backend
+Requires=gxb-http.service gxb-realtime.service gxb-scheduler.service
+After=postgresql.service network-online.target
+
+[Install]
+WantedBy=multi-user.target

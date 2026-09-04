@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "pass": "347.0",
+  "wave": "I8",
+  "status": "PASS",
+  "tests": {
+    "offline_passed": 280,
+    "offline_postgresql_skipped": 5,
+    "full_live_postgresql_passed": 285,
+    "compileall": "PASS",
+    "stock_like_http_smoke": "PASS",
+    "relational_mail_smoke": "PASS",
+    "gunicorn_process_startup": "PASS",
+    "realtime_gateway_startup": "PASS",
+    "scheduler_projection_idle_startup": "PASS",
+    "legacy_json_restart_after_open": "BLOCKED",
+    "database_cutover_reversal": "BLOCKED"
+  },
+  "postgresql": {
+    "version": "16.15",
+    "isolation": "READ COMMITTED",
+    "alembic_head": "0008_pass347_i8",
+    "representative_migration": "VALIDATED",
+    "traffic_open_simulation": "PASS",
+    "candidate_source_content_root": "62370df8770eea6883f6670470dd47067c03bf8a20aa27a367f0bc6e63628116",
+    "candidate_source_manifest_digest": "12ed23e843c2a5992dfe895c53e8e70ff7851d3a148a8750ace842a64961abbc"
+  },
+  "authority": {
+    "production_runtime": "PostgreSQL",
+    "playerstate": "versioned JSONB aggregate",
+    "http_workers": 1,
+    "global_rlock_retained": true,
+    "json_dual_write": false,
+    "json_fallback_after_open": false,
+    "actual_operator_server_state_supplied": false
+  },
+  "pass346_self_heal": {
+    "authoritative_offline_count": 273,
+    "incorrect_narrative_count": 276,
+    "resolution": "Pass346 stage-validation JSON plus Pass347 baseline recount win; the prose count was a clerical typo"
+  }
+}

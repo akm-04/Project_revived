@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "pass": "346.0",
+  "wave": "I7",
+  "artifact": "gxb-backend-v0.60.0-pass346.0",
+  "status": "SEALED_AFTER_GUARDS",
+  "baseline": {
+    "artifact": "gxb-backend-v0.59.0-pass345.0",
+    "sha256": "0fcd4e65c0238d5de2f38e7f1d056e3cc1dd24a6dd7719ab76401bb8d1a92c31"
+  },
+  "implemented": [
+    "strict immutable source inventory/snapshot/manifest",
+    "offline relational importer and migration_runs state machine",
+    "credential retirement and legacy PBKDF2 verifier preservation",
+    "player JSONB/receipt/mail/account-global extraction and equivalence validation",
+    "allocator lifts and deterministic mail remaps",
+    "logical dump/restore validation tooling",
+    "pgBackRest/WAL/PITR operator rehearsal evidence",
+    "live SQLAlchemy Connection repository repair"
+  ],
+  "gates": {
+    "i7_complete": true,
+    "i8_authorized": false,
+    "traffic_open": false,
+    "json_runtime_authority_changed": false,
+    "global_rlock_changed": false,
+    "multiworker_changed": false
+  },
+  "next": "Pass347 I8 runtime packaging and one-way cutover under one Gunicorn worker plus legacy RLock, only after explicit authorization"
+}

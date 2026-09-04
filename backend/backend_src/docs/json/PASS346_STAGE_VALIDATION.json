@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "pass": "346.0",
+  "wave": "I7",
+  "status": "PASS",
+  "tests": {
+    "offline_total": 273,
+    "i7_tests": 12,
+    "live_postgresql_integration": 2,
+    "legacy_controlling_regressions": 14,
+    "compileall": "PASS",
+    "pass346_invariant_guard": "PASS"
+  },
+  "postgresql": {
+    "version": "16.15",
+    "data_checksums": true,
+    "isolation": "READ COMMITTED",
+    "alembic_head": "0007_pass346_i7",
+    "representative_migration": "VALIDATED",
+    "logical_dump_restore": "VALIDATED",
+    "pgbackrest_version": "2.50",
+    "wal_archive_check": "PASS",
+    "full_backup_label": "20260902-144420F",
+    "pitr_marker_expectation": [1, 2, 3],
+    "pitr_marker_observed": [1, 2, 3],
+    "post_target_marker_absent": 4,
+    "promoted_timeline": 2
+  },
+  "failure_injection": {
+    "case": "receipt migration identity exceeds target bound",
+    "process_exit_nonzero": true,
+    "migration_status": "FAILED",
+    "accounts_after_failure": 0,
+    "players_after_failure": 0,
+    "receipts_after_failure": 0,
+    "traffic_open_at_null": true
+  },
+  "authority": {
+    "json_playerstate_still_canonical": true,
+    "traffic_open": false,
+    "global_rlock_retained": true,
+    "multiworker_enabled": false,
+    "actual_operator_server_state_supplied": false
+  }
+}

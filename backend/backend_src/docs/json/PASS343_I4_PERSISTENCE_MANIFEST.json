@@ -1,0 +1,63 @@
+{
+  "baseline": {
+    "archive_sha256": "44b740d5f741622fd3fc81720b2961a8e4f5c46af061fa354129213b9a0dab73",
+    "backend_version": "0.56.0",
+    "legacy_runtime_files": 495,
+    "legacy_runtime_root_sha256": "d90e6b6e73bf1bebb760a51762191e04e6d53ff55065e125cd1c989736e176f1",
+    "pass": "342.0"
+  },
+  "canonical_switch": false,
+  "current_runtime": {
+    "content_bytes": 83556375,
+    "files": 495,
+    "modified_baseline_files": [
+      "gxb_backend/state/repository.py"
+    ],
+    "root_sha256": "acf9220097059037be2699dac33640757dd1a853fadb10df9e7b99c427a70eaa"
+  },
+  "global_rlock_changed": false,
+  "json_playerstate_canonical_changed": false,
+  "pass": "343.0",
+  "postgres_playerstore_runtime_wired": false,
+  "postgresql_attempted": false,
+  "schema_version": 1,
+  "sha256_by_path": {
+    "PASS343_RUNTIME_DELTA_MANIFEST.json": "e938bc657a96a79d9ac5c05689368f7598af5c5b47ed4324ac4c0c52b5e1926f",
+    "gxb_backend/foundation/schema.py": "3c515159c6902a1642214dbbba309775cbedab8d6c4c1c5c4e72a650a71ab8b1",
+    "gxb_backend/persistence/__init__.py": "354872b240a2aedffca819e74861fcea9d5ace164986ef18da65235c1034e793",
+    "gxb_backend/persistence/codec.py": "deda317afd6a8b47e1f0cccfb10fe5c7d3bddaf922c228e057b09bff20dbb8da",
+    "gxb_backend/persistence/locking.py": "54bc152b907790b3bdf94e2de7e475b4f278784f0f03c046d0ac5a5ca0552c13",
+    "gxb_backend/persistence/repositories.py": "6d9d002c08060fb886d465a046df32b748eb93c8cc32eb5e12546ba494da52b6",
+    "gxb_backend/persistence/schema.py": "48e00b2073424e9f59a4b315aa7edaf861bfd18277a297cc60fa339ac19f0acf",
+    "gxb_backend/persistence/shared.py": "352fad8efad1ede17eb2103769443ebc4721a7089989d39631952e7c171b70ae",
+    "gxb_backend/persistence/store.py": "c7e652b5d8932d153bf9b43c28cc3d0cf0109b3ff8a0f64082e23e7bef5ee722",
+    "gxb_backend/state/repository.py": "af7ba15e484dd44e74e93c7b6f90cdc1de66f0c6e9a20d93f4e8d3b807818412",
+    "migrations/env.py": "ad3361a3ecf4445b9a8b25064728a7158df8625d4d5bed2efb2d1dede69bc72b",
+    "migrations/versions/0004_pass343_i4_player_persistence.py": "e00a89e7d29ec731f51bb2a7f4767c0b55d1689d9903d4d27412783c8e9bae20",
+    "tests/i3/test_schema_and_migration.py": "024926b7828276850b3484907e1a8389db04490487de5aa4838a1f8a8c21b31d",
+    "tests/i4/test_codec.py": "8c8e6ea4e0e9c96eeb7f3ebac5ca3a5e4da493846776816884f95c2078de04f4",
+    "tests/i4/test_i4_schema_migration.py": "2c2715ea8c8c33174d76a92b1099e5f68ae5747716697aec6e2d2f0a007b058a",
+    "tests/i4/test_locking.py": "fe90942e0ed01625da927414849a6e05534656cfee20aa580c3c7fd73a35c85e",
+    "tests/i4/test_repositories.py": "4746c7fdaf04c5e4f2ba63aafc49f6659ea9e7f17962edc4a1039b19a953fd8c",
+    "tests/i4/test_src64_and_runtime_contract.py": "b9810f4c0b54ab65ee73fcbdb79b145d4838b5ece070f76725b9ce7a0a208909",
+    "tests/i4/test_store_and_subuow.py": "62c87174edc195f1bd168e27299f1720e31fcf1b858521996ced72bcc420d2cc",
+    "tests/i4/test_strangler_and_shared.py": "237f6b3ad6943f5f1a73227d33bcbeb50ccd99ab6a62a121166612fc6a9c5252",
+    "tools/run_pass343_i4.py": "485bc0391244cb91d3b504de9384395ce25978c6376dc3ea5a5027354e455c0e",
+    "tools/verify_pass343_i4_invariants.py": "8076c5b4b26753fba61eef01bf1f0a50c577a9344c4f9ba00be8e0fb3555dff1"
+  },
+  "src64_changed": false,
+  "status": "I4_IMPLEMENTED_ACCEPTED",
+  "validation": {
+    "combined": "167/167",
+    "compileall": "PASS",
+    "foundation": "19/19",
+    "historical_controlling": "14/14 segmented",
+    "i1": "34/34",
+    "i2": "39/39",
+    "i3": "48/48",
+    "i4": "27/27",
+    "invariant": "PASS",
+    "replacement": "PASS"
+  },
+  "wave": "I4"
+}

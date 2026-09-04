@@ -1,0 +1,77 @@
+{
+  "schema_version": 1,
+  "pass": "349.0",
+  "status": "I10_RECONCILIATION_CANDIDATE_NEEDS_STOCK_RETEST",
+  "symptom": "Pressing Login produces Tip: Invalid or expired gameplay credential before MID1 RETRIEVE_TOKEN.",
+  "runtime_evidence": {
+    "support_bundle": "gxb-support-20260903T153731Z.zip",
+    "support_bundle_sha256": "07bf35b7395af2b3534373ecf58b1aa6b3b4ec14742ee0c42d09170e53684171",
+    "observed_sequence": [
+      "MID20480",
+      "SDK package-info",
+      "MID2",
+      "SDK anonymous MID65284",
+      "MID2864 -> HTTP 401 CREDENTIAL_INVALID"
+    ],
+    "mid1_observed": false,
+    "request_2864": {
+      "unique_key": "mtspy",
+      "token_present": false,
+      "region_present": false
+    }
+  },
+  "source_facts": [
+    {
+      "source": "raw all-assest-rechecked-1 src_64/app/model/SelfPlayer.lua",
+      "fact": "getAbtestGroupByKey sends MID2864 with unique_key only."
+    },
+    {
+      "source": "raw all-assest-rechecked-1 src_64/app/common/network/Backend.lua",
+      "fact": "Before MID1, token_ and region_ have not been assigned; nil fields are omitted from the JSON payload."
+    },
+    {
+      "source": "raw all-assest-rechecked-1 src_64/app/scenes/LoadingScene.lua",
+      "fact": "MID1 RETRIEVE_TOKEN is the later login/context selection request carrying sid, login_token, and selected region."
+    },
+    {
+      "source": "Pass251/253 runtime evidence",
+      "fact": "Observed stock startup order includes MID7 -> MID2864 -> MID1."
+    }
+  ],
+  "backend_contradiction": [
+    "Pass348 AuthScopeRegistry PUBLIC_MIDS omitted 2864 and defaulted all other known MIDs to SELECTED_PLAYER.",
+    "PostgresStateRepository.request_scope duplicated the same public set and attempted gameplay-token resolution for MID2864.",
+    "Therefore a source-proven pre-MID1 request was forced to present a gameplay credential that cannot exist until MID1 succeeds."
+  ],
+  "implementation_decision": "Treat MID2864 as PUBLIC_BOOTSTRAP compatibility traffic because the stock client emits it before MID1 and the private-server handler is context-free/deterministic (mtspy -> B). This does not assert the official server physical/auth policy.",
+  "changes": [
+    "gxb_backend/auth/perimeter.py: add MID2864 to PUBLIC_MIDS.",
+    "gxb_backend/state/repository.py: use AuthScopeRegistry.PUBLIC_MIDS instead of duplicated hardcoded set.",
+    "gxb_backend/runtime/state_repository.py: use AuthScopeRegistry.PUBLIC_MIDS instead of duplicated hardcoded set.",
+    "local_assets/src_32/app/common/network/Backend.lua and src_64 counterpart: include GET_PLAYER_GROUP_BY_KEY in context-bootstrap bypass so the Pass340 client fence does not suppress this source-proven pre-MID1 lookup.",
+    "tests: add I10 regression and update frozen-baseline exceptions only for the explicitly authorized Pass349 deltas."
+  ],
+  "non_changes": [
+    "No relaxation for any other selected-player MID.",
+    "No JSON fallback or dual authority.",
+    "No session TTL/credential semantics change.",
+    "No PostgreSQL schema change.",
+    "No realtime change."
+  ],
+  "validation": {
+    "targeted_tests": "46 passed, 1 environment-only Flask test deselected in Python 3.13 sandbox; dedicated I10 tests 2/2 passed",
+    "compileall": "PASS"
+  },
+  "raw_source_sha256": {
+    "Backend.lua": "95378e2b0be8180df6de27e9e430c630bcfe46c080e1f91ef5f6d74bdbb1b840",
+    "LoadingScene.lua": "01c0e71ceee0f08f747552af66bd0f907ebfff1257be58ec480d3606a88f4a17",
+    "SelfPlayer.lua": "163d5893c9522ada412c2b9c4748a80757660fccdf03c8f72cb6edf0838b8eb4"
+  },
+  "candidate_hashes": {
+    "gxb_backend/auth/perimeter.py": "d80482c305d5e47b23d3035233e4d46dd88aa1acba623e321598b4a662b5fc78",
+    "gxb_backend/state/repository.py": "2feacce217e7baa4441aa331f54160cbfe8dc7c5f410ac616125a64cc38f162e",
+    "gxb_backend/runtime/state_repository.py": "f8c319fff2d6f7e231589a17aa11cf58b4bb3e3e2b5962ae966803288710e891",
+    "local_assets/src_64/app/common/network/Backend.lua": "c6822eaf9b10e677ea8c8edb14f23013d7d58364f4524c32169ee893acc471ea"
+  },
+  "delta_from_pass348_portable_dev5_files": 13
+}

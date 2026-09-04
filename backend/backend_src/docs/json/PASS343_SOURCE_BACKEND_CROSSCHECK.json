@@ -1,0 +1,79 @@
+{
+  "assessment": "Pass343 implements the frozen I4 persistence strangler without changing current src_64 wire behavior, switching canonical gameplay persistence, wiring the PostgreSQL player store into EngineDispatcher, retiring the global RLock, or widening workers.",
+  "authorities": {
+    "baseline_backend_archive_sha256": "44b740d5f741622fd3fc81720b2961a8e4f5c46af061fa354129213b9a0dab73",
+    "formal_design": "Pass337",
+    "implementation_baseline": "Pass342 I3"
+  },
+  "backend_runtime_rechecked": [
+    {
+      "fact": "I4 intentionally adds PlayerStateStore delegation seam while retaining process-global RLock and default legacy JSON store.",
+      "path": "gxb_backend/state/repository.py",
+      "sha256": "af7ba15e484dd44e74e93c7b6f90cdc1de66f0c6e9a20d93f4e8d3b807818412"
+    },
+    {
+      "fact": "Legacy JSON authority/session substrate remains byte-identical and canonical by default.",
+      "path": "gxb_backend/state/multiuser_database.py",
+      "sha256": "af43acc4a8e9d133f3c99fe65846459cab92aebb3f505b2d8725f947ee68fde3"
+    },
+    {
+      "fact": "Mature dispatcher remains byte-identical; PostgreSQL player store is not wired.",
+      "path": "gxb_backend/dispatch/engine_dispatcher.py",
+      "sha256": "11a8aa7718d8d2abdc99d73b7653cdea4b81bf20518e867db14ff59608d42b07"
+    },
+    {
+      "fact": "I1 auth/default-deny perimeter remains byte-identical.",
+      "path": "gxb_backend/auth/perimeter.py",
+      "sha256": "685984f6b5723c465b42eee9fa4546083c28b74744eb644e1bf6e28d32a3b3bc"
+    }
+  ],
+  "bounded_adaptations": [
+    "Pass334 deterministic receipt/mail extraction identities and exact semantic accounting were added before freeze.",
+    "Outer-transaction PostgreSQL store binding now tracks expected state_version independently per player to prevent cross-player version bleed.",
+    "I3 migration regression was pinned to revision 0003 so later Alembic heads do not rewrite historical test meaning.",
+    "Pytest importlib mode is used in the combined runner because I3 and I4 legitimately both contain test_locking.py."
+  ],
+  "client_runtime_rechecked": [
+    {
+      "fact": "Pass340 contextEpoch stale-response/retry fence, logical client_op_id reuse and MID1 token installation remain unchanged.",
+      "path": "local_assets/src_64/app/common/network/Backend.lua",
+      "sha256": "79ebbb6452bc62e764142d4dc04e5d024ead78f54562c0144921143ca6ad5df4"
+    },
+    {
+      "fact": "MID1 single-flight behavior remains unchanged.",
+      "path": "local_assets/src_64/app/scenes/LoadingScene.lua",
+      "sha256": "06da664086d167fa6be0401defb59d27411716543a648fabe76f81d4d0de9e84"
+    },
+    {
+      "fact": "MID18 account-scope credential/request shape remains unchanged.",
+      "path": "local_assets/src_64/app/windows/LoginWindow.lua",
+      "sha256": "f6fb06e51dca4e16ecd8755c7ae67c8000da1cc6b728d3e44f1bb3ed230eeb2e"
+    },
+    {
+      "fact": "Context transition ordering remains unchanged.",
+      "path": "local_assets/src_64/app/windows/SwitchItem.lua",
+      "sha256": "5f423c19ea8d58119709ed60e812dc526093d754a300c16cc9c9e815457b6fa3"
+    },
+    {
+      "fact": "Private realtime control MID and stock MID constants remain unchanged.",
+      "path": "local_assets/src_64/app/common/network/mid.lua",
+      "sha256": "11d4036ef68cdce66810bc02d5dfc7226a9c4286388bfd5a6cb2bc1a21f96a18"
+    }
+  ],
+  "i4_boundary": {
+    "canonical_switch": false,
+    "global_rlock_changed": false,
+    "json_playerstate_default_canonical": true,
+    "legacy_runtime_files": 495,
+    "legacy_runtime_modified_files": [
+      "gxb_backend/state/repository.py"
+    ],
+    "multiworker_changed": false,
+    "postgres_playerstore_runtime_wired": false,
+    "runtime_root_sha256": "acf9220097059037be2699dac33640757dd1a853fadb10df9e7b99c427a70eaa"
+  },
+  "pass": "343.0",
+  "schema_version": 1,
+  "status": "PASS_NO_MATERIAL_DESIGN_CONTRADICTION",
+  "wave": "I4"
+}

@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "pass": "348.0",
+  "gate": "PRE_RLOCK_RETIREMENT",
+  "status": "PASS",
+  "baseline": "Pass347.1 / backend v0.61.1",
+  "database": "fresh disposable clone of the Pass347.1 TRAFFIC_OPEN rehearsal database",
+  "legacy_authenticated_request_rlock": "RETAINED",
+  "pytest": {
+    "command": "python -m pytest -q tests/integration/test_postgresql_i9_concurrency.py",
+    "result": "5 passed",
+    "elapsed_seconds": 2.21
+  },
+  "proofs": [
+    "independent PLAYER rows overlap without database-global serialization",
+    "same PLAYER row serializes and preserves both version increments",
+    "reversed multi-player inputs canonicalize and complete without deadlock",
+    "twelve concurrent region allocations produce unique region-encoded IDs and an exact allocator cursor",
+    "two same-session context selections converge to one active context and one valid gameplay credential",
+    "concurrent semantic receipts converge to one durable row",
+    "concurrent identical mail deliveries converge after dual-unique-index conflict handling",
+    "concurrent scheduled-job creation converges on the dedupe key",
+    "four outbox and job claimers own twenty distinct rows each through SKIP LOCKED",
+    "process death before commit rolls back while process death after commit preserves claimable outbox work"
+  ],
+  "repair_discovered": {
+    "component": "gxb_backend.mail.repository.MailRepository.deliver",
+    "issue": "an identical concurrent insert could encounter the protocol-identity unique index before the named delivery-key conflict target",
+    "resolution": "suppress either uniqueness race, then verify the visible winner against the full semantic delivery identity",
+    "architecture_impact": "bounded idempotency repair; no design loopback required"
+  },
+  "next_gate": "retire only the PostgreSQL runtime request RLock; retain legacy JSON and subsystem-local locks"
+}

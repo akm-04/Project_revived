@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "pass": "347.1",
+  "wave": "I8",
+  "status": "PASS_AFTER_OPERATIONAL_GATE_REPAIR",
+  "tests": {
+    "focused_offline_passed": 11,
+    "focused_offline_skipped": 1,
+    "full_offline_passed": 284,
+    "full_offline_postgresql_skipped": 6,
+    "prepared_maintenance_smoke_passed": 1,
+    "full_live_postgresql_passed": 289,
+    "full_live_prepared_only_skipped": 1,
+    "compileall": "PASS",
+    "prepared_stock_like_http_smoke": "PASS",
+    "gunicorn_prepared_process_startup": "PASS_LOOPBACK_OVERRIDE",
+    "gunicorn_postopen_process_startup": "PASS_LOOPBACK_OVERRIDE",
+    "packaged_unix_socket_static_invariant": "PASS",
+    "realtime_gateway_postopen_startup": "PASS",
+    "scheduler_projection_postopen_idle": "PASS",
+    "legacy_json_restart_after_open": "BLOCKED",
+    "database_cutover_reversal": "BLOCKED"
+  },
+  "postgresql": {
+    "version": "16.15",
+    "isolation": "READ COMMITTED",
+    "alembic_head": "0008_pass347_i8",
+    "representative_migration": "VALIDATED",
+    "migration_run_id": "5ef3885e-2950-45cf-a784-4d42c8775197",
+    "traffic_open": "PASS",
+    "marker_retained_after_open": true,
+    "verified_separate_public_release": true,
+    "candidate_source_content_root": "62370df8770eea6883f6670470dd47067c03bf8a20aa27a367f0bc6e63628116",
+    "candidate_source_manifest_digest": "12ed23e843c2a5992dfe895c53e8e70ff7851d3a148a8750ace842a64961abbc"
+  },
+  "environment_limitations": {
+    "af_unix_creation": "DENIED_BY_WORK_SANDBOX_EPERM",
+    "dynamic_compensation": "Gunicorn process startup proven pre/post-open using an explicit loopback bind override; production config remained Unix-socket based"
+  },
+  "authority": {
+    "production_runtime": "PostgreSQL",
+    "playerstate": "versioned JSONB aggregate",
+    "http_workers": 1,
+    "global_rlock_retained": true,
+    "json_dual_write": false,
+    "json_fallback_after_open": false,
+    "actual_operator_server_state_supplied": false
+  }
+}

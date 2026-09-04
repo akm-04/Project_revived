@@ -1,0 +1,77 @@
+{
+  "assessment": "No current src_64/backend fact conflicts with Pass337. I3 establishes an unwired relational identity directory/credential/context authority candidate while JSON PlayerState, global RLock and current runtime behavior remain unchanged.",
+  "authorities": {
+    "baseline_backend_archive_sha256": "fa00f309e7015a6954524c18a85abf913b1a7dacba1d8290b9cb6a0d49919c8d",
+    "formal_design": "Pass337",
+    "implementation_baseline": "Pass341 I2"
+  },
+  "backend_runtime_rechecked": [
+    {
+      "fact": "Legacy JSON request_scope and process-global RLock unchanged.",
+      "path": "gxb_backend/state/repository.py",
+      "sha256": "61853b02f839c1be193c45353152de256e73fc261db3c7877d3d569f2ebd8c8a"
+    },
+    {
+      "fact": "Legacy JSON selected-context/session substrate unchanged; I3 candidate authority remains unwired.",
+      "path": "gxb_backend/state/multiuser_database.py",
+      "sha256": "af43acc4a8e9d133f3c99fe65846459cab92aebb3f505b2d8725f947ee68fde3"
+    },
+    {
+      "fact": "Relational identity adapter/service remains unwired from mature gameplay dispatcher.",
+      "path": "gxb_backend/dispatch/engine_dispatcher.py",
+      "sha256": "11a8aa7718d8d2abdc99d73b7653cdea4b81bf20518e867db14ff59608d42b07"
+    },
+    {
+      "fact": "I1 scope classifier/default-deny perimeter remains byte-identical.",
+      "path": "gxb_backend/auth/perimeter.py",
+      "sha256": "685984f6b5723c465b42eee9fa4546083c28b74744eb644e1bf6e28d32a3b3bc"
+    }
+  ],
+  "bounded_integrity_adaptation": "Added composite relational bindings and defensive resolver mismatch checks after audit found the initial candidate relied too heavily on application-code coherence. This strengthens Pass337 identity invariants without changing scope.",
+  "client_runtime_rechecked": [
+    {
+      "fact": "Pass340 contextEpoch stale-response fence, manual retry/client_op_id preservation and MID1 token installation remain unchanged; current I3 tests derive preservation from embedded runtime manifest.",
+      "path": "local_assets/src_64/app/common/network/Backend.lua",
+      "sha256": "79ebbb6452bc62e764142d4dc04e5d024ead78f54562c0144921143ca6ad5df4"
+    },
+    {
+      "fact": "MID1 single-flight and sid/login_token/region selection request remain unchanged.",
+      "path": "local_assets/src_64/app/scenes/LoadingScene.lua",
+      "sha256": "06da664086d167fa6be0401defb59d27411716543a648fabe76f81d4d0de9e84"
+    },
+    {
+      "fact": "MID18 account-scope SDK credential pair and manual SID-only path remain source-grounded.",
+      "path": "local_assets/src_64/app/windows/LoginWindow.lua",
+      "sha256": "f6fb06e51dca4e16ecd8755c7ae67c8000da1cc6b728d3e44f1bb3ed230eeb2e"
+    },
+    {
+      "fact": "Context transition ordering remains unchanged.",
+      "path": "local_assets/src_64/app/windows/SwitchItem.lua",
+      "sha256": "5f423c19ea8d58119709ed60e812dc526093d754a300c16cc9c9e815457b6fa3"
+    },
+    {
+      "fact": "MID constants/private control contract unchanged.",
+      "path": "local_assets/src_64/app/common/network/mid.lua",
+      "sha256": "11d4036ef68cdce66810bc02d5dfc7226a9c4286388bfd5a6cb2bc1a21f96a18"
+    }
+  ],
+  "i3_boundary": {
+    "canonical_switch": false,
+    "deleted": 0,
+    "legacy_runtime_files": 495,
+    "legacy_runtime_root_sha256": "d90e6b6e73bf1bebb760a51762191e04e6d53ff55065e125cd1c989736e176f1",
+    "pre_metadata_added_files": 23,
+    "pre_metadata_modified_baseline_files": 3,
+    "runtime_wired": false
+  },
+  "pass": "342.0",
+  "schema_version": 1,
+  "source_grounded_region_facts": {
+    "advertised_region_ids": "1..200",
+    "caller_region_selects_actor": false,
+    "fresh_allocator_shape": "region_id*100000+1",
+    "region_125_name": "Deep Valley"
+  },
+  "status": "PASS_NO_MATERIAL_DESIGN_CONTRADICTION",
+  "wave": "I3"
+}

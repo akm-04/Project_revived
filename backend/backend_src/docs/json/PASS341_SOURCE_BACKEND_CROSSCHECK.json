@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "pass": "341.0",
+  "wave": "I2",
+  "status": "PASS_NO_MATERIAL_DESIGN_CONTRADICTION",
+  "authorities": {
+    "formal_design": "Pass337",
+    "implementation_baseline": "Pass340 I1",
+    "baseline_backend_archive_sha256": "837c6f015bf853adc6caf9624bfa21579ac39db8978dd2126bb8498e2c581547"
+  },
+  "client_runtime_rechecked": [
+    {
+      "path": "local_assets/src_64/app/common/network/Backend.lua",
+      "sha256": "79ebbb6452bc62e764142d4dc04e5d024ead78f54562c0144921143ca6ad5df4",
+      "fact": "Pass340 context epoch/retry/client_op_id compatibility patch unchanged."
+    },
+    {
+      "path": "local_assets/src_64/app/scenes/LoadingScene.lua",
+      "sha256": "06da664086d167fa6be0401defb59d27411716543a648fabe76f81d4d0de9e84",
+      "fact": "Pass340 MID1 single-flight patch unchanged."
+    },
+    {
+      "path": "local_assets/src_64/app/windows/SwitchItem.lua",
+      "sha256": "5f423c19ea8d58119709ed60e812dc526093d754a300c16cc9c9e815457b6fa3",
+      "fact": "Pass340 context-transition ordering unchanged."
+    },
+    {
+      "path": "local_assets/src_64/app/common/network/mid.lua",
+      "sha256": "11d4036ef68cdce66810bc02d5dfc7226a9c4286388bfd5a6cb2bc1a21f96a18",
+      "fact": "Pass340 private realtime control MID unchanged."
+    }
+  ],
+  "backend_runtime_rechecked": [
+    {
+      "path": "gxb_backend/state/repository.py",
+      "sha256": "61853b02f839c1be193c45353152de256e73fc261db3c7877d3d569f2ebd8c8a",
+      "fact": "Legacy process-global RLock and JSON request_scope authority unchanged."
+    },
+    {
+      "path": "gxb_backend/state/multiuser_database.py",
+      "sha256": "af43acc4a8e9d133f3c99fe65846459cab92aebb3f505b2d8725f947ee68fde3",
+      "fact": "Legacy JSON selected-context/session substrate unchanged."
+    },
+    {
+      "path": "gxb_backend/dispatch/engine_dispatcher.py",
+      "sha256": "11a8aa7718d8d2abdc99d73b7653cdea4b81bf20518e867db14ff59608d42b07",
+      "fact": "Transaction kernel remains unwired from mature gameplay dispatcher."
+    }
+  ],
+  "i2_boundary": {
+    "modified_baseline_files": 4,
+    "added_pre_metadata_files": 22,
+    "deleted": 0,
+    "legacy_runtime_files": 495,
+    "legacy_runtime_root_sha256": "d90e6b6e73bf1bebb760a51762191e04e6d53ff55065e125cd1c989736e176f1",
+    "canonical_switch": false
+  },
+  "assessment": "No current src_64/backend fact conflicts with Pass337. I2 remains an unwired transaction kernel; I3 identity/session/context authority is not pulled forward."
+}

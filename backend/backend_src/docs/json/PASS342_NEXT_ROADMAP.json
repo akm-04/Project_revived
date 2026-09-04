@@ -1,0 +1,23 @@
+{
+  "authorization": "User explicitly authorized continuation to the next phase after Pass342 sealing.",
+  "continuing_constraints": [
+    "Start only from the sealed Pass342 backend/HOT authority.",
+    "Do not perform production/canonical cutover in I4; one-way traffic cutover remains I8.",
+    "Keep one HTTP worker and the legacy global RLock until I9 concurrency proof/retirement.",
+    "Do not start RealtimeGateway or SchedulerWorker consumption early.",
+    "In Standard Chat without a disposable PostgreSQL server, use offline DDL, exact-library logic, mocks/fakes and deterministic concurrency/fault models; do not attempt a live connection unless explicitly safe/available."
+  ],
+  "frozen_requirements": [
+    "Add versioned PlayerState JSONB aggregate with typed relational metadata/state_version while preserving unknown extension data and round-trip semantics.",
+    "Introduce PostgreSQL StateRepository/adapter strangler behind existing domain APIs rather than rewriting mature gameplay handlers.",
+    "Keep PlayerUnitOfWork as a player sub-UoW under ResourceTransaction and use explicit state_version conflict checks.",
+    "Implement explicit shared/account-global repository seams only where Pass337 assigns ownership; do not steal local write ownership with projections.",
+    "Keep stock-client/wire behavior stable and continually cross-check current src_64/current backend."
+  ],
+  "next_pass": "343.0",
+  "next_wave": "I4",
+  "pass": "342.0",
+  "schema_version": 1,
+  "status": "I3_CLOSED_I4_AUTHORIZED_NOT_STARTED",
+  "work": "PlayerState JSONB + StateRepository strangler/shared repositories"
+}

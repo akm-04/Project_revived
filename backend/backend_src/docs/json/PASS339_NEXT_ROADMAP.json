@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "pass": "339.0",
+  "status": "I0_CLOSED_I1_AWAITS_AUTHORIZATION",
+  "next_pass": "340.0",
+  "next_wave": "I1",
+  "work": "client compatibility + ingress/auth perimeter",
+  "frozen_requirements": [
+    "contextEpoch stale-response/retry fence before global response processing",
+    "MID1 single-flight repair",
+    "preserve one logical client_op_id across manual retry",
+    "private realtime control MID",
+    "account-scope MID18/MID1 transition and context-bound ordinary gameplay credential",
+    "caller region must not choose the actor"
+  ],
+  "continuing_constraints": [
+    "Cross-check current src_64 and Pass299 before and during implementation.",
+    "Stop for targeted research if new evidence materially threatens the frozen design.",
+    "Keep JSON canonical, one HTTP worker, and the legacy global RLock.",
+    "Do not start I2 transaction/receipt/outbox tables early."
+  ]
+}

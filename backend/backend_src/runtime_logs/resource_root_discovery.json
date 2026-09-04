@@ -1,0 +1,21 @@
+{
+  "generated_at": 1788434649,
+  "configured_roots": [
+    "/workspace/scratch/6467767a84ca/work347/backend/local_assets/res"
+  ],
+  "effective_roots": [],
+  "archives": [],
+  "archive_index_paths": 0,
+  "archive_errors": [],
+  "discovery_depth": 10,
+  "legacy_fallback": {
+    "enabled": false,
+    "allowlist": "/workspace/scratch/6467767a84ca/work347/backend/data/resource_catalog/legacy_fallback_allowlist.json",
+    "allowlist_entries": 0,
+    "allowlist_error": "",
+    "old_res": "/workspace/scratch/6467767a84ca/work347/backend/local_assets/old_res",
+    "old_res_available": false,
+    "policy": "DENY_BY_DEFAULT_EXACT_ALLOWLIST_ONLY"
+  },
+  "note": "Current-resource discovery never searches old_res. Current res/web paths may still use current-store layout aliases. Historical old_res is consulted only after an exact current-path+MD5 allowlist match and exact donor provenance verification."
+}
