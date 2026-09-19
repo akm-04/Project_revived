@@ -1,0 +1,38 @@
+PASS460 R3 INTEGRATED FOUNDATION REALITY CHECK
+STATUS: R3_GREEN_LOCAL_FOUNDATION_STILL_RED
+Scope: R3A RF-008 + R3B RF-009 + R3C RF-010/RF-011.
+
+R3A verdict: GREEN_LOCAL
+- AMF input-derived allocations and output construction are bounded.
+- cyclic/deep/output/integer abuse fails closed.
+- stock/current-client/Pass353 wire compatibility remains green locally.
+- fuzz and race evidence green.
+
+R3B verdict: GREEN_LOCAL
+- process connection admission, absolute pre-auth deadline, authority query deadlines and client-idle retirement are bounded.
+- bounded per-connection single writer and minimal dispatcher seam are wired.
+- stock 600-second heartbeat compatibility is preserved.
+- EX-05 multi-process ownership remains explicitly open.
+
+R3C verdict: GREEN_LOCAL_SERVER_EVIDENCE_MODEL
+- production tracking is aggregate-only when capture is disabled.
+- acceptance capture is finite and health-aware.
+- one run cannot be composed from unrelated run/context/connection evidence.
+- server intent/write is distinct from client observation/consumption.
+- server evidence alone cannot satisfy stock-client/Lua acceptance.
+- quiescence requires healthy capture and correlated live WORLD/SERVICE client state.
+
+Integrated regression:
+- gofmt: PASS
+- go test ./...: PASS (disposable Go 1.23 compatibility clone)
+- go vet ./...: PASS
+- targeted race: PASS
+- R0/R1A/R1B/R2A/R2B/R2C/R2D/R3A/R3B/R3C validators: PASS
+- I1/I2/I3/I4 validators: PASS
+- I5 validator: FAIL ONLY RF-015 EconomyBootstrapContributor + temporal bootstrap, intentionally unrepaired until R4/R5
+- oracle/current-source/Pass353 differential checks: PASS
+- schema/query ownership, dependency, sqlc, kernel querytext, resolved SBOM: PASS
+- aggregate tools/check.sh: RED (1 check), exactly RF-015; no R3 regression class
+
+Conclusion:
+R3 implementation is complete and locally green. R3 does not make the overall foundation green. R4-R7 and RF-013..RF-019/RF-023/RF-024 remain repair work. I6 stays BLOCKED_UNTIL_R7_GREEN. Stock-client acceptance remains DEFERRED_TO_W2_NOT_GREEN.

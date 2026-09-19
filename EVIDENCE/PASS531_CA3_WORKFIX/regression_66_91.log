@@ -1,0 +1,52 @@
+[66/91] gxb.local/backend/v2/internal/foundation/ids
+ok  	gxb.local/backend/v2/internal/foundation/ids	0.002s
+[67/91] gxb.local/backend/v2/internal/foundation/lockkey
+ok  	gxb.local/backend/v2/internal/foundation/lockkey	0.002s
+[68/91] gxb.local/backend/v2/internal/foundation/obligation
+ok  	gxb.local/backend/v2/internal/foundation/obligation	0.003s
+[69/91] gxb.local/backend/v2/internal/foundation/observability
+ok  	gxb.local/backend/v2/internal/foundation/observability	0.004s
+[70/91] gxb.local/backend/v2/internal/foundation/operation
+ok  	gxb.local/backend/v2/internal/foundation/operation	0.002s
+[71/91] gxb.local/backend/v2/internal/foundation/policy
+ok  	gxb.local/backend/v2/internal/foundation/policy	0.003s
+[72/91] gxb.local/backend/v2/internal/foundation/receipt
+ok  	gxb.local/backend/v2/internal/foundation/receipt	0.002s
+[73/91] gxb.local/backend/v2/internal/foundation/replaycatalog
+ok  	gxb.local/backend/v2/internal/foundation/replaycatalog	0.004s
+[74/91] gxb.local/backend/v2/internal/foundation/tx
+ok  	gxb.local/backend/v2/internal/foundation/tx	(cached)
+[75/91] gxb.local/backend/v2/internal/projection/activity
+?   	gxb.local/backend/v2/internal/projection/activity	[no test files]
+[76/91] gxb.local/backend/v2/internal/projection/backpack
+ok  	gxb.local/backend/v2/internal/projection/backpack	0.002s
+[77/91] gxb.local/backend/v2/internal/projection/hero
+ok  	gxb.local/backend/v2/internal/projection/hero	0.002s
+[78/91] gxb.local/backend/v2/internal/projection/lobby
+ok  	gxb.local/backend/v2/internal/projection/lobby	0.053s
+[79/91] gxb.local/backend/v2/internal/projection/ota
+?   	gxb.local/backend/v2/internal/projection/ota	[no test files]
+[80/91] gxb.local/backend/v2/internal/projection/pet
+ok  	gxb.local/backend/v2/internal/projection/pet	0.003s
+[81/91] gxb.local/backend/v2/internal/projection/publication
+?   	gxb.local/backend/v2/internal/projection/publication	[no test files]
+[82/91] gxb.local/backend/v2/internal/projection/publicplayer
+?   	gxb.local/backend/v2/internal/projection/publicplayer	[no test files]
+[83/91] gxb.local/backend/v2/internal/projection/ranking
+?   	gxb.local/backend/v2/internal/projection/ranking	[no test files]
+[84/91] gxb.local/backend/v2/internal/projection/realtimeview
+?   	gxb.local/backend/v2/internal/projection/realtimeview	[no test files]
+[85/91] gxb.local/backend/v2/internal/protocol/amf3
+ok  	gxb.local/backend/v2/internal/protocol/amf3	0.003s
+[86/91] gxb.local/backend/v2/internal/protocol/httpedge
+ok  	gxb.local/backend/v2/internal/protocol/httpedge	0.008s
+[87/91] gxb.local/backend/v2/internal/protocol/limits
+?   	gxb.local/backend/v2/internal/protocol/limits	[no test files]
+[88/91] gxb.local/backend/v2/internal/protocol/mids
+ok  	gxb.local/backend/v2/internal/protocol/mids	0.002s
+[89/91] gxb.local/backend/v2/internal/protocol/observe
+?   	gxb.local/backend/v2/internal/protocol/observe	[no test files]
+[90/91] gxb.local/backend/v2/internal/protocol/realtime
+ok  	gxb.local/backend/v2/internal/protocol/realtime	0.003s
+[91/91] gxb.local/backend/v2/internal/protocol/wire
+?   	gxb.local/backend/v2/internal/protocol/wire	[no test files]

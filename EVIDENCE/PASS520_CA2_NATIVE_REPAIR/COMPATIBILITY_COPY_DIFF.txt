@@ -1,0 +1,5 @@
+COMPATIBILITY_COPY_ONLY
+Canonical source: Pass520 repair candidate.
+Disposable adaptation: go.mod + .go-version only, from canonical Go 1.26.0/toolchain go1.27.1/.go-version 1.27.1 to local Go 1.23.2.
+Observed diff after tests: [.go-version, go.mod]
+No source, migration, generated query, test, assertion, package selection, or product configuration changed.

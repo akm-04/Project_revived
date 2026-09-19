@@ -1,0 +1,89 @@
+I2 ORACLE WIRE CHECK: PASS
+current Backend/mid/functions + APK QuickHTTP hashes and frozen wire facts verified
+I3 ORACLE BOOTSTRAP CHECK: PASS
+verified current MID18/MID1 selection, full/existing-owner gate, player-region formula, stock switch teardown and token replacement
+I4 ORACLE WAVE-S CHECK: PASS
+verified current src_64 UpdateScene MID20480/MID2 + public MID7/MID2864 + MID1 log_url/server_time/default sidebands + room discovery/TCP_LOGIN/room-entered/heartbeat/reconnect + 20018/1304/Lua truthiness; Pass353 corroborates bootstrap/realtime shapes only
+I5 ORACLE PLAYER-CORE CHECK: PASS
+verified current src_64 player/story/mail/stack/task/redeem facts; old-client MID230 stability; Pass353 mechanisms corroborative only
+I6A SOURCE ORACLE CHECK: PASS
+verified candidate-bound current/historical client hashes and reload/time source shape; no server reachability/reset semantics inferred
+I6B SOURCE ORACLE CHECK: PASS
+verified current/historical MID229/MID234/bootstrap/error-path hashes and source shape; no Activity mechanics/reset semantics inferred
+I6C SOURCE ORACLE CHECK: PASS
+verified Guild MID/request/presentation/policy/message source shape in current + historical corpora; no unrecovered server calendar/succession semantics inferred
+CA3-3 SOURCE ORACLE CHECK: PASS
+exact current src_64 c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf corroborates Pet progression MIDs, stock wire shapes, evolution/EXP/skill progression sources, and checked-in generated content pins
+R4A CONTENT GENERATION: PASS revision=86e64265941ab4e438f56548ffa0f1e2d78b77acb9af7204c73706ec048f6041 resources=5556 players=100 functions=99 heroes=568 pets=54 equipment=1176 pet_acquisition=27
+CA4-1 SOURCE ORACLE CHECK: PASS
+exact current src_64 c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf -> roots=604 closure=1176 recipe_nodes=797 ordered_edges=1934 repeated_recipes=29; generated CA4-1 catalog is byte-regenerable and all closure items remain I5-qualified
+CA5-3 SOURCE ORACLE CHECK: PASS
+current/old/V1 oracle identities remain pinned; effective current full/modern-delete triple and retained pet-less legacy delete remain discriminated; candidate does not promote UI/V1 policy into server truth
+CA5-4 SOURCE ORACLE CHECK: PASS
+current/old/V1/native identities pinned; MID66 UI/wrapper evidence remains bounded, saved presets remain mode-adapted source loadouts, and candidate activates only reverse guard/reference-state seams
+CA6-3 SOURCE ORACLE CHECK: PASS
+current/old/V1 identities and Practice wire family pinned; AUTO remains separate; dormant RNG-looking metadata is not runtime authority
+CA6-4 SOURCE ORACLE CHECK: PASS
+current/old AUTO MID+wire+batch+Bless+playback evidence pinned; candidate 127/132 decoding/projection/routing matches; batch edge/RNG policy remains separately qualified
+CA6-5 SOURCE ORACLE CHECK: PASS
+current+old MID1 Hero hydration/reducer/timer evidence pinned; real Hero duplicate-target tables=26; candidate key49/contribution/routing translation matches
+{
+  "status": "GREEN",
+  "boundary_vectors_checked": 35615,
+  "examples": [
+    {
+      "family": "HERO",
+      "table_id": 10001003,
+      "applied": [
+        200,
+        200,
+        200
+      ],
+      "result": [
+        [
+          1,
+          200
+        ],
+        [
+          2,
+          200
+        ],
+        [
+          3,
+          200
+        ],
+        [
+          4,
+          2500
+        ],
+        [
+          5,
+          60
+        ]
+      ]
+    },
+    {
+      "family": "PET",
+      "synthetic_duplicate": true,
+      "result": [
+        [
+          1,
+          260
+        ],
+        [
+          2,
+          10
+        ],
+        [
+          3,
+          10
+        ],
+        [
+          4,
+          50
+        ]
+      ]
+    }
+  ],
+  "result_sha256": "02fcf9d7947627bbe259afd817435a60461d4ad412a59800c67c56b567fb20a0"
+}

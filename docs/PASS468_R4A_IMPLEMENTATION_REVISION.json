@@ -1,0 +1,53 @@
+{
+  "base_artifact_sha256": "5b969bc248a06b47eafc3641bb0bf4a203c9d3e96e19f9c4b6801211d9a25f5b",
+  "base_commit": "76d4b71d205cb5a2b40945be2de06bc3fabd147b",
+  "files": [
+    {
+      "path": "internal/content/builtin/catalog.go",
+      "sha256": "c9cd5f13ca97b63ef33b6c17e025acb6fe7ab5968d34822e52a52f5a99c312b0"
+    },
+    {
+      "path": "internal/content/builtin/catalog_test.go",
+      "sha256": "10a6b62909387f6d388a503166985b0fb16c92ba1a54566a86a07dda9da0a68b"
+    },
+    {
+      "path": "internal/content/builtin/generated/manifest.json",
+      "sha256": "9edbce8ce0a0fc6244789b78dd11226a8f7c35f64cce20382f8b3e14feafe5e3"
+    },
+    {
+      "path": "internal/content/builtin/generated/objective_catalog.json",
+      "sha256": "ff4d225e9328cd108b2afdc449a70327c41326288a49a21cd991c3f548781824"
+    },
+    {
+      "path": "internal/content/builtin/generated/player_progression.json",
+      "sha256": "9b21a3d9f66cc9eed479d7246f69835c97614c611cc76529543d58f3348a8e08"
+    },
+    {
+      "path": "internal/content/builtin/generated/resource_catalog.json",
+      "sha256": "ddb2e962832eea93ab3a7f8f6568b2f7d95bb3af32ac86ae90b98d7cb683bfc6"
+    },
+    {
+      "path": "tools/check.sh",
+      "sha256": "3d4a7fb48a98f2d42c33f8d2bee941c0e7cce049a7d22fd9a4bee662becd7877"
+    },
+    {
+      "path": "tools/check_r4a_pass353_differential.py",
+      "sha256": "0bf92947cfad3d22aac57e1e3c9c911f51594c74f2a6d67cf86985141f7ce2f1"
+    },
+    {
+      "path": "tools/generate_builtin_content.py",
+      "sha256": "dac4b6a3c5d3dfc36009c8edf031627b78dbd05570fabf78812e8658eeb63c7b"
+    },
+    {
+      "path": "tools/test_generate_builtin_content.py",
+      "sha256": "31f0e134179542e817fce982cda24dd4565971f8d82ca37ee9ed7aea438e67bd"
+    },
+    {
+      "path": "tools/validate_r4a.py",
+      "sha256": "553d473028cbf7962acbe483ad6d27d83aa014604caa284eaa7936d7000899b1"
+    }
+  ],
+  "implementation_revision_sha256": "362769d710b76dfd73f90cda0662ae4ebe15a8ac6d76878b5f7f2e8aeb6a965f",
+  "schema_version": 1,
+  "scope": "PASS468_R4A_IMPLEMENTATION_DELTA_ONLY"
+}

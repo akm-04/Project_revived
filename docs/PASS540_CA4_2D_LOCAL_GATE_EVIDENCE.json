@@ -1,0 +1,83 @@
+{
+  "schema_version": 1,
+  "pass": "540.0",
+  "phase": "CA4-2D",
+  "result": "GREEN_LOCAL_CA4_2_ACCEPTANCE_CANDIDATE_COMPATIBILITY_COPY_ONLY_NATIVE_AGGREGATE_DEFERRED",
+  "authority_parent": "sealed Pass536 CA4-2 research/design plus explicit current-user authorization for staged CA4-2A -> B -> C -> D implementation",
+  "parent_stage": "CA4-2C v0.69.2 Pass539 checkpoint",
+  "parent_checkpoint_archive_sha256": "1c2d1d7f1caf2bd1b96d37a1711a056ce5159f0239575676ddad62f6e8427a32",
+  "implemented": [
+    "HeroDispatcher diagnostic MID54 request decoding and minimal stock-compatible success / HTTP-200 error_code=30001 projection",
+    "HeroDispatcher diagnostic MID62 request decoding and canonical six-equips response projection",
+    "authoritative postcommit current Mana projection through existing I5 ScalarProjector on every successful MID62 response including no-work/replay",
+    "production dependency wiring of existing Content/I5 owner-shaped equipment ports into CharacterHero Service",
+    "production Hero MID registry intentionally unchanged; shared MID54/MID62 remain unregistered through CA4-5",
+    "CA4-2 archguard and stage validator proving dispatcher presence plus production-route deferral"
+  ],
+  "canonical_static": [
+    "CA4-2D validator GREEN",
+    "CA4-1 exact current src_64 source oracle GREEN",
+    "CA4-2A exact current src_64 source oracle GREEN",
+    "immutable content regeneration GREEN at bd11a7482062dbaa851f3b495e3dc6efab88085011b3fe75d82105e127bba106",
+    "content/character/kernel query-text freshness GREEN",
+    "schema/query ownership GREEN",
+    "sqlc-generation policy GREEN",
+    "dependency policy GREEN",
+    "current cumulative candidate validator GREEN in cumulative mode",
+    "CA4-1 cumulative validator GREEN"
+  ],
+  "historical_expected_red": [
+    "CA3-3 standalone validator rejects later CA4 compiler/migration high-water by design",
+    "R5 standalone validator rejects later compiler identity by design",
+    "R6 standalone historical mode rejects later migration/toolchain-era state; validate_current_candidate invokes R6 cumulative mode and is GREEN"
+  ],
+  "compatibility_copy_only": {
+    "environment": "Go 1.23.2 linux/amd64",
+    "clone_only_accommodation": [
+      ".go-version 1.27.1 -> 1.23.2",
+      "go.mod go 1.26.0 -> 1.23.0",
+      "removed toolchain go1.27.1"
+    ],
+    "canonical_pins_changed": false,
+    "results": [
+      "focused CA4-2D plus cumulative touched-package tests GREEN",
+      "focused race GREEN",
+      "go vet ./... GREEN",
+      "archguard GREEN",
+      "sealed Pass536 planner oracle 15/15 GREEN",
+      "CA4-2 dispatcher contract tests GREEN",
+      "bounded package-by-package go test + go vet regression 92/92 GREEN"
+    ]
+  },
+  "canonical_environment": {
+    "exact_candidate_attempt": "ENVIRONMENT_BLOCKED",
+    "reason": "sandbox DNS/network cannot fetch pinned go1.27.1 from proxy.golang.org",
+    "go_version_sha256": "a8844fbc8c3eb51c26ed00aec4cd5a5a9d647f849c6ead07bcc83ed24c4a7718",
+    "go_mod_sha256": "313c574368bb56dc570bc3427b65f59b059e492f909fe43b7d0291b5ced21dc4",
+    "go_sum_sha256": "efbf6753542d66e2fefcb2ab5e2ade7c9d28f2206a1113d1eb9568f2cb75808d"
+  },
+  "oracle": {
+    "fixture": "internal/application/characterhero/testdata/ca4_2_planner_adversarial_vectors.json",
+    "sha256": "28d08a3346b1c6015a7da3a0e2b442613374d5199fd674d367580b7757f9ae78",
+    "vectors": 15,
+    "result": "15/15 GREEN"
+  },
+  "production_route_status": {
+    "dispatcher_mid54": true,
+    "dispatcher_mid62": true,
+    "registered_mid54": false,
+    "registered_mid62": false,
+    "registered_hero_mids": [49, 52, 55, 63, 67, 89],
+    "activation_dependency": "CA4-5 shared Super-family qualification and explicit activation reconciliation"
+  },
+  "bounded_activation_caveat": "MID62 authoritative Mana is projected through a postcommit read. Projection/infrastructure failure after semantic commit is not itself stock-safe; no stock exposure exists because shared MIDs remain production-unregistered. CA4-5 activation reconciliation must revisit this failure mode before registration.",
+  "deferred_mandatory": [
+    "exact Go 1.27.1 execution",
+    "real PostgreSQL migration/restore/locking/replay/concurrency",
+    "River where accumulated CA4 depends on it",
+    "aggregate native gate at CA4_AGGREGATE_PRE_CA4_E_NATIVE_WORK_GATE",
+    "W2 physical unmodified-stock-client proof"
+  ],
+  "reality_check": "docs/PASS540_CA4_2D_INDEPENDENT_POSTIMPLEMENTATION_REALITY_CHECK.md",
+  "next": "Freeze Pass540 v0.69.3 CA4-2D candidate, then synchronize/seal Pass541 CA4-2 local acceptance and advance the internal frontier to CA4-3A research only."
+}

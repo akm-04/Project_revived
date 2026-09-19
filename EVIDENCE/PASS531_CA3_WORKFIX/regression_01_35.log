@@ -1,0 +1,70 @@
+[01/91] gxb.local/backend/v2/cmd/gxb-admin
+?   	gxb.local/backend/v2/cmd/gxb-admin	[no test files]
+[02/91] gxb.local/backend/v2/cmd/gxb-api
+?   	gxb.local/backend/v2/cmd/gxb-api	[no test files]
+[03/91] gxb.local/backend/v2/cmd/gxb-realtime
+?   	gxb.local/backend/v2/cmd/gxb-realtime	[no test files]
+[04/91] gxb.local/backend/v2/cmd/gxb-wave-s-report
+?   	gxb.local/backend/v2/cmd/gxb-wave-s-report	[no test files]
+[05/91] gxb.local/backend/v2/cmd/gxb-worker
+?   	gxb.local/backend/v2/cmd/gxb-worker	[no test files]
+[06/91] gxb.local/backend/v2/internal/adapters/blobstore
+?   	gxb.local/backend/v2/internal/adapters/blobstore	[no test files]
+[07/91] gxb.local/backend/v2/internal/adapters/guildpolicybridge
+?   	gxb.local/backend/v2/internal/adapters/guildpolicybridge	[no test files]
+[08/91] gxb.local/backend/v2/internal/adapters/guildwire
+?   	gxb.local/backend/v2/internal/adapters/guildwire	[no test files]
+[09/91] gxb.local/backend/v2/internal/adapters/pass353diff
+?   	gxb.local/backend/v2/internal/adapters/pass353diff	[no test files]
+[10/91] gxb.local/backend/v2/internal/adapters/postgres
+ok  	gxb.local/backend/v2/internal/adapters/postgres	0.002s
+[11/91] gxb.local/backend/v2/internal/adapters/postgres/activitystore
+ok  	gxb.local/backend/v2/internal/adapters/postgres/activitystore	0.002s
+[12/91] gxb.local/backend/v2/internal/adapters/postgres/characterqueries
+?   	gxb.local/backend/v2/internal/adapters/postgres/characterqueries	[no test files]
+[13/91] gxb.local/backend/v2/internal/adapters/postgres/characterstore
+ok  	gxb.local/backend/v2/internal/adapters/postgres/characterstore	(cached)
+[14/91] gxb.local/backend/v2/internal/adapters/postgres/contentqueries
+?   	gxb.local/backend/v2/internal/adapters/postgres/contentqueries	[no test files]
+[15/91] gxb.local/backend/v2/internal/adapters/postgres/contentstore
+ok  	gxb.local/backend/v2/internal/adapters/postgres/contentstore	0.039s
+[16/91] gxb.local/backend/v2/internal/adapters/postgres/guildprojection
+?   	gxb.local/backend/v2/internal/adapters/postgres/guildprojection	[no test files]
+[17/91] gxb.local/backend/v2/internal/adapters/postgres/guildstore
+?   	gxb.local/backend/v2/internal/adapters/postgres/guildstore	[no test files]
+[18/91] gxb.local/backend/v2/internal/adapters/postgres/i4store
+ok  	gxb.local/backend/v2/internal/adapters/postgres/i4store	0.014s
+[19/91] gxb.local/backend/v2/internal/adapters/postgres/i5store
+ok  	gxb.local/backend/v2/internal/adapters/postgres/i5store	0.002s
+[20/91] gxb.local/backend/v2/internal/adapters/postgres/identitystore
+?   	gxb.local/backend/v2/internal/adapters/postgres/identitystore	[no test files]
+[21/91] gxb.local/backend/v2/internal/adapters/postgres/kernelqueries
+?   	gxb.local/backend/v2/internal/adapters/postgres/kernelqueries	[no test files]
+[22/91] gxb.local/backend/v2/internal/adapters/postgres/kernelstore
+ok  	gxb.local/backend/v2/internal/adapters/postgres/kernelstore	0.002s
+[23/91] gxb.local/backend/v2/internal/adapters/provider
+?   	gxb.local/backend/v2/internal/adapters/provider	[no test files]
+[24/91] gxb.local/backend/v2/internal/adapters/river
+?   	gxb.local/backend/v2/internal/adapters/river	[no test files]
+[25/91] gxb.local/backend/v2/internal/adapters/stockfixtures
+?   	gxb.local/backend/v2/internal/adapters/stockfixtures	[no test files]
+[26/91] gxb.local/backend/v2/internal/adapters/stockruntime
+ok  	gxb.local/backend/v2/internal/adapters/stockruntime	(cached)
+[27/91] gxb.local/backend/v2/internal/application/activitydirectory
+ok  	gxb.local/backend/v2/internal/application/activitydirectory	0.002s
+[28/91] gxb.local/backend/v2/internal/application/bootstrap
+ok  	gxb.local/backend/v2/internal/application/bootstrap	0.002s
+[29/91] gxb.local/backend/v2/internal/application/characterhero
+ok  	gxb.local/backend/v2/internal/application/characterhero	0.005s
+[30/91] gxb.local/backend/v2/internal/application/characterpet
+ok  	gxb.local/backend/v2/internal/application/characterpet	(cached)
+[31/91] gxb.local/backend/v2/internal/application/directorysync
+ok  	gxb.local/backend/v2/internal/application/directorysync	0.002s
+[32/91] gxb.local/backend/v2/internal/application/generation
+ok  	gxb.local/backend/v2/internal/application/generation	0.002s
+[33/91] gxb.local/backend/v2/internal/application/guildcore
+ok  	gxb.local/backend/v2/internal/application/guildcore	0.004s
+[34/91] gxb.local/backend/v2/internal/application/guildview
+ok  	gxb.local/backend/v2/internal/application/guildview	0.002s
+[35/91] gxb.local/backend/v2/internal/application/i5
+ok  	gxb.local/backend/v2/internal/application/i5	0.005s

@@ -1,0 +1,13 @@
+ok  	gxb.local/backend/v2/internal/projection/backpack	1.018s
+ok  	gxb.local/backend/v2/internal/application/directorysync	1.016s
+ok  	gxb.local/backend/v2/internal/application/identitylifecycle	1.021s
+ok  	gxb.local/backend/v2/internal/domain/logicalserver	1.018s
+ok  	gxb.local/backend/v2/internal/foundation/observability	1.022s
+ok  	gxb.local/backend/v2/internal/foundation/replaycatalog	1.030s
+ok  	gxb.local/backend/v2/internal/protocol/httpedge	1.089s
+ok  	gxb.local/backend/v2/internal/projection/lobby	1.406s
+ok  	gxb.local/backend/v2/internal/adapters/stockruntime	1.428s
+ok  	gxb.local/backend/v2/internal/application/bootstrap	1.018s
+ok  	gxb.local/backend/v2/internal/application/i5	1.067s
+ok  	gxb.local/backend/v2/internal/adapters/postgres/i4store	1.021s
+ok  	gxb.local/backend/v2/internal/adapters/postgres/i5store	1.013s

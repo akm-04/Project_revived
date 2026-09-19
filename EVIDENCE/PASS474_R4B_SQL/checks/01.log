@@ -1,0 +1,9 @@
+?   	gxb.local/backend/v2/cmd/gxb-api	[no test files]
+?   	gxb.local/backend/v2/internal/adapters/postgres	[no test files]
+?   	gxb.local/backend/v2/internal/adapters/postgres/contentqueries	[no test files]
+ok  	gxb.local/backend/v2/internal/adapters/postgres/contentstore	0.182s
+ok  	gxb.local/backend/v2/internal/adapters/postgres/i4store	0.039s
+ok  	gxb.local/backend/v2/internal/adapters/postgres/i5store	0.025s
+?   	gxb.local/backend/v2/internal/adapters/postgres/identitystore	[no test files]
+?   	gxb.local/backend/v2/internal/adapters/postgres/kernelqueries	[no test files]
+ok  	gxb.local/backend/v2/internal/adapters/postgres/kernelstore	0.026s

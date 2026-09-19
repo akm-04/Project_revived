@@ -1,0 +1,5 @@
+ok  	gxb.local/backend/v2/internal/application/characterpractice	1.076s
+ok  	gxb.local/backend/v2/internal/adapters/stockruntime	1.458s
+ok  	gxb.local/backend/v2/internal/application/i5	1.065s
+ok  	gxb.local/backend/v2/internal/adapters/postgres/characterstore	1.024s
+ok  	gxb.local/backend/v2/internal/archguard	1.219s

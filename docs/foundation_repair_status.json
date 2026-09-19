@@ -1,0 +1,447 @@
+{
+  "schema_version": 1,
+  "foundation_status": "GREEN_R0_R7_PHASE_ACCEPTED_PASS489",
+  "I6": "PHASE_ACCEPTED_PASS509_AFTER_I6E",
+  "base_backend": "Pass509/v0.60.0 metadata-truth promotion of Pass505 product implementation",
+  "repair_program": "R0-R7 COMPLETE / PHASE_ACCEPTED Pass489",
+  "rules": [
+    "Historical pass-specific RED/blocked records are provenance and are not rewritten.",
+    "R0-R7 repaired-foundation acceptance was sealed at Pass489 on exact native PostgreSQL/River evidence.",
+    "Parent I6 acceptance is independent from W2; W2 comprehensive stock-client acceptance remains future.",
+    "Future owner/provider obligations and open extension limits do not retroactively reopen accepted foundation phases absent a concrete contradiction."
+  ],
+  "findings": [
+    {
+      "id": "RF-001",
+      "batch": "R1B",
+      "title": "MID1 receipt replay returns an obsolete player snapshot",
+      "status": "RESOLVED_R7_NATIVE_PASS489_FOUNDATION_ACCEPTED",
+      "resolution": {
+        "evidence": [
+          "EVIDENCE/PASS452_R1B_LOCAL_VALIDATION.txt",
+          "internal/adapters/postgres/i4store/bootstrap_runtime_test.go",
+          "tools/validate_r1b.py"
+        ],
+        "live_gate": "REAL_POSTGRESQL_AMBIGUOUS_RESPONSE_HYDRATION_R7_AND_STOCK_CLIENT_W2"
+      }
+    },
+    {
+      "id": "RF-002",
+      "batch": "R1B",
+      "title": "Raw gameplay bearer is stored inside the MID1 receipt",
+      "status": "RESOLVED_R1B_PASS452_NEW_RECEIPTS_SECRET_FREE_HISTORICAL_V1_RETENTION_DOCUMENTED_EX01_OPEN",
+      "resolution": {
+        "evidence": [
+          "SECURITY.md",
+          "internal/adapters/postgres/i4store/bootstrap_runtime_test.go",
+          "tools/validate_r1b.py"
+        ],
+        "live_gate": "NO_NEW_SECRET_PERSISTENCE_CLAIM; HISTORICAL_BACKUP_RETENTION_OPERATIONAL; EX01_KEY_ROTATION_OPEN"
+      }
+    },
+    {
+      "id": "RF-003",
+      "batch": "R1B",
+      "title": "Existing-player logins unnecessarily lock the entire logical server exclusively",
+      "status": "RESOLVED_R7_NATIVE_PASS489_FOUNDATION_ACCEPTED",
+      "resolution": {
+        "evidence": [
+          "EVIDENCE/PASS452_R1B_LOCAL_VALIDATION.txt",
+          "internal/adapters/postgres/i4store/bootstrap_runtime_test.go",
+          "tools/validate_r1b.py"
+        ],
+        "live_gate": "REAL_POSTGRESQL_SHARED_EXCLUSIVE_LOCK_AND_CONCURRENT_CREATE_R7"
+      }
+    },
+    {
+      "id": "RF-004",
+      "batch": "R1A",
+      "title": "Transaction cleanup is not guaranteed during exceptional unwinding",
+      "status": "RESOLVED_R7_NATIVE_PASS489_FOUNDATION_ACCEPTED",
+      "resolution": {
+        "evidence": [
+          "EVIDENCE/PASS451_R1A_LOCAL_VALIDATION.txt",
+          "internal/foundation/tx/runner_test.go",
+          "tools/validate_r1a.py"
+        ],
+        "live_gate": "REAL_PGXPOOL_PANIC_CANCEL_COMMIT_AMBIGUITY_R7"
+      }
+    },
+    {
+      "id": "RF-005",
+      "batch": "R1A",
+      "title": "Missing receipt is still over-interpreted as terminal absence",
+      "status": "RESOLVED_R1A_PASS451_LOCAL_VALIDATION_GREEN_OPERATION_SPECIFIC_NEGATIVE_PROOFS_REMAIN_FUTURE_OWNER_WORK",
+      "resolution": {
+        "evidence": [
+          "EVIDENCE/PASS451_R1A_LOCAL_VALIDATION.txt",
+          "internal/foundation/receipt/receipt_test.go",
+          "internal/application/bootstrap/reconcile_test.go",
+          "tools/validate_r1a.py"
+        ],
+        "live_gate": "REAL_POSTGRESQL_AMBIGUOUS_COMMIT_VISIBILITY_R7"
+      }
+    },
+    {
+      "id": "RF-006",
+      "batch": "R2",
+      "title": "Durable identity lifecycle operations are only partly implemented",
+      "status": "RESOLVED_R7_NATIVE_PASS489_FOUNDATION_ACCEPTED",
+      "resolution": {
+        "implementation_commit": "e617687faf4d852b8d4856b8e396765c0bdbf5f2",
+        "evidence": [
+          "EVIDENCE/PASS454_R2A_LOCAL_VALIDATION.txt",
+          "internal/application/identitylifecycle/service_test.go",
+          "internal/adapters/postgres/identitystore/store.go",
+          "migrations/00007_identity_lifecycle_constraints.sql",
+          "tools/validate_r2a.py"
+        ],
+        "live_gate": "REAL_POSTGRESQL_PROVIDER_BIND_RACE_SESSION_ISSUE_ROLLBACK_REVOKE_VS_MUTATION_AND_MIGRATION_CONSTRAINTS_R7"
+      }
+    },
+    {
+      "id": "RF-007",
+      "batch": "R2",
+      "title": "Bootstrap persistence and projection are not yet safe extension contracts",
+      "status": "RESOLVED_R7_NATIVE_PASS489_FOUNDATION_ACCEPTED",
+      "resolution": {
+        "implementation_commit": "1d0e7b591b33970ced407c0141d48dbc9ed3ff25",
+        "evidence": [
+          "EVIDENCE/PASS455_R2B_LOCAL_VALIDATION.txt",
+          "internal/application/bootstrap/contributor_test.go",
+          "internal/adapters/postgres/i5store/bootstrap_owner_test.go",
+          "tools/validate_r2b.py",
+          "tools/check_schema_query_ownership.py"
+        ],
+        "live_gate": "REAL_POSTGRESQL_CHARACTER_CREATION_CONTRIBUTOR_ROLLBACK_AND_CONCURRENCY_R7"
+      }
+    },
+    {
+      "id": "RF-008",
+      "batch": "R3",
+      "title": "AMF resource limits do not cover all allocation and output paths",
+      "status": "RESOLVED_R7_NATIVE_PASS489_FOUNDATION_ACCEPTED_W2_CLIENT_SEPARATE",
+      "resolution": {
+        "implementation_commit": "43c8106f1a4392e4c1dce2cbd14593aa7b1d9655",
+        "evidence": [
+          "EVIDENCE/PASS458_R3A_LOCAL_VALIDATION.txt",
+          "internal/protocol/amf3/codec_test.go",
+          "internal/protocol/realtime/frame_test.go",
+          "tools/validate_r3a.py"
+        ],
+        "live_gate": "R7_LOAD_RESOURCE_PRESSURE_AND_FINAL_STOCK_WIRE_REGRESSION; LOCAL_GOLDEN_AND_FUZZ_GREEN"
+      }
+    },
+    {
+      "id": "RF-009",
+      "batch": "R3",
+      "title": "TCP connection and lifetime budgets are incomplete in the delivered runtime",
+      "status": "RESOLVED_R7_NATIVE_PASS489_FOUNDATION_ACCEPTED_EX05_MULTI_PROCESS_REMAINS_FUTURE",
+      "resolution": {
+        "implementation_commit": "68ebe9f0662b1dceab44a083453d5d1aceadc32e",
+        "evidence": [
+          "EVIDENCE/PASS459_R3B_LOCAL_VALIDATION.txt",
+          "internal/adapters/stockruntime/realtime_r3b_test.go",
+          "tools/validate_r3b.py"
+        ],
+        "live_gate": "R7_REAL_SOCKET_FD_PRESSURE_ADMISSION_AND_REAL_POSTGRES_AUTHORITY_QUERY_TIMEOUT_PROOF; EX05_MULTI_PROCESS_OPEN"
+      }
+    },
+    {
+      "id": "RF-010",
+      "batch": "R3",
+      "title": "Boot telemetry grows without bound even when file capture is disabled",
+      "status": "RESOLVED_R7_NATIVE_PASS489_FOUNDATION_ACCEPTED_OPERATIONAL_I11_SEPARATE",
+      "resolution": {
+        "implementation_commit": "76d4b71d205cb5a2b40945be2de06bc3fabd147b",
+        "evidence": [
+          "internal/projection/lobby/evidence_test.go",
+          "internal/projection/lobby/manifest_test.go",
+          "tools/validate_r3c.py",
+          "EVIDENCE/PASS460_R3C_LOCAL_VALIDATION.txt"
+        ],
+        "live_gate": "R7_OPERATIONAL_CAPTURE_IO_PRESSURE_AND_LONG_DURATION_EVIDENCE_HEALTH"
+      }
+    },
+    {
+      "id": "RF-011",
+      "batch": "R3",
+      "title": "Wave-S evidence cannot establish the full claimed acceptance condition",
+      "status": "RESOLVED_R3C_PASS460_MODEL_CANNOT_OVERCLAIM_SERVER_EVIDENCE_CLIENT_ACCEPTANCE_W2_PENDING",
+      "resolution": {
+        "implementation_commit": "76d4b71d205cb5a2b40945be2de06bc3fabd147b",
+        "evidence": [
+          "internal/projection/lobby/evidence_test.go",
+          "internal/adapters/stockruntime/realtime_r3b_test.go",
+          "cmd/gxb-wave-s-report/main.go",
+          "tools/validate_r3c.py"
+        ],
+        "live_gate": "W2_CORRELATED_REAL_STOCK_CLIENT_CONSUMPTION_LUA_HEALTH_AND_60S_QUIESCENCE"
+      }
+    },
+    {
+      "id": "RF-012",
+      "batch": "R0",
+      "title": "I0 architecture enforcement does not enforce all promised boundaries",
+      "status": "RESOLVED_R0_PASS450_LOCAL_VALIDATION_GREEN",
+      "resolution": {
+        "implementation_commit": "01b5348b52c3e986040f91e407cb4f9c1a1e5f11",
+        "evidence": [
+          "EVIDENCE/PASS450_R0_LOCAL_VALIDATION.txt",
+          "internal/archguard/archguard_test.go",
+          "docs/architecture/CANONICAL_TABLE_OWNERSHIP.json",
+          "tools/check_schema_query_ownership.py",
+          "tools/validate_r0.py"
+        ],
+        "live_gate": "NONE_BEHAVIOR_NEUTRAL_GUARD_REPAIR"
+      }
+    },
+    {
+      "id": "RF-013",
+      "batch": "R5",
+      "title": "EXP never advances canonical level",
+      "status": "RESOLVED_R5_PASS485_PHASE_ACCEPTED_R7_RECONFIRMED"
+    },
+    {
+      "id": "RF-014",
+      "batch": "R5",
+      "title": "Temporal state and wire semantics disagree with source",
+      "status": "RESOLVED_R5_PASS485_PHASE_ACCEPTED_R7_RECONFIRMED"
+    },
+    {
+      "id": "RF-015",
+      "batch": "R5",
+      "title": "Required economy bootstrap was incorrectly moved to I6",
+      "status": "RESOLVED_R5_PASS485_PHASE_ACCEPTED_R7_RECONFIRMED"
+    },
+    {
+      "id": "RF-016",
+      "batch": "R4",
+      "title": "Resource registry has no production population path",
+      "status": "RESOLVED_R4_PASS477_PHASE_ACCEPTED_R7_RECONFIRMED",
+      "progress": {
+        "evidence": [
+          "docs/PASS468_R4A_IMPLEMENTATION_REPORT.md",
+          "docs/PASS470_R4B_IMPLEMENTATION_REPORT.md",
+          "migrations/00009_r4_immutable_content_revisions.sql",
+          "docs/PASS473_R4C_IMPLEMENTATION_REPORT.md",
+          "docs/PASS476_R4D_IMPLEMENTATION_REPORT.md",
+          "docs/PASS476_R4D_INDEPENDENT_REALITY_CHECK.md"
+        ],
+        "remaining": "Targeted real PostgreSQL end-R4 Work gate on exact Pass476 candidate, including migration00010, restart/retry/old-receipt and backup/restore proof; no native acceptance claimed yet."
+      }
+    },
+    {
+      "id": "RF-017",
+      "batch": "R6",
+      "title": "Stack credit is persisted but stock inventory hydration stays empty",
+      "status": "RESOLVED_R6_PASS487_PHASE_ACCEPTED_R7_RECONFIRMED"
+    },
+    {
+      "id": "RF-018",
+      "batch": "R6",
+      "title": "Scalar and skill-point projections are incomplete",
+      "status": "SUPERSEDED_R5_OWNED_CONFIRMED_PASS487_R6"
+    },
+    {
+      "id": "RF-019",
+      "batch": "R5",
+      "title": "No canonical stack spending operation",
+      "status": "RESOLVED_R5_PASS485_PHASE_ACCEPTED_R7_RECONFIRMED"
+    },
+    {
+      "id": "RF-020",
+      "batch": "R2",
+      "title": "Grant cannot be composed from another domain caller transaction",
+      "status": "RESOLVED_R7_NATIVE_PASS489_FOUNDATION_ACCEPTED",
+      "resolution": {
+        "implementation_commit": "b203ed3299a1e027e157e2b21738d84389767a6f",
+        "evidence": [
+          "EVIDENCE/PASS456_R2C_LOCAL_VALIDATION.txt",
+          "internal/application/i5/service_test.go",
+          "internal/application/i5/grant_lock_plan.go",
+          "tools/validate_r2c.py"
+        ],
+        "live_gate": "REAL_POSTGRESQL_CALLER_OWNED_CROSS_DOMAIN_TRANSACTION_ROLLBACK_COMMIT_R7"
+      }
+    },
+    {
+      "id": "RF-021",
+      "batch": "R2",
+      "title": "Missing-row creation violates the documented fence contract",
+      "status": "RESOLVED_R7_NATIVE_PASS489_FOUNDATION_ACCEPTED",
+      "resolution": {
+        "implementation_commit": "b203ed3299a1e027e157e2b21738d84389767a6f",
+        "evidence": [
+          "migrations/00008_i5_economy_owner_fence.sql",
+          "internal/adapters/postgres/i5store/economy_owner.go",
+          "internal/application/i5/grant_lock_plan.go",
+          "tools/validate_r2c.py"
+        ],
+        "live_gate": "REAL_POSTGRESQL_CONCURRENT_FIRST_USE_SCALAR_STACK_CREATION_AND_DIFFERENT_PLAYER_INDEPENDENCE_R7"
+      }
+    },
+    {
+      "id": "RF-022",
+      "batch": "R2",
+      "title": "Objective claim lock is outside the CTE containing its base row",
+      "status": "RESOLVED_R7_NATIVE_PASS489_FOUNDATION_ACCEPTED",
+      "resolution": {
+        "implementation_commit": "96d78607eb5d3ecfeca46c575390d38081e491c6",
+        "evidence": [
+          "EVIDENCE/PASS457_R2D_LOCAL_VALIDATION.txt",
+          "internal/adapters/postgres/i5store/objective_lock_test.go",
+          "internal/application/i5/service_test.go",
+          "tools/validate_r2d.py"
+        ],
+        "live_gate": "REAL_POSTGRESQL_CONCURRENT_OBJECTIVE_DOUBLE_CLAIM_AND_LOCK_PROOF_R7"
+      }
+    },
+    {
+      "id": "RF-023",
+      "batch": "R4",
+      "title": "Content revision pinning is not complete",
+      "status": "RESOLVED_R4_PASS477_PHASE_ACCEPTED_R7_RECONFIRMED",
+      "progress": {
+        "evidence": [
+          "internal/content/builtin/generated/manifest.json",
+          "docs/PASS470_R4B_IMPLEMENTATION_REPORT.md",
+          "internal/foundation/receipt/receipt.go",
+          "sql/kernel/receipts.sql",
+          "docs/PASS473_R4C_IMPLEMENTATION_REPORT.md",
+          "docs/PASS476_R4D_IMPLEMENTATION_REPORT.md",
+          "docs/PASS476_R4D_INDEPENDENT_REALITY_CHECK.md"
+        ],
+        "remaining": "Targeted real PostgreSQL end-R4 Work gate on exact Pass476 candidate, including migration00010, restart/retry/old-receipt and backup/restore proof; no native acceptance claimed yet."
+      }
+    },
+    {
+      "id": "RF-024",
+      "batch": "R6",
+      "title": "Directory projection maintenance is an unfinished dependency",
+      "status": "RESOLVED_R6_PASS487_PHASE_ACCEPTED_R7_RECONFIRMED"
+    }
+  ],
+  "extension_limits": [
+    {
+      "id": "EX-01",
+      "title": "Versioned key resolution",
+      "required_by": "Before rotating retained keys",
+      "finding": "Single configured key cannot provide seamless old-context replay/rotation. Define supported rotation policy; no live compromise claimed.",
+      "related_findings": [
+        "RF-002",
+        "RF-006"
+      ],
+      "status": "OPEN_DESIGN_OR_INTEGRATION_WORK"
+    },
+    {
+      "id": "EX-02",
+      "title": "Actual lock plan consumption",
+      "required_by": "Before expanded cross-owner mutations",
+      "finding": "Canonical lock types alone are not acquisition enforcement.",
+      "related_findings": [
+        "RF-003",
+        "RF-021"
+      ],
+      "status": "RESOLVED_R2C_LOCAL_LOCK_PLAN_CONSUMED_R7_POSTGRESQL_PROOF_PENDING",
+      "resolution": "Pass456 Grant preflights the full I5 resource set and consumes canonical typed lock order before first entitlement mutation; broader future domains must extend the same law."
+    },
+    {
+      "id": "EX-03",
+      "title": "Content policy references",
+      "required_by": "Now with I5",
+      "finding": "Immutable reference holder is not production loading/pinning.",
+      "related_findings": [
+        "RF-016",
+        "RF-023"
+      ],
+      "status": "RESOLVED_R4D_LOCAL_IMPLEMENTED_END_R4_NATIVE_PROOF_PENDING",
+      "resolution": "Pass476 binds immutable content refs after receipt replay, retains them through retries/nested Grant, persists operation_policy_refs, and reads exact revisions through the content owner. Native PostgreSQL end-R4 proof remains mandatory."
+    },
+    {
+      "id": "EX-04",
+      "title": "Realtime dispatcher and single writer",
+      "required_by": "Before I7 implementation depends on it",
+      "finding": "Current ServeConn handles login/heartbeat directly; queue helper is not wired runtime writer. Full chat remains I7.",
+      "related_findings": [
+        "RF-009"
+      ],
+      "status": "RESOLVED_R3B_LOCAL_DISPATCHER_AND_SINGLE_WRITER_I7_FULL_HANDLERS_DEFERRED",
+      "resolution": "Pass459 wires one bounded per-connection writer and minimal post-auth dispatcher; full chat/social handlers remain I7."
+    },
+    {
+      "id": "EX-05",
+      "title": "Multi-process connection ownership",
+      "required_by": "Before multiple realtime replicas",
+      "finding": "Current newest-connection registry is deliberately process-local. Do not claim horizontal coordination.",
+      "related_findings": [
+        "RF-009"
+      ],
+      "status": "OPEN_DESIGN_OR_INTEGRATION_WORK"
+    },
+    {
+      "id": "EX-06",
+      "title": "Projection metadata",
+      "required_by": "max_lev now; server rename before operator control",
+      "finding": "Replace inherited max_lev=1 and synthetic region_name through actual owners.",
+      "related_findings": [
+        "RF-013",
+        "RF-024"
+      ],
+      "status": "OPEN_DESIGN_OR_INTEGRATION_WORK"
+    },
+    {
+      "id": "EX-07",
+      "title": "Cross-identity database invariants",
+      "required_by": "Before imports/operator paths",
+      "finding": "Review composite account/session/context/player relationship constraints. No mismatched live row was demonstrated.",
+      "related_findings": [
+        "RF-006"
+      ],
+      "status": "RESOLVED_R2A_SCHEMA_RELATION_CONSTRAINTS_LOCAL_R7_MIGRATION_PROOF_PENDING",
+      "resolution": "Pass454 migration 00007 adds composite session/account, player/account/server, and context/session parent constraints."
+    },
+    {
+      "id": "EX-08",
+      "title": "Retirement lifecycle transitions",
+      "required_by": "Before lifecycle controls enabled",
+      "finding": "Define whether retirement is terminal; prevent contradictory flags/timestamps. No new policy choice silently authorized.",
+      "related_findings": [
+        "RF-006"
+      ],
+      "status": "OPEN_DESIGN_OR_INTEGRATION_WORK"
+    },
+    {
+      "id": "EX-09",
+      "title": "Operational observability wiring",
+      "required_by": "Before operational acceptance",
+      "finding": "Ports/hooks and approved label names are not active bounded metrics.",
+      "related_findings": [
+        "RF-010",
+        "RF-012"
+      ],
+      "status": "OPEN_DESIGN_OR_INTEGRATION_WORK"
+    },
+    {
+      "id": "EX-10",
+      "title": "HTTP serialization failure contract",
+      "required_by": "Before unrestricted later projections",
+      "finding": "Encode/validate before response status; serialization failures do not undo already committed domain transactions.",
+      "related_findings": [
+        "RF-007"
+      ],
+      "status": "OPEN_DESIGN_OR_INTEGRATION_WORK"
+    }
+  ],
+  "current_batch": "FOUNDATION_REPAIR_COMPLETE_PASS489",
+  "next_batch": "PARENT_I6_ACCEPTED_PASS509; POST_I6 PROFILE1 FEATURE_LIFECYCLE",
+  "R3_integrated_verdict": "GREEN_R7_NATIVE_PASS489; W2_STOCK_CLIENT_SEPARATE",
+  "aggregate_foundation_check": "GREEN_R0_R7_PHASE_ACCEPTED; PARENT_I6_ACCEPTED_PASS509; W2_SEPARATE",
+  "current_truth_evidence": {
+    "R4": "00_PASSMAP/PASS477_R4_PHASE_CLOSURE.md",
+    "R5": "00_PASSMAP/PASS485_R5_PHASE_CLOSURE.md",
+    "R6": "docs/PASS487_R6_PHASE_CLOSURE.md",
+    "R7": "00_PASSMAP/PASS489_R7_PHASE_CLOSURE.md",
+    "I6E": "docs/PASS509_I6E_BROAD_REALITY_CHECK_AND_PARENT_I6_CLOSURE.md"
+  }
+}

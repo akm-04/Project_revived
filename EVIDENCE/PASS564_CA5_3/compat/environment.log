@@ -1,0 +1,8 @@
+go version go1.23.2 linux/amd64
+auto
+/home/oai/go
+/home/oai/go/pkg/mod
+https://proxy.golang.org,direct
+
+Adaptation diff vs canonical pins:
+go.sum: identical

@@ -1,0 +1,55 @@
+{
+  "base_artifact": "gxb-backend-v2-v0.54.0-pass468-r4a-deterministic-content.zip",
+  "base_implementation_commit": "76d4b71d205cb5a2b40945be2de06bc3fabd147b",
+  "base_sha256": "ec73de55088caaa98b4ec9f393863df62fafb8c165ec3a9c753243c5cf79eaf2",
+  "canonical_go": "go 1.26.0 / toolchain go1.27.1",
+  "canonical_go_execution": "ENVIRONMENT_BLOCKED_NORMAL_CHAT",
+  "canonical_static": {
+    "I2_oracle": "PASS",
+    "I3_oracle": "PASS",
+    "I4_oracle": "PASS",
+    "I5_oracle": "PASS",
+    "R0_R3C": "PASS",
+    "R4A_exact_source": "PASS",
+    "R4A_pass353_differential": "PASS",
+    "R4B": "PASS",
+    "foundation_trace": "PASS",
+    "kernel_query_freshness": "PASS",
+    "oracle_verify": "PASS",
+    "schema_query_ownership": "PASS"
+  },
+  "compatibility_copy": {
+    "R4B_validator": "PASS",
+    "changes": [
+      "go 1.26.0 -> go 1.23.0",
+      "removed toolchain go1.27.1 directive"
+    ],
+    "classification": "COMPATIBILITY_COPY_ONLY",
+    "focused_race": "PASS",
+    "go": "1.23.2",
+    "go_vet_all": "PASS",
+    "package_sweep": "64/64 PASS"
+  },
+  "content_revision": "77d0b329b0e4c6199fe8484837e025923ca89bf7dc8ebcdd96efa361bbea98b1",
+  "expected_existing_red": {
+    "validate_i5": [
+      "RF-015 required EconomyBootstrapContributor production seam missing",
+      "RF-015 required temporal-resource bootstrap persistence path missing"
+    ]
+  },
+  "foundation_verdict": "RED_REPAIR_ACTIVE_R4C_D_R5_R6_R7_REMAIN",
+  "implementation_revision_sha256": "10914981c7108580becb76253bfd6e8d1778dd3529929eca79434a64549ee654",
+  "independent_reality": {
+    "pass353": "PASS_NO_BOUNDED_ORACLE_CONTRADICTION",
+    "scope": "PASS_R4B_ONLY_NO_R4C_R4D_LEAKAGE",
+    "src64": "PASS_NO_BOUNDED_SOURCE_CONTRADICTION"
+  },
+  "local_verdict": "GREEN_LOCAL_R4B_BOUNDED",
+  "milestone": "R4B",
+  "next": "R4C pre-implementation research/reconciliation only; do not implement R4C until that research checkpoint is green.",
+  "overall_r4_verdict": "IMPLEMENTATION_IN_PROGRESS_R4C_D_REMAIN",
+  "pass": "470.0",
+  "postgresql": "NOT_RUN_NORMAL_CHAT; TARGETED_END_R4_WORK_GATE_AFTER_R4D_BEFORE_R5; R7_REMAINS_MANDATORY",
+  "schema_version": 1,
+  "version": "v0.54.1"
+}

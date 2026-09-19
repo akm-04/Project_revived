@@ -1,0 +1,2 @@
+CA4-3A-B INDEPENDENT CHECK: PASS 47/47
+Pass543->B delta bounded; MID58/I5/receipt/projection/route semantics qualified; later stages absent; protocol-limit remains explicit.

@@ -1,0 +1,74 @@
+{
+  "schema_version": 1,
+  "pass": "567.0",
+  "phase": "CA5_AGGREGATE_NATIVE_REPAIR4_CONTRACT_AMENDMENT",
+  "status": "PROPOSED_RETEST_PENDING_NOT_ACCEPTED",
+  "authority_passmap_sha256": "7766392d376a6b939a75eda2b477c69959f63e0dbb895520f891648423e99a2f",
+  "parent_repair3_backend_sha256": "9c364ce2eeef9c19f9e5db606a1bb6dc60f8fd709175cef463f6a180dd0c36f3",
+  "parent_repair3_implementation_revision_sha256": "b190366d5a9288e35b0ba5ae524995e2c741f03bbb5783f1e1a5f0b1ed553041",
+  "repair3_runtime_evidence_sha256": "cbb27af77e2e83369132a7278cb64ec72ee2afe88ebea99ec6d17b76871338e9",
+  "reopens": {
+    "authority": "Pass563 CA5-3 implementation contract",
+    "clause": "C4_TX_AND_LOCKS isolation subclause requiring caller-owned SERIALIZABLE transaction",
+    "basis": "demonstrated native PostgreSQL 18.6 defect on exact Repair3 candidate"
+  },
+  "runtime_observed": [
+    "A03 20-way same-player SavedPreset replacement workload surfaced SQLSTATE 40001 after the three-attempt service retry budget.",
+    "The failure reproduced on two independent fresh PostgreSQL 18.6 databases with zero product-tree drift.",
+    "PostgreSQL server evidence identifies SSI pivot cancellation during gxb_operation_receipts insertion: Canceled on identification as a pivot, during write.",
+    "One contender committed and aggregate structure remained valid; the defect is surfaced availability/progress failure under required contention, not durable corruption."
+  ],
+  "foundation_reconciliation": {
+    "Pass407": "Normal isolation is READ COMMITTED plus explicit canonical owner/parent locks, constraints and state-version fences; SERIALIZABLE is selective for predicate/set invariants unsafe or impractical to fence explicitly.",
+    "D01": "One caller-owned transaction; complete typed synchronization plan before first canonical mutation; deterministic global lock order; locked discovery may trigger pre-mutation replan/retry; no nested transactions or foreign-owner SQL.",
+    "I1": "Stable operation context, bounded definite-abort retry, semantic receipt, and conservative UNKNOWN-COMMIT resolution remain unchanged.",
+    "I3": "Actor liveness fencing remains inside every attempt.",
+    "I6": "No timed-gameplay/DecisionAt behavior is introduced or changed."
+  },
+  "amendment": {
+    "old_isolation": "SERIALIZABLE",
+    "new_isolation": "READ COMMITTED",
+    "scope": "CA5-3 SavedPreset MutationService.Replace only",
+    "unchanged": [
+      "preflight current aggregate read",
+      "complete old-union-desired Hero/Pet reference plan",
+      "Hero rank410 -> Pet rank430 -> SavedPresetRoot rank440 deterministic acquisition",
+      "locked root reread and legacy re-resolution",
+      "Covers(plan) pre-mutation definite-abort/replan",
+      "whole-aggregate expected-version CAS",
+      "same-transaction semantic receipt",
+      "MaxAttempts=3 and RetryDefiniteAbort=true",
+      "UNKNOWN-COMMIT receipt resolver semantics",
+      "wire/reload projection and MID1793 behavior",
+      "foreign-owner SQL prohibition",
+      "migration/schema ownership",
+      "savedPresetPolicyVersion semantic lineage"
+    ]
+  },
+  "rejected_repairs": [
+    {
+      "option": "raise retry budget/backoff only",
+      "reason": "masks a structurally unnecessary SSI conflict and changes retry tuning without removing the cause; exact evidence already shows repeated pivot cancellation under burst contention."
+    },
+    {
+      "option": "global per-player/advisory gameplay mutex",
+      "reason": "foundation explicitly rejects global gameplay locks as normal safety model; CA5 already has durable typed Hero/Pet/root owner locks."
+    },
+    {
+      "option": "generic tx.Runner behavior change",
+      "reason": "would expand blast radius across I0-I6 and unrelated services although the demonstrated defect is CA5-3-specific."
+    },
+    {
+      "option": "weaken/remove receipt",
+      "reason": "would violate same-transaction semantic receipt and UNKNOWN-COMMIT foundation contracts."
+    }
+  ],
+  "acceptance_required": [
+    "Exact candidate identity and zero drift.",
+    "Exact sqlc 1.31.1 regeneration remains green.",
+    "Dedicated A03 20-way same-player native PostgreSQL workload passes repeatedly without surfaced serialization/deadlock/timeout failure.",
+    "Previously missing dedicated native cases F01,F02,F06,P05,C07,C08,C09,C10,C14,C15,C16,C22,G09,G10 are freshly executed.",
+    "All 94 aggregate matrix IDs are dispositioned on Repair4; no mandatory case is inferred from Repair3.",
+    "N01/W2 remains the sole authorized deferral; R02 may be N/A only after fresh applicability audit."
+  ]
+}

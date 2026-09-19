@@ -1,0 +1,1111 @@
+{
+  "go": "go version go1.27.1 linux/amd64",
+  "sqlc": "v1.31.1",
+  "execution_scope": "EXACT_PINNED_UNMODIFIED_COPY",
+  "compatibility_edits": [],
+  "metadata_accommodation": "go list -buildvcs=false for archive without usable VCS metadata; no source/toolchain/dependency changes",
+  "package_count": 67,
+  "candidate_unchanged": true,
+  "real_postgres": "NOT_RUN; postgres-tag unit/build evidence only",
+  "results": [
+    {
+      "name": "focused_race",
+      "command": [
+        "go",
+        "test",
+        "-race",
+        "./internal/content/...",
+        "./internal/adapters/postgres/contentstore/...",
+        "./internal/archguard"
+      ],
+      "exit_code": 0,
+      "log": "focused_race.log"
+    },
+    {
+      "name": "vet",
+      "command": [
+        "go",
+        "vet",
+        "./..."
+      ],
+      "exit_code": 0,
+      "log": "vet.log"
+    },
+    {
+      "name": "postgres_tag",
+      "command": [
+        "go",
+        "test",
+        "-tags",
+        "postgres",
+        "./cmd/gxb-api",
+        "./internal/adapters/postgres/..."
+      ],
+      "exit_code": 0,
+      "log": "postgres_tag.log"
+    },
+    {
+      "name": "sqlc",
+      "command": [
+        "sqlc",
+        "generate"
+      ],
+      "exit_code": 0,
+      "log": "sqlc.log"
+    },
+    {
+      "name": "r4a_source",
+      "command": [
+        "python3",
+        "tools/validate_r4a.py",
+        "--source-archive",
+        "/workspace/scratch/954ae618448a/work473/inputs/all-assest-rechecked-1.zip"
+      ],
+      "exit_code": 0,
+      "log": "r4a_source.log"
+    },
+    {
+      "name": "v1_differential",
+      "command": [
+        "python3",
+        "tools/check_r4a_pass353_differential.py",
+        "--oracle-archive",
+        "/workspace/scratch/954ae618448a/work473/inputs/gxb-backend-v0.65.2-pass353.0-portable-dev1.zip"
+      ],
+      "exit_code": 0,
+      "log": "v1_differential.log"
+    },
+    {
+      "name": "pkg_0",
+      "command": [
+        "go",
+        "test",
+        "-timeout",
+        "90s",
+        "gxb.local/backend/v2/cmd/gxb-admin"
+      ],
+      "exit_code": 0,
+      "log": "pkg_0.log"
+    },
+    {
+      "name": "pkg_1",
+      "command": [
+        "go",
+        "test",
+        "-timeout",
+        "90s",
+        "gxb.local/backend/v2/cmd/gxb-api"
+      ],
+      "exit_code": 0,
+      "log": "pkg_1.log"
+    },
+    {
+      "name": "pkg_2",
+      "command": [
+        "go",
+        "test",
+        "-timeout",
+        "90s",
+        "gxb.local/backend/v2/cmd/gxb-realtime"
+      ],
+      "exit_code": 0,
+      "log": "pkg_2.log"
+    },
+    {
+      "name": "pkg_3",
+      "command": [
+        "go",
+        "test",
+        "-timeout",
+        "90s",
+        "gxb.local/backend/v2/cmd/gxb-wave-s-report"
+      ],
+      "exit_code": 0,
+      "log": "pkg_3.log"
+    },
+    {
+      "name": "pkg_4",
+      "command": [
+        "go",
+        "test",
+        "-timeout",
+        "90s",
+        "gxb.local/backend/v2/cmd/gxb-worker"
+      ],
+      "exit_code": 0,
+      "log": "pkg_4.log"
+    },
+    {
+      "name": "pkg_5",
+      "command": [
+        "go",
+        "test",
+        "-timeout",
+        "90s",
+        "gxb.local/backend/v2/internal/adapters/blobstore"
+      ],
+      "exit_code": 0,
+      "log": "pkg_5.log"
+    },
+    {
+      "name": "pkg_6",
+      "command": [
+        "go",
+        "test",
+        "-timeout",
+        "90s",
+        "gxb.local/backend/v2/internal/adapters/pass353diff"
+      ],
+      "exit_code": 0,
+      "log": "pkg_6.log"
+    },
+    {
+      "name": "pkg_7",
+      "command": [
+        "go",
+        "test",
+        "-timeout",
+        "90s",
+        "gxb.local/backend/v2/internal/adapters/postgres"
+      ],
+      "exit_code": 0,
+      "log": "pkg_7.log"
+    },
+    {
+      "name": "pkg_8",
+      "command": [
+        "go",
+        "test",
+        "-timeout",
+        "90s",
+        "gxb.local/backend/v2/internal/adapters/postgres/contentqueries"
+      ],
+      "exit_code": 0,
+      "log": "pkg_8.log"
+    },
+    {
+      "name": "pkg_9",
+      "command": [
+        "go",
+        "test",
+        "-timeout",
+        "90s",
+        "gxb.local/backend/v2/internal/adapters/postgres/contentstore"
+      ],
+      "exit_code": 0,
+      "log": "pkg_9.log"
+    },
+    {
+      "name": "pkg_10",
+      "command": [
+        "go",
+        "test",
+        "-timeout",
+        "90s",
+        "gxb.local/backend/v2/internal/adapters/postgres/i4store"
+      ],
+      "exit_code": 0,
+      "log": "pkg_10.log"
+    },
+    {
+      "name": "pkg_11",
+      "command": [
+        "go",
+        "test",
+        "-timeout",
+        "90s",
+        "gxb.local/backend/v2/internal/adapters/postgres/i5store"
+      ],
+      "exit_code": 0,
+      "log": "pkg_11.log"
+    },
+    {
+      "name": "pkg_12",
+      "command": [
+        "go",
+        "test",
+        "-timeout",
+        "90s",
+        "gxb.local/backend/v2/internal/adapters/postgres/identitystore"
+      ],
+      "exit_code": 0,
+      "log": "pkg_12.log"
+    },
+    {
+      "name": "pkg_13",
+      "command": [
+        "go",
+        "test",
+        "-timeout",
+        "90s",
+        "gxb.local/backend/v2/internal/adapters/postgres/kernelqueries"
+      ],
+      "exit_code": 0,
+      "log": "pkg_13.log"
+    },
+    {
+      "name": "pkg_14",
+      "command": [
+        "go",
+        "test",
+        "-timeout",
+        "90s",
+        "gxb.local/backend/v2/internal/adapters/postgres/kernelstore"
+      ],
+      "exit_code": 0,
+      "log": "pkg_14.log"
+    },
+    {
+      "name": "pkg_15",
+      "command": [
+        "go",
+        "test",
+        "-timeout",
+        "90s",
+        "gxb.local/backend/v2/internal/adapters/provider"
+      ],
+      "exit_code": 0,
+      "log": "pkg_15.log"
+    },
+    {
+      "name": "pkg_16",
+      "command": [
+        "go",
+        "test",
+        "-timeout",
+        "90s",
+        "gxb.local/backend/v2/internal/adapters/river"
+      ],
+      "exit_code": 0,
+      "log": "pkg_16.log"
+    },
+    {
+      "name": "pkg_17",
+      "command": [
+        "go",
+        "test",
+        "-timeout",
+        "90s",
+        "gxb.local/backend/v2/internal/adapters/stockfixtures"
+      ],
+      "exit_code": 0,
+      "log": "pkg_17.log"
+    },
+    {
+      "name": "pkg_18",
+      "command": [
+        "go",
+        "test",
+        "-timeout",
+        "90s",
+        "gxb.local/backend/v2/internal/adapters/stockruntime"
+      ],
+      "exit_code": 0,
+      "log": "pkg_18.log"
+    },
+    {
+      "name": "pkg_19",
+      "command": [
+        "go",
+        "test",
+        "-timeout",
+        "90s",
+        "gxb.local/backend/v2/internal/application/bootstrap"
+      ],
+      "exit_code": 0,
+      "log": "pkg_19.log"
+    },
+    {
+      "name": "pkg_20",
+      "command": [
+        "go",
+        "test",
+        "-timeout",
+        "90s",
+        "gxb.local/backend/v2/internal/application/i5"
+      ],
+      "exit_code": 0,
+      "log": "pkg_20.log"
+    },
+    {
+      "name": "pkg_21",
+      "command": [
+        "go",
+        "test",
+        "-timeout",
+        "90s",
+        "gxb.local/backend/v2/internal/application/identitylifecycle"
+      ],
+      "exit_code": 0,
+      "log": "pkg_21.log"
+    },
+    {
+      "name": "pkg_22",
+      "command": [
+        "go",
+        "test",
+        "-timeout",
+        "90s",
+        "gxb.local/backend/v2/internal/application/realtimeauth"
+      ],
+      "exit_code": 0,
+      "log": "pkg_22.log"
+    },
+    {
+      "name": "pkg_23",
+      "command": [
+        "go",
+        "test",
+        "-timeout",
+        "90s",
+        "gxb.local/backend/v2/internal/archguard"
+      ],
+      "exit_code": 0,
+      "log": "pkg_23.log"
+    },
+    {
+      "name": "pkg_24",
+      "command": [
+        "go",
+        "test",
+        "-timeout",
+        "90s",
+        "gxb.local/backend/v2/internal/content/builtin"
+      ],
+      "exit_code": 0,
+      "log": "pkg_24.log"
+    },
+    {
+      "name": "pkg_25",
+      "command": [
+        "go",
+        "test",
+        "-timeout",
+        "90s",
+        "gxb.local/backend/v2/internal/content/registry"
+      ],
+      "exit_code": 0,
+      "log": "pkg_25.log"
+    },
+    {
+      "name": "pkg_26",
+      "command": [
+        "go",
+        "test",
+        "-timeout",
+        "90s",
+        "gxb.local/backend/v2/internal/domain/combat"
+      ],
+      "exit_code": 0,
+      "log": "pkg_26.log"
+    },
+    {
+      "name": "pkg_27",
+      "command": [
+        "go",
+        "test",
+        "-timeout",
+        "90s",
+        "gxb.local/backend/v2/internal/domain/commerce"
+      ],
+      "exit_code": 0,
+      "log": "pkg_27.log"
+    },
+    {
+      "name": "pkg_28",
+      "command": [
+        "go",
+        "test",
+        "-timeout",
+        "90s",
+        "gxb.local/backend/v2/internal/domain/control"
+      ],
+      "exit_code": 0,
+      "log": "pkg_28.log"
+    },
+    {
+      "name": "pkg_29",
+      "command": [
+        "go",
+        "test",
+        "-timeout",
+        "90s",
+        "gxb.local/backend/v2/internal/domain/economy"
+      ],
+      "exit_code": 0,
+      "log": "pkg_29.log"
+    },
+    {
+      "name": "pkg_30",
+      "command": [
+        "go",
+        "test",
+        "-timeout",
+        "90s",
+        "gxb.local/backend/v2/internal/domain/generation"
+      ],
+      "exit_code": 0,
+      "log": "pkg_30.log"
+    },
+    {
+      "name": "pkg_31",
+      "command": [
+        "go",
+        "test",
+        "-timeout",
+        "90s",
+        "gxb.local/backend/v2/internal/domain/grant"
+      ],
+      "exit_code": 0,
+      "log": "pkg_31.log"
+    },
+    {
+      "name": "pkg_32",
+      "command": [
+        "go",
+        "test",
+        "-timeout",
+        "90s",
+        "gxb.local/backend/v2/internal/domain/guild"
+      ],
+      "exit_code": 0,
+      "log": "pkg_32.log"
+    },
+    {
+      "name": "pkg_33",
+      "command": [
+        "go",
+        "test",
+        "-timeout",
+        "90s",
+        "gxb.local/backend/v2/internal/domain/identity"
+      ],
+      "exit_code": 0,
+      "log": "pkg_33.log"
+    },
+    {
+      "name": "pkg_34",
+      "command": [
+        "go",
+        "test",
+        "-timeout",
+        "90s",
+        "gxb.local/backend/v2/internal/domain/logicalserver"
+      ],
+      "exit_code": 0,
+      "log": "pkg_34.log"
+    },
+    {
+      "name": "pkg_35",
+      "command": [
+        "go",
+        "test",
+        "-timeout",
+        "90s",
+        "gxb.local/backend/v2/internal/domain/mail"
+      ],
+      "exit_code": 0,
+      "log": "pkg_35.log"
+    },
+    {
+      "name": "pkg_36",
+      "command": [
+        "go",
+        "test",
+        "-timeout",
+        "90s",
+        "gxb.local/backend/v2/internal/domain/modes"
+      ],
+      "exit_code": 0,
+      "log": "pkg_36.log"
+    },
+    {
+      "name": "pkg_37",
+      "command": [
+        "go",
+        "test",
+        "-timeout",
+        "90s",
+        "gxb.local/backend/v2/internal/domain/objective"
+      ],
+      "exit_code": 0,
+      "log": "pkg_37.log"
+    },
+    {
+      "name": "pkg_38",
+      "command": [
+        "go",
+        "test",
+        "-timeout",
+        "90s",
+        "gxb.local/backend/v2/internal/domain/player"
+      ],
+      "exit_code": 0,
+      "log": "pkg_38.log"
+    },
+    {
+      "name": "pkg_39",
+      "command": [
+        "go",
+        "test",
+        "-timeout",
+        "90s",
+        "gxb.local/backend/v2/internal/domain/profile"
+      ],
+      "exit_code": 0,
+      "log": "pkg_39.log"
+    },
+    {
+      "name": "pkg_40",
+      "command": [
+        "go",
+        "test",
+        "-timeout",
+        "90s",
+        "gxb.local/backend/v2/internal/domain/realtimeauth"
+      ],
+      "exit_code": 0,
+      "log": "pkg_40.log"
+    },
+    {
+      "name": "pkg_41",
+      "command": [
+        "go",
+        "test",
+        "-timeout",
+        "90s",
+        "gxb.local/backend/v2/internal/domain/redeem"
+      ],
+      "exit_code": 0,
+      "log": "pkg_41.log"
+    },
+    {
+      "name": "pkg_42",
+      "command": [
+        "go",
+        "test",
+        "-timeout",
+        "90s",
+        "gxb.local/backend/v2/internal/domain/social"
+      ],
+      "exit_code": 0,
+      "log": "pkg_42.log"
+    },
+    {
+      "name": "pkg_43",
+      "command": [
+        "go",
+        "test",
+        "-timeout",
+        "90s",
+        "gxb.local/backend/v2/internal/foundation/audit"
+      ],
+      "exit_code": 0,
+      "log": "pkg_43.log"
+    },
+    {
+      "name": "pkg_44",
+      "command": [
+        "go",
+        "test",
+        "-timeout",
+        "90s",
+        "gxb.local/backend/v2/internal/foundation/clock"
+      ],
+      "exit_code": 0,
+      "log": "pkg_44.log"
+    },
+    {
+      "name": "pkg_45",
+      "command": [
+        "go",
+        "test",
+        "-timeout",
+        "90s",
+        "gxb.local/backend/v2/internal/foundation/config"
+      ],
+      "exit_code": 0,
+      "log": "pkg_45.log"
+    },
+    {
+      "name": "pkg_46",
+      "command": [
+        "go",
+        "test",
+        "-timeout",
+        "90s",
+        "gxb.local/backend/v2/internal/foundation/ids"
+      ],
+      "exit_code": 0,
+      "log": "pkg_46.log"
+    },
+    {
+      "name": "pkg_47",
+      "command": [
+        "go",
+        "test",
+        "-timeout",
+        "90s",
+        "gxb.local/backend/v2/internal/foundation/lockkey"
+      ],
+      "exit_code": 0,
+      "log": "pkg_47.log"
+    },
+    {
+      "name": "pkg_48",
+      "command": [
+        "go",
+        "test",
+        "-timeout",
+        "90s",
+        "gxb.local/backend/v2/internal/foundation/obligation"
+      ],
+      "exit_code": 0,
+      "log": "pkg_48.log"
+    },
+    {
+      "name": "pkg_49",
+      "command": [
+        "go",
+        "test",
+        "-timeout",
+        "90s",
+        "gxb.local/backend/v2/internal/foundation/observability"
+      ],
+      "exit_code": 0,
+      "log": "pkg_49.log"
+    },
+    {
+      "name": "pkg_50",
+      "command": [
+        "go",
+        "test",
+        "-timeout",
+        "90s",
+        "gxb.local/backend/v2/internal/foundation/operation"
+      ],
+      "exit_code": 0,
+      "log": "pkg_50.log"
+    },
+    {
+      "name": "pkg_51",
+      "command": [
+        "go",
+        "test",
+        "-timeout",
+        "90s",
+        "gxb.local/backend/v2/internal/foundation/policy"
+      ],
+      "exit_code": 0,
+      "log": "pkg_51.log"
+    },
+    {
+      "name": "pkg_52",
+      "command": [
+        "go",
+        "test",
+        "-timeout",
+        "90s",
+        "gxb.local/backend/v2/internal/foundation/receipt"
+      ],
+      "exit_code": 0,
+      "log": "pkg_52.log"
+    },
+    {
+      "name": "pkg_53",
+      "command": [
+        "go",
+        "test",
+        "-timeout",
+        "90s",
+        "gxb.local/backend/v2/internal/foundation/tx"
+      ],
+      "exit_code": 0,
+      "log": "pkg_53.log"
+    },
+    {
+      "name": "pkg_54",
+      "command": [
+        "go",
+        "test",
+        "-timeout",
+        "90s",
+        "gxb.local/backend/v2/internal/projection/lobby"
+      ],
+      "exit_code": 0,
+      "log": "pkg_54.log"
+    },
+    {
+      "name": "pkg_55",
+      "command": [
+        "go",
+        "test",
+        "-timeout",
+        "90s",
+        "gxb.local/backend/v2/internal/projection/ota"
+      ],
+      "exit_code": 0,
+      "log": "pkg_55.log"
+    },
+    {
+      "name": "pkg_56",
+      "command": [
+        "go",
+        "test",
+        "-timeout",
+        "90s",
+        "gxb.local/backend/v2/internal/projection/publication"
+      ],
+      "exit_code": 0,
+      "log": "pkg_56.log"
+    },
+    {
+      "name": "pkg_57",
+      "command": [
+        "go",
+        "test",
+        "-timeout",
+        "90s",
+        "gxb.local/backend/v2/internal/projection/publicplayer"
+      ],
+      "exit_code": 0,
+      "log": "pkg_57.log"
+    },
+    {
+      "name": "pkg_58",
+      "command": [
+        "go",
+        "test",
+        "-timeout",
+        "90s",
+        "gxb.local/backend/v2/internal/projection/ranking"
+      ],
+      "exit_code": 0,
+      "log": "pkg_58.log"
+    },
+    {
+      "name": "pkg_59",
+      "command": [
+        "go",
+        "test",
+        "-timeout",
+        "90s",
+        "gxb.local/backend/v2/internal/projection/realtimeview"
+      ],
+      "exit_code": 0,
+      "log": "pkg_59.log"
+    },
+    {
+      "name": "pkg_60",
+      "command": [
+        "go",
+        "test",
+        "-timeout",
+        "90s",
+        "gxb.local/backend/v2/internal/protocol/amf3"
+      ],
+      "exit_code": 0,
+      "log": "pkg_60.log"
+    },
+    {
+      "name": "pkg_61",
+      "command": [
+        "go",
+        "test",
+        "-timeout",
+        "90s",
+        "gxb.local/backend/v2/internal/protocol/httpedge"
+      ],
+      "exit_code": 0,
+      "log": "pkg_61.log"
+    },
+    {
+      "name": "pkg_62",
+      "command": [
+        "go",
+        "test",
+        "-timeout",
+        "90s",
+        "gxb.local/backend/v2/internal/protocol/limits"
+      ],
+      "exit_code": 0,
+      "log": "pkg_62.log"
+    },
+    {
+      "name": "pkg_63",
+      "command": [
+        "go",
+        "test",
+        "-timeout",
+        "90s",
+        "gxb.local/backend/v2/internal/protocol/mids"
+      ],
+      "exit_code": 0,
+      "log": "pkg_63.log"
+    },
+    {
+      "name": "pkg_64",
+      "command": [
+        "go",
+        "test",
+        "-timeout",
+        "90s",
+        "gxb.local/backend/v2/internal/protocol/observe"
+      ],
+      "exit_code": 0,
+      "log": "pkg_64.log"
+    },
+    {
+      "name": "pkg_65",
+      "command": [
+        "go",
+        "test",
+        "-timeout",
+        "90s",
+        "gxb.local/backend/v2/internal/protocol/realtime"
+      ],
+      "exit_code": 0,
+      "log": "pkg_65.log"
+    },
+    {
+      "name": "pkg_66",
+      "command": [
+        "go",
+        "test",
+        "-timeout",
+        "90s",
+        "gxb.local/backend/v2/internal/protocol/wire"
+      ],
+      "exit_code": 0,
+      "log": "pkg_66.log"
+    },
+    {
+      "name": "validate_foundation_trace",
+      "command": [
+        "python3",
+        "tools/validate_foundation_trace.py"
+      ],
+      "exit_code": 0,
+      "log": "validate_foundation_trace.log"
+    },
+    {
+      "name": "validate_i1",
+      "command": [
+        "python3",
+        "tools/validate_i1.py"
+      ],
+      "exit_code": 1,
+      "log": "validate_i1.log"
+    },
+    {
+      "name": "validate_i2",
+      "command": [
+        "python3",
+        "tools/validate_i2.py"
+      ],
+      "exit_code": 1,
+      "log": "validate_i2.log"
+    },
+    {
+      "name": "validate_i3",
+      "command": [
+        "python3",
+        "tools/validate_i3.py"
+      ],
+      "exit_code": 1,
+      "log": "validate_i3.log"
+    },
+    {
+      "name": "validate_i4",
+      "command": [
+        "python3",
+        "tools/validate_i4.py"
+      ],
+      "exit_code": 0,
+      "log": "validate_i4.log"
+    },
+    {
+      "name": "validate_i5",
+      "command": [
+        "python3",
+        "tools/validate_i5.py"
+      ],
+      "exit_code": 1,
+      "log": "validate_i5.log"
+    },
+    {
+      "name": "validate_r0",
+      "command": [
+        "python3",
+        "tools/validate_r0.py"
+      ],
+      "exit_code": 0,
+      "log": "validate_r0.log"
+    },
+    {
+      "name": "validate_r1a",
+      "command": [
+        "python3",
+        "tools/validate_r1a.py"
+      ],
+      "exit_code": 0,
+      "log": "validate_r1a.log"
+    },
+    {
+      "name": "validate_r1b",
+      "command": [
+        "python3",
+        "tools/validate_r1b.py"
+      ],
+      "exit_code": 0,
+      "log": "validate_r1b.log"
+    },
+    {
+      "name": "validate_r2a",
+      "command": [
+        "python3",
+        "tools/validate_r2a.py"
+      ],
+      "exit_code": 0,
+      "log": "validate_r2a.log"
+    },
+    {
+      "name": "validate_r2b",
+      "command": [
+        "python3",
+        "tools/validate_r2b.py"
+      ],
+      "exit_code": 0,
+      "log": "validate_r2b.log"
+    },
+    {
+      "name": "validate_r2c",
+      "command": [
+        "python3",
+        "tools/validate_r2c.py"
+      ],
+      "exit_code": 0,
+      "log": "validate_r2c.log"
+    },
+    {
+      "name": "validate_r2d",
+      "command": [
+        "python3",
+        "tools/validate_r2d.py"
+      ],
+      "exit_code": 0,
+      "log": "validate_r2d.log"
+    },
+    {
+      "name": "validate_r3a",
+      "command": [
+        "python3",
+        "tools/validate_r3a.py"
+      ],
+      "exit_code": 0,
+      "log": "validate_r3a.log"
+    },
+    {
+      "name": "validate_r3b",
+      "command": [
+        "python3",
+        "tools/validate_r3b.py"
+      ],
+      "exit_code": 0,
+      "log": "validate_r3b.log"
+    },
+    {
+      "name": "validate_r3c",
+      "command": [
+        "python3",
+        "tools/validate_r3c.py"
+      ],
+      "exit_code": 0,
+      "log": "validate_r3c.log"
+    },
+    {
+      "name": "validate_r4b",
+      "command": [
+        "python3",
+        "tools/validate_r4b.py"
+      ],
+      "exit_code": 0,
+      "log": "validate_r4b.log"
+    },
+    {
+      "name": "validate_r4c",
+      "command": [
+        "python3",
+        "tools/validate_r4c.py"
+      ],
+      "exit_code": 0,
+      "log": "validate_r4c.log"
+    },
+    {
+      "name": "check_dependency_policy.py",
+      "command": [
+        "python3",
+        "tools/check_dependency_policy.py"
+      ],
+      "exit_code": 0,
+      "log": "check_dependency_policy.py.log"
+    },
+    {
+      "name": "generate_resolved_sbom.py",
+      "command": [
+        "python3",
+        "tools/generate_resolved_sbom.py",
+        "--check"
+      ],
+      "exit_code": 1,
+      "log": "generate_resolved_sbom.py.log"
+    },
+    {
+      "name": "check_connected_candidate.py",
+      "command": [
+        "python3",
+        "tools/check_connected_candidate.py"
+      ],
+      "exit_code": 1,
+      "log": "check_connected_candidate.py.log"
+    },
+    {
+      "name": "generate_kernel_querytext.py",
+      "command": [
+        "python3",
+        "tools/generate_kernel_querytext.py",
+        "--check"
+      ],
+      "exit_code": 0,
+      "log": "generate_kernel_querytext.py.log"
+    },
+    {
+      "name": "generate_content_querytext.py",
+      "command": [
+        "python3",
+        "tools/generate_content_querytext.py",
+        "--check"
+      ],
+      "exit_code": 0,
+      "log": "generate_content_querytext.py.log"
+    },
+    {
+      "name": "check_schema_query_ownership.py",
+      "command": [
+        "python3",
+        "tools/check_schema_query_ownership.py"
+      ],
+      "exit_code": 0,
+      "log": "check_schema_query_ownership.py.log"
+    },
+    {
+      "name": "check_sqlc_generation_policy.py",
+      "command": [
+        "python3",
+        "tools/check_sqlc_generation_policy.py"
+      ],
+      "exit_code": 0,
+      "log": "check_sqlc_generation_policy.py.log"
+    }
+  ]
+}

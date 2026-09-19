@@ -1,0 +1,46 @@
+=== migration/sql/replay candidate files ===
+/mnt/data/ca5_1_impl/backend/internal/application/characterpet/timed_receipt.go
+/mnt/data/ca5_1_impl/backend/internal/application/i5/grant_receipts.go
+/mnt/data/ca5_1_impl/backend/internal/foundation/receipt/receipt.go
+/mnt/data/ca5_1_impl/backend/internal/foundation/receipt/receipt_test.go
+/mnt/data/ca5_1_impl/backend/migrations/00001_kernel_receipts.sql
+/mnt/data/ca5_1_impl/backend/migrations/00002_identity_logicalserver_bootstrap.sql
+/mnt/data/ca5_1_impl/backend/migrations/00003_identity_account_uid_repair.sql
+/mnt/data/ca5_1_impl/backend/migrations/00004_player_directory_profile_bootstrap.sql
+/mnt/data/ca5_1_impl/backend/migrations/00005_i5_player_economy_mail_objective_redeem.sql
+/mnt/data/ca5_1_impl/backend/migrations/00006_i5_transactional_policies.sql
+/mnt/data/ca5_1_impl/backend/migrations/00007_identity_lifecycle_constraints.sql
+/mnt/data/ca5_1_impl/backend/migrations/00008_i5_economy_owner_fence.sql
+/mnt/data/ca5_1_impl/backend/migrations/00009_r4_immutable_content_revisions.sql
+/mnt/data/ca5_1_impl/backend/migrations/00010_r4_manifest_identity_not_null.sql
+/mnt/data/ca5_1_impl/backend/migrations/00011_r5_foundation_repairs.sql
+/mnt/data/ca5_1_impl/backend/migrations/00012_i6c_guild_core.sql
+/mnt/data/ca5_1_impl/backend/migrations/00013_i6c_guild_replay_repair.sql
+/mnt/data/ca5_1_impl/backend/migrations/00014_ca2_hero_foundation.sql
+/mnt/data/ca5_1_impl/backend/migrations/00015_ca2_hero_progression_content.sql
+/mnt/data/ca5_1_impl/backend/migrations/00016_ca3_pet_foundation.sql
+/mnt/data/ca5_1_impl/backend/migrations/00017_ca3_pet_acquisition.sql
+/mnt/data/ca5_1_impl/backend/migrations/00018_ca3_pet_progression.sql
+/mnt/data/ca5_1_impl/backend/migrations/00019_ca4_equipment_primitives.sql
+/mnt/data/ca5_1_impl/backend/migrations/00020_ca4_2_hero_equipment.sql
+/mnt/data/ca5_1_impl/backend/migrations/00021_ca4_3a_hero_fumo.sql
+/mnt/data/ca5_1_impl/backend/migrations/00022_ca4_3b_hero_promotion_restoration.sql
+/mnt/data/ca5_1_impl/backend/migrations/00023_ca4_4a_pet_equipment_content.sql
+/mnt/data/ca5_1_impl/backend/migrations/00024_ca4_4a_pet_equipment_state.sql
+/mnt/data/ca5_1_impl/backend/migrations/00025_ca4_4b_pet_promotion_restoration_content.sql
+/mnt/data/ca5_1_impl/backend/migrations/00026_ca4_4b_pet_fumo_state.sql
+/mnt/data/ca5_1_impl/backend/migrations/00027_ca4_5_super_equipment_content.sql
+/mnt/data/ca5_1_impl/backend/sql/character/hero.sql
+/mnt/data/ca5_1_impl/backend/sql/character/pet.sql
+/mnt/data/ca5_1_impl/backend/sql/content/content.sql
+/mnt/data/ca5_1_impl/backend/sql/i3/identity_bootstrap.sql
+/mnt/data/ca5_1_impl/backend/sql/i5/economy.sql
+/mnt/data/ca5_1_impl/backend/sql/i5/mail.sql
+/mnt/data/ca5_1_impl/backend/sql/i5/objective.sql
+/mnt/data/ca5_1_impl/backend/sql/i5/player_core.sql
+/mnt/data/ca5_1_impl/backend/sql/i5/redeem.sql
+/mnt/data/ca5_1_impl/backend/sql/kernel/receipts.sql
+=== SQL file tree diff ===
+=== replay/receipt filename diff ===
+=== forbidden new MID/projection strings in changed prod files ===
+=== gofmt diffs ===

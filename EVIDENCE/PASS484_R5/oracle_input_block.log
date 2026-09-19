@@ -1,0 +1,27 @@
+=== verify_oracles ===
+ORACLE VERIFY: FAIL
+ - current_src64: no matching file with expected sha256
+ - v1_pass353: no matching file with expected sha256
+ - old_client: no matching file with expected sha256
+ - native_apk: no matching file with expected sha256
+ - pass222_probe: no matching file with expected sha256
+RC=1
+=== check_i2_oracle_wire ===
+current_src64: verified oracle not found
+RC=1
+=== check_i3_oracle_bootstrap ===
+I3 ORACLE BOOTSTRAP CHECK: FAIL
+ - current src_64 archive missing
+RC=1
+=== check_i4_oracle_wave_s ===
+current_src64: verified oracle not found
+RC=1
+=== check_i5_oracle_player_core ===
+current_src64: verified oracle not found
+RC=1
+=== generate_mid_registry ===
+current src_64 oracle not found by verified hash
+RC=1
+=== generate_pass353_wire_fixtures ===
+verified Pass353 oracle not found
+RC=1

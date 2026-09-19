@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "pass": "436.0",
+  "stage": "I3",
+  "version": "v0.30.0",
+  "status": "PASS_WITH_LIVE_POSTGRESQL_AND_STOCK_RUNTIME_PROOF_DEFERRED_TO_W1_AFTER_I4",
+  "product_behavior_claimed": false,
+  "source_oracles": {
+    "current_Backend_sha256": "95378e2b0be8180df6de27e9e430c630bcfe46c080e1f91ef5f6d74bdbb1b840",
+    "current_mid_sha256": "026a20b29d97624979777a68c64c749254031604057ff42aa8f8254c3e35b5af",
+    "Pass353_archive_sha256": "31729d5c5e4509c2c89eaa1e8203cf1570afe87e18ed2610b944e457a9946b15"
+  },
+  "implemented_contracts": {
+    "typed_account_provider_binding_session_context": "PASS",
+    "digest_only_session_and_gameplay_credentials": "PASS",
+    "honest_logical_server_directory": "PASS",
+    "region_encoded_player_id_allocator": "PASS",
+    "new_character_observation_gate": "PASS",
+    "existing_character_full_gate_exemption": "PASS",
+    "mid18_stock_shaped_non_nil_arrays": "PASS",
+    "mid1_replay_stable_same_target": "PASS",
+    "target_change_supersedes_only_after_admission": "PASS",
+    "failed_target_preserves_old_context": "PASS",
+    "first_character_atomic_bootstrap_plan": "PASS",
+    "first_entry_pending_preserved": "PASS",
+    "ambiguous_commit_reconciliation_no_partial_absent": "PASS",
+    "forward_only_identity_logicalserver_migration": "PASS",
+    "i3_sqlc_query_contract": "PASS"
+  },
+  "normal_chat_checks": {
+    "full_repository_gate": "PASS",
+    "i3_oracle_bootstrap_check": "PASS",
+    "unit_tests": "PASS",
+    "go_vet": "PASS",
+    "architecture_guard": "PASS",
+    "race_identity_logicalserver_application_archguard": "PASS",
+    "historical_i1_validator": "PASS",
+    "historical_i2_validator": "PASS",
+    "current_i3_validator": "PASS"
+  },
+  "honest_deferrals": [
+    "exact Go 1.27.1 connected tagged dependency build",
+    "PostgreSQL 18.6 migration execution and real locking/admission behavior at W1",
+    "real MID18/MID1 persistence transaction and ambiguous-COMMIT probes at W1",
+    "unmodified stock-client logical-server/bootstrap runtime at W1 after I4",
+    "fresh-login packaged-client [4] selection remains a Wave-S compatibility seam; no fake servers are invented"
+  ],
+  "next_stage": "I4 minimum realtime + stock-lobby/Wave-S compatibility candidate",
+  "work_mode_gate": "W1 remains after I4",
+  "implementation_commit": "687e9fc5fe7b9c87e150d87d407b43585a1a4568",
+  "local_go_version": "go version go1.23.2 linux/amd64",
+  "work_mode_environment_precheck": "OPERATOR_REPORTED_READY with Go 1.27.1/PostgreSQL 18.6/sqlc/goose/govulncheck and cached dependencies; W1 remains after I4"
+}

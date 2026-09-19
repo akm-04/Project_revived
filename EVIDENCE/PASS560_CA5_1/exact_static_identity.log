@@ -1,0 +1,24 @@
+=== changed paths ===
+Only in /mnt/data/ca5_1_impl/backend/internal/adapters/postgres/characterstore: reference_owner.go
+Only in /mnt/data/ca5_1_impl/backend/internal/adapters/postgres/characterstore: reference_owner_test.go
+Files /mnt/data/ca5_1_clean/backend/internal/application/characterasset/contracts.go and /mnt/data/ca5_1_impl/backend/internal/application/characterasset/contracts.go differ
+Only in /mnt/data/ca5_1_impl/backend/internal/application/characterasset: references.go
+Only in /mnt/data/ca5_1_impl/backend/internal/application/characterasset: references_test.go
+Only in /mnt/data/ca5_1_impl/backend/internal/archguard: ca5_1_contract_test.go
+Files /mnt/data/ca5_1_clean/backend/internal/domain/character/hero.go and /mnt/data/ca5_1_impl/backend/internal/domain/character/hero.go differ
+Only in /mnt/data/ca5_1_impl/backend/internal/domain/character: reference_test.go
+=== canonical pins ===
+313c574368bb56dc570bc3427b65f59b059e492f909fe43b7d0291b5ced21dc4  /mnt/data/ca5_1_impl/backend/go.mod
+efbf6753542d66e2fefcb2ab5e2ade7c9d28f2206a1113d1eb9568f2cb75808d  /mnt/data/ca5_1_impl/backend/go.sum
+a8844fbc8c3eb51c26ed00aec4cd5a5a9d647f849c6ead07bcc83ed24c4a7718  /mnt/data/ca5_1_impl/backend/.go-version
+=== pin equality ===
+go.mod_IDENTICAL
+go.sum_IDENTICAL
+.go-version_IDENTICAL
+=== migration dir diff ===
+=== query dir candidates ===
+/mnt/data/ca5_1_impl/backend/internal/adapters/postgres/contentqueries
+/mnt/data/ca5_1_impl/backend/internal/adapters/postgres/kernelqueries
+/mnt/data/ca5_1_impl/backend/internal/adapters/postgres/characterqueries
+=== stockruntime MID cases changed? ===
+=== replaycatalog diff ===

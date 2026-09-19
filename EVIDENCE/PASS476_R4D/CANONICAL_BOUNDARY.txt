@@ -1,0 +1,5 @@
+Canonical exact-toolchain execution: ENVIRONMENT_BLOCKED/NOT_RUN (Go1.27.1 fetch unavailable).
+Compatibility-copy executable results: COMPATIBILITY_COPY_ONLY.
+Fresh final compatibility copy differed from canonical only in go.mod language/toolchain lines and .go-version; go.sum and all product files identical.
+Native PostgreSQL18.6/pgx/Goose/River/crash/concurrency/backup-restore: NOT_RUN here; mandatory end-R4 Work gate remains.
+Expected validate_i5 RED is RF015/R5 only: EconomyBootstrapContributor and temporal-resource bootstrap persistence.

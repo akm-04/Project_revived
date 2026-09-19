@@ -1,0 +1,45 @@
+PASS447 I5 STATIC/ORACLE CHECKS
+2026-09-06T17:49:40Z
+--- python3 tools/validate_i1.py ---
+I1 VALIDATION: PASS
+minimal kernel schema, tx outcome/reconciliation, typed facts, adapter isolation and stage routing verified
+--- python3 tools/validate_i2.py ---
+I2 VALIDATION: PASS
+stock HTTP families, generated numeric MID catalog, bounded AMF3/TCP framing, fail-closed dispatch and differential fixtures verified
+--- python3 tools/validate_i3.py ---
+I3 VALIDATION: PASS
+typed account/session/context, honest server directory, region-encoded allocator, observation gate, replay-stable MID1 and unknown-COMMIT reconciliation contracts verified
+--- python3 tools/validate_i4.py ---
+I4 VALIDATION: PASS
+--- python3 tools/validate_i5.py ---
+I5 VALIDATION: PASS
+--- python3 tools/check_i2_oracle_wire.py /mnt/data ---
+I2 ORACLE WIRE CHECK: PASS
+current Backend/mid/functions + APK QuickHTTP hashes and frozen wire facts verified
+--- python3 tools/check_i3_oracle_bootstrap.py /mnt/data ---
+I3 ORACLE BOOTSTRAP CHECK: PASS
+verified current MID18/MID1 selection, full/existing-owner gate, player-region formula, stock switch teardown and token replacement
+--- python3 tools/check_i4_oracle_wave_s.py /mnt/data ---
+I4 ORACLE WAVE-S CHECK: PASS
+verified current src_64 UpdateScene MID20480/MID2 + public MID7/MID2864 + MID1 log_url/server_time/default sidebands + room discovery/TCP_LOGIN/room-entered/heartbeat/reconnect + 20018/1304/Lua truthiness; Pass353 corroborates bootstrap/realtime shapes only
+--- python3 tools/check_i5_oracle_player_core.py /mnt/data ---
+I5 ORACLE PLAYER-CORE CHECK: PASS
+verified current src_64 player/story/mail/stack/task/redeem facts; old-client MID230 stability; Pass353 mechanisms corroborative only
+--- python3 tools/check_schema_query_ownership.py ---
+SCHEMA/QUERY OWNERSHIP: PASS
+--- python3 tools/check_sqlc_generation_policy.py ---
+SQLC GENERATION POLICY: PASS
+--- python3 tools/check_dependency_policy.py ---
+DEPENDENCY POLICY: PASS
+resolved_go_modules 15 qualified_candidates 5
+--- python3 tools/verify_oracles.py --root /mnt/data ---
+PASS current_src64: all-assest-rechecked-1(20260906-162811).zip
+PASS v1_pass353: gxb-backend-v0.65.2-pass353.0-portable-dev1(20260906-162657).zip
+PASS old_client: gxb-old-client-v1.164.0-research-corpus(20260906-162800).zip
+PASS native_apk: latest_apk-smali-full(10).zip
+PASS pass222_probe: prep-apk-pass222-window-probe(20260906-162809).zip
+ORACLE VERIFY: PASS
+--- python3 tools/generate_mid_registry.py --root /mnt/data --check ---
+MID REGISTRY: PASS source_sha256=026a20b29d97624979777a68c64c749254031604057ff42aa8f8254c3e35b5af assignments=1213 unique=1211
+--- python3 tools/generate_pass353_wire_fixtures.py --root /mnt/data --check ---
+PASS353 WIRE FIXTURES: PASS cases=5

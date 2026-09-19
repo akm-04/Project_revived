@@ -1,0 +1,63 @@
+{
+  "base_artifact": "gxb-backend-v2-v0.54.0-pass468-r4a-deterministic-content.zip",
+  "base_artifact_sha256": "ec73de55088caaa98b4ec9f393863df62fafb8c165ec3a9c753243c5cf79eaf2",
+  "base_implementation_revision_sha256": "362769d710b76dfd73f90cda0662ae4ebe15a8ac6d76878b5f7f2e8aeb6a965f",
+  "digest_basis": "SHA256(canonical JSON of all fields except implementation_revision_sha256; sort_keys=true,separators=(comma,colon))",
+  "files": [
+    {
+      "path": "docs/architecture/CANONICAL_TABLE_OWNERSHIP.json",
+      "sha256": "aead0015808b4b4c42a79e892f625e291e74b5fcecbefc7ea890506b8ea32b89"
+    },
+    {
+      "path": "internal/adapters/postgres/kernelqueries/querytext_gen.go",
+      "sha256": "18e839e10d0cfb056df91908db3d3950c0ffe9938920279959acb339c3aedd3c"
+    },
+    {
+      "path": "internal/adapters/postgres/kernelstore/store.go",
+      "sha256": "269dad8432ea3dbfcc58672da90cf5b2f66f3cb1f79b5111fbe3c6a28da89d2a"
+    },
+    {
+      "path": "internal/adapters/postgres/kernelstore/store_test.go",
+      "sha256": "9b6afaa5eea71c596233e1f8c79ec128d4f36fbd135fd708e211218add7fec73"
+    },
+    {
+      "path": "internal/foundation/policy/refs.go",
+      "sha256": "8f63831a0ef566eb305a6294e1248279ce5ab5fc2b54cc8b392f0d871b67d20c"
+    },
+    {
+      "path": "internal/foundation/policy/refs_test.go",
+      "sha256": "4931fefaede67ae81e9827faa3e7a0d26dc50e105c3d5ba2b910de8c71f24bbc"
+    },
+    {
+      "path": "internal/foundation/receipt/receipt.go",
+      "sha256": "a9da020a75b3d96f62b467ee58e0e33a9e938680379e5662c85067942109d76c"
+    },
+    {
+      "path": "internal/foundation/receipt/receipt_test.go",
+      "sha256": "1ad513bebec3747b7e8be601b7f6a29dd40a6c084367dc2d69d904c22b8d59fc"
+    },
+    {
+      "path": "migrations/00009_r4_immutable_content_revisions.sql",
+      "sha256": "b67018f5ca39e5ad05379e9df16c52e1cda5eb54918ab0db14319609d76237e4"
+    },
+    {
+      "path": "migrations/README.md",
+      "sha256": "9127702acacb30ca8627c311616aae274bebc92b083c2850957d9f301320e446"
+    },
+    {
+      "path": "sql/kernel/receipts.sql",
+      "sha256": "74ad9accee063e77323a2eb4a69df394bdcb331ce88e3d789864ffbc904b7511"
+    },
+    {
+      "path": "tools/check.sh",
+      "sha256": "6e5737128d58ce5a8db72e7d1aec1fa546b9f69c5f47871b2e42281aed94b6b2"
+    },
+    {
+      "path": "tools/validate_r4b.py",
+      "sha256": "7015758c49a80140b62fb24c9a5ae0a9e6cf0cf72a8726e9ed932e2177c5018d"
+    }
+  ],
+  "implementation_revision_sha256": "10914981c7108580becb76253bfd6e8d1778dd3529929eca79434a64549ee654",
+  "schema_version": 1,
+  "scope": "PASS470_R4B_IMPLEMENTATION_DELTA_ONLY"
+}

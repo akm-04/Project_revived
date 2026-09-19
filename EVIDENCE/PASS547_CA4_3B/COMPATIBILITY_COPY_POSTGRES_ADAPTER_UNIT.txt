@@ -1,0 +1,7 @@
+ok  	gxb.local/backend/v2/internal/adapters/postgres/characterstore	0.005s
+ok  	gxb.local/backend/v2/internal/adapters/postgres/i5store	0.002s
+ok  	gxb.local/backend/v2/internal/adapters/postgres/kernelstore	0.002s
+?   	gxb.local/backend/v2/internal/adapters/postgres/guildstore	[no test files]
+ok  	gxb.local/backend/v2/internal/adapters/postgres/contentstore	0.151s
+ok  	gxb.local/backend/v2/internal/adapters/postgres/activitystore	0.002s
+ok  	gxb.local/backend/v2/internal/adapters/postgres/i4store	0.002s

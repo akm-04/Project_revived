@@ -1,0 +1,35 @@
+PASS460 R3C LOCAL VALIDATION
+STATUS: GREEN_LOCAL_SERVER_EVIDENCE_MODEL
+Canonical source stayed go 1.26.0 / toolchain go1.27.1.
+All Go 1.23 compatibility tests were executed only in disposable copies.
+
+PASS:
+- focused lobby/evidence/manifest tests
+- actual realtime opaque lifecycle correlation test
+- repository-wide go test ./...
+- repository-wide go vet ./...
+- targeted race: projection/lobby, stockruntime, realtimeauth, protocol/realtime
+- tools/validate_r3c.py
+- R0 through R3C structural validators except intentionally open I5 RF-015 gate
+- source/current-client/Pass353 differential and oracle checks
+- strict schema/query ownership, dependency, sqlc, kernel querytext and resolved SBOM checks
+- aggregate tools/check.sh completed and returned RED for exactly one check: validate_i5.py RF-015 EconomyBootstrap/temporal bootstrap
+
+R3C local conclusions:
+- capture-disabled operation retains no unbounded detailed event slice
+- capture-enabled evidence has finite event/ring bounds and explicit health failure
+- run/process/session-context/connection correlation is explicit and opaque
+- server intent/write cannot satisfy client-consumed proof
+- disconnect/stale capture/mixed run or context cannot count as healthy quiescence
+- actual realtime lifecycle evidence does not contain raw SessionID/ContextID values
+- server-only evidence cannot make AcceptanceGreen true
+
+LIVE/CLIENT DEFERRED — NOT GREEN:
+- real stock-client CLIENT_CONSUMED observation
+- real Lua-health observation
+- correlated real 60-second Wave-S quiescence
+- operational capture I/O/load pressure
+- EX-05 multi-process realtime ownership
+
+Client acceptance remains W2-deferred and NOT green.
+I6 remains blocked until R7 integrated foundation Reality Check is green.

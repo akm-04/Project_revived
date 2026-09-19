@@ -1,0 +1,4 @@
+ok  	gxb.local/backend/v2/internal/domain/identity	(cached)
+ok  	gxb.local/backend/v2/internal/domain/logicalserver	(cached)
+ok  	gxb.local/backend/v2/internal/application/bootstrap	(cached)
+ok  	gxb.local/backend/v2/internal/archguard	1.034s

@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "pass": "450.0",
+  "stage": "R0",
+  "status": "PASS_R0_GUARD_ENFORCEMENT_FOUNDATION_STILL_RED",
+  "implementation_commit": "01b5348b52c3e986040f91e407cb4f9c1a1e5f11",
+  "parent_implementation_commit": "c9d04f4473f179710778d87c6401a4dd06a4879c",
+  "behavior_changed": false,
+  "foundation_status": "RED_REPAIR_ACTIVE",
+  "I6": "BLOCKED",
+  "resolved_findings": [
+    "RF-012"
+  ],
+  "remaining_findings": [
+    "RF-001",
+    "RF-002",
+    "RF-003",
+    "RF-004",
+    "RF-005",
+    "RF-006",
+    "RF-007",
+    "RF-008",
+    "RF-009",
+    "RF-010",
+    "RF-011",
+    "RF-013",
+    "RF-014",
+    "RF-015",
+    "RF-016",
+    "RF-017",
+    "RF-018",
+    "RF-019",
+    "RF-020",
+    "RF-021",
+    "RF-022",
+    "RF-023",
+    "RF-024"
+  ],
+  "normal_chat_evidence": [
+    "go test ./...",
+    "go vet ./...",
+    "go test ./internal/archguard",
+    "validate_r0.py",
+    "validate_foundation_trace.py",
+    "ownership self/known-open checks"
+  ],
+  "expected_global_red": [
+    "RF-007",
+    "RF-015"
+  ],
+  "next": "R1A"
+}

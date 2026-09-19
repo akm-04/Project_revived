@@ -1,0 +1,169 @@
+{
+  "schema_version": 1,
+  "pass": "562.0",
+  "phase": "CA5-2 Saved-Preset Canonical State, Persistence, Migration & Reload local closure",
+  "authority_parent": "sealed Pass561 CA5-2 research/contract/acceptance matrix plus explicit user authorization to implement; dedicated accumulated CA5 native/Work proof remains mandatory immediately before CA5-E",
+  "parent_backend_sha256": "a7c9c02bcc599045159ccc2d6d415327d26fbe67622ad0f1dfcb8da0d5abab26",
+  "parent_implementation_revision_sha256": "7e3229aa0f413047729fb25fe1c987ffb9d6ddd4000d1294887bab8365756210",
+  "parent_passmap_sha256": "523f3922127a0447c84de835d5352991574f1fbf5341b1d3495769750c444590",
+  "source_oracle_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+  "result": "GREEN_LOCAL_CA5_2_ACCEPTED_COMPATIBILITY_COPY_ONLY_NATIVE_AGGREGATE_DEFERRED_PRE_CA5_E",
+  "implementation_scope": [
+    "migration 00028 normalized saved-preset root/lane/Hero-reference owner plus future CA5-4 reference indexes",
+    "per-player permanent rank-440 root backfill and required character-bootstrap root creation",
+    "whole-aggregate PostgreSQL read/lock/replace/CAS persistence under character/saved-preset logical ownership",
+    "MID1 detail projection for 17.save_team, 17.save_team_name and 17.save_pet only",
+    "mapping-driven legacy anti-corruption adapter with aggregate quarantine/no-overwrite semantics",
+    "CA5-3 successor reference-set helpers for old-union-desired planning without activating MID1793",
+    "query generation, schema/query ownership, migration-lock and CA5-2 architecture validation tooling"
+  ],
+  "explicit_non_scope": [
+    "no MID1793 route/handler/replay/receipt activation",
+    "no MID208/209 activation",
+    "no ownership of 17.formation",
+    "no Hero/Pet removal or reverse reference guard activation",
+    "no I9 mode formation state",
+    "no CA8 composite snapshot",
+    "no server claim for VIP capacity, 5-Hero rule, 10-character name rule or other unrecovered gameplay policy"
+  ],
+  "canonical_environment": {
+    "canonical_pins_changed": false,
+    "exact_candidate_attempt": "ENVIRONMENT_BLOCKED",
+    "reason": "canonical go.mod requires Go >=1.26 and toolchain go1.27.1; sandbox has Go1.23.2 and exact local execution fails closed",
+    "exact_toolchain_attempt_log": "EVIDENCE/PASS562_CA5_2/exact_toolchain_attempt.log"
+  },
+  "compatibility_copy_only": {
+    "environment": "Go1.23.2 linux/amd64",
+    "canonical_pins_changed": false,
+    "accommodation": [
+      "go.mod language/toolchain adapted only in disposable copy",
+      ".go-version adapted only in disposable copy"
+    ],
+    "results": [
+      "focused CA5-2 tests GREEN",
+      "focused CA5-2 race GREEN",
+      "focused CA5-2 vet GREEN",
+      "CA5-2 validator GREEN",
+      "schema/query ownership GREEN",
+      "sqlc-generation policy GREEN",
+      "go test ./... GREEN",
+      "go vet ./... GREEN"
+    ],
+    "full_tree_race": "NOT_RUN/NOT_CLAIMED; focused changed-path race is GREEN and dedicated native aggregate gate is deferred by user direction"
+  },
+  "deferred_mandatory": [
+    "exact canonical Go1.27.1 execution",
+    "real PostgreSQL migration/backfill/bootstrap/CAS/row-lock semantics for accumulated CA5",
+    "River only where accumulated CA5 later uses it",
+    "CA5 aggregate live Work gate immediately before CA5-E per user direction",
+    "physical stock-client W2 remains at its preexisting post-I14 gate"
+  ],
+  "evidence_logs": {
+    "compat_focused_race.log": {
+      "bytes": 269,
+      "sha256": "b6ddb270cd7bf3516cb54b0709df57807e004378a0c7aee9965c4c055513ff59"
+    },
+    "compat_focused_test.log": {
+      "bytes": 323,
+      "sha256": "57219e59687d868f4c111f3c6fa68bb0a88ee5a1f5719d41c7590eef7c01fa7d"
+    },
+    "compat_focused_vet.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "compat_full_go_test.log": {
+      "bytes": 6206,
+      "sha256": "354471f20aa501f8c192764b687f88df3d49121b962bf0282552e425430ce40a"
+    },
+    "compat_full_go_vet.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "compat_vs_canonical.diff": {
+      "bytes": 281,
+      "sha256": "ae322c4e432a36f51a63b0adfca72abbe1f0f3a56e7bcdc6e23c5957cc04ca4a"
+    },
+    "exact_ca5_2_validator.log": {
+      "bytes": 144,
+      "sha256": "dc27343a0b0af5d59fffc9c0f2e6c967147be8310870e389b07c11e2a2a87f87"
+    },
+    "exact_schema_query_ownership.log": {
+      "bytes": 29,
+      "sha256": "1d0eeef6e9a6aa5cc1a1abe4142a636a77896063f26ad65229891ff176bbf754"
+    },
+    "exact_sqlc_policy.log": {
+      "bytes": 29,
+      "sha256": "6b6e72c3e9efb996f2aacbeb53ec73955d3652e0699c7b83a035fa39ea1744f4"
+    },
+    "exact_static_identity.log": {
+      "bytes": 654,
+      "sha256": "3ece171c8d239ee057fd2d9335e77286afc3bf88a95b8a0cb984c5ac5e4421c1"
+    },
+    "exact_toolchain_attempt.log": {
+      "bytes": 72,
+      "sha256": "c82ba0d52a0a181094dd790d435616a2def13900579c3c3f3af72522c3a909cf"
+    }
+  },
+  "acceptance_cases": [
+    {
+      "id": "A1_CANDIDATE",
+      "result": "GREEN",
+      "finding": "Exact Pass560 v0.73.0 parent used; canonical go.mod/go.sum/.go-version remain byte-identical."
+    },
+    {
+      "id": "A2_SCHEMA_OWNER",
+      "result": "GREEN",
+      "finding": "00028 adds normalized player-scoped root/lane/Hero rows, rank-440 root backfill and CA5-4 lookup indexes; no cross-owner Hero/Pet foreign keys."
+    },
+    {
+      "id": "A3_ROOT_LIFECYCLE",
+      "result": "GREEN_LOCAL_STATIC",
+      "finding": "Existing V2 roots backfill in 00028 and required SavedPresetBootstrapContributor is wired for new MID1 character creation; real PostgreSQL rollback proof deferred to native aggregate gate."
+    },
+    {
+      "id": "A4_STORE_CAS",
+      "result": "GREEN_LOCAL",
+      "finding": "Store exposes atomic aggregate read, root lock, root ensure and whole-aggregate replacement with expected-version CAS; child tables are not exposed as independent application authority."
+    },
+    {
+      "id": "A5_MID1_PROJECTION",
+      "result": "GREEN",
+      "finding": "MID1 contributor claims exactly 17.save_team, 17.save_team_name, 17.save_pet; 17.formation remains unclaimed."
+    },
+    {
+      "id": "A6_LEGACY_IMPORT",
+      "result": "GREEN_LOCAL",
+      "finding": "Legacy adapter requires explicit Hero/Pet source-to-target mappers, quarantines unresolved/nonprojectable aggregate state, verifies typed target refs, and refuses overwrite of a different non-empty target."
+    },
+    {
+      "id": "A7_SUCCESSOR_SEAM",
+      "result": "GREEN",
+      "finding": "Reference collection/union/coverage helpers support CA5-3 old-union-desired planning without activating mutation routing."
+    },
+    {
+      "id": "A8_QUERY_OWNERSHIP",
+      "result": "GREEN",
+      "finding": "preset.sql is generated into querytext, character/saved-preset ownership is registered, cumulative migration lock includes 00028, schema/query and sqlc-generation guards are GREEN."
+    },
+    {
+      "id": "A9_SCOPE_NEGATIVES",
+      "result": "GREEN",
+      "finding": "No MID1793/208/209 route, replay/receipt registration, reverse-removal guard, 17.formation claim, I9 state or CA8 composite snapshot."
+    },
+    {
+      "id": "A10_LOCAL_TESTS",
+      "result": "GREEN_COMPATIBILITY_COPY_ONLY",
+      "finding": "Focused tests/race/vet and full go test ./... + go vet ./... are GREEN in a fresh two-file toolchain-accommodated copy."
+    },
+    {
+      "id": "A11_EXACT_NATIVE",
+      "result": "AUTHORIZED_DEFERRED_PRE_CA5_E",
+      "finding": "Exact executable candidate is environment-blocked here; user-authorized accumulated live/native Work gate remains mandatory immediately before CA5-E and is not marked passed."
+    },
+    {
+      "id": "A12_REALITY",
+      "result": "GREEN_LOCAL_PENDING_PASSMAP_SEAL",
+      "finding": "Independent postimplementation reread found no D01/D04/D13 or stage-boundary contradiction; Pass562 HOT+COLD seal required before CA5-3 implementation."
+    }
+  ]
+}

@@ -1,0 +1,5 @@
+--- /mnt/data/_gxb_init/backend/backend/.go-version	2026-09-16 22:37:32.000000000 +0000
++++ /mnt/data/_gxb_compat_ca63_closure2/.go-version	2026-09-18 18:26:50.309421410 +0000
+@@ -1 +1 @@
+-1.27.1
++1.23.2

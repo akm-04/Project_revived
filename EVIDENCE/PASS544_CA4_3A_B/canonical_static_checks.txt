@@ -1,0 +1,11 @@
+CA4-3A-B VALIDATION: PASS
+MID58 service/receipt/I5 debit/dispatcher/Mana projection/production registration present; later-stage writers and MID54/62 activation remain absent
+CA4-3A SOURCE ORACLE CHECK: PASS
+sealed Pass542 current-source oracle -> 359 target policies / 516 Hero-Fumo materials; generated catalog preserves sparse exact-decimal source deltas
+R4A CONTENT GENERATION: PASS revision=aa89ed03a9315a9faf8392b9beb4141594ad911033483659ea0c31674a79dc83 resources=5556 players=100 functions=99 heroes=568 pets=54 equipment=1176 pet_acquisition=27
+CONTENT QUERYTEXT: PASS sha256=795d0257904eb618f666bc6a9d519abe11559e8e6a454c1aec8f0e0f453408a5
+CHARACTER QUERYTEXT: PASS hero_sha256=6d4056da3437de401e1e98e285833cfd0907bbf8c345a0d9525dd0eadb8d4b9f pet_sha256=5477eed6bdd96afe2c0d3c46681b6fc0aeb83260f011cb95785a72e9d03c10ee
+SCHEMA/QUERY OWNERSHIP: PASS
+SQLC GENERATION POLICY: PASS
+DEPENDENCY POLICY: PASS
+resolved_go_modules 16 qualified_candidates 5

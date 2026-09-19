@@ -1,0 +1,90 @@
+[31/91] gxb.local/backend/v2/internal/application/directorysync
+ok  	gxb.local/backend/v2/internal/application/directorysync	0.002s
+PASS gxb.local/backend/v2/internal/application/directorysync
+[32/91] gxb.local/backend/v2/internal/application/generation
+ok  	gxb.local/backend/v2/internal/application/generation	0.002s
+PASS gxb.local/backend/v2/internal/application/generation
+[33/91] gxb.local/backend/v2/internal/application/guildcore
+ok  	gxb.local/backend/v2/internal/application/guildcore	0.006s
+PASS gxb.local/backend/v2/internal/application/guildcore
+[34/91] gxb.local/backend/v2/internal/application/guildview
+ok  	gxb.local/backend/v2/internal/application/guildview	0.002s
+PASS gxb.local/backend/v2/internal/application/guildview
+[35/91] gxb.local/backend/v2/internal/application/i5
+ok  	gxb.local/backend/v2/internal/application/i5	0.009s
+PASS gxb.local/backend/v2/internal/application/i5
+[36/91] gxb.local/backend/v2/internal/application/identitylifecycle
+ok  	gxb.local/backend/v2/internal/application/identitylifecycle	0.002s
+PASS gxb.local/backend/v2/internal/application/identitylifecycle
+[37/91] gxb.local/backend/v2/internal/application/playerdirectory
+?   	gxb.local/backend/v2/internal/application/playerdirectory	[no test files]
+PASS gxb.local/backend/v2/internal/application/playerdirectory
+[38/91] gxb.local/backend/v2/internal/application/playerroot
+ok  	gxb.local/backend/v2/internal/application/playerroot	0.002s
+PASS gxb.local/backend/v2/internal/application/playerroot
+[39/91] gxb.local/backend/v2/internal/application/realtimeauth
+ok  	gxb.local/backend/v2/internal/application/realtimeauth	0.002s
+PASS gxb.local/backend/v2/internal/application/realtimeauth
+[40/91] gxb.local/backend/v2/internal/archguard
+ok  	gxb.local/backend/v2/internal/archguard	0.027s
+PASS gxb.local/backend/v2/internal/archguard
+[41/91] gxb.local/backend/v2/internal/content/builtin
+ok  	gxb.local/backend/v2/internal/content/builtin	0.101s
+PASS gxb.local/backend/v2/internal/content/builtin
+[42/91] gxb.local/backend/v2/internal/content/guildpolicy
+ok  	gxb.local/backend/v2/internal/content/guildpolicy	0.004s
+PASS gxb.local/backend/v2/internal/content/guildpolicy
+[43/91] gxb.local/backend/v2/internal/content/registry
+ok  	gxb.local/backend/v2/internal/content/registry	0.665s
+PASS gxb.local/backend/v2/internal/content/registry
+[44/91] gxb.local/backend/v2/internal/domain/activity
+ok  	gxb.local/backend/v2/internal/domain/activity	0.002s
+PASS gxb.local/backend/v2/internal/domain/activity
+[45/91] gxb.local/backend/v2/internal/domain/character
+ok  	gxb.local/backend/v2/internal/domain/character	0.002s
+PASS gxb.local/backend/v2/internal/domain/character
+[46/91] gxb.local/backend/v2/internal/domain/combat
+?   	gxb.local/backend/v2/internal/domain/combat	[no test files]
+PASS gxb.local/backend/v2/internal/domain/combat
+[47/91] gxb.local/backend/v2/internal/domain/commerce
+?   	gxb.local/backend/v2/internal/domain/commerce	[no test files]
+PASS gxb.local/backend/v2/internal/domain/commerce
+[48/91] gxb.local/backend/v2/internal/domain/control
+?   	gxb.local/backend/v2/internal/domain/control	[no test files]
+PASS gxb.local/backend/v2/internal/domain/control
+[49/91] gxb.local/backend/v2/internal/domain/economy
+ok  	gxb.local/backend/v2/internal/domain/economy	0.002s
+PASS gxb.local/backend/v2/internal/domain/economy
+[50/91] gxb.local/backend/v2/internal/domain/generation
+ok  	gxb.local/backend/v2/internal/domain/generation	0.002s
+PASS gxb.local/backend/v2/internal/domain/generation
+[51/91] gxb.local/backend/v2/internal/domain/grant
+ok  	gxb.local/backend/v2/internal/domain/grant	0.002s
+PASS gxb.local/backend/v2/internal/domain/grant
+[52/91] gxb.local/backend/v2/internal/domain/guild
+?   	gxb.local/backend/v2/internal/domain/guild	[no test files]
+PASS gxb.local/backend/v2/internal/domain/guild
+[53/91] gxb.local/backend/v2/internal/domain/identity
+ok  	gxb.local/backend/v2/internal/domain/identity	0.003s
+PASS gxb.local/backend/v2/internal/domain/identity
+[54/91] gxb.local/backend/v2/internal/domain/logicalserver
+ok  	gxb.local/backend/v2/internal/domain/logicalserver	0.002s
+PASS gxb.local/backend/v2/internal/domain/logicalserver
+[55/91] gxb.local/backend/v2/internal/domain/mail
+ok  	gxb.local/backend/v2/internal/domain/mail	0.002s
+PASS gxb.local/backend/v2/internal/domain/mail
+[56/91] gxb.local/backend/v2/internal/domain/modes
+?   	gxb.local/backend/v2/internal/domain/modes	[no test files]
+PASS gxb.local/backend/v2/internal/domain/modes
+[57/91] gxb.local/backend/v2/internal/domain/objective
+ok  	gxb.local/backend/v2/internal/domain/objective	0.002s
+PASS gxb.local/backend/v2/internal/domain/objective
+[58/91] gxb.local/backend/v2/internal/domain/player
+ok  	gxb.local/backend/v2/internal/domain/player	0.002s
+PASS gxb.local/backend/v2/internal/domain/player
+[59/91] gxb.local/backend/v2/internal/domain/profile
+?   	gxb.local/backend/v2/internal/domain/profile	[no test files]
+PASS gxb.local/backend/v2/internal/domain/profile
+[60/91] gxb.local/backend/v2/internal/domain/realtimeauth
+ok  	gxb.local/backend/v2/internal/domain/realtimeauth	0.002s
+PASS gxb.local/backend/v2/internal/domain/realtimeauth

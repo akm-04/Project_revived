@@ -1,0 +1,28 @@
+==> python3 tools/check_i2_oracle_wire.py /mnt/data/pass509_oracles
+I2 ORACLE WIRE CHECK: PASS
+current Backend/mid/functions + APK QuickHTTP hashes and frozen wire facts verified
+
+==> python3 tools/check_i3_oracle_bootstrap.py /mnt/data/pass509_oracles
+I3 ORACLE BOOTSTRAP CHECK: PASS
+verified current MID18/MID1 selection, full/existing-owner gate, player-region formula, stock switch teardown and token replacement
+
+==> python3 tools/check_i4_oracle_wave_s.py /mnt/data/pass509_oracles
+I4 ORACLE WAVE-S CHECK: PASS
+verified current src_64 UpdateScene MID20480/MID2 + public MID7/MID2864 + MID1 log_url/server_time/default sidebands + room discovery/TCP_LOGIN/room-entered/heartbeat/reconnect + 20018/1304/Lua truthiness; Pass353 corroborates bootstrap/realtime shapes only
+
+==> python3 tools/check_i5_oracle_player_core.py /mnt/data/pass509_oracles
+I5 ORACLE PLAYER-CORE CHECK: PASS
+verified current src_64 player/story/mail/stack/task/redeem facts; old-client MID230 stability; Pass353 mechanisms corroborative only
+
+==> python3 tools/check_i6a_source_oracle.py /mnt/data/pass509_oracles
+I6A SOURCE ORACLE CHECK: PASS
+verified candidate-bound current/historical client hashes and reload/time source shape; no server reachability/reset semantics inferred
+
+==> python3 tools/check_i6b_source_oracle.py /mnt/data/pass509_oracles
+I6B SOURCE ORACLE CHECK: PASS
+verified current/historical MID229/MID234/bootstrap/error-path hashes and source shape; no Activity mechanics/reset semantics inferred
+
+==> python3 tools/check_i6c_source_oracle.py /mnt/data/pass509_oracles
+I6C SOURCE ORACLE CHECK: PASS
+verified Guild MID/request/presentation/policy/message source shape in current + historical corpora; no unrecovered server calendar/succession semantics inferred
+

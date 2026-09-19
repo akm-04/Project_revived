@@ -1,0 +1,31 @@
+Canonical static/source checks (no Go execution required):
+$ python tools/validate_ca4_4a_i1.py
+CA4-4A-I1 VALIDATION: PASS
+immutable Pet equipment topology + neutral partnerExp read + neutral I5 Prepare/Apply seam are present; durable Pet equipment and MID783/MID792 remain absent
+$ python tools/validate_ca4_4a_i2.py
+CA4-4A-I2 VALIDATION: PASS
+three binary Pet equipment slots are CharacterPet-owned, persisted/reloaded through one cohesive state CAS; Fumo and MID783/MID792 remain absent
+$ python tools/validate_ca4_4a_i3.py
+CA4-4A-I3 VALIDATION: PASS
+MID783 direct finished-item debit, Pet CAS, replay/30001 convergence, Awakening activation gate and typed unique-equipment fact are present
+$ python tools/validate_ca4_4a_i4.py
+CA4-4A-I4 VALIDATION: PASS
+MID792 canonical planner, neutral I5 debit, partnerExp compatibility/real Pet EXP split, no-work receipt and empty stock response are present
+$ python tools/validate_ca4_4a.py
+CA4-4A AGGREGATE VALIDATION: PASS
+A01-A25 structural/product invariants present; execution/source/live gates must be evaluated separately
+$ python tools/check_schema_query_ownership.py
+SCHEMA/QUERY OWNERSHIP: PASS
+$ python tools/check_sqlc_generation_policy.py
+SQLC GENERATION POLICY: PASS
+$ python tools/generate_content_querytext.py --check
+CONTENT QUERYTEXT: PASS sha256=a79fad5abdd203019a99f180cf00991efbcf07b3a36555e0aa4bfafa37daceae
+$ python tools/generate_character_querytext.py --check
+CHARACTER QUERYTEXT: PASS hero_sha256=6d4056da3437de401e1e98e285833cfd0907bbf8c345a0d9525dd0eadb8d4b9f pet_sha256=4332619ca2060c25f387a50280e1f2337b5a8eb2d606de6908530099818ae671
+$ python tools/generate_kernel_querytext.py --check
+KERNEL QUERYTEXT: PASS sha256=74ad9accee063e77323a2eb4a69df394bdcb331ce88e3d789864ffbc904b7511
+$ python tools/generate_builtin_content.py --source-archive /mnt/data/assets548_inspect/all-assest-rechecked-1.zip --check
+R4A CONTENT GENERATION: PASS revision=1d2eceef60f2b1a3561c0ab311c1f78b361b6984764e6b0ef38484d747ee55e8 resources=5556 players=100 functions=99 heroes=568 pets=54 equipment=1176 pet_acquisition=27
+$ GXB_R4A_SOURCE_ARCHIVE=/mnt/data/assets548_inspect/all-assest-rechecked-1.zip python tools/check_ca4_4a_source_oracle.py
+CA4-4A SOURCE ORACLE CHECK: PASS
+exact current src_64 MID783/MID792 wire, 30001, one-key planner, partnerExp/potion and local-Mana evidence matches implementation contracts

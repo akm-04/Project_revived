@@ -1,0 +1,10 @@
+PASS458 R3A LOCAL VALIDATION
+Focused AMF/realtime tests: PASS
+Repository-wide go test ./...: PASS (disposable Go 1.23 clone)
+Repository-wide go vet ./...: PASS (disposable Go 1.23 clone)
+Targeted race: PASS
+FuzzDecodeBounded ~5s: PASS
+FuzzEncodeBounded ~5s: PASS
+FuzzStreamDecoder ~5s: PASS
+Canonical go.mod unchanged: go 1.26.0 / toolchain go1.27.1
+R7 live/load gates remain open.

@@ -1,0 +1,12 @@
+==> validate_r4c.py
+CONTENT QUERYTEXT: PASS sha256=7d5a47bf794f69baae8a6c03f3607ef2232f57ed3f06ebe6a4a4b51bd237ed73
+SCHEMA/QUERY OWNERSHIP: PASS
+SQLC GENERATION POLICY: PASS
+R4C STATIC VALIDATION: PASS; executable and real-PG acceptance are separate evidence
+==> validate_r4d.py
+R4D VALIDATION: PASS
+immutable revision binding/replay/exact-read/restart guards present; R5 temporal/bootstrap remains intentionally out of scope
+==> validate_r5.py --cumulative
+R5 VALIDATION: FAIL
+ - canonical Go pins drifted
+ - .go-version pin drifted

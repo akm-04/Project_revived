@@ -1,0 +1,2 @@
+CA4-3A AGGREGATE INDEPENDENT CHECK: PASS 68/68
+A+B content/durability/MID58/I5/receipt/projection/activation compose without ownership drift; later CA4-3B+ mechanics absent.

@@ -1,0 +1,102 @@
+{
+  "schema_version": 1,
+  "pass": "537.0",
+  "phase": "CA4",
+  "internal_stage": "CA4-2A",
+  "candidate_version": "v0.69.0-candidate",
+  "authority_pass": "536.0",
+  "authority_passmap_sha256": "a9d32e203c9ac78f96831b2884b4f1c65379c8932c90045d93b1959da35b274d",
+  "parent_backend_sha256": "8259dd97a0424cd15f82502845d9a3d6e1ee41081e5747baa7c20d86c0a575cd",
+  "parent_implementation_revision_sha256": "3aa3d533ebe9aa84ca61c8d8f958841a6f9c76d465dba30611490a75beb9827c",
+  "source_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+  "content_revision": "bd11a7482062dbaa851f3b495e3dc6efab88085011b3fe75d82105e127bba106",
+  "authorization": "EXPLICIT_USER_AUTHORIZATION_CA4_2A_ONLY",
+  "result": "GREEN_LOCAL_STAGE_ACCEPTANCE_COMPATIBILITY_COPY_ONLY_NATIVE_AGGREGATE_DEFERRED",
+  "implemented": [
+    "HERO_EQUIPMENT_CA4_2 immutable Normal-Hero table/color/slot mapping under existing content authority, including deliberate zero positions",
+    "content migration 00020_ca4_2_hero_equipment.sql plus six Hero-owned nonnegative durable equipment values",
+    "cohesive Hero level+exp+equipment CAS persistence seam while retaining narrower progression CAS",
+    "reload/stock projection of the durable six equipment values",
+    "Normal-Hero RawEquipmentState reader bound to caller-pinned content revision and CA4-1 raw-stat seam"
+  ],
+  "source_qualified_metrics": {
+    "rows": 555,
+    "colors_per_row": 16,
+    "slots_per_color": 6,
+    "positions": 53280,
+    "ordinary_nonzero": 50504,
+    "special_nonzero": 1646,
+    "zero": 1130,
+    "unique_ordinary_items": 214,
+    "unique_special_items": 164
+  },
+  "canonical_static": [
+    "generated content --check GREEN at revision bd11a7482062dbaa851f3b495e3dc6efab88085011b3fe75d82105e127bba106",
+    "CA4-1 source oracle GREEN",
+    "CA4-2A independent direct-source oracle GREEN",
+    "content/character/kernel generated query text GREEN",
+    "schema/query ownership GREEN",
+    "dependency policy and SBOM GREEN",
+    "sqlc generation policy GREEN",
+    "CA4-1 validator GREEN",
+    "CA4-2A validator GREEN",
+    "CA3-3 cumulative GREEN",
+    "R5 cumulative GREEN"
+  ],
+  "canonical_exact_execution": {
+    "result": "ENVIRONMENT_BLOCKED",
+    "required_toolchain": "Go 1.27.1",
+    "observed": "canonical go test attempted automatic exact-toolchain download; proxy.golang.org DNS/network unavailable",
+    "canonical_pins_changed": false,
+    "evidence": "EVIDENCE/PASS537_CA4_2A/canonical_exact_go_attempt.txt"
+  },
+  "compatibility_copy_only": {
+    "origin": "fresh disposable clones of exact canonical CA4-2A candidate",
+    "environment": "Go 1.23.2 linux/amd64",
+    "environment_edits": [
+      "go.mod go 1.26.0 -> 1.23.0",
+      "removed toolchain go1.27.1 in clone only",
+      ".go-version 1.27.1 -> 1.23.2 in clone only"
+    ],
+    "canonical_product_or_assertion_edits_in_clone": false,
+    "results": [
+      "focused touched-package tests GREEN",
+      "focused touched-package race GREEN",
+      "go vet ./... GREEN",
+      "internal/archguard GREEN",
+      "bounded package-by-package go test 92/92 GREEN"
+    ]
+  },
+  "independent_postimplementation": {
+    "reviewer": "same assistant using separate independent checker/reread; no external reviewer claimed",
+    "result": "GREEN 62/62",
+    "evidence": "EVIDENCE/PASS537_CA4_2A/independent_check.txt"
+  },
+  "stage_boundary_proof": [
+    "no production case 54 or case 62 dispatcher branch",
+    "no CA4-2B prepared I5 debit seam",
+    "no CA4-2C planner/receipt gameplay implementation",
+    "no Super mapping compiled",
+    "no equipment-instance aggregate/table introduced",
+    "database equipment values deliberately permit >1 for future Super consumers while Normal reader enforces 0/1"
+  ],
+  "deferred_mandatory": [
+    "exact canonical Go 1.27.1 execution",
+    "pinned sqlc 1.31.1 native generation/verification where applicable",
+    "real PostgreSQL 18.6 migration/upgrade/restore/locking/replay/concurrency",
+    "River only where accumulated CA4 behavior depends on it",
+    "aggregate CA4 service/runtime native Work gate before CA4-E",
+    "W2 physical unmodified-stock-client proof at its routed lifecycle point"
+  ],
+  "not_claimed": [
+    "exact canonical-toolchain runtime proof",
+    "native PostgreSQL correctness",
+    "River proof",
+    "MID54/MID62 gameplay behavior",
+    "CA4-2B/CA4-2C/CA4-2D",
+    "physical stock-client proof",
+    "CA4 aggregate or CA4-E acceptance"
+  ],
+  "evidence_directory": "EVIDENCE/PASS537_CA4_2A",
+  "next_permitted_action": "CA4-2B design/contract reconciliation only unless separately authorized; do not implement CA4-2B from this CA4-2A authorization."
+}

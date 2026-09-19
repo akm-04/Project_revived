@@ -1,0 +1,92 @@
+{
+  "files": [
+    {
+      "bytes": 196,
+      "path": "EVIDENCE/PASS547_CA4_3B/BUILTIN_CONTENT_REGEN_CHECK.txt",
+      "sha256": "5bd6562b3c179380fe98dfd4a57bf8088dffc5e18ef8ab3d3e718f86d2fc7bf4"
+    },
+    {
+      "bytes": 221,
+      "path": "EVIDENCE/PASS547_CA4_3B/CA4_3A_A_CUMULATIVE_VALIDATOR.txt",
+      "sha256": "9d3944650a1a3ffb11eebea56d0cb683204951e66f9d23778b205d682299a594"
+    },
+    {
+      "bytes": 212,
+      "path": "EVIDENCE/PASS547_CA4_3B/CA4_3A_B_CUMULATIVE_VALIDATOR.txt",
+      "sha256": "303edfae3f02c1ea54deb52335dd65a94ac663a8d46dc1854b3e20d89d7b5ec9"
+    },
+    {
+      "bytes": 197,
+      "path": "EVIDENCE/PASS547_CA4_3B/CA4_3B_STAGE_A_VALIDATOR.txt",
+      "sha256": "23c51b63d18547148363be4dec4c5ea23b3cb85e32ce755ce579c4c9a3a6f9b0"
+    },
+    {
+      "bytes": 162,
+      "path": "EVIDENCE/PASS547_CA4_3B/CA4_3B_STAGE_C_VALIDATOR.txt",
+      "sha256": "080947f1e986bf7d19934812230ee945ede11be027ecc31862309b512b6981e2"
+    },
+    {
+      "bytes": 186,
+      "path": "EVIDENCE/PASS547_CA4_3B/CA4_3B_STAGE_D_VALIDATOR.txt",
+      "sha256": "cbcd5b826c847e3b6e97b006c56deb148b5ce4b3fe7615fb3e90a95023a81fce"
+    },
+    {
+      "bytes": 224,
+      "path": "EVIDENCE/PASS547_CA4_3B/CANONICAL_PINS.sha256",
+      "sha256": "fb0f4fc61c99e5130523740b47e30c6c78de229a8f2a8b4e68c9359d249b459a"
+    },
+    {
+      "bytes": 179,
+      "path": "EVIDENCE/PASS547_CA4_3B/CHARACTER_QUERYTEXT_CHECK.txt",
+      "sha256": "2206ef49dd28145a9068cdf6853ffcec9d96b93d8ac9112b3e6d393a41f6266e"
+    },
+    {
+      "bytes": 3809,
+      "path": "EVIDENCE/PASS547_CA4_3B/COMPATIBILITY_COPY_BROAD_INTERNAL_REGRESSION.txt",
+      "sha256": "84a325c3b82ff6adbcbd0404b6c62c12060a6d5ffb2c332e641ce670d55dca05"
+    },
+    {
+      "bytes": 241,
+      "path": "EVIDENCE/PASS547_CA4_3B/COMPATIBILITY_COPY_FOCUSED_TESTS.txt",
+      "sha256": "393a572737bd4f96c24780286c3d586e6b344458370896411ccf4e58bc400ec5"
+    },
+    {
+      "bytes": 510,
+      "path": "EVIDENCE/PASS547_CA4_3B/COMPATIBILITY_COPY_POSTGRES_ADAPTER_UNIT.txt",
+      "sha256": "1a20b4d612d36e55f6de6515de82c83adc856ce3049cda66b8622eeed78dc727"
+    },
+    {
+      "bytes": 241,
+      "path": "EVIDENCE/PASS547_CA4_3B/COMPATIBILITY_COPY_RACE.txt",
+      "sha256": "01db5f16562fbd882ca721bd2dd3a6679c55ca30a3f07a4e7feb64e6ced584d4"
+    },
+    {
+      "bytes": 0,
+      "path": "EVIDENCE/PASS547_CA4_3B/COMPATIBILITY_COPY_VET.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 96,
+      "path": "EVIDENCE/PASS547_CA4_3B/CONTENT_QUERYTEXT_CHECK.txt",
+      "sha256": "83b8385c84cb8d7f7ae14eac14552f79a9e9f4fcde21c60866e24bd9b6cee357"
+    },
+    {
+      "bytes": 517,
+      "path": "EVIDENCE/PASS547_CA4_3B/EXACT_TOOLCHAIN_ENVIRONMENT_BLOCKED.txt",
+      "sha256": "d929f81ec5bda9a338c9baabfb4821709e4e76a560a486b9ce5ade1805993898"
+    },
+    {
+      "bytes": 18814,
+      "path": "EVIDENCE/PASS547_CA4_3B/INDEPENDENT_POSTIMPLEMENTATION_CHECK.json",
+      "sha256": "e1fcc8de4fe7e5c87a49de7e2d0f62c4994ee4ae7f2eef7998de120f464ab1ec"
+    },
+    {
+      "bytes": 29,
+      "path": "EVIDENCE/PASS547_CA4_3B/SCHEMA_QUERY_OWNERSHIP_CHECK.txt",
+      "sha256": "1d0eeef6e9a6aa5cc1a1abe4142a636a77896063f26ad65229891ff176bbf754"
+    }
+  ],
+  "pass": "547.0",
+  "phase": "CA4-3B",
+  "schema_version": 1
+}

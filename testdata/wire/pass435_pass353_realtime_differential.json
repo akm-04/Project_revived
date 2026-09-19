@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "pass": "435.0",
+  "stage": "I2",
+  "oracle": "Pass353 realtime/codec.py",
+  "oracle_archive_sha256": "31729d5c5e4509c2c89eaa1e8203cf1570afe87e18ed2610b944e457a9946b15",
+  "fixtures": [
+    {
+      "name": "tcp_login",
+      "mid": 32771,
+      "sequence": 0,
+      "params": {
+        "token": "local_token",
+        "region": 194.0,
+        "room_id": 194.0
+      },
+      "frame_hex": "000000388003000000000a0b010b746f6b656e06176c6f63616c5f746f6b656e0d726567696f6e0540684000000000000f726f6f6d5f696405406840000000000001"
+    },
+    {
+      "name": "chat_room_entered",
+      "mid": 32779,
+      "sequence": 0,
+      "params": {
+        "room_id": 194.0
+      },
+      "frame_hex": "00000015800b000000000a0b010f726f6f6d5f696405406840000000000001"
+    },
+    {
+      "name": "heartbeat",
+      "mid": 32797,
+      "sequence": 0,
+      "params": {},
+      "frame_hex": "00000004801d000000000a0b0101"
+    },
+    {
+      "name": "string_reference_object",
+      "mid": 32797,
+      "sequence": 7,
+      "params": {
+        "left": "repeat",
+        "right": "repeat"
+      },
+      "frame_hex": "00000019801d000000070a0b01096c656674060d7265706561740b7269676874060201"
+    },
+    {
+      "name": "array_payload",
+      "mid": 32797,
+      "sequence": 9,
+      "params": {
+        "items": [
+          1.0,
+          "x",
+          true,
+          null
+        ]
+      },
+      "frame_hex": "0000001b801d000000090a0b010b6974656d73090901053ff0000000000000060378030101"
+    }
+  ]
+}

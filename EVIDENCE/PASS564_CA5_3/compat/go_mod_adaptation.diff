@@ -1,0 +1,13 @@
+--- /mnt/data/ca5_3_impl/backend/go.mod	1980-01-01 00:00:00.000000000 +0000
++++ go.mod	2026-09-16 11:29:40.964965107 +0000
+@@ -1,8 +1,8 @@
+ module gxb.local/backend/v2
+ 
+-go 1.26.0
++go 1.23.0
+ 
+-toolchain go1.27.1
++toolchain go1.23.2
+ 
+ require (
+ 	github.com/go-chi/chi/v5 v5.3.1

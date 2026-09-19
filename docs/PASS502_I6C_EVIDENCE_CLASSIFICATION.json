@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "pass": "502.0",
+  "node": "I6C",
+  "status": "PHASE_ACCEPTED",
+  "decision": "ACCEPT_EXACT_PASS501_NATIVE_CANDIDATE_WITH_METADATA_ONLY_RELEASE_REPACK",
+  "tested_candidate": {
+    "artifact": "gxb-backend-v2-v0.59.1-pass501-i6c-native-gate-candidate.zip",
+    "sha256": "35877fc20fc174854c1395f23f352d18737cbd12731481be1b5b5e5fafd2c156",
+    "tree_manifest_sha256": "3805459bb8e0182c655de4d39767e0106f322e7bbf931f5e475d12d795d4c42d",
+    "tree_paths": 717,
+    "semantic_content_root_sha256": "9b2d81931287d9fa85e801375676f2619785453e95b12f367ac8f72351df0b96",
+    "classification": "GREEN_EXACT_NATIVE_I6C_GATE_NO_PRODUCT_REPAIR"
+  },
+  "native_evidence": {
+    "round1": {
+      "artifact": "report.zip",
+      "sha256": "821146ead5c9fd9c1abf75e21060ff504ae13602059b0686a71e0dadb323d8b2",
+      "classification": "GREEN_EXACT_CORE_WITH_PHASE_LOCAL_DELTA_PENDING"
+    },
+    "delta": {
+      "artifact": "PASS501_I6C_NATIVE_DELTA_REPORT_FINAL.zip",
+      "sha256": "0379092e4f33b227fa2c08b81904a4d043fc264d31454d89ac09d4c397dcac8b",
+      "classification": "GREEN_I6C_NATIVE_DELTA_COMPLETE"
+    }
+  },
+  "proof": {
+    "exact_go_1_27_1": "GREEN",
+    "postgresql_18_6": "GREEN",
+    "module_closure_tests_vet_race": "GREEN",
+    "postgres_and_postgres_river_tagged_composition": "GREEN",
+    "migration_00001_00012_fresh_upgrade": "GREEN",
+    "schema_query_sqlc_dependency_sbom": "GREEN",
+    "source_oracles": "GREEN",
+    "allocator_membership_atomicity_unknown_commit_restart_restore": "GREEN",
+    "application_invitation_departure_races": "GREEN",
+    "rolling_windows_postgresql_authoritative_time": "GREEN",
+    "lock_contention_no_deadlocks_invariants": "GREEN",
+    "candidate_tree_integrity": "GREEN"
+  },
+  "non_exit_required": {
+    "stock_client_live": "DEFERRED_BY_ROADMAP_TO_W2",
+    "live_river_semantics_for_offline_succession": "NOT_I6C_EXIT_REQUIRED_WHILE_SUCCESSION_GATED",
+    "archive_vcs_stamping": "ENVIRONMENT_ARCHIVE_ACCOMMODATION_ONLY"
+  },
+  "preserved_gates": [
+    "PRESENCE_PROVIDER_GATED",
+    "SUCCESSOR_SELECTION_POLICY_GATED"
+  ],
+  "phase_accepted": true,
+  "next": "I6D_PRE_IMPLEMENTATION_RESEARCH_RECONCILIATION"
+}

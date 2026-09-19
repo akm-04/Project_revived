@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "pass": "538.0",
+  "phase": "CA4-2B",
+  "result": "GREEN_LOCAL_STAGE_ACCEPTANCE_COMPATIBILITY_COPY_ONLY_NATIVE_AGGREGATE_DEFERRED",
+  "authority_parent": "sealed Pass536 CA4-2 research/design plus explicit current-user staged implementation authorization",
+  "parent_stage": "CA4-2A v0.69.0 recovery checkpoint",
+  "implemented": [
+    "I5-owned opaque Prepare/Apply resource seam for canonical player level + Mana + bounded potential stack identities",
+    "Prepare locks EconomyOwner 700 -> Progression 710 -> Mana 720 -> canonical decimal-sorted Stack 722 after caller-held Hero 410",
+    "missing prepared stack rows snapshot as quantity zero under held EconomyOwner synchronization root without manufacturing rows",
+    "Apply accepts only exact debit subsets of the prepared closure and performs writes only: no content resolution, canonical reads, or new locks",
+    "zero-debit Apply is valid; duplicate/outside-closure/negative/insufficient debits are rejected before writes"
+  ],
+  "canonical_static": [
+    "CA4-1 source oracle GREEN",
+    "CA4-2A source oracle GREEN",
+    "builtin content regeneration/check GREEN at bd11a7482062dbaa851f3b495e3dc6efab88085011b3fe75d82105e127bba106",
+    "content/character/kernel query-text freshness GREEN",
+    "schema/query ownership GREEN",
+    "dependency and sqlc-generation policy GREEN",
+    "CA4-1 cumulative validator GREEN",
+    "CA4-2B validator GREEN",
+    "CA3-3 and R5 cumulative validators GREEN"
+  ],
+  "compatibility_copy_only": {
+    "environment": "Go 1.23.2 linux/amd64",
+    "clone_only_accommodation": ["go.mod go 1.26.0 -> 1.23.0", "removed toolchain go1.27.1", ".go-version 1.27.1 -> 1.23.2"],
+    "canonical_pins_changed": false,
+    "results": ["focused CA4-2B tests GREEN", "focused race GREEN", "go vet internal/application/i5 GREEN", "archguard GREEN", "bounded package regression 92/92 GREEN"]
+  },
+  "stage_boundary": [
+    "no CharacterHero MID54/MID62 gameplay service yet",
+    "no dispatcher case 54/62 yet",
+    "no production route registration",
+    "no Super/Fumo/Spirit mechanics",
+    "historical validate_ca4_2a.py intentionally rejects the B tree because its purpose is to prove A-only scope; it was not weakened"
+  ],
+  "metadata_note": "The pre-B CA4-2A recovery archive preserved a stale SBOM application version label v0.68.0 after BUILD_INFO had advanced to v0.69.0. The continuing canonical tree deterministically regenerated SBOM before this B checkpoint; dependency closure was unchanged.",
+  "deferred_mandatory": ["exact Go 1.27.1 execution", "real PostgreSQL migration/locking/replay/concurrency", "River where accumulated CA4 requires it", "aggregate native gate pre-CA4-E", "W2 physical unmodified-stock-client proof"],
+  "next": "Proceed to explicitly authorized CA4-2C; no PassMap sync until complete CA4-2 local closure."
+}

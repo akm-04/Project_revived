@@ -1,0 +1,748 @@
+{
+  "checks": [
+    {
+      "detail": "473b72ec14a81d01d6dbdaa19f92c3d78900f40ca34fa5c8cf46585b76d65414",
+      "name": "source_hash_HeroMainWindow.lua",
+      "status": "GREEN"
+    },
+    {
+      "detail": "125183556caeecc182bf0702dd1f95160c8ba1666a3b97fbb8a7261d30ae0ac9",
+      "name": "source_hash_NormalHero.lua",
+      "status": "GREEN"
+    },
+    {
+      "detail": "163d5893c9522ada412c2b9c4748a80757660fccdf03c8f72cb6edf0838b8eb4",
+      "name": "source_hash_SelfPlayer.lua",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "source_mid51",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "source_mid57",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "source_mid51_partner_only",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "source_mid57_partner_only",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "source_mid51_color_plus_one",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "source_mid57_maxcolor_branch",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "source_fumolev_direct_writes",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "source_fumolev_wire_allocation",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "source_maxcolor_server_supplied",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "source_oneclick_checker",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "source_oneclick_full_mana",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "source_oneclick_full_exp",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "contract_restore_policy",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "contract_maxcolor_epistemic",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "contract_deferred_MID122 GET_MAXLEVEL activation/schema",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "contract_deferred_Activity1016 activation/multiplier semantics",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "contract_deferred_MID54/MID62 production registration until CA4-5",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "content_revision",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "content_capability",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "restoration_eligible_195",
+      "status": "GREEN"
+    },
+    {
+      "detail": {
+        "2": 35,
+        "3": 35,
+        "4": 65,
+        "5": 42,
+        "6": 18
+      },
+      "name": "restoration_quality_distribution",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "restoration_denoms",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "restoration_fraction_count",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "internal/application/i5/max_hero_color_policy.go:PreservationMaxHeroColor int64 = 5",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "internal/application/i5/max_hero_color_policy.go:GXB1_PRESERVATION_MAX_HERO_COLOR_V1",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "internal/application/i5/max_hero_color_policy.go:MaxHeroColorTx",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "internal/adapters/postgres/i5store/bootstrap_projection.go:\"17.max_color\"",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "internal/adapters/postgres/i5store/bootstrap_projection.go:mid17[\"max_color\"] = b.MaxHeroColor.MaxHeroColor()",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "maxcolor_nonclock_policy",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "internal/application/i5/hero_promotion_resources.go:type TxStrictRestorationSettler interface",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "internal/application/i5/hero_promotion_resources.go:type TxHeroPromotionResourceSettler interface",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "internal/application/i5/hero_promotion_resources.go:PrepareStrictRestorationTx",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "internal/application/i5/hero_promotion_resources.go:ApplyStrictRestorationTx",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "internal/application/i5/hero_promotion_resources.go:PrepareHeroPromotionResourcesTx",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "internal/application/i5/hero_promotion_resources.go:ApplyHeroPromotionResourcesTx",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "internal/application/i5/hero_promotion_resources.go:ErrHeroPromotionResourceCollision",
+      "status": "GREEN"
+    },
+    {
+      "detail": 5,
+      "name": "i5_nested_receipt_rechecks",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "i5_canonical_union_components",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "i5_one_shot_guards",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "i5_collision_guard",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "i5_reuses_equipment_debiter",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "internal/application/characterhero/promotion_service.go:func (s Service) PowerUpHero",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "internal/application/characterhero/promotion_service.go:func (s Service) OneClickJinjie",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "internal/application/characterhero/promotion_service.go:HeroPromotionMID51Promote",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "internal/application/characterhero/promotion_service.go:HeroPromotionMID57Promote",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "internal/application/characterhero/promotion_service.go:HeroPromotionMID57Collect",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "internal/application/characterhero/promotion_service.go:heroPromotionReceiptSchema",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "internal/application/characterhero/promotion_service.go:gxb.ca4-3b.hero-promotion.v1",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "receipt_field_partner_id",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "receipt_field_branch",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "receipt_field_from_color",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "receipt_field_to_color",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "receipt_field_result_level",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "receipt_field_result_exp",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "receipt_field_result_equips",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "receipt_field_result_fumos",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "receipt_field_restore_items",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "receipt_field_mana_after",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "receipt_field_state_version",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "mid57_no_work_reject",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "mid57_all_or_nothing",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "hero_single_version_guard",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "promotion_color_increment",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "promotion_clears_ordinary_equipment_fumo",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "promotion_preserves_special_by_only_clearing_ordinary",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "promotion_corrupt_state_guard",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "maxcolor_policy_bound_to_operation",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "restoration_modifier_after_base",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "restoration_modifier_identity_guard",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "internal/application/characterhero/promotion_restoration.go:HeroPromotionRestorationPolicyVersion",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "internal/application/characterhero/promotion_restoration.go:new(big.Rat)",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "internal/application/characterhero/promotion_restoration.go:floor := new(big.Int).Quo",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "internal/application/characterhero/promotion_restoration.go:remaining / d.Value",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "base_restore_has_no_activity_multiplier",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "internal/application/characterhero/service.go:type HeroRosterView struct",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "internal/application/characterhero/service.go:func (s Service) RosterView",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "internal/application/characterhero/service.go:HeroCoreActive(ctx)",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "internal/application/characterhero/service.go:HeroEquipmentRevision(ctx, revision)",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "internal/application/characterhero/service.go:HeroFumoRevision(ctx, revision)",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "internal/application/characterhero/service.go:deriveFumoLevelsRead(ctx, revision",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "internal/application/characterhero/fumo_service.go:func (s Service) deriveFumoLevelsRead",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "internal/application/characterhero/fumo_service.go:deriveFumoLevel(raw, target)",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "internal/projection/hero/stock.go:func StockHeroWithFumoLevels",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "internal/projection/hero/stock.go:out[\"fumo_levels\"] = wireLevels",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "internal/projection/hero/stock.go:func StockRosterView",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "no_durable_fumo_levels_internal/domain/character/hero.go",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "no_durable_fumo_levels_sql/character/hero.sql",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "no_durable_fumo_levels_internal/adapters/postgres/characterstore/store.go",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "no_durable_fumo_levels_migrations/00021_ca4_3a_hero_fumo.sql",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "no_durable_fumo_levels_migrations/00022_ca4_3b_hero_promotion_restoration.sql",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "internal/adapters/stockruntime/hero_dispatcher.go:case 51: // POWERUP_HERO",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "internal/adapters/stockruntime/hero_dispatcher.go:case 57: // ONE_CLICK_JINJIE",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "internal/adapters/stockruntime/hero_dispatcher.go:PowerUpHero(ctx, actor",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "internal/adapters/stockruntime/hero_dispatcher.go:OneClickJinjie(ctx, actor",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "internal/adapters/stockruntime/hero_dispatcher.go:func heroPromotionResponse",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "internal/adapters/stockruntime/hero_dispatcher.go:RosterView(ctx, actor)",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "internal/adapters/stockruntime/hero_dispatcher.go:StockRosterView",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "mid57_no_postcommit_scalar_read",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "wire_sparse_expected_fields",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "wire_no_broad_field_\"equips\"",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "wire_no_broad_field_\"color\"",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "wire_no_broad_field_\"lev\"",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "wire_no_broad_field_\"exp\"",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "hero_route_found",
+      "status": "GREEN"
+    },
+    {
+      "detail": [
+        49,
+        51,
+        52,
+        55,
+        57,
+        58,
+        63,
+        67,
+        89
+      ],
+      "name": "mid51_57_production_registered",
+      "status": "GREEN"
+    },
+    {
+      "detail": [
+        49,
+        51,
+        52,
+        55,
+        57,
+        58,
+        63,
+        67,
+        89
+      ],
+      "name": "mid54_62_remain_deferred",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "mid122_not_hero_registered",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "production_wiring_Promotion: contentDB",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "production_wiring_PromotionResources: i5svc",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "production_wiring_StrictRestoration: i5svc",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "production_wiring_MaxHeroColorPolicy: maxHeroColorPolicy",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "production_wiring_RosterProjection: contentDB",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "no_foreign_sql_SELECT",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "no_foreign_sql_INSERT INTO",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "no_foreign_sql_UPDATE",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "no_foreign_sql_DELETE FROM",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "no_activity1016_character_implementation",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "no_mid122_character_activation",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "i5_test_TestStrictRestorationPrepareApplyFailsClosedOnReplay",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "i5_test_TestStrictRestorationConcurrentWaiterRechecksReceiptAfterLockAcquisition",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "i5_test_TestHeroPromotionPrepareClosesUnionBeforeSnapshotAndApplyUsesSubset",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "i5_test_TestHeroPromotionPrepareRejectsRestorationPotentialCollision",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "character_test_TestPowerUpHeroClearsOrdinaryAndPreservesSpecialFumoWithReceiptReplay",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "character_test_TestOneClickJinjieBelowCapRequiresCompletePlanAndPromotesAtomically",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "character_test_TestOneClickJinjieAtCapCollectsWithoutPromotionOrFumoReset",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "character_test_TestOneClickJinjieIncompletePlanFailsBeforeAnyI5Write",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "character_test_TestOneClickJinjiePotionEXPAndPromotionRemainOneHeroVersion",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "character_test_TestPowerUpHeroPreexistingNestedRestorationReceiptFailsClosed",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "character_test_TestPowerUpHeroUnknownCommitReceiptReconcilesWithoutReapply",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "character_test_TestPowerUpHeroUnknownCommitWithoutOuterReceiptDoesNotBlindRetry",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "dispatch_test_TestCA43BMID49ProjectsDerivedFumoLevelsAfterReconnect",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "dispatch_test_TestCA43BMID51StrictSparseRestoreResponse",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "dispatch_test_TestCA43BMID57UsesReceiptManaAndDoesNotPostReadEconomy",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "validator_exists_tools/validate_ca4_3b.py",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "validator_exists_tools/validate_ca4_3b_stage_c.py",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "validator_exists_tools/validate_ca4_3b_stage_d.py",
+      "status": "GREEN"
+    },
+    {
+      "detail": null,
+      "name": "validator_exists_internal/archguard/ca4_3b_contract_test.go",
+      "status": "GREEN"
+    },
+    {
+      "detail": "a8844fbc8c3eb51c26ed00aec4cd5a5a9d647f849c6ead07bcc83ed24c4a7718",
+      "name": "canonical_pin_.go-version",
+      "status": "GREEN"
+    },
+    {
+      "detail": "313c574368bb56dc570bc3427b65f59b059e492f909fe43b7d0291b5ced21dc4",
+      "name": "canonical_pin_go.mod",
+      "status": "GREEN"
+    },
+    {
+      "detail": "efbf6753542d66e2fefcb2ab5e2ade7c9d28f2206a1113d1eb9568f2cb75808d",
+      "name": "canonical_pin_go.sum",
+      "status": "GREEN"
+    }
+  ],
+  "green": 143,
+  "status": "GREEN",
+  "total": 143
+}

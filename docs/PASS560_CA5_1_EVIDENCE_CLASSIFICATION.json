@@ -1,0 +1,52 @@
+{
+  "classifications": [
+    {
+      "claim": "Pass555 parent identity and canonical pin equality",
+      "class": "SOURCE_FACT",
+      "evidence": [
+        "parent archive identity in Pass559",
+        "exact_static_identity.log"
+      ]
+    },
+    {
+      "claim": "CA5-1 eight-file source implementation exists on canonical tree",
+      "class": "RUNTIME_OBSERVED",
+      "conditions": "byte inspection of exact candidate; no execution required"
+    },
+    {
+      "claim": "compatibility-copy focused/full tests and vet are GREEN",
+      "class": "RUNTIME_OBSERVED",
+      "conditions": "Go1.23.2 disposable compatibility copy only; not native acceptance"
+    },
+    {
+      "claim": "exact canonical execution in this sandbox",
+      "class": "UNKNOWN",
+      "conditions": "ENVIRONMENT_BLOCKED; no negative product inference"
+    },
+    {
+      "basis": "Pass559 D01/D04 candidate-bound contract and concurrency analysis",
+      "claim": "rank 440 saved-preset root and stable absence-lock requirement",
+      "class": "IMPLEMENTATION_DECISION"
+    },
+    {
+      "basis": "Pass558/559 source reachability disposition; CA5-1 adds no activation",
+      "claim": "MID208/209 remain inactive/deferred",
+      "class": "IMPLEMENTATION_DECISION"
+    },
+    {
+      "basis": "user-authorized deferral immediately before CA5-E; gate preserved, not passed",
+      "claim": "aggregate exact-native/live CA5 gate",
+      "class": "IMPLEMENTATION_DECISION"
+    }
+  ],
+  "disallowed_promotions": [
+    "COMPATIBILITY_COPY_ONLY is not exact-native proof",
+    "static source presence is not stock reachability",
+    "local CA5-1 acceptance is not CA5 parent acceptance",
+    "deferred native gate is not GREEN"
+  ],
+  "pass": "560.0",
+  "phase": "CA5-1",
+  "schema_version": 1,
+  "status": "LOCAL_ACCEPTED_WITH_DEFERRED_EXACT_NATIVE_AGGREGATE"
+}

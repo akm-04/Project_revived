@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "pass": "441.0",
+  "stage": "I4_W1_REPAIR_CANDIDATE",
+  "version": "v0.40.1",
+  "status": "PASS_NORMAL_CHAT_REPAIR_W1_RETEST_REQUIRED_I5_BLOCKED",
+  "product_behavior_claimed": false,
+  "candidate_source_commit": "5708b844f7a41f7f85eb6591332668282773fa8c",
+  "prior_w1_evidence_sha256": "405e7250f7f5535e152520d33825455cf46e33c90385cbbfe9e6925b27b1e781",
+  "w1_findings": {
+    "tagged_dependency_closure": "REPAIRED_RETEST_REQUIRED",
+    "missing_boot_tracker_constructor": "REPAIRED_RETEST_REQUIRED",
+    "goose_compound_statement_parsing": "REPAIRED_RETEST_REQUIRED",
+    "river_package_mismatch": "REPAIRED_RETEST_REQUIRED",
+    "sqlc_clean_generation": "POLICY_REPAIRED_EXECUTION_RETEST_REQUIRED",
+    "resolved_dependency_license_sbom": "REPAIRED_EXECUTION_AUDIT_RETEST_REQUIRED",
+    "ambiguous_commit_reconciliation_history": "REPAIRED_RETEST_REQUIRED",
+    "cross_process_wave_s_instrumentation": "REPAIRED_RETEST_REQUIRED",
+    "pre_w1_connected_candidate_gate": "ADDED_EXECUTION_RETEST_REQUIRED"
+  },
+  "active_oracles": {
+    "current_src64_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+    "pass353_archive_sha256": "31729d5c5e4509c2c89eaa1e8203cf1570afe87e18ed2610b944e457a9946b15",
+    "i2_oracle_gate": "PASS_PRE_GO126_FLOOR",
+    "i3_oracle_gate": "PASS_PRE_GO126_FLOOR",
+    "i4_oracle_gate": "PASS_PRE_GO126_FLOOR",
+    "new_semantic_contradiction": false
+  },
+  "normal_chat_evidence": {
+    "pass440_full_gate_go1_23_compat": "PASS",
+    "pass440_selected_race_suite": "PASS",
+    "pass441_post_floor_static_connected_preseal": "PASS",
+    "pass441_dependency_policy": "PASS",
+    "pass441_resolved_sbom": "PASS",
+    "pass441_sqlc_policy": "PASS",
+    "pass441_i4_validator": "PASS"
+  },
+  "module_contract": {
+    "go_language_floor": "1.26.0",
+    "toolchain": "go1.27.1",
+    "work_target_go": "1.27.1",
+    "work_target_postgresql": "18.6",
+    "work_target_sqlc": "1.31.1"
+  },
+  "scope": "I4 repair only; no I5 implementation",
+  "gate": "Fresh W1 must return clean before I5"
+}

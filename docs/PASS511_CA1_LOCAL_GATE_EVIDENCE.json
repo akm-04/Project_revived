@@ -1,0 +1,89 @@
+{
+  "schema_version": 1,
+  "pass": "511.0",
+  "phase": "CA1_ASSET_KERNEL",
+  "status": "LOCAL_GREEN_COMPATIBILITY_COPY_ONLY_NATIVE_AND_REAL_POSTGRESQL_PENDING",
+  "authority": {
+    "sealed_semantic": "Pass509 HOT/CURRENT",
+    "parent_backend_sha256": "be1bbf9f4119c859bfc0dc679142a2c5ceb367ba3ccf1387bc6f984309570dbb",
+    "parent_implementation_revision_sha256": "46b9ea5d54c80f022449833d594d84c5f48b18304cd2a33c9e53b560ce070b26"
+  },
+  "source_inputs": {
+    "current_src64": {
+      "sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+      "verified": true
+    },
+    "old_client_v1_164": {
+      "sha256": "d0a4815507fd4626ac5749f2f6efae554d3a4bef717793f155f58c8bed7170b1",
+      "verified": true
+    },
+    "frozen_v1_oracle": {
+      "sha256": "31729d5c5e4509c2c89eaa1e8203cf1570afe87e18ed2610b944e457a9946b15",
+      "verified": true
+    },
+    "latest_apk_smali": {
+      "sha256": "fcc0f03e5973dd41a190a4bd390a8c4c5185f5f7cf2d4eeb0bcad696cfee7517",
+      "verified": true
+    },
+    "pass222_window_probe": {
+      "sha256": "7682925fa65728ac2032995cb384ac8878860de022169feaa2f749b521580f21",
+      "verified": true
+    }
+  },
+  "implementation": {
+    "character_lock_band": "400-599",
+    "partner_entity_materializer": "typed batch seam; no production provider",
+    "grant_receipt": "v2 unchanged for fungible; v3 only with typed materialization",
+    "material_debit": "scalar+stack caller-owned tx port",
+    "redeem_r0": "complete Grant suffix acquired before progression eligibility read",
+    "migration_high_water": "00013_i6c_guild_replay_repair.sql",
+    "production_provider_activated": false,
+    "specialized_domain_activated": false
+  },
+  "canonical_environment": {
+    "installed_go": "go1.23.2",
+    "required_go": "go1.27.1 (go.mod language floor 1.26.0)",
+    "postgres_18_6": "NOT_AVAILABLE",
+    "sqlc_1_31_1": "NOT_AVAILABLE",
+    "canonical_test_result": "ENVIRONMENT_BLOCKED",
+    "canonical_test_log": "EVIDENCE/PASS511_CA1/CANONICAL_GO_ENVIRONMENT_BLOCK.txt"
+  },
+  "compatibility_copy": {
+    "classification": "COMPATIBILITY_COPY_ONLY",
+    "edits": [
+      "go.mod: go 1.26.0 -> go 1.23.0",
+      "go.mod: remove toolchain go1.27.1 line"
+    ],
+    "all_other_files_unchanged_for_environment_accommodation": true,
+    "go_test_all": "PASS",
+    "go_vet_all": "PASS",
+    "go_test_race_all": "PASS",
+    "package_by_package": {
+      "pass": 84,
+      "fail": 0,
+      "timeout": 0,
+      "total": 84
+    },
+    "evidence_prefix": "EVIDENCE/PASS511_CA1/COMPATIBILITY_COPY_FINAL_"
+  },
+  "canonical_static": {
+    "validate_ca1": "PASS",
+    "source_oracle": "PASS",
+    "verify_oracles": "PASS",
+    "schema_query_ownership": "PASS",
+    "sqlc_generation_policy_static": "PASS",
+    "dependency_policy": "PASS",
+    "validate_i5": "PASS",
+    "validate_r5": "PASS",
+    "legacy_validate_r6": "SUPERSEDED_FAILS_IDENTICALLY_ON_UNTOUCHED_PASS509"
+  },
+  "mandatory_pending": [
+    "exact unmodified Go 1.27.1 native gate",
+    "sqlc 1.31.1 exact no-drift generation check",
+    "PostgreSQL 18.6 real-DB CA1 transaction/concurrency/rollback tests",
+    "postgres-tag and postgres+river repository regression under pinned toolchain",
+    "post-native independent reality reconciliation",
+    "HOT/COLD sync/seal"
+  ],
+  "next_action": "Run docs/PASS511_CA1_NATIVE_WORK_PROMPT.txt against exact candidate; return evidence for normal-chat adjudication. CA2 implementation remains blocked."
+}

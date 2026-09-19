@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "pass": "438.0",
+  "stage": "I4",
+  "version": "v0.40.0",
+  "status": "PASS_NORMAL_CHAT_W1_LIVE_PROOF_REQUIRED_BEFORE_I5",
+  "product_behavior_claimed": false,
+  "implementation_commit": "f2ff66322c1023c7b6164689b9516c0a92e60f87",
+  "source_oracles": {
+    "current_src64_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+    "current_Backend_sha256": "95378e2b0be8180df6de27e9e430c630bcfe46c080e1f91ef5f6d74bdbb1b840",
+    "current_mid_sha256": "026a20b29d97624979777a68c64c749254031604057ff42aa8f8254c3e35b5af",
+    "current_SelfPlayer_sha256": "163d5893c9522ada412c2b9c4748a80757660fccdf03c8f72cb6edf0838b8eb4",
+    "Pass353_archive_sha256": "31729d5c5e4509c2c89eaa1e8203cf1570afe87e18ed2610b944e457a9946b15"
+  },
+  "implemented_contracts": {
+    "mid18_mid1_postgres_orchestration_seam": "PASS_NORMAL_CHAT",
+    "account_uid_distinct_from_player_id": "PASS",
+    "bootstrap_directory_profile_no_half_character": "PASS",
+    "world_service_guild_physical_role_model": "PASS",
+    "team_remains_service_projection": "PASS",
+    "tcp_login_canonical_authorization": "PASS",
+    "heartbeat_without_invented_echo": "PASS",
+    "canonical_liveness_fencing": "PASS",
+    "same_context_role_reconnect_supersession": "PASS",
+    "mid192_honest_discovery": "PASS",
+    "mid1_33_record_hydration": "PASS",
+    "selfplayer_direct_field_structural_projection": "PASS",
+    "fresh_blank_name_lifecycle": "PASS",
+    "mid1304_array_semantics": "PASS",
+    "guild_is_enroll_boolean_false": "PASS",
+    "mid1_log_url_and_sidebands": "PASS",
+    "wave_s_boot_manifest_and_quiescence_tracker": "PASS",
+    "bounded_lobby_facades_only": "PASS"
+  },
+  "normal_chat_checks": {
+    "full_repository_gate": "PASS",
+    "i4_current_source_pass353_oracle_check": "PASS",
+    "unit_tests": "PASS",
+    "go_vet": "PASS",
+    "architecture_guard": "PASS",
+    "selected_race_suite": "PASS",
+    "historical_i1_i2_i3_validators": "PASS",
+    "current_i4_validator": "PASS"
+  },
+  "honest_deferrals": [
+    "exact Go 1.27.1 dependency/tagged PostgreSQL build",
+    "PostgreSQL 18.6 migration/locking/contention/final-slot/ambiguous-COMMIT execution",
+    "real River transactional enqueue/redelivery/restart behavior",
+    "unmodified stock-client Wave-S S0-S3 and all 14 done criteria",
+    "fresh-login packaged-client [4] selection seam; fake Server 3/4 remains forbidden"
+  ],
+  "gate": "W1 must be green before I5",
+  "local_go_version": "go version go1.23.2 linux/amd64"
+}

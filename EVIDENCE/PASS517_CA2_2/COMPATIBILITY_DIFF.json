@@ -1,0 +1,10 @@
+[
+  {
+    "path": ".go-version",
+    "kind": "changed"
+  },
+  {
+    "path": "go.mod",
+    "kind": "changed"
+  }
+]

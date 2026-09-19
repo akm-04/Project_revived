@@ -1,0 +1,70 @@
+# PASS468 R4A package-by-package compatibility regression
+2026-09-07T17:40:32Z
+go version go1.23.2 linux/amd64
+PASS gxb.local/backend/v2/cmd/gxb-admin
+PASS gxb.local/backend/v2/cmd/gxb-api
+PASS gxb.local/backend/v2/cmd/gxb-realtime
+PASS gxb.local/backend/v2/cmd/gxb-wave-s-report
+PASS gxb.local/backend/v2/cmd/gxb-worker
+PASS gxb.local/backend/v2/internal/adapters/blobstore
+PASS gxb.local/backend/v2/internal/adapters/pass353diff
+PASS gxb.local/backend/v2/internal/adapters/postgres
+PASS gxb.local/backend/v2/internal/adapters/postgres/i4store
+PASS gxb.local/backend/v2/internal/adapters/postgres/i5store
+PASS gxb.local/backend/v2/internal/adapters/postgres/identitystore
+PASS gxb.local/backend/v2/internal/adapters/postgres/kernelqueries
+PASS gxb.local/backend/v2/internal/adapters/postgres/kernelstore
+PASS gxb.local/backend/v2/internal/adapters/provider
+PASS gxb.local/backend/v2/internal/adapters/river
+PASS gxb.local/backend/v2/internal/adapters/stockfixtures
+PASS gxb.local/backend/v2/internal/adapters/stockruntime
+PASS gxb.local/backend/v2/internal/application/bootstrap
+PASS gxb.local/backend/v2/internal/application/i5
+PASS gxb.local/backend/v2/internal/application/identitylifecycle
+PASS gxb.local/backend/v2/internal/application/realtimeauth
+PASS gxb.local/backend/v2/internal/archguard
+PASS gxb.local/backend/v2/internal/content/builtin
+PASS gxb.local/backend/v2/internal/domain/combat
+PASS gxb.local/backend/v2/internal/domain/commerce
+PASS gxb.local/backend/v2/internal/domain/control
+PASS gxb.local/backend/v2/internal/domain/economy
+PASS gxb.local/backend/v2/internal/domain/generation
+PASS gxb.local/backend/v2/internal/domain/grant
+PASS gxb.local/backend/v2/internal/domain/guild
+PASS gxb.local/backend/v2/internal/domain/identity
+PASS gxb.local/backend/v2/internal/domain/logicalserver
+PASS gxb.local/backend/v2/internal/domain/mail
+PASS gxb.local/backend/v2/internal/domain/modes
+PASS gxb.local/backend/v2/internal/domain/objective
+PASS gxb.local/backend/v2/internal/domain/player
+PASS gxb.local/backend/v2/internal/domain/profile
+PASS gxb.local/backend/v2/internal/domain/realtimeauth
+PASS gxb.local/backend/v2/internal/domain/redeem
+PASS gxb.local/backend/v2/internal/domain/social
+PASS gxb.local/backend/v2/internal/foundation/audit
+PASS gxb.local/backend/v2/internal/foundation/clock
+PASS gxb.local/backend/v2/internal/foundation/config
+PASS gxb.local/backend/v2/internal/foundation/ids
+PASS gxb.local/backend/v2/internal/foundation/lockkey
+PASS gxb.local/backend/v2/internal/foundation/obligation
+PASS gxb.local/backend/v2/internal/foundation/observability
+PASS gxb.local/backend/v2/internal/foundation/operation
+PASS gxb.local/backend/v2/internal/foundation/policy
+PASS gxb.local/backend/v2/internal/foundation/receipt
+PASS gxb.local/backend/v2/internal/foundation/tx
+# CONTINUATION packages 52-64
+PASS gxb.local/backend/v2/internal/projection/lobby
+PASS gxb.local/backend/v2/internal/projection/ota
+PASS gxb.local/backend/v2/internal/projection/publication
+PASS gxb.local/backend/v2/internal/projection/publicplayer
+PASS gxb.local/backend/v2/internal/projection/ranking
+PASS gxb.local/backend/v2/internal/projection/realtimeview
+PASS gxb.local/backend/v2/internal/protocol/amf3
+PASS gxb.local/backend/v2/internal/protocol/httpedge
+PASS gxb.local/backend/v2/internal/protocol/limits
+PASS gxb.local/backend/v2/internal/protocol/mids
+PASS gxb.local/backend/v2/internal/protocol/observe
+PASS gxb.local/backend/v2/internal/protocol/realtime
+PASS gxb.local/backend/v2/internal/protocol/wire
+
+SUMMARY total=64 failures=0 note=monolithic wrapper timed out after package 51; continuation completed packages 52-64; all 64 individual packages passed

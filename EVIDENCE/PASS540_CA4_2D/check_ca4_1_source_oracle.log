@@ -1,0 +1,3 @@
+R4A CONTENT GENERATION: PASS revision=bd11a7482062dbaa851f3b495e3dc6efab88085011b3fe75d82105e127bba106 resources=5556 players=100 functions=99 heroes=568 pets=54 equipment=1176 pet_acquisition=27
+CA4-1 SOURCE ORACLE CHECK: PASS
+exact current src_64 c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf -> roots=604 closure=1176 recipe_nodes=797 ordered_edges=1934 repeated_recipes=29; generated CA4-1 catalog is byte-regenerable and all closure items remain I5-qualified

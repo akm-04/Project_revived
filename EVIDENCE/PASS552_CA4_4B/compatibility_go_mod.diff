@@ -1,0 +1,12 @@
+--- /mnt/data/gxb552_recon/wip/backend/go.mod	1980-01-01 00:00:00.000000000 +0000
++++ /mnt/data/gxb552_recon/compat_i5_gate1/go.mod	2026-09-15 08:36:56.683985528 +0000
+@@ -1,8 +1,7 @@
+ module gxb.local/backend/v2
+ 
+-go 1.26.0
++go 1.23.0
+ 
+-toolchain go1.27.1
+ 
+ require (
+ 	github.com/go-chi/chi/v5 v5.3.1

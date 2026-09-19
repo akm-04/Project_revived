@@ -1,0 +1,24 @@
+=== COMPATIBILITY COPY METADATA ===
+2026-09-09T06:05:07Z
+go version go1.23.2 linux/amd64
+DIFF FROM EXACT:
+--- /mnt/data/r6_exact_final/go.mod	2026-09-09 00:00:00.000000000 +0000
++++ go.mod	2026-09-09 06:05:06.941184780 +0000
+@@ -1,8 +1,7 @@
+ module gxb.local/backend/v2
+ 
+-go 1.26.0
++go 1.23.0
+ 
+-toolchain go1.27.1
+ 
+ require (
+ 	github.com/go-chi/chi/v5 v5.3.1
+--- /mnt/data/r6_exact_final/.go-version	2026-09-09 00:00:00.000000000 +0000
++++ .go-version	2026-09-09 06:05:06.941363983 +0000
+@@ -1 +1 @@
+-1.27.1
++1.23.2
+go.sum:
+efbf6753542d66e2fefcb2ab5e2ade7c9d28f2206a1113d1eb9568f2cb75808d  go.sum
+efbf6753542d66e2fefcb2ab5e2ade7c9d28f2206a1113d1eb9568f2cb75808d  /mnt/data/r6_exact_final/go.sum

@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "pass": "493.0-I6A",
+  "classification": "SOURCE_FACT",
+  "purpose": "Freeze only candidate-bound client facts used by the I6A generation/scheduler kernel. These hashes and lexical markers do not prove reachability, original-server behavior, or a universal reset/time policy.",
+  "current_src64": {
+    "ServerTime.lua": "c7a7ce8aca24fb2e832cebadea24c22e2b283c74efe404c4ee4ff1058d1560fb",
+    "Activities.lua": "9de010c147d4c977d393072379eeeeee66c9385d5defa5e7ca1d28ac721fe8d8",
+    "RegionArena.lua": "61112538d9a6c8a3b8b07de049d7bfc5c526a1c865a077f78c76845628bb8d66",
+    "Playoffs.lua": "e32a06ee4bf48fd6d98226c2653f350e366c26ea74651354ef42635409284f15"
+  },
+  "old_client": {
+    "ServerTime.lua": "7a664d8437a798f70fbe5bdfb133e1b15865444323628da2dbfe4d11955485a2",
+    "Activities.lua": "f1c288491a038636a16e92b125bc01e482a734572b3614db37f9d2bd405a9c4b",
+    "RegionArena.lua": "61112538d9a6c8a3b8b07de049d7bfc5c526a1c865a077f78c76845628bb8d66",
+    "Playoffs.lua": "e32a06ee4bf48fd6d98226c2653f350e366c26ea74651354ef42635409284f15"
+  }
+}

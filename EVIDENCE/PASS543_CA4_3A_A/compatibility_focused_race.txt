@@ -1,0 +1,8 @@
+ok  	gxb.local/backend/v2/internal/content/builtin	7.212s
+ok  	gxb.local/backend/v2/internal/content/guildpolicy	1.010s
+ok  	gxb.local/backend/v2/internal/content/registry	26.168s
+ok  	gxb.local/backend/v2/internal/domain/character	1.017s
+ok  	gxb.local/backend/v2/internal/adapters/postgres/contentstore	2.291s
+ok  	gxb.local/backend/v2/internal/adapters/postgres/characterstore	1.017s
+ok  	gxb.local/backend/v2/internal/application/characterhero	1.722s
+ok  	gxb.local/backend/v2/internal/projection/hero	1.012s

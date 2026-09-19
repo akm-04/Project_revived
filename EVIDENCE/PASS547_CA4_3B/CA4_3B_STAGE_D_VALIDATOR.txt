@@ -1,0 +1,2 @@
+CA4-3B STAGE D VALIDATION: PASS
+MID49 derived reload projection, sparse MID51/MID57 wire behavior, production 51/57 registration, deferred 54/62 boundary, and canonical pins are present

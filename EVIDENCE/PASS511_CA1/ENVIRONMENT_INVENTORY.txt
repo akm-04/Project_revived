@@ -1,0 +1,14 @@
+tool availability:
+go         /usr/local/go/bin/go
+sqlc       MISSING
+psql       MISSING
+postgres   MISSING
+pg_ctl     MISSING
+goose      MISSING
+python3    /opt/pyvenv/bin/python3
+java       /usr/bin/java
+gcc        /usr/bin/gcc
+clang      /usr/local/swift/usr/bin/clang
+
+GOTOOLCHAIN=local go version:
+go version go1.23.2 linux/amd64

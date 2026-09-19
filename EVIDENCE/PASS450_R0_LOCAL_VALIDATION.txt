@@ -1,0 +1,28 @@
+Pass450 / R0 local disposable-clone validation
+
+Canonical tree toolchain pins remained:
+  go 1.26.0
+  toolchain go1.27.1
+
+Disposable clone only:
+  go 1.23.0
+  toolchain line removed
+  GOTOOLCHAIN=local
+  GXB_COMPAT_SCRATCH=1
+
+PASS:
+- go test ./internal/archguard
+- go test ./...
+- go vet ./...
+- python3 tools/validate_r0.py
+- python3 tools/validate_foundation_trace.py
+- python3 tools/validate_i2.py
+- python3 tools/validate_i3.py
+- python3 tools/check_schema_query_ownership.py --self-test
+- python3 tools/check_schema_query_ownership.py --allow-known-open
+
+Expected RED from ./tools/check.sh:
+- strict schema/query ownership exposes RF-007 cross-owner I5 bootstrap writes still in i4store
+- validate_i5 exposes RF-007 and RF-015
+No obsolete I2/I3 validator failures remain.
+This RED is the R0 success condition: known later repair defects are visible rather than waived.

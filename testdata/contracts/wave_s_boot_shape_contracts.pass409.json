@@ -1,0 +1,307 @@
+{
+  "schema_version": 2,
+  "pass": "409.0",
+  "wave": "S_DESIGN_SUPPORT",
+  "status": "BOOT_SHAPE_CONTRACT_CATALOG_FROZEN_LIVE_RUN_DEFERRED",
+  "authority": "current all-assest-rechecked-1.zip src_64; Pass353 only differential/mechanism oracle",
+  "source_files": {
+    "SelfPlayer.lua": "163d5893c9522ada412c2b9c4748a80757660fccdf03c8f72cb6edf0838b8eb4",
+    "Backend.lua": "95378e2b0be8180df6de27e9e430c630bcfe46c080e1f91ef5f6d74bdbb1b840",
+    "SocialSystem.lua": "ec5bea26bbdcbb67ca2ea80ab5ad7e9fb53ee613a3ffcbb13ae5dfef9ddf0502",
+    "SelfGuild.lua": "c744e6f256a796a98613911372c1821b3e02f21d38480184df9c095373bd64f9",
+    "Illusion.lua": "072f8825ac48cb311f93a3eb71dbe2f0e23ead9e6391fc67f680fbc70e9e527a",
+    "Achievement.lua": "21997595c3bf71fde46029d8cfc31473dab8f3f39d94b480e3d3e6555a453d50",
+    "EventCentre.lua": "a74e8d057e5e520f302b5f4c5ece73b6e9d4eb934b9cbefa0447410c094e7596",
+    "Activities.lua": "9de010c147d4c977d393072379eeeeee66c9385d5defa5e7ca1d28ac721fe8d8",
+    "Mailbox.lua": "3232f5c4b7c8dc60bf2c76249813d684959e4970040890ea2d0a3f544516ba14"
+  },
+  "global_rules": [
+    "MID1 detail is a map keyed by decimal MID string; each embedded detail value has the same source-consumed schema as that MID handler, not an arbitrary placeholder.",
+    "Embedded MID1 hydration must be distinguished from later explicit network reloads in capture/differential logs.",
+    "Honest inactive stubs are allowed only when every source-dereferenced key/nesting/container/type remains present and internally coherent.",
+    "Boolean/integer/string distinctions are field-local and preserved exactly. In particular normal mail is_region must remain false/nil where source expects that meaning; numeric 0 is not a global boolean substitute.",
+    "Asynchronous MainScene fanout is checked by dependency/partial order, never one rigid packet sequence."
+  ],
+  "mid1_envelope": {
+    "mid": 1,
+    "request_required": [
+      "sid",
+      "login_token",
+      "region",
+      "is_test",
+      "v_",
+      "app_v",
+      "platform"
+    ],
+    "response_consumed": [
+      "token",
+      "region",
+      "log_url",
+      "uid",
+      "detail",
+      "is_new"
+    ],
+    "response_optional_defaulted": [
+      "story_type",
+      "is_debug",
+      "is_old_top",
+      "server_time where used by backend/oracle"
+    ],
+    "detail_contract": "contains the 33 Pass408 hydration records keyed by tostring(mid); handler records with error_msg are skipped by stock and therefore cannot silently replace required baseline hydration."
+  },
+  "embedded_mid1_records": [
+    17,
+    780,
+    49,
+    81,
+    112,
+    115,
+    2561,
+    229,
+    289,
+    336,
+    352,
+    384,
+    2485,
+    1408,
+    368,
+    56,
+    624,
+    612,
+    822,
+    530,
+    1056,
+    1152,
+    1808,
+    1304,
+    1856,
+    836,
+    2137,
+    2139,
+    2416,
+    2501,
+    2560,
+    2984,
+    3101
+  ],
+  "critical_source_consumed_shapes": [
+    {
+      "mid": 17,
+      "symbol": "LOAD_PLAYER_INFO",
+      "kind": "embedded",
+      "minimum": "source Player/SelfPlayer populate contract; must include player_id, uid, region, lev/exp/economy/time/open-function/formation/avatar/guild fields needed by startup; no shapeless stub",
+      "note": "Pass353 response-key corpus is differential oracle only."
+    },
+    {
+      "mid": 368,
+      "symbol": "LOAD_MAIL_LIST",
+      "kind": "embedded",
+      "required": {
+        "mail_list": "array",
+        "total": "number",
+        "new_mail_total": "number"
+      },
+      "note": "mail item field-local types remain source-specific; normal mail is_region false/nil, not numeric normalization."
+    },
+    {
+      "mid": 56,
+      "symbol": "LOAD_SUMMON_INFO",
+      "kind": "embedded+explicit",
+      "required": {
+        "mana_free_time": "numeric/convertible",
+        "crystal_free_time": "numeric/convertible",
+        "second_ids": "source container",
+        "main_ids": "source container",
+        "mana_id": "numeric/convertible",
+        "partner_id": "numeric/convertible"
+      },
+      "optional": [
+        "mana_free_num"
+      ],
+      "repeat": "explicit MainScene reload after hydration is source-valid and must be idempotent/read-safe."
+    },
+    {
+      "mid": 612,
+      "symbol": "GET_SELF_GUILD",
+      "kind": "embedded+conditional explicit",
+      "inactive": "guild_info absent/zero guild_id => stock sets guild_id=0",
+      "active_required": [
+        "guild_info.guild_id",
+        "guild_info.huoyue",
+        "guild_info.icon",
+        "guild_info.name",
+        "guild_info.des",
+        "guild_info.apply_type",
+        "guild_info.icon_frame",
+        "guild_info.min_allow_level",
+        "guild_info.guild_leader_name",
+        "self_info.today_huoyue",
+        "self_info.huoyue_num",
+        "self_info.join_time",
+        "self_info.job",
+        "member_nums"
+      ]
+    },
+    {
+      "mid": 1056,
+      "symbol": "GET_BUILDING_LIST",
+      "kind": "embedded+conditional explicit",
+      "required": [
+        "building_list",
+        "desk_info",
+        "pet_cabin_info",
+        "cabinet_info"
+      ],
+      "strong_requirement": "explicit getBuildingList dereferences cabinet_info.need_time/start_time/recent_complete_skill and building_list entries including key \"1\" plus ADMIN/BOARD/BOOKSHELF; a bare {} will crash/retrigger. Inactive fixture must provide coherent zero/idle building records."
+    },
+    {
+      "mid": 229,
+      "symbol": "ACTIVITIES",
+      "kind": "embedded+conditional explicit",
+      "required": {
+        "list": "array"
+      },
+      "inactive": "list=[] is the honest baseline if no startup activities are open."
+    },
+    {
+      "mid": 352,
+      "symbol": "LOAD_SIGN_INFO",
+      "kind": "embedded+optional explicit",
+      "required": [
+        "awards",
+        "is_signed",
+        "partner_id",
+        "sign_times",
+        "month",
+        "is_skin"
+      ],
+      "inactive": "signed fixture uses source-valid values; if is_signed==0 startup may legitimately send MID353 SIGN."
+    },
+    {
+      "mid": 2784,
+      "symbol": "ALBUM_SPECIAL_COLLECT_INFO",
+      "kind": "explicit after PlayerInfo",
+      "required": {
+        "is_award": "source scalar/container as consumed by album calculation"
+      }
+    },
+    {
+      "mid": 192,
+      "symbol": "LOAD_CHAT_ROOM_INFO",
+      "kind": "explicit HTTP",
+      "request": {
+        "room_id": "numeric source room identity"
+      },
+      "required": {
+        "host": "string",
+        "port": "numeric/string convertible by tonumber",
+        "room_id": "numeric/string convertible by tonumber"
+      },
+      "failure_behavior": "stock retries room discovery after ~5s on non-OK, so baseline must not intentionally return malformed/error responses."
+    },
+    {
+      "mid": 32771,
+      "symbol": "TCP_LOGIN",
+      "kind": "client->server TCP",
+      "request_required": [
+        "token",
+        "region",
+        "room_id"
+      ],
+      "server_success": "server sends CHAT_ROOM_ENTERED MID32779 for the same socket/room; that event clears the 10s connect timeout and starts heartbeat."
+    },
+    {
+      "mid": 32779,
+      "symbol": "CHAT_ROOM_ENTERED",
+      "kind": "server->client TCP",
+      "required": "source-compatible params may be empty if no consumer fields are required; MID itself is mandatory socket-admission acknowledgement."
+    },
+    {
+      "mid": 32797,
+      "symbol": "SOCKET_HEARTBEAT",
+      "kind": "client->server TCP",
+      "request": "{} every 600s after CHAT_ROOM_ENTERED",
+      "rule": "server accepts without creating request storms; exact reply requirement remains Wave-B transport contract if source/socket library requires one."
+    },
+    {
+      "mid": 1344,
+      "symbol": "ILLUSION_LOAD_INFO",
+      "kind": "explicit MainScene",
+      "required": [
+        "paradise_info.paradise_id",
+        "paradise_info.count",
+        "challenge_times",
+        "buy_times",
+        "hurt",
+        "rank"
+      ],
+      "inactive": "coherent closed/idle values, never missing paradise_info."
+    },
+    {
+      "mid": 176,
+      "symbol": "LOAD_FRIENDS",
+      "kind": "explicit MainScene",
+      "required": [
+        "server_time",
+        "blacklist",
+        "friend_list",
+        "notice_list",
+        "request_list",
+        "offline_msg_list",
+        "send_gift_count",
+        "receive_gift_count"
+      ],
+      "inactive": "all list fields=[], counts=0; server_time must be authoritative epoch because client resets ServerTime from it."
+    },
+    {
+      "mid": 2754,
+      "symbol": "CHECK_GAME_STAT",
+      "kind": "explicit MainScene fire-and-forget",
+      "minimum": "valid OK envelope; callback result is not consumed by this startup call."
+    },
+    {
+      "mid": 1302,
+      "symbol": "LOAD_ACHIEVEMENT_INFO",
+      "kind": "explicit MainScene",
+      "required": {
+        "achieve_list": "array",
+        "base_info": "object"
+      },
+      "inactive": "achieve_list=[] and coherent zero base_info fields used by red-mark/ranking logic."
+    },
+    {
+      "mid": 780,
+      "symbol": "PETS_GET",
+      "kind": "embedded+conditional explicit",
+      "required_if_present": {
+        "pets": "array"
+      },
+      "inactive": "pets=[]; stock creates collectedPets=[] even if pets absent, but explicit repeat should return stable source-shaped object."
+    },
+    {
+      "mid": 124,
+      "symbol": "GET_PRACTICE_INFO",
+      "kind": "conditional explicit",
+      "minimum": "must be an object storable as practiceInfo; when practice function/awakened hero path is enabled, downstream practice UI/red-mark fields must follow owning source contract; do not return nil/shape-less error loop."
+    },
+    {
+      "mid": 8193,
+      "symbol": "GET_PIC_NOTICE_INFO",
+      "kind": "optional startup popup",
+      "required": {
+        "has_read": "number",
+        "contents": "array"
+      },
+      "inactive": "has_read=1 and contents=[] avoids popup."
+    },
+    {
+      "mid": 353,
+      "symbol": "SIGN",
+      "kind": "optional startup mutation",
+      "rule": "only applicable when source-valid LOAD_SIGN_INFO reports unsigned; response must satisfy sign_in window contract and settlement must be semantically replay-safe."
+    }
+  ],
+  "remaining_embedded_rule": "For the other MID1 records not expanded above, Wave S binds each to its current src_64 handler schema and permits only source-shaped inactive values. Their deeper business semantics remain owned by later Design waves; shape compatibility is not permission to invent gameplay authority.",
+  "fixtures": "S0-S3 from Pass408 remain normative; S1 specifically forces Guild/Pets/EventCentre/Practice paths. 60-second stable-lobby quiescence excludes expected heartbeat/legitimate timers and requires zero Lua exceptions/request storms.",
+  "scheduling": "Live S0-S3 executes only after Design Waves A-D and foundational implementation exist, before deeper gameplay implementation. No design-time implementation exception was taken."
+}

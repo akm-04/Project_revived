@@ -1,0 +1,6 @@
+ok  	gxb.local/backend/v2/internal/domain/character	0.010s
+ok  	gxb.local/backend/v2/internal/application/characterhero	0.032s
+ok  	gxb.local/backend/v2/internal/application/i5	0.005s
+?   	gxb.local/backend/v2/internal/adapters/postgres/characterstore	[no test files]
+ok  	gxb.local/backend/v2/internal/adapters/stockruntime	0.398s
+ok  	gxb.local/backend/v2/internal/adapters/postgres/contentstore	0.037s

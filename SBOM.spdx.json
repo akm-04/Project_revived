@@ -1,0 +1,372 @@
+{
+  "spdxVersion": "SPDX-2.3",
+  "dataLicense": "CC0-1.0",
+  "SPDXID": "SPDXRef-DOCUMENT",
+  "name": "gxb-backend-v2-resolved",
+  "documentNamespace": "https://local.invalid/gxb/backend/v2/resolved",
+  "creationInfo": {
+    "created": "2026-09-16T23:15:03Z",
+    "creators": [
+      "Tool: GXB-V2-resolved-SBOM-generator"
+    ]
+  },
+  "packages": [
+    {
+      "SPDXID": "SPDXRef-GXB",
+      "name": "gxb-backend-v2",
+      "versionInfo": "v0.76.4-candidate",
+      "downloadLocation": "NOASSERTION",
+      "licenseConcluded": "NOASSERTION",
+      "licenseDeclared": "NOASSERTION",
+      "supplier": "NOASSERTION",
+      "filesAnalyzed": false,
+      "primaryPackagePurpose": "APPLICATION"
+    },
+    {
+      "SPDXID": "SPDXRef-GoModule-1",
+      "name": "github.com/go-chi/chi/v5",
+      "versionInfo": "v5.3.1",
+      "downloadLocation": "https://github.com/go-chi/chi/v5",
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "supplier": "NOASSERTION",
+      "filesAnalyzed": false,
+      "primaryPackagePurpose": "LIBRARY"
+    },
+    {
+      "SPDXID": "SPDXRef-GoModule-2",
+      "name": "github.com/jackc/pgx/v5",
+      "versionInfo": "v5.10.0",
+      "downloadLocation": "https://github.com/jackc/pgx/v5",
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "supplier": "NOASSERTION",
+      "filesAnalyzed": false,
+      "primaryPackagePurpose": "LIBRARY"
+    },
+    {
+      "SPDXID": "SPDXRef-GoModule-3",
+      "name": "github.com/riverqueue/river",
+      "versionInfo": "v0.47.0",
+      "downloadLocation": "https://github.com/riverqueue/river",
+      "licenseConcluded": "MPL-2.0",
+      "licenseDeclared": "MPL-2.0",
+      "supplier": "NOASSERTION",
+      "filesAnalyzed": false,
+      "primaryPackagePurpose": "LIBRARY"
+    },
+    {
+      "SPDXID": "SPDXRef-GoModule-4",
+      "name": "github.com/riverqueue/river/riverdriver/riverpgxv5",
+      "versionInfo": "v0.47.0",
+      "downloadLocation": "https://github.com/riverqueue/river/riverdriver/riverpgxv5",
+      "licenseConcluded": "MPL-2.0",
+      "licenseDeclared": "MPL-2.0",
+      "supplier": "NOASSERTION",
+      "filesAnalyzed": false,
+      "primaryPackagePurpose": "LIBRARY"
+    },
+    {
+      "SPDXID": "SPDXRef-GoModule-5",
+      "name": "github.com/jackc/pgpassfile",
+      "versionInfo": "v1.0.0",
+      "downloadLocation": "https://github.com/jackc/pgpassfile",
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "supplier": "NOASSERTION",
+      "filesAnalyzed": false,
+      "primaryPackagePurpose": "LIBRARY"
+    },
+    {
+      "SPDXID": "SPDXRef-GoModule-6",
+      "name": "github.com/jackc/pgservicefile",
+      "versionInfo": "v0.0.0-20240606120523-5a60cdf6a761",
+      "downloadLocation": "https://github.com/jackc/pgservicefile",
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "supplier": "NOASSERTION",
+      "filesAnalyzed": false,
+      "primaryPackagePurpose": "LIBRARY"
+    },
+    {
+      "SPDXID": "SPDXRef-GoModule-7",
+      "name": "github.com/jackc/puddle/v2",
+      "versionInfo": "v2.2.2",
+      "downloadLocation": "https://github.com/jackc/puddle/v2",
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "supplier": "NOASSERTION",
+      "filesAnalyzed": false,
+      "primaryPackagePurpose": "LIBRARY"
+    },
+    {
+      "SPDXID": "SPDXRef-GoModule-8",
+      "name": "github.com/riverqueue/river/riverdriver",
+      "versionInfo": "v0.47.0",
+      "downloadLocation": "https://github.com/riverqueue/river/riverdriver",
+      "licenseConcluded": "MPL-2.0",
+      "licenseDeclared": "MPL-2.0",
+      "supplier": "NOASSERTION",
+      "filesAnalyzed": false,
+      "primaryPackagePurpose": "LIBRARY"
+    },
+    {
+      "SPDXID": "SPDXRef-GoModule-9",
+      "name": "github.com/riverqueue/river/rivershared",
+      "versionInfo": "v0.47.0",
+      "downloadLocation": "https://github.com/riverqueue/river/rivershared",
+      "licenseConcluded": "MPL-2.0",
+      "licenseDeclared": "MPL-2.0",
+      "supplier": "NOASSERTION",
+      "filesAnalyzed": false,
+      "primaryPackagePurpose": "LIBRARY"
+    },
+    {
+      "SPDXID": "SPDXRef-GoModule-10",
+      "name": "github.com/riverqueue/river/rivertype",
+      "versionInfo": "v0.47.0",
+      "downloadLocation": "https://github.com/riverqueue/river/rivertype",
+      "licenseConcluded": "MPL-2.0",
+      "licenseDeclared": "MPL-2.0",
+      "supplier": "NOASSERTION",
+      "filesAnalyzed": false,
+      "primaryPackagePurpose": "LIBRARY"
+    },
+    {
+      "SPDXID": "SPDXRef-GoModule-11",
+      "name": "github.com/tidwall/gjson",
+      "versionInfo": "v1.19.0",
+      "downloadLocation": "https://github.com/tidwall/gjson",
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "supplier": "NOASSERTION",
+      "filesAnalyzed": false,
+      "primaryPackagePurpose": "LIBRARY"
+    },
+    {
+      "SPDXID": "SPDXRef-GoModule-12",
+      "name": "github.com/tidwall/match",
+      "versionInfo": "v1.2.0",
+      "downloadLocation": "https://github.com/tidwall/match",
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "supplier": "NOASSERTION",
+      "filesAnalyzed": false,
+      "primaryPackagePurpose": "LIBRARY"
+    },
+    {
+      "SPDXID": "SPDXRef-GoModule-13",
+      "name": "github.com/tidwall/pretty",
+      "versionInfo": "v1.2.1",
+      "downloadLocation": "https://github.com/tidwall/pretty",
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "supplier": "NOASSERTION",
+      "filesAnalyzed": false,
+      "primaryPackagePurpose": "LIBRARY"
+    },
+    {
+      "SPDXID": "SPDXRef-GoModule-14",
+      "name": "github.com/tidwall/sjson",
+      "versionInfo": "v1.2.5",
+      "downloadLocation": "https://github.com/tidwall/sjson",
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "supplier": "NOASSERTION",
+      "filesAnalyzed": false,
+      "primaryPackagePurpose": "LIBRARY"
+    },
+    {
+      "SPDXID": "SPDXRef-GoModule-15",
+      "name": "golang.org/x/sync",
+      "versionInfo": "v0.22.0",
+      "downloadLocation": "https://golang.org/x/sync",
+      "licenseConcluded": "BSD-3-Clause",
+      "licenseDeclared": "BSD-3-Clause",
+      "supplier": "NOASSERTION",
+      "filesAnalyzed": false,
+      "primaryPackagePurpose": "LIBRARY"
+    },
+    {
+      "SPDXID": "SPDXRef-GoModule-16",
+      "name": "golang.org/x/text",
+      "versionInfo": "v0.41.0",
+      "downloadLocation": "https://golang.org/x/text",
+      "licenseConcluded": "BSD-3-Clause",
+      "licenseDeclared": "BSD-3-Clause",
+      "supplier": "NOASSERTION",
+      "filesAnalyzed": false,
+      "primaryPackagePurpose": "LIBRARY"
+    },
+    {
+      "SPDXID": "SPDXRef-Qualified-18",
+      "name": "Go",
+      "versionInfo": "1.27.1",
+      "downloadLocation": "NOASSERTION",
+      "licenseConcluded": "BSD-3-Clause",
+      "licenseDeclared": "BSD-3-Clause",
+      "supplier": "NOASSERTION",
+      "filesAnalyzed": false
+    },
+    {
+      "SPDXID": "SPDXRef-Qualified-19",
+      "name": "PostgreSQL",
+      "versionInfo": "18.6",
+      "downloadLocation": "NOASSERTION",
+      "licenseConcluded": "PostgreSQL",
+      "licenseDeclared": "PostgreSQL",
+      "supplier": "NOASSERTION",
+      "filesAnalyzed": false
+    },
+    {
+      "SPDXID": "SPDXRef-Qualified-20",
+      "name": "sqlc",
+      "versionInfo": "v1.31.1",
+      "downloadLocation": "NOASSERTION",
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "supplier": "NOASSERTION",
+      "filesAnalyzed": false
+    },
+    {
+      "SPDXID": "SPDXRef-Qualified-21",
+      "name": "goose",
+      "versionInfo": "v3.27.3",
+      "downloadLocation": "NOASSERTION",
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "supplier": "NOASSERTION",
+      "filesAnalyzed": false
+    },
+    {
+      "SPDXID": "SPDXRef-Qualified-22",
+      "name": "Testcontainers for Go",
+      "versionInfo": "v0.44.0",
+      "downloadLocation": "NOASSERTION",
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "supplier": "NOASSERTION",
+      "filesAnalyzed": false
+    },
+    {
+      "SPDXID": "SPDXRef-Qualified-23",
+      "name": "OpenTelemetry Go",
+      "versionInfo": "v1.45.0",
+      "downloadLocation": "NOASSERTION",
+      "licenseConcluded": "Apache-2.0 AND BSD-3-Clause components",
+      "licenseDeclared": "Apache-2.0 AND BSD-3-Clause components",
+      "supplier": "NOASSERTION",
+      "filesAnalyzed": false
+    },
+    {
+      "SPDXID": "SPDXRef-Qualified-24",
+      "name": "Prometheus Go client",
+      "versionInfo": "v1.24.1",
+      "downloadLocation": "NOASSERTION",
+      "licenseConcluded": "Apache-2.0",
+      "licenseDeclared": "Apache-2.0",
+      "supplier": "NOASSERTION",
+      "filesAnalyzed": false
+    },
+    {
+      "SPDXID": "SPDXRef-Qualified-25",
+      "name": "goAMF3",
+      "versionInfo": "v1.0.2",
+      "downloadLocation": "NOASSERTION",
+      "licenseConcluded": "MIT-0",
+      "licenseDeclared": "MIT-0",
+      "supplier": "NOASSERTION",
+      "filesAnalyzed": false
+    }
+  ],
+  "relationships": [
+    {
+      "spdxElementId": "SPDXRef-GXB",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-GoModule-1"
+    },
+    {
+      "spdxElementId": "SPDXRef-GXB",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-GoModule-2"
+    },
+    {
+      "spdxElementId": "SPDXRef-GXB",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-GoModule-3"
+    },
+    {
+      "spdxElementId": "SPDXRef-GXB",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-GoModule-4"
+    },
+    {
+      "spdxElementId": "SPDXRef-GXB",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-GoModule-5"
+    },
+    {
+      "spdxElementId": "SPDXRef-GXB",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-GoModule-6"
+    },
+    {
+      "spdxElementId": "SPDXRef-GXB",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-GoModule-7"
+    },
+    {
+      "spdxElementId": "SPDXRef-GXB",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-GoModule-8"
+    },
+    {
+      "spdxElementId": "SPDXRef-GXB",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-GoModule-9"
+    },
+    {
+      "spdxElementId": "SPDXRef-GXB",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-GoModule-10"
+    },
+    {
+      "spdxElementId": "SPDXRef-GXB",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-GoModule-11"
+    },
+    {
+      "spdxElementId": "SPDXRef-GXB",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-GoModule-12"
+    },
+    {
+      "spdxElementId": "SPDXRef-GXB",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-GoModule-13"
+    },
+    {
+      "spdxElementId": "SPDXRef-GXB",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-GoModule-14"
+    },
+    {
+      "spdxElementId": "SPDXRef-GXB",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-GoModule-15"
+    },
+    {
+      "spdxElementId": "SPDXRef-GXB",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-GoModule-16"
+    }
+  ],
+  "annotations": [
+    {
+      "annotationType": "OTHER",
+      "annotator": "Tool: GXB-V2-resolved-SBOM-generator",
+      "annotationDate": "2026-09-16T23:15:03Z",
+      "comment": "Resolved runtime Go module closure is generated from the current BUILD_INFO version and DEPENDENCIES.lock.json; qualified non-linked tooling/services remain separately classified."
+    }
+  ]
+}

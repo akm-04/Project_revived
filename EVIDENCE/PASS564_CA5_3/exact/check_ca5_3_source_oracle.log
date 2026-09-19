@@ -1,0 +1,3 @@
+$ GXB_CA5_3_CURRENT_ARCHIVE=... python3 tools/check_ca5_3_source_oracle.py
+CA5-3 SOURCE ORACLE CHECK: PASS
+current/old/V1 oracle identities remain pinned; effective current full/modern-delete triple and retained pet-less legacy delete remain discriminated; candidate does not promote UI/V1 policy into server truth

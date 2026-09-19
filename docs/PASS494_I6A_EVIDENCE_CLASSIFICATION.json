@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "pass": "494.0",
+  "phase": "I6A",
+  "status": "PHASE_ACCEPTED",
+  "decision": "ACCEPT_WORK_REPAIRED_CANDIDATE_WITH_METADATA_ONLY_RELEASE_REPACK",
+  "original_checkpoint4_sha256": "f23edb50c2ac6dd42ad9894e2e493b908e1fc0fba0182824e2ccfbc195f36c44",
+  "original_checkpoint4_result": "RED_PRODUCT_MODULE_CLOSURE",
+  "work_repaired_backend_sha256": "836b5df6ba9edd88c4655c5d1e09d58a4e525068bfa6d61dd98fc13c71b2b6ea",
+  "work_evidence_archive_sha256": "b99d980715922c631f708d8dd3bbad30666ed5c3e1c3bca16a7ab86537b27ef1",
+  "accepted_repair": {
+    "classification": "IMPLEMENTATION_DECISION",
+    "changes": [
+      "go.mod direct github.com/riverqueue/river/riverdriver/riverpgxv5 v0.47.0 requirement",
+      "DEPENDENCIES.lock.json direct-module closure",
+      "regenerated SBOM.spdx.json"
+    ],
+    "source_or_migration_changes": false,
+    "rationale": "runtime.go directly imports the riverpgxv5 submodule; explicit direct module closure is required and was proven by exact Go 1.27.1 connected/native gates."
+  },
+  "proof": {
+    "exact_go_1_27_1_full_test": "PASS",
+    "exact_full_vet": "PASS",
+    "focused_race": "PASS",
+    "security_checks": "PASS",
+    "postgresql_18_6_goose_00001_00011": "PASS",
+    "river_native_database_a": "PASS",
+    "river_native_race_database_a": "PASS",
+    "postgres_dump_restore_database_b": "PASS",
+    "river_native_after_restore_database_b": "PASS",
+    "source_oracle": "PASS",
+    "migration_00012": false,
+    "vcs_metadata_build": "ENVIRONMENT_BLOCKED_ARCHIVE_NO_VCS; bounded -buildvcs=false diagnostic PASS"
+  },
+  "native_contract_coverage": [
+    "PostgreSQL-authoritative decision time under skewed application StartedAt",
+    "transactional River rollback/commit durability",
+    "scheduled restart persistence and no early semantic execution",
+    "duplicate/stale-generation fencing",
+    "missing wakeup reconciliation without elapsed-tick replay",
+    "synthetic lost-COMMIT-ack UNKNOWN-COMMIT convergence without blind replay",
+    "River static kind/semantic dispatch fail-closed behavior"
+  ],
+  "limitations": [
+    "Synthetic lost-COMMIT acknowledgement is REAL_POSTGRES_PLUS_SYNTHETIC_ACK_LOSS, not a real network ACK-loss experiment.",
+    "No I6B/I6C gameplay owner semantics are accepted by this phase.",
+    "No universal +8/05:00/reset/end-boundary policy is established."
+  ],
+  "next": "I6B_PRE_IMPLEMENTATION_RESEARCH_RECONCILIATION"
+}

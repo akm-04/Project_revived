@@ -1,0 +1,16 @@
+SQLC GENERATION POLICY: PASS
+DEPENDENCY POLICY: PASS
+resolved_go_modules 15 qualified_candidates 5
+RESOLVED SBOM: FAIL (regenerate tools/generate_resolved_sbom.py)
+Traceback (most recent call last):
+  File "/workspace/scratch/954ae618448a/work473/testcopy/tools/check_connected_candidate.py", line 72, in <module>
+    if __name__=='__main__': main()
+                             ^^^^^^
+  File "/workspace/scratch/954ae618448a/work473/testcopy/tools/check_connected_candidate.py", line 70, in main
+    ap=argparse.ArgumentParser(); ap.add_argument('--execute',action='store_true'); a=ap.parse_args(); static_checks();
+                                                                                                       ^^^^^^^^^^^^^^^
+  File "/workspace/scratch/954ae618448a/work473/testcopy/tools/check_connected_candidate.py", line 41, in static_checks
+    subprocess.run([sys.executable,str(ROOT/'tools/generate_resolved_sbom.py'),'--check'],check=True)
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3', '/workspace/scratch/954ae618448a/work473/testcopy/tools/generate_resolved_sbom.py', '--check']' returned non-zero exit status 1.

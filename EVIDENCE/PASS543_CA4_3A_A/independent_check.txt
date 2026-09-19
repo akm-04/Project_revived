@@ -1,0 +1,55 @@
+CA4-3A-A INDEPENDENT CHECK: 46/46 GREEN
+PASS canonical pin .go-version  :: a8844fbc8c3eb51c26ed00aec4cd5a5a9d647f849c6ead07bcc83ed24c4a7718
+PASS canonical pin go.mod  :: 313c574368bb56dc570bc3427b65f59b059e492f909fe43b7d0291b5ced21dc4
+PASS canonical pin go.sum  :: efbf6753542d66e2fefcb2ab5e2ade7c9d28f2206a1113d1eb9568f2cb75808d
+PASS content revision  :: aa89ed03a9315a9faf8392b9beb4141594ad911033483659ea0c31674a79dc83
+PASS compiler identity 
+PASS capability enabled 
+PASS target diagnostic 
+PASS material diagnostic 
+PASS target count 
+PASS material count 
+PASS sealed source oracle hash 
+PASS sparse stage rows  :: 40
+PASS fractional stage values  :: 14
+PASS type8 absent 
+PASS migration forward only 
+PASS fumo column 1 
+PASS fumo column 2 
+PASS fumo column 3 
+PASS fumo column 4 
+PASS fumo column 5 
+PASS fumo column 6 
+PASS migration highwater 
+PASS migration hash 
+PASS owner gxb_content_hero_fumo_targets 
+PASS owner gxb_content_hero_fumo_materials 
+PASS Hero owns raw Fumo 
+PASS persistent validation 
+PASS six-slot raw type 
+PASS no independent durable Fumo level 
+PASS cohesive CAS writes Fumo 
+PASS raw seam emits Fumo 
+PASS raw seam accepts special 
+PASS stock emits raw fumos 
+PASS stock omits fumo_levels 
+PASS no MID58 dispatcher 
+PASS no MID58 production registration 
+PASS no MID29 quick Fumo activation 
+PASS no MID51/57 added 
+PASS no Fumo service in A 
+PASS no I5 ownership changes  :: []
+PASS command python3 tools/check_ca4_3a_source_oracle.py  :: CA4-3A SOURCE ORACLE CHECK: PASS
+sealed Pass542 current-source oracle -> 359 target policies / 516 Hero-Fumo materials; generated catalog preserves sparse exact-decimal source deltas
+
+PASS command python3 tools/generate_content_querytext.py --check  :: CONTENT QUERYTEXT: PASS sha256=795d0257904eb618f666bc6a9d519abe11559e8e6a454c1aec8f0e0f453408a5
+
+PASS command python3 tools/generate_character_querytext.py --check  :: CHARACTER QUERYTEXT: PASS hero_sha256=6d4056da3437de401e1e98e285833cfd0907bbf8c345a0d9525dd0eadb8d4b9f pet_sha256=5477eed6bdd96afe2c0d3c46681b6fc0aeb83260f011cb95785a72e9d03c10ee
+
+PASS command python3 tools/check_schema_query_ownership.py  :: SCHEMA/QUERY OWNERSHIP: PASS
+
+PASS command python3 tools/check_sqlc_generation_policy.py  :: SQLC GENERATION POLICY: PASS
+
+PASS command python3 tools/validate_ca4_3a_a.py  :: CA4-3A-A VALIDATION: PASS
+immutable Fumo content + six raw Hero Fumo values + cohesive CAS/reload/raw-state projection are present; MID58 gameplay/route activation remains absent
+

@@ -1,0 +1,9 @@
+=== focused tests ===
+ok  	gxb.local/backend/v2/internal/application/characterpractice	0.011s
+ok  	gxb.local/backend/v2/internal/adapters/stockruntime	0.412s
+ok  	gxb.local/backend/v2/internal/archguard	0.062s
+=== focused vet ===
+=== focused race ===
+ok  	gxb.local/backend/v2/internal/application/characterpractice	1.031s
+ok  	gxb.local/backend/v2/internal/adapters/stockruntime	1.433s
+ok  	gxb.local/backend/v2/internal/archguard	1.229s

@@ -1,0 +1,147 @@
+PASS470 R4B COMPATIBILITY_COPY_ONLY
+Origin: /mnt/data/work_r4b/backend
+Accommodation: go 1.26.0 -> go 1.23.0; removed toolchain go1.27.1; no other compatibility edits.
+Go:
+go version go1.23.2 linux/amd64
+[focused race]
+ok  	gxb.local/backend/v2/internal/foundation/policy	(cached)
+ok  	gxb.local/backend/v2/internal/foundation/receipt	(cached)
+ok  	gxb.local/backend/v2/internal/adapters/postgres/kernelstore	(cached)
+[full vet]
+[package sweep]
+package_count=64
+[1/64] gxb.local/backend/v2/cmd/gxb-admin
+?   	gxb.local/backend/v2/cmd/gxb-admin	[no test files]
+[2/64] gxb.local/backend/v2/cmd/gxb-api
+?   	gxb.local/backend/v2/cmd/gxb-api	[no test files]
+[3/64] gxb.local/backend/v2/cmd/gxb-realtime
+?   	gxb.local/backend/v2/cmd/gxb-realtime	[no test files]
+[4/64] gxb.local/backend/v2/cmd/gxb-wave-s-report
+?   	gxb.local/backend/v2/cmd/gxb-wave-s-report	[no test files]
+[5/64] gxb.local/backend/v2/cmd/gxb-worker
+?   	gxb.local/backend/v2/cmd/gxb-worker	[no test files]
+[6/64] gxb.local/backend/v2/internal/adapters/blobstore
+?   	gxb.local/backend/v2/internal/adapters/blobstore	[no test files]
+[7/64] gxb.local/backend/v2/internal/adapters/pass353diff
+?   	gxb.local/backend/v2/internal/adapters/pass353diff	[no test files]
+[8/64] gxb.local/backend/v2/internal/adapters/postgres
+?   	gxb.local/backend/v2/internal/adapters/postgres	[no test files]
+[9/64] gxb.local/backend/v2/internal/adapters/postgres/i4store
+ok  	gxb.local/backend/v2/internal/adapters/postgres/i4store	(cached)
+[10/64] gxb.local/backend/v2/internal/adapters/postgres/i5store
+ok  	gxb.local/backend/v2/internal/adapters/postgres/i5store	(cached)
+[11/64] gxb.local/backend/v2/internal/adapters/postgres/identitystore
+?   	gxb.local/backend/v2/internal/adapters/postgres/identitystore	[no test files]
+[12/64] gxb.local/backend/v2/internal/adapters/postgres/kernelqueries
+?   	gxb.local/backend/v2/internal/adapters/postgres/kernelqueries	[no test files]
+[13/64] gxb.local/backend/v2/internal/adapters/postgres/kernelstore
+ok  	gxb.local/backend/v2/internal/adapters/postgres/kernelstore	(cached)
+[14/64] gxb.local/backend/v2/internal/adapters/provider
+?   	gxb.local/backend/v2/internal/adapters/provider	[no test files]
+[15/64] gxb.local/backend/v2/internal/adapters/river
+?   	gxb.local/backend/v2/internal/adapters/river	[no test files]
+[16/64] gxb.local/backend/v2/internal/adapters/stockfixtures
+?   	gxb.local/backend/v2/internal/adapters/stockfixtures	[no test files]
+[17/64] gxb.local/backend/v2/internal/adapters/stockruntime
+ok  	gxb.local/backend/v2/internal/adapters/stockruntime	(cached)
+[18/64] gxb.local/backend/v2/internal/application/bootstrap
+ok  	gxb.local/backend/v2/internal/application/bootstrap	(cached)
+[19/64] gxb.local/backend/v2/internal/application/i5
+ok  	gxb.local/backend/v2/internal/application/i5	(cached)
+[20/64] gxb.local/backend/v2/internal/application/identitylifecycle
+ok  	gxb.local/backend/v2/internal/application/identitylifecycle	(cached)
+[21/64] gxb.local/backend/v2/internal/application/realtimeauth
+ok  	gxb.local/backend/v2/internal/application/realtimeauth	(cached)
+[22/64] gxb.local/backend/v2/internal/archguard
+ok  	gxb.local/backend/v2/internal/archguard	(cached)
+[23/64] gxb.local/backend/v2/internal/content/builtin
+ok  	gxb.local/backend/v2/internal/content/builtin	(cached)
+[24/64] gxb.local/backend/v2/internal/domain/combat
+?   	gxb.local/backend/v2/internal/domain/combat	[no test files]
+[25/64] gxb.local/backend/v2/internal/domain/commerce
+?   	gxb.local/backend/v2/internal/domain/commerce	[no test files]
+[26/64] gxb.local/backend/v2/internal/domain/control
+?   	gxb.local/backend/v2/internal/domain/control	[no test files]
+[27/64] gxb.local/backend/v2/internal/domain/economy
+ok  	gxb.local/backend/v2/internal/domain/economy	(cached)
+[28/64] gxb.local/backend/v2/internal/domain/generation
+?   	gxb.local/backend/v2/internal/domain/generation	[no test files]
+[29/64] gxb.local/backend/v2/internal/domain/grant
+ok  	gxb.local/backend/v2/internal/domain/grant	(cached)
+[30/64] gxb.local/backend/v2/internal/domain/guild
+?   	gxb.local/backend/v2/internal/domain/guild	[no test files]
+[31/64] gxb.local/backend/v2/internal/domain/identity
+ok  	gxb.local/backend/v2/internal/domain/identity	(cached)
+[32/64] gxb.local/backend/v2/internal/domain/logicalserver
+ok  	gxb.local/backend/v2/internal/domain/logicalserver	(cached)
+[33/64] gxb.local/backend/v2/internal/domain/mail
+ok  	gxb.local/backend/v2/internal/domain/mail	(cached)
+[34/64] gxb.local/backend/v2/internal/domain/modes
+?   	gxb.local/backend/v2/internal/domain/modes	[no test files]
+[35/64] gxb.local/backend/v2/internal/domain/objective
+ok  	gxb.local/backend/v2/internal/domain/objective	(cached)
+[36/64] gxb.local/backend/v2/internal/domain/player
+ok  	gxb.local/backend/v2/internal/domain/player	(cached)
+[37/64] gxb.local/backend/v2/internal/domain/profile
+?   	gxb.local/backend/v2/internal/domain/profile	[no test files]
+[38/64] gxb.local/backend/v2/internal/domain/realtimeauth
+ok  	gxb.local/backend/v2/internal/domain/realtimeauth	(cached)
+[39/64] gxb.local/backend/v2/internal/domain/redeem
+ok  	gxb.local/backend/v2/internal/domain/redeem	(cached)
+[40/64] gxb.local/backend/v2/internal/domain/social
+?   	gxb.local/backend/v2/internal/domain/social	[no test files]
+[41/64] gxb.local/backend/v2/internal/foundation/audit
+?   	gxb.local/backend/v2/internal/foundation/audit	[no test files]
+[42/64] gxb.local/backend/v2/internal/foundation/clock
+?   	gxb.local/backend/v2/internal/foundation/clock	[no test files]
+[43/64] gxb.local/backend/v2/internal/foundation/config
+ok  	gxb.local/backend/v2/internal/foundation/config	(cached)
+[44/64] gxb.local/backend/v2/internal/foundation/ids
+ok  	gxb.local/backend/v2/internal/foundation/ids	(cached)
+[45/64] gxb.local/backend/v2/internal/foundation/lockkey
+ok  	gxb.local/backend/v2/internal/foundation/lockkey	(cached)
+[46/64] gxb.local/backend/v2/internal/foundation/obligation
+ok  	gxb.local/backend/v2/internal/foundation/obligation	(cached)
+[47/64] gxb.local/backend/v2/internal/foundation/observability
+ok  	gxb.local/backend/v2/internal/foundation/observability	(cached)
+[48/64] gxb.local/backend/v2/internal/foundation/operation
+ok  	gxb.local/backend/v2/internal/foundation/operation	(cached)
+[49/64] gxb.local/backend/v2/internal/foundation/policy
+ok  	gxb.local/backend/v2/internal/foundation/policy	(cached)
+[50/64] gxb.local/backend/v2/internal/foundation/receipt
+ok  	gxb.local/backend/v2/internal/foundation/receipt	(cached)
+[51/64] gxb.local/backend/v2/internal/foundation/tx
+ok  	gxb.local/backend/v2/internal/foundation/tx	(cached)
+[52/64] gxb.local/backend/v2/internal/projection/lobby
+ok  	gxb.local/backend/v2/internal/projection/lobby	(cached)
+[53/64] gxb.local/backend/v2/internal/projection/ota
+?   	gxb.local/backend/v2/internal/projection/ota	[no test files]
+[54/64] gxb.local/backend/v2/internal/projection/publication
+?   	gxb.local/backend/v2/internal/projection/publication	[no test files]
+[55/64] gxb.local/backend/v2/internal/projection/publicplayer
+?   	gxb.local/backend/v2/internal/projection/publicplayer	[no test files]
+[56/64] gxb.local/backend/v2/internal/projection/ranking
+?   	gxb.local/backend/v2/internal/projection/ranking	[no test files]
+[57/64] gxb.local/backend/v2/internal/projection/realtimeview
+?   	gxb.local/backend/v2/internal/projection/realtimeview	[no test files]
+[58/64] gxb.local/backend/v2/internal/protocol/amf3
+ok  	gxb.local/backend/v2/internal/protocol/amf3	(cached)
+[package sweep continuation 59-64]
+[59/64] gxb.local/backend/v2/internal/protocol/httpedge
+ok  	gxb.local/backend/v2/internal/protocol/httpedge	(cached)
+[60/64] gxb.local/backend/v2/internal/protocol/limits
+?   	gxb.local/backend/v2/internal/protocol/limits	[no test files]
+[61/64] gxb.local/backend/v2/internal/protocol/mids
+ok  	gxb.local/backend/v2/internal/protocol/mids	(cached)
+[62/64] gxb.local/backend/v2/internal/protocol/observe
+?   	gxb.local/backend/v2/internal/protocol/observe	[no test files]
+[63/64] gxb.local/backend/v2/internal/protocol/realtime
+ok  	gxb.local/backend/v2/internal/protocol/realtime	(cached)
+[64/64] gxb.local/backend/v2/internal/protocol/wire
+?   	gxb.local/backend/v2/internal/protocol/wire	[no test files]
+PASS_PACKAGES=64
+[r4b static in compat copy]
+KERNEL QUERYTEXT: PASS sha256=74ad9accee063e77323a2eb4a69df394bdcb331ce88e3d789864ffbc904b7511
+SCHEMA/QUERY OWNERSHIP: PASS
+R4B VALIDATION: PASS
+resource_rows 5556 progression_rows 100 objective_rows 0

@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "pass": "435.0-I2",
+  "rule": "read-only oracle inputs; never V2 implementation tree/persistence",
+  "oracles": [
+    {
+      "id": "current_src64",
+      "filename_patterns": [
+        "all-assest-rechecked-1*.zip"
+      ],
+      "sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+      "role": "ACTIVE implementation oracle"
+    },
+    {
+      "id": "v1_pass353",
+      "filename_patterns": [
+        "gxb-backend-v0.65.2-pass353.0-portable-dev1*.zip"
+      ],
+      "sha256": "31729d5c5e4509c2c89eaa1e8203cf1570afe87e18ed2610b944e457a9946b15",
+      "role": "frozen executable/source/differential oracle only"
+    },
+    {
+      "id": "old_client",
+      "filename_patterns": [
+        "gxb-old-client-v1.164.0-research-corpus*.zip"
+      ],
+      "sha256": "d0a4815507fd4626ac5749f2f6efae554d3a4bef717793f155f58c8bed7170b1",
+      "role": "historical client oracle"
+    },
+    {
+      "id": "native_apk",
+      "filename_patterns": [
+        "latest_apk-smali-full*.zip"
+      ],
+      "sha256": "fcc0f03e5973dd41a190a4bd390a8c4c5185f5f7cf2d4eeb0bcad696cfee7517",
+      "role": "current native/APK oracle"
+    },
+    {
+      "id": "pass222_probe",
+      "filename_patterns": [
+        "prep-apk-pass222-window-probe*.zip"
+      ],
+      "sha256": "7682925fa65728ac2032995cb384ac8878860de022169feaa2f749b521580f21",
+      "role": "historical probe"
+    }
+  ]
+}

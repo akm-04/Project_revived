@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "pass": "509.0",
+  "status": "PASS",
+  "classification": "TRUTH_METADATA_VALIDATION_ONLY_NO_PRODUCT_IMPLEMENTATION_CHANGE",
+  "accepted_implementation_revision_sha256": "46b9ea5d54c80f022449833d594d84c5f48b18304cd2a33c9e53b560ce070b26",
+  "implementation_paths_checked": 306,
+  "implementation_paths_changed": [],
+  "canonical_pins": {
+    "go.mod": "313c574368bb56dc570bc3427b65f59b059e492f909fe43b7d0291b5ced21dc4",
+    "go.sum": "efbf6753542d66e2fefcb2ab5e2ade7c9d28f2206a1113d1eb9568f2cb75808d",
+    ".go-version": "a8844fbc8c3eb51c26ed00aec4cd5a5a9d647f849c6ead07bcc83ed24c4a7718"
+  },
+  "migration_high_water": "00013_i6c_guild_replay_repair.sql",
+  "canonical_static": {
+    "foundation_trace": "PASS",
+    "R0-R6_cumulative": "PASS",
+    "current_candidate": "PASS",
+    "dependency_sqlc_ownership": "PASS",
+    "oracle_hashes": "PASS",
+    "I2_I3_I4_I5_I6A_I6B_I6C_source_oracles": "PASS"
+  },
+  "compatibility_copy": {
+    "classification": "COMPATIBILITY_COPY_ONLY",
+    "go": "go1.23.2",
+    "focused_tests": "PASS",
+    "full_go_test_all": "PASS",
+    "go_vet_all": "PASS",
+    "foundation_current_validators": "PASS",
+    "I6A_I6B_I6C_oracles": "PASS"
+  },
+  "native_evidence_reused": {
+    "R7_foundation": "Pass489 exact native accepted foundation evidence",
+    "I6D": "98d1df0c307e09a7868f050574cfcc5ddd2530ff68e0780ae0592333f4ef2c04 exact Pass504 candidate 16/16",
+    "reason": "Pass509 changes no runtime implementation path; I6E is independent truth/evidence barrier, not gameplay implementation"
+  },
+  "w2": "NOT_CLAIMED"
+}

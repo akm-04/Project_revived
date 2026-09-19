@@ -1,0 +1,77 @@
+PASS447 I5 LOCAL FULL CHECK
+2026-09-06T17:49:12Z
+go version go1.23.2 linux/amd64
+--- go test ./... ---
+?   	gxb.local/backend/v2/cmd/gxb-admin	[no test files]
+?   	gxb.local/backend/v2/cmd/gxb-api	[no test files]
+?   	gxb.local/backend/v2/cmd/gxb-realtime	[no test files]
+?   	gxb.local/backend/v2/cmd/gxb-wave-s-report	[no test files]
+?   	gxb.local/backend/v2/cmd/gxb-worker	[no test files]
+?   	gxb.local/backend/v2/internal/adapters/blobstore	[no test files]
+?   	gxb.local/backend/v2/internal/adapters/pass353diff	[no test files]
+?   	gxb.local/backend/v2/internal/adapters/postgres	[no test files]
+ok  	gxb.local/backend/v2/internal/adapters/postgres/i4store	0.002s
+?   	gxb.local/backend/v2/internal/adapters/postgres/i5store	[no test files]
+?   	gxb.local/backend/v2/internal/adapters/postgres/kernelqueries	[no test files]
+?   	gxb.local/backend/v2/internal/adapters/provider	[no test files]
+?   	gxb.local/backend/v2/internal/adapters/river	[no test files]
+?   	gxb.local/backend/v2/internal/adapters/stockfixtures	[no test files]
+ok  	gxb.local/backend/v2/internal/adapters/postgres/kernelstore	0.003s
+?   	gxb.local/backend/v2/internal/domain/combat	[no test files]
+?   	gxb.local/backend/v2/internal/domain/commerce	[no test files]
+?   	gxb.local/backend/v2/internal/domain/control	[no test files]
+ok  	gxb.local/backend/v2/internal/adapters/stockruntime	0.035s
+ok  	gxb.local/backend/v2/internal/application/bootstrap	0.004s
+ok  	gxb.local/backend/v2/internal/application/i5	0.003s
+ok  	gxb.local/backend/v2/internal/application/realtimeauth	0.002s
+ok  	gxb.local/backend/v2/internal/archguard	0.021s
+?   	gxb.local/backend/v2/internal/domain/generation	[no test files]
+ok  	gxb.local/backend/v2/internal/domain/economy	0.002s
+?   	gxb.local/backend/v2/internal/domain/guild	[no test files]
+ok  	gxb.local/backend/v2/internal/domain/grant	0.002s
+ok  	gxb.local/backend/v2/internal/domain/identity	0.002s
+ok  	gxb.local/backend/v2/internal/domain/logicalserver	0.004s
+?   	gxb.local/backend/v2/internal/domain/modes	[no test files]
+ok  	gxb.local/backend/v2/internal/domain/mail	0.002s
+ok  	gxb.local/backend/v2/internal/domain/objective	0.006s
+?   	gxb.local/backend/v2/internal/domain/profile	[no test files]
+ok  	gxb.local/backend/v2/internal/domain/player	0.003s
+ok  	gxb.local/backend/v2/internal/domain/realtimeauth	0.002s
+?   	gxb.local/backend/v2/internal/domain/social	[no test files]
+?   	gxb.local/backend/v2/internal/foundation/audit	[no test files]
+?   	gxb.local/backend/v2/internal/foundation/clock	[no test files]
+ok  	gxb.local/backend/v2/internal/domain/redeem	0.002s
+ok  	gxb.local/backend/v2/internal/foundation/config	0.001s
+ok  	gxb.local/backend/v2/internal/foundation/ids	0.005s
+ok  	gxb.local/backend/v2/internal/foundation/lockkey	0.006s
+ok  	gxb.local/backend/v2/internal/foundation/obligation	0.002s
+ok  	gxb.local/backend/v2/internal/foundation/observability	0.002s
+?   	gxb.local/backend/v2/internal/foundation/policy	[no test files]
+ok  	gxb.local/backend/v2/internal/foundation/operation	0.005s
+ok  	gxb.local/backend/v2/internal/foundation/receipt	0.001s
+?   	gxb.local/backend/v2/internal/projection/ota	[no test files]
+?   	gxb.local/backend/v2/internal/projection/publication	[no test files]
+?   	gxb.local/backend/v2/internal/projection/publicplayer	[no test files]
+ok  	gxb.local/backend/v2/internal/foundation/tx	0.008s
+ok  	gxb.local/backend/v2/internal/projection/lobby	0.002s
+?   	gxb.local/backend/v2/internal/projection/ranking	[no test files]
+?   	gxb.local/backend/v2/internal/projection/realtimeview	[no test files]
+ok  	gxb.local/backend/v2/internal/protocol/amf3	0.003s
+?   	gxb.local/backend/v2/internal/protocol/limits	[no test files]
+?   	gxb.local/backend/v2/internal/protocol/observe	[no test files]
+ok  	gxb.local/backend/v2/internal/protocol/httpedge	0.011s
+ok  	gxb.local/backend/v2/internal/protocol/mids	0.002s
+?   	gxb.local/backend/v2/internal/protocol/wire	[no test files]
+ok  	gxb.local/backend/v2/internal/protocol/realtime	0.002s
+--- go vet ./... ---
+--- archguard ---
+ok  	gxb.local/backend/v2/internal/archguard	0.011s
+--- targeted race ---
+ok  	gxb.local/backend/v2/internal/application/i5	1.015s
+ok  	gxb.local/backend/v2/internal/domain/economy	1.010s
+ok  	gxb.local/backend/v2/internal/domain/grant	1.013s
+ok  	gxb.local/backend/v2/internal/domain/mail	1.019s
+ok  	gxb.local/backend/v2/internal/domain/objective	1.012s
+ok  	gxb.local/backend/v2/internal/domain/redeem	1.010s
+ok  	gxb.local/backend/v2/internal/adapters/stockruntime	1.041s
+ok  	gxb.local/backend/v2/internal/application/bootstrap	1.008s

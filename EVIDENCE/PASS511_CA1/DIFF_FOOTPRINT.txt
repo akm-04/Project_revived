@@ -1,0 +1,9 @@
+Only in /mnt/data/gxb-ca1-candidate/EVIDENCE: PASS511_CA1
+Only in /mnt/data/gxb-ca1-candidate/internal/application/i5: ca1_test.go
+Files /mnt/data/gxb510_init/backend/internal/application/i5/grant_lock_plan.go and /mnt/data/gxb-ca1-candidate/internal/application/i5/grant_lock_plan.go differ
+Files /mnt/data/gxb510_init/backend/internal/application/i5/grant_receipts.go and /mnt/data/gxb-ca1-candidate/internal/application/i5/grant_receipts.go differ
+Only in /mnt/data/gxb-ca1-candidate/internal/application/i5: material_cost.go
+Only in /mnt/data/gxb-ca1-candidate/internal/application/i5: partner_materializer.go
+Files /mnt/data/gxb510_init/backend/internal/application/i5/service.go and /mnt/data/gxb-ca1-candidate/internal/application/i5/service.go differ
+Only in /mnt/data/gxb-ca1-candidate/tools: check_ca1_source_oracle.py
+Only in /mnt/data/gxb-ca1-candidate/tools: validate_ca1.py

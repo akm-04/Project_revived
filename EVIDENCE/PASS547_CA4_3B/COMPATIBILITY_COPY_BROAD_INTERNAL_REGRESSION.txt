@@ -1,0 +1,60 @@
+ok  	gxb.local/backend/v2/internal/application/activitydirectory	0.007s
+ok  	gxb.local/backend/v2/internal/application/bootstrap	0.004s
+ok  	gxb.local/backend/v2/internal/application/characterasset	0.009s
+ok  	gxb.local/backend/v2/internal/application/characterhero	0.110s
+ok  	gxb.local/backend/v2/internal/application/characterpet	0.003s
+ok  	gxb.local/backend/v2/internal/application/directorysync	0.003s
+ok  	gxb.local/backend/v2/internal/application/generation	0.003s
+ok  	gxb.local/backend/v2/internal/application/guildcore	0.005s
+ok  	gxb.local/backend/v2/internal/application/guildview	0.002s
+?   	gxb.local/backend/v2/internal/application/playerdirectory	[no test files]
+ok  	gxb.local/backend/v2/internal/application/i5	0.010s
+ok  	gxb.local/backend/v2/internal/application/identitylifecycle	0.005s
+ok  	gxb.local/backend/v2/internal/application/playerroot	0.002s
+ok  	gxb.local/backend/v2/internal/application/realtimeauth	0.003s
+ok  	gxb.local/backend/v2/internal/domain/activity	0.002s
+?   	gxb.local/backend/v2/internal/domain/combat	[no test files]
+?   	gxb.local/backend/v2/internal/domain/commerce	[no test files]
+?   	gxb.local/backend/v2/internal/domain/control	[no test files]
+ok  	gxb.local/backend/v2/internal/domain/character	0.003s
+ok  	gxb.local/backend/v2/internal/domain/economy	0.003s
+?   	gxb.local/backend/v2/internal/domain/guild	[no test files]
+ok  	gxb.local/backend/v2/internal/domain/generation	0.002s
+ok  	gxb.local/backend/v2/internal/domain/grant	0.003s
+ok  	gxb.local/backend/v2/internal/domain/identity	0.003s
+?   	gxb.local/backend/v2/internal/domain/modes	[no test files]
+ok  	gxb.local/backend/v2/internal/domain/logicalserver	0.004s
+ok  	gxb.local/backend/v2/internal/domain/mail	0.003s
+ok  	gxb.local/backend/v2/internal/domain/objective	0.005s
+?   	gxb.local/backend/v2/internal/domain/profile	[no test files]
+ok  	gxb.local/backend/v2/internal/domain/player	0.004s
+ok  	gxb.local/backend/v2/internal/domain/realtimeauth	0.003s
+?   	gxb.local/backend/v2/internal/domain/social	[no test files]
+?   	gxb.local/backend/v2/internal/foundation/audit	[no test files]
+?   	gxb.local/backend/v2/internal/foundation/clock	[no test files]
+ok  	gxb.local/backend/v2/internal/domain/redeem	0.005s
+ok  	gxb.local/backend/v2/internal/foundation/config	0.002s
+ok  	gxb.local/backend/v2/internal/foundation/ids	0.002s
+ok  	gxb.local/backend/v2/internal/foundation/lockkey	0.002s
+ok  	gxb.local/backend/v2/internal/foundation/obligation	0.003s
+ok  	gxb.local/backend/v2/internal/foundation/observability	0.005s
+ok  	gxb.local/backend/v2/internal/foundation/operation	0.006s
+ok  	gxb.local/backend/v2/internal/foundation/policy	0.006s
+ok  	gxb.local/backend/v2/internal/foundation/receipt	0.003s
+ok  	gxb.local/backend/v2/internal/foundation/replaycatalog	0.002s
+?   	gxb.local/backend/v2/internal/projection/activity	[no test files]
+ok  	gxb.local/backend/v2/internal/foundation/tx	0.014s
+ok  	gxb.local/backend/v2/internal/projection/backpack	0.002s
+ok  	gxb.local/backend/v2/internal/projection/hero	0.002s
+?   	gxb.local/backend/v2/internal/projection/ota	[no test files]
+?   	gxb.local/backend/v2/internal/projection/publication	[no test files]
+?   	gxb.local/backend/v2/internal/projection/publicplayer	[no test files]
+?   	gxb.local/backend/v2/internal/projection/ranking	[no test files]
+?   	gxb.local/backend/v2/internal/projection/realtimeview	[no test files]
+ok  	gxb.local/backend/v2/internal/projection/lobby	0.069s
+ok  	gxb.local/backend/v2/internal/projection/pet	0.003s
+ok  	gxb.local/backend/v2/internal/adapters/stockruntime	0.405s
+ok  	gxb.local/backend/v2/internal/content/builtin	0.949s
+ok  	gxb.local/backend/v2/internal/content/guildpolicy	0.005s
+ok  	gxb.local/backend/v2/internal/content/registry	2.705s
+ok  	gxb.local/backend/v2/internal/archguard	0.050s

@@ -1,0 +1,12 @@
+--- /mnt/data/gxb-backend-v2-v0.65.0-pass523-ca3-1-candidate/go.mod	2026-09-12 00:00:00.000000000 +0000
++++ /mnt/data/compat-pass523-ca3-1/go.mod	2026-09-12 11:36:55.900423767 +0000
+@@ -1,8 +1,7 @@
+ module gxb.local/backend/v2
+ 
+-go 1.26.0
++go 1.23.0
+ 
+-toolchain go1.27.1
+ 
+ require (
+ 	github.com/go-chi/chi/v5 v5.3.1

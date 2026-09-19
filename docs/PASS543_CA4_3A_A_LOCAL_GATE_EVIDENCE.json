@@ -1,0 +1,55 @@
+{
+  "canonical_exact_attempt": {
+    "log_sha256": "03281ad8e6dc2936b69b9cc22cb2ca143c69f5a3a323df757a57a3efde756651",
+    "reason": "pinned Go 1.27.1 download unavailable due sandbox DNS/network",
+    "result": "ENVIRONMENT_BLOCKED"
+  },
+  "canonical_pins": {
+    ".go-version": "a8844fbc8c3eb51c26ed00aec4cd5a5a9d647f849c6ead07bcc83ed24c4a7718",
+    "go.mod": "313c574368bb56dc570bc3427b65f59b059e492f909fe43b7d0291b5ced21dc4",
+    "go.sum": "efbf6753542d66e2fefcb2ab5e2ade7c9d28f2206a1113d1eb9568f2cb75808d"
+  },
+  "compatibility_copy": {
+    "accommodation": "disposable copy only: .go-version=1.23.2, go.mod language 1.23.0, toolchain directive removed",
+    "archguard": "GREEN",
+    "bounded_package_regression": "92/92 GREEN",
+    "classification": "COMPATIBILITY_COPY_ONLY",
+    "focused_race": "GREEN",
+    "focused_test": "GREEN",
+    "go_vet_all": "GREEN"
+  },
+  "content_revision": "aa89ed03a9315a9faf8392b9beb4141594ad911033483659ea0c31674a79dc83",
+  "deferred": [
+    "exact Go 1.27.1 executable proof",
+    "real PostgreSQL migration/locking/concurrency",
+    "CA4 aggregate native gate",
+    "W2 physical stock-client proof"
+  ],
+  "independent_postimplementation": "46/46 GREEN",
+  "parent_backend_sha256": "46ba902fe7adc2a9f97b8f1050b056ed0efcc5e35e541b914958f6b74ea4331e",
+  "parent_implementation_revision_sha256": "fcadce5510cd25d649281f5e333db7cd24927e73494577366152deaeb521eb8c",
+  "parent_passmap_sha256": "db7e15c6dcc8935f61f7e0bbabb21aabd158cc5fa4825cc0140aac06bfbc903b",
+  "pass": "543.0",
+  "phase": "CA4-3A-A",
+  "schema": "PASS543_CA4_3A_A_LOCAL_GATE_EVIDENCE_V1",
+  "source_oracle_sha256": "42c10c67be67278d83e81512403b0b3318d30ae9f957e878dbc1c9ee0596dbd0",
+  "stage_boundary": [
+    "no MID58 service",
+    "no MID58 dispatcher/route registration",
+    "no MID29 quick Fumo",
+    "no MID51/MID57",
+    "no Pet/Super Fumo gameplay",
+    "no final battle-stat materialization"
+  ],
+  "static_gates": [
+    "builtin generation --check GREEN",
+    "content querytext GREEN",
+    "character querytext GREEN",
+    "CA4-3A sealed source-oracle GREEN",
+    "schema/query ownership GREEN",
+    "sqlc policy GREEN",
+    "dependency/SBOM GREEN",
+    "CA4-3A-A stage validator GREEN"
+  ],
+  "status": "LOCAL_ACCEPTED_COMPATIBILITY_COPY_ONLY"
+}

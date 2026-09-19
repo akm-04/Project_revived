@@ -1,0 +1,7 @@
+Pass446 I5-A PostgreSQL-tag normal-chat availability probe
+go version go1.23.2 linux/amd64
+GOPROXY=off to prove required pgx module bytes are not cached rather than using network.
+go: downloading github.com/jackc/pgx/v5 v5.10.0
+internal/adapters/postgres/pgx_adapter.go:10:2: module lookup disabled by GOPROXY=off
+internal/adapters/postgres/pgx_adapter.go:11:2: module lookup disabled by GOPROXY=off
+exit_code=1

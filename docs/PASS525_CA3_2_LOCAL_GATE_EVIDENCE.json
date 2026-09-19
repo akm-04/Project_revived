@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "pass": "525.0",
+  "phase": "CA3",
+  "internal_stage": "CA3-2",
+  "candidate_version": "v0.66.0-candidate",
+  "authority_pass": "524.0",
+  "authority_hot_sha256": "26fe758049bdbe362215873dee32e135c5cbe13bfb115f13339f3d538f259547",
+  "parent_backend_sha256": "ce8d11be20ed7cbdec327f739ed50625980fea7e06d1c3de29405de27ffd3352",
+  "parent_implementation_revision_sha256": "c0ac6d25a7c05d2607519a16bd47b6d6afd9a249194f1437d23c7dd4ce91d501",
+  "content_revision": "5870441b5d4ee46391629613d46d20bdd0301d7fe856667b076bfb110d97e5ac",
+  "result": "GREEN_LOCAL_CANDIDATE_COMBINED_NATIVE_GATE_DEFERRED",
+  "exact_canonical_static_checks": [
+    "tools/generate_builtin_content.py --source-archive exact_src64 --check: PASS",
+    "tools/generate_character_querytext.py --check: PASS",
+    "tools/generate_content_querytext.py --check: PASS",
+    "tools/validate_ca3_1.py cumulative-aware: PASS",
+    "tools/validate_ca3_2.py: PASS"
+  ],
+  "compatibility_copy_only": {
+    "origin": "fresh copy of exact canonical Pass525 CA3-2 candidate",
+    "environment_edits": "go.mod go 1.26.0 -> 1.23.2; toolchain go1.27.1 -> local Go 1.23.2; .go-version -> 1.23.2",
+    "assertions_or_product_files_weakened": false,
+    "results": [
+      "changed-package go test: PASS",
+      "targeted characterpet/i5 behavior tests: PASS",
+      "go test ./... full regression: PASS",
+      "go test -race ./... full race regression: PASS",
+      "go vet ./...: PASS"
+    ]
+  },
+  "environment_blocked_or_deferred": [
+    "exact canonical Go 1.27.1 execution",
+    "pinned sqlc 1.31.1 generation",
+    "real PostgreSQL migration/query/concurrency proof",
+    "unmodified stock-client E2E proof",
+    "combined CA3 native acceptance"
+  ],
+  "not_claimed": [
+    "CA3 aggregate acceptance",
+    "real PostgreSQL correctness",
+    "exact canonical toolchain proof",
+    "stock-client compatibility",
+    "CA3-3 implementation",
+    "CA4 Pet equipment/advance activation",
+    "W2"
+  ]
+}

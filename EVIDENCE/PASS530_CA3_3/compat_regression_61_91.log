@@ -1,0 +1,93 @@
+[61/91] gxb.local/backend/v2/internal/domain/redeem
+ok  	gxb.local/backend/v2/internal/domain/redeem	0.002s
+PASS gxb.local/backend/v2/internal/domain/redeem
+[62/91] gxb.local/backend/v2/internal/domain/social
+?   	gxb.local/backend/v2/internal/domain/social	[no test files]
+PASS gxb.local/backend/v2/internal/domain/social
+[63/91] gxb.local/backend/v2/internal/foundation/audit
+?   	gxb.local/backend/v2/internal/foundation/audit	[no test files]
+PASS gxb.local/backend/v2/internal/foundation/audit
+[64/91] gxb.local/backend/v2/internal/foundation/clock
+?   	gxb.local/backend/v2/internal/foundation/clock	[no test files]
+PASS gxb.local/backend/v2/internal/foundation/clock
+[65/91] gxb.local/backend/v2/internal/foundation/config
+ok  	gxb.local/backend/v2/internal/foundation/config	0.002s
+PASS gxb.local/backend/v2/internal/foundation/config
+[66/91] gxb.local/backend/v2/internal/foundation/ids
+ok  	gxb.local/backend/v2/internal/foundation/ids	0.002s
+PASS gxb.local/backend/v2/internal/foundation/ids
+[67/91] gxb.local/backend/v2/internal/foundation/lockkey
+ok  	gxb.local/backend/v2/internal/foundation/lockkey	0.002s
+PASS gxb.local/backend/v2/internal/foundation/lockkey
+[68/91] gxb.local/backend/v2/internal/foundation/obligation
+ok  	gxb.local/backend/v2/internal/foundation/obligation	0.002s
+PASS gxb.local/backend/v2/internal/foundation/obligation
+[69/91] gxb.local/backend/v2/internal/foundation/observability
+ok  	gxb.local/backend/v2/internal/foundation/observability	0.003s
+PASS gxb.local/backend/v2/internal/foundation/observability
+[70/91] gxb.local/backend/v2/internal/foundation/operation
+ok  	gxb.local/backend/v2/internal/foundation/operation	0.002s
+PASS gxb.local/backend/v2/internal/foundation/operation
+[71/91] gxb.local/backend/v2/internal/foundation/policy
+ok  	gxb.local/backend/v2/internal/foundation/policy	0.002s
+PASS gxb.local/backend/v2/internal/foundation/policy
+[72/91] gxb.local/backend/v2/internal/foundation/receipt
+ok  	gxb.local/backend/v2/internal/foundation/receipt	0.002s
+PASS gxb.local/backend/v2/internal/foundation/receipt
+[73/91] gxb.local/backend/v2/internal/foundation/replaycatalog
+ok  	gxb.local/backend/v2/internal/foundation/replaycatalog	0.002s
+PASS gxb.local/backend/v2/internal/foundation/replaycatalog
+[74/91] gxb.local/backend/v2/internal/foundation/tx
+ok  	gxb.local/backend/v2/internal/foundation/tx	0.007s
+PASS gxb.local/backend/v2/internal/foundation/tx
+[75/91] gxb.local/backend/v2/internal/projection/activity
+?   	gxb.local/backend/v2/internal/projection/activity	[no test files]
+PASS gxb.local/backend/v2/internal/projection/activity
+[76/91] gxb.local/backend/v2/internal/projection/backpack
+ok  	gxb.local/backend/v2/internal/projection/backpack	0.002s
+PASS gxb.local/backend/v2/internal/projection/backpack
+[77/91] gxb.local/backend/v2/internal/projection/hero
+ok  	gxb.local/backend/v2/internal/projection/hero	0.002s
+PASS gxb.local/backend/v2/internal/projection/hero
+[78/91] gxb.local/backend/v2/internal/projection/lobby
+ok  	gxb.local/backend/v2/internal/projection/lobby	0.048s
+PASS gxb.local/backend/v2/internal/projection/lobby
+[79/91] gxb.local/backend/v2/internal/projection/ota
+?   	gxb.local/backend/v2/internal/projection/ota	[no test files]
+PASS gxb.local/backend/v2/internal/projection/ota
+[80/91] gxb.local/backend/v2/internal/projection/pet
+ok  	gxb.local/backend/v2/internal/projection/pet	0.002s
+PASS gxb.local/backend/v2/internal/projection/pet
+[81/91] gxb.local/backend/v2/internal/projection/publication
+?   	gxb.local/backend/v2/internal/projection/publication	[no test files]
+PASS gxb.local/backend/v2/internal/projection/publication
+[82/91] gxb.local/backend/v2/internal/projection/publicplayer
+?   	gxb.local/backend/v2/internal/projection/publicplayer	[no test files]
+PASS gxb.local/backend/v2/internal/projection/publicplayer
+[83/91] gxb.local/backend/v2/internal/projection/ranking
+?   	gxb.local/backend/v2/internal/projection/ranking	[no test files]
+PASS gxb.local/backend/v2/internal/projection/ranking
+[84/91] gxb.local/backend/v2/internal/projection/realtimeview
+?   	gxb.local/backend/v2/internal/projection/realtimeview	[no test files]
+PASS gxb.local/backend/v2/internal/projection/realtimeview
+[85/91] gxb.local/backend/v2/internal/protocol/amf3
+ok  	gxb.local/backend/v2/internal/protocol/amf3	0.002s
+PASS gxb.local/backend/v2/internal/protocol/amf3
+[86/91] gxb.local/backend/v2/internal/protocol/httpedge
+ok  	gxb.local/backend/v2/internal/protocol/httpedge	0.011s
+PASS gxb.local/backend/v2/internal/protocol/httpedge
+[87/91] gxb.local/backend/v2/internal/protocol/limits
+?   	gxb.local/backend/v2/internal/protocol/limits	[no test files]
+PASS gxb.local/backend/v2/internal/protocol/limits
+[88/91] gxb.local/backend/v2/internal/protocol/mids
+ok  	gxb.local/backend/v2/internal/protocol/mids	0.003s
+PASS gxb.local/backend/v2/internal/protocol/mids
+[89/91] gxb.local/backend/v2/internal/protocol/observe
+?   	gxb.local/backend/v2/internal/protocol/observe	[no test files]
+PASS gxb.local/backend/v2/internal/protocol/observe
+[90/91] gxb.local/backend/v2/internal/protocol/realtime
+ok  	gxb.local/backend/v2/internal/protocol/realtime	0.002s
+PASS gxb.local/backend/v2/internal/protocol/realtime
+[91/91] gxb.local/backend/v2/internal/protocol/wire
+?   	gxb.local/backend/v2/internal/protocol/wire	[no test files]
+PASS gxb.local/backend/v2/internal/protocol/wire

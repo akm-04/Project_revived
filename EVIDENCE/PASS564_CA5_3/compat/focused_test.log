@@ -1,0 +1,5 @@
+$ go test ./internal/application/charactersavedpreset ./internal/adapters/stockruntime ./internal/archguard ./internal/foundation/replaycatalog
+ok  	gxb.local/backend/v2/internal/application/charactersavedpreset	(cached)
+ok  	gxb.local/backend/v2/internal/adapters/stockruntime	(cached)
+ok  	gxb.local/backend/v2/internal/archguard	0.046s
+ok  	gxb.local/backend/v2/internal/foundation/replaycatalog	(cached)

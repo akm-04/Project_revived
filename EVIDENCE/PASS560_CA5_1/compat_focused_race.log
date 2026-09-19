@@ -1,0 +1,4 @@
+ok  	gxb.local/backend/v2/internal/domain/character	1.021s
+ok  	gxb.local/backend/v2/internal/application/characterasset	1.020s
+ok  	gxb.local/backend/v2/internal/adapters/postgres/characterstore	1.017s
+ok  	gxb.local/backend/v2/internal/archguard	1.200s

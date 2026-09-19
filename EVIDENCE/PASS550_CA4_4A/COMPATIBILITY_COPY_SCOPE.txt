@@ -1,0 +1,6 @@
+COMPATIBILITY_COPY_ONLY
+Environment: Go 1.23.2 linux/amd64
+Accommodation: disposable copy only; .go-version 1.27.1 -> 1.23.2; go.mod go 1.26.0 -> 1.23.0; toolchain go1.27.1 -> go1.23.2.
+No canonical product source/dependency/assertion changed for compatibility execution.
+
+go version go1.23.2 linux/amd64

@@ -1,0 +1,195 @@
+
+==> python3 tools/check_dependency_policy.py
+DEPENDENCY POLICY: PASS
+resolved_go_modules 16 qualified_candidates 5
+
+==> python3 tools/generate_resolved_sbom.py --check
+RESOLVED SBOM: PASS
+
+==> python3 tools/check_sqlc_generation_policy.py
+SQLC GENERATION POLICY: PASS
+
+==> python3 tools/check_connected_candidate.py
+SKIP: disposable compatibility clone intentionally relaxes canonical Go toolchain pins; canonical preseal remains separate.
+
+==> python3 tools/verify_oracles.py --root /mnt/data
+PASS current_src64: all-assest-rechecked-1.zip
+PASS v1_pass353: gxb-backend-v0.65.2-pass353.0-portable-dev1-V1-Final.zip
+PASS old_client: gxb-old-client-v1.164.0-research-corpus.zip
+PASS native_apk: latest_apk-smali-full.zip
+PASS pass222_probe: prep-apk-pass222-window-probe.zip
+ORACLE VERIFY: PASS
+
+==> python3 tools/check_i2_oracle_wire.py /mnt/data
+I2 ORACLE WIRE CHECK: PASS
+current Backend/mid/functions + APK QuickHTTP hashes and frozen wire facts verified
+
+==> python3 tools/check_i3_oracle_bootstrap.py /mnt/data
+I3 ORACLE BOOTSTRAP CHECK: PASS
+verified current MID18/MID1 selection, full/existing-owner gate, player-region formula, stock switch teardown and token replacement
+
+==> python3 tools/check_i4_oracle_wave_s.py /mnt/data
+I4 ORACLE WAVE-S CHECK: PASS
+verified current src_64 UpdateScene MID20480/MID2 + public MID7/MID2864 + MID1 log_url/server_time/default sidebands + room discovery/TCP_LOGIN/room-entered/heartbeat/reconnect + 20018/1304/Lua truthiness; Pass353 corroborates bootstrap/realtime shapes only
+
+==> python3 tools/check_i5_oracle_player_core.py /mnt/data
+I5 ORACLE PLAYER-CORE CHECK: PASS
+verified current src_64 player/story/mail/stack/task/redeem facts; old-client MID230 stability; Pass353 mechanisms corroborative only
+
+==> python3 tools/check_i6a_source_oracle.py /mnt/data
+I6A SOURCE ORACLE CHECK: PASS
+verified candidate-bound current/historical client hashes and reload/time source shape; no server reachability/reset semantics inferred
+
+==> python3 tools/check_i6b_source_oracle.py /mnt/data
+I6B SOURCE ORACLE CHECK: PASS
+verified current/historical MID229/MID234/bootstrap/error-path hashes and source shape; no Activity mechanics/reset semantics inferred
+
+==> python3 tools/check_i6c_source_oracle.py /mnt/data
+I6C SOURCE ORACLE CHECK: PASS
+verified Guild MID/request/presentation/policy/message source shape in current + historical corpora; no unrecovered server calendar/succession semantics inferred
+
+==> python3 tools/check_ca3_3_source_oracle.py /mnt/data
+CA3-3 SOURCE ORACLE CHECK: PASS
+exact current src_64 c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf corroborates Pet progression MIDs, stock wire shapes, evolution/EXP/skill progression sources, and checked-in generated content pins
+
+==> python3 tools/generate_mid_registry.py --root /mnt/data --check
+MID REGISTRY: PASS source_sha256=026a20b29d97624979777a68c64c749254031604057ff42aa8f8254c3e35b5af assignments=1213 unique=1211
+
+==> python3 tools/generate_pass353_wire_fixtures.py --root /mnt/data --check
+PASS353 WIRE FIXTURES: PASS cases=5
+
+==> python3 tools/generate_kernel_querytext.py --check
+KERNEL QUERYTEXT: PASS sha256=74ad9accee063e77323a2eb4a69df394bdcb331ce88e3d789864ffbc904b7511
+
+==> python3 tools/generate_content_querytext.py --check
+CONTENT QUERYTEXT: PASS sha256=5c2e28d1c4e8a6e552be9d4996ed7d29718c3a5f2b996219d7883d6ceac871e5
+
+==> python3 tools/generate_character_querytext.py --check
+CHARACTER QUERYTEXT: PASS hero_sha256=4d1dda29ec59fc2a9416d56dd9cfe45d14589e0ccc164ce36d1663686ad7a1d3 pet_sha256=5477eed6bdd96afe2c0d3c46681b6fc0aeb83260f011cb95785a72e9d03c10ee
+
+==> python3 tools/check_schema_query_ownership.py
+SCHEMA/QUERY OWNERSHIP: PASS
+
+==> python3 tools/validate_foundation_trace.py
+FOUNDATION TRACE: PASS (10 historical lifecycle records; 24/24 RF findings dispositioned; R0-R7 accepted Pass489; I6 accepted Pass509; 6 future extension limits remain explicit; W2 separate)
+
+==> gofmt -l
+PASS
+
+==> go test ./...
+?   	gxb.local/backend/v2/cmd/gxb-admin	[no test files]
+?   	gxb.local/backend/v2/cmd/gxb-api	[no test files]
+?   	gxb.local/backend/v2/cmd/gxb-realtime	[no test files]
+?   	gxb.local/backend/v2/cmd/gxb-wave-s-report	[no test files]
+?   	gxb.local/backend/v2/cmd/gxb-worker	[no test files]
+?   	gxb.local/backend/v2/internal/adapters/blobstore	[no test files]
+?   	gxb.local/backend/v2/internal/adapters/guildpolicybridge	[no test files]
+?   	gxb.local/backend/v2/internal/adapters/pass353diff	[no test files]
+?   	gxb.local/backend/v2/internal/adapters/guildwire	[no test files]
+ok  	gxb.local/backend/v2/internal/adapters/postgres	(cached)
+?   	gxb.local/backend/v2/internal/adapters/postgres/characterqueries	[no test files]
+?   	gxb.local/backend/v2/internal/adapters/postgres/characterstore	[no test files]
+?   	gxb.local/backend/v2/internal/adapters/postgres/contentqueries	[no test files]
+ok  	gxb.local/backend/v2/internal/adapters/postgres/activitystore	(cached)
+?   	gxb.local/backend/v2/internal/adapters/postgres/guildprojection	[no test files]
+?   	gxb.local/backend/v2/internal/adapters/postgres/guildstore	[no test files]
+ok  	gxb.local/backend/v2/internal/adapters/postgres/contentstore	(cached)
+ok  	gxb.local/backend/v2/internal/adapters/postgres/i4store	(cached)
+ok  	gxb.local/backend/v2/internal/adapters/postgres/i5store	(cached)
+?   	gxb.local/backend/v2/internal/adapters/postgres/identitystore	[no test files]
+?   	gxb.local/backend/v2/internal/adapters/postgres/kernelqueries	[no test files]
+ok  	gxb.local/backend/v2/internal/adapters/postgres/kernelstore	(cached)
+?   	gxb.local/backend/v2/internal/adapters/provider	[no test files]
+?   	gxb.local/backend/v2/internal/adapters/river	[no test files]
+?   	gxb.local/backend/v2/internal/adapters/stockfixtures	[no test files]
+ok  	gxb.local/backend/v2/internal/adapters/stockruntime	(cached)
+ok  	gxb.local/backend/v2/internal/application/activitydirectory	(cached)
+ok  	gxb.local/backend/v2/internal/application/bootstrap	(cached)
+ok  	gxb.local/backend/v2/internal/application/characterhero	(cached)
+ok  	gxb.local/backend/v2/internal/application/characterpet	(cached)
+ok  	gxb.local/backend/v2/internal/application/directorysync	(cached)
+ok  	gxb.local/backend/v2/internal/application/generation	(cached)
+ok  	gxb.local/backend/v2/internal/application/guildcore	(cached)
+ok  	gxb.local/backend/v2/internal/application/guildview	(cached)
+?   	gxb.local/backend/v2/internal/application/playerdirectory	[no test files]
+ok  	gxb.local/backend/v2/internal/application/i5	(cached)
+ok  	gxb.local/backend/v2/internal/application/identitylifecycle	(cached)
+ok  	gxb.local/backend/v2/internal/application/playerroot	(cached)
+ok  	gxb.local/backend/v2/internal/application/realtimeauth	(cached)
+ok  	gxb.local/backend/v2/internal/archguard	(cached)
+ok  	gxb.local/backend/v2/internal/content/builtin	(cached)
+ok  	gxb.local/backend/v2/internal/content/guildpolicy	(cached)
+ok  	gxb.local/backend/v2/internal/content/registry	(cached)
+?   	gxb.local/backend/v2/internal/domain/combat	[no test files]
+?   	gxb.local/backend/v2/internal/domain/commerce	[no test files]
+ok  	gxb.local/backend/v2/internal/domain/activity	(cached)
+ok  	gxb.local/backend/v2/internal/domain/character	(cached)
+?   	gxb.local/backend/v2/internal/domain/control	[no test files]
+ok  	gxb.local/backend/v2/internal/domain/economy	(cached)
+?   	gxb.local/backend/v2/internal/domain/guild	[no test files]
+ok  	gxb.local/backend/v2/internal/domain/generation	(cached)
+ok  	gxb.local/backend/v2/internal/domain/grant	(cached)
+ok  	gxb.local/backend/v2/internal/domain/identity	(cached)
+ok  	gxb.local/backend/v2/internal/domain/logicalserver	(cached)
+ok  	gxb.local/backend/v2/internal/domain/mail	(cached)
+?   	gxb.local/backend/v2/internal/domain/modes	[no test files]
+ok  	gxb.local/backend/v2/internal/domain/objective	(cached)
+?   	gxb.local/backend/v2/internal/domain/profile	[no test files]
+ok  	gxb.local/backend/v2/internal/domain/player	(cached)
+ok  	gxb.local/backend/v2/internal/domain/realtimeauth	(cached)
+?   	gxb.local/backend/v2/internal/domain/social	[no test files]
+ok  	gxb.local/backend/v2/internal/domain/redeem	(cached)
+?   	gxb.local/backend/v2/internal/foundation/audit	[no test files]
+?   	gxb.local/backend/v2/internal/foundation/clock	[no test files]
+ok  	gxb.local/backend/v2/internal/foundation/config	(cached)
+ok  	gxb.local/backend/v2/internal/foundation/ids	(cached)
+ok  	gxb.local/backend/v2/internal/foundation/lockkey	(cached)
+ok  	gxb.local/backend/v2/internal/foundation/obligation	(cached)
+ok  	gxb.local/backend/v2/internal/foundation/observability	(cached)
+ok  	gxb.local/backend/v2/internal/foundation/operation	(cached)
+ok  	gxb.local/backend/v2/internal/foundation/policy	(cached)
+ok  	gxb.local/backend/v2/internal/foundation/receipt	(cached)
+ok  	gxb.local/backend/v2/internal/foundation/replaycatalog	(cached)
+ok  	gxb.local/backend/v2/internal/foundation/tx	(cached)
+?   	gxb.local/backend/v2/internal/projection/activity	[no test files]
+ok  	gxb.local/backend/v2/internal/projection/backpack	(cached)
+ok  	gxb.local/backend/v2/internal/projection/hero	(cached)
+ok  	gxb.local/backend/v2/internal/projection/lobby	(cached)
+?   	gxb.local/backend/v2/internal/projection/publication	[no test files]
+?   	gxb.local/backend/v2/internal/projection/ota	[no test files]
+ok  	gxb.local/backend/v2/internal/projection/pet	(cached)
+?   	gxb.local/backend/v2/internal/projection/publicplayer	[no test files]
+?   	gxb.local/backend/v2/internal/projection/ranking	[no test files]
+?   	gxb.local/backend/v2/internal/projection/realtimeview	[no test files]
+ok  	gxb.local/backend/v2/internal/protocol/amf3	(cached)
+?   	gxb.local/backend/v2/internal/protocol/limits	[no test files]
+ok  	gxb.local/backend/v2/internal/protocol/httpedge	(cached)
+?   	gxb.local/backend/v2/internal/protocol/observe	[no test files]
+?   	gxb.local/backend/v2/internal/protocol/wire	[no test files]
+ok  	gxb.local/backend/v2/internal/protocol/mids	(cached)
+ok  	gxb.local/backend/v2/internal/protocol/realtime	(cached)
+
+==> go vet ./...
+
+==> go test ./internal/archguard
+ok  	gxb.local/backend/v2/internal/archguard	(cached)
+
+==> python3 tools/validate_i1.py
+I1 VALIDATION: PASS
+minimal kernel schema, tx outcome/reconciliation, typed facts, adapter isolation and stage routing verified
+
+==> python3 tools/validate_i2.py
+I2 VALIDATION: PASS
+stock HTTP families, generated numeric MID catalog, bounded AMF3/TCP framing, fail-closed dispatch and differential fixtures verified
+
+==> python3 tools/validate_i3.py
+I3 VALIDATION: PASS
+typed account/session/context, honest server directory, region-encoded allocator, observation gate, replay-stable MID1 and unknown-COMMIT reconciliation contracts verified
+
+==> python3 tools/validate_i4.py
+I4 VALIDATION: PASS
+
+==> python3 tools/validate_i5.py
+I5 VALIDATION: PASS
+
+==> python3 tools/validate_r0.py

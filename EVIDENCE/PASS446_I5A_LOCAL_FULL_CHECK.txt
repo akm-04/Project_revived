@@ -1,0 +1,74 @@
+Pass446 I5-A normal-chat sandbox compatibility run
+go version go1.23.2 linux/amd64
+NOTE: go.mod temporarily lowered to go 1.23.0; sealed source restores go 1.26.0 + toolchain go1.27.1.
+?   	gxb.local/backend/v2/cmd/gxb-admin	[no test files]
+?   	gxb.local/backend/v2/cmd/gxb-api	[no test files]
+?   	gxb.local/backend/v2/cmd/gxb-realtime	[no test files]
+?   	gxb.local/backend/v2/cmd/gxb-wave-s-report	[no test files]
+?   	gxb.local/backend/v2/cmd/gxb-worker	[no test files]
+?   	gxb.local/backend/v2/internal/adapters/blobstore	[no test files]
+?   	gxb.local/backend/v2/internal/adapters/pass353diff	[no test files]
+?   	gxb.local/backend/v2/internal/adapters/postgres	[no test files]
+ok  	gxb.local/backend/v2/internal/adapters/postgres/i4store	(cached)
+?   	gxb.local/backend/v2/internal/adapters/postgres/kernelqueries	[no test files]
+ok  	gxb.local/backend/v2/internal/adapters/postgres/kernelstore	(cached)
+?   	gxb.local/backend/v2/internal/adapters/river	[no test files]
+?   	gxb.local/backend/v2/internal/adapters/provider	[no test files]
+?   	gxb.local/backend/v2/internal/adapters/stockfixtures	[no test files]
+ok  	gxb.local/backend/v2/internal/adapters/stockruntime	(cached)
+ok  	gxb.local/backend/v2/internal/application/bootstrap	(cached)
+ok  	gxb.local/backend/v2/internal/application/realtimeauth	(cached)
+?   	gxb.local/backend/v2/internal/domain/combat	[no test files]
+?   	gxb.local/backend/v2/internal/domain/commerce	[no test files]
+?   	gxb.local/backend/v2/internal/domain/control	[no test files]
+?   	gxb.local/backend/v2/internal/domain/generation	[no test files]
+?   	gxb.local/backend/v2/internal/domain/guild	[no test files]
+?   	gxb.local/backend/v2/internal/domain/modes	[no test files]
+ok  	gxb.local/backend/v2/internal/archguard	0.019s
+ok  	gxb.local/backend/v2/internal/domain/economy	(cached)
+ok  	gxb.local/backend/v2/internal/domain/grant	(cached)
+ok  	gxb.local/backend/v2/internal/domain/identity	(cached)
+ok  	gxb.local/backend/v2/internal/domain/logicalserver	(cached)
+ok  	gxb.local/backend/v2/internal/domain/mail	(cached)
+ok  	gxb.local/backend/v2/internal/domain/objective	(cached)
+ok  	gxb.local/backend/v2/internal/domain/player	(cached)
+?   	gxb.local/backend/v2/internal/domain/profile	[no test files]
+ok  	gxb.local/backend/v2/internal/domain/realtimeauth	(cached)
+ok  	gxb.local/backend/v2/internal/domain/redeem	(cached)
+?   	gxb.local/backend/v2/internal/domain/social	[no test files]
+?   	gxb.local/backend/v2/internal/foundation/audit	[no test files]
+?   	gxb.local/backend/v2/internal/foundation/clock	[no test files]
+ok  	gxb.local/backend/v2/internal/foundation/config	(cached)
+ok  	gxb.local/backend/v2/internal/foundation/ids	(cached)
+ok  	gxb.local/backend/v2/internal/foundation/lockkey	(cached)
+ok  	gxb.local/backend/v2/internal/foundation/obligation	(cached)
+ok  	gxb.local/backend/v2/internal/foundation/observability	(cached)
+?   	gxb.local/backend/v2/internal/foundation/policy	[no test files]
+ok  	gxb.local/backend/v2/internal/foundation/operation	(cached)
+ok  	gxb.local/backend/v2/internal/foundation/receipt	(cached)
+ok  	gxb.local/backend/v2/internal/foundation/tx	(cached)
+?   	gxb.local/backend/v2/internal/projection/ota	[no test files]
+ok  	gxb.local/backend/v2/internal/projection/lobby	(cached)
+?   	gxb.local/backend/v2/internal/projection/publication	[no test files]
+?   	gxb.local/backend/v2/internal/projection/publicplayer	[no test files]
+?   	gxb.local/backend/v2/internal/projection/ranking	[no test files]
+?   	gxb.local/backend/v2/internal/projection/realtimeview	[no test files]
+ok  	gxb.local/backend/v2/internal/protocol/amf3	(cached)
+ok  	gxb.local/backend/v2/internal/protocol/httpedge	(cached)
+?   	gxb.local/backend/v2/internal/protocol/limits	[no test files]
+ok  	gxb.local/backend/v2/internal/protocol/mids	(cached)
+?   	gxb.local/backend/v2/internal/protocol/observe	[no test files]
+ok  	gxb.local/backend/v2/internal/protocol/realtime	(cached)
+?   	gxb.local/backend/v2/internal/protocol/wire	[no test files]
+SCHEMA/QUERY OWNERSHIP: PASS
+SQLC GENERATION POLICY: PASS
+I1 VALIDATION: PASS
+minimal kernel schema, tx outcome/reconciliation, typed facts, adapter isolation and stage routing verified
+I2 VALIDATION: PASS
+stock HTTP families, generated numeric MID catalog, bounded AMF3/TCP framing, fail-closed dispatch and differential fixtures verified
+I3 VALIDATION: PASS
+typed account/session/context, honest server directory, region-encoded allocator, observation gate, replay-stable MID1 and unknown-COMMIT reconciliation contracts verified
+I4 VALIDATION: PASS
+I5 VALIDATION: PASS
+I5 ORACLE PLAYER-CORE CHECK: PASS
+verified current src_64 player/story/mail/stack/task/redeem facts; old-client MID230 stability; Pass353 mechanisms corroborative only

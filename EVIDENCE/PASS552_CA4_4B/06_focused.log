@@ -1,0 +1,9 @@
+### go test ./internal/application/characterpet ./internal/adapters/stockruntime ./internal/application/i5 ./internal/adapters/postgres/characterstore ./internal/adapters/postgres/i5store ./internal/adapters/postgres/contentstore ./internal/content/builtin ./internal/content/registry
+ok  	gxb.local/backend/v2/internal/application/characterpet	(cached)
+ok  	gxb.local/backend/v2/internal/adapters/stockruntime	(cached)
+ok  	gxb.local/backend/v2/internal/application/i5	(cached)
+ok  	gxb.local/backend/v2/internal/adapters/postgres/characterstore	(cached)
+ok  	gxb.local/backend/v2/internal/adapters/postgres/i5store	(cached)
+ok  	gxb.local/backend/v2/internal/adapters/postgres/contentstore	(cached)
+ok  	gxb.local/backend/v2/internal/content/builtin	(cached)
+ok  	gxb.local/backend/v2/internal/content/registry	(cached)

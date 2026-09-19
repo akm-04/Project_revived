@@ -1,0 +1,96 @@
+{
+  "classification": {
+    "compatibility_copy_focused_race": "GREEN",
+    "compatibility_copy_focused_test": "GREEN",
+    "compatibility_copy_focused_vet": "GREEN",
+    "compatibility_copy_full_test": "GREEN",
+    "compatibility_copy_full_vet": "GREEN",
+    "compatibility_copy_fuzz": "GREEN_97367_EXECUTIONS_RECORDED",
+    "compatibility_copy_shuffle20": "GREEN",
+    "compatibility_copy_whole_tree_race": "PARTIAL_TIMEOUT_NOT_CLAIMED",
+    "exact_go_1_27_1_execution": "ENVIRONMENT_BLOCKED_TOOLCHAIN_DOWNLOAD_UNAVAILABLE",
+    "exact_static_source_oracle": "GREEN",
+    "physical_stock_client": "W2_DEFERRED",
+    "postgres_tag_compile": "ENVIRONMENT_BLOCKED_UNCACHED_PGX_AND_NO_NETWORK",
+    "real_postgresql": "ENVIRONMENT_BLOCKED_NOT_AVAILABLE"
+  },
+  "logs": {
+    "compat/focused_race.log": {
+      "bytes": 320,
+      "sha256": "63e73572d256eee8e994137cd72d15f0768bedcf945bb47149bddb15e8cb4d9c"
+    },
+    "compat/focused_test.log": {
+      "bytes": 320,
+      "sha256": "99c4ddb59b52aa6310fc4dbd2dda0c3426007a2ea9f5bee4d6064323efea3713"
+    },
+    "compat/focused_vet.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "compat/full_race_missing_packages.txt": {
+      "bytes": 1468,
+      "sha256": "e8526ffadbf8ea89c00351fc12fd19483e6ec3dfb64c27671a358a93af6aa532"
+    },
+    "compat/full_race_partial_timeout.log": {
+      "bytes": 4329,
+      "sha256": "97c2344a45e79f120e6722d58e9c871f08ab96f3518fc279fc410f3d3aa12999"
+    },
+    "compat/full_test.log": {
+      "bytes": 6168,
+      "sha256": "181100156f3c5d2328a0194abcb63992bc2f9db8ed5e6cbe6a907a8a509b6584"
+    },
+    "compat/full_vet.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "compat/fuzz.log": {
+      "bytes": 379,
+      "sha256": "41488cdff0b79f1ca03a33266b0955111f6ed3a9d382c7a9cc134f49b06b8c0f"
+    },
+    "compat/go_mod_adaptation.diff": {
+      "bytes": 304,
+      "sha256": "bb6550f215b44e6d4e29ef3c3a471b304e11c8ce4fd6057d949c15753290ed67"
+    },
+    "compat/go_version_adaptation.diff": {
+      "bytes": 204,
+      "sha256": "4da830d53738e2d05a3683b1b5263abe742ce2e7f02a507a86c4e825cd95310a"
+    },
+    "compat/postgres_tag_environment_block.log": {
+      "bytes": 643,
+      "sha256": "ebc8e5b44e43387d7919471a87762497cc368c74e504f5f306ccd0aed6d6d7d2"
+    },
+    "compat/shuffle20.log": {
+      "bytes": 136,
+      "sha256": "439b1f56824a93eb970e8338b9bbd9b8061381c46720a057790b7245575c72cb"
+    },
+    "exact/ca6_3_source_oracle.log": {
+      "bytes": 168,
+      "sha256": "3a1842213bf9ccff7b2ce3f382d554ff7d53db3e2e55cc48e6d255b4033bd5cf"
+    },
+    "exact/canonical_pins.sha256": {
+      "bytes": 224,
+      "sha256": "09258115a50e6f15790612a06bbc268adaad80b0a6ba4a8dd21330fdc19b51cb"
+    },
+    "exact/exact_go_environment_block.log": {
+      "bytes": 540,
+      "sha256": "8bcceadeecd69e1fbbb95874c3e575d3d15a9287a65fcd71d2795d45758e60f0"
+    },
+    "exact/foundation_source_oracle_regression.log": {
+      "bytes": 3166,
+      "sha256": "3b907c1e98912e2191b2eaa1255fc291dcfcc64a896159fcc207fed86a6da9af"
+    },
+    "exact/query_regeneration.log": {
+      "bytes": 159,
+      "sha256": "03f4d4e533d11042770e0dea5647705c8ec0b4f969cd7a3ad99f8f4ed2d88365"
+    },
+    "exact/static_core_with_failed_oracle_invocation.log": {
+      "bytes": 4319,
+      "sha256": "d984198bc2828452f576be4f9cfa8549be612a41eae0d012c48de2299eec6e4b"
+    }
+  },
+  "mandatory_future_gate": "CA6-6 exact accumulated Go1.27.1 + real PostgreSQL aggregate gate remains mandatory; compatibility-copy evidence cannot satisfy it.",
+  "pass": "575.0",
+  "schema_version": 1,
+  "stage": "CA6-3",
+  "status": "LOCAL_ACCEPTED_COMPATIBILITY_COPY_ONLY_EXACT_NATIVE_AGGREGATE_DEFERRED_CA6_6"
+}

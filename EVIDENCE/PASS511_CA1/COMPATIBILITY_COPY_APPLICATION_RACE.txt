@@ -1,0 +1,11 @@
+ok  	gxb.local/backend/v2/internal/application/activitydirectory	1.010s
+ok  	gxb.local/backend/v2/internal/application/bootstrap	1.013s
+ok  	gxb.local/backend/v2/internal/application/directorysync	1.012s
+ok  	gxb.local/backend/v2/internal/application/generation	1.012s
+ok  	gxb.local/backend/v2/internal/application/guildcore	1.025s
+?   	gxb.local/backend/v2/internal/application/playerdirectory	[no test files]
+ok  	gxb.local/backend/v2/internal/application/guildview	1.014s
+ok  	gxb.local/backend/v2/internal/application/i5	1.023s
+ok  	gxb.local/backend/v2/internal/application/identitylifecycle	1.014s
+ok  	gxb.local/backend/v2/internal/application/playerroot	1.010s
+ok  	gxb.local/backend/v2/internal/application/realtimeauth	1.010s

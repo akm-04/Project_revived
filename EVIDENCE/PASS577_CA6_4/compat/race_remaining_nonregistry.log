@@ -1,0 +1,52 @@
+=== race remaining: domain ===
+ok  	gxb.local/backend/v2/internal/domain/activity	(cached)
+ok  	gxb.local/backend/v2/internal/domain/character	(cached)
+?   	gxb.local/backend/v2/internal/domain/combat	[no test files]
+?   	gxb.local/backend/v2/internal/domain/commerce	[no test files]
+?   	gxb.local/backend/v2/internal/domain/control	[no test files]
+ok  	gxb.local/backend/v2/internal/domain/economy	(cached)
+ok  	gxb.local/backend/v2/internal/domain/generation	(cached)
+?   	gxb.local/backend/v2/internal/domain/guild	[no test files]
+ok  	gxb.local/backend/v2/internal/domain/grant	(cached)
+ok  	gxb.local/backend/v2/internal/domain/identity	(cached)
+ok  	gxb.local/backend/v2/internal/domain/logicalserver	(cached)
+ok  	gxb.local/backend/v2/internal/domain/mail	(cached)
+?   	gxb.local/backend/v2/internal/domain/modes	[no test files]
+ok  	gxb.local/backend/v2/internal/domain/objective	(cached)
+?   	gxb.local/backend/v2/internal/domain/profile	[no test files]
+ok  	gxb.local/backend/v2/internal/domain/player	(cached)
+ok  	gxb.local/backend/v2/internal/domain/realtimeauth	(cached)
+ok  	gxb.local/backend/v2/internal/domain/redeem	(cached)
+?   	gxb.local/backend/v2/internal/domain/social	[no test files]
+=== race remaining: foundation ===
+?   	gxb.local/backend/v2/internal/foundation/audit	[no test files]
+?   	gxb.local/backend/v2/internal/foundation/clock	[no test files]
+ok  	gxb.local/backend/v2/internal/foundation/config	(cached)
+ok  	gxb.local/backend/v2/internal/foundation/ids	(cached)
+ok  	gxb.local/backend/v2/internal/foundation/lockkey	(cached)
+ok  	gxb.local/backend/v2/internal/foundation/obligation	(cached)
+ok  	gxb.local/backend/v2/internal/foundation/observability	(cached)
+ok  	gxb.local/backend/v2/internal/foundation/operation	(cached)
+ok  	gxb.local/backend/v2/internal/foundation/policy	(cached)
+ok  	gxb.local/backend/v2/internal/foundation/receipt	(cached)
+ok  	gxb.local/backend/v2/internal/foundation/replaycatalog	(cached)
+ok  	gxb.local/backend/v2/internal/foundation/tx	(cached)
+=== race remaining: projection ===
+?   	gxb.local/backend/v2/internal/projection/activity	[no test files]
+ok  	gxb.local/backend/v2/internal/projection/backpack	(cached)
+ok  	gxb.local/backend/v2/internal/projection/hero	(cached)
+?   	gxb.local/backend/v2/internal/projection/ota	[no test files]
+ok  	gxb.local/backend/v2/internal/projection/lobby	(cached)
+?   	gxb.local/backend/v2/internal/projection/publication	[no test files]
+?   	gxb.local/backend/v2/internal/projection/publicplayer	[no test files]
+ok  	gxb.local/backend/v2/internal/projection/pet	(cached)
+?   	gxb.local/backend/v2/internal/projection/ranking	[no test files]
+?   	gxb.local/backend/v2/internal/projection/realtimeview	[no test files]
+=== race remaining: protocol ===
+ok  	gxb.local/backend/v2/internal/protocol/amf3	(cached)
+?   	gxb.local/backend/v2/internal/protocol/limits	[no test files]
+ok  	gxb.local/backend/v2/internal/protocol/httpedge	(cached)
+?   	gxb.local/backend/v2/internal/protocol/observe	[no test files]
+ok  	gxb.local/backend/v2/internal/protocol/mids	(cached)
+?   	gxb.local/backend/v2/internal/protocol/wire	[no test files]
+ok  	gxb.local/backend/v2/internal/protocol/realtime	1.015s

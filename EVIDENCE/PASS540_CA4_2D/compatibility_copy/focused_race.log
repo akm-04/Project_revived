@@ -1,0 +1,5 @@
+ok  	gxb.local/backend/v2/internal/adapters/stockruntime	1.423s
+ok  	gxb.local/backend/v2/internal/application/characterhero	1.805s
+ok  	gxb.local/backend/v2/internal/application/i5	1.028s
+ok  	gxb.local/backend/v2/internal/projection/hero	1.013s
+ok  	gxb.local/backend/v2/internal/archguard	1.145s

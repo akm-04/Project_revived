@@ -1,0 +1,10 @@
+=== RUN   TestLoadGeneratedCatalog
+--- PASS: TestLoadGeneratedCatalog (0.81s)
+=== RUN   TestGeneratedManifestIsCanonicalJSON
+--- PASS: TestGeneratedManifestIsCanonicalJSON (0.00s)
+=== RUN   TestPetCoreCatalogLineageAndCapability
+--- PASS: TestPetCoreCatalogLineageAndCapability (0.81s)
+=== RUN   TestPetEquipmentCA44ASourceTopology
+--- PASS: TestPetEquipmentCA44ASourceTopology (0.81s)
+PASS
+ok  	gxb.local/backend/v2/internal/content/builtin	3.446s

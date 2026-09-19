@@ -1,0 +1,94 @@
+{
+  "aggregate_independent_check": "59/59 GREEN",
+  "aggregate_independent_postimplementation": "68/68 GREEN",
+  "aggregate_reality_check": "docs/PASS544_CA4_3A_AGGREGATE_INDEPENDENT_REALITY_CHECK.md",
+  "authority_parent": "sealed Pass542 CA4-3A research/design + explicit user authorization for CA4-3A-A then CA4-3A-B",
+  "bounded_protocol_limit": "A new HTTP request retrying a lost successful MID58 response cannot be distinguished from an intentional repeated feed because stock MID58 has no reusable client nonce or expected-old-Fumo value. No payload/time-window dedupe is invented.",
+  "canonical_environment": {
+    "exact_candidate_attempt": "ENVIRONMENT_BLOCKED",
+    "go_mod_sha256": "313c574368bb56dc570bc3427b65f59b059e492f909fe43b7d0291b5ced21dc4",
+    "go_sum_sha256": "efbf6753542d66e2fefcb2ab5e2ade7c9d28f2206a1113d1eb9568f2cb75808d",
+    "go_version_sha256": "a8844fbc8c3eb51c26ed00aec4cd5a5a9d647f849c6ead07bcc83ed24c4a7718",
+    "reason": "sandbox DNS/network cannot fetch pinned go1.27.1 from proxy.golang.org"
+  },
+  "canonical_static": [
+    "CA4-3A-B validator GREEN",
+    "Pass542 CA4-3A source oracle GREEN",
+    "immutable content regeneration GREEN",
+    "content/character query-text freshness GREEN",
+    "schema/query ownership GREEN",
+    "sqlc-generation policy GREEN",
+    "dependency policy GREEN"
+  ],
+  "compatibility_copy_only": {
+    "canonical_pins_changed": false,
+    "clone_only_accommodation": [
+      ".go-version 1.27.1 -> 1.23.2",
+      "go.mod go 1.26.0 -> 1.23.0",
+      "removed toolchain go1.27.1"
+    ],
+    "environment": "Go 1.23.2 linux/amd64",
+    "results": [
+      "focused tests GREEN",
+      "focused race GREEN",
+      "go vet ./... GREEN",
+      "archguard GREEN",
+      "sealed MID58 adversarial vector tests GREEN",
+      "bounded package-by-package regression 92/92 GREEN"
+    ]
+  },
+  "content_revision": "aa89ed03a9315a9faf8392b9beb4141594ad911033483659ea0c31674a79dc83",
+  "deferred_mandatory": [
+    "exact Go 1.27.1 execution",
+    "real PostgreSQL migration/restore/locking/replay/concurrency",
+    "River where accumulated CA4 depends on it",
+    "aggregate native gate at CA4_AGGREGATE_PRE_CA4_E_NATIVE_WORK_GATE",
+    "W2 physical unmodified-stock-client proof"
+  ],
+  "implemented": [
+    "MID58 semantic CharacterHero FeedFumo operation",
+    "duplicate material occurrence accounting",
+    "credited Fumo cap with full requested material debit",
+    "Mana debit based on credited Fumo",
+    "reuse of existing I5 prepared resource debit seam",
+    "single cohesive Hero raw-Fumo CAS",
+    "same-operation semantic receipt replay",
+    "six-slot derived fumo_lev response projection",
+    "authoritative postcommit current Mana projection",
+    "strict MID58 stock request decoding",
+    "production registration of MID58 only"
+  ],
+  "out_of_scope_preserved": [
+    "MID29 Quick Fumo",
+    "MID51/MID57 promotion/reset",
+    "Pet/Super Fumo gameplay",
+    "final battle-stat materialization",
+    "MID54/MID62 production activation"
+  ],
+  "parent_checkpoint_archive_sha256": "49594fba218171fd936e7bb9b60f062bf7f5fb9e3477cebd9a6ddda9cbe6512f",
+  "parent_stage": "CA4-3A-A v0.70.0 Pass543 checkpoint",
+  "pass": "544.0",
+  "phase": "CA4-3A-B / aggregate CA4-3A local closure",
+  "postcommit_projection_caveat": "MID58 Mana is projected after semantic commit. Projection/transport loss after commit falls into the same irreducible stock-protocol lost-response ambiguity; same-operation receipt replay remains exactly-once.",
+  "result": "GREEN_LOCAL_CA4_3A_ACCEPTANCE_CANDIDATE_COMPATIBILITY_COPY_ONLY_NATIVE_AGGREGATE_DEFERRED",
+  "route_status": {
+    "mid29_registered": false,
+    "mid51_registered": false,
+    "mid54_registered": false,
+    "mid57_registered": false,
+    "mid58_registered": true,
+    "mid62_registered": false,
+    "registered_hero_mids": [
+      49,
+      52,
+      55,
+      58,
+      63,
+      67,
+      89
+    ]
+  },
+  "schema_version": 1,
+  "sealed_mid58_vectors_sha256": "063c8b17d72f423b62533d00b4e18453d0b159d1fa1927fc4ef40313ce34b3e7",
+  "sealed_source_oracle_sha256": "42c10c67be67278d83e81512403b0b3318d30ae9f957e878dbc1c9ee0596dbd0"
+}

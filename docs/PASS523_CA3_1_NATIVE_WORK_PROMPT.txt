@@ -1,0 +1,135 @@
+GXB1 V2 — PASS523 CA3-1 EXACT NATIVE/POSTGRESQL/SQLC GATE
+=========================================================
+
+AUTHORITY / SCOPE
+-----------------
+This is Girls X Battle 1 (GXB1), not GXB2.
+Pass522 HOT/CURRENT is the controlling design/research authority for this implementation.
+Test the exact supplied Pass523 CA3-1 candidate. Do not redesign or broaden scope unless a real defect/evidence conflict is discovered.
+CA3-1 is Pet Core Identity, Owner, Roster & Projection Foundation only.
+CA3-2 acquisition/starter/hatch commands and CA3-3 progression remain implementation-blocked.
+Do not implement or enable MID781-792 or MID134 as part of this gate.
+
+CANDIDATE IDENTITY
+------------------
+Expected semantic version: v0.65.0
+Expected pass: 523.0
+Parent accepted backend: v0.64.1 / Pass520 accepted under Pass521
+Parent archive SHA256: 58dc3f31d3e8ae82ea302cad4d7dcce2c958d9218c4e423f4af97a5cf018f830
+Pass522 HOT SHA256: 695377d5678861b83e9c93a4101d9a67e6469250a590fdd680b80c2eb43affbc
+Expected content revision: e9c310ac5a258e49cbf6e0a1a81a55a631706229b179617d66af9af78c225a25
+The final implementation-revision SHA and candidate ZIP SHA are recorded in BUILD_INFO.json/SNAPSHOT_INFO.json and the surrounding handoff. Verify them before testing.
+
+SOURCE / ORACLE INPUT
+---------------------
+Current src_64/assets archive SHA256:
+c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf
+
+Relevant exact current source pins:
+app/model/Pet.lua = 214f4dcd93d0e494408d14a225810134c2e72a0dedd18a935a27dc62e0c00660
+data/tables/pet.lua = bc974045ec92fd7c0ebb2655d635d1b057eee7f74a871cfa2316b511ad55986e
+
+ENVIRONMENT / PIN DISCIPLINE
+----------------------------
+Keep the supplied canonical candidate pristine.
+Use the repository-pinned Go/toolchain and sqlc versions exactly. Do not edit go.mod/go.sum/.go-version to make tests pass.
+If environment-specific accommodations are necessary, make them only in an isolated compatibility copy and label those results COMPATIBILITY_COPY_ONLY.
+Do not weaken tests, remove packages, suppress migrations, replace PostgreSQL with SQLite/mocks, or copy a compatibility tree wholesale back into canonical.
+
+MANDATORY GATES
+---------------
+1. Identity and manifest
+   - Verify candidate archive SHA256 against handoff.
+   - Run SNAPSHOT_MANIFEST.sha256 verification.
+   - Recompute docs/PASS523_CA3_1_IMPLEMENTATION_REVISION.json using its declared digest basis and verify BUILD_INFO.json/SNAPSHOT_INFO.json agree.
+   - Verify .go-version, go.mod and go.sum match snapshot hashes.
+
+2. Exact source/content regeneration
+   - Provide the exact current source archive above.
+   - Run deterministic built-in content generation/check.
+   - Expected revision: e9c310ac5a258e49cbf6e0a1a81a55a631706229b179617d66af9af78c225a25.
+   - Expected Pet count: 54; origin/lineage families: 27.
+   - Verify all five pre-CA3 payload artifacts remain byte-identical to the parent accepted candidate.
+
+3. Code generation / sqlc / query ownership
+   - Run repository-pinned sqlc generation/checks exactly as repository instructions require.
+   - Run Character and Content query-text regeneration/check and require zero unexpected diff.
+   - Run schema/query ownership guard and all current cumulative architecture/static validators.
+   - Confirm migration 00016 owns only CA3-1 Pet foundation tables and content Pet-template table under their declared owners.
+
+4. Go tests/build quality
+   - Run focused changed-package tests.
+   - Run full `go test ./...` with the exact pinned toolchain.
+   - Run relevant race tests and `go vet ./...`.
+   - Run postgres-tagged packages/builds with real cached/downloadable dependencies and exact canonical module files.
+   - Record exact commands, tool versions, exit codes and raw logs.
+
+5. Real PostgreSQL migration / ownership / persistence proof
+   Use a real PostgreSQL instance compatible with the repository pin/contract (prefer the pinned documented version, PostgreSQL 18.6 if available).
+   - Apply the full migration chain through 00016 to a fresh database.
+   - Upgrade a database created from the exact Pass520 migration high-water to 00016 and verify no earlier accepted data is damaged.
+   - Verify player_pet_roots is backfilled for existing players and created for newly bootstrapped players.
+   - Verify no starter Pet/egg/entitlement/progression state is fabricated.
+   - Verify root default allocator policy is 1 and Pet rows enforce `(player_id, pet_id)` PK plus `(player_id, origin_table_id)` uniqueness.
+   - Exercise owner-shaped queries under transactions, including root and instance locks; confirm no foreign-owner SQL.
+   - Verify transaction rollback behavior.
+
+6. Content registry rollout law
+   - Install/verify the new six-artifact revision including PET_CORE_CA3.
+   - Verify exact content revision and Pet-template rows.
+   - Critically: prove that merely booting/reading CA3-1 does NOT require switching an existing database's active content revision from the accepted Pass520 revision.
+   - Existing active revision may remain old while the new Pet-capable revision is installed.
+   - Do not introduce a silent active-revision switch.
+
+7. Bootstrap and stock protocol proof
+   - Verify Character bootstrap creates the Pet root in the caller-owned transaction.
+   - Verify MID1 embedded child `780` comes from canonical Pet storage.
+   - Verify explicit MID780 comes from the Pet dispatcher and matches canonical roster projection.
+   - Confirm MID780 is no longer served by the old lobby empty facade.
+   - Confirm missing Pet root fails closed rather than being silently projected as an empty owner.
+   - Confirm neutral private projection shape is stock-compatible: `is_born=0`, five raw skill defaults of 1, zeroed equips/fumos/practice_attr, CA7 style state omitted.
+   - Verify `origin_table_id` and content revision remain server-internal and are not leaked onto stock Pet wire.
+   - Confirm MID781-792 and MID134 are NOT newly registered by this candidate.
+
+8. Concurrency / identity invariants
+   - Exercise concurrent root/instance operations on real PostgreSQL where feasible.
+   - Confirm lock order: PetRoot rank 420, PetInstance 430, before I5 economy 700+ for future composition.
+   - Confirm durable `pet_id` and immutable `origin_table_id` remain separate from mutable/current `table_id`.
+   - Confirm no Pet capacity mechanic was invented.
+   - Confirm there is no Pet delete/removal path in CA3-1.
+
+9. Stock/native proof, if environment permits
+   - Prefer an unmodified stock client/effective-client baseline.
+   - Verify bootstrap with empty roster and explicit MID780 load without client modification.
+   - If real stock proof cannot be performed, label it ENVIRONMENT_BLOCKED/NOT_RUN; do not convert a synthetic request into stock-client acceptance.
+
+10. Security/dependency/license/SBOM checks
+   - Run the repository's current dependency/security/license/SBOM checks applicable to this candidate.
+   - Record tool/environment limitations exactly.
+
+DEFECT HANDLING
+---------------
+If a genuine product defect is found:
+- Identify it with evidence classification and exact path/symbol.
+- Fix it in the canonical candidate only if within approved CA3-1 scope and evidence supports the fix.
+- Do not broaden into CA3-2/3.
+- After any canonical fix, discard prior adapted/test copy, create a fresh one if needed, and rerun affected + regression gates.
+- Return the exact changed candidate and a full diff/revision identity.
+If source/authority contradicts the Pass522 contract, stop implementation advancement and report the conflict rather than guessing.
+
+RETURN BUNDLE
+-------------
+Return a report/evidence ZIP containing at minimum:
+- exact tested candidate ZIP if modified, otherwise candidate identity/hash confirmation;
+- raw logs and command transcript;
+- tool versions/environment inventory;
+- PostgreSQL dump or reproducible DB evidence where practical;
+- migration/upgrade evidence;
+- sqlc/generated-query diff proof;
+- content install/verification evidence;
+- focused/full/race/vet/static test evidence;
+- stock/native evidence or explicit ENVIRONMENT_BLOCKED record;
+- machine-readable JSON verdict separating exact-native, real-PostgreSQL, compatibility-copy and stock proof;
+- any product fixes with exact files/diff and new implementation revision.
+
+Do NOT grant CA3-1 phase acceptance in Work. Return evidence for normal-chat adjudication. Do NOT begin CA3-2.

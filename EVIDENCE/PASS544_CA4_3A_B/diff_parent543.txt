@@ -1,0 +1,13 @@
+Files /mnt/data/ca4_3a_b_parent543/backend/cmd/gxb-api/main_postgres.go and /mnt/data/ca4_3a_b_work/backend/cmd/gxb-api/main_postgres.go differ
+Files /mnt/data/ca4_3a_b_parent543/backend/internal/adapters/postgres/contentstore/hero_fumo.go and /mnt/data/ca4_3a_b_work/backend/internal/adapters/postgres/contentstore/hero_fumo.go differ
+Files /mnt/data/ca4_3a_b_parent543/backend/internal/adapters/stockruntime/hero_ca2_3_test.go and /mnt/data/ca4_3a_b_work/backend/internal/adapters/stockruntime/hero_ca2_3_test.go differ
+Files /mnt/data/ca4_3a_b_parent543/backend/internal/adapters/stockruntime/hero_ca4_2_test.go and /mnt/data/ca4_3a_b_work/backend/internal/adapters/stockruntime/hero_ca4_2_test.go differ
+Only in /mnt/data/ca4_3a_b_work/backend/internal/adapters/stockruntime: hero_ca4_3a_test.go
+Files /mnt/data/ca4_3a_b_parent543/backend/internal/adapters/stockruntime/hero_dispatcher.go and /mnt/data/ca4_3a_b_work/backend/internal/adapters/stockruntime/hero_dispatcher.go differ
+Only in /mnt/data/ca4_3a_b_work/backend/internal/application/characterhero: fumo_service.go
+Only in /mnt/data/ca4_3a_b_work/backend/internal/application/characterhero: fumo_service_test.go
+Files /mnt/data/ca4_3a_b_parent543/backend/internal/application/characterhero/service.go and /mnt/data/ca4_3a_b_work/backend/internal/application/characterhero/service.go differ
+Only in /mnt/data/ca4_3a_b_work/backend/internal/application/characterhero/testdata: ca4_3a_mid58_adversarial_vectors.json
+Files /mnt/data/ca4_3a_b_parent543/backend/internal/archguard/ca4_2_contract_test.go and /mnt/data/ca4_3a_b_work/backend/internal/archguard/ca4_2_contract_test.go differ
+Only in /mnt/data/ca4_3a_b_work/backend/internal/archguard: ca4_3a_contract_test.go
+Only in /mnt/data/ca4_3a_b_work/backend/tools: validate_ca4_3a_b.py

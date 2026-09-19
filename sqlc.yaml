@@ -1,0 +1,56 @@
+version: "2"
+sql:
+  - engine: "postgresql"
+    queries: "sql/kernel"
+    schema: "migrations"
+    gen:
+      go:
+        package: "kerneldb"
+        out: "../gxb-v2-sqlc-generated/kerneldb"
+        sql_package: "pgx/v5"
+        emit_interface: true
+        emit_empty_slices: true
+
+  - engine: "postgresql"
+    queries: "sql/i3"
+    schema: "migrations"
+    gen:
+      go:
+        package: "i3db"
+        out: "../gxb-v2-sqlc-generated/i3db"
+        sql_package: "pgx/v5"
+        emit_interface: true
+        emit_empty_slices: true
+
+  - engine: "postgresql"
+    queries: "sql/i5"
+    schema: "migrations"
+    gen:
+      go:
+        package: "i5db"
+        out: "../gxb-v2-sqlc-generated/i5db"
+        sql_package: "pgx/v5"
+        emit_interface: true
+        emit_empty_slices: true
+
+  - engine: "postgresql"
+    queries: "sql/content"
+    schema: "migrations"
+    gen:
+      go:
+        package: "contentdb"
+        out: "../gxb-v2-sqlc-generated/contentdb"
+        sql_package: "pgx/v5"
+        emit_interface: true
+        emit_empty_slices: true
+
+  - engine: "postgresql"
+    queries: "sql/character"
+    schema: "migrations"
+    gen:
+      go:
+        package: "characterdb"
+        out: "../gxb-v2-sqlc-generated/characterdb"
+        sql_package: "pgx/v5"
+        emit_interface: true
+        emit_empty_slices: true

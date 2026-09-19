@@ -1,0 +1,313 @@
+{
+  "schema_version": 1,
+  "pass": "564.0",
+  "phase": "CA5-3 MID1793 Mutation & Stock Compatibility local closure",
+  "authority_parent": "sealed Pass563 CA5-3 research/implementation contract/acceptance matrix plus explicit user implementation authorization; accumulated exact/native CA5 PostgreSQL/River proof remains mandatory immediately before CA5-E",
+  "parent_backend_sha256": "c357c29fcb5c3c90e0dde0de8149769474eaa317246ee69200f3d0bfa4ad616b",
+  "parent_implementation_revision_sha256": "a59d0d0825f4691e2e9e87edf1f8bf40e34ded17b3400606760f6592d1a29b58",
+  "parent_passmap_sha256": "ca1a6c9b8d8c7c74fbf98f3f79e7fe28d6fde945b5ba1d36c73576f60e35ecdc",
+  "source_oracle_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+  "result": "GREEN_LOCAL_CA5_3_ACCEPTED_COMPATIBILITY_COPY_ONLY_NATIVE_AGGREGATE_DEFERRED_PRE_CA5_E",
+  "implementation_scope": [
+    "strict presence-sensitive MID1793 full/legacy command codec",
+    "locked-state legacy omitted-pet delete compatibility resolver with irreducible ambiguity fail-closed",
+    "old-union-desired typed Hero/Pet synchronization at ranks 410/430 then saved-preset root 440",
+    "per-attempt preflight + locked reread/Covers whole-body replanning",
+    "whole-aggregate convergence/CAS revision behavior",
+    "same-attempt op-scoped semantic receipt and UNKNOWN-COMMIT reconciliation",
+    "CURRENT_STATE_CONVERGENCE replay catalog classification",
+    "dedicated stockruntime MID1793 dispatcher and production composition",
+    "successor qualification of CA5-1/CA5-2 milestone absence guards",
+    "CA5-3 static/source-oracle validation tooling"
+  ],
+  "explicit_non_scope": [
+    "no MID208/209",
+    "no 17.formation ownership",
+    "no Hero/Pet removal endpoint or CA5-4 reverse-removal guard activation",
+    "no I9 mode formation state",
+    "no CA8 composite snapshot",
+    "no UI-derived VIP/capacity/name/team-size server policy",
+    "no new migration/schema"
+  ],
+  "canonical_environment": {
+    "canonical_pins_changed": false,
+    "exact_candidate_attempt": "ENVIRONMENT_BLOCKED",
+    "reason": "canonical go.mod requires Go >=1.26/toolchain go1.27.1; local toolchain is Go1.23.2",
+    "exact_toolchain_attempt_log": "EVIDENCE/PASS564_CA5_3/exact/exact_go_environment_probe.log"
+  },
+  "compatibility_copy_only": {
+    "environment": "Go1.23.2 linux/amd64",
+    "canonical_pins_changed": false,
+    "accommodation": [
+      "go.mod language/toolchain adapted only in disposable copy",
+      ".go-version adapted only in disposable copy"
+    ],
+    "results": [
+      "focused CA5-3 tests GREEN",
+      "focused CA5-3 race GREEN",
+      "focused CA5-3 vet GREEN",
+      "concrete characterstore tests GREEN",
+      "CA5-2 successor validator GREEN",
+      "CA5-3 validator GREEN",
+      "schema/query ownership GREEN",
+      "sqlc-generation policy GREEN",
+      "source-oracle guard GREEN",
+      "go test ./... GREEN",
+      "go vet ./... GREEN",
+      "bounded package regression 93/93 GREEN"
+    ],
+    "postgres_tag": "ENVIRONMENT_BLOCKED by unavailable pgx/v5 with module lookup disabled",
+    "whole_tree_race": "NOT_REQUIRED_FOR_LOCAL_GATE; prior broad attempt timed out and is not claimed; focused changed-path race/concurrency gate is GREEN"
+  },
+  "deferred_mandatory": [
+    "exact canonical Go1.27.1 execution",
+    "real PostgreSQL row-lock/serialization/CAS/receipt semantics for accumulated CA5",
+    "River only where accumulated CA5 uses it",
+    "CA5 aggregate exact/native Work gate immediately before CA5-E",
+    "physical unmodified-stock-client W2 remains at preexisting post-I14 gate"
+  ],
+  "evidence_logs": {
+    "compat/characterstore_focused.log": {
+      "bytes": 131,
+      "sha256": "5df603a4d50703561bdab6928a6c660823ac45bf8a147782ae0f040e74030af3"
+    },
+    "compat/environment.log": {
+      "bytes": 157,
+      "sha256": "2fac46f2e547a3a3a4de572be6845ef841b1bfa382dbfaaacd1ceb90dec7f554"
+    },
+    "compat/focused_race.log": {
+      "bytes": 236,
+      "sha256": "d341a79871041accdb0e68b858eda7b000a7a8c997a3b698afe37c6e9ed3b872"
+    },
+    "compat/focused_test.log": {
+      "bytes": 408,
+      "sha256": "8c537424237dcc368a78f0c1f34251afa560691fb2d3c4d685c68a981ccba9e6"
+    },
+    "compat/focused_vet.log": {
+      "bytes": 143,
+      "sha256": "9485d3d45147f5f976aca365d68fda0a1d2ada9eacdc81a35530fb55d4892a43"
+    },
+    "compat/full_test.log": {
+      "bytes": 6224,
+      "sha256": "e9dbfd60d845e145a3223b5dda23b2b0b103dd90b2a4646b4ce70afd4c5fdb64"
+    },
+    "compat/full_vet.log": {
+      "bytes": 15,
+      "sha256": "bb1ede403057e15598724f3f63119129966a9ddddebe26eff4f7647ae2e0afdc"
+    },
+    "compat/go_mod_adaptation.diff": {
+      "bytes": 281,
+      "sha256": "5d8ae2cddffb11e37317ceb5369ad9e5a2b22236337a045bed22085cf159ed98"
+    },
+    "compat/go_version_adaptation.diff": {
+      "bytes": 161,
+      "sha256": "07e7efc072a7c88bd65fba76bfe4f0467bcde5182a789c6f1edf4db6d6c4d26e"
+    },
+    "compat/package_regression.log": {
+      "bytes": 6208,
+      "sha256": "fa9187b9a5aee318f986a580a99011542c065a2600b87d08aca763b55fb2e388"
+    },
+    "compat/package_regression_count.txt": {
+      "bytes": 27,
+      "sha256": "ecd8ee23a9a2e22361fbf71152511ed126d28c236a1b38722dc1d05bde93ada8"
+    },
+    "compat/package_regression_summary.txt": {
+      "bytes": 5112,
+      "sha256": "a6de6f836db5bf4ea0ad821223c119126ffa4584fc3d7864bc7de9c45af5560f"
+    },
+    "compat/postgres_tag_environment_probe.log": {
+      "bytes": 290,
+      "sha256": "f12b0734ca5eb982e1fd39cc23f8f0fed09584b26e3cdebbf6fe7b1caa8085ec"
+    },
+    "exact/canonical_pins.sha256": {
+      "bytes": 224,
+      "sha256": "09258115a50e6f15790612a06bbc268adaad80b0a6ba4a8dd21330fdc19b51cb"
+    },
+    "exact/check_ca5_3_source_oracle.log": {
+      "bytes": 315,
+      "sha256": "0d9c4dbc8fa66e1c43bb834e3673291c7974027ec032f7d2f559152df2f9da9a"
+    },
+    "exact/check_schema_query_ownership.log": {
+      "bytes": 77,
+      "sha256": "6be2568cfea87a772797c94cc524eb645c3b619784bac294b84c4886904302b8"
+    },
+    "exact/check_sqlc_generation_policy.log": {
+      "bytes": 77,
+      "sha256": "c93ff26b4b1dc8246884f693f185855e8ae5d2b87d52130436b4d486e8e7d7e6"
+    },
+    "exact/exact_go_environment_probe.log": {
+      "bytes": 151,
+      "sha256": "fc39a5e514f0578dca7894109f6d66f161953a713ccb5cce8033fb7a9af69ef0"
+    },
+    "exact/validate_ca5_2.log": {
+      "bytes": 215,
+      "sha256": "b292f7069bc066f6b9a7e260e264b772c75a034ee63bba56f7f7151855b1c127"
+    },
+    "exact/validate_ca5_3.log": {
+      "bytes": 177,
+      "sha256": "605593bb0d6ee2e4d3cec3bd592c2db77a3eb2ff2c467a07613374ba7ccd16db"
+    }
+  },
+  "acceptance_cases": [
+    {
+      "id": "A1_CANDIDATE",
+      "result": "GREEN",
+      "finding": "Exact Pass562 v0.74.0 parent c357c29f... used; canonical go.mod/go.sum/.go-version remain byte-identical to Pass562."
+    },
+    {
+      "id": "A2_STRICT_FULL_CODEC",
+      "result": "GREEN_COMPATIBILITY_COPY_ONLY",
+      "finding": "Strict full-form codec tests cover exact triple, final empty triple, malformed/wrong/misaligned/noncanonical tokens; candidate source is exact/static validated."
+    },
+    {
+      "id": "A3_ABSENT_VS_EMPTY_PET",
+      "result": "GREEN_COMPATIBILITY_COPY_ONLY",
+      "finding": "Dispatcher preserves pet_str presence; receipt fingerprint includes pet_present; missing and present-empty are separately tested."
+    },
+    {
+      "id": "A4_LEGACY_UNIQUE",
+      "result": "GREEN_COMPATIBILITY_COPY_ONLY",
+      "finding": "Locked-state legacy resolver removes exactly the matching lane and preserves positional Pet alignment for the unique canonical result."
+    },
+    {
+      "id": "A5_LEGACY_IDENTICAL_DUPLICATES",
+      "result": "GREEN_COMPATIBILITY_COPY_ONLY",
+      "finding": "Multiple deletable indices are accepted only when they produce one identical complete canonical aggregate."
+    },
+    {
+      "id": "A6_LEGACY_DIVERGENT_DUPLICATES",
+      "result": "GREEN_COMPATIBILITY_COPY_ONLY",
+      "finding": "Divergent Pet outcomes return ErrAmbiguousLegacyDelete with no replacement/receipt; historical server result remains UNKNOWN."
+    },
+    {
+      "id": "A7_LEGACY_RETRY_CONVERGENCE",
+      "result": "GREEN_COMPATIBILITY_COPY_ONLY",
+      "finding": "Legacy request whose Hero/name projection already equals locked canonical state converges and retains current Pet state rather than deleting again."
+    },
+    {
+      "id": "A8_ACTOR_OWNED_REFS",
+      "result": "GREEN_LOCAL_STATIC_PLUS_COMPATIBILITY_COPY",
+      "finding": "Service rejects foreign actor-scoped refs; concrete characterstore Hero/Pet owner adapters validate exact typed key/row identity and normalize missing rows to ErrReferenceNotFound."
+    },
+    {
+      "id": "A9_LOCK_ORDER",
+      "result": "GREEN_LOCAL_STATIC_PLUS_COMPATIBILITY_COPY",
+      "finding": "Plan deterministically sorts typed Hero rank410 then Pet rank430 and validates rank440 saved-preset root ordering; concrete owner adapters reuse CA5-1 keys."
+    },
+    {
+      "id": "A10_OLD_UNION_NEW",
+      "result": "GREEN_COMPATIBILITY_COPY_ONLY",
+      "finding": "Lock plan uses UnionReferences(old,desired); tests prove removed old and introduced new Hero/Pet identities are synchronized."
+    },
+    {
+      "id": "A11_PLAN_DRIFT_RETRY",
+      "result": "GREEN_COMPATIBILITY_COPY_ONLY",
+      "finding": "Locked reread with uncovered old/new reference MarkDefiniteAbort before mutation; transaction body reruns and replans on retry; concurrent edit/edit fixture proves this path."
+    },
+    {
+      "id": "A12_COVERED_DRIFT",
+      "result": "GREEN_COMPATIBILITY_COPY_ONLY",
+      "finding": "Locked state drift whose observed old\u222adesired identities remain covered is re-resolved and proceeds without pointless retry."
+    },
+    {
+      "id": "A13_CONVERGENCE_REVISION",
+      "result": "GREEN_COMPATIBILITY_COPY_ONLY",
+      "finding": "Semantic convergence performs no aggregate replacement or root revision/timestamp change while recording same-attempt terminal receipt."
+    },
+    {
+      "id": "A14_MUTATION_REVISION",
+      "result": "GREEN_LOCAL_STATIC_PLUS_COMPATIBILITY_COPY",
+      "finding": "Real replacement sets desired root version to locked+1 exactly once; concrete saved-preset store requires expectedVersion+1 and CASes one root row."
+    },
+    {
+      "id": "A15_RECEIPT_FINGERPRINT",
+      "result": "GREEN_COMPATIBILITY_COPY_ONLY",
+      "finding": "Fingerprint distinguishes omitted vs present Pet and same op.ID with different request shape raises receipt conflict before transaction."
+    },
+    {
+      "id": "A16_UNKNOWN_COMMIT_PRESENT",
+      "result": "GREEN_COMPATIBILITY_COPY_ONLY",
+      "finding": "Injected ambiguous COMMIT with externally visible matching receipt reconciles DefiniteCommit and returns stored canonical triple."
+    },
+    {
+      "id": "A17_UNKNOWN_COMMIT_ABSENT",
+      "result": "GREEN_COMPATIBILITY_COPY_ONLY",
+      "finding": "Injected ambiguous COMMIT with hidden/absent receipt returns UnknownCommitError; generic receipt resolver reports Unknown and body is not replayed."
+    },
+    {
+      "id": "A18_INTERNAL_RETRY",
+      "result": "GREEN_COMPATIBILITY_COPY_ONLY",
+      "finding": "Definite-abort path reruns the entire transaction body under the same operation context; rolled-back attempt leaves no replacement/receipt."
+    },
+    {
+      "id": "A19_LATER_HTTP_RETRY",
+      "result": "GREEN_COMPATIBILITY_COPY_ONLY",
+      "finding": "A distinct later operation converges from current canonical state and does not reuse the prior operation receipt."
+    },
+    {
+      "id": "A20_A_B_A",
+      "result": "GREEN_COMPATIBILITY_COPY_ONLY",
+      "finding": "A->B then B->A under distinct operation IDs produces two genuine revision-changing mutations; no permanent desired-hash dedupe exists."
+    },
+    {
+      "id": "A21_RESPONSE_TRIPLE",
+      "result": "GREEN_LOCAL_STATIC_PLUS_COMPATIBILITY_COPY",
+      "finding": "Dedicated MID1793 dispatcher returns HTTP 200 with canonical save_team/save_team_name/save_pet for every successful service result, including legacy convergence."
+    },
+    {
+      "id": "A22_MID1_RELOAD",
+      "result": "GREEN_LOCAL_STATIC_PLUS_COMPATIBILITY_COPY",
+      "finding": "CA5-2 MID1 contributor reads the same canonical aggregate and uses the same ProjectWire function; concrete projection tests are GREEN. Real reconnect/PostgreSQL proof remains part of the mandatory aggregate native gate."
+    },
+    {
+      "id": "A23_REPLAY_CATALOG",
+      "result": "GREEN",
+      "finding": "Exactly one ca5.saved-preset-replace replay-family entry is classified CURRENT_STATE_CONVERGENCE with stock-nonce/A->B->A residual documented."
+    },
+    {
+      "id": "A24_NO_FOREIGN_SQL",
+      "result": "GREEN",
+      "finding": "CA5-3 service depends only on typed HeroReferenceOwner/PetReferenceOwner and saved-preset Store; exact validators/archguards find no Hero/Pet foreign-owner SQL."
+    },
+    {
+      "id": "A25_SUCCESSOR_GUARDS",
+      "result": "GREEN",
+      "finding": "CA5-1/CA5-2 cumulative absence guards are successor-qualified only for authorized MID1793/replay activation; historical acceptance artifacts are unchanged."
+    },
+    {
+      "id": "A26_SCOPE_NEGATIVES",
+      "result": "GREEN",
+      "finding": "Exact CA5-3 validator keeps MID208/209 absent, 17.formation unclaimed, no CA5-4 reverse guards, no I9 mode ownership and no CA8 snapshot leakage."
+    },
+    {
+      "id": "A27_TIME_NEGATIVE",
+      "result": "GREEN",
+      "finding": "CA5-3 introduces no DecisionAt/deadline/reset/time-authority mechanism; op.StartedAt is used only for accepted metadata timestamp/receipt chronology."
+    },
+    {
+      "id": "A28_STATIC_QUERY_ARCH",
+      "result": "GREEN_LOCAL_STATIC_PLUS_COMPATIBILITY_COPY",
+      "finding": "Exact CA5-2/CA5-3 validators, schema/query ownership, sqlc policy and source-oracle checks pass; focused/full vet pass in the fresh compatibility copy."
+    },
+    {
+      "id": "A29_CONCURRENCY",
+      "result": "GREEN_COMPATIBILITY_COPY_ONLY",
+      "finding": "Focused go test -race passes for changed application/runtime packages; adversarial edit/edit fixture proves shared-old-lock serialization and uncovered-drift replanning; future removal-key equality is tested."
+    },
+    {
+      "id": "A30_REGRESSION",
+      "result": "GREEN_COMPATIBILITY_COPY_ONLY",
+      "finding": "Fresh two-file toolchain-accommodated copy passes full go test ./..., full go vet ./..., and bounded package-by-package regression 93/93; canonical product files match byte-for-byte."
+    },
+    {
+      "id": "A31_NATIVE_DEFERRED",
+      "result": "AUTHORIZED_DEFERRED_PRE_CA5_E",
+      "finding": "Exact canonical Go execution is blocked by local Go1.23.2 vs required >=1.26/toolchain1.27.1; postgres-tag production compile is blocked by unavailable pgx/v5 with network disabled. Accumulated exact/native CA5 PostgreSQL/River gate remains mandatory immediately before CA5-E; W2 unchanged."
+    },
+    {
+      "id": "A32_REALITY",
+      "result": "GREEN_LOCAL",
+      "finding": "Independent postimplementation reread traced current/old/V1 source -> sealed Pass563 contract -> codec/service -> typed Hero/Pet owner adapters -> rank440 CAS -> receipt resolver -> stock dispatcher -> MID1 projection -> successor guards and found no contradiction or demonstrated defect."
+    }
+  ]
+}

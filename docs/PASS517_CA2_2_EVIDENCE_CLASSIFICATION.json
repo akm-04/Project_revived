@@ -1,0 +1,48 @@
+{
+  "claims": [
+    {
+      "claim": "Exact current src_64 uses MID52 EVOLVE_HERO, MID55 USE_EXP_ITEM, MID63 USE_EXP_ITEMS and MID67 LOAD_HERO_PIECES with the recovered stock request/response consumers.",
+      "classification": "SOURCE_FACT"
+    },
+    {
+      "claim": "NormalHero/SuperHero clamp cumulative EXP at partnerExp:totalExp(heroMaxLev) and derive level by cumulative thresholds.",
+      "classification": "SOURCE_FACT"
+    },
+    {
+      "claim": "Qualified content contains five Hero EXP items with EXP 60/300/1500/7500/10000; Normal target-star costs and Super/Vows star rows match the exact source tables; effective Super/Vows client ceiling is 8.",
+      "classification": "SOURCE_FACT"
+    },
+    {
+      "claim": "Physical Super/Vows rows 6-8 retain needHeroNum=5; the recovered client uses prerequisite counting only in the low-star regime through target star 5, while later transitions use Mana/fragment costs.",
+      "classification": "SOURCE_FACT"
+    },
+    {
+      "claim": "Current canonical CA2-2 source/static/content/querytext/ownership guards pass.",
+      "classification": "RUNTIME_OBSERVED"
+    },
+    {
+      "claim": "A fresh toolchain-only compatibility copy passes focused tests, focused race, full vet, full go test and bounded 89/89 package regression.",
+      "classification": "RUNTIME_OBSERVED"
+    },
+    {
+      "claim": "Revision-bound gxb_content_hero_exp_items and HERO_PROGRESSION_CA2 normalize source-qualified progression data without runtime Lua parsing or hardcoded gameplay truth.",
+      "classification": "IMPLEMENTATION_DECISION"
+    },
+    {
+      "claim": "operation.Context content policy is pinned before transaction retries; kernel receipts are same-attempt UNKNOWN-COMMIT witnesses, not invented client idempotency.",
+      "classification": "IMPLEMENTATION_DECISION"
+    },
+    {
+      "claim": "Original Hero roster initial/max capacity and MID64 expansion price schedule remain unknown and do not activate CA2-3 routes.",
+      "classification": "UNKNOWN"
+    },
+    {
+      "claim": "Exact Go 1.27.1/sqlc/Goose/PostgreSQL 18.6/River/stock-client proof is not available in normal chat and remains a separate gate.",
+      "classification": "ENVIRONMENT_BLOCKED"
+    }
+  ],
+  "pass": "517.0",
+  "phase": "CA2-2",
+  "schema_version": 1,
+  "status": "LOCAL_CHECKPOINT_EVIDENCE_CLASSIFIED"
+}

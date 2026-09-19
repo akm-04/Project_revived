@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "pass": "520.0",
+  "classification": "NATIVE_GATE_PRODUCT_REPAIR_CANDIDATE",
+  "source_candidate_sha256": "a6bf87421767c5451f69fcf359995d28d91a6c6f861f55422bcdd642583e0141",
+  "source_implementation_revision_sha256": "0def8ffc697be0c43a40b3e447c328fee45011e76e9e87a69f17181b777e1c1b",
+  "work_evidence_zip_sha256": "36fad089f0390e50f3c6650b9dcec11bd30ca996a4cab460cb5de153395179bf",
+  "luna_proposed_repair_sha256": "b1ad9ceb47704ab673b327531b6fefc9ce244e69d838dbbf144ebe5b3ba03caa",
+  "luna_proposed_revision_sha256": "7b2951eae0fcbbd4e33691e275ac7a86b0f932d88d225f2ffef6d41467ffdb5b",
+  "defect": {
+    "tool": "sqlc v1.31.1",
+    "query": "VerifyContentRevision",
+    "observed_error": "sql/content/content.sql:228:10: column \"table_id\" does not exist",
+    "classification": "PRODUCT_BUILD_QUERY_GENERATION_DEFECT"
+  },
+  "normal_chat_repair": {
+    "changed_source": ["sql/content/content.sql"],
+    "regenerated": ["internal/adapters/postgres/contentqueries/querytext_gen.go"],
+    "mechanics_changed": false,
+    "content_revision_changed": false,
+    "migration_changed": false,
+    "production_activation_changed": false
+  },
+  "remaining_native_tests_required": [
+    "real PostgreSQL duplicate-origin Hero creation invariant",
+    "same-player HeroRoot allocator contention",
+    "same-Hero concurrent EXP/evolution",
+    "diagnostic capacity-allow PartnerEntity/MID59/MID305 real PostgreSQL mutations",
+    "same-semantic concurrent Grant-v3 exactly-once",
+    "MID305 vs Super MID52 cross-stage lock race",
+    "MID59 same/different-origin contention",
+    "forced ambiguous PostgreSQL COMMIT on Hero mutation",
+    "stock-client proof when executable effective client is available"
+  ]
+}

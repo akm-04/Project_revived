@@ -1,0 +1,2 @@
+ok  	gxb.local/backend/v2/internal/application/characterhero	0.092s
+ok  	gxb.local/backend/v2/internal/adapters/stockruntime	0.402s

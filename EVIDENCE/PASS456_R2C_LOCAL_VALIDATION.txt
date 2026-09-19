@@ -1,0 +1,25 @@
+Pass456/R2C local validation summary
+Canonical go.mod: go 1.26.0 / toolchain go1.27.1 (unchanged)
+Disposable compatibility clone only: go 1.23.0 / no toolchain pin
+
+PASS: go test ./...
+PASS: go vet ./...
+PASS: go test -race ./internal/application/i5 ./internal/foundation/lockkey ./internal/application/bootstrap ./internal/adapters/postgres/i5store
+PASS: tools/validate_r0.py
+PASS: tools/validate_r1a.py
+PASS: tools/validate_r1b.py
+PASS: tools/validate_r2a.py
+PASS: tools/validate_r2b.py
+PASS: tools/validate_r2c.py
+PASS: tools/validate_i1.py
+PASS: tools/validate_i2.py
+PASS: tools/validate_i3.py
+PASS: tools/validate_i4.py
+PASS: tools/check_schema_query_ownership.py
+PASS: tools/check_dependency_policy.py
+PASS: tools/check_sqlc_generation_policy.py
+PASS: tools/generate_resolved_sbom.py --check
+EXPECTED RED ONLY: tools/validate_i5.py => RF-015 EconomyBootstrapContributor + temporal bootstrap persistence still missing
+EXPECTED RED ONLY: tools/check.sh => 1 failing check (I5/RF-015)
+
+R7 LIVE GATES REMAIN: exact Go 1.27.1, real PostgreSQL concurrent first-use creation/lock behavior. No mock result is PostgreSQL proof.

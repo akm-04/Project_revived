@@ -1,0 +1,4 @@
+R6 VALIDATION: PASS (CUMULATIVE MODE)
+static projection/directory/replay/lifecycle/key/single-owner/http/observability R6 seams present; cumulative mode permits later migrations but does not weaken historical R6 pins
+CURRENT CUMULATIVE CANDIDATE VALIDATION: FAIL
+ - release version drift build=v0.72.0 snapshot=v0.72.0 sbom=v0.70.1

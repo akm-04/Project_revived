@@ -1,0 +1,189 @@
+[
+  {
+    "command": [
+      "go",
+      "test",
+      "-race",
+      "./internal/foundation/policy",
+      "./internal/foundation/receipt",
+      "./internal/adapters/postgres/kernelstore",
+      "./internal/content/...",
+      "./internal/adapters/postgres/contentstore",
+      "./internal/archguard"
+    ],
+    "exit_code": 0,
+    "log": "00.log"
+  },
+  {
+    "command": [
+      "go",
+      "test",
+      "-tags",
+      "postgres",
+      "./cmd/gxb-api",
+      "./internal/adapters/postgres/..."
+    ],
+    "exit_code": 0,
+    "log": "01.log"
+  },
+  {
+    "command": [
+      "sqlc",
+      "generate"
+    ],
+    "exit_code": 0,
+    "log": "02.log"
+  },
+  {
+    "command": [
+      "python",
+      "/workspace/scratch/954ae618448a/work474/testcopy/tools/validate_foundation_trace.py"
+    ],
+    "exit_code": 0,
+    "log": "03.log"
+  },
+  {
+    "command": [
+      "python",
+      "/workspace/scratch/954ae618448a/work474/testcopy/tools/validate_i1.py"
+    ],
+    "exit_code": 0,
+    "log": "04.log"
+  },
+  {
+    "command": [
+      "python",
+      "/workspace/scratch/954ae618448a/work474/testcopy/tools/validate_i2.py"
+    ],
+    "exit_code": 0,
+    "log": "05.log"
+  },
+  {
+    "command": [
+      "python",
+      "/workspace/scratch/954ae618448a/work474/testcopy/tools/validate_i3.py"
+    ],
+    "exit_code": 0,
+    "log": "06.log"
+  },
+  {
+    "command": [
+      "python",
+      "/workspace/scratch/954ae618448a/work474/testcopy/tools/validate_i4.py"
+    ],
+    "exit_code": 0,
+    "log": "07.log"
+  },
+  {
+    "command": [
+      "python",
+      "/workspace/scratch/954ae618448a/work474/testcopy/tools/validate_i5.py"
+    ],
+    "exit_code": 1,
+    "log": "08.log"
+  },
+  {
+    "command": [
+      "python",
+      "/workspace/scratch/954ae618448a/work474/testcopy/tools/validate_r0.py"
+    ],
+    "exit_code": 0,
+    "log": "09.log"
+  },
+  {
+    "command": [
+      "python",
+      "/workspace/scratch/954ae618448a/work474/testcopy/tools/validate_r1a.py"
+    ],
+    "exit_code": 0,
+    "log": "10.log"
+  },
+  {
+    "command": [
+      "python",
+      "/workspace/scratch/954ae618448a/work474/testcopy/tools/validate_r1b.py"
+    ],
+    "exit_code": 0,
+    "log": "11.log"
+  },
+  {
+    "command": [
+      "python",
+      "/workspace/scratch/954ae618448a/work474/testcopy/tools/validate_r2a.py"
+    ],
+    "exit_code": 0,
+    "log": "12.log"
+  },
+  {
+    "command": [
+      "python",
+      "/workspace/scratch/954ae618448a/work474/testcopy/tools/validate_r2b.py"
+    ],
+    "exit_code": 0,
+    "log": "13.log"
+  },
+  {
+    "command": [
+      "python",
+      "/workspace/scratch/954ae618448a/work474/testcopy/tools/validate_r2c.py"
+    ],
+    "exit_code": 0,
+    "log": "14.log"
+  },
+  {
+    "command": [
+      "python",
+      "/workspace/scratch/954ae618448a/work474/testcopy/tools/validate_r2d.py"
+    ],
+    "exit_code": 0,
+    "log": "15.log"
+  },
+  {
+    "command": [
+      "python",
+      "/workspace/scratch/954ae618448a/work474/testcopy/tools/validate_r3a.py"
+    ],
+    "exit_code": 0,
+    "log": "16.log"
+  },
+  {
+    "command": [
+      "python",
+      "/workspace/scratch/954ae618448a/work474/testcopy/tools/validate_r3b.py"
+    ],
+    "exit_code": 0,
+    "log": "17.log"
+  },
+  {
+    "command": [
+      "python",
+      "/workspace/scratch/954ae618448a/work474/testcopy/tools/validate_r3c.py"
+    ],
+    "exit_code": 0,
+    "log": "18.log"
+  },
+  {
+    "command": [
+      "python",
+      "/workspace/scratch/954ae618448a/work474/testcopy/tools/validate_r4b.py"
+    ],
+    "exit_code": 0,
+    "log": "19.log"
+  },
+  {
+    "command": [
+      "python",
+      "/workspace/scratch/954ae618448a/work474/testcopy/tools/validate_r4c.py"
+    ],
+    "exit_code": 0,
+    "log": "20.log"
+  },
+  {
+    "command": [
+      "python",
+      "tools/check_connected_candidate.py"
+    ],
+    "exit_code": 0,
+    "log": "21.log"
+  }
+]

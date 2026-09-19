@@ -1,0 +1,4 @@
+ok  	gxb.local/backend/v2/internal/application/characterhero	0.266s
+ok  	gxb.local/backend/v2/internal/application/characterpet	0.191s
+ok  	gxb.local/backend/v2/internal/application/i5	0.024s
+ok  	gxb.local/backend/v2/internal/application/bootstrap	0.032s

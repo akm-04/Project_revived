@@ -1,0 +1,4 @@
+ok  	gxb.local/backend/v2/internal/application/i5	1.017s
+ok  	gxb.local/backend/v2/internal/domain/grant	1.009s
+ok  	gxb.local/backend/v2/internal/adapters/postgres/i5store	1.008s
+ok  	gxb.local/backend/v2/internal/adapters/postgres/contentstore	1.204s

@@ -1,0 +1,2 @@
+CA4-2A SOURCE ORACLE CHECK: PASS
+exact current src_64 c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf -> rows=555 positions=53280 ordinary=50504 special=1646 zero=1130 unique ordinary/special=214/164; generated mapping exactly matches independent direct source parse

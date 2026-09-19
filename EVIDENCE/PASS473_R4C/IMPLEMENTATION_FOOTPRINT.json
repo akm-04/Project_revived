@@ -1,0 +1,80 @@
+{
+  "base_archive_sha256": "aa532e071515fc487bfcd7b4e24d69f108282c6ff59df19619bf6d764e012c33",
+  "implementation_revision_sha256": "85a6a21c29a319dd47e3d01cdded9db742025a9bc92fa8897ba4a47307eb66fd",
+  "basis": "SHA256 compact sorted-key JSON of changed product-file rows; excludes docs/EVIDENCE/SBOM and snapshot/build metadata; entire delivered tree separately covered by snapshot manifest and ZIP SHA256",
+  "files": [
+    {
+      "path": "README.md",
+      "sha256": "db15458a169d72ef436bb4e8ece4631bf76834163f7c8ea8b2269b98d54560f6",
+      "previous_sha256": "f5adc293ce8eeb0c1dadf889beac03020e008f48358680f2fc630dfed2c3241a"
+    },
+    {
+      "path": "SBOM.spdx.json",
+      "sha256": "929a599e2a7257511e717b8c214f9cfacb0578752beff3282b9f05875ab4ddb9",
+      "previous_sha256": "2f6169b595de5ca8e80ab77412208e31658a56873e517eba280e7c4b6fb457bb"
+    },
+    {
+      "path": "cmd/gxb-api/main_postgres.go",
+      "sha256": "c2b3c23207bf93ab6f0ddab86a755cb15d3b08380b673db17296abb4119b8eeb",
+      "previous_sha256": "df3f0b999bddc9664c91562506c31a393d90e124a82c735ee41a7e1346ade474"
+    },
+    {
+      "path": "internal/adapters/postgres/contentqueries/querytext_gen.go",
+      "sha256": "9cef3892a743b5c4fc617502f9de98a89aa7d8babe73b47a741121f417a81264",
+      "previous_sha256": "c254f2f17218e16ae7d53d792ce7d06512982baef9cabbf83778b63ffae303cf"
+    },
+    {
+      "path": "internal/adapters/postgres/contentstore/store_test.go",
+      "sha256": "870d69f4e8f95843f2828fc44c94cb2ee65a7d25702a7abb1cf3dff564c6bf79",
+      "previous_sha256": null
+    },
+    {
+      "path": "internal/content/registry/service.go",
+      "sha256": "58dbd091ebb9c30ba891f6b8d8b83f8f08ef931484c6870bd409533ceeceeb7c",
+      "previous_sha256": "b337cd4fcb695ad7a579d202dfb58408411c5a8056965144339f8b44271153ee"
+    },
+    {
+      "path": "internal/content/registry/service_test.go",
+      "sha256": "af23b4d6a8f7ada4ddb8378434dbfe65d3db746bc0e73d2c80b814c724d4246e",
+      "previous_sha256": null
+    },
+    {
+      "path": "internal/content/registry/startup.go",
+      "sha256": "b64f959c5b74b2832efb149b4b061c18037451552238f2ca721a830ebe739864",
+      "previous_sha256": null
+    },
+    {
+      "path": "internal/content/registry/types.go",
+      "sha256": "ca621c01c434fa598e9002dfaab6bb2744efc7769d41a466ebfe03e73c85edc2",
+      "previous_sha256": "4d93e833daedc1eae6d27c1f530fe1441767616d6aee447df8b1e98e5a104e41"
+    },
+    {
+      "path": "sql/content/content.sql",
+      "sha256": "05ab7783b11145428662bd553cf8701a9c674c417f76224cdc88036b55343766",
+      "previous_sha256": "f4895bf4ab8a413f2a4bcfeee55a927228c4784b9dc6951d3e62cb198f5a242f"
+    },
+    {
+      "path": "tools/check.sh",
+      "sha256": "a09c93e8e4e2f098085b56206c3a8964ef2e2d78942b29bdc6ae3ac9ded936e2",
+      "previous_sha256": "1bc16b451e8efdeba59a1d5c0918341de9378cc825b8c228b735d5ed79d81cc2"
+    },
+    {
+      "path": "tools/validate_r4b.py",
+      "sha256": "bbd525fd7b02c0851339ad9792b36430b0d61c8d597476efc7f780cf5cd873da",
+      "previous_sha256": "7015758c49a80140b62fb24c9a5ae0a9e6cf0cf72a8726e9ed932e2177c5018d"
+    },
+    {
+      "path": "tools/validate_r4c.py",
+      "sha256": "d4df3e1d55f2050d99e27c3009c681bbfa4cc64049141a74802d1f838d192c16",
+      "previous_sha256": null
+    }
+  ],
+  "removed": [],
+  "preserved_exact": [
+    "go.mod",
+    "go.sum",
+    "migrations/*",
+    "internal/kernel/*",
+    "internal/application/*"
+  ]
+}

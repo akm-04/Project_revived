@@ -1,0 +1,25 @@
+\n$ python3 tools/verify_oracles.py --root /mnt/data
+PASS current_src64: all-assest-rechecked-1.zip
+PASS v1_pass353: gxb-backend-v0.65.2-pass353.0-portable-dev1-V1-Final.zip
+PASS old_client: gxb-old-client-v1.164.0-research-corpus.zip
+PASS native_apk: latest_apk-smali-full.zip
+PASS pass222_probe: prep-apk-pass222-window-probe.zip
+ORACLE VERIFY: PASS
+\n$ python3 tools/check_i2_oracle_wire.py /mnt/data
+I2 ORACLE WIRE CHECK: PASS
+current Backend/mid/functions + APK QuickHTTP hashes and frozen wire facts verified
+\n$ python3 tools/check_i3_oracle_bootstrap.py /mnt/data
+I3 ORACLE BOOTSTRAP CHECK: PASS
+verified current MID18/MID1 selection, full/existing-owner gate, player-region formula, stock switch teardown and token replacement
+\n$ python3 tools/check_i4_oracle_wave_s.py /mnt/data
+I4 ORACLE WAVE-S CHECK: PASS
+verified current src_64 UpdateScene MID20480/MID2 + public MID7/MID2864 + MID1 log_url/server_time/default sidebands + room discovery/TCP_LOGIN/room-entered/heartbeat/reconnect + 20018/1304/Lua truthiness; Pass353 corroborates bootstrap/realtime shapes only
+\n$ python3 tools/check_i5_oracle_player_core.py /mnt/data
+I5 ORACLE PLAYER-CORE CHECK: PASS
+verified current src_64 player/story/mail/stack/task/redeem facts; old-client MID230 stability; Pass353 mechanisms corroborative only
+\n$ python3 tools/generate_mid_registry.py --root /mnt/data --check
+MID REGISTRY: PASS source_sha256=026a20b29d97624979777a68c64c749254031604057ff42aa8f8254c3e35b5af assignments=1213 unique=1211
+\n$ python3 tools/generate_pass353_wire_fixtures.py --root /mnt/data --check
+PASS353 WIRE FIXTURES: PASS cases=5
+
+All restored oracle/source/generator checks PASS

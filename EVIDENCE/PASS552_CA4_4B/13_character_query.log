@@ -1,0 +1,2 @@
+### python3 tools/generate_character_querytext.py --check
+CHARACTER QUERYTEXT: PASS hero_sha256=6d4056da3437de401e1e98e285833cfd0907bbf8c345a0d9525dd0eadb8d4b9f pet_sha256=23c24225245b6af220a562d94e604315aad5112c5cd245947db37f161fb0d963

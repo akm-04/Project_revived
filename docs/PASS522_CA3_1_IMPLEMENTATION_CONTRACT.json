@@ -1,0 +1,268 @@
+{
+  "schema_version": 1,
+  "pass": "522.0",
+  "phase": "CA3_PET_CORE_IDENTITY_ROSTER_BASE_PROGRESSION",
+  "internal_stage": "CA3-1",
+  "status": "GREEN_PREIMPLEMENTATION_CONTRACT_CANDIDATE",
+  "accepted_backend_sha256": "58dc3f31d3e8ae82ea302cad4d7dcce2c958d9218c4e423f4af97a5cf018f830",
+  "implementation_revision_sha256": "3813d389f577a90c9771f396a197c8ea926e0a602869e656bed2d557b5c01686",
+  "authority": {
+    "parent_sealed_pass": "521.0",
+    "current_src64_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+    "character_asset_roadmap": "00_PASSMAP/PASS522_CHARACTER_ASSET_SUBPHASE_ROADMAP.json",
+    "research_closure": "00_PASSMAP/PASS522_CA3_1_PREIMPLEMENTATION_RESEARCH_CLOSURE.md",
+    "source_evidence": "00_PASSMAP/PASS522_CA3_1_SOURCE_EVIDENCE.json"
+  },
+  "owner_boundary": {
+    "owns": [
+      "Pet root/allocator",
+      "persistent pet_id instance identity",
+      "Pet lineage/origin uniqueness",
+      "private Pet roster",
+      "Pet base star/level/exp/color persistence",
+      "Pet birthday/is_show passive lifecycle persistence",
+      "MID1 embedded MID780 projection",
+      "explicit MID780 projection",
+      "typed Pet identity/reference/summary seam for later consumers",
+      "revision-bound Pet core template/lineage content"
+    ],
+    "does_not_own": [
+      "starter Ross entitlement and function-38 activation composition (CA3-2)",
+      "Pet summon/material debit/hatching commands (CA3-2)",
+      "Pet EXP/evolution/skills (CA3-3)",
+      "Pet equipment/Fumo (CA4)",
+      "formation/reference fencing implementation (CA5)",
+      "Practice (CA6)",
+      "styles/appearance entitlements (CA7)",
+      "Pet Campaign, Guild Pet rental, Cabin/Event Centre",
+      "Gacha/business outcome selection",
+      "an independent is_born state machine"
+    ]
+  },
+  "identity_and_uniqueness": {
+    "pet_id": "opaque positive per-player persistent instance identity; distinct from partner_id and table_id",
+    "allocator_policy": {
+      "classification": "IMPLEMENTATION_DECISION",
+      "value": "monotonic per-player allocator beginning at 1 under PetRoot lock",
+      "original_server_start": "UNKNOWN"
+    },
+    "origin_family": "base Pet table_id for base form; source first_table_id for awakened form",
+    "live_uniqueness": "UNIQUE(player_id, origin_table_id)",
+    "table_id": "current form/template identity and may differ from origin_table_id after awakening",
+    "capacity": "NO FIELD; owned-roster capacity UNKNOWN/not source-qualified"
+  },
+  "lock_plan": {
+    "HeroRoot": 400,
+    "HeroInstance": 410,
+    "PetRoot": 420,
+    "PetInstance": 430,
+    "remaining_character_band": "440-599 reserved/unassigned",
+    "classification": "IMPLEMENTATION_DECISION",
+    "laws": [
+      "Pet allocation occurs only under predeclared PetRoot lock.",
+      "Multiple PetInstance locks are canonical-sorted when future stages require them.",
+      "Future CA3-2/3 cross-owner mutations acquire Character locks before I5 ranks 700+.",
+      "CA3-1 read projection acquires no gameplay mutation lock."
+    ]
+  },
+  "persistence_migration_00016": {
+    "character_owner": {
+      "sqlc_owner": "sql/character -> characterdb -> characterstore",
+      "tables": {
+        "player_pet_roots": {
+          "columns": [
+            "player_id bigint PK/FK players ON DELETE CASCADE",
+            "next_pet_id bigint NOT NULL DEFAULT 1 CHECK >0",
+            "state_version bigint NOT NULL DEFAULT 1 CHECK >0",
+            "created_at timestamptz NOT NULL",
+            "updated_at timestamptz NOT NULL"
+          ]
+        },
+        "player_pets": {
+          "columns": [
+            "player_id bigint FK player_pet_roots ON DELETE CASCADE",
+            "pet_id bigint CHECK >0",
+            "table_id bigint CHECK >0",
+            "origin_table_id bigint CHECK >0",
+            "star smallint CHECK 1..5",
+            "level bigint CHECK >0",
+            "exp bigint CHECK >=0",
+            "color smallint CHECK 1..16",
+            "birthday bigint CHECK >=0",
+            "is_show boolean NOT NULL",
+            "creation_content_revision text FK gxb_content_revisions ON DELETE RESTRICT",
+            "state_version bigint CHECK >0",
+            "created_at timestamptz NOT NULL",
+            "updated_at timestamptz NOT NULL"
+          ],
+          "primary_key": [
+            "player_id",
+            "pet_id"
+          ],
+          "unique": [
+            "player_id",
+            "origin_table_id"
+          ]
+        }
+      },
+      "existing_player_backfill": "insert empty Pet root for every canonical player; no starter egg, starter Pet, capacity, tutorial occurrence or hatch state fabricated"
+    },
+    "content_owner": {
+      "table": "gxb_content_pet_templates",
+      "columns": [
+        "revision_id",
+        "table_id",
+        "origin_table_id",
+        "is_awakened",
+        "awaken_table_id",
+        "initial_star"
+      ],
+      "expected_current_rows": 54,
+      "expected_current_origin_families": 27
+    },
+    "rollback": "forward-only project law; rollback is restore/redeploy"
+  },
+  "content_registry": {
+    "schema_version": 1,
+    "new_capability": "PET_CORE_CA3",
+    "new_payload": "pet_core_catalog.json",
+    "runtime_lua_parsing": false,
+    "compiler_generation": "ca3-1",
+    "parser_generation": "lua-generated-v3-pet",
+    "source_guards": {
+      "pet_rows": 54,
+      "pet_origin_families": 27,
+      "base_rows": 27,
+      "awakened_rows": 27,
+      "initial_star_values_observed": [
+        1,
+        3
+      ],
+      "lineage_rule": "base first_table_id=0; awakened first_table_id points to base; base awaken_table_id points to awakened when present"
+    },
+    "activation_law": "installation never rewrites an existing active pointer; CA3-1 roster reload does not invent data if the capability is absent. Future Pet creation/mutation stages must bind explicit qualified content revisions.",
+    "upgrade_law": "Upgraded databases may continue starting on an older schema-version-1 active revision that lacks PET_CORE_CA3. The new builtin is installed but never silently activated. CA3-1 MID1.780/MID780 read projection must remain startable because it projects already-owned rows without consulting current active Pet content; fresh CA3-1 creates no Pet rows. Future CA3-2/CA3-3 creation/mutation must fail closed unless the operation-bound content revision advertises the required Pet capability, and explicit host-authority CAS remains the only activation path.",
+    "ca3_1_active_revision_requirement": "NONE_FOR_EMPTY_OR_EXISTING_ROSTER_READ; PET_CORE_CA3 is compiled/installed/verified in CA3-1 but gameplay creation/mutation activation is deferred."
+  },
+  "bootstrap": {
+    "persistence_port": "CharacterBootstrapPersistenceContributor",
+    "required": true,
+    "state_created": "empty player_pet_roots row only",
+    "starter_pet": "PROHIBITED_IN_CA3_1",
+    "starter_egg": "PROHIBITED_IN_CA3_1",
+    "detail_contributor": {
+      "name": "ca3.pet-core",
+      "claim": "780",
+      "behavior": "overlay frozen MID1.780 baseline from canonical player_pets roster; contributor claim collision remains fail-closed"
+    }
+  },
+  "private_projection": {
+    "MID780": {
+      "kind": "READ",
+      "request": {},
+      "response": "{pets:[PetPrivate...]}",
+      "receipt": "none"
+    },
+    "core_fields": [
+      "pet_id",
+      "table_id",
+      "star",
+      "lev",
+      "exp",
+      "color",
+      "birthday",
+      "is_show"
+    ],
+    "neutral_compatibility_fields": {
+      "is_born": 0,
+      "skills": [
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "equips": [
+        0,
+        0,
+        0
+      ],
+      "fumos": [
+        0,
+        0,
+        0
+      ],
+      "practice_attr": [
+        0,
+        0,
+        0
+      ]
+    },
+    "omit_until_owner_exists": [
+      "active_style",
+      "pet_styles",
+      "Pet Campaign",
+      "rental",
+      "Cabin/Event Centre"
+    ],
+    "player_id": "optional for MID1/MID780 because SelfPlayer overwrites it after populate; projection may include canonical player_id for consistency"
+  },
+  "public_reference_seam": {
+    "identity": "player_id + pet_id",
+    "summary_minimum": [
+      "table_id",
+      "star",
+      "color"
+    ],
+    "reference_guard": "typed lookup/extension seam only; CA5 owns atomic formation/reference fencing",
+    "removal": "no Pet removal/consume endpoint activated in CA3-1"
+  },
+  "routing": {
+    "explicit_mid780": "remove MID780 from LobbyDispatcher production registration and register PetDispatcher",
+    "embedded_mid780": "Pet MID1 detail contributor owns claim 780",
+    "collision_policy": "router and MID1 claim duplicates fail closed",
+    "wave_s_baseline": "retained as unopened-domain fallback/provenance, not Pet gameplay authority after CA3-1 activation"
+  },
+  "implementation_scope": [
+    "migration 00016",
+    "sql/character/pet.sql and generated querytext",
+    "domain character PetRoot/Pet",
+    "postgres Character Pet store + bootstrap contributor",
+    "characterpet roster service",
+    "Pet private projection",
+    "MID1.780 detail contributor",
+    "explicit MID780 dispatcher/wiring",
+    "PET_CORE_CA3 compiler/catalog/registry/contentstore support",
+    "typed Pet identity/reference summary seam",
+    "focused source/architecture/regression tests"
+  ],
+  "explicit_non_scope": [
+    "MID781, MID782, MID783, MID784, MID785, MID786, MID787, MID788, MID789, MID790, MID791, MID792, MID134",
+    "generic PartnerEntity Pet materializer production wiring",
+    "function 38 unlock/announcement",
+    "starter entitlement/free hatch",
+    "skills persistence",
+    "Pet equipment/Fumo/Practice/styles"
+  ],
+  "test_gate": [
+    "unit/domain/projection tests",
+    "Pet compiler deterministic regeneration and exact source-hash guards",
+    "content bundle/registry install/verify capability tests",
+    "sqlc/querytext/schema-owner guards",
+    "fresh-player and existing-player PetRoot bootstrap/backfill tests",
+    "MID780 empty/nonempty projection tests",
+    "MID1.780 parity with explicit MID780",
+    "lineage uniqueness tests",
+    "router/detail-contributor collision tests",
+    "race/vet/static and bounded package regression",
+    "independent post-implementation reality check"
+  ],
+  "bounded_unknowns": [
+    "original Pet allocator seed",
+    "owned Pet roster capacity",
+    "starter Ross entitlement occurrence ownership",
+    "first free hatch durable/reconnect semantics",
+    "independent is_born server semantics",
+    "Pet skill mutation internals"
+  ]
+}

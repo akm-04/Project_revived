@@ -1,0 +1,4 @@
+R6 VALIDATION: FAIL
+ - unexpected migration00012: historical R6 contract is no-schema-change unless research is reopened
+ - canonical toolchain pin drift: go.mod
+baseline_rc=1

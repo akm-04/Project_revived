@@ -1,0 +1,6 @@
++ go test ./internal/application/i5 ./internal/domain/grant ./internal/adapters/postgres/i5store ./internal/adapters/postgres/contentstore
+ok  	gxb.local/backend/v2/internal/application/i5	0.003s
+ok  	gxb.local/backend/v2/internal/domain/grant	0.002s
+ok  	gxb.local/backend/v2/internal/adapters/postgres/i5store	0.002s
+ok  	gxb.local/backend/v2/internal/adapters/postgres/contentstore	0.026s
+RC=0

@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "pass": "566.0",
+  "stage": "CA5-4",
+  "status": "LOCAL_ACCEPTED_WITH_NATIVE_AGGREGATE_GATE_DUE_PRE_CA5_E",
+  "claims": [
+    {
+      "classification": "SOURCE_FACT",
+      "statement": "Current/historical source contains MID66 dismissal surface but effective reachability/original-server mutation semantics remain unqualified; CA5-4 does not activate it."
+    },
+    {
+      "classification": "SOURCE_FACT",
+      "statement": "Saved presets are an ordered source loadout set later adapted by mode UI; pre-formation state is separately loaded."
+    },
+    {
+      "classification": "IMPLEMENTATION_DECISION",
+      "statement": "CA5 exports whole ordered Hero/Pet reference state at one saved-preset root revision, excluding presentation Name and selected/current formation concepts."
+    },
+    {
+      "classification": "IMPLEMENTATION_DECISION",
+      "statement": "ca5.saved-presets preflight deterministically plans the actor rank440 root and locked validation uses indexed saved-preset-owned EXISTS reads."
+    },
+    {
+      "classification": "RUNTIME_OBSERVED",
+      "statement": "Fresh compatibility copy passes focused changed-path race, full test, full vet and 93/93 package regression after atomic repair of inherited test bookkeeping."
+    },
+    {
+      "classification": "RUNTIME_OBSERVED",
+      "statement": "Canonical exact Go probe fails solely because local Go1.23.2 cannot satisfy canonical >=1.26/toolchain1.27.1; postgres-tag probe is blocked by unavailable pgx/v5 with GOPROXY off."
+    },
+    {
+      "classification": "UNKNOWN",
+      "statement": "Original-server MID66 destructive semantics and effective current-client reachability remain unrecovered."
+    },
+    {
+      "classification": "UNKNOWN",
+      "statement": "Real PostgreSQL/River accumulated CA5 concurrency semantics remain pending the mandatory pre-CA5-E exact/native gate."
+    }
+  ]
+}

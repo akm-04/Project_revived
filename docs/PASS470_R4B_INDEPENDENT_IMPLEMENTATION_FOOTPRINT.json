@@ -1,0 +1,157 @@
+{
+  "base_artifact": "gxb-backend-v2-v0.54.0-pass468-r4a-deterministic-content.zip",
+  "base_sha256": "ec73de55088caaa98b4ec9f393863df62fafb8c165ec3a9c753243c5cf79eaf2",
+  "canonical_go_mod_sha256": "ecafe7641bc26c7ef91bdc5c21a5f71aa432bd162ed6fe1725004b501172a949",
+  "canonical_go_sum_sha256": "efbf6753542d66e2fefcb2ab5e2ade7c9d28f2206a1113d1eb9568f2cb75808d",
+  "changed_file_count": 26,
+  "changes": [
+    {
+      "kind": "MODIFIED",
+      "path": "BUILD_INFO.json",
+      "sha256_after": "64c4e833389d02ebff3cfbf79118873fef4b6c8ee5d110139e38b3cbe5d825d7",
+      "sha256_before": "17bdd41ebacf232275f6c2a3e72697b2037655b449d5ca97aab691309d21f5bb"
+    },
+    {
+      "kind": "ADDED",
+      "path": "EVIDENCE/PASS470_R4B_CANONICAL_STATIC_VALIDATION.txt",
+      "sha256": "f453dbf932da64ee564d965e5af41c20b8add277377dd5c3b2cfd65c927cb6c7"
+    },
+    {
+      "kind": "ADDED",
+      "path": "EVIDENCE/PASS470_R4B_COMPATIBILITY_COPY_FINAL.txt",
+      "sha256": "0001045d45e481b4507d70ed14db170e5046b34008a1fa005877623c4cb7cd65"
+    },
+    {
+      "kind": "ADDED",
+      "path": "EVIDENCE/PASS470_R4B_ENVIRONMENT_BLOCK.txt",
+      "sha256": "e40a85777c736aa3fa8113537f343948df58bd3971cb2ce4538a5758caa615f3"
+    },
+    {
+      "kind": "ADDED",
+      "path": "EVIDENCE/PASS470_R4B_I5_EXPECTED_RED.txt",
+      "sha256": "0f8d3bf02442d673e8a3af51a1da1745518ae6dd815afe3ce5e946ceacc05b96"
+    },
+    {
+      "kind": "ADDED",
+      "path": "EVIDENCE/PASS470_R4B_INDEPENDENT_REALITY_CHECK.txt",
+      "sha256": "e7c9a6de49877fdcbdf0fccbe5ba51e840c75fa5e4e85fe73fa16621d5005897"
+    },
+    {
+      "kind": "ADDED",
+      "path": "EVIDENCE/PASS470_R4B_SCOPE_REALITY_CHECK.txt",
+      "sha256": "b747aedcb4de172f32ed796bcb45c743779f557d101ed07f4361fc32a4bc1d85"
+    },
+    {
+      "kind": "MODIFIED",
+      "path": "SNAPSHOT_INFO.json",
+      "sha256_after": "de8999e434370b20625c9b85817f1f45724b649dc3aa649509ef7fb0f05a5d48",
+      "sha256_before": "c040a1f3e1e737e78019ee45e2dc50e48a0a4da5ccfa65e46954c01f9b2e21f1"
+    },
+    {
+      "kind": "ADDED",
+      "path": "docs/PASS470_R4B_EVIDENCE_CLASSIFICATION.json",
+      "sha256": "fdee2f833a5b0944da20e0e927329ffb730a1683417cfa3fc5ff2f4103413644"
+    },
+    {
+      "kind": "ADDED",
+      "path": "docs/PASS470_R4B_IMPLEMENTATION_REPORT.md",
+      "sha256": "e74b12453f06f29a52c49549ad856a8bbfa9c8eeaeccf0f29ec8e66d103bad64"
+    },
+    {
+      "kind": "ADDED",
+      "path": "docs/PASS470_R4B_IMPLEMENTATION_REVISION.json",
+      "sha256": "5f95eb9dc8ca8ced23a12b87154a3672b2eca33aa142c63bcb560f74840c46f8"
+    },
+    {
+      "kind": "ADDED",
+      "path": "docs/PASS470_R4B_STAGE_VALIDATION.json",
+      "sha256": "eeccfeb55016106fc4484676d6ff9f9db55867cf70c4404290dbe03f010a499b"
+    },
+    {
+      "kind": "MODIFIED",
+      "path": "docs/architecture/CANONICAL_TABLE_OWNERSHIP.json",
+      "sha256_after": "aead0015808b4b4c42a79e892f625e291e74b5fcecbefc7ea890506b8ea32b89",
+      "sha256_before": "e7c0c1148a6fa805d2794a69cd776cb60e6fbf87ed69ebda6b7e931a36a3916e"
+    },
+    {
+      "kind": "MODIFIED",
+      "path": "docs/foundation_repair_status.json",
+      "sha256_after": "c7b49f530125917f602479f1376b899eced800ca3f274c63e17f8b9c100c96ba",
+      "sha256_before": "7c1535f6d4f29f3e028dda3d278889e801dac1aa6e0368f2904200760f344be7"
+    },
+    {
+      "kind": "MODIFIED",
+      "path": "internal/adapters/postgres/kernelqueries/querytext_gen.go",
+      "sha256_after": "18e839e10d0cfb056df91908db3d3950c0ffe9938920279959acb339c3aedd3c",
+      "sha256_before": "40ad00f9a46371890bc4beadec801d9389b83c262b41fa5f79cdd3cdcc303204"
+    },
+    {
+      "kind": "MODIFIED",
+      "path": "internal/adapters/postgres/kernelstore/store.go",
+      "sha256_after": "269dad8432ea3dbfcc58672da90cf5b2f66f3cb1f79b5111fbe3c6a28da89d2a",
+      "sha256_before": "d7df642c78469d45deafc11d3f8b6ee927ce25379c9c003f80624231f19bbbc0"
+    },
+    {
+      "kind": "MODIFIED",
+      "path": "internal/adapters/postgres/kernelstore/store_test.go",
+      "sha256_after": "9b6afaa5eea71c596233e1f8c79ec128d4f36fbd135fd708e211218add7fec73",
+      "sha256_before": "23af3c5a48c1115800416382a211966db71dcd3b74ae83d8966a7c09d42c68db"
+    },
+    {
+      "kind": "MODIFIED",
+      "path": "internal/foundation/policy/refs.go",
+      "sha256_after": "8f63831a0ef566eb305a6294e1248279ce5ab5fc2b54cc8b392f0d871b67d20c",
+      "sha256_before": "b3ae769ee2c015e746270dcffca857f1a89d59fa272326127ca895d848b66bfa"
+    },
+    {
+      "kind": "ADDED",
+      "path": "internal/foundation/policy/refs_test.go",
+      "sha256": "4931fefaede67ae81e9827faa3e7a0d26dc50e105c3d5ba2b910de8c71f24bbc"
+    },
+    {
+      "kind": "MODIFIED",
+      "path": "internal/foundation/receipt/receipt.go",
+      "sha256_after": "a9da020a75b3d96f62b467ee58e0e33a9e938680379e5662c85067942109d76c",
+      "sha256_before": "eb15ecc8654b0059b3eab3f09942940a2853e7b2efebe4d7197b1f3f00e45232"
+    },
+    {
+      "kind": "MODIFIED",
+      "path": "internal/foundation/receipt/receipt_test.go",
+      "sha256_after": "1ad513bebec3747b7e8be601b7f6a29dd40a6c084367dc2d69d904c22b8d59fc",
+      "sha256_before": "c0b7b768aeab33aef3687f4ace65d7f3f500ce752bef586c19133c60f2499050"
+    },
+    {
+      "kind": "ADDED",
+      "path": "migrations/00009_r4_immutable_content_revisions.sql",
+      "sha256": "b67018f5ca39e5ad05379e9df16c52e1cda5eb54918ab0db14319609d76237e4"
+    },
+    {
+      "kind": "MODIFIED",
+      "path": "migrations/README.md",
+      "sha256_after": "9127702acacb30ca8627c311616aae274bebc92b083c2850957d9f301320e446",
+      "sha256_before": "e96c2e768351a149cf4cdf21e28fbe036c14765f152fdd4fba0593bb10aadc1a"
+    },
+    {
+      "kind": "MODIFIED",
+      "path": "sql/kernel/receipts.sql",
+      "sha256_after": "74ad9accee063e77323a2eb4a69df394bdcb331ce88e3d789864ffbc904b7511",
+      "sha256_before": "2693acb3cfd0abe76505d1cb89541f1ee5aad39ebe21296e1e48e04a06fac0d0"
+    },
+    {
+      "kind": "MODIFIED",
+      "path": "tools/check.sh",
+      "sha256_after": "6e5737128d58ce5a8db72e7d1aec1fa546b9f69c5f47871b2e42281aed94b6b2",
+      "sha256_before": "3d4a7fb48a98f2d42c33f8d2bee941c0e7cce049a7d22fd9a4bee662becd7877"
+    },
+    {
+      "kind": "ADDED",
+      "path": "tools/validate_r4b.py",
+      "sha256": "7015758c49a80140b62fb24c9a5ae0a9e6cf0cf72a8726e9ed932e2177c5018d"
+    }
+  ],
+  "conclusion": "PASS_R4B_SCOPE_ONLY",
+  "critical_runtime_changes": [],
+  "method": "FINAL_FRESH_PASS468_TO_PASS470_TREE_BYTE_DIFF_BEFORE_SNAPSHOT_MANIFEST",
+  "schema_version": 2,
+  "unexpected_changes": []
+}

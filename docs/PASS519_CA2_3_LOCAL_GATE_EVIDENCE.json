@@ -1,0 +1,68 @@
+{
+  "schema_version": 1,
+  "pass": "519.0",
+  "phase": "CHARACTER_ASSET_CORE/CA2/CA2-3",
+  "status": "LOCAL_GATE_GREEN_IMMUTABLE_IDENTITY_TO_BE_BOUND_BY_IMPLEMENTATION_REVISION_RECORD",
+  "adjudication": "CA2-3_INTERNAL_LOCAL_CHECKPOINT_GREEN; CA2-1 and CA2-2 GREEN preserved; aggregate CA2 remains OPEN pending exact native/real-PostgreSQL/applicable-River/stock gate.",
+  "authority": {
+    "pass518_passmap_sha256": "9eed0ca654080ee3428932df8914d231868b7a59fb85a0eea62ac1f7cfc9d783",
+    "source_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+    "parent_backend_sha256": "73a668580d416fba4275b97898d083b9fdcb12c58773eeb9ceec2b1f3711c58d",
+    "parent_implementation_revision_sha256": "96e77b4f15819dd4c157ec6c09c54476b5b63386a0acab84f14b12077af761d8"
+  },
+  "content": {
+    "schema_version": 1,
+    "compiler_version": "ca2-2",
+    "revision": "e5a7c922fd40d42a4354f6200c7e3ea0ca9f00d666527df1b5915b083e0e49fb",
+    "content_changed_by_ca2_3": false
+  },
+  "behavioral_coverage": [
+    "revisioned initial_star creation including 40001062->10001062 star5",
+    "Grant-v3 line-ordinal allocator and replay boundary",
+    "aggregate diagnostic capacity allow/deny with nil-authority hard fail",
+    "MID59 strict stock wire, authoritative Mana/fragment debit and direct Hero response",
+    "MID59 duplicate/cost/capacity failure atomicity",
+    "MID59 definite-abort retry retains bound content revision",
+    "MID59 UNKNOWN-COMMIT receipt reconciliation and absent-receipt no-blind-retry",
+    "MID305 strict stock wire, all-five prerequisite and level100 gate",
+    "MID305 Vows star derives from exactly-five-star prerequisite count with no prerequisite consumption",
+    "numeric Hero partner lock order including IDs 2 and 10",
+    "HeroRoot-first Super low-star roster stabilization",
+    "MID49 reload rehydrates kind from creation revision and preserves persisted identity/progression"
+  ],
+  "canonical_static_source": {
+    "result": "PASS",
+    "log": "EVIDENCE/PASS519_CA2_3/STATIC_SOURCE_FINAL.log"
+  },
+  "compatibility_copy": {
+    "classification": "COMPATIBILITY_COPY_ONLY",
+    "local_go": "go1.23.2",
+    "changes": [
+      "go.mod language/toolchain accommodation",
+      ".go-version 1.27.1 -> 1.23.2"
+    ],
+    "results": "focused PASS; focused race PASS; go vet ./... PASS; go test ./... PASS; bounded package sweep 89/89 PASS",
+    "canonical_product_or_test_files_changed": false
+  },
+  "production_fail_closed": {
+    "registered_hero_mids": [
+      49,
+      52,
+      55,
+      63,
+      67,
+      89
+    ],
+    "mid59_registered": false,
+    "mid305_registered": false,
+    "mid64_registered": false,
+    "hero_partner_entity_provider_installed": false
+  },
+  "limitations": [
+    "exact Go 1.27.1 NOT_RUN",
+    "real PostgreSQL 18.6 migration/query/concurrency NOT_RUN",
+    "applicable real River semantics NOT_RUN",
+    "stock-client end-to-end NOT_RUN",
+    "aggregate CA2 NOT ACCEPTED"
+  ]
+}

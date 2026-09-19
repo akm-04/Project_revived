@@ -1,0 +1,27 @@
+PASS470 R4B PASS468->CANDIDATE SCOPE REALITY CHECK
+ADDED 5
+ + EVIDENCE/PASS470_R4B_INDEPENDENT_REALITY_CHECK.txt
+ + EVIDENCE/PASS470_R4B_SCOPE_REALITY_CHECK.txt
+ + internal/foundation/policy/refs_test.go
+ + migrations/00009_r4_immutable_content_revisions.sql
+ + tools/validate_r4b.py
+REMOVED 0
+CHANGED 10
+ * docs/architecture/CANONICAL_TABLE_OWNERSHIP.json
+ * internal/adapters/postgres/kernelqueries/querytext_gen.go
+ * internal/adapters/postgres/kernelstore/store.go
+ * internal/adapters/postgres/kernelstore/store_test.go
+ * internal/foundation/policy/refs.go
+ * internal/foundation/receipt/receipt.go
+ * internal/foundation/receipt/receipt_test.go
+ * migrations/README.md
+ * sql/kernel/receipts.sql
+ * tools/check.sh
+UNEXPECTED_SCOPE []
+UNCHANGED go.mod ecafe7641bc26c7ef91bdc5c21a5f71aa432bd162ed6fe1725004b501172a949 PASS
+UNCHANGED go.sum efbf6753542d66e2fefcb2ab5e2ade7c9d28f2206a1113d1eb9568f2cb75808d PASS
+UNCHANGED internal/application/i5/service.go 076a1a063ca658f6ecb4baacb66d3075c29245447a04447ee8d42f6d5cb37e5e PASS
+UNCHANGED internal/protocol/httpedge/handler.go 718b64ce28c3117a6928498d4bb7786c243197046bfe915710a269a7e9198f52 PASS
+CONTENTSTORE_EXISTS False
+SQL_CONTENT_EXISTS False
+SCOPE_VERDICT PASS_R4B_ONLY_NO_R4C_R4D_LEAKAGE

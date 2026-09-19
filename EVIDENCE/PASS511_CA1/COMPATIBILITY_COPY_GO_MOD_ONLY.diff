@@ -1,0 +1,12 @@
+--- /mnt/data/gxb-ca1-candidate/go.mod	2026-09-11 00:00:00.000000000 +0000
++++ go.mod	2026-09-11 10:11:49.430926676 +0000
+@@ -1,8 +1,7 @@
+ module gxb.local/backend/v2
+ 
+-go 1.26.0
++go 1.23.0
+ 
+-toolchain go1.27.1
+ 
+ require (
+ 	github.com/go-chi/chi/v5 v5.3.1

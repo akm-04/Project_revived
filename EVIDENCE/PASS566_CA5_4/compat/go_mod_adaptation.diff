@@ -1,0 +1,12 @@
+--- canonical/go.mod
++++ compat/go.mod
+@@ -1,8 +1,6 @@
+ module gxb.local/backend/v2
+ 
+-go 1.26.0
+-
+-toolchain go1.27.1
++go 1.23.0
+ 
+ require (
+ 	github.com/go-chi/chi/v5 v5.3.1

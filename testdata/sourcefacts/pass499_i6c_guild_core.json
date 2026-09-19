@@ -1,0 +1,22 @@
+{
+  "current_src64": {
+    "SelfGuild.lua": "c744e6f256a796a98613911372c1821b3e02f21d38480184df9c095373bd64f9",
+    "mid.lua": "026a20b29d97624979777a68c64c749254031604057ff42aa8f8254c3e35b5af",
+    "Backend.lua": "95378e2b0be8180df6de27e9e430c630bcfe46c080e1f91ef5f6d74bdbb1b840",
+    "TeamFindWindow.lua": "719e25554fe3c58bd4d97b5c8769f1db64667807f3ac6caa656efec295247ac7",
+    "TeamMemberManageMenu.lua": "817aae964420a39352733d6d11b224fddd51e700e14bf7b060b1c3949f97413c",
+    "TeamManageMenuWindow.lua": "fa86707546a24a75de90b0d9db757d4fb1b4b2fb0ed30a738c5cae3a24ea2469",
+    "TeamCreateWindow.lua": "8bb1e094fb60e03429fec4efd7b73ecc90d7957e278f8946805c2599195bd2b7",
+    "TeamSettingWindow.lua": "f05e51cf962b2ae26dd438fb6df73e28633aebbcd1ee6377eb01a08a14341745",
+    "TeamSettingDataWindow.lua": "642f998533abafecc108bbd8799f72fea5e09acba6392decb2608b023ff70fad",
+    "GuildDetailWindow.lua": "629433a18d906f95f7addd471d08f3ea6302290d530ee12028d161dbc72ecda8",
+    "misc.lua": "058cf5719421ed71a12083a8c95b0ccded7204bedb5fa1263d508e2fa4257f9a",
+    "TeamApplyMemberWindow.lua": "841bd5818baab16586e01dfbc286197280f91f0af11fdf15663fdee80d16f695"
+  },
+  "old_client": {
+    "SelfGuild.lua": "686f32fdeac33941053cd31be4f46dc506cc7d7e915b590b18807127939ab40a",
+    "mid.lua": "c10ab0d38105be79201b6b1682a7fcb36eafa7f09b76002c5b9bf599a968d942",
+    "Backend.lua": "06f481e9358e357019c42fbf7d2cd8e650ba7044a774b182d833aebc85458315",
+    "misc.lua": "9c6b222db3a7b1eb14cd719de61339ed17b7010403a89bbdb46a47055c11d3c8"
+  }
+}

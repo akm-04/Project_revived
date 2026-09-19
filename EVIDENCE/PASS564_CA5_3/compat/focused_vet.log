@@ -1,0 +1,1 @@
+$ go vet ./internal/application/charactersavedpreset ./internal/adapters/stockruntime ./internal/archguard ./internal/foundation/replaycatalog

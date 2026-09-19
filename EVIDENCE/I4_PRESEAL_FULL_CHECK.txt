@@ -1,0 +1,85 @@
+DEPENDENCY POLICY: PASS
+qualified candidates 5
+DIRECT SBOM: PASS
+PASS current_src64: all-assest-rechecked-1(9).zip
+PASS v1_pass353: gxb-backend-v0.65.2-pass353.0-portable-dev1(8).zip
+PASS old_client: gxb-old-client-v1.164.0-research-corpus(9).zip
+PASS native_apk: latest_apk-smali-full(8).zip
+PASS pass222_probe: prep-apk-pass222-window-probe(9).zip
+ORACLE VERIFY: PASS
+I2 ORACLE WIRE CHECK: PASS
+current Backend/mid/functions + APK QuickHTTP hashes and frozen wire facts verified
+I3 ORACLE BOOTSTRAP CHECK: PASS
+verified current MID18/MID1 selection, full/existing-owner gate, player-region formula, stock switch teardown and token replacement
+I4 ORACLE WAVE-S CHECK: PASS
+verified current src_64 MID1 log_url/server_time/default sidebands + room discovery/TCP_LOGIN/room-entered/heartbeat/reconnect + 20018/1304/Lua truthiness; Pass353 corroborates bootstrap/realtime shapes only
+MID REGISTRY: PASS source_sha256=026a20b29d97624979777a68c64c749254031604057ff42aa8f8254c3e35b5af assignments=1213 unique=1211
+PASS353 WIRE FIXTURES: PASS cases=5
+generated internal/adapters/postgres/kernelqueries/querytext_gen.go from sql/kernel/receipts.sql sha256=2693acb3cfd0abe76505d1cb89541f1ee5aad39ebe21296e1e48e04a06fac0d0
+SCHEMA/QUERY OWNERSHIP: PASS
+?   	gxb.local/backend/v2/cmd/gxb-admin	[no test files]
+?   	gxb.local/backend/v2/cmd/gxb-api	[no test files]
+?   	gxb.local/backend/v2/cmd/gxb-realtime	[no test files]
+?   	gxb.local/backend/v2/cmd/gxb-worker	[no test files]
+?   	gxb.local/backend/v2/internal/adapters/blobstore	[no test files]
+?   	gxb.local/backend/v2/internal/adapters/pass353diff	[no test files]
+?   	gxb.local/backend/v2/internal/adapters/postgres	[no test files]
+?   	gxb.local/backend/v2/internal/adapters/postgres/kernelqueries	[no test files]
+?   	gxb.local/backend/v2/internal/adapters/provider	[no test files]
+?   	gxb.local/backend/v2/internal/adapters/river	[no test files]
+ok  	gxb.local/backend/v2/internal/adapters/postgres/i4store	(cached)
+ok  	gxb.local/backend/v2/internal/adapters/postgres/kernelstore	(cached)
+?   	gxb.local/backend/v2/internal/adapters/stockfixtures	[no test files]
+ok  	gxb.local/backend/v2/internal/adapters/stockruntime	(cached)
+ok  	gxb.local/backend/v2/internal/application/bootstrap	(cached)
+ok  	gxb.local/backend/v2/internal/application/realtimeauth	(cached)
+?   	gxb.local/backend/v2/internal/domain/combat	[no test files]
+?   	gxb.local/backend/v2/internal/domain/commerce	[no test files]
+?   	gxb.local/backend/v2/internal/domain/control	[no test files]
+?   	gxb.local/backend/v2/internal/domain/economy	[no test files]
+?   	gxb.local/backend/v2/internal/domain/generation	[no test files]
+?   	gxb.local/backend/v2/internal/domain/grant	[no test files]
+?   	gxb.local/backend/v2/internal/domain/guild	[no test files]
+ok  	gxb.local/backend/v2/internal/archguard	0.020s
+ok  	gxb.local/backend/v2/internal/domain/identity	(cached)
+?   	gxb.local/backend/v2/internal/domain/mail	[no test files]
+ok  	gxb.local/backend/v2/internal/domain/logicalserver	(cached)
+?   	gxb.local/backend/v2/internal/domain/modes	[no test files]
+?   	gxb.local/backend/v2/internal/domain/objective	[no test files]
+?   	gxb.local/backend/v2/internal/domain/player	[no test files]
+?   	gxb.local/backend/v2/internal/domain/profile	[no test files]
+?   	gxb.local/backend/v2/internal/domain/social	[no test files]
+?   	gxb.local/backend/v2/internal/foundation/audit	[no test files]
+?   	gxb.local/backend/v2/internal/foundation/clock	[no test files]
+ok  	gxb.local/backend/v2/internal/domain/realtimeauth	(cached)
+ok  	gxb.local/backend/v2/internal/foundation/config	(cached)
+ok  	gxb.local/backend/v2/internal/foundation/ids	(cached)
+ok  	gxb.local/backend/v2/internal/foundation/lockkey	(cached)
+ok  	gxb.local/backend/v2/internal/foundation/obligation	(cached)
+ok  	gxb.local/backend/v2/internal/foundation/observability	(cached)
+ok  	gxb.local/backend/v2/internal/foundation/operation	(cached)
+?   	gxb.local/backend/v2/internal/foundation/policy	[no test files]
+ok  	gxb.local/backend/v2/internal/foundation/receipt	(cached)
+ok  	gxb.local/backend/v2/internal/foundation/tx	(cached)
+ok  	gxb.local/backend/v2/internal/projection/lobby	(cached)
+?   	gxb.local/backend/v2/internal/projection/ota	[no test files]
+?   	gxb.local/backend/v2/internal/projection/publication	[no test files]
+?   	gxb.local/backend/v2/internal/projection/publicplayer	[no test files]
+?   	gxb.local/backend/v2/internal/projection/ranking	[no test files]
+?   	gxb.local/backend/v2/internal/projection/realtimeview	[no test files]
+ok  	gxb.local/backend/v2/internal/protocol/amf3	(cached)
+ok  	gxb.local/backend/v2/internal/protocol/httpedge	(cached)
+?   	gxb.local/backend/v2/internal/protocol/limits	[no test files]
+ok  	gxb.local/backend/v2/internal/protocol/mids	(cached)
+?   	gxb.local/backend/v2/internal/protocol/observe	[no test files]
+?   	gxb.local/backend/v2/internal/protocol/wire	[no test files]
+ok  	gxb.local/backend/v2/internal/protocol/realtime	(cached)
+ok  	gxb.local/backend/v2/internal/archguard	0.014s
+I1 VALIDATION: PASS
+minimal kernel schema, tx outcome/reconciliation, typed facts, adapter isolation and stage routing verified
+I2 VALIDATION: PASS
+stock HTTP families, generated numeric MID catalog, bounded AMF3/TCP framing, fail-closed dispatch and differential fixtures verified
+I3 VALIDATION: PASS
+typed account/session/context, honest server directory, region-encoded allocator, observation gate, replay-stable MID1 and unknown-COMMIT reconciliation contracts verified
+I4 VALIDATION: PASS
+I4 LOCAL CHECK: PASS (Go go1.23.2; target toolchain go1.27.1 and chi/postgres/river tagged builds remain connected/W1 proofs)

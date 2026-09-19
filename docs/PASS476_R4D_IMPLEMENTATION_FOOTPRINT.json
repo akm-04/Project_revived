@@ -1,0 +1,103 @@
+{
+  "base_backend_sha256": "f78c71bee86244f9efa656cb7f13e965bb9fea575677d874cf0e7c64d8e0b71d",
+  "product_delta": [
+    {
+      "path": "cmd/gxb-api/main_postgres.go",
+      "sha256": "249a63fc4c0993b8d69c01894f57e04618407e36fddfe22d8af02557541089f7",
+      "previous_sha256": "c2b3c23207bf93ab6f0ddab86a755cb15d3b08380b673db17296abb4119b8eeb"
+    },
+    {
+      "path": "internal/adapters/postgres/contentqueries/querytext_gen.go",
+      "sha256": "1cee5c547126eb6a08f03cc325ece3394865c64cafa9505e4988db2b92161f0c",
+      "previous_sha256": "9cef3892a743b5c4fc617502f9de98a89aa7d8babe73b47a741121f417a81264"
+    },
+    {
+      "path": "internal/adapters/postgres/contentstore/store.go",
+      "sha256": "0f59482700594cbfebd092e5b3c2c0bbcbab0705e91a448203819ddde8a0b651",
+      "previous_sha256": "ad6176cef00b7986614421f82164dbefbd77468a20d06d7f69272c4db4dba51a"
+    },
+    {
+      "path": "internal/adapters/postgres/contentstore/store_test.go",
+      "sha256": "1c2f5f31740ce0c63ea560a90b12f38db663d5c90d26a427a7261bb0c9990706",
+      "previous_sha256": "870d69f4e8f95843f2828fc44c94cb2ee65a7d25702a7abb1cf3dff564c6bf79"
+    },
+    {
+      "path": "internal/adapters/postgres/i5store/bootstrap_projection.go",
+      "sha256": "1ecaa2acac7d7fdc0debb0d23d9f67e4791447c38cd066761294c786cb009f80",
+      "previous_sha256": "84e5b3e99b8b795d379f97c516ba6a886cca9973bc32d82c25af1fc2b5b2daa6"
+    },
+    {
+      "path": "internal/adapters/postgres/i5store/store.go",
+      "sha256": "e032e1732608714334a04677ac3bd03e60ddb96eb533240120cdea5108c13dcd",
+      "previous_sha256": "1f9878bc7309e306df43118975342c4ee5641392af030938c149fa793453e747"
+    },
+    {
+      "path": "internal/application/i5/content_binding.go",
+      "sha256": "d91f1c5db3ff04e0d10d01c89fd8e43551fc217cd576dcc2d9c5b8f0cea2d8a8",
+      "previous_sha256": null
+    },
+    {
+      "path": "internal/application/i5/grant_lock_plan.go",
+      "sha256": "a9ac4e5c4f09ed6b22bb63f1769d5242af3a65d91a95a53fb52c13139104cf80",
+      "previous_sha256": "27afbf5e0f1ddafd528378fefc2d36a2f5540a18a3e2cf784f94d66f938254c2"
+    },
+    {
+      "path": "internal/application/i5/grant_receipts.go",
+      "sha256": "2529513008732482156d2bafbc457cc3795d06fa043a27c5e475f9185f823256",
+      "previous_sha256": null
+    },
+    {
+      "path": "internal/application/i5/objective_binding.go",
+      "sha256": "877a19217be4380b03be09d7ce51807dd477f680d29ec7303eae89a22cff9959",
+      "previous_sha256": null
+    },
+    {
+      "path": "internal/application/i5/ports.go",
+      "sha256": "2e3d351e9f51d08f5bcc8495ddffa29aaaf92df9c873e3ae7630b564f52ecfe6",
+      "previous_sha256": "798c6c0616a656c67c596080efcdfb4abd5eedafcb6e17fc8b2b8c76a58b8eea"
+    },
+    {
+      "path": "internal/application/i5/service.go",
+      "sha256": "53814c349bb17eb6de64be4376be9c60b1a0d7dc550f9ee54a74c0aa542841a3",
+      "previous_sha256": "076a1a063ca658f6ecb4baacb66d3075c29245447a04447ee8d42f6d5cb37e5e"
+    },
+    {
+      "path": "internal/application/i5/service_test.go",
+      "sha256": "efb8f052986c6afd46888def69ce4b3d608c679df6522472c8aa394a8a0cd558",
+      "previous_sha256": "6970c58dcbf93e04a7ee91c6d0e9800602acdf6264107028c606e4db0ac96418"
+    },
+    {
+      "path": "internal/domain/economy/resources.go",
+      "sha256": "31bfb847b4b356e8cb7561aa11723765a1c211ca2b6c67e61eb852123756ac23",
+      "previous_sha256": "ce3b1ae2cd66c7d8b9990745a5320d36906ee602fbe9808eef115af0e039e147"
+    },
+    {
+      "path": "internal/domain/grant/plan.go",
+      "sha256": "cd2deabaf760812291db72a6460a6be260daf7f2822c8daf4d060050fcafcb5e",
+      "previous_sha256": "45455b1e0f63d785080ecbc089399be540099c5397c26e25540e2ac97198c2e7"
+    },
+    {
+      "path": "internal/domain/grant/plan_test.go",
+      "sha256": "a81eaee9dad02f3dc79e5061ca871b426e05648932435cf9422a44e22ed5817a",
+      "previous_sha256": "6cb2b9729b7266277e45d3d91644bbe5e3d7bb7255dbefa288110e4129791e6b"
+    },
+    {
+      "path": "internal/domain/objective/objective.go",
+      "sha256": "5b0ae53a3d89da2a748a35f3f234b5bcd7d03aee855fdf5317ab2c8f08332d50",
+      "previous_sha256": "782f29b5eab90a61d107323ba0eaf88b3d8cdb13a613a7dc9d195bc318610089"
+    },
+    {
+      "path": "sql/content/content.sql",
+      "sha256": "d382d63fb57d41350ba41351f43dc08162d936fc7cf46667fd5a82feefa6399b",
+      "previous_sha256": "05ab7783b11145428662bd553cf8701a9c674c417f76224cdc88036b55343766"
+    },
+    {
+      "path": "tools/validate_r4d.py",
+      "sha256": "d7bb94a2f02b63e74ad4fb1efc2a0eb9469b4259bf9ead3264c6b9de91a79008",
+      "previous_sha256": null
+    }
+  ],
+  "removed": [],
+  "implementation_revision_sha256": "a10e5abef4985cd1982af9b6e31b05d735a9416154e85dfd181c9b8a2d250d17",
+  "basis": "SHA256 compact sorted-key JSON product_delta; docs/metadata/evidence/SBOM separately bound by snapshot manifest and ZIP SHA256"
+}

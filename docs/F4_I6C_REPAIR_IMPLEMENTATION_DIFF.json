@@ -1,0 +1,229 @@
+{
+  "base_backend_sha256": "e5bb29ddd61ffd9fccfc761f7727f46b1de938144e05f27a1aabb6e1756a4322",
+  "changed_paths": [
+    {
+      "base_sha256": "b7f3758028b19570cf5f97342ffe1f338dbeffd4ac925784878d623d97e1d36f",
+      "current_sha256": "66969920b73f743ec4a22388109206587731bbc2f611cd25f1be17e813c1b130",
+      "path": "BUILD_INFO.json",
+      "status": "MODIFIED"
+    },
+    {
+      "base_sha256": null,
+      "current_sha256": "bb4e121d3e43c6176ca400647c6bca1cd248d8aefc057d4674f173d427c42736",
+      "path": "EVIDENCE/f4/F4_COMPATIBILITY_COPY_FOCUSED_FINAL.log",
+      "status": "ADDED"
+    },
+    {
+      "base_sha256": null,
+      "current_sha256": "9c427b06c73cb71dce30934e032cd5bc10a7534e6a2fa18417b116cac52a9543",
+      "path": "EVIDENCE/f4/F4_PASS502_TO_F4.patch",
+      "status": "ADDED"
+    },
+    {
+      "base_sha256": "be0fdee9a37b7211c29fb4b1cbd82f89994f32a489ba99408a6abbd9e29da8a9",
+      "current_sha256": "1313f8832f0a491cf0ec7bd5ba0097fd95aec2f1d5b503e0bdd0e376c20db4b8",
+      "path": "SBOM.spdx.json",
+      "status": "MODIFIED"
+    },
+    {
+      "base_sha256": "cb1a805df76e523690a9336f9ae21312cf3fffa98ae0487b532193431cb83e3b",
+      "current_sha256": "a604e1f40493a720e3b967db2d7d55505596ca1579b2a16aab6ce5300ea89ca2",
+      "path": "SNAPSHOT_INFO.json",
+      "status": "MODIFIED"
+    },
+    {
+      "base_sha256": null,
+      "current_sha256": "f90a2ee524cb77c00bf0b90d341a7ec22be16478451619b7bf7727cfa160db36",
+      "path": "docs/F4_I6C_REPAIR_IMPLEMENTATION_REPORT.md",
+      "status": "ADDED"
+    },
+    {
+      "base_sha256": null,
+      "current_sha256": "ba2e29a1f3a0157cdc4d6897e04d2761d42962b319664106410bf0a7bbe1d63b",
+      "path": "docs/F4_I6C_REPAIR_LOCAL_EVIDENCE.json",
+      "status": "ADDED"
+    },
+    {
+      "base_sha256": null,
+      "current_sha256": "01437450fd85faa4d0a3632c5ad6b4a6f793a35fddc7e28054ee6d9a968efbed",
+      "path": "docs/architecture/CUMULATIVE_MIGRATION_LOCK.json",
+      "status": "ADDED"
+    },
+    {
+      "base_sha256": "e2111b3098bfed85f04e081fd3c4feafbf45d6b8c8ca9d3f428187a1cd8efaf2",
+      "current_sha256": "61fb230f908a6df9516f55e7246e43048452cbc126587ea45aa880735229d73d",
+      "path": "internal/adapters/postgres/guildstore/store.go",
+      "status": "MODIFIED"
+    },
+    {
+      "base_sha256": "3164e668944e779a8998f69a7f6a70ffebf533c68c37d987b118da378d2166cb",
+      "current_sha256": "029e80ca5b02c4f5cea50bcfc9efb6eb032d9bd84b7ba1e71fc71a42b0693eed",
+      "path": "internal/application/guildcore/mutations.go",
+      "status": "MODIFIED"
+    },
+    {
+      "base_sha256": "9c75ea07767b4038080c15b1e632cbfb8b2dbbf4ff56eb14d08763f5cd1a8500",
+      "current_sha256": "d3fa5379ba60021443631fd696e002eb9959b1631fa7ff3d07e177a41ca831d6",
+      "path": "internal/application/guildcore/ports.go",
+      "status": "MODIFIED"
+    },
+    {
+      "base_sha256": "56f45a7db1dfd47fde9fe6dc269946ae60763f6f49a6f32dd4da09bdbc6e2d4b",
+      "current_sha256": "3a6ab1c361a9c28d7b3f93f916c6b17097c7b6cec3f86519577249b15ea5f277",
+      "path": "internal/application/guildcore/service.go",
+      "status": "MODIFIED"
+    },
+    {
+      "base_sha256": "7218024416982d71f328a2ddc7c9a509dee6095226870fded3c3a6eaef5f15c3",
+      "current_sha256": "c2ff94e727dc67d6ebe70a6510752e5f4aaed73340284a67e08ac8ccb952a22e",
+      "path": "internal/application/guildcore/service_test.go",
+      "status": "MODIFIED"
+    },
+    {
+      "base_sha256": "03d244f81ae4378490ec97587a439fad0f85a21e56cf2a904427e3224fbdde29",
+      "current_sha256": "0f19ab1693b2eac7be7b20b362689fdd9f97bca7a86e6e70f53691c1b642df48",
+      "path": "internal/archguard/i6c_contract_test.go",
+      "status": "MODIFIED"
+    },
+    {
+      "base_sha256": "91155e7d56458c0c90a0b5f6b50378652221835895e32251423c6c5c39911f2a",
+      "current_sha256": "ac7eeaca86494905cee72abfc9c9b05d35f5bf615068e7e23ab7432c068a701d",
+      "path": "internal/foundation/replaycatalog/catalog.go",
+      "status": "MODIFIED"
+    },
+    {
+      "base_sha256": "1610535240e40fea071d1b9af8139d02a14ca6b10fe3e4dab337e1e0ea4b4d7c",
+      "current_sha256": "0668e9be71d22eaaf27031e20f7e6430d76897fc5c5259de02c7bb41e5fc84c4",
+      "path": "internal/foundation/replaycatalog/catalog_test.go",
+      "status": "MODIFIED"
+    },
+    {
+      "base_sha256": null,
+      "current_sha256": "cbb5e6ccd683f51fc3b5b6ae54ba9c54bf4edbcd4dd318f5546d6c16e7d7671c",
+      "path": "migrations/00013_i6c_guild_replay_repair.sql",
+      "status": "ADDED"
+    },
+    {
+      "base_sha256": "9127702acacb30ca8627c311616aae274bebc92b083c2850957d9f301320e446",
+      "current_sha256": "af42b19c378fe6d624fb52629cd9699239e8370858d11bbec8e811edd5c39d63",
+      "path": "migrations/README.md",
+      "status": "MODIFIED"
+    },
+    {
+      "base_sha256": "0d8e45b100d4fa03fb49060971ab0256bfc5c071aacc523d3d3fe02bdb4f865f",
+      "current_sha256": "019940e35d4214cdab05e0c321fe496574c803a627835ce4ffde7107a54c3e97",
+      "path": "tools/check.sh",
+      "status": "MODIFIED"
+    },
+    {
+      "base_sha256": "e01093ec6cd92e8e4c4854170394d26020cdc0a7c6858e4e586110c4a8a41990",
+      "current_sha256": "e52e2f13690519d89d0d69fb4764b2cc5aed1e1867042519e52d73ce85de88ba",
+      "path": "tools/generate_resolved_sbom.py",
+      "status": "MODIFIED"
+    },
+    {
+      "base_sha256": null,
+      "current_sha256": "b7d58354315052283cd3c3324655d96ea630b959a7991644c2e4b4e29633ee0c",
+      "path": "tools/validate_current_candidate.py",
+      "status": "ADDED"
+    },
+    {
+      "base_sha256": "e3357f5be3995562f0120b220aa2d32b7b4b9e12e6f783900d4f5f4e5cfcc117",
+      "current_sha256": "5a7a87dfabd5597df4ddcb0c2cc094b1ad91ab11f0db18881976c16ca8a7983f",
+      "path": "tools/validate_r4d.py",
+      "status": "MODIFIED"
+    },
+    {
+      "base_sha256": "4b817ab9d935e1a4195eee6b05a945e4332c3dd80d07b47bdd81d2e68fea4644",
+      "current_sha256": "d729765490a2a2f45634b414e896b9248eadc56d52de7899a2570e0a23105e9e",
+      "path": "tools/validate_r5.py",
+      "status": "MODIFIED"
+    },
+    {
+      "base_sha256": "59fb4d48dd07797162846edb0468cd01c0b179045a52490c13a00e67a0eda5a0",
+      "current_sha256": "ab37f2e901aa8302a0450d263634c5f94901330fb431ceae39747e36edab8e81",
+      "path": "tools/validate_r6.py",
+      "status": "MODIFIED"
+    }
+  ],
+  "note": "Excludes this diff record, SNAPSHOT_MANIFEST.sha256, and implementation-revision record to avoid self-reference.",
+  "protected_invariants": [
+    {
+      "path": "go.mod",
+      "sha256": "313c574368bb56dc570bc3427b65f59b059e492f909fe43b7d0291b5ced21dc4",
+      "unchanged": true
+    },
+    {
+      "path": "go.sum",
+      "sha256": "efbf6753542d66e2fefcb2ab5e2ade7c9d28f2206a1113d1eb9568f2cb75808d",
+      "unchanged": true
+    },
+    {
+      "path": ".go-version",
+      "sha256": "a8844fbc8c3eb51c26ed00aec4cd5a5a9d647f849c6ead07bcc83ed24c4a7718",
+      "unchanged": true
+    },
+    {
+      "path": "migrations/00001_kernel_receipts.sql",
+      "sha256": "fab5b35f4ca5eee53c62b0b924ec448327e1aa31205015c22e24ee0f2b710fd8",
+      "unchanged": true
+    },
+    {
+      "path": "migrations/00002_identity_logicalserver_bootstrap.sql",
+      "sha256": "adff86d27dd1c02e4da0dec6b1aa21f33aaafd4d410849abc76bfeec58a5cd5f",
+      "unchanged": true
+    },
+    {
+      "path": "migrations/00003_identity_account_uid_repair.sql",
+      "sha256": "f3c3463e85348fe70e3572d84633019461c900dda2e216f223ccdd72f0bf940c",
+      "unchanged": true
+    },
+    {
+      "path": "migrations/00004_player_directory_profile_bootstrap.sql",
+      "sha256": "c1b6499827a0f61054f0d77aaff46da2655410cb407881c8b734ed58a9b7e31b",
+      "unchanged": true
+    },
+    {
+      "path": "migrations/00005_i5_player_economy_mail_objective_redeem.sql",
+      "sha256": "7bd5dc3ce5e71dc19fea1d1ab2ff27cb8825d7631650f0a2b65f9a1278fb1059",
+      "unchanged": true
+    },
+    {
+      "path": "migrations/00006_i5_transactional_policies.sql",
+      "sha256": "b901b0185afd183a6c3973679571746347fc810c102597d298db3331908f1377",
+      "unchanged": true
+    },
+    {
+      "path": "migrations/00007_identity_lifecycle_constraints.sql",
+      "sha256": "11213cd5fa5b3f917ae9e3077fd6c736657e4bd0b9f4dd6b04a74ee7da1aed4d",
+      "unchanged": true
+    },
+    {
+      "path": "migrations/00008_i5_economy_owner_fence.sql",
+      "sha256": "b4f9b741bea82cfd08ea3163958fe7811049f4e8a029f33176666aadc8623265",
+      "unchanged": true
+    },
+    {
+      "path": "migrations/00009_r4_immutable_content_revisions.sql",
+      "sha256": "b67018f5ca39e5ad05379e9df16c52e1cda5eb54918ab0db14319609d76237e4",
+      "unchanged": true
+    },
+    {
+      "path": "migrations/00010_r4_manifest_identity_not_null.sql",
+      "sha256": "305822dc72d03f6194332b38ee9cea9dba9223282bd8ac75c42aa480a0a4cf01",
+      "unchanged": true
+    },
+    {
+      "path": "migrations/00011_r5_foundation_repairs.sql",
+      "sha256": "ffe15e505faa77e9e7d93c49abb95d59db58ee15021ad562b0cc121528fd995b",
+      "unchanged": true
+    },
+    {
+      "path": "migrations/00012_i6c_guild_core.sql",
+      "sha256": "216ab5e3ffe7218bfc2ee08427c5da0b288dac4e8f4cdb917831debe469997fa",
+      "unchanged": true
+    }
+  ],
+  "schema_version": 1,
+  "status": "F4_IMPLEMENTATION_DIFF_FINAL_PREPACKAGE"
+}

@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "pass": "446.0",
+  "milestone": "I5-A",
+  "verdict": "PASS_NORMAL_CHAT_CHECKPOINT_I5_CONTINUES",
+  "checks": {
+    "go_test_all_compat": "PASS",
+    "go_vet_all_compat": "PASS",
+    "race_new_i5_domains": "PASS",
+    "architecture_guard": "PASS",
+    "i5_validator": "PASS",
+    "i5_src64_oracle": "PASS",
+    "schema_query_ownership": "PASS",
+    "sqlc_policy": "PASS",
+    "postgres_tag_build": "NOT_EXECUTED_DEPENDENCY_NOT_CACHED_NETWORK_BLOCKED",
+    "real_postgresql_river": "DEFERRED_NOT_PROVED_BY_NORMAL_CHAT"
+  },
+  "authoritative_toolchain_restored": true,
+  "client_acceptance": "DEFERRED_TO_W2_NOT_GREEN"
+}

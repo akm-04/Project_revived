@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "pass": "451.0",
+  "stage": "R1A",
+  "status": "PASS_R1A_LOCAL_GREEN_FOUNDATION_STILL_RED",
+  "implementation_commit": "183585c968daeaffdd8a21612dc18c3c62bd61de",
+  "parent_implementation_commit": "01b5348b52c3e986040f91e407cb4f9c1a1e5f11",
+  "behavior_changed": true,
+  "foundation_status": "RED_REPAIR_ACTIVE",
+  "I6": "BLOCKED",
+  "resolved_findings": [
+    "RF-004",
+    "RF-005"
+  ],
+  "remaining_findings": [
+    "RF-001",
+    "RF-002",
+    "RF-003",
+    "RF-006",
+    "RF-007",
+    "RF-008",
+    "RF-009",
+    "RF-010",
+    "RF-011",
+    "RF-013",
+    "RF-014",
+    "RF-015",
+    "RF-016",
+    "RF-017",
+    "RF-018",
+    "RF-019",
+    "RF-020",
+    "RF-021",
+    "RF-022",
+    "RF-023",
+    "RF-024"
+  ],
+  "normal_chat_evidence": [
+    "go test ./...",
+    "go vet ./...",
+    "targeted go test -race transaction/receipt/bootstrap/i4store",
+    "validate_r1a.py",
+    "expected global RED only known RF-007/RF-015 classes"
+  ],
+  "live_deferred": [
+    "real pgxpool panic/cancel cleanup",
+    "real PostgreSQL ambiguous COMMIT visibility/fault injection"
+  ],
+  "next": "R1B"
+}

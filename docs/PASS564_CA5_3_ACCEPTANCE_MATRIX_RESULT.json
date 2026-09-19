@@ -1,0 +1,170 @@
+{
+  "schema_version": 1,
+  "pass": "564.0",
+  "stage": "CA5-3",
+  "result": "GREEN_LOCAL_CA5_3_ACCEPTED_COMPATIBILITY_COPY_ONLY_NATIVE_AGGREGATE_DEFERRED_PRE_CA5_E",
+  "cases": [
+    {
+      "id": "A1_CANDIDATE",
+      "result": "GREEN",
+      "finding": "Exact Pass562 v0.74.0 parent c357c29f... used; canonical go.mod/go.sum/.go-version remain byte-identical to Pass562."
+    },
+    {
+      "id": "A2_STRICT_FULL_CODEC",
+      "result": "GREEN_COMPATIBILITY_COPY_ONLY",
+      "finding": "Strict full-form codec tests cover exact triple, final empty triple, malformed/wrong/misaligned/noncanonical tokens; candidate source is exact/static validated."
+    },
+    {
+      "id": "A3_ABSENT_VS_EMPTY_PET",
+      "result": "GREEN_COMPATIBILITY_COPY_ONLY",
+      "finding": "Dispatcher preserves pet_str presence; receipt fingerprint includes pet_present; missing and present-empty are separately tested."
+    },
+    {
+      "id": "A4_LEGACY_UNIQUE",
+      "result": "GREEN_COMPATIBILITY_COPY_ONLY",
+      "finding": "Locked-state legacy resolver removes exactly the matching lane and preserves positional Pet alignment for the unique canonical result."
+    },
+    {
+      "id": "A5_LEGACY_IDENTICAL_DUPLICATES",
+      "result": "GREEN_COMPATIBILITY_COPY_ONLY",
+      "finding": "Multiple deletable indices are accepted only when they produce one identical complete canonical aggregate."
+    },
+    {
+      "id": "A6_LEGACY_DIVERGENT_DUPLICATES",
+      "result": "GREEN_COMPATIBILITY_COPY_ONLY",
+      "finding": "Divergent Pet outcomes return ErrAmbiguousLegacyDelete with no replacement/receipt; historical server result remains UNKNOWN."
+    },
+    {
+      "id": "A7_LEGACY_RETRY_CONVERGENCE",
+      "result": "GREEN_COMPATIBILITY_COPY_ONLY",
+      "finding": "Legacy request whose Hero/name projection already equals locked canonical state converges and retains current Pet state rather than deleting again."
+    },
+    {
+      "id": "A8_ACTOR_OWNED_REFS",
+      "result": "GREEN_LOCAL_STATIC_PLUS_COMPATIBILITY_COPY",
+      "finding": "Service rejects foreign actor-scoped refs; concrete characterstore Hero/Pet owner adapters validate exact typed key/row identity and normalize missing rows to ErrReferenceNotFound."
+    },
+    {
+      "id": "A9_LOCK_ORDER",
+      "result": "GREEN_LOCAL_STATIC_PLUS_COMPATIBILITY_COPY",
+      "finding": "Plan deterministically sorts typed Hero rank410 then Pet rank430 and validates rank440 saved-preset root ordering; concrete owner adapters reuse CA5-1 keys."
+    },
+    {
+      "id": "A10_OLD_UNION_NEW",
+      "result": "GREEN_COMPATIBILITY_COPY_ONLY",
+      "finding": "Lock plan uses UnionReferences(old,desired); tests prove removed old and introduced new Hero/Pet identities are synchronized."
+    },
+    {
+      "id": "A11_PLAN_DRIFT_RETRY",
+      "result": "GREEN_COMPATIBILITY_COPY_ONLY",
+      "finding": "Locked reread with uncovered old/new reference MarkDefiniteAbort before mutation; transaction body reruns and replans on retry; concurrent edit/edit fixture proves this path."
+    },
+    {
+      "id": "A12_COVERED_DRIFT",
+      "result": "GREEN_COMPATIBILITY_COPY_ONLY",
+      "finding": "Locked state drift whose observed old\u222adesired identities remain covered is re-resolved and proceeds without pointless retry."
+    },
+    {
+      "id": "A13_CONVERGENCE_REVISION",
+      "result": "GREEN_COMPATIBILITY_COPY_ONLY",
+      "finding": "Semantic convergence performs no aggregate replacement or root revision/timestamp change while recording same-attempt terminal receipt."
+    },
+    {
+      "id": "A14_MUTATION_REVISION",
+      "result": "GREEN_LOCAL_STATIC_PLUS_COMPATIBILITY_COPY",
+      "finding": "Real replacement sets desired root version to locked+1 exactly once; concrete saved-preset store requires expectedVersion+1 and CASes one root row."
+    },
+    {
+      "id": "A15_RECEIPT_FINGERPRINT",
+      "result": "GREEN_COMPATIBILITY_COPY_ONLY",
+      "finding": "Fingerprint distinguishes omitted vs present Pet and same op.ID with different request shape raises receipt conflict before transaction."
+    },
+    {
+      "id": "A16_UNKNOWN_COMMIT_PRESENT",
+      "result": "GREEN_COMPATIBILITY_COPY_ONLY",
+      "finding": "Injected ambiguous COMMIT with externally visible matching receipt reconciles DefiniteCommit and returns stored canonical triple."
+    },
+    {
+      "id": "A17_UNKNOWN_COMMIT_ABSENT",
+      "result": "GREEN_COMPATIBILITY_COPY_ONLY",
+      "finding": "Injected ambiguous COMMIT with hidden/absent receipt returns UnknownCommitError; generic receipt resolver reports Unknown and body is not replayed."
+    },
+    {
+      "id": "A18_INTERNAL_RETRY",
+      "result": "GREEN_COMPATIBILITY_COPY_ONLY",
+      "finding": "Definite-abort path reruns the entire transaction body under the same operation context; rolled-back attempt leaves no replacement/receipt."
+    },
+    {
+      "id": "A19_LATER_HTTP_RETRY",
+      "result": "GREEN_COMPATIBILITY_COPY_ONLY",
+      "finding": "A distinct later operation converges from current canonical state and does not reuse the prior operation receipt."
+    },
+    {
+      "id": "A20_A_B_A",
+      "result": "GREEN_COMPATIBILITY_COPY_ONLY",
+      "finding": "A->B then B->A under distinct operation IDs produces two genuine revision-changing mutations; no permanent desired-hash dedupe exists."
+    },
+    {
+      "id": "A21_RESPONSE_TRIPLE",
+      "result": "GREEN_LOCAL_STATIC_PLUS_COMPATIBILITY_COPY",
+      "finding": "Dedicated MID1793 dispatcher returns HTTP 200 with canonical save_team/save_team_name/save_pet for every successful service result, including legacy convergence."
+    },
+    {
+      "id": "A22_MID1_RELOAD",
+      "result": "GREEN_LOCAL_STATIC_PLUS_COMPATIBILITY_COPY",
+      "finding": "CA5-2 MID1 contributor reads the same canonical aggregate and uses the same ProjectWire function; concrete projection tests are GREEN. Real reconnect/PostgreSQL proof remains part of the mandatory aggregate native gate."
+    },
+    {
+      "id": "A23_REPLAY_CATALOG",
+      "result": "GREEN",
+      "finding": "Exactly one ca5.saved-preset-replace replay-family entry is classified CURRENT_STATE_CONVERGENCE with stock-nonce/A->B->A residual documented."
+    },
+    {
+      "id": "A24_NO_FOREIGN_SQL",
+      "result": "GREEN",
+      "finding": "CA5-3 service depends only on typed HeroReferenceOwner/PetReferenceOwner and saved-preset Store; exact validators/archguards find no Hero/Pet foreign-owner SQL."
+    },
+    {
+      "id": "A25_SUCCESSOR_GUARDS",
+      "result": "GREEN",
+      "finding": "CA5-1/CA5-2 cumulative absence guards are successor-qualified only for authorized MID1793/replay activation; historical acceptance artifacts are unchanged."
+    },
+    {
+      "id": "A26_SCOPE_NEGATIVES",
+      "result": "GREEN",
+      "finding": "Exact CA5-3 validator keeps MID208/209 absent, 17.formation unclaimed, no CA5-4 reverse guards, no I9 mode ownership and no CA8 snapshot leakage."
+    },
+    {
+      "id": "A27_TIME_NEGATIVE",
+      "result": "GREEN",
+      "finding": "CA5-3 introduces no DecisionAt/deadline/reset/time-authority mechanism; op.StartedAt is used only for accepted metadata timestamp/receipt chronology."
+    },
+    {
+      "id": "A28_STATIC_QUERY_ARCH",
+      "result": "GREEN_LOCAL_STATIC_PLUS_COMPATIBILITY_COPY",
+      "finding": "Exact CA5-2/CA5-3 validators, schema/query ownership, sqlc policy and source-oracle checks pass; focused/full vet pass in the fresh compatibility copy."
+    },
+    {
+      "id": "A29_CONCURRENCY",
+      "result": "GREEN_COMPATIBILITY_COPY_ONLY",
+      "finding": "Focused go test -race passes for changed application/runtime packages; adversarial edit/edit fixture proves shared-old-lock serialization and uncovered-drift replanning; future removal-key equality is tested."
+    },
+    {
+      "id": "A30_REGRESSION",
+      "result": "GREEN_COMPATIBILITY_COPY_ONLY",
+      "finding": "Fresh two-file toolchain-accommodated copy passes full go test ./..., full go vet ./..., and bounded package-by-package regression 93/93; canonical product files match byte-for-byte."
+    },
+    {
+      "id": "A31_NATIVE_DEFERRED",
+      "result": "AUTHORIZED_DEFERRED_PRE_CA5_E",
+      "finding": "Exact canonical Go execution is blocked by local Go1.23.2 vs required >=1.26/toolchain1.27.1; postgres-tag production compile is blocked by unavailable pgx/v5 with network disabled. Accumulated exact/native CA5 PostgreSQL/River gate remains mandatory immediately before CA5-E; W2 unchanged."
+    },
+    {
+      "id": "A32_REALITY",
+      "result": "GREEN_LOCAL",
+      "finding": "Independent postimplementation reread traced current/old/V1 source -> sealed Pass563 contract -> codec/service -> typed Hero/Pet owner adapters -> rank440 CAS -> receipt resolver -> stock dispatcher -> MID1 projection -> successor guards and found no contradiction or demonstrated defect."
+    }
+  ],
+  "native_gate": "DEFERRED_MANDATORY_CA5_AGGREGATE_PRE_CA5_E_WORK_GATE",
+  "next": "CA5-4 PRE_IMPLEMENTATION_RESEARCH_RECONCILIATION"
+}

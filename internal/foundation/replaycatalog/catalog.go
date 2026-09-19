@@ -1,0 +1,79 @@
+package replaycatalog
+
+import "errors"
+
+type IdentityClass string
+
+const (
+	IntrinsicOneShot           IdentityClass = "INTRINSIC_ONE_SHOT"
+	CallerSemantic             IdentityClass = "CALLER_SEMANTIC_IDENTITY"
+	ParameterStateSet          IdentityClass = "PARAMETER_STATE_ASSIGNMENT"
+	GenerationBound            IdentityClass = "GENERATION_BOUND"
+	OperatorCommand            IdentityClass = "OPERATOR_COMMAND"
+	CurrentStateConvergence    IdentityClass = "CURRENT_STATE_CONVERGENCE"
+	MembershipIncarnationBound IdentityClass = "MEMBERSHIP_INCARNATION_BOUND"
+)
+
+type Family struct {
+	Name           string
+	OwnerKind      string
+	Domain         string
+	Operation      string
+	IdentityClass  IdentityClass
+	SemanticSource string
+	Consumptive    bool
+	ReceiptSchema  string
+	Residual       string
+}
+
+// Enabled is the D11 replay-family census for the currently enabled surface through
+// the bounded F1/F2 I6C replay repair. It is evidence/guard metadata, not gameplay
+// authority. A new mutating family must be classified here before cumulative guards
+// may treat replay coverage as complete.
+var Enabled = []Family{
+	{Name: "identity.provider-bind", OwnerKind: "provider_principal", Domain: "identity", Operation: "provider.bind", IdentityClass: IntrinsicOneShot, SemanticSource: "provider principal digest + canonical", ReceiptSchema: "identity lifecycle receipt"},
+	{Name: "identity.session-issue", OwnerKind: "session", Domain: "identity", Operation: "session.issue", IdentityClass: IntrinsicOneShot, SemanticSource: "canonical session id", ReceiptSchema: "identity lifecycle receipt"},
+	{Name: "identity.session-revoke", OwnerKind: "session", Domain: "identity", Operation: "session.revoke", IdentityClass: IntrinsicOneShot, SemanticSource: "canonical session id", ReceiptSchema: "identity lifecycle receipt"},
+	{Name: "identity.mid1-select", OwnerKind: "session", Domain: "identity", Operation: "mid1.select", IdentityClass: GenerationBound, SemanticSource: "logical server + context generation", ReceiptSchema: "gxb.mid1.select.v2"},
+	{Name: "i5.save-story", OwnerKind: "player", Domain: "player-core", Operation: "save-story", IdentityClass: ParameterStateSet, SemanticSource: "exact story_id/story_state/guide_id tuple", ReceiptSchema: "gxb.i5.story.v1", Residual: "delayed identical stock intent is indistinguishable; assignment is non-economic and idempotent"},
+	{Name: "i5.grant", OwnerKind: "player", Domain: "grant", Operation: "settle", IdentityClass: CallerSemantic, SemanticSource: "Grant SourceIdentity domain/operation/business key/occurrence/policy", Consumptive: true, ReceiptSchema: "gxb.i5.grant.v2 with historical v1 replay"},
+	{Name: "i5.mail-claim", OwnerKind: "player", Domain: "mail", Operation: "claim", IdentityClass: IntrinsicOneShot, SemanticSource: "mail namespace + immutable wire address/mail uuid", Consumptive: true, ReceiptSchema: "gxb.i5.mail369.v2"},
+	{Name: "i5.mail-batch-claim", OwnerKind: "player", Domain: "mail", Operation: "batch-claim", IdentityClass: IntrinsicOneShot, SemanticSource: "canonical sorted mail address set", Consumptive: true, ReceiptSchema: "gxb.i5.mail370.v2"},
+	{Name: "i5.objective-claim", OwnerKind: "player", Domain: "objective", Operation: "claim", IdentityClass: GenerationBound, SemanticSource: "family + objective id + generation id", Consumptive: true, ReceiptSchema: "gxb.i5.objective-claim.v2"},
+	{Name: "i5.objective-stock-claim", OwnerKind: "player", Domain: "objective", Operation: "stock-claim", IdentityClass: GenerationBound, SemanticSource: "objective id + generation hint", Consumptive: true, ReceiptSchema: "gxb.i5.objective-stock-claim.v2"},
+	{Name: "i5.objective-fact", OwnerKind: "player", Domain: "objective-fact", Operation: "program id", IdentityClass: CallerSemantic, SemanticSource: "fact semantic key + objective id", ReceiptSchema: "objective fact receipt"},
+	{Name: "i5.redeem", OwnerKind: "player", Domain: "redeem", Operation: "stock-mid230", IdentityClass: IntrinsicOneShot, SemanticSource: "normalized code identity + player/account subject slot", Consumptive: true, ReceiptSchema: "gxb.i5.redeem.v2"},
+	{Name: "i5.stack-adjust", OwnerKind: "player", Domain: "stack", Operation: "adjust", IdentityClass: CallerSemantic, SemanticSource: "SourceIdentity semantic key + item id", Consumptive: true, ReceiptSchema: "gxb.i5.stack-adjust.v1"},
+	{Name: "i5.temporal-rebind", OwnerKind: "player", Domain: "temporal", Operation: "rebind", IdentityClass: GenerationBound, SemanticSource: "resource key + exact target content revision", ReceiptSchema: "gxb.i5.temporal-rebind.v1"},
+	{Name: "i5.admin-mail", OwnerKind: "player", Domain: "admin-mail", Operation: "deliver", IdentityClass: OperatorCommand, SemanticSource: "operator id + command key", Consumptive: true, ReceiptSchema: "admin mail delivery receipt"},
+
+	{Name: "ca5.saved-preset-replace", OwnerKind: "player", Domain: "character-saved-preset", Operation: "replace", IdentityClass: CurrentStateConvergence, SemanticSource: "current canonical saved-preset aggregate + same-attempt operation receipt", ReceiptSchema: "gxb.ca5.saved-preset-replace.v1", Residual: "stock nonce absent; reversible A->B->A and delayed identical packets are interpreted from current canonical state rather than permanent payload identity"},
+
+	{Name: "i6c.guild-create", OwnerKind: "guild", Domain: "guild", Operation: "create", IdentityClass: CurrentStateConvergence, SemanticSource: "current canonical GuildMembership/Guild state + same-attempt semantic create receipt", Consumptive: true, ReceiptSchema: "gxb.i6c.guild.create.v1", Residual: "stock nonce absent; exact delayed create intent is bounded by canonical membership/Guild state; F2 requires outgoing-application cleanup"},
+	{Name: "i6c.guild-dissolve", OwnerKind: "guild", Domain: "guild", Operation: "dissolve", IdentityClass: CurrentStateConvergence, SemanticSource: "current Guild state + leader authority + same-attempt receipt", ReceiptSchema: "gxb.i6c.guild.dissolve.v1", Residual: "historical receipt cannot manufacture an active Guild after dissolution"},
+	{Name: "i6c.guild-apply-or-join", OwnerKind: "guild", Domain: "guild", Operation: "apply-or-join", IdentityClass: CurrentStateConvergence, SemanticSource: "current locked apply_type; current application row or current membership; application_generation/internal attempt identity only for same-attempt COMMIT proof", ReceiptSchema: "gxb.i6c.guild.apply_application.v2 / gxb.i6c.guild.join_immediate.v2", Residual: "stock nonce absent; an old APPLY is indistinguishable from a genuine reapply after deletion, so absent current state is current intent subject to current policy"},
+	{Name: "i6c.guild-accept-application", OwnerKind: "guild", Domain: "guild-application", Operation: "accept", IdentityClass: GenerationBound, SemanticSource: "current application_generation under current officer authority", ReceiptSchema: "gxb.i6c.guild.accept_application.v1", Residual: "delayed old accept is indistinguishable from a new accept of a later current application row"},
+	{Name: "i6c.guild-refuse-application", OwnerKind: "guild", Domain: "guild-application", Operation: "refuse", IdentityClass: GenerationBound, SemanticSource: "current application_generation under current officer authority", ReceiptSchema: "gxb.i6c.guild.refuse_application.v1", Residual: "delayed old refusal is indistinguishable from a new refusal of a later current application row"},
+	{Name: "i6c.guild-leave", OwnerKind: "guild", Domain: "guild-membership", Operation: "leave", IdentityClass: MembershipIncarnationBound, SemanticSource: "current append-only JOIN event_id membership incarnation + membership_version", ReceiptSchema: "gxb.i6c.guild.leave.v2", Residual: "historical v1 membership_version-only receipts are retained as evidence but never satisfy a new v2 incarnation identity"},
+	{Name: "i6c.guild-description", OwnerKind: "guild", Domain: "guild", Operation: "description", IdentityClass: ParameterStateSet, SemanticSource: "desired description + current Guild state + same-attempt receipt", ReceiptSchema: "gxb.i6c.guild.description.v1", Residual: "nonce absent; reversible state assignment converges where current desired state already exists"},
+	{Name: "i6c.guild-role", OwnerKind: "guild", Domain: "guild-membership", Operation: "set-role", IdentityClass: MembershipIncarnationBound, SemanticSource: "actor and target membership incarnations + mutable membership versions + desired role", ReceiptSchema: "gxb.i6c.guild.set_role.v2", Residual: "historical v1 receipts can collide across reincarnation and must not satisfy v2 identities"},
+	{Name: "i6c.guild-kick", OwnerKind: "guild", Domain: "guild-membership", Operation: "kick", IdentityClass: MembershipIncarnationBound, SemanticSource: "actor and target membership incarnations + target membership_version", ReceiptSchema: "gxb.i6c.guild.kick.v2", Residual: "historical v1 receipts can collide across reincarnation and must not satisfy v2 identities"},
+	{Name: "i6c.guild-settings", OwnerKind: "guild", Domain: "guild", Operation: "settings", IdentityClass: CurrentStateConvergence, SemanticSource: "current settings state; paid rename receipt remains inside the existing economy transaction", Consumptive: true, ReceiptSchema: "gxb.i6c.guild.settings.v1", Residual: "A->B->C->B cannot distinguish a delayed first-B packet from a new rename-to-B intent without a stock nonce; no generic no-double-charge claim"},
+	{Name: "i6c.guild-cancel-application", OwnerKind: "guild", Domain: "guild-application", Operation: "cancel", IdentityClass: GenerationBound, SemanticSource: "current application_generation when a row exists", ReceiptSchema: "gxb.i6c.guild.cancel_application.v1", Residual: "delayed old cancel is indistinguishable from a new cancel of a later current application row"},
+	{Name: "i6c.guild-invite", OwnerKind: "guild", Domain: "guild-invite", Operation: "invite", IdentityClass: GenerationBound, SemanticSource: "current invite generation + rolling invitation-send ledger/current invite state", ReceiptSchema: "gxb.i6c.guild.invite.v1", Residual: "retain accepted I6C generation/window compatibility policy"},
+	{Name: "i6c.guild-accept-invite", OwnerKind: "guild", Domain: "guild-invite", Operation: "accept", IdentityClass: GenerationBound, SemanticSource: "current invite generation + current membership-state convergence", ReceiptSchema: "gxb.i6c.guild.accept_invite.v1", Residual: "successful membership establishment clears outgoing applications; stock nonce absent"},
+}
+
+func Validate() error {
+	seen := map[string]struct{}{}
+	for _, f := range Enabled {
+		if f.Name == "" || f.OwnerKind == "" || f.Domain == "" || f.Operation == "" || f.IdentityClass == "" || f.SemanticSource == "" || f.ReceiptSchema == "" {
+			return errors.New("incomplete replay-family classification")
+		}
+		if _, ok := seen[f.Name]; ok {
+			return errors.New("duplicate replay-family classification")
+		}
+		seen[f.Name] = struct{}{}
+	}
+	return nil
+}

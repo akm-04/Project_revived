@@ -1,0 +1,99 @@
+Pass452 R1B final disposable Go 1.23 validation
+2026-09-06T20:46:50Z
+== go test ./... ==
+?   	gxb.local/backend/v2/cmd/gxb-admin	[no test files]
+?   	gxb.local/backend/v2/cmd/gxb-api	[no test files]
+?   	gxb.local/backend/v2/cmd/gxb-realtime	[no test files]
+?   	gxb.local/backend/v2/cmd/gxb-wave-s-report	[no test files]
+?   	gxb.local/backend/v2/cmd/gxb-worker	[no test files]
+?   	gxb.local/backend/v2/internal/adapters/blobstore	[no test files]
+?   	gxb.local/backend/v2/internal/adapters/pass353diff	[no test files]
+?   	gxb.local/backend/v2/internal/adapters/postgres	[no test files]
+ok  	gxb.local/backend/v2/internal/adapters/postgres/i4store	0.002s
+?   	gxb.local/backend/v2/internal/adapters/postgres/i5store	[no test files]
+?   	gxb.local/backend/v2/internal/adapters/postgres/kernelqueries	[no test files]
+?   	gxb.local/backend/v2/internal/adapters/provider	[no test files]
+?   	gxb.local/backend/v2/internal/adapters/river	[no test files]
+?   	gxb.local/backend/v2/internal/adapters/stockfixtures	[no test files]
+ok  	gxb.local/backend/v2/internal/adapters/postgres/kernelstore	0.004s
+?   	gxb.local/backend/v2/internal/domain/combat	[no test files]
+?   	gxb.local/backend/v2/internal/domain/commerce	[no test files]
+?   	gxb.local/backend/v2/internal/domain/control	[no test files]
+ok  	gxb.local/backend/v2/internal/adapters/stockruntime	0.037s
+ok  	gxb.local/backend/v2/internal/application/bootstrap	0.004s
+ok  	gxb.local/backend/v2/internal/application/i5	0.004s
+ok  	gxb.local/backend/v2/internal/application/realtimeauth	0.005s
+ok  	gxb.local/backend/v2/internal/archguard	0.024s
+?   	gxb.local/backend/v2/internal/domain/generation	[no test files]
+ok  	gxb.local/backend/v2/internal/domain/economy	0.002s
+?   	gxb.local/backend/v2/internal/domain/guild	[no test files]
+ok  	gxb.local/backend/v2/internal/domain/grant	0.006s
+ok  	gxb.local/backend/v2/internal/domain/identity	0.003s
+ok  	gxb.local/backend/v2/internal/domain/logicalserver	0.005s
+?   	gxb.local/backend/v2/internal/domain/modes	[no test files]
+ok  	gxb.local/backend/v2/internal/domain/mail	0.002s
+ok  	gxb.local/backend/v2/internal/domain/objective	0.002s
+?   	gxb.local/backend/v2/internal/domain/profile	[no test files]
+ok  	gxb.local/backend/v2/internal/domain/player	0.001s
+ok  	gxb.local/backend/v2/internal/domain/realtimeauth	0.002s
+?   	gxb.local/backend/v2/internal/domain/social	[no test files]
+?   	gxb.local/backend/v2/internal/foundation/audit	[no test files]
+?   	gxb.local/backend/v2/internal/foundation/clock	[no test files]
+ok  	gxb.local/backend/v2/internal/domain/redeem	0.002s
+ok  	gxb.local/backend/v2/internal/foundation/config	0.005s
+ok  	gxb.local/backend/v2/internal/foundation/ids	0.003s
+ok  	gxb.local/backend/v2/internal/foundation/lockkey	0.002s
+ok  	gxb.local/backend/v2/internal/foundation/obligation	0.007s
+ok  	gxb.local/backend/v2/internal/foundation/observability	0.002s
+?   	gxb.local/backend/v2/internal/foundation/policy	[no test files]
+ok  	gxb.local/backend/v2/internal/foundation/operation	0.006s
+ok  	gxb.local/backend/v2/internal/foundation/receipt	0.001s
+ok  	gxb.local/backend/v2/internal/foundation/tx	0.007s
+?   	gxb.local/backend/v2/internal/projection/ota	[no test files]
+?   	gxb.local/backend/v2/internal/projection/publication	[no test files]
+?   	gxb.local/backend/v2/internal/projection/publicplayer	[no test files]
+?   	gxb.local/backend/v2/internal/projection/ranking	[no test files]
+ok  	gxb.local/backend/v2/internal/projection/lobby	0.004s
+?   	gxb.local/backend/v2/internal/projection/realtimeview	[no test files]
+ok  	gxb.local/backend/v2/internal/protocol/amf3	0.002s
+?   	gxb.local/backend/v2/internal/protocol/limits	[no test files]
+ok  	gxb.local/backend/v2/internal/protocol/httpedge	0.016s
+?   	gxb.local/backend/v2/internal/protocol/observe	[no test files]
+?   	gxb.local/backend/v2/internal/protocol/wire	[no test files]
+ok  	gxb.local/backend/v2/internal/protocol/mids	0.002s
+ok  	gxb.local/backend/v2/internal/protocol/realtime	0.002s
+== go vet ./... ==
+== targeted race ==
+ok  	gxb.local/backend/v2/internal/adapters/postgres/i4store	1.013s
+ok  	gxb.local/backend/v2/internal/application/bootstrap	1.016s
+ok  	gxb.local/backend/v2/internal/domain/identity	1.015s
+ok  	gxb.local/backend/v2/internal/domain/logicalserver	1.012s
+ok  	gxb.local/backend/v2/internal/foundation/tx	1.019s
+ok  	gxb.local/backend/v2/internal/foundation/receipt	1.009s
+== validators ==
+R0 VALIDATION: PASS (guard/enforcement repaired; global foundation intentionally remains RED)
+R1A VALIDATION: PASS
+panic-safe transaction finalization and authoritative-negative semantics verified structurally
+R1B VALIDATION: PASS
+MID1 immutable selection receipt/current hydration/secret retention and shared-vs-exclusive server fence verified structurally
+I1 VALIDATION: PASS
+minimal kernel schema, tx outcome/reconciliation, typed facts, adapter isolation and stage routing verified
+I2 VALIDATION: PASS
+stock HTTP families, generated numeric MID catalog, bounded AMF3/TCP framing, fail-closed dispatch and differential fixtures verified
+I3 VALIDATION: PASS
+typed account/session/context, honest server directory, region-encoded allocator, observation gate, replay-stable MID1 and unknown-COMMIT reconciliation contracts verified
+I4 VALIDATION: PASS
+I5 VALIDATION: FAIL
+ - RF-007 cross-owner bootstrap write remains in i4store: player_profiles
+ - RF-007 cross-owner bootstrap write remains in i4store: player_progression
+ - RF-007 cross-owner bootstrap write remains in i4store: player_story_cursors
+ - RF-007 cross-owner bootstrap write remains in i4store: player_guide_return_state
+ - RF-015 required EconomyBootstrapContributor production seam missing
+ - RF-015 required temporal-resource bootstrap persistence path missing
+validate_i5_rc=1 (expected RED RF-007/RF-015)
+== ownership known-open ==
+SCHEMA/QUERY OWNERSHIP: PASS WITH KNOWN OPEN FINDINGS
+ - KNOWN OPEN RF-007: write player_guide_return_state in internal/adapters/postgres/i4store/bootstrap_runtime.go
+ - KNOWN OPEN RF-007: write player_profiles in internal/adapters/postgres/i4store/bootstrap_runtime.go
+ - KNOWN OPEN RF-007: write player_progression in internal/adapters/postgres/i4store/bootstrap_runtime.go
+ - KNOWN OPEN RF-007: write player_story_cursors in internal/adapters/postgres/i4store/bootstrap_runtime.go

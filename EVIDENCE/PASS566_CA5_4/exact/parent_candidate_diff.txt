@@ -1,0 +1,15 @@
+Files /mnt/data/ca5_4_parent_verify/backend/internal/adapters/postgres/characterqueries/querytext_gen.go and /mnt/data/ca5_4_impl/backend/internal/adapters/postgres/characterqueries/querytext_gen.go differ
+Files /mnt/data/ca5_4_parent_verify/backend/internal/adapters/postgres/characterstore/saved_preset.go and /mnt/data/ca5_4_impl/backend/internal/adapters/postgres/characterstore/saved_preset.go differ
+Files /mnt/data/ca5_4_parent_verify/backend/internal/adapters/postgres/characterstore/saved_preset_test.go and /mnt/data/ca5_4_impl/backend/internal/adapters/postgres/characterstore/saved_preset_test.go differ
+Only in /mnt/data/ca5_4_impl/backend/internal/application/characterasset: saved_preset_reference_state.go
+Only in /mnt/data/ca5_4_impl/backend/internal/application/characterasset: saved_preset_reference_state_test.go
+Only in /mnt/data/ca5_4_impl/backend/internal/application/charactersavedpreset: reference_guard.go
+Only in /mnt/data/ca5_4_impl/backend/internal/application/charactersavedpreset: reference_guard_concurrency_test.go
+Only in /mnt/data/ca5_4_impl/backend/internal/application/charactersavedpreset: reference_guard_test.go
+Only in /mnt/data/ca5_4_impl/backend/internal/application/charactersavedpreset: reference_state.go
+Only in /mnt/data/ca5_4_impl/backend/internal/application/charactersavedpreset: reference_state_test.go
+Files /mnt/data/ca5_4_parent_verify/backend/internal/application/charactersavedpreset/service_test.go and /mnt/data/ca5_4_impl/backend/internal/application/charactersavedpreset/service_test.go differ
+Only in /mnt/data/ca5_4_impl/backend/internal/archguard: ca5_4_contract_test.go
+Files /mnt/data/ca5_4_parent_verify/backend/sql/character/preset.sql and /mnt/data/ca5_4_impl/backend/sql/character/preset.sql differ
+Only in /mnt/data/ca5_4_impl/backend/tools: check_ca5_4_source_oracle.py
+Only in /mnt/data/ca5_4_impl/backend/tools: validate_ca5_4.py

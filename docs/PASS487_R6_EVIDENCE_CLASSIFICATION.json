@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "pass": "487.0",
+  "node": "R6",
+  "result": "GREEN_BOUNDED_R7_NATIVE_PENDING",
+  "phase_acceptance_recommendation": "ACCEPT_R6_AND_ADVANCE_TO_R7_PRE_IMPLEMENTATION_RESEARCH_RECONCILIATION",
+  "claims": [
+    {"classification":"SOURCE_FACT","claim":"Current src_64 Backpack consumes time/table_id/item_num and preserves original stack timestamp on quantity merge."},
+    {"classification":"RUNTIME_OBSERVED","claim":"Fresh compatibility copy passed full tests, focused race, vet and archguard; exact canonical Go execution is environment-blocked."},
+    {"classification":"RUNTIME_OBSERVED","claim":"Canonical static/source/oracle gate is green with all five SHA256-locked external inputs."},
+    {"classification":"IMPLEMENTATION_DECISION","claim":"R6 adds no migration00012; existing durable owners are sufficient."},
+    {"classification":"IMPLEMENTATION_DECISION","claim":"Realtime deployment remains explicit single-owner enforcement; multi-replica HA is not claimed."},
+    {"classification":"UNKNOWN","claim":"Real PostgreSQL SSI overlap, advisory-lock session behavior, exact PostgreSQL-tag execution and River integration for the changed R6 code remain R7 proof obligations."},
+    {"classification":"SUPERSEDED","claim":"RF-018 Skill Point projection is not an R6 defect; R5 already owns and projects Skill through temporal/privilege semantics."}
+  ],
+  "r7_required": true,
+  "r7_scope": "Original repaired I0-I5 real PostgreSQL/River proof only; post-R7 feature owners excluded",
+  "w2_still_required": true
+}

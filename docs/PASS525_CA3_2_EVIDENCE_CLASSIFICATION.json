@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "pass": "525.0",
+  "phase": "CHARACTER_ASSET_CORE",
+  "internal_stage": "CA3-2",
+  "classifications": [
+    {"label":"SOURCE_FACT","claim":"MID781 request is table_id and client consumes egg first, otherwise source fragment requirement; MID782 success sets local is_show before MID789; extra_drops_ is processed before new_funcs_; first immediate hatch is localized as first-time free."},
+    {"label":"RUNTIME_OBSERVED","claim":"Pass525 implements Function-38 starter ensure-one, MID781 lineage-safe acquisition, MID782 free/paid/natural acceleration settlement, MID789 natural/idempotent show, and routes only 780/781/782/789."},
+    {"label":"IMPLEMENTATION_DECISION","claim":"PetRoot owns a player-wide first_free_hatch_used fact; MID781 same-lineage retry returns existing Pet; birthday uses stable operation StartedAt; server recomputes the source hatch-price formula."},
+    {"label":"UNKNOWN","claim":"Original server physical storage for first-free entitlement, exact original error IDs, and independent original-server verification of the hatch price formula remain unknown."},
+    {"label":"ENVIRONMENT_BLOCKED","claim":"Exact Go 1.27.1/sqlc 1.31.1/real PostgreSQL/stock-client proof is deferred to the combined CA3 Work gate."}
+  ]
+}

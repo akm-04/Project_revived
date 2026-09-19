@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "pass": "531.0",
+  "status": "LOCAL_WORKFIX_CANDIDATE_NOT_CA3_ACCEPTED",
+  "parent_pass530_archive_sha256": "c329abe73765cb8af90d394bc3362116cf8f32f4f03808c0ea58817847e9d7ef",
+  "luna_evidence_sha256": "3f7f3b17aa878d51dcb0a7196b561c7999d6fe890b8255cadc5deaddf228e581",
+  "luna_proposed_archive_sha256": "cd2ff21e6996b8c607f9d83493a9f11c2e6b97293c1ae2fa19e8c2504554425c",
+  "adjudication": {
+    "runtime_diagnoses": "ACCEPTED",
+    "luna_patch_verbatim": "REJECTED_IN_FAVOR_OF_STRONGER_TYPED_AND_SOURCE_COMPLETE_REPAIR"
+  },
+  "source_facts": {
+    "src64_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+    "backend_lua_sha256": "95378e2b0be8180df6de27e9e430c630bcfe46c080e1f91ef5f6d74bdbb1b840",
+    "stock_top_level_metadata": ["mid", "token", "region", "v_", "app_v", "platform"]
+  },
+  "normal_chat_proof": {
+    "canonical_static": "GREEN",
+    "compatibility_copy_focused_test_race_vet": "GREEN",
+    "compatibility_copy_bounded_package_regression": "91_OF_91_GREEN",
+    "go_execution_scope": "COMPATIBILITY_COPY_ONLY"
+  },
+  "work_requalification_required": true,
+  "aggregate_ca3_acceptance": false
+}

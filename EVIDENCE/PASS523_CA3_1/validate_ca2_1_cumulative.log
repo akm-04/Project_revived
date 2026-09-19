@@ -1,0 +1,2 @@
+CA2-1 STATIC VALIDATION: PASS (cumulative)
+CA2-1 foundation/projection invariants preserved while later-stage diagnostic handlers may exist without production activation

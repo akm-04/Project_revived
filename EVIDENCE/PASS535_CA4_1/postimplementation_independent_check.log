@@ -1,0 +1,43 @@
+CA4-1 POSTIMPLEMENTATION INDEPENDENT CHECK: PASS (42/42)
+PASS Pass534 implementation contract present
+PASS Pass534 acceptance matrix present
+PASS exact current src_64 archive hash
+PASS canonical Go/toolchain pins pristine
+PASS implementation delta limited to authorized CA4-1 surface bad=[]
+PASS migration 00019 adds equipment content relations
+PASS migration 00019 creates no mutable Character equipment owner
+PASS no universal Equipment aggregate/table in product code
+PASS character domain shared contract contains HeroEquipmentSlotRef
+PASS character domain shared contract contains PetEquipmentSlotRef
+PASS character domain shared contract contains SuperEquipmentSlotRef
+PASS character domain shared contract contains SpiritRef
+PASS character application shared contract contains PlayerProgressionMaxHeroColorProvider
+PASS character application shared contract contains RestorationModifier
+PASS borrowed Spirit boundary only
+PASS I5 exchange contains PrepareMaterialExchangeTx
+PASS I5 exchange contains ApplyMaterialExchangeTx
+PASS I5 exchange contains canonicalGrantLockRequirements
+PASS I5 exchange contains ErrMaterialExchangeResourceCollision
+PASS I5 exchange contains ErrMaterialExchangeGrantAlreadySettled
+PASS I5 exchange contains preflightGrantTx
+PASS I5 exchange contains prepareMaterialDebitStateTx
+PASS combined exchange does not own transaction lifecycle
+PASS equipment roots=604
+PASS equipment closure=1176
+PASS ordered recipe edges=1934
+PASS CA4-1 exact source oracle passes
+PASS CA4-1 shared implementation does not activate MID54
+PASS CA4-1 shared implementation does not activate MID62
+PASS CA4-1 shared implementation does not activate MID58
+PASS CA4-1 shared implementation does not activate MID51
+PASS CA4-1 shared implementation does not activate MID57
+PASS CA4-1 shared implementation does not activate MID783
+PASS CA4-1 shared implementation does not activate MID792
+PASS CA4-1 shared implementation does not activate MID785
+PASS CA4-1 shared implementation does not activate MID790
+PASS CA4-1 shared implementation does not activate MID304
+PASS evidence W4D_FINAL_FOCUSED_TESTS.log contains expected GREEN marker
+PASS evidence W4D_FOCUSED_RACE.log contains expected GREEN marker
+PASS evidence W4D_BOUNDED_REGRESSION.log contains expected GREEN marker
+PASS evidence W4D_BOUNDED_VET.log contains expected GREEN marker
+PASS evidence W4_CANONICAL_FINAL_VALIDATORS.log contains expected GREEN marker

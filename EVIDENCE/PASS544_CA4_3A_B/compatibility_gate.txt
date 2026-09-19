@@ -1,0 +1,11 @@
+=== focused ===
+ok  	gxb.local/backend/v2/internal/application/characterhero	0.075s
+ok  	gxb.local/backend/v2/internal/adapters/stockruntime	0.399s
+ok  	gxb.local/backend/v2/internal/archguard	0.027s
+=== focused race ===
+ok  	gxb.local/backend/v2/internal/application/characterhero	1.641s
+ok  	gxb.local/backend/v2/internal/adapters/stockruntime	1.421s
+ok  	gxb.local/backend/v2/internal/archguard	1.118s
+=== vet all ===
+=== archguard ===
+ok  	gxb.local/backend/v2/internal/archguard	(cached)

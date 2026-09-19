@@ -1,0 +1,49 @@
+{
+  "entries": [
+    {
+      "claim": "All 11 R4A source members and outer current src_64 archive match the frozen Pass467 hashes; direct independent parse reproduced compiled row/rule counts.",
+      "classification": "SOURCE_FACT",
+      "evidence": "docs/PASS468_R4A_INDEPENDENT_SRC64_REALITY_CHECK.json",
+      "id": "P468-E1"
+    },
+    {
+      "claim": "Pass353 independently corroborates the bounded R4A owner/capability boundaries without becoming V2 authority.",
+      "classification": "STRONG_INFERENCE",
+      "evidence": "docs/PASS468_R4A_INDEPENDENT_PASS353_REALITY_CHECK.json",
+      "id": "P468-E2"
+    },
+    {
+      "claim": "R4A canonical catalog enables only Mana, Crystal and qualified ordinary stack definitions; R5/owner-gated/fail-closed content remains non-mutating.",
+      "classification": "IMPLEMENTATION_DECISION",
+      "evidence": "internal/content/builtin/generated/manifest.json",
+      "id": "P468-E3"
+    },
+    {
+      "claim": "Disposable Go 1.23.2 compatibility copy passes focused test/race/vet and 64/64 individual Go packages.",
+      "classification": "RUNTIME_OBSERVED",
+      "evidence": "EVIDENCE/PASS468_R4A_COMPATIBILITY_COPY_CORE.txt; EVIDENCE/PASS468_R4A_COMPATIBILITY_COPY_PACKAGE_SWEEP.txt",
+      "id": "P468-E4",
+      "limitation": "COMPATIBILITY_COPY_ONLY"
+    },
+    {
+      "claim": "Canonical Python/static/source/oracle R4A gate passes; exact canonical Go execution is environment-blocked.",
+      "classification": "RUNTIME_OBSERVED",
+      "evidence": "EVIDENCE/PASS468_R4A_CANONICAL_STATIC_SOURCE_VALIDATION.txt",
+      "id": "P468-E5"
+    },
+    {
+      "claim": "Fresh Pass460-to-R4A byte diff has no migration/PostgreSQL/I5 mutation/Grant/operation/receipt/httpedge/go.mod/go.sum changes.",
+      "classification": "SOURCE_FACT",
+      "evidence": "docs/PASS468_R4A_INDEPENDENT_IMPLEMENTATION_FOOTPRINT.json",
+      "id": "P468-E6"
+    },
+    {
+      "claim": "Exact Go 1.27.1 and real PostgreSQL/River behavior remain unexecuted for Pass468; R7/W2 gates remain mandatory.",
+      "classification": "UNKNOWN",
+      "evidence": "docs/PASS468_R4A_STAGE_VALIDATION.json",
+      "id": "P468-E7"
+    }
+  ],
+  "pass": "468.0",
+  "schema_version": 1
+}

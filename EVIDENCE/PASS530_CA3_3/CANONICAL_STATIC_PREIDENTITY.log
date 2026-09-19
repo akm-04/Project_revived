@@ -1,0 +1,27 @@
+PASS530 CA3-3 canonical deterministic/static checks
+SOURCE_FACT exact source archive SHA256 c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf
+R4A CONTENT GENERATION: PASS revision=0c76be19146fbd477a7f63aac3cb955335f4529090906c13447ef54872da9931 resources=5556 players=100 functions=99 heroes=568 pets=54 pet_acquisition=27
+CA3-3 SOURCE ORACLE CHECK: PASS
+exact current src_64 c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf corroborates Pet progression MIDs, stock wire shapes, evolution/EXP/skill progression sources, and checked-in generated content pins
+KERNEL QUERYTEXT: PASS sha256=74ad9accee063e77323a2eb4a69df394bdcb331ce88e3d789864ffbc904b7511
+CONTENT QUERYTEXT: PASS sha256=5c2e28d1c4e8a6e552be9d4996ed7d29718c3a5f2b996219d7883d6ceac871e5
+CHARACTER QUERYTEXT: PASS hero_sha256=4d1dda29ec59fc2a9416d56dd9cfe45d14589e0ccc164ce36d1663686ad7a1d3 pet_sha256=5477eed6bdd96afe2c0d3c46681b6fc0aeb83260f011cb95785a72e9d03c10ee
+SCHEMA/QUERY OWNERSHIP: PASS
+R0 VALIDATION: PASS (historical R0 guard preserved; cumulative foundation repair accepted at Pass489)
+R5 VALIDATION: PASS (CUMULATIVE MODE)
+static progression/temporal/bootstrap/function/directory/receipt/wire/stack R5 seams present; historical compiler pin remains strict outside cumulative mode; native PostgreSQL/River/W2 remain separate
+CA3-3 VALIDATION: PASS
+Pet progression persistence/content/I5/service/strict-wire/timing seams and contract-specific regression guards are present; live aggregate acceptance remains separate
+R6 VALIDATION: PASS (CUMULATIVE MODE)
+static projection/directory/replay/lifecycle/key/single-owner/http/observability R6 seams present; cumulative mode permits later migrations but does not weaken historical R6 pins
+CURRENT CUMULATIVE CANDIDATE VALIDATION: PASS
+historical R6 pins retained; exact forward migration inventory and current release/SBOM version agree
+DEPENDENCY POLICY: PASS
+resolved_go_modules 16 qualified_candidates 5
+RESOLVED SBOM: PASS
+SQLC GENERATION POLICY: PASS
+SQLC GENERATION POLICY: PASS
+DEPENDENCY POLICY: PASS
+resolved_go_modules 16 qualified_candidates 5
+RESOLVED SBOM: PASS
+CONNECTED CANDIDATE STATIC PRESEAL: PASS

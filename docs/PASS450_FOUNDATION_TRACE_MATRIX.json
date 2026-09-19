@@ -1,0 +1,323 @@
+{
+  "schema_version": 1,
+  "pass": "450.0",
+  "purpose": "Machine design-to-implementation and owner-lifecycle trace for the implemented I0-I5 foundation.",
+  "required_fields": [
+    "stage",
+    "owner",
+    "contracts",
+    "production_paths",
+    "persistence",
+    "projection_or_wire",
+    "tests",
+    "evidence_level",
+    "open_findings",
+    "extension_seam"
+  ],
+  "records": [
+    {
+      "stage": "I0",
+      "owner": "architecture/dependency enforcement",
+      "contracts": [
+        "PASS407",
+        "PASS431/I0"
+      ],
+      "production_paths": [
+        "internal/archguard",
+        "tools/check_schema_query_ownership.py"
+      ],
+      "persistence": [],
+      "projection_or_wire": [],
+      "tests": [
+        "go test ./internal/archguard",
+        "tools/check_schema_query_ownership.py --self-test"
+      ],
+      "evidence_level": "LOCAL_STATIC_GUARD",
+      "open_findings": [],
+      "extension_seam": "Explicit layer matrix + CANONICAL_TABLE_OWNERSHIP.json; new layers/tables require registration."
+    },
+    {
+      "stage": "I1",
+      "owner": "foundation/tx + kernel/idempotency",
+      "contracts": [
+        "PASS407",
+        "PASS434_I1_FOUNDATION_CONTRACT"
+      ],
+      "production_paths": [
+        "internal/foundation/tx",
+        "internal/foundation/receipt",
+        "internal/adapters/postgres/kernelstore"
+      ],
+      "persistence": [
+        "gxb_operation_receipts"
+      ],
+      "projection_or_wire": [],
+      "tests": [
+        "internal/foundation/tx tests",
+        "internal/adapters/postgres/kernelstore tests",
+        "Pass441 PostgreSQL evidence"
+      ],
+      "evidence_level": "LOCAL_TEST_PLUS_HISTORICAL_LIVE_POSTGRES",
+      "open_findings": [],
+      "extension_seam": "Transaction runner and receipt resolver ports retained; R1A local outcome safety repaired, real pgxpool ambiguity proof remains R7."
+    },
+    {
+      "stage": "I2",
+      "owner": "protocol edge",
+      "contracts": [
+        "PASS412",
+        "PASS435/I2"
+      ],
+      "production_paths": [
+        "internal/protocol",
+        "internal/adapters/stockruntime"
+      ],
+      "persistence": [],
+      "projection_or_wire": [
+        "HTTP stock envelope",
+        "Xinyoudi AMF3/TCP"
+      ],
+      "tests": [
+        "validate_i2.py",
+        "oracle wire fixtures",
+        "validate_r3a.py",
+        "R3A AMF/realtime golden + fuzz tests"
+      ],
+      "evidence_level": "LOCAL_GOLDEN_STATIC_FUZZ_R3A_GREEN",
+      "open_findings": [],
+      "extension_seam": "Generated numeric MID registry retained; R3A adds finite decode/encode/frame resource budgets without stock wire changes."
+    },
+    {
+      "stage": "I3",
+      "owner": "identity/logicalserver/bootstrap",
+      "contracts": [
+        "PASS413",
+        "PASS414",
+        "PASS436/I3"
+      ],
+      "production_paths": [
+        "internal/application/bootstrap",
+        "internal/adapters/postgres/i4store"
+      ],
+      "persistence": [
+        "accounts",
+        "account_sessions",
+        "logical_servers",
+        "players",
+        "gameplay_contexts",
+        "player_directory_profiles"
+      ],
+      "projection_or_wire": [
+        "MID18",
+        "MID1"
+      ],
+      "tests": [
+        "validate_i3.py",
+        "I3 oracle bootstrap checks",
+        "validate_r1b.py",
+        "validate_r2a.py",
+        "validate_r2b.py",
+        "strict canonical table ownership"
+      ],
+      "evidence_level": "LOCAL_TEST_PLUS_HISTORICAL_LIVE_POSTGRES",
+      "open_findings": [],
+      "extension_seam": "R2A lifecycle and R2B transaction-aware owner bootstrap/projection seams locally repaired; real PostgreSQL concurrency/rollback remains R7."
+    },
+    {
+      "stage": "I4",
+      "owner": "realtime/Wave-S",
+      "contracts": [
+        "PASS411",
+        "PASS414 Wave-S addendum",
+        "PASS441/I4"
+      ],
+      "production_paths": [
+        "internal/application/realtime",
+        "internal/adapters/stockruntime",
+        "internal/adapters/postgres/i4store/realtime_authority.go"
+      ],
+      "persistence": [
+        "gameplay_contexts",
+        "account_sessions",
+        "accounts"
+      ],
+      "projection_or_wire": [
+        "WORLD/GUILD/SERVICE realtime",
+        "Wave-S boot events"
+      ],
+      "tests": [
+        "validate_i4.py",
+        "I4 oracle Wave-S checks",
+        "Pass441 W1 backend evidence",
+        "validate_r3b.py",
+        "R3B net.Pipe admission/deadline/idle/writer tests",
+        "validate_r3c.py",
+        "R3C bounded capture/correlation/quiescence/client-proof tests",
+        "R3C actual realtime opaque-correlation JSONL test"
+      ],
+      "evidence_level": "LOCAL_TEST_PLUS_HISTORICAL_LIVE_POSTGRES_R3_SERVER_EVIDENCE_GREEN_CLIENT_ACCEPTANCE_W2_PENDING",
+      "open_findings": [],
+      "extension_seam": "Realtime authority ports retained; R3B provides bounded admission/deadlines/dispatcher/single-writer and R3C provides bounded correlated evidence with server/client proof separation. EX-05 multi-process ownership and real stock-client consumption remain open/live-deferred."
+    },
+    {
+      "stage": "I5",
+      "owner": "player-core",
+      "contracts": [
+        "PASS415 Player Core"
+      ],
+      "production_paths": [
+        "internal/application/i5",
+        "internal/adapters/postgres/i5store"
+      ],
+      "persistence": [
+        "player_profiles",
+        "player_progression",
+        "player_story_cursors",
+        "player_function_unlocks",
+        "player_guide_return_state"
+      ],
+      "projection_or_wire": [
+        "MID17/MID1 contribution",
+        "MID26"
+      ],
+      "tests": [
+        "validate_i5.py",
+        "I5 application tests"
+      ],
+      "evidence_level": "LOCAL_TEST_REALITY_CHECK_RED",
+      "open_findings": [
+        "RF-013",
+        "RF-015",
+        "RF-018",
+        "RF-024"
+      ],
+      "extension_seam": "Owner rows are modular; bootstrap/progression/projection lifecycle requires R2/R5/R6."
+    },
+    {
+      "stage": "I5",
+      "owner": "typed-economy + grant",
+      "contracts": [
+        "PASS415 Typed Economy",
+        "PASS415 Grant"
+      ],
+      "production_paths": [
+        "internal/domain/economy",
+        "internal/application/i5",
+        "internal/adapters/postgres/i5store"
+      ],
+      "persistence": [
+        "player_currency_balances",
+        "player_temporal_resources",
+        "player_item_stacks",
+        "i5_resource_registry"
+      ],
+      "projection_or_wire": [
+        "MID17 economy fields",
+        "Grant award shapes"
+      ],
+      "tests": [
+        "I5 grant/replay tests",
+        "validate_r2c.py",
+        "caller-owned transaction witness/lock-order tests"
+      ],
+      "evidence_level": "LOCAL_TEST_REALITY_CHECK_RED",
+      "open_findings": [
+        "RF-014",
+        "RF-016",
+        "RF-018",
+        "RF-019",
+        "RF-023",
+        "RF-017"
+      ],
+      "extension_seam": "R2C caller-owned Grant composition and creation fencing are locally repaired; source policy/bootstrap/projection behavior remains R4-R6 and live lock proof remains R7."
+    },
+    {
+      "stage": "I5",
+      "owner": "mail",
+      "contracts": [
+        "PASS415 Mail"
+      ],
+      "production_paths": [
+        "internal/domain/mail",
+        "internal/application/i5",
+        "internal/adapters/postgres/i5store"
+      ],
+      "persistence": [
+        "mail_namespace_counters",
+        "mail_records",
+        "mail_attachments"
+      ],
+      "projection_or_wire": [
+        "MID368",
+        "MID369",
+        "MID370"
+      ],
+      "tests": [
+        "mail claim/overflow/replay tests"
+      ],
+      "evidence_level": "LOCAL_TEST",
+      "open_findings": [],
+      "extension_seam": "Grant/Mail semantic composition retained; stock inventory reload is a separate R6 concern."
+    },
+    {
+      "stage": "I5",
+      "owner": "objective",
+      "contracts": [
+        "PASS415 Objective"
+      ],
+      "production_paths": [
+        "internal/domain/objective",
+        "internal/application/i5",
+        "internal/adapters/postgres/i5store"
+      ],
+      "persistence": [
+        "player_mission_instances",
+        "objective_definitions"
+      ],
+      "projection_or_wire": [
+        "MID161",
+        "MID2736"
+      ],
+      "tests": [
+        "objective fact/claim tests",
+        "validate_r2d.py",
+        "objective stock-claim replay test",
+        "objective base-row SQL lock structural test"
+      ],
+      "evidence_level": "LOCAL_TEST_R2D_GREEN_REAL_POSTGRES_LOCK_PROOF_R7_PENDING",
+      "open_findings": [
+        "RF-023"
+      ],
+      "extension_seam": "Committed fact/claim model and caller-owned Grant composition retained; R2D base-row lock placement locally repaired; content revision pinning remains R4."
+    },
+    {
+      "stage": "I5",
+      "owner": "redeem",
+      "contracts": [
+        "PASS422 Redeem addendum"
+      ],
+      "production_paths": [
+        "internal/domain/redeem",
+        "internal/application/i5",
+        "internal/adapters/postgres/i5store"
+      ],
+      "persistence": [
+        "redeem_campaigns",
+        "redeem_codes",
+        "redeem_redemptions",
+        "redeem_reward_bundle_revisions"
+      ],
+      "projection_or_wire": [
+        "MID230"
+      ],
+      "tests": [
+        "redeem service/stock tests"
+      ],
+      "evidence_level": "LOCAL_TEST",
+      "open_findings": [
+        "RF-023"
+      ],
+      "extension_seam": "Redeem delegates to Grant; immutable revision pinning repaired in R4."
+    }
+  ]
+}

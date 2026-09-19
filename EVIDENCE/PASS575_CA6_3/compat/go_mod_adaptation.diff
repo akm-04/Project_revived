@@ -1,0 +1,12 @@
+--- /mnt/data/_gxb_init/backend/backend/go.mod	2026-09-16 22:37:32.000000000 +0000
++++ /mnt/data/_gxb_compat_ca63_closure2/go.mod	2026-09-18 18:26:50.309296114 +0000
+@@ -1,8 +1,7 @@
+ module gxb.local/backend/v2
+ 
+-go 1.26.0
++go 1.23.0
+ 
+-toolchain go1.27.1
+ 
+ require (
+ 	github.com/go-chi/chi/v5 v5.3.1

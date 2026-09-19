@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "pass": "433.0",
+  "stage": "I0",
+  "status": "PASS_WITH_ENVIRONMENT_DEFERRED_EXTERNAL_TOOLCHAIN_FETCH",
+  "product_behavior_claimed": false,
+  "pass353_copied_into_v2": false,
+  "oracle_hash_verification": "PASS",
+  "local_build_test_vet": "PASS",
+  "architecture_guard": "PASS",
+  "dependency_policy": "PASS",
+  "target_toolchain": "go1.27.1",
+  "postgres_target": "18.6",
+  "connected_checks_pending": [
+    "Go 1.27.1 exact build",
+    "resolved go.sum/transitive SBOM",
+    "govulncheck on resolved graph"
+  ],
+  "postgres_river_runtime_proof": "NOT_I0_W1_AFTER_I4",
+  "local_go_version": "go version go1.23.2 linux/amd64",
+  "offline_gate": "PASS",
+  "oracle_bounded_crosscheck": "PASS",
+  "i0_gate_decision": "CLOSED_FOR_NORMAL_CHAT_BOOTSTRAP; exact Go1.27.1/transitive govulncheck remains connected-environment proof, not PostgreSQL proof."
+}

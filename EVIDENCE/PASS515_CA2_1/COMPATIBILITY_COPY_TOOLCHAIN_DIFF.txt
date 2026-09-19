@@ -1,0 +1,11 @@
+COMPATIBILITY_COPY_ONLY
+Origin: /mnt/data/_gxb514/candidate_work
+Canonical toolchain files remained pristine.
+Disposable copy: /mnt/data/_gxb514/compat2
+Only environment accommodations in disposable copy:
+- go.mod: `go 1.26.0` -> `go 1.23.0`
+- go.mod: removed `toolchain go1.27.1`
+- .go-version: `1.27.1` -> `1.23.2`
+No source, migration, generated SQL, assertion, test, or package exclusion changes were made in the compatibility copy.
+Local execution toolchain: go1.23.2 linux/amd64
+Canonical pins: go.mod SHA256 313c574368bb56dc570bc3427b65f59b059e492f909fe43b7d0291b5ced21dc4; go.sum SHA256 efbf6753542d66e2fefcb2ab5e2ade7c9d28f2206a1113d1eb9568f2cb75808d; .go-version SHA256 a8844fbc8c3eb51c26ed00aec4cd5a5a9d647f849c6ead07bcc83ed24c4a7718
