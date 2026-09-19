@@ -5,7 +5,7 @@
   "name": "gxb-backend-v2-resolved",
   "documentNamespace": "https://local.invalid/gxb/backend/v2/resolved",
   "creationInfo": {
-    "created": "2026-09-16T23:15:03Z",
+    "created": "2026-09-19T08:16:59Z",
     "creators": [
       "Tool: GXB-V2-resolved-SBOM-generator"
     ]
@@ -14,7 +14,7 @@
     {
       "SPDXID": "SPDXRef-GXB",
       "name": "gxb-backend-v2",
-      "versionInfo": "v0.76.4-candidate",
+      "versionInfo": "v0.80.1-candidate",
       "downloadLocation": "NOASSERTION",
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
@@ -365,7 +365,7 @@
     {
       "annotationType": "OTHER",
       "annotator": "Tool: GXB-V2-resolved-SBOM-generator",
-      "annotationDate": "2026-09-16T23:15:03Z",
+      "annotationDate": "2026-09-19T08:16:59Z",
       "comment": "Resolved runtime Go module closure is generated from the current BUILD_INFO version and DEPENDENCIES.lock.json; qualified non-linked tooling/services remain separately classified."
     }
   ]

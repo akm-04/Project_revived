@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "document": "CA6_6G_LUNA_EVIDENCE_SUMMARY",
+  "overall_status": "BLOCKED_IDENTITY_DISCREPANCY",
+  "backend_unchanged": true,
+  "ca6_acceptance_declared": false,
+  "ca6_6_acceptance_declared": false,
+  "ca6e_acceptance_declared": false,
+  "stock_client_scope": "W2_DEFERRED_PHYSICAL_DEVICE_ONLY",
+  "candidate": {
+    "archive_sha256": "02c727d1476dba60a0b3e4ca83be3ca81cae8f1b2a587fdc538c84db3c61e780",
+    "version": "v0.80.0",
+    "product_pass": "579.0",
+    "file_count_excluding_git_initial": 1431,
+    "file_count_excluding_git_final": 1431,
+    "tree_digest_asserted_by_handoff": "f8c0db62554de2e860df9d85d41b8595fc7c18871f7e61db6670cbecae2fd993",
+    "tree_digest_computed_initial": "9c4a80134ebc6986394a1e2d2ede9edd7352577db51f43345759d7a4204ff1ba",
+    "tree_digest_computed_final": "9c4a80134ebc6986394a1e2d2ede9edd7352577db51f43345759d7a4204ff1ba",
+    "bytewise_identical_to_fresh_final_extraction": true
+  },
+  "authority": {
+    "passmap_archive_sha256": "bd6076d90b01d0326032eecf41c64b89210a852b3ae5caaacb57e44fb5220304",
+    "passmap_modified": false
+  },
+  "runtime": {
+    "go": "go1.27.1",
+    "postgresql": "18.6",
+    "sqlc": "v1.31.1",
+    "goose": "v3.27.3",
+    "govulncheck": "No vulnerabilities found",
+    "fresh_schema_high_water": 29,
+    "native_ca6_2_checks": 15,
+    "native_ca6_6_checks": 13,
+    "native_ca6_6_failures": 0,
+    "postgres_receipts_after_restore": 23
+  },
+  "blocking_finding": {
+    "row": "ID01",
+    "status": "FAIL",
+    "classification": "UNKNOWN/SUPERSEDED_METADATA",
+    "detail": "The supplied asserted tree digest f8c0db... does not equal the exact candidate's checked-in tree_digest algorithm output 9c4a8013... on both clean initial and clean final trees. Archive, manifest, pins, and file count match. No mutation was made to force a match."
+  },
+  "semantic_result": "All exact, static, source-oracle, Go, race, tagged, real-PostgreSQL, native CA6-2, native CA6-6, routing, restore, and security checks passed within their recorded scope.",
+  "evidence_root": "."
+}

@@ -1,19 +1,25 @@
 #!/usr/bin/env python3
 from __future__ import annotations
-import argparse,hashlib,re,shutil,subprocess,sys,tempfile
+import argparse,re,shutil,subprocess,sys,tempfile
 from pathlib import Path
+sys.dont_write_bytecode=True
+from candidate_identity import tree_identity, verify_snapshot_manifest
 ROOT=Path(__file__).resolve().parents[1]
 
 def fail(msg): print('CONNECTED CANDIDATE PRESEAL: FAIL\n - '+msg); raise SystemExit(1)
 def run(cmd,cwd=ROOT,env=None):
     print('+',' '.join(cmd)); subprocess.run(cmd,cwd=cwd,env=env,check=True)
 def tree_digest(root:Path):
-    h=hashlib.sha256()
-    for p in sorted(x for x in root.rglob('*') if x.is_file() and '.git' not in x.parts):
-        h.update(p.relative_to(root).as_posix().encode()+b'\0'); h.update(p.read_bytes())
-    return h.hexdigest()
+    # Single canonical identity algorithm shared with handoff/PassMap generation.
+    return str(tree_identity(root)["product_tree_digest_sha256"])
 
 def static_checks():
+    try:
+        snap=verify_snapshot_manifest(ROOT)
+    except RuntimeError as exc:
+        fail(str(exc))
+    ident=tree_identity(ROOT)
+    print('CONNECTED CANDIDATE IDENTITY:', ident['algorithm'], ident['product_tree_digest_sha256'], 'files', ident['file_count_excluding_git'], 'snapshot_entries', snap['snapshot_entry_count'])
     gm=(ROOT/'go.mod').read_text()
     if 'go 1.26.0' not in gm: fail('W1-resolved module language floor go 1.26.0 missing')
     if 'toolchain go1.27.1' not in gm: fail('toolchain go1.27.1 pin missing')
