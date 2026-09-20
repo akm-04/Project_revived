@@ -20,15 +20,15 @@ req('type TxPermanentSkinMaterializer interface' in materializer and 'GrantPerma
 for tok in ['case 60:', 'case 61:', 'case 2979:']:
     req(tok in dispatch, f'CA7-3 dispatcher route missing {tok}')
 for tok in ['case 1893:', 'case 1894:', 'case 1895:']:
-    req(tok not in dispatch, f'CA7-5 route activated early: {tok}')
+    req(tok not in dispatch, f'Pet-owned CA7-5 route leaked into Hero dispatcher: {tok}')
 req('58, 60, 61, 62' in main and '67, 68, 69, 89' in main and '304, 2979' in main, 'CA7-3/4 production registration drift')
 for tok in ['ca7.hero-skin-on', 'ca7.hero-skin-cancel', 'ca7.hero-illusion-select']:
     req(tok in replay, f'CA7-3 replay family missing {tok!r}')
 req('CurrentStateConvergence' in replay, 'MID60 current-state convergence replay classification missing')
-req('TestCA73HeroAppearanceActivationPreservesLaterStageFences' in arch, 'CA7-3 architecture fence missing')
+req('TestCA75AppearanceActivationPreservesOwnerAndSuccessorFences' in arch, 'evolved CA7 architecture ownership fence missing')
 if errs:
     print('CA7-3 VALIDATION: FAIL')
     for e in errs: print(' -',e)
     sys.exit(1)
 print('CA7-3 VALIDATION: PASS')
-print('Hero-owned ordinary/timed/illusion mutation seams, cohesive CAS, replay classes, future Commerce typed materializer, production routing and later-stage fences preserved')
+print('Hero-owned ordinary/timed/illusion mutation seams, cohesive CAS, replay classes, future Commerce typed materializer, production routing and Pet-owner separation preserved')

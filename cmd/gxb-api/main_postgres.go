@@ -240,7 +240,7 @@ func main() {
 		mustRegister(mid, heroD)
 	}
 	petD := stockruntime.PetDispatcher{Authority: authority, Service: petSvc, Economy: petEconomyProjection}
-	for _, mid := range []uint16{134, 780, 781, 782, 783, 785, 786, 787, 789, 790, 791, 792} {
+	for _, mid := range []uint16{134, 780, 781, 782, 783, 785, 786, 787, 789, 790, 791, 792, 1893, 1894, 1895} {
 		mustRegister(mid, petD)
 	}
 	guildD := stockruntime.GuildDispatcher{Authority: authority, Core: guildSvc, View: guildView}

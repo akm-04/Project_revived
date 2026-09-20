@@ -1,0 +1,6 @@
+COMPATIBILITY_COPY_ONLY
+Fresh clone of the current canonical CA7-5 candidate.
+Only environment accommodation: .go-version 1.27.1 -> 1.23.2; go.mod go 1.26.0 -> 1.23.0; toolchain go1.27.1 -> go1.23.2.
+go.sum unchanged. No compatibility edit was copied back to canonical.
+R4D/R5 failures in validators_part2 are expected pin-only failures caused by those three disposable-clone edits; the same cumulative validators pass on pristine canonical pins in exact/canonical_static_gate.log.
+This evidence does NOT prove exact Go1.27.1 execution, real PostgreSQL/River behavior, CA7-7 aggregate acceptance, or W2 physical stock-client compatibility.

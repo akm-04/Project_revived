@@ -1,0 +1,100 @@
+{
+  "schema_version": 2,
+  "pass": "592.0",
+  "stage": "CA7-5",
+  "status": "SOURCE_ORACLE_FROZEN_GREEN_CANDIDATE",
+  "authority": {
+    "passmap": {
+      "artifact": "gxb-backend-pass-591.0-passmap.zip",
+      "sha256": "957ab9ef7e0570d3344bbc605b070a365fa13cdcf945467021e013c43b088b8b"
+    },
+    "backend": {
+      "artifact": "gxb-backend-v2-v0.83.0-pass591-ca7-4-local-accepted.zip",
+      "sha256": "25e9958b956e5be6da45c0c327e457e9dbd096396e7be95cfe19de7d568511a8",
+      "git_head": "5ba75ec17ba07b585c1fa67ef5b5fb74ef627ef3",
+      "product_tree_sha256": "fa5b89591d1d88f63f7013a0e399bd80a5192a483f488c3a23dfef53f8baf798"
+    }
+  },
+  "oracles": [
+    {
+      "id": "current_src64",
+      "sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+      "role": "ACTIVE_IMPLEMENTATION_ORACLE",
+      "members": {
+        "app/common/network/mid.lua": "026a20b29d97624979777a68c64c749254031604057ff42aa8f8254c3e35b5af",
+        "app/windows/PetEquipInfoWindow.lua": "ff5297ed3fe600451df67fdc8e0b52be77cb30e5411beb72c42a60a45571a938",
+        "app/windows/BackpackWindow.lua": "48b18493fed4186541fc989a8ef60d6338d444c4e8a0fc986903a57e52ff19c1",
+        "app/model/Pet.lua": "214f4dcd93d0e494408d14a225810134c2e72a0dedd18a935a27dc62e0c00660",
+        "app/model/SelfPlayer.lua": "163d5893c9522ada412c2b9c4748a80757660fccdf03c8f72cb6edf0838b8eb4",
+        "app/common/tables/ItemTable.lua": "1f846972f29a55ee2dbb90f2cb9b0124eaeaa90646c3c66644ab66e231c37f00",
+        "data/tables/item.lua": "59b668c28a372543da0c36d7a8d84291cc5b93fa0d92b7cc389a645e96e7b7cc"
+      }
+    },
+    {
+      "id": "old_client",
+      "sha256": "d0a4815507fd4626ac5749f2f6efae554d3a4bef717793f155f58c8bed7170b1",
+      "role": "HISTORICAL_CLIENT_DIFFERENTIAL",
+      "members": {
+        "src/app/common/network/mid.lua": "c10ab0d38105be79201b6b1682a7fcb36eafa7f09b76002c5b9bf599a968d942",
+        "src/app/windows/PetMainWindow.lua": "786f2cb9e8d3a014208395f2667c7269325c7f51fee9952e2baa2e2bad249a57",
+        "src/app/windows/BackpackWindow.lua": "f7f24b903311e90027bfdf05c4c672ca397ef9f5e62df137e647bb1542ac74ec",
+        "src/app/model/Pet.lua": "ddd75c56c7875aa3f1cb4e4c184df302e4d91e8f11136fe0d58587938f98dc44",
+        "src/app/model/SelfPlayer.lua": "aee7827573d82bb36338512e908eb6883911f4996c6c85f1a6f8b826593def3a",
+        "src/app/common/tables/ItemTable.lua": "93403b47f624ede80ea4efb336041f9c30364abc89ba12432eef7c849368d81b",
+        "src/data/tables/item.lua": "32d073bc32b78d991e084f8f19782fbc66d660221805df540d26384e43e870d0"
+      }
+    }
+  ],
+  "source_facts": [
+    {
+      "id": "MID_1893",
+      "fact": "GET_PET_STYLE_FORM_ITEM=1893; request item_id; success callback consumes active_style and pet_styles then removes exactly one local backpack item."
+    },
+    {
+      "id": "MID_1894",
+      "fact": "USE_PET_STYLE=1894; request pet_id+style_id; success consumes active_style."
+    },
+    {
+      "id": "MID_1895",
+      "fact": "CANCEL_PET_STYLE=1895; request pet_id; success body state is unused and client sets active_style=0 locally."
+    },
+    {
+      "id": "STATE_MACHINE",
+      "fact": "Current and v1.164 Pet UI expose CANCEL whenever any home style is active; another USE is not reachable until cancel."
+    },
+    {
+      "id": "BACKPACK_ACQUIRE",
+      "fact": "Backpack can issue MID1893 for a qualified unowned style without consulting current active_style."
+    },
+    {
+      "id": "IDENTITY",
+      "fact": "Pet.petStyles and activeStyle store style item IDs; ItemTable.stylePet maps style item to canonical Pet family; SelfPlayer.getPetIgnoreAwaken resolves base/awakened collected instance."
+    },
+    {
+      "id": "CONTENT",
+      "fact": "Qualified current mappings are 50001374->10120001, 50001376->10030001, 50001402->10040001, 50001598->10190001."
+    },
+    {
+      "id": "DESCRIPTIONS",
+      "fact": "Current and v1.164 item descriptions characterize the consumables as obtaining/getting the Pet cabin, corroborating acquisition distinct from selection."
+    }
+  ],
+  "differential_findings": [
+    "Current and v1.164 callers/state model agree on MID1893/1894/1895 shapes and cancel-before-switch reachability.",
+    "Frozen V1 protocol registry corroborates MID identities but supplies no original-server semantic implementation; it remains differential/corroborative only.",
+    "APK/smali search supplied no discriminating native semantic evidence for Pet home-style mutations."
+  ],
+  "candidate_translation_requirements": [
+    "MID1893 acquisition must be grant-only and preserve pre-operation effective active style; it may normalize a stale raw selector but must not auto-select the acquired style.",
+    "MID1893 first acquisition must debit exactly one qualified style item through I5 only after canonical Pet owner lock and persist entitlement+normalized/preserved active_style with one Pet CAS.",
+    "MID1894 selects only effectively owned, family-qualified style and rejects different-style direct switch while another effective style is active.",
+    "MID1895 assigns desired active_style=0 and may normalize a stale raw positive selector.",
+    "Stock outputs remain exact: 1893 active_style+pet_styles; 1894 active_style; 1895 empty object; no invented inventory/economy/time fields.",
+    "Historical Pet MID60/MID61 ordinary-skin path stays inactive; CA7-6+ routes remain fenced.",
+    "Same-operation D11 flow must include pre-transaction replay, early in-transaction recheck before content-dependent owner discovery, and post-Pet-lock recheck.",
+    "Fresh already-owned MID1893 must not debit again even though a stale second client may locally remove one item after its success callback; this is a bounded client-cache residual, not permission to invent response fields."
+  ],
+  "epistemic_note": "Source facts constrain wire/reachability/identity. Grant-only, stale-selector normalization, D11 schemas and HTTP status distinctions are V2 compatibility/implementation decisions constrained by accepted CA7 authority, not claims about unrecovered original-server internals.",
+  "contract": "00_PASSMAP/PASS592_CA7_5_IMPLEMENTATION_CONTRACT.md",
+  "implementation_authorized": false
+}

@@ -1,0 +1,19 @@
+===== go test -race -count=1 ./internal/application/characterpet =====
+ok  	gxb.local/backend/v2/internal/application/characterpet	1.455s
+
+===== go test -race -count=1 ./internal/application/characterpractice =====
+ok  	gxb.local/backend/v2/internal/application/characterpractice	1.024s
+
+===== go test -race -count=1 ./internal/adapters/stockruntime =====
+ok  	gxb.local/backend/v2/internal/adapters/stockruntime	1.418s
+
+===== go test -race -count=1 ./internal/adapters/postgres/characterstore =====
+ok  	gxb.local/backend/v2/internal/adapters/postgres/characterstore	1.012s
+
+===== go test -race -count=1 ./internal/foundation/replaycatalog =====
+ok  	gxb.local/backend/v2/internal/foundation/replaycatalog	1.009s
+
+===== go test -race -count=1 ./internal/archguard =====
+ok  	gxb.local/backend/v2/internal/archguard	1.152s
+
+===== go vet ./... =====

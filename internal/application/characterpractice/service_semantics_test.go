@@ -1005,3 +1005,49 @@ func TestServiceAutoReceiptReplaySurvivesLaterDurableStateChanges(t *testing.T) 
 		t.Fatalf("receipt replay reran body: seq=%v scalar=%d/%d cas=%d/%d", h.seq, h.scalarCalls, scalarCalls, h.actorCASCalls, casCalls)
 	}
 }
+
+func TestCA75PetStateVersionMutationStalesPracticeProposalWhileSemanticNoopPreservesIt(t *testing.T) {
+	now := time.Date(2026, 9, 20, 15, 0, 0, 0, time.UTC)
+	actor := practiceTestActor()
+	target := Target{Hero: false, ActorID: 21}
+	cmd := ManualCommand{Target: target, Method: 1}
+
+	mutated := newPracticeHarness(now)
+	mutatedSvc := practiceHarnessService(mutated)
+	if _, err := mutatedSvc.Manual(context.Background(), actor, cmd, practiceTestOp(120, now)); err != nil {
+		t.Fatal(err)
+	}
+	key := proposalKey(actor.SessionID, target.ActorID)
+	proposal, ok := mutated.petProposals[key]
+	if !ok || proposal.ActorStateVersion != mutated.pets[target.ActorID].version {
+		t.Fatalf("proposal=%+v pet=%+v ok=%v", proposal, mutated.pets[target.ActorID], ok)
+	}
+	// CA7-5 actual appearance mutations use the same Pet owner CAS/state_version.
+	// Simulate that already-proved owner transition at the Practice boundary.
+	p := mutated.pets[target.ActorID]
+	p.version++
+	mutated.pets[target.ActorID] = p
+	if _, err := mutatedSvc.Save(context.Background(), actor, target, practiceTestOp(121, now.Add(time.Second))); !errors.Is(err, ErrActorStaleVersion) {
+		t.Fatalf("mutated Pet stale proposal err=%v", err)
+	}
+	if _, ok := mutated.petProposals[key]; !ok {
+		t.Fatal("stale Pet proposal was deleted")
+	}
+	if mutated.actorCASCalls != 0 {
+		t.Fatalf("stale Pet SAVE performed actor CAS: %d", mutated.actorCASCalls)
+	}
+
+	noop := newPracticeHarness(now)
+	noopSvc := practiceHarnessService(noop)
+	if _, err := noopSvc.Manual(context.Background(), actor, cmd, practiceTestOp(122, now)); err != nil {
+		t.Fatal(err)
+	}
+	before := noop.pets[target.ActorID].version
+	// A CA7-5 semantic no-op intentionally preserves Pet state_version.
+	if _, err := noopSvc.Save(context.Background(), actor, target, practiceTestOp(123, now.Add(time.Second))); err != nil {
+		t.Fatal(err)
+	}
+	if noop.actorCASCalls != 1 || noop.pets[target.ActorID].version != before+1 {
+		t.Fatalf("valid proposal did not survive semantic no-op boundary: before=%d after=%d cas=%d", before, noop.pets[target.ActorID].version, noop.actorCASCalls)
+	}
+}

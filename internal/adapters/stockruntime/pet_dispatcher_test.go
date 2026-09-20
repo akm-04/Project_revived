@@ -11,6 +11,7 @@ import (
 	apppet "gxb.local/backend/v2/internal/application/characterpet"
 	appi5 "gxb.local/backend/v2/internal/application/i5"
 	"gxb.local/backend/v2/internal/domain/character"
+	"gxb.local/backend/v2/internal/domain/economy"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/operation"
 )
@@ -32,6 +33,13 @@ type petServiceFake struct {
 	advanceResult       apppet.AdvanceResult
 	oneKeyAdvancePetID  int64
 	oneKeyAdvanceResult apppet.OneKeyAdvanceResult
+	styleAcquireItemID  int64
+	styleAcquireResult  apppet.PetStyleAcquireResult
+	styleSelectPetID    int64
+	styleSelectStyleID  int64
+	styleSelectResult   apppet.PetStyleSelectResult
+	styleCancelPetID    int64
+	styleCancelResult   apppet.PetStyleCancelResult
 }
 
 func (s *petServiceFake) RosterView(_ context.Context, _ identity.ActorContext, observedAt time.Time) (character.PetRoot, []apppet.PetRosterView, error) {
@@ -85,14 +93,17 @@ func (s *petServiceFake) OneKeyAdvance(_ context.Context, _ identity.ActorContex
 	s.oneKeyAdvancePetID = petID
 	return s.oneKeyAdvanceResult, s.err
 }
-func (s *petServiceFake) AcquirePetStyle(context.Context, identity.ActorContext, int64, operation.Context) (apppet.PetStyleAcquireResult, error) {
-	return apppet.PetStyleAcquireResult{}, s.err
+func (s *petServiceFake) AcquirePetStyle(_ context.Context, _ identity.ActorContext, itemID int64, _ operation.Context) (apppet.PetStyleAcquireResult, error) {
+	s.styleAcquireItemID = itemID
+	return s.styleAcquireResult, s.err
 }
-func (s *petServiceFake) SelectPetStyle(context.Context, identity.ActorContext, int64, int64, operation.Context) (apppet.PetStyleSelectResult, error) {
-	return apppet.PetStyleSelectResult{}, s.err
+func (s *petServiceFake) SelectPetStyle(_ context.Context, _ identity.ActorContext, petID, styleID int64, _ operation.Context) (apppet.PetStyleSelectResult, error) {
+	s.styleSelectPetID, s.styleSelectStyleID = petID, styleID
+	return s.styleSelectResult, s.err
 }
-func (s *petServiceFake) CancelPetStyle(context.Context, identity.ActorContext, int64, operation.Context) (apppet.PetStyleCancelResult, error) {
-	return apppet.PetStyleCancelResult{}, s.err
+func (s *petServiceFake) CancelPetStyle(_ context.Context, _ identity.ActorContext, petID int64, _ operation.Context) (apppet.PetStyleCancelResult, error) {
+	s.styleCancelPetID = petID
+	return s.styleCancelResult, s.err
 }
 
 type petEconomyFake struct {
@@ -363,6 +374,98 @@ func TestPetProgressionRejectsStringTypedIntegers(t *testing.T) {
 		resp := d.Dispatch(context.Background(), req)
 		if resp.HTTPStatus != 400 {
 			t.Fatalf("MID%d accepted string integer: status=%d body=%#v", tc.mid, resp.HTTPStatus, resp.Body)
+		}
+	}
+}
+
+func TestCA75PetStyleMIDsStrictWireAndStockProjection(t *testing.T) {
+	actor := actorForHTTP(t)
+	now := time.Unix(105, 0).UTC()
+	svc := &petServiceFake{
+		styleAcquireResult: apppet.PetStyleAcquireResult{PetID: 77, StyleItemID: 50001376, ActiveStyle: 50009999, PetStyles: []int64{50001376, 50009999}, StateVersion: 3, Mutated: true, Consumed: true},
+		styleSelectResult:  apppet.PetStyleSelectResult{PetID: 77, StyleItemID: 50001376, ActiveStyle: 50001376, StateVersion: 4, Mutated: true},
+		styleCancelResult:  apppet.PetStyleCancelResult{PetID: 77, ActiveStyle: 0, StateVersion: 5, Mutated: true},
+	}
+	d := PetDispatcher{Authority: httpAuthority{actor}, Service: svc}
+
+	r1893 := env(1893, nil, now)
+	r1893.Envelope.Params = map[string]any{"item_id": int64(50001376)}
+	got := d.Dispatch(context.Background(), r1893)
+	if got.HTTPStatus != 200 || svc.styleAcquireItemID != 50001376 || len(got.Body) != 2 || got.Body["active_style"] != int64(50009999) || !reflect.DeepEqual(got.Body["pet_styles"], []int64{50001376, 50009999}) {
+		t.Fatalf("MID1893 status=%d item=%d body=%#v", got.HTTPStatus, svc.styleAcquireItemID, got.Body)
+	}
+	for _, forbidden := range []string{"pet_id", "style_item_id", "state_version", "mutated", "consumed", "remove_item", "economy_", "server_time"} {
+		if _, ok := got.Body[forbidden]; ok {
+			t.Fatalf("MID1893 leaked %q in %#v", forbidden, got.Body)
+		}
+	}
+
+	r1894 := env(1894, nil, now)
+	r1894.Envelope.Params = map[string]any{"pet_id": int64(77), "style_id": int64(50001376)}
+	got = d.Dispatch(context.Background(), r1894)
+	if got.HTTPStatus != 200 || svc.styleSelectPetID != 77 || svc.styleSelectStyleID != 50001376 || len(got.Body) != 1 || got.Body["active_style"] != int64(50001376) {
+		t.Fatalf("MID1894 status=%d pet=%d style=%d body=%#v", got.HTTPStatus, svc.styleSelectPetID, svc.styleSelectStyleID, got.Body)
+	}
+
+	r1895 := env(1895, nil, now)
+	r1895.Envelope.Params = map[string]any{"pet_id": int64(77)}
+	got = d.Dispatch(context.Background(), r1895)
+	if got.HTTPStatus != 200 || svc.styleCancelPetID != 77 || len(got.Body) != 0 {
+		t.Fatalf("MID1895 status=%d pet=%d body=%#v", got.HTTPStatus, svc.styleCancelPetID, got.Body)
+	}
+}
+
+func TestCA75PetStyleMIDsRejectMalformedAndInventedParams(t *testing.T) {
+	actor := actorForHTTP(t)
+	now := time.Unix(106, 0).UTC()
+	d := PetDispatcher{Authority: httpAuthority{actor}, Service: &petServiceFake{}}
+	cases := []struct {
+		mid    uint16
+		params map[string]any
+	}{
+		{1893, map[string]any{}},
+		{1893, map[string]any{"item_id": "50001376"}},
+		{1893, map[string]any{"item_id": 50001376.5}},
+		{1893, map[string]any{"item_id": int64(50001376), "pet_id": int64(77)}},
+		{1894, map[string]any{"pet_id": int64(77)}},
+		{1894, map[string]any{"pet_id": "77", "style_id": int64(50001376)}},
+		{1894, map[string]any{"pet_id": int64(77), "style_id": false}},
+		{1894, map[string]any{"pet_id": int64(77), "style_id": int64(50001376), "item_id": int64(1)}},
+		{1895, map[string]any{}},
+		{1895, map[string]any{"pet_id": "77"}},
+		{1895, map[string]any{"pet_id": int64(77), "style_id": int64(50001376)}},
+	}
+	for i, tc := range cases {
+		r := env(tc.mid, nil, now)
+		r.Envelope.Params = tc.params
+		got := d.Dispatch(context.Background(), r)
+		if got.HTTPStatus != 400 {
+			t.Fatalf("bad[%d] MID%d accepted params=%#v status=%d body=%#v", i, tc.mid, tc.params, got.HTTPStatus, got.Body)
+		}
+	}
+}
+
+func TestCA75PetStyleErrorTransportMapping(t *testing.T) {
+	actor := actorForHTTP(t)
+	now := time.Unix(107, 0).UTC()
+	tests := []struct {
+		err  error
+		want int
+	}{
+		{apppet.ErrPetAppearanceContentInactive, 503},
+		{apppet.ErrPetNotFound, 404},
+		{apppet.ErrPetAppearanceUnavailable, 400},
+		{apppet.ErrPetStyleSwitchConflict, 409},
+		{economy.ErrInsufficientBalance, 409},
+		{errors.New("infrastructure"), 503},
+	}
+	for _, tc := range tests {
+		d := PetDispatcher{Authority: httpAuthority{actor}, Service: &petServiceFake{err: tc.err}}
+		r := env(1894, nil, now)
+		r.Envelope.Params = map[string]any{"pet_id": int64(77), "style_id": int64(50001376)}
+		got := d.Dispatch(context.Background(), r)
+		if got.HTTPStatus != tc.want {
+			t.Fatalf("err=%v status=%d want=%d body=%#v", tc.err, got.HTTPStatus, tc.want, got.Body)
 		}
 	}
 }

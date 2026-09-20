@@ -1,0 +1,49 @@
+===== python3 tools/validate_r4b.py =====
+CONTENT QUERYTEXT: PASS sha256=9709338916a5e4edd9d24f741815a77e0723bb89401574ed87dce9954a722a0c
+SCHEMA/QUERY OWNERSHIP: PASS
+SQLC GENERATION POLICY: PASS
+R4C STATIC VALIDATION: PASS; executable and real-PG acceptance are separate evidence
+KERNEL QUERYTEXT: PASS sha256=74ad9accee063e77323a2eb4a69df394bdcb331ce88e3d789864ffbc904b7511
+SCHEMA/QUERY OWNERSHIP: PASS
+R4B VALIDATION: PASS
+resource_rows 5556 progression_rows 100 objective_rows 0
+
+===== python3 tools/validate_r4c.py =====
+CONTENT QUERYTEXT: PASS sha256=9709338916a5e4edd9d24f741815a77e0723bb89401574ed87dce9954a722a0c
+SCHEMA/QUERY OWNERSHIP: PASS
+SQLC GENERATION POLICY: PASS
+R4C STATIC VALIDATION: PASS; executable and real-PG acceptance are separate evidence
+
+===== python3 tools/validate_r4d.py =====
+R4D VALIDATION: FAIL
+ - canonical Go language/toolchain pins drifted
+ - .go-version pin drifted
+FAILED rc=1
+
+===== python3 tools/validate_r5.py --cumulative =====
+R5 VALIDATION: FAIL
+ - canonical Go pins drifted
+ - .go-version pin drifted
+FAILED rc=1
+
+===== python3 tools/validate_ca3_3.py --cumulative =====
+CA3-3 VALIDATION: PASS
+Pet progression persistence/content/I5/service/strict-wire/timing seams and contract-specific regression guards are present; live aggregate acceptance remains separate
+
+===== python3 tools/validate_ca4_1.py =====
+CA4-1 VALIDATION: PASS
+shared content/I5/Character contracts are present; migration/ownership sealed; later CA4 family mechanics remain absent
+
+===== python3 tools/validate_ca7_3.py =====
+CA7-3 VALIDATION: PASS
+Hero-owned ordinary/timed/illusion mutation seams, cohesive CAS, replay classes, future Commerce typed materializer, production routing and Pet-owner separation preserved
+
+===== python3 tools/validate_ca7_4.py =====
+CA7-4 VALIDATION: PASS
+Hero-owned paid LIVE unlock/show seams, current-state convergence, strict wire parsing, I5 composition, single CAS, replay classes, production routing and CA7-5 Pet-owner separation preserved
+
+===== python3 tools/validate_ca7_5.py =====
+CA7-5 VALIDATION: PASS
+Pet-owned home-style acquisition/select/cancel, one-CAS persistence, D11 replay, strict stock routing, schema ownership and successor fences preserved
+
+TOTAL_FAILURES=2

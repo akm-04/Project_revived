@@ -128,9 +128,10 @@ if old.is_file():
         req('xyd.mid.SKIN_ON' in oldpet and 'xyd.mid.SKIN_CANCEL' in oldpet,'old active Pet MID60/61 differential evidence missing')
 
 # Candidate translation guard: recovered client facts constrain wire/state axes;
-# CA7-4 may extend production routing with paid LIVE; CA7-5 Pet mutation remains fenced.
+# Later stages may extend production routing; CA7-5 remains Pet-owned and must not leak into Hero routes.
 service=(ROOT/'internal/application/characterhero/appearance_service.go').read_text()
 dispatch=(ROOT/'internal/adapters/stockruntime/hero_dispatcher.go').read_text()
+pet_dispatch=(ROOT/'internal/adapters/stockruntime/pet_dispatcher.go').read_text()
 store=(ROOT/'internal/adapters/postgres/characterstore/appearance.go').read_text()
 main_go=(ROOT/'cmd/gxb-api/main_postgres.go').read_text()
 for tok in ['func (s Service) SkinOn(', 'func (s Service) SkinCancel(', 'func (s Service) UseIllusionSkinItem(', 'SaveHeroAppearanceMutationTx', 'BuildEffectiveHeroAppearanceTx']:
@@ -141,8 +142,9 @@ req('body["server_time"]' not in dispatch,'candidate invented MID60 server_time 
 req('58, 60, 61, 62' in main_go and '67, 68, 69, 89' in main_go and '304, 2979' in main_go,'candidate production Hero CA7-3/4 registration drift')
 for required in ['case 68:', 'case 69:']:
     req(required in dispatch,f'candidate lost accepted CA7-4 route {required}')
-for forbidden in ['case 1893:', 'case 1894:', 'case 1895:']:
-    req(forbidden not in dispatch,f'candidate captured future CA7-5 mutation route {forbidden}')
+for owned in ['case 1893:', 'case 1894:', 'case 1895:']:
+    req(owned not in dispatch,f'candidate leaked Pet-owned CA7-5 route into Hero dispatcher {owned}')
+    req(owned in pet_dispatch,f'candidate lost activated CA7-5 Pet route {owned}')
 
 if errs:
     print('CA7-3 SOURCE ORACLE CHECK: FAIL')

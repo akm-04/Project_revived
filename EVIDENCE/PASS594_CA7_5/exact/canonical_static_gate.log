@@ -1,0 +1,58 @@
+===== python3 tools/check_dependency_policy.py =====
+DEPENDENCY POLICY: PASS
+resolved_go_modules 16 qualified_candidates 5
+
+===== python3 tools/generate_resolved_sbom.py --check =====
+RESOLVED SBOM: PASS
+
+===== python3 tools/check_sqlc_generation_policy.py =====
+SQLC GENERATION POLICY: PASS
+
+===== python3 tools/check_schema_query_ownership.py =====
+SCHEMA/QUERY OWNERSHIP: PASS
+
+===== python3 tools/generate_character_querytext.py --check =====
+CHARACTER QUERYTEXT: PASS hero_sha256=74780e7a69490f2a68a9c5f0fe4b662059f50fedd94e8f05798e074141235c6b pet_sha256=07779a3b3acc6ae1ae1c065ffff81dccc3a7477193c5b339d07d06d537c0fd81 preset_sha256=649a7d71bf475e6710bdd28f111a364cc208b5600270e88338fda2d28fb37cd6 practice_sha256=bca19b6a86b90f87e1ba26d994c06929d58fa5bba2b9068ff3cb3cdae66570bf
+
+===== python3 tools/check_ca7_3_source_oracle.py =====
+CA7-3 SOURCE ORACLE CHECK: PASS
+current/old client identities pinned; MID60/61/2979 wire/state axes, timed expiry, ordinary combat axis, Pet reachability split, and CA7-4 coexistence preserved
+
+===== python3 tools/check_ca7_4_source_oracle.py =====
+CA7-4 SOURCE ORACLE CHECK: PASS
+current oracle identity pinned; MID68/69 wire, paid LIVE costs/item, economy refresh/retry behavior, positional reload projection and candidate translation preserved
+
+===== python3 tools/check_ca7_5_source_oracle.py =====
+CA7-5 SOURCE ORACLE CHECK: PASS
+current/old oracle bytes pinned; MID1893/1894/1895 wire, callback, reachability, identity and candidate translation preserved
+
+===== python3 tools/validate_ca7_3.py =====
+CA7-3 VALIDATION: PASS
+Hero-owned ordinary/timed/illusion mutation seams, cohesive CAS, replay classes, future Commerce typed materializer, production routing and Pet-owner separation preserved
+
+===== python3 tools/validate_ca7_4.py =====
+CA7-4 VALIDATION: PASS
+Hero-owned paid LIVE unlock/show seams, current-state convergence, strict wire parsing, I5 composition, single CAS, replay classes, production routing and CA7-5 Pet-owner separation preserved
+
+===== python3 tools/validate_ca7_5.py =====
+CA7-5 VALIDATION: PASS
+Pet-owned home-style acquisition/select/cancel, one-CAS persistence, D11 replay, strict stock routing, schema ownership and successor fences preserved
+
+===== python3 tools/validate_r4d.py =====
+R4D VALIDATION: PASS
+immutable revision binding/replay/exact-read/restart guards present; R5 temporal/bootstrap remains intentionally out of scope
+
+===== python3 tools/validate_r5.py --cumulative =====
+R5 VALIDATION: PASS (CUMULATIVE MODE)
+static progression/temporal/bootstrap/function/directory/receipt/wire/stack R5 seams present; historical compiler pin remains strict outside cumulative mode; native PostgreSQL/River/W2 remain separate
+
+===== python3 tools/validate_current_candidate.py =====
+R6 VALIDATION: PASS (CUMULATIVE MODE)
+static projection/directory/replay/lifecycle/key/single-owner/http/observability R6 seams present; cumulative mode permits later migrations but does not weaken historical R6 pins
+CURRENT CUMULATIVE CANDIDATE VALIDATION: PASS
+historical R6 pins retained; exact forward migration inventory and current release/SBOM version agree
+
+===== python3 tools/validate_foundation_trace.py =====
+FOUNDATION TRACE: PASS (10 historical lifecycle records; 24/24 RF findings dispositioned; R0-R7 accepted Pass489; I6 accepted Pass509; 6 future extension limits remain explicit; W2 separate)
+
+===== git diff --check =====

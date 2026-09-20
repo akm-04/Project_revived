@@ -42,7 +42,7 @@ for invented in ['"remove_item"', '"activation_item"', '"server_time"']:
 req('LIVEMutationStore: heroDB' in main and 'LIVE: heroSvc' in main,'CA7-4 production composition missing')
 req('67, 68, 69, 89' in main,'CA7-4 production MID registration missing')
 for forbidden in ['case 1893:', 'case 1894:', 'case 1895:']:
-    req(forbidden not in dispatch,f'CA7-5 route activated early: {forbidden}')
+    req(forbidden not in dispatch,f'Pet-owned CA7-5 route leaked into Hero dispatcher: {forbidden}')
 
 for tok in ['UpsertHeroLIVEEntitlement', 'TouchHeroAppearanceVersion']:
     req(tok in store,f'CA7-4 Hero-owned single-CAS LIVE persistence marker missing {tok!r}')
@@ -59,4 +59,4 @@ if errs:
     for e in errs: print(' -',e)
     sys.exit(1)
 print('CA7-4 VALIDATION: PASS')
-print('Hero-owned paid LIVE unlock/show seams, current-state convergence, strict wire parsing, I5 composition, single CAS, replay classes, production routing and CA7-5 fences preserved')
+print('Hero-owned paid LIVE unlock/show seams, current-state convergence, strict wire parsing, I5 composition, single CAS, replay classes, production routing and CA7-5 Pet-owner separation preserved')

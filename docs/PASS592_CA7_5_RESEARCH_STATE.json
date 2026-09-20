@@ -1,0 +1,47 @@
+{
+  "schema_version": 2,
+  "pass": "592.0",
+  "stage": "CA7-5",
+  "title": "Pet Home-Style Entitlement, Selection & Cancel Semantics",
+  "status": "PREIMPLEMENTATION_RESEARCH_GREEN_CONTRACT_FROZEN",
+  "research_ready": true,
+  "research_sealed": true,
+  "implementation_authorized": false,
+  "implementation_started": false,
+  "accepted_predecessor": "00_PASSMAP/PASS591_CA7_4_ACCEPTANCE_RECORD.json",
+  "accepted_backend": {
+    "artifact": "gxb-backend-v2-v0.83.0-pass591-ca7-4-local-accepted.zip",
+    "sha256": "25e9958b956e5be6da45c0c327e457e9dbd096396e7be95cfe19de7d568511a8",
+    "version": "v0.83.0",
+    "acceptance_pass": "591.0",
+    "git_head": "5ba75ec17ba07b585c1fa67ef5b5fb74ef627ef3",
+    "product_tree_sha256": "fa5b89591d1d88f63f7013a0e399bd80a5192a483f488c3a23dfef53f8baf798",
+    "migration_high_water": "00030_ca7_2_appearance_foundation.sql",
+    "content_revision": "ae577b8c9b9770f1d7a7dcf8335d9d36d27a15a687a12a5e5b01d97eca124116"
+  },
+  "normative_documents": {
+    "source_evidence": "00_PASSMAP/PASS592_CA7_5_SOURCE_EVIDENCE.json",
+    "implementation_contract": "00_PASSMAP/PASS592_CA7_5_IMPLEMENTATION_CONTRACT.md",
+    "acceptance_matrix": "00_PASSMAP/PASS592_CA7_5_ACCEPTANCE_MATRIX.json",
+    "preimplementation_reality": "00_PASSMAP/PASS592_CA7_5_INDEPENDENT_PREIMPLEMENTATION_REALITY_CHECK.md",
+    "research_closure": "00_PASSMAP/PASS592_CA7_5_PREIMPLEMENTATION_RESEARCH_CLOSURE.md",
+    "independent_check": "00_PASSMAP/PASS592_CA7_5_PREIMPLEMENTATION_CHECK.log"
+  },
+  "frozen_decisions": [
+    "MID1893 grant-only CURRENT_STATE_CONVERGENCE; preserve pre-operation effective active selector and never auto-select",
+    "MID1893 uses one Pet-owned composite entitlement+selector CAS when mutation/normalization is needed",
+    "MID1894 explicit owned-style assignment; different active style requires MID1895 cancel first",
+    "MID1895 explicit active_style=0 assignment and may normalize stale raw positive state",
+    "Pet430 precedes I5; only first MID1893 acquisition consumes one style item",
+    "Same-attempt D11 uses pre-transaction, early in-tx, and post-Pet-lock receipt checks",
+    "Stock response shapes remain exact; no invented numeric Pet-style errors or response fields",
+    "Stale second-client local item-removal residual is bounded; server never double-debits"
+  ],
+  "bounded_unknowns": [
+    "Original-server Pet-home-style numeric error codes remain UNKNOWN",
+    "Physical stock-client proof deferred W2",
+    "Accumulated exact PostgreSQL/River CA7 proof deferred mandatory CA7-7",
+    "Stale second-client local item-removal cache residual has no source-supported wire discriminator"
+  ],
+  "next": "Await explicit implementation authorization. If authorized, implement only CA7-5 against the frozen contract/matrix; contradiction triggers targeted research reopen."
+}

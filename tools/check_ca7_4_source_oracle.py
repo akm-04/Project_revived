@@ -95,6 +95,7 @@ req('function xyd.isShowDynamicCard' in utils and 'if var_265_2 == 0 then' in ut
 # Candidate translation guard.
 service=(ROOT/'internal/application/characterhero/live_service.go').read_text()
 dispatch=(ROOT/'internal/adapters/stockruntime/hero_dispatcher.go').read_text()
+pet_dispatch=(ROOT/'internal/adapters/stockruntime/pet_dispatcher.go').read_text()
 main=(ROOT/'cmd/gxb-api/main_postgres.go').read_text()
 replay=(ROOT/'internal/foundation/replaycatalog/catalog.go').read_text()
 for tok in ['func (s Service) UnlockLIVE(', 'func (s Service) SetLIVEShow(', 'AppearanceLIVETx', 'DebitMaterialCostTx', 'SaveHeroLIVEEntitlementTx']:
@@ -108,8 +109,9 @@ req('raw.(json.Number)' in dispatch and 'v != 0 && v != 1' in dispatch,'candidat
 req('67, 68, 69, 89' in main,'candidate CA7-4 production registration drift')
 for tok in ['ca7.hero-live-unlock', 'CurrentStateConvergence', 'ca7.hero-live-show', 'ParameterStateSet']:
     req(tok in replay,f'candidate CA7-4 replay classification missing {tok!r}')
-for forbidden in ['case 1893:', 'case 1894:', 'case 1895:']:
-    req(forbidden not in dispatch,f'candidate captured CA7-5 route {forbidden}')
+for owned in ['case 1893:', 'case 1894:', 'case 1895:']:
+    req(owned not in dispatch,f'candidate leaked Pet-owned CA7-5 route into Hero dispatcher {owned}')
+    req(owned in pet_dispatch,f'candidate lost activated CA7-5 Pet route {owned}')
 
 if errs:
     print('CA7-4 SOURCE ORACLE CHECK: FAIL')
