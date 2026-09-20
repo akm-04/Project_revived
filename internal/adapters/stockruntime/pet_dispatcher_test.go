@@ -85,6 +85,15 @@ func (s *petServiceFake) OneKeyAdvance(_ context.Context, _ identity.ActorContex
 	s.oneKeyAdvancePetID = petID
 	return s.oneKeyAdvanceResult, s.err
 }
+func (s *petServiceFake) AcquirePetStyle(context.Context, identity.ActorContext, int64, operation.Context) (apppet.PetStyleAcquireResult, error) {
+	return apppet.PetStyleAcquireResult{}, s.err
+}
+func (s *petServiceFake) SelectPetStyle(context.Context, identity.ActorContext, int64, int64, operation.Context) (apppet.PetStyleSelectResult, error) {
+	return apppet.PetStyleSelectResult{}, s.err
+}
+func (s *petServiceFake) CancelPetStyle(context.Context, identity.ActorContext, int64, operation.Context) (apppet.PetStyleCancelResult, error) {
+	return apppet.PetStyleCancelResult{}, s.err
+}
 
 type petEconomyFake struct {
 	amount int64

@@ -34,6 +34,9 @@ type PetServicePort interface {
 	OneKeyEquip(context.Context, identity.ActorContext, int64, operation.Context) (apppet.OneKeyEquipResult, error)
 	Advance(context.Context, identity.ActorContext, int64, operation.Context) (apppet.AdvanceResult, error)
 	OneKeyAdvance(context.Context, identity.ActorContext, int64, operation.Context) (apppet.OneKeyAdvanceResult, error)
+	AcquirePetStyle(context.Context, identity.ActorContext, int64, operation.Context) (apppet.PetStyleAcquireResult, error)
+	SelectPetStyle(context.Context, identity.ActorContext, int64, int64, operation.Context) (apppet.PetStyleSelectResult, error)
+	CancelPetStyle(context.Context, identity.ActorContext, int64, operation.Context) (apppet.PetStyleCancelResult, error)
 }
 
 type PetEconomyProjectionPort interface {
@@ -117,6 +120,45 @@ func (d PetDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReques
 			return petBad("invalid_pet_set_show")
 		}
 		if err := d.Service.SetShow(ctx, actor, petID, req.Envelope.Operation); err != nil {
+			return petFail(err)
+		}
+		return httpedge.Response{HTTPStatus: http.StatusOK, Body: map[string]any{}}
+	case 1893: // GET_PET_STYLE_FORM_ITEM — CA7-5 grant-only ownership convergence
+		if !onlyStockGameplayParams(req.Envelope.Params, "item_id") {
+			return petBad("invalid_pet_style_acquire")
+		}
+		itemID, err := requiredPetInt64(req.Envelope.Params, "item_id")
+		if err != nil || itemID <= 0 {
+			return petBad("invalid_pet_style_acquire")
+		}
+		got, err := d.Service.AcquirePetStyle(ctx, actor, itemID, req.Envelope.Operation)
+		if err != nil {
+			return petFail(err)
+		}
+		return httpedge.Response{HTTPStatus: http.StatusOK, Body: map[string]any{"active_style": got.ActiveStyle, "pet_styles": append([]int64(nil), got.PetStyles...)}}
+	case 1894: // USE_PET_STYLE — CA7-5 explicit owned-style assignment
+		if !onlyStockGameplayParams(req.Envelope.Params, "pet_id", "style_id") {
+			return petBad("invalid_pet_style_select")
+		}
+		petID, e1 := requiredPetInt64(req.Envelope.Params, "pet_id")
+		styleID, e2 := requiredPetInt64(req.Envelope.Params, "style_id")
+		if e1 != nil || e2 != nil || petID <= 0 || styleID <= 0 {
+			return petBad("invalid_pet_style_select")
+		}
+		got, err := d.Service.SelectPetStyle(ctx, actor, petID, styleID, req.Envelope.Operation)
+		if err != nil {
+			return petFail(err)
+		}
+		return httpedge.Response{HTTPStatus: http.StatusOK, Body: map[string]any{"active_style": got.ActiveStyle}}
+	case 1895: // CANCEL_PET_STYLE — CA7-5 explicit active_style=0 assignment
+		if !onlyStockGameplayParams(req.Envelope.Params, "pet_id") {
+			return petBad("invalid_pet_style_cancel")
+		}
+		petID, err := requiredPetInt64(req.Envelope.Params, "pet_id")
+		if err != nil || petID <= 0 {
+			return petBad("invalid_pet_style_cancel")
+		}
+		if _, err := d.Service.CancelPetStyle(ctx, actor, petID, req.Envelope.Operation); err != nil {
 			return petFail(err)
 		}
 		return httpedge.Response{HTTPStatus: http.StatusOK, Body: map[string]any{}}
@@ -387,13 +429,13 @@ func petBad(code string) httpedge.Response {
 
 func petFail(err error) httpedge.Response {
 	switch {
-	case errors.Is(err, apppet.ErrPetAcquisitionContentInactive), errors.Is(err, apppet.ErrPetProgressionContentInactive), errors.Is(err, apppet.ErrPetEquipmentContentInactive), errors.Is(err, apppet.ErrPetPromotionContentInactive), errors.Is(err, apppet.ErrPetAwakeningProviderUnavailable):
+	case errors.Is(err, apppet.ErrPetAcquisitionContentInactive), errors.Is(err, apppet.ErrPetProgressionContentInactive), errors.Is(err, apppet.ErrPetEquipmentContentInactive), errors.Is(err, apppet.ErrPetPromotionContentInactive), errors.Is(err, apppet.ErrPetAppearanceContentInactive), errors.Is(err, apppet.ErrPetAwakeningProviderUnavailable):
 		return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Body: map[string]any{"error": "pet_content_inactive"}}
 	case errors.Is(err, apppet.ErrPetNotFound):
 		return httpedge.Response{HTTPStatus: http.StatusNotFound, Body: map[string]any{"error": "pet_not_found"}}
-	case errors.Is(err, apppet.ErrPetStillIncubating), errors.Is(err, apppet.ErrPetNotShown), errors.Is(err, apppet.ErrPetTimeDiscontinuity), errors.Is(err, economy.ErrInsufficientBalance):
+	case errors.Is(err, apppet.ErrPetStillIncubating), errors.Is(err, apppet.ErrPetNotShown), errors.Is(err, apppet.ErrPetTimeDiscontinuity), errors.Is(err, apppet.ErrPetStyleSwitchConflict), errors.Is(err, economy.ErrInsufficientBalance):
 		return httpedge.Response{HTTPStatus: http.StatusConflict, Body: map[string]any{"error": "pet_operation_rejected"}}
-	case errors.Is(err, apppet.ErrPetExpMax), errors.Is(err, apppet.ErrPetEvolutionUnavailable), errors.Is(err, apppet.ErrPetSkillUnavailable), errors.Is(err, apppet.ErrPetEquipmentUnavailable), errors.Is(err, apppet.ErrPetPromotionUnavailable), errors.Is(err, apppet.ErrPetPromotionPrerequisites), errors.Is(err, apppet.ErrPetPromotionCorruptState), errors.Is(err, apppet.ErrPetPromotionQ1Unsupported):
+	case errors.Is(err, apppet.ErrPetAppearanceUnavailable), errors.Is(err, apppet.ErrPetExpMax), errors.Is(err, apppet.ErrPetEvolutionUnavailable), errors.Is(err, apppet.ErrPetSkillUnavailable), errors.Is(err, apppet.ErrPetEquipmentUnavailable), errors.Is(err, apppet.ErrPetPromotionUnavailable), errors.Is(err, apppet.ErrPetPromotionPrerequisites), errors.Is(err, apppet.ErrPetPromotionCorruptState), errors.Is(err, apppet.ErrPetPromotionQ1Unsupported):
 		return httpedge.Response{HTTPStatus: http.StatusBadRequest, Body: map[string]any{"error": "pet_operation_rejected"}}
 	default:
 		return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Body: map[string]any{"error": "pet_operation_failed"}}

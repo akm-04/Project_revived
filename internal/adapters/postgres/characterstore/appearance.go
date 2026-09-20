@@ -197,6 +197,33 @@ func (Store) SaveHeroLIVEEntitlementTx(ctx context.Context, t tx.Tx, h character
 	return nil
 }
 
+// SavePetAppearanceMutationTx is the cohesive CA7-5 Pet-owner CAS used when
+// acquisition may add one style entitlement and must preserve/normalize the
+// effective active selector in the same semantic mutation. The optional child
+// insert occurs before exactly one Pet state_version transition.
+func (Store) SavePetAppearanceMutationTx(ctx context.Context, t tx.Tx, p character.Pet, entitlement *character.PetStyleEntitlement, oldVersion int64) error {
+	if t == nil || p.ValidatePersistent() != nil || oldVersion <= 0 || p.StateVersion != oldVersion+1 {
+		return errors.New("character store: invalid Pet appearance mutation")
+	}
+	if entitlement != nil {
+		e := *entitlement
+		if e.Validate() != nil || p.PlayerID != e.PlayerID || p.PetID != e.PetID {
+			return errors.New("character store: invalid Pet appearance entitlement mutation")
+		}
+		if _, err := t.Exec(ctx, characterqueries.InsertPetStyleEntitlement, int64(e.PlayerID), e.PetID, e.StyleItemID); err != nil {
+			return err
+		}
+	}
+	tag, err := t.Exec(ctx, characterqueries.SavePetActiveStyle, int64(p.PlayerID), p.PetID, p.ActiveStyle, p.UpdatedAt.UTC(), oldVersion)
+	if err != nil {
+		return err
+	}
+	if tag.RowsAffected() != 1 {
+		return errors.New("character store: Pet appearance mutation lost race")
+	}
+	return nil
+}
+
 func (Store) SavePetActiveStyleTx(ctx context.Context, t tx.Tx, p character.Pet, oldVersion int64) error {
 	if t == nil || p.ValidatePersistent() != nil || oldVersion <= 0 || p.StateVersion != oldVersion+1 {
 		return errors.New("character store: invalid Pet active-style update")

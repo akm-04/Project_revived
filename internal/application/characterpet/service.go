@@ -64,26 +64,27 @@ type ProgressionContent interface {
 }
 
 type Service struct {
-	Runner              tx.Runner
-	Timed               appgeneration.TimedRunner
-	Store               Store
-	Fencer              ActorFencer
-	Content             AcquisitionContent
-	Progression         ProgressionContent
-	Receipts            receipt.Store
-	ReceiptRead         receipt.Reader
-	Acquisition         appi5.TxTimedPetAcquisitionDebiter
-	MaterialCosts       appi5.TxMaterialCostDebiter
-	Scalar              appi5.TxScalarDebiter
-	PetExp              appi5.TxPetExpDebiter
-	Equipment           EquipmentOperationContent
-	EquipmentResources  appi5.TxEquipmentResourceDebiter
-	Promotion           PetPromotionContent
-	PromotionResources  appi5.TxPromotionResourceSettler
-	StrictRestoration   appi5.TxStrictRestorationSettler
-	RestorationModifier characterasset.RestorationModifier
-	AppearanceStore     PetAppearanceStore
-	Appearance          characterasset.AppearanceContent
+	Runner                  tx.Runner
+	Timed                   appgeneration.TimedRunner
+	Store                   Store
+	Fencer                  ActorFencer
+	Content                 AcquisitionContent
+	Progression             ProgressionContent
+	Receipts                receipt.Store
+	ReceiptRead             receipt.Reader
+	Acquisition             appi5.TxTimedPetAcquisitionDebiter
+	MaterialCosts           appi5.TxMaterialCostDebiter
+	Scalar                  appi5.TxScalarDebiter
+	PetExp                  appi5.TxPetExpDebiter
+	Equipment               EquipmentOperationContent
+	EquipmentResources      appi5.TxEquipmentResourceDebiter
+	Promotion               PetPromotionContent
+	PromotionResources      appi5.TxPromotionResourceSettler
+	StrictRestoration       appi5.TxStrictRestorationSettler
+	RestorationModifier     characterasset.RestorationModifier
+	AppearanceStore         PetAppearanceStore
+	Appearance              characterasset.AppearanceContent
+	AppearanceMutationStore PetAppearanceMutationStore
 }
 
 func profile() tx.Profile {
