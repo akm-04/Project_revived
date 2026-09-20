@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 import argparse, hashlib, json
+from content_generation_policy import registered_pair_successor
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -23,10 +24,11 @@ def need(rel: str, *tokens: str) -> str:
 
 manifest=json.loads(read('internal/content/builtin/generated/manifest.json') or '{}')
 compiler_parser=(manifest.get('compiler_version'),manifest.get('parser_version'))
-allowed={('ca3-3','lua-generated-v5-pet-progression')}
 if args.cumulative:
-    allowed.update({('ca4-1','lua-generated-v6-equipment-primitives'), ('ca4-2a','lua-generated-v7-hero-equipment'), ('ca4-4a-i1','lua-generated-v10-pet-equipment'), ('ca4-4b-i1','lua-generated-v11-pet-restoration'), ('ca4-5-i1','lua-generated-v12-super-equipment'), ('ca6-2-practice-foundation','lua-generated-v13-practice')})
-if compiler_parser not in allowed:
+    compiler_identity_ok=registered_pair_successor(ROOT, compiler_parser[0], compiler_parser[1], 'ca3-3')
+else:
+    compiler_identity_ok=compiler_parser==('ca3-3','lua-generated-v5-pet-progression')
+if not compiler_identity_ok:
     errs.append(f'CA3-3 compiler/parser identity drift {compiler_parser!r}')
 for cap in ('PET_CORE_CA3','PET_ACQUISITION_CA3','PET_PROGRESSION_CA3'):
     if cap not in manifest.get('enabled_capabilities',[]): errs.append(f'missing content capability {cap}')

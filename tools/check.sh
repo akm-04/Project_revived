@@ -15,6 +15,7 @@ run() {
 }
 
 run python3 tools/check_dependency_policy.py
+run python3 tools/check_content_generation_policy.py
 run python3 tools/generate_resolved_sbom.py --check
 run python3 tools/check_sqlc_generation_policy.py
 if [ "${GXB_COMPAT_SCRATCH:-0}" = "1" ]; then

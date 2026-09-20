@@ -1,5 +1,5 @@
 {
-  "highest_migration": "00029_ca6_2_practice_foundation.sql",
+  "highest_migration": "00030_ca7_2_appearance_foundation.sql",
   "migrations": {
     "00001_kernel_receipts.sql": "fab5b35f4ca5eee53c62b0b924ec448327e1aa31205015c22e24ee0f2b710fd8",
     "00002_identity_logicalserver_bootstrap.sql": "adff86d27dd1c02e4da0dec6b1aa21f33aaafd4d410849abc76bfeec58a5cd5f",
@@ -29,9 +29,10 @@
     "00026_ca4_4b_pet_fumo_state.sql": "7ae99a977a362340d1806860a6799c328f64669e70764633919c15199edcc90b",
     "00027_ca4_5_super_equipment_content.sql": "9ba06c6cff37ea6d098346ff3dc65f1356ae87a777914cb15323422e53e41743",
     "00028_ca5_2_saved_presets.sql": "ac7cd5f62413dd54ed3fae03326ecd01354bf1450c4597d45a7e98e2c21681a6",
-    "00029_ca6_2_practice_foundation.sql": "698dbd7e44f7014155f66df366316ac937fd5e1a304ed67edb4d628bc655d065"
+    "00029_ca6_2_practice_foundation.sql": "698dbd7e44f7014155f66df366316ac937fd5e1a304ed67edb4d628bc655d065",
+    "00030_ca7_2_appearance_foundation.sql": "655d69cbc9e170f17f8476746591b5c70dbda01d966ee08dd3e6d5af237de8d0"
   },
   "rule": "All listed migration bytes are immutable for this cumulative candidate. Historical phase validators remain snapshot-specific; forward changes require a new migration and lock refresh after research.",
   "schema_version": 1,
-  "status": "CURRENT_CUMULATIVE_MIGRATION_LOCK_CA6_2"
+  "status": "CURRENT_CUMULATIVE_MIGRATION_LOCK_CA7_2"
 }

@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 from pathlib import Path
+from content_generation_policy import registered_pair_successor
 import fnmatch, hashlib, json, sys, zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -56,7 +57,7 @@ with zipfile.ZipFile(cur) as z:
 
 manifest = json.loads((ROOT / 'internal/content/builtin/generated/manifest.json').read_text())
 compiler_parser=(manifest.get('compiler_version'), manifest.get('parser_version'))
-if compiler_parser not in {('ca3-3','lua-generated-v5-pet-progression'), ('ca4-1','lua-generated-v6-equipment-primitives'), ('ca4-2a','lua-generated-v7-hero-equipment'), ('ca4-4a-i1','lua-generated-v10-pet-equipment'), ('ca4-4b-i1','lua-generated-v11-pet-restoration'), ('ca4-5-i1','lua-generated-v12-super-equipment'), ('ca6-2-practice-foundation','lua-generated-v13-practice')}:
+if not registered_pair_successor(ROOT, compiler_parser[0], compiler_parser[1], 'ca3-3'):
     errs.append(f'CA3-3 cumulative compiler/parser identity drift: {compiler_parser!r}')
 if manifest.get('source_archive_sha256') != sha(cur):
     errs.append('generated manifest source archive hash does not match exact current src_64')

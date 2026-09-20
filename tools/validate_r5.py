@@ -7,6 +7,7 @@ client acceptance remain separate gates.
 """
 from pathlib import Path
 import argparse, hashlib, json, os, re, sys
+from content_generation_policy import registered_compiler_successor
 R=Path(__file__).resolve().parents[1]
 ap=argparse.ArgumentParser()
 ap.add_argument("--cumulative", action="store_true", help="retain R5 semantics while permitting a later content compiler generation")
@@ -41,7 +42,7 @@ if '-- +goose Down' in m11: errs.append('00011 violates forward-only migration l
 try:
     man=json.loads((R/'internal/content/builtin/generated/manifest.json').read_text())
     if man.get('source_archive_sha256')!='c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf': errs.append('R5 builtin source archive drift')
-    if man.get('compiler_version')!='r5-1' and not (args.cumulative and man.get('compiler_version') in {'ca2-1','ca2-2','ca2-3','ca3-1','ca3-2','ca3-3','ca4-1','ca4-2a','ca4-4a-i1','ca4-4b-i1','ca4-5-i1','ca6-2-practice-foundation'}): errs.append('R5 compiler version drift')
+    if man.get('compiler_version')!='r5-1' and not (args.cumulative and registered_compiler_successor(R, man.get('compiler_version'), 'r5-1')): errs.append('R5 compiler version drift')
     caps=set(man.get('enabled_capabilities') or [])
     for cap in ['PLAYER_EXP_R5','TEMPORAL_ENERGY_R5','TEMPORAL_SPIRIT_ENERGY_R5','TEMPORAL_SKILL_POINT_R5','FUNCTION_LEVEL_ELIGIBILITY_R5']:
         if cap not in caps: errs.append(f'missing R5 capability {cap}')

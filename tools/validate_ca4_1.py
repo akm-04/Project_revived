@@ -2,6 +2,7 @@
 from __future__ import annotations
 from pathlib import Path
 import hashlib, json, sys
+from content_generation_policy import registered_pair_successor
 ROOT=Path(__file__).resolve().parents[1]
 errs=[]
 def req(cond,msg):
@@ -10,7 +11,7 @@ def req(cond,msg):
 def text(p): return (ROOT/p).read_text()
 manifest=json.loads(text('internal/content/builtin/generated/manifest.json'))
 req('EQUIPMENT_PRIMITIVES_CA4' in manifest.get('enabled_capabilities',[]),'CA4-1 content capability absent')
-req((manifest.get('compiler_version'),manifest.get('parser_version')) in {('ca4-1','lua-generated-v6-equipment-primitives'),('ca4-2a','lua-generated-v7-hero-equipment'),('ca4-4a-i1','lua-generated-v10-pet-equipment'),('ca4-4b-i1','lua-generated-v11-pet-restoration'),('ca4-5-i1','lua-generated-v12-super-equipment'), ('ca6-2-practice-foundation','lua-generated-v13-practice')},'CA4-1 cumulative compiler identity drift')
+req(registered_pair_successor(ROOT, manifest.get('compiler_version'), manifest.get('parser_version'), 'ca4-1'),'CA4-1 cumulative compiler identity drift')
 cat=json.loads(text('internal/content/builtin/generated/equipment_primitives_catalog.json'))
 req(len(cat.get('items',[]))==1176,'CA4-1 primitive count drift')
 req(len(cat.get('recipe_edges',[]))==1934,'CA4-1 recipe edge count drift')

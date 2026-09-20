@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 from pathlib import Path
+from content_generation_policy import registered_pair_successor
 import base64, csv, fnmatch, hashlib, io, json, re, subprocess, sys, zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -83,7 +84,7 @@ for got,want,label in [(len(closure),1176,'closure'),(recipe_nodes,797,'recipe_n
 manifest=json.loads((ROOT/'internal/content/builtin/generated/manifest.json').read_text())
 if manifest.get('source_archive_sha256')!=sha(cur): fail('generated manifest source archive hash drift')
 compiler_parser=(manifest.get('compiler_version'),manifest.get('parser_version'))
-if compiler_parser not in {('ca4-2a','lua-generated-v7-hero-equipment'), ('ca4-4a-i1','lua-generated-v10-pet-equipment'), ('ca4-4b-i1','lua-generated-v11-pet-restoration'), ('ca4-5-i1','lua-generated-v12-super-equipment'), ('ca6-2-practice-foundation','lua-generated-v13-practice')}: fail(f'compiler/parser successor drift {compiler_parser!r}')
+if not registered_pair_successor(ROOT, compiler_parser[0], compiler_parser[1], 'ca4-2a'): fail(f'compiler/parser successor drift {compiler_parser!r}')
 if 'EQUIPMENT_PRIMITIVES_CA4' not in manifest.get('enabled_capabilities',[]): fail('EQUIPMENT_PRIMITIVES_CA4 capability absent')
 diag=manifest.get('diagnostics',{})
 for key,want in {'equipment_roots':604,'equipment_closure_items':1176,'equipment_recipe_nodes':797,'equipment_recipe_edges':1934,'equipment_repeated_component_recipes':29}.items():

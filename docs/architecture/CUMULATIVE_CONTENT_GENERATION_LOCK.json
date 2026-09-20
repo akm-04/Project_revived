@@ -1,0 +1,107 @@
+{
+  "schema_version": 1,
+  "status": "CURRENT_CUMULATIVE_CONTENT_GENERATION_LOCK_CA7_2",
+  "rule": "Historical validators keep their phase-specific semantic invariants. In cumulative/current mode they may accept only an explicitly registered successor compiler generation at or after their baseline. New generations are append-only review events; registering a generation does not waive capability/count/source/migration/ownership assertions.",
+  "generations": [
+    {
+      "ordinal": 1,
+      "stage": "R5",
+      "compiler_version": "r5-1",
+      "parser_version": null
+    },
+    {
+      "ordinal": 2,
+      "stage": "CA2-1",
+      "compiler_version": "ca2-1",
+      "parser_version": null
+    },
+    {
+      "ordinal": 3,
+      "stage": "CA2-2",
+      "compiler_version": "ca2-2",
+      "parser_version": null
+    },
+    {
+      "ordinal": 4,
+      "stage": "CA2-3",
+      "compiler_version": "ca2-3",
+      "parser_version": null
+    },
+    {
+      "ordinal": 5,
+      "stage": "CA3-1",
+      "compiler_version": "ca3-1",
+      "parser_version": "lua-generated-v3-pet"
+    },
+    {
+      "ordinal": 6,
+      "stage": "CA3-2",
+      "compiler_version": "ca3-2",
+      "parser_version": "lua-generated-v4-pet-acquisition"
+    },
+    {
+      "ordinal": 7,
+      "stage": "CA3-3",
+      "compiler_version": "ca3-3",
+      "parser_version": "lua-generated-v5-pet-progression"
+    },
+    {
+      "ordinal": 8,
+      "stage": "CA4-1",
+      "compiler_version": "ca4-1",
+      "parser_version": "lua-generated-v6-equipment-primitives"
+    },
+    {
+      "ordinal": 9,
+      "stage": "CA4-2A",
+      "compiler_version": "ca4-2a",
+      "parser_version": "lua-generated-v7-hero-equipment"
+    },
+    {
+      "ordinal": 10,
+      "stage": "CA4-3A",
+      "compiler_version": "ca4-3a",
+      "parser_version": "lua-generated-v8-hero-fumo"
+    },
+    {
+      "ordinal": 11,
+      "stage": "CA4-3B",
+      "compiler_version": "ca4-3b",
+      "parser_version": "lua-generated-v9-hero-promotion-restoration"
+    },
+    {
+      "ordinal": 12,
+      "stage": "CA4-4A",
+      "compiler_version": "ca4-4a-i1",
+      "parser_version": "lua-generated-v10-pet-equipment"
+    },
+    {
+      "ordinal": 13,
+      "stage": "CA4-4B",
+      "compiler_version": "ca4-4b-i1",
+      "parser_version": "lua-generated-v11-pet-restoration"
+    },
+    {
+      "ordinal": 14,
+      "stage": "CA4-5",
+      "compiler_version": "ca4-5-i1",
+      "parser_version": "lua-generated-v12-super-equipment"
+    },
+    {
+      "ordinal": 15,
+      "stage": "CA6-2",
+      "compiler_version": "ca6-2-practice-foundation",
+      "parser_version": "lua-generated-v13-practice"
+    },
+    {
+      "ordinal": 16,
+      "stage": "CA7-2",
+      "compiler_version": "ca7-2-appearance-foundation",
+      "parser_version": "lua-generated-v14-appearance"
+    }
+  ],
+  "current": {
+    "compiler_version": "ca7-2-appearance-foundation",
+    "parser_version": "lua-generated-v14-appearance"
+  }
+}
