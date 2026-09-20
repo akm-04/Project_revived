@@ -127,3 +127,34 @@ func TestPetAppearanceQualifiesOriginAndActiveOwnership(t *testing.T) {
 		t.Fatalf("Pet appearance qualification=%+v", out)
 	}
 }
+
+func TestPaidLIVERemainsEffectiveAcrossOrdinaryTimedSkinExpiry(t *testing.T) {
+	deadline := time.Unix(200, 0).UTC()
+	h := appearanceHero(character.NormalHero)
+	h.CurrentSkinID = 40001001
+	h.IllusionSkinID = character.DefaultIllusionSkinID
+	content := appearanceReadFake{
+		skins: map[int64]AppearanceSkinDefinition{
+			40001001: {ModelID: 40001001, HeroOriginTableID: h.OriginTableID},
+		},
+		lives: map[int64]AppearanceLIVEDefinition{
+			40001002: {ModelID: 40001002, HeroOriginTableID: h.OriginTableID, CrystalCost: 10, ActivationItemID: 50005171, ActivationItemCount: 2},
+		},
+	}
+	skins := []character.HeroSkinEntitlement{{PlayerID: h.PlayerID, PartnerID: h.PartnerID, ModelID: 40001001, ExpiresAt: &deadline}}
+	lives := []character.HeroLIVEEntitlement{{PlayerID: h.PlayerID, PartnerID: h.PartnerID, ModelID: 40001002, IsShow: true}}
+	atDeadline, err := BuildEffectiveHeroAppearance(context.Background(), h.CreationContentRevision, h, skins, lives, deadline, content)
+	if err != nil {
+		t.Fatal(err)
+	}
+	after, err := BuildEffectiveHeroAppearance(context.Background(), h.CreationContentRevision, h, skins, lives, deadline.Add(time.Second), content)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if atDeadline.CurrentSkinID != 40001001 || len(atDeadline.LIVE) != 1 || !atDeadline.LIVE[0].IsShow {
+		t.Fatalf("pre-expiry appearance=%+v", atDeadline)
+	}
+	if after.CurrentSkinID != 0 || len(after.Skins) != 0 || len(after.LIVE) != 1 || after.LIVE[0].ModelID != 40001002 || !after.LIVE[0].IsShow {
+		t.Fatalf("paid LIVE did not survive ordinary skin expiry: %+v", after)
+	}
+}

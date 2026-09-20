@@ -34,6 +34,7 @@ run python3 tools/check_i6c_source_oracle.py "${GXB_ORACLE_ROOT:-/mnt/data}"
 run python3 tools/check_ca3_3_source_oracle.py "${GXB_ORACLE_ROOT:-/mnt/data}"
 run python3 tools/check_ca4_1_source_oracle.py "${GXB_ORACLE_ROOT:-/mnt/data}"
 run python3 tools/check_ca7_3_source_oracle.py "${GXB_ORACLE_ROOT:-/mnt/data}"
+run python3 tools/check_ca7_4_source_oracle.py "${GXB_ORACLE_ROOT:-/mnt/data}"
 run python3 tools/generate_mid_registry.py --root "${GXB_ORACLE_ROOT:-/mnt/data}" --check
 run python3 tools/generate_pass353_wire_fixtures.py --root "${GXB_ORACLE_ROOT:-/mnt/data}" --check
 run python3 tools/generate_kernel_querytext.py --check
@@ -78,6 +79,7 @@ run python3 tools/validate_r5.py --cumulative
 run python3 tools/validate_ca3_3.py --cumulative
 run python3 tools/validate_ca4_1.py
 run python3 tools/validate_ca7_3.py
+run python3 tools/validate_ca7_4.py
 run python3 tools/validate_current_candidate.py
 
 if [ "$failures" -ne 0 ]; then

@@ -1,0 +1,509 @@
+{
+  "candidate_binding": {
+    "backend_archive_sha256": "bdbb3c2ec795036e3ec4f97d33d57257133249f73c4f0aa2828de0540adbc9af",
+    "backend_git_head": "1b40629950996ade1ff0da841c5a53910080a22f",
+    "backend_product_tree_sha256": "002fc2a73fdff1866b153028febd32ad52ef7b905dfc5acac0d8756e8dce753c",
+    "passmap_sha256": "3b91544a74d177d3d8ca5dacca7e4fb0a6fbdecda5606f4f16d449fe08300431"
+  },
+  "document": "PASS590_CA7_4_ACCEPTANCE_MATRIX_R1",
+  "implementation_started": false,
+  "note": "This matrix defines required proof for a future CA7-4 implementation candidate. It is not evidence that those implementation tests have already passed.",
+  "parent_rows": [
+    "PASS586:A12_MID68",
+    "PASS586:A13_MID69",
+    "PASS586:A14_LIVE_LIFETIME"
+  ],
+  "preimplementation_gate": "GREEN_RESEARCH_ONLY",
+  "rows": [
+    {
+      "category": "binding",
+      "id": "R01_BIND",
+      "mids": [],
+      "must_prove": "Exact sealed Pass590 PassMap/backend/src_64 identities are bound; no later filename or compatibility copy silently replaces them.",
+      "planned_proof": [
+        "hash/manifest identity guard",
+        "git/tree identity"
+      ],
+      "preimplementation_state": "REQUIRED_FOR_IMPLEMENTATION_ACCEPTANCE"
+    },
+    {
+      "category": "source-oracle",
+      "id": "R02_SOURCE",
+      "mids": [
+        68,
+        69
+      ],
+      "must_prove": "Current source pins MID numbers, request/result shapes, type0/1/2 visibility, paid call sites, costs/item, economy sideband order, transport retry and array parsing.",
+      "planned_proof": [
+        "candidate-bound source oracle against current src_64 SHA",
+        "old-client/frozen-V1 differential classification"
+      ],
+      "preimplementation_state": "REQUIRED_FOR_IMPLEMENTATION_ACCEPTANCE"
+    },
+    {
+      "category": "wire",
+      "id": "A68_01_WIRE",
+      "mids": [
+        68
+      ],
+      "must_prove": "MID68 accepts only partner_id/model_id gameplay keys plus stock envelope metadata and rejects malformed/nonpositive IDs.",
+      "planned_proof": [
+        "dispatcher unit tests",
+        "HTTP decode test"
+      ],
+      "preimplementation_state": "REQUIRED_FOR_IMPLEMENTATION_ACCEPTANCE"
+    },
+    {
+      "category": "behavior",
+      "id": "A68_02_FIRST_UNLOCK",
+      "mids": [
+        68
+      ],
+      "must_prove": "First qualified NormalHero type2 LIVE unlock stores requested Hero+model entitlement with is_show=true and exactly one Hero state_version transition.",
+      "planned_proof": [
+        "application service tests",
+        "Postgres adapter CAS test"
+      ],
+      "preimplementation_state": "REQUIRED_FOR_IMPLEMENTATION_ACCEPTANCE"
+    },
+    {
+      "category": "economy",
+      "id": "A68_03_ATOMIC_DEBIT",
+      "mids": [
+        68
+      ],
+      "must_prove": "First unlock atomically debits exact revision-bound Crystal + activation item/count after Hero lock; no partial Hero/Economy mutation on failure.",
+      "planned_proof": [
+        "fake transaction state test",
+        "real PostgreSQL CA7-7 gate",
+        "lock-order/ownership guard"
+      ],
+      "preimplementation_state": "REQUIRED_FOR_IMPLEMENTATION_ACCEPTANCE"
+    },
+    {
+      "category": "replay",
+      "id": "A68_04_REPEAT",
+      "mids": [
+        68
+      ],
+      "must_prove": "Fresh already-owned MID68 preserves existing is_show, performs no second debit/write/version bump, and returns success from current state.",
+      "planned_proof": [
+        "fresh-operation repeat test",
+        "existing-show=false preservation test"
+      ],
+      "preimplementation_state": "REQUIRED_FOR_IMPLEMENTATION_ACCEPTANCE"
+    },
+    {
+      "category": "receipt",
+      "id": "A68_05_SAME_OP",
+      "mids": [
+        68
+      ],
+      "must_prove": "Same operation replay/UNKNOWN-COMMIT resolves through D11 receipt without repeating debit or Hero mutation and validates request fingerprint/schema.",
+      "planned_proof": [
+        "receipt replay test",
+        "receipt conflict test",
+        "UNKNOWN-COMMIT injected test where feasible"
+      ],
+      "preimplementation_state": "REQUIRED_FOR_IMPLEMENTATION_ACCEPTANCE"
+    },
+    {
+      "category": "recovery",
+      "id": "A68_06_LOST_RESPONSE",
+      "mids": [
+        68
+      ],
+      "must_prove": "A fresh transport retry after committed/lost response converges on ownership without debit and every success returns current economy_.crystal outside receipt.",
+      "planned_proof": [
+        "two-operation lost-response simulation",
+        "dispatcher scalar projection test"
+      ],
+      "preimplementation_state": "REQUIRED_FOR_IMPLEMENTATION_ACCEPTANCE"
+    },
+    {
+      "category": "wire",
+      "id": "A68_07_RESPONSE",
+      "mids": [
+        68
+      ],
+      "must_prove": "HTTP200 MID68 response emits deterministic aligned unlocked_dynamic_card/dynamic_card_state and generic economy_.crystal; does not invent remove_item/item balance/server_time/cost fields.",
+      "planned_proof": [
+        "dispatcher exact-shape tests",
+        "source-oracle guard"
+      ],
+      "preimplementation_state": "REQUIRED_FOR_IMPLEMENTATION_ACCEPTANCE"
+    },
+    {
+      "category": "content",
+      "id": "A68_08_QUALIFY",
+      "mids": [
+        68
+      ],
+      "must_prove": "Unknown/type0/type1/SuperHero/wrong-origin models reject; qualified paid LIVE does not require ordinary skin ownership/current selection.",
+      "planned_proof": [
+        "content table-driven tests",
+        "preview-path source oracle"
+      ],
+      "preimplementation_state": "REQUIRED_FOR_IMPLEMENTATION_ACCEPTANCE"
+    },
+    {
+      "category": "economy",
+      "id": "A68_09_INSUFFICIENT",
+      "mids": [
+        68
+      ],
+      "must_prove": "Insufficient/missing Crystal or activation item deterministically rejects with no Hero/LIVE mutation, no version bump, and no partial debit.",
+      "planned_proof": [
+        "material debit failure tests",
+        "transaction rollback test"
+      ],
+      "preimplementation_state": "REQUIRED_FOR_IMPLEMENTATION_ACCEPTANCE"
+    },
+    {
+      "category": "normalization",
+      "id": "A68_10_STALE_ROWS",
+      "mids": [
+        68
+      ],
+      "must_prove": "Unrelated stale/wrong-origin durable LIVE rows are filtered from projection and do not become canonical output or block an otherwise qualified request.",
+      "planned_proof": [
+        "projection+mutation fixture with stale row"
+      ],
+      "preimplementation_state": "REQUIRED_FOR_IMPLEMENTATION_ACCEPTANCE"
+    },
+    {
+      "category": "wire",
+      "id": "A69_01_WIRE",
+      "mids": [
+        69
+      ],
+      "must_prove": "is_show is external JSON numeric integer exactly 0 or 1; strings/bools/fractions/other integers/missing/extra gameplay fields reject.",
+      "planned_proof": [
+        "dispatcher HTTP decode table"
+      ],
+      "preimplementation_state": "REQUIRED_FOR_IMPLEMENTATION_ACCEPTANCE"
+    },
+    {
+      "category": "behavior",
+      "id": "A69_02_OWNERSHIP",
+      "mids": [
+        69
+      ],
+      "must_prove": "MID69 requires a qualified owned paid type2 LIVE for the requested Hero+model; unowned/type1/Super/wrong-origin rejects.",
+      "planned_proof": [
+        "application table-driven tests"
+      ],
+      "preimplementation_state": "REQUIRED_FOR_IMPLEMENTATION_ACCEPTANCE"
+    },
+    {
+      "category": "behavior",
+      "id": "A69_03_ASSIGN",
+      "mids": [
+        69
+      ],
+      "must_prove": "0->1 and 1->0 explicit desired-state assignments each mutate one LIVE child and bump Hero state_version exactly once.",
+      "planned_proof": [
+        "application service tests",
+        "Postgres CAS test"
+      ],
+      "preimplementation_state": "REQUIRED_FOR_IMPLEMENTATION_ACCEPTANCE"
+    },
+    {
+      "category": "behavior",
+      "id": "A69_04_NOOP",
+      "mids": [
+        69
+      ],
+      "must_prove": "Already-equal desired state succeeds with terminal receipt but performs no durable write/version bump.",
+      "planned_proof": [
+        "no-op+same-op receipt tests"
+      ],
+      "preimplementation_state": "REQUIRED_FOR_IMPLEMENTATION_ACCEPTANCE"
+    },
+    {
+      "category": "wire",
+      "id": "A69_05_RESPONSE",
+      "mids": [
+        69
+      ],
+      "must_prove": "HTTP200 MID69 response requires no semantic body fields; stock applies requested state locally.",
+      "planned_proof": [
+        "dispatcher exact empty-body test",
+        "source-oracle"
+      ],
+      "preimplementation_state": "REQUIRED_FOR_IMPLEMENTATION_ACCEPTANCE"
+    },
+    {
+      "category": "receipt",
+      "id": "A69_06_REPLAY",
+      "mids": [
+        69
+      ],
+      "must_prove": "Same-op D11 replay returns terminal success and fresh identical operation re-evaluates current desired-state convergence.",
+      "planned_proof": [
+        "same-op replay test",
+        "fresh-operation repeat test"
+      ],
+      "preimplementation_state": "REQUIRED_FOR_IMPLEMENTATION_ACCEPTANCE"
+    },
+    {
+      "category": "concurrency",
+      "id": "C01_SAME_MODEL_UNLOCK_RACE",
+      "mids": [
+        68
+      ],
+      "must_prove": "Concurrent first unlocks of same Hero+model serialize so exactly one debit/write/version bump occurs.",
+      "planned_proof": [
+        "race-capable atomic fake store test",
+        "real PostgreSQL CA7-7 concurrency"
+      ],
+      "preimplementation_state": "REQUIRED_FOR_IMPLEMENTATION_ACCEPTANCE"
+    },
+    {
+      "category": "concurrency",
+      "id": "C02_DIFF_MODEL_UNLOCK_RACE",
+      "mids": [
+        68
+      ],
+      "must_prove": "Concurrent distinct-model unlocks on same Hero serialize; each absent qualified model may debit once subject to remaining resources.",
+      "planned_proof": [
+        "atomic fake store test",
+        "real PostgreSQL later gate"
+      ],
+      "preimplementation_state": "REQUIRED_FOR_IMPLEMENTATION_ACCEPTANCE"
+    },
+    {
+      "category": "concurrency",
+      "id": "C03_UNLOCK_SHOW_ORDER",
+      "mids": [
+        68,
+        69
+      ],
+      "must_prove": "MID68 vs MID69 on absent model yields only valid serial outcomes: show-before-unlock rejects; show-after-unlock may assign.",
+      "planned_proof": [
+        "two-operation ordering test"
+      ],
+      "preimplementation_state": "REQUIRED_FOR_IMPLEMENTATION_ACCEPTANCE"
+    },
+    {
+      "category": "concurrency",
+      "id": "C04_SHOW_RACES",
+      "mids": [
+        69
+      ],
+      "must_prove": "Same desired concurrent assignments cause at most one state transition; opposite desired assignments serialize and final state follows order.",
+      "planned_proof": [
+        "atomic fake store tests",
+        "race"
+      ],
+      "preimplementation_state": "REQUIRED_FOR_IMPLEMENTATION_ACCEPTANCE"
+    },
+    {
+      "category": "lifetime",
+      "id": "L01_SKIN_INDEPENDENCE",
+      "mids": [
+        68,
+        69
+      ],
+      "must_prove": "Paid LIVE remains durable/effective across ordinary timed-skin expiry/removal; no expiry scheduler/write affects LIVE.",
+      "planned_proof": [
+        "projection tests at pre/post skin expiry",
+        "reload test"
+      ],
+      "preimplementation_state": "REQUIRED_FOR_IMPLEMENTATION_ACCEPTANCE"
+    },
+    {
+      "category": "lifetime",
+      "id": "L02_TYPE1_VOW",
+      "mids": [
+        68,
+        69
+      ],
+      "must_prove": "Vow/type1 automatic dynamic card never materializes paid LIVE and paid mutations reject it.",
+      "planned_proof": [
+        "content/source oracle",
+        "application rejection test"
+      ],
+      "preimplementation_state": "REQUIRED_FOR_IMPLEMENTATION_ACCEPTANCE"
+    },
+    {
+      "category": "normalization",
+      "id": "N01_DETERMINISTIC_ARRAYS",
+      "mids": [
+        68,
+        69
+      ],
+      "must_prove": "Reload and MID68 result arrays are model-sorted, aligned, and regenerated from keyed canonical rows; acquisition order and malformed stock arrays are not authority.",
+      "planned_proof": [
+        "projection tests",
+        "source-oracle malformed array evidence"
+      ],
+      "preimplementation_state": "REQUIRED_FOR_IMPLEMENTATION_ACCEPTANCE"
+    },
+    {
+      "category": "normalization",
+      "id": "N02_NO_REPAIR_ARRAYS",
+      "mids": [
+        68,
+        69
+      ],
+      "must_prove": "No mutation path ingests or attempts to repair client LIVE arrays; stale durable rows remain qualification-filtered.",
+      "planned_proof": [
+        "architecture/static source guard"
+      ],
+      "preimplementation_state": "REQUIRED_FOR_IMPLEMENTATION_ACCEPTANCE"
+    },
+    {
+      "category": "architecture",
+      "id": "X01_LOCK_OWNERSHIP",
+      "mids": [
+        68
+      ],
+      "must_prove": "Hero lock rank precedes I5 Economy locks; Character code uses typed I5 debit and contains no foreign-owner SQL.",
+      "planned_proof": [
+        "archguard",
+        "SQL ownership guard",
+        "static inspection"
+      ],
+      "preimplementation_state": "REQUIRED_FOR_IMPLEMENTATION_ACCEPTANCE"
+    },
+    {
+      "category": "architecture",
+      "id": "X02_SINGLE_CAS",
+      "mids": [
+        68,
+        69
+      ],
+      "must_prove": "Each semantic LIVE mutation advances Hero state_version exactly once through SaveHeroLIVEEntitlementTx; no-op advances zero times.",
+      "planned_proof": [
+        "store SQL/query guard",
+        "service tests"
+      ],
+      "preimplementation_state": "REQUIRED_FOR_IMPLEMENTATION_ACCEPTANCE"
+    },
+    {
+      "category": "architecture",
+      "id": "X03_NO_SCHEMA",
+      "mids": [
+        68,
+        69
+      ],
+      "must_prove": "CA7-4 requires no new schema/migration beyond accepted 00030.",
+      "planned_proof": [
+        "migration diff guard"
+      ],
+      "preimplementation_state": "REQUIRED_FOR_IMPLEMENTATION_ACCEPTANCE"
+    },
+    {
+      "category": "cross-phase",
+      "id": "X04_CA6_PRACTICE",
+      "mids": [
+        68,
+        69
+      ],
+      "must_prove": "Actual CA7-4 Hero mutation invalidates pending CA6 Practice proposal via state_version; semantic no-op does not.",
+      "planned_proof": [
+        "cross-phase regression fixture"
+      ],
+      "preimplementation_state": "REQUIRED_FOR_IMPLEMENTATION_ACCEPTANCE"
+    },
+    {
+      "category": "cross-phase",
+      "id": "X05_CA73_REGRESSION",
+      "mids": [
+        60,
+        61,
+        2979,
+        68,
+        69
+      ],
+      "must_prove": "CA7-3 ordinary/illusion/skin entitlement semantics and combat axis remain unchanged.",
+      "planned_proof": [
+        "bounded characterhero regression",
+        "retained CA7-3 source/arch guards"
+      ],
+      "preimplementation_state": "REQUIRED_FOR_IMPLEMENTATION_ACCEPTANCE"
+    },
+    {
+      "category": "errors",
+      "id": "E01_ERRORS",
+      "mids": [
+        68,
+        69
+      ],
+      "must_prove": "Malformed wire and deterministic semantic failures use non-OK V2 transport without invented numeric stock codes; content outage/infra retain 503 distinction.",
+      "planned_proof": [
+        "dispatcher error table tests"
+      ],
+      "preimplementation_state": "REQUIRED_FOR_IMPLEMENTATION_ACCEPTANCE"
+    },
+    {
+      "category": "bounded-residual",
+      "id": "E02_RESIDUAL_STALE_CLIENT",
+      "mids": [
+        68
+      ],
+      "must_prove": "No second server debit is introduced to compensate for a stale cross-client local activation-item cache; residual is documented rather than hidden.",
+      "planned_proof": [
+        "contract review"
+      ],
+      "preimplementation_state": "DOCUMENTED_RESIDUAL"
+    },
+    {
+      "category": "test-gate",
+      "id": "G01_FOCUSED",
+      "mids": [
+        68,
+        69
+      ],
+      "must_prove": "Focused behavior, receipt, concurrency, race, vet/static/architecture/query/source-oracle checks are green on implementation candidate.",
+      "planned_proof": [
+        "normal-chat exact candidate first",
+        "fresh COMPATIBILITY_COPY_ONLY clone only if environment blocks"
+      ],
+      "preimplementation_state": "REQUIRED_FOR_IMPLEMENTATION_ACCEPTANCE"
+    },
+    {
+      "category": "test-gate",
+      "id": "G02_BOUNDED_REGRESSION",
+      "mids": [
+        68,
+        69
+      ],
+      "must_prove": "Bounded package-by-package regression is green; canonical compatibility pins remain pristine.",
+      "planned_proof": [
+        "package regression",
+        "diff review"
+      ],
+      "preimplementation_state": "REQUIRED_FOR_IMPLEMENTATION_ACCEPTANCE"
+    },
+    {
+      "category": "deferred",
+      "id": "G03_NATIVE_DEFER",
+      "mids": [
+        68,
+        69
+      ],
+      "must_prove": "Accumulated exact/native PostgreSQL/River proof remains CA7-7 and is not falsely claimed at CA7-4 local gate.",
+      "planned_proof": [
+        "CA7-7 later"
+      ],
+      "preimplementation_state": "AUTHORIZED_DEFERRAL"
+    },
+    {
+      "category": "deferred",
+      "id": "G04_W2_DEFER",
+      "mids": [
+        68,
+        69
+      ],
+      "must_prove": "Physical unmodified-stock-client proof remains W2-deferred.",
+      "planned_proof": [
+        "W2 later"
+      ],
+      "preimplementation_state": "AUTHORIZED_DEFERRAL"
+    }
+  ],
+  "schema_version": 1,
+  "status": "PREIMPLEMENTATION_RESEARCH_MATRIX"
+}

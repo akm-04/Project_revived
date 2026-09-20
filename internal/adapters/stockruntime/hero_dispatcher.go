@@ -2,9 +2,11 @@ package stockruntime
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	apphero "gxb.local/backend/v2/internal/application/characterhero"
@@ -44,10 +46,16 @@ type HeroAppearanceServicePort interface {
 	UseIllusionSkinItem(context.Context, identity.ActorContext, int64, int64, operation.Context) (apphero.IllusionSelectResult, error)
 }
 
+type HeroLIVEAppearanceServicePort interface {
+	UnlockLIVE(context.Context, identity.ActorContext, int64, int64, operation.Context) (apphero.LIVEUnlockResult, error)
+	SetLIVEShow(context.Context, identity.ActorContext, int64, int64, bool, operation.Context) (apphero.LIVEShowResult, error)
+}
+
 type HeroDispatcher struct {
 	Authority  apprealtime.GameplayAuthorityPort
 	Service    HeroServicePort
 	Appearance HeroAppearanceServicePort
+	LIVE       HeroLIVEAppearanceServicePort
 	Economy    HeroEconomyProjectionPort
 }
 
@@ -92,6 +100,55 @@ func (d HeroDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReque
 			body["remove_item"] = int64(1)
 		}
 		return httpedge.Response{HTTPStatus: http.StatusOK, Body: body}
+	case 68: // UNLOCK_DYNAMIC_CARD — CA7-4 paid type-2 LIVE convergence
+		if d.LIVE == nil {
+			return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Body: map[string]any{"error": "hero_live_unavailable"}}
+		}
+		if !onlyStockGameplayParams(req.Envelope.Params, "partner_id", "model_id") {
+			return badHero("invalid_hero_live_unlock")
+		}
+		partnerID, e1 := requiredInt64(req.Envelope.Params, "partner_id")
+		modelID, e2 := requiredInt64(req.Envelope.Params, "model_id")
+		if e1 != nil || e2 != nil || partnerID <= 0 || modelID <= 0 {
+			return badHero("invalid_hero_live_unlock")
+		}
+		got, err := d.LIVE.UnlockLIVE(ctx, actor, partnerID, modelID, req.Envelope.Operation)
+		if err != nil {
+			return failHero(err)
+		}
+		if d.Economy == nil {
+			return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Body: map[string]any{"error": "hero_projection_unavailable"}}
+		}
+		crystal, err := d.Economy.CurrentScalar(ctx, actor.PlayerID, "crystal", req.Envelope.Operation)
+		if err != nil {
+			return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Body: map[string]any{"error": "hero_projection_failed"}}
+		}
+		models, states, err := liveStockStrings(got.LIVE)
+		if err != nil {
+			return failHero(err)
+		}
+		return httpedge.Response{HTTPStatus: http.StatusOK, Body: map[string]any{
+			"unlocked_dynamic_card": models,
+			"dynamic_card_state":    states,
+			"economy_":              map[string]any{"crystal": crystal},
+		}}
+	case 69: // SHOW_DYNAMIC_CARD — CA7-4 explicit desired show-state assignment
+		if d.LIVE == nil {
+			return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Body: map[string]any{"error": "hero_live_unavailable"}}
+		}
+		if !onlyStockGameplayParams(req.Envelope.Params, "partner_id", "model_id", "is_show") {
+			return badHero("invalid_hero_live_show")
+		}
+		partnerID, e1 := requiredInt64(req.Envelope.Params, "partner_id")
+		modelID, e2 := requiredInt64(req.Envelope.Params, "model_id")
+		show, e3 := requiredJSONBit(req.Envelope.Params, "is_show")
+		if e1 != nil || e2 != nil || e3 != nil || partnerID <= 0 || modelID <= 0 {
+			return badHero("invalid_hero_live_show")
+		}
+		if _, err := d.LIVE.SetLIVEShow(ctx, actor, partnerID, modelID, show, req.Envelope.Operation); err != nil {
+			return failHero(err)
+		}
+		return httpedge.Response{HTTPStatus: http.StatusOK, Body: map[string]any{}}
 	case 61: // SKIN_CANCEL — CA7-3 ordinary selector -> base
 		if d.Appearance == nil {
 			return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Body: map[string]any{"error": "hero_appearance_unavailable"}}
@@ -453,6 +510,41 @@ func heroPromotionResponse(got apphero.HeroPromotionResult) map[string]any {
 		body["economy_"] = map[string]any{"mana": *got.ManaAfter}
 	}
 	return body
+}
+
+func requiredJSONBit(params map[string]any, key string) (bool, error) {
+	raw, ok := params[key]
+	if !ok {
+		return false, errors.New("missing " + key)
+	}
+	n, ok := raw.(json.Number)
+	if !ok {
+		return false, errors.New("invalid " + key + " wire type")
+	}
+	v, err := n.Int64()
+	if err != nil || (v != 0 && v != 1) {
+		return false, errors.New("invalid " + key + " wire value")
+	}
+	return v == 1, nil
+}
+
+func liveStockStrings(in []apphero.LIVEResultState) (string, string, error) {
+	models := make([]string, 0, len(in))
+	states := make([]string, 0, len(in))
+	var prior int64
+	for i, row := range in {
+		if row.ModelID <= 0 || (i > 0 && row.ModelID <= prior) {
+			return "", "", errors.New("invalid Hero LIVE projection")
+		}
+		prior = row.ModelID
+		models = append(models, strconv.FormatInt(row.ModelID, 10))
+		if row.IsShow {
+			states = append(states, "1")
+		} else {
+			states = append(states, "0")
+		}
+	}
+	return strings.Join(models, "|"), strings.Join(states, "|"), nil
 }
 
 func badHero(code string) httpedge.Response {

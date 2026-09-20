@@ -1,0 +1,9 @@
+=== PASS591 CA7-4 FINAL COMPATIBILITY_COPY_ONLY focused ===
+2026-09-20T10:53:54Z
+Accommodation: .go-version 1.27.1->1.23.2; go.mod go1.26/toolchain1.27.1->go1.23/toolchain1.23.2 only.
+go version go1.23.2 linux/amd64
+ok  	gxb.local/backend/v2/internal/application/characterhero	(cached)
+ok  	gxb.local/backend/v2/internal/adapters/stockruntime	(cached)
+ok  	gxb.local/backend/v2/internal/adapters/postgres/characterstore	(cached)
+ok  	gxb.local/backend/v2/internal/foundation/replaycatalog	(cached)
+ok  	gxb.local/backend/v2/internal/archguard	0.037s

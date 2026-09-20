@@ -83,6 +83,7 @@ type Service struct {
 	Appearance                characterasset.AppearanceContent
 	AppearanceMutationStore   HeroAppearanceMutationStore
 	AppearanceMutationContent HeroAppearanceMutationContent
+	LIVEMutationStore         HeroLIVEMutationStore
 }
 
 func profile() tx.Profile {

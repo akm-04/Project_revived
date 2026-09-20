@@ -1,0 +1,151 @@
+{
+  "schema_version": 1,
+  "pass": "591.0",
+  "phase": "CA7-4 Normal-Girl paid LIVE entitlement/show-state semantics local closure",
+  "authority_parent": "sealed Pass590 CA7-3 local acceptance / CA7-4 research GREEN plus explicit user authorization to implement",
+  "parent_backend_sha256": "bdbb3c2ec795036e3ec4f97d33d57257133249f73c4f0aa2828de0540adbc9af",
+  "parent_git_head": "1b40629950996ade1ff0da841c5a53910080a22f",
+  "parent_implementation_revision_sha256": "d3c606dfa2b86e7338243ebd1cf0cbd8adaf5118c4d8aa0aa541c330e4d57c7a",
+  "parent_passmap_sha256": "3b91544a74d177d3d8ca5dacca7e4fb0a6fbdecda5606f4f16d449fe08300431",
+  "content_revision": "ae577b8c9b9770f1d7a7dcf8335d9d36d27a15a687a12a5e5b01d97eca124116",
+  "result": "GREEN_LOCAL_CA7_4_ACCEPTED_COMPATIBILITY_COPY_ONLY_NATIVE_AGGREGATE_DEFERRED_TO_CA7_7",
+  "implementation_scope": [
+    "MID68 paid type2 LIVE first acquisition/current-state convergence with typed I5 Crystal+activation-item debit",
+    "MID69 explicit desired show-state assignment with strict JSON numeric 0/1 wire parsing",
+    "Hero-owned LIVE entitlement/show persistence using existing one-CAS SaveHeroLIVEEntitlementTx seam",
+    "D11 ca7.hero-live-unlock CURRENT_STATE_CONVERGENCE and ca7.hero-live-show PARAMETER_STATE_SET families",
+    "generic economy_.crystal projection on every successful MID68 response outside semantic receipt",
+    "candidate-bound CA7-4 source/structural guards while retaining CA7-3 and fencing CA7-5"
+  ],
+  "explicit_non_scope": [
+    "MID1893/MID1894/MID1895 Pet home-style mutation (CA7-5)",
+    "new schema migration",
+    "paid Vow/type1 durable LIVE state",
+    "physical stock-client W2 proof",
+    "CA7-7 exact Go/native PostgreSQL/River accumulated proof"
+  ],
+  "research": {
+    "bundle_sha256": "c14a57088493f70c7e6f2e7d0b9f7e34f763c0a053c1a2c0455ea50e6aaba810",
+    "contract": "docs/PASS590_CA7_4_PREIMPLEMENTATION_CONTRACT_R1.md",
+    "acceptance_matrix": "docs/PASS590_CA7_4_ACCEPTANCE_MATRIX_R1.json",
+    "source_oracle": "docs/PASS590_CA7_4_SOURCE_ORACLE_R1.json",
+    "preimplementation_reality_check": "docs/PASS590_CA7_4_INDEPENDENT_PREIMPLEMENTATION_REALITY_CHECK_R1.md"
+  },
+  "source_oracles": {
+    "current_src64": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+    "old_client": "d0a4815507fd4626ac5749f2f6efae554d3a4bef717793f155f58c8bed7170b1",
+    "frozen_v1": "31729d5c5e4509c2c89eaa1e8203cf1570afe87e18ed2610b944e457a9946b15",
+    "native_apk": "fcc0f03e5973dd41a190a4bd390a8c4c5185f5f7cf2d4eeb0bcad696cfee7517"
+  },
+  "canonical_environment": {
+    "canonical_pins_changed": false,
+    "exact_candidate_attempt": "ENVIRONMENT_BLOCKED",
+    "reason": "pinned Go1.27.1 cannot be downloaded in this sandbox; canonical .go-version/go.mod/go.sum remain pristine"
+  },
+  "compatibility_copy_only": {
+    "environment": "Go1.23.2 linux/amd64",
+    "accommodation": [
+      ".go-version 1.27.1 -> 1.23.2 only in disposable clone",
+      "go.mod language 1.26.0 -> 1.23.0 and toolchain go1.27.1 -> go1.23.2 only in disposable clone"
+    ],
+    "go_sum_changed": false,
+    "results": [
+      "focused behavior GREEN",
+      "focused race GREEN",
+      "full go test ./... GREEN",
+      "full go vet ./... GREEN",
+      "bounded package regression 94/94 GREEN",
+      "retained cumulative validators GREEN under explicit compatibility classification"
+    ]
+  },
+  "canonical_static_results": [
+    "dependency policy GREEN",
+    "content generation policy GREEN",
+    "sqlc generation policy GREEN",
+    "schema/query ownership GREEN",
+    "foundation trace GREEN",
+    "retained CA7-3 exact source oracle GREEN",
+    "CA7-4 exact source oracle GREEN",
+    "CA7-4 structural validator GREEN",
+    "git diff --check GREEN"
+  ],
+  "deferred_mandatory": [
+    "CA7-7 exact canonical Go/native real PostgreSQL/River accumulated gate",
+    "physical unmodified-stock-client W2 post-I14"
+  ],
+  "evidence_logs": {
+    "EVIDENCE/PASS591_CA7_4/compat/final_focused.log": {
+      "bytes": 550,
+      "sha256": "77230f2d8ead90282a633340a55896f8953bc28ea73a832d2cee066b46a57790"
+    },
+    "EVIDENCE/PASS591_CA7_4/compat/final_full_test.log": {
+      "bytes": 6406,
+      "sha256": "f948e0c952549aa07b67fdc5b3661d50ae0e115c68b5cb98d05c931dffab1ffc"
+    },
+    "EVIDENCE/PASS591_CA7_4/compat/final_race.log": {
+      "bytes": 368,
+      "sha256": "7f4713b16408bae01704ab85d89f5c2ded2179651287cfe67365975de3627d08"
+    },
+    "EVIDENCE/PASS591_CA7_4/compat/final_vet.log": {
+      "bytes": 82,
+      "sha256": "9d22511ae9bb7eeb590c8785e3e57fbd13f98853feeccabe3941603ede8c97bd"
+    },
+    "EVIDENCE/PASS591_CA7_4/compat/full_check_partial_timeout.log": {
+      "bytes": 12578,
+      "sha256": "6a2f3cf5f6619aa24911441c28d4aeacb236800b3febde5d0cc256a5a8c5fa8b"
+    },
+    "EVIDENCE/PASS591_CA7_4/compat/package_regression_94_packages.log": {
+      "bytes": 11394,
+      "sha256": "1690a2c90b8a051a07bf43d63a9997c23e210f070f5c1a7b6907bba02316f5c0"
+    },
+    "EVIDENCE/PASS591_CA7_4/compat/remaining_validators.log": {
+      "bytes": 2570,
+      "sha256": "183d66f0d7c2e9d62876f1a8239d876f61eace79185674030fe38d222669fb84"
+    },
+    "EVIDENCE/PASS591_CA7_4/compat/scope.txt": {
+      "bytes": 415,
+      "sha256": "6a4073e3cccec513c7e57639768aa013a582437b5bb6e963880e7c7096de3904"
+    },
+    "EVIDENCE/PASS591_CA7_4/compat/source_binding.sha256": {
+      "bytes": 1741,
+      "sha256": "292454723944519527dfcf3d4ec4f9814d8dab4259ed5480c1217b31b0d5fdf4"
+    },
+    "EVIDENCE/PASS591_CA7_4/exact/check_ca7_3_source_oracle.log": {
+      "bytes": 257,
+      "sha256": "166a1bbad35e9314aa978c64cd768cbe4f1898a4771758a88f85c04b5f9f0f7a"
+    },
+    "EVIDENCE/PASS591_CA7_4/exact/check_ca7_4_source_oracle.log": {
+      "bytes": 253,
+      "sha256": "574b496d3dafd2502b44d0d5a24ac8177d9d678b430f219651a2b162e03ce137"
+    },
+    "EVIDENCE/PASS591_CA7_4/exact/check_content_generation_policy.log": {
+      "bytes": 104,
+      "sha256": "ddba1f126ca18d592213cc7f34161aa389d47eacf55c4d61003efb9a51820b0c"
+    },
+    "EVIDENCE/PASS591_CA7_4/exact/check_dependency_policy.log": {
+      "bytes": 123,
+      "sha256": "6e633284b4895ce54df4cdaae71148b22d92a3124baa56d2adc9a1b0a979f96d"
+    },
+    "EVIDENCE/PASS591_CA7_4/exact/check_schema_query_ownership.log": {
+      "bytes": 87,
+      "sha256": "2b4b92770a3613a9eaf35c2bd937e33e99d9327e83934280c6df448d777688d3"
+    },
+    "EVIDENCE/PASS591_CA7_4/exact/check_sqlc_generation_policy.log": {
+      "bytes": 87,
+      "sha256": "89b0612df97aa73490ea88d6e8aaa9593fc5c2e367dc6d4c8c7fd9765615a731"
+    },
+    "EVIDENCE/PASS591_CA7_4/exact/exact_go_attempt.log": {
+      "bytes": 678,
+      "sha256": "08a01ba1251da0b0147f8a31d86ba70fdad0cc8cc4d4a537bc6e5bd5251daa0c"
+    },
+    "EVIDENCE/PASS591_CA7_4/exact/validate_ca7_4.log": {
+      "bytes": 245,
+      "sha256": "a9859e75dda1817fe0942ed44090e0e656a8f8d88020c3f13a0eec065cc84b3c"
+    },
+    "EVIDENCE/PASS591_CA7_4/exact/validate_foundation_trace.log": {
+      "bytes": 246,
+      "sha256": "35a9dfcd97bbd393ab903c652aefd715001905711f681b52881d986bfe747bb5"
+    }
+  },
+  "independent_reality_check": "docs/PASS591_CA7_4_INDEPENDENT_POSTIMPLEMENTATION_REALITY_CHECK.md"
+}

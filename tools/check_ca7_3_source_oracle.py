@@ -128,7 +128,7 @@ if old.is_file():
         req('xyd.mid.SKIN_ON' in oldpet and 'xyd.mid.SKIN_CANCEL' in oldpet,'old active Pet MID60/61 differential evidence missing')
 
 # Candidate translation guard: recovered client facts constrain wire/state axes;
-# they do not authorize later CA7 LIVE/Pet mutation routes or foreign-owner SQL.
+# CA7-4 may extend production routing with paid LIVE; CA7-5 Pet mutation remains fenced.
 service=(ROOT/'internal/application/characterhero/appearance_service.go').read_text()
 dispatch=(ROOT/'internal/adapters/stockruntime/hero_dispatcher.go').read_text()
 store=(ROOT/'internal/adapters/postgres/characterstore/appearance.go').read_text()
@@ -138,13 +138,15 @@ for tok in ['func (s Service) SkinOn(', 'func (s Service) SkinCancel(', 'func (s
 for tok in ['case 60:', 'case 61:', 'case 2979:', '"current_skin_id"', '"skin_ids"', '"illusion_skin_id"']:
     req(tok in dispatch,f'candidate CA7-3 dispatcher marker missing {tok!r}')
 req('body["server_time"]' not in dispatch,'candidate invented MID60 server_time output')
-req('58, 60, 61, 62' in main_go and '304, 2979' in main_go,'candidate production Hero CA7-3 registration drift')
-for forbidden in ['case 68:', 'case 69:', 'case 1893:', 'case 1894:', 'case 1895:']:
-    req(forbidden not in dispatch,f'candidate captured future CA7 mutation route {forbidden}')
+req('58, 60, 61, 62' in main_go and '67, 68, 69, 89' in main_go and '304, 2979' in main_go,'candidate production Hero CA7-3/4 registration drift')
+for required in ['case 68:', 'case 69:']:
+    req(required in dispatch,f'candidate lost accepted CA7-4 route {required}')
+for forbidden in ['case 1893:', 'case 1894:', 'case 1895:']:
+    req(forbidden not in dispatch,f'candidate captured future CA7-5 mutation route {forbidden}')
 
 if errs:
     print('CA7-3 SOURCE ORACLE CHECK: FAIL')
     for e in errs: print(' -',e)
     sys.exit(1)
 print('CA7-3 SOURCE ORACLE CHECK: PASS')
-print('current/old client identities pinned; MID60/61/2979 wire/state axes, timed expiry, ordinary combat axis, and Pet reachability split preserved')
+print('current/old client identities pinned; MID60/61/2979 wire/state axes, timed expiry, ordinary combat axis, Pet reachability split, and CA7-4 coexistence preserved')

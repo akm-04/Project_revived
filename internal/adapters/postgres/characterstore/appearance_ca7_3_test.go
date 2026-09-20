@@ -26,7 +26,7 @@ type ca73StoreTx struct {
 func (*ca73StoreTx) QueryRow(context.Context, string, ...any) tx.Row { return ca42Row{} }
 func (q *ca73StoreTx) Exec(_ context.Context, sql string, args ...any) (tx.CommandTag, error) {
 	q.execs = append(q.execs, ca73Exec{sql: sql, args: append([]any(nil), args...)})
-	if sql == characterqueries.SaveHeroAppearanceSelectors {
+	if sql == characterqueries.SaveHeroAppearanceSelectors || sql == characterqueries.TouchHeroAppearanceVersion {
 		return ca42Tag(q.casRows), nil
 	}
 	return ca42Tag(1), nil
@@ -91,5 +91,27 @@ func TestCA73SaveHeroAppearanceMutationTxRollsBackLostOwnerCASByReturningError(t
 	q := &ca73StoreTx{casRows: 0}
 	if err := (Store{}).SaveHeroAppearanceMutationTx(context.Background(), q, h, &ent, old); err == nil {
 		t.Fatal("lost Hero CAS accepted after entitlement child write")
+	}
+}
+
+func TestCA74SaveHeroLIVEEntitlementTxUsesOneChildWriteAndOneOwnerCAS(t *testing.T) {
+	h := ca73StoreHero()
+	old := h.StateVersion
+	h.StateVersion++
+	h.UpdatedAt = h.UpdatedAt.Add(time.Second)
+	ent := character.HeroLIVEEntitlement{PlayerID: h.PlayerID, PartnerID: h.PartnerID, ModelID: 40001074, IsShow: true}
+	q := &ca73StoreTx{casRows: 1}
+	if err := (Store{}).SaveHeroLIVEEntitlementTx(context.Background(), q, h, ent, old); err != nil {
+		t.Fatal(err)
+	}
+	if len(q.execs) != 2 {
+		t.Fatalf("execs=%#v", q.execs)
+	}
+	if q.execs[0].sql != characterqueries.UpsertHeroLIVEEntitlement || !reflect.DeepEqual(q.execs[0].args, []any{int64(h.PlayerID), h.PartnerID, ent.ModelID, ent.IsShow}) {
+		t.Fatalf("LIVE child write=%#v", q.execs[0])
+	}
+	wantCAS := []any{int64(h.PlayerID), h.PartnerID, h.UpdatedAt.UTC(), old}
+	if q.execs[1].sql != characterqueries.TouchHeroAppearanceVersion || !reflect.DeepEqual(q.execs[1].args, wantCAS) {
+		t.Fatalf("owner CAS=%#v", q.execs[1])
 	}
 }

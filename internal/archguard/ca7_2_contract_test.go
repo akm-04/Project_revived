@@ -45,7 +45,12 @@ func TestCA73HeroAppearanceActivationPreservesLaterStageFences(t *testing.T) {
 			t.Fatalf("CA7-3 Hero MID %s is not registered in production", required)
 		}
 	}
-	for _, forbidden := range []string{"68", "69", "1893", "1894", "1895"} {
+	for _, required := range []string{"68", "69"} {
+		if !regexp.MustCompile(`\b` + required + `\b`).MatchString(heroMIDs) {
+			t.Fatalf("CA7-4 Hero MID %s is not registered in production", required)
+		}
+	}
+	for _, forbidden := range []string{"1893", "1894", "1895"} {
 		if regexp.MustCompile(`\b` + forbidden + `\b`).MatchString(heroMIDs) {
 			t.Fatalf("later-stage appearance MID %s leaked into production Hero registration", forbidden)
 		}
@@ -66,9 +71,14 @@ func TestCA73HeroAppearanceActivationPreservesLaterStageFences(t *testing.T) {
 		}
 	}
 	combined := hero + "\n" + string(petDispatcher)
-	for _, forbidden := range []string{"case 68:", "case 69:", "case 1893:", "case 1894:", "case 1895:"} {
+	for _, required := range []string{"case 68:", "case 69:"} {
+		if !strings.Contains(hero, required) {
+			t.Fatalf("CA7-4 missing Hero LIVE mutation route %q", required)
+		}
+	}
+	for _, forbidden := range []string{"case 1893:", "case 1894:", "case 1895:"} {
 		if strings.Contains(combined, forbidden) {
-			t.Fatalf("CA7-4/5 mutation route prematurely implemented %q", forbidden)
+			t.Fatalf("CA7-5 mutation route prematurely implemented %q", forbidden)
 		}
 	}
 
