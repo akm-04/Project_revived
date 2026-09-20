@@ -1,0 +1,207 @@
+{
+  "schema_version": 1,
+  "stage": "CA7-6",
+  "status": "PREIMPLEMENTATION_ACCEPTANCE_MATRIX_FROZEN_R2",
+  "implementation_authorized": false,
+  "authority": {
+    "passmap": {
+      "artifact": "gxb-backend-pass-594.0-passmap.zip",
+      "sha256": "1d946e04f322a272eb79661727a1a6cbd00c5469ec8fbfa46119ee7ae2f55c37"
+    },
+    "backend": {
+      "artifact": "gxb-backend-v2-v0.84.0-pass594-ca7-5-local-accepted.zip",
+      "sha256": "4f4db4fea63bf7368e3ab8207a0242b002a02ef45b2234a128143f73f4b6d16f",
+      "git_head": "5807ba882ccfeda2daf0e54966ee5fbed2da86ea"
+    },
+    "current_source_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+    "old_client_sha256": "d0a4815507fd4626ac5749f2f6efae554d3a4bef717793f155f58c8bed7170b1"
+  },
+  "roadmap_reconciliation": {
+    "original": "pending Practice manual/ticket/AUTO proposal becomes stale",
+    "replacement_for_CA7_6_contract": "MANUAL/TICKET pending proposals use owner-version stale rejection; AUTO has no pending proposal and is governed by shared owner-lock/CAS serialization.",
+    "basis": [
+      "characterpractice.PendingKind only MANUAL/TICKET",
+      "AutoResult comment and service implementation explicitly no pending AUTO proposal"
+    ]
+  },
+  "rows": [
+    {
+      "id": "A76_01_BINDING",
+      "title": "Authority/candidate binding",
+      "must_prove": "Bind Pass594 PassMap/backend/current src_64/v1.164 exact hashes; no newer archive promoted by filename.",
+      "proof_class": "STATIC_IDENTITY",
+      "gate": "LOCAL_REQUIRED"
+    },
+    {
+      "id": "A76_02_CONTRIBUTION_IDENTITY",
+      "title": "Typed appearance contribution identity",
+      "must_prove": "Hero/Pet contributions carry owner instance, current table, origin family, exact content revision, effective appearance owner state_version and captured observedAt; validation rejects mismatched/invalid identities.",
+      "proof_class": "UNIT+ARCH",
+      "gate": "LOCAL_REQUIRED"
+    },
+    {
+      "id": "A76_03_CALLER_OWNED_READ",
+      "title": "Caller-owned read seam",
+      "must_prove": "Contribution readers require caller tx.Queryer + exact revision + caller observedAt; no ActiveRevision lookup, tx.Runner, write, lock, receipt, I5 call, live clock, scheduler or battle/mode policy.",
+      "proof_class": "UNIT+ARCH",
+      "gate": "LOCAL_REQUIRED"
+    },
+    {
+      "id": "A76_04_HERO_KIND_PROVENANCE",
+      "title": "Hero kind provenance",
+      "must_prove": "Hero reader resolves HeroKind from immutable CreationContentRevision before effective projection; current exact appearance revision is used for skin/LIVE qualification.",
+      "proof_class": "UNIT+ARCH",
+      "gate": "LOCAL_REQUIRED"
+    },
+    {
+      "id": "A76_05_EFFECTIVE_TIME_FREEZE",
+      "title": "Operation-time qualification/freeze",
+      "must_prove": "Before/at/after timed expiry qualification follows accepted CA7 boundary; one supplied observedAt is used; a returned contribution remains unchanged if durable entitlement later expires/mutates.",
+      "proof_class": "UNIT",
+      "gate": "LOCAL_REQUIRED"
+    },
+    {
+      "id": "A76_06_STALE_SELECTOR_EFFECTIVE",
+      "title": "Raw/effective selector separation",
+      "must_prove": "Stale/unqualified ordinary selector projects 0; stale explicit illusion projects inherit/default -1; durable raw state is not rewritten by read contribution.",
+      "proof_class": "UNIT",
+      "gate": "LOCAL_REQUIRED"
+    },
+    {
+      "id": "A76_07_HERO_AXIS_ISOLATION",
+      "title": "Hero presentation/combat isolation",
+      "must_prove": "Current source oracle proves illusion-aware presentation and ordinary-skin combat-skill axes remain distinct; CA7 contribution does not collapse them into one battle model or derive illusion skin-skill.",
+      "proof_class": "SOURCE_ORACLE+ARCH",
+      "gate": "LOCAL_REQUIRED"
+    },
+    {
+      "id": "A76_08_LIVE_BOUNDARY",
+      "title": "Dynamic-card/LIVE boundary",
+      "must_prove": "MID68/69 qualified paid LIVE remains Character appearance state; current tree has no battle consumer; CA7 contribution carries qualified LIVE but does not invent combat stat/skill semantics. Deterministic model order retained.",
+      "proof_class": "SOURCE_ORACLE+UNIT",
+      "gate": "LOCAL_REQUIRED"
+    },
+    {
+      "id": "A76_09_PET_STYLE_BOUNDARY",
+      "title": "Pet home-style boundary",
+      "must_prove": "MID1893/1894/1895 effective Pet style contribution is family-qualified and deterministic; current Pet combat/model paths do not use active_style. Historical current-tree PetAttributeWindow0 MID60/61 branch stays fenced as unreachable retained source.",
+      "proof_class": "SOURCE_ORACLE+ARCH",
+      "gate": "LOCAL_REQUIRED"
+    },
+    {
+      "id": "A76_10_PRACTICE_HERO_STALE",
+      "title": "CA6 Hero MANUAL/TICKET invalidation",
+      "must_prove": "Create real pending Hero MANUAL or TICKET proposal, perform actual state-changing CA7 Hero mutation, then SAVE rejects owner-version stale before apply/delete.",
+      "proof_class": "CROSS_SERVICE_TEST",
+      "gate": "LOCAL_REQUIRED"
+    },
+    {
+      "id": "A76_11_PRACTICE_PET_STALE",
+      "title": "CA6 Pet MANUAL/TICKET invalidation",
+      "must_prove": "Create real pending Pet MANUAL or TICKET proposal, perform actual state-changing CA7 Pet mutation, then SAVE rejects owner-version stale before apply/delete.",
+      "proof_class": "CROSS_SERVICE_TEST",
+      "gate": "LOCAL_REQUIRED"
+    },
+    {
+      "id": "A76_12_PRACTICE_NOOP",
+      "title": "CA7 semantic no-op preservation",
+      "must_prove": "Real Hero/Pet CA7 semantic no-op does not advance owner state_version and does not invalidate an otherwise valid pending MANUAL/TICKET proposal.",
+      "proof_class": "CROSS_SERVICE_TEST",
+      "gate": "LOCAL_REQUIRED"
+    },
+    {
+      "id": "A76_13_TICKET_ACCOUNTING",
+      "title": "Stale TICKET accounting",
+      "must_prove": "Ticket consumed at proposal generation remains consumed; stale SAVE after CA7 mutation performs no second debit, no refund, and leaves stale proposal present.",
+      "proof_class": "CROSS_SERVICE_TEST",
+      "gate": "LOCAL_REQUIRED"
+    },
+    {
+      "id": "A76_14_AUTO_SERIALIZATION",
+      "title": "CA6 AUTO reconciliation",
+      "must_prove": "Do not fabricate an AUTO proposal. Prove from accepted application code/tests that CA7 mutations and CA6 AUTO compose through the same Hero410/Pet430 owner-lock and owner-CAS seams; locally prove deterministic serialized-order state transitions in a harness. Do not claim real concurrent PostgreSQL row-lock behavior; that remains CA7-7.",
+      "proof_class": "ARCH+LOCAL_SERIALIZED_ORDER_TEST",
+      "gate": "LOCAL_REQUIRED_WITH_CA7_7_NATIVE_DEFERRED"
+    },
+    {
+      "id": "A76_15_CA2_CA3_PRESERVATION",
+      "title": "Hero/Pet core preservation",
+      "must_prove": "Real unrelated Hero/Pet core/progression mutations preserve CA7 selectors/entitlement child state; real CA7 mutations preserve identity/progression/show/skills fields.",
+      "proof_class": "INTEGRATION_TEST+QUERY_GUARD",
+      "gate": "LOCAL_REQUIRED"
+    },
+    {
+      "id": "A76_16_CA4_PRESERVATION",
+      "title": "Equipment/Fumo preservation",
+      "must_prove": "Real CA4 Hero/Pet mutation preserves CA7 durable state; real CA7 mutation preserves equipment/Fumo; owner revision advances only for actual mutation.",
+      "proof_class": "INTEGRATION_TEST+QUERY_GUARD",
+      "gate": "LOCAL_REQUIRED"
+    },
+    {
+      "id": "A76_17_CA5_PRESERVATION",
+      "title": "Saved-reference preservation",
+      "must_prove": "CA7 mutation does not rewrite saved-preset root/lane/reference authority; CA5 mutation does not rewrite CA7 owner/child appearance state.",
+      "proof_class": "INTEGRATION_TEST+QUERY_GUARD",
+      "gate": "LOCAL_REQUIRED"
+    },
+    {
+      "id": "A76_18_COMMERCE_BOUNDARY",
+      "title": "Commerce materializer boundary",
+      "must_prove": "Preserve the already-accepted Character-side TxPermanentSkinMaterializer contract: caller owns transaction/retry/receipt and future Commerce settlement; Character alone validates/grants entitlement and advances Hero owner CAS. CA7-6 adds no second materializer and no foreign-owner SQL. No future Commerce business implementation is required here.",
+      "proof_class": "UNIT+ARCH",
+      "gate": "LOCAL_REQUIRED"
+    },
+    {
+      "id": "A76_19_LIBRARY_BOUNDARY",
+      "title": "LibraryPresentation boundary",
+      "must_prove": "Current MID835 board_partner/board_card/board_model_id remain separate Library/I9N persistence/policy facts. CA7 contribution exposes only qualified Hero appearance provenance/state; it does not own board_* fields, derive a universal board-card formula, or implement I9N policy.",
+      "proof_class": "SOURCE_ORACLE+ARCH",
+      "gate": "LOCAL_REQUIRED"
+    },
+    {
+      "id": "A76_20_FULL_SOURCE_ORACLE",
+      "title": "Tree-wide current source oracle",
+      "must_prove": "All eight CA7 appearance MIDs and bounded consumers are checked against the full 4,370-file current tree; source-member hashes match oracle; PetAttributeWindow0 reachability and v1.164 battle differential are explicit.",
+      "proof_class": "SOURCE_ORACLE",
+      "gate": "LOCAL_REQUIRED"
+    },
+    {
+      "id": "A76_21_RELOAD_DETERMINISM",
+      "title": "Reload/reconnect and deterministic projection",
+      "must_prove": "Existing stock reload plus new contribution readers rebuild effective state from keyed durable authority at exact revision/observedAt; sorted skin/LIVE/style projections remain deterministic and client projection arrays are never ingested as authority.",
+      "proof_class": "UNIT+REGRESSION",
+      "gate": "LOCAL_REQUIRED"
+    },
+    {
+      "id": "A76_22_NO_NEW_AUTHORITY",
+      "title": "No new owner/schema/scheduler",
+      "must_prove": "No migration, Cosmetics aggregate, foreign-owner SQL, per-player expiry scheduler, CA8 aggregate implementation, new gameplay MID, or new receipt family is introduced by CA7-6.",
+      "proof_class": "ARCH+DIFF",
+      "gate": "LOCAL_REQUIRED"
+    },
+    {
+      "id": "A76_23_RESIDUAL_ROUTING",
+      "title": "Residual Character obligations",
+      "must_prove": "Stone/capacity/stat-crosswalk/Spirit and unresolved Rune/rep-lock obligations remain routed to CA8/CAE/future provider work rather than misclassified as appearance implementation.",
+      "proof_class": "AUTHORITY_REVIEW",
+      "gate": "LOCAL_REQUIRED"
+    },
+    {
+      "id": "A76_24_DEFERRED_GATES",
+      "title": "Named deferred proof remains deferred",
+      "must_prove": "CA7-7 exact/native accumulated PostgreSQL/River proof and W2 physical unmodified-stock-client proof are not marked passed by CA7-6 local evidence.",
+      "proof_class": "EVIDENCE_CLASSIFICATION",
+      "gate": "DEFERRED"
+    },
+    {
+      "id": "A76_25_INDEPENDENT_REALITY",
+      "title": "Independent pre/post reality check",
+      "must_prove": "Before implementation: independently reread Pass594 authority, accepted CA7-1/CA6 contracts, current/v1.164 source and backend seams; attempt to falsify every R2 research decision. After implementation: independently inspect produced code and map every frozen acceptance row.",
+      "proof_class": "REALITY_CHECK",
+      "gate": "LOCAL_REQUIRED"
+    }
+  ],
+  "local_acceptance_rule": "Every LOCAL_REQUIRED row must be evidenced GREEN or explicitly ENVIRONMENT_BLOCKED only where the frozen contract names a later gate. A test passing in a compatibility copy does not satisfy exact-native CA7-7/W2 proof.",
+  "implementation_scope_guard": "CA7-6 implementation, if later authorized, is expected to be contribution/read seam + integration/architecture/source-oracle proof. New schema/MIDs/receipt families/owners are presumptively out of scope and require research reopening.",
+  "research_revision": "R2"
+}

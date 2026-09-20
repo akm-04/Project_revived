@@ -1,0 +1,497 @@
+{
+  "schema_version": 1,
+  "stage": "CA7-6",
+  "status": "PREIMPLEMENTATION_SOURCE_ORACLE_FROZEN_R2",
+  "implementation_authorized": false,
+  "authority": {
+    "passmap": {
+      "artifact": "gxb-backend-pass-594.0-passmap.zip",
+      "sha256": "1d946e04f322a272eb79661727a1a6cbd00c5469ec8fbfa46119ee7ae2f55c37"
+    },
+    "backend": {
+      "artifact": "gxb-backend-v2-v0.84.0-pass594-ca7-5-local-accepted.zip",
+      "sha256": "4f4db4fea63bf7368e3ab8207a0242b002a02ef45b2234a128143f73f4b6d16f",
+      "git_head": "5807ba882ccfeda2daf0e54966ee5fbed2da86ea",
+      "product_tree_sha256": "2fba04ab6d0cb8159e46d1d0fd30ca9b29e2435cf2cf92eb856b6fbbd38b4b45"
+    }
+  },
+  "oracles": [
+    {
+      "id": "current_src64",
+      "sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+      "role": "ACTIVE_IMPLEMENTATION_ORACLE",
+      "extracted_file_count": 4370,
+      "members": {
+        "app/common/network/mid.lua": {
+          "sha256": "026a20b29d97624979777a68c64c749254031604057ff42aa8f8254c3e35b5af",
+          "line_count": 1225,
+          "symbols": {
+            "SKIN_ON": [
+              329
+            ],
+            "SKIN_CANCEL": [
+              330
+            ],
+            "UNLOCK_DYNAMIC_CARD": [
+              46
+            ],
+            "SHOW_DYNAMIC_CARD": [
+              47
+            ],
+            "GET_PET_STYLE_FORM_ITEM": [
+              645
+            ],
+            "USE_PET_STYLE": [
+              646
+            ],
+            "CANCEL_PET_STYLE": [
+              647
+            ],
+            "USE_ILLUSION_SKIN_ITEM": [
+              1127
+            ]
+          }
+        },
+        "app/model/NormalHero.lua": {
+          "sha256": "125183556caeecc182bf0702dd1f95160c8ba1666a3b97fbb8a7261d30ae0ac9",
+          "line_count": 3290,
+          "symbols": {
+            "getModelID": [
+              649,
+              652,
+              655,
+              675,
+              976,
+              980,
+              984,
+              2101,
+              2675
+            ],
+            "getOldModelID": [
+              657,
+              667
+            ],
+            "UNLOCK_DYNAMIC_CARD": [
+              2797
+            ],
+            "SHOW_DYNAMIC_CARD": [
+              2855
+            ],
+            "USE_ILLUSION_SKIN_ITEM": [
+              2985
+            ],
+            "SKIN_CANCEL": [
+              2973
+            ]
+          }
+        },
+        "app/model/SuperHero.lua": {
+          "sha256": "b127c2cbef327d3142031bf30daa0af1b45997c6da82fba946d641a86783d622",
+          "line_count": 2957,
+          "symbols": {
+            "UNLOCK_DYNAMIC_CARD": [
+              2532
+            ],
+            "SHOW_DYNAMIC_CARD": [
+              2590
+            ],
+            "USE_ILLUSION_SKIN_ITEM": [
+              2687
+            ],
+            "SKIN_CANCEL": [
+              2675
+            ]
+          }
+        },
+        "lib/battle/BaseFighter.lua": {
+          "sha256": "b1936373a0404049f100de1ab639661d245c9f2a317ae6fbd443b71b45d538dc",
+          "line_count": 7436,
+          "symbols": {
+            "getModelID": [
+              406,
+              2065,
+              2091,
+              2110,
+              2156,
+              5435,
+              5436,
+              5448,
+              6164
+            ],
+            "getSkillModelID": [
+              5439,
+              6167
+            ],
+            "checkSkinSkillInfo": [
+              268,
+              6155
+            ]
+          }
+        },
+        "app/windows/HeroMainWindow.lua": {
+          "sha256": "473b72ec14a81d01d6dbdaa19f92c3d78900f40ca34fa5c8cf46585b76d65414",
+          "line_count": 8002,
+          "symbols": {
+            "USE_ILLUSION_SKIN_ITEM": [
+              4149,
+              4277
+            ],
+            "SKIN_ON": [
+              4183
+            ]
+          }
+        },
+        "app/windows/SkinSkillSelectWindow.lua": {
+          "sha256": "a6ac7ecb7da0f441b7babb135c5e68e46ece4b2f4bbb60ce77b0ab7a4af614cd",
+          "line_count": 198,
+          "symbols": {
+            "SKIN_ON": [
+              145
+            ],
+            "SKIN_CANCEL": [
+              120
+            ]
+          }
+        },
+        "app/windows/BackpackWindow.lua": {
+          "sha256": "48b18493fed4186541fc989a8ef60d6338d444c4e8a0fc986903a57e52ff19c1",
+          "line_count": 1958,
+          "symbols": {
+            "SKIN_ON": [
+              1270
+            ],
+            "GET_PET_STYLE_FORM_ITEM": [
+              1318
+            ]
+          }
+        },
+        "app/windows/PetEquipInfoWindow.lua": {
+          "sha256": "ff5297ed3fe600451df67fdc8e0b52be77cb30e5411beb72c42a60a45571a938",
+          "line_count": 318,
+          "symbols": {
+            "GET_PET_STYLE_FORM_ITEM": [
+              284
+            ],
+            "USE_PET_STYLE": [
+              274
+            ],
+            "CANCEL_PET_STYLE": [
+              250
+            ]
+          }
+        },
+        "app/model/Pet.lua": {
+          "sha256": "214f4dcd93d0e494408d14a225810134c2e72a0dedd18a935a27dc62e0c00660",
+          "line_count": 1549,
+          "symbols": {
+            "activeStyle": [
+              112,
+              298,
+              306,
+              310
+            ],
+            "petStyles": [
+              113,
+              314,
+              318
+            ],
+            "getModelID": [
+              393,
+              401,
+              460,
+              1056,
+              1455,
+              1458
+            ]
+          }
+        },
+        "app/model/Library.lua": {
+          "sha256": "1830b7e7a5a5203dc7e9eea5bd505b5025b03b52454c69756e14549718962063",
+          "line_count": 815,
+          "symbols": {
+            "SET_BOARD_HERO": [
+              51
+            ],
+            "illusionSkinId_": [
+              790,
+              794,
+              795,
+              800
+            ]
+          }
+        },
+        "app/windows/TuJianHeroDetailWindow.lua": {
+          "sha256": "6b3f7c6ebc30019c021835aa20dac3b06a06ebbe9299d5c54291de10733e7f5f",
+          "line_count": 1988,
+          "symbols": {
+            "board_model_id": [
+              1415,
+              1430,
+              1431
+            ],
+            "board_card": [
+              1426,
+              1427
+            ],
+            "board_partner": [
+              1422
+            ]
+          }
+        },
+        "data/tables/window.lua": {
+          "sha256": "c7f2fcc6637ab170d5f802904c5ee971eedac33e7fac7112d1afc1675b3a21e3",
+          "line_count": 27868,
+          "symbols": {
+            "pet_attribute": [
+              8572
+            ],
+            "PetAttributeWindow": [
+              8573
+            ]
+          }
+        },
+        "app/common/ui/WindowManager.lua": {
+          "sha256": "6550f9989c8e004b5cf73caaf9a8932f60751db4b1aa3f0bc6f207b46ceeb4f8",
+          "line_count": 685,
+          "symbols": {
+            "app.windows.": [
+              114,
+              207
+            ]
+          }
+        },
+        "app/windows/PetAttributeWindow.lua": {
+          "sha256": "8eef73e763bf8564c572d640949a8cd8ca6e1555112d497f81329be38268dfeb",
+          "line_count": 1473,
+          "symbols": {}
+        },
+        "app/windows/PetAttributeWindow0.lua": {
+          "sha256": "949a0d07d160f470a23e0d48285acfc279d4aae3ff268cae3f8fb02e7f956e43",
+          "line_count": 3065,
+          "symbols": {
+            "SKIN_ON": [
+              1618
+            ],
+            "SKIN_CANCEL": [
+              1577
+            ],
+            "is_skin_on": [
+              1621
+            ],
+            "skin_id": [
+              1622
+            ]
+          }
+        },
+        "app/windows/NewBattleLoadingWindow.lua": {
+          "sha256": "4a5336e3b02ea7d139d24025d25b7b5afd8f3f897fc85fff2496ffe3433e9368",
+          "line_count": 979,
+          "symbols": {
+            "illusionSkinId_": [
+              72,
+              150
+            ]
+          }
+        },
+        "app/windows/RegionArenaLoadingWindow.lua": {
+          "sha256": "55804d87c9bfe470b80d575d658a518f10c2e5bb747521df35a3fe3253d97644",
+          "line_count": 410,
+          "symbols": {
+            "illusionSkinId_": [
+              91,
+              92,
+              94,
+              155,
+              156,
+              158
+            ]
+          }
+        },
+        "app/windows/SyncSelectTeamWindow.lua": {
+          "sha256": "4b7fae926203e1c5a84612004b4f983466033f36e3bb7a958cc8e2cc1946e39f",
+          "line_count": 2692,
+          "symbols": {
+            "illusionSkinId_": [
+              2352
+            ],
+            "skin_id": [
+              2352,
+              2354
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "old_client_v1_164",
+      "sha256": "d0a4815507fd4626ac5749f2f6efae554d3a4bef717793f155f58c8bed7170b1",
+      "role": "HISTORICAL_CLIENT_DIFFERENTIAL_ONLY",
+      "members": {
+        "src/app/common/network/mid.lua": {
+          "sha256": "c10ab0d38105be79201b6b1682a7fcb36eafa7f09b76002c5b9bf599a968d942",
+          "line_count": 945,
+          "symbols": {
+            "SKIN_ON": [
+              322
+            ],
+            "SKIN_CANCEL": [
+              323
+            ]
+          }
+        },
+        "src/app/model/Hero.lua": {
+          "sha256": "0743a10aab6528e3c94efd9d8c549c4f56e3f2b11cf68853a934d688428ba4fa",
+          "line_count": 2600,
+          "symbols": {
+            "getModelID": [
+              594,
+              597,
+              600,
+              608,
+              826,
+              830,
+              834,
+              1932,
+              2492
+            ]
+          }
+        },
+        "src/lib/battle/BaseFighter.lua": {
+          "sha256": "f5acb66e9b3ca2d43270bdfa93294dd99c14fda97a3c2676019bce22541dbd1c",
+          "line_count": 6218,
+          "symbols": {
+            "getModelID": [
+              341,
+              1997,
+              2023,
+              2042,
+              2088,
+              5004,
+              5005,
+              5013,
+              5683,
+              5686
+            ],
+            "checkSkinSkillInfo": [
+              213,
+              5674
+            ]
+          }
+        },
+        "src/app/windows/PetAttributeWindow.lua": {
+          "sha256": "003c657bc03a52d37e6594f80ba599e142a1d3ac0b8c3ee5d9945fb2b9dbcbf0",
+          "line_count": 3061,
+          "symbols": {
+            "SKIN_ON": [
+              1618
+            ],
+            "SKIN_CANCEL": [
+              1577
+            ]
+          }
+        },
+        "src/app/model/Pet.lua": {
+          "sha256": "ddd75c56c7875aa3f1cb4e4c184df302e4d91e8f11136fe0d58587938f98dc44",
+          "line_count": 1503,
+          "symbols": {
+            "getModelID": [
+              383,
+              391,
+              450,
+              1046,
+              1445,
+              1448
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "source_facts": [
+    {
+      "id": "MID_IDENTITIES",
+      "classification": "SOURCE_FACT",
+      "fact": "Current mid.lua binds 60 SKIN_ON, 61 SKIN_CANCEL, 68 UNLOCK_DYNAMIC_CARD, 69 SHOW_DYNAMIC_CARD, 1893 GET_PET_STYLE_FORM_ITEM, 1894 USE_PET_STYLE, 1895 CANCEL_PET_STYLE, and 2979 USE_ILLUSION_SKIN_ITEM."
+    },
+    {
+      "id": "HERO_PRESENTATION_AXIS",
+      "classification": "SOURCE_FACT",
+      "fact": "Current NormalHero.getModelID honors illusion sentinel/explicit state while getOldModelID uses ordinary selected skin or current Hero model."
+    },
+    {
+      "id": "HERO_COMBAT_SKILL_AXIS",
+      "classification": "SOURCE_FACT",
+      "fact": "Current BaseFighter.getModelID uses Hero.getModelID for displayed fighter model, while getSkillModelID uses Hero.getOldModelID and checkSkinSkillInfo matches skin-skill model against getSkillModelID."
+    },
+    {
+      "id": "HERO_COMBAT_DIFFERENTIAL",
+      "classification": "SOURCE_FACT_DIFFERENTIAL",
+      "fact": "v1.164 BaseFighter has no getSkillModelID split and checkSkinSkillInfo compares skin-skill model against getModelID; current client therefore deliberately separates illusion-aware display model from ordinary-skin combat skill matching."
+    },
+    {
+      "id": "LIVE68",
+      "classification": "SOURCE_FACT",
+      "fact": "MID68 request is model_id+partner_id; success consumes unlocked_dynamic_card and dynamic_card_state aligned arrays."
+    },
+    {
+      "id": "LIVE69",
+      "classification": "SOURCE_FACT",
+      "fact": "MID69 request is model_id+partner_id+is_show; on success the client updates the matching local dynamic-card state and does not require returned semantic state."
+    },
+    {
+      "id": "LIVE_NONBATTLE_CENSUS",
+      "classification": "STRONG_INFERENCE_FROM_TREE_WIDE_SOURCE_SEARCH",
+      "fact": "No current lib/battle consumer of dynamic_card_state or unlocked_dynamic_card was found; observed consumers are Hero/presentation/UI paths. This constrains current-client behavior but does not prove original-server motive."
+    },
+    {
+      "id": "PET_STYLE_WIRE",
+      "classification": "SOURCE_FACT",
+      "fact": "MID1893 uses item_id and success active_style+pet_styles; MID1894 uses pet_id+style_id and success active_style; MID1895 uses pet_id and success state is unused while client locally clears active style."
+    },
+    {
+      "id": "PET_STYLE_NONCOMBAT",
+      "classification": "STRONG_INFERENCE_FROM_CURRENT_SOURCE",
+      "fact": "Pet activeStyle/petStyles are home-style state; current Pet.getModelID is table/star-derived and no lib/battle active_style consumer was found."
+    },
+    {
+      "id": "ILLUSION_WIRE",
+      "classification": "SOURCE_FACT",
+      "fact": "MID2979 request uses partner_id+item_id; success paths consume illusion_skin_id. Client expiry/cleanup may send item_id=0, but this does not establish a server scheduler."
+    },
+    {
+      "id": "LIBRARY_BOUNDARY",
+      "classification": "SOURCE_FACT_PLUS_ARCHITECTURE_INFERENCE",
+      "fact": "MID835 SET_BOARD_HERO persists/returns board_partner, board_card and board_model_id through Library paths; current card/presentation selection consumes Hero appearance. Board persistence is therefore distinct from Character appearance ownership."
+    },
+    {
+      "id": "PET_ATTRIBUTE_0_REACHABILITY",
+      "classification": "STRONG_INFERENCE",
+      "fact": "Current window table maps pet_attribute to PetAttributeWindow and WindowManager imports the registered class. Tree-wide search found no external PetAttributeWindow0 reference; its MID60/61 Pet ordinary-skin branch is retained source debris, not a reachable current-client mutation contract."
+    }
+  ],
+  "search_assertions": {
+    "external_PetAttributeWindow0_reference_count": 0,
+    "external_PetAttributeWindow0_references": [],
+    "lib_battle_dynamic_card_state_count": 0,
+    "lib_battle_dynamic_card_state_references": [],
+    "lib_battle_unlocked_dynamic_card_count": 0,
+    "lib_battle_unlocked_dynamic_card_references": [],
+    "lib_battle_active_style_count": 0,
+    "lib_battle_active_style_references": []
+  },
+  "bounded_unknowns": [
+    "Original-server motives for separating illusion presentation from ordinary-skin combat skill selection are unrecovered.",
+    "Original-server server-side numeric errors for appearance families remain bounded by prior CA7 contracts.",
+    "No source claim here promotes unreachable retained client code into server authority.",
+    "Physical unmodified-stock-client proof remains deferred to W2; exact accumulated PostgreSQL/River proof remains deferred to CA7-7."
+  ],
+  "candidate_translation_constraints": [
+    "CA8 materialization must preserve illusion-aware presentation and ordinary-skin combat-skill axes separately; do not collapse them into one generic effective model.",
+    "CA7 downstream projection remains content/time-qualified and owner-versioned; CA8 freezes a qualified observation and later expiry cannot mutate an already-sealed snapshot.",
+    "Dynamic-card/LIVE and Pet home-style state must not be invented as combat stat/skill producers absent evidence.",
+    "Library board choice remains a separate owner/policy boundary; Character contributes appearance facts only.",
+    "Historical Pet ordinary-skin MID60/61 source remains inactive unless new reachability/server evidence reopens it.",
+    "CA7-6 provider APIs remain caller-queryer/exact-revision/observedAt read seams only; transaction isolation and final aggregate seal policy remain CA8-owned future decisions."
+  ],
+  "research_revision": "R2"
+}

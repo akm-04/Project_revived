@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "pass": "595.0",
+  "stage": "CA7-6",
+  "status": "CA7_6_RESEARCH_CONTRACT_SEAL_GREEN_IMPLEMENTATION_AUTHORIZED_NOT_STARTED",
+  "parent_pass": "594.0",
+  "parent_passmap_sha256": "1d946e04f322a272eb79661727a1a6cbd00c5469ec8fbfa46119ee7ae2f55c37",
+  "accepted_backend_sha256": "4f4db4fea63bf7368e3ab8207a0242b002a02ef45b2234a128143f73f4b6d16f",
+  "accepted_backend_artifact": "gxb-backend-v2-v0.84.0-pass594-ca7-5-local-accepted.zip",
+  "research_bundle_sha256": "c1333fc57a33552ab87908c54ef7624dc1c476edfa19f88ffdd21b5a7edb22d9",
+  "normative_documents": {
+    "PASS595_CA7_6_RESEARCH_CHECKPOINT.md": "ad600dfabb81053593f2edc998ee19ac928dd961709d2655156e656aaf4ff87c",
+    "PASS595_CA7_6_CA8_SNAPSHOT_SEAM.md": "0b5a45398bd71c582ea978ab7d7a1cec502c81feb3c096f0f509b314d1d387bd",
+    "PASS595_CA7_6_SOURCE_ORACLE.json": "657e023a765088eb92ef419905c200499d7d6c1b111e7affde1c9cfc7c64eeb5",
+    "PASS595_CA7_6_CROSS_PHASE_PRESERVATION_MATRIX.json": "fd3ea593f4078523d73c4afca35ccd01ab8f59bdfbed760b9d0e477998076332",
+    "PASS595_CA7_6_PREIMPLEMENTATION_CONTRACT.md": "de0096b31fad620b7a22a821ffd41652a5610f279bcf82f171bd2e6f0ff2bb04",
+    "PASS595_CA7_6_ACCEPTANCE_MATRIX.json": "ffb8063bc0ff83a93894b8941c3161e702e0db9b0d5a75e49b0481b343f3c1d6",
+    "PASS595_CA7_6_PREIMPLEMENTATION_CHECK.log": "b7a98b54df1179222abb96004eb73e526b25393633191ac0371a5b05ff82ddbc",
+    "PASS595_CA7_6_NEGATIVE_FIXTURES.log": "fa73c257ad57119697edb7f79a5350f1e9d3ea288b3a76532e360e1e621ff1ae",
+    "PASS595_CA7_6_INDEPENDENT_PREIMPLEMENTATION_REALITY_CHECK.md": "839b9e88f6ddabd929e3d5d879805d4a1318162e3d99a3b0bc889910fbfe508c",
+    "PASS595_CA7_6_PREIMPLEMENTATION_RESEARCH_CLOSURE.md": "a73f76fdb406ab5fdaccb30c27db7254dbc73dff35daff548a57319fe080d47f",
+    "PASS595_CA7_6_PREIMPLEMENTATION_CHECK.py": "d4d2ef00f845322507268498c4f00997fc6fcb0842969a251b67ff1f4bce8270",
+    "PASS595_CA7_6_RESEARCH_STATE.json": "8a6b1ca72a854c2dd0ebb669f668e19d77760d0e71bb12f7beb17b67ab7f7cee"
+  },
+  "independent_check": {
+    "status": "GREEN",
+    "path": "00_PASSMAP/PASS595_CA7_6_PREIMPLEMENTATION_CHECK.log",
+    "negative_fixtures": "3/3 rejected",
+    "negative_fixture_path": "00_PASSMAP/PASS595_CA7_6_NEGATIVE_FIXTURES.log"
+  },
+  "implementation_authorized": true,
+  "implementation_started": false,
+  "authorization_source": "User explicitly authorized CA7-6 implementation after research closure, conditional on finishing research and PassMap synchronization first.",
+  "next": "Start CA7-6 implementation against frozen contract/matrix; CA7-7 and W2 remain deferred."
+}

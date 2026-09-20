@@ -1,0 +1,263 @@
+{
+  "schema_version": 1,
+  "pass": "596.0",
+  "phase": "CA7-6 Effective Appearance Contribution & Cross-Phase Integration Fence local closure",
+  "authority": "Pass595 HOT/CURRENT research-sealed + implementation-authorized authority over accepted Pass594 backend",
+  "authority_passmap_outer_sha256": "7c0fedc312c127ea5c53275f58025e3ef25f2abc8d926f067d202e4f66da94c8",
+  "parent_accepted_backend_sha256": "4f4db4fea63bf7368e3ab8207a0242b002a02ef45b2234a128143f73f4b6d16f",
+  "parent_accepted_git_head": "5807ba882ccfeda2daf0e54966ee5fbed2da86ea",
+  "current_source_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+  "old_client_sha256": "d0a4815507fd4626ac5749f2f6efae554d3a4bef717793f155f58c8bed7170b1",
+  "result": "GREEN_LOCAL_CA7_6_ACCEPTANCE_CANDIDATE_COMPATIBILITY_COPY_ONLY_CA7_7_NATIVE_AGGREGATE_PENDING",
+  "canonical_environment": {
+    "canonical_pins_changed": false,
+    "exact_go_execution": "ENVIRONMENT_BLOCKED",
+    "reason": "Pinned Go1.27.1 toolchain cannot be downloaded because proxy.golang.org DNS/network is unavailable in this sandbox.",
+    "static_source_query_ownership": "GREEN_ON_PRISTINE_CANONICAL"
+  },
+  "canonical_pins": {
+    "go_version_sha256": "a8844fbc8c3eb51c26ed00aec4cd5a5a9d647f849c6ead07bcc83ed24c4a7718",
+    "go_mod_sha256": "313c574368bb56dc570bc3427b65f59b059e492f909fe43b7d0291b5ced21dc4",
+    "go_sum_sha256": "efbf6753542d66e2fefcb2ab5e2ade7c9d28f2206a1113d1eb9568f2cb75808d"
+  },
+  "compatibility_copy_only": {
+    "environment": "Go1.23.2 linux/amd64",
+    "edits": [
+      ".go-version 1.27.1 -> 1.23.2",
+      "go.mod go 1.26.0 -> 1.23.0",
+      "go.mod toolchain go1.27.1 -> go1.23.2"
+    ],
+    "go_sum_changed": false,
+    "focused": "GREEN",
+    "race": "GREEN",
+    "vet": "GREEN",
+    "whole_tree_test": "GREEN",
+    "bounded_package_regression": "94_OF_94_GREEN",
+    "limitations": [
+      "does not satisfy exact Go1.27.1 execution",
+      "does not satisfy real PostgreSQL/River CA7-7 aggregate proof",
+      "does not satisfy W2 physical stock-client proof"
+    ]
+  },
+  "acceptance_matrix": {
+    "A76_01_BINDING": {
+      "result": "GREEN",
+      "proof": [
+        "docs/PASS595_CA7_6_PREIMPLEMENTATION_CONTRACT.md",
+        "docs/PASS595_CA7_6_SOURCE_ORACLE.json"
+      ]
+    },
+    "A76_02_CONTRIBUTION_IDENTITY": {
+      "result": "GREEN",
+      "proof": [
+        "internal/application/characterasset/appearance_contribution.go",
+        "internal/application/characterhero/appearance_contribution_test.go",
+        "internal/application/characterpet/appearance_contribution_test.go"
+      ]
+    },
+    "A76_03_CALLER_OWNED_READ": {
+      "result": "GREEN",
+      "proof": [
+        "internal/application/characterhero/appearance_contribution.go",
+        "internal/application/characterpet/appearance_contribution.go",
+        "internal/archguard/ca7_6_contract_test.go"
+      ]
+    },
+    "A76_04_HERO_KIND_PROVENANCE": {
+      "result": "GREEN",
+      "proof": [
+        "internal/application/characterhero/appearance_contribution.go",
+        "internal/application/characterhero/appearance_contribution_test.go"
+      ]
+    },
+    "A76_05_EFFECTIVE_TIME_FREEZE": {
+      "result": "GREEN",
+      "proof": [
+        "internal/application/characterasset/appearance_projection_test.go",
+        "internal/application/characterhero/appearance_contribution_test.go",
+        "internal/application/characterpet/appearance_contribution_test.go"
+      ]
+    },
+    "A76_06_STALE_SELECTOR_EFFECTIVE": {
+      "result": "GREEN",
+      "proof": [
+        "internal/application/characterasset/appearance_projection_test.go"
+      ]
+    },
+    "A76_07_HERO_AXIS_ISOLATION": {
+      "result": "GREEN",
+      "proof": [
+        "tools/check_ca7_6_source_oracle.py",
+        "internal/archguard/ca7_6_contract_test.go"
+      ]
+    },
+    "A76_08_LIVE_BOUNDARY": {
+      "result": "GREEN",
+      "proof": [
+        "tools/check_ca7_6_source_oracle.py",
+        "internal/application/characterhero/appearance_contribution_test.go"
+      ]
+    },
+    "A76_09_PET_STYLE_BOUNDARY": {
+      "result": "GREEN",
+      "proof": [
+        "tools/check_ca7_6_source_oracle.py",
+        "internal/application/characterpet/appearance_contribution_test.go"
+      ]
+    },
+    "A76_10_PRACTICE_HERO_STALE": {
+      "result": "GREEN",
+      "proof": [
+        "internal/application/characterpractice/ca7_6_integration_test.go"
+      ]
+    },
+    "A76_11_PRACTICE_PET_STALE": {
+      "result": "GREEN",
+      "proof": [
+        "internal/application/characterpractice/ca7_6_integration_test.go"
+      ]
+    },
+    "A76_12_PRACTICE_NOOP": {
+      "result": "GREEN",
+      "proof": [
+        "internal/application/characterpractice/ca7_6_integration_test.go"
+      ]
+    },
+    "A76_13_TICKET_ACCOUNTING": {
+      "result": "GREEN",
+      "proof": [
+        "internal/application/characterpractice/ca7_6_integration_test.go"
+      ]
+    },
+    "A76_14_AUTO_SERIALIZATION": {
+      "result": "GREEN_LOCAL_NATIVE_DEFERRED_TO_CA7_7",
+      "proof": [
+        "internal/application/characterpractice/ca7_6_integration_test.go",
+        "internal/archguard/ca7_6_contract_test.go"
+      ]
+    },
+    "A76_15_CA2_CA3_PRESERVATION": {
+      "result": "GREEN",
+      "proof": [
+        "internal/application/characterhero/ca7_6_preservation_test.go",
+        "internal/application/characterpet/ca7_6_preservation_test.go",
+        "internal/application/characterpractice/ca7_6_integration_test.go"
+      ]
+    },
+    "A76_16_CA4_PRESERVATION": {
+      "result": "GREEN",
+      "proof": [
+        "internal/application/characterhero/ca7_6_preservation_test.go",
+        "internal/application/characterpet/ca7_6_preservation_test.go",
+        "internal/application/characterpractice/ca7_6_integration_test.go"
+      ]
+    },
+    "A76_17_CA5_PRESERVATION": {
+      "result": "GREEN",
+      "proof": [
+        "internal/application/charactersavedpreset/ca7_6_preservation_test.go",
+        "tools/validate_ca7_6.py"
+      ]
+    },
+    "A76_18_COMMERCE_BOUNDARY": {
+      "result": "GREEN",
+      "proof": [
+        "internal/application/characterhero/appearance_materializer.go",
+        "tools/validate_ca7_6.py"
+      ]
+    },
+    "A76_19_LIBRARY_BOUNDARY": {
+      "result": "GREEN",
+      "proof": [
+        "tools/check_ca7_6_source_oracle.py",
+        "internal/archguard/ca7_6_contract_test.go"
+      ]
+    },
+    "A76_20_FULL_SOURCE_ORACLE": {
+      "result": "GREEN",
+      "proof": [
+        "tools/check_ca7_6_source_oracle.py",
+        "docs/PASS595_CA7_6_SOURCE_ORACLE.json"
+      ]
+    },
+    "A76_21_RELOAD_DETERMINISM": {
+      "result": "GREEN",
+      "proof": [
+        "internal/application/characterhero/appearance_contribution_test.go",
+        "internal/application/characterpet/appearance_contribution_test.go"
+      ]
+    },
+    "A76_22_NO_NEW_AUTHORITY": {
+      "result": "GREEN",
+      "proof": [
+        "internal/archguard/ca7_6_contract_test.go",
+        "tools/validate_ca7_6.py"
+      ]
+    },
+    "A76_23_RESIDUAL_ROUTING": {
+      "result": "GREEN",
+      "proof": [
+        "docs/PASS595_CA7_6_PREIMPLEMENTATION_RESEARCH_CLOSURE.md"
+      ]
+    },
+    "A76_24_DEFERRED_GATES": {
+      "result": "GREEN_DEFERRED_CLASSIFICATION",
+      "proof": [
+        "docs/PASS595_CA7_6_PREIMPLEMENTATION_CONTRACT.md"
+      ]
+    },
+    "A76_25_INDEPENDENT_REALITY": {
+      "result": "GREEN",
+      "proof": [
+        "docs/PASS595_CA7_6_INDEPENDENT_PREIMPLEMENTATION_REALITY_CHECK.md",
+        "docs/PASS596_CA7_6_INDEPENDENT_POSTIMPLEMENTATION_REALITY_CHECK.md"
+      ]
+    }
+  },
+  "deferred": {
+    "ca7_7_native_postgresql_river": "PENDING_MANDATORY_NEXT_GATE",
+    "w2_physical_stock_client": "PENDING_SEPARATE_GATE"
+  },
+  "evidence_files": [
+    {
+      "path": "EVIDENCE/PASS596_CA7_6/CANONICAL_STATIC_SOURCE_GATE.log",
+      "bytes": 2972,
+      "sha256": "f6c6b88c0fd12a6d05b1f28f4ce942dfa7efd5bfff354c5da66cf019625145cc"
+    },
+    {
+      "path": "EVIDENCE/PASS596_CA7_6/COMPATIBILITY_COPY_ALL_TEST.log",
+      "bytes": 6180,
+      "sha256": "3d45dcb0e3dfc994a2a220da763520669e87239116dfcf1dcfdb48b9fa21d2d6"
+    },
+    {
+      "path": "EVIDENCE/PASS596_CA7_6/COMPATIBILITY_COPY_BOUNDED_REGRESSION.log",
+      "bytes": 11760,
+      "sha256": "74915f818a714af9edb37e2f65dc7c10db546106ddf69411e783c4f494f1eb64"
+    },
+    {
+      "path": "EVIDENCE/PASS596_CA7_6/COMPATIBILITY_COPY_FOCUSED.log",
+      "bytes": 403,
+      "sha256": "bf8b6fb5625ab8546e83eccfe5822247b44fd78cf4d7704408b00d08f79cdbfb"
+    },
+    {
+      "path": "EVIDENCE/PASS596_CA7_6/COMPATIBILITY_COPY_RACE.log",
+      "bytes": 403,
+      "sha256": "39b3804fb5675bac15c8ab87c7e700e9600bd421d2f00ef748000831dd6c0fbb"
+    },
+    {
+      "path": "EVIDENCE/PASS596_CA7_6/COMPATIBILITY_COPY_VALIDATORS.log",
+      "bytes": 3454,
+      "sha256": "47f0f9fccb53dc1f77c86cae26131fd736722830b74ccb3222f1c8a08e3c730f"
+    },
+    {
+      "path": "EVIDENCE/PASS596_CA7_6/COMPATIBILITY_COPY_VET.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "EVIDENCE/PASS596_CA7_6/EXACT_CANONICAL_GO_ATTEMPT.log",
+      "bytes": 328,
+      "sha256": "d36b8d7ee8e219d915445e8611b5aed770e4b799010c900a4611cda6b44f06a2"
+    }
+  ]
+}

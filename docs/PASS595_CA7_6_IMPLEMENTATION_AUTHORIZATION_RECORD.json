@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "document": "PASS595_CA7_6_IMPLEMENTATION_AUTHORIZATION_RECORD",
+  "pass": "595.0",
+  "stage": "CA7-6",
+  "status": "AUTHORIZED_NOT_STARTED",
+  "authorization_basis": [
+    "00_PASSMAP/PASS595_CA7_6_RESEARCH_SEAL_RECORD.json GREEN",
+    "00_PASSMAP/PASS595_CA7_6_INDEPENDENT_PREIMPLEMENTATION_REALITY_CHECK.md GREEN",
+    "User explicitly approved direct CA7-6 implementation after research is done and PassMap is synchronized."
+  ],
+  "authorized_scope": "CA7-6 typed effective appearance contribution/read seam, cross-phase preservation/integration tests, candidate-bound source/architecture guards and only the minimal supporting code required by the frozen contract.",
+  "prohibited_scope": [
+    "Do not add new gameplay MIDs, schema, scheduler or durable owner.",
+    "Do not move Commerce or Library durable ownership into Character.",
+    "Do not freeze CA8 transaction/isolation policy inside CA7-6.",
+    "Do not start CA7-7 exact/native aggregate gate early or claim W2 physical stock proof."
+  ],
+  "backend_at_authorization": "gxb-backend-v2-v0.84.0-pass594-ca7-5-local-accepted.zip",
+  "backend_sha256": "4f4db4fea63bf7368e3ab8207a0242b002a02ef45b2234a128143f73f4b6d16f",
+  "research_contract": "00_PASSMAP/PASS595_CA7_6_PREIMPLEMENTATION_CONTRACT.md",
+  "acceptance_matrix": "00_PASSMAP/PASS595_CA7_6_ACCEPTANCE_MATRIX.json",
+  "implementation_started": false,
+  "next_gate": "CA7-6 local implementation/test/reality gate; accumulated exact PostgreSQL/River remains CA7-7."
+}

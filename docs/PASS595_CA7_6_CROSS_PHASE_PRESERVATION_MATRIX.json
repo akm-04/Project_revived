@@ -1,0 +1,273 @@
+{
+  "schema_version": 1,
+  "stage": "CA7-6",
+  "status": "PREIMPLEMENTATION_PRESERVATION_MATRIX_FROZEN_R2",
+  "implementation_authorized": false,
+  "authority": {
+    "passmap_sha256": "1d946e04f322a272eb79661727a1a6cbd00c5469ec8fbfa46119ee7ae2f55c37",
+    "backend_sha256": "4f4db4fea63bf7368e3ab8207a0242b002a02ef45b2234a128143f73f4b6d16f",
+    "git_head": "5807ba882ccfeda2daf0e54966ee5fbed2da86ea"
+  },
+  "evidence_file_sha256": {
+    "internal/adapters/postgres/characterqueries/querytext_gen.go": "c2b41b59b3ad816008b88b2cbf7d1c9d3174e55944593b646aff7e5d7ba949fb",
+    "internal/application/characterpractice/contracts.go": "574e4ce7354021973457f86444111ed509b8e6122929a2c85d3350eea682a783",
+    "internal/application/characterpractice/save_ticket.go": "6171568aa1aa3a49aeb4555141e557d3d85659dd95b39d3524bb86c72a0d8569",
+    "internal/application/characterpractice/auto_service.go": "a97b2d9e949a970cbda0fc299a8808a64ce5899d35a44f55e43cef45ffab8873",
+    "internal/application/characterpractice/auto.go": "1430ce59c048a2e06c6880273197b04e555a16eaadd54fe499fa7e8bf7fbd31c",
+    "internal/application/characterpractice/service.go": "a8ef7f58173ae8a827e41e80635143a10403da26ff519872297d3063a07592a7",
+    "internal/application/characterasset/appearance_projection.go": "9626482daca15bada5385e3f0c1334d4b0b8238abc3ad745d56902018ae3ba43",
+    "internal/application/characterasset/practice_contribution.go": "a5a47145cc319d40d9eae386a763abd5583f2601a4148f60fb29d0a402c70727",
+    "internal/application/characterasset/saved_preset_reference_state.go": "3b4765532440aa39e2f8cb436fc0f0db5f7845442e32a92b5391ab2506517924",
+    "internal/application/characterhero/equipment_state.go": "bc8d7aa1d475d516975cfb2e677ca6276fd3abe00f91ec7e72c409cabad13d2b",
+    "internal/application/characterhero/appearance_service.go": "744ded5696723871b06aff7ba5d09c88d49cb92fe278647dd5537acd5427769e",
+    "internal/application/characterhero/live_service.go": "56a625f3cb8b412381fcc53ddb3ed279ed2fe8dace5b254c88b3d6b8fb4c3f6c",
+    "internal/application/characterhero/appearance_materializer.go": "2e5cb0085c520de1139e26ee88b37a6a656ff8d51bdffba00b67d52452bfb8aa",
+    "internal/application/characterpet/appearance_style_service.go": "5887d2cc4bba0dce3f49ad70f02ece8c5aebc063229296d5fe6490eae5fac427",
+    "internal/adapters/postgres/characterstore/practice_actor.go": "839aaba0dccb14fd414fcf2843f22bccdf429aab41b8748d8e833c5f3a3817cb"
+  },
+  "global_model": {
+    "finding": "CA2/CA3/CA4/CA6 and CA7 share Hero/Pet owner state_version intentionally as the coherence fence while durable columns/child tables remain narrowly owned. CA5 uses separate saved-reference authority.",
+    "classification": "STRONG_INFERENCE_FROM_ACCEPTED_SQL_AND_CONTRACTS",
+    "no_claim": "Static narrow-write evidence does not replace required real cross-service tests or CA7-7 native concurrency proof."
+  },
+  "rows": [
+    {
+      "id": "CA1_KERNEL",
+      "phase": "CA1",
+      "accepted_scope": "Asset Kernel, transaction composition and typed materialization",
+      "preservation_finding": "CA7 reuses caller-owned transaction, typed I5 composition, D11 receipts and Character owner CAS seams; no new foreign-owner SQL or parallel economy owner is required.",
+      "evidence": [
+        {
+          "path": "internal/application/characterhero/appearance_materializer.go",
+          "symbols": [
+            "GrantPermanentSkinTx"
+          ]
+        },
+        {
+          "path": "internal/application/characterhero/appearance_service.go",
+          "symbols": [
+            "tx.Serializable",
+            "LockHeroByPartnerIDTx"
+          ]
+        },
+        {
+          "path": "internal/application/characterpet/appearance_style_service.go",
+          "symbols": [
+            "tx.Serializable",
+            "LockPetByIDTx"
+          ]
+        }
+      ],
+      "ca7_6_required_proof": [
+        "architecture guard: no foreign-owner SQL in CA7 contribution seam",
+        "typed Commerce materializer remains caller-transaction-owned",
+        "no new aggregate/scheduler/transaction runner for CA8 contribution"
+      ]
+    },
+    {
+      "id": "CA2_HERO_CORE",
+      "phase": "CA2",
+      "accepted_scope": "Hero Core Identity, Roster & Base Progression",
+      "preservation_finding": "Hero progression writes star/level/exp (or broader progression/equipment fields) plus state_version but do not write CA7 selectors/entitlement tables. CA7 writes selectors/child entitlements plus the same owner state_version but do not rewrite progression identity fields.",
+      "evidence": [
+        {
+          "path": "internal/adapters/postgres/characterqueries/querytext_gen.go",
+          "symbols": [
+            "SaveHeroProgression",
+            "SaveHeroState",
+            "SaveHeroAppearanceSelectors",
+            "TouchHeroAppearanceVersion",
+            "UpsertHeroSkinEntitlement",
+            "UpsertHeroLIVEEntitlement"
+          ]
+        }
+      ],
+      "ca7_6_required_proof": [
+        "real CA2 progression mutation preserves CA7 durable appearance",
+        "real CA7 mutation preserves Hero identity/progression fields",
+        "contribution carries canonical owner identity as validation evidence without becoming roster authority"
+      ]
+    },
+    {
+      "id": "CA3_PET_CORE",
+      "phase": "CA3",
+      "accepted_scope": "Pet Core Identity, Roster & Base Progression",
+      "preservation_finding": "Pet show/progression/equipment writes narrow owned fields plus state_version; CA7 Pet style writes active_style/child rows plus state_version. Neither query family rewrites the other owned columns.",
+      "evidence": [
+        {
+          "path": "internal/adapters/postgres/characterqueries/querytext_gen.go",
+          "symbols": [
+            "SavePetShowState",
+            "SavePetState",
+            "SavePetActiveStyle",
+            "TouchPetAppearanceVersion",
+            "InsertPetStyleEntitlement"
+          ]
+        }
+      ],
+      "ca7_6_required_proof": [
+        "real CA3 Pet mutation preserves CA7 style ownership/selector",
+        "real CA7 Pet mutation preserves Pet identity/progression/show/equipment fields"
+      ]
+    },
+    {
+      "id": "CA4_EQUIPMENT",
+      "phase": "CA4",
+      "accepted_scope": "Equipment / Fumo / Promotion-Reset / Super Equipment",
+      "preservation_finding": "Hero/Pet equipment and Fumo share the owner row/version but use narrow progression/equipment columns; CA7 appearance writes do not overwrite equipment/Fumo columns. CA4 raw downstream state is owner-versioned and caller-queryer/exact-revision qualified.",
+      "evidence": [
+        {
+          "path": "internal/adapters/postgres/characterqueries/querytext_gen.go",
+          "symbols": [
+            "SaveHeroState",
+            "SavePetState",
+            "SaveHeroAppearanceSelectors",
+            "SavePetActiveStyle"
+          ]
+        },
+        {
+          "path": "internal/application/characterhero/equipment_state.go",
+          "symbols": [
+            "RawEquipmentStateTx"
+          ]
+        }
+      ],
+      "ca7_6_required_proof": [
+        "equipment/Fumo mutation preserves CA7 state",
+        "CA7 mutation preserves equipment/Fumo state",
+        "CA8 same-snapshot observations agree on owner StateVersion or fail closed"
+      ]
+    },
+    {
+      "id": "CA5_SAVED_REFERENCES",
+      "phase": "CA5",
+      "accepted_scope": "Formation, Saved Teams & Reference Integrity",
+      "preservation_finding": "CA5 saved presets are separate root/lane/Hero-reference tables with an independent root revision; CA7 does not write these tables. CA5 references identify Character owners and do not own Character appearance.",
+      "evidence": [
+        {
+          "path": "internal/adapters/postgres/characterqueries/querytext_gen.go",
+          "symbols": [
+            "InsertSavedPresetRoot",
+            "ReadSavedPresetAggregate",
+            "SaveSavedPresetRootVersion",
+            "SavedPresetReferencesHero",
+            "SavedPresetReferencesPet"
+          ]
+        },
+        {
+          "path": "internal/application/characterasset/saved_preset_reference_state.go",
+          "symbols": [
+            "SavedPresetReferenceState",
+            "Clone"
+          ]
+        }
+      ],
+      "ca7_6_required_proof": [
+        "CA7 mutation leaves saved-reference bytes/root revision unchanged",
+        "saved-reference mutation leaves CA7 owner/child state unchanged",
+        "CA8 joins references to Character contributions without transferring ownership"
+      ]
+    },
+    {
+      "id": "CA6_PRACTICE_MANUAL_TICKET",
+      "phase": "CA6",
+      "accepted_scope": "Practice / Wash Proposal-Save Progression \u2014 pending MANUAL/TICKET",
+      "preservation_finding": "Pending proposal stores ActorStateVersion. SAVE locks Character owner first, then proposal, rejects on version mismatch before Practice CAS or proposal deletion. Real CA7 mutation therefore stales pending MANUAL/TICKET; semantic CA7 no-op preserves validity.",
+      "evidence": [
+        {
+          "path": "internal/application/characterpractice/contracts.go",
+          "symbols": [
+            "PendingManual",
+            "PendingTicket",
+            "ActorStateVersion"
+          ]
+        },
+        {
+          "path": "internal/application/characterpractice/save_ticket.go",
+          "symbols": [
+            "Save",
+            "ActorStateVersion",
+            "ErrActorStaleVersion"
+          ]
+        },
+        {
+          "path": "internal/application/characterpractice/service.go",
+          "symbols": [
+            "lockTarget"
+          ]
+        }
+      ],
+      "ca7_6_required_proof": [
+        "actual Hero CA7 mutation -> pending MANUAL/TICKET SAVE stale",
+        "actual Pet CA7 mutation -> pending MANUAL/TICKET SAVE stale",
+        "semantic CA7 no-op -> proposal remains saveable",
+        "stale rejection occurs before Practice apply/delete"
+      ]
+    },
+    {
+      "id": "CA6_PRACTICE_TICKET_ACCOUNTING",
+      "phase": "CA6",
+      "accepted_scope": "Ticket proposal accounting",
+      "preservation_finding": "TICKET prepares/applies one stack debit in generation transaction before proposal upsert/receipt. A later stale SAVE has no debit/refund path and rejects before proposal delete, so committed generation ticket remains spent and stale proposal remains.",
+      "evidence": [
+        {
+          "path": "internal/application/characterpractice/save_ticket.go",
+          "symbols": [
+            "PrepareLevelAndStackDebitTx",
+            "ApplyLevelAndStackDebitTx",
+            "upsertProposalTx"
+          ]
+        },
+        {
+          "path": "internal/application/characterpractice/save_ticket.go",
+          "symbols": [
+            "proposal.ActorStateVersion",
+            "deleteProposalTx"
+          ]
+        }
+      ],
+      "ca7_6_required_proof": [
+        "after CA7 stales a TICKET proposal, SAVE performs no second debit",
+        "stale SAVE performs no refund of generation ticket",
+        "stale proposal remains present after rejected SAVE"
+      ]
+    },
+    {
+      "id": "CA6_PRACTICE_AUTO",
+      "phase": "CA6",
+      "accepted_scope": "AUTO atomic Practice",
+      "preservation_finding": "AUTO never creates a pending proposal. It locks the same Hero/Pet owner through lockTarget before accounting/apply. CA7 and AUTO therefore require serialization/no torn state, not proposal-staleness semantics.",
+      "evidence": [
+        {
+          "path": "internal/application/characterpractice/auto.go",
+          "symbols": [
+            "AUTO never creates a CA6-3 pending proposal"
+          ]
+        },
+        {
+          "path": "internal/application/characterpractice/auto_service.go",
+          "symbols": [
+            "lockTarget",
+            "AuthorizeLevelAndDebitScalarTx",
+            "applyPracticeTx"
+          ]
+        }
+      ],
+      "ca7_6_required_proof": [
+        "application-level CA7-vs-AUTO ordering serializes on the same owner seam",
+        "either serialized order preserves both applicable states and one version transition per mutation",
+        "no invented AUTO proposal invalidation"
+      ],
+      "native_limit": "Exact PostgreSQL concurrent row-lock proof remains at CA7-7 accumulated native gate."
+    }
+  ],
+  "roadmap_reconciliation": {
+    "contradicted_text": "CA7-6 roadmap phrase \u201cpending Practice manual/ticket/AUTO proposal\u201d",
+    "accepted_CA6_reality": "Only MANUAL and TICKET are PendingKind; AUTO explicitly never creates a pending proposal.",
+    "proposed_superseding_interpretation": "MANUAL/TICKET use owner-version stale-proposal semantics; AUTO uses shared-owner-lock serialization semantics.",
+    "classification": "RESEARCH_RECONCILIATION_REQUIRED_BEFORE_CONTRACT_FREEZE",
+    "status": "SUPERSEDE_CA7_6_INTERPRETATION_ONLY_DO_NOT_REWRITE_HISTORICAL_CA6"
+  },
+  "future_test_location_constraint": "Cross-service integration tests should live in a neutral/external test package able to import characterhero/characterpet/characterpractice without introducing reverse production dependencies or foreign ownership.",
+  "research_revision": "R2"
+}

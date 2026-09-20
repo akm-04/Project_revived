@@ -1,0 +1,33 @@
+canonical_toolchain_hashes:
+a8844fbc8c3eb51c26ed00aec4cd5a5a9d647f849c6ead07bcc83ed24c4a7718  .go-version
+313c574368bb56dc570bc3427b65f59b059e492f909fe43b7d0291b5ced21dc4  go.mod
+efbf6753542d66e2fefcb2ab5e2ade7c9d28f2206a1113d1eb9568f2cb75808d  go.sum
+DEPENDENCY POLICY: PASS
+resolved_go_modules 16 qualified_candidates 5
+RESOLVED SBOM: PASS
+SQLC GENERATION POLICY: PASS
+KERNEL QUERYTEXT: PASS sha256=74ad9accee063e77323a2eb4a69df394bdcb331ce88e3d789864ffbc904b7511
+CONTENT QUERYTEXT: PASS sha256=9709338916a5e4edd9d24f741815a77e0723bb89401574ed87dce9954a722a0c
+CHARACTER QUERYTEXT: PASS hero_sha256=74780e7a69490f2a68a9c5f0fe4b662059f50fedd94e8f05798e074141235c6b pet_sha256=07779a3b3acc6ae1ae1c065ffff81dccc3a7477193c5b339d07d06d537c0fd81 preset_sha256=649a7d71bf475e6710bdd28f111a364cc208b5600270e88338fda2d28fb37cd6 practice_sha256=bca19b6a86b90f87e1ba26d994c06929d58fa5bba2b9068ff3cb3cdae66570bf
+SCHEMA/QUERY OWNERSHIP: PASS
+FOUNDATION TRACE: PASS (10 historical lifecycle records; 24/24 RF findings dispositioned; R0-R7 accepted Pass489; I6 accepted Pass509; 6 future extension limits remain explicit; W2 separate)
+CA3-3 VALIDATION: PASS
+Pet progression persistence/content/I5/service/strict-wire/timing seams and contract-specific regression guards are present; live aggregate acceptance remains separate
+CA4-1 VALIDATION: PASS
+shared content/I5/Character contracts are present; migration/ownership sealed; later CA4 family mechanics remain absent
+CA7-3 VALIDATION: PASS
+Hero-owned ordinary/timed/illusion mutation seams, cohesive CAS, replay classes, future Commerce typed materializer, production routing and Pet-owner separation preserved
+CA7-4 VALIDATION: PASS
+Hero-owned paid LIVE unlock/show seams, current-state convergence, strict wire parsing, I5 composition, single CAS, replay classes, production routing and CA7-5 Pet-owner separation preserved
+CA7-5 VALIDATION: PASS
+Pet-owned home-style acquisition/select/cancel, one-CAS persistence, D11 replay, strict stock routing, schema ownership and successor fences preserved
+CA7-6 VALIDATION: PASS
+typed caller-owned appearance contributions, provenance, Practice integration, bidirectional query preservation and no-new-authority fences preserved
+CA7-3 SOURCE ORACLE CHECK: PASS
+current/old client identities pinned; MID60/61/2979 wire/state axes, timed expiry, ordinary combat axis, Pet reachability split, and CA7-4 coexistence preserved
+CA7-4 SOURCE ORACLE CHECK: PASS
+current oracle identity pinned; MID68/69 wire, paid LIVE costs/item, economy refresh/retry behavior, positional reload projection and candidate translation preserved
+CA7-5 SOURCE ORACLE CHECK: PASS
+current/old oracle bytes pinned; MID1893/1894/1895 wire, callback, reachability, identity and candidate translation preserved
+CA7-6 SOURCE ORACLE CHECK: PASS
+full current src_64 census, eight appearance MIDs, presentation/combat differential, LIVE/Pet-style nonbattle census, Library boundary and legacy Pet window reachability preserved
