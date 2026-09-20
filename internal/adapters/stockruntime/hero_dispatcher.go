@@ -38,10 +38,17 @@ type HeroEconomyProjectionPort interface {
 	CurrentScalar(context.Context, identity.PlayerID, string, operation.Context) (int64, error)
 }
 
+type HeroAppearanceServicePort interface {
+	SkinOn(context.Context, identity.ActorContext, int64, int64, operation.Context) (apphero.SkinOnResult, error)
+	SkinCancel(context.Context, identity.ActorContext, int64, operation.Context) (apphero.SkinCancelResult, error)
+	UseIllusionSkinItem(context.Context, identity.ActorContext, int64, int64, operation.Context) (apphero.IllusionSelectResult, error)
+}
+
 type HeroDispatcher struct {
-	Authority apprealtime.GameplayAuthorityPort
-	Service   HeroServicePort
-	Economy   HeroEconomyProjectionPort
+	Authority  apprealtime.GameplayAuthorityPort
+	Service    HeroServicePort
+	Appearance HeroAppearanceServicePort
+	Economy    HeroEconomyProjectionPort
 }
 
 func (d HeroDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRequest) httpedge.Response {
@@ -53,6 +60,70 @@ func (d HeroDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReque
 		return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Body: map[string]any{"error": "hero_unavailable"}}
 	}
 	switch req.Envelope.MID {
+	case 60: // SKIN_ON — CA7-3 acquire-or-select
+		if d.Appearance == nil {
+			return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Body: map[string]any{"error": "hero_appearance_unavailable"}}
+		}
+		if !onlyStockGameplayParams(req.Envelope.Params, "partner_id", "item_id") {
+			return badHero("invalid_hero_skin_on")
+		}
+		partnerID, e1 := requiredInt64(req.Envelope.Params, "partner_id")
+		itemID, e2 := requiredInt64(req.Envelope.Params, "item_id")
+		if e1 != nil || e2 != nil || partnerID <= 0 || itemID <= 0 {
+			return badHero("invalid_hero_skin_on")
+		}
+		got, err := d.Appearance.SkinOn(ctx, actor, partnerID, itemID, req.Envelope.Operation)
+		if err != nil {
+			if errors.Is(err, apphero.ErrHeroSkinExperienceAlreadyOwned) {
+				return httpedge.Response{HTTPStatus: http.StatusBadRequest, Body: map[string]any{"error_code": int64(35035)}}
+			}
+			return failHero(err)
+		}
+		skins := make(map[string]any, len(got.Skins))
+		for _, skin := range got.Skins {
+			value := int64(-1)
+			if skin.ExpiresAtUnix != nil {
+				value = *skin.ExpiresAtUnix
+			}
+			skins[strconv.FormatInt(skin.ModelID, 10)] = value
+		}
+		body := map[string]any{"current_skin_id": got.CurrentSkinID, "skin_ids": skins}
+		if got.RemoveItem {
+			body["remove_item"] = int64(1)
+		}
+		return httpedge.Response{HTTPStatus: http.StatusOK, Body: body}
+	case 61: // SKIN_CANCEL — CA7-3 ordinary selector -> base
+		if d.Appearance == nil {
+			return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Body: map[string]any{"error": "hero_appearance_unavailable"}}
+		}
+		if !onlyStockGameplayParams(req.Envelope.Params, "partner_id") {
+			return badHero("invalid_hero_skin_cancel")
+		}
+		partnerID, err := requiredInt64(req.Envelope.Params, "partner_id")
+		if err != nil || partnerID <= 0 {
+			return badHero("invalid_hero_skin_cancel")
+		}
+		if _, err := d.Appearance.SkinCancel(ctx, actor, partnerID, req.Envelope.Operation); err != nil {
+			return failHero(err)
+		}
+		return httpedge.Response{HTTPStatus: http.StatusOK, Body: map[string]any{}}
+	case 2979: // USE_ILLUSION_SKIN_ITEM — CA7-3 independent presentation selector
+		if d.Appearance == nil {
+			return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Body: map[string]any{"error": "hero_appearance_unavailable"}}
+		}
+		if !onlyStockGameplayParams(req.Envelope.Params, "partner_id", "item_id") {
+			return badHero("invalid_hero_illusion")
+		}
+		partnerID, e1 := requiredInt64(req.Envelope.Params, "partner_id")
+		itemID, e2 := requiredInt64(req.Envelope.Params, "item_id")
+		if e1 != nil || e2 != nil || partnerID <= 0 || itemID < 0 {
+			return badHero("invalid_hero_illusion")
+		}
+		got, err := d.Appearance.UseIllusionSkinItem(ctx, actor, partnerID, itemID, req.Envelope.Operation)
+		if err != nil {
+			return failHero(err)
+		}
+		return httpedge.Response{HTTPStatus: http.StatusOK, Body: map[string]any{"illusion_skin_id": got.IllusionSkinID}}
 	case 49:
 		if raw, ok := req.Envelope.Params["player_id"]; ok && raw != nil {
 			pid, err := requiredInt64(req.Envelope.Params, "player_id")
@@ -389,10 +460,10 @@ func badHero(code string) httpedge.Response {
 }
 
 func failHero(err error) httpedge.Response {
-	if errors.Is(err, apphero.ErrHeroContentInactive) || errors.Is(err, apphero.ErrHeroProgressionContentInactive) || errors.Is(err, apphero.ErrHeroEquipmentContentInactive) || errors.Is(err, apphero.ErrHeroFumoContentInactive) || errors.Is(err, apphero.ErrHeroPromotionContentInactive) || errors.Is(err, apphero.ErrHeroCapacityUnavailable) {
+	if errors.Is(err, apphero.ErrHeroContentInactive) || errors.Is(err, apphero.ErrAppearanceContentInactive) || errors.Is(err, apphero.ErrHeroProgressionContentInactive) || errors.Is(err, apphero.ErrHeroEquipmentContentInactive) || errors.Is(err, apphero.ErrHeroFumoContentInactive) || errors.Is(err, apphero.ErrHeroPromotionContentInactive) || errors.Is(err, apphero.ErrHeroCapacityUnavailable) {
 		return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Body: map[string]any{"error": "hero_content_inactive"}}
 	}
-	if errors.Is(err, apphero.ErrHeroExpMax) || errors.Is(err, apphero.ErrHeroEvolutionUnavailable) || errors.Is(err, apphero.ErrHeroPrerequisites) || errors.Is(err, apphero.ErrHeroNotFound) || errors.Is(err, apphero.ErrHeroCapacityExceeded) || errors.Is(err, apphero.ErrHeroDuplicateOrigin) || errors.Is(err, apphero.ErrHeroAcquisitionInvalid) || errors.Is(err, apphero.ErrHeroVowsLevel) || errors.Is(err, apphero.ErrHeroEquipmentUnavailable) || errors.Is(err, apphero.ErrHeroFumoUnavailable) || errors.Is(err, apphero.ErrHeroPromotionUnavailable) || errors.Is(err, apphero.ErrHeroPromotionPrerequisites) || errors.Is(err, apphero.ErrHeroPromotionCorruptState) {
+	if errors.Is(err, apphero.ErrHeroAppearanceUnavailable) || errors.Is(err, apphero.ErrHeroExpMax) || errors.Is(err, apphero.ErrHeroEvolutionUnavailable) || errors.Is(err, apphero.ErrHeroPrerequisites) || errors.Is(err, apphero.ErrHeroNotFound) || errors.Is(err, apphero.ErrHeroCapacityExceeded) || errors.Is(err, apphero.ErrHeroDuplicateOrigin) || errors.Is(err, apphero.ErrHeroAcquisitionInvalid) || errors.Is(err, apphero.ErrHeroVowsLevel) || errors.Is(err, apphero.ErrHeroEquipmentUnavailable) || errors.Is(err, apphero.ErrHeroFumoUnavailable) || errors.Is(err, apphero.ErrHeroPromotionUnavailable) || errors.Is(err, apphero.ErrHeroPromotionPrerequisites) || errors.Is(err, apphero.ErrHeroPromotionCorruptState) {
 		return httpedge.Response{HTTPStatus: http.StatusBadRequest, Body: map[string]any{"error": "hero_operation_rejected"}}
 	}
 	return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Body: map[string]any{"error": "hero_operation_failed"}}

@@ -1,0 +1,135 @@
+{
+  "schema_version": 1,
+  "pass": "590.0",
+  "phase": "CA7-3 Hero/Vow Ordinary Skin, Timed Entitlement & Illusion Semantics local closure",
+  "authority_parent": "sealed Pass589 CA7-2 acceptance / CA7-3 preimplementation research authority plus explicit user authorization to implement after research GREEN",
+  "parent_backend_sha256": "ed2898e704d033607e41e3350765b20ba0343057cfe05d980bde774aecd5b685",
+  "parent_git_head": "b545f9568ada16183b1de7d13b2cb380815284ed",
+  "parent_implementation_revision_sha256": "f1642b3518c59194d8411e24e1721b57e9277710fd9ef3526f79efbb88de196c",
+  "parent_passmap_sha256": "adeca7a97ccde4559876ba5148b1526d00a5968c7dd8d8b25407389b5a688be7",
+  "content_revision": "ae577b8c9b9770f1d7a7dcf8335d9d36d27a15a687a12a5e5b01d97eca124116",
+  "result": "GREEN_LOCAL_CA7_3_ACCEPTED_COMPATIBILITY_COPY_ONLY_NATIVE_AGGREGATE_DEFERRED_TO_CA7_7",
+  "implementation_scope": [
+    "MID60 ordinary/permanent/timed acquire-or-select state machine and typed I5 debit composition",
+    "MID61 ordinary selector reset with no-op receipt convergence",
+    "MID2979 illusion selection with independent presentation axis",
+    "one-CAS Hero-owned appearance entitlement+selector persistence seam",
+    "typed caller-transaction permanent-skin Character materializer for future Commerce",
+    "D11 semantic receipt families / UNKNOWN-COMMIT recovery / current-state convergence classification",
+    "candidate-bound CA7-3 exact current+old-client source oracle and retained validation guards"
+  ],
+  "explicit_non_scope": [
+    "MID68/MID69 paid LIVE",
+    "MID1893/MID1894/MID1895 Pet home-style mutation",
+    "new schema migration",
+    "Commerce pricing/settlement/receipt ownership",
+    "physical stock-client W2 proof"
+  ],
+  "source_oracles": {
+    "current_src64": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+    "old_client": "d0a4815507fd4626ac5749f2f6efae554d3a4bef717793f155f58c8bed7170b1",
+    "frozen_v1": "31729d5c5e4509c2c89eaa1e8203cf1570afe87e18ed2610b944e457a9946b15",
+    "native_apk": "fcc0f03e5973dd41a190a4bd390a8c4c5185f5f7cf2d4eeb0bcad696cfee7517"
+  },
+  "canonical_environment": {
+    "canonical_pins_changed": false,
+    "exact_candidate_attempt": "ENVIRONMENT_BLOCKED",
+    "reason": "pinned Go1.27.1 cannot be downloaded in this sandbox; canonical toolchain/dependency pins remain pristine"
+  },
+  "compatibility_copy_only": {
+    "environment": "Go1.23.2 linux/amd64",
+    "accommodation": [
+      ".go-version 1.27.1 -> 1.23.2 only in disposable clone",
+      "go.mod language 1.26.0 -> 1.23.0 and toolchain go1.27.1 -> go1.23.2 only in disposable clone"
+    ],
+    "go_sum_changed": false,
+    "results": [
+      "focused behavior tests GREEN",
+      "focused race GREEN",
+      "focused vet GREEN",
+      "bounded package regression 94/94 GREEN",
+      "retained cumulative validators GREEN under explicit GXB_COMPAT_SCRATCH=1"
+    ]
+  },
+  "canonical_static_results": [
+    "dependency policy GREEN",
+    "content generation policy GREEN",
+    "sqlc generation policy GREEN",
+    "schema/query ownership GREEN",
+    "foundation trace GREEN",
+    "CA7-3 exact source oracle GREEN",
+    "CA7-3 structural validator GREEN",
+    "git diff --check GREEN"
+  ],
+  "deferred_mandatory": [
+    "CA7-7 exact canonical Go/native real PostgreSQL/River accumulated gate",
+    "physical unmodified-stock-client W2 post-I14"
+  ],
+  "evidence_logs": {
+    "EVIDENCE/PASS590_CA7_3/compat/00_scope.txt": {
+      "bytes": 939,
+      "sha256": "c80e65967357a1b597426c76cea31624aab19b6ba423ebd166f934275e3b478b"
+    },
+    "EVIDENCE/PASS590_CA7_3/compat/01_focused.log": {
+      "bytes": 380,
+      "sha256": "86bbe95d9ff2d2766ef186106650407a59b5a4f5e650d2331d07a6819e8e2380"
+    },
+    "EVIDENCE/PASS590_CA7_3/compat/02_race.log": {
+      "bytes": 274,
+      "sha256": "f7664c633ec67234ca036d3d01dce8e717aa31506782dfef5d700475c9b19c36"
+    },
+    "EVIDENCE/PASS590_CA7_3/compat/03_vet.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "EVIDENCE/PASS590_CA7_3/compat/04_package_regression.log": {
+      "bytes": 6201,
+      "sha256": "0d58137a21ce768a218d92a83c176b1d113da1df4bee67a562eb32c8bac8f03d"
+    },
+    "EVIDENCE/PASS590_CA7_3/compat/07_remaining_validators.log": {
+      "bytes": 4680,
+      "sha256": "059b56916656a0600ba102df1bedacd4557a92a4ffb8d44d58bf12c3a932c3f7"
+    },
+    "EVIDENCE/PASS590_CA7_3/compat/full_check_partial_timeout.log": {
+      "bytes": 10979,
+      "sha256": "33799aeb6fa534df62c7fc01fded3da3c5e96c3d047e7e29c9521e823d5915d6"
+    },
+    "EVIDENCE/PASS590_CA7_3/exact/EXECUTION_CLASSIFICATION.txt": {
+      "bytes": 178,
+      "sha256": "c60f3985283c716e2bcb394401f2451ed299fc60b9fbc6c2f92a121e2b88ef53"
+    },
+    "EVIDENCE/PASS590_CA7_3/exact/ca73_canonical_exact_smoke.log": {
+      "bytes": 328,
+      "sha256": "8c1f8303bc7ad07cc0d70c98e32a41258af62a40354b0a7022df8d577a2dd477"
+    },
+    "EVIDENCE/PASS590_CA7_3/exact/check_ca7_3_source_oracle.log": {
+      "bytes": 174,
+      "sha256": "db9bc1a055e171a0a1f6b909dd1cbb31d94392c4cbf555b870e097617f5ac37f"
+    },
+    "EVIDENCE/PASS590_CA7_3/exact/check_content_generation_policy.log": {
+      "bytes": 43,
+      "sha256": "d0e19a2dfcfd4ea447333f866d8f050fe33f893703fa8e549f5e16cd596e1a43"
+    },
+    "EVIDENCE/PASS590_CA7_3/exact/check_dependency_policy.log": {
+      "bytes": 70,
+      "sha256": "3ab08a368c74898ed33a1af92c1fd0f31280c6dcccbdcb957abaa7694343d703"
+    },
+    "EVIDENCE/PASS590_CA7_3/exact/check_schema_query_ownership.log": {
+      "bytes": 29,
+      "sha256": "1d0eeef6e9a6aa5cc1a1abe4142a636a77896063f26ad65229891ff176bbf754"
+    },
+    "EVIDENCE/PASS590_CA7_3/exact/check_sqlc_generation_policy.log": {
+      "bytes": 29,
+      "sha256": "6b6e72c3e9efb996f2aacbeb53ec73955d3652e0699c7b83a035fa39ea1744f4"
+    },
+    "EVIDENCE/PASS590_CA7_3/exact/validate_ca7_3.log": {
+      "bytes": 192,
+      "sha256": "4525be44610f13d2abb4d58bbb802416cb321ae963471cc01f8a1cdb881c3804"
+    },
+    "EVIDENCE/PASS590_CA7_3/exact/validate_foundation_trace.log": {
+      "bytes": 191,
+      "sha256": "084edcdcca3e2644679066fc7241917694173302070a95610f3c2d336dc40c5f"
+    }
+  },
+  "independent_reality_check": "docs/PASS590_CA7_3_INDEPENDENT_POSTIMPLEMENTATION_REALITY_CHECK.md"
+}

@@ -148,7 +148,7 @@ func main() {
 	// CA2-3 mechanics are constructed against owner-shaped ports, but Capacity
 	// remains nil and I5.PartnerEntities/MID59/MID305 remain unregistered in
 	// production until the original Hero capacity policy is recovered.
-	heroSvc := apphero.Service{Runner: runner, Store: heroDB, Fencer: i5db, Content: contentDB, Receipts: receipts, ReceiptRead: kernelstore.Reader{Queryer: pool}, ProgressionStore: heroDB, Progression: contentDB, Economy: heroEconomy, Backpack: i5db, AcquisitionStore: heroDB, Acquisition: contentDB, MaterialCosts: heroMaterialCosts, PlayerLevel: i5CrossOwner, Equipment: contentDB, EquipmentResources: heroEquipmentResources, Fumo: contentDB, Promotion: contentDB, PromotionResources: i5svc, StrictRestoration: i5svc, MaxHeroColorPolicy: maxHeroColorPolicy, RestorationModifier: characterasset.IdentityRestorationModifier{}, RosterProjection: contentDB, AppearanceStore: heroDB, Appearance: contentDB}
+	heroSvc := apphero.Service{Runner: runner, Timed: appgeneration.TimedRunner{Binder: appgeneration.Binder{Time: postgres.AuthoritativeTime{Queryer: pool}}, Runner: runner}, Store: heroDB, Fencer: i5db, Content: contentDB, Receipts: receipts, ReceiptRead: kernelstore.Reader{Queryer: pool}, ProgressionStore: heroDB, Progression: contentDB, Economy: heroEconomy, Backpack: i5db, AcquisitionStore: heroDB, Acquisition: contentDB, MaterialCosts: heroMaterialCosts, PlayerLevel: i5CrossOwner, Capacity: nil, Equipment: contentDB, EquipmentResources: heroEquipmentResources, Fumo: contentDB, Promotion: contentDB, PromotionResources: i5svc, StrictRestoration: i5svc, MaxHeroColorPolicy: maxHeroColorPolicy, RestorationModifier: characterasset.IdentityRestorationModifier{}, RosterProjection: contentDB, AppearanceStore: heroDB, Appearance: contentDB, AppearanceMutationStore: heroDB, AppearanceMutationContent: contentDB}
 	petAcquisitionDebit := appi5.PetAcquisitionDebiter{Store: i5db, Content: contentDB}
 	petExpDebit := appi5.PetExpDebiter{Store: i5db, Content: contentDB}
 	petTimed := appgeneration.TimedRunner{Binder: appgeneration.Binder{Time: postgres.AuthoritativeTime{Queryer: pool}}, Runner: runner}
@@ -235,8 +235,8 @@ func main() {
 	}
 	savedPresetD := stockruntime.SavedPresetDispatcher{Authority: authority, Service: savedPresetSvc}
 	mustRegister(1793, savedPresetD)
-	heroD := stockruntime.HeroDispatcher{Authority: authority, Service: heroSvc, Economy: heroEconomyProjection}
-	for _, mid := range []uint16{49, 51, 52, 54, 55, 57, 58, 62, 63, 67, 89, 304} {
+	heroD := stockruntime.HeroDispatcher{Authority: authority, Service: heroSvc, Appearance: heroSvc, Economy: heroEconomyProjection}
+	for _, mid := range []uint16{49, 51, 52, 54, 55, 57, 58, 60, 61, 62, 63, 67, 89, 304, 2979} {
 		mustRegister(mid, heroD)
 	}
 	petD := stockruntime.PetDispatcher{Authority: authority, Service: petSvc, Economy: petEconomyProjection}

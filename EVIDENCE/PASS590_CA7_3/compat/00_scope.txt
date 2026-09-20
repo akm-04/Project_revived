@@ -1,0 +1,18 @@
+ORIGIN_HEAD=b545f9568ada16183b1de7d13b2cb380815284ed
+ORIGIN_STATUS:
+ M cmd/gxb-api/main_postgres.go
+ M internal/adapters/postgres/characterstore/appearance.go
+ M internal/adapters/stockruntime/hero_dispatcher.go
+ M internal/application/characterhero/service.go
+ M internal/archguard/ca4_2_contract_test.go
+ M internal/archguard/ca7_2_contract_test.go
+ M internal/foundation/replaycatalog/catalog.go
+ M internal/foundation/replaycatalog/catalog_test.go
+?? internal/adapters/postgres/characterstore/appearance_ca7_3_test.go
+?? internal/adapters/stockruntime/hero_ca7_3_test.go
+?? internal/application/characterhero/appearance_materializer.go
+?? internal/application/characterhero/appearance_service.go
+?? internal/application/characterhero/appearance_service_test.go
+?? tools/check_ca7_3_source_oracle.py
+COMPAT_EDITS: .go-version 1.27.1->1.23.2; go.mod go 1.26.0->1.23.0; toolchain go1.27.1->go1.23.2
+CLASSIFICATION=COMPATIBILITY_COPY_ONLY

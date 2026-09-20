@@ -128,6 +128,37 @@ func (Store) SaveHeroAppearanceSelectorsTx(ctx context.Context, t tx.Tx, h chara
 	return nil
 }
 
+// SaveHeroAppearanceMutationTx is the cohesive CA7 Hero-owner CAS used when one
+// semantic appearance mutation may change an entitlement and selector state
+// together. The optional entitlement child write occurs before exactly one
+// Hero state_version transition in the same caller-owned transaction.
+func (Store) SaveHeroAppearanceMutationTx(ctx context.Context, t tx.Tx, h character.Hero, entitlement *character.HeroSkinEntitlement, oldVersion int64) error {
+	if t == nil || h.ValidatePersistent() != nil || oldVersion <= 0 || h.StateVersion != oldVersion+1 {
+		return errors.New("character store: invalid Hero appearance mutation")
+	}
+	if entitlement != nil {
+		e := *entitlement
+		if e.Validate() != nil || h.PlayerID != e.PlayerID || h.PartnerID != e.PartnerID {
+			return errors.New("character store: invalid Hero appearance entitlement mutation")
+		}
+		var expires any
+		if e.ExpiresAt != nil {
+			expires = e.ExpiresAt.UTC()
+		}
+		if _, err := t.Exec(ctx, characterqueries.UpsertHeroSkinEntitlement, int64(e.PlayerID), e.PartnerID, e.ModelID, expires); err != nil {
+			return err
+		}
+	}
+	tag, err := t.Exec(ctx, characterqueries.SaveHeroAppearanceSelectors, int64(h.PlayerID), h.PartnerID, h.CurrentSkinID, h.IllusionSkinID, h.UpdatedAt.UTC(), oldVersion)
+	if err != nil {
+		return err
+	}
+	if tag.RowsAffected() != 1 {
+		return errors.New("character store: Hero appearance mutation lost race")
+	}
+	return nil
+}
+
 func (Store) SaveHeroSkinEntitlementTx(ctx context.Context, t tx.Tx, h character.Hero, e character.HeroSkinEntitlement, oldVersion int64) error {
 	if t == nil || h.ValidatePersistent() != nil || e.Validate() != nil || h.PlayerID != e.PlayerID || h.PartnerID != e.PartnerID || oldVersion <= 0 || h.StateVersion != oldVersion+1 {
 		return errors.New("character store: invalid Hero skin entitlement update")

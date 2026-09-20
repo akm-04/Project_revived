@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"gxb.local/backend/v2/internal/application/characterasset"
+	appgeneration "gxb.local/backend/v2/internal/application/generation"
 	appi5 "gxb.local/backend/v2/internal/application/i5"
 	"gxb.local/backend/v2/internal/domain/character"
 	"gxb.local/backend/v2/internal/domain/identity"
@@ -53,32 +54,35 @@ type HeroRosterView struct {
 }
 
 type Service struct {
-	Runner              tx.Runner
-	Store               Store
-	Fencer              ActorFencer
-	Content             ContentGate
-	Receipts            receipt.Store
-	ReceiptRead         receipt.Reader
-	ProgressionStore    ProgressionStore
-	Progression         ProgressionContent
-	Economy             appi5.TxHeroProgressionDebiter
-	Backpack            appi5.BackpackReader
-	AcquisitionStore    AcquisitionStore
-	Acquisition         AcquisitionContent
-	MaterialCosts       appi5.TxMaterialCostDebiter
-	PlayerLevel         appi5.TxPlayerLevelReader
-	Capacity            CapacityAuthorizer
-	Equipment           EquipmentOperationContent
-	EquipmentResources  appi5.TxHeroEquipmentResourceDebiter
-	Fumo                FumoOperationContent
-	Promotion           HeroPromotionContent
-	PromotionResources  appi5.TxHeroPromotionResourceSettler
-	StrictRestoration   appi5.TxStrictRestorationSettler
-	MaxHeroColorPolicy  MaxHeroColorPolicyProvider
-	RestorationModifier RestorationModifier
-	RosterProjection    HeroRosterProjectionContent
-	AppearanceStore     HeroAppearanceStore
-	Appearance          characterasset.AppearanceContent
+	Runner                    tx.Runner
+	Timed                     appgeneration.TimedRunner
+	Store                     Store
+	Fencer                    ActorFencer
+	Content                   ContentGate
+	Receipts                  receipt.Store
+	ReceiptRead               receipt.Reader
+	ProgressionStore          ProgressionStore
+	Progression               ProgressionContent
+	Economy                   appi5.TxHeroProgressionDebiter
+	Backpack                  appi5.BackpackReader
+	AcquisitionStore          AcquisitionStore
+	Acquisition               AcquisitionContent
+	MaterialCosts             appi5.TxMaterialCostDebiter
+	PlayerLevel               appi5.TxPlayerLevelReader
+	Capacity                  CapacityAuthorizer
+	Equipment                 EquipmentOperationContent
+	EquipmentResources        appi5.TxHeroEquipmentResourceDebiter
+	Fumo                      FumoOperationContent
+	Promotion                 HeroPromotionContent
+	PromotionResources        appi5.TxHeroPromotionResourceSettler
+	StrictRestoration         appi5.TxStrictRestorationSettler
+	MaxHeroColorPolicy        MaxHeroColorPolicyProvider
+	RestorationModifier       RestorationModifier
+	RosterProjection          HeroRosterProjectionContent
+	AppearanceStore           HeroAppearanceStore
+	Appearance                characterasset.AppearanceContent
+	AppearanceMutationStore   HeroAppearanceMutationStore
+	AppearanceMutationContent HeroAppearanceMutationContent
 }
 
 func profile() tx.Profile {

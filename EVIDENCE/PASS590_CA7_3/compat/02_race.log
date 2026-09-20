@@ -1,0 +1,4 @@
+ok  	gxb.local/backend/v2/internal/application/characterhero	1.712s
+ok  	gxb.local/backend/v2/internal/adapters/stockruntime	1.420s
+ok  	gxb.local/backend/v2/internal/adapters/postgres/characterstore	1.016s
+ok  	gxb.local/backend/v2/internal/foundation/replaycatalog	1.010s

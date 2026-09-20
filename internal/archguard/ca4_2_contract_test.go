@@ -3,6 +3,7 @@ package archguard
 import (
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"testing"
 )
@@ -29,7 +30,13 @@ func TestCA45SharedEquipmentWiresAreProductionRegistered(t *testing.T) {
 			t.Errorf("CA4-5 production composition missing %q", need)
 		}
 	}
-	if !strings.Contains(main, "[]uint16{49, 51, 52, 54, 55, 57, 58, 62, 63, 67, 89, 304}") {
-		t.Error("CA4-5 MID54/MID62 are not in the production Hero registration set")
+	registration := regexp.MustCompile(`for _, mid := range \[]uint16\{([^}]*)\} \{\n\t\tmustRegister\(mid, heroD\)`).FindStringSubmatch(main)
+	if len(registration) != 2 {
+		t.Fatal("could not resolve production Hero registration set")
+	}
+	for _, need := range []string{"54", "62"} {
+		if !regexp.MustCompile(`\b` + need + `\b`).MatchString(registration[1]) {
+			t.Errorf("CA4-5 MID%s is not in the production Hero registration set", need)
+		}
 	}
 }

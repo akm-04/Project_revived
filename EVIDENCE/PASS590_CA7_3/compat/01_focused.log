@@ -1,0 +1,6 @@
+?   	gxb.local/backend/v2/cmd/gxb-api	[no test files]
+ok  	gxb.local/backend/v2/internal/application/characterhero	0.090s
+ok  	gxb.local/backend/v2/internal/adapters/stockruntime	0.405s
+ok  	gxb.local/backend/v2/internal/adapters/postgres/characterstore	0.004s
+ok  	gxb.local/backend/v2/internal/foundation/replaycatalog	0.002s
+ok  	gxb.local/backend/v2/internal/archguard	0.041s

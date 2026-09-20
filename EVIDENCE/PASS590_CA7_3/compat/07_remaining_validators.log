@@ -1,0 +1,76 @@
+==> python3 tools/validate_r0.py
+R0 VALIDATION: PASS (historical R0 guard preserved; cumulative foundation repair accepted at Pass489)
+==> python3 tools/validate_r1a.py
+R1A VALIDATION: PASS
+panic-safe transaction finalization and authoritative-negative semantics verified structurally
+==> python3 tools/validate_r1b.py
+R1B VALIDATION: PASS
+MID1 immutable selection receipt/current hydration/secret retention and shared-vs-exclusive server fence verified structurally
+==> python3 tools/validate_r2a.py
+R2A VALIDATION: PASS
+transactional provider/session/revocation lifecycle, coalesced optional activity, key seam and cross-identity constraints verified structurally
+==> python3 tools/validate_r2b.py
+R2B VALIDATION: PASS
+transaction-aware owner bootstrap, same-tx canonical projection, projection claims and RF-007 ownership closure verified structurally
+==> python3 tools/validate_r2c.py
+R2C VALIDATION: PASS
+caller-owned Grant seam, preflight canonical lock planning, durable creation fence and non-fabricating owner bootstrap verified
+==> python3 tools/validate_r2d.py
+R2D VALIDATION: PASS
+==> python3 tools/validate_r3a.py
+R3A VALIDATION: PASS
+==> python3 tools/validate_r3b.py
+R3B VALIDATION: PASS
+==> python3 tools/validate_r3c.py
+R3C VALIDATION: PASS
+==> python3 tools/validate_r4a.py
+test_exact_archive_is_deterministic_and_matches_checked_in (__main__.ExactArchiveTests.test_exact_archive_is_deterministic_and_matches_checked_in) ... skipped 'exact source archive not supplied'
+test_encoded_item_fixture (__main__.ParserTests.test_encoded_item_fixture) ... ok
+test_generated_lua_table_fixture (__main__.ParserTests.test_generated_lua_table_fixture) ... ok
+test_generated_lua_table_rejects_expression (__main__.ParserTests.test_generated_lua_table_rejects_expression) ... ok
+test_member_hash_mismatch_fails_even_when_outer_hash_matches_test_archive (__main__.ParserTests.test_member_hash_mismatch_fails_even_when_outer_hash_matches_test_archive) ... ok
+test_source_archive_hash_mismatch_fails (__main__.ParserTests.test_source_archive_hash_mismatch_fails) ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 0.002s
+
+OK (skipped=1)
+R4A VALIDATION: PASS
+==> python3 tools/validate_r4b.py
+CONTENT QUERYTEXT: PASS sha256=9709338916a5e4edd9d24f741815a77e0723bb89401574ed87dce9954a722a0c
+==> python3 tools/validate_r4b.py
+CONTENT QUERYTEXT: PASS sha256=9709338916a5e4edd9d24f741815a77e0723bb89401574ed87dce9954a722a0c
+SCHEMA/QUERY OWNERSHIP: PASS
+SQLC GENERATION POLICY: PASS
+R4C STATIC VALIDATION: PASS; executable and real-PG acceptance are separate evidence
+KERNEL QUERYTEXT: PASS sha256=74ad9accee063e77323a2eb4a69df394bdcb331ce88e3d789864ffbc904b7511
+SCHEMA/QUERY OWNERSHIP: PASS
+R4B VALIDATION: PASS
+resource_rows 5556 progression_rows 100 objective_rows 0
+==> python3 tools/validate_r4c.py
+CONTENT QUERYTEXT: PASS sha256=9709338916a5e4edd9d24f741815a77e0723bb89401574ed87dce9954a722a0c
+SCHEMA/QUERY OWNERSHIP: PASS
+SQLC GENERATION POLICY: PASS
+R4C STATIC VALIDATION: PASS; executable and real-PG acceptance are separate evidence
+==> python3 tools/validate_r4d.py
+R4D VALIDATION: FAIL
+ - canonical Go language/toolchain pins drifted
+ - .go-version pin drifted
+==> python3 tools/validate_r4d.py
+R4D VALIDATION: PASS
+immutable revision binding/replay/exact-read/restart guards present; R5 temporal/bootstrap remains intentionally out of scope
+==> python3 tools/validate_r5.py --cumulative
+R5 VALIDATION: PASS (CUMULATIVE MODE)
+static progression/temporal/bootstrap/function/directory/receipt/wire/stack R5 seams present; historical compiler pin remains strict outside cumulative mode; native PostgreSQL/River/W2 remain separate
+==> python3 tools/validate_ca3_3.py --cumulative
+CA3-3 VALIDATION: PASS
+Pet progression persistence/content/I5/service/strict-wire/timing seams and contract-specific regression guards are present; live aggregate acceptance remains separate
+==> python3 tools/validate_ca4_1.py
+CA4-1 VALIDATION: PASS
+shared content/I5/Character contracts are present; migration/ownership sealed; later CA4 family mechanics remain absent
+==> python3 tools/validate_current_candidate.py
+R6 VALIDATION: PASS (CUMULATIVE COMPATIBILITY-SCRATCH MODE)
+static projection/directory/replay/lifecycle/key/single-owner/http/observability R6 seams present; cumulative mode permits later migrations but does not weaken historical R6 pins
+CURRENT CUMULATIVE CANDIDATE VALIDATION: PASS
+historical R6 pins retained; exact forward migration inventory and current release/SBOM version agree; COMPATIBILITY_COPY_ONLY toolchain accommodation explicitly excluded from canonical/native proof
+REMAINING VALIDATORS GREEN (COMPATIBILITY_COPY_ONLY)

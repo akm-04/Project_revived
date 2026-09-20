@@ -10,6 +10,7 @@ func TestEnabledReplayFamiliesAreCompleteAndUnique(t *testing.T) {
 		t.Fatalf("unexpectedly small replay census: %d", len(Enabled))
 	}
 	var saveStory, grant, savedPreset bool
+	ca73 := map[string]bool{"ca7.hero-skin-on": false, "ca7.hero-skin-cancel": false, "ca7.hero-illusion-select": false}
 	wantGuild := map[string]bool{
 		"i6c.guild-create": false, "i6c.guild-dissolve": false, "i6c.guild-apply-or-join": false,
 		"i6c.guild-accept-application": false, "i6c.guild-refuse-application": false, "i6c.guild-leave": false,
@@ -25,6 +26,16 @@ func TestEnabledReplayFamiliesAreCompleteAndUnique(t *testing.T) {
 		}
 		if f.Name == "ca5.saved-preset-replace" {
 			savedPreset = f.IdentityClass == CurrentStateConvergence && !f.Consumptive && f.Residual != "" && f.ReceiptSchema == "gxb.ca5.saved-preset-replace.v1"
+		}
+		if _, ok := ca73[f.Name]; ok {
+			switch f.Name {
+			case "ca7.hero-skin-on":
+				ca73[f.Name] = f.IdentityClass == CurrentStateConvergence && f.Consumptive && f.ReceiptSchema == "gxb.ca7-3.skin-on.v1" && f.Residual != ""
+			case "ca7.hero-skin-cancel":
+				ca73[f.Name] = f.IdentityClass == ParameterStateSet && !f.Consumptive && f.ReceiptSchema == "gxb.ca7-3.skin-cancel.v1"
+			case "ca7.hero-illusion-select":
+				ca73[f.Name] = f.IdentityClass == ParameterStateSet && !f.Consumptive && f.ReceiptSchema == "gxb.ca7-3.illusion-select.v1"
+			}
 		}
 		if _, ok := wantGuild[f.Name]; ok {
 			wantGuild[f.Name] = true
@@ -49,5 +60,10 @@ func TestEnabledReplayFamiliesAreCompleteAndUnique(t *testing.T) {
 	}
 	if !savedPreset {
 		t.Fatal("CA5 saved-preset current-state replay classification missing")
+	}
+	for name, ok := range ca73 {
+		if !ok {
+			t.Fatalf("CA7-3 replay classification missing or drifted for %s", name)
+		}
 	}
 }

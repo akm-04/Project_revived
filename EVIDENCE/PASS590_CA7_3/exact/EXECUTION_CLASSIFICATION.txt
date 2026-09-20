@@ -1,0 +1,1 @@
+Canonical exact execution attempted with pinned Go 1.27.1; environment blocked by unavailable network/toolchain download. Canonical go.mod/go.sum/.go-version remained unchanged.
