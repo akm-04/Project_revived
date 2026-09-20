@@ -39,7 +39,7 @@ func TestCA65MID1RegistrationAndLobby124CleanupAreExact(t *testing.T) {
 	if !strings.Contains(main, "characterstore.HeroBootstrapProjection{Content: contentDB}") {
 		t.Fatal("Hero key49 bootstrap contributor not registered")
 	}
-	if !strings.Contains(main, "characterstore.PetBootstrapProjection{}") {
+	if !strings.Contains(main, "characterstore.PetBootstrapProjection{Content: contentDB}") {
 		t.Fatal("Pet key780 bootstrap contributor changed/missing")
 	}
 

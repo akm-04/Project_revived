@@ -94,7 +94,7 @@ func TestStockRosterViewProjectsSixDerivedFumoLevelsForNormalHeroOnly(t *testing
 	normal.PartnerID = 7
 	super := fixture(character.SuperHero)
 	super.PartnerID = 8
-	body, err := StockRosterView(0, []RosterHeroView{{Hero: normal, FumoLevels: character.HeroFumoSlots{0, 1, 2, 3, 4, 5}}, {Hero: super}})
+	body, err := StockRosterView(0, []RosterHeroView{{Hero: normal, FumoLevels: character.HeroFumoSlots{0, 1, 2, 3, 4, 5}, Appearance: AppearanceView{OwnerStateVersion: normal.StateVersion, CurrentSkinID: normal.CurrentSkinID, IllusionSkinID: normal.IllusionSkinID}}, {Hero: super, Appearance: AppearanceView{OwnerStateVersion: super.StateVersion, CurrentSkinID: super.CurrentSkinID, IllusionSkinID: super.IllusionSkinID}}})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -111,5 +111,46 @@ func TestStockRosterViewProjectsSixDerivedFumoLevelsForNormalHeroOnly(t *testing
 	}
 	if _, ok := rows["8"].(map[string]any)["fumo_levels"]; ok {
 		t.Fatal("SuperHero must not project Normal-Hero fumo_levels")
+	}
+}
+
+func TestStockRosterViewProjectsEmptyLIVEAsStockSafeEmptyStrings(t *testing.T) {
+	h := fixture(character.NormalHero)
+	body, err := StockRosterView(0, []RosterHeroView{{Hero: h, FumoLevels: character.HeroFumoSlots{}, Appearance: AppearanceView{OwnerStateVersion: h.StateVersion, CurrentSkinID: h.CurrentSkinID, IllusionSkinID: h.IllusionSkinID}}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	wire := body["heros"].(map[string]any)["7"].(map[string]any)
+	if wire["unlocked_dynamic_card"] != "" || wire["dynamic_card_state"] != "" {
+		t.Fatalf("empty LIVE wire=%#v/%#v", wire["unlocked_dynamic_card"], wire["dynamic_card_state"])
+	}
+}
+
+func TestStockRosterViewProjectsQualifiedAppearanceWire(t *testing.T) {
+	h := fixture(character.NormalHero)
+	h.CurrentSkinID = 40001001
+	h.IllusionSkinID = -1
+	expires := time.Unix(500, 0).UTC()
+	appearance := AppearanceView{
+		OwnerStateVersion: h.StateVersion,
+		CurrentSkinID:     h.CurrentSkinID,
+		IllusionSkinID:    h.IllusionSkinID,
+		Skins:             []QualifiedSkinView{{ModelID: 40001001}, {ModelID: 40001002, ExpiresAt: &expires}},
+		LIVE:              []QualifiedLIVEView{{ModelID: 40001003, IsShow: true}, {ModelID: 40001004, IsShow: false}},
+	}
+	body, err := StockRosterView(0, []RosterHeroView{{Hero: h, FumoLevels: character.HeroFumoSlots{}, Appearance: appearance}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	wire := body["heros"].(map[string]any)["7"].(map[string]any)
+	if wire["current_skin_id"] != int64(40001001) || wire["illusion_skin_id"] != int64(-1) {
+		t.Fatalf("selectors=%#v/%#v", wire["current_skin_id"], wire["illusion_skin_id"])
+	}
+	skins := wire["skin_ids"].(map[string]any)
+	if skins["40001001"] != int64(-1) || skins["40001002"] != int64(500) {
+		t.Fatalf("skin_ids=%#v", skins)
+	}
+	if wire["unlocked_dynamic_card"] != "40001003|40001004" || wire["dynamic_card_state"] != "1|0" {
+		t.Fatalf("LIVE wire=%#v/%#v", wire["unlocked_dynamic_card"], wire["dynamic_card_state"])
 	}
 }

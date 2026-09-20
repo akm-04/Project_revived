@@ -376,6 +376,42 @@ type HeroPromotionRestorationCatalog struct {
 	Source            string                                 `json:"source"`
 }
 
+type AppearanceSkinDefinition struct {
+	HeroOriginTableID int64 `json:"hero_origin_table_id"`
+	ModelID           int64 `json:"model_id"`
+	SkinSkillID       int64 `json:"skin_skill_id"`
+	SourceSkinID      int64 `json:"source_skin_id"`
+}
+
+type AppearanceSkinAcquisitionItem struct {
+	DurationSeconds   *int64 `json:"duration_seconds"`
+	HeroOriginTableID int64  `json:"hero_origin_table_id"`
+	ItemID            int64  `json:"item_id"`
+	ModelID           int64  `json:"model_id"`
+}
+
+type AppearancePaidLIVEDefinition struct {
+	ActivationItemCount int64 `json:"activation_item_count"`
+	ActivationItemID    int64 `json:"activation_item_id"`
+	CrystalCost         int64 `json:"crystal_cost"`
+	HeroOriginTableID   int64 `json:"hero_origin_table_id"`
+	ModelID             int64 `json:"model_id"`
+}
+
+type AppearancePetHomeStyleDefinition struct {
+	PetOriginTableID int64 `json:"pet_origin_table_id"`
+	StyleItemID      int64 `json:"style_item_id"`
+}
+
+type AppearanceCatalog struct {
+	PaidLIVEDefinitions           []AppearancePaidLIVEDefinition     `json:"paid_live_definitions"`
+	PetHomeStyleDefinitions       []AppearancePetHomeStyleDefinition `json:"pet_home_style_definitions"`
+	QualifiedSkinAcquisitionItems []AppearanceSkinAcquisitionItem    `json:"qualified_skin_acquisition_items"`
+	QualifiedSkinDefinitions      []AppearanceSkinDefinition         `json:"qualified_skin_definitions"`
+	SchemaVersion                 int                                `json:"schema_version"`
+	Source                        string                             `json:"source"`
+}
+
 type PracticeMethod struct {
 	MethodID     int64 `json:"method_id"`
 	CurrencyType int64 `json:"currency_type"`
@@ -452,6 +488,7 @@ type Catalog struct {
 	HeroFumo                 HeroFumoCatalog
 	HeroPromotionRestoration HeroPromotionRestorationCatalog
 	Practice                 PracticeCatalog
+	Appearance               AppearanceCatalog
 }
 
 func GeneratedFile(name string) ([]byte, error) {
@@ -542,6 +579,10 @@ func Load() (*Catalog, error) {
 	if err := decodeAndVerify("practice_catalog.json", manifest.ArtifactSHA256s, &practice); err != nil {
 		return nil, err
 	}
+	var appearance AppearanceCatalog
+	if err := decodeAndVerify("appearance_catalog.json", manifest.ArtifactSHA256s, &appearance); err != nil {
+		return nil, err
+	}
 
 	catalog := &Catalog{
 		Manifest:                 manifest,
@@ -561,6 +602,7 @@ func Load() (*Catalog, error) {
 		HeroFumo:                 heroFumo,
 		HeroPromotionRestoration: heroPromotionRestoration,
 		Practice:                 practice,
+		Appearance:               appearance,
 	}
 	if err := validateCatalog(catalog); err != nil {
 		return nil, err
@@ -606,11 +648,11 @@ func validateManifest(raw []byte, manifest *Manifest) error {
 	if _, err := hex.DecodeString(manifest.RevisionID); err != nil || strings.ToLower(manifest.RevisionID) != manifest.RevisionID {
 		return fmt.Errorf("builtin content: revision id must be lowercase SHA-256 hex")
 	}
-	if len(manifest.Sources) != 47 {
-		return fmt.Errorf("builtin content: expected 47 source records, got %d", len(manifest.Sources))
+	if len(manifest.Sources) != 58 {
+		return fmt.Errorf("builtin content: expected 58 source records, got %d", len(manifest.Sources))
 	}
-	if len(manifest.ArtifactSHA256s) != 16 {
-		return fmt.Errorf("builtin content: expected 16 hashed payload artifacts, got %d", len(manifest.ArtifactSHA256s))
+	if len(manifest.ArtifactSHA256s) != 17 {
+		return fmt.Errorf("builtin content: expected 17 hashed payload artifacts, got %d", len(manifest.ArtifactSHA256s))
 	}
 
 	var basis map[string]any
@@ -630,9 +672,60 @@ func validateManifest(raw []byte, manifest *Manifest) error {
 }
 
 func validateCatalog(c *Catalog) error {
-	if c.Resources.SchemaVersion != SchemaVersion || c.PlayerProgression.SchemaVersion != SchemaVersion || c.FunctionGates.SchemaVersion != SchemaVersion || c.Objectives.SchemaVersion != SchemaVersion || c.HeroCore.SchemaVersion != SchemaVersion || c.PetCore.SchemaVersion != SchemaVersion || c.PetAcquisition.SchemaVersion != SchemaVersion || c.PetProgression.SchemaVersion != SchemaVersion || c.EquipmentPrimitives.SchemaVersion != SchemaVersion || c.HeroEquipment.SchemaVersion != SchemaVersion || c.SuperEquipment.SchemaVersion != SchemaVersion || c.PetEquipment.SchemaVersion != SchemaVersion || c.PetPromotionRestoration.SchemaVersion != SchemaVersion || c.HeroFumo.SchemaVersion != SchemaVersion || c.HeroPromotionRestoration.SchemaVersion != SchemaVersion || c.Practice.SchemaVersion != SchemaVersion {
+	if c.Resources.SchemaVersion != SchemaVersion || c.PlayerProgression.SchemaVersion != SchemaVersion || c.FunctionGates.SchemaVersion != SchemaVersion || c.Objectives.SchemaVersion != SchemaVersion || c.HeroCore.SchemaVersion != SchemaVersion || c.PetCore.SchemaVersion != SchemaVersion || c.PetAcquisition.SchemaVersion != SchemaVersion || c.PetProgression.SchemaVersion != SchemaVersion || c.EquipmentPrimitives.SchemaVersion != SchemaVersion || c.HeroEquipment.SchemaVersion != SchemaVersion || c.SuperEquipment.SchemaVersion != SchemaVersion || c.PetEquipment.SchemaVersion != SchemaVersion || c.PetPromotionRestoration.SchemaVersion != SchemaVersion || c.HeroFumo.SchemaVersion != SchemaVersion || c.HeroPromotionRestoration.SchemaVersion != SchemaVersion || c.Practice.SchemaVersion != SchemaVersion || c.Appearance.SchemaVersion != SchemaVersion {
 		return errors.New("builtin content: payload schema version mismatch")
 	}
+	if c.Appearance.Source != "CA7 exact src_64 Character appearance content facts" || len(c.Appearance.QualifiedSkinDefinitions) != 262 || len(c.Appearance.QualifiedSkinAcquisitionItems) != 264 || len(c.Appearance.PaidLIVEDefinitions) != 12 || len(c.Appearance.PetHomeStyleDefinitions) != 4 {
+		return errors.New("builtin content: CA7 appearance source/count drift")
+	}
+	lastAppearanceModel := int64(0)
+	skillBearingAppearance := 0
+	appearanceModels := make(map[int64]int64, 262)
+	for _, row := range c.Appearance.QualifiedSkinDefinitions {
+		if row.ModelID <= lastAppearanceModel || row.HeroOriginTableID <= 0 || row.SourceSkinID <= 0 || row.SkinSkillID < 0 {
+			return errors.New("builtin content: invalid/sort-drift CA7 skin definition")
+		}
+		lastAppearanceModel = row.ModelID
+		appearanceModels[row.ModelID] = row.HeroOriginTableID
+		if row.SkinSkillID > 0 {
+			skillBearingAppearance++
+		}
+	}
+	if skillBearingAppearance != 225 {
+		return errors.New("builtin content: CA7 skin-skill count drift")
+	}
+	lastAppearanceItem := int64(0)
+	timedAppearanceItems := 0
+	for _, row := range c.Appearance.QualifiedSkinAcquisitionItems {
+		if row.ItemID <= lastAppearanceItem || row.ModelID <= 0 || row.HeroOriginTableID <= 0 || appearanceModels[row.ModelID] != row.HeroOriginTableID {
+			return errors.New("builtin content: invalid/sort-drift CA7 skin acquisition item")
+		}
+		lastAppearanceItem = row.ItemID
+		if row.DurationSeconds != nil {
+			if *row.DurationSeconds != 259200 {
+				return errors.New("builtin content: CA7 timed skin duration drift")
+			}
+			timedAppearanceItems++
+		}
+	}
+	if timedAppearanceItems != 2 {
+		return errors.New("builtin content: CA7 timed skin item count drift")
+	}
+	lastLIVEModel := int64(0)
+	for _, row := range c.Appearance.PaidLIVEDefinitions {
+		if row.ModelID <= lastLIVEModel || row.HeroOriginTableID <= 0 || row.CrystalCost <= 0 || row.ActivationItemID != 50005171 || row.ActivationItemCount <= 0 {
+			return errors.New("builtin content: invalid/sort-drift CA7 paid LIVE definition")
+		}
+		lastLIVEModel = row.ModelID
+	}
+	lastPetStyle := int64(0)
+	for _, row := range c.Appearance.PetHomeStyleDefinitions {
+		if row.StyleItemID <= lastPetStyle || row.PetOriginTableID <= 0 {
+			return errors.New("builtin content: invalid/sort-drift CA7 Pet-style definition")
+		}
+		lastPetStyle = row.StyleItemID
+	}
+
 	if c.PlayerProgression.Source != "data/tables/player.lua" {
 		return fmt.Errorf("builtin content: unexpected progression source %q", c.PlayerProgression.Source)
 	}
@@ -1181,7 +1274,7 @@ func validateCatalog(c *Catalog) error {
 
 	caps := append([]string(nil), c.Manifest.EnabledCapabilities...)
 	sort.Strings(caps)
-	wantCaps := []string{"EQUIPMENT_PRIMITIVES_CA4", "FUNCTION_LEVEL_ELIGIBILITY_R5", "HERO_CORE_CA2", "HERO_EQUIPMENT_CA4_2", "HERO_FUMO_CA4_3A", "HERO_PROGRESSION_CA2", "HERO_PROMOTION_RESTORATION_CA4_3B", "PET_ACQUISITION_CA3", "PET_CORE_CA3", "PET_EQUIPMENT_CA4_4A", "PET_PROGRESSION_CA3", "PET_PROMOTION_RESTORATION_CA4_4B", "PLAYER_EXP_R5", "PRACTICE_CA6", "QUALIFIED_ORDINARY_STACK_ITEM_DEFINITIONS", "SCALAR_CRYSTAL", "SCALAR_MANA", "SUPER_EQUIPMENT_CA4_5", "TEMPORAL_ENERGY_R5", "TEMPORAL_SKILL_POINT_R5", "TEMPORAL_SPIRIT_ENERGY_R5"}
+	wantCaps := []string{"CHARACTER_APPEARANCE_CA7", "EQUIPMENT_PRIMITIVES_CA4", "FUNCTION_LEVEL_ELIGIBILITY_R5", "HERO_CORE_CA2", "HERO_EQUIPMENT_CA4_2", "HERO_FUMO_CA4_3A", "HERO_PROGRESSION_CA2", "HERO_PROMOTION_RESTORATION_CA4_3B", "PET_ACQUISITION_CA3", "PET_CORE_CA3", "PET_EQUIPMENT_CA4_4A", "PET_PROGRESSION_CA3", "PET_PROMOTION_RESTORATION_CA4_4B", "PLAYER_EXP_R5", "PRACTICE_CA6", "QUALIFIED_ORDINARY_STACK_ITEM_DEFINITIONS", "SCALAR_CRYSTAL", "SCALAR_MANA", "SUPER_EQUIPMENT_CA4_5", "TEMPORAL_ENERGY_R5", "TEMPORAL_SKILL_POINT_R5", "TEMPORAL_SPIRIT_ENERGY_R5"}
 	if len(caps) != len(wantCaps) {
 		return fmt.Errorf("builtin content: enabled capability count drift: %v", caps)
 	}

@@ -31,8 +31,8 @@ WHERE player_id=$1 AND pet_id=$2 AND state_version=$5;
 -- name: InsertPlayerPet :execrows
 INSERT INTO player_pets(
   player_id,pet_id,table_id,origin_table_id,star,level,exp,color,birthday,is_show,
-  skill_1,skill_2,skill_3,skill_4,skill_5,equip_1,equip_2,equip_3,fumo_1,fumo_2,fumo_3,creation_content_revision,state_version,created_at,updated_at
-) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25);
+  skill_1,skill_2,skill_3,skill_4,skill_5,equip_1,equip_2,equip_3,fumo_1,fumo_2,fumo_3,active_style,creation_content_revision,state_version,created_at,updated_at
+) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26);
 
 -- name: ListPlayerPets :one
 SELECT COALESCE(jsonb_agg(jsonb_build_object(
@@ -40,24 +40,24 @@ SELECT COALESCE(jsonb_agg(jsonb_build_object(
   'star',star,'level',level,'exp',exp,'color',color,
   'skill_1',skill_1,'skill_2',skill_2,'skill_3',skill_3,'skill_4',skill_4,'skill_5',skill_5,
   'birthday',birthday,'is_show',is_show,'equip_1',equip_1,'equip_2',equip_2,'equip_3',equip_3,'fumo_1',fumo_1,'fumo_2',fumo_2,'fumo_3',fumo_3,
-  'practice_str',practice_str,'practice_int',practice_int,'practice_agi',practice_agi,'creation_content_revision',creation_content_revision,'state_version',state_version,
+  'practice_str',practice_str,'practice_int',practice_int,'practice_agi',practice_agi,'active_style',active_style,'creation_content_revision',creation_content_revision,'state_version',state_version,
   'created_at',created_at,'updated_at',updated_at
 ) ORDER BY pet_id),'[]'::jsonb)::text
 FROM player_pets WHERE player_id=$1;
 
 -- name: ReadPetByOrigin :one
 SELECT player_id,pet_id,table_id,origin_table_id,star,level,exp,color,equip_1,equip_2,equip_3,fumo_1,fumo_2,fumo_3,skill_1,skill_2,skill_3,skill_4,skill_5,birthday,is_show,
-       practice_str,practice_int,practice_agi,creation_content_revision,state_version,created_at,updated_at
+       practice_str,practice_int,practice_agi,active_style,creation_content_revision,state_version,created_at,updated_at
 FROM player_pets WHERE player_id=$1 AND origin_table_id=$2;
 
 -- name: ReadPetByID :one
 SELECT player_id,pet_id,table_id,origin_table_id,star,level,exp,color,equip_1,equip_2,equip_3,fumo_1,fumo_2,fumo_3,skill_1,skill_2,skill_3,skill_4,skill_5,birthday,is_show,
-       practice_str,practice_int,practice_agi,creation_content_revision,state_version,created_at,updated_at
+       practice_str,practice_int,practice_agi,active_style,creation_content_revision,state_version,created_at,updated_at
 FROM player_pets WHERE player_id=$1 AND pet_id=$2;
 
 -- name: LockPetByID :one
 SELECT player_id,pet_id,table_id,origin_table_id,star,level,exp,color,equip_1,equip_2,equip_3,fumo_1,fumo_2,fumo_3,skill_1,skill_2,skill_3,skill_4,skill_5,birthday,is_show,
-       practice_str,practice_int,practice_agi,creation_content_revision,state_version,created_at,updated_at
+       practice_str,practice_int,practice_agi,active_style,creation_content_revision,state_version,created_at,updated_at
 FROM player_pets WHERE player_id=$1 AND pet_id=$2 FOR UPDATE;
 
 
@@ -71,3 +71,28 @@ WHERE player_id=$1 AND pet_id=$2 AND state_version=$19;
 UPDATE player_pets
 SET practice_str=$3,practice_int=$4,practice_agi=$5,state_version=state_version+1,updated_at=$6
 WHERE player_id=$1 AND pet_id=$2 AND state_version=$7;
+
+-- CA7-2 Pet appearance persistence primitives. Child writes are paired with
+-- the owning Pet state-version CAS in the same caller-owned transaction.
+
+-- name: SavePetActiveStyle :execrows
+UPDATE player_pets
+SET active_style=$3,state_version=state_version+1,updated_at=$4
+WHERE player_id=$1 AND pet_id=$2 AND state_version=$5;
+
+-- name: TouchPetAppearanceVersion :execrows
+UPDATE player_pets
+SET state_version=state_version+1,updated_at=$3
+WHERE player_id=$1 AND pet_id=$2 AND state_version=$4;
+
+-- name: ListPetStyleEntitlements :one
+SELECT COALESCE(jsonb_agg(jsonb_build_object(
+  'style_item_id',style_item_id
+) ORDER BY style_item_id),'[]'::jsonb)::text
+FROM player_pet_style_entitlements
+WHERE player_id=$1 AND pet_id=$2;
+
+-- name: InsertPetStyleEntitlement :execrows
+INSERT INTO player_pet_style_entitlements(player_id,pet_id,style_item_id)
+VALUES ($1,$2,$3)
+ON CONFLICT (player_id,pet_id,style_item_id) DO NOTHING;

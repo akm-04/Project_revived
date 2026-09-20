@@ -21,14 +21,20 @@ from pathlib import Path
 from typing import Any, Iterable
 
 SCHEMA_VERSION = 1
-COMPILER_VERSION = "ca6-2-practice-foundation"
-PARSER_VERSION = "lua-generated-v13-practice"
+COMPILER_VERSION = "ca7-2-appearance-foundation"
+PARSER_VERSION = "lua-generated-v14-appearance"
 EXPECTED_SOURCE_ARCHIVE_SHA256 = "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
 SOURCE_PREFIX = "app-assets/output/assets/src_64/"
 
 SOURCE_MANIFEST = [
     ("app/common/tables/ItemTable.lua", "1f846972f29a55ee2dbb90f2cb9b0124eaeaa90646c3c66644ab66e231c37f00", "ITEM_BEHAVIORAL_PARSER_AUTHORITY"),
     ("data/tables/item.lua", "59b668c28a372543da0c36d7a8d84291cc5b93fa0d92b7cc389a645e96e7b7cc", "ITEM_DATA_AUTHORITY_ENCODED_TABLE"),
+    ("app/common/tables/SkinSkillTable.lua", "5ce8af1fddb22a503c779183495f84743a8ceb8305cb891ef556a88b6a7988e5", "CA7_SKIN_SKILL_ACCESSOR_AUTHORITY"),
+    ("data/tables/skin_skill.lua", "78e62be9bc8e08833b1e886b260cf1dee4c7c8b418a8ba40badde8b6ffaebe46", "CA7_SKIN_MODEL_AND_COMBAT_SKILL_DATA"),
+    ("app/common/tables/SkinDynamicTable.lua", "b41bcc1fd5ded9fc26463ddc8080b1dd1920bf0bd0ba387c1e2dc9b23090bf71", "CA7_LIVE_ACCESSOR_AUTHORITY"),
+    ("data/tables/skin_dynamic.lua", "defe867b01dc6cc0a1eb8dd5ce8c259bc76c2b4aa15427199b040d30fe4fb920", "CA7_LIVE_COST_AND_HERO_DATA"),
+    ("app/common/tables/ModelTable.lua", "fb9bfb7d9beb4b50eb7c978abfba60cc4ff7644a48de08f950af2f6e2e3d6038", "CA7_DYNAMIC_TYPE_ACCESSOR_AUTHORITY"),
+    ("data/tables/model.lua", "616e532ec965be4de96b9b2feeb364aecc9ae91506ce0d9bbfb17156f0769ea8", "CA7_DYNAMIC_TYPE_DATA_AUTHORITY"),
     ("app/model/Backpack.lua", "953999f81fc43ecd00e587d884c88b6a1ba066e35ff75a20dd698b6cb950af7a", "ITEM_CONSUMER_BEHAVIOR"),
     ("app/model/SelfPlayer.lua", "163d5893c9522ada412c2b9c4748a80757660fccdf03c8f72cb6edf0838b8eb4", "TEMPORAL_AND_SCALAR_CONSUMER_BEHAVIOR"),
     ("app/common/tables/PlayerTable.lua", "9feedb4360090c1c7d5e20853ca2cdbdd85670cc276c3b56a2bb7a4a429b569f", "PLAYER_PROGRESSION_ACCESSOR_AUTHORITY"),
@@ -64,6 +70,11 @@ SOURCE_MANIFEST = [
     ("app/windows/PetMainWindow.lua", "fcebe7e4fa742d8a176c8da10502c410e5031720023369bebed01c7da3a99832", "PET_PROGRESSION_ACTIVE_UI_SEMANTICS"),
     ("app/windows/PetAddExpWindow.lua", "1b2a56e20ff47a9c94245a5d84466c13428815342f29d2959286e3fd549fb5a3", "PET_EXP_MANUAL_UI_SEMANTICS"),
     ("app/windows/HeroMainWindow.lua", "473b72ec14a81d01d6dbdaa19f92c3d78900f40ca34fa5c8cf46585b76d65414", "HERO_PROMOTION_ACTIVE_UI_SEMANTICS"),
+    ("app/windows/SkinSkillSelectWindow.lua", "a6ac7ecb7da0f441b7babb135c5e68e46ece4b2f4bbb60ce77b0ab7a4af614cd", "CA7_SKIN_SELECT_UI_SEMANTICS"),
+    ("app/windows/BackpackWindow.lua", "48b18493fed4186541fc989a8ef60d6338d444c4e8a0fc986903a57e52ff19c1", "CA7_SKIN_AND_PET_ITEM_UI_SEMANTICS"),
+    ("app/windows/PetEquipInfoWindow.lua", "ff5297ed3fe600451df67fdc8e0b52be77cb30e5411beb72c42a60a45571a938", "CA7_PET_STYLE_UI_SEMANTICS"),
+    ("app/common/network/mid.lua", "026a20b29d97624979777a68c64c749254031604057ff42aa8f8254c3e35b5af", "CA7_WIRE_MID_IDENTITY"),
+    ("lib/battle/BaseFighter.lua", "b1936373a0404049f100de1ab639661d245c9f2a317ae6fbd443b71b45d538dc", "CA7_COMBAT_SKIN_SKILL_AXIS"),
     ("data/tables/practice_type.lua", "74b94f440898a24522fb1c91f61528bab91f3724300f2e0534e586e8f4d2f14d", "PRACTICE_METHOD_SOURCE_FACTS"),
     ("app/common/tables/PracticeTypeTable.lua", "4db929ca65f9b841a2a82cad173dd27fc74d5a3507a1167f3549094e526b71ce", "PRACTICE_METHOD_ACCESSOR_BOUNDARY"),
     ("data/tables/practice_lock.lua", "f6ee8803f96d38f5da434425be409ba4a660c61d3794e2091ad794e4ce3bdb13", "PRACTICE_LOCK_SOURCE_FACTS"),
@@ -98,6 +109,7 @@ ENABLED_CAPABILITIES = [
     "PET_PROMOTION_RESTORATION_CA4_4B",
     "SUPER_EQUIPMENT_CA4_5",
     "PRACTICE_CA6",
+    "CHARACTER_APPEARANCE_CA7",
 ]
 
 
@@ -429,6 +441,9 @@ def build_artifacts(blobs: dict[str, SourceBlob], archive_sha256: str) -> dict[s
     items = parse_encoded_item_table(blobs["data/tables/item.lua"].data)
     players = parse_generated_lua_table(blobs["data/tables/player.lua"].data)
     misc = parse_generated_lua_table(blobs["data/tables/misc.lua"].data)
+    skin_skill_rows = parse_generated_lua_table(blobs["data/tables/skin_skill.lua"].data)
+    skin_dynamic_rows = parse_generated_lua_table(blobs["data/tables/skin_dynamic.lua"].data)
+    model_rows = parse_generated_lua_table(blobs["data/tables/model.lua"].data)
     functions = parse_generated_lua_table(blobs["data/tables/function.lua"].data)
     practice_type_rows = parse_generated_lua_table(blobs["data/tables/practice_type.lua"].data)
     practice_lock_rows = parse_generated_lua_table(blobs["data/tables/practice_lock.lua"].data)
@@ -447,6 +462,37 @@ def build_artifacts(blobs: dict[str, SourceBlob], archive_sha256: str) -> dict[s
     for needle in ("stack_exceed_mail", "partner_id", "function var_0_2.stack", "function var_0_2.type"):
         if needle not in item_behavior:
             raise CompileError(f"ItemTable.lua behavioral guard missing {needle!r}")
+    for needle in ("skinModel", "skinPartner", "skinLastTime", "stylePet"):
+        if needle not in item_behavior:
+            raise CompileError(f"ItemTable.lua CA7 appearance guard missing {needle!r}")
+    skin_skill_behavior = blobs["app/common/tables/SkinSkillTable.lua"].data.decode("utf-8-sig")
+    for needle in ("getHeroID", "getSkillID", "getModelID"):
+        if needle not in skin_skill_behavior:
+            raise CompileError(f"SkinSkillTable.lua CA7 guard missing {needle!r}")
+    skin_dynamic_behavior = blobs["app/common/tables/SkinDynamicTable.lua"].data.decode("utf-8-sig")
+    for needle in ("partnerID", "cost", "num"):
+        if needle not in skin_dynamic_behavior:
+            raise CompileError(f"SkinDynamicTable.lua CA7 guard missing {needle!r}")
+    model_behavior = blobs["app/common/tables/ModelTable.lua"].data.decode("utf-8-sig")
+    if "dynamicType" not in model_behavior:
+        raise CompileError("ModelTable.lua CA7 dynamicType guard missing")
+    mid_behavior = blobs["app/common/network/mid.lua"].data.decode("utf-8-sig")
+    for needle in ("SKIN_ON = 60", "SKIN_CANCEL = 61", "UNLOCK_DYNAMIC_CARD = 68", "SHOW_DYNAMIC_CARD = 69", "GET_PET_STYLE_FORM_ITEM = 1893", "USE_PET_STYLE = 1894", "CANCEL_PET_STYLE = 1895", "USE_ILLUSION_SKIN_ITEM = 2979"):
+        if needle not in mid_behavior:
+            raise CompileError(f"mid.lua CA7 wire guard missing {needle!r}")
+    base_fighter = blobs["lib/battle/BaseFighter.lua"].data.decode("utf-8-sig")
+    if "getSkillModelID" not in base_fighter or "getOldModelID" not in base_fighter:
+        raise CompileError("BaseFighter.lua CA7 ordinary-axis combat guard missing")
+    skin_select_behavior = blobs["app/windows/SkinSkillSelectWindow.lua"].data.decode("utf-8-sig")
+    backpack_window_behavior = blobs["app/windows/BackpackWindow.lua"].data.decode("utf-8-sig")
+    pet_style_behavior = blobs["app/windows/PetEquipInfoWindow.lua"].data.decode("utf-8-sig")
+    if "xyd.mid.SKIN_ON" not in skin_select_behavior or "xyd.mid.SKIN_ON" not in backpack_window_behavior:
+        raise CompileError("CA7 MID60 caller guards missing")
+    if "xyd.mid.GET_PET_STYLE_FORM_ITEM" not in backpack_window_behavior:
+        raise CompileError("BackpackWindow.lua CA7 Pet-style acquisition guard missing")
+    for needle in ("xyd.mid.GET_PET_STYLE_FORM_ITEM", "xyd.mid.USE_PET_STYLE", "xyd.mid.CANCEL_PET_STYLE"):
+        if needle not in pet_style_behavior:
+            raise CompileError(f"PetEquipInfoWindow.lua CA7 style guard missing {needle!r}")
     player_behavior = blobs["app/common/tables/PlayerTable.lua"].data.decode("utf-8-sig")
     for needle in ("maxEnergy", "totalExp", "awardEnergy", "heroMaxLev"):
         if needle not in player_behavior:
@@ -1517,6 +1563,125 @@ def build_artifacts(blobs: dict[str, SourceBlob], archive_sha256: str) -> dict[s
     if len(pet_thresholds) != len(pet_templates)*3:
         raise CompileError("Pet Practice threshold count drifted")
 
+    # CA7-2 Character Appearance immutable catalog. Compile only source-qualified
+    # content facts here. Temporal equality, stale-selector fallback and first-LIVE
+    # show state remain implementation policy, not content facts.
+    hero_origin_by_table = {int(x["table_id"]): int(x["origin_table_id"]) for x in templates}
+    pet_origin_by_table = {int(x["table_id"]): int(x["origin_table_id"]) for x in pet_templates}
+
+    appearance_skins=[]
+    skin_by_model={}
+    for idx,row in enumerate(skin_skill_rows,1):
+        model_id=parse_int(row.get("model",""),label=f"skin_skill[{idx}].model",allow_zero=False,allow_negative=False)
+        raw_hero_id=parse_int(row.get("hero",""),label=f"skin_skill[{idx}].hero",allow_zero=False,allow_negative=False)
+        origin=hero_origin_by_table.get(raw_hero_id)
+        if origin is None:
+            raise CompileError(f"skin_skill[{idx}] hero {raw_hero_id} has no qualified Hero origin")
+        skill_id=parse_int(row.get("skill","0") or "0",label=f"skin_skill[{idx}].skill",allow_negative=False)
+        source_skin_id=parse_int(row.get("skin_id",""),label=f"skin_skill[{idx}].skin_id",allow_zero=False,allow_negative=False)
+        if model_id in skin_by_model:
+            raise CompileError(f"duplicate CA7 skin model {model_id}")
+        out={"hero_origin_table_id":origin,"model_id":model_id,"skin_skill_id":skill_id,"source_skin_id":source_skin_id}
+        appearance_skins.append(out); skin_by_model[model_id]=out
+    appearance_skins.sort(key=lambda x:x["model_id"])
+    if len(appearance_skins)!=262:
+        raise CompileError(f"CA7 qualified skin model count drifted: {len(appearance_skins)}")
+    if sum(1 for x in appearance_skins if x["skin_skill_id"]>0)!=225:
+        raise CompileError("CA7 skill-bearing skin count drifted")
+
+    appearance_skin_items=[]
+    unqualified_skin_items=[]
+    skin_item_candidates=0
+    for row in items:
+        item_id=parse_int(row.get("id",""),label="item.id",allow_zero=False,allow_negative=False)
+        model_id=parse_int(row.get("skin_model","0") or "0",label=f"item[{item_id}].skin_model",allow_negative=False)
+        raw_partner=parse_int(row.get("skin_partner","0") or "0",label=f"item[{item_id}].skin_partner",allow_negative=False)
+        if model_id<=0 or raw_partner<=0:
+            continue
+        skin_item_candidates += 1
+        origin=hero_origin_by_table.get(raw_partner)
+        qualified=skin_by_model.get(model_id)
+        if origin is None or qualified is None or qualified["hero_origin_table_id"] != origin:
+            unqualified_skin_items.append({"hero_origin_table_id":origin or raw_partner,"item_id":item_id,"model_id":model_id})
+            continue
+        duration=parse_int(row.get("skin_last_time","0") or "0",label=f"item[{item_id}].skin_last_time",allow_negative=False)
+        appearance_skin_items.append({"duration_seconds":duration or None,"hero_origin_table_id":origin,"item_id":item_id,"model_id":model_id})
+    appearance_skin_items.sort(key=lambda x:x["item_id"])
+    if skin_item_candidates!=265 or len(appearance_skin_items)!=264:
+        raise CompileError(f"CA7 skin item count drifted candidates={skin_item_candidates} qualified={len(appearance_skin_items)}")
+    if unqualified_skin_items != [{"hero_origin_table_id":10001065,"item_id":50005191,"model_id":40001065}]:
+        raise CompileError(f"CA7 unqualified skin anomalies drifted: {unqualified_skin_items!r}")
+    timed=[x for x in appearance_skin_items if x["duration_seconds"] is not None]
+    if timed != [
+        {"duration_seconds":259200,"hero_origin_table_id":10001006,"item_id":50001807,"model_id":40002006},
+        {"duration_seconds":259200,"hero_origin_table_id":10001049,"item_id":50009163,"model_id":40002049},
+    ]:
+        raise CompileError(f"CA7 timed-trial definitions drifted: {timed!r}")
+
+    dynamic_type_by_model={}
+    for idx,row in enumerate(model_rows,1):
+        model_id=parse_int(row.get("id",""),label=f"model[{idx}].id",allow_zero=False,allow_negative=False)
+        dynamic_type_by_model[model_id]=parse_int(row.get("is_dynamic","0") or "0",label=f"model[{model_id}].is_dynamic",allow_negative=False)
+    live_activation_item_id=misc_int("dymisic_item")
+    if live_activation_item_id!=50005171 or live_activation_item_id not in items_by_id:
+        raise CompileError(f"CA7 LIVE activation item drifted: {live_activation_item_id}")
+    appearance_live=[]
+    automatic_type1=0
+    for idx,row in enumerate(skin_dynamic_rows,1):
+        model_id=parse_int(row.get("model_id",""),label=f"skin_dynamic[{idx}].model_id",allow_zero=False,allow_negative=False)
+        dynamic_type=dynamic_type_by_model.get(model_id)
+        if dynamic_type is None:
+            raise CompileError(f"skin_dynamic[{idx}] model {model_id} missing model row")
+        if dynamic_type==1:
+            automatic_type1 += 1
+            continue
+        if dynamic_type!=2:
+            raise CompileError(f"skin_dynamic[{idx}] unexpected dynamic type {dynamic_type} for model {model_id}")
+        raw_partner=parse_int(row.get("partner_id",""),label=f"skin_dynamic[{idx}].partner_id",allow_zero=False,allow_negative=False)
+        origin=hero_origin_by_table.get(raw_partner)
+        if origin is None:
+            raise CompileError(f"skin_dynamic[{idx}] partner {raw_partner} has no qualified Hero origin")
+        appearance_live.append({
+            "activation_item_count":parse_int(row.get("num",""),label=f"skin_dynamic[{idx}].num",allow_zero=False,allow_negative=False),
+            "activation_item_id":live_activation_item_id,
+            "crystal_cost":parse_int(row.get("diamond",""),label=f"skin_dynamic[{idx}].diamond",allow_zero=False,allow_negative=False),
+            "hero_origin_table_id":origin,
+            "model_id":model_id,
+        })
+    appearance_live.sort(key=lambda x:x["model_id"])
+    if automatic_type1!=21 or len(appearance_live)!=12:
+        raise CompileError(f"CA7 dynamic-card counts drifted type1={automatic_type1} paid_type2={len(appearance_live)}")
+    if [(x["model_id"],x["hero_origin_table_id"]) for x in appearance_live if x["model_id"] in (11001074,11001079)] != [(11001074,10001074),(11001079,10001079)]:
+        raise CompileError("CA7 awakened LIVE origin normalization drifted")
+
+    appearance_pet_styles=[]
+    for row in items:
+        item_id=parse_int(row.get("id",""),label="item.id",allow_zero=False,allow_negative=False)
+        raw_pet=parse_int(row.get("style_pet","0") or "0",label=f"item[{item_id}].style_pet",allow_negative=False)
+        if raw_pet<=0:
+            continue
+        origin=pet_origin_by_table.get(raw_pet)
+        if origin is None:
+            raise CompileError(f"item[{item_id}] Pet style target {raw_pet} has no qualified Pet origin")
+        appearance_pet_styles.append({"pet_origin_table_id":origin,"style_item_id":item_id})
+    appearance_pet_styles.sort(key=lambda x:x["style_item_id"])
+    if appearance_pet_styles != [
+        {"pet_origin_table_id":10120001,"style_item_id":50001374},
+        {"pet_origin_table_id":10030001,"style_item_id":50001376},
+        {"pet_origin_table_id":10040001,"style_item_id":50001402},
+        {"pet_origin_table_id":10190001,"style_item_id":50001598},
+    ]:
+        raise CompileError(f"CA7 Pet-style definitions drifted: {appearance_pet_styles!r}")
+
+    appearance_artifact={
+        "paid_live_definitions":appearance_live,
+        "pet_home_style_definitions":appearance_pet_styles,
+        "qualified_skin_acquisition_items":appearance_skin_items,
+        "qualified_skin_definitions":appearance_skins,
+        "schema_version":SCHEMA_VERSION,
+        "source":"CA7 exact src_64 Character appearance content facts",
+    }
+
     function14=next((x for x in function_gates if x["function_id"]==14),None)
     if function14 is None or function14["gate_kind"]!="PURE_LEVEL" or function14["required_level"]!=90:
         raise CompileError(f"Practice function 14 gate drifted: {function14!r}")
@@ -1581,6 +1746,7 @@ def build_artifacts(blobs: dict[str, SourceBlob], archive_sha256: str) -> dict[s
         "super_equipment_catalog.json": super_equipment_artifact,
         "player_progression.json": player_artifact,
         "practice_catalog.json": practice_artifact,
+        "appearance_catalog.json": appearance_artifact,
         "resource_catalog.json": resource_artifact,
     }
     artifact_bytes = {name: canonical_json_bytes(value) for name, value in artifacts.items()}
@@ -1641,6 +1807,13 @@ def build_artifacts(blobs: dict[str, SourceBlob], archive_sha256: str) -> dict[s
         "practice_vip_rows": len(vip_bless),
         "practice_hero_thresholds": len(hero_thresholds),
         "practice_pet_thresholds": len(pet_thresholds),
+        "appearance_skin_models": len(appearance_skins),
+        "appearance_skin_skill_models": sum(1 for x in appearance_skins if x["skin_skill_id"] > 0),
+        "appearance_skin_items": len(appearance_skin_items),
+        "appearance_timed_skin_items": len(timed),
+        "appearance_paid_live": len(appearance_live),
+        "appearance_automatic_dynamic_type1": automatic_type1,
+        "appearance_pet_styles": len(appearance_pet_styles),
     }
     dependencies = {
         "r5_enabled": ["PLAYER_EXP", "TEMPORAL_ENERGY", "TEMPORAL_SPIRIT_ENERGY", "TEMPORAL_SKILL_POINT", "FUNCTION_LEVEL_ELIGIBILITY"],

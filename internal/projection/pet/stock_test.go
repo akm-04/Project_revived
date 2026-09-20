@@ -1,6 +1,7 @@
 package pet
 
 import (
+	"reflect"
 	"testing"
 	"time"
 
@@ -58,5 +59,26 @@ func TestStockRosterPreservesPetIDOrderAndShape(t *testing.T) {
 	}
 	if rows[0].(map[string]any)["pet_id"] != int64(3) || rows[1].(map[string]any)["pet_id"] != int64(4) {
 		t.Fatalf("pet order=%#v", rows)
+	}
+}
+
+func TestStockRosterViewProjectsQualifiedPetStyles(t *testing.T) {
+	p := stockFixture()
+	view := RosterPetView{Pet: p, Appearance: AppearanceView{
+		OwnerStateVersion: p.StateVersion,
+		ActiveStyle:       50030002,
+		OwnedStyles:       []int64{50030001, 50030002},
+	}}
+	body, err := StockRosterView([]RosterPetView{view})
+	if err != nil {
+		t.Fatal(err)
+	}
+	wire := body["pets"].([]any)[0].(map[string]any)
+	if wire["active_style"] != int64(50030002) {
+		t.Fatalf("active_style=%#v", wire["active_style"])
+	}
+	styles := wire["pet_styles"].([]any)
+	if !reflect.DeepEqual(styles, []any{int64(50030001), int64(50030002)}) {
+		t.Fatalf("pet_styles=%#v", styles)
 	}
 }

@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 
 	apppet "gxb.local/backend/v2/internal/application/characterpet"
 	appi5 "gxb.local/backend/v2/internal/application/i5"
@@ -21,7 +22,7 @@ import (
 )
 
 type PetServicePort interface {
-	Roster(context.Context, identity.ActorContext) (character.PetRoot, []character.Pet, error)
+	RosterView(context.Context, identity.ActorContext, time.Time) (character.PetRoot, []apppet.PetRosterView, error)
 	Summon(context.Context, identity.ActorContext, int64, operation.Context) (character.Pet, error)
 	CleanCD(context.Context, identity.ActorContext, int64, operation.Context) (apppet.HatchResult, error)
 	SetShow(context.Context, identity.ActorContext, int64, operation.Context) error
@@ -58,11 +59,15 @@ func (d PetDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReques
 		if !onlyStockGameplayParams(req.Envelope.Params) {
 			return petBad("invalid_pet_roster")
 		}
-		_, pets, err := d.Service.Roster(ctx, actor)
+		_, pets, err := d.Service.RosterView(ctx, actor, req.Envelope.Operation.StartedAt)
 		if err != nil {
 			return petFail(err)
 		}
-		body, err := petproj.StockRoster(pets)
+		views := make([]petproj.RosterPetView, 0, len(pets))
+		for _, pet := range pets {
+			views = append(views, petproj.RosterPetView{Pet: pet.Pet, Appearance: petproj.AppearanceView{OwnerStateVersion: pet.Appearance.OwnerStateVersion, ActiveStyle: pet.Appearance.ActiveStyle, OwnedStyles: append([]int64(nil), pet.Appearance.OwnedStyles...)}})
+		}
+		body, err := petproj.StockRosterView(views)
 		if err != nil {
 			return petFail(err)
 		}

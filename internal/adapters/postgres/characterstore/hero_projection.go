@@ -17,6 +17,7 @@ type HeroBootstrapContent interface {
 	HeroCoreActiveTx(context.Context, tx.Queryer) (string, bool, error)
 	HeroEquipmentRevisionTx(context.Context, tx.Queryer, string) (bool, error)
 	HeroFumoRevisionTx(context.Context, tx.Queryer, string) (bool, error)
+	AppearanceRevisionTx(context.Context, tx.Queryer, string) (bool, error)
 }
 
 // HeroBootstrapProjection repairs MID1 key49 with canonical owner state while
@@ -55,6 +56,14 @@ func (p HeroBootstrapProjection) OverlayMID1(ctx context.Context, q tx.Queryer, 
 		return nil
 	}
 
+	appearanceActive, err := p.Content.AppearanceRevisionTx(ctx, q, revision)
+	if err != nil {
+		return err
+	}
+	if !appearanceActive {
+		return nil
+	}
+
 	store := Store{}
 	root, err := store.ReadRootTx(ctx, q, actor.PlayerID)
 	if err != nil {
@@ -64,13 +73,25 @@ func (p HeroBootstrapProjection) OverlayMID1(ctx context.Context, q tx.Queryer, 
 	if err != nil {
 		return err
 	}
-	views, err := apphero.BuildRosterViewsTx(ctx, q, revision, heroes, p.Content)
+	views, err := apphero.BuildRosterViewsTx(ctx, q, revision, heroes, observedAt, store, p.Content)
 	if err != nil {
 		return err
 	}
 	stockViews := make([]heroproj.RosterHeroView, 0, len(views))
 	for _, view := range views {
-		stockViews = append(stockViews, heroproj.RosterHeroView{Hero: view.Hero, FumoLevels: view.FumoLevels})
+		stockViews = append(stockViews, heroproj.RosterHeroView{Hero: view.Hero, FumoLevels: view.FumoLevels, Appearance: heroproj.AppearanceView{OwnerStateVersion: view.Appearance.OwnerStateVersion, CurrentSkinID: view.Appearance.CurrentSkinID, IllusionSkinID: view.Appearance.IllusionSkinID, Skins: func() []heroproj.QualifiedSkinView {
+			out := make([]heroproj.QualifiedSkinView, 0, len(view.Appearance.Skins))
+			for _, x := range view.Appearance.Skins {
+				out = append(out, heroproj.QualifiedSkinView{ModelID: x.ModelID, ExpiresAt: x.ExpiresAt})
+			}
+			return out
+		}(), LIVE: func() []heroproj.QualifiedLIVEView {
+			out := make([]heroproj.QualifiedLIVEView, 0, len(view.Appearance.LIVE))
+			for _, x := range view.Appearance.LIVE {
+				out = append(out, heroproj.QualifiedLIVEView{ModelID: x.ModelID, IsShow: x.IsShow})
+			}
+			return out
+		}()}})
 	}
 	body, err := heroproj.StockRosterView(root.SortType, stockViews)
 	if err != nil {

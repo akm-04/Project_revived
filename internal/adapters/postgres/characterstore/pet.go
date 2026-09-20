@@ -89,7 +89,7 @@ func (Store) InsertPetTx(ctx context.Context, t tx.Tx, p character.Pet) error {
 	if t == nil || p.ValidatePersistent() != nil || p.StateVersion != 1 {
 		return errors.New("character store: invalid Pet insert")
 	}
-	tag, err := t.Exec(ctx, characterqueries.InsertPlayerPet, int64(p.PlayerID), p.PetID, p.TableID, p.OriginTableID, p.Star, p.Level, p.Exp, p.Color, p.Birthday, p.IsShow, p.Skills[0], p.Skills[1], p.Skills[2], p.Skills[3], p.Skills[4], p.Equipment[0], p.Equipment[1], p.Equipment[2], p.Fumo[0], p.Fumo[1], p.Fumo[2], p.CreationContentRevision, p.StateVersion, p.CreatedAt.UTC(), p.UpdatedAt.UTC())
+	tag, err := t.Exec(ctx, characterqueries.InsertPlayerPet, int64(p.PlayerID), p.PetID, p.TableID, p.OriginTableID, p.Star, p.Level, p.Exp, p.Color, p.Birthday, p.IsShow, p.Skills[0], p.Skills[1], p.Skills[2], p.Skills[3], p.Skills[4], p.Equipment[0], p.Equipment[1], p.Equipment[2], p.Fumo[0], p.Fumo[1], p.Fumo[2], p.ActiveStyle, p.CreationContentRevision, p.StateVersion, p.CreatedAt.UTC(), p.UpdatedAt.UTC())
 	if err != nil {
 		return err
 	}
@@ -138,6 +138,7 @@ func (Store) ListPetsTx(ctx context.Context, q tx.Queryer, pid identity.PlayerID
 		PracticeStr             int64     `json:"practice_str"`
 		PracticeInt             int64     `json:"practice_int"`
 		PracticeAgi             int64     `json:"practice_agi"`
+		ActiveStyle             int64     `json:"active_style"`
 		CreationContentRevision string    `json:"creation_content_revision"`
 		StateVersion            int64     `json:"state_version"`
 		CreatedAt               time.Time `json:"created_at"`
@@ -148,7 +149,7 @@ func (Store) ListPetsTx(ctx context.Context, q tx.Queryer, pid identity.PlayerID
 	}
 	out := make([]character.Pet, 0, len(rows))
 	for _, x := range rows {
-		p := character.Pet{PlayerID: identity.PlayerID(x.PlayerID), PetID: x.PetID, TableID: x.TableID, OriginTableID: x.OriginTableID, Star: x.Star, Level: x.Level, Exp: x.Exp, Color: x.Color, Equipment: character.PetEquipmentSlots{x.Equip1, x.Equip2, x.Equip3}, Fumo: character.PetFumoSlots{x.Fumo1, x.Fumo2, x.Fumo3}, Skills: character.PetSkillLevels{x.Skill1, x.Skill2, x.Skill3, x.Skill4, x.Skill5}, Birthday: x.Birthday, IsShow: x.IsShow, Practice: character.PracticeAttrs{x.PracticeStr, x.PracticeInt, x.PracticeAgi}, CreationContentRevision: x.CreationContentRevision, StateVersion: x.StateVersion, CreatedAt: x.CreatedAt.UTC(), UpdatedAt: x.UpdatedAt.UTC()}
+		p := character.Pet{PlayerID: identity.PlayerID(x.PlayerID), PetID: x.PetID, TableID: x.TableID, OriginTableID: x.OriginTableID, Star: x.Star, Level: x.Level, Exp: x.Exp, Color: x.Color, Equipment: character.PetEquipmentSlots{x.Equip1, x.Equip2, x.Equip3}, Fumo: character.PetFumoSlots{x.Fumo1, x.Fumo2, x.Fumo3}, Skills: character.PetSkillLevels{x.Skill1, x.Skill2, x.Skill3, x.Skill4, x.Skill5}, Birthday: x.Birthday, IsShow: x.IsShow, Practice: character.PracticeAttrs{x.PracticeStr, x.PracticeInt, x.PracticeAgi}, ActiveStyle: x.ActiveStyle, CreationContentRevision: x.CreationContentRevision, StateVersion: x.StateVersion, CreatedAt: x.CreatedAt.UTC(), UpdatedAt: x.UpdatedAt.UTC()}
 		if err := p.ValidatePersistent(); err != nil {
 			return nil, err
 		}
@@ -160,7 +161,7 @@ func (Store) ListPetsTx(ctx context.Context, q tx.Queryer, pid identity.PlayerID
 func scanPet(row tx.Row) (character.Pet, error) {
 	var p character.Pet
 	var pid int64
-	if err := row.Scan(&pid, &p.PetID, &p.TableID, &p.OriginTableID, &p.Star, &p.Level, &p.Exp, &p.Color, &p.Equipment[0], &p.Equipment[1], &p.Equipment[2], &p.Fumo[0], &p.Fumo[1], &p.Fumo[2], &p.Skills[0], &p.Skills[1], &p.Skills[2], &p.Skills[3], &p.Skills[4], &p.Birthday, &p.IsShow, &p.Practice[0], &p.Practice[1], &p.Practice[2], &p.CreationContentRevision, &p.StateVersion, &p.CreatedAt, &p.UpdatedAt); err != nil {
+	if err := row.Scan(&pid, &p.PetID, &p.TableID, &p.OriginTableID, &p.Star, &p.Level, &p.Exp, &p.Color, &p.Equipment[0], &p.Equipment[1], &p.Equipment[2], &p.Fumo[0], &p.Fumo[1], &p.Fumo[2], &p.Skills[0], &p.Skills[1], &p.Skills[2], &p.Skills[3], &p.Skills[4], &p.Birthday, &p.IsShow, &p.Practice[0], &p.Practice[1], &p.Practice[2], &p.ActiveStyle, &p.CreationContentRevision, &p.StateVersion, &p.CreatedAt, &p.UpdatedAt); err != nil {
 		return p, err
 	}
 	p.PlayerID = identity.PlayerID(pid)

@@ -43,6 +43,7 @@ var supportedCapabilities = [...]string{
 	"PET_PROMOTION_RESTORATION_CA4_4B",
 	"SUPER_EQUIPMENT_CA4_5",
 	"PRACTICE_CA6",
+	"CHARACTER_APPEARANCE_CA7",
 }
 
 type Bundle struct {
@@ -64,6 +65,7 @@ type Bundle struct {
 	petEquipmentJSON                          []byte
 	petPromotionRestorationJSON               []byte
 	practiceJSON                              []byte
+	appearanceJSON                            []byte
 	resourceCount                             int64
 	progressionCount                          int64
 	functionGateCount                         int64
@@ -83,6 +85,7 @@ type Bundle struct {
 	petEquipmentCount                         int64
 	petPromotionRestorationEquipmentCount     int64
 	practiceCount                             int64
+	appearanceCount                           int64
 }
 
 func LoadBuiltinBundle() (Bundle, error) {
@@ -158,6 +161,10 @@ func LoadBuiltinBundle() (Bundle, error) {
 	if err != nil {
 		return Bundle{}, err
 	}
+	appearance, err := builtin.GeneratedFile("appearance_catalog.json")
+	if err != nil {
+		return Bundle{}, err
+	}
 	b := Bundle{
 		manifest:                               cat.Manifest,
 		manifestJSON:                           append([]byte(nil), manifest...),
@@ -177,6 +184,7 @@ func LoadBuiltinBundle() (Bundle, error) {
 		petEquipmentJSON:                       append([]byte(nil), petEquipment...),
 		petPromotionRestorationJSON:            append([]byte(nil), petPromotionRestoration...),
 		practiceJSON:                           append([]byte(nil), practice...),
+		appearanceJSON:                         append([]byte(nil), appearance...),
 		resourceCount:                          int64(len(cat.Resources.Resources)),
 		progressionCount:                       int64(len(cat.PlayerProgression.Rows)),
 		functionGateCount:                      int64(len(cat.FunctionGates.Gates)),
@@ -196,6 +204,7 @@ func LoadBuiltinBundle() (Bundle, error) {
 		petEquipmentCount:                         int64(len(cat.PetEquipment.Positions)),
 		petPromotionRestorationEquipmentCount:     int64(len(cat.PetPromotionRestoration.EligibleEquipment)),
 		practiceCount:                             int64(len(cat.Practice.Methods) + len(cat.Practice.Locks) + len(cat.Practice.VIPBless) + len(cat.Practice.HeroThresholds) + len(cat.Practice.PetThresholds) + 1),
+		appearanceCount:                           int64(len(cat.Appearance.QualifiedSkinDefinitions) + len(cat.Appearance.QualifiedSkinAcquisitionItems) + len(cat.Appearance.PaidLIVEDefinitions) + len(cat.Appearance.PetHomeStyleDefinitions)),
 	}
 	if err := b.Validate(); err != nil {
 		return Bundle{}, err
@@ -213,12 +222,12 @@ func (b Bundle) Validate() error {
 	if b.manifest.SchemaVersion != builtin.SchemaVersion {
 		return fmt.Errorf("content registry: unsupported bundle schema %d", b.manifest.SchemaVersion)
 	}
-	for name, raw := range map[string][]byte{"manifest": b.manifestJSON, "resources": b.resourcesJSON, "progression": b.progressionJSON, "functions": b.functionGatesJSON, "objectives": b.objectivesJSON, "hero-core": b.heroCoreJSON, "pet-core": b.petCoreJSON, "pet-acquisition": b.petAcquisitionJSON, "pet-progression": b.petProgressionJSON, "equipment-primitives": b.equipmentPrimitivesJSON, "hero-equipment": b.heroEquipmentJSON, "super-equipment": b.superEquipmentJSON, "hero-fumo": b.heroFumoJSON, "hero-promotion-restoration": b.heroPromotionRestorationJSON, "pet-equipment": b.petEquipmentJSON, "pet-promotion-restoration": b.petPromotionRestorationJSON, "practice": b.practiceJSON} {
+	for name, raw := range map[string][]byte{"manifest": b.manifestJSON, "resources": b.resourcesJSON, "progression": b.progressionJSON, "functions": b.functionGatesJSON, "objectives": b.objectivesJSON, "hero-core": b.heroCoreJSON, "pet-core": b.petCoreJSON, "pet-acquisition": b.petAcquisitionJSON, "pet-progression": b.petProgressionJSON, "equipment-primitives": b.equipmentPrimitivesJSON, "hero-equipment": b.heroEquipmentJSON, "super-equipment": b.superEquipmentJSON, "hero-fumo": b.heroFumoJSON, "hero-promotion-restoration": b.heroPromotionRestorationJSON, "pet-equipment": b.petEquipmentJSON, "pet-promotion-restoration": b.petPromotionRestorationJSON, "practice": b.practiceJSON, "appearance": b.appearanceJSON} {
 		if len(raw) == 0 || !json.Valid(raw) {
 			return fmt.Errorf("content registry: invalid %s JSON", name)
 		}
 	}
-	if b.resourceCount < 0 || b.progressionCount < 0 || b.functionGateCount < 0 || b.objectiveCount < 0 || b.heroCount < 0 || b.petCount < 0 || b.petAcquisitionCount < 0 || b.petProgressionCount < 0 || b.equipmentPrimitiveCount < 0 || b.heroEquipmentCount < 0 || b.superEquipmentCount < 0 || b.heroFumoTargetCount < 0 || b.heroFumoMaterialCount < 0 || b.heroPromotionRestorationEquipmentCount < 0 || b.heroPromotionRestorationFractionCount < 0 || b.heroPromotionRestorationDenominationCount < 0 || b.petEquipmentCount < 0 || b.petPromotionRestorationEquipmentCount < 0 || b.practiceCount < 0 {
+	if b.resourceCount < 0 || b.progressionCount < 0 || b.functionGateCount < 0 || b.objectiveCount < 0 || b.heroCount < 0 || b.petCount < 0 || b.petAcquisitionCount < 0 || b.petProgressionCount < 0 || b.equipmentPrimitiveCount < 0 || b.heroEquipmentCount < 0 || b.superEquipmentCount < 0 || b.heroFumoTargetCount < 0 || b.heroFumoMaterialCount < 0 || b.heroPromotionRestorationEquipmentCount < 0 || b.heroPromotionRestorationFractionCount < 0 || b.heroPromotionRestorationDenominationCount < 0 || b.petEquipmentCount < 0 || b.petPromotionRestorationEquipmentCount < 0 || b.practiceCount < 0 || b.appearanceCount < 0 {
 		return errors.New("content registry: invalid negative catalog count")
 	}
 	return nil
@@ -250,9 +259,10 @@ func (b Bundle) PetEquipmentJSON() []byte { return append([]byte(nil), b.petEqui
 func (b Bundle) PetPromotionRestorationJSON() []byte {
 	return append([]byte(nil), b.petPromotionRestorationJSON...)
 }
-func (b Bundle) PracticeJSON() []byte { return append([]byte(nil), b.practiceJSON...) }
-func (b Bundle) ExpectedCounts() (resources, progression, functions, objectives, heroes, pets, petAcquisition, petProgression, equipmentPrimitives, heroEquipment, superEquipment, heroFumoTargets, heroFumoMaterials, heroPromotionRestorationEquipment, heroPromotionRestorationFractions, heroPromotionRestorationDenominations, petEquipment, petPromotionRestorationEquipment, practice int64) {
-	return b.resourceCount, b.progressionCount, b.functionGateCount, b.objectiveCount, b.heroCount, b.petCount, b.petAcquisitionCount, b.petProgressionCount, b.equipmentPrimitiveCount, b.heroEquipmentCount, b.superEquipmentCount, b.heroFumoTargetCount, b.heroFumoMaterialCount, b.heroPromotionRestorationEquipmentCount, b.heroPromotionRestorationFractionCount, b.heroPromotionRestorationDenominationCount, b.petEquipmentCount, b.petPromotionRestorationEquipmentCount, b.practiceCount
+func (b Bundle) PracticeJSON() []byte   { return append([]byte(nil), b.practiceJSON...) }
+func (b Bundle) AppearanceJSON() []byte { return append([]byte(nil), b.appearanceJSON...) }
+func (b Bundle) ExpectedCounts() (resources, progression, functions, objectives, heroes, pets, petAcquisition, petProgression, equipmentPrimitives, heroEquipment, superEquipment, heroFumoTargets, heroFumoMaterials, heroPromotionRestorationEquipment, heroPromotionRestorationFractions, heroPromotionRestorationDenominations, petEquipment, petPromotionRestorationEquipment, practice, appearance int64) {
+	return b.resourceCount, b.progressionCount, b.functionGateCount, b.objectiveCount, b.heroCount, b.petCount, b.petAcquisitionCount, b.petProgressionCount, b.equipmentPrimitiveCount, b.heroEquipmentCount, b.superEquipmentCount, b.heroFumoTargetCount, b.heroFumoMaterialCount, b.heroPromotionRestorationEquipmentCount, b.heroPromotionRestorationFractionCount, b.heroPromotionRestorationDenominationCount, b.petEquipmentCount, b.petPromotionRestorationEquipmentCount, b.practiceCount, b.appearanceCount
 }
 
 type ProviderSet struct{ names map[string]struct{} }
@@ -348,11 +358,12 @@ type Verification struct {
 	PetEquipmentCount                         int64
 	PetPromotionRestorationEquipmentCount     int64
 	PracticeCount                             int64
+	AppearanceCount                           int64
 }
 
 func (v Verification) Matches(b Bundle) bool {
-	r, p, f, o, h, pet, petAcquisition, petProgression, equipmentPrimitives, heroEquipment, superEquipment, heroFumoTargets, heroFumoMaterials, restorationEquipment, restorationFractions, restorationDenominations, petEquipment, petRestorationEquipment, practice := b.ExpectedCounts()
-	return v.Exact && v.ResourceCount == r && v.ProgressionCount == p && v.FunctionGateCount == f && v.ObjectiveCount == o && v.HeroCount == h && v.PetCount == pet && v.PetAcquisitionCount == petAcquisition && v.PetProgressionCount == petProgression && v.EquipmentPrimitiveCount == equipmentPrimitives && v.HeroEquipmentCount == heroEquipment && v.SuperEquipmentCount == superEquipment && v.HeroFumoTargetCount == heroFumoTargets && v.HeroFumoMaterialCount == heroFumoMaterials && v.HeroPromotionRestorationEquipmentCount == restorationEquipment && v.HeroPromotionRestorationFractionCount == restorationFractions && v.HeroPromotionRestorationDenominationCount == restorationDenominations && v.PetEquipmentCount == petEquipment && v.PetPromotionRestorationEquipmentCount == petRestorationEquipment && v.PracticeCount == practice
+	r, p, f, o, h, pet, petAcquisition, petProgression, equipmentPrimitives, heroEquipment, superEquipment, heroFumoTargets, heroFumoMaterials, restorationEquipment, restorationFractions, restorationDenominations, petEquipment, petRestorationEquipment, practice, appearance := b.ExpectedCounts()
+	return v.Exact && v.ResourceCount == r && v.ProgressionCount == p && v.FunctionGateCount == f && v.ObjectiveCount == o && v.HeroCount == h && v.PetCount == pet && v.PetAcquisitionCount == petAcquisition && v.PetProgressionCount == petProgression && v.EquipmentPrimitiveCount == equipmentPrimitives && v.HeroEquipmentCount == heroEquipment && v.SuperEquipmentCount == superEquipment && v.HeroFumoTargetCount == heroFumoTargets && v.HeroFumoMaterialCount == heroFumoMaterials && v.HeroPromotionRestorationEquipmentCount == restorationEquipment && v.HeroPromotionRestorationFractionCount == restorationFractions && v.HeroPromotionRestorationDenominationCount == restorationDenominations && v.PetEquipmentCount == petEquipment && v.PetPromotionRestorationEquipmentCount == petRestorationEquipment && v.PracticeCount == practice && v.AppearanceCount == appearance
 }
 
 // Repository is the canonical content-registry persistence port. It receives
@@ -376,6 +387,7 @@ type Repository interface {
 	InsertPetEquipment(context.Context, tx.Tx, Bundle) (int64, error)
 	InsertPetPromotionRestoration(context.Context, tx.Tx, Bundle) (int64, error)
 	InsertPractice(context.Context, tx.Tx, Bundle) (int64, error)
+	InsertAppearance(context.Context, tx.Tx, Bundle) (int64, error)
 	VerifyRevision(context.Context, tx.Queryer, Bundle) (Verification, error)
 	ReadActivation(context.Context, tx.Queryer) (ActivationIdentity, bool, error)
 	ReadActiveSummary(context.Context, tx.Queryer) (ActiveSummary, bool, error)

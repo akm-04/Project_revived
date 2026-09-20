@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"time"
 
+	"gxb.local/backend/v2/internal/application/characterasset"
 	appi5 "gxb.local/backend/v2/internal/application/i5"
 	"gxb.local/backend/v2/internal/domain/character"
 	"gxb.local/backend/v2/internal/domain/identity"
@@ -17,6 +18,7 @@ import (
 )
 
 var ErrHeroContentInactive = errors.New("CA2 Hero content capability inactive")
+var ErrAppearanceContentInactive = errors.New("CA7 appearance content capability inactive")
 
 type Store interface {
 	ReadRoot(context.Context, identity.PlayerID) (character.HeroRoot, error)
@@ -24,6 +26,11 @@ type Store interface {
 	LockRootTx(context.Context, tx.Tx, identity.PlayerID) (character.HeroRoot, error)
 	SaveSortTypeTx(context.Context, tx.Tx, character.HeroRoot, int64) error
 }
+type HeroAppearanceStore interface {
+	ListHeroSkinEntitlements(context.Context, identity.PlayerID, int64) ([]character.HeroSkinEntitlement, error)
+	ListHeroLIVEEntitlements(context.Context, identity.PlayerID, int64) ([]character.HeroLIVEEntitlement, error)
+}
+
 type ActorFencer interface {
 	FenceActorTx(context.Context, tx.Tx, identity.ActorContext, time.Time) error
 }
@@ -42,6 +49,7 @@ type HeroRosterProjectionContent interface {
 type HeroRosterView struct {
 	Hero       character.Hero
 	FumoLevels character.HeroFumoSlots
+	Appearance characterasset.EffectiveHeroAppearance
 }
 
 type Service struct {
@@ -69,6 +77,8 @@ type Service struct {
 	MaxHeroColorPolicy  MaxHeroColorPolicyProvider
 	RestorationModifier RestorationModifier
 	RosterProjection    HeroRosterProjectionContent
+	AppearanceStore     HeroAppearanceStore
+	Appearance          characterasset.AppearanceContent
 }
 
 func profile() tx.Profile {
@@ -120,14 +130,14 @@ func (s Service) Roster(ctx context.Context, actor identity.ActorContext) (chara
 	}
 	return root, heroes, nil
 }
-func (s Service) RosterView(ctx context.Context, actor identity.ActorContext) (character.HeroRoot, []HeroRosterView, error) {
+func (s Service) RosterView(ctx context.Context, actor identity.ActorContext, observedAt time.Time) (character.HeroRoot, []HeroRosterView, error) {
 	if err := s.validate(); err != nil {
 		return character.HeroRoot{}, nil, err
 	}
-	if !actor.PlayerID.Valid() {
-		return character.HeroRoot{}, nil, errors.New("character hero: invalid actor")
+	if !actor.PlayerID.Valid() || observedAt.IsZero() {
+		return character.HeroRoot{}, nil, errors.New("character hero: invalid actor or observation time")
 	}
-	if s.RosterProjection == nil {
+	if s.RosterProjection == nil || s.AppearanceStore == nil || s.Appearance == nil {
 		return character.HeroRoot{}, nil, errors.New("character hero: roster projection unavailable")
 	}
 	revision, ok, err := s.Content.HeroCoreActive(ctx)
@@ -146,6 +156,11 @@ func (s Service) RosterView(ctx context.Context, actor identity.ActorContext) (c
 		return character.HeroRoot{}, nil, err
 	} else if !good {
 		return character.HeroRoot{}, nil, ErrHeroFumoContentInactive
+	}
+	if good, err := s.Appearance.AppearanceRevision(ctx, revision); err != nil {
+		return character.HeroRoot{}, nil, err
+	} else if !good {
+		return character.HeroRoot{}, nil, ErrAppearanceContentInactive
 	}
 	root, err := s.Store.ReadRoot(ctx, actor.PlayerID)
 	if err != nil {
@@ -173,6 +188,19 @@ func (s Service) RosterView(ctx context.Context, actor identity.ActorContext) (c
 			}
 			view.FumoLevels = levels
 		}
+		skins, err := s.AppearanceStore.ListHeroSkinEntitlements(ctx, actor.PlayerID, heroes[i].PartnerID)
+		if err != nil {
+			return root, nil, err
+		}
+		lives, err := s.AppearanceStore.ListHeroLIVEEntitlements(ctx, actor.PlayerID, heroes[i].PartnerID)
+		if err != nil {
+			return root, nil, err
+		}
+		appearance, err := characterasset.BuildEffectiveHeroAppearance(ctx, revision, heroes[i], skins, lives, observedAt, s.Appearance)
+		if err != nil {
+			return root, nil, err
+		}
+		view.Appearance = appearance
 		out = append(out, view)
 	}
 	return root, out, nil

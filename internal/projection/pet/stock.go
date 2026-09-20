@@ -55,3 +55,56 @@ func boolInt(v bool) int64 {
 	}
 	return 0
 }
+
+type AppearanceView struct {
+	OwnerStateVersion int64
+	ActiveStyle       int64
+	OwnedStyles       []int64
+}
+
+type RosterPetView struct {
+	Pet        character.Pet
+	Appearance AppearanceView
+}
+
+func StockPrivateView(view RosterPetView, includePlayerID bool) (map[string]any, error) {
+	out, err := StockPrivate(view.Pet, includePlayerID)
+	if err != nil {
+		return nil, err
+	}
+	if view.Appearance.OwnerStateVersion <= 0 || view.Appearance.OwnerStateVersion != view.Pet.StateVersion || view.Appearance.ActiveStyle < 0 {
+		return nil, errors.New("pet projection: invalid effective appearance")
+	}
+	styles := make([]any, 0, len(view.Appearance.OwnedStyles))
+	owned := make(map[int64]struct{}, len(view.Appearance.OwnedStyles))
+	for _, style := range view.Appearance.OwnedStyles {
+		if style <= 0 {
+			return nil, errors.New("pet projection: invalid owned style")
+		}
+		if _, dup := owned[style]; dup {
+			return nil, errors.New("pet projection: duplicate owned style")
+		}
+		owned[style] = struct{}{}
+		styles = append(styles, style)
+	}
+	if view.Appearance.ActiveStyle > 0 {
+		if _, ok := owned[view.Appearance.ActiveStyle]; !ok {
+			return nil, errors.New("pet projection: active style not owned")
+		}
+	}
+	out["active_style"] = view.Appearance.ActiveStyle
+	out["pet_styles"] = styles
+	return out, nil
+}
+
+func StockRosterView(views []RosterPetView) (map[string]any, error) {
+	rows := make([]any, 0, len(views))
+	for _, view := range views {
+		m, err := StockPrivateView(view, true)
+		if err != nil {
+			return nil, err
+		}
+		rows = append(rows, m)
+	}
+	return map[string]any{"pets": rows}, nil
+}

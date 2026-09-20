@@ -450,6 +450,47 @@ WHERE (SELECT count(*) FROM method_ins)=3
   AND (SELECT count(*) FROM pet_ins)=162
   AND (SELECT count(*) FROM policy_ins)=1;
 
+-- name: InsertContentAppearance :one
+WITH skin_expected AS (
+  SELECT * FROM jsonb_to_recordset(($2::jsonb)->'qualified_skin_definitions') AS x(
+    hero_origin_table_id bigint, model_id bigint, skin_skill_id bigint, source_skin_id bigint
+  )
+), skin_ins AS (
+  INSERT INTO gxb_content_appearance_skins(revision_id,model_id,hero_origin_table_id,skin_skill_id)
+  SELECT $1,model_id,hero_origin_table_id,skin_skill_id FROM skin_expected RETURNING 1
+), item_expected AS (
+  SELECT * FROM jsonb_to_recordset(($2::jsonb)->'qualified_skin_acquisition_items') AS x(
+    duration_seconds bigint, hero_origin_table_id bigint, item_id bigint, model_id bigint
+  )
+), item_ins AS (
+  INSERT INTO gxb_content_appearance_skin_items(revision_id,item_id,model_id,hero_origin_table_id,duration_seconds)
+  SELECT $1,item_id,model_id,hero_origin_table_id,duration_seconds FROM item_expected RETURNING 1
+), live_expected AS (
+  SELECT * FROM jsonb_to_recordset(($2::jsonb)->'paid_live_definitions') AS x(
+    activation_item_count bigint, activation_item_id bigint, crystal_cost bigint,
+    hero_origin_table_id bigint, model_id bigint
+  )
+), live_ins AS (
+  INSERT INTO gxb_content_appearance_live(
+    revision_id,model_id,hero_origin_table_id,crystal_cost,activation_item_id,activation_item_count
+  )
+  SELECT $1,model_id,hero_origin_table_id,crystal_cost,activation_item_id,activation_item_count
+  FROM live_expected RETURNING 1
+), style_expected AS (
+  SELECT * FROM jsonb_to_recordset(($2::jsonb)->'pet_home_style_definitions') AS x(
+    pet_origin_table_id bigint, style_item_id bigint
+  )
+), style_ins AS (
+  INSERT INTO gxb_content_appearance_pet_styles(revision_id,style_item_id,pet_origin_table_id)
+  SELECT $1,style_item_id,pet_origin_table_id FROM style_expected RETURNING 1
+)
+SELECT ((SELECT count(*) FROM skin_ins)+(SELECT count(*) FROM item_ins)+
+        (SELECT count(*) FROM live_ins)+(SELECT count(*) FROM style_ins))::bigint
+WHERE (SELECT count(*) FROM skin_ins)=262
+  AND (SELECT count(*) FROM item_ins)=264
+  AND (SELECT count(*) FROM live_ins)=12
+  AND (SELECT count(*) FROM style_ins)=4;
+
 -- name: VerifyContentRevision :one
 WITH
 expected_revision AS (
@@ -803,7 +844,49 @@ expected_practice_policy AS (
   SELECT unlock_level,attr_cap,free_interval_seconds,legendary_vip_min,ticket_item_id,ticket_add_str,ticket_add_int,ticket_add_agi
   FROM gxb_content_practice_policy_facts WHERE revision_id=$1
 ), practice_policy_missing AS (SELECT * FROM expected_practice_policy EXCEPT SELECT * FROM stored_practice_policy),
-practice_policy_extra AS (SELECT * FROM stored_practice_policy EXCEPT SELECT * FROM expected_practice_policy)
+practice_policy_extra AS (SELECT * FROM stored_practice_policy EXCEPT SELECT * FROM expected_practice_policy),
+expected_appearance_skins AS (
+  SELECT (j.value->>'model_id')::bigint AS model_id,
+         (j.value->>'hero_origin_table_id')::bigint AS hero_origin_table_id,
+         (j.value->>'skin_skill_id')::bigint AS skin_skill_id
+  FROM jsonb_array_elements(($22::jsonb)->'qualified_skin_definitions') AS j(value)
+), stored_appearance_skins AS (
+  SELECT model_id,hero_origin_table_id,skin_skill_id
+  FROM gxb_content_appearance_skins WHERE revision_id=$1
+), appearance_skin_missing AS (SELECT * FROM expected_appearance_skins EXCEPT SELECT * FROM stored_appearance_skins),
+appearance_skin_extra AS (SELECT * FROM stored_appearance_skins EXCEPT SELECT * FROM expected_appearance_skins),
+expected_appearance_items AS (
+  SELECT (j.value->>'item_id')::bigint AS item_id,
+         (j.value->>'model_id')::bigint AS model_id,
+         (j.value->>'hero_origin_table_id')::bigint AS hero_origin_table_id,
+         NULLIF(j.value->>'duration_seconds','')::bigint AS duration_seconds
+  FROM jsonb_array_elements(($22::jsonb)->'qualified_skin_acquisition_items') AS j(value)
+), stored_appearance_items AS (
+  SELECT item_id,model_id,hero_origin_table_id,duration_seconds
+  FROM gxb_content_appearance_skin_items WHERE revision_id=$1
+), appearance_item_missing AS (SELECT * FROM expected_appearance_items EXCEPT SELECT * FROM stored_appearance_items),
+appearance_item_extra AS (SELECT * FROM stored_appearance_items EXCEPT SELECT * FROM expected_appearance_items),
+expected_appearance_live AS (
+  SELECT (j.value->>'model_id')::bigint AS model_id,
+         (j.value->>'hero_origin_table_id')::bigint AS hero_origin_table_id,
+         (j.value->>'crystal_cost')::bigint AS crystal_cost,
+         (j.value->>'activation_item_id')::bigint AS activation_item_id,
+         (j.value->>'activation_item_count')::bigint AS activation_item_count
+  FROM jsonb_array_elements(($22::jsonb)->'paid_live_definitions') AS j(value)
+), stored_appearance_live AS (
+  SELECT model_id,hero_origin_table_id,crystal_cost,activation_item_id,activation_item_count
+  FROM gxb_content_appearance_live WHERE revision_id=$1
+), appearance_live_missing AS (SELECT * FROM expected_appearance_live EXCEPT SELECT * FROM stored_appearance_live),
+appearance_live_extra AS (SELECT * FROM stored_appearance_live EXCEPT SELECT * FROM expected_appearance_live),
+expected_appearance_styles AS (
+  SELECT (j.value->>'style_item_id')::bigint AS style_item_id,
+         (j.value->>'pet_origin_table_id')::bigint AS pet_origin_table_id
+  FROM jsonb_array_elements(($22::jsonb)->'pet_home_style_definitions') AS j(value)
+), stored_appearance_styles AS (
+  SELECT style_item_id,pet_origin_table_id
+  FROM gxb_content_appearance_pet_styles WHERE revision_id=$1
+), appearance_style_missing AS (SELECT * FROM expected_appearance_styles EXCEPT SELECT * FROM stored_appearance_styles),
+appearance_style_extra AS (SELECT * FROM stored_appearance_styles EXCEPT SELECT * FROM expected_appearance_styles)
 SELECT
   NOT EXISTS(SELECT 1 FROM revision_missing) AND NOT EXISTS(SELECT 1 FROM revision_extra)
   AND NOT EXISTS(SELECT 1 FROM resource_missing) AND NOT EXISTS(SELECT 1 FROM resource_extra)
@@ -847,6 +930,10 @@ SELECT
   AND NOT EXISTS(SELECT 1 FROM hero_practice_missing) AND NOT EXISTS(SELECT 1 FROM hero_practice_extra)
   AND NOT EXISTS(SELECT 1 FROM pet_practice_missing) AND NOT EXISTS(SELECT 1 FROM pet_practice_extra)
   AND NOT EXISTS(SELECT 1 FROM practice_policy_missing) AND NOT EXISTS(SELECT 1 FROM practice_policy_extra)
+  AND NOT EXISTS(SELECT 1 FROM appearance_skin_missing) AND NOT EXISTS(SELECT 1 FROM appearance_skin_extra)
+  AND NOT EXISTS(SELECT 1 FROM appearance_item_missing) AND NOT EXISTS(SELECT 1 FROM appearance_item_extra)
+  AND NOT EXISTS(SELECT 1 FROM appearance_live_missing) AND NOT EXISTS(SELECT 1 FROM appearance_live_extra)
+  AND NOT EXISTS(SELECT 1 FROM appearance_style_missing) AND NOT EXISTS(SELECT 1 FROM appearance_style_extra)
   AS exact_match,
   (SELECT count(*)::bigint FROM stored_resources) AS resource_count,
   (SELECT count(*)::bigint FROM stored_progression) AS progression_count,
@@ -866,7 +953,28 @@ SELECT
   (SELECT count(*)::bigint FROM stored_hero_promotion_restoration_denominations) AS hero_promotion_restoration_denomination_count,
   (SELECT count(*)::bigint FROM stored_pet_equipment) AS pet_equipment_count,
   (SELECT count(*)::bigint FROM stored_pet_promotion_restoration_equipment) AS pet_promotion_restoration_equipment_count,
-  ((SELECT count(*) FROM stored_practice_methods)+(SELECT count(*) FROM stored_practice_locks)+(SELECT count(*) FROM stored_practice_vip)+(SELECT count(*) FROM stored_hero_practice)+(SELECT count(*) FROM stored_pet_practice)+(SELECT count(*) FROM stored_practice_policy))::bigint AS practice_count;
+  ((SELECT count(*) FROM stored_practice_methods)+(SELECT count(*) FROM stored_practice_locks)+(SELECT count(*) FROM stored_practice_vip)+(SELECT count(*) FROM stored_hero_practice)+(SELECT count(*) FROM stored_pet_practice)+(SELECT count(*) FROM stored_practice_policy))::bigint AS practice_count,
+  ((SELECT count(*) FROM stored_appearance_skins)+(SELECT count(*) FROM stored_appearance_items)+(SELECT count(*) FROM stored_appearance_live)+(SELECT count(*) FROM stored_appearance_styles))::bigint AS appearance_count;
+
+-- name: ReadAppearanceSkinDefinition :one
+SELECT hero_origin_table_id,skin_skill_id
+FROM gxb_content_appearance_skins
+WHERE revision_id=$1 AND model_id=$2;
+
+-- name: ReadAppearanceSkinItem :one
+SELECT model_id,hero_origin_table_id,duration_seconds
+FROM gxb_content_appearance_skin_items
+WHERE revision_id=$1 AND item_id=$2;
+
+-- name: ReadAppearanceLIVE :one
+SELECT hero_origin_table_id,crystal_cost,activation_item_id,activation_item_count
+FROM gxb_content_appearance_live
+WHERE revision_id=$1 AND model_id=$2;
+
+-- name: ReadAppearancePetStyle :one
+SELECT pet_origin_table_id
+FROM gxb_content_appearance_pet_styles
+WHERE revision_id=$1 AND style_item_id=$2;
 
 -- name: ReadEquipmentPrimitive :one
 SELECT source_item_type,required_level,compose_mana

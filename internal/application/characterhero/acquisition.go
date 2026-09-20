@@ -74,7 +74,7 @@ func (s Service) validateAcquisition() error {
 }
 
 func heroFromReceipt(r acquisitionReceipt, pid identity.PlayerID, now operation.Context) (character.Hero, error) {
-	h := character.Hero{PlayerID: pid, PartnerID: r.PartnerID, TableID: r.TableID, OriginTableID: r.OriginTableID, Kind: character.HeroKind(r.Kind), Star: r.Star, Level: r.Level, Exp: r.Exp, Color: r.Color, CreationContentRevision: r.CreationContentRevision, StateVersion: r.StateVersion, CreatedAt: now.StartedAt.UTC(), UpdatedAt: now.StartedAt.UTC()}
+	h := character.Hero{PlayerID: pid, PartnerID: r.PartnerID, TableID: r.TableID, OriginTableID: r.OriginTableID, Kind: character.HeroKind(r.Kind), Star: r.Star, Level: r.Level, Exp: r.Exp, Color: r.Color, IllusionSkinID: character.DefaultIllusionSkinID, CreationContentRevision: r.CreationContentRevision, StateVersion: r.StateVersion, CreatedAt: now.StartedAt.UTC(), UpdatedAt: now.StartedAt.UTC()}
 	if err := h.Validate(); err != nil {
 		return character.Hero{}, err
 	}
@@ -89,7 +89,7 @@ func newHero(pid identity.PlayerID, partnerID int64, t character.HeroAcquisition
 	if partnerID <= 0 || t.TableID <= 0 || t.OriginTableID != t.TableID || star < 1 || star > character.MaxHeroStar || len(revision) != 64 || op.StartedAt.IsZero() {
 		return character.Hero{}, ErrHeroAcquisitionInvalid
 	}
-	h := character.Hero{PlayerID: pid, PartnerID: partnerID, TableID: t.TableID, OriginTableID: t.OriginTableID, Kind: t.Kind, Star: star, Level: 1, Exp: 0, Color: 1, CreationContentRevision: revision, StateVersion: 1, CreatedAt: op.StartedAt.UTC(), UpdatedAt: op.StartedAt.UTC()}
+	h := character.Hero{PlayerID: pid, PartnerID: partnerID, TableID: t.TableID, OriginTableID: t.OriginTableID, Kind: t.Kind, Star: star, Level: 1, Exp: 0, Color: 1, IllusionSkinID: character.DefaultIllusionSkinID, CreationContentRevision: revision, StateVersion: 1, CreatedAt: op.StartedAt.UTC(), UpdatedAt: op.StartedAt.UTC()}
 	if err := h.Validate(); err != nil {
 		return character.Hero{}, err
 	}

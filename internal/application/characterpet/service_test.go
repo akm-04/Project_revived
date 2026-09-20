@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	"gxb.local/backend/v2/internal/application/characterasset"
 	"gxb.local/backend/v2/internal/domain/character"
 	"gxb.local/backend/v2/internal/domain/identity"
 )
@@ -28,6 +29,20 @@ func (s fakeStore) ListPets(context.Context, identity.PlayerID) ([]character.Pet
 		return nil, s.err
 	}
 	return append([]character.Pet(nil), s.pets...), nil
+}
+
+type fakeAppearanceStore struct{ PetAppearanceStore }
+
+func (fakeAppearanceStore) ListPetStyleEntitlements(context.Context, identity.PlayerID, int64) ([]character.PetStyleEntitlement, error) {
+	return nil, nil
+}
+
+type fakeAppearanceContent struct {
+	characterasset.AppearanceContent
+}
+
+func (fakeAppearanceContent) AppearanceActive(context.Context) (string, bool, error) {
+	return "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", true, nil
 }
 
 func serviceFixture() (character.PetRoot, character.Pet) {
@@ -63,5 +78,21 @@ func TestRosterFailsClosedOnMissingStoreOrCorruptPet(t *testing.T) {
 	_, _, err = (Service{Store: fakeStore{err: want}}).Roster(context.Background(), identity.ActorContext{PlayerID: 7})
 	if !errors.Is(err, want) {
 		t.Fatalf("store error=%v", err)
+	}
+}
+
+func TestRosterViewBindsDirectlyToAppearanceCapability(t *testing.T) {
+	root, pet := serviceFixture()
+	s := Service{
+		Store:           fakeStore{root: root, pets: []character.Pet{pet}},
+		AppearanceStore: fakeAppearanceStore{},
+		Appearance:      fakeAppearanceContent{},
+	}
+	gotRoot, views, err := s.RosterView(context.Background(), identity.ActorContext{PlayerID: 7}, time.Unix(200, 0).UTC())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if gotRoot.NextPetID != 2 || len(views) != 1 || views[0].Pet.PetID != 1 || views[0].Appearance.OwnerStateVersion != pet.StateVersion {
+		t.Fatalf("root=%+v views=%+v", gotRoot, views)
 	}
 }

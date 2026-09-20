@@ -139,3 +139,76 @@ func (s RawEquipmentState) Validate() error {
 	}
 	return nil
 }
+
+const AppearanceContentCapability = "CHARACTER_APPEARANCE_CA7"
+
+type AppearanceSkinDefinition struct {
+	ModelID           int64
+	HeroOriginTableID int64
+	SkinSkillID       int64
+}
+
+func (d AppearanceSkinDefinition) Validate() error {
+	if d.ModelID <= 0 || d.HeroOriginTableID <= 0 || d.SkinSkillID < 0 {
+		return errors.New("character asset: invalid appearance skin definition")
+	}
+	return nil
+}
+
+type AppearanceSkinItemDefinition struct {
+	ItemID            int64
+	ModelID           int64
+	HeroOriginTableID int64
+	DurationSeconds   int64
+}
+
+func (d AppearanceSkinItemDefinition) Validate() error {
+	if d.ItemID <= 0 || d.ModelID <= 0 || d.HeroOriginTableID <= 0 || d.DurationSeconds < 0 {
+		return errors.New("character asset: invalid appearance skin item definition")
+	}
+	return nil
+}
+
+type AppearanceLIVEDefinition struct {
+	ModelID             int64
+	HeroOriginTableID   int64
+	CrystalCost         int64
+	ActivationItemID    int64
+	ActivationItemCount int64
+}
+
+func (d AppearanceLIVEDefinition) Validate() error {
+	if d.ModelID <= 0 || d.HeroOriginTableID <= 0 || d.CrystalCost <= 0 || d.ActivationItemID <= 0 || d.ActivationItemCount <= 0 {
+		return errors.New("character asset: invalid appearance LIVE definition")
+	}
+	return nil
+}
+
+type AppearancePetStyleDefinition struct {
+	StyleItemID      int64
+	PetOriginTableID int64
+}
+
+func (d AppearancePetStyleDefinition) Validate() error {
+	if d.StyleItemID <= 0 || d.PetOriginTableID <= 0 {
+		return errors.New("character asset: invalid appearance Pet-style definition")
+	}
+	return nil
+}
+
+// AppearanceContent is the revision-scoped immutable CA7 content seam shared by
+// Hero and Pet owners. It exposes content facts only; mutation ownership remains
+// with the owning Hero/Pet application service.
+type AppearanceContent interface {
+	AppearanceActive(context.Context) (string, bool, error)
+	AppearanceRevision(context.Context, string) (bool, error)
+	AppearanceRevisionTx(context.Context, tx.Queryer, string) (bool, error)
+	AppearanceSkin(context.Context, string, int64) (AppearanceSkinDefinition, bool, error)
+	AppearanceSkinTx(context.Context, tx.Queryer, string, int64) (AppearanceSkinDefinition, bool, error)
+	AppearanceSkinItem(context.Context, string, int64) (AppearanceSkinItemDefinition, bool, error)
+	AppearanceSkinItemTx(context.Context, tx.Queryer, string, int64) (AppearanceSkinItemDefinition, bool, error)
+	AppearanceLIVE(context.Context, string, int64) (AppearanceLIVEDefinition, bool, error)
+	AppearanceLIVETx(context.Context, tx.Queryer, string, int64) (AppearanceLIVEDefinition, bool, error)
+	AppearancePetStyle(context.Context, string, int64) (AppearancePetStyleDefinition, bool, error)
+	AppearancePetStyleTx(context.Context, tx.Queryer, string, int64) (AppearancePetStyleDefinition, bool, error)
+}

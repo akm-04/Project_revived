@@ -14,7 +14,7 @@ func TestCA43BProductionWiringAndSharedEquipmentBoundary(t *testing.T) {
 		t.Fatal(err)
 	}
 	d := string(dispatcher)
-	for _, need := range []string{"case 51:", "PowerUpHero(ctx, actor", "case 57:", "OneClickJinjie(ctx, actor", "heroPromotionResponse(got)", "RosterView(ctx, actor)", "StockRosterView"} {
+	for _, need := range []string{"case 51:", "PowerUpHero(ctx, actor", "case 57:", "OneClickJinjie(ctx, actor", "heroPromotionResponse(got)", "RosterView(ctx, actor, req.Envelope.Operation.StartedAt)", "StockRosterView"} {
 		if !strings.Contains(d, need) {
 			t.Fatalf("CA4-3B dispatcher missing %q", need)
 		}

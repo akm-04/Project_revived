@@ -5,6 +5,7 @@ import (
 	"errors"
 	"net/http"
 	"strconv"
+	"time"
 
 	apphero "gxb.local/backend/v2/internal/application/characterhero"
 	appi5 "gxb.local/backend/v2/internal/application/i5"
@@ -17,7 +18,7 @@ import (
 )
 
 type HeroServicePort interface {
-	RosterView(context.Context, identity.ActorContext) (character.HeroRoot, []apphero.HeroRosterView, error)
+	RosterView(context.Context, identity.ActorContext, time.Time) (character.HeroRoot, []apphero.HeroRosterView, error)
 	SaveSortType(context.Context, identity.ActorContext, int64, operation.Context) error
 	UseExpItem(context.Context, identity.ActorContext, int64, int64, int64, operation.Context) (apphero.ExpResult, error)
 	UseExpItems(context.Context, identity.ActorContext, int64, []appi5.HeroExpItemDebit, operation.Context) (apphero.ExpResult, error)
@@ -59,13 +60,25 @@ func (d HeroDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReque
 				return httpedge.Response{HTTPStatus: http.StatusForbidden, Body: map[string]any{"error": "private_hero_roster"}}
 			}
 		}
-		root, heroes, err := d.Service.RosterView(ctx, actor)
+		root, heroes, err := d.Service.RosterView(ctx, actor, req.Envelope.Operation.StartedAt)
 		if err != nil {
 			return failHero(err)
 		}
 		views := make([]heroproj.RosterHeroView, 0, len(heroes))
 		for _, hero := range heroes {
-			views = append(views, heroproj.RosterHeroView{Hero: hero.Hero, FumoLevels: hero.FumoLevels})
+			views = append(views, heroproj.RosterHeroView{Hero: hero.Hero, FumoLevels: hero.FumoLevels, Appearance: heroproj.AppearanceView{OwnerStateVersion: hero.Appearance.OwnerStateVersion, CurrentSkinID: hero.Appearance.CurrentSkinID, IllusionSkinID: hero.Appearance.IllusionSkinID, Skins: func() []heroproj.QualifiedSkinView {
+				out := make([]heroproj.QualifiedSkinView, 0, len(hero.Appearance.Skins))
+				for _, x := range hero.Appearance.Skins {
+					out = append(out, heroproj.QualifiedSkinView{ModelID: x.ModelID, ExpiresAt: x.ExpiresAt})
+				}
+				return out
+			}(), LIVE: func() []heroproj.QualifiedLIVEView {
+				out := make([]heroproj.QualifiedLIVEView, 0, len(hero.Appearance.LIVE))
+				for _, x := range hero.Appearance.LIVE {
+					out = append(out, heroproj.QualifiedLIVEView{ModelID: x.ModelID, IsShow: x.IsShow})
+				}
+				return out
+			}()}})
 		}
 		body, err := heroproj.StockRosterView(root.SortType, views)
 		if err != nil {

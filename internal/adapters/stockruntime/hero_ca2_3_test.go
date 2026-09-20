@@ -22,7 +22,7 @@ type ca23HeroService struct {
 func (s *ca23HeroService) Roster(context.Context, identity.ActorContext) (character.HeroRoot, []character.Hero, error) {
 	return character.HeroRoot{}, nil, nil
 }
-func (s *ca23HeroService) RosterView(context.Context, identity.ActorContext) (character.HeroRoot, []apphero.HeroRosterView, error) {
+func (s *ca23HeroService) RosterView(_ context.Context, _ identity.ActorContext, observedAt time.Time) (character.HeroRoot, []apphero.HeroRosterView, error) {
 	return character.HeroRoot{}, nil, nil
 }
 func (s *ca23HeroService) SaveSortType(context.Context, identity.ActorContext, int64, operation.Context) error {

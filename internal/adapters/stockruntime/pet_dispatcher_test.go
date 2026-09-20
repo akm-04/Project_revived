@@ -7,6 +7,7 @@ import (
 	"testing"
 	"time"
 
+	"gxb.local/backend/v2/internal/application/characterasset"
 	apppet "gxb.local/backend/v2/internal/application/characterpet"
 	appi5 "gxb.local/backend/v2/internal/application/i5"
 	"gxb.local/backend/v2/internal/domain/character"
@@ -33,8 +34,12 @@ type petServiceFake struct {
 	oneKeyAdvanceResult apppet.OneKeyAdvanceResult
 }
 
-func (s *petServiceFake) Roster(context.Context, identity.ActorContext) (character.PetRoot, []character.Pet, error) {
-	return s.root, append([]character.Pet(nil), s.pets...), s.err
+func (s *petServiceFake) RosterView(_ context.Context, _ identity.ActorContext, observedAt time.Time) (character.PetRoot, []apppet.PetRosterView, error) {
+	out := make([]apppet.PetRosterView, 0, len(s.pets))
+	for _, pet := range s.pets {
+		out = append(out, apppet.PetRosterView{Pet: pet, Appearance: characterasset.EffectivePetAppearance{OwnerStateVersion: pet.StateVersion, ObservedAt: observedAt, ActiveStyle: 0}})
+	}
+	return s.root, out, s.err
 }
 func (s *petServiceFake) Summon(context.Context, identity.ActorContext, int64, operation.Context) (character.Pet, error) {
 	if len(s.pets) > 0 {

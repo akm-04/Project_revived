@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	"gxb.local/backend/v2/internal/application/characterasset"
 	"gxb.local/backend/v2/internal/domain/character"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/ids"
@@ -37,7 +38,9 @@ func (fakeDB) Begin(context.Context, tx.Options) (tx.Tx, error) { return &fakeTx
 
 type gate bool
 
-func (g gate) HeroCoreActive(context.Context) (string, bool, error) { return "rev", bool(g), nil }
+func (g gate) HeroCoreActive(context.Context) (string, bool, error) {
+	return "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", bool(g), nil
+}
 func (g gate) HeroKind(context.Context, string, int64) (character.HeroKind, error) {
 	return character.NormalHero, nil
 }
@@ -68,6 +71,40 @@ func (r rosterProjection) HeroFumoTarget(_ context.Context, _ string, itemID cha
 	return character.HeroFumoTarget{}, errors.New("missing target")
 }
 
+type appearanceContent struct{}
+
+func (appearanceContent) AppearanceActive(context.Context) (string, bool, error) {
+	return "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", true, nil
+}
+func (appearanceContent) AppearanceRevision(context.Context, string) (bool, error) { return true, nil }
+func (appearanceContent) AppearanceRevisionTx(context.Context, tx.Queryer, string) (bool, error) {
+	return true, nil
+}
+func (appearanceContent) AppearanceSkin(context.Context, string, int64) (characterasset.AppearanceSkinDefinition, bool, error) {
+	return characterasset.AppearanceSkinDefinition{}, false, nil
+}
+func (appearanceContent) AppearanceSkinTx(context.Context, tx.Queryer, string, int64) (characterasset.AppearanceSkinDefinition, bool, error) {
+	return characterasset.AppearanceSkinDefinition{}, false, nil
+}
+func (appearanceContent) AppearanceSkinItem(context.Context, string, int64) (characterasset.AppearanceSkinItemDefinition, bool, error) {
+	return characterasset.AppearanceSkinItemDefinition{}, false, nil
+}
+func (appearanceContent) AppearanceSkinItemTx(context.Context, tx.Queryer, string, int64) (characterasset.AppearanceSkinItemDefinition, bool, error) {
+	return characterasset.AppearanceSkinItemDefinition{}, false, nil
+}
+func (appearanceContent) AppearanceLIVE(context.Context, string, int64) (characterasset.AppearanceLIVEDefinition, bool, error) {
+	return characterasset.AppearanceLIVEDefinition{}, false, nil
+}
+func (appearanceContent) AppearanceLIVETx(context.Context, tx.Queryer, string, int64) (characterasset.AppearanceLIVEDefinition, bool, error) {
+	return characterasset.AppearanceLIVEDefinition{}, false, nil
+}
+func (appearanceContent) AppearancePetStyle(context.Context, string, int64) (characterasset.AppearancePetStyleDefinition, bool, error) {
+	return characterasset.AppearancePetStyleDefinition{}, false, nil
+}
+func (appearanceContent) AppearancePetStyleTx(context.Context, tx.Queryer, string, int64) (characterasset.AppearancePetStyleDefinition, bool, error) {
+	return characterasset.AppearancePetStyleDefinition{}, false, nil
+}
+
 type fence struct{ n int }
 
 func (f *fence) FenceActorTx(context.Context, tx.Tx, identity.ActorContext, time.Time) error {
@@ -92,6 +129,13 @@ func (s *store) LockRootTx(context.Context, tx.Tx, identity.PlayerID) (character
 	s.rootLocks++
 	return s.root, nil
 }
+func (s *store) ListHeroSkinEntitlements(context.Context, identity.PlayerID, int64) ([]character.HeroSkinEntitlement, error) {
+	return nil, nil
+}
+func (s *store) ListHeroLIVEEntitlements(context.Context, identity.PlayerID, int64) ([]character.HeroLIVEEntitlement, error) {
+	return nil, nil
+}
+
 func (s *store) SaveSortTypeTx(_ context.Context, _ tx.Tx, r character.HeroRoot, _ int64) error {
 	s.root = r
 	s.saves++
@@ -171,8 +215,8 @@ func TestRosterViewPinsActiveRevisionAndDerivesSixNormalHeroFumoLevels(t *testin
 	st := &store{root: character.HeroRoot{PlayerID: 7, NextPartnerID: 43, StateVersion: 2, CreatedAt: now, UpdatedAt: now}, heroes: []character.Hero{h}}
 	itemID := character.EquipmentTemplateID(20001001)
 	rp := rosterProjection{equipmentOK: true, fumoOK: true, positions: map[int64]character.HeroEquipmentPosition{1: {HeroTableID: h.TableID, Color: h.Color, Slot: 1, ItemID: itemID, OrdinaryEligible: true}}, targets: map[character.EquipmentTemplateID]character.HeroFumoTarget{itemID: {ItemID: itemID, ThresholdIncrements: []int64{20, 40, 40}, TotalCap: 100, ManaPerFumo: 1, StageDeltaByAttr: []map[int64]string{{1: "1"}, {1: "1"}, {1: "1"}}}}}
-	svc := Service{Runner: tx.Runner{DB: fakeDB{}}, Store: st, Fencer: &fence{}, Content: gate(true), Receipts: &receipts{}, ReceiptRead: &receipts{}, RosterProjection: rp}
-	root, views, err := svc.RosterView(context.Background(), testActor(t))
+	svc := Service{Runner: tx.Runner{DB: fakeDB{}}, Store: st, Fencer: &fence{}, Content: gate(true), Receipts: &receipts{}, ReceiptRead: &receipts{}, RosterProjection: rp, AppearanceStore: st, Appearance: appearanceContent{}}
+	root, views, err := svc.RosterView(context.Background(), testActor(t), time.Unix(200, 0).UTC())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -190,8 +234,8 @@ func TestRosterViewPinsActiveRevisionAndDerivesSixNormalHeroFumoLevels(t *testin
 func TestRosterViewFailsClosedWhenDerivedCapabilitiesInactive(t *testing.T) {
 	now := time.Unix(1, 0).UTC()
 	st := &store{root: character.HeroRoot{PlayerID: 7, NextPartnerID: 1, StateVersion: 1, CreatedAt: now, UpdatedAt: now}}
-	svc := Service{Runner: tx.Runner{DB: fakeDB{}}, Store: st, Fencer: &fence{}, Content: gate(true), Receipts: &receipts{}, ReceiptRead: &receipts{}, RosterProjection: rosterProjection{equipmentOK: false, fumoOK: true}}
-	if _, _, err := svc.RosterView(context.Background(), testActor(t)); !errors.Is(err, ErrHeroEquipmentContentInactive) {
+	svc := Service{Runner: tx.Runner{DB: fakeDB{}}, Store: st, Fencer: &fence{}, Content: gate(true), Receipts: &receipts{}, ReceiptRead: &receipts{}, RosterProjection: rosterProjection{equipmentOK: false, fumoOK: true}, AppearanceStore: st, Appearance: appearanceContent{}}
+	if _, _, err := svc.RosterView(context.Background(), testActor(t), time.Unix(200, 0).UTC()); !errors.Is(err, ErrHeroEquipmentContentInactive) {
 		t.Fatalf("err=%v", err)
 	}
 }

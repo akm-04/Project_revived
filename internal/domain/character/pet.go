@@ -60,6 +60,7 @@ type Pet struct {
 	Skills                  PetSkillLevels
 	Birthday                int64
 	IsShow                  bool
+	ActiveStyle             int64
 	CreationContentRevision string
 	StateVersion            int64
 	CreatedAt               time.Time
@@ -67,7 +68,7 @@ type Pet struct {
 }
 
 func (p Pet) ValidatePersistent() error {
-	if !p.PlayerID.Valid() || p.PetID <= 0 || p.TableID <= 0 || p.OriginTableID <= 0 || p.Star < 1 || p.Star > MaxPetStar || p.Level < 1 || p.Exp < 0 || p.Color < 1 || p.Color > 16 || p.Equipment.Validate() != nil || p.Fumo.Validate() != nil || p.Skills.Validate() != nil || p.Birthday < 0 || p.Practice.Validate() != nil || p.StateVersion <= 0 || p.CreatedAt.IsZero() || p.UpdatedAt.IsZero() {
+	if !p.PlayerID.Valid() || p.PetID <= 0 || p.TableID <= 0 || p.OriginTableID <= 0 || p.Star < 1 || p.Star > MaxPetStar || p.Level < 1 || p.Exp < 0 || p.Color < 1 || p.Color > 16 || p.Equipment.Validate() != nil || p.Fumo.Validate() != nil || p.Skills.Validate() != nil || p.Birthday < 0 || p.ActiveStyle < 0 || p.Practice.Validate() != nil || p.StateVersion <= 0 || p.CreatedAt.IsZero() || p.UpdatedAt.IsZero() {
 		return errors.New("character pet: invalid pet")
 	}
 	if len(p.CreationContentRevision) != 64 || strings.ToLower(p.CreationContentRevision) != p.CreationContentRevision {

@@ -271,6 +271,78 @@
       "owner": "content-registry",
       "write_exceptions": []
     },
+    "gxb_content_appearance_live": {
+      "allowed_query_owners": [
+        "content-registry"
+      ],
+      "allowed_read_paths": [
+        "sql/content/",
+        "internal/adapters/postgres/contentstore/",
+        "internal/adapters/postgres/contentqueries/"
+      ],
+      "allowed_write_paths": [
+        "sql/content/",
+        "internal/adapters/postgres/contentstore/",
+        "internal/adapters/postgres/contentqueries/"
+      ],
+      "migration": "migrations/00030_ca7_2_appearance_foundation.sql",
+      "owner": "content-registry",
+      "write_exceptions": []
+    },
+    "gxb_content_appearance_pet_styles": {
+      "allowed_query_owners": [
+        "content-registry"
+      ],
+      "allowed_read_paths": [
+        "sql/content/",
+        "internal/adapters/postgres/contentstore/",
+        "internal/adapters/postgres/contentqueries/"
+      ],
+      "allowed_write_paths": [
+        "sql/content/",
+        "internal/adapters/postgres/contentstore/",
+        "internal/adapters/postgres/contentqueries/"
+      ],
+      "migration": "migrations/00030_ca7_2_appearance_foundation.sql",
+      "owner": "content-registry",
+      "write_exceptions": []
+    },
+    "gxb_content_appearance_skin_items": {
+      "allowed_query_owners": [
+        "content-registry"
+      ],
+      "allowed_read_paths": [
+        "sql/content/",
+        "internal/adapters/postgres/contentstore/",
+        "internal/adapters/postgres/contentqueries/"
+      ],
+      "allowed_write_paths": [
+        "sql/content/",
+        "internal/adapters/postgres/contentstore/",
+        "internal/adapters/postgres/contentqueries/"
+      ],
+      "migration": "migrations/00030_ca7_2_appearance_foundation.sql",
+      "owner": "content-registry",
+      "write_exceptions": []
+    },
+    "gxb_content_appearance_skins": {
+      "allowed_query_owners": [
+        "content-registry"
+      ],
+      "allowed_read_paths": [
+        "sql/content/",
+        "internal/adapters/postgres/contentstore/",
+        "internal/adapters/postgres/contentqueries/"
+      ],
+      "allowed_write_paths": [
+        "sql/content/",
+        "internal/adapters/postgres/contentstore/",
+        "internal/adapters/postgres/contentqueries/"
+      ],
+      "migration": "migrations/00030_ca7_2_appearance_foundation.sql",
+      "owner": "content-registry",
+      "write_exceptions": []
+    },
     "gxb_content_equipment_primitives": {
       "allowed_query_owners": [
         "content-registry"
@@ -1223,6 +1295,24 @@
       "owner": "player-core",
       "write_exceptions": []
     },
+    "player_hero_live_entitlements": {
+      "allowed_query_owners": [
+        "character/hero-core"
+      ],
+      "allowed_read_paths": [
+        "sql/character/",
+        "internal/adapters/postgres/characterstore/",
+        "internal/adapters/postgres/characterqueries/"
+      ],
+      "allowed_write_paths": [
+        "sql/character/",
+        "internal/adapters/postgres/characterstore/",
+        "internal/adapters/postgres/characterqueries/"
+      ],
+      "migration": "migrations/00030_ca7_2_appearance_foundation.sql",
+      "owner": "character/hero-core",
+      "write_exceptions": []
+    },
     "player_hero_practice_candidates": {
       "allowed_query_owners": [
         "character/practice"
@@ -1256,6 +1346,24 @@
         "internal/adapters/postgres/characterqueries/"
       ],
       "migration": "migrations/00014_ca2_hero_foundation.sql",
+      "owner": "character/hero-core",
+      "write_exceptions": []
+    },
+    "player_hero_skin_entitlements": {
+      "allowed_query_owners": [
+        "character/hero-core"
+      ],
+      "allowed_read_paths": [
+        "sql/character/",
+        "internal/adapters/postgres/characterstore/",
+        "internal/adapters/postgres/characterqueries/"
+      ],
+      "allowed_write_paths": [
+        "sql/character/",
+        "internal/adapters/postgres/characterstore/",
+        "internal/adapters/postgres/characterqueries/"
+      ],
+      "migration": "migrations/00030_ca7_2_appearance_foundation.sql",
       "owner": "character/hero-core",
       "write_exceptions": []
     },
@@ -1342,6 +1450,24 @@
         "internal/adapters/postgres/characterqueries/"
       ],
       "migration": "migrations/00016_ca3_pet_foundation.sql",
+      "owner": "character/pet-core",
+      "write_exceptions": []
+    },
+    "player_pet_style_entitlements": {
+      "allowed_query_owners": [
+        "character/pet-core"
+      ],
+      "allowed_read_paths": [
+        "sql/character/",
+        "internal/adapters/postgres/characterstore/",
+        "internal/adapters/postgres/characterqueries/"
+      ],
+      "allowed_write_paths": [
+        "sql/character/",
+        "internal/adapters/postgres/characterstore/",
+        "internal/adapters/postgres/characterqueries/"
+      ],
+      "migration": "migrations/00030_ca7_2_appearance_foundation.sql",
       "owner": "character/pet-core",
       "write_exceptions": []
     },

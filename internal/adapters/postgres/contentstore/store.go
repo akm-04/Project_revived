@@ -172,12 +172,21 @@ func (Store) InsertPractice(ctx context.Context, t tx.Tx, b registry.Bundle) (in
 	return n, err
 }
 
+func (Store) InsertAppearance(ctx context.Context, t tx.Tx, b registry.Bundle) (int64, error) {
+	if t == nil {
+		return 0, errors.New("content store: nil transaction")
+	}
+	var n int64
+	err := t.QueryRow(ctx, contentqueries.InsertContentAppearance, b.RevisionID(), string(b.AppearanceJSON())).Scan(&n)
+	return n, err
+}
+
 func (Store) VerifyRevision(ctx context.Context, q tx.Queryer, b registry.Bundle) (registry.Verification, error) {
 	if q == nil {
 		return registry.Verification{}, errors.New("content store: nil queryer")
 	}
 	var v registry.Verification
-	err := q.QueryRow(ctx, contentqueries.VerifyContentRevision, b.RevisionID(), b.SchemaVersion(), b.CompilerVersion(), b.ParserVersion(), string(b.ManifestJSON()), string(b.ResourcesJSON()), string(b.ProgressionJSON()), string(b.FunctionGatesJSON()), string(b.ObjectivesJSON()), string(b.HeroCoreJSON()), string(b.PetCoreJSON()), string(b.PetAcquisitionJSON()), string(b.PetProgressionJSON()), string(b.EquipmentPrimitivesJSON()), string(b.HeroEquipmentJSON()), string(b.HeroFumoJSON()), string(b.HeroPromotionRestorationJSON()), string(b.PetEquipmentJSON()), string(b.PetPromotionRestorationJSON()), string(b.SuperEquipmentJSON()), string(b.PracticeJSON())).Scan(&v.Exact, &v.ResourceCount, &v.ProgressionCount, &v.FunctionGateCount, &v.ObjectiveCount, &v.HeroCount, &v.PetCount, &v.PetAcquisitionCount, &v.PetProgressionCount, &v.EquipmentPrimitiveCount, &v.HeroEquipmentCount, &v.SuperEquipmentCount, &v.HeroFumoTargetCount, &v.HeroFumoMaterialCount, &v.HeroPromotionRestorationEquipmentCount, &v.HeroPromotionRestorationFractionCount, &v.HeroPromotionRestorationDenominationCount, &v.PetEquipmentCount, &v.PetPromotionRestorationEquipmentCount, &v.PracticeCount)
+	err := q.QueryRow(ctx, contentqueries.VerifyContentRevision, b.RevisionID(), b.SchemaVersion(), b.CompilerVersion(), b.ParserVersion(), string(b.ManifestJSON()), string(b.ResourcesJSON()), string(b.ProgressionJSON()), string(b.FunctionGatesJSON()), string(b.ObjectivesJSON()), string(b.HeroCoreJSON()), string(b.PetCoreJSON()), string(b.PetAcquisitionJSON()), string(b.PetProgressionJSON()), string(b.EquipmentPrimitivesJSON()), string(b.HeroEquipmentJSON()), string(b.HeroFumoJSON()), string(b.HeroPromotionRestorationJSON()), string(b.PetEquipmentJSON()), string(b.PetPromotionRestorationJSON()), string(b.SuperEquipmentJSON()), string(b.PracticeJSON()), string(b.AppearanceJSON())).Scan(&v.Exact, &v.ResourceCount, &v.ProgressionCount, &v.FunctionGateCount, &v.ObjectiveCount, &v.HeroCount, &v.PetCount, &v.PetAcquisitionCount, &v.PetProgressionCount, &v.EquipmentPrimitiveCount, &v.HeroEquipmentCount, &v.SuperEquipmentCount, &v.HeroFumoTargetCount, &v.HeroFumoMaterialCount, &v.HeroPromotionRestorationEquipmentCount, &v.HeroPromotionRestorationFractionCount, &v.HeroPromotionRestorationDenominationCount, &v.PetEquipmentCount, &v.PetPromotionRestorationEquipmentCount, &v.PracticeCount, &v.AppearanceCount)
 	return v, err
 }
 

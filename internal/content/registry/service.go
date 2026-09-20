@@ -105,7 +105,7 @@ func (s Service) EnsureBuiltinInstalled(ctx context.Context, op operation.Contex
 			return err
 		}
 		if inserted {
-			wantR, wantP, wantF, wantO, wantH, wantPet, wantPetAcquisition, wantPetProgression, wantEquipmentPrimitives, wantHeroEquipment, wantSuperEquipment, wantHeroFumoTargets, wantHeroFumoMaterials, wantRestorationEquipment, wantRestorationFractions, wantRestorationDenominations, wantPetEquipment, wantPetRestorationEquipment, wantPractice := b.ExpectedCounts()
+			wantR, wantP, wantF, wantO, wantH, wantPet, wantPetAcquisition, wantPetProgression, wantEquipmentPrimitives, wantHeroEquipment, wantSuperEquipment, wantHeroFumoTargets, wantHeroFumoMaterials, wantRestorationEquipment, wantRestorationFractions, wantRestorationDenominations, wantPetEquipment, wantPetRestorationEquipment, wantPractice, wantAppearance := b.ExpectedCounts()
 			gotR, err := s.Repo.InsertResources(tctx, scope.Tx, b)
 			if err != nil {
 				return err
@@ -217,6 +217,13 @@ func (s Service) EnsureBuiltinInstalled(ctx context.Context, op operation.Contex
 			}
 			if gotPractice != wantPractice {
 				return fmt.Errorf("content registry: Practice insert count=%d want=%d", gotPractice, wantPractice)
+			}
+			gotAppearance, err := s.Repo.InsertAppearance(tctx, scope.Tx, b)
+			if err != nil {
+				return err
+			}
+			if gotAppearance != wantAppearance {
+				return fmt.Errorf("content registry: appearance insert count=%d want=%d", gotAppearance, wantAppearance)
 			}
 		}
 		v, err := s.Repo.VerifyRevision(tctx, scope.Tx, b)

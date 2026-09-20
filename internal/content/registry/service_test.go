@@ -223,6 +223,13 @@ func (r repo) InsertPractice(_ context.Context, x tx.Tx, b Bundle) (int64, error
 	t.installed[b.RevisionID()] = v
 	return b.practiceCount, nil
 }
+func (r repo) InsertAppearance(_ context.Context, x tx.Tx, b Bundle) (int64, error) {
+	t := x.(*modelTx)
+	v := t.installed[b.RevisionID()]
+	v.AppearanceCount = b.appearanceCount
+	t.installed[b.RevisionID()] = v
+	return b.appearanceCount, nil
+}
 func (r repo) VerifyRevision(_ context.Context, q tx.Queryer, b Bundle) (Verification, error) {
 	if t, ok := q.(*modelTx); ok {
 		return t.installed[b.RevisionID()], nil
@@ -474,9 +481,9 @@ func TestRawBundleZeroFalseAndIsolation(t *testing.T) {
 	if zero != 3 || noMail != 1117 {
 		t.Fatal(zero, noMail)
 	}
-	r, p, f, o, h, pet, petAcq, petProg, equipment, heroEquipment, superEquipment, heroFumoTargets, heroFumoMaterials, restorationEquipment, restorationFractions, restorationDenominations, petEquipment, petRestorationEquipment, practice := b.ExpectedCounts()
-	if r != 5556 || p != 100 || f != 99 || o != 0 || h != 568 || pet != 54 || petAcq != 27 || petProg != 54 || equipment != 1176 || heroEquipment != 53280 || superEquipment != 84 || heroFumoTargets != 359 || heroFumoMaterials != 516 || restorationEquipment != 195 || restorationFractions != 5 || restorationDenominations != 3 || petEquipment != 2592 || petRestorationEquipment != 73 || practice != 1889 {
-		t.Fatal(r, p, f, o, h, pet, petAcq, petProg, equipment, heroEquipment, superEquipment, heroFumoTargets, heroFumoMaterials, restorationEquipment, restorationFractions, restorationDenominations, petEquipment, petRestorationEquipment, practice)
+	r, p, f, o, h, pet, petAcq, petProg, equipment, heroEquipment, superEquipment, heroFumoTargets, heroFumoMaterials, restorationEquipment, restorationFractions, restorationDenominations, petEquipment, petRestorationEquipment, practice, appearance := b.ExpectedCounts()
+	if r != 5556 || p != 100 || f != 99 || o != 0 || h != 568 || pet != 54 || petAcq != 27 || petProg != 54 || equipment != 1176 || heroEquipment != 53280 || superEquipment != 84 || heroFumoTargets != 359 || heroFumoMaterials != 516 || restorationEquipment != 195 || restorationFractions != 5 || restorationDenominations != 3 || petEquipment != 2592 || petRestorationEquipment != 73 || practice != 1889 || appearance != 542 {
+		t.Fatal(r, p, f, o, h, pet, petAcq, petProg, equipment, heroEquipment, superEquipment, heroFumoTargets, heroFumoMaterials, restorationEquipment, restorationFractions, restorationDenominations, petEquipment, petRestorationEquipment, practice, appearance)
 	}
 	raw := b.ManifestJSON()
 	raw[0] = '!'

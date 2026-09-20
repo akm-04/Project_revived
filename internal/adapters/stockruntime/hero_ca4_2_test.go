@@ -5,6 +5,7 @@ import (
 	"errors"
 	"reflect"
 	"testing"
+	"time"
 
 	apphero "gxb.local/backend/v2/internal/application/characterhero"
 	"gxb.local/backend/v2/internal/domain/character"
@@ -62,8 +63,17 @@ func (s *ca42HeroService) FeedFumo(_ context.Context, _ identity.ActorContext, p
 	return s.fumoResult, s.fumoErr
 }
 
-func (s *ca42HeroService) RosterView(context.Context, identity.ActorContext) (character.HeroRoot, []apphero.HeroRosterView, error) {
-	return s.rosterRoot, append([]apphero.HeroRosterView(nil), s.rosterViews...), nil
+func (s *ca42HeroService) RosterView(_ context.Context, _ identity.ActorContext, observedAt time.Time) (character.HeroRoot, []apphero.HeroRosterView, error) {
+	out := append([]apphero.HeroRosterView(nil), s.rosterViews...)
+	for i := range out {
+		if out[i].Appearance.ObservedAt.IsZero() {
+			out[i].Appearance.OwnerStateVersion = out[i].Hero.StateVersion
+			out[i].Appearance.ObservedAt = observedAt
+			out[i].Appearance.CurrentSkinID = out[i].Hero.CurrentSkinID
+			out[i].Appearance.IllusionSkinID = out[i].Hero.IllusionSkinID
+		}
+	}
+	return s.rosterRoot, out, nil
 }
 func (s *ca42HeroService) PowerUpHero(_ context.Context, _ identity.ActorContext, partnerID int64, _ operation.Context) (apphero.HeroPromotionResult, error) {
 	s.promotePartner = partnerID

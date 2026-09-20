@@ -27,6 +27,15 @@ type Store interface {
 	SavePetStateTx(context.Context, tx.Tx, character.Pet, int64) error
 }
 
+type PetAppearanceStore interface {
+	ListPetStyleEntitlements(context.Context, identity.PlayerID, int64) ([]character.PetStyleEntitlement, error)
+}
+
+type PetRosterView struct {
+	Pet        character.Pet
+	Appearance characterasset.EffectivePetAppearance
+}
+
 type ActorFencer interface {
 	FenceActorTx(context.Context, tx.Tx, identity.ActorContext, time.Time) error
 }
@@ -73,6 +82,8 @@ type Service struct {
 	PromotionResources  appi5.TxPromotionResourceSettler
 	StrictRestoration   appi5.TxStrictRestorationSettler
 	RestorationModifier characterasset.RestorationModifier
+	AppearanceStore     PetAppearanceStore
+	Appearance          characterasset.AppearanceContent
 }
 
 func profile() tx.Profile {
@@ -97,6 +108,47 @@ func (s Service) validateProgression() error {
 	}
 	return nil
 }
+
+func (s Service) RosterView(ctx context.Context, actor identity.ActorContext, observedAt time.Time) (character.PetRoot, []PetRosterView, error) {
+	if err := s.validateRead(); err != nil {
+		return character.PetRoot{}, nil, err
+	}
+	if !actor.PlayerID.Valid() || observedAt.IsZero() || s.AppearanceStore == nil || s.Appearance == nil {
+		return character.PetRoot{}, nil, errors.New("character pet: invalid appearance roster request")
+	}
+	revision, active, err := s.Appearance.AppearanceActive(ctx)
+	if err != nil {
+		return character.PetRoot{}, nil, err
+	}
+	if !active {
+		return character.PetRoot{}, nil, errors.New("character pet: appearance content inactive")
+	}
+	root, err := s.Store.ReadPetRoot(ctx, actor.PlayerID)
+	if err != nil {
+		return root, nil, err
+	}
+	pets, err := s.Store.ListPets(ctx, actor.PlayerID)
+	if err != nil {
+		return root, nil, err
+	}
+	out := make([]PetRosterView, 0, len(pets))
+	for i := range pets {
+		if err := pets[i].ValidatePersistent(); err != nil {
+			return root, nil, err
+		}
+		styles, err := s.AppearanceStore.ListPetStyleEntitlements(ctx, actor.PlayerID, pets[i].PetID)
+		if err != nil {
+			return root, nil, err
+		}
+		appearance, err := characterasset.BuildEffectivePetAppearance(ctx, revision, pets[i], styles, observedAt, s.Appearance)
+		if err != nil {
+			return root, nil, err
+		}
+		out = append(out, PetRosterView{Pet: pets[i], Appearance: appearance})
+	}
+	return root, out, nil
+}
+
 func (s Service) Roster(ctx context.Context, actor identity.ActorContext) (character.PetRoot, []character.Pet, error) {
 	if err := s.validateRead(); err != nil {
 		return character.PetRoot{}, nil, err

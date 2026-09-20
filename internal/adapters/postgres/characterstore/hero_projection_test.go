@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"gxb.local/backend/v2/internal/adapters/postgres/characterqueries"
+	"gxb.local/backend/v2/internal/application/characterasset"
 	"gxb.local/backend/v2/internal/domain/character"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/tx"
@@ -66,6 +67,8 @@ func (q *heroBootstrapQueryer) QueryRow(_ context.Context, query string, _ ...an
 				PracticeStr             int64     `json:"practice_str"`
 				PracticeInt             int64     `json:"practice_int"`
 				PracticeAgi             int64     `json:"practice_agi"`
+				CurrentSkinID           int64     `json:"current_skin_id"`
+				IllusionSkinID          int64     `json:"illusion_skin_id"`
 				StateVersion            int64     `json:"state_version"`
 				CreationContentRevision string    `json:"creation_content_revision"`
 				CreatedAt               time.Time `json:"created_at"`
@@ -76,7 +79,7 @@ func (q *heroBootstrapQueryer) QueryRow(_ context.Context, query string, _ ...an
 				rows = append(rows, row{PlayerID: int64(h.PlayerID), PartnerID: h.PartnerID, TableID: h.TableID, OriginTableID: h.OriginTableID, Star: h.Star, Level: h.Level, Exp: h.Exp, Color: h.Color,
 					Equip1: h.Equipment[0], Equip2: h.Equipment[1], Equip3: h.Equipment[2], Equip4: h.Equipment[3], Equip5: h.Equipment[4], Equip6: h.Equipment[5],
 					Fumo1: h.Fumo[0], Fumo2: h.Fumo[1], Fumo3: h.Fumo[2], Fumo4: h.Fumo[3], Fumo5: h.Fumo[4], Fumo6: h.Fumo[5],
-					PracticeStr: h.Practice[0], PracticeInt: h.Practice[1], PracticeAgi: h.Practice[2], StateVersion: h.StateVersion,
+					PracticeStr: h.Practice[0], PracticeInt: h.Practice[1], PracticeAgi: h.Practice[2], CurrentSkinID: h.CurrentSkinID, IllusionSkinID: h.IllusionSkinID, StateVersion: h.StateVersion,
 					CreationContentRevision: h.CreationContentRevision, CreatedAt: h.CreatedAt, UpdatedAt: h.UpdatedAt})
 			}
 			b, err := json.Marshal(rows)
@@ -86,18 +89,24 @@ func (q *heroBootstrapQueryer) QueryRow(_ context.Context, query string, _ ...an
 			*(dest[0].(*string)) = string(b)
 			return nil
 		}}
+	case characterqueries.ListHeroSkinEntitlements, characterqueries.ListHeroLIVEEntitlements:
+		return heroBootstrapRow{scan: func(dest ...any) error {
+			*(dest[0].(*string)) = "[]"
+			return nil
+		}}
 	default:
 		return heroBootstrapRow{scan: func(...any) error { return errors.New("unexpected query") }}
 	}
 }
 
 type heroBootstrapContent struct {
-	revision  string
-	core      bool
-	equipment bool
-	fumo      bool
-	err       error
-	kind      character.HeroKind
+	revision   string
+	core       bool
+	equipment  bool
+	fumo       bool
+	appearance bool
+	err        error
+	kind       character.HeroKind
 }
 
 func (c heroBootstrapContent) HeroCoreActiveTx(context.Context, tx.Queryer) (string, bool, error) {
@@ -118,6 +127,22 @@ func (c heroBootstrapContent) HeroFumoRevisionTx(context.Context, tx.Queryer, st
 	}
 	return c.fumo, nil
 }
+func (c heroBootstrapContent) AppearanceRevisionTx(context.Context, tx.Queryer, string) (bool, error) {
+	if c.err != nil {
+		return false, c.err
+	}
+	return c.appearance, nil
+}
+func (heroBootstrapContent) AppearanceSkinTx(context.Context, tx.Queryer, string, int64) (characterasset.AppearanceSkinDefinition, bool, error) {
+	return characterasset.AppearanceSkinDefinition{}, false, nil
+}
+func (heroBootstrapContent) AppearanceLIVETx(context.Context, tx.Queryer, string, int64) (characterasset.AppearanceLIVEDefinition, bool, error) {
+	return characterasset.AppearanceLIVEDefinition{}, false, nil
+}
+func (heroBootstrapContent) AppearancePetStyleTx(context.Context, tx.Queryer, string, int64) (characterasset.AppearancePetStyleDefinition, bool, error) {
+	return characterasset.AppearancePetStyleDefinition{}, false, nil
+}
+
 func (c heroBootstrapContent) HeroKindTx(context.Context, tx.Queryer, string, int64) (character.HeroKind, error) {
 	if c.err != nil {
 		return "", c.err
@@ -143,7 +168,7 @@ func heroBootstrapFixture() (character.HeroRoot, character.Hero) {
 func TestHeroBootstrapProjectionActiveOverlaysCanonicalMID49(t *testing.T) {
 	root, h := heroBootstrapFixture()
 	q := &heroBootstrapQueryer{root: root, heroes: []character.Hero{h}}
-	content := heroBootstrapContent{revision: h.CreationContentRevision, core: true, equipment: true, fumo: true, kind: character.SuperHero}
+	content := heroBootstrapContent{revision: h.CreationContentRevision, core: true, equipment: true, fumo: true, appearance: true, kind: character.SuperHero}
 	detail := map[string]any{"49": map[string]any{"sort_type": int64(0), "heros": map[string]any{}}}
 	p := HeroBootstrapProjection{Content: content}
 	if err := p.OverlayMID1(context.Background(), q, identity.ActorContext{PlayerID: 7}, false, time.Unix(200, 0).UTC(), detail); err != nil {
@@ -167,9 +192,10 @@ func TestHeroBootstrapProjectionActiveOverlaysCanonicalMID49(t *testing.T) {
 func TestHeroBootstrapProjectionInactivePreservesFrozenBaselineWithoutOwnerReads(t *testing.T) {
 	root, h := heroBootstrapFixture()
 	for _, tc := range []heroBootstrapContent{
-		{revision: h.CreationContentRevision, core: false, equipment: true, fumo: true, kind: character.NormalHero},
-		{revision: h.CreationContentRevision, core: true, equipment: false, fumo: true, kind: character.NormalHero},
-		{revision: h.CreationContentRevision, core: true, equipment: true, fumo: false, kind: character.NormalHero},
+		{revision: h.CreationContentRevision, core: false, equipment: true, fumo: true, appearance: true, kind: character.NormalHero},
+		{revision: h.CreationContentRevision, core: true, equipment: false, fumo: true, appearance: true, kind: character.NormalHero},
+		{revision: h.CreationContentRevision, core: true, equipment: true, fumo: false, appearance: true, kind: character.NormalHero},
+		{revision: h.CreationContentRevision, core: true, equipment: true, fumo: true, appearance: false, kind: character.NormalHero},
 	} {
 		q := &heroBootstrapQueryer{root: root, heroes: []character.Hero{h}}
 		baseline := map[string]any{"sort_type": int64(0), "heros": map[string]any{}}
@@ -200,14 +226,14 @@ func TestHeroBootstrapProjectionMatchesDirectMID49StockProjection(t *testing.T) 
 	root, h := heroBootstrapFixture()
 	h.Kind = character.NormalHero
 	q := &heroBootstrapQueryer{root: root, heroes: []character.Hero{h}}
-	content := heroBootstrapContent{revision: h.CreationContentRevision, core: true, equipment: true, fumo: true, kind: character.NormalHero}
+	content := heroBootstrapContent{revision: h.CreationContentRevision, core: true, equipment: true, fumo: true, appearance: true, kind: character.NormalHero}
 	detail := map[string]any{"49": map[string]any{"sort_type": int64(0), "heros": map[string]any{}}}
 	if err := (HeroBootstrapProjection{Content: content}).OverlayMID1(context.Background(), q, identity.ActorContext{PlayerID: 7}, false, time.Unix(200, 0).UTC(), detail); err != nil {
 		t.Fatal(err)
 	}
 	wantHero := h
 	wantHero.Kind = character.NormalHero
-	want, err := heroproj.StockRosterView(root.SortType, []heroproj.RosterHeroView{{Hero: wantHero}})
+	want, err := heroproj.StockRosterView(root.SortType, []heroproj.RosterHeroView{{Hero: wantHero, Appearance: heroproj.AppearanceView{OwnerStateVersion: wantHero.StateVersion, CurrentSkinID: 0, IllusionSkinID: wantHero.IllusionSkinID}}})
 	if err != nil {
 		t.Fatal(err)
 	}

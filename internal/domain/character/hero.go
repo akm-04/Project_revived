@@ -64,6 +64,8 @@ type Hero struct {
 	Equipment               HeroEquipmentSlots
 	Fumo                    HeroFumoSlots
 	Practice                PracticeAttrs
+	CurrentSkinID           int64
+	IllusionSkinID          int64
 	CreationContentRevision string
 	StateVersion            int64
 	CreatedAt               time.Time
@@ -73,7 +75,7 @@ type Hero struct {
 func (h Hero) Ref() HeroRef { return HeroRef{PlayerID: h.PlayerID, PartnerID: h.PartnerID} }
 
 func (h Hero) ValidatePersistent() error {
-	if !h.PlayerID.Valid() || h.PartnerID <= 0 || h.TableID <= 0 || h.OriginTableID <= 0 || h.Star < 1 || h.Star > MaxHeroStar || h.Level < 1 || h.Exp < 0 || h.Color < 1 || h.Color > 16 || h.StateVersion <= 0 || h.CreatedAt.IsZero() || h.UpdatedAt.IsZero() {
+	if !h.PlayerID.Valid() || h.PartnerID <= 0 || h.TableID <= 0 || h.OriginTableID <= 0 || h.Star < 1 || h.Star > MaxHeroStar || h.Level < 1 || h.Exp < 0 || h.Color < 1 || h.Color > 16 || h.CurrentSkinID < 0 || h.IllusionSkinID < -1 || h.StateVersion <= 0 || h.CreatedAt.IsZero() || h.UpdatedAt.IsZero() {
 		return errors.New("character hero: invalid hero")
 	}
 	if err := h.Equipment.Validate(); err != nil {
