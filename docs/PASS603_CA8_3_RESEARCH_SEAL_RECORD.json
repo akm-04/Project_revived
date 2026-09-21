@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "pass": "603.0",
+  "stage": "CA8-3",
+  "status": "RESEARCH_CONTRACT_ACCEPTED_IMPLEMENTATION_AUTHORIZED",
+  "authority_at_research_start": {
+    "pass": "602.0",
+    "passmap_sha256": "84f09da0afe309e36956a65e35b6e67e407646153e0343902b562367e7f3a59c"
+  },
+  "accepted_backend_at_research_gate": {
+    "artifact": "gxb-backend-v2-v0.85.0-pass602-ca8-2-local-accepted.zip",
+    "sha256": "a0787575035494437f31150fea283ea212cefd80370faa8d8231396f6f3a23ae",
+    "git": "f61f3ed7d6d80424af79923f1ea1d704846df857"
+  },
+  "contract_package": {
+    "artifact": "CA8_3_PREIMPLEMENTATION_CONTRACT_R1.zip",
+    "sha256": "92632299d9433d7a0e4664086e61c56bb891810e9b89c8544642b215858e0197"
+  },
+  "research_result": "GREEN",
+  "foundation_audit": "I0_I6_AND_CA1_CA8_2_REUSED_NO_REOPEN",
+  "implementation_authorized": true,
+  "authorization_basis": "User explicitly authorized CA8-3 implementation once the preimplementation research was sufficient; independent preimplementation reality check is GREEN.",
+  "authorized_scope": "CA8_3_OWNED_PER_REF_COMPOSITE_SAVED_REFERENCE_EXPORT_AND_SUPER_EQUIPMENT_OBSERVATION_ONLY",
+  "forbidden": [
+    "schema/migration/MID/receipt/new durable owner",
+    "borrowed/synthetic actor business behavior",
+    "I7B/I8/I9 consumer profile implementation",
+    "consumer-specific requiredness",
+    "final battle stats",
+    "eager full-roster materialization"
+  ],
+  "next": "Implement and locally qualify CA8-3 against the frozen R1 contract; CA8-9 retains accumulated exact/native PostgreSQL gate."
+}

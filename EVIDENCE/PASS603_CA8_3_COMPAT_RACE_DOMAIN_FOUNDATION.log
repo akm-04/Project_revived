@@ -1,0 +1,31 @@
+?   	gxb.local/backend/v2/internal/domain/combat	[no test files]
+?   	gxb.local/backend/v2/internal/domain/commerce	[no test files]
+?   	gxb.local/backend/v2/internal/domain/control	[no test files]
+ok  	gxb.local/backend/v2/internal/domain/activity	1.014s
+?   	gxb.local/backend/v2/internal/domain/guild	[no test files]
+ok  	gxb.local/backend/v2/internal/domain/character	1.016s
+ok  	gxb.local/backend/v2/internal/domain/economy	1.013s
+ok  	gxb.local/backend/v2/internal/domain/generation	1.015s
+ok  	gxb.local/backend/v2/internal/domain/grant	1.016s
+?   	gxb.local/backend/v2/internal/domain/modes	[no test files]
+ok  	gxb.local/backend/v2/internal/domain/identity	1.012s
+?   	gxb.local/backend/v2/internal/domain/profile	[no test files]
+ok  	gxb.local/backend/v2/internal/domain/logicalserver	1.013s
+ok  	gxb.local/backend/v2/internal/domain/mail	1.016s
+ok  	gxb.local/backend/v2/internal/domain/objective	1.019s
+?   	gxb.local/backend/v2/internal/domain/social	[no test files]
+?   	gxb.local/backend/v2/internal/foundation/audit	[no test files]
+?   	gxb.local/backend/v2/internal/foundation/clock	[no test files]
+ok  	gxb.local/backend/v2/internal/domain/player	1.026s
+ok  	gxb.local/backend/v2/internal/domain/realtimeauth	1.016s
+ok  	gxb.local/backend/v2/internal/domain/redeem	1.018s
+ok  	gxb.local/backend/v2/internal/foundation/config	1.016s
+ok  	gxb.local/backend/v2/internal/foundation/ids	1.018s
+ok  	gxb.local/backend/v2/internal/foundation/lockkey	1.021s
+ok  	gxb.local/backend/v2/internal/foundation/obligation	1.024s
+ok  	gxb.local/backend/v2/internal/foundation/observability	1.027s
+ok  	gxb.local/backend/v2/internal/foundation/operation	1.017s
+ok  	gxb.local/backend/v2/internal/foundation/policy	1.021s
+ok  	gxb.local/backend/v2/internal/foundation/receipt	1.128s
+ok  	gxb.local/backend/v2/internal/foundation/replaycatalog	1.016s
+ok  	gxb.local/backend/v2/internal/foundation/tx	1.025s

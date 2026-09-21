@@ -1,0 +1,80 @@
+{
+  "schema_version": 1,
+  "pass": "603.0",
+  "stage": "CA8-3",
+  "status": "LOCAL_ACCEPTANCE_CANDIDATE",
+  "parent_backend_archive_sha256": "a0787575035494437f31150fea283ea212cefd80370faa8d8231396f6f3a23ae",
+  "parent_git": "f61f3ed7d6d80424af79923f1ea1d704846df857",
+  "pass602_authority_sha256": "84f09da0afe309e36956a65e35b6e67e407646153e0343902b562367e7f3a59c",
+  "ca8_3_contract_package_sha256": "92632299d9433d7a0e4664086e61c56bb891810e9b89c8544642b215858e0197",
+  "implementation_revision_algorithm": "sha256(sorted(path UTF-8 || NUL || final file bytes) over CA8-3 implementation/test footprint)",
+  "implementation_revision_sha256": "5b55dcee10ec72a6bd14c362d3ed284bd44af5c7e5f97795c24fb6078bce061b",
+  "changed_implementation_files": [
+    {
+      "path": "internal/adapters/postgres/contentstore/super_equipment.go",
+      "sha256": "71a3ead9e91ed0782d68f70da9815196f79e53c35605206417b4a4d048254116",
+      "bytes": 3586
+    },
+    {
+      "path": "internal/application/characterasset/owned_composite.go",
+      "sha256": "422f1cc951aff40ad2854609ca8f418797cef84f9206c12554849d81d7954504",
+      "bytes": 14879
+    },
+    {
+      "path": "internal/application/characterasset/owned_composite_test.go",
+      "sha256": "b1ce851a23d0d587dbcc6f52b66f67be0e735da184dcd341a61d94875df41702",
+      "bytes": 11583
+    },
+    {
+      "path": "internal/application/characterhero/ca8_observation_adapters.go",
+      "sha256": "c6db27fea0366115b13fb91fdd951755ec57e7535645f509e0709a513f3f74f2",
+      "bytes": 3170
+    },
+    {
+      "path": "internal/application/characterhero/ca8_observation_adapters_test.go",
+      "sha256": "0e32a82ff20fc9fbbf190f9e8f8702d5edffa614c01303e298adef960952561c",
+      "bytes": 2372
+    },
+    {
+      "path": "internal/application/characterhero/equipment_state.go",
+      "sha256": "37bbd3ebcb6286cdff1fb7bdffbda5e0effb7f073ec94c742b3bb4cb1c4588aa",
+      "bytes": 5538
+    },
+    {
+      "path": "internal/application/characterhero/equipment_state_test.go",
+      "sha256": "1a6700e5d1b333a4d4d05cb5b1004c2fc1ac66790e68be2abac69e2b36389e0e",
+      "bytes": 7361
+    },
+    {
+      "path": "internal/application/characterpet/ca8_observation_adapters.go",
+      "sha256": "5299af2e43ac5513daa91e099ff1548f054349ba2f7041a9a037fe567d59102c",
+      "bytes": 3107
+    },
+    {
+      "path": "internal/application/characterpet/ca8_observation_adapters_test.go",
+      "sha256": "335fe5f720393e8616b019265fb111604b42c19e49c90a4d4c9819a5a993637c",
+      "bytes": 1655
+    }
+  ],
+  "scope": [
+    "compose immutable owned Hero/Pet observations per requested ref under caller-owned CoherentReadScope",
+    "enforce exact actor StateVersion/table/content-revision/observation-time coherence across CA2/3 base, CA4 equipment, CA6 Practice and CA7 appearance providers",
+    "export CA5 SavedPresetReferenceState independently with order/duplicates/empty aggregate preserved",
+    "map only explicit provider-inactive sentinels to local inactive disposition; hard provider/storage/integrity errors propagate",
+    "complete CA4-deferred Super-Hero RawEquipmentState observation using fixed pinned slot mapping and raw N>0 => enhancement N-1 with RawFumo=0",
+    "keep Super equipment capability validation on caller-owned Queryer through SuperEquipmentRevisionTx"
+  ],
+  "non_changes": [
+    "no schema or migration",
+    "no MID or wire change",
+    "no receipt family",
+    "no new durable owner",
+    "no nested transaction",
+    "no eager roster snapshot or selected/current formation authority",
+    "no borrowed/synthetic actor business behavior",
+    "no final battle-stat compiler",
+    "no consumer-specific REQUIRED_BUT_UNAVAILABLE policy",
+    "no dependency pin/toolchain change"
+  ],
+  "migration_high_water": "00030_ca7_2_appearance_foundation.sql"
+}

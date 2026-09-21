@@ -1,0 +1,11 @@
+===== TestManifestAndProviderFailClosed =====
+ok  	gxb.local/backend/v2/internal/content/registry	2.792s
+EXIT=0
+===== TestRawBundleZeroFalseAndIsolation =====
+ok  	gxb.local/backend/v2/internal/content/registry	3.000s
+EXIT=0
+===== TestStartupOrderAndFailure =====
+ok  	gxb.local/backend/v2/internal/content/registry	7.972s
+EXIT=0
+
+===== full package after split =====

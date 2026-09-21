@@ -1,0 +1,16 @@
+===== TestExactInstallAndCorruptSameID =====
+ok  	gxb.local/backend/v2/internal/content/registry	4.399s
+EXIT=0
+===== TestInstallRollback =====
+ok  	gxb.local/backend/v2/internal/content/registry	3.152s
+EXIT=0
+===== TestConcurrentInstallModel =====
+ok  	gxb.local/backend/v2/internal/content/registry	3.160s
+EXIT=0
+===== TestBootstrapNeverSwitchesAndCAS =====
+ok  	gxb.local/backend/v2/internal/content/registry	5.452s
+EXIT=0
+===== TestRetryAndPositiveOnlyUnknownCommit =====
+ok  	gxb.local/backend/v2/internal/content/registry	10.627s
+EXIT=0
+===== TestBootstrapAndActivateUnknownResolution =====

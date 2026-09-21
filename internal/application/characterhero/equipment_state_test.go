@@ -29,13 +29,18 @@ func (s equipmentStateStore) ReadHeroByPartnerIDTx(context.Context, tx.Queryer, 
 }
 
 type equipmentStateContent struct {
-	good      bool
-	kind      character.HeroKind
-	positions map[int64]character.HeroEquipmentPosition
+	good           bool
+	superGood      bool
+	kind           character.HeroKind
+	positions      map[int64]character.HeroEquipmentPosition
+	superPositions map[int64]character.SuperEquipmentPosition
 }
 
 func (c equipmentStateContent) HeroEquipmentRevisionTx(context.Context, tx.Queryer, string) (bool, error) {
 	return c.good, nil
+}
+func (c equipmentStateContent) SuperEquipmentRevisionTx(context.Context, tx.Queryer, string) (bool, error) {
+	return c.superGood, nil
 }
 func (c equipmentStateContent) HeroTemplateProgressionTx(context.Context, tx.Queryer, string, int64) (character.HeroTemplateProgression, error) {
 	return character.HeroTemplateProgression{Kind: c.kind, OriginTableID: 11001, InitialStar: 1}, nil
@@ -46,6 +51,14 @@ func (c equipmentStateContent) HeroEquipmentPositionTx(_ context.Context, _ tx.Q
 		return character.HeroEquipmentPosition{}, errors.New("missing position")
 	}
 	p.HeroTableID, p.Color, p.Slot = tableID, color, slot
+	return p, nil
+}
+func (c equipmentStateContent) SuperEquipmentPositionTx(_ context.Context, _ tx.Queryer, _ string, tableID, slot int64) (character.SuperEquipmentPosition, error) {
+	p, ok := c.superPositions[slot]
+	if !ok {
+		return character.SuperEquipmentPosition{}, errors.New("missing Super position")
+	}
+	p.HeroTableID, p.Slot = tableID, slot
 	return p, nil
 }
 
@@ -80,26 +93,44 @@ func TestRawEquipmentStateNormalHeroUsesPinnedMapping(t *testing.T) {
 	}
 }
 
-func TestRawEquipmentStateRejectsInactiveAndSuper(t *testing.T) {
+func TestRawEquipmentStateRejectsInactiveAndMapsSuper(t *testing.T) {
 	h := equipmentStateHero()
 	rev := "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
-	for name, tc := range map[string]struct {
-		c    equipmentStateContent
-		want error
-	}{
-		"inactive": {equipmentStateContent{good: false, kind: character.NormalHero}, ErrHeroEquipmentContentInactive},
-		"super":    {equipmentStateContent{good: true, kind: character.SuperHero}, nil},
-	} {
-		t.Run(name, func(t *testing.T) {
-			r := EquipmentStateReader{Store: equipmentStateStore{hero: h}, Content: tc.c}
-			_, err := r.RawEquipmentStateTx(context.Background(), equipmentStateQueryer{}, h.PlayerID, h.PartnerID, rev)
-			if err == nil {
-				t.Fatal("expected rejection")
+	r := EquipmentStateReader{Store: equipmentStateStore{hero: h}, Content: equipmentStateContent{good: false, kind: character.NormalHero}}
+	if _, err := r.RawEquipmentStateTx(context.Background(), equipmentStateQueryer{}, h.PlayerID, h.PartnerID, rev); !errors.Is(err, ErrHeroEquipmentContentInactive) {
+		t.Fatalf("inactive err=%v", err)
+	}
+
+	h.Equipment = character.HeroEquipmentSlots{0, 1, 2, 11, 21, 40}
+	superPositions := map[int64]character.SuperEquipmentPosition{}
+	for slot := int64(1); slot <= character.HeroEquipmentSlotCount; slot++ {
+		superPositions[slot] = character.SuperEquipmentPosition{ItemID: character.EquipmentTemplateID(20001365 + slot)}
+	}
+	r = EquipmentStateReader{Store: equipmentStateStore{hero: h}, Content: equipmentStateContent{superGood: true, kind: character.SuperHero, superPositions: superPositions}}
+	got, err := r.RawEquipmentStateTx(context.Background(), equipmentStateQueryer{}, h.PlayerID, h.PartnerID, rev)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got.Family != "SUPER" || got.OwnerID != h.PartnerID || got.StateVersion != h.StateVersion || len(got.Slots) != 6 {
+		t.Fatalf("raw=%+v", got)
+	}
+	wantRaw := []int64{0, 1, 2, 11, 21, 40}
+	for i, slot := range got.Slots {
+		if slot.RawFumo != 0 {
+			t.Fatalf("slot %d invented Fumo: %+v", i+1, slot)
+		}
+		if wantRaw[i] == 0 {
+			if slot.TemplateID != 0 || slot.Enhancement != 0 {
+				t.Fatalf("empty slot=%+v", slot)
 			}
-			if tc.want != nil && !errors.Is(err, tc.want) {
-				t.Fatalf("err=%v", err)
-			}
-		})
+		} else if slot.TemplateID != character.EquipmentTemplateID(20001365+int64(i+1)) || slot.Enhancement != wantRaw[i]-1 {
+			t.Fatalf("slot %d=%+v", i+1, slot)
+		}
+	}
+
+	r = EquipmentStateReader{Store: equipmentStateStore{hero: h}, Content: equipmentStateContent{superGood: false, kind: character.SuperHero, superPositions: superPositions}}
+	if _, err := r.RawEquipmentStateTx(context.Background(), equipmentStateQueryer{}, h.PlayerID, h.PartnerID, rev); !errors.Is(err, ErrSuperEquipmentContentInactive) {
+		t.Fatalf("Super inactive err=%v", err)
 	}
 }
 

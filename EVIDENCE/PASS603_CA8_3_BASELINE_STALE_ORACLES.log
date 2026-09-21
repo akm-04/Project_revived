@@ -1,0 +1,8 @@
+===== baseline CA4-5 source oracle =====
+CA4-5 SOURCE ORACLE CHECK: FAIL
+ - CA4-5 generated content revision drift
+EXIT=1
+===== baseline CA6-5 source oracle =====
+CA6-5 SOURCE ORACLE CHECK: FAIL
+ - Pet production route family drift
+EXIT=1

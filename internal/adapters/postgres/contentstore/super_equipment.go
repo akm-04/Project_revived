@@ -14,11 +14,20 @@ const superEquipmentCapability = "SUPER_EQUIPMENT_CA4_5"
 // SuperEquipmentRevision verifies the immutable CA4-5 capability on the exact
 // revision pinned by the caller. It never falls forward to a newer revision.
 func (s Store) SuperEquipmentRevision(ctx context.Context, revision string) (bool, error) {
-	if s.Queryer == nil || len(revision) != 64 {
+	if s.Queryer == nil {
+		return false, errors.New("content store: nil Super equipment revision queryer")
+	}
+	return (Store{}).SuperEquipmentRevisionTx(ctx, s.Queryer, revision)
+}
+
+// SuperEquipmentRevisionTx verifies CA4-5 capability through the caller-owned
+// Queryer so CA8 composition cannot escape its coherent transaction snapshot.
+func (Store) SuperEquipmentRevisionTx(ctx context.Context, q tx.Queryer, revision string) (bool, error) {
+	if q == nil || len(revision) != 64 {
 		return false, errors.New("content store: invalid Super equipment revision")
 	}
 	var raw string
-	if err := s.Queryer.QueryRow(ctx, contentqueries.ReadContentRevisionManifest, revision).Scan(&raw); err != nil {
+	if err := q.QueryRow(ctx, contentqueries.ReadContentRevisionManifest, revision).Scan(&raw); err != nil {
 		return false, err
 	}
 	return manifestHasCapability([]byte(raw), revision, superEquipmentCapability)
