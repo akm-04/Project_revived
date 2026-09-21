@@ -72,6 +72,15 @@ type PetStyleCancelResult struct {
 	Replayed     bool  `json:"-"`
 }
 
+func petStyleRetryPolicy() tx.RetryPolicy {
+	return tx.RetryPolicy{
+		MaxAttempts:              8,
+		RetryDefiniteAbort:       true,
+		DefiniteAbortBackoffBase: 25 * time.Millisecond,
+		DefiniteAbortBackoffMax:  400 * time.Millisecond,
+	}
+}
+
 func petStyleProfile() tx.Profile {
 	return tx.Profile{Name: "CA7_5_PET_HOME_STYLE", AcquireTimeout: 2 * time.Second, LockTimeout: 2 * time.Second, StatementTimeout: 5 * time.Second, TransactionTimeout: 8 * time.Second, CleanupTimeout: 2 * time.Second, ReconcileTimeout: 5 * time.Second, OperationTimeout: 12 * time.Second}
 }
@@ -238,7 +247,7 @@ func (s Service) AcquirePetStyle(ctx context.Context, actor identity.ActorContex
 		return PetStyleAcquireResult{}, err
 	}
 	var result PetStyleAcquireResult
-	txres, err := s.Runner.Run(ctx, bound, petStyleProfile(), tx.Options{Isolation: tx.Serializable}, tx.RetryPolicy{MaxAttempts: 3, RetryDefiniteAbort: true}, receipt.Resolver{Reader: s.ReceiptRead, Identity: id, Fingerprint: fp}, func(txctx context.Context, scope tx.Scope) error {
+	txres, err := s.Runner.Run(ctx, bound, petStyleProfile(), tx.Options{Isolation: tx.Serializable}, petStyleRetryPolicy(), receipt.Resolver{Reader: s.ReceiptRead, Identity: id, Fingerprint: fp}, func(txctx context.Context, scope tx.Scope) error {
 		if err := s.Fencer.FenceActorTx(txctx, scope.Tx, actor, bound.StartedAt); err != nil {
 			return err
 		}
@@ -362,7 +371,7 @@ func (s Service) SelectPetStyle(ctx context.Context, actor identity.ActorContext
 		return PetStyleSelectResult{}, err
 	}
 	var result PetStyleSelectResult
-	txres, err := s.Runner.Run(ctx, bound, petStyleProfile(), tx.Options{Isolation: tx.Serializable}, tx.RetryPolicy{MaxAttempts: 3, RetryDefiniteAbort: true}, receipt.Resolver{Reader: s.ReceiptRead, Identity: id, Fingerprint: fp}, func(txctx context.Context, scope tx.Scope) error {
+	txres, err := s.Runner.Run(ctx, bound, petStyleProfile(), tx.Options{Isolation: tx.Serializable}, petStyleRetryPolicy(), receipt.Resolver{Reader: s.ReceiptRead, Identity: id, Fingerprint: fp}, func(txctx context.Context, scope tx.Scope) error {
 		if err := s.Fencer.FenceActorTx(txctx, scope.Tx, actor, bound.StartedAt); err != nil {
 			return err
 		}
@@ -469,7 +478,7 @@ func (s Service) CancelPetStyle(ctx context.Context, actor identity.ActorContext
 		return PetStyleCancelResult{}, err
 	}
 	var result PetStyleCancelResult
-	txres, err := s.Runner.Run(ctx, bound, petStyleProfile(), tx.Options{Isolation: tx.Serializable}, tx.RetryPolicy{MaxAttempts: 3, RetryDefiniteAbort: true}, receipt.Resolver{Reader: s.ReceiptRead, Identity: id, Fingerprint: fp}, func(txctx context.Context, scope tx.Scope) error {
+	txres, err := s.Runner.Run(ctx, bound, petStyleProfile(), tx.Options{Isolation: tx.Serializable}, petStyleRetryPolicy(), receipt.Resolver{Reader: s.ReceiptRead, Identity: id, Fingerprint: fp}, func(txctx context.Context, scope tx.Scope) error {
 		if err := s.Fencer.FenceActorTx(txctx, scope.Tx, actor, bound.StartedAt); err != nil {
 			return err
 		}

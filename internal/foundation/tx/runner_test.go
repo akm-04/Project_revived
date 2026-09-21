@@ -279,3 +279,60 @@ func TestProfileRequiresReconcileTimeout(t *testing.T) {
 		t.Fatal("expected missing reconcile timeout to fail")
 	}
 }
+
+func TestDefiniteAbortBackoffIsBoundedAndAttemptScoped(t *testing.T) {
+	p := RetryPolicy{
+		MaxAttempts:              4,
+		RetryDefiniteAbort:       true,
+		DefiniteAbortBackoffBase: 20 * time.Millisecond,
+		DefiniteAbortBackoffMax:  80 * time.Millisecond,
+	}
+	op := opctx()
+	for attempt, wantCap := range map[int]time.Duration{1: 20 * time.Millisecond, 2: 40 * time.Millisecond, 3: 80 * time.Millisecond, 4: 80 * time.Millisecond} {
+		got := definiteAbortRetryDelay(op, attempt, p)
+		if got < wantCap/2 || got > wantCap {
+			t.Fatalf("attempt %d delay %v outside [%v,%v]", attempt, got, wantCap/2, wantCap)
+		}
+	}
+	if got := definiteAbortRetryDelay(op, 1, RetryPolicy{MaxAttempts: 2, RetryDefiniteAbort: true}); got != 0 {
+		t.Fatalf("zero-value backoff changed historical retry behavior: %v", got)
+	}
+}
+
+func TestDefiniteAbortBackoffHonorsOperationCancellationBeforeReplay(t *testing.T) {
+	d := &fakeDB{txs: []*fakeTx{{}, {}}}
+	ctx, cancel := context.WithCancel(context.Background())
+	calls := 0
+	res, err := (Runner{DB: d}).Run(ctx, opctx(), profile(), Options{Isolation: Serializable}, RetryPolicy{
+		MaxAttempts:              2,
+		RetryDefiniteAbort:       true,
+		DefiniteAbortBackoffBase: 100 * time.Millisecond,
+		DefiniteAbortBackoffMax:  100 * time.Millisecond,
+	}, nil, func(context.Context, Scope) error {
+		calls++
+		cancel()
+		return stateErr("40001")
+	})
+	if !errors.Is(err, context.Canceled) {
+		t.Fatalf("expected canceled backoff, got res=%+v err=%v", res, err)
+	}
+	if calls != 1 || d.n != 1 {
+		t.Fatalf("canceled backoff replayed: calls=%d begins=%d", calls, d.n)
+	}
+	if res.Outcome != DefiniteAbort || res.Attempts != 1 {
+		t.Fatalf("unexpected result: %+v", res)
+	}
+}
+
+func TestRetryPolicyBackoffValidation(t *testing.T) {
+	for _, tc := range []RetryPolicy{
+		{MaxAttempts: 2, DefiniteAbortBackoffBase: time.Millisecond, DefiniteAbortBackoffMax: 2 * time.Millisecond},
+		{MaxAttempts: 2, RetryDefiniteAbort: true, DefiniteAbortBackoffBase: time.Millisecond},
+		{MaxAttempts: 2, RetryDefiniteAbort: true, DefiniteAbortBackoffMax: time.Millisecond},
+		{MaxAttempts: 2, RetryDefiniteAbort: true, DefiniteAbortBackoffBase: 2 * time.Millisecond, DefiniteAbortBackoffMax: time.Millisecond},
+	} {
+		if err := tc.validate(); err == nil {
+			t.Fatalf("expected invalid backoff policy: %+v", tc)
+		}
+	}
+}

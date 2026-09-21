@@ -90,11 +90,28 @@ type RetryPolicy struct {
 	MaxAttempts                           int
 	RetryDefiniteAbort                    bool
 	AllowReplayAfterAuthoritativeNegative bool
+	// DefiniteAbortBackoffBase/Max optionally de-phase retries after
+	// authoritative definite-abort outcomes such as PostgreSQL 40001/40P01.
+	// Zero/zero preserves the historical immediate-retry behavior.
+	DefiniteAbortBackoffBase time.Duration
+	DefiniteAbortBackoffMax  time.Duration
 }
 
 func (p RetryPolicy) validate() error {
 	if p.MaxAttempts < 1 {
 		return errors.New("MaxAttempts must be >= 1")
+	}
+	if p.DefiniteAbortBackoffBase == 0 && p.DefiniteAbortBackoffMax == 0 {
+		return nil
+	}
+	if !p.RetryDefiniteAbort {
+		return errors.New("definite-abort backoff requires RetryDefiniteAbort")
+	}
+	if p.DefiniteAbortBackoffBase <= 0 || p.DefiniteAbortBackoffMax <= 0 {
+		return errors.New("definite-abort backoff requires positive base and max")
+	}
+	if p.DefiniteAbortBackoffMax < p.DefiniteAbortBackoffBase {
+		return errors.New("definite-abort backoff max must be >= base")
 	}
 	return nil
 }

@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	mathrand "math/rand"
 	"time"
 
 	"gxb.local/backend/v2/internal/foundation/operation"
@@ -42,6 +43,12 @@ func (r Runner) Run(ctx context.Context, op operation.Context, profile Profile, 
 		if len(res.Reconciliations) > 0 {
 			reconciliationHistory = append(reconciliationHistory, res.Reconciliations...)
 		}
+		if action == actionRetryDefiniteAbort {
+			if err := waitDefiniteAbortRetry(opCtx, op, attempt, retry); err != nil {
+				return res, err
+			}
+			continue
+		}
 		if action == actionRetry {
 			continue
 		}
@@ -68,6 +75,7 @@ type nextAction uint8
 const (
 	actionReturn nextAction = iota
 	actionRetry
+	actionRetryDefiniteAbort
 )
 
 func (r Runner) attempt(ctx context.Context, op operation.Context, attempt int, profile Profile, opts Options, retry RetryPolicy, resolver UnknownCommitResolver, body Body) (Result, nextAction, error) {
@@ -101,7 +109,7 @@ func (r Runner) attempt(ctx context.Context, op operation.Context, attempt int, 
 		outcome := DefiniteAbort
 		r.event(op, profile, attempt, "configure", outcome, err, time.Since(started))
 		if IsDefiniteAbortError(err) && retry.RetryDefiniteAbort && attempt < retry.MaxAttempts {
-			return Result{Outcome: outcome, Attempts: attempt}, actionRetry, nil
+			return Result{Outcome: outcome, Attempts: attempt}, actionRetryDefiniteAbort, nil
 		}
 		return Result{Outcome: outcome, Attempts: attempt}, actionReturn, err
 	}
@@ -109,7 +117,7 @@ func (r Runner) attempt(ctx context.Context, op operation.Context, attempt int, 
 		_ = finalizer.rollback()
 		r.event(op, profile, attempt, "body", DefiniteAbort, err, time.Since(started))
 		if IsDefiniteAbortError(err) && retry.RetryDefiniteAbort && attempt < retry.MaxAttempts {
-			return Result{Outcome: DefiniteAbort, Attempts: attempt}, actionRetry, nil
+			return Result{Outcome: DefiniteAbort, Attempts: attempt}, actionRetryDefiniteAbort, nil
 		}
 		return Result{Outcome: DefiniteAbort, Attempts: attempt}, actionReturn, err
 	}
@@ -124,7 +132,7 @@ func (r Runner) attempt(ctx context.Context, op operation.Context, attempt int, 
 	if IsDefiniteAbortError(err) {
 		r.event(op, profile, attempt, "commit", DefiniteAbort, err, time.Since(started))
 		if retry.RetryDefiniteAbort && attempt < retry.MaxAttempts {
-			return Result{Outcome: DefiniteAbort, Attempts: attempt}, actionRetry, nil
+			return Result{Outcome: DefiniteAbort, Attempts: attempt}, actionRetryDefiniteAbort, nil
 		}
 		return Result{Outcome: DefiniteAbort, Attempts: attempt}, actionReturn, err
 	}
@@ -159,6 +167,47 @@ func (r Runner) attempt(ctx context.Context, op operation.Context, attempt int, 
 		u := &UnknownCommitError{Cause: err}
 		r.event(op, profile, attempt, "reconcile_unknown", UnknownCommitOutcome, u, time.Since(started))
 		return Result{Outcome: UnknownCommitOutcome, Attempts: attempt}, actionReturn, u
+	}
+}
+
+func definiteAbortRetryDelay(op operation.Context, attempt int, retry RetryPolicy) time.Duration {
+	if retry.DefiniteAbortBackoffBase <= 0 || retry.DefiniteAbortBackoffMax <= 0 || attempt < 1 {
+		return 0
+	}
+	capDelay := retry.DefiniteAbortBackoffBase
+	for i := 1; i < attempt && capDelay < retry.DefiniteAbortBackoffMax; i++ {
+		if capDelay > retry.DefiniteAbortBackoffMax/2 {
+			capDelay = retry.DefiniteAbortBackoffMax
+			break
+		}
+		capDelay *= 2
+	}
+	if capDelay > retry.DefiniteAbortBackoffMax {
+		capDelay = retry.DefiniteAbortBackoffMax
+	}
+	floor := capDelay / 2
+	span := capDelay - floor
+	if span <= 0 {
+		return capDelay
+	}
+	// Scheduling jitter is deliberately operational rather than gameplay
+	// entropy. Using the process-safe math/rand package de-phases even
+	// concurrent duplicate attempts that share one operation ID.
+	return floor + time.Duration(mathrand.Uint64()%(uint64(span)+1))
+}
+
+func waitDefiniteAbortRetry(ctx context.Context, op operation.Context, attempt int, retry RetryPolicy) error {
+	d := definiteAbortRetryDelay(op, attempt, retry)
+	if d <= 0 {
+		return nil
+	}
+	t := time.NewTimer(d)
+	defer t.Stop()
+	select {
+	case <-ctx.Done():
+		return ctx.Err()
+	case <-t.C:
+		return nil
 	}
 }
 

@@ -23,13 +23,27 @@ practice_tests=read('internal/application/characterpractice/service_semantics_te
 
 for tok in [
     'func (s Service) AcquirePetStyle(', 'func (s Service) SelectPetStyle(', 'func (s Service) CancelPetStyle(',
-    'PetAppearanceMutationStore', 'tx.Serializable', 'RetryDefiniteAbort: true', 'FenceActorTx',
+    'PetAppearanceMutationStore', 'tx.Serializable', 'FenceActorTx',
     'AppearanceRevisionTx', 'LockPetByIDTx', 'BuildEffectivePetAppearanceTx', 'SavePetAppearanceMutationTx', 'SavePetActiveStyleTx',
     'petStyleAcquireSchema', 'petStyleSelectSchema', 'petStyleCancelSchema',
 ]: req(tok in service, f'CA7-5 service marker missing {tok!r}')
 req('AppearanceMutationStore PetAppearanceMutationStore' in svcroot,'CA7-5 Pet mutation seam not present in Service')
 req('AppearanceMutationStore: heroDB' in main,'CA7-5 production Pet mutation store composition missing')
 req('Appearance: contentDB' in main,'CA7-5 production appearance content composition missing')
+
+# CA7-7 native contention reconciliation: the Pet style family must use the
+# shared transaction foundation's opt-in definite-abort de-phasing policy.
+# This guard deliberately checks the helper and all three call sites rather
+# than requiring an inline RetryPolicy literal.
+for tok in [
+    'func petStyleRetryPolicy() tx.RetryPolicy',
+    'MaxAttempts:              8',
+    'RetryDefiniteAbort:       true',
+    'DefiniteAbortBackoffBase: 25 * time.Millisecond',
+    'DefiniteAbortBackoffMax:  400 * time.Millisecond',
+    'TestCA75PetStyleRetryPolicyUsesBoundedContentionBackoff',
+]: req(tok in service + service_tests, f'CA7-5 contention retry policy marker missing {tok!r}')
+req(service.count('petStyleRetryPolicy()') == 4, 'CA7-5 Pet style retry policy must be defined once and used by all three mutations')
 
 for tok in ['case 1893:', 'case 1894:', 'case 1895:', 'invalid_pet_style_acquire', 'invalid_pet_style_select', 'invalid_pet_style_cancel']:
     req(tok in dispatch,f'CA7-5 stock dispatcher marker missing {tok!r}')

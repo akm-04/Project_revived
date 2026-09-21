@@ -447,3 +447,13 @@ func TestCA75ReloadProjectionTracksMutationAndNoopStateVersion(t *testing.T) {
 		t.Fatalf("canceled=%+v views=%+v", canceled, views)
 	}
 }
+
+func TestCA75PetStyleRetryPolicyUsesBoundedContentionBackoff(t *testing.T) {
+	p := petStyleRetryPolicy()
+	if p.MaxAttempts != 8 || !p.RetryDefiniteAbort {
+		t.Fatalf("unexpected retry policy: %+v", p)
+	}
+	if p.DefiniteAbortBackoffBase != 25*time.Millisecond || p.DefiniteAbortBackoffMax != 400*time.Millisecond {
+		t.Fatalf("unexpected contention backoff: %+v", p)
+	}
+}
