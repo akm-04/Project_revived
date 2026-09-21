@@ -29,11 +29,21 @@ func (s Store) PetEquipmentActive(ctx context.Context) (string, bool, error) {
 // PetEquipmentRevision verifies the capability on the exact caller-pinned
 // immutable revision. It never silently follows a later activation.
 func (s Store) PetEquipmentRevision(ctx context.Context, revision string) (bool, error) {
-	if s.Queryer == nil || len(revision) != 64 {
+	if s.Queryer == nil {
+		return false, errors.New("content store: invalid Pet equipment revision")
+	}
+	return (Store{}).PetEquipmentRevisionTx(ctx, s.Queryer, revision)
+}
+
+// PetEquipmentRevisionTx verifies the exact revision through the caller-owned
+// transaction/queryer so later CA8 composition never escapes its coherent read
+// snapshot merely to re-check capability.
+func (Store) PetEquipmentRevisionTx(ctx context.Context, q tx.Queryer, revision string) (bool, error) {
+	if q == nil || len(revision) != 64 {
 		return false, errors.New("content store: invalid Pet equipment revision")
 	}
 	var raw string
-	if err := s.Queryer.QueryRow(ctx, contentqueries.ReadContentRevisionManifest, revision).Scan(&raw); err != nil {
+	if err := q.QueryRow(ctx, contentqueries.ReadContentRevisionManifest, revision).Scan(&raw); err != nil {
 		return false, err
 	}
 	return manifestHasCapability([]byte(raw), revision, petEquipmentCapability)

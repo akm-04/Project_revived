@@ -17,7 +17,7 @@ type EquipmentStateStore interface {
 }
 
 type EquipmentStateContent interface {
-	HeroEquipmentRevision(context.Context, string) (bool, error)
+	HeroEquipmentRevisionTx(context.Context, tx.Queryer, string) (bool, error)
 	HeroTemplateProgressionTx(context.Context, tx.Queryer, string, int64) (character.HeroTemplateProgression, error)
 	HeroEquipmentPositionTx(context.Context, tx.Queryer, string, int64, int64, int64) (character.HeroEquipmentPosition, error)
 }
@@ -34,7 +34,7 @@ func (r EquipmentStateReader) RawEquipmentStateTx(ctx context.Context, q tx.Quer
 	if r.Store == nil || r.Content == nil || q == nil || !pid.Valid() || partnerID <= 0 || len(revision) != 64 {
 		return characterasset.RawEquipmentState{}, errors.New("character hero: invalid equipment-state read")
 	}
-	good, err := r.Content.HeroEquipmentRevision(ctx, revision)
+	good, err := r.Content.HeroEquipmentRevisionTx(ctx, q, revision)
 	if err != nil {
 		return characterasset.RawEquipmentState{}, err
 	}

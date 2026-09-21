@@ -336,3 +336,25 @@ func TestRetryPolicyBackoffValidation(t *testing.T) {
 		}
 	}
 }
+
+func TestScopeCarriesExactRunnerOptionsAcrossRetry(t *testing.T) {
+	d := &fakeDB{txs: []*fakeTx{{}, {}}}
+	want := Options{Isolation: Serializable, ReadOnly: true}
+	calls := 0
+	_, err := (Runner{DB: d}).Run(context.Background(), opctx(), profile(), want, RetryPolicy{MaxAttempts: 2, RetryDefiniteAbort: true}, nil, func(_ context.Context, s Scope) error {
+		calls++
+		if s.Options != want {
+			t.Fatalf("scope options=%+v want=%+v", s.Options, want)
+		}
+		if calls == 1 {
+			return stateErr("40001")
+		}
+		return nil
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if calls != 2 {
+		t.Fatalf("calls=%d", calls)
+	}
+}

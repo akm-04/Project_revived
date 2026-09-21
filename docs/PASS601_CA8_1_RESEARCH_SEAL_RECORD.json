@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "pass": "601.0",
+  "stage": "CA8-1",
+  "status": "RESEARCH_CONTRACT_ACCEPTED_IMPLEMENTATION_AUTHORIZED",
+  "accepted_backend_at_research_gate": {
+    "artifact": "gxb-backend-v2-v0.85.0-pass596-ca7-accepted-pass598.zip",
+    "sha256": "3dd02ea37e07995f81df18fbf259633db11f478a1be67d5dfd59344309a9d155",
+    "git": "49f3f8295f7c9c5d7eacbab1c151343072e00548"
+  },
+  "authority_at_research_start": {
+    "pass": "600.0",
+    "passmap_sha256": "5406f87e29cc5557988165e6ca0e936cc27c4c1ab765dc73e7e86f81105815e6"
+  },
+  "contract_package": {
+    "artifact": "CA8_1_PREIMPLEMENTATION_CONTRACT_R1.zip",
+    "sha256": "5cf110f5b6c137e29a1c32fe413dd8b2039e2b00d192605e40ee2f22cf13f3cd"
+  },
+  "research_result": "GREEN",
+  "foundation_audit": "I0-I6_REUSED_WITH_NARROW_I1_SCOPE_OPTIONS_WITNESS",
+  "implementation_authorized": true,
+  "authorization_basis": "User explicitly authorized direct implementation after CA8-1 research completed and independent reality check was GREEN.",
+  "authorized_scope": "CA8-2_SHARED_COHERENT_CHARACTER_OBSERVATION_FOUNDATION_ONLY",
+  "forbidden": [
+    "schema/migration/MID/receipt/new durable owner",
+    "owned composite orchestration",
+    "borrowed/synthetic business behavior",
+    "I7B/I8/I9 consumer implementation",
+    "authoritative CA8 snapshot hash"
+  ],
+  "next": "Implement and locally qualify CA8-2 against the frozen CA8-1 contract; CA8-9 retains accumulated exact/native PostgreSQL gate."
+}

@@ -34,7 +34,7 @@ type equipmentStateContent struct {
 	positions map[int64]character.HeroEquipmentPosition
 }
 
-func (c equipmentStateContent) HeroEquipmentRevision(context.Context, string) (bool, error) {
+func (c equipmentStateContent) HeroEquipmentRevisionTx(context.Context, tx.Queryer, string) (bool, error) {
 	return c.good, nil
 }
 func (c equipmentStateContent) HeroTemplateProgressionTx(context.Context, tx.Queryer, string, int64) (character.HeroTemplateProgression, error) {

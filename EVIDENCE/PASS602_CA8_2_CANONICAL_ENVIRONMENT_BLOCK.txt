@@ -1,0 +1,5 @@
+Exact canonical Go/toolchain execution was not available in this normal-chat environment.
+Candidate pins remain unchanged: go 1.26.0; toolchain go1.27.1.
+Disposable compatibility copy changed only go/toolchain accommodation to local Go 1.23.2; results are COMPATIBILITY_COPY_ONLY.
+No compatibility-copy files were copied back into canonical candidate.
+CA8-9 remains the mandatory accumulated exact/native PostgreSQL gate.

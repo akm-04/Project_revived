@@ -20,6 +20,7 @@ type TimedScope struct {
 	Tx        tx.Tx
 	Operation TimedOperation
 	Attempt   int
+	Options   tx.Options
 }
 
 type TimedBody func(context.Context, TimedScope) error
@@ -74,7 +75,7 @@ func (r TimedRunner) Run(
 		if !sameOperation(scope.Operation, timed.Operation()) {
 			return ErrTimedOperationDrift
 		}
-		return body(txctx, TimedScope{Tx: scope.Tx, Operation: timed, Attempt: scope.Attempt})
+		return body(txctx, TimedScope{Tx: scope.Tx, Operation: timed, Attempt: scope.Attempt, Options: scope.Options})
 	})
 	return timed, res, err
 }

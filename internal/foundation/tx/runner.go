@@ -113,7 +113,7 @@ func (r Runner) attempt(ctx context.Context, op operation.Context, attempt int, 
 		}
 		return Result{Outcome: outcome, Attempts: attempt}, actionReturn, err
 	}
-	if err = body(txCtx, Scope{Tx: dbtx, Operation: op, Attempt: attempt}); err != nil {
+	if err = body(txCtx, Scope{Tx: dbtx, Operation: op, Attempt: attempt, Options: opts}); err != nil {
 		_ = finalizer.rollback()
 		r.event(op, profile, attempt, "body", DefiniteAbort, err, time.Since(started))
 		if IsDefiniteAbortError(err) && retry.RetryDefiniteAbort && attempt < retry.MaxAttempts {

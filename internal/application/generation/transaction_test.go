@@ -201,3 +201,19 @@ func TestTimedRunnerAndBinderFailBeforeSideEffectsForInvalidInput(t *testing.T) 
 		t.Fatalf("nil body queried authoritative time %d times", authority.calls)
 	}
 }
+
+func TestTimedRunnerForwardsFoundationOptionsWitness(t *testing.T) {
+	authority := &fakeTimeAuthority{at: time.Unix(905, 0).UTC()}
+	db := &timedFakeDB{txs: []*timedFakeTx{{}}}
+	runner := TimedRunner{Binder: Binder{Time: authority}, Runner: tx.Runner{DB: db}}
+	want := tx.Options{Isolation: tx.Serializable, ReadOnly: true}
+	_, _, err := runner.Run(context.Background(), opFixture(), timedProfile(), want, tx.RetryPolicy{MaxAttempts: 1}, nil, func(_ context.Context, scope TimedScope) error {
+		if scope.Options != want {
+			t.Fatalf("options=%+v want=%+v", scope.Options, want)
+		}
+		return nil
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+}

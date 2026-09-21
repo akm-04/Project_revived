@@ -120,6 +120,10 @@ type Scope struct {
 	Tx        Tx
 	Operation operation.Context
 	Attempt   int
+	// Options is the exact transaction options selected by Runner for this attempt.
+	// It is an observation/wiring witness only; consumers must not mutate it or
+	// infer commit/retry authority from it.
+	Options Options
 }
 type Body func(context.Context, Scope) error
 
