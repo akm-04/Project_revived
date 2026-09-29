@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "pass": "607.0",
+  "stage": "CA8-5",
+  "result": "GREEN_LOCAL",
+  "evidence_classification": "COMPATIBILITY_COPY_ONLY_PLUS_CANONICAL_STATIC_AND_EXACT_SOURCE_ORACLE",
+  "acceptance_matrix": {
+    "A01_exact_baseline_and_authority": "GREEN",
+    "A02_trial_hero_base_only": "GREEN",
+    "A03_trial_npc_identity_separation": "GREEN",
+    "A04_synthetic_pet_typed_projection": "GREEN",
+    "A05_optional_owned_source_lineage": "GREEN",
+    "A06_deterministic_same_scope_same_spec": "GREEN",
+    "A07_payload_defensive_copy": "GREEN",
+    "A08_no_live_owner_or_content_lookup": "GREEN",
+    "A09_owned_borrowed_origin_rejected": "GREEN",
+    "A10_blank_or_malformed_identity_provenance_rejected": "GREEN",
+    "A11_scope_operation_content_time_mismatch_rejected": "GREEN",
+    "A12_invalid_hero_pet_base_rejected": "GREEN",
+    "A13_invalid_lineage_rejected": "GREEN",
+    "A14_unknown_required_schema_has_no_default_formula": "GREEN",
+    "A15_present_payload_requires_schema_revision_bytes": "GREEN",
+    "A16_no_forbidden_sql_tx_clock_content_guild_mode_imports": "GREEN",
+    "A17_no_migration_mid_receipt_durable_state_change": "GREEN",
+    "A18_no_fabricated_owned_contribution_types": "GREEN",
+    "A19_no_predecessor_origin_or_structure_mutation": "GREEN"
+  },
+  "canonical": {
+    "go_mod_sha256": "313c574368bb56dc570bc3427b65f59b059e492f909fe43b7d0291b5ced21dc4",
+    "go_sum_sha256": "efbf6753542d66e2fefcb2ab5e2ade7c9d28f2206a1113d1eb9568f2cb75808d",
+    "go_version_sha256": "a8844fbc8c3eb51c26ed00aec4cd5a5a9d647f849c6ead07bcc83ed24c4a7718",
+    "pins": "go 1.26.0 / toolchain go1.27.1 unchanged",
+    "exact_execution": "ENVIRONMENT_BLOCKED_GO1_27_1_DOWNLOAD_UNAVAILABLE",
+    "static_source_log": "EVIDENCE/PASS607_CA8_5_CANONICAL_STATIC_SOURCE.log",
+    "exact_attempt_log": "EVIDENCE/PASS607_CA8_5_EXACT_TOOLCHAIN_ATTEMPT.log",
+    "source_oracle_bundle_sha256": "b04eab34b8041e455aaac31557d9cbadb1a9280f41d2a7f31ba452d0696be87e",
+    "source_oracle_current_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+    "exact_execution_limitation": "Exact canonical Go execution is environment-blocked. Local acceptance uses canonical static/source checks plus compatibility-copy execution; exact/native aggregate proof remains mandatory at CA8-9."
+  },
+  "compatibility_copy": {
+    "go": "1.23.2",
+    "label": "COMPATIBILITY_COPY_ONLY",
+    "focused_test": "GREEN",
+    "focused_race": "GREEN",
+    "focused_vet": "GREEN",
+    "whole_tree_test": "GREEN",
+    "whole_tree_vet": "GREEN",
+    "package_by_package": "94_PACKAGES_GREEN",
+    "application_race": "GREEN",
+    "logs": [
+      "EVIDENCE/PASS607_CA8_5_COMPAT_FOCUSED_TEST.log",
+      "EVIDENCE/PASS607_CA8_5_COMPAT_FOCUSED_RACE.log",
+      "EVIDENCE/PASS607_CA8_5_COMPAT_FOCUSED_VET.log",
+      "EVIDENCE/PASS607_CA8_5_COMPAT_FULL_TEST.log",
+      "EVIDENCE/PASS607_CA8_5_COMPAT_FULL_VET.log",
+      "EVIDENCE/PASS607_CA8_5_COMPAT_PACKAGE_BY_PACKAGE.log",
+      "EVIDENCE/PASS607_CA8_5_COMPAT_APPLICATION_RACE.log"
+    ]
+  },
+  "static_policy": {
+    "dependency_policy": "GREEN",
+    "schema_query_ownership": "GREEN",
+    "sqlc_generation_policy": "GREEN",
+    "log": "EVIDENCE/PASS607_CA8_5_STATIC_POLICY_CHECKS.log"
+  },
+  "postimplementation_reality_check": "47_OF_47_GREEN",
+  "native_gate": "DEFERRED_MANDATORY_CA8_9_EXACT_NATIVE_POSTGRESQL_AGGREGATE",
+  "ca8_e": "MANDATORY_UNPASSED",
+  "w2": "DEFERRED_UNPASSED"
+}

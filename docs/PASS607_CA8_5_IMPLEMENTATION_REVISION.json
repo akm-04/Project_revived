@@ -1,0 +1,58 @@
+{
+  "schema_version": 1,
+  "pass": "607.0",
+  "stage": "CA8-5",
+  "status": "LOCAL_ACCEPTANCE_CANDIDATE",
+  "parent_backend_archive_sha256": "0a346f782f45caf09731ee71b4fd47ea17476bd60418a871255dafe6712d55df",
+  "parent_git": "e2e2ed48e694f74d02e8e1b78aa7557dab186ff0",
+  "pass606_authority_sha256": "363f65a5fb46eacea24ddee5c104ffa673f46bbca1d58a4a497ee30cf153d206",
+  "pass606_research_seal_sha256": "4b3f2dcd8f3421bf556b3c3a820af1a5b35d4ad45e40b6b996483ea8cead887a",
+  "pass606_implementation_contract_sha256": "4a1eda3993478a7e07f0469d122c42bfcd3fa12beb34307ce3490e49f1e2ed69",
+  "pass606_acceptance_matrix_sha256": "80076d5d383eaf9c0327eb8e535b2b878be14400007d6200a56a667237853eca",
+  "implementation_revision_algorithm": "sha256(sorted(path UTF-8 || NUL || final file bytes) over CA8-5 implementation/test footprint)",
+  "implementation_revision_sha256": "aa89eb9d360374d1e3189c2b98dc8c131e45e9ddd7cbde437f1693d4116dbeb6",
+  "changed_implementation_files": [
+    {
+      "path": "internal/application/characterasset/synthetic_projection.go",
+      "sha256": "2adb846db69c030c40c3897f6ca669c9a4397cf1bdc8dd322d89fbd282368688",
+      "bytes": 12560
+    },
+    {
+      "path": "internal/application/characterasset/synthetic_projection_test.go",
+      "sha256": "e84f59d58ea4f451adfa2e666e661622f0de86dc87f89d486d1da61ad5fd9c62",
+      "bytes": 13198
+    },
+    {
+      "path": "internal/archguard/ca8_5_contract_test.go",
+      "sha256": "253616022cc44afc0b87d473e70cd4bd3ce5b49b783cf76f0558cef619c1206b",
+      "bytes": 3101
+    }
+  ],
+  "scope": [
+    "operation-scoped SyntheticActorIdentity preserving TRIAL versus NPC_TEMPLATE without durable Character ownership",
+    "opaque SyntheticProfileProvenance bound exactly to caller OperationID, ContentRevision and ObservedAt",
+    "typed already-qualified Hero/Pet base facts with no fabricated owner IDs or StateVersion",
+    "optional schema-qualified immutable feature Character payload cloned without formula interpretation",
+    "optional owned-instance or template source lineage preserved as provenance only and never dereferenced",
+    "read-only deterministic MaterializeSyntheticHero/MaterializeSyntheticPet with strict fail-closed validation"
+  ],
+  "non_changes": [
+    "no schema or migration",
+    "no MID or wire change",
+    "no receipt family",
+    "no new durable owner",
+    "no Queryer call or nested transaction/transaction runner",
+    "no fresh clock or ActiveRevision lookup",
+    "no feature eligibility, mode roster or universal trial/NPC formula",
+    "no RawEquipmentState/PracticeContribution/AppearanceContribution fabrication",
+    "no final battle-stat compilation, CombatSnapshot, content_hash, RNG or resolver ownership",
+    "no dependency pin/toolchain change"
+  ],
+  "evidence": {
+    "exact_candidate_execution": "ENVIRONMENT_BLOCKED_GO_1_27_1_DOWNLOAD_UNAVAILABLE",
+    "compatibility_copy": "GREEN_FOCUSED_RACE_VET_FULL_94_PACKAGE_REGRESSION_APPLICATION_RACE",
+    "postimplementation_reality_check": "47_OF_47_GREEN",
+    "classification": "LOCAL_STATIC_PLUS_COMPATIBILITY_COPY_ONLY; CA8-9/CA8-E/W2 remain open"
+  },
+  "migration_high_water": "00030_ca7_2_appearance_foundation.sql"
+}
