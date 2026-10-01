@@ -1,0 +1,7 @@
+# PASS610 CA8-6 exact canonical toolchain attempt
++ GOTOOLCHAIN=local go version
+go version go1.23.2 linux/amd64
++ GOTOOLCHAIN=local go test ./internal/application/characterasset ./internal/archguard
+go: go.mod requires go >= 1.26.0 (running go 1.23.2; GOTOOLCHAIN=local)
+exit_code=1
+ENVIRONMENT_BLOCKED: local Go cannot satisfy canonical go.mod floor/toolchain

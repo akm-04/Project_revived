@@ -1,0 +1,20 @@
+# PASS610 CA8-6 canonical static/source evidence
++ python3 tools/check_ca8_6_source_oracle.py /mnt/data/ca86_oracles
+CA8-6 SOURCE ORACLE CHECK: PASS
+current/V1.164 identities, owned selector provenance, MID1829/1832/1838 request continuity, 5-visible/6-stored delta, optional-force/Bookmark deltas and client-default nonauthority preserved; no original-server response schema claimed
++ python3 tools/validate_ca8_6.py
+CA8-6 VALIDATION: PASS
+thin OWNED-only facade, provider-disposition boundary, Hero-skill residual, tests/archguard/source-oracle wiring and pristine canonical Go pins preserved
++ python3 tools/check_dependency_policy.py
+DEPENDENCY POLICY: PASS
+resolved_go_modules 16 qualified_candidates 5
++ python3 tools/check_content_generation_policy.py
+CUMULATIVE CONTENT GENERATION POLICY: PASS
++ python3 tools/check_sqlc_generation_policy.py
+SQLC GENERATION POLICY: PASS
++ python3 tools/check_schema_query_ownership.py
+SCHEMA/QUERY OWNERSHIP: PASS
++ python3 tools/validate_foundation_trace.py
+FOUNDATION TRACE: PASS (10 historical lifecycle records; 24/24 RF findings dispositioned; R0-R7 accepted Pass489; I6 accepted Pass509; 6 future extension limits remain explicit; W2 separate)
++ git diff --check
++ gofmt -d changed Go files (must print nothing)
