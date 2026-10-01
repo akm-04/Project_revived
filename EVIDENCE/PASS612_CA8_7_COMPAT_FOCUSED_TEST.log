@@ -1,0 +1,3 @@
+$ go test ./internal/application/characterasset ./internal/archguard
+ok  	gxb.local/backend/v2/internal/application/characterasset	(cached)
+ok  	gxb.local/backend/v2/internal/archguard	(cached)
