@@ -1,0 +1,21 @@
+PASS614 CA8-8 CANONICAL STATIC/SOURCE EVIDENCE
+classification=CANONICAL_STATIC_EXACT_SOURCE_ORACLE
+candidate_git=1529fb6beac331179664363e7917dd2a9fb66408
+$ sha256sum go.mod go.sum .go-version
+313c574368bb56dc570bc3427b65f59b059e492f909fe43b7d0291b5ced21dc4  go.mod
+efbf6753542d66e2fefcb2ab5e2ade7c9d28f2206a1113d1eb9568f2cb75808d  go.sum
+a8844fbc8c3eb51c26ed00aec4cd5a5a9d647f849c6ead07bcc83ed24c4a7718  .go-version
+$ python3 tools/validate_ca8_8.py
+CA8-8 VALIDATION: PASS
+three-method mode/Guild Character boundary, CA5/CA8-4 reuse, caller-owned coherent scope, no wire/business/persistence ownership and canonical pins preserved
+$ GXB_ORACLE_ROOT=/tmp/gxb_ca88_impl/assets_outer python3 tools/check_ca8_8_source_oracle.py /tmp/gxb_ca88_impl/assets_outer
+CA8-8 SOURCE ORACLE CHECK: PASS
+current source keeps Tutor, anniversary and ordinary lender/actor rental request families distinct; V1.164 corroborates lender+actor identity; CA8-8 consumes only typed qualified references. These are client/source facts and do not establish original-server rental business rules.
+$ python3 tools/check_sqlc_generation_policy.py
+SQLC GENERATION POLICY: PASS
+$ python3 tools/generate_character_querytext.py --check
+CHARACTER QUERYTEXT: PASS hero_sha256=74780e7a69490f2a68a9c5f0fe4b662059f50fedd94e8f05798e074141235c6b pet_sha256=07779a3b3acc6ae1ae1c065ffff81dccc3a7477193c5b339d07d06d537c0fd81 preset_sha256=649a7d71bf475e6710bdd28f111a364cc208b5600270e88338fda2d28fb37cd6 practice_sha256=bca19b6a86b90f87e1ba26d994c06929d58fa5bba2b9068ff3cb3cdae66570bf
+$ python3 tools/check_schema_query_ownership.py
+SCHEMA/QUERY OWNERSHIP: PASS
+$ gofmt -l ...
+$ git diff --check HEAD^ HEAD
