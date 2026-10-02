@@ -68,12 +68,25 @@ func Explicit(mid uint16, v BootstrapView) (any, bool) {
 	case 2754:
 		return map[string]any{}, true // source callback ignores response fields
 	case 2784:
-		return map[string]any{"is_award": int64(0)}, true
+		return map[string]any{"is_award": freshAlbumSpecialCollectAwards()}, true
 	case 8193:
 		return map[string]any{"has_read": int64(1), "contents": []any{}}, true
 	default:
 		return nil, false
 	}
+}
+
+const currentAlbumSpecialCollectCount = 23
+
+// freshAlbumSpecialCollectAwards is an I4/Wave-S compatibility projection bound
+// to the current collect_special content baseline. It is not durable White Album
+// claim state; the source-oracle guard fails closed if that baseline drifts.
+func freshAlbumSpecialCollectAwards() []any {
+	out := make([]any, currentAlbumSpecialCollectCount)
+	for i := range out {
+		out[i] = int64(0)
+	}
+	return out
 }
 
 func baseline(mid uint16, v BootstrapView) (any, bool) {

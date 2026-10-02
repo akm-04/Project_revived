@@ -1,0 +1,33 @@
+GXB1 CAE MID2784 POST-FIX INDEPENDENT REALITY CHECK
+date=2026-10-02
+canonical_input_pass614_sha256=52e0e6ba719561ddac8d7757769aef2a7c616721e89ab575d848970709a39325
+authoritative_passmap_pass617_sha256=1242014d31229a72b11178450ddf2ddbe7ccf8098c9781560cc85ff5aff79950
+repair_candidate_product_tree_sha256=f9970ed88091b95d1b920e9b7cee66e4d23d8be8c5bbe880ab1f060e452fb795
+
+SOURCE_FACT current_src64: MID2784 is assigned directly to albumSpecialCollect and consumed via Lua length/indexing.
+SOURCE_FACT current_src64: WhiteAlbumWindow independently length/indexes the same collection.
+SOURCE_FACT current_content: collect_special IDs are exactly contiguous 1..23; hash=5c159c89f7ffcbfb698d9599539a897896ce0e9ab93e7d04875d012d59df509a
+
+SOURCE_FACT Pass409: MID2784 requires is_award source scalar/container as consumed by album calculation.
+SOURCE_FACT Pass373: special collection uses MID2784/2785 server claim vector; durable eligibility/claim state belongs to a separate server owner.
+SOURCE_FACT Pass616: WHITE_ALBUM_COLLECTION_PROVIDER remains a bounded residual, not Character Asset ownership.
+
+IMPLEMENTATION_DECISION produced code: MID2784 returns fresh []any length 23 with every entry int64(0).
+IMPLEMENTATION_DECISION produced code: helper is explicitly compatibility projection, not durable claim state.
+SOURCE_FACT produced router: MID2784 remains registered; MID72 and MID2785 remain unregistered.
+
+R06 boundary: only four authorized projection/test/oracle files changed; no schema/persistence/domain/application/transaction/receipt path changed.
+R07 canonical pins unchanged: {'go.mod': '313c574368bb56dc570bc3427b65f59b059e492f909fe43b7d0291b5ced21dc4', 'go.sum': 'efbf6753542d66e2fefcb2ab5e2ade7c9d28f2206a1113d1eb9568f2cb75808d', '.go-version': 'a8844fbc8c3eb51c26ed00aec4cd5a5a9d647f849c6ead07bcc83ed24c4a7718'}
+
+CONTRACT_IMPACT D05: no White Album stat contributor is activated; full provider remains residual.
+CONTRACT_IMPACT D11: read-only MID2784 projection adds no semantic operation/receipt identity.
+CONTRACT_IMPACT D13: no durable owner/schema/migration is added, so owner migration obligations are not activated.
+CONTRACT_IMPACT D14: change is a narrow version-bound compatibility adapter with source/consumer checks; no ownership graph change.
+CONTRACT_IMPACT Pass465 time: no clock/reset/duration semantics are introduced by this response-shape repair.
+
+REALITY_RESULT=GREEN_FOR_TARGETED_MID2784_REPAIR
+CAE_PARENT_STATUS=REMAINS_OPEN_PENDING_ACCEPTANCE_EVIDENCE_CLASSIFICATION_AND_PASSMAP_CLOSURE
+W2=DEFERRED_UNPASSED
+EXACT_GO_1_27_1_EXECUTION=ENVIRONMENT_BLOCKED_NETWORK_TOOLCHAIN_DOWNLOAD
+REAL_POSTGRESQL_RIVER=NOT_RUN_NOT_REQUIRED_TO_PROVE_THIS_READ_ONLY_SHAPE_IN_NORMAL_CHAT
+PHYSICAL_STOCK_CLIENT=NOT_RUN_DEFERRED_W2

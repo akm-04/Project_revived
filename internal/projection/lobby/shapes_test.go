@@ -93,3 +93,35 @@ func TestExplicitSourceShapes(t *testing.T) {
 		t.Fatal("SIGN mutation must not be exposed by I4 read facade")
 	}
 }
+
+func TestExplicitMID2784FreshCompatibilityShape(t *testing.T) {
+	got, ok := Explicit(2784, view(t))
+	if !ok {
+		t.Fatal("MID2784 explicit shape missing")
+	}
+	body, ok := got.(map[string]any)
+	if !ok {
+		t.Fatalf("MID2784 body type=%T", got)
+	}
+	awards, ok := body["is_award"].([]any)
+	if !ok {
+		t.Fatalf("MID2784 is_award must be collection, got %T", body["is_award"])
+	}
+	if len(awards) != currentAlbumSpecialCollectCount {
+		t.Fatalf("MID2784 is_award len=%d want=%d", len(awards), currentAlbumSpecialCollectCount)
+	}
+	for i, award := range awards {
+		v, ok := award.(int64)
+		if !ok || v != 0 {
+			t.Fatalf("MID2784 is_award[%d]=%#v (%T), want numeric int64(0)", i, award, award)
+		}
+	}
+}
+
+func TestExplicitWhiteAlbumMutationMIDsRemainUnsupported(t *testing.T) {
+	for _, mid := range []uint16{72, 2785} {
+		if got, ok := Explicit(mid, view(t)); ok || got != nil {
+			t.Fatalf("White Album mutation MID%d must remain unsupported: got=%v ok=%v", mid, got, ok)
+		}
+	}
+}

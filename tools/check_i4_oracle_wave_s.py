@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 from __future__ import annotations
-import fnmatch,hashlib,json,sys,zipfile
+import fnmatch,hashlib,json,re,sys,zipfile
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 OROOT=Path(sys.argv[1] if len(sys.argv)>1 else '/mnt/data')
@@ -29,6 +29,8 @@ paths={
  'loading':'app-assets/output/assets/src_64/app/scenes/LoadingScene.lua',
  'update':'app-assets/output/assets/src_64/UpdateScene.lua',
  'login':'app-assets/output/assets/src_64/app/windows/LoginWindow.lua',
+ 'whitealbum':'app-assets/output/assets/src_64/app/windows/WhiteAlbumWindow.lua',
+ 'collect_special':'app-assets/output/assets/src_64/data/tables/collect_special.lua',
 }
 expected={
  'backend':'95378e2b0be8180df6de27e9e430c630bcfe46c080e1f91ef5f6d74bdbb1b840',
@@ -38,6 +40,8 @@ expected={
  'loading':'01c0e71ceee0f08f747552af66bd0f907ebfff1257be58ec480d3606a88f4a17',
  'update':'52c78a98002a27532343334360bd264af02700cbbda631d3b0cbf367e55516ac',
  'login':'8b91542e1f0648a2a859e9618a8a9c64dd46f9961fb8a049d0b06ce2cabec7e0',
+ 'whitealbum':'851a53f588b59d95cfe460f3399ab1a6904fff7714131c358f3c3a73910b6bb9',
+ 'collect_special':'5c159c89f7ffcbfb698d9599539a897896ce0e9ab93e7d04875d012d59df509a',
 }
 with zipfile.ZipFile(cur) as z:
  txt={}
@@ -45,7 +49,7 @@ with zipfile.ZipFile(cur) as z:
   b=z.read(n)
   if sha(b)!=expected[k]:errs.append(f'current source hash drift: {k} {sha(b)}')
   txt[k]=b.decode('utf-8-sig',errors='replace')
-b=txt['backend']; m=txt['mid']; sp=txt['selfplayer']; sg=txt['selfguild']; loading=txt['loading']; update=txt['update']; login=txt['login']
+b=txt['backend']; m=txt['mid']; sp=txt['selfplayer']; sg=txt['selfguild']; loading=txt['loading']; update=txt['update']; login=txt['login']; whitealbum=txt['whitealbum']; collect_special=txt['collect_special']
 region_window=member(cur, 'app-assets/output/assets/src_64/app/windows/RegionWindow.lua').decode('utf-8-sig',errors='replace')
 main_up=member(cur, 'app-assets/output/assets/src_64/app/windows/MainSceneUpWindow.lua').decode('utf-8-sig',errors='replace')
 edit_name=member(cur, 'app-assets/output/assets/src_64/app/windows/EditPlayerNameWindow.lua').decode('utf-8-sig',errors='replace')
@@ -71,11 +75,19 @@ checks=[
  ('account uid/player identity are distinct stock fields', 'arg_215_0.uid = arg_215_1.params.uid' in sp and 'arg_9_0.uid = arg_9_1.params.uid' in sp and 'tostring(var_172_0.uid)' in member(cur, 'app-assets/output/assets/src_64/app/common/utils.lua').decode('utf-8-sig',errors='replace') and 'tostring(var_172_0.playerID)' in member(cur, 'app-assets/output/assets/src_64/app/common/utils.lua').decode('utf-8-sig',errors='replace')),
  ('MID1 20018 special case', 'error_code ~= 20018' in loading),
  ('MID1304 array semantics', 'xyd.mid.GET_OFFLINE_INFO' in sp and 'if #var_221_29 > 0 then' in sp),
+ ('MID2784 current symbol identity', 'xyd.mid.ALBUM_SPECIAL_COLLECT_INFO = 2784' in m),
+ ('MID2784 SelfPlayer consumes is_award as indexed collection', 'arg_269_0.albumSpecialCollect = arg_270_1.is_award' in sp and 'for iter_271_3 = 1, #arg_271_0.albumSpecialCollect do' in sp and 'arg_271_0.albumSpecialCollect[iter_271_3]' in sp),
+ ('WhiteAlbumWindow consumes albumSpecialCollect as indexed collection', 'for iter_4_0 = 1, #arg_4_0.selfPlayer.albumSpecialCollect do' in whitealbum and 'arg_5_0.selfPlayer.albumSpecialCollect[arg_6_0]' in whitealbum),
  ('guild enroll truthiness', 'if var_103_0.is_enroll then' in sg),
  ('MID18 player summary fields are directly consumed', all(x in region_window for x in ['arg_3_0.lev > arg_3_1.lev','var_8_15.vip > 0','tonumber(var_8_15.lev)','var_8_15.avatar_id','var_8_15.avatar_frame_id','var_8_15.conquer_lev','var_8_15.conquer_loop_id'])),
  ('blank player name remains stock lifecycle signal', 'player.playerName == ""' in main_up and 'playerName == ""' in edit_name),
  ('110001001 exists as current initial-owned avatar row', '"110001001"' in avatar_data and '"初始擁有"' in avatar_data),
 ]
+# Current White Album special-set compatibility is content-bound. Parse only
+# the first field of each top-level row and require the exact current 1..23 ID set.
+collect_special_ids=[int(x) for x in re.findall(r'\r?\n\t\t\{\r?\n\t\t\t"(\d+)",', collect_special)]
+if collect_special_ids != list(range(1,24)):
+ errs.append('current collect_special IDs/cardinality drift: '+repr(collect_special_ids))
 for label,ok in checks:
  if not ok:errs.append('current source fact missing '+label)
 # Every direct SelfPlayer MID17 hydration field except optional buff_exp must be
@@ -90,6 +102,16 @@ for fld in re.findall(r'arg_9_1\.params\.([A-Za-z0-9_]+)', sp[fn_start:fn_end]):
 shape_text=(ROOT/'internal/projection/lobby/shapes.go').read_text()
 missing=[fld for fld in src_fields if f'"{fld}"' not in shape_text]
 if missing: errs.append('I4 MID17 structural projection missing current SelfPlayer fields: '+','.join(missing))
+# Preserve the current read-only registration boundary for the White Album repair.
+# Parse hard-coded registration lists/direct registrations in the production router;
+# MID2784 must remain present while mutation MIDs 72/2785 remain unregistered.
+api_text=(ROOT/'cmd/gxb-api/main_postgres.go').read_text()
+registered={int(x) for x in re.findall(r'mustRegister\(\s*(\d+)\s*,', api_text)}
+for body in re.findall(r'for _, mid := range \[\]uint16\{([^}]*)\}\s*\{\s*mustRegister\(mid,', api_text, re.S):
+ registered.update(int(x) for x in re.findall(r'\d+', body))
+if 2784 not in registered: errs.append('I4 production router lost MID2784 registration')
+for forbidden_mid in (72,2785):
+ if forbidden_mid in registered: errs.append(f'I4 production router unexpectedly registers White Album mutation MID{forbidden_mid}')
 # V1 is corroborative/differential only: verify its recovered realtime/MID192 facts,
 # never import its private architecture or stubs into V2.
 with zipfile.ZipFile(v1) as z:
@@ -116,4 +138,4 @@ for label,ok in [
 if errs:
  print('I4 ORACLE WAVE-S CHECK: FAIL'); [print(' -',e) for e in errs]; raise SystemExit(1)
 print('I4 ORACLE WAVE-S CHECK: PASS')
-print('verified current src_64 UpdateScene MID20480/MID2 + public MID7/MID2864 + MID1 log_url/server_time/default sidebands + room discovery/TCP_LOGIN/room-entered/heartbeat/reconnect + 20018/1304/Lua truthiness; Pass353 corroborates bootstrap/realtime shapes only')
+print('verified current src_64 UpdateScene MID20480/MID2 + public MID7/MID2864 + MID1 log_url/server_time/default sidebands + room discovery/TCP_LOGIN/room-entered/heartbeat/reconnect + 20018/1304/Lua truthiness + MID2784 collection consumption + collect_special IDs 1..23; Pass353 corroborates bootstrap/realtime shapes only')

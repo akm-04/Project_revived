@@ -88,8 +88,18 @@ func TestLobbyFacadeRequiresCanonicalRegionAndRecordsExplicit(t *testing.T) {
 	actor := actorForHTTP(t)
 	d := LobbyDispatcher{Authority: httpAuthority{actor}, Tracker: tracker}
 	r := d.Dispatch(context.Background(), env(2784, nil, now))
-	if r.HTTPStatus != 200 || r.Body["is_award"] != int64(0) {
+	if r.HTTPStatus != 200 {
 		t.Fatalf("%+v", r)
+	}
+	awards, ok := r.Body["is_award"].([]any)
+	if !ok || len(awards) != 23 {
+		t.Fatalf("MID2784 is_award type=%T len=%d body=%v", r.Body["is_award"], len(awards), r.Body)
+	}
+	for i, award := range awards {
+		v, ok := award.(int64)
+		if !ok || v != 0 {
+			t.Fatalf("MID2784 is_award[%d]=%#v (%T)", i, award, award)
+		}
 	}
 	bad := env(2784, nil, now)
 	bad.Envelope.Claims.Region = 2
