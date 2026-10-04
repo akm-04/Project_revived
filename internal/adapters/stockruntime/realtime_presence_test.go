@@ -92,7 +92,7 @@ func presenceServer(t *testing.T, projection *presenceProjectionFake, onErr func
 		Auth:   app.Service{Authority: fullRTAuthority{fullActorForPresence(t)}, Endpoints: rtEndpoint{}},
 		Limits: limits.Default(), Policy: p, Registry: NewConnectionRegistry(), Presence: projection,
 		PresenceOperations: operation.Factory{Clock: clock.Fixed{T: time.Unix(1000, 0).UTC()}, Random: bytes.NewReader(make([]byte, 4096))},
-		RealtimeInstanceID: instance, OnPresenceError: onErr,
+		RealtimeOwnerFence: 7, RealtimeInstanceID: instance, OnPresenceError: onErr,
 	}
 }
 

@@ -1593,6 +1593,20 @@
       "owner": "character/saved-preset",
       "write_exceptions": []
     },
+    "player_social_presence": {
+      "allowed_query_owners": [
+        "social-presence"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/presencestore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/presencestore/"
+      ],
+      "migration": "migrations/00031_i7a3_social_presence.sql",
+      "owner": "social-presence",
+      "write_exceptions": []
+    },
     "player_story_cursors": {
       "allowed_query_owners": [
         "player-core"
@@ -1653,6 +1667,34 @@
           "reason": "Player Core service persists first_entry_pending through the I5 owner store; retained as an explicit column-level ownership exception."
         }
       ]
+    },
+    "realtime_presence_leases": {
+      "allowed_query_owners": [
+        "social-presence"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/presencestore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/presencestore/"
+      ],
+      "migration": "migrations/00031_i7a3_social_presence.sql",
+      "owner": "social-presence",
+      "write_exceptions": []
+    },
+    "realtime_presence_owner_state": {
+      "allowed_query_owners": [
+        "social-presence"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/presencestore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/presencestore/"
+      ],
+      "migration": "migrations/00032_i7a3_presence_owner_fence_repair.sql",
+      "owner": "social-presence",
+      "write_exceptions": []
     },
     "redeem_campaigns": {
       "allowed_query_owners": [

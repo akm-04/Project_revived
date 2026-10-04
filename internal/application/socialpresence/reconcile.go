@@ -11,16 +11,17 @@ import (
 const ReconcileProviderName = "I7A3_SOCIAL_PRESENCE"
 
 type Reconciler struct {
-	Runner  tx.Runner
-	Store   Store
-	Expired ExpiredPlayerStore
+	Runner             tx.Runner
+	RealtimeOwnerFence int64
+	Store              Store
+	Expired            ExpiredPlayerStore
 }
 
 func (r Reconciler) Name() string { return ReconcileProviderName }
 
 func (r Reconciler) Reconcile(ctx context.Context, timed appgeneration.TimedOperation, limit int) (appgeneration.ReconcileResult, error) {
 	result := appgeneration.ReconcileResult{Provider: ReconcileProviderName}
-	if r.Runner.DB == nil || r.Store == nil || r.Expired == nil || timed.Validate() != nil || limit <= 0 || limit > appgeneration.MaxReconcileBatch {
+	if r.Runner.DB == nil || r.Store == nil || r.Expired == nil || r.RealtimeOwnerFence <= 0 || timed.Validate() != nil || limit <= 0 || limit > appgeneration.MaxReconcileBatch {
 		return result, errors.New("social presence: invalid reconciler")
 	}
 	players, err := r.Expired.ExpiredPlayerIDs(ctx, timed.DecisionAt(), limit)
@@ -32,6 +33,9 @@ func (r Reconciler) Reconcile(ctx context.Context, timed appgeneration.TimedOper
 		changed := false
 		_, err := r.Runner.Run(ctx, timed.Operation(), DefaultProfile(), tx.Options{Isolation: tx.Serializable}, retryPolicy(), nil,
 			func(txctx context.Context, scope tx.Scope) error {
+				if err := r.Store.AssertOwnerFenceTx(txctx, scope.Tx, r.RealtimeOwnerFence); err != nil {
+					return err
+				}
 				if err := r.Store.EnsureAndLockRootTx(txctx, scope.Tx, pid, timed.DecisionAt()); err != nil {
 					return err
 				}

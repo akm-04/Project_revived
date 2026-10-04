@@ -54,6 +54,7 @@ type RealtimeServer struct {
 	Dispatcher         ClientFrameDispatcher
 	Presence           PresenceProjection
 	PresenceOperations operation.Factory
+	RealtimeOwnerFence int64
 	RealtimeInstanceID ids.UUID
 	OnPresenceError    PresenceErrorHandler
 }
@@ -74,7 +75,7 @@ func (s RealtimeServer) runtimeConfig() (limits.Config, RealtimePolicy, error) {
 		return limits.Config{}, RealtimePolicy{}, err
 	}
 	if s.Presence != nil {
-		if s.Registry == nil || s.PresenceOperations.Clock == nil || s.RealtimeInstanceID.IsZero() {
+		if s.Registry == nil || s.PresenceOperations.Clock == nil || s.RealtimeOwnerFence <= 0 || s.RealtimeInstanceID.IsZero() {
 			return limits.Config{}, RealtimePolicy{}, errors.New("realtime presence integration incomplete")
 		}
 	}
@@ -284,12 +285,12 @@ func protocolRole(r domainrt.PhysicalRole) wireRT.Role {
 }
 func (s RealtimeServer) presenceRef(h SessionHandle) (socialpresence.LeaseRef, error) {
 	meta, ok := h.Metadata()
-	if !ok || s.RealtimeInstanceID.IsZero() {
+	if !ok || s.RealtimeOwnerFence <= 0 || s.RealtimeInstanceID.IsZero() {
 		return socialpresence.LeaseRef{}, socialpresence.ErrInvalidLease
 	}
 	ref := socialpresence.LeaseRef{
 		PlayerID: meta.PlayerID, ContextID: meta.ContextID, Role: meta.PhysicalRole,
-		RealtimeInstanceID: s.RealtimeInstanceID, ConnectionGeneration: meta.RegistryGeneration,
+		RealtimeOwnerFence: s.RealtimeOwnerFence, RealtimeInstanceID: s.RealtimeInstanceID, ConnectionGeneration: meta.RegistryGeneration,
 	}
 	return ref, ref.Validate()
 }

@@ -10,7 +10,8 @@ def need(path,*tokens):
  for t in tokens:
   if t not in s: errs.append(f'{path}: missing {t}')
 need(Path('internal/domain/realtimeauth/authority.go'),'WORLD','SERVICE','GUILD','ServiceRoomID int64 = 99999','TEAM is a logical SERVICE projection')
-need(Path('internal/adapters/stockruntime/realtime_server.go'),'handshakeDeadline','MIDSocketHeartbeat','validateLive','ConnectionRegistry','NewConnectionRegistry')
+need(Path('internal/adapters/stockruntime/realtime_server.go'),'handshakeDeadline','MIDSocketHeartbeat','validateLive','ConnectionRegistry')
+need(Path('internal/adapters/stockruntime/realtime_registry.go'),'type ConnectionRegistry struct','func NewConnectionRegistry() *ConnectionRegistry')
 need(Path('internal/adapters/stockruntime/realtime_policy.go'),'StockTCPLoginTimeout','StockHeartbeatInterval','ClientIdleTimeout','AuthQueryTimeout','LivenessQueryTimeout')
 need(Path('internal/adapters/stockruntime/http_dispatchers.go'),'case 18:','case 1:','error_code": int64(20018)','room_id','log_url','server_time','story_type')
 need(Path('internal/adapters/postgres/i4store/bootstrap_runtime.go'),'tx.Serializable','MID1Fingerprint(session.ID, req.Region)','generation:%d','FindTx','PutTx','revokeContextCredentials')

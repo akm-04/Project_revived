@@ -14,6 +14,7 @@ import (
 // Store is the canonical SocialPresence owner port. Every method mutates or
 // reads only SocialPresence-owned root/lease state.
 type Store interface {
+	AssertOwnerFenceTx(context.Context, tx.Tx, int64) error
 	EnsureAndLockRootTx(context.Context, tx.Tx, identity.PlayerID, time.Time) error
 	SettleExpiredTx(context.Context, tx.Tx, identity.PlayerID, time.Time) (ExpiredSummary, error)
 	UpsertLeaseTx(context.Context, tx.Tx, LeaseRef, time.Time, time.Time) error
@@ -67,6 +68,9 @@ func (s Service) Admit(ctx context.Context, op operation.Context, ref LeaseRef, 
 	_, _, err := s.Timed.Run(ctx, op, DefaultProfile(), tx.Options{Isolation: tx.Serializable}, retryPolicy(), nil,
 		func(txctx context.Context, scope appgeneration.TimedScope) error {
 			at := scope.Operation.DecisionAt()
+			if err := s.Store.AssertOwnerFenceTx(txctx, scope.Tx, ref.RealtimeOwnerFence); err != nil {
+				return err
+			}
 			if err := s.Store.EnsureAndLockRootTx(txctx, scope.Tx, ref.PlayerID, at); err != nil {
 				return err
 			}
@@ -100,6 +104,9 @@ func (s Service) Retire(ctx context.Context, op operation.Context, ref LeaseRef)
 	_, _, err := s.Timed.Run(ctx, op, DefaultProfile(), tx.Options{Isolation: tx.Serializable}, retryPolicy(), nil,
 		func(txctx context.Context, scope appgeneration.TimedScope) error {
 			at := scope.Operation.DecisionAt()
+			if err := s.Store.AssertOwnerFenceTx(txctx, scope.Tx, ref.RealtimeOwnerFence); err != nil {
+				return err
+			}
 			if err := s.Store.EnsureAndLockRootTx(txctx, scope.Tx, ref.PlayerID, at); err != nil {
 				return err
 			}

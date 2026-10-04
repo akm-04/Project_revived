@@ -13,6 +13,7 @@ import (
 var (
 	ErrInvalidLease         = errors.New("social presence: invalid lease")
 	ErrStaleLeaseGeneration = errors.New("social presence: stale lease generation")
+	ErrStaleRealtimeOwner   = errors.New("social presence: stale realtime owner")
 	ErrInvalidObservation   = errors.New("social presence: invalid observation")
 )
 
@@ -22,12 +23,13 @@ type LeaseRef struct {
 	PlayerID             identity.PlayerID
 	ContextID            identity.ContextID
 	Role                 domainrt.PhysicalRole
+	RealtimeOwnerFence   int64
 	RealtimeInstanceID   ids.UUID
 	ConnectionGeneration uint64
 }
 
 func (r LeaseRef) Validate() error {
-	if !r.PlayerID.Valid() || r.ContextID.UUID().IsZero() || !r.Role.Valid() || r.RealtimeInstanceID.IsZero() || r.ConnectionGeneration == 0 || r.ConnectionGeneration > math.MaxInt64 {
+	if !r.PlayerID.Valid() || r.ContextID.UUID().IsZero() || !r.Role.Valid() || r.RealtimeOwnerFence <= 0 || r.RealtimeInstanceID.IsZero() || r.ConnectionGeneration == 0 || r.ConnectionGeneration > math.MaxInt64 {
 		return ErrInvalidLease
 	}
 	return nil

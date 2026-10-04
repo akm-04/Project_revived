@@ -15,6 +15,59 @@ import (
 
 type Store struct{ Queryer tx.Queryer }
 
+const activateRealtimeOwnerFenceSQL = `
+INSERT INTO realtime_presence_owner_state(singleton,owner_fence,activated_at)
+VALUES(TRUE,nextval('realtime_presence_owner_fence_seq'),clock_timestamp())
+ON CONFLICT(singleton) DO UPDATE SET
+  owner_fence=EXCLUDED.owner_fence,
+  activated_at=EXCLUDED.activated_at
+RETURNING owner_fence`
+
+// ActivateRealtimeOwnerFence advances the Presence writer epoch after the
+// process has acquired the accepted R6 PostgreSQL advisory realtime-owner lock.
+// The UPDATE waits for any in-flight Presence mutation holding the singleton
+// row FOR SHARE, producing a linear handoff boundary without becoming gameplay
+// authority. Sequence gaps are valid.
+func (s Store) ActivateRealtimeOwnerFence(ctx context.Context) (int64, error) {
+	if s.Queryer == nil {
+		return 0, errors.New("presence store: nil owner-fence queryer")
+	}
+	var fence int64
+	if err := s.Queryer.QueryRow(ctx, activateRealtimeOwnerFenceSQL).Scan(&fence); err != nil {
+		return 0, err
+	}
+	if fence <= 0 {
+		return 0, errors.New("presence store: invalid owner fence")
+	}
+	return fence, nil
+}
+
+const assertOwnerFenceSQL = `
+SELECT owner_fence
+FROM realtime_presence_owner_state
+WHERE singleton=TRUE
+FOR SHARE`
+
+// AssertOwnerFenceTx establishes a transaction-scoped writer fence. FOR SHARE
+// allows concurrent current-owner player transactions but forces the next
+// owner activation UPDATE to wait until all earlier Presence mutations finish.
+func (Store) AssertOwnerFenceTx(ctx context.Context, t tx.Tx, expected int64) error {
+	if t == nil || expected <= 0 {
+		return socialpresence.ErrStaleRealtimeOwner
+	}
+	var current int64
+	if err := t.QueryRow(ctx, assertOwnerFenceSQL).Scan(&current); err != nil {
+		if noRows(err) {
+			return socialpresence.ErrStaleRealtimeOwner
+		}
+		return err
+	}
+	if current != expected {
+		return socialpresence.ErrStaleRealtimeOwner
+	}
+	return nil
+}
+
 func noRows(err error) bool { return errors.Is(err, kernelstore.ErrNoRows) }
 
 const ensureRootSQL = `
@@ -72,31 +125,39 @@ func (Store) SettleExpiredTx(ctx context.Context, t tx.Tx, pid identity.PlayerID
 
 const upsertLeaseSQL = `
 INSERT INTO realtime_presence_leases(
-  gameplay_context_id,physical_role,player_id,realtime_instance_id,connection_generation,
+  gameplay_context_id,physical_role,player_id,realtime_owner_fence,realtime_instance_id,connection_generation,
   connected_at,last_renewed_at,lease_expires_at
-) VALUES($1::uuid,$2,$3,$4::uuid,$5,$6,$6,$7)
+) VALUES($1::uuid,$2,$3,$4,$5::uuid,$6,$7,$7,$8)
 ON CONFLICT(gameplay_context_id,physical_role) DO UPDATE SET
   player_id=EXCLUDED.player_id,
+  realtime_owner_fence=EXCLUDED.realtime_owner_fence,
   realtime_instance_id=EXCLUDED.realtime_instance_id,
   connection_generation=EXCLUDED.connection_generation,
   connected_at=CASE
-    WHEN realtime_presence_leases.realtime_instance_id=EXCLUDED.realtime_instance_id
+    WHEN realtime_presence_leases.realtime_owner_fence=EXCLUDED.realtime_owner_fence
+     AND realtime_presence_leases.realtime_instance_id=EXCLUDED.realtime_instance_id
      AND realtime_presence_leases.connection_generation=EXCLUDED.connection_generation
     THEN realtime_presence_leases.connected_at ELSE EXCLUDED.connected_at END,
   last_renewed_at=CASE
-    WHEN realtime_presence_leases.realtime_instance_id=EXCLUDED.realtime_instance_id
+    WHEN realtime_presence_leases.realtime_owner_fence=EXCLUDED.realtime_owner_fence
+     AND realtime_presence_leases.realtime_instance_id=EXCLUDED.realtime_instance_id
      AND realtime_presence_leases.connection_generation=EXCLUDED.connection_generation
     THEN GREATEST(realtime_presence_leases.last_renewed_at,EXCLUDED.last_renewed_at)
     ELSE EXCLUDED.last_renewed_at END,
   lease_expires_at=CASE
-    WHEN realtime_presence_leases.realtime_instance_id=EXCLUDED.realtime_instance_id
+    WHEN realtime_presence_leases.realtime_owner_fence=EXCLUDED.realtime_owner_fence
+     AND realtime_presence_leases.realtime_instance_id=EXCLUDED.realtime_instance_id
      AND realtime_presence_leases.connection_generation=EXCLUDED.connection_generation
     THEN GREATEST(realtime_presence_leases.lease_expires_at,EXCLUDED.lease_expires_at)
     ELSE EXCLUDED.lease_expires_at END
 WHERE realtime_presence_leases.player_id=EXCLUDED.player_id
   AND (
-    realtime_presence_leases.realtime_instance_id<>EXCLUDED.realtime_instance_id
-    OR realtime_presence_leases.connection_generation<=EXCLUDED.connection_generation
+    realtime_presence_leases.realtime_owner_fence < EXCLUDED.realtime_owner_fence
+    OR (
+      realtime_presence_leases.realtime_owner_fence = EXCLUDED.realtime_owner_fence
+      AND realtime_presence_leases.realtime_instance_id = EXCLUDED.realtime_instance_id
+      AND realtime_presence_leases.connection_generation <= EXCLUDED.connection_generation
+    )
   )`
 
 func (Store) UpsertLeaseTx(ctx context.Context, t tx.Tx, ref socialpresence.LeaseRef, connectedAt, expiresAt time.Time) error {
@@ -108,7 +169,7 @@ func (Store) UpsertLeaseTx(ctx context.Context, t tx.Tx, ref socialpresence.Leas
 		return socialpresence.ErrInvalidLease
 	}
 	tag, err := t.Exec(ctx, upsertLeaseSQL,
-		ref.ContextID.UUID().String(), string(ref.Role), int64(ref.PlayerID), ref.RealtimeInstanceID.String(), generation,
+		ref.ContextID.UUID().String(), string(ref.Role), int64(ref.PlayerID), ref.RealtimeOwnerFence, ref.RealtimeInstanceID.String(), generation,
 		connectedAt.UTC(), expiresAt.UTC(),
 	)
 	if err != nil {
@@ -123,7 +184,7 @@ func (Store) UpsertLeaseTx(ctx context.Context, t tx.Tx, ref socialpresence.Leas
 const deleteExactLeaseSQL = `
 DELETE FROM realtime_presence_leases
 WHERE gameplay_context_id=$1::uuid AND physical_role=$2 AND player_id=$3
-  AND realtime_instance_id=$4::uuid AND connection_generation=$5
+  AND realtime_owner_fence=$4 AND realtime_instance_id=$5::uuid AND connection_generation=$6
 RETURNING lease_expires_at`
 
 func (Store) DeleteExactLeaseTx(ctx context.Context, t tx.Tx, ref socialpresence.LeaseRef) (time.Time, bool, error) {
@@ -133,7 +194,7 @@ func (Store) DeleteExactLeaseTx(ctx context.Context, t tx.Tx, ref socialpresence
 	}
 	var expiry time.Time
 	err = t.QueryRow(ctx, deleteExactLeaseSQL,
-		ref.ContextID.UUID().String(), string(ref.Role), int64(ref.PlayerID), ref.RealtimeInstanceID.String(), generation,
+		ref.ContextID.UUID().String(), string(ref.Role), int64(ref.PlayerID), ref.RealtimeOwnerFence, ref.RealtimeInstanceID.String(), generation,
 	).Scan(&expiry)
 	if noRows(err) {
 		return time.Time{}, false, nil

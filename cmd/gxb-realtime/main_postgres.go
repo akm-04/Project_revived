@@ -70,6 +70,11 @@ func main() {
 			log.Printf("realtime owner guard close: %v", err)
 		}
 	}()
+	presenceStore := presencestore.Store{Queryer: pool}
+	realtimeOwnerFence, err := presenceStore.ActivateRealtimeOwnerFence(ctx)
+	if err != nil {
+		log.Fatalf("realtime presence owner fence allocation failed: %v", err)
+	}
 	realtimeInstanceID, err := ids.NewUUID()
 	if err != nil {
 		log.Fatalf("realtime process instance id: %v", err)
@@ -116,7 +121,6 @@ func main() {
 			}
 		}()
 	}
-	presenceStore := presencestore.Store{Queryer: pool}
 	presenceRunner := tx.Runner{DB: pool}
 	presenceService := socialpresence.Service{
 		Timed: appgeneration.TimedRunner{
@@ -127,7 +131,7 @@ func main() {
 	}
 	presenceOperations := operation.Factory{Clock: clock.System{}}
 	presenceProviders, err := appgeneration.NewReconcileRegistry(socialpresence.Reconciler{
-		Runner: presenceRunner, Store: presenceStore, Expired: presenceStore,
+		Runner: presenceRunner, RealtimeOwnerFence: realtimeOwnerFence, Store: presenceStore, Expired: presenceStore,
 	})
 	if err != nil {
 		log.Fatalf("social presence reconciler registry: %v", err)
@@ -170,8 +174,8 @@ func main() {
 		Auth: auth, Limits: limits.Default(), Policy: runtimePolicy, Tracker: tracker,
 		Registry: stockruntime.NewConnectionRegistry(), Admission: admission,
 		Presence: presenceService, PresenceOperations: presenceOperations,
-		RealtimeInstanceID: realtimeInstanceID,
-		OnPresenceError:    func(stage string, err error) { log.Printf("social presence %s degraded: %v", stage, err) },
+		RealtimeOwnerFence: realtimeOwnerFence, RealtimeInstanceID: realtimeInstanceID,
+		OnPresenceError: func(stage string, err error) { log.Printf("social presence %s degraded: %v", stage, err) },
 	}
 
 	ln, err := net.Listen("tcp", cfg.RealtimeAddr)

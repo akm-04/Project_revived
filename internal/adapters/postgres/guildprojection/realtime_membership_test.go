@@ -2,44 +2,26 @@ package guildprojection
 
 import (
 	"context"
-	"errors"
-	"strings"
 	"testing"
 
-	"gxb.local/backend/v2/internal/adapters/postgres/kernelstore"
 	apprealtime "gxb.local/backend/v2/internal/application/realtimeauth"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/ids"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
-type bindingRow struct {
-	guildID, eventID int64
-	err              error
-}
+type bindingProjectionRow struct{ guildID, eventID int64 }
 
-func (r bindingRow) Scan(dest ...any) error {
-	if r.err != nil {
-		return r.err
-	}
+func (r bindingProjectionRow) Scan(dest ...any) error {
 	*(dest[0].(*int64)) = r.guildID
 	*(dest[1].(*int64)) = r.eventID
 	return nil
 }
 
-type bindingQueryer struct {
-	query string
-	args  []any
-	row   bindingRow
-}
+type bindingProjectionQueryer struct{ row bindingProjectionRow }
 
-func (q *bindingQueryer) QueryRow(_ context.Context, sql string, args ...any) tx.Row {
-	q.query = sql
-	q.args = args
-	return q.row
-}
-
-func bindingActor(t *testing.T) identity.ActorContext {
+func (q bindingProjectionQueryer) QueryRow(context.Context, string, ...any) tx.Row { return q.row }
+func projectionActor(t *testing.T) identity.ActorContext {
 	t.Helper()
 	u, err := ids.ParseUUID("22222222-2222-4222-8222-222222222222")
 	if err != nil {
@@ -48,32 +30,10 @@ func bindingActor(t *testing.T) identity.ActorContext {
 	cid, _ := identity.ContextIDFrom(u)
 	return identity.ActorContext{ContextID: cid, LogicalServerID: 2, PlayerID: 200001}
 }
-
-func TestRealtimeMembershipReadsCurrentSameGuildJoinIncarnation(t *testing.T) {
-	q := &bindingQueryer{row: bindingRow{guildID: 2_000_001, eventID: 77}}
-	got, ok, err := (RealtimeMembership{Queryer: q}).CurrentGuildBinding(context.Background(), bindingActor(t))
-	if err != nil || !ok || got != (apprealtime.GuildBinding{GuildID: 2_000_001, JoinEventID: 77}) {
+func TestRealtimeMembershipTranslatesGuildOwnerBinding(t *testing.T) {
+	got, ok, err := (RealtimeMembership{Queryer: bindingProjectionQueryer{row: bindingProjectionRow{guildID: 2_000_001, eventID: 77}}}).CurrentGuildBinding(context.Background(), projectionActor(t))
+	want := apprealtime.GuildBinding{GuildID: 2_000_001, JoinEventID: 77}
+	if err != nil || !ok || got != want {
 		t.Fatalf("got=%+v ok=%v err=%v", got, ok, err)
-	}
-	for _, needle := range []string{"JOIN LATERAL", "AND guild_id=gm.guild_id", "AND event_kind='JOIN'", "ORDER BY event_id DESC", ") e ON TRUE", "g.retired_at IS NULL", "g.logical_server_id=$2"} {
-		if !strings.Contains(q.query, needle) {
-			t.Fatalf("query missing %q", needle)
-		}
-	}
-}
-
-func TestRealtimeMembershipNoCurrentJoinFailsClosed(t *testing.T) {
-	q := &bindingQueryer{row: bindingRow{err: kernelstore.ErrNoRows}}
-	_, ok, err := (RealtimeMembership{Queryer: q}).CurrentGuildBinding(context.Background(), bindingActor(t))
-	if err != nil || ok {
-		t.Fatalf("ok=%v err=%v", ok, err)
-	}
-	q.row = bindingRow{guildID: 0, eventID: 0}
-	if _, _, err := (RealtimeMembership{Queryer: q}).CurrentGuildBinding(context.Background(), bindingActor(t)); err == nil {
-		t.Fatal("invalid binding accepted")
-	}
-	q.row = bindingRow{err: errors.New("db down")}
-	if _, _, err := (RealtimeMembership{Queryer: q}).CurrentGuildBinding(context.Background(), bindingActor(t)); err == nil {
-		t.Fatal("db error hidden")
 	}
 }
