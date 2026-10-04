@@ -62,25 +62,43 @@ func (w *connWriter) release(n int) {
 }
 
 func (w *connWriter) Send(ctx context.Context, frame wireRT.Frame, cfg limits.Config) error {
-	b, err := wireRT.EncodeFrameWithConfig(frame, cfg)
+	done, err := w.enqueue(ctx, frame, cfg)
 	if err != nil {
 		return err
 	}
+	return w.await(ctx, done)
+}
+
+// enqueue performs bounded frame admission without waiting for network I/O.
+// I7A-2 session retirement uses this narrow seam to linearize "may this stale
+// handle enqueue?" without holding a lifecycle mutex while conn.Write blocks.
+func (w *connWriter) enqueue(ctx context.Context, frame wireRT.Frame, cfg limits.Config) (<-chan error, error) {
+	b, err := wireRT.EncodeFrameWithConfig(frame, cfg)
+	if err != nil {
+		return nil, err
+	}
 	if err := w.reserve(len(b)); err != nil {
-		return err
+		return nil, err
 	}
 	req := outboundWrite{data: b, done: make(chan error, 1)}
 	select {
 	case w.queue <- req:
+		return req.done, nil
 	case <-ctx.Done():
 		w.release(len(b))
-		return ctx.Err()
+		return nil, ctx.Err()
 	default:
 		w.release(len(b))
-		return wireRT.ErrQueueFull
+		return nil, wireRT.ErrQueueFull
+	}
+}
+
+func (w *connWriter) await(ctx context.Context, done <-chan error) error {
+	if done == nil {
+		return ErrRealtimeWriterClosed
 	}
 	select {
-	case err := <-req.done:
+	case err := <-done:
 		return err
 	case <-ctx.Done():
 		return ctx.Err()

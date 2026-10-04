@@ -85,6 +85,11 @@ func TestGateAndQueue(t *testing.T) {
 	if err := g.ObserveClientFrame(Frame{MID: mids.MIDChatRoomEntered, Params: &amf3.Object{}}); !errors.Is(err, ErrWrongDirection) {
 		t.Fatalf("err=%v", err)
 	}
+	for _, mid := range []uint16{mids.MIDChatFromPlayer, mids.MIDChatFromFriend, mids.MIDChatMessage, mids.MIDWorldNotice, mids.MIDPlayerNotice, mids.MIDForceReload, mids.MIDGuildBroadcast} {
+		if err := g.ObserveClientFrame(Frame{MID: mid, Params: &amf3.Object{}}); !errors.Is(err, ErrWrongDirection) {
+			t.Fatalf("S2C mid=%d anti-spoof err=%v", mid, err)
+		}
+	}
 	q, _ := NewWriteQueue(1, 100)
 	if err := q.Push(make([]byte, 50)); err != nil {
 		t.Fatal(err)

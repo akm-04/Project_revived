@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io"
 	"net"
-	"sync"
 	"time"
 
 	app "gxb.local/backend/v2/internal/application/realtimeauth"
@@ -40,50 +39,6 @@ type RealtimeServer struct {
 	Registry   *ConnectionRegistry
 	Admission  *AdmissionLimiter
 	Dispatcher ClientFrameDispatcher
-}
-
-type registryKey struct {
-	Context string
-	Role    domainrt.PhysicalRole
-}
-
-type registryEntry struct {
-	Conn net.Conn
-	ID   uint64
-}
-
-type ConnectionRegistry struct {
-	mu   sync.Mutex
-	next uint64
-	by   map[registryKey]registryEntry
-}
-
-func NewConnectionRegistry() *ConnectionRegistry {
-	return &ConnectionRegistry{by: make(map[registryKey]registryEntry)}
-}
-func (r *ConnectionRegistry) Replace(key registryKey, conn net.Conn) uint64 {
-	if r == nil {
-		return 0
-	}
-	r.mu.Lock()
-	defer r.mu.Unlock()
-	r.next++
-	id := r.next
-	if old, ok := r.by[key]; ok && old.Conn != nil && old.Conn != conn {
-		_ = old.Conn.Close()
-	}
-	r.by[key] = registryEntry{Conn: conn, ID: id}
-	return id
-}
-func (r *ConnectionRegistry) Remove(key registryKey, id uint64) {
-	if r == nil || id == 0 {
-		return
-	}
-	r.mu.Lock()
-	defer r.mu.Unlock()
-	if cur, ok := r.by[key]; ok && cur.ID == id {
-		delete(r.by, key)
-	}
 }
 
 func (s RealtimeServer) runtimeConfig() (limits.Config, RealtimePolicy, error) {
@@ -131,15 +86,14 @@ func (s RealtimeServer) ServeConn(ctx context.Context, conn net.Conn) error {
 	var gate *wireRT.Gate
 	roleKey := ""
 	var admitted *app.Admission
-	var regKey registryKey
-	var regID uint64
+	var regHandle SessionHandle
 	var sessionTag, contextTag, connectionTag string
 	defer func() {
 		if s.Tracker != nil && contextTag != "" && roleKey != "" {
 			_ = s.Tracker.Record(lobby.BootEvent{Kind: lobby.BootClientClosed, Phase: lobby.PhaseClientState, At: time.Now().UTC(), Key: roleKey, SessionTag: sessionTag, ContextTag: contextTag, ConnectionTag: connectionTag})
 		}
 		if s.Registry != nil {
-			s.Registry.Remove(regKey, regID)
+			s.Registry.Remove(regHandle)
 		}
 	}()
 
@@ -196,9 +150,11 @@ func (s RealtimeServer) ServeConn(ctx context.Context, conn net.Conn) error {
 					admitted = &copyAdmission
 					lastClientActivity = now
 					nextLiveness = now.Add(policy.LivenessInterval)
-					regKey = registryKey{Context: admission.Domain.Actor.ContextID.UUID().String(), Role: admission.Domain.Role}
 					if s.Registry != nil {
-						regID = s.Registry.Replace(regKey, conn)
+						regHandle, err = s.Registry.Replace(admission.Domain, writer)
+						if err != nil {
+							return err
+						}
 					}
 					if s.Tracker != nil {
 						sessionTag, contextTag = s.Tracker.CorrelationTags(admission.Domain.Actor.SessionID.UUID().String(), admission.Domain.Actor.ContextID.UUID().String())

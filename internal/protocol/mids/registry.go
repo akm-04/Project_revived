@@ -29,6 +29,15 @@ const (
 )
 
 const (
+	MIDChatFromPlayer  uint16 = 514
+	MIDChatFromFriend  uint16 = 516
+	MIDSendChatMessage uint16 = 32782
+	MIDChatMessage     uint16 = 32783
+	MIDWorldNotice     uint16 = 32784
+	MIDPlayerNotice    uint16 = 36854
+	MIDForceReload     uint16 = 36855
+	MIDGuildBroadcast  uint16 = 36863
+
 	MIDTCPLogin          uint16 = 32771
 	MIDChatRoomEntered   uint16 = 32779
 	MIDSocketHeartbeat   uint16 = 32797
@@ -89,12 +98,26 @@ func Lookup(mid uint16) (Descriptor, bool) {
 		d.Encoding = Ordinary
 	}
 	switch mid {
-	case MIDTCPLogin, MIDSocketHeartbeat:
+	case MIDTCPLogin, MIDSocketHeartbeat, MIDSendChatMessage:
 		d.Direction = C2S
-		d.Status = ProtocolImplemented
+		if mid == MIDTCPLogin || mid == MIDSocketHeartbeat {
+			d.Status = ProtocolImplemented
+		}
 	case MIDChatRoomEntered:
 		d.Direction = S2C
 		d.Status = ProtocolImplemented
+	case MIDChatFromPlayer, MIDChatFromFriend:
+		// These low-number events are explicit source-proven realtime pushes and
+		// therefore override the generic numeric-plane heuristic.
+		d.Transport = TCP
+		d.Encoding = AMF3
+		d.Direction = S2C
+		d.Status = ResearchedUnimplemented
+	case MIDChatMessage, MIDWorldNotice, MIDPlayerNotice, MIDForceReload, MIDGuildBroadcast:
+		d.Transport = TCP
+		d.Encoding = AMF3
+		d.Direction = S2C
+		d.Status = ResearchedUnimplemented
 	}
 	return d, true
 }

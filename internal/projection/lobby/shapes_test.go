@@ -125,3 +125,19 @@ func TestExplicitWhiteAlbumMutationMIDsRemainUnsupported(t *testing.T) {
 		}
 	}
 }
+
+func TestI7A2MID17InactiveTitleAndBubbleCompatibility(t *testing.T) {
+	d, err := BuildMID1Detail(view(t))
+	if err != nil {
+		t.Fatal(err)
+	}
+	player := d["17"].(map[string]any)
+	title, ok := player["title_info"].(map[string]any)
+	if !ok || title["title_id"] != int64(0) || title["unique_id"] != int64(0) || title["end_time"] != int64(0) {
+		t.Fatalf("inactive title_info=%#v", player["title_info"])
+	}
+	bubble, ok := player["bubble_info"].(map[string]any)
+	if !ok || bubble["bubble_id"] != int64(10001) || bubble["end_time"] != int64(0) {
+		t.Fatalf("inactive bubble_info=%#v", player["bubble_info"])
+	}
+}

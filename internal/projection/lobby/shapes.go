@@ -127,10 +127,11 @@ func baseline(mid uint16, v BootstrapView) (any, bool) {
 			"guild_id": int64(0), "main_scene_type": int64(0),
 
 			"magic_energy": int64(0), "magic_dust": int64(0), "magic_liquid": int64(0), "magic_exp": int64(0),
-			"degree_cer": int64(0), "graduate_cer": int64(0), "patent_cer": int64(0), "title_info": zeroMap(),
+			"degree_cer": int64(0), "graduate_cer": int64(0), "patent_cer": int64(0),
+			"title_info": map[string]any{"title_id": int64(0), "unique_id": int64(0), "end_time": int64(0)},
 			"vip_awards": zeroList(), "conquer_lev": int64(0), "conquer_loop_id": int64(1), "conquer_region": int64(0),
 			"first_main_touch": int64(0), "occult_ticket": int64(0), "tutor_coin": int64(0), "skin_coin": int64(0),
-			"bubble_info": zeroMap(), "crab_times": int64(0),
+			"bubble_info": map[string]any{"bubble_id": int64(10001), "end_time": int64(0)}, "crab_times": int64(0),
 			"story_id": int64(0), "story_state": int64(0), "guide_id": int64(0),
 		}, true
 	case 49:

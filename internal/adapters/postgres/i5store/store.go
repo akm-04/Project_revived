@@ -938,3 +938,25 @@ func (Store) LockPlayerLevelTx(ctx context.Context, t tx.Tx, pid identity.Player
 	}
 	return p.Level, nil
 }
+
+// PlayerType exposes the narrow I5-owned presentation read required by I7A.
+// It deliberately returns the canonical int64 verbatim; no source-qualified
+// PlayerType range exists in the active contract.
+func (s Store) PlayerType(ctx context.Context, pid identity.PlayerID) (int64, bool, error) {
+	if s.Queryer == nil || !pid.Valid() {
+		return 0, false, errors.New("invalid player type read")
+	}
+	var rawPID int64
+	var playerType int64
+	err := s.Queryer.QueryRow(ctx, `SELECT player_id,player_type FROM player_profiles WHERE player_id=$1`, int64(pid)).Scan(&rawPID, &playerType)
+	if noRows(err) {
+		return 0, false, nil
+	}
+	if err != nil {
+		return 0, false, err
+	}
+	if identity.PlayerID(rawPID) != pid {
+		return 0, false, errors.New("player type owner mismatch")
+	}
+	return playerType, true, nil
+}

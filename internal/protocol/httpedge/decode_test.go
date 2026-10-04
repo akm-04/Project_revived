@@ -274,3 +274,12 @@ func TestHandlerResponseEncodingFailureDoesNotRedispatch(t *testing.T) {
 		t.Fatalf("body=%v", body)
 	}
 }
+
+func TestI7A2LowNumberRealtimePushesAreNotOrdinaryHTTP(t *testing.T) {
+	for _, mid := range []uint16{514, 516} {
+		_, edgeErr := Decode(ordinaryRequest(t, fmt.Sprintf(`{"mid":%d}`, mid)), limits.Default())
+		if edgeErr == nil || edgeErr.HTTPStatus != http.StatusBadRequest {
+			t.Fatalf("mid=%d unexpectedly accepted as ordinary HTTP: %v", mid, edgeErr)
+		}
+	}
+}
