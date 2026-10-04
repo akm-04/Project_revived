@@ -20,12 +20,14 @@ SELECT gm.guild_id,e.event_id
 FROM guild_memberships gm
 JOIN guilds g ON g.guild_id=gm.guild_id
 JOIN LATERAL (
-  SELECT event_id,guild_id,event_kind
+  SELECT event_id
   FROM guild_membership_events
   WHERE player_id=gm.player_id
+    AND guild_id=gm.guild_id
+    AND event_kind='JOIN'
   ORDER BY event_id DESC
   LIMIT 1
-) e ON e.guild_id=gm.guild_id AND e.event_kind='JOIN'
+) e ON TRUE
 WHERE gm.player_id=$1
   AND g.retired_at IS NULL
   AND g.logical_server_id=$2`

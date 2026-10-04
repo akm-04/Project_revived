@@ -55,7 +55,7 @@ func TestRealtimeMembershipReadsCurrentSameGuildJoinIncarnation(t *testing.T) {
 	if err != nil || !ok || got != (apprealtime.GuildBinding{GuildID: 2_000_001, JoinEventID: 77}) {
 		t.Fatalf("got=%+v ok=%v err=%v", got, ok, err)
 	}
-	for _, needle := range []string{"JOIN LATERAL", "ORDER BY event_id DESC", "e.event_kind='JOIN'", "g.retired_at IS NULL", "g.logical_server_id=$2"} {
+	for _, needle := range []string{"JOIN LATERAL", "AND guild_id=gm.guild_id", "AND event_kind='JOIN'", "ORDER BY event_id DESC", ") e ON TRUE", "g.retired_at IS NULL", "g.logical_server_id=$2"} {
 		if !strings.Contains(q.query, needle) {
 			t.Fatalf("query missing %q", needle)
 		}
