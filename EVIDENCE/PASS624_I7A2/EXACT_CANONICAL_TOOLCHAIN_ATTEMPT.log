@@ -1,0 +1,16 @@
+Exact canonical focused execution attempt
+canonical go.mod:
+module gxb.local/backend/v2
+
+go 1.26.0
+
+toolchain go1.27.1
+
+require (
+	github.com/go-chi/chi/v5 v5.3.1
+	github.com/jackc/pgx/v5 v5.10.0
+	github.com/riverqueue/river v0.47.0
+.go-version:
+1.27.1
+go: go.mod requires go >= 1.26.0 (running go 1.23.2; GOTOOLCHAIN=local)
+exit=1

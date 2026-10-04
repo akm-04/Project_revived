@@ -1,0 +1,55 @@
+{
+  "claims": [
+    {
+      "claim": "Pass618 parent archive/Git/product-tree/snapshot identity before implementation",
+      "classification": "SOURCE_FACT",
+      "evidence": "Pass623 + independent hash verification"
+    },
+    {
+      "claim": "current src_64 MID aliases/roles and MID17 consumer/default bubble facts",
+      "classification": "SOURCE_FACT",
+      "evidence": "EVIDENCE/PASS624_I7A2/SOURCE_ORACLE_RESULT.json"
+    },
+    {
+      "claim": "I7A-2 registry/schema/presentation/wakeup architecture",
+      "classification": "IMPLEMENTATION_DECISION",
+      "evidence": "Pass623 contract + Pass624 implementation"
+    },
+    {
+      "claim": "compatibility-copy focused/race/vet/96-package execution",
+      "classification": "RUNTIME_OBSERVED",
+      "conditions": "Go1.23.2 compatibility copy only"
+    },
+    {
+      "claim": "exact canonical Go execution",
+      "classification": "UNKNOWN",
+      "conditions": "ENVIRONMENT_BLOCKED; not run"
+    },
+    {
+      "claim": "real PostgreSQL LISTEN/reconnect semantics for an active production route",
+      "classification": "UNKNOWN",
+      "conditions": "NOT_RUN activation-gated; zero production routes"
+    },
+    {
+      "claim": "stock-client physical acceptance",
+      "classification": "UNKNOWN",
+      "conditions": "W2 deferred after I14"
+    }
+  ],
+  "disproven_or_repaired": [
+    {
+      "claim": "first lifecycle-lock implementation safely interrupts blocked writer",
+      "classification": "DISPROVEN",
+      "disposition": "fixed before candidate freeze by enqueue/wait split"
+    },
+    {
+      "claim": "postgres-tagged reconnect tests satisfy ordinary local lifecycle proof in this environment",
+      "classification": "DISPROVEN",
+      "disposition": "generic reconnect core/test moved untagged; concrete pgx remains tagged"
+    }
+  ],
+  "pass": "624.0",
+  "schema_version": 1,
+  "stage": "I7A-2",
+  "status": "POSTIMPLEMENTATION_EVIDENCE_CLASSIFIED"
+}

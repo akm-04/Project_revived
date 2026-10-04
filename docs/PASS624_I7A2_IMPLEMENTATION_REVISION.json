@@ -1,0 +1,166 @@
+{
+  "changed_implementation_files": [
+    {
+      "bytes": 1479,
+      "path": "internal/adapters/postgres/i5store/player_type_test.go",
+      "sha256": "6f86eb8736300893b708ec9d539a7e52c5aa8e12d073b13709e2e87191940626"
+    },
+    {
+      "bytes": 46652,
+      "path": "internal/adapters/postgres/i5store/store.go",
+      "sha256": "9eea6783a92024dd48960eb79bf176a495b67c2e69d9a42c4d3c98ed11d27059"
+    },
+    {
+      "bytes": 1975,
+      "path": "internal/adapters/postgres/realtime_wakeup.go",
+      "sha256": "194a20223ffb6a09b5da3d2dd848c34dbbbc1a645f7efe94d6b01bebb9330a8d"
+    },
+    {
+      "bytes": 2732,
+      "path": "internal/adapters/postgres/realtime_wakeup_core.go",
+      "sha256": "78e2571c8fb0e71ee7364ee6ea270e913001eae84676752e699abfad876e64da"
+    },
+    {
+      "bytes": 4334,
+      "path": "internal/adapters/postgres/realtime_wakeup_test.go",
+      "sha256": "ee89e20ac9d6ebbf8ddf437122324562fcca5aea9afa9580d644f6a72dfdbdb7"
+    },
+    {
+      "bytes": 1780,
+      "path": "internal/adapters/stockruntime/realtime_publisher.go",
+      "sha256": "d063333f25a59d0ca022cc81a64c335d2a2bda2e4d622f55c01b225f41cf214f"
+    },
+    {
+      "bytes": 2244,
+      "path": "internal/adapters/stockruntime/realtime_publisher_test.go",
+      "sha256": "0a3907eca3ca325d267c43fad3cedbd254017ab9d094299469b2ad7f2d6720e7"
+    },
+    {
+      "bytes": 8648,
+      "path": "internal/adapters/stockruntime/realtime_registry.go",
+      "sha256": "da4597128c6138006cd33cdebc34f8fdbb4c5feb9c0bd4788190fe54ce89218d"
+    },
+    {
+      "bytes": 8775,
+      "path": "internal/adapters/stockruntime/realtime_registry_test.go",
+      "sha256": "a13acf123069f8ee2b800368ec56a6b2c6b6b4cbe77895b46066f8a9fee4c104"
+    },
+    {
+      "bytes": 8266,
+      "path": "internal/adapters/stockruntime/realtime_server.go",
+      "sha256": "0494afc0731f0e6bed65ae6376e982947c472418ce74c2ea1460b842a29e3ee4"
+    },
+    {
+      "bytes": 3624,
+      "path": "internal/adapters/stockruntime/realtime_writer.go",
+      "sha256": "d1c53167c7cec20821bc04b863ca28648a759d5e384c228de9a45ea9edaf4cc2"
+    },
+    {
+      "bytes": 1976,
+      "path": "internal/application/playerpresentation/service.go",
+      "sha256": "b87f7988343e900b7bc6775156855dae0954872f972c5118a43eb0d7d5238cb8"
+    },
+    {
+      "bytes": 1951,
+      "path": "internal/application/playerpresentation/service_test.go",
+      "sha256": "823204922e2cb57ca9945204054de2d39b3f8545d6dca9f537182b0e9e49b440"
+    },
+    {
+      "bytes": 4232,
+      "path": "internal/application/realtimewakeup/registry.go",
+      "sha256": "7ef9ba9d04fbbd7518f0c4e53304f21f2549521c6825d4f3ccb4019f5ea9b1b4"
+    },
+    {
+      "bytes": 2395,
+      "path": "internal/application/realtimewakeup/registry_test.go",
+      "sha256": "7457c26aaf35532dee272de28f63a4dff65895ec6f0cfde51392793cb5445496"
+    },
+    {
+      "bytes": 4698,
+      "path": "internal/archguard/i7a2_contract_test.go",
+      "sha256": "bc043812428626658b94fa6c7c8f12ae993cdbcae15dd40574413934d8154904"
+    },
+    {
+      "bytes": 12276,
+      "path": "internal/projection/lobby/shapes.go",
+      "sha256": "9df78e3888974e9226c636294181e12ecbf26c578b4aeeab4ea7261f3e59f95a"
+    },
+    {
+      "bytes": 4942,
+      "path": "internal/projection/lobby/shapes_test.go",
+      "sha256": "90738627c97fe7455f679c0bcda344ae4b01edb671e4e36e0445d36b85b9ec1b"
+    },
+    {
+      "bytes": 8682,
+      "path": "internal/protocol/httpedge/decode_test.go",
+      "sha256": "01c18097c14867ecf009c2493af9caf0964696a0b50094a6c88b07b0d382b523"
+    },
+    {
+      "bytes": 4233,
+      "path": "internal/protocol/mids/registry.go",
+      "sha256": "cf84c3a527f8a9dda880bb30eb103085aaa8ddf7f16eaec0e44d89ca07570304"
+    },
+    {
+      "bytes": 1055,
+      "path": "internal/protocol/mids/registry_special_test.go",
+      "sha256": "f0085e0c85d71839fe36ce49b08cbb9549bdc3cdd47df56c18dc95937d7c1830"
+    },
+    {
+      "bytes": 3825,
+      "path": "internal/protocol/realtime/frame_test.go",
+      "sha256": "66fa411593d8bce22a21dfc75fcbc0320e3701078f5f2350370586072aa1e542"
+    },
+    {
+      "bytes": 7347,
+      "path": "internal/protocol/realtime/s2c_registry.go",
+      "sha256": "1185e76940e4185643389c733c92f1e3ed0d1c80bba4cf1d25a635d290befa28"
+    },
+    {
+      "bytes": 4626,
+      "path": "internal/protocol/realtime/s2c_registry_test.go",
+      "sha256": "ef5716009a090aded2830bcd4794e42fd1bacf844c038990eb42999efa760331"
+    }
+  ],
+  "evidence": {
+    "canonical_static_source": "GREEN",
+    "classification": "LOCAL_IMPLEMENTATION_COMPLETE_WITH_CANONICAL_STATIC_AND_EXACT_SOURCE_ORACLE_PLUS_COMPATIBILITY_COPY_DIAGNOSTICS; EXACT_CANONICAL_TOOLCHAIN_ACCEPTANCE_NOT_CLAIMED",
+    "compatibility_copy": "GREEN_FOCUSED_TEST_RACE_FULL_VET_96_OF_96_PACKAGE_REGRESSION",
+    "exact_candidate_execution": "ENVIRONMENT_BLOCKED_LOCAL_GO_1_23_2_BELOW_CANONICAL_GO_1_26_MINIMUM_AND_PINNED_GO_1_27_1_UNAVAILABLE",
+    "exact_src64_source_oracle": "GREEN_38_OF_38",
+    "postgres_concrete_tag": "ENVIRONMENT_BLOCKED_PGX_NOT_CACHED_GOPROXY_OFF",
+    "postimplementation_reality_check": "GREEN",
+    "real_postgresql_listener": "NOT_RUN_ACTIVATION_GATED_ZERO_PRODUCTION_ROUTES"
+  },
+  "implementation_revision_algorithm": "sha256(sorted(path UTF-8 || NUL || bytes) over I7A-2 implementation/test footprint before release metadata)",
+  "implementation_revision_sha256": "eb5cd87d59d46ec22660a51a690c294b5528452b292932adcf9dc7d8e3b714e9",
+  "implementation_source_commit": "1f0d7629fe93043c7fc4befbfe85d7f158851068",
+  "migration_high_water": "00030_ca7_2_appearance_foundation.sql",
+  "non_changes": [
+    "no new migration/schema/table/durable social/chat state",
+    "no raw net.Conn feature API or second writer",
+    "no generic gameplay bus/outbox/durable realtime queue",
+    "no generic notice/chat/DM producer activation",
+    "no I7B title/bubble entitlement or equipped-state ownership",
+    "no application/domain numeric MID dependency",
+    "no go.mod/go.sum/.go-version/toolchain dependency pin change"
+  ],
+  "parent_backend_archive_sha256": "6b1aa5e5433d4bb64d74f5485a6f43f6f1e02ed878fab86836d778090e20795f",
+  "parent_git": "5d3a711c2b046981c993c0d5a7b3ab972037755e",
+  "pass": "624.0",
+  "pass623_acceptance_matrix_sha256": "8d2558ba5e1b432bcbfc08e88b0d54c53e8fb419870f4cae971b7124ae9b666c",
+  "pass623_authority_sha256": "6d352ac15216af26d58d0876419678ba5131dd7343cedd2b0a964c3d761e139e",
+  "pass623_implementation_authorization_sha256": "bf9024feb32d518d1f4775f81614c85e5ea1f718350b13687b6ed2e64a0d37b7",
+  "pass623_implementation_contract_sha256": "2d7a2c8a732b3ae5259fa6bea060accb25df08997034892050d88e3a43ef43dd",
+  "pass623_research_seal_sha256": "4b9e0f1c22b432bfc0a76f970d78bfae25c6eec336602b265a9cdb1dbf859775",
+  "schema_version": 1,
+  "scope": [
+    "I4 ConnectionRegistry extension with immutable generation-fenced writer-backed handles and PlayerID/role + RoomID/role secondary indices",
+    "existing connWriter retained as sole conn.Write owner; queue admission split from completion wait so retirement can close blocked old sockets without registry/lifecycle lock inversion",
+    "typed TCP/AMF3/S2C descriptor corrections for 514/516 and selected direct-event/notice foundations with fail-closed immutable schema registries and zero production producer registrations",
+    "narrow I5-owned PlayerType read plus application-level I4+I5 minimal player presentation",
+    "MID17 inactive title/bubble compatibility projection title_id=0 unique_id=0 end_time=0 and bubble_id=10001 end_time=0",
+    "dormant bounded reference-only PostgreSQL wakeup envelope/route registry/reconnect core; concrete LISTEN session remains postgres-tagged and zero production routes are active"
+  ],
+  "stage": "I7A-2",
+  "status": "LOCAL_IMPLEMENTATION_COMPLETE_CANDIDATE"
+}
