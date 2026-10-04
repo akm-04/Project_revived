@@ -10,7 +10,6 @@ import (
 
 	app "gxb.local/backend/v2/internal/application/realtimeauth"
 	"gxb.local/backend/v2/internal/application/socialpresence"
-	"gxb.local/backend/v2/internal/domain/identity"
 	domainrt "gxb.local/backend/v2/internal/domain/realtimeauth"
 	"gxb.local/backend/v2/internal/foundation/ids"
 	"gxb.local/backend/v2/internal/foundation/operation"
@@ -203,7 +202,7 @@ func (s RealtimeServer) ServeConn(ctx context.Context, conn net.Conn) error {
 					return ErrRealtimeNotAuthenticated
 				}
 				if !now.Before(nextLiveness) {
-					if err := s.validateLive(ctx, policy.LivenessQueryTimeout, admitted.Domain.Actor, now); err != nil {
+					if err := s.validateLive(ctx, policy.LivenessQueryTimeout, *admitted, now); err != nil {
 						return err
 					}
 					nextLiveness = now.Add(policy.LivenessInterval)
@@ -250,7 +249,7 @@ func (s RealtimeServer) ServeConn(ctx context.Context, conn net.Conn) error {
 					return ErrRealtimeClientIdle
 				}
 				if !now.Before(nextLiveness) {
-					if err := s.validateLive(ctx, policy.LivenessQueryTimeout, admitted.Domain.Actor, now); err != nil {
+					if err := s.validateLive(ctx, policy.LivenessQueryTimeout, *admitted, now); err != nil {
 						return err
 					}
 					nextLiveness = now.Add(policy.LivenessInterval)
@@ -262,10 +261,10 @@ func (s RealtimeServer) ServeConn(ctx context.Context, conn net.Conn) error {
 	}
 }
 
-func (s RealtimeServer) validateLive(ctx context.Context, timeout time.Duration, actor identity.ActorContext, now time.Time) error {
+func (s RealtimeServer) validateLive(ctx context.Context, timeout time.Duration, admitted app.Admission, now time.Time) error {
 	queryCtx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
-	return s.Auth.ValidateActor(queryCtx, actor, now)
+	return s.Auth.ValidateAdmission(queryCtx, admitted, now)
 }
 
 func (s RealtimeServer) record(e lobby.BootEvent) {
