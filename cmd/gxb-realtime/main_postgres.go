@@ -27,6 +27,7 @@ import (
 	"gxb.local/backend/v2/internal/foundation/config"
 	"gxb.local/backend/v2/internal/foundation/ids"
 	"gxb.local/backend/v2/internal/foundation/operation"
+	"gxb.local/backend/v2/internal/foundation/policy"
 	"gxb.local/backend/v2/internal/foundation/tx"
 	"gxb.local/backend/v2/internal/projection/lobby"
 	"gxb.local/backend/v2/internal/protocol/limits"
@@ -124,10 +125,51 @@ func main() {
 		},
 		Store: presenceStore,
 	}
+	presenceOperations := operation.Factory{Clock: clock.System{}}
+	presenceProviders, err := appgeneration.NewReconcileRegistry(socialpresence.Reconciler{
+		Runner: presenceRunner, Store: presenceStore, Expired: presenceStore,
+	})
+	if err != nil {
+		log.Fatalf("social presence reconciler registry: %v", err)
+	}
+	presenceReconcile := appgeneration.ReconcileKernel{
+		Binder:    appgeneration.Binder{Time: postgres.AuthoritativeTime{Queryer: pool}},
+		Providers: presenceProviders,
+	}
+	runPresenceReconcile := func(stage string) {
+		op, err := presenceOperations.New(policy.Set{})
+		if err != nil {
+			log.Printf("social presence reconcile %s operation degraded: %v", stage, err)
+			return
+		}
+		results, err := presenceReconcile.Run(ctx, op, appgeneration.MaxReconcileBatch)
+		if err != nil {
+			log.Printf("social presence reconcile %s degraded: %v", stage, err)
+			return
+		}
+		for _, result := range results {
+			if result.Settled > 0 {
+				log.Printf("social presence reconcile %s provider=%s scanned=%d settled=%d noops=%d", stage, result.Provider, result.Scanned, result.Settled, result.Noops)
+			}
+		}
+	}
+	runPresenceReconcile("startup")
+	go func() {
+		ticker := time.NewTicker(runtimePolicy.LivenessInterval)
+		defer ticker.Stop()
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case <-ticker.C:
+				runPresenceReconcile("periodic")
+			}
+		}
+	}()
 	server := stockruntime.RealtimeServer{
 		Auth: auth, Limits: limits.Default(), Policy: runtimePolicy, Tracker: tracker,
 		Registry: stockruntime.NewConnectionRegistry(), Admission: admission,
-		Presence: presenceService, PresenceOperations: operation.Factory{Clock: clock.System{}},
+		Presence: presenceService, PresenceOperations: presenceOperations,
 		RealtimeInstanceID: realtimeInstanceID,
 		OnPresenceError:    func(stage string, err error) { log.Printf("social presence %s degraded: %v", stage, err) },
 	}

@@ -43,6 +43,7 @@ func (t *testTime) Now(context.Context) (time.Time, error) { t.calls++; return t
 
 type fakeStore struct {
 	settle       ExpiredSummary
+	settleAt     []time.Time
 	deleteExpiry time.Time
 	deleteFound  bool
 	advanced     []time.Time
@@ -52,7 +53,8 @@ type fakeStore struct {
 func (*fakeStore) EnsureAndLockRootTx(context.Context, tx.Tx, identity.PlayerID, time.Time) error {
 	return nil
 }
-func (s *fakeStore) SettleExpiredTx(context.Context, tx.Tx, identity.PlayerID, time.Time) (ExpiredSummary, error) {
+func (s *fakeStore) SettleExpiredTx(_ context.Context, _ tx.Tx, _ identity.PlayerID, at time.Time) (ExpiredSummary, error) {
+	s.settleAt = append(s.settleAt, at)
 	return s.settle, nil
 }
 func (s *fakeStore) UpsertLeaseTx(context.Context, tx.Tx, LeaseRef, time.Time, time.Time) error {
@@ -70,6 +72,18 @@ func (s *fakeStore) AdvanceLastSeenTx(_ context.Context, _ tx.Tx, _ identity.Pla
 type fakeObservationStore struct {
 	gotAt time.Time
 	out   map[identity.PlayerID]Observation
+}
+
+type fakeExpiredStore struct {
+	players []identity.PlayerID
+	gotAt   time.Time
+	limit   int
+}
+
+func (s *fakeExpiredStore) ExpiredPlayerIDs(_ context.Context, at time.Time, limit int) ([]identity.PlayerID, error) {
+	s.gotAt = at
+	s.limit = limit
+	return append([]identity.PlayerID(nil), s.players...), nil
 }
 
 func (s *fakeObservationStore) ReadManyAt(_ context.Context, _ []identity.PlayerID, at time.Time) (map[identity.PlayerID]Observation, error) {
@@ -157,5 +171,33 @@ func TestReaderBindsOneAuthoritativeInstantForBatch(t *testing.T) {
 	}
 	if tm.calls != 1 || !store.gotAt.Equal(at) || got[200001].PlayerID != 200001 {
 		t.Fatalf("calls=%d at=%v got=%v", tm.calls, store.gotAt, got)
+	}
+}
+
+func TestReconcilerUsesKernelDecisionInstantAndSettlesExpiredPlayer(t *testing.T) {
+	decision := time.Unix(3000, 0).UTC()
+	expiry := time.Unix(2990, 0).UTC()
+	store := &fakeStore{settle: ExpiredSummary{MaxExpiredAt: &expiry}}
+	expired := &fakeExpiredStore{players: []identity.PlayerID{200001}}
+	timed, err := appgeneration.NewTimedOperation(testOp(t), decision)
+	if err != nil {
+		t.Fatal(err)
+	}
+	r := Reconciler{Runner: tx.Runner{DB: &testDB{}}, Store: store, Expired: expired}
+	result, err := r.Reconcile(context.Background(), timed, 17)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if result.Provider != ReconcileProviderName || result.Scanned != 1 || result.Settled != 1 || result.Noops != 0 {
+		t.Fatalf("result=%+v", result)
+	}
+	if !expired.gotAt.Equal(decision) || expired.limit != 17 {
+		t.Fatalf("expired at=%v limit=%d", expired.gotAt, expired.limit)
+	}
+	if len(store.settleAt) != 1 || !store.settleAt[0].Equal(decision) {
+		t.Fatalf("settleAt=%v", store.settleAt)
+	}
+	if len(store.advanced) != 1 || !store.advanced[0].Equal(expiry) {
+		t.Fatalf("advanced=%v", store.advanced)
 	}
 }

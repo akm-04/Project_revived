@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"gxb.local/backend/v2/internal/application/playerdirectory"
+	"gxb.local/backend/v2/internal/application/socialpresence"
 	"gxb.local/backend/v2/internal/domain/guild"
 	"gxb.local/backend/v2/internal/domain/identity"
 )
@@ -53,6 +54,18 @@ func (d viewDirectory) Profile(_ context.Context, p identity.PlayerID) (playerdi
 	return v, ok, nil
 }
 
+type viewPresence struct {
+	observations map[identity.PlayerID]socialpresence.Observation
+	calls        int
+	requested    []identity.PlayerID
+}
+
+func (p *viewPresence) ReadMany(_ context.Context, ids []identity.PlayerID) (map[identity.PlayerID]socialpresence.Observation, error) {
+	p.calls++
+	p.requested = append([]identity.PlayerID(nil), ids...)
+	return p.observations, nil
+}
+
 func viewFixture() (Service, identity.ActorContext) {
 	at := time.Unix(100, 0).UTC()
 	g := guild.Guild{ID: 1000001, LogicalServerID: 1, Name: "guild", Icon: 20010001, Description: "d", ApplyType: guild.ApplyByApplication, MinAllowLevel: 32, Vitality: 20000, PolicyRevision: "p", StateVersion: 1, CreatedAt: at, UpdatedAt: at}
@@ -64,10 +77,14 @@ func viewFixture() (Service, identity.ActorContext) {
 		100001: {PlayerID: 100001, Name: "leader", Level: 40, AvatarID: 11, AvatarFrameID: 1, ConquerLevel: 2, ConquerLoopID: 3},
 		100002: {PlayerID: 100002, Name: "member", Level: 35, AvatarID: 12, AvatarFrameID: 2, ConquerLevel: 4, ConquerLoopID: 5},
 	}
-	return Service{Store: viewStore{g: g, memberships: ms}, Directory: dir}, identity.ActorContext{LogicalServerID: 1, PlayerID: 100001}
+	presence := &viewPresence{observations: map[identity.PlayerID]socialpresence.Observation{
+		100001: {PlayerID: 100001},
+		100002: {PlayerID: 100002},
+	}}
+	return Service{Store: viewStore{g: g, memberships: ms}, Directory: dir, Presence: presence}, identity.ActorContext{LogicalServerID: 1, PlayerID: 100001}
 }
 
-func TestMembersUsesTypedPlayerDirectoryAndPresentationSentinels(t *testing.T) {
+func TestMembersUsesTypedPlayerDirectoryPresenceAndNeutralActivitySentinels(t *testing.T) {
 	s, a := viewFixture()
 	info, members, err := s.Members(context.Background(), a)
 	if err != nil {
@@ -83,6 +100,48 @@ func TestMembersUsesTypedPlayerDirectoryAndPresentationSentinels(t *testing.T) {
 		if m.Name == "" || m.Level < 1 {
 			t.Fatalf("typed profile missing: %+v", m)
 		}
+	}
+	presence := s.Presence.(*viewPresence)
+	if presence.calls != 1 || len(presence.requested) != 2 {
+		t.Fatalf("presence calls=%d requested=%v", presence.calls, presence.requested)
+	}
+}
+
+func TestMembersProjectsGuildLastTimeFromPresenceBatch(t *testing.T) {
+	s, a := viewFixture()
+	presence := s.Presence.(*viewPresence)
+	connected := time.Unix(300, 0).UTC()
+	oldSeen := time.Unix(50, 0).UTC()
+	offline := time.Unix(200, 0).UTC()
+	presence.observations = map[identity.PlayerID]socialpresence.Observation{
+		100001: {PlayerID: 100001, IsOnline: true, LastSeenAt: &oldSeen, LatestConnectedAt: &connected},
+		100002: {PlayerID: 100002, LastSeenAt: &offline},
+	}
+
+	_, members, err := s.Members(context.Background(), a)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(members) != 2 {
+		t.Fatalf("members=%+v", members)
+	}
+	if members[0].PlayerID != 100001 || members[0].LastTime != connected.Unix() {
+		t.Fatalf("online projection=%+v", members[0])
+	}
+	if members[1].PlayerID != 100002 || members[1].LastTime != offline.Unix() {
+		t.Fatalf("offline projection=%+v", members[1])
+	}
+	if presence.calls != 1 || len(presence.requested) != 2 {
+		t.Fatalf("presence calls=%d requested=%v", presence.calls, presence.requested)
+	}
+}
+
+func TestMembersFailsClosedWhenPresenceBatchOmitsCanonicalMember(t *testing.T) {
+	s, a := viewFixture()
+	presence := s.Presence.(*viewPresence)
+	delete(presence.observations, 100002)
+	if _, _, err := s.Members(context.Background(), a); err != ErrUnavailable {
+		t.Fatalf("err=%v", err)
 	}
 }
 

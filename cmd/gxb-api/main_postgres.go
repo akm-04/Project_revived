@@ -23,6 +23,7 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres/i4store"
 	"gxb.local/backend/v2/internal/adapters/postgres/i5store"
 	"gxb.local/backend/v2/internal/adapters/postgres/kernelstore"
+	"gxb.local/backend/v2/internal/adapters/postgres/presencestore"
 	"gxb.local/backend/v2/internal/adapters/stockruntime"
 	appactivity "gxb.local/backend/v2/internal/application/activitydirectory"
 	appboot "gxb.local/backend/v2/internal/application/bootstrap"
@@ -38,6 +39,7 @@ import (
 	appi5 "gxb.local/backend/v2/internal/application/i5"
 	appidentity "gxb.local/backend/v2/internal/application/identitylifecycle"
 	apprealtime "gxb.local/backend/v2/internal/application/realtimeauth"
+	"gxb.local/backend/v2/internal/application/socialpresence"
 	"gxb.local/backend/v2/internal/content/guildpolicy"
 	"gxb.local/backend/v2/internal/content/registry"
 	"gxb.local/backend/v2/internal/foundation/clock"
@@ -169,7 +171,9 @@ func main() {
 		Level: i5CrossOwner, Scalar: i5CrossOwner, LevelAndScalar: i5CrossOwner,
 		Receipts: receipts, ReceiptRead: kernelstore.Reader{Queryer: pool}, Policy: guildPolicy,
 	}
-	guildView := guildview.Service{Store: guildDB, Directory: i4store.PlayerDirectoryReader{Queryer: pool}}
+	presenceDB := presencestore.Store{Queryer: pool}
+	presenceReader := socialpresence.Reader{Time: postgres.AuthoritativeTime{Queryer: pool}, Store: presenceDB}
+	guildView := guildview.Service{Store: guildDB, Directory: i4store.PlayerDirectoryReader{Queryer: pool}, Presence: presenceReader}
 	bootstrap := i4store.BootstrapService{
 		Runner: runner, Receipts: receipts, ReceiptReader: kernelstore.Reader{Queryer: pool},
 		DigestSecret: digestSecret, BearerSecret: bearerSecret, DerivationKeyID: keyID, BearerKeys: bearerKeys,

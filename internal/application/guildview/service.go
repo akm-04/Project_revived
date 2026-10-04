@@ -6,6 +6,7 @@ import (
 	"sort"
 
 	"gxb.local/backend/v2/internal/application/playerdirectory"
+	"gxb.local/backend/v2/internal/application/socialpresence"
 	"gxb.local/backend/v2/internal/domain/guild"
 	"gxb.local/backend/v2/internal/domain/identity"
 )
@@ -24,9 +25,14 @@ type Store interface {
 	ListPlayerApplications(context.Context, identity.PlayerID) ([]guild.Application, error)
 }
 
+type PresenceReader interface {
+	ReadMany(context.Context, []identity.PlayerID) (map[identity.PlayerID]socialpresence.Observation, error)
+}
+
 type Service struct {
 	Store     Store
 	Directory playerdirectory.Reader
+	Presence  PresenceReader
 }
 
 func (s Service) validateStore() error {
@@ -41,6 +47,15 @@ func (s Service) validateDirectory() error {
 		return err
 	}
 	if s.Directory == nil {
+		return ErrUnavailable
+	}
+	return nil
+}
+func (s Service) validateMembers() error {
+	if err := s.validateDirectory(); err != nil {
+		return err
+	}
+	if s.Presence == nil {
 		return ErrUnavailable
 	}
 	return nil
@@ -158,6 +173,9 @@ func (s Service) Self(ctx context.Context, actor identity.ActorContext) (SelfGui
 	return SelfGuild{GuildInfo: info, SelfRole: int16(m.Role), JoinTime: m.JoinedAt.Unix(), MemberNum: int64(len(ms))}, true, nil
 }
 func (s Service) Members(ctx context.Context, actor identity.ActorContext) (GuildInfo, []Member, error) {
+	if err := s.validateMembers(); err != nil {
+		return GuildInfo{}, nil, err
+	}
 	self, ok, err := s.Self(ctx, actor)
 	if err != nil {
 		return GuildInfo{}, nil, err
@@ -169,13 +187,31 @@ func (s Service) Members(ctx context.Context, actor identity.ActorContext) (Guil
 	if err != nil {
 		return GuildInfo{}, nil, err
 	}
+	playerIDs := make([]identity.PlayerID, 0, len(ms))
+	for _, m := range ms {
+		playerIDs = append(playerIDs, m.PlayerID)
+	}
+	presence, err := s.Presence.ReadMany(ctx, playerIDs)
+	if err != nil {
+		return GuildInfo{}, nil, err
+	}
 	out := make([]Member, 0, len(ms))
 	for _, m := range ms {
 		p, err := s.profile(ctx, m.PlayerID)
 		if err != nil {
 			return GuildInfo{}, nil, err
 		}
-		out = append(out, Member{PlayerID: int64(m.PlayerID), Name: p.Name, Level: p.Level, AvatarID: p.AvatarID, AvatarFrameID: p.AvatarFrameID, ConquerLevel: p.ConquerLevel, ConquerLoopID: p.ConquerLoopID, Role: int16(m.Role), JoinTime: m.JoinedAt.Unix(), LastTime: 0, SevenVitality: 0, CopyChallengeTime: 0})
+		obs, ok := presence[m.PlayerID]
+		if !ok || obs.PlayerID != m.PlayerID {
+			return GuildInfo{}, nil, ErrUnavailable
+		}
+		lastTime := int64(0)
+		if obs.IsOnline && obs.LatestConnectedAt != nil {
+			lastTime = obs.LatestConnectedAt.Unix()
+		} else if obs.LastSeenAt != nil {
+			lastTime = obs.LastSeenAt.Unix()
+		}
+		out = append(out, Member{PlayerID: int64(m.PlayerID), Name: p.Name, Level: p.Level, AvatarID: p.AvatarID, AvatarFrameID: p.AvatarFrameID, ConquerLevel: p.ConquerLevel, ConquerLoopID: p.ConquerLoopID, Role: int16(m.Role), JoinTime: m.JoinedAt.Unix(), LastTime: lastTime, SevenVitality: 0, CopyChallengeTime: 0})
 	}
 	sort.Slice(out, func(i, j int) bool { return out[i].PlayerID < out[j].PlayerID })
 	return self.GuildInfo, out, nil
