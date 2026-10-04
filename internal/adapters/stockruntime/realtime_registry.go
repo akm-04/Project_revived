@@ -189,9 +189,9 @@ func (r *ConnectionRegistry) Replace(admission domainrt.Admission, writer *connW
 
 // Remove deletes only the exact generation represented by h. A stale ServeConn
 // defer cannot remove a newer replacement for the same context+role.
-func (r *ConnectionRegistry) Remove(h SessionHandle) {
+func (r *ConnectionRegistry) Remove(h SessionHandle) bool {
 	if r == nil || h.session == nil {
-		return
+		return false
 	}
 	s := h.session
 	key := registryKey{Context: s.meta.ContextID, Role: s.meta.PhysicalRole}
@@ -206,6 +206,7 @@ func (r *ConnectionRegistry) Remove(h SessionHandle) {
 	if removed {
 		s.retire()
 	}
+	return removed
 }
 
 func (r *ConnectionRegistry) ByPlayerRole(playerID identity.PlayerID, role domainrt.PhysicalRole) []SessionHandle {

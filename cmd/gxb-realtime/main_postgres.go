@@ -17,10 +17,17 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres"
 	"gxb.local/backend/v2/internal/adapters/postgres/guildprojection"
 	"gxb.local/backend/v2/internal/adapters/postgres/i4store"
+	"gxb.local/backend/v2/internal/adapters/postgres/presencestore"
 	"gxb.local/backend/v2/internal/adapters/stockruntime"
+	appgeneration "gxb.local/backend/v2/internal/application/generation"
 	appidentity "gxb.local/backend/v2/internal/application/identitylifecycle"
 	apprealtime "gxb.local/backend/v2/internal/application/realtimeauth"
+	"gxb.local/backend/v2/internal/application/socialpresence"
+	"gxb.local/backend/v2/internal/foundation/clock"
 	"gxb.local/backend/v2/internal/foundation/config"
+	"gxb.local/backend/v2/internal/foundation/ids"
+	"gxb.local/backend/v2/internal/foundation/operation"
+	"gxb.local/backend/v2/internal/foundation/tx"
 	"gxb.local/backend/v2/internal/projection/lobby"
 	"gxb.local/backend/v2/internal/protocol/limits"
 )
@@ -62,6 +69,10 @@ func main() {
 			log.Printf("realtime owner guard close: %v", err)
 		}
 	}()
+	realtimeInstanceID, err := ids.NewUUID()
+	if err != nil {
+		log.Fatalf("realtime process instance id: %v", err)
+	}
 	go func() {
 		if err := ownerGuard.RunHealthPulses(ctx, postgres.DefaultRealtimeOwnerHealthInterval); err != nil && ctx.Err() == nil {
 			log.Printf("realtime owner session lost: %v", err)
@@ -104,7 +115,22 @@ func main() {
 			}
 		}()
 	}
-	server := stockruntime.RealtimeServer{Auth: auth, Limits: limits.Default(), Policy: runtimePolicy, Tracker: tracker, Registry: stockruntime.NewConnectionRegistry(), Admission: admission}
+	presenceStore := presencestore.Store{Queryer: pool}
+	presenceRunner := tx.Runner{DB: pool}
+	presenceService := socialpresence.Service{
+		Timed: appgeneration.TimedRunner{
+			Binder: appgeneration.Binder{Time: postgres.AuthoritativeTime{Queryer: pool}},
+			Runner: presenceRunner,
+		},
+		Store: presenceStore,
+	}
+	server := stockruntime.RealtimeServer{
+		Auth: auth, Limits: limits.Default(), Policy: runtimePolicy, Tracker: tracker,
+		Registry: stockruntime.NewConnectionRegistry(), Admission: admission,
+		Presence: presenceService, PresenceOperations: operation.Factory{Clock: clock.System{}},
+		RealtimeInstanceID: realtimeInstanceID,
+		OnPresenceError:    func(stage string, err error) { log.Printf("social presence %s degraded: %v", stage, err) },
+	}
 
 	ln, err := net.Listen("tcp", cfg.RealtimeAddr)
 	if err != nil {

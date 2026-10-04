@@ -86,12 +86,16 @@ func TestConnectionRegistryReplacementRetiresSnapshottedHandle(t *testing.T) {
 		t.Fatalf("player index after replacement=%v", generations(got))
 	}
 
-	r.Remove(h1) // stale remover must not delete the replacement.
+	if r.Remove(h1) {
+		t.Fatal("stale remover reported current generation")
+	} // stale remover must not delete the replacement.
 	got = r.ByRoomRole(1, domainrt.World)
 	if len(got) != 1 || got[0].RegistryGeneration() != h2.RegistryGeneration() {
 		t.Fatalf("stale remove deleted replacement: %v", generations(got))
 	}
-	r.Remove(h2)
+	if !r.Remove(h2) {
+		t.Fatal("current generation removal was not reported")
+	}
 	if got := r.ByPlayerRole(100001, domainrt.World); len(got) != 0 {
 		t.Fatalf("removed handle still indexed: %v", generations(got))
 	}

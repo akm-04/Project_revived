@@ -9,8 +9,12 @@ import (
 	"time"
 
 	app "gxb.local/backend/v2/internal/application/realtimeauth"
+	"gxb.local/backend/v2/internal/application/socialpresence"
 	"gxb.local/backend/v2/internal/domain/identity"
 	domainrt "gxb.local/backend/v2/internal/domain/realtimeauth"
+	"gxb.local/backend/v2/internal/foundation/ids"
+	"gxb.local/backend/v2/internal/foundation/operation"
+	"gxb.local/backend/v2/internal/foundation/policy"
 	"gxb.local/backend/v2/internal/projection/lobby"
 	"gxb.local/backend/v2/internal/protocol/amf3"
 	"gxb.local/backend/v2/internal/protocol/limits"
@@ -31,14 +35,28 @@ type ClientFrameDispatcher interface {
 	HandleClientFrame(context.Context, app.Admission, wireRT.Frame) ([]wireRT.Frame, error)
 }
 
+// PresenceProjection is the narrow I7A-3 adapter seam. Projection failures are
+// observable but never become a second gameplay/session authorization gate.
+type PresenceProjection interface {
+	Admit(context.Context, operation.Context, socialpresence.LeaseRef, time.Duration) error
+	Renew(context.Context, operation.Context, socialpresence.LeaseRef, time.Duration) error
+	Retire(context.Context, operation.Context, socialpresence.LeaseRef) error
+}
+
+type PresenceErrorHandler func(stage string, err error)
+
 type RealtimeServer struct {
-	Auth       app.Service
-	Limits     limits.Config
-	Policy     RealtimePolicy
-	Tracker    *lobby.BootTracker
-	Registry   *ConnectionRegistry
-	Admission  *AdmissionLimiter
-	Dispatcher ClientFrameDispatcher
+	Auth               app.Service
+	Limits             limits.Config
+	Policy             RealtimePolicy
+	Tracker            *lobby.BootTracker
+	Registry           *ConnectionRegistry
+	Admission          *AdmissionLimiter
+	Dispatcher         ClientFrameDispatcher
+	Presence           PresenceProjection
+	PresenceOperations operation.Factory
+	RealtimeInstanceID ids.UUID
+	OnPresenceError    PresenceErrorHandler
 }
 
 func (s RealtimeServer) runtimeConfig() (limits.Config, RealtimePolicy, error) {
@@ -55,6 +73,11 @@ func (s RealtimeServer) runtimeConfig() (limits.Config, RealtimePolicy, error) {
 	}
 	if err := p.Validate(); err != nil {
 		return limits.Config{}, RealtimePolicy{}, err
+	}
+	if s.Presence != nil {
+		if s.Registry == nil || s.PresenceOperations.Clock == nil || s.RealtimeInstanceID.IsZero() {
+			return limits.Config{}, RealtimePolicy{}, errors.New("realtime presence integration incomplete")
+		}
 	}
 	return cfg, p, nil
 }
@@ -92,8 +115,12 @@ func (s RealtimeServer) ServeConn(ctx context.Context, conn net.Conn) error {
 		if s.Tracker != nil && contextTag != "" && roleKey != "" {
 			_ = s.Tracker.Record(lobby.BootEvent{Kind: lobby.BootClientClosed, Phase: lobby.PhaseClientState, At: time.Now().UTC(), Key: roleKey, SessionTag: sessionTag, ContextTag: contextTag, ConnectionTag: connectionTag})
 		}
+		removedCurrent := false
 		if s.Registry != nil {
-			s.Registry.Remove(regHandle)
+			removedCurrent = s.Registry.Remove(regHandle)
+		}
+		if removedCurrent && admitted != nil && s.Presence != nil {
+			s.projectPresenceRetire(ctx, policy.LivenessQueryTimeout, regHandle)
 		}
 	}()
 
@@ -156,6 +183,9 @@ func (s RealtimeServer) ServeConn(ctx context.Context, conn net.Conn) error {
 							return err
 						}
 					}
+					if s.Presence != nil {
+						s.projectPresenceAdmit(ctx, policy.LivenessQueryTimeout, regHandle, policy.ClientIdleTimeout)
+					}
 					if s.Tracker != nil {
 						sessionTag, contextTag = s.Tracker.CorrelationTags(admission.Domain.Actor.SessionID.UUID().String(), admission.Domain.Actor.ContextID.UUID().String())
 						connectionTag = s.Tracker.NewConnectionTag()
@@ -186,6 +216,9 @@ func (s RealtimeServer) ServeConn(ctx context.Context, conn net.Conn) error {
 				case mids.MIDSocketHeartbeat:
 					if err := validateHeartbeat(f.Params); err != nil {
 						return err
+					}
+					if s.Presence != nil {
+						s.projectPresenceRenew(ctx, policy.LivenessQueryTimeout, regHandle, policy.ClientIdleTimeout)
 					}
 					s.record(lobby.BootEvent{MID: mids.MIDSocketHeartbeat, Kind: lobby.BootHeartbeat, Phase: lobby.PhaseClientRequestObserved, At: now, Key: roleKey, SessionTag: sessionTag, ContextTag: contextTag, ConnectionTag: connectionTag})
 				default:
@@ -250,6 +283,76 @@ func protocolRole(r domainrt.PhysicalRole) wireRT.Role {
 		return wireRT.Service
 	}
 }
+func (s RealtimeServer) presenceRef(h SessionHandle) (socialpresence.LeaseRef, error) {
+	meta, ok := h.Metadata()
+	if !ok || s.RealtimeInstanceID.IsZero() {
+		return socialpresence.LeaseRef{}, socialpresence.ErrInvalidLease
+	}
+	ref := socialpresence.LeaseRef{
+		PlayerID: meta.PlayerID, ContextID: meta.ContextID, Role: meta.PhysicalRole,
+		RealtimeInstanceID: s.RealtimeInstanceID, ConnectionGeneration: meta.RegistryGeneration,
+	}
+	return ref, ref.Validate()
+}
+
+func (s RealtimeServer) newPresenceOperation() (operation.Context, error) {
+	return s.PresenceOperations.New(policy.Set{})
+}
+
+func (s RealtimeServer) presenceError(stage string, err error) {
+	if err != nil && s.OnPresenceError != nil {
+		s.OnPresenceError(stage, err)
+	}
+}
+
+func (s RealtimeServer) projectPresenceAdmit(ctx context.Context, timeout time.Duration, h SessionHandle, ttl time.Duration) {
+	ref, err := s.presenceRef(h)
+	if err != nil {
+		s.presenceError("admit", err)
+		return
+	}
+	op, err := s.newPresenceOperation()
+	if err != nil {
+		s.presenceError("admit", err)
+		return
+	}
+	qctx, cancel := context.WithTimeout(ctx, timeout)
+	defer cancel()
+	s.presenceError("admit", s.Presence.Admit(qctx, op, ref, ttl))
+}
+
+func (s RealtimeServer) projectPresenceRenew(ctx context.Context, timeout time.Duration, h SessionHandle, ttl time.Duration) {
+	ref, err := s.presenceRef(h)
+	if err != nil {
+		s.presenceError("renew", err)
+		return
+	}
+	op, err := s.newPresenceOperation()
+	if err != nil {
+		s.presenceError("renew", err)
+		return
+	}
+	qctx, cancel := context.WithTimeout(ctx, timeout)
+	defer cancel()
+	s.presenceError("renew", s.Presence.Renew(qctx, op, ref, ttl))
+}
+
+func (s RealtimeServer) projectPresenceRetire(ctx context.Context, timeout time.Duration, h SessionHandle) {
+	ref, err := s.presenceRef(h)
+	if err != nil {
+		s.presenceError("retire", err)
+		return
+	}
+	op, err := s.newPresenceOperation()
+	if err != nil {
+		s.presenceError("retire", err)
+		return
+	}
+	qctx, cancel := context.WithTimeout(context.WithoutCancel(ctx), timeout)
+	defer cancel()
+	s.presenceError("retire", s.Presence.Retire(qctx, op, ref))
+}
+
 func validateHeartbeat(v any) error {
 	o, ok := v.(*amf3.Object)
 	if !ok || o == nil {
