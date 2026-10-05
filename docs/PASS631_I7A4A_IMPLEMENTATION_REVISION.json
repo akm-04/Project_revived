@@ -1,0 +1,139 @@
+{
+  "schema_version": 1,
+  "pass": "631.0",
+  "stage": "I7A-4A",
+  "status": "LOCAL_IMPLEMENTATION_COMPLETE_REAL_POSTGRESQL_EXIT_GATE_PENDING",
+  "parent_backend_archive_sha256": "bb70a4fac544edc83330a0687a819c06622edc8463f986d39c4c7b384dd775ba",
+  "parent_git": "565faf0b1c5e1fad619fb986d2b6245136255253",
+  "pass630_passmap_sha256": "a47df1ec98f936e927c16a3c6e32d1b72784d7ff98c0c787623a4fdead021266",
+  "pass630_hot_sha256": "f19ba40676d17842b7bb6e54c37b86e631e78dbe40b1da81a33ffeb55d9a8620",
+  "implementation_source_commit": "7d6c3723f1a03b8605c002833e262a45853d130a",
+  "migration_high_water": "00033_i7a4a_social_foundation.sql",
+  "migration_00033_sha256": "59f919552065ef0c8bbd9629e1f7aa471095abebd02de7f2db256a171a4d25ed",
+  "implementation_revision_algorithm": "sha256(sorted(path UTF-8 || NUL || bytes) over exact parent..product committed I7A-4A footprint before Pass631 release metadata)",
+  "implementation_revision_sha256": "0048a44668b91d0f9910d820a4a033b707c2776c2cb79878b48bb31968094c9b",
+  "changed_implementation_files": [
+    {
+      "path": "docs/architecture/CANONICAL_TABLE_OWNERSHIP.json",
+      "bytes": 59342,
+      "sha256": "921d367de3107c3dee7f0fc8a9819c25d74bd529304460102d12617f24df0c42"
+    },
+    {
+      "path": "docs/architecture/CUMULATIVE_MIGRATION_LOCK.json",
+      "bytes": 4226,
+      "sha256": "f890e378e19324efd0ad7b0ca442fd0061618aa23dfa1ef1bf594155c62a873b"
+    },
+    {
+      "path": "internal/adapters/postgres/i4store/directory_discovery.go",
+      "bytes": 4409,
+      "sha256": "2f0237b607330e6d32b06248c3c9daf61caf05b496874bd1ce270b93e5841d62"
+    },
+    {
+      "path": "internal/adapters/postgres/i4store/directory_discovery_test.go",
+      "bytes": 3216,
+      "sha256": "381e24cafb401ee7b980f4b8485a4fbb90845a339917ea3406fe4c6d2dc49244"
+    },
+    {
+      "path": "internal/adapters/postgres/socialinboxstore/store.go",
+      "bytes": 2500,
+      "sha256": "42446c8590ceadbf5579d3b1a70935e6e6c79dfb9451133742656adee3664233"
+    },
+    {
+      "path": "internal/adapters/postgres/socialinboxstore/store_test.go",
+      "bytes": 2319,
+      "sha256": "5a91d02b48738b8963a5979691a131e1280e457131339dcc0d8aa8452dc76e54"
+    },
+    {
+      "path": "internal/adapters/postgres/socialrelationstore/store.go",
+      "bytes": 7327,
+      "sha256": "65c8838a3b16a810e46e66113e2f4e7171438b8df93c306e426bdf74a2cf05a3"
+    },
+    {
+      "path": "internal/adapters/postgres/socialrelationstore/store_test.go",
+      "bytes": 2901,
+      "sha256": "75eefb2f369cefb28d77b79258ccb0b20cb623feb8d2fb14c28bf3f9abce45fc"
+    },
+    {
+      "path": "internal/application/playerdirectory/reader.go",
+      "bytes": 1220,
+      "sha256": "0362f345c3a1ce0156b6355e5f736f4c943b3dff2829332b133974518031ecf9"
+    },
+    {
+      "path": "internal/application/socialinbox/locks.go",
+      "bytes": 1198,
+      "sha256": "c874558e242b114dd598620e19b05f20365eb3a29baae193dc9de7d6c4b1eb23"
+    },
+    {
+      "path": "internal/application/socialinbox/locks_test.go",
+      "bytes": 887,
+      "sha256": "d4479f0ab02c4538a2bc800fe703a2c50796ebb261612642a0a66fe1b2c57d88"
+    },
+    {
+      "path": "internal/application/socialinbox/ports.go",
+      "bytes": 486,
+      "sha256": "9a2ae0fa2fba5912e72071a6b1242881cecba7062bab72b363915871bd7824f8"
+    },
+    {
+      "path": "internal/application/socialinbox/types.go",
+      "bytes": 1267,
+      "sha256": "8cbf15b2f3ccd081a498f9a2842c1a239c5c91f1f3f223fc86f3253501164920"
+    },
+    {
+      "path": "internal/application/socialrelation/locks.go",
+      "bytes": 2724,
+      "sha256": "66a0eb067c97de25fc36a4c153282da215840bed144f4de2296c0f172035aa3e"
+    },
+    {
+      "path": "internal/application/socialrelation/locks_test.go",
+      "bytes": 1744,
+      "sha256": "70b0019162d5e75260a956cb61044ee58a7ecae1128e06f68726c4ee4dd1a9da"
+    },
+    {
+      "path": "internal/application/socialrelation/ports.go",
+      "bytes": 883,
+      "sha256": "867b94bc5705fa39c15d2de54cabcdef977d3e3085051ee4ea675aa7d286af80"
+    },
+    {
+      "path": "internal/application/socialrelation/types.go",
+      "bytes": 3556,
+      "sha256": "9db31c93448379bd9766a8e0fe8a5868c2e0c2c44182a7b0d993a0683248ae2d"
+    },
+    {
+      "path": "internal/archguard/i7a4a_contract_test.go",
+      "bytes": 8366,
+      "sha256": "10f8eacaf307317a2eeffa7a43a8e9bc0c211e85ad67a56c52a0532e8e6fd6ad"
+    },
+    {
+      "path": "migrations/00033_i7a4a_social_foundation.sql",
+      "bytes": 5846,
+      "sha256": "59f919552065ef0c8bbd9629e1f7aa471095abebd02de7f2db256a171a4d25ed"
+    },
+    {
+      "path": "tools/validate_i7a4a.py",
+      "bytes": 4495,
+      "sha256": "966381175b71f34672ed08b0b3a666ec0350896b3fce0a2341052f5b7e2d8698"
+    }
+  ],
+  "scope": [
+    "forward-only 00033 SocialRelation/SocialInbox durable foundation with no Social backfill",
+    "canonical table ownership and cumulative migration high-water through 00033",
+    "SocialRelation root/friendship/request/block/request-epoch types, ranks 360-364, typed owner-local store reads/creation seam",
+    "SocialInbox notice/source identity, rank 370, owner-local sequence and notice lock seam",
+    "additive I4 playerdirectory DiscoveryReader with exact C-collated name reads and deterministic PlayerID bounds/paging",
+    "I7A-4A static/archguard tests proving no name uniqueness, no foreign-owner SQL and no stock Social route activation"
+  ],
+  "non_changes": [
+    "no MID176 facade replacement and no MID177-190 route activation",
+    "no relation mutation state machines or Social gameplay command handlers",
+    "no MID23/name editing or player-name uniqueness authority",
+    "no new advisory-lock subsystem, event bus, generic receipt ledger or duplicate Presence/profile authority",
+    "no go.mod/go.sum/.go-version/toolchain pin change"
+  ],
+  "evidence": {
+    "canonical_static_and_foundation": "GREEN_R0_R4D_I1_I5_PLUS_I2_I6_SOURCE_ORACLES_AND_CURRENT_OWNERSHIP_CANDIDATE_GUARDS",
+    "compatibility_copy": "GREEN_FOCUSED_TEST_RACE_GO_VET_FULL_GO_TEST_DIAGNOSTIC_ONLY",
+    "exact_candidate_execution": "ENVIRONMENT_BLOCKED_LOCAL_GO_1_23_2_AND_OFFLINE_PINNED_GO_1_27_1_UNAVAILABLE",
+    "real_postgresql_goose": "ENVIRONMENT_BLOCKED_LOCAL_BINARIES_UNAVAILABLE_MANDATORY_EXTERNAL_GATE_PENDING",
+    "postimplementation_reality_check": "GREEN_FOR_EXTERNAL_4A_EXIT_GATE_NOT_STAGE_ACCEPTANCE"
+  }
+}
