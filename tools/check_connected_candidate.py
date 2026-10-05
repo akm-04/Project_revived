@@ -36,7 +36,16 @@ def static_checks():
             sb=t.rfind('-- +goose StatementBegin',0,d); se=t.find('-- +goose StatementEnd',d)
             if sb<0 or se<0: fail(f'Goose DO block unbounded in {mf}')
             pos=se+1
-    if not (ROOT/'migrations/00004_player_directory_profile_bootstrap.sql').read_text().startswith('-- +goose Up\n'): fail('00004 missing explicit Goose Up marker')
+    # All canonical SQL migrations are Goose-managed and forward-only.  Checking
+    # only individual historical migrations allowed 00032 to be valid raw SQL but
+    # unparsable by the canonical migration runner.  Enforce the envelope across
+    # the entire current inventory so future migrations cannot bypass the gate.
+    for migration in sorted((ROOT/'migrations').glob('*.sql')):
+        text=migration.read_text()
+        if not text.startswith('-- +goose Up\n'):
+            fail(f'{migration.name} missing explicit leading Goose Up marker')
+        if '-- +goose Down' in text:
+            fail(f'{migration.name} violates forward-only production migration law')
     pkgs=set()
     for p in (ROOT/'internal/adapters/river').glob('*.go'):
         m=re.search(r'^package\s+(\w+)',p.read_text(),re.M)

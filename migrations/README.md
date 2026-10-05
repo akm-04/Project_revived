@@ -1,6 +1,7 @@
 Goose expand/contract migrations begin in I1. PostgreSQL is the only V2 gameplay database.
 
 Production migrations are forward-only; rollback is restore/redeploy, not destructive DOWN SQL.
+Every canonical SQL migration must begin with the literal `-- +goose Up` directive so the pinned Goose runner parses the file; `-- +goose Down` sections are forbidden.
 
 - 00001: I1 kernel semantic receipts.
 - 00002: I3 identity/session/logical-server/player-root/gameplay-context foundation.

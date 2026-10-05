@@ -1,3 +1,4 @@
+-- +goose Up
 -- I7A-3 real-PostgreSQL repair: fence derived Presence writes across
 -- realtime-owner handoff without changing R6 advisory-lock serving authority.
 --

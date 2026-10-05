@@ -32,9 +32,9 @@
     "00029_ca6_2_practice_foundation.sql": "698dbd7e44f7014155f66df366316ac937fd5e1a304ed67edb4d628bc655d065",
     "00030_ca7_2_appearance_foundation.sql": "655d69cbc9e170f17f8476746591b5c70dbda01d966ee08dd3e6d5af237de8d0",
     "00031_i7a3_social_presence.sql": "e48eae04abad7a673907124343ef90c271fcc80b31174a92d83e4bc8c7a7a954",
-    "00032_i7a3_presence_owner_fence_repair.sql": "6a8f1b452d37be92e71ebea72dc8784fb890d5eec8a07335e7fc66685ad8f0d6"
+    "00032_i7a3_presence_owner_fence_repair.sql": "634ad982152eff1e4d0e9750cbff27c888ad73c6c1a301bc368ca789d13173b1"
   },
-  "rule": "All listed migration bytes are immutable for this cumulative candidate. Historical phase validators remain snapshot-specific; forward changes require a new migration and lock refresh after research.",
+  "rule": "All listed migration bytes are immutable for this cumulative candidate. Historical phase validators remain snapshot-specific; forward schema changes require a new migration. Repair-2 exceptionally refreshes unaccepted 00032 only to add the canonical leading Goose Up parser directive; SQL statements and schema/data semantics are unchanged.",
   "schema_version": 1,
-  "status": "CURRENT_CUMULATIVE_MIGRATION_LOCK_I7A3_REALPG_REPAIR1"
+  "status": "CURRENT_CUMULATIVE_MIGRATION_LOCK_I7A3_REALPG_REPAIR2_GOOSE_ENVELOPE"
 }
