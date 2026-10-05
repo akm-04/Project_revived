@@ -1607,6 +1607,20 @@
       "owner": "social-presence",
       "write_exceptions": []
     },
+    "player_social_roots": {
+      "allowed_query_owners": [
+        "social-relation"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/socialrelationstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/socialrelationstore/"
+      ],
+      "migration": "migrations/00033_i7a4a_social_foundation.sql",
+      "owner": "social-relation",
+      "write_exceptions": []
+    },
     "player_story_cursors": {
       "allowed_query_owners": [
         "player-core"
@@ -1758,6 +1772,76 @@
       ],
       "migration": "migrations/00005_i5_player_economy_mail_objective_redeem.sql",
       "owner": "redeem",
+      "write_exceptions": []
+    },
+    "social_blocks": {
+      "allowed_query_owners": [
+        "social-relation"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/socialrelationstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/socialrelationstore/"
+      ],
+      "migration": "migrations/00033_i7a4a_social_foundation.sql",
+      "owner": "social-relation",
+      "write_exceptions": []
+    },
+    "social_friend_requests": {
+      "allowed_query_owners": [
+        "social-relation"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/socialrelationstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/socialrelationstore/"
+      ],
+      "migration": "migrations/00033_i7a4a_social_foundation.sql",
+      "owner": "social-relation",
+      "write_exceptions": []
+    },
+    "social_friendships": {
+      "allowed_query_owners": [
+        "social-relation"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/socialrelationstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/socialrelationstore/"
+      ],
+      "migration": "migrations/00033_i7a4a_social_foundation.sql",
+      "owner": "social-relation",
+      "write_exceptions": []
+    },
+    "social_notices": {
+      "allowed_query_owners": [
+        "social-inbox"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/socialinboxstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/socialinboxstore/"
+      ],
+      "migration": "migrations/00033_i7a4a_social_foundation.sql",
+      "owner": "social-inbox",
+      "write_exceptions": []
+    },
+    "social_request_epochs": {
+      "allowed_query_owners": [
+        "social-relation"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/socialrelationstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/socialrelationstore/"
+      ],
+      "migration": "migrations/00033_i7a4a_social_foundation.sql",
+      "owner": "social-relation",
       "write_exceptions": []
     }
   }

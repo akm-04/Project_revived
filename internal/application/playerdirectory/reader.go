@@ -29,3 +29,12 @@ func (p Profile) Validate() error {
 type Reader interface {
 	Profile(context.Context, identity.PlayerID) (Profile, bool, error)
 }
+
+// DiscoveryReader is the additive I4-owned directory selection seam introduced
+// by I7A-4A. It contains no Social policy: callers decide search semantics,
+// exclusions, paging strategy, and presentation composition themselves.
+type DiscoveryReader interface {
+	ProfilesByExactName(context.Context, string, int) ([]Profile, error)
+	PlayerIDBounds(context.Context) (min identity.PlayerID, max identity.PlayerID, ok bool, err error)
+	ProfilesAfter(context.Context, identity.PlayerID, int) ([]Profile, error)
+}
