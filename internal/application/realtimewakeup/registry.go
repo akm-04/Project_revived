@@ -61,6 +61,31 @@ func Decode(b []byte) (Envelope, error) {
 	if len(b) == 0 || len(b) > MaxEnvelopeBytes {
 		return Envelope{}, ErrInvalidEnvelope
 	}
+	// The finite envelope has exactly three scalar fields; reject duplicate keys
+	// before struct decoding can erase their ambiguity.
+	keys := map[string]bool{}
+	scan := json.NewDecoder(bytes.NewReader(b))
+	if first, err := scan.Token(); err != nil || first != json.Delim('{') {
+		return Envelope{}, ErrInvalidEnvelope
+	}
+	for scan.More() {
+		t, err := scan.Token()
+		k, ok := t.(string)
+		if err != nil || !ok || keys[k] {
+			return Envelope{}, ErrInvalidEnvelope
+		}
+		keys[k] = true
+		v, err := scan.Token()
+		if err != nil {
+			return Envelope{}, ErrInvalidEnvelope
+		}
+		if _, nested := v.(json.Delim); nested {
+			return Envelope{}, ErrInvalidEnvelope
+		}
+	}
+	if last, err := scan.Token(); err != nil || last != json.Delim('}') {
+		return Envelope{}, ErrInvalidEnvelope
+	}
 	dec := json.NewDecoder(bytes.NewReader(b))
 	dec.DisallowUnknownFields()
 	var e Envelope

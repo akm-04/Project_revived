@@ -36,7 +36,7 @@ type Request struct {
 }
 type Notice struct {
 	ID     int64  `json:"notice_id"`
-	Type   int16  `json:"type"`
+	Type   int16  `json:"notice_type"`
 	At     int64  `json:"notice_time"`
 	Player Common `json:"player_info"`
 }

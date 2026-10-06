@@ -98,6 +98,9 @@ func decodeOrdinary(r *http.Request, cfg limits.Config) (*Decoded, *wire.EdgeErr
 	if !ok {
 		return nil, bad("numeric mid required")
 	}
+	if err := validateSocialRaw([]byte(payloads[0]), socialMID(mid), cfg.JSONDepth, cfg.JSONNodes); err != nil {
+		return nil, bad("invalid Social JSON payload")
+	}
 	if d, known := mids.Lookup(mid); known && (d.Transport != mids.HTTP || d.Encoding != mids.Ordinary) {
 		return nil, bad("MID illegal for ordinary encoding")
 	}

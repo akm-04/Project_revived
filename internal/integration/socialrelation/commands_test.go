@@ -402,7 +402,7 @@ func TestUnknownCommitEveryCommandNoReplayOrAttemptedResult(t *testing.T) {
 				f.s.Timed.Runner.DB = fault
 				r, e := f.runAs(a, k, targets...)
 				var unknown *tx.UnknownCommitError
-				if !errors.As(e, &unknown) || fault.begins != 1 || len(r.Changes) != 0 || len(r.Players.Players) != 0 {
+				if !errors.As(e, &unknown) || fault.begins != 1 || len(r.Changes) != 0 || len(r.Players.Players) != 0 || len(r.Reloads) != 0 {
 					t.Fatalf("unknown leaked success/replayed: result%+v err%v begins%d", r, e, fault.begins)
 				}
 				after := f.snapshot()

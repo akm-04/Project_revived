@@ -18,11 +18,16 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres/guildprojection"
 	"gxb.local/backend/v2/internal/adapters/postgres/i4store"
 	"gxb.local/backend/v2/internal/adapters/postgres/presencestore"
+	"gxb.local/backend/v2/internal/adapters/postgres/socialinboxstore"
+	"gxb.local/backend/v2/internal/adapters/postgres/socialrelationstore"
+	"gxb.local/backend/v2/internal/adapters/socialpresentation"
 	"gxb.local/backend/v2/internal/adapters/stockruntime"
 	appgeneration "gxb.local/backend/v2/internal/application/generation"
 	appidentity "gxb.local/backend/v2/internal/application/identitylifecycle"
 	apprealtime "gxb.local/backend/v2/internal/application/realtimeauth"
+	"gxb.local/backend/v2/internal/application/realtimewakeup"
 	"gxb.local/backend/v2/internal/application/socialpresence"
+	"gxb.local/backend/v2/internal/application/socialreload"
 	"gxb.local/backend/v2/internal/foundation/clock"
 	"gxb.local/backend/v2/internal/foundation/config"
 	"gxb.local/backend/v2/internal/foundation/ids"
@@ -34,6 +39,12 @@ import (
 )
 
 func main() {
+	if err := run(); err != nil {
+		log.Fatal(err)
+	}
+}
+
+func run() error {
 	cfg := config.FromEnv()
 	digestSecret := []byte(os.Getenv("GXB_CREDENTIAL_DIGEST_SECRET"))
 	bearerSecret := []byte(os.Getenv("GXB_GAMEPLAY_BEARER_SECRET"))
@@ -170,9 +181,10 @@ func main() {
 			}
 		}
 	}()
+	connectionsRegistry := stockruntime.NewConnectionRegistry()
 	server := stockruntime.RealtimeServer{
 		Auth: auth, Limits: limits.Default(), Policy: runtimePolicy, Tracker: tracker,
-		Registry: stockruntime.NewConnectionRegistry(), Admission: admission,
+		Registry: connectionsRegistry, Admission: admission,
 		Presence: presenceService, PresenceOperations: presenceOperations,
 		RealtimeOwnerFence: realtimeOwnerFence, RealtimeInstanceID: realtimeInstanceID,
 		OnPresenceError: func(stage string, err error) { log.Printf("social presence %s degraded: %v", stage, err) },
@@ -185,14 +197,39 @@ func main() {
 	defer ln.Close()
 	go func() { <-ctx.Done(); _ = ln.Close() }()
 	log.Printf("gxb-realtime I4 listening on %s", cfg.RealtimeAddr)
+	socialEvents, err := stockruntime.NewSocialEventRegistry()
+	if err != nil {
+		log.Fatal(err)
+	}
+	socialReload := socialreload.Service{Runner: presenceRunner, Relations: socialrelationstore.Store{}, Inbox: socialinboxstore.Store{}, Observer: socialpresentation.TransactionReader{}}
+	socialHandler := stockruntime.SocialReloadHandler{Service: socialReload, Operations: presenceOperations, Registry: connectionsRegistry, Publisher: stockruntime.RealtimePublisher{Registry: socialEvents, Limits: limits.Default()}, Authority: authority, Time: postgres.AuthoritativeTime{Queryer: pool}, MaxHandles: runtimePolicy.MaxConnections, IsStaleActor: func(err error) bool { return errors.Is(err, i4store.ErrGameplayBearerNotLive) }, OnDeliveryError: func(err error) { log.Printf("social delivery degraded: %v", err) }}
+	wakeups, err := realtimewakeup.NewRegistry(realtimewakeup.Registration{Route: postgres.SocialReloadRoute, Handler: socialHandler})
+	if err != nil {
+		log.Fatal(err)
+	}
+	listenerDone := make(chan struct{})
+	listenerFailure := make(chan error, 1)
+	go func() {
+		defer close(listenerDone)
+		if err := (postgres.RealtimeWakeupListener{Pool: pool, Registry: wakeups}).Run(ctx); err != nil && ctx.Err() == nil {
+			log.Printf("social listener fatal: %v", err)
+			listenerFailure <- err
+			stop()
+		}
+	}()
 	listenerSlots := make(chan struct{}, runtimePolicy.MaxConnections)
 	var connections sync.WaitGroup
-	defer connections.Wait()
+	defer func() { stop(); connectionsRegistry.CloseAll(); connections.Wait(); <-listenerDone }()
 	for {
 		conn, err := ln.Accept()
 		if err != nil {
 			if ctx.Err() != nil || errors.Is(err, net.ErrClosed) {
-				return
+				select {
+				case failure := <-listenerFailure:
+					return failure
+				default:
+					return nil
+				}
 			}
 			log.Printf("realtime accept: %v", err)
 			continue
@@ -205,6 +242,8 @@ func main() {
 		}
 		connections.Add(1)
 		go func(c net.Conn) {
+			stopSocket := context.AfterFunc(ctx, func() { _ = c.Close() })
+			defer stopSocket()
 			defer connections.Done()
 			defer func() { <-listenerSlots }()
 			defer c.Close()

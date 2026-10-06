@@ -274,3 +274,30 @@ func snapshotSessions(in map[uint64]*registrySession) []SessionHandle {
 	}
 	return out
 }
+
+// IsCurrent compares the exact immutable handle generation under the index lock.
+func (r *ConnectionRegistry) IsCurrent(h SessionHandle) bool {
+	if r == nil || h.session == nil {
+		return false
+	}
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	s := h.session
+	return r.by[registryKey{Context: s.meta.ContextID, Role: s.meta.PhysicalRole}] == s
+}
+
+// CloseAll snapshots under the mutex; private teardown happens outside it.
+func (r *ConnectionRegistry) CloseAll() {
+	if r == nil {
+		return
+	}
+	r.mu.Lock()
+	sessions := make([]SessionHandle, 0, len(r.by))
+	for _, s := range r.by {
+		sessions = append(sessions, SessionHandle{session: s})
+	}
+	r.mu.Unlock()
+	for _, h := range sessions {
+		r.Remove(h)
+	}
+}

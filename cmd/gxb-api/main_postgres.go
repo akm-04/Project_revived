@@ -24,6 +24,9 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres/i5store"
 	"gxb.local/backend/v2/internal/adapters/postgres/kernelstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/presencestore"
+	"gxb.local/backend/v2/internal/adapters/postgres/socialinboxstore"
+	"gxb.local/backend/v2/internal/adapters/postgres/socialrelationstore"
+	"gxb.local/backend/v2/internal/adapters/socialpresentation"
 	"gxb.local/backend/v2/internal/adapters/stockruntime"
 	appactivity "gxb.local/backend/v2/internal/application/activitydirectory"
 	appboot "gxb.local/backend/v2/internal/application/bootstrap"
@@ -39,7 +42,11 @@ import (
 	appi5 "gxb.local/backend/v2/internal/application/i5"
 	appidentity "gxb.local/backend/v2/internal/application/identitylifecycle"
 	apprealtime "gxb.local/backend/v2/internal/application/realtimeauth"
+	"gxb.local/backend/v2/internal/application/socialdismiss"
+	"gxb.local/backend/v2/internal/application/socialinbox"
 	"gxb.local/backend/v2/internal/application/socialpresence"
+	"gxb.local/backend/v2/internal/application/socialprojection"
+	"gxb.local/backend/v2/internal/application/socialrelation"
 	"gxb.local/backend/v2/internal/content/guildpolicy"
 	"gxb.local/backend/v2/internal/content/registry"
 	"gxb.local/backend/v2/internal/foundation/clock"
@@ -226,8 +233,19 @@ func main() {
 	mustRegister(1, boot)
 	mustRegister(192, stockruntime.DiscoveryDispatcher{Realtime: realtime, Tracker: tracker})
 	lobbyD := stockruntime.LobbyDispatcher{Authority: authority, Tracker: tracker}
-	for _, mid := range []uint16{56, 1056, 176, 1302, 1344, 2754, 2784, 8193} {
+	for _, mid := range []uint16{56, 1056, 1302, 1344, 2754, 2784, 8193} {
 		mustRegister(mid, lobbyD)
+	}
+	socialTimed := appgeneration.TimedRunner{Binder: appgeneration.Binder{Time: postgres.AuthoritativeTime{Queryer: pool}}, Runner: runner}
+	socialRelationDB := socialrelationstore.Store{}
+	socialInboxDB := socialinboxstore.Store{}
+	socialPresentation := socialpresentation.TransactionReader{}
+	socialCommands := socialrelation.Service{Timed: socialTimed, PlayerRoots: i4store.PlayerRootLocker{}, Store: socialRelationDB, Inbox: socialinbox.RelationService{Store: socialInboxDB}, Presentation: socialPresentation}
+	socialReads := socialprojection.Service{Runner: runner, PlayerRoots: i4store.PlayerRootLocker{}, Relations: socialRelationDB, Inbox: socialInboxDB, Directory: i4store.TransactionDiscoveryReader{}, Presentation: socialPresentation, Observer: socialPresentation}
+	socialDismissal := socialdismiss.Service{Timed: socialTimed, PlayerRoots: i4store.PlayerRootLocker{}, Roots: socialRelationDB, Inbox: socialInboxDB}
+	socialDispatcher := stockruntime.SocialDispatcher{Authority: authority, Relations: socialCommands, Projection: socialReads, Dismissal: socialDismissal, Tracker: tracker, Emitter: postgres.SocialWakeupEmitter{Pool: pool, OnError: func(err error) { log.Printf("social wakeup degraded: %v", err) }}}
+	if err := stockruntime.RegisterSocialRoutes(router, socialDispatcher); err != nil {
+		log.Fatalf("social route assembly: %v", err)
 	}
 	practiceD := stockruntime.PracticeDispatcher{Authority: authority, Service: practiceSvc, Tracker: tracker}
 	for _, mid := range []uint16{124, 125, 126, 127, 128, 129, 130, 131, 132, 133} {

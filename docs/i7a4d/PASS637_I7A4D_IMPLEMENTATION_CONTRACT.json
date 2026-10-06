@@ -1,0 +1,107 @@
+{
+  "schema_version": 1,
+  "stage": "I7A-4D",
+  "status": "RESEARCH_DESIGN_SELECTED_EFFECTIVE_ONLY_WITH_VALIDATED_PASS637_SEAL",
+  "backend_sha256": "23624449f758088585590a4e2490228782872033a23100354cfa96ffad6c6a76",
+  "backend_git_head": "36304ead90442c41c324f07c4b7a2fbf887141f0",
+  "operations": [
+    176,
+    177,
+    178,
+    179,
+    180,
+    181,
+    182,
+    184,
+    185,
+    186,
+    187,
+    188,
+    189,
+    190
+  ],
+  "stock_activation": "PLANNED_ONLY_AFTER637_SEAL_AND_DERIVED_IMPLEMENTATION",
+  "implementation_started": false,
+  "runtime_gate_result": "NOT_RUN",
+  "migration_high_water": "00033_i7a4a_social_foundation.sql",
+  "new_migration": null,
+  "inherited_i7a1_index": {
+    "path": "00_PASSMAP/PASS622_I7A1_CONTRACT_INDEX.json",
+    "sha256": "319917ec91e3f4e4d52e0a323b10142b4a70b9b1353d7d80070583370b6b5c8f"
+  },
+  "parent_contract_index": "00_PASSMAP/PASS630_I7A4_CONTRACT_INDEX.json",
+  "foundation_traceability": "00_PASSMAP/PASS637_I7A4D_DESIGN/FOUNDATION_TRACEABILITY.json",
+  "d14_extension_record": "00_PASSMAP/PASS637_I7A4D_DESIGN/D14_EXTENSION_RECORD.json",
+  "implementation_plan": {
+    "path": "00_PASSMAP/PASS637_I7A4D_DESIGN/IMPLEMENTATION_PLAN.md",
+    "sha256": "6f4dbe045ed140241eaaa7de770f1161eb8437e56cdf5a4855f565d24ba82831"
+  },
+  "required_matrix": {
+    "path": "00_PASSMAP/PASS637_I7A4D_ACCEPTANCE_MATRIX.json",
+    "sha256": "ddf5906ec0ac71ce647d7dd363adc64f6bfcdeb40368772ef26591f87e5252cf"
+  },
+  "amendments": [
+    "Correct notice_type mapper tag",
+    "Scoped raw duplicate validation + duplicate wakeup envelope validation",
+    "Finite sourceNULL lifecycle dismissal",
+    "Typed actual postcommit reference",
+    "Zero mandatory numeric reloadplayer_id",
+    "SafeLua noticeinteger bound",
+    "Boundedfanout and fatal listener supervision"
+  ],
+  "authorization_rule": "Direct user authorization conditional on normal seal; latest requested stop at sync honored; documents/checkpoints alone authorize nothing",
+  "deferred": [
+    "183SocialGift",
+    "FriendDM",
+    "GuildInvite authority",
+    "RichHero/Pet/I7B",
+    "I7A10",
+    "E",
+    "W2physical acceptance"
+  ],
+  "reopen_triggers": [
+    "schema/migration required",
+    "new provider/writer/role/authority",
+    "current source contradicts selected wire",
+    "cannot meet required activation evidence",
+    "canonical reference requires new durable intent ledger"
+  ],
+  "pass": "637.0",
+  "sealed_at_pass": "637.0",
+  "selected_authority": true,
+  "implementation_authorized_by_document": false,
+  "plan_documents": [
+    {
+      "path": "00_PASSMAP/PASS637_I7A4D_DESIGN/D14_EXTENSION_RECORD.json",
+      "sha256": "dbeb6f2897b273f4c54d253d95e5ebfd1efc7c835cda3bf65ec15e83178ccc18"
+    },
+    {
+      "path": "00_PASSMAP/PASS637_I7A4D_DESIGN/DECISIONS.json",
+      "sha256": "476e4a58657ab134fa80ec1014802a4778aeb141689b9f59d9289be69f5fa42e"
+    },
+    {
+      "path": "00_PASSMAP/PASS637_I7A4D_DESIGN/EVIDENCE_LEDGER.json",
+      "sha256": "e8dee0ef1b6dd25fa18b80d1e367045d15a048e6ab864c59ecd0e9a0be436f0a"
+    },
+    {
+      "path": "00_PASSMAP/PASS637_I7A4D_DESIGN/FOUNDATION_TRACEABILITY.json",
+      "sha256": "38c190ced5883ea1acbc21a8dc55765ff8764f4249a9dc4db8d5e6d2d7fa567b"
+    },
+    {
+      "path": "00_PASSMAP/PASS637_I7A4D_DESIGN/IMPLEMENTATION_PLAN.md",
+      "sha256": "6f4dbe045ed140241eaaa7de770f1161eb8437e56cdf5a4855f565d24ba82831"
+    },
+    {
+      "path": "00_PASSMAP/PASS637_I7A4D_DESIGN/NATIVE_RESEARCH_PROBES.log",
+      "sha256": "04f40fbdeb664b36ab190d38f38a1905760eab82d240c586dff63066d73cb064"
+    },
+    {
+      "path": "00_PASSMAP/PASS637_I7A4D_DESIGN/OPEN_QUESTIONS.json",
+      "sha256": "0f27f4e60d4c3155d6fb032c95549cef03a3573fb8640ada8f723349585f6dae"
+    },
+    {
+      "path": "00_PASSMAP/PASS637_I7A4D_DESIGN/RESEARCH_JOURNAL.jsonl",
+      "sha256": "833e90851b2f031fb0a73568f5a4993e28b73f499f0eca0211a5a482965184e0"
+    }
+  ]
+}

@@ -177,7 +177,7 @@ func (s Service) load(c context.Context, a identity.ActorContext, op operation.C
 			return Result{}, ErrInvalidRead
 		}
 		for i, n := range notices {
-			if n.Validate() != nil || socialinbox.ValidateRelationDescriptor(n) != nil || n.RecipientPlayerID != a.PlayerID || !n.Active || !n.RelatedPlayerID.Valid() {
+			if !n.NoticeID.WireSafe() || n.Validate() != nil || socialinbox.ValidateRelationDescriptor(n) != nil || n.RecipientPlayerID != a.PlayerID || !n.Active || !n.RelatedPlayerID.Valid() {
 				return Result{}, ErrInvalidRead
 			}
 			if i > 0 && (n.NoticeTime.After(notices[i-1].NoticeTime) || n.NoticeTime.Equal(notices[i-1].NoticeTime) && n.NoticeID >= notices[i-1].NoticeID) {

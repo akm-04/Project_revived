@@ -27,18 +27,19 @@ type StockError struct{ Code int64 }
 
 func (e *StockError) Error() string { return "social relation semantic rejection" }
 
-type CommandKind uint16
+// CommandKind is a semantic owner operation, independent of transport MID.
+type CommandKind uint8
 
 const (
-	RequestFriend     CommandKind = 177
-	DenyRequests      CommandKind = 178
-	IgnoreRequests    CommandKind = 179
-	AcceptRequest     CommandKind = 180
-	DeleteFriend      CommandKind = 181
-	AcceptAllRequests CommandKind = 182
-	AddBlock          CommandKind = 185
-	RemoveBlock       CommandKind = 186
-	ClearBlocks       CommandKind = 187
+	RequestFriend CommandKind = iota + 1
+	DenyRequests
+	IgnoreRequests
+	AcceptRequest
+	DeleteFriend
+	AcceptAllRequests
+	AddBlock
+	RemoveBlock
+	ClearBlocks
 )
 
 type Command struct {
@@ -136,6 +137,7 @@ type Change struct {
 type Result struct {
 	Players playerpresentation.Batch
 	Changes []Change
+	Reloads []ReloadReference
 	NoOp    bool
 }
 

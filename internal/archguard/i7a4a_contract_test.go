@@ -179,6 +179,10 @@ func TestI7A4ADiscoveryIsI4OwnedAndDomainNeutral(t *testing.T) {
 }
 
 func TestI7A4ARoutesRemainExternallyEquivalentToPass629(t *testing.T) {
+	if selectedSocialActivation(t) {
+		validateSocialActivationRoutes(t)
+		return
+	}
 	root := repoRoot(t)
 	b, err := os.ReadFile(filepath.Join(root, "cmd", "gxb-api", "main_postgres.go"))
 	if err != nil {

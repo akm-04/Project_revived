@@ -109,6 +109,10 @@ func (s Service) Execute(ctx context.Context, actor identity.ActorContext, comma
 				return err
 			}
 		}
+		p.result.Reloads, err = p.reloadReferences(state, command)
+		if err != nil {
+			return err
+		}
 		p.result.NoOp = !p.changed()
 		answer = p.result
 		return nil

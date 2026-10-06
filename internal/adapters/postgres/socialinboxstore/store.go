@@ -55,6 +55,7 @@ func (Store) LockNoticeTx(ctx context.Context, t tx.Tx, recipient identity.Playe
 	out.RecipientPlayerID = identity.PlayerID(rawRecipient)
 	out.NoticeID = socialinbox.NoticeID(rawID)
 	out.Source = socialinbox.SourceKey{Kind: sourceKind, Key: sourceKey}
+	out.RelatedPlayerDeleted = related == nil
 	if related != nil {
 		out.RelatedPlayerID = identity.PlayerID(*related)
 	}

@@ -147,12 +147,19 @@ func TestI7A2KeepsFeatureProducerAndWakeupRoutesDormant(t *testing.T) {
 			"realtime.DirectRegistration{",
 			"realtime.NoticeRegistration{",
 			"wireRT.DirectRegistration{",
+			"rt.DirectRegistration{",
 			"wireRT.NoticeRegistration{",
 			"realtimewakeup.Registration{",
 			"appwakeup.Registration{",
 		} {
 			if strings.Contains(s, marker) {
 				rel, _ := filepath.Rel(root, path)
+				allowedSocial := filepath.ToSlash(rel) == "cmd/gxb-realtime/main_postgres.go" && marker == "realtimewakeup.Registration{" && strings.Count(s, marker) == 1 && strings.Contains(s, "Route: postgres.SocialReloadRoute, Handler: socialHandler")
+				allowedSchema := filepath.ToSlash(rel) == "internal/adapters/stockruntime/social_reload.go" && marker == "rt.DirectRegistration{" && strings.Count(s, marker) == 1 && strings.Count(s, "MID:") == 1
+				if (allowedSocial || allowedSchema) && selectedSocialActivation(t) {
+					validateSocialActivationRoutes(t)
+					continue
+				}
 				offenders = append(offenders, filepath.ToSlash(rel)+": "+marker)
 			}
 		}

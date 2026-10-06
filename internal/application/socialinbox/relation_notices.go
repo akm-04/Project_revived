@@ -224,6 +224,9 @@ func (s RelationService) ApplyRelationsTx(ctx context.Context, t tx.Tx, plans []
 			return nil, err
 		}
 		if p.existing != nil {
+			if !p.existing.NoticeID.WireSafe() {
+				return nil, ErrInvalidNotice
+			}
 			if err := sameRelationNotice(*p.existing, p.descriptor); err != nil {
 				return nil, err
 			}
@@ -236,6 +239,9 @@ func (s RelationService) ApplyRelationsTx(ctx context.Context, t tx.Tx, plans []
 		}
 		if err := sameRelationNotice(n, p.descriptor); err != nil {
 			return nil, err
+		}
+		if !n.NoticeID.WireSafe() {
+			return nil, ErrInvalidNotice
 		}
 		out = append(out, n)
 	}
