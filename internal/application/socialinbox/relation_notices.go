@@ -85,8 +85,18 @@ func (p PreparedRelationNotice) ExistingNotice() (Notice, bool) {
 	if p.existing == nil {
 		return Notice{}, false
 	}
-	return *p.existing, true
+	return copyNotice(*p.existing), true
 }
+
+// copyNotice isolates nullable lifecycle pointers from the private prepared plan.
+func copyNotice(n Notice) Notice {
+	if n.DismissedAt != nil {
+		at := *n.DismissedAt
+		n.DismissedAt = &at
+	}
+	return n
+}
+
 func sameCaller(a, b tx.Tx) bool {
 	av, bv := reflect.ValueOf(a), reflect.ValueOf(b)
 	return av.IsValid() && bv.IsValid() && av.Type() == bv.Type() && av.Comparable() && av.Equal(bv)
@@ -185,7 +195,7 @@ func (s RelationService) PrepareRelationsTx(ctx context.Context, t tx.Tx, fences
 			if err := sameRelationNotice(n, p.descriptor); err != nil {
 				return nil, err
 			}
-			copy := n
+			copy := copyNotice(n)
 			p.existing = &copy
 		}
 		ordered = append(ordered, p)
@@ -217,7 +227,7 @@ func (s RelationService) ApplyRelationsTx(ctx context.Context, t tx.Tx, plans []
 			if err := sameRelationNotice(*p.existing, p.descriptor); err != nil {
 				return nil, err
 			}
-			out = append(out, *p.existing)
+			out = append(out, copyNotice(*p.existing))
 			continue
 		}
 		n, err := s.Store.InsertRelationNoticeTx(ctx, t, p.descriptor)

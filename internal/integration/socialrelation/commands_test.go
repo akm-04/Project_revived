@@ -313,9 +313,20 @@ func TestDismissedSourceReplayPreservesIdentityAndRejectsMismatch(t *testing.T) 
 	if e != nil {
 		t.Fatal(e)
 	}
+	view, exists := plans[0].ExistingNotice()
+	if !exists || view.DismissedAt == nil {
+		t.Fatal("missing dismissed view")
+	}
+	originalDismissal := *view.DismissedAt
+	*view.DismissedAt = at.Add(time.Hour)
 	got, e := inbox.ApplyRelationsTx(ctx, handle, plans)
-	if e != nil || len(got) != 1 || got[0].Active || got[0].StateVersion != 2 {
+	if e != nil || len(got) != 1 || got[0].Active || got[0].StateVersion != 2 || got[0].DismissedAt == nil || !got[0].DismissedAt.Equal(originalDismissal) {
 		t.Fatalf("dismissed resurrection: %+v %v", got, e)
+	}
+	*got[0].DismissedAt = at.Add(2 * time.Hour)
+	again, replayErr := inbox.ApplyRelationsTx(ctx, handle, plans)
+	if replayErr != nil || len(again) != 1 || again[0].DismissedAt == nil || !again[0].DismissedAt.Equal(originalDismissal) {
+		t.Fatal("returned notice mutation changed private replay plan", replayErr)
 	}
 	event.At = at.Add(time.Second)
 	if _, e = inbox.PrepareRelationsTx(ctx, handle, []socialinbox.RecipientFence{{PlayerID: 100001, StateVersion: root.StateVersion}}, []socialinbox.RelationTransition{event}); !errors.Is(e, socialinbox.ErrRelationNoticeConflict) {
