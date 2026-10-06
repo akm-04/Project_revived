@@ -1,6 +1,7 @@
-package socialinbox
+package socialinbox_test
 
 import (
+	"gxb.local/backend/v2/internal/application/socialinbox"
 	"testing"
 
 	"gxb.local/backend/v2/internal/application/socialrelation"
@@ -9,18 +10,18 @@ import (
 )
 
 func TestNoticeRankFollowsRelationRanks(t *testing.T) {
-	if LockRankNotice != 370 || LockRankNotice <= socialrelation.LockRankRequestEpoch {
-		t.Fatalf("notice rank=%d request epoch=%d", LockRankNotice, socialrelation.LockRankRequestEpoch)
+	if socialinbox.LockRankNotice != 370 || socialinbox.LockRankNotice <= socialrelation.LockRankRequestEpoch {
+		t.Fatalf("notice rank=%d request epoch=%d", socialinbox.LockRankNotice, socialrelation.LockRankRequestEpoch)
 	}
 }
 
 func TestNoticeKeysAreTypedAndCanonical(t *testing.T) {
 	pid := identity.PlayerID(100001)
-	a, err := NoticeLockKey(pid, 7)
+	a, err := socialinbox.NoticeLockKey(pid, 7)
 	if err != nil {
 		t.Fatal(err)
 	}
-	b, err := NoticeSourceLockKey(pid, SourceKey{Kind: "friend-request", Key: "100001:200001:3:accepted"})
+	b, err := socialinbox.NoticeSourceLockKey(pid, socialinbox.SourceKey{Kind: "friend-request", Key: "100001:200001:3:accepted"})
 	if err != nil {
 		t.Fatal(err)
 	}
