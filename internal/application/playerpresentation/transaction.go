@@ -37,3 +37,9 @@ type Batch struct {
 type TxReader interface {
 	ReadManyTx(context.Context, tx.Tx, []identity.PlayerID) (Batch, error)
 }
+
+// TxObserver supplies response-only database time when no presentations exist.
+// It does not alter the established empty ReadManyTx behavior.
+type TxObserver interface {
+	ObserveTx(context.Context, tx.Tx) (time.Time, error)
+}

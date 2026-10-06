@@ -1,0 +1,263 @@
+{
+  "schema_version": 1,
+  "status": "RESEARCH_DESIGN_SELECTED_EFFECTIVE_ONLY_WITH_VALIDATED_PASS635_SEAL",
+  "stage": "I7A-4C",
+  "tests": [
+    {
+      "id": "C01",
+      "name": "Fresh exact candidate/tool/migration identity",
+      "proof_class": "IDENTITY_STATIC_EXECUTABLE",
+      "required": true,
+      "assertions": [
+        "Accepted634parent tree/hash/pins00033 unchanged; clean frozen4CcandidateZIP roundtrip; exacttool manifest/versions"
+      ],
+      "result": "NOT_RUN"
+    },
+    {
+      "id": "C02",
+      "name": "Absent Social root and empty base",
+      "proof_class": "REAL_POSTGRESQL",
+      "required": true,
+      "assertions": [
+        "ActorI4validated/locked; noEnsureRoot; complete arrays/defaults; authoritative nonzero server_time; no durable change"
+      ],
+      "result": "NOT_RUN"
+    },
+    {
+      "id": "C03",
+      "name": "Actor/server/port integrity failures",
+      "proof_class": "REAL_POSTGRESQL",
+      "required": true,
+      "assertions": [
+        "Missing actor,storedserver mismatch,nilTx and invalid provider outputs fail locally; no result or writes"
+      ],
+      "result": "NOT_RUN"
+    },
+    {
+      "id": "C04",
+      "name": "Four canonical list variants",
+      "proof_class": "REAL_POSTGRESQL",
+      "required": true,
+      "assertions": [
+        "Activefriend only,inboundPENDING only,ownactiveblock only,relationnotices; tombstones/direction/coexistence respected"
+      ],
+      "result": "NOT_RUN"
+    },
+    {
+      "id": "C05",
+      "name": "Stable list ordering and complete large lists",
+      "proof_class": "REAL_POSTGRESQL",
+      "required": true,
+      "assertions": [
+        "requestDESC+PIDties,friend/blockPIDorder; >512inbound/block rows returned completely or whole operation fails,never silently truncated"
+      ],
+      "result": "NOT_RUN"
+    },
+    {
+      "id": "C06",
+      "name": "Notice50window and deferred providers",
+      "proof_class": "REAL_POSTGRESQL",
+      "required": true,
+      "assertions": [
+        "NewerGift/Guild/unknownfamily rows do not consume relationwindow; no foreign validity/claim authority"
+      ],
+      "result": "NOT_RUN"
+    },
+    {
+      "id": "C07",
+      "name": "NULL related player and older refill",
+      "proof_class": "REAL_POSTGRESQL",
+      "required": true,
+      "assertions": [
+        "ActualFKSETNULL row retained but unprojected; after explicit fixture/qualifieddismissal older active rows refill; no expiry/cleanup"
+      ],
+      "result": "NOT_RUN"
+    },
+    {
+      "id": "C08",
+      "name": "Included notice source binding corruption",
+      "proof_class": "REAL_POSTGRESQL",
+      "required": true,
+      "assertions": [
+        "AcceptedfiniteDescriptor validator rejectswrongtype/family/participant/generation/key; no partial response"
+      ],
+      "result": "NOT_RUN"
+    },
+    {
+      "id": "C09",
+      "name": "Required profile/type unavailable",
+      "proof_class": "REAL_POSTGRESQL",
+      "required": true,
+      "assertions": [
+        "Includedfriend/request/block/notice/search/recommend with missingI4/I5 fails entire read, no invented or partialprofiles"
+      ],
+      "result": "NOT_RUN"
+    },
+    {
+      "id": "C10",
+      "name": "Presence observation and wire times",
+      "proof_class": "REAL_POSTGRESQL",
+      "required": true,
+      "assertions": [
+        "OnecallerTxObservedAt/attempt; online/offline/never fields; multiple roles/expiry; presence does not determineeligibility"
+      ],
+      "result": "NOT_RUN"
+    },
+    {
+      "id": "C11",
+      "name": "Modern exact search and numeric-name union",
+      "proof_class": "REAL_POSTGRESQL",
+      "required": true,
+      "assertions": [
+        "ExactIDfirst,rawnameCcollation,PIDdedupe/order,numericname/leadingzero collisions; self/friend/block remainvisible"
+      ],
+      "result": "NOT_RUN"
+    },
+    {
+      "id": "C12",
+      "name": "Modern no-match and outgoing overlay",
+      "proof_class": "REAL_POSTGRESQL",
+      "required": true,
+      "assertions": [
+        "No-match/empty success[]; onlyactoroutgoingPENDING boolean; inbound/terminalnottrue"
+      ],
+      "result": "NOT_RUN"
+    },
+    {
+      "id": "C13",
+      "name": "Search shape/UTF8/numeric boundary",
+      "proof_class": "REAL_POSTGRESQL",
+      "required": true,
+      "assertions": [
+        "Both/neither/wrongtypes/unknownkeys rejected;20vs21codepoints,invalidUTF8,sign/space/nonASCIIdigits/overflow preserveexactnamebranch"
+      ],
+      "result": "NOT_RUN"
+    },
+    {
+      "id": "C14",
+      "name": "Search saturation and legacy ambiguity",
+      "proof_class": "REAL_POSTGRESQL",
+      "required": true,
+      "assertions": [
+        "100namesallowed,101failsno truncation; legacyoneobject,zeroqualified20004,multiplelocallyambiguous"
+      ],
+      "result": "NOT_RUN"
+    },
+    {
+      "id": "C15",
+      "name": "Recommendation exclusion rules",
+      "proof_class": "REAL_POSTGRESQL",
+      "required": true,
+      "assertions": [
+        "Self/friend/eitherblock/eitherpendingexcluded; quota/capacity/Presence notfilters;10max"
+      ],
+      "result": "NOT_RUN"
+    },
+    {
+      "id": "C16",
+      "name": "Sparse inclusive pivot and one wrap",
+      "proof_class": "REAL_POSTGRESQL",
+      "required": true,
+      "assertions": [
+        "Existingpivotincluded,holepivot,strictpageordering/noPIDduplicates,onewrap;empty/single/extremebounds"
+      ],
+      "result": "NOT_RUN"
+    },
+    {
+      "id": "C17",
+      "name": "Recommendation candidate budget",
+      "proof_class": "REAL_POSTGRESQL",
+      "required": true,
+      "assertions": [
+        "Fetchedanduniquecandidates<=4096; fullyexcluded/sparselyeligiblepopulationreturnsfewer;page<=128"
+      ],
+      "result": "NOT_RUN"
+    },
+    {
+      "id": "C18",
+      "name": "Definite-abort retry and changed bounds",
+      "proof_class": "REAL_POSTGRESQL",
+      "required": true,
+      "assertions": [
+        "Real/injectedqualified40001 rollback; sameopandabsoluteanchor; oldoutputdiscarded; unchangedstateorderedresultsstable;changedstateresultsnotpromisedequal"
+      ],
+      "result": "NOT_RUN"
+    },
+    {
+      "id": "C19",
+      "name": "AmbiguousCOMMIT output boundary",
+      "proof_class": "REAL_POSTGRESQL_PLUS_INJECTED_ACK_LOSS",
+      "required": true,
+      "assertions": [
+        "Native readtransaction commits; injectedtransportackfailure yieldsnoresult/noblindreplay; finiteMaxAttempts3; readonlyfactsunchanged"
+      ],
+      "result": "NOT_RUN"
+    },
+    {
+      "id": "C20",
+      "name": "Concurrent coherent read/mutation snapshot",
+      "proof_class": "REAL_POSTGRESQL",
+      "required": true,
+      "assertions": [
+        "Concurrent accepted4B request/accept/block/delete/noticeproduction; actorfencingandRepeatableRead snapshot consistent; no clientpartialmixedlists"
+      ],
+      "result": "NOT_RUN"
+    },
+    {
+      "id": "C21",
+      "name": "Restart and dump/restore parity",
+      "proof_class": "REAL_POSTGRESQL",
+      "required": true,
+      "assertions": [
+        "Canonicalrelation/inbox/type/profile/Presenceprojectionparityatcontrolledobservation; seq/tombstones/generationspreserved; inheritedPG03projection obligation"
+      ],
+      "result": "NOT_RUN"
+    },
+    {
+      "id": "C22",
+      "name": "Pure stock shapes and source consumers",
+      "proof_class": "STATIC_SOURCE_AND_EXECUTABLE_DTO",
+      "required": true,
+      "assertions": [
+        "JSONarrayvsnull/object,numericonline/booleanflags,188modernlist/legacyobject,189barelists,190listobject,176allfields; no activation"
+      ],
+      "result": "NOT_RUN"
+    },
+    {
+      "id": "C23",
+      "name": "Foundational ownership/transaction boundaries",
+      "proof_class": "STATIC_AND_EXECUTABLE_ARCHITECTURE",
+      "required": true,
+      "assertions": [
+        "D01/D07/D11/D13/D14+I7A1 preserved; typedcallerTx; noforeignSQL/nestedTx/reflectionregistry/bus;existing4Bregressionswhereaffected"
+      ],
+      "result": "NOT_RUN"
+    },
+    {
+      "id": "C24",
+      "name": "Scope/route/metadata/reality review",
+      "proof_class": "IDENTITY_STATIC_REALITY",
+      "required": true,
+      "assertions": [
+        "StockmainMIDlist/realtime/bootstrap unchanged,no00034/pindrift; candidateboundreviewandexplicitclassification;4D/parent/W2unpassed"
+      ],
+      "result": "NOT_RUN"
+    }
+  ],
+  "inherited_obligations": {
+    "PG03": "Projection dump/restore portion inC21; final coherent fullparentproof remains4D",
+    "PG21": "C06-C08 nativewindow/refill",
+    "PG22": "C02/C04/C10 basecomposition",
+    "PG23": "C04/C05/C09 fourtypes/noeffects",
+    "PG24": "C11-C14 modernsearch",
+    "PG25": "C14 legacysearch",
+    "PG26": "C15-C18 recommendation"
+  },
+  "stage_exit": "All24requiredrowswithclaimedproofclasses,exact frozenidentity,independentpostimplementationreality andclassification,normalHOT/COLDseal; not4D/parent/W2",
+  "unknown_commit_limit": "Injected acknowledgement-loss evidence isnot actualnetworkpartition",
+  "research_probes_do_not_satisfy_matrix": true,
+  "pass": "635.0",
+  "sealed_at_pass": "635.0",
+  "selected_authority": true,
+  "implementation_authorized_by_document": false
+}

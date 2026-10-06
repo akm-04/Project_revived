@@ -1,0 +1,253 @@
+{
+  "schema": "gxb-i7a4c-foundation-traceability/v1",
+  "status": "HASH_VERIFIED_SELECTED_CONTRACTS_REUSED",
+  "selected_registry_path": "00_PASSMAP/PASS634_OBJECT_REGISTRY.json",
+  "selected_registry_sha256": "c5ccbea3a668d14a176ca5d15e980bbc4c2c73d9575ec0c168d3df3d51674cb6",
+  "registry_rule": "Existing Object Registry remains the only contract-selection registry; this is a traceability record, not a new database or competing current-state index.",
+  "references": [
+    {
+      "logical_id": "design.transaction.ownership",
+      "selected_object_id": "design.transaction.ownership@d01",
+      "path": "00_PASSMAP/PASS463_DESIGNS/D01.json",
+      "sha256": "34ddc24af8cd3028366b1c672ead2a1ed1cad2207c5adc80cc151f45edbc851e",
+      "disposition": "REUSED_PRESERVED",
+      "application": "One caller-owned transaction; typed exactTx owner reads; actor parent fences absent Social roots; no nested commit/foreign SQL/semantic read effects.",
+      "invariants": [
+        "One command owns one transaction; nested owner ports accept caller transaction and never commit independently.",
+        "Before first canonical mutation, command-specific typed plans close every possible transactional canonical effect and required synchronization identity. Include indirect EXP/energy, overflow/Mail, immediate objectives, references and receipt/fact/obligation source rows.",
+        "Plan known keys or an explicit conservative superset. If a locked read discovers another key, expand before mutation and reacquire/retry in global order. Never acquire an out-of-order lock after mutation.",
+        "Post-commit notification, transport writing and River worker execution are delivery work, not extra gameplay-owner locks. Their durable source rows/obligations participate only according to their actual transactional ownership.",
+        "No universal effect-graph engine is mandated. Command-specific typed planners and existing global lock-rank registry suffice.",
+        "Each canonical row has exactly one owner; cross-owner code calls narrow typed ports. Missing-row creation fences a stable namespace/parent synchronization key.",
+        "Semantic receipt, immutable economic ledger, response payload and durable obligation remain distinct. Failed delivery after commit never authorizes repeat settlement."
+      ],
+      "acceptance": [
+        "Rollback leaves no partial debit/grant/objective/obligation",
+        "Composite indirect effect uses global lock order",
+        "Concurrent missing owner rows create one identity",
+        "No nested transaction or direct foreign-owner SQL"
+      ]
+    },
+    {
+      "logical_id": "design.time.jobs.projection",
+      "selected_object_id": "design.time.jobs.projection@d07",
+      "path": "00_PASSMAP/PASS475_DESIGNS/D07.json",
+      "sha256": "29042b4691e5af17c7ce7f0ce08b52eaf3c4d393ec459b01775d01b738c06c95",
+      "disposition": "REUSED_PRESERVED",
+      "application": "Database response observation is separate from durable gameplay decision time; no new scheduler/reset/clock authority.",
+      "invariants": [
+        "Generation owns explicit occurrence identity, scope, time policy and lifecycle. Wall-clock recomputation is not the identity of an already accepted operation.",
+        "Jobs are at-least-once wakeups. Owner tables/obligations remain truth; job uniqueness is not economic idempotency. Reconciliation recreates lost delivery from durable obligations.",
+        "Facts have stable identity, owner aggregate revision, schema and causal operation reference. Consumers record deduplication and ordering policy; ordering is per relevant aggregate, not a promised global order.",
+        "Immediate objective effects participate in preplanned transaction locks. Deferred projections declare revision/watermark and read-your-write behavior. Realtime notifications cannot be the only durable evidence.",
+        "ActivityDirectory aggregates qualified owner providers and availability. It never authorizes spending/rewards or turns an unqualified capability on.",
+        "Shared scope retains participant character/logical-server identity. Cross-server namespaces require explicit owner keys and arbitration, not widening a character key.",
+        "Client timers/scene entry are not expiry or settlement authority. Authoritative admission and owner reconciliation enforce validity; jobs only wake durable owner obligations. Distinguish validity cutoff from physical deletion and retained receipt/tombstone history.",
+        "Shared packet claims require an occurrence owner and atomic arbitration over remaining allocation and recipient claims; notifications only project committed facts. Exact scope, supply, expiry and allocation policy must be researched before activation.",
+        "Work Place / TREASURE528-540 must satisfy PASS465_WORKPLACE_TIME_CONTRACT.json; clock infrastructure and inactive projection do not establish feature completion.",
+        "AUDIT-PROFILE-03: Battle Pass profile separates occurrence/season, progression, premium entitlement, normal/advanced claim state and shop currency. Client wallet projection is not a second wallet owner.",
+        "AUDIT-PROFILE-03: Season and subject scope must be part of durable claim identity; track/reward identity and content revision must be explicit.",
+        "AUDIT-PROFILE-03: Orchestrator composes typed Generation, progression/Objectives, Commerce entitlement and Economy/Grant effects in existing transaction/replay boundaries. No parallel seasonal wallet or universal BattlePass kernel.",
+        "AUDIT-PROFILE-03: Resolve late premium purchase, season rollover, historical claim replay and closure policy before schema freeze. Do not infer retroactive/refund policy from premium UI flag.",
+        "AUDIT-PROFILE-05: Clock supplies authoritative time, not universal reset or regeneration policy. Keep Pass465 Work Place time contract in force.",
+        "AUDIT-PROFILE-05: Client ServerTime +8-hour helper is evidence for that helper only. Specify timezone/reset offset, interval, cap and occurrence identity per enabled time policy.",
+        "AUDIT-PROFILE-05: Work Place recovery/spend uses its canonical resource/refresh facts and existing typed effect/transaction plan. UI timers and scheduler wakeups do not define server completion.",
+        "AUDIT-PROFILE-05: Record remainder, at-cap, elapsed interval and backwards-time handling as qualified policy before affected schema/command freeze; no silent policy guessed from display code."
+      ],
+      "acceptance": [
+        "Duplicate/out-of-order facts do not duplicate awards",
+        "Crash after commit before enqueue recoverable",
+        "Late job cannot mutate next occurrence",
+        "Directory hides unsupported capabilities",
+        "Projection lag and recovery have bounded observable policy",
+        "Elapsed regeneration/deadline reconciliation survives offline/restart without tick delivery",
+        "Clock discontinuity, boundary and retry-stable time policy explicitly tested by each timed owner",
+        "AUDIT-PROFILE-03: Concurrent/replayed normal and advanced claims cannot duplicate grants.",
+        "AUDIT-PROFILE-03: Season N retry after rollover cannot claim season N+1 rewards.",
+        "AUDIT-PROFILE-03: Purchase/claim ordering, late purchase and closure behavior follow a recorded qualified policy.",
+        "AUDIT-PROFILE-03: Rollback leaves entitlement/claim/reward state consistent; currency projection reloads from its canonical owner.",
+        "AUDIT-PROFILE-05: Before/at/after interval and daily boundary with explicit policy offset.",
+        "AUDIT-PROFILE-05: At-cap wait then spend, multiple elapsed intervals, remainder preservation/reset according to qualified policy.",
+        "AUDIT-PROFILE-05: Concurrent spend/recover, retry/reload, restart and late wakeup cannot duplicate recovery or switch occurrence.",
+        "AUDIT-PROFILE-05: Injected clock enables tests without wall-clock sleeps; Work Place is not made an R4 prerequisite."
+      ]
+    },
+    {
+      "logical_id": "design.replay.identity",
+      "selected_object_id": "design.replay.identity@d11",
+      "path": "00_PASSMAP/PASS475_DESIGNS/D11.json",
+      "sha256": "c939268d7e67a73edbb849cb1c00b847adc0f09d07e4418e5e2bbc90ab39b62b",
+      "disposition": "REUSED_PRESERVED",
+      "application": "Private attempted output and stable operation selection anchor; unknownCOMMIT not replay permission; stock read does not identify successor mutation intent.",
+      "invariants": [
+        "Guarantee at-most-once settlement for a known semantic operation. Do not equate this with perfect identification of every identical nonce-less stock request.",
+        "Transport write success means bytes accepted by transport, not application consumption. Rename such state to TRANSPORT_WRITE_RECORDED; it cannot by itself advance a consumptive replay lane.",
+        "Classify each family: intrinsic one-shot key, provider receipt key, explicit source nonce, or ambiguous repeatable parameters. Strong keys use semantic receipts; parameter hashes alone are not universal operation identity.",
+        "For ambiguous repeatable consumptive families default to fail-closed ambiguity after an unresolved operation. Reconnect, lease expiry and receipt age alone do not prove new intent. A family may adopt an explicit bounded compatibility policy only with documented residual duplicate/false-replay tradeoff and W2 acceptance; no universal no-double-charge claim.",
+        "Retention preserves receipt/tombstone meaning across restore. Expiry must not silently reopen a previously settled one-shot entitlement. Response payloads never retain raw credentials.",
+        "No private nonce or modified-client acknowledgment may be required of an unmodified stock client.",
+        "Practice SAVE identifies actor without candidate revision. Internal revision fencing prevents stale internal writes, but cannot perfectly identify whether a delayed nonce-less SAVE intended an older or newly replaced draft. Require family-specific conservative/compatibility policy, as with repeated paid requests; no private client nonce or perfect stale-intent guarantee.",
+        "AUDIT-MID-01: Preserve ordered raw MID declarations separately from the effective symbol map. Retain overwritten declarations as provenance, not active aliases by default.",
+        "AUDIT-MID-01: Bind effective mappings to exact packaged/OTA source hashes and proven load order. Unknown overlay/load precedence remains unqualified; downloaded presence alone is not activation.",
+        "AUDIT-MID-01: Packaged SAKURA_FIGHT_RESULT has declarations 246 then1826. After this table initializes the symbolic call selects1826 absent later changes. Do not delete246 across all variants or fabricate aliases for absent symbols.",
+        "AUDIT-MID-01: Catalog presence, direction, transport, reachability, handler binding and support status are separate evidence claims. Numeric-catalog counts must name raw versus effective semantics."
+      ],
+      "acceptance": [
+        "Delayed retry after reconnect/lease expiry remains explicitly classified",
+        "Successful socket write does not prove consumption",
+        "Known operation cannot double settle",
+        "Compatibility limitations visible in acceptance report",
+        "AUDIT-MID-01: Fixture: duplicate symbol with changed value resolves last assignment while preserving both declarations.",
+        "AUDIT-MID-01: Fixture: repeated identical assignment is retained as provenance without extra effective route.",
+        "AUDIT-MID-01: Fixture: profile mismatch, unresolved overlay and absent symbol cannot promote support.",
+        "AUDIT-MID-01: Affected stock request/response fixture verifies wire MID and direction; no arbitrary activation of both Sakura numbers."
+      ]
+    },
+    {
+      "logical_id": "design.migration.recovery",
+      "selected_object_id": "design.migration.recovery@d13",
+      "path": "00_PASSMAP/PASS463_DESIGNS/D13.json",
+      "sha256": "323563f4f2af0d53c1f6ffdf99d7bb28bec241bb60d1e883e24aac2858cf2745",
+      "disposition": "REUSED_PRESERVED",
+      "application": "No schema change; exact candidate/native restart/dump-restore proof required; research probes do not satisfy implementation gate.",
+      "invariants": [
+        "Every owner added now declares schema version, forward migration/backfill, source mapping, identity/tombstone retention and rollback/roll-forward boundary. Do not defer owner data semantics to I13.",
+        "Restore creates/records history epoch and reconciles external payments/receipts before reopening writes. Retain semantic operation identity across restore; never pretend recovered queue delivery proves external settlement.",
+        "Preserve Pass425 RPO/RTO policy as acceptance targets, not achieved measurements. Backup success is not restore proof.",
+        "I12 is global integration hardening, not first concurrency test. R7 proves repaired foundation on real PostgreSQL/River; each later owner carries scoped DB concurrency/recovery proof. W2 remains comprehensive real stock-client/restore/migration/load acceptance after I14.",
+        "I14 runs available checks and enumerates unavailable checks with exact evidence needs. Replace literally every test possible with a versioned risk/requirement inventory; missing evidence cannot become PASS.",
+        "I15 reconciles each required capability, acceptance row and outstanding unknown against actual evidence. No release with unresolved required feature dependencies; deliberately inactive features must be source-compatible and explicitly approved in release scope."
+      ],
+      "acceptance": [
+        "Restore plus replay causes no duplicate entitlement",
+        "External reconciliation and history epoch exercised",
+        "Owner mappings cover counts/value/references",
+        "Required evidence inventory has no unknown treated as PASS"
+      ]
+    },
+    {
+      "logical_id": "design.extension.change_law",
+      "selected_object_id": "design.extension.change_law@d14",
+      "path": "00_PASSMAP/PASS463_DESIGNS/D14.json",
+      "sha256": "45cd98a6ac2735b108122d60d593d96786f498d198c0a590d59ed39d999c8c62",
+      "disposition": "REUSED_PRESERVED",
+      "application": "Additive narrow owner ports with consumers, compatibility, lock/effect and proof records; no generic registry/repository/bus.",
+      "invariants": [
+        "Supersede absolute prohibition on future interface edits. Prefer additive narrow typed ports; permit evidence-backed versioned interface evolution when an actual new responsibility requires it.",
+        "A change record names source contradiction/new capability, owning package, consumers, data migration, compatibility adapter, lock/effect changes and acceptance evidence. Deprecate old version only after consumer migration.",
+        "No opaque map, reflection registry, generic foreign-table repository or bypass SQL solely to avoid changing a port.",
+        "Keep modular monolith and PostgreSQL transaction boundary. Separate processes are justified only by isolation/operational need, such as battle resolver; no new universal event bus or ledger owner.",
+        "Modularity is a reviewable ownership/dependency property, not a guarantee that unforeseen discoveries never change foundations."
+      ],
+      "acceptance": [
+        "Owner graph is acyclic except explicit orchestration through ports",
+        "Direct table ownership guards pass",
+        "Old consumers have migration/compatibility coverage",
+        "Effect plan updated for new indirect mutations"
+      ]
+    },
+    {
+      "logical_id": "I7A1_PHASE_ARCHITECTURE_CONTRACT",
+      "path": "00_PASSMAP/PASS622_I7A1_PHASE_ARCHITECTURE_CONTRACT.json",
+      "sha256": "c870861afc84378d18b62d867823a3fb9969cf04452067479f8776f7aac96362",
+      "disposition": "INHERITED_UNCHANGED",
+      "application": "Owner/lock/provider/shape/time/stage-local native/explicit authorization/zero-client/W2 laws govern the4C design. Historical baseline fields remain provenance, not current backend identity."
+    },
+    {
+      "logical_id": "I7A1_TRANSACTION_LOCK_EFFECT_CONTRACT",
+      "path": "00_PASSMAP/PASS622_I7A1_TRANSACTION_LOCK_EFFECT_CONTRACT.json",
+      "sha256": "c4e11cbab1a7193fd7575229f76a1322128273047d599e08deac7993959f85f8",
+      "disposition": "INHERITED_UNCHANGED",
+      "application": "Owner/lock/provider/shape/time/stage-local native/explicit authorization/zero-client/W2 laws govern the4C design. Historical baseline fields remain provenance, not current backend identity."
+    },
+    {
+      "logical_id": "I7A1_DELIVERY_RECOVERY_WIRE_CONTRACT",
+      "path": "00_PASSMAP/PASS622_I7A1_DELIVERY_RECOVERY_WIRE_CONTRACT.json",
+      "sha256": "80964805f03f8b6f9d3324283a82248db512db57950a9fc1e2ffe6f00b0729b6",
+      "disposition": "INHERITED_UNCHANGED",
+      "application": "Owner/lock/provider/shape/time/stage-local native/explicit authorization/zero-client/W2 laws govern the4C design. Historical baseline fields remain provenance, not current backend identity."
+    },
+    {
+      "logical_id": "I7A1_TIME_CONTENT_POLICY_REGISTER",
+      "path": "00_PASSMAP/PASS622_I7A1_TIME_CONTENT_POLICY_REGISTER.json",
+      "sha256": "4b4cb9801cb35a9cab4cd11f706abf2c28be6addcc00297eb524e0fbb9face5a",
+      "disposition": "INHERITED_UNCHANGED",
+      "application": "Owner/lock/provider/shape/time/stage-local native/explicit authorization/zero-client/W2 laws govern the4C design. Historical baseline fields remain provenance, not current backend identity."
+    },
+    {
+      "logical_id": "I7A1_MIGRATION_RESTORE_PROOF_CONTRACT",
+      "path": "00_PASSMAP/PASS622_I7A1_MIGRATION_RESTORE_PROOF_CONTRACT.json",
+      "sha256": "11d72e984bee246982cafd0e849f206aabb5e6a42d5393b50042be87b5896e88",
+      "disposition": "INHERITED_UNCHANGED",
+      "application": "Owner/lock/provider/shape/time/stage-local native/explicit authorization/zero-client/W2 laws govern the4C design. Historical baseline fields remain provenance, not current backend identity."
+    },
+    {
+      "logical_id": "I7A1_STAGE_ACCEPTANCE_CONTRACT",
+      "path": "00_PASSMAP/PASS622_I7A1_STAGE_ACCEPTANCE_CONTRACT.json",
+      "sha256": "a4266a4234d83db34ba3fa0e58599c8764385260b1a87b5ca057d3b64fbb5a55",
+      "disposition": "INHERITED_UNCHANGED",
+      "application": "Owner/lock/provider/shape/time/stage-local native/explicit authorization/zero-client/W2 laws govern the4C design. Historical baseline fields remain provenance, not current backend identity."
+    },
+    {
+      "logical_id": "I7A1_EVIDENCE_CLASSIFICATION",
+      "path": "00_PASSMAP/PASS622_I7A1_EVIDENCE_CLASSIFICATION.json",
+      "sha256": "f129b63c7afe95f5f6850ddbb81868eb1eba82c956240f2dd5f017617cc56457",
+      "disposition": "INHERITED_UNCHANGED",
+      "application": "Owner/lock/provider/shape/time/stage-local native/explicit authorization/zero-client/W2 laws govern the4C design. Historical baseline fields remain provenance, not current backend identity."
+    },
+    {
+      "logical_id": "I7A1_PREIMPLEMENTATION_REALITY_CHECK",
+      "path": "00_PASSMAP/PASS622_I7A1_PREIMPLEMENTATION_REALITY_CHECK.json",
+      "sha256": "62d75cc680b3ae8570f355b9c03ae2e99703e4809cc2e8dfa77d61dfb4879d96",
+      "disposition": "INHERITED_UNCHANGED",
+      "application": "Owner/lock/provider/shape/time/stage-local native/explicit authorization/zero-client/W2 laws govern the4C design. Historical baseline fields remain provenance, not current backend identity."
+    },
+    {
+      "logical_id": "i7a4_contract_index",
+      "path": "00_PASSMAP/PASS630_I7A4_CONTRACT_INDEX.json",
+      "sha256": "84e2d0a60516047945b5daa85e94947dd3b90b48a94d61e2b2c6387d5d521d32",
+      "disposition": "INHERITED_UNCHANGED",
+      "application": "Existing4A-Cstock-invisible topology, accepted4B behavior and qualified limitations retained."
+    },
+    {
+      "logical_id": "i7a4_scope_decomposition",
+      "path": "00_PASSMAP/PASS630_I7A4_SCOPE_SIZE_DECOMPOSITION_AUDIT.json",
+      "sha256": "6910ff651d591f977e7c0d7658af8b8b6dd525e457b6554b35bc334512eb4343",
+      "disposition": "INHERITED_UNCHANGED",
+      "application": "Existing4A-Cstock-invisible topology, accepted4B behavior and qualified limitations retained."
+    },
+    {
+      "logical_id": "i7a4b_acceptance_record",
+      "path": "00_PASSMAP/PASS634_I7A4B_ACCEPTANCE_RECORD.json",
+      "sha256": "78dfe9641a33a64de32fa0467a64bea7084938d0f6ece16ff3a770d2ab17bccc",
+      "disposition": "INHERITED_UNCHANGED",
+      "application": "Existing4A-Cstock-invisible topology, accepted4B behavior and qualified limitations retained."
+    },
+    {
+      "logical_id": "i7a4b_contract_index",
+      "path": "00_PASSMAP/PASS633_I7A4B_CONTRACT_INDEX.json",
+      "sha256": "39c7163e3c82bd943a5061b8790679a8dcb42dc957a29440bfae1850f8ab659d",
+      "disposition": "INHERITED_UNCHANGED",
+      "application": "Existing4A-Cstock-invisible topology, accepted4B behavior and qualified limitations retained."
+    },
+    {
+      "logical_id": "i7a4b_final_real_postgresql_matrix",
+      "path": "00_PASSMAP/PASS634_I7A4B_FOCUSED_MATRIX_RESULT.json",
+      "sha256": "daad075af247bc44a8156180ab9b76ab243fc55fb5a72086a46ba29af1862970",
+      "disposition": "INHERITED_UNCHANGED",
+      "application": "Existing4A-Cstock-invisible topology, accepted4B behavior and qualified limitations retained."
+    },
+    {
+      "logical_id": "i7a4b_final_postimplementation_reality",
+      "path": "00_PASSMAP/PASS634_I7A4B_FINAL_POSTIMPLEMENTATION_REALITY.json",
+      "sha256": "2d44e6896b09bd6087a1e9ef94a3db57cb65feea17b5c5dc4e1f161e7a4af34c",
+      "disposition": "INHERITED_UNCHANGED",
+      "application": "Existing4A-Cstock-invisible topology, accepted4B behavior and qualified limitations retained."
+    }
+  ],
+  "i7a1_index": {
+    "path": "00_PASSMAP/PASS622_I7A1_CONTRACT_INDEX.json",
+    "sha256": "319917ec91e3f4e4d52e0a323b10142b4a70b9b1353d7d80070583370b6b5c8f"
+  },
+  "foundational_contracts_superseded": []
+}

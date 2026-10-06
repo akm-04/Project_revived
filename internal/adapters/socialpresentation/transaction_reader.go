@@ -12,6 +12,7 @@ import (
 	"gxb.local/backend/v2/internal/application/playerroot"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/tx"
+	"time"
 )
 
 // TransactionReader has no pool fallback or transaction opener.
@@ -65,3 +66,12 @@ func (TransactionReader) ReadManyTx(ctx context.Context, t tx.Tx, ids []identity
 }
 
 var _ playerpresentation.TxReader = TransactionReader{}
+
+func (TransactionReader) ObserveTx(ctx context.Context, t tx.Tx) (time.Time, error) {
+	if t == nil {
+		return time.Time{}, errors.New("nil observation transaction")
+	}
+	return (postgres.AuthoritativeTime{Queryer: t}).Now(ctx)
+}
+
+var _ playerpresentation.TxObserver = TransactionReader{}
