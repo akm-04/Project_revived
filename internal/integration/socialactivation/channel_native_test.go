@@ -17,6 +17,7 @@ import (
 	"gxb.local/backend/v2/internal/protocol/amf3"
 	"gxb.local/backend/v2/internal/protocol/mids"
 	rt "gxb.local/backend/v2/internal/protocol/realtime"
+	"math"
 	"net"
 	"os"
 	"strings"
@@ -97,6 +98,24 @@ func TestChatA03StrictAMFFieldsAndNumerics(t *testing.T) {
 		writeChatFrame(t, c, rt.Frame{MID: mids.MIDSendChatMessage, Params: obj})
 		closedChat(t, c)
 	}
+}
+func TestChatA03bMalformedChannelsAndDiscriminators(t *testing.T) {
+	f := fresh(t)
+	f.chatPlayers(100001)
+	h := chatHarness(t, f, channelHarnessOptions{})
+	for _, channel := range []any{1.0, 3.0, 5.0, -1.0, 0.5, "0", math.NaN(), math.Inf(1)} {
+		c, _, _ := h.login(100001, dr.World, 1)
+		writeChatFrame(t, c, rt.Frame{MID: mids.MIDSendChatMessage, Params: chatParams(amf3.Property{Name: "message", Value: "invalidchannel"}, amf3.Property{Name: "channel", Value: channel})})
+		closedChat(t, c)
+	}
+	for _, kind := range []any{-1.0, 9.0, math.NaN(), math.Inf(-1), true} {
+		c, _, _ := h.login(100001, dr.World, 1)
+		sendChat(t, c, "invalidtype", 0, amf3.Property{Name: "type", Value: kind})
+		closedChat(t, c)
+	}
+	c, _, _ := h.login(100001, dr.World, 1)
+	writeChatFrame(t, c, rt.Frame{MID: mids.MIDSendChatMessage, Params: nil})
+	closedChat(t, c)
 }
 func TestChatA04UnicodeBoundAndWhitespace(t *testing.T) {
 	f := fresh(t)
@@ -362,15 +381,19 @@ func TestChatA16NoNetworkWithActiveTransactionOrRegistryMutex(t *testing.T) {
 	f.chatPlayers(100001)
 	w := &readWitness{f: f}
 	var checks atomic.Int64
+	var h *channelHarness
 	decorate := func(c net.Conn) net.Conn {
 		return &networkWitness{Conn: c, check: func() {
 			if w.active.Load() != 0 {
 				t.Error("network under active transaction")
 			}
 			checks.Add(1)
+			if h != nil {
+				h.reg.ByRoomRole(1, dr.World)
+			}
 		}}
 	}
-	h := chatHarness(t, f, channelHarnessOptions{db: w, decorate: decorate})
+	h = chatHarness(t, f, channelHarnessOptions{db: w, decorate: decorate})
 	c, _, _ := h.login(100001, dr.World, 1)
 	sendChat(t, c, "unlocked", 0)
 	readChat(t, c, "unlocked")

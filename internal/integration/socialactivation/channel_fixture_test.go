@@ -196,7 +196,7 @@ func (f *fixture) chatPlayers(pids ...identity.PlayerID) {
 	}
 }
 func (f *fixture) chatGuild(gid int64, pids ...identity.PlayerID) {
-	f.sql(`INSERT INTO guilds(guild_id,logical_server_id,name,icon,apply_type,min_allow_level,vitality,policy_revision,created_at,updated_at)VALUES($1,$2,$3,1,0,1,0,'fixture',$4,$4)`, gid, int32(gid/1000000), "g"+string(rune('a'+gid%26)), f.now())
+	f.sql(`INSERT INTO guilds(guild_id,logical_server_id,name,icon,apply_type,min_allow_level,vitality,policy_revision,created_at,updated_at)VALUES($1,$2,$3,1,0,1,0,'fixture',$4,$4) ON CONFLICT(guild_id) DO UPDATE SET retired_at=NULL`, gid, int32(gid/1000000), "g"+string(rune('a'+gid%26)), f.now())
 	for _, pid := range pids {
 		f.sql(`INSERT INTO guild_memberships(player_id,guild_id,role,joined_at,updated_at)VALUES($1,$2,0,$3,$3)`, int64(pid), gid, f.now())
 		f.sql(`INSERT INTO guild_membership_events(player_id,guild_id,event_kind,actor_player_id,occurred_at,policy_revision)VALUES($1,$2,'JOIN',$1,$3,'fixture')`, int64(pid), gid, f.now())
