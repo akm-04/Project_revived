@@ -41,6 +41,7 @@ type channelHarness struct {
 }
 type channelHarnessOptions struct {
 	policy   *stockruntime.ChannelChatPolicy
+	limits   *limits.Config
 	reader   channelchat.Reader
 	db       tx.Beginner
 	decorate func(net.Conn) net.Conn
@@ -77,7 +78,11 @@ func chatHarness(t *testing.T, f *fixture, o channelHarnessOptions) *channelHarn
 	if e != nil {
 		t.Fatal(e)
 	}
-	server := stockruntime.RealtimeServer{Auth: auth, Registry: reg, Policy: policy, Admission: limiter, SessionDispatcher: d}
+	cfg := limits.Default()
+	if o.limits != nil {
+		cfg = *o.limits
+	}
+	server := stockruntime.RealtimeServer{Limits: cfg, Auth: auth, Registry: reg, Policy: policy, Admission: limiter, SessionDispatcher: d}
 	l, e := net.Listen("tcp", "127.0.0.1:0")
 	if e != nil {
 		t.Fatal(e)

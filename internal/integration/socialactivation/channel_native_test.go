@@ -17,6 +17,7 @@ import (
 	dr "gxb.local/backend/v2/internal/domain/realtimeauth"
 	"gxb.local/backend/v2/internal/foundation/tx"
 	"gxb.local/backend/v2/internal/protocol/amf3"
+	"gxb.local/backend/v2/internal/protocol/limits"
 	"gxb.local/backend/v2/internal/protocol/mids"
 	rt "gxb.local/backend/v2/internal/protocol/realtime"
 	"math"
@@ -737,8 +738,20 @@ func TestChatA24ActualProductionDispatcherAndHTTPRejection(t *testing.T) {
 	startProcess(t, apiBin, api, world)
 	proc := startProcess(t, rtBin, api, world)
 	c := worldLogin(t, world, token, 1)
+	leaseBefore := f.text(`SELECT lease_expires_at::text FROM realtime_presence_leases WHERE player_id=100001 LIMIT 1`)
 	sendChat(t, c, "production", 0)
 	readChat(t, c, "production")
+	if f.text(`SELECT lease_expires_at::text FROM realtime_presence_leases WHERE player_id=100001 LIMIT 1`) != leaseBefore {
+		t.Fatal("chat renewed Presence")
+	}
+	writeChatFrame(t, c, rt.Frame{MID: mids.MIDSocketHeartbeat, Params: chatParams()})
+	deadline := time.Now().Add(time.Second)
+	for f.text(`SELECT lease_expires_at::text FROM realtime_presence_leases WHERE player_id=100001 LIMIT 1`) == leaseBefore {
+		if time.Now().After(deadline) {
+			t.Fatal("heartbeat did not renew Presence")
+		}
+		time.Sleep(5 * time.Millisecond)
+	}
 	noChat(t, c)
 	code, _ := postProcess(t, api, token, 1, 32782, map[string]any{"message": "httpmustreject", "channel": 0})
 	if code == 200 {
@@ -822,4 +835,57 @@ func TestChatA29CrashReconnectAndRetirementNativeLifecycle(t *testing.T) {
 	sendChat(t, sender, "stilllive", 0)
 	readChat(t, sender, "stilllive")
 	h.report()
+}
+
+func TestChatA17bFullNativeWriterQueueIsolated(t *testing.T) {
+	f := fresh(t)
+	f.chatPlayers(100001, 100002)
+	gate := make(chan struct{})
+	entered := make(chan struct{}, 1)
+	var ordinal atomic.Int64
+	cfg := limits.Default()
+	cfg.WriterFrames = 1
+	h := chatHarness(t, f, channelHarnessOptions{limits: &cfg, decorate: func(c net.Conn) net.Conn {
+		if ordinal.Add(1) == 4 {
+			return &blockChatConn{Conn: c, gate: gate, entered: entered, closed: make(chan struct{})}
+		}
+		return c
+	}})
+	senders := make([]net.Conn, 3)
+	for i := range senders {
+		senders[i], _, _ = h.login(100001, dr.World, 1)
+	}
+	peer, _, _ := h.login(100002, dr.World, 1)
+	var drains sync.WaitGroup
+	for _, c := range senders {
+		drains.Add(1)
+		go func(c net.Conn) {
+			defer drains.Done()
+			for i := 0; i < 3; i++ {
+				frameRead(t, c, mids.MIDChatMessage)
+			}
+		}(c)
+	}
+	for i, c := range senders {
+		sendChat(t, c, fmt.Sprintf("queue%d", i), 0)
+	}
+	for i := 0; i < 3; i++ {
+		r := h.report()
+		if r.Outcomes[stockruntime.ChatSendUnknown] != 1 || r.Outcomes[stockruntime.ChatTransportWriteRecorded] != 3 {
+			t.Fatal(r)
+		}
+	}
+	drains.Wait()
+	close(gate)
+	seen := map[string]bool{}
+	for i := 0; i < 2; i++ {
+		f := frameRead(t, peer, mids.MIDChatMessage)
+		m, _ := f.Params.(*amf3.Object).StrictMap()
+		seen[m["message"].(string)] = true
+	}
+	if len(seen) != 2 {
+		t.Fatal(seen)
+	}
+	noChat(t, peer)
+	t.Log("Real TCP, nativePG, explicit WriterFrames1 fault-capacity variant: third enqueue rejected while two admitted frames complete later; healthy recipients isolated")
 }
