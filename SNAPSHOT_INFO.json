@@ -1,5 +1,5 @@
 {
-  "base_backend_sha256": "2fdbdfb9f4a97f5acf2a9e3fcf4efd42fd964edf59e91c7d6b88ecc97f4e57a1",
+  "base_backend_sha256": "e0ff7628b1c226256b0138ddba011cbdbc5f7485f26a680931877e8444e9e456",
   "ca1_stage": "ACCEPTED_SEALED_PASS512",
   "ca2_1": "LOCAL_CHECKPOINT_ACCEPTED_PASS515; NOT_CA2_PHASE_ACCEPTANCE",
   "ca2_2": "LOCAL_CHECKPOINT_ACCEPTED_PASS517; NOT_CA2_PHASE_ACCEPTANCE",
@@ -376,8 +376,8 @@
   "native_repair_parent_implementation_revision_sha256": "0def8ffc697be0c43a40b3e447c328fee45011e76e9e87a69f17181b777e1c1b",
   "native_sqlc_repair": "REPRODUCED_IN_NORMAL_CHAT_FROM_PRISTINE_PASS519",
   "native_work_evidence_sha256": "36fad089f0390e50f3c6650b9dcec11bd30ca996a4cab460cb5de153395179bf",
-  "next": "Exact candidate31-row5A gate, reality and owning641 acceptance seal;5B/parent5/I7A10/E/W2 unpassed",
-  "next_stage": "I7A4D_EXACT_GATE_AND_NORMAL_EXIT_SEAL",
+  "next": "Exact5A+5B gate and explicitparent5reality; owning643seal required",
+  "next_stage": "I7A5B_EXACT_GATE_AND_PARENT5_REVIEW",
   "parent_accepted_implementation_revision_sha256": "b3a8123633fe85155019becd66aed45726e94316aee11b232b1f422e55e5b863",
   "parent_backend_archive_sha256": "23624449f758088585590a4e2490228782872033a23100354cfa96ffad6c6a76",
   "parent_backend_sha256": "0be3877bc3c8206f11b7b51c0a9771c98a30c7f34bda3d3b57065cc3aca907a4",
@@ -386,18 +386,18 @@
   "parent_i6_accepted_tested_candidate_sha256": "dbc752c6cc18e51ca859caec598d6500a1d12de28f826849d55c5f665fbddec9",
   "parent_i6c_native_evidence": "Pass501 predecessor native evidence retained; F6 repaired-candidate native report + targeted delta + final micro-delta jointly GREEN",
   "parent_revision_verification": "REPRODUCIBLE_UNDER_PASS517_CANONICAL_DIGEST_BASIS",
-  "pass": "641.0",
+  "pass": "643.0",
   "passmap_authority_note": "Exactsealed640selected5Adesign plus directhumanimplementationauthorization; candidate metadata acceptsnothing; normalowning641seal governs acceptance",
-  "passmap_authority_sha256": "402b6af6d9311dca1ef82fda8a3f2807870e0604903c3009d0a58b004d647817",
+  "passmap_authority_sha256": "ecf1c20ac133e14f8174129bf1a485e7a05bc59dc489c7608fcfe5ca604916d7",
   "product_behavior_implemented": "Selected637coordinated14routeSocialHTTP/WORLDreloadactivation plus184relationdismissal;183remainsI7A7",
   "profile1": "PERSISTENT_RECONSTRUCTION_PROFILE_1",
   "runtime_evidence_sha256": "021514f4ab8b4bfa6c9085aa550df97af782688e7b9807f50e655d2a79d16659",
   "sbom_created_at": "2026-10-07T00:00:00Z",
   "schema_version": 1,
-  "snapshot": "Selected6374Dactivation over exactaccepted6364C; no schema/pin/client delta",
-  "stage": "I7A-4D_GATE_CANDIDATE",
+  "snapshot": "9finite source-shaped variants for8structuredtypes; typed owner/read/privatepublication boundaries, all productionproducers inactive",
+  "stage": "I7A-5B_GATE_CANDIDATE",
   "status": "IMPLEMENTED_CANDIDATE_NOT_ACCEPTED_EXACT_FROZEN_GATE_PENDING",
-  "version": "v0.92.0",
+  "version": "v0.93.0",
   "w2_claimed": false,
   "i7a4d_inherited_metadata_provenance": {
     "parent_archive_sha256": "23624449f758088585590a4e2490228782872033a23100354cfa96ffad6c6a76",
@@ -442,5 +442,25 @@
   "i7a5a_source_binding": "docs/i7a5a/SOURCE_IDENTITY.json",
   "i7a5a_direct_user_implementation_authorized": true,
   "i7a5a_product_acceptance": false,
-  "i7a4_parent_acceptance_pass": "639.0"
+  "i7a4_parent_acceptance_pass": "639.0",
+  "i7a5b": {
+    "schema": "gxb-i7a5b-implementation/v1",
+    "base_passmap_sha256": "ecf1c20ac133e14f8174129bf1a485e7a05bc59dc489c7608fcfe5ca604916d7",
+    "base_backend_sha256": "e0ff7628b1c226256b0138ddba011cbdbc5f7485f26a680931877e8444e9e456",
+    "direct_user_implementation_authorized": true,
+    "scope": "9finite source-shaped variants for8structuredtypes; typed owner/read/privatepublication boundaries, all productionproducers inactive",
+    "new_contract_qualifications": [
+      "Exact numeric work bounds: token64bytes/exponentabs400 before rational validation",
+      "Reject unpaired UTF16 JSON escapes; preserve emptyScratch arrays separatelyfromnil",
+      "Ownerreceives sameTx+sameDB-authoritative observedAt; positive contentrevision and canonicalevent distinctfromdisplayroom0",
+      "Role-aware subtype validator addedinside oneMID32783 registry; finitefields only"
+    ],
+    "migrations_changed": false,
+    "live_provider_activation": false,
+    "unknown36863_activation": false,
+    "physical_stock_claimed": false,
+    "test_status": "FROZEN_EXACT_GATE_PENDING",
+    "acceptance": "NONE_CANDIDATE_METADATA_ONLY",
+    "parent_closure": "Pending explicit qualified parent review and normal seal"
+  }
 }

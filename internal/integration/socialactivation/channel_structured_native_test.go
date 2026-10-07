@@ -171,3 +171,27 @@ func TestChatB30ActualProductionProcessStructuredGate(t *testing.T) {
 }
 
 var _ = channelchatread.Reader{}
+
+func TestChatB15StructuredReadRetainsGuildJoinIncarnation(t *testing.T) {
+	f := fresh(t)
+	f.chatPlayers(100001, 100002)
+	f.chatGuild(1000001, 100001, 100002)
+	w := &readWitness{f: f}
+	o := &nativeArenaOwner{w: w, source: cc.SourceObservation{Identity: "fixture:guildrecord", ContentRevisionID: 1}}
+	h := chatHarness(t, f, channelHarnessOptions{db: w, owners: cc.Owners{Arena: o}})
+	_, a, _ := h.login(100001, dr.Guild, 1000001)
+	_, recipient, _ := h.login(100002, dr.Guild, 1000001)
+	p, e := h.service.PrepareStructured(context.Background(), a, cc.Selector{Kind: cc.ArenaReference, Arena: &cc.RecordSelection{PlayerID: 100001, RecordID: 1}})
+	if e != nil {
+		t.Fatal(e)
+	}
+	f.chatRejoin(100002, 1000001)
+	if e := h.service.AuthorizeStructuredRecipient(context.Background(), recipient, p); e == nil {
+		t.Fatal("oldrecipientJOIN accepted")
+	}
+	f.chatRejoin(100001, 1000001)
+	p, e = h.service.PrepareStructured(context.Background(), a, cc.Selector{Kind: cc.ArenaReference, Arena: &cc.RecordSelection{PlayerID: 100001, RecordID: 1}})
+	if e == nil || p.Message.Arena != nil || o.seen != 1 {
+		t.Fatal("oldsenderJOIN owner invoked", p, e, o.seen)
+	}
+}
