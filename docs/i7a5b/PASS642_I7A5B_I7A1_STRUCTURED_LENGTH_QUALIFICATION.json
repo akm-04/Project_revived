@@ -1,0 +1,35 @@
+{
+  "schema": "gxb-i7a5b-140-qualifier/v1",
+  "status": "PROPOSED_FOR_NORMAL_RESEARCH_DESIGN_SELECTION_NOT_IMPLEMENTED",
+  "supersedes_I7A1_bytes": false,
+  "ordinary_140_preserved": true,
+  "baseline_sources": [
+    {
+      "path": "00_PASSMAP/PASS622_I7A1_DELIVERY_RECOVERY_WIRE_CONTRACT.json",
+      "sha256": "80964805f03f8b6f9d3324283a82248db512db57950a9fc1e2ffe6f00b0729b6"
+    },
+    {
+      "path": "00_PASSMAP/PASS622_I7A1_TIME_CONTENT_POLICY_REGISTER.json",
+      "sha256": "4b4cb9801cb35a9cab4cd11f706abf2c28be6addcc00297eb524e0fbb9face5a"
+    }
+  ],
+  "qualification": "140 Unicodecodepoints continues for ordinarytype0. Nonzero selectedfinite schemas carry JSON with <=8192encodedbytes and per-field/containercaps; no general arbitraryJSON exemption and no truncation. This is scoped reconstruction policy, not recovered serverbound. Applied onlyunderselected5Bschema/ownergate; accepted641 runtime remainsstrict140 forallparserinputs until5Bcode exists. WAR_CAMP common body40preserved andmetadata maypushJSONpast140.",
+  "proof": "00_PASSMAP/PASS642_I7A5B_STRUCTURED_LENGTH_PROBE.json",
+  "consumers": [
+    "I7A-5B",
+    "I7A-6",
+    "I7A-10",
+    "I7A-E",
+    "Future canonical mode/report/share owners"
+  ],
+  "private_scope": "I7A6 private FriendMsgType namespace remainsseparate; no automatic5BJSONqualification toMID513..516",
+  "unknowns": [
+    "Originalserverstructuredpayloadlimit",
+    "HistoricalOTAloadprecedence",
+    "Originalserverpacing"
+  ],
+  "gate": "Boundaryfixtures mustprove140/141type0,validstructuredJSON>140,8192/8193bytes,inner40/41,type/schema mismatch,nestedfieldcaps and nilowners noemit",
+  "pass": "642.0",
+  "selected_status": "SELECTED_RESEARCH_DESIGN_WITH_VALIDATED_NORMAL_SEAL_NOT_IMPLEMENTED",
+  "working_recovery_reference": "CP90 exact COLD checkpoint/source/probe caches"
+}

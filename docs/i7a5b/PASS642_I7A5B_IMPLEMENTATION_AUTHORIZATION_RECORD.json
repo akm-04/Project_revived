@@ -1,0 +1,13 @@
+{
+  "schema": "gxb-stage-authorization/v2",
+  "pass": "642.0",
+  "stage": "I7A-5B",
+  "status": "RESEARCH_DESIGN_COMPLETE_STOP_AT_USER_REQUESTED_SYNC",
+  "source": "Directlatesthuman continuationauthorizes5Bresearch/design/fullsync/actualmemoryrepairs",
+  "implementation_authorized": false,
+  "implementation_started": false,
+  "product_acceptance": false,
+  "stock_activation": false,
+  "new_node_authorized": false,
+  "next_execution": "Subsequentexplicitimplementation continuation onselected642scope; checkpoint/contractdoesnotgrantauthority"
+}

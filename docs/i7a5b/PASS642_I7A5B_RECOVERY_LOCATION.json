@@ -1,0 +1,19 @@
+{
+  "schema": "gxb-recovery-location/v1",
+  "pass": "642.0",
+  "checkpoint": "CP90",
+  "cold_path": "PROVENANCE_ARCHIVE/I7A5B_RESEARCH_PASS642/I7A5B_CP90.zip",
+  "sha256": "d77ce3f42b315d4b5f0f86a9d4435ede5357154261f6993ba392e6ab0a461ac8",
+  "bytes": 598732,
+  "lineage": {
+    "CP87_sha256": "9afa57c1e8f970332227a5f172f49e32f7ee200b2f527ae5d3bb02433ccefd87",
+    "CP88_sha256": "dca404b7585ac8e22681d121f9983a1157ae0708bf376c3236757b35abea7bd3",
+    "CP89_sha256": "ad63a259dd12ee5f19da9d6416527e73dd658b7fe652fc9ec212d3df3b87bcff"
+  },
+  "authority_effect": "NONE; checkpoint deltas reconciled through642 normal research/design seal. No implementation/product acceptance/gate",
+  "required_external_artifacts": [
+    "gxb-backend-v2-v0.92.0-pass641-i7a5a-accepted.zip",
+    "gxb1_all_assets.zip",
+    "gxb-backend-v2-e2e-tools-self-contained-linux-amd64.zip"
+  ]
+}

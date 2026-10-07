@@ -81,7 +81,14 @@ func ParseChannelChat(v any) (ChannelChatRequest, error) {
 	return r, nil
 }
 func NewChannelChatEventRegistry() (EventRegistry, error) {
-	return NewEventRegistry([]DirectRegistration{{MID: mids.MIDChatMessage, Roles: []Role{World, Guild, Service}, Validate: ValidateOrdinaryChannelChat}}, nil)
+	r, e := NewEventRegistry([]DirectRegistration{{MID: mids.MIDChatMessage, Roles: []Role{World, Guild, Service}, Validate: ValidateChannelChat}}, nil)
+	if e != nil {
+		return r, e
+	}
+	schema := r.direct[mids.MIDChatMessage]
+	schema.validateRole = ValidateChannelChatForRole
+	r.direct[mids.MIDChatMessage] = schema
+	return r, nil
 }
 func ValidateOrdinaryChannelChat(v any) error {
 	o, ok := v.(*amf3.Object)

@@ -45,8 +45,9 @@ type NoticeRegistration struct {
 }
 
 type directSchema struct {
-	roles    map[Role]struct{}
-	validate PayloadValidator
+	validateRole func(Role, any) error
+	roles        map[Role]struct{}
+	validate     PayloadValidator
 }
 
 type noticeKey struct {
@@ -135,6 +136,11 @@ func (r EventRegistry) ValidateDirect(mid uint16, role Role, payload any) error 
 	}
 	if err := schema.validate(payload); err != nil {
 		return fmt.Errorf("%w: MID %d: %v", ErrInvalidS2CPayload, mid, err)
+	}
+	if schema.validateRole != nil {
+		if err := schema.validateRole(role, payload); err != nil {
+			return err
+		}
 	}
 	return nil
 }

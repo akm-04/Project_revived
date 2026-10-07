@@ -1,0 +1,39 @@
+{
+  "schema": "gxb-i7a5b-d14-extension/v1",
+  "selected_D14_superseded": false,
+  "extensions": [
+    {
+      "id": "STRUCTURED_SELECTOR_AND_RESULT",
+      "owner": "ChannelChat semantic application",
+      "consumer": "stockruntime adapter + typedcanonicalrecord/share/mode ports",
+      "change": "Separate semantic finitevariant selectors and canonical result structs, no AMF/MID/JSONmap inapplication API. Kind enum is semantic; numericwiretags adapter-owned.",
+      "compatibility": "Reuse641 Prepare/AuthorizeRecipient forordinary; separate PrepareStructured same callerTx observation, no secondDispatcher/writer",
+      "migration": "NONE",
+      "effect": "ReadOnlyRR zero canonicalwrites; no modeSQL inChannelChat"
+    },
+    {
+      "id": "CANONICAL_STRUCTURED_OWNER_READ",
+      "owner": "Later actualrecord/share/mode owner",
+      "consumer": "ChannelChat sender preparation andrecipient eligibility",
+      "change": "Explicit namednarrow callerTx typedreads for record/share/invite/camp. Nil/inactive owner returnsunavailable beforeDBpublication; dynamic genericproviderbus forbidden.",
+      "compatibility": "No newcanonicalowner fabricated; noActivityDirectory registration asproxy authority; bothsender/recipientcamp eligibility serverchecked",
+      "migration": "NONE now; futureowner changes owngate",
+      "effect": "SameTx canonicalchecks/contentrevision; no nestedtx/commit/transport"
+    },
+    {
+      "id": "FINITE_WIRE_VARIANT_VALIDATOR",
+      "owner": "protocol/realtime wireboundary",
+      "consumer": "existing32783 DirectRegistration/typedPublisher",
+      "change": "One descriptorperMID/direction/role; validator discriminates0..8 allowedfinite schemas withoutduplicateMIDregistration; productiongates remainall8inactive",
+      "compatibility": "Existing9senderfields,np_info,AMFexactinteger,ordinary140contract unchanged; noTEAMrole/noACK/no36863emit",
+      "migration": "NONE",
+      "effect": "Projection only; fixtures are notliveproducerproof"
+    }
+  ],
+  "generic_bus_or_repository": false,
+  "activation": "Allmatchingcanonicalprovidersabsent; no runtimeactivation inthisresearch/designseal",
+  "acceptance": "future5B frozen exactcandidate nativecomposition andseparate-methodreality; componentfakeowner onlyfixtureproof",
+  "pass": "642.0",
+  "selected_status": "SELECTED_RESEARCH_DESIGN_WITH_VALIDATED_NORMAL_SEAL_NOT_IMPLEMENTED",
+  "working_recovery_reference": "CP90 exact COLD checkpoint/source/probe caches"
+}

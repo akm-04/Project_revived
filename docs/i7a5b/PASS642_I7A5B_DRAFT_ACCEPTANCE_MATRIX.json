@@ -1,0 +1,264 @@
+{
+  "schema": "gxb-i7a5b-planned-matrix/v1",
+  "stage": "I7A-5B",
+  "rows": [
+    {
+      "id": "B01",
+      "requirement": "Exactbase/backend/tree/head/source/toolsidentity beforecoding/testing",
+      "status": "NOT_RUN",
+      "candidate": null,
+      "evidence_required": "NativePG/TCP/race whereobservable; static/source/component/fixtureonly explicitlyqualified; nophysicalstockclaim"
+    },
+    {
+      "id": "B02",
+      "requirement": "All14D/all8I7A1 plus12I7A4/7I7A5A reviewedhashstable",
+      "status": "NOT_RUN",
+      "candidate": null,
+      "evidence_required": "NativePG/TCP/race whereobservable; static/source/component/fixtureonly explicitlyqualified; nophysicalstockclaim"
+    },
+    {
+      "id": "B03",
+      "requirement": "Ordinary140UTF8 bound and canonical9field sender regression",
+      "status": "NOT_RUN",
+      "candidate": null,
+      "evidence_required": "NativePG/TCP/race whereobservable; static/source/component/fixtureonly explicitlyqualified; nophysicalstockclaim"
+    },
+    {
+      "id": "B04",
+      "requirement": "All9schema fixtures andvariantdiscriminator/channelconstraints",
+      "status": "NOT_RUN",
+      "candidate": null,
+      "evidence_required": "NativePG/TCP/race whereobservable; static/source/component/fixtureonly explicitlyqualified; nophysicalstockclaim"
+    },
+    {
+      "id": "B05",
+      "requirement": "Duplicatekeys/unknownfields/trailing/null/boolnumeric/unsafe/nonfinite input rejection",
+      "status": "NOT_RUN",
+      "candidate": null,
+      "evidence_required": "NativePG/TCP/race whereobservable; static/source/component/fixtureonly explicitlyqualified; nophysicalstockclaim"
+    },
+    {
+      "id": "B06",
+      "requirement": "8192/8193encodedbytes anddepth/key/value/arraybudgets",
+      "status": "NOT_RUN",
+      "candidate": null,
+      "evidence_required": "NativePG/TCP/race whereobservable; static/source/component/fixtureonly explicitlyqualified; nophysicalstockclaim"
+    },
+    {
+      "id": "B07",
+      "requirement": "Structured>140characters narrowqualification; noarbitraryJSONexception",
+      "status": "NOT_RUN",
+      "candidate": null,
+      "evidence_required": "NativePG/TCP/race whereobservable; static/source/component/fixtureonly explicitlyqualified; nophysicalstockclaim"
+    },
+    {
+      "id": "B08",
+      "requirement": "WAR_CAMP COMMON40/41 andemoticoncontentIDtypecheck",
+      "status": "NOT_RUN",
+      "candidate": null,
+      "evidence_required": "NativePG/TCP/race whereobservable; static/source/component/fixtureonly explicitlyqualified; nophysicalstockclaim"
+    },
+    {
+      "id": "B09",
+      "requirement": "REPORT variants rejectambiguousid+record_id/foreignnamespace",
+      "status": "NOT_RUN",
+      "candidate": null,
+      "evidence_required": "NativePG/TCP/race whereobservable; static/source/component/fixtureonly explicitlyqualified; nophysicalstockclaim"
+    },
+    {
+      "id": "B10",
+      "requirement": "Peakprofile7fields andboolnormalization; Lua false/0 truthiness fixture",
+      "status": "NOT_RUN",
+      "candidate": null,
+      "evidence_required": "NativePG/TCP/race whereobservable; static/source/component/fixtureonly explicitlyqualified; nophysicalstockclaim"
+    },
+    {
+      "id": "B11",
+      "requirement": "Scratch3arrays shape/budget/contentownerqualification",
+      "status": "NOT_RUN",
+      "candidate": null,
+      "evidence_required": "NativePG/TCP/race whereobservable; static/source/component/fixtureonly explicitlyqualified; nophysicalstockclaim"
+    },
+    {
+      "id": "B12",
+      "requirement": "No clientname/privilegedsender/cosmeticentitlement spoof",
+      "status": "NOT_RUN",
+      "candidate": null,
+      "evidence_required": "NativePG/TCP/race whereobservable; static/source/component/fixtureonly explicitlyqualified; nophysicalstockclaim"
+    },
+    {
+      "id": "B13",
+      "requirement": "ExactingressSessionHandle replacementrace fences oldbufferedrequest",
+      "status": "NOT_RUN",
+      "candidate": null,
+      "evidence_required": "NativePG/TCP/race whereobservable; static/source/component/fixtureonly explicitlyqualified; nophysicalstockclaim"
+    },
+    {
+      "id": "B14",
+      "requirement": "No latest-handle substitution; physicalrole/channel/region agreement",
+      "status": "NOT_RUN",
+      "candidate": null,
+      "evidence_required": "NativePG/TCP/race whereobservable; static/source/component/fixtureonly explicitlyqualified; nophysicalstockclaim"
+    },
+    {
+      "id": "B15",
+      "requirement": "Guildsender leave/rejoin sameGuild exactJOIN rejection",
+      "status": "NOT_RUN",
+      "candidate": null,
+      "evidence_required": "NativePG/TCP/race whereobservable; static/source/component/fixtureonly explicitlyqualified; nophysicalstockclaim"
+    },
+    {
+      "id": "B16",
+      "requirement": "Guildrecipientleave/rejoin/retiredroom freshownercheck",
+      "status": "NOT_RUN",
+      "candidate": null,
+      "evidence_required": "NativePG/TCP/race whereobservable; static/source/component/fixtureonly explicitlyqualified; nophysicalstockclaim"
+    },
+    {
+      "id": "B17",
+      "requirement": "Nilall8providers unavailablewithnoDBownerwrite orsocketemit",
+      "status": "NOT_RUN",
+      "candidate": null,
+      "evidence_required": "NativePG/TCP/race whereobservable; static/source/component/fixtureonly explicitlyqualified; nophysicalstockclaim"
+    },
+    {
+      "id": "B18",
+      "requirement": "Unselected/fakeprovider cannotactivateproductiondescriptor",
+      "status": "NOT_RUN",
+      "candidate": null,
+      "evidence_required": "NativePG/TCP/race whereobservable; static/source/component/fixtureonly explicitlyqualified; nophysicalstockclaim"
+    },
+    {
+      "id": "B19",
+      "requirement": "Explicit typedownerreadsamecallerTx/no foreignSQL/nestedTx",
+      "status": "NOT_RUN",
+      "candidate": null,
+      "evidence_required": "NativePG/TCP/race whereobservable; static/source/component/fixtureonly explicitlyqualified; nophysicalstockclaim"
+    },
+    {
+      "id": "B20",
+      "requirement": "Definitecommitonlypublication; ambiguousreadcommit noemit",
+      "status": "NOT_RUN",
+      "candidate": null,
+      "evidence_required": "NativePG/TCP/race whereobservable; static/source/component/fixtureonly explicitlyqualified; nophysicalstockclaim"
+    },
+    {
+      "id": "B21",
+      "requirement": "Senderreference missing/stale/unauthorized content revision failclosed",
+      "status": "NOT_RUN",
+      "candidate": null,
+      "evidence_required": "NativePG/TCP/race whereobservable; static/source/component/fixtureonly explicitlyqualified; nophysicalstockclaim"
+    },
+    {
+      "id": "B22",
+      "requirement": "Fixtureprovider canonical rebuild ignoresforged innernames/roomfields",
+      "status": "NOT_RUN",
+      "candidate": null,
+      "evidence_required": "NativePG/TCP/race whereobservable; static/source/component/fixtureonly explicitlyqualified; nophysicalstockclaim"
+    },
+    {
+      "id": "B23",
+      "requirement": "WAR_CAMP sender+recipientcanonical audience/camp filter fixture",
+      "status": "NOT_RUN",
+      "candidate": null,
+      "evidence_required": "NativePG/TCP/race whereobservable; static/source/component/fixtureonly explicitlyqualified; nophysicalstockclaim"
+    },
+    {
+      "id": "B24",
+      "requirement": "WAR_CAMP no allSERVICEbroadcast-to-clientfilter",
+      "status": "NOT_RUN",
+      "candidate": null,
+      "evidence_required": "NativePG/TCP/race whereobservable; static/source/component/fixtureonly explicitlyqualified; nophysicalstockclaim"
+    },
+    {
+      "id": "B25",
+      "requirement": "SERVICE->TEAM types3/4/5/6/8 roleSERVICE4 only",
+      "status": "NOT_RUN",
+      "candidate": null,
+      "evidence_required": "NativePG/TCP/race whereobservable; static/source/component/fixtureonly explicitlyqualified; nophysicalstockclaim"
+    },
+    {
+      "id": "B26",
+      "requirement": "Unknown36863 producer neverregistered/emitted; noMID588 substitution",
+      "status": "NOT_RUN",
+      "candidate": null,
+      "evidence_required": "NativePG/TCP/race whereobservable; static/source/component/fixtureonly explicitlyqualified; nophysicalstockclaim"
+    },
+    {
+      "id": "B27",
+      "requirement": "Reuseboundglobal/localfanout+deadlines+singlewriter; noACK/retry",
+      "status": "NOT_RUN",
+      "candidate": null,
+      "evidence_required": "NativePG/TCP/race whereobservable; static/source/component/fixtureonly explicitlyqualified; nophysicalstockclaim"
+    },
+    {
+      "id": "B28",
+      "requirement": "RealTCP slow/fullwriter/nativefault uncertainty qualified",
+      "status": "NOT_RUN",
+      "candidate": null,
+      "evidence_required": "NativePG/TCP/race whereobservable; static/source/component/fixtureonly explicitlyqualified; nophysicalstockclaim"
+    },
+    {
+      "id": "B29",
+      "requirement": "ChatdoesnotrenewPresence; heartbeat/SocialLISTEN regressions",
+      "status": "NOT_RUN",
+      "candidate": null,
+      "evidence_required": "NativePG/TCP/race whereobservable; static/source/component/fixtureonly explicitlyqualified; nophysicalstockclaim"
+    },
+    {
+      "id": "B30",
+      "requirement": "Productiongxb-api HTTP32782reject +singleRealtimeowner",
+      "status": "NOT_RUN",
+      "candidate": null,
+      "evidence_required": "NativePG/TCP/race whereobservable; static/source/component/fixtureonly explicitlyqualified; nophysicalstockclaim"
+    },
+    {
+      "id": "B31",
+      "requirement": "FreshPGmigrations1..33 andidempotent/no newschema",
+      "status": "NOT_RUN",
+      "candidate": null,
+      "evidence_required": "NativePG/TCP/race whereobservable; static/source/component/fixtureonly explicitlyqualified; nophysicalstockclaim"
+    },
+    {
+      "id": "B32",
+      "requirement": "Realprocessrestart nohistory/replay; no fabricatedliveTEAM",
+      "status": "NOT_RUN",
+      "candidate": null,
+      "evidence_required": "NativePG/TCP/race whereobservable; static/source/component/fixtureonly explicitlyqualified; nophysicalstockclaim"
+    },
+    {
+      "id": "B33",
+      "requirement": "Nativefrozenexactcandidate retestfull5A+5B focusedrace/source/static",
+      "status": "NOT_RUN",
+      "candidate": null,
+      "evidence_required": "NativePG/TCP/race whereobservable; static/source/component/fixtureonly explicitlyqualified; nophysicalstockclaim"
+    },
+    {
+      "id": "B34",
+      "requirement": "Separate-methodpostimplementationreality andscopeclassification",
+      "status": "NOT_RUN",
+      "candidate": null,
+      "evidence_required": "NativePG/TCP/race whereobservable; static/source/component/fixtureonly explicitlyqualified; nophysicalstockclaim"
+    },
+    {
+      "id": "B35",
+      "requirement": "Parent5 explicitqualifiedcomposition notautomaticwholephase/W2",
+      "status": "NOT_RUN",
+      "candidate": null,
+      "evidence_required": "NativePG/TCP/race whereobservable; static/source/component/fixtureonly explicitlyqualified; nophysicalstockclaim"
+    },
+    {
+      "id": "B36",
+      "requirement": "NormalHOT/COLDseal foundationharvest/registry/routing/recovery/negativeguards",
+      "status": "NOT_RUN",
+      "candidate": null,
+      "evidence_required": "NativePG/TCP/race whereobservable; static/source/component/fixtureonly explicitlyqualified; nophysicalstockclaim"
+    }
+  ],
+  "product_gate": "NOT_RUN",
+  "provider_live_gate": "NOT_ELIGIBLE_ALL8OWNERS_ABSENT",
+  "parent_accepted": false,
+  "pass": "642.0",
+  "selected_status": "SELECTED_RESEARCH_DESIGN_WITH_VALIDATED_NORMAL_SEAL_NOT_IMPLEMENTED",
+  "working_recovery_reference": "CP90 exact COLD checkpoint/source/probe caches"
+}

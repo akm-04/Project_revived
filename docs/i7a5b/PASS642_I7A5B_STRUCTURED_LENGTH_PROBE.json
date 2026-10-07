@@ -1,0 +1,94 @@
+{
+  "schema": "gxb-structured-length-probe/v1",
+  "status": "PASS_LENGTH_ARITHMETIC_AND_SOURCE_FIELD_COMPARISON",
+  "fixtures": [
+    {
+      "schema_id": "REPORT_ARENA_REFERENCE_V1",
+      "message": "{\"player_id\":1,\"player_name\":\"甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲\",\"enemy_name\":\"甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲\",\"time\":1,\"is_attack\":0,\"id\":1}",
+      "unicode_codepoints": 138,
+      "encoded_utf8_bytes": 258,
+      "above140": false,
+      "below8192": true,
+      "class": "SOURCE_SHAPED_HYPOTHETICAL_VALUES_LENGTH_RESEARCH_ONLY_NOT_STOCK_CAPTURE"
+    },
+    {
+      "schema_id": "REPORT_PEAK_REFERENCE_V1",
+      "message": "{\"player_id\":1,\"player_name\":\"甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲\",\"enemy_name\":\"甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲\",\"time\":1,\"isAttack\":false,\"record_id\":1,\"isWin\":false,\"attackInfo\":{\"player_id\":1,\"player_name\":\"甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲\",\"lev\":1,\"avatar_id\":1,\"avatar_frame_id\":1,\"conquer_lev\":1,\"conquer_loop_id\":1},\"defendInfo\":{\"player_id\":1,\"player_name\":\"甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲\",\"lev\":1,\"avatar_id\":1,\"avatar_frame_id\":1,\"conquer_lev\":1,\"conquer_loop_id\":1}}",
+      "unicode_codepoints": 470,
+      "encoded_utf8_bytes": 710,
+      "above140": true,
+      "below8192": true,
+      "class": "SOURCE_SHAPED_HYPOTHETICAL_VALUES_LENGTH_RESEARCH_ONLY_NOT_STOCK_CAPTURE"
+    },
+    {
+      "schema_id": "LUCKY_SCRATCH_REFERENCE_V1",
+      "message": "{\"player_id\":1,\"player_name\":\"甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲\",\"share_gua\":1,\"rand_card_group\":[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],\"card_group\":[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],\"scratch_status\":[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]}",
+      "unicode_codepoints": 226,
+      "encoded_utf8_bytes": 286,
+      "above140": true,
+      "below8192": true,
+      "class": "SOURCE_SHAPED_HYPOTHETICAL_VALUES_LENGTH_RESEARCH_ONLY_NOT_STOCK_CAPTURE"
+    },
+    {
+      "schema_id": "ILLUSION_INVITE_V1",
+      "message": "{\"room_id\":1,\"type\":3,\"boss_name\":\"甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲\",\"room_lev\":1}",
+      "unicode_codepoints": 80,
+      "encoded_utf8_bytes": 140,
+      "above140": false,
+      "below8192": true,
+      "class": "SOURCE_SHAPED_HYPOTHETICAL_VALUES_LENGTH_RESEARCH_ONLY_NOT_STOCK_CAPTURE"
+    },
+    {
+      "schema_id": "OCCULT_INVITE_V1",
+      "message": "{\"room_id\":1,\"type\":4,\"chapter_id\":1,\"force\":1}",
+      "unicode_codepoints": 47,
+      "encoded_utf8_bytes": 47,
+      "above140": false,
+      "below8192": true,
+      "class": "SOURCE_SHAPED_HYPOTHETICAL_VALUES_LENGTH_RESEARCH_ONLY_NOT_STOCK_CAPTURE"
+    },
+    {
+      "schema_id": "ADVENTURE_ILLUSION_INVITE_V1",
+      "message": "{\"room_id\":1,\"type\":5,\"boss_name\":\"甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲\",\"room_lev\":1}",
+      "unicode_codepoints": 80,
+      "encoded_utf8_bytes": 140,
+      "above140": false,
+      "below8192": true,
+      "class": "SOURCE_SHAPED_HYPOTHETICAL_VALUES_LENGTH_RESEARCH_ONLY_NOT_STOCK_CAPTURE"
+    },
+    {
+      "schema_id": "ADVENTURE_DEFENSE_INVITE_V1",
+      "message": "{\"room_id\":1,\"type\":6,\"room_lev\":1}",
+      "unicode_codepoints": 35,
+      "encoded_utf8_bytes": 35,
+      "above140": false,
+      "below8192": true,
+      "class": "SOURCE_SHAPED_HYPOTHETICAL_VALUES_LENGTH_RESEARCH_ONLY_NOT_STOCK_CAPTURE"
+    },
+    {
+      "schema_id": "WAR_CAMP_BODY_V1",
+      "message": "{\"type\":7,\"message\":\"甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲\",\"msgType\":0,\"selectType\":5,\"roomID\":0,\"camp\":1}",
+      "unicode_codepoints": 110,
+      "encoded_utf8_bytes": 190,
+      "above140": false,
+      "below8192": true,
+      "class": "SOURCE_SHAPED_HYPOTHETICAL_VALUES_LENGTH_RESEARCH_ONLY_NOT_STOCK_CAPTURE"
+    },
+    {
+      "schema_id": "RAGNAROK_INVITE_V1",
+      "message": "{\"room_id\":1,\"type\":8,\"boss_name\":\"甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲\",\"room_lev\":1}",
+      "unicode_codepoints": 80,
+      "encoded_utf8_bytes": 140,
+      "above140": false,
+      "below8192": true,
+      "class": "SOURCE_SHAPED_HYPOTHETICAL_VALUES_LENGTH_RESEARCH_ONLY_NOT_STOCK_CAPTURE"
+    }
+  ],
+  "ordinary140_runes": "unchanged accepted641 behavior; no5B runtime executed",
+  "utf8_bytes_vs_codepoints": "JSON bytebound differs from humaninput Unicodecodepoints",
+  "currentcontent140": "data/tables/misc.lua rows chat_limit_words140; source cache and binding exact",
+  "limitations": "Hypothetical source-shaped values, staticsource review and lengtharithmetic only; no Lua runtime/originalserver/productionprovideractivation/native5Bgate proof",
+  "pass": "642.0",
+  "selected_status": "SELECTED_RESEARCH_DESIGN_WITH_VALIDATED_NORMAL_SEAL_NOT_IMPLEMENTED",
+  "working_recovery_reference": "CP90 exact COLD checkpoint/source/probe caches"
+}

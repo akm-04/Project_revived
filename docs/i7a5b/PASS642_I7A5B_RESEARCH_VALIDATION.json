@@ -1,0 +1,21 @@
+{
+  "status": "PASS_RESEARCH_DESIGN_CONSISTENCY",
+  "exact_source_backend_historical_V1_members": 59,
+  "immutable_foundation_references": 27,
+  "D_contracts": 14,
+  "I7A1_members": 8,
+  "I7A4_inherited": 12,
+  "I7A5A_inherited": 7,
+  "schema_variants": 9,
+  "nonzero_types": 8,
+  "research_findings": 20,
+  "design_review_rows": 32,
+  "planned_product_rows_NOT_RUN": 36,
+  "fixture_length_only_above140": 2,
+  "product_changed": false,
+  "implementation_started": false,
+  "live_producer_activation_ready": false,
+  "pass": "642.0",
+  "selected_status": "SELECTED_RESEARCH_DESIGN_WITH_VALIDATED_NORMAL_SEAL_NOT_IMPLEMENTED",
+  "working_recovery_reference": "CP90 exact COLD checkpoint/source/probe caches"
+}

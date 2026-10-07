@@ -695,7 +695,7 @@ func TestChatA22StructuredTypesGatedMalformedUnknownClose(t *testing.T) {
 	h := chatHarness(t, f, channelHarnessOptions{})
 	c, _, _ := h.login(100001, dr.Service, 99999)
 	for n := 1; n <= 8; n++ {
-		sendChat(t, c, "structuredplaceholder", 4, amf3.Property{Name: "type", Value: float64(n)})
+		sendChat(t, c, structuredNativeFixtures()[n-1].message, 4, amf3.Property{Name: "type", Value: float64(n)})
 		if !h.report().ProviderGated {
 			t.Fatal(n)
 		}

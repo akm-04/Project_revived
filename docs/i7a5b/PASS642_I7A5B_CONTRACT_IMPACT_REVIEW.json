@@ -1,0 +1,225 @@
+{
+  "schema": "gxb-i7a5a-contract-impact/v1",
+  "stage": "I7A-5B",
+  "parent": "I7A-5",
+  "status": "RESEARCH_DESIGN_RECONCILIATION_NOT_IMPLEMENTED",
+  "baseline": {
+    "passmap_pass": "639.0",
+    "passmap_sha256": "bba6823a34ba41c445c017f0347e8488eb2b54cc548a9a5797c890f74e3a9bbf",
+    "backend_archive": "gxb-backend-v2-v0.91.0-pass638-i7a4d-accepted.zip",
+    "backend_sha256": "2fdbdfb9f4a97f5acf2a9e3fcf4efd42fd964edf59e91c7d6b88ecc97f4e57a1",
+    "backend_tree_sha256": "58aa9e6c2f4db113b690d15b1b68b6ba1dbb744883715ca26d0c126b27b662bc",
+    "src64_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+    "checkpoint_parent": {
+      "filename": "gxb1-checkpoint-80-i7a5a-research.zip",
+      "sha256": "82d6875e62da561a387121e38380b6c6ba38821545222d0b940c885d8cef838a"
+    }
+  },
+  "i7a4_obligations": [
+    {
+      "id": "I7A4-OWNERS_TX_LOCK",
+      "disposition": "PRESERVED",
+      "rationale": "5B read-only typedprojection/inactiveprovidergates preserveacceptedI7A4owner/evidence/identity/time/aggregate boundary. Existing source/evidence remains unchanged; no newsemanticwrite/workeractivation.",
+      "evidence": [
+        "00_PASSMAP/PASS639_I7A4_SUCCESSOR_CONTRACT.json",
+        "00_PASSMAP/PASS642_I7A5B_FOUNDATION_TRACEABILITY.json",
+        "00_PASSMAP/PASS642_I7A5B_D14_EXTENSION_RECORD.json"
+      ]
+    },
+    {
+      "id": "I7A4-GENERATION_D11",
+      "disposition": "PRESERVED",
+      "rationale": "5B read-only typedprojection/inactiveprovidergates preserveacceptedI7A4owner/evidence/identity/time/aggregate boundary. Existing source/evidence remains unchanged; no newsemanticwrite/workeractivation.",
+      "evidence": [
+        "00_PASSMAP/PASS639_I7A4_SUCCESSOR_CONTRACT.json",
+        "00_PASSMAP/PASS642_I7A5B_FOUNDATION_TRACEABILITY.json",
+        "00_PASSMAP/PASS642_I7A5B_D14_EXTENSION_RECORD.json"
+      ]
+    },
+    {
+      "id": "I7A4-TIME_QUOTA",
+      "disposition": "PRESERVED",
+      "rationale": "5B read-only typedprojection/inactiveprovidergates preserveacceptedI7A4owner/evidence/identity/time/aggregate boundary. Existing source/evidence remains unchanged; no newsemanticwrite/workeractivation.",
+      "evidence": [
+        "00_PASSMAP/PASS639_I7A4_SUCCESSOR_CONTRACT.json",
+        "00_PASSMAP/PASS642_I7A5B_FOUNDATION_TRACEABILITY.json",
+        "00_PASSMAP/PASS642_I7A5B_D14_EXTENSION_RECORD.json"
+      ]
+    },
+    {
+      "id": "I7A4-NOTICE_ID_SOURCE",
+      "disposition": "PRESERVED",
+      "rationale": "5B read-only typedprojection/inactiveprovidergates preserveacceptedI7A4owner/evidence/identity/time/aggregate boundary. Existing source/evidence remains unchanged; no newsemanticwrite/workeractivation.",
+      "evidence": [
+        "00_PASSMAP/PASS639_I7A4_SUCCESSOR_CONTRACT.json",
+        "00_PASSMAP/PASS642_I7A5B_FOUNDATION_TRACEABILITY.json",
+        "00_PASSMAP/PASS642_I7A5B_D14_EXTENSION_RECORD.json"
+      ]
+    },
+    {
+      "id": "I7A4-NULL_AND_WINDOW",
+      "disposition": "PRESERVED",
+      "rationale": "5B read-only typedprojection/inactiveprovidergates preserveacceptedI7A4owner/evidence/identity/time/aggregate boundary. Existing source/evidence remains unchanged; no newsemanticwrite/workeractivation.",
+      "evidence": [
+        "00_PASSMAP/PASS639_I7A4_SUCCESSOR_CONTRACT.json",
+        "00_PASSMAP/PASS642_I7A5B_FOUNDATION_TRACEABILITY.json",
+        "00_PASSMAP/PASS642_I7A5B_D14_EXTENSION_RECORD.json"
+      ]
+    },
+    {
+      "id": "I7A4-READ_SNAPSHOT",
+      "disposition": "PRESERVED",
+      "rationale": "5B read-only typedprojection/inactiveprovidergates preserveacceptedI7A4owner/evidence/identity/time/aggregate boundary. Existing source/evidence remains unchanged; no newsemanticwrite/workeractivation.",
+      "evidence": [
+        "00_PASSMAP/PASS639_I7A4_SUCCESSOR_CONTRACT.json",
+        "00_PASSMAP/PASS642_I7A5B_FOUNDATION_TRACEABILITY.json",
+        "00_PASSMAP/PASS642_I7A5B_D14_EXTENSION_RECORD.json"
+      ]
+    },
+    {
+      "id": "I7A4-DISCOVERY_ANCHOR",
+      "disposition": "PRESERVED",
+      "rationale": "5B read-only typedprojection/inactiveprovidergates preserveacceptedI7A4owner/evidence/identity/time/aggregate boundary. Existing source/evidence remains unchanged; no newsemanticwrite/workeractivation.",
+      "evidence": [
+        "00_PASSMAP/PASS639_I7A4_SUCCESSOR_CONTRACT.json",
+        "00_PASSMAP/PASS642_I7A5B_FOUNDATION_TRACEABILITY.json",
+        "00_PASSMAP/PASS642_I7A5B_D14_EXTENSION_RECORD.json"
+      ]
+    },
+    {
+      "id": "I7A4-AUTH_BOOT_ACTIVATION",
+      "disposition": "PRESERVED",
+      "rationale": "5B read-only typedprojection/inactiveprovidergates preserveacceptedI7A4owner/evidence/identity/time/aggregate boundary. Existing source/evidence remains unchanged; no newsemanticwrite/workeractivation.",
+      "evidence": [
+        "00_PASSMAP/PASS639_I7A4_SUCCESSOR_CONTRACT.json",
+        "00_PASSMAP/PASS642_I7A5B_FOUNDATION_TRACEABILITY.json",
+        "00_PASSMAP/PASS642_I7A5B_D14_EXTENSION_RECORD.json"
+      ]
+    },
+    {
+      "id": "I7A4-WIRE_GUARDS",
+      "disposition": "PRESERVED",
+      "rationale": "5B read-only typedprojection/inactiveprovidergates preserveacceptedI7A4owner/evidence/identity/time/aggregate boundary. Existing source/evidence remains unchanged; no newsemanticwrite/workeractivation.",
+      "evidence": [
+        "00_PASSMAP/PASS639_I7A4_SUCCESSOR_CONTRACT.json",
+        "00_PASSMAP/PASS642_I7A5B_FOUNDATION_TRACEABILITY.json",
+        "00_PASSMAP/PASS642_I7A5B_D14_EXTENSION_RECORD.json"
+      ]
+    },
+    {
+      "id": "I7A4-CANONICAL_HINT_WORLD",
+      "disposition": "PRESERVED",
+      "rationale": "5B read-only typedprojection/inactiveprovidergates preserveacceptedI7A4owner/evidence/identity/time/aggregate boundary. Existing source/evidence remains unchanged; no newsemanticwrite/workeractivation.",
+      "evidence": [
+        "00_PASSMAP/PASS639_I7A4_SUCCESSOR_CONTRACT.json",
+        "00_PASSMAP/PASS642_I7A5B_FOUNDATION_TRACEABILITY.json",
+        "00_PASSMAP/PASS642_I7A5B_D14_EXTENSION_RECORD.json"
+      ]
+    },
+    {
+      "id": "I7A4-POSTCOMMIT_RECOVERY",
+      "disposition": "PRESERVED",
+      "rationale": "5B read-only typedprojection/inactiveprovidergates preserveacceptedI7A4owner/evidence/identity/time/aggregate boundary. Existing source/evidence remains unchanged; no newsemanticwrite/workeractivation.",
+      "evidence": [
+        "00_PASSMAP/PASS639_I7A4_SUCCESSOR_CONTRACT.json",
+        "00_PASSMAP/PASS642_I7A5B_FOUNDATION_TRACEABILITY.json",
+        "00_PASSMAP/PASS642_I7A5B_D14_EXTENSION_RECORD.json"
+      ]
+    },
+    {
+      "id": "I7A4-FUTURE_PROVIDER_EXTENSION",
+      "disposition": "PRESERVED",
+      "rationale": "5B read-only typedprojection/inactiveprovidergates preserveacceptedI7A4owner/evidence/identity/time/aggregate boundary. Existing source/evidence remains unchanged; no newsemanticwrite/workeractivation.",
+      "evidence": [
+        "00_PASSMAP/PASS639_I7A4_SUCCESSOR_CONTRACT.json",
+        "00_PASSMAP/PASS642_I7A5B_FOUNDATION_TRACEABILITY.json",
+        "00_PASSMAP/PASS642_I7A5B_D14_EXTENSION_RECORD.json"
+      ]
+    }
+  ],
+  "D01_D14_review": "00_PASSMAP/PASS642_I7A5B_FOUNDATION_TRACEABILITY.json",
+  "new_inheritance": [],
+  "amended_foundational_contracts": [
+    {
+      "path": "00_PASSMAP/PASS642_I7A5B_I7A1_STRUCTURED_LENGTH_QUALIFICATION.json",
+      "scope": "Additive finiteJSONexception tochat140; originalall8I7A1bytes retained"
+    }
+  ],
+  "pass": "642.0",
+  "selected_status": "SELECTED_RESEARCH_DESIGN_WITH_VALIDATED_NORMAL_SEAL_NOT_IMPLEMENTED",
+  "candidate_sha256": "e0ff7628b1c226256b0138ddba011cbdbc5f7485f26a680931877e8444e9e456",
+  "accepted_backend_unchanged": true,
+  "i7a5a_obligations": [
+    {
+      "id": "I7A5A-EXACT_HANDLE_ROLE",
+      "disposition": "PRESERVED",
+      "rationale": "Exacthandle/GuildJOIN/canonicalsameTx/finitefanout/ephemeraloutcome/provideravailability applyto5Bunchanged. Ordinary140 preserved; finiteJSONqualifier isexplicitanddoesnotreactivateanowner.",
+      "evidence": [
+        "00_PASSMAP/PASS641_I7A5A_SUCCESSOR_CONTRACT.json",
+        "00_PASSMAP/PASS642_I7A5B_IMPLEMENTATION_CONTRACT.json",
+        "00_PASSMAP/PASS642_I7A5B_I7A1_STRUCTURED_LENGTH_QUALIFICATION.json"
+      ]
+    },
+    {
+      "id": "I7A5A-GUILD_JOIN_INCARNATION",
+      "disposition": "PRESERVED",
+      "rationale": "Exacthandle/GuildJOIN/canonicalsameTx/finitefanout/ephemeraloutcome/provideravailability applyto5Bunchanged. Ordinary140 preserved; finiteJSONqualifier isexplicitanddoesnotreactivateanowner.",
+      "evidence": [
+        "00_PASSMAP/PASS641_I7A5A_SUCCESSOR_CONTRACT.json",
+        "00_PASSMAP/PASS642_I7A5B_IMPLEMENTATION_CONTRACT.json",
+        "00_PASSMAP/PASS642_I7A5B_I7A1_STRUCTURED_LENGTH_QUALIFICATION.json"
+      ]
+    },
+    {
+      "id": "I7A5A-CANONICAL_SENDER_WIRE",
+      "disposition": "PRESERVED",
+      "rationale": "Exacthandle/GuildJOIN/canonicalsameTx/finitefanout/ephemeraloutcome/provideravailability applyto5Bunchanged. Ordinary140 preserved; finiteJSONqualifier isexplicitanddoesnotreactivateanowner.",
+      "evidence": [
+        "00_PASSMAP/PASS641_I7A5A_SUCCESSOR_CONTRACT.json",
+        "00_PASSMAP/PASS642_I7A5B_IMPLEMENTATION_CONTRACT.json",
+        "00_PASSMAP/PASS642_I7A5B_I7A1_STRUCTURED_LENGTH_QUALIFICATION.json"
+      ]
+    },
+    {
+      "id": "I7A5A-CALLER_TX_OBSERVATION",
+      "disposition": "PRESERVED",
+      "rationale": "Exacthandle/GuildJOIN/canonicalsameTx/finitefanout/ephemeraloutcome/provideravailability applyto5Bunchanged. Ordinary140 preserved; finiteJSONqualifier isexplicitanddoesnotreactivateanowner.",
+      "evidence": [
+        "00_PASSMAP/PASS641_I7A5A_SUCCESSOR_CONTRACT.json",
+        "00_PASSMAP/PASS642_I7A5B_IMPLEMENTATION_CONTRACT.json",
+        "00_PASSMAP/PASS642_I7A5B_I7A1_STRUCTURED_LENGTH_QUALIFICATION.json"
+      ]
+    },
+    {
+      "id": "I7A5A-BOUNDED_FANOUT_OUTCOME",
+      "disposition": "PRESERVED",
+      "rationale": "Exacthandle/GuildJOIN/canonicalsameTx/finitefanout/ephemeraloutcome/provideravailability applyto5Bunchanged. Ordinary140 preserved; finiteJSONqualifier isexplicitanddoesnotreactivateanowner.",
+      "evidence": [
+        "00_PASSMAP/PASS641_I7A5A_SUCCESSOR_CONTRACT.json",
+        "00_PASSMAP/PASS642_I7A5B_IMPLEMENTATION_CONTRACT.json",
+        "00_PASSMAP/PASS642_I7A5B_I7A1_STRUCTURED_LENGTH_QUALIFICATION.json"
+      ]
+    },
+    {
+      "id": "I7A5A-EPHEMERAL_NO_REPLAY",
+      "disposition": "PRESERVED",
+      "rationale": "Exacthandle/GuildJOIN/canonicalsameTx/finitefanout/ephemeraloutcome/provideravailability applyto5Bunchanged. Ordinary140 preserved; finiteJSONqualifier isexplicitanddoesnotreactivateanowner.",
+      "evidence": [
+        "00_PASSMAP/PASS641_I7A5A_SUCCESSOR_CONTRACT.json",
+        "00_PASSMAP/PASS642_I7A5B_IMPLEMENTATION_CONTRACT.json",
+        "00_PASSMAP/PASS642_I7A5B_I7A1_STRUCTURED_LENGTH_QUALIFICATION.json"
+      ]
+    },
+    {
+      "id": "I7A5A-FUTURE_PRODUCER_GATE",
+      "disposition": "PRESERVED",
+      "rationale": "Exacthandle/GuildJOIN/canonicalsameTx/finitefanout/ephemeraloutcome/provideravailability applyto5Bunchanged. Ordinary140 preserved; finiteJSONqualifier isexplicitanddoesnotreactivateanowner.",
+      "evidence": [
+        "00_PASSMAP/PASS641_I7A5A_SUCCESSOR_CONTRACT.json",
+        "00_PASSMAP/PASS642_I7A5B_IMPLEMENTATION_CONTRACT.json",
+        "00_PASSMAP/PASS642_I7A5B_I7A1_STRUCTURED_LENGTH_QUALIFICATION.json"
+      ]
+    }
+  ],
+  "working_recovery_reference": "CP90 exact COLD checkpoint/source/probe caches"
+}

@@ -1,0 +1,206 @@
+{
+  "schema": "gxb-preimplementation-review/v1",
+  "stage": "I7A-5B",
+  "status": "PASS_SCOPED_INACTIVE_BOUNDARY_DESIGN_32_ROWS",
+  "method": "Same primaryagent separate source/code/contract review; no externalreviewer/productnativeproof",
+  "rows": [
+    {
+      "id": "BR01",
+      "requirement": "Exactsealedbase/externalidentities",
+      "result": "PASS_DESIGN_REVIEW",
+      "evidence": "BASE_IDENTITIES.json"
+    },
+    {
+      "id": "BR02",
+      "requirement": "9schemas8types channels",
+      "result": "PASS_DESIGN_REVIEW",
+      "evidence": "00_PASSMAP/PASS642_I7A5B_STRUCTURED_SCHEMA_CONTRACT.json"
+    },
+    {
+      "id": "BR03",
+      "requirement": "Peak7profilekeys",
+      "result": "PASS_DESIGN_REVIEW",
+      "evidence": "00_PASSMAP/PASS642_I7A5B_STRUCTURED_SCHEMA_CONTRACT.json"
+    },
+    {
+      "id": "BR04",
+      "requirement": "WAR_CAMP exactcamelcase/inner40/recipientauthority",
+      "result": "PASS_DESIGN_REVIEW",
+      "evidence": "00_PASSMAP/PASS642_I7A5B_STRUCTURED_SCHEMA_CONTRACT.json"
+    },
+    {
+      "id": "BR05",
+      "requirement": "140ordinarypreserved/additivequalification",
+      "result": "PASS_DESIGN_REVIEW",
+      "evidence": "00_PASSMAP/PASS642_I7A5B_I7A1_STRUCTURED_LENGTH_QUALIFICATION.json"
+    },
+    {
+      "id": "BR06",
+      "requirement": "Finite8KiB/key/depth/arraylimits explicitlypolicy",
+      "result": "PASS_DESIGN_REVIEW",
+      "evidence": "00_PASSMAP/PASS642_I7A5B_STRUCTURED_SCHEMA_CONTRACT.json"
+    },
+    {
+      "id": "BR07",
+      "requirement": "Nooriginalserverpromotion",
+      "result": "PASS_DESIGN_REVIEW",
+      "evidence": "00_PASSMAP/PASS642_I7A5B_EVIDENCE_LEDGER.json"
+    },
+    {
+      "id": "BR08",
+      "requirement": "Allownersunavailablebaseline",
+      "result": "PASS_DESIGN_REVIEW",
+      "evidence": "evidence/PRODUCER_READINESS_STATIC_SCAN.json"
+    },
+    {
+      "id": "BR09",
+      "requirement": "No fakeproductionprovider",
+      "result": "PASS_DESIGN_REVIEW",
+      "evidence": "00_PASSMAP/PASS642_I7A5B_IMPLEMENTATION_CONTRACT.json"
+    },
+    {
+      "id": "BR10",
+      "requirement": "No36863activation/588conflation",
+      "result": "PASS_DESIGN_REVIEW",
+      "evidence": "00_PASSMAP/PASS642_I7A5B_IMPLEMENTATION_CONTRACT.json"
+    },
+    {
+      "id": "BR11",
+      "requirement": "Approvedtwochildtopologyunchanged",
+      "result": "PASS_DESIGN_REVIEW",
+      "evidence": "00_PASSMAP/PASS642_I7A5B_RESEARCH_CLOSURE.json"
+    },
+    {
+      "id": "BR12",
+      "requirement": "Parentonlyexplicitqualifiedrollup",
+      "result": "PASS_DESIGN_REVIEW",
+      "evidence": "00_PASSMAP/PASS642_I7A5B_IMPLEMENTATION_CONTRACT.json"
+    },
+    {
+      "id": "BR13",
+      "requirement": "All14D/all8I7A1trace",
+      "result": "PASS_DESIGN_REVIEW",
+      "evidence": "00_PASSMAP/PASS642_I7A5B_FOUNDATION_TRACEABILITY.json"
+    },
+    {
+      "id": "BR14",
+      "requirement": "12I7A4inheritance",
+      "result": "PASS_DESIGN_REVIEW",
+      "evidence": "00_PASSMAP/PASS642_I7A5B_CONTRACT_IMPACT_REVIEW.json"
+    },
+    {
+      "id": "BR15",
+      "requirement": "7accepted5Ainheritance",
+      "result": "PASS_DESIGN_REVIEW",
+      "evidence": "00_PASSMAP/PASS642_I7A5B_CONTRACT_IMPACT_REVIEW.json"
+    },
+    {
+      "id": "BR16",
+      "requirement": "NoD14rewrite/typedownerextension",
+      "result": "PASS_DESIGN_REVIEW",
+      "evidence": "00_PASSMAP/PASS642_I7A5B_D14_EXTENSION_RECORD.json"
+    },
+    {
+      "id": "BR17",
+      "requirement": "ExacthandleandGuildJOIN preserved",
+      "result": "PASS_DESIGN_REVIEW",
+      "evidence": "00_PASSMAP/PASS642_I7A5B_IMPLEMENTATION_CONTRACT.json"
+    },
+    {
+      "id": "BR18",
+      "requirement": "SamecallerTxcanonicaltime/definitecommit",
+      "result": "PASS_DESIGN_REVIEW",
+      "evidence": "00_PASSMAP/PASS642_I7A5B_IMPLEMENTATION_CONTRACT.json"
+    },
+    {
+      "id": "BR19",
+      "requirement": "NetworkoutsideTx/no secondwriter",
+      "result": "PASS_DESIGN_REVIEW",
+      "evidence": "00_PASSMAP/PASS642_I7A5B_IMPLEMENTATION_CONTRACT.json"
+    },
+    {
+      "id": "BR20",
+      "requirement": "No newSQL/migration/receipt/history/quota",
+      "result": "PASS_DESIGN_REVIEW",
+      "evidence": "00_PASSMAP/PASS642_I7A5B_IMPLEMENTATION_CONTRACT.json"
+    },
+    {
+      "id": "BR21",
+      "requirement": "Productionordinary5Aregression",
+      "result": "PASS_DESIGN_REVIEW",
+      "evidence": "00_PASSMAP/PASS642_I7A5B_DRAFT_ACCEPTANCE_MATRIX.json"
+    },
+    {
+      "id": "BR22",
+      "requirement": "36mandatoryfuturegaterowsNOT_RUN",
+      "result": "PASS_DESIGN_REVIEW",
+      "evidence": "00_PASSMAP/PASS642_I7A5B_DRAFT_ACCEPTANCE_MATRIX.json"
+    },
+    {
+      "id": "BR23",
+      "requirement": "No liveTEAM/wholephase/W2claim",
+      "result": "PASS_DESIGN_REVIEW",
+      "evidence": "00_PASSMAP/PASS642_I7A5B_IMPLEMENTATION_CONTRACT.json"
+    },
+    {
+      "id": "BR24",
+      "requirement": "Source/historical/V1evidenceclasses",
+      "result": "PASS_DESIGN_REVIEW",
+      "evidence": "00_PASSMAP/PASS642_I7A5B_INPUT_CAPTURE.json"
+    },
+    {
+      "id": "BR25",
+      "requirement": "FullLua callsiteinventory",
+      "result": "PASS_DESIGN_REVIEW",
+      "evidence": "evidence/CURRENT_CALLSITE_INVENTORY.json"
+    },
+    {
+      "id": "BR26",
+      "requirement": "Reportfallback ownernamespacequalification",
+      "result": "PASS_DESIGN_REVIEW",
+      "evidence": "00_PASSMAP/PASS642_I7A5B_STRUCTURED_SCHEMA_CONTRACT.json"
+    },
+    {
+      "id": "BR27",
+      "requirement": "Scratcharrayunknowncardinalityboundedandgated",
+      "result": "PASS_DESIGN_REVIEW",
+      "evidence": "00_PASSMAP/PASS642_I7A5B_STRUCTURED_SCHEMA_CONTRACT.json"
+    },
+    {
+      "id": "BR28",
+      "requirement": "Owneractivationmatrixall8false",
+      "result": "PASS_DESIGN_REVIEW",
+      "evidence": "00_PASSMAP/PASS642_I7A5B_IMPLEMENTATION_CONTRACT.json"
+    },
+    {
+      "id": "BR29",
+      "requirement": "No180sec/universal10secserverquota",
+      "result": "PASS_DESIGN_REVIEW",
+      "evidence": "00_PASSMAP/PASS642_I7A5B_IMPLEMENTATION_CONTRACT.json"
+    },
+    {
+      "id": "BR30",
+      "requirement": "Memorybanklabelissuecurrentreviewfixed",
+      "result": "PASS_DESIGN_REVIEW",
+      "evidence": "00_PASSMAP/PASS642_I7A5B_CONTRACT_IMPACT_REVIEW.json"
+    },
+    {
+      "id": "BR31",
+      "requirement": "Researchcheckpointnotauthority",
+      "result": "PASS_DESIGN_REVIEW",
+      "evidence": "AUTHORIZATION.json"
+    },
+    {
+      "id": "BR32",
+      "requirement": "Stopatnormalresearchdesignsyncnoproductioncode",
+      "result": "PASS_DESIGN_REVIEW",
+      "evidence": "AUTHORIZATION.json"
+    }
+  ],
+  "product_gate": "NOT_RUN",
+  "live_owner_gate": "INELIGIBLE_NO_CANONICAL_PRODUCERS",
+  "ready_for_scope": "Typedcodec/inactiveownerboundaries; no newnode ormodeimplementation",
+  "pass": "642.0",
+  "selected_status": "SELECTED_RESEARCH_DESIGN_WITH_VALIDATED_NORMAL_SEAL_NOT_IMPLEMENTED",
+  "working_recovery_reference": "CP90 exact COLD checkpoint/source/probe caches"
+}

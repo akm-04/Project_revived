@@ -1,0 +1,194 @@
+{
+  "schema": "gxb-i7a5b-successor/v1",
+  "stage": "I7A-5B",
+  "authority_role": "SELECTED_RECONSTRUCTION_DESIGN_WITH_VALIDATED_NORMAL_SEAL_NOT_IMPLEMENTED",
+  "product_implemented": false,
+  "obligations": [
+    {
+      "id": "I7A5B-FINITE_VARIANTS",
+      "rule": "Finite9schema union; no arbitraryJSONrelay/unknownkeys/ambiguousreport selectors; source-shapedarrays/nestedprofiles.",
+      "consumers": [
+        "I7A-5B",
+        "I7A-6",
+        "I7A-10",
+        "I7A-E",
+        "Future canonical structured producers"
+      ],
+      "classification": "RECONSTRUCTION_DESIGN_NOT_IMPLEMENTED_NOT_ORIGINAL_SERVER_TRUTH",
+      "sources": [
+        {
+          "path": "00_PASSMAP/PASS642_I7A5B_IMPLEMENTATION_CONTRACT.json",
+          "sha256": "5861a1e878a2a3f1c9faf70235b112a2533990cb455e6f9ef0b06eaa7adaa69a"
+        },
+        {
+          "path": "00_PASSMAP/PASS642_I7A5B_STRUCTURED_SCHEMA_CONTRACT.json",
+          "sha256": "af865cc2c8938a345d5f22eec1c013385f35410c6bb0cf97ec910a315dca0da8"
+        }
+      ],
+      "evidence": {
+        "design_review": "00_PASSMAP/PASS642_I7A5B_PREIMPLEMENTATION_REALITY_CHECK.json",
+        "implementation_and_native_gate": "NOT_RUN"
+      }
+    },
+    {
+      "id": "I7A5B-ORDINARY140_STRUCTURED_QUALIFIER",
+      "rule": "Type0 retains140Unicodecodepoints; finite5BJSON8KiB andfield/containercaps only. Noautomaticprivateexception/truncation.",
+      "consumers": [
+        "I7A-5B",
+        "I7A-6",
+        "I7A-10",
+        "I7A-E",
+        "Future canonical structured producers"
+      ],
+      "classification": "RECONSTRUCTION_DESIGN_NOT_IMPLEMENTED_NOT_ORIGINAL_SERVER_TRUTH",
+      "sources": [
+        {
+          "path": "00_PASSMAP/PASS642_I7A5B_IMPLEMENTATION_CONTRACT.json",
+          "sha256": "5861a1e878a2a3f1c9faf70235b112a2533990cb455e6f9ef0b06eaa7adaa69a"
+        },
+        {
+          "path": "00_PASSMAP/PASS642_I7A5B_STRUCTURED_SCHEMA_CONTRACT.json",
+          "sha256": "af865cc2c8938a345d5f22eec1c013385f35410c6bb0cf97ec910a315dca0da8"
+        }
+      ],
+      "evidence": {
+        "design_review": "00_PASSMAP/PASS642_I7A5B_PREIMPLEMENTATION_REALITY_CHECK.json",
+        "implementation_and_native_gate": "NOT_RUN"
+      }
+    },
+    {
+      "id": "I7A5B-CANONICAL_OWNER_ACTIVATION",
+      "rule": "All8providers absent/inactive; componentfake neverproductionauthority. Activationrequiresselectedactualowner+content/schema+nativeproof+normalamendment.",
+      "consumers": [
+        "I7A-5B",
+        "I7A-6",
+        "I7A-10",
+        "I7A-E",
+        "Future canonical structured producers"
+      ],
+      "classification": "RECONSTRUCTION_DESIGN_NOT_IMPLEMENTED_NOT_ORIGINAL_SERVER_TRUTH",
+      "sources": [
+        {
+          "path": "00_PASSMAP/PASS642_I7A5B_IMPLEMENTATION_CONTRACT.json",
+          "sha256": "5861a1e878a2a3f1c9faf70235b112a2533990cb455e6f9ef0b06eaa7adaa69a"
+        },
+        {
+          "path": "00_PASSMAP/PASS642_I7A5B_STRUCTURED_SCHEMA_CONTRACT.json",
+          "sha256": "af865cc2c8938a345d5f22eec1c013385f35410c6bb0cf97ec910a315dca0da8"
+        }
+      ],
+      "evidence": {
+        "design_review": "00_PASSMAP/PASS642_I7A5B_PREIMPLEMENTATION_REALITY_CHECK.json",
+        "implementation_and_native_gate": "NOT_RUN"
+      }
+    },
+    {
+      "id": "I7A5B-CAMP_AUDIENCE_AUTHORITY",
+      "rule": "Room/camp clientfilters are displayonly; sender ANDrecipient canonicalownerchecks beforepublication. NeverallSERVICEbroadcast confidentialcampdata.",
+      "consumers": [
+        "I7A-5B",
+        "I7A-6",
+        "I7A-10",
+        "I7A-E",
+        "Future canonical structured producers"
+      ],
+      "classification": "RECONSTRUCTION_DESIGN_NOT_IMPLEMENTED_NOT_ORIGINAL_SERVER_TRUTH",
+      "sources": [
+        {
+          "path": "00_PASSMAP/PASS642_I7A5B_IMPLEMENTATION_CONTRACT.json",
+          "sha256": "5861a1e878a2a3f1c9faf70235b112a2533990cb455e6f9ef0b06eaa7adaa69a"
+        },
+        {
+          "path": "00_PASSMAP/PASS642_I7A5B_STRUCTURED_SCHEMA_CONTRACT.json",
+          "sha256": "af865cc2c8938a345d5f22eec1c013385f35410c6bb0cf97ec910a315dca0da8"
+        }
+      ],
+      "evidence": {
+        "design_review": "00_PASSMAP/PASS642_I7A5B_PREIMPLEMENTATION_REALITY_CHECK.json",
+        "implementation_and_native_gate": "NOT_RUN"
+      }
+    },
+    {
+      "id": "I7A5B-REFERENCE_NAMESPACE",
+      "rule": "Recordid/roomid/reportsubtype authoritycomesfromtypedowner;WarCamp/Championslegacyfallback unresolved untilownerqualifies. No cross-mode reference substitution.",
+      "consumers": [
+        "I7A-5B",
+        "I7A-6",
+        "I7A-10",
+        "I7A-E",
+        "Future canonical structured producers"
+      ],
+      "classification": "RECONSTRUCTION_DESIGN_NOT_IMPLEMENTED_NOT_ORIGINAL_SERVER_TRUTH",
+      "sources": [
+        {
+          "path": "00_PASSMAP/PASS642_I7A5B_IMPLEMENTATION_CONTRACT.json",
+          "sha256": "5861a1e878a2a3f1c9faf70235b112a2533990cb455e6f9ef0b06eaa7adaa69a"
+        },
+        {
+          "path": "00_PASSMAP/PASS642_I7A5B_STRUCTURED_SCHEMA_CONTRACT.json",
+          "sha256": "af865cc2c8938a345d5f22eec1c013385f35410c6bb0cf97ec910a315dca0da8"
+        }
+      ],
+      "evidence": {
+        "design_review": "00_PASSMAP/PASS642_I7A5B_PREIMPLEMENTATION_REALITY_CHECK.json",
+        "implementation_and_native_gate": "NOT_RUN"
+      }
+    },
+    {
+      "id": "I7A5B-SCOPED_PARENT_ROLLUP",
+      "rule": "Explicitparentcomposition afterchildaccepted; liveTEAM/report/scratch/camp flagsremainfalsewhenprovidersinactive; no10/E/W2claim.",
+      "consumers": [
+        "I7A-5B",
+        "I7A-6",
+        "I7A-10",
+        "I7A-E",
+        "Future canonical structured producers"
+      ],
+      "classification": "RECONSTRUCTION_DESIGN_NOT_IMPLEMENTED_NOT_ORIGINAL_SERVER_TRUTH",
+      "sources": [
+        {
+          "path": "00_PASSMAP/PASS642_I7A5B_IMPLEMENTATION_CONTRACT.json",
+          "sha256": "5861a1e878a2a3f1c9faf70235b112a2533990cb455e6f9ef0b06eaa7adaa69a"
+        },
+        {
+          "path": "00_PASSMAP/PASS642_I7A5B_STRUCTURED_SCHEMA_CONTRACT.json",
+          "sha256": "af865cc2c8938a345d5f22eec1c013385f35410c6bb0cf97ec910a315dca0da8"
+        }
+      ],
+      "evidence": {
+        "design_review": "00_PASSMAP/PASS642_I7A5B_PREIMPLEMENTATION_REALITY_CHECK.json",
+        "implementation_and_native_gate": "NOT_RUN"
+      }
+    },
+    {
+      "id": "I7A5B-WIRE_NAMESPACE_AND_UNKNOWN_PRODUCER",
+      "rule": "Reuse32783role/typefinitevalidator+canonicalsender;TEAMlogicalonly;36863unknownandMID588/I7A6namespaces stayseparate.",
+      "consumers": [
+        "I7A-5B",
+        "I7A-6",
+        "I7A-10",
+        "I7A-E",
+        "Future canonical structured producers"
+      ],
+      "classification": "RECONSTRUCTION_DESIGN_NOT_IMPLEMENTED_NOT_ORIGINAL_SERVER_TRUTH",
+      "sources": [
+        {
+          "path": "00_PASSMAP/PASS642_I7A5B_IMPLEMENTATION_CONTRACT.json",
+          "sha256": "5861a1e878a2a3f1c9faf70235b112a2533990cb455e6f9ef0b06eaa7adaa69a"
+        },
+        {
+          "path": "00_PASSMAP/PASS642_I7A5B_STRUCTURED_SCHEMA_CONTRACT.json",
+          "sha256": "af865cc2c8938a345d5f22eec1c013385f35410c6bb0cf97ec910a315dca0da8"
+        }
+      ],
+      "evidence": {
+        "design_review": "00_PASSMAP/PASS642_I7A5B_PREIMPLEMENTATION_REALITY_CHECK.json",
+        "implementation_and_native_gate": "NOT_RUN"
+      }
+    }
+  ],
+  "pass": "642.0",
+  "selected_status": "SELECTED_RESEARCH_DESIGN_WITH_VALIDATED_NORMAL_SEAL_NOT_IMPLEMENTED",
+  "working_recovery_reference": "CP90 exact COLD checkpoint/source/probe caches",
+  "selected_authority_with_validated_seal": true
+}

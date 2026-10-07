@@ -40,6 +40,7 @@ type channelHarness struct {
 	ends       chan error
 }
 type channelHarnessOptions struct {
+	owners   channelchat.Owners
 	policy   *stockruntime.ChannelChatPolicy
 	limits   *limits.Config
 	reader   channelchat.Reader
@@ -54,7 +55,7 @@ func chatHarness(t *testing.T, f *fixture, o channelHarnessOptions) *channelHarn
 	if e != nil {
 		t.Fatal(e)
 	}
-	svc := channelchat.Service{Runner: tx.Runner{DB: f.p}, Operations: operation.Factory{Clock: clock.System{}}, Reader: channelchatread.Reader{}}
+	svc := channelchat.Service{Runner: tx.Runner{DB: f.p}, Operations: operation.Factory{Clock: clock.System{}}, Reader: channelchatread.Reader{}, Owners: o.owners}
 	if o.reader != nil {
 		svc.Reader = o.reader
 	}

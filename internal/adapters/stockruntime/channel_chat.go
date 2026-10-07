@@ -52,6 +52,7 @@ type ChannelChatDispatcher struct {
 	policy            ChannelChatPolicy
 	OnReport          func(ChannelChatReport)
 	messages, workers chan struct{}
+	structuredEnabled bool // no production setter or constructor activation; future owner activation requires a new selected seal
 }
 
 func NewChannelChatDispatcher(reg *ConnectionRegistry, service channelchat.Service, publisher RealtimePublisher, p ChannelChatPolicy) (*ChannelChatDispatcher, error) {
@@ -92,7 +93,8 @@ func (d *ChannelChatDispatcher) HandleSessionClientFrame(ctx context.Context, h 
 	if f.MID != mids.MIDSendChatMessage {
 		return nil, ErrUnsupportedRealtimeMID
 	}
-	r, err := wireRT.ParseChannelChat(f.Params)
+	ingress, err := wireRT.ParseChannelChatIngress(f.Params)
+	r := ingress.Request
 	if err != nil {
 		return nil, err
 	}
@@ -100,7 +102,7 @@ func (d *ChannelChatDispatcher) HandleSessionClientFrame(ctx context.Context, h 
 	if !ok || !sameAdmission(exact, admitted) || !d.Registry.IsCurrent(h) || r.Channel != channelForRole(exact.Domain.Role) || r.HasRegion && r.Region != int64(exact.Domain.Actor.LogicalServerID) {
 		return nil, ErrInvalidRealtimeSession
 	}
-	if r.Type != 0 {
+	if r.Type != 0 && (!d.structuredEnabled || ingress.Selector == nil || !d.Service.Owners.Available(ingress.Selector.Kind)) {
 		d.report(ChannelChatReport{ProviderGated: true})
 		return nil, nil
 	}
@@ -122,7 +124,14 @@ func (d *ChannelChatDispatcher) HandleSessionClientFrame(ctx context.Context, h 
 		return nil, nil
 	}
 	prep, stop := context.WithTimeout(command, d.policy.PrepareWait)
-	value, err := d.Service.Prepare(prep, exact, r.Message)
+	var value playerpresentation.Minimal
+	var structured channelchat.PreparedStructured
+	if r.Type == 0 {
+		value, err = d.Service.Prepare(prep, exact, r.Message)
+	} else {
+		structured, err = d.Service.PrepareStructured(prep, exact, *ingress.Selector)
+		value = structured.Sender
+	}
 	stop()
 	if err != nil {
 		return nil, err
@@ -130,7 +139,14 @@ func (d *ChannelChatDispatcher) HandleSessionClientFrame(ctx context.Context, h 
 	if !d.Registry.IsCurrent(h) {
 		return nil, ErrRealtimeSessionRetired
 	}
-	params, err := ordinaryChatPayload(value, r.Message)
+	message := r.Message
+	if r.Type != 0 {
+		message, err = wireRT.ProjectStructuredMessage(structured.Message, r.Channel)
+		if err != nil {
+			return nil, err
+		}
+	}
+	params, err := chatPayload(value, message, r.Type)
 	if err != nil {
 		return nil, err
 	}
@@ -170,7 +186,13 @@ func (d *ChannelChatDispatcher) HandleSessionClientFrame(ctx context.Context, h 
 					if !ok || !d.Registry.IsCurrent(recipient) || a.Domain.Role != exact.Domain.Role || a.Domain.RoomID != exact.Domain.RoomID {
 						return ChatIneligible
 					}
-					if err := d.Service.AuthorizeRecipient(publication, a); err != nil {
+					authorize := func() error {
+						if r.Type == 0 {
+							return d.Service.AuthorizeRecipient(publication, a)
+						}
+						return d.Service.AuthorizeStructuredRecipient(publication, a, structured)
+					}
+					if err := authorize(); err != nil {
 						if publication.Err() != nil {
 							return ChatBudget
 						}
@@ -215,6 +237,12 @@ func ordinaryChatPayload(m playerpresentation.Minimal, message string) (*amf3.Ob
 	if err := channelchat.ValidateMessage(message); err != nil {
 		return nil, err
 	}
+	return chatPayload(m, message, 0)
+}
+func chatPayload(m playerpresentation.Minimal, message string, kind int64) (*amf3.Object, error) {
+	if err := m.Validate(); err != nil {
+		return nil, err
+	}
 	for _, n := range []int64{int64(m.PlayerID), m.PlayerType, m.Level, m.AvatarID, m.AvatarFrameID, m.ConquerLevel, m.ConquerLoopID} {
 		if !wireRT.IsExactChatNumber(n) {
 			return nil, wireRT.ErrInvalidS2CPayload
@@ -224,8 +252,8 @@ func ordinaryChatPayload(m playerpresentation.Minimal, message string) (*amf3.Ob
 	if err != nil {
 		return nil, err
 	}
-	obj := &amf3.Object{Properties: []amf3.Property{{Name: "player_id", Value: float64(m.PlayerID)}, {Name: "player_name", Value: m.Name}, {Name: "message", Value: message}, {Name: "player_type", Value: float64(m.PlayerType)}, {Name: "type", Value: float64(0)}, {Name: "avatar_id", Value: float64(m.AvatarID)}, {Name: "avatar_frame_id", Value: float64(m.AvatarFrameID)}, {Name: "lev", Value: float64(m.Level)}, {Name: "np_info", Value: string(np)}}}
-	if err := wireRT.ValidateOrdinaryChannelChat(obj); err != nil {
+	obj := &amf3.Object{Properties: []amf3.Property{{Name: "player_id", Value: float64(m.PlayerID)}, {Name: "player_name", Value: m.Name}, {Name: "message", Value: message}, {Name: "player_type", Value: float64(m.PlayerType)}, {Name: "type", Value: float64(kind)}, {Name: "avatar_id", Value: float64(m.AvatarID)}, {Name: "avatar_frame_id", Value: float64(m.AvatarFrameID)}, {Name: "lev", Value: float64(m.Level)}, {Name: "np_info", Value: string(np)}}}
+	if err := wireRT.ValidateChannelChat(obj); err != nil {
 		return nil, err
 	}
 	return obj, nil

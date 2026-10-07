@@ -32,6 +32,7 @@ type Service struct {
 	Runner     tx.Runner
 	Operations operation.Factory
 	Reader     Reader
+	Owners     Owners
 }
 
 func ReadProfile() tx.Profile {
