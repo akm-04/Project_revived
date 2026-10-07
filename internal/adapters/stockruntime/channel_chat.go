@@ -102,7 +102,7 @@ func (d *ChannelChatDispatcher) HandleSessionClientFrame(ctx context.Context, h 
 	if !ok || !sameAdmission(exact, admitted) || !d.Registry.IsCurrent(h) || r.Channel != channelForRole(exact.Domain.Role) || r.HasRegion && r.Region != int64(exact.Domain.Actor.LogicalServerID) {
 		return nil, ErrInvalidRealtimeSession
 	}
-	if r.Type != 0 && (!d.structuredEnabled || ingress.Selector == nil || !d.Service.Owners.Available(ingress.Selector.Kind)) {
+	if r.Type != 0 && (!d.structuredEnabled || ingress.Selector == nil || !d.Service.Owners.Available(channelchat.Kind(ingress.Selector.Kind))) {
 		d.report(ChannelChatReport{ProviderGated: true})
 		return nil, nil
 	}
@@ -129,7 +129,7 @@ func (d *ChannelChatDispatcher) HandleSessionClientFrame(ctx context.Context, h 
 	if r.Type == 0 {
 		value, err = d.Service.Prepare(prep, exact, r.Message)
 	} else {
-		structured, err = d.Service.PrepareStructured(prep, exact, *ingress.Selector)
+		structured, err = d.Service.PrepareStructured(prep, exact, semanticStructuredSelector(*ingress.Selector))
 		value = structured.Sender
 	}
 	stop()
@@ -141,7 +141,7 @@ func (d *ChannelChatDispatcher) HandleSessionClientFrame(ctx context.Context, h 
 	}
 	message := r.Message
 	if r.Type != 0 {
-		message, err = wireRT.ProjectStructuredMessage(structured.Message, r.Channel)
+		message, err = wireRT.ProjectStructuredMessage(wireStructuredValue(structured.Message), r.Channel)
 		if err != nil {
 			return nil, err
 		}

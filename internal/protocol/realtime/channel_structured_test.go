@@ -3,9 +3,9 @@ package realtime
 import (
 	"encoding/json"
 	"fmt"
-	cc "gxb.local/backend/v2/internal/application/channelchat"
 	"gxb.local/backend/v2/internal/protocol/amf3"
 	"gxb.local/backend/v2/internal/protocol/mids"
+	cc "gxb.local/backend/v2/internal/protocol/realtime/chatschema"
 	"strings"
 	"testing"
 )

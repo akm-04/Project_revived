@@ -3,8 +3,8 @@ package realtime
 import (
 	"encoding/json"
 	"errors"
-	cc "gxb.local/backend/v2/internal/application/channelchat"
 	"gxb.local/backend/v2/internal/protocol/amf3"
+	cc "gxb.local/backend/v2/internal/protocol/realtime/chatschema"
 	"io"
 	"math/big"
 	"strconv"

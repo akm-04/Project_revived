@@ -16,5 +16,6 @@
   "physical_stock_claimed": false,
   "test_status": "FROZEN_EXACT_GATE_PENDING",
   "acceptance": "NONE_CANDIDATE_METADATA_ONLY",
-  "parent_closure": "Pending explicit qualified parent review and normal seal"
+  "parent_closure": "Pending explicit qualified parent review and normal seal",
+  "layer_correction": "Finite protocol-owned wire structs map explicitly at stockruntime adapter edge to application-owned semantic types. I0/D14matrix unchanged; no protocol->application/domain import."
 }
