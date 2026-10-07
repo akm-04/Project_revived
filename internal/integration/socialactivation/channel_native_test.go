@@ -3,7 +3,9 @@
 package socialactivation_test
 
 import (
+	"bytes"
 	"context"
+	"encoding/binary"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -103,15 +105,41 @@ func TestChatA03bMalformedChannelsAndDiscriminators(t *testing.T) {
 	f := fresh(t)
 	f.chatPlayers(100001)
 	h := chatHarness(t, f, channelHarnessOptions{})
-	for _, channel := range []any{1.0, 3.0, 5.0, -1.0, 0.5, "0", math.NaN(), math.Inf(1)} {
+	for _, channel := range []any{1.0, 3.0, 5.0, -1.0, 0.5, "0"} {
 		c, _, _ := h.login(100001, dr.World, 1)
 		writeChatFrame(t, c, rt.Frame{MID: mids.MIDSendChatMessage, Params: chatParams(amf3.Property{Name: "message", Value: "invalidchannel"}, amf3.Property{Name: "channel", Value: channel})})
 		closedChat(t, c)
 	}
-	for _, kind := range []any{-1.0, 9.0, math.NaN(), math.Inf(-1), true} {
+	for _, kind := range []any{-1.0, 9.0, true} {
 		c, _, _ := h.login(100001, dr.World, 1)
 		sendChat(t, c, "invalidtype", 0, amf3.Property{Name: "type", Value: kind})
 		closedChat(t, c)
+	}
+	for _, field := range []string{"channel", "type"} {
+		for _, v := range []float64{math.NaN(), math.Inf(1), math.Inf(-1)} {
+			c, _, _ := h.login(100001, dr.World, 1)
+			props := []amf3.Property{{Name: "message", Value: "rawfloat"}, {Name: "channel", Value: 0.0}, {Name: "type", Value: 0.0}}
+			for i := range props {
+				if props[i].Name == field {
+					props[i].Value = 123.456
+				}
+			}
+			raw, e := rt.EncodeFrame(rt.Frame{MID: mids.MIDSendChatMessage, Params: chatParams(props...)})
+			if e != nil {
+				t.Fatal(e)
+			}
+			sentinel := make([]byte, 8)
+			binary.BigEndian.PutUint64(sentinel, math.Float64bits(123.456))
+			at := bytes.Index(raw, sentinel)
+			if at < 0 {
+				t.Fatal("double sentinel missing")
+			}
+			binary.BigEndian.PutUint64(raw[at:at+8], math.Float64bits(v))
+			if _, e := c.Write(raw); e != nil {
+				t.Fatal(e)
+			}
+			closedChat(t, c)
+		}
 	}
 	c, _, _ := h.login(100001, dr.World, 1)
 	writeChatFrame(t, c, rt.Frame{MID: mids.MIDSendChatMessage, Params: nil})
