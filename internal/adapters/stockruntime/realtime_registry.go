@@ -7,6 +7,7 @@ import (
 	"sort"
 	"sync"
 
+	apprealtime "gxb.local/backend/v2/internal/application/realtimeauth"
 	"gxb.local/backend/v2/internal/domain/identity"
 	domainrt "gxb.local/backend/v2/internal/domain/realtimeauth"
 	"gxb.local/backend/v2/internal/protocol/limits"
@@ -59,9 +60,10 @@ func (m SessionMetadata) valid() bool {
 }
 
 type registrySession struct {
-	meta   SessionMetadata
-	writer *connWriter
-	conn   net.Conn
+	guildBinding apprealtime.GuildBinding
+	meta         SessionMetadata
+	writer       *connWriter
+	conn         net.Conn
 
 	lifecycle sync.Mutex
 	retired   bool
@@ -156,6 +158,25 @@ func (r *ConnectionRegistry) Replace(admission domainrt.Admission, writer *connW
 	if r == nil || writer == nil || writer.conn == nil || !admission.Role.Valid() || admission.RoomID <= 0 {
 		return SessionHandle{}, ErrInvalidRealtimeSession
 	}
+	return r.replace(admission, apprealtime.GuildBinding{}, writer)
+}
+
+// ReplaceAdmission retains a value copy of the exact canonical JOIN observed at login.
+func (r *ConnectionRegistry) ReplaceAdmission(admission apprealtime.Admission, writer *connWriter) (SessionHandle, error) {
+	var binding apprealtime.GuildBinding
+	if admission.Domain.Role == domainrt.Guild {
+		if admission.GuildBinding == nil || !admission.GuildBinding.Valid() || admission.GuildBinding.GuildID != admission.Domain.RoomID {
+			return SessionHandle{}, ErrInvalidRealtimeSession
+		}
+		binding = *admission.GuildBinding
+	}
+	return r.replace(admission.Domain, binding, writer)
+}
+
+func (r *ConnectionRegistry) replace(admission domainrt.Admission, binding apprealtime.GuildBinding, writer *connWriter) (SessionHandle, error) {
+	if r == nil || writer == nil || writer.conn == nil || !admission.Role.Valid() || admission.RoomID <= 0 {
+		return SessionHandle{}, ErrInvalidRealtimeSession
+	}
 	a := admission.Actor
 	if a.AccountID.UUID().IsZero() || !a.AccountUID.Valid() || a.SessionID.UUID().IsZero() || a.ContextID.UUID().IsZero() ||
 		!a.LogicalServerID.Valid() || !a.PlayerID.Valid() || a.ContextGeneration <= 0 || a.SessionLivenessVersion <= 0 || a.ContextLivenessVersion <= 0 {
@@ -172,7 +193,7 @@ func (r *ConnectionRegistry) Replace(admission domainrt.Admission, writer *connW
 		LogicalServerID: a.LogicalServerID, PlayerID: a.PlayerID, ContextGeneration: a.ContextGeneration,
 		SessionLivenessVersion: a.SessionLivenessVersion, ContextLivenessVersion: a.ContextLivenessVersion,
 		PhysicalRole: admission.Role, RoomID: admission.RoomID, RegistryGeneration: r.next,
-	}, writer: writer, conn: writer.conn}
+	}, guildBinding: binding, writer: writer, conn: writer.conn}
 	old = r.by[key]
 	if old != nil {
 		r.removeIndicesLocked(old)
@@ -300,4 +321,35 @@ func (r *ConnectionRegistry) CloseAll() {
 	for _, h := range sessions {
 		r.Remove(h)
 	}
+}
+
+// Admission returns a value copy; callers cannot mutate a retained JOIN binding.
+func (h SessionHandle) Admission() (apprealtime.Admission, bool) {
+	m, ok := h.Metadata()
+	if !ok {
+		return apprealtime.Admission{}, false
+	}
+	a := apprealtime.Admission{Domain: domainrt.Admission{Actor: identity.ActorContext{AccountID: m.AccountID, AccountUID: m.AccountUID, SessionID: m.SessionID, ContextID: m.ContextID, LogicalServerID: m.LogicalServerID, PlayerID: m.PlayerID, ContextGeneration: m.ContextGeneration, SessionLivenessVersion: m.SessionLivenessVersion, ContextLivenessVersion: m.ContextLivenessVersion}, Role: m.PhysicalRole, RoomID: m.RoomID}}
+	if m.PhysicalRole == domainrt.Guild {
+		b := h.session.guildBinding
+		if !b.Valid() || b.GuildID != m.RoomID {
+			return apprealtime.Admission{}, false
+		}
+		a.GuildBinding = &b
+	}
+	return a, true
+}
+
+// ByRoomRoleBounded rejects overflow before allocating a snapshot or admitting any writes.
+func (r *ConnectionRegistry) ByRoomRoleBounded(room int64, role domainrt.PhysicalRole, max int) ([]SessionHandle, bool) {
+	if r == nil || room <= 0 || !role.Valid() || max <= 0 {
+		return nil, false
+	}
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	set := r.byRoom[roomRoleKey{Room: room, Role: role}]
+	if len(set) > max {
+		return nil, false
+	}
+	return snapshotSessions(set), true
 }

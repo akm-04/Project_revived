@@ -1,0 +1,168 @@
+{
+  "schema": "gxb-i7a5a-implementation-contract/v1",
+  "stage": "I7A-5A",
+  "status": "SELECTED_RESEARCH_DESIGN_READY_NOT_IMPLEMENTED",
+  "baseline": {
+    "passmap_pass": "639.0",
+    "passmap_sha256": "bba6823a34ba41c445c017f0347e8488eb2b54cc548a9a5797c890f74e3a9bbf",
+    "backend_archive": "gxb-backend-v2-v0.91.0-pass638-i7a4d-accepted.zip",
+    "backend_sha256": "2fdbdfb9f4a97f5acf2a9e3fcf4efd42fd964edf59e91c7d6b88ecc97f4e57a1",
+    "backend_tree_sha256": "58aa9e6c2f4db113b690d15b1b68b6ba1dbb744883715ca26d0c126b27b662bc",
+    "src64_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+    "checkpoint_parent": {
+      "filename": "gxb1-checkpoint-80-i7a5a-research.zip",
+      "sha256": "82d6875e62da561a387121e38380b6c6ba38821545222d0b940c885d8cef838a"
+    }
+  },
+  "scope": "Authenticated ordinary type0/default WORLD/GUILD/SERVICE channel text only",
+  "implementation_authorized_by_contract": false,
+  "product_implementation_started": false,
+  "source_or_original_server_truth": "Source facts separated from named compatibility/engineering decisions; no original server truth claimed",
+  "owners": {
+    "channelchat": "Ephemeral semantic normal-message preparation; no canonical chat store",
+    "I4": "actor/directory/session/single writer/registry",
+    "I5": "canonical PlayerType",
+    "I6C": "canonical GuildID+JOIN event",
+    "I6A": "DB time observation",
+    "SocialPresence": "Derived display only; not consulted for authorization",
+    "I7B": "Actual cosmetic entitlement/equipped ownership remains future"
+  },
+  "request": {
+    "transport": "TCP_REALTIME",
+    "mid": 32782,
+    "required_fields": [
+      "message",
+      "channel"
+    ],
+    "optional_fields": [
+      "type",
+      "token",
+      "region"
+    ],
+    "extra_fields": "Reject all other request fields, including player_id/player_type/name/room_id/np_info; never echo presentation claims",
+    "message": "Nonempty valid UTF8 string,1..140 Unicode code points; preserve original text/whitespace/emotion syntax; no normalization or truncation",
+    "channel": "Integral exact0/2/4 matching actual admitted physical WORLD/GUILD/SERVICE role. Missing channel, TEAM5,GM3,PERSONAL1,nonintegral/nonfinite rejected",
+    "type": "Absent or exact integral0 normal. Known integral1..8 are well-formed but provider-gated/deferred to5B: no publish; unknown/fractional/wrong-type rejected",
+    "token": "If present validUTF8 string bounded by existing native frame/decoder limits; discard after parsing, never retain/log/use to replace admitted actor. Socket actor+fresh canonical I4 liveness authorize command.",
+    "region": "If present exact positive integral admitted LogicalServerID; mismatch rejected. Not room override.",
+    "AMF": "Strict object duplicate-key rejection and existing frame/property/depth/node/UTF8/integer safety budgets; S2C frames still blocked and no HTTP32782 handler"
+  },
+  "wire32783": {
+    "roles": [
+      "WORLD",
+      "GUILD",
+      "SERVICE"
+    ],
+    "sequence": 0,
+    "fields": [
+      "player_id",
+      "player_name",
+      "message",
+      "player_type",
+      "type",
+      "avatar_id",
+      "avatar_frame_id",
+      "lev",
+      "np_info"
+    ],
+    "type": 0,
+    "np_info": "JSON string with inactive title_info=\"@@@@\", bubble_info=\"10001@0\", canonical conquer_lev/conquer_loop_id; no acquired/equipped entitlement claim",
+    "numbers": "Exact finite integral AMF-safe values; IDspositive<=2^53-1. Canonical PlayerType retains no invented semantic range, but unrepresentable wire integers fail closed",
+    "time": "Ordinary consumer uses receipt-side ServerTime; do not invent server history id/time/ACK",
+    "sender": "Canonical I4 directory + I5 PlayerType in same sender preparation callerTx; included sender eligible through same recipient gate"
+  },
+  "transactions_and_effects": {
+    "semantic_writes": [],
+    "gameplay_locks": [],
+    "foreign_sql": false,
+    "transaction_options": {
+      "isolation": "RepeatableRead",
+      "read_only": true
+    },
+    "commit": "One caller-owned tx commits once; semantic output private until DefiniteCommit. Any unknown/error aborts preparation/publication; no replay.",
+    "retry": {
+      "max_attempts": 1,
+      "reason": "Fresh bounded authorization observation, no settlement or receipts. No retry around socket work."
+    },
+    "time": "One fresh PostgreSQL clock_timestamp observation per bounded sender/recipient read. No NamedEpoch/quota policy is added; process monotonic clocks govern transport deadlines only."
+  },
+  "authorization": {
+    "ingress": "Exact current incoming handle and supplied admitted actor/role/room/generation must agree; never substitute latest context handle",
+    "sender": "Fresh canonical I4 actor and exact I6C admitted Guild binding in bounded callerTx; no raw bearer retained",
+    "recipient": "Each exact snapshotted handle must retain admitted actor/role/room and Guild JOIN. Fresh current canonical validation in its own bounded callerTx; commit then registry-current recheck and existing handle gate before enqueue",
+    "revocation_boundary": "Authorization is observed at DB snapshot/time, not held through I/O. Revocation/expiry after that read can race already admitted publication. Do not hold gameplay locks to claim instantaneous revocation. Retired handle rejects sends after retirement linearization."
+  },
+  "room_policy": {
+    "WORLD": "RoomID=canonical logical server",
+    "GUILD": "RoomID=canonical GuildID and exact admitted JOIN event",
+    "SERVICE": "Room99999 among current admitted SERVICE handles across logical-server contexts in supported single realtime-owner deployment",
+    "classification": "Selected I4 room/role registry policy + explicit reconstruction scope, not historical deployment-shard truth"
+  },
+  "operational_policy": {
+    "id": "CHANNEL_CHAT_OPERATIONS_V1",
+    "classification": "V2_ENGINEERING_POLICY_NOT_ORIGINAL_SERVER_RULE",
+    "max_inflight_messages": 16,
+    "global_recipient_workers": 8,
+    "max_local_recipient_workers_per_message": 8,
+    "max_snapshot_handles": "Existing RealtimePolicy.MaxConnections; default2048; overflow rejects whole publication before any enqueue, never silently truncate",
+    "max_sender_preparation": "3s",
+    "max_publication_wait": "2s",
+    "max_command_wait": "5s plus existing bounded cleanup",
+    "db_read_profile": {
+      "Name": "channel-chat-read-v1",
+      "AcquireTimeout": "500ms",
+      "LockTimeout": "500ms",
+      "StatementTimeout": "1500ms",
+      "TransactionTimeout": "2s",
+      "CleanupTimeout": "500ms",
+      "ReconcileTimeout": "500ms",
+      "OperationTimeout": "3s"
+    },
+    "concurrency": "Nonblocking global message slots before any DB read; at most16x8 local workers waiting on global8 recipient slots. Snapshot<=16xMaxConnections handles. Parent cancellation stops new work; drain joins workers and releases slots.",
+    "full_budget": "Recipient transaction/cleanup and wait inherit remaining publication deadline; completed commit then exact-handle recheck before queue admission.",
+    "rate": "No durable/per-player10-second server quota. Existing finite frame/admission budgets plus these limits; source client10s pacing and debug/FreshManGuide bypass remain source observations.",
+    "wire_outcomes": "No invented ACK/error packet. Invalid/auth/stale input closes; valid provider-gated type1..8 or operational saturation drops without push and keeps socket; sender prepare/infrastructure failure closes fail-closed; failed recipients skipped independently.",
+    "publication_outcomes": [
+      "TRANSPORT_WRITE_RECORDED",
+      "NOT_ATTEMPTED_INELIGIBLE",
+      "NOT_ATTEMPTED_BUDGET",
+      "SEND_OUTCOME_UNKNOWN_OR_ERROR"
+    ],
+    "uncertainty": "A Send error/caller deadline does not prove zero bytes or cancel admitted frames. Already admitted frames may complete later under existing writer timeout. No retry, rollback or client consumption claim."
+  },
+  "delivery": {
+    "ephemeral": true,
+    "schema_or_migration": "NONE",
+    "history": "Client-local only; no server replay/offline queue/outbox",
+    "self_echo": "Only same32783 fanout; no separate successACK or duplicate local sender frame",
+    "partial_failure": "No room-wide retry after any enqueue/write; no transaction rollback of transport",
+    "duplicates": "Each nonce-less receive is a separate publication attempt; no parameter-hash dedupe/exactly-once claim",
+    "ordering": "Existing per-socket writer enqueue order only. Concurrent room messages can be observed in different orders; no global room sequence",
+    "restart": "Loses in-flight ephemeral work; stale/unqualified recovered Presence rows do not recreate handles or replay messages"
+  },
+  "foundations_unchanged": [
+    "D01-D14",
+    "all8selectedI7A1",
+    "migration00001..00033",
+    "Go/module/sqlc/policy pins",
+    "I7A3 heartbeat-only Presence renewal",
+    "I7A4 typed canonical Social reload route"
+  ],
+  "deferred": {
+    "I7A-5B": "Nonzero structured schemas, actual producer qualifications and parent composition",
+    "MID36863": "Unknown trigger remains inactive; separateconsumer projection only later",
+    "I7A6": "Private messages513/514/515/516",
+    "I7A8": "Guild mail588/worker/River activation",
+    "I7A10_E_W2": "Separate unpassed gates"
+  },
+  "reopen_triggers": [
+    "Any durable chat/rate/replay/receipt schema becomes necessary",
+    "Any foreign SQL/network under transaction or second writer becomes necessary",
+    "Any source contradiction changes field/role/UTF8 bound",
+    "Any privileged cosmetics or actual mode ownership required",
+    "Any stricter revocation/delivery deadline guarantee exceeds existing writer",
+    "Any change to selected source/contract/pins/migration"
+  ],
+  "pass": "640.0",
+  "selected_status": "SELECTED_WITH_VALIDATED_NORMAL_RESEARCH_DESIGN_SEAL_NOT_IMPLEMENTED"
+}

@@ -42,6 +42,11 @@ type PresenceProjection interface {
 	Retire(context.Context, operation.Context, socialpresence.LeaseRef) error
 }
 
+// SessionClientFrameDispatcher receives the actual incoming admitted generation.
+type SessionClientFrameDispatcher interface {
+	HandleSessionClientFrame(context.Context, SessionHandle, app.Admission, wireRT.Frame) ([]wireRT.Frame, error)
+}
+
 type PresenceErrorHandler func(stage string, err error)
 
 type RealtimeServer struct {
@@ -52,6 +57,7 @@ type RealtimeServer struct {
 	Registry           *ConnectionRegistry
 	Admission          *AdmissionLimiter
 	Dispatcher         ClientFrameDispatcher
+	SessionDispatcher  SessionClientFrameDispatcher
 	Presence           PresenceProjection
 	PresenceOperations operation.Factory
 	RealtimeOwnerFence int64
@@ -60,6 +66,12 @@ type RealtimeServer struct {
 }
 
 func (s RealtimeServer) runtimeConfig() (limits.Config, RealtimePolicy, error) {
+	if s.Dispatcher != nil && s.SessionDispatcher != nil {
+		return limits.Config{}, RealtimePolicy{}, errors.New("ambiguous realtime dispatchers")
+	}
+	if s.SessionDispatcher != nil && s.Registry == nil {
+		return limits.Config{}, RealtimePolicy{}, errors.New("session dispatcher requires registry")
+	}
 	cfg := s.Limits
 	if cfg.RealtimeBufferedBytes == 0 {
 		cfg = limits.Default()
@@ -178,7 +190,7 @@ func (s RealtimeServer) ServeConn(ctx context.Context, conn net.Conn) error {
 					lastClientActivity = now
 					nextLiveness = now.Add(policy.LivenessInterval)
 					if s.Registry != nil {
-						regHandle, err = s.Registry.Replace(admission.Domain, writer)
+						regHandle, err = s.Registry.ReplaceAdmission(admission, writer)
 						if err != nil {
 							return err
 						}
@@ -222,10 +234,16 @@ func (s RealtimeServer) ServeConn(ctx context.Context, conn net.Conn) error {
 					}
 					s.record(lobby.BootEvent{MID: mids.MIDSocketHeartbeat, Kind: lobby.BootHeartbeat, Phase: lobby.PhaseClientRequestObserved, At: now, Key: roleKey, SessionTag: sessionTag, ContextTag: contextTag, ConnectionTag: connectionTag})
 				default:
-					if s.Dispatcher == nil {
+					if s.Dispatcher == nil && s.SessionDispatcher == nil {
 						return fmt.Errorf("%w: %d", ErrUnsupportedRealtimeMID, f.MID)
 					}
-					out, err := s.Dispatcher.HandleClientFrame(ctx, *admitted, f)
+					var out []wireRT.Frame
+					var err error
+					if s.SessionDispatcher != nil {
+						out, err = s.SessionDispatcher.HandleSessionClientFrame(ctx, regHandle, *admitted, f)
+					} else {
+						out, err = s.Dispatcher.HandleClientFrame(ctx, *admitted, f)
+					}
 					if err != nil {
 						return err
 					}

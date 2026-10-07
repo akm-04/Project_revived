@@ -1,0 +1,387 @@
+{
+  "schema": "gxb-i7a5a-foundation-trace/v1",
+  "baseline": {
+    "passmap_pass": "639.0",
+    "passmap_sha256": "bba6823a34ba41c445c017f0347e8488eb2b54cc548a9a5797c890f74e3a9bbf",
+    "backend_archive": "gxb-backend-v2-v0.91.0-pass638-i7a4d-accepted.zip",
+    "backend_sha256": "2fdbdfb9f4a97f5acf2a9e3fcf4efd42fd964edf59e91c7d6b88ecc97f4e57a1",
+    "backend_tree_sha256": "58aa9e6c2f4db113b690d15b1b68b6ba1dbb744883715ca26d0c126b27b662bc",
+    "src64_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+    "checkpoint_parent": {
+      "filename": "gxb1-checkpoint-80-i7a5a-research.zip",
+      "sha256": "82d6875e62da561a387121e38380b6c6ba38821545222d0b940c885d8cef838a"
+    }
+  },
+  "all_selected_D01_D14_reviewed": true,
+  "all8_I7A1_members_preserved": true,
+  "references": [
+    {
+      "logical_id": "D01",
+      "path": "00_PASSMAP/PASS463_DESIGNS/D01.json",
+      "sha256": "34ddc24af8cd3028366b1c672ead2a1ed1cad2207c5adc80cc151f45edbc851e",
+      "disposition": "PRESERVED",
+      "rationale": "One bounded callerTx per sender preparation/recipient authorization. Zero canonical mutation, no gameplay locks, no foreign SQL or network until definite read completion.",
+      "reviewed_invariants": [
+        "One command owns one transaction; nested owner ports accept caller transaction and never commit independently.",
+        "Before first canonical mutation, command-specific typed plans close every possible transactional canonical effect and required synchronization identity. Include indirect EXP/energy, overflow/Mail, immediate objectives, references and receipt/fact/obligation source rows.",
+        "Plan known keys or an explicit conservative superset. If a locked read discovers another key, expand before mutation and reacquire/retry in global order. Never acquire an out-of-order lock after mutation.",
+        "Post-commit notification, transport writing and River worker execution are delivery work, not extra gameplay-owner locks. Their durable source rows/obligations participate only according to their actual transactional ownership.",
+        "No universal effect-graph engine is mandated. Command-specific typed planners and existing global lock-rank registry suffice.",
+        "Each canonical row has exactly one owner; cross-owner code calls narrow typed ports. Missing-row creation fences a stable namespace/parent synchronization key.",
+        "Semantic receipt, immutable economic ledger, response payload and durable obligation remain distinct. Failed delivery after commit never authorizes repeat settlement."
+      ]
+    },
+    {
+      "logical_id": "D02",
+      "path": "00_PASSMAP/PASS475_DESIGNS/D02.json",
+      "sha256": "bfbe47718fdbee32df8fe7eec5439bce69e2c906b386c9dfd06706ae352cecfb",
+      "disposition": "PRESERVED",
+      "rationale": "Pin source/content revision and default_bubble10001; no source expressions/defaults invented, no mutable entitlement implied.",
+      "reviewed_invariants": [
+        "Preserve R4A-D plan and source hashes. Allocate the next unused forward migration after inspecting the actual tree; Pass460 already has migrations beyond 00006. Never renumber applied migrations.",
+        "Compiler emits deterministic immutable revision manifest: source archive/path/hash, parser version, typed row schemas, dependencies, validation diagnostics and output digest. Unsupported source expressions are explicit blockers, not defaults.",
+        "Load validated built-in revision transactionally on a fresh database with explicit active pointer. Activation checks all required owner capabilities and typed table consistency before switching pointer.",
+        "Pin revision once per operation; pass it into nested Grant, objective reducers and retries. A retry of a committed semantic operation uses its recorded revision. Policy revision is not entitlement identity.",
+        "Dynamic temporal limits are evaluated by owner state plus pinned policy; do not compile them into universal static caps.",
+        "Capability evidence is orthogonal dimensions, not a mutually exclusive lifecycle enum. Record research status/evidence, contract status/version, schema status, implementation artifact, PostgreSQL evidence, stock evidence, activation policy, and owner-assignment status separately. UNKNOWN is not false proof and DESIGNED is not implemented.",
+        "Full future capability enumeration does not block R4 installation of qualified I5 policies. Active revision validates only its declared enabled capability closure; retain unknown/inactive rows without inventing an owner.",
+        "Record capability applicability/reachability separately from evidence dimensions. A Lua class, instance-like ID or MID declaration alone does not activate a system. Missing symbol definitions/dynamic bindings remain RESEARCH_REQUIRED until source/effective-baseline closure; never invent numeric MID aliases.",
+        "AUDIT-MID-01: Preserve ordered raw MID declarations separately from the effective symbol map. Retain overwritten declarations as provenance, not active aliases by default.",
+        "AUDIT-MID-01: Bind effective mappings to exact packaged/OTA source hashes and proven load order. Unknown overlay/load precedence remains unqualified; downloaded presence alone is not activation.",
+        "AUDIT-MID-01: Packaged SAKURA_FIGHT_RESULT has declarations 246 then1826. After this table initializes the symbolic call selects1826 absent later changes. Do not delete246 across all variants or fabricate aliases for absent symbols.",
+        "AUDIT-MID-01: Catalog presence, direction, transport, reachability, handler binding and support status are separate evidence claims. Numeric-catalog counts must name raw versus effective semantics."
+      ]
+    },
+    {
+      "logical_id": "D03",
+      "path": "00_PASSMAP/PASS475_DESIGNS/D03.json",
+      "sha256": "77cfe501bb874e862702d7553aafa2a748b67b38bc2679d9b5f6967cee8e423a",
+      "disposition": "NOT_APPLICABLE",
+      "rationale": "No Hero/Pet asset lifecycle, grants or state mutation; canonical minimal profile read only.",
+      "reviewed_invariants": [
+        "Hero partner_id and Pet pet_id are distinct persistent identity domains, each separate from template table_id. Typed logical ownership is required; physical package/table layout remains reviewable.",
+        "Ordinary Hero and Pet equipment slots are progression state. Synthesized display Item IDs (tier*10+slot) must never become canonical globally allocated equipment identities. Hero slots stay under Hero logical authority; Pet slots under Pet logical authority; material stacks use TypedEconomy.",
+        "Spirit equipment has persistent spirit_id and requires explicit item-instance ownership/reference contract. Do not force Element, Inscription, Dorm or all future equipment into that model merely because a field is named item_id/equip_id.",
+        "Minimal asset materializers are typed, caller-transaction-aware and keyed by semantic grant plus stable line identity. Replay returns original created persistent entity IDs. Allocation and duplicate conversion follow owner-specific pinned policy, not response hydration.",
+        "Capacity, duplicate conversion, feed/evolution/awakening/consume rules require command-specific source/table/result/error/retention profiles before those commands are implemented and activated. Preserve current intentional unsupported destinations during R4-R7.",
+        "Bootstrap and migration use existing R2B contributor ports; no second character initializer. Snapshot exporters return immutable typed state and owning revisions.",
+        "No universal transfer or dismantle operation is inferred. A domain owner must specify legal targets, costs, reference behavior and replay policy before exposing each mutation.",
+        "Persistent asset ownership, time-bounded entitlement validity and currently selected appearance are distinct typed facts. Ordinary slots, Spirit instances and source-only Rune candidates must not be collapsed by a generic item_id convention. Rune remains a research candidate until active path qualification.",
+        "Timed skin entitlement must not be converted to a permanent boolean unlock. Current source has string-key map(-1 permanent, expiry timestamps) and numeric-key legacy list branches; wire profile and validity are explicit.",
+        "AUDIT-PROFILE-02: Use family-specific entitlement wire adapters: mapped skin -1, bubble nonpositive expiry, and avatar startTime+content duration must not share an assumed sentinel.",
+        "AUDIT-PROFILE-02: Normalize only qualified profiles to typed permanent/timed entitlement; missing, unknown and invalid wire representations stay distinct.",
+        "AUDIT-PROFILE-02: Entitlement, equipped/selected cosmetic and derived combat/display projection are separate facts. Lazy client cleanup is not authority to delete server ownership.",
+        "AUDIT-PROFILE-02: Pin content duration and authoritative time inputs for accepted operations; explicit expiry boundary policy belongs to each family.",
+        "AUDIT-PROFILE-04: Combat participant identity distinguishes owned instance, borrowed actor, trial projection and NPC/template projection. Template-derived trial combatants do not imply durable player ownership.",
+        "AUDIT-PROFILE-04: Qualified snapshot adapter records actor origin, operation-scoped identity, content/policy revision and deterministic projected stats; no live owner/content lookup inside resolver.",
+        "AUDIT-PROFILE-04: Temporary trial transformations must not persist to owned roster. Borrowed/owned references retain their existing validation and ownership rules."
+      ]
+    },
+    {
+      "logical_id": "D04",
+      "path": "00_PASSMAP/PASS463_DESIGNS/D04.json",
+      "sha256": "639a75c504c31e55ab7309854050610029f056a20a5d4704129759b2a3ed41b5",
+      "disposition": "NOT_APPLICABLE",
+      "rationale": "No formation/equipment assignment/reference writes; structured room/report references are5B/later owner gated.",
+      "reviewed_invariants": [
+        "Use a source-qualified reference kind: persistent partner_id, persistent pet_id, persistent spirit_id, or typed owner slot/template reference. Display object item_id does not establish persistent identity.",
+        "Formation identity includes its source context (type, num/team/profile, subject character and scope where applicable). Do not infer universal slot count, duplicate-template restriction or cross-mode exclusivity from one window.",
+        "Owner assignment, combat formation, Course attendance, Event Centre mission assignment and Dorm occupancy are different facts. Model explicit compatibility restrictions where evidenced; no universal busy boolean or global exclusive roster lock.",
+        "Any persistent reference mutation and consume path validates both owners under preplanned transaction synchronization. Either reject referenced-entity consumption or use the family-specific atomic detach rule; never eventual cleanup of canonical references.",
+        "Hero/Pet slot equip consumes the source-derived template material and updates slot state atomically. Spirit instance equip is a different typed transition. Element active/bound-backup state and Inscription replace/return flows have separate contracts.",
+        "Raw client arrays and packed strings are wire representations, not a prescribed database schema. Preserve ordering/zero sentinels/types at projection boundary.",
+        "Freeze each command schema only after input identity, current state, cost, locks, changes, result/error shape, replay behavior and snapshot producer are recorded.",
+        "Borrowing never transfers lender entity ownership. Retain Pass418 borrowed capability architecture and add offer eligibility/revocation/profile mapping where those commands activate. Cache rent_count/load_place inputs never authorize ownership, costs or available supply."
+      ]
+    },
+    {
+      "logical_id": "D05",
+      "path": "00_PASSMAP/PASS475_DESIGNS/D05.json",
+      "sha256": "20927a3640e39005669601f2154d7425c661ebf1c435dbeb791408e076faf368",
+      "disposition": "NOT_APPLICABLE",
+      "rationale": "No resolver or battle-input authority; report text is not live combat evidence.",
+      "reviewed_invariants": [
+        "The 726-unit battle count is a scoped corpus count, not a closed dependency graph. Qualify app models, transitive imports, global symbols, tables, environment branches and adapters.",
+        "Missing lib.battle.app.model.Item and lib.spirit.spirit_item server imports are unresolved source dependencies. Do not fabricate their historical behavior. Recover semantics or specify a reviewed V2 snapshot-only adapter with explicit compatibility status.",
+        "Resolver receives immutable fully materialized input: battle/rule/schema versions, deterministic RNG policy and seed, combatants, equipment, formations and all enabled stat contributors. It has no database, clock, network or owner service access.",
+        "Enumerate separate total-attribute paths and each producer: equipment, Fumo, practice, bookshelf/book skill, inscription, ConquerSchool, feed, Course, collection, Element and Spirit. Unsupported enabled producer blocks input; legitimate absent feature must be explicitly inactive, not silently zeroed.",
+        "Snapshot orchestration obtains a coherent owner view and records revisions before attempt seal. Settlement uses the attempt receipt, not rerunning against current owner state.",
+        "Claims of deterministic V2 replay and official RNG parity are separate. Resource/time bounds and isolated failure classification do not license fallback victory or reward.",
+        "I8 has separate technology/scaffolding and integrated-qualification milestones. Integrated qualification waits on required CHARACTER_ASSET_CORE and I9N stat producers even if those are implemented later numerically. A declared inactive producer may be omitted only under an explicit supported battle profile; missing active stats never become zeros.",
+        "Snapshot admission evaluates enabled timed entitlements at the declared freeze time. Later expiry/selection/offer edits do not rewrite a frozen attempt. A pending Practice/Inscription candidate is not an applied stat producer. Source-only Rune code does not automatically become a required combat producer.",
+        "AUDIT-PROFILE-02: Use family-specific entitlement wire adapters: mapped skin -1, bubble nonpositive expiry, and avatar startTime+content duration must not share an assumed sentinel.",
+        "AUDIT-PROFILE-02: Normalize only qualified profiles to typed permanent/timed entitlement; missing, unknown and invalid wire representations stay distinct.",
+        "AUDIT-PROFILE-02: Entitlement, equipped/selected cosmetic and derived combat/display projection are separate facts. Lazy client cleanup is not authority to delete server ownership.",
+        "AUDIT-PROFILE-02: Pin content duration and authoritative time inputs for accepted operations; explicit expiry boundary policy belongs to each family.",
+        "AUDIT-PROFILE-04: Combat participant identity distinguishes owned instance, borrowed actor, trial projection and NPC/template projection. Template-derived trial combatants do not imply durable player ownership.",
+        "AUDIT-PROFILE-04: Qualified snapshot adapter records actor origin, operation-scoped identity, content/policy revision and deterministic projected stats; no live owner/content lookup inside resolver.",
+        "AUDIT-PROFILE-04: Temporary trial transformations must not persist to owned roster. Borrowed/owned references retain their existing validation and ownership rules."
+      ]
+    },
+    {
+      "logical_id": "D06",
+      "path": "00_PASSMAP/PASS475_DESIGNS/D06.json",
+      "sha256": "35edbb372ea726e4eb1077b9cd36b7bc0169a8c3b46572efac8be38745ff023f",
+      "disposition": "PRESERVED",
+      "rationale": "Channel transport/UI is not a generic backend owner;9types mapped but5A only type0. No fake mode provider closure.",
+      "reviewed_invariants": [
+        "Client model classes and windows are projection/orchestration surfaces, not canonical backend owner boundaries. EventCentre, Dorm and Library each aggregate multiple responsibilities.",
+        "Maintain independent capability records with source MIDs, transition profiles, canonical fact owner, integration dependencies, stat producer and migration requirements. Unknown owner remains null with RESEARCH_REQUIRED; do not assign generic Workshop/Library authority to complete the register.",
+        "EventCentre read projection combines buildings, desk, Pet cabin and cabinet; bookshelf and cabinet skills feed Hero stats. Mission leader/partner usage is separately identifiable. Prefer typed owner projections aggregated under the existing wire endpoint.",
+        "Library forum actions are social scope; per-Hero relationship/dialog/collection is character progression/presentation scope. Dorm social actions do not own layout/occupancy/equipment or Hero EXP.",
+        "Course attendance and partner_courses are related canonical facts. Inscription includes pending rebuild then save/abandon; Element includes active and bound-backup equipment/levels. These require explicit state machines, not a generic stat map.",
+        "Common Economy/Grant/Mail/Generation mechanisms remain shared infrastructure; they do not own specialist progression truth.",
+        "An operation cannot activate until its owner, scope, transition/profile, dependencies and acceptance are qualified. Lexical source identification is not runtime proof.",
+        "Practice roll and save are separate state transitions. Treat paid proposed attributes separately from applied Hero/Pet attributes; retain generated candidate under semantic operation and revision before response. Consult PASS463_FOUNDATION_PROFILES.json for source-bounded candidate lifecycle obligations.",
+        "Work Place / TREASURE528-540 must satisfy PASS465_WORKPLACE_TIME_CONTRACT.json; clock infrastructure and inactive projection do not establish feature completion.",
+        "AUDIT-PROFILE-05: Clock supplies authoritative time, not universal reset or regeneration policy. Keep Pass465 Work Place time contract in force.",
+        "AUDIT-PROFILE-05: Client ServerTime +8-hour helper is evidence for that helper only. Specify timezone/reset offset, interval, cap and occurrence identity per enabled time policy.",
+        "AUDIT-PROFILE-05: Work Place recovery/spend uses its canonical resource/refresh facts and existing typed effect/transaction plan. UI timers and scheduler wakeups do not define server completion.",
+        "AUDIT-PROFILE-05: Record remainder, at-cap, elapsed interval and backwards-time handling as qualified policy before affected schema/command freeze; no silent policy guessed from display code."
+      ]
+    },
+    {
+      "logical_id": "D07",
+      "path": "00_PASSMAP/PASS475_DESIGNS/D07.json",
+      "sha256": "29042b4691e5af17c7ce7f0ce08b52eaf3c4d393ec459b01775d01b738c06c95",
+      "disposition": "PRESERVED",
+      "rationale": "Ephemeral per-writer enqueue order only; no global sequence/facts/jobs/replay or Presence authority. Existing heartbeat renewal unchanged.",
+      "reviewed_invariants": [
+        "Generation owns explicit occurrence identity, scope, time policy and lifecycle. Wall-clock recomputation is not the identity of an already accepted operation.",
+        "Jobs are at-least-once wakeups. Owner tables/obligations remain truth; job uniqueness is not economic idempotency. Reconciliation recreates lost delivery from durable obligations.",
+        "Facts have stable identity, owner aggregate revision, schema and causal operation reference. Consumers record deduplication and ordering policy; ordering is per relevant aggregate, not a promised global order.",
+        "Immediate objective effects participate in preplanned transaction locks. Deferred projections declare revision/watermark and read-your-write behavior. Realtime notifications cannot be the only durable evidence.",
+        "ActivityDirectory aggregates qualified owner providers and availability. It never authorizes spending/rewards or turns an unqualified capability on.",
+        "Shared scope retains participant character/logical-server identity. Cross-server namespaces require explicit owner keys and arbitration, not widening a character key.",
+        "Client timers/scene entry are not expiry or settlement authority. Authoritative admission and owner reconciliation enforce validity; jobs only wake durable owner obligations. Distinguish validity cutoff from physical deletion and retained receipt/tombstone history.",
+        "Shared packet claims require an occurrence owner and atomic arbitration over remaining allocation and recipient claims; notifications only project committed facts. Exact scope, supply, expiry and allocation policy must be researched before activation.",
+        "Work Place / TREASURE528-540 must satisfy PASS465_WORKPLACE_TIME_CONTRACT.json; clock infrastructure and inactive projection do not establish feature completion.",
+        "AUDIT-PROFILE-03: Battle Pass profile separates occurrence/season, progression, premium entitlement, normal/advanced claim state and shop currency. Client wallet projection is not a second wallet owner.",
+        "AUDIT-PROFILE-03: Season and subject scope must be part of durable claim identity; track/reward identity and content revision must be explicit.",
+        "AUDIT-PROFILE-03: Orchestrator composes typed Generation, progression/Objectives, Commerce entitlement and Economy/Grant effects in existing transaction/replay boundaries. No parallel seasonal wallet or universal BattlePass kernel.",
+        "AUDIT-PROFILE-03: Resolve late premium purchase, season rollover, historical claim replay and closure policy before schema freeze. Do not infer retroactive/refund policy from premium UI flag.",
+        "AUDIT-PROFILE-05: Clock supplies authoritative time, not universal reset or regeneration policy. Keep Pass465 Work Place time contract in force.",
+        "AUDIT-PROFILE-05: Client ServerTime +8-hour helper is evidence for that helper only. Specify timezone/reset offset, interval, cap and occurrence identity per enabled time policy.",
+        "AUDIT-PROFILE-05: Work Place recovery/spend uses its canonical resource/refresh facts and existing typed effect/transaction plan. UI timers and scheduler wakeups do not define server completion.",
+        "AUDIT-PROFILE-05: Record remainder, at-cap, elapsed interval and backwards-time handling as qualified policy before affected schema/command freeze; no silent policy guessed from display code."
+      ]
+    },
+    {
+      "logical_id": "D08",
+      "path": "00_PASSMAP/PASS463_DESIGNS/D08.json",
+      "sha256": "71d4a9884bf9c2692ee3313edd3367a8db89c91a2dc0af197eee420fb7c175fd",
+      "disposition": "NOT_APPLICABLE",
+      "rationale": "No Auction/escrow/settlement or reward state.",
+      "reviewed_invariants": [
+        "Auction is a shared lot state machine, not a Shop alias. Keys include scope profile, occurrence and lot; bidder identity retains character/server.",
+        "Choose and record source-compatible scope/time/bid profile before activation. Conflicting guide/translation closing times remain unresolved historical evidence; no universal official time is asserted.",
+        "Bid transaction locks lot plus all planned economy/entitlement owners in global order, revalidates open deadline and current bid, debits/reserves the new bid and creates unique refund entitlement for displaced escrow. Never refund by replaying transport.",
+        "Escrow liability, refund entitlement and winner entitlement have separate durable identities and audit entries. Define whether same-bidder increase reserves difference or full amount in the frozen profile; do not invent behavior.",
+        "Finalize closes bidding and creates unique winner delivery and any refund obligations atomically. Mail is an entitlement delivery mechanism with replay-safe claims. Unsold, cancelled and invalid-lot paths explicitly conserve liabilities.",
+        "DiamondSpend objective classification follows auction-specific inclusion/exclusion rules; refunds are not new earned income or qualifying spend.",
+        "Packaged source schedule profile is start18000/end77400 UTC+8 seconds-of-day (05:00-21:30). The runtime uses misc table values; this narrows text conflict for this packaged profile, not proof of deployed OTA/native effective baseline or exact server deadline inclusivity.",
+        "Current highest bidder may confirm another bid. UI checks full offered price against wallet and sends price; this is not proof whether server debit is difference or full amount. Keep same-bidder settlement policy unresolved; it blocks Auction activation, not R4.",
+        "Bid increment calculation in inspected window is ceil(1.01*current price). Freeze integer rounding, monetary bounds and zero-price/minimum under a reviewed profile and qualify boundary fixtures."
+      ]
+    },
+    {
+      "logical_id": "D09",
+      "path": "00_PASSMAP/PASS475_DESIGNS/D09.json",
+      "sha256": "8ebdecc274b084c103169dea764d16267a3a08db3d357b36b960e42bae1fdd82",
+      "disposition": "PRESERVED",
+      "rationale": "No Commerce/mode eligibility workaround; later producers require actual owners.",
+      "reviewed_invariants": [
+        "Retain I0-I15 numbering but use dependency edges for activation. I10A supplies only the typed Commerce services required by enabled I9 operations; it is not completion of all I10.",
+        "Every mode operation declares required owner ports, occurrence/policy versions and entitlement identity. Scaffolding can precede providers; completion and activation cannot.",
+        "Modes cannot introduce local wallets, reward tables, purchase ledgers or random draw authority to work around phase order.",
+        "Gacha/purchase outcomes are fixed once under semantic operation and pinned policy; replay cannot reroll. Payment/provider receipt identity differs from a nonce-less repeatable local request.",
+        "Fish and other specialist value services remain explicit domain providers; no assumption that generic Shop implements their state machines.",
+        "I9 scaffolding, I10A provider implementation and I9 operation integration are separate DAG nodes. Marking scaffolding complete must never close the whole mode or permit enabled mutations with missing providers.",
+        "Add RedEnvelope as a separately qualified shared-claim capability where enabled: source packet occurrence and category/send-right identity differ; do not implement it as Chat, Mail or an unbounded per-player Grant. Existing Economy/Grant/Generation are reused. Funding and allocation algorithm remain source/profile questions.",
+        "AUDIT-PROFILE-03: Battle Pass profile separates occurrence/season, progression, premium entitlement, normal/advanced claim state and shop currency. Client wallet projection is not a second wallet owner.",
+        "AUDIT-PROFILE-03: Season and subject scope must be part of durable claim identity; track/reward identity and content revision must be explicit.",
+        "AUDIT-PROFILE-03: Orchestrator composes typed Generation, progression/Objectives, Commerce entitlement and Economy/Grant effects in existing transaction/replay boundaries. No parallel seasonal wallet or universal BattlePass kernel.",
+        "AUDIT-PROFILE-03: Resolve late premium purchase, season rollover, historical claim replay and closure policy before schema freeze. Do not infer retroactive/refund policy from premium UI flag."
+      ]
+    },
+    {
+      "logical_id": "D10",
+      "path": "00_PASSMAP/PASS475_DESIGNS/D10.json",
+      "sha256": "5f44fded332a3b37459e7e2ba12a906ada4187dabb0a9b153a01cea959fe4932",
+      "disposition": "PRESERVED",
+      "rationale": "Channel live text distinct from Publication sets/read markers and domain entitlements; no activation of I7A9.",
+      "reviewed_invariants": [
+        "Publication owns immutable published sets, revisioned item identity, targeting/schedule and character read markers. Board and picture notices retain distinct stock projections.",
+        "Read markers bind publication set/item version; replacement semantics are specified rather than accidentally inheriting old read state.",
+        "Publication is presentation only. Links to domain capabilities resolve through ActivityDirectory and owner authorization; a notice cannot create eligibility or rewards.",
+        "Published media/OTA locations are validated by Control contracts. Operator draft/approve/publish history is auditable; historical revisions remain available for referenced markers.",
+        "AUDIT-PROFILE-02: Use family-specific entitlement wire adapters: mapped skin -1, bubble nonpositive expiry, and avatar startTime+content duration must not share an assumed sentinel.",
+        "AUDIT-PROFILE-02: Normalize only qualified profiles to typed permanent/timed entitlement; missing, unknown and invalid wire representations stay distinct.",
+        "AUDIT-PROFILE-02: Entitlement, equipped/selected cosmetic and derived combat/display projection are separate facts. Lazy client cleanup is not authority to delete server ownership.",
+        "AUDIT-PROFILE-02: Pin content duration and authoritative time inputs for accepted operations; explicit expiry boundary policy belongs to each family."
+      ]
+    },
+    {
+      "logical_id": "D11",
+      "path": "00_PASSMAP/PASS475_DESIGNS/D11.json",
+      "sha256": "c939268d7e67a73edbb849cb1c00b847adc0f09d07e4418e5e2bbc90ab39b62b",
+      "disposition": "PRESERVED",
+      "rationale": "Actual write observation is TRANSPORT_WRITE_RECORDED, not client consumption. Caller timeout after enqueue is outcome-unknown; no semantic receipt, parameter-hash collapse or fanout replay.",
+      "reviewed_invariants": [
+        "Guarantee at-most-once settlement for a known semantic operation. Do not equate this with perfect identification of every identical nonce-less stock request.",
+        "Transport write success means bytes accepted by transport, not application consumption. Rename such state to TRANSPORT_WRITE_RECORDED; it cannot by itself advance a consumptive replay lane.",
+        "Classify each family: intrinsic one-shot key, provider receipt key, explicit source nonce, or ambiguous repeatable parameters. Strong keys use semantic receipts; parameter hashes alone are not universal operation identity.",
+        "For ambiguous repeatable consumptive families default to fail-closed ambiguity after an unresolved operation. Reconnect, lease expiry and receipt age alone do not prove new intent. A family may adopt an explicit bounded compatibility policy only with documented residual duplicate/false-replay tradeoff and W2 acceptance; no universal no-double-charge claim.",
+        "Retention preserves receipt/tombstone meaning across restore. Expiry must not silently reopen a previously settled one-shot entitlement. Response payloads never retain raw credentials.",
+        "No private nonce or modified-client acknowledgment may be required of an unmodified stock client.",
+        "Practice SAVE identifies actor without candidate revision. Internal revision fencing prevents stale internal writes, but cannot perfectly identify whether a delayed nonce-less SAVE intended an older or newly replaced draft. Require family-specific conservative/compatibility policy, as with repeated paid requests; no private client nonce or perfect stale-intent guarantee.",
+        "AUDIT-MID-01: Preserve ordered raw MID declarations separately from the effective symbol map. Retain overwritten declarations as provenance, not active aliases by default.",
+        "AUDIT-MID-01: Bind effective mappings to exact packaged/OTA source hashes and proven load order. Unknown overlay/load precedence remains unqualified; downloaded presence alone is not activation.",
+        "AUDIT-MID-01: Packaged SAKURA_FIGHT_RESULT has declarations 246 then1826. After this table initializes the symbolic call selects1826 absent later changes. Do not delete246 across all variants or fabricate aliases for absent symbols.",
+        "AUDIT-MID-01: Catalog presence, direction, transport, reachability, handler binding and support status are separate evidence claims. Numeric-catalog counts must name raw versus effective semantics."
+      ]
+    },
+    {
+      "logical_id": "D12",
+      "path": "00_PASSMAP/PASS463_DESIGNS/D12.json",
+      "sha256": "ffe22db54162940466e909a298c5c5907a2a0bd14fb597991c64357981c74f72",
+      "disposition": "PRESERVED",
+      "rationale": "Canonical I4 actor and exact Guild JOIN; existing single realtime owner/fence, exact current handle; raw bearer never retained/logged.",
+      "reviewed_invariants": [
+        "Preserve R1-R3 local repairs. Keyring has explicit active signing key, retained verification versions and revocation policy. Rotation retains only nonsecret receipt identity; never reintroduces raw credentials.",
+        "Logical server lifecycle includes terminal RETIRED tombstone; ID reuse is prohibited. Maintenance/drain do not reset first-open or occurrence history. Character ownership scope remains immutable except explicit audited migration.",
+        "Production multi-replica ownership requires fenced lease/epoch enforcement for session delivery and scheduled ownership where used. Until validated, explicitly enforce supported single-owner deployment; in-memory singleton is not distributed exclusion.",
+        "Observability must reach bounded real sinks: operation/receipt/obligation IDs, outcome/revision and latency; secret redaction, cardinality and retention limits. An interface without sink is not operational proof.",
+        "Encode and size-check response before headers/write where possible. Keep immutable committed outcome separate from current safe session/detail hydration. Encode/send error cannot trigger another economic commit.",
+        "Operator commands use the same domain ports and audit authorization; no generic database-write admin endpoint. OTA namespace/version and preservation SDK unknowns block those features, not unrelated repairs.",
+        "Outcome adapters must distinguish canonical settlement result from source-shaped envelope/error fields. Hero and Pet equip clients apply slot/inventory updates on OK OR error_code30001; research that family response before mapping all nonzero codes to rollback/retry. This source behavior does not itself prove the historical server transaction.",
+        "Wire profile qualification includes caller/callee argument contract and effective code path. Inspected RedEnvelope grab model forwards one callback argument while window expects two; no backend response schema can alone fix that positional mismatch. Record source contradiction and verify reachability/effective baseline under ZCM before activation.",
+        "Preserve AMF3 array/object and numeric/string key distinctions where source branches on them, including skin_ids. Do not assume JSON-like map normalization preserves client semantics."
+      ]
+    },
+    {
+      "logical_id": "D13",
+      "path": "00_PASSMAP/PASS463_DESIGNS/D13.json",
+      "sha256": "323563f4f2af0d53c1f6ffdf99d7bb28bec241bb60d1e883e24aac2858cf2745",
+      "disposition": "PRESERVED",
+      "rationale": "No migration/pin change; native PG/TCP concurrent/lifecycle/restart tests planned before acceptance; checkpoint/component proof cannot accept feature.",
+      "reviewed_invariants": [
+        "Every owner added now declares schema version, forward migration/backfill, source mapping, identity/tombstone retention and rollback/roll-forward boundary. Do not defer owner data semantics to I13.",
+        "Restore creates/records history epoch and reconciles external payments/receipts before reopening writes. Retain semantic operation identity across restore; never pretend recovered queue delivery proves external settlement.",
+        "Preserve Pass425 RPO/RTO policy as acceptance targets, not achieved measurements. Backup success is not restore proof.",
+        "I12 is global integration hardening, not first concurrency test. R7 proves repaired foundation on real PostgreSQL/River; each later owner carries scoped DB concurrency/recovery proof. W2 remains comprehensive real stock-client/restore/migration/load acceptance after I14.",
+        "I14 runs available checks and enumerates unavailable checks with exact evidence needs. Replace literally every test possible with a versioned risk/requirement inventory; missing evidence cannot become PASS.",
+        "I15 reconciles each required capability, acceptance row and outstanding unknown against actual evidence. No release with unresolved required feature dependencies; deliberately inactive features must be source-compatible and explicitly approved in release scope."
+      ]
+    },
+    {
+      "logical_id": "D14",
+      "path": "00_PASSMAP/PASS463_DESIGNS/D14.json",
+      "sha256": "45cd98a6ac2735b108122d60d593d96786f498d198c0a590d59ed39d999c8c62",
+      "disposition": "PRESERVED_ADDITIVE_EXTENSION",
+      "rationale": "Narrow handle-aware dispatcher, immutable admitted-Guild capability and callerTx owner-read composition, legacy adapters retained; explicit consumers/effects/evidence below.",
+      "reviewed_invariants": [
+        "Supersede absolute prohibition on future interface edits. Prefer additive narrow typed ports; permit evidence-backed versioned interface evolution when an actual new responsibility requires it.",
+        "A change record names source contradiction/new capability, owning package, consumers, data migration, compatibility adapter, lock/effect changes and acceptance evidence. Deprecate old version only after consumer migration.",
+        "No opaque map, reflection registry, generic foreign-table repository or bypass SQL solely to avoid changing a port.",
+        "Keep modular monolith and PostgreSQL transaction boundary. Separate processes are justified only by isolation/operational need, such as battle resolver; no new universal event bus or ledger owner.",
+        "Modularity is a reviewable ownership/dependency property, not a guarantee that unforeseen discoveries never change foundations."
+      ]
+    },
+    {
+      "logical_id": "I7A1_PHASE_ARCHITECTURE_CONTRACT",
+      "path": "00_PASSMAP/PASS622_I7A1_PHASE_ARCHITECTURE_CONTRACT.json",
+      "sha256": "c870861afc84378d18b62d867823a3fb9969cf04452067479f8776f7aac96362",
+      "disposition": "PRESERVED_UNCHANGED",
+      "rationale": "Required5A stage-entry reconciliation; scope no durability/grants, strict source wire, exact owners, separate runtime gate and explicit lifecycle authorization."
+    },
+    {
+      "logical_id": "I7A1_TRANSACTION_LOCK_EFFECT_CONTRACT",
+      "path": "00_PASSMAP/PASS622_I7A1_TRANSACTION_LOCK_EFFECT_CONTRACT.json",
+      "sha256": "c4e11cbab1a7193fd7575229f76a1322128273047d599e08deac7993959f85f8",
+      "disposition": "PRESERVED_UNCHANGED",
+      "rationale": "Required5A stage-entry reconciliation; scope no durability/grants, strict source wire, exact owners, separate runtime gate and explicit lifecycle authorization."
+    },
+    {
+      "logical_id": "I7A1_DELIVERY_RECOVERY_WIRE_CONTRACT",
+      "path": "00_PASSMAP/PASS622_I7A1_DELIVERY_RECOVERY_WIRE_CONTRACT.json",
+      "sha256": "80964805f03f8b6f9d3324283a82248db512db57950a9fc1e2ffe6f00b0729b6",
+      "disposition": "PRESERVED_UNCHANGED",
+      "rationale": "Required5A stage-entry reconciliation; scope no durability/grants, strict source wire, exact owners, separate runtime gate and explicit lifecycle authorization."
+    },
+    {
+      "logical_id": "I7A1_TIME_CONTENT_POLICY_REGISTER",
+      "path": "00_PASSMAP/PASS622_I7A1_TIME_CONTENT_POLICY_REGISTER.json",
+      "sha256": "4b4cb9801cb35a9cab4cd11f706abf2c28be6addcc00297eb524e0fbb9face5a",
+      "disposition": "PRESERVED_UNCHANGED",
+      "rationale": "Required5A stage-entry reconciliation; scope no durability/grants, strict source wire, exact owners, separate runtime gate and explicit lifecycle authorization."
+    },
+    {
+      "logical_id": "I7A1_MIGRATION_RESTORE_PROOF_CONTRACT",
+      "path": "00_PASSMAP/PASS622_I7A1_MIGRATION_RESTORE_PROOF_CONTRACT.json",
+      "sha256": "11d72e984bee246982cafd0e849f206aabb5e6a42d5393b50042be87b5896e88",
+      "disposition": "PRESERVED_UNCHANGED",
+      "rationale": "Required5A stage-entry reconciliation; scope no durability/grants, strict source wire, exact owners, separate runtime gate and explicit lifecycle authorization."
+    },
+    {
+      "logical_id": "I7A1_STAGE_ACCEPTANCE_CONTRACT",
+      "path": "00_PASSMAP/PASS622_I7A1_STAGE_ACCEPTANCE_CONTRACT.json",
+      "sha256": "a4266a4234d83db34ba3fa0e58599c8764385260b1a87b5ca057d3b64fbb5a55",
+      "disposition": "PRESERVED_UNCHANGED",
+      "rationale": "Required5A stage-entry reconciliation; scope no durability/grants, strict source wire, exact owners, separate runtime gate and explicit lifecycle authorization."
+    },
+    {
+      "logical_id": "I7A1_EVIDENCE_CLASSIFICATION",
+      "path": "00_PASSMAP/PASS622_I7A1_EVIDENCE_CLASSIFICATION.json",
+      "sha256": "f129b63c7afe95f5f6850ddbb81868eb1eba82c956240f2dd5f017617cc56457",
+      "disposition": "PRESERVED_UNCHANGED",
+      "rationale": "Required5A stage-entry reconciliation; scope no durability/grants, strict source wire, exact owners, separate runtime gate and explicit lifecycle authorization."
+    },
+    {
+      "logical_id": "I7A1_PREIMPLEMENTATION_REALITY_CHECK",
+      "path": "00_PASSMAP/PASS622_I7A1_PREIMPLEMENTATION_REALITY_CHECK.json",
+      "sha256": "62d75cc680b3ae8570f355b9c03ae2e99703e4809cc2e8dfa77d61dfb4879d96",
+      "disposition": "PRESERVED_UNCHANGED",
+      "rationale": "Required5A stage-entry reconciliation; scope no durability/grants, strict source wire, exact owners, separate runtime gate and explicit lifecycle authorization."
+    },
+    {
+      "logical_id": "i7a2_implementation_contract",
+      "path": "00_PASSMAP/PASS623_I7A2_IMPLEMENTATION_CONTRACT.json",
+      "sha256": "2d7a2c8a732b3ae5259fa6bea060accb25df08997034892050d88e3a43ef43dd",
+      "disposition": "PRESERVED",
+      "rationale": "Reuse accepted single-writer/registry/minimal sender/canonical Guild owner epoch and selected successor applicability; no feature activation from descriptor alone."
+    },
+    {
+      "logical_id": "i7a3_implementation_contract",
+      "path": "00_PASSMAP/PASS625_I7A3_IMPLEMENTATION_CONTRACT.json",
+      "sha256": "4f4bb3f0ead56e94de9a378c2d28896c0cd35bac142b94354435b754b8c82ebc",
+      "disposition": "PRESERVED",
+      "rationale": "Reuse accepted single-writer/registry/minimal sender/canonical Guild owner epoch and selected successor applicability; no feature activation from descriptor alone."
+    },
+    {
+      "logical_id": "i7a3_repair1_contract_amendment",
+      "path": "00_PASSMAP/PASS628_I7A3_REPAIR1_CONTRACT_AMENDMENT.json",
+      "sha256": "bc73a056d4a4cae05ced3cd4edf213e1c2ddb02c4616525d1d4fe3452036f318",
+      "disposition": "PRESERVED",
+      "rationale": "Reuse accepted single-writer/registry/minimal sender/canonical Guild owner epoch and selected successor applicability; no feature activation from descriptor alone."
+    },
+    {
+      "logical_id": "i7a3_repair2_contract_amendment",
+      "path": "00_PASSMAP/PASS628_I7A3_REPAIR2_CONTRACT_AMENDMENT.json",
+      "sha256": "424b5faa1ca7c654087eede1556e6b2b9d09e9fb119b82d86d2cc9a7378a3504",
+      "disposition": "PRESERVED",
+      "rationale": "Reuse accepted single-writer/registry/minimal sender/canonical Guild owner epoch and selected successor applicability; no feature activation from descriptor alone."
+    },
+    {
+      "logical_id": "i7a4_successor_contract",
+      "path": "00_PASSMAP/PASS639_I7A4_SUCCESSOR_CONTRACT.json",
+      "sha256": "b620690bcc59cec62141a8e79af466edbbc023ab6b91c8f2aa7447ace395b05e",
+      "disposition": "PRESERVED",
+      "rationale": "Reuse accepted single-writer/registry/minimal sender/canonical Guild owner epoch and selected successor applicability; no feature activation from descriptor alone."
+    }
+  ],
+  "migration_changed": false,
+  "selected_contract_bytes_changed": [],
+  "pass": "640.0",
+  "selected_status": "SELECTED_WITH_VALIDATED_NORMAL_RESEARCH_DESIGN_SEAL_NOT_IMPLEMENTED"
+}

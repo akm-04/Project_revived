@@ -1,0 +1,282 @@
+{
+  "schema": "gxb-i7a5a-source-binding/v1",
+  "source_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+  "all_assets_sha256": "b04eab34b8041e455aaac31557d9cbadb1a9280f41d2a7f31ba452d0696be87e",
+  "members": [
+    {
+      "cache": "source_cache/current/app/model/MessageManager.lua",
+      "origin": "/home/akm/Chatgpt/2026-10-06/files-mentioned-by-the-user-additional/work/initialization/source/all-assest-rechecked-1/app-assets/output/assets/src_64/app/model/MessageManager.lua",
+      "sha256": "493f6452938f038d201462771228744559aa8f446f1233bc0228f2de6db17a46",
+      "bytes": 71430,
+      "classification": "CURRENT_CLIENT_SOURCE_FACT",
+      "archive": "all-assest-rechecked-1.zip",
+      "archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+      "member": "app-assets/output/assets/src_64/app/model/MessageManager.lua",
+      "verified_exact_archive_member": true
+    },
+    {
+      "cache": "source_cache/current/app/common/network/Backend.lua",
+      "origin": "/home/akm/Chatgpt/2026-10-06/files-mentioned-by-the-user-additional/work/initialization/source/all-assest-rechecked-1/app-assets/output/assets/src_64/app/common/network/Backend.lua",
+      "sha256": "95378e2b0be8180df6de27e9e430c630bcfe46c080e1f91ef5f6d74bdbb1b840",
+      "bytes": 36252,
+      "classification": "CURRENT_CLIENT_SOURCE_FACT",
+      "archive": "all-assest-rechecked-1.zip",
+      "archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+      "member": "app-assets/output/assets/src_64/app/common/network/Backend.lua",
+      "verified_exact_archive_member": true
+    },
+    {
+      "cache": "source_cache/current/app/common/network/mid.lua",
+      "origin": "/home/akm/Chatgpt/2026-10-06/files-mentioned-by-the-user-additional/work/initialization/source/all-assest-rechecked-1/app-assets/output/assets/src_64/app/common/network/mid.lua",
+      "sha256": "026a20b29d97624979777a68c64c749254031604057ff42aa8f8254c3e35b5af",
+      "bytes": 43121,
+      "classification": "CURRENT_CLIENT_SOURCE_FACT",
+      "archive": "all-assest-rechecked-1.zip",
+      "archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+      "member": "app-assets/output/assets/src_64/app/common/network/mid.lua",
+      "verified_exact_archive_member": true
+    },
+    {
+      "cache": "source_cache/current/app/common/enums.lua",
+      "origin": "/home/akm/Chatgpt/2026-10-06/files-mentioned-by-the-user-additional/work/initialization/source/all-assest-rechecked-1/app-assets/output/assets/src_64/app/common/enums.lua",
+      "sha256": "15340bd89fe7c6f150ccfd4a5cd2a2f0e8e73c89dfae9ac3388376a4799901f3",
+      "bytes": 80531,
+      "classification": "CURRENT_CLIENT_SOURCE_FACT",
+      "archive": "all-assest-rechecked-1.zip",
+      "archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+      "member": "app-assets/output/assets/src_64/app/common/enums.lua",
+      "verified_exact_archive_member": true
+    },
+    {
+      "cache": "source_cache/current/app/windows/ChatWindow.lua",
+      "origin": "/home/akm/Chatgpt/2026-10-06/files-mentioned-by-the-user-additional/work/initialization/source/all-assest-rechecked-1/app-assets/output/assets/src_64/app/windows/ChatWindow.lua",
+      "sha256": "f6d1014e5ced715de0d06e3443d01c73ffa99adce78862566cd95aff26043eec",
+      "bytes": 52371,
+      "classification": "CURRENT_CLIENT_SOURCE_FACT",
+      "archive": "all-assest-rechecked-1.zip",
+      "archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+      "member": "app-assets/output/assets/src_64/app/windows/ChatWindow.lua",
+      "verified_exact_archive_member": true
+    },
+    {
+      "cache": "source_cache/current/app/modules/ChatBar.lua",
+      "origin": "/home/akm/Chatgpt/2026-10-06/files-mentioned-by-the-user-additional/work/initialization/source/all-assest-rechecked-1/app-assets/output/assets/src_64/app/modules/ChatBar.lua",
+      "sha256": "9d9decc679586543e00e7be26b3c44f7189176954fcaf5b1fc59f62f0c40fa09",
+      "bytes": 4293,
+      "classification": "CURRENT_CLIENT_SOURCE_FACT",
+      "archive": "all-assest-rechecked-1.zip",
+      "archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+      "member": "app-assets/output/assets/src_64/app/modules/ChatBar.lua",
+      "verified_exact_archive_member": true
+    },
+    {
+      "cache": "source_cache/current/app/common/storage/ChatMessageRecord.lua",
+      "origin": "/home/akm/Chatgpt/2026-10-06/files-mentioned-by-the-user-additional/work/initialization/source/all-assest-rechecked-1/app-assets/output/assets/src_64/app/common/storage/ChatMessageRecord.lua",
+      "sha256": "357f7bec4fe9eb8da4d214e8179fee6fb7a68e65a2adf2cb9311009a99613b62",
+      "bytes": 2223,
+      "classification": "CURRENT_CLIENT_SOURCE_FACT",
+      "archive": "all-assest-rechecked-1.zip",
+      "archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+      "member": "app-assets/output/assets/src_64/app/common/storage/ChatMessageRecord.lua",
+      "verified_exact_archive_member": true
+    },
+    {
+      "cache": "source_cache/current/data/tables/chat_config.lua",
+      "origin": "/home/akm/Chatgpt/2026-10-06/files-mentioned-by-the-user-additional/work/initialization/source/all-assest-rechecked-1/app-assets/output/assets/src_64/data/tables/chat_config.lua",
+      "sha256": "5662a0144955cec95150e78767d49a467bf2842d9a2f6cba9a4bbaea8ba8edfa",
+      "bytes": 286,
+      "classification": "CURRENT_CLIENT_SOURCE_FACT",
+      "archive": "all-assest-rechecked-1.zip",
+      "archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+      "member": "app-assets/output/assets/src_64/data/tables/chat_config.lua",
+      "verified_exact_archive_member": true
+    },
+    {
+      "cache": "source_cache/current/app/common/tables/ChatConfigTable.lua",
+      "origin": "/home/akm/Chatgpt/2026-10-06/files-mentioned-by-the-user-additional/work/initialization/source/all-assest-rechecked-1/app-assets/output/assets/src_64/app/common/tables/ChatConfigTable.lua",
+      "sha256": "90e7e285761264f18d0fc7a75c90345916f9196c9002b2f8b65dffad53437309",
+      "bytes": 630,
+      "classification": "CURRENT_CLIENT_SOURCE_FACT",
+      "archive": "all-assest-rechecked-1.zip",
+      "archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+      "member": "app-assets/output/assets/src_64/app/common/tables/ChatConfigTable.lua",
+      "verified_exact_archive_member": true
+    },
+    {
+      "cache": "source_cache/current/data/tables/misc.lua",
+      "origin": "/home/akm/Chatgpt/2026-10-06/files-mentioned-by-the-user-additional/work/initialization/source/all-assest-rechecked-1/app-assets/output/assets/src_64/data/tables/misc.lua",
+      "sha256": "058cf5719421ed71a12083a8c95b0ccded7204bedb5fa1263d508e2fa4257f9a",
+      "bytes": 175945,
+      "classification": "CURRENT_CLIENT_SOURCE_FACT",
+      "archive": "all-assest-rechecked-1.zip",
+      "archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+      "member": "app-assets/output/assets/src_64/data/tables/misc.lua",
+      "verified_exact_archive_member": true
+    },
+    {
+      "cache": "source_cache/current/app/common/tables/MiscTable.lua",
+      "origin": "/home/akm/Chatgpt/2026-10-06/files-mentioned-by-the-user-additional/work/initialization/source/all-assest-rechecked-1/app-assets/output/assets/src_64/app/common/tables/MiscTable.lua",
+      "sha256": "6579de771dbef3224fcaa9568a8fcfade26209f134acfe3a3e666ecbd6c13cee",
+      "bytes": 75984,
+      "classification": "CURRENT_CLIENT_SOURCE_FACT",
+      "archive": "all-assest-rechecked-1.zip",
+      "archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+      "member": "app-assets/output/assets/src_64/app/common/tables/MiscTable.lua",
+      "verified_exact_archive_member": true
+    },
+    {
+      "cache": "source_cache/current/app/windows/IllusionInviteWindow.lua",
+      "origin": "/home/akm/Chatgpt/2026-10-06/files-mentioned-by-the-user-additional/work/initialization/source/all-assest-rechecked-1/app-assets/output/assets/src_64/app/windows/IllusionInviteWindow.lua",
+      "sha256": "d16287d8065e23fe3b418e8ef3d001b1c0754a4e1821977b74b3aa3977dee8ab",
+      "bytes": 7282,
+      "classification": "CURRENT_CLIENT_SOURCE_FACT",
+      "archive": "all-assest-rechecked-1.zip",
+      "archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+      "member": "app-assets/output/assets/src_64/app/windows/IllusionInviteWindow.lua",
+      "verified_exact_archive_member": true
+    },
+    {
+      "cache": "source_cache/current/app/windows/OccultInviteWindow.lua",
+      "origin": "/home/akm/Chatgpt/2026-10-06/files-mentioned-by-the-user-additional/work/initialization/source/all-assest-rechecked-1/app-assets/output/assets/src_64/app/windows/OccultInviteWindow.lua",
+      "sha256": "ec1b6ad8827d1141cd2a60b5a7413e664c33946e0c4125efa85972ff7eddba4d",
+      "bytes": 7371,
+      "classification": "CURRENT_CLIENT_SOURCE_FACT",
+      "archive": "all-assest-rechecked-1.zip",
+      "archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+      "member": "app-assets/output/assets/src_64/app/windows/OccultInviteWindow.lua",
+      "verified_exact_archive_member": true
+    },
+    {
+      "cache": "source_cache/current/app/windows/AdventureIllusionInviteWindow.lua",
+      "origin": "/home/akm/Chatgpt/2026-10-06/files-mentioned-by-the-user-additional/work/initialization/source/all-assest-rechecked-1/app-assets/output/assets/src_64/app/windows/AdventureIllusionInviteWindow.lua",
+      "sha256": "45a9e0b5eaed138e2cb99917b867a001971d8456fa32831f97aae5f61dad4dba",
+      "bytes": 7336,
+      "classification": "CURRENT_CLIENT_SOURCE_FACT",
+      "archive": "all-assest-rechecked-1.zip",
+      "archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+      "member": "app-assets/output/assets/src_64/app/windows/AdventureIllusionInviteWindow.lua",
+      "verified_exact_archive_member": true
+    },
+    {
+      "cache": "source_cache/current/app/windows/AdventureDefenseInviteWindow.lua",
+      "origin": "/home/akm/Chatgpt/2026-10-06/files-mentioned-by-the-user-additional/work/initialization/source/all-assest-rechecked-1/app-assets/output/assets/src_64/app/windows/AdventureDefenseInviteWindow.lua",
+      "sha256": "b194af453bbd09b87cccc4903a89017bca9e85b9d517ccc84ab3c6c59405cc16",
+      "bytes": 7245,
+      "classification": "CURRENT_CLIENT_SOURCE_FACT",
+      "archive": "all-assest-rechecked-1.zip",
+      "archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+      "member": "app-assets/output/assets/src_64/app/windows/AdventureDefenseInviteWindow.lua",
+      "verified_exact_archive_member": true
+    },
+    {
+      "cache": "source_cache/current/app/windows/RagnarokInviteWindow.lua",
+      "origin": "/home/akm/Chatgpt/2026-10-06/files-mentioned-by-the-user-additional/work/initialization/source/all-assest-rechecked-1/app-assets/output/assets/src_64/app/windows/RagnarokInviteWindow.lua",
+      "sha256": "65129eec77b8c7b4e3f7c8560907a5fc02a442c9e6663ba962e27fe0a771151e",
+      "bytes": 6937,
+      "classification": "CURRENT_CLIENT_SOURCE_FACT",
+      "archive": "all-assest-rechecked-1.zip",
+      "archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+      "member": "app-assets/output/assets/src_64/app/windows/RagnarokInviteWindow.lua",
+      "verified_exact_archive_member": true
+    },
+    {
+      "cache": "source_cache/current/app/windows/GroupChatWnd.lua",
+      "origin": "/home/akm/Chatgpt/2026-10-06/files-mentioned-by-the-user-additional/work/initialization/source/all-assest-rechecked-1/app-assets/output/assets/src_64/app/windows/GroupChatWnd.lua",
+      "sha256": "6cef1f7d9889f54f3accbe972fece72e902cdbfa23a1c3a5e9ad412dc338ad41",
+      "bytes": 24028,
+      "classification": "CURRENT_CLIENT_SOURCE_FACT",
+      "archive": "all-assest-rechecked-1.zip",
+      "archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+      "member": "app-assets/output/assets/src_64/app/windows/GroupChatWnd.lua",
+      "verified_exact_archive_member": true
+    },
+    {
+      "cache": "source_cache/current/app/windows/GroupChatNewWnd.lua",
+      "origin": "/home/akm/Chatgpt/2026-10-06/files-mentioned-by-the-user-additional/work/initialization/source/all-assest-rechecked-1/app-assets/output/assets/src_64/app/windows/GroupChatNewWnd.lua",
+      "sha256": "ba3b07b08907dfd92cb90526fa848638c42ae6d2af2d1b19f45667acd8a1df79",
+      "bytes": 24122,
+      "classification": "CURRENT_CLIENT_SOURCE_FACT",
+      "archive": "all-assest-rechecked-1.zip",
+      "archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+      "member": "app-assets/output/assets/src_64/app/windows/GroupChatNewWnd.lua",
+      "verified_exact_archive_member": true
+    },
+    {
+      "cache": "source_cache/current/app/windows/RecordShareMenuWindow.lua",
+      "origin": "/home/akm/Chatgpt/2026-10-06/files-mentioned-by-the-user-additional/work/initialization/source/all-assest-rechecked-1/app-assets/output/assets/src_64/app/windows/RecordShareMenuWindow.lua",
+      "sha256": "62bd8504afbb513f91591980c6bc06d7461e715e54acbb5115d11467d4d4a143",
+      "bytes": 3372,
+      "classification": "CURRENT_CLIENT_SOURCE_FACT",
+      "archive": "all-assest-rechecked-1.zip",
+      "archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+      "member": "app-assets/output/assets/src_64/app/windows/RecordShareMenuWindow.lua",
+      "verified_exact_archive_member": true
+    },
+    {
+      "cache": "source_cache/current/app/windows/ArenaRecordWindow.lua",
+      "origin": "/home/akm/Chatgpt/2026-10-06/files-mentioned-by-the-user-additional/work/initialization/source/all-assest-rechecked-1/app-assets/output/assets/src_64/app/windows/ArenaRecordWindow.lua",
+      "sha256": "62615dcbf8d59f4bd64150901ea0cfc1ff25b24cddeaa9b7a8122d84d13b341a",
+      "bytes": 33920,
+      "classification": "CURRENT_CLIENT_SOURCE_FACT",
+      "archive": "all-assest-rechecked-1.zip",
+      "archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+      "member": "app-assets/output/assets/src_64/app/windows/ArenaRecordWindow.lua",
+      "verified_exact_archive_member": true
+    },
+    {
+      "cache": "source_cache/current/app/windows/NewArenaRecordWindow.lua",
+      "origin": "/home/akm/Chatgpt/2026-10-06/files-mentioned-by-the-user-additional/work/initialization/source/all-assest-rechecked-1/app-assets/output/assets/src_64/app/windows/NewArenaRecordWindow.lua",
+      "sha256": "74e057dbe8bdb84c075fab911886b79b11bec65873ed6887ab033ea426f88abb",
+      "bytes": 34399,
+      "classification": "CURRENT_CLIENT_SOURCE_FACT",
+      "archive": "all-assest-rechecked-1.zip",
+      "archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+      "member": "app-assets/output/assets/src_64/app/windows/NewArenaRecordWindow.lua",
+      "verified_exact_archive_member": true
+    },
+    {
+      "cache": "source_cache/current/app/windows/ChampionsLeagueRecordWindow.lua",
+      "origin": "/home/akm/Chatgpt/2026-10-06/files-mentioned-by-the-user-additional/work/initialization/source/all-assest-rechecked-1/app-assets/output/assets/src_64/app/windows/ChampionsLeagueRecordWindow.lua",
+      "sha256": "69c431fb9d0bc4303048b3b87ed660ec649b4b2cf3ae4f25fe6a61dd45d150ab",
+      "bytes": 13772,
+      "classification": "CURRENT_CLIENT_SOURCE_FACT",
+      "archive": "all-assest-rechecked-1.zip",
+      "archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+      "member": "app-assets/output/assets/src_64/app/windows/ChampionsLeagueRecordWindow.lua",
+      "verified_exact_archive_member": true
+    },
+    {
+      "cache": "source_cache/current/app/windows/ScratchCardRecordWindow.lua",
+      "origin": "/home/akm/Chatgpt/2026-10-06/files-mentioned-by-the-user-additional/work/initialization/source/all-assest-rechecked-1/app-assets/output/assets/src_64/app/windows/ScratchCardRecordWindow.lua",
+      "sha256": "69ee32f4e63252e1ce92be33bbd758c51b9c2db1948545f49e55e67a03edb2e7",
+      "bytes": 7188,
+      "classification": "CURRENT_CLIENT_SOURCE_FACT",
+      "archive": "all-assest-rechecked-1.zip",
+      "archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+      "member": "app-assets/output/assets/src_64/app/windows/ScratchCardRecordWindow.lua",
+      "verified_exact_archive_member": true
+    },
+    {
+      "cache": "source_cache/current/app/windows/WarCampRecordsWindow.lua",
+      "origin": "/home/akm/Chatgpt/2026-10-06/files-mentioned-by-the-user-additional/work/initialization/source/all-assest-rechecked-1/app-assets/output/assets/src_64/app/windows/WarCampRecordsWindow.lua",
+      "sha256": "cdfbf058d9538f96a098cbf17bbab0de143a4bdb74955c964e8e76943ff0143f",
+      "bytes": 10073,
+      "classification": "CURRENT_CLIENT_SOURCE_FACT",
+      "archive": "all-assest-rechecked-1.zip",
+      "archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+      "member": "app-assets/output/assets/src_64/app/windows/WarCampRecordsWindow.lua",
+      "verified_exact_archive_member": true
+    },
+    {
+      "cache": "source_cache/current/app/common/utils.lua",
+      "sha256": "6e56c7342e889d7ae8d41fe47cb06f66832227efe702f3863f693ee7ba84ffad",
+      "bytes": 250825,
+      "archive": "all-assest-rechecked-1.zip",
+      "archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+      "member": "app-assets/output/assets/src_64/app/common/utils.lua",
+      "verified_exact_archive_member": true,
+      "classification": "CURRENT_CLIENT_SOURCE_FACT"
+    }
+  ],
+  "original_server_truth_claimed": false
+}

@@ -1,0 +1,66 @@
+{
+  "schema": "gxb-i7a5a-d14-extension/v1",
+  "baseline": {
+    "passmap_pass": "639.0",
+    "passmap_sha256": "bba6823a34ba41c445c017f0347e8488eb2b54cc548a9a5797c890f74e3a9bbf",
+    "backend_archive": "gxb-backend-v2-v0.91.0-pass638-i7a4d-accepted.zip",
+    "backend_sha256": "2fdbdfb9f4a97f5acf2a9e3fcf4efd42fd964edf59e91c7d6b88ecc97f4e57a1",
+    "backend_tree_sha256": "58aa9e6c2f4db113b690d15b1b68b6ba1dbb744883715ca26d0c126b27b662bc",
+    "src64_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+    "checkpoint_parent": {
+      "filename": "gxb1-checkpoint-80-i7a5a-research.zip",
+      "sha256": "82d6875e62da561a387121e38380b6c6ba38821545222d0b940c885d8cef838a"
+    }
+  },
+  "selected_D14_superseded": false,
+  "extensions": [
+    {
+      "id": "CHAT_EXACT_HANDLE",
+      "owner": "I4 stockruntime RealtimeServer/ConnectionRegistry",
+      "source_gap": "Dispatcher receives Admission+Frame but lacks exact incoming generation",
+      "consumer": "5A channel-chat adapter and future5B",
+      "extension": "Add session-aware dispatcher accepting exact SessionHandle and immutable admitted value. Preserve old dispatcher for existing consumers; configuration rejects simultaneous ambiguous dispatchers. Chat returns no direct response frames after its room publication.",
+      "compatibility": "Existing heartbeat/direction/boot/single writer unchanged; legacy dispatcher tests retained",
+      "migration": "NONE",
+      "effect": "No canonical write/lock; no raw Conn; reject stale handle rather than resolve a newer handle by lookup"
+    },
+    {
+      "id": "CHAT_GUILD_ADMISSION",
+      "owner": "I4 registry + existing realtimeauth/I6C GuildBinding",
+      "source_gap": "Handle metadata lacks exact admitted Guild JOIN identity",
+      "consumer": "Fresh recipient/send authorization",
+      "extension": "Add immutable admitted binding value and typed accessor/authorized registration seam; production registration supplies exact app Admission from Auth.Authorize. Legacy Replace remains compatible; a Guild handle without retained binding is ineligible for chat.",
+      "compatibility": "Do not substitute membership_version or current GuildID; preserve newest context+role and multi-context indexes",
+      "migration": "NONE",
+      "effect": "In-memory metadata only, never copied Guild authority"
+    },
+    {
+      "id": "CHAT_CALLER_TX_READS",
+      "owner": "I4 liveness/directory + I5 PlayerType + I6C binding via typed postgres composition",
+      "source_gap": "Pool-backed read calls alone do not guarantee one coherent authorization/presentation snapshot",
+      "consumer": "Numeric-MID-free application/channelchat Prepare/AuthorizeRecipient",
+      "extension": "Narrow callerTx reader composes existing RealtimeAuthority{Queryer:t}, guildprojection.RealtimeMembership{Queryer:t}, playerpresentation.Service with existing I4/I5 readers bound to t; no duplicated foreign-owner SQL.",
+      "compatibility": "Existing playerpresentation.TxReader includes Presence and remains unchanged; plain chat does not need Presence",
+      "migration": "NONE",
+      "effect": {
+        "semantic_writes": [],
+        "gameplay_locks": [],
+        "foreign_sql": false,
+        "transaction_options": {
+          "isolation": "RepeatableRead",
+          "read_only": true
+        },
+        "commit": "One caller-owned tx commits once; semantic output private until DefiniteCommit. Any unknown/error aborts preparation/publication; no replay.",
+        "retry": {
+          "max_attempts": 1,
+          "reason": "Fresh bounded authorization observation, no settlement or receipts. No retry around socket work."
+        },
+        "time": "One fresh PostgreSQL clock_timestamp observation per bounded sender/recipient read. No NamedEpoch/quota policy is added; process monotonic clocks govern transport deadlines only."
+      }
+    }
+  ],
+  "acceptance": "5A matrix rows on exact future candidate before acceptance; source/static/component/probe/native/physical classes separate",
+  "generic_bus_or_repository": false,
+  "pass": "640.0",
+  "selected_status": "SELECTED_WITH_VALIDATED_NORMAL_RESEARCH_DESIGN_SEAL_NOT_IMPLEMENTED"
+}

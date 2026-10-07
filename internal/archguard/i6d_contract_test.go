@@ -60,7 +60,7 @@ func TestI6DProductionKeepsDeferredRealtimePublicationInactive(t *testing.T) {
 		t.Fatal(err)
 	}
 	s := string(b)
-	if strings.Contains(s, "Dispatcher:") {
+	if strings.Contains(s, "Dispatcher:") && !selectedChannelChat(t) {
 		t.Fatal("I6D must not activate established-socket feature publication; I7A owns that surface")
 	}
 	if strings.Contains(s, "gxb-worker") || strings.Contains(s, "river.NewClient") {

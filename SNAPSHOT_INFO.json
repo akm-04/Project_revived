@@ -1,5 +1,5 @@
 {
-  "base_backend_sha256": "e5bb29ddd61ffd9fccfc761f7727f46b1de938144e05f27a1aabb6e1756a4322",
+  "base_backend_sha256": "2fdbdfb9f4a97f5acf2a9e3fcf4efd42fd964edf59e91c7d6b88ecc97f4e57a1",
   "ca1_stage": "ACCEPTED_SEALED_PASS512",
   "ca2_1": "LOCAL_CHECKPOINT_ACCEPTED_PASS515; NOT_CA2_PHASE_ACCEPTANCE",
   "ca2_2": "LOCAL_CHECKPOINT_ACCEPTED_PASS517; NOT_CA2_PHASE_ACCEPTANCE",
@@ -376,7 +376,7 @@
   "native_repair_parent_implementation_revision_sha256": "0def8ffc697be0c43a40b3e447c328fee45011e76e9e87a69f17181b777e1c1b",
   "native_sqlc_repair": "REPRODUCED_IN_NORMAL_CHAT_FROM_PRISTINE_PASS519",
   "native_work_evidence_sha256": "36fad089f0390e50f3c6650b9dcec11bd30ca996a4cab460cb5de153395179bf",
-  "next": "Exactcandidate PG01-PG35+DX01-DX10 classifiedgate,normalowning638seal; parent4/I7A10/E/W2 unpassed",
+  "next": "Exact candidate31-row5A gate, reality and owning641 acceptance seal;5B/parent5/I7A10/E/W2 unpassed",
   "next_stage": "I7A4D_EXACT_GATE_AND_NORMAL_EXIT_SEAL",
   "parent_accepted_implementation_revision_sha256": "b3a8123633fe85155019becd66aed45726e94316aee11b232b1f422e55e5b863",
   "parent_backend_archive_sha256": "23624449f758088585590a4e2490228782872033a23100354cfa96ffad6c6a76",
@@ -386,18 +386,18 @@
   "parent_i6_accepted_tested_candidate_sha256": "dbc752c6cc18e51ca859caec598d6500a1d12de28f826849d55c5f665fbddec9",
   "parent_i6c_native_evidence": "Pass501 predecessor native evidence retained; F6 repaired-candidate native report + targeted delta + final micro-delta jointly GREEN",
   "parent_revision_verification": "REPRODUCIBLE_UNDER_PASS517_CANONICAL_DIGEST_BASIS",
-  "pass": "638.0",
-  "passmap_authority_note": "Exact sealed637selected4Dcontract; frozenmetadata accepts nothing. Normal638seal required.",
+  "pass": "641.0",
+  "passmap_authority_note": "Exactsealed640selected5Adesign plus directhumanimplementationauthorization; candidate metadata acceptsnothing; normalowning641seal governs acceptance",
   "passmap_authority_sha256": "402b6af6d9311dca1ef82fda8a3f2807870e0604903c3009d0a58b004d647817",
   "product_behavior_implemented": "Selected637coordinated14routeSocialHTTP/WORLDreloadactivation plus184relationdismissal;183remainsI7A7",
   "profile1": "PERSISTENT_RECONSTRUCTION_PROFILE_1",
   "runtime_evidence_sha256": "021514f4ab8b4bfa6c9085aa550df97af782688e7b9807f50e655d2a79d16659",
-  "sbom_created_at": "2026-10-06T17:00:00.135521Z",
+  "sbom_created_at": "2026-10-07T00:00:00Z",
   "schema_version": 1,
   "snapshot": "Selected6374Dactivation over exactaccepted6364C; no schema/pin/client delta",
   "stage": "I7A-4D_GATE_CANDIDATE",
   "status": "IMPLEMENTED_CANDIDATE_NOT_ACCEPTED_EXACT_FROZEN_GATE_PENDING",
-  "version": "v0.91.0",
+  "version": "v0.92.0",
   "w2_claimed": false,
   "i7a4d_inherited_metadata_provenance": {
     "parent_archive_sha256": "23624449f758088585590a4e2490228782872033a23100354cfa96ffad6c6a76",
@@ -435,5 +435,12 @@
     "realtime": "WORLD MID36855 finite single selectors/player_id0",
     "w2": "DEFERRED_UNPASSED",
     "new_migration": null
-  }
+  },
+  "i7a5a_stage": "IMPLEMENTED_GATE_CANDIDATE_NOT_ACCEPTED",
+  "i7a5a_contract": "docs/i7a5a/PASS640_I7A5A_IMPLEMENTATION_CONTRACT.json",
+  "i7a5a_contract_sha256": "1ebca25be86d7fe6b49bf5ff40b59292847d67455821b3fe05d3cb2570db094c",
+  "i7a5a_source_binding": "docs/i7a5a/SOURCE_IDENTITY.json",
+  "i7a5a_direct_user_implementation_authorized": true,
+  "i7a5a_product_acceptance": false,
+  "i7a4_parent_acceptance_pass": "639.0"
 }

@@ -14,6 +14,7 @@ import (
 	"syscall"
 	"time"
 
+	"gxb.local/backend/v2/internal/adapters/channelchatread"
 	"gxb.local/backend/v2/internal/adapters/postgres"
 	"gxb.local/backend/v2/internal/adapters/postgres/guildprojection"
 	"gxb.local/backend/v2/internal/adapters/postgres/i4store"
@@ -22,6 +23,7 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres/socialrelationstore"
 	"gxb.local/backend/v2/internal/adapters/socialpresentation"
 	"gxb.local/backend/v2/internal/adapters/stockruntime"
+	"gxb.local/backend/v2/internal/application/channelchat"
 	appgeneration "gxb.local/backend/v2/internal/application/generation"
 	appidentity "gxb.local/backend/v2/internal/application/identitylifecycle"
 	apprealtime "gxb.local/backend/v2/internal/application/realtimeauth"
@@ -36,6 +38,7 @@ import (
 	"gxb.local/backend/v2/internal/foundation/tx"
 	"gxb.local/backend/v2/internal/projection/lobby"
 	"gxb.local/backend/v2/internal/protocol/limits"
+	wireRT "gxb.local/backend/v2/internal/protocol/realtime"
 )
 
 func main() {
@@ -182,9 +185,17 @@ func run() error {
 		}
 	}()
 	connectionsRegistry := stockruntime.NewConnectionRegistry()
+	chatEvents, err := wireRT.NewChannelChatEventRegistry()
+	if err != nil {
+		return err
+	}
+	chatDispatcher, err := stockruntime.NewChannelChatDispatcher(connectionsRegistry, channelchat.Service{Runner: presenceRunner, Operations: presenceOperations, Reader: channelchatread.Reader{}}, stockruntime.RealtimePublisher{Registry: chatEvents, Limits: limits.Default()}, stockruntime.DefaultChannelChatPolicy(runtimePolicy.MaxConnections))
+	if err != nil {
+		return err
+	}
 	server := stockruntime.RealtimeServer{
 		Auth: auth, Limits: limits.Default(), Policy: runtimePolicy, Tracker: tracker,
-		Registry: connectionsRegistry, Admission: admission,
+		Registry: connectionsRegistry, Admission: admission, SessionDispatcher: chatDispatcher,
 		Presence: presenceService, PresenceOperations: presenceOperations,
 		RealtimeOwnerFence: realtimeOwnerFence, RealtimeInstanceID: realtimeInstanceID,
 		OnPresenceError: func(stage string, err error) { log.Printf("social presence %s degraded: %v", stage, err) },
