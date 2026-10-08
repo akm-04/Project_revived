@@ -1266,4 +1266,6 @@ SELECT jsonb_array_length(artifact->'definitions')::bigint FROM inserted;
 -- name: VerifyContentEmoticons :one
 SELECT artifact=$2::jsonb AS exact,jsonb_array_length(artifact->'definitions')::bigint AS count FROM content_emoticon_catalogs WHERE revision_id=$1;
 -- name: ReadContentEmoticon :one
-SELECT (d->>'item_id')::bigint FROM content_emoticon_catalogs c,LATERAL jsonb_array_elements(c.artifact->'definitions')d WHERE c.revision_id=$1 AND (d->>'id')::bigint=$2;
+SELECT (jsonb_path_query_first(artifact, '$.definitions[*] ? (@.id == $id)'::jsonpath, jsonb_build_object('id', $2::bigint))->>'item_id')::bigint AS item_id
+FROM content_emoticon_catalogs
+WHERE revision_id=$1 AND jsonb_path_exists(artifact, '$.definitions[*] ? (@.id == $id)'::jsonpath, jsonb_build_object('id', $2::bigint));
