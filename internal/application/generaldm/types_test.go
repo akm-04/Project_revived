@@ -9,7 +9,7 @@ import (
 
 func fixture() Intent {
 	now := time.Unix(1700000000, 0).UTC()
-	return Intent{ID: "00000000-0000-4000-8000-000000000001", Digest: Digest(1, 2, "hello"), Sender: 1, Recipient: 2, Message: "hello", AcceptedAt: now, ExpiresAt: now.Add(IntentLifetime), BlockVersion: 0, Bindings: []Binding{{ContextID: "ctx", ContextGeneration: 1, SessionID: "sess", SessionLiveness: 1, ContextLiveness: 1, RealtimeInstanceID: "rt", ConnectionGeneration: 1, OwnerFence: 1, LogicalServerID: 1}}, Status: Pending, StateVersion: 1}
+	return Intent{ID: "00000000-0000-4000-8000-000000000001", Digest: Digest(1, 2, "hello"), Sender: 1, Recipient: 2, Message: "hello", AcceptedAt: now, ExpiresAt: now.Add(IntentLifetime), BlockVersion: 0, Bindings: []Binding{{ContextID: "ctx", ContextGeneration: 1, SessionID: "sess", SessionLiveness: 1, ContextLiveness: 1, RealtimeInstanceID: "rt", ConnectionGeneration: 1, OwnerFence: 1, LogicalServerID: 1}}, Status: Pending, StateVersion: 1, LastObservedAt: now}
 }
 
 func TestAttemptCannotReturnToPending(t *testing.T) {
@@ -95,4 +95,35 @@ func FuzzGeneralMessage(f *testing.F) {
 			t.Fatal("invalid accepted")
 		}
 	})
+}
+
+func Test6B_G13PositiveReceiptReloadFailsClosedOnInvalidProof(t *testing.T) {
+	i, _ := fixture().Claim(fixture().AcceptedAt.Add(time.Second), 1)
+	i, _ = i.BeginAttempt(fixture().AcceptedAt.Add(2 * time.Second))
+	i, _ = i.Finish(fixture().AcceptedAt.Add(3*time.Second), fixture().AcceptedAt.Add(3*time.Second), true)
+	if i.Validate() != nil {
+		t.Fatal("valid receipt")
+	}
+	for _, at := range []time.Time{time.Time{}, i.AcceptedAt, i.ExpiresAt} {
+		j := i
+		j.CompletionUpper = &at
+		if j.Validate() == nil {
+			t.Fatal("invalid upper accepted", at)
+		}
+	}
+	j := i
+	j.AttemptCommittedAt = nil
+	if j.Validate() == nil {
+		t.Fatal("marker missing")
+	}
+	j = i
+	j.OwnerFence = 0
+	if j.Validate() == nil {
+		t.Fatal("fence missing")
+	}
+	j = i
+	j.LastObservedAt = j.ExpiresAt
+	if j.Validate() == nil {
+		t.Fatal("late positive finalization")
+	}
 }

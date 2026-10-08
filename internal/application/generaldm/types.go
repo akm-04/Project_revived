@@ -125,7 +125,10 @@ func (i Intent) Validate() error {
 	if i.Status == Attempting && i.AttemptCommittedAt == nil {
 		return ErrInvalid
 	}
-	if i.Status == WrittenBeforeDeadline && (i.CompletionUpper == nil || !i.CompletionUpper.Before(i.ExpiresAt)) {
+	if i.LastObservedAt.IsZero() || i.LastObservedAt.Before(i.AcceptedAt) {
+		return ErrInvalid
+	}
+	if i.Status == WrittenBeforeDeadline && (i.CompletionUpper == nil || i.CompletionUpper.IsZero() || i.AttemptCommittedAt == nil || i.AttemptCommittedAt.Before(i.AcceptedAt) || i.CompletionUpper.Before(*i.AttemptCommittedAt) || !i.CompletionUpper.Before(i.ExpiresAt) || !i.LastObservedAt.Before(i.ExpiresAt) || i.OwnerFence < 1 || i.ClaimGeneration < 1) {
 		return ErrInvalid
 	}
 	return nil
