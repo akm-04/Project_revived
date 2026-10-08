@@ -1917,6 +1917,48 @@
       "migration": "migrations/00034_i7a6a_friend_dm.sql",
       "owner": "content-registry",
       "write_exceptions": []
+    },
+    "personal_dm_intents": {
+      "allowed_query_owners": [
+        "personal-dm"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/generaldmstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/generaldmstore/"
+      ],
+      "migration": "migrations/00035_personal_dm_delivery.sql",
+      "owner": "personal-dm",
+      "write_exceptions": []
+    },
+    "personal_dm_payloads": {
+      "allowed_query_owners": [
+        "personal-dm"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/generaldmstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/generaldmstore/"
+      ],
+      "migration": "migrations/00035_personal_dm_delivery.sql",
+      "owner": "personal-dm",
+      "write_exceptions": []
+    },
+    "personal_dm_delivery": {
+      "allowed_query_owners": [
+        "personal-dm"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/generaldmstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/generaldmstore/"
+      ],
+      "migration": "migrations/00035_personal_dm_delivery.sql",
+      "owner": "personal-dm",
+      "write_exceptions": []
     }
   }
 }

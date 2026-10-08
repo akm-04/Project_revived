@@ -1,0 +1,59 @@
+{
+  "schema": "gxb-i7a6b-preimplementation-design/v1",
+  "pass": "647.0",
+  "stage": "I7A-6B",
+  "baseline_passmap": "646.0",
+  "baseline_passmap_sha256": "1e9943a4df772785ec46477f5c46a36fa595781a0fdbc91d634a0e9ed4849149",
+  "backend_sha256": "cb46a317b94a00e9983a686e8c97c6bc05b0893b0d65e222337f16a5e5d498d1",
+  "backend_tree": "07d697cc331ba3bfaa2c085a04fabba21df4f94d8abb658dfe89589a767e1403",
+  "status": "RESEARCH_DESIGN_COMPLETE_PRODUCT_NOT_IMPLEMENTED",
+  "implementation_authorized": true,
+  "implementation_started": false,
+  "product_accepted": false,
+  "original_server_truth_claimed": false,
+  "contract_id": "I7A6B_RECOVERY_CAPACITY_MIGRATION",
+  "wakeup": {
+    "route": "personal.dm.v1 PROPOSED",
+    "envelope": "existingv1 route/ref; reference{opUUID,version},<=256bytes; no text/profile/recipientset",
+    "source": "canonicalintent/statusreloaded; bad/staleref failsclosed; boundedpostcommit emission optionalacceleration"
+  },
+  "runtime": {
+    "single_owner": "reuseexistingsinglerealtimeadvisoryownerandcanonicalepoch;no secondowner/socketwriter",
+    "startup": "registerSocialreload/FriendDM/General514andwakeuproutes beforeLISTENready andboundedinitialscans; onlythenTCPadmission",
+    "workers": {
+      "periodic": 4,
+      "hint": 1,
+      "total": 5,
+      "scheduled_intents": 32,
+      "periodic_queue": 24,
+      "hint_queue": 8,
+      "coalesced_hints": 32,
+      "scan_page": 64,
+      "tick_ms": 1000,
+      "writer_workers_per_intent": 8,
+      "captured_handles": 64
+    },
+    "ordering": "keysetaccepted_at+opUUID withhighwater; terminalizeexpired/invalid ratherthanstarvebehindthem; wrapfornewbelowcursor; nosecondattemptforATTEMPTING",
+    "API_per_process_waiters": 16,
+    "API_waiter_status_poll_ms": 100,
+    "aggregate": "existingchannel8+Friend8+General5 boundedfeatureworkers;perintentswriterfanoutcapped/joined. No claimofclusterwideboundfromperAPIprocess16. Explicitcapacityconfigfailclosed; no unboundedgoroutineperqueuedintent.",
+    "errors": "canonicalscan failurefatal closesregistry andjoinsALLfeaturelisteners/reconcilers/writers. Routine noeligibleoriginalWORLD/late/privacy/providererror mapsownerstatus/non200; doesnotkillwholeprocess."
+  },
+  "restore": {
+    "unexpired_Pending": "onlyoriginalcapturedliveadmissions/epoch,notnewconnect;API-onlyrestartcanresumeexistingintents",
+    "expired": "terminalEXPIRED;noenqueue;payloadpurge",
+    "claimed": "onlynoattemptmarker/unexpired/currentepochcanreleaseleaseandclaimagain",
+    "attempting": "terminalUNKNOWN/EXPIRED; neverrepeatfanout",
+    "terminal": "positivereceipt/tombstone stable;no176projection",
+    "fresh_populated_upgrade": "newmigration35neutral;prior1..34bytesunchanged;noFriendrows/contentpointerchanges"
+  },
+  "cleanup": "bounded64ownerlocalexpired/terminalpayloads perbatch;minimalterminalopidentity/evidenceretained; nohistoryendpoint",
+  "required_regressions": [
+    "Friend515/516/176 state/lease/retention/unknowncommit",
+    "existingSocialread/noEnsureRoot/179",
+    "existingChannel5role/Guild/liveness/writerboundedness",
+    "existingLISTEN/advisoryowner/fatalshutdown",
+    "modulepins/contentpriorpayloads/migrations1..34",
+    "sourceprofiles/effectiveclientboundaries"
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "scope": "Existing historical Channel cumulative migration fixture",
+  "prior_34_lock_sha256": "79894063f79848374e117eb03a1b68fae705b5e0d96e1cafce75943b5f26df36",
+  "six_general_selection_sha256": "ec5e3207c9d6b634499cb4749157946a9328f438d6730bd53311882198170247",
+  "exact_new_high_water": 35,
+  "historical_floors_33_34_preserved": true,
+  "all_prior_hashes_verified": true,
+  "assertions_waived": false,
+  "reason": "Authorized additive neutral migration35 is a scoped successor, not a change to historical migration law."
+}

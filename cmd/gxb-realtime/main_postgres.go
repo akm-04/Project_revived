@@ -15,9 +15,11 @@ import (
 	"time"
 
 	"gxb.local/backend/v2/internal/adapters/channelchatread"
+	"gxb.local/backend/v2/internal/adapters/generaldmbindings"
 	"gxb.local/backend/v2/internal/adapters/postgres"
 	"gxb.local/backend/v2/internal/adapters/postgres/contentstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/frienddmstore"
+	"gxb.local/backend/v2/internal/adapters/postgres/generaldmstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/guildprojection"
 	"gxb.local/backend/v2/internal/adapters/postgres/i4store"
 	"gxb.local/backend/v2/internal/adapters/postgres/presencestore"
@@ -27,6 +29,7 @@ import (
 	"gxb.local/backend/v2/internal/adapters/stockruntime"
 	"gxb.local/backend/v2/internal/application/channelchat"
 	"gxb.local/backend/v2/internal/application/frienddm"
+	"gxb.local/backend/v2/internal/application/generaldm"
 	appgeneration "gxb.local/backend/v2/internal/application/generation"
 	appidentity "gxb.local/backend/v2/internal/application/identitylifecycle"
 	apprealtime "gxb.local/backend/v2/internal/application/realtimeauth"
@@ -205,7 +208,7 @@ func run() error {
 		OnPresenceError: func(stage string, err error) { log.Printf("social presence %s degraded: %v", stage, err) },
 	}
 
-	socialEvents, err := stockruntime.NewFriendSocialEventRegistry()
+	socialEvents, err := stockruntime.NewGeneralSocialEventRegistry()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -214,7 +217,10 @@ func run() error {
 	friendDM := frienddm.Service{Timed: appgeneration.TimedRunner{Binder: appgeneration.Binder{Time: postgres.AuthoritativeTime{Queryer: pool}}, Runner: presenceRunner}, Queryer: pool, Store: frienddmstore.Store{}, Players: i4store.PlayerRootLocker{}, Privacy: socialrelation.FriendDMPrivacyProvider{Store: socialrelationstore.Store{}}, Observer: socialpresentation.TransactionReader{}, Content: contentstore.Store{Queryer: pool}, Owner: presenceStore}
 	friendDelivery := stockruntime.FriendDMDelivery{Service: friendDM, Fence: realtimeOwnerFence, Operations: presenceOperations, Registry: connectionsRegistry, Publisher: stockruntime.RealtimePublisher{Registry: socialEvents, Limits: limits.Default()}, Authority: authority, Time: postgres.AuthoritativeTime{Queryer: pool}, MaxHandles: runtimePolicy.MaxConnections, IsStaleActor: func(e error) bool { return errors.Is(e, i4store.ErrGameplayBearerNotLive) }, OnDeliveryError: func(e error) { log.Printf("friend dm write degraded: %v", e) }}
 	friendReconcile := &frienddm.Reconciler{Store: frienddmstore.Store{}, Queryer: pool, Deliverer: friendDelivery, OnDeliveryError: func(e error) { log.Printf("friend dm reconcile delivery degraded: %v", e) }}
-	wakeups, err := realtimewakeup.NewRegistry(realtimewakeup.Registration{Route: postgres.SocialReloadRoute, Handler: socialHandler}, realtimewakeup.Registration{Route: frienddm.WakeupRoute, Handler: friendReconcile})
+	generalDM := generaldm.Service{Timed: appgeneration.TimedRunner{Binder: appgeneration.Binder{Time: postgres.AuthoritativeTime{Queryer: pool}}, Runner: presenceRunner}, Queryer: pool, Store: generaldmstore.Store{}, Bindings: generaldmbindings.Reader{}, Privacy: socialrelation.GeneralDMPrivacyProvider{Store: socialrelationstore.Store{}}, Players: i4store.PlayerRootLocker{}, Presentation: socialpresentation.TransactionReader{}, Observer: socialpresentation.TransactionReader{}, Owner: presenceStore}
+	generalDelivery := stockruntime.GeneralDMDelivery{Service: generalDM, Fence: realtimeOwnerFence, InstanceID: realtimeInstanceID, Operations: presenceOperations, Registry: connectionsRegistry, Publisher: stockruntime.RealtimePublisher{Registry: socialEvents, Limits: limits.Default()}, Authority: authority, Time: postgres.AuthoritativeTime{Queryer: pool}}
+	generalReconcile := &generaldm.Reconciler{Store: generaldmstore.Store{}, Queryer: pool, Deliverer: generalDelivery, OnDeliveryError: func(e error) { log.Printf("general dm delivery degraded: %v", e) }}
+	wakeups, err := realtimewakeup.NewRegistry(realtimewakeup.Registration{Route: postgres.SocialReloadRoute, Handler: socialHandler}, realtimewakeup.Registration{Route: frienddm.WakeupRoute, Handler: friendReconcile}, realtimewakeup.Registration{Route: generaldm.WakeupRoute, Handler: generalReconcile})
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -242,6 +248,11 @@ func run() error {
 		<-listenerDone
 		return errors.New("realtime wakeup listener readiness timeout")
 	}
+	if err := generalReconcile.InitialReconcile(ctx); err != nil {
+		stop()
+		<-listenerDone
+		return err
+	}
 	if err := friendReconcile.InitialReconcile(ctx); err != nil {
 		stop()
 		<-listenerDone
@@ -257,11 +268,21 @@ func run() error {
 			stop()
 		}
 	}()
+	generalDone := make(chan struct{})
+	generalFailure := make(chan error, 1)
+	go func() {
+		defer close(generalDone)
+		if e := generalReconcile.Run(ctx); e != nil && ctx.Err() == nil {
+			generalFailure <- e
+			stop()
+		}
+	}()
 	ln, err := net.Listen("tcp", cfg.RealtimeAddr)
 	if err != nil {
 		stop()
 		<-listenerDone
 		<-reconcileDone
+		<-generalDone
 		return err
 	}
 	defer ln.Close()
@@ -269,7 +290,14 @@ func run() error {
 	log.Printf("gxb-realtime I4 listening on %s", cfg.RealtimeAddr)
 	listenerSlots := make(chan struct{}, runtimePolicy.MaxConnections)
 	var connections sync.WaitGroup
-	defer func() { stop(); connectionsRegistry.CloseAll(); connections.Wait(); <-listenerDone; <-reconcileDone }()
+	defer func() {
+		stop()
+		connectionsRegistry.CloseAll()
+		connections.Wait()
+		<-listenerDone
+		<-reconcileDone
+		<-generalDone
+	}()
 	for {
 		conn, err := ln.Accept()
 		if err != nil {
@@ -278,6 +306,8 @@ func run() error {
 				case failure := <-listenerFailure:
 					return failure
 				case failure := <-reconcileFailure:
+					return failure
+				case failure := <-generalFailure:
 					return failure
 				default:
 					return nil

@@ -154,8 +154,13 @@ func TestI7A2KeepsFeatureProducerAndWakeupRoutesDormant(t *testing.T) {
 		} {
 			if strings.Contains(s, marker) {
 				rel, _ := filepath.Rel(root, path)
+				allowedGeneralSchema := filepath.ToSlash(rel) == "internal/adapters/stockruntime/general_dm_events.go" && marker == "rt.DirectRegistration{" && strings.Count(s, marker) == 1
+				if allowedGeneralSchema && selectedGeneralDMActivation(t) {
+					validateGeneralDMActivation(t)
+					continue
+				}
 				allowedFriendSchema := filepath.ToSlash(rel) == "internal/adapters/stockruntime/friend_dm_delivery.go" && marker == "rt.DirectRegistration{" && strings.Count(s, marker) == 1
-				allowedFriendRoutes := filepath.ToSlash(rel) == "cmd/gxb-realtime/main_postgres.go" && marker == "realtimewakeup.Registration{" && strings.Count(s, marker) == 2 && strings.Contains(s, "Route: frienddm.WakeupRoute, Handler: friendReconcile")
+				allowedFriendRoutes := filepath.ToSlash(rel) == "cmd/gxb-realtime/main_postgres.go" && marker == "realtimewakeup.Registration{" && (strings.Count(s, marker) == 2 || strings.Count(s, marker) == 3 && selectedGeneralDMActivation(t)) && strings.Contains(s, "Route: frienddm.WakeupRoute, Handler: friendReconcile")
 				if (allowedFriendSchema || allowedFriendRoutes) && selectedFriendDMActivation(t) {
 					validateSocialActivationRoutes(t)
 					validateFriendDMActivation(t)

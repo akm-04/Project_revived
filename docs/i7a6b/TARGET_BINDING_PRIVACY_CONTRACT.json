@@ -1,0 +1,53 @@
+{
+  "schema": "gxb-i7a6b-preimplementation-design/v1",
+  "pass": "647.0",
+  "stage": "I7A-6B",
+  "baseline_passmap": "646.0",
+  "baseline_passmap_sha256": "1e9943a4df772785ec46477f5c46a36fa595781a0fdbc91d634a0e9ed4849149",
+  "backend_sha256": "cb46a317b94a00e9983a686e8c97c6bc05b0893b0d65e222337f16a5e5d498d1",
+  "backend_tree": "07d697cc331ba3bfaa2c085a04fabba21df4f94d8abb658dfe89589a767e1403",
+  "status": "RESEARCH_DESIGN_COMPLETE_PRODUCT_NOT_IMPLEMENTED",
+  "implementation_authorized": true,
+  "implementation_started": false,
+  "product_accepted": false,
+  "original_server_truth_claimed": false,
+  "contract_id": "I7A6B_TARGET_PRIVACY",
+  "Social_port": {
+    "owner": "SocialRelation",
+    "proposed": "PrepareGeneralDMPrivacyTx(ctx,callerTx,sender,recipient)",
+    "returns": "recipient_block_state_version;eligible iff noactive recipient->senderblock; rootabsenceversion0; nofriendshiprequirement/noEnsureRoot/noquotaeffect",
+    "reuse": "existingSocialroot/blockstoresandcanonicalcreationfences; additiveGeneralmethodneverweakensFriendDMreader"
+  },
+  "target_port": {
+    "owner": "I4canonicalcontext/liveness withSocialPresenceleaseprojectionreadcomposition",
+    "proposed": "ReadGeneralWorldBindingsTx(ctx,callerTx,recipient,observedAt)",
+    "returns": [
+      "player_id",
+      "logical_server_id",
+      "session_id",
+      "context_id",
+      "context_generation",
+      "session_liveness_version",
+      "context_liveness_version",
+      "realtime_instance_id",
+      "connection_generation",
+      "owner_fence",
+      "physical_roleWORLD"
+    ],
+    "composition": "I4storequeryI4facts;presencestorequeryleasefacts;adapternoSQL;nestedtx/poolfallbackforbidden;Presenceisdiscoverynotauthority",
+    "cap": 64,
+    "selection": "snapshotallcurrentauthorizedunexpiredWORLDbindings intheacceptancecallerTx; zero=>non200/nointent",
+    "publication": "currentregistryexactbinding+freshI4authorization; noGUILD/SERVICEfallback/newcontext/replacement/reconnectaddition"
+  },
+  "privacy_policy": "Acceptandfreshpreenqueue/finalize recheckdirectedblockversion. Senderonlyblockdoesnotreject. Block/unblockversionchanges permanentlysuppressoldintent. Selftargetrejected;crossservercanonicalidentityallowed. NoSocialmembershipquota transferred.",
+  "transaction_plan": [
+    "canonicalI4PlayerRoots315 sender+recipient inglobalsort",
+    "allSocialRoots360 sender+recipient; absencepreserved",
+    "directedrecipient->senderBlock363",
+    "PersonalDMintent381",
+    "samecallerTx canonicalsenderI4/I5minimal/content-qualifieddefault andtarget-bindingreader complete BEFOREfirstmutation",
+    "mutateonlyPersonalDMowner;onecommit;wait/hints/networkafterrelease"
+  ],
+  "source_time_target_binding": "Sourcecapturedadmission identities immutable; no-reconnect-replay. Unexpiredrestoration/reconciliation canonlydeliveroriginalstillcurrentbindings/epoch. Realtimeownerrestart advancesepoch;oldbindings terminalADMISSION_RETIRED evenifUTCunexpired.",
+  "network_fence_limit": "Preenqueueauthorization is notatomicwithlaterprivacycommit; alreadyadmittedbytescanarrivelate. Finalizationcannotundobytes."
+}

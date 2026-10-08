@@ -57,7 +57,11 @@ func validateFriendDMActivation(t *testing.T) {
 		t.Fatal("6A HTTP/sameTx assembly")
 	}
 	realtime := read("cmd/gxb-realtime/main_postgres.go")
-	if strings.Count(realtime, "realtimewakeup.Registration{") != 2 || !strings.Contains(realtime, "Route: frienddm.WakeupRoute, Handler: friendReconcile") || !strings.Contains(realtime, "<-reconcileDone") {
+	expectedRoutes := 2
+	if selectedGeneralDMActivation(t) {
+		expectedRoutes = 3
+	}
+	if strings.Count(realtime, "realtimewakeup.Registration{") != expectedRoutes || !strings.Contains(realtime, "Route: frienddm.WakeupRoute, Handler: friendReconcile") || !strings.Contains(realtime, "<-reconcileDone") {
 		t.Fatal("6A routes/reconcile join")
 	}
 	schema := read("internal/adapters/stockruntime/friend_dm_delivery.go")

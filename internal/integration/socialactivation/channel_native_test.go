@@ -927,5 +927,36 @@ func selectedNativeMigrationHighWater(t *testing.T) int64 {
 			t.Fatal("prior migration drift", name)
 		}
 	}
+	if build["i7a6b_stage"] != nil {
+		selected, e := os.ReadFile(filepath.Join(root, "docs/i7a6b/IMPLEMENTATION_SELECTION.json"))
+		if e != nil || fmt.Sprintf("%x", sha256.Sum256(selected)) != "ec5e3207c9d6b634499cb4749157946a9328f438d6730bd53311882198170247" || build["i7a6b_contract_sha256"] != "ec5e3207c9d6b634499cb4749157946a9328f438d6730bd53311882198170247" {
+			t.Fatal("unqualified General migration")
+		}
+		var contracts struct{ Contracts map[string]string }
+		if json.Unmarshal(selected, &contracts) != nil || len(contracts.Contracts) != 6 {
+			t.Fatal("six General selections required")
+		}
+		for name, want := range contracts.Contracts {
+			b, e := os.ReadFile(filepath.Join(root, "docs/i7a6b", name+".json"))
+			if e != nil || fmt.Sprintf("%x", sha256.Sum256(b)) != want {
+				t.Fatal("General contract drift", name)
+			}
+		}
+		baseline, e := os.ReadFile(filepath.Join(root, "docs/i7a6b/PRIOR_MIGRATION_LOCK_1_34.json"))
+		if e != nil || fmt.Sprintf("%x", sha256.Sum256(baseline)) != "79894063f79848374e117eb03a1b68fae705b5e0d96e1cafce75943b5f26df36" {
+			t.Fatal("prior34 identity")
+		}
+		var prior struct{ Migrations map[string]string }
+		if json.Unmarshal(baseline, &prior) != nil || len(prior.Migrations) != 34 {
+			t.Fatal("prior34 inventory")
+		}
+		for name, want := range prior.Migrations {
+			b, e := os.ReadFile(filepath.Join(root, "migrations", name))
+			if e != nil || fmt.Sprintf("%x", sha256.Sum256(b)) != want {
+				t.Fatal("prior34 drift", name)
+			}
+		}
+		return 35
+	}
 	return 34
 }
