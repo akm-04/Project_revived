@@ -6,3 +6,7 @@
 .env.*
 !.env.example
 .DS_Store
+
+# Generated interpreter caches never belong to a frozen source tree.
+__pycache__/
+*.py[cod]
