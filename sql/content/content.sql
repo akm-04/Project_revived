@@ -1259,3 +1259,11 @@ WHERE revision_id=$1 AND program_id=$2 AND objective_id=$3 AND definition_revisi
 
 -- name: ReadContentRevisionManifest :one
 SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1;
+
+-- name: InsertContentEmoticons :one
+WITH inserted AS (INSERT INTO content_emoticon_catalogs(revision_id,artifact)VALUES($1,$2::jsonb)RETURNING artifact)
+SELECT jsonb_array_length(artifact->'definitions')::bigint FROM inserted;
+-- name: VerifyContentEmoticons :one
+SELECT artifact=$2::jsonb AS exact,jsonb_array_length(artifact->'definitions')::bigint AS count FROM content_emoticon_catalogs WHERE revision_id=$1;
+-- name: ReadContentEmoticon :one
+SELECT (d->>'item_id')::bigint FROM content_emoticon_catalogs c,LATERAL jsonb_array_elements(c.artifact->'definitions')d WHERE c.revision_id=$1 AND (d->>'id')::bigint=$2;

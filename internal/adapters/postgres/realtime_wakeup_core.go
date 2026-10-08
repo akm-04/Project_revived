@@ -42,6 +42,9 @@ type wakeupFactory interface {
 }
 
 func runRealtimeWakeupListener(ctx context.Context, factory wakeupFactory, registry appwakeup.Registry, retryDelay time.Duration) error {
+	return runRealtimeWakeupListenerReady(ctx, factory, registry, retryDelay, nil)
+}
+func runRealtimeWakeupListenerReady(ctx context.Context, factory wakeupFactory, registry appwakeup.Registry, retryDelay time.Duration, onReady func()) error {
 	if factory == nil || retryDelay < 0 {
 		return errors.New("invalid realtime wakeup listener configuration")
 	}
@@ -51,7 +54,7 @@ func runRealtimeWakeupListener(ctx context.Context, factory wakeupFactory, regis
 		}
 		session, err := factory.Acquire(ctx)
 		if err == nil {
-			retry, runErr := consumeRealtimeWakeups(ctx, session, registry)
+			retry, runErr := consumeRealtimeWakeupsReady(ctx, session, registry, onReady)
 			session.Close()
 			if !retry {
 				return runErr
@@ -80,11 +83,17 @@ func runRealtimeWakeupListener(ctx context.Context, factory wakeupFactory, regis
 // Malformed/unknown route input fails closed to the caller rather than being
 // silently discarded as if canonical delivery had succeeded.
 func consumeRealtimeWakeups(ctx context.Context, session wakeupSession, registry appwakeup.Registry) (bool, error) {
+	return consumeRealtimeWakeupsReady(ctx, session, registry, nil)
+}
+func consumeRealtimeWakeupsReady(ctx context.Context, session wakeupSession, registry appwakeup.Registry, onReady func()) (bool, error) {
 	if session == nil {
 		return true, errors.New("nil realtime wakeup session")
 	}
 	if err := session.Listen(ctx); err != nil {
 		return true, err
+	}
+	if onReady != nil {
+		onReady()
 	}
 	for {
 		payload, err := session.Wait(ctx)

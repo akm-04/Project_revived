@@ -1,0 +1,33 @@
+{
+  "schema": "gxb-i7a6a-implementation-selection/v1",
+  "stage": "I7A-6A",
+  "implementation_authorized": true,
+  "product_accepted": false,
+  "authority": "sealed Pass645 six design contracts plus direct human 2026-10-08 authorization",
+  "contracts": {
+    "PRIVATE_WIRE_CONTRACT": "7ed0aa88ab0953a5144a18c87e1c0a358a06d7b0d7c410cecb213ca7e0808350",
+    "DIRECTED_PRIVACY_CONTRACT": "355d454f15aec5585c1febfd824f04c832702e199733f4501f8c843dd5f782de",
+    "FRIEND_LIFECYCLE_CONTRACT": "6c98b4a8cd449377e42e83dc4f9cc9fbf433cb472079613d6098f6b98ac17f4a",
+    "MID176_COMPOSITION_CONTRACT": "2e6338b2d286a784d002f5273e06124004865a78f16fd14f3a2527309ef2daa8",
+    "EMOTICON_OWNER_CONTRACT": "dae6ecb3eede07263efac252d166e25a00c7d56a65a27b1e70fdeed8920a48b8",
+    "RECOVERY_AND_ERROR_CONTRACT": "c8ea4ef6c4482b271e783c283164642633a3f51868167e874be3f022e7cd442e"
+  },
+  "routes": {
+    "http": [
+      515
+    ],
+    "direct_world": [
+      516
+    ],
+    "wakeup": [
+      "friend.dm.v1"
+    ]
+  },
+  "excluded": [
+    "I7A-6B",
+    "REPORT2",
+    "selectType1..6",
+    "roomID"
+  ],
+  "acceptance_gate": "42 rows pending native evidence; physical stock W2 remains deferred"
+}

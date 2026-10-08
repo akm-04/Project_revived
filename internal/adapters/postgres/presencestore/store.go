@@ -345,3 +345,23 @@ func utcPtr(v *time.Time) *time.Time {
 	t := v.UTC()
 	return &t
 }
+
+// ReadOwnerFenceTx observes the current canonical realtime epoch in the caller
+// snapshot. Offline projection uses it to exclude only the current owner's lease.
+func (Store) ReadOwnerFenceTx(ctx context.Context, q tx.Queryer) (int64, error) {
+	var current int64
+	if q == nil {
+		return 0, socialpresence.ErrStaleRealtimeOwner
+	}
+	err := q.QueryRow(ctx, `SELECT owner_fence FROM realtime_presence_owner_state WHERE singleton=true`).Scan(&current)
+	if noRows(err) {
+		return 0, nil
+	}
+	if err != nil {
+		return 0, err
+	}
+	if current < 1 {
+		return 0, socialpresence.ErrStaleRealtimeOwner
+	}
+	return current, nil
+}

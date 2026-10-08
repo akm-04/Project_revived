@@ -1,0 +1,79 @@
+{
+  "schema": "gxb-i7a6a-design/v1",
+  "pass": "645.0",
+  "stage": "I7A-6A",
+  "status": "PREIMPLEMENTATION_DESIGN_NO_PRODUCT_AUTHORIZATION",
+  "baseline_passmap": "644.0",
+  "baseline_passmap_sha256": "c786b95f60301abb1d9f5502d5d1f6b6a109281d90c01bbbabd6e58a2941e81a",
+  "backend_sha256": "60b90871802e1f75e0bf08261d6df07dc3c030b9a1c50ffbcfe0092d7e698f02",
+  "backend_tree": "1be8d601037bd203bb4faa7bc4cd1aae3cf2d3ba57d2b1dc4cd670bb9e4e03ab",
+  "implementation_authorized": false,
+  "implementation_started": false,
+  "product_accepted": false,
+  "original_server_truth_claimed": false,
+  "classification": "SOURCE_FACT + IMPLEMENTATION_DECISION",
+  "variants": {
+    "COMMON": {
+      "msgType": 0,
+      "message": "nonempty valid Unicode string <=140 scalar values; preserve text, no truncation"
+    },
+    "EMOTICON": {
+      "msgType": 1,
+      "message": "exact positive integral ID in pinned finite85 definition catalog; number, never numeric string"
+    }
+  },
+  "inner": {
+    "required": [
+      "message",
+      "msgType"
+    ],
+    "optional": {
+      "selectType": "exact integral0 only"
+    },
+    "forbidden": [
+      "roomID",
+      "unknown fields",
+      "arrays or nested objects as message",
+      "msgType2 REPORT",
+      "selectType1..6",
+      "null/boolean/string discriminators"
+    ],
+    "raw_utf8_bytes_max": 2048,
+    "parser_depth_max": 2,
+    "parser_nodes_max": 16,
+    "semantic_shape": "one root object, at most3 named primitive values",
+    "numeric_token_bytes_max": 64,
+    "numeric_exponent_abs_max": 400,
+    "unicode": "reject invalid UTF8 and unpaired UTF16 escapes before lossy decoding; <=140 Unicode scalars, not graphemes or encoded bytes",
+    "duplicate_keys": "reject at outer and inner scoped decoders before map collapse",
+    "encoded_policy": "PRIVATE_ORDINARY_WRAPPER_V1; separately justified, no inherited8KiB exception",
+    "outer_owner_fields_encoded_bytes_max": 4608,
+    "outer_limit_scope": "private payload portion player_id/msg only; auth/MID envelope keeps unchanged existing edge limits"
+  },
+  "outer515": {
+    "player_id": "canonical target exact AMF-safe positive PlayerID, distinct from trusted actor; canonical logical server must resolve",
+    "msg": "bounded encoded inner JSON string",
+    "authority": "existing I4 bearer/region/actor resolver; no client actor/profile fields"
+  },
+  "output516": {
+    "role": "WORLD target only",
+    "fields": {
+      "friend_id": "canonical sender PlayerID",
+      "message": "server canonical finite encoded inner wrapper",
+      "time": "accepted occurrence DB UTC epoch seconds"
+    },
+    "no_sender_echo": true,
+    "no_stable_stock_occurrence_id": true
+  },
+  "output176": {
+    "fields": {
+      "player_id": "canonical sender PlayerID",
+      "message": "same canonical encoded wrapper",
+      "time": "same accepted occurrence DB UTC epoch seconds"
+    },
+    "collection": "typed nonnil array, oldest eligible sequence first",
+    "server_time": "same-Tx qualified DB observation; unrelated existing base collections preserved"
+  },
+  "encoding_evidence": "56 reference UTF8/escaped forms max1721 bytes; compiled stock cjson NOT_RUN; physical compatibility remains W2",
+  "report_mode_gate": "ObservedREPORT2 and selectors1..6 remain unavailable. Future actual canonical owner, finite schema/reference/audience, native evidence and normal amendment required; no generic relay/offline mode insertion."
+}

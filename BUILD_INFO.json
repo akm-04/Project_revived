@@ -415,7 +415,7 @@
   "parent_i6_accepted_tested_candidate_sha256": "dbc752c6cc18e51ca859caec598d6500a1d12de28f826849d55c5f665fbddec9",
   "parent_i6_accepted_tested_implementation_revision_sha256": "46b9ea5d54c80f022449833d594d84c5f48b18304cd2a33c9e53b560ce070b26",
   "parent_revision_verification": "REPRODUCIBLE_UNDER_PASS517_CANONICAL_DIGEST_BASIS",
-  "pass": "643.0",
+  "pass": "646.0",
   "passmap_authority_note": "Sealed642 selecteddesign plus directhuman implementationauthorization; currentacceptance inPassMaponly",
   "passmap_authority_sha256": "ecf1c20ac133e14f8174129bf1a485e7a05bc59dc489c7608fcfe5ca604916d7",
   "product_behavior_implemented": "9finite source-shaped variants for8structuredtypes; typed owner/read/privatepublication boundaries, all productionproducers inactive",
@@ -432,7 +432,7 @@
   "target_go": "1.27.1",
   "target_postgresql": "18.6",
   "target_sqlc": "1.31.1",
-  "version": "v0.93.0",
+  "version": "v0.94.0",
   "w2_claimed": false,
   "i7a4d_inherited_metadata_provenance": {
     "parent_archive_sha256": "23624449f758088585590a4e2490228782872033a23100354cfa96ffad6c6a76",
@@ -496,5 +496,14 @@
     "test_status": "FROZEN_EXACT_GATE_PENDING",
     "acceptance": "NONE_CANDIDATE_METADATA_ONLY",
     "parent_closure": "Pending explicit qualified parent review and normal seal"
-  }
+  },
+  "i7a6a_stage": "IMPLEMENTED_GATE_CANDIDATE_NOT_ACCEPTED",
+  "i7a6a_contract_sha256": "854011799f9c3b2eb779f0b1ec3e3cd291566aef58a491d317236f1c0f70f7da",
+  "i7a6a_implementation_authorized": true,
+  "i7a6a_product_accepted": false,
+  "i7a6a_contract": "docs/i7a6a/IMPLEMENTATION_SELECTION.json",
+  "i7a6a_parent_backend_sha256": "60b90871802e1f75e0bf08261d6df07dc3c030b9a1c50ffbcfe0092d7e698f02",
+  "i7a6a_gate_status_at_identity_freeze": "PENDING",
+  "i7a6a_acceptance_authority": "Exact candidate archive/tree binding in sealed PassMap; build metadata records creation-time gate state",
+  "i7a6a_physical_stock": "DEFERRED_UNPASSED_W2"
 }

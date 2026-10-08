@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "status": "CURRENT_CUMULATIVE_CONTENT_GENERATION_LOCK_CA7_2",
+  "status": "CURRENT_CUMULATIVE_CONTENT_GENERATION_LOCK_I7A6A",
   "rule": "Historical validators keep their phase-specific semantic invariants. In cumulative/current mode they may accept only an explicitly registered successor compiler generation at or after their baseline. New generations are append-only review events; registering a generation does not waive capability/count/source/migration/ownership assertions.",
   "generations": [
     {
@@ -98,10 +98,16 @@
       "stage": "CA7-2",
       "compiler_version": "ca7-2-appearance-foundation",
       "parser_version": "lua-generated-v14-appearance"
+    },
+    {
+      "ordinal": 17,
+      "stage": "I7A-6A",
+      "compiler_version": "i7a6a-emoticon",
+      "parser_version": "lua-generated-v15-emoticon"
     }
   ],
   "current": {
-    "compiler_version": "ca7-2-appearance-foundation",
-    "parser_version": "lua-generated-v14-appearance"
+    "compiler_version": "i7a6a-emoticon",
+    "parser_version": "lua-generated-v15-emoticon"
   }
 }

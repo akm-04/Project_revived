@@ -1843,6 +1843,80 @@
       "migration": "migrations/00033_i7a4a_social_foundation.sql",
       "owner": "social-relation",
       "write_exceptions": []
+    },
+    "friend_dm_roots": {
+      "allowed_query_owners": [
+        "friend-dm"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/frienddmstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/frienddmstore/"
+      ],
+      "migration": "migrations/00034_i7a6a_friend_dm.sql",
+      "owner": "friend-dm",
+      "write_exceptions": []
+    },
+    "friend_dm_occurrences": {
+      "allowed_query_owners": [
+        "friend-dm"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/frienddmstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/frienddmstore/"
+      ],
+      "migration": "migrations/00034_i7a6a_friend_dm.sql",
+      "owner": "friend-dm",
+      "write_exceptions": []
+    },
+    "friend_dm_delivery": {
+      "allowed_query_owners": [
+        "friend-dm"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/frienddmstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/frienddmstore/"
+      ],
+      "migration": "migrations/00034_i7a6a_friend_dm.sql",
+      "owner": "friend-dm",
+      "write_exceptions": []
+    },
+    "friend_dm_projection_receipts": {
+      "allowed_query_owners": [
+        "friend-dm"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/frienddmstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/frienddmstore/"
+      ],
+      "migration": "migrations/00034_i7a6a_friend_dm.sql",
+      "owner": "friend-dm",
+      "write_exceptions": []
+    },
+    "content_emoticon_catalogs": {
+      "allowed_query_owners": [
+        "content-registry"
+      ],
+      "allowed_read_paths": [
+        "sql/content/",
+        "internal/adapters/postgres/contentstore/",
+        "internal/adapters/postgres/contentqueries/"
+      ],
+      "allowed_write_paths": [
+        "sql/content/",
+        "internal/adapters/postgres/contentstore/",
+        "internal/adapters/postgres/contentqueries/"
+      ],
+      "migration": "migrations/00034_i7a6a_friend_dm.sql",
+      "owner": "content-registry",
+      "write_exceptions": []
     }
   }
 }

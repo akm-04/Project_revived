@@ -4,6 +4,7 @@ package socialprojection
 
 import (
 	"errors"
+	dm "gxb.local/backend/v2/internal/application/frienddm"
 	"gxb.local/backend/v2/internal/application/playerpresentation"
 	"gxb.local/backend/v2/internal/application/socialinbox"
 	"gxb.local/backend/v2/internal/application/socialrelation"
@@ -65,6 +66,7 @@ type ScanStats struct {
 	Wrapped            bool
 }
 type Result struct {
+	PrivateMessages          []dm.Projection
 	ObservedAt               time.Time
 	Friends, Blocks, Players []Player
 	Requests                 []Requested

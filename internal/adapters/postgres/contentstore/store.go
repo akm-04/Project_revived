@@ -187,6 +187,12 @@ func (Store) VerifyRevision(ctx context.Context, q tx.Queryer, b registry.Bundle
 	}
 	var v registry.Verification
 	err := q.QueryRow(ctx, contentqueries.VerifyContentRevision, b.RevisionID(), b.SchemaVersion(), b.CompilerVersion(), b.ParserVersion(), string(b.ManifestJSON()), string(b.ResourcesJSON()), string(b.ProgressionJSON()), string(b.FunctionGatesJSON()), string(b.ObjectivesJSON()), string(b.HeroCoreJSON()), string(b.PetCoreJSON()), string(b.PetAcquisitionJSON()), string(b.PetProgressionJSON()), string(b.EquipmentPrimitivesJSON()), string(b.HeroEquipmentJSON()), string(b.HeroFumoJSON()), string(b.HeroPromotionRestorationJSON()), string(b.PetEquipmentJSON()), string(b.PetPromotionRestorationJSON()), string(b.SuperEquipmentJSON()), string(b.PracticeJSON()), string(b.AppearanceJSON())).Scan(&v.Exact, &v.ResourceCount, &v.ProgressionCount, &v.FunctionGateCount, &v.ObjectiveCount, &v.HeroCount, &v.PetCount, &v.PetAcquisitionCount, &v.PetProgressionCount, &v.EquipmentPrimitiveCount, &v.HeroEquipmentCount, &v.SuperEquipmentCount, &v.HeroFumoTargetCount, &v.HeroFumoMaterialCount, &v.HeroPromotionRestorationEquipmentCount, &v.HeroPromotionRestorationFractionCount, &v.HeroPromotionRestorationDenominationCount, &v.PetEquipmentCount, &v.PetPromotionRestorationEquipmentCount, &v.PracticeCount, &v.AppearanceCount)
+	if err != nil {
+		return v, err
+	}
+	var exact bool
+	err = q.QueryRow(ctx, contentqueries.VerifyContentEmoticons, b.RevisionID(), string(b.EmoticonsJSON())).Scan(&exact, &v.EmoticonCount)
+	v.Exact = v.Exact && exact
 	return v, err
 }
 
@@ -528,4 +534,10 @@ func decodeContentGrantPlan(raw []byte) (grant.Plan, error) {
 		}
 	}
 	return p, nil
+}
+
+func (Store) InsertEmoticons(ctx context.Context, t tx.Tx, b registry.Bundle) (int64, error) {
+	var n int64
+	err := t.QueryRow(ctx, contentqueries.InsertContentEmoticons, b.RevisionID(), string(b.EmoticonsJSON())).Scan(&n)
+	return n, err
 }

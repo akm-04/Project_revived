@@ -58,6 +58,7 @@ func (s *pgWakeupSession) Close() {
 // never borrows RealtimeOwnerGuard.conn and therefore cannot alter advisory-lock
 // ownership semantics.
 type RealtimeWakeupListener struct {
+	OnReady    func()
 	Pool       *Pool
 	Registry   appwakeup.Registry
 	RetryDelay time.Duration
@@ -71,5 +72,5 @@ func (l RealtimeWakeupListener) Run(ctx context.Context) error {
 	if delay < 0 {
 		return errors.New("negative realtime wakeup retry delay")
 	}
-	return runRealtimeWakeupListener(ctx, pgWakeupFactory{pool: l.Pool}, l.Registry, delay)
+	return runRealtimeWakeupListenerReady(ctx, pgWakeupFactory{pool: l.Pool}, l.Registry, delay, l.OnReady)
 }

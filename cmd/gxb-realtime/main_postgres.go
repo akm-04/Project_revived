@@ -16,6 +16,8 @@ import (
 
 	"gxb.local/backend/v2/internal/adapters/channelchatread"
 	"gxb.local/backend/v2/internal/adapters/postgres"
+	"gxb.local/backend/v2/internal/adapters/postgres/contentstore"
+	"gxb.local/backend/v2/internal/adapters/postgres/frienddmstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/guildprojection"
 	"gxb.local/backend/v2/internal/adapters/postgres/i4store"
 	"gxb.local/backend/v2/internal/adapters/postgres/presencestore"
@@ -24,11 +26,13 @@ import (
 	"gxb.local/backend/v2/internal/adapters/socialpresentation"
 	"gxb.local/backend/v2/internal/adapters/stockruntime"
 	"gxb.local/backend/v2/internal/application/channelchat"
+	"gxb.local/backend/v2/internal/application/frienddm"
 	appgeneration "gxb.local/backend/v2/internal/application/generation"
 	appidentity "gxb.local/backend/v2/internal/application/identitylifecycle"
 	apprealtime "gxb.local/backend/v2/internal/application/realtimeauth"
 	"gxb.local/backend/v2/internal/application/realtimewakeup"
 	"gxb.local/backend/v2/internal/application/socialpresence"
+	"gxb.local/backend/v2/internal/application/socialrelation"
 	"gxb.local/backend/v2/internal/application/socialreload"
 	"gxb.local/backend/v2/internal/foundation/clock"
 	"gxb.local/backend/v2/internal/foundation/config"
@@ -201,42 +205,79 @@ func run() error {
 		OnPresenceError: func(stage string, err error) { log.Printf("social presence %s degraded: %v", stage, err) },
 	}
 
-	ln, err := net.Listen("tcp", cfg.RealtimeAddr)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer ln.Close()
-	go func() { <-ctx.Done(); _ = ln.Close() }()
-	log.Printf("gxb-realtime I4 listening on %s", cfg.RealtimeAddr)
-	socialEvents, err := stockruntime.NewSocialEventRegistry()
+	socialEvents, err := stockruntime.NewFriendSocialEventRegistry()
 	if err != nil {
 		log.Fatal(err)
 	}
 	socialReload := socialreload.Service{Runner: presenceRunner, Relations: socialrelationstore.Store{}, Inbox: socialinboxstore.Store{}, Observer: socialpresentation.TransactionReader{}}
 	socialHandler := stockruntime.SocialReloadHandler{Service: socialReload, Operations: presenceOperations, Registry: connectionsRegistry, Publisher: stockruntime.RealtimePublisher{Registry: socialEvents, Limits: limits.Default()}, Authority: authority, Time: postgres.AuthoritativeTime{Queryer: pool}, MaxHandles: runtimePolicy.MaxConnections, IsStaleActor: func(err error) bool { return errors.Is(err, i4store.ErrGameplayBearerNotLive) }, OnDeliveryError: func(err error) { log.Printf("social delivery degraded: %v", err) }}
-	wakeups, err := realtimewakeup.NewRegistry(realtimewakeup.Registration{Route: postgres.SocialReloadRoute, Handler: socialHandler})
+	friendDM := frienddm.Service{Timed: appgeneration.TimedRunner{Binder: appgeneration.Binder{Time: postgres.AuthoritativeTime{Queryer: pool}}, Runner: presenceRunner}, Queryer: pool, Store: frienddmstore.Store{}, Players: i4store.PlayerRootLocker{}, Privacy: socialrelation.FriendDMPrivacyProvider{Store: socialrelationstore.Store{}}, Observer: socialpresentation.TransactionReader{}, Content: contentstore.Store{Queryer: pool}, Owner: presenceStore}
+	friendDelivery := stockruntime.FriendDMDelivery{Service: friendDM, Fence: realtimeOwnerFence, Operations: presenceOperations, Registry: connectionsRegistry, Publisher: stockruntime.RealtimePublisher{Registry: socialEvents, Limits: limits.Default()}, Authority: authority, Time: postgres.AuthoritativeTime{Queryer: pool}, MaxHandles: runtimePolicy.MaxConnections, IsStaleActor: func(e error) bool { return errors.Is(e, i4store.ErrGameplayBearerNotLive) }, OnDeliveryError: func(e error) { log.Printf("friend dm write degraded: %v", e) }}
+	friendReconcile := &frienddm.Reconciler{Store: frienddmstore.Store{}, Queryer: pool, Deliverer: friendDelivery, OnDeliveryError: func(e error) { log.Printf("friend dm reconcile delivery degraded: %v", e) }}
+	wakeups, err := realtimewakeup.NewRegistry(realtimewakeup.Registration{Route: postgres.SocialReloadRoute, Handler: socialHandler}, realtimewakeup.Registration{Route: frienddm.WakeupRoute, Handler: friendReconcile})
 	if err != nil {
 		log.Fatal(err)
 	}
+	listenerReady := make(chan struct{})
+	var readyOnce sync.Once
 	listenerDone := make(chan struct{})
 	listenerFailure := make(chan error, 1)
 	go func() {
 		defer close(listenerDone)
-		if err := (postgres.RealtimeWakeupListener{Pool: pool, Registry: wakeups}).Run(ctx); err != nil && ctx.Err() == nil {
+		if err := (postgres.RealtimeWakeupListener{Pool: pool, Registry: wakeups, OnReady: func() { readyOnce.Do(func() { close(listenerReady) }) }}).Run(ctx); err != nil && ctx.Err() == nil {
 			log.Printf("social listener fatal: %v", err)
 			listenerFailure <- err
 			stop()
 		}
 	}()
+	// Routes and successful LISTEN precede initial canonical discovery and TCP
+	// admission. Failure before admission still cancels and joins the listener.
+	select {
+	case <-listenerReady:
+	case <-ctx.Done():
+		<-listenerDone
+		return ctx.Err()
+	case <-time.After(2 * time.Second):
+		stop()
+		<-listenerDone
+		return errors.New("realtime wakeup listener readiness timeout")
+	}
+	if err := friendReconcile.InitialReconcile(ctx); err != nil {
+		stop()
+		<-listenerDone
+		return err
+	}
+	reconcileDone := make(chan struct{})
+	reconcileFailure := make(chan error, 1)
+	go func() {
+		defer close(reconcileDone)
+		if e := friendReconcile.Run(ctx); e != nil && ctx.Err() == nil {
+			log.Printf("friend dm canonical reconcile fatal: %v", e)
+			reconcileFailure <- e
+			stop()
+		}
+	}()
+	ln, err := net.Listen("tcp", cfg.RealtimeAddr)
+	if err != nil {
+		stop()
+		<-listenerDone
+		<-reconcileDone
+		return err
+	}
+	defer ln.Close()
+	go func() { <-ctx.Done(); _ = ln.Close() }()
+	log.Printf("gxb-realtime I4 listening on %s", cfg.RealtimeAddr)
 	listenerSlots := make(chan struct{}, runtimePolicy.MaxConnections)
 	var connections sync.WaitGroup
-	defer func() { stop(); connectionsRegistry.CloseAll(); connections.Wait(); <-listenerDone }()
+	defer func() { stop(); connectionsRegistry.CloseAll(); connections.Wait(); <-listenerDone; <-reconcileDone }()
 	for {
 		conn, err := ln.Accept()
 		if err != nil {
 			if ctx.Err() != nil || errors.Is(err, net.ErrClosed) {
 				select {
 				case failure := <-listenerFailure:
+					return failure
+				case failure := <-reconcileFailure:
 					return failure
 				default:
 					return nil

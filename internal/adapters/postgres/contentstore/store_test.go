@@ -21,26 +21,35 @@ type tag int64
 func (t tag) RowsAffected() int64 { return int64(t) }
 
 type recording struct {
-	sql    string
-	args   []any
-	values []any
-	n      int64
-	err    error
+	bySQL    map[string][]any
+	calls    []string
+	callArgs [][]any
+	sql      string
+	args     []any
+	values   []any
+	n        int64
+	err      error
 }
 
 func (r *recording) QueryRow(_ context.Context, sql string, args ...any) tx.Row {
 	r.sql = sql
 	r.args = args
+	r.calls = append(r.calls, sql)
+	r.callArgs = append(r.callArgs, args)
 	return r
 }
 func (r *recording) Scan(dest ...any) error {
 	if r.err != nil {
 		return r.err
 	}
-	if len(dest) != len(r.values) {
+	values := r.values
+	if v, ok := r.bySQL[r.sql]; ok {
+		values = v
+	}
+	if len(dest) != len(values) {
 		return errors.New("scan arity")
 	}
-	for i, v := range r.values {
+	for i, v := range values {
 		reflect.ValueOf(dest[i]).Elem().Set(reflect.ValueOf(v))
 	}
 	return nil
@@ -71,7 +80,7 @@ func TestBundleQueriesUseExactRawBytes(t *testing.T) {
 		sql  string
 		raw  []byte
 		n    int64
-	}{{s.InsertResources, contentqueries.InsertContentResources, b.ResourcesJSON(), 5556}, {s.InsertProgression, contentqueries.InsertContentPlayerProgression, b.ProgressionJSON(), 100}, {s.InsertFunctionGates, contentqueries.InsertContentFunctionGates, b.FunctionGatesJSON(), 99}, {s.InsertObjectives, contentqueries.InsertContentObjectives, b.ObjectivesJSON(), 0}, {s.InsertHeroCore, contentqueries.InsertContentHeroCore, b.HeroCoreJSON(), 568}, {s.InsertPetCore, contentqueries.InsertContentPetCore, b.PetCoreJSON(), 54}, {s.InsertPetAcquisition, contentqueries.InsertContentPetAcquisition, b.PetAcquisitionJSON(), 27}, {s.InsertPetProgression, contentqueries.InsertContentPetProgression, b.PetProgressionJSON(), 54}, {s.InsertEquipmentPrimitives, contentqueries.InsertContentEquipmentPrimitives, b.EquipmentPrimitivesJSON(), 1176}, {s.InsertHeroEquipment, contentqueries.InsertContentHeroEquipment, b.HeroEquipmentJSON(), 53280}, {s.InsertSuperEquipment, contentqueries.InsertContentSuperEquipment, b.SuperEquipmentJSON(), 84}, {s.InsertPetEquipment, contentqueries.InsertContentPetEquipment, b.PetEquipmentJSON(), 2592}, {s.InsertPetPromotionRestoration, contentqueries.InsertContentPetPromotionRestoration, b.PetPromotionRestorationJSON(), 73}, {s.InsertPractice, contentqueries.InsertContentPractice, b.PracticeJSON(), 1889}, {s.InsertAppearance, contentqueries.InsertContentAppearance, b.AppearanceJSON(), 542}}
+	}{{s.InsertResources, contentqueries.InsertContentResources, b.ResourcesJSON(), 5556}, {s.InsertProgression, contentqueries.InsertContentPlayerProgression, b.ProgressionJSON(), 100}, {s.InsertFunctionGates, contentqueries.InsertContentFunctionGates, b.FunctionGatesJSON(), 99}, {s.InsertObjectives, contentqueries.InsertContentObjectives, b.ObjectivesJSON(), 0}, {s.InsertHeroCore, contentqueries.InsertContentHeroCore, b.HeroCoreJSON(), 568}, {s.InsertPetCore, contentqueries.InsertContentPetCore, b.PetCoreJSON(), 54}, {s.InsertPetAcquisition, contentqueries.InsertContentPetAcquisition, b.PetAcquisitionJSON(), 27}, {s.InsertPetProgression, contentqueries.InsertContentPetProgression, b.PetProgressionJSON(), 54}, {s.InsertEquipmentPrimitives, contentqueries.InsertContentEquipmentPrimitives, b.EquipmentPrimitivesJSON(), 1176}, {s.InsertHeroEquipment, contentqueries.InsertContentHeroEquipment, b.HeroEquipmentJSON(), 53280}, {s.InsertSuperEquipment, contentqueries.InsertContentSuperEquipment, b.SuperEquipmentJSON(), 84}, {s.InsertPetEquipment, contentqueries.InsertContentPetEquipment, b.PetEquipmentJSON(), 2592}, {s.InsertPetPromotionRestoration, contentqueries.InsertContentPetPromotionRestoration, b.PetPromotionRestorationJSON(), 73}, {s.InsertPractice, contentqueries.InsertContentPractice, b.PracticeJSON(), 1889}, {s.InsertAppearance, contentqueries.InsertContentAppearance, b.AppearanceJSON(), 542}, {s.InsertEmoticons, contentqueries.InsertContentEmoticons, b.EmoticonsJSON(), 85}}
 	for _, c := range cases {
 		q.values = []any{c.n}
 		if got, err := c.call(ctx, q, b); err != nil || got != c.n {
@@ -96,8 +105,9 @@ func TestBundleQueriesUseExactRawBytes(t *testing.T) {
 		t.Fatal("Hero promotion restoration query input mismatch")
 	}
 	q.values = []any{true, int64(5556), int64(100), int64(99), int64(0), int64(568), int64(54), int64(27), int64(54), int64(1176), int64(53280), int64(84), int64(359), int64(516), int64(195), int64(5), int64(3), int64(2592), int64(73), int64(1889), int64(542)}
+	q.bySQL = map[string][]any{contentqueries.VerifyContentEmoticons: {true, int64(85)}}
 	v, err := s.VerifyRevision(ctx, q, b)
-	if err != nil || !v.Matches(b) || q.sql != contentqueries.VerifyContentRevision || len(q.args) != 22 {
+	if err != nil || !v.Matches(b) || q.calls[len(q.calls)-2] != contentqueries.VerifyContentRevision || len(q.callArgs[len(q.callArgs)-2]) != 22 || q.sql != contentqueries.VerifyContentEmoticons || !reflect.DeepEqual(q.args, []any{b.RevisionID(), string(b.EmoticonsJSON())}) || v.EmoticonCount != 85 {
 		t.Fatal(v, err)
 	}
 }

@@ -1,0 +1,96 @@
+{
+  "schema": "gxb-i7a6a-source-binding/v1",
+  "source_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+  "source_prefix": "app-assets/output/assets/src_64/",
+  "source_files": [
+    {
+      "path": "app/common/network/Backend.lua",
+      "sha256": "95378e2b0be8180df6de27e9e430c630bcfe46c080e1f91ef5f6d74bdbb1b840",
+      "anchors": [
+        {
+          "finding": "6A-F12",
+          "line": 562,
+          "anchor": "if var_31_1 ~= 200 then"
+        },
+        {
+          "finding": "6A-F12",
+          "line": 566,
+          "anchor": "var_23_3(json.decode(var_31_0), xyd.error.OK)"
+        },
+        {
+          "finding": "6A-F12",
+          "line": 426,
+          "anchor": "arg_23_3(arg_25_1, arg_25_0, arg_23_4)"
+        }
+      ]
+    },
+    {
+      "path": "app/model/SocialSystem.lua",
+      "sha256": "ec5bea26bbdcbb67ca2ea80ab5ad7e9fb53ee613a3ffcbb13ae5dfef9ddf0502",
+      "anchors": [
+        {
+          "finding": "6A-F01",
+          "line": 172,
+          "anchor": "var_9_1.selectType or"
+        },
+        {
+          "finding": "6A-F04",
+          "line": 165,
+          "anchor": "friendID = arg_9_1.params.friend_id"
+        },
+        {
+          "finding": "6A-F04",
+          "line": 249,
+          "anchor": "friendID = var_11_0.player_id"
+        }
+      ]
+    },
+    {
+      "path": "app/windows/SocialSystemChatWindow.lua",
+      "sha256": "3d0368923f0418f0442deee0fd7204419937c88ce5a2e02142b1f6ad16701dae",
+      "anchors": [
+        {
+          "finding": "6A-F01",
+          "line": 159,
+          "anchor": "msgType = xyd.FriendMsgType.COMMON"
+        },
+        {
+          "finding": "6A-F09",
+          "line": 486,
+          "anchor": "getItemNumByID"
+        },
+        {
+          "finding": "6A-F13",
+          "line": 165,
+          "anchor": "if arg_11_0 == xyd.error.OK then"
+        }
+      ]
+    },
+    {
+      "path": "data/tables/emoticon.lua",
+      "sha256": "76ccbf5c136f5a484e6e5fbe2ca0ef4f58451676ddea78281285a99afc2d3c08",
+      "anchors": [
+        {
+          "finding": "6A-F09",
+          "line": 6,
+          "anchor": "\"item_id\""
+        }
+      ]
+    },
+    {
+      "path": "framework/json.lua",
+      "sha256": "c6b04241008d47e56f6b4d5ebcc9b7946730d6bab204dd602cc18a20f7dd671a",
+      "anchors": [
+        {
+          "finding": "6A-F02",
+          "line": 5,
+          "anchor": "require(\"cjson\")"
+        }
+      ]
+    }
+  ],
+  "classification": "SOURCE_FACT static selected source; no physical reachability or original-server-truth claim",
+  "stock_gate": "W2 DEFERRED_UNPASSED",
+  "design_contracts": "Six exact selected Pass645 contracts retained in this directory",
+  "content": "85 definitions,25free/60paid,47qualified stackitems; deterministic existing compiler, prior17 artifacts preserved"
+}

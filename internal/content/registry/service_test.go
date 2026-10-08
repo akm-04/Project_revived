@@ -534,3 +534,11 @@ func TestStartupOrderAndFailure(t *testing.T) {
 		}
 	}
 }
+
+func (r repo) InsertEmoticons(_ context.Context, x tx.Tx, b Bundle) (int64, error) {
+	t := x.(*modelTx)
+	v := t.installed[b.RevisionID()]
+	v.EmoticonCount = 85
+	t.installed[b.RevisionID()] = v
+	return 85, nil
+}

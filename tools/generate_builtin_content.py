@@ -21,12 +21,13 @@ from pathlib import Path
 from typing import Any, Iterable
 
 SCHEMA_VERSION = 1
-COMPILER_VERSION = "ca7-2-appearance-foundation"
-PARSER_VERSION = "lua-generated-v14-appearance"
+COMPILER_VERSION = "i7a6a-emoticon"
+PARSER_VERSION = "lua-generated-v15-emoticon"
 EXPECTED_SOURCE_ARCHIVE_SHA256 = "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
 SOURCE_PREFIX = "app-assets/output/assets/src_64/"
 
 SOURCE_MANIFEST = [
+    ("data/tables/emoticon.lua", "76ccbf5c136f5a484e6e5fbe2ca0ef4f58451676ddea78281285a99afc2d3c08", "I7A6A_EMOTICON_DATA_AUTHORITY"),
     ("app/common/tables/ItemTable.lua", "1f846972f29a55ee2dbb90f2cb9b0124eaeaa90646c3c66644ab66e231c37f00", "ITEM_BEHAVIORAL_PARSER_AUTHORITY"),
     ("data/tables/item.lua", "59b668c28a372543da0c36d7a8d84291cc5b93fa0d92b7cc389a645e96e7b7cc", "ITEM_DATA_AUTHORITY_ENCODED_TABLE"),
     ("app/common/tables/SkinSkillTable.lua", "5ce8af1fddb22a503c779183495f84743a8ceb8305cb891ef556a88b6a7988e5", "CA7_SKIN_SKILL_ACCESSOR_AUTHORITY"),
@@ -110,6 +111,7 @@ ENABLED_CAPABILITIES = [
     "SUPER_EQUIPMENT_CA4_5",
     "PRACTICE_CA6",
     "CHARACTER_APPEARANCE_CA7",
+    "FRIEND_DM_EMOTICON_I7A6A",
 ]
 
 
@@ -1730,7 +1732,22 @@ def build_artifacts(blobs: dict[str, SourceBlob], archive_sha256: str) -> dict[s
         "status": "BUILTIN_ACTIVATION_EMPTY_UNQUALIFIED_MAPPING",
     }
 
+    emoticons=[]
+    for row in parse_generated_lua_table(blobs["data/tables/emoticon.lua"].data):
+        eid=parse_int(row["id"],label="emoticon id",allow_zero=False,allow_negative=False)
+        item_id=parse_int(row["item_id"],label="emoticon item",allow_negative=False)
+        if item_id:
+            # The authoritative normalized resource artifact is used below.
+            matches=[r for r in resource_artifact["resources"] if r.get("item_id")==item_id]
+            if len(matches)!=1 or matches[0].get("class")!="STACK_ITEM" or matches[0].get("settlement_activation")!="ENABLED_R4" or matches[0].get("stack_cap")!=1:
+                raise CompileError(f"unqualified emoticon stack item {item_id}")
+        emoticons.append({"id":eid,"item_id":item_id})
+    emoticons.sort(key=lambda r:r["id"])
+    if len(emoticons)!=85 or len({r["id"] for r in emoticons})!=85 or sum(r["item_id"]==0 for r in emoticons)!=25 or len({r["item_id"] for r in emoticons if r["item_id"]})!=47:
+        raise CompileError("I7A6A emoticon source counts drift")
+    emoticon_artifact={"definitions":emoticons,"schema_version":SCHEMA_VERSION,"source":"data/tables/emoticon.lua"}
     artifacts = {
+        "emoticon_catalog.json": emoticon_artifact,
         "equipment_primitives_catalog.json": equipment_artifact,
         "function_gates.json": function_artifact,
         "hero_core_catalog.json": hero_artifact,

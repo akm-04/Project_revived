@@ -39,7 +39,13 @@ func wireInput(r sp.Result) sv.Result {
 	}
 	return v
 }
-func MapBase(r sp.Result) sv.Base { return sv.MapBase(wireInput(r)) }
+func MapBase(r sp.Result) sv.Base {
+	out := sv.MapBase(wireInput(r))
+	for _, m := range r.PrivateMessages {
+		out.Offline = append(out.Offline, sv.PrivateMessage{PlayerID: int64(m.PlayerID), Message: m.Message, Time: m.Time})
+	}
+	return out
+}
 func MapList(r sp.Result, k sp.ListKind) (any, error) {
 	return sv.MapList(wireInput(r), sv.ListKind(k))
 }

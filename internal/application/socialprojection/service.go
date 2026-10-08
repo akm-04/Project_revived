@@ -132,87 +132,100 @@ func (s Service) LoadList(c context.Context, a identity.ActorContext, k ListKind
 }
 func (s Service) load(c context.Context, a identity.ActorContext, op operation.Context, k ListKind) (Result, error) {
 	return s.run(c, a, op, func(c context.Context, t tx.Tx, hasRoot bool) (Result, error) {
-		out := emptyResult()
-		friends, blocks := []identity.PlayerID{}, []identity.PlayerID{}
-		requests := []socialrelation.FriendRequest{}
-		notices := []socialinbox.Notice{}
-		var e error
-		if hasRoot {
-			if k == 0 || k == Friend {
-				friends, e = s.Relations.ActiveFriendsTx(c, t, a.PlayerID)
-				if e != nil {
-					return Result{}, e
-				}
-			}
-			if k == 0 || k == Blacklist {
-				blocks, e = s.Relations.ActiveBlocksForTx(c, t, a.PlayerID)
-				if e != nil {
-					return Result{}, e
-				}
-			}
-			if k == 0 || k == Request {
-				requests, e = s.Relations.InboundPendingTx(c, t, a.PlayerID)
-				if e != nil {
-					return Result{}, e
-				}
-			}
-			if k == 0 || k == Notice {
-				notices, e = s.Inbox.RelationWindowTx(c, t, a.PlayerID)
-				if e != nil {
-					return Result{}, e
-				}
+		return s.loadTx(c, t, a, k, hasRoot)
+	})
+}
+
+// ReadBasePreparedTx is the additive I7A6A same-transaction entry. The caller
+// already holds its complete ordered 315/360/361/363 plan, including recipient
+// root presence/absence. It performs reads only and never ensures a root.
+func (s Service) ReadBasePreparedTx(c context.Context, t tx.Tx, a identity.ActorContext, hasRoot bool) (Result, error) {
+	if t == nil || s.Presentation == nil || s.Observer == nil || s.Relations == nil || s.Inbox == nil {
+		return Result{}, ErrInvalidRead
+	}
+	return s.loadTx(c, t, a, 0, hasRoot)
+}
+func (s Service) loadTx(c context.Context, t tx.Tx, a identity.ActorContext, k ListKind, hasRoot bool) (Result, error) {
+	out := emptyResult()
+	friends, blocks := []identity.PlayerID{}, []identity.PlayerID{}
+	requests := []socialrelation.FriendRequest{}
+	notices := []socialinbox.Notice{}
+	var e error
+	if hasRoot {
+		if k == 0 || k == Friend {
+			friends, e = s.Relations.ActiveFriendsTx(c, t, a.PlayerID)
+			if e != nil {
+				return Result{}, e
 			}
 		}
-		ids := append(append([]identity.PlayerID{}, friends...), blocks...)
-		for i, req := range requests {
-			if req.Validate() != nil || req.TargetPlayerID != a.PlayerID || req.Status != socialrelation.RequestPending {
-				return Result{}, ErrInvalidRead
+		if k == 0 || k == Blacklist {
+			blocks, e = s.Relations.ActiveBlocksForTx(c, t, a.PlayerID)
+			if e != nil {
+				return Result{}, e
 			}
-			if i > 0 && (req.RequestedAt.After(requests[i-1].RequestedAt) || req.RequestedAt.Equal(requests[i-1].RequestedAt) && req.RequesterPlayerID <= requests[i-1].RequesterPlayerID) {
-				return Result{}, ErrInvalidRead
-			}
-			ids = append(ids, req.RequesterPlayerID)
 		}
-		if len(notices) > 50 {
+		if k == 0 || k == Request {
+			requests, e = s.Relations.InboundPendingTx(c, t, a.PlayerID)
+			if e != nil {
+				return Result{}, e
+			}
+		}
+		if k == 0 || k == Notice {
+			notices, e = s.Inbox.RelationWindowTx(c, t, a.PlayerID)
+			if e != nil {
+				return Result{}, e
+			}
+		}
+	}
+	ids := append(append([]identity.PlayerID{}, friends...), blocks...)
+	for i, req := range requests {
+		if req.Validate() != nil || req.TargetPlayerID != a.PlayerID || req.Status != socialrelation.RequestPending {
 			return Result{}, ErrInvalidRead
 		}
-		for i, n := range notices {
-			if !n.NoticeID.WireSafe() || n.Validate() != nil || socialinbox.ValidateRelationDescriptor(n) != nil || n.RecipientPlayerID != a.PlayerID || !n.Active || !n.RelatedPlayerID.Valid() {
+		if i > 0 && (req.RequestedAt.After(requests[i-1].RequestedAt) || req.RequestedAt.Equal(requests[i-1].RequestedAt) && req.RequesterPlayerID <= requests[i-1].RequesterPlayerID) {
+			return Result{}, ErrInvalidRead
+		}
+		ids = append(ids, req.RequesterPlayerID)
+	}
+	if len(notices) > 50 {
+		return Result{}, ErrInvalidRead
+	}
+	for i, n := range notices {
+		if !n.NoticeID.WireSafe() || n.Validate() != nil || socialinbox.ValidateRelationDescriptor(n) != nil || n.RecipientPlayerID != a.PlayerID || !n.Active || !n.RelatedPlayerID.Valid() {
+			return Result{}, ErrInvalidRead
+		}
+		if i > 0 && (n.NoticeTime.After(notices[i-1].NoticeTime) || n.NoticeTime.Equal(notices[i-1].NoticeTime) && n.NoticeID >= notices[i-1].NoticeID) {
+			return Result{}, ErrInvalidRead
+		}
+		ids = append(ids, n.RelatedPlayerID)
+	}
+	for _, list := range [][]identity.PlayerID{friends, blocks} {
+		var prev identity.PlayerID
+		for _, id := range list {
+			if id == a.PlayerID || id <= prev {
 				return Result{}, ErrInvalidRead
 			}
-			if i > 0 && (n.NoticeTime.After(notices[i-1].NoticeTime) || n.NoticeTime.Equal(notices[i-1].NoticeTime) && n.NoticeID >= notices[i-1].NoticeID) {
-				return Result{}, ErrInvalidRead
-			}
-			ids = append(ids, n.RelatedPlayerID)
+			prev = id
 		}
-		for _, list := range [][]identity.PlayerID{friends, blocks} {
-			var prev identity.PlayerID
-			for _, id := range list {
-				if id == a.PlayerID || id <= prev {
-					return Result{}, ErrInvalidRead
-				}
-				prev = id
-			}
-		}
-		b, e := s.present(c, t, ids)
-		if e != nil {
-			return Result{}, e
-		}
-		out.ObservedAt = b.ObservedAt
-		for _, id := range friends {
-			out.Friends = append(out.Friends, Player{Presentation: b.Players[id]})
-		}
-		for _, id := range blocks {
-			out.Blocks = append(out.Blocks, Player{Presentation: b.Players[id]})
-		}
-		for _, req := range requests {
-			out.Requests = append(out.Requests, Requested{Player: Player{Presentation: b.Players[req.RequesterPlayerID]}, Relation: req})
-		}
-		for _, n := range notices {
-			out.Notices = append(out.Notices, Notified{Player: Player{Presentation: b.Players[n.RelatedPlayerID]}, Notice: n})
-		}
-		return out, nil
-	})
+	}
+	b, e := s.present(c, t, ids)
+	if e != nil {
+		return Result{}, e
+	}
+	out.ObservedAt = b.ObservedAt
+	for _, id := range friends {
+		out.Friends = append(out.Friends, Player{Presentation: b.Players[id]})
+	}
+	for _, id := range blocks {
+		out.Blocks = append(out.Blocks, Player{Presentation: b.Players[id]})
+	}
+	for _, req := range requests {
+		out.Requests = append(out.Requests, Requested{Player: Player{Presentation: b.Players[req.RequesterPlayerID]}, Relation: req})
+	}
+	for _, n := range notices {
+		out.Notices = append(out.Notices, Notified{Player: Player{Presentation: b.Players[n.RelatedPlayerID]}, Notice: n})
+	}
+	return out, nil
 }
 func numericPID(raw string) (identity.PlayerID, bool) {
 	if raw == "" {

@@ -40,19 +40,24 @@ type Notice struct {
 	At     int64  `json:"notice_time"`
 	Player Common `json:"player_info"`
 }
+type PrivateMessage struct {
+	PlayerID int64  `json:"player_id"`
+	Message  string `json:"message"`
+	Time     int64  `json:"time"`
+}
 type Base struct {
-	ServerTime   int64     `json:"server_time"`
-	Blacklist    []Common  `json:"blacklist"`
-	Friends      []Friend  `json:"friend_list"`
-	Notices      []Notice  `json:"notice_list"`
-	Requests     []Request `json:"request_list"`
-	Offline      []any     `json:"offline_msg_list"`
-	SendCount    int       `json:"send_gift_count"`
-	ReceiveCount int       `json:"receive_gift_count"`
-	Doing        []any     `json:"doing_recall"`
-	Done         []any     `json:"done_recall"`
-	Got          []any     `json:"got_recall"`
-	Awarded      []any     `json:"recall_awarded"`
+	ServerTime   int64            `json:"server_time"`
+	Blacklist    []Common         `json:"blacklist"`
+	Friends      []Friend         `json:"friend_list"`
+	Notices      []Notice         `json:"notice_list"`
+	Requests     []Request        `json:"request_list"`
+	Offline      []PrivateMessage `json:"offline_msg_list"`
+	SendCount    int              `json:"send_gift_count"`
+	ReceiveCount int              `json:"receive_gift_count"`
+	Doing        []any            `json:"doing_recall"`
+	Done         []any            `json:"done_recall"`
+	Got          []any            `json:"got_recall"`
+	Awarded      []any            `json:"recall_awarded"`
 }
 
 func common(p Player) Common {
@@ -67,7 +72,7 @@ func common(p Player) Common {
 	return v
 }
 func MapBase(r Result) Base {
-	v := Base{ServerTime: r.ObservedAt.Unix(), Blacklist: []Common{}, Friends: []Friend{}, Notices: []Notice{}, Requests: []Request{}, Offline: []any{}, Doing: []any{}, Done: []any{}, Got: []any{}, Awarded: []any{}}
+	v := Base{ServerTime: r.ObservedAt.Unix(), Blacklist: []Common{}, Friends: []Friend{}, Notices: []Notice{}, Requests: []Request{}, Offline: []PrivateMessage{}, Doing: []any{}, Done: []any{}, Got: []any{}, Awarded: []any{}}
 	for _, p := range r.Blocks {
 		v.Blacklist = append(v.Blacklist, common(p))
 	}

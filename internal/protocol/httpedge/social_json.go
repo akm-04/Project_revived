@@ -4,11 +4,12 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"gxb.local/backend/v2/internal/foundation/finitejson"
 	"io"
 	"unicode/utf8"
 )
 
-func socialMID(mid uint16) bool { return mid >= 176 && mid <= 190 && mid != 183 }
+func socialMID(mid uint16) bool { return mid == 515 || mid >= 176 && mid <= 190 && mid != 183 }
 
 // Social requires raw duplicate detection: decoded maps have already lost it.
 // Inspect every top-level MID declaration so a last-wins MID cannot evade scope.
@@ -86,7 +87,7 @@ func validateSocialRaw(raw []byte, selected bool, depthBudget, nodeBudget int) e
 		if e != nil {
 			return e
 		}
-		if duplicate || !utf8.Valid(raw) {
+		if duplicate || !utf8.Valid(raw) || !finitejson.ValidateUnicodeEscapes(string(raw)) {
 			return errors.New("ambiguous Social JSON")
 		}
 	}
