@@ -72,12 +72,12 @@ func common(p Player) Common {
 	return v
 }
 func MapBase(r Result) Base {
-	v := Base{ServerTime: r.ObservedAt.Unix(), Blacklist: []Common{}, Friends: []Friend{}, Notices: []Notice{}, Requests: []Request{}, Offline: []PrivateMessage{}, Doing: []any{}, Done: []any{}, Got: []any{}, Awarded: []any{}}
+	v := Base{ServerTime: r.ObservedAt.Unix(), SendCount: r.SendCount, ReceiveCount: r.ReceiveCount, Blacklist: []Common{}, Friends: []Friend{}, Notices: []Notice{}, Requests: []Request{}, Offline: []PrivateMessage{}, Doing: []any{}, Done: []any{}, Got: []any{}, Awarded: []any{}}
 	for _, p := range r.Blocks {
 		v.Blacklist = append(v.Blacklist, common(p))
 	}
 	for _, p := range r.Friends {
-		v.Friends = append(v.Friends, Friend{Common: common(p)})
+		v.Friends = append(v.Friends, Friend{Common: common(p), IsSent: p.IsSent})
 	}
 	for _, p := range r.Requests {
 		v.Requests = append(v.Requests, Request{Common: common(p.Player), Message: p.Message, At: p.At.Unix()})

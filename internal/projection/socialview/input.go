@@ -52,6 +52,7 @@ type Player struct {
 	Minimal         Minimal
 	Presence        Presence
 	OutgoingPending bool
+	IsSent          bool
 }
 type Requested struct {
 	Player  Player
@@ -69,4 +70,5 @@ type Result struct {
 	Friends, Blocks, Players []Player
 	Requests                 []Requested
 	Notices                  []Notified
+	SendCount, ReceiveCount  int
 }

@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "pass": "650.0",
+  "stage": "I7A-7B",
+  "node_path": [
+    "ROOT",
+    "I7",
+    "I7A",
+    "I7A-7",
+    "I7A-7B"
+  ],
+  "status": "SELECTED_7B_RESEARCH_DESIGN_REQUIRES_VALIDATED_FINAL650_SEAL",
+  "classification": "IMPLEMENTATION_DECISION_UNLESS_EXPLICIT_SOURCE_FACT",
+  "implementation_started": false,
+  "product_accepted": false,
+  "backend_sha256": "4f3a64bec275a2532a4cff9d6b5680d09d4c84b63147797f02fee48e2ead408d",
+  "sealed_base_passmap_sha256": "6f41f3c7b2e7937a89dc728ec11ef95973ebfc2129546434a16559d793bd6987",
+  "contract_id": "I7A7B_PROJECTION_WINDOW_CONTRACT",
+  "ports": "Pure accepted GiftSnapshotTx counts+directed recipients at base.ObservedAt; new narrow GiftNoticeValidityTx over owner source IDs, typed values only, no foreign SQL or locks/mutations. Inbox owns page read and typed Notice DTO; I4/I5 own presentation.",
+  "176": "All Social/Gift/content/presentation reads within same RepeatableRead caller transaction before Friend ApplyDrainTx380. Share canonical DB ObservedAt across server_time/presence/GiftDay. Read creates no GiftEpoch/root/counter and never refreshes371 after drain.",
+  "189": "Friend list boolean is_sent from current-day snapshot; notice list merged qualified window; raw array shape retained. No envelope or gift count reset; noGift mutations.",
+  "window": {
+    "policy": "Newest notice_time DESC then notice_id DESC; finite qualified types1..4 only; filter unsupported family and deleted/null sender before50; recognized malformed gift source/linkage/content fails whole read; properly terminal claimed notice excluded, inconsistent active claim fails closed. No hidden entitlement deletion.",
+    "page_size": 128,
+    "max_evaluated_candidates": 4096,
+    "saturation": "If50 valid or EOF cannot be established within bound, non200. Never silently publish undersized list known to hide eligible older rows.",
+    "validator": "Batch Gift owner validates immutable Transfer<->Notice/recipient/sender/time/source/content/reward and unclaimed lifecycle under same caller snapshot; projection is never entitlement authority."
+  },
+  "DTO": "Application and pure view types carry int counts0..10 and boolis_sent; arrays remain[], nested player_info from real presentation. Do not introduce generic maps in application/domain.",
+  "selected_authority": true,
+  "selection_requires_validated_owning650_seal": true
+}

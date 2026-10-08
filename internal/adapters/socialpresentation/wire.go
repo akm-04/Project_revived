@@ -15,13 +15,13 @@ func timeCopy(p *time.Time) *time.Time {
 }
 func wirePlayer(p sp.Player) sv.Player {
 	m, o := p.Presentation.Minimal, p.Presentation.Presence
-	return sv.Player{Minimal: sv.Minimal{PlayerID: int64(m.PlayerID), Name: m.Name, Level: m.Level, AvatarID: m.AvatarID, AvatarFrameID: m.AvatarFrameID, ConquerLevel: m.ConquerLevel, ConquerLoopID: m.ConquerLoopID, PlayerType: m.PlayerType}, Presence: sv.Presence{IsOnline: o.IsOnline, LastSeenAt: timeCopy(o.LastSeenAt), LatestConnectedAt: timeCopy(o.LatestConnectedAt)}, OutgoingPending: p.OutgoingPending}
+	return sv.Player{Minimal: sv.Minimal{PlayerID: int64(m.PlayerID), Name: m.Name, Level: m.Level, AvatarID: m.AvatarID, AvatarFrameID: m.AvatarFrameID, ConquerLevel: m.ConquerLevel, ConquerLoopID: m.ConquerLoopID, PlayerType: m.PlayerType}, Presence: sv.Presence{IsOnline: o.IsOnline, LastSeenAt: timeCopy(o.LastSeenAt), LatestConnectedAt: timeCopy(o.LatestConnectedAt)}, OutgoingPending: p.OutgoingPending, IsSent: p.IsSent}
 }
 
 // wireInput is the finite application-to-view bridge at the allowed edge. It
 // copies only committed response values; it performs no read or selection.
 func wireInput(r sp.Result) sv.Result {
-	v := sv.Result{ObservedAt: r.ObservedAt}
+	v := sv.Result{ObservedAt: r.ObservedAt, SendCount: r.SendCount, ReceiveCount: r.ReceiveCount}
 	for _, p := range r.Friends {
 		v.Friends = append(v.Friends, wirePlayer(p))
 	}

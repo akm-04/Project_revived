@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "pass": "650.0",
+  "stage": "I7A-7B",
+  "node_path": [
+    "ROOT",
+    "I7",
+    "I7A",
+    "I7A-7",
+    "I7A-7B"
+  ],
+  "status": "SELECTED_7B_RESEARCH_DESIGN_REQUIRES_VALIDATED_FINAL650_SEAL",
+  "classification": "IMPLEMENTATION_DECISION_UNLESS_EXPLICIT_SOURCE_FACT",
+  "implementation_started": false,
+  "product_accepted": false,
+  "backend_sha256": "4f3a64bec275a2532a4cff9d6b5680d09d4c84b63147797f02fee48e2ead408d",
+  "sealed_base_passmap_sha256": "6f41f3c7b2e7937a89dc728ec11ef95973ebfc2129546434a16559d793bd6987",
+  "contract_id": "I7A7B_RELOAD_AUTHORITY_CONTRACT",
+  "neutral_codec": "Neutral application Social reload package with finite relation r1 branch unchanged and g1 Gift branch; SocialRelation owns relation source checks, SocialGift owns Gift checks; typed ports prevent package cycle. Existing sr type alias compatibility may preserve callers; no second current index/bus/socket writer.",
+  "gift_branch": {
+    "grammar": "g1|recipient|actor|root_version|purpose|transfer_uuid; strict canonical UUID and exact field count. purpose GiftRecipientNotice or GiftSenderList only; each branch validates source sender/recipient role and current SocialRoot.StateVersion>=committed revision.",
+    "source": "Exact committed Transfer UUID+finite GiftDescriptor, not send operationUUID/day integer/general hash; source reload must verify recipient Notice evidence for recipient purpose, sender/recipient linkage for sender purpose; stale/missing/forged generation/source/root fails closed. Later claimed source may still emit refresh-only acceleration, never award/create/reset.",
+    "wire": "player_id=0 + ONE selector=1 per MIDForceReload frame, recipientfriend_notice or senderfriend_list; no184 hint."
+  },
+  "delivery": "Reuse PostgreSQL reference wakeup/listener, world-role indexed newest connection handles, admitted identity/liveness validation, single connWriter, finite2s deadline and existingmaxhandles. No network under gameplayTx/registry mutex; delivery failure cannot roll back committedGift.",
+  "selected_authority": true,
+  "selection_requires_validated_owning650_seal": true
+}

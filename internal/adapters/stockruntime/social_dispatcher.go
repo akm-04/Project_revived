@@ -5,8 +5,10 @@ import (
 	"encoding/json"
 	"errors"
 	"gxb.local/backend/v2/internal/adapters/socialpresentation"
+	"gxb.local/backend/v2/internal/application/i5"
 	"gxb.local/backend/v2/internal/application/realtimeauth"
 	"gxb.local/backend/v2/internal/application/socialdismiss"
+	"gxb.local/backend/v2/internal/application/socialgift"
 	"gxb.local/backend/v2/internal/application/socialinbox"
 	sp "gxb.local/backend/v2/internal/application/socialprojection"
 	sr "gxb.local/backend/v2/internal/application/socialrelation"
@@ -15,6 +17,7 @@ import (
 	"gxb.local/backend/v2/internal/projection/lobby"
 	"gxb.local/backend/v2/internal/protocol/httpedge"
 	"net/http"
+	"time"
 )
 
 type SocialRelationCommands interface {
@@ -32,19 +35,30 @@ type SocialProjectionQueries interface {
 type SocialReloadEmitter interface {
 	Emit(context.Context, []sr.ReloadReference)
 }
+type SocialGiftCommands interface {
+	Send(context.Context, identity.ActorContext, identity.PlayerID, operation.Context) (socialgift.Result, error)
+	Claim(context.Context, identity.ActorContext, []socialinbox.NoticeID, operation.Context) (socialgift.Result, error)
+	ReloadReferences(context.Context, identity.ActorContext, identity.PlayerID, socialgift.Result, operation.Context) ([]sr.ReloadReference, error)
+}
 type SocialDispatcher struct {
-	Authority  realtimeauth.GameplayAuthorityPort
-	Relations  SocialRelationCommands
-	Dismissal  SocialDismissCommands
-	Projection SocialProjectionQueries
-	Emitter    SocialReloadEmitter
-	Tracker    *lobby.BootTracker
+	Gifts          SocialGiftCommands
+	giftStockReady bool
+	Scalar         i5.CurrentScalarProjectionPort
+	Authority      realtimeauth.GameplayAuthorityPort
+	Relations      SocialRelationCommands
+	Dismissal      SocialDismissCommands
+	Projection     SocialProjectionQueries
+	Emitter        SocialReloadEmitter
+	Tracker        *lobby.BootTracker
 }
 
-var SocialHTTPMIDs = []uint16{176, 177, 178, 179, 180, 181, 182, 184, 185, 186, 187, 188, 189, 190}
+var SocialHTTPMIDs = []uint16{176, 177, 178, 179, 180, 181, 182, 183, 184, 185, 186, 187, 188, 189, 190}
 
 func RegisterSocialRoutes(router *httpedge.Router, d SocialDispatcher) error {
 	for _, mid := range SocialHTTPMIDs {
+		if mid == 183 && !d.giftStockReady {
+			continue
+		}
 		if e := router.Register(mid, d); e != nil {
 			return e
 		}
@@ -118,6 +132,9 @@ func socialFailure(e error) httpedge.Response {
 	return httpedge.Response{HTTPStatus: http.StatusConflict, Body: map[string]any{"error": "social_unavailable"}}
 }
 func (d SocialDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRequest) httpedge.Response {
+	// One finite parent deadline covers authority, command and postcommit projection.
+	ctx, cancel := context.WithTimeout(ctx, 12*time.Second)
+	defer cancel()
 	bad := func() httpedge.Response {
 		return httpedge.Response{HTTPStatus: 400, Body: map[string]any{"error": "invalid_social_request"}}
 	}
@@ -196,6 +213,28 @@ func (d SocialDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReq
 		}
 		return httpedge.Response{HTTPStatus: 200, JSON: body}
 	}
+	if mid == 183 {
+		fields, e := socialFields(m, "player_id")
+		if e != nil {
+			return bad()
+		}
+		targets, e := socialTargets(fields, "player_id", false)
+		if e != nil || len(targets) != 1 {
+			return bad()
+		}
+		if !d.giftStockReady || d.Gifts == nil || d.Scalar == nil || d.Projection == nil || d.Emitter == nil {
+			return giftFailure()
+		}
+		result, e := d.Gifts.Send(ctx, a, targets[0], op)
+		if e != nil {
+			return giftFailure()
+		}
+		refs, e := d.Gifts.ReloadReferences(ctx, a, targets[0], result, op)
+		if e == nil && len(refs) > 0 {
+			d.Emitter.Emit(ctx, refs)
+		}
+		return httpedge.Response{HTTPStatus: 200, Body: map[string]any{}}
+	}
 	if mid == 184 {
 		fields, e := socialFields(m, "notice_ids")
 		if e != nil {
@@ -212,6 +251,28 @@ func (d SocialDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReq
 				return bad()
 			}
 			ids = append(ids, socialinbox.NoticeID(n))
+		}
+		if d.giftStockReady {
+			if d.Gifts == nil || d.Scalar == nil || d.Projection == nil || d.Emitter == nil {
+				return giftFailure()
+			}
+			result, e := d.Gifts.Claim(ctx, a, ids, op)
+			if e != nil {
+				return giftFailure()
+			}
+			out := result.NoticeIDs
+			if out == nil {
+				out = []socialinbox.NoticeID{}
+			}
+			body := map[string]any{"ids": out, "awards": []any{}}
+			if result.Amount > 0 {
+				amount, e := d.Scalar.CurrentScalar(ctx, a.PlayerID, "friendship_coin", op)
+				if e != nil || amount < 0 || amount > 9007199254740991 {
+					return giftFailure()
+				}
+				body["economy_"] = map[string]any{"friendship_coin": amount}
+			}
+			return httpedge.Response{HTTPStatus: 200, Body: body}
 		}
 		if d.Dismissal == nil {
 			return socialFailure(socialinbox.ErrInvalidNotice)
@@ -299,3 +360,7 @@ func (d SocialDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReq
 }
 
 var _ SocialDismissCommands = socialdismiss.Service{}
+
+func giftFailure() httpedge.Response {
+	return httpedge.Response{HTTPStatus: 409, Body: map[string]any{"error": "social_gift_unavailable"}}
+}

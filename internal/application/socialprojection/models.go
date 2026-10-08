@@ -49,6 +49,7 @@ func (q SearchQuery) Validate() error {
 type Player struct {
 	Presentation    playerpresentation.Projected
 	OutgoingPending bool
+	IsSent          bool
 }
 type Requested struct {
 	Player   Player
@@ -72,6 +73,7 @@ type Result struct {
 	Requests                 []Requested
 	Notices                  []Notified
 	Scan                     ScanStats
+	SendCount, ReceiveCount  int
 }
 
 func emptyResult() Result {

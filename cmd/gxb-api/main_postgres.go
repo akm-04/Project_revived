@@ -27,6 +27,7 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres/i5store"
 	"gxb.local/backend/v2/internal/adapters/postgres/kernelstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/presencestore"
+	"gxb.local/backend/v2/internal/adapters/postgres/socialgiftstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/socialinboxstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/socialrelationstore"
 	"gxb.local/backend/v2/internal/adapters/socialpresentation"
@@ -49,10 +50,12 @@ import (
 	apprealtime "gxb.local/backend/v2/internal/application/realtimeauth"
 	"gxb.local/backend/v2/internal/application/socialdismiss"
 	"gxb.local/backend/v2/internal/application/socialfriendbase"
+	"gxb.local/backend/v2/internal/application/socialgift"
 	"gxb.local/backend/v2/internal/application/socialinbox"
 	"gxb.local/backend/v2/internal/application/socialpresence"
 	"gxb.local/backend/v2/internal/application/socialprojection"
 	"gxb.local/backend/v2/internal/application/socialrelation"
+	"gxb.local/backend/v2/internal/application/socialreload"
 	"gxb.local/backend/v2/internal/content/guildpolicy"
 	"gxb.local/backend/v2/internal/content/registry"
 	"gxb.local/backend/v2/internal/foundation/clock"
@@ -247,14 +250,34 @@ func main() {
 	socialInboxDB := socialinboxstore.Store{}
 	socialPresentation := socialpresentation.TransactionReader{}
 	socialCommands := socialrelation.Service{Timed: socialTimed, PlayerRoots: i4store.PlayerRootLocker{}, Store: socialRelationDB, Inbox: socialinbox.RelationService{Store: socialInboxDB}, Presentation: socialPresentation}
-	socialReads := socialprojection.Service{Runner: runner, PlayerRoots: i4store.PlayerRootLocker{}, Relations: socialRelationDB, Inbox: socialInboxDB, Directory: i4store.TransactionDiscoveryReader{}, Presentation: socialPresentation, Observer: socialPresentation}
+	giftService := socialgift.Service{Timed: socialTimed, Reads: runner, Store: socialgiftstore.Store{}, Content: contentDB, Players: i4store.PlayerRootLocker{}, Relations: socialRelationDB, Privacy: socialrelation.FriendDMPrivacyProvider{Store: socialRelationDB}, Inbox: socialinbox.GiftService{Store: socialInboxDB}, NoticeEvidence: socialInboxDB, Grants: i5svc, Admission: authority, Fence: i5db}
+	socialReads := socialprojection.Service{Gifts: giftService, NoticePages: socialInboxDB, Runner: runner, PlayerRoots: i4store.PlayerRootLocker{}, Relations: socialRelationDB, Inbox: socialInboxDB, Directory: i4store.TransactionDiscoveryReader{}, Presentation: socialPresentation, Observer: socialPresentation}
 	friendDM := frienddm.Service{Timed: socialTimed, Queryer: pool, Store: frienddmstore.Store{}, Players: i4store.PlayerRootLocker{}, Privacy: socialrelation.FriendDMPrivacyProvider{Store: socialRelationDB}, Observer: socialPresentation, Content: contentDB, Entitlement: appi5.EmoticonEntitlementReader{Store: i5db, Content: contentDB}, Owner: presencestore.Store{Queryer: pool}}
 	generalDM := generaldm.Service{Timed: socialTimed, Queryer: pool, Store: generaldmstore.Store{}, Bindings: generaldmbindings.Reader{}, Privacy: socialrelation.GeneralDMPrivacyProvider{Store: socialRelationDB}, Players: i4store.PlayerRootLocker{}, Presentation: socialPresentation, Observer: socialPresentation, Owner: presencestore.Store{Queryer: pool}}
 	mustRegister(513, stockruntime.GeneralDMDispatcher{Authority: authority, Service: generalDM, Slots: make(chan struct{}, 16), Emitter: postgres.GeneralDMWakeupEmitter{Pool: pool}})
 	friendBase := socialfriendbase.Service{FriendDM: friendDM, Projection: socialReads}
 	mustRegister(515, stockruntime.FriendDMDispatcher{Authority: authority, Service: friendDM, Emitter: postgres.FriendDMWakeupEmitter{Pool: pool, OnError: func(err error) { log.Printf("friend dm wakeup degraded: %v", err) }}})
 	socialDismissal := socialdismiss.Service{Timed: socialTimed, PlayerRoots: i4store.PlayerRootLocker{}, Roots: socialRelationDB, Inbox: socialInboxDB}
-	socialDispatcher := stockruntime.SocialDispatcher{Authority: authority, Relations: socialCommands, Projection: friendBase, Dismissal: socialDismissal, Tracker: tracker, Emitter: postgres.SocialWakeupEmitter{Pool: pool, OnError: func(err error) { log.Printf("social wakeup degraded: %v", err) }}}
+	socialDispatcher := stockruntime.SocialDispatcher{Authority: authority, Relations: socialCommands, Projection: friendBase, Dismissal: socialDismissal, Scalar: appi5.ScalarProjector{Runner: runner, Store: i5db}, Tracker: tracker, Emitter: postgres.SocialWakeupEmitter{Pool: pool, OnError: func(err error) { log.Printf("social wakeup degraded: %v", err) }}}
+	giftReload := socialreload.Service{Runner: runner, Relations: socialRelationDB, Inbox: socialInboxDB, Observer: socialPresentation, Gifts: giftService}
+	giftGroup, err := stockruntime.PrepareGiftStock(socialDispatcher, giftService, friendBase, giftReload)
+	if err != nil {
+		log.Fatalf("Gift consumer readiness: %v", err)
+	}
+	// Startup preserves the content-owner activation pointer. Only a compatible
+	// active catalog enables all Gift surfaces together; relation routes remain.
+	giftReadinessCtx, giftReadinessCancel := context.WithTimeout(ctx, 2*time.Second)
+	enabledGiftDispatcher, giftReadinessErr := giftGroup.Enable(giftReadinessCtx, pool)
+	giftReadinessCancel()
+	if giftReadinessErr == nil {
+		socialDispatcher = enabledGiftDispatcher
+	} else {
+		legacyReads := socialReads
+		legacyReads.Gifts = nil
+		legacyReads.NoticePages = nil
+		socialDispatcher.Projection = socialfriendbase.Service{FriendDM: friendDM, Projection: legacyReads}
+		log.Printf("Gift stock group inactive; explicit content-owner activation required: %v", giftReadinessErr)
+	}
 	if err := stockruntime.RegisterSocialRoutes(router, socialDispatcher); err != nil {
 		log.Fatalf("social route assembly: %v", err)
 	}

@@ -6,6 +6,7 @@ import (
 	"gxb.local/backend/v2/internal/application/realtimeauth"
 	sr "gxb.local/backend/v2/internal/application/socialrelation"
 	reload "gxb.local/backend/v2/internal/application/socialreload"
+	"gxb.local/backend/v2/internal/application/socialreloadref"
 	"gxb.local/backend/v2/internal/domain/identity"
 	domainrt "gxb.local/backend/v2/internal/domain/realtimeauth"
 	"gxb.local/backend/v2/internal/foundation/operation"
@@ -108,6 +109,10 @@ func (s SocialReloadHandler) ReloadAndDeliver(ctx context.Context, raw string) e
 	}
 	selectors := []string{}
 	switch intent.Purpose {
+	case socialreloadref.ReloadGiftSenderList:
+		selectors = []string{"friend_list"}
+	case socialreloadref.ReloadGiftRecipientNotice:
+		selectors = []string{"friend_notice"}
 	case sr.ReloadRequest:
 		selectors = []string{"friend_req"}
 	case sr.ReloadDeny:

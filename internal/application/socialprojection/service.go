@@ -6,6 +6,7 @@ import (
 	"gxb.local/backend/v2/internal/application/playerdirectory"
 	"gxb.local/backend/v2/internal/application/playerpresentation"
 	"gxb.local/backend/v2/internal/application/playerroot"
+	"gxb.local/backend/v2/internal/application/socialgift"
 	"gxb.local/backend/v2/internal/application/socialinbox"
 	"gxb.local/backend/v2/internal/application/socialrelation"
 	"gxb.local/backend/v2/internal/domain/identity"
@@ -16,7 +17,13 @@ import (
 	"time"
 )
 
+type GiftReader interface {
+	GiftSnapshotTx(context.Context, tx.Queryer, identity.PlayerID, time.Time) (socialgift.Snapshot, error)
+	GiftNoticeValidityTx(context.Context, tx.Queryer, identity.PlayerID, []socialinbox.Notice) (map[socialinbox.NoticeID]bool, error)
+}
 type Service struct {
+	Gifts        GiftReader
+	NoticePages  socialinbox.NoticePageReader
 	Runner       tx.Runner
 	PlayerRoots  playerroot.TxLocker
 	Relations    socialrelation.ProjectionReader
@@ -171,7 +178,11 @@ func (s Service) loadTx(c context.Context, t tx.Tx, a identity.ActorContext, k L
 			}
 		}
 		if k == 0 || k == Notice {
-			notices, e = s.Inbox.RelationWindowTx(c, t, a.PlayerID)
+			if s.Gifts != nil {
+				notices, e = s.qualifiedWindow(c, t, a.PlayerID)
+			} else {
+				notices, e = s.Inbox.RelationWindowTx(c, t, a.PlayerID)
+			}
 			if e != nil {
 				return Result{}, e
 			}
@@ -191,7 +202,7 @@ func (s Service) loadTx(c context.Context, t tx.Tx, a identity.ActorContext, k L
 		return Result{}, ErrInvalidRead
 	}
 	for i, n := range notices {
-		if !n.NoticeID.WireSafe() || n.Validate() != nil || socialinbox.ValidateRelationDescriptor(n) != nil || n.RecipientPlayerID != a.PlayerID || !n.Active || !n.RelatedPlayerID.Valid() {
+		if !n.NoticeID.WireSafe() || n.Validate() != nil || (n.Source.Kind != socialinbox.GiftSourceKind && socialinbox.ValidateRelationDescriptor(n) != nil) || n.RecipientPlayerID != a.PlayerID || !n.Active || !n.RelatedPlayerID.Valid() {
 			return Result{}, ErrInvalidRead
 		}
 		if i > 0 && (n.NoticeTime.After(notices[i-1].NoticeTime) || n.NoticeTime.Equal(notices[i-1].NoticeTime) && n.NoticeID >= notices[i-1].NoticeID) {
@@ -213,8 +224,27 @@ func (s Service) loadTx(c context.Context, t tx.Tx, a identity.ActorContext, k L
 		return Result{}, e
 	}
 	out.ObservedAt = b.ObservedAt
+	sent := map[identity.PlayerID]bool{}
+	if s.Gifts != nil && (k == 0 || k == Friend) {
+		gift, e := s.Gifts.GiftSnapshotTx(c, t, a.PlayerID, b.ObservedAt)
+		if e != nil {
+			return Result{}, e
+		}
+		day, e := socialgift.Day(b.ObservedAt)
+		if e != nil || gift.Day != day || gift.Policy != socialgift.DayPolicy || gift.Sent < 0 || gift.Sent > 10 || gift.Claimed < 0 || gift.Claimed > 10 || int64(len(gift.SentRecipients)) != gift.Sent {
+			return Result{}, ErrInvalidRead
+		}
+		out.SendCount = int(gift.Sent)
+		out.ReceiveCount = int(gift.Claimed)
+		for i, p := range gift.SentRecipients {
+			if !p.Valid() || p == a.PlayerID || i > 0 && gift.SentRecipients[i-1] >= p {
+				return Result{}, ErrInvalidRead
+			}
+			sent[p] = true
+		}
+	}
 	for _, id := range friends {
-		out.Friends = append(out.Friends, Player{Presentation: b.Players[id]})
+		out.Friends = append(out.Friends, Player{Presentation: b.Players[id], IsSent: sent[id]})
 	}
 	for _, id := range blocks {
 		out.Blocks = append(out.Blocks, Player{Presentation: b.Players[id]})

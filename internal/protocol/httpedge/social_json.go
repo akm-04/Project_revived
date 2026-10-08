@@ -10,7 +10,7 @@ import (
 )
 
 func socialMID(mid uint16) bool {
-	return mid == 513 || mid == 515 || mid >= 176 && mid <= 190 && mid != 183
+	return mid == 513 || mid == 515 || mid >= 176 && mid <= 190
 }
 
 // Social requires raw duplicate detection: decoded maps have already lost it.

@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "pass": "650.0",
+  "stage": "I7A-7B",
+  "node_path": [
+    "ROOT",
+    "I7",
+    "I7A",
+    "I7A-7",
+    "I7A-7B"
+  ],
+  "status": "SELECTED_7B_RESEARCH_DESIGN_REQUIRES_VALIDATED_FINAL650_SEAL",
+  "classification": "IMPLEMENTATION_DECISION_UNLESS_EXPLICIT_SOURCE_FACT",
+  "implementation_started": false,
+  "product_accepted": false,
+  "backend_sha256": "4f3a64bec275a2532a4cff9d6b5680d09d4c84b63147797f02fee48e2ead408d",
+  "sealed_base_passmap_sha256": "6f41f3c7b2e7937a89dc728ec11ef95973ebfc2129546434a16559d793bd6987",
+  "contract_id": "I7A7B_COMPOSITION_RECOVERY_CONTRACT",
+  "176": "Prepare complete315/360/361/363 Friend privacy plan then pure Social/Gift/provider reads before destructive380 apply. No new371/372 locks for snapshot. Missing content/source/read failure must abort before drain and leave offline rows pending. Known Friend receipt uses stored messages/currentGiftview without redrain; unknowncommit completepositive receipt preserves existingresolution, no absence retry.",
+  "operation": "Reuse operation.Context/TimedRunner stable binding and bounded definite-abort policy. All adapter result output private until definite/positive committed outcome. Postcommit scalar is fresh transient response read; no balance in receipt. No universal parameter dedupe.",
+  "races": [
+    "Cross-server send/claim/176/read189 overlap, midnight old/new request times, Gift epoch count concurrent update, Friend delivery/drain/known replay, profile tombstone and stale hints. Exact native same-Tx witnesses and no lower-rank postmutation locks required."
+  ],
+  "restore": "Current combined candidate nonempty dump/restore/restart preservingM36 source/notice/epochs/claim receipts/I5balance and Friend/General delivery boundaries; no newschema expected, any required schema delta must be reviewed/neutral/ledgered first. Public adapters do not introduce another worker.",
+  "selected_authority": true,
+  "selection_requires_validated_owning650_seal": true
+}

@@ -23,6 +23,7 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres/guildprojection"
 	"gxb.local/backend/v2/internal/adapters/postgres/i4store"
 	"gxb.local/backend/v2/internal/adapters/postgres/presencestore"
+	"gxb.local/backend/v2/internal/adapters/postgres/socialgiftstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/socialinboxstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/socialrelationstore"
 	"gxb.local/backend/v2/internal/adapters/socialpresentation"
@@ -34,6 +35,7 @@ import (
 	appidentity "gxb.local/backend/v2/internal/application/identitylifecycle"
 	apprealtime "gxb.local/backend/v2/internal/application/realtimeauth"
 	"gxb.local/backend/v2/internal/application/realtimewakeup"
+	"gxb.local/backend/v2/internal/application/socialgift"
 	"gxb.local/backend/v2/internal/application/socialpresence"
 	"gxb.local/backend/v2/internal/application/socialrelation"
 	"gxb.local/backend/v2/internal/application/socialreload"
@@ -212,7 +214,7 @@ func run() error {
 	if err != nil {
 		log.Fatal(err)
 	}
-	socialReload := socialreload.Service{Runner: presenceRunner, Relations: socialrelationstore.Store{}, Inbox: socialinboxstore.Store{}, Observer: socialpresentation.TransactionReader{}}
+	socialReload := socialreload.Service{Gifts: socialgift.Service{Store: socialgiftstore.Store{}, Content: contentstore.Store{Queryer: pool}, NoticeEvidence: socialinboxstore.Store{}}, Runner: presenceRunner, Relations: socialrelationstore.Store{}, Inbox: socialinboxstore.Store{}, Observer: socialpresentation.TransactionReader{}}
 	socialHandler := stockruntime.SocialReloadHandler{Service: socialReload, Operations: presenceOperations, Registry: connectionsRegistry, Publisher: stockruntime.RealtimePublisher{Registry: socialEvents, Limits: limits.Default()}, Authority: authority, Time: postgres.AuthoritativeTime{Queryer: pool}, MaxHandles: runtimePolicy.MaxConnections, IsStaleActor: func(err error) bool { return errors.Is(err, i4store.ErrGameplayBearerNotLive) }, OnDeliveryError: func(err error) { log.Printf("social delivery degraded: %v", err) }}
 	friendDM := frienddm.Service{Timed: appgeneration.TimedRunner{Binder: appgeneration.Binder{Time: postgres.AuthoritativeTime{Queryer: pool}}, Runner: presenceRunner}, Queryer: pool, Store: frienddmstore.Store{}, Players: i4store.PlayerRootLocker{}, Privacy: socialrelation.FriendDMPrivacyProvider{Store: socialrelationstore.Store{}}, Observer: socialpresentation.TransactionReader{}, Content: contentstore.Store{Queryer: pool}, Owner: presenceStore}
 	friendDelivery := stockruntime.FriendDMDelivery{Service: friendDM, Fence: realtimeOwnerFence, Operations: presenceOperations, Registry: connectionsRegistry, Publisher: stockruntime.RealtimePublisher{Registry: socialEvents, Limits: limits.Default()}, Authority: authority, Time: postgres.AuthoritativeTime{Queryer: pool}, MaxHandles: runtimePolicy.MaxConnections, IsStaleActor: func(e error) bool { return errors.Is(e, i4store.ErrGameplayBearerNotLive) }, OnDeliveryError: func(e error) { log.Printf("friend dm write degraded: %v", e) }}

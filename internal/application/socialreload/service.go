@@ -7,6 +7,7 @@ import (
 	"gxb.local/backend/v2/internal/application/playerpresentation"
 	"gxb.local/backend/v2/internal/application/socialinbox"
 	sr "gxb.local/backend/v2/internal/application/socialrelation"
+	"gxb.local/backend/v2/internal/application/socialreloadref"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/tx"
@@ -18,7 +19,11 @@ type Intent struct {
 	Purpose    sr.ReloadPurpose
 	ObservedAt time.Time
 }
+type GiftReloadReader interface {
+	ValidateReloadTx(context.Context, tx.Queryer, socialreloadref.ReloadReference) (bool, error)
+}
 type Service struct {
+	Gifts     GiftReloadReader
 	Runner    tx.Runner
 	Relations sr.ReloadReader
 	Inbox     socialinbox.SourceReader
@@ -45,7 +50,18 @@ func (s Service) Reload(ctx context.Context, r sr.ReloadReference, op operation.
 		if root.PlayerID != r.Recipient || root.Validate() != nil {
 			return sr.ErrInvalidState
 		}
-		if r.Purpose == sr.ReloadRequest {
+		if r.Purpose == socialreloadref.ReloadGiftSenderList || r.Purpose == socialreloadref.ReloadGiftRecipientNotice {
+			if s.Gifts == nil {
+				return sr.ErrInvalidState
+			}
+			ok, e := s.Gifts.ValidateReloadTx(ctx, scope.Tx, r)
+			if e != nil {
+				return e
+			}
+			if !ok {
+				return nil
+			}
+		} else if r.Purpose == sr.ReloadRequest {
 			req, ok, e := s.Relations.ReadRequestTx(ctx, scope.Tx, r.First, r.Second)
 			if e != nil {
 				return e

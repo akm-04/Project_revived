@@ -53,7 +53,10 @@ func validateSocialActivationRoutes(t *testing.T) {
 	}
 	d := read("internal/adapters/stockruntime/social_dispatcher.go")
 	if !strings.Contains(d, "[]uint16{176, 177, 178, 179, 180, 181, 182, 184, 185, 186, 187, 188, 189, 190}") {
-		t.Fatal("4Dfinite14routes/183exclusion")
+		if !selectedGiftStockActivation(t) {
+			t.Fatal("4Dfinite14routes/183exclusion")
+		}
+		validateGiftStockActivation(t)
 	}
 	if !strings.Contains(d, "lobby.BootExplicitHTTP") {
 		t.Fatal("176bootcontract")
