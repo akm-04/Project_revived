@@ -5,8 +5,8 @@ package socialactivation_test
 import (
 	"encoding/json"
 	"gxb.local/backend/v2/internal/adapters/stockruntime"
+	"gxb.local/backend/v2/internal/protocol/amf3"
 	"gxb.local/backend/v2/internal/protocol/mids"
- "gxb.local/backend/v2/internal/protocol/amf3"
 	rt "gxb.local/backend/v2/internal/protocol/realtime"
 	"net"
 	"net/http"
@@ -53,7 +53,9 @@ func Test6A_G26_G28_G30_G31_G32_G38_G39ProductionProcesses(t *testing.T) {
 		if rt.ValidateFriendDM(frame.Params) != nil {
 			t.Fatal("live schema", frame)
 		}
- m,_:=frame.Params.(*amf3.Object).StrictMap();raw,_:=json.Marshal(m);t.Logf("RUNTIME_OBSERVED WORLD MID516 %s",raw)
+		m, _ := frame.Params.(*amf3.Object).StrictMap()
+		raw, _ := json.Marshal(m)
+		t.Logf("RUNTIME_OBSERVED WORLD MID516 %s", raw)
 	}
 	deadline := time.Now().Add(3 * time.Second)
 	for f.number(`SELECT count(*) FROM friend_dm_delivery WHERE status='TRANSPORT_WRITE_RECORDED'`) == 0 {
@@ -111,7 +113,8 @@ func Test6A_G26_G28_G30_G31_G32_G38_G39ProductionProcesses(t *testing.T) {
 	if len(m) != 3 || m["player_id"] != float64(100001) {
 		t.Fatal("typed176", m)
 	}
- observed,_:=json.Marshal(messages);t.Logf("RUNTIME_OBSERVED HTTP176 offline_msg_list %s",observed)
+	observed, _ := json.Marshal(messages)
+	t.Logf("RUNTIME_OBSERVED HTTP176 offline_msg_list %s", observed)
 	var inner map[string]any
 	if json.Unmarshal([]byte(m["message"].(string)), &inner) != nil || inner["message"] != "offline" {
 		t.Fatal(m)
