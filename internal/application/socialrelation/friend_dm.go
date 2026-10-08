@@ -6,6 +6,7 @@ import (
 	"gxb.local/backend/v2/internal/foundation/lockkey"
 	"gxb.local/backend/v2/internal/foundation/tx"
 	"sort"
+	"time"
 )
 
 // FriendDMPrivacy is a directed read qualification, not a friendship mutation.
@@ -13,6 +14,7 @@ import (
 type FriendDMPrivacy struct {
 	FriendshipGeneration, RecipientBlockVersion int64
 	Eligible                                    bool
+	LatestRelationAt                            time.Time
 }
 type FriendDMPrivacyPlan struct {
 	RecipientRootPresent bool
@@ -77,6 +79,7 @@ func (p FriendDMPrivacyProvider) PrepareFriendDMPrivacyTx(c context.Context, t t
 				return FriendDMPrivacyPlan{}, ErrInvalidState
 			}
 			v.FriendshipGeneration = f.Generation
+			v.LatestRelationAt = f.UpdatedAt
 			v.Eligible = f.Active && present[id] && present[recipient]
 		}
 		out[id] = v
@@ -97,6 +100,9 @@ func (p FriendDMPrivacyProvider) PrepareFriendDMPrivacyTx(c context.Context, t t
 				return FriendDMPrivacyPlan{}, ErrInvalidState
 			}
 			v.RecipientBlockVersion = bl.StateVersion
+			if bl.UpdatedAt.After(v.LatestRelationAt) {
+				v.LatestRelationAt = bl.UpdatedAt
+			}
 			v.Eligible = v.Eligible && !bl.Active
 		}
 		out[id] = v

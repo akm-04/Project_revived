@@ -21,12 +21,14 @@ from pathlib import Path
 from typing import Any, Iterable
 
 SCHEMA_VERSION = 1
-COMPILER_VERSION = "i7a6a-emoticon"
-PARSER_VERSION = "lua-generated-v15-emoticon"
+COMPILER_VERSION = "i7a7a-social-gift"
+PARSER_VERSION = "lua-generated-v16-social-gift"
 EXPECTED_SOURCE_ARCHIVE_SHA256 = "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
 SOURCE_PREFIX = "app-assets/output/assets/src_64/"
 
 SOURCE_MANIFEST = [
+    ('data/tables/friend_dailygift.lua', 'b350a14dab62799dcca37dddde370bd86ed78f1745f01483d0bce065062cf707', 'I7A7A_DAILY_GIFT_EQUIVALENCE'),
+    ('data/tables/gift.lua', '8c87dfdc116242afcdebd011cf898d61b08e2cf54ea7d0a11a5f69fabade2ac7', 'I7A7A_COMPLETE_REWARD_VECTOR'),
     ("data/tables/emoticon.lua", "76ccbf5c136f5a484e6e5fbe2ca0ef4f58451676ddea78281285a99afc2d3c08", "I7A6A_EMOTICON_DATA_AUTHORITY"),
     ("app/common/tables/ItemTable.lua", "1f846972f29a55ee2dbb90f2cb9b0124eaeaa90646c3c66644ab66e231c37f00", "ITEM_BEHAVIORAL_PARSER_AUTHORITY"),
     ("data/tables/item.lua", "59b668c28a372543da0c36d7a8d84291cc5b93fa0d92b7cc389a645e96e7b7cc", "ITEM_DATA_AUTHORITY_ENCODED_TABLE"),
@@ -112,6 +114,7 @@ ENABLED_CAPABILITIES = [
     "PRACTICE_CA6",
     "CHARACTER_APPEARANCE_CA7",
     "FRIEND_DM_EMOTICON_I7A6A",
+    "SOCIAL_GIFT_I7A7A",
 ]
 
 
@@ -628,6 +631,16 @@ def build_artifacts(blobs: dict[str, SourceBlob], archive_sha256: str) -> dict[s
             "source_asset_id": asset["source_asset_id"],
         })
 
+    # A bounded named scalar; the stock economy sideband has no numeric asset ID.
+    if "friendship_coin" not in economy_names or "friendship_coin" in asset_by_name:
+        raise CompileError("SocialGift named scalar source identity drift")
+    resources.append({"catalog_status":"QUALIFIED","class":"SCALAR_CURRENCY",
+        "definition_key":"scalar_currency:friendship_coin","resource_key":"friendship_coin",
+        "settlement_activation":"ENABLED_R4"})
+    social_gift_artifact=build_social_gift(
+        parse_generated_lua_table(blobs["data/tables/gift.lua"].data),
+        parse_generated_lua_table(blobs["data/tables/friend_dailygift.lua"].data),
+        misc_int("gift_send_limit"),misc_int("gift_get_limit"))
     temporal_defs = [
         ("energy", misc_int("energy_incr_time"), "PLAYER_LEVEL_ENERGY", None, "QUALIFIED", "ENABLED_R5"),
         ("spirit_energy", misc_int("spirit_energy_minute"), "STATIC", misc_int("spirit_energy_up_limit"), "QUALIFIED", "ENABLED_R5"),
@@ -1747,6 +1760,7 @@ def build_artifacts(blobs: dict[str, SourceBlob], archive_sha256: str) -> dict[s
         raise CompileError("I7A6A emoticon source counts drift")
     emoticon_artifact={"definitions":emoticons,"schema_version":SCHEMA_VERSION,"source":"data/tables/emoticon.lua"}
     artifacts = {
+        "social_gift_catalog.json": social_gift_artifact,
         "emoticon_catalog.json": emoticon_artifact,
         "equipment_primitives_catalog.json": equipment_artifact,
         "function_gates.json": function_artifact,
@@ -1872,6 +1886,33 @@ def write_artifacts(artifacts: dict[str, Any], output: Path, *, check: bool) -> 
             path.write_bytes(expected)
     if errors:
         raise CompileError("; ".join(errors))
+
+
+def build_social_gift(gift_rows, daily, send_cap, claim_cap):
+    by_gift={r["id"]:r for r in gift_rows}
+    if len(by_gift)!=len(gift_rows):raise CompileError("duplicate gift identity")
+    if len(daily)!=100 or sorted(int(r["level"])for r in daily)!=list(range(1,101)):
+        raise CompileError("dailygift complete100-level source drift")
+    gift_mapping=[]; vector=None; used=set()
+    for row in sorted(daily,key=lambda r:int(r["level"])):
+        if row["gift_id"] in used:raise CompileError("duplicate dailygift mapping")
+        used.add(row["gift_id"])
+        g=by_gift.get(row["gift_id"])
+        if g is None:raise CompileError("missing dailygift reward")
+        current={k:v for k,v in g.items()if k not in {"id","name","desc"}}
+        if current != {'arena_coin': '0', 'badge': '0', 'crystal': '0', 'drops': '0', 'energy': '0', 'equip': '0', 'ex_badge': '0', 'exp': '0', 'friendship_coin': '5', 'item_nums': '0', 'items': '0', 'lucky_coin': '0', 'mana': '0', 'march_coin': '0', 'skin_coin': '0', 'skin_fragment': '0', 'soul': '0', 'spirit_energy': '', 'summon_id': '0', 'summon_init_time': '', 'tutor_coin': '', 'vip': '0', 'vip_exp': '0'}:raise CompileError("unqualified complete dailygift vector")
+        if vector is None:vector=current
+        if current!=vector:raise CompileError("nonuniform dailygift: selector UNKNOWN")
+        if current.get("friendship_coin")!="5" or any(v not in {"","0"}for k,v in current.items()if k!="friendship_coin"):
+            raise CompileError("unqualified dailygift reward vector")
+        gift_mapping.append({"level":int(row["level"]),"gift_id":int(row["gift_id"])})
+    social_gift_artifact={"schema_version":SCHEMA_VERSION,"resource_key":"friendship_coin","amount":5,
+        "send_cap":send_cap,"claim_cap":claim_cap,
+        "policy":"SOCIAL_GIFT_DAY_V1","selector":"UNKNOWN_UNIFORM_ONLY","mapping":gift_mapping,
+        "vector_fingerprint":sha256_bytes(canonical_json_bytes(vector)),"reward_vector":vector}
+    if social_gift_artifact["send_cap"]!=10 or social_gift_artifact["claim_cap"]!=10:
+        raise CompileError("SocialGift source caps drift")
+    return social_gift_artifact
 
 
 def compile_archive(archive: Path) -> dict[str, Any]:

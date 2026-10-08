@@ -104,10 +104,16 @@
       "stage": "I7A-6A",
       "compiler_version": "i7a6a-emoticon",
       "parser_version": "lua-generated-v15-emoticon"
+    },
+    {
+      "ordinal": 18,
+      "stage": "I7A-7A",
+      "compiler_version": "i7a7a-social-gift",
+      "parser_version": "lua-generated-v16-social-gift"
     }
   ],
   "current": {
-    "compiler_version": "i7a6a-emoticon",
-    "parser_version": "lua-generated-v15-emoticon"
+    "compiler_version": "i7a7a-social-gift",
+    "parser_version": "lua-generated-v16-social-gift"
   }
 }

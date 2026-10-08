@@ -480,6 +480,7 @@ type EmoticonCatalog struct {
 	Source        string               `json:"source"`
 }
 type Catalog struct {
+	SocialGift               SocialGiftCatalog
 	Emoticons                EmoticonCatalog
 	Manifest                 Manifest
 	Resources                ResourceCatalog
@@ -594,11 +595,16 @@ func Load() (*Catalog, error) {
 		return nil, err
 	}
 
+	var socialGift SocialGiftCatalog
+	if err := decodeAndVerify("social_gift_catalog.json", manifest.ArtifactSHA256s, &socialGift); err != nil {
+		return nil, err
+	}
 	var emoticons EmoticonCatalog
 	if err := decodeAndVerify("emoticon_catalog.json", manifest.ArtifactSHA256s, &emoticons); err != nil {
 		return nil, err
 	}
 	catalog := &Catalog{
+		SocialGift:               socialGift,
 		Emoticons:                emoticons,
 		Manifest:                 manifest,
 		Resources:                resources,
@@ -663,11 +669,11 @@ func validateManifest(raw []byte, manifest *Manifest) error {
 	if _, err := hex.DecodeString(manifest.RevisionID); err != nil || strings.ToLower(manifest.RevisionID) != manifest.RevisionID {
 		return fmt.Errorf("builtin content: revision id must be lowercase SHA-256 hex")
 	}
-	if len(manifest.Sources) != 59 {
-		return fmt.Errorf("builtin content: expected 59 source records, got %d", len(manifest.Sources))
+	if len(manifest.Sources) != 61 {
+		return fmt.Errorf("builtin content: expected 61 source records, got %d", len(manifest.Sources))
 	}
-	if len(manifest.ArtifactSHA256s) != 18 {
-		return fmt.Errorf("builtin content: expected 18 hashed payload artifacts, got %d", len(manifest.ArtifactSHA256s))
+	if len(manifest.ArtifactSHA256s) != 19 {
+		return fmt.Errorf("builtin content: expected 19 hashed payload artifacts, got %d", len(manifest.ArtifactSHA256s))
 	}
 
 	var basis map[string]any
@@ -687,6 +693,10 @@ func validateManifest(raw []byte, manifest *Manifest) error {
 }
 
 func validateCatalog(c *Catalog) error {
+	if err := c.SocialGift.Validate(); err != nil {
+		return err
+	}
+
 	if c.Emoticons.SchemaVersion != SchemaVersion || c.Emoticons.Source != "data/tables/emoticon.lua" || len(c.Emoticons.Definitions) != 85 {
 		return errors.New("builtin content: emoticon schema/source/count drift")
 	}
@@ -968,6 +978,10 @@ func validateCatalog(c *Catalog) error {
 			return ResourceDefinition{}, fmt.Errorf("builtin content: resource %q class/activation drift", key)
 		}
 		return row, nil
+	}
+	coin, err := mustResource("scalar_currency:friendship_coin", "SCALAR_CURRENCY", "ENABLED_R4")
+	if err != nil || coin.SourceAssetID != nil || coin.ItemID != 0 {
+		return errors.New("builtin content: named Friendship Coin identity drift")
 	}
 	mana, err := mustResource("scalar_currency:mana", "SCALAR_CURRENCY", "ENABLED_R4")
 	if err != nil {
@@ -1319,7 +1333,7 @@ func validateCatalog(c *Catalog) error {
 
 	caps := append([]string(nil), c.Manifest.EnabledCapabilities...)
 	sort.Strings(caps)
-	wantCaps := []string{"CHARACTER_APPEARANCE_CA7", "EQUIPMENT_PRIMITIVES_CA4", "FRIEND_DM_EMOTICON_I7A6A", "FUNCTION_LEVEL_ELIGIBILITY_R5", "HERO_CORE_CA2", "HERO_EQUIPMENT_CA4_2", "HERO_FUMO_CA4_3A", "HERO_PROGRESSION_CA2", "HERO_PROMOTION_RESTORATION_CA4_3B", "PET_ACQUISITION_CA3", "PET_CORE_CA3", "PET_EQUIPMENT_CA4_4A", "PET_PROGRESSION_CA3", "PET_PROMOTION_RESTORATION_CA4_4B", "PLAYER_EXP_R5", "PRACTICE_CA6", "QUALIFIED_ORDINARY_STACK_ITEM_DEFINITIONS", "SCALAR_CRYSTAL", "SCALAR_MANA", "SUPER_EQUIPMENT_CA4_5", "TEMPORAL_ENERGY_R5", "TEMPORAL_SKILL_POINT_R5", "TEMPORAL_SPIRIT_ENERGY_R5"}
+	wantCaps := []string{"CHARACTER_APPEARANCE_CA7", "EQUIPMENT_PRIMITIVES_CA4", "FRIEND_DM_EMOTICON_I7A6A", "FUNCTION_LEVEL_ELIGIBILITY_R5", "HERO_CORE_CA2", "HERO_EQUIPMENT_CA4_2", "HERO_FUMO_CA4_3A", "HERO_PROGRESSION_CA2", "HERO_PROMOTION_RESTORATION_CA4_3B", "PET_ACQUISITION_CA3", "PET_CORE_CA3", "PET_EQUIPMENT_CA4_4A", "PET_PROGRESSION_CA3", "PET_PROMOTION_RESTORATION_CA4_4B", "PLAYER_EXP_R5", "PRACTICE_CA6", "QUALIFIED_ORDINARY_STACK_ITEM_DEFINITIONS", "SCALAR_CRYSTAL", "SCALAR_MANA", "SOCIAL_GIFT_I7A7A", "SUPER_EQUIPMENT_CA4_5", "TEMPORAL_ENERGY_R5", "TEMPORAL_SKILL_POINT_R5", "TEMPORAL_SPIRIT_ENERGY_R5"}
 	if len(caps) != len(wantCaps) {
 		return fmt.Errorf("builtin content: enabled capability count drift: %v", caps)
 	}

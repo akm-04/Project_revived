@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"math"
 	"strconv"
 	"strings"
 	"time"
@@ -310,6 +311,19 @@ func (s Service) settleGrantTx(ctx context.Context, t tx.Tx, actor identity.Acto
 	}
 	if err := s.validatePartnerEntityLockedTx(ctx, t, pf); err != nil {
 		return GrantResult{}, err
+	}
+	// The new SocialGift scalar retains accepted StartedAt semantics and refuses
+	// time/version regression before any grant mutation. Other resources are unchanged.
+	for _, line := range plan.Lines {
+		if line.Kind == grant.ScalarCurrency && line.ResourceKey == "friendship_coin" {
+			balance, exists, err := s.Store.ReadScalarTx(ctx, t, plan.PlayerID, line.ResourceKey)
+			if err != nil {
+				return GrantResult{}, err
+			}
+			if exists && (op.StartedAt.Before(balance.UpdatedAt) || balance.StateVersion == math.MaxInt64) {
+				return GrantResult{}, errors.New("SocialGift scalar clock/version regression")
+			}
+		}
 	}
 	return s.applyPreparedGrantTx(ctx, t, actor, plan, op, allowOverflowMail, contentRevision, pf, id, fp)
 }

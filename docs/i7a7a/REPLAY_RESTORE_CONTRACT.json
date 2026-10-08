@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "pass": "649.0",
+  "stage": "I7A-7A",
+  "phase": "I7A",
+  "status": "SELECTED_PREIMPLEMENTATION_DESIGN_WITH_VALIDATED_NORMAL_PASS649_SEAL",
+  "classification": "IMPLEMENTATION_DECISION_UNLESS_EXPLICIT_SOURCE_FACT",
+  "implementation_started": false,
+  "product_accepted": false,
+  "base_backend_sha256": "2fa5d71e52c1246580eb5eba39ed7f7ca687bb446deca3bbd1af555b25d529da",
+  "base_passmap_sha256": "d2eba13ca5bb91c333309726f134729ca314225506a56d729ed95646b2d3841b",
+  "node_path": [
+    "ROOT",
+    "I7",
+    "I7A",
+    "I7A-7",
+    "I7A-7A"
+  ],
+  "contract_id": "I7A7A_REPLAY_RESTORE_CONTRACT",
+  "unknown_commit": {
+    "positive": "Resolver reads exact stable operation ID and fingerprint through owner read port in authoritative store. Send requires complete transfer+typednotice result; claim requires frozen claim membership+all claimed transfer links+I5 receipt reference and semantic result. Never infer entire batch success from one Grant receipt alone.",
+    "negative": "Generic absence/missing row/unavailable lookup never authorizes replay; AllowReplayAfterAuthoritativeNegative:false. Return uncertainty when exact positive proof is unavailable.",
+    "internal_replay": "Same internal operation+same immutable fingerprint yields known committed result. Same operation different player/IDs/content fingerprint is conflict. New HTTP operation is not silently equivalent.",
+    "w2": "Nonce-less resubmission across day remains bounded ambiguity"
+  },
+  "restoration": {
+    "inventory": [
+      "all epochs, transfers including claimed/unclaimed",
+      "immutable claim operations and membership",
+      "typed notice IDs/source/lifecycle and notice sequence high-water",
+      "I5 scalar balances plus Grant receipts/effects",
+      "content immutable revisions/activation and all policy snapshots",
+      "I4/Social roots/lifecycle tombstones/source generations"
+    ],
+    "nonempty_proof": [
+      "send/claim before backup",
+      "old-day unclaimed, same-day claimed, mixed issue revisions",
+      "unclaimed after sender deletion and receiver deletion restricted",
+      "restore then duplicate operation and new HTTP duplicate, claim last quota slot, rollover",
+      "negative missing transfer/notice/claimlink/Grant receipt/content revision/source generation must fail closed without credit or silently reconstructing receipt"
+    ],
+    "deletion": "No destructive restore/TTL cleanup resets natural keys, consumed entitlement or quota truth. Claimed tombstones/Grant linkage persist. Existing D12 lifecycle controls receiver identity; no retired-player ID reuse."
+  },
+  "authority": "Checkpoint recovery does not select these contracts or accept candidate. Normal649 research/design seal selects policies. Later exact candidate/native gate and independent reality review accept implementation scope.",
+  "creation_time_workpaper_status": "PREIMPLEMENTATION_DESIGN_NORMAL_SELECTION_PENDING",
+  "authority_condition": "Valid owning HOT649 content seal and sole ObjectRegistry selection; this is design authority only, not product acceptance"
+}

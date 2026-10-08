@@ -1,0 +1,122 @@
+{
+  "schema_version": 1,
+  "pass": "649.0",
+  "stage": "I7A-7A",
+  "phase": "I7A",
+  "status": "SELECTED_PREIMPLEMENTATION_DESIGN_WITH_VALIDATED_NORMAL_PASS649_SEAL",
+  "classification": "IMPLEMENTATION_DECISION_UNLESS_EXPLICIT_SOURCE_FACT",
+  "implementation_started": false,
+  "product_accepted": false,
+  "base_backend_sha256": "2fa5d71e52c1246580eb5eba39ed7f7ca687bb446deca3bbd1af555b25d529da",
+  "base_passmap_sha256": "d2eba13ca5bb91c333309726f134729ca314225506a56d729ed95646b2d3841b",
+  "node_path": [
+    "ROOT",
+    "I7",
+    "I7A",
+    "I7A-7",
+    "I7A-7A"
+  ],
+  "contract_id": "I7A7A_OWNER_SCHEMA_CONTRACT",
+  "owner": "SocialGift",
+  "tables": {
+    "social_gift_epochs": {
+      "key": [
+        "player_id",
+        "policy_id",
+        "generation"
+      ],
+      "fields": [
+        "typed_generation_id_uuid",
+        "state_version",
+        "created_at",
+        "updated_at"
+      ],
+      "purpose": "Named generation fence only; no independent mutable send/claim counters",
+      "parent_fence": "SocialRoot360 serializes enumeration and absent-key creation",
+      "time": "Reject generation regression versus greatest existing generation and at before owner updated_at; never recycle old generation"
+    },
+    "social_gift_transfers": {
+      "key": [
+        "sender_player_id",
+        "recipient_player_id",
+        "sender_policy_id",
+        "sender_generation"
+      ],
+      "fields": [
+        "immutable_transfer_id",
+        "send_operation_id",
+        "send_started_at",
+        "issued_at_db",
+        "friendship_generation_at_issue",
+        "recipient_block_version_at_issue",
+        "reward_revision",
+        "reward_vector_fingerprint",
+        "resource_key",
+        "amount",
+        "notice_id",
+        "state_version",
+        "claim_operation_id nullable",
+        "claim_generation nullable",
+        "claim_decision_at_db nullable",
+        "grant_receipt_id nullable",
+        "claim_content_revision nullable"
+      ],
+      "constraints": [
+        "sender != recipient; positive IDs, generation, version; amount = qualified immutable vector",
+        "send operation unique with identity/fingerprint conflict detection",
+        "recipient+notice identity unique; typed source reconstructs exact natural key",
+        "claim fields all null or all nonnull; no claimed-to-unclaimed transition",
+        "No expiry or destructive retention: unclaimed persists through day/relation/content changes"
+      ],
+      "foreign_keys": "No sender/profile CASCADE. Receiver canonical player FK RESTRICT, not CASCADE; physical receiver deletion is explicitly blocked until an I4 deletion/entitlement policy is separately qualified. Epoch historical IDs and sender identity survive profile removal. No resurrection of a deleted sender profile."
+    },
+    "social_gift_claim_operations": {
+      "key": [
+        "recipient_player_id",
+        "operation_id"
+      ],
+      "fields": [
+        "operation_started_at",
+        "db_decision_at",
+        "claim_generation",
+        "ordered_unique_notice_ids",
+        "canonical_transfer_membership",
+        "reward_vector_total",
+        "gift_policy_revision",
+        "bound_i5_content_revision",
+        "request_fingerprint",
+        "grant_receipt_id",
+        "semantic_result",
+        "created_at"
+      ],
+      "purpose": "Immutable committed claim batch fact links all transfers to one Grant; not an independent quota counter",
+      "identity": "Operation ID minted once before retry, retained for exact unknown-COMMIT resolution; fingerprint checks conflict, never creates identity"
+    }
+  },
+  "quota_truth": {
+    "send": "Count durable transfers issued by sender in sender generation, at most10; unique directed recipient per sender generation even after delete/re-friend",
+    "receive": "Count transfers whose claim recipient and claim_generation match current receiver generation, at most10; old-day issued gifts can be claimed in current claim day",
+    "epoch": "Epoch is fence, transfer facts are quota truth. No daily destructive reset job"
+  },
+  "notice_truth": "SocialInbox owns notice row/sequence/dismissal. Type4 + finite source social-gift.transfer.v1 points to canonical transfer; type alone never proves value.",
+  "deletion_qualification": "Existing projection forbids fabricated profiles; deleted sender may make retained gift inaccessible through stock notice view. Value remains durable; this seal does not claim a new stock recovery UI or I4 physical-deletion support.",
+  "migration": "Next neutral migration expected00036, verify actual frontier before assigning. New empty owner tables/indexes/checks only; no retroactive gifts/coin credits, no rewriting migrations1..35. Default routes/producers stay inactive.",
+  "indexes": [
+    "sender+sender_generation for send count",
+    "recipient+claim_generation for claim count",
+    "recipient+notice_id",
+    "recipient+unclaimed+issued_at for projection scans",
+    "operation identity and exact source identity unique indexes"
+  ],
+  "named_generation_reuse": {
+    "existing_types": "Reuse domain/generation GenerationID, AuthorityScope and GenerationRef with domain social-gift and player scope; do not invent a generic generation aggregate. Existing I6A TimedRunner/Binder gives stable database time. ReconcileKernel owns no Gift tables and creates no fabricated epoch state.",
+    "named_identity": "GiftEpoch key is player+SOCIAL_GIFT_DAY_V1+calendar token; persist a distinct typed GenerationID UUID minted from stable backend operation entropy at first creation, retained across retry and restore. Calendar token and UUID/operation/transfer/claim identities are distinct. Existing epoch wins under360/371; never manufacture new UUID for an existing day.",
+    "facts": "Transfer snapshots sender GenerationID plus calendar token and policy revision; claim records receiver GenerationID and claim calendar token. Facts derive quotas for exact named day. Purging epoch/facts cannot permit uniqueness reset.",
+    "provider_prerequisites": [
+      "Selected I5 TxGrant/core content/receipt contracts",
+      "Accepted I6A generation identity/time contracts; original I7A1 aliases I5_GRANT/I6A_NAMED_EPOCH remain exact contract providers"
+    ]
+  },
+  "creation_time_workpaper_status": "PREIMPLEMENTATION_DESIGN_NORMAL_SELECTION_PENDING",
+  "authority_condition": "Valid owning HOT649 content seal and sole ObjectRegistry selection; this is design authority only, not product acceptance"
+}

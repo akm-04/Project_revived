@@ -103,6 +103,98 @@
       "owner": "identity/logicalserver/bootstrap",
       "write_exceptions": []
     },
+    "content_emoticon_catalogs": {
+      "allowed_query_owners": [
+        "content-registry"
+      ],
+      "allowed_read_paths": [
+        "sql/content/",
+        "internal/adapters/postgres/contentstore/",
+        "internal/adapters/postgres/contentqueries/"
+      ],
+      "allowed_write_paths": [
+        "sql/content/",
+        "internal/adapters/postgres/contentstore/",
+        "internal/adapters/postgres/contentqueries/"
+      ],
+      "migration": "migrations/00034_i7a6a_friend_dm.sql",
+      "owner": "content-registry",
+      "write_exceptions": []
+    },
+    "content_social_gift_catalogs": {
+      "allowed_query_owners": [
+        "content-registry"
+      ],
+      "allowed_read_paths": [
+        "sql/content/",
+        "internal/adapters/postgres/contentstore/",
+        "internal/adapters/postgres/contentqueries/"
+      ],
+      "allowed_write_paths": [
+        "sql/content/",
+        "internal/adapters/postgres/contentstore/",
+        "internal/adapters/postgres/contentqueries/"
+      ],
+      "migration": "migrations/00036_social_gift.sql",
+      "owner": "content-registry",
+      "write_exceptions": []
+    },
+    "friend_dm_delivery": {
+      "allowed_query_owners": [
+        "friend-dm"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/frienddmstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/frienddmstore/"
+      ],
+      "migration": "migrations/00034_i7a6a_friend_dm.sql",
+      "owner": "friend-dm",
+      "write_exceptions": []
+    },
+    "friend_dm_occurrences": {
+      "allowed_query_owners": [
+        "friend-dm"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/frienddmstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/frienddmstore/"
+      ],
+      "migration": "migrations/00034_i7a6a_friend_dm.sql",
+      "owner": "friend-dm",
+      "write_exceptions": []
+    },
+    "friend_dm_projection_receipts": {
+      "allowed_query_owners": [
+        "friend-dm"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/frienddmstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/frienddmstore/"
+      ],
+      "migration": "migrations/00034_i7a6a_friend_dm.sql",
+      "owner": "friend-dm",
+      "write_exceptions": []
+    },
+    "friend_dm_roots": {
+      "allowed_query_owners": [
+        "friend-dm"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/frienddmstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/frienddmstore/"
+      ],
+      "migration": "migrations/00034_i7a6a_friend_dm.sql",
+      "owner": "friend-dm",
+      "write_exceptions": []
+    },
     "gameplay_context_credentials": {
       "allowed_query_owners": [
         "identity/logicalserver/bootstrap"
@@ -1187,6 +1279,48 @@
       "owner": "objective-definition-policy",
       "write_exceptions": []
     },
+    "personal_dm_delivery": {
+      "allowed_query_owners": [
+        "personal-dm"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/generaldmstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/generaldmstore/"
+      ],
+      "migration": "migrations/00035_personal_dm_delivery.sql",
+      "owner": "personal-dm",
+      "write_exceptions": []
+    },
+    "personal_dm_intents": {
+      "allowed_query_owners": [
+        "personal-dm"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/generaldmstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/generaldmstore/"
+      ],
+      "migration": "migrations/00035_personal_dm_delivery.sql",
+      "owner": "personal-dm",
+      "write_exceptions": []
+    },
+    "personal_dm_payloads": {
+      "allowed_query_owners": [
+        "personal-dm"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/generaldmstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/generaldmstore/"
+      ],
+      "migration": "migrations/00035_personal_dm_delivery.sql",
+      "owner": "personal-dm",
+      "write_exceptions": []
+    },
     "player_currency_balances": {
       "allowed_query_owners": [
         "typed-economy"
@@ -1816,6 +1950,48 @@
       "owner": "social-relation",
       "write_exceptions": []
     },
+    "social_gift_claim_operations": {
+      "allowed_query_owners": [
+        "social-gift"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/socialgiftstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/socialgiftstore/"
+      ],
+      "migration": "migrations/00036_social_gift.sql",
+      "owner": "social-gift",
+      "write_exceptions": []
+    },
+    "social_gift_epochs": {
+      "allowed_query_owners": [
+        "social-gift"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/socialgiftstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/socialgiftstore/"
+      ],
+      "migration": "migrations/00036_social_gift.sql",
+      "owner": "social-gift",
+      "write_exceptions": []
+    },
+    "social_gift_transfers": {
+      "allowed_query_owners": [
+        "social-gift"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/socialgiftstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/socialgiftstore/"
+      ],
+      "migration": "migrations/00036_social_gift.sql",
+      "owner": "social-gift",
+      "write_exceptions": []
+    },
     "social_notices": {
       "allowed_query_owners": [
         "social-inbox"
@@ -1842,122 +2018,6 @@
       ],
       "migration": "migrations/00033_i7a4a_social_foundation.sql",
       "owner": "social-relation",
-      "write_exceptions": []
-    },
-    "friend_dm_roots": {
-      "allowed_query_owners": [
-        "friend-dm"
-      ],
-      "allowed_read_paths": [
-        "internal/adapters/postgres/frienddmstore/"
-      ],
-      "allowed_write_paths": [
-        "internal/adapters/postgres/frienddmstore/"
-      ],
-      "migration": "migrations/00034_i7a6a_friend_dm.sql",
-      "owner": "friend-dm",
-      "write_exceptions": []
-    },
-    "friend_dm_occurrences": {
-      "allowed_query_owners": [
-        "friend-dm"
-      ],
-      "allowed_read_paths": [
-        "internal/adapters/postgres/frienddmstore/"
-      ],
-      "allowed_write_paths": [
-        "internal/adapters/postgres/frienddmstore/"
-      ],
-      "migration": "migrations/00034_i7a6a_friend_dm.sql",
-      "owner": "friend-dm",
-      "write_exceptions": []
-    },
-    "friend_dm_delivery": {
-      "allowed_query_owners": [
-        "friend-dm"
-      ],
-      "allowed_read_paths": [
-        "internal/adapters/postgres/frienddmstore/"
-      ],
-      "allowed_write_paths": [
-        "internal/adapters/postgres/frienddmstore/"
-      ],
-      "migration": "migrations/00034_i7a6a_friend_dm.sql",
-      "owner": "friend-dm",
-      "write_exceptions": []
-    },
-    "friend_dm_projection_receipts": {
-      "allowed_query_owners": [
-        "friend-dm"
-      ],
-      "allowed_read_paths": [
-        "internal/adapters/postgres/frienddmstore/"
-      ],
-      "allowed_write_paths": [
-        "internal/adapters/postgres/frienddmstore/"
-      ],
-      "migration": "migrations/00034_i7a6a_friend_dm.sql",
-      "owner": "friend-dm",
-      "write_exceptions": []
-    },
-    "content_emoticon_catalogs": {
-      "allowed_query_owners": [
-        "content-registry"
-      ],
-      "allowed_read_paths": [
-        "sql/content/",
-        "internal/adapters/postgres/contentstore/",
-        "internal/adapters/postgres/contentqueries/"
-      ],
-      "allowed_write_paths": [
-        "sql/content/",
-        "internal/adapters/postgres/contentstore/",
-        "internal/adapters/postgres/contentqueries/"
-      ],
-      "migration": "migrations/00034_i7a6a_friend_dm.sql",
-      "owner": "content-registry",
-      "write_exceptions": []
-    },
-    "personal_dm_intents": {
-      "allowed_query_owners": [
-        "personal-dm"
-      ],
-      "allowed_read_paths": [
-        "internal/adapters/postgres/generaldmstore/"
-      ],
-      "allowed_write_paths": [
-        "internal/adapters/postgres/generaldmstore/"
-      ],
-      "migration": "migrations/00035_personal_dm_delivery.sql",
-      "owner": "personal-dm",
-      "write_exceptions": []
-    },
-    "personal_dm_payloads": {
-      "allowed_query_owners": [
-        "personal-dm"
-      ],
-      "allowed_read_paths": [
-        "internal/adapters/postgres/generaldmstore/"
-      ],
-      "allowed_write_paths": [
-        "internal/adapters/postgres/generaldmstore/"
-      ],
-      "migration": "migrations/00035_personal_dm_delivery.sql",
-      "owner": "personal-dm",
-      "write_exceptions": []
-    },
-    "personal_dm_delivery": {
-      "allowed_query_owners": [
-        "personal-dm"
-      ],
-      "allowed_read_paths": [
-        "internal/adapters/postgres/generaldmstore/"
-      ],
-      "allowed_write_paths": [
-        "internal/adapters/postgres/generaldmstore/"
-      ],
-      "migration": "migrations/00035_personal_dm_delivery.sql",
-      "owner": "personal-dm",
       "write_exceptions": []
     }
   }

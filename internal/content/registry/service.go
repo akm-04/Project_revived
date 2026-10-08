@@ -225,6 +225,13 @@ func (s Service) EnsureBuiltinInstalled(ctx context.Context, op operation.Contex
 			if gotAppearance != wantAppearance {
 				return fmt.Errorf("content registry: appearance insert count=%d want=%d", gotAppearance, wantAppearance)
 			}
+			gotGift, err := s.Repo.InsertSocialGift(tctx, scope.Tx, b)
+			if err != nil {
+				return err
+			}
+			if gotGift != 1 {
+				return errors.New("content registry: SocialGift payload count drift")
+			}
 			gotEmoticons, err := s.Repo.InsertEmoticons(tctx, scope.Tx, b)
 			if err != nil {
 				return err

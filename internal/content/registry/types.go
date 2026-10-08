@@ -45,9 +45,11 @@ var supportedCapabilities = [...]string{
 	"PRACTICE_CA6",
 	"CHARACTER_APPEARANCE_CA7",
 	"FRIEND_DM_EMOTICON_I7A6A",
+	"SOCIAL_GIFT_I7A7A",
 }
 
 type Bundle struct {
+	socialGiftJSON                            []byte
 	emoticonsJSON                             []byte
 	manifest                                  builtin.Manifest
 	manifestJSON                              []byte
@@ -171,7 +173,12 @@ func LoadBuiltinBundle() (Bundle, error) {
 	if err != nil {
 		return Bundle{}, err
 	}
+	socialGift, err := builtin.GeneratedFile("social_gift_catalog.json")
+	if err != nil {
+		return Bundle{}, err
+	}
 	b := Bundle{
+		socialGiftJSON:                         append([]byte(nil), socialGift...),
 		emoticonsJSON:                          append([]byte(nil), emoticons...),
 		manifest:                               cat.Manifest,
 		manifestJSON:                           append([]byte(nil), manifest...),
@@ -229,7 +236,7 @@ func (b Bundle) Validate() error {
 	if b.manifest.SchemaVersion != builtin.SchemaVersion {
 		return fmt.Errorf("content registry: unsupported bundle schema %d", b.manifest.SchemaVersion)
 	}
-	for name, raw := range map[string][]byte{"manifest": b.manifestJSON, "resources": b.resourcesJSON, "progression": b.progressionJSON, "functions": b.functionGatesJSON, "objectives": b.objectivesJSON, "hero-core": b.heroCoreJSON, "pet-core": b.petCoreJSON, "pet-acquisition": b.petAcquisitionJSON, "pet-progression": b.petProgressionJSON, "equipment-primitives": b.equipmentPrimitivesJSON, "hero-equipment": b.heroEquipmentJSON, "super-equipment": b.superEquipmentJSON, "hero-fumo": b.heroFumoJSON, "hero-promotion-restoration": b.heroPromotionRestorationJSON, "pet-equipment": b.petEquipmentJSON, "pet-promotion-restoration": b.petPromotionRestorationJSON, "practice": b.practiceJSON, "appearance": b.appearanceJSON, "emoticons": b.emoticonsJSON} {
+	for name, raw := range map[string][]byte{"manifest": b.manifestJSON, "resources": b.resourcesJSON, "progression": b.progressionJSON, "functions": b.functionGatesJSON, "objectives": b.objectivesJSON, "hero-core": b.heroCoreJSON, "pet-core": b.petCoreJSON, "pet-acquisition": b.petAcquisitionJSON, "pet-progression": b.petProgressionJSON, "equipment-primitives": b.equipmentPrimitivesJSON, "hero-equipment": b.heroEquipmentJSON, "super-equipment": b.superEquipmentJSON, "hero-fumo": b.heroFumoJSON, "hero-promotion-restoration": b.heroPromotionRestorationJSON, "pet-equipment": b.petEquipmentJSON, "pet-promotion-restoration": b.petPromotionRestorationJSON, "practice": b.practiceJSON, "appearance": b.appearanceJSON, "emoticons": b.emoticonsJSON, "social-gift": b.socialGiftJSON} {
 		if len(raw) == 0 || !json.Valid(raw) {
 			return fmt.Errorf("content registry: invalid %s JSON", name)
 		}
@@ -240,6 +247,7 @@ func (b Bundle) Validate() error {
 	return nil
 }
 
+func (b Bundle) SocialGiftJSON() []byte     { return append([]byte(nil), b.socialGiftJSON...) }
 func (b Bundle) EmoticonsJSON() []byte      { return append([]byte(nil), b.emoticonsJSON...) }
 func (b Bundle) RevisionID() string         { return b.manifest.RevisionID }
 func (b Bundle) SchemaVersion() int         { return b.manifest.SchemaVersion }
@@ -397,6 +405,7 @@ type Repository interface {
 	InsertPetPromotionRestoration(context.Context, tx.Tx, Bundle) (int64, error)
 	InsertPractice(context.Context, tx.Tx, Bundle) (int64, error)
 	InsertAppearance(context.Context, tx.Tx, Bundle) (int64, error)
+	InsertSocialGift(context.Context, tx.Tx, Bundle) (int64, error)
 	InsertEmoticons(context.Context, tx.Tx, Bundle) (int64, error)
 	VerifyRevision(context.Context, tx.Queryer, Bundle) (Verification, error)
 	ReadActivation(context.Context, tx.Queryer) (ActivationIdentity, bool, error)

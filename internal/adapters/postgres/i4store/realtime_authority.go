@@ -36,7 +36,7 @@ SELECT EXISTS(
  WHERE c.context_id=$1 AND c.session_id=$2 AND c.account_id=$3
    AND c.logical_server_id=$4 AND c.player_id=$5 AND c.context_generation=$6
    AND c.liveness_version=$7 AND s.liveness_version=$8
-   AND a.status='ACTIVE' AND a.disabled_at IS NULL
+   AND a.account_uid=$10 AND a.status='ACTIVE' AND a.disabled_at IS NULL
    AND c.ended_at IS NULL AND s.revoked_at IS NULL
    AND (s.absolute_expires_at IS NULL OR $9 < s.absolute_expires_at)
    AND (s.idle_timeout_seconds IS NULL OR $9 < s.last_activity_at + make_interval(secs => s.idle_timeout_seconds::double precision))
@@ -188,7 +188,7 @@ func (a RealtimeAuthority) ValidateActor(ctx context.Context, actor identity.Act
 	err := a.Queryer.QueryRow(ctx, validateActorLiveness,
 		actor.ContextID.UUID().String(), actor.SessionID.UUID().String(), actor.AccountID.UUID().String(),
 		int32(actor.LogicalServerID), int64(actor.PlayerID), actor.ContextGeneration,
-		actor.ContextLivenessVersion, actor.SessionLivenessVersion, now.UTC(),
+		actor.ContextLivenessVersion, actor.SessionLivenessVersion, now.UTC(), string(actor.AccountUID),
 	).Scan(&live)
 	if err != nil || !live {
 		return ErrGameplayBearerNotLive
