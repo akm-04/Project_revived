@@ -5,6 +5,7 @@ package socialactivation_test
 import (
 	"bytes"
 	"context"
+	"crypto/sha256"
 	"encoding/binary"
 	"encoding/json"
 	"errors"
@@ -23,6 +24,7 @@ import (
 	"math"
 	"net"
 	"os"
+	"path/filepath"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -778,7 +780,7 @@ func TestChatA25HeartbeatPresenceAndSocialProductionRegression(t *testing.T) {
 func TestChatA26NativeMigrationSchemaAndIdempotentComposition(t *testing.T) {
 	f := fresh(t)
 	f.chatPlayers(100001)
-	if f.number(`SELECT max(version_id) FROM goose_db_version WHERE is_applied`) != 33 {
+	if f.number(`SELECT max(version_id) FROM goose_db_version WHERE is_applied`) != selectedNativeMigrationHighWater(t) {
 		t.Fatal("migration highwater changed")
 	}
 	h := chatHarness(t, f, channelHarnessOptions{})
@@ -888,4 +890,42 @@ func TestChatA17bFullNativeWriterQueueIsolated(t *testing.T) {
 	}
 	noChat(t, peer)
 	t.Log("Real TCP, nativePG, explicit WriterFrames1 fault-capacity variant: third enqueue rejected while two admitted frames complete later; healthy recipients isolated")
+}
+
+// The historical Channel5A fixture keeps its33 floor. The exact authorized
+// FriendDM6A extension permits precisely34, only with the selected six-contract
+// identity and an unchanged hash inventory for all33 prior migrations.
+func selectedNativeMigrationHighWater(t *testing.T) int64 {
+	t.Helper()
+	root := filepath.Clean("../../..")
+	raw, e := os.ReadFile(filepath.Join(root, "BUILD_INFO.json"))
+	if e != nil {
+		t.Fatal(e)
+	}
+	var build map[string]any
+	if json.Unmarshal(raw, &build) != nil {
+		t.Fatal("build metadata")
+	}
+	if build["i7a6a_stage"] == nil {
+		return 33
+	}
+	selection, e := os.ReadFile(filepath.Join(root, "docs/i7a6a/IMPLEMENTATION_SELECTION.json"))
+	if e != nil || fmt.Sprintf("%x", sha256.Sum256(selection)) != "854011799f9c3b2eb779f0b1ec3e3cd291566aef58a491d317236f1c0f70f7da" || build["i7a6a_contract_sha256"] != "854011799f9c3b2eb779f0b1ec3e3cd291566aef58a491d317236f1c0f70f7da" {
+		t.Fatal("unqualified migration successor")
+	}
+	baseline, e := os.ReadFile(filepath.Join(root, "docs/i7a6a/PRIOR_MIGRATION_LOCK_1_33.json"))
+	if e != nil || fmt.Sprintf("%x", sha256.Sum256(baseline)) != "f890e378e19324efd0ad7b0ca442fd0061618aa23dfa1ef1bf594155c62a873b" {
+		t.Fatal("prior migration inventory identity")
+	}
+	var lock struct{ Migrations map[string]string }
+	if json.Unmarshal(baseline, &lock) != nil || len(lock.Migrations) != 33 {
+		t.Fatal("prior33 inventory")
+	}
+	for name, want := range lock.Migrations {
+		raw, e := os.ReadFile(filepath.Join(root, "migrations", name))
+		if e != nil || fmt.Sprintf("%x", sha256.Sum256(raw)) != want {
+			t.Fatal("prior migration drift", name)
+		}
+	}
+	return 34
 }
