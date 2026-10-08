@@ -165,6 +165,10 @@ func (s Service) sendProof(c context.Context, q tx.Queryer, actor identity.Actor
 	if e != nil || !exists || epoch.Generation != v.SenderGeneration {
 		return Result{}, false, ErrConflict
 	}
+	recipientEpoch, exists, e := s.Store.ReadEpoch(c, q, v.Recipient, v.SenderDay)
+	if e != nil || !exists || recipientEpoch.Validate() != nil {
+		return Result{}, false, ErrConflict
+	}
 	n, exists, e := s.NoticeEvidence.ReadNoticeEvidenceTx(c, q, v.Recipient, v.NoticeID)
 	if e != nil || !exists || socialinbox.MatchGift(n, v.Descriptor()) != nil || n.Active != v.ClaimOperation.IsZero() {
 		return Result{}, false, ErrConflict
@@ -325,10 +329,23 @@ func (s Service) Send(c context.Context, actor identity.ActorContext, recipient 
 		if e != nil {
 			return e
 		}
-		epoch, exists, e := s.epoch(c, sc.Tx, actor.PlayerID, day, bound, at)
-		if e != nil {
-			return e
+		epochOrder := []identity.PlayerID{actor.PlayerID, recipient}
+		sort.Slice(epochOrder, func(i, j int) bool {
+			a, _ := EpochKey(epochOrder[i])
+			b, _ := EpochKey(epochOrder[j])
+			return lockkey.Compare(a, b) < 0
+		})
+		epochs := map[identity.PlayerID]Epoch{}
+		existingEpochs := map[identity.PlayerID]bool{}
+		for _, pid := range epochOrder {
+			v, exists, e := s.epoch(c, sc.Tx, pid, day, bound, at)
+			if e != nil {
+				return e
+			}
+			epochs[pid] = v
+			existingEpochs[pid] = exists
 		}
+		epoch := epochs[actor.PlayerID]
 		prior, ok, e := s.Store.LockTransfer(c, sc.Tx, actor.PlayerID, recipient, day)
 		if e != nil {
 			return e
@@ -357,8 +374,10 @@ func (s Service) Send(c context.Context, actor identity.ActorContext, recipient 
 		if sent >= content.Catalog.SendCap {
 			return ErrQuota
 		} // Complete lower lock/preflight plan is now held. All effects use this Tx.
-		if e := s.Store.PutEpoch(c, sc.Tx, epoch, exists, at); e != nil {
-			return e
+		for _, pid := range epochOrder {
+			if e := s.Store.PutEpoch(c, sc.Tx, epochs[pid], existingEpochs[pid], at); e != nil {
+				return e
+			}
 		}
 		n, e := s.Inbox.ApplyTx(c, sc.Tx, p)
 		if e != nil {

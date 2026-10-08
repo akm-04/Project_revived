@@ -34,7 +34,10 @@
     "Transfer UUID derived from stable operation entropy and operationID label; distinct from send operation and GenerationID",
     "Forward-only00036 honors canonical foundation; earlier working Down prototype removed before freeze",
     "Pure GiftSnapshotTx returns day/counts/sent recipients without refreshing epochs",
-    "10 competing sends permit bounded authoritative abort outcomes, verified empty source then separate fresh operation resubmission; no unknown-COMMIT replay"
+    "10 competing sends permit bounded authoritative abort outcomes, verified empty source then separate fresh operation resubmission; no unknown-COMMIT replay",
+    "Send locks both current/latest sender and recipient GiftEpoch371 keys in canonical order, creates/touches both named fences and derives counts only from transfers",
+    "R1 explicitly rejected in final I7A1/649 reread for missing recipient epoch lock; exactR2 supersedes it",
+    "Inherited native fixture truncates gift child plus notices together; current migration assertion advances35to36, preserving existing behavior checks"
   ],
   "wire_time_evidence": "Static src_64 and corroborative historical/V1 do not prove original server. GMT+8 and recipient-block rule are selected implementation policies.",
   "migration_high_water": 36

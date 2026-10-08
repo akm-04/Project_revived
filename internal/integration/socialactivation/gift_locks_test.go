@@ -112,7 +112,7 @@ func Test7A_CompleteLockPlanSameCallerTx(t *testing.T) {
 	for _, k := range w.keys {
 		ranks = append(ranks, k.DomainRank)
 	}
-	if !reflect.DeepEqual(ranks, []uint16{315, 315, 360, 360, 361, 363, 370, 371, 372}) {
+	if !reflect.DeepEqual(ranks, []uint16{315, 315, 360, 360, 361, 363, 370, 371, 371, 372}) {
 		t.Fatal(ranks)
 	}
 	s = f.gift()

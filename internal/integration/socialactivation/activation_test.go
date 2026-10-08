@@ -291,7 +291,7 @@ func TestD06SafeNoticeProjectionAndMaterialization(t *testing.T) {
 	if e == nil || len(v.Notices) != 0 || f.snapshot() != before {
 		t.Fatal("unsafe projection", e)
 	}
-	f.sql(`TRUNCATE social_notices`)
+	f.sql(`TRUNCATE social_gift_transfers,social_notices`)
 	f.sql(`SELECT setval('social_notice_id_seq',9007199254740991,true)`)
 	f.ok(100001, sr.RequestFriend, 200001)
 	before = f.snapshot()

@@ -956,6 +956,39 @@ func selectedNativeMigrationHighWater(t *testing.T) int64 {
 				t.Fatal("prior34 drift", name)
 			}
 		}
+		if build["i7a7a_stage"] != nil {
+			selected, e := os.ReadFile(filepath.Join(root, "docs/i7a7a/IMPLEMENTATION_SELECTION.json"))
+			if e != nil || fmt.Sprintf("%x", sha256.Sum256(selected)) != build["i7a7a_contract_sha256"] {
+				t.Fatal("unqualified Gift migration selection")
+			}
+			var contracts struct {
+				ContractFiles map[string]string `json:"contract_files"`
+			}
+			if json.Unmarshal(selected, &contracts) != nil || len(contracts.ContractFiles) != 5 {
+				t.Fatal("five Gift contracts required")
+			}
+			for name, want := range contracts.ContractFiles {
+				b, e := os.ReadFile(filepath.Join(root, "docs/i7a7a", name))
+				if e != nil || fmt.Sprintf("%x", sha256.Sum256(b)) != want {
+					t.Fatal("Gift contract drift", name)
+				}
+			}
+			baseline, e := os.ReadFile(filepath.Join(root, "docs/i7a7a/PRIOR_MIGRATION_LOCK_1_35.json"))
+			if e != nil || fmt.Sprintf("%x", sha256.Sum256(baseline)) != build["i7a7a_prior35_lock_sha256"] {
+				t.Fatal("prior35 identity")
+			}
+			var prior struct{ Migrations map[string]string }
+			if json.Unmarshal(baseline, &prior) != nil || len(prior.Migrations) != 35 {
+				t.Fatal("prior35 inventory")
+			}
+			for name, want := range prior.Migrations {
+				b, e := os.ReadFile(filepath.Join(root, "migrations", name))
+				if e != nil || fmt.Sprintf("%x", sha256.Sum256(b)) != want {
+					t.Fatal("prior35 drift", name)
+				}
+			}
+			return 36
+		}
 		return 35
 	}
 	return 34

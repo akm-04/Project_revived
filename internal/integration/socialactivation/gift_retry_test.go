@@ -63,7 +63,7 @@ func Test7A_RetryBindingAcrossMidnight(t *testing.T) {
 	if _, e := s.Send(ctx, a, b.PlayerID, op); e != nil {
 		t.Fatal(e)
 	}
-	if clock.calls != 1 || len(store.writes) != 2 || len(store.epochs) != 2 || !reflect.DeepEqual(store.writes[0].SenderGeneration, store.writes[1].SenderGeneration) || !reflect.DeepEqual(store.epochs[0], store.epochs[1]) {
+	if clock.calls != 1 || len(store.writes) != 2 || len(store.epochs) != 4 || !reflect.DeepEqual(store.writes[0].SenderGeneration, store.writes[1].SenderGeneration) || !reflect.DeepEqual(store.epochs[0], store.epochs[2]) || !reflect.DeepEqual(store.epochs[1], store.epochs[3]) {
 		t.Fatal(clock.calls, store.writes, store.epochs)
 	}
 	for _, v := range store.writes {
