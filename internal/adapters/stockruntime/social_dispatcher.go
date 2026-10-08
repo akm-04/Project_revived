@@ -133,8 +133,11 @@ func socialFailure(e error) httpedge.Response {
 }
 func (d SocialDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRequest) httpedge.Response {
 	// One finite parent deadline covers authority, command and postcommit projection.
-	ctx, cancel := context.WithTimeout(ctx, 12*time.Second)
-	defer cancel()
+	if req.Envelope.MID == 183 || req.Envelope.MID == 184 {
+		var cancel context.CancelFunc
+		ctx, cancel = context.WithTimeout(ctx, 12*time.Second)
+		defer cancel()
+	}
 	bad := func() httpedge.Response {
 		return httpedge.Response{HTTPStatus: 400, Body: map[string]any{"error": "invalid_social_request"}}
 	}

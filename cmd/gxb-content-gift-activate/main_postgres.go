@@ -21,7 +21,7 @@ import (
 func main() {
 	c, cancel := context.WithTimeout(context.Background(), 3*time.Minute)
 	defer cancel()
-	p, e := postgres.Open(c, os.Getenv("GXB_DATABASE_URL"), postgres.PoolSettings{MaxConns: 2, MaxConnLifetime: time.Hour, MaxConnIdleTime: time.Minute, HealthCheckPeriod: time.Minute})
+	p, e := postgres.Open(c, os.Getenv("GXB_POSTGRES_DSN"), postgres.PoolSettings{MaxConns: 2, MaxConnLifetime: time.Hour, MaxConnIdleTime: time.Minute, HealthCheckPeriod: time.Minute})
 	if e != nil {
 		log.Fatal(e)
 	}
