@@ -106,3 +106,27 @@ func PreflightConsumption(n Notice, at time.Time) error {
 	return nil
 }
 func (n Notice) VersionExhausted() bool { return n.StateVersion == math.MaxInt64 }
+
+// PreparedGiftConsumption is presentation-only authority. Canonical Gift value
+// and the aggregate Grant remain SocialGift/I5-owned. Fields and caller binding
+// are private so a consumer cannot substitute another notice or transaction.
+type PreparedGiftConsumption struct {
+	caller     tx.Tx
+	notice     Notice
+	descriptor GiftDescriptor
+	at         time.Time
+	prepared   bool
+}
+
+func (s GiftService) PrepareConsumptionTx(c context.Context, t tx.Tx, f RecipientFence, n Notice, d GiftDescriptor, at time.Time) (PreparedGiftConsumption, error) {
+	if t == nil || s.Store == nil || f.PlayerID != n.RecipientPlayerID || f.StateVersion < 1 || MatchGift(n, d) != nil || PreflightConsumption(n, at) != nil {
+		return PreparedGiftConsumption{}, ErrInvalidNotice
+	}
+	return PreparedGiftConsumption{caller: t, notice: copyNotice(n), descriptor: d, at: at.UTC(), prepared: true}, nil
+}
+func (s GiftService) ApplyConsumptionTx(c context.Context, t tx.Tx, p PreparedGiftConsumption) error {
+	if !p.prepared || !sameCaller(t, p.caller) || s.Store == nil || MatchGift(p.notice, p.descriptor) != nil || PreflightConsumption(p.notice, p.at) != nil {
+		return ErrInvalidNotice
+	}
+	return s.Store.ConsumeGiftNoticeTx(c, t, copyNotice(p.notice), p.at)
+}

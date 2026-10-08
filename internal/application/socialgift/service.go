@@ -259,6 +259,11 @@ func (s Service) completeClaim(c context.Context, q tx.Queryer, v ClaimOperation
 	return v.Result, true, nil
 }
 func (s Service) Send(c context.Context, actor identity.ActorContext, recipient identity.PlayerID, op operation.Context) (Result, error) {
+	c, cancel := context.WithTimeout(c, Profile().OperationTimeout)
+	defer cancel()
+	if e := c.Err(); e != nil {
+		return Result{}, e
+	}
 	if e := s.validate(actor); e != nil {
 		return Result{}, e
 	}
@@ -398,6 +403,11 @@ func (s Service) Send(c context.Context, actor identity.ActorContext, recipient 
 	return resolved(answer, outcome, e)
 }
 func (s Service) Claim(c context.Context, actor identity.ActorContext, input []socialinbox.NoticeID, op operation.Context) (Result, error) {
+	c, cancel := context.WithTimeout(c, Profile().OperationTimeout)
+	defer cancel()
+	if e := c.Err(); e != nil {
+		return Result{}, e
+	}
 	if e := s.validate(actor); e != nil {
 		return Result{}, e
 	}
@@ -571,6 +581,14 @@ func (s Service) Claim(c context.Context, actor identity.ActorContext, input []s
 				}
 			}
 		}
+		consumptions := map[socialinbox.NoticeID]socialinbox.PreparedGiftConsumption{}
+		for _, v := range transfers {
+			p, e := s.Inbox.PrepareConsumptionTx(c, sc.Tx, socialinbox.RecipientFence{PlayerID: actor.PlayerID, StateVersion: root.StateVersion}, notices[v.NoticeID], v.Descriptor(), at)
+			if e != nil {
+				return e
+			}
+			consumptions[v.NoticeID] = p
+		}
 		for _, id := range requested {
 			if _, ok := notices[id]; ok {
 				answer.NoticeIDs = append(answer.NoticeIDs, id)
@@ -615,7 +633,7 @@ func (s Service) Claim(c context.Context, actor identity.ActorContext, input []s
 			}
 			changed = true
 			if n.Source.Kind == socialinbox.GiftSourceKind {
-				if e := s.Inbox.Store.ConsumeGiftNoticeTx(c, sc.Tx, n, at); e != nil {
+				if e := s.Inbox.ApplyConsumptionTx(c, sc.Tx, consumptions[id]); e != nil {
 					return e
 				}
 			} else {

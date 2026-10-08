@@ -37,7 +37,9 @@
     "10 competing sends permit bounded authoritative abort outcomes, verified empty source then separate fresh operation resubmission; no unknown-COMMIT replay",
     "Send locks both current/latest sender and recipient GiftEpoch371 keys in canonical order, creates/touches both named fences and derives counts only from transfers",
     "R1 explicitly rejected in final I7A1/649 reread for missing recipient epoch lock; exactR2 supersedes it",
-    "Inherited native fixture truncates gift child plus notices together; current migration assertion advances35to36, preserving existing behavior checks"
+    "Inherited native fixture truncates gift child plus notices together; current migration assertion advances35to36, preserving existing behavior checks",
+    "Single finite parent deadline covers existing I4 admission, replay/content read transactions and the complete gameplay command; reconciliation keeps foundation cleanup bounds",
+    "Gift-only Inbox consumption is privately prepared with exact caller Tx and source descriptor before Grant, then applied after one aggregate settlement; wrongTx/unprepared/substituted-source native negatives required"
   ],
   "wire_time_evidence": "Static src_64 and corroborative historical/V1 do not prove original server. GMT+8 and recipient-block rule are selected implementation policies.",
   "migration_high_water": 36
