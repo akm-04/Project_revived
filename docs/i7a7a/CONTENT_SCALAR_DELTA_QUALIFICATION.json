@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "stage": "I7A-7A",
+  "classification": "SCOPED_CUMULATIVE_SUCCESSOR_NO_HISTORICAL_ASSERTION_WAIVER",
+  "compiler_version": "i7a7a-social-gift",
+  "parser_version": "lua-generated-v16-social-gift",
+  "old_count": 5556,
+  "new_count": 5557,
+  "exact_new_row": {
+    "catalog_status": "QUALIFIED",
+    "class": "SCALAR_CURRENCY",
+    "definition_key": "scalar_currency:friendship_coin",
+    "resource_key": "friendship_coin",
+    "settlement_activation": "ENABLED_R4"
+  },
+  "old_catalog_sha256": "f41f158f6b0ba779ac6f62c21025dccfffd1d049f8498717e6ed2592175e6ab9",
+  "new_catalog_sha256": "330eff83c5f32ff3e6518aaaaceb98256670bdef23f4810fe5a4e5a94a8388c5",
+  "gift_catalog_sha256": "0d87fe051c201163775993dbf7a2565a12df3082e4506158db52a0e0b2d6d75e",
+  "base_backend_sha256": "2fa5d71e52c1246580eb5eba39ed7f7ca687bb446deca3bbd1af555b25d529da",
+  "proof": "Removing exactly the bounded named scalar reproduces accepted5556-row canonical catalog bytes, including all other classifications/activations. Historical5556 remains required for earlier generations."
+}

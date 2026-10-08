@@ -36,3 +36,22 @@ def current_identity_is_latest(root: Path, compiler: str | None, parser: str | N
     latest=rows[-1]
     declared=data.get("current") or {}
     return (compiler,parser)==(latest.get("compiler_version"),latest.get("parser_version")) == (declared.get("compiler_version"),declared.get("parser_version"))
+
+def qualified_social_gift_scalar_delta(root: Path, payload: dict) -> bool:
+    """Narrow successor proof: all5556 historical rows remain byte identical."""
+    import hashlib
+    qualification=json.loads((root/"docs/i7a7a/CONTENT_SCALAR_DELTA_QUALIFICATION.json").read_text())
+    manifest=json.loads((root/"internal/content/builtin/generated/manifest.json").read_text())
+    if manifest.get("compiler_version")!="i7a7a-social-gift" or manifest.get("parser_version")!="lua-generated-v16-social-gift":return False
+    if not current_identity_is_latest(root,manifest["compiler_version"],manifest["parser_version"]):return False
+    expected={"catalog_status":"QUALIFIED","class":"SCALAR_CURRENCY","definition_key":"scalar_currency:friendship_coin","resource_key":"friendship_coin","settlement_activation":"ENABLED_R4"}
+    rows=payload.get("resources",[])
+    extra=[r for r in rows if r.get("definition_key")==expected["definition_key"]]
+    if extra!=[expected] or qualification.get("exact_new_row")!=expected or len(rows)!=5557:return False
+    reduced=dict(payload);reduced["resources"]=[r for r in rows if r.get("definition_key")!=expected["definition_key"]]
+    data=(json.dumps(reduced,ensure_ascii=False,sort_keys=True,separators=(",",":"))+"\n").encode()
+    if len(reduced["resources"])!=5556 or hashlib.sha256(data).hexdigest()!=qualification.get("old_catalog_sha256"):return False
+    raw=(root/"internal/content/builtin/generated/resource_catalog.json").read_bytes()
+    gift=(root/"internal/content/builtin/generated/social_gift_catalog.json").read_bytes()
+    if hashlib.sha256(raw).hexdigest()!=qualification.get("new_catalog_sha256") or hashlib.sha256(gift).hexdigest()!=qualification.get("gift_catalog_sha256"):return False
+    return "SOCIAL_GIFT_I7A7A" in manifest.get("enabled_capabilities",[]) and qualification.get("old_count")==5556 and qualification.get("new_count")==5557

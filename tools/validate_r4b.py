@@ -6,6 +6,7 @@ import re
 import subprocess
 import sys
 from pathlib import Path
+from content_generation_policy import qualified_social_gift_scalar_delta
 
 ROOT = Path(__file__).resolve().parents[1]
 MIG = ROOT / "migrations/00009_r4_immutable_content_revisions.sql"
@@ -131,11 +132,17 @@ def main() -> int:
         if entry.get("owner") != "content-registry" or entry.get("migration") != "migrations/00009_r4_immutable_content_revisions.sql":
             errors.append(f"ownership mismatch {table}")
 
-    resources = json.loads((GEN / "resource_catalog.json").read_text()).get("resources") or []
+    resource_payload=json.loads((GEN / "resource_catalog.json").read_text())
+    resources = resource_payload.get("resources") or []
     progression = json.loads((GEN / "player_progression.json").read_text()).get("rows") or []
     objectives = json.loads((GEN / "objective_catalog.json").read_text()).get("definitions") or []
-    if len(resources) != 5556:
-        errors.append(f"resource count={len(resources)} want 5556")
+    expected_resource_count=5556
+    manifest=json.loads((GEN/"manifest.json").read_text())
+    if manifest.get("compiler_version")=="i7a7a-social-gift":
+        if qualified_social_gift_scalar_delta(ROOT,resource_payload):expected_resource_count=5557
+        else:errors.append("unqualified SocialGift scalar delta; historical catalog identity must remain exact")
+    if len(resources)!=expected_resource_count:
+        errors.append(f"resource count={len(resources)} want {expected_resource_count}")
     if len(progression) != 100:
         errors.append(f"progression count={len(progression)} want 100")
     if objectives != []:

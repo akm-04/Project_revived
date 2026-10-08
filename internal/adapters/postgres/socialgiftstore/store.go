@@ -151,7 +151,7 @@ func (w epochWire) value() (sg.Epoch, error) {
 // no row is inserted until the complete notice/epoch/transfer plan is held.
 func (Store) LockEpoch(c context.Context, t tx.Tx, p identity.PlayerID, day string) (sg.Epoch, bool, sg.Epoch, bool, error) {
 	var raw []byte
-	e := t.QueryRow(c, `SELECT coalesce(jsonb_agg(to_jsonb(e) ORDER BY day_token DESC),'[]'::jsonb) FROM (SELECT * FROM social_gift_epochs WHERE player_id=$1 AND policy_id=$2 AND (day_token=$3 OR day_token=(SELECT max(day_token) FROM social_gift_epochs WHERE player_id=$1 AND policy_id=$2)) ORDER BY day_token DESC FOR UPDATE) e`, int64(p), sg.DayPolicy, day).Scan(&raw)
+	e := t.QueryRow(c, `SELECT coalesce(jsonb_agg(to_jsonb(e) ORDER BY day_token DESC),'[]'::jsonb) FROM (SELECT * FROM social_gift_epochs WHERE player_id=$1 AND policy_id=$2 AND (day_token=$3 OR day_token=(SELECT max(day_token) FROM social_gift_epochs WHERE player_id=$1 AND policy_id=$2)) ORDER BY day_token ASC FOR UPDATE) e`, int64(p), sg.DayPolicy, day).Scan(&raw)
 	if e != nil {
 		return sg.Epoch{}, false, sg.Epoch{}, false, e
 	}
