@@ -480,6 +480,7 @@ type EmoticonCatalog struct {
 	Source        string               `json:"source"`
 }
 type Catalog struct {
+	GuildBroadcast           GuildBroadcastPolicy
 	SocialGift               SocialGiftCatalog
 	Emoticons                EmoticonCatalog
 	Manifest                 Manifest
@@ -595,6 +596,10 @@ func Load() (*Catalog, error) {
 		return nil, err
 	}
 
+	var broadcast GuildBroadcastPolicy
+	if err := decodeAndVerify("guild_broadcast_policy.json", manifest.ArtifactSHA256s, &broadcast); err != nil {
+		return nil, err
+	}
 	var socialGift SocialGiftCatalog
 	if err := decodeAndVerify("social_gift_catalog.json", manifest.ArtifactSHA256s, &socialGift); err != nil {
 		return nil, err
@@ -604,6 +609,7 @@ func Load() (*Catalog, error) {
 		return nil, err
 	}
 	catalog := &Catalog{
+		GuildBroadcast:           broadcast,
 		SocialGift:               socialGift,
 		Emoticons:                emoticons,
 		Manifest:                 manifest,
@@ -669,11 +675,11 @@ func validateManifest(raw []byte, manifest *Manifest) error {
 	if _, err := hex.DecodeString(manifest.RevisionID); err != nil || strings.ToLower(manifest.RevisionID) != manifest.RevisionID {
 		return fmt.Errorf("builtin content: revision id must be lowercase SHA-256 hex")
 	}
-	if len(manifest.Sources) != 61 {
-		return fmt.Errorf("builtin content: expected 61 source records, got %d", len(manifest.Sources))
+	if len(manifest.Sources) != 62 {
+		return fmt.Errorf("builtin content: expected 62 source records, got %d", len(manifest.Sources))
 	}
-	if len(manifest.ArtifactSHA256s) != 19 {
-		return fmt.Errorf("builtin content: expected 19 hashed payload artifacts, got %d", len(manifest.ArtifactSHA256s))
+	if len(manifest.ArtifactSHA256s) != 20 {
+		return fmt.Errorf("builtin content: expected 20 hashed payload artifacts, got %d", len(manifest.ArtifactSHA256s))
 	}
 
 	var basis map[string]any
@@ -693,6 +699,9 @@ func validateManifest(raw []byte, manifest *Manifest) error {
 }
 
 func validateCatalog(c *Catalog) error {
+	if err := c.GuildBroadcast.Validate(); err != nil {
+		return err
+	}
 	if err := c.SocialGift.Validate(); err != nil {
 		return err
 	}
@@ -1333,7 +1342,7 @@ func validateCatalog(c *Catalog) error {
 
 	caps := append([]string(nil), c.Manifest.EnabledCapabilities...)
 	sort.Strings(caps)
-	wantCaps := []string{"CHARACTER_APPEARANCE_CA7", "EQUIPMENT_PRIMITIVES_CA4", "FRIEND_DM_EMOTICON_I7A6A", "FUNCTION_LEVEL_ELIGIBILITY_R5", "HERO_CORE_CA2", "HERO_EQUIPMENT_CA4_2", "HERO_FUMO_CA4_3A", "HERO_PROGRESSION_CA2", "HERO_PROMOTION_RESTORATION_CA4_3B", "PET_ACQUISITION_CA3", "PET_CORE_CA3", "PET_EQUIPMENT_CA4_4A", "PET_PROGRESSION_CA3", "PET_PROMOTION_RESTORATION_CA4_4B", "PLAYER_EXP_R5", "PRACTICE_CA6", "QUALIFIED_ORDINARY_STACK_ITEM_DEFINITIONS", "SCALAR_CRYSTAL", "SCALAR_MANA", "SOCIAL_GIFT_I7A7A", "SUPER_EQUIPMENT_CA4_5", "TEMPORAL_ENERGY_R5", "TEMPORAL_SKILL_POINT_R5", "TEMPORAL_SPIRIT_ENERGY_R5"}
+	wantCaps := []string{"CHARACTER_APPEARANCE_CA7", "EQUIPMENT_PRIMITIVES_CA4", "FRIEND_DM_EMOTICON_I7A6A", "FUNCTION_LEVEL_ELIGIBILITY_R5", "GUILD_BROADCAST_I7A8A", "HERO_CORE_CA2", "HERO_EQUIPMENT_CA4_2", "HERO_FUMO_CA4_3A", "HERO_PROGRESSION_CA2", "HERO_PROMOTION_RESTORATION_CA4_3B", "PET_ACQUISITION_CA3", "PET_CORE_CA3", "PET_EQUIPMENT_CA4_4A", "PET_PROGRESSION_CA3", "PET_PROMOTION_RESTORATION_CA4_4B", "PLAYER_EXP_R5", "PRACTICE_CA6", "QUALIFIED_ORDINARY_STACK_ITEM_DEFINITIONS", "SCALAR_CRYSTAL", "SCALAR_MANA", "SOCIAL_GIFT_I7A7A", "SUPER_EQUIPMENT_CA4_5", "TEMPORAL_ENERGY_R5", "TEMPORAL_SKILL_POINT_R5", "TEMPORAL_SPIRIT_ENERGY_R5"}
 	if len(caps) != len(wantCaps) {
 		return fmt.Errorf("builtin content: enabled capability count drift: %v", caps)
 	}

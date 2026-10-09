@@ -13,7 +13,9 @@ func socialMID(mid uint16) bool {
 	return mid == 513 || mid == 515 || mid >= 176 && mid <= 190
 }
 
-// Social requires raw duplicate detection: decoded maps have already lost it.
+func strictRawMID(mid uint16) bool { return socialMID(mid) || mid == 588 }
+
+// Finite selected routes require raw duplicate detection: decoded maps have already lost it.
 // Inspect every top-level MID declaration so a last-wins MID cannot evade scope.
 func validateSocialRaw(raw []byte, selected bool, depthBudget, nodeBudget int) error {
 	d := json.NewDecoder(bytes.NewReader(raw))
@@ -52,7 +54,7 @@ func validateSocialRaw(raw []byte, selected bool, depthBudget, nodeBudget int) e
 				keys[key] = true
 				v, e := walk(depth+1, false)
 				if top && key == "mid" {
-					if n, ok := numericMID(v); ok && socialMID(n) {
+					if n, ok := numericMID(v); ok && strictRawMID(n) {
 						selected = true
 					}
 				}

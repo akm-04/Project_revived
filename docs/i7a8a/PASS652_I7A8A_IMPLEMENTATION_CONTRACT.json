@@ -1,0 +1,34 @@
+{
+  "pass": "652.0",
+  "stage": "I7A-8A",
+  "status": "SELECTED_PREIMPLEMENTATION_CONTRACT_REQUIRES_VALIDATED_NORMAL652_SEAL",
+  "implementation_authorized": false,
+  "implementation_started": false,
+  "product_accepted": false,
+  "base_backend_sha256": "12d5c1b21658df0458eefdd9e9b8a96215ca0e04343699fb756311409ecb3478",
+  "schema_version": 1,
+  "contract_id": "I7A8A_IMPLEMENTATION_CONTRACT",
+  "scope": [
+    "Productionobligationruntime concreteGuildBroadcastroutes/reconciliation",
+    "Leader588 immutableoccurrence/source-timeroster",
+    "I5fixedSourceMail idempotentNORMAL/category0/noattachments/noexpiry",
+    "Deployment/partialdelivery/recovery/currentMailboxreadqualification"
+  ],
+  "out_of_scope": [
+    "8Btype10/Invite/JOINcleanup/expiryrepair",
+    "Publication9",
+    "Richprofile7B",
+    "MAIL2liveproducer",
+    "Othermodeworkeractivation",
+    "originalserver/physicalW2"
+  ],
+  "architecture": [
+    "OnecallerTx persemanticcommand; no nestedcommits",
+    "Guildsource andI5Mailtarget transactseparately; appendRiverwithsourceTx",
+    "Callerjobdatareferenceonly; canonicalsource reloadrequired",
+    "I6DBtimeonce beforeattemptloop; stale-after-lockfailclosed; no universal reset",
+    "Closedlockplans/typedownerreads/no foreignSQL/no sockets undergameplaylocks",
+    "NoAdminimpersonation/no generalfreeformMailport/no additionalGrant/valueledger"
+  ],
+  "completion": "Implementthenfreezeexactnewcandidate; realPG+Rivergates/primary8Arealreview/normalowningseal. No new acceptance fromthisdesign."
+}

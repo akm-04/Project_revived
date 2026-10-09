@@ -24,9 +24,24 @@ var ErrRealtimeOwnerAlreadyHeld = errors.New("realtime single-owner lease alread
 // distributed ownership mechanism.
 type RealtimeOwnerGuard struct {
 	conn *pgxpool.Conn
+	key  int64
 }
 
 func AcquireRealtimeOwner(ctx context.Context, p *Pool) (*RealtimeOwnerGuard, error) {
+	return acquireSessionOwner(ctx, p, RealtimeOwnerAdvisoryKey, ErrRealtimeOwnerAlreadyHeld)
+}
+
+// GuildBroadcastOwnerAdvisoryKey is a separate finite worker namespace (GXB1GBOW).
+// It never claims the Realtime owner key or enables another obligation owner.
+const GuildBroadcastOwnerAdvisoryKey int64 = 0x4758423147424f57
+
+var ErrGuildBroadcastOwnerAlreadyHeld = errors.New("Guild broadcast single-worker owner already held")
+
+func AcquireGuildBroadcastOwner(ctx context.Context, p *Pool) (*RealtimeOwnerGuard, error) {
+	return acquireSessionOwner(ctx, p, GuildBroadcastOwnerAdvisoryKey, ErrGuildBroadcastOwnerAlreadyHeld)
+}
+
+func acquireSessionOwner(ctx context.Context, p *Pool, key int64, held error) (*RealtimeOwnerGuard, error) {
 	if p == nil || p.raw == nil {
 		return nil, errors.New("nil PostgreSQL pool for realtime ownership")
 	}
@@ -35,15 +50,15 @@ func AcquireRealtimeOwner(ctx context.Context, p *Pool) (*RealtimeOwnerGuard, er
 		return nil, err
 	}
 	var ok bool
-	if err := conn.QueryRow(ctx, `SELECT pg_try_advisory_lock($1)`, RealtimeOwnerAdvisoryKey).Scan(&ok); err != nil {
+	if err := conn.QueryRow(ctx, `SELECT pg_try_advisory_lock($1)`, key).Scan(&ok); err != nil {
 		conn.Release()
 		return nil, normalize(err)
 	}
 	if !ok {
 		conn.Release()
-		return nil, ErrRealtimeOwnerAlreadyHeld
+		return nil, held
 	}
-	return &RealtimeOwnerGuard{conn: conn}, nil
+	return &RealtimeOwnerGuard{conn: conn, key: key}, nil
 }
 
 // RunHealthPulses proves the dedicated lock-owning PostgreSQL session remains
@@ -81,7 +96,7 @@ func (g *RealtimeOwnerGuard) Close() error {
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 	defer cancel()
-	_, err := g.conn.Exec(ctx, `SELECT pg_advisory_unlock($1)`, RealtimeOwnerAdvisoryKey)
+	_, err := g.conn.Exec(ctx, `SELECT pg_advisory_unlock($1)`, g.key)
 	g.conn.Release()
 	g.conn = nil
 	return normalize(err)

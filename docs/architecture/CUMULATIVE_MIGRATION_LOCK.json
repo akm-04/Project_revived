@@ -1,5 +1,5 @@
 {
-  "highest_migration": "00036_social_gift.sql",
+  "highest_migration": "00037_guild_broadcast.sql",
   "migrations": {
     "00001_kernel_receipts.sql": "fab5b35f4ca5eee53c62b0b924ec448327e1aa31205015c22e24ee0f2b710fd8",
     "00002_identity_logicalserver_bootstrap.sql": "adff86d27dd1c02e4da0dec6b1aa21f33aaafd4d410849abc76bfeec58a5cd5f",
@@ -36,7 +36,8 @@
     "00033_i7a4a_social_foundation.sql": "59f919552065ef0c8bbd9629e1f7aa471095abebd02de7f2db256a171a4d25ed",
     "00034_i7a6a_friend_dm.sql": "c384841850ad862edde9c070bbf508d5fa9ad3310c66ca2401c9d005ef7a4a4c",
     "00035_personal_dm_delivery.sql": "34b47ec789f5ba94161399856f4b3afd085c4e0f1b0139256412dcc830c8fa7d",
-    "00036_social_gift.sql": "f566250324c748f6c685b288d2aadf11bc7498a9f7bcd5590790c608a3d6cfb8"
+    "00036_social_gift.sql": "f566250324c748f6c685b288d2aadf11bc7498a9f7bcd5590790c608a3d6cfb8",
+    "00037_guild_broadcast.sql": "12c0452d701e5c44186bafa78b1a4c0cd10ce5143e95c23289ce570afa5057e9"
   },
   "rule": "All listed migration bytes are immutable for this cumulative candidate. Historical phase validators remain snapshot-specific; forward schema changes require a new migration. I7A-4A allocates forward-only 00033 for SocialRelation/SocialInbox durable foundations and an I4-owned non-unique discovery index; it performs no Social backfill and activates no stock routes.",
   "schema_version": 1,

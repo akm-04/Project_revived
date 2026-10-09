@@ -2019,6 +2019,52 @@
       "migration": "migrations/00033_i7a4a_social_foundation.sql",
       "owner": "social-relation",
       "write_exceptions": []
+    },
+    "content_guild_broadcast_policies": {
+      "allowed_query_owners": [
+        "content-registry"
+      ],
+      "allowed_read_paths": [
+        "sql/content/",
+        "internal/adapters/postgres/contentstore/",
+        "internal/adapters/postgres/contentqueries/"
+      ],
+      "allowed_write_paths": [
+        "sql/content/",
+        "internal/adapters/postgres/contentstore/",
+        "internal/adapters/postgres/contentqueries/"
+      ],
+      "migration": "migrations/00037_guild_broadcast.sql",
+      "owner": "content-registry",
+      "write_exceptions": []
+    },
+    "guild_broadcast_sources": {
+      "allowed_query_owners": [
+        "GuildBroadcast"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/guildbroadcaststore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/guildbroadcaststore/"
+      ],
+      "migration": "migrations/00037_guild_broadcast.sql",
+      "owner": "GuildBroadcast",
+      "write_exceptions": []
+    },
+    "guild_broadcast_recipients": {
+      "allowed_query_owners": [
+        "GuildBroadcast"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/guildbroadcaststore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/guildbroadcaststore/"
+      ],
+      "migration": "migrations/00037_guild_broadcast.sql",
+      "owner": "GuildBroadcast",
+      "write_exceptions": []
     }
   }
 }

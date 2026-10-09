@@ -42,7 +42,7 @@ def qualified_social_gift_scalar_delta(root: Path, payload: dict) -> bool:
     import hashlib
     qualification=json.loads((root/"docs/i7a7a/CONTENT_SCALAR_DELTA_QUALIFICATION.json").read_text())
     manifest=json.loads((root/"internal/content/builtin/generated/manifest.json").read_text())
-    if manifest.get("compiler_version")!="i7a7a-social-gift" or manifest.get("parser_version")!="lua-generated-v16-social-gift":return False
+    if not registered_pair_successor(root,manifest.get("compiler_version"),manifest.get("parser_version"),"i7a7a-social-gift"):return False
     if not current_identity_is_latest(root,manifest["compiler_version"],manifest["parser_version"]):return False
     expected={"catalog_status":"QUALIFIED","class":"SCALAR_CURRENCY","definition_key":"scalar_currency:friendship_coin","resource_key":"friendship_coin","settlement_activation":"ENABLED_R4"}
     rows=payload.get("resources",[])

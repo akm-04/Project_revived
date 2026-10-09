@@ -21,12 +21,13 @@ from pathlib import Path
 from typing import Any, Iterable
 
 SCHEMA_VERSION = 1
-COMPILER_VERSION = "i7a7a-social-gift"
-PARSER_VERSION = "lua-generated-v16-social-gift"
+COMPILER_VERSION = "i7a8a-guild-broadcast"
+PARSER_VERSION = "lua-generated-v17-guild-broadcast"
 EXPECTED_SOURCE_ARCHIVE_SHA256 = "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
 SOURCE_PREFIX = "app-assets/output/assets/src_64/"
 
 SOURCE_MANIFEST = [
+    ("app/windows/TeamMessageWindow.lua", "fe5732defb999617d38bb63e94aab355ccefaf567ab87c4506657e021095a085", "I7A8A_STOCK588_TITLE_CONTENT_BOUNDARIES"),
     ('data/tables/friend_dailygift.lua', 'b350a14dab62799dcca37dddde370bd86ed78f1745f01483d0bce065062cf707', 'I7A7A_DAILY_GIFT_EQUIVALENCE'),
     ('data/tables/gift.lua', '8c87dfdc116242afcdebd011cf898d61b08e2cf54ea7d0a11a5f69fabade2ac7', 'I7A7A_COMPLETE_REWARD_VECTOR'),
     ("data/tables/emoticon.lua", "76ccbf5c136f5a484e6e5fbe2ca0ef4f58451676ddea78281285a99afc2d3c08", "I7A6A_EMOTICON_DATA_AUTHORITY"),
@@ -91,6 +92,7 @@ SOURCE_MANIFEST = [
 ]
 
 ENABLED_CAPABILITIES = [
+    "GUILD_BROADCAST_I7A8A",
     "QUALIFIED_ORDINARY_STACK_ITEM_DEFINITIONS",
     "SCALAR_CRYSTAL",
     "SCALAR_MANA",
@@ -1759,7 +1761,21 @@ def build_artifacts(blobs: dict[str, SourceBlob], archive_sha256: str) -> dict[s
     if len(emoticons)!=85 or len({r["id"] for r in emoticons})!=85 or sum(r["item_id"]==0 for r in emoticons)!=25 or len({r["item_id"] for r in emoticons if r["item_id"]})!=47:
         raise CompileError("I7A6A emoticon source counts drift")
     emoticon_artifact={"definitions":emoticons,"schema_version":SCHEMA_VERSION,"source":"data/tables/emoticon.lua"}
+    title_limit=misc_int("guild_mail_title_limit")
+    body_limit=misc_int("guild_mail_body_limit")
+    if (title_limit,body_limit)!=(10,100):
+        raise CompileError("Guild broadcast text limits drifted")
+    broadcast_artifact={
+        "schema_version":1,"policy_id":"GUILD_BROADCAST_STOCK_TEXTLEN_V1","storage_policy_id":"PG_UTF8_TEXT_NO_NUL_V1",
+        "text_source_sha256":blobs["app/common/utils.lua"].sha256,
+        "title_half_units":2*title_limit,"body_half_units":2*body_limit,
+        "title_bytes":80,"body_bytes":800,"member_cap":50,
+        "guild_core_revision":"0c74f31996a5cc3290a63541814495f5e830cbd5a56a1554e99cf66071a2b963",
+        "mail_namespace":"NORMAL","mail_category":0,
+        "mail_platform":"ANY","mail_shown":True,"attachments":False,"expiry":False
+    }
     artifacts = {
+        "guild_broadcast_policy.json":broadcast_artifact,
         "social_gift_catalog.json": social_gift_artifact,
         "emoticon_catalog.json": emoticon_artifact,
         "equipment_primitives_catalog.json": equipment_artifact,

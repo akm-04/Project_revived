@@ -13,6 +13,7 @@ import (
 	"github.com/riverqueue/river"
 	"gxb.local/backend/v2/internal/adapters/postgres"
 	appgeneration "gxb.local/backend/v2/internal/application/generation"
+	guildbroadcast "gxb.local/backend/v2/internal/application/guildbroadcast"
 	"gxb.local/backend/v2/internal/foundation/obligation"
 	ftx "gxb.local/backend/v2/internal/foundation/tx"
 )
@@ -74,7 +75,14 @@ func (q Queue) InsertTx(ctx context.Context, t ftx.Tx, o obligation.Obligation) 
 	if !ok {
 		return errors.New("transaction is not pgx-backed")
 	}
-	opts := &river.InsertOpts{Queue: o.Queue}
+	physical := o.Queue
+	if o.Kind == guildbroadcast.MailKind || o.Kind == guildbroadcast.ReconcileKind {
+		if e := guildbroadcast.ValidateObligation(o); e != nil {
+			return e
+		}
+		physical = GuildPhysicalQueue
+	}
+	opts := &river.InsertOpts{Queue: physical}
 	if !o.DueAt.IsZero() {
 		opts.ScheduledAt = o.DueAt.UTC()
 	}
@@ -99,6 +107,16 @@ func (w *obligationWorker) Work(ctx context.Context, job *river.Job[jobArgs]) er
 		return errors.New("nil River obligation job")
 	}
 	o := job.Args.obligation()
+	if o.Kind == guildbroadcast.MailKind || o.Kind == guildbroadcast.ReconcileKind {
+		if job.Queue != GuildPhysicalQueue {
+			return errors.New("Guild physical queue binding conflict")
+		}
+		normalized, e := guildbroadcast.NormalizeStoredObligation(o)
+		if e != nil {
+			return e
+		}
+		o = normalized
+	}
 	if err := o.Validate(); err != nil {
 		return fmt.Errorf("invalid River obligation evidence: %w", err)
 	}

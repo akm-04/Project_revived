@@ -1,0 +1,29 @@
+{
+  "contract_id": "I7A8A_OPERATION_CONTEXT_PRECISION_V1",
+  "classification": "IMPLEMENTATION_DECISION",
+  "status": "RECONCILED_BEFORE_SOURCE_STORE",
+  "base_backend_sha256": "12d5c1b21658df0458eefdd9e9b8a96215ca0e04343699fb756311409ecb3478",
+  "source_evidence": [
+    "internal/foundation/clock/clock.go:System.Now nanoseconds",
+    "PostgreSQL18.6 timestamptz/pgxTime microsecond projection",
+    "internal/foundation/operation/context.go:Context stableID/start/entropy/refs"
+  ],
+  "decision": "Store originalStartedAt as UTC RFC3339Nano exacttext beside PostgreSQL timestamptz projection. Verify microsecond equality onreload; retain originalexact context forfingerprint/replay. Receipt timestamp is existingmicrosecond evidence; do not changefoundation pins/schema/retryPolicy. Bind decisionDBtimeonce andretain sourcecreatedtime.",
+  "owner": "GuildBroadcast",
+  "migration": "00037_guild_broadcast.sql (unfrozennewmigration only)",
+  "consumers": [
+    "knownsource replay",
+    "unknowncommit sourcepositiveproof",
+    "futureworker immutable source reload"
+  ],
+  "authorization_basis": "Standing targeted contractreconciliation autonomy; preserve originaloperationcontext ratherthan silently losing precision",
+  "required_proof": [
+    "realPG exactnanosecond roundtrip",
+    "fingerprint requalification",
+    "source/receipt temporal mirror checks",
+    "unknowncommit fullpositiveproof; genericabsenceUNKNOWN"
+  ],
+  "acceptance": false,
+  "snapshot_timestamp_canonicalization": "Canonical source fingerprint encodes name-snapshot and recipient JOIN instants in UTC without dropping nanoseconds. The pgx row scan used Europe/London UTC+1 while JSON aggregation returned UTC; same instant must not become a different immutable fingerprint. Source creator/readback explicitly normalize JOIN timestamps. Original StartedAt exact string and PostgreSQL UnixMicro witness rules remain unchanged.",
+  "new_runtime_evidence": "continuation/logs/p5-source-fingerprint-trace.log and corrected real source-service test p5-source-native.log"
+}

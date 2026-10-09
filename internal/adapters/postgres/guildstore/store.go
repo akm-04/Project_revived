@@ -514,3 +514,26 @@ func (Store) DeleteGuildInvitesTx(ctx context.Context, t tx.Tx, gid guild.ID) er
 	_, err := t.Exec(ctx, `DELETE FROM guild_invites WHERE guild_id=$1`, int64(gid))
 	return err
 }
+
+// ListMembershipsTx retains source-time membership closure in the caller's
+// snapshot. Fetch one beyond the finite source cap to detect corrupt overflow.
+func (Store) ListMembershipsTx(ctx context.Context, q tx.Queryer, gid guild.ID) ([]guild.Membership, error) {
+	if q == nil || gid <= 0 {
+		return nil, errors.New("invalid tx membership list")
+	}
+	var raw string
+	e := q.QueryRow(ctx, `SELECT COALESCE(jsonb_agg(jsonb_build_object('PlayerID',player_id,'GuildID',guild_id,'Role',role,'JoinedAt',joined_at,'MembershipVersion',membership_version,'StateVersion',state_version,'UpdatedAt',updated_at) ORDER BY player_id),'[]'::jsonb)::text FROM (SELECT * FROM guild_memberships WHERE guild_id=$1 ORDER BY player_id LIMIT 51) members`, int64(gid)).Scan(&raw)
+	if e != nil {
+		return nil, e
+	}
+	var out []guild.Membership
+	if e = json.Unmarshal([]byte(raw), &out); e != nil {
+		return nil, e
+	}
+	for _, m := range out {
+		if e = m.Validate(); e != nil {
+			return nil, e
+		}
+	}
+	return out, nil
+}

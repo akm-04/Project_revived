@@ -110,10 +110,16 @@
       "stage": "I7A-7A",
       "compiler_version": "i7a7a-social-gift",
       "parser_version": "lua-generated-v16-social-gift"
+    },
+    {
+      "ordinal": 19,
+      "stage": "I7A-8A",
+      "compiler_version": "i7a8a-guild-broadcast",
+      "parser_version": "lua-generated-v17-guild-broadcast"
     }
   ],
   "current": {
-    "compiler_version": "i7a7a-social-gift",
-    "parser_version": "lua-generated-v16-social-gift"
+    "compiler_version": "i7a8a-guild-broadcast",
+    "parser_version": "lua-generated-v17-guild-broadcast"
   }
 }

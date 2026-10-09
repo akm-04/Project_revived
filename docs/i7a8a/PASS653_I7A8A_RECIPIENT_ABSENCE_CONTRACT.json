@@ -1,0 +1,16 @@
+{
+  "contract_id": "I7A8A_I4_ALLOCATOR_BACKED_RECIPIENT_ABSENCE_V1",
+  "classification": "IMPLEMENTATION_DECISION",
+  "status": "IMPLEMENTED_WITH_SCOPED_REAL_POSTGRES_PROOF",
+  "base_fact": "Accepted I4 logical-server allocator advances next_player_id contiguously; canonical Player IDs are not recycled. Source binding proves prior allocated recipient identity.",
+  "decision": "I4 typed target root port first locks the exact recipient root315 on the bound server. Only typed root absence plus same coherent transaction allocator cursor greater than the already-bound ID, valid server range and max/cursor consistency returns NonReusedAbsent. Query errors, server mismatch, unallocated cursor hole or invalid root binding fail closed. Target records RECIPIENT_GONE receipt without namespace creation or Mail; a historical delivered receipt may retain delivered meaning after typed player absence and Mail cascade. Restores preserve allocator/source/recipient/Mail/receipt together; counter resets or manual ID reuse are prohibited.",
+  "evidence": "accepted migrations00002 and I4 bootstrap_runtime allocator; continuation/logs/p4-exact-policy-native.log deleted allocated recipient and no namespace proof",
+  "required_gate": [
+    "absent allocated recipient terminal no allocation",
+    "generic error/server mismatch/unallocated cursor do not classify gone",
+    "historical delivered recipient deletion proof",
+    "nonempty restore retains cursor and bound IDs; cursor holes fail closed"
+  ],
+  "authorization_basis": "Direct implementation of selected652 source-Mail typed absence/nonreuse contract through owning I4 port; no foreign SQL exception.",
+  "product_accepted": false
+}

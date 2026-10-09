@@ -1,0 +1,18 @@
+{
+  "contract_id": "I7A8A_PG_TEXT_STORAGE_BOUNDARY_V1",
+  "classification": "IMPLEMENTATION_DECISION",
+  "status": "RECONCILED_BEFORE_EXACT_CANDIDATE_FREEZE",
+  "affected_contract": "PASS652_I7A8A_WIRE_TIME_CONTENT_POLICY.json valid UTF8 text admission",
+  "evidence": "Pinned PostgreSQL18.6 real select chr(0) fails with null character not permitted; raw diagnostic retained in continuation/logs/p5-postgres-nul-text-diagnostic.log",
+  "decision": "Preserve literal src_64 text half-unit algorithm. Reject U+0000 in title/body before source transaction admission because the canonical Source and I5 Mail text storage cannot represent it. Do not strip, truncate or replace it. All other supported valid UTF8 and whitespace remain byte-preserved. Record PG_UTF8_TEXT_NO_NUL_V1 in the new immutable content policy row so its revision binds this additional reconstruction decision.",
+  "evidence_class_boundary": "No recovered original-server NUL rule is claimed. This is an explicit storage admission amendment based on the pinned reconstruction database, not a client source fact.",
+  "authorization_basis": "Direct human full implementation, reconciliation and contract-registry delegation. Original selected652 documents retained unchanged; additive qualified amendment records the conflict rather than silently treating the inherited UTF8 assumption as fulfilled.",
+  "required_gate": [
+    "literal half-unit NUL still counts1",
+    "raw escaped/literal NUL rejects before source/receipt/job mutation",
+    "other whitespace and Unicode boundaries remain exact",
+    "immutable policy artifact and source exact-revision restore proof",
+    "supplemental acceptance row explicitly covers the amendment"
+  ],
+  "product_accepted": false
+}

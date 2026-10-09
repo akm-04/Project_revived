@@ -544,3 +544,11 @@ func (r repo) InsertEmoticons(_ context.Context, x tx.Tx, b Bundle) (int64, erro
 }
 
 func (r repo) InsertSocialGift(_ context.Context, x tx.Tx, b Bundle) (int64, error) { return 1, nil }
+
+func (r repo) InsertGuildBroadcast(_ context.Context, x tx.Tx, b Bundle) (int64, error) {
+	t := x.(*modelTx)
+	v := t.installed[b.RevisionID()]
+	v.GuildBroadcastCount = 1
+	t.installed[b.RevisionID()] = v
+	return 1, nil
+}

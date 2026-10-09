@@ -23,6 +23,7 @@ type RuntimeConfig struct {
 	Queues          map[string]int
 	SoftStopTimeout time.Duration
 	PollOnly        bool
+	JobTimeout      time.Duration
 }
 
 func (c RuntimeConfig) riverQueues() (map[string]river.QueueConfig, error) {
@@ -64,6 +65,7 @@ func NewRuntime(pool *pgxpool.Pool, dispatcher appgeneration.ObligationDispatche
 		Workers:         workers,
 		SoftStopTimeout: cfg.SoftStopTimeout,
 		PollOnly:        cfg.PollOnly,
+		JobTimeout:      cfg.JobTimeout,
 	})
 	if err != nil {
 		return nil, err

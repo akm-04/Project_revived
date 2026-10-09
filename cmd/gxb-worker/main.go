@@ -1,7 +1,9 @@
+//go:build !postgres || !river
+
 package main
 
 import "fmt"
 
 func main() {
-	fmt.Println("gxb-worker: GXB V2 I0 bootstrap; product behavior not implemented")
+	fmt.Println("gxb-worker: Guild broadcast runtime unavailable; production requires -tags postgres,river")
 }

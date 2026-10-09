@@ -303,6 +303,9 @@ func main() {
 	for _, mid := range []uint16{576, 577, 578, 579, 580, 581, 582, 583, 584, 585, 586, 587, 589, 598, 599, 612, 2563, 2564, 2565} {
 		mustRegister(mid, guildD)
 	}
+	if e := registerGuildBroadcast(ctx, pool, runner, authority, guildDB, i5db, receipts, contentDB, router); e != nil {
+		log.Fatalf("Guild broadcast group: %v", e)
+	}
 	i5d := stockruntime.I5Dispatcher{Authority: authority, Service: i5svc}
 	for _, mid := range []uint16{26, 81, 161, 230, 368, 369, 370, 2736} {
 		mustRegister(mid, i5d)
@@ -322,7 +325,7 @@ func main() {
 		defer cancel()
 		_ = srv.Shutdown(shutdownCtx)
 	}()
-	log.Printf("gxb-api I6C candidate listening on %s; advertised realtime=%s:%d", cfg.HTTPAddr, host, port)
+	log.Printf("gxb-api listening on %s; advertised realtime=%s:%d", cfg.HTTPAddr, host, port)
 	if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 		log.Fatal(err)
 	}

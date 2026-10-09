@@ -1,0 +1,285 @@
+{
+  "pass": "652.0",
+  "stage": "I7A-8A",
+  "status": "REQUIREMENTS_FROZEN_ALL38_PRODUCT_ROWS_NOT_RUN",
+  "implementation_authorized": false,
+  "implementation_started": false,
+  "product_accepted": false,
+  "base_backend_sha256": "12d5c1b21658df0458eefdd9e9b8a96215ca0e04343699fb756311409ecb3478",
+  "schema_version": 1,
+  "contract_id": "I7A8A_ACCEPTANCE_MATRIX",
+  "rows": [
+    {
+      "id": "A01",
+      "requirement": "source588leader/nonleader/retired/wrongserver",
+      "status": "NOT_RUN",
+      "evidence": [],
+      "candidate_sha256": null
+    },
+    {
+      "id": "A02",
+      "requirement": "rawduplicate/unknown/invalidUTF8/stringbounds/non200callback",
+      "status": "NOT_RUN",
+      "evidence": [],
+      "candidate_sha256": null
+    },
+    {
+      "id": "A03",
+      "requirement": "literalhalfunitASCII/Han/emoji/bytebounds",
+      "status": "NOT_RUN",
+      "evidence": [],
+      "candidate_sha256": null
+    },
+    {
+      "id": "A04",
+      "requirement": "sourcefullroster+allrootsclosed sorted beforemutation",
+      "status": "NOT_RUN",
+      "evidence": [],
+      "candidate_sha256": null
+    },
+    {
+      "id": "A05",
+      "requirement": "sourceDBtimeonce/stale-after-lock/backwardsclock",
+      "status": "NOT_RUN",
+      "evidence": [],
+      "candidate_sha256": null
+    },
+    {
+      "id": "A06",
+      "requirement": "knownoperationreplayafterroster/name/rolechange",
+      "status": "NOT_RUN",
+      "evidence": [],
+      "candidate_sha256": null
+    },
+    {
+      "id": "A07",
+      "requirement": "nonce-lessfreshidenticalHTTPdistinctoccurrence documented",
+      "status": "NOT_RUN",
+      "evidence": [],
+      "candidate_sha256": null
+    },
+    {
+      "id": "A08",
+      "requirement": "receipt/source fingerprintconflict/orphanproof",
+      "status": "NOT_RUN",
+      "evidence": [],
+      "candidate_sha256": null
+    },
+    {
+      "id": "A09",
+      "requirement": "sourceTx rollbackleavesnoRiverjob/source/receipt",
+      "status": "NOT_RUN",
+      "evidence": [],
+      "candidate_sha256": null
+    },
+    {
+      "id": "A10",
+      "requirement": "realRiver cannotrunbeforecommittedsource",
+      "status": "NOT_RUN",
+      "evidence": [],
+      "candidate_sha256": null
+    },
+    {
+      "id": "A11",
+      "requirement": "realworker finitekind/profile/queue/ref failclosed",
+      "status": "NOT_RUN",
+      "evidence": [],
+      "candidate_sha256": null
+    },
+    {
+      "id": "A12",
+      "requirement": "APIinsertonly neverworker; missingRivertag/schema failreadiness",
+      "status": "NOT_RUN",
+      "evidence": [],
+      "candidate_sha256": null
+    },
+    {
+      "id": "A13",
+      "requirement": "Mailatomicrecord/receipt/sourceunique/610fence",
+      "status": "NOT_RUN",
+      "evidence": [],
+      "candidate_sha256": null
+    },
+    {
+      "id": "A14",
+      "requirement": "Mailnoattach/noGrant/normalBoolcategory0/createdsourcefromsnapshot",
+      "status": "NOT_RUN",
+      "evidence": [],
+      "candidate_sha256": null
+    },
+    {
+      "id": "A15",
+      "requirement": "duplicatejob preserveswireID/readstate/counters",
+      "status": "NOT_RUN",
+      "evidence": [],
+      "candidate_sha256": null
+    },
+    {
+      "id": "A16",
+      "requirement": "unsafeMailwirecounterrollback",
+      "status": "NOT_RUN",
+      "evidence": [],
+      "candidate_sha256": null
+    },
+    {
+      "id": "A17",
+      "requirement": "recipientgone typedproof/noallocation/no resurrection",
+      "status": "NOT_RUN",
+      "evidence": [],
+      "candidate_sha256": null
+    },
+    {
+      "id": "A18",
+      "requirement": "missingMailwhileplayerexists/sourcehole conflicts",
+      "status": "NOT_RUN",
+      "evidence": [],
+      "candidate_sha256": null
+    },
+    {
+      "id": "A19",
+      "requirement": "unknownsource/mailcommitpositiveproof/absenceunknown",
+      "status": "NOT_RUN",
+      "evidence": [],
+      "candidate_sha256": null
+    },
+    {
+      "id": "A20",
+      "requirement": "workercrashafterMailcommitbeforeAck replayoneMail",
+      "status": "NOT_RUN",
+      "evidence": [],
+      "candidate_sha256": null
+    },
+    {
+      "id": "A21",
+      "requirement": "AckrequiresmatchingtypedMailproof",
+      "status": "NOT_RUN",
+      "evidence": [],
+      "candidate_sha256": null
+    },
+    {
+      "id": "A22",
+      "requirement": "partialrecipientrestore/deliveryafterGuildretirement",
+      "status": "NOT_RUN",
+      "evidence": [],
+      "candidate_sha256": null
+    },
+    {
+      "id": "A23",
+      "requirement": "missing/discardedjobs boundedcanonicalreconciliation",
+      "status": "NOT_RUN",
+      "evidence": [],
+      "candidate_sha256": null
+    },
+    {
+      "id": "A24",
+      "requirement": "reconcilepaging/bounds/backwardsnotbeforeclock/terminalnorequeue",
+      "status": "NOT_RUN",
+      "evidence": [],
+      "candidate_sha256": null
+    },
+    {
+      "id": "A25",
+      "requirement": "workerPGadvisory2ndprocess/lockloss/stop/restart",
+      "status": "NOT_RUN",
+      "evidence": [],
+      "candidate_sha256": null
+    },
+    {
+      "id": "A26",
+      "requirement": "Riverschemadeploymentexplicit/pinned/upgradereadiness",
+      "status": "NOT_RUN",
+      "evidence": [],
+      "candidate_sha256": null
+    },
+    {
+      "id": "A27",
+      "requirement": "contentcompilerprior18unchanged/newrownegativefixtures",
+      "status": "NOT_RUN",
+      "evidence": [],
+      "candidate_sha256": null
+    },
+    {
+      "id": "A28",
+      "requirement": "genericAPIstartupoldpointerpreserved/explicitactivation/588jointgroup",
+      "status": "NOT_RUN",
+      "evidence": [],
+      "candidate_sha256": null
+    },
+    {
+      "id": "A29",
+      "requirement": "MAIL2producerinactive/368andbootstrapreadcanonicalnohintclaim",
+      "status": "NOT_RUN",
+      "evidence": [],
+      "candidate_sha256": null
+    },
+    {
+      "id": "A30",
+      "requirement": "existingGift/Friend/General/Guild/I4regression",
+      "status": "NOT_RUN",
+      "evidence": [],
+      "candidate_sha256": null
+    },
+    {
+      "id": "A31",
+      "requirement": "populated36neutralupgrade oldfacts/sequencesunchanged",
+      "status": "NOT_RUN",
+      "evidence": [],
+      "candidate_sha256": null
+    },
+    {
+      "id": "A32",
+      "requirement": "samebackupsourceroster/Mail/receipts/replay no duplicate",
+      "status": "NOT_RUN",
+      "evidence": [],
+      "candidate_sha256": null
+    },
+    {
+      "id": "A33",
+      "requirement": "partialrestorehole/knownproof conflicts/operatorboundary",
+      "status": "NOT_RUN",
+      "evidence": [],
+      "candidate_sha256": null
+    },
+    {
+      "id": "A34",
+      "requirement": "actualAPI+workerprocessstop/start realRiverrescue",
+      "status": "NOT_RUN",
+      "evidence": [],
+      "candidate_sha256": null
+    },
+    {
+      "id": "A35",
+      "requirement": "race/vet/architecture/query/static/sourceoracle/codec/fuzz",
+      "status": "NOT_RUN",
+      "evidence": [],
+      "candidate_sha256": null
+    },
+    {
+      "id": "A36",
+      "requirement": "exactcandidateHEAD/tree/snapshot/toolsourceidentityunchanged",
+      "status": "NOT_RUN",
+      "evidence": [],
+      "candidate_sha256": null
+    },
+    {
+      "id": "A37",
+      "requirement": "primaryindependent8Acode/source/contracts/realityscope review",
+      "status": "NOT_RUN",
+      "evidence": [],
+      "candidate_sha256": null
+    },
+    {
+      "id": "A38",
+      "requirement": "normalunacceptedpublicationpreflight+freshHOT/COLDsemanticnegativechecks",
+      "status": "NOT_RUN",
+      "evidence": [],
+      "candidate_sha256": null
+    }
+  ],
+  "stage_required_real_infrastructure": [
+    "PostgreSQL18.6",
+    "River0.47.0concreteproductionworker",
+    "canonicalGo1.27.1/offlinepins"
+  ],
+  "no_credit": "Researchmodels/static/source are notproduct runtime, no8Aacceptance; global10/E/W2 remainseparate."
+}

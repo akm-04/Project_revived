@@ -22,6 +22,7 @@ const (
 )
 
 var supportedCapabilities = [...]string{
+	"GUILD_BROADCAST_I7A8A",
 	"QUALIFIED_ORDINARY_STACK_ITEM_DEFINITIONS",
 	"SCALAR_CRYSTAL",
 	"SCALAR_MANA",
@@ -49,6 +50,7 @@ var supportedCapabilities = [...]string{
 }
 
 type Bundle struct {
+	guildBroadcastJSON                        []byte
 	socialGiftJSON                            []byte
 	emoticonsJSON                             []byte
 	manifest                                  builtin.Manifest
@@ -173,11 +175,16 @@ func LoadBuiltinBundle() (Bundle, error) {
 	if err != nil {
 		return Bundle{}, err
 	}
+	broadcast, err := builtin.GeneratedFile("guild_broadcast_policy.json")
+	if err != nil {
+		return Bundle{}, err
+	}
 	socialGift, err := builtin.GeneratedFile("social_gift_catalog.json")
 	if err != nil {
 		return Bundle{}, err
 	}
 	b := Bundle{
+		guildBroadcastJSON:                     append([]byte(nil), broadcast...),
 		socialGiftJSON:                         append([]byte(nil), socialGift...),
 		emoticonsJSON:                          append([]byte(nil), emoticons...),
 		manifest:                               cat.Manifest,
@@ -236,7 +243,7 @@ func (b Bundle) Validate() error {
 	if b.manifest.SchemaVersion != builtin.SchemaVersion {
 		return fmt.Errorf("content registry: unsupported bundle schema %d", b.manifest.SchemaVersion)
 	}
-	for name, raw := range map[string][]byte{"manifest": b.manifestJSON, "resources": b.resourcesJSON, "progression": b.progressionJSON, "functions": b.functionGatesJSON, "objectives": b.objectivesJSON, "hero-core": b.heroCoreJSON, "pet-core": b.petCoreJSON, "pet-acquisition": b.petAcquisitionJSON, "pet-progression": b.petProgressionJSON, "equipment-primitives": b.equipmentPrimitivesJSON, "hero-equipment": b.heroEquipmentJSON, "super-equipment": b.superEquipmentJSON, "hero-fumo": b.heroFumoJSON, "hero-promotion-restoration": b.heroPromotionRestorationJSON, "pet-equipment": b.petEquipmentJSON, "pet-promotion-restoration": b.petPromotionRestorationJSON, "practice": b.practiceJSON, "appearance": b.appearanceJSON, "emoticons": b.emoticonsJSON, "social-gift": b.socialGiftJSON} {
+	for name, raw := range map[string][]byte{"manifest": b.manifestJSON, "resources": b.resourcesJSON, "progression": b.progressionJSON, "functions": b.functionGatesJSON, "objectives": b.objectivesJSON, "hero-core": b.heroCoreJSON, "pet-core": b.petCoreJSON, "pet-acquisition": b.petAcquisitionJSON, "pet-progression": b.petProgressionJSON, "equipment-primitives": b.equipmentPrimitivesJSON, "hero-equipment": b.heroEquipmentJSON, "super-equipment": b.superEquipmentJSON, "hero-fumo": b.heroFumoJSON, "hero-promotion-restoration": b.heroPromotionRestorationJSON, "pet-equipment": b.petEquipmentJSON, "pet-promotion-restoration": b.petPromotionRestorationJSON, "practice": b.practiceJSON, "appearance": b.appearanceJSON, "emoticons": b.emoticonsJSON, "social-gift": b.socialGiftJSON, "guild-broadcast": b.guildBroadcastJSON} {
 		if len(raw) == 0 || !json.Valid(raw) {
 			return fmt.Errorf("content registry: invalid %s JSON", name)
 		}
@@ -247,6 +254,7 @@ func (b Bundle) Validate() error {
 	return nil
 }
 
+func (b Bundle) GuildBroadcastJSON() []byte { return append([]byte(nil), b.guildBroadcastJSON...) }
 func (b Bundle) SocialGiftJSON() []byte     { return append([]byte(nil), b.socialGiftJSON...) }
 func (b Bundle) EmoticonsJSON() []byte      { return append([]byte(nil), b.emoticonsJSON...) }
 func (b Bundle) RevisionID() string         { return b.manifest.RevisionID }
@@ -354,6 +362,7 @@ type ActiveSummary struct {
 }
 
 type Verification struct {
+	GuildBroadcastCount                       int64
 	EmoticonCount                             int64
 	Exact                                     bool
 	ResourceCount                             int64
@@ -380,7 +389,7 @@ type Verification struct {
 
 func (v Verification) Matches(b Bundle) bool {
 	r, p, f, o, h, pet, petAcquisition, petProgression, equipmentPrimitives, heroEquipment, superEquipment, heroFumoTargets, heroFumoMaterials, restorationEquipment, restorationFractions, restorationDenominations, petEquipment, petRestorationEquipment, practice, appearance := b.ExpectedCounts()
-	return v.Exact && v.EmoticonCount == 85 && v.ResourceCount == r && v.ProgressionCount == p && v.FunctionGateCount == f && v.ObjectiveCount == o && v.HeroCount == h && v.PetCount == pet && v.PetAcquisitionCount == petAcquisition && v.PetProgressionCount == petProgression && v.EquipmentPrimitiveCount == equipmentPrimitives && v.HeroEquipmentCount == heroEquipment && v.SuperEquipmentCount == superEquipment && v.HeroFumoTargetCount == heroFumoTargets && v.HeroFumoMaterialCount == heroFumoMaterials && v.HeroPromotionRestorationEquipmentCount == restorationEquipment && v.HeroPromotionRestorationFractionCount == restorationFractions && v.HeroPromotionRestorationDenominationCount == restorationDenominations && v.PetEquipmentCount == petEquipment && v.PetPromotionRestorationEquipmentCount == petRestorationEquipment && v.PracticeCount == practice && v.AppearanceCount == appearance
+	return v.GuildBroadcastCount == 1 && v.Exact && v.EmoticonCount == 85 && v.ResourceCount == r && v.ProgressionCount == p && v.FunctionGateCount == f && v.ObjectiveCount == o && v.HeroCount == h && v.PetCount == pet && v.PetAcquisitionCount == petAcquisition && v.PetProgressionCount == petProgression && v.EquipmentPrimitiveCount == equipmentPrimitives && v.HeroEquipmentCount == heroEquipment && v.SuperEquipmentCount == superEquipment && v.HeroFumoTargetCount == heroFumoTargets && v.HeroFumoMaterialCount == heroFumoMaterials && v.HeroPromotionRestorationEquipmentCount == restorationEquipment && v.HeroPromotionRestorationFractionCount == restorationFractions && v.HeroPromotionRestorationDenominationCount == restorationDenominations && v.PetEquipmentCount == petEquipment && v.PetPromotionRestorationEquipmentCount == petRestorationEquipment && v.PracticeCount == practice && v.AppearanceCount == appearance
 }
 
 // Repository is the canonical content-registry persistence port. It receives
@@ -405,6 +414,7 @@ type Repository interface {
 	InsertPetPromotionRestoration(context.Context, tx.Tx, Bundle) (int64, error)
 	InsertPractice(context.Context, tx.Tx, Bundle) (int64, error)
 	InsertAppearance(context.Context, tx.Tx, Bundle) (int64, error)
+	InsertGuildBroadcast(context.Context, tx.Tx, Bundle) (int64, error)
 	InsertSocialGift(context.Context, tx.Tx, Bundle) (int64, error)
 	InsertEmoticons(context.Context, tx.Tx, Bundle) (int64, error)
 	VerifyRevision(context.Context, tx.Queryer, Bundle) (Verification, error)
