@@ -14,7 +14,7 @@
     {
       "SPDXID": "SPDXRef-GXB",
       "name": "gxb-backend-v2",
-      "versionInfo": "v0.100.0",
+      "versionInfo": "v0.100.1",
       "downloadLocation": "NOASSERTION",
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
@@ -201,7 +201,7 @@
     {
       "SPDXID": "SPDXRef-Qualified-18",
       "name": "Go",
-      "versionInfo": "1.27.1",
+      "versionInfo": "1.27.2",
       "downloadLocation": "NOASSERTION",
       "licenseConcluded": "BSD-3-Clause",
       "licenseDeclared": "BSD-3-Clause",

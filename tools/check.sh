@@ -97,4 +97,4 @@ if [ "$failures" -ne 0 ]; then
   printf '\nFOUNDATION CHECK: RED (%d failing checks). Cumulative candidate or retained historical phase invariants are not green.\n' "$failures"
   exit 1
 fi
-printf '\nFOUNDATION CHECK: GREEN (Go %s compatibility run; pinned Go 1.27.1 and required live PostgreSQL/River/client gates remain separately authoritative).\n' "$(go version | awk '{print $3}')"
+printf '\nFOUNDATION CHECK: GREEN (Go %s compatibility run; pinned Go 1.27.2 and required live PostgreSQL/River/client gates remain separately authoritative).\n' "$(go version | awk '{print $3}')"

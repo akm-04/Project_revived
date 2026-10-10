@@ -22,7 +22,7 @@ def static_checks():
     print('CONNECTED CANDIDATE IDENTITY:', ident['algorithm'], ident['product_tree_digest_sha256'], 'files', ident['file_count_excluding_git'], 'snapshot_entries', snap['snapshot_entry_count'])
     gm=(ROOT/'go.mod').read_text()
     if 'go 1.26.0' not in gm: fail('W1-resolved module language floor go 1.26.0 missing')
-    if 'toolchain go1.27.1' not in gm: fail('toolchain go1.27.1 pin missing')
+    if 'toolchain go1.27.2' not in gm: fail('toolchain go1.27.2 pin missing')
     if not (ROOT/'go.sum').exists(): fail('go.sum missing')
     for mod in ('github.com/go-chi/chi/v5','github.com/jackc/pgx/v5','github.com/riverqueue/river'):
         if not re.search(rf'^{re.escape(mod)}\s+v[^\s]+\s+h1:',(ROOT/'go.sum').read_text(),re.M): fail(f'content checksum missing for {mod}')
@@ -61,7 +61,7 @@ def execute_checks():
     for n,c in tools.items():
         if shutil.which(c) is None: fail(f'{n} not found for --execute')
     gv=subprocess.check_output(['go','version'],text=True).strip()
-    if 'go1.27.1 ' not in gv: fail('exact Go 1.27.1 required for --execute, got '+gv)
+    if 'go1.27.2 ' not in gv: fail('exact Go 1.27.2 required for --execute, got '+gv)
     sv=subprocess.check_output(['sqlc','version'],text=True).strip()
     if '1.31.1' not in sv: fail('exact sqlc 1.31.1 required, got '+sv)
     with tempfile.TemporaryDirectory(prefix='gxb-connected-preseal-') as td:

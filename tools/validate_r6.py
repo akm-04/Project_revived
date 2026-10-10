@@ -112,7 +112,7 @@ if args.cumulative:
     if args.compat_scratch:
         need('go.mod')
     else:
-        need('go.mod','go 1.26.0','toolchain go1.27.1')
+        need('go.mod','go 1.26.0','toolchain go1.27.2')
     if not (R/'go.sum').exists():
         errs.append('current cumulative go.sum missing')
 

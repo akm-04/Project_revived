@@ -18,3 +18,5 @@ Notable review decisions:
 - goAMF3 v1.0.2: **not runtime-approved**. I2 may promote it only after captured corpus + Pass353 differential equivalence.
 
 Pass438 W1 resolved the tagged dependency closure under Go 1.27.1 and exposed packaging defects before stock execution. Pass440 commits that closure and adds a connected preseal validator. Pass440 captured the last normal-chat executable compatibility gate under Go 1.23.2 before Pass441 froze the W1-resolved `go 1.26.0` language floor. The exact Pass441 module therefore requires the Work Go 1.27.1 executable preseal; PostgreSQL 18.6, River, and stock runtime remain W1 proofs.
+
+Selected I7A-10 security repair: compiler/runtime patch pin Go 1.27.2 is approved by normal660; exact replacement qualification follows. Keep Go language floor 1.26.0 and all runtime module, PostgreSQL and River pins unchanged. Earlier Go 1.27.1 qualification above remains historical provenance. Seven current reachable-symbol standard-library advisories make the existing pinned security gate fail; physicalW2 remains deferred.

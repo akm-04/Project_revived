@@ -39,9 +39,9 @@ for rel in ['internal/application/i5','internal/adapters/postgres/i5store','inte
 gm=(R/'go.mod').read_text()
 compat_scratch=os.environ.get('GXB_COMPAT_SCRATCH')=='1'
 if not compat_scratch:
-    if 'go 1.26.0' not in gm or 'toolchain go1.27.1' not in gm:
+    if 'go 1.26.0' not in gm or 'toolchain go1.27.2' not in gm:
         errs.append('canonical Go language/toolchain pins drifted')
-    if (R/'.go-version').read_text().strip()!='1.27.1': errs.append('.go-version pin drifted')
+    if (R/'.go-version').read_text().strip()!='1.27.2': errs.append('.go-version pin drifted')
 if errs:
     print('R4D VALIDATION: FAIL')
     for e in errs: print(' -',e)
