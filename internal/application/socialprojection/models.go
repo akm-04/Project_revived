@@ -56,8 +56,10 @@ type Requested struct {
 	Relation socialrelation.FriendRequest
 }
 type Notified struct {
-	Player Player
-	Notice socialinbox.Notice
+	GuildID   int64
+	GuildName string
+	Player    Player
+	Notice    socialinbox.Notice
 }
 
 // ScanStats describes only this ephemeral attempt; it has no durable authority.

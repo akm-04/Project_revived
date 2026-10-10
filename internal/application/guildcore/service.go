@@ -11,9 +11,11 @@ import (
 	"time"
 
 	appgeneration "gxb.local/backend/v2/internal/application/generation"
+	appinvite "gxb.local/backend/v2/internal/application/guildinvite"
 	appi5 "gxb.local/backend/v2/internal/application/i5"
 	"gxb.local/backend/v2/internal/domain/economy"
 	"gxb.local/backend/v2/internal/domain/guild"
+	gi "gxb.local/backend/v2/internal/domain/guildinvite"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/policy"
@@ -57,17 +59,18 @@ func (e *CantJoinError) Error() string {
 func (e *CantJoinError) Unwrap() error { return ErrCantJoinGuild }
 
 type Service struct {
-	Timed          appgeneration.TimedRunner
-	Store          Store
-	Fencer         ActorFencer
-	PlayerRoots    PlayerRootLocker
-	Level          LevelReader
-	Scalar         ScalarDebiter
-	LevelAndScalar LevelAndScalarDebiter
-	Receipts       receipt.Store
-	ReceiptRead    receipt.Reader
-	Policy         PolicyBinding
-	Profile        tx.Profile
+	Timed            appgeneration.TimedRunner
+	Store            Store
+	Fencer           ActorFencer
+	PlayerRoots      PlayerRootLocker
+	Level            LevelReader
+	Scalar           ScalarDebiter
+	LevelAndScalar   LevelAndScalarDebiter
+	Receipts         receipt.Store
+	ReceiptRead      receipt.Reader
+	Policy           PolicyBinding
+	Profile          tx.Profile
+	InviteProjection *appinvite.SourceService
 }
 
 func DefaultProfile() tx.Profile {
@@ -132,6 +135,7 @@ type dynamicResolver struct {
 	id     receipt.Identity
 	fp     [32]byte
 	ready  bool
+	proof  func(context.Context) error
 }
 
 func (r *dynamicResolver) set(id receipt.Identity, fp [32]byte) { r.id = id; r.fp = fp; r.ready = true }
@@ -139,16 +143,35 @@ func (r *dynamicResolver) ResolveTimed(ctx context.Context, _ appgeneration.Time
 	if !r.ready {
 		return tx.Resolution{State: tx.ResolutionUnknown}, nil
 	}
-	return (receipt.Resolver{Reader: r.reader, Identity: r.id, Fingerprint: r.fp}).Resolve(ctx, tx.ResolutionRequest{})
+	resolved, err := (receipt.Resolver{Reader: r.reader, Identity: r.id, Fingerprint: r.fp}).Resolve(ctx, tx.ResolutionRequest{})
+	if err != nil {
+		return resolved, err
+	}
+	if resolved.State == tx.ResolutionCommitted && r.proof != nil {
+		if err := r.proof(ctx); err != nil {
+			return tx.Resolution{State: tx.ResolutionUnknown}, err
+		}
+	}
+	return resolved, nil
 }
 
 func (s Service) Create(ctx context.Context, actor identity.ActorContext, req CreateRequest, op operation.Context) (CreateResult, error) {
+	ctx, cancel := context.WithTimeout(ctx, s.profile().OperationTimeout)
+	defer cancel()
 	if err := s.validate(); err != nil {
 		return CreateResult{}, err
 	}
 	p := s.Policy.Policy
 	if !actor.PlayerID.Valid() || !actor.LogicalServerID.Valid() || !p.ValidName(req.Name) || !p.AllowsIcon(req.Icon) || req.IconFrame != 0 {
 		return CreateResult{}, ErrInvalidGuildPolicyInput
+	}
+	bound, err := bindGuildPolicy(op, s.Policy.Revision)
+	if err != nil {
+		return CreateResult{}, err
+	}
+	bound, projected, err := s.admitInviteProjection(ctx, bound)
+	if err != nil {
+		return CreateResult{}, err
 	}
 	// Stock Create has no client operation nonce. A read-only convergence fast
 	// path handles the common post-commit retry without allocating another Guild.
@@ -159,6 +182,11 @@ func (s Service) Create(ctx context.Context, actor identity.ActorContext, req Cr
 		if g, gok, err := s.Store.ReadGuild(ctx, existing.GuildID); err != nil {
 			return CreateResult{}, err
 		} else if gok && g.RetiredAt == nil && existing.Role == guild.Leader && g.LogicalServerID == actor.LogicalServerID && g.Name == req.Name && g.Icon == req.Icon && g.IconFrame == req.IconFrame {
+			if s.InviteProjection != nil {
+				if err := s.validateMembershipProjectionTx(ctx, s.InviteProjection.Queryer, existing); err != nil {
+					return CreateResult{}, err
+				}
+			}
 			return CreateResult{GuildID: int64(g.ID), Role: int16(existing.Role), Replayed: true}, nil
 		}
 		return CreateResult{}, ErrAlreadyInGuild
@@ -167,10 +195,7 @@ func (s Service) Create(ctx context.Context, actor identity.ActorContext, req Cr
 	if err != nil {
 		return CreateResult{}, err
 	}
-	bound, err := bindGuildPolicy(op, s.Policy.Revision)
-	if err != nil {
-		return CreateResult{}, err
-	}
+
 	var out CreateResult
 	resolver := &dynamicResolver{reader: s.ReceiptRead}
 	_, _, err = s.Timed.Run(ctx, bound, s.profile(), tx.Options{Isolation: tx.Serializable}, tx.RetryPolicy{MaxAttempts: 3, RetryDefiniteAbort: true, AllowReplayAfterAuthoritativeNegative: false}, resolver, func(txctx context.Context, scope appgeneration.TimedScope) error {
@@ -195,11 +220,13 @@ func (s Service) Create(ctx context.Context, actor identity.ActorContext, req Cr
 			return err
 		}
 		g := guild.Guild{ID: gid, LogicalServerID: actor.LogicalServerID, Name: req.Name, Icon: req.Icon, IconFrame: req.IconFrame, Description: "", ApplyType: guild.ApplyByApplication, MinAllowLevel: p.JoinLevelMin, Vitality: p.InitialVitality, PolicyRevision: s.Policy.Revision, StateVersion: 1, CreatedAt: at, UpdatedAt: at}
-		// Create the new Guild root (rank 310) before crossing the I4 player-root
-		// fence (315) and GuildMembership (320). If a concurrent membership won
-		// the player root first, this whole speculative Guild row rolls back.
-		if err := s.Store.InsertGuildTx(txctx, scope.Tx, g); err != nil {
-			return err
+		// Legacy profile retains its speculative fresh310 insertion. Qualified
+		// profile prepares allocator-backed fresh310 absence,315/320/330/350
+		// before inserting the Guild and membership under that complete plan.
+		if !projected {
+			if err := s.Store.InsertGuildTx(txctx, scope.Tx, g); err != nil {
+				return err
+			}
 		}
 		if _, err := s.PlayerRoots.LockPlayerRootsTx(txctx, scope.Tx, actor.LogicalServerID, []identity.PlayerID{actor.PlayerID}); err != nil {
 			return err
@@ -227,6 +254,22 @@ func (s Service) Create(ctx context.Context, actor identity.ActorContext, req Cr
 			out.Replayed = true
 			return nil
 		}
+		var plan appinvite.MarkerPlan
+		if projected {
+			if err := s.InviteProjection.Bindings.PrepareMembershipCleanupTx(txctx, scope.Tx, actor.PlayerID); err != nil {
+				return err
+			}
+			plan, err = s.InviteProjection.PrepareMarkerTx(txctx, scope.Tx, g, actor, actor.PlayerID, gi.Join, bound, at)
+			if err != nil {
+				return err
+			}
+			s.bindProjectionResolver(resolver, bound.ID, false)
+			// Fresh310 absence is fenced by allocator300 and unique Guild identity;
+			// this INSERT is an effect under the already prepared complete lower plan.
+			if err := s.Store.InsertGuildTx(txctx, scope.Tx, g); err != nil {
+				return err
+			}
+		}
 		m := guild.Membership{PlayerID: actor.PlayerID, GuildID: gid, Role: guild.Leader, JoinedAt: at, MembershipVersion: 1, StateVersion: 1, UpdatedAt: at}
 		if err := s.Store.InsertMembershipTx(txctx, scope.Tx, m); err != nil {
 			return err
@@ -238,7 +281,8 @@ func (s Service) Create(ctx context.Context, actor identity.ActorContext, req Cr
 			return err
 		}
 		ev := guild.MembershipEvent{PlayerID: actor.PlayerID, GuildID: gid, Kind: guild.EventJoin, OccurredAt: at, ActorPlayerID: actor.PlayerID, PolicyRevision: s.Policy.Revision}
-		if err := s.Store.AppendMembershipEventTx(txctx, scope.Tx, ev, bound.ID); err != nil {
+		ev, err = s.appendProjectionEventTx(txctx, scope.Tx, ev, bound.ID, projected)
+		if err != nil {
 			return err
 		}
 		if err := s.Store.AppendAuditTx(txctx, scope.Tx, gid, "CREATE", actor.PlayerID, actor.PlayerID, at, s.Policy.Revision, bound.ID, "{}"); err != nil {
@@ -265,13 +309,21 @@ func (s Service) Create(ctx context.Context, actor identity.ActorContext, req Cr
 		rr.ActorAccountUID = string(actor.AccountUID)
 		rr.ContextID = actor.ContextID.UUID()
 		rr.PolicyVersion = s.Policy.Revision
-		_, err = s.Receipts.PutTx(txctx, scope.Tx, rr)
-		return err
+		stored, err := s.Receipts.PutTx(txctx, scope.Tx, rr)
+		if err != nil {
+			return err
+		}
+		if projected {
+			return s.InviteProjection.ApplyMarkerTx(txctx, scope.Tx, plan, ev, stored.Receipt)
+		}
+		return nil
 	})
 	return out, err
 }
 
 func (s Service) ApplyOrJoin(ctx context.Context, actor identity.ActorContext, gid guild.ID, op operation.Context) (ApplyResult, error) {
+	ctx, cancel := context.WithTimeout(ctx, s.profile().OperationTimeout)
+	defer cancel()
 	if err := s.validate(); err != nil {
 		return ApplyResult{}, err
 	}
@@ -279,6 +331,10 @@ func (s Service) ApplyOrJoin(ctx context.Context, actor identity.ActorContext, g
 		return ApplyResult{}, ErrGuildNotFound
 	}
 	bound, err := bindGuildPolicy(op, s.Policy.Revision)
+	if err != nil {
+		return ApplyResult{}, err
+	}
+	bound, projected, err := s.admitInviteProjection(ctx, bound)
 	if err != nil {
 		return ApplyResult{}, err
 	}
@@ -313,6 +369,9 @@ func (s Service) ApplyOrJoin(ctx context.Context, actor identity.ActorContext, g
 			return err
 		} else if has {
 			if m.GuildID == gid {
+				if err := s.validateMembershipProjectionTx(txctx, scope.Tx, m); err != nil {
+					return err
+				}
 				out = ApplyResult{GuildID: int64(gid), Joined: true, Replayed: true}
 				return nil
 			}
@@ -431,12 +490,24 @@ func (s Service) ApplyOrJoin(ctx context.Context, actor identity.ActorContext, g
 				out.Replayed = true
 				return nil
 			}
+			var plan appinvite.MarkerPlan
+			if projected {
+				if err := s.InviteProjection.Bindings.PrepareMembershipCleanupTx(txctx, scope.Tx, actor.PlayerID); err != nil {
+					return err
+				}
+				plan, err = s.InviteProjection.PrepareMarkerTx(txctx, scope.Tx, g, actor, actor.PlayerID, gi.Join, bound, at)
+				if err != nil {
+					return err
+				}
+				s.bindProjectionResolver(resolver, bound.ID, false)
+			}
 			m := guild.Membership{PlayerID: actor.PlayerID, GuildID: gid, Role: guild.Member, JoinedAt: at, MembershipVersion: 1, StateVersion: 1, UpdatedAt: at}
 			if err := s.Store.InsertMembershipTx(txctx, scope.Tx, m); err != nil {
 				return err
 			}
 			ev := guild.MembershipEvent{PlayerID: actor.PlayerID, GuildID: gid, Kind: guild.EventJoin, OccurredAt: at, ActorPlayerID: actor.PlayerID, PolicyRevision: s.Policy.Revision}
-			if err := s.Store.AppendMembershipEventTx(txctx, scope.Tx, ev, bound.ID); err != nil {
+			ev, err = s.appendProjectionEventTx(txctx, scope.Tx, ev, bound.ID, projected)
+			if err != nil {
 				return err
 			}
 			if err := s.Store.DeleteApplicationsForPlayerTx(txctx, scope.Tx, actor.PlayerID); err != nil {
@@ -461,8 +532,14 @@ func (s Service) ApplyOrJoin(ctx context.Context, actor identity.ActorContext, g
 			rr.ActorAccountUID = string(actor.AccountUID)
 			rr.ContextID = actor.ContextID.UUID()
 			rr.PolicyVersion = s.Policy.Revision
-			_, err = s.Receipts.PutTx(txctx, scope.Tx, rr)
-			return err
+			stored, err := s.Receipts.PutTx(txctx, scope.Tx, rr)
+			if err != nil {
+				return err
+			}
+			if projected {
+				return s.InviteProjection.ApplyMarkerTx(txctx, scope.Tx, plan, ev, stored.Receipt)
+			}
+			return nil
 		default:
 			return ErrGuildClosed
 		}

@@ -35,10 +35,12 @@ type Request struct {
 	At      int64  `json:"request_time"`
 }
 type Notice struct {
-	ID     int64  `json:"notice_id"`
-	Type   int16  `json:"notice_type"`
-	At     int64  `json:"notice_time"`
-	Player Common `json:"player_info"`
+	GuildID   *int64  `json:"guild_id,omitempty"`
+	GuildName *string `json:"guild_name,omitempty"`
+	ID        int64   `json:"notice_id"`
+	Type      int16   `json:"notice_type"`
+	At        int64   `json:"notice_time"`
+	Player    Common  `json:"player_info"`
 }
 type PrivateMessage struct {
 	PlayerID int64  `json:"player_id"`
@@ -83,7 +85,13 @@ func MapBase(r Result) Base {
 		v.Requests = append(v.Requests, Request{Common: common(p.Player), Message: p.Message, At: p.At.Unix()})
 	}
 	for _, p := range r.Notices {
-		v.Notices = append(v.Notices, Notice{ID: int64(p.ID), Type: p.Type, At: p.At.Unix(), Player: common(p.Player)})
+		row := Notice{ID: int64(p.ID), Type: p.Type, At: p.At.Unix(), Player: common(p.Player)}
+		if p.Type == 10 {
+			gid, name := p.GuildID, p.GuildName
+			row.GuildID = &gid
+			row.GuildName = &name
+		}
+		v.Notices = append(v.Notices, row)
 	}
 	return v
 }

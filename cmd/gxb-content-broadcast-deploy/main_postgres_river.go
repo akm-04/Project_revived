@@ -74,7 +74,7 @@ func deploy() error {
 		if e2 != nil {
 			return e2
 		}
-		_, e = service.ActivateBuiltin(c, op, bundle, current.Activation, "i7a8a-guild-broadcast-owner")
+		_, e = service.ActivateBuiltin(c, op, bundle, current.Activation, "i7a8-guild-broadcast-invite-owner")
 	}
 	if e != nil {
 		return e

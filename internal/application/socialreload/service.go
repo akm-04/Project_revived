@@ -22,7 +22,11 @@ type Intent struct {
 type GiftReloadReader interface {
 	ValidateReloadTx(context.Context, tx.Queryer, socialreloadref.ReloadReference) (bool, error)
 }
+type InviteReloadReader interface {
+	PrepareInviteReloadTx(context.Context, tx.Queryer, socialreloadref.ReloadReference) (socialreloadref.InviteObservation, bool, error)
+}
 type Service struct {
+	Invites   InviteReloadReader
 	Gifts     GiftReloadReader
 	Runner    tx.Runner
 	Relations sr.ReloadReader
@@ -50,7 +54,21 @@ func (s Service) Reload(ctx context.Context, r sr.ReloadReference, op operation.
 		if root.PlayerID != r.Recipient || root.Validate() != nil {
 			return sr.ErrInvalidState
 		}
-		if r.Purpose == socialreloadref.ReloadGiftSenderList || r.Purpose == socialreloadref.ReloadGiftRecipientNotice {
+		var invite socialreloadref.InviteObservation
+		isInvite := r.Purpose == socialreloadref.ReloadInviteMaterialized || r.Purpose == socialreloadref.ReloadInviteInvalidated
+		if isInvite {
+			if s.Invites == nil {
+				return sr.ErrInvalidState
+			}
+			var ready bool
+			invite, ready, e = s.Invites.PrepareInviteReloadTx(ctx, scope.Tx, r)
+			if e != nil {
+				return e
+			}
+			if !ready {
+				return nil
+			}
+		} else if r.Purpose == socialreloadref.ReloadGiftSenderList || r.Purpose == socialreloadref.ReloadGiftRecipientNotice {
 			if s.Gifts == nil {
 				return sr.ErrInvalidState
 			}
@@ -94,6 +112,15 @@ func (s Service) Reload(ctx context.Context, r sr.ReloadReference, op operation.
 		}
 		if at.IsZero() {
 			return sr.ErrInvalidState
+		}
+		if isInvite {
+			eligible, e := invite.ValidAt(at)
+			if e != nil {
+				return e
+			}
+			if !eligible {
+				return nil
+			}
 		}
 		value = Intent{Recipient: r.Recipient, Purpose: r.Purpose, ObservedAt: at}
 		valid = true

@@ -65,6 +65,50 @@ func (TransactionReader) ReadManyTx(ctx context.Context, t tx.Tx, ids []identity
 	return out, nil
 }
 
+func (TransactionReader) ReadManyAtTx(ctx context.Context, t tx.Tx, ids []identity.PlayerID, observed time.Time) (playerpresentation.Batch, error) {
+	out := playerpresentation.Batch{Players: make(map[identity.PlayerID]playerpresentation.Projected)}
+	if t == nil || observed.IsZero() {
+		return out, errors.New("nil presentation transaction")
+	}
+	if len(ids) == 0 {
+		out.ObservedAt = observed.UTC()
+		return out, nil
+	}
+	ordered, err := playerroot.CanonicalPlayerIDs(ids)
+	if err != nil {
+		return out, err
+	}
+	minimal := playerpresentation.Service{Directory: i4store.PlayerDirectoryReader{Queryer: t}, Types: i5store.Store{Queryer: t}}
+	for _, pid := range ordered {
+		value, ok, err := minimal.Read(ctx, pid)
+		if err != nil {
+			return out, err
+		}
+		if !ok || value.PlayerID != pid {
+			return out, playerpresentation.ErrMissingPresentation
+		}
+		out.Players[pid] = playerpresentation.Projected{Minimal: value}
+	}
+	presence, err := (presencestore.Store{Queryer: t}).ReadManyAt(ctx, ordered, observed)
+	if err != nil {
+		return out, err
+	}
+	for _, pid := range ordered {
+		value := out.Players[pid]
+		obs, ok := presence[pid]
+		if !ok {
+			return out, playerpresentation.ErrMissingPresentation
+		}
+		value.Presence = obs
+		if err := value.Validate(pid); err != nil {
+			return out, err
+		}
+		out.Players[pid] = value
+	}
+	out.ObservedAt = observed.UTC()
+	return out, nil
+}
+
 var _ playerpresentation.TxReader = TransactionReader{}
 
 func (TransactionReader) ObserveTx(ctx context.Context, t tx.Tx) (time.Time, error) {
@@ -75,3 +119,5 @@ func (TransactionReader) ObserveTx(ctx context.Context, t tx.Tx) (time.Time, err
 }
 
 var _ playerpresentation.TxObserver = TransactionReader{}
+
+var _ playerpresentation.TxReaderAt = TransactionReader{}

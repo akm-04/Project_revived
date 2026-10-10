@@ -155,11 +155,12 @@ func (c Content) Compatible(t Transfer) bool {
 }
 
 type Result struct {
-	NoticeIDs      []socialinbox.NoticeID `json:"notice_ids"`
-	TransferIDs    []string               `json:"transfer_ids"`
-	GrantReceiptID string                 `json:"grant_receipt_id,omitempty"`
-	Amount         int64                  `json:"amount"`
-	Revision       string                 `json:"revision"`
+	OperationStartedAtExact string                 `json:"operation_started_at_exact,omitempty"`
+	NoticeIDs               []socialinbox.NoticeID `json:"notice_ids"`
+	TransferIDs             []string               `json:"transfer_ids"`
+	GrantReceiptID          string                 `json:"grant_receipt_id,omitempty"`
+	Amount                  int64                  `json:"amount"`
+	Revision                string                 `json:"revision"`
 }
 type ClaimOperation struct {
 	ID                    ids.UUID

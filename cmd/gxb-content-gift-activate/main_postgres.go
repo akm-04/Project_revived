@@ -31,6 +31,15 @@ func main() {
 	if e != nil {
 		log.Fatal(e)
 	}
+	manifest, e := registry.DecodeManifestStrict(b.ManifestJSON())
+	if e != nil {
+		log.Fatal(e)
+	}
+	for _, capability := range manifest.EnabledCapabilities {
+		if capability == "GUILD_INVITE_PRESENTATION_I7A8B" {
+			log.Fatal("This catalog requires gxb-content-broadcast-deploy with the pinned River build, which prepares the complete phase8 bundle before activation.")
+		}
+	}
 	factory := operation.Factory{Clock: clock.System{}}
 	op, e := factory.New(policy.Set{})
 	if e != nil {

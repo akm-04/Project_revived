@@ -22,15 +22,17 @@ type GiftReader interface {
 	GiftNoticeValidityTx(context.Context, tx.Queryer, identity.PlayerID, []socialinbox.Notice) (map[socialinbox.NoticeID]bool, error)
 }
 type Service struct {
-	Gifts        GiftReader
-	NoticePages  socialinbox.NoticePageReader
-	Runner       tx.Runner
-	PlayerRoots  playerroot.TxLocker
-	Relations    socialrelation.ProjectionReader
-	Inbox        socialinbox.RelationWindowReader
-	Directory    playerdirectory.TxDiscoveryReader
-	Presentation playerpresentation.TxReader
-	Observer     playerpresentation.TxObserver
+	Invites        socialinbox.InviteNoticeReader
+	PresentationAt playerpresentation.TxReaderAt
+	Gifts          GiftReader
+	NoticePages    socialinbox.NoticePageReader
+	Runner         tx.Runner
+	PlayerRoots    playerroot.TxLocker
+	Relations      socialrelation.ProjectionReader
+	Inbox          socialinbox.RelationWindowReader
+	Directory      playerdirectory.TxDiscoveryReader
+	Presentation   playerpresentation.TxReader
+	Observer       playerpresentation.TxObserver
 }
 
 func DefaultReadProfile() tx.Profile {
@@ -158,6 +160,8 @@ func (s Service) loadTx(c context.Context, t tx.Tx, a identity.ActorContext, k L
 	requests := []socialrelation.FriendRequest{}
 	notices := []socialinbox.Notice{}
 	var e error
+	var prepared inviteWindow
+	var observed time.Time
 	if hasRoot {
 		if k == 0 || k == Friend {
 			friends, e = s.Relations.ActiveFriendsTx(c, t, a.PlayerID)
@@ -178,11 +182,28 @@ func (s Service) loadTx(c context.Context, t tx.Tx, a identity.ActorContext, k L
 			}
 		}
 		if k == 0 || k == Notice {
-			if s.Gifts != nil {
+			if s.Invites != nil {
+				prepared, e = s.prepareInviteWindow(c, t, a.PlayerID)
+			} else if s.Gifts != nil {
 				notices, e = s.qualifiedWindow(c, t, a.PlayerID)
 			} else {
 				notices, e = s.Inbox.RelationWindowTx(c, t, a.PlayerID)
 			}
+			if e != nil {
+				return Result{}, e
+			}
+		}
+	}
+	if s.Invites != nil {
+		if s.PresentationAt == nil {
+			return Result{}, ErrInvalidRead
+		}
+		observed, e = s.Observer.ObserveTx(c, t)
+		if e != nil || observed.IsZero() {
+			return Result{}, ErrInvalidRead
+		}
+		if hasRoot && (k == 0 || k == Notice) {
+			notices, e = prepared.selectAt(observed)
 			if e != nil {
 				return Result{}, e
 			}
@@ -202,7 +223,7 @@ func (s Service) loadTx(c context.Context, t tx.Tx, a identity.ActorContext, k L
 		return Result{}, ErrInvalidRead
 	}
 	for i, n := range notices {
-		if !n.NoticeID.WireSafe() || n.Validate() != nil || (n.Source.Kind != socialinbox.GiftSourceKind && socialinbox.ValidateRelationDescriptor(n) != nil) || n.RecipientPlayerID != a.PlayerID || !n.Active || !n.RelatedPlayerID.Valid() {
+		if !n.NoticeID.WireSafe() || n.Validate() != nil || (n.Source.Kind != socialinbox.GiftSourceKind && !socialinbox.InviteFamily(n.Source) && socialinbox.ValidateRelationDescriptor(n) != nil) || n.RecipientPlayerID != a.PlayerID || !n.Active || !n.RelatedPlayerID.Valid() {
 			return Result{}, ErrInvalidRead
 		}
 		if i > 0 && (n.NoticeTime.After(notices[i-1].NoticeTime) || n.NoticeTime.Equal(notices[i-1].NoticeTime) && n.NoticeID >= notices[i-1].NoticeID) {
@@ -219,7 +240,12 @@ func (s Service) loadTx(c context.Context, t tx.Tx, a identity.ActorContext, k L
 			prev = id
 		}
 	}
-	b, e := s.present(c, t, ids)
+	var b playerpresentation.Batch
+	if s.Invites != nil {
+		b, e = s.presentAt(c, t, ids, observed)
+	} else {
+		b, e = s.present(c, t, ids)
+	}
 	if e != nil {
 		return Result{}, e
 	}
@@ -253,7 +279,12 @@ func (s Service) loadTx(c context.Context, t tx.Tx, a identity.ActorContext, k L
 		out.Requests = append(out.Requests, Requested{Player: Player{Presentation: b.Players[req.RequesterPlayerID]}, Relation: req})
 	}
 	for _, n := range notices {
-		out.Notices = append(out.Notices, Notified{Player: Player{Presentation: b.Players[n.RelatedPlayerID]}, Notice: n})
+		value := Notified{Player: Player{Presentation: b.Players[n.RelatedPlayerID]}, Notice: n}
+		if snap, ok := prepared.invites[n.NoticeID]; ok {
+			value.GuildID = int64(snap.Issue.Tuple.GuildID)
+			value.GuildName = snap.Issue.GuildName
+		}
+		out.Notices = append(out.Notices, value)
 	}
 	return out, nil
 }
@@ -469,4 +500,32 @@ func (s Service) Recommend(c context.Context, a identity.ActorContext, op operat
 		}
 		return out, nil
 	})
+}
+
+func (s Service) presentAt(c context.Context, t tx.Tx, ids []identity.PlayerID, at time.Time) (playerpresentation.Batch, error) {
+	unique := []identity.PlayerID{}
+	seen := map[identity.PlayerID]bool{}
+	for _, id := range ids {
+		if supported(id) != nil {
+			return playerpresentation.Batch{}, ErrInvalidRead
+		}
+		if !seen[id] {
+			seen[id] = true
+			unique = append(unique, id)
+		}
+	}
+	b, e := s.PresentationAt.ReadManyAtTx(c, t, unique, at)
+	if e != nil {
+		return b, e
+	}
+	if b.ObservedAt != at || len(b.Players) != len(unique) {
+		return b, ErrInvalidRead
+	}
+	for _, id := range unique {
+		p, ok := b.Players[id]
+		if !ok || p.Validate(id) != nil {
+			return b, playerpresentation.ErrMissingPresentation
+		}
+	}
+	return b, nil
 }

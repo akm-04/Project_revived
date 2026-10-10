@@ -251,6 +251,13 @@ func (Store) ReadClaim(c context.Context, q tx.Queryer, id ids.UUID) (sg.ClaimOp
 	}
 	u, e := ids.ParseUUID(w.ID)
 	v := sg.ClaimOperation{ID: u, Recipient: w.Recipient, Fingerprint: w.Fingerprint, StartedAt: w.StartedAt.UTC(), DecisionAt: w.DecisionAt.UTC(), Day: w.Day, Revision: w.Revision, Result: w.Result}
+	if v.Result.OperationStartedAtExact != "" {
+		exact, err := time.Parse(time.RFC3339Nano, v.Result.OperationStartedAtExact)
+		if err != nil || exact.Location() != time.UTC || exact.Format(time.RFC3339Nano) != v.Result.OperationStartedAtExact || exact.UnixMicro() != v.StartedAt.UnixMicro() {
+			return v, false, sg.ErrConflict
+		}
+		v.StartedAt = exact
+	}
 	if e != nil || u != id || w.Policy != sg.ClaimPolicy || !w.CreatedAt.Equal(w.DecisionAt) || w.Grant != w.Result.GrantReceiptID {
 		return v, false, sg.ErrConflict
 	}

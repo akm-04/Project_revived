@@ -43,3 +43,9 @@ type TxReader interface {
 type TxObserver interface {
 	ObserveTx(context.Context, tx.Tx) (time.Time, error)
 }
+
+// TxReaderAt uses an already captured response instant. This additive seam
+// leaves the original empty ReadManyTx behavior unchanged.
+type TxReaderAt interface {
+	ReadManyAtTx(context.Context, tx.Tx, []identity.PlayerID, time.Time) (Batch, error)
+}

@@ -5,6 +5,7 @@ package socialreloadref
 import (
 	"errors"
 	"gxb.local/backend/v2/internal/application/socialinbox"
+	gi "gxb.local/backend/v2/internal/domain/guildinvite"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/ids"
 	"math"
@@ -30,19 +31,32 @@ const (
 	ReloadDelete
 	ReloadGiftRecipientNotice
 	ReloadGiftSenderList
+	ReloadInviteMaterialized
+	ReloadInviteInvalidated
 )
 
 // ReloadReference identifies committed owner state, never authoritative wire data.
 type ReloadReference struct {
-	Recipient, Actor identity.PlayerID
-	RootVersion      int64
-	Purpose          ReloadPurpose
-	First, Second    identity.PlayerID
-	Generation       int64
-	TransferID       ids.UUID
+	Recipient, Actor   identity.PlayerID
+	RootVersion        int64
+	Purpose            ReloadPurpose
+	First, Second      identity.PlayerID
+	Generation         int64
+	SourceID, MarkerID ids.UUID
+	TransferID         ids.UUID
 }
 
 func (r ReloadReference) Validate() error {
+	if r.Purpose == ReloadInviteMaterialized || r.Purpose == ReloadInviteInvalidated {
+		if canonical(r.Recipient) != nil || canonical(r.Actor) != nil || r.RootVersion < 1 || r.SourceID.IsZero() || r.First != 0 || r.Second != 0 || r.Generation != 0 || !r.TransferID.IsZero() || r.Purpose == ReloadInviteMaterialized && (!r.MarkerID.IsZero() || r.Actor == r.Recipient) || r.Purpose == ReloadInviteInvalidated && r.MarkerID.IsZero() {
+			return ErrInvalidState
+		}
+		return nil
+	}
+	if !r.SourceID.IsZero() || !r.MarkerID.IsZero() {
+		return ErrInvalidState
+	}
+
 	if r.Purpose == ReloadGiftRecipientNotice || r.Purpose == ReloadGiftSenderList {
 		if canonical(r.Recipient) != nil || canonical(r.Actor) != nil || r.Recipient == r.Actor || r.RootVersion < 1 || r.TransferID.IsZero() || r.First != 0 || r.Second != 0 || r.Generation != 0 {
 			return ErrInvalidState
@@ -86,4 +100,25 @@ func (r ReloadReference) NoticeSource() (socialinbox.SourceKey, error) {
 	}
 	n, e := (socialinbox.RelationTransition{Event: ev, First: r.First, Second: r.Second, Generation: r.Generation, Actor: r.Actor, Recipient: r.Recipient, At: time.Unix(1, 0)}).Descriptor()
 	return n.Source, e
+}
+
+// InviteObservation is prepared by the typed source/target owner before the
+// response clock. Evaluation after Observe performs no owner query.
+type InviteObservation struct {
+	Snapshot             gi.Snapshot
+	Active, Invalidation bool
+}
+
+func (v InviteObservation) ValidAt(at time.Time) (bool, error) {
+	eligible, e := v.Snapshot.Eligible(at)
+	if e != nil {
+		return false, e
+	}
+	if v.Snapshot.CurrentGeneration != 0 && v.Snapshot.CurrentGeneration != v.Snapshot.Issue.Tuple.Generation {
+		return false, nil
+	}
+	if v.Invalidation {
+		return true, nil
+	}
+	return eligible && v.Active, nil
 }

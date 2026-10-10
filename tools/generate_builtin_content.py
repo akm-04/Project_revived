@@ -21,12 +21,16 @@ from pathlib import Path
 from typing import Any, Iterable
 
 SCHEMA_VERSION = 1
-COMPILER_VERSION = "i7a8a-guild-broadcast"
-PARSER_VERSION = "lua-generated-v17-guild-broadcast"
+COMPILER_VERSION = "i7a8b-guild-invite"
+PARSER_VERSION = "lua-generated-v18-guild-invite"
 EXPECTED_SOURCE_ARCHIVE_SHA256 = "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
 SOURCE_PREFIX = "app-assets/output/assets/src_64/"
 
 SOURCE_MANIFEST = [
+    ("app/model/SelfGuild.lua", "c744e6f256a796a98613911372c1821b3e02f21d38480184df9c095373bd64f9", "I7A8B_CLIENT_ACCEPT_MID_LINK"),
+    ("app/model/SocialSystem.lua", "ec5bea26bbdcbb67ca2ea80ab5ad7e9fb53ee613a3ffcbb13ae5dfef9ddf0502", "I7A8B_CLIENT_PRESENTATION_DISMISS_MID_LINK"),
+    ("app/windows/SocialSystemWindow.lua", "5d0c3e1e20d69b7009ff52bf94ad438c6a133c8b099301d951bd1e413b90f112", "I7A8B_TYPE10_ACCEPT_AND_PRESENTATION_DISMISS_CLIENT_STATIC"),
+    ("app/common/network/mid.lua", "026a20b29d97624979777a68c64c749254031604057ff42aa8f8254c3e35b5af", "I7A8B_FINITE_STOCK_CONSUMER_MID_IDENTITY"),
     ("app/windows/TeamMessageWindow.lua", "fe5732defb999617d38bb63e94aab355ccefaf567ab87c4506657e021095a085", "I7A8A_STOCK588_TITLE_CONTENT_BOUNDARIES"),
     ('data/tables/friend_dailygift.lua', 'b350a14dab62799dcca37dddde370bd86ed78f1745f01483d0bce065062cf707', 'I7A7A_DAILY_GIFT_EQUIVALENCE'),
     ('data/tables/gift.lua', '8c87dfdc116242afcdebd011cf898d61b08e2cf54ea7d0a11a5f69fabade2ac7', 'I7A7A_COMPLETE_REWARD_VECTOR'),
@@ -93,6 +97,7 @@ SOURCE_MANIFEST = [
 
 ENABLED_CAPABILITIES = [
     "GUILD_BROADCAST_I7A8A",
+    "GUILD_INVITE_PRESENTATION_I7A8B",
     "QUALIFIED_ORDINARY_STACK_ITEM_DEFINITIONS",
     "SCALAR_CRYSTAL",
     "SCALAR_MANA",
@@ -1774,7 +1779,42 @@ def build_artifacts(blobs: dict[str, SourceBlob], archive_sha256: str) -> dict[s
         "mail_namespace":"NORMAL","mail_category":0,
         "mail_platform":"ANY","mail_shown":True,"attachments":False,"expiry":False
     }
+    # Exact source client structure supports the finite wire family only.
+    # Lifetime/cursor/name/eligibility/restore behavior below is reconstruction
+    # policy selected by whole8B design, not original server facts.
+    enums=blobs["app/common/enums.lua"].data.decode("utf-8")
+    mids=blobs["app/common/network/mid.lua"].data.decode("utf-8")
+    window=blobs["app/windows/SocialSystemWindow.lua"].data.decode("utf-8")
+    if not re.search(r"GUILD_INVITE\s*=\s*10",enums) or any(not re.search(r"\b"+name+r"\s*=\s*"+str(number)+r"\b",mids) for name,number in [("INVITE_TO_GUILD",2563),("ACCEPT_INVITE_TO_GUILD",2564),("READ_NOTICE",184),("LOAD_FRIENDS",176),("LOAD_FRIEND_INFO",189)]):
+        raise CompileError("I7A8B finite client enum/MID identity drift")
+    if any(token not in window for token in ["createGuildInviteItemContent","guild_name","guild_id","acceptInviteToGuild","readNotice"]):
+        raise CompileError("I7A8B client type10 accept/dismiss consumer drift")
+    guild_model=blobs["app/model/SelfGuild.lua"].data.decode("utf-8")
+    social_model=blobs["app/model/SocialSystem.lua"].data.decode("utf-8")
+    if "acceptInviteToGuild" not in guild_model or "ACCEPT_INVITE_TO_GUILD" not in guild_model or "readNotice" not in social_model or "READ_NOTICE" not in social_model:
+        raise CompileError("I7A8B model-to-MID consumer link drift")
+    invite_artifact={
+        "schema_version":1,"policy_id":"GUILD_INVITE_PRESENTATION_V1",
+        "guild_core_revision":"0c74f31996a5cc3290a63541814495f5e830cbd5a56a1554e99cf66071a2b963",
+        "notice_type":10,"source_identity":"guild_id:recipient_player_id:invite_generation",
+        "expiry_policy":"GUILD_INVITE_STRICT_EXPIRY_V1",
+        "generation_policy":"GUILD_INVITE_RETAINED_PAIR_CURSOR_V1",
+        "join_policy":"GUILD_INVITE_JOIN_BOUNDARY_V1",
+        "name_policy":"GUILD_INVITE_NAME_SNAPSHOT_V1",
+        "observation_policy":"GUILD_INVITE_SHARED_OBSERVATION_V1",
+        "stock_invite_mid":2563,"stock_accept_mid":2564,"stock_dismiss_mid":184,
+        "stock_base_mid":176,"stock_list_mid":189,
+        "reload_first_materialized_purpose":7,"reload_invalidation_purpose":8,
+        "window_limit":50,"scan_limit":4096,"scan_page":128,"cleanup_default":32,"cleanup_max":1000,
+        "enums_source_sha256":blobs["app/common/enums.lua"].sha256,
+        "mid_source_sha256":blobs["app/common/network/mid.lua"].sha256,
+        "window_source_sha256":blobs["app/windows/SocialSystemWindow.lua"].sha256,
+        "guild_model_source_sha256":blobs["app/model/SelfGuild.lua"].sha256,
+        "social_model_source_sha256":blobs["app/model/SocialSystem.lua"].sha256,
+        "dismiss_joins_guild":False,"dismiss_cancels_invite":False,"historical_backfill":False
+    }
     artifacts = {
+        "guild_invite_policy.json":invite_artifact,
         "guild_broadcast_policy.json":broadcast_artifact,
         "social_gift_catalog.json": social_gift_artifact,
         "emoticon_catalog.json": emoticon_artifact,

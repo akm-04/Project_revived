@@ -121,9 +121,7 @@ func main() {
 	runner := tx.Runner{DB: pool, Admission: tx.NewSemaphore(64), Hooks: observability.TxHooks{Metrics: txMetrics}}
 	// Deployment must apply migrations first. Gate all HTTP traffic on content readiness.
 	contentCtx, contentCancel := context.WithTimeout(ctx, 3*registry.DefaultWriteProfile().OperationTimeout)
-	active, contentErr := registry.Initialize(contentCtx, registry.Service{
-		Runner: runner, Repo: contentstore.Store{}, Fresh: pool, Providers: registry.DefaultProviderSet(),
-	}, operation.Factory{Clock: clock.System{}})
+	active, contentErr := (registry.Service{Runner: runner, Repo: contentstore.Store{}, Fresh: pool, Providers: registry.DefaultProviderSet()}).ValidateActiveReadiness(contentCtx)
 	contentCancel()
 	if contentErr != nil {
 		log.Fatalf("content startup failed: %v", contentErr)
@@ -260,6 +258,13 @@ func main() {
 	socialDismissal := socialdismiss.Service{Timed: socialTimed, PlayerRoots: i4store.PlayerRootLocker{}, Roots: socialRelationDB, Inbox: socialInboxDB}
 	socialDispatcher := stockruntime.SocialDispatcher{Authority: authority, Relations: socialCommands, Projection: friendBase, Dismissal: socialDismissal, Scalar: appi5.ScalarProjector{Runner: runner, Store: i5db}, Tracker: tracker, Emitter: postgres.SocialWakeupEmitter{Pool: pool, OnError: func(err error) { log.Printf("social wakeup degraded: %v", err) }}}
 	giftReload := socialreload.Service{Runner: runner, Relations: socialRelationDB, Inbox: socialInboxDB, Observer: socialPresentation, Gifts: giftService}
+	if e := configureGuildInvite(ctx, pool, runner, &guildSvc, &giftService, &socialReads, &giftReload); e != nil {
+		log.Fatalf("Guild Invite bundle readiness: %v", e)
+	}
+	socialReads.Gifts = giftService
+	giftReload.Gifts = giftService
+	friendBase.Projection = socialReads
+	socialDispatcher.Projection = friendBase
 	giftGroup, err := stockruntime.PrepareGiftStock(socialDispatcher, giftService, friendBase, giftReload)
 	if err != nil {
 		log.Fatalf("Gift consumer readiness: %v", err)
@@ -273,6 +278,8 @@ func main() {
 		socialDispatcher = enabledGiftDispatcher
 	} else {
 		legacyReads := socialReads
+		legacyReads.Invites = nil
+		legacyReads.PresentationAt = nil
 		legacyReads.Gifts = nil
 		legacyReads.NoticePages = nil
 		socialDispatcher.Projection = socialfriendbase.Service{FriendDM: friendDM, Projection: legacyReads}

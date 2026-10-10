@@ -37,9 +37,10 @@
     "00034_i7a6a_friend_dm.sql": "c384841850ad862edde9c070bbf508d5fa9ad3310c66ca2401c9d005ef7a4a4c",
     "00035_personal_dm_delivery.sql": "34b47ec789f5ba94161399856f4b3afd085c4e0f1b0139256412dcc830c8fa7d",
     "00036_social_gift.sql": "f566250324c748f6c685b288d2aadf11bc7498a9f7bcd5590790c608a3d6cfb8",
-    "00037_guild_broadcast.sql": "12c0452d701e5c44186bafa78b1a4c0cd10ce5143e95c23289ce570afa5057e9"
+    "00037_guild_broadcast.sql": "12c0452d701e5c44186bafa78b1a4c0cd10ce5143e95c23289ce570afa5057e9",
+    "00038_guild_invite_projection.sql": "aa25f8a3293466f2e8578ed771142fefef1df488b99e66fe8b2590c4b6d6c481"
   },
   "rule": "All listed migration bytes are immutable for this cumulative candidate. Historical phase validators remain snapshot-specific; forward schema changes require a new migration. I7A-4A allocates forward-only 00033 for SocialRelation/SocialInbox durable foundations and an I4-owned non-unique discovery index; it performs no Social backfill and activates no stock routes.",
   "schema_version": 1,
-  "status": "CURRENT_CUMULATIVE_MIGRATION_LOCK_I7A6B"
+  "status": "CURRENT_CUMULATIVE_MIGRATION_LOCK_I7A8B_WORKING"
 }

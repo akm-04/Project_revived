@@ -35,7 +35,7 @@ func wireInput(r sp.Result) sv.Result {
 		v.Requests = append(v.Requests, sv.Requested{Player: wirePlayer(p.Player), Message: p.Relation.Message, At: p.Relation.RequestedAt})
 	}
 	for _, p := range r.Notices {
-		v.Notices = append(v.Notices, sv.Notified{Player: wirePlayer(p.Player), ID: int64(p.Notice.NoticeID), Type: p.Notice.NoticeType, At: p.Notice.NoticeTime})
+		v.Notices = append(v.Notices, sv.Notified{GuildID: p.GuildID, GuildName: p.GuildName, Player: wirePlayer(p.Player), ID: int64(p.Notice.NoticeID), Type: p.Notice.NoticeType, At: p.Notice.NoticeTime})
 	}
 	return v
 }

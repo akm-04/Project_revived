@@ -1,0 +1,149 @@
+{
+  "schema_version": 1,
+  "pass": "655.0",
+  "stage": "I7A-8B",
+  "contract_id": "I7A8B_OWNER_SOURCE_SCHEMA_POLICY_CONTRACT",
+  "id": "B1",
+  "status": "PROPOSED_COMPLETED_DESIGN_REQUIRES_VALIDATED_NORMAL655_SELECTION",
+  "classification": "SOURCE_STATIC_IMPLEMENTATION_DECISION_NOT_PRODUCT_RUNTIME",
+  "base_backend_sha256": "40cd6059e301598e193a84c10521b1f825b1ddf41fced9c4b40fcace7cbe7260",
+  "immutable_foundation_bindings": [
+    {
+      "id": "D01",
+      "path": "00_PASSMAP/PASS463_DESIGNS/D01.json",
+      "sha256": "34ddc24af8cd3028366b1c672ead2a1ed1cad2207c5adc80cc151f45edbc851e"
+    },
+    {
+      "id": "D02",
+      "path": "00_PASSMAP/PASS475_DESIGNS/D02.json",
+      "sha256": "bfbe47718fdbee32df8fe7eec5439bce69e2c906b386c9dfd06706ae352cecfb"
+    },
+    {
+      "id": "D03",
+      "path": "00_PASSMAP/PASS475_DESIGNS/D03.json",
+      "sha256": "77cfe501bb874e862702d7553aafa2a748b67b38bc2679d9b5f6967cee8e423a"
+    },
+    {
+      "id": "D04",
+      "path": "00_PASSMAP/PASS463_DESIGNS/D04.json",
+      "sha256": "639a75c504c31e55ab7309854050610029f056a20a5d4704129759b2a3ed41b5"
+    },
+    {
+      "id": "D05",
+      "path": "00_PASSMAP/PASS475_DESIGNS/D05.json",
+      "sha256": "20927a3640e39005669601f2154d7425c661ebf1c435dbeb791408e076faf368"
+    },
+    {
+      "id": "D06",
+      "path": "00_PASSMAP/PASS475_DESIGNS/D06.json",
+      "sha256": "35edbb372ea726e4eb1077b9cd36b7bc0169a8c3b46572efac8be38745ff023f"
+    },
+    {
+      "id": "D07",
+      "path": "00_PASSMAP/PASS475_DESIGNS/D07.json",
+      "sha256": "29042b4691e5af17c7ce7f0ce08b52eaf3c4d393ec459b01775d01b738c06c95"
+    },
+    {
+      "id": "D08",
+      "path": "00_PASSMAP/PASS463_DESIGNS/D08.json",
+      "sha256": "71d4a9884bf9c2692ee3313edd3367a8db89c91a2dc0af197eee420fb7c175fd"
+    },
+    {
+      "id": "D09",
+      "path": "00_PASSMAP/PASS475_DESIGNS/D09.json",
+      "sha256": "8ebdecc274b084c103169dea764d16267a3a08db3d357b36b960e42bae1fdd82"
+    },
+    {
+      "id": "D10",
+      "path": "00_PASSMAP/PASS475_DESIGNS/D10.json",
+      "sha256": "5f44fded332a3b37459e7e2ba12a906ada4187dabb0a9b153a01cea959fe4932"
+    },
+    {
+      "id": "D11",
+      "path": "00_PASSMAP/PASS475_DESIGNS/D11.json",
+      "sha256": "c939268d7e67a73edbb849cb1c00b847adc0f09d07e4418e5e2bbc90ab39b62b"
+    },
+    {
+      "id": "D12",
+      "path": "00_PASSMAP/PASS463_DESIGNS/D12.json",
+      "sha256": "ffe22db54162940466e909a298c5c5907a2a0bd14fb597991c64357981c74f72"
+    },
+    {
+      "id": "D13",
+      "path": "00_PASSMAP/PASS463_DESIGNS/D13.json",
+      "sha256": "323563f4f2af0d53c1f6ffdf99d7bb28bec241bb60d1e883e24aac2858cf2745"
+    },
+    {
+      "id": "D14",
+      "path": "00_PASSMAP/PASS463_DESIGNS/D14.json",
+      "sha256": "45cd98a6ac2735b108122d60d593d96786f498d198c0a590d59ed39d999c8c62"
+    },
+    {
+      "id": "I7A1_PHASE_ARCHITECTURE_CONTRACT",
+      "path": "00_PASSMAP/PASS622_I7A1_PHASE_ARCHITECTURE_CONTRACT.json",
+      "sha256": "c870861afc84378d18b62d867823a3fb9969cf04452067479f8776f7aac96362"
+    },
+    {
+      "id": "I7A1_TRANSACTION_LOCK_EFFECT_CONTRACT",
+      "path": "00_PASSMAP/PASS622_I7A1_TRANSACTION_LOCK_EFFECT_CONTRACT.json",
+      "sha256": "c4e11cbab1a7193fd7575229f76a1322128273047d599e08deac7993959f85f8"
+    },
+    {
+      "id": "I7A1_DELIVERY_RECOVERY_WIRE_CONTRACT",
+      "path": "00_PASSMAP/PASS622_I7A1_DELIVERY_RECOVERY_WIRE_CONTRACT.json",
+      "sha256": "80964805f03f8b6f9d3324283a82248db512db57950a9fc1e2ffe6f00b0729b6"
+    },
+    {
+      "id": "I7A1_TIME_CONTENT_POLICY_REGISTER",
+      "path": "00_PASSMAP/PASS622_I7A1_TIME_CONTENT_POLICY_REGISTER.json",
+      "sha256": "4b4cb9801cb35a9cab4cd11f706abf2c28be6addcc00297eb524e0fbb9face5a"
+    },
+    {
+      "id": "I7A1_MIGRATION_RESTORE_PROOF_CONTRACT",
+      "path": "00_PASSMAP/PASS622_I7A1_MIGRATION_RESTORE_PROOF_CONTRACT.json",
+      "sha256": "11d72e984bee246982cafd0e849f206aabb5e6a42d5393b50042be87b5896e88"
+    },
+    {
+      "id": "I7A1_STAGE_ACCEPTANCE_CONTRACT",
+      "path": "00_PASSMAP/PASS622_I7A1_STAGE_ACCEPTANCE_CONTRACT.json",
+      "sha256": "a4266a4234d83db34ba3fa0e58599c8764385260b1a87b5ca057d3b64fbb5a55"
+    },
+    {
+      "id": "I7A1_EVIDENCE_CLASSIFICATION",
+      "path": "00_PASSMAP/PASS622_I7A1_EVIDENCE_CLASSIFICATION.json",
+      "sha256": "f129b63c7afe95f5f6850ddbb81868eb1eba82c956240f2dd5f017617cc56457"
+    },
+    {
+      "id": "I7A1_PREIMPLEMENTATION_REALITY_CHECK",
+      "path": "00_PASSMAP/PASS622_I7A1_PREIMPLEMENTATION_REALITY_CHECK.json",
+      "sha256": "62d75cc680b3ae8570f355b9c03ae2e99703e4809cc2e8dfa77d61dfb4879d96"
+    }
+  ],
+  "qualified8A_successor": {
+    "path": "00_PASSMAP/PASS654_I7A8A_SUCCESSOR_CONTRACT.json",
+    "sha256": "08ddb9d34e51493a6209dbe8c78da997de92714b38f983ce2b026994cdbfa14d"
+  },
+  "rules": [
+    {
+      "section": "Selected-direction policies to finish validating before selection",
+      "rule": "1. `GUILD_INVITE_STRICT_EXPIRY_V1`: duplicate/no-op and fresh reissue use the same strict `decision_at < expires_at` boundary as2564. Exact expiry is expired; do not silently subtract epsilon or extend lifetime. Existing core policy supplies the unchanged Invite lifetime/quota. Source created/expires timestamps are canonical database microseconds; private operation start is additionally exact UTC RFC3339Nano, matching8A precision law.\n2. `GUILD_INVITE_RETAINED_PAIR_CURSOR_V1`: retained counter per `(guild_id,target_pid)` cannot be removed with Invite. Before the first qualified issue, seed its high-water from current Invite and the highest retained Guild Invite semantic generation through a narrow Foundation-owned receipt witness. Never query Foundation SQL from Guild. A malformed historical witness or exhausted int64 fails closed. Advance the cursor and new Invite in one source transaction; allocation is not committed on abort. This preserves tuple `(guild_id,target_pid,generation)` source identity and prevents a historical semantic receipt from being reused as a new issue. No historical Notice backfill.\n3. `GUILD_INVITE_JOIN_BOUNDARY_V1`: issue binds the target's latest retained JOIN event_id (zero only when there has never been JOIN), not current MembershipVersion. A current retained JOIN high-water below the issue boundary is a proof conflict, not eligibility or ordinary suppression. Any later JOIN permanently invalidates that issue even after departure; a new issue after departure binds the newer event. Every qualified new JOIN emits an immutable marker using the exact inserted event ID and producer operation identity.\n4. `GUILD_INVITE_NAME_SNAPSHOT_V1`: bind Guild name at issue for immutable type10 display. Current active Guild/generation still governs eligibility. A later rename does not rewrite issue/Notice proof. This is reconstruction policy, not a recovered original-server name rule.\n5. `GUILD_INVITE_SHARED_OBSERVATION_V1`: gather bounded Notice candidates and all typed Guild proof snapshots before observing; observe once, evaluate frozen eligibility at that instant, then use an additive presentation ReadManyAtTx for those selected players. Gift counts and Presence use the same observation. No second clock, Guild reads after observation or FriendDM380, root/epoch refresh on read or mutation on qualified views.\n\nGeneration witness queries may aggregate retained Foundation receipt identities under a bounded statement timeout, but return only the finite Guild Invite witness. The application does not parse arbitrary receipts or expose a universal event/history API. The exact typed seam and malformed-identity handling must be model/native tested before product acceptance."
+    },
+    {
+      "section": "Owner data and complete proof",
+      "rule": "Guild source additions belong to I6C, analogous to existing GuildBroadcast. SocialInbox owns target materialization/invalidation proof. There is no shared cross-owner SQL or generic event ledger.\n\nProposed additive migration38 has six tables: Guild Invite retained pair cursors; immutable Guild Invite issues; per-issue recipient delivery/scheduling bindings; immutable Guild lifecycle markers with bounded cursor/scheduling progress; SocialInbox Invite materialization receipts; SocialInbox Invite invalidation receipts. Exact names and columns become selected schema contract after verification. Existing Invite and membership-event rows gain nullable projection source bindings, with no historical update; existing generation and event IDs remain unchanged. New tables use retained numeric player/Guild identities without cascading live-owner foreign keys. Source/target receipt relationships may use deferred FK to the existing Foundation receipt owner, as in8A. Immutable source fingerprints exclude mutable queue/cursor/ACK state.\n\nIssue proof binds trusted operation UUID, exact start, seed, canonical policy refs, decision time, Guild/server, inviter/target, tuple generation, send-event ID, Guild name, target latest JOIN boundary, source content/core/Invite-policy revisions, immutable source fingerprint and complete core receipt identity/ID. The current Invite points to this issue only for qualified new creation. A legacy Invite has no projection binding and produces no Notice merely because a worker/read encounters it.\n\nJOIN/retirement marker proof binds operation/context/content/policy, exact membership event_id, marker kind, player/Guild, occurred/retired instant and finite maximum issue serial at source commit. JOIN scopes all prior issues for that recipient; retirement scopes all prior issues for that Guild. Scans use strictly increasing retained issue serial and a source-time high-water bound, not timestamps, offset paging, resettable membership version or job IDs. New post-JOIN issues after a later departure cannot enter an older cleanup marker.\n\nSource validation includes complete core/source receipt pairs and all exact bindings. Known positive source/marker paths must fail on orphan source, missing bound receipt, mismatched operation/fingerprint/nullable event binding. Legacy unprojected events/Invites retain legacy behavior and are not backfilled. Core's dynamic UNKNOWN resolver must add complete projection witness validation when a new projected source exists; receipt presence alone cannot hide a partial restore. UNKNOWN absence is never replay permission. A later nonce-less stock Invite command acknowledging the same live generation does not create a new issue or replace the original issuer/op; validate the existing issue rather than comparing its operation to the new stock command."
+    },
+    {
+      "section": "Source transaction integration and lock closure",
+      "rule": "Use additive typed source-hook preparation/application and event-returning methods. Hooks are finite and bound to the exact caller transaction. Guild core retains all current admission, leader/deputy permissions, same-server target root checks, level/quota/cooldown/capacity rules and receipts. No source hook calls SocialInbox or sockets.\n\nA qualified producer first pins the compatible Invite content profile and trusted private source ID. Close the complete Guild/I4 plan before effects: allocator300 when Create; Guild310; globally sorted player roots315; memberships320; required applications330/Invites and retained pair cursor340; fixed Guild projection source/audit350. The pair's absence is fenced by existing Guild/player keys and unique constraint. Allocate/advance its counter only after source350 preparation. Existing speculative membership-before-application/Invite patterns in AcceptApplication/AcceptInvite must be moved behind full preparation; no new lower/equal acquisition after mutation. New Guild creation uses its existing allocator/unique creation fence and a prepared fresh Guild identity; do not add a late existing Guild lock. Typed I5 level/debit effects follow the complete lower-rank plan.\n\nAppendMembershipEventReturningTx returns the exact persisted event ID. All four JOIN paths prepare and apply their marker in the same transaction as membership/event/core receipt and finite enqueue. DISSOLVE binds the exact retirement and DISSOLVE event and enqueues a retirement marker in that same transaction. No leave/kick/in-place role or name mutation emits JOIN. Known membership fast paths inspect the retained event's projection binding and complete marker proof; they never repair a missing marker by backfilling it.\n\nPrepare source metadata and immutable binding before the existing receipt is written; finalize using the returned actual core receipt ID, not a job ID or fabricated operation hash. Foundation writes and typed I5 effects do not open another transaction. Deferred receipt FK can bind first source insert to the actual same-transaction receipt. Failure of enqueue, receipt, source, audit or any final policy gate rolls back all source effects. Source case tests must demonstrate visibility and rollback on every producer path."
+    },
+    {
+      "section": "Primary design review resolutions",
+      "rule": "The whole-source review found three existing source preparation defects relevant to new projected producers: Dissolve saves the Guild root before PlayerRoot/Membership acquisition; AcceptApplication inserts membership before locking the application; AcceptInvite inserts membership before locking the Invite. The implementation must move those effects behind complete preparation. Guild retirement additionally prepares owner-local application rows330 and Invite rows340 in canonical player order before350/effects. The active logical-server player band bounds that collection; no Social target rows enter this source transaction. Fresh Create's allocator/unique creation fence covers its new Guild identity and existing lower-rank preparation before I5. None of these sequencing repairs changes Guild permissions, gates, costs, capacity, lifetime or wire results. They require targeted concurrency/rollback and inherited Guild regression on the new candidate.\n\nThe historical generation witness is a narrow Foundation-owned query over retained owner=guild/domain=guild/operation=invite semantic identities, scoped to exact Guild and target. Parse the known actorver/target/gen format canonically, reject malformed scoped witnesses and int64 exhaustion, and take the maximum witnessed generation alongside current Invite and retained pair cursor. It returns a numeric high-water witness only. It never returns value or authorizes a Guild command. Receipt retention for these existing Guild facts is indefinite (New supplies no retain_until). Native tests must verify seeded upgrade/delete/reissue and malformed/max cases. Original random generations and all historical bytes remain unchanged.\n\nImmutable source reload validates its own complete bound core receipt and retained source snapshot, not the continued existence of a mutable Invite/member/profile. Current-eligibility reads still validate all present live bindings and later JOIN evidence. New target/source proof tables have no cascading live Player/Guild FK. Existing I6C event/Invite FKs remain unchanged, including RESTRICT limitations on physical deletion. Deleted-player tests must label direct owner fixture deletion/FK-null simulation accurately; this phase does not introduce an account deletion command or claim unrestricted physical deletion. Target positive proof preserves immutable Notice/source fields when related_player_id became NULL or recipient vanished honestly; fresh Gone still requires the I4 allocator witness. Missing expected source/target/receipt/Notice or mismatched live projection binding fails closed, not resurrection.\n\nThe4096 prefix saturation policy remains conservative: if fewer than50 qualify after4096 evaluated rows, return saturation even if a further empty page would prove physical exhaustion; do not perform a4097th row or claim a partial authoritative result. A complete short prefix may return fewer than50. This is the existing explicit bounded-policy behavior, now including type10. Collect all bounded Guild snapshots before a single observation; an additive ReadManyAtTx reuses that instant for selected minimal/Presence projection, and the existing Gift snapshot uses it. Empty selection does not cause a second observation. Known176 replay continues to use current Social views and original private messages without another drain.\n\nThe108-case finite design model exercises expiry/cursor/departure/marker watermarks/tombstones/page bounds/complete plans and negative plan examples. It is design evidence only, not SQL/River/UNKNOWN-COMMIT proof. Full exact-candidate native rows remain required. There are no unresolved in-scope owner/lifecycle/recovery/consumer design questions after these explicit decisions; original server and physical W2 uncertainties remain bounded rather than fabricated. Final selected preimplementation contracts and normal publication are still required before8B product edits."
+    }
+  ],
+  "no_foreign_owner_sql": true,
+  "implementation_authorized_by_latest_human_after_selection": true,
+  "product_accepted": false,
+  "i7a8_phase_accepted": false,
+  "i7a10_e_w2_accepted": false
+}

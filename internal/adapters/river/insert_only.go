@@ -10,7 +10,6 @@ import (
 	"github.com/riverqueue/river/riverdriver/riverpgxv5"
 	"gxb.local/backend/v2/internal/adapters/postgres"
 	gen "gxb.local/backend/v2/internal/application/generation"
-	gb "gxb.local/backend/v2/internal/application/guildbroadcast"
 	"gxb.local/backend/v2/internal/foundation/obligation"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
@@ -42,7 +41,7 @@ func NewGuildInsertOnly(pool *pgxpool.Pool) (obligation.Queue, error) {
 	return guildInsertOnly{queue: Queue{Client: client}}, nil
 }
 func (q guildInsertOnly) InsertTx(c context.Context, t tx.Tx, o obligation.Obligation) error {
-	if e := gb.ValidateObligation(o); e != nil {
+	if e := validateGuildRoute(o); e != nil {
 		return e
 	}
 	raw, ok := postgres.UnwrapTx(t)

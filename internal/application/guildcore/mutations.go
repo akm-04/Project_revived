@@ -11,7 +11,9 @@ import (
 	"time"
 
 	appgeneration "gxb.local/backend/v2/internal/application/generation"
+	appinvite "gxb.local/backend/v2/internal/application/guildinvite"
 	"gxb.local/backend/v2/internal/domain/guild"
+	gi "gxb.local/backend/v2/internal/domain/guildinvite"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/receipt"
@@ -168,15 +170,7 @@ func (s Service) currentMembershipIncarnationTx(ctx context.Context, q tx.Querye
 }
 
 func (s Service) putAckReceipt(ctx context.Context, t tx.Tx, bound operation.Context, actor identity.ActorContext, rid receipt.Identity, fp [32]byte, profile string, out AckResult) error {
-	raw, _ := json.Marshal(out)
-	rr, err := receipt.New(bound, rid, "I6C_GUILD", profile, raw, fp)
-	if err != nil {
-		return err
-	}
-	rr.ActorAccountUID = string(actor.AccountUID)
-	rr.ContextID = actor.ContextID.UUID()
-	rr.PolicyVersion = s.Policy.Revision
-	_, err = s.Receipts.PutTx(ctx, t, rr)
+	_, err := s.putAckReceiptReturning(ctx, t, bound, string(actor.AccountUID), actor.ContextID.UUID(), rid, fp, profile, out)
 	return err
 }
 
@@ -315,6 +309,8 @@ func (s Service) RefuseApplication(ctx context.Context, actor identity.ActorCont
 }
 
 func (s Service) AcceptApplication(ctx context.Context, actor identity.ActorContext, target identity.PlayerID, op operation.Context) (AckResult, error) {
+	ctx, cancel := context.WithTimeout(ctx, s.profile().OperationTimeout)
+	defer cancel()
 	if err := s.validate(); err != nil {
 		return AckResult{}, err
 	}
@@ -323,6 +319,10 @@ func (s Service) AcceptApplication(ctx context.Context, actor identity.ActorCont
 		return AckResult{}, err
 	}
 	bound, err := bindGuildPolicy(op, s.Policy.Revision)
+	if err != nil {
+		return AckResult{}, err
+	}
+	bound, projected, err := s.admitInviteProjection(ctx, bound)
 	if err != nil {
 		return AckResult{}, err
 	}
@@ -346,6 +346,9 @@ func (s Service) AcceptApplication(ctx context.Context, actor identity.ActorCont
 		}
 		if tok {
 			if tm.GuildID == gid {
+				if err := s.validateMembershipProjectionTx(txctx, scope.Tx, tm); err != nil {
+					return err
+				}
 				out = AckResult{GuildID: int64(gid), Replayed: true}
 				return nil
 			}
@@ -358,11 +361,10 @@ func (s Service) AcceptApplication(ctx context.Context, actor identity.ActorCont
 		if count >= s.Policy.Policy.MemberCap {
 			return ErrGuildFull
 		}
-		// PlayerRoot already fences target membership absence. Establish the rank-320
-		// membership before acquiring the rank-330 application row.
-		m := guild.Membership{PlayerID: target, GuildID: gid, Role: guild.Member, JoinedAt: at, MembershipVersion: 1, StateVersion: 1, UpdatedAt: at}
-		if err := s.Store.InsertMembershipTx(txctx, scope.Tx, m); err != nil {
-			return err
+		if projected {
+			if err := s.InviteProjection.Bindings.PrepareMembershipCleanupTx(txctx, scope.Tx, target); err != nil {
+				return err
+			}
 		}
 		a, ok, err := s.Store.LockApplicationTx(txctx, scope.Tx, gid, target)
 		if err != nil {
@@ -382,6 +384,20 @@ func (s Service) AcceptApplication(ctx context.Context, actor identity.ActorCont
 		if err := s.checkJoinGatesTx(txctx, scope.Tx, target, gid, at); err != nil {
 			return err
 		}
+		// PlayerRoot315 and the prepared membership320 absence fence
+		// precede the application330 lock; effects follow all preparation.
+		var plan appinvite.MarkerPlan
+		if projected {
+			plan, err = s.InviteProjection.PrepareMarkerTx(txctx, scope.Tx, g, actor, target, gi.Join, bound, at)
+			if err != nil {
+				return err
+			}
+			s.bindProjectionResolver(resolver, bound.ID, false)
+		}
+		m := guild.Membership{PlayerID: target, GuildID: gid, Role: guild.Member, JoinedAt: at, MembershipVersion: 1, StateVersion: 1, UpdatedAt: at}
+		if err := s.Store.InsertMembershipTx(txctx, scope.Tx, m); err != nil {
+			return err
+		}
 		if err := s.Store.DeleteApplicationTx(txctx, scope.Tx, gid, target); err != nil {
 			return err
 		}
@@ -389,7 +405,8 @@ func (s Service) AcceptApplication(ctx context.Context, actor identity.ActorCont
 			return err
 		}
 		ev := guild.MembershipEvent{PlayerID: target, GuildID: gid, Kind: guild.EventJoin, OccurredAt: at, ActorPlayerID: actor.PlayerID, PolicyRevision: s.Policy.Revision}
-		if err := s.Store.AppendMembershipEventTx(txctx, scope.Tx, ev, bound.ID); err != nil {
+		ev, err = s.appendProjectionEventTx(txctx, scope.Tx, ev, bound.ID, projected)
+		if err != nil {
 			return err
 		}
 		if err := s.Store.AppendAuditTx(txctx, scope.Tx, gid, "ACCEPT_APPLY", actor.PlayerID, target, at, s.Policy.Revision, bound.ID, "{}"); err != nil {
@@ -403,7 +420,14 @@ func (s Service) AcceptApplication(ctx context.Context, actor identity.ActorCont
 			return ErrLevelTooLow
 		}
 		out = AckResult{GuildID: int64(gid)}
-		return s.putAckReceipt(txctx, scope.Tx, bound, actor, rid, fp, "gxb.i6c.guild.accept_application.v1", out)
+		rr, err := s.putAckReceiptReturning(txctx, scope.Tx, bound, string(actor.AccountUID), actor.ContextID.UUID(), rid, fp, "gxb.i6c.guild.accept_application.v1", out)
+		if err != nil {
+			return err
+		}
+		if projected {
+			return s.InviteProjection.ApplyMarkerTx(txctx, scope.Tx, plan, ev, rr)
+		}
+		return nil
 	})
 	return out, err
 }
@@ -500,6 +524,8 @@ func (s Service) removeSelf(ctx context.Context, actor identity.ActorContext, gi
 }
 
 func (s Service) Dissolve(ctx context.Context, actor identity.ActorContext, op operation.Context) (AckResult, error) {
+	ctx, cancel := context.WithTimeout(ctx, s.profile().OperationTimeout)
+	defer cancel()
 	if err := s.validate(); err != nil {
 		return AckResult{}, err
 	}
@@ -508,6 +534,10 @@ func (s Service) Dissolve(ctx context.Context, actor identity.ActorContext, op o
 		return AckResult{}, err
 	}
 	bound, err := bindGuildPolicy(op, s.Policy.Revision)
+	if err != nil {
+		return AckResult{}, err
+	}
+	bound, projected, err := s.admitInviteProjection(ctx, bound)
 	if err != nil {
 		return AckResult{}, err
 	}
@@ -527,6 +557,11 @@ func (s Service) Dissolve(ctx context.Context, actor identity.ActorContext, op o
 			return err
 		}
 		if !ok || g.RetiredAt != nil {
+			if s.InviteProjection != nil {
+				if err := s.InviteProjection.ValidateRetirementTx(txctx, scope.Tx, gid); err != nil {
+					return err
+				}
+			}
 			out = AckResult{GuildID: int64(gid), Replayed: true}
 			return nil
 		}
@@ -541,12 +576,6 @@ func (s Service) Dissolve(ctx context.Context, actor identity.ActorContext, op o
 			return ErrDissolveRequiresSolo
 		}
 		old := g.StateVersion
-		g.StateVersion++
-		g.UpdatedAt = at
-		g.RetiredAt = &at
-		if err := s.Store.SaveGuildTx(txctx, scope.Tx, g, old); err != nil {
-			return err
-		}
 		if _, err := s.PlayerRoots.LockPlayerRootsTx(txctx, scope.Tx, actor.LogicalServerID, []identity.PlayerID{actor.PlayerID}); err != nil {
 			return err
 		}
@@ -565,6 +594,20 @@ func (s Service) Dissolve(ctx context.Context, actor identity.ActorContext, op o
 			out = prior
 			return nil
 		}
+		var plan appinvite.MarkerPlan
+		if projected {
+			plan, err = s.InviteProjection.PrepareMarkerTx(txctx, scope.Tx, g, actor, actor.PlayerID, gi.Retire, bound, at)
+			if err != nil {
+				return err
+			}
+			s.bindProjectionResolver(resolver, bound.ID, false)
+		}
+		g.StateVersion++
+		g.UpdatedAt = at
+		g.RetiredAt = &at
+		if err := s.Store.SaveGuildTx(txctx, scope.Tx, g, old); err != nil {
+			return err
+		}
 		if err := s.Store.DeleteMembershipTx(txctx, scope.Tx, actor.PlayerID, gid, m.StateVersion); err != nil {
 			return err
 		}
@@ -575,14 +618,22 @@ func (s Service) Dissolve(ctx context.Context, actor identity.ActorContext, op o
 			return err
 		}
 		ev := guild.MembershipEvent{PlayerID: actor.PlayerID, GuildID: gid, Kind: guild.EventDissolve, OccurredAt: at, ActorPlayerID: actor.PlayerID, PolicyRevision: s.Policy.Revision}
-		if err := s.Store.AppendMembershipEventTx(txctx, scope.Tx, ev, bound.ID); err != nil {
+		ev, err = s.appendProjectionEventTx(txctx, scope.Tx, ev, bound.ID, projected)
+		if err != nil {
 			return err
 		}
 		if err := s.Store.AppendAuditTx(txctx, scope.Tx, gid, "DISSOLVE", actor.PlayerID, actor.PlayerID, at, s.Policy.Revision, bound.ID, "{}"); err != nil {
 			return err
 		}
 		out = AckResult{GuildID: int64(gid)}
-		return s.putAckReceipt(txctx, scope.Tx, bound, actor, rid, fp, "gxb.i6c.guild.dissolve.v1", out)
+		rr, err := s.putAckReceiptReturning(txctx, scope.Tx, bound, string(actor.AccountUID), actor.ContextID.UUID(), rid, fp, "gxb.i6c.guild.dissolve.v1", out)
+		if err != nil {
+			return err
+		}
+		if projected {
+			return s.InviteProjection.ApplyMarkerTx(txctx, scope.Tx, plan, ev, rr)
+		}
+		return nil
 	})
 	return out, err
 }
@@ -901,6 +952,8 @@ func (s Service) SetRole(ctx context.Context, actor identity.ActorContext, req R
 }
 
 func (s Service) Invite(ctx context.Context, actor identity.ActorContext, target identity.PlayerID, op operation.Context) (AckResult, error) {
+	ctx, cancel := context.WithTimeout(ctx, s.profile().OperationTimeout)
+	defer cancel()
 	if err := s.validate(); err != nil {
 		return AckResult{}, err
 	}
@@ -915,6 +968,10 @@ func (s Service) Invite(ctx context.Context, actor identity.ActorContext, target
 	if err != nil {
 		return AckResult{}, err
 	}
+	bound, projected, err := s.admitInviteProjection(ctx, bound)
+	if err != nil {
+		return AckResult{}, err
+	}
 	fp, err := receipt.FingerprintRequest(TargetRequest{target})
 	if err != nil {
 		return AckResult{}, err
@@ -926,7 +983,7 @@ func (s Service) Invite(ctx context.Context, actor identity.ActorContext, target
 		if err := s.Fencer.FenceActorTx(txctx, scope.Tx, actor, at); err != nil {
 			return err
 		}
-		_, am, _, tok, err := s.lockGuildActorTargetTx(txctx, scope.Tx, actor, gid, target)
+		g, am, _, tok, err := s.lockGuildActorTargetTx(txctx, scope.Tx, actor, gid, target)
 		if err != nil {
 			return err
 		}
@@ -936,9 +993,16 @@ func (s Service) Invite(ctx context.Context, actor identity.ActorContext, target
 		if tok {
 			return ErrTargetAlreadyMember
 		}
-		if ex, ok, err := s.Store.LockInviteTx(txctx, scope.Tx, gid, target); err != nil {
+		ex, exists, err := s.Store.LockInviteTx(txctx, scope.Tx, gid, target)
+		if err != nil {
 			return err
-		} else if ok && !at.After(ex.ExpiresAt) {
+		}
+		if exists && (projected && at.Before(ex.ExpiresAt) || !projected && !at.After(ex.ExpiresAt)) {
+			if s.InviteProjection != nil {
+				if err := s.InviteProjection.ValidateCurrentInviteTx(txctx, scope.Tx, ex); err != nil {
+					return err
+				}
+			}
 			out = AckResult{GuildID: int64(gid), Replayed: true}
 			return nil
 		}
@@ -950,6 +1014,19 @@ func (s Service) Invite(ctx context.Context, actor identity.ActorContext, target
 			return ErrInviteLimit
 		}
 		gen := positiveGeneration(bound.Derive("guild.invite-generation", uint64(target)))
+		var plan appinvite.IssuePlan
+		if projected {
+			current := int64(0)
+			if exists {
+				current = ex.Generation
+			}
+			plan, err = s.InviteProjection.PrepareIssueTx(txctx, scope.Tx, g, actor, target, current, bound, at, at.Add(time.Duration(s.Policy.Policy.InviteLifetimeSeconds)*time.Second))
+			if err != nil {
+				return err
+			}
+			gen = plan.Generation()
+			s.bindProjectionResolver(resolver, bound.ID, true)
+		}
 		inv := guild.Invite{GuildID: gid, InvitedPlayerID: target, Generation: gen, InviterPlayerID: actor.PlayerID, CreatedAt: at, ExpiresAt: at.Add(time.Duration(s.Policy.Policy.InviteLifetimeSeconds) * time.Second), StateVersion: 1}
 		rid := semanticReceipt(strconv.FormatInt(int64(gid), 10), "invite", fmt.Sprintf("actorver:%d:target:%d:gen:%d", am.MembershipVersion, target, gen))
 		resolver.set(rid, fp)
@@ -959,22 +1036,42 @@ func (s Service) Invite(ctx context.Context, actor identity.ActorContext, target
 			out = prior
 			return nil
 		}
-		if err := s.Store.UpsertInviteTx(txctx, scope.Tx, inv); err != nil {
+		if s.InviteProjection != nil {
+			err = s.InviteProjection.Bindings.UpsertInviteForProjectionTx(txctx, scope.Tx, inv)
+		} else {
+			err = s.Store.UpsertInviteTx(txctx, scope.Tx, inv)
+		}
+		if err != nil {
 			return err
 		}
-		if err := s.Store.AppendInviteSendTx(txctx, scope.Tx, gid, actor.PlayerID, target, at, s.Policy.Revision, bound.ID); err != nil {
+		var sendID int64
+		if projected {
+			sendID, err = s.InviteProjection.Bindings.AppendInviteSendReturningTx(txctx, scope.Tx, gid, actor.PlayerID, target, at, s.Policy.Revision, bound.ID)
+		} else {
+			err = s.Store.AppendInviteSendTx(txctx, scope.Tx, gid, actor.PlayerID, target, at, s.Policy.Revision, bound.ID)
+		}
+		if err != nil {
 			return err
 		}
 		if err := s.Store.AppendAuditTx(txctx, scope.Tx, gid, "INVITE", actor.PlayerID, target, at, s.Policy.Revision, bound.ID, "{}"); err != nil {
 			return err
 		}
 		out = AckResult{GuildID: int64(gid)}
-		return s.putAckReceipt(txctx, scope.Tx, bound, actor, rid, fp, "gxb.i6c.guild.invite.v1", out)
+		rr, err := s.putAckReceiptReturning(txctx, scope.Tx, bound, string(actor.AccountUID), actor.ContextID.UUID(), rid, fp, "gxb.i6c.guild.invite.v1", out)
+		if err != nil {
+			return err
+		}
+		if projected {
+			return s.InviteProjection.ApplyIssueTx(txctx, scope.Tx, plan, sendID, rr)
+		}
+		return nil
 	})
 	return out, err
 }
 
 func (s Service) AcceptInvite(ctx context.Context, actor identity.ActorContext, gid guild.ID, op operation.Context) (AckResult, error) {
+	ctx, cancel := context.WithTimeout(ctx, s.profile().OperationTimeout)
+	defer cancel()
 	if err := s.validate(); err != nil {
 		return AckResult{}, err
 	}
@@ -982,6 +1079,10 @@ func (s Service) AcceptInvite(ctx context.Context, actor identity.ActorContext, 
 		return AckResult{}, ErrGuildNotFound
 	}
 	bound, err := bindGuildPolicy(op, s.Policy.Revision)
+	if err != nil {
+		return AckResult{}, err
+	}
+	bound, projected, err := s.admitInviteProjection(ctx, bound)
 	if err != nil {
 		return AckResult{}, err
 	}
@@ -1016,6 +1117,9 @@ func (s Service) AcceptInvite(ctx context.Context, actor identity.ActorContext, 
 			return err
 		} else if mok {
 			if m.GuildID == gid {
+				if err := s.validateMembershipProjectionTx(txctx, scope.Tx, m); err != nil {
+					return err
+				}
 				out = AckResult{GuildID: int64(gid), Replayed: true}
 				return nil
 			}
@@ -1028,9 +1132,10 @@ func (s Service) AcceptInvite(ctx context.Context, actor identity.ActorContext, 
 		if n >= s.Policy.Policy.MemberCap {
 			return ErrGuildFull
 		}
-		m := guild.Membership{PlayerID: actor.PlayerID, GuildID: gid, Role: guild.Member, JoinedAt: at, MembershipVersion: 1, StateVersion: 1, UpdatedAt: at}
-		if err := s.Store.InsertMembershipTx(txctx, scope.Tx, m); err != nil {
-			return err
+		if projected {
+			if err := s.InviteProjection.Bindings.PrepareMembershipCleanupTx(txctx, scope.Tx, actor.PlayerID); err != nil {
+				return err
+			}
 		}
 		inv, ok, err := s.Store.LockInviteTx(txctx, scope.Tx, gid, actor.PlayerID)
 		if err != nil {
@@ -1038,6 +1143,11 @@ func (s Service) AcceptInvite(ctx context.Context, actor identity.ActorContext, 
 		}
 		if !ok {
 			return ErrInviteNotFound
+		}
+		if s.InviteProjection != nil {
+			if err := s.InviteProjection.ValidateCurrentInviteTx(txctx, scope.Tx, inv); err != nil {
+				return err
+			}
 		}
 		if !at.Before(inv.ExpiresAt) {
 			return ErrInviteExpired
@@ -1053,6 +1163,18 @@ func (s Service) AcceptInvite(ctx context.Context, actor identity.ActorContext, 
 		if err := s.checkJoinGatesTx(txctx, scope.Tx, actor.PlayerID, gid, at); err != nil {
 			return err
 		}
+		var plan appinvite.MarkerPlan
+		if projected {
+			plan, err = s.InviteProjection.PrepareMarkerTx(txctx, scope.Tx, g, actor, actor.PlayerID, gi.Join, bound, at)
+			if err != nil {
+				return err
+			}
+			s.bindProjectionResolver(resolver, bound.ID, false)
+		}
+		m := guild.Membership{PlayerID: actor.PlayerID, GuildID: gid, Role: guild.Member, JoinedAt: at, MembershipVersion: 1, StateVersion: 1, UpdatedAt: at}
+		if err := s.Store.InsertMembershipTx(txctx, scope.Tx, m); err != nil {
+			return err
+		}
 		if err := s.Store.DeleteInviteTx(txctx, scope.Tx, gid, actor.PlayerID); err != nil {
 			return err
 		}
@@ -1060,7 +1182,8 @@ func (s Service) AcceptInvite(ctx context.Context, actor identity.ActorContext, 
 			return err
 		}
 		ev := guild.MembershipEvent{PlayerID: actor.PlayerID, GuildID: gid, Kind: guild.EventJoin, OccurredAt: at, ActorPlayerID: actor.PlayerID, PolicyRevision: s.Policy.Revision}
-		if err := s.Store.AppendMembershipEventTx(txctx, scope.Tx, ev, bound.ID); err != nil {
+		ev, err = s.appendProjectionEventTx(txctx, scope.Tx, ev, bound.ID, projected)
+		if err != nil {
 			return err
 		}
 		if err := s.Store.AppendAuditTx(txctx, scope.Tx, gid, "ACCEPT_INVITE", actor.PlayerID, actor.PlayerID, at, s.Policy.Revision, bound.ID, "{}"); err != nil {
@@ -1074,7 +1197,14 @@ func (s Service) AcceptInvite(ctx context.Context, actor identity.ActorContext, 
 			return ErrLevelTooLow
 		}
 		out = AckResult{GuildID: int64(gid)}
-		return s.putAckReceipt(txctx, scope.Tx, bound, actor, rid, fp, "gxb.i6c.guild.accept_invite.v1", out)
+		rr, err := s.putAckReceiptReturning(txctx, scope.Tx, bound, string(actor.AccountUID), actor.ContextID.UUID(), rid, fp, "gxb.i6c.guild.accept_invite.v1", out)
+		if err != nil {
+			return err
+		}
+		if projected {
+			return s.InviteProjection.ApplyMarkerTx(txctx, scope.Tx, plan, ev, rr)
+		}
+		return nil
 	})
 	return out, err
 }

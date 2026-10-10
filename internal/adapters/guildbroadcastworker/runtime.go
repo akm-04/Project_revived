@@ -1,6 +1,6 @@
 //go:build postgres && river
 
-// Package guildbroadcastworker composes the two qualified Guild routes through
+// Package guildbroadcastworker composes the finite Broadcast and Invite Guild routes through
 // the existing River runtime and application reconciliation kernel.
 package guildbroadcastworker
 
@@ -8,15 +8,18 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"gxb.local/backend/v2/internal/adapters/guildinvitebundle"
 	"gxb.local/backend/v2/internal/adapters/postgres"
 	"gxb.local/backend/v2/internal/adapters/postgres/contentstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/guildbroadcaststore"
+	"gxb.local/backend/v2/internal/adapters/postgres/guildinvitestore"
 	"gxb.local/backend/v2/internal/adapters/postgres/i4store"
 	"gxb.local/backend/v2/internal/adapters/postgres/i5store"
 	"gxb.local/backend/v2/internal/adapters/postgres/kernelstore"
 	riveradapter "gxb.local/backend/v2/internal/adapters/river"
 	gen "gxb.local/backend/v2/internal/application/generation"
 	app "gxb.local/backend/v2/internal/application/guildbroadcast"
+	giapp "gxb.local/backend/v2/internal/application/guildinvite"
 	"gxb.local/backend/v2/internal/application/i5"
 	"gxb.local/backend/v2/internal/content/registry"
 	"gxb.local/backend/v2/internal/foundation/clock"
@@ -92,14 +95,30 @@ func newForRevision(c context.Context, p *postgres.Pool, revision string) (*Runt
 	if e != nil {
 		return nil, e
 	}
-	providers, e := gen.NewReconcileRegistry(app.Reconciler{Runner: runner, Store: guildbroadcaststore.Store{}, Sources: source, Enqueue: queue})
+	invite, e := guildinvitebundle.Prepare(c, p, runner, revision)
+	if e != nil {
+		return nil, e
+	}
+	ownerProviders := []gen.ReconcileProvider{app.Reconciler{Runner: runner, Store: guildbroadcaststore.Store{}, Sources: source, Enqueue: queue}}
+	var inviteDelivery giapp.Delivery
+	var cleanup giapp.Cleanup
+	if invite.Present {
+		inviteDelivery = giapp.Delivery{Timed: gen.TimedRunner{Binder: binder, Runner: runner}, Reads: runner, Store: guildinvitestore.Store{}, Sources: invite.Source, Players: i4store.PlayerRootLocker{}, Target: invite.Target}
+		cleanup = giapp.Cleanup{Timed: inviteDelivery.Timed, Reads: runner, Sources: invite.Source, Store: guildinvitestore.Store{}, Players: i4store.PlayerRootLocker{}, Target: invite.Target, Receipts: kernelstore.Store{}, Enqueue: queue}
+		ownerProviders = append(ownerProviders, giapp.Reconciler{Runner: runner, Store: guildinvitestore.Store{}, Sources: invite.Source, Target: invite.Target, Enqueue: queue})
+	}
+	providers, e := gen.NewReconcileRegistry(ownerProviders...)
 	if e != nil {
 		return nil, e
 	}
 	kernel := gen.ReconcileKernel{Binder: binder, Providers: providers}
 	operations := operation.Factory{Clock: clock.System{}}
 	handler := app.ReconcileHandler{Kernel: kernel, Operations: operations, Batch: app.DefaultReconcileBatch}
-	dispatch, e := gen.NewDispatchRegistry(gen.DispatchRegistration{Kind: app.MailKind, Profile: app.WorkerProfile, Handler: delivery}, gen.DispatchRegistration{Kind: app.ReconcileKind, Profile: app.WorkerProfile, Handler: handler})
+	routes := []gen.DispatchRegistration{{Kind: app.MailKind, Profile: app.WorkerProfile, Handler: delivery}, {Kind: app.ReconcileKind, Profile: app.WorkerProfile, Handler: handler}}
+	if invite.Present {
+		routes = append(routes, gen.DispatchRegistration{Kind: giapp.IssueKind, Profile: giapp.WorkerProfile, Handler: inviteDelivery}, gen.DispatchRegistration{Kind: giapp.MarkerKind, Profile: giapp.WorkerProfile, Handler: cleanup})
+	}
+	dispatch, e := gen.NewDispatchRegistry(routes...)
 	if e != nil {
 		return nil, e
 	}

@@ -40,3 +40,30 @@ func TestFiniteCodecRelationCompatibilityGiftCanonical(t *testing.T) {
 		}
 	}
 }
+
+func TestInviteU1FiniteCodecAndOldBytes(t *testing.T) {
+	source, _ := ids.ParseUUID("12345678-1234-4234-8234-123456789abc")
+	marker, _ := ids.ParseUUID("12345678-1234-4234-8234-123456789abd")
+	for _, purpose := range []ReloadPurpose{ReloadInviteMaterialized, ReloadInviteInvalidated} {
+		r := ReloadReference{Recipient: 200001, Actor: 100001, RootVersion: 3, Purpose: purpose, SourceID: source}
+		if purpose == ReloadInviteInvalidated {
+			r.MarkerID = marker
+			r.Actor = r.Recipient
+		}
+		raw, e := r.Encode()
+		if e != nil {
+			t.Fatal(e)
+		}
+		again, e := DecodeReloadReference(raw)
+		if e != nil || again != r {
+			t.Fatal(raw, again, e)
+		}
+		for _, bad := range []string{raw + "|x", strings.ToUpper(raw), strings.Replace(raw, "u1|", "g1|", 1), strings.Replace(raw, "|3|", "|03|", 1), strings.Replace(raw, source.String(), "-", 1), strings.Replace(raw, "|7|", "|6|", 1)} {
+			if bad != raw {
+				if _, e = DecodeReloadReference(bad); e == nil {
+					t.Fatal(bad)
+				}
+			}
+		}
+	}
+}

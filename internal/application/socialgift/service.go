@@ -20,18 +20,20 @@ import (
 )
 
 type Service struct {
-	Timed          gen.TimedRunner
-	Reads          tx.Runner
-	Store          Store
-	Content        ContentReader
-	Players        playerroot.TxLocker
-	Relations      RelationOwner
-	Privacy        socialrelation.FriendDMPrivacyReader
-	Inbox          socialinbox.GiftService
-	NoticeEvidence NoticeEvidence
-	Grants         GrantOwner
-	Admission      ActorAdmission
-	Fence          ActorFence
+	Invites           socialinbox.InviteNoticeReader
+	InviteConsumption socialinbox.InviteConsumptionStore
+	Timed             gen.TimedRunner
+	Reads             tx.Runner
+	Store             Store
+	Content           ContentReader
+	Players           playerroot.TxLocker
+	Relations         RelationOwner
+	Privacy           socialrelation.FriendDMPrivacyReader
+	Inbox             socialinbox.GiftService
+	NoticeEvidence    NoticeEvidence
+	Grants            GrantOwner
+	Admission         ActorAdmission
+	Fence             ActorFence
 }
 
 func Profile() tx.Profile {
@@ -249,6 +251,13 @@ func (s Service) completeClaim(c context.Context, q tx.Queryer, v ClaimOperation
 				return Result{}, false, ErrConflict
 			}
 			delete(gifts, id)
+		} else if socialinbox.InviteFamily(n.Source) {
+			if s.Invites == nil {
+				return Result{}, false, ErrConflict
+			}
+			if _, e = s.Invites.ReadImmutableInviteNoticeTx(c, q, n); e != nil {
+				return Result{}, false, e
+			}
 		} else if !socialinbox.RelationFamily(n.Source) || socialinbox.ValidateRelationLifecycle(n) != nil {
 			return Result{}, false, ErrConflict
 		}
@@ -452,6 +461,9 @@ func (s Service) Claim(c context.Context, actor identity.ActorContext, input []s
 	resolver := resolution{service: s, original: op, actor: actor, fingerprint: fp}
 	_, outcome, e := s.Timed.Run(c, bound, Profile(), tx.Options{Isolation: tx.Serializable}, tx.RetryPolicy{MaxAttempts: 3, RetryDefiniteAbort: true, AllowReplayAfterAuthoritativeNegative: false}, resolver, func(c context.Context, sc gen.TimedScope) error {
 		answer = Result{NoticeIDs: []socialinbox.NoticeID{}, TransferIDs: []string{}, Revision: content.Revision}
+		if s.Invites != nil {
+			answer.OperationStartedAtExact = op.StartedAt.UTC().Format(time.RFC3339Nano)
+		}
 		at := sc.Operation.DecisionAt()
 		if e := s.Fence.FenceActorTx(c, sc.Tx, actor, at); e != nil {
 			return e
@@ -498,6 +510,17 @@ func (s Service) Claim(c context.Context, actor identity.ActorContext, input []s
 				continue
 			}
 			switch {
+			case socialinbox.InviteFamily(n.Source):
+				if s.Invites == nil || s.InviteConsumption == nil {
+					return ErrConflict
+				}
+				if _, e = s.Invites.ReadImmutableInviteNoticeTx(c, sc.Tx, n); e != nil {
+					return e
+				}
+				if n.Active && socialinbox.PreflightConsumption(n, at) != nil {
+					return ErrClock
+				}
+				notices[id] = n
 			case socialinbox.RelationFamily(n.Source):
 				if socialinbox.ValidateRelationLifecycle(n) != nil {
 					return ErrConflict
@@ -632,7 +655,11 @@ func (s Service) Claim(c context.Context, actor identity.ActorContext, input []s
 				continue
 			}
 			changed = true
-			if n.Source.Kind == socialinbox.GiftSourceKind {
+			if socialinbox.InviteFamily(n.Source) {
+				if e := s.InviteConsumption.ConsumeInviteNoticeTx(c, sc.Tx, n, at); e != nil {
+					return e
+				}
+			} else if n.Source.Kind == socialinbox.GiftSourceKind {
 				if e := s.Inbox.ApplyConsumptionTx(c, sc.Tx, consumptions[id]); e != nil {
 					return e
 				}

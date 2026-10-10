@@ -111,7 +111,7 @@ func (s SocialReloadHandler) ReloadAndDeliver(ctx context.Context, raw string) e
 	switch intent.Purpose {
 	case socialreloadref.ReloadGiftSenderList:
 		selectors = []string{"friend_list"}
-	case socialreloadref.ReloadGiftRecipientNotice:
+	case socialreloadref.ReloadInviteMaterialized, socialreloadref.ReloadInviteInvalidated, socialreloadref.ReloadGiftRecipientNotice:
 		selectors = []string{"friend_notice"}
 	case sr.ReloadRequest:
 		selectors = []string{"friend_req"}

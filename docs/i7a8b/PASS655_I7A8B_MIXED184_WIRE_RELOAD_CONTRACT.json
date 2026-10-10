@@ -1,0 +1,141 @@
+{
+  "schema_version": 1,
+  "pass": "655.0",
+  "stage": "I7A-8B",
+  "contract_id": "I7A8B_MIXED184_WIRE_RELOAD_CONTRACT",
+  "id": "B4",
+  "status": "PROPOSED_COMPLETED_DESIGN_REQUIRES_VALIDATED_NORMAL655_SELECTION",
+  "classification": "SOURCE_STATIC_IMPLEMENTATION_DECISION_NOT_PRODUCT_RUNTIME",
+  "base_backend_sha256": "40cd6059e301598e193a84c10521b1f825b1ddf41fced9c4b40fcace7cbe7260",
+  "immutable_foundation_bindings": [
+    {
+      "id": "D01",
+      "path": "00_PASSMAP/PASS463_DESIGNS/D01.json",
+      "sha256": "34ddc24af8cd3028366b1c672ead2a1ed1cad2207c5adc80cc151f45edbc851e"
+    },
+    {
+      "id": "D02",
+      "path": "00_PASSMAP/PASS475_DESIGNS/D02.json",
+      "sha256": "bfbe47718fdbee32df8fe7eec5439bce69e2c906b386c9dfd06706ae352cecfb"
+    },
+    {
+      "id": "D03",
+      "path": "00_PASSMAP/PASS475_DESIGNS/D03.json",
+      "sha256": "77cfe501bb874e862702d7553aafa2a748b67b38bc2679d9b5f6967cee8e423a"
+    },
+    {
+      "id": "D04",
+      "path": "00_PASSMAP/PASS463_DESIGNS/D04.json",
+      "sha256": "639a75c504c31e55ab7309854050610029f056a20a5d4704129759b2a3ed41b5"
+    },
+    {
+      "id": "D05",
+      "path": "00_PASSMAP/PASS475_DESIGNS/D05.json",
+      "sha256": "20927a3640e39005669601f2154d7425c661ebf1c435dbeb791408e076faf368"
+    },
+    {
+      "id": "D06",
+      "path": "00_PASSMAP/PASS475_DESIGNS/D06.json",
+      "sha256": "35edbb372ea726e4eb1077b9cd36b7bc0169a8c3b46572efac8be38745ff023f"
+    },
+    {
+      "id": "D07",
+      "path": "00_PASSMAP/PASS475_DESIGNS/D07.json",
+      "sha256": "29042b4691e5af17c7ce7f0ce08b52eaf3c4d393ec459b01775d01b738c06c95"
+    },
+    {
+      "id": "D08",
+      "path": "00_PASSMAP/PASS463_DESIGNS/D08.json",
+      "sha256": "71d4a9884bf9c2692ee3313edd3367a8db89c91a2dc0af197eee420fb7c175fd"
+    },
+    {
+      "id": "D09",
+      "path": "00_PASSMAP/PASS475_DESIGNS/D09.json",
+      "sha256": "8ebdecc274b084c103169dea764d16267a3a08db3d357b36b960e42bae1fdd82"
+    },
+    {
+      "id": "D10",
+      "path": "00_PASSMAP/PASS475_DESIGNS/D10.json",
+      "sha256": "5f44fded332a3b37459e7e2ba12a906ada4187dabb0a9b153a01cea959fe4932"
+    },
+    {
+      "id": "D11",
+      "path": "00_PASSMAP/PASS475_DESIGNS/D11.json",
+      "sha256": "c939268d7e67a73edbb849cb1c00b847adc0f09d07e4418e5e2bbc90ab39b62b"
+    },
+    {
+      "id": "D12",
+      "path": "00_PASSMAP/PASS463_DESIGNS/D12.json",
+      "sha256": "ffe22db54162940466e909a298c5c5907a2a0bd14fb597991c64357981c74f72"
+    },
+    {
+      "id": "D13",
+      "path": "00_PASSMAP/PASS463_DESIGNS/D13.json",
+      "sha256": "323563f4f2af0d53c1f6ffdf99d7bb28bec241bb60d1e883e24aac2858cf2745"
+    },
+    {
+      "id": "D14",
+      "path": "00_PASSMAP/PASS463_DESIGNS/D14.json",
+      "sha256": "45cd98a6ac2735b108122d60d593d96786f498d198c0a590d59ed39d999c8c62"
+    },
+    {
+      "id": "I7A1_PHASE_ARCHITECTURE_CONTRACT",
+      "path": "00_PASSMAP/PASS622_I7A1_PHASE_ARCHITECTURE_CONTRACT.json",
+      "sha256": "c870861afc84378d18b62d867823a3fb9969cf04452067479f8776f7aac96362"
+    },
+    {
+      "id": "I7A1_TRANSACTION_LOCK_EFFECT_CONTRACT",
+      "path": "00_PASSMAP/PASS622_I7A1_TRANSACTION_LOCK_EFFECT_CONTRACT.json",
+      "sha256": "c4e11cbab1a7193fd7575229f76a1322128273047d599e08deac7993959f85f8"
+    },
+    {
+      "id": "I7A1_DELIVERY_RECOVERY_WIRE_CONTRACT",
+      "path": "00_PASSMAP/PASS622_I7A1_DELIVERY_RECOVERY_WIRE_CONTRACT.json",
+      "sha256": "80964805f03f8b6f9d3324283a82248db512db57950a9fc1e2ffe6f00b0729b6"
+    },
+    {
+      "id": "I7A1_TIME_CONTENT_POLICY_REGISTER",
+      "path": "00_PASSMAP/PASS622_I7A1_TIME_CONTENT_POLICY_REGISTER.json",
+      "sha256": "4b4cb9801cb35a9cab4cd11f706abf2c28be6addcc00297eb524e0fbb9face5a"
+    },
+    {
+      "id": "I7A1_MIGRATION_RESTORE_PROOF_CONTRACT",
+      "path": "00_PASSMAP/PASS622_I7A1_MIGRATION_RESTORE_PROOF_CONTRACT.json",
+      "sha256": "11d72e984bee246982cafd0e849f206aabb5e6a42d5393b50042be87b5896e88"
+    },
+    {
+      "id": "I7A1_STAGE_ACCEPTANCE_CONTRACT",
+      "path": "00_PASSMAP/PASS622_I7A1_STAGE_ACCEPTANCE_CONTRACT.json",
+      "sha256": "a4266a4234d83db34ba3fa0e58599c8764385260b1a87b5ca057d3b64fbb5a55"
+    },
+    {
+      "id": "I7A1_EVIDENCE_CLASSIFICATION",
+      "path": "00_PASSMAP/PASS622_I7A1_EVIDENCE_CLASSIFICATION.json",
+      "sha256": "f129b63c7afe95f5f6850ddbb81868eb1eba82c956240f2dd5f017617cc56457"
+    },
+    {
+      "id": "I7A1_PREIMPLEMENTATION_REALITY_CHECK",
+      "path": "00_PASSMAP/PASS622_I7A1_PREIMPLEMENTATION_REALITY_CHECK.json",
+      "sha256": "62d75cc680b3ae8570f355b9c03ae2e99703e4809cc2e8dfa77d61dfb4879d96"
+    }
+  ],
+  "qualified8A_successor": {
+    "path": "00_PASSMAP/PASS654_I7A8A_SUCCESSOR_CONTRACT.json",
+    "sha256": "08ddb9d34e51493a6209dbe8c78da997de92714b38f983ce2b026994cdbfa14d"
+  },
+  "rules": [
+    {
+      "section": "Qualified read,184 and reload consumers",
+      "rule": "The additive8B qualified read gathers a bounded prefix of at most4096 Notice rows in128 keyset pages and typed Guild snapshots before shared observation. It qualifies Relation/Gift/type10 and selects the newest50 eligible rows; invalid newer Invite rows do not occupy the50 slots. Pagination/time/ID/order/finite family corruption fail closed. Deleted inviter rows are hidden without erasing source evidence. Selected type10 DTO adds exactly Guild ID/name to the existing notice_id/type/time/player_info fields; other families retain byte/shape behavior. MID176 known replay still returns current valid Social state and original private messages; all Guild work is before FriendDM380 and any error prevents drain.\n\nMID184 extends the existing whole-batch SocialGift orchestration: first canonical deduplication, all recognized Notice locks, type10 immutable source/target evidence and clock/version preflight alongside Relation/Gift, then all required GiftEpoch371/Transfer372 and one I5 Grant. Type10 adds no Grant, membership, Invite cancellation or wakeup. Dismissal affects only SocialInbox and root version, and complete Claim replay validates the type10 tuple/target proof after source expiry, retirement or related-player deletion. A malformed recognized type10 anywhere in a mixed batch rolls back all Gift entitlement/scalar/dismissal changes. Unknown families keep the established finite ignore policy. Exact source-dependent immutable proof can be read through typed ports; no new Guild lock is acquired after Notice370 or Gift/I5 effects.\n\nExtend the neutral reload codec with finite `u1` Guild references and two purposes: first materialized Invite Notice and canonical lifecycle invalidation. r1/g1 encodings remain byte-identical. New reference contains recipient/actor/rootVersion and immutable issue/marker UUIDs only; tuple/current generation comes from canonical source reload, not reference payload. First materialization reload requires complete target/Notice source and current Guild validity at shared observedAt; stale/replaced/expired/JOINed/retired sources suppress the hint. Invalidation reload requires complete target invalidation marker/issue proof. Root fencing, actor/source equality, serving handle authority and current WORLD connWriter remain mandatory.\n\nHints are emitted only after the first definite target commit (or first invalidation change), through the existing bounded post-commit SocialWakeupEmitter. A replay or UNKNOWN-positive recovery does not emit another hint. Loss after canonical commit is acceptable acceleration loss and is recovered by canonical176/189/reconnect views, not a new durable bus. MID184 emits no hint. The realtime handler adds only `friend_notice` selector for the finite Guild purposes, preserving all old purpose encodings and selectors."
+    },
+    {
+      "section": "Evidence and current behavior",
+      "rule": "Current locked `src_64` shows FriendNoticeType.GUILD_INVITE=10; INVITE_TO_GUILD=2563, ACCEPT_INVITE_TO_GUILD=2564, READ_NOTICE=184, LOAD_FRIENDS=176 and LOAD_FRIEND_INFO=189. SocialSystemWindow.createGuildInviteItemContent reads `player_info`, `guild_name`, `guild_id`, Notice ID/type/time; the agree button sends Guild2564 with Guild ID, while refuse invokes184. If already a member, the client dismisses all type10 presentation; after successful2564 it removes all type10 locally. This does not authorize184 to join Guild or cancel Invite. Historical v1.164 client has the same essential type10 name/accept/dismiss flow. V1 Guild handlers contain empty compatibility structures rather than an implemented Invite/notice transaction oracle. APK/smali and probe ZIP identities are retained in the locked five-oracle set; their presence is not native execution or original-server proof. No original Invite lifetime, name snapshot or exactly-once stock-client semantics are claimed.\n\nAccepted I6C owns Guild, current Invite and membership events. Invite currently derives a positive random generation from trusted operation entropy. It skips creation when `at <= expires_at`; AcceptInvite instead requires `at < expires_at`. This exact-expiry disagreement needs a narrow reconstruction policy amendment. Invite creation atomically appends its send event, audit and semantic receipt. Invite rows can be deleted by acceptance/retirement and replaced after expiry. The generation is present in retained semantic receipt identity, so the Foundation owner can supply a narrow typed high-water witness without Guild code querying receipt SQL.\n\nAll four JOIN producers exist: Create, immediate ApplyOrJoin, AcceptApplication, AcceptInvite. AppendMembershipEventTx currently returns error only, although the database has a retained event_id. MembershipVersion resets after departure and is not an incarnation identity. Realtime's existing typed Guild binding already uses exact JOIN event ID. Dissolve retires the Guild root, removes its memberships/applications/invites, appends DISSOLVE/audit and a receipt; Guild IDs are allocator-backed and not reused. New projection facts must survive those deletions and remain separate from SocialInbox.\n\nSocialInbox already owns globally safe numeric Notice IDs, typed source uniqueness, dismissal tombstones and related-player FK-to-NULL lifecycle. Its existing narrow creation/dismissal ports accept Relation or Gift, not type10. SocialProjection's qualifiedWindow scans128 keyset rows at a time with a4096 evaluation budget and takes50 after qualification. It recognizes only Relation/Gift. SocialGift184 first deduplicates IDs, validates the entire recognized batch, then performs at most one aggregate I5 Gift Grant and records a ClaimOperation. Both fresh preflight and completeClaim replay need type10 recognition; extending only the fresh switch would break positive replay.\n\nMID176's FriendDM composition reads SocialProjection in the caller transaction before PrepareDrainTx/ApplyDrainTx at rank380. Known176 replay reads current Social views while preserving its original private-message result, without draining again. Guild validity reads must finish before this destructive boundary and before the shared observation. The existing presentation reader samples its own database clock after minimal profile reads. Calling a new expiry clock and then this old reader would violate the one-observation rule.\n\nThe WORLD Social reload bridge already carries finite `r1` relation and `g1` Gift references, reloads canonical owner state, observes once and emits stock type140 `friend_notice`/other finite selectors through current writer-backed WORLD handles. It is post-commit acceleration only. New Guild references belong on this same bridge and listener; neither184 nor jobs supply projection facts or create a fourth bus."
+    }
+  ],
+  "no_foreign_owner_sql": true,
+  "implementation_authorized_by_latest_human_after_selection": true,
+  "product_accepted": false,
+  "i7a8_phase_accepted": false,
+  "i7a10_e_w2_accepted": false
+}

@@ -116,10 +116,16 @@
       "stage": "I7A-8A",
       "compiler_version": "i7a8a-guild-broadcast",
       "parser_version": "lua-generated-v17-guild-broadcast"
+    },
+    {
+      "ordinal": 20,
+      "stage": "I7A-8B",
+      "compiler_version": "i7a8b-guild-invite",
+      "parser_version": "lua-generated-v18-guild-invite"
     }
   ],
   "current": {
-    "compiler_version": "i7a8a-guild-broadcast",
-    "parser_version": "lua-generated-v17-guild-broadcast"
+    "compiler_version": "i7a8b-guild-invite",
+    "parser_version": "lua-generated-v18-guild-invite"
   }
 }

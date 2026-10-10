@@ -2065,6 +2065,108 @@
       "migration": "migrations/00037_guild_broadcast.sql",
       "owner": "GuildBroadcast",
       "write_exceptions": []
+    },
+    "guild_invite_projection_cursors": {
+      "owner": "GuildInviteProjection",
+      "migration": "migrations/00038_guild_invite_projection.sql",
+      "allowed_query_owners": [
+        "GuildInviteProjection"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/guildinvitestore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/guildinvitestore/"
+      ],
+      "write_exceptions": []
+    },
+    "guild_invite_projection_sources": {
+      "owner": "GuildInviteProjection",
+      "migration": "migrations/00038_guild_invite_projection.sql",
+      "allowed_query_owners": [
+        "GuildInviteProjection"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/guildinvitestore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/guildinvitestore/"
+      ],
+      "write_exceptions": []
+    },
+    "guild_invite_projection_deliveries": {
+      "owner": "GuildInviteProjection",
+      "migration": "migrations/00038_guild_invite_projection.sql",
+      "allowed_query_owners": [
+        "GuildInviteProjection"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/guildinvitestore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/guildinvitestore/"
+      ],
+      "write_exceptions": []
+    },
+    "guild_invite_projection_markers": {
+      "owner": "GuildInviteProjection",
+      "migration": "migrations/00038_guild_invite_projection.sql",
+      "allowed_query_owners": [
+        "GuildInviteProjection"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/guildinvitestore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/guildinvitestore/"
+      ],
+      "write_exceptions": []
+    },
+    "social_guild_invite_materializations": {
+      "owner": "social-inbox",
+      "migration": "migrations/00038_guild_invite_projection.sql",
+      "allowed_query_owners": [
+        "social-inbox"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/socialinboxstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/socialinboxstore/"
+      ],
+      "write_exceptions": []
+    },
+    "social_guild_invite_invalidations": {
+      "owner": "social-inbox",
+      "migration": "migrations/00038_guild_invite_projection.sql",
+      "allowed_query_owners": [
+        "social-inbox"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/socialinboxstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/socialinboxstore/"
+      ],
+      "write_exceptions": []
+    },
+    "content_guild_invite_policies": {
+      "allowed_query_owners": [
+        "content-registry"
+      ],
+      "allowed_read_paths": [
+        "sql/content/",
+        "internal/adapters/postgres/contentstore/",
+        "internal/adapters/postgres/contentqueries/"
+      ],
+      "allowed_write_paths": [
+        "sql/content/",
+        "internal/adapters/postgres/contentstore/",
+        "internal/adapters/postgres/contentqueries/"
+      ],
+      "migration": "migrations/00038_guild_invite_projection.sql",
+      "owner": "content-registry",
+      "write_exceptions": []
     }
   }
 }

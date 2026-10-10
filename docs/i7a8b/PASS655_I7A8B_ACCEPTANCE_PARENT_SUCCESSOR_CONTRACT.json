@@ -1,0 +1,137 @@
+{
+  "schema_version": 1,
+  "pass": "655.0",
+  "stage": "I7A-8B",
+  "contract_id": "I7A8B_ACCEPTANCE_PARENT_SUCCESSOR_CONTRACT",
+  "id": "B6",
+  "status": "PROPOSED_COMPLETED_DESIGN_REQUIRES_VALIDATED_NORMAL655_SELECTION",
+  "classification": "SOURCE_STATIC_IMPLEMENTATION_DECISION_NOT_PRODUCT_RUNTIME",
+  "base_backend_sha256": "40cd6059e301598e193a84c10521b1f825b1ddf41fced9c4b40fcace7cbe7260",
+  "immutable_foundation_bindings": [
+    {
+      "id": "D01",
+      "path": "00_PASSMAP/PASS463_DESIGNS/D01.json",
+      "sha256": "34ddc24af8cd3028366b1c672ead2a1ed1cad2207c5adc80cc151f45edbc851e"
+    },
+    {
+      "id": "D02",
+      "path": "00_PASSMAP/PASS475_DESIGNS/D02.json",
+      "sha256": "bfbe47718fdbee32df8fe7eec5439bce69e2c906b386c9dfd06706ae352cecfb"
+    },
+    {
+      "id": "D03",
+      "path": "00_PASSMAP/PASS475_DESIGNS/D03.json",
+      "sha256": "77cfe501bb874e862702d7553aafa2a748b67b38bc2679d9b5f6967cee8e423a"
+    },
+    {
+      "id": "D04",
+      "path": "00_PASSMAP/PASS463_DESIGNS/D04.json",
+      "sha256": "639a75c504c31e55ab7309854050610029f056a20a5d4704129759b2a3ed41b5"
+    },
+    {
+      "id": "D05",
+      "path": "00_PASSMAP/PASS475_DESIGNS/D05.json",
+      "sha256": "20927a3640e39005669601f2154d7425c661ebf1c435dbeb791408e076faf368"
+    },
+    {
+      "id": "D06",
+      "path": "00_PASSMAP/PASS475_DESIGNS/D06.json",
+      "sha256": "35edbb372ea726e4eb1077b9cd36b7bc0169a8c3b46572efac8be38745ff023f"
+    },
+    {
+      "id": "D07",
+      "path": "00_PASSMAP/PASS475_DESIGNS/D07.json",
+      "sha256": "29042b4691e5af17c7ce7f0ce08b52eaf3c4d393ec459b01775d01b738c06c95"
+    },
+    {
+      "id": "D08",
+      "path": "00_PASSMAP/PASS463_DESIGNS/D08.json",
+      "sha256": "71d4a9884bf9c2692ee3313edd3367a8db89c91a2dc0af197eee420fb7c175fd"
+    },
+    {
+      "id": "D09",
+      "path": "00_PASSMAP/PASS475_DESIGNS/D09.json",
+      "sha256": "8ebdecc274b084c103169dea764d16267a3a08db3d357b36b960e42bae1fdd82"
+    },
+    {
+      "id": "D10",
+      "path": "00_PASSMAP/PASS475_DESIGNS/D10.json",
+      "sha256": "5f44fded332a3b37459e7e2ba12a906ada4187dabb0a9b153a01cea959fe4932"
+    },
+    {
+      "id": "D11",
+      "path": "00_PASSMAP/PASS475_DESIGNS/D11.json",
+      "sha256": "c939268d7e67a73edbb849cb1c00b847adc0f09d07e4418e5e2bbc90ab39b62b"
+    },
+    {
+      "id": "D12",
+      "path": "00_PASSMAP/PASS463_DESIGNS/D12.json",
+      "sha256": "ffe22db54162940466e909a298c5c5907a2a0bd14fb597991c64357981c74f72"
+    },
+    {
+      "id": "D13",
+      "path": "00_PASSMAP/PASS463_DESIGNS/D13.json",
+      "sha256": "323563f4f2af0d53c1f6ffdf99d7bb28bec241bb60d1e883e24aac2858cf2745"
+    },
+    {
+      "id": "D14",
+      "path": "00_PASSMAP/PASS463_DESIGNS/D14.json",
+      "sha256": "45cd98a6ac2735b108122d60d593d96786f498d198c0a590d59ed39d999c8c62"
+    },
+    {
+      "id": "I7A1_PHASE_ARCHITECTURE_CONTRACT",
+      "path": "00_PASSMAP/PASS622_I7A1_PHASE_ARCHITECTURE_CONTRACT.json",
+      "sha256": "c870861afc84378d18b62d867823a3fb9969cf04452067479f8776f7aac96362"
+    },
+    {
+      "id": "I7A1_TRANSACTION_LOCK_EFFECT_CONTRACT",
+      "path": "00_PASSMAP/PASS622_I7A1_TRANSACTION_LOCK_EFFECT_CONTRACT.json",
+      "sha256": "c4e11cbab1a7193fd7575229f76a1322128273047d599e08deac7993959f85f8"
+    },
+    {
+      "id": "I7A1_DELIVERY_RECOVERY_WIRE_CONTRACT",
+      "path": "00_PASSMAP/PASS622_I7A1_DELIVERY_RECOVERY_WIRE_CONTRACT.json",
+      "sha256": "80964805f03f8b6f9d3324283a82248db512db57950a9fc1e2ffe6f00b0729b6"
+    },
+    {
+      "id": "I7A1_TIME_CONTENT_POLICY_REGISTER",
+      "path": "00_PASSMAP/PASS622_I7A1_TIME_CONTENT_POLICY_REGISTER.json",
+      "sha256": "4b4cb9801cb35a9cab4cd11f706abf2c28be6addcc00297eb524e0fbb9face5a"
+    },
+    {
+      "id": "I7A1_MIGRATION_RESTORE_PROOF_CONTRACT",
+      "path": "00_PASSMAP/PASS622_I7A1_MIGRATION_RESTORE_PROOF_CONTRACT.json",
+      "sha256": "11d72e984bee246982cafd0e849f206aabb5e6a42d5393b50042be87b5896e88"
+    },
+    {
+      "id": "I7A1_STAGE_ACCEPTANCE_CONTRACT",
+      "path": "00_PASSMAP/PASS622_I7A1_STAGE_ACCEPTANCE_CONTRACT.json",
+      "sha256": "a4266a4234d83db34ba3fa0e58599c8764385260b1a87b5ca057d3b64fbb5a55"
+    },
+    {
+      "id": "I7A1_EVIDENCE_CLASSIFICATION",
+      "path": "00_PASSMAP/PASS622_I7A1_EVIDENCE_CLASSIFICATION.json",
+      "sha256": "f129b63c7afe95f5f6850ddbb81868eb1eba82c956240f2dd5f017617cc56457"
+    },
+    {
+      "id": "I7A1_PREIMPLEMENTATION_REALITY_CHECK",
+      "path": "00_PASSMAP/PASS622_I7A1_PREIMPLEMENTATION_REALITY_CHECK.json",
+      "sha256": "62d75cc680b3ae8570f355b9c03ae2e99703e4809cc2e8dfa77d61dfb4879d96"
+    }
+  ],
+  "qualified8A_successor": {
+    "path": "00_PASSMAP/PASS654_I7A8A_SUCCESSOR_CONTRACT.json",
+    "sha256": "08ddb9d34e51493a6209dbe8c78da997de92714b38f983ce2b026994cdbfa14d"
+  },
+  "rules": [
+    {
+      "section": "Implementation task sequence and gate design",
+      "rule": "After this entire picture is source/contract/model-reviewed and selected through a normal preimplementation publication:\n\n1. Domain/source models, typed generation/JOIN/current-proof ports, migration38 and compiler capability with immutable baseline checks.\n2. Complete prepared source hooks across Invite/all four JOIN/retirement, core replay/UNKNOWN proof and same-transaction finite enqueue; test source effects and rollback before target wiring.\n3. SocialInbox fixed-source materialize/invalidate commands, terminal witnesses/tombstones, separate Guild ACK and bounded page cursor/reconciliation; test crash/unknown/orphan/races.\n4. Same-transaction qualified read/shared observation, exact type10 DTO and full mixed184 preflight/replay; test owner/clock/drain boundaries before HTTP composition.\n5. Existing WORLD bridge finite u1 codec/consumer and post-commit first-only emitter; combined API/worker explicit deploy/readiness with old catalog fallback and strict stored-job handling.\n6. Freeze a new clean combined candidate, use the exact supplied pinned toolbox for all new native/process/recovery rows and all applicable8A regression requirements, reconcile, verify cumulative checkpoint and explicit parent8 reality/contract registry/normal publication closure.\n\nThe candidate gate must include real concurrent and rollback source tests for all four JOIN producers, exact-expiry/cursor exhaustion/pre8 compatibility, target replay/dismissal/deletion/orphan proof, bounded large retirement fanout, creation/cleanup races, target commit-before-sourceACK SIGKILL recovery, positive/absent UNKNOWN, missing job recovery, stale/future clock and rollback cursor holes,128/4096/50 invalid-newer refill,176 replay/no drain on Guild failure, mixed184 single Grant and whole-batch corruption rollback, real HTTP2563/2564/184/176/189 and stock type140 current WORLD path, forged/stale u1 while old r1/g1 remain unchanged, listener/process restart, owner refusal/loss/drain, exact readiness/old pointer preservation/explicit deploy, populated37→38 and complete joint restore/second restart. Existing8A code/source/mail/process behavior must be requalified on the new combined candidate. Final parent8 review separately checks C01-C14,22 immutable foundations, all existing4/5/6/7/8A successor obligations and every new8B contract, without claiming I7A10/E/physical W2 or original-server semantics.\n\nThese seams are resolved in the primary design review below; required native proof remains deferred to the new exact combined candidate."
+    }
+  ],
+  "no_foreign_owner_sql": true,
+  "implementation_authorized_by_latest_human_after_selection": true,
+  "product_accepted": false,
+  "i7a8_phase_accepted": false,
+  "i7a10_e_w2_accepted": false
+}

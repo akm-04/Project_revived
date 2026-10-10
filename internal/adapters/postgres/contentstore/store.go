@@ -181,6 +181,8 @@ func (Store) InsertAppearance(ctx context.Context, t tx.Tx, b registry.Bundle) (
 	return n, err
 }
 
+const verifyGuildInviteSQL = `SELECT count(*)=1 AND COALESCE(bool_and(payload=$2::jsonb),false),count(*) FROM content_guild_invite_policies WHERE revision_id=$1`
+
 const verifyGuildBroadcastSQL = `SELECT count(*)=1 AND COALESCE(bool_and(payload=$2::jsonb),false),count(*) FROM content_guild_broadcast_policies WHERE revision_id=$1`
 
 const verifySocialGiftSQL = `SELECT count(*)=1 AND COALESCE(bool_and(payload=$2::jsonb),false) FROM content_social_gift_catalogs WHERE revision_id=$1`
@@ -209,6 +211,12 @@ func (Store) VerifyRevision(ctx context.Context, q tx.Queryer, b registry.Bundle
 	var broadcastExact bool
 	err = q.QueryRow(ctx, verifyGuildBroadcastSQL, b.RevisionID(), string(b.GuildBroadcastJSON())).Scan(&broadcastExact, &v.GuildBroadcastCount)
 	v.Exact = v.Exact && broadcastExact
+	if err != nil {
+		return v, err
+	}
+	var inviteExact bool
+	err = q.QueryRow(ctx, verifyGuildInviteSQL, b.RevisionID(), string(b.GuildInviteJSON())).Scan(&inviteExact, &v.GuildInviteCount)
+	v.Exact = v.Exact && inviteExact
 	return v, err
 }
 
@@ -572,4 +580,18 @@ func (Store) InsertGuildBroadcast(ctx context.Context, t tx.Tx, b registry.Bundl
 	}
 	tag, e := t.Exec(ctx, `INSERT INTO content_guild_broadcast_policies(revision_id,payload)VALUES($1,$2::jsonb)`, b.RevisionID(), string(b.GuildBroadcastJSON()))
 	return tag.RowsAffected(), e
+}
+
+func (Store) InsertGuildInvite(c context.Context, t tx.Tx, b registry.Bundle) (int64, error) {
+	if t == nil {
+		return 0, errors.New("content store: nil transaction")
+	}
+	tag, e := t.Exec(c, `INSERT INTO content_guild_invite_policies(revision_id,payload)VALUES($1,$2::jsonb)`, b.RevisionID(), string(b.GuildInviteJSON()))
+	if e != nil {
+		return 0, e
+	}
+	if tag == nil {
+		return 0, errors.New("content store: missing insert count")
+	}
+	return tag.RowsAffected(), nil
 }
