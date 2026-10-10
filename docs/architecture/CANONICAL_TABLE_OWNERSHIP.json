@@ -2167,6 +2167,48 @@
       "migration": "migrations/00038_guild_invite_projection.sql",
       "owner": "content-registry",
       "write_exceptions": []
+    },
+    "publication_sets": {
+      "owner": "Publication",
+      "migration": "migrations/00039_publication_v1.sql",
+      "allowed_query_owners": [
+        "Publication"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/publicationstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/publicationstore/"
+      ],
+      "write_exceptions": []
+    },
+    "publication_items": {
+      "owner": "Publication",
+      "migration": "migrations/00039_publication_v1.sql",
+      "allowed_query_owners": [
+        "Publication"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/publicationstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/publicationstore/"
+      ],
+      "write_exceptions": []
+    },
+    "publication_picture_reads": {
+      "owner": "Publication",
+      "migration": "migrations/00039_publication_v1.sql",
+      "allowed_query_owners": [
+        "Publication"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/publicationstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/publicationstore/"
+      ],
+      "write_exceptions": []
     }
   }
 }
