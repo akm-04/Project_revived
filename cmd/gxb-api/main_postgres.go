@@ -27,6 +27,7 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres/i5store"
 	"gxb.local/backend/v2/internal/adapters/postgres/kernelstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/presencestore"
+	"gxb.local/backend/v2/internal/adapters/postgres/publicationstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/socialgiftstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/socialinboxstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/socialrelationstore"
@@ -47,6 +48,7 @@ import (
 	"gxb.local/backend/v2/internal/application/guildview"
 	appi5 "gxb.local/backend/v2/internal/application/i5"
 	appidentity "gxb.local/backend/v2/internal/application/identitylifecycle"
+	apppublication "gxb.local/backend/v2/internal/application/publication"
 	apprealtime "gxb.local/backend/v2/internal/application/realtimeauth"
 	"gxb.local/backend/v2/internal/application/socialdismiss"
 	"gxb.local/backend/v2/internal/application/socialfriendbase"
@@ -62,6 +64,7 @@ import (
 	"gxb.local/backend/v2/internal/foundation/config"
 	"gxb.local/backend/v2/internal/foundation/observability"
 	"gxb.local/backend/v2/internal/foundation/operation"
+	"gxb.local/backend/v2/internal/foundation/policy"
 	"gxb.local/backend/v2/internal/foundation/tx"
 	"gxb.local/backend/v2/internal/projection/lobby"
 	"gxb.local/backend/v2/internal/protocol/httpedge"
@@ -232,7 +235,7 @@ func main() {
 		}
 	}
 	prelogin := stockruntime.PreloginDispatcher{PublicEngineURL: cfg.PublicEngineURL, Tracker: tracker}
-	for _, mid := range []uint16{2, 7, 2864, 20480} {
+	for _, mid := range []uint16{2, 2864, 20480} {
 		mustRegister(mid, prelogin)
 	}
 	boot := stockruntime.BootstrapDispatcher{Bootstrap: bootstrap, Tracker: tracker, ClientLogURL: cfg.ClientLogURL}
@@ -240,10 +243,37 @@ func main() {
 	mustRegister(1, boot)
 	mustRegister(192, stockruntime.DiscoveryDispatcher{Realtime: realtime, Tracker: tracker})
 	lobbyD := stockruntime.LobbyDispatcher{Authority: authority, Tracker: tracker}
-	for _, mid := range []uint16{56, 1056, 1302, 1344, 2754, 2784, 8193} {
+	for _, mid := range []uint16{56, 1056, 1302, 1344, 2754, 2784} {
 		mustRegister(mid, lobbyD)
 	}
 	socialTimed := appgeneration.TimedRunner{Binder: appgeneration.Binder{Time: postgres.AuthoritativeTime{Queryer: pool}}, Runner: runner}
+	publicationDB := publicationstore.Store{}
+	if err := publicationDB.CheckSchema(ctx, pool); err != nil {
+		log.Fatal(err)
+	}
+	publicationService := apppublication.Service{Timed: socialTimed, Store: publicationDB, PlayerRoots: i4store.PlayerRootLocker{}, Fence: i5db, Evidence: pool}
+	if file := os.Getenv("GXB_PUBLICATION_FILE"); file != "" {
+		f, err := os.Open(file)
+		if err != nil {
+			log.Fatal(err)
+		}
+		input, err := stockruntime.DecodePublicationInput(f)
+		f.Close()
+		if err != nil {
+			log.Fatal(err)
+		}
+		op, err := (operation.Factory{Clock: clock.System{}}).New(policy.Set{})
+		if err != nil {
+			log.Fatal(err)
+		}
+		if err = publicationService.Install(ctx, op, input); err != nil {
+			log.Fatal(err)
+		}
+	}
+	publicationDispatcher := stockruntime.PublicationDispatcher{Authority: authority, Service: publicationService, Tracker: tracker}
+	for _, mid := range []uint16{7, 1537, 8193, 8194} {
+		mustRegister(mid, publicationDispatcher)
+	}
 	socialRelationDB := socialrelationstore.Store{}
 	socialInboxDB := socialinboxstore.Store{}
 	socialPresentation := socialpresentation.TransactionReader{}

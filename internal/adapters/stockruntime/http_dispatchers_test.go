@@ -200,7 +200,7 @@ func TestPreloginDispatcherStockShapes(t *testing.T) {
 		t.Fatalf("version=%+v", version)
 	}
 	announce := d.Dispatch(context.Background(), mk(7, nil))
-	if announce.HTTPStatus != 200 || announce.Body["contents"] != "{}" {
+	if announce.HTTPStatus != 200 || announce.Body["contents"] != "{\"contents\":[]}" {
 		t.Fatalf("announce=%+v", announce)
 	}
 	ab := d.Dispatch(context.Background(), mk(2864, map[string]any{"unique_key": "mtspy"}))

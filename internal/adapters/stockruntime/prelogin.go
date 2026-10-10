@@ -35,7 +35,7 @@ func (d PreloginDispatcher) Dispatch(_ context.Context, req httpedge.DispatchReq
 			"is_appstore": int64(0), "is_inapp": int64(0), "is_review": int64(0), "need_restart": int64(0),
 		}}
 	case 7: // LOAD_ANNOUNCE: LoginWindow json-decodes this field.
-		return httpedge.Response{HTTPStatus: http.StatusOK, Body: map[string]any{"contents": "{}"}}
+		return httpedge.Response{HTTPStatus: http.StatusOK, Body: map[string]any{"contents": "{\"contents\":[]}"}}
 	case 2864: // GET_PLAYER_GROUP_BY_KEY: source consumes a JSON scalar.
 		key, _ := req.Envelope.Params["unique_key"].(string)
 		if strings.EqualFold(strings.TrimSpace(key), "mtspy") {
