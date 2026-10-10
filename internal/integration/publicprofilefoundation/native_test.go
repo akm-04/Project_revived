@@ -511,7 +511,7 @@ func TestActorRevocationAndExpiryFences(t *testing.T) {
 	done := make(chan error, 1)
 	go func() {
 		close(started)
-		_, e := p.Raw().Exec(ctx, "UPDATE account_sessions SET revoked_at=$2,liveness_version=liveness_version+1 WHERE session_id=$1", a.SessionID.UUID().String(), at)
+		_, e := p.Raw().Exec(ctx, "UPDATE account_sessions SET revoked_at=$2,revocation_reason='native-qualification',liveness_version=liveness_version+1 WHERE session_id=$1", a.SessionID.UUID().String(), at)
 		done <- e
 	}()
 	<-started
