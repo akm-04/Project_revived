@@ -88,7 +88,7 @@ func actor(t *testing.T, p *pg.Pool) identity.ActorContext {
 	}{
 		{`INSERT INTO accounts(account_id,account_uid,status,created_at)VALUES($1,$2,'ACTIVE',clock_timestamp())`, []any{a.String(), a.String()}},
 		{`INSERT INTO players(player_id,account_id,logical_server_id,created_at,bootstrap_profile_version)VALUES($1,$2,1,clock_timestamp(),'i7b2a-native')`, []any{pid, a.String()}},
-		{`INSERT INTO account_sessions(session_id,account_id,auth_profile,issued_at,last_activity_at)VALUES($1,$2,'i7b2a-native',clock_timestamp(),clock_timestamp())`, []any{s.String(), a.String()}},
+		{`INSERT INTO account_sessions(session_id,account_id,auth_profile,issued_at,last_activity_at)VALUES($1,$2,'i7b2a-native',$3,$3)`, []any{s.String(), a.String(), at.Add(-time.Hour)}},
 		{`INSERT INTO gameplay_contexts(context_id,session_id,account_id,logical_server_id,player_id,context_generation,created_at)VALUES($1,$2,$3,1,$4,1,clock_timestamp())`, []any{g.String(), s.String(), a.String(), pid}},
 		{`INSERT INTO player_profiles(player_id,display_name,avatar_id,avatar_frame_id,player_type,state_version,created_at,updated_at)VALUES($1,'basis',1,0,0,1,$2::timestamptz-interval '1 day',$2)`, []any{pid, at}},
 		{`INSERT INTO player_progression(player_id,level,exp,state_version,updated_at)VALUES($1,1,0,1,$2)`, []any{pid, at}},
@@ -503,6 +503,7 @@ func TestActorRevocationAndExpiryFences(t *testing.T) {
 	p := pool(t)
 	a := actor(t, p)
 	tr, _ := p.Begin(ctx, tx.Options{Isolation: tx.ReadCommitted})
+	defer tr.Rollback(ctx)
 	if _, e := prepare(ctx, tr, a, at); e != nil {
 		t.Fatal(e)
 	}
