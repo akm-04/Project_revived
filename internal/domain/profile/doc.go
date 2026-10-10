@@ -1,2 +1,2 @@
-// Package profile is an I0 ownership placeholder. Domain behavior begins only in its assigned implementation wave.
+// Package profile owns PublicProfile preferences; Player facts, asset references, feedback and media retain their canonical owners.
 package profile

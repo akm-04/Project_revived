@@ -2209,6 +2209,20 @@
         "internal/adapters/postgres/publicationstore/"
       ],
       "write_exceptions": []
+    },
+    "player_public_profile_roots": {
+      "owner": "public-profile",
+      "migration": "migrations/00040_i7b2a_public_profile_foundation.sql",
+      "allowed_query_owners": [
+        "public-profile"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/publicprofilestore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/publicprofilestore/"
+      ],
+      "write_exceptions": []
     }
   }
 }

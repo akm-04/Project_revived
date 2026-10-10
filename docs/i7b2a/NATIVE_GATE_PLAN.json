@@ -1,0 +1,122 @@
+{
+  "schema_version": 1,
+  "pass": "663.0",
+  "node_path": [
+    "ROOT",
+    "I7",
+    "I7B",
+    "I7B-2",
+    "I7B-2A"
+  ],
+  "status": "PLANNED_NOT_RUN_NO_PRODUCT_CANDIDATE",
+  "source_authority": "00_PASSMAP/PASS662_I7B1_ACCEPTANCE_EXIT_CONTRACT.json",
+  "toolchain": "PinnedR2 Go1.27.2 / PG18.6; inheritedRiver/sqlc unchanged, nonewRiverroutein2A",
+  "matrix": [
+    {
+      "id": "A01",
+      "behavior": "fresh/upgrade",
+      "required_proof": "ExactnewmigrationonfreshDB andupgradeaccepted39; nofakeprofilebackfill; historicalbytesunchanged",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "A02",
+      "behavior": "owner/absence",
+      "required_proof": "I4existing/missingplayer, wrongserver/player binding; absentread andemptydesirednoop donotcreate/touchrow",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "A03",
+      "behavior": "constraints",
+      "required_proof": "RealPGpositiveversion/time, UTF8/NUL/40/41, NULL/empty/multidim/lowerbound/duplicate/invalidID arrays andflags validate",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "A04",
+      "behavior": "creationrace",
+      "required_proof": "Two processes/transactions same315parent+absent391root convergeonePKrow; no version0orpartialstate",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "A05",
+      "behavior": "CAS/update/no-op",
+      "required_proof": "Competingindependentfield assignments preserveotherfields underroot lock; changedoneincrement, no-opnone; stale preparedCAS/wrongTxfail",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "A06",
+      "behavior": "overflow/time",
+      "required_proof": "MaxInt64 stateversion changedmutationrejected; fixedDBDecisionAt retry, staleexistingUpdatedAt rejection, equalityhandled; no dailyreset",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "A07",
+      "behavior": "rollback",
+      "required_proof": "Rootchangeandsharedkernelreceipt atomicallyrollback onfailurebeforecommit; no outcomeleak",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "A08",
+      "behavior": "knownattempt",
+      "required_proof": "Existingreceipt sameidentity/fingerprint returnsknownoutcome withoutreapplyingolderstate; conflictidentity/binding/schema/policiesrejected",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "A09",
+      "behavior": "unknowncommit",
+      "required_proof": "ACKlossafteractualPGcommit resolvesfreshauthoritative receipt; missremainsUNKNOWN/noreplay/resultleak; decodecommittedEvidence",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "A10",
+      "behavior": "auth",
+      "required_proof": "Realactor/session/context/server/livenessfencing withrevocation/concurrentexpiry underacceptedfencesemantics; no newHTTPauthproof",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "A11",
+      "behavior": "coherentI5",
+      "required_proof": "SameRR/Serializablescope canonicalprofile/progression/functions/ownerversions stableunderconcurrentownerupdates; missingrequiredownerrowfailclosed; legitimateemptyfunctionset qualified",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "A12",
+      "behavior": "coherentprofile",
+      "required_proof": "ReadsnapshotrequiresactualRunnerisolation/op/revision/instant; no owntransaction/poolclock discovery/default-as-ownerproof",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "A13",
+      "behavior": "reload/process",
+      "required_proof": "Newroot+receipt persistence survivesprocessrestart; no temporaryin-memoryproof substitution",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "A14",
+      "behavior": "scopedrestore",
+      "required_proof": "Backup/restore exactnewroot andknownoperationreceipt scope/policy/outcome; no oldI7A/CA runtimeproof repetition",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "A15",
+      "behavior": "static/race/regression",
+      "required_proof": "Affectedpackage unit/race/vet/schemaqueryownership/architecture/source/snapshot checks; baselineproofreused whenunchanged",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "A16",
+      "behavior": "handoff",
+      "required_proof": "Bindexactfrozencomponentcandidate nativeproof before2B/3/4/5/6 consumesroot; explicitnotrunwhenunavailable",
+      "status": "NOT_RUN"
+    }
+  ],
+  "runtime_subject": null,
+  "fixture_boundary": "Meaningfulnativeharnesscomposes actualnewroot/I5typedports withsharedI4auth/runner/receiptmechanisms; no replacementfakeowner or newwireintent/HTTProute. It iscomponentqualification only.",
+  "proof_limits": [
+    "No MID1831/1833/1834 or1829/1838/1840 activated",
+    "No2Bprivacy/moderation/wirequalified response accepted",
+    "No Character/bookmark/feedback/blob tests credited",
+    "No physicalstock W2/neworiginalserverproof",
+    "No broadacceptedhistorytest rerun; requiredfreshnewDBsetup not oldphase acceptance"
+  ],
+  "parent_exit": "OriginalI7B2 explicitcombinedreconciliation afterB; preserve fullI7B-E separatebarrier"
+}
