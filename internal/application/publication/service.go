@@ -30,11 +30,7 @@ type Service struct {
 	Fence       ActorFence
 	Evidence    tx.Queryer
 }
-type View struct {
-	Set     pub.Set
-	Visible bool
-	HasRead bool
-}
+type View = pub.View
 
 var ErrUnavailable = errors.New("publication unavailable")
 

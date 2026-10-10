@@ -1,6 +1,6 @@
 //go:build postgres && river
 
-package publication_test
+package riveradapter_test
 
 import (
 	"context"

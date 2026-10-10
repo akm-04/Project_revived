@@ -2,12 +2,11 @@ package publication
 
 import (
 	"encoding/json"
-	app "gxb.local/backend/v2/internal/application/publication"
 	pub "gxb.local/backend/v2/internal/domain/publication"
 	"sort"
 )
 
-func Announcement(v app.View) (map[string]any, error) {
+func Announcement(v pub.View) (map[string]any, error) {
 	rows := []pub.Section{}
 	if v.Visible {
 		for _, i := range v.Set.Items {
@@ -17,7 +16,7 @@ func Announcement(v app.View) (map[string]any, error) {
 	b, e := json.Marshal(map[string]any{"contents": rows})
 	return map[string]any{"contents": string(b)}, e
 }
-func Board(v app.View) (map[string]any, error) {
+func Board(v pub.View) (map[string]any, error) {
 	rows := []map[string]any{}
 	if v.Visible {
 		for _, i := range v.Set.Items {
@@ -32,7 +31,7 @@ func Board(v app.View) (map[string]any, error) {
 	sort.Slice(rows, func(i, j int) bool { return rows[i]["notice_id"].(int64) > rows[j]["notice_id"].(int64) })
 	return map[string]any{"contents": rows}, nil
 }
-func Picture(v app.View) map[string]any {
+func Picture(v pub.View) map[string]any {
 	rows := []pub.PictureItem{}
 	if v.Visible {
 		for _, i := range v.Set.Items {

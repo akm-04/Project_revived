@@ -126,3 +126,10 @@ func (s Set) Canonical() (Set, string, error) {
 	h := sha256.Sum256(b)
 	return out, hex.EncodeToString(h[:]), nil
 }
+
+// View is a Publication-owned read snapshot; projections do not import application orchestration.
+type View struct {
+	Set     Set
+	Visible bool
+	HasRead bool
+}
