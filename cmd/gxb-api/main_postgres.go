@@ -343,6 +343,9 @@ func main() {
 	if e := registerGuildBroadcast(ctx, pool, runner, authority, guildDB, i5db, receipts, contentDB, router); e != nil {
 		log.Fatalf("Guild broadcast group: %v", e)
 	}
+	if e := registerPublicProfile(ctx, pool, runner, authority, receipts, contentDB, router); e != nil {
+		log.Fatalf("PublicProfile startup: %v", e)
+	}
 	i5d := stockruntime.I5Dispatcher{Authority: authority, Service: i5svc}
 	for _, mid := range []uint16{26, 81, 161, 230, 368, 369, 370, 2736} {
 		mustRegister(mid, i5d)

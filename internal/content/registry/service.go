@@ -225,6 +225,13 @@ func (s Service) EnsureBuiltinInstalled(ctx context.Context, op operation.Contex
 			if gotAppearance != wantAppearance {
 				return fmt.Errorf("content registry: appearance insert count=%d want=%d", gotAppearance, wantAppearance)
 			}
+			gotProfile, err := s.Repo.InsertPublicProfile(tctx, scope.Tx, b)
+			if err != nil {
+				return err
+			}
+			if gotProfile != 1 {
+				return errors.New("content registry: profile payload count drift")
+			}
 			gotInvite, err := s.Repo.InsertGuildInvite(tctx, scope.Tx, b)
 			if err != nil {
 				return err

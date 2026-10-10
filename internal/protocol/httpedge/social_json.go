@@ -13,7 +13,9 @@ func socialMID(mid uint16) bool {
 	return mid == 513 || mid == 515 || mid >= 176 && mid <= 190
 }
 
-func strictRawMID(mid uint16) bool { return socialMID(mid) || mid == 588 }
+func strictRawMID(mid uint16) bool {
+	return socialMID(mid) || mid == 588 || mid == 1831 || mid == 1833 || mid == 1834
+}
 
 // Finite selected routes require raw duplicate detection: decoded maps have already lost it.
 // Inspect every top-level MID declaration so a last-wins MID cannot evade scope.

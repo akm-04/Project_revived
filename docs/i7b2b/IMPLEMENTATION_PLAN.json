@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "node": "I7B-2B",
+  "full_node_path": "ROOT/I7/I7B/I7B-2/I7B-2B",
+  "status": "DESIGN_READY_PENDING_NORMAL_PUBLICATION_NOT_PRODUCT_GATE",
+  "topology": "I7B-topology-v2 unchanged, no further split",
+  "contracts": "Five frozen selected PASS662 I7B1 contracts + inherited I7A1+/D02/D03/D04/D10/D11/D14/CA owner boundaries; no amendment",
+  "implementation_authorization": "Latest human direct request, conditional on sufficient research/design normal reconciliation",
+  "accepted_base": "v0.101.0 scopedacceptedPass664; preserve accepted tree/ZIP; owned workingcopy only",
+  "product_changes": [
+    "Add PublicProfile content policy artifact/compiler/registry retention and caller-Tx reader; required forward Content-owned migration41 and cumulative lock extension only",
+    "Domain scalar-safe source-list moderation and command validation, exactsourcepolicy metadata",
+    "PublicProfile typed command service with existingTimedRunner/I4roots/I5authfencer/sharedRootService/receipt; strictstoredresultschema/bindings and freshunknownproof",
+    "Qualified requestedmetric seam, canonicalI5 CreatedAt1011 producer, atomicallyfailunsupported selected IDs",
+    "Internal coherent Player/PublicProfile/Social composition and privacy eligibility; cross-server typedroot admission withoutnewauthority",
+    "Finite stockdispatcher and PostgreSQL composition for1831/1833/1834; finite rawJSON selector extension; no fullpubliccard/readMID activation"
+  ],
+  "mutations": "PublicProfile preferences/version + existing knownoperation receipt only. Content install/activation owned separately. Player/Social reads neverwrite.",
+  "lock_order": "auth first; global315 sorted; basicread360, optional361,363 sorted;391 PublicProfile; no provider/network IO orlowerrediscovery aftermutation",
+  "wire": {
+    "1834": "content:string -> intro:moderatedstring",
+    "1833": "sub_types:[] or onlyempty{} boundedunique2/4 -> hide_types:numericarray",
+    "1831": "show_types:[] oronlyempty{} boundedunique1001..1011 max4 -> show_types:stringkeyvalueobject; currently only1011qualified",
+    "failure": "Non200 beforeclientOK callbacks; no successuntildefinite/reconciledcommit"
+  },
+  "schema_impact": "Reuse40preferencesroot unchanged; Content-owned immutablepolicy storage only if existingregistry requiresnewtable. All1..40bytes fixed.",
+  "recovery": "knownattempt replay under exactstoredrevision/policy and actor/context/server fingerprint; missesUNKNOWN, no blindreplay; speculativeprivate result neverdelivered",
+  "validation": {
+    "working": "Targeted newdomain/service/transport/content tests, batchrelatededits beforetest; nohistorical2Atest repeats absent specificinvalidations",
+    "frozen": [
+      "PinnedR2 exactGo1.27.2/PG18.6; compiler reproducibility and source hashes, newpolicyinstall/activation/retainedoldreceipt semantics",
+      "Native threecommands actualI5auth/server/root/receipt atomicity; noops/version/concurrentassignments; retryDecisionAt/ACKloss/UNKNOWN/conflictreplay afternewerstate",
+      "Native self/otherhidden2/4/SYSTEM6 andbothblockdirections/coherentconcurrentI5/read/targetcrossserver; ownerreadfailure failclosed",
+      "Strict finiteHTTP rawduplicates/types/empty[]{} and success/failure actualcallback expectations; realHTTP/authfence/process qualification",
+      "Ownedprocessrestart/root+receipt+content restore andtypedreload under exactcandidate; reuseunchanged2Afoundation evidence withfiledependency review",
+      "Affectedrace/vet/queryowner/architecture andinheritedtx/receipt/content regression; no arbitraryfullhistoricreruns"
+    ],
+    "parent": "Primaryagent independent I7B-2 actualcode/source/contract/composition/receipt/recovery inspection and combined exactsubject reconciliation after2B; childGREEN noautoacceptance"
+  },
+  "unaccepted": "Full1829/1838/1840,11metricproducerintegration,feedback/showcase/media/bookmark,wholeI7B/I7/physicalW2; named later gates unchanged",
+  "publication": "Normal research/design PassMap reconciliation beforecoding; final2B+parent2normal seal onlyafterrequiredproof/reality. Light cumulativecheckpoint at milestones."
+}

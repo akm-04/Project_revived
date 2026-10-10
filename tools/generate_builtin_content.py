@@ -21,7 +21,7 @@ from pathlib import Path
 from typing import Any, Iterable
 
 SCHEMA_VERSION = 1
-COMPILER_VERSION = "i7a8b-guild-invite"
+COMPILER_VERSION = "i7b2b-public-profile"
 PARSER_VERSION = "lua-generated-v18-guild-invite"
 EXPECTED_SOURCE_ARCHIVE_SHA256 = "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
 SOURCE_PREFIX = "app-assets/output/assets/src_64/"
@@ -95,7 +95,12 @@ SOURCE_MANIFEST = [
     ("data/tables/guide_page.lua", "7cf246fa0d16d12954d9235b3b05fc918763dbe5c3e690b4d87999d3e1112802", "PRACTICE_TICKET_GUIDE_SOURCE_FACT"),
 ]
 
+SOURCE_MANIFEST.append(('data/tables/name.lua', '2254bb1bb4283199a112cb94a7e14e82ac28cd29e3a19e281d11faf23d9ec316', 'PUBLIC_PROFILE_PREFERENCE_SOURCE_AUTHORITY'))
+SOURCE_MANIFEST.append(('data/tables/person_display_words.lua', 'ca342990ff24d8c5a4c12b270401c276b3e29597d43555f30978a2c5162afeb6', 'PUBLIC_PROFILE_PREFERENCE_SOURCE_AUTHORITY'))
+SOURCE_MANIFEST.append(('app/model/FilterWordManager.lua', 'e961a9a0029c90cce75d8deee23d066ba4d74bc133e733625dae5b43e0c34783', 'PUBLIC_PROFILE_PREFERENCE_SOURCE_AUTHORITY'))
+
 ENABLED_CAPABILITIES = [
+    "PUBLIC_PROFILE_PREFERENCES_I7B2B",
     "GUILD_BROADCAST_I7A8A",
     "GUILD_INVITE_PRESENTATION_I7A8B",
     "QUALIFIED_ORDINARY_STACK_ITEM_DEFINITIONS",
@@ -1813,7 +1818,18 @@ def build_artifacts(blobs: dict[str, SourceBlob], archive_sha256: str) -> dict[s
         "social_model_source_sha256":blobs["app/model/SocialSystem.lua"].sha256,
         "dismiss_joins_guild":False,"dismiss_cancels_invite":False,"historical_backfill":False
     }
+    profile_artifact = {
+        "schema_version":1,"policy_id":"I7B_PUBLIC_V1",
+        "moderation_policy_id":"PROFILE_SCALAR_CASE_SENSITIVE_SPACE_MASK_V1",
+        "name_source_sha256":blobs["data/tables/name.lua"].sha256,
+        "filter_source_sha256":blobs["app/model/FilterWordManager.lua"].sha256,
+        "show_source_sha256":blobs["data/tables/person_display_words.lua"].sha256,
+        "words":sorted(set(r["name"] for r in parse_generated_lua_table(blobs["data/tables/name.lua"].data))),
+        "show_type_ids":[int(r["id"]) for r in parse_generated_lua_table(blobs["data/tables/person_display_words.lua"].data) if 1001 <= int(r["id"]) <= 1011],
+        "hide_subtypes":[2,4],"intro_codepoints":40,"selected_limit":4
+    }
     artifacts = {
+        "public_profile_policy.json":profile_artifact,
         "guild_invite_policy.json":invite_artifact,
         "guild_broadcast_policy.json":broadcast_artifact,
         "social_gift_catalog.json": social_gift_artifact,

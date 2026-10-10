@@ -1,0 +1,39 @@
+{
+  "node": "I7B-2B",
+  "status": "PLANNED_NOT_RUN",
+  "authority": "Existing I7B2 stage andfrozen662 acceptance requirements applied to2B; no addedgate",
+  "matrix": [
+    {
+      "id": "B01",
+      "required_proof": "PinnedR2 exactGo1.27.2/PG18.6; compiler reproducibility and source hashes, newpolicyinstall/activation/retainedoldreceipt semantics",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "B02",
+      "required_proof": "Native threecommands actualI5auth/server/root/receipt atomicity; noops/version/concurrentassignments; retryDecisionAt/ACKloss/UNKNOWN/conflictreplay afternewerstate",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "B03",
+      "required_proof": "Native self/otherhidden2/4/SYSTEM6 andbothblockdirections/coherentconcurrentI5/read/targetcrossserver; ownerreadfailure failclosed",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "B04",
+      "required_proof": "Strict finiteHTTP rawduplicates/types/empty[]{} and success/failure actualcallback expectations; realHTTP/authfence/process qualification",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "B05",
+      "required_proof": "Ownedprocessrestart/root+receipt+content restore andtypedreload under exactcandidate; reuseunchanged2Afoundation evidence withfiledependency review",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "B06",
+      "required_proof": "Affectedrace/vet/queryowner/architecture andinheritedtx/receipt/content regression; no arbitraryfullhistoricreruns",
+      "status": "NOT_RUN"
+    }
+  ],
+  "reuse": "2A unchangedaccepted664 proof only, filedependencies review afterproductdiff",
+  "parent_exit": "Primaryagent independent I7B-2 actualcode/source/contract/composition/receipt/recovery inspection and combined exactsubject reconciliation after2B; childGREEN noautoacceptance"
+}
