@@ -94,14 +94,14 @@ need('internal/foundation/observability/metrics.go','forbiddenMetricFragments','
 # Historical R6 snapshot pins the exact module closure. A cumulative candidate may
 # legitimately add later researched dependencies, so whole-file go.mod/go.sum hashes
 # are snapshot-only there; the current dependency/SBOM validators own cumulative
-# module closure. The canonical Go toolchain pin itself remains immutable.
+# module closure. Historical toolchain bytes stay pinned; cumulative mode uses the selected current patch pin.
 toolchain_pins = {
     'go.mod':'ecafe7641bc26c7ef91bdc5c21a5f71aa432bd162ed6fe1725004b501172a949',
     'go.sum':'efbf6753542d66e2fefcb2ab5e2ade7c9d28f2206a1113d1eb9568f2cb75808d',
     '.go-version':'a8844fbc8c3eb51c26ed00aec4cd5a5a9d647f849c6ead07bcc83ed24c4a7718',
 }
 for rel,want in toolchain_pins.items():
-    if args.cumulative and rel in {'go.mod','go.sum'}:
+    if args.cumulative and rel in {'go.mod','go.sum','.go-version'}:
         continue
     if args.compat_scratch and rel == '.go-version':
         continue
@@ -113,6 +113,8 @@ if args.cumulative:
         need('go.mod')
     else:
         need('go.mod','go 1.26.0','toolchain go1.27.2')
+        if (R/'.go-version').read_text().strip() != '1.27.2':
+            errs.append('current cumulative .go-version pin drift')
     if not (R/'go.sum').exists():
         errs.append('current cumulative go.sum missing')
 
