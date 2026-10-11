@@ -48,6 +48,7 @@ func StockHero(h character.Hero) (map[string]any, error) {
 	out := map[string]any{
 		"partner_id": h.PartnerID, "table_id": h.TableID, "star": h.Star, "lev": h.Level, "exp": h.Exp, "color": h.Color,
 		"skills": skills, "skill_ids": append([]any(nil), zero6...), "equips": equips, "fumos": fumos,
+		"is_like":       h.IsLike,
 		"practice_attr": []any{h.Practice[0], h.Practice[1], h.Practice[2]},
 	}
 	if h.Kind == character.SuperHero {

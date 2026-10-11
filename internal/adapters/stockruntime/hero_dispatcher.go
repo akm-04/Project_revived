@@ -51,7 +51,12 @@ type HeroLIVEAppearanceServicePort interface {
 	SetLIVEShow(context.Context, identity.ActorContext, int64, int64, bool, operation.Context) (apphero.LIVEShowResult, error)
 }
 
+type HeroBookmarkServicePort interface {
+	SetBookmark(context.Context, identity.ActorContext, int64, int64, operation.Context) (apphero.BookmarkResult, error)
+}
+
 type HeroDispatcher struct {
+	Bookmark   HeroBookmarkServicePort
 	Authority  apprealtime.GameplayAuthorityPort
 	Service    HeroServicePort
 	Appearance HeroAppearanceServicePort
@@ -68,6 +73,27 @@ func (d HeroDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReque
 		return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Body: map[string]any{"error": "hero_unavailable"}}
 	}
 	switch req.Envelope.MID {
+	case 3116: // HERO_COLLOCATION is desired assignment, never a server toggle.
+		if d.Bookmark == nil {
+			return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Body: map[string]any{"error": "hero_bookmark_unavailable"}}
+		}
+		if !onlyStockGameplayParams(req.Envelope.Params, "partner_id", "is_like") {
+			return badHero("invalid_hero_bookmark")
+		}
+		partner, e1 := requiredInt64(req.Envelope.Params, "partner_id")
+		desired, e2 := requiredJSONBit(req.Envelope.Params, "is_like")
+		if e1 != nil || e2 != nil || partner <= 0 || partner > 9007199254740991 {
+			return badHero("invalid_hero_bookmark")
+		}
+		value := int64(0)
+		if desired {
+			value = 1
+		}
+		if _, e := d.Bookmark.SetBookmark(ctx, actor, partner, value, req.Envelope.Operation); e != nil {
+			return failHero(e)
+		}
+		return httpedge.Response{HTTPStatus: http.StatusOK, Body: map[string]any{}}
+
 	case 60: // SKIN_ON — CA7-3 acquire-or-select
 		if d.Appearance == nil {
 			return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Body: map[string]any{"error": "hero_appearance_unavailable"}}

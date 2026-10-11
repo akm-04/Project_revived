@@ -80,7 +80,7 @@ func (Store) InsertHeroTx(ctx context.Context, t tx.Tx, h character.Hero) error 
 	tag, err := t.Exec(ctx, characterqueries.InsertPlayerHero, int64(h.PlayerID), h.PartnerID, h.TableID, h.OriginTableID, h.Star, h.Level, h.Exp, h.Color,
 		h.Equipment[0], h.Equipment[1], h.Equipment[2], h.Equipment[3], h.Equipment[4], h.Equipment[5],
 		h.Fumo[0], h.Fumo[1], h.Fumo[2], h.Fumo[3], h.Fumo[4], h.Fumo[5],
-		h.CurrentSkinID, h.IllusionSkinID, h.CreationContentRevision, h.StateVersion, h.CreatedAt.UTC(), h.UpdatedAt.UTC())
+		h.CurrentSkinID, h.IllusionSkinID, h.CreationContentRevision, h.StateVersion, h.CreatedAt.UTC(), h.UpdatedAt.UTC(), h.IsLike)
 	if err != nil {
 		return err
 	}
@@ -128,6 +128,7 @@ func (Store) ListHeroesTx(ctx context.Context, q tx.Queryer, pid identity.Player
 		PracticeStr             int64     `json:"practice_str"`
 		PracticeInt             int64     `json:"practice_int"`
 		PracticeAgi             int64     `json:"practice_agi"`
+		IsLike                  int64     `json:"is_like"`
 		CurrentSkinID           int64     `json:"current_skin_id"`
 		IllusionSkinID          int64     `json:"illusion_skin_id"`
 		StateVersion            int64     `json:"state_version"`
@@ -140,7 +141,7 @@ func (Store) ListHeroesTx(ctx context.Context, q tx.Queryer, pid identity.Player
 	}
 	out := make([]character.Hero, 0, len(rows))
 	for _, x := range rows {
-		h := character.Hero{PlayerID: identity.PlayerID(x.PlayerID), PartnerID: x.PartnerID, TableID: x.TableID, OriginTableID: x.OriginTableID, Star: x.Star, Level: x.Level, Exp: x.Exp, Color: x.Color, Equipment: character.HeroEquipmentSlots{x.Equip1, x.Equip2, x.Equip3, x.Equip4, x.Equip5, x.Equip6}, Fumo: character.HeroFumoSlots{x.Fumo1, x.Fumo2, x.Fumo3, x.Fumo4, x.Fumo5, x.Fumo6}, Practice: character.PracticeAttrs{x.PracticeStr, x.PracticeInt, x.PracticeAgi}, CurrentSkinID: x.CurrentSkinID, IllusionSkinID: x.IllusionSkinID, CreationContentRevision: x.CreationContentRevision, StateVersion: x.StateVersion, CreatedAt: x.CreatedAt.UTC(), UpdatedAt: x.UpdatedAt.UTC()}
+		h := character.Hero{PlayerID: identity.PlayerID(x.PlayerID), PartnerID: x.PartnerID, TableID: x.TableID, OriginTableID: x.OriginTableID, Star: x.Star, Level: x.Level, Exp: x.Exp, Color: x.Color, Equipment: character.HeroEquipmentSlots{x.Equip1, x.Equip2, x.Equip3, x.Equip4, x.Equip5, x.Equip6}, Fumo: character.HeroFumoSlots{x.Fumo1, x.Fumo2, x.Fumo3, x.Fumo4, x.Fumo5, x.Fumo6}, Practice: character.PracticeAttrs{x.PracticeStr, x.PracticeInt, x.PracticeAgi}, IsLike: x.IsLike, CurrentSkinID: x.CurrentSkinID, IllusionSkinID: x.IllusionSkinID, CreationContentRevision: x.CreationContentRevision, StateVersion: x.StateVersion, CreatedAt: x.CreatedAt.UTC(), UpdatedAt: x.UpdatedAt.UTC()}
 		if err := h.ValidatePersistent(); err != nil {
 			return nil, err
 		}
@@ -156,7 +157,7 @@ func scanHero(row tx.Row) (character.Hero, error) {
 		&h.Equipment[0], &h.Equipment[1], &h.Equipment[2], &h.Equipment[3], &h.Equipment[4], &h.Equipment[5],
 		&h.Fumo[0], &h.Fumo[1], &h.Fumo[2], &h.Fumo[3], &h.Fumo[4], &h.Fumo[5],
 		&h.Practice[0], &h.Practice[1], &h.Practice[2], &h.CurrentSkinID, &h.IllusionSkinID,
-		&h.CreationContentRevision, &h.StateVersion, &h.CreatedAt, &h.UpdatedAt); err != nil {
+		&h.IsLike, &h.CreationContentRevision, &h.StateVersion, &h.CreatedAt, &h.UpdatedAt); err != nil {
 		return h, err
 	}
 	h.PlayerID = identity.PlayerID(pid)

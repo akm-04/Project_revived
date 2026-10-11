@@ -1,0 +1,14 @@
+{
+  "status": "WORKING_FAIL_REPAIRS_BATCHED_RETEST_REQUIRED",
+  "product": [
+    "Receipt DB recorded_at is actual insert timestamp; decision_at must not be later, equality was incorrect. Apply inherited3A chronology.",
+    "Add existing bounded definite-abort backoff to dephase sameHero races; no newretry/acceptance law."
+  ],
+  "fixtures": [
+    "Native49 appearance reader needed pool queryer",
+    "Processfixture reuses accepted actorTransport encoding; UUID internals are not JSON roundtrip DTO",
+    "Socialblockfixture must own socialroot before FK",
+    "Concurrency accepts declared serialization/stale definitefailure, asserts converged desiredstate and exactlyone versionchange; no fabricated all-arrival success"
+  ],
+  "invalidations": "Only new working bookmark proof/fixture tests affected. No frozen candidate or newproduct gate yet. Previously passing affected compile/unit/source evidence retained."
+}

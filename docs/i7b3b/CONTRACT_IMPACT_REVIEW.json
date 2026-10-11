@@ -1,0 +1,600 @@
+{
+  "status": "TARGETED_PREIMPLEMENTATION_RECONCILIATION_COMPLETE",
+  "preserved": [
+    "I0 layers independent ownerDTOs, no foreign SQL",
+    "D11 operation ambiguity; receipts privateuntildefinite",
+    "I7A1 actor/context/session/root/lock/time/content/recovery",
+    "I7B1 CharacterHero bookmark canonical owner; callerTx; richprovider gate",
+    "CA2 persistentidentity/materialization/retirement",
+    "CA4/6/7 state_version and partialwrites preserve bookmark",
+    "CA8 coherentfacet and no bookmark ownership",
+    "3A selection/root/reference guards and privacy unchanged except new composed method",
+    "SavedPreset guard440 unchanged"
+  ],
+  "new_durable_extension": "Applied CharacterHero bookmark/version/receipt/canonicalload and typed public read seam; final harvest once qualified",
+  "no_new_owner_or_architecture_constraints": true,
+  "obligations": [
+    {
+      "id": "CA-IDENTITY",
+      "disposition": "PRESERVED",
+      "rationale": "3B changes only canonical Hero bookmark/version and typed reads. Accepted identity/materialization/retirement, reference guards, owner-qualified coherent facets/dispositions and rich activation routes remain. Relevant metadata/load effects receive targeted requalification.",
+      "evidence": [
+        "00_PASSMAP/PASS669_I7B3B_RESEARCH/IMPLEMENTATION_PLAN.json",
+        "00_PASSMAP/PASS669_I7B3B_RESEARCH/SOURCE_VERIFICATION.json"
+      ]
+    },
+    {
+      "id": "CA-PRACTICE",
+      "disposition": "PRESERVED",
+      "rationale": "3B changes only canonical Hero bookmark/version and typed reads. Accepted identity/materialization/retirement, reference guards, owner-qualified coherent facets/dispositions and rich activation routes remain. Relevant metadata/load effects receive targeted requalification.",
+      "evidence": [
+        "00_PASSMAP/PASS669_I7B3B_RESEARCH/IMPLEMENTATION_PLAN.json",
+        "00_PASSMAP/PASS669_I7B3B_RESEARCH/SOURCE_VERIFICATION.json"
+      ]
+    },
+    {
+      "id": "CA-APPEARANCE",
+      "disposition": "PRESERVED",
+      "rationale": "3B changes only canonical Hero bookmark/version and typed reads. Accepted identity/materialization/retirement, reference guards, owner-qualified coherent facets/dispositions and rich activation routes remain. Relevant metadata/load effects receive targeted requalification.",
+      "evidence": [
+        "00_PASSMAP/PASS669_I7B3B_RESEARCH/IMPLEMENTATION_PLAN.json",
+        "00_PASSMAP/PASS669_I7B3B_RESEARCH/SOURCE_VERIFICATION.json"
+      ]
+    },
+    {
+      "id": "CA8-COHERENT-SCOPE",
+      "disposition": "PRESERVED",
+      "rationale": "3B changes only canonical Hero bookmark/version and typed reads. Accepted identity/materialization/retirement, reference guards, owner-qualified coherent facets/dispositions and rich activation routes remain. Relevant metadata/load effects receive targeted requalification.",
+      "evidence": [
+        "00_PASSMAP/PASS669_I7B3B_RESEARCH/IMPLEMENTATION_PLAN.json",
+        "00_PASSMAP/PASS669_I7B3B_RESEARCH/SOURCE_VERIFICATION.json"
+      ]
+    },
+    {
+      "id": "CA8-OWNED",
+      "disposition": "PRESERVED",
+      "rationale": "3B changes only canonical Hero bookmark/version and typed reads. Accepted identity/materialization/retirement, reference guards, owner-qualified coherent facets/dispositions and rich activation routes remain. Relevant metadata/load effects receive targeted requalification.",
+      "evidence": [
+        "00_PASSMAP/PASS669_I7B3B_RESEARCH/IMPLEMENTATION_PLAN.json",
+        "00_PASSMAP/PASS669_I7B3B_RESEARCH/SOURCE_VERIFICATION.json"
+      ]
+    },
+    {
+      "id": "CA8-PUBLIC",
+      "disposition": "PRESERVED",
+      "rationale": "3B changes only canonical Hero bookmark/version and typed reads. Accepted identity/materialization/retirement, reference guards, owner-qualified coherent facets/dispositions and rich activation routes remain. Relevant metadata/load effects receive targeted requalification.",
+      "evidence": [
+        "00_PASSMAP/PASS669_I7B3B_RESEARCH/IMPLEMENTATION_PLAN.json",
+        "00_PASSMAP/PASS669_I7B3B_RESEARCH/SOURCE_VERIFICATION.json"
+      ]
+    },
+    {
+      "id": "CA8-AVAILABILITY",
+      "disposition": "PRESERVED",
+      "rationale": "3B changes only canonical Hero bookmark/version and typed reads. Accepted identity/materialization/retirement, reference guards, owner-qualified coherent facets/dispositions and rich activation routes remain. Relevant metadata/load effects receive targeted requalification.",
+      "evidence": [
+        "00_PASSMAP/PASS669_I7B3B_RESEARCH/IMPLEMENTATION_PLAN.json",
+        "00_PASSMAP/PASS669_I7B3B_RESEARCH/SOURCE_VERIFICATION.json"
+      ]
+    },
+    {
+      "id": "CA-SUPERSESSION",
+      "disposition": "PRESERVED",
+      "rationale": "3B changes only canonical Hero bookmark/version and typed reads. Accepted identity/materialization/retirement, reference guards, owner-qualified coherent facets/dispositions and rich activation routes remain. Relevant metadata/load effects receive targeted requalification.",
+      "evidence": [
+        "00_PASSMAP/PASS669_I7B3B_RESEARCH/IMPLEMENTATION_PLAN.json",
+        "00_PASSMAP/PASS669_I7B3B_RESEARCH/SOURCE_VERIFICATION.json"
+      ]
+    },
+    {
+      "id": "CA-PARENT-EXIT",
+      "disposition": "PRESERVED",
+      "rationale": "3B changes only canonical Hero bookmark/version and typed reads. Accepted identity/materialization/retirement, reference guards, owner-qualified coherent facets/dispositions and rich activation routes remain. Relevant metadata/load effects receive targeted requalification.",
+      "evidence": [
+        "00_PASSMAP/PASS669_I7B3B_RESEARCH/IMPLEMENTATION_PLAN.json",
+        "00_PASSMAP/PASS669_I7B3B_RESEARCH/SOURCE_VERIFICATION.json"
+      ]
+    },
+    {
+      "id": "CA-BOOKMARK",
+      "disposition": "PRESERVED",
+      "rationale": "3B changes only canonical Hero bookmark/version and typed reads. Accepted identity/materialization/retirement, reference guards, owner-qualified coherent facets/dispositions and rich activation routes remain. Relevant metadata/load effects receive targeted requalification.",
+      "evidence": [
+        "00_PASSMAP/PASS669_I7B3B_RESEARCH/IMPLEMENTATION_PLAN.json",
+        "00_PASSMAP/PASS669_I7B3B_RESEARCH/SOURCE_VERIFICATION.json"
+      ]
+    }
+  ],
+  "i7a4_obligations": [
+    {
+      "id": "I7A4-OWNERS_TX_LOCK",
+      "disposition": "PRESERVED",
+      "rationale": "3A uses inheritedactor/context/owner/Tx/globalkey/readscope/finitewire/recovery law; noSocialquota/noticedomain changes oractivation. Concrete3Adesign/source review preserves thisobligation.",
+      "evidence": [
+        "00_PASSMAP/PASS667_I7B3A_RESEARCH/IMPLEMENTATION_PLAN.json",
+        "00_PASSMAP/PASS667_I7B3A_RESEARCH/DESIGN_DECISIONS.json",
+        "00_PASSMAP/PASS667_I7B3A_RESEARCH/SOURCE_VERIFICATION.json"
+      ],
+      "reuse_basis": "Accepted Pass662 I7B-1 review; unchanged product/owner contracts. No new runtime proof.",
+      "application_to_I7B2A": "Apply the frozen I7B-1 mapping to the narrow PublicProfile root and additive I5 read seam; preserve canonical Character/Social and other owners. Consumer qualification remains at the named downstream stage/gate."
+    },
+    {
+      "id": "I7A4-GENERATION_D11",
+      "disposition": "PRESERVED",
+      "rationale": "3A uses inheritedactor/context/owner/Tx/globalkey/readscope/finitewire/recovery law; noSocialquota/noticedomain changes oractivation. Concrete3Adesign/source review preserves thisobligation.",
+      "evidence": [
+        "00_PASSMAP/PASS667_I7B3A_RESEARCH/IMPLEMENTATION_PLAN.json",
+        "00_PASSMAP/PASS667_I7B3A_RESEARCH/DESIGN_DECISIONS.json",
+        "00_PASSMAP/PASS667_I7B3A_RESEARCH/SOURCE_VERIFICATION.json"
+      ],
+      "reuse_basis": "Accepted Pass662 I7B-1 review; unchanged product/owner contracts. No new runtime proof.",
+      "application_to_I7B2A": "Apply the frozen I7B-1 mapping to the narrow PublicProfile root and additive I5 read seam; preserve canonical Character/Social and other owners. Consumer qualification remains at the named downstream stage/gate."
+    },
+    {
+      "id": "I7A4-TIME_QUOTA",
+      "disposition": "PRESERVED",
+      "rationale": "3A uses inheritedactor/context/owner/Tx/globalkey/readscope/finitewire/recovery law; noSocialquota/noticedomain changes oractivation. Concrete3Adesign/source review preserves thisobligation.",
+      "evidence": [
+        "00_PASSMAP/PASS667_I7B3A_RESEARCH/IMPLEMENTATION_PLAN.json",
+        "00_PASSMAP/PASS667_I7B3A_RESEARCH/DESIGN_DECISIONS.json",
+        "00_PASSMAP/PASS667_I7B3A_RESEARCH/SOURCE_VERIFICATION.json"
+      ],
+      "reuse_basis": "Accepted Pass662 I7B-1 review; unchanged product/owner contracts. No new runtime proof.",
+      "application_to_I7B2A": "Apply the frozen I7B-1 mapping to the narrow PublicProfile root and additive I5 read seam; preserve canonical Character/Social and other owners. Consumer qualification remains at the named downstream stage/gate."
+    },
+    {
+      "id": "I7A4-NOTICE_ID_SOURCE",
+      "disposition": "PRESERVED",
+      "rationale": "3A uses inheritedactor/context/owner/Tx/globalkey/readscope/finitewire/recovery law; noSocialquota/noticedomain changes oractivation. Concrete3Adesign/source review preserves thisobligation.",
+      "evidence": [
+        "00_PASSMAP/PASS667_I7B3A_RESEARCH/IMPLEMENTATION_PLAN.json",
+        "00_PASSMAP/PASS667_I7B3A_RESEARCH/DESIGN_DECISIONS.json",
+        "00_PASSMAP/PASS667_I7B3A_RESEARCH/SOURCE_VERIFICATION.json"
+      ],
+      "reuse_basis": "Accepted Pass662 I7B-1 review; unchanged product/owner contracts. No new runtime proof.",
+      "application_to_I7B2A": "Apply the frozen I7B-1 mapping to the narrow PublicProfile root and additive I5 read seam; preserve canonical Character/Social and other owners. Consumer qualification remains at the named downstream stage/gate."
+    },
+    {
+      "id": "I7A4-NULL_AND_WINDOW",
+      "disposition": "PRESERVED",
+      "rationale": "3A uses inheritedactor/context/owner/Tx/globalkey/readscope/finitewire/recovery law; noSocialquota/noticedomain changes oractivation. Concrete3Adesign/source review preserves thisobligation.",
+      "evidence": [
+        "00_PASSMAP/PASS667_I7B3A_RESEARCH/IMPLEMENTATION_PLAN.json",
+        "00_PASSMAP/PASS667_I7B3A_RESEARCH/DESIGN_DECISIONS.json",
+        "00_PASSMAP/PASS667_I7B3A_RESEARCH/SOURCE_VERIFICATION.json"
+      ],
+      "reuse_basis": "Accepted Pass662 I7B-1 review; unchanged product/owner contracts. No new runtime proof.",
+      "application_to_I7B2A": "Apply the frozen I7B-1 mapping to the narrow PublicProfile root and additive I5 read seam; preserve canonical Character/Social and other owners. Consumer qualification remains at the named downstream stage/gate."
+    },
+    {
+      "id": "I7A4-READ_SNAPSHOT",
+      "disposition": "PRESERVED",
+      "rationale": "3A uses inheritedactor/context/owner/Tx/globalkey/readscope/finitewire/recovery law; noSocialquota/noticedomain changes oractivation. Concrete3Adesign/source review preserves thisobligation.",
+      "evidence": [
+        "00_PASSMAP/PASS667_I7B3A_RESEARCH/IMPLEMENTATION_PLAN.json",
+        "00_PASSMAP/PASS667_I7B3A_RESEARCH/DESIGN_DECISIONS.json",
+        "00_PASSMAP/PASS667_I7B3A_RESEARCH/SOURCE_VERIFICATION.json"
+      ],
+      "reuse_basis": "Accepted Pass662 I7B-1 review; unchanged product/owner contracts. No new runtime proof.",
+      "application_to_I7B2A": "Apply the frozen I7B-1 mapping to the narrow PublicProfile root and additive I5 read seam; preserve canonical Character/Social and other owners. Consumer qualification remains at the named downstream stage/gate."
+    },
+    {
+      "id": "I7A4-DISCOVERY_ANCHOR",
+      "disposition": "PRESERVED",
+      "rationale": "3A uses inheritedactor/context/owner/Tx/globalkey/readscope/finitewire/recovery law; noSocialquota/noticedomain changes oractivation. Concrete3Adesign/source review preserves thisobligation.",
+      "evidence": [
+        "00_PASSMAP/PASS667_I7B3A_RESEARCH/IMPLEMENTATION_PLAN.json",
+        "00_PASSMAP/PASS667_I7B3A_RESEARCH/DESIGN_DECISIONS.json",
+        "00_PASSMAP/PASS667_I7B3A_RESEARCH/SOURCE_VERIFICATION.json"
+      ],
+      "reuse_basis": "Accepted Pass662 I7B-1 review; unchanged product/owner contracts. No new runtime proof.",
+      "application_to_I7B2A": "Apply the frozen I7B-1 mapping to the narrow PublicProfile root and additive I5 read seam; preserve canonical Character/Social and other owners. Consumer qualification remains at the named downstream stage/gate."
+    },
+    {
+      "id": "I7A4-AUTH_BOOT_ACTIVATION",
+      "disposition": "PRESERVED",
+      "rationale": "3A uses inheritedactor/context/owner/Tx/globalkey/readscope/finitewire/recovery law; noSocialquota/noticedomain changes oractivation. Concrete3Adesign/source review preserves thisobligation.",
+      "evidence": [
+        "00_PASSMAP/PASS667_I7B3A_RESEARCH/IMPLEMENTATION_PLAN.json",
+        "00_PASSMAP/PASS667_I7B3A_RESEARCH/DESIGN_DECISIONS.json",
+        "00_PASSMAP/PASS667_I7B3A_RESEARCH/SOURCE_VERIFICATION.json"
+      ],
+      "reuse_basis": "Accepted Pass662 I7B-1 review; unchanged product/owner contracts. No new runtime proof.",
+      "application_to_I7B2A": "Apply the frozen I7B-1 mapping to the narrow PublicProfile root and additive I5 read seam; preserve canonical Character/Social and other owners. Consumer qualification remains at the named downstream stage/gate."
+    },
+    {
+      "id": "I7A4-WIRE_GUARDS",
+      "disposition": "PRESERVED",
+      "rationale": "3A uses inheritedactor/context/owner/Tx/globalkey/readscope/finitewire/recovery law; noSocialquota/noticedomain changes oractivation. Concrete3Adesign/source review preserves thisobligation.",
+      "evidence": [
+        "00_PASSMAP/PASS667_I7B3A_RESEARCH/IMPLEMENTATION_PLAN.json",
+        "00_PASSMAP/PASS667_I7B3A_RESEARCH/DESIGN_DECISIONS.json",
+        "00_PASSMAP/PASS667_I7B3A_RESEARCH/SOURCE_VERIFICATION.json"
+      ],
+      "reuse_basis": "Accepted Pass662 I7B-1 review; unchanged product/owner contracts. No new runtime proof.",
+      "application_to_I7B2A": "Apply the frozen I7B-1 mapping to the narrow PublicProfile root and additive I5 read seam; preserve canonical Character/Social and other owners. Consumer qualification remains at the named downstream stage/gate."
+    },
+    {
+      "id": "I7A4-CANONICAL_HINT_WORLD",
+      "disposition": "PRESERVED",
+      "rationale": "3A uses inheritedactor/context/owner/Tx/globalkey/readscope/finitewire/recovery law; noSocialquota/noticedomain changes oractivation. Concrete3Adesign/source review preserves thisobligation.",
+      "evidence": [
+        "00_PASSMAP/PASS667_I7B3A_RESEARCH/IMPLEMENTATION_PLAN.json",
+        "00_PASSMAP/PASS667_I7B3A_RESEARCH/DESIGN_DECISIONS.json",
+        "00_PASSMAP/PASS667_I7B3A_RESEARCH/SOURCE_VERIFICATION.json"
+      ],
+      "reuse_basis": "Accepted Pass662 I7B-1 review; unchanged product/owner contracts. No new runtime proof.",
+      "application_to_I7B2A": "Apply the frozen I7B-1 mapping to the narrow PublicProfile root and additive I5 read seam; preserve canonical Character/Social and other owners. Consumer qualification remains at the named downstream stage/gate."
+    },
+    {
+      "id": "I7A4-POSTCOMMIT_RECOVERY",
+      "disposition": "PRESERVED",
+      "rationale": "3A uses inheritedactor/context/owner/Tx/globalkey/readscope/finitewire/recovery law; noSocialquota/noticedomain changes oractivation. Concrete3Adesign/source review preserves thisobligation.",
+      "evidence": [
+        "00_PASSMAP/PASS667_I7B3A_RESEARCH/IMPLEMENTATION_PLAN.json",
+        "00_PASSMAP/PASS667_I7B3A_RESEARCH/DESIGN_DECISIONS.json",
+        "00_PASSMAP/PASS667_I7B3A_RESEARCH/SOURCE_VERIFICATION.json"
+      ],
+      "reuse_basis": "Accepted Pass662 I7B-1 review; unchanged product/owner contracts. No new runtime proof.",
+      "application_to_I7B2A": "Apply the frozen I7B-1 mapping to the narrow PublicProfile root and additive I5 read seam; preserve canonical Character/Social and other owners. Consumer qualification remains at the named downstream stage/gate."
+    },
+    {
+      "id": "I7A4-FUTURE_PROVIDER_EXTENSION",
+      "disposition": "PRESERVED",
+      "rationale": "3A uses inheritedactor/context/owner/Tx/globalkey/readscope/finitewire/recovery law; noSocialquota/noticedomain changes oractivation. Concrete3Adesign/source review preserves thisobligation.",
+      "evidence": [
+        "00_PASSMAP/PASS667_I7B3A_RESEARCH/IMPLEMENTATION_PLAN.json",
+        "00_PASSMAP/PASS667_I7B3A_RESEARCH/DESIGN_DECISIONS.json",
+        "00_PASSMAP/PASS667_I7B3A_RESEARCH/SOURCE_VERIFICATION.json"
+      ],
+      "reuse_basis": "Accepted Pass662 I7B-1 review; unchanged product/owner contracts. No new runtime proof.",
+      "application_to_I7B2A": "Apply the frozen I7B-1 mapping to the narrow PublicProfile root and additive I5 read seam; preserve canonical Character/Social and other owners. Consumer qualification remains at the named downstream stage/gate."
+    }
+  ],
+  "i7a5a_obligations": [
+    {
+      "id": "I7A5A-EXACT_HANDLE_ROLE",
+      "disposition": "PRESERVED",
+      "rationale": "Existing owning invariants preserved in I7B projection/read integration; no activation of deferred producers or change to notice/DM/Guild authority.",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS641_I7A5A_SUCCESSOR_CONTRACT.json",
+          "sha256": "b13e4d208b9ca78b1a694382b7e7c11d84cad345a3f5d25174ead22ead8b82db"
+        },
+        {
+          "path": "00_PASSMAP/PASS662_I7B1_ARCHITECTURE_PROVIDER_CONTRACT.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS662_I7B1_TRANSACTION_REFERENCE_REPLAY_CONTRACT.json"
+        }
+      ],
+      "reuse_basis": "Accepted Pass662 I7B-1 review; unchanged product/owner contracts. No new runtime proof.",
+      "application_to_I7B2A": "Apply the frozen I7B-1 mapping to the narrow PublicProfile root and additive I5 read seam; preserve canonical Character/Social and other owners. Consumer qualification remains at the named downstream stage/gate."
+    },
+    {
+      "id": "I7A5A-GUILD_JOIN_INCARNATION",
+      "disposition": "PRESERVED",
+      "rationale": "Existing owning invariants preserved in I7B projection/read integration; no activation of deferred producers or change to notice/DM/Guild authority.",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS641_I7A5A_SUCCESSOR_CONTRACT.json",
+          "sha256": "b13e4d208b9ca78b1a694382b7e7c11d84cad345a3f5d25174ead22ead8b82db"
+        },
+        {
+          "path": "00_PASSMAP/PASS662_I7B1_ARCHITECTURE_PROVIDER_CONTRACT.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS662_I7B1_TRANSACTION_REFERENCE_REPLAY_CONTRACT.json"
+        }
+      ],
+      "reuse_basis": "Accepted Pass662 I7B-1 review; unchanged product/owner contracts. No new runtime proof.",
+      "application_to_I7B2A": "Apply the frozen I7B-1 mapping to the narrow PublicProfile root and additive I5 read seam; preserve canonical Character/Social and other owners. Consumer qualification remains at the named downstream stage/gate."
+    },
+    {
+      "id": "I7A5A-CANONICAL_SENDER_WIRE",
+      "disposition": "PRESERVED",
+      "rationale": "Existing owning invariants preserved in I7B projection/read integration; no activation of deferred producers or change to notice/DM/Guild authority.",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS641_I7A5A_SUCCESSOR_CONTRACT.json",
+          "sha256": "b13e4d208b9ca78b1a694382b7e7c11d84cad345a3f5d25174ead22ead8b82db"
+        },
+        {
+          "path": "00_PASSMAP/PASS662_I7B1_ARCHITECTURE_PROVIDER_CONTRACT.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS662_I7B1_TRANSACTION_REFERENCE_REPLAY_CONTRACT.json"
+        }
+      ],
+      "reuse_basis": "Accepted Pass662 I7B-1 review; unchanged product/owner contracts. No new runtime proof.",
+      "application_to_I7B2A": "Apply the frozen I7B-1 mapping to the narrow PublicProfile root and additive I5 read seam; preserve canonical Character/Social and other owners. Consumer qualification remains at the named downstream stage/gate."
+    },
+    {
+      "id": "I7A5A-CALLER_TX_OBSERVATION",
+      "disposition": "PRESERVED",
+      "rationale": "Existing owning invariants preserved in I7B projection/read integration; no activation of deferred producers or change to notice/DM/Guild authority.",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS641_I7A5A_SUCCESSOR_CONTRACT.json",
+          "sha256": "b13e4d208b9ca78b1a694382b7e7c11d84cad345a3f5d25174ead22ead8b82db"
+        },
+        {
+          "path": "00_PASSMAP/PASS662_I7B1_ARCHITECTURE_PROVIDER_CONTRACT.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS662_I7B1_TRANSACTION_REFERENCE_REPLAY_CONTRACT.json"
+        }
+      ],
+      "reuse_basis": "Accepted Pass662 I7B-1 review; unchanged product/owner contracts. No new runtime proof.",
+      "application_to_I7B2A": "Apply the frozen I7B-1 mapping to the narrow PublicProfile root and additive I5 read seam; preserve canonical Character/Social and other owners. Consumer qualification remains at the named downstream stage/gate."
+    },
+    {
+      "id": "I7A5A-BOUNDED_FANOUT_OUTCOME",
+      "disposition": "PRESERVED",
+      "rationale": "Existing owning invariants preserved in I7B projection/read integration; no activation of deferred producers or change to notice/DM/Guild authority.",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS641_I7A5A_SUCCESSOR_CONTRACT.json",
+          "sha256": "b13e4d208b9ca78b1a694382b7e7c11d84cad345a3f5d25174ead22ead8b82db"
+        },
+        {
+          "path": "00_PASSMAP/PASS662_I7B1_ARCHITECTURE_PROVIDER_CONTRACT.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS662_I7B1_TRANSACTION_REFERENCE_REPLAY_CONTRACT.json"
+        }
+      ],
+      "reuse_basis": "Accepted Pass662 I7B-1 review; unchanged product/owner contracts. No new runtime proof.",
+      "application_to_I7B2A": "Apply the frozen I7B-1 mapping to the narrow PublicProfile root and additive I5 read seam; preserve canonical Character/Social and other owners. Consumer qualification remains at the named downstream stage/gate."
+    },
+    {
+      "id": "I7A5A-EPHEMERAL_NO_REPLAY",
+      "disposition": "PRESERVED",
+      "rationale": "Existing owning invariants preserved in I7B projection/read integration; no activation of deferred producers or change to notice/DM/Guild authority.",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS641_I7A5A_SUCCESSOR_CONTRACT.json",
+          "sha256": "b13e4d208b9ca78b1a694382b7e7c11d84cad345a3f5d25174ead22ead8b82db"
+        },
+        {
+          "path": "00_PASSMAP/PASS662_I7B1_ARCHITECTURE_PROVIDER_CONTRACT.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS662_I7B1_TRANSACTION_REFERENCE_REPLAY_CONTRACT.json"
+        }
+      ],
+      "reuse_basis": "Accepted Pass662 I7B-1 review; unchanged product/owner contracts. No new runtime proof.",
+      "application_to_I7B2A": "Apply the frozen I7B-1 mapping to the narrow PublicProfile root and additive I5 read seam; preserve canonical Character/Social and other owners. Consumer qualification remains at the named downstream stage/gate."
+    },
+    {
+      "id": "I7A5A-FUTURE_PRODUCER_GATE",
+      "disposition": "PRESERVED",
+      "rationale": "Existing owning invariants preserved in I7B projection/read integration; no activation of deferred producers or change to notice/DM/Guild authority.",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS641_I7A5A_SUCCESSOR_CONTRACT.json",
+          "sha256": "b13e4d208b9ca78b1a694382b7e7c11d84cad345a3f5d25174ead22ead8b82db"
+        },
+        {
+          "path": "00_PASSMAP/PASS662_I7B1_ARCHITECTURE_PROVIDER_CONTRACT.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS662_I7B1_TRANSACTION_REFERENCE_REPLAY_CONTRACT.json"
+        }
+      ],
+      "reuse_basis": "Accepted Pass662 I7B-1 review; unchanged product/owner contracts. No new runtime proof.",
+      "application_to_I7B2A": "Apply the frozen I7B-1 mapping to the narrow PublicProfile root and additive I5 read seam; preserve canonical Character/Social and other owners. Consumer qualification remains at the named downstream stage/gate."
+    }
+  ],
+  "i7a5b_obligations": [
+    {
+      "id": "I7A5B-FINITE_VARIANTS",
+      "disposition": "PRESERVED",
+      "rationale": "Existing owning invariants preserved in I7B projection/read integration; no activation of deferred producers or change to notice/DM/Guild authority.",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS643_I7A5B_SUCCESSOR_CONTRACT.json",
+          "sha256": "5094210edcbd54dddb2ea9a26695856703f228120291d0bfb9fd1fd23960ff81"
+        },
+        {
+          "path": "00_PASSMAP/PASS662_I7B1_ARCHITECTURE_PROVIDER_CONTRACT.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS662_I7B1_TRANSACTION_REFERENCE_REPLAY_CONTRACT.json"
+        }
+      ],
+      "reuse_basis": "Accepted Pass662 I7B-1 review; unchanged product/owner contracts. No new runtime proof.",
+      "application_to_I7B2A": "Apply the frozen I7B-1 mapping to the narrow PublicProfile root and additive I5 read seam; preserve canonical Character/Social and other owners. Consumer qualification remains at the named downstream stage/gate."
+    },
+    {
+      "id": "I7A5B-ORDINARY140_STRUCTURED_QUALIFIER",
+      "disposition": "PRESERVED",
+      "rationale": "Existing owning invariants preserved in I7B projection/read integration; no activation of deferred producers or change to notice/DM/Guild authority.",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS643_I7A5B_SUCCESSOR_CONTRACT.json",
+          "sha256": "5094210edcbd54dddb2ea9a26695856703f228120291d0bfb9fd1fd23960ff81"
+        },
+        {
+          "path": "00_PASSMAP/PASS662_I7B1_ARCHITECTURE_PROVIDER_CONTRACT.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS662_I7B1_TRANSACTION_REFERENCE_REPLAY_CONTRACT.json"
+        }
+      ],
+      "reuse_basis": "Accepted Pass662 I7B-1 review; unchanged product/owner contracts. No new runtime proof.",
+      "application_to_I7B2A": "Apply the frozen I7B-1 mapping to the narrow PublicProfile root and additive I5 read seam; preserve canonical Character/Social and other owners. Consumer qualification remains at the named downstream stage/gate."
+    },
+    {
+      "id": "I7A5B-CANONICAL_OWNER_ACTIVATION",
+      "disposition": "PRESERVED",
+      "rationale": "Existing owning invariants preserved in I7B projection/read integration; no activation of deferred producers or change to notice/DM/Guild authority.",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS643_I7A5B_SUCCESSOR_CONTRACT.json",
+          "sha256": "5094210edcbd54dddb2ea9a26695856703f228120291d0bfb9fd1fd23960ff81"
+        },
+        {
+          "path": "00_PASSMAP/PASS662_I7B1_ARCHITECTURE_PROVIDER_CONTRACT.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS662_I7B1_TRANSACTION_REFERENCE_REPLAY_CONTRACT.json"
+        }
+      ],
+      "reuse_basis": "Accepted Pass662 I7B-1 review; unchanged product/owner contracts. No new runtime proof.",
+      "application_to_I7B2A": "Apply the frozen I7B-1 mapping to the narrow PublicProfile root and additive I5 read seam; preserve canonical Character/Social and other owners. Consumer qualification remains at the named downstream stage/gate."
+    },
+    {
+      "id": "I7A5B-CAMP_AUDIENCE_AUTHORITY",
+      "disposition": "PRESERVED",
+      "rationale": "Existing owning invariants preserved in I7B projection/read integration; no activation of deferred producers or change to notice/DM/Guild authority.",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS643_I7A5B_SUCCESSOR_CONTRACT.json",
+          "sha256": "5094210edcbd54dddb2ea9a26695856703f228120291d0bfb9fd1fd23960ff81"
+        },
+        {
+          "path": "00_PASSMAP/PASS662_I7B1_ARCHITECTURE_PROVIDER_CONTRACT.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS662_I7B1_TRANSACTION_REFERENCE_REPLAY_CONTRACT.json"
+        }
+      ],
+      "reuse_basis": "Accepted Pass662 I7B-1 review; unchanged product/owner contracts. No new runtime proof.",
+      "application_to_I7B2A": "Apply the frozen I7B-1 mapping to the narrow PublicProfile root and additive I5 read seam; preserve canonical Character/Social and other owners. Consumer qualification remains at the named downstream stage/gate."
+    },
+    {
+      "id": "I7A5B-REFERENCE_NAMESPACE",
+      "disposition": "PRESERVED",
+      "rationale": "Existing owning invariants preserved in I7B projection/read integration; no activation of deferred producers or change to notice/DM/Guild authority.",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS643_I7A5B_SUCCESSOR_CONTRACT.json",
+          "sha256": "5094210edcbd54dddb2ea9a26695856703f228120291d0bfb9fd1fd23960ff81"
+        },
+        {
+          "path": "00_PASSMAP/PASS662_I7B1_ARCHITECTURE_PROVIDER_CONTRACT.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS662_I7B1_TRANSACTION_REFERENCE_REPLAY_CONTRACT.json"
+        }
+      ],
+      "reuse_basis": "Accepted Pass662 I7B-1 review; unchanged product/owner contracts. No new runtime proof.",
+      "application_to_I7B2A": "Apply the frozen I7B-1 mapping to the narrow PublicProfile root and additive I5 read seam; preserve canonical Character/Social and other owners. Consumer qualification remains at the named downstream stage/gate."
+    },
+    {
+      "id": "I7A5B-SCOPED_PARENT_ROLLUP",
+      "disposition": "PRESERVED",
+      "rationale": "Existing owning invariants preserved in I7B projection/read integration; no activation of deferred producers or change to notice/DM/Guild authority.",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS643_I7A5B_SUCCESSOR_CONTRACT.json",
+          "sha256": "5094210edcbd54dddb2ea9a26695856703f228120291d0bfb9fd1fd23960ff81"
+        },
+        {
+          "path": "00_PASSMAP/PASS662_I7B1_ARCHITECTURE_PROVIDER_CONTRACT.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS662_I7B1_TRANSACTION_REFERENCE_REPLAY_CONTRACT.json"
+        }
+      ],
+      "reuse_basis": "Accepted Pass662 I7B-1 review; unchanged product/owner contracts. No new runtime proof.",
+      "application_to_I7B2A": "Apply the frozen I7B-1 mapping to the narrow PublicProfile root and additive I5 read seam; preserve canonical Character/Social and other owners. Consumer qualification remains at the named downstream stage/gate."
+    },
+    {
+      "id": "I7A5B-WIRE_NAMESPACE_AND_UNKNOWN_PRODUCER",
+      "disposition": "PRESERVED",
+      "rationale": "Existing owning invariants preserved in I7B projection/read integration; no activation of deferred producers or change to notice/DM/Guild authority.",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS643_I7A5B_SUCCESSOR_CONTRACT.json",
+          "sha256": "5094210edcbd54dddb2ea9a26695856703f228120291d0bfb9fd1fd23960ff81"
+        },
+        {
+          "path": "00_PASSMAP/PASS662_I7B1_ARCHITECTURE_PROVIDER_CONTRACT.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS662_I7B1_TRANSACTION_REFERENCE_REPLAY_CONTRACT.json"
+        }
+      ],
+      "reuse_basis": "Accepted Pass662 I7B-1 review; unchanged product/owner contracts. No new runtime proof.",
+      "application_to_I7B2A": "Apply the frozen I7B-1 mapping to the narrow PublicProfile root and additive I5 read seam; preserve canonical Character/Social and other owners. Consumer qualification remains at the named downstream stage/gate."
+    },
+    {
+      "id": "I7A5B-LEXICAL_NUMERIC_UNICODE",
+      "disposition": "PRESERVED",
+      "rationale": "Existing owning invariants preserved in I7B projection/read integration; no activation of deferred producers or change to notice/DM/Guild authority.",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS643_I7A5B_SUCCESSOR_CONTRACT.json",
+          "sha256": "5094210edcbd54dddb2ea9a26695856703f228120291d0bfb9fd1fd23960ff81"
+        },
+        {
+          "path": "00_PASSMAP/PASS662_I7B1_ARCHITECTURE_PROVIDER_CONTRACT.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS662_I7B1_TRANSACTION_REFERENCE_REPLAY_CONTRACT.json"
+        }
+      ],
+      "reuse_basis": "Accepted Pass662 I7B-1 review; unchanged product/owner contracts. No new runtime proof.",
+      "application_to_I7B2A": "Apply the frozen I7B-1 mapping to the narrow PublicProfile root and additive I5 read seam; preserve canonical Character/Social and other owners. Consumer qualification remains at the named downstream stage/gate."
+    },
+    {
+      "id": "I7A5B-EDGE_BRIDGE",
+      "disposition": "PRESERVED",
+      "rationale": "Existing owning invariants preserved in I7B projection/read integration; no activation of deferred producers or change to notice/DM/Guild authority.",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS643_I7A5B_SUCCESSOR_CONTRACT.json",
+          "sha256": "5094210edcbd54dddb2ea9a26695856703f228120291d0bfb9fd1fd23960ff81"
+        },
+        {
+          "path": "00_PASSMAP/PASS662_I7B1_ARCHITECTURE_PROVIDER_CONTRACT.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS662_I7B1_TRANSACTION_REFERENCE_REPLAY_CONTRACT.json"
+        }
+      ],
+      "reuse_basis": "Accepted Pass662 I7B-1 review; unchanged product/owner contracts. No new runtime proof.",
+      "application_to_I7B2A": "Apply the frozen I7B-1 mapping to the narrow PublicProfile root and additive I5 read seam; preserve canonical Character/Social and other owners. Consumer qualification remains at the named downstream stage/gate."
+    },
+    {
+      "id": "I7A5B-OWNER_OBSERVATION",
+      "disposition": "PRESERVED",
+      "rationale": "Existing owning invariants preserved in I7B projection/read integration; no activation of deferred producers or change to notice/DM/Guild authority.",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS643_I7A5B_SUCCESSOR_CONTRACT.json",
+          "sha256": "5094210edcbd54dddb2ea9a26695856703f228120291d0bfb9fd1fd23960ff81"
+        },
+        {
+          "path": "00_PASSMAP/PASS662_I7B1_ARCHITECTURE_PROVIDER_CONTRACT.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS662_I7B1_TRANSACTION_REFERENCE_REPLAY_CONTRACT.json"
+        }
+      ],
+      "reuse_basis": "Accepted Pass662 I7B-1 review; unchanged product/owner contracts. No new runtime proof.",
+      "application_to_I7B2A": "Apply the frozen I7B-1 mapping to the narrow PublicProfile root and additive I5 read seam; preserve canonical Character/Social and other owners. Consumer qualification remains at the named downstream stage/gate."
+    },
+    {
+      "id": "I7A5B-CANONICAL_EVENT_AND_INACTIVE_CONSTRUCTOR",
+      "disposition": "PRESERVED",
+      "rationale": "Existing owning invariants preserved in I7B projection/read integration; no activation of deferred producers or change to notice/DM/Guild authority.",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS643_I7A5B_SUCCESSOR_CONTRACT.json",
+          "sha256": "5094210edcbd54dddb2ea9a26695856703f228120291d0bfb9fd1fd23960ff81"
+        },
+        {
+          "path": "00_PASSMAP/PASS662_I7B1_ARCHITECTURE_PROVIDER_CONTRACT.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS662_I7B1_TRANSACTION_REFERENCE_REPLAY_CONTRACT.json"
+        }
+      ],
+      "reuse_basis": "Accepted Pass662 I7B-1 review; unchanged product/owner contracts. No new runtime proof.",
+      "application_to_I7B2A": "Apply the frozen I7B-1 mapping to the narrow PublicProfile root and additive I5 read seam; preserve canonical Character/Social and other owners. Consumer qualification remains at the named downstream stage/gate."
+    }
+  ]
+}

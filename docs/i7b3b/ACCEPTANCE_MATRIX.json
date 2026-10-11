@@ -1,0 +1,45 @@
+{
+  "status": "NOT_RUN",
+  "rows": [
+    {
+      "id": "DB",
+      "result": "NOT_RUN",
+      "scope": "fresh43 and accepted42 upgrade; ownednormal/superbit/versions/noop/strictpersistedconstraint"
+    },
+    {
+      "id": "COMMAND",
+      "result": "NOT_RUN",
+      "scope": "MID3116 params and auth, knownreplay/mismatch/revokedactor/unknown/abort; no publicroot orotherHero mutation"
+    },
+    {
+      "id": "LOAD",
+      "result": "NOT_RUN",
+      "scope": "canonical Read/Lock/List/MID49/MID1/fullHero propagatesfield; samemetadata races preserveotherstate"
+    },
+    {
+      "id": "PUBLIC",
+      "result": "NOT_RUN",
+      "scope": "same-scope selectedHero+bookmark exactref/version/rev/time, bothblocks andholes/Pet disposition"
+    },
+    {
+      "id": "CONSUMER",
+      "result": "NOT_RUN",
+      "scope": "actualsource Lua desired0/failurecallback/NormalSuper load/export and icon/filter/formation predicates"
+    },
+    {
+      "id": "RECOVERY",
+      "result": "NOT_RUN",
+      "scope": "newOSprocess/restart/scopedrestore DBstate+receipt equality"
+    },
+    {
+      "id": "REGRESSION",
+      "result": "NOT_RUN",
+      "scope": "changedCharacterdomain/scanner/queries/serializer/dispatcher andapp/API/architecture/static/race/security"
+    },
+    {
+      "id": "PARENT",
+      "result": "NOT_RUN",
+      "scope": "explicit3A+3B source/code/contract/owner/recovery/capability independentreality;6/E/W2 unaccepted"
+    }
+  ]
+}
