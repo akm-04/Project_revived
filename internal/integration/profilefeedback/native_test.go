@@ -504,6 +504,7 @@ func TestPraiseHistoryPagingAndProviderFailure(t *testing.T) {
 	if e != nil || n != 23 || before != after {
 		t.Fatal("read deleted/changed facts")
 	}
+	sqlExec(t, p, `DELETE FROM gameplay_contexts WHERE player_id=$1`, int64(actors[22].PlayerID))
 	sqlExec(t, p, `DELETE FROM players WHERE player_id=$1`, int64(actors[22].PlayerID))
 	if _, e = s.List(ctx, target, app.PageRequest{Offset: 1}, op()); !errors.Is(e, app.ErrProvider) {
 		t.Fatal("absent canonical author fabricated", e)

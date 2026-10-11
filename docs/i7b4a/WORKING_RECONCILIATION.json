@@ -16,7 +16,8 @@
   "fixes": [
     "Tx Queryer has QueryRow only; bounded ordered JSON aggregate for page",
     "Shared receipt RecordedAt DB write time is >= boundDecisionAt, not equal",
-    "Test fixture canonical Social table and pointer identity corrected"
+    "Test fixture canonical Social table and pointer identity corrected",
+    "Retired-author fixture must delete its gameplay context before canonical Player deletion; actual I4 FK honored. Repaired before final qualification. F1 superseded; product bytes unchanged."
   ],
   "reused": "Source11PASS parentmodel probe and locked source evidence; accepted670/662/I7A1+/D11/D14 foundations unchanged except affected composition metadata/edge regressions needed",
   "final": "NOT_RUN",
