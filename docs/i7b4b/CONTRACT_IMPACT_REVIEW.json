@@ -1,0 +1,12 @@
+{
+  "node": "I7B-4B",
+  "status": "DESIGN_RECONCILED",
+  "contracts": "AUTHORITY_CACHE.json exact current/inherited paths and hashes",
+  "required_extension": "D11 concrete admission/control + terminalfence, shared392 comment owner, D14 forward45 and restore sequence; no superseding662 obligation",
+  "one_command_one_tx": "One semantic gameplayTx only. Separate authenticated admission/terminal-fence control transactions persist identity, do not commit gameplay, no nestedTx. Required by D11 across crash. Audit native tests must count and distinguish them. No relaxation of atomic comment/root/receipt/reaction/delete settlement.",
+  "inherited_locks": "Complete touched315 actor/target then existingSocial360..363/target391/392 before first gameplaymutation; pending control onlyactor315 then ownedlane. One pending actor lane subordinateowner, no new rank or foreignSQL.",
+  "moderation": "Accepted algorithm40 unchanged, new wrapper bounds30; corpus/revision immutable retained",
+  "source": "Parent source ledger current/old model and effectiveMID; V1 corroboration only",
+  "completed_assets": "TypedI5 author projection/minimalI4 identity; no CharacterAsset writes/new fakeproviders.3showcase/bookmark code notchanged.",
+  "prior_evidence_invalidations": "No productcode yet. Future root TouchTx/currentobservation/edgeaddition changes require affected4A root/concurrency/admission checks; other previously passing evidence remains valid."
+}

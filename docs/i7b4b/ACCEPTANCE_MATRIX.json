@@ -1,0 +1,87 @@
+{
+  "schema_version": 1,
+  "node": "I7B-4B",
+  "rows": [
+    {
+      "id": "B01",
+      "obligation": "Scalar moderation30, exact shape/numeric admission and source consumer author/owner mapping",
+      "status": "NOT_RUN",
+      "subject": "One eventual frozen combined4A+4B candidate"
+    },
+    {
+      "id": "B02",
+      "obligation": "Fresh45 and44upgrade, immutable1..44, ownSQL/schema/query/document guards",
+      "status": "NOT_RUN",
+      "subject": "One eventual frozen combined4A+4B candidate"
+    },
+    {
+      "id": "B03",
+      "obligation": "Same/differentactor concurrent post/root version; shared praise/comment root races and monotonic time",
+      "status": "NOT_RUN",
+      "subject": "One eventual frozen combined4A+4B candidate"
+    },
+    {
+      "id": "B04",
+      "obligation": "Add-once reaction, target mismatch/self/bothblocks/SPACEhide/retiredauthor/provider errors and delete ownership",
+      "status": "NOT_RUN",
+      "subject": "One eventual frozen combined4A+4B candidate"
+    },
+    {
+      "id": "B05",
+      "obligation": "Best2 ties/promotion/ordinary >20paging/stalehint/count/emptyarrays/tombstone/freshdeleted failure",
+      "status": "NOT_RUN",
+      "subject": "One eventual frozen combined4A+4B candidate"
+    },
+    {
+      "id": "B06",
+      "obligation": "Known-operation exact proof/fingerprint/actor/context/retainedpolicy/entropy; corrupt proof failclosed",
+      "status": "NOT_RUN",
+      "subject": "One eventual frozen combined4A+4B candidate"
+    },
+    {
+      "id": "B07",
+      "obligation": "Definite abort stable storedDecisionAt; semantic rollback; unknown commit found/miss neverblindbody",
+      "status": "NOT_RUN",
+      "subject": "One eventual frozen combined4A+4B candidate"
+    },
+    {
+      "id": "B08",
+      "obligation": "Durable pending crash before/duringTx; independentprocess actorfence; cancelled oldworker cannotsettle; concurrent freshpost pending cannotadvance; malformed proof blocks",
+      "status": "NOT_RUN",
+      "subject": "One eventual frozen combined4A+4B candidate"
+    },
+    {
+      "id": "B09",
+      "obligation": "IndependentOS process actualAPI routes with realbearer and reconnect/currentcontext; admission and gameplay outcome distinct",
+      "status": "NOT_RUN",
+      "subject": "One eventual frozen combined4A+4B candidate"
+    },
+    {
+      "id": "B10",
+      "obligation": "Dump/restore/restart commentID highwater/tombstones/reactions/pending/committed/aborted rows/retainedpolicy/receipt; nextIDnonreuse and reload",
+      "status": "NOT_RUN",
+      "subject": "One eventual frozen combined4A+4B candidate"
+    },
+    {
+      "id": "B11",
+      "obligation": "Affected4A root/currentcount/history/receipt regressions; unchanged prior2/3/CA/I7A proof reused",
+      "status": "NOT_RUN",
+      "subject": "One eventual frozen combined4A+4B candidate"
+    },
+    {
+      "id": "B12",
+      "obligation": "Frozencombined R2 offline build/fulldefaultGo/raceaffected/vet/query/migration/deployment/pins/security requiredcoverage; no accommodation unless exactcandidateblocked",
+      "status": "NOT_RUN",
+      "subject": "One eventual frozen combined4A+4B candidate"
+    },
+    {
+      "id": "B13",
+      "obligation": "Independent parent4 source/contract/code/recovery review; bothchild obligations and typed6 consumer residuals explicit",
+      "status": "NOT_RUN",
+      "subject": "One eventual frozen combined4A+4B candidate"
+    }
+  ],
+  "inherited_evidence": "Pass672 4A exactF2 + Pass666/670 unchanged dependencies; rerun only documented affectedbehavior",
+  "physical_stock": "Deferred existingW2 afterI14; hostLua/static/API are separate evidence",
+  "parent_acceptance": "B13 explicit independent exit, childgreen notautomaticparentgreen"
+}

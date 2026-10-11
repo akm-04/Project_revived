@@ -239,7 +239,7 @@ func (s Service) Execute(c context.Context, a identity.ActorContext, q Command, 
 		return CommandResult{}, e
 	}
 	var out CommandResult
-	_, res, e := s.Timed.Run(c, bound, i5.DefaultProfile(), tx.Options{Isolation: tx.Serializable}, tx.RetryPolicy{MaxAttempts: 3, RetryDefiniteAbort: true}, resolver{s, a, q, bound}, func(c context.Context, ts gen.TimedScope) error {
+	_, res, e := s.Timed.Run(c, bound, i5.DefaultProfile(), tx.Options{Isolation: tx.Serializable}, tx.RetryPolicy{MaxAttempts: 24, RetryDefiniteAbort: true, DefiniteAbortBackoffBase: 5 * time.Millisecond, DefiniteAbortBackoffMax: 100 * time.Millisecond}, resolver{s, a, q, bound}, func(c context.Context, ts gen.TimedScope) error {
 		at := ts.Operation.DecisionAt()
 		sc := tx.Scope{Tx: ts.Tx, Operation: ts.Operation.Operation(), Attempt: ts.Attempt, Options: ts.Options}
 		basic, e := s.Basic.ReadBasicTx(c, sc, a, q.Target, p.Revision, at)
@@ -322,14 +322,8 @@ func (q PageRequest) Validate() error {
 	return nil
 }
 
-type Author struct {
-	PlayerID int64  `json:"player_id"`
-	Name     string `json:"player_name"`
-	Avatar   int64  `json:"avatar_id"`
-	Frame    int64  `json:"avatar_frame_id"`
-	Level    int64  `json:"lev"`
-	Region   int32  `json:"region"`
-}
+type Author = d.PublicAuthor
+
 type Row struct {
 	Author     Author `json:"player_info"`
 	PraiseTime int64  `json:"praise_time"`

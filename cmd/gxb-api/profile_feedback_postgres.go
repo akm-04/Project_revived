@@ -46,5 +46,11 @@ func registerProfileFeedback(c context.Context, p *postgres.Pool, r tx.Runner, a
 			return e
 		}
 	}
+	comments := stockruntime.ProfileCommentDispatcher{Authority: a, Service: app.CommentService{Base: s, Store: profilefeedbackstore.Store{}}}
+	for _, mid := range []uint16{1835, 1836, 1839, 1841} {
+		if e = router.Register(mid, comments); e != nil {
+			return e
+		}
+	}
 	return nil
 }

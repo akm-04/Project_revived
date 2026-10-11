@@ -1,0 +1,53 @@
+{
+  "status": "IMPLEMENTATION_WORKING_TARGETED_CHECKS_PASS_NOT_FINAL_QUALIFICATION",
+  "changes": [
+    "Migration45 comments/reactions/retainedadmissioncontrol",
+    "Shared392 typed TouchTx/commentsnapshot; unchangedpraise fact/countownership",
+    "Four strictsrc64 routes; existing40 scalaralgorithm reused with30bound",
+    "Durable cancellation fences knownpending andfreshpending; definiteaborted semanticcommand cleans control, neverunknownbodyrerun",
+    "Knownpost replay observation/auth uses freshinstant separateoriginalDecisionAt",
+    "Finite24 abortretry attempts with5..100msbackoff for mixed392 contention; no entropy/time resampling"
+  ],
+  "executed_native_working": [
+    "TestCommentLifecyclePaging",
+    "TestCommentScalarAndPrivacy",
+    "TestCommentPendingTerminalFenceAndUnknown",
+    "TestCommentConcurrencySharedPraiseRoot",
+    "TestCommentIndependentProcessPendingRecovery",
+    "TestCommentDefiniteAbortStableTime",
+    "TestCommentInflightLaneWaitsForOriginal",
+    "TestCommentKilledProcessRollbackRecovery",
+    "TestCommentCorruptProofAndMissingAuthor",
+    "TestPraiseConcurrencyAndSharedTime",
+    "TestPraiseAbortAndUnknownReconciliation"
+  ],
+  "executed_static": "Affectedpackages compile/test and schema/queryownership pass; latestarchguard/stockruntime/httpedge/replaycatalog pass",
+  "fixes": [
+    {
+      "failure": "Mixed16 newpost/praisewriters exhausted3/8 immediate/boundedserializable retries",
+      "changed": "profilefeedback/service.go andcomment_service.go finite24+backoff",
+      "invalidated_evidence": "4A praiseconcurrency/definiteabort timing for newworkingcandidate; targetednamednativechecks and finalaffectedregression reestablish. Accepted672 remains immutable."
+    },
+    {
+      "failure": "Childprocess ActorContext privateUUIDtypes didnotJSONroundtrip",
+      "changed": "Use existing actorTransport/decodeActor fixture, no productidentityrelaxation"
+    },
+    {
+      "failure": "Known hiddenpost definite rejection leftPENDING before laterunhide",
+      "changed": "Definiteabort cleanup using same315+durablecancellation; cleanup failure stayspending, UNKNOWN stayspending"
+    },
+    {
+      "review": "Knownpost current observation reused oldDecisionAt",
+      "changed": "Separate freshcurrent/auth witness from private retained terminal decision; nativeTestCorruptProofAndMissingAuthor asserts"
+    }
+  ],
+  "inherited_reuse": "Current/old src64 parent11PASS unchanged; exactaccepted4A and2/3/I7A/CA proofs notrepeated except affectedretry/mixedowner/source-wire obligations. FinalR2 candidatesuite pending.",
+  "not_run": [
+    "FinalactualAPI/Riverfixture",
+    "Exact frozen final suite",
+    "45upgrade fixture",
+    "Restored sequence/highwater/tombstone/pending/receipt/policy typedreload",
+    "Independentparent4exit"
+  ],
+  "limitations": "Working checks are realPG18.6/R2Go1.27.2, not frozenqualification/physicalclient. Earlierworkinglogs overwritten by oldrunner; caseexecution recorded; finalqualification will retainexactlogs."
+}

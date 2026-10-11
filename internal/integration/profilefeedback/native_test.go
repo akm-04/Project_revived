@@ -50,7 +50,10 @@ var at = time.Now().UTC()
 
 func pool(t *testing.T) *pg.Pool {
 	t.Helper()
-	dsn := os.Getenv("GXB_I7B4A_DSN")
+	dsn := os.Getenv("GXB_I7B4B_DSN")
+	if dsn == "" {
+		dsn = os.Getenv("GXB_I7B4A_DSN")
+	}
 	if dsn == "" {
 		t.Fatal("required exact native DSN missing")
 	}

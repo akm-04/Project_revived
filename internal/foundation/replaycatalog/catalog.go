@@ -31,6 +31,10 @@ type Family struct {
 // authority. A new mutating family must be classified here before cumulative guards
 // may treat replay coverage as complete.
 var Enabled = []Family{
+	{Name: "i7b.comment-post", OwnerKind: "player", Domain: "profile-feedback", Operation: "comment-post", IdentityClass: CallerSemantic, SemanticSource: "retained admission identity; exact pending terminal fence before new occurrence", ReceiptSchema: "gxb.profile-feedback.comment.v1", Residual: "ambiguous repeatable stock text; late identical after resolved success may create new occurrence; unresolved lane never blind resubmits"},
+	{Name: "i7b.comment-react", OwnerKind: "player", Domain: "profile-feedback", Operation: "comment-react", IdentityClass: IntrinsicOneShot, SemanticSource: "global retained commentID plus actor add-once reaction", ReceiptSchema: "gxb.profile-feedback.comment.v1"},
+	{Name: "i7b.comment-delete", OwnerKind: "player", Domain: "profile-feedback", Operation: "comment-delete", IdentityClass: IntrinsicOneShot, SemanticSource: "canonical commentID plus cardowner; retained tombstone, fresh deleted fails", ReceiptSchema: "gxb.profile-feedback.comment.v1"},
+
 	{Name: "i7b.profile-praise", OwnerKind: "player", Domain: "profile-feedback", Operation: "praise", IdentityClass: IntrinsicOneShot, SemanticSource: "permanent target/actor fact; private operation receipt distinct from fresh stock repeat", ReceiptSchema: "gxb.profile-feedback.praise.v1", Residual: "no stock nonce; fresh repeated praise returns current coherent count/bit without changing first fact or version"},
 	{Name: "identity.provider-bind", OwnerKind: "provider_principal", Domain: "identity", Operation: "provider.bind", IdentityClass: IntrinsicOneShot, SemanticSource: "provider principal digest + canonical", ReceiptSchema: "identity lifecycle receipt"},
 	{Name: "identity.session-issue", OwnerKind: "session", Domain: "identity", Operation: "session.issue", IdentityClass: IntrinsicOneShot, SemanticSource: "canonical session id", ReceiptSchema: "identity lifecycle receipt"},

@@ -2301,6 +2301,48 @@
         "internal/adapters/postgres/profilefeedbackstore/"
       ],
       "write_exceptions": []
+    },
+    "player_profile_comments": {
+      "owner": "profile-feedback",
+      "migration": "migrations/00045_i7b4b_profile_comments.sql",
+      "allowed_query_owners": [
+        "profile-feedback"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/profilefeedbackstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/profilefeedbackstore/"
+      ],
+      "write_exceptions": []
+    },
+    "player_profile_comment_reactions": {
+      "owner": "profile-feedback",
+      "migration": "migrations/00045_i7b4b_profile_comments.sql",
+      "allowed_query_owners": [
+        "profile-feedback"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/profilefeedbackstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/profilefeedbackstore/"
+      ],
+      "write_exceptions": []
+    },
+    "player_profile_comment_operations": {
+      "owner": "profile-feedback",
+      "migration": "migrations/00045_i7b4b_profile_comments.sql",
+      "allowed_query_owners": [
+        "profile-feedback"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/profilefeedbackstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/profilefeedbackstore/"
+      ],
+      "write_exceptions": []
     }
   }
 }

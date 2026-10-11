@@ -1,0 +1,65 @@
+{
+  "schema_version": 1,
+  "node": "I7B-4B",
+  "status": "RESEARCH_DESIGN_READY_NOT_IMPLEMENTED",
+  "decisions": [
+    {
+      "id": "B-WIRE",
+      "classification": "SOURCE_FACT",
+      "decision": "1835 {to_player_id,content}->best_comments/comment_list/comment_num;1836 {comment_id,to_player_id}->best_comments/comment_info;1839 {to_player_id,start,offset,comment_num?}->comment_list and current comment_num;1841 {comment_id}->unused empty success. All safe integers, exact fields/envelope admitted, finite error_code1. Row player_id is card owner; player_info is genuine author; comment_id global; content and is_has_praise exposed, no private operation metadata.",
+      "basis": "PersonDisplay.lua538-635; PersonDisplayWindow.lua1810-1906/1973-2017 exact parent source ledger"
+    },
+    {
+      "id": "B-OWNER",
+      "classification": "INHERITED_CONTRACT_RECONCILIATION",
+      "decision": "Extend accepted ProfileFeedback392 owner/store/prepared root with comments, reactions and tombstones. Actual insert/new reaction/delete touches same target root once. No-op reaction preserves version/time. Praise count/history independent but root version shared. Minimal typed TouchTx seam validates exact prepared caller and CAS, preserves accepted timestamp monotonic law. PublicProfile391 remains untouched; no foreign SQL or parallel counters."
+    },
+    {
+      "id": "B-CONTENT",
+      "classification": "IMPLEMENTATION_DECISION",
+      "decision": "Fixed I7B_PROFILE_COMMENT_V1 binds retained existing public-profile policy revision/moderation corpus; require nonempty validUTF8/noNUL <=30 scalar values then call existing profile.ModerateIntro unchanged (already scalar-safe <=40). No new corpus/content table/policy40 amendment. DecisionAt bound once from DB before admission and reused during all semantic attempts; no reset/quota/TTL."
+    },
+    {
+      "id": "B-ID",
+      "classification": "IMPLEMENTATION_DECISION",
+      "decision": "Own global PostgreSQL bigint noncycling identity/sequence MAXVALUE9007199254740991, preserving existing positive wire-safe allocator convention. IDs may have rollback gaps, are never reused; tombstones keep allocation history. Dump/restore includes sequence highwater, deleted rows, reaction facts, operation records and kernel receipts. Fresh45/upgrade44/restore gates discriminate this."
+    },
+    {
+      "id": "B-PAGE",
+      "classification": "INHERITED_CONTRACT + IMPLEMENTATION_DECISION",
+      "decision": "Best two live comments reaction-count DESC, creation DecisionAt DESC, global ID DESC; ordinary creation/ID DESC excluding current read-local best IDs. First post composite <=20 total incl bests;1839 start is ordinary loaded length, offset1..20, optional total hint never authority. No cross-request snapshot/cursor/50-row pruning. Count all live comments; bests reselect after deletion. Arrays JSON arrays. Source empty-cache replacement/deletion page drift retained residual, full1829 consumer6/W2 route remains."
+    },
+    {
+      "id": "B-PRIVACY",
+      "classification": "INHERITED_CONTRACT",
+      "decision": "Post/react foreigncard only, current SPACE4 eligibility and both directed blocks; selfcard read allowed. Resolve canonical comment target before acquiring all sorted315/relations/391/392 locks, revalidate immutable ID/target after locks. Reaction supplied target must match stored card owner; only card owner may delete, derive target from ID. Fresh deleted/missing ID fails (client decrements count on success), known operation delete replay is private receipt scope. No author/moderator delete right invented. Missing required author basis fails projection without deleting retained facts."
+    },
+    {
+      "id": "B-D11-CONTROL",
+      "classification": "IMPLEMENTATION_DECISION + REQUIRED_D11_RECONCILIATION",
+      "decision": "Durable owner admission/control records precede semantic mutation. Keep all internal identities, exact actor/account/context/server/start/entropy/fingerprint/policy/revision/DecisionAt and PENDING/COMMITTED/ABORTED state; one PENDING per actor comment family. Control transaction authenticates current actor and locks existing315 actor before pending-row lock; it creates no gameplay fact/root/counter and is not the semantic command transaction. Semantic transaction plans all lower locks, takes same315 actor fence, validates own PENDING binding before any mutation; comment/root/receipt/COMMITTED transition settle atomically. A fresh request encountering PENDING never starts a new occurrence: after exclusive actor fence, inspect exact old identity/receipt and terminalize conservatively; absence alone is not replay permission. A durable ABORTED transition fences future delayed old workers; return finite failure for that request. Only a subsequent fresh request may admit a new identity after definite terminalization. Live original transaction owns315, so reconciliation waits or fails closed; serializable retry re-establishes fresh snapshot. If exact old committed proof exists, reconcile it; malformed/mismatched proof remains blocked, not erased. No clock/lease/age/reconnect heuristic, clientnonce, transport-ack or fingerprint-as-identity. Known original operation uses retained binding; COMMITTED receipt replay never creates a new ID. Late identical wire after resolved success can be a new occurrence, per frozen662 residual.",
+      "why_required": "Existing receipt-only resolver miss UNKNOWN does not retain freshedge ambiguity across process death. Durable terminal fence provides a concrete resolution, preserving one semantic callerTx. Admission/control commits and gameplay commits reported separately; no semantic nestedTx/providerTx."
+    },
+    {
+      "id": "B-RECOVERY",
+      "classification": "INHERITED_CONTRACT_RECONCILIATION",
+      "decision": "UNKNOWN semanticcommit remains unknown until fresh writer read validates exact retained receipt and canonical comment/root ancestry. Never rerun body from a missing receipt. Explicit pending reconciliation under actor fence prevents prior worker future commit via ABORTED marker; proof of terminality is locking+durable cancellation, not receipt absence alone. Retain every operation row and tombstone across restore; react/delete intrinsic identities use same kernel known-operation proof/current observation without new pending lane."
+    },
+    {
+      "id": "B-SCOPE",
+      "classification": "INHERITED_CONTRACT",
+      "decision": "Four stock routes only plus typed caller-scoped SPACE comment observation port for6. Full1829/freshness later6/E; I7B4 parent exit after this child and independent4A+4B review; wholeI7B/I7/W2 not accepted. No CA/economy/mail/River product edits expected. Existing4A evidence reused except shared root/edge changes target affected assertions."
+    }
+  ],
+  "new_phasewide_contracts": [],
+  "applied_owner_extension": "Concrete required D11 pending admission/terminal fence, comment IDs/tombstones, shared392 comment child; register applied contract only after qualified implementation",
+  "rejected": [
+    "Receipt absence alone authorizes retry",
+    "In-memory lane/journal loses identity on process crash",
+    "Timeout, lease expiry or reconnect identifies new intent",
+    "Control record inserted only inside gameplayTx disappears on abort/crash",
+    "Private nonce/client patch",
+    "Duplicate owner count, generic new lock rank/kernel",
+    "Changing existing40 scalar moderation"
+  ]
+}
