@@ -31,6 +31,7 @@ type Family struct {
 // authority. A new mutating family must be classified here before cumulative guards
 // may treat replay coverage as complete.
 var Enabled = []Family{
+	{Name: "i7b.profile-praise", OwnerKind: "player", Domain: "profile-feedback", Operation: "praise", IdentityClass: IntrinsicOneShot, SemanticSource: "permanent target/actor fact; private operation receipt distinct from fresh stock repeat", ReceiptSchema: "gxb.profile-feedback.praise.v1", Residual: "no stock nonce; fresh repeated praise returns current coherent count/bit without changing first fact or version"},
 	{Name: "identity.provider-bind", OwnerKind: "provider_principal", Domain: "identity", Operation: "provider.bind", IdentityClass: IntrinsicOneShot, SemanticSource: "provider principal digest + canonical", ReceiptSchema: "identity lifecycle receipt"},
 	{Name: "identity.session-issue", OwnerKind: "session", Domain: "identity", Operation: "session.issue", IdentityClass: IntrinsicOneShot, SemanticSource: "canonical session id", ReceiptSchema: "identity lifecycle receipt"},
 	{Name: "identity.session-revoke", OwnerKind: "session", Domain: "identity", Operation: "session.revoke", IdentityClass: IntrinsicOneShot, SemanticSource: "canonical session id", ReceiptSchema: "identity lifecycle receipt"},

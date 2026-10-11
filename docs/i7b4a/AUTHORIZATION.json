@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "node": "I7B-4A",
+  "full_node_path": "ROOT/I7/I7B/I7B-4/I7B-4A",
+  "research_authorized": true,
+  "design_authorized": true,
+  "research_started": true,
+  "research_complete": true,
+  "design_frozen": true,
+  "implementation_authorized": true,
+  "implementation_started": true,
+  "publication_authorized": true,
+  "human_scope": "Current direct user request authorizes I7B-4A implementation, portable R2 qualification, reconciliation and scoped PassMap closure. I7B-4B not authorized.",
+  "approved_parent_split": "stage4/APPROVED_STAGE_TREE.json"
+}

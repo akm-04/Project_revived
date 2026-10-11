@@ -14,7 +14,7 @@ func socialMID(mid uint16) bool {
 }
 
 func strictRawMID(mid uint16) bool {
-	return socialMID(mid) || mid == 588 || mid == 1832 || mid == 1838 || mid == 1831 || mid == 1833 || mid == 1834
+	return mid == 1830 || mid == 1842 || socialMID(mid) || mid == 588 || mid == 1832 || mid == 1838 || mid == 1831 || mid == 1833 || mid == 1834
 }
 
 // Finite selected routes require raw duplicate detection: decoded maps have already lost it.

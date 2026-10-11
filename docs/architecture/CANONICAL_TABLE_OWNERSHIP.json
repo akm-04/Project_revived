@@ -2273,6 +2273,34 @@
       "migration": "migrations/00042_i7b3a_showcase_selection.sql",
       "owner": "content-registry",
       "write_exceptions": []
+    },
+    "player_profile_feedback_roots": {
+      "owner": "profile-feedback",
+      "migration": "migrations/00044_i7b4a_profile_praise.sql",
+      "allowed_query_owners": [
+        "profile-feedback"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/profilefeedbackstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/profilefeedbackstore/"
+      ],
+      "write_exceptions": []
+    },
+    "player_profile_praises": {
+      "owner": "profile-feedback",
+      "migration": "migrations/00044_i7b4a_profile_praise.sql",
+      "allowed_query_owners": [
+        "profile-feedback"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/profilefeedbackstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/profilefeedbackstore/"
+      ],
+      "write_exceptions": []
     }
   }
 }

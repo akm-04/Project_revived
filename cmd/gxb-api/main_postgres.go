@@ -344,6 +344,9 @@ func main() {
 	if e := registerGuildBroadcast(ctx, pool, runner, authority, guildDB, i5db, receipts, contentDB, router); e != nil {
 		log.Fatalf("Guild broadcast group: %v", e)
 	}
+	if e := registerProfileFeedback(ctx, pool, runner, authority, receipts, contentDB, router); e != nil {
+		log.Fatal(e)
+	}
 	if e := registerPublicProfile(ctx, pool, runner, authority, receipts, contentDB, router); e != nil {
 		log.Fatalf("PublicProfile startup: %v", e)
 	}

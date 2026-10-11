@@ -1,5 +1,5 @@
 {
-  "base_backend_sha256": "676bccb8d9f108612461291576228504d7f251af1a4e63e7df90460dc3433d93",
+  "base_backend_sha256": "77a9ba59b3a96339b68b7d12027dd018fcefc13470c919f04c33fcf989e31751",
   "ca1_stage": "ACCEPTED_SEALED_PASS512",
   "ca2_1": "LOCAL_CHECKPOINT_ACCEPTED_PASS515; NOT_CA2_PHASE_ACCEPTANCE",
   "ca2_2": "LOCAL_CHECKPOINT_ACCEPTED_PASS517; NOT_CA2_PHASE_ACCEPTANCE",
@@ -490,7 +490,7 @@
   "snapshot": "D10 Publication immutable revisions/items, canonical scope and PostgreSQL visibility, read markers, source-shaped7/1537/8193/8194; inherited8 accepted656 preserved.",
   "stage": "I7B-2B_EXACT_COMBINED_CANDIDATE",
   "status": "FROZEN_NOT_ACCEPTED_QUALIFICATION_PENDING",
-  "version": "v0.104.0",
+  "version": "v0.105.0",
   "w2_claimed": false,
   "inherited_creation_metadata_provenance": {
     "archive": "gxb-backend-v2-v0.99.0-pass656-i7a8-accepted.zip",
@@ -513,8 +513,8 @@
   "i7a8b_content_revision": "9b81049a746521a5e8b57fd0fe42121470b0921481da257298ecf9c624f448e7",
   "i7a8b_parent_accepted_git_commit": "0d7593677a5ac1c7c2b669a73bd9166d8116418a",
   "i7a8b_authority": "Trusted Pass655 whole8B selection plus direct human implementation and closure authorization; frozen identity does not imply acceptance.",
-  "phase": "I7B3B_HERO_BOOKMARK_COMBINED_I7B3",
-  "next_action": "ExactR2 combined3B/parent3 scoped qualification then independentparent3 reality and normal670closure; richactivation6/wholeI7B/E/W2 unaccepted.",
+  "phase": "I7B4A_PROFILE_FEEDBACK_PRAISE",
+  "next_action": "Exact portable R2 scoped4A qualification, independent code/source/owner/contract/recovery reality and Pass672 closure. Comments4B, parent4/6/E/I7/W2 remain unaccepted.",
   "i7a9_product_accepted": false,
   "i7a9_gate_status_at_identity_freeze": "NOT_RUN",
   "i7a9_contract": "Selected normal658 I7A9 contract index in PassMap",
@@ -538,7 +538,7 @@
   "i7b2a_gate_status_at_identity_freeze": "NOT_RUN",
   "inherited_stage_metadata_is_historical": true,
   "i7b2a_contract": "docs/i7b2a/IMPLEMENTATION_SPEC.json",
-  "research_design_passmap_sha256": "6db63917d3438895401e147700159bd1ec0891d3840985e0257ac6c225c2a312",
+  "research_design_passmap_sha256": "0c05cce388bc92a1b5905a9d8c315467ec68fc8ac92d06586b65b492a6961c85",
   "i7b2a_acceptance_pass": "664.0",
   "i7b2b_product_accepted": false,
   "i7b2b_gate_status_at_identity_freeze": "NOT_RUN",
@@ -553,5 +553,10 @@
   "i7b3b_gate_status_at_identity_freeze": "NOT_RUN",
   "i7b3b_contract": "docs/i7b3b/IMPLEMENTATION_PLAN.json",
   "i7b3b_migration_high_water": "00043_i7b3b_hero_bookmark.sql",
-  "i7b3a_inherited_accepted_pass": "668.0"
+  "i7b3a_inherited_accepted_pass": "668.0",
+  "i7b4a_product_accepted": false,
+  "i7b4_parent_accepted": false,
+  "i7b4a_gate_status_at_identity_freeze": "NOT_RUN",
+  "i7b4a_contract": "docs/i7b4a/IMPLEMENTATION_PLAN.json",
+  "i7b4a_migration_high_water": "00044_i7b4a_profile_praise.sql"
 }
