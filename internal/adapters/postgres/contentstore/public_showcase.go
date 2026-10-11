@@ -10,6 +10,7 @@ import (
 	app "gxb.local/backend/v2/internal/application/publicprofile"
 	"gxb.local/backend/v2/internal/content/builtin"
 	"gxb.local/backend/v2/internal/content/registry"
+	"gxb.local/backend/v2/internal/domain/profile"
 	"gxb.local/backend/v2/internal/foundation/tx"
 	"io"
 )
@@ -81,7 +82,7 @@ func (Store) ReadPublicShowcasePolicy(c context.Context, q tx.Queryer, rev strin
 	if d.Decode(&extra) != io.EOF {
 		return out, app.ErrContent
 	}
-	out.Policy = p
+	out.Policy = profile.PublicShowcasePolicy(p)
 	return out, out.Validate()
 }
 func (Store) HasPublicShowcaseCapabilityTx(c context.Context, q tx.Queryer, rev string) (bool, error) {

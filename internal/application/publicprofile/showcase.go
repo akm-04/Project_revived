@@ -6,9 +6,9 @@ import (
 	"encoding/json"
 	"errors"
 	"gxb.local/backend/v2/internal/application/characterasset"
-	"gxb.local/backend/v2/internal/content/builtin"
 	"gxb.local/backend/v2/internal/domain/character"
 	"gxb.local/backend/v2/internal/domain/identity"
+	"gxb.local/backend/v2/internal/domain/profile"
 	"gxb.local/backend/v2/internal/foundation/finitejson"
 	"gxb.local/backend/v2/internal/foundation/lockkey"
 	"gxb.local/backend/v2/internal/foundation/tx"
@@ -75,7 +75,7 @@ type ShowcaseStore interface {
 }
 type ShowcaseContentPolicy struct {
 	Revision string
-	Policy   builtin.PublicShowcasePolicy
+	Policy   profile.PublicShowcasePolicy
 }
 
 func (p ShowcaseContentPolicy) Validate() error {
