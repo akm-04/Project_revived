@@ -301,7 +301,7 @@ func TestCommentRestoredReload(t *testing.T) {
 	p := pool(t)
 	var id string
 	state := "PENDING"
-	e := p.QueryRow(ctx, `SELECT operation_id::text,state FROM player_profile_comment_operations WHERE admission_payload->'Command'->>'Content'='restore-pending' ORDER BY (admission_payload->>'DecisionAt')::timestamptz DESC LIMIT 1`).Scan(&id, &state)
+	e := p.QueryRow(ctx, `SELECT operation_id::text,state FROM player_profile_comment_operations WHERE admission_payload->'Command'->>'content'='restore-pending' ORDER BY (admission_payload->>'DecisionAt')::timestamptz DESC LIMIT 1`).Scan(&id, &state)
 	if e != nil {
 		t.Fatal(e)
 	}
@@ -318,7 +318,7 @@ func TestCommentRestoredReload(t *testing.T) {
 	actor := decodeActor(t, tr)
 	s := app.CommentService{Base: service(p, p), Store: store}
 	var liveOp string
-	if e = p.QueryRow(ctx, `SELECT operation_id::text FROM player_profile_comment_operations WHERE actor_player_id=$1 AND admission_payload->'Command'->>'Content'='restore-live' AND state='COMMITTED' ORDER BY operation_id LIMIT 1`, int64(actor.PlayerID)).Scan(&liveOp); e != nil {
+	if e = p.QueryRow(ctx, `SELECT operation_id::text FROM player_profile_comment_operations WHERE actor_player_id=$1 AND admission_payload->'Command'->>'content'='restore-live' AND state='COMMITTED' ORDER BY operation_id LIMIT 1`, int64(actor.PlayerID)).Scan(&liveOp); e != nil {
 		t.Fatal(e)
 	}
 	live, has, e := store.ReadAdmissionTx(ctx, p, liveOp, false)
