@@ -697,7 +697,6 @@ func TestGuardAbsenceVersusFirstSelection(t *testing.T) {
 type signalledFence struct {
 	inner  app.ActorFencer
 	signal chan struct{}
-	once   sync.Once
 }
 
 func (s signalledFence) FenceActorTx(c context.Context, t tx.Tx, a identity.ActorContext, at time.Time) error {
