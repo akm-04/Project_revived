@@ -1,0 +1,86 @@
+{
+  "status": "PASS_PRE_FREEZE_INDEPENDENT_CODE_SOURCE_OWNER_CONTRACT_REVIEW",
+  "checks": [
+    "MIGRATION_UNCHANGED:00001_kernel_receipts.sql",
+    "MIGRATION_UNCHANGED:00002_identity_logicalserver_bootstrap.sql",
+    "MIGRATION_UNCHANGED:00003_identity_account_uid_repair.sql",
+    "MIGRATION_UNCHANGED:00004_player_directory_profile_bootstrap.sql",
+    "MIGRATION_UNCHANGED:00005_i5_player_economy_mail_objective_redeem.sql",
+    "MIGRATION_UNCHANGED:00006_i5_transactional_policies.sql",
+    "MIGRATION_UNCHANGED:00007_identity_lifecycle_constraints.sql",
+    "MIGRATION_UNCHANGED:00008_i5_economy_owner_fence.sql",
+    "MIGRATION_UNCHANGED:00009_r4_immutable_content_revisions.sql",
+    "MIGRATION_UNCHANGED:00010_r4_manifest_identity_not_null.sql",
+    "MIGRATION_UNCHANGED:00011_r5_foundation_repairs.sql",
+    "MIGRATION_UNCHANGED:00012_i6c_guild_core.sql",
+    "MIGRATION_UNCHANGED:00013_i6c_guild_replay_repair.sql",
+    "MIGRATION_UNCHANGED:00014_ca2_hero_foundation.sql",
+    "MIGRATION_UNCHANGED:00015_ca2_hero_progression_content.sql",
+    "MIGRATION_UNCHANGED:00016_ca3_pet_foundation.sql",
+    "MIGRATION_UNCHANGED:00017_ca3_pet_acquisition.sql",
+    "MIGRATION_UNCHANGED:00018_ca3_pet_progression.sql",
+    "MIGRATION_UNCHANGED:00019_ca4_equipment_primitives.sql",
+    "MIGRATION_UNCHANGED:00020_ca4_2_hero_equipment.sql",
+    "MIGRATION_UNCHANGED:00021_ca4_3a_hero_fumo.sql",
+    "MIGRATION_UNCHANGED:00022_ca4_3b_hero_promotion_restoration.sql",
+    "MIGRATION_UNCHANGED:00023_ca4_4a_pet_equipment_content.sql",
+    "MIGRATION_UNCHANGED:00024_ca4_4a_pet_equipment_state.sql",
+    "MIGRATION_UNCHANGED:00025_ca4_4b_pet_promotion_restoration_content.sql",
+    "MIGRATION_UNCHANGED:00026_ca4_4b_pet_fumo_state.sql",
+    "MIGRATION_UNCHANGED:00027_ca4_5_super_equipment_content.sql",
+    "MIGRATION_UNCHANGED:00028_ca5_2_saved_presets.sql",
+    "MIGRATION_UNCHANGED:00029_ca6_2_practice_foundation.sql",
+    "MIGRATION_UNCHANGED:00030_ca7_2_appearance_foundation.sql",
+    "MIGRATION_UNCHANGED:00031_i7a3_social_presence.sql",
+    "MIGRATION_UNCHANGED:00032_i7a3_presence_owner_fence_repair.sql",
+    "MIGRATION_UNCHANGED:00033_i7a4a_social_foundation.sql",
+    "MIGRATION_UNCHANGED:00034_i7a6a_friend_dm.sql",
+    "MIGRATION_UNCHANGED:00035_personal_dm_delivery.sql",
+    "MIGRATION_UNCHANGED:00036_social_gift.sql",
+    "MIGRATION_UNCHANGED:00037_guild_broadcast.sql",
+    "MIGRATION_UNCHANGED:00038_guild_invite_projection.sql",
+    "MIGRATION_UNCHANGED:00039_publication_v1.sql",
+    "MIGRATION_UNCHANGED:00040_i7b2a_public_profile_foundation.sql",
+    "MIGRATION_UNCHANGED:00041_i7b2b_public_profile_content.sql",
+    "MIGRATION_UNCHANGED:00042_i7b3a_showcase_selection.sql",
+    "MIGRATION_UNCHANGED:00043_i7b3b_hero_bookmark.sql",
+    "MIGRATION_UNCHANGED:00044_i7b4a_profile_praise.sql",
+    "MIGRATION_UNCHANGED:00045_i7b4b_profile_comments.sql",
+    "PIN_UNCHANGED:go.mod",
+    "PIN_UNCHANGED:go.sum",
+    "PIN_UNCHANGED:.go-version",
+    "NO_EXISTING_GAMEPLAY_OR_PROVIDER_CODE_CHANGED",
+    "PHYSICAL_ADAPTER_NO_SQL_AUTH_PUBLIC_HTTP_OR_FOREIGN_OWNER",
+    "SOURCE_NATIVE_PNG_AND_ACTUAL_BYTE_MD5_CONSUMER_CROSS_CHECKED"
+  ],
+  "source_files": [
+    {
+      "path": "work/i7b5/source/current/app/model/PersonDisplay.lua",
+      "sha256": "022fcbf39167ac9197ce5034b32fd5833016742744ad3de118ceacf6f808cfb8"
+    },
+    {
+      "path": "work/i7b5/source/current/app/common/ui/OnlineImageSprite.lua",
+      "sha256": "bc330465fbf17f95038da72e260e949d0a5f468a6f78e067d2c411f4125d0933"
+    },
+    {
+      "path": "work/i7b5/source/native/smali/com/xyd/platform/android/utility/PhotoClipWindow$3.smali",
+      "sha256": "d04f45d9f5cf32c69d973b54f054ad9b6cd2ee7eab1caea13823fdc6edc10262"
+    }
+  ],
+  "code_review": [
+    "Descriptor has no filesystem/URL/credential facts; exactPNG/SHA/actualbyteMD5; dimensions checkedbeforefullDecode; EOF required",
+    "Bounded privatecopy/2slots/contextcheckedlimits; immutable400hardlink no-replace+actualdedupverification+file/dirsync beforeexclusiveoperationpin/Ready",
+    "IndependentSH/EX filedescriptions/stableinode; Readyprivate store/op/actor/server-bound; Closeunknown/default retains durablepin; knowncleanupdoesnotdeletebyte orreexecute gameplay",
+    "Maintenancechecks malformedpins, lifetimeandactualbytes; deletechecksphysicalpins; qualifiedResolvePin requires exactrecord/definiteoutcome fromfuture5B; noage/receiptmissabort",
+    "Root391/stableDecisionAt/315order/KernelReceipt untouched; Character/Playerfacts not written; physicalfoundationalone doesnotimplement1844,GET,replay,currentrefs,GCbusiness,jointDBrestore orfull1829"
+  ],
+  "design_delta": "Requiredtypedpinresolution seam recorded IMPLEMENTATION_DECISIONS.json; nophasewideamendment",
+  "qualification": "Workingcomponent/native/arch tests green; exactfrozenportablequalificationpending",
+  "reviewer": "Primaryagent independentreview, nosecondreviewer claim",
+  "limitations": [
+    "SIGKILL/restart andfsyncfault tests are notpowercut/storagehardwareproof",
+    "CooperativeReader/OSsyscall cancellation, nohardreal-timepreemption",
+    "No5B DB/ref/HTTP orphysicalAndroid proof"
+  ],
+  "reused_evidence": "Unchanged accepted674 product/sql/provider/source regressions keeptheiroriginalsubject; no5A runtimeproof inherited"
+}

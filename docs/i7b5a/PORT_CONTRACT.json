@@ -1,0 +1,43 @@
+{
+  "contract_id": "I7B5A_STORAGE_PORT_V1",
+  "status": "FROZEN_DESIGN_PASS675_NOT_PRODUCT_QUALIFIED",
+  "ports": [
+    {
+      "name": "Store.Prepare(ctx, inputReader, Reservation)",
+      "arguments": "ExistingoperationUUID andcanonicalactorPlayerID/server metadata; trustedcaller preauth; callerReader/temp lifetime valid. No credentials, publicURL orclientfilename authority.",
+      "result": "PrivatePreparedAsset storesexactLocalinstance, Reservation,immutableDescriptor andindependentlive SHlock handle; descriptor containsPNG/SHA256/MD5/size/width/height/policy only.",
+      "effects": "Boundedprivatecopy/validation/install anddurablepin outsidegameplayTx. NoSQL/provider/receipt/clock/auth decision.",
+      "failures": "BadPNG/bounds/cancellation/conflict/integrity/durability/capabilityerrors; existingdifferentop pin untouched. Partialpreparation cannotmintPreparedAsset orauthorizeDB reference."
+    },
+    {
+      "name": "PreparedAsset.Descriptor()/ValidateBinding",
+      "arguments": "ExactLocal instance/opUUID/actor/server fromoriginalprepare; nofilesystemprobeinDB",
+      "result": "Immutablecopy; memory-onlycurrentpermit/binding check, reusableacrossdefiniteabortretries whileheld",
+      "effects": "NoI/O orTx. Handle cannot beusedafterClose.5B ownswhichsemanticTx mayconsumeit."
+    },
+    {
+      "name": "PreparedAsset.Close(classifiedOutcome)",
+      "arguments": "Existing definitecommit/definiteabort/unknown classification fromtrusted5B composition; never inferredfromclientACK",
+      "result": "Idempotent release; cleanup error separatefrombusinessoutcome",
+      "effects": "AfterallDBscopeends: definiteabort removes onlythisboundpin andleavesunreferencedimmutableblob; definitecommit unpins onlyaftercanonicalref/history/receiptcommitverifiedby5B; unknown/default retainspin durably. AlwaysreleasesliveSHhandle aftersafeprotectionstate. Failedunpin retainsprotection/failscleanup, neverrollsback committedreference orreexecutesgameplay."
+    },
+    {
+      "name": "Store.OpenValidated(ctx, Descriptor)",
+      "arguments": "QualifiedDBmetadata/retainedknownoutcome from5B/6; callerTx closedbeforecall",
+      "result": "Validatedimmutable reader+independentSHpermit andbyteidentity; callerclosesreader/permit",
+      "effects": "NoSQL/auth. Missing/corruptreferencedbytes returnErrIntegrity; mustnotdefault/synthesize. No rawclientfilesystempath orautomaticURL."
+    },
+    {
+      "name": "Store.WithMaintenance(ctx, callback)",
+      "arguments": "Context-bound exclusiveindependentcoordlock acquired withnogameplayTxheld",
+      "result": "PrivateMaintenance handle; paged/streamedblob+pininventory andownedbyteexport/delete operations",
+      "effects": "EnumeratefilesystemoutsideDBscope;5B performsownertypedcurrent/history/receipt reachabilityqueries andclosesTx beforefileexport/delete. Unknownpins andmalformedpinmetadata protect/failclosed. Ahandlealone neverestablishesbusinessunreferencedtruth.",
+      "not_authorized_in5A": "No autonomousGCcommand,backupDBadapterorpublicGETactivation in5A."
+    }
+  ],
+  "dependency_direction": "application/profileasset interfaces/domain metadata <-adapters/blobstore Local; futurePublicProfile5B composes theseports plusexisting391/receipt. ProfileAssetStoredoesnotimportPublicProfile/Postgres/foreignbusinessSQL.",
+  "reservation_identity": "Reuse existinginternal operationUUID. Exclusivepinpath perop refusesany secondPrepare until5B resolvesit; even samehash doesnotmintconcurrentsecondpermit. No newwire/businessnonce or IDallocator. Knownoperation replay/miss handledby5B, notblindPrepare retry.",
+  "uncertain_commit": "Durablepin existsbeforeReady canreachsemanticTx. UNKNOWNreleasesOSlockbutretains pin, coveringpossiblelateDBcommit; missingreceipt alone cannotclear it.",
+  "restore": "Descriptors arelocation-independent SHA/metadata; noabsoluteFSroot orpublicdeploymentURLcanonicalfacts. Backupincludes immutablebytes/protectionpins andstoreformatmarker; afterrestore no livepermits resurrect.5B validates canonicalreferences/receipts andrestoredbytes.",
+  "implementation_extension": "Maintenance.ResolvePin(expectedexactPin,DefiniteAbort|VerifiedCommit), withunknownrefused; requiredexisting5Breconciliation. See IMPLEMENTATION_DECISIONS."
+}

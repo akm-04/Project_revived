@@ -1,0 +1,20 @@
+{
+  "classification": "IMPLEMENTATION_DECISION_REQUIRED_BY_EXISTING_UNCERTAIN_COMMIT_RECONCILIATION",
+  "finding": "Frozen675 maintenanceports inventory/delete/export didnot exposeclearingretainedunknownpins after qualified5Breconciliation. Withouttypedresolution consumerwouldneedforeignphysicalaccess orretainforever.",
+  "contract_basis": [
+    "Frozen662 media unknown/current/history/receipt protection",
+    "675PORT_CONTRACT uncertain_commit andrestore",
+    "D14 typedownerextension"
+  ],
+  "resolution": "Add Maintenance.ResolvePin(expectedexactPin,classifiedOutcome): onlyDefiniteAbort/VerifiedCommit afterqualified5B terminalreconciliation andDBscopesclosed; UNKNOWNrefused, exactrecordmatch, allpinswellformed, uncertainunpinrestoresprotection. No autoage/receiptmiss inference.",
+  "scope": "Physicalportconcretization only, nophasewideamendment/noDBcode/no5Bimplementation. Usercurrentimplementationauthorizationcoversnecessaryexistingcontractcompletion.",
+  "affected_consumers": [
+    "5B uncertain-outcome reconciliation/GC",
+    "5B jointrestore"
+  ],
+  "required_requalification": [
+    "Newexactpinresolution andmissingexpectedpin tests",
+    "Frozen5A nativecomponent/race/gates"
+  ],
+  "reader_cancellation_limit": "Contextchecked admission/lock/read/decode/install; Reader must return from Read (stockspool does). No leakedgoroutine/universalpreemption of arbitrary blockingreader, OSsyscall orCPUinstruction; timeoutiscontextcap, nothardreal-timeguarantee."
+}
