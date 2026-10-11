@@ -10,5 +10,7 @@
     "Socialblockfixture must own socialroot before FK",
     "Concurrency accepts declared serialization/stale definitefailure, asserts converged desiredstate and exactlyone versionchange; no fabricated all-arrival success"
   ],
-  "invalidations": "Only new working bookmark proof/fixture tests affected. No frozen candidate or newproduct gate yet. Previously passing affected compile/unit/source evidence retained."
+  "invalidations": "Only new working bookmark proof/fixture tests affected. No frozen candidate or newproduct gate yet. Previously passing affected compile/unit/source evidence retained.",
+  "final_candidate_failure": "F1 connected-candidate static gate correctly rejected destructive Down43. Up43 andallGo/runtime bytes unchanged. ReplaceDown with explicit refusal underinherited forward-only law.",
+  "candidate_acceptance": "F1 neveraccepted; F2 targetedstatic/newopposite-harness and remainingqualification; reuseunchangedF1 runtime/schema with exactsubjects"
 }

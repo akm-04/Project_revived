@@ -43,7 +43,7 @@
     "00040_i7b2a_public_profile_foundation.sql": "9a47a9e609ec96386f015cb4850950c50cfd2acc24c72a08e2093f0326a74c3a",
     "00041_i7b2b_public_profile_content.sql": "0b3faf544185120b8ee94a580e619ec5395235c1042fd94818b622b6e210df1e",
     "00042_i7b3a_showcase_selection.sql": "7e454591091ecf6643c26f39cf16f2b51a30e14c3b523277cac66c0bbf3804c4",
-    "00043_i7b3b_hero_bookmark.sql": "f9fb4c114be420ced4f5d99c47a19a99d0a21dcd5c686d488bb223021113ef4e"
+    "00043_i7b3b_hero_bookmark.sql": "a5271a2df141257b4ca8de9c66e0ddab08ac163ea60aac5d87df60168e35efac"
   },
   "rule": "All listed migration bytes are immutable for this cumulative candidate. Historical phase validators remain snapshot-specific; forward schema changes require a new migration. I7A-4A allocates forward-only 00033 for SocialRelation/SocialInbox durable foundations and an I4-owned non-unique discovery index; it performs no Social backfill and activates no stock routes.",
   "schema_version": 1,
