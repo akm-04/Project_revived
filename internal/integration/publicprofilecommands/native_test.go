@@ -193,6 +193,17 @@ func TestCommandsValidationMetricsAndKnownReplay(t *testing.T) {
 	if r.Preferences.Intro != later.Intro {
 		t.Fatal("replay overwrote newer state")
 	}
+	// A distinct nonce-less wire arrival receives a new internal operation.
+	// The old desired value may therefore overwrite a newer assignment; this
+	// is the frozen compatibility residual, unlike a known-attempt replay.
+	lateOld := app.Command{Kind: app.IntroCommand, Intro: "late old intent"}
+	oldResult := assign(t, p, a, lateOld, op())
+	newResult := assign(t, p, a, app.Command{Kind: app.IntroCommand, Intro: "new intent"}, op())
+	lateResult := assign(t, p, a, lateOld, op())
+	lateRoot, _ := root(t, p, a.PlayerID)
+	if lateResult.Intro != oldResult.Intro || lateResult.RootVersion != newResult.RootVersion+1 || lateRoot.Preferences.Intro != oldResult.Intro {
+		t.Fatal("late distinct assignment residual changed")
+	}
 	if _, e = service(p, p).Execute(ctx, a, app.Command{Kind: app.IntroCommand, Intro: "different"}, o); !errors.Is(e, app.ErrConflict) {
 		t.Fatalf("fingerprint conflict %v", e)
 	}
@@ -811,4 +822,13 @@ func TestRetainedPolicyReplayAndCorruptProofRejection(t *testing.T) {
 		t.Fatal("corrupt retained policy accepted")
 	}
 	sqlExec(t, p, `UPDATE content_public_profile_policies SET payload=$2::jsonb WHERE revision_id=$1`, rev, oldPayload)
+	var oldManifest string
+	if e = p.QueryRow(ctx, `SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1`, rev).Scan(&oldManifest); e != nil {
+		t.Fatal(e)
+	}
+	sqlExec(t, p, `UPDATE gxb_content_revisions SET manifest=jsonb_set(manifest,'{source_archive_sha256}','"0000000000000000000000000000000000000000000000000000000000000000"'::jsonb) WHERE revision_id=$1`, rev)
+	if _, e = service(p, p).Execute(ctx, a, q, o); e == nil {
+		t.Fatal("mismatched retained manifest identity accepted")
+	}
+	sqlExec(t, p, `UPDATE gxb_content_revisions SET manifest=$2::jsonb WHERE revision_id=$1`, rev, oldManifest)
 }

@@ -197,7 +197,7 @@ func (Store) VerifyRevision(ctx context.Context, q tx.Queryer, b registry.Bundle
 		return v, err
 	}
 	var profileExact bool
-	err = q.QueryRow(ctx, `SELECT count(*)=1 AND COALESCE(bool_and(payload=$2::jsonb),false),count(*) FROM content_public_profile_policies WHERE revision_id=$1`, b.RevisionID(), string(b.PublicProfileJSON())).Scan(&profileExact, &v.PublicProfileCount)
+	err = q.QueryRow(ctx, verifyPublicProfileSQL, b.RevisionID(), string(b.PublicProfileJSON())).Scan(&profileExact, &v.PublicProfileCount)
 	if err != nil {
 		return v, err
 	}

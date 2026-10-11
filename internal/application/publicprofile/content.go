@@ -3,14 +3,14 @@ package publicprofile
 import (
 	"context"
 	"encoding/hex"
-	"gxb.local/backend/v2/internal/content/builtin"
+	"gxb.local/backend/v2/internal/domain/profile"
 	"gxb.local/backend/v2/internal/foundation/tx"
 	"strings"
 )
 
 type ContentPolicy struct {
 	Revision string
-	Policy   builtin.PublicProfilePolicy
+	Policy   profile.PublicProfilePolicy
 }
 
 func (p ContentPolicy) Validate() error {

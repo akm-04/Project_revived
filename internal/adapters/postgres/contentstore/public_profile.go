@@ -10,6 +10,7 @@ import (
 	app "gxb.local/backend/v2/internal/application/publicprofile"
 	"gxb.local/backend/v2/internal/content/builtin"
 	"gxb.local/backend/v2/internal/content/registry"
+	"gxb.local/backend/v2/internal/domain/profile"
 	"gxb.local/backend/v2/internal/foundation/tx"
 	"io"
 )
@@ -32,6 +33,24 @@ func (Store) ReadPublicProfilePolicy(c context.Context, q tx.Queryer, rev string
 	}
 	m, e := registry.DecodeManifestStrict([]byte(manifest))
 	if e != nil || m.RevisionID != rev {
+		return out, app.ErrContent
+	}
+	// Retained content must match its canonical manifest identity, as required
+	// by the existing immutable Content contract.
+	if m.RevisionDigestScope != "canonical_manifest_without_revision_id" {
+		return out, app.ErrContent
+	}
+	var basis map[string]any
+	if e = json.Unmarshal([]byte(manifest), &basis); e != nil {
+		return out, e
+	}
+	delete(basis, "revision_id")
+	canonical, e := json.Marshal(basis)
+	if e != nil {
+		return out, e
+	}
+	identity := sha256.Sum256(canonical)
+	if hex.EncodeToString(identity[:]) != rev {
 		return out, app.ErrContent
 	}
 	good, e := manifestHasCapability([]byte(manifest), rev, "PUBLIC_PROFILE_PREFERENCES_I7B2B")
@@ -63,7 +82,7 @@ func (Store) ReadPublicProfilePolicy(c context.Context, q tx.Queryer, rev string
 	if d.Decode(&extra) != io.EOF {
 		return out, app.ErrContent
 	}
-	out.Policy = p
+	out.Policy = profile.PublicProfilePolicy(p)
 	return out, out.Validate()
 }
 func (Store) HasPublicProfileCapabilityTx(c context.Context, q tx.Queryer, rev string) (bool, error) {
@@ -76,3 +95,5 @@ func (Store) HasPublicProfileCapabilityTx(c context.Context, q tx.Queryer, rev s
 	}
 	return manifestHasCapability([]byte(raw), rev, "PUBLIC_PROFILE_PREFERENCES_I7B2B")
 }
+
+const verifyPublicProfileSQL = `SELECT count(*)=1 AND COALESCE(bool_and(payload=$2::jsonb),false),count(*) FROM content_public_profile_policies WHERE revision_id=$1`
