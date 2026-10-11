@@ -196,6 +196,12 @@ func (Store) VerifyRevision(ctx context.Context, q tx.Queryer, b registry.Bundle
 	if err != nil {
 		return v, err
 	}
+	var showcaseExact bool
+	err = q.QueryRow(ctx, verifyPublicShowcaseSQL, b.RevisionID(), string(b.PublicShowcaseJSON())).Scan(&showcaseExact, &v.PublicShowcaseCount)
+	if err != nil {
+		return v, err
+	}
+	v.Exact = v.Exact && showcaseExact
 	var profileExact bool
 	err = q.QueryRow(ctx, verifyPublicProfileSQL, b.RevisionID(), string(b.PublicProfileJSON())).Scan(&profileExact, &v.PublicProfileCount)
 	if err != nil {

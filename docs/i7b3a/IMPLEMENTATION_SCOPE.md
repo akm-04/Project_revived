@@ -1,0 +1,5 @@
+I7B-3A implemented scoped selection foundation. Direct human authorization follows sealed normal667 research/design. Sparse six signed owned-instance slots share the existing PublicProfile root/version. Root315/391 precede all Character instance locks. Reverse guard uses stable315+391, including absent state. Existing SavedPreset guard remains separately composed; no destructive gameplay route is introduced.
+
+Assignment receipts are internal only (showcase-internal.v1); complete1832/1838 success is not registered. The adapter boundary requires a genuine rich builder before any mutation; nil/error rejects. Full HeroSkills/bookmark/rich DTO activation remains the accepted I7B-3B/I7B-6 route. Typed selected reads use MAIN1 privacy, exact caller snapshot/content/time and accepted CA8 owned facets. Six-record projection components use test builders only; not stock-client or original-server proof.
+
+Versions/acceptance fields at freeze are creation history. External qualification/reality and selected next PassMap decide scoped acceptance; parent3/wholeI7B/E/I7/W2 remain unaccepted.

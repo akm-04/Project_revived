@@ -2241,6 +2241,38 @@
       "migration": "migrations/00041_i7b2b_public_profile_content.sql",
       "owner": "content-registry",
       "write_exceptions": []
+    },
+    "player_public_profile_showcase_slots": {
+      "allowed_query_owners": [
+        "public-profile"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/publicprofilestore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/publicprofilestore/"
+      ],
+      "migration": "migrations/00042_i7b3a_showcase_selection.sql",
+      "owner": "public-profile",
+      "write_exceptions": []
+    },
+    "content_public_showcase_policies": {
+      "allowed_query_owners": [
+        "content-registry"
+      ],
+      "allowed_read_paths": [
+        "sql/content/",
+        "internal/adapters/postgres/contentstore/",
+        "internal/adapters/postgres/contentqueries/"
+      ],
+      "allowed_write_paths": [
+        "sql/content/",
+        "internal/adapters/postgres/contentstore/",
+        "internal/adapters/postgres/contentqueries/"
+      ],
+      "migration": "migrations/00042_i7b3a_showcase_selection.sql",
+      "owner": "content-registry",
+      "write_exceptions": []
     }
   }
 }

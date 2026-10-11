@@ -1,0 +1,50 @@
+{
+  "status": "FUTURE_REQUIRED_SCOPED_QUALIFICATION_NOT_EXECUTED",
+  "tool_sha256": "e4e194c9627929299577364b953b2468d6118fac4283fd8030f10b5a27456c2b",
+  "rows": [
+    {
+      "id": "DB",
+      "scope": "NativePGfresh+666upgrade/new42 only; exactcontentartifactreadiness; sparseholes/slot6/rootdefault/noop/touch/prefsretention",
+      "result": "NOT_RUN"
+    },
+    {
+      "id": "REF",
+      "scope": "OwnedHero/Pet/mixed/tableidentity/foreign/borrowed/trial/template/synthetic/missing/malformed/duplicatefamilytemplate; no partialwrite",
+      "result": "NOT_RUN"
+    },
+    {
+      "id": "RACE",
+      "scope": "Assignmentvsassignment/reorder; newroot/preferences/sharedrootCAS; guardabsentrootvsassignment; guardreferencedvsunreferenced; mixedSavedPreset+PublicProfile keyorder",
+      "result": "NOT_RUN"
+    },
+    {
+      "id": "READ",
+      "scope": "RR/Serializable currentindex1..6 +privacyMAIN1; blockbothdirections; hide2/4donotsuppressMAIN; exactcontent/time/familyexpiry/dispositions/deepcopy",
+      "result": "NOT_RUN"
+    },
+    {
+      "id": "WIRE",
+      "scope": "Strictsignedexactinteger/rawduplicate parsing; sixrecordslots/{}holes; unavailablefullproviders rejectwithnowrite. Componentbuilders/testproviders notfullstockactivationproof.",
+      "result": "NOT_RUN"
+    },
+    {
+      "id": "RECOVERY",
+      "scope": "Stabledefiniteabort; knownstoredoutcomevsnewassignment; UNKNOWN unresolved/resolved/mismatch; staleauthcontext; restart/backuprestore/rootrefs/retainedpolicies/receipts",
+      "result": "NOT_RUN"
+    },
+    {
+      "id": "REGRESSION",
+      "scope": "AffectedPublicProfileroot/preferences/receipt andCA8/refguard/Characterread consumers; source/query/ownerarchitecture/race/static; existingunchangedproofreused",
+      "result": "NOT_RUN"
+    },
+    {
+      "id": "REALITY",
+      "scope": "Independentproducedcode/source/contract/owner/activation review; 3A scopedclosureonly; no childGREENautomaticparent3 orwholeI7B",
+      "result": "NOT_RUN"
+    }
+  ],
+  "early_gate": "ExactnativePGDB/REF/RACE beforelaterconsumersnewselection/referencefoundation; inheriteddatabase/ref laws applied, notnewunrelatedacceptancerequirements.",
+  "frozen_subject": "Noneyet",
+  "physical_stock": "NOT_RUN_EXISTING_W2_AFTERI14",
+  "evidence_reuse": "No productdelta now invalidates priorpassingtests. Identifyactualchangedfile/behavior andspecificpriorresultbeforefuture rerun."
+}

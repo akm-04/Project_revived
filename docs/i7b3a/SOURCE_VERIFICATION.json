@@ -1,0 +1,115 @@
+{
+  "classification": "STATIC_SOURCE_AND_ACCEPTED_IMPLEMENTATION_INSPECTION_NOT_RUNTIME_PROOF",
+  "accepted_backend_sha256": "22d2f4cb5e17d75adf8244400f5defeacc899c448cbd7badaf18ae48a95e1f6d",
+  "backend_paths": [
+    {
+      "path": "internal/application/publicprofile/root.go",
+      "sha256": "0f1b3f96e6c99795204478a6faa47528fc4212fd15f490627ac01a19e3cfae0c"
+    },
+    {
+      "path": "internal/application/publicprofile/ports.go",
+      "sha256": "b987eccb870f543a0f2a675ad3dbb94fcbb8b9504f9a412de5786ff0452667a5"
+    },
+    {
+      "path": "internal/application/publicprofile/reads.go",
+      "sha256": "a5c1f5320470a04894c62229f68450857e954c430e066d8b3f2d54cf4c105a4c"
+    },
+    {
+      "path": "internal/application/publicprofile/locks.go",
+      "sha256": "c694fb864b084cba5845facd8ead535b81505b959e0a0616165046cb0454848d"
+    },
+    {
+      "path": "internal/application/publicprofile/basic.go",
+      "sha256": "adbcca3b1f278e7ab00f4122d72fb45a8e69ecaadf0dc0fe1600382f944a7a4a"
+    },
+    {
+      "path": "internal/application/publicprofile/commands.go",
+      "sha256": "1e28c758a593e8eb1f35a5a0330994c65ccf7b17732b7894dc3570a0c8d35aa6"
+    },
+    {
+      "path": "internal/application/publicprofile/content.go",
+      "sha256": "8767e118a4aa79973386c893323db734a7bcab6e7754636e1acd35490864cf29"
+    },
+    {
+      "path": "internal/adapters/postgres/publicprofilestore/store.go",
+      "sha256": "ef7fd7da2573097141cfebe184c9f749bf4dbd317c14c8076ffc9c7d81829fdd"
+    },
+    {
+      "path": "internal/application/playerroot/ports.go",
+      "sha256": "05ac4eca29509d87697b24cfbba1be34abf093c896424245c933cb45a12680dc"
+    },
+    {
+      "path": "internal/application/characterasset/references.go",
+      "sha256": "be2e66f2a52c2f6e7650439708809810890cd697e689ed6e74f24f5291f376b8"
+    },
+    {
+      "path": "internal/application/characterasset/public_showcase.go",
+      "sha256": "8ad966f00b668a0058018d33033c75b02aa521c7794e6fc53e9db6eb5c73c93c"
+    },
+    {
+      "path": "internal/application/characterasset/ca8_foundation.go",
+      "sha256": "079fc8682bdba465b8ec90c5b4d2e97fd8646eeb97d3518995a1052ee2cd69ec"
+    },
+    {
+      "path": "internal/application/charactersavedpreset/reference_guard.go",
+      "sha256": "e0f5ab80ea0a43dd6da76a3965eff8ee87e8b65046ce6ef3522d9a7c9e363b5e"
+    },
+    {
+      "path": "internal/adapters/postgres/characterstore/reference_owner.go",
+      "sha256": "baf17830ef6aa2ac26648e5ede5f6f079adeffb28151a1f43019f6309f403043"
+    },
+    {
+      "path": "internal/adapters/postgres/contentstore/public_profile.go",
+      "sha256": "d51d89bfed32a05fab687f2f64755f2adf5ef332945743a174d75eb400ef1171"
+    },
+    {
+      "path": "internal/domain/profile/public_profile_policy.go",
+      "sha256": "7601e6d2ea3e410f12b9d516beb8fec04bcd0be9a737c66629c639bc22bf0b9d"
+    },
+    {
+      "path": "internal/protocol/httpedge/social_json.go",
+      "sha256": "41718f4f061e3935c0db84627a6fbd182ba30fd42cf2e0ea8318fa651050bea1"
+    },
+    {
+      "path": "internal/adapters/stockruntime/public_profile.go",
+      "sha256": "e63a6e89d5d435610bf6a1d1f72066a560a81892fa7a24ae2533e110f6826e7a"
+    },
+    {
+      "path": "internal/foundation/finitejson/json.go",
+      "sha256": "05309e5b9f45b67c55237b446e82593e40fed984c4095421224c1b0adbd192da"
+    },
+    {
+      "path": "migrations/00040_i7b2a_public_profile_foundation.sql",
+      "sha256": "9a47a9e609ec96386f015cb4850950c50cfd2acc24c72a08e2093f0326a74c3a"
+    },
+    {
+      "path": "migrations/00041_i7b2b_public_profile_content.sql",
+      "sha256": "0b3faf544185120b8ee94a580e619ec5395235c1042fd94818b622b6e210df1e"
+    },
+    {
+      "path": "migrations/00028_ca5_2_saved_presets.sql",
+      "sha256": "ac7cd5f62413dd54ed3fae03326ecd01354bf1450c4597d45a7e98e2c21681a6"
+    }
+  ],
+  "current_source_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+  "reused_parent": "../i7b3 source/census/cache and coverage package; included in cumulative checkpoint.",
+  "new_source": {
+    "archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+    "member": "app-assets/output/assets/src_64/app/common/enums.lua",
+    "sha256": "15340bd89fe7c6f150ccfd4a5cd2a2f0e8e73c89dfae9ac3388376a4799901f3",
+    "symbol": "PlayerCardButtonStyle",
+    "excerpt": "xyd.PlayerCardButtonStyle = {\n\tBATTLE_RECORD = 3,\n\tSPACE = 4,\n\tHELP = 5,\n\tMAIN = 1,\n\tHISTORY = 2,\n\tSYSTEM = 6\n}\nxyd.PlayerCardHistory = {\n\tSUPER_ARENA = 2,\n\tREGION_ARENA = 3,\n\tARENA = 1",
+    "classification": "SOURCE_FACT"
+  },
+  "source_symbols": [
+    "PersonDisplay.modifyShowCase / getShowcaseDetail",
+    "SelectHeroCardWindow.getSelectIds / initPreSelect",
+    "PersonDisplayWindow.createMain / createHeroShow / checkIsHide",
+    "HeroListCell.ONLYSHOW / updateFavorProgress"
+  ],
+  "limits": [
+    "Original server optional DTO fields/error categories unrecovered",
+    "Untouched native emptytable encoding/load reachability not proved",
+    "No native/product/source executable tests run in research"
+  ]
+}

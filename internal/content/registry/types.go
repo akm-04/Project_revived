@@ -22,6 +22,7 @@ const (
 )
 
 var supportedCapabilities = [...]string{
+	"PUBLIC_PROFILE_SHOWCASE_SELECTION_I7B3A",
 	"PUBLIC_PROFILE_PREFERENCES_I7B2B",
 	"GUILD_BROADCAST_I7A8A",
 	"GUILD_INVITE_PRESENTATION_I7A8B",
@@ -52,6 +53,7 @@ var supportedCapabilities = [...]string{
 }
 
 type Bundle struct {
+	publicShowcaseJSON                        []byte
 	publicProfileJSON                         []byte
 	guildInviteJSON                           []byte
 	guildBroadcastJSON                        []byte
@@ -191,11 +193,25 @@ func LoadBuiltinBundle() (Bundle, error) {
 	if err != nil {
 		return Bundle{}, err
 	}
+	publicShowcase, err := builtin.GeneratedFile("public_showcase_policy.json")
+	if err != nil {
+		return Bundle{}, err
+	}
+	var showcase builtin.PublicShowcasePolicy
+	decoder := json.NewDecoder(bytes.NewReader(publicShowcase))
+	decoder.DisallowUnknownFields()
+	if err = decoder.Decode(&showcase); err != nil {
+		return Bundle{}, err
+	}
+	if err = showcase.Validate(); err != nil {
+		return Bundle{}, err
+	}
 	publicProfile, err := builtin.GeneratedFile("public_profile_policy.json")
 	if err != nil {
 		return Bundle{}, err
 	}
 	b := Bundle{
+		publicShowcaseJSON:                     append([]byte(nil), publicShowcase...),
 		publicProfileJSON:                      append([]byte(nil), publicProfile...),
 		guildInviteJSON:                        append([]byte(nil), invite...),
 		guildBroadcastJSON:                     append([]byte(nil), broadcast...),
@@ -269,6 +285,7 @@ func (b Bundle) Validate() error {
 }
 
 func (b Bundle) GuildInviteJSON() []byte    { return append([]byte(nil), b.guildInviteJSON...) }
+func (b Bundle) PublicShowcaseJSON() []byte { return append([]byte(nil), b.publicShowcaseJSON...) }
 func (b Bundle) PublicProfileJSON() []byte  { return append([]byte(nil), b.publicProfileJSON...) }
 func (b Bundle) GuildBroadcastJSON() []byte { return append([]byte(nil), b.guildBroadcastJSON...) }
 func (b Bundle) SocialGiftJSON() []byte     { return append([]byte(nil), b.socialGiftJSON...) }
@@ -378,6 +395,7 @@ type ActiveSummary struct {
 }
 
 type Verification struct {
+	PublicShowcaseCount                       int64
 	PublicProfileCount                        int64
 	GuildInviteCount                          int64
 	GuildBroadcastCount                       int64
@@ -407,7 +425,7 @@ type Verification struct {
 
 func (v Verification) Matches(b Bundle) bool {
 	r, p, f, o, h, pet, petAcquisition, petProgression, equipmentPrimitives, heroEquipment, superEquipment, heroFumoTargets, heroFumoMaterials, restorationEquipment, restorationFractions, restorationDenominations, petEquipment, petRestorationEquipment, practice, appearance := b.ExpectedCounts()
-	return v.PublicProfileCount == 1 && v.GuildInviteCount == 1 && v.GuildBroadcastCount == 1 && v.Exact && v.EmoticonCount == 85 && v.ResourceCount == r && v.ProgressionCount == p && v.FunctionGateCount == f && v.ObjectiveCount == o && v.HeroCount == h && v.PetCount == pet && v.PetAcquisitionCount == petAcquisition && v.PetProgressionCount == petProgression && v.EquipmentPrimitiveCount == equipmentPrimitives && v.HeroEquipmentCount == heroEquipment && v.SuperEquipmentCount == superEquipment && v.HeroFumoTargetCount == heroFumoTargets && v.HeroFumoMaterialCount == heroFumoMaterials && v.HeroPromotionRestorationEquipmentCount == restorationEquipment && v.HeroPromotionRestorationFractionCount == restorationFractions && v.HeroPromotionRestorationDenominationCount == restorationDenominations && v.PetEquipmentCount == petEquipment && v.PetPromotionRestorationEquipmentCount == petRestorationEquipment && v.PracticeCount == practice && v.AppearanceCount == appearance
+	return v.PublicShowcaseCount == 1 && v.PublicProfileCount == 1 && v.GuildInviteCount == 1 && v.GuildBroadcastCount == 1 && v.Exact && v.EmoticonCount == 85 && v.ResourceCount == r && v.ProgressionCount == p && v.FunctionGateCount == f && v.ObjectiveCount == o && v.HeroCount == h && v.PetCount == pet && v.PetAcquisitionCount == petAcquisition && v.PetProgressionCount == petProgression && v.EquipmentPrimitiveCount == equipmentPrimitives && v.HeroEquipmentCount == heroEquipment && v.SuperEquipmentCount == superEquipment && v.HeroFumoTargetCount == heroFumoTargets && v.HeroFumoMaterialCount == heroFumoMaterials && v.HeroPromotionRestorationEquipmentCount == restorationEquipment && v.HeroPromotionRestorationFractionCount == restorationFractions && v.HeroPromotionRestorationDenominationCount == restorationDenominations && v.PetEquipmentCount == petEquipment && v.PetPromotionRestorationEquipmentCount == petRestorationEquipment && v.PracticeCount == practice && v.AppearanceCount == appearance
 }
 
 // Repository is the canonical content-registry persistence port. It receives
@@ -432,6 +450,7 @@ type Repository interface {
 	InsertPetPromotionRestoration(context.Context, tx.Tx, Bundle) (int64, error)
 	InsertPractice(context.Context, tx.Tx, Bundle) (int64, error)
 	InsertAppearance(context.Context, tx.Tx, Bundle) (int64, error)
+	InsertPublicShowcase(context.Context, tx.Tx, Bundle) (int64, error)
 	InsertPublicProfile(context.Context, tx.Tx, Bundle) (int64, error)
 	InsertGuildBroadcast(context.Context, tx.Tx, Bundle) (int64, error)
 	InsertGuildInvite(context.Context, tx.Tx, Bundle) (int64, error)

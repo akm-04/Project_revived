@@ -95,11 +95,14 @@ SOURCE_MANIFEST = [
     ("data/tables/guide_page.lua", "7cf246fa0d16d12954d9235b3b05fc918763dbe5c3e690b4d87999d3e1112802", "PRACTICE_TICKET_GUIDE_SOURCE_FACT"),
 ]
 
+SOURCE_MANIFEST.append(('app/model/PersonDisplay.lua', '022fcbf39167ac9197ce5034b32fd5833016742744ad3de118ceacf6f808cfb8', "PUBLIC_SHOWCASE_SELECTION_SOURCE_AUTHORITY"))
+SOURCE_MANIFEST.append(('app/windows/SelectHeroCardWindow.lua', 'e1db1b02194652043b289b2670501c0fc8226ccaba17c8e5eca1a915e715440e', "PUBLIC_SHOWCASE_SELECTION_SOURCE_AUTHORITY"))
 SOURCE_MANIFEST.append(('data/tables/name.lua', '2254bb1bb4283199a112cb94a7e14e82ac28cd29e3a19e281d11faf23d9ec316', 'PUBLIC_PROFILE_PREFERENCE_SOURCE_AUTHORITY'))
 SOURCE_MANIFEST.append(('data/tables/person_display_words.lua', 'ca342990ff24d8c5a4c12b270401c276b3e29597d43555f30978a2c5162afeb6', 'PUBLIC_PROFILE_PREFERENCE_SOURCE_AUTHORITY'))
 SOURCE_MANIFEST.append(('app/model/FilterWordManager.lua', 'e961a9a0029c90cce75d8deee23d066ba4d74bc133e733625dae5b43e0c34783', 'PUBLIC_PROFILE_PREFERENCE_SOURCE_AUTHORITY'))
 
 ENABLED_CAPABILITIES = [
+    "PUBLIC_PROFILE_SHOWCASE_SELECTION_I7B3A",
     "PUBLIC_PROFILE_PREFERENCES_I7B2B",
     "GUILD_BROADCAST_I7A8A",
     "GUILD_INVITE_PRESENTATION_I7A8B",
@@ -1828,7 +1831,9 @@ def build_artifacts(blobs: dict[str, SourceBlob], archive_sha256: str) -> dict[s
         "show_type_ids":[int(r["id"]) for r in parse_generated_lua_table(blobs["data/tables/person_display_words.lua"].data) if 1001 <= int(r["id"]) <= 1011],
         "hide_subtypes":[2,4],"intro_codepoints":40,"selected_limit":4
     }
+    showcase_artifact = {'schema_version': 1, 'policy_id': 'I7B_SHOWCASE_SELECTION_V1', 'slots': 6, 'visible_slots': 5, 'sign_rule': 'POSITIVE_OWNED_HERO_NEGATIVE_OWNED_PET_ZERO_EMPTY', 'duplicate_rule': 'FAMILY_CURRENT_TEMPLATE', 'index_rule': 'CURRENT_CALLER_SNAPSHOT_ONE_BASED', 'empty_record': 'OBJECT', 'wire_rule': 'REQUIRED_PROVIDERS_BEFORE_WRITE_I7B6', 'model_source_sha256': '022fcbf39167ac9197ce5034b32fd5833016742744ad3de118ceacf6f808cfb8', 'selector_source_sha256': 'e1db1b02194652043b289b2670501c0fc8226ccaba17c8e5eca1a915e715440e'}
     artifacts = {
+        "public_showcase_policy.json":showcase_artifact,
         "public_profile_policy.json":profile_artifact,
         "guild_invite_policy.json":invite_artifact,
         "guild_broadcast_policy.json":broadcast_artifact,

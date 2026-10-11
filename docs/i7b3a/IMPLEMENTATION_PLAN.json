@@ -1,0 +1,88 @@
+{
+  "schema_version": 1,
+  "contract_id": "I7B3A_SHOWCASE_SELECTION_DESIGN_V1",
+  "full_node_path": "ROOT/I7/I7B/I7B-3/I7B-3A",
+  "status": "DESIGN_FROZEN_FOR_NORMAL_RESEARCH_PUBLICATION_NOT_IMPLEMENTATION_AUTHORIZATION",
+  "extends": [
+    "I7B1_ARCHITECTURE_PROVIDER",
+    "I7B1_WIRE_PRIVACY_POLICY",
+    "I7B1_TRANSACTION_REFERENCE_REPLAY",
+    "I7B1_ACCEPTANCE_EXIT",
+    "I7A1_TRANSACTION_LOCK_EFFECT_CONTRACT",
+    "I7A1_TIME_CONTENT_POLICY_REGISTER",
+    "CA8_PUBLIC",
+    "CA_REFERENCE_GUARDS",
+    "D14"
+  ],
+  "accepted_backend": {
+    "filename": "gxb-backend-v2-v0.102.0-pass666-i7b2-accepted.zip",
+    "artifact": "gxb-backend-v2-v0.102.0-pass666-i7b2-accepted.zip",
+    "path": "/home/akm/Chatgpt/2026-10-09/files-mentioned-by-the-user-additional/outputs/gxb-backend-v2-v0.102.0-pass666-i7b2-accepted.zip",
+    "sha256": "22d2f4cb5e17d75adf8244400f5defeacc899c448cbd7badaf18ae48a95e1f6d",
+    "bytes": 5796036,
+    "version": "v0.102.0",
+    "acceptance_pass": "666.0",
+    "role": "ACCEPTED_SCOPED_I7B2_BACKEND_NORMAL666",
+    "git_head": "39d1339fea59da982bd3bc4a848556a5b232de9d",
+    "tree_identity": {
+      "algorithm": "gxb-candidate-tree-v1:path-nul-bytes-sorted-excluding-vcs-python-cache",
+      "file_count_excluding_git": 2183,
+      "product_tree_digest_sha256": "ada314bc301ede25e282d1203a216c77c6cd0b1581be20e94cb763718fedb33c",
+      "snapshot_entry_count": 2182,
+      "snapshot_manifest_sha256": "3aa32d20c77d14a0706695d480dc4a96bd1ad5dd33adb9be19a5686562eacf53"
+    },
+    "scope": "I7B-2A root/typedfoundation + I7B-2B preferencecommands/moderation/internalbasicprivacy/qualified1011; fullmetrics/richDTO remainstage6",
+    "active_I7B_candidate": null,
+    "publication_sha256": "e3ee74a10480a5ea281c5abd65b906acc7c675052a68d6f1b740f184e86061b0",
+    "status": "EXACT_F2_BYTES_SCOPED_PARENT2_ACCEPTED_VERIFIED_NORMAL666"
+  },
+  "decisions": "DESIGN_DECISIONS.json",
+  "steps": [
+    {
+      "id": "1",
+      "work": "Add ownedslot/schema + separate immutableContentpolicy through existingcompiler/registry/readiness/store flows. Plan nextmigration00042_i7b3a_showcase_selection.sql; migrations1..41 immutable. No migrationwritten/appliednow."
+    },
+    {
+      "id": "2",
+      "work": "Implement boundedslot/domain validation andShowcaseStore; reuse391root touch/noop,315fence andtypedCharacterrefs. No foreignownerSQL."
+    },
+    {
+      "id": "3",
+      "work": "Implement internalShowcaseAssignmentService with existingactor/time/operation/receipt composition; complete315/391/assetkeyplan; validateallbeforewrite; stableoutcomes andunknowncommitresolver."
+    },
+    {
+      "id": "4",
+      "work": "Implement actor-boundPublicProfileReferenceGuard through existinginterfaces; stable315+391plans; combineSavedPreset; lockedreferencevalidation; no destructiveproductionactivation."
+    },
+    {
+      "id": "5",
+      "work": "Implement coherentReadSelectionTx/ReadSelectedTx, privacyMAIN1, andsource-shapedslot/facet assembly preservingproviderdispositions. Wireadapterrequiresqualifiedfullbuilder; completeproductionactivation remains6."
+    },
+    {
+      "id": "6",
+      "work": "Run targetedworkingchecks onnewbehavior, thenfreeze intended3A subjectandexecute scopedR2native/process/recovery/regression gate; independentreality/evidence reconciliation; normal3Aclosure. Then3B, explicitparent3exit,6/E/I7/W2 remain."
+    }
+  ],
+  "reuse": [
+    "PublicProfile RootService/PreparedRoot/readsnapshot",
+    "I4/playerroot TxLocker and391RootLockKey/RootCreationFence",
+    "Character typedrefowners/CA8 caller scope/PublicShowcaseCharacterReader",
+    "existingRemovalGuardplan/canonicalization +SavedPreset provider",
+    "TimedRunner/operation/receipt/actorcontext foundation",
+    "Contentimmutablemanifest/compiler/readiness/exactrevision",
+    "finitejson.ExactInteger andstrictselectedrawJSON"
+  ],
+  "product_code_changed": false,
+  "product_tests": "NOT_RUN_RESEARCH_DESIGN",
+  "planned_migration": "00042_i7b3a_showcase_selection.sql",
+  "production_mids": "1832/1838completeactivation requiresexisting6gate; sourceboundary/componentqualification onlyin3A.",
+  "out_of_scope": [
+    "Hero bookmarkmutation/fieldscans3B",
+    "Feedback/media4/5",
+    "Richproviderproduction6",
+    "NewHero/Petdestructivecommands",
+    "WholeI8/I9implementation",
+    "PhysicalW2"
+  ],
+  "open_blocking_design_questions": []
+}

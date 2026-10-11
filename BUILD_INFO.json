@@ -1,5 +1,5 @@
 {
-  "base_backend_sha256": "68c7f18ef6eaf3d8020da4b9be65b0d90c33d5173b7a72f4a4f091242df90c08",
+  "base_backend_sha256": "22d2f4cb5e17d75adf8244400f5defeacc899c448cbd7badaf18ae48a95e1f6d",
   "ca1_acceptance": "ACCEPTED_SEALED_PASS512",
   "ca1_contract": "docs/PASS511_CA1_IMPLEMENTATION_CONTRACT.md",
   "ca1_local_evidence": "docs/PASS511_CA1_LOCAL_GATE_EVIDENCE.json",
@@ -533,7 +533,7 @@
   "target_go": "1.27.1",
   "target_postgresql": "18.6",
   "target_sqlc": "1.31.1",
-  "version": "v0.102.0",
+  "version": "v0.103.0",
   "w2_claimed": false,
   "inherited_creation_metadata_provenance": {
     "archive": "gxb-backend-v2-v0.99.0-pass656-i7a8-accepted.zip",
@@ -556,8 +556,8 @@
   "i7a8b_content_revision": "9b81049a746521a5e8b57fd0fe42121470b0921481da257298ecf9c624f448e7",
   "i7a8b_parent_accepted_git_commit": "0d7593677a5ac1c7c2b669a73bd9166d8116418a",
   "i7a8b_authority": "Trusted Pass655 whole8B selection plus direct human implementation and closure authorization; frozen identity does not imply acceptance.",
-  "phase": "I7B2B_PREFERENCES_PRIVACY",
-  "next_action": "Exact2A frozen component qualification and independent source/contract/recovery reality; normal664 acceptance only after all required proof passes.",
+  "phase": "I7B3A_SHOWCASE_SELECTION_FOUNDATION",
+  "next_action": "Exact3A portableR2 native/process/recovery qualification then independent3A reality and normal668 scoped closure; no 3B/6 activation.",
   "i7a9_product_accepted": false,
   "i7a9_gate_status_at_identity_freeze": "NOT_RUN",
   "i7a9_contract": "Selected normal658 I7A9 contract index in PassMap",
@@ -581,9 +581,14 @@
   "i7b2a_gate_status_at_identity_freeze": "NOT_RUN",
   "inherited_stage_metadata_is_historical": true,
   "i7b2a_contract": "docs/i7b2a/IMPLEMENTATION_SPEC.json",
-  "research_design_passmap_sha256": "56893fc9624450a40711502e81b047bff326adcce2d045bed2f2d1245bd77d48",
+  "research_design_passmap_sha256": "f29fd9ae2c7fffaaed26c38f4a8eb00552d168e5df7d500091382e74a7b9d5b0",
   "i7b2a_acceptance_pass": "664.0",
   "i7b2b_product_accepted": false,
   "i7b2b_gate_status_at_identity_freeze": "NOT_RUN",
-  "i7b2b_contract": "docs/i7b2b/IMPLEMENTATION_PLAN.json"
+  "i7b2b_contract": "docs/i7b2b/IMPLEMENTATION_PLAN.json",
+  "i7b3a_product_accepted": false,
+  "i7b3a_gate_status_at_identity_freeze": "NOT_RUN",
+  "i7b3a_contract": "docs/i7b3a/IMPLEMENTATION_PLAN.json",
+  "i7b3a_migration_high_water": "00042_i7b3a_showcase_selection.sql",
+  "i7b2_parent_inherited_accepted_pass": "666.0"
 }
