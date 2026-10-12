@@ -1,0 +1,41 @@
+{
+  "classification": "SOURCE_FACT_AND_IMPLEMENTATION_INSPECTION_NOT_RUNTIME",
+  "reused": [
+    "679whole6scope120fields/11metrics/sixsubtypes/v6topology",
+    "680accepted6APlayerdisplay andcomponentcontracts",
+    "662frozenI7B1 fivecontracts; inheritedI7A1 and2..5 proofsunchanged"
+  ],
+  "new": [
+    {
+      "id": "6B-F01",
+      "source": "app/model/PersonDisplay.lua:updateInfo/updateBasicInfo",
+      "finding": "Missing subtype followsMAIN; 1MAIN/2HISTORY/3record/4SPACE/5localHELP/6selfSYSTEM dispositions retained. Source defaults do not prove genuineprovider absence."
+    },
+    {
+      "id": "6B-F02",
+      "source": "app/windows/PersonDisplayWindow.lua:createBasicMsg",
+      "finding": "Nonrobot branch evaluates exp arithmetic beforewidgetvisibility; canonicalPlayerExp must accompany minimalidentity evenwithblock."
+    },
+    {
+      "id": "6B-F03",
+      "source": "app/windows/PersonDisplayWindow.lua:752..785",
+      "finding": "1838payload is directHero/Petpopulate record; pet_id decidesclass; detailopens fullattribute. Minimalcard DTO cannotclaimrichsuccess."
+    },
+    {
+      "id": "6B-F04",
+      "source": "app/windows/SelectShowTypeWindow.lua:initAllTypes",
+      "finding": "Iterates all_show_types keys; advertiseonlyqualified1011; selectedunqualifiedIDs mustfailaffectedread; full11acceptance remainsblocked."
+    },
+    {
+      "id": "6B-F05",
+      "source": "accepted109 publicprofile/showcase_assignment.go",
+      "finding": "InternalreceiptstoresSelection only; final1832muststore originalfullrecords atomicallybeforemutation; postcommit renderingwould violatefailureatomicity/replay."
+    },
+    {
+      "id": "6B-F06",
+      "source": "accepted109 Guild/GuildInvite typedstores",
+      "finding": "Acceptedfacts available through ReadGuildTx/ReadMembershipTx and inviteimmutablevalidity; publicprofile mustuse typedGuildview, noforeignSQL."
+    }
+  ],
+  "cold_reconciliation": "679/680PROVENANCE_RECENT mirrorscurrentselectedresearch/appliedcontract. No conflictinghistorical authority adopted; historicalcorroboration isreuse fromsourceidentities/679ledger."
+}

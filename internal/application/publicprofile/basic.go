@@ -19,15 +19,17 @@ type RelationReader interface {
 	CandidateStatesTx(context.Context, tx.Tx, identity.PlayerID, []identity.PlayerID) ([]socialrelation.CandidateState, error)
 }
 type BasicIdentity struct {
-	PlayerID                             identity.PlayerID
-	Server                               identity.LogicalServerID
-	Name                                 string
-	AvatarID, FrameID, PlayerType, Level int64
+	PlayerID                                  identity.PlayerID
+	Server                                    identity.LogicalServerID
+	Name                                      string
+	AvatarID, FrameID, PlayerType, Level, Exp int64
 }
 type BasicResult struct {
 	Identity                                                 BasicIdentity
 	Relation                                                 socialrelation.CandidateState
 	Intro                                                    string
+	Functions                                                []int64
+	ActorBlocked                                             bool
 	SelfPreferences                                          *profile.Preferences
 	Eligible                                                 map[int16]bool
 	ProfileVersion, PlayerProfileVersion, ProgressionVersion int64
@@ -86,6 +88,7 @@ func (s BasicReader) ReadBasicTx(c context.Context, sc tx.Scope, a identity.Acto
 			return out, ErrInvalidState
 		}
 	}
+	actorBlocked := false
 	rel := socialrelation.CandidateState{PlayerID: target}
 	if target != a.PlayerID {
 		if _, _, e = s.Relations.LockFriendshipTx(c, sc.Tx, a.PlayerID, target); e != nil {
@@ -102,8 +105,12 @@ func (s BasicReader) ReadBasicTx(c context.Context, sc tx.Scope, a identity.Acto
 			pairs[0], pairs[1] = pairs[1], pairs[0]
 		}
 		for _, pair := range pairs {
-			if _, _, e = s.Relations.LockBlockTx(c, sc.Tx, pair.from, pair.to); e != nil {
+			block, found, e := s.Relations.LockBlockTx(c, sc.Tx, pair.from, pair.to)
+			if e != nil {
 				return out, e
+			}
+			if found && pair.from == a.PlayerID {
+				actorBlocked = block.Active
 			}
 		}
 		states, e := s.Relations.CandidateStatesTx(c, sc.Tx, a.PlayerID, []identity.PlayerID{target})
@@ -127,7 +134,11 @@ func (s BasicReader) ReadBasicTx(c context.Context, sc tx.Scope, a identity.Acto
 	if e != nil || basis.Validate() != nil || basis.Profile.PlayerID != target {
 		return out, ErrContent
 	}
-	out = BasicResult{Identity: BasicIdentity{PlayerID: target, Server: targetServer, Name: basis.Profile.DisplayName, AvatarID: basis.Profile.AvatarID, FrameID: basis.Profile.AvatarFrameID, PlayerType: int64(basis.Profile.PlayerType), Level: basis.Progression.Level}, Relation: rel, Eligible: map[int16]bool{}, ProfileVersion: snapshot.Root.StateVersion, PlayerProfileVersion: basis.Profile.StateVersion, ProgressionVersion: basis.Progression.StateVersion, ContentRevision: rev, ObservedAt: at.UTC()}
+	out = BasicResult{Identity: BasicIdentity{PlayerID: target, Server: targetServer, Name: basis.Profile.DisplayName, AvatarID: basis.Profile.AvatarID, FrameID: basis.Profile.AvatarFrameID, PlayerType: int64(basis.Profile.PlayerType), Level: basis.Progression.Level, Exp: basis.Progression.Exp}, Relation: rel, ActorBlocked: actorBlocked, Eligible: map[int16]bool{}, ProfileVersion: snapshot.Root.StateVersion, PlayerProfileVersion: basis.Profile.StateVersion, ProgressionVersion: basis.Progression.StateVersion, ContentRevision: rev, ObservedAt: at.UTC()}
+	out.Functions = make([]int64, len(basis.Functions))
+	for i, f := range basis.Functions {
+		out.Functions[i] = f.FunctionID
+	}
 	self := a.PlayerID == target
 	protected := self || !rel.Blocked
 	for _, sub := range []int16{1, 2, 3, 4, 6} {

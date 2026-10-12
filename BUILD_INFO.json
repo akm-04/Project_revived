@@ -1,5 +1,5 @@
 {
-  "base_backend_sha256": "26c274f38c4a7baad9c44d5c004ba1016a157c191a174b2b76b12ecf291f1bf4",
+  "base_backend_sha256": "a3aabb725a4a66df91133aa1c543d30ee263e3e93f590ad7ca25981f3c4ba7c6",
   "ca1_acceptance": "ACCEPTED_SEALED_PASS512",
   "ca1_contract": "docs/PASS511_CA1_IMPLEMENTATION_CONTRACT.md",
   "ca1_local_evidence": "docs/PASS511_CA1_LOCAL_GATE_EVIDENCE.json",
@@ -533,7 +533,7 @@
   "target_go": "1.27.1",
   "target_postgresql": "18.6",
   "target_sqlc": "1.31.1",
-  "version": "v0.109.0",
+  "version": "v0.110.0",
   "w2_claimed": false,
   "inherited_creation_metadata_provenance": {
     "archive": "gxb-backend-v2-v0.99.0-pass656-i7a8-accepted.zip",
@@ -556,8 +556,8 @@
   "i7a8b_content_revision": "9b81049a746521a5e8b57fd0fe42121470b0921481da257298ecf9c624f448e7",
   "i7a8b_parent_accepted_git_commit": "0d7593677a5ac1c7c2b669a73bd9166d8116418a",
   "i7a8b_authority": "Trusted Pass655 whole8B selection plus direct human implementation and closure authorization; frozen identity does not imply acceptance.",
-  "phase": "I7B6A_PLAYER_DISPLAY_OWNER_FOUNDATION",
-  "next_action": "Exact6A F1 portableR2/native/process/restore qualification; independent6Areality and680closure only. 6B/6C/parent6/E/I7/W2 unaccepted.",
+  "phase": "I7B6B_COHERENT_PROFILE_COMPONENTS_REQUIRED_PRODUCERS_BLOCKED",
+  "next_action": "Exact6BcomponentportableR2/native/API/process/recovery qualification and scopedreality/evidencereconciliation. Full6B/parent6/B-E/I7/W2 remainunaccepted pendingrequiredmetrics/skills/stats/history/richproviders.",
   "i7a9_product_accepted": false,
   "i7a9_gate_status_at_identity_freeze": "NOT_RUN",
   "i7a9_contract": "Selected normal658 I7A9 contract index in PassMap",
@@ -581,7 +581,7 @@
   "i7b2a_gate_status_at_identity_freeze": "NOT_RUN",
   "inherited_stage_metadata_is_historical": true,
   "i7b2a_contract": "docs/i7b2a/IMPLEMENTATION_SPEC.json",
-  "research_design_passmap_sha256": "6810490d9f4fe0b06d7a34e31b5bc9c10a17a6d657b7c8bb25c4648136e42fbe",
+  "research_design_passmap_sha256": "601d2194b543705144497ea94f017e61f4569c47cc963971bef66dd95320b275",
   "i7b2a_acceptance_pass": "664.0",
   "i7b2b_product_accepted": false,
   "i7b2b_gate_status_at_identity_freeze": "NOT_RUN",
@@ -619,10 +619,15 @@
   "i7b5b_implementation_authorized": true,
   "i7b5b_implementation_started": true,
   "current_migration_high_water": "00047_i7b6a_player_display.sql",
-  "i7b6a_product_accepted": false,
+  "i7b6a_product_accepted": true,
   "i7b6_parent_accepted": false,
   "i7b6a_gate_status_at_identity_freeze": "NOT_RUN",
   "i7b6a_contract": "docs/i7b6a/IMPLEMENTATION_PLAN.json",
   "i7b6a_implementation_authorized": true,
-  "i7b6a_implementation_started": true
+  "i7b6a_implementation_started": true,
+  "i7b6b_product_accepted": false,
+  "i7b6b_gate_status_at_identity_freeze": "NOT_RUN",
+  "i7b6b_contract": "docs/i7b6b/IMPLEMENTATION_PLAN.json",
+  "i7b6b_implementation_authorized": true,
+  "i7b6b_implementation_started": true
 }

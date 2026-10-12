@@ -353,6 +353,9 @@ func main() {
 	if e := registerPublicProfile(ctx, pool, runner, authority, receipts, contentDB, router); e != nil {
 		log.Fatalf("PublicProfile startup: %v", e)
 	}
+	if e := registerPublicProfileReads(ctx, pool, runner, authority, receipts, contentDB, displayService, router); e != nil {
+		log.Fatal(e)
+	}
 	if e := registerPlayerDisplay(ctx, pool, contentDB, router, stockruntime.PlayerDisplayDispatcher{Authority: authority, Service: displayService}); e != nil {
 		log.Fatalf("Player display startup: %v", e)
 	}
