@@ -99,7 +99,7 @@ func TestDisplayActualAPIAndRelocatedDatabaseRestore(t *testing.T) {
 	listener.Close()
 	origin := "http://" + addr
 	targetDSN := os.Getenv("GXB_I7B6A_DSN")
-	assets := t.TempDir()
+	assets := filepath.Join(t.TempDir(), "private-media")
 	if _, e := blobstore.NewLocal(assets); e != nil {
 		t.Fatal(e)
 	}
