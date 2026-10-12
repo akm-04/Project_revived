@@ -196,6 +196,12 @@ func (Store) VerifyRevision(ctx context.Context, q tx.Queryer, b registry.Bundle
 	if err != nil {
 		return v, err
 	}
+	var displayExact bool
+	err = q.QueryRow(ctx, verifyPlayerDisplaySQL, b.RevisionID(), string(b.PlayerDisplayJSON())).Scan(&displayExact, &v.PlayerDisplayCount)
+	if err != nil {
+		return v, err
+	}
+	v.Exact = v.Exact && displayExact
 	var showcaseExact bool
 	err = q.QueryRow(ctx, verifyPublicShowcaseSQL, b.RevisionID(), string(b.PublicShowcaseJSON())).Scan(&showcaseExact, &v.PublicShowcaseCount)
 	if err != nil {

@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "status": "CURRENT_CUMULATIVE_CONTENT_GENERATION_LOCK_I7A6A",
+  "status": "CURRENT_CUMULATIVE_CONTENT_GENERATION_LOCK_I7B6A",
   "rule": "Historical validators keep their phase-specific semantic invariants. In cumulative/current mode they may accept only an explicitly registered successor compiler generation at or after their baseline. New generations are append-only review events; registering a generation does not waive capability/count/source/migration/ownership assertions.",
   "generations": [
     {
@@ -122,10 +122,18 @@
       "stage": "I7A-8B",
       "compiler_version": "i7a8b-guild-invite",
       "parser_version": "lua-generated-v18-guild-invite"
+    },
+    {
+      "ordinal": 21,
+      "stage": "I7B-6A",
+      "compiler_version": "i7b6a-player-display",
+      "parser_version": "lua-generated-v18-guild-invite",
+      "revision_id": "bd1f4ceac82c016cd7282ed02a4d851029ac791df9776db3c5ce5569626a03b0",
+      "scope": "Forward source-derived display/name/cosmetic catalog; previousimmutable revisions unchanged"
     }
   ],
   "current": {
-    "compiler_version": "i7a8b-guild-invite",
+    "compiler_version": "i7b6a-player-display",
     "parser_version": "lua-generated-v18-guild-invite"
   }
 }

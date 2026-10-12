@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"gxb.local/backend/v2/internal/domain/player"
 	"reflect"
 	"sort"
 	"strings"
@@ -480,6 +481,7 @@ type EmoticonCatalog struct {
 	Source        string               `json:"source"`
 }
 type Catalog struct {
+	PlayerDisplay            player.DisplayCatalog
 	PublicShowcase           PublicShowcasePolicy
 	PublicProfile            PublicProfilePolicy
 	GuildInvite              GuildInvitePolicy
@@ -599,6 +601,10 @@ func Load() (*Catalog, error) {
 		return nil, err
 	}
 
+	var playerDisplay player.DisplayCatalog
+	if err := decodeAndVerify("player_display_catalog.json", manifest.ArtifactSHA256s, &playerDisplay); err != nil {
+		return nil, err
+	}
 	var publicShowcase PublicShowcasePolicy
 	if err := decodeAndVerify("public_showcase_policy.json", manifest.ArtifactSHA256s, &publicShowcase); err != nil {
 		return nil, err
@@ -624,6 +630,7 @@ func Load() (*Catalog, error) {
 		return nil, err
 	}
 	catalog := &Catalog{
+		PlayerDisplay:            playerDisplay,
 		PublicShowcase:           publicShowcase,
 		PublicProfile:            publicProfile,
 		GuildInvite:              invite,
@@ -693,10 +700,14 @@ func validateManifest(raw []byte, manifest *Manifest) error {
 	if _, err := hex.DecodeString(manifest.RevisionID); err != nil || strings.ToLower(manifest.RevisionID) != manifest.RevisionID {
 		return fmt.Errorf("builtin content: revision id must be lowercase SHA-256 hex")
 	}
-	if len(manifest.Sources) != 71 {
+	expectedSources, expectedArtifacts := 71, 23
+	if manifest.CompilerVersion == "i7b6a-player-display" {
+		expectedSources, expectedArtifacts = 75, 24
+	}
+	if len(manifest.Sources) != expectedSources {
 		return fmt.Errorf("builtin content: expected 71 source records, got %d", len(manifest.Sources))
 	}
-	if len(manifest.ArtifactSHA256s) != 23 {
+	if len(manifest.ArtifactSHA256s) != expectedArtifacts {
 		return fmt.Errorf("builtin content: expected 23 hashed payload artifacts, got %d", len(manifest.ArtifactSHA256s))
 	}
 
@@ -717,6 +728,9 @@ func validateManifest(raw []byte, manifest *Manifest) error {
 }
 
 func validateCatalog(c *Catalog) error {
+	if e := c.PlayerDisplay.Validate(); e != nil {
+		return e
+	}
 	if e := c.PublicShowcase.Validate(); e != nil {
 		return e
 	}
@@ -1369,7 +1383,7 @@ func validateCatalog(c *Catalog) error {
 
 	caps := append([]string(nil), c.Manifest.EnabledCapabilities...)
 	sort.Strings(caps)
-	wantCaps := []string{"CHARACTER_APPEARANCE_CA7", "EQUIPMENT_PRIMITIVES_CA4", "FRIEND_DM_EMOTICON_I7A6A", "FUNCTION_LEVEL_ELIGIBILITY_R5", "GUILD_BROADCAST_I7A8A", "GUILD_INVITE_PRESENTATION_I7A8B", "HERO_CORE_CA2", "HERO_EQUIPMENT_CA4_2", "HERO_FUMO_CA4_3A", "HERO_PROGRESSION_CA2", "HERO_PROMOTION_RESTORATION_CA4_3B", "PET_ACQUISITION_CA3", "PET_CORE_CA3", "PET_EQUIPMENT_CA4_4A", "PET_PROGRESSION_CA3", "PET_PROMOTION_RESTORATION_CA4_4B", "PLAYER_EXP_R5", "PRACTICE_CA6", "PUBLIC_PROFILE_PREFERENCES_I7B2B", "PUBLIC_PROFILE_SHOWCASE_SELECTION_I7B3A", "QUALIFIED_ORDINARY_STACK_ITEM_DEFINITIONS", "SCALAR_CRYSTAL", "SCALAR_MANA", "SOCIAL_GIFT_I7A7A", "SUPER_EQUIPMENT_CA4_5", "TEMPORAL_ENERGY_R5", "TEMPORAL_SKILL_POINT_R5", "TEMPORAL_SPIRIT_ENERGY_R5"}
+	wantCaps := []string{"CHARACTER_APPEARANCE_CA7", "EQUIPMENT_PRIMITIVES_CA4", "FRIEND_DM_EMOTICON_I7A6A", "FUNCTION_LEVEL_ELIGIBILITY_R5", "GUILD_BROADCAST_I7A8A", "GUILD_INVITE_PRESENTATION_I7A8B", "HERO_CORE_CA2", "HERO_EQUIPMENT_CA4_2", "HERO_FUMO_CA4_3A", "HERO_PROGRESSION_CA2", "HERO_PROMOTION_RESTORATION_CA4_3B", "PET_ACQUISITION_CA3", "PET_CORE_CA3", "PET_EQUIPMENT_CA4_4A", "PET_PROGRESSION_CA3", "PET_PROMOTION_RESTORATION_CA4_4B", "PLAYER_DISPLAY_I7B6A", "PLAYER_EXP_R5", "PRACTICE_CA6", "PUBLIC_PROFILE_PREFERENCES_I7B2B", "PUBLIC_PROFILE_SHOWCASE_SELECTION_I7B3A", "QUALIFIED_ORDINARY_STACK_ITEM_DEFINITIONS", "SCALAR_CRYSTAL", "SCALAR_MANA", "SOCIAL_GIFT_I7A7A", "SUPER_EQUIPMENT_CA4_5", "TEMPORAL_ENERGY_R5", "TEMPORAL_SKILL_POINT_R5", "TEMPORAL_SPIRIT_ENERGY_R5"}
 	if len(caps) != len(wantCaps) {
 		return fmt.Errorf("builtin content: enabled capability count drift: %v", caps)
 	}

@@ -22,6 +22,7 @@ const (
 )
 
 var supportedCapabilities = [...]string{
+	"PLAYER_DISPLAY_I7B6A",
 	"PUBLIC_PROFILE_SHOWCASE_SELECTION_I7B3A",
 	"PUBLIC_PROFILE_PREFERENCES_I7B2B",
 	"GUILD_BROADCAST_I7A8A",
@@ -53,6 +54,7 @@ var supportedCapabilities = [...]string{
 }
 
 type Bundle struct {
+	playerDisplayJSON                         []byte
 	publicShowcaseJSON                        []byte
 	publicProfileJSON                         []byte
 	guildInviteJSON                           []byte
@@ -210,7 +212,12 @@ func LoadBuiltinBundle() (Bundle, error) {
 	if err != nil {
 		return Bundle{}, err
 	}
+	display, err := builtin.GeneratedFile("player_display_catalog.json")
+	if err != nil {
+		return Bundle{}, err
+	}
 	b := Bundle{
+		playerDisplayJSON:                      append([]byte(nil), display...),
 		publicShowcaseJSON:                     append([]byte(nil), publicShowcase...),
 		publicProfileJSON:                      append([]byte(nil), publicProfile...),
 		guildInviteJSON:                        append([]byte(nil), invite...),
@@ -285,6 +292,7 @@ func (b Bundle) Validate() error {
 }
 
 func (b Bundle) GuildInviteJSON() []byte    { return append([]byte(nil), b.guildInviteJSON...) }
+func (b Bundle) PlayerDisplayJSON() []byte  { return append([]byte(nil), b.playerDisplayJSON...) }
 func (b Bundle) PublicShowcaseJSON() []byte { return append([]byte(nil), b.publicShowcaseJSON...) }
 func (b Bundle) PublicProfileJSON() []byte  { return append([]byte(nil), b.publicProfileJSON...) }
 func (b Bundle) GuildBroadcastJSON() []byte { return append([]byte(nil), b.guildBroadcastJSON...) }
@@ -395,6 +403,7 @@ type ActiveSummary struct {
 }
 
 type Verification struct {
+	PlayerDisplayCount                        int64
 	PublicShowcaseCount                       int64
 	PublicProfileCount                        int64
 	GuildInviteCount                          int64
@@ -425,7 +434,7 @@ type Verification struct {
 
 func (v Verification) Matches(b Bundle) bool {
 	r, p, f, o, h, pet, petAcquisition, petProgression, equipmentPrimitives, heroEquipment, superEquipment, heroFumoTargets, heroFumoMaterials, restorationEquipment, restorationFractions, restorationDenominations, petEquipment, petRestorationEquipment, practice, appearance := b.ExpectedCounts()
-	return v.PublicShowcaseCount == 1 && v.PublicProfileCount == 1 && v.GuildInviteCount == 1 && v.GuildBroadcastCount == 1 && v.Exact && v.EmoticonCount == 85 && v.ResourceCount == r && v.ProgressionCount == p && v.FunctionGateCount == f && v.ObjectiveCount == o && v.HeroCount == h && v.PetCount == pet && v.PetAcquisitionCount == petAcquisition && v.PetProgressionCount == petProgression && v.EquipmentPrimitiveCount == equipmentPrimitives && v.HeroEquipmentCount == heroEquipment && v.SuperEquipmentCount == superEquipment && v.HeroFumoTargetCount == heroFumoTargets && v.HeroFumoMaterialCount == heroFumoMaterials && v.HeroPromotionRestorationEquipmentCount == restorationEquipment && v.HeroPromotionRestorationFractionCount == restorationFractions && v.HeroPromotionRestorationDenominationCount == restorationDenominations && v.PetEquipmentCount == petEquipment && v.PetPromotionRestorationEquipmentCount == petRestorationEquipment && v.PracticeCount == practice && v.AppearanceCount == appearance
+	return v.PlayerDisplayCount == 1 && v.PublicShowcaseCount == 1 && v.PublicProfileCount == 1 && v.GuildInviteCount == 1 && v.GuildBroadcastCount == 1 && v.Exact && v.EmoticonCount == 85 && v.ResourceCount == r && v.ProgressionCount == p && v.FunctionGateCount == f && v.ObjectiveCount == o && v.HeroCount == h && v.PetCount == pet && v.PetAcquisitionCount == petAcquisition && v.PetProgressionCount == petProgression && v.EquipmentPrimitiveCount == equipmentPrimitives && v.HeroEquipmentCount == heroEquipment && v.SuperEquipmentCount == superEquipment && v.HeroFumoTargetCount == heroFumoTargets && v.HeroFumoMaterialCount == heroFumoMaterials && v.HeroPromotionRestorationEquipmentCount == restorationEquipment && v.HeroPromotionRestorationFractionCount == restorationFractions && v.HeroPromotionRestorationDenominationCount == restorationDenominations && v.PetEquipmentCount == petEquipment && v.PetPromotionRestorationEquipmentCount == petRestorationEquipment && v.PracticeCount == practice && v.AppearanceCount == appearance
 }
 
 // Repository is the canonical content-registry persistence port. It receives
@@ -450,6 +459,7 @@ type Repository interface {
 	InsertPetPromotionRestoration(context.Context, tx.Tx, Bundle) (int64, error)
 	InsertPractice(context.Context, tx.Tx, Bundle) (int64, error)
 	InsertAppearance(context.Context, tx.Tx, Bundle) (int64, error)
+	InsertPlayerDisplay(context.Context, tx.Tx, Bundle) (int64, error)
 	InsertPublicShowcase(context.Context, tx.Tx, Bundle) (int64, error)
 	InsertPublicProfile(context.Context, tx.Tx, Bundle) (int64, error)
 	InsertGuildBroadcast(context.Context, tx.Tx, Bundle) (int64, error)

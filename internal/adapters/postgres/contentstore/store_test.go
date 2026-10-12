@@ -105,9 +105,9 @@ func TestBundleQueriesUseExactRawBytes(t *testing.T) {
 		t.Fatal("Hero promotion restoration query input mismatch")
 	}
 	q.values = []any{true, int64(5557), int64(100), int64(99), int64(0), int64(568), int64(54), int64(27), int64(54), int64(1176), int64(53280), int64(84), int64(359), int64(516), int64(195), int64(5), int64(3), int64(2592), int64(73), int64(1889), int64(542)}
-	q.bySQL = map[string][]any{contentqueries.VerifyContentEmoticons: {true, int64(85)}, verifySocialGiftSQL: {true}, verifyGuildBroadcastSQL: {true, int64(1)}, verifyGuildInviteSQL: {true, int64(1)}, verifyPublicProfileSQL: {true, int64(1)}, verifyPublicShowcaseSQL: {true, int64(1)}}
+	q.bySQL = map[string][]any{verifyPlayerDisplaySQL:{true,int64(1)},contentqueries.VerifyContentEmoticons: {true, int64(85)}, verifySocialGiftSQL: {true}, verifyGuildBroadcastSQL: {true, int64(1)}, verifyGuildInviteSQL: {true, int64(1)}, verifyPublicProfileSQL: {true, int64(1)}, verifyPublicShowcaseSQL: {true, int64(1)}}
 	v, err := s.VerifyRevision(ctx, q, b)
-	if err != nil || !v.Matches(b) || q.calls[len(q.calls)-7] != contentqueries.VerifyContentRevision || len(q.callArgs[len(q.callArgs)-7]) != 22 || q.calls[len(q.calls)-5] != verifyPublicProfileSQL || !reflect.DeepEqual(q.callArgs[len(q.callArgs)-5], []any{b.RevisionID(), string(b.PublicProfileJSON())}) || q.sql != verifyGuildInviteSQL || !reflect.DeepEqual(q.args, []any{b.RevisionID(), string(b.GuildInviteJSON())}) || v.PublicProfileCount != 1 || v.GuildBroadcastCount != 1 || v.EmoticonCount != 85 {
+	if err != nil || !v.Matches(b) || q.calls[len(q.calls)-8] != contentqueries.VerifyContentRevision || len(q.callArgs[len(q.callArgs)-8]) != 22 || q.calls[len(q.calls)-5] != verifyPublicProfileSQL || !reflect.DeepEqual(q.callArgs[len(q.callArgs)-5], []any{b.RevisionID(), string(b.PublicProfileJSON())}) || q.sql != verifyGuildInviteSQL || !reflect.DeepEqual(q.args, []any{b.RevisionID(), string(b.GuildInviteJSON())}) || v.PublicProfileCount != 1 || v.GuildBroadcastCount != 1 || v.EmoticonCount != 85 {
 		t.Fatal(v, err)
 	}
 }

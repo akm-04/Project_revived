@@ -21,7 +21,7 @@ from pathlib import Path
 from typing import Any, Iterable
 
 SCHEMA_VERSION = 1
-COMPILER_VERSION = "i7b2b-public-profile"
+COMPILER_VERSION = "i7b6a-player-display"
 PARSER_VERSION = "lua-generated-v18-guild-invite"
 EXPECTED_SOURCE_ARCHIVE_SHA256 = "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
 SOURCE_PREFIX = "app-assets/output/assets/src_64/"
@@ -101,7 +101,13 @@ SOURCE_MANIFEST.append(('data/tables/name.lua', '2254bb1bb4283199a112cb94a7e14e8
 SOURCE_MANIFEST.append(('data/tables/person_display_words.lua', 'ca342990ff24d8c5a4c12b270401c276b3e29597d43555f30978a2c5162afeb6', 'PUBLIC_PROFILE_PREFERENCE_SOURCE_AUTHORITY'))
 SOURCE_MANIFEST.append(('app/model/FilterWordManager.lua', 'e961a9a0029c90cce75d8deee23d066ba4d74bc133e733625dae5b43e0c34783', 'PUBLIC_PROFILE_PREFERENCE_SOURCE_AUTHORITY'))
 
+SOURCE_MANIFEST.append(('data/tables/avatar.lua','0a90c0296d9ddc15aeba8fbf77de4a4a0ce690b680c005d6be11ae102b4acb61','PLAYER_DISPLAY_SOURCE_AUTHORITY'))
+SOURCE_MANIFEST.append(('data/tables/title_system.lua','a91f9afa54ceba80d1fe752f95e417a6fa22c0663fab520f73ee64262ae2ea2d','PLAYER_DISPLAY_SOURCE_AUTHORITY'))
+SOURCE_MANIFEST.append(('data/tables/chat_bubble.lua','abed6a89251099b42345a6414265aceb6c70ed0099f4d8648386811dcb21f03e','PLAYER_DISPLAY_SOURCE_AUTHORITY'))
+SOURCE_MANIFEST.append(('data/tables/random_name.lua','bf47c258f7be691ee2bf15df19af0e8dfb0cf5a3f86945ec27d10edbf61854cc','PLAYER_DISPLAY_SOURCE_AUTHORITY'))
+
 ENABLED_CAPABILITIES = [
+    "PLAYER_DISPLAY_I7B6A",
     "PUBLIC_PROFILE_SHOWCASE_SELECTION_I7B3A",
     "PUBLIC_PROFILE_PREFERENCES_I7B2B",
     "GUILD_BROADCAST_I7A8A",
@@ -1832,7 +1838,17 @@ def build_artifacts(blobs: dict[str, SourceBlob], archive_sha256: str) -> dict[s
         "hide_subtypes":[2,4],"intro_codepoints":40,"selected_limit":4
     }
     showcase_artifact = {'schema_version': 1, 'policy_id': 'I7B_SHOWCASE_SELECTION_V1', 'slots': 6, 'visible_slots': 5, 'sign_rule': 'POSITIVE_OWNED_HERO_NEGATIVE_OWNED_PET_ZERO_EMPTY', 'duplicate_rule': 'FAMILY_CURRENT_TEMPLATE', 'index_rule': 'CURRENT_CALLER_SNAPSHOT_ONE_BASED', 'empty_record': 'OBJECT', 'wire_rule': 'REQUIRED_PROVIDERS_BEFORE_WRITE_I7B6', 'model_source_sha256': '022fcbf39167ac9197ce5034b32fd5833016742744ad3de118ceacf6f808cfb8', 'selector_source_sha256': 'e1db1b02194652043b289b2670501c0fc8226ccaba17c8e5eca1a915e715440e'}
+    cosmetics=[]
+    for r in parse_generated_lua_table(blobs["data/tables/avatar.lua"].data):
+        cosmetics.append(dict(family="avatar" if r["avatar_type"]=="1" else "frame",id=int(r["id"]),icon=int(r["icon"]),type=int(r["type"]),partner_id=int(r["partner_id"]),days=int(r["time"]),vip=int(r["vip_level"]),price=int(r["value2"])))
+    for family,table in [("title","title_system"),("bubble","chat_bubble")]:
+        for r in parse_generated_lua_table(blobs["data/tables/"+table+".lua"].data):
+            cosmetics.append(dict(family=family,id=int(r["id"]),icon=0,type=int(r.get("type","0")),partner_id=0,days=int(r["time"]),vip=0,price=0))
+    words=profile_artifact["words"]
+    names=[r["text"] for r in sorted(parse_generated_lua_table(blobs["data/tables/random_name.lua"].data),key=lambda r:int(r["id"])) if 2<=len(r["text"])<=16 and not any(w and w in r["text"] for w in words)][:12]
+    display_artifact=dict(hero_templates=[dict(table_id=r["table_id"],before_awaken=r["first_table_id"],kind=r["hero_kind"])for r in hero_artifact["templates"]],schema_version=1,policy_id="PLAYER_DISPLAY_V1",rename_cost=100,default_avatar=110001001,default_frame=120001001,default_bubble=10001,cosmetics=cosmetics,names=names,words=words,collection=[110007026,110007027,110007043,110007049])
     artifacts = {
+        "player_display_catalog.json":display_artifact,
         "public_showcase_policy.json":showcase_artifact,
         "public_profile_policy.json":profile_artifact,
         "guild_invite_policy.json":invite_artifact,

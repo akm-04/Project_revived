@@ -545,6 +545,13 @@ func (r repo) InsertEmoticons(_ context.Context, x tx.Tx, b Bundle) (int64, erro
 
 func (r repo) InsertSocialGift(_ context.Context, x tx.Tx, b Bundle) (int64, error) { return 1, nil }
 
+func (r repo) InsertPlayerDisplay(_ context.Context, x tx.Tx, b Bundle) (int64, error) {
+	t := x.(*modelTx)
+	v := t.installed[b.RevisionID()]
+	v.PlayerDisplayCount = 1
+	t.installed[b.RevisionID()] = v
+	return 1, nil
+}
 func (r repo) InsertPublicShowcase(_ context.Context, x tx.Tx, b Bundle) (int64, error) {
 	t := x.(*modelTx)
 	v := t.installed[b.RevisionID()]

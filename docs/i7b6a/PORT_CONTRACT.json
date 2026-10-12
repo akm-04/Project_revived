@@ -1,0 +1,72 @@
+{
+  "schema_version": 1,
+  "node": "I7B-6A",
+  "full_node_path": "ROOT/I7/I7B/I7B-6/I7B-6A",
+  "status": "RESEARCH_DESIGN_READY_PENDING_NORMAL679_PUBLICATION",
+  "classification": "SOURCE_FACT + IMPLEMENTATION_DECISION + UNKNOWN",
+  "product_implementation_authorized": false,
+  "product_implementation_started": false,
+  "product_accepted": false,
+  "logical_owner": "I5 Playerdisplay/cosmeticboundary frozen662",
+  "proposed_ports": [
+    {
+      "name": "PublicPlayerDisplayReaderTx",
+      "shape": "ExistingPublicPlayerBasisplusqualifiedfamilyeffectiveobservations; PlayerID/canonicalprofile/progressionversions/observedAt/contentRevision, no ownTx/clock",
+      "reuse": "i5.PublicPlayerBasisReader"
+    },
+    {
+      "name": "PlayerCosmeticEligibilityReaderTx",
+      "shape": "family/catalogID/sourceWirePayload/qualifiedorigin/validity/sourceversions; callercoherentscope",
+      "reuse": "CAOWNEDreadfacets +I5inventory/privilege readseams"
+    },
+    {
+      "name": "PlayerDisplayAssignmentTx",
+      "shape": "Prepareddesiredname/avatar/frame/title/bubble selection, exactactor/pin/time; no nestedsemanticcommit",
+      "reuse": "I5fence +playerroot315 +KernelReceipt +directorysync"
+    },
+    {
+      "name": "PlayerCosmeticGrantRecipientTx",
+      "shape": "Trustedowningoriginsemanticidentity/familydescriptor/validity; exactcallerTx; no clientoriginclaim/implicittitleunique allocator",
+      "reuse": "I5TxGrantSettler specialrecipient extension onlywherequalified"
+    },
+    {
+      "name": "PlayerDisplayValueEffectTx",
+      "shape": "Qualifiedpinnedsourcecost/recipient; completeexistingI5lockplan beforedebit/mutation",
+      "reuse": "Economy/Grant ports; productabsencefailsclosed"
+    }
+  ],
+  "identity_rules": [
+    "tableID/icon/frameID/pickercategorydistinct",
+    "titlewireunique_id !=operationUUID or universalgrantID",
+    "ActorPlayerID !=target/borrowed/templateID",
+    "contentrevision!=businessentitlementidentity"
+  ],
+  "versions": "ExistingcanonicalPlayerProfileStateVersion incrementsoneeffectivePlayerdisplaychange, noopunchanged; newfamilyfactsretainownversion where fact changes independently. DeriveddirectoryVersion isnotcreatedAt/rename timestamp.",
+  "source_request_shapes": {
+    "23": [
+      "player_name"
+    ],
+    "119": [],
+    "98": [
+      "table_id",
+      "avatar_id",
+      "avatar_type"
+    ],
+    "100": [
+      "avatar_frame_id"
+    ],
+    "656": [
+      "id"
+    ],
+    "2490": [],
+    "2492": [
+      "title_id",
+      "unique_id"
+    ],
+    "2493": [],
+    "2494": [
+      "bubble_id"
+    ]
+  },
+  "publication_kind": "Scopedimplementationdesign underexistingparentcontracts, notnewdurableappliedcontract"
+}

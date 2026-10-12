@@ -1,0 +1,75 @@
+{
+  "schema_version": 1,
+  "node": "I7B-6A",
+  "full_node_path": "ROOT/I7/I7B/I7B-6/I7B-6A",
+  "status": "RESEARCH_DESIGN_READY_PENDING_NORMAL679_PUBLICATION",
+  "classification": "SOURCE_FACT + IMPLEMENTATION_DECISION + UNKNOWN",
+  "product_implementation_authorized": false,
+  "product_implementation_started": false,
+  "product_accepted": false,
+  "rows": [
+    {
+      "id": "T01",
+      "obligation": "Source catalog/name/wire/callback policy",
+      "required_evidence": "Currentcaller/model/table/serialization; id!=icon, forgedtuple/framefamiliar, titlepayloadtypes, UTF8/moderation/name119event; oldinactiveprofile",
+      "result": "NOT_RUN_PRODUCT_NOT_STARTED"
+    },
+    {
+      "id": "T02",
+      "obligation": "RealPG ownerfoundation earlygate",
+      "required_evidence": "Forward47 fresh/upgradefromaccepted46/reload; not rerununchanged1..46semantics; typedowner/foreignSQL/schema/tableownership",
+      "result": "NOT_RUN_PRODUCT_NOT_STARTED"
+    },
+    {
+      "id": "T03",
+      "obligation": "Actor/updateconcurrency",
+      "required_evidence": "Context/logout/select/retirement fences; same/differentdesiredassignment; Charactereligibility/destruction races; no lowerlockdiscovery",
+      "result": "NOT_RUN_PRODUCT_NOT_STARTED"
+    },
+    {
+      "id": "T04",
+      "obligation": "Value/unknownrecovery",
+      "required_evidence": "Renamefirst/noop/charged and656qualifiedrecipient; insufficientfunds; atomicdebit/grant/display/feed/receipt rollback; knownopafterlaterchange; unknowncommit cannotdebitagainorreceiptmissabort",
+      "result": "NOT_RUN_PRODUCT_NOT_STARTED"
+    },
+    {
+      "id": "T05",
+      "obligation": "Familyexpiry/readcoherence",
+      "required_evidence": "Permanent/timed/absent/unavailable/invalidperfamily; before/at/afterexpiry; backward/staleclock/pinnedrevisionchange; noownershipdelete; noAcquiredAtstartguess",
+      "result": "NOT_RUN_PRODUCT_NOT_STARTED"
+    },
+    {
+      "id": "T06",
+      "obligation": "CanonicalPlayer/directory version",
+      "required_evidence": "Realchangeincrements1/nooppreserves; exactsameTxcanonicalfeed preservesVIP/conquestunrelatedfacts; canonicalfallbackwitnessproducedfor6C",
+      "result": "NOT_RUN_PRODUCT_NOT_STARTED"
+    },
+    {
+      "id": "T07",
+      "obligation": "Externalprovider activation",
+      "required_evidence": "QualifiedCharacter/base/permanentinventoryfacets; missingVIP/timed/title/bubbleorigin failsrequiredsurface, nevercatalogallowned/empty-successproof",
+      "result": "NOT_RUN_PRODUCT_NOT_STARTED"
+    },
+    {
+      "id": "T08",
+      "obligation": "ExactportableR2/process/recovery",
+      "required_evidence": "Freezeone6Acandidate;Go1.27.2/PG18.6/River;API routesstartup/pin/provider checks; restart/backuprestoremetadata+receipts/admission; affectedrace/vet/architecture/security/regression",
+      "result": "NOT_RUN_PRODUCT_NOT_STARTED"
+    },
+    {
+      "id": "T09",
+      "obligation": "Inheritedconsumerpreservation",
+      "required_evidence": "Accepted2..5/I7A/CA reusedifunchanged; specific6Achangesinvalidateonlyaffecteddisplay/I5/Character/directoryfacets; noalteredcustomimage/DM historicalpayload",
+      "result": "NOT_RUN_PRODUCT_NOT_STARTED"
+    },
+    {
+      "id": "T10",
+      "obligation": "Independentreality/parentlimits",
+      "required_evidence": "Reviewactualsource/code/ownership/time/recovery/providers;6Aqualificationnot6B/6C/parent6/E/I7/W2closure",
+      "result": "NOT_RUN_PRODUCT_NOT_STARTED"
+    }
+  ],
+  "early_gate": "T02/T03/T04/T05beforeconsumingnewdurablefoundation",
+  "tests_this_reply": "Staticresearch/parsing/checkpointintegrityonly; no product/native/E2Etests",
+  "no_additional_acceptance_requirement": true
+}

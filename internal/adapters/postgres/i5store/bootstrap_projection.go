@@ -21,19 +21,23 @@ import (
 // BootstrapProjection contributes only domains implemented by I5. The frozen
 // Wave-S baseline continues to own not-yet-implemented fields.
 type BootstrapProjection struct {
+	Display      appi5.TxEffectivePlayerDisplayReader
 	Content      appi5.ContentRuntime
 	Privileges   appi5.PrivilegeSnapshotProvider
 	MaxHeroColor appi5.MaxHeroColorPolicyProvider
 }
 
 func (BootstrapProjection) Name() string { return "i5.player-core-economy-mail-r5" }
-func (BootstrapProjection) Claims() []string {
+func (b BootstrapProjection) Claims() []string {
 	claims := []string{
 		"17.player_name", "17.player_type", "17.avatar_id", "17.avatar_frame_id",
 		"17.lev", "17.exp", "17.max_lev", "17.max_color", "17.story_id", "17.story_state", "17.guide_id",
 		"17.func_ids", "17.guide_function_ids", "17.guide_return_id",
 		"17.energy_time", "17.max_energy", "17.spirit_energy_time", "17.skill_time",
 		"17.invitation_time", "17.max_invitation", "81", "368",
+	}
+	if b.Display != nil {
+		claims = append(claims, "17.title_info", "17.bubble_info")
 	}
 	keys := make([]string, 0, len(stockEconomyFields))
 	for key := range stockEconomyFields {
@@ -65,6 +69,23 @@ func (b BootstrapProjection) OverlayMID1(ctx context.Context, q tx.Queryer, acto
 	}
 	for k, v := range owned {
 		mid17[k] = v
+	}
+	if b.Display != nil {
+		rev, e := b.Content.ActiveRevision(ctx, q)
+		if e != nil {
+			return e
+		}
+		d, e := b.Display.ReadEffectivePlayerDisplayTx(ctx, q, pid, rev, now.UTC())
+		if e != nil {
+			return e
+		}
+		if d.ProfileVersion != core.Profile.StateVersion || d.ProgressionVersion != core.Progression.StateVersion || d.ContentRevision != rev || !d.ObservedAt.Equal(now.UTC()) {
+			return errors.New("display observation drift")
+		}
+		mid17["avatar_id"] = d.AvatarID
+		mid17["avatar_frame_id"] = d.AvatarFrameID
+		mid17["title_info"] = d.TitleInfo
+		mid17["bubble_info"] = d.BubbleInfo
 	}
 	mid17["max_color"] = b.MaxHeroColor.MaxHeroColor()
 	if err := b.overlayEconomy(ctx, q, pid, core.Progression, now.UTC(), mid17); err != nil {
