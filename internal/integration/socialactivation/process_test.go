@@ -238,7 +238,6 @@ func TestD07ProductionProcessesWorldListenerFanoutAndRestart(t *testing.T) {
 	if e := apiProc.Wait(); e != nil {
 		t.Fatal(e)
 	}
-	apiProc.ProcessState = apiProc.ProcessState
 	startProcess(t, apiBin, api, world)
 	code, body = postProcess(t, api, a, 1, 176, nil)
 	if code != 200 || len(body.(map[string]any)["friend_list"].([]any)) != 1 {
