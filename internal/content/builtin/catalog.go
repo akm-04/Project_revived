@@ -7,7 +7,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"gxb.local/backend/v2/internal/domain/player"
+
 	"reflect"
 	"sort"
 	"strings"
@@ -481,7 +481,7 @@ type EmoticonCatalog struct {
 	Source        string               `json:"source"`
 }
 type Catalog struct {
-	PlayerDisplay            player.DisplayCatalog
+	PlayerDisplay            PlayerDisplayCatalog
 	PublicShowcase           PublicShowcasePolicy
 	PublicProfile            PublicProfilePolicy
 	GuildInvite              GuildInvitePolicy
@@ -601,7 +601,7 @@ func Load() (*Catalog, error) {
 		return nil, err
 	}
 
-	var playerDisplay player.DisplayCatalog
+	var playerDisplay PlayerDisplayCatalog
 	if err := decodeAndVerify("player_display_catalog.json", manifest.ArtifactSHA256s, &playerDisplay); err != nil {
 		return nil, err
 	}
