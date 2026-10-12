@@ -212,9 +212,8 @@ func (s ReadService) ReadTx(c context.Context, sc tx.Scope, a identity.ActorCont
 	out["share_switch"] = prefs.ShareSwitch
 	out["is_first_time"] = prefs.IsFirstTime
 	out["hide_types"] = prefs.HideSubtypes
-	if sub == 6 {
-		return out, nil
-	}
+	// SYSTEM also refreshes the source basic cache; self must receive the
+	// complete qualified basic projection instead of clearing MAIN fields.
 	if s.Guilds == nil || s.Feedback == nil || s.Slots == nil || s.Content == nil {
 		return nil, ErrProfileProvider
 	}

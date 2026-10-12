@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"gxb.local/backend/v2/internal/adapters/guildinvitebundle"
 	"gxb.local/backend/v2/internal/adapters/guildpolicybridge"
+	pg "gxb.local/backend/v2/internal/adapters/postgres"
 	"gxb.local/backend/v2/internal/adapters/postgres/contentstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/guildinvitestore"
 	"gxb.local/backend/v2/internal/adapters/postgres/guildstore"
@@ -54,7 +55,7 @@ func Test6BGuildCurrentMembershipAndInviteSource(t *testing.T) {
 		t.Fatal(e)
 	}
 	cross := i5.CrossOwner{Store: i5store.Store{}}
-	core := guildcore.Service{Timed: gen.TimedRunner{Binder: gen.Binder{Time: fixedTime{at.Add(2 * time.Second)}}, Runner: runner}, Store: store, Fencer: i5store.Store{}, PlayerRoots: i4store.PlayerRootLocker{}, Level: cross, Scalar: cross, LevelAndScalar: cross, Receipts: kernel, ReceiptRead: kernelstore.Reader{Queryer: p}, Policy: binding, InviteProjection: &source}
+	core := guildcore.Service{Timed: gen.TimedRunner{Binder: gen.Binder{Time: pg.AuthoritativeTime{Queryer: p}}, Runner: runner}, Store: store, Fencer: i5store.Store{}, PlayerRoots: i4store.PlayerRootLocker{}, Level: cross, Scalar: cross, LevelAndScalar: cross, Receipts: kernel, ReceiptRead: kernelstore.Reader{Queryer: p}, Policy: binding, InviteProjection: &source}
 	for _, a := range []identity.ActorContext{a, b} {
 		sqlExec(t, p, `UPDATE player_progression SET level=80 WHERE player_id=$1`, int64(a.PlayerID))
 		sqlExec(t, p, `INSERT INTO player_economy_owners(player_id,state_version,created_at)VALUES($1,1,clock_timestamp())`, int64(a.PlayerID))
@@ -104,7 +105,6 @@ func Test6BGuildCurrentMembershipAndInviteSource(t *testing.T) {
 		t.Fatal("missingrequiredsource fabricatedabsence")
 	}
 	view.Invites = bundle.Source
-	core.Timed.Binder.Time = fixedTime{saved.DecisionAt.Add(time.Second)}
 	if _, e = core.AcceptInvite(ctx, b, guild.ID(created.GuildID), gop()); e != nil {
 		t.Fatal(e)
 	}
@@ -112,11 +112,9 @@ func Test6BGuildCurrentMembershipAndInviteSource(t *testing.T) {
 	if e != nil || v.InviteTime != 0 || v.GuildID != guild.ID(created.GuildID) || v.Role != guild.Member {
 		t.Fatal("JOIN notcurrentinvite", v, e)
 	}
-	core.Timed.Binder.Time = fixedTime{saved.DecisionAt.Add(3 * time.Second)}
 	if _, e = core.Leave(ctx, b, gop()); e != nil {
 		t.Fatal(e)
 	}
-	core.Timed.Binder.Time = fixedTime{saved.DecisionAt.Add(4 * time.Second)}
 	if _, e = core.Dissolve(ctx, a, gop()); e != nil {
 		t.Fatal(e)
 	}

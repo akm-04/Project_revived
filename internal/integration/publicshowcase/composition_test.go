@@ -180,6 +180,15 @@ func Test6BCoherentCompositionPrivacyMetricsAndCurrentDetail(t *testing.T) {
 	if out["show_case"].([6]map[string]any)[5] == nil {
 		t.Fatal("missinghole")
 	}
+	system, e := read(b, b.PlayerID, 6)
+	if e != nil {
+		t.Fatal(e)
+	}
+	for _, k := range []string{"show_case", "show_types", "praise_num", "open_functions", "player_info"} {
+		if _, ok := system[k]; !ok {
+			t.Fatal("SYSTEM would clear basiccache", k)
+		}
+	}
 	choices, e := s.Read(ctx, a, app.ReadRequest{MID: 1840}, op())
 	if e != nil {
 		t.Fatal(e)
