@@ -14,7 +14,14 @@ import (
 // existing owner store. No Player-domain SQL is introduced here.
 type DisplayReader struct {
 	Store   Store
-	Content app.Content
+	Content DisplayContent
+}
+
+// Preserve the accepted Character immutable kind provenance; current display
+// policy still supplies the caller-pinned beforeAwaken mapping.
+type DisplayContent interface {
+	app.Content
+	HeroKindTx(context.Context, tx.Queryer, string, int64) (character.HeroKind, error)
 }
 
 func (r DisplayReader) PrepareDisplayHeroesTx(c context.Context, t tx.Tx, pid identity.PlayerID) error {
@@ -55,8 +62,12 @@ func (r DisplayReader) ReadDisplayHeroesTx(c context.Context, q tx.Queryer, pid 
 		for _, tmpl := range p.HeroTemplates {
 			if tmpl.TableID == h.TableID {
 				f.BeforeAwaken = tmpl.BeforeAwaken
-				f.Super = tmpl.Kind == string(character.SuperHero)
-				f.Awakened = tmpl.Kind == string(character.NormalHero) && tmpl.BeforeAwaken > 0
+				kind, e := r.Content.HeroKindTx(c, q, h.CreationContentRevision, h.TableID)
+				if e != nil {
+					return nil, e
+				}
+				f.Super = kind == character.SuperHero
+				f.Awakened = kind == character.NormalHero && tmpl.BeforeAwaken > 0
 				found = true
 				break
 			}

@@ -7,6 +7,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"gxb.local/backend/v2/internal/adapters/blobstore"
 	pg "gxb.local/backend/v2/internal/adapters/postgres"
 	"gxb.local/backend/v2/internal/adapters/postgres/contentstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/i5store"
@@ -99,6 +100,9 @@ func TestDisplayActualAPIAndRelocatedDatabaseRestore(t *testing.T) {
 	origin := "http://" + addr
 	targetDSN := os.Getenv("GXB_I7B6A_DSN")
 	assets := t.TempDir()
+	if _, e := blobstore.NewLocal(assets); e != nil {
+		t.Fatal(e)
+	}
 	start := func() *osexec.Cmd {
 		cmd := osexec.Command(binary)
 		cmd.Env = append(os.Environ(), "GXB_POSTGRES_DSN="+targetDSN, "GXB_HTTP_ADDR="+addr, "GXB_PUBLIC_ENGINE_URL="+origin+"/engine", "GXB_REALTIME_PUBLIC_HOST=127.0.0.1", "GXB_REALTIME_PUBLIC_PORT=19001", "GXB_CREDENTIAL_DIGEST_SECRET=i7b2b-fixture-digest-key-00001", "GXB_GAMEPLAY_BEARER_SECRET=i7b2b-fixture-bearer-key-00001", "GXB_REDEEM_DIGEST_SECRET=i7b5b-fixture-redeem-key-00001", "GXB_DERIVATION_KEY_ID=i7b2b-native", "GXB_PROFILE_MEDIA_ROOT="+assets, "GXB_PROFILE_MEDIA_PUBLIC_ORIGIN="+origin)

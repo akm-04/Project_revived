@@ -73,6 +73,10 @@ func TestDisplayCanonicalCharacterEligibilityAndDestructionRace(t *testing.T) {
 	if _, e = s.Execute(ctx, a, cmd(super, 3), op()); e != nil {
 		t.Fatal("super star2", e)
 	}
+	exec(t, p, `UPDATE player_heroes SET color=7,state_version=state_version+1 WHERE player_id=$1 AND partner_id=2`, int64(a.PlayerID))
+	if _, e = s.Execute(ctx, a, cmd(super, 2), op()); e != nil {
+		t.Fatal("source purple Super also in category2", e)
+	}
 	if _, e = s.Execute(ctx, a, cmd(awaken, 4), op()); e != nil {
 		t.Fatal("awaken sourcefirstid", e)
 	}

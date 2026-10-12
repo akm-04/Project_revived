@@ -60,7 +60,7 @@ func (s Service) eligible(c context.Context, t tx.Queryer, pid identity.PlayerID
 			for _, skin := range h.Skins {
 				skins[skin] = true
 			}
-			if v.Type == 2 && ((category == 2 && !h.Super && (h.TableID == v.PartnerID && h.Color >= 7 || h.Awakened && h.BeforeAwaken == v.PartnerID)) || (category == 3 && h.Super && h.Star >= 2 && h.TableID == v.PartnerID)) || v.Type == 3 && h.Awakened && h.TableID == v.PartnerID {
+			if v.Type == 2 && ((category == 2 && (h.TableID == v.PartnerID && h.Color >= 7 || h.Awakened && h.BeforeAwaken == v.PartnerID)) || (category == 3 && h.Super && h.Star >= 2 && h.TableID == v.PartnerID)) || v.Type == 3 && h.Awakened && h.TableID == v.PartnerID {
 				matched = append(matched, h)
 			}
 		}
