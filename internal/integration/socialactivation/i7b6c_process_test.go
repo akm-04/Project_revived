@@ -8,6 +8,7 @@ import (
 	"gxb.local/backend/v2/internal/protocol/amf3"
 	"gxb.local/backend/v2/internal/protocol/mids"
 	"os"
+	"path/filepath"
 	"syscall"
 	"testing"
 	"time"
@@ -32,7 +33,7 @@ func Test6CActualProcessesFreshSendSearchImmutableDMReconnectPrivacy(t *testing.
 		t.Fatal("exact combined candidate API/realtime binaries required")
 	}
 	api, world := freeAddr(t), freeAddr(t)
-	t.Setenv("GXB_PROFILE_MEDIA_ROOT", t.TempDir())
+	t.Setenv("GXB_PROFILE_MEDIA_ROOT", filepath.Join(t.TempDir(), "private-media"))
 	t.Setenv("GXB_PROFILE_MEDIA_PUBLIC_ORIGIN", "http://"+api)
 	startProcess(t, apiBin, api, world)
 	realtime := startProcess(t, rtBin, api, world)

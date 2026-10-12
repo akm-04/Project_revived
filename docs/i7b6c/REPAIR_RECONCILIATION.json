@@ -1,0 +1,17 @@
+{
+  "failure": "F1newprocess test suppliedGoTempDir leaf asprivateblobroot; group/otherpermissions forbidden byacceptedblobstore.privateDir",
+  "changed_files": [
+    "internal/integration/socialactivation/i7b6c_process_test.go"
+  ],
+  "repair": "Useprivate-media subdirectory, created0700 byunalteredblobstore.NewLocal. No productcode/schema/configpolicy/toolpin/assertion relaxed. Freshfixture alsoexplicitlyinitializesbuiltin/River.",
+  "product_code_changed": false,
+  "test_subject_changed": true,
+  "F1_reuse": [
+    "API/realtime builds: runtime source/dependencies unchanged",
+    "Five6C nativecases andschema47payloadrestore: filesandbehavior unchanged"
+  ],
+  "rerun": [
+    "Correctedprocesscase fromexactF2; remainingpendingregression/vet/static/security fromF2"
+  ],
+  "parent_acceptance": "Stillblockedbyactualrequiredproviders; no gatewaiver"
+}
