@@ -301,7 +301,7 @@ func (s CommentService) proof(c context.Context, t tx.Queryer, a identity.ActorC
 	}
 	return out, true, nil
 }
-func (s CommentService) row(c context.Context, t tx.Queryer, f d.Comment) (CommentRow, error) {
+func (s CommentService) row(c context.Context, t tx.Queryer, f d.Comment, rev string, at time.Time) (CommentRow, error) {
 	if f.Validate() != nil || f.DeletedAt != nil {
 		return CommentRow{}, ErrInvalid
 	}
@@ -321,7 +321,11 @@ func (s CommentService) row(c context.Context, t tx.Queryer, f d.Comment) (Comme
 	if f.HasPraised {
 		bit = 1
 	}
-	return CommentRow{ID: f.ID, Owner: f.Target, Author: Author{PlayerID: int64(f.Author), Name: basis.Profile.DisplayName, Avatar: basis.Profile.AvatarID, Frame: basis.Profile.AvatarFrameID, Level: basis.Progression.Level, Region: int32(srv)}, Content: f.Content, PraiseCount: f.PraiseCount, HasPraised: bit}, nil
+	author, e := s.Base.author(c, t, basis, rev, at, srv)
+	if e != nil {
+		return CommentRow{}, e
+	}
+	return CommentRow{ID: f.ID, Owner: f.Target, Author: author, Content: f.Content, PraiseCount: f.PraiseCount, HasPraised: bit}, nil
 }
 
 // ObserveCommentsTx is a typed provider for6. Its caller supplies privacy,
@@ -360,7 +364,7 @@ func (s CommentService) ObserveCommentsTx(c context.Context, sc tx.Scope, target
 		if f.CreatedVersion > out.RootVersion {
 			return out, ErrInvalid
 		}
-		r, e := s.row(c, sc.Tx, f)
+		r, e := s.row(c, sc.Tx, f, rev, at)
 		if e != nil {
 			return out, e
 		}
@@ -378,7 +382,7 @@ func (s CommentService) ObserveCommentsTx(c context.Context, sc tx.Scope, target
 		if f.CreatedVersion > out.RootVersion {
 			return out, ErrInvalid
 		}
-		r, e := s.row(c, sc.Tx, f)
+		r, e := s.row(c, sc.Tx, f, rev, at)
 		if e != nil {
 			return out, e
 		}
@@ -414,7 +418,7 @@ func (s CommentService) currentResult(c context.Context, sc tx.Scope, a identity
 			return out, e
 		}
 		if ok && f.DeletedAt == nil {
-			row, e := s.row(c, sc.Tx, f)
+			row, e := s.row(c, sc.Tx, f, rev, at)
 			if e != nil {
 				return out, e
 			}

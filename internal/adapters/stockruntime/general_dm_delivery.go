@@ -44,7 +44,15 @@ func GeneralCompletionUpper(start, end time.Time, elapsed time.Duration) (time.T
 	return upper, nil
 }
 func generalPayload(i dm.Intent) (*amf3.Object, error) {
-	np, e := json.Marshal(map[string]any{"title_info": "@@@@", "bubble_info": "10001@0", "conquer_lev": i.SenderConquerLevel, "conquer_loop_id": i.SenderConquerLoopID})
+	title, bubble := i.SenderTitleInfo, i.SenderBubbleInfo
+	// Absent fields retain the historic creation-time default, without a current read.
+	if title == "" {
+		title = "@@@@"
+	}
+	if bubble == "" {
+		bubble = "10001@0"
+	}
+	np, e := json.Marshal(map[string]any{"title_info": title, "bubble_info": bubble, "conquer_lev": i.SenderConquerLevel, "conquer_loop_id": i.SenderConquerLoopID})
 	if e != nil {
 		return nil, e
 	}

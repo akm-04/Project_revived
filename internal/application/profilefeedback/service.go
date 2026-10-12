@@ -75,6 +75,7 @@ type Service struct {
 	Receipts   receipt.Store
 	Recipients playerroot.RecipientReader
 	Authors    i5.PublicPlayerBasisReader
+	Display    i5.TxEffectivePlayerDisplayReader
 }
 
 func receiptIdentity(a identity.ActorContext, o operation.Context) receipt.Identity {
@@ -387,7 +388,11 @@ func (s Service) List(c context.Context, a identity.ActorContext, q PageRequest,
 			if e != nil || basis.Validate() != nil || basis.Profile.PlayerID != f.Actor {
 				return ErrProvider
 			}
-			out.Rows = append(out.Rows, Row{Author: Author{PlayerID: int64(f.Actor), Name: basis.Profile.DisplayName, Avatar: basis.Profile.AvatarID, Frame: basis.Profile.AvatarFrameID, Level: basis.Progression.Level, Region: int32(srv)}, PraiseTime: f.FirstAt.Unix()})
+			author, e := s.author(c, sc.Tx, basis, rev, at, srv)
+			if e != nil {
+				return e
+			}
+			out.Rows = append(out.Rows, Row{Author: author, PraiseTime: f.FirstAt.Unix()})
 		}
 		return nil
 	})

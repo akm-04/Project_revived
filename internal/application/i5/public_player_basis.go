@@ -34,6 +34,11 @@ type PublicPlayerBasisReader interface {
 	ReadPublicPlayerBasisTx(context.Context, tx.Queryer, identity.PlayerID) (PublicPlayerBasis, error)
 }
 
+// Canonical bounded name selection happens before derived row enrichment.
+type PublicPlayerNameReader interface {
+	ReadPlayerIDsByExactNameTx(context.Context, tx.Queryer, string, int) ([]identity.PlayerID, error)
+}
+
 // Effective display is a narrow typed Player owner observation; callers pin
 // revision and instant in their existing coherent transaction.
 type EffectivePlayerDisplay struct {

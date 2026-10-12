@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"errors"
+	"gxb.local/backend/v2/internal/domain/player"
 	"strings"
 	"time"
 	"unicode/utf8"
@@ -94,6 +95,9 @@ type Intent struct {
 	LastObservedAt      time.Time
 	AttemptCommittedAt  *time.Time
 	CompletionUpper     *time.Time
+	// Empty fields are omitted to preserve the exact legacy payload digest. Never backfill.
+	SenderTitleInfo  string `json:",omitempty"`
+	SenderBubbleInfo string `json:",omitempty"`
 }
 
 func ValidateMessage(s string) error {
@@ -103,6 +107,9 @@ func ValidateMessage(s string) error {
 	return nil
 }
 func (i Intent) Validate() error {
+	if i.SenderTitleInfo != "" && !player.ValidateChatCosmeticString(i.SenderTitleInfo, true) || i.SenderBubbleInfo != "" && !player.ValidateChatCosmeticString(i.SenderBubbleInfo, false) {
+		return ErrInvalid
+	}
 	if i.ID == "" || len(i.Digest) != 64 || i.Sender < 1 || i.Recipient < 1 || i.Sender == i.Recipient || i.AcceptedAt.IsZero() || i.ExpiresAt.Sub(i.AcceptedAt) != IntentLifetime || i.BlockVersion < 0 || i.StateVersion < 1 || i.ClaimGeneration < 0 || !i.StatusValid() {
 		return ErrInvalid
 	}

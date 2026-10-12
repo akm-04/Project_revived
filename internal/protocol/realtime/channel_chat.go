@@ -7,6 +7,7 @@ import (
 	"gxb.local/backend/v2/internal/protocol/mids"
 	"io"
 	"math"
+	"strconv"
 	"strings"
 	"unicode/utf8"
 )
@@ -145,11 +146,13 @@ func ValidateOrdinaryChannelChat(v any) error {
 		}
 		switch k {
 		case "title_info":
-			if value != "@@@@" {
+			text, ok := value.(string)
+			if !ok || !validChatCosmeticString(text, true) {
 				return ErrInvalidS2CPayload
 			}
 		case "bubble_info":
-			if value != "10001@0" {
+			text, ok := value.(string)
+			if !ok || !validChatCosmeticString(text, false) {
 				return ErrInvalidS2CPayload
 			}
 		case "conquer_lev", "conquer_loop_id":
@@ -179,4 +182,26 @@ func ValidateOrdinaryChannelChat(v any) error {
 // IsExactChatNumber is used by the canonical presentation adapter before conversion to AMF double.
 func IsExactChatNumber(n int64) bool {
 	return n >= -MaxExactWireInteger && n <= MaxExactWireInteger && !math.IsInf(float64(n), 0)
+}
+
+// The protocol boundary validates transport grammar independently of gameplay.
+func validChatCosmeticString(s string, title bool) bool {
+	if title && s == "@@@@" {
+		return true
+	}
+	parts := strings.Split(s, "@")
+	n := 2
+	if title {
+		n = 3
+	}
+	if len(parts) != n {
+		return false
+	}
+	for i, p := range parts {
+		v, e := strconv.ParseInt(p, 10, 64)
+		if e != nil || v < 0 || v > MaxExactWireInteger || strconv.FormatInt(v, 10) != p || i == 0 && v == 0 {
+			return false
+		}
+	}
+	return true
 }

@@ -1,0 +1,22 @@
+{
+  "stage": "I7B-6C",
+  "research_ready": true,
+  "criteria": {
+    "selected_scope_mapped": true,
+    "existing_owner_ports_traced": true,
+    "wire_time_recovery_rules_recovered_or_explicitly_bounded": true,
+    "source_consumers_and_old_V1_disposition": true,
+    "provider_residual_routes_retained": true,
+    "concrete_plan_and_required_proof": true
+  },
+  "Q07": "Closed design: canonical typed fallback, canonical candidate selection, atomically recovered rename feed. Timed expiry observed every read, not version-only.",
+  "Q08": "Closed design: future-only optional omitempty snapshot extension preserving legacy JSON hash and immutable committed payload. No migration/backfill.",
+  "bounded_unknowns": [
+    "Original-server cosmetic optional-emission semantics not runtime established",
+    "Inherited6B required actual producer qualifications absent",
+    "Current/old source has mixed older Player/Guild models; preserve qualifiedMID188/current social shape rather than widening from older model alone"
+  ],
+  "historical": "Old MessageManager corroborates metadata delimiters; V1 chat/stub.py has no semantic chat implementation and cannot qualify provider values",
+  "implementation_boundary": "Consumer components ready; full activated rich-profile integration remains partial until qualified required providers",
+  "product_tests": "NOT_RUN_RESEARCH_DESIGN_ONLY"
+}

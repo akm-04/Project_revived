@@ -1,0 +1,40 @@
+{
+  "findings": [
+    {
+      "failure": "unused Guild presence binding variables after moving view into caller transaction",
+      "repair": "Removed obsolete composition variables only"
+    },
+    {
+      "failure": "Protocol layer imported domain cosmetic validator",
+      "repair": "Protocol validates transport grammar locally, preserving I0 layer matrix; no exception"
+    },
+    {
+      "failure": "I7A5A static composition asserted pre-I7B directory/type reads directly in channel adapter",
+      "repair": "Existing assertion now validates current typed publicpresentation caller-queryer bridge, preserves auth/time/foreignSQL/nestedTx bans"
+    },
+    {
+      "source_correction": "Title unique_id0 is source-visible and accepted6A-valid",
+      "repair": "Allow0 unique ID while retaining positive title/bubble and exact numeric grammar"
+    },
+    {
+      "design_refinement": "Discovery selector initially enriched cosmetics before Social batch, causing needless second clock/revision observation",
+      "repair": "Canonical name selector only returns exact typed name candidates; I4 registered identity check then existing single batch does final mutable display enrichment"
+    }
+  ],
+  "tests": [
+    "working-compile-unit.log",
+    "working-native-freshness.log",
+    "working-native-guild-feedback.log",
+    "working-native-repair-restore.log",
+    "working-architecture.log",
+    "working-ownership.log"
+  ],
+  "not_run": [
+    "Exact new API/realtime process case; reservedforfrozenqualification",
+    "Frozencombinedfinalcandidate suite"
+  ],
+  "new_durable_contracts": [
+    "I7B6C_SENDER_SNAPSHOT_EXTENSION"
+  ],
+  "why_contract_is_new": "Actual persistent future Intent JSON representation changed. This applied forward extension is required by existing6C C13 and immutable381 contract, not extra design machinery. Publish via existing registry/harvest only after reconciliation."
+}

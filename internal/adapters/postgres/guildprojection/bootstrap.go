@@ -6,8 +6,9 @@ import (
 	"time"
 
 	guildproj "gxb.local/backend/v2/internal/adapters/guildwire"
+	"gxb.local/backend/v2/internal/adapters/postgres/contentstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/guildstore"
-	"gxb.local/backend/v2/internal/adapters/postgres/i4store"
+	"gxb.local/backend/v2/internal/adapters/publicpresentation"
 	appboot "gxb.local/backend/v2/internal/application/bootstrap"
 	"gxb.local/backend/v2/internal/application/guildview"
 	"gxb.local/backend/v2/internal/domain/identity"
@@ -30,9 +31,13 @@ func (BootstrapProjection) OverlayMID1(ctx context.Context, q tx.Queryer, actor 
 	if !ok {
 		return errors.New("guild bootstrap: MID17 frozen baseline missing")
 	}
+	rev, err := (contentstore.Store{}).ActiveRevision(ctx, q)
+	if err != nil {
+		return err
+	}
 	view := guildview.Service{
 		Store:     guildstore.Store{Queryer: q},
-		Directory: i4store.PlayerDirectoryReader{Queryer: q},
+		Directory: publicpresentation.Reader{Queryer: q, Revision: rev, ObservedAt: observedAt},
 	}
 	self, member, err := view.Self(ctx, actor)
 	if err != nil {

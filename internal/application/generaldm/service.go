@@ -164,7 +164,12 @@ func (s Service) Accept(c context.Context, sender, recipient int64, message stri
 				return ErrAdmissionRetired
 			}
 		}
-		b, e := s.Presentation.ReadManyTx(c, sc.Tx, []identity.PlayerID{identity.PlayerID(sender)})
+		var b playerpresentation.Batch
+		if atReader, ok := s.Presentation.(playerpresentation.TxReaderAt); ok {
+			b, e = atReader.ReadManyAtTx(c, sc.Tx, []identity.PlayerID{identity.PlayerID(sender)}, sc.Operation.DecisionAt())
+		} else {
+			b, e = s.Presentation.ReadManyTx(c, sc.Tx, []identity.PlayerID{identity.PlayerID(sender)})
+		}
 		if e != nil {
 			return e
 		}
@@ -173,7 +178,7 @@ func (s Service) Accept(c context.Context, sender, recipient int64, message stri
 			return ErrUnavailable
 		}
 		m := p.Minimal
-		out = Intent{ID: op.ID.String(), Digest: digest, Sender: sender, Recipient: recipient, Message: message, SenderName: m.Name, SenderType: m.PlayerType, SenderAvatarID: m.AvatarID, SenderAvatarFrameID: m.AvatarFrameID, SenderLevel: m.Level, SenderConquerLevel: m.ConquerLevel, SenderConquerLoopID: m.ConquerLoopID, AcceptedAt: sc.Operation.DecisionAt(), ExpiresAt: sc.Operation.DecisionAt().Add(IntentLifetime), BlockVersion: version, Bindings: bindings, Status: Pending, StateVersion: 1, LastObservedAt: at}
+		out = Intent{ID: op.ID.String(), Digest: digest, Sender: sender, Recipient: recipient, Message: message, SenderTitleInfo: m.TitleInfo, SenderBubbleInfo: m.BubbleInfo, SenderName: m.Name, SenderType: m.PlayerType, SenderAvatarID: m.AvatarID, SenderAvatarFrameID: m.AvatarFrameID, SenderLevel: m.Level, SenderConquerLevel: m.ConquerLevel, SenderConquerLoopID: m.ConquerLoopID, AcceptedAt: sc.Operation.DecisionAt(), ExpiresAt: sc.Operation.DecisionAt().Add(IntentLifetime), BlockVersion: version, Bindings: bindings, Status: Pending, StateVersion: 1, LastObservedAt: at}
 		if out.Validate() != nil {
 			return ErrInvalid
 		}

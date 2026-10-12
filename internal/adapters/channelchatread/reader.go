@@ -5,9 +5,10 @@ import (
 	"context"
 	"errors"
 	"gxb.local/backend/v2/internal/adapters/postgres"
+	"gxb.local/backend/v2/internal/adapters/postgres/contentstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/guildprojection"
 	"gxb.local/backend/v2/internal/adapters/postgres/i4store"
-	"gxb.local/backend/v2/internal/adapters/postgres/i5store"
+	"gxb.local/backend/v2/internal/adapters/publicpresentation"
 	"gxb.local/backend/v2/internal/application/channelchat"
 	"gxb.local/backend/v2/internal/application/playerpresentation"
 	apprealtime "gxb.local/backend/v2/internal/application/realtimeauth"
@@ -45,7 +46,11 @@ func (Reader) ObserveTx(ctx context.Context, t tx.Tx, a apprealtime.Admission, p
 	if !prepare {
 		return channelchat.Observation{At: now}, nil
 	}
-	value, ok, err := (playerpresentation.Service{Directory: i4store.PlayerDirectoryReader{Queryer: t}, Types: i5store.Store{Queryer: t}}).Read(ctx, actor.PlayerID)
+	rev, err := (contentstore.Store{}).ActiveRevision(ctx, t)
+	if err != nil {
+		return channelchat.Observation{}, err
+	}
+	value, ok, err := (publicpresentation.Reader{Queryer: t, Revision: rev, ObservedAt: now}).Minimal(ctx, actor.PlayerID)
 	if err != nil {
 		return channelchat.Observation{}, err
 	}

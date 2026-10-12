@@ -6,6 +6,7 @@ import (
 
 	"gxb.local/backend/v2/internal/application/playerdirectory"
 	"gxb.local/backend/v2/internal/domain/identity"
+	"gxb.local/backend/v2/internal/domain/player"
 )
 
 var ErrInvalidMinimalPresentation = errors.New("invalid minimal player presentation")
@@ -25,9 +26,14 @@ type Minimal struct {
 	ConquerLevel  int64
 	ConquerLoopID int64
 	PlayerType    int64
+	TitleInfo     string
+	BubbleInfo    string
 }
 
 func (m Minimal) Validate() error {
+	if m.TitleInfo != "" && !player.ValidateChatCosmeticString(m.TitleInfo, true) || m.BubbleInfo != "" && !player.ValidateChatCosmeticString(m.BubbleInfo, false) {
+		return ErrInvalidMinimalPresentation
+	}
 	if !m.PlayerID.Valid() || m.Level < 1 || m.AvatarID < 0 || m.AvatarFrameID < 0 || m.ConquerLevel < 0 || m.ConquerLoopID < 0 {
 		return ErrInvalidMinimalPresentation
 	}

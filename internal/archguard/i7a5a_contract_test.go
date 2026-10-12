@@ -51,10 +51,20 @@ func TestI7A5ASelectedFiniteProductionComposition(t *testing.T) {
 		}
 	}
 	reader := read("internal/adapters/channelchatread/reader.go")
-	for _, w := range []string{"RealtimeAuthority{Queryer: t}", "RealtimeMembership{Queryer: t}", "PlayerDirectoryReader{Queryer: t}", "i5store.Store{Queryer: t}", "AuthoritativeTime{Queryer: t}"} {
+	for _, w := range []string{"RealtimeAuthority{Queryer: t}", "RealtimeMembership{Queryer: t}", "publicpresentation.Reader{Queryer: t, Revision: rev, ObservedAt: now}", "AuthoritativeTime{Queryer: t}"} {
 		if !strings.Contains(reader, w) {
 			t.Fatal("wrong callerTx port", w)
 		}
+	}
+	// I7B-6C applies the inherited D14 fallback through the same caller queryer.
+	bridge := read("internal/adapters/publicpresentation/reader.go")
+	for _, w := range []string{"Directory: i4store.PlayerDirectoryReader{Queryer: r.Queryer}", "Basis: i5store.Store{}", "ReadAtTx(c, r.Queryer, pid, r.Revision, r.ObservedAt)"} {
+		if !strings.Contains(bridge, w) {
+			t.Fatal("wrong canonical fallback caller binding", w)
+		}
+	}
+	if strings.Contains(bridge, "SELECT ") || strings.Contains(bridge, "Begin(") || strings.Contains(bridge, "Commit(") {
+		t.Fatal("canonical fallback foreignSQL/nestedtransaction")
 	}
 	if strings.Contains(reader, "SELECT ") || strings.Contains(reader, "Begin(") || strings.Contains(reader, "Commit(") {
 		t.Fatal("foreignSQL/nestedtransaction")

@@ -16,6 +16,7 @@ import (
 
 	"gxb.local/backend/v2/internal/adapters/generaldmbindings"
 	"gxb.local/backend/v2/internal/adapters/guildpolicybridge"
+	"gxb.local/backend/v2/internal/adapters/guildviewread"
 	"gxb.local/backend/v2/internal/adapters/postgres"
 	"gxb.local/backend/v2/internal/adapters/postgres/activitystore"
 	"gxb.local/backend/v2/internal/adapters/postgres/characterstore"
@@ -32,6 +33,7 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres/socialgiftstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/socialinboxstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/socialrelationstore"
+	"gxb.local/backend/v2/internal/adapters/publicpresentation"
 	"gxb.local/backend/v2/internal/adapters/socialpresentation"
 	"gxb.local/backend/v2/internal/adapters/stockruntime"
 	appactivity "gxb.local/backend/v2/internal/application/activitydirectory"
@@ -46,7 +48,6 @@ import (
 	"gxb.local/backend/v2/internal/application/generaldm"
 	appgeneration "gxb.local/backend/v2/internal/application/generation"
 	"gxb.local/backend/v2/internal/application/guildcore"
-	"gxb.local/backend/v2/internal/application/guildview"
 	appi5 "gxb.local/backend/v2/internal/application/i5"
 	appidentity "gxb.local/backend/v2/internal/application/identitylifecycle"
 	apppublication "gxb.local/backend/v2/internal/application/publication"
@@ -55,7 +56,6 @@ import (
 	"gxb.local/backend/v2/internal/application/socialfriendbase"
 	"gxb.local/backend/v2/internal/application/socialgift"
 	"gxb.local/backend/v2/internal/application/socialinbox"
-	"gxb.local/backend/v2/internal/application/socialpresence"
 	"gxb.local/backend/v2/internal/application/socialprojection"
 	"gxb.local/backend/v2/internal/application/socialrelation"
 	"gxb.local/backend/v2/internal/application/socialreload"
@@ -191,9 +191,7 @@ func main() {
 		Level: i5CrossOwner, Scalar: i5CrossOwner, LevelAndScalar: i5CrossOwner,
 		Receipts: receipts, ReceiptRead: kernelstore.Reader{Queryer: pool}, Policy: guildPolicy,
 	}
-	presenceDB := presencestore.Store{Queryer: pool}
-	presenceReader := socialpresence.Reader{Time: postgres.AuthoritativeTime{Queryer: pool}, Store: presenceDB}
-	guildView := guildview.Service{Store: guildDB, Directory: i4store.PlayerDirectoryReader{Queryer: pool}, Presence: presenceReader}
+	guildView := guildviewread.Reader{Runner: runner}
 	bootstrap := i4store.BootstrapService{
 		Runner: runner, Receipts: receipts, ReceiptReader: kernelstore.Reader{Queryer: pool},
 		DigestSecret: digestSecret, BearerSecret: bearerSecret, DerivationKeyID: keyID, BearerKeys: bearerKeys,
@@ -279,10 +277,10 @@ func main() {
 	}
 	socialRelationDB := socialrelationstore.Store{}
 	socialInboxDB := socialinboxstore.Store{}
-	socialPresentation := socialpresentation.TransactionReader{}
+	socialPresentation := socialpresentation.TransactionReader{Display: displayService}
 	socialCommands := socialrelation.Service{Timed: socialTimed, PlayerRoots: i4store.PlayerRootLocker{}, Store: socialRelationDB, Inbox: socialinbox.RelationService{Store: socialInboxDB}, Presentation: socialPresentation}
 	giftService := socialgift.Service{Timed: socialTimed, Reads: runner, Store: socialgiftstore.Store{}, Content: contentDB, Players: i4store.PlayerRootLocker{}, Relations: socialRelationDB, Privacy: socialrelation.FriendDMPrivacyProvider{Store: socialRelationDB}, Inbox: socialinbox.GiftService{Store: socialInboxDB}, NoticeEvidence: socialInboxDB, Grants: i5svc, Admission: authority, Fence: i5db}
-	socialReads := socialprojection.Service{Gifts: giftService, NoticePages: socialInboxDB, Runner: runner, PlayerRoots: i4store.PlayerRootLocker{}, Relations: socialRelationDB, Inbox: socialInboxDB, Directory: i4store.TransactionDiscoveryReader{}, Presentation: socialPresentation, Observer: socialPresentation}
+	socialReads := socialprojection.Service{Gifts: giftService, NoticePages: socialInboxDB, Runner: runner, PlayerRoots: i4store.PlayerRootLocker{}, Relations: socialRelationDB, Inbox: socialInboxDB, Directory: publicpresentation.DiscoveryReader{}, Presentation: socialPresentation, Observer: socialPresentation}
 	friendDM := frienddm.Service{Timed: socialTimed, Queryer: pool, Store: frienddmstore.Store{}, Players: i4store.PlayerRootLocker{}, Privacy: socialrelation.FriendDMPrivacyProvider{Store: socialRelationDB}, Observer: socialPresentation, Content: contentDB, Entitlement: appi5.EmoticonEntitlementReader{Store: i5db, Content: contentDB}, Owner: presencestore.Store{Queryer: pool}}
 	generalDM := generaldm.Service{Timed: socialTimed, Queryer: pool, Store: generaldmstore.Store{}, Bindings: generaldmbindings.Reader{}, Privacy: socialrelation.GeneralDMPrivacyProvider{Store: socialRelationDB}, Players: i4store.PlayerRootLocker{}, Presentation: socialPresentation, Observer: socialPresentation, Owner: presencestore.Store{Queryer: pool}}
 	mustRegister(513, stockruntime.GeneralDMDispatcher{Authority: authority, Service: generalDM, Slots: make(chan struct{}, 16), Emitter: postgres.GeneralDMWakeupEmitter{Pool: pool}})

@@ -199,6 +199,13 @@ func run() error {
 	if err != nil {
 		return err
 	}
+	displayRevision, err := (contentstore.Store{}).ActiveRevision(ctx, pool)
+	if err != nil {
+		return err
+	}
+	if _, err = (contentstore.Store{}).ReadPlayerDisplayCatalogTx(ctx, pool, displayRevision); err != nil {
+		return err
+	}
 	chatDispatcher, err := stockruntime.NewChannelChatDispatcher(connectionsRegistry, channelchat.Service{Runner: presenceRunner, Operations: presenceOperations, Reader: channelchatread.Reader{}}, stockruntime.RealtimePublisher{Registry: chatEvents, Limits: limits.Default()}, stockruntime.DefaultChannelChatPolicy(runtimePolicy.MaxConnections))
 	if err != nil {
 		return err

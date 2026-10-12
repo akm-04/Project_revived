@@ -67,7 +67,7 @@ func registerPublicProfileReads(c context.Context, p *pg.Pool, r tx.Runner, a re
 		return e
 	}
 	basic := app.BasicReader{Roots: app.RootService{Store: publicprofilestore.Store{}}, Players: i4store.PlayerRootLocker{}, Fence: i5store.Store{}, PlayerBasis: i5store.Store{}, Relations: socialrelationstore.Store{}, Content: content}
-	fb := feedback.Service{Roots: feedback.RootService{Store: profilefeedbackstore.Store{}}, Content: content, Recipients: i4store.PlayerRootLocker{}, Authors: i5store.Store{}}
+	fb := feedback.Service{Roots: feedback.RootService{Store: profilefeedbackstore.Store{}}, Content: content, Recipients: i4store.PlayerRootLocker{}, Authors: i5store.Store{}, Display: display}
 	bases := profileCharacterBases{characterhero.BaseObservationReader{Store: characterstore.Store{}, Content: content}, characterpet.BaseObservationReader{Store: characterstore.Store{}}}
 	records := app.UnavailableShowcaseRecords{}
 	reads := app.ReadService{Runner: r, Fresh: p, Time: pg.AuthoritativeTime{Queryer: p}, Content: content, Basic: basic, Display: display, Guilds: guildcore.PublicViewReader{Store: guildstore.Store{}, Invites: invite.Source}, Feedback: fb.Roots, Comments: feedback.CommentService{Base: fb, Store: profilefeedbackstore.Store{}}, Media: publicprofilestore.Store{}, Metrics: app.CanonicalCreationMetricProvider{Players: i5store.Store{}}, Slots: publicprofilestore.Store{}, Characters: characterasset.PublicShowcaseCharacterReader{OwnerComposite: &characterasset.OwnedCompositeBuilder{HeroBase: bases, PetBase: bases}}, Records: records}

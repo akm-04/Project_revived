@@ -248,7 +248,14 @@ func chatPayload(m playerpresentation.Minimal, message string, kind int64) (*amf
 			return nil, wireRT.ErrInvalidS2CPayload
 		}
 	}
-	np, err := json.Marshal(map[string]any{"title_info": "@@@@", "bubble_info": "10001@0", "conquer_lev": m.ConquerLevel, "conquer_loop_id": m.ConquerLoopID})
+	title, bubble := m.TitleInfo, m.BubbleInfo
+	if title == "" {
+		title = "@@@@"
+	}
+	if bubble == "" {
+		bubble = "10001@0"
+	}
+	np, err := json.Marshal(map[string]any{"title_info": title, "bubble_info": bubble, "conquer_lev": m.ConquerLevel, "conquer_loop_id": m.ConquerLoopID})
 	if err != nil {
 		return nil, err
 	}
