@@ -45,3 +45,9 @@ WHERE owner_kind = $1
   AND domain = $3
   AND operation = $4
   AND semantic_key = $5;
+
+-- name: ListOperationReceiptIdentities :one
+SELECT COALESCE(jsonb_agg(jsonb_build_object('OwnerKind',owner_kind,'OwnerKey',owner_key,'Domain',domain,'Operation',operation,'SemanticKey',semantic_key) ORDER BY semantic_key,owner_key),'[]'::jsonb)::text
+FROM (SELECT owner_kind,owner_key,domain,operation,semantic_key FROM gxb_operation_receipts
+      WHERE domain=$1 AND operation=$2 AND semantic_key>$3
+      ORDER BY semantic_key,owner_key LIMIT 256) r;

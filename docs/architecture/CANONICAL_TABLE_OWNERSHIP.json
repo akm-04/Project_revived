@@ -2343,6 +2343,34 @@
         "internal/adapters/postgres/profilefeedbackstore/"
       ],
       "write_exceptions": []
+    },
+    "player_public_profile_media_history": {
+      "owner": "public-profile",
+      "migration": "migrations/00046_i7b5b_profile_media.sql",
+      "allowed_query_owners": [
+        "public-profile"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/publicprofilestore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/publicprofilestore/"
+      ],
+      "write_exceptions": []
+    },
+    "player_public_profile_media_current": {
+      "owner": "public-profile",
+      "migration": "migrations/00046_i7b5b_profile_media.sql",
+      "allowed_query_owners": [
+        "public-profile"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/publicprofilestore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/publicprofilestore/"
+      ],
+      "write_exceptions": []
     }
   }
 }

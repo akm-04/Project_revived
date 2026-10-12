@@ -2,7 +2,7 @@
 package kernelqueries
 
 // SourceSHA256 is the exact owner query-source hash.
-const SourceSHA256 = "74ad9accee063e77323a2eb4a69df394bdcb331ce88e3d789864ffbc904b7511"
+const SourceSHA256 = "60983c2ab37b14e04c005975449c770fc52a1da4fe0e153363d343a242ea554b"
 
 const InsertOperationReceipt = `WITH ins AS (
     INSERT INTO gxb_operation_receipts (
@@ -46,3 +46,8 @@ WHERE owner_kind = $1
   AND domain = $3
   AND operation = $4
   AND semantic_key = $5;`
+
+const ListOperationReceiptIdentities = `SELECT COALESCE(jsonb_agg(jsonb_build_object('OwnerKind',owner_kind,'OwnerKey',owner_key,'Domain',domain,'Operation',operation,'SemanticKey',semantic_key) ORDER BY semantic_key,owner_key),'[]'::jsonb)::text
+FROM (SELECT owner_kind,owner_key,domain,operation,semantic_key FROM gxb_operation_receipts
+      WHERE domain=$1 AND operation=$2 AND semantic_key>$3
+      ORDER BY semantic_key,owner_key LIMIT 256) r;`

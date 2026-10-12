@@ -354,6 +354,10 @@ func main() {
 	for _, mid := range []uint16{26, 81, 161, 230, 368, 369, 370, 2736} {
 		mustRegister(mid, i5d)
 	}
+	mediaHandler, err := registerProfileMedia(ctx, pool, runner, authority, receipts, contentDB, router, cfg.ProfileMediaRoot, cfg.ProfileMediaPublicOrigin)
+	if err != nil {
+		log.Fatalf("Profile media startup: %v", err)
+	}
 	admission, err := httpedge.NewAdmission(256)
 	if err != nil {
 		log.Fatal(err)
@@ -362,7 +366,12 @@ func main() {
 		Limits: limits.Default(), Admission: admission,
 		Operations: operation.Factory{Clock: clock.System{}}, Router: router,
 	}
-	srv := &http.Server{Addr: cfg.HTTPAddr, Handler: h, ReadHeaderTimeout: 5 * time.Second, ReadTimeout: limits.StockMultipartHTTPTimeout + 5*time.Second, WriteTimeout: limits.StockMultipartHTTPTimeout + 5*time.Second, IdleTimeout: 60 * time.Second}
+	mux := http.NewServeMux()
+	mux.Handle("/", h)
+	if mediaHandler != nil {
+		mux.Handle("/profile-media/", mediaHandler)
+	}
+	srv := &http.Server{Addr: cfg.HTTPAddr, Handler: mux, ReadHeaderTimeout: 5 * time.Second, ReadTimeout: limits.StockMultipartHTTPTimeout + 5*time.Second, WriteTimeout: limits.StockMultipartHTTPTimeout + 5*time.Second, IdleTimeout: 60 * time.Second}
 	go func() {
 		<-ctx.Done()
 		shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
