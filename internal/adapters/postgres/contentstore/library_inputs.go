@@ -83,7 +83,7 @@ func (s Store) LibraryCatalogTx(ctx context.Context, q tx.Queryer, revision stri
 	if d.Decode(&extra) != io.EOF {
 		return out, library.ErrUnqualified
 	}
-	return payload.Domain(revision)
+	return libraryCatalogDomain(payload, revision)
 }
 
 func (s Store) LibraryInputsRevisionTx(ctx context.Context, q tx.Queryer, revision string) (bool, error) {
@@ -95,4 +95,49 @@ func (s Store) LibraryInputsRevisionTx(ctx context.Context, q tx.Queryer, revisi
 		return false, e
 	}
 	return manifestHasCapability([]byte(manifest), revision, "LIBRARY_INPUTS_I7C2B")
+}
+
+type libraryDomainPayload struct {
+	Templates          []library.TemplateRule          `json:"templates"`
+	Gifts              []library.GiftRule              `json:"gifts"`
+	Feeding            library.FeedRules               `json:"feeding"`
+	NormalCollections  []library.NormalCollectionRule  `json:"normal_collections"`
+	SpecialCollections []library.SpecialCollectionRule `json:"special_collections"`
+}
+
+func libraryCatalogDomain(payload builtin.LibraryInputCatalog, revision string) (library.Catalog, error) {
+	var out library.Catalog
+	if !library.ValidRevision(revision) || payload.Validate() != nil {
+		return out, library.ErrUnqualified
+	}
+	raw, e := json.Marshal(payload)
+	if e != nil {
+		return out, e
+	}
+	var c libraryDomainPayload
+	if e = json.Unmarshal(raw, &c); e != nil {
+		return out, e
+	}
+	if c.Feeding.Validate() != nil {
+		return out, library.ErrUnqualified
+	}
+	out = library.Catalog{ContentRevision: revision, Templates: map[int64]library.TemplateRule{}, Gifts: map[int64]library.GiftRule{}, Feeding: c.Feeding, NormalCollections: map[int64]library.NormalCollectionRule{}}
+	for _, r := range c.Templates {
+		out.Templates[r.TableID] = r
+	}
+	for _, r := range c.Gifts {
+		out.Gifts[r.ItemID] = r
+	}
+	for _, r := range c.NormalCollections {
+		r.QualityThresholds = append([]int64(nil), r.QualityThresholds...)
+		r.QualityHundredths = append([]int64(nil), r.QualityHundredths...)
+		r.StarThresholds = append([]int64(nil), r.StarThresholds...)
+		r.StarHundredths = append([]int64(nil), r.StarHundredths...)
+		out.NormalCollections[r.SourceID] = r
+	}
+	for i, r := range c.SpecialCollections {
+		r.RequiredSourceIDs = append([]int64(nil), r.RequiredSourceIDs...)
+		out.SpecialCollections[i] = r
+	}
+	return out, nil
 }
