@@ -187,7 +187,7 @@ func (s Service) SummonNormal(ctx context.Context, actor identity.ActorContext, 
 		if err != nil {
 			return err
 		}
-		if err := s.AcquisitionStore.InsertHeroTx(txctx, scope.Tx, h); err != nil {
+		if err := insertFreshHero(txctx, scope.Tx, s.AcquisitionStore, s.FreshFacets, h); err != nil {
 			return err
 		}
 		nextRoot, err := advanceRoot(root, 1, boundOp)
@@ -326,7 +326,7 @@ func (s Service) CreateVows(ctx context.Context, actor identity.ActorContext, ta
 		if err != nil {
 			return err
 		}
-		if err := s.AcquisitionStore.InsertHeroTx(txctx, scope.Tx, h); err != nil {
+		if err := insertFreshHero(txctx, scope.Tx, s.AcquisitionStore, s.FreshFacets, h); err != nil {
 			return err
 		}
 		nextRoot, err := advanceRoot(root, 1, boundOp)

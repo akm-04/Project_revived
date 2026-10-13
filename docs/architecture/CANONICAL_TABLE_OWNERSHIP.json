@@ -2437,6 +2437,72 @@
       "migration": "migrations/00033_i7a4a_social_foundation.sql",
       "owner": "social-relation",
       "write_exceptions": []
+    },
+    "content_library_input_catalogs": {
+      "allowed_query_owners": [
+        "content-registry"
+      ],
+      "allowed_read_paths": [
+        "sql/content/",
+        "internal/adapters/postgres/contentstore/",
+        "internal/adapters/postgres/contentqueries/"
+      ],
+      "allowed_write_paths": [
+        "sql/content/",
+        "internal/adapters/postgres/contentstore/",
+        "internal/adapters/postgres/contentqueries/"
+      ],
+      "migration": "migrations/00049_i7c2b_library_inputs.sql",
+      "owner": "content-registry",
+      "write_exceptions": []
+    },
+    "player_library_roots": {
+      "owner": "library-local-progression",
+      "migration": "migrations/00049_i7c2b_library_inputs.sql",
+      "allowed_query_owners": [
+        "library-local-progression"
+      ],
+      "allowed_write_paths": [
+        "sql/library/",
+        "internal/adapters/postgres/librarystore/"
+      ],
+      "allowed_read_paths": [
+        "sql/library/",
+        "internal/adapters/postgres/librarystore/"
+      ],
+      "write_exceptions": []
+    },
+    "player_library_heroes": {
+      "owner": "library-local-progression",
+      "migration": "migrations/00049_i7c2b_library_inputs.sql",
+      "allowed_query_owners": [
+        "library-local-progression"
+      ],
+      "allowed_write_paths": [
+        "sql/library/",
+        "internal/adapters/postgres/librarystore/"
+      ],
+      "allowed_read_paths": [
+        "sql/library/",
+        "internal/adapters/postgres/librarystore/"
+      ],
+      "write_exceptions": []
+    },
+    "player_library_admissions": {
+      "owner": "library-local-progression",
+      "migration": "migrations/00049_i7c2b_library_inputs.sql",
+      "allowed_query_owners": [
+        "library-local-progression"
+      ],
+      "allowed_write_paths": [
+        "sql/library/",
+        "internal/adapters/postgres/librarystore/"
+      ],
+      "allowed_read_paths": [
+        "sql/library/",
+        "internal/adapters/postgres/librarystore/"
+      ],
+      "write_exceptions": []
     }
   }
 }

@@ -21,7 +21,7 @@ from pathlib import Path
 from typing import Any, Iterable
 
 SCHEMA_VERSION = 1
-COMPILER_VERSION = "i7b6a-player-display"
+COMPILER_VERSION = "i7c2b-library-inputs"
 PARSER_VERSION = "lua-generated-v18-guild-invite"
 EXPECTED_SOURCE_ARCHIVE_SHA256 = "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
 SOURCE_PREFIX = "app-assets/output/assets/src_64/"
@@ -106,7 +106,21 @@ SOURCE_MANIFEST.append(('data/tables/title_system.lua','a91f9afa54ceba80d1fe752f
 SOURCE_MANIFEST.append(('data/tables/chat_bubble.lua','abed6a89251099b42345a6414265aceb6c70ed0099f4d8648386811dcb21f03e','PLAYER_DISPLAY_SOURCE_AUTHORITY'))
 SOURCE_MANIFEST.append(('data/tables/random_name.lua','bf47c258f7be691ee2bf15df19af0e8dfb0cf5a3f86945ec27d10edbf61854cc','PLAYER_DISPLAY_SOURCE_AUTHORITY'))
 
+
+# I7C-2B source-qualified minimum Library inputs; probability remains reconstruction.
+SOURCE_MANIFEST.append(('data/tables/library_feed_cost.lua','de45631b923b4c322cd5b83680ec5885fe42f4d0580665604b7f35bcf70aa4c1',"LIBRARY_INPUT_SOURCE_AUTHORITY"))
+SOURCE_MANIFEST.append(('data/tables/library_feed_attr.lua','ea208080fa6786401d646bd078702a7edf52bc637b147120c73479acd39379f9',"LIBRARY_INPUT_SOURCE_AUTHORITY"))
+SOURCE_MANIFEST.append(('data/tables/library_gift.lua','966f002c019df51058e41d8e839543d2e2fb61577c02c423084ce70257eb9adc',"LIBRARY_INPUT_SOURCE_AUTHORITY"))
+SOURCE_MANIFEST.append(('data/tables/library_amour.lua','3c607e4c878d1308822d8e8fb3e89a27718ef253915e8a5966df26ab3b187534',"LIBRARY_INPUT_SOURCE_AUTHORITY"))
+SOURCE_MANIFEST.append(('data/tables/collect_normal.lua','bfd1a9312035cf430e882d1fcda742f334f089acc6d5438a34e938d3bb43f142',"LIBRARY_INPUT_SOURCE_AUTHORITY"))
+SOURCE_MANIFEST.append(('data/tables/collect_special.lua','5c159c89f7ffcbfb698d9599539a897896ce0e9ab93e7d04875d012d59df509a',"LIBRARY_INPUT_SOURCE_AUTHORITY"))
+SOURCE_MANIFEST.append(('app/model/Library.lua','1830b7e7a5a5203dc7e9eea5bd505b5025b03b52454c69756e14549718962063',"LIBRARY_INPUT_SOURCE_AUTHORITY"))
+SOURCE_MANIFEST.append(('app/windows/LibraryFeedWindow.lua','f9d84b4fe134a63f697e9f0e58f768d5e803f2b827e68e0d85fc1675858ba69e',"LIBRARY_INPUT_SOURCE_AUTHORITY"))
+SOURCE_MANIFEST.append(('app/windows/HeroGiftBoxWindow.lua','d6065c3d601f582091546d77225c352be0ba83900d71fc294dbe26a7425a32c5',"LIBRARY_INPUT_SOURCE_AUTHORITY"))
+SOURCE_MANIFEST.append(('app/windows/WhiteAlbumWindow.lua','851a53f588b59d95cfe460f3399ab1a6904fff7714131c358f3c3a73910b6bb9',"LIBRARY_INPUT_SOURCE_AUTHORITY"))
+
 ENABLED_CAPABILITIES = [
+    "LIBRARY_INPUTS_I7C2B",
     "PLAYER_DISPLAY_I7B6A",
     "PUBLIC_PROFILE_SHOWCASE_SELECTION_I7B3A",
     "PUBLIC_PROFILE_PREFERENCES_I7B2B",
@@ -1864,7 +1878,51 @@ def build_artifacts(blobs: dict[str, SourceBlob], archive_sha256: str) -> dict[s
     words=profile_artifact["words"]
     names=[r["text"] for r in sorted(parse_generated_lua_table(blobs["data/tables/random_name.lua"].data),key=lambda r:int(r["id"])) if 2<=len(r["text"])<=16 and not any(w and w in r["text"] for w in words)][:12]
     display_artifact=dict(hero_templates=[dict(table_id=r["table_id"],before_awaken=r["first_table_id"],kind=r["hero_kind"])for r in hero_artifact["templates"]],schema_version=1,policy_id="PLAYER_DISPLAY_V1",rename_cost=100,default_avatar=110001001,default_frame=120001001,default_bubble=10001,cosmetics=cosmetics,names=names,words=words,collection=[110007026,110007027,110007043,110007049])
+    # Minimum Library providers, distinct from full Library gameplay/title grants.
+    def decimal100(raw):
+        value=Decimal(raw)*100
+        if value != value.to_integral_value(): raise CompileError("Library source precision exceeds selected hundredths")
+        return int(value)
+    def pipe_ints(raw): return [int(x) for x in raw.split("|")] if raw else []
+    library_templates=[]
+    for core in hero_artifact["templates"]:
+        table_id=core["table_id"]
+        keys,rows=(super_keys,super_rows) if core["hero_kind"]=="SUPER" else (partner_keys,partner_rows)
+        values=rows[table_id]
+        def field(name): return indexed_field(keys,values,name,row_id=table_id) or "0"
+        first=int(field("first_table_id"))
+        relationship_id=first if first>0 else table_id
+        origin_values=rows.get(relationship_id)
+        if origin_values is None: raise CompileError("Library relationship source row absent")
+        like=int(indexed_field(keys,origin_values,"gift_like_type",row_id=relationship_id) or "0")
+        dislike=int(indexed_field(keys,origin_values,"gift_dislike_type",row_id=relationship_id) or "0")
+        enabled=int(field("is_open_dialog"))
+        if enabled not in [0,1]: raise CompileError("Library dialog eligibility shape")
+        library_templates.append(dict(table_id=table_id,relationship_source_id=relationship_id,collection_source_id=core["origin_table_id"] if core["hero_kind"]=="NORMAL" else table_id,dialog_enabled=bool(enabled),gift_like_type=like,gift_dislike_type=dislike))
+    items_by_id={int(x["id"]):x for x in items}
+    library_gifts=[]
+    for row in parse_generated_lua_table(blobs["data/tables/library_gift.lua"].data):
+        for item_id in pipe_ints(row["item"]):
+            library_gifts.append(dict(item_id=item_id,category=int(row["type"]),base_favor=int(items_by_id[item_id]["amour"]),ring=item_id==50001112))
+    library_gifts.sort(key=lambda x:x["item_id"])
+    normal=[]
+    for row in parse_generated_lua_table(blobs["data/tables/collect_normal.lua"].data):
+        normal.append(dict(source_id=int(row["id"]),attr_id=int(row["attr"]),quality_thresholds=pipe_ints(row["quality"]),quality_hundredths=[decimal100(x)for x in row["num"].split("|")],star_thresholds=pipe_ints(row["star"]),star_hundredths=[decimal100(x)for x in row["star_attr"].split("|")]))
+    special=[]
+    for row in parse_generated_lua_table(blobs["data/tables/collect_special.lua"].data):
+        special.append(dict(id=int(row["id"]),type=int(row["type"]),required_source_ids=pipe_ints(row["partner_id"]),contribution=dict(attr_id=int(row["content"]),hundredths=decimal100(row["num"]))))
+    axes=[]
+    for row in parse_generated_lua_table(blobs["data/tables/library_feed_attr.lua"].data):
+        axes.append(dict(attr_id=int(row["attr_type"]),cap=int(row["attr_limit"]),positive=pipe_ints(row["incr_span"]),negative=pipe_ints(row["decr_span"])))
+    methods=[]
+    for row in parse_generated_lua_table(blobs["data/tables/library_feed_cost.lua"].data):
+        methods.append(dict(id=int(row["id"]),cost_type=int(row["cost_type"]),cost=int(row["cost"]),initial_rates=pipe_ints(row["init_rate"]),change_step_percent=int(row["rate_change_step"]),negative_step_bp=decimal100(row["progress_rate_change"])))
+    if misc_int("library_favor_limit")!=2000 or misc_int("library_gift_right")!=5 or misc_by_key["library_gift_wrong"]!="-3": raise CompileError("Library favor preservation profile source drift")
+    favor_rows=parse_generated_lua_table(blobs["data/tables/library_amour.lua"].data)
+    if len(normal)!=132 or len(special)!=23 or any(x["type"]!=1 for x in special) or len(library_gifts)!=10: raise CompileError("Library selected source counts/shape drift")
+    library_artifact=dict(schema_version=1,seed_policy_id="LIBRARY_NEUTRAL_SEED_V1",feed_policy_id="LIBRARY_FEED_RECONSTRUCTION_V1",original_server_probability_recovered=False,favor_limit=2000,templates=library_templates,gifts=library_gifts,feeding=dict(axes=axes,methods=methods,decrease_begin_percent=misc_int("library_feed_decr_begin")),normal_collections=normal,special_collections=special)
     artifacts = {
+        "library_input_catalog.json":library_artifact,
         "player_display_catalog.json":display_artifact,
         "public_showcase_policy.json":showcase_artifact,
         "public_profile_policy.json":profile_artifact,

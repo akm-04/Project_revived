@@ -58,7 +58,11 @@ type HeroBookmarkServicePort interface {
 type HeroSkillChoicePort interface {
 	ChangeSkill(context.Context, identity.ActorContext, int64, int64, int64, operation.Context) (apphero.SkillChoiceResult, error)
 }
+type HeroRosterBodyPort interface {
+	Read(context.Context, identity.ActorContext, operation.Context, uint16, int64) (map[string]any, error)
+}
 type HeroDispatcher struct {
+	Roster     HeroRosterBodyPort
 	Skills     HeroSkillChoicePort
 	Bookmark   HeroBookmarkServicePort
 	Authority  apprealtime.GameplayAuthorityPort
@@ -236,6 +240,13 @@ func (d HeroDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReque
 			if err != nil || pid != int64(actor.PlayerID) {
 				return httpedge.Response{HTTPStatus: http.StatusForbidden, Body: map[string]any{"error": "private_hero_roster"}}
 			}
+		}
+		if d.Roster != nil {
+			body, err := d.Roster.Read(ctx, actor, req.Envelope.Operation, 49, 0)
+			if err != nil {
+				return failHero(err)
+			}
+			return httpedge.Response{HTTPStatus: 200, Body: body}
 		}
 		root, heroes, err := d.Service.RosterView(ctx, actor, req.Envelope.Operation.StartedAt)
 		if err != nil {

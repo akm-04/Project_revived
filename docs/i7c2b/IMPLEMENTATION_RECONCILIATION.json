@@ -1,0 +1,100 @@
+{
+  "status": "WORKING_IMPLEMENTATION_COMPLETE_TARGETED_CHECKS_PASS_NOT_FROZEN_QUALIFIED_OR_ACCEPTED",
+  "selected_authority": "Pass688",
+  "contract": "I7C2B_LIBRARY_INPUT_LIFECYCLE",
+  "implemented": [
+    "LibraryLocalProgression root/Hero facets/paid-preview/admission lifecycle",
+    "Source-qualified immutable catalog and exact content payload installation",
+    "Controlled typed missing-facet deployment backfill before activation",
+    "Shared fresh Hero creator initializer and bootstrap root in existing owning transactions",
+    "Gift/ring + atomic I5 material cost",
+    "Reconstruction RNG using operation entropy, retained admission/time/content/policies, economic receipt resolution",
+    "Normal and special collection claims and exact raw contribution providers",
+    "Caller-queryer Hero/Library versioned observations and coherent MID1/MID49/836/853/2784 projections",
+    "Stock routes72/840/852/854/2785 with inherited actor authority and private-surface rejection"
+  ],
+  "working_checks": [
+    {
+      "log": "working-native-commands-r2.log",
+      "log_sha256": "9e45ee2d5390228fbd1d6266c65f02aa32471a72d358edd3f8956dd878809db4",
+      "passing_cases": [
+        "GiftMarriageFeedingAndReplay",
+        "BackfillAndSpecialDecimals"
+      ],
+      "scope": "Targeted working evidence; final exact frozen qualification still required"
+    },
+    {
+      "log": "working-native-recovery-r3.log",
+      "log_sha256": "96b3391deefdaa4a6b1a7880f14228201c9049d5e7957cbbf9971b790b2e3f2a",
+      "passing_cases": [
+        "LibraryCollectionPopulationAndRetirement"
+      ],
+      "scope": "Targeted working evidence; final exact frozen qualification still required"
+    },
+    {
+      "log": "working-process-kill-r4.log",
+      "log_sha256": "9916718bd1d6ed83fa03682231998579c7fe79a05ce2fbbd9307f5e4e6e175b0",
+      "passing_cases": [
+        "ProcessKillReopenPaidAdmission"
+      ],
+      "scope": "Targeted working evidence; final exact frozen qualification still required"
+    },
+    {
+      "log": "working-api-library-r2.log",
+      "log_sha256": "70ec2e055aef7f4c7de00ef4ec0be1356b020980c7033d27950cd4b998f1d100",
+      "passing_cases": [
+        "ActualAPILibraryAndRestartRoster"
+      ],
+      "scope": "Targeted working evidence; final exact frozen qualification still required"
+    },
+    {
+      "log": "working-native-boundaries.log",
+      "log_sha256": "1654dc8a4d262b0776030478c933447971a064d0b594e2e49b631f7a9e089cf5",
+      "passing_cases": [
+        "CostRollbackCapsAndBootstrap",
+        "FreshMaterializerAtomicFacet"
+      ],
+      "scope": "Targeted working evidence; final exact frozen qualification still required"
+    },
+    {
+      "log": "working-native-concurrency-r5.log",
+      "log_sha256": "246610f3d0e91a6f168912b7032595c62d89f2c7a4d28fc78150f5e84312af57",
+      "passing_cases": [
+        "RetiredPendingAndReconnectFence"
+      ],
+      "scope": "Targeted working evidence; final exact frozen qualification still required"
+    },
+    {
+      "log": "working-native-concurrency-r6.log",
+      "log_sha256": "0f9b2a671f8210acb1dd48ee1c4b40a05226284065eae8037c74419f025a7775",
+      "passing_cases": [
+        "UnknownRollbackPendingAndConcurrency",
+        "ConcurrentMarriageAndRetirement"
+      ],
+      "scope": "Targeted working evidence; final exact frozen qualification still required"
+    }
+  ],
+  "specific_reconciliation": [
+    "PostgreSQL adapter maps no-rows to kernelstore sentinel; admission/retired Hero readers corrected",
+    "Source collection duplicate instances use distinct canonical origins with common collectionSourceID; fixture corrected without weakening Character uniqueness",
+    "Library2784 replaces inherited neutral Lobby route; duplicate route fixed before API runtime qualification",
+    "Killed-process fixture uses inherited durable Actor serialization; no raw private identity JSON",
+    "Inherited receipt.RecordedAt is owning database insert time; capturedDecisionAt is separately retained/proved, not equated to recording time",
+    "Concrete same-family contention justified finite5-attempt admission/rejection retry with bounded backoff; semantic operation/decision/seed unchanged across retry",
+    "Root captured-time fence prevents a concurrent older operation from moving provider timestamp backwards"
+  ],
+  "scope_contract_deltas": "No new requirement or durable contract beyond sealed Pass688 Library lifecycle; no changed inherited migration bytes or tool pins",
+  "limitations": [
+    "User-authorized reconstruction probability policy, not recovered original-server math",
+    "Test-only HeroCapacity qualifier; production nil/inactive MID59/305/I5 partner entity remains inherited deferral",
+    "No full Library/Commerce/Battle/final stat/force/title-frame consumer acceptance",
+    "No physical stock client proof; W2 afterI14 remains unpassed",
+    "Raw providers distinguish caller-selected player/replay scope; foreign nonreplay projection policy remains downstream C3B"
+  ],
+  "remaining": [
+    "Freeze one combined candidate",
+    "Final exact portableR2 qualification: fresh1..49,48->49upgrade/backfill/activation preservation,native/concurrency/process/recovery,affected inherited coverage/source/compiler/security",
+    "Independent child2B reality and contract reconciliation",
+    "One final HOT+COLD child2B closure sync; parent2/C/I7 stay open"
+  ]
+}

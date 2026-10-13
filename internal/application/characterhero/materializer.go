@@ -22,9 +22,10 @@ const (
 )
 
 type HeroMaterializer struct {
-	Store    AcquisitionStore
-	Content  AcquisitionContent
-	Capacity CapacityAuthorizer
+	FreshFacets HeroLocalFacetInitializer
+	Store       AcquisitionStore
+	Content     AcquisitionContent
+	Capacity    CapacityAuthorizer
 }
 
 func (HeroMaterializer) ProviderID() string       { return HeroMaterializerProviderID }
@@ -164,7 +165,7 @@ func (m HeroMaterializer) MaterializePartnerEntityBatchTx(ctx context.Context, t
 		if err != nil {
 			return nil, err
 		}
-		if err := m.Store.InsertHeroTx(ctx, t, h); err != nil {
+		if err := insertFreshHero(ctx, t, m.Store, m.FreshFacets, h); err != nil {
 			return nil, err
 		}
 		payload, err := json.Marshal(heroMaterializationPayload{PartnerID: h.PartnerID, TableID: h.TableID, OriginTableID: h.OriginTableID})

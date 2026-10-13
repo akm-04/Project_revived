@@ -225,6 +225,13 @@ func (s Service) EnsureBuiltinInstalled(ctx context.Context, op operation.Contex
 			if gotAppearance != wantAppearance {
 				return fmt.Errorf("content registry: appearance insert count=%d want=%d", gotAppearance, wantAppearance)
 			}
+			gotLibrary, err := s.Repo.InsertLibraryInputs(tctx, scope.Tx, b)
+			if err != nil {
+				return err
+			}
+			if gotLibrary != 1 {
+				return errors.New("content registry: library payload count drift")
+			}
 			gotDisplay, err := s.Repo.InsertPlayerDisplay(tctx, scope.Tx, b)
 			if err != nil {
 				return err

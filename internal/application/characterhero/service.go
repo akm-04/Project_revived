@@ -54,6 +54,7 @@ type HeroRosterView struct {
 }
 
 type Service struct {
+	FreshFacets               HeroLocalFacetInitializer
 	Runner                    tx.Runner
 	Timed                     appgeneration.TimedRunner
 	Store                     Store

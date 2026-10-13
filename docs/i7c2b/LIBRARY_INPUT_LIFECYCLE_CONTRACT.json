@@ -1,0 +1,65 @@
+{
+  "id": "I7C2B_LIBRARY_INPUT_LIFECYCLE",
+  "version": 1,
+  "stage": "I7C-2B",
+  "status": "FROZEN_PREIMPLEMENTATION_PENDING_NORMAL_PASS688_PUBLICATION",
+  "classification": "SOURCE_BOUND_RULES_PLUS_EXPLICIT_PRESERVATION_DECISIONS",
+  "clauses": [
+    {
+      "id": "I7C2B-OWNER",
+      "requirement": "LibraryLocalProgression solely owns per-instance favor/marriage/appliedfeeding, pendingpaidpreview and normalcollectionstages; player-specialclaims are separatewithinowner. Character owns HeroRef/identity/growth; ContentRegistry owns immutable qualified rules; I5 ownsdebitedvalue; PublicProfile/cachesnottruth."
+    },
+    {
+      "id": "I7C2B-INITIALIZATION",
+      "requirement": "Fresh owned Hero gets explicit zero Library facet (favor0,marriagefalse,sixfeed0,collectionstages0) via typed same-transaction initializer after unique fresh Hero insertion. V1 neutral defaults corroborate preservation seed, not original truth. Existing V2 actors lack these fields: controlled typed owner backfill seeds missing facets only, preserves any existing explicit facets. No per-read invented values for eligible missing rows. Non-dialog template qualification permits typed absence for relationship/feed; collection is qualified separately."
+    },
+    {
+      "id": "I7C2B-GIFT",
+      "requirement": "Minimum selected genuine producer supports qualified Library gift item baseamour plus source preferred+5/disliked-3/neutral0, clamps to selected favorlimit2000, atomic I5 stackdebit. Ring50001112 requires eligible ownedHero atlimit, setsmarriage once. Actual Commerce gift acquisition staysCommerce; fixtures/I5 qualified grants supplyinput for this gate. Usermemory3000retained uncertain, selectedcurrent/old2000controls."
+    },
+    {
+      "id": "I7C2B-FEED",
+      "requirement": "Only eligible marriedHero;sourcecosts/axes/spans/caps. Formula is user-authorized LIBRARY_FEED_RECONSTRUCTION_V1 and explicitly not recovered server mathematics; no Practice formula adoption or new global RNG."
+    },
+    {
+      "id": "I7C2B-PREVIEW",
+      "requirement": "Rollcost and durablecandidate committogether. Pendingresult remainsseparatefromappliedattributes, survivesreconnect/restart until replaced/saved/actorretired. Redo pays newcost and replacescandidate with newerrevision. Saveidentifiescurrentpendingcandidateatlockedadmission; double-savewithoutnewcandidateisnocharge/convergentno-op. Noexpiry/refund invented. Atomicactorretirement removeslive eligibility; orphanedpaidoutcome/receipt remains history and cannot be saved or counted as livefacts."
+    },
+    {
+      "id": "I7C2B-REPLAY",
+      "requirement": "Knownsemanticoperation receipt preserves exact outcome and cost; unknownCOMMITresolved byreceipt. Persist pending admission identity/seed/policy/result binding before repeatableeconomic work, resolve pending before next admission. New resolved stock request is currentintent; late identical aftersuccessmaycause a newpaidroll/gift. Nonce-less lateSAVEafterredo mayapplycurrentcandidate. These are explicit boundedcompatibilitytradeoffs, not perfect no-double-charge/stale-intent guarantees; W2 at namedafterI14gate remainsunpassed. Reconnect/age/write-successalone never advances unresolvedlane."
+    },
+    {
+      "id": "I7C2B-COLLECTION",
+      "requirement": "NormalMID72 claims monotonic per-instancequality/star stages fromsource thresholds; state-basedrepeatclaimno-op. Special2784/2785 ownsplayer23claimbits; require currentownedorigin set;currentall23type1noeconomyaward. Unsupportedlater type2 staysfailclosed. Exactdecimal contributions preserved. Selfaggregate sums currentownedinstances stagecontributions plus player-specialclaims; no unnoticed deduplication bytemplate and no auto-claim merelyfromcurrentHero growth. Replaytargetaggregate isseparatetypedobservation, foreignnonreplayzeroattrbranch doesnotwaiveforce/replayrequirements. CollectionSourceID follows xyd.getOriginHeroId: awakened Normal rewrites to before-awaken ID, Super remains current template ID; relationship gift preference instead follows getFirstTableID for both kinds."
+    },
+    {
+      "id": "I7C2B-READ",
+      "requirement": "Typedcaller-ownedqueryer/repeatable-or-serializable scope withpinnedcontent/instant andHero+Libraryversions; no nestedtx, foreignownerSQL orprojectioncanonicalwrites. Qualifiedinitialbackfill mustfinish before new Library capabilityactivation/consumers; missingrequiredfacet remainsunqualified. MID1/MID49 andLibraryreload projectactualfacts; pendingneverpublishedasapplied. Future3B/4C/6 consume narrow LIBRARY_INPUTS ports, not copiedrawDTO truth."
+    },
+    {
+      "id": "I7C2B-COMPOSITION",
+      "requirement": "Reuse actorfencer/playerroot/Hero reference andmutation locks, I5 MaterialCostDebiter, TimedRunner, ContentRegistry, receipts and owningdeployment. Fullknownlockplan: identity/player315, Hero410, Libraryroot490/record491, I5economy700/resources afterward. Fresh unpublished facet initializer performs only unique freshinsert, no existingLibraryrootlock after I5 locks. Backfill is controlled owningcomposition via Character typedenumeration/reads andLibrary writes; no runtime cross-ownerSQL."
+    },
+    {
+      "id": "I7C2B-ACCEPTANCE",
+      "requirement": "Exactfrozencombinedcandidate R2/realPG/newschema+upgrade+ownerbackfill/contentdeployment gates beforeconsumers; concurrency/feed-save/redo/gift/marriage/retirement, unknownCOMMIT/restart/reload/sourcecontracts/race/vet/affectedregression and independentreality. 2Aproofreusedwhenunchanged; newcontent/projection/initializer changesinvalidate specifically affected2Achecks. Child2Bacceptance doesnotaccept2/I7C/I7 or qualify finalstat/title/fullLibrary gameplay."
+    }
+  ],
+  "parent_contracts": [
+    "I7C1_PROVIDER_SCOPE_OWNERSHIP",
+    "I7C1_DELIVERY_ACCEPTANCE",
+    "I7C1_RESEARCH_AMENDMENT"
+  ],
+  "inherited": [
+    "D04",
+    "D06",
+    "D11",
+    "FP01",
+    "CA_CORE616",
+    "I7B1_TRANSACTION_REFERENCE_REPLAY",
+    "I7A1",
+    "WORKPLACE_TIME465"
+  ],
+  "original_server_formula_claimed": false
+}

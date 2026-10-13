@@ -24,7 +24,11 @@ type HeroBootstrapContent interface {
 // preserving the frozen inactive baseline when Hero projection capabilities are
 // legitimately inactive. It is read-only and executes entirely through the
 // caller-owned MID1 transaction/queryer.
+type LibraryRosterOverlay interface {
+	OverlayRosterTx(context.Context, tx.Queryer, identity.ActorContext, string, time.Time, map[string]any) error
+}
 type HeroBootstrapProjection struct {
+	Library LibraryRosterOverlay
 	Content HeroBootstrapContent
 }
 
@@ -96,6 +100,11 @@ func (p HeroBootstrapProjection) OverlayMID1(ctx context.Context, q tx.Queryer, 
 	body, err := heroproj.StockRosterView(root.SortType, stockViews)
 	if err != nil {
 		return err
+	}
+	if p.Library != nil {
+		if err = p.Library.OverlayRosterTx(ctx, q, actor, revision, observedAt, body); err != nil {
+			return err
+		}
 	}
 	detail["49"] = body
 	return nil

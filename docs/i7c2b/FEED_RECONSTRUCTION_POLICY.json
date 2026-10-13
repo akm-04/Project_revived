@@ -1,0 +1,136 @@
+{
+  "id": "LIBRARY_FEED_RECONSTRUCTION_V1",
+  "status": "DIRECT_USER_AUTHORIZED_PRESERVATION_DECISION",
+  "classification": "IMPLEMENTATION_DECISION",
+  "authorization": "USER_AUTHORIZATION.json",
+  "original_server_equivalence": false,
+  "foundation": "operation.Context.Derive from secure operation.Factory seed; no foundation algorithm changes",
+  "recovered_constraints": {
+    "axes": [
+      4,
+      5,
+      6,
+      7,
+      8,
+      9
+    ],
+    "caps": [
+      5000,
+      480,
+      480,
+      120,
+      120,
+      120
+    ],
+    "positive_inclusive_spans": [
+      [
+        60,
+        80
+      ],
+      [
+        5,
+        8
+      ],
+      [
+        5,
+        8
+      ],
+      [
+        2,
+        3
+      ],
+      [
+        2,
+        3
+      ],
+      [
+        2,
+        3
+      ]
+    ],
+    "negative_inclusive_spans": [
+      [
+        45,
+        60
+      ],
+      [
+        3,
+        5
+      ],
+      [
+        3,
+        5
+      ],
+      [
+        1,
+        2
+      ],
+      [
+        1,
+        2
+      ],
+      [
+        1,
+        2
+      ]
+    ],
+    "methods": [
+      {
+        "id": 1,
+        "cost_type": 1,
+        "cost": 500000,
+        "init_rate": [
+          70,
+          30
+        ],
+        "rate_change_step": 8,
+        "progress_rate_change": "0.8"
+      },
+      {
+        "id": 2,
+        "cost_type": 2,
+        "cost": 80,
+        "init_rate": [
+          55,
+          45
+        ],
+        "rate_change_step": 15,
+        "progress_rate_change": "0.6"
+      },
+      {
+        "id": 3,
+        "cost_type": 50001375,
+        "cost": 1,
+        "init_rate": [
+          20,
+          80
+        ],
+        "rate_change_step": 20,
+        "progress_rate_change": "0.4"
+      }
+    ],
+    "decrease_begin_percent": 10,
+    "gate": "Owned selected-dialog-enabled married Hero; all six at cap rejects without charge"
+  },
+  "chosen_math": {
+    "interpretation": "Explicit reconstruction: init_rate[1] negative weight, [2] positive weight; rate_change_step is percentage-point progress bucket width; progress_rate_change is added negative probability in percentage points per bucket. Source exposes parameters but does not establish these meanings.",
+    "per_axis_progress_bp": "floor(applied_axis*10000/axis_cap)",
+    "negative_probability_bp": "If progress_bp<1000:0. Else steps=floor((progress_bp-1000)/(rate_change_step*100)); negative_bp=min(9900,init_rate[1]*100 + steps*(progress_rate_change*100)). Tables sum weights100; reject unsupported shapes.",
+    "direction": "Unbiased integer draw in[0,9999]; negative if draw<negative_bp, positive otherwise. Axis/cost/direction labels domain separated.",
+    "amount": "Independent unbiased integer in chosen inclusive source span. Clamp proposed applied value to[0,sourcecap]; feed_add is proposed-current, not unclamped raw amount.",
+    "sampling": "Use Context.Derive stable named labels and draw ordinal; unsigned32-bit rejection sampling over2^32 avoids modulo bias. Rejection round appears in label, never SQL retry count.",
+    "correlation": "Independent per-axis direction/amount draws; no invented whole-vector success guarantee or paid reroll until favorable.",
+    "gold_negative_bp_at_progress_percent": {
+      "0": 0,
+      "9": 0,
+      "10": 7000,
+      "50": 7400,
+      "90": 7800,
+      "100": 7880
+    },
+    "diamond_negative_bp_at100": 5860,
+    "onigiri_negative_bp_at100": 2160
+  },
+  "lifecycle": "Persist exact pending outcome, applied base, candidate revision, policy/content binding and generation receipt atomically with I5 charge; SAVE alone applies. Known semantic replay returns stored result without RNG.",
+  "update_policy": "Future formula change requires a new family policy version; pending candidates retain their pinned results/rules. No global RNG service/new entropy table required."
+}

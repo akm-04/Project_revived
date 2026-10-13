@@ -10,8 +10,12 @@ import (
 	"errors"
 	"gxb.local/backend/v2/internal/adapters/guildbroadcastworker"
 	"gxb.local/backend/v2/internal/adapters/postgres"
+	"gxb.local/backend/v2/internal/adapters/postgres/characterstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/contentstore"
+	"gxb.local/backend/v2/internal/adapters/postgres/librarystore"
 	riveradapter "gxb.local/backend/v2/internal/adapters/river"
+	gen "gxb.local/backend/v2/internal/application/generation"
+	applib "gxb.local/backend/v2/internal/application/librarylocal"
 	"gxb.local/backend/v2/internal/content/registry"
 	"gxb.local/backend/v2/internal/foundation/clock"
 	"gxb.local/backend/v2/internal/foundation/operation"
@@ -54,6 +58,9 @@ func deploy() error {
 		return e
 	}
 	if _, e = service.EnsureBuiltinInstalled(c, op, bundle); e != nil {
+		return e
+	}
+	if e = applib.RunBackfill(c, gen.TimedRunner{Binder: gen.Binder{Time: postgres.AuthoritativeTime{Queryer: p}}, Runner: service.Runner}, characterstore.Store{}, librarystore.Store{}, op); e != nil {
 		return e
 	}
 	if e = guildbroadcastworker.PrepareDeployment(c, p, bundle.RevisionID()); e != nil {
