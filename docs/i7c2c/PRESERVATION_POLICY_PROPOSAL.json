@@ -1,0 +1,54 @@
+{
+  "full_node_path": "ROOT/I7/I7C/I7C-2/I7C-2C",
+  "sealed_base": {
+    "pass_id": "689.0",
+    "artifact": "gxb-backend-pass-689.0-passmap.zip",
+    "filename": "gxb-backend-pass-689.0-passmap.zip",
+    "path": "/home/akm/Chatgpt/2026-10-09/files-mentioned-by-the-user-additional/outputs/gxb-backend-pass-689.0-passmap.zip",
+    "sha256": "e9bf78821d56247c38bc55be26c4aac52c73d771b2db5391f76497b85e51ec40",
+    "bytes": 301972772,
+    "status": "NESTED_CRC_HASH_FRESH_HOT_PRESEAL_COLD_DEEP_ZERO_REGENERATION_DRIFT_PASS"
+  },
+  "accepted_backend_sha256": "cf5e1ae2bf2735d00daf81c3c614ed37ec8f037aeeb0c2891a952d9d6accccf6",
+  "working_backend_sha256": "cf5e1ae2bf2735d00daf81c3c614ed37ec8f037aeeb0c2891a952d9d6accccf6",
+  "status": "APPROVED_RECONSTRUCTION_FROZEN_PENDING_NORMAL_PASS690_SEAL",
+  "product_implementation_started": false,
+  "product_gate_credit": false,
+  "authorization": "USER_POLICY_AUTHORIZATION.json",
+  "policies": [
+    {
+      "id": "C2C_LOUNGE_EXP_V1",
+      "status": "USER_AUTHORIZED_IMPLEMENTATION_DECISION_FROZEN",
+      "source_established": [
+        "60+20*comfort per hour per resident",
+        "Claim upon entering Lounge",
+        "Ten-hour accumulation cap",
+        "Character owns EXP and its existing cap"
+      ],
+      "proposed_details": [
+        "Settle at authoritative captured time on own Lounge read and before occupancy/comfort mutation",
+        "Use checked exact numerator over3600; retain fractional EXP between uncapped settlements",
+        "Discard elapsed beyond ten-hour unattended interval; advance anchor to settled time, preventing repeated ten-hour claims",
+        "Settle old comfort before changing furniture; incoming residents start at current time and cannot claim pre-entry elapsed",
+        "Apply Character.AddSourceEXP and current qualified player max level; consume capped interval without banking EXP above level cap",
+        "Backward captured time does not subtract EXP or move anchors backwards; stale observations fail closed",
+        "No expiry worker or UI tick owns EXP"
+      ],
+      "classification": "IMPLEMENTATION_DECISION"
+    },
+    {
+      "id": "C2C_RANDOM_KEY_V1",
+      "status": "USER_AUTHORIZED_IMPLEMENTATION_DECISION_FROZEN",
+      "source_established": [
+        "Three random keys and their finite room template lists"
+      ],
+      "proposed_details": [
+        "Uniform unbiased selection from the particular source list using existing V2 operation.Context derivation",
+        "Persist semantic operation seed/result and content revision before paid result response; retries/unknownCOMMIT never reroll or consume another key"
+      ],
+      "classification": "IMPLEMENTATION_DECISION"
+    }
+  ],
+  "new_rng_foundation": false,
+  "source_rule_text_recovered_after_question": "Claim on entry and ten-hour cap are now source-established; remaining approval concerns settlement details and unrecovered odds"
+}

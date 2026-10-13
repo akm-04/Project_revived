@@ -22,7 +22,10 @@ import (
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
-type Store struct{ Queryer tx.Queryer }
+type Store struct {
+	Queryer    tx.Queryer
+	StackUsage appi5.StackUsageQuery
+}
 
 func noRows(err error) bool { return errors.Is(err, kernelstore.ErrNoRows) }
 func rowsOne(tag tx.CommandTag, what string) error {
@@ -279,7 +282,10 @@ func (Store) LockStackTx(ctx context.Context, t tx.Tx, pid identity.PlayerID, it
 	}
 	return s, err == nil, err
 }
-func (Store) SaveStackTx(ctx context.Context, t tx.Tx, s economy.StackState, exists bool) error {
+func (store Store) SaveStackTx(ctx context.Context, t tx.Tx, s economy.StackState, exists bool) error {
+	if err := store.requireRetainedStackTx(ctx, t, s.PlayerID, s.ItemID, s.Quantity); err != nil {
+		return err
+	}
 	if err := s.Validate(); err != nil {
 		return err
 	}
@@ -307,7 +313,10 @@ func (Store) SaveStackTx(ctx context.Context, t tx.Tx, s economy.StackState, exi
 	return rowsOne(tag, "stack update")
 }
 
-func (Store) DeleteStackTx(ctx context.Context, t tx.Tx, s economy.StackState) error {
+func (store Store) DeleteStackTx(ctx context.Context, t tx.Tx, s economy.StackState) error {
+	if err := store.requireRetainedStackTx(ctx, t, s.PlayerID, s.ItemID, 0); err != nil {
+		return err
+	}
 	tag, err := t.Exec(ctx, `DELETE FROM player_item_stacks WHERE player_id=$1 AND item_id=$2 AND state_version=$3`, int64(s.PlayerID), s.ItemID, s.StateVersion-1)
 	if err != nil {
 		return err

@@ -1,0 +1,85 @@
+{
+  "status": "WORKING_IMPLEMENTATION_COMPLETE_TARGETED_CHECKS_PASS_NOT_FROZEN_QUALIFIED_OR_ACCEPTED",
+  "selected_authority": "Pass690",
+  "contract": "I7C2C_DORM_INPUT_LIFECYCLE",
+  "implemented": [
+    "Dorm owner source catalog/layout/membership/per-Hero equipment/expansion and Lounge anchors",
+    "Nine stock operations and real source response consumers; MID2515 remains compressed multipart",
+    "Atomic I5 key/debit/exchange/overflow and placed stock retention",
+    "Canonical Character EXP and live reference/cooldown composition",
+    "Existing operation RNG/admission/receipt infrastructure; retained decision/revision/entropy and immutable semantic result",
+    "Typed missing-only deployment backfill, fresh/bootstrap facets, roster/MID1 key49 and raw future-provider inputs"
+  ],
+  "working_checks": [
+    {
+      "log": "transitions-native-working.log",
+      "log_sha256": "a631ad9ed21b79d90a96be8ef4f9d955eea546c4274918753f8e52f293f4de04",
+      "passing_cases": [
+        "CommandsOwnershipCostsReplayAndProviders",
+        "LoungeFractionsCapOldComfortForeignAndNaturalExpansion",
+        "EquipmentGatesRetainedGearAtomicCostsAndConcurrentMoves"
+      ]
+    },
+    {
+      "log": "contention-working.log",
+      "log_sha256": "e7a381a1f5d21e06caf119d59e3c4b48581a0419a1ff2fd6a4da8554c4d53974",
+      "passing_cases": [
+        "UnknownCommitRetainedAdmissionAndConcurrentSlot",
+        "ConcurrentResidentAdmissionVersusGuardedRemoval"
+      ]
+    },
+    {
+      "log": "recovery-reference-fresh-working.log",
+      "log_sha256": "94c07a53302ba92f9d56170bebdd8ba4e2537141b1cf4c0ae98f8aeceb93617a",
+      "passing_cases": [
+        "StockConsumptionVersusPlacementAndRemovalGuard",
+        "ProcessKillReopenRandomPaidAdmission"
+      ]
+    },
+    {
+      "log": "fresh-acquisition-working.log",
+      "log_sha256": "d9febef185e2b8a01a2eff6307b4562d906aeec0ffebf63f636e921cf7e4aad8",
+      "passing_cases": [
+        "FreshBootstrapAndActualAcquisitionRequiredFacets"
+      ]
+    },
+    {
+      "log": "exchange-overflow-working.log",
+      "log_sha256": "70e08d94213e2664a272ebc21d407afc58b48dd805b840b7765109dd80a8f44a",
+      "passing_cases": [
+        "KeyExchangeOverflowAndActorGate"
+      ]
+    },
+    {
+      "log": "final-working-http.log",
+      "log_sha256": "7103444aa9d2739acb88b45bc5dce4438bf2d3324f33112e7199f4cbedfb3a7c",
+      "passing_cases": [
+        "ActualAPIDormAndRestartRoster"
+      ]
+    }
+  ],
+  "specific_reconciliation": [
+    "Source exchange list includes random green/blue keys; 14 source rates compiled from existing misc.lua, prior25 payloads unchanged",
+    "Actual SellDetailWindow callback consumes awards; return existing I5 Restoration.Awards",
+    "Layout diagnostic wrong_key is an actual offending packed key when identified, omitted for aggregate failure",
+    "MID2515 inherited compressed multipart transport preserved; HTTP fixture corrected to form-field zlib",
+    "Six-way contention exhausted initial retries; finite8-attempt definite-abort retry/backoff retains operation/decision/revision/entropy; unknownCOMMIT remains proof-only",
+    "Canonical source cap fixtures corrected: Cement9999/furniture999/permits99; Character cap derives active policy, no level99 assumption",
+    "Killed-process fixture uses inherited durable Actor encoding; private UUID fields not raw JSON",
+    "Common700/Serializable stock-retention proof reused from CP310; no invented epoch guard",
+    "Exchange plans Mail610 before I5 suffix; canonical progression/function observations do not discover lower locks after planned values"
+  ],
+  "scope_contract_deltas": "No new durable contract or scope beyond sealed Pass690/C1 and approved preservation policies; no inherited migrations changed",
+  "limitations": [
+    "Reconstruction policies explicitly authorized, not original-server algorithms",
+    "Campaign function/retirement/evolved Hero inputs are explicit fixtures; no later writer acceptance",
+    "Test-only HeroCapacity; production MID59/305/PartnerEntities deferral retained",
+    "Stock W2afterI14 and all parent exits remain open",
+    "Foreign observation and raw inputs do not accept I9N privacy/social or future final stats/title consumers"
+  ],
+  "remaining": [
+    "Exact frozen R2 fresh1..50/49upgrade/backfill/deployment/restore/native/process/affected regression qualification",
+    "Independent primary-agent source/code/contracts reality",
+    "Final child2C only HOT+COLD closure sync"
+  ]
+}

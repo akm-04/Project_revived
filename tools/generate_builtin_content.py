@@ -21,7 +21,7 @@ from pathlib import Path
 from typing import Any, Iterable
 
 SCHEMA_VERSION = 1
-COMPILER_VERSION = "i7c2b-library-inputs"
+COMPILER_VERSION = "i7c2c-dorm-inputs"
 PARSER_VERSION = "lua-generated-v18-guild-invite"
 EXPECTED_SOURCE_ARCHIVE_SHA256 = "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
 SOURCE_PREFIX = "app-assets/output/assets/src_64/"
@@ -120,6 +120,7 @@ SOURCE_MANIFEST.append(('app/windows/HeroGiftBoxWindow.lua','d6065c3d601f5820915
 SOURCE_MANIFEST.append(('app/windows/WhiteAlbumWindow.lua','851a53f588b59d95cfe460f3399ab1a6904fff7714131c358f3c3a73910b6bb9',"LIBRARY_INPUT_SOURCE_AUTHORITY"))
 
 ENABLED_CAPABILITIES = [
+    "DORM_INPUTS_I7C2C",
     "LIBRARY_INPUTS_I7C2B",
     "PLAYER_DISPLAY_I7B6A",
     "PUBLIC_PROFILE_SHOWCASE_SELECTION_I7B3A",
@@ -152,6 +153,18 @@ ENABLED_CAPABILITIES = [
     "SOCIAL_GIFT_I7A7A",
 ]
 
+
+
+# I7C-2C: raw owner/placement/time profile; settlement and odds are reconstruction.
+SOURCE_MANIFEST.append(('app/common/tables/DormFurnitureItemTable.lua', 'a044697c0a46b13784bd8beb82b0e501fd06938b318a8966570961a54b7ac5b7', 'I7C2C_DORM_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('app/model/Dorm.lua', 'd6d1a314a6b93949f91c67a6f5a3f8d9e491bc30824a747bb62ac79f1f6cb911', 'I7C2C_DORM_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('app/windows/DormRoomExpandWatingWindow.lua', '91061de0b72f10ba5f214c4cf0c2f3bb48e089e45c78f632f6fe95f718cb75f2', 'I7C2C_DORM_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('app/windows/DormRoomWindow.lua', '30fe757307b167b4f4b0a915a2840b84d0391545745f1088abba54cc69033d15', 'I7C2C_DORM_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/dorm_expand.lua', 'a51734fe82d17b021b2856b2e66f38c6784e3acded00796dff1d660657808062', 'I7C2C_DORM_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/dorm_furniture_item.lua', '4bd6844119457165bb8dec161ca0b4121c70a9a3108f6e6b508bdcc7adecaf9a', 'I7C2C_DORM_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/dorm_house.lua', 'ce0f2c7b5bac8ffaea9590b682f7cfd044eb8ca81116862473100565eb4753e5', 'I7C2C_DORM_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/dorm_house_key.lua', 'b9abe851b2cdf2c2f69aad2b43c5eb0b7671019e9b9f6295939269f932138940', 'I7C2C_DORM_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/dorm_house_type.lua', '99964f53860e75fdc05852f7fe2f78514d0f3f59d19ebfa4b02237ac2b178520', 'I7C2C_DORM_SOURCE_BOUNDARY'))
 
 class CompileError(ValueError):
     pass
@@ -1921,7 +1934,10 @@ def build_artifacts(blobs: dict[str, SourceBlob], archive_sha256: str) -> dict[s
     favor_rows=parse_generated_lua_table(blobs["data/tables/library_amour.lua"].data)
     if len(normal)!=132 or len(special)!=23 or any(x["type"]!=1 for x in special) or len(library_gifts)!=10: raise CompileError("Library selected source counts/shape drift")
     library_artifact=dict(schema_version=1,seed_policy_id="LIBRARY_NEUTRAL_SEED_V1",feed_policy_id="LIBRARY_FEED_RECONSTRUCTION_V1",original_server_probability_recovered=False,favor_limit=2000,templates=library_templates,gifts=library_gifts,feeding=dict(axes=axes,methods=methods,decrease_begin_percent=misc_int("library_feed_decr_begin")),normal_collections=normal,special_collections=special)
+    from dorm_content import build_dorm
+    dorm_artifact=build_dorm(blobs,parse_generated_lua_table,pipe_ints,hero_artifact["templates"],partner_keys,partner_rows,super_keys,super_rows,indexed_field,items,CompileError)
     artifacts = {
+        "dorm_input_catalog.json":dorm_artifact,
         "library_input_catalog.json":library_artifact,
         "player_display_catalog.json":display_artifact,
         "public_showcase_policy.json":showcase_artifact,

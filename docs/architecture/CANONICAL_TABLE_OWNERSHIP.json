@@ -2503,6 +2503,88 @@
         "internal/adapters/postgres/librarystore/"
       ],
       "write_exceptions": []
+    },
+    "player_dorm_roots": {
+      "owner": "dorm-house",
+      "migration": "migrations/00050_i7c2c_dorm_inputs.sql",
+      "allowed_query_owners": [
+        "dorm-house"
+      ],
+      "allowed_write_paths": [
+        "sql/dorm/",
+        "internal/adapters/postgres/dormstore/"
+      ],
+      "allowed_read_paths": [
+        "sql/dorm/",
+        "internal/adapters/postgres/dormstore/"
+      ],
+      "write_exceptions": []
+    },
+    "player_dorm_rooms": {
+      "owner": "dorm-house",
+      "migration": "migrations/00050_i7c2c_dorm_inputs.sql",
+      "allowed_query_owners": [
+        "dorm-house"
+      ],
+      "allowed_write_paths": [
+        "sql/dorm/",
+        "internal/adapters/postgres/dormstore/"
+      ],
+      "allowed_read_paths": [
+        "sql/dorm/",
+        "internal/adapters/postgres/dormstore/"
+      ],
+      "write_exceptions": []
+    },
+    "player_dorm_heroes": {
+      "owner": "dorm-house",
+      "migration": "migrations/00050_i7c2c_dorm_inputs.sql",
+      "allowed_query_owners": [
+        "dorm-house"
+      ],
+      "allowed_write_paths": [
+        "sql/dorm/",
+        "internal/adapters/postgres/dormstore/"
+      ],
+      "allowed_read_paths": [
+        "sql/dorm/",
+        "internal/adapters/postgres/dormstore/"
+      ],
+      "write_exceptions": []
+    },
+    "player_dorm_admissions": {
+      "owner": "dorm-house",
+      "migration": "migrations/00050_i7c2c_dorm_inputs.sql",
+      "allowed_query_owners": [
+        "dorm-house"
+      ],
+      "allowed_write_paths": [
+        "sql/dorm/",
+        "internal/adapters/postgres/dormstore/"
+      ],
+      "allowed_read_paths": [
+        "sql/dorm/",
+        "internal/adapters/postgres/dormstore/"
+      ],
+      "write_exceptions": []
+    },
+    "content_dorm_input_catalogs": {
+      "allowed_query_owners": [
+        "content-registry"
+      ],
+      "allowed_read_paths": [
+        "sql/content/",
+        "internal/adapters/postgres/contentstore/",
+        "internal/adapters/postgres/contentqueries/"
+      ],
+      "allowed_write_paths": [
+        "sql/content/",
+        "internal/adapters/postgres/contentstore/",
+        "internal/adapters/postgres/contentqueries/"
+      ],
+      "migration": "migrations/00050_i7c2c_dorm_inputs.sql",
+      "owner": "content-registry",
+      "write_exceptions": []
     }
   }
 }

@@ -1,0 +1,74 @@
+{
+  "full_node_path": "ROOT/I7/I7C/I7C-2/I7C-2C",
+  "sealed_base": {
+    "pass_id": "689.0",
+    "artifact": "gxb-backend-pass-689.0-passmap.zip",
+    "filename": "gxb-backend-pass-689.0-passmap.zip",
+    "path": "/home/akm/Chatgpt/2026-10-09/files-mentioned-by-the-user-additional/outputs/gxb-backend-pass-689.0-passmap.zip",
+    "sha256": "e9bf78821d56247c38bc55be26c4aac52c73d771b2db5391f76497b85e51ec40",
+    "bytes": 301972772,
+    "status": "NESTED_CRC_HASH_FRESH_HOT_PRESEAL_COLD_DEEP_ZERO_REGENERATION_DRIFT_PASS"
+  },
+  "accepted_backend_sha256": "cf5e1ae2bf2735d00daf81c3c614ed37ec8f037aeeb0c2891a952d9d6accccf6",
+  "working_backend_sha256": "cf5e1ae2bf2735d00daf81c3c614ed37ec8f037aeeb0c2891a952d9d6accccf6",
+  "status": "FROZEN_PREIMPLEMENTATION_PENDING_NORMAL_PASS690_SEAL",
+  "product_implementation_started": false,
+  "product_gate_credit": false,
+  "ready": true,
+  "freeze_blockers": [],
+  "architecture": "Reuse named DormHouse role selected by C1/D06/I9N; separate application orchestration and owned repositories, one canonical authority per fact",
+  "approved_leaf_boundary": "Keep I7C-2C as one leaf. Layout/occupancy/retained equipment/expansion/EXP share one reference graph and atomic lifecycle. No new child IDs justified by current evidence.",
+  "size_estimate": "LARGE: source catalog+placement validator, one owner/repository, value/reference/time composition, wire/roster/bootstrap/deploy, native recovery/process and affected I5 coverage; rough25-40 product files plus tests. Estimate only, not acceptance.",
+  "schema_proposal": [
+    "Dorm-owned root/room/per-Hero equipment and admissions/expansion occurrence tables; exact names/DDL remain design proposal",
+    "Use player-scoped persistent wire-safe allocated house IDs; Lounge is a real owner row linked to source template1000001, not a magic truth fallback",
+    "Packed layout serialized at boundary; normalize/validate parent graph under owner, recompute authoritative comfort/used counts",
+    "No persistent furniture instance IDs from template strings; no foreign-owner query/FK migration for Hero facts",
+    "Existing accepted113 has neutral projected Dorm fields and no canonical Dorm facts; typed owning backfill initializes missing roots/Lounge without overwriting explicit facts; assert this premise at final schema review"
+  ],
+  "transaction_plan": [
+    "Capture one authoritative decision time and bind immutable catalog/rule revision before retry. Complete deduplicated lock plan before first owner/value mutation",
+    "Actor/session/context fences -> canonical Player root315 -> Character root400 and all affected Hero410 keys -> Dorm root500 -> I5 progression/economy/resource keys as required; census confirms500 unused in accepted113",
+    "For occupancy, preflight old/new residents and source rooms; root serializes graph. Revalidate owned/alive refs and current versions after acquiring all required locks; D04 guard protects retirement/consumption",
+    "All layout used-count changes and furniture-stock reductions share canonical I5 economy/stock locks. I5 consumes a typed Dorm usage query under those locks, never takes a lower Dorm lock afterward. Every affected canonical reduction path must be censused/configured/qualified; otherwise Dorm layout activation stays blocked",
+    "No foreign SQL, nested Tx, active-revision discovery, fresh clock or I/O under locks. Domain pure arithmetic/geometry; repositories persist only their owner facts"
+  ],
+  "content_deploy": [
+    "Add one source-qualified Dorm payload without changing prior25 payload bytes unless a concrete invalidation is documented",
+    "Fresh bootstrap creates Dorm root before higher I5 mutation locks; existing player enumeration/backfill through owning ports, deploy before feature activation; API startup does not flip content/backfill",
+    "Typed provider validates owner ref, canonical active/alive state, versions, operation revision and time; true no-room/Lounge absence distinct from missing/unqualified owner"
+  ],
+  "implementation_batches": [
+    "Catalog/profile and pure owner/placement validator + focused tests",
+    "Migration/repository/bootstrap/backfill and raw caller-Tx ports",
+    "Stock retention/Character EXP/reference composition; admissions/time/state transitions; batch working PG proof",
+    "MID dispatcher/roster/MID1/production/deploy wiring; source/error/reload reconciliation",
+    "One intended frozen candidate; portableR2 qualification; independent reality; final HOT+COLD closure seal"
+  ],
+  "authority": "No product edits or freeze until both policy decisions reconciled and normal research/design publication complete. Direct user product approval is already retained; do not ask to reapprove covered implementation.",
+  "policy_authorization": "USER_POLICY_AUTHORIZATION.json",
+  "owner_packages": {
+    "domain": "internal/domain/dormhouse",
+    "application": "internal/application/dormhouse",
+    "postgres": "internal/adapters/postgres/dormstore",
+    "content": "pure Dorm input DTO/compiler and contentstore binding",
+    "wire": "stockruntime Dorm dispatcher"
+  },
+  "planned_migration": "00050_i7c2c_dorm_inputs.sql",
+  "root_lock_rank": 500,
+  "typed_seams": {
+    "PlayerState": "I5-owned ReadDormPlayerStateTx(Queryer,pid) exposes canonical level/functions with versions; no campaign unlock inference. Player315 + planned I5 progression710/function730 when required, all before mutation.",
+    "CharacterEXP": "Character-owned ApplyDormEXPTx(Tx,HeroRef,revision,capturedtime,amount,maxlevel/threshold context) validates live locked Hero and applies existing AddSourceEXP/SaveHeroProgressionTx. Caller plans Hero400/410 before Dorm500; capped Hero no-op consumes elapsed interval without banking whole EXP. Dorm owns only anchors/fraction.",
+    "CharacterReference": "Dorm implements existing HeroRemovalGuard. Plan always includes Dorm500 even currently unreferenced; validate blocks resident consumption/retirement. Per-Hero retained equipment does not become a universal busy flag; explicit retirement policy deletes inactive facet only through owning lifecycle if allowed.",
+    "StackUsage": "I5-owned StackUsageQuery.MinimumRetainedStackTx(ctx,Queryer,pid,item) returns Dorm-used count/qualification. Central I5 SaveStackTx and DeleteStackTx enforce proposed quantity>=used; no lower Dorm lock. Dorm layout mutations always acquire I5economy700, even unchanged total count. This common mutex protects query vs layout. Placement cannot erase another room; full root current layouts determine count. Missing Dorm root after activation is unqualified, not zero; deploy/backfill prerequisite and actual writer composition are mandatory.",
+    "RawInputs": "DormHouseInputsTx(ctx,Queryer,{pid,revision,ObservedAt},HeroRef) exposes live house/template/comfort/applied expansion/per-Hero equipment/root/population versions; VillaCountTx uses same qualified snapshot. Consumers3B/6 must consume these ports, not roster projections."
+  },
+  "expansion_decisions": [
+    "Integer-second wire timestamps; deadline is accepted start+source duration. Natural owner read completes at captured time>=deadline (boundary implementation decision; client eventually polls strictly after deadline). Early FINISH charges125*ceil(remaining seconds/900), zero at deadline; pending oldlevel remains applied until completion. Persist one occurrence/revision/duration; replay receipt resolves old outcome. Stock house_id-only fresh FINISH addresses currently locked occurrence; delayed request after a newer START may finish the newer occurrence for its current price. No perfect stale-intent guarantee; no cancellation/refund or invented server nonce."
+  ],
+  "qualification_limits": [
+    "Campaign function fixtures prove Dorm conditional behavior only, not the later campaign writer; named integration remains parent/stock gate",
+    "Stock W2afterI14 unpassed; no stock-client or parent acceptance from native tests",
+    "Pure domain tests do not qualify deploy/backfill/SQL/recovery; require exact frozen R2 PG/process suite"
+  ]
+}

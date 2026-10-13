@@ -12,8 +12,10 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres"
 	"gxb.local/backend/v2/internal/adapters/postgres/characterstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/contentstore"
+	"gxb.local/backend/v2/internal/adapters/postgres/dormstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/librarystore"
 	riveradapter "gxb.local/backend/v2/internal/adapters/river"
+	appdorm "gxb.local/backend/v2/internal/application/dormhouse"
 	gen "gxb.local/backend/v2/internal/application/generation"
 	applib "gxb.local/backend/v2/internal/application/librarylocal"
 	"gxb.local/backend/v2/internal/content/registry"
@@ -61,6 +63,9 @@ func deploy() error {
 		return e
 	}
 	if e = applib.RunBackfill(c, gen.TimedRunner{Binder: gen.Binder{Time: postgres.AuthoritativeTime{Queryer: p}}, Runner: service.Runner}, characterstore.Store{}, librarystore.Store{}, op); e != nil {
+		return e
+	}
+	if e = appdorm.RunBackfill(c, gen.TimedRunner{Binder: gen.Binder{Time: postgres.AuthoritativeTime{Queryer: p}}, Runner: service.Runner}, characterstore.Store{}, dormstore.Store{}, bundle.RevisionID(), op); e != nil {
 		return e
 	}
 	if e = guildbroadcastworker.PrepareDeployment(c, p, bundle.RevisionID()); e != nil {

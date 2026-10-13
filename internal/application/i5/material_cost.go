@@ -282,3 +282,31 @@ func (d MaterialCostDebiter) DebitMaterialCostTx(ctx context.Context, t tx.Tx, p
 	}
 	return prepared, nil
 }
+
+// PreparedMaterialDebit closes the existing debit plan before a caller mutates
+// another owner. It is opaque and valid only in the caller's current transaction.
+type PreparedMaterialDebit struct{ result MaterialDebitResult }
+
+func (d MaterialCostDebiter) PrepareMaterialDebitTx(ctx context.Context, t tx.Tx, pid identity.PlayerID, cost MaterialCost, op operation.Context) (*PreparedMaterialDebit, error) {
+	pf, e := d.preflightMaterialCostTx(ctx, t, pid, cost, op)
+	if e != nil {
+		return nil, e
+	}
+	if e = d.acquireMaterialCostLocksTx(ctx, t, pid, pf); e != nil {
+		return nil, e
+	}
+	result, e := d.prepareMaterialDebitStateTx(ctx, t, pid, pf)
+	if e != nil {
+		return nil, e
+	}
+	return &PreparedMaterialDebit{result}, nil
+}
+func (d MaterialCostDebiter) ApplyMaterialDebitTx(ctx context.Context, t tx.Tx, p *PreparedMaterialDebit) (MaterialDebitResult, error) {
+	if p == nil || t == nil {
+		return MaterialDebitResult{}, errors.New("i5: prepared debit required")
+	}
+	if e := d.applyPreparedMaterialDebitTx(ctx, t, p.result); e != nil {
+		return MaterialDebitResult{}, e
+	}
+	return p.result, nil
+}

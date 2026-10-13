@@ -131,10 +131,10 @@ type LibraryNormalCollectionRule struct {
 	StarHundredths    []int64 `json:"star_hundredths"`
 }
 type LibrarySpecialCollectionRule struct {
-	ID                  int64               `json:"id"`
-	Type                int64               `json:"type"`
-	RequiredSourceIDs   []int64             `json:"required_source_ids"`
-	Contribution LibraryContribution `json:"contribution"`
+	ID                int64               `json:"id"`
+	Type              int64               `json:"type"`
+	RequiredSourceIDs []int64             `json:"required_source_ids"`
+	Contribution      LibraryContribution `json:"contribution"`
 }
 
 func (r LibraryNormalCollectionRule) Validate() error {
