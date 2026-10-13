@@ -59,7 +59,7 @@ func superAsset(t *testing.T, p *pg.Pool, a identity.ActorContext, rev string) {
 	var h character.Hero
 	for _, v := range b.HeroCore.Templates {
 		if v.HeroKind == "SUPER" {
-			h = character.Hero{PlayerID: a.PlayerID, PartnerID: 4, TableID: v.TableID, OriginTableID: v.OriginTableID, Star: v.InitialStar, Level: 1, Color: 1, CreationContentRevision: rev, StateVersion: 1, CreatedAt: at, UpdatedAt: at}
+			h = character.Hero{RawSkills: character.NewHeroRawSkillSeed(), PlayerID: a.PlayerID, PartnerID: 4, TableID: v.TableID, OriginTableID: v.OriginTableID, Star: v.InitialStar, Level: 1, Color: 1, CreationContentRevision: rev, StateVersion: 1, CreatedAt: at, UpdatedAt: at}
 			break
 		}
 	}

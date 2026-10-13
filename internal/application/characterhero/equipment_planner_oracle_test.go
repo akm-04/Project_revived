@@ -152,7 +152,7 @@ func TestOneKeyPlannerMatchesSealedPass536AdversarialVectors(t *testing.T) {
 				t.Fatalf("equipped count=%d", len(v.Input.Equipped))
 			}
 			copy(equips[:], v.Input.Equipped)
-			h := character.Hero{PlayerID: 7, PartnerID: 1, TableID: v.Input.TableID, OriginTableID: v.Input.TableID, Star: 1, Level: v.Input.HeroLevel, Exp: v.Input.HeroExpTotal, Color: v.Input.Color, Equipment: equips, CreationContentRevision: progRev, StateVersion: 1, CreatedAt: now, UpdatedAt: now}
+			h := character.Hero{RawSkills: character.NewHeroRawSkillSeed(), PlayerID: 7, PartnerID: 1, TableID: v.Input.TableID, OriginTableID: v.Input.TableID, Star: 1, Level: v.Input.HeroLevel, Exp: v.Input.HeroExpTotal, Color: v.Input.Color, Equipment: equips, CreationContentRevision: progRev, StateVersion: 1, CreatedAt: now, UpdatedAt: now}
 			var pos [character.HeroEquipmentSlotCount]character.HeroEquipmentPosition
 			for slot := int64(1); slot <= character.HeroEquipmentSlotCount; slot++ {
 				pos[slot-1] = positions[[3]int64{h.TableID, h.Color, slot}]

@@ -16,7 +16,7 @@ func TestHeroRefIsOwnerScopedAndCarriesNoMutableState(t *testing.T) {
 			t.Fatalf("invalid HeroRef accepted: %+v", bad)
 		}
 	}
-	h := Hero{PlayerID: 7, PartnerID: 9}
+	h := Hero{RawSkills: NewHeroRawSkillSeed(), PlayerID: 7, PartnerID: 9}
 	if got := h.Ref(); got != ref {
 		t.Fatalf("Hero.Ref()=%+v want %+v", got, ref)
 	}

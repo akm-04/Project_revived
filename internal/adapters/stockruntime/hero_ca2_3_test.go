@@ -60,7 +60,7 @@ func (s *ca23HeroService) HeroPieces(context.Context, identity.ActorContext) (ma
 }
 func ca23Hero(kind character.HeroKind, table, partner, star int64) character.Hero {
 	now := time.Unix(1, 0).UTC()
-	return character.Hero{PlayerID: 100001, PartnerID: partner, TableID: table, OriginTableID: table, Kind: kind, Star: star, Level: 1, Exp: 0, Color: 1, CreationContentRevision: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", StateVersion: 1, CreatedAt: now, UpdatedAt: now}
+	return character.Hero{RawSkills: character.NewHeroRawSkillSeed(), PlayerID: 100001, PartnerID: partner, TableID: table, OriginTableID: table, Kind: kind, Star: star, Level: 1, Exp: 0, Color: 1, CreationContentRevision: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", StateVersion: 1, CreatedAt: now, UpdatedAt: now}
 }
 func (s *ca23HeroService) SummonNormal(_ context.Context, _ identity.ActorContext, tableID, stoneID, stoneNum int64, _ operation.Context) (character.Hero, error) {
 	s.summonArgs = []int64{tableID, stoneID, stoneNum}

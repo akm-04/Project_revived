@@ -26,8 +26,8 @@ INSERT INTO player_heroes(
   player_id,partner_id,table_id,origin_table_id,star,level,exp,color,
   equip_1,equip_2,equip_3,equip_4,equip_5,equip_6,
   fumo_1,fumo_2,fumo_3,fumo_4,fumo_5,fumo_6,
-  current_skin_id,illusion_skin_id,creation_content_revision,state_version,created_at,updated_at,is_like
-) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27);
+  current_skin_id,illusion_skin_id,creation_content_revision,state_version,created_at,updated_at,is_like,raw_skill_1,raw_skill_2,raw_skill_3,raw_skill_4,raw_skill_5,raw_skill_6,raw_skill_id_1,raw_skill_id_2,raw_skill_id_3,raw_skill_id_4,raw_skill_id_5,raw_skill_id_6,skill_seed_policy_id
+) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29,$30,$31,$32,$33,$34,$35,$36,$37,$38,$39,$40);
 
 -- name: ListPlayerHeroes :one
 SELECT COALESCE(jsonb_agg(jsonb_build_object(
@@ -38,20 +38,20 @@ SELECT COALESCE(jsonb_agg(jsonb_build_object(
   'practice_str',practice_str,'practice_int',practice_int,'practice_agi',practice_agi,
   'is_like',is_like,'current_skin_id',current_skin_id,'illusion_skin_id',illusion_skin_id,
   'creation_content_revision',creation_content_revision,'state_version',state_version,
-  'created_at',created_at,'updated_at',updated_at
+  'created_at',created_at,'updated_at',updated_at,'raw_skill_1',raw_skill_1,'raw_skill_2',raw_skill_2,'raw_skill_3',raw_skill_3,'raw_skill_4',raw_skill_4,'raw_skill_5',raw_skill_5,'raw_skill_6',raw_skill_6,'raw_skill_id_1',raw_skill_id_1,'raw_skill_id_2',raw_skill_id_2,'raw_skill_id_3',raw_skill_id_3,'raw_skill_id_4',raw_skill_id_4,'raw_skill_id_5',raw_skill_id_5,'raw_skill_id_6',raw_skill_id_6,'skill_seed_policy_id',skill_seed_policy_id
 ) ORDER BY partner_id),'[]'::jsonb)::text
 FROM player_heroes WHERE player_id=$1;
 
 -- name: ReadHeroByOrigin :one
-SELECT player_id,partner_id,table_id,origin_table_id,star,level,exp,color,equip_1,equip_2,equip_3,equip_4,equip_5,equip_6,fumo_1,fumo_2,fumo_3,fumo_4,fumo_5,fumo_6,practice_str,practice_int,practice_agi,current_skin_id,illusion_skin_id,is_like,creation_content_revision,state_version,created_at,updated_at
+SELECT player_id,partner_id,table_id,origin_table_id,star,level,exp,color,equip_1,equip_2,equip_3,equip_4,equip_5,equip_6,fumo_1,fumo_2,fumo_3,fumo_4,fumo_5,fumo_6,practice_str,practice_int,practice_agi,current_skin_id,illusion_skin_id,is_like,creation_content_revision,state_version,created_at,updated_at,raw_skill_1,raw_skill_2,raw_skill_3,raw_skill_4,raw_skill_5,raw_skill_6,raw_skill_id_1,raw_skill_id_2,raw_skill_id_3,raw_skill_id_4,raw_skill_id_5,raw_skill_id_6,skill_seed_policy_id
 FROM player_heroes WHERE player_id=$1 AND origin_table_id=$2;
 
 -- name: ReadHeroByPartnerID :one
-SELECT player_id,partner_id,table_id,origin_table_id,star,level,exp,color,equip_1,equip_2,equip_3,equip_4,equip_5,equip_6,fumo_1,fumo_2,fumo_3,fumo_4,fumo_5,fumo_6,practice_str,practice_int,practice_agi,current_skin_id,illusion_skin_id,is_like,creation_content_revision,state_version,created_at,updated_at
+SELECT player_id,partner_id,table_id,origin_table_id,star,level,exp,color,equip_1,equip_2,equip_3,equip_4,equip_5,equip_6,fumo_1,fumo_2,fumo_3,fumo_4,fumo_5,fumo_6,practice_str,practice_int,practice_agi,current_skin_id,illusion_skin_id,is_like,creation_content_revision,state_version,created_at,updated_at,raw_skill_1,raw_skill_2,raw_skill_3,raw_skill_4,raw_skill_5,raw_skill_6,raw_skill_id_1,raw_skill_id_2,raw_skill_id_3,raw_skill_id_4,raw_skill_id_5,raw_skill_id_6,skill_seed_policy_id
 FROM player_heroes WHERE player_id=$1 AND partner_id=$2;
 
 -- name: LockHeroByPartnerID :one
-SELECT player_id,partner_id,table_id,origin_table_id,star,level,exp,color,equip_1,equip_2,equip_3,equip_4,equip_5,equip_6,fumo_1,fumo_2,fumo_3,fumo_4,fumo_5,fumo_6,practice_str,practice_int,practice_agi,current_skin_id,illusion_skin_id,is_like,creation_content_revision,state_version,created_at,updated_at
+SELECT player_id,partner_id,table_id,origin_table_id,star,level,exp,color,equip_1,equip_2,equip_3,equip_4,equip_5,equip_6,fumo_1,fumo_2,fumo_3,fumo_4,fumo_5,fumo_6,practice_str,practice_int,practice_agi,current_skin_id,illusion_skin_id,is_like,creation_content_revision,state_version,created_at,updated_at,raw_skill_1,raw_skill_2,raw_skill_3,raw_skill_4,raw_skill_5,raw_skill_6,raw_skill_id_1,raw_skill_id_2,raw_skill_id_3,raw_skill_id_4,raw_skill_id_5,raw_skill_id_6,skill_seed_policy_id
 FROM player_heroes WHERE player_id=$1 AND partner_id=$2 FOR UPDATE;
 
 -- name: SaveHeroProgression :execrows
@@ -115,3 +115,7 @@ DO UPDATE SET is_show=EXCLUDED.is_show;
 -- name: SaveHeroBookmark :execrows
 UPDATE player_heroes SET is_like=$3,state_version=state_version+1,updated_at=$4
 WHERE player_id=$1 AND partner_id=$2 AND state_version=$5;
+
+-- name: SaveHeroSkillChoice :execrows
+UPDATE player_heroes SET raw_skill_id_1=$3,raw_skill_id_2=$4,raw_skill_id_3=$5,raw_skill_id_4=$6,raw_skill_id_5=$7,raw_skill_id_6=$8,state_version=state_version+1,updated_at=$9
+WHERE player_id=$1 AND partner_id=$2 AND state_version=$10;

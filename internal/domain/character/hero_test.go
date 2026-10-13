@@ -16,7 +16,7 @@ func TestHeroAndRootValidation(t *testing.T) {
 	if err := r.Validate(); err == nil {
 		t.Fatal("accepted invalid sort")
 	}
-	h := Hero{PlayerID: identity.PlayerID(1), PartnerID: 2, TableID: 10001001, OriginTableID: 10001001, Star: 1, Level: 1, Color: 1, CreationContentRevision: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", StateVersion: 1, CreatedAt: now, UpdatedAt: now}
+	h := Hero{RawSkills: NewHeroRawSkillSeed(), PlayerID: identity.PlayerID(1), PartnerID: 2, TableID: 10001001, OriginTableID: 10001001, Star: 1, Level: 1, Color: 1, CreationContentRevision: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", StateVersion: 1, CreatedAt: now, UpdatedAt: now}
 	if err := h.ValidatePersistent(); err != nil {
 		t.Fatal(err)
 	}

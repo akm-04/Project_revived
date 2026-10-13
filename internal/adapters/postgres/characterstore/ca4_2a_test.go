@@ -38,7 +38,7 @@ func (ca42Row) Scan(...any) error { return errors.New("unexpected row") }
 
 func ca42Hero() character.Hero {
 	now := time.Unix(100, 0).UTC()
-	return character.Hero{PlayerID: identity.PlayerID(1), PartnerID: 7, TableID: 11001, OriginTableID: 11001, Star: 3, Level: 20, Exp: 500, Color: 5,
+	return character.Hero{RawSkills: character.NewHeroRawSkillSeed(), PlayerID: identity.PlayerID(1), PartnerID: 7, TableID: 11001, OriginTableID: 11001, Star: 3, Level: 20, Exp: 500, Color: 5,
 		Equipment: character.HeroEquipmentSlots{1, 0, 1, 0, 1, 0}, CreationContentRevision: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", StateVersion: 4, CreatedAt: now, UpdatedAt: now}
 }
 

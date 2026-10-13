@@ -54,7 +54,7 @@ func (c *heroPracticeContributionContent) HeroPracticeThresholdsTx(_ context.Con
 func heroPracticeContributionFixture() character.Hero {
 	now := time.Unix(100, 0).UTC()
 	rev := "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-	return character.Hero{PlayerID: 7, PartnerID: 9, TableID: 10001003, OriginTableID: 10001003, Star: 1, Level: 1, Color: 1, Practice: character.PracticeAttrs{150, 160, 170}, CreationContentRevision: rev, StateVersion: 8, CreatedAt: now, UpdatedAt: now}
+	return character.Hero{RawSkills: character.NewHeroRawSkillSeed(), PlayerID: 7, PartnerID: 9, TableID: 10001003, OriginTableID: 10001003, Star: 1, Level: 1, Color: 1, Practice: character.PracticeAttrs{150, 160, 170}, CreationContentRevision: rev, StateVersion: 8, CreatedAt: now, UpdatedAt: now}
 }
 
 func TestHeroPracticeContributionReaderUsesAppliedOwnerStateAndPinnedRevision(t *testing.T) {

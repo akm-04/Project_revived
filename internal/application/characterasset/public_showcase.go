@@ -20,6 +20,7 @@ type PublicHeroCharacterFacet struct {
 	Equipment             ProviderObservation[RawEquipmentState]
 	Practice              ProviderObservation[PracticeContribution]
 	Appearance            ProviderObservation[HeroAppearanceContribution]
+	RawSkills             *HeroRawSkillObservation
 	HeroSkillsDisposition ProviderDisposition
 }
 
@@ -39,19 +40,19 @@ type PublicPetCharacterFacet struct {
 // resolution and consumer-specific provider requiredness remain outside CA8-6.
 type PublicShowcaseCharacterReader struct {
 	OwnerComposite *OwnedCompositeBuilder
+	RawSkills      HeroRawSkillObservationProvider
 }
 
 func (r PublicShowcaseCharacterReader) HeroTx(ctx context.Context, scope CoherentReadScope, ref character.HeroRef) (PublicHeroCharacterFacet, error) {
 	if r.OwnerComposite == nil {
 		return PublicHeroCharacterFacet{}, ErrPublicShowcaseCharacterRequest
 	}
-	if err := scope.Validate(); err != nil {
-		return PublicHeroCharacterFacet{}, err
+	if e := scope.Validate(); e != nil {
+		return PublicHeroCharacterFacet{}, e
 	}
-	if err := ref.Validate(); err != nil {
-		return PublicHeroCharacterFacet{}, err
+	if e := ref.Validate(); e != nil {
+		return PublicHeroCharacterFacet{}, e
 	}
-
 	owned, err := r.OwnerComposite.OwnedHeroTx(ctx, scope, ref)
 	if err != nil {
 		return PublicHeroCharacterFacet{}, err
@@ -59,15 +60,18 @@ func (r PublicShowcaseCharacterReader) HeroTx(ctx context.Context, scope Coheren
 	if owned.Origin != ActorOriginOwned || owned.Base.Ref != ref {
 		return PublicHeroCharacterFacet{}, fmt.Errorf("%w: public showcase Hero", ErrOwnedCompositeCoherence)
 	}
-
-	return PublicHeroCharacterFacet{
-		Origin:                owned.Origin,
-		Base:                  owned.Base,
-		Equipment:             owned.Equipment,
-		Practice:              owned.Practice,
-		Appearance:            owned.Appearance,
-		HeroSkillsDisposition: ProviderUnavailableUnqualified,
-	}, nil
+	var raw *HeroRawSkillObservation
+	if r.RawSkills != nil {
+		v, e := r.RawSkills.HeroRawSkillsTx(ctx, scope, ref)
+		if e != nil {
+			return PublicHeroCharacterFacet{}, e
+		}
+		if v.Ref != ref || v.StateVersion != owned.Base.StateVersion || v.ContentRevision != scope.ContentRevision || !v.ObservedAt.Equal(scope.ObservedAt) || v.Facts.Validate() != nil {
+			return PublicHeroCharacterFacet{}, ErrOwnedCompositeCoherence
+		}
+		raw = &v
+	}
+	return PublicHeroCharacterFacet{Origin: owned.Origin, Base: owned.Base, Equipment: owned.Equipment, Practice: owned.Practice, Appearance: owned.Appearance, RawSkills: raw, HeroSkillsDisposition: ProviderUnavailableUnqualified}, nil
 }
 
 func (r PublicShowcaseCharacterReader) PetTx(ctx context.Context, scope CoherentReadScope, ref character.PetRef) (PublicPetCharacterFacet, error) {

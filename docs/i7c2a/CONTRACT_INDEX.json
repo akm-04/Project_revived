@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "pass": "686.0",
+  "phase": "I7C",
+  "stage": "I7C-2A",
+  "full_node_path": "ROOT/I7/I7C/I7C-2/I7C-2A",
+  "sealed_base_sha256": "c06d73821a33b856bd16b61ef3b1a69d1c8472740b47263fe454ad7d5bb0dce2",
+  "accepted_backend_sha256": "a3aabb725a4a66df91133aa1c543d30ee263e3e93f590ad7ca25981f3c4ba7c6",
+  "working_backend_sha256": "f46f8dff7c546a24ba399dba3c210653684d9dfc411673ef62263c1040822014",
+  "product_implementation_authorized": false,
+  "product_implementation_started": false,
+  "product_tests": "NOT_RUN_RESEARCH_DESIGN_UNCHANGED_PRODUCT",
+  "status": "FROZEN_LEAF_DESIGN_REQUIRES_NORMAL_PUBLICATION",
+  "selected_contracts": [
+    {
+      "contract_id": "I7C2A_HERO_RAW_SKILL_LIFECYCLE",
+      "path": "00_PASSMAP/PASS686_I7C2A_HERO_RAW_SKILL_LIFECYCLE_CONTRACT.json",
+      "working_path": "i7c2a/HERO_RAW_SKILL_LIFECYCLE_CONTRACT.json",
+      "sha256": "ee41df79fb178247e65759598248d736479967bda259465197b08aad5ec74ea2"
+    }
+  ],
+  "inherited_contract_index": "00_PASSMAP/PASS685_I7C1_CONTRACT_INDEX.json",
+  "inherited_authority_paths": [
+    "00_PASSMAP/PASS662_I7B1_ARCHITECTURE_PROVIDER_CONTRACT.json",
+    "00_PASSMAP/PASS662_I7B1_ACCEPTANCE_EXIT_CONTRACT.json",
+    "00_PASSMAP/PASS662_I7B1_TRANSACTION_REFERENCE_REPLAY_CONTRACT.json",
+    "00_PASSMAP/PASS662_I7B1_WIRE_PRIVACY_POLICY_CONTRACT.json",
+    "00_PASSMAP/PASS662_I7B1_MEDIA_FRESHNESS_CONTRACT.json",
+    "00_PASSMAP/PASS616_CHARACTER_ASSET_CORE_CONTRACT.json",
+    "00_PASSMAP/PASS463_DESIGNS/D04.json",
+    "00_PASSMAP/PASS475_DESIGNS/D05.json",
+    "00_PASSMAP/PASS475_DESIGNS/D06.json",
+    "00_PASSMAP/PASS475_DESIGNS/D07.json",
+    "00_PASSMAP/PASS465_WORKPLACE_TIME_CONTRACT.json",
+    "00_PASSMAP/PASS509_PROFILE1_SCOPE_SELECTION.json"
+  ],
+  "source_research_snapshot": "00_PASSMAP/PASS686_I7C2A_CHECKPOINT_BINDING.json"
+}

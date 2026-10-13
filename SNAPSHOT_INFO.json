@@ -1,5 +1,5 @@
 {
-  "base_backend_sha256": "4bf526e43ce72dcdfbabf01519616758a9f1f643d2baae4ceff64cec19a860c0",
+  "base_backend_sha256": "f46f8dff7c546a24ba399dba3c210653684d9dfc411673ef62263c1040822014",
   "ca1_stage": "ACCEPTED_SEALED_PASS512",
   "ca2_1": "LOCAL_CHECKPOINT_ACCEPTED_PASS515; NOT_CA2_PHASE_ACCEPTANCE",
   "ca2_2": "LOCAL_CHECKPOINT_ACCEPTED_PASS517; NOT_CA2_PHASE_ACCEPTANCE",
@@ -490,7 +490,7 @@
   "snapshot": "D10 Publication immutable revisions/items, canonical scope and PostgreSQL visibility, read markers, source-shaped7/1537/8193/8194; inherited8 accepted656 preserved.",
   "stage": "I7B-2B_EXACT_COMBINED_CANDIDATE",
   "status": "FROZEN_NOT_ACCEPTED_QUALIFICATION_PENDING",
-  "version": "v0.111.0",
+  "version": "v0.112.0",
   "w2_claimed": false,
   "inherited_creation_metadata_provenance": {
     "archive": "gxb-backend-v2-v0.99.0-pass656-i7a8-accepted.zip",
@@ -513,8 +513,8 @@
   "i7a8b_content_revision": "9b81049a746521a5e8b57fd0fe42121470b0921481da257298ecf9c624f448e7",
   "i7a8b_parent_accepted_git_commit": "0d7593677a5ac1c7c2b669a73bd9166d8116418a",
   "i7a8b_authority": "Trusted Pass655 whole8B selection plus direct human implementation and closure authorization; frozen identity does not imply acceptance.",
-  "phase": "I7B6C_CONSUMER_FRESHNESS_COMPONENTS_REQUIRED_PRODUCERS_BLOCKED",
-  "next_action": "Exact6CcomponentportableR2/native/API+realtime/process/payloadrecovery qualification and scopedreality/evidencereconciliation. Full6B/parent6/B-E/I7/W2 remainunaccepted pendingrequiredmetrics/skills/stats/history/richproviders.",
+  "phase": "I7C2A_RAW_SKILL_LIFECYCLE_CANDIDATE",
+  "next_action": "Exact frozen I7C2A portableR2 PG/process/upgrade/source/inherited qualification, independent reality reconciliation, then selected PassMap closure only on PASS.",
   "i7a9_product_accepted": false,
   "i7a9_gate_status_at_identity_freeze": "NOT_RUN",
   "i7a9_contract": "Selected normal658 I7A9 contract index in PassMap",
@@ -538,7 +538,7 @@
   "i7b2a_gate_status_at_identity_freeze": "NOT_RUN",
   "inherited_stage_metadata_is_historical": true,
   "i7b2a_contract": "docs/i7b2a/IMPLEMENTATION_SPEC.json",
-  "research_design_passmap_sha256": "1ec90c43df1c8d4b96585f7ef124753724d12723972886b71933f895d3aa8054",
+  "research_design_passmap_sha256": "d77bd23c3af22360dcfa46ff4ce2c74de1b7b45c05a4af43ccc194a1abab90e0",
   "i7b2a_acceptance_pass": "664.0",
   "i7b2b_product_accepted": false,
   "i7b2b_gate_status_at_identity_freeze": "NOT_RUN",
@@ -575,7 +575,7 @@
   "i7b5b_contract": "docs/i7b5b/IMPLEMENTATION_PLAN.json",
   "i7b5b_implementation_authorized": true,
   "i7b5b_implementation_started": true,
-  "current_migration_high_water": "00047_i7b6a_player_display.sql",
+  "current_migration_high_water": "00048_i7c2a_hero_raw_skills.sql",
   "i7b6a_product_accepted": true,
   "i7b6_parent_accepted": false,
   "i7b6a_gate_status_at_identity_freeze": "NOT_RUN",
@@ -592,5 +592,12 @@
   "i7b6c_gate_status_at_identity_freeze": "NOT_RUN",
   "i7b6c_contract": "docs/i7b6c/IMPLEMENTATION_PLAN.json",
   "i7b6c_implementation_authorized": true,
-  "i7b6c_implementation_started": true
+  "i7b6c_implementation_started": true,
+  "i7c2a_implementation_authorized": true,
+  "i7c2a_implementation_started": true,
+  "i7c2a_product_accepted": false,
+  "i7c2a_gate_status_at_identity_freeze": "NOT_RUN",
+  "i7c2a_contract": "docs/i7c2a/HERO_RAW_SKILL_LIFECYCLE_CONTRACT.json",
+  "i7c_product_accepted": false,
+  "i7_product_accepted": false
 }

@@ -70,7 +70,7 @@ func (*heroAppearanceContributionContent) AppearancePetStyleTx(context.Context, 
 
 func heroAppearanceContributionFixture() character.Hero {
 	now := time.Unix(100, 0).UTC()
-	return character.Hero{PlayerID: 7, PartnerID: 9, TableID: 10001003, OriginTableID: 1001, Star: 1, Level: 1, Color: 1, CurrentSkinID: 40002006, IllusionSkinID: -1, CreationContentRevision: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", StateVersion: 8, CreatedAt: now, UpdatedAt: now}
+	return character.Hero{RawSkills: character.NewHeroRawSkillSeed(), PlayerID: 7, PartnerID: 9, TableID: 10001003, OriginTableID: 1001, Star: 1, Level: 1, Color: 1, CurrentSkinID: 40002006, IllusionSkinID: -1, CreationContentRevision: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", StateVersion: 8, CreatedAt: now, UpdatedAt: now}
 }
 
 func TestHeroAppearanceContributionReaderUsesPinnedRevisionAndCreationKindProvenance(t *testing.T) {

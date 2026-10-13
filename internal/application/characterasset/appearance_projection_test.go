@@ -31,7 +31,7 @@ func (f appearanceReadFake) AppearancePetStyle(_ context.Context, _ string, id i
 func appearanceHero(kind character.HeroKind) character.Hero {
 	now := time.Unix(100, 0).UTC()
 	return character.Hero{
-		PlayerID: identity.PlayerID(7), PartnerID: 9, TableID: 10001001, OriginTableID: 10001001, Kind: kind,
+		RawSkills: character.NewHeroRawSkillSeed(), PlayerID: identity.PlayerID(7), PartnerID: 9, TableID: 10001001, OriginTableID: 10001001, Kind: kind,
 		Star: 1, Level: 1, Color: 1, CurrentSkinID: 40001001, IllusionSkinID: 40001002,
 		CreationContentRevision: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
 		StateVersion:            5, CreatedAt: now, UpdatedAt: now,

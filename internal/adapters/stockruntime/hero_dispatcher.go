@@ -55,7 +55,11 @@ type HeroBookmarkServicePort interface {
 	SetBookmark(context.Context, identity.ActorContext, int64, int64, operation.Context) (apphero.BookmarkResult, error)
 }
 
+type HeroSkillChoicePort interface {
+	ChangeSkill(context.Context, identity.ActorContext, int64, int64, int64, operation.Context) (apphero.SkillChoiceResult, error)
+}
 type HeroDispatcher struct {
+	Skills     HeroSkillChoicePort
 	Bookmark   HeroBookmarkServicePort
 	Authority  apprealtime.GameplayAuthorityPort
 	Service    HeroServicePort
@@ -73,6 +77,25 @@ func (d HeroDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReque
 		return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Body: map[string]any{"error": "hero_unavailable"}}
 	}
 	switch req.Envelope.MID {
+	case 2144:
+		if d.Skills == nil {
+			return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Body: map[string]any{"error": "hero_skills_unavailable"}}
+		}
+		if !onlyStockGameplayParams(req.Envelope.Params, "partner_id", "skill_index", "skill_item") {
+			return badHero("invalid_hero_skill_choice")
+		}
+		partner, e1 := requiredInt64(req.Envelope.Params, "partner_id")
+		slot, e2 := requiredInt64(req.Envelope.Params, "skill_index")
+		book, e3 := requiredInt64(req.Envelope.Params, "skill_item")
+		if e1 != nil || e2 != nil || e3 != nil || partner <= 0 || slot != 5 || book <= 0 {
+			return badHero("invalid_hero_skill_choice")
+		}
+		result, e := d.Skills.ChangeSkill(ctx, actor, partner, slot, book, req.Envelope.Operation)
+		if e != nil {
+			return failHero(e)
+		}
+		return httpedge.Response{HTTPStatus: http.StatusOK, Body: map[string]any{"skill_ids": result.SkillIDs}}
+
 	case 3116: // HERO_COLLOCATION is desired assignment, never a server toggle.
 		if d.Bookmark == nil {
 			return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Body: map[string]any{"error": "hero_bookmark_unavailable"}}

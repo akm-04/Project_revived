@@ -192,7 +192,7 @@ func TestRosterRehydratesKindFromCreationRevisionAfterReload(t *testing.T) {
 	rev := "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
 	st := &store{
 		root:   character.HeroRoot{PlayerID: 7, NextPartnerID: 43, StateVersion: 2, CreatedAt: now, UpdatedAt: now},
-		heroes: []character.Hero{{PlayerID: 7, PartnerID: 42, TableID: 10001062, OriginTableID: 10001062, Star: 5, Level: 17, Exp: 1234, Color: 1, CreationContentRevision: rev, StateVersion: 4, CreatedAt: now, UpdatedAt: now}},
+		heroes: []character.Hero{{RawSkills: character.NewHeroRawSkillSeed(), PlayerID: 7, PartnerID: 42, TableID: 10001062, OriginTableID: 10001062, Star: 5, Level: 17, Exp: 1234, Color: 1, CreationContentRevision: rev, StateVersion: 4, CreatedAt: now, UpdatedAt: now}},
 	}
 	s := Service{Runner: tx.Runner{DB: fakeDB{}}, Store: st, Fencer: &fence{}, Content: gate(true), Receipts: &receipts{}, ReceiptRead: &receipts{}}
 	root, heroes, err := s.Roster(context.Background(), testActor(t))
@@ -211,7 +211,7 @@ func TestRosterRehydratesKindFromCreationRevisionAfterReload(t *testing.T) {
 func TestRosterViewPinsActiveRevisionAndDerivesSixNormalHeroFumoLevels(t *testing.T) {
 	now := time.Unix(1, 0).UTC()
 	rev := "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-	h := character.Hero{PlayerID: 7, PartnerID: 42, TableID: 10001062, OriginTableID: 10001062, Star: 5, Level: 17, Exp: 1234, Color: 3, Equipment: character.HeroEquipmentSlots{1, 0, 0, 0, 0, 0}, Fumo: character.HeroFumoSlots{60, 0, 0, 0, 0, 0}, CreationContentRevision: rev, StateVersion: 4, CreatedAt: now, UpdatedAt: now}
+	h := character.Hero{RawSkills: character.NewHeroRawSkillSeed(), PlayerID: 7, PartnerID: 42, TableID: 10001062, OriginTableID: 10001062, Star: 5, Level: 17, Exp: 1234, Color: 3, Equipment: character.HeroEquipmentSlots{1, 0, 0, 0, 0, 0}, Fumo: character.HeroFumoSlots{60, 0, 0, 0, 0, 0}, CreationContentRevision: rev, StateVersion: 4, CreatedAt: now, UpdatedAt: now}
 	st := &store{root: character.HeroRoot{PlayerID: 7, NextPartnerID: 43, StateVersion: 2, CreatedAt: now, UpdatedAt: now}, heroes: []character.Hero{h}}
 	itemID := character.EquipmentTemplateID(20001001)
 	rp := rosterProjection{equipmentOK: true, fumoOK: true, positions: map[int64]character.HeroEquipmentPosition{1: {HeroTableID: h.TableID, Color: h.Color, Slot: 1, ItemID: itemID, OrdinaryEligible: true}}, targets: map[character.EquipmentTemplateID]character.HeroFumoTarget{itemID: {ItemID: itemID, ThresholdIncrements: []int64{20, 40, 40}, TotalCap: 100, ManaPerFumo: 1, StageDeltaByAttr: []map[int64]string{{1: "1"}, {1: "1"}, {1: "1"}}}}}

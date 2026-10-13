@@ -267,7 +267,7 @@ func assets(t *testing.T, p *pg.Pool, a identity.ActorContext, rev string) {
 		t.Fatal("hero fixture candidates missing")
 	}
 	for i, id := range []int64{heroIDs[0], heroIDs[1], heroIDs[0]} {
-		h := character.Hero{PlayerID: a.PlayerID, PartnerID: int64(i + 1), TableID: id, OriginTableID: heroIDs[i], Star: 1, Level: 1, Color: 1, CreationContentRevision: rev, StateVersion: 1, CreatedAt: at, UpdatedAt: at}
+		h := character.Hero{RawSkills: character.NewHeroRawSkillSeed(), PlayerID: a.PlayerID, PartnerID: int64(i + 1), TableID: id, OriginTableID: heroIDs[i], Star: 1, Level: 1, Color: 1, CreationContentRevision: rev, StateVersion: 1, CreatedAt: at, UpdatedAt: at}
 		if e = (characterstore.Store{}).InsertHeroTx(ctx, tr, h); e != nil {
 			t.Fatal(e)
 		}

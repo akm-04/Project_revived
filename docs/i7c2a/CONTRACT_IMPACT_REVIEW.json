@@ -1,0 +1,401 @@
+{
+  "schema_version": 1,
+  "pass": "686.0",
+  "phase": "I7C",
+  "stage": "I7C-2A",
+  "full_node_path": "ROOT/I7/I7C/I7C-2/I7C-2A",
+  "sealed_base_sha256": "c06d73821a33b856bd16b61ef3b1a69d1c8472740b47263fe454ad7d5bb0dce2",
+  "accepted_backend_sha256": "a3aabb725a4a66df91133aa1c543d30ee263e3e93f590ad7ca25981f3c4ba7c6",
+  "working_backend_sha256": "f46f8dff7c546a24ba399dba3c210653684d9dfc411673ef62263c1040822014",
+  "product_implementation_authorized": false,
+  "product_implementation_started": false,
+  "product_tests": "NOT_RUN_RESEARCH_DESIGN_UNCHANGED_PRODUCT",
+  "status": "RESEARCH_DESIGN_RECONCILED_WITH_SELECTED_FOUNDATIONS",
+  "selected_parent_contracts": [
+    {
+      "contract_id": "I7C1_PROVIDER_SCOPE_OWNERSHIP",
+      "path": "00_PASSMAP/PASS685_I7C1_PROVIDER_SCOPE_OWNERSHIP_CONTRACT.json",
+      "working_path": "I7C1_PROVIDER_SCOPE_OWNERSHIP_CONTRACT.json",
+      "sha256": "73f4e5b8e8603a68380be31d4aec7a5f9f10ecd9b68246b56dfb350ae36ea943"
+    },
+    {
+      "contract_id": "I7C1_DELIVERY_ACCEPTANCE",
+      "path": "00_PASSMAP/PASS685_I7C1_DELIVERY_ACCEPTANCE_CONTRACT.json",
+      "working_path": "I7C1_DELIVERY_ACCEPTANCE_CONTRACT.json",
+      "sha256": "992b38344aef6196e99cd2f17dc8810c2e962017db8de5c1a563890d54cf49a0"
+    },
+    {
+      "contract_id": "I7C1_RESEARCH_AMENDMENT",
+      "path": "00_PASSMAP/PASS685_I7C1_RESEARCH_AMENDMENT_CONTRACT.json",
+      "working_path": "I7C1_RESEARCH_AMENDMENT_CONTRACT.json",
+      "sha256": "6e29a18a81e820f53a5accd471cf367c625cd48537fa37094f6b17fa0b88b8e9"
+    }
+  ],
+  "inherited_authority_paths": [
+    "00_PASSMAP/PASS662_I7B1_ARCHITECTURE_PROVIDER_CONTRACT.json",
+    "00_PASSMAP/PASS662_I7B1_ACCEPTANCE_EXIT_CONTRACT.json",
+    "00_PASSMAP/PASS662_I7B1_TRANSACTION_REFERENCE_REPLAY_CONTRACT.json",
+    "00_PASSMAP/PASS662_I7B1_WIRE_PRIVACY_POLICY_CONTRACT.json",
+    "00_PASSMAP/PASS662_I7B1_MEDIA_FRESHNESS_CONTRACT.json",
+    "00_PASSMAP/PASS616_CHARACTER_ASSET_CORE_CONTRACT.json",
+    "00_PASSMAP/PASS463_DESIGNS/D04.json",
+    "00_PASSMAP/PASS475_DESIGNS/D05.json",
+    "00_PASSMAP/PASS475_DESIGNS/D06.json",
+    "00_PASSMAP/PASS475_DESIGNS/D07.json",
+    "00_PASSMAP/PASS465_WORKPLACE_TIME_CONTRACT.json",
+    "00_PASSMAP/PASS509_PROFILE1_SCOPE_SELECTION.json",
+    "00_PASSMAP/PASS660_I7A1_CONTRACT_INDEX.json",
+    "00_PASSMAP/PASS513_CA2_IMPLEMENTATION_CONTRACT.json"
+  ],
+  "operation_traces": [
+    {
+      "operation": "Fresh acquisition/materialization",
+      "behavior": "Common newHero + InsertHeroTx; seed same transaction as costs and allocation. Existing semantic receipts return raw facts snapshot.",
+      "owner_ports": "CharacterHero / I5 typed materialization",
+      "required_proof": "Fresh PG acquisitions, grants, retry, rollback and allocator concurrency"
+    },
+    {
+      "operation": "Legacy upgrade",
+      "behavior": "Forward-only next migration, never edit00014..00047. Add raw fields without implicit per-read defaulting. Only missing facts receive approved seed.",
+      "owner_ports": "CharacterHero SQL ownership / inherited migration lock",
+      "required_proof": "00047 -> new schema upgrade; base identity/version/allocator/receipt preservation"
+    },
+    {
+      "operation": "KongMing change",
+      "behavior": "MID2144 exact V1 gate and five mappings; preserve all other slots/levels. No book consumption.",
+      "owner_ports": "CharacterHero + I5 typed stack observation and inherited actor/reference/version locks",
+      "required_proof": "Foreign Hero, base/non-KongMing, wrong slot/item/missing book, concurrent ownership change, exact receipt replay and unknown commit"
+    },
+    {
+      "operation": "Read/reload",
+      "behavior": "StockHero from canonical arrays; owned raw observation retains coherent queryer, Hero version, captured instant and pinned content; no live read during operation replay.",
+      "owner_ports": "Existing Character projection/Showcase read ports",
+      "required_proof": "MID1/MID49 reload, public raw reader coherence and no false final-stat qualification"
+    },
+    {
+      "operation": "Other Hero lifecycle",
+      "behavior": "Every existing save/progression/appearance/bookmark must retain raw columns. Existing delete/retirement outcome rules remain unchanged.",
+      "owner_ports": "Existing owner aggregate / D04 references",
+      "required_proof": "Affected progression/preservation/retirement and version-consistent reads; no new unrelated retirement route"
+    },
+    {
+      "operation": "Derived consumers",
+      "behavior": "Qualified content supplies ordinary IDs and special choice alternatives; stat/buff calculation waits for3A/3B and twice-awake rules for2I.",
+      "owner_ports": "Existing ContentRegistry / future stat reader",
+      "required_proof": "Content/source identity, raw-vs-derived separation, Normal/Super/Pet distinction"
+    }
+  ],
+  "not_reopened": "Accepted product evidence remains valid for unchanged111/F3. A future domain/schema/projection edit invalidates affected Hero acquisition/replay/reload checks only; final exact candidate gate follows existing contracts.",
+  "new_contracts": [
+    "I7C2A_HERO_RAW_SKILL_LIFECYCLE"
+  ],
+  "scope_delta": "Bounded MID2144 selected because a nondefault KongMing choice needs a real canonical producer; no new leaf or general skill economy.",
+  "original_server_truth_claimed": false,
+  "i7a4_obligations": [
+    {
+      "id": "I7A4-OWNERS_TX_LOCK",
+      "disposition": "PRESERVED",
+      "rationale": "6C preserves owner commands, lock order, clocks/epochs/quotas, bounded selection/window/notice IDs, auth, recovery and singleconnWriter. Canonical fallback changes ephemeral presentation and exact-name source selection only; no new owner, hint authority, room or ACK. Future DM metadata is absent-omitted and old snapshot bytes preserved. Existing minimal Social188 wire shape remains; source-qualified chat np vocabulary extension only. Affected native/process/privacy/recovery tests required as scoped in6C plan; no fullparent acceptance.",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS683_I7B6C_RESEARCH/IMPLEMENTATION_PLAN.json"
+        }
+      ]
+    },
+    {
+      "id": "I7A4-GENERATION_D11",
+      "disposition": "PRESERVED",
+      "rationale": "6C preserves owner commands, lock order, clocks/epochs/quotas, bounded selection/window/notice IDs, auth, recovery and singleconnWriter. Canonical fallback changes ephemeral presentation and exact-name source selection only; no new owner, hint authority, room or ACK. Future DM metadata is absent-omitted and old snapshot bytes preserved. Existing minimal Social188 wire shape remains; source-qualified chat np vocabulary extension only. Affected native/process/privacy/recovery tests required as scoped in6C plan; no fullparent acceptance.",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS683_I7B6C_RESEARCH/IMPLEMENTATION_PLAN.json"
+        }
+      ]
+    },
+    {
+      "id": "I7A4-TIME_QUOTA",
+      "disposition": "PRESERVED",
+      "rationale": "6C preserves owner commands, lock order, clocks/epochs/quotas, bounded selection/window/notice IDs, auth, recovery and singleconnWriter. Canonical fallback changes ephemeral presentation and exact-name source selection only; no new owner, hint authority, room or ACK. Future DM metadata is absent-omitted and old snapshot bytes preserved. Existing minimal Social188 wire shape remains; source-qualified chat np vocabulary extension only. Affected native/process/privacy/recovery tests required as scoped in6C plan; no fullparent acceptance.",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS683_I7B6C_RESEARCH/IMPLEMENTATION_PLAN.json"
+        }
+      ]
+    },
+    {
+      "id": "I7A4-NOTICE_ID_SOURCE",
+      "disposition": "PRESERVED",
+      "rationale": "6C preserves owner commands, lock order, clocks/epochs/quotas, bounded selection/window/notice IDs, auth, recovery and singleconnWriter. Canonical fallback changes ephemeral presentation and exact-name source selection only; no new owner, hint authority, room or ACK. Future DM metadata is absent-omitted and old snapshot bytes preserved. Existing minimal Social188 wire shape remains; source-qualified chat np vocabulary extension only. Affected native/process/privacy/recovery tests required as scoped in6C plan; no fullparent acceptance.",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS683_I7B6C_RESEARCH/IMPLEMENTATION_PLAN.json"
+        }
+      ]
+    },
+    {
+      "id": "I7A4-NULL_AND_WINDOW",
+      "disposition": "PRESERVED",
+      "rationale": "6C preserves owner commands, lock order, clocks/epochs/quotas, bounded selection/window/notice IDs, auth, recovery and singleconnWriter. Canonical fallback changes ephemeral presentation and exact-name source selection only; no new owner, hint authority, room or ACK. Future DM metadata is absent-omitted and old snapshot bytes preserved. Existing minimal Social188 wire shape remains; source-qualified chat np vocabulary extension only. Affected native/process/privacy/recovery tests required as scoped in6C plan; no fullparent acceptance.",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS683_I7B6C_RESEARCH/IMPLEMENTATION_PLAN.json"
+        }
+      ]
+    },
+    {
+      "id": "I7A4-READ_SNAPSHOT",
+      "disposition": "PRESERVED",
+      "rationale": "6C preserves owner commands, lock order, clocks/epochs/quotas, bounded selection/window/notice IDs, auth, recovery and singleconnWriter. Canonical fallback changes ephemeral presentation and exact-name source selection only; no new owner, hint authority, room or ACK. Future DM metadata is absent-omitted and old snapshot bytes preserved. Existing minimal Social188 wire shape remains; source-qualified chat np vocabulary extension only. Affected native/process/privacy/recovery tests required as scoped in6C plan; no fullparent acceptance.",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS683_I7B6C_RESEARCH/IMPLEMENTATION_PLAN.json"
+        }
+      ]
+    },
+    {
+      "id": "I7A4-DISCOVERY_ANCHOR",
+      "disposition": "PRESERVED",
+      "rationale": "6C preserves owner commands, lock order, clocks/epochs/quotas, bounded selection/window/notice IDs, auth, recovery and singleconnWriter. Canonical fallback changes ephemeral presentation and exact-name source selection only; no new owner, hint authority, room or ACK. Future DM metadata is absent-omitted and old snapshot bytes preserved. Existing minimal Social188 wire shape remains; source-qualified chat np vocabulary extension only. Affected native/process/privacy/recovery tests required as scoped in6C plan; no fullparent acceptance.",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS683_I7B6C_RESEARCH/IMPLEMENTATION_PLAN.json"
+        }
+      ]
+    },
+    {
+      "id": "I7A4-AUTH_BOOT_ACTIVATION",
+      "disposition": "PRESERVED",
+      "rationale": "6C preserves owner commands, lock order, clocks/epochs/quotas, bounded selection/window/notice IDs, auth, recovery and singleconnWriter. Canonical fallback changes ephemeral presentation and exact-name source selection only; no new owner, hint authority, room or ACK. Future DM metadata is absent-omitted and old snapshot bytes preserved. Existing minimal Social188 wire shape remains; source-qualified chat np vocabulary extension only. Affected native/process/privacy/recovery tests required as scoped in6C plan; no fullparent acceptance.",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS683_I7B6C_RESEARCH/IMPLEMENTATION_PLAN.json"
+        }
+      ]
+    },
+    {
+      "id": "I7A4-WIRE_GUARDS",
+      "disposition": "PRESERVED",
+      "rationale": "6C preserves owner commands, lock order, clocks/epochs/quotas, bounded selection/window/notice IDs, auth, recovery and singleconnWriter. Canonical fallback changes ephemeral presentation and exact-name source selection only; no new owner, hint authority, room or ACK. Future DM metadata is absent-omitted and old snapshot bytes preserved. Existing minimal Social188 wire shape remains; source-qualified chat np vocabulary extension only. Affected native/process/privacy/recovery tests required as scoped in6C plan; no fullparent acceptance.",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS683_I7B6C_RESEARCH/IMPLEMENTATION_PLAN.json"
+        }
+      ]
+    },
+    {
+      "id": "I7A4-CANONICAL_HINT_WORLD",
+      "disposition": "PRESERVED",
+      "rationale": "6C preserves owner commands, lock order, clocks/epochs/quotas, bounded selection/window/notice IDs, auth, recovery and singleconnWriter. Canonical fallback changes ephemeral presentation and exact-name source selection only; no new owner, hint authority, room or ACK. Future DM metadata is absent-omitted and old snapshot bytes preserved. Existing minimal Social188 wire shape remains; source-qualified chat np vocabulary extension only. Affected native/process/privacy/recovery tests required as scoped in6C plan; no fullparent acceptance.",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS683_I7B6C_RESEARCH/IMPLEMENTATION_PLAN.json"
+        }
+      ]
+    },
+    {
+      "id": "I7A4-POSTCOMMIT_RECOVERY",
+      "disposition": "PRESERVED",
+      "rationale": "6C preserves owner commands, lock order, clocks/epochs/quotas, bounded selection/window/notice IDs, auth, recovery and singleconnWriter. Canonical fallback changes ephemeral presentation and exact-name source selection only; no new owner, hint authority, room or ACK. Future DM metadata is absent-omitted and old snapshot bytes preserved. Existing minimal Social188 wire shape remains; source-qualified chat np vocabulary extension only. Affected native/process/privacy/recovery tests required as scoped in6C plan; no fullparent acceptance.",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS683_I7B6C_RESEARCH/IMPLEMENTATION_PLAN.json"
+        }
+      ]
+    },
+    {
+      "id": "I7A4-FUTURE_PROVIDER_EXTENSION",
+      "disposition": "PRESERVED",
+      "rationale": "6C preserves owner commands, lock order, clocks/epochs/quotas, bounded selection/window/notice IDs, auth, recovery and singleconnWriter. Canonical fallback changes ephemeral presentation and exact-name source selection only; no new owner, hint authority, room or ACK. Future DM metadata is absent-omitted and old snapshot bytes preserved. Existing minimal Social188 wire shape remains; source-qualified chat np vocabulary extension only. Affected native/process/privacy/recovery tests required as scoped in6C plan; no fullparent acceptance.",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS683_I7B6C_RESEARCH/IMPLEMENTATION_PLAN.json"
+        }
+      ]
+    }
+  ],
+  "i7a5a_obligations": [
+    {
+      "id": "I7A5A-EXACT_HANDLE_ROLE",
+      "disposition": "PRESERVED",
+      "rationale": "6C preserves owner commands, lock order, clocks/epochs/quotas, bounded selection/window/notice IDs, auth, recovery and singleconnWriter. Canonical fallback changes ephemeral presentation and exact-name source selection only; no new owner, hint authority, room or ACK. Future DM metadata is absent-omitted and old snapshot bytes preserved. Existing minimal Social188 wire shape remains; source-qualified chat np vocabulary extension only. Affected native/process/privacy/recovery tests required as scoped in6C plan; no fullparent acceptance.",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS683_I7B6C_RESEARCH/IMPLEMENTATION_PLAN.json"
+        }
+      ]
+    },
+    {
+      "id": "I7A5A-GUILD_JOIN_INCARNATION",
+      "disposition": "PRESERVED",
+      "rationale": "6C preserves owner commands, lock order, clocks/epochs/quotas, bounded selection/window/notice IDs, auth, recovery and singleconnWriter. Canonical fallback changes ephemeral presentation and exact-name source selection only; no new owner, hint authority, room or ACK. Future DM metadata is absent-omitted and old snapshot bytes preserved. Existing minimal Social188 wire shape remains; source-qualified chat np vocabulary extension only. Affected native/process/privacy/recovery tests required as scoped in6C plan; no fullparent acceptance.",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS683_I7B6C_RESEARCH/IMPLEMENTATION_PLAN.json"
+        }
+      ]
+    },
+    {
+      "id": "I7A5A-CANONICAL_SENDER_WIRE",
+      "disposition": "PRESERVED",
+      "rationale": "6C preserves owner commands, lock order, clocks/epochs/quotas, bounded selection/window/notice IDs, auth, recovery and singleconnWriter. Canonical fallback changes ephemeral presentation and exact-name source selection only; no new owner, hint authority, room or ACK. Future DM metadata is absent-omitted and old snapshot bytes preserved. Existing minimal Social188 wire shape remains; source-qualified chat np vocabulary extension only. Affected native/process/privacy/recovery tests required as scoped in6C plan; no fullparent acceptance.",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS683_I7B6C_RESEARCH/IMPLEMENTATION_PLAN.json"
+        }
+      ]
+    },
+    {
+      "id": "I7A5A-CALLER_TX_OBSERVATION",
+      "disposition": "PRESERVED",
+      "rationale": "6C preserves owner commands, lock order, clocks/epochs/quotas, bounded selection/window/notice IDs, auth, recovery and singleconnWriter. Canonical fallback changes ephemeral presentation and exact-name source selection only; no new owner, hint authority, room or ACK. Future DM metadata is absent-omitted and old snapshot bytes preserved. Existing minimal Social188 wire shape remains; source-qualified chat np vocabulary extension only. Affected native/process/privacy/recovery tests required as scoped in6C plan; no fullparent acceptance.",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS683_I7B6C_RESEARCH/IMPLEMENTATION_PLAN.json"
+        }
+      ]
+    },
+    {
+      "id": "I7A5A-BOUNDED_FANOUT_OUTCOME",
+      "disposition": "PRESERVED",
+      "rationale": "6C preserves owner commands, lock order, clocks/epochs/quotas, bounded selection/window/notice IDs, auth, recovery and singleconnWriter. Canonical fallback changes ephemeral presentation and exact-name source selection only; no new owner, hint authority, room or ACK. Future DM metadata is absent-omitted and old snapshot bytes preserved. Existing minimal Social188 wire shape remains; source-qualified chat np vocabulary extension only. Affected native/process/privacy/recovery tests required as scoped in6C plan; no fullparent acceptance.",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS683_I7B6C_RESEARCH/IMPLEMENTATION_PLAN.json"
+        }
+      ]
+    },
+    {
+      "id": "I7A5A-EPHEMERAL_NO_REPLAY",
+      "disposition": "PRESERVED",
+      "rationale": "6C preserves owner commands, lock order, clocks/epochs/quotas, bounded selection/window/notice IDs, auth, recovery and singleconnWriter. Canonical fallback changes ephemeral presentation and exact-name source selection only; no new owner, hint authority, room or ACK. Future DM metadata is absent-omitted and old snapshot bytes preserved. Existing minimal Social188 wire shape remains; source-qualified chat np vocabulary extension only. Affected native/process/privacy/recovery tests required as scoped in6C plan; no fullparent acceptance.",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS683_I7B6C_RESEARCH/IMPLEMENTATION_PLAN.json"
+        }
+      ]
+    },
+    {
+      "id": "I7A5A-FUTURE_PRODUCER_GATE",
+      "disposition": "PRESERVED",
+      "rationale": "6C preserves owner commands, lock order, clocks/epochs/quotas, bounded selection/window/notice IDs, auth, recovery and singleconnWriter. Canonical fallback changes ephemeral presentation and exact-name source selection only; no new owner, hint authority, room or ACK. Future DM metadata is absent-omitted and old snapshot bytes preserved. Existing minimal Social188 wire shape remains; source-qualified chat np vocabulary extension only. Affected native/process/privacy/recovery tests required as scoped in6C plan; no fullparent acceptance.",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS683_I7B6C_RESEARCH/IMPLEMENTATION_PLAN.json"
+        }
+      ]
+    }
+  ],
+  "i7a5b_obligations": [
+    {
+      "id": "I7A5B-FINITE_VARIANTS",
+      "disposition": "PRESERVED",
+      "rationale": "6C preserves owner commands, lock order, clocks/epochs/quotas, bounded selection/window/notice IDs, auth, recovery and singleconnWriter. Canonical fallback changes ephemeral presentation and exact-name source selection only; no new owner, hint authority, room or ACK. Future DM metadata is absent-omitted and old snapshot bytes preserved. Existing minimal Social188 wire shape remains; source-qualified chat np vocabulary extension only. Affected native/process/privacy/recovery tests required as scoped in6C plan; no fullparent acceptance.",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS683_I7B6C_RESEARCH/IMPLEMENTATION_PLAN.json"
+        }
+      ]
+    },
+    {
+      "id": "I7A5B-ORDINARY140_STRUCTURED_QUALIFIER",
+      "disposition": "PRESERVED",
+      "rationale": "6C preserves owner commands, lock order, clocks/epochs/quotas, bounded selection/window/notice IDs, auth, recovery and singleconnWriter. Canonical fallback changes ephemeral presentation and exact-name source selection only; no new owner, hint authority, room or ACK. Future DM metadata is absent-omitted and old snapshot bytes preserved. Existing minimal Social188 wire shape remains; source-qualified chat np vocabulary extension only. Affected native/process/privacy/recovery tests required as scoped in6C plan; no fullparent acceptance.",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS683_I7B6C_RESEARCH/IMPLEMENTATION_PLAN.json"
+        }
+      ]
+    },
+    {
+      "id": "I7A5B-CANONICAL_OWNER_ACTIVATION",
+      "disposition": "PRESERVED",
+      "rationale": "6C preserves owner commands, lock order, clocks/epochs/quotas, bounded selection/window/notice IDs, auth, recovery and singleconnWriter. Canonical fallback changes ephemeral presentation and exact-name source selection only; no new owner, hint authority, room or ACK. Future DM metadata is absent-omitted and old snapshot bytes preserved. Existing minimal Social188 wire shape remains; source-qualified chat np vocabulary extension only. Affected native/process/privacy/recovery tests required as scoped in6C plan; no fullparent acceptance.",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS683_I7B6C_RESEARCH/IMPLEMENTATION_PLAN.json"
+        }
+      ]
+    },
+    {
+      "id": "I7A5B-CAMP_AUDIENCE_AUTHORITY",
+      "disposition": "PRESERVED",
+      "rationale": "6C preserves owner commands, lock order, clocks/epochs/quotas, bounded selection/window/notice IDs, auth, recovery and singleconnWriter. Canonical fallback changes ephemeral presentation and exact-name source selection only; no new owner, hint authority, room or ACK. Future DM metadata is absent-omitted and old snapshot bytes preserved. Existing minimal Social188 wire shape remains; source-qualified chat np vocabulary extension only. Affected native/process/privacy/recovery tests required as scoped in6C plan; no fullparent acceptance.",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS683_I7B6C_RESEARCH/IMPLEMENTATION_PLAN.json"
+        }
+      ]
+    },
+    {
+      "id": "I7A5B-REFERENCE_NAMESPACE",
+      "disposition": "PRESERVED",
+      "rationale": "6C preserves owner commands, lock order, clocks/epochs/quotas, bounded selection/window/notice IDs, auth, recovery and singleconnWriter. Canonical fallback changes ephemeral presentation and exact-name source selection only; no new owner, hint authority, room or ACK. Future DM metadata is absent-omitted and old snapshot bytes preserved. Existing minimal Social188 wire shape remains; source-qualified chat np vocabulary extension only. Affected native/process/privacy/recovery tests required as scoped in6C plan; no fullparent acceptance.",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS683_I7B6C_RESEARCH/IMPLEMENTATION_PLAN.json"
+        }
+      ]
+    },
+    {
+      "id": "I7A5B-SCOPED_PARENT_ROLLUP",
+      "disposition": "PRESERVED",
+      "rationale": "6C preserves owner commands, lock order, clocks/epochs/quotas, bounded selection/window/notice IDs, auth, recovery and singleconnWriter. Canonical fallback changes ephemeral presentation and exact-name source selection only; no new owner, hint authority, room or ACK. Future DM metadata is absent-omitted and old snapshot bytes preserved. Existing minimal Social188 wire shape remains; source-qualified chat np vocabulary extension only. Affected native/process/privacy/recovery tests required as scoped in6C plan; no fullparent acceptance.",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS683_I7B6C_RESEARCH/IMPLEMENTATION_PLAN.json"
+        }
+      ]
+    },
+    {
+      "id": "I7A5B-WIRE_NAMESPACE_AND_UNKNOWN_PRODUCER",
+      "disposition": "PRESERVED",
+      "rationale": "6C preserves owner commands, lock order, clocks/epochs/quotas, bounded selection/window/notice IDs, auth, recovery and singleconnWriter. Canonical fallback changes ephemeral presentation and exact-name source selection only; no new owner, hint authority, room or ACK. Future DM metadata is absent-omitted and old snapshot bytes preserved. Existing minimal Social188 wire shape remains; source-qualified chat np vocabulary extension only. Affected native/process/privacy/recovery tests required as scoped in6C plan; no fullparent acceptance.",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS683_I7B6C_RESEARCH/IMPLEMENTATION_PLAN.json"
+        }
+      ]
+    },
+    {
+      "id": "I7A5B-LEXICAL_NUMERIC_UNICODE",
+      "disposition": "PRESERVED",
+      "rationale": "6C preserves owner commands, lock order, clocks/epochs/quotas, bounded selection/window/notice IDs, auth, recovery and singleconnWriter. Canonical fallback changes ephemeral presentation and exact-name source selection only; no new owner, hint authority, room or ACK. Future DM metadata is absent-omitted and old snapshot bytes preserved. Existing minimal Social188 wire shape remains; source-qualified chat np vocabulary extension only. Affected native/process/privacy/recovery tests required as scoped in6C plan; no fullparent acceptance.",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS683_I7B6C_RESEARCH/IMPLEMENTATION_PLAN.json"
+        }
+      ]
+    },
+    {
+      "id": "I7A5B-EDGE_BRIDGE",
+      "disposition": "PRESERVED",
+      "rationale": "6C preserves owner commands, lock order, clocks/epochs/quotas, bounded selection/window/notice IDs, auth, recovery and singleconnWriter. Canonical fallback changes ephemeral presentation and exact-name source selection only; no new owner, hint authority, room or ACK. Future DM metadata is absent-omitted and old snapshot bytes preserved. Existing minimal Social188 wire shape remains; source-qualified chat np vocabulary extension only. Affected native/process/privacy/recovery tests required as scoped in6C plan; no fullparent acceptance.",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS683_I7B6C_RESEARCH/IMPLEMENTATION_PLAN.json"
+        }
+      ]
+    },
+    {
+      "id": "I7A5B-OWNER_OBSERVATION",
+      "disposition": "PRESERVED",
+      "rationale": "6C preserves owner commands, lock order, clocks/epochs/quotas, bounded selection/window/notice IDs, auth, recovery and singleconnWriter. Canonical fallback changes ephemeral presentation and exact-name source selection only; no new owner, hint authority, room or ACK. Future DM metadata is absent-omitted and old snapshot bytes preserved. Existing minimal Social188 wire shape remains; source-qualified chat np vocabulary extension only. Affected native/process/privacy/recovery tests required as scoped in6C plan; no fullparent acceptance.",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS683_I7B6C_RESEARCH/IMPLEMENTATION_PLAN.json"
+        }
+      ]
+    },
+    {
+      "id": "I7A5B-CANONICAL_EVENT_AND_INACTIVE_CONSTRUCTOR",
+      "disposition": "PRESERVED",
+      "rationale": "6C preserves owner commands, lock order, clocks/epochs/quotas, bounded selection/window/notice IDs, auth, recovery and singleconnWriter. Canonical fallback changes ephemeral presentation and exact-name source selection only; no new owner, hint authority, room or ACK. Future DM metadata is absent-omitted and old snapshot bytes preserved. Existing minimal Social188 wire shape remains; source-qualified chat np vocabulary extension only. Affected native/process/privacy/recovery tests required as scoped in6C plan; no fullparent acceptance.",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS683_I7B6C_RESEARCH/IMPLEMENTATION_PLAN.json"
+        }
+      ]
+    }
+  ],
+  "inherited_successor_review_reuse": "Unchanged selected carry rules from Pass685 parent review; planned raw Hero extension preserves owners, actor/time/replay/typed reference discipline. Added operation traces cover the affected leaf."
+}

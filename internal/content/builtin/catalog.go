@@ -107,14 +107,20 @@ type ObjectiveCatalog struct {
 	Status        string                `json:"status"`
 }
 
+type HeroSkillSlot struct {
+	DefaultID   int64   `json:"default_id"`
+	ChoiceIDs   []int64 `json:"choice_ids"`
+	BookItemIDs []int64 `json:"book_item_ids"`
+}
 type HeroTemplate struct {
-	AwakenTableID int64  `json:"awaken_table_id"`
-	FirstTableID  int64  `json:"first_table_id"`
-	HeroKind      string `json:"hero_kind"`
-	InitialStar   int64  `json:"initial_star"`
-	OriginTableID int64  `json:"origin_table_id"`
-	StoneItemID   int64  `json:"stone_item_id"`
-	TableID       int64  `json:"table_id"`
+	SkillSlots    []HeroSkillSlot `json:"skill_slots"`
+	AwakenTableID int64           `json:"awaken_table_id"`
+	FirstTableID  int64           `json:"first_table_id"`
+	HeroKind      string          `json:"hero_kind"`
+	InitialStar   int64           `json:"initial_star"`
+	OriginTableID int64           `json:"origin_table_id"`
+	StoneItemID   int64           `json:"stone_item_id"`
+	TableID       int64           `json:"table_id"`
 }
 type HeroExpRow struct {
 	Level    int64 `json:"level"`
@@ -149,15 +155,17 @@ type HeroAcquisitionItem struct {
 	OriginTableID int64 `json:"origin_table_id"`
 }
 type HeroCoreCatalog struct {
-	AcquisitionItems   []HeroAcquisitionItem `json:"acquisition_items"`
-	ExpItems           []HeroExpItem         `json:"exp_items"`
-	ExpRows            []HeroExpRow          `json:"exp_rows"`
-	NormalStarRows     []HeroNormalStarRow   `json:"normal_star_rows"`
-	SchemaVersion      int                   `json:"schema_version"`
-	Source             string                `json:"source"`
-	SuperPrerequisites []HeroPrerequisite    `json:"super_prerequisites"`
-	SuperStarRows      []HeroSuperStarRow    `json:"super_star_rows"`
-	Templates          []HeroTemplate        `json:"templates"`
+	RawSkillSeedPolicyID string                `json:"raw_skill_seed_policy_id"`
+	ChoicePolicyID       string                `json:"choice_policy_id"`
+	AcquisitionItems     []HeroAcquisitionItem `json:"acquisition_items"`
+	ExpItems             []HeroExpItem         `json:"exp_items"`
+	ExpRows              []HeroExpRow          `json:"exp_rows"`
+	NormalStarRows       []HeroNormalStarRow   `json:"normal_star_rows"`
+	SchemaVersion        int                   `json:"schema_version"`
+	Source               string                `json:"source"`
+	SuperPrerequisites   []HeroPrerequisite    `json:"super_prerequisites"`
+	SuperStarRows        []HeroSuperStarRow    `json:"super_star_rows"`
+	Templates            []HeroTemplate        `json:"templates"`
 }
 
 type PetTemplate struct {
@@ -845,7 +853,23 @@ func validateCatalog(c *Catalog) error {
 	}
 	lastHero := int64(0)
 	origins := make(map[int64]struct{}, 291)
+	if c.HeroCore.RawSkillSeedPolicyID != "I7C2A_V1_RAW_SKILL_SEED_V1" || c.HeroCore.ChoicePolicyID != "I7C2A_V1_KONGMING_CHOICE_V1" {
+		return errors.New("builtin content: raw Hero skill policy drift")
+	}
 	for _, h := range c.HeroCore.Templates {
+		if len(h.SkillSlots) != 6 {
+			return errors.New("builtin content: Hero skill slot shape")
+		}
+		for _, slot := range h.SkillSlots {
+			if len(slot.ChoiceIDs) == 0 || len(slot.ChoiceIDs) != len(slot.BookItemIDs) || slot.DefaultID != slot.ChoiceIDs[0] {
+				return errors.New("builtin content: Hero skill choices shape")
+			}
+			for i, id := range slot.ChoiceIDs {
+				if id < 0 || slot.BookItemIDs[i] < 0 {
+					return errors.New("builtin content: negative Hero skill ID")
+				}
+			}
+		}
 		if h.TableID <= lastHero || h.OriginTableID <= 0 || (h.HeroKind != "NORMAL" && h.HeroKind != "SUPER") || h.InitialStar <= 0 {
 			return errors.New("builtin content: invalid/sort-drift Hero template")
 		}
@@ -1383,7 +1407,7 @@ func validateCatalog(c *Catalog) error {
 
 	caps := append([]string(nil), c.Manifest.EnabledCapabilities...)
 	sort.Strings(caps)
-	wantCaps := []string{"CHARACTER_APPEARANCE_CA7", "EQUIPMENT_PRIMITIVES_CA4", "FRIEND_DM_EMOTICON_I7A6A", "FUNCTION_LEVEL_ELIGIBILITY_R5", "GUILD_BROADCAST_I7A8A", "GUILD_INVITE_PRESENTATION_I7A8B", "HERO_CORE_CA2", "HERO_EQUIPMENT_CA4_2", "HERO_FUMO_CA4_3A", "HERO_PROGRESSION_CA2", "HERO_PROMOTION_RESTORATION_CA4_3B", "PET_ACQUISITION_CA3", "PET_CORE_CA3", "PET_EQUIPMENT_CA4_4A", "PET_PROGRESSION_CA3", "PET_PROMOTION_RESTORATION_CA4_4B", "PLAYER_DISPLAY_I7B6A", "PLAYER_EXP_R5", "PRACTICE_CA6", "PUBLIC_PROFILE_PREFERENCES_I7B2B", "PUBLIC_PROFILE_SHOWCASE_SELECTION_I7B3A", "QUALIFIED_ORDINARY_STACK_ITEM_DEFINITIONS", "SCALAR_CRYSTAL", "SCALAR_MANA", "SOCIAL_GIFT_I7A7A", "SUPER_EQUIPMENT_CA4_5", "TEMPORAL_ENERGY_R5", "TEMPORAL_SKILL_POINT_R5", "TEMPORAL_SPIRIT_ENERGY_R5"}
+	wantCaps := []string{"CHARACTER_APPEARANCE_CA7", "EQUIPMENT_PRIMITIVES_CA4", "FRIEND_DM_EMOTICON_I7A6A", "FUNCTION_LEVEL_ELIGIBILITY_R5", "GUILD_BROADCAST_I7A8A", "GUILD_INVITE_PRESENTATION_I7A8B", "HERO_CORE_CA2", "HERO_EQUIPMENT_CA4_2", "HERO_FUMO_CA4_3A", "HERO_PROGRESSION_CA2", "HERO_PROMOTION_RESTORATION_CA4_3B", "HERO_RAW_SKILLS_I7C2A", "PET_ACQUISITION_CA3", "PET_CORE_CA3", "PET_EQUIPMENT_CA4_4A", "PET_PROGRESSION_CA3", "PET_PROMOTION_RESTORATION_CA4_4B", "PLAYER_DISPLAY_I7B6A", "PLAYER_EXP_R5", "PRACTICE_CA6", "PUBLIC_PROFILE_PREFERENCES_I7B2B", "PUBLIC_PROFILE_SHOWCASE_SELECTION_I7B3A", "QUALIFIED_ORDINARY_STACK_ITEM_DEFINITIONS", "SCALAR_CRYSTAL", "SCALAR_MANA", "SOCIAL_GIFT_I7A7A", "SUPER_EQUIPMENT_CA4_5", "TEMPORAL_ENERGY_R5", "TEMPORAL_SKILL_POINT_R5", "TEMPORAL_SPIRIT_ENERGY_R5"}
 	if len(caps) != len(wantCaps) {
 		return fmt.Errorf("builtin content: enabled capability count drift: %v", caps)
 	}

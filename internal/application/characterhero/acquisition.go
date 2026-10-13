@@ -48,16 +48,18 @@ type AcquisitionContent interface {
 }
 
 type acquisitionReceipt struct {
-	PartnerID               int64  `json:"partner_id"`
-	TableID                 int64  `json:"table_id"`
-	OriginTableID           int64  `json:"origin_table_id"`
-	Star                    int64  `json:"star"`
-	Level                   int64  `json:"level"`
-	Exp                     int64  `json:"exp"`
-	Color                   int64  `json:"color"`
-	CreationContentRevision string `json:"creation_content_revision"`
-	StateVersion            int64  `json:"state_version"`
-	Kind                    string `json:"kind"`
+	SkillSchema             int                          `json:"skill_schema,omitempty"`
+	RawSkills               *character.HeroRawSkillFacts `json:"raw_skills,omitempty"`
+	PartnerID               int64                        `json:"partner_id"`
+	TableID                 int64                        `json:"table_id"`
+	OriginTableID           int64                        `json:"origin_table_id"`
+	Star                    int64                        `json:"star"`
+	Level                   int64                        `json:"level"`
+	Exp                     int64                        `json:"exp"`
+	Color                   int64                        `json:"color"`
+	CreationContentRevision string                       `json:"creation_content_revision"`
+	StateVersion            int64                        `json:"state_version"`
+	Kind                    string                       `json:"kind"`
 }
 
 func (s Service) validateAcquisition() error {
@@ -75,6 +77,13 @@ func (s Service) validateAcquisition() error {
 
 func heroFromReceipt(r acquisitionReceipt, pid identity.PlayerID, now operation.Context) (character.Hero, error) {
 	h := character.Hero{PlayerID: pid, PartnerID: r.PartnerID, TableID: r.TableID, OriginTableID: r.OriginTableID, Kind: character.HeroKind(r.Kind), Star: r.Star, Level: r.Level, Exp: r.Exp, Color: r.Color, IllusionSkinID: character.DefaultIllusionSkinID, CreationContentRevision: r.CreationContentRevision, StateVersion: r.StateVersion, CreatedAt: now.StartedAt.UTC(), UpdatedAt: now.StartedAt.UTC()}
+	if r.SkillSchema == 0 && r.RawSkills == nil {
+		h.RawSkills = character.NewHeroRawSkillSeed()
+	} else if r.SkillSchema == 2 && r.RawSkills != nil {
+		h.RawSkills = *r.RawSkills
+	} else {
+		return character.Hero{}, ErrHeroAcquisitionInvalid
+	}
 	if err := h.Validate(); err != nil {
 		return character.Hero{}, err
 	}
@@ -82,14 +91,14 @@ func heroFromReceipt(r acquisitionReceipt, pid identity.PlayerID, now operation.
 }
 
 func encodeAcquisitionReceipt(h character.Hero) ([]byte, error) {
-	return json.Marshal(acquisitionReceipt{PartnerID: h.PartnerID, TableID: h.TableID, OriginTableID: h.OriginTableID, Star: h.Star, Level: h.Level, Exp: h.Exp, Color: h.Color, CreationContentRevision: h.CreationContentRevision, StateVersion: h.StateVersion, Kind: string(h.Kind)})
+	return json.Marshal(acquisitionReceipt{SkillSchema: 2, RawSkills: &h.RawSkills, PartnerID: h.PartnerID, TableID: h.TableID, OriginTableID: h.OriginTableID, Star: h.Star, Level: h.Level, Exp: h.Exp, Color: h.Color, CreationContentRevision: h.CreationContentRevision, StateVersion: h.StateVersion, Kind: string(h.Kind)})
 }
 
 func newHero(pid identity.PlayerID, partnerID int64, t character.HeroAcquisitionTemplate, star int64, revision string, op operation.Context) (character.Hero, error) {
 	if partnerID <= 0 || t.TableID <= 0 || t.OriginTableID != t.TableID || star < 1 || star > character.MaxHeroStar || len(revision) != 64 || op.StartedAt.IsZero() {
 		return character.Hero{}, ErrHeroAcquisitionInvalid
 	}
-	h := character.Hero{PlayerID: pid, PartnerID: partnerID, TableID: t.TableID, OriginTableID: t.OriginTableID, Kind: t.Kind, Star: star, Level: 1, Exp: 0, Color: 1, IllusionSkinID: character.DefaultIllusionSkinID, CreationContentRevision: revision, StateVersion: 1, CreatedAt: op.StartedAt.UTC(), UpdatedAt: op.StartedAt.UTC()}
+	h := character.Hero{RawSkills: character.NewHeroRawSkillSeed(), PlayerID: pid, PartnerID: partnerID, TableID: t.TableID, OriginTableID: t.OriginTableID, Kind: t.Kind, Star: star, Level: 1, Exp: 0, Color: 1, IllusionSkinID: character.DefaultIllusionSkinID, CreationContentRevision: revision, StateVersion: 1, CreatedAt: op.StartedAt.UTC(), UpdatedAt: op.StartedAt.UTC()}
 	if err := h.Validate(); err != nil {
 		return character.Hero{}, err
 	}

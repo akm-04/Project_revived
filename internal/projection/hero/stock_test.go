@@ -9,7 +9,7 @@ import (
 
 func fixture(kind character.HeroKind) character.Hero {
 	now := time.Unix(1, 0).UTC()
-	return character.Hero{PlayerID: identity.PlayerID(1), PartnerID: 7, TableID: 11001, OriginTableID: 11001, Kind: kind, Star: 2, Level: 3, Exp: 4, Color: 1, CreationContentRevision: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", StateVersion: 1, CreatedAt: now, UpdatedAt: now}
+	return character.Hero{RawSkills: character.NewHeroRawSkillSeed(), PlayerID: identity.PlayerID(1), PartnerID: 7, TableID: 11001, OriginTableID: 11001, Kind: kind, Star: 2, Level: 3, Exp: 4, Color: 1, CreationContentRevision: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", StateVersion: 1, CreatedAt: now, UpdatedAt: now}
 }
 func TestStockHeroNeutralShapesAndSpiritOmission(t *testing.T) {
 	m, err := StockHero(fixture(character.SuperHero))

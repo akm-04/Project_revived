@@ -37,8 +37,12 @@ func StockHero(h character.Hero) (map[string]any, error) {
 	if err := h.Validate(); err != nil {
 		return nil, err
 	}
-	skills := []any{int64(1), int64(1), int64(1), int64(1), int64(1), int64(1)}
-	zero6 := []any{int64(0), int64(0), int64(0), int64(0), int64(0), int64(0)}
+	skills := make([]any, 6)
+	ids := make([]any, 6)
+	for i := range h.RawSkills.Levels {
+		skills[i] = h.RawSkills.Levels[i]
+		ids[i] = h.RawSkills.ChoiceIDs[i]
+	}
 	equips := make([]any, character.HeroEquipmentSlotCount)
 	fumos := make([]any, character.HeroEquipmentSlotCount)
 	for i, v := range h.Equipment {
@@ -47,7 +51,7 @@ func StockHero(h character.Hero) (map[string]any, error) {
 	}
 	out := map[string]any{
 		"partner_id": h.PartnerID, "table_id": h.TableID, "star": h.Star, "lev": h.Level, "exp": h.Exp, "color": h.Color,
-		"skills": skills, "skill_ids": append([]any(nil), zero6...), "equips": equips, "fumos": fumos,
+		"skills": skills, "skill_ids": ids, "equips": equips, "fumos": fumos,
 		"is_like":       h.IsLike,
 		"practice_attr": []any{h.Practice[0], h.Practice[1], h.Practice[2]},
 	}

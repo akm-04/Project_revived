@@ -120,7 +120,7 @@ ENABLED_CAPABILITIES = [
     "TEMPORAL_SPIRIT_ENERGY_R5",
     "TEMPORAL_SKILL_POINT_R5",
     "FUNCTION_LEVEL_ELIGIBILITY_R5",
-    "HERO_CORE_CA2",
+    "HERO_RAW_SKILLS_I7C2A", "HERO_CORE_CA2",
     "HERO_PROGRESSION_CA2",
     "PET_CORE_CA3",
     "PET_ACQUISITION_CA3",
@@ -1200,7 +1200,24 @@ def build_artifacts(blobs: dict[str, SourceBlob], archive_sha256: str) -> dict[s
     if [x["exp_value"] for x in hero_exp_items] != [60,300,1500,7500,10000]:
         raise CompileError(f"Hero EXP item values drifted: {hero_exp_items}")
 
-    hero_artifact={"acquisition_items":acquisition,"exp_items":hero_exp_items,"exp_rows":exp_out,"normal_star_rows":normal_star,"schema_version":SCHEMA_VERSION,"source":"CA2 exact src_64 Hero core","super_prerequisites":prerequisites,"super_star_rows":super_star,"templates":templates}
+    # I7C2A source-bound raw skill IDs/choices. Raw initialization is an
+    # explicitly user-authorized V1 policy, not original-server inference.
+    for t in templates:
+        keys,rows=(super_keys,super_rows) if t['hero_kind']=='SUPER' else (partner_keys,partner_rows)
+        vals=rows[t['table_id']]; slots=[]
+        for slot in range(1,7):
+            raw=indexed_field(keys,vals,f'skill{slot}',row_id=t['table_id'])
+            ids=[parse_int(x,label=f'hero[{t["table_id"]}].skill{slot}',allow_negative=False) for x in raw.split('|')] if raw else [0]
+            for sid in ids:
+                if sid and sid not in skill_rows: raise CompileError(f'Hero skill references missing skill {sid}')
+            books=[parse_int(skill_rows[sid].get('item_id','0') or '0',label='skill.item_id',allow_negative=False) if sid else 0 for sid in ids]
+            slots.append({'default_id':ids[0],'choice_ids':ids,'book_item_ids':books})
+        t['skill_slots']=slots
+    for tid in [10001144,11001144]:
+        t=next(x for x in templates if x['table_id']==tid)
+        if t['skill_slots'][4]['choice_ids'] != [60010144,60020144,60030144,60040144,60050144] or t['skill_slots'][4]['book_item_ids'] != [50000005,50000010,50000015,50000020,50000025]:
+            raise CompileError('I7C2A source/V1 KongMing policy contradiction; reconcile before activation')
+    hero_artifact={"acquisition_items":acquisition,"exp_items":hero_exp_items,"exp_rows":exp_out,"normal_star_rows":normal_star,"schema_version":SCHEMA_VERSION,"source":"CA2 exact src_64 Hero core","super_prerequisites":prerequisites,"super_star_rows":super_star,"templates":templates,"raw_skill_seed_policy_id":"I7C2A_V1_RAW_SKILL_SEED_V1","choice_policy_id":"I7C2A_V1_KONGMING_CHOICE_V1"}
 
     # CA3-1 Pet identity/lineage content only. Acquisition, hatch timing/economy,
     # progression and skills remain separate later-stage capabilities.

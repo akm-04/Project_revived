@@ -64,6 +64,7 @@ type Hero struct {
 	Equipment               HeroEquipmentSlots
 	Fumo                    HeroFumoSlots
 	Practice                PracticeAttrs
+	RawSkills               HeroRawSkillFacts
 	CurrentSkinID           int64
 	IllusionSkinID          int64
 	CreationContentRevision string
@@ -83,6 +84,9 @@ func (h Hero) ValidatePersistent() error {
 		return err
 	}
 	if err := h.Fumo.Validate(); err != nil {
+		return err
+	}
+	if err := h.RawSkills.Validate(); err != nil {
 		return err
 	}
 	if err := h.Practice.Validate(); err != nil {

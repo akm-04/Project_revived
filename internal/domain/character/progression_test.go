@@ -8,7 +8,7 @@ import (
 )
 
 func testProgressHero(now time.Time) Hero {
-	return Hero{PlayerID: identity.PlayerID(7), PartnerID: 11, TableID: 1001, OriginTableID: 1001, Star: 3, Level: 1, Exp: 0, Color: 1, CreationContentRevision: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", StateVersion: 1, CreatedAt: now, UpdatedAt: now}
+	return Hero{RawSkills: NewHeroRawSkillSeed(), PlayerID: identity.PlayerID(7), PartnerID: 11, TableID: 1001, OriginTableID: 1001, Star: 3, Level: 1, Exp: 0, Color: 1, CreationContentRevision: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", StateVersion: 1, CreatedAt: now, UpdatedAt: now}
 }
 
 func TestAddSourceEXPMatchesRecoveredCumulativeLevelLoop(t *testing.T) {

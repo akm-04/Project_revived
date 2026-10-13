@@ -64,7 +64,7 @@ func (c equipmentStateContent) SuperEquipmentPositionTx(_ context.Context, _ tx.
 
 func equipmentStateHero() character.Hero {
 	now := time.Unix(10, 0).UTC()
-	return character.Hero{PlayerID: 1, PartnerID: 7, TableID: 11001, OriginTableID: 11001, Star: 2, Level: 3, Exp: 4, Color: 5,
+	return character.Hero{RawSkills: character.NewHeroRawSkillSeed(), PlayerID: 1, PartnerID: 7, TableID: 11001, OriginTableID: 11001, Star: 2, Level: 3, Exp: 4, Color: 5,
 		Equipment: character.HeroEquipmentSlots{1, 0, 1, 0, 0, 1}, Fumo: character.HeroFumoSlots{10, 0, 30, 0, 0, 60}, CreationContentRevision: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", StateVersion: 9, CreatedAt: now, UpdatedAt: now}
 }
 

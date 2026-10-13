@@ -44,6 +44,19 @@ func (q *heroBootstrapQueryer) QueryRow(_ context.Context, query string, _ ...an
 	case characterqueries.ListPlayerHeroes:
 		return heroBootstrapRow{scan: func(dest ...any) error {
 			type row struct {
+				RawSkill1               int64     `json:"raw_skill_1"`
+				RawSkillID1             int64     `json:"raw_skill_id_1"`
+				RawSkill2               int64     `json:"raw_skill_2"`
+				RawSkillID2             int64     `json:"raw_skill_id_2"`
+				RawSkill3               int64     `json:"raw_skill_3"`
+				RawSkillID3             int64     `json:"raw_skill_id_3"`
+				RawSkill4               int64     `json:"raw_skill_4"`
+				RawSkillID4             int64     `json:"raw_skill_id_4"`
+				RawSkill5               int64     `json:"raw_skill_5"`
+				RawSkillID5             int64     `json:"raw_skill_id_5"`
+				RawSkill6               int64     `json:"raw_skill_6"`
+				RawSkillID6             int64     `json:"raw_skill_id_6"`
+				SkillSeedPolicyID       string    `json:"skill_seed_policy_id"`
 				PlayerID                int64     `json:"player_id"`
 				PartnerID               int64     `json:"partner_id"`
 				TableID                 int64     `json:"table_id"`
@@ -76,7 +89,7 @@ func (q *heroBootstrapQueryer) QueryRow(_ context.Context, query string, _ ...an
 			}
 			rows := make([]row, 0, len(q.heroes))
 			for _, h := range q.heroes {
-				rows = append(rows, row{PlayerID: int64(h.PlayerID), PartnerID: h.PartnerID, TableID: h.TableID, OriginTableID: h.OriginTableID, Star: h.Star, Level: h.Level, Exp: h.Exp, Color: h.Color,
+				rows = append(rows, row{RawSkill1: h.RawSkills.Levels[0], RawSkillID1: h.RawSkills.ChoiceIDs[0], RawSkill2: h.RawSkills.Levels[1], RawSkillID2: h.RawSkills.ChoiceIDs[1], RawSkill3: h.RawSkills.Levels[2], RawSkillID3: h.RawSkills.ChoiceIDs[2], RawSkill4: h.RawSkills.Levels[3], RawSkillID4: h.RawSkills.ChoiceIDs[3], RawSkill5: h.RawSkills.Levels[4], RawSkillID5: h.RawSkills.ChoiceIDs[4], RawSkill6: h.RawSkills.Levels[5], RawSkillID6: h.RawSkills.ChoiceIDs[5], SkillSeedPolicyID: h.RawSkills.SeedPolicyID, PlayerID: int64(h.PlayerID), PartnerID: h.PartnerID, TableID: h.TableID, OriginTableID: h.OriginTableID, Star: h.Star, Level: h.Level, Exp: h.Exp, Color: h.Color,
 					Equip1: h.Equipment[0], Equip2: h.Equipment[1], Equip3: h.Equipment[2], Equip4: h.Equipment[3], Equip5: h.Equipment[4], Equip6: h.Equipment[5],
 					Fumo1: h.Fumo[0], Fumo2: h.Fumo[1], Fumo3: h.Fumo[2], Fumo4: h.Fumo[3], Fumo5: h.Fumo[4], Fumo6: h.Fumo[5],
 					PracticeStr: h.Practice[0], PracticeInt: h.Practice[1], PracticeAgi: h.Practice[2], CurrentSkinID: h.CurrentSkinID, IllusionSkinID: h.IllusionSkinID, StateVersion: h.StateVersion,
@@ -160,7 +173,7 @@ func heroBootstrapFixture() (character.HeroRoot, character.Hero) {
 	now := time.Unix(100, 0).UTC()
 	rev := "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
 	root := character.HeroRoot{PlayerID: 7, NextPartnerID: 2, SortType: 3, StateVersion: 4, CreatedAt: now, UpdatedAt: now}
-	h := character.Hero{PlayerID: 7, PartnerID: 1, TableID: 10001001, OriginTableID: 10001001, Star: 1, Level: 1, Color: 1,
+	h := character.Hero{RawSkills: character.NewHeroRawSkillSeed(), PlayerID: 7, PartnerID: 1, TableID: 10001001, OriginTableID: 10001001, Star: 1, Level: 1, Color: 1,
 		Practice: character.PracticeAttrs{11, 22, 33}, CreationContentRevision: rev, StateVersion: 5, CreatedAt: now, UpdatedAt: now}
 	return root, h
 }

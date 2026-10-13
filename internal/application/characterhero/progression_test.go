@@ -201,7 +201,7 @@ func (missingProgressionReceiptReader) Find(context.Context, receipt.Identity) (
 }
 
 func heroAt(id, table, origin, star, level, exp int64, now time.Time) character.Hero {
-	return character.Hero{PlayerID: 7, PartnerID: id, TableID: table, OriginTableID: origin, Star: star, Level: level, Exp: exp, Color: 1, CreationContentRevision: progRev, StateVersion: 1, CreatedAt: now, UpdatedAt: now}
+	return character.Hero{RawSkills: character.NewHeroRawSkillSeed(), PlayerID: 7, PartnerID: id, TableID: table, OriginTableID: origin, Star: star, Level: level, Exp: exp, Color: 1, CreationContentRevision: progRev, StateVersion: 1, CreatedAt: now, UpdatedAt: now}
 }
 func progressionService(ps *progStore, pc progContent, pe *progEconomy, rr *receipts) Service {
 	now := time.Unix(1, 0).UTC()

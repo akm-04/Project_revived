@@ -37,7 +37,7 @@ func (*ca73StoreTx) Rollback(context.Context) error { return errors.New("unexpec
 func ca73StoreHero() character.Hero {
 	now := time.Unix(100, 0).UTC()
 	return character.Hero{
-		PlayerID: identity.PlayerID(1), PartnerID: 7, TableID: 11001, OriginTableID: 11001,
+		RawSkills: character.NewHeroRawSkillSeed(), PlayerID: identity.PlayerID(1), PartnerID: 7, TableID: 11001, OriginTableID: 11001,
 		Star: 3, Level: 20, Color: 5, IllusionSkinID: -1,
 		CreationContentRevision: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
 		StateVersion:            5, CreatedAt: now, UpdatedAt: now,
