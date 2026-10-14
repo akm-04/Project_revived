@@ -17,7 +17,7 @@ type BootstrapProjection struct {
 }
 
 func (BootstrapProjection) Name() string     { return "i7c2e.course-attendance" }
-func (BootstrapProjection) Claims() []string { return []string{"2137"} }
+func (BootstrapProjection) Claims() []string { return []string{"2137", "2139"} }
 func (b BootstrapProjection) OverlayMID1(ctx context.Context, q tx.Queryer, a identity.ActorContext, _ bool, at time.Time, detail map[string]any) error {
 	rev, on, e := b.Content.CourseInputsActiveTx(ctx, q)
 	if e != nil || !on {
@@ -28,5 +28,6 @@ func (b BootstrapProjection) OverlayMID1(ctx context.Context, q tx.Queryer, a id
 		return e
 	}
 	detail["2137"] = v
+	detail["2139"] = map[string]any{"is_has_gift": int64(0)}
 	return nil
 }

@@ -14,7 +14,7 @@ import (
 var EmbeddedMID1Records = [...]uint16{
 	17, 780, 49, 81, 112, 115, 2561, 229, 289, 336, 352, 384, 2485,
 	1408, 368, 56, 624, 612, 822, 530, 1056, 1152, 1808, 1304, 1856,
-	836, 2416, 2501, 2560, 2984, 3101,
+	836, 2137, 2139, 2416, 2501, 2560, 2984, 3101,
 }
 
 type BootstrapView struct {
@@ -187,6 +187,10 @@ func baseline(mid uint16, v BootstrapView) (any, bool) {
 		return map[string]any{"self_wish_info": zeroMap()}, true
 	case 1856:
 		return map[string]any{"apply_list": zeroList(), "mission_list": zeroList()}, true
+	case 2137:
+		return map[string]any{"study_infos": zeroList()}, true
+	case 2139:
+		return map[string]any{"is_has_gift": int64(0)}, true // Never overwrite owner attendance during hydration.
 	case 2416:
 		return map[string]any{"adventure_list": map[string]any{"list": zeroMap()}}, true
 	case 2485:
