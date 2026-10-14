@@ -2635,6 +2635,72 @@
       "migration": "migrations/00051_i7c2d_book_inputs.sql",
       "owner": "content-registry",
       "write_exceptions": []
+    },
+    "content_course_input_catalogs": {
+      "allowed_query_owners": [
+        "content-registry"
+      ],
+      "allowed_read_paths": [
+        "sql/content/",
+        "internal/adapters/postgres/contentstore/",
+        "internal/adapters/postgres/contentqueries/"
+      ],
+      "allowed_write_paths": [
+        "sql/content/",
+        "internal/adapters/postgres/contentstore/",
+        "internal/adapters/postgres/contentqueries/"
+      ],
+      "migration": "migrations/00052_i7c2e_course_inputs.sql",
+      "owner": "content-registry",
+      "write_exceptions": []
+    },
+    "player_course_roots": {
+      "owner": "course",
+      "migration": "migrations/00052_i7c2e_course_inputs.sql",
+      "allowed_query_owners": [
+        "course"
+      ],
+      "allowed_read_paths": [
+        "sql/course/",
+        "internal/adapters/postgres/coursestore/"
+      ],
+      "allowed_write_paths": [
+        "sql/course/",
+        "internal/adapters/postgres/coursestore/"
+      ],
+      "write_exceptions": []
+    },
+    "player_course_heroes": {
+      "owner": "course",
+      "migration": "migrations/00052_i7c2e_course_inputs.sql",
+      "allowed_query_owners": [
+        "course"
+      ],
+      "allowed_read_paths": [
+        "sql/course/",
+        "internal/adapters/postgres/coursestore/"
+      ],
+      "allowed_write_paths": [
+        "sql/course/",
+        "internal/adapters/postgres/coursestore/"
+      ],
+      "write_exceptions": []
+    },
+    "player_course_admissions": {
+      "owner": "course",
+      "migration": "migrations/00052_i7c2e_course_inputs.sql",
+      "allowed_query_owners": [
+        "course"
+      ],
+      "allowed_read_paths": [
+        "sql/course/",
+        "internal/adapters/postgres/coursestore/"
+      ],
+      "allowed_write_paths": [
+        "sql/course/",
+        "internal/adapters/postgres/coursestore/"
+      ],
+      "write_exceptions": []
     }
   }
 }

@@ -199,6 +199,12 @@ func (Store) VerifyRevision(ctx context.Context, q tx.Queryer, b registry.Bundle
 	var displayExact bool
 	var dormExact bool
 	var bookExact bool
+	var courseExact bool
+	err = q.QueryRow(ctx, verifyCourseInputsSQL, b.RevisionID(), string(b.CourseInputsJSON())).Scan(&courseExact, &v.CourseInputsCount)
+	if err != nil {
+		return v, err
+	}
+	v.Exact = v.Exact && courseExact
 	err = q.QueryRow(ctx, verifyBookInputsSQL, b.RevisionID(), string(b.BookInputsJSON())).Scan(&bookExact, &v.BookInputsCount)
 	if err != nil {
 		return v, err

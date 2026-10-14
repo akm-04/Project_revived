@@ -1,0 +1,32 @@
+{
+  "status": "EXPLICIT_USER_APPROVED",
+  "question_call_id": "call_6389be11724240878f669198ead2992c",
+  "policies": [
+    {
+      "id": "C2E_V1_COURSE_PROGRESS_AND_SEEDS_V1",
+      "answer": "Approve this Course reconstruction policy",
+      "rules": [
+        "New enrollment progress0, quality1, proficiencyEXP0, no bound skill",
+        "One completed source28800-second session +20progress capped100; no partial progress or automatic repeated sessions",
+        "Continuation free; early cancellation no progress/application-ticket refund",
+        "At/after expiry materialize earnedprogress once before cancellation/removal",
+        "Room-list reads may show ended uncollected session until owning request collects"
+      ]
+    },
+    {
+      "id": "C2E_V1_WHOLE_BOOK_PROFICIENCY_V1",
+      "answer": "Approve V1\u2019s whole-book overflow policy",
+      "rules": [
+        "Fullylearned course below1680EXP consumes submitted whole books in full and caps result1680",
+        "Alreadycapped request rejected without consumption"
+      ]
+    }
+  ],
+  "classification": "IMPLEMENTATION_DECISION",
+  "original_server_truth": false,
+  "provenance": [
+    "Current client source time/cost/quality/book rules",
+    "Frozen V1 reconstruction policies",
+    "Current direct user answers"
+  ]
+}

@@ -603,3 +603,11 @@ func (r repo) InsertBookInputs(_ context.Context, x tx.Tx, b Bundle) (int64, err
 	t.installed[b.RevisionID()] = v
 	return 1, nil
 }
+
+func (r repo) InsertCourseInputs(_ context.Context, x tx.Tx, b Bundle) (int64, error) {
+	t := x.(*modelTx)
+	v := t.installed[b.RevisionID()]
+	v.CourseInputsCount = 1
+	t.installed[b.RevisionID()] = v
+	return 1, nil
+}

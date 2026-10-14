@@ -1,0 +1,67 @@
+{
+  "status": "FROZEN_SOURCE_PROFILE_CORRECTED_PENDING_NORMAL695",
+  "node_path": "ROOT/I7/I7C/I7C-2/I7C-2E",
+  "ready": true,
+  "freeze_blockers": [],
+  "accepted_backend_sha256": "af3ecbf85db50d0e58ac6b6d70d268cd423c3f99273911cfe02a16cedf5aab38",
+  "planned_migration": "00052_i7c2e_course_inputs.sql",
+  "owner_packages": {
+    "domain": "internal/domain/course",
+    "application": "internal/application/course",
+    "postgres": "internal/adapters/postgres/coursestore",
+    "wire": "stockruntime Course dispatcher",
+    "content": "builtin Course DTO/compiler+contentstore binder"
+  },
+  "root_lock_rank": 520,
+  "hero_facet_lock_rank": 530,
+  "selected_mids": [
+    2128,
+    2129,
+    2130,
+    2131,
+    2132,
+    2133,
+    2134,
+    2135,
+    2136,
+    2137,
+    2138,
+    2139,
+    2140,
+    2142
+  ],
+  "canonical_state": [
+    "player_course_roots: version, stored attendance/jobs, bounded canonical logs",
+    "player_course_heroes: perHero version, acquisitionordered course records id/progress/add_skill/quality/exp",
+    "player_course_admissions: operation/actor/decision/revision/command/result",
+    "content_course_input_catalogs: Content owner immutable28th payload"
+  ],
+  "policy": "USER_POLICY_AUTHORIZATION.json",
+  "typed_seams": "OWNER_DEPENDENCY_MAP.json",
+  "transaction_plan": [
+    "Full fixed order actor/Player/Character population/liveHero/Courseglobal/perHero/I5 suffix beforewrite",
+    "Freshfacet insert-onlynewHero, do notlock existinglowerroot afterI5suffix",
+    "No perHero FK blockingretirement: stableCourseguard protects live attendance; oldfacet history remains unqualified",
+    "No currentclock/contentrevision discovery underlocks; captures and versionchecks follow inheritedservice",
+    "Target-only due materialization avoids discovering otherHero lockset underJOIN; capacity counts uncollectedended attendance"
+  ],
+  "normalization": "Pure inputs expose stored and applied dueclone/materialization-required; owning target commands collectonce. No timer/scheduler/automaticrepeat. Global readonlyroom list can showendedsession. BoundCourse changes recomputed throughraw observation, no duplicateCharacterdbfields.",
+  "batches": [
+    "DTO/compiler/domain and forward52 ownstore",
+    "Typed Content/Character/I5 prerequisites, freshfacetchain/backfill/activation",
+    "Admission/value/finite transitions + API routes/roster/MID1 singleowner wiring",
+    "New targeted native/process/concurrency/recovery then intended candidatefreeze"
+  ],
+  "source_profile_limits": [
+    "LiveNormal+Super Courseprofile, sourcepositive-ID/book_open slots; Pets excluded",
+    "VIP0 existingprovisionalbaseline capacity2; highertiers metadata retained forfuturequalifiedprovider",
+    "Gift2141 andrecommend2500 not invented; namedresidual owners",
+    "Conditional genuineI5inputgrants prove leaf, laterShop origins remainlaterI9N"
+  ],
+  "qualification_limits": [
+    "Static research no runtimegate",
+    "StockW2afterI14 staysunpassed",
+    "Parents remainopen"
+  ],
+  "source_profile_amendment": "SOURCE_PROFILE_AMENDMENT.json"
+}

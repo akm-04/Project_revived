@@ -1,0 +1,257 @@
+{
+  "status": "COMPLETE_SELECTED_SOURCE_TO_PROOF",
+  "operations": [
+    {
+      "mid": 2128,
+      "name": "APPLY_COURSE",
+      "source": "cache/SRC64/app/model/Course.lua + matching Course windows",
+      "contract": [
+        "I7C2E-TIME",
+        "I7C2E-WIRE",
+        "I7C2E-REPLAY",
+        "I7C2E-VALUE"
+      ],
+      "owner": "CourseProgression",
+      "behavior": "Acquire neutral Course once; debit sourceclass ticket; preserve existing enrollment",
+      "transaction": "ActorFence->Player315->CharacterPopulation400->LiveHero410->Course520->HeroCourse530->closedI5suffix610+; observations callerQueryer only",
+      "recovery": "Durable admission/original operation/positive receipt proof; readonly no writes; no inferred replay",
+      "response_reload": "CourseModel.handleInfos coherent requested subject; Character key49 aligned arrays and2137 owner hydration",
+      "consumer": "I7C3B raw stat inputs then4C effects; no finalmath here",
+      "required_proof": "Native operation/value/clock/race plus realAPI process/reload/restore exactcandidate"
+    },
+    {
+      "mid": 2129,
+      "name": "GET_COURSE_INFO",
+      "source": "cache/SRC64/app/model/Course.lua + matching Course windows",
+      "contract": [
+        "I7C2E-TIME",
+        "I7C2E-WIRE",
+        "I7C2E-REPLAY",
+        "I7C2E-VALUE"
+      ],
+      "owner": "CourseProgression",
+      "behavior": "Owning target request collects due finite session then returns perHero entirecourse list/selectedcourse/globalattendance",
+      "transaction": "ActorFence->Player315->CharacterPopulation400->LiveHero410->Course520->HeroCourse530->closedI5suffix610+; observations callerQueryer only",
+      "recovery": "Durable admission/original operation/positive receipt proof; readonly no writes; no inferred replay",
+      "response_reload": "CourseModel.handleInfos coherent requested subject; Character key49 aligned arrays and2137 owner hydration",
+      "consumer": "I7C3B raw stat inputs then4C effects; no finalmath here",
+      "required_proof": "Native operation/value/clock/race plus realAPI process/reload/restore exactcandidate"
+    },
+    {
+      "mid": 2130,
+      "name": "GET_STUDYROOM_INFO",
+      "source": "cache/SRC64/app/model/Course.lua + matching Course windows",
+      "contract": [
+        "I7C2E-TIME",
+        "I7C2E-WIRE",
+        "I7C2E-REPLAY",
+        "I7C2E-VALUE"
+      ],
+      "owner": "CourseProgression",
+      "behavior": "Pure stored attendance+bounded liveHero-filtered logs; mayshow ended",
+      "transaction": "ActorFence->Player315->CharacterPopulation400->LiveHero410->Course520->HeroCourse530->closedI5suffix610+; observations callerQueryer only",
+      "recovery": "Durable admission/original operation/positive receipt proof; readonly no writes; no inferred replay",
+      "response_reload": "CourseModel.handleInfos coherent requested subject; Character key49 aligned arrays and2137 owner hydration",
+      "consumer": "I7C3B raw stat inputs then4C effects; no finalmath here",
+      "required_proof": "Native operation/value/clock/race plus realAPI process/reload/restore exactcandidate"
+    },
+    {
+      "mid": 2131,
+      "name": "STUDY",
+      "source": "cache/SRC64/app/model/Course.lua + matching Course windows",
+      "contract": [
+        "I7C2E-TIME",
+        "I7C2E-WIRE",
+        "I7C2E-REPLAY",
+        "I7C2E-VALUE"
+      ],
+      "owner": "CourseProgression",
+      "behavior": "Unowned acquire+ticket+start; ownedpartial free resume; reject incompatible active job",
+      "transaction": "ActorFence->Player315->CharacterPopulation400->LiveHero410->Course520->HeroCourse530->closedI5suffix610+; observations callerQueryer only",
+      "recovery": "Durable admission/original operation/positive receipt proof; readonly no writes; no inferred replay",
+      "response_reload": "CourseModel.handleInfos coherent requested subject; Character key49 aligned arrays and2137 owner hydration",
+      "consumer": "I7C3B raw stat inputs then4C effects; no finalmath here",
+      "required_proof": "Native operation/value/clock/race plus realAPI process/reload/restore exactcandidate"
+    },
+    {
+      "mid": 2132,
+      "name": "SPEED_STUDY",
+      "source": "cache/SRC64/app/model/Course.lua + matching Course windows",
+      "contract": [
+        "I7C2E-TIME",
+        "I7C2E-WIRE",
+        "I7C2E-REPLAY",
+        "I7C2E-VALUE"
+      ],
+      "owner": "CourseProgression",
+      "behavior": "Collectdue first; otherwise debit sourceceil cost then one completion",
+      "transaction": "ActorFence->Player315->CharacterPopulation400->LiveHero410->Course520->HeroCourse530->closedI5suffix610+; observations callerQueryer only",
+      "recovery": "Durable admission/original operation/positive receipt proof; readonly no writes; no inferred replay",
+      "response_reload": "CourseModel.handleInfos coherent requested subject; Character key49 aligned arrays and2137 owner hydration",
+      "consumer": "I7C3B raw stat inputs then4C effects; no finalmath here",
+      "required_proof": "Native operation/value/clock/race plus realAPI process/reload/restore exactcandidate"
+    },
+    {
+      "mid": 2133,
+      "name": "ADD_SKILL",
+      "source": "cache/SRC64/app/model/Course.lua + matching Course windows",
+      "contract": [
+        "I7C2E-TIME",
+        "I7C2E-WIRE",
+        "I7C2E-REPLAY",
+        "I7C2E-VALUE"
+      ],
+      "owner": "CourseProgression",
+      "behavior": "Learnedcourse bind sourceeligible slot; clear priorcourse binding same slot",
+      "transaction": "ActorFence->Player315->CharacterPopulation400->LiveHero410->Course520->HeroCourse530->closedI5suffix610+; observations callerQueryer only",
+      "recovery": "Durable admission/original operation/positive receipt proof; readonly no writes; no inferred replay",
+      "response_reload": "CourseModel.handleInfos coherent requested subject; Character key49 aligned arrays and2137 owner hydration",
+      "consumer": "I7C3B raw stat inputs then4C effects; no finalmath here",
+      "required_proof": "Native operation/value/clock/race plus realAPI process/reload/restore exactcandidate"
+    },
+    {
+      "mid": 2134,
+      "name": "FORGET_COURSE",
+      "source": "cache/SRC64/app/model/Course.lua + matching Course windows",
+      "contract": [
+        "I7C2E-TIME",
+        "I7C2E-WIRE",
+        "I7C2E-REPLAY",
+        "I7C2E-VALUE"
+      ],
+      "owner": "CourseProgression",
+      "behavior": "Collectdue; mixed200crystal+qualityrefund; remove course/binding/itsattendance atomically",
+      "transaction": "ActorFence->Player315->CharacterPopulation400->LiveHero410->Course520->HeroCourse530->closedI5suffix610+; observations callerQueryer only",
+      "recovery": "Durable admission/original operation/positive receipt proof; readonly no writes; no inferred replay",
+      "response_reload": "CourseModel.handleInfos coherent requested subject; Character key49 aligned arrays and2137 owner hydration",
+      "consumer": "I7C3B raw stat inputs then4C effects; no finalmath here",
+      "required_proof": "Native operation/value/clock/race plus realAPI process/reload/restore exactcandidate"
+    },
+    {
+      "mid": 2135,
+      "name": "ENTER_ROOM",
+      "source": "cache/SRC64/app/model/Course.lua + matching Course windows",
+      "contract": [
+        "I7C2E-TIME",
+        "I7C2E-WIRE",
+        "I7C2E-REPLAY",
+        "I7C2E-VALUE"
+      ],
+      "owner": "CourseProgression",
+      "behavior": "Idleattendance admission subjectalive/capacity, no ticket",
+      "transaction": "ActorFence->Player315->CharacterPopulation400->LiveHero410->Course520->HeroCourse530->closedI5suffix610+; observations callerQueryer only",
+      "recovery": "Durable admission/original operation/positive receipt proof; readonly no writes; no inferred replay",
+      "response_reload": "CourseModel.handleInfos coherent requested subject; Character key49 aligned arrays and2137 owner hydration",
+      "consumer": "I7C3B raw stat inputs then4C effects; no finalmath here",
+      "required_proof": "Native operation/value/clock/race plus realAPI process/reload/restore exactcandidate"
+    },
+    {
+      "mid": 2136,
+      "name": "LEAVE_ROOM",
+      "source": "cache/SRC64/app/model/Course.lua + matching Course windows",
+      "contract": [
+        "I7C2E-TIME",
+        "I7C2E-WIRE",
+        "I7C2E-REPLAY",
+        "I7C2E-VALUE"
+      ],
+      "owner": "CourseProgression",
+      "behavior": "Collectdue then remove attendance; cancel partialsession with no ticketrefund",
+      "transaction": "ActorFence->Player315->CharacterPopulation400->LiveHero410->Course520->HeroCourse530->closedI5suffix610+; observations callerQueryer only",
+      "recovery": "Durable admission/original operation/positive receipt proof; readonly no writes; no inferred replay",
+      "response_reload": "CourseModel.handleInfos coherent requested subject; Character key49 aligned arrays and2137 owner hydration",
+      "consumer": "I7C3B raw stat inputs then4C effects; no finalmath here",
+      "required_proof": "Native operation/value/clock/race plus realAPI process/reload/restore exactcandidate"
+    },
+    {
+      "mid": 2137,
+      "name": "GET_STUDY_INFOS",
+      "source": "cache/SRC64/app/model/Course.lua + matching Course windows",
+      "contract": [
+        "I7C2E-TIME",
+        "I7C2E-WIRE",
+        "I7C2E-REPLAY",
+        "I7C2E-VALUE"
+      ],
+      "owner": "CourseProgression",
+      "behavior": "Pure coherent attendance; realMID1 contributor",
+      "transaction": "ActorFence->Player315->CharacterPopulation400->LiveHero410->Course520->HeroCourse530->closedI5suffix610+; observations callerQueryer only",
+      "recovery": "Durable admission/original operation/positive receipt proof; readonly no writes; no inferred replay",
+      "response_reload": "CourseModel.handleInfos coherent requested subject; Character key49 aligned arrays and2137 owner hydration",
+      "consumer": "I7C3B raw stat inputs then4C effects; no finalmath here",
+      "required_proof": "Native operation/value/clock/race plus realAPI process/reload/restore exactcandidate"
+    },
+    {
+      "mid": 2138,
+      "name": "CANCEL_STUDY",
+      "source": "cache/SRC64/app/model/Course.lua + matching Course windows",
+      "contract": [
+        "I7C2E-TIME",
+        "I7C2E-WIRE",
+        "I7C2E-REPLAY",
+        "I7C2E-VALUE"
+      ],
+      "owner": "CourseProgression",
+      "behavior": "Collectdue first, otherwise no earnedpartial; remove attendance preserve enrolledfacts",
+      "transaction": "ActorFence->Player315->CharacterPopulation400->LiveHero410->Course520->HeroCourse530->closedI5suffix610+; observations callerQueryer only",
+      "recovery": "Durable admission/original operation/positive receipt proof; readonly no writes; no inferred replay",
+      "response_reload": "CourseModel.handleInfos coherent requested subject; Character key49 aligned arrays and2137 owner hydration",
+      "consumer": "I7C3B raw stat inputs then4C effects; no finalmath here",
+      "required_proof": "Native operation/value/clock/race plus realAPI process/reload/restore exactcandidate"
+    },
+    {
+      "mid": 2139,
+      "name": "GET_GIFT_BOX_INFO",
+      "source": "cache/SRC64/app/model/Course.lua + matching Course windows",
+      "contract": [
+        "I7C2E-TIME",
+        "I7C2E-WIRE",
+        "I7C2E-REPLAY",
+        "I7C2E-VALUE"
+      ],
+      "owner": "CourseProgression",
+      "behavior": "Explicitinactivegift profile, zero giftflag plus actualattendance or omission, no falseempty",
+      "transaction": "ActorFence->Player315->CharacterPopulation400->LiveHero410->Course520->HeroCourse530->closedI5suffix610+; observations callerQueryer only",
+      "recovery": "Durable admission/original operation/positive receipt proof; readonly no writes; no inferred replay",
+      "response_reload": "CourseModel.handleInfos coherent requested subject; Character key49 aligned arrays and2137 owner hydration",
+      "consumer": "I7C3B raw stat inputs then4C effects; no finalmath here",
+      "required_proof": "Native operation/value/clock/race plus realAPI process/reload/restore exactcandidate"
+    },
+    {
+      "mid": 2140,
+      "name": "INCR_COURESE_EXP",
+      "source": "cache/SRC64/app/model/Course.lua + matching Course windows",
+      "contract": [
+        "I7C2E-TIME",
+        "I7C2E-WIRE",
+        "I7C2E-REPLAY",
+        "I7C2E-VALUE"
+      ],
+      "owner": "CourseProgression",
+      "behavior": "Learnedcourse consume whole submittedproficiencybooks, cap1680, thresholdsquality, total_num freshprecondition",
+      "transaction": "ActorFence->Player315->CharacterPopulation400->LiveHero410->Course520->HeroCourse530->closedI5suffix610+; observations callerQueryer only",
+      "recovery": "Durable admission/original operation/positive receipt proof; readonly no writes; no inferred replay",
+      "response_reload": "CourseModel.handleInfos coherent requested subject; Character key49 aligned arrays and2137 owner hydration",
+      "consumer": "I7C3B raw stat inputs then4C effects; no finalmath here",
+      "required_proof": "Native operation/value/clock/race plus realAPI process/reload/restore exactcandidate"
+    },
+    {
+      "mid": 2142,
+      "name": "CONTINUE_STUDY",
+      "source": "cache/SRC64/app/model/Course.lua + matching Course windows",
+      "contract": [
+        "I7C2E-TIME",
+        "I7C2E-WIRE",
+        "I7C2E-REPLAY",
+        "I7C2E-VALUE"
+      ],
+      "owner": "CourseProgression",
+      "behavior": "Free ownedpartial start with same job restrictions asSTUDY",
+      "transaction": "ActorFence->Player315->CharacterPopulation400->LiveHero410->Course520->HeroCourse530->closedI5suffix610+; observations callerQueryer only",
+      "recovery": "Durable admission/original operation/positive receipt proof; readonly no writes; no inferred replay",
+      "response_reload": "CourseModel.handleInfos coherent requested subject; Character key49 aligned arrays and2137 owner hydration",
+      "consumer": "I7C3B raw stat inputs then4C effects; no finalmath here",
+      "required_proof": "Native operation/value/clock/race plus realAPI process/reload/restore exactcandidate"
+    }
+  ]
+}

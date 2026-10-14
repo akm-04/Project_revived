@@ -13,10 +13,12 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres/bookstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/characterstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/contentstore"
+	"gxb.local/backend/v2/internal/adapters/postgres/coursestore"
 	"gxb.local/backend/v2/internal/adapters/postgres/dormstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/librarystore"
 	riveradapter "gxb.local/backend/v2/internal/adapters/river"
 	appbook "gxb.local/backend/v2/internal/application/bookskill"
+	appcourse "gxb.local/backend/v2/internal/application/course"
 	appdorm "gxb.local/backend/v2/internal/application/dormhouse"
 	gen "gxb.local/backend/v2/internal/application/generation"
 	applib "gxb.local/backend/v2/internal/application/librarylocal"
@@ -73,6 +75,10 @@ func deploy() error {
 	if e = appbook.RunBackfill(c, gen.TimedRunner{Binder: gen.Binder{Time: postgres.AuthoritativeTime{Queryer: p}}, Runner: service.Runner}, characterstore.Store{}, bookstore.Store{}, bundle.RevisionID(), op); e != nil {
 		return e
 	}
+	if e = appcourse.RunBackfill(c, gen.TimedRunner{Binder: gen.Binder{Time: postgres.AuthoritativeTime{Queryer: p}}, Runner: service.Runner}, characterstore.Store{}, coursestore.Store{}, bundle.RevisionID(), op); e != nil {
+		log.Fatal(e)
+	}
+
 	if e = guildbroadcastworker.PrepareDeployment(c, p, bundle.RevisionID()); e != nil {
 		return e
 	}

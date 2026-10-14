@@ -1,0 +1,100 @@
+{
+  "status": "WORKING_REQUIRED_CHECKS_PASS_FINAL_FROZEN_GATE_NOT_RUN",
+  "selected_authority": "Pass695",
+  "contract": "I7C2E_COURSE_INPUT_LIFECYCLE:v2",
+  "implemented": [
+    "Canonical Courseglobal/perHero/admission/sourcecatalog/schema52",
+    "All14selected sourceoperations; sharedNormal+Super sourceeligible slots",
+    "Approvedfinite28800/+20/no-repeat/seeds andwholebookcap1680 policies",
+    "Typed actor/Character/I5function51/Privilege/value/receipt fullunion; I5sourceoverflowMail andinlineactualawards only",
+    "Missing-only freshfacetchain/controlledbackfill; noAPIstartuprepair/activation",
+    "Typed stored/applieddue inputs, population/Hero/owner/facet versions, readonlysnapshot/liveness filtering",
+    "Canonical source6logs/30limit; stableattendance guard andconditionalretirementrace",
+    "RealAPI/MID1/accountpair authentication/roster/reload/restart andpaidEnrollment killboundaries"
+  ],
+  "working_checks": [
+    {
+      "log": "working-native-4.log",
+      "sha256": "c7d14a3c1922a659433ca4c5851d15a71210923b547c1541a53b2fd2ecfc1e76",
+      "cases": [
+        "CourseCoreQualifiedInputs",
+        "CourseLearnBindProficiencyForgetWire",
+        "CourseCapacityCancelReferenceAndRollback",
+        "CourseUnknownCommitAndActor",
+        "CourseDeadlinePureDueAndCancelOnce"
+      ]
+    },
+    {
+      "log": "working-race-recovery-1.log",
+      "sha256": "2f99af5db9ef760f0eb99e74269ee2db7017a3d8eef723ec7f29b901383ad767",
+      "cases": [
+        "CourseUnknownCommitAndActor",
+        "CourseConcurrentAdmissionAndTransitions"
+      ]
+    },
+    {
+      "log": "working-api-process-2.log",
+      "sha256": "52bc1ba7b7cb2c7c5fd798b2ce33b6eb3e39aa1de98dd0e90c9a5ae558a68752",
+      "cases": [
+        "FreshBootstrapAndActualAcquisitionRequiredFacets",
+        "ProcessKillReopenRandomPaidAdmission"
+      ]
+    },
+    {
+      "log": "working-profile-value-reference-1.log",
+      "sha256": "dbd12719e54c8ace97c24bdb4b157169c4d3ae88c750a9b6af3627056c7985da",
+      "cases": [
+        "CourseSuperSlotsAndMissingPrerequisite"
+      ]
+    },
+    {
+      "log": "working-value-reference-2.log",
+      "sha256": "1622995e6d027083a236a7dd3ce807f88c4d83d39b887991c9ca16e03bec19a5",
+      "cases": [
+        "CourseJoinVersusConditionalRetirement"
+      ]
+    },
+    {
+      "log": "working-overflow-3.log",
+      "sha256": "93fa2b2a08aafa8ab0873cb9c8485b1b4d2fab794c49218dc2b627f425b0f16a",
+      "cases": [
+        "CourseForgetOverflowUsesI5Policy"
+      ]
+    },
+    {
+      "log": "working-api-snapshot-5.log",
+      "sha256": "fd60b467ea3d009f63ed19d72af7e34a93bf9e1f6c29afcf7eb61b993f2403d2",
+      "cases": [
+        "CourseCallerSnapshotAndDormIndependence"
+      ]
+    },
+    {
+      "log": "working-api-8.log",
+      "sha256": "5fab7152b1ff57d911e85fc9452c25b3908e32bd081fe541d7c34396e9545383",
+      "cases": [
+        "ActualAPICourseAndRestartRoster"
+      ]
+    }
+  ],
+  "reconciliation": [
+    "Sourceprofilev2 correctsNormal-only inference undernormal695seal; other10clauses/policies unchanged",
+    "STUDY ownedpartial free resume requiredcurrentStudyRoomcaller; V1implementationwrong",
+    "Legacygiftinfo falseemptyattendance removed, samequalifiedowner snapshots",
+    "CanonicalJSON mixedwidthVIP keys string-normalized; allprior27payloadbytesunchanged",
+    "Courseadmission policykeycorrected, boundeddefiniteabortretry16 afterconcrete20-requestracefailure",
+    "ActualMID1 proof usesgenuine newlybootstrappedaccount+productionSID/loginpair; earlierminimalactorfixture lacksbootstrapimage andisnotvalidMID1existingplayerfixture",
+    "InheritedI5sourcecap999/exceedMail1 honored withclosedmixedexchange, no duplicateinlineaward"
+  ],
+  "limitations": [
+    "Reconstruction policies notoriginalservertruth",
+    "Explicitfunction51/Dorm prerequisite/nativeinputfixtures qualifyconditionalconsumers, notlaterCampaign/Shop origins",
+    "Controlledclock boundary proof retains8h duration; no physical8hwallclockwait",
+    "Conditionalretirement ownerfixture qualifiesguard seam, notnewretirementendpoint",
+    "No finalstats/effects/metrics/history/title/parent orphysicalW2acceptance"
+  ],
+  "remaining": [
+    "One intendedexactfrozen R2candidatequalification",
+    "Primaryindependentreality",
+    "Finalscopedchild2E PassMapseal parentsopen"
+  ]
+}

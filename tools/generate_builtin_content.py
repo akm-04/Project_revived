@@ -21,7 +21,7 @@ from pathlib import Path
 from typing import Any, Iterable
 
 SCHEMA_VERSION = 1
-COMPILER_VERSION = "i7c2d-book-inputs"
+COMPILER_VERSION = "i7c2e-course-inputs"
 PARSER_VERSION = "lua-generated-v18-guild-invite"
 EXPECTED_SOURCE_ARCHIVE_SHA256 = "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
 SOURCE_PREFIX = "app-assets/output/assets/src_64/"
@@ -120,7 +120,7 @@ SOURCE_MANIFEST.append(('app/windows/HeroGiftBoxWindow.lua','d6065c3d601f5820915
 SOURCE_MANIFEST.append(('app/windows/WhiteAlbumWindow.lua','851a53f588b59d95cfe460f3399ab1a6904fff7714131c358f3c3a73910b6bb9',"LIBRARY_INPUT_SOURCE_AUTHORITY"))
 
 ENABLED_CAPABILITIES = [
-    "BOOK_INPUTS_I7C2D",
+    "COURSE_INPUTS_I7C2E", "BOOK_INPUTS_I7C2D",
     "DORM_INPUTS_I7C2C",
     "LIBRARY_INPUTS_I7C2B",
     "PLAYER_DISPLAY_I7B6A",
@@ -186,6 +186,40 @@ SOURCE_MANIFEST.append(('data/tables/event_centre_cabinetbook.lua', '5a56863298b
 SOURCE_MANIFEST.append(('data/tables/event_centre_cabinetskill.lua', 'dddaa9ff5889a2803b0b42330399fd8d10509c69e34efe6de19eade300a31365', 'I7C2D_BOOK_SOURCE_BOUNDARY'))
 SOURCE_MANIFEST.append(('data/tables/event_centre_skillcost.lua', 'f224e7ab52da1cb0a1fd533e4c9fd4abba3590e9851ce8fac6fa7fb02b2df73a', 'I7C2D_BOOK_SOURCE_BOUNDARY'))
 
+
+SOURCE_MANIFEST.append(('app/common/tables/ObjectBookColorTable.lua', '07f54c2c629c0dab488d719641b61bd6c50deabffcfba93d918d07c153b248a6', 'I7C2E_COURSE_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('app/common/tables/ObjectBookShopTable.lua', '1f841cb4cb78f8b7691306eaf4f4ef300a4978aee6a6f6e8963c2be65c234769', 'I7C2E_COURSE_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('app/common/tables/ObjectBookTable.lua', '86addaf1c6f31bcf66616ecb505d5fa85f3c5fe3da666ffb80dd4bb8ebd674e7', 'I7C2E_COURSE_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('app/common/tables/ObjectBranchTable.lua', 'd0ff266d14ea7420d6f6737fb8866e1414382ff3567a970efb544b0cbb22935d', 'I7C2E_COURSE_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('app/common/tables/ObjectClassTable.lua', '690448c2a2be9010eea9f5c1c09ae48569849f0d5a6bdf81dd10d3776495233e', 'I7C2E_COURSE_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('app/common/tables/ObjectLogTable.lua', 'a62b34cb14213cf959751cb3bd0bf35732bc8864dc1d9e75843a7dcc08621ee5', 'I7C2E_COURSE_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('app/common/tables/ObjectSubjectTable.lua', 'eab196b3834867325f32ebb703b65077f1ff575940c11c8f53af867e69b0d181', 'I7C2E_COURSE_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('app/model/Course.lua', '130666bd52843d12a897b21b79dfc4d13245f86e3f73c2fe751fc76862f2d659', 'I7C2E_COURSE_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('app/windows/CourseAddSkillWindow.lua', 'd86f76ee5d157b2d10e98265d3d50528f67a74c2a4dc585e4cca23c798369c15', 'I7C2E_COURSE_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('app/windows/CourseApplySucceedWindow.lua', 'fdf9935b2c75c97dd70d7e12568b8c07cad77bf1b3f89f2d2b61936fced0633a', 'I7C2E_COURSE_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('app/windows/CourseApplyWindow.lua', '2ee5d0080d72ce960ab8c73fb764ce986e870941811234513a3c55b19bb85fd3', 'I7C2E_COURSE_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('app/windows/CourseBookstoreWindow.lua', 'fe6c651b3b3ddd34d7fa9aa5dfced5ff61c768ca49273816ac56370d1284d3d2', 'I7C2E_COURSE_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('app/windows/CourseHeroListWindow.lua', 'd47b5dff495a616731df61535af8fe0e8aeef3cfaf375bc6dde12e6362c9be01', 'I7C2E_COURSE_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('app/windows/CourseInfoWindow.lua', '1b642a4ab066e43f443f09b64950931679733bf85a85e8a561af591bcd470fa8', 'I7C2E_COURSE_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('app/windows/CourseListWindow.lua', '5c2398bf0c535006b4de568b3dcef61e577d55e55d716e91e5db10838805890b', 'I7C2E_COURSE_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('app/windows/CourseRecommendApplyWindow.lua', '60498b783687369f81641107b7624b4166bd979da8b05c4d876ce411c9663f2d', 'I7C2E_COURSE_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('app/windows/CourseRecommendWindow.lua', '7f6ba285c32c0c435f425f42ff12e7481cf5bcf58748804d65a6e9e8e8fd9f49', 'I7C2E_COURSE_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('app/windows/CourseSelectHeroWindow.lua', '18ad2a1fa2c9519a8792fb4770ffa3f00ce167388900999243787fd8f27bd2e1', 'I7C2E_COURSE_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('app/windows/CourseStudySelectWindow.lua', '6a54523d75b7bebeace82393a8a09b2a10fd627297a0250a292a0f37fbce3b39', 'I7C2E_COURSE_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('app/windows/CourseStudyroomWindow.lua', '6da967f3fd58624039286cad58b826e762749ee1b9b39574d3588fc41ae64993', 'I7C2E_COURSE_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('app/windows/CourseTipWindow.lua', 'b1a2f4600ef196a0ccb236b06354902f0b8cd5ee693b0bfa4f00875977919fb4', 'I7C2E_COURSE_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('app/windows/CourseUpgradeWindow.lua', '4e3fd86e9b279acfd49c3db099a3a276d76bb85bc00af89a2b731486b6daca8a', 'I7C2E_COURSE_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('app/windows/CourseWindow.lua', 'e283a5bcd10c5b9f815080513cb591335c6e89e77e3c099a1017c693ad7ab366', 'I7C2E_COURSE_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/object_book.lua', '978bc0367124643116add8ac903f2a169d0c543ed110869c8f0af69c6bb92732', 'I7C2E_COURSE_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/object_book_color.lua', '88228fd4ee11d22414f15bbda2b6af358ba56c996b619bc11f335427aeb11337', 'I7C2E_COURSE_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/object_book_shop.lua', '82cc5a4a5b68cb116987db9695299ff826c9655e01a15c006e1d22454189438d', 'I7C2E_COURSE_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/object_branch.lua', '5f45c31a1234eb6248d22c2fb68fe7d065b8fbb8f0644ccea9bd031900b0ba33', 'I7C2E_COURSE_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/object_class.lua', '518026a4c950d444eb1d732ac3dc4cecc24acb6121bc93db5fa0ee912d4e6070', 'I7C2E_COURSE_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/object_log.lua', '5ddb6cfecd9946f73332985577a6b44cd62abd415a7c8902d189446a89a10ef9', 'I7C2E_COURSE_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/object_subject.lua', '07b9dc913f4eaa667c6ee5a6d0e5206cf5652a95ccb96bdf6cb1a9babbbb0f26', 'I7C2E_COURSE_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/skill_level.lua', '700221095b3728bacb23a118daf9e0a8cf2dd6e31c402b1a55359ac9fac4d98a', 'I7C2E_COURSE_SOURCE_BOUNDARY'))
+
+from course_content import build_course
 class CompileError(ValueError):
     pass
 
@@ -1960,10 +1994,12 @@ def build_artifacts(blobs: dict[str, SourceBlob], archive_sha256: str) -> dict[s
     if len(normal)!=132 or len(special)!=23 or any(x["type"]!=1 for x in special) or len(library_gifts)!=10: raise CompileError("Library selected source counts/shape drift")
     library_artifact=dict(schema_version=1,seed_policy_id="LIBRARY_NEUTRAL_SEED_V1",feed_policy_id="LIBRARY_FEED_RECONSTRUCTION_V1",original_server_probability_recovered=False,favor_limit=2000,templates=library_templates,gifts=library_gifts,feeding=dict(axes=axes,methods=methods,decrease_begin_percent=misc_int("library_feed_decr_begin")),normal_collections=normal,special_collections=special)
     from book_content import build_book
+    course_artifact=build_course(blobs,parse_generated_lua_table,items)
     book_artifact=build_book(blobs,parse_generated_lua_table,items)
     from dorm_content import build_dorm
     dorm_artifact=build_dorm(blobs,parse_generated_lua_table,pipe_ints,hero_artifact["templates"],partner_keys,partner_rows,super_keys,super_rows,indexed_field,items,CompileError)
     artifacts = {
+        "course_input_catalog.json":course_artifact,
         "book_input_catalog.json":book_artifact,
         "dorm_input_catalog.json":dorm_artifact,
         "library_input_catalog.json":library_artifact,

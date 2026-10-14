@@ -1,0 +1,65 @@
+{
+  "id": "I7C2E_COURSE_INPUT_LIFECYCLE",
+  "version": 2,
+  "status": "FROZEN_SOURCE_CORRECTION_PENDING_NORMAL_PASS695_SEAL",
+  "stage": "I7C-2E",
+  "classification": "SOURCE_BOUND_RULES_PLUS_USER_APPROVED_RECONSTRUCTION",
+  "clauses": [
+    {
+      "id": "I7C2E-OWNER",
+      "requirement": "CourseProgression is sole canonical player attendance/log/admission and per-live-Hero course facts owner. Character identity/rawskills/origins, I5 values/functions/privileges, Content catalogs remain prior owners. No copied Course facts in persisted Heroes."
+    },
+    {
+      "id": "I7C2E-PROFILE",
+      "requirement": "Exact current48 course rows,12classes,4subjects,6qualities and signeddecimal/specialmetadata retained. Selected liveNormal AND Super Heroes shareCourse eligibility using qualifiedpositive source skill IDs/book_open slots; Pets excluded. No final stats/effect/gift/recommendation algorithms invented."
+    },
+    {
+      "id": "I7C2E-PROGRESSION",
+      "requirement": "Approved Course seeds/+20session/whole-book policies apply; learned boundslot unique perHero, progress100 required. Owned partial STUDY and CONTINUE free; different activecourse rejected. Unowned enrollment consumes one sourceapplicationticket once; no free books."
+    },
+    {
+      "id": "I7C2E-TIME",
+      "requirement": "Finite accepted job start/duration/content/occurrence authoritative; at deadline +20once, no partial/repeated/unattended sessions. Owning request collects due target before transitions; pure observation distinguishes stored attendance, applied due facts and materialization need. Speed source15*ceil(remaining/1800), zero afterexpiry. Pinned decision time/content before locks; no WorkPlace reset borrowing."
+    },
+    {
+      "id": "I7C2E-REFERENCE",
+      "requirement": "Capacity sourceVIP snapshot; stable Course attendance guard planned even when absent. Live attendance blocks Hero retirement; idle ENTER and studying transitions race safely with leave/cancel/retirement. Dorm and Course different facts. Bounded source6 log events/limit30 once; projection filters retiredHero references rather than logs preventing retirement."
+    },
+    {
+      "id": "I7C2E-VALUE",
+      "requirement": "Existing typed I5 cost/grant/mixedexchange ports govern ticket, speed, proficiency and forget200crystal/refund. Full sorted lock union before writes; no foreign SQL/nestedTx/partial debit/dual awards. Submitted total_num only fresh optimisticprecondition, never proof of replay."
+    },
+    {
+      "id": "I7C2E-REPLAY",
+      "requirement": "Durable operation actor/decision/revision/admission/semantic result; pending recovery before new intent, positive unknownCOMMIT proof only. Fresh rejected commands do not manufacture replay success; no quantity/fingerprint-as-intent. Restart/restore retains occurrence/replay facts."
+    },
+    {
+      "id": "I7C2E-WIRE",
+      "requirement": "CourseModel subject-specific responses, required room log_infos array and coherent study_infos. MID1 key2137 real owner snapshot; single existingCharacter key49 overlay five alignedCourse arrays. Giftinfo2139 never supplies falseempty attendance; sourceunsupported2141/2500 explicitly residual/inactive."
+    },
+    {
+      "id": "I7C2E-PORTS",
+      "requirement": "Typed caller Queryer/Tx CourseInputs/HeroCourseInputs observations include pinned time/content, population/liveHero/global/facet versions; missing owner/content fails closed. Stored vs applied due inputs distinguished. Later3B/4C consumers and parent gates remain mandatory, not accepted by leaf."
+    },
+    {
+      "id": "I7C2E-DEPLOY",
+      "requirement": "Forward schema52; prior1..51 immutable. New28th sourcecatalog retains previous27 payloads unless concrete invalidation. Missing-only fresh perHero initializer and owning explicit backfill preserve facts before content activation; API startup neither seeds nor activates."
+    },
+    {
+      "id": "I7C2E-ACCEPTANCE",
+      "requirement": "Normal research/design seal before code; intended frozen combined candidate exactR2 realPG fresh/51upgrade/backfill/lifecycle/value/concurrency/unknownCOMMIT/API/process/reload/restore plus affected source/regression/security and primary independent reality. Reuse unchanged proof. Leaf acceptance never accepts parents/W2."
+    }
+  ],
+  "parent_contracts": [
+    "I7C1_PROVIDER_SCOPE_OWNERSHIP",
+    "I7C1_DELIVERY_ACCEPTANCE",
+    "I7C1_RESEARCH_AMENDMENT"
+  ],
+  "original_server_formula_claimed": false,
+  "supersedes": {
+    "path": "00_PASSMAP/PASS694_I7C2E_COURSE_INPUT_LIFECYCLE_CONTRACT.json",
+    "sha256": "a444391eebbdda89b8a8f09e08416e28b6cc73b2595c852ba38a04b049163720",
+    "reason": "Source-required Normal+Super profilecorrection; other10clausesunchanged"
+  },
+  "amendment": "SOURCE_PROFILE_AMENDMENT.json"
+}

@@ -138,10 +138,22 @@
       "parser_version": "lua-generated-v18-guild-invite",
       "revision_id": "7441492510c3869e2ad1c9fcdd99a2cb9bd5d0d2a223be5a5ca77d84c558884c",
       "scope": "Book inputs and four existing I5 named scalar definitions; prior25 payloads unchanged"
+    },
+    {
+      "ordinal": 23,
+      "stage": "I7C-2E",
+      "compiler_version": "i7c2e-course-inputs",
+      "parser_version": "lua-generated-v18-guild-invite",
+      "revision_id": "4e2540adfef4dd01d5a19d709aa35b8306ab11717705de77dca82a50fb54f93c",
+      "scope": "New rawCoursecatalog only; prior27payloadsbyteidentical; 31sourceboundarymembersadded"
     }
   ],
   "current": {
-    "compiler_version": "i7c2d-book-inputs",
-    "parser_version": "lua-generated-v18-guild-invite"
+    "ordinal": 23,
+    "stage": "I7C-2E",
+    "compiler_version": "i7c2e-course-inputs",
+    "parser_version": "lua-generated-v18-guild-invite",
+    "revision_id": "4e2540adfef4dd01d5a19d709aa35b8306ab11717705de77dca82a50fb54f93c",
+    "scope": "New rawCoursecatalog only; prior27payloadsbyteidentical; 31sourceboundarymembersadded"
   }
 }
