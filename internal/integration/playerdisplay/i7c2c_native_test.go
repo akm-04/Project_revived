@@ -203,16 +203,17 @@ func TestI7C2CCommandsOwnershipCostsReplayAndProviders(t *testing.T) {
 		rate = v
 		break
 	}
+	beforeExchangeKey := dormStack(t, p, a, exchangeKey)
 	cement := dormStack(t, p, a, 50005167)
 	o = op()
 	ec := app.Command{Family: app.Exchange, ItemID: exchangeKey, Amount: 2}
 	if _, e = s.Command(ctx, a, ec, o); e != nil {
 		t.Fatal("exchange", e)
 	}
-	if dormStack(t, p, a, exchangeKey) != 18 || dormStack(t, p, a, 50005167) != cement+2*rate {
+	if dormStack(t, p, a, exchangeKey) != beforeExchangeKey-2 || dormStack(t, p, a, 50005167) != cement+2*rate {
 		t.Fatal("exchange vector")
 	}
-	if _, e = s.Command(ctx, a, ec, o); e != nil || dormStack(t, p, a, exchangeKey) != 18 {
+	if _, e = s.Command(ctx, a, ec, o); e != nil || dormStack(t, p, a, exchangeKey) != beforeExchangeKey-2 {
 		t.Fatal("exchange replay", e)
 	}
 	villa := dormOpen(t, s, a, c, 4, 1)

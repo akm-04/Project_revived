@@ -19,6 +19,7 @@ import (
 	dorm "gxb.local/backend/v2/internal/application/dormhouse"
 	gen "gxb.local/backend/v2/internal/application/generation"
 	i5 "gxb.local/backend/v2/internal/application/i5"
+	"gxb.local/backend/v2/internal/domain/economy"
 	"gxb.local/backend/v2/internal/domain/grant"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/operation"
@@ -337,6 +338,23 @@ func TestI7C2DBookMemoirPagesRefundAndRecipeOverrides(t *testing.T) {
 	r := bookCmd(t, s, a, app.Command{Family: app.GiveUp, SkillID: id})
 	if r.Body["return_skillpage"] != used || dormStack(t, p, a, 240001001) != beforePages || bookRoot(t, p, a).Facts.Skills[id] != 5 {
 		t.Fatal("page refund", r)
+	}
+	// Source Skill Pages cap999 disallows Mail overflow. Cancellation must
+	// retain its full refund intent and roll back atomically until capacity exists.
+	bookCmd(t, s, a, app.Command{Family: app.Learn, SkillID: id})
+	exec(t, p, `UPDATE player_item_stacks SET quantity=999 WHERE player_id=$1 AND item_id=240001001`, int64(a.PlayerID))
+	capOperation := op()
+	manaBefore := libraryAmount(t, p, a, "mana")
+	if _, e := s.Command(ctx, a, app.Command{Family: app.GiveUp, SkillID: id}, capOperation); !errors.Is(e, economy.ErrStackCapacity) {
+		t.Fatal("required cap protection", e)
+	}
+	if bookRoot(t, p, a).Facts.Research == nil || dormStack(t, p, a, 240001001) != 999 || libraryAmount(t, p, a, "mana") != manaBefore {
+		t.Fatal("partial cap refund")
+	}
+	exec(t, p, `UPDATE player_item_stacks SET quantity=939 WHERE player_id=$1 AND item_id=240001001`, int64(a.PlayerID))
+	capRefund, e := s.Command(ctx, a, app.Command{Family: app.GiveUp, SkillID: id}, capOperation)
+	if e != nil || capRefund.Body["return_skillpage"] != int64(60) || dormStack(t, p, a, 240001001) != 999 || bookRoot(t, p, a).Facts.Research != nil {
+		t.Fatal("retained full cap refund", capRefund, e)
 	}
 	for _, pair := range [][2]int64{{130001020, 140001020}, {130001021, 140001021}} {
 		before := libraryAmount(t, p, a, "mana")
