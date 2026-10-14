@@ -2585,6 +2585,56 @@
       "migration": "migrations/00050_i7c2c_dorm_inputs.sql",
       "owner": "content-registry",
       "write_exceptions": []
+    },
+    "player_book_roots": {
+      "owner": "book-skill",
+      "migration": "migrations/00051_i7c2d_book_inputs.sql",
+      "allowed_query_owners": [
+        "book-skill"
+      ],
+      "allowed_read_paths": [
+        "sql/book/",
+        "internal/adapters/postgres/bookstore/"
+      ],
+      "allowed_write_paths": [
+        "sql/book/",
+        "internal/adapters/postgres/bookstore/"
+      ],
+      "write_exceptions": []
+    },
+    "player_book_admissions": {
+      "owner": "book-skill",
+      "migration": "migrations/00051_i7c2d_book_inputs.sql",
+      "allowed_query_owners": [
+        "book-skill"
+      ],
+      "allowed_read_paths": [
+        "sql/book/",
+        "internal/adapters/postgres/bookstore/"
+      ],
+      "allowed_write_paths": [
+        "sql/book/",
+        "internal/adapters/postgres/bookstore/"
+      ],
+      "write_exceptions": []
+    },
+    "content_book_input_catalogs": {
+      "allowed_query_owners": [
+        "content-registry"
+      ],
+      "allowed_read_paths": [
+        "sql/content/",
+        "internal/adapters/postgres/contentstore/",
+        "internal/adapters/postgres/contentqueries/"
+      ],
+      "allowed_write_paths": [
+        "sql/content/",
+        "internal/adapters/postgres/contentstore/",
+        "internal/adapters/postgres/contentqueries/"
+      ],
+      "migration": "migrations/00051_i7c2d_book_inputs.sql",
+      "owner": "content-registry",
+      "write_exceptions": []
     }
   }
 }

@@ -1,0 +1,47 @@
+{
+  "id": "I7C2D_BOOK_INPUT_LIFECYCLE",
+  "version": 1,
+  "status": "PREIMPLEMENTATION_FROZEN_PENDING_NORMAL_PASS692_SEAL",
+  "stage": "I7C-2D",
+  "classification": "SOURCE_BOUND_RULES_PLUS_USER_APPROVED_RECONSTRUCTION",
+  "clauses": [
+    {
+      "id": "I7C2D-OWNER",
+      "requirement": "BookSkillProgression canonical player-global building/learned/research facts and semantic admissions only; Character identity/origin/raw skill facts and I5 value remain under prior owners. No duplicate bookshelf/skill levels in persisted Heroes."
+    },
+    {
+      "id": "I7C2D-PROFILE",
+      "requirement": "Current exact src64 catalogs54books399skills, separate Normal/Super origin mapping and raw special action/decimal metadata. Ten family MIDs plus book-only83 producer; unrelated EventCentre gameplay excluded. Necessary Cabinet/Recycle building ladder honored, not mocked away."
+    },
+    {
+      "id": "I7C2D-TIME",
+      "requirement": "Approved C2D_V1_BUILDING_SEEDS_AND_JOB_REFUNDS_V1 applies; accepted job occurrence/start/duration/target/content/cost snapshot authoritative. Once completion at deadline, confirm acknowledgment only; early cancel snapshot-based prorata resources/full pages; no refund or speed charge after expiry. No clock/active revision discovery under locks."
+    },
+    {
+      "id": "I7C2D-VALUE",
+      "requirement": "Book composition/cost/refund/speed each atomically uses existing I5 Prepare/Apply/Grant ports and central stock safeguards; full sorted closed lockplan before canonical mutation. No foreign value SQL, additional transaction or double local award projection."
+    },
+    {
+      "id": "I7C2D-REPLAY",
+      "requirement": "Durable operation/actor/decision/revision/semantic result proof; resolve pending admission before fresh stock intent, UNKNOWN COMMIT positive proof only; no fingerprint-as-intent nonce, no blind replay. Restart/refund/completion receipts survive backup/restore."
+    },
+    {
+      "id": "I7C2D-PORTS",
+      "requirement": "Raw BookInputs/BookshelfInputs typed caller Queryer/Tx, pinned content/time with population/owner versions; learned/applied vs pending/recent completion distinct. No projection truth/fabricated qualification/zero for missing required owner. Later3B/4C/6 consumers and parent exits remain mandatory."
+    },
+    {
+      "id": "I7C2D-DEPLOY",
+      "requirement": "Forward-only migration51, prior1..50 immutable; source DTO/compiler preserve26 prior payloads unless concrete invalidation. Owning missing-only fresh/bootstrap/backfill before activation, preserve explicit facts; API startup does not seed or activate."
+    },
+    {
+      "id": "I7C2D-ACCEPTANCE",
+      "requirement": "Research/design normal seal before authorized code; one intended frozen combined candidate, R2 exact realPG fresh/50upgrade/backfill/concurrency/atomic rollback/unknownCOMMIT/process/API/reload/backuprestore plus affected source/regression/security and independent reality. Reuse unchanged evidence; leaf GREEN never accepts parents or W2."
+    }
+  ],
+  "parent_contracts": [
+    "I7C1_PROVIDER_SCOPE_OWNERSHIP",
+    "I7C1_DELIVERY_ACCEPTANCE",
+    "I7C1_RESEARCH_AMENDMENT"
+  ],
+  "original_server_formula_claimed": false
+}

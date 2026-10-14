@@ -1,0 +1,29 @@
+{
+  "status": "SOURCE_AND_INHERITED_I5_OWNER_RECONCILED_MINIMUM_FIX_FOR_NATIVE_FAILURE",
+  "failure": "core-required-magic-profile-failure.log",
+  "scope": [
+    "magic_dust",
+    "magic_liquid",
+    "magic_energy",
+    "magic_exp"
+  ],
+  "owner": "ExistingI5 ScalarBalance/ScalarCurrency",
+  "source": [
+    "enums.ECONOMY named keys; currencyType11/12/13 costs; Bookshelf table14",
+    "SelfPlayer:onLoadPlayer/updateParams scalar sidebands",
+    "book_input_catalog source resource costs"
+  ],
+  "rules": [
+    "ExistingI5 nonnegative checkedint64 scalar credit/debit, sorted lockplan andreceipt behavior unchanged",
+    "Nameddefinitions have no fabricated assetID; currency enum11..14 is a distinct category",
+    "magic_exp is spendable Workshop material, not PlayerEXP or new temporalresource",
+    "Missing scalarrow is existingqualifiedI5zero; no inventedfreeinitialresources or secondwallet",
+    "I5 MID1 canonicalwallet projection already covers these namedkeys; verify actualwire afterproduct wiring"
+  ],
+  "changed_prior_payloads": [
+    "resource_catalog.json + manifest.json"
+  ],
+  "unchanged_prior_payloads": "Other25 payloads byte-identical; no existing definition changed, addfour named scalar definitions",
+  "new_contracts": false,
+  "publication": "Reconcile at nextnormal implementation/evidence seal; current692 Book lifecycle VALUE alreadyrequires these sourcecosts"
+}

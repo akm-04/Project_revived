@@ -21,7 +21,7 @@ from pathlib import Path
 from typing import Any, Iterable
 
 SCHEMA_VERSION = 1
-COMPILER_VERSION = "i7c2c-dorm-inputs"
+COMPILER_VERSION = "i7c2d-book-inputs"
 PARSER_VERSION = "lua-generated-v18-guild-invite"
 EXPECTED_SOURCE_ARCHIVE_SHA256 = "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
 SOURCE_PREFIX = "app-assets/output/assets/src_64/"
@@ -120,6 +120,7 @@ SOURCE_MANIFEST.append(('app/windows/HeroGiftBoxWindow.lua','d6065c3d601f5820915
 SOURCE_MANIFEST.append(('app/windows/WhiteAlbumWindow.lua','851a53f588b59d95cfe460f3399ab1a6904fff7714131c358f3c3a73910b6bb9',"LIBRARY_INPUT_SOURCE_AUTHORITY"))
 
 ENABLED_CAPABILITIES = [
+    "BOOK_INPUTS_I7C2D",
     "DORM_INPUTS_I7C2C",
     "LIBRARY_INPUTS_I7C2B",
     "PLAYER_DISPLAY_I7B6A",
@@ -165,6 +166,25 @@ SOURCE_MANIFEST.append(('data/tables/dorm_furniture_item.lua', '4bd6844119457165
 SOURCE_MANIFEST.append(('data/tables/dorm_house.lua', 'ce0f2c7b5bac8ffaea9590b682f7cfd044eb8ca81116862473100565eb4753e5', 'I7C2C_DORM_SOURCE_BOUNDARY'))
 SOURCE_MANIFEST.append(('data/tables/dorm_house_key.lua', 'b9abe851b2cdf2c2f69aad2b43c5eb0b7671019e9b9f6295939269f932138940', 'I7C2C_DORM_SOURCE_BOUNDARY'))
 SOURCE_MANIFEST.append(('data/tables/dorm_house_type.lua', '99964f53860e75fdc05852f7fe2f78514d0f3f59d19ebfa4b02237ac2b178520', 'I7C2C_DORM_SOURCE_BOUNDARY'))
+
+SOURCE_MANIFEST.append(('app/model/EventCentre.lua', 'a74e8d057e5e520f302b5f4c5ece73b6e9d4eb934b9cbefa0447410c094e7596', 'I7C2D_BOOK_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('app/windows/EventCentreUpgradeWindow.lua', '9329f921989c2ca2cc065c4555e4b48e82d5671d3036be2e4a00aa71309325d7', 'I7C2D_BOOK_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('app/windows/BookShelfWindow.lua', '6ccd239fd6adefd032c9f13acf36a0dcba2bb282b520cc2f320398db3dd82cee', 'I7C2D_BOOK_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('app/windows/JunkChestWindow.lua', 'a69bf0a5f6c2e68bcb40f1b713da1a12daac8ddd24b1a490bed7164f0d23fd0c', 'I7C2D_BOOK_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('app/windows/JunkChestSkillUpWindow.lua', 'debdddd5cfe482c10884d9cb88f541e5e6e058bbec2db9614e4716d19e6d0010', 'I7C2D_BOOK_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('app/windows/FragmentMake.lua', '56dc888e894f7a14131cec70300ff10c7b2de8cf3aa0e7a3ab7fd01bb1f05d28', 'I7C2D_BOOK_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('app/common/tables/EventCentreBookShelfTable.lua', '35968941ebea7f1cd81fafd5c961e2037d98b04809741acaf09c37a843a737f7', 'I7C2D_BOOK_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('app/common/tables/EventCentreRecycleTable.lua', 'a40542ff95cdfe5bd107a7bb9af6f2c4a731c6d200d578fcf362989a00ef2836', 'I7C2D_BOOK_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('app/common/tables/CabinetTable.lua', '4936c47870e426eb60bb8ec2999d49d11db1a1432920f73a812c703d40cdff62', 'I7C2D_BOOK_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('app/common/tables/CabinetBookTable.lua', 'd9a51975ef816382a18705e52d26c0b05de93a35191e5e48c4fd9d60656a76ea', 'I7C2D_BOOK_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('app/common/tables/CabinetSkillTable.lua', '6b31896b2cb5fd60719c1392d96fea37fde7bf1b7319a150922004f795612b41', 'I7C2D_BOOK_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('app/common/tables/CabinetSkillCostTable.lua', 'a9f6c4dcbf1751fe6b647993f9a0a7c5152f6aa3681daac5e4bd822b0efb8bb6', 'I7C2D_BOOK_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/event_centre_bookshelf.lua', '2caa18336a1e8c7fab3521cefd8b261a7cc420bea594f684bbacc7e1221e50b0', 'I7C2D_BOOK_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/event_centre_recycle.lua', '8a60562844b71bd82e9b4e35061bfebdf32dc561c63f3b8aa54b19d0e0ae745e', 'I7C2D_BOOK_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/event_centre_cabinet.lua', '2bb59560151405d652f282a47276c7d31134866394259a328feeabc42022ae2b', 'I7C2D_BOOK_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/event_centre_cabinetbook.lua', '5a56863298b9ad883bbf684548d24c6e0124811b31d8447231d1415fc392b5b3', 'I7C2D_BOOK_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/event_centre_cabinetskill.lua', 'dddaa9ff5889a2803b0b42330399fd8d10509c69e34efe6de19eade300a31365', 'I7C2D_BOOK_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/event_centre_skillcost.lua', 'f224e7ab52da1cb0a1fd533e4c9fd4abba3590e9851ce8fac6fa7fb02b2df73a', 'I7C2D_BOOK_SOURCE_BOUNDARY'))
 
 class CompileError(ValueError):
     pass
@@ -685,6 +705,11 @@ def build_artifacts(blobs: dict[str, SourceBlob], archive_sha256: str) -> dict[s
     resources.append({"catalog_status":"QUALIFIED","class":"SCALAR_CURRENCY",
         "definition_key":"scalar_currency:friendship_coin","resource_key":"friendship_coin",
         "settlement_activation":"ENABLED_R4"})
+    # Named Workshop balances are scalar I5 facts, not asset-ID or PlayerEXP identities.
+    # Current enums.ECONOMY and SelfPlayer scalar hydration plus source Book costs qualify these four.
+    for key in ('magic_dust','magic_liquid','magic_energy','magic_exp'):
+        if key not in economy_names or key in asset_by_name:raise CompileError("Workshop named scalar identity drift: "+key)
+        resources.append({"catalog_status":"QUALIFIED","class":"SCALAR_CURRENCY","definition_key":"scalar_currency:"+key,"resource_key":key,"settlement_activation":"ENABLED_R4"})
     social_gift_artifact=build_social_gift(
         parse_generated_lua_table(blobs["data/tables/gift.lua"].data),
         parse_generated_lua_table(blobs["data/tables/friend_dailygift.lua"].data),
@@ -1934,9 +1959,12 @@ def build_artifacts(blobs: dict[str, SourceBlob], archive_sha256: str) -> dict[s
     favor_rows=parse_generated_lua_table(blobs["data/tables/library_amour.lua"].data)
     if len(normal)!=132 or len(special)!=23 or any(x["type"]!=1 for x in special) or len(library_gifts)!=10: raise CompileError("Library selected source counts/shape drift")
     library_artifact=dict(schema_version=1,seed_policy_id="LIBRARY_NEUTRAL_SEED_V1",feed_policy_id="LIBRARY_FEED_RECONSTRUCTION_V1",original_server_probability_recovered=False,favor_limit=2000,templates=library_templates,gifts=library_gifts,feeding=dict(axes=axes,methods=methods,decrease_begin_percent=misc_int("library_feed_decr_begin")),normal_collections=normal,special_collections=special)
+    from book_content import build_book
+    book_artifact=build_book(blobs,parse_generated_lua_table,items)
     from dorm_content import build_dorm
     dorm_artifact=build_dorm(blobs,parse_generated_lua_table,pipe_ints,hero_artifact["templates"],partner_keys,partner_rows,super_keys,super_rows,indexed_field,items,CompileError)
     artifacts = {
+        "book_input_catalog.json":book_artifact,
         "dorm_input_catalog.json":dorm_artifact,
         "library_input_catalog.json":library_artifact,
         "player_display_catalog.json":display_artifact,

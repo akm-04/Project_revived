@@ -130,10 +130,18 @@
       "parser_version": "lua-generated-v18-guild-invite",
       "revision_id": "bd1f4ceac82c016cd7282ed02a4d851029ac791df9776db3c5ce5569626a03b0",
       "scope": "Forward source-derived display/name/cosmetic catalog; previousimmutable revisions unchanged"
+    },
+    {
+      "ordinal": 22,
+      "stage": "I7C-2D",
+      "compiler_version": "i7c2d-book-inputs",
+      "parser_version": "lua-generated-v18-guild-invite",
+      "revision_id": "7441492510c3869e2ad1c9fcdd99a2cb9bd5d0d2a223be5a5ca77d84c558884c",
+      "scope": "Book inputs and four existing I5 named scalar definitions; prior25 payloads unchanged"
     }
   ],
   "current": {
-    "compiler_version": "i7b6a-player-display",
+    "compiler_version": "i7c2d-book-inputs",
     "parser_version": "lua-generated-v18-guild-invite"
   }
 }
