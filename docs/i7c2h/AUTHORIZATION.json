@@ -1,0 +1,13 @@
+{
+  "stage": "I7C-2H",
+  "source": "Current direct human instruction",
+  "research_authorized": true,
+  "research_started": true,
+  "preimplementation_authorized": true,
+  "implementation_authorized": true,
+  "implementation_started": true,
+  "qualification_authorized": true,
+  "reality_sync_authorized": true,
+  "scope": "Whole2H research until sufficient, plan/checkpoint and required preimplementation publication, implement, exact R2 tests, reconcile/reality and PassMap closure; intermittent cumulative checkpoints. HonorI7C1 and transitive contracts, src64 crosschecks.",
+  "limits": "No implicit policy/gate waiver; previous2F/2G and parent/W2 gates retained"
+}

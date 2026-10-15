@@ -1,0 +1,76 @@
+{
+  "status": "IMPLEMENTED_EXACT_QUALIFICATION_PENDING",
+  "stage": "I7C-2H",
+  "implementation_started": true,
+  "physical_owner": "DedicatedSpiritInstance/spiritstore owns persistentinstances, bindings andsavedSpiritloadouts; Character onlyliveHero/borrowedSpiritRef, I5 values remainI5",
+  "schema": {
+    "migration": "00055_i7c2h_spirit_inputs.sql",
+    "tables": [
+      "content_spirit_input_catalogs",
+      "player_spirit_roots",
+      "player_spirit_heroes",
+      "player_spirit_admissions"
+    ],
+    "root580": "RootJSONfacts:monotoniccursors,instanceID->materializedinstance,presetID->name+sixrefs; rootversionserializes canonicalinstance/presetwrites",
+    "hero590": "Freshlocalpublishedfacet: sixSpiritIDs, version/time. Solebindingauthority. Inventoryis_equip/collo_count derivedinownquery; notduplicatedauthority"
+  },
+  "stock_commands": [
+    3089,
+    3090,
+    3091,
+    3094,
+    3095,
+    3112,
+    3113,
+    3114,
+    3115
+  ],
+  "symbol_only_not_frozen": [
+    3088,
+    3098
+  ],
+  "reads": [
+    "MID81 canonicalI5stack+Spiritinventory coherentcomposition throughtypedport",
+    "MID1/roster andtypedforeignmaterialized sixslotpayloads",
+    "CA8 witnessed coherentprovider scope withsamecontent/time/liveHero"
+  ],
+  "generation": "Existingop entropy/receipt andI5Grant preplannedMaterializer extension; no newrandom/grantframework",
+  "locking": "Actor/player/Characterroot400; discoveraffectedHerorefs underprefix andsorted410; Spiritroot580/facets590; completeI5suffix beforeeffects. Applyloadout capturesallsourceHeroes. Freshfacet existinginsert-onlyseam; noexistingownerlockdiscovery afterI5planning.",
+  "recovery": "Proofbeforeadmission; retainedSpiritlane; terminalrejection/UNKNOWN reuseexistingpatterns; source callback-specific response projection andcurrentstate reload",
+  "qualification": [
+    "PersistentIDno-reuse/type-safe templateIDs/foreignownerrejection",
+    "I5specialized generatedGrant actuallymints viaqualifiedSpiritowner thenreplaysnoreallocate",
+    "All9 stockcmds strictschema,consume/ref/transfer/concurrency/rollback/UNKNOWN/restart/SIGKILL",
+    "Fresh/backfill/nooverwrite, coherentforeignpayload no viewerfallback",
+    "RealPGfresh55/populated54upgrade/restore/replay; unit/source/differential/fuzz/arch/vet/pins/securityscope",
+    "All3C1 andaffectedtransitivecontractobligations"
+  ],
+  "named_remaining_scope": [
+    "GiftMID241 genuine sourcecaller and GodsTrial settledtemplateintent qualification separatefromSpiritcore; no arbitrarygiftwireactivation",
+    "Originalserverlib.spirit/probabilities unrecovered; privateprofileexplicit",
+    "Finalstat/combat/publicconsumer andparent/W2 gates remainrequired"
+  ],
+  "next": [
+    "Freeze intended119candidate",
+    "Exact portable R2 qualification/upgrade/restore",
+    "Primary separate reality/classification/final706sync"
+  ],
+  "policy_disposition": "Install V1PreservationPolicy at production composition after V2 exact candidate qualification; no generic Qualified flag. Stable semantic receipts, existing Operation.Derive namespace entropy; nil provider explicitly unavailable.",
+  "core_scope": "Canonical materializedSpirit owner and sixslotbinding, presets, full strengthening and typedI5 specialized mint under versioned reconstructed V1 policy.",
+  "remaining_gates": [
+    "Genuine sourceGift241/GodsTrialtemplateoriginconsumer qualification; noinvented3098wire",
+    "Parents/3A/3B/combat/public/W2 unchanged"
+  ],
+  "implementation_authorized": true,
+  "implementation_sequence": [
+    "Dedicateddomain/content/sourcecompiler/migration55/SQLowner",
+    "ExistingI5 narrowSpirit typedprovider with versioned V1PreservationPolicy",
+    "Spiritroot/facet/store andretainedcommands+allaffectedHerotransfer/preparedI5costs",
+    "Typedreads/MID81/MID1/roster/reference/fresh/deploymentcomposition",
+    "Targetedworkingchecks/repair thenfreezeintended119candidate, exactR2/scopedreuse/reality/sync"
+  ],
+  "publication_gate": "Pass705 amended contract before affected production policy implementation",
+  "intended_final_pass": "706.0",
+  "intended_backend_version": "v0.119.0",
+  "implementation_sequence_complete": true
+}

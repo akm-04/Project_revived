@@ -1,0 +1,15 @@
+{
+  "status": "RESOLVED_EXISTING_I5_ELIGIBILITY_FACT_NOT_ANNOUNCEMENT",
+  "classification": "SOURCE_FACT + IMPLEMENTATION_DECISION",
+  "evidence": [
+    "internal/application/i5/r5_policy.go PetStarterFunctionAnnouncements: NONE produces no unlock message",
+    "internal/application/i5/service.go PlayerExp: all pure-level eligibility facts persisted before selected announcement",
+    "generated/function_gates.json function99 PURE_LEVEL60 NONE"
+  ],
+  "correction": "Use existing I5 player_function_eligibility99 plus validated exact progression policy/state and current source gate. No new unlock flag, announcement capability or invented composite policy.",
+  "contract": "Spirit v2 clause5 wording actualunlockfact is interpreted as canonical I5 eligibility fact under higher-priority accepted I5 contract; final published selected clause must say eligibility explicitly.",
+  "affected_qualification": [
+    "Actual I5 PlayerExpGrant reacheslevel60 creates99eligibility; no99unlock row",
+    "Manual level60 with missing eligibility rejected; malformed progression fails before effects"
+  ]
+}

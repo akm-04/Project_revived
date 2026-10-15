@@ -33,9 +33,13 @@ type I5ServicePort interface {
 	Redeem(context.Context, identity.ActorContext, string, string, operation.Context) (appi5.RedeemResult, error)
 }
 
+type SpiritBackpackProjector interface {
+	Backpack(context.Context, identity.ActorContext, operation.Context) (map[string]any, error)
+}
 type I5Dispatcher struct {
-	Authority apprealtime.GameplayAuthorityPort
-	Service   I5ServicePort
+	SpiritBackpack SpiritBackpackProjector
+	Authority      apprealtime.GameplayAuthorityPort
+	Service        I5ServicePort
 }
 
 func (d I5Dispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRequest) httpedge.Response {
@@ -59,6 +63,13 @@ func (d I5Dispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRequest
 		}
 		return okI5(map[string]any{})
 	case 81: // LOAD_BACKPACK
+		if d.SpiritBackpack != nil {
+			body, e := d.SpiritBackpack.Backpack(ctx, actor, req.Envelope.Operation)
+			if e != nil {
+				return failI5(e)
+			}
+			return okI5(body)
+		}
 		stacks, err := d.Service.ListBackpack(ctx, actor)
 		if err != nil {
 			return failI5(err)

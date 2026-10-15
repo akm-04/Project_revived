@@ -39,6 +39,7 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres/socialgiftstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/socialinboxstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/socialrelationstore"
+	"gxb.local/backend/v2/internal/adapters/postgres/spiritstore"
 	"gxb.local/backend/v2/internal/adapters/publicpresentation"
 	"gxb.local/backend/v2/internal/adapters/socialpresentation"
 	"gxb.local/backend/v2/internal/adapters/stockruntime"
@@ -71,8 +72,10 @@ import (
 	"gxb.local/backend/v2/internal/application/socialprojection"
 	"gxb.local/backend/v2/internal/application/socialrelation"
 	"gxb.local/backend/v2/internal/application/socialreload"
+	appspirit "gxb.local/backend/v2/internal/application/spirit"
 	"gxb.local/backend/v2/internal/content/guildpolicy"
 	"gxb.local/backend/v2/internal/content/registry"
+	domainspirit "gxb.local/backend/v2/internal/domain/spirit"
 	"gxb.local/backend/v2/internal/foundation/clock"
 	"gxb.local/backend/v2/internal/foundation/config"
 	"gxb.local/backend/v2/internal/foundation/observability"
@@ -186,7 +189,7 @@ func main() {
 	// CA2-3 mechanics are constructed against owner-shaped ports, but Capacity
 	// remains nil and I5.PartnerEntities/MID59/MID305 remain unregistered in
 	// production until the original Hero capacity policy is recovered.
-	heroSvc := apphero.Service{FreshFacets: apphero.FreshFacetChain{librarystore.Store{}, dormstore.Store{}, coursestore.Store{}, inscriptionstore.Store{}, elementstore.Store{}}, Runner: runner, Timed: appgeneration.TimedRunner{Binder: appgeneration.Binder{Time: postgres.AuthoritativeTime{Queryer: pool}}, Runner: runner}, Store: heroDB, Fencer: i5db, Content: contentDB, Receipts: receipts, ReceiptRead: kernelstore.Reader{Queryer: pool}, ProgressionStore: heroDB, Progression: contentDB, Economy: heroEconomy, Backpack: i5db, AcquisitionStore: heroDB, Acquisition: contentDB, MaterialCosts: heroMaterialCosts, PlayerLevel: i5CrossOwner, Capacity: nil, Equipment: contentDB, EquipmentResources: heroEquipmentResources, Fumo: contentDB, Promotion: contentDB, PromotionResources: i5svc, StrictRestoration: i5svc, MaxHeroColorPolicy: maxHeroColorPolicy, RestorationModifier: characterasset.IdentityRestorationModifier{}, RosterProjection: contentDB, AppearanceStore: heroDB, Appearance: contentDB, AppearanceMutationStore: heroDB, AppearanceMutationContent: contentDB, LIVEMutationStore: heroDB}
+	heroSvc := apphero.Service{FreshFacets: apphero.FreshFacetChain{librarystore.Store{}, dormstore.Store{}, coursestore.Store{}, inscriptionstore.Store{}, elementstore.Store{}, spiritstore.Store{}}, Runner: runner, Timed: appgeneration.TimedRunner{Binder: appgeneration.Binder{Time: postgres.AuthoritativeTime{Queryer: pool}}, Runner: runner}, Store: heroDB, Fencer: i5db, Content: contentDB, Receipts: receipts, ReceiptRead: kernelstore.Reader{Queryer: pool}, ProgressionStore: heroDB, Progression: contentDB, Economy: heroEconomy, Backpack: i5db, AcquisitionStore: heroDB, Acquisition: contentDB, MaterialCosts: heroMaterialCosts, PlayerLevel: i5CrossOwner, Capacity: nil, Equipment: contentDB, EquipmentResources: heroEquipmentResources, Fumo: contentDB, Promotion: contentDB, PromotionResources: i5svc, StrictRestoration: i5svc, MaxHeroColorPolicy: maxHeroColorPolicy, RestorationModifier: characterasset.IdentityRestorationModifier{}, RosterProjection: contentDB, AppearanceStore: heroDB, Appearance: contentDB, AppearanceMutationStore: heroDB, AppearanceMutationContent: contentDB, LIVEMutationStore: heroDB}
 	petAcquisitionDebit := appi5.PetAcquisitionDebiter{Store: i5db, Content: contentDB}
 	petExpDebit := appi5.PetExpDebiter{Store: i5db, Content: contentDB}
 	petTimed := appgeneration.TimedRunner{Binder: appgeneration.Binder{Time: postgres.AuthoritativeTime{Queryer: pool}}, Runner: runner}
@@ -196,7 +199,10 @@ func main() {
 	courseSvc := appcourse.Service{Timed: heroSvc.Timed, Reads: runner, Heroes: characterstore.CourseHeroPort{Store: heroDB}, Owner: coursestore.Store{}, Content: contentDB, Players: i4store.PlayerRootLocker{}, Fence: i5db, Costs: heroMaterialCosts, Values: i5db, Grants: i5svc, Exchange: i5svc, Receipts: receipts, Privileges: appi5.BaselinePrivilegeProvider{}}
 	inscriptionSvc := appinscription.Service{Timed: heroSvc.Timed, Reads: runner, Heroes: characterstore.InscriptionHeroPort{Store: heroDB}, Owner: inscriptionstore.Store{}, Content: contentDB, Players: i4store.PlayerRootLocker{}, Fence: i5db, Values: i5db, ValuePlans: i5svc, Eligibility: characterstore.InscriptionHeroPort{Store: heroDB}, Receipts: receipts}
 	elementSvc := appelement.Service{MaxHeroColor: maxHeroColorPolicy, Timed: heroSvc.Timed, Reads: runner, Heroes: characterstore.ElementHeroPort{Store: heroDB}, Owner: elementstore.Store{}, Content: contentDB, Players: i4store.PlayerRootLocker{}, Fence: i5db, Values: i5db, Costs: heroMaterialCosts, Grants: i5svc, Exchange: i5svc, Receipts: receipts}
-	librarySvc.Roster = characterstore.HeroBootstrapProjection{Content: contentDB, Library: librarySvc, Dorm: dormSvc, Book: bookSvc, Course: courseSvc, Inscription: inscriptionSvc, Element: elementSvc}
+	spiritSvc := appspirit.Service{Mint: domainspirit.V1PreservationPolicy{}, Milestones: domainspirit.V1PreservationPolicy{}, Timed: heroSvc.Timed, Reads: runner, Heroes: characterstore.SpiritHeroPort{Store: heroDB}, Owner: spiritstore.Store{}, Content: contentDB, Players: i4store.PlayerRootLocker{}, Fence: i5db, Values: i5db, Costs: heroMaterialCosts, Receipts: receipts}
+	i5svc.Spirits = spiritSvc
+
+	librarySvc.Roster = characterstore.HeroBootstrapProjection{Content: contentDB, Library: librarySvc, Dorm: dormSvc, Book: bookSvc, Course: courseSvc, Inscription: inscriptionSvc, Element: elementSvc, Spirit: spiritSvc}
 	petSvc := apppet.Service{Runner: runner, Timed: petTimed, Store: heroDB, Fencer: i5db, Content: contentDB, Progression: contentDB, Receipts: receipts, ReceiptRead: kernelstore.Reader{Queryer: pool}, Acquisition: petAcquisitionDebit, MaterialCosts: heroMaterialCosts, Scalar: i5CrossOwner, PetExp: petExpDebit, Equipment: contentDB, EquipmentResources: heroEquipmentResources, Promotion: contentDB, PromotionResources: i5svc, StrictRestoration: i5svc, RestorationModifier: characterasset.IdentityRestorationModifier{}, AppearanceStore: heroDB, Appearance: contentDB, AppearanceMutationStore: heroDB}
 	petEconomyProjection := appi5.ScalarProjector{Runner: runner, Store: i5db}
 	guildPolicyArtifact, err := guildpolicy.LoadBuiltin()
@@ -219,10 +225,10 @@ func main() {
 		Runner: runner, Receipts: receipts, ReceiptReader: kernelstore.Reader{Queryer: pool},
 		DigestSecret: digestSecret, BearerSecret: bearerSecret, DerivationKeyID: keyID, BearerKeys: bearerKeys,
 		BootstrapProfileVersion: "i4-wave-s-v1",
-		PersistenceContributors: []appboot.CharacterBootstrapPersistenceContributor{i5store.PlayerCoreBootstrapContributor{}, i5store.EconomyOwnerBootstrapContributor{Content: contentstore.Store{Queryer: pool}, Privileges: appi5.BaselinePrivilegeProvider{}}, characterstore.BootstrapContributor{}, characterstore.PetBootstrapContributor{}, characterstore.SavedPresetBootstrapContributor{}, characterstore.PracticeBootstrapContributor{}, librarystore.BootstrapContributor{}, dormstore.BootstrapContributor{Revision: dormBundle.RevisionID()}, bookstore.BootstrapContributor{Revision: dormBundle.RevisionID()}, coursestore.BootstrapContributor{Revision: dormBundle.RevisionID()}, inscriptionstore.BootstrapContributor{Revision: dormBundle.RevisionID()}, i5store.InscriptionCertificateBootstrap{}, elementstore.BootstrapContributor{Revision: dormBundle.RevisionID()}},
+		PersistenceContributors: []appboot.CharacterBootstrapPersistenceContributor{i5store.PlayerCoreBootstrapContributor{}, i5store.EconomyOwnerBootstrapContributor{Content: contentstore.Store{Queryer: pool}, Privileges: appi5.BaselinePrivilegeProvider{}}, characterstore.BootstrapContributor{}, characterstore.PetBootstrapContributor{}, characterstore.SavedPresetBootstrapContributor{}, characterstore.PracticeBootstrapContributor{}, librarystore.BootstrapContributor{}, dormstore.BootstrapContributor{Revision: dormBundle.RevisionID()}, bookstore.BootstrapContributor{Revision: dormBundle.RevisionID()}, coursestore.BootstrapContributor{Revision: dormBundle.RevisionID()}, inscriptionstore.BootstrapContributor{Revision: dormBundle.RevisionID()}, i5store.InscriptionCertificateBootstrap{}, elementstore.BootstrapContributor{Revision: dormBundle.RevisionID()}, spiritstore.BootstrapContributor{Revision: dormBundle.RevisionID()}},
 		LoginReconcilers:        []appboot.CharacterLoginReconciler{appi5.PetStarterLoginReconciler{Store: i5db, Content: contentDB}},
 		OperationBinder:         contentstore.Store{},
-		DetailContributors:      []appboot.MID1DetailContributor{i5store.BootstrapProjection{Display: displayService, Content: contentstore.Store{Queryer: pool}, Privileges: appi5.BaselinePrivilegeProvider{}, MaxHeroColor: maxHeroColorPolicy}, activitystore.BootstrapProjection{Directory: activityDirectory}, guildprojection.BootstrapProjection{}, characterstore.HeroBootstrapProjection{Content: contentDB, Library: librarySvc, Dorm: dormSvc, Book: bookSvc, Course: courseSvc, Inscription: inscriptionSvc, Element: elementSvc}, librarystore.BootstrapProjection{Service: librarySvc}, bookstore.BootstrapProjection{Service: bookSvc, Content: contentDB}, coursestore.BootstrapProjection{Service: courseSvc, Content: contentDB}, characterstore.PetBootstrapProjection{Content: contentDB}, characterstore.SavedPresetBootstrapProjection{}},
+		DetailContributors:      []appboot.MID1DetailContributor{i5store.BootstrapProjection{Display: displayService, Content: contentstore.Store{Queryer: pool}, Privileges: appi5.BaselinePrivilegeProvider{}, MaxHeroColor: maxHeroColorPolicy, Spirit: spiritSvc}, activitystore.BootstrapProjection{Directory: activityDirectory}, guildprojection.BootstrapProjection{}, characterstore.HeroBootstrapProjection{Content: contentDB, Library: librarySvc, Dorm: dormSvc, Book: bookSvc, Course: courseSvc, Inscription: inscriptionSvc, Element: elementSvc, Spirit: spiritSvc}, librarystore.BootstrapProjection{Service: librarySvc}, bookstore.BootstrapProjection{Service: bookSvc, Content: contentDB}, coursestore.BootstrapProjection{Service: courseSvc, Content: contentDB}, characterstore.PetBootstrapProjection{Content: contentDB}, characterstore.SavedPresetBootstrapProjection{}},
 		DirectoryReconciler:     appdir.Reconciler{Source: i5db, Sink: i4store.DirectoryLevelProjection{}},
 	}
 	authority := i4store.RealtimeAuthority{Queryer: pool, DigestSecret: digestSecret, BearerSecret: bearerSecret, DerivationKeyID: keyID, BearerKeys: bearerKeys}
@@ -358,6 +364,11 @@ func main() {
 	for _, mid := range []uint16{2144, 3116, 49, 51, 52, 54, 55, 57, 58, 60, 61, 62, 63, 67, 68, 69, 89, 304, 2979} {
 		mustRegister(mid, heroD)
 	}
+	spiritD := stockruntime.SpiritDispatcher{Authority: authority, Service: spiritSvc}
+	for _, mid := range []uint16{3089, 3090, 3091, 3094, 3095, 3112, 3113, 3114, 3115} {
+		mustRegister(mid, spiritD)
+	}
+
 	elementD := stockruntime.ElementDispatcher{Authority: authority, Service: elementSvc}
 	for _, mid := range []uint16{2849, 2850, 2851, 2852, 2853} {
 		mustRegister(mid, elementD)
@@ -405,7 +416,7 @@ func main() {
 	if e := registerPlayerDisplay(ctx, pool, contentDB, router, stockruntime.PlayerDisplayDispatcher{Authority: authority, Service: displayService}); e != nil {
 		log.Fatalf("Player display startup: %v", e)
 	}
-	i5d := stockruntime.I5Dispatcher{Authority: authority, Service: i5svc}
+	i5d := stockruntime.I5Dispatcher{Authority: authority, Service: i5svc, SpiritBackpack: stockruntime.SpiritBackpackProjection{Service: spiritSvc}}
 	for _, mid := range []uint16{26, 81, 161, 230, 368, 369, 370, 2736} {
 		mustRegister(mid, i5d)
 	}

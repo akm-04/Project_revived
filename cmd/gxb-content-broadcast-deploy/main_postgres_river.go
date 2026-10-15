@@ -19,6 +19,7 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres/i5store"
 	"gxb.local/backend/v2/internal/adapters/postgres/inscriptionstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/librarystore"
+	"gxb.local/backend/v2/internal/adapters/postgres/spiritstore"
 	riveradapter "gxb.local/backend/v2/internal/adapters/river"
 	appbook "gxb.local/backend/v2/internal/application/bookskill"
 	appcourse "gxb.local/backend/v2/internal/application/course"
@@ -27,6 +28,7 @@ import (
 	gen "gxb.local/backend/v2/internal/application/generation"
 	appinscription "gxb.local/backend/v2/internal/application/inscription"
 	applib "gxb.local/backend/v2/internal/application/librarylocal"
+	appspirit "gxb.local/backend/v2/internal/application/spirit"
 	"gxb.local/backend/v2/internal/content/registry"
 	"gxb.local/backend/v2/internal/foundation/clock"
 	"gxb.local/backend/v2/internal/foundation/operation"
@@ -85,6 +87,9 @@ func deploy() error {
 	}
 	if e = appelement.RunBackfill(c, gen.TimedRunner{Binder: gen.Binder{Time: postgres.AuthoritativeTime{Queryer: p}}, Runner: service.Runner}, characterstore.Store{}, elementstore.Store{}, bundle.RevisionID(), op); e != nil {
 		log.Fatal(e)
+	}
+	if e = appspirit.RunBackfill(c, gen.TimedRunner{Binder: gen.Binder{Time: postgres.AuthoritativeTime{Queryer: p}}, Runner: service.Runner}, characterstore.Store{}, spiritstore.Store{}, bundle.RevisionID(), op); e != nil {
+		return e
 	}
 
 	if e = appcourse.RunBackfill(c, gen.TimedRunner{Binder: gen.Binder{Time: postgres.AuthoritativeTime{Queryer: p}}, Runner: service.Runner}, characterstore.Store{}, coursestore.Store{}, bundle.RevisionID(), op); e != nil {

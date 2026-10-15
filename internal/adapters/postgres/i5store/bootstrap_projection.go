@@ -20,7 +20,11 @@ import (
 
 // BootstrapProjection contributes only domains implemented by I5. The frozen
 // Wave-S baseline continues to own not-yet-implemented fields.
+type BootstrapSpiritInventory interface {
+	InventoryForBootstrapTx(context.Context, tx.Queryer, identity.PlayerID, string, time.Time) ([]map[string]any, error)
+}
 type BootstrapProjection struct {
+	Spirit       BootstrapSpiritInventory
 	Display      appi5.TxEffectivePlayerDisplayReader
 	Content      appi5.ContentRuntime
 	Privileges   appi5.PrivilegeSnapshotProvider
@@ -98,6 +102,17 @@ func (b BootstrapProjection) OverlayMID1(ctx context.Context, q tx.Queryer, acto
 	backpackWire, err := backpackproj.Build(stacks)
 	if err != nil {
 		return err
+	}
+	if b.Spirit != nil {
+		rev, e := b.Content.ActiveRevision(ctx, q)
+		if e != nil {
+			return e
+		}
+		rows, e := b.Spirit.InventoryForBootstrapTx(ctx, q, pid, rev, now.UTC())
+		if e != nil {
+			return e
+		}
+		backpackWire["spirit_list"] = rows
 	}
 	detail["81"] = backpackWire
 	if !created {

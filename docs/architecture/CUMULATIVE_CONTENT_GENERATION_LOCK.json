@@ -162,14 +162,22 @@
       "parser_version": "lua-generated-v18-guild-invite",
       "revision_id": "b55f0900f2cff611313a5a4a88e03d3c2f034625c4a06c5f3bfe490b04f477bd",
       "scope": "Element catalog only; all29 prior payloads and existingI5 resources unchanged"
+    },
+    {
+      "ordinal": 26,
+      "stage": "I7C-2H",
+      "compiler_version": "i7c2h-spirit-inputs",
+      "parser_version": "lua-generated-v18-guild-invite",
+      "revision_id": "f5547b0455f529a3869512ef84d493b455947c0598f8e27be62117159e6d385c",
+      "scope": "Spirit source catalog only; prior30payloads and I5resources unchanged. Unknownmint/milestone productionpolicies gated."
     }
   ],
   "current": {
-    "ordinal": 25,
-    "stage": "I7C-2G",
-    "compiler_version": "i7c2g-element-inputs",
+    "ordinal": 26,
+    "stage": "I7C-2H",
+    "compiler_version": "i7c2h-spirit-inputs",
     "parser_version": "lua-generated-v18-guild-invite",
-    "revision_id": "b55f0900f2cff611313a5a4a88e03d3c2f034625c4a06c5f3bfe490b04f477bd",
-    "scope": "Element catalog only; all29 prior payloads and existingI5 resources unchanged"
+    "revision_id": "f5547b0455f529a3869512ef84d493b455947c0598f8e27be62117159e6d385c",
+    "scope": "Spirit source catalog only; prior30payloads and I5resources unchanged. Unknownmint/milestone productionpolicies gated."
   }
 }

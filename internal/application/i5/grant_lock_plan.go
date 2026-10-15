@@ -48,6 +48,7 @@ const (
 	grantLockStack
 	grantLockFunctionState
 	grantLockDirectory
+	grantLockSpirit
 )
 
 type grantLockRequirement struct {
@@ -66,6 +67,7 @@ type grantPreflight struct {
 	EnergyDescriptor  *TemporalDescriptor
 	PetStarterPolicy  *PetStarterPolicy
 	Partner           *partnerEntityPrepared
+	Spirit            *spiritPrepared
 }
 
 type grantPreflightOptions struct {
@@ -162,7 +164,11 @@ func (s Service) preflightGrantTx(ctx context.Context, t tx.Tx, plan grant.Plan,
 			continue
 		}
 		if line.Kind == grant.SpecializedDomain {
-			return grantPreflight{}, ErrUnsupportedGrantDestination
+			if line.Domain != "spirit" || line.ResourceKey != "" || line.ItemID <= 0 {
+				return grantPreflight{}, ErrUnsupportedGrantDestination
+			}
+			out.Lines = append(out.Lines, grantPreparedLine{Line: line, Ordinal: ordinal})
+			continue
 		}
 		if err := requireContent(); err != nil {
 			return grantPreflight{}, err
@@ -333,6 +339,32 @@ func (s Service) preflightGrantTx(ctx context.Context, t tx.Tx, plan grant.Plan,
 		}
 	}
 
+	sb, err := spiritBatchForPlan(plan, contentRevision)
+	if err != nil {
+		return grantPreflight{}, err
+	}
+	if len(sb.Lines) > 0 {
+		if s.Spirits == nil {
+			return grantPreflight{}, ErrUnsupportedGrantDestination
+		}
+		id, rev := s.Spirits.ProviderID(), s.Spirits.ProviderRevision()
+		if err := validatePartnerProviderIdentity(id, rev); err != nil {
+			return grantPreflight{}, err
+		}
+		prepared, err := s.Spirits.PreflightSpiritBatchTx(ctx, t, sb)
+		if err != nil {
+			return grantPreflight{}, err
+		}
+		prepared.Locks, err = canonicalPartnerLocks(prepared.Locks)
+		if err != nil {
+			return grantPreflight{}, err
+		}
+		out.Spirit = &spiritPrepared{Batch: sb, Preflight: prepared, ProviderID: id, ProviderRevision: rev}
+		for _, k := range prepared.Locks {
+			reqs = append(reqs, grantLockRequirement{Key: k, Kind: grantLockSpirit})
+		}
+	}
+
 	if needsMailCounter {
 		if err := appendGrantLock(&reqs, grantLockRankMailNamespace, "i5.mail-namespace", grantChildIdentity(plan.PlayerID, mail.Normal.String()), grantLockMailNamespace, "", 0, mail.Normal); err != nil {
 			return grantPreflight{}, err
@@ -375,8 +407,18 @@ func (s Service) acquireGrantLocksTx(ctx context.Context, t tx.Tx, pid identity.
 			return errors.New("partner entity provider identity/revision changed after preflight")
 		}
 	}
+	if pf.Spirit != nil && (s.Spirits == nil || s.Spirits.ProviderID() != pf.Spirit.ProviderID || s.Spirits.ProviderRevision() != pf.Spirit.ProviderRevision) {
+		return errors.New("Spirit provider changed after preflight")
+	}
 	for _, r := range pf.Locks {
 		switch r.Kind {
+		case grantLockSpirit:
+			if pf.Spirit == nil || s.Spirits == nil {
+				return ErrUnsupportedGrantDestination
+			}
+			if err := s.Spirits.LockSpiritKeyTx(ctx, t, r.Key); err != nil {
+				return err
+			}
 		case grantLockPartnerEntity:
 			if pf.Partner == nil || s.PartnerEntities == nil {
 				return errors.New("partner entity lock without prepared provider")

@@ -175,6 +175,7 @@ type Service struct {
 	Directory       DirectoryLevelProjectionPort
 	Backpack        BackpackReader
 	PartnerEntities PartnerEntityMaterializer
+	Spirits         SpiritMaterializer
 	Receipts        receipt.Store
 	ReceiptRead     receipt.Reader
 	RedeemSecret    []byte
@@ -334,6 +335,11 @@ func (s Service) applyPreparedGrantTx(ctx context.Context, t tx.Tx, actor identi
 	if err != nil {
 		return GrantResult{}, err
 	}
+	spirits, err := s.materializeSpiritTx(ctx, t, pf, op)
+	if err != nil {
+		return GrantResult{}, err
+	}
+	materializations = append(materializations, spirits...)
 	awards := make([]Award, 0, len(plan.Lines))
 	effects := &GrantEffects{ContentRevision: contentRevision, PlayerID: int64(plan.PlayerID), OperationID: op.ID.String(), OperationStartedAt: now}
 	if s.Functions != nil {
@@ -611,7 +617,10 @@ func (s Service) applyPreparedGrantTx(ctx context.Context, t tx.Tx, actor identi
 			// entity lines; CA2+ must qualify stock projection before activation.
 			continue
 		case grant.SpecializedDomain:
-			return GrantResult{}, ErrUnsupportedGrantDestination
+			if line.Domain != "spirit" || pf.Spirit == nil {
+				return GrantResult{}, ErrUnsupportedGrantDestination
+			}
+			continue
 		default:
 			return GrantResult{}, economy.ErrUnknownResource
 		}

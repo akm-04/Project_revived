@@ -21,7 +21,7 @@ from pathlib import Path
 from typing import Any, Iterable
 
 SCHEMA_VERSION = 1
-COMPILER_VERSION = "i7c2g-element-inputs"
+COMPILER_VERSION = "i7c2h-spirit-inputs"
 PARSER_VERSION = "lua-generated-v18-guild-invite"
 EXPECTED_SOURCE_ARCHIVE_SHA256 = "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
 SOURCE_PREFIX = "app-assets/output/assets/src_64/"
@@ -120,6 +120,7 @@ SOURCE_MANIFEST.append(('app/windows/HeroGiftBoxWindow.lua','d6065c3d601f5820915
 SOURCE_MANIFEST.append(('app/windows/WhiteAlbumWindow.lua','851a53f588b59d95cfe460f3399ab1a6904fff7714131c358f3c3a73910b6bb9',"LIBRARY_INPUT_SOURCE_AUTHORITY"))
 
 ENABLED_CAPABILITIES = [
+    "SPIRIT_INPUTS_I7C2H",
     "ELEMENT_INPUTS_I7C2G", "INSCRIPTION_INPUTS_I7C2F", "COURSE_INPUTS_I7C2E", "BOOK_INPUTS_I7C2D",
     "DORM_INPUTS_I7C2C",
     "LIBRARY_INPUTS_I7C2B",
@@ -244,7 +245,35 @@ SOURCE_MANIFEST.append(('data/tables/element_strth.lua', '58af04513e1ae433987c47
 SOURCE_MANIFEST.append(('data/tables/element_equipment.lua', '994bb7c9f5c6f49a4cc47309b0f39639028e3dcf30fc8ccfc8cb67398a2d7cd7', 'I7C2G_ELEMENT_SOURCE_BOUNDARY'))
 SOURCE_MANIFEST.append(('data/tables/element_strengthen.lua', '02e08788823297e8945866c4ef86c4cc58dce07076e710a5b72063271671b0a9', 'I7C2G_ELEMENT_SOURCE_BOUNDARY'))
 from inscription_content import build_inscription
+SOURCE_MANIFEST.append(('app/common/tables/SpiritCampaignTable.lua', '11fdd058903b57e6a916cb485d8e28563b6744efcf62d7b6ea4a056d76facc22', 'I7C2H_SPIRIT_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('app/common/tables/SpiritEquipTable.lua', 'da7d311b30ff7b6c14dc5df48b2d72e4b04486934a6abb7e42e314f5a1326432', 'I7C2H_SPIRIT_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('app/common/tables/SpiritStrthTable.lua', 'ee385a2db8d6ea4aa72d1191bb7ea50aa0e9929f518af598be3b7ac3abbd34df', 'I7C2H_SPIRIT_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('app/common/tables/SpiritSuitTable.lua', 'd41a26123c263acca89cf14a455252a4d0afe572be0df04452b024c2657b603d', 'I7C2H_SPIRIT_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('app/common/tables/SpiritTable.lua', 'cf56d08c491d2825d1aea3dedd331d7095d63e168ea90e24381b1136b3b58fc7', 'I7C2H_SPIRIT_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('app/scenes/BattleCreate.lua', 'bb9ae19c20ec165eeb7ba5b81a4ce85b6b7fea3a3a7eb278123bb8c0af0bbef9', 'I7C2H_SPIRIT_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('app/windows/BattleWinWindow.lua', 'f3a362765adea6fc5cbd239c8a9801cfef762146ddb1c48c854f0266c7a06096', 'I7C2H_SPIRIT_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('app/windows/GiftbagUseWindow.lua', 'cbc1c0cb373adc68a0c74b42d2aa3d5e28a96f536c80729e22be8fd03c5af600', 'I7C2H_SPIRIT_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('app/windows/HunqiAutoFightWindow.lua', '7dbd2ca1119286ca5c1d9a01861d3b5738045af9be276d49932cf1ed660bd379', 'I7C2H_SPIRIT_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('app/windows/HunqiCampaignRuleWindow.lua', 'de39392cb6f53cd8ae20f35b4ae804da4abb2206c79e6cd5a5c8cae7002fda45', 'I7C2H_SPIRIT_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('app/windows/HunqiCampaignWindow.lua', '8c4cdcce8f2f13e875171170a15f3eb07911764bdf3dee53ac905380e35e0a65', 'I7C2H_SPIRIT_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('app/windows/HunqiCombConfirmWindow.lua', '9df55271cff82f317979f438d446b7d6086d774b775d6de06a4694c329c381d5', 'I7C2H_SPIRIT_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('app/windows/HunqiCombEditorWindow.lua', 'a70ee1e1457c914b846053988ad5fd9183d4c10d451649f739463a633f16fff1', 'I7C2H_SPIRIT_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('app/windows/HunqiCombInputNameWindow.lua', '21c51bc0deffa2abfb9309be105a5beb92ce4e8bcc7aae4795ee017cc2effb0e', 'I7C2H_SPIRIT_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('app/windows/HunqiCombWindow.lua', 'b882e02c619d9016ffb94f5f015760aca22b286d97ae70553218d0948945fce5', 'I7C2H_SPIRIT_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('app/windows/HunqiDetailWindow.lua', '583ed17e5862136a6097469d1144cbc306af73928dc74ded01535acc56fa4de1', 'I7C2H_SPIRIT_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('app/windows/HunqiEnergyTips.lua', 'cc629fd9a31a926a985fe505b9d7cf5e19ac6958e6895178f65d5d7e462dbe42', 'I7C2H_SPIRIT_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('app/windows/HunqiSortTypeWindow.lua', '5f22e7000b7619051f2bb8f72e5cb56a0f9e52ab0511d79ebee592018028ed21', 'I7C2H_SPIRIT_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('app/windows/HunqiStrengthenResultWindow.lua', 'b95d18fdcab7591f813207752df1e3cddb5c3c59d900a9b5f85cb6cf533bdd7c', 'I7C2H_SPIRIT_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('app/windows/HunqiStrengthenWindow.lua', '9a2acd4bc570b3f7fd81f2d6044c2d3e11235caade2f2694c5aa3bdb39ec536a', 'I7C2H_SPIRIT_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('app/windows/HunqiWindow.lua', '2f87cc8d6fe80079ac21ae899351ca1eecef016c15bd394f6e32d6d2e631ac84', 'I7C2H_SPIRIT_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/spirit.lua', '1be9bc2eacf2abcff6806d2d9e679ff70c722a1ec1654da4eb54ada6bf00f1e6', 'I7C2H_SPIRIT_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/spirit_campaign.lua', '53a3ee40f9accb749e2992d3306512fdecc63108f84bcd72058224f739024989', 'I7C2H_SPIRIT_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/spirit_equip.lua', 'd0522ee3e292a6fd8297fc5c44185ef71141525abc9e61a18ab128478b805a08', 'I7C2H_SPIRIT_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/spirit_strth.lua', '950c5c37792ec2a763d458d8a53d8588dd759cf8dde5f7a023b68b9db5a182b2', 'I7C2H_SPIRIT_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/spirit_suit.lua', '2a0fd1487cabd9945a2298482c90b34e88bc874557a03d3a48a2e3c03b2590d7', 'I7C2H_SPIRIT_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('app/common/tables/FunctionOpenTable.lua', '0494aed27d769e03924450cd554c759f7245823fa907688dfd9e7766f0481b44', 'I7C2H_SPIRIT_SOURCE_BOUNDARY'))
 from element_content import build_element
+from spirit_content import build_spirit
 from course_content import build_course
 class CompileError(ValueError):
     pass
@@ -2025,6 +2054,7 @@ def build_artifacts(blobs: dict[str, SourceBlob], archive_sha256: str) -> dict[s
     from dorm_content import build_dorm
     dorm_artifact=build_dorm(blobs,parse_generated_lua_table,pipe_ints,hero_artifact["templates"],partner_keys,partner_rows,super_keys,super_rows,indexed_field,items,CompileError)
     artifacts = {
+        "spirit_input_catalog.json":build_spirit(blobs,parse_generated_lua_table,items),
         "element_input_catalog.json":build_element(blobs,parse_generated_lua_table,items),
         "inscription_input_catalog.json":build_inscription(blobs,parse_generated_lua_table,items),
         "course_input_catalog.json":course_artifact,

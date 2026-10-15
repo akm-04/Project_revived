@@ -2849,6 +2849,72 @@
         "internal/adapters/postgres/elementstore/"
       ],
       "write_exceptions": []
+    },
+    "content_spirit_input_catalogs": {
+      "allowed_query_owners": [
+        "content-registry"
+      ],
+      "allowed_read_paths": [
+        "sql/content/",
+        "internal/adapters/postgres/contentstore/",
+        "internal/adapters/postgres/contentqueries/"
+      ],
+      "allowed_write_paths": [
+        "sql/content/",
+        "internal/adapters/postgres/contentstore/",
+        "internal/adapters/postgres/contentqueries/"
+      ],
+      "migration": "migrations/00055_i7c2h_spirit_inputs.sql",
+      "owner": "content-registry",
+      "write_exceptions": []
+    },
+    "player_spirit_roots": {
+      "owner": "spirit",
+      "migration": "migrations/00055_i7c2h_spirit_inputs.sql",
+      "allowed_query_owners": [
+        "spirit"
+      ],
+      "allowed_read_paths": [
+        "sql/spirit/",
+        "internal/adapters/postgres/spiritstore/"
+      ],
+      "allowed_write_paths": [
+        "sql/spirit/",
+        "internal/adapters/postgres/spiritstore/"
+      ],
+      "write_exceptions": []
+    },
+    "player_spirit_heroes": {
+      "owner": "spirit",
+      "migration": "migrations/00055_i7c2h_spirit_inputs.sql",
+      "allowed_query_owners": [
+        "spirit"
+      ],
+      "allowed_read_paths": [
+        "sql/spirit/",
+        "internal/adapters/postgres/spiritstore/"
+      ],
+      "allowed_write_paths": [
+        "sql/spirit/",
+        "internal/adapters/postgres/spiritstore/"
+      ],
+      "write_exceptions": []
+    },
+    "player_spirit_admissions": {
+      "owner": "spirit",
+      "migration": "migrations/00055_i7c2h_spirit_inputs.sql",
+      "allowed_query_owners": [
+        "spirit"
+      ],
+      "allowed_read_paths": [
+        "sql/spirit/",
+        "internal/adapters/postgres/spiritstore/"
+      ],
+      "allowed_write_paths": [
+        "sql/spirit/",
+        "internal/adapters/postgres/spiritstore/"
+      ],
+      "write_exceptions": []
     }
   }
 }

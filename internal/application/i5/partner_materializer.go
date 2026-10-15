@@ -202,6 +202,9 @@ func validatePartnerMaterializations(lines []PartnerEntityLine, got []PartnerEnt
 }
 
 func (s Service) validatePartnerEntityLockedTx(ctx context.Context, t tx.Tx, pf grantPreflight) error {
+	if err := s.validateSpiritLockedTx(ctx, t, pf); err != nil {
+		return err
+	}
 	if pf.Partner == nil {
 		return nil
 	}
