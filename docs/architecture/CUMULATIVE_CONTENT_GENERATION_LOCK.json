@@ -151,15 +151,17 @@
       "ordinal": 24,
       "stage": "I7C-2F",
       "compiler_version": "i7c2f-inscription-inputs",
-      "parser_version": "lua-generated-v18-guild-invite"
+      "parser_version": "lua-generated-v18-guild-invite",
+      "revision_id": "2fb1b3bd7fa1a9cdf719ed0646a9dc4a6e59a938e7b1f1b4eb49f65f3fb2e136",
+      "scope": "Inscription source catalog and exactly three named certificate scalars; old resource rows and 27 prior payloads preserved"
     }
   ],
   "current": {
-    "ordinal": 23,
-    "stage": "I7C-2E",
-    "compiler_version": "i7c2e-course-inputs",
+    "ordinal": 24,
+    "stage": "I7C-2F",
+    "compiler_version": "i7c2f-inscription-inputs",
     "parser_version": "lua-generated-v18-guild-invite",
-    "revision_id": "4e2540adfef4dd01d5a19d709aa35b8306ab11717705de77dca82a50fb54f93c",
-    "scope": "New rawCoursecatalog only; prior27payloadsbyteidentical; 31sourceboundarymembersadded"
+    "revision_id": "2fb1b3bd7fa1a9cdf719ed0646a9dc4a6e59a938e7b1f1b4eb49f65f3fb2e136",
+    "scope": "Inscription source catalog and exactly three named certificate scalars; old resource rows and 27 prior payloads preserved"
   }
 }
