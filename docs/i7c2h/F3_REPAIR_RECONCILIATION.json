@@ -1,0 +1,12 @@
+{
+  "status": "F3_TEST_ONLY_REPAIR_AND_SUPER_COVERAGE",
+  "basis": "F1/F2 vet diagnostic on unkeyed InputScope literals; replace with equivalent keyed fields. Add explicit Super bind/read/unbind assertion to existing pinned-kind regression.",
+  "product_code_changed": false,
+  "schema_content_policy_dependencies_changed": false,
+  "required_exact_proof": [
+    "Allunit, keyedvet/static/identity",
+    "Normal+Super qualified provider native race; exactAPI build"
+  ],
+  "reuse": "F2 native/process/API and affectedrace subjects preserved; implementation source is byte-identical. Source/profile/dependency proofs remain bound to unchanged F1 subjects.",
+  "no_claim_failed_vet_passed": true
+}

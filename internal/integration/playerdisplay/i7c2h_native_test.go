@@ -184,11 +184,11 @@ func TestI7C2HAllCommandsTransferReferencesAndFullStrengthening(t *testing.T) {
 	saved := spiritCmd(t, s, a, app.Command{Family: app.Save, Name: "一二三四五六七八九十", Slots: slots})
 	id := saved.Body["id"].(int64)
 	spiritCmd(t, s, a, app.Command{Family: app.Apply, ProgramID: id, PartnerID: 2})
-	one, e := s.HeroSpiritInputsTx(ctx, p, app.InputScope{a.PlayerID, rev, time.Now()}, 1)
+	one, e := s.HeroSpiritInputsTx(ctx, p, app.InputScope{Player: a.PlayerID, ContentRevision: rev, ObservedAt: time.Now()}, 1)
 	if e != nil || one.Facet.Facts.Slots != ([6]int64{}) {
 		t.Fatal("source detach", one, e)
 	}
-	two, e := s.HeroSpiritInputsTx(ctx, p, app.InputScope{a.PlayerID, rev, time.Now()}, 2)
+	two, e := s.HeroSpiritInputsTx(ctx, p, app.InputScope{Player: a.PlayerID, ContentRevision: rev, ObservedAt: time.Now()}, 2)
 	if e != nil || two.Items[0]["spirit_id"] != int64(1) || two.Facet.Facts.Slots != slots {
 		t.Fatal("target payload", two, e)
 	}
@@ -230,7 +230,7 @@ func TestI7C2HAllCommandsTransferReferencesAndFullStrengthening(t *testing.T) {
 	if e != nil || len(programs) != 0 {
 		t.Fatal(programs, e)
 	}
-	items, e := s.InventoryTx(ctx, p, app.InputScope{a.PlayerID, rev, time.Now()})
+	items, e := s.InventoryTx(ctx, p, app.InputScope{Player: a.PlayerID, ContentRevision: rev, ObservedAt: time.Now()})
 	if e != nil || len(items) != 11 {
 		t.Fatal("inventory", len(items), e)
 	}
@@ -388,11 +388,29 @@ func TestI7C2HProgramLimitIDsAndFunctionEligibilityFacts(t *testing.T) {
 func TestI7C2HQualifiedHeroKindComesFromPinnedContent(t *testing.T) {
 	p := pool(t)
 	a, rev, s := spiritFixture(t, p)
-	v, e := s.HeroSpiritInputsTx(ctx, p, app.InputScope{Player: a.PlayerID, ContentRevision: rev, ObservedAt: time.Now()}, 1)
+	skillHero(t, p, a, rev, 11001, 4)
+	tr, e := p.Begin(ctx, tx.Options{})
 	if e != nil {
 		t.Fatal(e)
 	}
-	if e = v.Hero.Validate(); e != nil || v.Hero.Kind != character.NormalHero {
-		t.Fatal("qualified provider omitted pinned HeroKind", v.Hero.Kind, e)
+	if e = (spiritstore.Store{}).EnsureHeroTx(ctx, tr, a.PlayerID, 4, time.Now().Add(-time.Hour)); e != nil {
+		t.Fatal(e)
+	}
+	if e = tr.Commit(ctx); e != nil {
+		t.Fatal(e)
+	}
+	for _, row := range []struct {
+		id   int64
+		kind character.HeroKind
+	}{{1, character.NormalHero}, {4, character.SuperHero}} {
+		spiritCmd(t, s, a, app.Command{Family: app.Equip, PartnerID: row.id, SpiritID: 2, Position: 1})
+		v, e := s.HeroSpiritInputsTx(ctx, p, app.InputScope{Player: a.PlayerID, ContentRevision: rev, ObservedAt: time.Now()}, row.id)
+		if e != nil {
+			t.Fatal(e)
+		}
+		if e = v.Hero.Validate(); e != nil || v.Hero.Kind != row.kind || v.Items[0]["spirit_id"] != int64(2) {
+			t.Fatal("qualified provider omitted pinned HeroKind orbinding", v.Hero.Kind, e)
+		}
+		spiritCmd(t, s, a, app.Command{Family: app.AllOff, PartnerID: row.id})
 	}
 }
