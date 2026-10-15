@@ -1,0 +1,337 @@
+{
+  "status": "DESIGNED_NOT_IMPLEMENTED",
+  "operations": [
+    {
+      "mid": 1400,
+      "name": "MAKE",
+      "request_keys": [
+        "inscript_id",
+        "make_num"
+      ],
+      "admission": "make_num=1; selected ordinary source family",
+      "owner": "Inscription lifecycle with Character/I5/Content typed ports",
+      "source_paths": [
+        "app/model/Inscription.lua",
+        "app/windows/InscriptionWindow.lua",
+        "app/windows/InscriptionEquipWindow.lua",
+        "app/windows/InscriptionTenTimesWindow.lua",
+        "app/windows/SellDetailWindow.lua"
+      ],
+      "contract_refs": [
+        "I7C1_PROVIDER_SCOPE_OWNERSHIP",
+        "I7C1_DELIVERY_ACCEPTANCE",
+        "I7C1_RESEARCH_AMENDMENT",
+        "D04",
+        "D06",
+        "D11",
+        "CA_CORE616"
+      ],
+      "transaction": "One owning caller Tx; fenced actor/session/player; complete canonical lock union before first write; pinned exact content and stable DecisionAt",
+      "effects": "Certificate+optional stack debit; choose one persisted output then I5 Grant once",
+      "response_projection": "inscript_items: raw integer template array",
+      "reload": "I5 Backpack/scalar bootstrap and Inscription-applied Character key49/roster overlays",
+      "replay": "Paid repeated stock packet is a new occurrence after prior outcome resolution",
+      "errors": "Existing stockruntime authentication/bad request/unavailable envelopes; no invented success payload on missing provider",
+      "consumer": "INSCRIPTION_INPUTS -> I7C-3B raw/final stat; selected effects ->4C; 6B/6C/parent barriers unchanged",
+      "qualification": [
+        "realPG atomic debit/state/grant/receipt",
+        "rollback",
+        "UNKNOWN positive/negative evidence",
+        "concurrent same/different operation",
+        "restart/SIGKILL",
+        "response-loss/reload"
+      ],
+      "active_now": false
+    },
+    {
+      "mid": 1401,
+      "name": "REBUILD",
+      "request_keys": [
+        "item_id",
+        "rebuild_num",
+        "cost_type"
+      ],
+      "admission": "Owned ordinary inventory template; rebuild_num 1/10; cost_type 1 Crystal/2 Mana",
+      "owner": "Inscription lifecycle with Character/I5/Content typed ports",
+      "source_paths": [
+        "app/model/Inscription.lua",
+        "app/windows/InscriptionWindow.lua",
+        "app/windows/InscriptionEquipWindow.lua",
+        "app/windows/InscriptionTenTimesWindow.lua",
+        "app/windows/SellDetailWindow.lua"
+      ],
+      "contract_refs": [
+        "I7C1_PROVIDER_SCOPE_OWNERSHIP",
+        "I7C1_DELIVERY_ACCEPTANCE",
+        "I7C1_RESEARCH_AMENDMENT",
+        "D04",
+        "D06",
+        "D11",
+        "CA_CORE616"
+      ],
+      "transaction": "One owning caller Tx; fenced actor/session/player; complete canonical lock union before first write; pinned exact content and stable DecisionAt",
+      "effects": "Validate full source/cost before entropy; debit named scalar; freeze latest pending and counters once",
+      "response_projection": "inscript_items: raw integer candidate array",
+      "reload": "I5 Backpack/scalar bootstrap and Inscription-applied Character key49/roster overlays",
+      "replay": "Paid generation operation retained; definite abort reuses seed/ordinal, UNKNOWN cannot blind regenerate",
+      "errors": "Existing stockruntime authentication/bad request/unavailable envelopes; no invented success payload on missing provider",
+      "consumer": "INSCRIPTION_INPUTS -> I7C-3B raw/final stat; selected effects ->4C; 6B/6C/parent barriers unchanged",
+      "qualification": [
+        "realPG atomic debit/state/grant/receipt",
+        "rollback",
+        "UNKNOWN positive/negative evidence",
+        "concurrent same/different operation",
+        "restart/SIGKILL",
+        "response-loss/reload"
+      ],
+      "active_now": false
+    },
+    {
+      "mid": 1402,
+      "name": "INSERT",
+      "request_keys": [
+        "partner_id",
+        "item_id",
+        "replace_item_id"
+      ],
+      "admission": "Live actor-owned eligible Hero; source-mapped slot; exact current replacement",
+      "owner": "Inscription lifecycle with Character/I5/Content typed ports",
+      "source_paths": [
+        "app/model/Inscription.lua",
+        "app/windows/InscriptionWindow.lua",
+        "app/windows/InscriptionEquipWindow.lua",
+        "app/windows/InscriptionTenTimesWindow.lua",
+        "app/windows/SellDetailWindow.lua"
+      ],
+      "contract_refs": [
+        "I7C1_PROVIDER_SCOPE_OWNERSHIP",
+        "I7C1_DELIVERY_ACCEPTANCE",
+        "I7C1_RESEARCH_AMENDMENT",
+        "D04",
+        "D06",
+        "D11",
+        "CA_CORE616"
+      ],
+      "transaction": "One owning caller Tx; fenced actor/session/player; complete canonical lock union before first write; pinned exact content and stable DecisionAt",
+      "effects": "One I5 stack debit; optional20 Crystal debit+old template Grant; applied slot/version mutation same Tx",
+      "response_projection": "inscript_items: dense applied template array",
+      "reload": "I5 Backpack/scalar bootstrap and Inscription-applied Character key49/roster overlays",
+      "replay": "Current-state validation plus original-operation receipt; no permanent payload cache",
+      "errors": "Existing stockruntime authentication/bad request/unavailable envelopes; no invented success payload on missing provider",
+      "consumer": "INSCRIPTION_INPUTS -> I7C-3B raw/final stat; selected effects ->4C; 6B/6C/parent barriers unchanged",
+      "qualification": [
+        "realPG atomic debit/state/grant/receipt",
+        "rollback",
+        "UNKNOWN positive/negative evidence",
+        "concurrent same/different operation",
+        "restart/SIGKILL",
+        "response-loss/reload"
+      ],
+      "active_now": false
+    },
+    {
+      "mid": 1403,
+      "name": "REMOVE",
+      "request_keys": [
+        "partner_id",
+        "item_id"
+      ],
+      "admission": "Exact canonical applied slot and live Hero; recovery eligibility policy",
+      "owner": "Inscription lifecycle with Character/I5/Content typed ports",
+      "source_paths": [
+        "app/model/Inscription.lua",
+        "app/windows/InscriptionWindow.lua",
+        "app/windows/InscriptionEquipWindow.lua",
+        "app/windows/InscriptionTenTimesWindow.lua",
+        "app/windows/SellDetailWindow.lua"
+      ],
+      "contract_refs": [
+        "I7C1_PROVIDER_SCOPE_OWNERSHIP",
+        "I7C1_DELIVERY_ACCEPTANCE",
+        "I7C1_RESEARCH_AMENDMENT",
+        "D04",
+        "D06",
+        "D11",
+        "CA_CORE616"
+      ],
+      "transaction": "One owning caller Tx; fenced actor/session/player; complete canonical lock union before first write; pinned exact content and stable DecisionAt",
+      "effects": "20 Crystal debit; detach exact slot and Grant one template same Tx",
+      "response_projection": "inscript_items: dense applied template array",
+      "reload": "I5 Backpack/scalar bootstrap and Inscription-applied Character key49/roster overlays",
+      "replay": "Original receipt resolves known occurrence; fresh absent/wrong slot fails without a second grant",
+      "errors": "Existing stockruntime authentication/bad request/unavailable envelopes; no invented success payload on missing provider",
+      "consumer": "INSCRIPTION_INPUTS -> I7C-3B raw/final stat; selected effects ->4C; 6B/6C/parent barriers unchanged",
+      "qualification": [
+        "realPG atomic debit/state/grant/receipt",
+        "rollback",
+        "UNKNOWN positive/negative evidence",
+        "concurrent same/different operation",
+        "restart/SIGKILL",
+        "response-loss/reload"
+      ],
+      "active_now": false
+    },
+    {
+      "mid": 1404,
+      "name": "RESOLVE",
+      "request_keys": [
+        "item_id",
+        "resolve_num"
+      ],
+      "admission": "Positive owned inventory quantity; family source return resource/amount",
+      "owner": "Inscription lifecycle with Character/I5/Content typed ports",
+      "source_paths": [
+        "app/model/Inscription.lua",
+        "app/windows/InscriptionWindow.lua",
+        "app/windows/InscriptionEquipWindow.lua",
+        "app/windows/InscriptionTenTimesWindow.lua",
+        "app/windows/SellDetailWindow.lua"
+      ],
+      "contract_refs": [
+        "I7C1_PROVIDER_SCOPE_OWNERSHIP",
+        "I7C1_DELIVERY_ACCEPTANCE",
+        "I7C1_RESEARCH_AMENDMENT",
+        "D04",
+        "D06",
+        "D11",
+        "CA_CORE616"
+      ],
+      "transaction": "One owning caller Tx; fenced actor/session/player; complete canonical lock union before first write; pinned exact content and stable DecisionAt",
+      "effects": "Debit inventory quantity; scalar certificate Grant checked multiplication; never consume applied slot",
+      "response_projection": "{} plus current economy_ certificate balances",
+      "reload": "I5 Backpack/scalar bootstrap and Inscription-applied Character key49/roster overlays",
+      "replay": "Each new accepted dissolve is consumptive current intent, original known operation at most once",
+      "errors": "Existing stockruntime authentication/bad request/unavailable envelopes; no invented success payload on missing provider",
+      "consumer": "INSCRIPTION_INPUTS -> I7C-3B raw/final stat; selected effects ->4C; 6B/6C/parent barriers unchanged",
+      "qualification": [
+        "realPG atomic debit/state/grant/receipt",
+        "rollback",
+        "UNKNOWN positive/negative evidence",
+        "concurrent same/different operation",
+        "restart/SIGKILL",
+        "response-loss/reload"
+      ],
+      "active_now": false
+    },
+    {
+      "mid": 1405,
+      "name": "SAVE_REBUILD",
+      "request_keys": [
+        "item_id"
+      ],
+      "admission": "Selected template is member of retained latest pending and original still owned",
+      "owner": "Inscription lifecycle with Character/I5/Content typed ports",
+      "source_paths": [
+        "app/model/Inscription.lua",
+        "app/windows/InscriptionWindow.lua",
+        "app/windows/InscriptionEquipWindow.lua",
+        "app/windows/InscriptionTenTimesWindow.lua",
+        "app/windows/SellDetailWindow.lua"
+      ],
+      "contract_refs": [
+        "I7C1_PROVIDER_SCOPE_OWNERSHIP",
+        "I7C1_DELIVERY_ACCEPTANCE",
+        "I7C1_RESEARCH_AMENDMENT",
+        "D04",
+        "D06",
+        "D11",
+        "CA_CORE616"
+      ],
+      "transaction": "One owning caller Tx; fenced actor/session/player; complete canonical lock union before first write; pinned exact content and stable DecisionAt",
+      "effects": "No RNG; debit original+Grant one frozen selected template; clear pending atomically",
+      "response_projection": "rebuild_items: [{table_id,item_num:1}]",
+      "reload": "I5 Backpack/scalar bootstrap and Inscription-applied Character key49/roster overlays",
+      "replay": "Internal generation+admission/receipt; same IDs across generations remain wire-ambiguous",
+      "errors": "Existing stockruntime authentication/bad request/unavailable envelopes; no invented success payload on missing provider",
+      "consumer": "INSCRIPTION_INPUTS -> I7C-3B raw/final stat; selected effects ->4C; 6B/6C/parent barriers unchanged",
+      "qualification": [
+        "realPG atomic debit/state/grant/receipt",
+        "rollback",
+        "UNKNOWN positive/negative evidence",
+        "concurrent same/different operation",
+        "restart/SIGKILL",
+        "response-loss/reload"
+      ],
+      "active_now": false
+    },
+    {
+      "mid": 1406,
+      "name": "ABANDON_REBUILD",
+      "request_keys": [],
+      "admission": "Current paid pending or explicit no-pending policy",
+      "owner": "Inscription lifecycle with Character/I5/Content typed ports",
+      "source_paths": [
+        "app/model/Inscription.lua",
+        "app/windows/InscriptionWindow.lua",
+        "app/windows/InscriptionEquipWindow.lua",
+        "app/windows/InscriptionTenTimesWindow.lua",
+        "app/windows/SellDetailWindow.lua"
+      ],
+      "contract_refs": [
+        "I7C1_PROVIDER_SCOPE_OWNERSHIP",
+        "I7C1_DELIVERY_ACCEPTANCE",
+        "I7C1_RESEARCH_AMENDMENT",
+        "D04",
+        "D06",
+        "D11",
+        "CA_CORE616"
+      ],
+      "transaction": "One owning caller Tx; fenced actor/session/player; complete canonical lock union before first write; pinned exact content and stable DecisionAt",
+      "effects": "Clear pending only; no refund/material credit, no RNG",
+      "response_projection": "{}",
+      "reload": "I5 Backpack/scalar bootstrap and Inscription-applied Character key49/roster overlays",
+      "replay": "Empty stock request is current-pending intent; retained operation proof distinct from a new occurrence",
+      "errors": "Existing stockruntime authentication/bad request/unavailable envelopes; no invented success payload on missing provider",
+      "consumer": "INSCRIPTION_INPUTS -> I7C-3B raw/final stat; selected effects ->4C; 6B/6C/parent barriers unchanged",
+      "qualification": [
+        "realPG atomic debit/state/grant/receipt",
+        "rollback",
+        "UNKNOWN positive/negative evidence",
+        "concurrent same/different operation",
+        "restart/SIGKILL",
+        "response-loss/reload"
+      ],
+      "active_now": false
+    },
+    {
+      "mid": 1407,
+      "name": "EXCHANGE_MATERIALS",
+      "request_keys": [],
+      "admission": "Only source three Stars 50001343/44/45 and source economic_value 19|5,20|5,21|5",
+      "owner": "Inscription lifecycle with Character/I5/Content typed ports",
+      "source_paths": [
+        "app/model/Inscription.lua",
+        "app/windows/InscriptionWindow.lua",
+        "app/windows/InscriptionEquipWindow.lua",
+        "app/windows/InscriptionTenTimesWindow.lua",
+        "app/windows/SellDetailWindow.lua"
+      ],
+      "contract_refs": [
+        "I7C1_PROVIDER_SCOPE_OWNERSHIP",
+        "I7C1_DELIVERY_ACCEPTANCE",
+        "I7C1_RESEARCH_AMENDMENT",
+        "D04",
+        "D06",
+        "D11",
+        "CA_CORE616"
+      ],
+      "transaction": "One owning caller Tx; fenced actor/session/player; complete canonical lock union before first write; pinned exact content and stable DecisionAt",
+      "effects": "Lock/count source stock; debit all locked quantities and credit certificates once; checked arithmetic",
+      "response_projection": "currency_change:[{currency:19/20/21,change}] plus current economy_",
+      "reload": "I5 Backpack/scalar bootstrap and Inscription-applied Character key49/roster overlays",
+      "replay": "Locked quantities are inputs, never receipt evidence; new exchange after new acquisition is a new occurrence",
+      "errors": "Existing stockruntime authentication/bad request/unavailable envelopes; no invented success payload on missing provider",
+      "consumer": "INSCRIPTION_INPUTS -> I7C-3B raw/final stat; selected effects ->4C; 6B/6C/parent barriers unchanged",
+      "qualification": [
+        "realPG atomic debit/state/grant/receipt",
+        "rollback",
+        "UNKNOWN positive/negative evidence",
+        "concurrent same/different operation",
+        "restart/SIGKILL",
+        "response-loss/reload"
+      ],
+      "active_now": false
+    }
+  ],
+  "implementation_authorized": true
+}

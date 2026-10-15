@@ -1,0 +1,48 @@
+{
+  "status": "SOURCE_BOUND_ADDITIVE_SUCCESSOR",
+  "source_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+  "prior_payloads_byte_identical": [
+    "appearance_catalog.json",
+    "book_input_catalog.json",
+    "course_input_catalog.json",
+    "dorm_input_catalog.json",
+    "emoticon_catalog.json",
+    "equipment_primitives_catalog.json",
+    "function_gates.json",
+    "guild_broadcast_policy.json",
+    "guild_invite_policy.json",
+    "hero_core_catalog.json",
+    "hero_equipment_catalog.json",
+    "hero_fumo_catalog.json",
+    "hero_promotion_restoration_catalog.json",
+    "library_input_catalog.json",
+    "objective_catalog.json",
+    "pet_acquisition_catalog.json",
+    "pet_core_catalog.json",
+    "pet_equipment_catalog.json",
+    "pet_progression_catalog.json",
+    "pet_promotion_restoration_catalog.json",
+    "player_display_catalog.json",
+    "player_progression.json",
+    "practice_catalog.json",
+    "public_profile_policy.json",
+    "public_showcase_policy.json",
+    "social_gift_catalog.json",
+    "super_equipment_catalog.json"
+  ],
+  "changed_prior": [
+    "manifest.json",
+    "resource_catalog.json"
+  ],
+  "new_payload": "inscription_input_catalog.json",
+  "source_rows": {
+    "families": 23,
+    "templates": 240,
+    "slots": 3,
+    "suits": 12
+  },
+  "resource_change": "Exactly three qualified I5 named scalar definitions, all prior resource rows byte-semantically retained",
+  "private_policies": "Five explicit user-adopted reconstruction choices; not recovered official math",
+  "genuine_blood_stage": "Deferred narrow I7C2I producer; default Character port explicitly unavailable; no faked stage",
+  "physicalW2": false
+}

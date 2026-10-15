@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "status": "ADOPTED_CURRENT_USER_2026_10_15",
+  "policies": [
+    {
+      "id": "C2F_PROPOSAL_ROLL_V1",
+      "classification": "IMPLEMENTATION_DECISION",
+      "status": "ADOPTED_USER_2026_10_15",
+      "source_facts": "ordinary item/relative-weight pools, Lv7 special families 40001/50001 with 70/30 relative weights, rate_suit/rate_step/max_num rows",
+      "proposal": "Reuse V1 fixed-point Scholarship ladder: attempt=misses+1; forge 10bp and reforge 100bp per eligible attempt; cap/hard ceiling at 1000/100. Reset lane misses on special hit; separate forge/reforge counters. Reforge excludes original template. A batch is 10 sequential draws with counters advanced/reset per draw.",
+      "limitation": "Outer probability/counter interpretation and same-result exclusion are reconstruction choices, not recovered official server math."
+    },
+    {
+      "id": "C2F_PROPOSAL_PENDING_V1",
+      "classification": "IMPLEMENTATION_DECISION",
+      "status": "ADOPTED_USER_2026_10_15",
+      "proposal": "Latest accepted paid rebuild replaces prior pending; original is not consumed/reserved until Save. Persist candidates, source, generation, content/policy, operation identity and entropy provenance across restart. Save accepts a member of latest frozen candidates, consumes one original and grants one selected template without RNG. Missing original causes durable stale-clear and rejected Save. Abandon discards without refund; no-pending Abandon is no-op. No wall-time expiry.",
+      "limitation": "Wire lacks occurrence/proposal nonce. Late identical Save/Abandon can address a newer pending occurrence; internal generation does not recover unavailable client intent."
+    },
+    {
+      "id": "C2F_PROPOSAL_INIT_IMPORT_V1",
+      "classification": "IMPLEMENTATION_DECISION",
+      "status": "ADOPTED_USER_2026_10_15",
+      "proposal": "New eligible owner installation creates empty applied slots/no pending/zero misses and zero new certificate balances only under an explicit preservation seed version. Missing-only owner backfill preserves existing qualified rows. Existing/imported nonempty slots, pending/counters/balances need a typed provenance-bearing importer and per-row validation; reject/quarantine unqualified inputs rather than invent them.",
+      "limitation": "Client empty-array/zero fallback is not original-server initial/backfill truth; migration creates no eligible Hero."
+    },
+    {
+      "id": "C2F_PROPOSAL_REFERENCE_V1",
+      "classification": "IMPLEMENTATION_DECISION",
+      "status": "ADOPTED_USER_2026_10_15",
+      "proposal": "Applied live-Hero bindings block destructive retirement until explicitly removed; removal remains recovery-capable despite eligibility loss when canonical applied reference is valid. No automatic detach, refund or eventual cleanup. Pending inventory rebuild is not a Hero reference.",
+      "limitation": "D04 permits a qualified reject-or-atomic-detach choice; rejection is this bounded design proposal and requires adoption."
+    },
+    {
+      "id": "C2F_PROPOSAL_ACCESS_V1",
+      "classification": "IMPLEMENTATION_DECISION",
+      "status": "ADOPTED_USER_2026_10_15",
+      "proposal": "Per-Hero Insert requires owner-qualified live Normal/Super stage COMPLETE=3 and level>=100. Forge/Rebuild require a genuine eligible owned Hero through a coherent upstream snapshot; Save/Abandon/Remove retain recovery paths for already-paid/applied state. Function45 announcement never authorizes gameplay; use existing I5 function mechanism when an actual qualification producer supplies its facts.",
+      "limitation": "Source establishes UI per-Hero gate; the global forge/rebuild admission and recovery exceptions are source-shaped V1 policy choices."
+    }
+  ],
+  "source_v1_policy_sha256": "5ac2a9e2140889853e24cf2ea039516ac0c98f3a2caca1f2f562ee605d789229",
+  "authorization_basis": "Direct user adopted all proposals and authorized implementation/testing/reconciliation/closure, preserving named qualification gates",
+  "implementation_authorized": true,
+  "implementation_started": true,
+  "policies_adopted": true
+}

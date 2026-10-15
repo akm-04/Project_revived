@@ -1,0 +1,12 @@
+{
+  "status": "SELECTED_FROZEN_USER_APPROVED",
+  "selected_contracts": [
+    {
+      "contract_id": "I7C2F_INSCRIPTION_INPUT_LIFECYCLE",
+      "version": 1,
+      "path": "docs/i7c2f/INSCRIPTION_INPUT_LIFECYCLE_CONTRACT.json",
+      "sha256": "251036bb250de3f886562a1f008eddb394a2b329d41da58a9743442ec907bca3"
+    }
+  ],
+  "inherited": "All three frozen I7C-1 contracts and accepted2A..2E/transitive foundations retained; see CONTRACT_IMPACT_REVIEW.json"
+}

@@ -489,6 +489,7 @@ type EmoticonCatalog struct {
 	Source        string               `json:"source"`
 }
 type Catalog struct {
+	InscriptionInputs        InscriptionInputCatalog
 	CourseInputs             CourseInputCatalog
 	BookInputs               BookInputCatalog
 	DormInputs               DormInputCatalog
@@ -613,6 +614,10 @@ func Load() (*Catalog, error) {
 		return nil, err
 	}
 
+	var inscriptionInputs InscriptionInputCatalog
+	if err := decodeAndVerify("inscription_input_catalog.json", manifest.ArtifactSHA256s, &inscriptionInputs); err != nil {
+		return nil, err
+	}
 	var courseInputs CourseInputCatalog
 	if err := decodeAndVerify("course_input_catalog.json", manifest.ArtifactSHA256s, &courseInputs); err != nil {
 		return nil, err
@@ -658,6 +663,7 @@ func Load() (*Catalog, error) {
 		return nil, err
 	}
 	catalog := &Catalog{
+		InscriptionInputs:        inscriptionInputs,
 		CourseInputs:             courseInputs,
 		BookInputs:               bookInputs,
 		DormInputs:               dormInputs,
@@ -748,6 +754,9 @@ func validateManifest(raw []byte, manifest *Manifest) error {
 	if manifest.CompilerVersion == "i7c2e-course-inputs" {
 		expectedSources, expectedArtifacts = 143, 28
 	}
+	if manifest.CompilerVersion == "i7c2f-inscription-inputs" {
+		expectedSources, expectedArtifacts = 158, 29
+	}
 	if len(manifest.Sources) != expectedSources {
 		return fmt.Errorf("builtin content: expected %d source records, got %d", expectedSources, len(manifest.Sources))
 	}
@@ -772,6 +781,9 @@ func validateManifest(raw []byte, manifest *Manifest) error {
 }
 
 func validateCatalog(c *Catalog) error {
+	if err := c.InscriptionInputs.Validate(); err != nil {
+		return err
+	}
 	if err := c.CourseInputs.Validate(); err != nil {
 		return err
 	}
@@ -1455,7 +1467,7 @@ func validateCatalog(c *Catalog) error {
 
 	caps := append([]string(nil), c.Manifest.EnabledCapabilities...)
 	sort.Strings(caps)
-	wantCaps := []string{"COURSE_INPUTS_I7C2E", "BOOK_INPUTS_I7C2D", "DORM_INPUTS_I7C2C", "LIBRARY_INPUTS_I7C2B", "CHARACTER_APPEARANCE_CA7", "EQUIPMENT_PRIMITIVES_CA4", "FRIEND_DM_EMOTICON_I7A6A", "FUNCTION_LEVEL_ELIGIBILITY_R5", "GUILD_BROADCAST_I7A8A", "GUILD_INVITE_PRESENTATION_I7A8B", "HERO_CORE_CA2", "HERO_EQUIPMENT_CA4_2", "HERO_FUMO_CA4_3A", "HERO_PROGRESSION_CA2", "HERO_PROMOTION_RESTORATION_CA4_3B", "HERO_RAW_SKILLS_I7C2A", "PET_ACQUISITION_CA3", "PET_CORE_CA3", "PET_EQUIPMENT_CA4_4A", "PET_PROGRESSION_CA3", "PET_PROMOTION_RESTORATION_CA4_4B", "PLAYER_DISPLAY_I7B6A", "PLAYER_EXP_R5", "PRACTICE_CA6", "PUBLIC_PROFILE_PREFERENCES_I7B2B", "PUBLIC_PROFILE_SHOWCASE_SELECTION_I7B3A", "QUALIFIED_ORDINARY_STACK_ITEM_DEFINITIONS", "SCALAR_CRYSTAL", "SCALAR_MANA", "SOCIAL_GIFT_I7A7A", "SUPER_EQUIPMENT_CA4_5", "TEMPORAL_ENERGY_R5", "TEMPORAL_SKILL_POINT_R5", "TEMPORAL_SPIRIT_ENERGY_R5"}
+	wantCaps := []string{"INSCRIPTION_INPUTS_I7C2F", "COURSE_INPUTS_I7C2E", "BOOK_INPUTS_I7C2D", "DORM_INPUTS_I7C2C", "LIBRARY_INPUTS_I7C2B", "CHARACTER_APPEARANCE_CA7", "EQUIPMENT_PRIMITIVES_CA4", "FRIEND_DM_EMOTICON_I7A6A", "FUNCTION_LEVEL_ELIGIBILITY_R5", "GUILD_BROADCAST_I7A8A", "GUILD_INVITE_PRESENTATION_I7A8B", "HERO_CORE_CA2", "HERO_EQUIPMENT_CA4_2", "HERO_FUMO_CA4_3A", "HERO_PROGRESSION_CA2", "HERO_PROMOTION_RESTORATION_CA4_3B", "HERO_RAW_SKILLS_I7C2A", "PET_ACQUISITION_CA3", "PET_CORE_CA3", "PET_EQUIPMENT_CA4_4A", "PET_PROGRESSION_CA3", "PET_PROMOTION_RESTORATION_CA4_4B", "PLAYER_DISPLAY_I7B6A", "PLAYER_EXP_R5", "PRACTICE_CA6", "PUBLIC_PROFILE_PREFERENCES_I7B2B", "PUBLIC_PROFILE_SHOWCASE_SELECTION_I7B3A", "QUALIFIED_ORDINARY_STACK_ITEM_DEFINITIONS", "SCALAR_CRYSTAL", "SCALAR_MANA", "SOCIAL_GIFT_I7A7A", "SUPER_EQUIPMENT_CA4_5", "TEMPORAL_ENERGY_R5", "TEMPORAL_SKILL_POINT_R5", "TEMPORAL_SPIRIT_ENERGY_R5"}
 	sort.Strings(wantCaps)
 	if len(caps) != len(wantCaps) {
 		return fmt.Errorf("builtin content: enabled capability count drift: %v", caps)

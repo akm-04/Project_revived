@@ -28,11 +28,12 @@ type LibraryRosterOverlay interface {
 	OverlayRosterTx(context.Context, tx.Queryer, identity.ActorContext, string, time.Time, map[string]any) error
 }
 type HeroBootstrapProjection struct {
-	Course  LibraryRosterOverlay
-	Book    LibraryRosterOverlay
-	Dorm    LibraryRosterOverlay
-	Library LibraryRosterOverlay
-	Content HeroBootstrapContent
+	Course      LibraryRosterOverlay
+	Inscription LibraryRosterOverlay
+	Book        LibraryRosterOverlay
+	Dorm        LibraryRosterOverlay
+	Library     LibraryRosterOverlay
+	Content     HeroBootstrapContent
 }
 
 func (HeroBootstrapProjection) Name() string     { return "ca6.hero-bootstrap" }
@@ -116,6 +117,11 @@ func (p HeroBootstrapProjection) OverlayMID1(ctx context.Context, q tx.Queryer, 
 	}
 	if p.Book != nil {
 		if err = p.Book.OverlayRosterTx(ctx, q, actor, revision, observedAt, body); err != nil {
+			return err
+		}
+	}
+	if p.Inscription != nil {
+		if err = p.Inscription.OverlayRosterTx(ctx, q, actor, revision, observedAt, body); err != nil {
 			return err
 		}
 	}

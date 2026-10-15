@@ -21,7 +21,7 @@ from pathlib import Path
 from typing import Any, Iterable
 
 SCHEMA_VERSION = 1
-COMPILER_VERSION = "i7c2e-course-inputs"
+COMPILER_VERSION = "i7c2f-inscription-inputs"
 PARSER_VERSION = "lua-generated-v18-guild-invite"
 EXPECTED_SOURCE_ARCHIVE_SHA256 = "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
 SOURCE_PREFIX = "app-assets/output/assets/src_64/"
@@ -120,7 +120,7 @@ SOURCE_MANIFEST.append(('app/windows/HeroGiftBoxWindow.lua','d6065c3d601f5820915
 SOURCE_MANIFEST.append(('app/windows/WhiteAlbumWindow.lua','851a53f588b59d95cfe460f3399ab1a6904fff7714131c358f3c3a73910b6bb9',"LIBRARY_INPUT_SOURCE_AUTHORITY"))
 
 ENABLED_CAPABILITIES = [
-    "COURSE_INPUTS_I7C2E", "BOOK_INPUTS_I7C2D",
+    "INSCRIPTION_INPUTS_I7C2F", "COURSE_INPUTS_I7C2E", "BOOK_INPUTS_I7C2D",
     "DORM_INPUTS_I7C2C",
     "LIBRARY_INPUTS_I7C2B",
     "PLAYER_DISPLAY_I7B6A",
@@ -219,6 +219,22 @@ SOURCE_MANIFEST.append(('data/tables/object_log.lua', '5ddb6cfecd9946f7333298557
 SOURCE_MANIFEST.append(('data/tables/object_subject.lua', '07b9dc913f4eaa667c6ee5a6d0e5206cf5652a95ccb96bdf6cb1a9babbbb0f26', 'I7C2E_COURSE_SOURCE_BOUNDARY'))
 SOURCE_MANIFEST.append(('data/tables/skill_level.lua', '700221095b3728bacb23a118daf9e0a8cf2dd6e31c402b1a55359ac9fac4d98a', 'I7C2E_COURSE_SOURCE_BOUNDARY'))
 
+SOURCE_MANIFEST.append(('data/tables/inscription.lua', 'dc0d5d8b0de66b9495665cb6a300aa9bdb5979065f28c565ede35e447adce23c', 'I7C2F_INSCRIPTION_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/inscription_suit.lua', 'cd5e0f6438d34a3d597c9d25175f7fee81f14eb4808439d60b272fa2a2e4ca25', 'I7C2F_INSCRIPTION_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/inscription_pos.lua', '714644c260a86581d04880289dd6e36abdfd446fc0f7c25342b4fe870d6a10cf', 'I7C2F_INSCRIPTION_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/inscription_rate.lua', '2bdb4a95b2bcd0850b6bd7661fdf047c95633a8c880a0b4cc8b5e85b0aa4a6e8', 'I7C2F_INSCRIPTION_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('app/model/Inscription.lua', 'd14a19472279d2eb911a824bbd4bd053f4d1cdede9c16e4080518488bd7b066f', 'I7C2F_INSCRIPTION_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('app/windows/InscriptionWindow.lua', '4ca0f6a8b6d70caf60205efe14a55665142acd1f3ac9b93d6dc014d5a8bd04e6', 'I7C2F_INSCRIPTION_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('app/windows/InscriptionEquipWindow.lua', 'd6426f0abbc0c7532f8b4f12ed5facc4a38f12db8954acf685b7e8604b4d278c', 'I7C2F_INSCRIPTION_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('app/windows/InscriptionTenTimesWindow.lua', '2dae5c579e44bd9a092ca534b6050c06f9718b4566ef1d9cdfb381ff97b480c1', 'I7C2F_INSCRIPTION_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('app/model/NormalHero.lua', '125183556caeecc182bf0702dd1f95160c8ba1666a3b97fbb8a7261d30ae0ac9', 'I7C2F_INSCRIPTION_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('app/model/SuperHero.lua', 'b127c2cbef327d3142031bf30daa0af1b45997c6da82fba946d641a86783d622', 'I7C2F_INSCRIPTION_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('app/common/tables/InscriptionTable.lua', '643f1b935b3fa18c9b9289b527ed3f25a0c109e663c2b8b56a642b88695eced0', 'I7C2F_STOCK_CALLBACK_AND_CONSUMER_BOUNDARY'))
+SOURCE_MANIFEST.append(('app/common/tables/InscriptionSuitTable.lua', 'cd315ed3116e1930cc1b371c5823a6a790784f19195b7563c2fd5db3132cf669', 'I7C2F_STOCK_CALLBACK_AND_CONSUMER_BOUNDARY'))
+SOURCE_MANIFEST.append(('app/windows/BackpackWindow.lua', '48b18493fed4186541fc989a8ef60d6338d444c4e8a0fc986903a57e52ff19c1', 'I7C2F_STOCK_CALLBACK_AND_CONSUMER_BOUNDARY'))
+SOURCE_MANIFEST.append(('app/windows/SellDetailWindow.lua', 'cdb8e1ffde40e173219886a9de0c0ca4905b9d3965e3e8c9dc00026b765b360f', 'I7C2F_STOCK_CALLBACK_AND_CONSUMER_BOUNDARY'))
+SOURCE_MANIFEST.append(('app/windows/ExchangeMaterialWindow.lua', '6636740cc170a3bb149e9a85241de755ae8d6dde612a880354f516bee668f6b9', 'I7C2F_STOCK_CALLBACK_AND_CONSUMER_BOUNDARY'))
+from inscription_content import build_inscription
 from course_content import build_course
 class CompileError(ValueError):
     pass
@@ -741,7 +757,7 @@ def build_artifacts(blobs: dict[str, SourceBlob], archive_sha256: str) -> dict[s
         "settlement_activation":"ENABLED_R4"})
     # Named Workshop balances are scalar I5 facts, not asset-ID or PlayerEXP identities.
     # Current enums.ECONOMY and SelfPlayer scalar hydration plus source Book costs qualify these four.
-    for key in ('magic_dust','magic_liquid','magic_energy','magic_exp'):
+    for key in ('magic_dust','magic_liquid','magic_energy','magic_exp','degree_cer','graduate_cer','patent_cer'):
         if key not in economy_names or key in asset_by_name:raise CompileError("Workshop named scalar identity drift: "+key)
         resources.append({"catalog_status":"QUALIFIED","class":"SCALAR_CURRENCY","definition_key":"scalar_currency:"+key,"resource_key":key,"settlement_activation":"ENABLED_R4"})
     social_gift_artifact=build_social_gift(
@@ -1999,6 +2015,7 @@ def build_artifacts(blobs: dict[str, SourceBlob], archive_sha256: str) -> dict[s
     from dorm_content import build_dorm
     dorm_artifact=build_dorm(blobs,parse_generated_lua_table,pipe_ints,hero_artifact["templates"],partner_keys,partner_rows,super_keys,super_rows,indexed_field,items,CompileError)
     artifacts = {
+        "inscription_input_catalog.json":build_inscription(blobs,parse_generated_lua_table,items),
         "course_input_catalog.json":course_artifact,
         "book_input_catalog.json":book_artifact,
         "dorm_input_catalog.json":dorm_artifact,

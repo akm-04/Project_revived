@@ -146,6 +146,12 @@
       "parser_version": "lua-generated-v18-guild-invite",
       "revision_id": "4e2540adfef4dd01d5a19d709aa35b8306ab11717705de77dca82a50fb54f93c",
       "scope": "New rawCoursecatalog only; prior27payloadsbyteidentical; 31sourceboundarymembersadded"
+    },
+    {
+      "ordinal": 24,
+      "stage": "I7C-2F",
+      "compiler_version": "i7c2f-inscription-inputs",
+      "parser_version": "lua-generated-v18-guild-invite"
     }
   ],
   "current": {
