@@ -1,0 +1,40 @@
+{
+  "status": "MATERIAL_TRANSITIVE_PREREQUISITE_DISCOVERY_NORMAL_LIVE_GATE_UNQUALIFIED",
+  "finding": "Production MaxHeroColor uses PreservationMaxHeroColorProvider immutable value5, revision GXB1_PRESERVATION_MAX_HERO_COLOR_V1. Source Normal Common requires16. A manually seeded Normal16 fixture is conditional and not a genuine qualified Character producer.",
+  "contradicted_design": "Initial2G plan no_known_upstream_blocker and claim inherited qualified endgame Normal preconditions. Preserve numerical source predicate16; do not lower it to5 or silently raise inherited policy.",
+  "contract_reopen_trigger": "PASS546_CA4_3B_IMPLEMENTATION_CONTRACT.json max_color_policy and reopen triggers: schedule replacement or mutable/Open-Level policy requires explicit targeted CA4-3B reconciliation/requalification.",
+  "secondary_finding": "Element eligible() currently validates PlayerProgression metadata but not rule.ValidateState; fixture set level100 with exp0. Fix validator and use canonical Exp threshold in endgame fixture. I5 MID17 max_lev already equals exact activeProgression.MaxLevel(), so player level cap source trace is confirmed.",
+  "required_amendment": [
+    "Record source/contract discovery and v2 Element lifecycle contract",
+    "Preserve normal cap5; gate Normal paid Equip/Enhance unavailable before new admission until genuine qualified Normal16 owner capability",
+    "Bind same existing PlayerProgression policy revision and keep recovery/live Super distinct",
+    "Normal16 tests explicitly conditional max-color fixture; actual production API exercise Super5-command path, plus Normal503/no-admission check",
+    "Validate full I5 progression policy state and correct fixture Exp",
+    "Versioned narrow qualification edge from accepted Character foundation to2G Normal producer, no sequence jump or wholephase build edge"
+  ],
+  "implementation_scope": "Pause affected Normal admission/qualification claim until amended design/publication. Continue independent authorized Super/core/recovery; do not accept full2G/parent/W2 fromfixtures.",
+  "next_authority": "Owned Pass702 preimplementation amendment, then intended F3 candidate/final Pass703 scoped core sync if full Normal gate remains blocked",
+  "evidence": [
+    {
+      "path": "internal/application/i5/max_hero_color_policy.go",
+      "sha256": "defb9ddbde1129fcccc5b42b7c5170aa423295c59155d226aaaa0aafd47940dd"
+    },
+    {
+      "path": "internal/application/i5/max_hero_color_policy_test.go",
+      "sha256": "9ba7a40edd6ed7d8c754780d7e23ee286f40cd0508e6e40629ac7e9eb94105b1"
+    },
+    {
+      "path": "internal/application/characterhero/promotion_service.go",
+      "sha256": "40638476f2ff756ab50fdc591660b0c854c332f9c115a0a0b4daf71e63e46ccc"
+    },
+    {
+      "path": "internal/adapters/postgres/i5store/bootstrap_projection.go",
+      "sha256": "2a17140754632165aa354b55568f8c2ea0a437e6c2f1547f2551b759d92def76"
+    },
+    {
+      "path": "internal/domain/player/core.go",
+      "sha256": "1344c81ae2b18d213052afcedcf8255f600714c4cff89c42abf12da91ccd1915"
+    }
+  ],
+  "all_3_i7c1_contracts_unchanged": true
+}

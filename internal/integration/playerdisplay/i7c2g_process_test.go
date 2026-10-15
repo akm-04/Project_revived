@@ -36,6 +36,7 @@ func TestI7C2GActualAPIFiveCommandsRosterAndRestart(t *testing.T) {
 	p := pool(t)
 	a, _, svc := elementFixture(t, p)
 	rev := installed(t, p)
+	eligibleElementHero(t, p, a, rev, 11001, 5, true)
 	h := skillHero(t, p, a, rev, 11001, 4)
 	tr, e := p.Begin(ctx, tx.Options{})
 	if e != nil {
@@ -50,12 +51,12 @@ func TestI7C2GActualAPIFiveCommandsRosterAndRestart(t *testing.T) {
 	if e = (librarystore.Store{}).EnsurePlayerRootTx(ctx, tr, a.PlayerID, time.Now().Add(-time.Hour)); e != nil {
 		t.Fatal(e)
 	}
-	for _, id := range []int64{1, 2, 3, 4} {
+	for _, id := range []int64{1, 2, 3, 4, 5} {
 		h := skillRead(t, p, a, id)
 		if e = (inscriptionstore.Store{}).EnsureHeroTx(ctx, tr, a.PlayerID, id, time.Now().Add(-time.Hour)); e != nil {
 			t.Fatal(e)
 		}
-		if id == 4 {
+		if id == 4 || id == 5 {
 			if e = (inscriptionstore.Store{}).EnsureHeroTx(ctx, tr, a.PlayerID, id, time.Now().Add(-time.Hour)); e != nil {
 				t.Fatal(e)
 			}
@@ -149,7 +150,7 @@ func TestI7C2GActualAPIFiveCommandsRosterAndRestart(t *testing.T) {
 		return resp.StatusCode, out
 	}
 
-	elementCmd(t, svc, a, app.Command{Family: app.Equip, PartnerID: 1, EquipID: 1, Position: 1})
+	elementCmd(t, svc, a, app.Command{Family: app.Equip, PartnerID: 5, EquipID: 1, Position: 1})
 	cmd := start()
 	running := true
 	defer func() {
@@ -163,13 +164,14 @@ func TestI7C2GActualAPIFiveCommandsRosterAndRestart(t *testing.T) {
 		params map[string]any
 		status int
 	}{
-		{2849, map[string]any{"partner_id": 1, "equip_id": 7, "equip_pos": 2}, 200},
-		{2850, map[string]any{"partner_id": 1, "equip_id": 7}, 200},
-		{2851, map[string]any{"partner_id": 1, "equip_pos": 2}, 200},
-		{2849, map[string]any{"partner_id": 1, "equip_id": 7, "equip_pos": 3}, 200},
-		{2852, map[string]any{"partner_id": 1, "equip_id": 7}, 200},
+		{2849, map[string]any{"partner_id": 1, "equip_id": 7, "equip_pos": 2}, 503},
+		{2849, map[string]any{"partner_id": 5, "equip_id": 7, "equip_pos": 2}, 200},
+		{2850, map[string]any{"partner_id": 5, "equip_id": 7}, 200},
+		{2851, map[string]any{"partner_id": 5, "equip_pos": 2}, 200},
+		{2849, map[string]any{"partner_id": 5, "equip_id": 7, "equip_pos": 3}, 200},
+		{2852, map[string]any{"partner_id": 5, "equip_id": 7}, 200},
 		{2853, map[string]any{"equip_id": 1}, 200},
-		{2849, map[string]any{"partner_id": 1, "equip_id": 7, "equip_pos": true}, 400},
+		{2849, map[string]any{"partner_id": 5, "equip_id": 7, "equip_pos": true}, 400},
 		{2853, map[string]any{"equip_id": 1, "item_num": 2}, 400},
 	} {
 		code, out := post(step.mid, step.params)

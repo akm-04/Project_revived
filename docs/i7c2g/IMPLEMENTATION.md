@@ -1,0 +1,2 @@
+
+V2 prerequisite amendment: source Normal entry requires color16, while the inherited CA4-3B immutable MaxHeroColor policy is5. Normal paid Equip/Enhance fail unavailable before new admission; recovery, destruction and unload stay available. Production uses the same policy instance as promotion/MID17. Tests using Normal16 are explicitly conditional; actual API commands use independent Super prerequisites. Full progression level/EXP consistency is validated. Lifecycle policyV2 retains max-color revision provenance. No full Normal/parent/W2 acceptance is claimed.
