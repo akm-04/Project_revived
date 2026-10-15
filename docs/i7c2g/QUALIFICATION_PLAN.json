@@ -1,0 +1,99 @@
+{
+  "status": "FROZEN_REQUIRED_EXACT_R2_MATRIX_NOT_RUN",
+  "candidate": "INTENDED_FROZEN_UNMODIFIED_CANDIDATE_AFTER_TARGETED_WORKING_CHECKS",
+  "toolbox_sha256": "e4e194c9627929299577364b953b2468d6118fac4283fd8030f10b5a27456c2b",
+  "checks": [
+    {
+      "id": "G01",
+      "requirement": "source row/item ID and strict request schemas/callback shapes",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "G02",
+      "requirement": "all80 catalog rows/11 cost tiers/107 existing I5 resources, decimal/p fields",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "G03",
+      "requirement": "Normal eligibility collected ordinary slots; Super six21raw slots and player max cap",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "G04",
+      "requirement": "new bind/unload/rebind/replace/upgrade backup/duplicate rejection",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "G05",
+      "requirement": "enhance0..10 cap, all3types cost/refund, insufficient resource rollback",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "G06",
+      "requirement": "destroy active/backup/backpack; stale/missing identity no duplicate rewards",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "G07",
+      "requirement": "nondefault genuine I5 acquisition/Character eligibility and unavailable vs empty",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "G08",
+      "requirement": "actor fences/old policies/replay/mismatched operation fingerprint",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "G09",
+      "requirement": "positive UNKNOWN receipt; qualified negative proof/retry; invalid/missing proof unresolved",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "G10",
+      "requirement": "retained lane different command and actor retirement no stale charge",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "G11",
+      "requirement": "same/different command concurrency and source ordinal/slot order",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "G12",
+      "requirement": "normal exclusive owned book count vs Super no multiplier; p and negative exact arithmetic",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "G13",
+      "requirement": "typed retirement guard anybackup/absent preflight race",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "G14",
+      "requirement": "fresh Hero acquisition+MID1+roster preserve2A..2F fields",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "G15",
+      "requirement": "coherent RR/readcommitted reject/pinned revision/time/stale clock",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "G16",
+      "requirement": "real API process restart/response loss and SIGKILL boundaries",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "G17",
+      "requirement": "fresh54/populated53upgrade/repeat deployment/backup restore row hashes",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "G18",
+      "requirement": "all-unit/affected-race/vet/source/SQLownership/currentcandidate/SBOM/module/security snapshot/bounded domain fuzz",
+      "status": "NOT_RUN"
+    }
+  ],
+  "reuse": "Only unchanged candidate assumptions/subjects with explicit basis; no historical blanket reruns",
+  "scope": "2G provider/lifecycle only; parent/stat/combat/W2 qualification remains separate"
+}

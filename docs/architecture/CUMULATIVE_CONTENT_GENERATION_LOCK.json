@@ -154,14 +154,22 @@
       "parser_version": "lua-generated-v18-guild-invite",
       "revision_id": "2fb1b3bd7fa1a9cdf719ed0646a9dc4a6e59a938e7b1f1b4eb49f65f3fb2e136",
       "scope": "Inscription source catalog and exactly three named certificate scalars; old resource rows and 27 prior payloads preserved"
+    },
+    {
+      "ordinal": 25,
+      "stage": "I7C-2G",
+      "compiler_version": "i7c2g-element-inputs",
+      "parser_version": "lua-generated-v18-guild-invite",
+      "revision_id": "b55f0900f2cff611313a5a4a88e03d3c2f034625c4a06c5f3bfe490b04f477bd",
+      "scope": "Element catalog only; all29 prior payloads and existingI5 resources unchanged"
     }
   ],
   "current": {
-    "ordinal": 24,
-    "stage": "I7C-2F",
-    "compiler_version": "i7c2f-inscription-inputs",
+    "ordinal": 25,
+    "stage": "I7C-2G",
+    "compiler_version": "i7c2g-element-inputs",
     "parser_version": "lua-generated-v18-guild-invite",
-    "revision_id": "2fb1b3bd7fa1a9cdf719ed0646a9dc4a6e59a938e7b1f1b4eb49f65f3fb2e136",
-    "scope": "Inscription source catalog and exactly three named certificate scalars; old resource rows and 27 prior payloads preserved"
+    "revision_id": "b55f0900f2cff611313a5a4a88e03d3c2f034625c4a06c5f3bfe490b04f477bd",
+    "scope": "Element catalog only; all29 prior payloads and existingI5 resources unchanged"
   }
 }

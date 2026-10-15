@@ -1,0 +1,121 @@
+[
+  {
+    "path": "app/model/ElementEquip.lua",
+    "sha256": "b4b8cc1f629805b424c07f349aab874b00d04a7049178ce1f73ad090f9502104",
+    "bytes": 3473,
+    "classification": "SOURCE_FACT",
+    "source_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
+  },
+  {
+    "path": "app/windows/ElementEquipWindow.lua",
+    "sha256": "4365984aa9ab18ec228c2cc862b5ae6dd2373ebbaa8acb476e46c0ff38b23bef",
+    "bytes": 49433,
+    "classification": "SOURCE_FACT",
+    "source_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
+  },
+  {
+    "path": "app/windows/ElementEquipTujianWindow.lua",
+    "sha256": "4370861c2d9d9dd15c25850e59e06aaa7d86900e6f165138e1e865552660e5c4",
+    "bytes": 45705,
+    "classification": "SOURCE_FACT",
+    "source_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
+  },
+  {
+    "path": "app/windows/HeroMainWindow.lua",
+    "sha256": "473b72ec14a81d01d6dbdaa19f92c3d78900f40ca34fa5c8cf46585b76d65414",
+    "bytes": 271948,
+    "classification": "SOURCE_FACT",
+    "source_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
+  },
+  {
+    "path": "app/model/NormalHero.lua",
+    "sha256": "125183556caeecc182bf0702dd1f95160c8ba1666a3b97fbb8a7261d30ae0ac9",
+    "bytes": 103561,
+    "classification": "SOURCE_FACT",
+    "source_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
+  },
+  {
+    "path": "app/model/SuperHero.lua",
+    "sha256": "b127c2cbef327d3142031bf30daa0af1b45997c6da82fba946d641a86783d622",
+    "bytes": 94188,
+    "classification": "SOURCE_FACT",
+    "source_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
+  },
+  {
+    "path": "app/model/SelfPlayer.lua",
+    "sha256": "163d5893c9522ada412c2b9c4748a80757660fccdf03c8f72cb6edf0838b8eb4",
+    "bytes": 156513,
+    "classification": "SOURCE_FACT",
+    "source_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
+  },
+  {
+    "path": "app/model/Backpack.lua",
+    "sha256": "953999f81fc43ecd00e587d884c88b6a1ba066e35ff75a20dd698b6cb950af7a",
+    "bytes": 9432,
+    "classification": "SOURCE_FACT",
+    "source_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
+  },
+  {
+    "path": "app/common/tables/ElementEquipTable.lua",
+    "sha256": "1c300da385fb90ebf1382f23b5823e72a7e29f3fde716cf08618901fe712c8b2",
+    "bytes": 4571,
+    "classification": "SOURCE_FACT",
+    "source_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
+  },
+  {
+    "path": "app/common/tables/ElementStrthTable.lua",
+    "sha256": "00fa4a0230da91baf3754d2289ef55ec32626c988855932dcb86bbe16805d184",
+    "bytes": 1808,
+    "classification": "SOURCE_FACT",
+    "source_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
+  },
+  {
+    "path": "app/common/enums.lua",
+    "sha256": "15340bd89fe7c6f150ccfd4a5cd2a2f0e8e73c89dfae9ac3388376a4799901f3",
+    "bytes": 80531,
+    "classification": "SOURCE_FACT",
+    "source_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
+  },
+  {
+    "path": "app/common/const.lua",
+    "sha256": "29bfca03fb8094710ae2e3b6b752e0f6413b7086b17032f0c17abad79b048854",
+    "bytes": 2397,
+    "classification": "SOURCE_FACT",
+    "source_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
+  },
+  {
+    "path": "app/common/network/mid.lua",
+    "sha256": "026a20b29d97624979777a68c64c749254031604057ff42aa8f8254c3e35b5af",
+    "bytes": 43121,
+    "classification": "SOURCE_FACT",
+    "source_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
+  },
+  {
+    "path": "data/tables/element_equip.lua",
+    "sha256": "900359ae27727e8f1ee1a926fefc2c5dc47c1a1114ccf5bf599be76b12753d52",
+    "bytes": 40264,
+    "classification": "SOURCE_FACT",
+    "source_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
+  },
+  {
+    "path": "data/tables/element_strth.lua",
+    "sha256": "58af04513e1ae433987c47d09a4438a0ae9f46bc37c9f41f20efc40f8899c1a4",
+    "bytes": 2371,
+    "classification": "SOURCE_FACT",
+    "source_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
+  },
+  {
+    "path": "data/tables/element_equipment.lua",
+    "sha256": "994bb7c9f5c6f49a4cc47309b0f39639028e3dcf30fc8ccfc8cb67398a2d7cd7",
+    "bytes": 298,
+    "classification": "SOURCE_FACT",
+    "source_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
+  },
+  {
+    "path": "data/tables/element_strengthen.lua",
+    "sha256": "02e08788823297e8945866c4ef86c4cc58dce07076e710a5b72063271671b0a9",
+    "bytes": 528,
+    "classification": "SOURCE_FACT",
+    "source_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
+  }
+]

@@ -8,6 +8,7 @@ import (
 	pg "gxb.local/backend/v2/internal/adapters/postgres"
 	"gxb.local/backend/v2/internal/adapters/postgres/characterstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/contentstore"
+	"gxb.local/backend/v2/internal/adapters/postgres/elementstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/i4store"
 	"gxb.local/backend/v2/internal/adapters/postgres/i5store"
 	"gxb.local/backend/v2/internal/adapters/postgres/kernelstore"
@@ -45,6 +46,13 @@ func skillHero(t *testing.T, p *pg.Pool, a identity.ActorContext, rev string, ta
 	}
 	defer tr.Rollback(ctx)
 	if e = (characterstore.Store{}).InsertHeroTx(ctx, tr, h); e != nil {
+		t.Fatal(e)
+	}
+	// Current Element-enabled test profile requires the same missing-only local facet as production bootstrap/acquisition.
+	if e = (elementstore.Store{}).EnsureRootTx(ctx, tr, a.PlayerID, rev, at); e != nil {
+		t.Fatal(e)
+	}
+	if e = (elementstore.Store{}).EnsureHeroTx(ctx, tr, a.PlayerID, partner, at); e != nil {
 		t.Fatal(e)
 	}
 	if e = tr.Commit(ctx); e != nil {

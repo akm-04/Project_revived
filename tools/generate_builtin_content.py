@@ -21,7 +21,7 @@ from pathlib import Path
 from typing import Any, Iterable
 
 SCHEMA_VERSION = 1
-COMPILER_VERSION = "i7c2f-inscription-inputs"
+COMPILER_VERSION = "i7c2g-element-inputs"
 PARSER_VERSION = "lua-generated-v18-guild-invite"
 EXPECTED_SOURCE_ARCHIVE_SHA256 = "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
 SOURCE_PREFIX = "app-assets/output/assets/src_64/"
@@ -120,7 +120,7 @@ SOURCE_MANIFEST.append(('app/windows/HeroGiftBoxWindow.lua','d6065c3d601f5820915
 SOURCE_MANIFEST.append(('app/windows/WhiteAlbumWindow.lua','851a53f588b59d95cfe460f3399ab1a6904fff7714131c358f3c3a73910b6bb9',"LIBRARY_INPUT_SOURCE_AUTHORITY"))
 
 ENABLED_CAPABILITIES = [
-    "INSCRIPTION_INPUTS_I7C2F", "COURSE_INPUTS_I7C2E", "BOOK_INPUTS_I7C2D",
+    "ELEMENT_INPUTS_I7C2G", "INSCRIPTION_INPUTS_I7C2F", "COURSE_INPUTS_I7C2E", "BOOK_INPUTS_I7C2D",
     "DORM_INPUTS_I7C2C",
     "LIBRARY_INPUTS_I7C2B",
     "PLAYER_DISPLAY_I7B6A",
@@ -234,7 +234,17 @@ SOURCE_MANIFEST.append(('app/common/tables/InscriptionSuitTable.lua', 'cd315ed31
 SOURCE_MANIFEST.append(('app/windows/BackpackWindow.lua', '48b18493fed4186541fc989a8ef60d6338d444c4e8a0fc986903a57e52ff19c1', 'I7C2F_STOCK_CALLBACK_AND_CONSUMER_BOUNDARY'))
 SOURCE_MANIFEST.append(('app/windows/SellDetailWindow.lua', 'cdb8e1ffde40e173219886a9de0c0ca4905b9d3965e3e8c9dc00026b765b360f', 'I7C2F_STOCK_CALLBACK_AND_CONSUMER_BOUNDARY'))
 SOURCE_MANIFEST.append(('app/windows/ExchangeMaterialWindow.lua', '6636740cc170a3bb149e9a85241de755ae8d6dde612a880354f516bee668f6b9', 'I7C2F_STOCK_CALLBACK_AND_CONSUMER_BOUNDARY'))
+SOURCE_MANIFEST.append(('app/model/ElementEquip.lua', 'b4b8cc1f629805b424c07f349aab874b00d04a7049178ce1f73ad090f9502104', 'I7C2G_ELEMENT_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('app/windows/ElementEquipWindow.lua', '4365984aa9ab18ec228c2cc862b5ae6dd2373ebbaa8acb476e46c0ff38b23bef', 'I7C2G_ELEMENT_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('app/windows/ElementEquipTujianWindow.lua', '4370861c2d9d9dd15c25850e59e06aaa7d86900e6f165138e1e865552660e5c4', 'I7C2G_ELEMENT_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('app/common/tables/ElementEquipTable.lua', '1c300da385fb90ebf1382f23b5823e72a7e29f3fde716cf08618901fe712c8b2', 'I7C2G_ELEMENT_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('app/common/tables/ElementStrthTable.lua', '00fa4a0230da91baf3754d2289ef55ec32626c988855932dcb86bbe16805d184', 'I7C2G_ELEMENT_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/element_equip.lua', '900359ae27727e8f1ee1a926fefc2c5dc47c1a1114ccf5bf599be76b12753d52', 'I7C2G_ELEMENT_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/element_strth.lua', '58af04513e1ae433987c47d09a4438a0ae9f46bc37c9f41f20efc40f8899c1a4', 'I7C2G_ELEMENT_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/element_equipment.lua', '994bb7c9f5c6f49a4cc47309b0f39639028e3dcf30fc8ccfc8cb67398a2d7cd7', 'I7C2G_ELEMENT_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/element_strengthen.lua', '02e08788823297e8945866c4ef86c4cc58dce07076e710a5b72063271671b0a9', 'I7C2G_ELEMENT_SOURCE_BOUNDARY'))
 from inscription_content import build_inscription
+from element_content import build_element
 from course_content import build_course
 class CompileError(ValueError):
     pass
@@ -2015,6 +2025,7 @@ def build_artifacts(blobs: dict[str, SourceBlob], archive_sha256: str) -> dict[s
     from dorm_content import build_dorm
     dorm_artifact=build_dorm(blobs,parse_generated_lua_table,pipe_ints,hero_artifact["templates"],partner_keys,partner_rows,super_keys,super_rows,indexed_field,items,CompileError)
     artifacts = {
+        "element_input_catalog.json":build_element(blobs,parse_generated_lua_table,items),
         "inscription_input_catalog.json":build_inscription(blobs,parse_generated_lua_table,items),
         "course_input_catalog.json":course_artifact,
         "book_input_catalog.json":book_artifact,

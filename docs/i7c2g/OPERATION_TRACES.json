@@ -1,0 +1,125 @@
+{
+  "status": "DESIGNED_IMPLEMENTATION_AUTHORIZED_NOT_STARTED",
+  "operations": [
+    {
+      "mid": 2849,
+      "name": "Equip",
+      "request_keys": [
+        "partner_id",
+        "equip_id",
+        "equip_pos"
+      ],
+      "effects": "Bound transfer or consume one unbound I5 stack; retain replaced item in backup",
+      "source": "app/model/ElementEquip.lua + app/windows/ElementEquipWindow.lua",
+      "contract": "I7C2G_ELEMENT_INPUT_LIFECYCLE",
+      "owner": "ElementEquipment with typed Character/Content/I5 ports",
+      "transaction": "actor/player/Character400/410/Element560/570 then planned I5 suffix; same caller Tx",
+      "receipt": "retained Element lane + semantic command receipt; original operation proof before new admission",
+      "response": "four current pipe fields except backpack-only empty callback; no duplicate local reward/debit sideband",
+      "reload": "MID1/roster four numeric arrays, existing I5 backpack",
+      "consumer": "ELEMENT_INPUTS -> I7C3B; coherent live Hero scope",
+      "required_proof": [
+        "rollback",
+        "race/concurrency",
+        "unknown positive/negative",
+        "replay/restart",
+        "source callback and reload"
+      ]
+    },
+    {
+      "mid": 2850,
+      "name": "Enhance",
+      "request_keys": [
+        "partner_id",
+        "equip_id"
+      ],
+      "effects": "Debit exact source material vector; increment actual active/backup level once",
+      "source": "app/model/ElementEquip.lua + app/windows/ElementEquipWindow.lua",
+      "contract": "I7C2G_ELEMENT_INPUT_LIFECYCLE",
+      "owner": "ElementEquipment with typed Character/Content/I5 ports",
+      "transaction": "actor/player/Character400/410/Element560/570 then planned I5 suffix; same caller Tx",
+      "receipt": "retained Element lane + semantic command receipt; original operation proof before new admission",
+      "response": "four current pipe fields except backpack-only empty callback; no duplicate local reward/debit sideband",
+      "reload": "MID1/roster four numeric arrays, existing I5 backpack",
+      "consumer": "ELEMENT_INPUTS -> I7C3B; coherent live Hero scope",
+      "required_proof": [
+        "rollback",
+        "race/concurrency",
+        "unknown positive/negative",
+        "replay/restart",
+        "source callback and reload"
+      ]
+    },
+    {
+      "mid": 2851,
+      "name": "Unload",
+      "request_keys": [
+        "partner_id",
+        "equip_pos"
+      ],
+      "effects": "Move exact active item/level into backup, no I5 refund",
+      "source": "app/model/ElementEquip.lua + app/windows/ElementEquipWindow.lua",
+      "contract": "I7C2G_ELEMENT_INPUT_LIFECYCLE",
+      "owner": "ElementEquipment with typed Character/Content/I5 ports",
+      "transaction": "actor/player/Character400/410/Element560/570 then planned I5 suffix; same caller Tx",
+      "receipt": "retained Element lane + semantic command receipt; original operation proof before new admission",
+      "response": "four current pipe fields except backpack-only empty callback; no duplicate local reward/debit sideband",
+      "reload": "MID1/roster four numeric arrays, existing I5 backpack",
+      "consumer": "ELEMENT_INPUTS -> I7C3B; coherent live Hero scope",
+      "required_proof": [
+        "rollback",
+        "race/concurrency",
+        "unknown positive/negative",
+        "replay/restart",
+        "source callback and reload"
+      ]
+    },
+    {
+      "mid": 2852,
+      "name": "DestroyBound",
+      "request_keys": [
+        "partner_id",
+        "equip_id"
+      ],
+      "effects": "Remove one actual active/backup binding and grant level-qualified source refunds",
+      "source": "app/model/ElementEquip.lua + app/windows/ElementEquipWindow.lua",
+      "contract": "I7C2G_ELEMENT_INPUT_LIFECYCLE",
+      "owner": "ElementEquipment with typed Character/Content/I5 ports",
+      "transaction": "actor/player/Character400/410/Element560/570 then planned I5 suffix; same caller Tx",
+      "receipt": "retained Element lane + semantic command receipt; original operation proof before new admission",
+      "response": "four current pipe fields except backpack-only empty callback; no duplicate local reward/debit sideband",
+      "reload": "MID1/roster four numeric arrays, existing I5 backpack",
+      "consumer": "ELEMENT_INPUTS -> I7C3B; coherent live Hero scope",
+      "required_proof": [
+        "rollback",
+        "race/concurrency",
+        "unknown positive/negative",
+        "replay/restart",
+        "source callback and reload"
+      ]
+    },
+    {
+      "mid": 2853,
+      "name": "DestroyBackpack",
+      "request_keys": [
+        "equip_id"
+      ],
+      "effects": "Consume one corresponding I5 item; grant level0 source refunds",
+      "source": "app/model/ElementEquip.lua + app/windows/ElementEquipWindow.lua",
+      "contract": "I7C2G_ELEMENT_INPUT_LIFECYCLE",
+      "owner": "ElementEquipment with typed Character/Content/I5 ports",
+      "transaction": "actor/player/Character400/410/Element560/570 then planned I5 suffix; same caller Tx",
+      "receipt": "retained Element lane + semantic command receipt; original operation proof before new admission",
+      "response": "four current pipe fields except backpack-only empty callback; no duplicate local reward/debit sideband",
+      "reload": "MID1/roster four numeric arrays, existing I5 backpack",
+      "consumer": "ELEMENT_INPUTS -> I7C3B; coherent live Hero scope",
+      "required_proof": [
+        "rollback",
+        "race/concurrency",
+        "unknown positive/negative",
+        "replay/restart",
+        "source callback and reload"
+      ]
+    }
+  ]
+}

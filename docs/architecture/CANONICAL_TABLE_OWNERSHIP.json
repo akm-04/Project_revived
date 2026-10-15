@@ -2783,6 +2783,72 @@
         "internal/adapters/postgres/inscriptionstore/"
       ],
       "write_exceptions": []
+    },
+    "content_element_input_catalogs": {
+      "allowed_query_owners": [
+        "content-registry"
+      ],
+      "allowed_read_paths": [
+        "sql/content/",
+        "internal/adapters/postgres/contentstore/",
+        "internal/adapters/postgres/contentqueries/"
+      ],
+      "allowed_write_paths": [
+        "sql/content/",
+        "internal/adapters/postgres/contentstore/",
+        "internal/adapters/postgres/contentqueries/"
+      ],
+      "migration": "migrations/00054_i7c2g_element_inputs.sql",
+      "owner": "content-registry",
+      "write_exceptions": []
+    },
+    "player_element_roots": {
+      "owner": "elementequipment",
+      "migration": "migrations/00054_i7c2g_element_inputs.sql",
+      "allowed_query_owners": [
+        "elementequipment"
+      ],
+      "allowed_read_paths": [
+        "sql/elementequipment/",
+        "internal/adapters/postgres/elementstore/"
+      ],
+      "allowed_write_paths": [
+        "sql/elementequipment/",
+        "internal/adapters/postgres/elementstore/"
+      ],
+      "write_exceptions": []
+    },
+    "player_element_heroes": {
+      "owner": "elementequipment",
+      "migration": "migrations/00054_i7c2g_element_inputs.sql",
+      "allowed_query_owners": [
+        "elementequipment"
+      ],
+      "allowed_read_paths": [
+        "sql/elementequipment/",
+        "internal/adapters/postgres/elementstore/"
+      ],
+      "allowed_write_paths": [
+        "sql/elementequipment/",
+        "internal/adapters/postgres/elementstore/"
+      ],
+      "write_exceptions": []
+    },
+    "player_element_admissions": {
+      "owner": "elementequipment",
+      "migration": "migrations/00054_i7c2g_element_inputs.sql",
+      "allowed_query_owners": [
+        "elementequipment"
+      ],
+      "allowed_read_paths": [
+        "sql/elementequipment/",
+        "internal/adapters/postgres/elementstore/"
+      ],
+      "allowed_write_paths": [
+        "sql/elementequipment/",
+        "internal/adapters/postgres/elementstore/"
+      ],
+      "write_exceptions": []
     }
   }
 }
