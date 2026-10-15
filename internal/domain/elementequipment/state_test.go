@@ -14,7 +14,7 @@ func catalog(t *testing.T) elem.Catalog {
 	if e != nil {
 		t.Fatal(e)
 	}
-	return c.ElementInputs
+	return elem.Catalog{SchemaVersion: c.ElementInputs.SchemaVersion, PolicyID: c.ElementInputs.PolicyID, Tables: c.ElementInputs.Tables}
 }
 func TestSourceRationalRatesBackupIsolationAndExclusiveCount(t *testing.T) {
 	c := catalog(t)
@@ -102,8 +102,8 @@ func FuzzSourceBattleValueExactAndLevelBounded(f *testing.F) {
 		f.Fatal(e)
 	}
 	f.Fuzz(func(t *testing.T, id, l int64) {
-		v, _, e := c.ElementInputs.BattleValue(id, l)
-		_, exists := c.ElementInputs.Item(id)
+		v, _, e := (elem.Catalog{SchemaVersion: c.ElementInputs.SchemaVersion, PolicyID: c.ElementInputs.PolicyID, Tables: c.ElementInputs.Tables}).BattleValue(id, l)
+		_, exists := (elem.Catalog{SchemaVersion: c.ElementInputs.SchemaVersion, PolicyID: c.ElementInputs.PolicyID, Tables: c.ElementInputs.Tables}).Item(id)
 		if !exists || l < 0 || l > 10 {
 			if e == nil {
 				t.Fatal("out of source domain")

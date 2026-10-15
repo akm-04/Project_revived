@@ -478,3 +478,55 @@ func TestI7C2GAdmissionRechecksChangedEligibilityBeforeSpend(t *testing.T) {
 		t.Fatal("stale admission spent values")
 	}
 }
+
+// Conditional future Character removal under the inherited owner lock prefix;
+// this qualifies the guard seam and adds no retirement endpoint.
+func TestI7C2GAbsentReferencePreflightRacesFirstBinding(t *testing.T) {
+	p := pool(t)
+	a, _, s := elementFixture(t, p)
+	guard := elementstore.Store{}
+	ref := character.HeroRef{PlayerID: a.PlayerID, PartnerID: 1}
+	plan, e := guard.PreflightHeroRemovalTx(ctx, p, ref)
+	if e != nil || len(plan.Locks) != 1 || plan.Locks[0].DomainRank != elem.RootLockRank {
+		t.Fatal("absent preflight omitted owner lock", plan, e)
+	}
+	tr, e := p.Begin(ctx, tx.Options{Isolation: tx.Serializable})
+	if e != nil {
+		t.Fatal(e)
+	}
+	defer tr.Rollback(ctx)
+	if _, e = (characterstore.Store{}).LockRootTx(ctx, tr, a.PlayerID); e != nil {
+		t.Fatal(e)
+	}
+	if _, e = (characterstore.Store{}).LockHeroByPartnerIDTx(ctx, tr, a.PlayerID, 1); e != nil {
+		t.Fatal(e)
+	}
+	if e = guard.LockReferenceGuardKeyTx(ctx, tr, plan.Locks[0]); e != nil {
+		t.Fatal(e)
+	}
+	done := make(chan error, 1)
+	go func() {
+		_, e := s.Command(ctx, a, app.Command{Family: app.Equip, PartnerID: 1, EquipID: 7, Position: 2}, op())
+		done <- e
+	}()
+	if e = guard.ValidateHeroRemovalLockedTx(ctx, tr, ref, plan); e != nil {
+		t.Fatal(e)
+	}
+	if _, e = tr.Exec(ctx, `DELETE FROM player_heroes WHERE player_id=$1 AND partner_id=$2`, int64(a.PlayerID), int64(1)); e != nil {
+		t.Fatal(e)
+	}
+	if e = tr.Commit(ctx); e != nil {
+		t.Fatal(e)
+	}
+	select {
+	case e := <-done:
+		if !errors.Is(e, app.ErrRetired) {
+			t.Fatal("retired identity rebound", e)
+		}
+	case <-time.After(10 * time.Second):
+		t.Fatal("binding failed to settle after removal")
+	}
+	if dormStack(t, p, a, 20001413) != 100 || elementFacet(t, p, a, 1).Facts.Slots[1] != 0 {
+		t.Fatal("orphan binding or debit")
+	}
+}
