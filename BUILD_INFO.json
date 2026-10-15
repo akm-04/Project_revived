@@ -528,7 +528,7 @@
   "sbom_created_at": "2026-10-09T10:31:06Z",
   "schema_version": 1,
   "snapshot": "D10 Publication immutable revisions/items, canonical scope and PostgreSQL visibility, read markers, source-shaped7/1537/8193/8194; inherited8 accepted656 preserved.",
-  "stage": "I7C-2F_CONDITIONAL_INSCRIPTION_CORE_F2",
+  "stage": "I7C-2F_CONDITIONAL_INSCRIPTION_CORE_F3",
   "status": "FROZEN_NOT_ACCEPTED_EXACT_QUALIFICATION_PENDING",
   "target_go": "1.27.1",
   "target_postgresql": "18.6",

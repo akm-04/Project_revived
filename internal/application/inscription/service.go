@@ -24,7 +24,7 @@ import (
 	"time"
 )
 
-const LifecyclePolicy = "COURSE_INPUT_LIFECYCLE_V1"
+const LifecyclePolicy = "INSCRIPTION_INPUT_LIFECYCLE_V1"
 const ResultSchema = "gxb.inscription.command.v1"
 const (
 	Make     = "INSCRIPTION_MAKE"
@@ -209,7 +209,7 @@ func (s Service) proof(ctx context.Context, q tx.Queryer, d Admission) (Result, 
 	if e != nil {
 		return out, true, e
 	}
-	if r.Validate() != nil || r.Identity != receiptID(d) || r.RequestFingerprint != fp || r.OperationClass != "I7C2F_COURSE_INPUT" || r.ResultSchema != ResultSchema || r.ActorAccountUID != d.Actor.AccountUID || r.ContextID != d.Actor.Context || r.PolicyVersion != LifecyclePolicy || r.OperationStartedAt.UnixMicro() != d.Operation.StartedAt.UnixMicro() {
+	if r.Validate() != nil || r.Identity != receiptID(d) || r.RequestFingerprint != fp || r.OperationClass != "I7C2F_INSCRIPTION_INPUT" || r.ResultSchema != ResultSchema || r.ActorAccountUID != d.Actor.AccountUID || r.ContextID != d.Actor.Context || r.PolicyVersion != LifecyclePolicy || r.OperationStartedAt.UnixMicro() != d.Operation.StartedAt.UnixMicro() {
 		return out, true, ErrProof
 	}
 	dec := json.NewDecoder(bytes.NewReader(r.ResultPayload))
@@ -243,7 +243,7 @@ func (s Service) putReceipt(ctx context.Context, t tx.Tx, d Admission, out Resul
 	if e != nil {
 		return e
 	}
-	r, e := receipt.New(d.Operation, receiptID(d), "I7C2F_COURSE_INPUT", ResultSchema, raw, fp)
+	r, e := receipt.New(d.Operation, receiptID(d), "I7C2F_INSCRIPTION_INPUT", ResultSchema, raw, fp)
 	if e != nil {
 		return e
 	}
