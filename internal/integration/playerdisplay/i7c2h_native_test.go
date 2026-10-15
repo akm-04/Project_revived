@@ -384,3 +384,15 @@ func TestI7C2HProgramLimitIDsAndFunctionEligibilityFacts(t *testing.T) {
 		t.Fatal("missing facet fabricated zero")
 	}
 }
+
+func TestI7C2HQualifiedHeroKindComesFromPinnedContent(t *testing.T) {
+	p := pool(t)
+	a, rev, s := spiritFixture(t, p)
+	v, e := s.HeroSpiritInputsTx(ctx, p, app.InputScope{Player: a.PlayerID, ContentRevision: rev, ObservedAt: time.Now()}, 1)
+	if e != nil {
+		t.Fatal(e)
+	}
+	if e = v.Hero.Validate(); e != nil || v.Hero.Kind != character.NormalHero {
+		t.Fatal("qualified provider omitted pinned HeroKind", v.Hero.Kind, e)
+	}
+}

@@ -105,6 +105,13 @@ func (s Service) HeroSpiritInputsTx(ctx context.Context, q tx.Queryer, scope Inp
 	if e != nil {
 		return out, e
 	}
+	h.Kind, e = s.Content.HeroKindTx(ctx, q, scope.ContentRevision, h.TableID)
+	if e != nil {
+		return out, e
+	}
+	if e = h.Validate(); e != nil {
+		return out, e
+	}
 	var f d.HeroRoot
 	for _, v := range fs {
 		if v.PartnerID == id {
