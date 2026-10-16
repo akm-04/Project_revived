@@ -102,7 +102,7 @@ func TestR3BAbsoluteHandshakeDeadlineSlowloris(t *testing.T) {
 	defer client.Close()
 	done := make(chan error, 1)
 	start := time.Now()
-	go func() { done <- srv.ServeConn(context.Background(), server) }()
+	go func() { defer server.Close(); done <- srv.ServeConn(context.Background(), server) }()
 	frame := loginFrame(t)
 	for i := 0; i < 4; i++ {
 		_, _ = client.Write(frame[i : i+1])

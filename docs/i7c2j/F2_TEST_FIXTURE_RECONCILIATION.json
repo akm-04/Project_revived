@@ -1,0 +1,17 @@
+{
+  "status": "RECONCILED_EXISTING_REALTIME_TEST_FIXTURE_PEER_LIFETIME_RACE_NO_PRODUCT_CHANGE",
+  "classification": "RUNTIME_OBSERVED + IMPLEMENTATION_DECISION",
+  "counterexample": "ExactF1 all-unit stockruntime hung; SIGQUIT captured TestR3BAbsoluteHandshakeDeadlineSlowloris at net.Pipe.Write line108 after server goroutine already exited.",
+  "diagnostic": "evidence/all-unit.log",
+  "interruption": "Only hung stockruntime child received SIGQUIT after >2minutes to preserve stack; original aggregate remainsFAIL/interrupted, not productpass",
+  "cause": "Test owns net.Pipe server but leaves it open when ServeConn returns; scheduling may move fourth byte after absolute70ms read timeout so clientWrite blocks before existingselecttimeout.",
+  "repair": "Defer server.Close in owning test goroutine, same lifetime contract as startAuthenticated helper. All70/180/250ms timeout assertions retained; no productruntime/timeouts changed.",
+  "before_sha256": "81c5f6028eec09dd589461cd3260179a60f64a11a739528d398421dfee2346fd",
+  "after_sha256": "396c89828fb63e13e3fa25ec1afd89a7f300b6356ad271be63fd31dda903e3cc",
+  "requalification": [
+    "30x exactslowloris test andrace",
+    "F2 allunit/stockruntime-race/static identity",
+    "Bound unchangedF1 runtime/native/schema/content tests"
+  ],
+  "candidate_reuse": "Only testfile/docs/snapshot willchange; preserve exactF1failedaggregate and successfulsubjectlogs. No compatibilitycopy andno weakenedassertion."
+}
