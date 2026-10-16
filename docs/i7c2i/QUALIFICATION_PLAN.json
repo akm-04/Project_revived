@@ -1,0 +1,94 @@
+{
+  "status": "FROZEN_EXACT_R2_SCOPED_MATRIX",
+  "checks": [
+    {
+      "id": "I00",
+      "check": "GenuinecanonicalI5EXPPlayer100producer; Player79deniedand80admittedsourcepanelthreshold; contradictorylevelEXP/stale unavailable failclosed beforeadmission/cost; retainedproofbeforecurrentavailability"
+    },
+    {
+      "id": "I01",
+      "check": "exactsrc64/old/V1 boundaries and currenttwoactualcallers"
+    },
+    {
+      "id": "I02",
+      "check": "all3stages/5attrs cumulative evaluation, invalidstate failsclosed"
+    },
+    {
+      "id": "I03",
+      "check": "allauthorized ownstones/tickets pluswrongitem/zero/overflow/attr/count/caps"
+    },
+    {
+      "id": "I04",
+      "check": "Normal/Super level/star exactbefore/at gates, actual stage1->2->3"
+    },
+    {
+      "id": "I05",
+      "check": "onecostperpoint/noextrareward, fullcost/facet/receiptrollback"
+    },
+    {
+      "id": "I06",
+      "check": "retainedsameUUID fingerprint/actor/content/time proof andpendinglane recovery"
+    },
+    {
+      "id": "I07",
+      "check": "differentpriorHero pendinglane resolution withpreplannedownerlocks"
+    },
+    {
+      "id": "I08",
+      "check": "concurrentsameUUID anddistinctadd/stage-race withoutdoublecost/overcap"
+    },
+    {
+      "id": "I09",
+      "check": "SIGKILLafteradmit/postrollback/postcommit andUNKNOWN resolvers"
+    },
+    {
+      "id": "I10",
+      "check": "strictwiretypes/duplicates/requestkeys andHTTPerror callbacks"
+    },
+    {
+      "id": "I11",
+      "check": "actualAPI2608/2609/MID1/MID49/restart currentprojection"
+    },
+    {
+      "id": "I12",
+      "check": "freshacquisition andpreparedGrantfacet, missing-onlydeploybackfill"
+    },
+    {
+      "id": "I13",
+      "check": "retiredHero rejected; retainedfacet/IDnonreuse; foreignread isolation"
+    },
+    {
+      "id": "I14",
+      "check": "CA8caller-witness coherentinputs, correctHeroKind andcopies"
+    },
+    {
+      "id": "I15",
+      "check": "newcontentcatalog manifests/prior31payloads/all1..55migrationbytes unchanged"
+    },
+    {
+      "id": "I16",
+      "check": "fresh56/populated55upgrade/repeateddeployment/restore/replayrowhashes"
+    },
+    {
+      "id": "I17",
+      "check": "affectedCharacter/I5/Content/arch/protocol unit/race/vet/source andboundedregression"
+    },
+    {
+      "id": "I18",
+      "check": "meaningfuldomainfuzz andexactsourcecontentvectors"
+    },
+    {
+      "id": "I19",
+      "check": "portableR2canonicalpins/offlinemodules/security subject"
+    },
+    {
+      "id": "I20",
+      "check": "primaryindependentreality/remainingbloodorigin/parentsW2 qualification boundaries"
+    }
+  ],
+  "toolbox": "gxb-backend-v2-e2e-tools-r2-go1.27.2-linux-amd64.zip",
+  "toolbox_sha256": "e4e194c9627929299577364b953b2468d6118fac4283fd8030f10b5a27456c2b",
+  "core_scope": "Canonicalrealappliedstoneprogression andevaluatedcontribution",
+  "full_2i_blood_origin_accepted": false,
+  "amendment": "PLAYER_ELIGIBILITY_RECONCILIATION.json"
+}

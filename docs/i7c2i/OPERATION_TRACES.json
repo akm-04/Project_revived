@@ -1,0 +1,52 @@
+{
+  "status": "IMPLEMENTED_WORKING_GREEN_EXACT_FROZEN_QUALIFICATION_PENDING",
+  "operations": [
+    {
+      "mid": 2608,
+      "name": "BREACH_STONE_ADD",
+      "request_keys": [
+        "partner_id",
+        "attr_id",
+        "add_num",
+        "cost_item"
+      ],
+      "source": "SelfPlayer/HeroMainWindow exactcurrent src64",
+      "contract": "I7C2I_EVOLUTION_INPUT_LIFECYCLE",
+      "owner": "CharacterHero",
+      "effect": "Validate currentrow eligibility and exactauthorizeditem; preparedI5 debit andcanonicalpoints increment atomically",
+      "locks": "actor/player315/Character400/Hero410/I5suffix",
+      "receipt": "Owner admission lane + existing operationUUID receipt/UNKNOWN resolution",
+      "response": "Currentcoherent evo_info after knowncommit",
+      "reload": "MID1/49/typedcoherentprovider",
+      "consumer": "I7C3B EVOLUTION_INPUTS; no fullstat/force claim",
+      "proof": [
+        "realPG/debitrollback/race/UNKNOWN/restart",
+        "wirestrict/reload/currentresponse",
+        "cumulativecontentandfresh/backfill/retired/refisolation"
+      ]
+    },
+    {
+      "mid": 2609,
+      "name": "BREACH_STONE_EVOLVE",
+      "request_keys": [
+        "partner_id"
+      ],
+      "source": "SelfPlayer/HeroMainWindow exactcurrent src64",
+      "contract": "I7C2I_EVOLUTION_INPUT_LIFECYCLE",
+      "owner": "CharacterHero",
+      "effect": "Validate completecurrentrow andnextroweligibility; stage+1 andemptycurrentmap",
+      "locks": "actor/player315/Character400/Hero410/I5suffix",
+      "receipt": "Owner admission lane + existing operationUUID receipt/UNKNOWN resolution",
+      "response": "Currentcoherent evo_info after knowncommit",
+      "reload": "MID1/49/typedcoherentprovider",
+      "consumer": "I7C3B EVOLUTION_INPUTS; no fullstat/force claim",
+      "proof": [
+        "realPG/debitrollback/race/UNKNOWN/restart",
+        "wirestrict/reload/currentresponse",
+        "cumulativecontentandfresh/backfill/retired/refisolation"
+      ]
+    }
+  ],
+  "implementation_started": true,
+  "implementation_complete": true
+}

@@ -170,14 +170,22 @@
       "parser_version": "lua-generated-v18-guild-invite",
       "revision_id": "f5547b0455f529a3869512ef84d493b455947c0598f8e27be62117159e6d385c",
       "scope": "Spirit source catalog only; prior30payloads and I5resources unchanged. Unknownmint/milestone productionpolicies gated."
+    },
+    {
+      "ordinal": 27,
+      "stage": "I7C-2I",
+      "compiler_version": "i7c2i-evolution-inputs",
+      "parser_version": "lua-generated-v18-guild-invite",
+      "revision_id": "e56814fdac078d6b47deb99c96f39c2770e812e0d054bdf146ddd63ee591262f",
+      "scope": "Stone evolution source catalog only; prior31 payloads immutable. Genuine blood mission producer remains qualification-gated."
     }
   ],
   "current": {
-    "ordinal": 26,
-    "stage": "I7C-2H",
-    "compiler_version": "i7c2h-spirit-inputs",
+    "ordinal": 27,
+    "stage": "I7C-2I",
+    "compiler_version": "i7c2i-evolution-inputs",
     "parser_version": "lua-generated-v18-guild-invite",
-    "revision_id": "f5547b0455f529a3869512ef84d493b455947c0598f8e27be62117159e6d385c",
-    "scope": "Spirit source catalog only; prior30payloads and I5resources unchanged. Unknownmint/milestone productionpolicies gated."
+    "revision_id": "e56814fdac078d6b47deb99c96f39c2770e812e0d054bdf146ddd63ee591262f",
+    "scope": "Stone evolution source catalog only; prior31 payloads immutable. Genuine blood mission producer remains qualification-gated."
   }
 }

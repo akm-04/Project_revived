@@ -83,6 +83,8 @@ type PrivilegeSnapshotProvider interface {
 	SnapshotTx(context.Context, tx.Queryer, identity.PlayerID, time.Time) (PrivilegeSnapshot, error)
 }
 
+// Announce receives newly inserted eligibility facts for this transition.
+// Existing eligibility is durable and is not a new announcement on a later grant.
 type FunctionAnnouncementProvider interface {
 	ProviderRevision() string
 	Announce(context.Context, identity.PlayerID, FunctionGatePolicy, []player.FunctionEligibility) ([]int64, error)

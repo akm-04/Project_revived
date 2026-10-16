@@ -28,6 +28,7 @@ type LibraryRosterOverlay interface {
 	OverlayRosterTx(context.Context, tx.Queryer, identity.ActorContext, string, time.Time, map[string]any) error
 }
 type HeroBootstrapProjection struct {
+	Evolution   LibraryRosterOverlay
 	Course      LibraryRosterOverlay
 	Element     LibraryRosterOverlay
 	Spirit      LibraryRosterOverlay
@@ -140,6 +141,11 @@ func (p HeroBootstrapProjection) OverlayMID1(ctx context.Context, q tx.Queryer, 
 	}
 	if p.Element != nil {
 		if err = p.Element.OverlayRosterTx(ctx, q, actor, revision, observedAt, body); err != nil {
+			return err
+		}
+	}
+	if p.Evolution != nil {
+		if err = p.Evolution.OverlayRosterTx(ctx, q, actor, revision, observedAt, body); err != nil {
 			return err
 		}
 	}

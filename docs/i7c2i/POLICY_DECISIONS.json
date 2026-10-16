@@ -1,0 +1,19 @@
+{
+  "status": "ADOPTED_EXPLICIT_RECONSTRUCTION_POLICY_UNDER_CURRENT_USER_DESIGN_IMPLEMENTATION_AUTHORITY",
+  "policy_id": "C2I_V1_STONE_LIFECYCLE_V2",
+  "classification": "IMPLEMENTATION_DECISION",
+  "authority": "Current direct user authorization of research/design/implementation + project-director policy adjudication within source contracts",
+  "initialization": {
+    "fresh": "Stage1 and empty allocated map as explicit V1 preservation policy",
+    "legacy": "Missing-only schema<=55 V2 facets seeded under same named policy; never overwrite extant progression or infer original server truth",
+    "original_server_initial_state": "UNKNOWN",
+    "source": "V1 hero_repository.py:225-226; current Normal/Super default1 corroborates wire shape only"
+  },
+  "allocation": "Positive add_num, current-stage attr, count<=remaining per-attribute limit, Hero current row level/star met. One of own source stone or explicitly authorized ticket items consumes one per point. Exact cumulative integer coefficients, no RNG.",
+  "advance": "Nonmaximum stage; all current attrs exactly full; meet next-stage level/star; stage+1 and empty current points; no invented mana or extra cost.",
+  "wire": "Exact source request fields and evo_info response. V2 HTTP400/503 failure envelope prevents success callback; do not copy V1 HTTP200-error workaround or client-local debit into canonical reward projection.",
+  "replay": "Retained semantic operation receipt plus owner pending lane: stable actor/content/policy/DecisionAt/entropy, no blind retry on UNKNOWN. New identical stock packet after terminal completion may be a new occurrence; no wire exactly-once claim.",
+  "scope": "Stone evolution contributions only; blood mission origin route retained separately; all prior Normal16/2F/2H/parent/W2 gates unchanged",
+  "player_eligibility": "CanonicalPlayerlevel>=firststagerow.level80, underqualifiedI5progression andsamepinnedcontent/time; sourcepanelgate preserved. ActualI5EXPGrantsupplieslevel, no capoverride.",
+  "amendment": "PLAYER_ELIGIBILITY_RECONCILIATION.json"
+}

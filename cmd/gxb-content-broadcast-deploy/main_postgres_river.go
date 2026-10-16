@@ -26,6 +26,7 @@ import (
 	appdorm "gxb.local/backend/v2/internal/application/dormhouse"
 	appelement "gxb.local/backend/v2/internal/application/elementequipment"
 	gen "gxb.local/backend/v2/internal/application/generation"
+	appevolution "gxb.local/backend/v2/internal/application/heroevolution"
 	appinscription "gxb.local/backend/v2/internal/application/inscription"
 	applib "gxb.local/backend/v2/internal/application/librarylocal"
 	appspirit "gxb.local/backend/v2/internal/application/spirit"
@@ -87,6 +88,9 @@ func deploy() error {
 	}
 	if e = appelement.RunBackfill(c, gen.TimedRunner{Binder: gen.Binder{Time: postgres.AuthoritativeTime{Queryer: p}}, Runner: service.Runner}, characterstore.Store{}, elementstore.Store{}, bundle.RevisionID(), op); e != nil {
 		log.Fatal(e)
+	}
+	if e = appevolution.RunBackfill(c, gen.TimedRunner{Binder: gen.Binder{Time: postgres.AuthoritativeTime{Queryer: p}}, Runner: service.Runner}, characterstore.Store{}, characterstore.EvolutionStore{}, op); e != nil {
+		return e
 	}
 	if e = appspirit.RunBackfill(c, gen.TimedRunner{Binder: gen.Binder{Time: postgres.AuthoritativeTime{Queryer: p}}, Runner: service.Runner}, characterstore.Store{}, spiritstore.Store{}, bundle.RevisionID(), op); e != nil {
 		return e

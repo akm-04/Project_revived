@@ -511,7 +511,7 @@ func (s Service) applyPreparedGrantTx(ctx context.Context, t tx.Tx, actor identi
 					functionChanged = true
 				}
 			}
-			announced, err := s.Functions.Announce(ctx, plan.PlayerID, *pf.FunctionPolicy, eligible)
+			announced, err := s.Functions.Announce(ctx, plan.PlayerID, *pf.FunctionPolicy, newEligible)
 			if err != nil {
 				return GrantResult{}, err
 			}

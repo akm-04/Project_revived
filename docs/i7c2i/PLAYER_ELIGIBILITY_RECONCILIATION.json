@@ -1,0 +1,27 @@
+{
+  "status": "SOURCE_DISCOVERY_RECONCILED_AFFECTED_IMPLEMENTATION_PAUSED_UNTIL_PASS708_AMENDMENT",
+  "classification": "SOURCE_FACT + IMPLEMENTATION_DECISION",
+  "evidence": [
+    "Exact src64 HeroMainWindow.lua:909-927 button_breach checks SelfPlayer.lev against StoneEvolution.level(1)=80",
+    "SelfPlayer.lua:127 lev from canonicalparams.lev; maxTeamLev is separateparams.max_lev",
+    "Existingdomain/player ProgressionPolicy.MaxLevel=lenRows; qualifiedsource100rows"
+  ],
+  "finding": "Source panel has Player level80 eligibility in addition to Hero perstage level/star. Original V1 advancedrepository omittedthis. Workingcommands previouslyacceptedPlayer1 fixture; thisdoesnotqualify live selectedproducer.",
+  "counterexample": "Prior actualAPI workingtest admittedsource2608/2609 withfixturePlayer1; now explicitlyDISPROVEN as completeeligibilityproof",
+  "contract_change": "EVOLUTION_INPUT_LIFECYCLE v2, C2I_V1_STONE_LIFECYCLE_V2: sourcepanel Player>=firstStage.Level beforeaffectedcommand admission, revalidate beforecost; requirecanonicalProgression.ValidateState againstsamepinnedcontent, time/version coherent. Known receipt replay beforeprovider availability remains.",
+  "ports": "ExistingI5 ReadProgressionTx + Content.ResolveProgressionPolicyTx, no foreignSQL/newwallet/capoverride",
+  "lock_effects": "Read canonicalprogression in callerSerializable transaction afterplannedCharacterprefix; no progressmutation/newrank. Existingactor/player315 fence andSSI retaincoherentread, I5prepareddebitsuffix unchanged.",
+  "required_requalification": [
+    "Affectedcommand/native/API/fresh/recovery traces onnewV2subject",
+    "GenuineI5PlayerEXP grantto100; denyvalidlevel79 beforeadmission andallowvalid80threshold",
+    "Contradictorylevel/EXP, stale/futureprogression, UNKNOWNandreceipt replay withprogressreader unavailable"
+  ],
+  "authority": "Currentdirectuserfull2Ilifecycle andstandingC1source-triggeredamendmentrule; no additionaluserconfirmation required",
+  "unaffected": [
+    "Purethree-stage point/cumulative arithmetic",
+    "All31priorpayloads/migrations1..55",
+    "AcceptedI5progression100rowpolicy",
+    "Bloodorigin/2F/2G/2H/parentW2gate boundaries"
+  ],
+  "old_working_evidence": "SUPERSEDED_FOR_PLAYER_ELIGIBILITY_NOT_FROZEN_ACCEPTANCE"
+}

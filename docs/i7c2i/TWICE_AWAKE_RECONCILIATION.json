@@ -1,0 +1,31 @@
+{
+  "status": "RECONCILED_SEPARATE_QUALIFICATION_DEPENDENCY_NOT_STONE_MECHANIC",
+  "classification": "SOURCE_FACT",
+  "canonical_raw_fact_owner": "CharacterHero",
+  "producer_owner": "AwakeningMission",
+  "required_output": "HERO_TWICE_AWAKE_ELIGIBILITY",
+  "producer_path": [
+    "TASK_AWAKE_OPEN2738 HERO_TWICE -> stage1",
+    "source special equipment and TAKE_MISSION_AWARD161 -> stage2",
+    "UNLIMIT_START_FIGHT866 and UNLIMIT_FIGHT_RESULT867 -> qualified current mission result",
+    "TAKE_MISSION_AWARD161 -> complete stage3 via CharacterHero typed caller-Tx port"
+  ],
+  "evidence": [
+    "app/model/Task.lua:281-345",
+    "app/windows/HeroMainWindow.lua:6684-6708",
+    "app/windows/TaskAwakeCell.lua:938-992",
+    "app/windows/AwakeTwiceSelectTeamWindow.lua:418",
+    "V1/awakening_mission_service.py"
+  ],
+  "v2_inspection": "Only MID registry symbols and unqualified Inscription eligibility stub; no durable mission owner/result or raw-stage writer",
+  "decision": "Do not implement whole Awakening or Unlimited battle as implicit2I. Keep existing Inscription eligibility fail-closed until actual mission producer qualifies; no synthetic stage3 setter/Qualified fixture substituted.",
+  "topology_amendment": {
+    "provider": "AWAKENING_MISSION_OWNER",
+    "consumer": "I7C-2I",
+    "capability": "QUALIFIED_HERO_TWICE_AWAKE_STAGE",
+    "kind": "OUTPUT_QUALIFICATION_ONLY_NO_WHOLE_MODE_BUILD_BACKEDGE"
+  },
+  "preserve_existing_edge": "I7C-2I -> I7C-2F HERO_TWICE_AWAKE_ELIGIBILITY",
+  "ordinary_star_evolve": "ExistingMID52 unchanged; not stone evolution or blood awakening",
+  "full_2i_product_qualification": false
+}

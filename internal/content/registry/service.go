@@ -225,6 +225,13 @@ func (s Service) EnsureBuiltinInstalled(ctx context.Context, op operation.Contex
 			if gotAppearance != wantAppearance {
 				return fmt.Errorf("content registry: appearance insert count=%d want=%d", gotAppearance, wantAppearance)
 			}
+			gotEvolution, err := s.Repo.InsertEvolutionInputs(tctx, scope.Tx, b)
+			if err != nil {
+				return err
+			}
+			if gotEvolution != 1 {
+				return errors.New("content registry: evolution payload count drift")
+			}
 			gotSpirit, err := s.Repo.InsertSpiritInputs(tctx, scope.Tx, b)
 			if err != nil {
 				return err

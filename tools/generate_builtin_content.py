@@ -21,7 +21,7 @@ from pathlib import Path
 from typing import Any, Iterable
 
 SCHEMA_VERSION = 1
-COMPILER_VERSION = "i7c2h-spirit-inputs"
+COMPILER_VERSION = "i7c2i-evolution-inputs"
 PARSER_VERSION = "lua-generated-v18-guild-invite"
 EXPECTED_SOURCE_ARCHIVE_SHA256 = "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
 SOURCE_PREFIX = "app-assets/output/assets/src_64/"
@@ -120,6 +120,7 @@ SOURCE_MANIFEST.append(('app/windows/HeroGiftBoxWindow.lua','d6065c3d601f5820915
 SOURCE_MANIFEST.append(('app/windows/WhiteAlbumWindow.lua','851a53f588b59d95cfe460f3399ab1a6904fff7714131c358f3c3a73910b6bb9',"LIBRARY_INPUT_SOURCE_AUTHORITY"))
 
 ENABLED_CAPABILITIES = [
+    "EVOLUTION_INPUTS_I7C2I",
     "SPIRIT_INPUTS_I7C2H",
     "ELEMENT_INPUTS_I7C2G", "INSCRIPTION_INPUTS_I7C2F", "COURSE_INPUTS_I7C2E", "BOOK_INPUTS_I7C2D",
     "DORM_INPUTS_I7C2C",
@@ -273,7 +274,12 @@ SOURCE_MANIFEST.append(('data/tables/spirit_strth.lua', '950c5c37792ec2a763d458d
 SOURCE_MANIFEST.append(('data/tables/spirit_suit.lua', '2a0fd1487cabd9945a2298482c90b34e88bc874557a03d3a48a2e3c03b2590d7', 'I7C2H_SPIRIT_SOURCE_BOUNDARY'))
 SOURCE_MANIFEST.append(('app/common/tables/FunctionOpenTable.lua', '0494aed27d769e03924450cd554c759f7245823fa907688dfd9e7766f0481b44', 'I7C2H_SPIRIT_SOURCE_BOUNDARY'))
 from element_content import build_element
+SOURCE_MANIFEST.append(('app/common/tables/StoneEvolutionTable.lua', '427a6f74505f5f221026e3695aa7d2506e3eafcbc71918271e5644b544c9dc3f', 'I7C2I_EVOLUTION_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('app/common/tables/StoneTicketTable.lua', '9e5b079a415f11da581666baf030ee485c726df67d0bacb399629ccf6bc737b0', 'I7C2I_EVOLUTION_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/stone_evolution.lua', '3c1935f5e3c0bbce70b89ccf66ed29b2862bec4554bc97f8bf7b8090b56ae82c', 'I7C2I_EVOLUTION_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/stone_ticket.lua', 'b986ce8fd5ef3fd2934a3213b1b6d7782e122fe25fe702a5b5591c0f074f78ff', 'I7C2I_EVOLUTION_SOURCE_BOUNDARY'))
 from spirit_content import build_spirit
+from evolution_content import build_evolution
 from course_content import build_course
 class CompileError(ValueError):
     pass
@@ -2054,6 +2060,7 @@ def build_artifacts(blobs: dict[str, SourceBlob], archive_sha256: str) -> dict[s
     from dorm_content import build_dorm
     dorm_artifact=build_dorm(blobs,parse_generated_lua_table,pipe_ints,hero_artifact["templates"],partner_keys,partner_rows,super_keys,super_rows,indexed_field,items,CompileError)
     artifacts = {
+        "evolution_input_catalog.json":build_evolution(blobs,parse_generated_lua_table,parse_base64_indexed_lua_table,indexed_field),
         "spirit_input_catalog.json":build_spirit(blobs,parse_generated_lua_table,items),
         "element_input_catalog.json":build_element(blobs,parse_generated_lua_table,items),
         "inscription_input_catalog.json":build_inscription(blobs,parse_generated_lua_table,items),
