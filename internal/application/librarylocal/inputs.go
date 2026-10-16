@@ -75,7 +75,7 @@ func (s Service) HeroLibraryInputsTx(ctx context.Context, q tx.Queryer, scope In
 	if e != nil {
 		return out, e
 	}
-	if scope.ObservedAt.Before(h.UpdatedAt) || scope.ObservedAt.Before(facts.UpdatedAt) || catalog.Feeding.ValidateApplied(facts.Applied) != nil {
+	if scope.ObservedAt.Before(root.UpdatedAt) || scope.ObservedAt.Before(lr.UpdatedAt) || scope.ObservedAt.Before(h.UpdatedAt) || scope.ObservedAt.Before(facts.UpdatedAt) || catalog.Feeding.ValidateApplied(facts.Applied) != nil {
 		return out, lib.ErrUnqualified
 	}
 	bonus, e := facts.FavorBonusBP()
@@ -104,6 +104,9 @@ func (s Service) PlayerCollectionInputsTx(ctx context.Context, q tx.Queryer, sco
 	if e != nil {
 		return out, e
 	}
+	if scope.ObservedAt.Before(hr.UpdatedAt) || scope.ObservedAt.Before(lr.UpdatedAt) {
+		return out, lib.ErrUnqualified
+	}
 	out.PopulationVersion = hr.StateVersion
 	out.LibraryRootVersion = lr.StateVersion
 	heroes, e := s.Heroes.ListHeroesTx(ctx, q, scope.Player)
@@ -126,7 +129,7 @@ func (s Service) PlayerCollectionInputsTx(ctx context.Context, q tx.Queryer, sco
 		if e != nil {
 			return out, e
 		}
-		if scope.ObservedAt.Before(f.UpdatedAt) {
+		if scope.ObservedAt.Before(h.UpdatedAt) || scope.ObservedAt.Before(f.UpdatedAt) {
 			return out, lib.ErrUnqualified
 		}
 		if f.Married {

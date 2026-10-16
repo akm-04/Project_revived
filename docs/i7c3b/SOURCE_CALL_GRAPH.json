@@ -1,0 +1,20 @@
+{
+  "stage": "I7C-3B",
+  "traces": [
+    {
+      "operation": "read owned Pet stats",
+      "path": "privacy-checked caller -> CA8 scope -> OwnedPet/base+equipment+practice+appearance -> input content/skill template -> pure leaf materializers ->3A Engine -> detached facet",
+      "effects": "zero writes/locks/receipts; missing owner fails; same content/time/target"
+    },
+    {
+      "operation": "read owned Normal/Super stats",
+      "path": "same plus2A raw skills + mandatory raw awakening attestation +2B..2J typed observations -> source view materialization ->3AEngine",
+      "effects": "zero writes; check Hero identity across every read; actual missing producer remains unavailable"
+    },
+    {
+      "operation": "recovery/replay",
+      "path": "live pure read reread under new coherent scope; no durable stat state. Historical replay stays future5A immutable input",
+      "effects": "no retroactive report backfill or current-state replay"
+    }
+  ]
+}

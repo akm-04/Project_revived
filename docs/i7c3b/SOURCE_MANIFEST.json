@@ -1,0 +1,49 @@
+{
+  "source_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+  "files": [
+    {
+      "path": "app/model/NormalHero.lua",
+      "sha256": "125183556caeecc182bf0702dd1f95160c8ba1666a3b97fbb8a7261d30ae0ac9"
+    },
+    {
+      "path": "app/model/SuperHero.lua",
+      "sha256": "b127c2cbef327d3142031bf30daa0af1b45997c6da82fba946d641a86783d622"
+    },
+    {
+      "path": "app/model/Pet.lua",
+      "sha256": "214f4dcd93d0e494408d14a225810134c2e72a0dedd18a935a27dc62e0c00660"
+    },
+    {
+      "path": "app/model/Item.lua",
+      "sha256": "af46a18cad788aa903464237821262ffc51fc73db5bb666287407c90922248f5"
+    },
+    {
+      "path": "app/model/PersonDisplay.lua",
+      "sha256": "022fcbf39167ac9197ce5034b32fd5833016742744ad3de118ceacf6f808cfb8"
+    },
+    {
+      "path": "app/windows/PersonDisplayWindow.lua",
+      "sha256": "22a0c02172eabec1d9728d18293273c8e2aa9e6c8e5b1a4bf3af2feae14f158c"
+    },
+    {
+      "path": "app/windows/HeroattributWindow.lua",
+      "sha256": "5a650d24f9ed9d31c5a1dc8aff614363c5feb4ce204179972922bfac361ecb2e"
+    },
+    {
+      "path": "app/common/enums.lua",
+      "sha256": "15340bd89fe7c6f150ccfd4a5cd2a2f0e8e73c89dfae9ac3388376a4799901f3"
+    },
+    {
+      "path": "app/common/tables/ItemTable.lua",
+      "sha256": "1f846972f29a55ee2dbb90f2cb9b0124eaeaa90646c3c66644ab66e231c37f00"
+    },
+    {
+      "path": "app/common/tables/SkillTable.lua",
+      "sha256": "0184d2ea9bc63a93438f1f0029e4703e8979afd2101959d5a567f1859bd9befc"
+    },
+    {
+      "path": "app/common/tables/SuperEquipEnhanceTable.lua",
+      "sha256": "ea0a38914be31543315d427e45cb2aaa8fe6abb712d75a6c7d2105e628b65d9e"
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+# I7C-3B public stat composition core
+
+PublicStats composes accepted canonical typed owner observations in a caller-witnessed CA8 repeatable-read or serializable transaction. Content revision, operation, instant, target identity, current template and state versions remain coherent. There is no stat owner table, live clock, nested transaction or foreign owner SQL. Missing, stale, unknown and inactive inputs fail closed. The separate immutable numerical input catalog appends to the prior34 payloads; Content-only migration59 changes no gameplay schema.
+
+Normal Hero, Super Hero and Pet formulas retain source distinctions. Raw skill force levels differ from capped Buff levels. Super's first four skill slots are unconditional. Pet star bonuses, promotion, Fumo labels and force remain separate. Practice contributions already contain raw axes. Book, Course, Library, Dorm, Inscription display/battle, Element normal display, Spirit, Evolution and known Conquer observations use existing owner inputs.
+
+The optional public-profile selected-stat read first applies accepted privacy/selection reads and validates the returned target, model, state, revision, operation and time. It does not activate the entire MID1838 rich response, ten metrics or three history families. Existing CA8 Hero skills unavailable disposition is not retroactively rewritten.
+
+Pet canonical input/producer qualification can stand independently. Hero composition explicitly requires a genuine Character raw twice-awakening attestation; there is currently no production implementation of that port. Native Hero fixtures prove conditional composition, never that missing producer or the prior2F/2G/2H/2J actual origin gates. Replay is rejected by the live provider and remains an immutable5A snapshot obligation. No parent, release, original-server, combat, ranking or physicalW2 parity is claimed.

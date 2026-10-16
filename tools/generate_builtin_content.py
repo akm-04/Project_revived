@@ -21,7 +21,7 @@ from pathlib import Path
 from typing import Any, Iterable
 
 SCHEMA_VERSION = 1
-COMPILER_VERSION = "i7c3a-stat-rules"
+COMPILER_VERSION = "i7c3b-stat-inputs"
 PARSER_VERSION = "lua-generated-v18-guild-invite"
 EXPECTED_SOURCE_ARCHIVE_SHA256 = "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
 SOURCE_PREFIX = "app-assets/output/assets/src_64/"
@@ -120,6 +120,7 @@ SOURCE_MANIFEST.append(('app/windows/HeroGiftBoxWindow.lua','d6065c3d601f5820915
 SOURCE_MANIFEST.append(('app/windows/WhiteAlbumWindow.lua','851a53f588b59d95cfe460f3399ab1a6904fff7714131c358f3c3a73910b6bb9',"LIBRARY_INPUT_SOURCE_AUTHORITY"))
 
 ENABLED_CAPABILITIES = [
+    "STAT_INPUTS_I7C3B",
     "STAT_RULES_I7C3A",
     "CONQUER_INPUTS_I7C2J",
     "EVOLUTION_INPUTS_I7C2I",
@@ -304,7 +305,9 @@ SOURCE_MANIFEST.append(('app/common/tables/TableParser.lua', '98f70cc1337278f233
 SOURCE_MANIFEST.append(('data/tables/attr.lua', '2b1d1fcc48f96a5caf83d938d15da586f62f4f3973cf825cfd9c67f121890aae', 'I7C3A_STAT_SOURCE_BOUNDARY'))
 SOURCE_MANIFEST.append(('data/tables/buff.lua', '2c3ce443dda2e46f405156ea7da92862fadf7aaa173ca8cf729eb1cc2945c886', 'I7C3A_STAT_SOURCE_BOUNDARY'))
 from conquer_content import build_conquer
+SOURCE_MANIFEST.append(('app/common/tables/SuperEquipEnhanceTable.lua', 'ea0a38914be31543315d427e45cb2aaa8fe6abb712d75a6c7d2105e628b65d9e', 'I7C3B_NUMERIC_INPUT_SOURCE'))
 from stat_content import build_stat_rules
+from stat_input_content import build_stat_inputs
 from course_content import build_course
 class CompileError(ValueError):
     pass
@@ -2085,6 +2088,7 @@ def build_artifacts(blobs: dict[str, SourceBlob], archive_sha256: str) -> dict[s
     from dorm_content import build_dorm
     dorm_artifact=build_dorm(blobs,parse_generated_lua_table,pipe_ints,hero_artifact["templates"],partner_keys,partner_rows,super_keys,super_rows,indexed_field,items,CompileError)
     artifacts = {
+        "stat_input_catalog.json":build_stat_inputs(blobs,parse_generated_lua_table,parse_base64_indexed_lua_table,indexed_field,parse_encoded_item_table,parse_encoded_skill_table),
         "stat_rule_catalog.json":build_stat_rules(blobs,parse_generated_lua_table,parse_base64_indexed_lua_table,indexed_field),
         "conquer_input_catalog.json":build_conquer(blobs,parse_generated_lua_table,parse_base64_indexed_lua_table,indexed_field),
         "evolution_input_catalog.json":build_evolution(blobs,parse_generated_lua_table,parse_base64_indexed_lua_table,indexed_field),

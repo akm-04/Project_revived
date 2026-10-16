@@ -612,6 +612,13 @@ func (r repo) InsertCourseInputs(_ context.Context, x tx.Tx, b Bundle) (int64, e
 	return 1, nil
 }
 
+func (r repo) InsertStatInputs(_ context.Context, x tx.Tx, b Bundle) (int64, error) {
+	t := x.(*modelTx)
+	v := t.installed[b.RevisionID()]
+	v.StatInputsCount = 1
+	t.installed[b.RevisionID()] = v
+	return 1, nil
+}
 func (r repo) InsertStatRules(_ context.Context, x tx.Tx, b Bundle) (int64, error) {
 	t := x.(*modelTx)
 	v := t.installed[b.RevisionID()]

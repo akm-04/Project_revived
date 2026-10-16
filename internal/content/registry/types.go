@@ -22,6 +22,7 @@ const (
 )
 
 var supportedCapabilities = [...]string{
+	"STAT_INPUTS_I7C3B",
 	"STAT_RULES_I7C3A",
 	"CONQUER_INPUTS_I7C2J",
 	"EVOLUTION_INPUTS_I7C2I",
@@ -64,6 +65,7 @@ var supportedCapabilities = [...]string{
 }
 
 type Bundle struct {
+	statInputsJSON                            []byte
 	statRulesJSON                             []byte
 	conquerInputsJSON                         []byte
 	evolutionInputsJSON                       []byte
@@ -276,7 +278,12 @@ func LoadBuiltinBundle() (Bundle, error) {
 	if err != nil {
 		return Bundle{}, err
 	}
+	statInputs, err := builtin.GeneratedFile("stat_input_catalog.json")
+	if err != nil {
+		return Bundle{}, err
+	}
 	b := Bundle{
+		statInputsJSON:                         append([]byte(nil), statInputs...),
 		statRulesJSON:                          append([]byte(nil), statRules...),
 		conquerInputsJSON:                      append([]byte(nil), conquerInputs...),
 		evolutionInputsJSON:                    append([]byte(nil), evolutionInputs...),
@@ -350,7 +357,7 @@ func (b Bundle) Validate() error {
 	if b.manifest.SchemaVersion != builtin.SchemaVersion {
 		return fmt.Errorf("content registry: unsupported bundle schema %d", b.manifest.SchemaVersion)
 	}
-	for name, raw := range map[string][]byte{"stat-rules": b.statRulesJSON, "conquer-inputs": b.conquerInputsJSON, "evolution-inputs": b.evolutionInputsJSON, "spirit-inputs": b.spiritInputsJSON, "element-inputs": b.elementInputsJSON, "inscription-inputs": b.inscriptionInputsJSON, "course-inputs": b.courseInputsJSON, "book-inputs": b.bookInputsJSON, "dorm-inputs": b.dormInputsJSON, "library-inputs": b.libraryInputsJSON, "manifest": b.manifestJSON, "resources": b.resourcesJSON, "progression": b.progressionJSON, "functions": b.functionGatesJSON, "objectives": b.objectivesJSON, "hero-core": b.heroCoreJSON, "pet-core": b.petCoreJSON, "pet-acquisition": b.petAcquisitionJSON, "pet-progression": b.petProgressionJSON, "equipment-primitives": b.equipmentPrimitivesJSON, "hero-equipment": b.heroEquipmentJSON, "super-equipment": b.superEquipmentJSON, "hero-fumo": b.heroFumoJSON, "hero-promotion-restoration": b.heroPromotionRestorationJSON, "pet-equipment": b.petEquipmentJSON, "pet-promotion-restoration": b.petPromotionRestorationJSON, "practice": b.practiceJSON, "appearance": b.appearanceJSON, "emoticons": b.emoticonsJSON, "social-gift": b.socialGiftJSON, "guild-invite": b.guildInviteJSON, "guild-broadcast": b.guildBroadcastJSON} {
+	for name, raw := range map[string][]byte{"stat-inputs": b.statInputsJSON, "stat-rules": b.statRulesJSON, "conquer-inputs": b.conquerInputsJSON, "evolution-inputs": b.evolutionInputsJSON, "spirit-inputs": b.spiritInputsJSON, "element-inputs": b.elementInputsJSON, "inscription-inputs": b.inscriptionInputsJSON, "course-inputs": b.courseInputsJSON, "book-inputs": b.bookInputsJSON, "dorm-inputs": b.dormInputsJSON, "library-inputs": b.libraryInputsJSON, "manifest": b.manifestJSON, "resources": b.resourcesJSON, "progression": b.progressionJSON, "functions": b.functionGatesJSON, "objectives": b.objectivesJSON, "hero-core": b.heroCoreJSON, "pet-core": b.petCoreJSON, "pet-acquisition": b.petAcquisitionJSON, "pet-progression": b.petProgressionJSON, "equipment-primitives": b.equipmentPrimitivesJSON, "hero-equipment": b.heroEquipmentJSON, "super-equipment": b.superEquipmentJSON, "hero-fumo": b.heroFumoJSON, "hero-promotion-restoration": b.heroPromotionRestorationJSON, "pet-equipment": b.petEquipmentJSON, "pet-promotion-restoration": b.petPromotionRestorationJSON, "practice": b.practiceJSON, "appearance": b.appearanceJSON, "emoticons": b.emoticonsJSON, "social-gift": b.socialGiftJSON, "guild-invite": b.guildInviteJSON, "guild-broadcast": b.guildBroadcastJSON} {
 		if len(raw) == 0 || !json.Valid(raw) {
 			return fmt.Errorf("content registry: invalid %s JSON", name)
 		}
@@ -362,6 +369,7 @@ func (b Bundle) Validate() error {
 }
 
 func (b Bundle) GuildInviteJSON() []byte     { return append([]byte(nil), b.guildInviteJSON...) }
+func (b Bundle) StatInputsJSON() []byte      { return append([]byte(nil), b.statInputsJSON...) }
 func (b Bundle) StatRulesJSON() []byte       { return append([]byte(nil), b.statRulesJSON...) }
 func (b Bundle) ConquerInputsJSON() []byte   { return append([]byte(nil), b.conquerInputsJSON...) }
 func (b Bundle) EvolutionInputsJSON() []byte { return append([]byte(nil), b.evolutionInputsJSON...) }
@@ -485,6 +493,7 @@ type ActiveSummary struct {
 }
 
 type Verification struct {
+	StatInputsCount                           int64
 	StatRulesCount                            int64
 	ConquerInputsCount                        int64
 	EvolutionInputsCount                      int64
@@ -526,7 +535,7 @@ type Verification struct {
 
 func (v Verification) Matches(b Bundle) bool {
 	r, p, f, o, h, pet, petAcquisition, petProgression, equipmentPrimitives, heroEquipment, superEquipment, heroFumoTargets, heroFumoMaterials, restorationEquipment, restorationFractions, restorationDenominations, petEquipment, petRestorationEquipment, practice, appearance := b.ExpectedCounts()
-	return v.StatRulesCount == 1 && v.ConquerInputsCount == 1 && v.EvolutionInputsCount == 1 && v.SpiritInputsCount == 1 && v.ElementInputsCount == 1 && v.InscriptionInputsCount == 1 && v.CourseInputsCount == 1 && v.BookInputsCount == 1 && v.DormInputsCount == 1 && v.LibraryInputsCount == 1 && v.PlayerDisplayCount == 1 && v.PublicShowcaseCount == 1 && v.PublicProfileCount == 1 && v.GuildInviteCount == 1 && v.GuildBroadcastCount == 1 && v.Exact && v.EmoticonCount == 85 && v.ResourceCount == r && v.ProgressionCount == p && v.FunctionGateCount == f && v.ObjectiveCount == o && v.HeroCount == h && v.PetCount == pet && v.PetAcquisitionCount == petAcquisition && v.PetProgressionCount == petProgression && v.EquipmentPrimitiveCount == equipmentPrimitives && v.HeroEquipmentCount == heroEquipment && v.SuperEquipmentCount == superEquipment && v.HeroFumoTargetCount == heroFumoTargets && v.HeroFumoMaterialCount == heroFumoMaterials && v.HeroPromotionRestorationEquipmentCount == restorationEquipment && v.HeroPromotionRestorationFractionCount == restorationFractions && v.HeroPromotionRestorationDenominationCount == restorationDenominations && v.PetEquipmentCount == petEquipment && v.PetPromotionRestorationEquipmentCount == petRestorationEquipment && v.PracticeCount == practice && v.AppearanceCount == appearance
+	return v.StatInputsCount == 1 && v.StatRulesCount == 1 && v.ConquerInputsCount == 1 && v.EvolutionInputsCount == 1 && v.SpiritInputsCount == 1 && v.ElementInputsCount == 1 && v.InscriptionInputsCount == 1 && v.CourseInputsCount == 1 && v.BookInputsCount == 1 && v.DormInputsCount == 1 && v.LibraryInputsCount == 1 && v.PlayerDisplayCount == 1 && v.PublicShowcaseCount == 1 && v.PublicProfileCount == 1 && v.GuildInviteCount == 1 && v.GuildBroadcastCount == 1 && v.Exact && v.EmoticonCount == 85 && v.ResourceCount == r && v.ProgressionCount == p && v.FunctionGateCount == f && v.ObjectiveCount == o && v.HeroCount == h && v.PetCount == pet && v.PetAcquisitionCount == petAcquisition && v.PetProgressionCount == petProgression && v.EquipmentPrimitiveCount == equipmentPrimitives && v.HeroEquipmentCount == heroEquipment && v.SuperEquipmentCount == superEquipment && v.HeroFumoTargetCount == heroFumoTargets && v.HeroFumoMaterialCount == heroFumoMaterials && v.HeroPromotionRestorationEquipmentCount == restorationEquipment && v.HeroPromotionRestorationFractionCount == restorationFractions && v.HeroPromotionRestorationDenominationCount == restorationDenominations && v.PetEquipmentCount == petEquipment && v.PetPromotionRestorationEquipmentCount == petRestorationEquipment && v.PracticeCount == practice && v.AppearanceCount == appearance
 }
 
 // Repository is the canonical content-registry persistence port. It receives
@@ -551,6 +560,7 @@ type Repository interface {
 	InsertPetPromotionRestoration(context.Context, tx.Tx, Bundle) (int64, error)
 	InsertPractice(context.Context, tx.Tx, Bundle) (int64, error)
 	InsertAppearance(context.Context, tx.Tx, Bundle) (int64, error)
+	InsertStatInputs(context.Context, tx.Tx, Bundle) (int64, error)
 	InsertStatRules(context.Context, tx.Tx, Bundle) (int64, error)
 	InsertConquerInputs(context.Context, tx.Tx, Bundle) (int64, error)
 	InsertEvolutionInputs(context.Context, tx.Tx, Bundle) (int64, error)

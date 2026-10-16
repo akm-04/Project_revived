@@ -194,14 +194,22 @@
       "parser_version": "lua-generated-v18-guild-invite",
       "revision_id": "c320a1a9c430e6fdf79ec162eeead787a1677143dccc758af4d1b7264eb925f2",
       "scope": "Exact stat arithmetic/content and detached numeric adapter; prior33payloads unchanged.3B genuine publicownerqualification separate."
+    },
+    {
+      "ordinal": 30,
+      "stage": "I7C-3B",
+      "compiler_version": "i7c3b-stat-inputs",
+      "parser_version": "lua-generated-v18-guild-invite",
+      "revision_id": "3c23b1550c548174feac9a3487a24174673d44508c716e5908176db5ed93b4b3",
+      "scope": "Source numeric equipment/skill input catalog; prior34payloads unchanged; owner qualification separate."
     }
   ],
   "current": {
-    "ordinal": 29,
-    "stage": "I7C-3A",
-    "compiler_version": "i7c3a-stat-rules",
+    "ordinal": 30,
+    "stage": "I7C-3B",
+    "compiler_version": "i7c3b-stat-inputs",
     "parser_version": "lua-generated-v18-guild-invite",
-    "revision_id": "c320a1a9c430e6fdf79ec162eeead787a1677143dccc758af4d1b7264eb925f2",
-    "scope": "Exact stat arithmetic/content and detached numeric adapter; prior33payloads unchanged.3B genuine publicownerqualification separate."
+    "revision_id": "3c23b1550c548174feac9a3487a24174673d44508c716e5908176db5ed93b4b3",
+    "scope": "Source numeric equipment/skill input catalog; prior34payloads unchanged; owner qualification separate."
   }
 }

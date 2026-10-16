@@ -3021,6 +3021,24 @@
       "migration": "migrations/00058_i7c3a_stat_rules.sql",
       "owner": "content-registry",
       "write_exceptions": []
+    },
+    "content_stat_input_catalogs": {
+      "allowed_query_owners": [
+        "content-registry"
+      ],
+      "allowed_read_paths": [
+        "sql/content/",
+        "internal/adapters/postgres/contentstore/",
+        "internal/adapters/postgres/contentqueries/"
+      ],
+      "allowed_write_paths": [
+        "sql/content/",
+        "internal/adapters/postgres/contentstore/",
+        "internal/adapters/postgres/contentqueries/"
+      ],
+      "migration": "migrations/00059_i7c3b_stat_inputs.sql",
+      "owner": "content-registry",
+      "write_exceptions": []
     }
   }
 }
