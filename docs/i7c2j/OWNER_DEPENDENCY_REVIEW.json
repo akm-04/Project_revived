@@ -1,0 +1,23 @@
+{
+  "status": "FROZEN_SAME_OWNER_READ_WRITER_BOUNDARY",
+  "owner": "CONQUER_SCHOOL",
+  "read_consumers": [
+    "I7C-3B",
+    "I7C-5E",
+    "futureCA8materializedstatadapter"
+  ],
+  "same_owner": "2J/5E",
+  "no_mode_build_backedge": true,
+  "locks": "I4canonicalPlayer315 serializesConquerrow -> optionalCharacter400/410 ->existingvalue suffix, onecallerTx",
+  "projection": "Existingdirectory/socialsnapshot fieldsnotretainedtruth; laterwriterqualifiedtypedprojection required",
+  "no_foreign_reference": "OnlycanonicalPlayerFK; HeroRef inputread notpersistedownership",
+  "transitive": [
+    "D05CLIENT_SUMMARY_ATTESTED notserverresolver",
+    "D06physicalowner/research",
+    "I7B1transaction/reference/replay/privacy",
+    "CA8witnessedread",
+    "I4bootstraprequiredcontributors/playerroot",
+    "I6authoritativetime",
+    "Contentrevision/hash/activation/forwardmigration"
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "status": "WORKING_NATIVE_FOUNDATION_PASS_API_TRANSPORT_RECHECK",
+  "passes": [
+    "Initialknownabsence/legacyunknown/no-directory-inference",
+    "RetainedNormal/Super/sourceattrs/run-vs-stat distinction/current-read",
+    "Atomiccallerreceipt/rollback/UNKNOWNcommitted-and-uncommitted/concurrency",
+    "Witness/stale/missing/CAS/RRconcurrentwriter/targetplayer",
+    "SIGKILLcommitted/uncommittedreopen"
+  ],
+  "test_harness_corrections": [
+    "New1570probe mustuseinheritedcompressedtransport; firstuncompressedprobe400didnotreachinactivehandler; correctedtestdoesnotchangeproduct",
+    "Domainunitfixtures usefixedUTCtime ratherthan directtime.Now underexistingarchguard"
+  ],
+  "product_changes_from_working_failures": false,
+  "exact_candidate_qualification": "NOT_RUN_YET"
+}

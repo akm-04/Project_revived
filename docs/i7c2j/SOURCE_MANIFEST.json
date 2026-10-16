@@ -1,0 +1,176 @@
+{
+  "source_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+  "files": [
+    {
+      "profile": "EXACT_ARCHIVE_SRC64",
+      "path": "app/model/ConquerSchool.lua",
+      "archive_member": "app-assets/output/assets/src_64/app/model/ConquerSchool.lua",
+      "sha256": "39092e73a2fe3200924e53c96bb72073735079bf668691b5cd37d4de8d1c2321",
+      "bytes": 7349
+    },
+    {
+      "profile": "EXACT_ARCHIVE_SRC64",
+      "path": "app/model/NormalHero.lua",
+      "archive_member": "app-assets/output/assets/src_64/app/model/NormalHero.lua",
+      "sha256": "125183556caeecc182bf0702dd1f95160c8ba1666a3b97fbb8a7261d30ae0ac9",
+      "bytes": 103561
+    },
+    {
+      "profile": "EXACT_ARCHIVE_SRC64",
+      "path": "app/model/SuperHero.lua",
+      "archive_member": "app-assets/output/assets/src_64/app/model/SuperHero.lua",
+      "sha256": "b127c2cbef327d3142031bf30daa0af1b45997c6da82fba946d641a86783d622",
+      "bytes": 94188
+    },
+    {
+      "profile": "EXACT_ARCHIVE_SRC64",
+      "path": "app/model/SelfPlayer.lua",
+      "archive_member": "app-assets/output/assets/src_64/app/model/SelfPlayer.lua",
+      "sha256": "163d5893c9522ada412c2b9c4748a80757660fccdf03c8f72cb6edf0838b8eb4",
+      "bytes": 156513
+    },
+    {
+      "profile": "EXACT_ARCHIVE_SRC64",
+      "path": "app/common/network/mid.lua",
+      "archive_member": "app-assets/output/assets/src_64/app/common/network/mid.lua",
+      "sha256": "026a20b29d97624979777a68c64c749254031604057ff42aa8f8254c3e35b5af",
+      "bytes": 43121
+    },
+    {
+      "profile": "EXACT_ARCHIVE_SRC64",
+      "path": "app/common/tables/ConquerSchoolTable.lua",
+      "archive_member": "app-assets/output/assets/src_64/app/common/tables/ConquerSchoolTable.lua",
+      "sha256": "5d874454b36dae9eb603d2f654fbcda43a3a8ff9cba99b44615a44762c20360d",
+      "bytes": 1683
+    },
+    {
+      "profile": "EXACT_ARCHIVE_SRC64",
+      "path": "app/common/tables/ConquerSchoolCampaignTable.lua",
+      "archive_member": "app-assets/output/assets/src_64/app/common/tables/ConquerSchoolCampaignTable.lua",
+      "sha256": "4af5248bd1ec151032e77471a5f3b4641184c57f8bed5b03cbd472b8359e8759",
+      "bytes": 4830
+    },
+    {
+      "profile": "EXACT_ARCHIVE_SRC64",
+      "path": "app/common/tables/ConquerSchoolLoopTable.lua",
+      "archive_member": "app-assets/output/assets/src_64/app/common/tables/ConquerSchoolLoopTable.lua",
+      "sha256": "69c60b74fc90713103e191e341a107d9884306d7541b87837f1e49703c524790",
+      "bytes": 1141
+    },
+    {
+      "profile": "EXACT_ARCHIVE_SRC64",
+      "path": "app/windows/ConquerSchoolWindow.lua",
+      "archive_member": "app-assets/output/assets/src_64/app/windows/ConquerSchoolWindow.lua",
+      "sha256": "603c7fd25e2e127ea3bec158e867e49be7967a89852f773f28793a3bf169d60d",
+      "bytes": 25402
+    },
+    {
+      "profile": "EXACT_ARCHIVE_SRC64",
+      "path": "app/windows/ConquerSchoolFieldWindow.lua",
+      "archive_member": "app-assets/output/assets/src_64/app/windows/ConquerSchoolFieldWindow.lua",
+      "sha256": "31aead2935077bba158480d664717a257e9e52448ba8d57be57ed640f66b8421",
+      "bytes": 3754
+    },
+    {
+      "profile": "EXACT_ARCHIVE_SRC64",
+      "path": "app/windows/ConquerSchoolReportWindow.lua",
+      "archive_member": "app-assets/output/assets/src_64/app/windows/ConquerSchoolReportWindow.lua",
+      "sha256": "f90aa7b54b1f61d2af8b3c2122c601d7abf07112b85685c27d05823588d7735b",
+      "bytes": 14876
+    },
+    {
+      "profile": "EXACT_ARCHIVE_SRC64",
+      "path": "data/tables/conquer_school.lua",
+      "archive_member": "app-assets/output/assets/src_64/data/tables/conquer_school.lua",
+      "sha256": "62f6da01f803e916c6103dee20b84b76a2a4e136b97e1f2fe2564b868273f557",
+      "bytes": 933
+    },
+    {
+      "profile": "EXACT_ARCHIVE_SRC64",
+      "path": "data/tables/conquer_school_campaign.lua",
+      "archive_member": "app-assets/output/assets/src_64/data/tables/conquer_school_campaign.lua",
+      "sha256": "3438c3cbb8aa6b6f981f20c0d7513bba83a1cf4e206b574ecc4cafda3b3302f9",
+      "bytes": 21473
+    },
+    {
+      "profile": "EXACT_ARCHIVE_SRC64",
+      "path": "data/tables/conquer_school_loop.lua",
+      "archive_member": "app-assets/output/assets/src_64/data/tables/conquer_school_loop.lua",
+      "sha256": "8781e3c7965c5c854582f2ce4caa25f4bdee12d395e7de8a9a2e49a3587dfb0c",
+      "bytes": 549
+    },
+    {
+      "profile": "EXACT_ARCHIVE_SRC64",
+      "path": "data/tables/misc.lua",
+      "archive_member": "app-assets/output/assets/src_64/data/tables/misc.lua",
+      "sha256": "058cf5719421ed71a12083a8c95b0ccded7204bedb5fa1263d508e2fa4257f9a",
+      "bytes": 175945
+    },
+    {
+      "profile": "V1_CORROBORATION",
+      "path": "gxb_backend/state/player_state.py",
+      "sha256": "f3551f5f926bdf6e1b0f8dbd0106b64579dd5ab4be783597f8cf851e8886a685",
+      "bytes": 39534
+    },
+    {
+      "profile": "V1_CORROBORATION",
+      "path": "gxb_backend/state/hero_repository.py",
+      "sha256": "be7ed885f9e492933be5a051dd20bc52500cab0fd9f08bf655acfac6c2a169ae",
+      "bytes": 36454
+    },
+    {
+      "profile": "V1_CORROBORATION",
+      "path": "gxb_backend/dispatch/engine_dispatcher.py",
+      "sha256": "6f0a61ed76ef78760037c22e67473e56018194831d7f00ea231b075c7192c26a",
+      "bytes": 44256
+    },
+    {
+      "profile": "V1_CORROBORATION",
+      "path": "gxb_backend/protocol/routing.py",
+      "sha256": "c669bf23e423cc080c690255fb5ade6f8bcd3d3167818bf37306f719e5aeaa0d",
+      "bytes": 1938
+    },
+    {
+      "profile": "V1_CORROBORATION",
+      "path": "gxb_backend/handlers/system.py",
+      "sha256": "65668f90680cef5a85a0e18518e1d994cf40c97432e05c101d2f8e0490dc2b86",
+      "bytes": 6099
+    },
+    {
+      "profile": "OLD_CLIENT",
+      "path": "app/model/ConquerSchool.lua",
+      "sha256": "dc9943fe3d07c061e11b4923d9940b9cfc1e6733be6b57223dd4cbc6aad96ebf",
+      "bytes": 6698
+    },
+    {
+      "profile": "OLD_CLIENT",
+      "path": "app/model/SelfPlayer.lua",
+      "sha256": "aee7827573d82bb36338512e908eb6883911f4996c6c85f1a6f8b826593def3a",
+      "bytes": 129595
+    },
+    {
+      "profile": "OLD_CLIENT",
+      "path": "app/common/network/mid.lua",
+      "sha256": "c10ab0d38105be79201b6b1682a7fcb36eafa7f09b76002c5b9bf599a968d942",
+      "bytes": 32435
+    },
+    {
+      "profile": "OLD_CLIENT",
+      "path": "app/common/tables/ConquerSchoolTable.lua",
+      "sha256": "5d874454b36dae9eb603d2f654fbcda43a3a8ff9cba99b44615a44762c20360d",
+      "bytes": 1683
+    },
+    {
+      "profile": "OLD_CLIENT",
+      "path": "app/common/tables/ConquerSchoolCampaignTable.lua",
+      "sha256": "4af5248bd1ec151032e77471a5f3b4641184c57f8bed5b03cbd472b8359e8759",
+      "bytes": 4830
+    },
+    {
+      "profile": "OLD_CLIENT",
+      "path": "app/common/tables/ConquerSchoolLoopTable.lua",
+      "sha256": "69c60b74fc90713103e191e341a107d9884306d7541b87837f1e49703c524790",
+      "bytes": 1141
+    }
+  ]
+}

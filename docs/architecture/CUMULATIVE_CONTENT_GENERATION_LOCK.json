@@ -178,14 +178,22 @@
       "parser_version": "lua-generated-v18-guild-invite",
       "revision_id": "e56814fdac078d6b47deb99c96f39c2770e812e0d054bdf146ddd63ee591262f",
       "scope": "Stone evolution source catalog only; prior31 payloads immutable. Genuine blood mission producer remains qualification-gated."
+    },
+    {
+      "ordinal": 28,
+      "stage": "I7C-2J",
+      "compiler_version": "i7c2j-conquer-inputs",
+      "parser_version": "lua-generated-v18-guild-invite",
+      "revision_id": "9aba2815bc7f91793129c151224986c5240df883c1a2dc33dc5cccfc78bf8e15",
+      "scope": "Conquer source contribution/read catalog only; prior32 payloads immutable. Genuine5E attestedwriter remains qualification-gated."
     }
   ],
   "current": {
-    "ordinal": 27,
-    "stage": "I7C-2I",
-    "compiler_version": "i7c2i-evolution-inputs",
+    "ordinal": 28,
+    "stage": "I7C-2J",
+    "compiler_version": "i7c2j-conquer-inputs",
     "parser_version": "lua-generated-v18-guild-invite",
-    "revision_id": "e56814fdac078d6b47deb99c96f39c2770e812e0d054bdf146ddd63ee591262f",
-    "scope": "Stone evolution source catalog only; prior31 payloads immutable. Genuine blood mission producer remains qualification-gated."
+    "revision_id": "9aba2815bc7f91793129c151224986c5240df883c1a2dc33dc5cccfc78bf8e15",
+    "scope": "Conquer source contribution/read catalog only; prior32 payloads immutable. Genuine5E attestedwriter remains qualification-gated."
   }
 }

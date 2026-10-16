@@ -2969,6 +2969,40 @@
       "migration": "migrations/00056_i7c2i_hero_evolution.sql",
       "owner": "character/hero-core",
       "write_exceptions": []
+    },
+    "content_conquer_input_catalogs": {
+      "allowed_query_owners": [
+        "content-registry"
+      ],
+      "allowed_read_paths": [
+        "sql/content/",
+        "internal/adapters/postgres/contentstore/",
+        "internal/adapters/postgres/contentqueries/"
+      ],
+      "allowed_write_paths": [
+        "sql/content/",
+        "internal/adapters/postgres/contentstore/",
+        "internal/adapters/postgres/contentqueries/"
+      ],
+      "migration": "migrations/00057_i7c2j_conquer_facts.sql",
+      "owner": "content-registry",
+      "write_exceptions": []
+    },
+    "player_conquer_facts": {
+      "owner": "conquer",
+      "migration": "migrations/00057_i7c2j_conquer_facts.sql",
+      "allowed_query_owners": [
+        "conquer"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/conquerstore/",
+        "sql/conquer/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/conquerstore/",
+        "sql/conquer/"
+      ],
+      "write_exceptions": []
     }
   }
 }

@@ -1,0 +1,35 @@
+{
+  "status": "IMPLEMENTED_WORKING_NATIVE_GREEN_EXACT_CANDIDATE_QUALIFICATION_PENDING",
+  "operations": [
+    {
+      "name": "FRESH_INITIAL",
+      "source": "V1defaultcorroboration + adoptedpolicy",
+      "trace": "I4newMID1 ->requiredConquerpersistence -> sameTxinitialrow+existingbootstrapreceipt -> reread",
+      "implemented": false,
+      "genuine_producer_qualified": false
+    },
+    {
+      "name": "LEGACY_UNKNOWN",
+      "source": "C1legitimateabsence/noinferencerequirement",
+      "trace": "Explicitdeployment ->typedI4playerlist/315lock ->missing-onlyunknown -> qualifiedreadunavailable",
+      "implemented": false,
+      "genuine_producer_qualified": false
+    },
+    {
+      "name": "RETAINED_CALLER_WRITE",
+      "source": "421samecanonicalownerfor5E",
+      "trace": "Laterqualifiedcaller ->315/ownerrow lock ->CAS/provenance+existingcallerreceipt atomic ->coherentread; positivefixturesonlynow",
+      "implemented": false,
+      "genuine_producer_qualified": false
+    },
+    {
+      "name": "COHERENT_HERO_READ",
+      "source": "Normal/SupergetConquerSchoolAttr",
+      "trace": "WitnessedRRscope/pin/time/HeroRef ->Characterroot+Hero/currentkind ->Conquerowner/catalog ->detachedfacts+contribution; noforeignsql/zero fallback",
+      "implemented": false,
+      "genuine_producer_qualified": false
+    }
+  ],
+  "implementation_started": true,
+  "implementation_complete": true
+}

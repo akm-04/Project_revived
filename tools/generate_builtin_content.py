@@ -21,7 +21,7 @@ from pathlib import Path
 from typing import Any, Iterable
 
 SCHEMA_VERSION = 1
-COMPILER_VERSION = "i7c2i-evolution-inputs"
+COMPILER_VERSION = "i7c2j-conquer-inputs"
 PARSER_VERSION = "lua-generated-v18-guild-invite"
 EXPECTED_SOURCE_ARCHIVE_SHA256 = "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
 SOURCE_PREFIX = "app-assets/output/assets/src_64/"
@@ -120,6 +120,7 @@ SOURCE_MANIFEST.append(('app/windows/HeroGiftBoxWindow.lua','d6065c3d601f5820915
 SOURCE_MANIFEST.append(('app/windows/WhiteAlbumWindow.lua','851a53f588b59d95cfe460f3399ab1a6904fff7714131c358f3c3a73910b6bb9',"LIBRARY_INPUT_SOURCE_AUTHORITY"))
 
 ENABLED_CAPABILITIES = [
+    "CONQUER_INPUTS_I7C2J",
     "EVOLUTION_INPUTS_I7C2I",
     "SPIRIT_INPUTS_I7C2H",
     "ELEMENT_INPUTS_I7C2G", "INSCRIPTION_INPUTS_I7C2F", "COURSE_INPUTS_I7C2E", "BOOK_INPUTS_I7C2D",
@@ -279,7 +280,18 @@ SOURCE_MANIFEST.append(('app/common/tables/StoneTicketTable.lua', '9e5b079a415f1
 SOURCE_MANIFEST.append(('data/tables/stone_evolution.lua', '3c1935f5e3c0bbce70b89ccf66ed29b2862bec4554bc97f8bf7b8090b56ae82c', 'I7C2I_EVOLUTION_SOURCE_BOUNDARY'))
 SOURCE_MANIFEST.append(('data/tables/stone_ticket.lua', 'b986ce8fd5ef3fd2934a3213b1b6d7782e122fe25fe702a5b5591c0f074f78ff', 'I7C2I_EVOLUTION_SOURCE_BOUNDARY'))
 from spirit_content import build_spirit
+SOURCE_MANIFEST.append(('app/model/ConquerSchool.lua', '39092e73a2fe3200924e53c96bb72073735079bf668691b5cd37d4de8d1c2321', 'I7C2J_CONQUER_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('app/common/tables/ConquerSchoolTable.lua', '5d874454b36dae9eb603d2f654fbcda43a3a8ff9cba99b44615a44762c20360d', 'I7C2J_CONQUER_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('app/common/tables/ConquerSchoolCampaignTable.lua', '4af5248bd1ec151032e77471a5f3b4641184c57f8bed5b03cbd472b8359e8759', 'I7C2J_CONQUER_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('app/common/tables/ConquerSchoolLoopTable.lua', '69c60b74fc90713103e191e341a107d9884306d7541b87837f1e49703c524790', 'I7C2J_CONQUER_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('app/windows/ConquerSchoolWindow.lua', '603c7fd25e2e127ea3bec158e867e49be7967a89852f773f28793a3bf169d60d', 'I7C2J_CONQUER_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('app/windows/ConquerSchoolFieldWindow.lua', '31aead2935077bba158480d664717a257e9e52448ba8d57be57ed640f66b8421', 'I7C2J_CONQUER_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('app/windows/ConquerSchoolReportWindow.lua', 'f90aa7b54b1f61d2af8b3c2122c601d7abf07112b85685c27d05823588d7735b', 'I7C2J_CONQUER_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/conquer_school.lua', '62f6da01f803e916c6103dee20b84b76a2a4e136b97e1f2fe2564b868273f557', 'I7C2J_CONQUER_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/conquer_school_campaign.lua', '3438c3cbb8aa6b6f981f20c0d7513bba83a1cf4e206b574ecc4cafda3b3302f9', 'I7C2J_CONQUER_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/conquer_school_loop.lua', '8781e3c7965c5c854582f2ce4caa25f4bdee12d395e7de8a9a2e49a3587dfb0c', 'I7C2J_CONQUER_SOURCE_BOUNDARY'))
 from evolution_content import build_evolution
+from conquer_content import build_conquer
 from course_content import build_course
 class CompileError(ValueError):
     pass
@@ -2060,6 +2072,7 @@ def build_artifacts(blobs: dict[str, SourceBlob], archive_sha256: str) -> dict[s
     from dorm_content import build_dorm
     dorm_artifact=build_dorm(blobs,parse_generated_lua_table,pipe_ints,hero_artifact["templates"],partner_keys,partner_rows,super_keys,super_rows,indexed_field,items,CompileError)
     artifacts = {
+        "conquer_input_catalog.json":build_conquer(blobs,parse_generated_lua_table,parse_base64_indexed_lua_table,indexed_field),
         "evolution_input_catalog.json":build_evolution(blobs,parse_generated_lua_table,parse_base64_indexed_lua_table,indexed_field),
         "spirit_input_catalog.json":build_spirit(blobs,parse_generated_lua_table,items),
         "element_input_catalog.json":build_element(blobs,parse_generated_lua_table,items),

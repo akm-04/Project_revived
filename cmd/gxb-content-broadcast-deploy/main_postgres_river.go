@@ -12,16 +12,19 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres"
 	"gxb.local/backend/v2/internal/adapters/postgres/bookstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/characterstore"
+	"gxb.local/backend/v2/internal/adapters/postgres/conquerstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/contentstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/coursestore"
 	"gxb.local/backend/v2/internal/adapters/postgres/dormstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/elementstore"
+	"gxb.local/backend/v2/internal/adapters/postgres/i4store"
 	"gxb.local/backend/v2/internal/adapters/postgres/i5store"
 	"gxb.local/backend/v2/internal/adapters/postgres/inscriptionstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/librarystore"
 	"gxb.local/backend/v2/internal/adapters/postgres/spiritstore"
 	riveradapter "gxb.local/backend/v2/internal/adapters/river"
 	appbook "gxb.local/backend/v2/internal/application/bookskill"
+	appconquer "gxb.local/backend/v2/internal/application/conquerschool"
 	appcourse "gxb.local/backend/v2/internal/application/course"
 	appdorm "gxb.local/backend/v2/internal/application/dormhouse"
 	appelement "gxb.local/backend/v2/internal/application/elementequipment"
@@ -72,6 +75,9 @@ func deploy() error {
 		return e
 	}
 	if _, e = service.EnsureBuiltinInstalled(c, op, bundle); e != nil {
+		return e
+	}
+	if e = appconquer.RunBackfill(c, gen.TimedRunner{Binder: gen.Binder{Time: postgres.AuthoritativeTime{Queryer: p}}, Runner: service.Runner}, i4store.PlayerRootLocker{}, conquerstore.Store{}, bundle.RevisionID(), op); e != nil {
 		return e
 	}
 	if e = applib.RunBackfill(c, gen.TimedRunner{Binder: gen.Binder{Time: postgres.AuthoritativeTime{Queryer: p}}, Runner: service.Runner}, characterstore.Store{}, librarystore.Store{}, op); e != nil {

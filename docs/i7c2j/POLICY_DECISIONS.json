@@ -1,0 +1,10 @@
+{
+  "status": "ADOPTED_EXPLICIT_SCOPED_INITIAL_STATE_POLICY",
+  "policy": "C2J_INITIAL_NO_PROGRESS_V1",
+  "fresh": "CanonicalINITIAL level0loop1 withnorun and durableMID1operationprovenance",
+  "legacy": "Missing-onlyUNKNOWN_LEGACYmarker; no inferencefromdirectoryorclientdefaults",
+  "original_server_initialization": "UNKNOWN",
+  "source": "V1player_state173..175/Hero234..235 corroborationonly",
+  "retained": "Onlyvalidatedexplicitprovidedretainedprogress/optionalrun; storageportnotbattleattestation; allpositivequalificationfixtureslabelled",
+  "time": "No reset/timerpolicy enabled; stableauthoritativeinstant and rejectstateupdatedafterobservation,5E ownsrunresetgeneration"
+}
