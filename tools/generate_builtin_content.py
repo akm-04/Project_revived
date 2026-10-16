@@ -21,7 +21,7 @@ from pathlib import Path
 from typing import Any, Iterable
 
 SCHEMA_VERSION = 1
-COMPILER_VERSION = "i7c2j-conquer-inputs"
+COMPILER_VERSION = "i7c3a-stat-rules"
 PARSER_VERSION = "lua-generated-v18-guild-invite"
 EXPECTED_SOURCE_ARCHIVE_SHA256 = "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
 SOURCE_PREFIX = "app-assets/output/assets/src_64/"
@@ -120,6 +120,7 @@ SOURCE_MANIFEST.append(('app/windows/HeroGiftBoxWindow.lua','d6065c3d601f5820915
 SOURCE_MANIFEST.append(('app/windows/WhiteAlbumWindow.lua','851a53f588b59d95cfe460f3399ab1a6904fff7714131c358f3c3a73910b6bb9',"LIBRARY_INPUT_SOURCE_AUTHORITY"))
 
 ENABLED_CAPABILITIES = [
+    "STAT_RULES_I7C3A",
     "CONQUER_INPUTS_I7C2J",
     "EVOLUTION_INPUTS_I7C2I",
     "SPIRIT_INPUTS_I7C2H",
@@ -291,7 +292,19 @@ SOURCE_MANIFEST.append(('data/tables/conquer_school.lua', '62f6da01f803e916c6103
 SOURCE_MANIFEST.append(('data/tables/conquer_school_campaign.lua', '3438c3cbb8aa6b6f981f20c0d7513bba83a1cf4e206b574ecc4cafda3b3302f9', 'I7C2J_CONQUER_SOURCE_BOUNDARY'))
 SOURCE_MANIFEST.append(('data/tables/conquer_school_loop.lua', '8781e3c7965c5c854582f2ce4caa25f4bdee12d395e7de8a9a2e49a3587dfb0c', 'I7C2J_CONQUER_SOURCE_BOUNDARY'))
 from evolution_content import build_evolution
+SOURCE_MANIFEST.append(('app/model/Item.lua', 'af46a18cad788aa903464237821262ffc51fc73db5bb666287407c90922248f5', 'I7C3A_STAT_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('app/common/tables/AttrTable.lua', '6e6d76cc6cdcd916ab662446c258228f76bba5ccabe24c582290ae32547346af', 'I7C3A_STAT_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('app/common/tables/DBuffTable.lua', '7241fd7cb60ac8a39fec196dd53a11561b8c8813f0e9261169fada4b7ab5d6be', 'I7C3A_STAT_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('lib/battle/requireServer.lua', 'b5d6398960e1b67f7806456f7571f5855689aeb3739b73df1e70275b8560f721', 'I7C3A_STAT_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('lib/battle/framework/cocos.lua', '4e5feea45d6f014dbebf47de6feea3df3baba788a989ff8c605881bc9ed829dd', 'I7C3A_STAT_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('app/windows/HeroattributWindow.lua', '5a650d24f9ed9d31c5a1dc8aff614363c5feb4ce204179972922bfac361ecb2e', 'I7C3A_STAT_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('app/windows/PetAttributeWindow.lua', '8eef73e763bf8564c572d640949a8cd8ca6e1555112d497f81329be38268dfeb', 'I7C3A_STAT_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('lib/battle/Buff.lua', '57b6f90f6bedd665eac88fb70b958cc49c22b1f11ba0dbb5f2013fd3ade93ef4', 'I7C3A_STAT_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('app/common/tables/TableParser.lua', '98f70cc1337278f2338d6d2ed6049b2c3b0b26b247ded0a2dd044b6cc62d0586', 'I7C3A_STAT_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/attr.lua', '2b1d1fcc48f96a5caf83d938d15da586f62f4f3973cf825cfd9c67f121890aae', 'I7C3A_STAT_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/buff.lua', '2c3ce443dda2e46f405156ea7da92862fadf7aaa173ca8cf729eb1cc2945c886', 'I7C3A_STAT_SOURCE_BOUNDARY'))
 from conquer_content import build_conquer
+from stat_content import build_stat_rules
 from course_content import build_course
 class CompileError(ValueError):
     pass
@@ -2072,6 +2085,7 @@ def build_artifacts(blobs: dict[str, SourceBlob], archive_sha256: str) -> dict[s
     from dorm_content import build_dorm
     dorm_artifact=build_dorm(blobs,parse_generated_lua_table,pipe_ints,hero_artifact["templates"],partner_keys,partner_rows,super_keys,super_rows,indexed_field,items,CompileError)
     artifacts = {
+        "stat_rule_catalog.json":build_stat_rules(blobs,parse_generated_lua_table,parse_base64_indexed_lua_table,indexed_field),
         "conquer_input_catalog.json":build_conquer(blobs,parse_generated_lua_table,parse_base64_indexed_lua_table,indexed_field),
         "evolution_input_catalog.json":build_evolution(blobs,parse_generated_lua_table,parse_base64_indexed_lua_table,indexed_field),
         "spirit_input_catalog.json":build_spirit(blobs,parse_generated_lua_table,items),

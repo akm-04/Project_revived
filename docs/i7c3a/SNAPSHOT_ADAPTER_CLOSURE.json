@@ -1,0 +1,43 @@
+{
+  "status": "REVIEWED_V2_STAT_ONLY_FULLY_MATERIALIZED_BOUNDARY",
+  "policy": "C3A_SRC64_MATERIALIZED_STAT_V1",
+  "required_values": {
+    "getJinjieEquipAttr": "Character/Equipment accepted promotion restoration and source equipment topology",
+    "getEquipAttr": "Character/Equipment plus Dorm2C; Super enhancement distinct",
+    "getEquipFumoAttr": "CharacterHero/Pet Fumo; Super structurally0",
+    "getTotalPracticeAttr": "CharacterPractice appliedattrs+thresholdaward, pendingexcluded",
+    "getSkillBookAttr": "BookSkill2D storedcounts/content; specialZhuge rules",
+    "getInscriptionAttr": "Inscription2F displayattrs+suit",
+    "getBattleInscriptionAttr": "Inscription2F battleattrs+suit",
+    "getConquerSchoolAttr": "ConquerSchool2J qualifiedknownprogress;5Egenuinewriterretained",
+    "getFeedAttr": "Library2B perHeroattributeFeed",
+    "getCoursesAttr": "Course2E appliedstate type0 only",
+    "getStoneEvolutionAttr": "Evolution2I stage/pointscontent",
+    "getWhiteAlbumAttr": "Library2B targetPlayercollection",
+    "getElementAttr": "Element2G activebattleattrs;backupnotapplied",
+    "getElementAttrJustForShow": "Element2G normalforce displaybranch",
+    "getSpiritEquipsAttr": "Spirit2H targetboundinstances+suits+sourcepercentage",
+    "getSkillAttr": "CharacterHero2A/CharacterPet effectiveBUFF_SELF flat;SkillNumbershelper",
+    "getSkillForce": "CharacterHero2A/CharacterPet effectivelevels+source template slots;SkillNumbershelper",
+    "getInscriptionForce": "Inscription2F familyfightingCapacity+completeSuitpower,notweightedbattleattrs",
+    "getCoursesForce": "Course2E allapplied addskill>0 power+quality*stepPower,includingtype1",
+    "getFeedForce": "Library2B weightedfeedvalues",
+    "getWhiteAlbumForce": "Library2B targetplayercollectionweightedvalues",
+    "getFavorAttrGrowth": "Library2B canonicalfavor/marriage",
+    "getHouseAttrGrowthByType": "Dorm2C housecomfort/expansionqualifiedgrowth",
+    "getBookShelfAttr": "BookSkill2D bookshelfleveltypedcontent"
+  },
+  "missing_import_disposition": {
+    "lib/battle/app/model/Item.lua": "No historicalmodule recovered. Snapshotboundary receives detachedcanonicalItem/equipment/fumo numericresults; noDB/globallookup.",
+    "lib/spirit/spirit_item.lua": "No historicalmodule recovered. Snapshotboundary receives complete targetSpiritvalues; no playerbackpack/viewerfallback. Existing2Htypedfacts/sourcecontent remaincanonical."
+  },
+  "upstream_numeric_materialization": "Eachnamedvalue has its exactsource/helper rules in cachedmodel+existingownercontent catalogs.3Bmustmaterialize and qualify genuineowner state for theseports; a bare suppliednumber/reference isnotownerproof.",
+  "scope": "Selectedstat evaluation numericclosure. No originalservermodule orcombat/RNG parity. Materializedfixturestubs deliberately replace upstreamowners, not claimproductionownership.",
+  "all_stat_rule_outputs": [
+    "Normal/Super/Pet49totals",
+    "Normal/SuperWithoutBook49",
+    "independentforce loops49/22",
+    "PetdetailFumolabelsplit"
+  ],
+  "public_provider_qualified": false
+}

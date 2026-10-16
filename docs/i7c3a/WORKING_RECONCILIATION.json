@@ -1,0 +1,15 @@
+{
+  "status": "SOURCE_DIFFERENTIAL_AND_FOCUSED_WORKING_PASS_EXACT_FREEZE_NEXT",
+  "source_vectors": 12,
+  "attribute_cases": 588,
+  "source_methods": "OriginalLua methods with explicitupstreamleafsubstitution; scope noted",
+  "repairs": [
+    "Corrected Normaldisplay vsSuperbattleElement force beforecoding",
+    "ContentDTOownerneutral afterarchguard caught initialContent->domain import",
+    "CanonicalnumericJSON integernormalization forrealPostgreSQLjsonb hashverification",
+    "SourcePettemplate typeabsent retained0; no inventedHeroType forPet"
+  ],
+  "inherited_evidence_reused": "Prior2A..2J ownerlifecycle/receipts no behavioralchanges, qualifiedinputs remain separatelygated",
+  "prior_payloads_unchanged": 33,
+  "prior_migrations_unchanged": 57
+}

@@ -1,0 +1,23 @@
+{
+  "status": "FROZEN_PREIMPLEMENTATION_PLAN",
+  "stage": "I7C-3A",
+  "version_target": "v0.122.0",
+  "schema": "Immutable statrulecontent extension only; no newgameplayowner/writes. Newcontentmigration58 onlyifrequiredbyexistingstore.",
+  "physical": [
+    "internal/domain/statrules",
+    "internal/content/builtin/stat_rules.go",
+    "existingcontentcompiler/contentstore"
+  ],
+  "rules": "Deterministic Go numeric rule evaluator reproduces source aggregation/main/derived/force/label separately. Compiler extracts sourcebranch return formulas into typed expressiontrees (no generalLua execution); leafcontributions explicit, neverzero fallback. Initial/growth/weights/constants contentderived.",
+  "adapter": "Caller supplies complete detached snapshot keyedmodel/method/attribute, explicit contentrevision/time/identity/provenance, optionalqualifiedabsencevalue0onlyupstream. Evaluator cannot qualifyownerauthority ordiscoverstate; inputboundariesvalidated.3Bowns genuinewitnessedcomposition.",
+  "content": "Append statcatalog to builtin compiler/manifest/DTO/registry/deploy; allprior33payloadbytes andmigration1..57 unchanged. Include exactcurrentstatdata/parsers/methods/globals inventory.",
+  "sequence": [
+    "Compile source rule/content expressions + numeric runtime/closed snapshotboundary",
+    "Source-derived base/growth/flatBUFF_SELF helpers + Item/Spirit adapterrequirements usingexistingcanonicalinputs",
+    "Frozen nondefaultnormal/super/pet/label/force oraclefixtures and failclosedboundaries",
+    "ExactR2 finalcandidate unit/race/vet/static/content/nativefreshdeploy/upgrade/restore and snapshotdeterminism",
+    "Separate primaryreality; finalPass713 sync/research+closure"
+  ],
+  "public_wire_activation": false,
+  "topology_version_unchanged": "I7C-topology-v5"
+}

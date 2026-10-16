@@ -225,6 +225,13 @@ func (s Service) EnsureBuiltinInstalled(ctx context.Context, op operation.Contex
 			if gotAppearance != wantAppearance {
 				return fmt.Errorf("content registry: appearance insert count=%d want=%d", gotAppearance, wantAppearance)
 			}
+			gotStat, err := s.Repo.InsertStatRules(tctx, scope.Tx, b)
+			if err != nil {
+				return err
+			}
+			if gotStat != 1 {
+				return errors.New("content registry: stat rules payload count drift")
+			}
 			gotConquer, err := s.Repo.InsertConquerInputs(tctx, scope.Tx, b)
 			if err != nil {
 				return err
