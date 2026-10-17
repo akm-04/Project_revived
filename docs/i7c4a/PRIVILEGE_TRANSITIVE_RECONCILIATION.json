@@ -1,0 +1,19 @@
+{
+  "status": "PREIMPLEMENTATION_TARGETED_CONTRACT_RECONCILIATION_NO_PRODUCT_CODE_CHANGED",
+  "discovery": "Introducing canonicalVIP while leavingglobal BaselinePrivilegeProvider in I5/Hero/Course/bootstrap would create contradictoryVIP/cap/room-capacity facts; retroactive newcap could mint skillpoints.",
+  "affected_contracts": [
+    "I7C1 canonicalowners/coherentinputs",
+    "R5 immutabletemporalpolicy/oldcaptransition",
+    "CA6 epochprivilege capture",
+    "Course pinnedadmissionprivileges",
+    "424 canonicalVIPprojection"
+  ],
+  "approved_basis": "Direct full4A lifecycle approval and existingtypedPrivilege/Temporal extension seams; no independentnewphase",
+  "amendment": "Sharedfacade + explicitmonthly-nonemanualprofile + I5preparedcaptransition reusingexistingApplyLevelTransition0 + MID1ownedvip/chargeprojection",
+  "required_proof": [
+    "NonbaselineVIP cannot leaveotherconsumers atbaseline0: Course/Practice/I5snapshot/MID1 allsamecanonicallevel",
+    "Skillpointcap boundary settlesoldcap beforechange, preservesqualifiedrunningremainder/rearmsatcap and atomicrollback/receipt recovery"
+  ],
+  "superseded_unpublished_contract_sha256": "ff23fc7692a238fec80b860c48f44d690aadc715167a366dfda94970a59ecc0b",
+  "implementation_started": false
+}

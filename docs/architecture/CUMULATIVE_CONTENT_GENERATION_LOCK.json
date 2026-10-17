@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "status": "CURRENT_CUMULATIVE_CONTENT_GENERATION_LOCK_I7B6A",
+  "status": "CURRENT_CUMULATIVE_CONTENT_GENERATION_LOCK_I7C4A",
   "rule": "Historical validators keep their phase-specific semantic invariants. In cumulative/current mode they may accept only an explicitly registered successor compiler generation at or after their baseline. New generations are append-only review events; registering a generation does not waive capability/count/source/migration/ownership assertions.",
   "generations": [
     {
@@ -202,14 +202,22 @@
       "parser_version": "lua-generated-v18-guild-invite",
       "revision_id": "3c23b1550c548174feac9a3487a24174673d44508c716e5908176db5ed93b4b3",
       "scope": "Source numeric equipment/skill input catalog; prior34payloads unchanged; owner qualification separate."
+    },
+    {
+      "ordinal": 31,
+      "stage": "I7C-4A",
+      "compiler_version": "i7c4a-cosmetic-privilege",
+      "parser_version": "lua-generated-v18-guild-invite",
+      "revision_id": "2a44f1c205ab6d8e9da0c42c9ab994644c3ec41a689fb13414b2899afbb27559",
+      "scope": "Source VIP thresholds/skill caps only; prior35payloads immutable. Manual preservation authority explicitly separate from payment."
     }
   ],
   "current": {
-    "ordinal": 30,
-    "stage": "I7C-3B",
-    "compiler_version": "i7c3b-stat-inputs",
+    "ordinal": 31,
+    "stage": "I7C-4A",
+    "compiler_version": "i7c4a-cosmetic-privilege",
     "parser_version": "lua-generated-v18-guild-invite",
-    "revision_id": "3c23b1550c548174feac9a3487a24174673d44508c716e5908176db5ed93b4b3",
-    "scope": "Source numeric equipment/skill input catalog; prior34payloads unchanged; owner qualification separate."
+    "revision_id": "2a44f1c205ab6d8e9da0c42c9ab994644c3ec41a689fb13414b2899afbb27559",
+    "scope": "Source VIP thresholds/skill caps only; prior35payloads immutable. Manual preservation authority explicitly separate from payment."
   }
 }

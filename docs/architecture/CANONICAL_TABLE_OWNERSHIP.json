@@ -3039,6 +3039,38 @@
       "migration": "migrations/00059_i7c3b_stat_inputs.sql",
       "owner": "content-registry",
       "write_exceptions": []
+    },
+    "content_privilege_catalogs": {
+      "allowed_query_owners": [
+        "content-registry"
+      ],
+      "allowed_read_paths": [
+        "sql/content/",
+        "internal/adapters/postgres/contentstore/",
+        "internal/adapters/postgres/contentqueries/"
+      ],
+      "allowed_write_paths": [
+        "sql/content/",
+        "internal/adapters/postgres/contentstore/",
+        "internal/adapters/postgres/contentqueries/"
+      ],
+      "migration": "migrations/00060_i7c4a_cosmetic_privilege.sql",
+      "owner": "content-registry",
+      "write_exceptions": []
+    },
+    "commerce_privilege_roots": {
+      "owner": "commerce-privilege",
+      "allowed_query_owners": [
+        "commerce-privilege"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/commerceprivilegestore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/commerceprivilegestore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00060_i7c4a_cosmetic_privilege.sql"
     }
   }
 }

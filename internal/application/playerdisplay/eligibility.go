@@ -2,8 +2,10 @@ package playerdisplay
 
 import (
 	"context"
+	"errors"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/domain/player"
+	"gxb.local/backend/v2/internal/domain/privilege"
 	"gxb.local/backend/v2/internal/foundation/tx"
 	"time"
 )
@@ -30,18 +32,21 @@ func (s Service) eligible(c context.Context, t tx.Queryer, pid identity.PlayerID
 	if v.Family == "avatar" && v.Type == 1 || v.Family == "frame" && v.Type == 1 || v.Family == "bubble" && v.ID == p.DefaultBubble {
 		return []Origin{}, nil, nil
 	}
-	if v.Family == "frame" && v.Type == 6 {
-		if s.Privileges == nil {
-			return nil, nil, ErrUnavailable
-		}
-		x, e := s.Privileges.SnapshotTx(c, t, pid, at)
-		if e != nil {
+	vipKnown := false
+	if v.Family == "frame" && v.Type == 6 && s.CosmeticPrivileges != nil {
+		x, e := s.CosmeticPrivileges.ReadCosmeticPrivilegeTx(c, t, pid, rev, at)
+		if e != nil && !errors.Is(e, privilege.ErrUnavailable) {
 			return nil, nil, e
 		}
-		if x.ProviderRevision == "" || x.VIPLevel < v.VIP {
-			return nil, nil, ErrUnavailable
+		if e == nil {
+			if x.Validate(pid, rev, at) != nil {
+				return nil, nil, ErrUnavailable
+			}
+			vipKnown = true
+			if x.State.VIPLevel >= v.VIP {
+				return []Origin{}, nil, nil
+			}
 		}
-		return []Origin{}, nil, nil
 	}
 	if v.Family == "avatar" && (v.Type == 2 || v.Type == 3 || v.Type == 7 || v.Type == 11) {
 		if s.Characters == nil {
@@ -51,38 +56,13 @@ func (s Service) eligible(c context.Context, t tx.Queryer, pid identity.PlayerID
 		if e != nil {
 			return nil, nil, e
 		}
-		skins := map[int64]bool{}
-		matched := []HeroFacet{}
-		for _, h := range hs {
-			if h.PlayerID != pid || h.PartnerID <= 0 || h.Version < 1 {
-				return nil, nil, ErrConflict
-			}
-			for _, skin := range h.Skins {
-				skins[skin] = true
-			}
-			if v.Type == 2 && ((category == 2 && (h.TableID == v.PartnerID && h.Color >= 7 || h.Awakened && h.BeforeAwaken == v.PartnerID)) || (category == 3 && h.Super && h.Star >= 2 && h.TableID == v.PartnerID)) || v.Type == 3 && h.Awakened && h.TableID == v.PartnerID {
-				matched = append(matched, h)
-			}
-		}
-		if v.Type == 7 && skins[v.PartnerID] {
-			return []Origin{}, hs, nil
-		}
-		if v.Type == 11 && v.ID == 110006002 {
-			ok := true
-			for _, id := range p.Collection {
-				item, found := p.Find("avatar", id)
-				if !found || !skins[item.PartnerID] {
-					ok = false
-				}
-			}
-			if ok {
-				return []Origin{}, hs, nil
-			}
-		}
+		matched := HeroEligibility(v, category, hs, p)
 		if len(matched) > 0 {
 			return []Origin{}, matched, nil
 		}
-		return nil, nil, ErrRequest
+		if v.Type == 2 || v.Type == 3 {
+			return nil, nil, ErrRequest
+		}
 	}
 	// Ordinary canonical stacks qualify only the source permanent branch. They
 	// contain no qualified timed startTime, irrespective of AcquiredAt.
@@ -97,6 +77,16 @@ func (s Service) eligible(c context.Context, t tx.Queryer, pid identity.PlayerID
 			}
 		}
 	}
+	if v.Family == "avatar" && (v.Type == 7 || v.Type == 11) {
+		return nil, nil, ErrRequest
+	}
+	if v.Family == "frame" && v.Type == 6 {
+		if vipKnown {
+			return nil, nil, ErrRequest
+		}
+		return nil, nil, ErrUnavailable
+	}
+
 	origins, e := s.origins(c, t, pid, v.Family, rev, at)
 	if e != nil {
 		return nil, nil, e

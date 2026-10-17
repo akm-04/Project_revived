@@ -2,6 +2,7 @@ package characterstore
 
 import (
 	"context"
+	ca "gxb.local/backend/v2/internal/application/characterasset"
 	app "gxb.local/backend/v2/internal/application/playerdisplay"
 	"gxb.local/backend/v2/internal/domain/character"
 	"gxb.local/backend/v2/internal/domain/identity"
@@ -54,7 +55,7 @@ func (r DisplayReader) ReadDisplayHeroesTx(c context.Context, q tx.Queryer, pid 
 	}
 	out := make([]app.HeroFacet, 0, len(hs))
 	for _, h := range hs {
-		if h.ValidatePersistent() != nil || h.PlayerID != pid {
+		if h.ValidatePersistent() != nil || h.PlayerID != pid || h.UpdatedAt.After(at) {
 			return nil, app.ErrConflict
 		}
 		f := app.HeroFacet{PlayerID: pid, PartnerID: h.PartnerID, TableID: h.TableID, Version: h.StateVersion, Color: h.Color, Star: h.Star, Skins: []int64{}}
@@ -93,3 +94,26 @@ func (r DisplayReader) ReadDisplayHeroesTx(c context.Context, q tx.Queryer, pid 
 }
 
 var _ app.CharacterReader = DisplayReader{}
+
+func (r DisplayReader) ReadDisplayPopulationTx(c context.Context, sc ca.CoherentReadScope, pid identity.PlayerID) (app.CharacterPopulation, error) {
+	var out app.CharacterPopulation
+	pin, ok := sc.Operation.Policies.Get("content")
+	if sc.Validate() != nil || !ok || pin != sc.ContentRevision || !pid.Valid() {
+		return out, app.ErrUnavailable
+	}
+	root, e := r.Store.ReadRootTx(c, sc.Queryer(), pid)
+	if e != nil {
+		return out, e
+	}
+	if root.Validate() != nil || root.PlayerID != pid || root.UpdatedAt.After(sc.ObservedAt) {
+		return out, app.ErrConflict
+	}
+	hs, e := r.ReadDisplayHeroesTx(c, sc.Queryer(), pid, sc.ContentRevision, sc.ObservedAt)
+	if e != nil {
+		return out, e
+	}
+	out = app.CharacterPopulation{PlayerID: pid, Revision: sc.ContentRevision, ObservedAt: sc.ObservedAt, RootVersion: root.StateVersion, RootUpdatedAt: root.UpdatedAt, Heroes: hs, Digest: app.PopulationDigest(hs)}
+	return out, nil
+}
+
+var _ app.CharacterPopulationReader = DisplayReader{}

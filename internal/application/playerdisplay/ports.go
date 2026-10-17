@@ -149,19 +149,22 @@ type Fence interface {
 	FenceActorTx(context.Context, tx.Tx, identity.ActorContext, time.Time) error
 }
 type Service struct {
-	Runner     tx.Runner
-	Fresh      tx.Queryer
-	Time       gen.TimeAuthority
-	Players    playerroot.TxLocker
-	Fence      Fence
-	Store      Store
-	Content    Content
-	Receipts   receipt.Store
-	Characters CharacterReader
-	Privileges i5.PrivilegeSnapshotProvider
-	External   ExternalOrigins
-	Values     ValuePort
-	Directory  directorysync.Reconciler
+	Runner             tx.Runner
+	Fresh              tx.Queryer
+	Time               gen.TimeAuthority
+	Players            playerroot.TxLocker
+	Fence              Fence
+	Store              Store
+	Content            Content
+	Receipts           receipt.Store
+	Characters         CharacterReader
+	Privileges         i5.PrivilegeSnapshotProvider
+	CosmeticPrivileges CosmeticPrivilegeReader
+	Population         CharacterPopulationReader
+	Inventory          InventoryReader
+	External           ExternalOrigins
+	Values             ValuePort
+	Directory          directorysync.Reconciler
 }
 type Observation struct {
 	TitleEndTime, BubbleEndTime                         int64
