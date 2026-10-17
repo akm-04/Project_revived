@@ -1,0 +1,29 @@
+{
+  "status": "PREIMPLEMENTATION_PLAN_FROZEN",
+  "owner": "Existing Playerdisplay + new narrow Commerce canonical privilege module per424",
+  "version": "v0.124.0 planned",
+  "migration": "00060_i7c4a_cosmetic_privilege.sql",
+  "changes": [
+    "Read-only CA8 witnessed eligibility observations with owner/version/time/content evidence; complete-family/count gates explicit",
+    "Character-owned coherent display population observation reusing accepted Hero/skin storage and original creationKind plus currentbeforeAwaken mapping",
+    "New Commerce privilege immutable catalog (16VIPthresholds, existingrawvip sourcebinding) and root row; manual trusted application import with monotonic snapshot/replay/audit",
+    "Typed privilege port in Playerdisplay, production read wiring; no public operator/payment activation",
+    "Existing selection/eligible helper and core reader share source predicates or explicitly differential-test consistency; no duplicateeligibilityauthority"
+  ],
+  "read_scope": "CoherentReadScope witness; content ref must match Operation.Policies content; everyowner update<=ObservedAt; no writes, lock acquisition or newTx",
+  "read_result": "Per-fact state ELIGIBLE/INELIGIBLE/UNAVAILABLE with eligibilitybasis distinct from durableowned origin; no count scalar; coverage complete onlyforqualifiedcore, wholefamilyfalse whilemissingorigin",
+  "manual_import": {
+    "policy": "C4A_MANUAL_PRIVILEGE_SNAPSHOT_V1",
+    "target": "I4 RecipientRoot identity; offline target allowed onlytrustedoperatorseam",
+    "semantic_id": "operator + stablecommandkey, independent oftarget/policy/content",
+    "time": "DB-authoritative once; replay retains old pin/instant",
+    "recovery": "Kernelreceipt positiveonly; missingunresolved; concurrent conflict rollback atomically"
+  },
+  "constraints": [
+    "Externalpaymentverification",
+    "AuthenticatedI11transport/durableoperatoraudit",
+    "Allcatalogoriginactivation",
+    "Fullcosmeticcount/familyqualification beforelater origins",
+    "ParentI7C/I7B/I7/W2acceptance"
+  ]
+}
