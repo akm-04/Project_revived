@@ -8,7 +8,10 @@
     "Character-owned coherent display population observation reusing accepted Hero/skin storage and original creationKind plus currentbeforeAwaken mapping",
     "New Commerce privilege immutable catalog (16VIPthresholds, existingrawvip sourcebinding) and root row; manual trusted application import with monotonic snapshot/replay/audit",
     "Typed privilege port in Playerdisplay, production read wiring; no public operator/payment activation",
-    "Existing selection/eligible helper and core reader share source predicates or explicitly differential-test consistency; no duplicateeligibilityauthority"
+    "Existing selection/eligible helper and core reader share source predicates or explicitly differential-test consistency; no duplicateeligibilityauthority",
+    "Shared existing I5 privilege facade uses actualcanonicalVIP when known; all production consumers wired consistently",
+    "I5 prepared skillpoint captransition reuses ApplyLevelTransition0 under storedoldcontent descriptor; atomic with privilege import",
+    "Commerce MID1vip/charge readprojection for qualified manualstate; no baseline-as-canonical claim"
   ],
   "read_scope": "CoherentReadScope witness; content ref must match Operation.Policies content; everyowner update<=ObservedAt; no writes, lock acquisition or newTx",
   "read_result": "Per-fact state ELIGIBLE/INELIGIBLE/UNAVAILABLE with eligibilitybasis distinct from durableowned origin; no count scalar; coverage complete onlyforqualifiedcore, wholefamilyfalse whilemissingorigin",
@@ -17,7 +20,9 @@
     "target": "I4 RecipientRoot identity; offline target allowed onlytrustedoperatorseam",
     "semantic_id": "operator + stablecommandkey, independent oftarget/policy/content",
     "time": "DB-authoritative once; replay retains old pin/instant",
-    "recovery": "Kernelreceipt positiveonly; missingunresolved; concurrent conflict rollback atomically"
+    "recovery": "Kernelreceipt positiveonly; missingunresolved; concurrent conflict rollback atomically",
+    "monthly_state": "Explicit QUALIFIED_ABSENT required. No active monthly product, timer or reset policy invented.",
+    "transitive_effect": "Prepare I5 locks700/721 before first write when old/new skillcap differ. Materialize oldcap, reuse ApplyLevelTransition0/newcap; oneCAS. Read facade forknown row returnssourceVIP skill_max, MonthlyPrivilegeActive=false backed by explicitmanualabsence."
   },
   "constraints": [
     "Externalpaymentverification",
