@@ -1,0 +1,87 @@
+{
+  "status": "TARGETED_BRANCH_INSPECTION_NOT_EXHAUSTIVE_ALL_WRITER_CERTIFICATE",
+  "base_git_head": "395d9e3e9cd645e4bb2d440c44c3b3a50a7dc717",
+  "findings": [
+    {
+      "path": "internal/application/bookskill/transitions.go",
+      "symbols": [
+        "apply"
+      ],
+      "effect": "Settle before and after commands; SpeedSkill writes Skills directly; SaveRoot after I5 debit/refund/exchange, so prepare620 before I5 and apply after actual save"
+    },
+    {
+      "path": "internal/application/bookskill/projection.go",
+      "symbols": [
+        "Read",
+        "BookInputsTx"
+      ],
+      "effect": "Read1056/1059 Serializable owns lockPlan and persists due root; BookInputsTx clones/applies without persistence. Prepared620 needed on mutation path only"
+    },
+    {
+      "path": "internal/application/course/transitions.go",
+      "symbols": [
+        "apply"
+      ],
+      "effect": "Values.LockCoursePlayerStateTx precedes settle; any Achievement620 prepare must move before this I5 suffix, actual completion apply after successful root/Hero saves"
+    },
+    {
+      "path": "internal/application/course/projection.go",
+      "symbols": [
+        "Read",
+        "HeroCourseInputsTx"
+      ],
+      "effect": "RR query path computes projected settlement on cloned state with MaterializationDue, no SaveRoot. Correction to broad earlier research note: no persisted course read event"
+    },
+    {
+      "path": "internal/application/characterhero/acquisition.go",
+      "symbols": [
+        "SummonNormal",
+        "CreateVows",
+        "newHero"
+      ],
+      "effect": "Insert then local facets then allocator; original semantic receipt replays before mutation. Production Capacity nil and MIDs59/305 unregistered still unqualified"
+    },
+    {
+      "path": "internal/application/characterhero/materializer.go",
+      "symbols": [
+        "PreflightPartnerEntityBatchTx",
+        "MaterializePartnerEntityBatchTx"
+      ],
+      "effect": "I5 trusted Hero batch route; root400 in preflight, fresh facet after full lock union. Production provider unregistered; do not treat fixture as production success"
+    },
+    {
+      "path": "internal/application/characterhero/appearance_service.go",
+      "symbols": [
+        "SkinOn",
+        "SkinCancel",
+        "UseIllusionSkinItem"
+      ],
+      "effect": "SkinOn owns entitlement acquisition/extension and selector mutation; cancel/illusion are presentation, no new skin count. Expiry resolved at authoritative pinned read time"
+    },
+    {
+      "path": "internal/application/characterhero/appearance_materializer.go",
+      "symbols": [
+        "GrantPermanentSkinTx"
+      ],
+      "effect": "Trusted permanent acquisition, no new public grant route; locks Hero410, canonical entitlement + Hero CAS; must be included in any complete acquisition history"
+    },
+    {
+      "path": "internal/application/dormhouse/projection.go",
+      "symbols": [
+        "VillaCountTx"
+      ],
+      "effect": "Existing typed current-villa count uses canonical MainType4 and owner versions; reuse for same semantic population. It alone does not freeze new expanded-villa achievement policy"
+    }
+  ],
+  "file_hashes": {
+    "internal/application/bookskill/transitions.go": "8689739d1adb4d7bad2914c63ddb3d1744ba145fda64aa3f2772b2a6a0bbcb8c",
+    "internal/application/bookskill/projection.go": "79fcee4bee86cdfa607aac9e15c9383004a1357cd624e950d60f3547040cb369",
+    "internal/application/course/transitions.go": "803436830aad14e1caae66680704a9272f4b161fbb51b45007f6bd842614a0f6",
+    "internal/application/course/projection.go": "fd80e1e24436ab3d8c6b8eabf6ba0bcad841cb6ff776477e0480b46f66311bff",
+    "internal/application/characterhero/acquisition.go": "201bdbd0adc0868ac233ef57fdd41d7813a0ee554ce13073c0256741bec87f65",
+    "internal/application/characterhero/materializer.go": "ab389cb5479d1be071eccb2c67d224451119ad948a95827a5936b1da2c7eb90d",
+    "internal/application/characterhero/appearance_service.go": "744ded5696723871b06aff7ba5d09c88d49cb92fe278647dd5537acd5427769e",
+    "internal/application/characterhero/appearance_materializer.go": "2e5cb0085c520de1139e26ee88b37a6a656ff8d51bdffba00b67d52452bfb8aa",
+    "internal/application/dormhouse/projection.go": "24a50b3bdd8de29c3d17678899c89ad85a0c7750ae0d98bd5bc38c523eafcac7"
+  }
+}

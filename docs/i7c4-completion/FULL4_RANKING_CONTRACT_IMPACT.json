@@ -1,0 +1,41 @@
+{
+  "status": "TARGETED_IMPLEMENTATION_READY_RESEARCH_FOR_GIRLS_ONLY_OTHER_STREAMS_EXPLICIT_GATES",
+  "changes": [
+    "Explicit private server scoped Girls Ranking using existing qualified1001; no change to canonicalmetric definition",
+    "Introduce canonical Ranking snapshot/settlement authority, not new Hero-count authority",
+    "Per-catalog scoped origin request prevents all-title capability laundering; prior ExternalOrigins API remains compatible",
+    "Weekly on-demand settlement is versioned private behavior, source only establishes title mapping/duration. Not reused for otherboards byassociation."
+  ],
+  "lock_order": [
+    "Refresh: actor fence / Rank root600; canonical owner reads through same CA8 Serializable Queryer, no foreign owner SQL",
+    "Settlement: read immutable pending snapshot, acquire I4 canonical winner315 roots ascending, then Ranking600 revalidate period/snapshot/policy and publish recipient origins; no actor/root locks discovered after600",
+    "No achievement620 or I5value writes in this path"
+  ],
+  "replay": [
+    "Refresh operationID exact immutable snapshot positive proof. Retry must not publish a different generation for same operationID",
+    "Weekly semantic period record binds first snapshot and terminal settlement, immutable recipients/origins. UnknownCOMMIT uses fresh positive terminal proof only",
+    "Expiry/canonical grant revision pinned to snapshot, never current catalog or new request time"
+  ],
+  "affected": [
+    "I4",
+    "CA2/CA7 identity and canonical roster readers",
+    "CA8",
+    "I6 time/tx/receipt",
+    "I7B profile/display and query privacy",
+    "I7C1",
+    "I7C4A",
+    "I7C4C",
+    "I7C6 handoff remainsopen"
+  ],
+  "full4_gate_waiver": false,
+  "private_policy_ref": "PRIVATE_GIRLS_RANKING_POLICY.json",
+  "source_binding": {
+    "app/model/RankList.lua": "00fcd7a76889791876e23b48f6441b7c6047a97a17b794a2adb495449233f222",
+    "app/windows/NewRankWindow.lua": "5b8d28ea2556cd0e9c2398c49873e2759a29ac939ccf70cb5dd5c9f939735360",
+    "data/tables/rank.lua": "bd8507d717b6ff1add6d943ddee68c800c97305014290941e8df203be6e4386d",
+    "data/tables/title_system.lua": "a91f9afa54ceba80d1fe752f95e417a6fa22c0663fab520f73ee64262ae2ea2d",
+    "app/common/enums.lua": "15340bd89fe7c6f150ccfd4a5cd2a2f0e8e73c89dfae9ac3388376a4799901f3",
+    "app/common/network/mid.lua": "026a20b29d97624979777a68c64c749254031604057ff42aa8f8254c3e35b5af"
+  },
+  "independent_gate_before_code": true
+}

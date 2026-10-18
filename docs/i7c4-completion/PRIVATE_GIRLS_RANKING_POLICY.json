@@ -1,0 +1,69 @@
+{
+  "schema_version": 1,
+  "policy_id": "C4C_PRIVATE_GIRLS_SERVER_RANKING_V1",
+  "classification": "IMPLEMENTATION_DECISION_PRIVATE_SERVER_POLICY_NOT_ORIGINAL_SERVER_ALGORITHM",
+  "authority": "Directuserauthorizesimplementationandprivatealgorithms;lateststeeringfull4active5queued",
+  "scope": {
+    "kind": "SERVER",
+    "cohort": "ALL_CANONICAL_I4_PLAYER_ROOTS_IN_LOGICAL_SERVER",
+    "identity": "I4playerroots,neverplayerIDarithmeticorchatregionguess"
+  },
+  "score": {
+    "field_id": 1001,
+    "provider": "Qualified127 CanonicalMetricProvider.ReadMetricsScopeTx",
+    "population": "CURRENT_DISTINCT_OWNED_NORMAL_AND_SUPER_HERO_ORIGINS",
+    "missing": "Any unavailable canonical player/Character root or invalid source observation rejects publication of the entire snapshot; never omit that player or supply zero",
+    "zero": "Qualified empty Character root yields genuine current count0; no history claim"
+  },
+  "ordering": {
+    "profile": "CURRENT_STAT_OBSERVED_V1",
+    "tie_break": "STABLE_SUBJECT_ID_ASC",
+    "basis": "Firstdurableobservationofcurrentvalueunderthisexactpolicy/content;retainwhilevalueunchanged;resetonvalue/content/policychange. Newrootdoesnotreconstructhistoricalfirstreach.",
+    "rng": "No random draw in comparisons/requests/replay. Optional lottery remains existing pure seam only, not activated."
+  },
+  "refresh": {
+    "trigger": "Each MID301 subtype37 request after client close/reopen cache clear",
+    "semantics": "Fresh coherent full cohort; immutable generation + retained metric provenance. No live polling/socket refresh.",
+    "retention": "Never silently trim snapshots referenced by period settlement or semantic operation receipts; later archival must preserve immutable references"
+  },
+  "titles": {
+    "ids": {
+      "1": 100059,
+      "2": 100060,
+      "3": 100061,
+      "4..20": 100062
+    },
+    "minimum_score": 1,
+    "source_duration_seconds": 604800,
+    "calendar": "MONDAY_00_UTC_WEEK_V1",
+    "settlement": "ON_DEMAND_FIRST_SUCCESSFUL_COHERENT_SNAPSHOT_OF_WEEK_V1",
+    "rule": "Firstpersistedsnapshotbindsoneweeklyperiod atomically. Subsequentfreshrequests cannotreplaceitswinners. Missingweekswithoutsnapshotgrantnothing, neverinventhistoricalwinners. Processpendingrecordedperiodsonrequests throughsameownerentry; futureworkeriswakeuponly.",
+    "starts": "Bound snapshot authoritative observed instant, immutable even if application delayed; expiresAt=start+604800, no refresh on replay/select/read",
+    "revocation": "No early revocation guessed; each genuine award remains eligible until fixed expiry. Different weekly origins may coexist.",
+    "delivery": "Atomic Ranking settlement record + typed PlayerDisplay.ReceiveOriginTx mirror with I4-owned sorted winner root315 locks before Ranking600. Source policy/content/generation/week/recipient/rank/title/time form immutable semantic identity."
+  },
+  "wire": {
+    "mid": 301,
+    "request": "rank_types array of subtype37, not catalog16001 or metric1001; reject unsupported/mixed subtypes until owning profiles qualified",
+    "response": "rank_list[{rank_type:37,rank_info:{my_rank:{rank,score},rank_info:[{player_id,player_name,level,avatar_id,avatar_frame_id,score,rank}]}}]",
+    "presentation": "I4 directory fields are display-only, never score/membership authority. Missing required directory rejects snapshot projection; no invented player name/avatar."
+  },
+  "origins": {
+    "scope": "Exact family+catalogID witness for100059..100062 only",
+    "rule": "Extend typed per-catalog External origin seam; retained whole-family External port compatible. Do not label whole title/bubble family complete. Ranking reads own immutable settlements to establish award truth, recipient ledger alone not proof.",
+    "others": "All other selected actual origin sources remain unavailable under their own contracts"
+  },
+  "time": {
+    "instant": "Existing generation.TimedRunner DB-authoritative instant pinned once before retry/locks",
+    "stale": "Reject bound instant older than observed root; do not resample while waiting/retrying",
+    "clock": "UTC, no universal WorkPlace05reset inference; future policy version explicit. Backward jumps cannot refresh expiry or award same period twice."
+  },
+  "not_claimed": [
+    "Originalglobal/serverGirlsscope",
+    "Originalfirst-reachhistory",
+    "Originalweeklytitlealgorithm",
+    "PerHeroAP/Skins/modeRankingactivation",
+    "CompleteAchievement/cosmetic/force/full4closure",
+    "Heroacquisitionproductioncapacityqualification"
+  ]
+}
