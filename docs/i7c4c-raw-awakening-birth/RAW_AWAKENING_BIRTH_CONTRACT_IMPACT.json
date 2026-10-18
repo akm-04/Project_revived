@@ -1,6 +1,5 @@
 {
   "status": "TARGETED_SOURCE_AND_TRANSITIVE_CONTRACT_IMPACT_REVIEW_RECONCILED_BEFORE_NEW_OWNER_CODE",
-  "contract_id": "C4C_PRIVATE_CHARACTER_RAW_AWAKENING_BIRTH_V1",
   "c1_bindings": [
     {
       "path": "hot/00_PASSMAP/PASS685_I7C1_PROVIDER_SCOPE_OWNERSHIP_CONTRACT.json",
@@ -54,5 +53,6 @@
   ],
   "authorization": "Direct user full4 research/design/implementation/privatepolicy authority retained; required new preimplementation publication gate still mandatory before product edits.",
   "full4_closed": false,
-  "next5a_started": false
+  "next5a_started": false,
+  "affected_contract_id": "C4C_PRIVATE_CHARACTER_RAW_AWAKENING_BIRTH_V1"
 }
