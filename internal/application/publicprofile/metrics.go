@@ -24,6 +24,9 @@ type MetricObservation struct {
 	Value              int64             `json:"value"`
 	Semantics          string            `json:"semantics"`
 	PopulationVersion  int64             `json:"population_version,omitempty"`
+	PrivatePolicy      string            `json:"private_policy,omitempty"`
+	PopulationDigest   string            `json:"population_digest,omitempty"`
+	PetRootVersion     int64             `json:"pet_root_version,omitempty"`
 	LibraryRootVersion int64             `json:"library_root_version,omitempty"`
 	SourceVersion      int64             `json:"source_version"`
 	ContentRevision    string            `json:"content_revision"`

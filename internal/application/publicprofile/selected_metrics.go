@@ -20,6 +20,7 @@ type MarriedPopulationReader interface {
 }
 type CanonicalMetricProvider struct {
 	Creation CanonicalCreationMetricProvider
+	Roster   ca.RosterMetricReader
 	Library  MarriedPopulationReader
 }
 
@@ -44,7 +45,7 @@ func (p CanonicalMetricProvider) ReadMetricsScopeTx(c context.Context, sc tx.Sco
 	}
 	seen := map[int64]bool{}
 	for _, id := range r.IDs {
-		if seen[id] || (id != 1010 && id != 1011) {
+		if seen[id] || (id != 1010 && id != 1011 && !isRosterMetric(id)) {
 			return nil, ErrContent
 		}
 		seen[id] = true
@@ -79,8 +80,17 @@ func (p CanonicalMetricProvider) ReadMetricsScopeTx(c context.Context, sc tx.Sco
 		}
 		created = values[0]
 	}
+	roster := map[int64]MetricObservation{}
+	if seen[1001] || seen[1002] || seen[1008] || seen[1009] {
+		roster, e = p.rosterMetrics(c, coherent, r, seen[1001] || seen[1008] || seen[1009], seen[1002])
+		if e != nil {
+			return nil, e
+		}
+	}
 	for _, id := range r.IDs {
-		if id == 1010 {
+		if isRosterMetric(id) {
+			out = append(out, roster[id])
+		} else if id == 1010 {
 			out = append(out, married)
 		} else {
 			out = append(out, created)
@@ -89,6 +99,18 @@ func (p CanonicalMetricProvider) ReadMetricsScopeTx(c context.Context, sc tx.Sco
 	return out, nil
 }
 func validMetricBasis(v MetricObservation) bool {
+	if isRosterMetric(v.FieldID) {
+		if v.PrivatePolicy != RosterMetricPolicy || v.Semantics != RosterMetricSemantics || !validRosterDigest(v.PopulationDigest) || v.LibraryRootVersion != 0 || v.Value < 0 {
+			return false
+		}
+		if v.FieldID == 1002 {
+			return v.Owner == "CharacterPet" && v.PopulationVersion == 0 && v.PetRootVersion > 0 && v.SourceVersion == v.PetRootVersion
+		}
+		return v.Owner == "CharacterHero" && v.PetRootVersion == 0 && v.PopulationVersion > 0 && v.SourceVersion == v.PopulationVersion
+	}
+	if v.PrivatePolicy != "" || v.PopulationDigest != "" || v.PetRootVersion != 0 {
+		return false
+	}
 	switch v.FieldID {
 	case 1011:
 		return v.Owner == "I5.Player" && v.Semantics == CreationMetricSemantics && v.PopulationVersion == 0 && v.LibraryRootVersion == 0

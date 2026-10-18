@@ -215,6 +215,14 @@ func (s CommandService) proof(c context.Context, t tx.Queryer, a identity.ActorC
 		}
 	}
 	if q.Kind == ShowCommand {
+		for _, v := range r.MetricObservations {
+			if isRosterMetric(v.FieldID) {
+				pin, ok := rr.OperationPolicyRefs.Get("roster-metrics")
+				if !ok || pin != v.PrivatePolicy {
+					return r, true, ErrConflict
+				}
+			}
+		}
 		values, e := metricValues(MetricRequest{PlayerID: a.PlayerID, IDs: q.Show, ContentRevision: r.Revision, ObservedAt: r.DecisionAt}, r.MetricObservations)
 		if e != nil || r.Intro != "" || len(r.Hide) > 0 || len(values) != len(r.Show) {
 			return r, true, ErrConflict
@@ -300,6 +308,15 @@ func (s CommandService) Execute(c context.Context, a identity.ActorContext, q Co
 	bound, e := bindPolicy(o, p)
 	if e != nil {
 		return CommandResult{}, e
+	}
+	for _, id := range q.Show {
+		if isRosterMetric(id) {
+			bound, e = bindRosterPolicy(bound)
+			if e != nil {
+				return CommandResult{}, e
+			}
+			break
+		}
 	}
 	var out CommandResult
 	_, res, e := s.Timed.Run(c, bound, i5.DefaultProfile(), tx.Options{Isolation: tx.Serializable}, tx.RetryPolicy{MaxAttempts: 3, RetryDefiniteAbort: true}, commandResolver{s, a, q, bound}, func(c context.Context, sc gen.TimedScope) error {

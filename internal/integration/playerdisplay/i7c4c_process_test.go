@@ -87,12 +87,12 @@ func TestI7C4CActualAPIMetricSelectionReadAndRestart(t *testing.T) {
 	if code != 200 || achievementRoot(t, p, a).Progress != 1 || achievementEvents(t, p, a) != 1 {
 		t.Fatal("actualMID840", code, out)
 	}
-	code, out = post(1831, map[string]any{"show_types": []int64{1010, 1011}})
+	code, out = post(1831, map[string]any{"show_types": []int64{1001, 1008, 1009, 1010}})
 	if code != 200 {
 		t.Fatal("metricselection", code, out)
 	}
 	selected, ok := out["show_types"].(map[string]any)
-	if !ok || selected["1010"] != float64(1) {
+	if !ok || selected["1010"] != float64(1) || selected["1001"] != float64(1) || selected["1008"] != float64(5) || selected["1009"] != float64(0) {
 		t.Fatal("metricselectionvalue", out)
 	}
 	code, out = post(1829, map[string]any{"to_player_id": int64(a.PlayerID), "sub_type": 1})
@@ -100,7 +100,7 @@ func TestI7C4CActualAPIMetricSelectionReadAndRestart(t *testing.T) {
 		t.Fatal("selectedread", code, out)
 	}
 	selected, ok = out["show_types"].(map[string]any)
-	if !ok || selected["1010"] != float64(1) {
+	if !ok || selected["1010"] != float64(1) || selected["1001"] != float64(1) || selected["1008"] != float64(5) || selected["1009"] != float64(0) {
 		t.Fatal("currentmetric", out)
 	}
 	code, out = post(1840, map[string]any{})
@@ -119,7 +119,7 @@ func TestI7C4CActualAPIMetricSelectionReadAndRestart(t *testing.T) {
 		t.Fatal("restartread", code, out)
 	}
 	selected, ok = out["show_types"].(map[string]any)
-	if !ok || selected["1010"] != float64(1) {
+	if !ok || selected["1010"] != float64(1) || selected["1001"] != float64(1) || selected["1008"] != float64(5) || selected["1009"] != float64(0) {
 		t.Fatal("restartmetric", out)
 	}
 	code, out = post(1831, map[string]any{"show_types": []int64{1004}})

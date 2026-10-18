@@ -12,5 +12,5 @@ import (
 )
 
 func canonicalProfileMetrics(content contentstore.Store) app.CanonicalMetricProvider {
-	return app.CanonicalMetricProvider{Creation: app.CanonicalCreationMetricProvider{Players: i5store.Store{}}, Library: lib.Service{Heroes: characterstore.LibraryHeroPort{Store: characterstore.Store{}}, Library: librarystore.Store{}, Content: content}}
+	return app.CanonicalMetricProvider{Roster: characterstore.RosterMetricReader{Store: characterstore.Store{}, Content: content}, Creation: app.CanonicalCreationMetricProvider{Players: i5store.Store{}}, Library: lib.Service{Heroes: characterstore.LibraryHeroPort{Store: characterstore.Store{}}, Library: librarystore.Store{}, Content: content}}
 }

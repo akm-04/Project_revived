@@ -1,6 +1,6 @@
 {
   "accepted_backend_sha256": "d8d586f85ec6b186c49545eccd550aa75cb92a86741c795b6427d38e017ed9b9",
-  "base_backend_sha256": "4e90a138a655fbc794eccd6d3bcd08294824f9f6fd13ab3095abaa883ae3e863",
+  "base_backend_sha256": "ac78e8b354030618fa259ca09ac3a479c892499d6c069c1ac320b1070e8169a6",
   "ca1_acceptance": "ACCEPTED_SEALED_PASS512",
   "ca1_contract": "docs/PASS511_CA1_IMPLEMENTATION_CONTRACT.md",
   "ca1_local_evidence": "docs/PASS511_CA1_LOCAL_GATE_EVIDENCE.json",
@@ -674,8 +674,22 @@
   "i7c4c_gate_status_at_identity_freeze": "NOT_RUN",
   "i7c4c_implementation_authorized": true,
   "i7c4c_implementation_started": true,
-  "i7c4c_preimplementation_pass": "721.0",
+  "i7c4c_preimplementation_pass": "723.0",
+  "i7c4c_private_metric_ids": [
+    1001,
+    1002,
+    1008,
+    1009
+  ],
+  "i7c4c_private_policy": "docs/i7c4c-private-policy/PRIVATE_METRIC_RANKING_POLICY.json",
+  "i7c4c_private_policy_gate_status_at_identity_freeze": "NOT_RUN",
+  "i7c4c_private_roster_implementation_started": true,
   "i7c4c_product_accepted": false,
+  "i7c4c_qualified_base_metric_ids": [
+    1010,
+    1011
+  ],
+  "i7c4c_ranking_activation": false,
   "i7c4c_ranking_qualified": false,
   "i7c_product_accepted": false,
   "implementation_revision_algorithm": "sha256(sorted changed source path-NUL-bytes versus accepted650R5;release metadata excluded)",
@@ -776,7 +790,7 @@
   "parent_i6_accepted_tested_candidate_sha256": "dbc752c6cc18e51ca859caec598d6500a1d12de28f826849d55c5f665fbddec9",
   "parent_i6_accepted_tested_implementation_revision_sha256": "46b9ea5d54c80f022449833d594d84c5f48b18304cd2a33c9e53b560ce070b26",
   "parent_revision_verification": "REPRODUCIBLE_UNDER_PASS517_CANONICAL_DIGEST_BASIS",
-  "pass": "722.0",
+  "pass": "724.0",
   "passmap_authority_note": "Selected Pass663 frozen2A design and approvedtopology; explicit user product implementation authorization recordedCP189.",
   "passmap_authority_sha256": "7a9d5fa7522d384d690b09ec7caa99eb69a8097ebba4d51473db00746cc7ef0f",
   "passmap_generation": "663_RESEARCH_DESIGN",
@@ -791,12 +805,12 @@
   "sbom_created_at": "2026-10-09T10:31:06Z",
   "schema_version": 1,
   "snapshot": "D10 Publication immutable revisions/items, canonical scope and PostgreSQL visibility, read markers, source-shaped7/1537/8193/8194; inherited8 accepted656 preserved.",
-  "stage": "I7C-4C_SELECTED_METRICS_F1",
+  "stage": "I7C-4C_PRIVATE_ROSTER_ORDERING_F1",
   "status": "FROZEN_NOT_ACCEPTED_EXACT_QUALIFICATION_PENDING",
   "target_go": "1.27.1",
   "target_postgresql": "18.6",
   "target_sqlc": "1.31.1",
   "toolbox_archive_sha256": "e4e194c9627929299577364b953b2468d6118fac4283fd8030f10b5a27456c2b",
-  "version": "v0.126.0",
+  "version": "v0.127.0",
   "w2_claimed": false
 }

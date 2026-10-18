@@ -94,6 +94,10 @@ func (s ReadService) Read(c context.Context, a identity.ActorContext, q ReadRequ
 			return nil, e
 		}
 	}
+	o, e = bindRosterPolicy(o)
+	if e != nil {
+		return nil, e
+	}
 	var out map[string]any
 	res, e := s.Runner.Run(c, o, i5.DefaultProfile(), tx.Options{Isolation: tx.RepeatableRead}, tx.RetryPolicy{MaxAttempts: 1}, nil, func(c context.Context, sc tx.Scope) error {
 		var e error
