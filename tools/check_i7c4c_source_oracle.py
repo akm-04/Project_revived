@@ -1,0 +1,11 @@
+#!/usr/bin/env python3
+from pathlib import Path
+import hashlib,json,re,sys,zipfile
+EXPECTED={'app/common/enums.lua': '15340bd89fe7c6f150ccfd4a5cd2a2f0e8e73c89dfae9ac3388376a4799901f3', 'app/model/PersonDisplay.lua': '022fcbf39167ac9197ce5034b32fd5833016742744ad3de118ceacf6f808cfb8', 'app/windows/PersonDisplayWindow.lua': '22a0c02172eabec1d9728d18293273c8e2aa9e6c8e5b1a4bf3af2feae14f158c', 'app/windows/SelectShowTypeWindow.lua': '636f466ca804cacdd24ad3e892b1f713a9dd9af5394366e18796913eb498adda', 'app/common/tables/PersonDisplayWordsTable.lua': '9c57ef8bcd912654e30fb04cc3ef00be937ada4036c8c426064bc0879217e729', 'data/tables/person_display_words.lua': 'ca342990ff24d8c5a4c12b270401c276b3e29597d43555f30978a2c5162afeb6', 'app/model/RankList.lua': '00fcd7a76889791876e23b48f6441b7c6047a97a17b794a2adb495449233f222', 'app/common/tables/RankTable.lua': '691eca82e14cfbd028a60502c8a8c6a79a0deb6702b52375f5fae142314f53ef', 'app/windows/NewRankWindow.lua': '5b8d28ea2556cd0e9c2398c49873e2759a29ac939ccf70cb5dd5c9f939735360', 'app/windows/RankWindow.lua': '080c4261e0fdaddcfe4db8c27cea494adefd11ed03c4c2030ba62afc4b8ecad7', 'data/tables/rank.lua': 'bd8507d717b6ff1add6d943ddee68c800c97305014290941e8df203be6e4386d', 'data/tables/title_system.lua': 'a91f9afa54ceba80d1fe752f95e417a6fa22c0663fab520f73ee64262ae2ea2d', 'app/model/Library.lua': '1830b7e7a5a5203dc7e9eea5bd505b5025b03b52454c69756e14549718962063', 'app/model/NormalHero.lua': '125183556caeecc182bf0702dd1f95160c8ba1666a3b97fbb8a7261d30ae0ac9'}
+p=Path(sys.argv[1]);assert hashlib.file_digest(p.open('rb'),'sha256').hexdigest()=='c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf'
+with zipfile.ZipFile(p)as z:
+ for n,h in EXPECTED.items():assert hashlib.sha256(z.read('app-assets/output/assets/src_64/'+n)).hexdigest()==h,n
+ enums=z.read('app-assets/output/assets/src_64/app/common/enums.lua').decode('utf-8-sig');assert re.search(r'WIVE_NUM\s*=\s*1010',enums)
+ table=z.read('app-assets/output/assets/src_64/data/tables/person_display_words.lua').decode('utf-8-sig');assert '締結契約的戰姬'in table and '同一成就的金銀銅三個獎盃算三個'in table
+ rank=z.read('app-assets/output/assets/src_64/app/model/RankList.lua').decode('utf-8-sig');assert 'LOAD_RANK_LIST'in rank and 'rank_types'in rank
+print('I7C4C SOURCE ORACLE: PASS exact14 relevant source members;1010 canonicalmarriage;1004tier distinction;Rankingconsumer only')

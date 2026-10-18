@@ -35,7 +35,7 @@ func registerPublicProfile(c context.Context, p *postgres.Pool, r tx.Runner, a r
 	if _, e = content.ReadPublicProfilePolicy(c, p, rev); e != nil {
 		return e
 	}
-	s := app.CommandService{Timed: gen.TimedRunner{Binder: gen.Binder{Time: postgres.AuthoritativeTime{Queryer: p}}, Runner: r}, Reads: r, Fresh: p, Roots: app.RootService{Store: publicprofilestore.Store{}}, Players: i4store.PlayerRootLocker{}, Fence: i5store.Store{}, Receipts: receipts, Content: content, Metrics: app.CanonicalCreationMetricProvider{Players: i5store.Store{}}}
+	s := app.CommandService{Timed: gen.TimedRunner{Binder: gen.Binder{Time: postgres.AuthoritativeTime{Queryer: p}}, Runner: r}, Reads: r, Fresh: p, Roots: app.RootService{Store: publicprofilestore.Store{}}, Players: i4store.PlayerRootLocker{}, Fence: i5store.Store{}, Receipts: receipts, Content: content, Metrics: canonicalProfileMetrics(content)}
 	d := stockruntime.PublicProfileDispatcher{Authority: a, Service: s}
 	for _, mid := range []uint16{1831, 1833, 1834} {
 		if e = router.Register(mid, d); e != nil {

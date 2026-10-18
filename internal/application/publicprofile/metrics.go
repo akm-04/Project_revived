@@ -18,14 +18,16 @@ type MetricRequest struct {
 	ObservedAt      time.Time
 }
 type MetricObservation struct {
-	Owner           string            `json:"owner"`
-	PlayerID        identity.PlayerID `json:"player_id"`
-	FieldID         int64             `json:"field_id"`
-	Value           int64             `json:"value"`
-	Semantics       string            `json:"semantics"`
-	SourceVersion   int64             `json:"source_version"`
-	ContentRevision string            `json:"content_revision"`
-	ObservedAt      time.Time         `json:"observed_at"`
+	Owner              string            `json:"owner"`
+	PlayerID           identity.PlayerID `json:"player_id"`
+	FieldID            int64             `json:"field_id"`
+	Value              int64             `json:"value"`
+	Semantics          string            `json:"semantics"`
+	PopulationVersion  int64             `json:"population_version,omitempty"`
+	LibraryRootVersion int64             `json:"library_root_version,omitempty"`
+	SourceVersion      int64             `json:"source_version"`
+	ContentRevision    string            `json:"content_revision"`
+	ObservedAt         time.Time         `json:"observed_at"`
 }
 type MetricReader interface {
 	ReadMetricsTx(context.Context, tx.Queryer, MetricRequest) ([]MetricObservation, error)
@@ -71,7 +73,7 @@ func metricValues(r MetricRequest, obs []MetricObservation) (map[string]int64, e
 	}
 	out := map[string]int64{}
 	for _, v := range obs {
-		if !wanted[v.FieldID] || v.PlayerID != r.PlayerID || v.ContentRevision != r.ContentRevision || !v.ObservedAt.Equal(r.ObservedAt) || v.SourceVersion <= 0 || v.FieldID != 1011 || v.Owner != "I5.Player" || v.Semantics != CreationMetricSemantics || v.Value < -9007199254740991 || v.Value > 9007199254740991 {
+		if !wanted[v.FieldID] || v.PlayerID != r.PlayerID || v.ContentRevision != r.ContentRevision || !v.ObservedAt.Equal(r.ObservedAt) || v.SourceVersion <= 0 || !validMetricBasis(v) || v.Value < -9007199254740991 || v.Value > 9007199254740991 {
 			return nil, ErrContent
 		}
 		delete(wanted, v.FieldID)

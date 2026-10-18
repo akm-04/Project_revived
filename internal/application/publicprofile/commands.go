@@ -337,7 +337,7 @@ func (s CommandService) Execute(c context.Context, a identity.ActorContext, q Co
 			change.HideSubtypes = &q.Hide
 			result.Hide = append([]int16{}, q.Hide...)
 		case ShowCommand:
-			obs, e := s.Metrics.ReadMetricsTx(c, sc.Tx, MetricRequest{PlayerID: a.PlayerID, IDs: q.Show, ContentRevision: rev, ObservedAt: at})
+			obs, e := readMetricsScopeTx(c, s.Metrics, tx.Scope{Tx: sc.Tx, Operation: sc.Operation.Operation(), Attempt: sc.Attempt, Options: sc.Options}, MetricRequest{PlayerID: a.PlayerID, IDs: q.Show, ContentRevision: rev, ObservedAt: at})
 			if e != nil {
 				return ErrContent
 			}

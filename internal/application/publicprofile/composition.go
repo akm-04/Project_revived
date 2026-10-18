@@ -10,6 +10,7 @@ import (
 	"gxb.local/backend/v2/internal/application/i5"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/operation"
+	"gxb.local/backend/v2/internal/foundation/policy"
 	"gxb.local/backend/v2/internal/foundation/tx"
 	"strconv"
 	"time"
@@ -80,6 +81,18 @@ func (s ReadService) Read(c context.Context, a identity.ActorContext, q ReadRequ
 	rev, e := s.Content.ActiveRevision(c, s.Fresh)
 	if e != nil {
 		return nil, e
+	}
+	// Preserve existing operation policies while pinning the selected metric
+	// content before the caller transaction; a conflicting caller pin fails closed.
+	if pin, ok := o.Policies.Get("content"); ok && pin != rev {
+		return nil, ErrContent
+	}
+	if _, ok := o.Policies.Get("content"); !ok {
+		refs := append(o.Policies.Refs(), policy.Ref{Name: "content", Version: rev})
+		o.Policies, e = policy.NewSet(refs...)
+		if e != nil {
+			return nil, e
+		}
 	}
 	var out map[string]any
 	res, e := s.Runner.Run(c, o, i5.DefaultProfile(), tx.Options{Isolation: tx.RepeatableRead}, tx.RetryPolicy{MaxAttempts: 1}, nil, func(c context.Context, sc tx.Scope) error {
@@ -276,7 +289,7 @@ func (s ReadService) metrics(c context.Context, sc tx.Scope, pid identity.Player
 		return nil, ErrProfileProvider
 	}
 	req := MetricRequest{PlayerID: pid, IDs: ids, ContentRevision: rev, ObservedAt: at}
-	obs, e := s.Metrics.ReadMetricsTx(c, sc.Tx, req)
+	obs, e := readMetricsScopeTx(c, s.Metrics, sc, req)
 	if e != nil {
 		return nil, e
 	}
