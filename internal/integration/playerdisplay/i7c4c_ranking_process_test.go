@@ -7,6 +7,10 @@ import (
 	"encoding/json"
 	"gxb.local/backend/v2/internal/adapters/blobstore"
 	pg "gxb.local/backend/v2/internal/adapters/postgres"
+	"gxb.local/backend/v2/internal/adapters/postgres/characterstore"
+	"gxb.local/backend/v2/internal/adapters/postgres/contentstore"
+	ca "gxb.local/backend/v2/internal/application/characterasset"
+	"gxb.local/backend/v2/internal/application/publicstats"
 	"gxb.local/backend/v2/internal/domain/character"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"net"
@@ -350,7 +354,7 @@ func TestI7C4CRankingActualAPIReopenRestartAndDatabaseRestore(t *testing.T) {
 	admissionState := func(db *pg.Pool) string {
 		t.Helper()
 		var parts []string
-		for _, table := range []string{"player_hero_roots", "player_heroes", "player_library_heroes", "player_dorm_heroes", "player_course_heroes", "player_inscription_heroes", "player_element_heroes", "player_spirit_heroes", "player_hero_evolution", "player_currency_balances", "player_item_stacks"} {
+		for _, table := range []string{"player_hero_roots", "player_heroes", "player_library_heroes", "player_dorm_heroes", "player_course_heroes", "player_inscription_heroes", "player_element_heroes", "player_spirit_heroes", "player_hero_evolution", "player_hero_raw_awakening", "player_currency_balances", "player_item_stacks"} {
 			var raw string
 			if e := db.QueryRow(ctx, `SELECT coalesce(jsonb_agg(to_jsonb(x) ORDER BY to_jsonb(x)::text),'[]'::jsonb)::text FROM `+table+` x WHERE player_id=$1`, born).Scan(&raw); e != nil {
 				t.Fatal(table, e)
@@ -361,12 +365,71 @@ func TestI7C4CRankingActualAPIReopenRestartAndDatabaseRestore(t *testing.T) {
 			parts = append(parts, table+":"+raw)
 		}
 		var raw string
-		if e := db.QueryRow(ctx, `SELECT jsonb_agg(to_jsonb(x) ORDER BY receipt_id)::text FROM gxb_operation_receipts x WHERE owner_kind='player' AND owner_key=$1 AND domain='character-hero' AND operation='stone-summon'`, strconv.FormatInt(born, 10)).Scan(&raw); e != nil {
+		if e := db.QueryRow(ctx, `SELECT jsonb_agg(to_jsonb(x) ORDER BY receipt_id)::text FROM gxb_operation_receipts x WHERE owner_kind='player' AND owner_key=$1 AND domain='character-hero' AND operation IN('stone-summon','equip-item')`, strconv.FormatInt(born, 10)).Scan(&raw); e != nil {
 			t.Fatal(e)
 		}
 		parts = append(parts, "receipts:"+raw)
 		return strings.Join(parts, "\n")
 	}
+	forceRead := func(db *pg.Pool) float64 {
+		t.Helper()
+		var force float64
+		if e := statRead(t, db, rev, func(sc ca.CoherentReadScope) error {
+			result, e := rawBirthStats(db).HeroTx(ctx, sc, character.HeroRef{PlayerID: identity.PlayerID(born), PartnerID: 1}, publicstats.View{Kind: publicstats.Self, Viewer: identity.PlayerID(born)})
+			if e == nil && (result.Stats.Force <= 0 || result.Stats.Model != "NormalHero") {
+				t.Fatal("invalid genuine fresh Hero force", result)
+			}
+			force = result.Stats.Force
+			return e
+		}); e != nil {
+			t.Fatal("genuine fresh Hero canonical stat composition", e)
+		}
+		return force
+	}
+	beforeForce := forceRead(restored)
+	var position character.HeroEquipmentPosition
+	var equipSlot int64
+	for slot := int64(1); slot <= character.HeroEquipmentSlotCount; slot++ {
+		candidate, err := (contentstore.Store{}).HeroEquipmentPositionTx(ctx, restored, rev, 10001001, 1, slot)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if !candidate.OrdinaryEligible || !candidate.ItemID.Valid() {
+			continue
+		}
+		primitive, err := (contentstore.Store{}).EquipmentPrimitiveTx(ctx, restored, rev, int64(candidate.ItemID))
+		if err != nil {
+			t.Fatal(err)
+		}
+		if primitive.SourceItemType == 1 && primitive.RequiredLevel <= 1 {
+			position = candidate
+			equipSlot = slot
+			break
+		}
+	}
+	if equipSlot == 0 {
+		t.Fatal("no source-qualified gear for actual level1 Hero")
+	}
+	// Explicit owned inventory fixture; the actual production equipment command
+	// must consume it and persist the source-defined Hero slot.
+	exec(t, restored, `INSERT INTO player_item_stacks(player_id,item_id,quantity,state_version,acquired_at,updated_at)VALUES($1,$2,2,1,clock_timestamp(),clock_timestamp())ON CONFLICT(player_id,item_id)DO UPDATE SET quantity=excluded.quantity`, born, int64(position.ItemID))
+	code, out = post(54, map[string]any{"partner_id": int64(1), "equip_index": equipSlot})
+	if code != 200 || out["error"] != nil || (out["error_code"] != nil && out["error_code"] != float64(0)) {
+		t.Fatal("actual production equipment mutation", code, out)
+	}
+	equipped, e := (characterstore.Store{}).ReadHeroByPartnerIDTx(ctx, restored, identity.PlayerID(born), 1)
+	if e != nil || equipped.Equipment[equipSlot-1] != 1 || equipped.StateVersion != 2 {
+		t.Fatal("equipment success lacks canonical mutation", equipped, e)
+	}
+	var gearLeft int64
+	if e = restored.QueryRow(ctx, `SELECT quantity FROM player_item_stacks WHERE player_id=$1 AND item_id=$2`, born, int64(position.ItemID)).Scan(&gearLeft); e != nil || gearLeft != 1 {
+		t.Fatal("gear cost not consumed once", gearLeft, e)
+	}
+	afterForce := forceRead(restored)
+	if afterForce <= beforeForce {
+		t.Fatal("genuine source gear did not increase current force", beforeForce, afterForce)
+	}
+	t.Log("GENUINE_PRODUCTION_HERO_FORCE_NO_RAW_AWAKENING_FIXTURE_BEFORE_AFTER_GEAR", beforeForce, afterForce)
 	admissionBefore := admissionState(restored)
 	stop()
 	admissionDump := filepath.Join(t.TempDir(), "normal59-admission.dump")
@@ -384,6 +447,9 @@ func TestI7C4CRankingActualAPIReopenRestartAndDatabaseRestore(t *testing.T) {
 	if admissionState(admissionRestored) != admissionBefore {
 		t.Fatal("admission restore changed canonical state/receipt/facets/resources")
 	}
+	if forceRead(admissionRestored) != afterForce {
+		t.Fatal("restored canonical force changed")
+	}
 	cmd = start()
 	running = true
 	freshBoard()
@@ -397,6 +463,6 @@ func TestI7C4CRankingActualAPIReopenRestartAndDatabaseRestore(t *testing.T) {
 			t.Fatal("unqualified route activated", mid, out)
 		}
 	}
-	t.Log("GENUINE_PRODUCTION_NORMAL59_NO_DIAGNOSTIC_CAPACITY canonical source cost+private policy receipt+all seven fresh facets+currentGirls Ranking+restart+relocated restore;64/305 remain gated", born)
+	t.Log("GENUINE_PRODUCTION_NORMAL59_NO_DIAGNOSTIC_CAPACITY canonical source cost+private policy receipt+all eight fresh facets+currentGirls Ranking+genuine currentforce after gear+restart+relocated restore;64/305 remain gated", born)
 	t.Log("ACTUAL_API_301_SERVER37_REOPEN_RESTART_RELOCATED_PG_RESTORE immutable snapshot receipt/weekly award/recipient provenance preserved; initial legacy participants use diagnostic capacity; new fresh Normal59 is real production policy; whole title picker remains gated", before)
 }

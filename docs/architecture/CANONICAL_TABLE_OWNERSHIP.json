@@ -3187,6 +3187,24 @@
       "migration": "migrations/00062_i7c4c_girls_ranking.sql",
       "owner": "Ranking",
       "write_exceptions": []
+    },
+    "player_hero_raw_awakening": {
+      "allowed_query_owners": [
+        "character/hero-core"
+      ],
+      "allowed_read_paths": [
+        "sql/character/",
+        "internal/adapters/postgres/characterstore/",
+        "internal/adapters/postgres/characterqueries/"
+      ],
+      "allowed_write_paths": [
+        "sql/character/",
+        "internal/adapters/postgres/characterstore/",
+        "internal/adapters/postgres/characterqueries/"
+      ],
+      "migration": "migrations/00063_i7c4_character_raw_awakening_birth.sql",
+      "owner": "character/hero-core",
+      "write_exceptions": []
     }
   }
 }

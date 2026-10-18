@@ -83,17 +83,10 @@ type Conquer interface {
 	HeroInputsTx(context.Context, ca.CoherentReadScope, character.HeroRef) (conquer.HeroInputs, error)
 }
 
-// Awakening is a required future Character-owned observation. A caller default
+// Awakening is a required Character-owned observation. A caller default
 // or a stat fixture is not its implementation; nil leaves Hero reads unavailable.
-type AwakeningObservation struct {
-	Ref               character.HeroRef
-	StateVersion      int64
-	ContentRevision   string
-	ObservedAt        time.Time
-	Known             bool
-	RawStage          int64
-	ProducerReference string
-}
+type AwakeningObservation = ca.HeroRawAwakeningObservation
+
 type Awakening interface {
 	RawAwakeningTx(context.Context, ca.CoherentReadScope, character.HeroRef) (AwakeningObservation, error)
 }
