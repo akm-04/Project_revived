@@ -1,0 +1,366 @@
+[
+  {
+    "name": "RULE_RANK_TEXT",
+    "translation": "Your current rank is No.%s at Top Floor, maintain this rank(No.%s to No.%s), you will get the following rewards"
+  },
+  {
+    "name": "RULE_RANK_TEXT2",
+    "translation": "Your current rank at No.%s at Top Floor, maintain this rank(No.%s), you will get the following rewards"
+  },
+  {
+    "name": "PEAK_RULE_RANK_TEXT",
+    "translation": "Your server rank of 1 on 1 is %d,stay at current rank and you can get these rewards:"
+  },
+  {
+    "name": "PEAK_RULE_RANK_TEXT2",
+    "translation": "You currently rank at No.%s at 1 on 1, maintain this rank(No.%s), you will get the following rewards"
+  },
+  {
+    "name": "PARADISE_RULE_RANK_TEXT",
+    "translation": "You are currently rank at No.%d at Fantasy， maintain current rank, then you will be rewarded"
+  },
+  {
+    "name": "REGION_SUOYOUSIFUQI",
+    "translation": "All Servers"
+  },
+  {
+    "name": "APPLY_RANK_DESC1",
+    "translation": "left.Current Place: No."
+  },
+  {
+    "name": "APPLY_RANK_DESC2",
+    "translation": "Current Place: No."
+  },
+  {
+    "name": "APPLY_RANK_DESC3",
+    "translation": ", number of applicants:"
+  },
+  {
+    "name": "APPLY_RANK_DESC4",
+    "translation": "Number of applicants:"
+  },
+  {
+    "name": "BOSS_RANK_TITLE_1",
+    "translation": "Karatine"
+  },
+  {
+    "name": "BOSS_RANK_TITLE_2",
+    "translation": "Haxie"
+  },
+  {
+    "name": "BOSS_RANK_TITLE_3",
+    "translation": "Gambler"
+  },
+  {
+    "name": "BOSS_RANK_TITLE_4",
+    "translation": "Smartie"
+  },
+  {
+    "name": "BOSS_RANK_TITLE_5",
+    "translation": "Saint"
+  },
+  {
+    "name": "NIAN_RANK_TITLE_1",
+    "translation": "Monkey King"
+  },
+  {
+    "name": "SERVICE_CHAT_CHANNEL",
+    "translation": "Cross Server"
+  },
+  {
+    "name": "KITE_KING_RULE",
+    "translation": "1.During event, you can get kites by recharging required amount of diamonds. |2. Your one-time recharge must reach the requirements to get kites, if you recharge more than 3000 diamonds at a time, it’ll be counted as 3000 diamonds recharge. |3.You will get the kites from other 2 options if your one time recharge reaches 3000 diamonds. Which means, recharging 600 diamonds will also earn you 300 diamonds level of rewards.|4.After flying a kite, other players are needed to find the kite in correct location to earn diamond rewards. Getting the wrong place will result in you getting less diamond rewards! |5.To join the Election, you must be above lv20 and at least fly 10 kites during event. |6.During event, you can join the Election any time as long as you fit the requirement. |7.The rank in Election will be displayed by the votes participant gets. Rank 51 and below will not be displayed|8.Every player can vote for 1 player once a day, the vote of first 4 days will reward you gold, and the last 3 days will earn you diamonds. The more votes you send, the more rewards you get. |9.Except winning votes from players, you can get votes through flying kites. |10.Every vote players send you equals to 2 votes, flying 1 mini kite equals to 1 vote, flying 1 classic kite equals to 2 votes, flying 1 deluxe kite equals to 10 votes. |11.The event will start calculating rewards on the last day of event at 22:00(GMT+8). Players will receive their rewards based on their rank via email.|12. The No.1 player will receive 1 additional reward which is called \"Event Ticket\". The user may use \"Event Ticket\" to open 1 ordinary event for all servers that lasts for 6 hours."
+  },
+  {
+    "name": "RANK_NOT_ENOUGH_TO_VOTE",
+    "translation": "Please reach Academy Lv20 first."
+  },
+  {
+    "name": "SKYCITY_RULE",
+    "translation": "1.Every player only has 1 chance to reset Sky Tower; after reset, cleared floor will be reset.|2.In Sky Tower, the higher floor you conquer, the more reward you shall receive.|3.There is a Pet Pack in every 5 floors for you to collect.|4.There are 100 floors in Sky Tower, you will start with Floor 1 and finish all enemies to enter the next floor.|5.Quick clear can only be used to the conquered floors.|6.It requires some time to quick clear, the more floors you want to clear, the more time will be used to quick clear.|7.Players can also use diamonds to finish clearing immediately, and the spending diamond amount is based on how many floors need to be cleared.|8.Battle can be manually, or choose to quick clear.|9.Players can check enemy formation of 5 more floors above current floor; And cleared floors cannot be reviewed."
+  },
+  {
+    "name": "PET_CHARGE_RULE",
+    "translation": "1.During event, daily recharge reaches certain amount(Bonus diamonds will not be counted in), then you shall receive corresponding reward by how much you recharged.|2.The first day reward is a 2-star battle girl; The second day reward is a 3-star battle girl; The third day reward is a 2-star battle girl.|3.Daily recharge will be reset on the next day.|4.Reward will be expired if you didn’t collect on time, please collect your reward in time."
+  },
+  {
+    "name": "DRAGONBOAT_RULE_TEXT5",
+    "translation": "After each race is over, rewards will be sent according to your current performance. Race on each day starts at every 6 am and ends at next 5 am. Rewards for each day will be sent to your mailbox based on your rank in your server ranking at next 6 pm. Bonus will be sent along with rank rewards to the champion of all servers on final day. Fight for it!"
+  },
+  {
+    "name": "DRAGONBOAT_RANK_TIP",
+    "translation": "1st in all servers:1st on 1st day:1st on 2nd day:1st on 3rd day:1st on 4th day:1st on 5th day:1st on 6th day:1st on 7th day"
+  },
+  {
+    "name": "THIEF_RANK_TITLE",
+    "translation": "Rank of Damage"
+  },
+  {
+    "name": "GUILD_RANK_TITLE",
+    "translation": "Guild Rank"
+  },
+  {
+    "name": "STAR_TREASURE_RULE_TITLE",
+    "translation": "Rules of Treasure Hunt"
+  },
+  {
+    "name": "STAR_TREASURE_RULE_TEXT",
+    "translation": "1.There are 9 floors in total in the Treasure Hunt . And every floor has rare rewards. Restarting the progress will also reset the special rewards!|2.Each exploration consumes 1 Exploring item equipped. Effectiveness of each item varies from each other. For example, exploring many cells at a time can multiply the rewards.|3.Exploring items can be got from the Treasure Items store and through exploration randomly.|4.You can choose a different Exploring item by tapping it.|5.To go to the next floor, you need to find the Portal through exploration.|6.The explore items will expire after the event,so remember to use them in time."
+  },
+  {
+    "name": "FULL_RANKING_TEXT",
+    "translation": "Server Ranking"
+  },
+  {
+    "name": "ACHIEVEMENT_RANK_TEXT",
+    "translation": "Achievement Ranking"
+  },
+  {
+    "name": "AWAKEN_RANK_TITLE",
+    "translation": "Awaken"
+  },
+  {
+    "name": "RANK_EMPTY_TEXT",
+    "translation": "No data now!"
+  },
+  {
+    "name": "SKYCITY_HARD_RULE_TITLE",
+    "translation": "Rules of Elite Sky Tower"
+  },
+  {
+    "name": "SKYCITY_HARD_RULE",
+    "translation": "1. Players may switch to Elite Sky Tower after clearing 100 floors of normal Sky Tower. |2. Normal Sky Tower and Elite Sky Tower are separated, don’t worry about your progress. |3. There are 20 floors in Elite Sky Tower, you can only access further floors after clearing current floor. |4. Each floor’s challenge consumes 1 ticket, you can earn tickets in normal Sky Tower. You can’t challenge Elite Sky Tower if you don’t have tickets. |5.You can only raid the floors you have cleared. |6. Each floor can be raided with no time limit, e.g. If you raid 1st floor 3 times, you will consume 3 raid tickets. |7. You can only claim the reward after clearing that floor. |8.You can manually finish the challenge, or you can choose to use raid function after clearing it for the first time. |9.Clicking the button on right side may skip you to other floors, you can’t skip to floors you haven’t cleared.|10.Everyday you will have 3 free raid chances, you can purchase more attempts if you need. |11. Each floor has practice mode, practice mode shares same difficulty. |12. Practice mode consumes no ticket nor produces rewards, each time you try practice mode costs 10k gold. |12. No matter if you cleared the floor, you can always practice."
+  },
+  {
+    "name": "TEACHER_RULE",
+    "translation": "The class has begun! Time to find your ideal student and mentor! |1. This function does not apply cross server. 1 mentor can only have 1 student and 1 student also can only have 1 mentor. If you have reached the requirement, you can be mentor and student at the same time, but you can’t have these 2 relationships with 1 same person. |2.Requirement to be student: Academy level is more than 10 and below 90, has no mentor. |Requirement to be mentor: Academy level is more than 60, mentor must be 3 levels higher than student. Has no student. |3.You may send request to 3 different players everyday, request will expire after 48 hours. |4.When you are in a class, you’ll automatically add your mentor/student into friendlist. Thus you 2 can start sending gifts to each other. Not only can you 2 both get friend coins, but also the “Bond” between you 2 will be increased by 100, once a day. The cap of bond is 3000. When you 2 have 1000 bond, 1 stamina gets 0.5 bonus exp; when you 2 have 2000 bond, 1 stamina gets 0.75 bonus exp. When you 2 have 3000 bond, 1 stamina gets the student 1 bonus exp. |5.As a mentor, you can check your target in homework, when your student finish the target, you'll get the corresponding reward. As a student, you can check your target in campus, to finish it, you 'll get the reward|6.When outstanding students finish the quest in Campus. Corresponding amount of scholarship will be given to them. Detailed info can be viewed in Campus. |7.When one side raises dismissal of the relationship, the relationship will immediately be removed. But the raiser will receive punishment of suspending class for 24 hours. And the other side will receive no punishment. But you can’t raise dismissal of a relationship shorter than 24 hours. Bond will be reset to 0 after the relationship is removed. |8.When student reaches lv90. Graduation Test will start, passing it will reward the student and graduation will be approved. The student and mentor relationship will automatically be removed."
+  },
+  {
+    "name": "PERSON_MSG_START",
+    "translation": "Reach the first page!"
+  },
+  {
+    "name": "GODDESS_STRATEGY_RULE",
+    "translation": "1.During event, when your recharge reaches certain goals, daily recharge rewards will be available to claim. |2.During event, you can only collect Score Rewards after your scores reach the requirements.|3.Diamonds received from mails or quests or gifts and diamonds of first recharge bonus will not be counted into recharge. |4. Daily recharge rewards must be claimed on the day you recharged or you will lose it, all rewards must be claimed before the event ends."
+  },
+  {
+    "name": "MYRANK_TEXT",
+    "translation": "My rank："
+  },
+  {
+    "name": "NO_RANK_TEXT",
+    "translation": "No rank yet"
+  },
+  {
+    "name": "QUIZ_END_RANK_TEXT",
+    "translation": "Final rank:"
+  },
+  {
+    "name": "AUCTION_RULES",
+    "translation": "Because of the fierce battles that happened in academy, the head of academy needs a lot of funds to repair the broken places. Thus, many girls have donated their treasures to host this Auction. Hopefully they can gather enough money in days! Masters, time to show your love to girls! |1.Auction is only available from 5:00-21:30(GMT+8) everyday. If you enter the auction after 21:30(GMT+8), you can only view the items that are for auctions on that day instead of being able to join the auction. The items that’ll be in auction will refresh at everyday’s 5:00am. |2.There is only 1 kind of Auction for now-Global Auction, that all players from all servers can join. The bid increment cannot be less than 1% of current highest price. |3.Refreshing button allows you to check the current highest price, so do not forget to refresh before you take your bid! If your price is outbid by others, go to claim the fund you paid in your mail. If you win the auction, the item you bought will also be issued through mail. |4.Click the item‘s icon to view detailed info about it. |5.Auction contains a lot of rewards that you might have wanted to get but couldn’t, stay focused on the items. |6.Diamonds spent in auctions will not be counted into Spending Event nor Daily Quest."
+  },
+  {
+    "name": "CREATS_RULE3",
+    "translation": "1.Sorcery War is made up of multiple individual campaigns.|2.Every campaign needs enough players join to unlock it.|3.Every player needs to consume one sorcery scroll to join the campaign.|4.Sorcery scroll is obtained from stamina consumption, every accumulative 3000 stamina will provide one sorcery scroll.|5.When number of sorcery scroll owns reached max limit, players can't get more sorcery scroll and stamina consumption won't accumulate.|6.Players can team up with any players in the same server, or cross server with player who is less than 5 academy levels higher/lower than self.|7.Single player could choose single mode to challenge sorcery war campaign directly.|8.Enemies in single mode are same with group mode, but players can send more girls than in group mode.|9.Reward calculate of single mode is the same with group mode."
+  },
+  {
+    "name": "RECOMMEND_RANK_TEXT1",
+    "translation": "surpassed"
+  },
+  {
+    "name": "RECOMMEND_RANK_TEXT2",
+    "translation": "players"
+  },
+  {
+    "name": "RECOMMEND_PLAYER_RANK_TEXT",
+    "translation": "%s AP Rank"
+  },
+  {
+    "name": "RECOMMEND_RANK_TITLE_TEXT",
+    "translation": "%s Popular BG"
+  },
+  {
+    "name": "RED_ENVELOPE_RULE_REWARD_RANK",
+    "translation": "Rank %d~%d:"
+  },
+  {
+    "name": "ACTIVITY_CHARGE_LEVEL_RULE",
+    "translation": "The Package will discount for the first 12 hours when reaching certain level. You could still purchase Package yet without discount later. |(Tip: Purchase of Package won't be counted on any recharge events~)"
+  },
+  {
+    "name": "REGION_FULL_TEXT",
+    "translation": "The current server is full, do you want to jump to the latest server?"
+  },
+  {
+    "name": "GUILD_RANK_TEXT",
+    "translation": "Guild Ranking:"
+  },
+  {
+    "name": "PEAK_RULE_RANK_TEXT1",
+    "translation": ""
+  },
+  {
+    "name": "PEAK_RULE_RANK_TEXT_OLD",
+    "translation": "你的鬥牛排名是%d名，保持當前排名，可領獎勵為"
+  },
+  {
+    "name": "PEAK_RULE_RANK_TEXT2_OLD",
+    "translation": "你的鬥牛排名是%d名，保持當前排名，可領獎勵為"
+  },
+  {
+    "name": "ACTIVITY_RICH_RULE_TEXT",
+    "translation": "【Map】|(1)Get Dices: You can directly spend diamonds to buy dices in Dice Store or gain from other events. Click the Dicing to roll the dice, your girl will move steps forward according to the number on the dice. |(2)Get Stars: Different events will be triggered according to the grid where the girl stays after moving. When your girl stays at the number grid, you will gain same number of Stars. |(3)Get Rich: When your girl stays at ★Sushi Bar, ★Bakery Cafe, ★Restaurant or ★Burger Girl, you could invest some gold coins to level them up. After that, every step you move will accumulate a certain number of gold coins which will be claimed automatically when your girl stays at these grids again. The higher level, the more income, level 3 at most. Bank will reward you diamonds but you can only invest it once. |(4)Random Events: If your girl stays at “?”, something special will happen: Hurricane (move to random grid, but the event in the grid won’t be triggered), Collapse (one of your investment shops collapse, disappear if it is Lv.1), Quality Problem (one of your shops’ interest decreases to 0. If you don’t have investment, nothing will happen), Theft (one of your Bag items is stolen), Text Fraud (lose some Stars), Free Trial (gain a random Bag item), Bank Bonus (Bank’s interest increases and you will gain more diamonds), Popular Store (one of your shops’ interest increases and you will gain more gold coins), Lottery (gain some Stars), Hitchhike (move forward as the same number as last Dicing), Restriction (the girl will turn back). |(5) Before the next Richman, stars and all items will expire, please remember.||【Star Shop】|You can buy items at the Star Shop. There are three items there: ★Cheat dice(roll the number you want), ★VIP card(help you in Sky Wheel, Pipe War and Warrior), ★Avoid card(to avoid the adversity in special events). Also there are some rare girls and items~||【Warrior】【Pipe War】【Sky Wheel】|Please view the Illustrations to get details about rules and rewards.||【About Scores】| There is a Ranking based on the scores you gained. Every time you defeat a boss of Warrior, you will gain 2 scores. Every time you light a room of Sky Wheel, you will gain 3 scores. Every time you finish Pipe War, you will gain 10 scores. Top 10 will get Rich Man title, Top 60 will get Gamble Master Frame (They will be sent to you in 7 working days after the event ends). Also, at the end of the event there will be a Ranking reward as showing bellow:"
+  },
+  {
+    "name": "SUPER_RICH_RANK_TEXT1",
+    "translation": "Total scores:"
+  },
+  {
+    "name": "SUPER_RICH_RANK_TEXT2",
+    "translation": "Total scores:"
+  },
+  {
+    "name": "ACTIVITY_STICKER_RULE_RANK_2",
+    "translation": "Rank %d-%d :"
+  },
+  {
+    "name": "ACTIVITY_STICKER_RULE_RANK_1",
+    "translation": "Rank %d"
+  },
+  {
+    "name": "ACTIVITY_1025_TEXT",
+    "translation": "Event: #During event period, whenever the like count reaches its goal, we will send out a great reward to all the players in server. The more likes we get, the better rewards for you! You can only collect your reward once at each stage. Hurry up! Come and help to like our page!&Details: #Starting today, whenever we reach each stage of our like count goal, we will send out a great reward to all the players in server. And we won't stop until we reach all our goals!&Note:#1. You have to like our page first in order to collect your reward.#2. You may only collect once on the reward for each stage, car not collect repeatedly.#3. Once the like count reaches its goal, we will manually send the rewards out for all players in the server."
+  },
+  {
+    "name": "RANK_LEFT_TITLE_1",
+    "translation": "VS Player"
+  },
+  {
+    "name": "RANK_LEFT_TITLE_2",
+    "translation": "Attack Power"
+  },
+  {
+    "name": "RANK_LEFT_TITLE_3",
+    "translation": "Collection"
+  },
+  {
+    "name": "RANK_LEFT_TITLE_4",
+    "translation": "Guild"
+  },
+  {
+    "name": "RANK_LEFT_TITLE_5",
+    "translation": "Awaken"
+  },
+  {
+    "name": "RANK_LEFT_TITLE_6",
+    "translation": "Trophy"
+  },
+  {
+    "name": "RANK_LEFT_TITLE_7",
+    "translation": "Fate"
+  },
+  {
+    "name": "RANK_LEFT_TITLE_8",
+    "translation": "Monkey King"
+  },
+  {
+    "name": "RANK_LEFT_TITLE_9",
+    "translation": "Sky Tower"
+  },
+  {
+    "name": "RANK_LEFT_TITLE_10",
+    "translation": "Fantasy"
+  },
+  {
+    "name": "RANK_LEFT_TITLE_11",
+    "translation": "Sorcery War"
+  },
+  {
+    "name": "RANK_LEFT_TITLE_12",
+    "translation": "Preparation"
+  },
+  {
+    "name": "RANK_LEFT_TITLE_13",
+    "translation": "Detail"
+  },
+  {
+    "name": "RANK_LEFT_TITLE_14",
+    "translation": "Ranking"
+  },
+  {
+    "name": "RANK_LEFT_TITLE_15",
+    "translation": "Dormitory"
+  },
+  {
+    "name": "COLLECT_RULE",
+    "translation": "1. Collect and cultivate the girls in Solo mode to gain a specific attribute bonus, which will work for all the academic girls and increase the attack power for them.|2. Better promoted girls will gain more attribute bonus, and also the 4-star and 5-star girls will gain attributes bonus from stars. |3. Collect the girls in Bond mode and it will unlock the special attributes bonus for all the girls and also increase the attack power for them."
+  },
+  {
+    "name": "ACTIVITY_TUTOR_RANK_RULE_TEXT",
+    "translation": "1. Only pass the difficult mode you can get the points ||2. The points will be calculated according to the number of surviving girls. ||3. Reset the available girl will deduct points, but the score will not be lower than 0 ."
+  },
+  {
+    "name": "ACTIVITY_TUTOR_RANK_SCORE_TEXT",
+    "translation": "Points: %d "
+  },
+  {
+    "name": "TOP_PEAKARENAWINDOW_TEXT4",
+    "translation": "Cross Server Ranking"
+  },
+  {
+    "name": "ACTIVITY_POLAR_MAIL_TEXT",
+    "translation": "Dear Senpai, there is a change in rewards.  Those who have previously won the accumulated rewards such as i.e. the Light Capsule coin will be compensated with the same number of dark capsule coins. Please look in your email attachments~"
+  },
+  {
+    "name": "THIRD_DIGLETT_RANK_TITLE1",
+    "translation": "Whac-A-Mole Rank"
+  },
+  {
+    "name": "THIRD_DIGLETT_RANK_TITLE2",
+    "translation": "Works Collection Rank"
+  },
+  {
+    "name": "RAGNAROK_RANK_MAIL_TITLE_1",
+    "translation": "Dusk of the Gods Carry List Reward"
+  },
+  {
+    "name": "RAGNAROK_RANK_MAIL_TITLE_2",
+    "translation": "Dusk of the Gods Ultimate List reward"
+  },
+  {
+    "name": "CHAMPIONS_LEAGUE_RANK_TITLE",
+    "translation": "King in season %s"
+  },
+  {
+    "name": "ASK_STONE_TITLE1",
+    "translation": "The following Girl contract can be request %d (Cross server use not allowed)"
+  },
+  {
+    "name": "ACTIVITY_BALLOON_RULE_TEXT",
+    "translation": "Welcome to the Summer Balloon Event! |1. Each round of rewards consists of 16 balloons. Breaking the balloons can get a random item, and one of the 16 balloons must contain the highest reward for the current prize pool display. |2. The ordinary prize pool is blue balloons, the rare prize pool is purple balloons, and the Top prize pool is golden balloons. |3. There is a small probability of a rare prize pool when refreshing. Only in the 4th to 6th rounds there is a small probability to encounter the skin prize pool, and the skin prize pool will definitely be encountered within 6 rounds. |4. The skin prize pool will only appear once. When it appears, the refresh button will be locked and cannot be refreshed. |5. Use a small amount of diamonds to refresh the current prize pool. The daily refresh limit is 10 times. The first refresh is free. |6. Refresh when the highest reward of the current prize pool has not been obtained, and the current round will not be increased. |7. When you get the highest reward of this round, you will be given a free refresh opportunity, and will not occupy the number of daily refreshes. After this refresh, the current round will be +1.|8. The largest round of the prize pool of this event The number of times is 25, and it cannot be refreshed after reaching the upper limit of rounds. |9. Rewards of this event include: |Top prize pool:Fencer's skin Wonder Heroine*1 |Rare prize pool: Yuri's skin Night Fairy*1, Wandy's skin Chopping Summer*1, Nancy's skin Baseball Catcher*1|ordinary prize pool:Legend Purify*15, Classic Furniture Coupon*20, Purple Gear Pack*8, Brave Evidence Pack I*5, Victory Vow Pack*3, Vows Essence*3000."
+  },
+  {
+    "name": "OCCLUT_RULE_TEXT",
+    "translation": "Rules for participating in the competition: | 1. The Sorcery War  consists of multiple independent chapters. |2. Each chapters requires a sufficient number of players to open. |3. Each player needs to consume one Sorcery Scroll to participate in the chapter. |4. The Sorcery Scroll can be obtained from daily stamina consuming, every 3000 stamina consuming will give you 1 Sorcery Scroll. |5. When the number of scrolls held by players reaches the maximum, the scrolls can't be accumulated. |6. There is no limit for the Fight Effectiveness of the team with players from the same server. Players with level difference less than five can join the cross server team. |7. Single player can select Single mode to open the challenge for getting Sorcery Scrolls in chapter. |8. The strength of enemies in Single mode is the same as that in Team mode, but players in Single mode will have more dispatch places. |9. The reward mechanism of Single mode is the same as that of Team mode. ||Fighting Rules in Chapter: | 1. Each chapter is composed of multiple strongholds. Strongholds are linked by paths. Each stronghold will have an array of enemies. The chapters not opened show gray and the chapters can be challenged are lighted. |2. The chapter maps have different buffs due to Boss feature. |3. Each group of enemies can be challenged by Single mode or Team mode. |4. Each group of enemies can only open one battle at a time | 5. Each group of enemies will have a 1 minute time limit for selecting girls. If it exceeds the time limit, players will withdraw from the current battle and select girls again. |6. After the end of the battle, the status of the girls and enemies sent by players will be saved, and the pets' energy will be recalculated at the beginning of the next battle. |7. Every time you send a girl who has not fighted, you will consume one dispatch place. After the place is exhausted, you can only dispatch those who have fighted. |8. When the remaining time of the chapter is less than 2.5 minutes, you can't open a new battle. |The Raid function of each chapter will be activated after a challenge. ||Reward rules in chapter: | 1. The reward after the challenge is determined according to points you got. The higher the points you got, the richer the reward. |2. The points is related to the degree of completion, every one percent of the completion in the chapter will make you obtain 10 points. |3. After the completion degree reaches 100%, all girls not killed, the dispatch places not consumed and the remaining time will be converted into points according to a certain proportion. |4. Players who fight in the same chapter will get the same points. |5. The reward of Raid is obtained according to a certain proportion of the highest points in the challenge history of this chapter."
+  },
+  {
+    "name": "FIFTH_ANNI_BOSS_RANK_MAIL_TITLE",
+    "translation": "Paradise Lord Reward for Rankings"
+  },
+  {
+    "name": "FIFTH_ANNI_PARTY_RANK_MAIL_TITLE",
+    "translation": "Paradise Party Reward for Rankings"
+  },
+  {
+    "name": "AUCTION_TIP_TEXT3",
+    "translation": "Cross Server"
+  },
+  {
+    "name": "GARDEN_RANK_TITLE_TEXT",
+    "translation": "Rank"
+  },
+  {
+    "name": "GARDEN_NO_RANK_TEXT",
+    "translation": "No rank yet"
+  }
+]

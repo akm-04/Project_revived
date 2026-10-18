@@ -68,7 +68,7 @@
         "first_achieved_at ASC",
         "stable_subject_id ASC"
       ],
-      "time": "Trustedownerfirstreachforcurrenthighestscore, immutableonreplay; no clienttimestamp. Subjectnotvalidwithoutqualifiedtimestamp. IntendedreuseselectedSkyTowerstyleprofileonly; activationrequiresowningmodecontract."
+      "time": "Trustedownerfirstreachforcurrenthighestscore, immutableonreplay; no clienttimestamp. Reusablewithinexplicitmodeprofile/cohort; notautomaticallyactivateexistingPvP modes."
     },
     "CURRENT_STAT_OBSERVED_V1": {
       "order": [
@@ -80,12 +80,21 @@
     },
     "PVP_AUTHORITATIVE_POSITION": {
       "order": "Usemode-ownedrank/resultcontract; neverreplaceArena/TF/1on1withcollectionsortbyassociation."
+    },
+    "CURRENT_STAT_FIRST_REACH_V1": {
+      "order": [
+        "score DESC",
+        "score_reached_at ASC",
+        "stable_subject_id ASC"
+      ],
+      "time": "Trustedownerrecordoflatesttransitionintocurrentscore; preservewhileunchanged, resetwhenvaluechangesincludingdecrease/reacquire. HistoricfirstreachnotreconstructablefromrowUpdatedAt. UseexplicitOBSERVEDbootstrapprofileuntilgenuinehistoryavailable. ApplieschosenGirls/Pets/Starsprofilesbyprivatepolicy, notoriginalserverproof."
     }
   },
   "refresh_profiles": {
     "PROFILE_FIELDS": "RECOMPUTE_CALLER_COHERENT_SNAPSHOT",
-    "COLLECTION_REALTIME_FLAGS": "FRESH_ON_REQUEST; preserveclientis_realtime1 semantics",
-    "NON_REALTIME_AP_RECOMMENDATION": "Configurableboundedcache; proposeddefault900seconds. Privatechoice, nothistoricalrecovery, no frozenpopularityfakealgorithm. NeverusecachetosupplyqualifiedcurrentprofileAP."
+    "COLLECTION_REALTIME_FLAGS": "FRESH_ON_OPEN_REQUEST: RankList.loadRankList clearsis_realtimecachedentries; noobservedpolltimerorbutton. Close/reopenfetchesrealtimeboards; otherboardsmayreusecacheuntilforceclear. Serverdoesnotpushnewrefreshwire.",
+    "NON_REALTIME_AP_RECOMMENDATION": "Configurableboundedcache; proposeddefault900seconds. Privatechoice, nothistoricalrecovery, no frozenpopularityfakealgorithm. NeverusecachetosupplyqualifiedcurrentprofileAP.",
+    "TOP_FLOOR_LIVE": "Distinctmode: investigateownproducer/socketcontractbeforeclaimingautomaticon-screenupdates; namealoneinsufficient."
   },
   "title_policy": {
     "implementation": "DESIGN_ONLY_NOT_NEW_GRANT_ACTIVATION",
@@ -136,5 +145,20 @@
     "Completecosmetic/Achievement/forceproducercoverage",
     "ActiveRankingsettlementornewtitlegrant",
     "Full4C/parent/W2acceptance"
-  ]
+  ],
+  "tie_policy": {
+    "default": "STABLE_SUBJECT_ID_ASC",
+    "optional": "PERSISTED_LOTTERY_PRIORITY_ASC",
+    "rule": "Nofreshcoinfliponcomparison/request. Optionalrandomprioritysampledoncebyowningdurablesnapshotpolicy,retainedwithgenerationandreceipt; stableIDfallback. ComparatorneverdrawsRNG; pairwisecoinflipswouldbreaktransitivity."
+  },
+  "scope_policy": {
+    "required": "ExplicitScope{SERVER,GLOBAL,serverID,cohortID,policyVersion}beforecomparison; rejectmixedscope/cohort/policy rows; no defaultglobal",
+    "source_confirmed": {
+      "rank1003": "1on1GLOBAL",
+      "rank1004": "1on1SERVER"
+    },
+    "private_collection_default": "SERVER is proposedprivatechoiceforGirls/Pets/Stars; activationrequiresrecordedprofile/cohort; sourceuncertain",
+    "sky_tower": "SERVER byplayerrecollection/privatepolicy; sourceSKYCITY_RULEhasnotie/scopeclause",
+    "pets": "Profilefield1002exists; examinedrankcataloghasnoPetsownedboardsodonotinventwiretype"
+  }
 }

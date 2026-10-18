@@ -1,0 +1,19 @@
+{
+  "classification": "SOURCE_FACT_AND_BOUNDED_UNKNOWN",
+  "translation_rows": "LEADERBOARD_DESCRIPTION_ROWS.json",
+  "findings": [
+    "rank1003explicitGlobal,1004explicitServer",
+    "SKYCITY_RULEandSKYCITY_HARD_RULE haveno tie/scopeclause",
+    "Girls16001 realtime,Stars2003nonrealtime; labelsdonotspecifycohort/tie",
+    "RankList.loadRankList clearsrealtimecacheatrequest; no timerinmodel. PetCampaignWindowopensSkyTowerbyrank_type22withforcecleartrue",
+    "FULL_RANKING_TEXT=ServerRanking is unreferencedintheexaminedappLua,donotassigntoeveryboard"
+  ],
+  "source_paths": [
+    "data/tables/rank.lua",
+    "data/tables/translation.lua",
+    "app/model/RankList.lua",
+    "app/windows/PetCampaignWindow.lua",
+    "app/windows/NewRankWindow.lua"
+  ],
+  "limits": "Nooriginalserverquery/scope/firstreachtimestampsrecovered. Userrecollectionandprivatepolicyexplicitlyseparate."
+}
