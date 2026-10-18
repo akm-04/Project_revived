@@ -1,0 +1,150 @@
+{
+  "status": "NEW_TARGETED_CURRENT_CLIENT_CAPACITY_EVIDENCE_RECONCILED_PRIOR_GATE_REOPENING_JUSTIFIED_NO_PRODUCT_CODE_YET",
+  "source_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+  "prior_research": "docs/PASS519_CA2_3_INDEPENDENT_REALITY_CHECK.md and EVIDENCE_CLASSIFICATION.json; reused source gap and diagnostic-only boundaries, not rerun historic CA2 tests",
+  "user_recollection": {
+    "period": "2018-2023",
+    "duration": "About4years",
+    "vip": 0,
+    "girl_capacity": "Definitely no recalled limit or expansion; believes old feature removed/hidden",
+    "saved_teams": "Recalls saved-team number can expand; separate from girl ownership"
+  },
+  "source_bindings": [
+    {
+      "path": "app/windows/MainSceneBottomWindow.lua",
+      "sha256": "1a113a3b6491e04b0af3293817b37706d7bb9be0823c328c9783771d8bc2d216"
+    },
+    {
+      "path": "app/windows/HeroListWindow.lua",
+      "sha256": "6128b1924caf12a1b191c9a59defabc9bbfdb0b98666f7885da20b1a7245b8ac"
+    },
+    {
+      "path": "app/windows/HeroListCell.lua",
+      "sha256": "0b2f3142f31e6ca39a54a2500908c04c392a0e5dc658410eb1833dde0f78e943"
+    },
+    {
+      "path": "app/windows/HeroCollectWindow.lua",
+      "sha256": "c6d8cb59b88c2e94413e7eb4009613a95827f9ed61b672d30273886e86f7b06d"
+    },
+    {
+      "path": "app/windows/HeroMainWindow.lua",
+      "sha256": "473b72ec14a81d01d6dbdaa19f92c3d78900f40ca34fa5c8cf46585b76d65414"
+    },
+    {
+      "path": "app/windows/HeroWindow.lua",
+      "sha256": "c0e893b8e406f88271dd9799a63fc11d976d5409fedc8e64459375eba96e6ace"
+    },
+    {
+      "path": "app/windows/HeroSingleViewLayer.lua",
+      "sha256": "5cefcb7a15cfaf40037ce9e0493116dcf3afbcd6c77dd723e1baa232ef56d3d9"
+    },
+    {
+      "path": "app/windows/SuperPartnerWindow.lua",
+      "sha256": "72f17a8133c5b61c8c8a638330485628d45d62d487972ef645670175b2586ec1"
+    },
+    {
+      "path": "app/model/NormalHero.lua",
+      "sha256": "125183556caeecc182bf0702dd1f95160c8ba1666a3b97fbb8a7261d30ae0ac9"
+    },
+    {
+      "path": "app/model/SelfPlayer.lua",
+      "sha256": "163d5893c9522ada412c2b9c4748a80757660fccdf03c8f72cb6edf0838b8eb4"
+    },
+    {
+      "path": "app/model/Player.lua",
+      "sha256": "e8e591f754ffc4fb68d81aa108a861e724a9ac0e16af18b38237bafdd7946dad"
+    },
+    {
+      "path": "app/common/tables/WindowTable.lua",
+      "sha256": "b3fd242ac8ea9fef99e8c8e246015af9439d0a2c3b2439ec1701888f34bc79fe"
+    },
+    {
+      "path": "app/common/tables/MiscTable.lua",
+      "sha256": "6579de771dbef3224fcaa9568a8fcfade26209f134acfe3a3e666ecbd6c13cee"
+    },
+    {
+      "path": "app/common/ui/WindowManager.lua",
+      "sha256": "6550f9989c8e004b5cf73caaf9a8932f60751db4b1aa3f0bc6f207b46ceeb4f8"
+    },
+    {
+      "path": "data/tables/window.lua",
+      "sha256": "c7f2fcc6637ab170d5f802904c5ee971eedac33e7fac7112d1afc1675b3a21e3"
+    }
+  ],
+  "facts": [
+    {
+      "classification": "SOURCE_FACT",
+      "finding": "MainSceneBottomWindow.willOpen lines64..105 routes main girl button through loadHeros/backpack into hero_list; window table resolves HeroListWindow, not legacy HeroWindow."
+    },
+    {
+      "classification": "SOURCE_FACT",
+      "finding": "HeroListWindow.getHeroesData iterates source getWholeHeroes and maps canonical owned origins. It and HeroListCell/HeroCollectWindow/active HeroMainWindow examined paths have no maxHeroNumLimit_/heroSlot/slot-expand references."
+    },
+    {
+      "classification": "SOURCE_FACT",
+      "finding": "HeroListCell.summonHero and HeroCollectWindow.summonHero call NormalHero.stoneSummonHero -> SelfPlayer.stoneSummonHero -> MID59. NormalHero.canSummon tests collection/fragment threshold, no roster capacity predicate."
+    },
+    {
+      "classification": "SOURCE_FACT",
+      "finding": "Legacy HeroWindow and HeroSingleViewLayer read maxHeroNumLimit_ and refer heroSlot table and hero_slots_expand; exact examined window table has zero hero_slots_expand definitions. Missing definition does not alone prove globally unreachable."
+    },
+    {
+      "classification": "SOURCE_FACT",
+      "finding": "Source SelfPlayer.expandHeroSlots MID64 callback increments old maxHeroNumLimit_ by misc.expandHeroSlotNum; source +5 does not establish initial limit, max or price."
+    },
+    {
+      "classification": "SOURCE_FACT",
+      "finding": "Frozen V1 engine_dispatcher routes EXPAND_HERO_SLOTS through fallback status_only, not a real capacity owner or paid expansion algorithm.",
+      "scope": "Frozen V1 static code observation only; not original server or new runtime proof"
+    },
+    {
+      "classification": "STRONG_INFERENCE",
+      "finding": "User history and traced modern main menu support treating purchased roster slots as a legacy profile, separate from active unique-origin collection. This is not original-server algorithm proof."
+    }
+  ],
+  "window_rows": [
+    {
+      "win_name": "hero",
+      "class": "HeroWindow",
+      "res": "windows/hero_window.json",
+      "type": "0"
+    },
+    {
+      "win_name": "hero_main",
+      "class": "HeroMainWindow",
+      "res": "windows/hero/hero.csb",
+      "type": "0"
+    },
+    {
+      "win_name": "hero_list",
+      "class": "HeroListWindow",
+      "res": "windows/common_widgets/common_frame_with_sidebar.csb",
+      "type": "0"
+    }
+  ],
+  "missing_slot_window_rows": 0,
+  "runtime_catalog_inventory": {
+    "record": "SUBJECT_full4-capacity-pinned-catalog-inventory.json",
+    "revision": "fec70d3ad6ca36b08f54ccc81fefe9dbc7380aaf94d2cb14a9009e1ab60664f0",
+    "normal_template_rows": 554,
+    "normal_origins": 277,
+    "super_rows_and_origins": 14,
+    "total_current_origin_catalog": 291,
+    "role": "Diagnostic current pinned content inventory, not an official fixed capacity291"
+  },
+  "adjudication": "Reopen capacity prerequisite as a versioned current-client unique-origin collection admission policy. Do not invent80/1000 slots, gem expansion prices, VIP capacity or conflate saved presets. Preserve source original-capacity unknown and old MID64 unavailable. No test allow-authorizer as production proof.",
+  "online_check": {
+    "queries": [
+      "Girls X Battle hero slots",
+      "Girls X Battle capacity girls limit excluding Battle2/GXB2",
+      "Girls X Battle maxHeroNumLimit",
+      "Girls X Battle slots excluding Battle2/SaveTheDog",
+      "Girls X Battle capacity site:facebook.com",
+      "Girls X Battle limit girls site:game168.com.tw"
+    ],
+    "result": "No qualified GXB1 primary capacity-policy source located in this bounded search. GXB2 VIP/slot references and unrelated pages excluded. GXB1 Scythe/Emblem pages did not establish roster capacity.",
+    "positive_mechanics_adopted_from_web": false
+  },
+  "full4_closed": false,
+  "next5a_started": false
+}
