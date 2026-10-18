@@ -366,3 +366,30 @@ func TestI7C4BMissingHookAndEventConflict(t *testing.T) {
 		t.Fatal("content pin mismatch accepted")
 	}
 }
+
+// A legacy target can have valid Library facts while another retained Hero lacks
+// its Library facet. No Achievement history exists to qualify a population.
+func TestI7C4BLegacyPartialPopulationDoesNotGateSourceGift(t *testing.T) {
+	p := pool(t)
+	a, rev := achievementFixture(t, p, false)
+	skillHero(t, p, a, rev, 10001002, 2)
+	favorForMarriage(t, p, a, 1)
+	r, e := achievementLibraryService(p, p).Command(ctx, a, lib.Command{Family: lib.Gift, PartnerID: 1, Value: 50001112}, op())
+	if e != nil || !r.Married || achievementEvents(t, p, a) != 0 {
+		t.Fatal("legacy unknown Achievement history must not require unrelated population facet", r, e)
+	}
+	if _, e = readAchievement(t, p, a, rev, ach.Request{Player: a.PlayerID, AchievementID: 100014}, time.Now()); !errors.Is(e, d.ErrUnavailable) {
+		t.Fatal("legacy history invented", e)
+	}
+}
+
+func TestI7C4BTrackedIncompletePopulationFailsClosed(t *testing.T) {
+	p := pool(t)
+	a, rev := achievementFixture(t, p, true)
+	skillHero(t, p, a, rev, 10001002, 2)
+	favorForMarriage(t, p, a, 1)
+	r, e := achievementLibraryService(p, p).Command(ctx, a, lib.Command{Family: lib.Gift, PartnerID: 1, Value: 50001112}, op())
+	if e == nil || libraryFacts(t, p, a).Married || achievementRoot(t, p, a).Progress != 0 || achievementEvents(t, p, a) != 0 {
+		t.Fatal("tracked missing canonical population must rollback", r, e)
+	}
+}

@@ -1,0 +1,20 @@
+{
+  "status": "REPRODUCED_EXACT_F2_IMPLEMENTATION_CONTRACT_DEFECT_FIXED_F3_REQUALIFICATION_PENDING",
+  "evidence": "logs/f2-legacy-partial-reproduction.log; newtest-only overlay against exactF2 unchanged product",
+  "candidate": "784b6f356c5e7aec9c54e52c9e5dc7410c7a588f045a04f958f9d7c05c0f5acd",
+  "contradicted_contract": "I7C4B_ACHIEVEMENT_TIER_FACTS rule5: missing legacy root preserves source operation, never synthesizes knownhistory",
+  "mechanism": "Prepare read all Library population before checking Achievement root existence. An unrelated missing Library facet blocked legacytarget ringgift that previous2Ballowed.",
+  "repair": "Read/lock Achievement root620 after alreadyheldCharacter/Libraryprefix andsmall immutablecatalog validation. Missingroot returnsnilconsumer before populationquery. Trackedroot stillrequires exact canonical before/aftercount andsameTx facts.",
+  "contract_amendment_required": false,
+  "affected_consumers": [
+    "Library ringgift on untrackedlegacy players",
+    "TrackedAchievement preparedsourcehook lock/read order"
+  ],
+  "authorization": "Direct user4B implementation/reconciliation; repair restores frozencontract and inherited2B behavior, no new policy/scope",
+  "requalification": [
+    "F3fresh61 all4Bnative including newlegacy partialpopulation success andtrackedmissingpopulation rollback",
+    "F3raceAPI/unknowncommit/rollback/concurrency/process/readnegative",
+    "Affected2Bnative andfullunit/currentstatic; F1unchangedpure/source/schema/dependencyproof reused with explicitsubjectreview",
+    "Populated60->61 upgrade/restore/restart stillpending, runF3"
+  ]
+}

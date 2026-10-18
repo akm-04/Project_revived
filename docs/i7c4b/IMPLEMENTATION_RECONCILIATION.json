@@ -5,7 +5,8 @@
     "Distinct sourceHero templates used in native20marriagefixture to preserve canonical OriginTableID uniqueness",
     "ContentDTO and DomainCatalog remain separate under existing architecture layers",
     "Existing2Bnative Library helper now wires production Achievement consumer; legacy histories stay unavailable",
-    "F1actualAPI503 reproduced missingDormfixture owner; F2 all4Bfixtures supply typedDormemptyroot anduse productionFurnitureUsage debit. Productionunchanged; noassertionsweakened."
+    "F1actualAPI503 reproduced missingDormfixture owner; F2 all4Bfixtures supply typedDormemptyroot anduse productionFurnitureUsage debit. Productionunchanged; noassertionsweakened.",
+    "ExactF2 reproduced legacy partialpopulation regression; owner root620 presence checked before populationquery, missinghistory returnsnilconsumer. Tracked fullpopulation requirement unchanged. F3 targetedrequalification required."
   ],
   "proof_scope": "Genuine Library favor/ring/debit/receipt operation; raw unmarriedHero and inventory testpreconditions do not qualify acquisitioncapacity orgrantorigin",
   "operation_trace": [
@@ -25,5 +26,6 @@
     "Retirement/lifetime marriage history reconstruction",
     "Fullconsumer/parent/W2 acceptance"
   ],
-  "fixture_reconciliation": "AFFECTED_FIXTURE_RECONCILIATION.json"
+  "fixture_reconciliation": "AFFECTED_FIXTURE_RECONCILIATION.json",
+  "legacy_isolation_repair": "LEGACY_ISOLATION_REPAIR.json"
 }

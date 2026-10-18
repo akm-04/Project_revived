@@ -88,6 +88,23 @@ func (s Service) PrepareMarriageTx(c context.Context, t tx.Tx, e lib.MarriageEve
 	if err != nil {
 		return nil, err
 	}
+	// Rank620, acquired before Library's first I5 debit. Missing legacy history is
+	// explicit unknown; source operation remains valid without invented backfill.
+	r, ok, err := s.Store.ReadRootTx(c, t, e.Player, true)
+	if err != nil {
+		return nil, err
+	}
+	if ok && (r.Validate() != nil || r.UpdatedAt.After(e.DecisionAt)) {
+		return nil, d.ErrConflict
+	}
+	if !ok {
+		return nil, nil
+	}
+	if ok {
+		if _, err = s.Content.AchievementCatalogTx(c, t, r.ContentRevision); err != nil {
+			return nil, err
+		}
+	}
 	scope := lib.InputScope{Player: e.Player, ContentRevision: e.ContentRevision, ObservedAt: e.DecisionAt}
 	h, err := s.Population.HeroLibraryInputsTx(c, t, scope, e.PartnerID)
 	if err != nil {
@@ -106,20 +123,6 @@ func (s Service) PrepareMarriageTx(c context.Context, t tx.Tx, e lib.MarriageEve
 	event, err := NewEvent(e, count.MarriedCount+1)
 	if err != nil {
 		return nil, err
-	}
-	// Rank620, acquired before Library's first I5 debit. Missing legacy history is
-	// explicit unknown; source operation remains valid without invented backfill.
-	r, ok, err := s.Store.ReadRootTx(c, t, e.Player, true)
-	if err != nil {
-		return nil, err
-	}
-	if ok && (r.Validate() != nil || r.UpdatedAt.After(e.DecisionAt)) {
-		return nil, d.ErrConflict
-	}
-	if ok {
-		if _, err = s.Content.AchievementCatalogTx(c, t, r.ContentRevision); err != nil {
-			return nil, err
-		}
 	}
 	return prepared{owner: s, event: event, root: r, catalog: catalog, tracked: ok}, nil
 }
