@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "contract_id": "I7C4C_SELECTED_METRIC_PROVIDER",
+  "version": 1,
+  "status": "FROZEN_BOUNDED1010_CORE_DIRECT_USER_AUTHORIZED",
+  "classification": "SOURCE_FACT + INHERITED_CONTRACT + IMPLEMENTATION_DECISION",
+  "rules": [
+    "1010 WIVE_NUM is current canonical Library married-Hero population through existing MarriedHeroCountTx. Recompute on caller snapshot; do not store a second count, inferlifetime/retired facts, use Achievement highwater or clientscalar. 1011 canonical Player CreatedAt Unix seconds reused unchanged.",
+    "New coherent metric provider requires CA8 caller scope RR/Serializable, operation content pin equal selected revision, authoritative observed instant. It validates player/revision/instant, safe nonnegative1010value, positive Characterpopulation andLibraryroot versions. Retain both versions in immutable observation/command receipt; SourceVersion is Libraryroot version, never max/sum composite fingerprint. Library owns meaning and complete currentpopulation.",
+    "Canonical creation provider and MetricReader interface remain backwards compatible; optional scoped interface used by actual command/read composers. Unscoped calls cannot activate1010. ReadService pins content before tx; no liveclock/newtx/foreignSQL/rank authority inside provider.",
+    "1831 selection calls provider before PublicProfile preferences root391 write, same Serializable transaction; typed Library reads do not acquire mutationlocks. Existing semanticreceipt/replay returns original values and basis versions evenaftercurrentmarriagechanges;1829 selectedread recomputes currentvalue. Existing authentication/privacy/references unchanged.",
+    "1840 retains existing1011-only component discovery until full11 profile qualification; do not label partialdictionary all11qualified. Typed/1831/1829 selected1010 integration qualifies boundedcomponent only. Other9 IDs reject without preferences/receipt effects; invalid/absentLibraryowner is unavailable notzero.",
+    "1010only requests needLibrary;1011only requests retain previousproviderandlegacybehavior. Emptyrequest returns nonnil emptylist without accessingnewowner. Request duplicate/unknown IDs reject before ownerreads. Validate allobservations includingduplicate,wrongowner,wrongsemantics,wrongplayer/revision/time,unsafevalues andmissingbasisversions; readfailure returns no partialsuccess.",
+    "No migration/content/pin change is required: canonical owners and existingPublicProfile receiptJSON carry allfacts. Allmigrations1..61 and37payloads immutable; no newTable/projection/job/RankMID301 activation.",
+    "1001/1002/1007/1008/1009 population/reduction/lifetime/dedup unknowns stay named4C rule gates.1003/1005/1006 fullorigin/expiry domains and1004 completeearnedtiers remain unavailable. SelectedAP/Girls/Skins title profiles require qualifiedpopulation/content/tie/freshness/window/generation/immutable settlement/replay beforefull4C/6/parentclosure. Labels604800/is_realtime do not establish calendar or algorithm.",
+    "ExactportableR2unit/race/vet/source/static/security and realPGfresh61/populated61 adoption/rollback/replay/unknownCOMMIT/concurrency/coherent snapshots/realAPI restart/dumprestore proof required. Reuseunchanged4Bprocess producer proof onlywithbyteexactscope; independentlyinspectnewcomposition. No full4Cacceptance fromboundedcore."
+  ],
+  "not_claimed": [
+    "Recovered original backend metric/rank algorithm",
+    "Full11 metric availability",
+    "Full4C product closure",
+    "Ranking settlement or title producer qualification",
+    "Full1840all11 discovery",
+    "Stockclient/W2 and parent acceptance",
+    "Nine unresolved metric/reduction/fullorigin profiles and requiredRankingtitle settlement"
+  ]
+}
