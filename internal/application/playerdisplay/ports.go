@@ -163,6 +163,7 @@ type Service struct {
 	Population         CharacterPopulationReader
 	Inventory          InventoryReader
 	External           ExternalOrigins
+	CatalogExternal    CatalogExternalOrigins
 	Values             ValuePort
 	Directory          directorysync.Reconciler
 }

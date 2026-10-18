@@ -87,7 +87,7 @@ func (s Service) eligible(c context.Context, t tx.Queryer, pid identity.PlayerID
 		return nil, nil, ErrUnavailable
 	}
 
-	origins, e := s.origins(c, t, pid, v.Family, rev, at)
+	origins, complete, e := s.catalogOrigins(c, t, pid, v.Family, v.ID, rev, at)
 	if e != nil {
 		return nil, nil, e
 	}
@@ -111,6 +111,9 @@ func (s Service) eligible(c context.Context, t tx.Queryer, pid identity.PlayerID
 			x.EndTime = end
 			return []Origin{x}, nil, nil
 		}
+	}
+	if !complete {
+		return nil, nil, ErrUnavailable
 	}
 	return nil, nil, ErrRequest
 }

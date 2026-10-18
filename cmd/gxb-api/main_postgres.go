@@ -40,6 +40,7 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres/librarystore"
 	"gxb.local/backend/v2/internal/adapters/postgres/presencestore"
 	"gxb.local/backend/v2/internal/adapters/postgres/publicationstore"
+	"gxb.local/backend/v2/internal/adapters/postgres/rankingstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/socialgiftstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/socialinboxstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/socialrelationstore"
@@ -178,6 +179,9 @@ func main() {
 	i5svc := appi5.Service{Runner: runner, Store: i5db, Content: contentDB, Privileges: privileges, Functions: appi5.PetStarterFunctionAnnouncements{}, Directory: i4store.DirectoryLevelProjection{}, Backpack: i5db, Receipts: receipts, ReceiptRead: kernelstore.Reader{Queryer: pool}, RedeemSecret: redeemSecret}
 	displayService := playerdisplay.Service{Runner: runner, Fresh: pool, Time: postgres.AuthoritativeTime{Queryer: pool}, Players: i4store.PlayerRootLocker{}, Fence: i5db, Store: i5db, Content: contentDB, Receipts: receipts, Privileges: privileges, CosmeticPrivileges: privileges, Inventory: i5db, Population: characterstore.DisplayReader{Store: characterstore.Store{Queryer: pool}, Content: contentDB}, Characters: characterstore.DisplayReader{Store: characterstore.Store{Queryer: pool}, Content: contentDB}, Values: appi5.DisplayValueOwner{Store: i5db, Content: contentDB, Grant: i5svc}, Directory: appdir.Reconciler{Source: i5db, Sink: i4store.DirectoryLevelProjection{}}}
 
+	girlsRanking := canonicalGirlsRanking(pool, runner, contentDB, displayService, receipts)
+	displayService.CatalogExternal = girlsRanking
+
 	maxHeroColorPolicy := appi5.PreservationMaxHeroColorProvider{}
 	heroDB := characterstore.Store{Queryer: pool}
 	savedPresetSvc := appsavedpreset.MutationService{Runner: runner, Store: heroDB, Fencer: i5db, References: appsavedpreset.ReferenceOwners{Heroes: heroDB, Pets: heroDB}, Receipts: receipts, ReceiptRead: kernelstore.Reader{Queryer: pool}}
@@ -234,7 +238,7 @@ func main() {
 		Runner: runner, Receipts: receipts, ReceiptReader: kernelstore.Reader{Queryer: pool},
 		DigestSecret: digestSecret, BearerSecret: bearerSecret, DerivationKeyID: keyID, BearerKeys: bearerKeys,
 		BootstrapProfileVersion: "i4-wave-s-v1",
-		PersistenceContributors: []appboot.CharacterBootstrapPersistenceContributor{i5store.PlayerCoreBootstrapContributor{}, i5store.EconomyOwnerBootstrapContributor{Content: contentstore.Store{Queryer: pool}, Privileges: privileges}, characterstore.BootstrapContributor{}, characterstore.PetBootstrapContributor{}, characterstore.SavedPresetBootstrapContributor{}, characterstore.PracticeBootstrapContributor{}, librarystore.BootstrapContributor{}, achievementstore.BootstrapContributor{Revision: dormBundle.RevisionID()}, dormstore.BootstrapContributor{Revision: dormBundle.RevisionID()}, bookstore.BootstrapContributor{Revision: dormBundle.RevisionID()}, coursestore.BootstrapContributor{Revision: dormBundle.RevisionID()}, inscriptionstore.BootstrapContributor{Revision: dormBundle.RevisionID()}, i5store.InscriptionCertificateBootstrap{}, elementstore.BootstrapContributor{Revision: dormBundle.RevisionID()}, spiritstore.BootstrapContributor{Revision: dormBundle.RevisionID()}, conquerstore.BootstrapContributor{Revision: dormBundle.RevisionID()}},
+		PersistenceContributors: []appboot.CharacterBootstrapPersistenceContributor{i5store.PlayerCoreBootstrapContributor{}, i5store.EconomyOwnerBootstrapContributor{Content: contentstore.Store{Queryer: pool}, Privileges: privileges}, characterstore.BootstrapContributor{}, characterstore.PetBootstrapContributor{}, characterstore.SavedPresetBootstrapContributor{}, characterstore.PracticeBootstrapContributor{}, librarystore.BootstrapContributor{}, achievementstore.BootstrapContributor{Revision: dormBundle.RevisionID()}, rankingstore.BootstrapContributor{}, dormstore.BootstrapContributor{Revision: dormBundle.RevisionID()}, bookstore.BootstrapContributor{Revision: dormBundle.RevisionID()}, coursestore.BootstrapContributor{Revision: dormBundle.RevisionID()}, inscriptionstore.BootstrapContributor{Revision: dormBundle.RevisionID()}, i5store.InscriptionCertificateBootstrap{}, elementstore.BootstrapContributor{Revision: dormBundle.RevisionID()}, spiritstore.BootstrapContributor{Revision: dormBundle.RevisionID()}, conquerstore.BootstrapContributor{Revision: dormBundle.RevisionID()}},
 		LoginReconcilers:        []appboot.CharacterLoginReconciler{appi5.PetStarterLoginReconciler{Store: i5db, Content: contentDB}},
 		OperationBinder:         contentstore.Store{},
 		DetailContributors:      []appboot.MID1DetailContributor{commerceprivilege.BootstrapProjection{Provider: privileges}, i5store.BootstrapProjection{Display: displayService, Content: contentstore.Store{Queryer: pool}, Privileges: privileges, MaxHeroColor: maxHeroColorPolicy, Spirit: spiritSvc}, activitystore.BootstrapProjection{Directory: activityDirectory}, guildprojection.BootstrapProjection{}, characterstore.HeroBootstrapProjection{Content: contentDB, Library: librarySvc, Dorm: dormSvc, Book: bookSvc, Course: courseSvc, Inscription: inscriptionSvc, Element: elementSvc, Spirit: spiritSvc, Evolution: evolutionSvc}, librarystore.BootstrapProjection{Service: librarySvc}, bookstore.BootstrapProjection{Service: bookSvc, Content: contentDB}, coursestore.BootstrapProjection{Service: courseSvc, Content: contentDB}, characterstore.PetBootstrapProjection{Content: contentDB}, characterstore.SavedPresetBootstrapProjection{}},
@@ -281,6 +285,7 @@ func main() {
 	mustRegister(18, boot)
 	mustRegister(1, boot)
 	mustRegister(192, stockruntime.DiscoveryDispatcher{Realtime: realtime, Tracker: tracker})
+	mustRegister(301, stockruntime.RankingDispatcher{Authority: authority, Service: girlsRanking})
 	lobbyD := stockruntime.LobbyDispatcher{Authority: authority, Tracker: tracker}
 	for _, mid := range []uint16{56, 1302, 1344, 2754} {
 		mustRegister(mid, lobbyD)

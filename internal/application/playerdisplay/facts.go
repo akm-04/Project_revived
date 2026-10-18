@@ -222,6 +222,42 @@ func (s Service) ReadEligibilityTx(c context.Context, sc ca.CoherentReadScope, q
 					f.Origins = []Origin{{PlayerID: q.PlayerID, Key: "ordinary-stack", Owner: "i5", Family: v.Family, CatalogID: v.ID, Revision: sc.ContentRevision, StateVersion: x.StateVersion}}
 				}
 			}
+			// A bounded title owner can now provide exact positive or complete
+			// negative facts for one catalog row without claiming the family.
+			if q.Family == "title" && f.Status == Unavailable && s.CatalogExternal != nil {
+				os, complete, err := s.catalogOrigins(c, sc.Queryer(), q.PlayerID, q.Family, v.ID, sc.ContentRevision, sc.ObservedAt)
+				if err != nil && !errors.Is(err, ErrUnavailable) {
+					return out, err
+				}
+				if err == nil {
+					f.Basis = "CANONICAL_CATALOG_SCOPED_ORIGIN"
+					if complete {
+						f.Status = Ineligible
+					}
+					for _, o := range os {
+						original, err := s.Content.ReadPlayerDisplayCatalogTx(c, sc.Queryer(), o.Revision)
+						if err != nil {
+							return out, err
+						}
+						if original.Validate() != nil {
+							return out, ErrConflict
+						}
+						row, found := original.Find(o.Family, o.CatalogID)
+						if !found {
+							return out, ErrConflict
+						}
+						end, err := row.EndTime(o.StartsAt, o.EndTime)
+						if err != nil {
+							return out, err
+						}
+						if player.EligibleAt(end, sc.ObservedAt) {
+							o.EndTime = end
+							f.Status = Eligible
+							f.Origins = append(f.Origins, o)
+						}
+					}
+				}
+			}
 			out.Facts = append(out.Facts, f)
 		}
 	}

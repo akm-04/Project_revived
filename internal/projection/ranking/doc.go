@@ -1,2 +1,2 @@
-// Package ranking is an I0 ownership placeholder. Domain behavior begins only in its assigned implementation wave.
+// Package ranking projects canonical Ranking snapshots into source-compatible response shapes.
 package ranking

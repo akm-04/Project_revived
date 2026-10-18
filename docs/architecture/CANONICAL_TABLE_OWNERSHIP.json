@@ -3117,6 +3117,76 @@
       ],
       "write_exceptions": [],
       "migration": "migrations/00061_i7c4b_achievement_facts.sql"
+    },
+    "ranking_girls_roots": {
+      "allowed_query_owners": [
+        "Ranking"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/rankingstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/rankingstore/"
+      ],
+      "migration": "migrations/00062_i7c4c_girls_ranking.sql",
+      "owner": "Ranking",
+      "write_exceptions": []
+    },
+    "ranking_girls_snapshots": {
+      "allowed_query_owners": [
+        "Ranking"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/rankingstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/rankingstore/"
+      ],
+      "migration": "migrations/00062_i7c4c_girls_ranking.sql",
+      "owner": "Ranking",
+      "write_exceptions": []
+    },
+    "ranking_girls_periods": {
+      "allowed_query_owners": [
+        "Ranking"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/rankingstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/rankingstore/"
+      ],
+      "migration": "migrations/00062_i7c4c_girls_ranking.sql",
+      "owner": "Ranking",
+      "write_exceptions": []
+    },
+    "ranking_girls_awards": {
+      "allowed_query_owners": [
+        "Ranking"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/rankingstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/rankingstore/"
+      ],
+      "migration": "migrations/00062_i7c4c_girls_ranking.sql",
+      "owner": "Ranking",
+      "write_exceptions": []
+    },
+    "ranking_girls_birth_tracking": {
+      "allowed_query_owners": [
+        "Ranking"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/rankingstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/rankingstore/"
+      ],
+      "migration": "migrations/00062_i7c4c_girls_ranking.sql",
+      "owner": "Ranking",
+      "write_exceptions": []
     }
   }
 }

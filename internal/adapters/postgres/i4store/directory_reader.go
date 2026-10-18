@@ -13,12 +13,16 @@ import (
 type PlayerDirectoryReader struct{ Queryer tx.Queryer }
 
 func (r PlayerDirectoryReader) Profile(ctx context.Context, pid identity.PlayerID) (playerdirectory.Profile, bool, error) {
-	if r.Queryer == nil || !pid.Valid() {
+	return r.ProfileTx(ctx, r.Queryer, pid)
+}
+
+func (PlayerDirectoryReader) ProfileTx(ctx context.Context, q tx.Queryer, pid identity.PlayerID) (playerdirectory.Profile, bool, error) {
+	if q == nil || !pid.Valid() {
 		return playerdirectory.Profile{}, false, errors.New("invalid player directory read")
 	}
 	var p playerdirectory.Profile
 	var rawPID int64
-	err := r.Queryer.QueryRow(ctx, `SELECT player_id,name,lev,avatar_id,avatar_frame_id,conquer_lev,conquer_loop_id FROM player_directory_profiles WHERE player_id=$1`, int64(pid)).Scan(&rawPID, &p.Name, &p.Level, &p.AvatarID, &p.AvatarFrameID, &p.ConquerLevel, &p.ConquerLoopID)
+	err := q.QueryRow(ctx, `SELECT player_id,name,lev,avatar_id,avatar_frame_id,conquer_lev,conquer_loop_id FROM player_directory_profiles WHERE player_id=$1`, int64(pid)).Scan(&rawPID, &p.Name, &p.Level, &p.AvatarID, &p.AvatarFrameID, &p.ConquerLevel, &p.ConquerLoopID)
 	if errors.Is(err, kernelstore.ErrNoRows) {
 		return playerdirectory.Profile{}, false, nil
 	}

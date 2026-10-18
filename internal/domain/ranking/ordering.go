@@ -1,5 +1,5 @@
-// Package ranking contains versioned private-server ordering rules. It does not
-// own scores, timestamps, cohorts, snapshots, RNG or reward/title settlement.
+// Package ranking contains versioned private-server Ranking rules and immutable
+// snapshot validation. Ordering never samples a clock or draws gameplay RNG.
 package ranking
 
 import (
