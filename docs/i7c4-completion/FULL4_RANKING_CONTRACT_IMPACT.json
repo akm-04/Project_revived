@@ -4,7 +4,8 @@
     "Explicit private server scoped Girls Ranking using existing qualified1001; no change to canonicalmetric definition",
     "Introduce canonical Ranking snapshot/settlement authority, not new Hero-count authority",
     "Per-catalog scoped origin request prevents all-title capability laundering; prior ExternalOrigins API remains compatible",
-    "Weekly on-demand settlement is versioned private behavior, source only establishes title mapping/duration. Not reused for otherboards byassociation."
+    "Weekly on-demand settlement is versioned private behavior, source only establishes title mapping/duration. Not reused for otherboards byassociation.",
+    "New exactGirls-profile birth history marker only via I4 fresh unpublished bootstrap; canonical earned/private award history distinct from Achievement/future mode production proof. Scoped positive witness vs complete negative coverage are separate fields."
   ],
   "lock_order": [
     "Refresh: actor fence / Rank root600; canonical owner reads through same CA8 Serializable Queryer, no foreign owner SQL",
@@ -25,7 +26,8 @@
     "I7C1",
     "I7C4A",
     "I7C4C",
-    "I7C6 handoff remainsopen"
+    "I7C6 handoff remainsopen",
+    "I4 fresh unpublished namespace persistence contributor"
   ],
   "full4_gate_waiver": false,
   "private_policy_ref": "PRIVATE_GIRLS_RANKING_POLICY.json",
@@ -37,5 +39,6 @@
     "app/common/enums.lua": "15340bd89fe7c6f150ccfd4a5cd2a2f0e8e73c89dfae9ac3388376a4799901f3",
     "app/common/network/mid.lua": "026a20b29d97624979777a68c64c749254031604057ff42aa8f8254c3e35b5af"
   },
-  "independent_gate_before_code": true
+  "independent_gate_before_code": true,
+  "origin_history_discovery": "Existing ExternalOrigins.Qualified implies complete family and empty result becomes ErrRequest/fallback. A bounded Ranking provider cannot use that flag to hide unknown legacy/other origin history. New catalog-scoped interface must explicitly distinguish positive proof from complete negative history; old API behavior preserved."
 }

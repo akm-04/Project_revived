@@ -51,7 +51,11 @@
   "origins": {
     "scope": "Exact family+catalogID witness for100059..100062 only",
     "rule": "Extend typed per-catalog External origin seam; retained whole-family External port compatible. Do not label whole title/bubble family complete. Ranking reads own immutable settlements to establish award truth, recipient ledger alone not proof.",
-    "others": "All other selected actual origin sources remain unavailable under their own contracts"
+    "others": "All other selected actual origin sources remain unavailable under their own contracts",
+    "positive_vs_complete": "Scoped observation distinguishes qualified returned positive origins from complete negative coverage. Any genuine active matching award is sufficient positive proof. No match establishes ineligibility only with complete exact catalog history; otherwise return unavailable, never clear an unknown legacy selection.",
+    "fresh_tracking": "Ranking-owned exactGirlsprofile birth marker inserted only by trusted I4 fresh unpublished namespace bootstrap; no deployment backfill/legacy auto-enrollment. Marker qualifies empty new-private-profile award history only, not other titles or Achievement/mode history.",
+    "mirror_consistency": "Canonical Ranking immutable settlement origins must match typed PlayerDisplay recipient ledger. Unknown/mismatched/missing recipient origins invalidate complete-history claim; never silently skip foreign/mismatched origins.",
+    "expiry": "New-profile tracked history with only expired origins is qualified ineligible, normal display fallback. Legacy/untracked with no active qualified positive remains unavailable; do not pretend expired known award establishes complete original history."
   },
   "time": {
     "instant": "Existing generation.TimedRunner DB-authoritative instant pinned once before retry/locks",
