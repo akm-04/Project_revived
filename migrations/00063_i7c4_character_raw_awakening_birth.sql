@@ -15,4 +15,3 @@ CREATE TABLE player_hero_raw_awakening (
  PRIMARY KEY(player_id,partner_id),
  CHECK(created_at=birth_at AND updated_at>=created_at)
 );
-
