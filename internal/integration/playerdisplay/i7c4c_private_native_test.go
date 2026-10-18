@@ -231,7 +231,7 @@ func TestI7C4CPrivateAwakenCountsNormalAndSuperWithoutSkinEligibility(t *testing
 	}
 	ids := map[string]int64{}
 	for _, h := range catalog.HeroTemplates {
-		if h.BeforeAwaken > 0 && ids[h.Kind] == 0 {
+		if ((h.Kind == "NORMAL" && h.BeforeAwaken > 0) || (h.Kind == "SUPER" && h.BeforeAwaken == 0)) && ids[h.Kind] == 0 {
 			ids[h.Kind] = h.TableID
 		}
 	}
@@ -243,7 +243,7 @@ func TestI7C4CPrivateAwakenCountsNormalAndSuperWithoutSkinEligibility(t *testing
 	skillHero(t, p, a, rev, ids["NORMAL"], 1)
 	skillHero(t, p, a, rev, ids["SUPER"], 2)
 	got, e := privateRead(t, p, a, rev, []int64{1001, 1008, 1009})
-	if e != nil || got[0].Value != 2 || got[1].Value != 10 || got[2].Value != 2 {
+	if e != nil || got[0].Value != 2 || got[1].Value != 10 || got[2].Value != 1 {
 		t.Fatal(got, e)
 	}
 	exec(t, p, `UPDATE player_heroes SET updated_at=clock_timestamp()+interval '1 hour',state_version=state_version+1 WHERE player_id=$1 AND partner_id=1`, int64(a.PlayerID))
