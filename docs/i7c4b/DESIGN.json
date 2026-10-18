@@ -1,0 +1,33 @@
+{
+  "status": "PREIMPLEMENTATION_PLAN_FROZEN",
+  "version": "v0.125.0 planned",
+  "migration": "00061_i7c4b_achievement_facts.sql",
+  "owner": "Achievement module; pure I5 Objective reducer reused, no duplicate I5 objective authority",
+  "selected_producer": "100014 Library real ring-gift false-to-true marriage; canonical population count highwater",
+  "changes": [
+    "Immutable33definition sourcecatalog with selected100014 exacttiers",
+    "Fresh Player bootstrap root only; legacy unknown preserved",
+    "Library typed prepare/apply hook before I5 writes and after canonical SaveHero",
+    "Achievement root and immutable event rows with source identity/fingerprint, per-tier firstcompletion and CAS",
+    "Witnessed coherent typed selected-tier read, explicit allcatalog unavailable",
+    "Production sourcehook/bootstrap wiring; no new public route"
+  ],
+  "lock_plan": [
+    "I4actor315",
+    "Character population400/target410",
+    "Libraryroot490/Hero491",
+    "Achievementroot620",
+    "Existing I5 value700+"
+  ],
+  "history": "Newly tracked fresh players only; no automatic legacy reinterpretation or complete_time backfill",
+  "reducer": "objective.HighWaterFromCanonicalState + objective.Fact.Key; immutable tier completion under explicit source-supported current population policy",
+  "not_claimed": [
+    "Original server achievement algorithm",
+    "Legacy completion-history import",
+    "Other32 achievement producers and daily reset policies",
+    "Award claim or points/ranking metric algorithm",
+    "Public1302/1303/CHECK route activation",
+    "Retirement/lifetime marriage history reconstruction",
+    "Fullconsumer/parent/W2 acceptance"
+  ]
+}

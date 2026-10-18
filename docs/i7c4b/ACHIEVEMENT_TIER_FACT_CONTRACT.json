@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "contract_id": "I7C4B_ACHIEVEMENT_TIER_FACTS",
+  "stage": "I7C-4B",
+  "version": 1,
+  "status": "FROZEN_FOR_DIRECTLY_AUTHORIZED_BOUNDED_IMPLEMENTATION",
+  "classification": "SOURCE_FACT + IMPLEMENTATION_DECISION + INHERITED_CONTRACT",
+  "rules": [
+    "Achievement is the sole canonical earned-tier fact owner. complete_time indices1/2/3 are bronze/silver/gold, strictly positive means earned; unearned requires qualified history and zero. Points, award claims, generic Objective rows and latest-index are not trophy counts.",
+    "Compile exact33 source definitions with allthree thresholds/points/visibility/daily/stamp metadata. Qualify selected100014 Love and Vow only, using real canonical Library ring50001112 false-to-true marriage transition and its typed MarriedHeroCountTx population. Source conditions1/10/20 preserved. Other32 actual producer/reduction/time profiles remain explicitly unavailable.",
+    "Use existing Objective pure HighWaterFromCanonicalState reducer and Fact.Key identity; Achievement owns persistence. I5 stock families1..7 and coupled Objective/Grant storage are not extended with an invented achievement family. No reward/value grant because source award algorithm and CHECK_ACHIEVEMENT MID are unresolved. Existing I5 debit/receipt infrastructure remains reused by Library.",
+    "Policy C4B_MARRIED_POPULATION_TIER_FACTS_V1 records first observed canonical population threshold crossing at the same DB-authoritative Library decisioninstant for newly tracked players. This is a disclosed implementation policy, not a recovered original-server algorithm. Current married population basis reuses accepted2B/metric1010 typed input; persistent earned tiers do not revoke when population falls. Retirement/cumulative-lifetime reconstruction is not qualified or invented.",
+    "Bootstrap only fresh unpublished Player namespace with qualified empty selected history. Never auto-backfill legacy roots, original complete_time, points, awards, or unavailable producers. Missing legacy root preserves Library operation but read remains unavailable. Old pinned content lacking new capability preserves old source operation without retroactive achievement mutation. New capability with missing hook is an error, not silently skipped.",
+    "Producer hook prepares all Achievement root620 locks after Character400/410 and Library490/491, before any I5 value700+ writes. Typed prepared consumer applies only after canonical Library SaveHero in same callerTx. No foreignSQL, nestedTx, liveclock, source scalar supplied by client or late existing-owner locks.",
+    "Before preparing count, validate source Hero old/new marriage transition, actor/operation/content/time and owner versions. Compute count through existing typed Library provider plus one before source save, then verify post-save typed population equals expected. All owner versions/timestamps coherent. Same semantic event identity is bound to source operation, target, old/new version, count, revision and time; conflicts fail atomic rollback. Event receipt and rootCAS share transaction with ring debit and source receipt.",
+    "Replay returns original source receipt before hook, retaining original content/time. Unknown COMMIT uses source positiveproof only; absent proof unresolved. Concurrency uses source full lock plan plus Achievement root. No-op/already-married gift emits no new fact. Failed debit/CAS/event write rolls back all effects.",
+    "Read-only CA8 witnessed scope with pinned content-policy match, target identity, authoritativeinstant and owner version; root origin revision and tier times validated. Per-achievement availability explicit. Selected projection returns exactly3 tier facts with completion timestamps; all-catalog trophy reduction/Ranking/publicwire deferred4C. No qualified overall zero from one covered achievement.",
+    "Forward migration61/content generation125. Previous migrations1..60 and36 payloads immutable. New content and Achievement tables have explicit ownership. Fresh61/populated60 upgrade plus replay/rollback/unknowncommit/concurrency/reload/restore/restart, exactportableR2/source/ownership/race/static/security and separate primary reality required before bounded closure.",
+    "Known source LOAD1302/GETAWARD1303 remain unactivated until complete applicable wire/reward profile. CHECK undefined remains unresolved. Full catalogue origins/4C/fullconsumer/I7C-E/parents/W2 remain open; selected genuine producer qualifies independent core only."
+  ],
+  "policy_id": "C4B_MARRIED_POPULATION_TIER_FACTS_V1",
+  "selected_achievement_id": 100014,
+  "full_catalog_qualified": false,
+  "not_claimed": [
+    "Original server achievement algorithm",
+    "Legacy completion-history import",
+    "Other32 achievement producers and daily reset policies",
+    "Award claim or points/ranking metric algorithm",
+    "Public1302/1303/CHECK route activation",
+    "Retirement/lifetime marriage history reconstruction",
+    "Fullconsumer/parent/W2 acceptance"
+  ]
+}
