@@ -1,0 +1,219 @@
+// Package achievement owns earned tier facts. It consumes canonical Library
+// transitions; generic objectives, points and award claims are not trophies.
+package achievement
+
+import (
+	"context"
+	"crypto/sha256"
+	"encoding/hex"
+	"encoding/json"
+	ca "gxb.local/backend/v2/internal/application/characterasset"
+	lib "gxb.local/backend/v2/internal/application/librarylocal"
+	d "gxb.local/backend/v2/internal/domain/achievement"
+	"gxb.local/backend/v2/internal/domain/identity"
+	"gxb.local/backend/v2/internal/domain/objective"
+	"gxb.local/backend/v2/internal/foundation/tx"
+	"time"
+)
+
+type Event struct {
+	Source           lib.MarriageEvent
+	Population       int64
+	Key, Fingerprint string
+}
+
+func (e Event) Validate() error {
+	s := e.Source
+	if !s.Player.Valid() || s.PartnerID < 1 || s.OldVersion < 1 || s.NewVersion != s.OldVersion+1 || s.OperationID.IsZero() || !d.RevisionValid(s.ContentRevision) || s.DecisionAt.Unix() <= 0 || e.Population < 1 || e.Population > 9007199254740991 {
+		return d.ErrConflict
+	}
+	v, err := NewEvent(s, e.Population)
+	if err != nil || v.Key != e.Key || v.Fingerprint != e.Fingerprint {
+		return d.ErrConflict
+	}
+	return nil
+}
+func NewEvent(s lib.MarriageEvent, n int64) (Event, error) {
+	f := objective.Fact{PlayerID: s.Player, SourceDomain: "Library", SourceBusinessKey: s.OperationID.String(), Kind: "MARRIED_HERO_POPULATION"}
+	key, e := f.Key()
+	if e != nil {
+		return Event{}, e
+	}
+	raw, e := json.Marshal(struct {
+		Source     lib.MarriageEvent
+		Population int64
+		Policy     string
+	}{s, n, d.Policy})
+	if e != nil {
+		return Event{}, e
+	}
+	hash := sha256.Sum256(raw)
+	return Event{Source: s, Population: n, Key: key, Fingerprint: hex.EncodeToString(hash[:])}, nil
+}
+
+type Store interface {
+	ReadRootTx(context.Context, tx.Queryer, identity.PlayerID, bool) (d.Root, bool, error)
+	SaveRootTx(context.Context, tx.Tx, d.Root, int64) error
+	PutEventTx(context.Context, tx.Tx, Event) error
+}
+type Content interface {
+	AchievementCatalogTx(context.Context, tx.Queryer, string) (d.Catalog, error)
+}
+type Population interface {
+	MarriedHeroCountTx(context.Context, tx.Queryer, lib.InputScope) (lib.CollectionInputs, error)
+	HeroLibraryInputsTx(context.Context, tx.Queryer, lib.InputScope, int64) (lib.HeroInputs, error)
+}
+type Service struct {
+	Store      Store
+	Content    Content
+	Population Population
+}
+type prepared struct {
+	owner   Service
+	event   Event
+	root    d.Root
+	catalog d.Catalog
+	tracked bool
+}
+
+func (s Service) PrepareMarriageTx(c context.Context, t tx.Tx, e lib.MarriageEvent) (lib.PreparedMarriageFact, error) {
+	if t == nil || s.Store == nil || s.Content == nil || s.Population == nil {
+		return nil, d.ErrUnavailable
+	}
+	probe, err := NewEvent(e, 1)
+	if err != nil || probe.Validate() != nil {
+		return nil, d.ErrConflict
+	}
+	catalog, err := s.Content.AchievementCatalogTx(c, t, e.ContentRevision)
+	if err != nil {
+		return nil, err
+	}
+	scope := lib.InputScope{Player: e.Player, ContentRevision: e.ContentRevision, ObservedAt: e.DecisionAt}
+	h, err := s.Population.HeroLibraryInputsTx(c, t, scope, e.PartnerID)
+	if err != nil {
+		return nil, err
+	}
+	if h.Facts.Married || h.Facts.Favor != 2000 || h.Facts.StateVersion != e.OldVersion {
+		return nil, d.ErrConflict
+	}
+	count, err := s.Population.MarriedHeroCountTx(c, t, scope)
+	if err != nil {
+		return nil, err
+	}
+	if count.MarriedCount >= 9007199254740991 {
+		return nil, d.ErrConflict
+	}
+	event, err := NewEvent(e, count.MarriedCount+1)
+	if err != nil {
+		return nil, err
+	}
+	// Rank620, acquired before Library's first I5 debit. Missing legacy history is
+	// explicit unknown; source operation remains valid without invented backfill.
+	r, ok, err := s.Store.ReadRootTx(c, t, e.Player, true)
+	if err != nil {
+		return nil, err
+	}
+	if ok && (r.Validate() != nil || r.UpdatedAt.After(e.DecisionAt)) {
+		return nil, d.ErrConflict
+	}
+	if ok {
+		if _, err = s.Content.AchievementCatalogTx(c, t, r.ContentRevision); err != nil {
+			return nil, err
+		}
+	}
+	return prepared{owner: s, event: event, root: r, catalog: catalog, tracked: ok}, nil
+}
+func (p prepared) ApplyMarriageTx(c context.Context, t tx.Tx) error {
+	if t == nil {
+		return d.ErrUnavailable
+	}
+	s := p.event.Source
+	scope := lib.InputScope{Player: s.Player, ContentRevision: s.ContentRevision, ObservedAt: s.DecisionAt}
+	h, e := p.owner.Population.HeroLibraryInputsTx(c, t, scope, s.PartnerID)
+	if e != nil {
+		return e
+	}
+	if !h.Facts.Married || h.Facts.StateVersion != s.NewVersion {
+		return d.ErrConflict
+	}
+	count, e := p.owner.Population.MarriedHeroCountTx(c, t, scope)
+	if e != nil {
+		return e
+	}
+	if count.MarriedCount != p.event.Population {
+		return d.ErrConflict
+	}
+	if !p.tracked {
+		return nil
+	}
+	next, changed, e := p.root.ObservePopulation(p.catalog, count.MarriedCount, s.DecisionAt)
+	if e != nil {
+		return e
+	}
+	if e = p.owner.Store.PutEventTx(c, t, p.event); e != nil {
+		return e
+	}
+	if changed {
+		return p.owner.Store.SaveRootTx(c, t, next, p.root.StateVersion)
+	}
+	return nil
+}
+
+type Request struct {
+	Player          identity.PlayerID
+	AchievementID   int64
+	CompleteCatalog bool
+}
+type TierFact struct {
+	Tier         int
+	Earned       bool
+	CompleteTime int64
+}
+type Observation struct {
+	Player                                    identity.PlayerID
+	AchievementID                             int64
+	ContentRevision, OriginRevision, PolicyID string
+	ObservedAt                                time.Time
+	StateVersion, Progress                    int64
+	Tiers                                     [3]TierFact
+	CompleteCatalog                           bool
+	UnavailableAchievementIDs                 []int64
+}
+
+func (s Service) ReadTierFactsTx(c context.Context, sc ca.CoherentReadScope, q Request) (Observation, error) {
+	var out Observation
+	pin, ok := sc.Operation.Policies.Get("content")
+	if sc.Validate() != nil || !ok || pin != sc.ContentRevision || !q.Player.Valid() || q.AchievementID != d.SelectedID || q.CompleteCatalog || s.Store == nil || s.Content == nil {
+		return out, d.ErrUnavailable
+	}
+	catalog, e := s.Content.AchievementCatalogTx(c, sc.Queryer(), sc.ContentRevision)
+	if e != nil {
+		return out, e
+	}
+	r, found, e := s.Store.ReadRootTx(c, sc.Queryer(), q.Player, false)
+	if e != nil {
+		return out, e
+	}
+	if !found {
+		return out, d.ErrUnavailable
+	}
+	if r.PlayerID != q.Player || r.Validate() != nil || r.UpdatedAt.After(sc.ObservedAt) {
+		return out, d.ErrConflict
+	}
+	if _, e = s.Content.AchievementCatalogTx(c, sc.Queryer(), r.ContentRevision); e != nil {
+		return out, e
+	}
+	out = Observation{Player: q.Player, AchievementID: d.SelectedID, ContentRevision: sc.ContentRevision, OriginRevision: r.ContentRevision, PolicyID: r.PolicyID, ObservedAt: sc.ObservedAt, StateVersion: r.StateVersion, Progress: r.Progress}
+	for i, at := range r.CompleteTimes {
+		out.Tiers[i] = TierFact{Tier: i + 1, Earned: at != nil}
+		if at != nil {
+			out.Tiers[i].CompleteTime = at.Unix()
+		}
+	}
+	for _, row := range catalog.Rows {
+		if row.ID != d.SelectedID {
+			out.UnavailableAchievementIDs = append(out.UnavailableAchievementIDs, row.ID)
+		}
+	}
+	return out, nil
+}

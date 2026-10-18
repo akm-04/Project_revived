@@ -1,0 +1,86 @@
+[
+  {
+    "path": "app/common/network/mid.lua",
+    "sha256": "026a20b29d97624979777a68c64c749254031604057ff42aa8f8254c3e35b5af",
+    "source_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+    "classification": "SOURCE_FACT_CACHED_PRIMARY"
+  },
+  {
+    "path": "app/common/tables/AchievementLevelTable.lua",
+    "sha256": "111a4a4fc0d3ab47ad09ac8b73c4f3883fbcc3766d6dbb464e48d3e81491ea48",
+    "source_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+    "classification": "SOURCE_FACT_CACHED_PRIMARY"
+  },
+  {
+    "path": "app/common/tables/AchievementTable.lua",
+    "sha256": "76fac87df563ec30384e281aca27497052f47609d3f11ef71b0be459b2de801e",
+    "source_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+    "classification": "SOURCE_FACT_CACHED_PRIMARY"
+  },
+  {
+    "path": "app/common/utils.lua",
+    "sha256": "6e56c7342e889d7ae8d41fe47cb06f66832227efe702f3863f693ee7ba84ffad",
+    "source_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+    "classification": "SOURCE_FACT_CACHED_PRIMARY"
+  },
+  {
+    "path": "app/model/Achievement.lua",
+    "sha256": "21997595c3bf71fde46029d8cfc31473dab8f3f39d94b480e3d3e6555a453d50",
+    "source_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+    "classification": "SOURCE_FACT_CACHED_PRIMARY"
+  },
+  {
+    "path": "app/model/NormalHero.lua",
+    "sha256": "125183556caeecc182bf0702dd1f95160c8ba1666a3b97fbb8a7261d30ae0ac9",
+    "source_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+    "classification": "SOURCE_FACT_CACHED_PRIMARY"
+  },
+  {
+    "path": "app/model/SuperHero.lua",
+    "sha256": "b127c2cbef327d3142031bf30daa0af1b45997c6da82fba946d641a86783d622",
+    "source_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+    "classification": "SOURCE_FACT_CACHED_PRIMARY"
+  },
+  {
+    "path": "app/windows/AchievementAwardWindow.lua",
+    "sha256": "9cd6a9edb56ff64bb7dc6e997e7a80eedf5fd5e152c0a97ad51ab913406fd030",
+    "source_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+    "classification": "SOURCE_FACT_CACHED_PRIMARY"
+  },
+  {
+    "path": "app/windows/AchievementDetailWindow.lua",
+    "sha256": "0fdcf0a7aeb5f444f0a61f706d2ddf256da30cf27c5a9880335eee0555f70635",
+    "source_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+    "classification": "SOURCE_FACT_CACHED_PRIMARY"
+  },
+  {
+    "path": "app/windows/AchievementGettingWindow.lua",
+    "sha256": "89c585b588773afaedb9fa56c867cb4f29d07d39ccc70b8ce1a4e41fd180ab2f",
+    "source_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+    "classification": "SOURCE_FACT_CACHED_PRIMARY"
+  },
+  {
+    "path": "app/windows/AchievementWindow.lua",
+    "sha256": "f9a89b8f13dc7888278acb74eb8f5ee5d78dafa36c02a8223eeb4c25c0d91fed",
+    "source_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+    "classification": "SOURCE_FACT_CACHED_PRIMARY"
+  },
+  {
+    "path": "app/windows/HeroGiftBoxWindow.lua",
+    "sha256": "d6065c3d601f582091546d77225c352be0ba83900d71fc294dbe26a7425a32c5",
+    "source_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+    "classification": "SOURCE_FACT_CACHED_PRIMARY"
+  },
+  {
+    "path": "data/tables/achievement.lua",
+    "sha256": "f6d89a716ed5f60c4b3e4616ff5c6728632a0d2614c93644be1125a1f9db1462",
+    "source_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+    "classification": "SOURCE_FACT_CACHED_PRIMARY"
+  },
+  {
+    "path": "data/tables/achievement_level.lua",
+    "sha256": "aeaed09a920222ebc7c47e3e73e82f7efeb36a1dac1d728796af6d2b0f75325a",
+    "source_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+    "classification": "SOURCE_FACT_CACHED_PRIMARY"
+  }
+]

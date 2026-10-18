@@ -21,12 +21,21 @@ from pathlib import Path
 from typing import Any, Iterable
 
 SCHEMA_VERSION = 1
-COMPILER_VERSION = "i7c4a-cosmetic-privilege"
+COMPILER_VERSION = "i7c4b-achievement-facts"
 PARSER_VERSION = "lua-generated-v18-guild-invite"
 EXPECTED_SOURCE_ARCHIVE_SHA256 = "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
 SOURCE_PREFIX = "app-assets/output/assets/src_64/"
 
 SOURCE_MANIFEST = [
+    ('app/common/tables/AchievementLevelTable.lua', '111a4a4fc0d3ab47ad09ac8b73c4f3883fbcc3766d6dbb464e48d3e81491ea48', 'I7C4B_ACHIEVEMENT_SOURCE_BOUNDARY'),
+    ('app/common/tables/AchievementTable.lua', '76fac87df563ec30384e281aca27497052f47609d3f11ef71b0be459b2de801e', 'I7C4B_ACHIEVEMENT_SOURCE_BOUNDARY'),
+    ('app/model/Achievement.lua', '21997595c3bf71fde46029d8cfc31473dab8f3f39d94b480e3d3e6555a453d50', 'I7C4B_ACHIEVEMENT_SOURCE_BOUNDARY'),
+    ('app/windows/AchievementAwardWindow.lua', '9cd6a9edb56ff64bb7dc6e997e7a80eedf5fd5e152c0a97ad51ab913406fd030', 'I7C4B_ACHIEVEMENT_SOURCE_BOUNDARY'),
+    ('app/windows/AchievementDetailWindow.lua', '0fdcf0a7aeb5f444f0a61f706d2ddf256da30cf27c5a9880335eee0555f70635', 'I7C4B_ACHIEVEMENT_SOURCE_BOUNDARY'),
+    ('app/windows/AchievementGettingWindow.lua', '89c585b588773afaedb9fa56c867cb4f29d07d39ccc70b8ce1a4e41fd180ab2f', 'I7C4B_ACHIEVEMENT_SOURCE_BOUNDARY'),
+    ('app/windows/AchievementWindow.lua', 'f9a89b8f13dc7888278acb74eb8f5ee5d78dafa36c02a8223eeb4c25c0d91fed', 'I7C4B_ACHIEVEMENT_SOURCE_BOUNDARY'),
+    ('data/tables/achievement.lua', 'f6d89a716ed5f60c4b3e4616ff5c6728632a0d2614c93644be1125a1f9db1462', 'I7C4B_ACHIEVEMENT_SOURCE_BOUNDARY'),
+    ('data/tables/achievement_level.lua', 'aeaed09a920222ebc7c47e3e73e82f7efeb36a1dac1d728796af6d2b0f75325a', 'I7C4B_ACHIEVEMENT_SOURCE_BOUNDARY'),
     ("app/model/SelfGuild.lua", "c744e6f256a796a98613911372c1821b3e02f21d38480184df9c095373bd64f9", "I7A8B_CLIENT_ACCEPT_MID_LINK"),
     ("app/model/SocialSystem.lua", "ec5bea26bbdcbb67ca2ea80ab5ad7e9fb53ee613a3ffcbb13ae5dfef9ddf0502", "I7A8B_CLIENT_PRESENTATION_DISMISS_MID_LINK"),
     ("app/windows/SocialSystemWindow.lua", "5d0c3e1e20d69b7009ff52bf94ad438c6a133c8b099301d951bd1e413b90f112", "I7A8B_TYPE10_ACCEPT_AND_PRESENTATION_DISMISS_CLIENT_STATIC"),
@@ -120,6 +129,7 @@ SOURCE_MANIFEST.append(('app/windows/HeroGiftBoxWindow.lua','d6065c3d601f5820915
 SOURCE_MANIFEST.append(('app/windows/WhiteAlbumWindow.lua','851a53f588b59d95cfe460f3399ab1a6904fff7714131c358f3c3a73910b6bb9',"LIBRARY_INPUT_SOURCE_AUTHORITY"))
 
 ENABLED_CAPABILITIES = [
+    "ACHIEVEMENT_TIER_FACTS_I7C4B",
     "COSMETIC_PRIVILEGE_I7C4A",
     "STAT_INPUTS_I7C3B",
     "STAT_RULES_I7C3A",
@@ -310,6 +320,7 @@ SOURCE_MANIFEST.append(('app/common/tables/SuperEquipEnhanceTable.lua', 'ea0a389
 from stat_content import build_stat_rules
 from stat_input_content import build_stat_inputs
 from privilege_content import build_privilege
+from achievement_content import build_achievement
 from course_content import build_course
 class CompileError(ValueError):
     pass
@@ -2090,6 +2101,7 @@ def build_artifacts(blobs: dict[str, SourceBlob], archive_sha256: str) -> dict[s
     from dorm_content import build_dorm
     dorm_artifact=build_dorm(blobs,parse_generated_lua_table,pipe_ints,hero_artifact["templates"],partner_keys,partner_rows,super_keys,super_rows,indexed_field,items,CompileError)
     artifacts = {
+        "achievement_catalog.json":build_achievement(blobs,parse_generated_lua_table),
         "privilege_catalog.json":build_privilege(blobs,parse_generated_lua_table),
         "stat_input_catalog.json":build_stat_inputs(blobs,parse_generated_lua_table,parse_base64_indexed_lua_table,indexed_field,parse_encoded_item_table,parse_encoded_skill_table),
         "stat_rule_catalog.json":build_stat_rules(blobs,parse_generated_lua_table,parse_base64_indexed_lua_table,indexed_field),

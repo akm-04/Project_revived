@@ -6,12 +6,14 @@ import (
 	"context"
 	"errors"
 	pg "gxb.local/backend/v2/internal/adapters/postgres"
+	"gxb.local/backend/v2/internal/adapters/postgres/achievementstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/characterstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/contentstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/i4store"
 	"gxb.local/backend/v2/internal/adapters/postgres/i5store"
 	"gxb.local/backend/v2/internal/adapters/postgres/kernelstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/librarystore"
+	ach "gxb.local/backend/v2/internal/application/achievement"
 	hero "gxb.local/backend/v2/internal/application/characterhero"
 	gen "gxb.local/backend/v2/internal/application/generation"
 	i5 "gxb.local/backend/v2/internal/application/i5"
@@ -33,6 +35,7 @@ func libraryService(p *pg.Pool, db tx.Beginner) app.Service {
 	hero := characterstore.Store{Queryer: p}
 	inv := i5store.Store{Queryer: p}
 	s := app.Service{Timed: gen.TimedRunner{Binder: gen.Binder{Time: pg.AuthoritativeTime{Queryer: p}}, Runner: tx.Runner{DB: db}}, Reads: tx.Runner{DB: p}, Heroes: characterstore.LibraryHeroPort{Store: hero}, Library: librarystore.Store{}, Content: content, Players: i4store.PlayerRootLocker{}, Fence: inv, Costs: i5.MaterialCostDebiter{Store: inv, Content: content}, Receipts: kernelstore.Store{}}
+	s.Achievements = ach.Service{Store: achievementstore.Store{}, Content: content, Population: s}
 	s.Roster = characterstore.HeroBootstrapProjection{Content: content, Library: s}
 	return s
 }

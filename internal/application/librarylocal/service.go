@@ -151,16 +151,17 @@ type ActorFence interface {
 	FenceActorTx(context.Context, tx.Tx, identity.ActorContext, time.Time) error
 }
 type Service struct {
-	Timed    gen.TimedRunner
-	Reads    tx.Runner
-	Heroes   HeroPort
-	Library  LibraryPort
-	Content  ContentPort
-	Players  playerroot.TxLocker
-	Fence    ActorFence
-	Costs    i5.TxMaterialCostDebiter
-	Receipts receipt.Store
-	Roster   RosterProjectionPort
+	Achievements MarriageFactConsumer
+	Timed        gen.TimedRunner
+	Reads        tx.Runner
+	Heroes       HeroPort
+	Library      LibraryPort
+	Content      ContentPort
+	Players      playerroot.TxLocker
+	Fence        ActorFence
+	Costs        i5.TxMaterialCostDebiter
+	Receipts     receipt.Store
+	Roster       RosterProjectionPort
 }
 
 func Profile() tx.Profile {
@@ -480,6 +481,8 @@ func (s Service) execute(ctx context.Context, d Admission) (Result, error) {
 				return ErrStale
 			}
 			old := facts.StateVersion
+			wasMarried := facts.Married
+			var achievement PreparedMarriageFact
 			changed := false
 			switch d.Command.Family {
 			case Gift:
@@ -492,6 +495,12 @@ func (s Service) execute(ctx context.Context, d Admission) (Result, error) {
 					return e
 				}
 				if changed {
+					if !wasMarried && facts.Married {
+						achievement, e = s.prepareMarriage(ctx, sc.Tx, d, old)
+						if e != nil {
+							return e
+						}
+					}
 					_, e = s.Costs.DebitMaterialCostTx(ctx, sc.Tx, a.PlayerID, i5.MaterialCost{Stacks: []i5.StackMaterialCost{{ItemID: gift.ItemID, Amount: 1}}}, costOp)
 				}
 			case Feed:
@@ -532,6 +541,11 @@ func (s Service) execute(ctx context.Context, d Admission) (Result, error) {
 			}
 			if changed {
 				if e = s.Library.SaveHeroTx(ctx, sc.Tx, facts, old); e != nil {
+					return e
+				}
+			}
+			if achievement != nil {
+				if e = achievement.ApplyMarriageTx(ctx, sc.Tx); e != nil {
 					return e
 				}
 			}

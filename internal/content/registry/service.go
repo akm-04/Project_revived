@@ -225,6 +225,13 @@ func (s Service) EnsureBuiltinInstalled(ctx context.Context, op operation.Contex
 			if gotAppearance != wantAppearance {
 				return fmt.Errorf("content registry: appearance insert count=%d want=%d", gotAppearance, wantAppearance)
 			}
+			gotAchievement, err := s.Repo.InsertAchievement(tctx, scope.Tx, b)
+			if err != nil {
+				return err
+			}
+			if gotAchievement != 1 {
+				return errors.New("content registry achievement count")
+			}
 			gotPrivilege, err := s.Repo.InsertPrivilege(tctx, scope.Tx, b)
 			if err != nil {
 				return err

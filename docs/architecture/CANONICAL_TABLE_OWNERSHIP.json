@@ -3071,6 +3071,52 @@
       ],
       "write_exceptions": [],
       "migration": "migrations/00060_i7c4a_cosmetic_privilege.sql"
+    },
+    "content_achievement_catalogs": {
+      "allowed_query_owners": [
+        "content-registry"
+      ],
+      "allowed_read_paths": [
+        "sql/content/",
+        "internal/adapters/postgres/contentstore/",
+        "internal/adapters/postgres/contentqueries/"
+      ],
+      "allowed_write_paths": [
+        "sql/content/",
+        "internal/adapters/postgres/contentstore/",
+        "internal/adapters/postgres/contentqueries/"
+      ],
+      "migration": "migrations/00061_i7c4b_achievement_facts.sql",
+      "owner": "content-registry",
+      "write_exceptions": []
+    },
+    "achievement_roots": {
+      "owner": "achievement",
+      "allowed_query_owners": [
+        "achievement"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/achievementstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/achievementstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00061_i7c4b_achievement_facts.sql"
+    },
+    "achievement_events": {
+      "owner": "achievement",
+      "allowed_query_owners": [
+        "achievement"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/achievementstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/achievementstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00061_i7c4b_achievement_facts.sql"
     }
   }
 }
