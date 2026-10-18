@@ -1,0 +1,10 @@
+{
+  "status": "F1_API_FAILURE_REPRODUCED_AND_RECONCILED_TYPED_DORM_FIXTURE_REQUIRED_F2_PENDING",
+  "failed_candidate": "f21b3907abf5d3fd59faf8bbead79e58e89dba5818772821bfb27baa5561b848",
+  "failed_check": "TestI7C4BActualAPIRingAndRestartFacts returned503; PENDING admission, no marriage/trophy/ring partialeffect",
+  "diagnosis": "Production i5store.StackUsage calls Dorm FurnitureUsage.MinimumRetainedStackTx for ring debit; prerequisite fixture lacked Dorm root. Logging-only disposable overlay exposed postgres:no rows. Exact originalpending operation later succeeded via standalone noStackUsage composition, identifyingcompositiondifference; production requiresDormhistory andmustnot weakenit.",
+  "canonical_fix": "Only new4Btests: initialize typed qualified empty Dorm root, use actual production FurnitureUsage stackretention port in all4Bapp/process command helpers. No production source/algorithm/schema/content/pin/contract/assertion change.",
+  "f1_evidence": "evidence_f1/ (all failed/passing F1 logs retained); QUALIFICATION_F1.json creation paths historical; relocation_map evidence/=>evidence_f1/",
+  "proof_reuse": "F1 unchanged product reducer/units/affectedrace/fuzz/source/ownership/security proof retained with F1subject. NewF2 native4B productiondebit/API/process profile and currentidentity/fullunits required. Populated60upgrade/recovery not yetrun, willrunF2.",
+  "not_qualification": "diagnostic_harness/logging-overlay.json changed only dispatcherlogging and testlogdestination; diagnosticapi neverqualified"
+}

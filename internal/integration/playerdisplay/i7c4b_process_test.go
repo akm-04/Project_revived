@@ -118,7 +118,7 @@ func TestI7C4BProcessHelper(t *testing.T) {
 	}
 	at, _ := strconv.Atoi(os.Getenv("GXB_I7C4B_KILL_AT"))
 	p := pool(t)
-	_, e = libraryService(p, &libraryKillDB{Beginner: p, at: int32(at), file: file + ".ready", committed: os.Getenv("GXB_I7C4B_KILL_COMMITTED") == "1"}).Command(ctx, in.Actor, app.Command{Family: app.Gift, PartnerID: 1, Value: 50001112}, in.Operation)
+	_, e = achievementLibraryService(p, &libraryKillDB{Beginner: p, at: int32(at), file: file + ".ready", committed: os.Getenv("GXB_I7C4B_KILL_COMMITTED") == "1"}).Command(ctx, in.Actor, app.Command{Family: app.Gift, PartnerID: 1, Value: 50001112}, in.Operation)
 	t.Fatal("returned past boundary", e)
 }
 
@@ -173,7 +173,7 @@ func TestI7C4BProcessKillReopenMarriageFact(t *testing.T) {
 			t.Fatal("atomic commit visibility", caseID)
 		}
 		reopened := pool(t)
-		s := libraryService(reopened, reopened)
+		s := achievementLibraryService(reopened, reopened)
 		r, e := s.Command(ctx, a, app.Command{Family: app.Gift, PartnerID: 1, Value: 50001112}, in.Operation)
 		if e != nil || r.OperationID != in.Operation.ID || achievementEvents(t, p, a) != 1 || achievementRoot(t, p, a).Progress != 1 {
 			t.Fatal("recovered exact operation", caseID, r, e)

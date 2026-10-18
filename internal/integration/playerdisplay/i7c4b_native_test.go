@@ -8,9 +8,13 @@ import (
 	pg "gxb.local/backend/v2/internal/adapters/postgres"
 	"gxb.local/backend/v2/internal/adapters/postgres/achievementstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/contentstore"
+	"gxb.local/backend/v2/internal/adapters/postgres/dormstore"
+	"gxb.local/backend/v2/internal/adapters/postgres/i5store"
 	"gxb.local/backend/v2/internal/adapters/postgres/librarystore"
 	ach "gxb.local/backend/v2/internal/application/achievement"
 	ca "gxb.local/backend/v2/internal/application/characterasset"
+	dorm "gxb.local/backend/v2/internal/application/dormhouse"
+	"gxb.local/backend/v2/internal/application/i5"
 	lib "gxb.local/backend/v2/internal/application/librarylocal"
 	d "gxb.local/backend/v2/internal/domain/achievement"
 	"gxb.local/backend/v2/internal/domain/character"
@@ -26,8 +30,15 @@ import (
 	"time"
 )
 
+func achievementLibraryService(p *pg.Pool, db tx.Beginner) lib.Service {
+	s := libraryService(p, db)
+	inv := i5store.Store{Queryer: p, StackUsage: dorm.FurnitureUsage{Owner: dormstore.Store{}, Content: contentstore.Store{Queryer: p}}}
+	s.Costs = i5.MaterialCostDebiter{Store: inv, Content: contentstore.Store{Queryer: p}}
+	s.Achievements = ach.Service{Store: achievementstore.Store{}, Content: contentstore.Store{Queryer: p}, Population: s}
+	return s
+}
 func achievementService(p *pg.Pool) ach.Service {
-	return ach.Service{Store: achievementstore.Store{}, Content: contentstore.Store{}, Population: libraryService(p, p)}
+	return ach.Service{Store: achievementstore.Store{}, Content: contentstore.Store{}, Population: achievementLibraryService(p, p)}
 }
 
 // The actor/unmarried Hero/inventory are explicit test prerequisites. All favor
@@ -35,6 +46,17 @@ func achievementService(p *pg.Pool) ach.Service {
 // commands. This does not qualify unresolved Hero acquisition-capacity policy.
 func achievementFixture(t *testing.T, p *pg.Pool, tracked bool) (identity.ActorContext, string) {
 	a, rev := libraryFixture(t, p, false)
+	dt, e := p.Begin(ctx, tx.Options{})
+	if e != nil {
+		t.Fatal(e)
+	}
+	if e = (dormstore.BootstrapContributor{Revision: rev}).PersistCharacterBootstrap(ctx, dt, logicalserver.BootstrapContext{PlayerID: a.PlayerID, Operation: op()}); e != nil {
+		dt.Rollback(ctx)
+		t.Fatal(e)
+	}
+	if e = dt.Commit(ctx); e != nil {
+		t.Fatal(e)
+	}
 	if tracked {
 		tr, e := p.Begin(ctx, tx.Options{})
 		if e != nil {
@@ -52,7 +74,7 @@ func achievementFixture(t *testing.T, p *pg.Pool, tracked bool) (identity.ActorC
 }
 func favorForMarriage(t *testing.T, p *pg.Pool, a identity.ActorContext, partner int64) {
 	t.Helper()
-	s := libraryService(p, p)
+	s := achievementLibraryService(p, p)
 	for i := 0; i < 22; i++ {
 		if _, e := s.Command(ctx, a, lib.Command{Family: lib.Gift, PartnerID: partner, Value: 50005013}, op()); e != nil {
 			t.Fatal("favor", partner, i, e)
@@ -133,7 +155,7 @@ func TestI7C4BGenuineLibraryAllTiersReplayAndUnavailable(t *testing.T) {
 		}
 		favorForMarriage(t, p, a, partner)
 		o := op()
-		r, e := libraryService(p, p).Command(ctx, a, lib.Command{Family: lib.Gift, PartnerID: partner, Value: 50001112}, o)
+		r, e := achievementLibraryService(p, p).Command(ctx, a, lib.Command{Family: lib.Gift, PartnerID: partner, Value: 50001112}, o)
 		if e != nil || !r.Married || !r.Changed {
 			t.Fatal(n, r, e)
 		}
@@ -155,14 +177,14 @@ func TestI7C4BGenuineLibraryAllTiersReplayAndUnavailable(t *testing.T) {
 	if achievementEvents(t, p, a) != 20 || r.StateVersion != 21 {
 		t.Fatal(r)
 	}
-	replay, e := libraryService(p, p).Command(ctx, a, lib.Command{Family: lib.Gift, PartnerID: 1, Value: 50001112}, first)
+	replay, e := achievementLibraryService(p, p).Command(ctx, a, lib.Command{Family: lib.Gift, PartnerID: 1, Value: 50001112}, first)
 	if e != nil || !reflect.DeepEqual(replay, original) {
 		t.Fatal("replay", replay, e)
 	}
 	if achievementEvents(t, p, a) != 20 || !reflect.DeepEqual(achievementRoot(t, p, a), r) {
 		t.Fatal("replay changed facts")
 	}
-	noop, e := libraryService(p, p).Command(ctx, a, lib.Command{Family: lib.Gift, PartnerID: 1, Value: 50001112}, op())
+	noop, e := achievementLibraryService(p, p).Command(ctx, a, lib.Command{Family: lib.Gift, PartnerID: 1, Value: 50001112}, op())
 	if e != nil || noop.Changed || achievementEvents(t, p, a) != 20 {
 		t.Fatal("noop", noop, e)
 	}
@@ -189,7 +211,7 @@ func TestI7C4BLegacyHistoryUnavailableButSourceWorks(t *testing.T) {
 	p := pool(t)
 	a, rev := achievementFixture(t, p, false)
 	favorForMarriage(t, p, a, 1)
-	if _, e := libraryService(p, p).Command(ctx, a, lib.Command{Family: lib.Gift, PartnerID: 1, Value: 50001112}, op()); e != nil {
+	if _, e := achievementLibraryService(p, p).Command(ctx, a, lib.Command{Family: lib.Gift, PartnerID: 1, Value: 50001112}, op()); e != nil {
 		t.Fatal(e)
 	}
 	if achievementEvents(t, p, a) != 0 {
@@ -209,7 +231,7 @@ func TestI7C4BAtomicRollbackAndRetainedRecovery(t *testing.T) {
 	p := pool(t)
 	a, _ := achievementFixture(t, p, true)
 	favorForMarriage(t, p, a, 1)
-	s := libraryService(p, p)
+	s := achievementLibraryService(p, p)
 	bad := achievementService(p)
 	bad.Store = failingAchievementStore{}
 	s.Achievements = bad
@@ -225,7 +247,7 @@ func TestI7C4BAtomicRollbackAndRetainedRecovery(t *testing.T) {
 	if e := p.QueryRow(ctx, `SELECT quantity FROM player_item_stacks WHERE player_id=$1 AND item_id=50001112`, int64(a.PlayerID)).Scan(&quantity); e != nil || quantity != 100 {
 		t.Fatal(quantity, e)
 	}
-	r, e := libraryService(p, p).Command(ctx, a, cmd, op())
+	r, e := achievementLibraryService(p, p).Command(ctx, a, cmd, op())
 	if e != nil || r.OperationID != o.ID || achievementRoot(t, p, a).Progress != 1 || achievementEvents(t, p, a) != 1 {
 		t.Fatal("retained recovery", r, e)
 	}
@@ -237,7 +259,7 @@ func TestI7C4BUnknownCommitAndConcurrentReplay(t *testing.T) {
 		favorForMarriage(t, p, a, 1)
 		o := op()
 		cmd := lib.Command{Family: lib.Gift, PartnerID: 1, Value: 50001112}
-		s := libraryService(p, &libraryFaultDB{Beginner: p, commit: committed})
+		s := achievementLibraryService(p, &libraryFaultDB{Beginner: p, commit: committed})
 		r, e := s.Command(ctx, a, cmd, o)
 		if committed {
 			if e != nil || !r.Married || achievementEvents(t, p, a) != 1 {
@@ -248,7 +270,7 @@ func TestI7C4BUnknownCommitAndConcurrentReplay(t *testing.T) {
 			if !errors.As(e, &u) || achievementEvents(t, p, a) != 0 || libraryFacts(t, p, a).Married {
 				t.Fatal("unknown absent", e)
 			}
-			r, e = libraryService(pool(t), p).Command(ctx, a, cmd, op())
+			r, e = achievementLibraryService(pool(t), p).Command(ctx, a, cmd, op())
 			if e != nil || r.OperationID != o.ID || achievementEvents(t, p, a) != 1 {
 				t.Fatal("unknown recovery", r, e)
 			}
@@ -256,7 +278,7 @@ func TestI7C4BUnknownCommitAndConcurrentReplay(t *testing.T) {
 	}
 	a, _ := achievementFixture(t, p, true)
 	favorForMarriage(t, p, a, 1)
-	s := libraryService(p, p)
+	s := achievementLibraryService(p, p)
 	o := op()
 	errs := make(chan error, 6)
 	var wg sync.WaitGroup
@@ -286,14 +308,14 @@ func TestI7C4BMissingHookAndEventConflict(t *testing.T) {
 	p := pool(t)
 	a, rev := achievementFixture(t, p, true)
 	favorForMarriage(t, p, a, 1)
-	s := libraryService(p, p)
+	s := achievementLibraryService(p, p)
 	s.Achievements = nil
 	o := op()
 	cmd := lib.Command{Family: lib.Gift, PartnerID: 1, Value: 50001112}
 	if _, e := s.Command(ctx, a, cmd, o); e == nil || achievementEvents(t, p, a) != 0 || libraryFacts(t, p, a).Married {
 		t.Fatal("new content missing hook silently passed", e)
 	}
-	r, e := libraryService(p, p).Command(ctx, a, cmd, op())
+	r, e := achievementLibraryService(p, p).Command(ctx, a, cmd, op())
 	if e != nil {
 		t.Fatal(e)
 	}
