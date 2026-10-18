@@ -24,8 +24,9 @@ var (
 )
 
 // CapacityAuthorizer is intentionally policy-only. CA2-3 has no qualified
-// production capacity owner, lock or persistence model; production wiring must
-// therefore leave this seam nil until that separate authority is recovered.
+// production purchased-slot owner, lock or persistence model. This historical
+// seam remains diagnostic; the named current-client CollectionAdmission policy
+// is a separate typed caller-transaction authorizer for Normal59.
 type CapacityAuthorizer interface {
 	AuthorizeHeroAddition(identity.PlayerID, int, int) error
 }
@@ -48,18 +49,19 @@ type AcquisitionContent interface {
 }
 
 type acquisitionReceipt struct {
-	SkillSchema             int                          `json:"skill_schema,omitempty"`
-	RawSkills               *character.HeroRawSkillFacts `json:"raw_skills,omitempty"`
-	PartnerID               int64                        `json:"partner_id"`
-	TableID                 int64                        `json:"table_id"`
-	OriginTableID           int64                        `json:"origin_table_id"`
-	Star                    int64                        `json:"star"`
-	Level                   int64                        `json:"level"`
-	Exp                     int64                        `json:"exp"`
-	Color                   int64                        `json:"color"`
-	CreationContentRevision string                       `json:"creation_content_revision"`
-	StateVersion            int64                        `json:"state_version"`
-	Kind                    string                       `json:"kind"`
+	CollectionAdmission     *character.CollectionAdmissionProof `json:"collection_admission,omitempty"`
+	SkillSchema             int                                 `json:"skill_schema,omitempty"`
+	RawSkills               *character.HeroRawSkillFacts        `json:"raw_skills,omitempty"`
+	PartnerID               int64                               `json:"partner_id"`
+	TableID                 int64                               `json:"table_id"`
+	OriginTableID           int64                               `json:"origin_table_id"`
+	Star                    int64                               `json:"star"`
+	Level                   int64                               `json:"level"`
+	Exp                     int64                               `json:"exp"`
+	Color                   int64                               `json:"color"`
+	CreationContentRevision string                              `json:"creation_content_revision"`
+	StateVersion            int64                               `json:"state_version"`
+	Kind                    string                              `json:"kind"`
 }
 
 func (s Service) validateAcquisition() error {
@@ -69,13 +71,20 @@ func (s Service) validateAcquisition() error {
 	if s.Progression == nil || s.AcquisitionStore == nil || s.Acquisition == nil || s.MaterialCosts == nil || s.PlayerLevel == nil {
 		return errors.New("character hero: incomplete CA2-3 acquisition service")
 	}
-	if s.Capacity == nil {
+	if s.Capacity == nil && s.CollectionAdmission == nil {
 		return ErrHeroCapacityUnavailable
 	}
 	return nil
 }
 
 func heroFromReceipt(r acquisitionReceipt, pid identity.PlayerID, now operation.Context) (character.Hero, error) {
+	if p := r.CollectionAdmission; p != nil {
+		revision, ok := now.Policies.Get("content")
+		pin, has := now.Policies.Get(character.CollectionAdmissionPolicyRef)
+		if p.Validate() != nil || p.Player != pid || p.OriginTableID != r.OriginTableID || p.Revision != r.CreationContentRevision || !p.DecisionAt.Equal(now.StartedAt) || !ok || revision != p.Revision || !has || pin != p.PolicyID {
+			return character.Hero{}, ErrHeroAcquisitionInvalid
+		}
+	}
 	h := character.Hero{PlayerID: pid, PartnerID: r.PartnerID, TableID: r.TableID, OriginTableID: r.OriginTableID, Kind: character.HeroKind(r.Kind), Star: r.Star, Level: r.Level, Exp: r.Exp, Color: r.Color, IllusionSkinID: character.DefaultIllusionSkinID, CreationContentRevision: r.CreationContentRevision, StateVersion: r.StateVersion, CreatedAt: now.StartedAt.UTC(), UpdatedAt: now.StartedAt.UTC()}
 	if r.SkillSchema == 0 && r.RawSkills == nil {
 		h.RawSkills = character.NewHeroRawSkillSeed()
@@ -90,8 +99,15 @@ func heroFromReceipt(r acquisitionReceipt, pid identity.PlayerID, now operation.
 	return h, nil
 }
 
-func encodeAcquisitionReceipt(h character.Hero) ([]byte, error) {
-	return json.Marshal(acquisitionReceipt{SkillSchema: 2, RawSkills: &h.RawSkills, PartnerID: h.PartnerID, TableID: h.TableID, OriginTableID: h.OriginTableID, Star: h.Star, Level: h.Level, Exp: h.Exp, Color: h.Color, CreationContentRevision: h.CreationContentRevision, StateVersion: h.StateVersion, Kind: string(h.Kind)})
+func encodeAcquisitionReceipt(h character.Hero, proof ...*character.CollectionAdmissionProof) ([]byte, error) {
+	var admission *character.CollectionAdmissionProof
+	if len(proof) > 1 {
+		return nil, ErrHeroAcquisitionInvalid
+	}
+	if len(proof) == 1 {
+		admission = proof[0]
+	}
+	return json.Marshal(acquisitionReceipt{CollectionAdmission: admission, SkillSchema: 2, RawSkills: &h.RawSkills, PartnerID: h.PartnerID, TableID: h.TableID, OriginTableID: h.OriginTableID, Star: h.Star, Level: h.Level, Exp: h.Exp, Color: h.Color, CreationContentRevision: h.CreationContentRevision, StateVersion: h.StateVersion, Kind: string(h.Kind)})
 }
 
 func newHero(pid identity.PlayerID, partnerID int64, t character.HeroAcquisitionTemplate, star int64, revision string, op operation.Context) (character.Hero, error) {
@@ -131,15 +147,15 @@ func (s Service) SummonNormal(ctx context.Context, actor identity.ActorContext, 
 	if !actor.PlayerID.Valid() || tableID <= 0 || stoneID <= 0 || stoneNum <= 0 {
 		return character.Hero{}, ErrHeroAcquisitionInvalid
 	}
-	boundOp, revision, err := s.bindProgressionContent(ctx, op)
-	if err != nil {
-		return character.Hero{}, err
-	}
-	id := heroReceiptID(actor, "stone-summon", boundOp)
 	fp, err := receipt.FingerprintRequest(map[string]any{"table_id": tableID, "stone": stoneID, "stone_num": stoneNum})
 	if err != nil {
 		return character.Hero{}, err
 	}
+	boundOp, revision, err := s.bindNormalAcquisition(ctx, actor, op, fp)
+	if err != nil {
+		return character.Hero{}, err
+	}
+	id := heroReceiptID(actor, "stone-summon", boundOp)
 	var result character.Hero
 	_, err = s.Runner.Run(ctx, boundOp, profile(), tx.Options{Isolation: tx.Serializable}, tx.RetryPolicy{MaxAttempts: 3, RetryDefiniteAbort: true}, receipt.Resolver{Reader: s.ReceiptRead, Identity: id, Fingerprint: fp}, func(txctx context.Context, scope tx.Scope) error {
 		if err := s.Fencer.FenceActorTx(txctx, scope.Tx, actor, boundOp.StartedAt); err != nil {
@@ -148,6 +164,10 @@ func (s Service) SummonNormal(ctx context.Context, actor identity.ActorContext, 
 		if prior, ok, err := s.Receipts.FindTx(txctx, scope.Tx, id); err != nil {
 			return err
 		} else if ok {
+			if s.CollectionAdmission != nil {
+				result, err = decodeNormalAcquisition(prior, actor, op, fp)
+				return err
+			}
 			if !bytes.Equal(prior.RequestFingerprint[:], fp[:]) {
 				return &receipt.ConflictError{Identity: id}
 			}
@@ -176,9 +196,20 @@ func (s Service) SummonNormal(ctx context.Context, actor identity.ActorContext, 
 		if hasOrigin(heroes, policy.Template.OriginTableID) {
 			return ErrHeroDuplicateOrigin
 		}
-		if err := s.Capacity.AuthorizeHeroAddition(actor.PlayerID, len(heroes), 1); err != nil {
+		var admission *character.CollectionAdmissionProof
+		if s.CollectionAdmission != nil {
+			proof, err := s.CollectionAdmission.AuthorizeCollectionOriginTx(txctx, scope.Tx, root, heroes, policy.Template.OriginTableID, revision, boundOp)
+			if err != nil {
+				return err
+			}
+			if proof.Validate() != nil || proof.Player != actor.PlayerID || proof.RootVersion != root.StateVersion || proof.OwnedCount != int64(len(heroes)) || proof.OriginTableID != policy.Template.OriginTableID || proof.Revision != revision || !proof.DecisionAt.Equal(boundOp.StartedAt) {
+				return ErrHeroCapacityUnavailable
+			}
+			admission = &proof
+		} else if err := s.Capacity.AuthorizeHeroAddition(actor.PlayerID, len(heroes), 1); err != nil {
 			return err
 		}
+
 		_, err = s.MaterialCosts.DebitMaterialCostTx(txctx, scope.Tx, actor.PlayerID, appi5.MaterialCost{Scalars: []appi5.ScalarMaterialCost{{ResourceKey: "mana", Amount: policy.Mana}}, Stacks: []appi5.StackMaterialCost{{ItemID: policy.Template.FragmentItemID, Amount: policy.FragmentCount}}}, boundOp)
 		if err != nil {
 			return err
@@ -197,7 +228,7 @@ func (s Service) SummonNormal(ctx context.Context, actor identity.ActorContext, 
 		if err := s.AcquisitionStore.SaveRootAllocatorTx(txctx, scope.Tx, nextRoot, root.StateVersion); err != nil {
 			return err
 		}
-		payload, err := encodeAcquisitionReceipt(h)
+		payload, err := encodeAcquisitionReceipt(h, admission)
 		if err != nil {
 			return err
 		}
@@ -208,6 +239,9 @@ func (s Service) SummonNormal(ctx context.Context, actor identity.ActorContext, 
 		rr.ActorAccountUID = string(actor.AccountUID)
 		rr.ContextID = actor.ContextID.UUID()
 		rr.PolicyVersion = "pass518-ca2-3"
+		if admission != nil {
+			rr.PolicyVersion = character.CollectionAdmissionPolicy
+		}
 		if _, err := s.Receipts.PutTx(txctx, scope.Tx, rr); err != nil {
 			return err
 		}
@@ -218,6 +252,10 @@ func (s Service) SummonNormal(ctx context.Context, actor identity.ActorContext, 
 }
 
 func (s Service) CreateVows(ctx context.Context, actor identity.ActorContext, tableID int64, op operation.Context) (character.Hero, error) {
+	// The current-client private admission rollout qualifies Normal59 only.
+	if s.Capacity == nil {
+		return character.Hero{}, ErrHeroCapacityUnavailable
+	}
 	if err := s.validateAcquisition(); err != nil {
 		return character.Hero{}, err
 	}

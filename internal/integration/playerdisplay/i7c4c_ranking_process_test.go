@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"gxb.local/backend/v2/internal/adapters/blobstore"
 	pg "gxb.local/backend/v2/internal/adapters/postgres"
+	"gxb.local/backend/v2/internal/domain/character"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"net"
 	"net/http"
@@ -15,6 +16,7 @@ import (
 	osexec "os/exec"
 	"path/filepath"
 	"reflect"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -281,5 +283,120 @@ func TestI7C4CRankingActualAPIReopenRestartAndDatabaseRestore(t *testing.T) {
 	if e = restored.QueryRow(ctx, `SELECT count(*) FROM ranking_girls_birth_tracking WHERE player_id=$1`, born).Scan(&n); e != nil || n != 1 {
 		t.Fatal("login duplicated birth marker", n, e)
 	}
-	t.Log("ACTUAL_API_301_SERVER37_REOPEN_RESTART_RELOCATED_PG_RESTORE immutable snapshot receipt/weekly award/recipient provenance preserved; diagnostic acquisition capacity only; whole title picker remains gated", before)
+
+	// The fresh player now uses the production-composed Normal59 policy and all
+	// existing production fresh facets. Only starting resources are fixtures.
+	newBearer, ok := out["token"].(string)
+	if !ok || newBearer == "" {
+		t.Fatal("fresh gameplay token missing", out)
+	}
+	bearer = newBearer
+	freshActor := identity.ActorContext{PlayerID: identity.PlayerID(born)}
+	def := collectionResources(t, restored, freshActor, rev, 10001001)
+	const startingMana int64 = 1000000
+	exec(t, restored, `INSERT INTO player_currency_balances(player_id,resource_key,amount,state_version,updated_at)VALUES($1,'mana',$2,1,clock_timestamp()) ON CONFLICT(player_id,resource_key)DO UPDATE SET amount=excluded.amount,state_version=player_currency_balances.state_version+1,updated_at=excluded.updated_at`, born, startingMana)
+	summon := map[string]any{"table_id": int64(10001001), "stone": def.Template.FragmentItemID, "stone_num": def.FragmentCount}
+	code, out = post(59, summon)
+	if code != 200 || out["table_id"] != float64(10001001) || out["partner_id"] == nil {
+		t.Fatal("production Normal59", code, out)
+	}
+	economics, ok := out["economy_"].(map[string]any)
+	if !ok || economics["mana"] != float64(startingMana-def.Mana) || out["extra_drops_"] != nil || out["collection_admission"] != nil {
+		t.Fatal("source callback economy/scroll contract", out)
+	}
+	rawSummon, _ := json.Marshal(out)
+	t.Log("PRODUCTION_NORMAL59_SOURCE_RESPONSE", string(rawSummon))
+	code, out = post(59, map[string]any{"table_id": int64(10001001), "stone": def.Template.FragmentItemID, "stone_num": def.FragmentCount})
+	if code == 200 {
+		t.Fatal("duplicate origin accepted", out)
+	}
+	var actualMana, actualStones int64
+	if e = restored.QueryRow(ctx, `SELECT amount FROM player_currency_balances WHERE player_id=$1 AND resource_key='mana'`, born).Scan(&actualMana); e != nil {
+		t.Fatal(e)
+	}
+	if e = restored.QueryRow(ctx, `SELECT quantity FROM player_item_stacks WHERE player_id=$1 AND item_id=$2`, born, def.Template.FragmentItemID).Scan(&actualStones); e != nil {
+		t.Fatal(e)
+	}
+	if actualMana != startingMana-def.Mana || actualStones != 9 {
+		t.Fatal("production command paid twice", actualMana, actualStones)
+	}
+	if e = restored.QueryRow(ctx, `SELECT count(*) FROM gxb_operation_receipts WHERE owner_kind='player' AND owner_key=$1 AND domain='character-hero' AND operation='stone-summon' AND policy_version=$2 AND result_payload->'collection_admission' IS NOT NULL`, strconv.FormatInt(born, 10), character.CollectionAdmissionPolicy).Scan(&n); e != nil || n != 1 {
+		t.Fatal("missing genuine production admission witness", n, e)
+	}
+	freshBoard := func() {
+		t.Helper()
+		code, out := post(301, map[string]any{"rank_types": []int{37}})
+		if code != 200 {
+			t.Fatal("genuine production Ranking input", code, out)
+		}
+		list := out["rank_list"].([]any)
+		info := list[0].(map[string]any)["rank_info"].(map[string]any)
+		mine := info["my_rank"].(map[string]any)
+		if mine["score"] != float64(1) || mine["rank"] != float64(2) || len(info["rank_info"].([]any)) != 3 {
+			t.Fatal("production-created girl not in canonical Ranking", info)
+		}
+	}
+	freshBoard()
+	code, out = post(49, map[string]any{})
+	if code != 200 || len(out["heros"].(map[string]any)) != 1 {
+		t.Fatal("production fresh facets roster reload", code, out)
+	}
+	stop()
+	cmd = start()
+	running = true
+	freshBoard()
+	// Restore the newly produced Hero/receipt/facets too, rather than borrowing
+	// the earlier Girls-only restore as acquisition recovery evidence.
+	admissionState := func(db *pg.Pool) string {
+		t.Helper()
+		var parts []string
+		for _, table := range []string{"player_hero_roots", "player_heroes", "player_library_heroes", "player_dorm_heroes", "player_course_heroes", "player_inscription_heroes", "player_element_heroes", "player_spirit_heroes", "player_hero_evolution", "player_currency_balances", "player_item_stacks"} {
+			var raw string
+			if e := db.QueryRow(ctx, `SELECT coalesce(jsonb_agg(to_jsonb(x) ORDER BY to_jsonb(x)::text),'[]'::jsonb)::text FROM `+table+` x WHERE player_id=$1`, born).Scan(&raw); e != nil {
+				t.Fatal(table, e)
+			}
+			if raw == "[]" {
+				t.Fatal("missing production fresh state", table)
+			}
+			parts = append(parts, table+":"+raw)
+		}
+		var raw string
+		if e := db.QueryRow(ctx, `SELECT jsonb_agg(to_jsonb(x) ORDER BY receipt_id)::text FROM gxb_operation_receipts x WHERE owner_kind='player' AND owner_key=$1 AND domain='character-hero' AND operation='stone-summon'`, strconv.FormatInt(born, 10)).Scan(&raw); e != nil {
+			t.Fatal(e)
+		}
+		parts = append(parts, "receipts:"+raw)
+		return strings.Join(parts, "\n")
+	}
+	admissionBefore := admissionState(restored)
+	stop()
+	admissionDump := filepath.Join(t.TempDir(), "normal59-admission.dump")
+	tool("pg_dump", "--format=custom", "--file", admissionDump, targetDSN)
+	admissionDB := "admission_restore_" + strings.ReplaceAll(uuid().String(), "-", "")
+	tool("createdb", "--maintenance-db", targetDSN, admissionDB)
+	u.Path = "/" + admissionDB
+	targetDSN = u.String()
+	tool("pg_restore", "--no-owner", "--dbname", targetDSN, admissionDump)
+	admissionRestored, e := pg.Open(ctx, targetDSN, pg.PoolSettings{MaxConns: 8, MaxConnLifetime: time.Hour, MaxConnIdleTime: time.Minute, HealthCheckPeriod: time.Minute})
+	if e != nil {
+		t.Fatal(e)
+	}
+	defer admissionRestored.Close()
+	if admissionState(admissionRestored) != admissionBefore {
+		t.Fatal("admission restore changed canonical state/receipt/facets/resources")
+	}
+	cmd = start()
+	running = true
+	freshBoard()
+	code, out = post(49, map[string]any{})
+	if code != 200 || len(out["heros"].(map[string]any)) != 1 {
+		t.Fatal("restored production roster", code, out)
+	}
+	for _, mid := range []int{64, 305} {
+		code, out = post(mid, map[string]any{})
+		if code == 200 {
+			t.Fatal("unqualified route activated", mid, out)
+		}
+	}
+	t.Log("GENUINE_PRODUCTION_NORMAL59_NO_DIAGNOSTIC_CAPACITY canonical source cost+private policy receipt+all seven fresh facets+currentGirls Ranking+restart+relocated restore;64/305 remain gated", born)
+	t.Log("ACTUAL_API_301_SERVER37_REOPEN_RESTART_RELOCATED_PG_RESTORE immutable snapshot receipt/weekly award/recipient provenance preserved; initial legacy participants use diagnostic capacity; new fresh Normal59 is real production policy; whole title picker remains gated", before)
 }

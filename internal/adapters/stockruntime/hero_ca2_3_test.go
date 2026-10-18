@@ -79,10 +79,16 @@ func heroReq(t *testing.T, mid uint16, params map[string]any) httpedge.DispatchR
 
 func TestCA23MID59StrictRequestAndDirectHeroResponse(t *testing.T) {
 	svc := &ca23HeroService{}
-	d := HeroDispatcher{Authority: httpAuthority{actorForHTTP(t)}, Service: svc}
+	d := HeroDispatcher{Authority: httpAuthority{actorForHTTP(t)}, Service: svc, Economy: &ca42HeroEconomy{amount: 777}}
 	r := d.Dispatch(context.Background(), heroReq(t, 59, map[string]any{"table_id": int64(1001), "stone": int64(4001), "stone_num": int64(10)}))
 	if r.HTTPStatus != 200 || r.Body["table_id"] != int64(1001) || r.Body["partner_id"] != int64(7) {
 		t.Fatalf("response=%+v", r)
+	}
+	if economy, ok := r.Body["economy_"].(map[string]any); !ok || economy["mana"] != int64(777) {
+		t.Fatal("missing current source Mana projection", r)
+	}
+	if r.Body["collection_admission"] != nil || r.Body["extra_drops_"] != nil {
+		t.Fatal("private proof or duplicate fragment grant leaked", r)
 	}
 	if len(svc.summonArgs) != 3 || svc.summonArgs[0] != 1001 || svc.summonArgs[1] != 4001 || svc.summonArgs[2] != 10 {
 		t.Fatalf("summon args=%v", svc.summonArgs)
@@ -112,7 +118,7 @@ func TestCA23MID305StrictRequestAndPartnerInfoEnvelope(t *testing.T) {
 
 func TestHeroDispatcherAcceptsStockEnvelopeMetadataButRejectsUnknownGameplayField(t *testing.T) {
 	svc := &ca23HeroService{}
-	d := HeroDispatcher{Authority: httpAuthority{actorForHTTP(t)}, Service: svc}
+	d := HeroDispatcher{Authority: httpAuthority{actorForHTTP(t)}, Service: svc, Economy: &ca42HeroEconomy{amount: 777}}
 	params := map[string]any{
 		"table_id": int64(1001), "stone": int64(4001), "stone_num": int64(10),
 		"mid": int64(59), "token": "bearer", "region": int64(1),
@@ -126,5 +132,14 @@ func TestHeroDispatcherAcceptsStockEnvelopeMetadataButRejectsUnknownGameplayFiel
 	r = d.Dispatch(context.Background(), heroReq(t, 59, params))
 	if r.HTTPStatus != 400 {
 		t.Fatalf("invented gameplay field accepted: %+v", r)
+	}
+}
+
+func TestNormal59MissingEconomyRejectsBeforeMutation(t *testing.T) {
+	svc := &ca23HeroService{}
+	d := HeroDispatcher{Authority: httpAuthority{actorForHTTP(t)}, Service: svc}
+	r := d.Dispatch(context.Background(), heroReq(t, 59, map[string]any{"table_id": int64(1001), "stone": int64(4001), "stone_num": int64(10)}))
+	if r.HTTPStatus != 503 || len(svc.summonArgs) != 0 {
+		t.Fatal("missing projection allowed partial mutation", r, svc.summonArgs)
 	}
 }

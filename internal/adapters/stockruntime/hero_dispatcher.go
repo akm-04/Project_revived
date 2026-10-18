@@ -410,7 +410,7 @@ func (d HeroDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReque
 			return failHero(err)
 		}
 		return httpedge.Response{HTTPStatus: http.StatusOK, Body: map[string]any{}}
-	case 59: // STONE_SUMMON_HERO (implemented for CA2-3 diagnostics; production router remains unregistered)
+	case 59: // STONE_SUMMON_HERO; current-client collection admission in production.
 		if !onlyStockGameplayParams(req.Envelope.Params, "table_id", "stone", "stone_num") {
 			return badHero("invalid_hero_summon")
 		}
@@ -420,6 +420,9 @@ func (d HeroDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReque
 		if e1 != nil || e2 != nil || e3 != nil || tableID <= 0 || stoneID <= 0 || stoneNum <= 0 {
 			return badHero("invalid_hero_summon")
 		}
+		if d.Economy == nil {
+			return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Body: map[string]any{"error": "hero_projection_unavailable"}}
+		}
 		h, err := d.Service.SummonNormal(ctx, actor, tableID, stoneID, stoneNum, req.Envelope.Operation)
 		if err != nil {
 			return failHero(err)
@@ -428,6 +431,11 @@ func (d HeroDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReque
 		if err != nil {
 			return failHero(err)
 		}
+		mana, err := d.Economy.CurrentScalar(ctx, actor.PlayerID, "mana", req.Envelope.Operation)
+		if err != nil {
+			return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Body: map[string]any{"error": "hero_projection_failed"}}
+		}
+		body["economy_"] = map[string]any{"mana": mana}
 		return httpedge.Response{HTTPStatus: http.StatusOK, Body: body}
 	case 304: // UPGRADE_SUPER_EQUIP (CA4-5)
 		if !onlyStockGameplayParams(req.Envelope.Params, "partner_id", "equip_index", "enhance_times") {

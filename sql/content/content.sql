@@ -1272,3 +1272,8 @@ WHERE revision_id=$1 AND jsonb_path_exists(artifact, '$.definitions[*] ? (@.id =
 
 -- name: ReadHeroSkillSlots :one
 SELECT skill_slots::text FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2 AND skill_slots IS NOT NULL;
+
+-- name: ReadHeroOriginCatalog :one
+SELECT COALESCE(jsonb_agg(table_id ORDER BY table_id),'[]'::jsonb)::text
+FROM gxb_content_hero_templates
+WHERE revision_id=$1 AND table_id=origin_table_id;

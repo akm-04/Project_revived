@@ -197,10 +197,11 @@ func main() {
 			TicketDebit: appi5.LevelAndStackDebiter{Store: i5db, Content: contentDB}, Receipts: receipts, ReceiptRead: kernelstore.Reader{Queryer: pool},
 		},
 	}
-	// CA2-3 mechanics are constructed against owner-shaped ports, but Capacity
-	// remains nil and I5.PartnerEntities/MID59/MID305 remain unregistered in
-	// production until the original Hero capacity policy is recovered.
-	heroSvc := apphero.Service{FreshFacets: apphero.FreshFacetChain{librarystore.Store{}, dormstore.Store{}, coursestore.Store{}, inscriptionstore.Store{}, elementstore.Store{}, spiritstore.Store{}, characterstore.EvolutionStore{}}, Runner: runner, Timed: appgeneration.TimedRunner{Binder: appgeneration.Binder{Time: postgres.AuthoritativeTime{Queryer: pool}}, Runner: runner}, Store: heroDB, Fencer: i5db, Content: contentDB, Receipts: receipts, ReceiptRead: kernelstore.Reader{Queryer: pool}, ProgressionStore: heroDB, Progression: contentDB, Economy: heroEconomy, Backpack: i5db, AcquisitionStore: heroDB, Acquisition: contentDB, MaterialCosts: heroMaterialCosts, PlayerLevel: i5CrossOwner, Capacity: nil, Equipment: contentDB, EquipmentResources: heroEquipmentResources, Fumo: contentDB, Promotion: contentDB, PromotionResources: i5svc, StrictRestoration: i5svc, MaxHeroColorPolicy: maxHeroColorPolicy, RestorationModifier: characterasset.IdentityRestorationModifier{}, RosterProjection: contentDB, AppearanceStore: heroDB, Appearance: contentDB, AppearanceMutationStore: heroDB, AppearanceMutationContent: contentDB, LIVEMutationStore: heroDB}
+	// The current-client private collection policy admits Normal59 against the
+	// pinned origin catalog and canonical unique roster. Legacy paid slots/MID64,
+	// Vows305 and the I5 Hero materializer remain separately unqualified.
+
+	heroSvc := apphero.Service{FreshFacets: apphero.FreshFacetChain{librarystore.Store{}, dormstore.Store{}, coursestore.Store{}, inscriptionstore.Store{}, elementstore.Store{}, spiritstore.Store{}, characterstore.EvolutionStore{}}, Runner: runner, Timed: appgeneration.TimedRunner{Binder: appgeneration.Binder{Time: postgres.AuthoritativeTime{Queryer: pool}}, Runner: runner}, Store: heroDB, Fencer: i5db, Content: contentDB, Receipts: receipts, ReceiptRead: kernelstore.Reader{Queryer: pool}, ProgressionStore: heroDB, Progression: contentDB, Economy: heroEconomy, Backpack: i5db, AcquisitionStore: heroDB, Acquisition: contentDB, MaterialCosts: heroMaterialCosts, PlayerLevel: i5CrossOwner, CollectionAdmission: apphero.CatalogCollectionAdmission{Content: contentDB}, Capacity: nil, Equipment: contentDB, EquipmentResources: heroEquipmentResources, Fumo: contentDB, Promotion: contentDB, PromotionResources: i5svc, StrictRestoration: i5svc, MaxHeroColorPolicy: maxHeroColorPolicy, RestorationModifier: characterasset.IdentityRestorationModifier{}, RosterProjection: contentDB, AppearanceStore: heroDB, Appearance: contentDB, AppearanceMutationStore: heroDB, AppearanceMutationContent: contentDB, LIVEMutationStore: heroDB}
 	petAcquisitionDebit := appi5.PetAcquisitionDebiter{Store: i5db, Content: contentDB}
 	petExpDebit := appi5.PetExpDebiter{Store: i5db, Content: contentDB}
 	petTimed := appgeneration.TimedRunner{Binder: appgeneration.Binder{Time: postgres.AuthoritativeTime{Queryer: pool}}, Runner: runner}
@@ -375,7 +376,7 @@ func main() {
 	bookmarkSvc := apphero.BookmarkService{Timed: heroSvc.Timed, Reads: runner, Store: heroDB, Players: i4store.PlayerRootLocker{}, Fence: i5db, Receipts: receipts}
 	skillSvc := apphero.SkillChoiceService{Timed: heroSvc.Timed, Reads: runner, Store: heroDB, Players: i4store.PlayerRootLocker{}, Fence: i5db, Receipts: receipts, Inventory: i5db, Content: contentDB}
 	heroD := stockruntime.HeroDispatcher{Roster: librarySvc, Skills: skillSvc, Bookmark: bookmarkSvc, Authority: authority, Service: heroSvc, Appearance: heroSvc, LIVE: heroSvc, Economy: heroEconomyProjection}
-	for _, mid := range []uint16{2144, 3116, 49, 51, 52, 54, 55, 57, 58, 60, 61, 62, 63, 67, 68, 69, 89, 304, 2979} {
+	for _, mid := range []uint16{2144, 3116, 49, 51, 52, 54, 55, 57, 58, 59, 60, 61, 62, 63, 67, 68, 69, 89, 304, 2979} {
 		mustRegister(mid, heroD)
 	}
 	evolutionD := stockruntime.EvolutionDispatcher{Authority: authority, Service: evolutionSvc}

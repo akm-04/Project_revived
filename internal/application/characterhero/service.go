@@ -70,6 +70,7 @@ type Service struct {
 	Acquisition               AcquisitionContent
 	MaterialCosts             appi5.TxMaterialCostDebiter
 	PlayerLevel               appi5.TxPlayerLevelReader
+	CollectionAdmission       CollectionAdmissionAuthorizer
 	Capacity                  CapacityAuthorizer
 	Equipment                 EquipmentOperationContent
 	EquipmentResources        appi5.TxHeroEquipmentResourceDebiter
