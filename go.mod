@@ -9,6 +9,7 @@ require (
 	github.com/jackc/pgx/v5 v5.10.0
 	github.com/riverqueue/river v0.47.0
 	github.com/riverqueue/river/riverdriver/riverpgxv5 v0.47.0
+	github.com/yuin/gopher-lua v1.1.2
 )
 
 require (

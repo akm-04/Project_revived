@@ -6,6 +6,7 @@ Direct runtime modules:
 - github.com/go-chi/chi/v5 v5.3.1 — MIT.
 - github.com/jackc/pgx/v5 v5.10.0 — MIT.
 - github.com/riverqueue/river v0.47.0 — MPL-2.0.
+- github.com/yuin/gopher-lua v1.1.2 — MIT (Copyright (c) 2015 Yusuke Inuzuka); linked only into the isolated combat worker resolver.
 
 Resolved indirect runtime modules:
 - github.com/jackc/pgpassfile v1.0.0 — MIT.

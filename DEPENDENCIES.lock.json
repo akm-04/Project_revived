@@ -111,6 +111,16 @@
       "use": "I2 differential codec candidate only",
       "status": "NOT_RUNTIME_APPROVED",
       "notes": "Pass435 keeps project-owned bounded Xinyoudi codec; goAMF3 remains differential-only."
+    },
+    {
+      "name": "GopherLua",
+      "kind": "runtime",
+      "module": "github.com/yuin/gopher-lua",
+      "version": "v1.1.2",
+      "license": "MIT",
+      "use": "Lua 5.1 VM inside the isolated I7C-5A combat worker only",
+      "status": "PINNED_I7C5A_COMBAT_WORKER",
+      "notes": "h1:yF/FjE3hD65tBbt0VXLE13HWS9h34fdzJmrWRXwobGA=; confined to internal/adapters/combatresolver by archguard; io/os/debug/channel libraries are never opened. Offline module source: retained proxy work/i7c5a/goproxy (zip sha256 recorded in the I7C-5A evidence)."
     }
   ],
   "resolved_go_modules": [
@@ -136,6 +146,12 @@
       "module": "github.com/riverqueue/river/riverdriver/riverpgxv5",
       "version": "v0.47.0",
       "license": "MPL-2.0",
+      "direct": true
+    },
+    {
+      "module": "github.com/yuin/gopher-lua",
+      "version": "v1.1.2",
+      "license": "MIT",
       "direct": true
     },
     {

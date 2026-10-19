@@ -691,3 +691,19 @@ func (Store) InsertGuildInvite(c context.Context, t tx.Tx, b registry.Bundle) (i
 	}
 	return tag.RowsAffected(), nil
 }
+
+// SourceArchiveTx returns the immutable revision manifest's source archive
+// identity so consumers can require it to match their own pinned corpus.
+func (Store) SourceArchiveTx(ctx context.Context, q tx.Queryer, revision string) (string, error) {
+	if q == nil || revision == "" {
+		return "", errors.New("content store: source archive lookup requires queryer and revision")
+	}
+	var archive string
+	if err := q.QueryRow(ctx, `SELECT COALESCE(manifest->>'source_archive_sha256','') FROM gxb_content_revisions WHERE revision_id=$1`, revision).Scan(&archive); err != nil {
+		return "", err
+	}
+	if len(archive) != 64 {
+		return "", errors.New("content store: revision manifest lacks source archive identity")
+	}
+	return archive, nil
+}

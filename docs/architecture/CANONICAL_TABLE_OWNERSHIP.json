@@ -3205,6 +3205,76 @@
       "migration": "migrations/00063_i7c4_character_raw_awakening_birth.sql",
       "owner": "character/hero-core",
       "write_exceptions": []
+    },
+    "combat_locator_roots": {
+      "allowed_query_owners": [
+        "Combat"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/combatstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/combatstore/"
+      ],
+      "migration": "migrations/00064_i7c5a_combat_foundation.sql",
+      "owner": "Combat",
+      "write_exceptions": []
+    },
+    "combat_snapshots": {
+      "allowed_query_owners": [
+        "Combat"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/combatstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/combatstore/"
+      ],
+      "migration": "migrations/00064_i7c5a_combat_foundation.sql",
+      "owner": "Combat",
+      "write_exceptions": []
+    },
+    "combat_report_blobs": {
+      "allowed_query_owners": [
+        "Combat"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/combatstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/combatstore/"
+      ],
+      "migration": "migrations/00064_i7c5a_combat_foundation.sql",
+      "owner": "Combat",
+      "write_exceptions": []
+    },
+    "combat_resolutions": {
+      "allowed_query_owners": [
+        "Combat"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/combatstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/combatstore/"
+      ],
+      "migration": "migrations/00064_i7c5a_combat_foundation.sql",
+      "owner": "Combat",
+      "write_exceptions": []
+    },
+    "combat_attempts": {
+      "allowed_query_owners": [
+        "Combat"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/combatstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/combatstore/"
+      ],
+      "migration": "migrations/00064_i7c5a_combat_foundation.sql",
+      "owner": "Combat",
+      "write_exceptions": []
     }
   }
 }
