@@ -1,0 +1,20 @@
+{
+  "status": "I7C5B_ACCEPTANCE_MATRIX_PLANNED_NOT_RUN",
+  "policy_id": "C5B_TOP_FLOOR_MODE_V1",
+  "rows": [
+    {"id": "B01_CONTENT", "proof": "top_floor catalog re-derived from source archive; arena_coin activation; source oracle facts (times, costs, cooldown 300, match params, reward rows, frame, robots)."},
+    {"id": "B02_ENTRY_LADDER", "proof": "First LOAD at level >= 10 enters at bottom once; robot ladder occupies 1..10325; ranks stay contiguous and unique under concurrent entries."},
+    {"id": "B03_ADMISSION", "proof": "Freeze 21:00-21:30 refused; tickets, cooldown 300, buy limit/cost, paid reset with VIP/monthly card; formation ownership and size; empty defender defense refused; offered/revenge range enforced."},
+    {"id": "B04_FIGHT_ROBOT_AND_PLAYER", "proof": "START vs robot TEMPLATE and vs player OWNED_FOREIGN produce source reports; empty-report retry replays the same attempt without a second ticket."},
+    {"id": "B05_TERMINAL_ONCE", "proof": "Swap only when challenger wins against a better rank; stale candidate (defender moved) cannot force an invalid swap; competing settlements apply once; repeated START returns the recorded result."},
+    {"id": "B06_DAILY_SETTLEMENT", "proof": "Settle-before-mutate snapshot equals the 21:00 ladder; one mail per ranked player with exact source lines; rank 1 frame item yields frame eligibility; idempotent across worker and request triggers."},
+    {"id": "B07_BEST_RANK_REWARD", "proof": "getRankReward amounts over rank_reward_diamond_new, min 1, mailed once per improvement; award_crystal echoed."},
+    {"id": "B08_ACHIEVEMENT_100001", "proof": "Streak of top-3 day snapshots earns tiers at 3/6/10, resets on drop, never revokes; marriage producer unchanged."},
+    {"id": "B09_HISTORY_RECORDS", "proof": "Both sides' fights/wins and per-partner fights/wins/kills/damage from persisted reports; last 10 records; expired report answers empty."},
+    {"id": "B10_WIRE_SHAPES", "proof": "Stock process API returns source-shaped 272/273/278/280/281/288/289/290/291/293/294 and 301 rank_type 1; 292 refused."},
+    {"id": "B11_RECONCILE_RECOVERY", "proof": "Worker reconcile settles pending days and resolves/settles abandoned attempts; unknown COMMIT positive-evidence only; restart safe."},
+    {"id": "B12_SCHEMA", "proof": "00065 fresh, populated 64->65 upgrade unchanged counts, repeat, relocated restore/restart preserve Top Floor state."},
+    {"id": "B13_REGRESSION_LOCKS", "proof": "Rank 601 unique; lock order 315<601<609<610<620<700 in code; 5A, 4B, I5 mail and girls ranking suites pass; archguard/vet/race/ownership/dependency/security."}
+  ],
+  "not_in_scope": ["Original matching/robot/retention algorithms (private policy)", "1829 history projection", "ARENA_MODE", "Arena shop", "Stock-client end-to-end"]
+}
