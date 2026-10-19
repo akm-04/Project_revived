@@ -55,8 +55,9 @@ CREATE TABLE combat_attempts (
  semantic_receipt_id text CHECK(semantic_receipt_id IS NULL OR length(semantic_receipt_id) BETWEEN 1 AND 256),
  FOREIGN KEY(domain_kind,authority_scope,domain_locator) REFERENCES combat_locator_roots(domain_kind,authority_scope,domain_locator),
  CHECK(result_deadline>started_at),
- CHECK((state='STAGED')=(resolution_hash IS NULL)),
- CHECK((state='STAGED')=(resolver_status<>'READY')),
+ CHECK(state<>'STAGED' OR resolution_hash IS NULL),
+ CHECK(state<>'RESOLUTION_READY' OR resolution_hash IS NOT NULL),
+ CHECK((resolution_hash IS NOT NULL)=(resolver_status='READY')),
  CHECK((state='TERMINAL')=(terminal_kind IS NOT NULL AND terminal_at IS NOT NULL AND semantic_receipt_id IS NOT NULL)),
  CHECK(state='TERMINAL' OR (terminal_kind IS NULL AND terminal_at IS NULL AND semantic_receipt_id IS NULL))
 );

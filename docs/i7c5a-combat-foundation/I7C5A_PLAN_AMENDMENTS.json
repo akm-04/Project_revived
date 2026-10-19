@@ -63,6 +63,26 @@
       "id": "M10_REPORT_CONTEXT",
       "implemented": "The report blob is BattleCreateReport.writeReport output plus hero_collect_attr[player] (all 49 attr types) and zhuge_book_skill_num[player], the server-wrapper keys NormalHero/SuperHero read on ReplayReport.",
       "classification": "STRONG_INFERENCE from the replay readers; JSON byte compatibility with original cjson is UNKNOWN"
+    },
+    {
+      "id": "M11_CLOSE_UNRESOLVED_ATTEMPT",
+      "discovery": "Reality review of F1: a PERMANENT_FAILED attempt stayed STAGED forever and, with one unresolved attempt per locator and TERMINAL requiring a resolution, blocked its locator permanently.",
+      "contract_basis": "Pass418 attempt_record lists resolution_id/report_blob_id as optional and resolver_status NOT_REQUIRED; modes define supersession/expiry explicitly. F1 was stricter than the inherited envelope.",
+      "implemented": "Attempt.Close and Service.CloseTx: inside the mode transaction, under the rank-609 locator lock, a PERMANENT_FAILED attempt or one at/after its result deadline ends TERMINAL without settlement (an expired RESOLUTION_READY attempt keeps its resolution hash); same semantic receipt replays. Schema checks restated per state plus resolution <=> READY. TerminalTx replay refuses an attempt closed under a different kind.",
+      "affected_consumers": "Every mode leaf 5B..5F (expiry/supersession policy remains mode-owned).",
+      "requalification": "F1 superseded; F2 freeze and full exact R2 qualification.",
+      "classification": "IMPLEMENTATION_DECISION aligned to inherited Pass418 contract"
+    },
+    {
+      "id": "M12_RANDOM_EXACT_INTEGER_ARGUMENTS",
+      "evidence": "Every math.random bound and math.randomseed seed in the corpus is an integer expression (#list, constants, math.ceil, tonumber(os.time()), seed_ counter with os.clock()=0).",
+      "implemented": "Non-integer or non-finite bounds/seeds raise a deterministic PERMANENT failure instead of guessing Lua 5.1 truncation versus LuaJIT real semantics.",
+      "classification": "IMPLEMENTATION_DECISION; original runtime semantics for fractional arguments UNKNOWN and unused"
+    },
+    {
+      "id": "M13_CORPUS_PINNED_PER_ATTEMPT",
+      "implemented": "An attempt resolves only with the corpus it was started under; after a corpus upgrade an unresolved older attempt fails PERMANENT and is closed by the mode (M11). Historical reports stay readable from persisted bytes.",
+      "classification": "IMPLEMENTATION_DECISION"
     }
   ]
 }

@@ -131,6 +131,9 @@ func (s Service) Resolve(ctx context.Context, op operation.Context, attemptID id
 	if !found {
 		return Resolved{}, ErrAttemptNotFound
 	}
+	if attempt.State != d.Staged && attempt.ResolutionHash == "" {
+		return Resolved{Attempt: attempt}, d.ErrNotReady
+	}
 	if attempt.State != d.Staged {
 		return s.loadTx(ctx, s.Fresh, attempt)
 	}
@@ -283,6 +286,9 @@ func (s Service) TerminalTx(ctx context.Context, t tx.Tx, request TerminalReques
 		if !found {
 			return Settled{}, ErrAttemptNotFound
 		}
+		if done.TerminalKind != request.TerminalKind || done.ResolutionHash == "" {
+			return Settled{}, d.ErrStale
+		}
 		resolved, err := s.loadTx(ctx, t, done)
 		return Settled{Resolved: resolved, Replayed: true}, err
 	}
@@ -305,6 +311,49 @@ func (s Service) TerminalTx(ctx context.Context, t tx.Tx, request TerminalReques
 	}
 	resolved, err := s.loadTx(ctx, t, next)
 	return Settled{Resolved: resolved}, err
+}
+
+type Closed struct {
+	Attempt  d.Attempt
+	Replayed bool
+}
+
+// CloseTx ends the locator's unresolved attempt without settlement inside the
+// mode's transaction, under the mode's own expiry or supersession rule. Only a
+// permanently failed attempt or one past its result deadline is closable.
+func (s Service) CloseTx(ctx context.Context, t tx.Tx, request TerminalRequest) (Closed, error) {
+	if t == nil || !request.Locator.Valid() || request.GenerationRef == "" || request.TerminalKind == "" || request.SemanticReceiptID == "" || request.At.IsZero() {
+		return Closed{}, d.ErrInvalid
+	}
+	if err := s.Store.LockLocatorTx(ctx, t, request.Locator); err != nil {
+		return Closed{}, err
+	}
+	open, found, err := s.Store.FindUnresolvedTx(ctx, t, request.Locator)
+	if err != nil {
+		return Closed{}, err
+	}
+	if !found {
+		done, found, err := s.Store.FindTerminalTx(ctx, t, request.Locator, request.SemanticReceiptID)
+		if err != nil || !found {
+			return Closed{}, errors.Join(err, ErrAttemptNotFound)
+		}
+		if done.TerminalKind != request.TerminalKind {
+			return Closed{}, d.ErrStale
+		}
+		return Closed{Attempt: done, Replayed: true}, nil
+	}
+	if open.GenerationRef != request.GenerationRef {
+		return Closed{}, d.ErrStale
+	}
+	current, err := s.Store.LockAttemptTx(ctx, t, open.ID)
+	if err != nil {
+		return Closed{}, err
+	}
+	next, err := current.Close(request.TerminalKind, request.SemanticReceiptID, request.At)
+	if err != nil {
+		return Closed{}, err
+	}
+	return Closed{Attempt: next}, s.Store.SaveAttemptTx(ctx, t, next, current.StateVersion)
 }
 
 func (s Service) loadTx(ctx context.Context, q tx.Queryer, attempt d.Attempt) (Resolved, error) {

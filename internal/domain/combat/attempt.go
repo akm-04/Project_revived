@@ -74,7 +74,8 @@ func (a Attempt) Validate() error {
 			return ErrInvalid
 		}
 	case Terminal:
-		if !resolved || a.TerminalKind == "" || a.TerminalAt == nil || a.SemanticReceiptID == "" || a.ResolverStatus != ResolverReady {
+		// A closed attempt may end unresolved (Pass418: resolution is optional).
+		if a.TerminalKind == "" || a.TerminalAt == nil || a.SemanticReceiptID == "" || resolved != (a.ResolverStatus == ResolverReady) {
 			return ErrInvalid
 		}
 	default:
@@ -114,7 +115,29 @@ func (a Attempt) Resolve(resolutionHash string) (Attempt, error) {
 }
 
 func (a Attempt) Terminate(kind, semanticReceiptID string, at time.Time) (Attempt, error) {
-	if a.State != ResolutionReady || kind == "" || semanticReceiptID == "" || at.IsZero() {
+	if a.State != ResolutionReady {
+		return a, ErrStale
+	}
+	return a.finish(kind, semanticReceiptID, at)
+}
+
+// Closable reports whether the owning mode may end the attempt without
+// settlement: its resolution failed permanently or its result deadline passed.
+func (a Attempt) Closable(at time.Time) bool {
+	expired := !at.Before(a.ResultDeadline)
+	return a.State == Staged && (a.ResolverStatus == ResolverPermanentFailed || expired) || a.State == ResolutionReady && expired
+}
+
+// Close frees the locator slot under the mode's expiry or supersession rule.
+func (a Attempt) Close(kind, semanticReceiptID string, at time.Time) (Attempt, error) {
+	if !a.Closable(at) {
+		return a, ErrStale
+	}
+	return a.finish(kind, semanticReceiptID, at)
+}
+
+func (a Attempt) finish(kind, semanticReceiptID string, at time.Time) (Attempt, error) {
+	if kind == "" || semanticReceiptID == "" || at.IsZero() {
 		return a, ErrStale
 	}
 	at = at.UTC()

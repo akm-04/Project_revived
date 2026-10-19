@@ -152,4 +152,18 @@ func TestAttemptLifecycle(t *testing.T) {
 	if permanent.Runnable() {
 		t.Fatal("permanent failure runnable")
 	}
+	if _, err = a.Close("EXPIRED", "close", start); err == nil {
+		t.Fatal("pending attempt closed before its deadline")
+	}
+	closed, err := permanent.Close("RESOLVER_FAILED", "close", start)
+	if err != nil || closed.Unresolved() || closed.ResolutionHash != "" {
+		t.Fatal("permanent failure must be closable without resolution", err)
+	}
+	expired, err := ready.Close("EXPIRED", "close", a.ResultDeadline)
+	if err != nil || expired.ResolutionHash == "" {
+		t.Fatal("expired ready attempt keeps its resolution", err)
+	}
+	if _, err = ready.Close("EXPIRED", "close", start); err == nil {
+		t.Fatal("ready attempt closed before its deadline")
+	}
 }

@@ -154,13 +154,19 @@ func (f *freezer) build(p Participant, params map[string]any) (d.Actor, error) {
 		return d.Actor{}, d.ErrInvalid
 	}
 	var shape struct {
-		TableID json.Number `json:"table_id"`
+		TableID   json.Number `json:"table_id"`
+		PartnerID json.Number `json:"partner_id"`
+		PetID     json.Number `json:"pet_id"`
 	}
 	if err = json.Unmarshal(raw, &shape); err != nil {
 		return d.Actor{}, d.ErrInvalid
 	}
+	identity := shape.PartnerID
+	if p.Kind == d.PetActor {
+		identity = shape.PetID
+	}
 	tableID, err := shape.TableID.Int64()
-	if err != nil || tableID <= 0 {
+	if err != nil || tableID <= 0 || identity.String() != strconv.FormatInt(p.Identity, 10) {
 		return d.Actor{}, d.ErrInvalid
 	}
 	tables := []string{"partner", "super_partner", "activity_partner"}

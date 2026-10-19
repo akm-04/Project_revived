@@ -786,3 +786,69 @@ func TestI7C5ACombatStartTakesOnlyCombatLocksNative(t *testing.T) {
 	}
 	t.Logf("%d owner tables remained lockable during START", len(tables))
 }
+
+type permanentWorker struct{}
+
+func (permanentWorker) Resolve(context.Context, []byte, string, [32]byte) (combat.WorkerOutput, error) {
+	return combat.WorkerOutput{}, fmt.Errorf("%w: deterministic script failure fixture", d.ErrResolverPermanent)
+}
+
+// Pass418 lets the owning mode end an unresolved attempt: a permanently failed
+// or expired attempt is closable without settlement, freeing its locator.
+func TestI7C5ACombatCloseUnresolvedNative(t *testing.T) {
+	pool := pool(t)
+	a, rev, ref := combatOwner(t, pool, rankingServer(t, pool))
+	s := combatService(t, pool)
+	s.Worker = permanentWorker{}
+	locator := d.Locator{DomainKind: "i7c5a-fixture-mode", AuthorityScope: "close", DomainLocator: fmt.Sprint(a.PlayerID)}
+	request := func(name string) combat.StartRequest {
+		return combat.StartRequest{Actor: a, Locator: locator, GenerationRef: "g", StartFingerprint: fingerprint(name), Battle: combat.BattleRequest{CampaignType: 1,
+			TeamA: []combat.Participant{{Origin: d.OwnedSelf, Kind: d.HeroActor, Player: a.PlayerID, Identity: ref.PartnerID}}, WavesB: [][]combat.Participant{{{Origin: d.Template, Kind: d.HeroActor, Identity: 10001002, TemplateParams: templateParams(10001002)}}}}}
+	}
+	first, err := fixtureStart(t, s, rev, request("close-1"), pool)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err = s.Resolve(ctx, op(), first.Attempt.ID); !errors.Is(err, d.ErrResolverPermanent) {
+		t.Fatal("permanent failure", err)
+	}
+	if _, err = fixtureStart(t, s, rev, request("close-other"), pool); !errors.Is(err, d.ErrStartConflict) {
+		t.Fatal("failed attempt must still own its locator", err)
+	}
+	close := func(receipt string, at time.Time) (combat.Closed, error) {
+		var closed combat.Closed
+		_, err := (tx.Runner{DB: pool}).Run(ctx, opPinned(rev), conquer.Profile(), tx.Options{Isolation: tx.RepeatableRead}, tx.RetryPolicy{MaxAttempts: 1}, nil, func(c context.Context, scope tx.Scope) error {
+			var err error
+			closed, err = s.CloseTx(c, scope.Tx, combat.TerminalRequest{Locator: locator, GenerationRef: "g", TerminalKind: "RESOLVER_FAILED", SemanticReceiptID: receipt, At: at})
+			return err
+		})
+		return closed, err
+	}
+	_, settleErr := (tx.Runner{DB: pool}).Run(ctx, opPinned(rev), conquer.Profile(), tx.Options{Isolation: tx.RepeatableRead}, tx.RetryPolicy{MaxAttempts: 1}, nil, func(c context.Context, scope tx.Scope) error {
+		_, err := s.TerminalTx(c, scope.Tx, combat.TerminalRequest{Locator: locator, GenerationRef: "g", TerminalKind: "SETTLED", SemanticReceiptID: "never-settled", At: time.Now().UTC()})
+		return err
+	})
+	if !errors.Is(settleErr, d.ErrNotReady) {
+		t.Fatal("unresolved attempt settled", settleErr)
+	}
+	now := time.Now().UTC()
+	closed, err := close("close-receipt-1", now)
+	if err != nil || closed.Replayed || closed.Attempt.State != d.Terminal || closed.Attempt.ResolutionHash != "" {
+		t.Fatal("close permanent failure", closed, err)
+	}
+	again, err := close("close-receipt-1", now)
+	if err != nil || !again.Replayed || again.Attempt.ID != first.Attempt.ID {
+		t.Fatal("close replay", again, err)
+	}
+	second, err := fixtureStart(t, s, rev, request("close-2"), pool)
+	if err != nil || second.Attempt.ID == first.Attempt.ID || second.Replayed {
+		t.Fatal("locator not freed", err)
+	}
+	if _, err = close("close-receipt-2", now); !errors.Is(err, d.ErrStale) {
+		t.Fatal("pending attempt closed before deadline", err)
+	}
+	expired, err := close("close-receipt-2", second.Attempt.ResultDeadline)
+	if err != nil || expired.Attempt.State != d.Terminal {
+		t.Fatal("expired attempt close", err)
+	}
+}
