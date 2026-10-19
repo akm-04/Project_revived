@@ -1,0 +1,32 @@
+{
+  "status": "CONCRETE_5A_FOUNDATION_PLAN_DOCS_READY_REQUIRED_PUBLICATION_GATE_PENDING_NO_PRODUCT_CODE",
+  "policy_id": "C5A_COMBAT_INPUT_ATTEMPT_RESULT_FOUNDATION_V1",
+  "base_product_commit": "63905b659a553574d17570c54a1ebf45405739b7",
+  "new_product_code_started": false,
+  "steps": [
+    "S0 Commit these research/policy/impact/plan records; cumulative checkpoint; owned authority 728 from 727 with contract index entry, routing, HOT preseal, COLD build --deep and exact sole-contract query before any product code.",
+    "S1 Rules corpus artifact: tools/combat_corpus.py compiles exact bytes of the required lib/battle modules, BattleCreateReport, the four model modules plus Hero/Item and the 44 traced data tables from archive c7e98789... into internal/combat/corpus/generated (deterministic gzip bundle + manifest with per-file sha256, source archive, fighter-class manifest, corpus id = sha256 of canonical manifest). tools/check_i7c5a_source_oracle.py re-derives it from the archive. Go test verifies embedded bytes against the manifest.",
+    "S2 Dependency: add gopher-lua v1.1.2 with exact h1 sums; update DEPENDENCIES.lock.json, SBOM.spdx.json, THIRD_PARTY_NOTICES.md; seed an owned GOMODCACHE from the retained exact module zip for offline R2 builds; toolbox root untouched.",
+    "S3 internal/domain/combat: snapshot (origins OWNED_SELF/OWNED_FOREIGN/TEMPLATE, per-actor params + 3B facet, per-player collection attr and book count), canonical serialization and hash, attempt state machine and resolver statuses (418), trust profile SERVER_REPORT_AUTHORITATIVE_V1, resolution, report reference, entropy root derivation and Lua random()/random(n)/random(a,b) unbiased mapping with fixed vectors. Pure, no I/O.",
+    "S4 Resolver worker: cmd/gxb-combat-worker plus internal/combat/resolver. Fresh GopherLua state per attempt, allowlisted loader over the embedded corpus, SNAPSHOT_ONLY_ADAPTERS_V1, virtual os.time, entropy shim, framed bounded stdio protocol, typed output. Archguard test forbids database, net, os/exec, filesystem and clock imports in resolver packages.",
+    "S5 internal/adapters/combatworker: launches the worker with empty environment and cwd, closed extra fds, rlimits (address space, CPU, open files, zero file size), process-group wall deadline kill and stdin/stdout/stderr caps; classifies crash/timeout/resource kill as RETRYABLE and deterministic script/validation failure as PERMANENT; revalidates output.",
+    "S6 publicstats: extract the validated owner gather from HeroTx/PetTx into typed observation sets with no behaviour change; add combat-input methods returning observations plus battle totals. Existing 3B tests pass unchanged.",
+    "S7 internal/application/combat snapshot materializer: source-shaped params from observations via owner-local pure serializers shared with existing OverlayRosterTx code (no duplicated mapping); per-player context; TEMPLATE validation against content and class manifest; typed refusal for unavailable providers or classes; content manifest source archive must equal corpus source archive.",
+    "S8 Migration 00064 (combat-owned): combat_snapshots, combat_attempts (418 minimum + optional fields; partial unique index on domain kind/authority scope/locator while unresolved), combat_resolutions, combat_report_blobs; immutability enforced; schema-owner catalog updated; internal/adapters/postgres/combatstore with generated queries.",
+    "S9 internal/application/combat service: StartTx in the caller's transaction (lock rank 609 on locator, same-fingerprint replay, conflict on different fingerprint, PG decision instant, snapshot freeze, entropy root from key ring, STAGED/PENDING attempt); Resolve outside locks (load, run worker, short CAS transaction persisting resolution and report once, idempotent duplicate completion, integrity failure on mismatch); TerminalTx in the caller's transaction (validate RESOLUTION_READY, state version, generation; mark TERMINAL with the mode's semantic receipt identity; return immutable resolution). No background scheduler: modes call Resolve after their START commit and on same-START replay.",
+    "S10 Proof: domain/entropy/serialization unit tests; corpus/oracle check; resolver fixtures (template fights, owned-fixture Normal/Super/Pet with nondefault Spirit/Course/Inscription/Element/book/collection), all reachable-class construction sweep, determinism across fresh processes, VM totals versus frozen 3B totals differential on fixtures, post-freeze owner mutation, worker failure classes; exact portableR2 PostgreSQL fresh/upgrade 63->64/repeat/rollback/restore, unknown COMMIT, competing START, duplicate completion, competing terminal, restart; 3B and CA8 regression; vet/race/archguard. Test-only fixture mode consumer exercises START/RESOLVE/TERMINAL with I5 Grant and receipts.",
+    "S11 Freeze intended candidate once, exact R2 qualification, independent reality review, evidence reconciliation, truthful scoped 5A PassMap closure. Full4 and 5B..5F gates stay open."
+  ],
+  "required_checks": [
+    "Unchanged C1 and inherited contract bytes; existing migrations and content artifacts byte-identical",
+    "No fallback class/zero/default outcome; class manifest refusal before START commit",
+    "No resolver access to DB/network/clock/owner ports; process limits executed, not assumed",
+    "Same START replay never recharges, resnapshots or rerolls; terminal settlement once; unknown COMMIT positive-only",
+    "Lock rank 609 with no collision; no lock held during resolution"
+  ],
+  "open_gates": [
+    "Owned 728 preimplementation publication gate not yet created/passed",
+    "Product not started; no schema64, worker or proof yet",
+    "Mode leaves 5B..5F and all full I7C4 gates remain"
+  ]
+}
