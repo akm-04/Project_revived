@@ -1,0 +1,113 @@
+{
+  "status": "I7C5C_CONTRACT_IMPACT_REVIEWED_PREIMPLEMENTATION",
+  "affected_contract_id": "C5C_ONE_ON_ONE_MODE_V1",
+  "c1_bindings": [
+    {
+      "path": "hot/00_PASSMAP/PASS685_I7C1_PROVIDER_SCOPE_OWNERSHIP_CONTRACT.json",
+      "sha256": "73f4e5b8e8603a68380be31d4aec7a5f9f10ecd9b68246b56dfb350ae36ea943",
+      "upheld": "OneOnOne is the canonical owner of its ladder/state/history facts; canonical owner observations only, never defaults; three HISTORY families stay distinct and 1829 stays unactivated until all are qualified."
+    },
+    {
+      "path": "hot/00_PASSMAP/PASS685_I7C1_DELIVERY_ACCEPTANCE_CONTRACT.json",
+      "sha256": "992b38344aef6196e99cd2f17dc8810c2e962017db8de5c1a563890d54cf49a0",
+      "upheld": "Caller-transaction coherent composition, no foreign SQL or nested transaction or I/O under locks; battle follows D05/418/420 through the 5A foundation; new DB foundation gets exact R2 fresh/upgrade/restore/unknown-COMMIT/concurrency proof; child GREEN never accepts the parent."
+    },
+    {
+      "path": "hot/00_PASSMAP/PASS685_I7C1_RESEARCH_AMENDMENT_CONTRACT.json",
+      "sha256": "6e29a18a81e820f53a5accd471cf367c625cd48537fa37094f6b17fa0b88b8e9",
+      "upheld": "Whole-leaf research completed before code; numerical/initialization unknowns routed to the labelled private policy under the user rule (PASS723) with this impact record; no topology renumbering."
+    },
+    {
+      "path": "hot/00_PASSMAP/PASS724_I7C1_QUESTION_DISPOSITIONS.json",
+      "sha256": "cb702416bf09cfb65eb7762b45c1be7c37359b298dd68ff587f9e88f9bec77b7",
+      "upheld": "Q_TOP_FLOOR_HISTORY_WINDOW is closed for this leaf by the labelled history policy (lifetime from producer start, both sides, per-partner usage from reports, last 10 records); not claimed as original."
+    },
+    {
+      "path": "hot/00_PASSMAP/PASS709_I7C_TOPOLOGY_V5.json",
+      "sha256": "1b87dd43b8fe17c1536a366e08ce834a829ac78d7eebec251d5cca9ab33184db",
+      "upheld": "Leaf I7C-5B scope: actual qualifying result/counter/generation, typed observations, history totals/partner use, selected rank/reward origins from immutable settlement; excludes other I9 modes and rank-manufactured counters."
+    }
+  ],
+  "inherited_bindings": [
+    {
+      "path": "hot/00_PASSMAP/PASS418_COMBAT_ATTEMPT_START_RESULT_RUNTIME_DESIGN.json",
+      "sha256": "494d24864e41297792cb1d5f3dbe029bf4b28d047535f2738b5ce57f1bd820c7"
+    },
+    {
+      "path": "hot/00_PASSMAP/PASS419_ASYNC_PVP_FAMILY_FOUNDATION_DESIGN.json",
+      "sha256": "9a2106dce7179971ee43df39fdd8a14e6bc909edd920f2f325eb6fb2482262d6"
+    },
+    {
+      "path": "hot/00_PASSMAP/PASS420_PRIORITY_GAMEPLAY_MODE_BINDING_REGISTRY.json",
+      "sha256": "0b23969fd918d674813d72d949c0fd9720634e0e0dda2df0dfe85b2b5505735a",
+      "note": "Pass420 cites a 10-minute cooldown from help text; source data misc arena_cooldown 300 and ArenaWindow (lastMatchTime+300) win. Recorded as a source conflict, data selected."
+    },
+    {
+      "path": "hot/00_PASSMAP/PASS421_FINAL_GAMEPLAY_MODE_REGISTRY.json",
+      "sha256": "451333300a1cb2022bf56016d2e1a319f9743330bfd2c63de7f26c520948a2e3"
+    },
+    {
+      "path": "hot/00_PASSMAP/PASS426_GLOBAL_LOCK_ORDER_AND_CYCLE_AUDIT.json",
+      "sha256": "bfb53ada4fde3b32194ab5f1a935d3afbccef943a55ba5826fb4b8df04625ad7"
+    },
+    {
+      "path": "hot/00_PASSMAP/PASS723_I7C4C_PRIVATE_SERVER_POLICY_AUTHORIZATION.json",
+      "sha256": "8eb6218d87544e57c96c2e435cedb06376d4e46ff3e6491d2d22a4783aacc353",
+      "note": "User rule applied to 5B by precedent with its mandatory actions."
+    },
+    {
+      "path": "hot/00_PASSMAP/PASS728_I7C5A_POLICY.json",
+      "sha256": "161fe48207a0523cab792c7dbfab1058baf5ddf782a37ce1056d1a8d38d82559",
+      "note": "Consumed unchanged: START/Resolve/TerminalTx/CloseTx; TEMPLATE robots; campaign_type ARENA."
+    },
+    {
+      "path": "hot/00_PASSMAP/PASS730_I7C5B_POLICY.json",
+      "sha256": "a6ce00c8eb5b2f2e60593dce5c7c4a54580c8d562e91f26da768ed78454ece51"
+    }
+  ],
+  "successor_obligations": {
+    "CA-IDENTITY": "PRESERVED: defense/attack teams store player-scoped HeroRef/PetRef ids, never template ids; Combat freezes OWNED_SELF/OWNED_FOREIGN actors through the 5A freezer.",
+    "CA-PRACTICE": "PRESERVED: battle inputs come only from the 5A CombatSnapshot freezer (applied Practice); no pending rolls.",
+    "CA-APPEARANCE": "PRESERVED: display rows read PlayerDisplay selections; 1 on 1 titles enter only as owner origins through the PlayerDisplay catalog-origin seam (entitlement vs selection kept).",
+    "CA8-COHERENT-SCOPE": "PRESERVED: START/load/settlement use the caller RepeatableRead transaction, pinned content revision and DB-authoritative decision instant; no nested transaction or foreign SQL.",
+    "CA8-OWNED": "PRESERVED: reuse accepted per-reference builders via 5A freeze; no new snapshot builder.",
+    "CA8-PUBLIC": "NOT_APPLICABLE: no showcase surface is added; enemy formations are mode projections of the frozen/defense refs.",
+    "CA8-AVAILABILITY": "PRESERVED: unavailable producers refuse (START refuses when the freezer refuses); content without the one_on_one catalog fails closed.",
+    "CA-SUPERSESSION": "AMENDED (recorded): scoped amendments to Combat resolver bootstrap, Achievement, PlayerDisplay origins routing and content top_coin activation are listed in scoped_amendments; unrelated invariants preserved.",
+    "CA-BOOKMARK": "NOT_APPLICABLE: no MID3116 surface.",
+    "CA-PARENT-EXIT": "PRESERVED: 5C GREEN closes only the 5C component; I7C-5 parent and full I7C-4 stay open."
+  },
+  "scoped_amendments": [
+    {
+      "owner": "Combat resolver adapter (C5A)",
+      "change": "Bootstrap materializes a PEAK_ARENA model stub (clear/setCurrentBattleRound/getCurrentBattleRound) and the driver shapes herosA/herosB as {team1=...} only for CampaignType 65; other campaigns unchanged.",
+      "requalification": "5A resolver tests unchanged; new 65 report/star test."
+    },
+    {
+      "owner": "Achievement (I7C-4B)",
+      "change": "Typed producers for 100002 (weekly top-3 server rank streak 1/2/3) and 100028 (attack win streak 5/15/30) on the existing streak persistence, lock 620, no value grant.",
+      "requalification": "100001/marriage unchanged; new native tests."
+    },
+    {
+      "owner": "PlayerDisplay (I7B-6A)",
+      "change": "CatalogExternalOrigins router by catalog id: 100059-100062 girls ranking, 100002-100005 OneOnOne.",
+      "requalification": "girls ranking origin tests unchanged; new 1 on 1 title origin test."
+    },
+    {
+      "owner": "Content/I5 resources",
+      "change": "top_coin SCALAR_CURRENCY ENABLED_R4 (income owner OneOnOne); one_on_one catalog artifact; compiler version bump.",
+      "requalification": "content revision pins and registry verify."
+    },
+    {
+      "owner": "I5 SettlementMail (C5B seam)",
+      "change": "Reused unchanged with new source kinds ONE_ON_ONE_REWARD, ONE_ON_ONE_FRAME, ONE_ON_ONE_TITLE.",
+      "requalification": "existing tests."
+    }
+  ],
+  "downstream_consumers": [
+    "I7C-4 full: Achievement 100002/100028 producers, frame 120001005 and titles 100002-100005 origins",
+    "1829 HISTORY SUPER_ARENA family (gated until 5D)",
+    "ranking 301 rank_types 3/4"
+  ],
+  "full4_closed": false
+}
