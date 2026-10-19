@@ -1,0 +1,23 @@
+{
+  "status": "I7C5A_FOUNDATION_ACCEPTANCE_MATRIX_PLANNED_NOT_RUN",
+  "policy_id": "C5A_COMBAT_INPUT_ATTEMPT_RESULT_FOUNDATION_V1",
+  "scope": "Foundation only: snapshot, attempt, isolated resolver, resolution/report persistence and terminal composition seam. No mode, ranking, history, cosmetic origin or full I7C4 acceptance.",
+  "rows": [
+    {"id": "A01_CORPUS", "proof": "Corpus manifest re-derived from source archive c7e98789...; embedded bytes equal manifest; corpus source archive equals content manifest source archive; START refuses mismatch.", "environment": "local + source oracle"},
+    {"id": "A02_IMPORT_CLOSURE", "proof": "Every reachable import/global resolves to a corpus module or a named SNAPSHOT_ONLY_ADAPTERS_V1 entry; unknown module request fails closed (D05).", "environment": "worker fixtures"},
+    {"id": "A03_CLASS_COVERAGE", "proof": "Every fighter class reachable from gate-open Partner/Pet rows, monster lineups and summon targets constructs in the VM; manifest-absent class refuses START before commit; no fallback.", "environment": "worker sweep + service"},
+    {"id": "A04_DETERMINISM", "proof": "Same snapshot/attempt/key version gives byte-identical resolution and report in fresh worker processes; entropy vectors for random()/random(n)/random(a,b) and reseed match the specified mapping.", "environment": "local"},
+    {"id": "A05_INPUT_FIDELITY", "proof": "Owned Normal/Super/Pet fixtures with nondefault equipment, Fumo, practice, book, inscription, Conquer, feed, Course, collection, Element (incl. Zhuge book count), Spirit and evolution: VM totals equal frozen 3B battle totals; TEMPLATE fixture works without inserting an owned Hero; timed entitlement evaluated at freeze.", "environment": "R2 PostgreSQL + worker"},
+    {"id": "A06_FAIL_CLOSED_INPUT", "proof": "Missing/unavailable/stale provider, wrong content pin, missing key version and malformed template params refuse START with typed errors and no rows written.", "environment": "R2 PostgreSQL"},
+    {"id": "A07_POST_FREEZE", "proof": "Owner mutations after START (equipment, level, Spirit, collection, inventory books) do not change snapshot, resolution or report.", "environment": "R2 PostgreSQL"},
+    {"id": "A08_START_IDEMPOTENCE", "proof": "Same-fingerprint START returns the same attempt/snapshot/entropy; different fingerprint while unresolved conflicts; concurrent START on one locator yields exactly one attempt.", "environment": "R2 PostgreSQL concurrency"},
+    {"id": "A09_RESOLVER_ISOLATION", "proof": "Worker runs with empty environment, no DB credentials, enforced wall deadline, memory/CPU/file limits and output caps; timeout/crash/resource kill leaves attempt RETRYABLE with identical inputs; deterministic script/validation error is PERMANENT; no DB lock held during resolution.", "environment": "native process"},
+    {"id": "A10_RESOLUTION_ONCE", "proof": "Duplicate worker completion with identical hash is idempotent; mismatching hash is an integrity failure; report bytes immutable and hash verified on load; replay never reruns entropy.", "environment": "R2 PostgreSQL"},
+    {"id": "A11_TERMINAL_ONCE", "proof": "Fixture mode consumer applies TERMINAL plus I5 Grant and semantic receipt in one caller transaction; competing terminal requests settle once; repeated terminal reconstructs the recorded result without paying twice; RESULT cannot create an attempt.", "environment": "R2 PostgreSQL concurrency"},
+    {"id": "A12_UNKNOWN_COMMIT", "proof": "Injected unknown COMMIT on START, resolution persistence and terminal is resolved by positive receipt/postcondition evidence only; absence yields ResolutionUnknown.", "environment": "R2 PostgreSQL fault injection"},
+    {"id": "A13_SCHEMA_RECOVERY", "proof": "Migration 00064 fresh and populated 63->64 upgrade, repeat migrate, rollback, restart and relocated restore preserve attempts, snapshots, resolutions and report bytes; earlier migrations and content artifacts byte-identical.", "environment": "R2 PostgreSQL"},
+    {"id": "A14_REGRESSION", "proof": "3B publicstats and CA8 suites unchanged and passing after gather extraction; archguard (including resolver import bans and CA8 seam guards), vet and race pass; affected inherited suites selected by changed files.", "environment": "R2"},
+    {"id": "A15_LOCK_ORDER", "proof": "Combat attempt rank 609 has no collision; START/terminal lock sets are discovered before mutation and canonical; no lower rank acquired after 609 within combat code.", "environment": "static + R2"}
+  ],
+  "not_in_scope": ["Stock-client end-to-end for any mode", "Original RNG parity", "Mode locators/costs/rewards/retention", "BORROWED and CLIENT_ATTESTED profiles"]
+}
