@@ -3090,6 +3090,150 @@
       "owner": "content-registry",
       "write_exceptions": []
     },
+    "achievement_streaks": {
+      "owner": "achievement",
+      "allowed_query_owners": [
+        "achievement"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/achievementstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/achievementstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00065_i7c5b_top_floor.sql"
+    },
+    "content_top_floor_catalogs": {
+      "owner": "content-registry",
+      "allowed_query_owners": [
+        "content-registry"
+      ],
+      "allowed_read_paths": [
+        "sql/content/",
+        "internal/adapters/postgres/contentstore/",
+        "internal/adapters/postgres/contentqueries/"
+      ],
+      "allowed_write_paths": [
+        "sql/content/",
+        "internal/adapters/postgres/contentstore/",
+        "internal/adapters/postgres/contentqueries/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00065_i7c5b_top_floor.sql"
+    },
+    "top_floor_ladders": {
+      "owner": "TopFloor",
+      "allowed_query_owners": [
+        "TopFloor"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/topfloorstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/topfloorstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00065_i7c5b_top_floor.sql"
+    },
+    "top_floor_ranks": {
+      "owner": "TopFloor",
+      "allowed_query_owners": [
+        "TopFloor"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/topfloorstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/topfloorstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00065_i7c5b_top_floor.sql"
+    },
+    "top_floor_players": {
+      "owner": "TopFloor",
+      "allowed_query_owners": [
+        "TopFloor"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/topfloorstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/topfloorstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00065_i7c5b_top_floor.sql"
+    },
+    "top_floor_fights": {
+      "owner": "TopFloor",
+      "allowed_query_owners": [
+        "TopFloor"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/topfloorstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/topfloorstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00065_i7c5b_top_floor.sql"
+    },
+    "top_floor_records": {
+      "owner": "TopFloor",
+      "allowed_query_owners": [
+        "TopFloor"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/topfloorstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/topfloorstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00065_i7c5b_top_floor.sql"
+    },
+    "top_floor_partner_usage": {
+      "owner": "TopFloor",
+      "allowed_query_owners": [
+        "TopFloor"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/topfloorstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/topfloorstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00065_i7c5b_top_floor.sql"
+    },
+    "top_floor_day_settlements": {
+      "owner": "TopFloor",
+      "allowed_query_owners": [
+        "TopFloor"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/topfloorstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/topfloorstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00065_i7c5b_top_floor.sql"
+    },
+    "top_floor_day_ranks": {
+      "owner": "TopFloor",
+      "allowed_query_owners": [
+        "TopFloor"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/topfloorstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/topfloorstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00065_i7c5b_top_floor.sql"
+    },
     "achievement_roots": {
       "owner": "achievement",
       "allowed_query_owners": [

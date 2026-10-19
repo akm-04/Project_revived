@@ -109,3 +109,62 @@ func (c Catalog) Validate() error {
 	}
 	return nil
 }
+
+// Scoped I7C-5B amendment: Top Floor Challenger (100001) earns tiers at 3/6/10
+// consecutive daily 21:00 snapshots in the top 3; tiers are never revoked.
+const StreakPolicy = "C5B_TOP_FLOOR_CHALLENGER_STREAK_V1"
+const StreakID int64 = 100001
+const StreakTopRank int64 = 3
+
+type Streak struct {
+	PlayerID             identity.PlayerID
+	ContentRevision      string
+	Current              int64
+	LastDay              *int64
+	CompleteTimes        [3]*time.Time
+	StateVersion         int64
+	CreatedAt, UpdatedAt time.Time
+}
+
+func NewStreak(pid identity.PlayerID, rev string, at time.Time) (Streak, error) {
+	s := Streak{PlayerID: pid, ContentRevision: rev, StateVersion: 1, CreatedAt: at.UTC(), UpdatedAt: at.UTC()}
+	return s, s.Validate()
+}
+func (s Streak) Validate() error {
+	if !s.PlayerID.Valid() || !RevisionValid(s.ContentRevision) || s.Current < 0 || (s.Current > 0) && s.LastDay == nil || s.StateVersion < 1 || s.CreatedAt.Unix() <= 0 || s.UpdatedAt.Before(s.CreatedAt) {
+		return ErrConflict
+	}
+	for i, t := range s.CompleteTimes {
+		if t != nil && (t.Before(s.CreatedAt) || t.After(s.UpdatedAt) || i > 0 && s.CompleteTimes[i-1] == nil) {
+			return ErrConflict
+		}
+	}
+	return nil
+}
+
+// ObserveDay applies one settled day; a day at or before the last observed one is a no-op.
+func (s Streak) ObserveDay(c Catalog, day int64, top bool, at time.Time) (Streak, bool, error) {
+	if s.Validate() != nil || c.Validate() != nil || c.Rows[0].ID != StreakID || c.Rows[0].Thresholds != [3]int64{3, 6, 10} || at.Before(s.UpdatedAt) {
+		return Streak{}, false, ErrConflict
+	}
+	if s.LastDay != nil && day <= *s.LastDay {
+		return s, false, nil
+	}
+	next := int64(0)
+	if top {
+		next = 1
+		if s.LastDay != nil && *s.LastDay == day-1 {
+			next = s.Current + 1
+		}
+	}
+	stamp := at.UTC()
+	for i, target := range c.Rows[0].Thresholds {
+		if s.CompleteTimes[i] == nil && next >= target {
+			s.CompleteTimes[i] = &stamp
+		}
+	}
+	s.Current, s.LastDay = next, &day
+	s.StateVersion++
+	s.UpdatedAt = stamp
+	return s, true, s.Validate()
+}

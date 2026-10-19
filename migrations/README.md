@@ -18,3 +18,4 @@ Every canonical SQL migration must begin with the literal `-- +goose Up` directi
 - 00012: I6C canonical Guild/GuildMembership authority and Guild workflow ledgers.
 - 00013: F2/I6C data-cleanup-only replay repair removing obsolete Guild applications for players who already have canonical membership.
 - 00064: I7C-5A Combat foundation: locator roots (lock rank 609), append-only snapshots/resolutions/report blobs and the Pass418 attempt envelope. Empty on upgrade.
+- 00065: I7C-5B Top Floor: content catalog, per-server ladder root (lock rank 601), ranks, player state, fights, last-10 records, partner usage, daily settlements and the Achievement 100001 streak table. Empty on upgrade.

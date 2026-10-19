@@ -371,3 +371,23 @@ func (s Service) loadTx(ctx context.Context, q tx.Queryer, attempt d.Attempt) (R
 func (s Service) TerminalEvidenceTx(ctx context.Context, q tx.Queryer, locator d.Locator, semanticReceiptID string) (d.Attempt, bool, error) {
 	return s.Store.FindTerminalTx(ctx, q, locator, semanticReceiptID)
 }
+
+// ResultTx reads a terminal attempt's persisted resolution and report for replay.
+func (s Service) ResultTx(ctx context.Context, q tx.Queryer, id ids.UUID) (Resolved, error) {
+	attempt, found, err := s.Store.ReadAttemptTx(ctx, q, id)
+	if err != nil {
+		return Resolved{}, err
+	}
+	if !found {
+		return Resolved{}, ErrAttemptNotFound
+	}
+	if attempt.State != d.Terminal || attempt.ResolutionHash == "" {
+		return Resolved{Attempt: attempt}, d.ErrNotReady
+	}
+	return s.loadTx(ctx, q, attempt)
+}
+
+// AttemptTx reads one attempt so its owning mode can decide closure.
+func (s Service) AttemptTx(ctx context.Context, q tx.Queryer, id ids.UUID) (d.Attempt, bool, error) {
+	return s.Store.ReadAttemptTx(ctx, q, id)
+}

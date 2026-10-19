@@ -218,14 +218,22 @@
       "parser_version": "lua-generated-v18-guild-invite",
       "revision_id": "fec70d3ad6ca36b08f54ccc81fefe9dbc7380aaf94d2cb14a9009e1ab60664f0",
       "scope": "33 source achievement definitions; selected100014 genuineproducer, other32 explicitly unavailable; prior36payloads unchanged."
+    },
+    {
+      "ordinal": 33,
+      "stage": "I7C-5B",
+      "compiler_version": "i7c5b-top-floor",
+      "parser_version": "lua-generated-v18-guild-invite",
+      "revision_id": "368455bea9adc0f1f06ba54bf5e90e07d7d30a45d19d723dc3c2e2fe56615ad0",
+      "scope": "Top Floor catalog (arena_reward, misc, vip, refresh_cost, robot, robot_hero, random_name; C5B private ladder policy inputs); arena_coin ENABLED_R4 as Top Floor income owner; prior37payloads otherwise unchanged."
     }
   ],
   "current": {
-    "ordinal": 32,
-    "stage": "I7C-4B",
-    "compiler_version": "i7c4b-achievement-facts",
+    "ordinal": 33,
+    "stage": "I7C-5B",
+    "compiler_version": "i7c5b-top-floor",
     "parser_version": "lua-generated-v18-guild-invite",
-    "revision_id": "fec70d3ad6ca36b08f54ccc81fefe9dbc7380aaf94d2cb14a9009e1ab60664f0",
-    "scope": "33 source achievement definitions; selected100014 genuineproducer, other32 explicitly unavailable; prior36payloads unchanged."
+    "revision_id": "368455bea9adc0f1f06ba54bf5e90e07d7d30a45d19d723dc3c2e2fe56615ad0",
+    "scope": "Top Floor catalog (arena_reward, misc, vip, refresh_cost, robot, robot_hero, random_name; C5B private ladder policy inputs); arena_coin ENABLED_R4 as Top Floor income owner; prior37payloads otherwise unchanged."
   }
 }

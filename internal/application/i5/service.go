@@ -663,7 +663,16 @@ func (s Service) applyPreparedGrantTx(ctx context.Context, t tx.Tx, actor identi
 }
 
 func (s Service) createMailTx(ctx context.Context, t tx.Tx, playerID identity.PlayerID, ns mail.Namespace, sourceKind, sourceKey, title, sender, body string, lines []grant.Line, now time.Time, expires *time.Time, policyVersion string) (mail.Record, error) {
-	wireID, err := s.Store.AllocateMailWireIDTx(ctx, t, playerID, ns)
+	return createMailTx(ctx, t, s.Store, playerID, ns, sourceKind, sourceKey, title, sender, body, lines, now, expires, policyVersion)
+}
+
+type mailWriter interface {
+	AllocateMailWireIDTx(context.Context, tx.Tx, identity.PlayerID, mail.Namespace) (int64, error)
+	InsertMailTx(context.Context, tx.Tx, mail.Record) error
+}
+
+func createMailTx(ctx context.Context, t tx.Tx, store mailWriter, playerID identity.PlayerID, ns mail.Namespace, sourceKind, sourceKey, title, sender, body string, lines []grant.Line, now time.Time, expires *time.Time, policyVersion string) (mail.Record, error) {
+	wireID, err := store.AllocateMailWireIDTx(ctx, t, playerID, ns)
 	if err != nil {
 		return mail.Record{}, err
 	}
@@ -679,7 +688,7 @@ func (s Service) createMailTx(ctx context.Context, t tx.Tx, playerID identity.Pl
 	if err := r.Validate(); err != nil {
 		return mail.Record{}, err
 	}
-	if err := s.Store.InsertMailTx(ctx, t, r); err != nil {
+	if err := store.InsertMailTx(ctx, t, r); err != nil {
 		return mail.Record{}, err
 	}
 	return r, nil

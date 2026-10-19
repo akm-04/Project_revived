@@ -232,6 +232,13 @@ func (s Service) EnsureBuiltinInstalled(ctx context.Context, op operation.Contex
 			if gotAchievement != 1 {
 				return errors.New("content registry achievement count")
 			}
+			gotTopFloor, err := s.Repo.InsertTopFloor(tctx, scope.Tx, b)
+			if err != nil {
+				return err
+			}
+			if gotTopFloor != 1 {
+				return errors.New("content registry top floor count")
+			}
 			gotPrivilege, err := s.Repo.InsertPrivilege(tctx, scope.Tx, b)
 			if err != nil {
 				return err

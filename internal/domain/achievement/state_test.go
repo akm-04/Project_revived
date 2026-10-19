@@ -81,3 +81,48 @@ func FuzzTierMonotonicity(f *testing.F) {
 		}
 	})
 }
+
+func TestTopFloorStreakTiers(t *testing.T) {
+	c := Catalog{SchemaVersion: 1, PolicyID: Policy, SelectedID: SelectedID}
+	for i := int64(0); i < 33; i++ {
+		c.Rows = append(c.Rows, Definition{ID: 100001 + i, Thresholds: [3]int64{1, 10, 20}, Points: [3]int64{1, 1, 1}})
+	}
+	c.Rows[0].Thresholds = [3]int64{3, 6, 10}
+	at := time.Unix(1700000000, 0).UTC()
+	s, err := NewStreak(100001, strings.Repeat("a", 64), at)
+	if err != nil {
+		t.Fatal(err)
+	}
+	observe := func(day int64, top bool) {
+		t.Helper()
+		at = at.Add(time.Hour)
+		if s, _, err = s.ObserveDay(c, day, top, at); err != nil {
+			t.Fatal(err)
+		}
+	}
+	for day := int64(1); day <= 3; day++ {
+		observe(day, true)
+	}
+	if s.Current != 3 || s.CompleteTimes[0] == nil || s.CompleteTimes[1] != nil {
+		t.Fatalf("three days %+v", s)
+	}
+	observe(3, false)
+	if s.Current != 3 {
+		t.Fatal("a repeated day is a no-op")
+	}
+	observe(4, false)
+	observe(6, true)
+	if s.Current != 1 || s.CompleteTimes[0] == nil {
+		t.Fatalf("reset keeps earned tiers %+v", s)
+	}
+	observe(8, true)
+	if s.Current != 1 {
+		t.Fatal("a gap day restarts the streak")
+	}
+	for day := int64(9); day <= 17; day++ {
+		observe(day, true)
+	}
+	if s.Current != 10 || s.CompleteTimes[2] == nil {
+		t.Fatalf("ten days %+v", s)
+	}
+}

@@ -13,6 +13,7 @@ import (
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/domain/objective"
 	"gxb.local/backend/v2/internal/foundation/tx"
+	"sort"
 	"time"
 )
 
@@ -55,6 +56,9 @@ type Store interface {
 	ReadRootTx(context.Context, tx.Queryer, identity.PlayerID, bool) (d.Root, bool, error)
 	SaveRootTx(context.Context, tx.Tx, d.Root, int64) error
 	PutEventTx(context.Context, tx.Tx, Event) error
+	ReadStreakTx(context.Context, tx.Queryer, identity.PlayerID, bool) (d.Streak, bool, error)
+	SaveStreakTx(context.Context, tx.Tx, d.Streak, int64) error
+	ActiveStreakPlayersTx(context.Context, tx.Queryer, identity.LogicalServerID, int64) ([]identity.PlayerID, error)
 }
 type Content interface {
 	AchievementCatalogTx(context.Context, tx.Queryer, string) (d.Catalog, error)
@@ -219,4 +223,67 @@ func (s Service) ReadTierFactsTx(c context.Context, sc ca.CoherentReadScope, q R
 		}
 	}
 	return out, nil
+}
+
+// ObserveTopFloorDayTx is the typed Top Floor producer (rank 620) for one
+// immutable daily snapshot: top holds the server's players ranked 1..3 that day.
+// Players without an Achievement root stay explicitly untracked.
+func (s Service) ObserveTopFloorDayTx(c context.Context, t tx.Tx, server identity.LogicalServerID, day int64, revision string, top []identity.PlayerID, at time.Time) error {
+	if t == nil || s.Store == nil || s.Content == nil || !server.Valid() || len(top) > int(d.StreakTopRank) {
+		return d.ErrUnavailable
+	}
+	catalog, err := s.Content.AchievementCatalogTx(c, t, revision)
+	if err != nil {
+		return err
+	}
+	running, err := s.Store.ActiveStreakPlayersTx(c, t, server, day)
+	if err != nil {
+		return err
+	}
+	inTop := map[identity.PlayerID]bool{}
+	for _, p := range top {
+		inTop[p] = true
+	}
+	players := append([]identity.PlayerID(nil), top...)
+	for _, p := range running {
+		if !inTop[p] {
+			players = append(players, p)
+		}
+	}
+	sort.Slice(players, func(i, j int) bool { return players[i] < players[j] })
+	for _, p := range players {
+		if int64(p)/100000 != int64(server) {
+			return d.ErrConflict
+		}
+		if _, tracked, err := s.Store.ReadRootTx(c, t, p, true); err != nil || !tracked {
+			if err != nil {
+				return err
+			}
+			continue
+		}
+		current, found, err := s.Store.ReadStreakTx(c, t, p, true)
+		if err != nil {
+			return err
+		}
+		if !found {
+			if current, err = d.NewStreak(p, revision, at); err != nil {
+				return err
+			}
+		}
+		next, changed, err := current.ObserveDay(catalog, day, inTop[p], at)
+		if err != nil {
+			return err
+		}
+		if !changed {
+			continue
+		}
+		old := current.StateVersion
+		if !found {
+			next.StateVersion, old = 1, 0
+		}
+		if err = s.Store.SaveStreakTx(c, t, next, old); err != nil {
+			return err
+		}
+	}
+	return nil
 }

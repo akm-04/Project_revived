@@ -14,7 +14,12 @@ var errBroadcastWireOverflow = errors.New("Guild broadcast Mail wire ID overflow
 
 // Exact source lookup includes attachments and mutable read/shown state. It
 // never uses an expiry-filtered mailbox list to prove semantic completion.
-func (Store) ReadGuildBroadcastMailTx(c context.Context, q tx.Queryer, pid identity.PlayerID, source ids.UUID) (mail.Record, bool, error) {
+func (s Store) ReadGuildBroadcastMailTx(c context.Context, q tx.Queryer, pid identity.PlayerID, source ids.UUID) (mail.Record, bool, error) {
+	return s.ReadSourceMailTx(c, q, pid, "GUILD_BROADCAST", source.String())
+}
+
+// ReadSourceMailTx is the exact (recipient, source kind, source key) lookup.
+func (Store) ReadSourceMailTx(c context.Context, q tx.Queryer, pid identity.PlayerID, kind, key string) (mail.Record, bool, error) {
 	var raw string
 	e := q.QueryRow(c, `SELECT COALESCE(jsonb_agg(jsonb_build_object(
  'mail_uuid',m.mail_uuid::text,'recipient',m.recipient_player_id,'namespace',m.namespace,'wire_id',m.wire_id,
@@ -22,7 +27,7 @@ func (Store) ReadGuildBroadcastMailTx(c context.Context, q tx.Queryer, pid ident
  'created_at',m.created_at,'expires_at',m.expires_at,'read_at',m.read_at,'shown',m.shown,'claimed_at',m.claimed_at,
  'platform',m.platform_eligibility,'policy',m.compatibility_policy_version,'state_version',m.state_version,
  'attachments',(SELECT COALESCE(jsonb_agg(jsonb_build_object('ordinal',a.ordinal,'kind',a.grant_line_kind,'resource_key',a.resource_key,'item_id',a.item_id,'amount',a.amount,'metadata',a.metadata) ORDER BY a.ordinal),'[]'::jsonb) FROM mail_attachments a WHERE a.mail_uuid=m.mail_uuid))),'[]'::jsonb)::text
- FROM mail_records m WHERE m.recipient_player_id=$1 AND m.source_kind='GUILD_BROADCAST' AND m.source_key=$2`, int64(pid), source.String()).Scan(&raw)
+ FROM mail_records m WHERE m.recipient_player_id=$1 AND m.source_kind=$2 AND m.source_key=$3`, int64(pid), kind, key).Scan(&raw)
 	if e != nil {
 		return mail.Record{}, false, e
 	}
@@ -34,7 +39,7 @@ func (Store) ReadGuildBroadcastMailTx(c context.Context, q tx.Queryer, pid ident
 		return mail.Record{}, false, nil
 	}
 	if len(rows) != 1 {
-		return mail.Record{}, false, errors.New("Guild broadcast Mail source uniqueness conflict")
+		return mail.Record{}, false, errors.New("Mail source uniqueness conflict")
 	}
 	return rows[0], true, nil
 }

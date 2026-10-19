@@ -21,12 +21,22 @@ from pathlib import Path
 from typing import Any, Iterable
 
 SCHEMA_VERSION = 1
-COMPILER_VERSION = "i7c4b-achievement-facts"
+COMPILER_VERSION = "i7c5b-top-floor"
 PARSER_VERSION = "lua-generated-v18-guild-invite"
 EXPECTED_SOURCE_ARCHIVE_SHA256 = "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
 SOURCE_PREFIX = "app-assets/output/assets/src_64/"
 
 SOURCE_MANIFEST = [
+    ('data/tables/arena_reward.lua', '17763ceee2c24ef77c33ebef51f0cc823d90389c605a52ef01416046d2d06099', 'I7C5B_TOP_FLOOR_SOURCE_BOUNDARY'),
+    ('data/tables/robot.lua', '87de111b1eead9f5a8e833f5fe341b70fd3c1d6e786ca28803c53b954f98c1aa', 'I7C5B_TOP_FLOOR_SOURCE_BOUNDARY'),
+    ('data/tables/robot_hero.lua', '78bd3abeb6e9f306a15a9b663661efbb484d41fcad6590774cc0a58c631636f0', 'I7C5B_TOP_FLOOR_SOURCE_BOUNDARY'),
+    ('data/tables/refresh_cost.lua', '53e3bd5efb3981513a0987be7f1cf9758679fedfaa6400e72c1fc9d6942bfa06', 'I7C5B_TOP_FLOOR_SOURCE_BOUNDARY'),
+    ('app/model/Arena.lua', '4b1fa8a10bfe8cfd7ea07292eac73ddbf256e204ee0b69e57384438f0399df4a', 'I7C5B_TOP_FLOOR_SOURCE_BOUNDARY'),
+    ('app/common/tables/ArenaRewardTable.lua', '0e54504ebaf675c1ddfaf7657632be94a5d52aad1d65356c81cb9c758cecfd8e', 'I7C5B_TOP_FLOOR_SOURCE_BOUNDARY'),
+    ('app/windows/ArenaWindow.lua', '647a2ff5892ffc455d6f5c0e514b5cea561ce0d5924c1fe477be35eaf3879ff4', 'I7C5B_TOP_FLOOR_SOURCE_BOUNDARY'),
+    ('app/windows/ArenaSelectTeamNewWindow.lua', '2a047948d1126120dbe4c65bc2a98c1d7cf01a2f57bf99dc489eb99d15140f36', 'I7C5B_TOP_FLOOR_SOURCE_BOUNDARY'),
+    ('app/windows/ArenaRecordWindow.lua', '62615dcbf8d59f4bd64150901ea0cfc1ff25b24cddeaa9b7a8122d84d13b341a', 'I7C5B_TOP_FLOOR_SOURCE_BOUNDARY'),
+    ('app/common/tables/RandomNameTable.lua', '23e5a8cc35912125f34b8f2c6cf2cdce28c6f68a9a8c4ee73cfdbef4e6c3de27', 'I7C5B_TOP_FLOOR_SOURCE_BOUNDARY'),
     ('app/common/tables/AchievementLevelTable.lua', '111a4a4fc0d3ab47ad09ac8b73c4f3883fbcc3766d6dbb464e48d3e81491ea48', 'I7C4B_ACHIEVEMENT_SOURCE_BOUNDARY'),
     ('app/common/tables/AchievementTable.lua', '76fac87df563ec30384e281aca27497052f47609d3f11ef71b0be459b2de801e', 'I7C4B_ACHIEVEMENT_SOURCE_BOUNDARY'),
     ('app/model/Achievement.lua', '21997595c3bf71fde46029d8cfc31473dab8f3f39d94b480e3d3e6555a453d50', 'I7C4B_ACHIEVEMENT_SOURCE_BOUNDARY'),
@@ -129,6 +139,7 @@ SOURCE_MANIFEST.append(('app/windows/HeroGiftBoxWindow.lua','d6065c3d601f5820915
 SOURCE_MANIFEST.append(('app/windows/WhiteAlbumWindow.lua','851a53f588b59d95cfe460f3399ab1a6904fff7714131c358f3c3a73910b6bb9',"LIBRARY_INPUT_SOURCE_AUTHORITY"))
 
 ENABLED_CAPABILITIES = [
+    "TOP_FLOOR_MODE_I7C5B",
     "ACHIEVEMENT_TIER_FACTS_I7C4B",
     "COSMETIC_PRIVILEGE_I7C4A",
     "STAT_INPUTS_I7C3B",
@@ -321,6 +332,7 @@ from stat_content import build_stat_rules
 from stat_input_content import build_stat_inputs
 from privilege_content import build_privilege
 from achievement_content import build_achievement
+from top_floor_content import build_top_floor
 from course_content import build_course
 class CompileError(ValueError):
     pass
@@ -812,7 +824,8 @@ def build_artifacts(blobs: dict[str, SourceBlob], archive_sha256: str) -> dict[s
 
     resources: list[dict[str, Any]] = []
 
-    # Catalog all source-known named assets conservatively. Only Mana/Crystal are R4 settlement-enabled.
+    # Catalog all source-known named assets conservatively. Mana/Crystal and the
+    # I7C-5B Top Floor income owner's arena_coin are R4 settlement-enabled.
     for asset in asset_rows:
         name = asset["backend_name"]
         if name == "exp":
@@ -825,7 +838,7 @@ def build_artifacts(blobs: dict[str, SourceBlob], archive_sha256: str) -> dict[s
         else:
             cls = "SCALAR_CURRENCY"
             status = "QUALIFIED" if name in economy_names else "SOURCE_KNOWN"
-            activation = "ENABLED_R4" if name in {"mana", "crystal"} else "OWNER_REQUIRED"
+            activation = "ENABLED_R4" if name in {"mana", "crystal", "arena_coin"} else "OWNER_REQUIRED"
         resources.append({
             "catalog_status": status,
             "class": cls,
@@ -2101,6 +2114,7 @@ def build_artifacts(blobs: dict[str, SourceBlob], archive_sha256: str) -> dict[s
     from dorm_content import build_dorm
     dorm_artifact=build_dorm(blobs,parse_generated_lua_table,pipe_ints,hero_artifact["templates"],partner_keys,partner_rows,super_keys,super_rows,indexed_field,items,CompileError)
     artifacts = {
+        "top_floor_catalog.json":build_top_floor(blobs,parse_generated_lua_table),
         "achievement_catalog.json":build_achievement(blobs,parse_generated_lua_table),
         "privilege_catalog.json":build_privilege(blobs,parse_generated_lua_table),
         "stat_input_catalog.json":build_stat_inputs(blobs,parse_generated_lua_table,parse_base64_indexed_lua_table,indexed_field,parse_encoded_item_table,parse_encoded_skill_table),

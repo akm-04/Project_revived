@@ -286,7 +286,23 @@ func main() {
 	mustRegister(18, boot)
 	mustRegister(1, boot)
 	mustRegister(192, stockruntime.DiscoveryDispatcher{Realtime: realtime, Tracker: tracker})
-	mustRegister(301, stockruntime.RankingDispatcher{Authority: authority, Service: girlsRanking})
+	owners := topFloorOwners{library: librarySvc, dorm: dormSvc, book: bookSvc, course: courseSvc, inscription: inscriptionSvc, element: elementSvc, spirit: spiritSvc, evolution: evolutionSvc}
+	fight, fightReady, err := canonicalCombat(pool, runner, contentDB, owners)
+	if err != nil {
+		log.Fatalf("I7C-5B Combat composition: %v", err)
+	}
+	ranking := stockruntime.RankingDispatcher{Authority: authority, Service: girlsRanking}
+	if fightReady {
+		topFloor := canonicalTopFloor(pool, runner, contentDB, i5db, privileges, fight, owners)
+		ranking.TopFloor = topFloor
+		for _, mid := range stockruntime.TopFloorMIDs {
+			mustRegister(mid, stockruntime.TopFloorDispatcher{Authority: authority, Service: topFloor})
+		}
+		go runTopFloorReconcile(ctx, pool, topFloor)
+	} else {
+		log.Print("I7C-5B Top Floor routes not registered: GXB_COMBAT_ENTROPY_KEYS is unset")
+	}
+	mustRegister(301, ranking)
 	lobbyD := stockruntime.LobbyDispatcher{Authority: authority, Tracker: tracker}
 	for _, mid := range []uint16{56, 1302, 1344, 2754} {
 		mustRegister(mid, lobbyD)
