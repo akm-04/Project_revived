@@ -38,7 +38,6 @@ import (
 	ca "gxb.local/backend/v2/internal/application/characterasset"
 	hero "gxb.local/backend/v2/internal/application/characterhero"
 	combat "gxb.local/backend/v2/internal/application/combat"
-	conquer "gxb.local/backend/v2/internal/application/conquerschool"
 	"gxb.local/backend/v2/internal/application/i5"
 	lib "gxb.local/backend/v2/internal/application/librarylocal"
 	"gxb.local/backend/v2/internal/content/combatcorpus"
@@ -151,6 +150,12 @@ func templateParams(tableID int64) map[string]any {
 		"equips": []any{0, 0, 0, 0, 0, 0}, "fumos": []any{0, 0, 0, 0, 0, 0}, "skills": []any{1, 1, 1, 1, 1, 1}}
 }
 
+// combatTestProfile bounds the fixture mode transactions generously enough for
+// race-instrumented runs, where START's owner reads are an order slower.
+func combatTestProfile() tx.Profile {
+	return tx.Profile{Name: "I7C5A_FIXTURE_MODE", AcquireTimeout: 10 * time.Second, LockTimeout: 60 * time.Second, StatementTimeout: 60 * time.Second, TransactionTimeout: 120 * time.Second, CleanupTimeout: 5 * time.Second, ReconcileTimeout: 30 * time.Second, OperationTimeout: 180 * time.Second}
+}
+
 func fingerprint(s string) string {
 	sum := sha256.Sum256([]byte(s))
 	return hex.EncodeToString(sum[:])
@@ -163,7 +168,7 @@ func fixtureStart(t *testing.T, s combat.Service, rev string, request combat.Sta
 	var started combat.Started
 	runner := tx.Runner{DB: db}
 	evidence := startEvidence{service: s, q: s.Fresh, locator: request.Locator, fingerprint: request.StartFingerprint}
-	_, err := runner.Run(ctx, opPinned(rev), conquer.Profile(), tx.Options{Isolation: tx.RepeatableRead}, tx.RetryPolicy{MaxAttempts: 3, RetryDefiniteAbort: true}, evidence, func(c context.Context, scope tx.Scope) error {
+	_, err := runner.Run(ctx, opPinned(rev), combatTestProfile(), tx.Options{Isolation: tx.RepeatableRead}, tx.RetryPolicy{MaxAttempts: 3, RetryDefiniteAbort: true}, evidence, func(c context.Context, scope tx.Scope) error {
 		var at time.Time
 		if err := scope.Tx.QueryRow(c, "SELECT clock_timestamp()").Scan(&at); err != nil {
 			return err
@@ -222,7 +227,7 @@ func fixtureTerminal(t *testing.T, s combat.Service, pool *pg.Pool, a identity.A
 	t.Helper()
 	var settled combat.Settled
 	runner := tx.Runner{DB: db}
-	_, err := runner.Run(ctx, o, conquer.Profile(), tx.Options{Isolation: tx.RepeatableRead}, tx.RetryPolicy{MaxAttempts: 3, RetryDefiniteAbort: true}, terminalEvidence{service: s, q: s.Fresh, locator: locator, receipt: receipt}, func(c context.Context, scope tx.Scope) error {
+	_, err := runner.Run(ctx, o, combatTestProfile(), tx.Options{Isolation: tx.RepeatableRead}, tx.RetryPolicy{MaxAttempts: 3, RetryDefiniteAbort: true}, terminalEvidence{service: s, q: s.Fresh, locator: locator, receipt: receipt}, func(c context.Context, scope tx.Scope) error {
 		var at time.Time
 		if err := scope.Tx.QueryRow(c, "SELECT clock_timestamp()").Scan(&at); err != nil {
 			return err
@@ -510,13 +515,13 @@ func TestI7C5ACombatCompletionAndUnknownCommitNative(t *testing.T) {
 		ready.Add(2)
 		var errs [2]error
 		var wg sync.WaitGroup
+		attempt := start(id, pool).Attempt
 		for i := range reports {
 			wg.Add(1)
 			go func(i int) {
 				defer wg.Done()
 				s := base
 				s.Worker = barrierWorker{ready: &ready, report: reports[i]}
-				attempt := start(id, pool).Attempt
 				_, errs[i] = s.Resolve(ctx, op(), attempt.ID)
 			}(i)
 		}
@@ -817,14 +822,14 @@ func TestI7C5ACombatCloseUnresolvedNative(t *testing.T) {
 	}
 	close := func(receipt string, at time.Time) (combat.Closed, error) {
 		var closed combat.Closed
-		_, err := (tx.Runner{DB: pool}).Run(ctx, opPinned(rev), conquer.Profile(), tx.Options{Isolation: tx.RepeatableRead}, tx.RetryPolicy{MaxAttempts: 1}, nil, func(c context.Context, scope tx.Scope) error {
+		_, err := (tx.Runner{DB: pool}).Run(ctx, opPinned(rev), combatTestProfile(), tx.Options{Isolation: tx.RepeatableRead}, tx.RetryPolicy{MaxAttempts: 1}, nil, func(c context.Context, scope tx.Scope) error {
 			var err error
 			closed, err = s.CloseTx(c, scope.Tx, combat.TerminalRequest{Locator: locator, GenerationRef: "g", TerminalKind: "RESOLVER_FAILED", SemanticReceiptID: receipt, At: at})
 			return err
 		})
 		return closed, err
 	}
-	_, settleErr := (tx.Runner{DB: pool}).Run(ctx, opPinned(rev), conquer.Profile(), tx.Options{Isolation: tx.RepeatableRead}, tx.RetryPolicy{MaxAttempts: 1}, nil, func(c context.Context, scope tx.Scope) error {
+	_, settleErr := (tx.Runner{DB: pool}).Run(ctx, opPinned(rev), combatTestProfile(), tx.Options{Isolation: tx.RepeatableRead}, tx.RetryPolicy{MaxAttempts: 1}, nil, func(c context.Context, scope tx.Scope) error {
 		_, err := s.TerminalTx(c, scope.Tx, combat.TerminalRequest{Locator: locator, GenerationRef: "g", TerminalKind: "SETTLED", SemanticReceiptID: "never-settled", At: time.Now().UTC()})
 		return err
 	})
