@@ -811,6 +811,15 @@
   "target_postgresql": "18.6",
   "target_sqlc": "1.31.1",
   "toolbox_archive_sha256": "e4e194c9627929299577364b953b2468d6118fac4283fd8030f10b5a27456c2b",
-  "version": "v0.127.0",
-  "w2_claimed": false
+  "version": "v0.128.0",
+  "w2_claimed": false,
+  "i7c5a_contract": "docs/i7c5a-combat-foundation/I7C5A_POLICY.json",
+  "i7c5a_preimplementation_pass": "728.0",
+  "i7c5a_implementation_authorized": true,
+  "i7c5a_implementation_started": true,
+  "i7c5a_gate_status_at_identity_freeze": "NOT_RUN",
+  "i7c5a_product_accepted": false,
+  "i7c5a_mode_leaves_qualified": false,
+  "i7c5a_stock_client_qualified": false,
+  "i7c5a_rules_corpus_id": "9b241b526c51d9613334a92fa8643ffded27d3f01521b57b846294148c0ca566"
 }
