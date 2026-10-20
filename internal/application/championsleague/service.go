@@ -361,7 +361,7 @@ func (s Service) Execute(c context.Context, a identity.ActorContext, cmd Command
 			p.ClaimedDay = day
 			for _, item := range gr.Awards {
 				if item.TableID > 0 && item.ItemNum > 0 {
-					out.Awards = append(out.Awards, Item{item.TableID, item.ItemNum})
+					out.Awards = append(out.Awards, Item{TableID: item.TableID, ItemNum: item.ItemNum})
 				}
 			}
 		case "FIGHT":
