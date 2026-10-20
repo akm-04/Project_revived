@@ -6,9 +6,9 @@ import (
 	arenaprojection "gxb.local/backend/v2/internal/projection/arena"
 	"net/http"
 
-	"gxb.local/backend/v2/internal/application/achievement"
 	"gxb.local/backend/v2/internal/application/realtimeauth"
 	"gxb.local/backend/v2/internal/application/topfloor"
+	"gxb.local/backend/v2/internal/domain/achievement"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/domain/oneonone"
 	rankingdomain "gxb.local/backend/v2/internal/domain/ranking"

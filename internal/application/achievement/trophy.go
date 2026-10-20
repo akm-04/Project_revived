@@ -11,25 +11,6 @@ import (
 
 const trophyRows = 50
 
-type TrophyStanding struct {
-	Player identity.PlayerID
-	Points int64
-}
-type TrophyRow struct {
-	TrophyStanding
-	Rank    int64
-	Profile playerdirectory.Profile
-}
-
-// TrophyBoard is 301 rank_types 15 (SubRankType.ACHIEVEMENT_POINT), ordered by
-// C4F_LIVE_TROPHY_RANK_V1 like the 1302 rank.
-type TrophyBoard struct {
-	Server           identity.LogicalServerID
-	Region           string
-	Rows             []TrophyRow
-	MyRank, MyPoints int64
-}
-
 type Directory interface {
 	ProfileTx(context.Context, tx.Queryer, identity.PlayerID) (playerdirectory.Profile, bool, error)
 }
@@ -37,8 +18,8 @@ type Servers interface {
 	ServerNameTx(context.Context, tx.Queryer, identity.LogicalServerID) (string, error)
 }
 
-func (s Service) TrophyBoard(c context.Context, a identity.ActorContext) (TrophyBoard, error) {
-	out := TrophyBoard{Server: a.LogicalServerID, Rows: []TrophyRow{}}
+func (s Service) TrophyBoard(c context.Context, a identity.ActorContext) (d.TrophyBoard, error) {
+	out := d.TrophyBoard{Server: a.LogicalServerID, Rows: []d.TrophyRow{}}
 	if s.Runtime == nil || s.Runtime.Fresh == nil || s.Runtime.Active == nil || s.Runtime.Directory == nil || s.Runtime.Servers == nil || s.Store == nil || s.Content == nil || !a.PlayerID.Valid() {
 		return out, d.ErrUnavailable
 	}
@@ -67,7 +48,8 @@ func (s Service) TrophyBoard(c context.Context, a identity.ActorContext) (Trophy
 		if !ok {
 			return out, d.ErrUnavailable
 		}
-		out.Rows = append(out.Rows, TrophyRow{TrophyStanding: standing, Rank: int64(i + 1), Profile: profile})
+		display := d.TrophyPresentation{Name: profile.Name, Level: profile.Level, AvatarID: profile.AvatarID, FrameID: profile.AvatarFrameID, ConquerLevel: profile.ConquerLevel, ConquerLoopID: profile.ConquerLoopID}
+		out.Rows = append(out.Rows, d.TrophyRow{TrophyStanding: standing, Rank: int64(i + 1), Display: display})
 	}
 	out.MyRank, e = s.Store.TrophyRankTx(c, q, a.PlayerID, catalog)
 	if e != nil || out.MyRank == 0 {

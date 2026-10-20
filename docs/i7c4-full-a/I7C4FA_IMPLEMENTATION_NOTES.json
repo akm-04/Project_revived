@@ -13,7 +13,7 @@
     "Metric 1007 sums rounded Self-view public force over the coherent Hero roster (C4F_ALL_GIRLS_AP_V1)",
     "Ranking boards are profiles over one shared store: Girls (subtype 37, titles 100059..100062, ranks 1..20) and AP (subtype 8, metric 1007, title 100001 rank 1 only); Girls receipt names and stored generations are unchanged",
     "Notice 17 intents are written with the earning transaction; a transactional NOTIFY wakes the feature-specific route achievement.notice.v1, which pushes to live World connections and marks delivery at most once",
-    "MID301 rank_types 15 (SubRankType.ACHIEVEMENT_POINT) is a live list in C4F_LIVE_TROPHY_RANK_V1 order"
+    "MID301 rank_types 15 (SubRankType.ACHIEVEMENT_POINT) is a live list in C4F_LIVE_TROPHY_RANK_V1 order; trophy rows are domain values (internal/domain/achievement/trophy.go) so the projection depends only on domain"
   ],
   "deviations_from_plan": [
     "P4: points are derived on read from earned tiers; no total_points/points_reached_at root columns were added",
@@ -28,7 +28,8 @@
   "known_limits": [
     "An offline player's pending notices wait for that player's next tier wakeup; 1302 remains the converged truth",
     "Trophy rank aggregates the server's tier rows per read",
-    "Fifteen mode achievements stay MODE_NOT_LIVE with forward I9 bindings (Q1); 100016 waits for Stage C"
+    "Fifteen mode achievements stay MODE_NOT_LIVE with forward I9 bindings (Q1); 100016 waits for Stage C",
+    "Four playerdisplay natives fail identically on the frozen v0.133.0 base and are skipped by name in qualification: TestDisplayCanonicalCharacterEligibilityAndDestructionRace and TestI7C3ANativePinnedCatalogAndPayloadIntegrity (stale fixtures), TestI7C5FLeagueRecoveredRowsNative (needs a restored database), Test6BActualAPICompositionMediaPrivacyAndWireRecovery (needs GXB_I7B6B_API_BINARY)"
   ],
   "checks": [
     "tools/check_i7c4fa_source_oracle.py",

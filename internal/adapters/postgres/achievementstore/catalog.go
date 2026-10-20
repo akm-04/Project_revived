@@ -133,12 +133,12 @@ func (Store) TrophyRankTx(c context.Context, q tx.Queryer, pid identity.PlayerID
 	return rank, e
 }
 
-func (Store) TrophyTopTx(c context.Context, q tx.Queryer, server identity.LogicalServerID, catalog d.Catalog, limit int) ([]app.TrophyStanding, error) {
+func (Store) TrophyTopTx(c context.Context, q tx.Queryer, server identity.LogicalServerID, catalog d.Catalog, limit int) ([]d.TrophyStanding, error) {
 	achievementIDs, tiers, points := trophyPoints(catalog)
 	var raw string
 	if e := q.QueryRow(c, trophyTopSQL, int64(server), achievementIDs, tiers, points, limit).Scan(&raw); e != nil {
 		return nil, e
 	}
-	out := []app.TrophyStanding{}
+	out := []d.TrophyStanding{}
 	return out, json.Unmarshal([]byte(raw), &out)
 }
