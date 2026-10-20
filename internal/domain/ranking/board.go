@@ -78,6 +78,7 @@ func (b Board) title(rank int64) int64 {
 	}
 	return b.Titles[rank-1]
 }
+
 var ErrStale = errors.New("ranking: bound observation precedes durable state")
 
 func digest(v any) string {
