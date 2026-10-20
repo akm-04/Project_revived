@@ -31,12 +31,15 @@ type Board struct {
 	FieldID, SubType, TitleType, TitledRanks    int64
 	// Titles[i] goes to rank i+1; the last title covers the remaining titled ranks.
 	Titles []int64
+	// RowValue is the rank_info row field NewRankWindow.initInfoText reads for
+	// the rank table type: info_val for RankType.Power (2001), score for DEV_PARTNER_NUM.
+	RowValue string
 }
 
-var GirlsBoard = Board{Name: "girls", Policy: GirlsPolicy, SourcePolicy: "C4C_PRIVATE_CURRENT_ROSTER_V1", SourceSemantics: "CURRENT_DISTINCT_ORIGIN_HERO_PET_STARS_BEFORE_AWAKEN_V1", FieldID: 1001, SubType: 37, TitleType: 8, TitledRanks: 20, Titles: []int64{100059, 100060, 100061, 100062}}
+var GirlsBoard = Board{Name: "girls", Policy: GirlsPolicy, SourcePolicy: "C4C_PRIVATE_CURRENT_ROSTER_V1", SourceSemantics: "CURRENT_DISTINCT_ORIGIN_HERO_PET_STARS_BEFORE_AWAKEN_V1", FieldID: 1001, SubType: 37, TitleType: 8, TitledRanks: 20, Titles: []int64{100059, 100060, 100061, 100062}, RowValue: "score"}
 
 // AchievementPointBoard is rank 2001 "All girls' AP" (user Q3/Q4): metric 1007, No.1 title only.
-var AchievementPointBoard = Board{Name: "achievement-point", Policy: AchievementPointPolicy, SourcePolicy: "C4F_ALL_GIRLS_AP_V1", SourceSemantics: "CURRENT_SUM_OWNED_HERO_PUBLIC_FORCE_SELF_V1", FieldID: 1007, SubType: 8, TitleType: 1, TitledRanks: 1, Titles: []int64{100001}}
+var AchievementPointBoard = Board{Name: "achievement-point", Policy: AchievementPointPolicy, SourcePolicy: "C4F_ALL_GIRLS_AP_V1", SourceSemantics: "CURRENT_SUM_OWNED_HERO_PUBLIC_FORCE_SELF_V1", FieldID: 1007, SubType: 8, TitleType: 1, TitledRanks: 1, Titles: []int64{100001}, RowValue: "info_val"}
 
 var Boards = []Board{GirlsBoard, AchievementPointBoard}
 

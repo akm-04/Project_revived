@@ -81,7 +81,9 @@ func TestI7C4FAAchievementPointBoardSumsForceAndTitlesOnlyFirst(t *testing.T) {
 	}
 	list := wire["rank_list"].([]map[string]any)[0]
 	mine := list["rank_info"].(map[string]any)["my_rank"].(map[string]any)
-	if list["rank_type"] != int64(8) || mine["rank"] != int64(2) {
+	first := list["rank_info"].(map[string]any)["rank_info"].([]map[string]any)[0]
+	_, scored := first["score"]
+	if list["rank_type"] != int64(8) || mine["rank"] != int64(2) || first["info_val"] != board.Entries[0].Metric.Value || scored {
 		t.Fatal(wire)
 	}
 

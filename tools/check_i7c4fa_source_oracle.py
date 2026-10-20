@@ -24,7 +24,7 @@ with zipfile.ZipFile(src)as z:
  model=text('app/model/Achievement.lua')
  for k in ['achieve_id','complete_time','progress','point_level','total_points','rank']:assert 'var_6_0.'+k in model
  window=text('app/windows/AchievementWindow.lua');assert 'xyd.SubRankType.ACHIEVEMENT_POINT'in window and 'loadRankList'in window
- assert 'arg_20_2.point'in text('app/windows/NewRankWindow.lua')
- rank={r['id']:r for r in table('rank')};assert rank['2001']['sub_type']=='8'
+ ranks=text('app/windows/NewRankWindow.lua');assert 'arg_20_2.point'in ranks and re.search(r'rank_type == xyd\.RankType\.Power or [^\n]*\n\s*var_20_2 = arg_20_2\.info_val',ranks) and re.search(r'\bPower\s*=\s*2\b',enums)
+ rank={r['id']:r for r in table('rank')};assert rank['2001']['sub_type']=='8' and rank['2001']['type']=='2' and rank['16001']['type']=='3'
  titles={int(r['id']):r for r in table('title_system')};assert titles[100001]['time']=='604800' and titles[100001]['type']=='1'
-print('I7C4FA SOURCE ORACLE: PASS 33 achievement rows/99000 points, 10 point levels with items, MIDs 1302/1303, notice 17 params, rank 2001 subtype 8, trophy list subtype 15, title 100001 (604800 s). Private AP, ranking, backfill and notice policies are not asserted as recovered server algorithms.')
+print('I7C4FA SOURCE ORACLE: PASS 33 achievement rows/99000 points, 10 point levels with items, MIDs 1302/1303, notice 17 params, rank 2001 subtype 8 type Power (rows read info_val), trophy list subtype 15, title 100001 (604800 s). Private AP, ranking, backfill and notice policies are not asserted as recovered server algorithms.')

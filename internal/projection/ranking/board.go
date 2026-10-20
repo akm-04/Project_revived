@@ -18,7 +18,7 @@ func BoardList(s d.BoardSnapshot, viewer identity.PlayerID) (map[string]any, err
 	for i, v := range s.Entries {
 		rank := int64(i + 1)
 		p := v.Display
-		rows = append(rows, map[string]any{"player_id": int64(p.Player), "player_name": p.Name, "level": p.Level, "avatar_id": p.AvatarID, "avatar_frame_id": p.FrameID, "conquer_lev": p.ConquerLevel, "conquer_loop_id": p.ConquerLoopID, "score": v.Metric.Value, "rank": rank})
+		rows = append(rows, map[string]any{"player_id": int64(p.Player), "player_name": p.Name, "level": p.Level, "avatar_id": p.AvatarID, "avatar_frame_id": p.FrameID, "conquer_lev": p.ConquerLevel, "conquer_loop_id": p.ConquerLoopID, board.RowValue: v.Metric.Value, "rank": rank})
 		if p.Player == viewer {
 			found = true
 			mine = map[string]any{"rank": rank, "score": v.Metric.Value}

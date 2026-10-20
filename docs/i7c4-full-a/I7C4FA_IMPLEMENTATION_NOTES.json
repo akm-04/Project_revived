@@ -11,7 +11,7 @@
     "1302 observes every family and reads in one Serializable transaction; owner dispatchers are wrapped to observe their own family after a successful command (C4F_OBSERVE_AFTER_COMMAND_V1)",
     "1303 claims the lowest reached unclaimed point level once through I5 with a receipt (C4F_POINT_LEVEL_AWARDS_V1)",
     "Metric 1007 sums rounded Self-view public force over the coherent Hero roster (C4F_ALL_GIRLS_AP_V1)",
-    "Ranking boards are profiles over one shared store: Girls (subtype 37, titles 100059..100062, ranks 1..20) and AP (subtype 8, metric 1007, title 100001 rank 1 only); Girls receipt names and stored generations are unchanged",
+    "Ranking boards are profiles over one shared store: Girls (subtype 37, titles 100059..100062, ranks 1..20) and AP (subtype 8, metric 1007, title 100001 rank 1 only); Girls receipt names and stored generations are unchanged; each board names its rank_info row field (Girls score, AP info_val because rank 2001 is RankType.Power)",
     "Notice 17 intents are written with the earning transaction; a transactional NOTIFY wakes the feature-specific route achievement.notice.v1, which pushes to live World connections and marks delivery at most once",
     "MID301 rank_types 15 (SubRankType.ACHIEVEMENT_POINT) is a live list in C4F_LIVE_TROPHY_RANK_V1 order; trophy rows are domain values (internal/domain/achievement/trophy.go) so the projection depends only on domain"
   ],
