@@ -492,6 +492,7 @@ type Catalog struct {
 	TopFloor                 TopFloorCatalog
 	OneOnOne                 OneOnOneCatalog
 	Arena                    ArenaCatalog
+	ConquerMode              ConquerModeCatalog
 	Achievement              AchievementCatalog
 	Privilege                PrivilegeCatalog
 	StatInputs               StatInputCatalog
@@ -637,6 +638,10 @@ func Load() (*Catalog, error) {
 	if err := decodeAndVerify("arena_catalog.json", manifest.ArtifactSHA256s, &arena); err != nil {
 		return nil, err
 	}
+	var conquerMode ConquerModeCatalog
+	if err := decodeAndVerify("conquer_mode_catalog.json", manifest.ArtifactSHA256s, &conquerMode); err != nil {
+		return nil, err
+	}
 	var achievement AchievementCatalog
 	if err := decodeAndVerify("achievement_catalog.json", manifest.ArtifactSHA256s, &achievement); err != nil {
 		return nil, err
@@ -721,6 +726,7 @@ func Load() (*Catalog, error) {
 		TopFloor:                 topFloor,
 		OneOnOne:                 oneOnOne,
 		Arena:                    arena,
+		ConquerMode:              conquerMode,
 		Achievement:              achievement,
 		Privilege:                privilege,
 		StatInputs:               statInputs,
@@ -856,6 +862,9 @@ func validateManifest(raw []byte, manifest *Manifest) error {
 	if manifest.CompilerVersion == "i7c5d-arena" {
 		expectedSources, expectedArtifacts = 266, 40
 	}
+	if manifest.CompilerVersion == "i7c5e-conquer" {
+		expectedSources, expectedArtifacts = 267, 41
+	}
 	if len(manifest.Sources) != expectedSources {
 		return fmt.Errorf("builtin content: expected %d source records, got %d", expectedSources, len(manifest.Sources))
 	}
@@ -887,6 +896,9 @@ func validateCatalog(c *Catalog) error {
 		return err
 	}
 	if err := c.Arena.Validate(); err != nil {
+		return err
+	}
+	if err := c.ConquerMode.Validate(); err != nil {
 		return err
 	}
 	if err := c.Achievement.Validate(); err != nil {
@@ -1599,7 +1611,7 @@ func validateCatalog(c *Catalog) error {
 
 	caps := append([]string(nil), c.Manifest.EnabledCapabilities...)
 	sort.Strings(caps)
-	wantCaps := []string{"ARENA_MODE_I7C5D", "ONE_ON_ONE_MODE_I7C5C", "TOP_FLOOR_MODE_I7C5B", "ACHIEVEMENT_TIER_FACTS_I7C4B", "COSMETIC_PRIVILEGE_I7C4A", "STAT_INPUTS_I7C3B", "STAT_RULES_I7C3A", "CONQUER_INPUTS_I7C2J", "EVOLUTION_INPUTS_I7C2I", "SPIRIT_INPUTS_I7C2H", "ELEMENT_INPUTS_I7C2G", "INSCRIPTION_INPUTS_I7C2F", "COURSE_INPUTS_I7C2E", "BOOK_INPUTS_I7C2D", "DORM_INPUTS_I7C2C", "LIBRARY_INPUTS_I7C2B", "CHARACTER_APPEARANCE_CA7", "EQUIPMENT_PRIMITIVES_CA4", "FRIEND_DM_EMOTICON_I7A6A", "FUNCTION_LEVEL_ELIGIBILITY_R5", "GUILD_BROADCAST_I7A8A", "GUILD_INVITE_PRESENTATION_I7A8B", "HERO_CORE_CA2", "HERO_EQUIPMENT_CA4_2", "HERO_FUMO_CA4_3A", "HERO_PROGRESSION_CA2", "HERO_PROMOTION_RESTORATION_CA4_3B", "HERO_RAW_SKILLS_I7C2A", "PET_ACQUISITION_CA3", "PET_CORE_CA3", "PET_EQUIPMENT_CA4_4A", "PET_PROGRESSION_CA3", "PET_PROMOTION_RESTORATION_CA4_4B", "PLAYER_DISPLAY_I7B6A", "PLAYER_EXP_R5", "PRACTICE_CA6", "PUBLIC_PROFILE_PREFERENCES_I7B2B", "PUBLIC_PROFILE_SHOWCASE_SELECTION_I7B3A", "QUALIFIED_ORDINARY_STACK_ITEM_DEFINITIONS", "SCALAR_CRYSTAL", "SCALAR_MANA", "SOCIAL_GIFT_I7A7A", "SUPER_EQUIPMENT_CA4_5", "TEMPORAL_ENERGY_R5", "TEMPORAL_SKILL_POINT_R5", "TEMPORAL_SPIRIT_ENERGY_R5"}
+	wantCaps := []string{"CONQUER_MODE_I7C5E", "ARENA_MODE_I7C5D", "ONE_ON_ONE_MODE_I7C5C", "TOP_FLOOR_MODE_I7C5B", "ACHIEVEMENT_TIER_FACTS_I7C4B", "COSMETIC_PRIVILEGE_I7C4A", "STAT_INPUTS_I7C3B", "STAT_RULES_I7C3A", "CONQUER_INPUTS_I7C2J", "EVOLUTION_INPUTS_I7C2I", "SPIRIT_INPUTS_I7C2H", "ELEMENT_INPUTS_I7C2G", "INSCRIPTION_INPUTS_I7C2F", "COURSE_INPUTS_I7C2E", "BOOK_INPUTS_I7C2D", "DORM_INPUTS_I7C2C", "LIBRARY_INPUTS_I7C2B", "CHARACTER_APPEARANCE_CA7", "EQUIPMENT_PRIMITIVES_CA4", "FRIEND_DM_EMOTICON_I7A6A", "FUNCTION_LEVEL_ELIGIBILITY_R5", "GUILD_BROADCAST_I7A8A", "GUILD_INVITE_PRESENTATION_I7A8B", "HERO_CORE_CA2", "HERO_EQUIPMENT_CA4_2", "HERO_FUMO_CA4_3A", "HERO_PROGRESSION_CA2", "HERO_PROMOTION_RESTORATION_CA4_3B", "HERO_RAW_SKILLS_I7C2A", "PET_ACQUISITION_CA3", "PET_CORE_CA3", "PET_EQUIPMENT_CA4_4A", "PET_PROGRESSION_CA3", "PET_PROMOTION_RESTORATION_CA4_4B", "PLAYER_DISPLAY_I7B6A", "PLAYER_EXP_R5", "PRACTICE_CA6", "PUBLIC_PROFILE_PREFERENCES_I7B2B", "PUBLIC_PROFILE_SHOWCASE_SELECTION_I7B3A", "QUALIFIED_ORDINARY_STACK_ITEM_DEFINITIONS", "SCALAR_CRYSTAL", "SCALAR_MANA", "SOCIAL_GIFT_I7A7A", "SUPER_EQUIPMENT_CA4_5", "TEMPORAL_ENERGY_R5", "TEMPORAL_SKILL_POINT_R5", "TEMPORAL_SPIRIT_ENERGY_R5"}
 	sort.Strings(wantCaps)
 	if len(caps) != len(wantCaps) {
 		return fmt.Errorf("builtin content: enabled capability count drift: %v", caps)

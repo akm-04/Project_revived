@@ -253,6 +253,13 @@ func (s Service) EnsureBuiltinInstalled(ctx context.Context, op operation.Contex
 			if gotArena != 1 {
 				return errors.New("content registry arena count")
 			}
+			gotConquerMode, err := s.Repo.InsertConquerMode(tctx, scope.Tx, b)
+			if err != nil {
+				return err
+			}
+			if gotConquerMode != 1 {
+				return errors.New("content registry conquer mode count")
+			}
 			gotPrivilege, err := s.Repo.InsertPrivilege(tctx, scope.Tx, b)
 			if err != nil {
 				return err

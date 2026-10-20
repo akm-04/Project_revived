@@ -3665,6 +3665,66 @@
       ],
       "write_exceptions": [],
       "migration": "migrations/00067_i7c5d_arena.sql"
+    },
+    "content_conquer_mode_catalogs": {
+      "owner": "content-registry",
+      "allowed_query_owners": [
+        "content-registry"
+      ],
+      "allowed_read_paths": [
+        "sql/content/",
+        "internal/adapters/postgres/contentstore/",
+        "internal/adapters/postgres/contentqueries/"
+      ],
+      "allowed_write_paths": [
+        "sql/content/",
+        "internal/adapters/postgres/contentstore/",
+        "internal/adapters/postgres/contentqueries/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00068_i7c5e_conquer_school.sql"
+    },
+    "conquer_school_players": {
+      "owner": "conquer",
+      "allowed_query_owners": [
+        "conquer"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/conquerstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/conquerstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00068_i7c5e_conquer_school.sql"
+    },
+    "conquer_school_reports": {
+      "owner": "conquer",
+      "allowed_query_owners": [
+        "conquer"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/conquerstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/conquerstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00068_i7c5e_conquer_school.sql"
+    },
+    "conquer_school_report_views": {
+      "owner": "conquer",
+      "allowed_query_owners": [
+        "conquer"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/conquerstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/conquerstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00068_i7c5e_conquer_school.sql"
     }
   }
 }

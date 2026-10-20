@@ -148,22 +148,40 @@ func (c Catalog) Complete(r Run) (bool, error) {
 	}
 	return r.CurrentID == r.PassedID || c.campaigns[r.CurrentID].Open == 0 || r.Loop > c.maxLoop, nil
 }
-func (c Catalog) Evaluate(p Progress) (map[int64]int64, error) {
-	if e := c.ValidateProgress(p); e != nil {
-		return nil, e
-	}
-	out := map[int64]int64{}
+
+// openRegions are the regions whose attributes a validated progress opens:
+// every region after loop 1, else the regions whose last mission is cleared.
+func (c Catalog) openRegions(p Progress) []int64 {
 	if p.Level == 0 {
-		return out, nil
+		return nil
 	}
 	max := c.levels[p.Level]
 	if p.Loop > 1 {
 		max = 5
 	}
+	var out []int64
 	for region := int64(1); region <= max; region++ {
 		if p.Loop == 1 && region == max && p.Level != c.last[region] {
 			continue
 		}
+		out = append(out, region)
+	}
+	return out
+}
+
+// Region is MID1 conquer_region: the number of attribute-open regions.
+func (c Catalog) Region(p Progress) (int64, error) {
+	if e := c.ValidateProgress(p); e != nil {
+		return 0, e
+	}
+	return int64(len(c.openRegions(p))), nil
+}
+func (c Catalog) Evaluate(p Progress) (map[int64]int64, error) {
+	if e := c.ValidateProgress(p); e != nil {
+		return nil, e
+	}
+	out := map[int64]int64{}
+	for _, region := range c.openRegions(p) {
 		for k, v := range c.attrs[region] {
 			if out[k] > math.MaxInt64-v {
 				return nil, ErrUnqualified

@@ -21,12 +21,13 @@ from pathlib import Path
 from typing import Any, Iterable
 
 SCHEMA_VERSION = 1
-COMPILER_VERSION = "i7c5d-arena"
+COMPILER_VERSION = "i7c5e-conquer"
 PARSER_VERSION = "lua-generated-v18-guild-invite"
 EXPECTED_SOURCE_ARCHIVE_SHA256 = "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
 SOURCE_PREFIX = "app-assets/output/assets/src_64/"
 
 SOURCE_MANIFEST = [
+    ('app/windows/SelectTeamWindow.lua', '6d57e6bc7251060184190f7be14dcc9a277251673493a5b27e6c67c71cb96561', 'I7C5E_CONQUER_SOURCE_BOUNDARY'),
     ('data/tables/region_arena_level.lua', 'a1a7860cd66acc9a5f5195bb7bf612b3ad786038298185bf0c84dca474c7382a', 'I7C5D_ARENA_SOURCE_BOUNDARY'),
     ('data/tables/region_arena_reward.lua', '0d429b8b80be2c207fcc5c945af75d427464d7d380570129781cf6ec4c941e09', 'I7C5D_ARENA_SOURCE_BOUNDARY'),
     ('data/tables/region_arena_notice.lua', '8ea41073b2c6ca4ff6d69d5933458bcfedb7e8e5eb9ceaf3e9b35b10e7b331c0', 'I7C5D_ARENA_SOURCE_BOUNDARY'),
@@ -166,6 +167,7 @@ SOURCE_MANIFEST.append(('app/windows/HeroGiftBoxWindow.lua','d6065c3d601f5820915
 SOURCE_MANIFEST.append(('app/windows/WhiteAlbumWindow.lua','851a53f588b59d95cfe460f3399ab1a6904fff7714131c358f3c3a73910b6bb9',"LIBRARY_INPUT_SOURCE_AUTHORITY"))
 
 ENABLED_CAPABILITIES = [
+    "CONQUER_MODE_I7C5E",
     "ARENA_MODE_I7C5D",
     "ONE_ON_ONE_MODE_I7C5C",
     "TOP_FLOOR_MODE_I7C5B",
@@ -364,6 +366,7 @@ from achievement_content import build_achievement
 from top_floor_content import build_top_floor
 from one_on_one_content import build_one_on_one
 from arena_content import build_arena
+from conquer_mode_content import build_conquer_mode
 from course_content import build_course
 class CompileError(ValueError):
     pass
@@ -2157,6 +2160,7 @@ def build_artifacts(blobs: dict[str, SourceBlob], archive_sha256: str) -> dict[s
         "top_floor_catalog.json":build_top_floor(blobs,parse_generated_lua_table),
         "one_on_one_catalog.json":build_one_on_one(blobs,parse_generated_lua_table),
         "arena_catalog.json":build_arena(blobs,parse_generated_lua_table),
+        "conquer_mode_catalog.json":build_conquer_mode(blobs,parse_generated_lua_table),
         "achievement_catalog.json":build_achievement(blobs,parse_generated_lua_table),
         "privilege_catalog.json":build_privilege(blobs,parse_generated_lua_table),
         "stat_input_catalog.json":build_stat_inputs(blobs,parse_generated_lua_table,parse_base64_indexed_lua_table,indexed_field,parse_encoded_item_table,parse_encoded_skill_table),

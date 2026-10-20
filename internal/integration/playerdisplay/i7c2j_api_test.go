@@ -168,7 +168,6 @@ func TestI7C2JActualAPIFreshConquerAtomicityAndInactiveMode(t *testing.T) {
 		{2608, map[string]any{"partner_id": 1, "attr_id": 4, "add_num": true, "cost_item": 40001001}, 400},
 		{2609, map[string]any{"partner_id": 1, "twice_awake_stage": 3}, 400},
 		{2738, map[string]any{"mission_id": 1, "awake_type": 2}, 501},
-		{1568, map[string]any{}, 501}, {1569, map[string]any{}, 501}, {1570, map[string]any{}, 501}, {1571, map[string]any{}, 501}, {1572, map[string]any{}, 501}, {1573, map[string]any{}, 501}, {2790, map[string]any{}, 501},
 	} {
 		code, out := post(step.mid, step.params)
 		if code != step.status {
@@ -261,5 +260,5 @@ func TestI7C2JActualAPIFreshConquerAtomicityAndInactiveMode(t *testing.T) {
 	if e != nil || facts.Payload.Kind != d.Initial || facts.Payload.Progress == nil || facts.Payload.Progress.Level != 0 || facts.Payload.Progress.Loop != 1 || facts.Payload.Run != nil || facts.ContentRevision != rev || facts.Payload.OriginOperation.IsZero() {
 		t.Fatal("actual MID1 missing canonical seed", facts, e)
 	}
-	t.Log("real API fresh Conquer seed and atomic contributor rollback; no Conquer mode activation", newPID)
+	t.Log("real API fresh Conquer seed and atomic contributor rollback", newPID)
 }

@@ -57,7 +57,9 @@ func (s Service) FactsTx(ctx context.Context, scope characterasset.CoherentReadS
 	if e != nil {
 		return out, e
 	}
-	if f.Player != p || f.ContentRevision != pin {
+	// I7C-5E amendment: a row written under an earlier revision is validated
+	// against the pinned catalog; its revision is provenance.
+	if f.Player != p {
 		return out, d.ErrUnqualified
 	}
 	c, e := s.Content.ConquerCatalogTx(ctx, scope.Queryer(), pin)
@@ -126,8 +128,8 @@ func (s Service) HeroInputsTx(ctx context.Context, scope characterasset.Coherent
 	return HeroInputs{Hero: h, PopulationVersion: root.StateVersion, Observation: v}, nil
 }
 
-// PreparedWrite is a caller-Tx extension seam, not a battle attestation or a
-// production Conquer command. I7C-5E must qualify source/attempt/receipt effects.
+// PreparedWrite is the caller-Tx writer seam; the I7C-5E Mode service is its
+// only production writer and qualifies attempt, receipt and value effects.
 type PreparedWrite struct {
 	before  d.Facts
 	catalog d.Catalog

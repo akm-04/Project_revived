@@ -1,0 +1,25 @@
+{
+  "status": "I7C5E_IMPLEMENTATION_RECONCILIATION",
+  "contract_id": "C5E_CONQUER_SCHOOL_MODE_V1",
+  "private_policy_additions": [
+    "START needs 1..6 distinct owned partner ids (getFormationStr leaves rented girls out); a formation with no owned girl is refused.",
+    "RESULT total_damage is the client's harm sum and may be fractional; it is truncated to an integer before bounding (0..1e15). conquer_lev, conquer_loop_id, conquer_region and awards are answered only on promotion, because the client re-enters chat rooms whenever conquer_lev is present.",
+    "A kept report snapshots the owner's directory card (name, level, avatar, frame, logical server as region, the post-settlement conquer_lev/conquer_loop_id) and the formation's MID1 roster rows and pet row at RESULT time; it never changes afterwards.",
+    "1572 answers report.report as the stored replay JSON text (ConquerSchoolReportWindow json.decodes it). Reading a report needs no function gate; viewing one's own report never rewards.",
+    "The view reward mail is one mail per rewarded view (source key report:viewer:day, CONQUER_SCHOOL_MAIL_TEXT with count 1, sender CONQUER_SCHOOL_MAIL_NAME, 50000 mana)."
+  ],
+  "deviations_from_plan": [
+    "The open attempt lives in the mode row (state.attempt) instead of a conquer_school_attempts table: there is at most one open attempt per player, a newer START supersedes it, and settled attempts survive as the facts origin_ref, the RESULT receipt and the kept report's attempt_id.",
+    "conquer_school_report_views has no rewarded column: only a first (report, viewer, day) view can reward, and the owner's report_award_times plus the mail record carry the outcome.",
+    "The function 48 gate reads the I5 function eligibility fact (as Top Floor does) instead of the directory level.",
+    "The Conquer School routes register with the other I7C-5 mode routes when GXB_COMBAT_ENTROPY_KEYS is configured: the mode itself starts no Combat attempt, but it reads the same MID1 roster composers.",
+    "The I7C-2J API test no longer expects 501 for 1568-1573/2790 (activated by this stage).",
+    "5D hygiene defect repaired: the 48 MB gxb-api binary committed in 106e65e is untracked and ignored."
+  ],
+  "known_limitations": [
+    "BUY_CONQUER_TIMES reads the shared I5 privilege snapshot, whose provider reports MonthlyPrivilegeActive false until a monthly card owner exists (same limit as Top Floor and 1 on 1 purchases), so 2790 is refused in practice.",
+    "SystemBroadcast 3005, the conquer_school_ratio/conquer_school_reward tables and MID1 privilege_left_card_day stay unactivated.",
+    "Enemy scaling by loop ratio and the battle itself are client-side (CLIENT_SUMMARY_ATTESTED); the server bounds and recomputes consequences only."
+  ],
+  "lock_order": "actor fence 315 -> I4 player root (2J PrepareWriteTx) -> Conquer facts row -> Conquer mode row -> I5 mail 610 / values 700+ -> directory 740; report view: viewer fence 315 -> view row -> owner mode row -> owner mail 610."
+}

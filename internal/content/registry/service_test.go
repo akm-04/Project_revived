@@ -636,6 +636,14 @@ func (r repo) InsertArena(_ context.Context, x tx.Tx, b Bundle) (int64, error) {
 	return 1, nil
 }
 
+func (r repo) InsertConquerMode(_ context.Context, x tx.Tx, b Bundle) (int64, error) {
+	t := x.(*modelTx)
+	v := t.installed[b.RevisionID()]
+	v.ConquerModeCount = 1
+	t.installed[b.RevisionID()] = v
+	return 1, nil
+}
+
 func (r repo) InsertAchievement(_ context.Context, x tx.Tx, b Bundle) (int64, error) {
 	t := x.(*modelTx)
 	v := t.installed[b.RevisionID()]
