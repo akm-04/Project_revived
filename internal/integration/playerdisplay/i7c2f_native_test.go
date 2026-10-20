@@ -136,6 +136,8 @@ func TestI7C2FAllEightOperationsPendingIsolationAndRecovery(t *testing.T) {
 	if len(ids) != 1 || libraryAmount(t, p, a, "degree_cer") != before-90 {
 		t.Fatal(r)
 	}
+	// The Make draw can itself be 160100101.
+	held := dormStack(t, p, a, 160100101)
 	o := op()
 	cmd := app.Command{Family: app.Rebuild, ItemID: 160100101, Amount: 10, CostType: 1}
 	r, e := s.Command(ctx, a, cmd, o)
@@ -143,7 +145,7 @@ func TestI7C2FAllEightOperationsPendingIsolationAndRecovery(t *testing.T) {
 		t.Fatal(e)
 	}
 	pending := insRoot(t, p, a).Facts.Pending
-	if pending == nil || len(pending.Candidates) != 10 || dormStack(t, p, a, 160100101) != 20 || len(insFacet(t, p, a, 1).Facts.Wire()) != 0 {
+	if pending == nil || len(pending.Candidates) != 10 || dormStack(t, p, a, 160100101) != held || len(insFacet(t, p, a, 1).Facts.Wire()) != 0 {
 		t.Fatal(pending)
 	}
 	r2, e := s.Command(ctx, a, cmd, o)
@@ -153,7 +155,7 @@ func TestI7C2FAllEightOperationsPendingIsolationAndRecovery(t *testing.T) {
 	chosen := pending.Candidates[0]
 	n := dormStack(t, p, a, chosen)
 	saved := insCmd(t, s, a, app.Command{Family: app.Save, ItemID: chosen})
-	if insRoot(t, p, a).Facts.Pending != nil || dormStack(t, p, a, 160100101) != 19 || dormStack(t, p, a, chosen) != n+1 || saved.Body["rebuild_items"] == nil {
+	if insRoot(t, p, a).Facts.Pending != nil || dormStack(t, p, a, 160100101) != held-1 || dormStack(t, p, a, chosen) != n+1 || saved.Body["rebuild_items"] == nil {
 		t.Fatal("save", saved)
 	}
 	insCmd(t, s, a, app.Command{Family: app.Rebuild, ItemID: 160100101, Amount: 1, CostType: 2})
@@ -164,7 +166,7 @@ func TestI7C2FAllEightOperationsPendingIsolationAndRecovery(t *testing.T) {
 	}
 	insCmd(t, s, a, app.Command{Family: app.Insert, PartnerID: 1, ItemID: 160100101})
 	insCmd(t, s, a, app.Command{Family: app.Insert, PartnerID: 1, ItemID: 160100102, ReplaceID: 160100101})
-	if dormStack(t, p, a, 160100101) != 19 || insFacet(t, p, a, 1).Facts.Slots[0] != 160100102 {
+	if dormStack(t, p, a, 160100101) != held-1 || insFacet(t, p, a, 1).Facts.Slots[0] != 160100102 {
 		t.Fatal("replace")
 	}
 	v, e := s.HeroInscriptionInputsTx(ctx, p, app.InputScope{Player: a.PlayerID, ContentRevision: rev, ObservedAt: time.Now().UTC()}, 1)

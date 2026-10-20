@@ -24,6 +24,7 @@ func TestI7C4CActualAPIMetricSelectionReadAndRestart(t *testing.T) {
 	p := pool(t)
 	a, _ := achievementFixture(t, p, true)
 	favorForMarriage(t, p, a, 1)
+	exec(t, p, `INSERT INTO player_pet_roots(player_id,next_pet_id,first_free_hatch_used,state_version,created_at,updated_at)VALUES($1,1,false,1,clock_timestamp(),clock_timestamp())`, int64(a.PlayerID))
 	bearer := displayToken(t, p, a)
 	listener, e := net.Listen("tcp", "127.0.0.1:0")
 	if e != nil {
@@ -108,8 +109,8 @@ func TestI7C4CActualAPIMetricSelectionReadAndRestart(t *testing.T) {
 		t.Fatal("creationdiscovery", code, out)
 	}
 	all, ok := out["all_show_types"].(map[string]any)
-	if !ok || len(all) != 1 || all["1011"] == nil {
-		t.Fatal("full11 accidentallyactivated", out)
+	if !ok || len(all) != 10 || all["1007"] != nil || all["1011"] == nil || all["1003"] != float64(0) || all["1004"] == nil {
+		t.Fatal("full11", out)
 	}
 	cmd.Process.Signal(os.Interrupt)
 	cmd.Wait()
@@ -123,7 +124,7 @@ func TestI7C4CActualAPIMetricSelectionReadAndRestart(t *testing.T) {
 		t.Fatal("restartmetric", out)
 	}
 	code, out = post(1831, map[string]any{"show_types": []int64{1004}})
-	if code == 200 {
-		t.Fatal("partialachievement fullmetric", out)
+	if selected, ok = out["show_types"].(map[string]any); code != 200 || !ok || selected["1004"] != all["1004"] {
+		t.Fatal("trophy metric selection", code, out)
 	}
 }

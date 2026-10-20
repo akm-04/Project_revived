@@ -133,7 +133,7 @@ func Test6BActualAPICompositionMediaPrivacyAndWireRecovery(t *testing.T) {
 		t.Fatal("MAIN", code, v)
 	}
 	code, v = post(token, 1840, map[string]any{})
-	if code != 200 || len(v["all_show_types"].(map[string]any)) != 1 || v["all_show_types"].(map[string]any)["1011"] == nil {
+	if code != 200 || v["all_show_types"].(map[string]any)["1011"] == nil {
 		t.Fatal("qualifiedmetrics", code, v)
 	}
 	for _, sub := range []int{2, 3, 5, 6} {

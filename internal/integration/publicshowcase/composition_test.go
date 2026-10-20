@@ -189,13 +189,8 @@ func Test6BCoherentCompositionPrivacyMetricsAndCurrentDetail(t *testing.T) {
 			t.Fatal("SYSTEM would clear basiccache", k)
 		}
 	}
-	choices, e := s.Read(ctx, a, app.ReadRequest{MID: 1840}, op())
-	if e != nil {
-		t.Fatal(e)
-	}
-	all := choices["all_show_types"].(map[string]int64)
-	if len(all) != 1 || all["1011"] <= 0 {
-		t.Fatal(choices)
+	if choices, e := s.Read(ctx, a, app.ReadRequest{MID: 1840}, op()); e != nil || len(choices["all_show_types"].(map[string]int64)) != 1 {
+		t.Fatal("1840 omits owners it cannot read instead of zeroing them", choices, e)
 	}
 	// Future persisted choice cannot become a guessed zero.
 	assign(t, p, b, app.Command{Kind: app.ShowCommand, Show: []int64{1011}}, op())
