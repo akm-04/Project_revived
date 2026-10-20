@@ -1,0 +1,34 @@
+{
+  "status": "TARGETED_TRANSITIVE_PREIMPLEMENTATION_REVIEW_COMPLETE",
+  "affected_contract_id": "C6_SELECTED_COSMETIC_ORIGINS_V1",
+  "c1_bindings": [
+    {
+      "path": "hot/00_PASSMAP/PASS685_I7C1_PROVIDER_SCOPE_OWNERSHIP_CONTRACT.json",
+      "sha256": "73f4e5b8e8603a68380be31d4aec7a5f9f10ecd9b68246b56dfb350ae36ea943",
+      "upheld": "Origins stay with Library/Cabinet/Dorm/Arena owners read through the existing catalog-scoped port; PlayerDisplay stays the composer; no new cosmetic owner."
+    },
+    {
+      "path": "hot/00_PASSMAP/PASS685_I7C1_DELIVERY_ACCEPTANCE_CONTRACT.json",
+      "sha256": "992b38344aef6196e99cd2f17dc8810c2e962017db8de5c1a563890d54cf49a0",
+      "upheld": "Caller-transaction composition, pinned content, authoritative instant; exact R2 fresh/upgrade proof; child GREEN never accepts the parent."
+    },
+    {
+      "path": "hot/00_PASSMAP/PASS685_I7C1_RESEARCH_AMENDMENT_CONTRACT.json",
+      "sha256": "6e29a18a81e820f53a5accd471cf367c625cd48537fa37094f6b17fa0b88b8e9",
+      "upheld": "Whole-stage research before code; user decisions recorded before planning; forward bindings explicit."
+    }
+  ],
+  "inherited_bindings": [],
+  "successor_obligations": {
+    "CA-IDENTITY": "PRESERVED: married count reads HeroRef-scoped Library facts",
+    "CA-PRACTICE": "NOT_APPLICABLE(no practice reads)",
+    "CA-APPEARANCE": "PRESERVED: entitlement vs selection unchanged; timed avatar end = settlement + catalog days at one observation instant",
+    "CA8-COHERENT-SCOPE": "PRESERVED: owners read in the caller display scope at its revision/instant",
+    "CA8-OWNED": "NOT_APPLICABLE(no per-reference stat builders)",
+    "CA8-PUBLIC": "NOT_APPLICABLE(no showcase change)",
+    "CA8-AVAILABILITY": "PRESERVED: unrouted ids stay unavailable, routed owners return qualified complete negatives",
+    "CA-SUPERSESSION": "PRESERVED: forward bindings scoped; no historical absence asserted",
+    "CA-BOOKMARK": "NOT_APPLICABLE",
+    "CA-PARENT-EXIT": "PRESERVED: Stage B closure is scoped; full I7C-4, I7C-E and W2 remain"
+  }
+}

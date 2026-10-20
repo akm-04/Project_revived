@@ -1,0 +1,44 @@
+{
+  "status": "PLANNED_PREIMPLEMENTATION",
+  "policy_id": "C6_SELECTED_COSMETIC_ORIGINS_V1",
+  "stage": "FULL_I7C4_STAGE_B (I7C-6 selected cosmetic origins)",
+  "version_target": "v0.135.0",
+  "migration": "00071_i7c6_cosmetic_origins.sql",
+  "steps": [
+    {
+      "id": "B1",
+      "area": "content",
+      "work": "Compile title_system condition into player display title rows (compiler version bump, new capability COSMETIC_TITLE_CONDITION_I7C6); oracle tools/check_i7c6_source_oracle.py (conditions 30/50, 50/80, 30/60/100; DormType.VILLA=4; bookshelf type 4; avatar 110006001 days 60 = arena champion item)."
+    },
+    {
+      "id": "B2",
+      "area": "library",
+      "work": "Migration 00071 adds player_library_roots.married_high_water (NOT NULL DEFAULT 0); PlayerFacts carries it; marriage raises it to the new married count in the marriage transaction; Backfiller raises it from current state. Library implements CatalogExternalOrigins for 100022/100023: max(high water, current) >= condition."
+    },
+    {
+      "id": "B3",
+      "area": "bookskill+dormhouse",
+      "work": "Each implements CatalogExternalOrigins for its titles from current bookshelf level / villa count (never decreasing) in the caller scope; qualified complete negative below the condition."
+    },
+    {
+      "id": "B4",
+      "area": "arena",
+      "work": "Arena implements CatalogExternalOrigins for avatar 110006001 from settlement rows with Champion (StartsAt = SettledAt); complete history (Arena settlements exist since 5D)."
+    },
+    {
+      "id": "B5",
+      "area": "playerdisplay",
+      "work": "List consults catalog-scoped owners also for avatar/frame rows with days > 0 (selection already does); wire the new routes in cmd/gxb-api; no generic grant path."
+    },
+    {
+      "id": "B6",
+      "area": "docs/locks",
+      "work": "Ownership, migration and content-generation locks, VERSION v0.135.0, implementation notes; natives for all four owners incl. legacy backfill, falling married count, expiry at settlement+60d."
+    }
+  ],
+  "lock_order": "Unchanged: owner reads in the caller display scope; marriage raises the mark inside its existing Library transaction",
+  "explicitly_deferred": [
+    "Forward-bound ids (C6_COSMETIC_FORWARD_BINDINGS_V1)",
+    "Skins board titles 100063..100066 (Stage C)"
+  ]
+}

@@ -1,0 +1,154 @@
+{
+  "policy_id": "C6_SELECTED_COSMETIC_ORIGINS_V1",
+  "classification": "SOURCE_FACT_PLUS_LABELLED_PRIVATE_POLICY_USER_DECIDED_2026_10_20",
+  "authority": "work/i7c4full/AUTHORIZATION.json stage_b_answers (user, 2026-10-20) and Q1 forward-binding rule. Original server grant algorithms are unrecovered.",
+  "source_facts": [
+    "title_system.lua 100022/100023 type 5 condition 30/50 time -1 (marry 30/50 girls)",
+    "title_system.lua 100024/100025 type 6 condition 50/80 time -1 (Bookshelf lv.50/80); event_centre_bookshelf type 4 levels 1..100",
+    "title_system.lua 100026..100028 type 7 condition 30/60/100 time -1 (possess N villas); enums DormType.VILLA = 4",
+    "arena region reward champion item 110006001: player_display avatar type 10 days 60",
+    "title_system type 2 skin titles 100008/100010/100011/100014..100017 condition 0: description text is the only skin link"
+  ],
+  "rules": {
+    "C6_PROGRESSION_TITLE_HIGH_WATER_V1": {
+      "titles": [
+        100022,
+        100023,
+        100024,
+        100025,
+        100026,
+        100027,
+        100028
+      ],
+      "rule": "A title is held once its owner count first reaches the title condition and is never revoked (user: keep once earned). Bookshelf level and villa count never fall, so the current value is the high-water mark; Library records a married high-water mark on its root, raised at marriage and by the owner backfill from current state (legacy, Q5).",
+      "owners": {
+        "library": "married heroes (100022/100023)",
+        "bookskill": "bookshelf building type 4 level (100024/100025)",
+        "dormhouse": "villas, rooms with DormType 4 (100026..100028)"
+      },
+      "duration": "permanent (-1)"
+    },
+    "C6_ARENA_CHAMPION_AVATAR_V1": {
+      "avatar": 110006001,
+      "rule": "Each settled Arena season whose immutable settlement row marks the player Champion is one origin starting at that settlement SettledAt; the catalog 60-day duration gives its end. The champion mail item stays the source reward (user: start at settlement)."
+    },
+    "C6_COSMETIC_FORWARD_BINDINGS_V1": {
+      "rule": "Per Q1/Stage B answer: never earnable, never counted, never zero-claimed until the owning phase binds a typed producer and removes the entry in its own PassMap sync.",
+      "titles": [
+        100006,
+        100007,
+        100008,
+        100009,
+        100010,
+        100011,
+        100012,
+        100013,
+        100014,
+        100015,
+        100016,
+        100017,
+        100018,
+        100019,
+        100020,
+        100021,
+        100029,
+        100030,
+        100031,
+        100032,
+        100033,
+        100034,
+        100035,
+        100036,
+        100053,
+        100054,
+        100055,
+        100056,
+        100057,
+        100058,
+        100067,
+        100068,
+        100069,
+        100070,
+        100071,
+        100072,
+        100073,
+        100074,
+        100075,
+        100076,
+        100077,
+        100078,
+        100079,
+        100080,
+        100081,
+        100082,
+        100083,
+        100084,
+        100085,
+        100086,
+        100087,
+        100088,
+        100089,
+        100090,
+        100091,
+        100092,
+        100093,
+        100094,
+        100095,
+        100096,
+        100097,
+        100098,
+        100099,
+        100100,
+        100101,
+        100102,
+        100103,
+        100105,
+        100106,
+        100107,
+        100108,
+        100109,
+        100110,
+        100112,
+        100113,
+        100122,
+        100123,
+        100201,
+        100202,
+        100203,
+        100204,
+        100205,
+        100206,
+        100207,
+        100208,
+        100209
+      ],
+      "bubbles": [
+        10008
+      ],
+      "timed_frames_without_producer": [
+        120001041,
+        120001042,
+        120001155,
+        120001163,
+        120001164
+      ],
+      "vip_frames": {
+        "ids": [
+          120001002,
+          120001003
+        ],
+        "note": "existing privilege branch; nonbaseline VIP provider is I9 commerce"
+      },
+      "notes": {
+        "100078..100080": "League titles ambiguous as history (5F); not in the live League profile",
+        "100008/100010/100011/100014..100017": "skin titles: description-only link (user: not live)",
+        "100063..100066": "Skins board, Stage C, not forward bound"
+      }
+    }
+  },
+  "not_claimed": [
+    "Original server title/avatar grant algorithms",
+    "Skin-title name matching"
+  ],
+  "display_mechanism": "Each owner implements playerdisplay.CatalogExternalOrigins for its catalog range; the display list consults catalog-scoped owners for titles/bubbles and for timed avatar/frame rows (days > 0)."
+}

@@ -1,0 +1,30 @@
+{
+  "status": "PLANNED",
+  "policy_id": "C6_SELECTED_COSMETIC_ORIGINS_V1",
+  "rows": [
+    {
+      "id": "B-A1",
+      "check": "Source oracle: title conditions, DormType.VILLA, bookshelf type, avatar 110006001 days 60 / arena champion item"
+    },
+    {
+      "id": "B-A2",
+      "check": "Native: married count 29->30 grants 100022; consuming a married hero keeps it (high water); legacy player backfilled from current state"
+    },
+    {
+      "id": "B-A3",
+      "check": "Native: bookshelf lv 50 grants 100024 not 100025; villas 30 grants 100026 only; below conditions are qualified negatives"
+    },
+    {
+      "id": "B-A4",
+      "check": "Native: arena champion avatar eligible from settlement until +60 days, ineligible after; non-champion negative; selection works"
+    },
+    {
+      "id": "B-A5",
+      "check": "Forward-bound ids stay unavailable (never empty success)"
+    },
+    {
+      "id": "B-A6",
+      "check": "Populated 00070 upgrade + content deploy + relocated restore preserve library roots and display digests"
+    }
+  ]
+}
