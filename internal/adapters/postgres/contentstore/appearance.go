@@ -6,6 +6,7 @@ import (
 	"errors"
 
 	"gxb.local/backend/v2/internal/adapters/postgres/contentqueries"
+	"gxb.local/backend/v2/internal/adapters/postgres/kernelstore"
 	"gxb.local/backend/v2/internal/application/characterasset"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
@@ -53,7 +54,7 @@ func (Store) AppearanceSkinTx(ctx context.Context, q tx.Queryer, revision string
 	}
 	out := characterasset.AppearanceSkinDefinition{ModelID: modelID}
 	if err := q.QueryRow(ctx, contentqueries.ReadAppearanceSkinDefinition, revision, modelID).Scan(&out.HeroOriginTableID, &out.SkinSkillID); err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
+		if errors.Is(err, kernelstore.ErrNoRows) {
 			return characterasset.AppearanceSkinDefinition{}, false, nil
 		}
 		return characterasset.AppearanceSkinDefinition{}, false, err
@@ -78,7 +79,7 @@ func (Store) AppearanceSkinItemTx(ctx context.Context, q tx.Queryer, revision st
 	out := characterasset.AppearanceSkinItemDefinition{ItemID: itemID}
 	var duration sql.NullInt64
 	if err := q.QueryRow(ctx, contentqueries.ReadAppearanceSkinItem, revision, itemID).Scan(&out.ModelID, &out.HeroOriginTableID, &duration); err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
+		if errors.Is(err, kernelstore.ErrNoRows) {
 			return characterasset.AppearanceSkinItemDefinition{}, false, nil
 		}
 		return characterasset.AppearanceSkinItemDefinition{}, false, err
@@ -105,7 +106,7 @@ func (Store) AppearanceLIVETx(ctx context.Context, q tx.Queryer, revision string
 	}
 	out := characterasset.AppearanceLIVEDefinition{ModelID: modelID}
 	if err := q.QueryRow(ctx, contentqueries.ReadAppearanceLIVE, revision, modelID).Scan(&out.HeroOriginTableID, &out.CrystalCost, &out.ActivationItemID, &out.ActivationItemCount); err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
+		if errors.Is(err, kernelstore.ErrNoRows) {
 			return characterasset.AppearanceLIVEDefinition{}, false, nil
 		}
 		return characterasset.AppearanceLIVEDefinition{}, false, err
@@ -129,7 +130,7 @@ func (Store) AppearancePetStyleTx(ctx context.Context, q tx.Queryer, revision st
 	}
 	out := characterasset.AppearancePetStyleDefinition{StyleItemID: styleItemID}
 	if err := q.QueryRow(ctx, contentqueries.ReadAppearancePetStyle, revision, styleItemID).Scan(&out.PetOriginTableID); err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
+		if errors.Is(err, kernelstore.ErrNoRows) {
 			return characterasset.AppearancePetStyleDefinition{}, false, nil
 		}
 		return characterasset.AppearancePetStyleDefinition{}, false, err
