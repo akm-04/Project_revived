@@ -99,6 +99,7 @@ func TestI7C5DArenaEntryFightSettlementNative(t *testing.T) {
 	b, _ := oneOnOnePlayer(t, pool, rankingServer(t, pool))
 	catalog := arenaCatalog(t, pool)
 	season := catalog.SeasonAt(time.Now())
+	exec(t, pool, `DELETE FROM arena_settlement_ranks WHERE season>=$1`, season.Number-1)
 	exec(t, pool, `DELETE FROM arena_settlements WHERE season>=$1`, season.Number-1)
 
 	// D02: function 37 needs level 60 and 5 girls; entry is the current season at 0 stars with 3 missions.
@@ -166,8 +167,8 @@ func TestI7C5DArenaEntryFightSettlementNative(t *testing.T) {
 	if err != nil || replay.Win != result.Win || string(replay.Report) != string(result.Report) {
 		t.Fatal("identical FIGHT must return the recorded battle", err)
 	}
-	if scalar(t, pool, `SELECT count(*) FROM arena_records`) != 2 || scalar(t, pool, `SELECT count(*) FROM arena_partner_usage WHERE player_id=$1`, int64(a.PlayerID)) != 5 ||
-		scalar(t, pool, `SELECT count(*) FROM combat_attempts c JOIN arena_matches m ON m.attempt_id=c.attempt_id WHERE c.state='TERMINAL'`) != 1 {
+	if scalar(t, pool, `SELECT count(*) FROM arena_records WHERE owner_player_id IN ($1,$2)`, int64(a.PlayerID), int64(b.PlayerID)) != 2 || scalar(t, pool, `SELECT count(*) FROM arena_partner_usage WHERE player_id=$1`, int64(a.PlayerID)) != 5 ||
+		scalar(t, pool, `SELECT count(*) FROM combat_attempts c JOIN arena_matches m ON m.attempt_id=c.attempt_id WHERE c.state='TERMINAL' AND m.attacker_id=$1`, int64(a.PlayerID)) != 1 {
 		t.Fatal("records, usage and terminal attempt")
 	}
 	if scalar(t, pool, `SELECT COALESCE(max(current),0) FROM achievement_streaks WHERE player_id=$1 AND achievement_id=100003`, int64(a.PlayerID)) != result.Player.KeepWin {
@@ -188,7 +189,7 @@ func TestI7C5DArenaEntryFightSettlementNative(t *testing.T) {
 	// D07: practice changes nothing; STOP and an abandoned START settle a loss without a battle.
 	exec(t, pool, `UPDATE arena_players SET star=12 WHERE player_id=$1`, int64(a.PlayerID))
 	practice := arenaFight(t, s, a, b.PlayerID, true)
-	if practice.Player.Star != 12 || practice.Player.TotalFight != 1 || len(practice.Report) == 0 || scalar(t, pool, `SELECT count(*) FROM arena_records`) != 2 {
+	if practice.Player.Star != 12 || practice.Player.TotalFight != 1 || len(practice.Report) == 0 || scalar(t, pool, `SELECT count(*) FROM arena_records WHERE owner_player_id IN ($1,$2)`, int64(a.PlayerID), int64(b.PlayerID)) != 2 {
 		t.Fatalf("practice %+v", practice.Player)
 	}
 	if _, err = s.Match(ctx, a, false, op()); err != nil {
