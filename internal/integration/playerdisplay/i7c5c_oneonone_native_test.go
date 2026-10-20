@@ -187,7 +187,7 @@ func TestI7C5COneOnOneEntryMatchSettlementNative(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Logf("best-of-three START with resolution and settlement took %s", time.Since(started))
+	t.Logf("best-of-three START with resolution and settlement took %s (rounds %v)", time.Since(started), result.Wins)
 	if len(result.Wins) < 2 || len(result.Wins) > 3 || len(result.ReportKeys) != len(result.Wins) || result.Arena.Player.TriesLeft != 9 {
 		t.Fatalf("match %+v", result)
 	}
@@ -208,8 +208,11 @@ func TestI7C5COneOnOneEntryMatchSettlementNative(t *testing.T) {
 		t.Fatal("junior cooldown must refuse the next START")
 	}
 	if scalar(t, pool, `SELECT count(*) FROM one_on_one_matches WHERE attacker_id=$1 AND status='SETTLED'`, int64(a.PlayerID)) != 1 ||
-		scalar(t, pool, `SELECT count(*) FROM combat_attempts a JOIN one_on_one_rounds r USING(attempt_id) WHERE a.state='TERMINAL'`) < 2 {
+		scalar(t, pool, `SELECT count(*) FROM combat_attempts a JOIN one_on_one_rounds r USING(attempt_id) WHERE a.state='TERMINAL'`) != int64(len(result.Wins)) {
 		t.Fatal("match and rounds settled once")
+	}
+	if scalar(t, pool, `SELECT count(*) FROM combat_attempts a JOIN one_on_one_rounds r USING(attempt_id) WHERE a.state='STAGED'`) != int64(3-len(result.Wins)) {
+		t.Fatal("a round after the decision must stay unsimulated")
 	}
 	report, err := s.Report(ctx, result.ReportKeys[0])
 	if err != nil || len(report) == 0 {

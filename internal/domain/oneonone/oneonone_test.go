@@ -3,6 +3,7 @@ package oneonone
 import (
 	"encoding/json"
 	"os"
+	"slices"
 	"testing"
 	"time"
 
@@ -154,6 +155,23 @@ func TestWinsMajorityAndForfeit(t *testing.T) {
 	wins, win, _ = Wins([]Round{won(0), {}, {}})
 	if !win || len(wins) != 3 {
 		t.Fatal("missing defender teams are forfeited", wins)
+	}
+}
+
+func TestPendingPlaysOnlyUntilDecided(t *testing.T) {
+	open := func() Round { return Round{AttemptID: attempt(t)} }
+	won := func(star int64) Round { return Round{AttemptID: attempt(t), Star: star, Resolved: true} }
+	if got := Pending([]Round{open(), open(), open(), open(), open()}); !slices.Equal(got, []int{0, 1, 2}) {
+		t.Fatal("best of five starts with three rounds", got)
+	}
+	if got := Pending([]Round{won(1), won(1), won(1), open(), open()}); len(got) != 0 {
+		t.Fatal("a 3-0 sweep plays no further round", got)
+	}
+	if got := Pending([]Round{won(1), won(0), won(1), won(0), open(), open(), open()}); !slices.Equal(got, []int{4, 5}) {
+		t.Fatal("2-2 in best of seven needs two more", got)
+	}
+	if got := Pending([]Round{won(0), open(), open(), {}, {}}); !slices.Equal(got, []int{1, 2}) {
+		t.Fatal("forfeits count once reached", got)
 	}
 }
 

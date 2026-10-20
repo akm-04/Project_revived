@@ -3,7 +3,7 @@
   "contract_id": "C5C_ONE_ON_ONE_MODE_V1",
   "private_policy_additions": [
     "Title notification: the I5 settlement-mail seam requires attachments, so LEGEND_KUAFU_MAIL (text only) is not sent; Sunday titles reach players only as PlayerDisplay title origins.",
-    "Rounds beyond the majority are resolved and settled terminally in Combat (they were frozen at START), but count for nothing: report keys, wins, usage and history cover only rounds up to the majority.",
+    "A match ends as soon as its winner is decided (user-approved 2026-10-20): every round is frozen at START, then each wave resolves in parallel the fewest rounds that could decide the match; rounds after the decision are never simulated and their Combat attempts stay STAGED without a result. Report keys, wins, usage and history cover only the played rounds.",
     "A match whose round can no longer resolve is closed without result and keeps its consumed try or promotion chance; a different START while an earlier match is open first finishes that match.",
     "An identical START within 60 s of the previous one (or while it is open) returns the recorded match; results are due within 10 min.",
     "GET_ENEMY_TEAM serves any competitor (the rank list opens it), hiding the last team_hide teams; missing teams render empty.",
@@ -31,7 +31,8 @@
     "Standings are computed from the full competitor list on each read (no rank index); adequate for private-server scale.",
     "1829 SUPER_ARENA history projection, the exchange shop (ShopType.TOP) and old Peak MIDs 560-571 stay unactivated.",
     "Promotion success after the locked opponent has left the target group still swaps with that opponent's current position (rare; no extra guard).",
-    "Worst-case Master/Senior matches with full 5-hero teams need a second identical START (or the reconcile provider) to deliver the result; resolution of a 5v5 round takes about 22 s on 12 cores (5A engine cost)."
+    "Worst-case Master/Senior matches with full 5-hero teams need a second identical START (or the reconcile provider) to deliver the result; resolution of a 5v5 round takes about 22 s on 12 cores (5A engine cost).",
+    "A close match (for example 2-1, 3-2 or 4-3) needs one to three further resolution waves, so a Master/Senior START reaches the 25 s budget more often than a sweep; the identical retry or the reconcile provider returns the result."
   ],
   "lock_order": "actor fence 315 -> 1 on 1 competition root 602 (settlement, transitions, match settlement; START admission reads it unlocked) -> 1 on 1 player rows (player order) -> Combat locator 609 -> I5 mail 610 -> Achievement 620 -> I5 value 700+; scheduled settlements and promotion transitions each run in their own transaction before any competition mutation (settle-before-mutate)."
 }

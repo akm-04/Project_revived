@@ -265,18 +265,14 @@ func (s Service) finish(c context.Context, a identity.ActorContext, m d.Match, o
 // result and the reconcile provider settles it regardless.
 var ErrUnresolved = errors.New("oneonone: match rounds still resolving")
 
-// conclude resolves a started match's rounds in parallel outside locks, on a
-// context detached from the caller so work survives the request, and settles
-// it once; a permanently failed round closes the match. A zero deadline waits.
+// conclude resolves a started match's rounds outside locks, on a context
+// detached from the caller so work survives the request, and settles it once.
+// Each wave resolves in parallel the fewest rounds that could decide the
+// match, so no round after the decision is simulated; a permanently failed
+// round closes the match. A zero deadline waits.
 func (s Service) conclude(c context.Context, m d.Match, op operation.Context, deadline time.Time) (d.Match, error) {
 	if m.Status != d.StatusStarted {
 		return m, nil
-	}
-	flights := []*flight{}
-	for _, r := range m.Rounds {
-		if !r.Forfeit() {
-			flights = append(flights, s.resolveOnce(c, op, r.AttemptID))
-		}
 	}
 	var budget <-chan time.Time
 	if !deadline.IsZero() {
@@ -284,22 +280,29 @@ func (s Service) conclude(c context.Context, m d.Match, op operation.Context, de
 		defer timer.Stop()
 		budget = timer.C
 	}
-	errs := []error{}
-	for _, f := range flights {
-		select {
-		case <-f.done:
-			errs = append(errs, f.err)
-		case <-budget:
-			return m, ErrUnresolved
+	for wave := d.Pending(m.Rounds); len(wave) > 0; wave = d.Pending(m.Rounds) {
+		flights := make([]*flight, len(wave))
+		for i, round := range wave {
+			flights[i] = s.resolveOnce(c, op, m.Rounds[round].AttemptID)
 		}
-	}
-	for _, err := range errs {
-		if errors.Is(err, cd.ErrResolverPermanent) {
-			return m, errors.Join(err, s.close(c, m, op))
+		errs := []error{}
+		for i, f := range flights {
+			select {
+			case <-f.done:
+				errs = append(errs, f.err)
+				m.Rounds[wave[i]].Star, m.Rounds[wave[i]].Resolved = f.resolved.Resolution.Outcome.Star, f.err == nil
+			case <-budget:
+				return m, ErrUnresolved
+			}
 		}
-	}
-	if err := errors.Join(errs...); err != nil {
-		return m, err
+		for _, err := range errs {
+			if errors.Is(err, cd.ErrResolverPermanent) {
+				return m, errors.Join(err, s.close(c, m, op))
+			}
+		}
+		if err := errors.Join(errs...); err != nil {
+			return m, err
+		}
 	}
 	return s.settle(c, m, op)
 }
@@ -307,8 +310,9 @@ func (s Service) conclude(c context.Context, m d.Match, op operation.Context, de
 // flight is one in-process resolution of an attempt; repeated STARTs and the
 // reconcile provider wait on it instead of launching another worker.
 type flight struct {
-	done chan struct{}
-	err  error
+	done     chan struct{}
+	resolved combat.Resolved
+	err      error
 }
 
 var flights sync.Map
@@ -320,7 +324,7 @@ func (s Service) resolveOnce(c context.Context, op operation.Context, attempt id
 	}
 	detached := context.WithoutCancel(c)
 	go func() {
-		_, f.err = s.Combat.Resolve(detached, op, attempt)
+		f.resolved, f.err = s.Combat.Resolve(detached, op, attempt)
 		flights.Delete(attempt)
 		close(f.done)
 	}()
@@ -419,10 +423,14 @@ func (s Service) settleMatchTx(c context.Context, sc gen.TimedScope, id ids.UUID
 		}
 		players[pid] = p
 	}
-	// Every played round resolved; each is settled terminally (Combat 609) and
-	// only the rounds up to the majority count toward the match.
+	// Rounds up to the majority are settled terminally (Combat 609); later
+	// rounds were frozen at START but never simulated, so their attempts stay
+	// staged without a result.
 	reports := make([][]byte, len(m.Rounds))
 	for i := range m.Rounds {
+		if _, _, decided := d.Wins(m.Rounds); decided {
+			break
+		}
 		if m.Rounds[i].Forfeit() {
 			continue
 		}

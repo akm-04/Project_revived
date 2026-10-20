@@ -50,6 +50,28 @@ func (m Match) Validate() error {
 	return nil
 }
 
+// Pending lists, in order, the fewest unresolved rounds that could still
+// reach the majority; rounds after the decision are never played (private
+// policy, approved: the match ends as soon as its winner is decided).
+func Pending(rounds []Round) []int {
+	need := len(rounds)/2 + 1
+	won, lost, out := 0, 0, []int{}
+	for i, r := range rounds {
+		if max(won, lost)+len(out) >= need {
+			break
+		}
+		switch {
+		case r.Forfeit() || r.Resolved && r.Star > 0:
+			won++
+		case r.Resolved:
+			lost++
+		default:
+			out = append(out, i)
+		}
+	}
+	return out
+}
+
 // Wins plays rounds in order until one side holds a majority (best of n; the
 // source PeakArena.checkBattleResult stops at two of three, STRONG_INFERENCE).
 // Star > 0 is a round win for the attacker; a forfeit is an attacker win.
