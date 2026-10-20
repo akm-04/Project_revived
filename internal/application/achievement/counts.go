@@ -8,6 +8,7 @@ import (
 	course "gxb.local/backend/v2/internal/application/course"
 	dorm "gxb.local/backend/v2/internal/application/dormhouse"
 	ins "gxb.local/backend/v2/internal/application/inscription"
+	display "gxb.local/backend/v2/internal/application/playerdisplay"
 	d "gxb.local/backend/v2/internal/domain/achievement"
 	"gxb.local/backend/v2/internal/domain/character"
 	"gxb.local/backend/v2/internal/domain/identity"
@@ -30,6 +31,9 @@ type Courses interface {
 type Inscriptions interface {
 	HeroInscriptionInputsTx(context.Context, tx.Queryer, ins.InputScope, int64) (ins.HeroInputs, error)
 }
+type Skins interface {
+	SkinCollectionTx(context.Context, ca.CoherentReadScope, identity.PlayerID) (display.CosmeticCount, error)
+}
 type Dorm interface {
 	VillaCountTx(context.Context, tx.Queryer, dorm.InputScope) (dorm.VillaInputs, error)
 }
@@ -45,6 +49,7 @@ type OwnerCounts struct {
 	Courses      Courses
 	Inscriptions Inscriptions
 	Dorm         Dorm
+	Skins        Skins
 }
 
 func (o OwnerCounts) OwnedStateCountsTx(c context.Context, sc ca.CoherentReadScope, p identity.PlayerID, families []int64) map[int64]int64 {
@@ -90,6 +95,11 @@ func (o OwnerCounts) OwnedStateCountsTx(c context.Context, sc ca.CoherentReadSco
 	if wanted[d.RegionsID] {
 		if v, e := o.Conquer.FactsTx(c, sc, p); e == nil {
 			out[d.RegionsID] = v.Regions
+		}
+	}
+	if wanted[d.SkinsID] && o.Skins != nil {
+		if v, e := o.Skins.SkinCollectionTx(c, sc, p); e == nil {
+			out[d.SkinsID] = v.Value
 		}
 	}
 	if wanted[d.RoomsID] || wanted[d.ExpandedRoomsID] {

@@ -3,12 +3,14 @@ package achievement
 import "time"
 
 // I7C-4 full stage A (C4F_ACHIEVEMENT_CATALOG_AND_AP_V1). The nine owned-state
-// achievements are high-water tiers over a current owner count (step 0 profiles).
+// achievements are high-water tiers over a current owner count (step 0 profiles);
+// stage C adds 100016 over the 1003 skin collection (C4F_SKINS_ACHIEVEMENT_V1).
 const OwnedStatePolicy = "C4F_OWNED_STATE_COUNT_V1"
 const (
 	NormalHeroesID   int64 = 100013
 	AwakenedHeroesID int64 = 100015
 	PetsID           int64 = 100017
+	SkinsID          int64 = 100016
 	TextbooksID      int64 = 100019
 	RegionsID        int64 = 100021
 	SubjectsID       int64 = 100023
@@ -17,7 +19,7 @@ const (
 	ExpandedRoomsID  int64 = 100030
 )
 
-var OwnedStateIDs = []int64{NormalHeroesID, AwakenedHeroesID, PetsID, TextbooksID, RegionsID, SubjectsID, SuitsID, RoomsID, ExpandedRoomsID}
+var OwnedStateIDs = []int64{NormalHeroesID, AwakenedHeroesID, SkinsID, PetsID, TextbooksID, RegionsID, SubjectsID, SuitsID, RoomsID, ExpandedRoomsID}
 
 type Status string
 
@@ -25,15 +27,13 @@ const (
 	Qualified    Status = "QUALIFIED"
 	ModeNotLive  Status = "MODE_NOT_LIVE"
 	OwnerUnknown Status = "OWNER_UNKNOWN"
-	// StageC marks 100016 (skins), bound with metric 1003 after I7C-6.
-	StageC Status = "STAGE_C_PENDING"
 )
 
 var unavailable = map[int64]Status{
 	100004: ModeNotLive, 100005: ModeNotLive, 100006: ModeNotLive, 100007: ModeNotLive, 100008: ModeNotLive,
 	100009: ModeNotLive, 100010: ModeNotLive, 100011: ModeNotLive, 100012: ModeNotLive, 100018: ModeNotLive,
 	100020: ModeNotLive, 100022: ModeNotLive, 100024: ModeNotLive, 100026: ModeNotLive, 100027: ModeNotLive,
-	100031: OwnerUnknown, 100033: OwnerUnknown, 100016: StageC,
+	100031: OwnerUnknown, 100033: OwnerUnknown,
 }
 
 // StatusOf is the explicit per-definition producer coverage; it is never
@@ -47,6 +47,19 @@ func StatusOf(id int64) Status {
 		return Qualified
 	}
 	return OwnerUnknown
+}
+
+// Trophies is the C4F_TROPHY_COUNT_V1 count of earned tiers (metric 1004).
+func (c Catalog) Trophies(earned Tiers) int64 {
+	total := int64(0)
+	for _, row := range c.Rows {
+		for _, at := range earned[row.ID] {
+			if at != nil {
+				total++
+			}
+		}
+	}
+	return total
 }
 
 // Tiers maps an achievement id to its earned tier instants.

@@ -50,7 +50,7 @@ func TestPointsLevelsAndClaims(t *testing.T) {
 }
 
 func TestStatusAndOwnedStateCounts(t *testing.T) {
-	if StatusOf(100014) != Qualified || StatusOf(PetsID) != Qualified || StatusOf(100005) != ModeNotLive || StatusOf(100031) != OwnerUnknown || StatusOf(100016) != StageC {
+	if StatusOf(100014) != Qualified || StatusOf(PetsID) != Qualified || StatusOf(100005) != ModeNotLive || StatusOf(100031) != OwnerUnknown || StatusOf(SkinsID) != Qualified {
 		t.Fatal("status")
 	}
 	qualified := 0
@@ -59,12 +59,15 @@ func TestStatusAndOwnedStateCounts(t *testing.T) {
 			qualified++
 		}
 	}
-	if qualified != 15 {
+	if qualified != 16 {
 		t.Fatal(qualified)
 	}
 	c := catalog()
-	c.Rows[PetsID-100001].Thresholds = [3]int64{2, 8, 15}
 	at := time.Unix(100, 0)
+	if trophies := c.Trophies(Tiers{100014: {&at, &at, nil}, PetsID: {&at, nil, nil}, 999999: {&at, &at, &at}}); trophies != 3 {
+		t.Fatal("trophies count earned catalog tiers", trophies)
+	}
+	c.Rows[PetsID-100001].Thresholds = [3]int64{2, 8, 15}
 	s, e := NewStreak(7, PetsID, strings.Repeat("a", 64), at)
 	if e != nil {
 		t.Fatal(e)

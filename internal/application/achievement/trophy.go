@@ -2,7 +2,12 @@ package achievement
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
+	"encoding/json"
+	"errors"
 
+	ca "gxb.local/backend/v2/internal/application/characterasset"
 	"gxb.local/backend/v2/internal/application/playerdirectory"
 	d "gxb.local/backend/v2/internal/domain/achievement"
 	"gxb.local/backend/v2/internal/domain/identity"
@@ -10,6 +15,53 @@ import (
 )
 
 const trophyRows = 50
+
+// TrophyCountPolicy is metric 1004: tiers recorded by observation. An unobserved
+// legacy root has recorded none yet; its first observation backfills them.
+const TrophyCountPolicy = "C4F_TROPHY_COUNT_V1"
+
+type TrophyCount struct {
+	Value, RootVersion int64
+	TiersDigest        string
+}
+
+func (s Service) TrophyCountTx(c context.Context, sc ca.CoherentReadScope, p identity.PlayerID) (TrophyCount, error) {
+	if s.Store == nil || s.Content == nil || !p.Valid() {
+		return TrophyCount{}, d.ErrUnavailable
+	}
+	catalog, e := s.Content.AchievementCatalogTx(c, sc.Queryer(), sc.ContentRevision)
+	if e != nil {
+		return TrophyCount{}, e
+	}
+	root, _, earned, e := s.earnedTx(c, sc.Queryer(), p)
+	if errors.Is(e, d.ErrUnavailable) {
+		return TrophyCount{TiersDigest: tiersDigest(nil)}, nil
+	}
+	if e != nil {
+		return TrophyCount{}, e
+	}
+	if root.UpdatedAt.After(sc.ObservedAt) {
+		return TrophyCount{}, d.ErrConflict
+	}
+	recorded := [][2]int64{}
+	for _, row := range catalog.Rows {
+		for tier, at := range earned[row.ID] {
+			if at != nil {
+				recorded = append(recorded, [2]int64{row.ID, int64(tier + 1)})
+			}
+		}
+	}
+	return TrophyCount{Value: catalog.Trophies(earned), RootVersion: root.StateVersion, TiersDigest: tiersDigest(recorded)}, nil
+}
+
+func tiersDigest(recorded [][2]int64) string {
+	if recorded == nil {
+		recorded = [][2]int64{}
+	}
+	b, _ := json.Marshal(recorded)
+	h := sha256.Sum256(b)
+	return hex.EncodeToString(h[:])
+}
 
 type Directory interface {
 	ProfileTx(context.Context, tx.Queryer, identity.PlayerID) (playerdirectory.Profile, bool, error)

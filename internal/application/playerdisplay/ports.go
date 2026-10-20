@@ -164,6 +164,7 @@ type Service struct {
 	Inventory          InventoryReader
 	External           ExternalOrigins
 	CatalogExternal    CatalogExternalOrigins
+	SkinItems          SkinItems
 	Values             ValuePort
 	Directory          directorysync.Reconciler
 }

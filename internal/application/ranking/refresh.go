@@ -30,6 +30,7 @@ type boardReceipt struct{ metricPin, refreshClass, settlementClass string }
 var boardReceipts = map[string]boardReceipt{
 	d.GirlsPolicy:            {metricPin: "roster-metrics", refreshClass: "I7C4C_GIRLS_RANKING_REFRESH", settlementClass: "I7C4C_GIRLS_RANKING_WEEKLY_TITLES"},
 	d.AchievementPointPolicy: {metricPin: "force-metric", refreshClass: "I7C4FA_AP_RANKING_REFRESH", settlementClass: "I7C4FA_AP_RANKING_WEEKLY_TITLES"},
+	d.SkinsPolicy:            {metricPin: "skin-metric", refreshClass: "I7C4FC_SKINS_RANKING_REFRESH", settlementClass: "I7C4FC_SKINS_RANKING_WEEKLY_TITLES"},
 }
 
 func refreshSchema(b d.Board) string { return "gxb.ranking." + b.Name + "-refresh.v1" }

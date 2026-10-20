@@ -184,12 +184,12 @@ func main() {
 	contentDB := contentstore.Store{Queryer: pool}
 	privileges := commerceprivilege.Provider{Store: commerceprivilegestore.Store{}, Content: contentDB}
 	i5svc := appi5.Service{Runner: runner, Store: i5db, Content: contentDB, Privileges: privileges, Functions: appi5.PetStarterFunctionAnnouncements{}, Directory: i4store.DirectoryLevelProjection{}, Backpack: i5db, Receipts: receipts, ReceiptRead: kernelstore.Reader{Queryer: pool}, RedeemSecret: redeemSecret}
-	displayService := playerdisplay.Service{Runner: runner, Fresh: pool, Time: postgres.AuthoritativeTime{Queryer: pool}, Players: i4store.PlayerRootLocker{}, Fence: i5db, Store: i5db, Content: contentDB, Receipts: receipts, Privileges: privileges, CosmeticPrivileges: privileges, Inventory: i5db, Population: characterstore.DisplayReader{Store: characterstore.Store{Queryer: pool}, Content: contentDB}, Characters: characterstore.DisplayReader{Store: characterstore.Store{Queryer: pool}, Content: contentDB}, Values: appi5.DisplayValueOwner{Store: i5db, Content: contentDB, Grant: i5svc}, Directory: appdir.Reconciler{Source: i5db, Sink: i4store.DirectoryLevelProjection{}}}
+	displayService := playerdisplay.Service{Runner: runner, Fresh: pool, Time: postgres.AuthoritativeTime{Queryer: pool}, Players: i4store.PlayerRootLocker{}, Fence: i5db, Store: i5db, Content: contentDB, Receipts: receipts, Privileges: privileges, CosmeticPrivileges: privileges, Inventory: i5db, Population: characterstore.DisplayReader{Store: characterstore.Store{Queryer: pool}, Content: contentDB}, Characters: characterstore.DisplayReader{Store: characterstore.Store{Queryer: pool}, Content: contentDB}, Values: appi5.DisplayValueOwner{Store: i5db, Content: contentDB, Grant: i5svc}, Directory: appdir.Reconciler{Source: i5db, Sink: i4store.DirectoryLevelProjection{}}, SkinItems: contentDB}
 
 	boardRanking := canonicalBoardRanking(pool, runner, contentDB, displayService, receipts)
 	// Title origins route by catalog id; the 1 on 1 origin read needs no Combat.
 	leagueOrigins := appleague.Service{Store: leaguestore.Store{}, Content: contentDB, Entitlements: i5db}
-	displayRoutes := playerdisplay.CatalogOriginRoutes{{Family: "bubble", First: 10002, Last: 10007, Owner: leagueOrigins}, {Family: "title", First: 100104, Last: 100104, Owner: leagueOrigins}, {Family: "title", First: 100111, Last: 100111, Owner: leagueOrigins}, {Family: "title", First: 100114, Last: 100121, Owner: leagueOrigins}, {Family: "title", First: 100059, Last: 100062, Owner: boardRanking}, {Family: "title", First: 100001, Last: 100001, Owner: boardRanking},
+	displayRoutes := playerdisplay.CatalogOriginRoutes{{Family: "bubble", First: 10002, Last: 10007, Owner: leagueOrigins}, {Family: "title", First: 100104, Last: 100104, Owner: leagueOrigins}, {Family: "title", First: 100111, Last: 100111, Owner: leagueOrigins}, {Family: "title", First: 100114, Last: 100121, Owner: leagueOrigins}, {Family: "title", First: 100059, Last: 100066, Owner: boardRanking}, {Family: "title", First: 100001, Last: 100001, Owner: boardRanking},
 		{First: 100002, Last: 100005, Owner: apponeonone.Service{Store: oneononestore.Store{}, Content: contentDB, Entitlements: i5db}},
 		{Family: "avatar", First: 110006001, Last: 110006001, Owner: apparena.Service{Store: arenastore.Store{}, Content: contentDB}}}
 
@@ -232,7 +232,7 @@ func main() {
 		playerdisplay.CatalogOriginRoute{Family: "title", First: 100026, Last: 100028, Owner: playerdisplay.ProgressTitleOrigins{Owner: "Dormhouse", TitleType: 7, Content: contentDB, Progress: dormSvc}})
 
 	librarySvc.Roster = characterstore.HeroBootstrapProjection{Content: contentDB, Library: librarySvc, Dorm: dormSvc, Book: bookSvc, Course: courseSvc, Inscription: inscriptionSvc, Element: elementSvc, Spirit: spiritSvc, Evolution: evolutionSvc}
-	achievements := canonicalAchievements(pool, runner, contentDB, i5db, i5svc, librarySvc, achievementOwners{books: bookSvc, courses: courseSvc, inscriptions: inscriptionSvc, dorm: dormSvc})
+	achievements := canonicalAchievements(pool, runner, contentDB, i5db, i5svc, librarySvc, achievementOwners{books: bookSvc, courses: courseSvc, inscriptions: inscriptionSvc, dorm: dormSvc, skins: displayService})
 	petSvc := apppet.Service{Runner: runner, Timed: petTimed, Store: heroDB, Fencer: i5db, Content: contentDB, Progression: contentDB, Receipts: receipts, ReceiptRead: kernelstore.Reader{Queryer: pool}, Acquisition: petAcquisitionDebit, MaterialCosts: heroMaterialCosts, Scalar: i5CrossOwner, PetExp: petExpDebit, Equipment: contentDB, EquipmentResources: heroEquipmentResources, Promotion: contentDB, PromotionResources: i5svc, StrictRestoration: i5svc, RestorationModifier: characterasset.IdentityRestorationModifier{}, AppearanceStore: heroDB, Appearance: contentDB, AppearanceMutationStore: heroDB}
 	petEconomyProjection := appi5.ScalarProjector{Runner: runner, Store: i5db}
 	guildPolicyArtifact, err := guildpolicy.LoadBuiltin()
@@ -303,7 +303,7 @@ func main() {
 	mustRegister(1, boot)
 	mustRegister(192, stockruntime.DiscoveryDispatcher{Realtime: realtime, Tracker: tracker})
 	owners := topFloorOwners{library: librarySvc, dorm: dormSvc, book: bookSvc, course: courseSvc, inscription: inscriptionSvc, element: elementSvc, spirit: spiritSvc, evolution: evolutionSvc}
-	profileMetrics := canonicalProfileMetrics(contentDB, canonicalPublicStats(pool, contentDB, owners))
+	profileMetrics := canonicalProfileMetrics(contentDB, canonicalPublicStats(pool, contentDB, owners), displayService, achievements)
 	// The title origin route copied above never reads metrics.
 	boardRanking.Metrics = profileMetrics
 	fight, fightReady, err := canonicalCombat(pool, runner, contentDB, owners)

@@ -18,6 +18,7 @@ import (
 // New tuning requires a new policy identity; stored generations keep this one.
 const GirlsPolicy = "C4C_PRIVATE_GIRLS_SERVER_RANKING_V1"
 const AchievementPointPolicy = "C4F_PRIVATE_AP_SERVER_RANKING_V1"
+const SkinsPolicy = "C4F_PRIVATE_SKINS_SERVER_RANKING_V1"
 const ServerCohort = "I4_SERVER_ALL_PLAYERS_V1"
 const BoardTitleDuration int64 = 604800
 const BoardLockRank uint16 = 600
@@ -27,8 +28,8 @@ var ErrSnapshot = errors.New("ranking: invalid or unavailable canonical board sn
 // Board is one private weekly server board over one public-profile metric.
 // Every board shares the cohort, ordering, UTC week and title duration.
 type Board struct {
-	Name, Policy, SourcePolicy, SourceSemantics string
-	FieldID, SubType, TitleType, TitledRanks    int64
+	Name, Policy, SourceOwner, SourcePolicy, SourceSemantics string
+	FieldID, SubType, TitleType, TitledRanks                 int64
 	// Titles[i] goes to rank i+1; the last title covers the remaining titled ranks.
 	Titles []int64
 	// RowValue is the rank_info row field NewRankWindow.initInfoText reads for
@@ -36,12 +37,15 @@ type Board struct {
 	RowValue string
 }
 
-var GirlsBoard = Board{Name: "girls", Policy: GirlsPolicy, SourcePolicy: "C4C_PRIVATE_CURRENT_ROSTER_V1", SourceSemantics: "CURRENT_DISTINCT_ORIGIN_HERO_PET_STARS_BEFORE_AWAKEN_V1", FieldID: 1001, SubType: 37, TitleType: 8, TitledRanks: 20, Titles: []int64{100059, 100060, 100061, 100062}, RowValue: "score"}
+var GirlsBoard = Board{Name: "girls", Policy: GirlsPolicy, SourceOwner: "CharacterHero", SourcePolicy: "C4C_PRIVATE_CURRENT_ROSTER_V1", SourceSemantics: "CURRENT_DISTINCT_ORIGIN_HERO_PET_STARS_BEFORE_AWAKEN_V1", FieldID: 1001, SubType: 37, TitleType: 8, TitledRanks: 20, Titles: []int64{100059, 100060, 100061, 100062}, RowValue: "score"}
 
 // AchievementPointBoard is rank 2001 "All girls' AP" (user Q3/Q4): metric 1007, No.1 title only.
-var AchievementPointBoard = Board{Name: "achievement-point", Policy: AchievementPointPolicy, SourcePolicy: "C4F_ALL_GIRLS_AP_V1", SourceSemantics: "CURRENT_SUM_OWNED_HERO_PUBLIC_FORCE_SELF_V1", FieldID: 1007, SubType: 8, TitleType: 1, TitledRanks: 1, Titles: []int64{100001}, RowValue: "info_val"}
+var AchievementPointBoard = Board{Name: "achievement-point", Policy: AchievementPointPolicy, SourceOwner: "CharacterHero", SourcePolicy: "C4F_ALL_GIRLS_AP_V1", SourceSemantics: "CURRENT_SUM_OWNED_HERO_PUBLIC_FORCE_SELF_V1", FieldID: 1007, SubType: 8, TitleType: 1, TitledRanks: 1, Titles: []int64{100001}, RowValue: "info_val"}
 
-var Boards = []Board{GirlsBoard, AchievementPointBoard}
+// SkinsBoard is rank 38 (user Q4: the Girls ranking policy) over skin collection 1003.
+var SkinsBoard = Board{Name: "skins", Policy: SkinsPolicy, SourceOwner: "PlayerDisplay", SourcePolicy: "C4F_SKIN_COLLECTION_V1", SourceSemantics: "CURRENT_SKIN_FRAME_AVATAR_COLLECTION_V1", FieldID: 1003, SubType: 38, TitleType: 9, TitledRanks: 20, Titles: []int64{100063, 100064, 100065, 100066}, RowValue: "score"}
+
+var Boards = []Board{GirlsBoard, AchievementPointBoard, SkinsBoard}
 
 func BoardOf(policy string) (Board, bool) {
 	for _, b := range Boards {
@@ -139,7 +143,7 @@ type BoardMetric struct {
 }
 
 func (m BoardMetric) valid(b Board, at time.Time, rev string) bool {
-	return m.Player.Valid() && m.Owner == "CharacterHero" && m.Policy == b.SourcePolicy && m.Semantics == b.SourceSemantics && m.Revision == rev && m.FieldID == b.FieldID && m.Value >= 0 && m.Value <= 9007199254740991 && m.SourceVersion > 0 && m.PopulationVersion == m.SourceVersion && revision(m.PopulationDigest) && m.ObservedAt.Equal(at)
+	return m.Player.Valid() && m.Owner == b.SourceOwner && m.Policy == b.SourcePolicy && m.Semantics == b.SourceSemantics && m.Revision == rev && m.FieldID == b.FieldID && m.Value >= 0 && m.Value <= 9007199254740991 && m.SourceVersion > 0 && m.PopulationVersion == m.SourceVersion && revision(m.PopulationDigest) && m.ObservedAt.Equal(at)
 }
 
 // Presentation is a snapshot of I4's derived directory; it never establishes a

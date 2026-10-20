@@ -152,6 +152,7 @@ var streakProfiles = map[int64]streakProfile{
 	LeagueDaysID:     {"C5F_LEAGUE_TOP5_DAYS_V2", [3]int64{1, 3, 7}, 0},
 	NormalHeroesID:   {OwnedStatePolicy, [3]int64{10, 50, 150}, 0},
 	AwakenedHeroesID: {OwnedStatePolicy, [3]int64{1, 30, 50}, 0},
+	SkinsID:          {OwnedStatePolicy, [3]int64{1, 10, 20}, 0},
 	PetsID:           {OwnedStatePolicy, [3]int64{2, 8, 15}, 0},
 	TextbooksID:      {OwnedStatePolicy, [3]int64{1, 15, 30}, 0},
 	RegionsID:        {OwnedStatePolicy, [3]int64{1, 3, 5}, 0},
