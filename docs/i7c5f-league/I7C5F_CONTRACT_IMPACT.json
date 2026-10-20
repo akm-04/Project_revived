@@ -30,14 +30,14 @@
     {
       "path": "hot/00_PASSMAP/PASS709_I7C_TOPOLOGY_V5.json",
       "sha256": "1b87dd43b8fe17c1536a366e08ce834a829ac78d7eebec251d5cca9ab33184db",
-      "upheld": "Leaf I7C-5E output CONQUER_PROGRESSION_WRITER; no renumbering."
+      "upheld": "Leaf I7C-5F is CHAMPIONS_LEAGUE_RECURRING_ORIGIN dependency; preserve 5A..5E closures and I7C6 handoff, no renumbering."
     }
   ],
   "inherited_bindings": [
     {
       "path": "hot/00_PASSMAP/PASS711_I7C2J_CONQUER_FACT_READ_CONTRACT.json",
       "sha256": "c16515646df4ca68e73716d00bde8e68e558887509a27c70f7c698fd058d9ca5",
-      "note": "Writer uses LockFactsTx/SaveFactsTx CAS under I4 315; scoped amendment: earlier-revision rows validated against the pinned catalog."
+      "note": "Read the existing2J/5E Conquer owner through canonical Combat snapshot inputs; no League writes or parallel Conquer owner."
     },
     {
       "path": "hot/00_PASSMAP/PASS418_COMBAT_TRUST_PROFILE_MATRIX.json",
@@ -71,7 +71,7 @@
     {
       "path": "hot/00_PASSMAP/PASS734_I7C5D_POLICY.json",
       "sha256": "b16a6ad9d128e3afeb80953024254b7bc0023d6657b6b8abf6ab9259242b99db",
-      "note": "Receipted value moves, roster snapshot and settle patterns reused; C5D approval merged from work/i7c5d/PASSMAP_PENDING_MERGE.json."
+      "note": "Reuse already qualified Combat detached resolution, receipt and settlement composition patterns only; do not copy RegionArena roster balancing, star economy or45day schedule."
     },
     {
       "path": "hot/00_PASSMAP/PASS420_PVP_PRIORITY_BINDING_DESIGN.json",
