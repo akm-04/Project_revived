@@ -26,6 +26,7 @@ import (
 	appdisplay "gxb.local/backend/v2/internal/application/playerdisplay"
 	cd "gxb.local/backend/v2/internal/domain/combat"
 	"gxb.local/backend/v2/internal/domain/identity"
+	"gxb.local/backend/v2/internal/domain/mail"
 	d "gxb.local/backend/v2/internal/domain/oneonone"
 	"gxb.local/backend/v2/internal/foundation/ids"
 	"gxb.local/backend/v2/internal/foundation/operation"
@@ -279,6 +280,17 @@ func TestI7C5COneOnOneEntryMatchSettlementNative(t *testing.T) {
 	if scalar(t, pool, `SELECT count(*) FROM mail_attachments m JOIN mail_records r USING(mail_uuid) WHERE r.recipient_player_id=$1 AND r.source_kind='ONE_ON_ONE_REWARD' AND m.resource_key='top_coin' AND m.amount=2100`, int64(a.PlayerID)) != int64(settled) ||
 		scalar(t, pool, `SELECT count(*) FROM mail_records WHERE recipient_player_id=$1 AND source_kind='ONE_ON_ONE_FRAME'`, int64(a.PlayerID)) != 1 {
 		t.Fatal("reward and frame mails")
+	}
+	// The top_coin income (ENABLED_R4) is claimable through the stock mail claim.
+	wire := scalar(t, pool, `SELECT min(wire_id) FROM mail_records WHERE recipient_player_id=$1 AND source_kind='ONE_ON_ONE_REWARD' AND namespace='NORMAL'`, int64(a.PlayerID))
+	values := i5store.Store{Queryer: pool}
+	claims := i5.Service{Runner: tx.Runner{DB: pool}, Store: values, Content: contentstore.Store{Queryer: pool}, Privileges: i5.BaselinePrivilegeProvider{}, Functions: i5.PetStarterFunctionAnnouncements{},
+		Directory: i4store.DirectoryLevelProjection{}, Backpack: values, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: pool}}
+	if _, err = claims.ClaimMail(ctx, a, mail.Address{Namespace: mail.Normal, WireID: wire}, op()); err != nil {
+		t.Fatal("claim 1 on 1 reward mail", err)
+	}
+	if scalar(t, pool, `SELECT amount FROM player_currency_balances WHERE player_id=$1 AND resource_key='top_coin'`, int64(a.PlayerID)) != 2100 {
+		t.Fatal("top_coin credited by the claim")
 	}
 	sundays := scalar(t, pool, `SELECT count(*) FROM one_on_one_settlement_ranks WHERE player_id=$1 AND title_id=100002`, int64(a.PlayerID))
 	if sundays < 1 || scalar(t, pool, `SELECT current FROM achievement_streaks WHERE player_id=$1 AND achievement_id=100002`, int64(a.PlayerID)) < 1 {
