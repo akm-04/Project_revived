@@ -482,7 +482,7 @@ func TestRawBundleZeroFalseAndIsolation(t *testing.T) {
 		t.Fatal(zero, noMail)
 	}
 	r, p, f, o, h, pet, petAcq, petProg, equipment, heroEquipment, superEquipment, heroFumoTargets, heroFumoMaterials, restorationEquipment, restorationFractions, restorationDenominations, petEquipment, petRestorationEquipment, practice, appearance := b.ExpectedCounts()
-	if r != 5564 || p != 100 || f != 99 || o != 0 || h != 568 || pet != 54 || petAcq != 27 || petProg != 54 || equipment != 1176 || heroEquipment != 53280 || superEquipment != 84 || heroFumoTargets != 359 || heroFumoMaterials != 516 || restorationEquipment != 195 || restorationFractions != 5 || restorationDenominations != 3 || petEquipment != 2592 || petRestorationEquipment != 73 || practice != 1889 || appearance != 542 {
+	if r != 5565 || p != 100 || f != 99 || o != 0 || h != 568 || pet != 54 || petAcq != 27 || petProg != 54 || equipment != 1176 || heroEquipment != 53280 || superEquipment != 84 || heroFumoTargets != 359 || heroFumoMaterials != 516 || restorationEquipment != 195 || restorationFractions != 5 || restorationDenominations != 3 || petEquipment != 2592 || petRestorationEquipment != 73 || practice != 1889 || appearance != 542 {
 		t.Fatal(r, p, f, o, h, pet, petAcq, petProg, equipment, heroEquipment, superEquipment, heroFumoTargets, heroFumoMaterials, restorationEquipment, restorationFractions, restorationDenominations, petEquipment, petRestorationEquipment, practice, appearance)
 	}
 	raw := b.ManifestJSON()
@@ -616,6 +616,14 @@ func (r repo) InsertTopFloor(_ context.Context, x tx.Tx, b Bundle) (int64, error
 	t := x.(*modelTx)
 	v := t.installed[b.RevisionID()]
 	v.TopFloorCount = 1
+	t.installed[b.RevisionID()] = v
+	return 1, nil
+}
+
+func (r repo) InsertOneOnOne(_ context.Context, x tx.Tx, b Bundle) (int64, error) {
+	t := x.(*modelTx)
+	v := t.installed[b.RevisionID()]
+	v.OneOnOneCount = 1
 	t.installed[b.RevisionID()] = v
 	return 1, nil
 }

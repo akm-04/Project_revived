@@ -449,7 +449,7 @@ func (s Service) settleTx(c context.Context, sc gen.TimedScope, id ids.UUID) err
 		if err = s.Store.InsertRecordTx(c, sc.Tx, d.Record{Owner: side.player, AttemptID: f.AttemptID, Attack: side.attack, Win: side.won, Opponent: side.opponent, At: at}, catalog.RecordsMax); err != nil {
 			return err
 		}
-		uses, err := d.Usage(settled.Report, side.side, side.won)
+		uses, err := cd.Usage(settled.Report, side.side, side.won)
 		if err != nil {
 			return err
 		}

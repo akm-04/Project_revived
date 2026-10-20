@@ -107,6 +107,10 @@ xyd.ModelManager = {
 				if kind == xyd.ModelType.REGION_ARENA then
 					return {}
 				end
+				-- C5C: SUPER_ARENA reads only the current round; each round is its own attempt.
+				if kind == xyd.ModelType.PEAK_ARENA then
+					return { clear = function() end, setCurrentBattleRound = function() end, getCurrentBattleRound = function() return 1 end }
+				end
 				error("COMBAT_ADAPTER_UNMATERIALIZED_MODEL " .. tostring(kind))
 			end,
 		}

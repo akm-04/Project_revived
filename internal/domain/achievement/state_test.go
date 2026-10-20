@@ -89,7 +89,7 @@ func TestTopFloorStreakTiers(t *testing.T) {
 	}
 	c.Rows[0].Thresholds = [3]int64{3, 6, 10}
 	at := time.Unix(1700000000, 0).UTC()
-	s, err := NewStreak(100001, strings.Repeat("a", 64), at)
+	s, err := NewStreak(100001, TopFloorStreakID, strings.Repeat("a", 64), at)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -124,5 +124,38 @@ func TestTopFloorStreakTiers(t *testing.T) {
 	}
 	if s.Current != 10 || s.CompleteTimes[2] == nil {
 		t.Fatalf("ten days %+v", s)
+	}
+}
+
+func TestOneOnOneStreakTiers(t *testing.T) {
+	c := Catalog{SchemaVersion: 1, PolicyID: Policy, SelectedID: SelectedID}
+	for i := int64(0); i < 33; i++ {
+		c.Rows = append(c.Rows, Definition{ID: 100001 + i, Thresholds: [3]int64{1, 10, 20}, Points: [3]int64{1, 1, 1}})
+	}
+	c.Rows[1].Thresholds, c.Rows[27].Thresholds = [3]int64{1, 2, 3}, [3]int64{5, 15, 30}
+	at := time.Unix(1700000000, 0).UTC()
+	weekly, _ := NewStreak(100001, WeeklyStreakID, strings.Repeat("a", 64), at)
+	for _, week := range []int64{7, 14, 21} {
+		at = at.Add(time.Hour)
+		weekly, _, _ = weekly.ObserveDay(c, week, true, at)
+	}
+	if weekly.Current != 3 || weekly.CompleteTimes[2] == nil {
+		t.Fatalf("three consecutive Sundays %+v", weekly)
+	}
+	at = at.Add(time.Hour)
+	if weekly, _, _ = weekly.ObserveDay(c, 35, true, at); weekly.Current != 1 {
+		t.Fatal("a skipped Sunday restarts the weekly streak")
+	}
+	wins, _ := NewStreak(100001, WinStreakID, strings.Repeat("a", 64), at)
+	at = at.Add(time.Hour)
+	if wins, _, _ = wins.ObserveCount(c, 15, at); wins.CompleteTimes[1] == nil || wins.CompleteTimes[2] != nil {
+		t.Fatalf("win streak tiers %+v", wins)
+	}
+	at = at.Add(time.Hour)
+	if wins, _, _ = wins.ObserveCount(c, 0, at); wins.Current != 0 || wins.CompleteTimes[1] == nil {
+		t.Fatal("a loss resets the count but keeps earned tiers")
+	}
+	if _, _, err := wins.ObserveDay(c, 1, true, at); err == nil {
+		t.Fatal("a counted streak has no periods")
 	}
 }

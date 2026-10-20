@@ -7,7 +7,9 @@ import (
 	"errors"
 	"gxb.local/backend/v2/internal/adapters/postgres/commerceprivilegestore"
 	"gxb.local/backend/v2/internal/application/commerceprivilege"
+	apponeonone "gxb.local/backend/v2/internal/application/oneonone"
 	"gxb.local/backend/v2/internal/application/playerdisplay"
+	apptopfloor "gxb.local/backend/v2/internal/application/topfloor"
 	"log"
 	"net/http"
 	"os"
@@ -38,6 +40,7 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres/inscriptionstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/kernelstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/librarystore"
+	"gxb.local/backend/v2/internal/adapters/postgres/oneononestore"
 	"gxb.local/backend/v2/internal/adapters/postgres/presencestore"
 	"gxb.local/backend/v2/internal/adapters/postgres/publicationstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/rankingstore"
@@ -180,7 +183,9 @@ func main() {
 	displayService := playerdisplay.Service{Runner: runner, Fresh: pool, Time: postgres.AuthoritativeTime{Queryer: pool}, Players: i4store.PlayerRootLocker{}, Fence: i5db, Store: i5db, Content: contentDB, Receipts: receipts, Privileges: privileges, CosmeticPrivileges: privileges, Inventory: i5db, Population: characterstore.DisplayReader{Store: characterstore.Store{Queryer: pool}, Content: contentDB}, Characters: characterstore.DisplayReader{Store: characterstore.Store{Queryer: pool}, Content: contentDB}, Values: appi5.DisplayValueOwner{Store: i5db, Content: contentDB, Grant: i5svc}, Directory: appdir.Reconciler{Source: i5db, Sink: i4store.DirectoryLevelProjection{}}}
 
 	girlsRanking := canonicalGirlsRanking(pool, runner, contentDB, displayService, receipts)
-	displayService.CatalogExternal = girlsRanking
+	// Title origins route by catalog id; the 1 on 1 origin read needs no Combat.
+	displayService.CatalogExternal = playerdisplay.CatalogOriginRoutes{{First: 100059, Last: 100062, Owner: girlsRanking},
+		{First: 100002, Last: 100005, Owner: apponeonone.Service{Store: oneononestore.Store{}, Content: contentDB, Entitlements: i5db}}}
 
 	maxHeroColorPolicy := appi5.PreservationMaxHeroColorProvider{}
 	heroDB := characterstore.Store{Queryer: pool}
@@ -298,9 +303,15 @@ func main() {
 		for _, mid := range stockruntime.TopFloorMIDs {
 			mustRegister(mid, stockruntime.TopFloorDispatcher{Authority: authority, Service: topFloor})
 		}
-		go runTopFloorReconcile(ctx, pool, topFloor)
+		go runReconcile(ctx, pool, apptopfloor.Reconciler{Service: topFloor})
+		oneOnOne := canonicalOneOnOne(pool, runner, contentDB, i5db, privileges, fight, owners)
+		ranking.OneOnOne = oneOnOne
+		for _, mid := range stockruntime.OneOnOneMIDs {
+			mustRegister(mid, stockruntime.OneOnOneDispatcher{Authority: authority, Service: oneOnOne})
+		}
+		go runReconcile(ctx, pool, apponeonone.Reconciler{Service: oneOnOne})
 	} else {
-		log.Print("I7C-5B Top Floor routes not registered: GXB_COMBAT_ENTROPY_KEYS is unset")
+		log.Print("I7C-5B/5C Top Floor and 1 on 1 routes not registered: GXB_COMBAT_ENTROPY_KEYS is unset")
 	}
 	mustRegister(301, ranking)
 	lobbyD := stockruntime.LobbyDispatcher{Authority: authority, Tracker: tracker}

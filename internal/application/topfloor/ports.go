@@ -48,7 +48,7 @@ type Store interface {
 	RecordTx(context.Context, tx.Queryer, int64) (d.Record, bool, error)
 	RetainedTx(context.Context, tx.Queryer, ids.UUID) (bool, error)
 	LostDefenseTx(context.Context, tx.Queryer, identity.PlayerID, identity.PlayerID) (bool, error)
-	AddUsageTx(context.Context, tx.Tx, identity.PlayerID, []d.PartnerUse) error
+	AddUsageTx(context.Context, tx.Tx, identity.PlayerID, []cd.PartnerUse) error
 	InsertDaySettlementTx(context.Context, tx.Tx, d.DaySettlement) error
 	DueServersTx(context.Context, tx.Queryer, int64) ([]identity.LogicalServerID, error)
 }

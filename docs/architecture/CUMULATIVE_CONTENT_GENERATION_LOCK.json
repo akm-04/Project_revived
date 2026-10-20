@@ -226,14 +226,22 @@
       "parser_version": "lua-generated-v18-guild-invite",
       "revision_id": "368455bea9adc0f1f06ba54bf5e90e07d7d30a45d19d723dc3c2e2fe56615ad0",
       "scope": "Top Floor catalog (arena_reward, misc, vip, refresh_cost, robot, robot_hero, random_name; C5B private ladder policy inputs); arena_coin ENABLED_R4 as Top Floor income owner; prior37payloads otherwise unchanged."
+    },
+    {
+      "ordinal": 34,
+      "stage": "I7C-5C",
+      "compiler_version": "i7c5c-one-on-one",
+      "parser_version": "lua-generated-v18-guild-invite",
+      "revision_id": "bc12206a9236f744d50d205a927fdc8050d9dfc1f7dd13bc59fe8169cb1787ce",
+      "scope": "1 on 1 catalog (legend_arena_rank, legend_reward, misc legend_*/top_refresh_cost, vip num_top/top_reset, refresh_cost buy_top_cost, title_system 100002-100005, translation LEGEND_MAIL_*, message 30002; C5C private policy inputs); top_coin ENABLED_R4 as 1 on 1 income owner; prior38payloads otherwise unchanged."
     }
   ],
   "current": {
-    "ordinal": 33,
-    "stage": "I7C-5B",
-    "compiler_version": "i7c5b-top-floor",
+    "ordinal": 34,
+    "stage": "I7C-5C",
+    "compiler_version": "i7c5c-one-on-one",
     "parser_version": "lua-generated-v18-guild-invite",
-    "revision_id": "368455bea9adc0f1f06ba54bf5e90e07d7d30a45d19d723dc3c2e2fe56615ad0",
-    "scope": "Top Floor catalog (arena_reward, misc, vip, refresh_cost, robot, robot_hero, random_name; C5B private ladder policy inputs); arena_coin ENABLED_R4 as Top Floor income owner; prior37payloads otherwise unchanged."
+    "revision_id": "bc12206a9236f744d50d205a927fdc8050d9dfc1f7dd13bc59fe8169cb1787ce",
+    "scope": "1 on 1 catalog (legend_arena_rank, legend_reward, misc legend_*/top_refresh_cost, vip num_top/top_reset, refresh_cost buy_top_cost, title_system 100002-100005, translation LEGEND_MAIL_*, message 30002; C5C private policy inputs); top_coin ENABLED_R4 as 1 on 1 income owner; prior38payloads otherwise unchanged."
   }
 }

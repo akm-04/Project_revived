@@ -95,17 +95,17 @@ func (Store) PutEventTx(c context.Context, t tx.Tx, e app.Event) error {
 	return nil
 }
 
-func (Store) ReadStreakTx(c context.Context, q tx.Queryer, pid identity.PlayerID, lock bool) (d.Streak, bool, error) {
-	var s d.Streak
+func (Store) ReadStreakTx(c context.Context, q tx.Queryer, pid identity.PlayerID, id int64, lock bool) (d.Streak, bool, error) {
+	s := d.Streak{AchievementID: id}
 	if q == nil || !pid.Valid() {
 		return s, false, d.ErrUnavailable
 	}
-	sql := `SELECT player_id,content_revision,current,last_day,complete_times::text,state_version,created_at,updated_at FROM achievement_streaks WHERE player_id=$1`
+	sql := `SELECT player_id,content_revision,current,last_day,complete_times::text,state_version,created_at,updated_at FROM achievement_streaks WHERE player_id=$1 AND achievement_id=$2`
 	if lock {
 		sql += " FOR UPDATE"
 	}
 	var raw string
-	e := q.QueryRow(c, sql, int64(pid)).Scan(&s.PlayerID, &s.ContentRevision, &s.Current, &s.LastDay, &raw, &s.StateVersion, &s.CreatedAt, &s.UpdatedAt)
+	e := q.QueryRow(c, sql, int64(pid), id).Scan(&s.PlayerID, &s.ContentRevision, &s.Current, &s.LastDay, &raw, &s.StateVersion, &s.CreatedAt, &s.UpdatedAt)
 	if errors.Is(e, kernelstore.ErrNoRows) {
 		return s, false, nil
 	}
@@ -129,11 +129,11 @@ func (Store) SaveStreakTx(c context.Context, t tx.Tx, s d.Streak, old int64) err
 	if e != nil {
 		return e
 	}
-	sql := `UPDATE achievement_streaks SET current=$3,last_day=$4,complete_times=$5::jsonb,state_version=$6,updated_at=$7 WHERE player_id=$1 AND state_version=$2`
-	args := []any{int64(s.PlayerID), old, s.Current, s.LastDay, string(raw), s.StateVersion, s.UpdatedAt}
+	sql := `UPDATE achievement_streaks SET current=$3,last_day=$4,complete_times=$5::jsonb,state_version=$6,updated_at=$7 WHERE player_id=$1 AND state_version=$2 AND achievement_id=$8`
+	args := []any{int64(s.PlayerID), old, s.Current, s.LastDay, string(raw), s.StateVersion, s.UpdatedAt, s.AchievementID}
 	if old == 0 {
 		sql = `INSERT INTO achievement_streaks(player_id,achievement_id,policy_id,content_revision,current,last_day,complete_times,state_version,created_at,updated_at)VALUES($1,$2,$3,$4,$5,$6,$7::jsonb,$8,$9,$10)`
-		args = []any{int64(s.PlayerID), d.StreakID, d.StreakPolicy, s.ContentRevision, s.Current, s.LastDay, string(raw), s.StateVersion, s.CreatedAt, s.UpdatedAt}
+		args = []any{int64(s.PlayerID), s.AchievementID, d.StreakPolicy(s.AchievementID), s.ContentRevision, s.Current, s.LastDay, string(raw), s.StateVersion, s.CreatedAt, s.UpdatedAt}
 	}
 	tag, e := t.Exec(c, sql, args...)
 	if e != nil {
@@ -145,10 +145,10 @@ func (Store) SaveStreakTx(c context.Context, t tx.Tx, s d.Streak, old int64) err
 	return nil
 }
 
-// ActiveStreakPlayersTx lists the server's players with a running streak observed before day.
-func (Store) ActiveStreakPlayersTx(c context.Context, q tx.Queryer, server identity.LogicalServerID, day int64) ([]identity.PlayerID, error) {
+// ActiveStreakPlayersTx lists the server's players with a running periodic streak observed before day.
+func (Store) ActiveStreakPlayersTx(c context.Context, q tx.Queryer, server identity.LogicalServerID, id, day int64) ([]identity.PlayerID, error) {
 	var raw string
-	if e := q.QueryRow(c, `SELECT COALESCE(jsonb_agg(player_id ORDER BY player_id),'[]'::jsonb)::text FROM achievement_streaks WHERE player_id/100000=$1 AND current>0 AND last_day<$2`, int64(server), day).Scan(&raw); e != nil {
+	if e := q.QueryRow(c, `SELECT COALESCE(jsonb_agg(player_id ORDER BY player_id),'[]'::jsonb)::text FROM achievement_streaks WHERE player_id/100000=$1 AND achievement_id=$3 AND current>0 AND last_day<$2`, int64(server), day, id).Scan(&raw); e != nil {
 		return nil, e
 	}
 	var out []identity.PlayerID

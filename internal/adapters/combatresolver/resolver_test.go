@@ -153,3 +153,22 @@ end`, "class sweep"); err != nil {
 	}
 	t.Logf("constructed %d of %d referenced fighter classes; server-incompatible %v", len(seen)-len(failed), len(seen), failed)
 }
+
+// C5C: 1 on 1 rounds run under engine CampaignType.SUPER_ARENA with battle 114001.
+func TestSuperArenaRoundResolves(t *testing.T) {
+	corpus, _ := combatcorpus.Load()
+	s := templateSnapshot(t, []combat.Actor{TemplateHero(t, 10001001, 3, 20, 2)}, []combat.Actor{TemplateHero(t, 10001002, 3, 20, 2)})
+	s.Battle.CampaignType, s.Battle.BattleID = 65, 114001
+	root := sha256.Sum256([]byte("super-arena-root"))
+	first, err := Resolve(corpus, s, root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	second, err := Resolve(corpus, s, root)
+	if err != nil || !bytes.Equal(first.Report, second.Report) {
+		t.Fatal("super arena round is not deterministic", err)
+	}
+	if first.Outcome.Frames <= 0 || first.Outcome.Star < 0 || first.Outcome.Star > 3 {
+		t.Fatal("super arena outcome", first.Outcome)
+	}
+}

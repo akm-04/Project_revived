@@ -6,13 +6,19 @@ local waves = {}
 for i, wave in ipairs(input.waves_b) do
 	waves[i] = combat_models(wave)
 end
+local herosA = combat_models(input.team_a)
+local herosB = waves
+-- SUPER_ARENA BattleCreateReport takes team groups; one round is team1.
+if input.campaign_type == xyd.CampaignType.SUPER_ARENA then
+	herosA, herosB = { team1 = herosA }, { team1 = waves[1] }
+end
 local Report = require("app.scenes.BattleCreateReport")
 local battle = Report.new({
 	battleType = xyd.BattleType.CreateReport,
 	campaignType = input.campaign_type,
 	battleID = input.battle_id,
-	herosA = combat_models(input.team_a),
-	herosB = waves,
+	herosA = herosA,
+	herosB = herosB,
 	petsA = combat_models(input.pets_a),
 	petsB = combat_models(input.pets_b),
 	fighterInfo = {},

@@ -110,14 +110,35 @@ func (c Catalog) Validate() error {
 	return nil
 }
 
-// Scoped I7C-5B amendment: Top Floor Challenger (100001) earns tiers at 3/6/10
-// consecutive daily 21:00 snapshots in the top 3; tiers are never revoked.
-const StreakPolicy = "C5B_TOP_FLOOR_CHALLENGER_STREAK_V1"
-const StreakID int64 = 100001
-const StreakTopRank int64 = 3
+// Scoped I7C-5B/5C amendments: streak producers. Tiers are never revoked.
+// 100001 Top Floor Challenger: consecutive daily 21:00 snapshots in the top 3 (3/6/10).
+// 100002 1 on 1 Dominator: consecutive Sunday 22:00 snapshots with server rank <= 3 (1/2/3 weeks).
+// 100028 1 on 1 Smash 'em all: a running attack-match win streak (5/15/30).
+const (
+	TopFloorStreakID int64 = 100001
+	WeeklyStreakID   int64 = 100002
+	WinStreakID      int64 = 100028
+	StreakTopRank    int64 = 3
+)
+
+type streakProfile struct {
+	policy     string
+	thresholds [3]int64
+	// step is the distance between consecutive periods; 0 counts directly.
+	step int64
+}
+
+var streakProfiles = map[int64]streakProfile{
+	TopFloorStreakID: {"C5B_TOP_FLOOR_CHALLENGER_STREAK_V1", [3]int64{3, 6, 10}, 1},
+	WeeklyStreakID:   {"C5C_ONE_ON_ONE_DOMINATOR_STREAK_V1", [3]int64{1, 2, 3}, 7},
+	WinStreakID:      {"C5C_ONE_ON_ONE_WIN_STREAK_V1", [3]int64{5, 15, 30}, 0},
+}
+
+func StreakPolicy(id int64) string { return streakProfiles[id].policy }
 
 type Streak struct {
 	PlayerID             identity.PlayerID
+	AchievementID        int64
 	ContentRevision      string
 	Current              int64
 	LastDay              *int64
@@ -126,12 +147,16 @@ type Streak struct {
 	CreatedAt, UpdatedAt time.Time
 }
 
-func NewStreak(pid identity.PlayerID, rev string, at time.Time) (Streak, error) {
-	s := Streak{PlayerID: pid, ContentRevision: rev, StateVersion: 1, CreatedAt: at.UTC(), UpdatedAt: at.UTC()}
+func NewStreak(pid identity.PlayerID, id int64, rev string, at time.Time) (Streak, error) {
+	s := Streak{PlayerID: pid, AchievementID: id, ContentRevision: rev, StateVersion: 1, CreatedAt: at.UTC(), UpdatedAt: at.UTC()}
 	return s, s.Validate()
 }
+
 func (s Streak) Validate() error {
-	if !s.PlayerID.Valid() || !RevisionValid(s.ContentRevision) || s.Current < 0 || (s.Current > 0) && s.LastDay == nil || s.StateVersion < 1 || s.CreatedAt.Unix() <= 0 || s.UpdatedAt.Before(s.CreatedAt) {
+	profile, known := streakProfiles[s.AchievementID]
+	periodic := profile.step > 0
+	if !known || !s.PlayerID.Valid() || !RevisionValid(s.ContentRevision) || s.Current < 0 || periodic && s.Current > 0 && s.LastDay == nil || !periodic && s.LastDay != nil ||
+		s.StateVersion < 1 || s.CreatedAt.Unix() <= 0 || s.UpdatedAt.Before(s.CreatedAt) {
 		return ErrConflict
 	}
 	for i, t := range s.CompleteTimes {
@@ -142,9 +167,33 @@ func (s Streak) Validate() error {
 	return nil
 }
 
-// ObserveDay applies one settled day; a day at or before the last observed one is a no-op.
+func (s Streak) profile(c Catalog, at time.Time) (streakProfile, error) {
+	profile := streakProfiles[s.AchievementID]
+	index := s.AchievementID - c.Rows[0].ID
+	if s.Validate() != nil || c.Validate() != nil || index < 0 || index >= int64(len(c.Rows)) || c.Rows[index].Thresholds != profile.thresholds || at.Before(s.UpdatedAt) {
+		return profile, ErrConflict
+	}
+	return profile, nil
+}
+
+func (s Streak) advance(profile streakProfile, next int64, at time.Time) Streak {
+	stamp := at.UTC()
+	for i, target := range profile.thresholds {
+		if s.CompleteTimes[i] == nil && next >= target {
+			s.CompleteTimes[i] = &stamp
+		}
+	}
+	s.Current = next
+	s.StateVersion++
+	s.UpdatedAt = stamp
+	return s
+}
+
+// ObserveDay applies one settled period (a day number); a period at or before
+// the last observed one is a no-op.
 func (s Streak) ObserveDay(c Catalog, day int64, top bool, at time.Time) (Streak, bool, error) {
-	if s.Validate() != nil || c.Validate() != nil || c.Rows[0].ID != StreakID || c.Rows[0].Thresholds != [3]int64{3, 6, 10} || at.Before(s.UpdatedAt) {
+	profile, err := s.profile(c, at)
+	if err != nil || profile.step == 0 {
 		return Streak{}, false, ErrConflict
 	}
 	if s.LastDay != nil && day <= *s.LastDay {
@@ -153,18 +202,24 @@ func (s Streak) ObserveDay(c Catalog, day int64, top bool, at time.Time) (Streak
 	next := int64(0)
 	if top {
 		next = 1
-		if s.LastDay != nil && *s.LastDay == day-1 {
+		if s.LastDay != nil && *s.LastDay == day-profile.step {
 			next = s.Current + 1
 		}
 	}
-	stamp := at.UTC()
-	for i, target := range c.Rows[0].Thresholds {
-		if s.CompleteTimes[i] == nil && next >= target {
-			s.CompleteTimes[i] = &stamp
-		}
+	s = s.advance(profile, next, at)
+	s.LastDay = &day
+	return s, true, s.Validate()
+}
+
+// ObserveCount records a counted streak's current value.
+func (s Streak) ObserveCount(c Catalog, count int64, at time.Time) (Streak, bool, error) {
+	profile, err := s.profile(c, at)
+	if err != nil || profile.step != 0 || count < 0 {
+		return Streak{}, false, ErrConflict
 	}
-	s.Current, s.LastDay = next, &day
-	s.StateVersion++
-	s.UpdatedAt = stamp
+	if count == s.Current {
+		return s, false, nil
+	}
+	s = s.advance(profile, count, at)
 	return s, true, s.Validate()
 }

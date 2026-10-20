@@ -1,5 +1,5 @@
 {
-  "highest_migration": "00065_i7c5b_top_floor.sql",
+  "highest_migration": "00066_i7c5c_one_on_one.sql",
   "migrations": {
     "00001_kernel_receipts.sql": "fab5b35f4ca5eee53c62b0b924ec448327e1aa31205015c22e24ee0f2b710fd8",
     "00002_identity_logicalserver_bootstrap.sql": "adff86d27dd1c02e4da0dec6b1aa21f33aaafd4d410849abc76bfeec58a5cd5f",
@@ -65,7 +65,8 @@
     "00062_i7c4c_girls_ranking.sql": "582ae5844a974f0980855eae5e80ee8e5a6264300ee2e3d63cf3e7d21e77e44e",
     "00063_i7c4_character_raw_awakening_birth.sql": "e6f107683dd05913b464ced40a16cafc55580d35e28d18b7227cb584dde3238b",
     "00064_i7c5a_combat_foundation.sql": "e2f33e72f3951d2c7a163cefe160b8a3520ae6f929b817f5651a94a282584612",
-    "00065_i7c5b_top_floor.sql": "7115e00149ab9e3bf9fe9945eaba6718a07ac7ddc2b81ea67fd5ffb3043bc06d"
+    "00065_i7c5b_top_floor.sql": "7115e00149ab9e3bf9fe9945eaba6718a07ac7ddc2b81ea67fd5ffb3043bc06d",
+    "00066_i7c5c_one_on_one.sql": "b8467111447ecaaa832d52c051d424d82d32e79fe6aaa1b3df470fbd3e3b6f99"
   },
   "rule": "All listed migration bytes are immutable for this cumulative candidate. Historical phase validators remain snapshot-specific; forward schema changes require a new migration. I7A-4A allocates forward-only 00033 for SocialRelation/SocialInbox durable foundations and an I4-owned non-unique discovery index; it performs no Social backfill and activates no stock routes.",
   "schema_version": 1,

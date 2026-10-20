@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"gxb.local/backend/v2/internal/adapters/postgres/kernelstore"
+	cd "gxb.local/backend/v2/internal/domain/combat"
 	"gxb.local/backend/v2/internal/domain/identity"
 	d "gxb.local/backend/v2/internal/domain/topfloor"
 	"gxb.local/backend/v2/internal/foundation/ids"
@@ -438,7 +439,7 @@ func (Store) LostDefenseTx(c context.Context, q tx.Queryer, owner, attacker iden
 	return found, e
 }
 
-func (Store) AddUsageTx(c context.Context, t tx.Tx, pid identity.PlayerID, uses []d.PartnerUse) error {
+func (Store) AddUsageTx(c context.Context, t tx.Tx, pid identity.PlayerID, uses []cd.PartnerUse) error {
 	if t == nil {
 		return d.ErrUnavailable
 	}
@@ -450,7 +451,7 @@ func (Store) AddUsageTx(c context.Context, t tx.Tx, pid identity.PlayerID, uses 
 	return nil
 }
 
-func (Store) UsageTx(c context.Context, q tx.Queryer, pid identity.PlayerID) ([]d.PartnerUse, error) {
+func (Store) UsageTx(c context.Context, q tx.Queryer, pid identity.PlayerID) ([]cd.PartnerUse, error) {
 	var rows []struct {
 		PartnerID int64  `json:"partner_id"`
 		Fights    int64  `json:"fights"`
@@ -461,9 +462,9 @@ func (Store) UsageTx(c context.Context, q tx.Queryer, pid identity.PlayerID) ([]
 	if _, e := readJSON(c, q, `SELECT COALESCE(jsonb_agg(jsonb_build_object('partner_id',partner_id,'fights',fights,'wins',wins,'kills',kill_count,'harms',harms::text) ORDER BY partner_id),'[]'::jsonb)::text FROM top_floor_partner_usage WHERE player_id=$1`, &rows, int64(pid)); e != nil {
 		return nil, e
 	}
-	out := make([]d.PartnerUse, 0, len(rows))
+	out := make([]cd.PartnerUse, 0, len(rows))
 	for _, r := range rows {
-		out = append(out, d.PartnerUse{PartnerID: r.PartnerID, Wins: r.Wins, Kills: r.Kills, Harms: r.Harms})
+		out = append(out, cd.PartnerUse{PartnerID: r.PartnerID, Wins: r.Wins, Kills: r.Kills, Harms: r.Harms})
 	}
 	return out, nil
 }

@@ -21,12 +21,23 @@ from pathlib import Path
 from typing import Any, Iterable
 
 SCHEMA_VERSION = 1
-COMPILER_VERSION = "i7c5b-top-floor"
+COMPILER_VERSION = "i7c5c-one-on-one"
 PARSER_VERSION = "lua-generated-v18-guild-invite"
 EXPECTED_SOURCE_ARCHIVE_SHA256 = "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
 SOURCE_PREFIX = "app-assets/output/assets/src_64/"
 
 SOURCE_MANIFEST = [
+    ('data/tables/legend_arena_rank.lua', '047203550eae124c95807b001845d2f80e1cb332744f689c2987e9bf35828fb4', 'I7C5C_ONE_ON_ONE_SOURCE_BOUNDARY'),
+    ('data/tables/legend_reward.lua', 'cbcbe0077320c12820400225564cd1d0dc3f0d5af7ea86b36af98d58cc61efdf', 'I7C5C_ONE_ON_ONE_SOURCE_BOUNDARY'),
+    ('data/tables/translation.lua', '734790d99e4022575ebb3bb3e229cac21ffcf26c84d22dee28c76082dcaf8a36', 'I7C5C_ONE_ON_ONE_SOURCE_BOUNDARY'),
+    ('data/tables/message.lua', '538875e1f791c1faf2c0ad113eb73b1d3a53d1c07d9738f4c70315fa59e00e1d', 'I7C5C_ONE_ON_ONE_SOURCE_BOUNDARY'),
+    ('app/model/PeakArena.lua', '08ad1b2d481cce1e4b1ffd6d53830f28d5f6853deecd8275ed74efd97d64fbaf', 'I7C5C_ONE_ON_ONE_SOURCE_BOUNDARY'),
+    ('app/common/tables/PeakArenaRankTable.lua', '6b180815bdfd1e70b9cc62585bff5174cb798e4ea44a417419120860fd74e01e', 'I7C5C_ONE_ON_ONE_SOURCE_BOUNDARY'),
+    ('app/common/tables/PeakArenaRewardTable.lua', 'aa0a05d28378ddac1e2a5aa622b8c866680a51484c02a70315c5584edeb4d364', 'I7C5C_ONE_ON_ONE_SOURCE_BOUNDARY'),
+    ('app/windows/PeakArenaWindow.lua', '0b6fbc0774fec0612d86dc475c314aa874417f207eae0078ba18140c343639e7', 'I7C5C_ONE_ON_ONE_SOURCE_BOUNDARY'),
+    ('app/windows/SelectPeakTeamWindow.lua', '11389e8daa7c9e6f350b1579352fac0037961b34c29a4355220a5ffc0ecd99f0', 'I7C5C_ONE_ON_ONE_SOURCE_BOUNDARY'),
+    ('app/windows/ChangeEnemyWindow.lua', '24874cb2876ff3b7764af0de75814fa29fada0555fed606de2d352d45308ad22', 'I7C5C_ONE_ON_ONE_SOURCE_BOUNDARY'),
+    ('app/windows/PeakArenaReportWindow.lua', 'b28bc10b302c603a7c8b55f9a8a394de086ef67e507bb4d5f1a17cad4ecc0cf8', 'I7C5C_ONE_ON_ONE_SOURCE_BOUNDARY'),
     ('data/tables/arena_reward.lua', '17763ceee2c24ef77c33ebef51f0cc823d90389c605a52ef01416046d2d06099', 'I7C5B_TOP_FLOOR_SOURCE_BOUNDARY'),
     ('data/tables/robot.lua', '87de111b1eead9f5a8e833f5fe341b70fd3c1d6e786ca28803c53b954f98c1aa', 'I7C5B_TOP_FLOOR_SOURCE_BOUNDARY'),
     ('data/tables/robot_hero.lua', '78bd3abeb6e9f306a15a9b663661efbb484d41fcad6590774cc0a58c631636f0', 'I7C5B_TOP_FLOOR_SOURCE_BOUNDARY'),
@@ -139,6 +150,7 @@ SOURCE_MANIFEST.append(('app/windows/HeroGiftBoxWindow.lua','d6065c3d601f5820915
 SOURCE_MANIFEST.append(('app/windows/WhiteAlbumWindow.lua','851a53f588b59d95cfe460f3399ab1a6904fff7714131c358f3c3a73910b6bb9',"LIBRARY_INPUT_SOURCE_AUTHORITY"))
 
 ENABLED_CAPABILITIES = [
+    "ONE_ON_ONE_MODE_I7C5C",
     "TOP_FLOOR_MODE_I7C5B",
     "ACHIEVEMENT_TIER_FACTS_I7C4B",
     "COSMETIC_PRIVILEGE_I7C4A",
@@ -333,6 +345,7 @@ from stat_input_content import build_stat_inputs
 from privilege_content import build_privilege
 from achievement_content import build_achievement
 from top_floor_content import build_top_floor
+from one_on_one_content import build_one_on_one
 from course_content import build_course
 class CompileError(ValueError):
     pass
@@ -859,6 +872,10 @@ def build_artifacts(blobs: dict[str, SourceBlob], archive_sha256: str) -> dict[s
     for key in ('magic_dust','magic_liquid','magic_energy','magic_exp','degree_cer','graduate_cer','patent_cer'):
         if key not in economy_names or key in asset_by_name:raise CompileError("Workshop named scalar identity drift: "+key)
         resources.append({"catalog_status":"QUALIFIED","class":"SCALAR_CURRENCY","definition_key":"scalar_currency:"+key,"resource_key":key,"settlement_activation":"ENABLED_R4"})
+    # I7C-5C 1 on 1 is the income owner of the named top_coin scalar (no numeric asset ID).
+    if "top_coin" not in economy_names or "top_coin" in asset_by_name:
+        raise CompileError("1 on 1 top_coin named scalar identity drift")
+    resources.append({"catalog_status":"QUALIFIED","class":"SCALAR_CURRENCY","definition_key":"scalar_currency:top_coin","resource_key":"top_coin","settlement_activation":"ENABLED_R4"})
     social_gift_artifact=build_social_gift(
         parse_generated_lua_table(blobs["data/tables/gift.lua"].data),
         parse_generated_lua_table(blobs["data/tables/friend_dailygift.lua"].data),
@@ -2115,6 +2132,7 @@ def build_artifacts(blobs: dict[str, SourceBlob], archive_sha256: str) -> dict[s
     dorm_artifact=build_dorm(blobs,parse_generated_lua_table,pipe_ints,hero_artifact["templates"],partner_keys,partner_rows,super_keys,super_rows,indexed_field,items,CompileError)
     artifacts = {
         "top_floor_catalog.json":build_top_floor(blobs,parse_generated_lua_table),
+        "one_on_one_catalog.json":build_one_on_one(blobs,parse_generated_lua_table),
         "achievement_catalog.json":build_achievement(blobs,parse_generated_lua_table),
         "privilege_catalog.json":build_privilege(blobs,parse_generated_lua_table),
         "stat_input_catalog.json":build_stat_inputs(blobs,parse_generated_lua_table,parse_base64_indexed_lua_table,indexed_field,parse_encoded_item_table,parse_encoded_skill_table),

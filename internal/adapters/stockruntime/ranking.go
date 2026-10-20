@@ -7,8 +7,10 @@ import (
 	"gxb.local/backend/v2/internal/application/realtimeauth"
 	"gxb.local/backend/v2/internal/application/topfloor"
 	"gxb.local/backend/v2/internal/domain/identity"
+	"gxb.local/backend/v2/internal/domain/oneonone"
 	d "gxb.local/backend/v2/internal/domain/ranking"
 	"gxb.local/backend/v2/internal/foundation/operation"
+	oneononeprojection "gxb.local/backend/v2/internal/projection/oneonone"
 	projection "gxb.local/backend/v2/internal/projection/ranking"
 	topfloorprojection "gxb.local/backend/v2/internal/projection/topfloor"
 	"gxb.local/backend/v2/internal/protocol/httpedge"
@@ -20,10 +22,14 @@ type GirlsRankingReads interface {
 type TopFloorRanks interface {
 	RankList(context.Context, identity.ActorContext) (topfloor.RankList, error)
 }
+type OneOnOneRanks interface {
+	RankList(context.Context, identity.ActorContext, bool) (oneonone.RankList, error)
+}
 type RankingDispatcher struct {
 	Authority realtimeauth.GameplayAuthorityPort
 	Service   GirlsRankingReads
 	TopFloor  TopFloorRanks
+	OneOnOne  OneOnOneRanks
 }
 
 func (d RankingDispatcher) Dispatch(c context.Context, r httpedge.DispatchRequest) httpedge.Response {
@@ -59,6 +65,15 @@ func (d RankingDispatcher) Dispatch(c context.Context, r httpedge.DispatchReques
 			return fail(http.StatusServiceUnavailable)
 		}
 		body := topfloorprojection.RankList(list.Rows, list.MyRank, a.LogicalServerID)
+		body["error_code"] = int64(0)
+		return httpedge.Response{HTTPStatus: http.StatusOK, Body: body}
+	}
+	if (subtype == 3 || subtype == 4) && d.OneOnOne != nil {
+		list, e := d.OneOnOne.RankList(c, a, subtype == 3)
+		if e != nil {
+			return fail(http.StatusServiceUnavailable)
+		}
+		body := oneononeprojection.RankList(list, subtype)
 		body["error_code"] = int64(0)
 		return httpedge.Response{HTTPStatus: http.StatusOK, Body: body}
 	}

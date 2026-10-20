@@ -1,12 +1,8 @@
 package contentstore
 
 import (
-	"bytes"
 	"context"
-	"crypto/sha256"
-	"encoding/hex"
-	"encoding/json"
-	"io"
+	"errors"
 	"sync"
 
 	"gxb.local/backend/v2/internal/content/registry"
@@ -28,45 +24,13 @@ func (s Store) TopFloorCatalogTx(ctx context.Context, q tx.Queryer, revision str
 	if cached, ok := topFloorCatalogs.Load(revision); ok {
 		return cached.(topfloor.Catalog), nil
 	}
-	var manifest, raw string
-	if e := q.QueryRow(ctx, `SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1`, revision).Scan(&manifest); e != nil {
-		return topfloor.Catalog{}, e
-	}
-	m, e := registry.DecodeManifestStrict([]byte(manifest))
-	if e != nil {
-		return topfloor.Catalog{}, e
-	}
-	good, e := manifestHasCapability([]byte(manifest), revision, topFloorCapability)
-	if e != nil {
-		return topfloor.Catalog{}, e
-	}
-	if !good {
-		return topfloor.Catalog{}, topfloor.ErrUnavailable
-	}
-	if e = q.QueryRow(ctx, `SELECT payload::text FROM content_top_floor_catalogs WHERE revision_id=$1`, revision).Scan(&raw); e != nil {
-		return topfloor.Catalog{}, e
-	}
-	var generic any
-	if e = json.Unmarshal([]byte(raw), &generic); e != nil {
-		return topfloor.Catalog{}, e
-	}
-	canonical, e := json.Marshal(generic)
-	if e != nil {
-		return topfloor.Catalog{}, e
-	}
-	hash := sha256.Sum256(append(canonical, 10))
-	if hex.EncodeToString(hash[:]) != m.ArtifactSHA256s["top_floor_catalog.json"] {
-		return topfloor.Catalog{}, topfloor.ErrUnavailable
-	}
 	var out topfloor.Catalog
-	dec := json.NewDecoder(bytes.NewBufferString(raw))
-	dec.DisallowUnknownFields()
-	if e = dec.Decode(&out); e != nil {
-		return topfloor.Catalog{}, e
-	}
-	var extra any
-	if dec.Decode(&extra) != io.EOF {
+	e := readModeCatalog(ctx, q, revision, topFloorCapability, "content_top_floor_catalogs", "top_floor_catalog.json", &out)
+	if errors.Is(e, errModeCatalog) {
 		return topfloor.Catalog{}, topfloor.ErrUnavailable
+	}
+	if e != nil {
+		return topfloor.Catalog{}, e
 	}
 	if e = out.Validate(); e != nil {
 		return topfloor.Catalog{}, e

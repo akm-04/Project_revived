@@ -56,9 +56,9 @@ type Store interface {
 	ReadRootTx(context.Context, tx.Queryer, identity.PlayerID, bool) (d.Root, bool, error)
 	SaveRootTx(context.Context, tx.Tx, d.Root, int64) error
 	PutEventTx(context.Context, tx.Tx, Event) error
-	ReadStreakTx(context.Context, tx.Queryer, identity.PlayerID, bool) (d.Streak, bool, error)
+	ReadStreakTx(context.Context, tx.Queryer, identity.PlayerID, int64, bool) (d.Streak, bool, error)
 	SaveStreakTx(context.Context, tx.Tx, d.Streak, int64) error
-	ActiveStreakPlayersTx(context.Context, tx.Queryer, identity.LogicalServerID, int64) ([]identity.PlayerID, error)
+	ActiveStreakPlayersTx(context.Context, tx.Queryer, identity.LogicalServerID, int64, int64) ([]identity.PlayerID, error)
 }
 type Content interface {
 	AchievementCatalogTx(context.Context, tx.Queryer, string) (d.Catalog, error)
@@ -229,6 +229,30 @@ func (s Service) ReadTierFactsTx(c context.Context, sc ca.CoherentReadScope, q R
 // immutable daily snapshot: top holds the server's players ranked 1..3 that day.
 // Players without an Achievement root stay explicitly untracked.
 func (s Service) ObserveTopFloorDayTx(c context.Context, t tx.Tx, server identity.LogicalServerID, day int64, revision string, top []identity.PlayerID, at time.Time) error {
+	return s.observePeriodTx(c, t, d.TopFloorStreakID, server, day, revision, top, at)
+}
+
+// ObserveOneOnOneWeekTx is the typed 1 on 1 producer (rank 620) for one
+// immutable Sunday 22:00 snapshot: top holds the server's players ranked 1..3.
+func (s Service) ObserveOneOnOneWeekTx(c context.Context, t tx.Tx, server identity.LogicalServerID, day int64, revision string, top []identity.PlayerID, at time.Time) error {
+	return s.observePeriodTx(c, t, d.WeeklyStreakID, server, day, revision, top, at)
+}
+
+// ObserveOneOnOneWinStreakTx records a player's running 1 on 1 attack win streak.
+func (s Service) ObserveOneOnOneWinStreakTx(c context.Context, t tx.Tx, player identity.PlayerID, revision string, count int64, at time.Time) error {
+	if t == nil || s.Store == nil || s.Content == nil || !player.Valid() {
+		return d.ErrUnavailable
+	}
+	catalog, err := s.Content.AchievementCatalogTx(c, t, revision)
+	if err != nil {
+		return err
+	}
+	return s.observePlayerTx(c, t, d.WinStreakID, player, revision, at, func(current d.Streak) (d.Streak, bool, error) {
+		return current.ObserveCount(catalog, count, at)
+	})
+}
+
+func (s Service) observePeriodTx(c context.Context, t tx.Tx, id int64, server identity.LogicalServerID, day int64, revision string, top []identity.PlayerID, at time.Time) error {
 	if t == nil || s.Store == nil || s.Content == nil || !server.Valid() || len(top) > int(d.StreakTopRank) {
 		return d.ErrUnavailable
 	}
@@ -236,7 +260,7 @@ func (s Service) ObserveTopFloorDayTx(c context.Context, t tx.Tx, server identit
 	if err != nil {
 		return err
 	}
-	running, err := s.Store.ActiveStreakPlayersTx(c, t, server, day)
+	running, err := s.Store.ActiveStreakPlayersTx(c, t, server, id, day)
 	if err != nil {
 		return err
 	}
@@ -255,35 +279,36 @@ func (s Service) ObserveTopFloorDayTx(c context.Context, t tx.Tx, server identit
 		if int64(p)/100000 != int64(server) {
 			return d.ErrConflict
 		}
-		if _, tracked, err := s.Store.ReadRootTx(c, t, p, true); err != nil || !tracked {
-			if err != nil {
-				return err
-			}
-			continue
-		}
-		current, found, err := s.Store.ReadStreakTx(c, t, p, true)
+		err = s.observePlayerTx(c, t, id, p, revision, at, func(current d.Streak) (d.Streak, bool, error) {
+			return current.ObserveDay(catalog, day, inTop[p], at)
+		})
 		if err != nil {
-			return err
-		}
-		if !found {
-			if current, err = d.NewStreak(p, revision, at); err != nil {
-				return err
-			}
-		}
-		next, changed, err := current.ObserveDay(catalog, day, inTop[p], at)
-		if err != nil {
-			return err
-		}
-		if !changed {
-			continue
-		}
-		old := current.StateVersion
-		if !found {
-			next.StateVersion, old = 1, 0
-		}
-		if err = s.Store.SaveStreakTx(c, t, next, old); err != nil {
 			return err
 		}
 	}
 	return nil
+}
+
+func (s Service) observePlayerTx(c context.Context, t tx.Tx, id int64, p identity.PlayerID, revision string, at time.Time, observe func(d.Streak) (d.Streak, bool, error)) error {
+	if _, tracked, err := s.Store.ReadRootTx(c, t, p, true); err != nil || !tracked {
+		return err
+	}
+	current, found, err := s.Store.ReadStreakTx(c, t, p, id, true)
+	if err != nil {
+		return err
+	}
+	if !found {
+		if current, err = d.NewStreak(p, id, revision, at); err != nil {
+			return err
+		}
+	}
+	next, changed, err := observe(current)
+	if err != nil || !changed {
+		return err
+	}
+	old := current.StateVersion
+	if !found {
+		next.StateVersion, old = 1, 0
+	}
+	return s.Store.SaveStreakTx(c, t, next, old)
 }

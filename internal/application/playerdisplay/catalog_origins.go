@@ -52,3 +52,22 @@ func (s Service) catalogOrigins(c context.Context, q tx.Queryer, pid identity.Pl
 	origins, e := s.origins(c, q, pid, family, rev, at)
 	return origins, e == nil, e
 }
+
+// CatalogOriginRoute names the owner of a contiguous range of catalog ids.
+type CatalogOriginRoute struct {
+	First, Last int64
+	Owner       CatalogExternalOrigins
+}
+
+// CatalogOriginRoutes sends each bounded request to the owner whose range
+// covers it; an id no owner produces stays unavailable.
+type CatalogOriginRoutes []CatalogOriginRoute
+
+func (routes CatalogOriginRoutes) ReadCatalogDisplayOriginsTx(c context.Context, q tx.Queryer, r CatalogOriginRequest) (CatalogOriginObservation, error) {
+	for _, route := range routes {
+		if r.CatalogID >= route.First && r.CatalogID <= route.Last {
+			return route.Owner.ReadCatalogDisplayOriginsTx(c, q, r)
+		}
+	}
+	return CatalogOriginObservation{Request: r, Origins: []Origin{}}, ErrUnavailable
+}

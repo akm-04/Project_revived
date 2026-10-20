@@ -136,13 +136,18 @@ func combatOwner(t *testing.T, p *pg.Pool, server identity.LogicalServerID) (ide
 		t.Fatal(err)
 	}
 	def := collectionResources(t, p, a, rev, 10001001)
-	s := rawBirthService(p)
-	s.FreshFacets = hero.FreshFacetChain{librarystore.Store{}, dormstore.Store{}, coursestore.Store{}, inscriptionstore.Store{}, elementstore.Store{}, spiritstore.Store{}, characterstore.EvolutionStore{}, characterstore.RawAwakeningStore{}}
-	h, err := s.SummonNormal(ctx, a, def.Template.TableID, def.Template.FragmentItemID, def.FragmentCount, op())
+	h, err := ownerSummoner(p).SummonNormal(ctx, a, def.Template.TableID, def.Template.FragmentItemID, def.FragmentCount, op())
 	if err != nil {
 		t.Fatal(err)
 	}
 	return a, rev, h.Ref()
+}
+
+// ownerSummoner births heroes with every fresh facet the combat roster reads.
+func ownerSummoner(p *pg.Pool) hero.Service {
+	s := rawBirthService(p)
+	s.FreshFacets = hero.FreshFacetChain{librarystore.Store{}, dormstore.Store{}, coursestore.Store{}, inscriptionstore.Store{}, elementstore.Store{}, spiritstore.Store{}, characterstore.EvolutionStore{}, characterstore.RawAwakeningStore{}}
+	return s
 }
 
 func templateParams(tableID int64) map[string]any {

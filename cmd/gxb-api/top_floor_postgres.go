@@ -21,6 +21,7 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres/i4store"
 	"gxb.local/backend/v2/internal/adapters/postgres/i5store"
 	"gxb.local/backend/v2/internal/adapters/postgres/kernelstore"
+	"gxb.local/backend/v2/internal/adapters/postgres/oneononestore"
 	"gxb.local/backend/v2/internal/adapters/postgres/topfloorstore"
 	appachievement "gxb.local/backend/v2/internal/application/achievement"
 	appbook "gxb.local/backend/v2/internal/application/bookskill"
@@ -38,6 +39,7 @@ import (
 	appi5 "gxb.local/backend/v2/internal/application/i5"
 	appinscription "gxb.local/backend/v2/internal/application/inscription"
 	applibrary "gxb.local/backend/v2/internal/application/librarylocal"
+	apponeonone "gxb.local/backend/v2/internal/application/oneonone"
 	"gxb.local/backend/v2/internal/application/publicstats"
 	appspirit "gxb.local/backend/v2/internal/application/spirit"
 	apptopfloor "gxb.local/backend/v2/internal/application/topfloor"
@@ -99,6 +101,13 @@ func canonicalCombat(p *postgres.Pool, r tx.Runner, content contentstore.Store, 
 		Inputs: combat.Inputs{Heroes: roster, Pets: characterstore.PetBootstrapProjection{Content: content}, Stats: stats, Awakening: awakening, Collection: o.library, Conquer: conquer, Stacks: i5store.Store{Queryer: p}}}, true, nil
 }
 
+func canonicalOneOnOne(p *postgres.Pool, r tx.Runner, content contentstore.Store, i5db i5store.Store, privileges commerceprivilege.Provider, fight combat.Service, o topFloorOwners) apponeonone.Service {
+	return apponeonone.Service{Timed: appgeneration.TimedRunner{Binder: appgeneration.Binder{Time: postgres.AuthoritativeTime{Queryer: p}}, Runner: r}, Fresh: p, Store: oneononestore.Store{}, Content: content,
+		Fence: i5db, Privileges: privileges, Costs: appi5.MaterialCostDebiter{Store: i5db, Content: content}, Mail: appi5.SettlementMail{Store: i5db},
+		Achievements: appachievement.Service{Store: achievementstore.Store{}, Content: content, Population: o.library}, Combat: fight,
+		Heroes: fight.Inputs.Heroes, Pets: fight.Inputs.Pets, Directory: i4store.PlayerDirectoryReader{}, Entitlements: i5db, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}}
+}
+
 func canonicalTopFloor(p *postgres.Pool, r tx.Runner, content contentstore.Store, i5db i5store.Store, privileges commerceprivilege.Provider, fight combat.Service, o topFloorOwners) apptopfloor.Service {
 	return apptopfloor.Service{Timed: appgeneration.TimedRunner{Binder: appgeneration.Binder{Time: postgres.AuthoritativeTime{Queryer: p}}, Runner: r}, Fresh: p, Store: topfloorstore.Store{}, Content: content,
 		Fence: i5db, Functions: i5db, Privileges: privileges, Costs: appi5.MaterialCostDebiter{Store: i5db, Content: content}, Mail: appi5.SettlementMail{Store: i5db},
@@ -106,9 +115,8 @@ func canonicalTopFloor(p *postgres.Pool, r tx.Runner, content contentstore.Store
 		Heroes: fight.Inputs.Heroes, Pets: fight.Inputs.Pets, Directory: i4store.PlayerDirectoryReader{}, Guilds: guildstore.Store{}, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}}
 }
 
-// runTopFloorReconcile settles owed days and abandoned fights every 30 s (in-process reconcile provider).
-func runTopFloorReconcile(ctx context.Context, p *postgres.Pool, s apptopfloor.Service) {
-	reconciler := apptopfloor.Reconciler{Service: s}
+// runReconcile runs one mode's owed settlements and abandoned matches every 30 s (in-process reconcile provider).
+func runReconcile(ctx context.Context, p *postgres.Pool, provider appgeneration.ReconcileProvider) {
 	operations := operation.Factory{Clock: clock.System{}}
 	binder := appgeneration.Binder{Time: postgres.AuthoritativeTime{Queryer: p}}
 	ticker := time.NewTicker(30 * time.Second)
@@ -123,11 +131,11 @@ func runTopFloorReconcile(ctx context.Context, p *postgres.Pool, s apptopfloor.S
 		if err == nil {
 			var timed appgeneration.TimedOperation
 			if timed, err = binder.Bind(ctx, op); err == nil {
-				_, err = reconciler.Reconcile(ctx, timed, 50)
+				_, err = provider.Reconcile(ctx, timed, 50)
 			}
 		}
 		if err != nil && ctx.Err() == nil {
-			log.Printf("Top Floor reconcile: %v", err)
+			log.Printf("%s reconcile: %v", provider.Name(), err)
 		}
 	}
 }

@@ -3104,6 +3104,136 @@
       "write_exceptions": [],
       "migration": "migrations/00065_i7c5b_top_floor.sql"
     },
+    "content_one_on_one_catalogs": {
+      "owner": "content-registry",
+      "allowed_query_owners": [
+        "content-registry"
+      ],
+      "allowed_read_paths": [
+        "sql/content/",
+        "internal/adapters/postgres/contentstore/",
+        "internal/adapters/postgres/contentqueries/"
+      ],
+      "allowed_write_paths": [
+        "sql/content/",
+        "internal/adapters/postgres/contentstore/",
+        "internal/adapters/postgres/contentqueries/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00066_i7c5c_one_on_one.sql"
+    },
+    "one_on_one_competitions": {
+      "owner": "OneOnOne",
+      "allowed_query_owners": [
+        "OneOnOne"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/oneononestore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/oneononestore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00066_i7c5c_one_on_one.sql"
+    },
+    "one_on_one_players": {
+      "owner": "OneOnOne",
+      "allowed_query_owners": [
+        "OneOnOne"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/oneononestore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/oneononestore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00066_i7c5c_one_on_one.sql"
+    },
+    "one_on_one_matches": {
+      "owner": "OneOnOne",
+      "allowed_query_owners": [
+        "OneOnOne"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/oneononestore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/oneononestore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00066_i7c5c_one_on_one.sql"
+    },
+    "one_on_one_rounds": {
+      "owner": "OneOnOne",
+      "allowed_query_owners": [
+        "OneOnOne"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/oneononestore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/oneononestore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00066_i7c5c_one_on_one.sql"
+    },
+    "one_on_one_records": {
+      "owner": "OneOnOne",
+      "allowed_query_owners": [
+        "OneOnOne"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/oneononestore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/oneononestore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00066_i7c5c_one_on_one.sql"
+    },
+    "one_on_one_partner_usage": {
+      "owner": "OneOnOne",
+      "allowed_query_owners": [
+        "OneOnOne"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/oneononestore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/oneononestore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00066_i7c5c_one_on_one.sql"
+    },
+    "one_on_one_settlements": {
+      "owner": "OneOnOne",
+      "allowed_query_owners": [
+        "OneOnOne"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/oneononestore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/oneononestore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00066_i7c5c_one_on_one.sql"
+    },
+    "one_on_one_settlement_ranks": {
+      "owner": "OneOnOne",
+      "allowed_query_owners": [
+        "OneOnOne"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/oneononestore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/oneononestore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00066_i7c5c_one_on_one.sql"
+    },
     "content_top_floor_catalogs": {
       "owner": "content-registry",
       "allowed_query_owners": [
