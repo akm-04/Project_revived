@@ -15,7 +15,10 @@
     "Populated68upgrade + migration69 idempotence + backupfreshrestore",
     "Race/vet/arch/static and bounded5A/B/C/D/E affected regressions",
     "Independent source/code/crossowner/recovery review",
-    "HOT+COLD routing/semantic/lifecycle/manifest/transportrestore checks"
+    "HOT+COLD routing/semantic/lifecycle/manifest/transportrestore checks",
+    "Rest-phase close vs next-season reset, before/at/after local competition cutoff; no daily/titles farming during rest",
+    "Promotion previous-group final rank declines when others surpass frozen score; exactly one selected final profile",
+    "New source RuleWindow/schedule wrapper/activity1193 oracle and finite-date stockclient limitation evidence"
   ],
   "not_proven_by_these": [
     "Original server algorithm",

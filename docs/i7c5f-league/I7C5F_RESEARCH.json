@@ -1,5 +1,5 @@
 {
-  "status": "RESEARCH_COMPLETE_BOUNDED_UNKNOWN_ALGORITHMS_LABELLED",
+  "status": "RESEARCH_COMPLETE_AFTER_TARGETED_ALGORITHM_FAIRNESS_RECONCILIATION",
   "full_node_path": "ROOT/I7/I7C/I7C-5/I7C-5F",
   "source_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
   "evidence": [
@@ -51,16 +51,25 @@
   ],
   "inherited": "selected737 HOT contract cache + COLD_INDEX/MEMORY_RETENTION_CATALOG consulted; query_memory selected5F route cached; COLD is provenance only; no claim of exhaustive corpus audit",
   "bounded_unknowns": [
-    "Private point transfer formula",
-    "Schedule extrapolation after final source date/opening midnight",
-    "Exact tie collision ordering",
-    "Cumulative versus consecutive top5 day counter",
-    "Ambiguous title078..80 and occurrence087..89 remain child6 profile gates, with genuine rank/counter evidence retained"
+    "Original score formula absent;36onlyconfirmedparameter,2meaningunknown",
+    "Exact rest/open/close inclusivity: source rest state and date-minus3 clue; labelled3calendar-day choice",
+    "Post2024 schedule and stock-client rules date presentation",
+    "Repeated promotions and exact original-group score/ordinal maintenance",
+    "Legacytitle078..80 activation and historicalseason2 titles087..89 remain named6profile gates"
   ],
   "source_conflicts": [
     "Unused model.startFight2800 vs active caller2802 resolved in favor of reachable caller",
     "Reward wrapper ignores bubble_id; raw rows and bubble descriptions independently agree",
-    "English generic top-group title text conflicts with group-specific names and season2 Chinese rows; never infer activation by name alone"
+    "English generic top-group title text conflicts with group-specific names and season2 Chinese rows; never infer activation by name alone",
+    "Source RuleWindow date arithmetic subtracts3 from YYYYMMDD integer; do not interpret as Unix seconds or copy invalid month arithmetic.",
+    "Finite client schedule cannot render recurrent future dates; leave existing stock-client/effective-client gate OPEN and report limitation."
   ],
-  "sufficient_for": "Bounded genuine recurring League producer, source wire surfaces, versioned explicit private-policy operation design; no original-server algorithm claim"
+  "sufficient_for": "Bounded genuine recurring League producer, source wire surfaces, versioned explicit private-policy operation design; no original-server algorithm claim",
+  "additional_records": [
+    "ALGORITHM_RECONCILIATION_R04.md",
+    "FAIRNESS_REVIEW.json",
+    "WEB_RESEARCH.json",
+    "SOURCE_MANIFEST.json"
+  ],
+  "fairness_review": "Completed design-only curve/conservation/monotonicity model58081pairs; frozen-ordinal guarantee rejected; no claim of originalserver or product execution."
 }

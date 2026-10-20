@@ -1,17 +1,17 @@
 {
-  "status": "PLAN_COMMITTED_PREIMPLEMENTATION",
+  "status": "AMENDED_PLAN_AFTER_RESEARCH_FAIRNESS_RECONCILIATION_PREIMPLEMENTATION_GATE_PENDING",
   "policy_id": "C5F_CHAMPIONS_LEAGUE_MODE_V1",
   "base_product_commit": "7e5c5286a9deb18bdc4f19af809fb7364ee50ae1",
   "steps": [
     "1 Add league_content compiler/source oracle; typed immutable catalog; builtin/registry/contentstore content capability CHAMPIONS_LEAGUE_I7C5F.",
-    "2 New domain/application championsleague and postgres leaguestore. Migration00069 owning root/player/match/settlement/origin rows; no foreign SQL. Pure calendar/rank/score/group/protection/counter rules.",
+    "2 New domain/application championsleague and postgres leaguestore. Migration00069 owning root/player/match/settlement/origin rows; no foreign SQL. Pure calendar/rank/score/group/protection/counter rules. Separate close/rest/roll state; previous-group score witnesses and recomputed final placement.",
     "3 Caller-Tx operation traces: actor fence -> League root/player ->5A immutable actual-owned combat -> isolatedworker -> once terminal points/records/protection -> response/reload; unknownCOMMIT positive evidence.",
     "4 Chronological daily/season source snapshots and once mail/origin/Achievement composition; I4roots beforemode lock and no lower-rank discovery after I5. Participant eligibility and cutoff consistency.",
     "5 Source-shaped stock MIDs2800..2807/projection/composition/reconciler; source formation IDs and no unused2800fight fallback. Bounded replay retention separate from logs; scoped catalog origins.",
     "6 Domain/wire/source-oracle/nativePG concurrency/rollback/unknownCOMMIT/latewake/expiry/groupchoice tests; version133 freeze intended candidate; portableR2 fresh/populated68upgrade/restart/restore/static/race/vet regression; independent code/source/owner reality review.",
     "7 Reconcile all proof/limits and HOT+COLD closure publication; keep full4/6/aggregate/stockclient gates OPEN."
   ],
-  "implementation_gate": "Commit plan+checkpoint; reconcile owned738 required preimplementation gate from737, pending5Epolicyapproval and finalizedrestartlog binding; validate/restore. No5F product code before gate.",
+  "implementation_gate": "Record new source/fairness findings and amended plan in Git+checkpoint. Reconcile owned739 contract-amendment gate over738, bound to partial unaccepted implementation. Resume affected coding only after validation/restore.",
   "operation_traces": {
     "info": "91eligibility and canonical playerlevel -> ownedreadonlyroster -> owneradmission/group synchronization and durable selection reset -> source projection; no rewards from UI fields",
     "fight": "2802 instance formation -> existing roster/currentpublicstats+conquer+all2A..J inputs -> repeatable-read pinned5A snapshot/entropy -> detached worker -> League root+players+attempt609 -> genuine point changes+record -> immutable report response",
@@ -23,6 +23,8 @@
     "I7C6 ambiguous historicaltitle profiles and selectedcosmetic handoff",
     "I7C-E aggregate provider/consumer reality",
     "Unmodified stock-client E2E not replaced by PG/wire/unit proof",
-    "I9 full League scope beyond selectedproducer and source mode core"
-  ]
+    "I9 full League scope beyond selectedproducer and source mode core",
+    "Existing stock/effective-client gate: source finite-date rules presentation after2024 is unresolved; no stockcompatibility or fullmode release claim"
+  ],
+  "policy_version": "C5F_LEAGUE_PRIVATE_POLICY_V2"
 }
