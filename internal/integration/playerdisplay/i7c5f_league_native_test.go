@@ -516,7 +516,7 @@ func TestI7C5FLeagueRecoveredRowsNative(t *testing.T) {
 	if e != nil || len(players) < 2 {
 		t.Fatal("missing recovered players", e)
 	}
-	if leagueScalar(t, p, `SELECT count(*) FROM league_matches WHERE status='SETTLED'`) < 1 {
+	if leagueScalar(t, p, `SELECT count(*) FROM league_matches WHERE payload->>'Status'='SETTLED'`) < 1 {
 		t.Fatal("missing genuine recovered match")
 	}
 	for _, x := range players {
