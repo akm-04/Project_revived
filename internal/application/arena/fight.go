@@ -247,7 +247,7 @@ func (s Service) Fight(c context.Context, a identity.ActorContext, r FightComman
 func (s Service) admitFight(c context.Context, a identity.ActorContext, id ids.UUID, r FightCommand, fp string, op operation.Context) (d.Match, error) {
 	var out d.Match
 	err := s.mutate(c, op, func() error {
-		_, res, err := s.Timed.Run(c, op, Profile(), tx.Options{Isolation: tx.RepeatableRead}, retry(), fightEvidence{store: s.Store, reader: s.Fresh, id: id, fingerprint: fp}, func(c context.Context, sc gen.TimedScope) error {
+		_, res, err := s.Timed.Run(c, op, fightProfile(), tx.Options{Isolation: tx.RepeatableRead}, retry(), fightEvidence{store: s.Store, reader: s.Fresh, id: id, fingerprint: fp}, func(c context.Context, sc gen.TimedScope) error {
 			at := sc.Operation.DecisionAt()
 			if err := s.Fence.FenceActorTx(c, sc.Tx, a, at); err != nil {
 				return err
@@ -449,7 +449,7 @@ func (s Service) settle(c context.Context, id ids.UUID, forfeit bool, parent ope
 		return err
 	}
 	return s.mutate(c, op, func() error {
-		_, _, err := s.Timed.Run(c, op, Profile(), tx.Options{Isolation: tx.RepeatableRead}, retry(), settledEvidenceMatch{store: s.Store, reader: s.Fresh, id: id}, func(c context.Context, sc gen.TimedScope) error {
+		_, _, err := s.Timed.Run(c, op, fightProfile(), tx.Options{Isolation: tx.RepeatableRead}, retry(), settledEvidenceMatch{store: s.Store, reader: s.Fresh, id: id}, func(c context.Context, sc gen.TimedScope) error {
 			return s.settleMatchTx(c, sc, id, forfeit)
 		})
 		return err

@@ -39,6 +39,14 @@ func settlementProfile() tx.Profile {
 	return p
 }
 
+// fightProfile bounds FIGHT admission and fight settlement, which freeze or
+// settle a ten-girl Combat attempt in one transaction.
+func fightProfile() tx.Profile {
+	p := Profile()
+	p.Name, p.StatementTimeout, p.TransactionTimeout, p.OperationTimeout = "arena-fight", 30*time.Second, 120*time.Second, 180*time.Second
+	return p
+}
+
 func retry() tx.RetryPolicy {
 	return tx.RetryPolicy{MaxAttempts: 6, RetryDefiniteAbort: true, DefiniteAbortBackoffBase: 20 * time.Millisecond, DefiniteAbortBackoffMax: 160 * time.Millisecond}
 }
