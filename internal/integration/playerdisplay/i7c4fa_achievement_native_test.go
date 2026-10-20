@@ -74,6 +74,13 @@ func TestI7C4FALegacyBackfillPointsClaimsRankAndNotices(t *testing.T) {
 	if e = p.QueryRow(ctx, `SELECT count(*) FROM achievement_notices WHERE player_id=$1`, int64(a.PlayerID)).Scan(&notices); e != nil || notices != 4 {
 		t.Fatal("notice intents", notices, e)
 	}
+	taken, e := s.TakeNotices(ctx, a.PlayerID, op())
+	if e != nil || len(taken) == 0 || len(taken) > 3 || taken[0].TotalPoints != 2500 || taken[0].PointLevel != 2 {
+		t.Fatal("notice params", taken, e)
+	}
+	if again, e := s.TakeNotices(ctx, a.PlayerID, op()); e != nil || len(again) != 0 {
+		t.Fatal("notices delivered twice", again, e)
+	}
 	first := op()
 	claim, e := s.Claim(ctx, a, first)
 	if e != nil || claim.Level != 2 || !reflect.DeepEqual(claim.AwardStatus, []int64{-1, -1, 0, 0, 0, 0, 0, 0, 0, 0}) {

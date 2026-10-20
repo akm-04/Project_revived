@@ -66,7 +66,7 @@ func validateGiftStockActivation(t *testing.T) {
 	if !strings.Contains(read("cmd/gxb-content-gift-activate/main_postgres.go"), "s.ActivateBuiltin(") {
 		t.Fatal("explicit owning activation missing")
 	}
-	if strings.Count(read("cmd/gxb-realtime/main_postgres.go"), "realtimewakeup.Registration{") != 3 {
+	if genericWakeupRoutes(read("cmd/gxb-realtime/main_postgres.go")) != 3 {
 		t.Fatal("fourth generic bus/worker introduced")
 	}
 }

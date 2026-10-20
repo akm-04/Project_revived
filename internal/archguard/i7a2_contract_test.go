@@ -119,6 +119,14 @@ func TestI7A2ApplicationSeamsRemainProtocolAndPersistenceFree(t *testing.T) {
 	}
 }
 
+// achievementNoticeRoute is the one feature-specific route I7C-4 full stage A
+// adds (C4F_ACHIEVEMENT_NOTICE_V1); it is not a generic bus or worker.
+const achievementNoticeRoute = "realtimewakeup.Registration{Route: achievement.NoticeRoute, Handler: achievementNotices}"
+
+func genericWakeupRoutes(realtime string) int {
+	return strings.Count(realtime, "realtimewakeup.Registration{") - strings.Count(realtime, achievementNoticeRoute)
+}
+
 func TestI7A2KeepsFeatureProducerAndWakeupRoutesDormant(t *testing.T) {
 	root := repoRoot(t)
 	var offenders []string
@@ -149,11 +157,20 @@ func TestI7A2KeepsFeatureProducerAndWakeupRoutesDormant(t *testing.T) {
 			"wireRT.DirectRegistration{",
 			"rt.DirectRegistration{",
 			"wireRT.NoticeRegistration{",
+			"rt.NoticeRegistration{",
 			"realtimewakeup.Registration{",
 			"appwakeup.Registration{",
 		} {
 			if strings.Contains(s, marker) {
 				rel, _ := filepath.Rel(root, path)
+				// I7C-4 full stage A activates exactly one notice schema (17) and its route.
+				achievementSchema := filepath.ToSlash(rel) == "internal/adapters/stockruntime/achievement_notice.go" && marker == "rt.NoticeRegistration{" && strings.Count(s, marker) == 1 && strings.Count(s, "NoticeType:") == 1
+				if achievementSchema {
+					continue
+				}
+				if marker == "realtimewakeup.Registration{" {
+					s = strings.Replace(s, achievementNoticeRoute, "", 1)
+				}
 				allowedGeneralSchema := filepath.ToSlash(rel) == "internal/adapters/stockruntime/general_dm_events.go" && marker == "rt.DirectRegistration{" && strings.Count(s, marker) == 1
 				if allowedGeneralSchema && selectedGeneralDMActivation(t) {
 					validateGeneralDMActivation(t)

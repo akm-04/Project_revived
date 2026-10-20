@@ -3,11 +3,14 @@ package achievementstore
 import (
 	"context"
 	"encoding/json"
+	"gxb.local/backend/v2/internal/adapters/postgres"
 	app "gxb.local/backend/v2/internal/application/achievement"
+	wake "gxb.local/backend/v2/internal/application/realtimewakeup"
 	d "gxb.local/backend/v2/internal/domain/achievement"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/ids"
 	"gxb.local/backend/v2/internal/foundation/tx"
+	"strconv"
 	"time"
 )
 
@@ -62,10 +65,20 @@ func (Store) PutClaimTx(c context.Context, t tx.Tx, pid identity.PlayerID, level
 	return nil
 }
 
-// PutNoticesTx records notice intents once per earned tier.
+// PutNoticesTx records notice intents once per earned tier. The wakeup is a
+// transactional NOTIFY, so it reaches the realtime route only on commit.
 func (Store) PutNoticesTx(c context.Context, t tx.Tx, notices []app.Notice) error {
+	woken := map[identity.PlayerID]bool{}
 	for _, n := range notices {
-		if _, e := t.Exec(c, `INSERT INTO achievement_notices(player_id,achievement_id,tier,complete_time)VALUES($1,$2,$3,$4) ON CONFLICT DO NOTHING`, int64(n.Player), n.AchievementID, n.Tier, n.CompleteTime.UTC()); e != nil {
+		tag, e := t.Exec(c, `INSERT INTO achievement_notices(player_id,achievement_id,tier,complete_time)VALUES($1,$2,$3,$4) ON CONFLICT DO NOTHING`, int64(n.Player), n.AchievementID, n.Tier, n.CompleteTime.UTC())
+		if e != nil {
+			return e
+		}
+		if tag.RowsAffected() == 0 || woken[n.Player] {
+			continue
+		}
+		woken[n.Player] = true
+		if e = postgres.EmitRealtimeWakeup(c, t, wake.Envelope{Version: wake.EnvelopeVersion, Route: app.NoticeRoute, Ref: strconv.FormatInt(int64(n.Player), 10)}); e != nil {
 			return e
 		}
 	}

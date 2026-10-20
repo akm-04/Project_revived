@@ -428,9 +428,9 @@ func main() {
 	mustRegister(1793, savedPresetD)
 	bookmarkSvc := apphero.BookmarkService{Timed: heroSvc.Timed, Reads: runner, Store: heroDB, Players: i4store.PlayerRootLocker{}, Fence: i5db, Receipts: receipts}
 	skillSvc := apphero.SkillChoiceService{Timed: heroSvc.Timed, Reads: runner, Store: heroDB, Players: i4store.PlayerRootLocker{}, Fence: i5db, Receipts: receipts, Inventory: i5db, Content: contentDB}
-	heroD := stockruntime.HeroDispatcher{Roster: librarySvc, Skills: skillSvc, Bookmark: bookmarkSvc, Authority: authority, Service: heroSvc, Appearance: heroSvc, LIVE: heroSvc, Economy: heroEconomyProjection}
+	heroD := observing(authority, achievements, "Hero", stockruntime.HeroDispatcher{Roster: librarySvc, Skills: skillSvc, Bookmark: bookmarkSvc, Authority: authority, Service: heroSvc, Appearance: heroSvc, LIVE: heroSvc, Economy: heroEconomyProjection})
 	for _, mid := range []uint16{2144, 3116, 49, 51, 52, 54, 55, 57, 58, 59, 60, 61, 62, 63, 67, 68, 69, 89, 304, 2979} {
-		mustRegister(mid, observing(authority, achievements, "Hero", heroD))
+		mustRegister(mid, heroD)
 	}
 	evolutionD := stockruntime.EvolutionDispatcher{Authority: authority, Service: evolutionSvc}
 	for _, mid := range []uint16{2608, 2609} {
@@ -465,9 +465,9 @@ func main() {
 	for _, mid := range []uint16{72, 836, 840, 852, 853, 854, 2784, 2785} {
 		mustRegister(mid, libraryD)
 	}
-	petD := stockruntime.PetDispatcher{Authority: authority, Service: petSvc, Economy: petEconomyProjection}
+	petD := observing(authority, achievements, "Pet", stockruntime.PetDispatcher{Authority: authority, Service: petSvc, Economy: petEconomyProjection})
 	for _, mid := range []uint16{134, 780, 781, 782, 783, 785, 786, 787, 789, 790, 791, 792, 1893, 1894, 1895} {
-		mustRegister(mid, observing(authority, achievements, "Pet", petD))
+		mustRegister(mid, petD)
 	}
 	guildD := stockruntime.GuildDispatcher{Authority: authority, Core: guildSvc, View: guildView}
 	for _, mid := range []uint16{576, 577, 578, 579, 580, 581, 582, 583, 584, 585, 586, 587, 589, 598, 599, 612, 2563, 2564, 2565} {

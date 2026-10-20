@@ -61,7 +61,7 @@ func validateGeneralDMActivation(t *testing.T) {
 			t.Fatal("missing GeneralDM realtime qualification", v)
 		}
 	}
-	if strings.Count(realtime, "realtimewakeup.Registration{") != 3 || strings.Count(schema, "MID:") != 3 || !strings.Contains(schema, "Validate: rt.ValidateGeneralDM") {
+	if genericWakeupRoutes(realtime) != 3 || strings.Count(schema, "MID:") != 3 || !strings.Contains(schema, "Validate: rt.ValidateGeneralDM") {
 		t.Fatal("GeneralDM exact schema/route set")
 	}
 	foreign := read("internal/adapters/postgres/generaldmstore/store.go")

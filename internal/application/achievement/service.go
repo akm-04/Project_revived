@@ -65,6 +65,8 @@ type Store interface {
 	ReadClaimsTx(context.Context, tx.Queryer, identity.PlayerID) (map[int64]bool, error)
 	PutClaimTx(context.Context, tx.Tx, identity.PlayerID, int64, string, ids.UUID, int64, time.Time) error
 	PutNoticesTx(context.Context, tx.Tx, []Notice) error
+	PendingNoticesTx(context.Context, tx.Queryer, identity.PlayerID) ([]Notice, error)
+	MarkNoticesDeliveredTx(context.Context, tx.Tx, identity.PlayerID, time.Time) error
 	TrophyRankTx(context.Context, tx.Queryer, identity.PlayerID, d.Catalog) (int64, error)
 }
 type Content interface {

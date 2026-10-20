@@ -18,6 +18,7 @@ import (
 	"gxb.local/backend/v2/internal/adapters/generaldmbindings"
 	"gxb.local/backend/v2/internal/adapters/guildinvitebundle"
 	"gxb.local/backend/v2/internal/adapters/postgres"
+	"gxb.local/backend/v2/internal/adapters/postgres/achievementstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/contentstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/frienddmstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/generaldmstore"
@@ -29,6 +30,7 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres/socialrelationstore"
 	"gxb.local/backend/v2/internal/adapters/socialpresentation"
 	"gxb.local/backend/v2/internal/adapters/stockruntime"
+	"gxb.local/backend/v2/internal/application/achievement"
 	"gxb.local/backend/v2/internal/application/channelchat"
 	"gxb.local/backend/v2/internal/application/frienddm"
 	"gxb.local/backend/v2/internal/application/generaldm"
@@ -241,7 +243,13 @@ func run() error {
 	generalDM := generaldm.Service{Timed: appgeneration.TimedRunner{Binder: appgeneration.Binder{Time: postgres.AuthoritativeTime{Queryer: pool}}, Runner: presenceRunner}, Queryer: pool, Store: generaldmstore.Store{}, Bindings: generaldmbindings.Reader{}, Privacy: socialrelation.GeneralDMPrivacyProvider{Store: socialrelationstore.Store{}}, Players: i4store.PlayerRootLocker{}, Presentation: socialpresentation.TransactionReader{}, Observer: socialpresentation.TransactionReader{}, Owner: presenceStore}
 	generalDelivery := stockruntime.GeneralDMDelivery{Service: generalDM, Fence: realtimeOwnerFence, InstanceID: realtimeInstanceID, Operations: presenceOperations, Registry: connectionsRegistry, Publisher: stockruntime.RealtimePublisher{Registry: socialEvents, Limits: limits.Default()}, Authority: authority, Time: postgres.AuthoritativeTime{Queryer: pool}}
 	generalReconcile := &generaldm.Reconciler{Store: generaldmstore.Store{}, Queryer: pool, Deliverer: generalDelivery, OnDeliveryError: func(e error) { log.Printf("general dm delivery degraded: %v", e) }}
-	wakeups, err := realtimewakeup.NewRegistry(realtimewakeup.Registration{Route: postgres.SocialReloadRoute, Handler: socialHandler}, realtimewakeup.Registration{Route: frienddm.WakeupRoute, Handler: friendReconcile}, realtimewakeup.Registration{Route: generaldm.WakeupRoute, Handler: generalReconcile})
+	achievementEvents, err := stockruntime.NewAchievementNoticeRegistry()
+	if err != nil {
+		log.Fatal(err)
+	}
+	achievementRuntime := &achievement.Runtime{Timed: appgeneration.TimedRunner{Binder: appgeneration.Binder{Time: postgres.AuthoritativeTime{Queryer: pool}}, Runner: presenceRunner}, Fresh: pool, Active: contentstore.Store{Queryer: pool}}
+	achievementNotices := stockruntime.AchievementNoticeHandler{Service: achievement.Service{Store: achievementstore.Store{}, Content: contentstore.Store{Queryer: pool}, Runtime: achievementRuntime}, Operations: presenceOperations, Registry: connectionsRegistry, Publisher: stockruntime.RealtimePublisher{Registry: achievementEvents, Limits: limits.Default()}, Authority: authority, Time: postgres.AuthoritativeTime{Queryer: pool}, MaxHandles: runtimePolicy.MaxConnections, OnDeliveryError: func(e error) { log.Printf("achievement notice delivery degraded: %v", e) }}
+	wakeups, err := realtimewakeup.NewRegistry(realtimewakeup.Registration{Route: postgres.SocialReloadRoute, Handler: socialHandler}, realtimewakeup.Registration{Route: frienddm.WakeupRoute, Handler: friendReconcile}, realtimewakeup.Registration{Route: generaldm.WakeupRoute, Handler: generalReconcile}, realtimewakeup.Registration{Route: achievement.NoticeRoute, Handler: achievementNotices})
 	if err != nil {
 		log.Fatal(err)
 	}
