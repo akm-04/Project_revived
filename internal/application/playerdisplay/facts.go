@@ -20,6 +20,10 @@ const Eligible = "ELIGIBLE"
 const Ineligible = "INELIGIBLE"
 const Unavailable = "UNAVAILABLE"
 
+// NotLive is a forward-bound row (C4F_FULL_FAMILY_V1): resolved, never earnable
+// and never counted.
+const NotLive = "NOT_LIVE"
+
 type CosmeticPrivilegeReader interface {
 	ReadCosmeticPrivilegeTx(context.Context, tx.Queryer, identity.PlayerID, string, time.Time) (privilege.Snapshot, error)
 }
@@ -86,8 +90,8 @@ func scopeValid(sc ca.CoherentReadScope) bool {
 }
 
 // ReadEligibilityTx has no clock, revision discovery, nested transaction, lock or
-// write. It returns exact per-row core facts; complete-family/metric consumers
-// remain unavailable until actual mode/occurrence/title providers are qualified.
+// write. It returns exact per-row core facts. A family is complete only when no
+// row is UNAVAILABLE; a CompleteFamily request fails otherwise, never reading zero.
 func (s Service) ReadEligibilityTx(c context.Context, sc ca.CoherentReadScope, q EligibilityRequest) (EligibilityObservation, error) {
 	var out EligibilityObservation
 	if !scopeValid(sc) || !q.PlayerID.Valid() || s.Content == nil || s.Store == nil || s.Population == nil || s.Inventory == nil {
@@ -95,9 +99,6 @@ func (s Service) ReadEligibilityTx(c context.Context, sc ca.CoherentReadScope, q
 	}
 	if q.Family != "avatar" && q.Family != "frame" && q.Family != "title" && q.Family != "bubble" {
 		return out, ErrRequest
-	}
-	if q.CompleteFamily {
-		return out, ErrUnavailable
 	}
 	p, e := s.Content.ReadPlayerDisplayCatalogTx(c, sc.Queryer(), sc.ContentRevision)
 	if e != nil {
@@ -260,8 +261,19 @@ func (s Service) ReadEligibilityTx(c context.Context, sc ca.CoherentReadScope, q
 					}
 				}
 			}
+			if f.Status == Unavailable && player.ForwardBound(f.Family, f.CatalogID) {
+				f.Status = NotLive
+				f.Basis = player.ForwardBindingsPolicy
+			}
 			out.Facts = append(out.Facts, f)
 		}
+	}
+	out.CompleteFamily = completeFamily(out.Facts)
+	if out.CompleteFamily {
+		out.MissingProviders = []string{}
+	}
+	if q.CompleteFamily && !out.CompleteFamily {
+		return out, ErrUnavailable
 	}
 	out.PopulationDigest = PopulationDigest(struct {
 		Character CharacterPopulation
@@ -270,4 +282,12 @@ func (s Service) ReadEligibilityTx(c context.Context, sc ca.CoherentReadScope, q
 		Origins   []Origin
 	}{pop, inv, out.Privilege, out.RecipientOrigins})
 	return out, nil
+}
+func completeFamily(facts []EligibilityFact) bool {
+	for _, f := range facts {
+		if f.Status == Unavailable {
+			return false
+		}
+	}
+	return true
 }
