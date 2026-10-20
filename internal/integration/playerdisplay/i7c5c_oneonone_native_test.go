@@ -363,8 +363,10 @@ func TestI7C5COneOnOneConcurrentEntryNative(t *testing.T) {
 // stalledRounds withholds resolution from START, as if the client vanished.
 type stalledRounds struct{ app.Combat }
 
-func (stalledRounds) Resolve(context.Context, operation.Context, ids.UUID) (combat.Resolved, error) {
-	return combat.Resolved{}, cd.ErrResolverRetryable
+func (stalledRounds) ResolveDetached(context.Context, operation.Context, ids.UUID) *combat.Flight {
+	f := &combat.Flight{Done: make(chan struct{}), Err: cd.ErrResolverRetryable}
+	close(f.Done)
+	return f
 }
 
 // C05: an abandoned match is resolved and settled once by the reconcile provider.

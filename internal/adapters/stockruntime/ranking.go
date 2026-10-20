@@ -2,6 +2,8 @@ package stockruntime
 
 import (
 	"context"
+	"gxb.local/backend/v2/internal/domain/arena"
+	arenaprojection "gxb.local/backend/v2/internal/projection/arena"
 	"net/http"
 
 	"gxb.local/backend/v2/internal/application/realtimeauth"
@@ -25,11 +27,15 @@ type TopFloorRanks interface {
 type OneOnOneRanks interface {
 	RankList(context.Context, identity.ActorContext, bool) (oneonone.RankList, error)
 }
+type ArenaRanks interface {
+	RankList(context.Context, identity.ActorContext) (arena.RankList, error)
+}
 type RankingDispatcher struct {
 	Authority realtimeauth.GameplayAuthorityPort
 	Service   GirlsRankingReads
 	TopFloor  TopFloorRanks
 	OneOnOne  OneOnOneRanks
+	Arena     ArenaRanks
 }
 
 func (d RankingDispatcher) Dispatch(c context.Context, r httpedge.DispatchRequest) httpedge.Response {
@@ -74,6 +80,15 @@ func (d RankingDispatcher) Dispatch(c context.Context, r httpedge.DispatchReques
 			return fail(http.StatusServiceUnavailable)
 		}
 		body := oneononeprojection.RankList(list, subtype)
+		body["error_code"] = int64(0)
+		return httpedge.Response{HTTPStatus: http.StatusOK, Body: body}
+	}
+	if subtype == 6 && d.Arena != nil {
+		list, e := d.Arena.RankList(c, a)
+		if e != nil {
+			return fail(http.StatusServiceUnavailable)
+		}
+		body := arenaprojection.RankList(list)
 		body["error_code"] = int64(0)
 		return httpedge.Response{HTTPStatus: http.StatusOK, Body: body}
 	}

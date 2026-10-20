@@ -11,8 +11,10 @@ import (
 // PartnerUse is one side's per-partner history fact from a persisted report.
 type PartnerUse struct {
 	PartnerID int64
-	Wins      int64
-	Kills     int64
+	// TableID is the fighter's template id (Arena keys usage by girl).
+	TableID int64
+	Wins    int64
+	Kills   int64
 	// Harms is the exact decimal the report carried.
 	Harms string
 }
@@ -27,6 +29,7 @@ func Usage(report []byte, side string, won bool) ([]PartnerUse, error) {
 			KillCount  json.Number `json:"kill_count"`
 			Hero       struct {
 				PartnerID json.Number `json:"partner_id"`
+				TableID   json.Number `json:"table_id"`
 			} `json:"hero"`
 		} `json:"fighter"`
 	}
@@ -53,7 +56,11 @@ func Usage(report []byte, side string, won bool) ([]PartnerUse, error) {
 		if !ok || harms.Sign() < 0 || err != nil || kills < 0 {
 			return nil, ErrIntegrity
 		}
-		out = append(out, PartnerUse{PartnerID: partner, Wins: wins, Kills: kills, Harms: harms.FloatString(6)})
+		table, err := json.Number(defaultNumber(f.Hero.TableID)).Int64()
+		if err != nil || table < 0 {
+			return nil, ErrIntegrity
+		}
+		out = append(out, PartnerUse{PartnerID: partner, TableID: table, Wins: wins, Kills: kills, Harms: harms.FloatString(6)})
 	}
 	sort.Slice(out, func(i, j int) bool { return out[i].PartnerID < out[j].PartnerID })
 	return out, nil

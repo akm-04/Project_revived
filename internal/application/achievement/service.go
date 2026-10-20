@@ -240,6 +240,15 @@ func (s Service) ObserveOneOnOneWeekTx(c context.Context, t tx.Tx, server identi
 
 // ObserveOneOnOneWinStreakTx records a player's running 1 on 1 attack win streak.
 func (s Service) ObserveOneOnOneWinStreakTx(c context.Context, t tx.Tx, player identity.PlayerID, revision string, count int64, at time.Time) error {
+	return s.observeCountTx(c, t, d.WinStreakID, player, revision, count, at)
+}
+
+// ObserveArenaWinStreakTx records a player's running ranked Arena attack win streak.
+func (s Service) ObserveArenaWinStreakTx(c context.Context, t tx.Tx, player identity.PlayerID, revision string, count int64, at time.Time) error {
+	return s.observeCountTx(c, t, d.ArenaStreakID, player, revision, count, at)
+}
+
+func (s Service) observeCountTx(c context.Context, t tx.Tx, id int64, player identity.PlayerID, revision string, count int64, at time.Time) error {
 	if t == nil || s.Store == nil || s.Content == nil || !player.Valid() {
 		return d.ErrUnavailable
 	}
@@ -247,7 +256,7 @@ func (s Service) ObserveOneOnOneWinStreakTx(c context.Context, t tx.Tx, player i
 	if err != nil {
 		return err
 	}
-	return s.observePlayerTx(c, t, d.WinStreakID, player, revision, at, func(current d.Streak) (d.Streak, bool, error) {
+	return s.observePlayerTx(c, t, id, player, revision, at, func(current d.Streak) (d.Streak, bool, error) {
 		return current.ObserveCount(catalog, count, at)
 	})
 }

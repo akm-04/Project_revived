@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"gxb.local/backend/v2/internal/adapters/postgres/commerceprivilegestore"
+	apparena "gxb.local/backend/v2/internal/application/arena"
 	"gxb.local/backend/v2/internal/application/commerceprivilege"
 	apponeonone "gxb.local/backend/v2/internal/application/oneonone"
 	"gxb.local/backend/v2/internal/application/playerdisplay"
@@ -310,8 +311,14 @@ func main() {
 			mustRegister(mid, stockruntime.OneOnOneDispatcher{Authority: authority, Service: oneOnOne})
 		}
 		go runReconcile(ctx, pool, apponeonone.Reconciler{Service: oneOnOne})
+		arena := canonicalArena(pool, runner, contentDB, i5db, i5svc, fight, owners)
+		ranking.Arena = arena
+		for _, mid := range stockruntime.ArenaMIDs {
+			mustRegister(mid, stockruntime.ArenaDispatcher{Authority: authority, Service: arena})
+		}
+		go runReconcile(ctx, pool, apparena.Reconciler{Service: arena})
 	} else {
-		log.Print("I7C-5B/5C Top Floor and 1 on 1 routes not registered: GXB_COMBAT_ENTROPY_KEYS is unset")
+		log.Print("I7C-5B/5C/5D Top Floor, 1 on 1 and Arena routes not registered: GXB_COMBAT_ENTROPY_KEYS is unset")
 	}
 	mustRegister(301, ranking)
 	lobbyD := stockruntime.LobbyDispatcher{Authority: authority, Tracker: tracker}

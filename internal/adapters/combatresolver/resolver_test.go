@@ -172,3 +172,46 @@ func TestSuperArenaRoundResolves(t *testing.T) {
 		t.Fatal("super arena outcome", first.Outcome)
 	}
 }
+
+func TestRegionArenaBalancesHeroes(t *testing.T) {
+	corpus, _ := combatcorpus.Load()
+	attacker := TemplateHero(t, 10001001, 3, 20, 2)
+	raw, _ := combat.CanonicalJSON(map[string]any{"player_id": 0, "partner_id": 10001001, "table_id": 10001001, "star": 3, "lev": 20, "color": 2,
+		"skin_ids": map[string]any{}, "current_skin_id": 0, "illusion_skin_id": -1, "spirit_equip": []any{}, "spirit_item": []any{},
+		"practice_attr": []any{0, 0, 0}, "equips": []any{0, 0, 0, 0, 0, 0}, "fumos": []any{0, 0, 0, 0, 0, 0}, "skills": []any{1, 1, 1, 1, 1, 1}, "arena_add_star": 1})
+	attacker.Params = raw
+	s := templateSnapshot(t, []combat.Actor{attacker}, []combat.Actor{TemplateHero(t, 10001002, 3, 20, 2)})
+	s.Battle.CampaignType, s.Battle.BattleID = 45, 111001
+	root := sha256.Sum256([]byte("region-arena-root"))
+	first, err := Resolve(corpus, s, root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	second, err := Resolve(corpus, s, root)
+	if err != nil || !bytes.Equal(first.Report, second.Report) {
+		t.Fatal("region arena battle is not deterministic", err)
+	}
+	var report struct {
+		Fighter map[string]struct {
+			Hero struct {
+				Lev  json.Number `json:"lev"`
+				Star json.Number `json:"star"`
+			} `json:"hero"`
+		} `json:"fighter"`
+	}
+	if err = json.Unmarshal(first.Report, &report); err != nil {
+		t.Fatal(err)
+	}
+	seen := 0
+	for key, f := range report.Fighter {
+		if strings.HasPrefix(key, "A|") && f.Hero.Lev == "100" && f.Hero.Star == "4" {
+			seen++
+		}
+		if strings.HasPrefix(key, "B|") && f.Hero.Lev == "100" && f.Hero.Star == "3" {
+			seen++
+		}
+	}
+	if seen != 2 {
+		t.Fatal("balanced level 100 with the season star award", report.Fighter)
+	}
+}

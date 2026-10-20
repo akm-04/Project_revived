@@ -24,6 +24,9 @@ type Participant struct {
 	Player         identity.PlayerID
 	Identity       int64
 	TemplateParams map[string]any
+	// Overlay adds mode keys (Arena season awards) to the frozen params; it
+	// never replaces a key the owner or template wrote.
+	Overlay map[string]int64
 }
 
 type BattleRequest struct {
@@ -168,6 +171,19 @@ func (f *freezer) template(p Participant) (d.Actor, error) {
 }
 
 func (f *freezer) build(p Participant, params map[string]any) (d.Actor, error) {
+	if len(p.Overlay) > 0 {
+		merged := make(map[string]any, len(params)+len(p.Overlay))
+		for k, v := range params {
+			merged[k] = v
+		}
+		for k, v := range p.Overlay {
+			if _, taken := merged[k]; taken {
+				return d.Actor{}, d.ErrInvalid
+			}
+			merged[k] = v
+		}
+		params = merged
+	}
 	raw, err := d.CanonicalJSON(params)
 	if err != nil {
 		return d.Actor{}, d.ErrInvalid

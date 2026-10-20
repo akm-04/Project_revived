@@ -21,12 +21,28 @@ from pathlib import Path
 from typing import Any, Iterable
 
 SCHEMA_VERSION = 1
-COMPILER_VERSION = "i7c5c-one-on-one"
+COMPILER_VERSION = "i7c5d-arena"
 PARSER_VERSION = "lua-generated-v18-guild-invite"
 EXPECTED_SOURCE_ARCHIVE_SHA256 = "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
 SOURCE_PREFIX = "app-assets/output/assets/src_64/"
 
 SOURCE_MANIFEST = [
+    ('data/tables/region_arena_level.lua', 'a1a7860cd66acc9a5f5195bb7bf612b3ad786038298185bf0c84dca474c7382a', 'I7C5D_ARENA_SOURCE_BOUNDARY'),
+    ('data/tables/region_arena_reward.lua', '0d429b8b80be2c207fcc5c945af75d427464d7d380570129781cf6ec4c941e09', 'I7C5D_ARENA_SOURCE_BOUNDARY'),
+    ('data/tables/region_arena_notice.lua', '8ea41073b2c6ca4ff6d69d5933458bcfedb7e8e5eb9ceaf3e9b35b10e7b331c0', 'I7C5D_ARENA_SOURCE_BOUNDARY'),
+    ('data/tables/region_mission.lua', '5c3ae0e0c8ee59f41635c8269bd70bd42c34c1c83ba7d2dfcac8b63542ee3035', 'I7C5D_ARENA_SOURCE_BOUNDARY'),
+    ('data/tables/region_exchange.lua', 'd590ad0c5d19315ee030d814ae2d494b805f639a22b83eae0bb54998b9575372', 'I7C5D_ARENA_SOURCE_BOUNDARY'),
+    ('app/model/RegionArena.lua', '61112538d9a6c8a3b8b07de049d7bfc5c526a1c865a077f78c76845628bb8d66', 'I7C5D_ARENA_SOURCE_BOUNDARY'),
+    ('app/windows/RegionArenaWindow.lua', 'c7ddbe37cacd8ba13f1756dcb4d6b1be6eddb62c490315ce63cace282fb12e0d', 'I7C5D_ARENA_SOURCE_BOUNDARY'),
+    ('app/windows/SelectTeamRearenaWindow.lua', '3ba794bf14f43ee869c91dffe02b6168ce7308b99f7a21aa94ab9fcc48e70065', 'I7C5D_ARENA_SOURCE_BOUNDARY'),
+    ('app/windows/FoundEnemyWindow.lua', 'a75762ca2d61694aa8f006d9f821ad26dae0c0d169d16d068a67d0f5783cd592', 'I7C5D_ARENA_SOURCE_BOUNDARY'),
+    ('app/windows/RegionArenaHeroShopWindow.lua', 'a5118fd1bd22cca8bff1e677b03a0854587e3ba2c8bf831398835975b97c023c', 'I7C5D_ARENA_SOURCE_BOUNDARY'),
+    ('app/windows/RegionBattleScoresWindow.lua', '788ddc3547a8d37556100c49fa6cfcf72308d64e1038a70a5e97a6e3f0f4b8d6', 'I7C5D_ARENA_SOURCE_BOUNDARY'),
+    ('app/windows/SubArenaWindow.lua', '4aeee6de7e4b544d7e09f072f3929e67e3695e385ebc79e44f2c401f04903cd3', 'I7C5D_ARENA_SOURCE_BOUNDARY'),
+    ('app/windows/SeasonAwardWindow.lua', '6647c7cb49a68ee40f65404a9d2b02ace629721cf4c3e3768d1b1a977292b884', 'I7C5D_ARENA_SOURCE_BOUNDARY'),
+    ('app/common/tables/RegionArenaLevelTable.lua', 'ff1aa6b0edde34c23e562374c287d70b65c702a8bfbba5ffc913c19f14664eea', 'I7C5D_ARENA_SOURCE_BOUNDARY'),
+    ('app/common/tables/RegionArenaAwardTable.lua', '7e95ac319445a4277b169753cb7e8c26d6cc2d5712faa5fbaaea3e0295e8a620', 'I7C5D_ARENA_SOURCE_BOUNDARY'),
+    ('app/common/network/Backend.lua', '95378e2b0be8180df6de27e9e430c630bcfe46c080e1f91ef5f6d74bdbb1b840', 'I7C5D_ARENA_SOURCE_BOUNDARY'),
     ('data/tables/legend_arena_rank.lua', '047203550eae124c95807b001845d2f80e1cb332744f689c2987e9bf35828fb4', 'I7C5C_ONE_ON_ONE_SOURCE_BOUNDARY'),
     ('data/tables/legend_reward.lua', 'cbcbe0077320c12820400225564cd1d0dc3f0d5af7ea86b36af98d58cc61efdf', 'I7C5C_ONE_ON_ONE_SOURCE_BOUNDARY'),
     ('data/tables/translation.lua', '734790d99e4022575ebb3bb3e229cac21ffcf26c84d22dee28c76082dcaf8a36', 'I7C5C_ONE_ON_ONE_SOURCE_BOUNDARY'),
@@ -150,6 +166,7 @@ SOURCE_MANIFEST.append(('app/windows/HeroGiftBoxWindow.lua','d6065c3d601f5820915
 SOURCE_MANIFEST.append(('app/windows/WhiteAlbumWindow.lua','851a53f588b59d95cfe460f3399ab1a6904fff7714131c358f3c3a73910b6bb9',"LIBRARY_INPUT_SOURCE_AUTHORITY"))
 
 ENABLED_CAPABILITIES = [
+    "ARENA_MODE_I7C5D",
     "ONE_ON_ONE_MODE_I7C5C",
     "TOP_FLOOR_MODE_I7C5B",
     "ACHIEVEMENT_TIER_FACTS_I7C4B",
@@ -346,6 +363,7 @@ from privilege_content import build_privilege
 from achievement_content import build_achievement
 from top_floor_content import build_top_floor
 from one_on_one_content import build_one_on_one
+from arena_content import build_arena
 from course_content import build_course
 class CompileError(ValueError):
     pass
@@ -876,6 +894,11 @@ def build_artifacts(blobs: dict[str, SourceBlob], archive_sha256: str) -> dict[s
     if "top_coin" not in economy_names or "top_coin" in asset_by_name:
         raise CompileError("1 on 1 top_coin named scalar identity drift")
     resources.append({"catalog_status":"QUALIFIED","class":"SCALAR_CURRENCY","definition_key":"scalar_currency:top_coin","resource_key":"top_coin","settlement_activation":"ENABLED_R4"})
+    # I7C-5D Arena is the income owner of the named region_coin and king_coin scalars (no numeric asset IDs).
+    for key in ("region_coin", "king_coin"):
+        if key not in economy_names or key in asset_by_name:
+            raise CompileError("Arena named scalar identity drift: " + key)
+        resources.append({"catalog_status":"QUALIFIED","class":"SCALAR_CURRENCY","definition_key":"scalar_currency:"+key,"resource_key":key,"settlement_activation":"ENABLED_R4"})
     social_gift_artifact=build_social_gift(
         parse_generated_lua_table(blobs["data/tables/gift.lua"].data),
         parse_generated_lua_table(blobs["data/tables/friend_dailygift.lua"].data),
@@ -2133,6 +2156,7 @@ def build_artifacts(blobs: dict[str, SourceBlob], archive_sha256: str) -> dict[s
     artifacts = {
         "top_floor_catalog.json":build_top_floor(blobs,parse_generated_lua_table),
         "one_on_one_catalog.json":build_one_on_one(blobs,parse_generated_lua_table),
+        "arena_catalog.json":build_arena(blobs,parse_generated_lua_table),
         "achievement_catalog.json":build_achievement(blobs,parse_generated_lua_table),
         "privilege_catalog.json":build_privilege(blobs,parse_generated_lua_table),
         "stat_input_catalog.json":build_stat_inputs(blobs,parse_generated_lua_table,parse_base64_indexed_lua_table,indexed_field,parse_encoded_item_table,parse_encoded_skill_table),

@@ -8,7 +8,6 @@ import (
 	"errors"
 	"fmt"
 	"slices"
-	"sync"
 	"time"
 
 	ca "gxb.local/backend/v2/internal/application/characterasset"
@@ -281,16 +280,16 @@ func (s Service) conclude(c context.Context, m d.Match, op operation.Context, de
 		budget = timer.C
 	}
 	for wave := d.Pending(m.Rounds); len(wave) > 0; wave = d.Pending(m.Rounds) {
-		flights := make([]*flight, len(wave))
+		flights := make([]*combat.Flight, len(wave))
 		for i, round := range wave {
-			flights[i] = s.resolveOnce(c, op, m.Rounds[round].AttemptID)
+			flights[i] = s.Combat.ResolveDetached(c, op, m.Rounds[round].AttemptID)
 		}
 		errs := []error{}
 		for i, f := range flights {
 			select {
-			case <-f.done:
-				errs = append(errs, f.err)
-				m.Rounds[wave[i]].Star, m.Rounds[wave[i]].Resolved = f.resolved.Resolution.Outcome.Star, f.err == nil
+			case <-f.Done:
+				errs = append(errs, f.Err)
+				m.Rounds[wave[i]].Star, m.Rounds[wave[i]].Resolved = f.Resolved.Resolution.Outcome.Star, f.Err == nil
 			case <-budget:
 				return m, ErrUnresolved
 			}
@@ -305,30 +304,6 @@ func (s Service) conclude(c context.Context, m d.Match, op operation.Context, de
 		}
 	}
 	return s.settle(c, m, op)
-}
-
-// flight is one in-process resolution of an attempt; repeated STARTs and the
-// reconcile provider wait on it instead of launching another worker.
-type flight struct {
-	done     chan struct{}
-	resolved combat.Resolved
-	err      error
-}
-
-var flights sync.Map
-
-func (s Service) resolveOnce(c context.Context, op operation.Context, attempt ids.UUID) *flight {
-	f := &flight{done: make(chan struct{})}
-	if running, loaded := flights.LoadOrStore(attempt, f); loaded {
-		return running.(*flight)
-	}
-	detached := context.WithoutCancel(c)
-	go func() {
-		f.resolved, f.err = s.Combat.Resolve(detached, op, attempt)
-		flights.Delete(attempt)
-		close(f.done)
-	}()
-	return f
 }
 
 func (s Service) matchView(c context.Context, a identity.ActorContext, m d.Match) (d.MatchView, error) {

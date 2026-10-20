@@ -1,0 +1,40 @@
+{
+  "status": "I7C5D_IMPLEMENTATION_RECONCILIATION",
+  "contract_id": "C5D_ARENA_SEASON_MODE_V1",
+  "private_policy_additions": [
+    "Seasons repeat every 45 days from the 2022-10-28 05:00 GMT+8 source season (season number counted from it); ranked play closes at 00:00 GMT+8 of day 45 and INFO answers is_close until the next 05:00 opening (user decision 2026-10-20).",
+    "A new season fully resets stars, Lord points, statistics, streaks, exchanges and awards; missions, mission time, the saved defense and king_coin/region_coin balances carry over (user decision 2026-10-20 full reset).",
+    "Matching offers one opponent with a saved five-girl defense: ranked from the star band [0.8 s, 1.2 s] widened by 0.1 per side until someone is found, then anyone; practice from anyone; deterministic per player, season and match counter (user decision 2026-10-20 widen).",
+    "A started match left 10 minutes without FIGHT, a STOP, and a started match superseded by a new START settle as an attacker loss without a battle: stars/streak/statistics only, no coins or mission progress, defender unchanged (user decision 2026-10-20).",
+    "Lord points (Challenger, 95 stars): min(50, 10 + floor(0.1 x max(0, opponent points - own points))) added on a win; a loss removes the same formula with the difference reversed, floored at 0; defenders' points are unchanged; region_count_param2 has no inferred role.",
+    "Multi-star drops (third consecutive failed defense, -3) floor at region_arena_fail_protect 10, or at 90 once a player holds 90+; Challenger never drops.",
+    "Missions: three distinct region_mission rows drawn by weight; progress only from ranked attacks (kills and damage of the attacker side, the current attack win streak, wins); a completed mission is claimed for king_coin; claim or give-up empties the slot; empty slots refill together 72000 s after the last change.",
+    "Exchanges cost king_coin per region_exchange (escalating per season); star-up and awaken require an owned or summoned girl; summon requires a girl the player does not own and has not summoned; awards are keyed by the base (pre-awaken) table id.",
+    "A table id owned in several copies resolves to the strongest copy (star, then level, then lowest partner id) at freeze; a defense girl no longer available is left out of the battle.",
+    "Defender lineup (girls, pet, season awards) is frozen at START; the defender's current rows are read at FIGHT; the defender pet fights as the real owned pet (the client-resolved path used an uncollected pet with only its star).",
+    "FIGHT answers within 15 s (client JSON timeout 20 s); still resolving answers battle_report [] so the client's PLAYOFFS_RETRY path re-sends the same FIGHT after 3 s; resolution continues detached and the reconcile provider settles it regardless.",
+    "Season settlement mails every player with at least one ranked fight in the season its final-level region_arena_reward (region_coin, mana, items, frame at 26, skin pack from 15) and the season rank 1 Challenger the champion item 110006001; season order is stars, points, earlier reach, player id.",
+    "History (Q_ARENA_HISTORY_WINDOW): INFO/769 statistics and girl usage are per season from ranked attacks; records keep the 20 newest ranked fights (attack and defense, viewer-side win); practice fights leave no record; immutable season settlement rows are retained.",
+    "Ranking 301 rank_types 6 lists the season top 50 with level, star, point and fights; 775 (no window caller) and the client-resolved 774/778 are refused.",
+    "The daily first-10 coins are granted at settlement through I5 (region_coin, 50 win / 25 loss) and returned through economy_."
+  ],
+  "deviations_from_plan": [
+    "Combat resolution flights (detached, deduplicated in-process) moved from oneonone into the Combat application (combat.Service.ResolveDetached); 1 on 1 behaviour unchanged, its stall test double now overrides ResolveDetached.",
+    "Combat Participant gained Overlay (mode keys merged into frozen params, never replacing an owner key); the resolver driver applies arena_add_star / arena_awake then xyd.formatRegionArenaHeros / formatRegionArenaPets only for CampaignType 45.",
+    "combat.PartnerUse carries the report hero table_id (Arena keys usage by girl); Top Floor and 1 on 1 ignore it.",
+    "Identity store gained a read-only ServerNames.ServerNameTx display seam (opponent server names in cross-server Arena surfaces).",
+    "contentstore.ArenaTemplatesTx exposes the hero template lineage (base, awakened, super, initial star) of the pinned revision.",
+    "First entry bumps the competition root so concurrent first INFO calls of one player serialize into a retry (found by native tests); the same race exists in 1 on 1 LOAD (not changed in 5D).",
+    "region_coin is the eco_type 11 'Arena Coin' (SOURCE_FACT, upgraded from inference) and king_coin eco_type 16; both are ENABLED_R4 named scalars with Arena as income owner."
+  ],
+  "known_limitations": [
+    "One competition over all logical servers serializes season settlement and fight settlement on the root (lock 603); adequate for private-server scale.",
+    "Standings are computed from all competitor rows on each read (no rank index).",
+    "No robots: a server with no other defended player cannot match.",
+    "The champion portrait item's 45-day lifetime is the item's own definition; Arena grants the item only.",
+    "The client season window always prints the source dates (2022-10-28 .. 2022-12-12).",
+    "Playoffs (1280-1294), the Arena shop (region shop), the casual arena and PlayerDisplay 1829 history stay unactivated.",
+    "1 on 1 LOAD has the same concurrent same-player first-entry race fixed here for Arena (one request fails and the client retries)."
+  ],
+  "lock_order": "actor fence 315 -> Arena competition root 603 (first entry, fight settlement, season settlement; matching/START/FIGHT admission read it unlocked) -> Arena player rows (player order) -> Combat locator 609 -> I5 mail 610 -> Achievement 620 -> I5 value 700+; season settlements run in their own transactions before any Arena mutation (settle-before-mutate)."
+}

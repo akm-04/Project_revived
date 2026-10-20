@@ -234,14 +234,22 @@
       "parser_version": "lua-generated-v18-guild-invite",
       "revision_id": "bc12206a9236f744d50d205a927fdc8050d9dfc1f7dd13bc59fe8169cb1787ce",
       "scope": "1 on 1 catalog (legend_arena_rank, legend_reward, misc legend_*/top_refresh_cost, vip num_top/top_reset, refresh_cost buy_top_cost, title_system 100002-100005, translation LEGEND_MAIL_*, message 30002; C5C private policy inputs); top_coin ENABLED_R4 as 1 on 1 income owner; prior38payloads otherwise unchanged."
+    },
+    {
+      "ordinal": 35,
+      "stage": "I7C-5D",
+      "compiler_version": "i7c5d-arena",
+      "parser_version": "lua-generated-v18-guild-invite",
+      "revision_id": "d9c6bcc458c00e66da9ab2c86e319c0d04c3536eba13267a3121769d9c5a8e5d",
+      "scope": "Arena catalog (region_arena_level/reward/notice, region_mission, region_exchange, misc region_*, function 37, translation REGION_ARENA_MAIL_*/RULE3; C5D private policy inputs); region_coin and king_coin ENABLED_R4 as Arena income owner; prior39payloads otherwise unchanged."
     }
   ],
   "current": {
-    "ordinal": 34,
-    "stage": "I7C-5C",
-    "compiler_version": "i7c5c-one-on-one",
+    "ordinal": 35,
+    "stage": "I7C-5D",
+    "compiler_version": "i7c5d-arena",
     "parser_version": "lua-generated-v18-guild-invite",
-    "revision_id": "bc12206a9236f744d50d205a927fdc8050d9dfc1f7dd13bc59fe8169cb1787ce",
-    "scope": "1 on 1 catalog (legend_arena_rank, legend_reward, misc legend_*/top_refresh_cost, vip num_top/top_reset, refresh_cost buy_top_cost, title_system 100002-100005, translation LEGEND_MAIL_*, message 30002; C5C private policy inputs); top_coin ENABLED_R4 as 1 on 1 income owner; prior38payloads otherwise unchanged."
+    "revision_id": "d9c6bcc458c00e66da9ab2c86e319c0d04c3536eba13267a3121769d9c5a8e5d",
+    "scope": "Arena catalog (region_arena_level/reward/notice, region_mission, region_exchange, misc region_*, function 37, translation REGION_ARENA_MAIL_*/RULE3; C5D private policy inputs); region_coin and king_coin ENABLED_R4 as Arena income owner; prior39payloads otherwise unchanged."
   }
 }

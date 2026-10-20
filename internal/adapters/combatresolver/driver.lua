@@ -8,6 +8,30 @@ for i, wave in ipairs(input.waves_b) do
 end
 local herosA = combat_models(input.team_a)
 local herosB = waves
+local petsA, petsB = combat_models(input.pets_a), combat_models(input.pets_b)
+-- C5D: REGION_ARENA applies the frozen season awards after populate, then the
+-- client's own balancing (SelectTeamRearenaWindow initOtherHero/willOpen).
+if input.campaign_type == xyd.CampaignType.REGION_ARENA then
+	local function balance(actors, heroes)
+		for i, actor in ipairs(actors) do
+			local hero, addStar = heroes[i], actor.params.arena_add_star or 0
+			if addStar > 0 then
+				local cap = xyd.isSuperHero(hero) and xyd.SUPER_HERO_TOTAL_STARS or xyd.MAX_STAR_LEVEL
+				hero:setStar(math.min(hero:getStar() + addStar, cap))
+			end
+			if actor.params.arena_awake == 1 and not hero:isAwaken() then
+				hero:setTableID(xyd.tables.hero:afterAwaken(hero:getTableID()))
+			end
+		end
+		xyd.formatRegionArenaHeros(heroes)
+	end
+	balance(input.team_a, herosA)
+	for i, wave in ipairs(input.waves_b) do
+		balance(wave, waves[i])
+	end
+	xyd.formatRegionArenaPets(petsA)
+	xyd.formatRegionArenaPets(petsB)
+end
 -- SUPER_ARENA BattleCreateReport takes team groups; one round is team1.
 if input.campaign_type == xyd.CampaignType.SUPER_ARENA then
 	herosA, herosB = { team1 = herosA }, { team1 = waves[1] }
@@ -19,8 +43,8 @@ local battle = Report.new({
 	battleID = input.battle_id,
 	herosA = herosA,
 	herosB = herosB,
-	petsA = combat_models(input.pets_a),
-	petsB = combat_models(input.pets_b),
+	petsA = petsA,
+	petsB = petsB,
 	fighterInfo = {},
 })
 function battle:sendBattleResult()

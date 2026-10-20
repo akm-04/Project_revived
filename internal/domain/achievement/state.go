@@ -110,14 +110,16 @@ func (c Catalog) Validate() error {
 	return nil
 }
 
-// Scoped I7C-5B/5C amendments: streak producers. Tiers are never revoked.
+// Scoped I7C-5B/5C/5D amendments: streak producers. Tiers are never revoked.
 // 100001 Top Floor Challenger: consecutive daily 21:00 snapshots in the top 3 (3/6/10).
 // 100002 1 on 1 Dominator: consecutive Sunday 22:00 snapshots with server rank <= 3 (1/2/3 weeks).
 // 100028 1 on 1 Smash 'em all: a running attack-match win streak (5/15/30).
+// 100003 Arena Skilled Master: a running ranked Arena attack win streak (5/15/30).
 const (
 	TopFloorStreakID int64 = 100001
 	WeeklyStreakID   int64 = 100002
 	WinStreakID      int64 = 100028
+	ArenaStreakID    int64 = 100003
 	StreakTopRank    int64 = 3
 )
 
@@ -132,6 +134,7 @@ var streakProfiles = map[int64]streakProfile{
 	TopFloorStreakID: {"C5B_TOP_FLOOR_CHALLENGER_STREAK_V1", [3]int64{3, 6, 10}, 1},
 	WeeklyStreakID:   {"C5C_ONE_ON_ONE_DOMINATOR_STREAK_V1", [3]int64{1, 2, 3}, 7},
 	WinStreakID:      {"C5C_ONE_ON_ONE_WIN_STREAK_V1", [3]int64{5, 15, 30}, 0},
+	ArenaStreakID:    {"C5D_ARENA_WIN_STREAK_V1", [3]int64{5, 15, 30}, 0},
 }
 
 func StreakPolicy(id int64) string { return streakProfiles[id].policy }

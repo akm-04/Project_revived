@@ -71,6 +71,7 @@ type Achievements interface {
 type Combat interface {
 	StartManyTx(context.Context, tx.Tx, ca.CoherentReadScope, []combat.StartRequest) ([]combat.Started, error)
 	Resolve(context.Context, operation.Context, ids.UUID) (combat.Resolved, error)
+	ResolveDetached(context.Context, operation.Context, ids.UUID) *combat.Flight
 	TerminalTx(context.Context, tx.Tx, combat.TerminalRequest) (combat.Settled, error)
 	CloseTx(context.Context, tx.Tx, combat.TerminalRequest) (combat.Closed, error)
 	ResultTx(context.Context, tx.Queryer, ids.UUID) (combat.Resolved, error)

@@ -3549,6 +3549,122 @@
       "migration": "migrations/00064_i7c5a_combat_foundation.sql",
       "owner": "Combat",
       "write_exceptions": []
+    },
+    "content_arena_catalogs": {
+      "owner": "content-registry",
+      "allowed_query_owners": [
+        "content-registry"
+      ],
+      "allowed_read_paths": [
+        "sql/content/",
+        "internal/adapters/postgres/contentstore/",
+        "internal/adapters/postgres/contentqueries/"
+      ],
+      "allowed_write_paths": [
+        "sql/content/",
+        "internal/adapters/postgres/contentstore/",
+        "internal/adapters/postgres/contentqueries/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00067_i7c5d_arena.sql"
+    },
+    "arena_competitions": {
+      "owner": "Arena",
+      "allowed_query_owners": [
+        "Arena"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/arenastore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/arenastore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00067_i7c5d_arena.sql"
+    },
+    "arena_players": {
+      "owner": "Arena",
+      "allowed_query_owners": [
+        "Arena"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/arenastore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/arenastore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00067_i7c5d_arena.sql"
+    },
+    "arena_matches": {
+      "owner": "Arena",
+      "allowed_query_owners": [
+        "Arena"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/arenastore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/arenastore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00067_i7c5d_arena.sql"
+    },
+    "arena_records": {
+      "owner": "Arena",
+      "allowed_query_owners": [
+        "Arena"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/arenastore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/arenastore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00067_i7c5d_arena.sql"
+    },
+    "arena_partner_usage": {
+      "owner": "Arena",
+      "allowed_query_owners": [
+        "Arena"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/arenastore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/arenastore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00067_i7c5d_arena.sql"
+    },
+    "arena_settlements": {
+      "owner": "Arena",
+      "allowed_query_owners": [
+        "Arena"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/arenastore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/arenastore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00067_i7c5d_arena.sql"
+    },
+    "arena_settlement_ranks": {
+      "owner": "Arena",
+      "allowed_query_owners": [
+        "Arena"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/arenastore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/arenastore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00067_i7c5d_arena.sql"
     }
   }
 }

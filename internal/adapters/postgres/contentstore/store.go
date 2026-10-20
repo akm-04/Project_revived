@@ -211,6 +211,12 @@ func (Store) VerifyRevision(ctx context.Context, q tx.Queryer, b registry.Bundle
 		return registry.Verification{}, err
 	}
 	v.Exact = v.Exact && oneOnOneExact
+	var arenaExact bool
+	err = q.QueryRow(ctx, verifyArenaSQL, b.RevisionID(), string(b.ArenaJSON())).Scan(&arenaExact, &v.ArenaCount)
+	if err != nil {
+		return registry.Verification{}, err
+	}
+	v.Exact = v.Exact && arenaExact
 	var achievementExact bool
 	err = q.QueryRow(ctx, verifyAchievementSQL, b.RevisionID(), string(b.AchievementJSON())).Scan(&achievementExact, &v.AchievementCount)
 	if err != nil {
