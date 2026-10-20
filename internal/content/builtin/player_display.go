@@ -18,13 +18,13 @@ type PlayerDisplayCatalog struct {
 		Kind         string `json:"kind"`
 	} `json:"hero_templates"`
 	Cosmetics []struct {
-		Family    string `json:"family"`
-		ID        int64  `json:"id"`
-		Icon      int64  `json:"icon"`
-		Type      int64  `json:"type"`
-		PartnerID int64  `json:"partner_id"`
-		Days      int64  `json:"days"`
-		VIP       int64  `json:"vip"`
+		Family    string  `json:"family"`
+		ID        int64   `json:"id"`
+		Icon      int64   `json:"icon"`
+		Type      int64   `json:"type"`
+		PartnerID int64   `json:"partner_id"`
+		Days      int64   `json:"days"`
+		VIP       int64   `json:"vip"`
 		Price     int64   `json:"price"`
 		Condition []int64 `json:"condition,omitempty"`
 	} `json:"cosmetics"`

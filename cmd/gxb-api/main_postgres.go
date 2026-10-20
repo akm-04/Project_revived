@@ -188,8 +188,9 @@ func main() {
 	boardRanking := canonicalBoardRanking(pool, runner, contentDB, displayService, receipts)
 	// Title origins route by catalog id; the 1 on 1 origin read needs no Combat.
 	leagueOrigins := appleague.Service{Store: leaguestore.Store{}, Content: contentDB, Entitlements: i5db}
-	displayService.CatalogExternal = playerdisplay.CatalogOriginRoutes{{Family: "bubble", First: 10002, Last: 10007, Owner: leagueOrigins}, {Family: "title", First: 100104, Last: 100104, Owner: leagueOrigins}, {Family: "title", First: 100111, Last: 100111, Owner: leagueOrigins}, {Family: "title", First: 100114, Last: 100121, Owner: leagueOrigins}, {Family: "title", First: 100059, Last: 100062, Owner: boardRanking}, {Family: "title", First: 100001, Last: 100001, Owner: boardRanking},
-		{First: 100002, Last: 100005, Owner: apponeonone.Service{Store: oneononestore.Store{}, Content: contentDB, Entitlements: i5db}}}
+	displayRoutes := playerdisplay.CatalogOriginRoutes{{Family: "bubble", First: 10002, Last: 10007, Owner: leagueOrigins}, {Family: "title", First: 100104, Last: 100104, Owner: leagueOrigins}, {Family: "title", First: 100111, Last: 100111, Owner: leagueOrigins}, {Family: "title", First: 100114, Last: 100121, Owner: leagueOrigins}, {Family: "title", First: 100059, Last: 100062, Owner: boardRanking}, {Family: "title", First: 100001, Last: 100001, Owner: boardRanking},
+		{First: 100002, Last: 100005, Owner: apponeonone.Service{Store: oneononestore.Store{}, Content: contentDB, Entitlements: i5db}},
+		{Family: "avatar", First: 110006001, Last: 110006001, Owner: apparena.Service{Store: arenastore.Store{}, Content: contentDB}}}
 
 	maxHeroColorPolicy := appi5.PreservationMaxHeroColorProvider{}
 	heroDB := characterstore.Store{Queryer: pool}
@@ -224,6 +225,10 @@ func main() {
 	spiritSvc := appspirit.Service{Mint: domainspirit.V1PreservationPolicy{}, Milestones: domainspirit.V1PreservationPolicy{}, Timed: heroSvc.Timed, Reads: runner, Heroes: characterstore.SpiritHeroPort{Store: heroDB}, Owner: spiritstore.Store{}, Content: contentDB, Players: i4store.PlayerRootLocker{}, Fence: i5db, Values: i5db, Costs: heroMaterialCosts, Receipts: receipts}
 	evolutionSvc := appevolution.Service{Values: i5db, Timed: heroSvc.Timed, Reads: runner, Heroes: characterstore.EvolutionHeroPort{Store: heroDB}, Owner: characterstore.EvolutionStore{}, Content: contentDB, Players: i4store.PlayerRootLocker{}, Fence: i5db, Costs: heroMaterialCosts, Receipts: receipts}
 	i5svc.Spirits = spiritSvc
+	displayService.CatalogExternal = append(displayRoutes,
+		playerdisplay.CatalogOriginRoute{Family: "title", First: 100022, Last: 100023, Owner: playerdisplay.ProgressTitleOrigins{Owner: "Library", TitleType: 5, Content: contentDB, Progress: librarySvc}},
+		playerdisplay.CatalogOriginRoute{Family: "title", First: 100024, Last: 100025, Owner: playerdisplay.ProgressTitleOrigins{Owner: "BookSkill", TitleType: 6, Content: contentDB, Progress: bookSvc}},
+		playerdisplay.CatalogOriginRoute{Family: "title", First: 100026, Last: 100028, Owner: playerdisplay.ProgressTitleOrigins{Owner: "Dormhouse", TitleType: 7, Content: contentDB, Progress: dormSvc}})
 
 	librarySvc.Roster = characterstore.HeroBootstrapProjection{Content: contentDB, Library: librarySvc, Dorm: dormSvc, Book: bookSvc, Course: courseSvc, Inscription: inscriptionSvc, Element: elementSvc, Spirit: spiritSvc, Evolution: evolutionSvc}
 	achievements := canonicalAchievements(pool, runner, contentDB, i5db, i5svc, librarySvc, achievementOwners{books: bookSvc, courses: courseSvc, inscriptions: inscriptionSvc, dorm: dormSvc})

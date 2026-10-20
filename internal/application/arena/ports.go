@@ -21,6 +21,7 @@ import (
 	"gxb.local/backend/v2/internal/domain/guild"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/domain/mail"
+	"gxb.local/backend/v2/internal/domain/player"
 	"gxb.local/backend/v2/internal/foundation/ids"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/receipt"
@@ -46,12 +47,14 @@ type Store interface {
 	AddUsageTx(context.Context, tx.Tx, identity.PlayerID, int64, []cd.PartnerUse) error
 	UsageTx(context.Context, tx.Queryer, identity.PlayerID, int64) ([]d.Usage, error)
 	InsertSettlementTx(context.Context, tx.Tx, d.Settlement) error
+	ChampionSettlementsTx(context.Context, tx.Queryer, identity.PlayerID) ([]d.ChampionSettlement, error)
 }
 
 type Content interface {
 	ActiveRevision(context.Context, tx.Queryer) (string, error)
 	ArenaCatalogTx(context.Context, tx.Queryer, string) (d.Catalog, error)
 	ArenaTemplatesTx(context.Context, tx.Queryer, string) (d.Templates, error)
+	ReadPlayerDisplayCatalogTx(context.Context, tx.Queryer, string) (player.DisplayCatalog, error)
 }
 
 type Fence interface {

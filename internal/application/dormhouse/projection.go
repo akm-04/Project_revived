@@ -370,3 +370,13 @@ func (s Service) OverlayRosterTx(ctx context.Context, q tx.Queryer, a identity.A
 	}
 	return nil
 }
+
+// TitleProgressTx is the villa title progress: rooms of DormType.VILLA, which
+// are never removed.
+func (s Service) TitleProgressTx(ctx context.Context, q tx.Queryer, player identity.PlayerID, revision string, at time.Time) (int64, int64, error) {
+	inputs, e := s.VillaCountTx(ctx, q, InputScope{Player: player, ContentRevision: revision, ObservedAt: at})
+	if e != nil {
+		return 0, 0, e
+	}
+	return inputs.Count, inputs.DormRootVersion, nil
+}

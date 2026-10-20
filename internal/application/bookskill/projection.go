@@ -229,3 +229,13 @@ func (s Service) OverlayRosterTx(ctx context.Context, q tx.Queryer, a identity.A
 func (s Service) BuildingsWireTx(ctx context.Context, q tx.Queryer, scope InputScope) (map[string]any, error) {
 	return s.buildingsWire(ctx, q, scope)
 }
+
+// TitleProgressTx is the Bookshelf title progress: the applied level of book
+// building 4 (EventCentreBuildingType.BOOKSHELF), which never decreases.
+func (s Service) TitleProgressTx(ctx context.Context, q tx.Queryer, player identity.PlayerID, revision string, at time.Time) (int64, int64, error) {
+	inputs, e := s.BookInputsTx(ctx, q, InputScope{Player: player, ContentRevision: revision, ObservedAt: at})
+	if e != nil {
+		return 0, 0, e
+	}
+	return inputs.Applied.Buildings[4].Level, inputs.OwnerVersion, nil
+}

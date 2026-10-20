@@ -64,6 +64,8 @@ type PlayerFacts struct {
 	SeedPolicy    string
 	CreatedAt     time.Time
 	UpdatedAt     time.Time
+	// MarriedHighWater is the most heroes ever married at once; marriage titles keep it.
+	MarriedHighWater int64
 }
 
 func ValidRevision(revision string) bool {
@@ -86,7 +88,7 @@ func NewPlayerFacts(player identity.PlayerID, now time.Time) (PlayerFacts, error
 	return f, f.Validate()
 }
 func (f PlayerFacts) Validate() error {
-	if !f.PlayerID.Valid() || f.StateVersion <= 0 || f.SeedPolicy != SeedPolicyV1 || f.CreatedAt.IsZero() || f.UpdatedAt.Before(f.CreatedAt) {
+	if !f.PlayerID.Valid() || f.StateVersion <= 0 || f.SeedPolicy != SeedPolicyV1 || f.CreatedAt.IsZero() || f.UpdatedAt.Before(f.CreatedAt) || f.MarriedHighWater < 0 {
 		return ErrInvalidFacts
 	}
 	return nil

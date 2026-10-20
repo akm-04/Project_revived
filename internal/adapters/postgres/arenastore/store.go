@@ -338,6 +338,15 @@ func (Store) RecordsTx(c context.Context, q tx.Queryer, owner identity.PlayerID)
 	return out, nil
 }
 
+// ChampionSettlementsTx lists the settled seasons the player won as champion.
+func (Store) ChampionSettlementsTx(c context.Context, q tx.Queryer, pid identity.PlayerID) ([]d.ChampionSettlement, error) {
+	var rows []d.ChampionSettlement
+	if _, e := readJSON(c, q, `SELECT COALESCE(jsonb_agg(jsonb_build_object('season',s.season,'settled_at',s.settled_at) ORDER BY s.season),'[]'::jsonb)::text FROM arena_settlement_ranks r JOIN arena_settlements s USING(season) WHERE r.player_id=$1 AND r.champion`, &rows, int64(pid)); e != nil {
+		return nil, e
+	}
+	return rows, nil
+}
+
 // RetainedAttemptTx reports whether a retained record still references the attempt's match.
 func (Store) RetainedAttemptTx(c context.Context, q tx.Queryer, attempt ids.UUID) (bool, error) {
 	if q == nil {

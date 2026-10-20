@@ -16,14 +16,14 @@ import (
 
 type Store struct{ Queryer tx.Queryer }
 
-const rootColumns = `player_id,state_version,special_claims::text,seed_policy_id,created_at,updated_at`
+const rootColumns = `player_id,state_version,special_claims::text,seed_policy_id,created_at,updated_at,married_high_water`
 const heroColumns = `player_id,partner_id,state_version,favor_degree,is_married,feed_attrs::text,collect_quality_stage,collect_star_stage,pending_candidate::text,seed_policy_id,created_at,updated_at`
 
 func scanRoot(row tx.Row) (library.PlayerFacts, error) {
 	var f library.PlayerFacts
 	var pid int64
 	var raw string
-	if e := row.Scan(&pid, &f.StateVersion, &raw, &f.SeedPolicy, &f.CreatedAt, &f.UpdatedAt); e != nil {
+	if e := row.Scan(&pid, &f.StateVersion, &raw, &f.SeedPolicy, &f.CreatedAt, &f.UpdatedAt, &f.MarriedHighWater); e != nil {
 		return f, e
 	}
 	f.PlayerID = identity.PlayerID(pid)
@@ -178,7 +178,7 @@ func (Store) SaveHeroTx(ctx context.Context, t tx.Tx, f library.HeroFacts, oldVe
 	if tag.RowsAffected() != 1 {
 		return errors.New("library: facet update lost version")
 	}
-	tag, e = t.Exec(ctx, `UPDATE player_library_roots SET state_version=state_version+1,updated_at=$2 WHERE player_id=$1`, int64(f.Ref.PlayerID), f.UpdatedAt.UTC())
+	tag, e = t.Exec(ctx, `UPDATE player_library_roots SET state_version=state_version+1,updated_at=$2,married_high_water=GREATEST(married_high_water,(SELECT count(*) FROM player_library_heroes WHERE player_id=$1 AND is_married)) WHERE player_id=$1`, int64(f.Ref.PlayerID), f.UpdatedAt.UTC())
 	if e != nil {
 		return e
 	}

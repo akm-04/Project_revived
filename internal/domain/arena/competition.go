@@ -62,6 +62,12 @@ type SettlementRow struct {
 	Mail     *ids.UUID
 }
 
+// ChampionSettlement is a settled season the player won as champion.
+type ChampionSettlement struct {
+	Season    int64     `json:"season"`
+	SettledAt time.Time `json:"settled_at"`
+}
+
 type Settlement struct {
 	Season             int64
 	CutoffAt           time.Time

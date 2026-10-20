@@ -294,3 +294,18 @@ func (s Service) ReadBodyTx(ctx context.Context, q tx.Queryer, a identity.ActorC
 	*out = map[string]any{"library_infos": infos, "library_talk_infos": map[string]any{}}
 	return nil
 }
+
+// TitleProgressTx is the marriage title progress (C6_SELECTED_COSMETIC_ORIGINS_V1):
+// a title once earned is kept, so the stored high-water mark counts even after
+// the current married count falls.
+func (s Service) TitleProgressTx(ctx context.Context, q tx.Queryer, player identity.PlayerID, revision string, at time.Time) (int64, int64, error) {
+	inputs, e := s.MarriedHeroCountTx(ctx, q, InputScope{Player: player, ContentRevision: revision, ObservedAt: at})
+	if e != nil {
+		return 0, 0, e
+	}
+	root, e := s.Library.ReadRootTx(ctx, q, player)
+	if e != nil {
+		return 0, 0, e
+	}
+	return max(root.MarriedHighWater, inputs.MarriedCount), inputs.LibraryRootVersion, nil
+}
