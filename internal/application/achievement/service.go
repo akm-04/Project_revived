@@ -12,6 +12,7 @@ import (
 	d "gxb.local/backend/v2/internal/domain/achievement"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/domain/objective"
+	"gxb.local/backend/v2/internal/foundation/ids"
 	"gxb.local/backend/v2/internal/foundation/tx"
 	"sort"
 	"time"
@@ -59,6 +60,12 @@ type Store interface {
 	ReadStreakTx(context.Context, tx.Queryer, identity.PlayerID, int64, bool) (d.Streak, bool, error)
 	SaveStreakTx(context.Context, tx.Tx, d.Streak, int64) error
 	ActiveStreakPlayersTx(context.Context, tx.Queryer, identity.LogicalServerID, int64, int64) ([]identity.PlayerID, error)
+	InitFreshTx(context.Context, tx.Tx, identity.PlayerID, string, time.Time) error
+	ReadStreaksTx(context.Context, tx.Queryer, identity.PlayerID) ([]d.Streak, error)
+	ReadClaimsTx(context.Context, tx.Queryer, identity.PlayerID) (map[int64]bool, error)
+	PutClaimTx(context.Context, tx.Tx, identity.PlayerID, int64, string, ids.UUID, int64, time.Time) error
+	PutNoticesTx(context.Context, tx.Tx, []Notice) error
+	TrophyRankTx(context.Context, tx.Queryer, identity.PlayerID, d.Catalog) (int64, error)
 }
 type Content interface {
 	AchievementCatalogTx(context.Context, tx.Queryer, string) (d.Catalog, error)
@@ -71,6 +78,7 @@ type Service struct {
 	Store      Store
 	Content    Content
 	Population Population
+	Runtime    *Runtime
 }
 type prepared struct {
 	owner   Service
@@ -160,10 +168,13 @@ func (p prepared) ApplyMarriageTx(c context.Context, t tx.Tx) error {
 	if e = p.owner.Store.PutEventTx(c, t, p.event); e != nil {
 		return e
 	}
-	if changed {
-		return p.owner.Store.SaveRootTx(c, t, next, p.root.StateVersion)
+	if !changed {
+		return nil
 	}
-	return nil
+	if e = p.owner.Store.SaveRootTx(c, t, next, p.root.StateVersion); e != nil {
+		return e
+	}
+	return p.owner.Store.PutNoticesTx(c, t, newTiers(s.Player, d.SelectedID, p.root.CompleteTimes, next.CompleteTimes))
 }
 
 type Request struct {
@@ -319,7 +330,10 @@ func (s Service) observePlayerTx(c context.Context, t tx.Tx, id int64, p identit
 	if !found {
 		next.StateVersion, old = 1, 0
 	}
-	return s.Store.SaveStreakTx(c, t, next, old)
+	if err = s.Store.SaveStreakTx(c, t, next, old); err != nil {
+		return err
+	}
+	return s.Store.PutNoticesTx(c, t, newTiers(p, id, current.CompleteTimes, next.CompleteTimes))
 }
 
 // ObserveLeagueDaysTx consumes the League owner's cumulative count of unique

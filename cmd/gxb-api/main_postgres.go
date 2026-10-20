@@ -226,6 +226,7 @@ func main() {
 	i5svc.Spirits = spiritSvc
 
 	librarySvc.Roster = characterstore.HeroBootstrapProjection{Content: contentDB, Library: librarySvc, Dorm: dormSvc, Book: bookSvc, Course: courseSvc, Inscription: inscriptionSvc, Element: elementSvc, Spirit: spiritSvc, Evolution: evolutionSvc}
+	achievements := canonicalAchievements(pool, runner, contentDB, i5db, i5svc, librarySvc, achievementOwners{books: bookSvc, courses: courseSvc, inscriptions: inscriptionSvc, dorm: dormSvc})
 	petSvc := apppet.Service{Runner: runner, Timed: petTimed, Store: heroDB, Fencer: i5db, Content: contentDB, Progression: contentDB, Receipts: receipts, ReceiptRead: kernelstore.Reader{Queryer: pool}, Acquisition: petAcquisitionDebit, MaterialCosts: heroMaterialCosts, Scalar: i5CrossOwner, PetExp: petExpDebit, Equipment: contentDB, EquipmentResources: heroEquipmentResources, Promotion: contentDB, PromotionResources: i5svc, StrictRestoration: i5svc, RestorationModifier: characterasset.IdentityRestorationModifier{}, AppearanceStore: heroDB, Appearance: contentDB, AppearanceMutationStore: heroDB}
 	petEconomyProjection := appi5.ScalarProjector{Runner: runner, Store: i5db}
 	guildPolicyArtifact, err := guildpolicy.LoadBuiltin()
@@ -327,15 +328,18 @@ func main() {
 		go runReconcile(ctx, pool, appleague.Reconciler{Service: league})
 		conquer := canonicalConquer(pool, runner, contentDB, i5db, i5svc, privileges, fight)
 		for _, mid := range stockruntime.ConquerMIDs {
-			mustRegister(mid, stockruntime.ConquerDispatcher{Authority: authority, Service: conquer})
+			mustRegister(mid, observing(authority, achievements, "Conquer", stockruntime.ConquerDispatcher{Authority: authority, Service: conquer}))
 		}
 	} else {
 		log.Print("I7C-5B/5C/5D/5E/5F Top Floor, 1 on 1, Arena, Conquer School and Champions League routes not registered: GXB_COMBAT_ENTROPY_KEYS is unset")
 	}
 	mustRegister(301, ranking)
 	lobbyD := stockruntime.LobbyDispatcher{Authority: authority, Tracker: tracker}
-	for _, mid := range []uint16{56, 1302, 1344, 2754} {
+	for _, mid := range []uint16{56, 1344, 2754} {
 		mustRegister(mid, lobbyD)
+	}
+	for _, mid := range stockruntime.AchievementMIDs {
+		mustRegister(mid, stockruntime.AchievementDispatcher{Authority: authority, Service: achievements})
 	}
 	socialTimed := appgeneration.TimedRunner{Binder: appgeneration.Binder{Time: postgres.AuthoritativeTime{Queryer: pool}}, Runner: runner}
 	publicationDB := publicationstore.Store{}
@@ -423,7 +427,7 @@ func main() {
 	skillSvc := apphero.SkillChoiceService{Timed: heroSvc.Timed, Reads: runner, Store: heroDB, Players: i4store.PlayerRootLocker{}, Fence: i5db, Receipts: receipts, Inventory: i5db, Content: contentDB}
 	heroD := stockruntime.HeroDispatcher{Roster: librarySvc, Skills: skillSvc, Bookmark: bookmarkSvc, Authority: authority, Service: heroSvc, Appearance: heroSvc, LIVE: heroSvc, Economy: heroEconomyProjection}
 	for _, mid := range []uint16{2144, 3116, 49, 51, 52, 54, 55, 57, 58, 59, 60, 61, 62, 63, 67, 68, 69, 89, 304, 2979} {
-		mustRegister(mid, heroD)
+		mustRegister(mid, observing(authority, achievements, "Hero", heroD))
 	}
 	evolutionD := stockruntime.EvolutionDispatcher{Authority: authority, Service: evolutionSvc}
 	for _, mid := range []uint16{2608, 2609} {
@@ -440,19 +444,19 @@ func main() {
 	}
 	inscriptionD := stockruntime.InscriptionDispatcher{Authority: authority, Service: inscriptionSvc}
 	for mid := uint16(1400); mid <= 1407; mid++ {
-		mustRegister(mid, inscriptionD)
+		mustRegister(mid, observing(authority, achievements, "Inscription", inscriptionD))
 	}
 	courseD := stockruntime.CourseDispatcher{Authority: authority, Service: courseSvc}
 	for _, mid := range []uint16{2128, 2129, 2130, 2131, 2132, 2133, 2134, 2135, 2136, 2137, 2138, 2139, 2140, 2142} {
-		mustRegister(mid, courseD)
+		mustRegister(mid, observing(authority, achievements, "Course", courseD))
 	}
 	bookD := stockruntime.BookDispatcher{Authority: authority, Service: bookSvc}
 	for _, mid := range []uint16{83, 1056, 1057, 1058, 1059, 1060, 1061, 1077, 1078, 1079, 1080} {
-		mustRegister(mid, bookD)
+		mustRegister(mid, observing(authority, achievements, "Book", bookD))
 	}
 	dormD := stockruntime.DormDispatcher{Authority: authority, Service: dormSvc}
 	for _, mid := range []uint16{2512, 2513, 2514, 2515, 2516, 2517, 2693, 2694, 2695} {
-		mustRegister(mid, dormD)
+		mustRegister(mid, observing(authority, achievements, "Dorm", dormD))
 	}
 	libraryD := stockruntime.LibraryDispatcher{Authority: authority, Service: librarySvc}
 	for _, mid := range []uint16{72, 836, 840, 852, 853, 854, 2784, 2785} {
@@ -460,7 +464,7 @@ func main() {
 	}
 	petD := stockruntime.PetDispatcher{Authority: authority, Service: petSvc, Economy: petEconomyProjection}
 	for _, mid := range []uint16{134, 780, 781, 782, 783, 785, 786, 787, 789, 790, 791, 792, 1893, 1894, 1895} {
-		mustRegister(mid, petD)
+		mustRegister(mid, observing(authority, achievements, "Pet", petD))
 	}
 	guildD := stockruntime.GuildDispatcher{Authority: authority, Core: guildSvc, View: guildView}
 	for _, mid := range []uint16{576, 577, 578, 579, 580, 581, 582, 583, 584, 585, 586, 587, 589, 598, 599, 612, 2563, 2564, 2565} {

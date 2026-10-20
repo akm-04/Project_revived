@@ -83,15 +83,22 @@ type Definition struct {
 	Hidden     int      `json:"hidden"`
 	Stamp      int      `json:"stamp"`
 }
+type Level struct {
+	ID             int64      `json:"id"`
+	PointCondition int64      `json:"point_condition"`
+	Items          [][2]int64 `json:"items"`
+}
 type Catalog struct {
 	SchemaVersion int          `json:"schema_version"`
 	PolicyID      string       `json:"policy_id"`
 	SelectedID    int64        `json:"selected_id"`
 	Rows          []Definition `json:"rows"`
+	Levels        []Level      `json:"levels,omitempty"`
 }
 
 func (c Catalog) Validate() error {
-	if c.SchemaVersion != 1 || c.PolicyID != "C4B_MARRIED_POPULATION_TIER_FACTS_V1" || c.SelectedID != 100014 || len(c.Rows) != 33 {
+	levelsPresent := c.SchemaVersion == 2 && len(c.Levels) == 10 || c.SchemaVersion == 1 && len(c.Levels) == 0
+	if !levelsPresent || c.PolicyID != "C4B_MARRIED_POPULATION_TIER_FACTS_V1" || c.SelectedID != 100014 || len(c.Rows) != 33 {
 		return errors.New("achievement catalog profile")
 	}
 	for i, r := range c.Rows {
@@ -101,6 +108,16 @@ func (c Catalog) Validate() error {
 		for j, v := range r.Thresholds {
 			if v < 1 || j > 0 && v <= r.Thresholds[j-1] || r.Points[j] <= 0 {
 				return errors.New("achievement tier")
+			}
+		}
+	}
+	for i, l := range c.Levels {
+		if l.ID != int64(i+1) || i == 0 && (l.PointCondition != 0 || len(l.Items) != 0) || i > 0 && (l.PointCondition <= c.Levels[i-1].PointCondition || len(l.Items) == 0) {
+			return errors.New("achievement level")
+		}
+		for _, item := range l.Items {
+			if item[0] <= 0 || item[1] <= 0 {
+				return errors.New("achievement level item")
 			}
 		}
 	}
@@ -133,6 +150,15 @@ type streakProfile struct {
 
 var streakProfiles = map[int64]streakProfile{
 	LeagueDaysID:     {"C5F_LEAGUE_TOP5_DAYS_V2", [3]int64{1, 3, 7}, 0},
+	NormalHeroesID:   {OwnedStatePolicy, [3]int64{10, 50, 150}, 0},
+	AwakenedHeroesID: {OwnedStatePolicy, [3]int64{1, 30, 50}, 0},
+	PetsID:           {OwnedStatePolicy, [3]int64{2, 8, 15}, 0},
+	TextbooksID:      {OwnedStatePolicy, [3]int64{1, 15, 30}, 0},
+	RegionsID:        {OwnedStatePolicy, [3]int64{1, 3, 5}, 0},
+	SubjectsID:       {OwnedStatePolicy, [3]int64{50, 200, 500}, 0},
+	SuitsID:          {OwnedStatePolicy, [3]int64{1, 15, 30}, 0},
+	RoomsID:          {OwnedStatePolicy, [3]int64{5, 10, 15}, 0},
+	ExpandedRoomsID:  {OwnedStatePolicy, [3]int64{5, 10, 15}, 0},
 	TopFloorStreakID: {"C5B_TOP_FLOOR_CHALLENGER_STREAK_V1", [3]int64{3, 6, 10}, 1},
 	WeeklyStreakID:   {"C5C_ONE_ON_ONE_DOMINATOR_STREAK_V1", [3]int64{1, 2, 3}, 7},
 	WinStreakID:      {"C5C_ONE_ON_ONE_WIN_STREAK_V1", [3]int64{5, 15, 30}, 0},

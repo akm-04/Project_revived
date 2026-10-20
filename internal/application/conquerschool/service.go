@@ -40,6 +40,7 @@ type Observation struct {
 	ContentRevision string
 	ObservedAt      time.Time
 	Contributions   map[int64]int64
+	Regions         int64
 	RunAvailable    bool
 	RunComplete     bool
 }
@@ -79,7 +80,11 @@ func (s Service) FactsTx(ctx context.Context, scope characterasset.CoherentReadS
 	if e != nil {
 		return out, e
 	}
-	out = Observation{Facts: f, ContentRevision: pin, ObservedAt: scope.ObservedAt, Contributions: v}
+	regions, e := c.Region(*f.Payload.Progress)
+	if e != nil {
+		return out, e
+	}
+	out = Observation{Facts: f, ContentRevision: pin, ObservedAt: scope.ObservedAt, Contributions: v, Regions: regions}
 	out.Facts.Payload = f.Payload.Clone()
 	if f.Payload.Run != nil {
 		out.RunAvailable = true

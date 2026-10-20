@@ -289,8 +289,10 @@ func (s Service) DormHouseInputsTx(ctx context.Context, q tx.Queryer, scope Inpu
 
 type VillaInputs struct {
 	Count, PopulationVersion, DormRootVersion int64
-	ContentRevision                           string
-	ObservedAt                                time.Time
+	// Rooms excludes the lounge; Expanded counts rooms with an expansion level.
+	Rooms, Expanded int64
+	ContentRevision string
+	ObservedAt      time.Time
 }
 
 func (s Service) VillaCountTx(ctx context.Context, q tx.Queryer, scope InputScope) (VillaInputs, error) {
@@ -323,6 +325,12 @@ func (s Service) VillaCountTx(ctx context.Context, q tx.Queryer, scope InputScop
 		}
 		if r.MainType == 4 {
 			out.Count++
+		}
+		if r.MainType != dorm.LoungeType {
+			out.Rooms++
+		}
+		if r.ExpansionLevel >= 1 {
+			out.Expanded++
 		}
 	}
 	return out, nil

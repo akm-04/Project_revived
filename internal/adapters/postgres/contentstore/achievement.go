@@ -67,6 +67,9 @@ func achievementCatalogDomain(d builtin.AchievementCatalog) (achievement.Catalog
 	for _, r := range d.Rows {
 		out.Rows = append(out.Rows, achievement.Definition{ID: r.ID, Thresholds: r.Thresholds, Points: r.Points, Daily: r.Daily, Hidden: r.Hidden, Stamp: r.Stamp})
 	}
+	for _, l := range d.Levels {
+		out.Levels = append(out.Levels, achievement.Level{ID: l.ID, PointCondition: l.PointCondition, Items: l.Items})
+	}
 	return out, out.Validate()
 }
 func (Store) InsertAchievement(ctx context.Context, t tx.Tx, b registry.Bundle) (int64, error) {

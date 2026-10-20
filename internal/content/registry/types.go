@@ -22,6 +22,7 @@ const (
 )
 
 var supportedCapabilities = [...]string{
+	"ACHIEVEMENT_CATALOG_I7C4FA",
 	"CHAMPIONS_LEAGUE_I7C5F",
 	"CONQUER_MODE_I7C5E",
 	"ONE_ON_ONE_MODE_I7C5C",
