@@ -3,13 +3,13 @@ package stockruntime
 import (
 	"context"
 	"errors"
-	"log"
 	app "gxb.local/backend/v2/internal/application/achievement"
 	rt "gxb.local/backend/v2/internal/application/realtimeauth"
 	d "gxb.local/backend/v2/internal/domain/achievement"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/protocol/httpedge"
+	"log"
 	"net/http"
 )
 

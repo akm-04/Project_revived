@@ -297,6 +297,9 @@ func main() {
 	mustRegister(1, boot)
 	mustRegister(192, stockruntime.DiscoveryDispatcher{Realtime: realtime, Tracker: tracker})
 	owners := topFloorOwners{library: librarySvc, dorm: dormSvc, book: bookSvc, course: courseSvc, inscription: inscriptionSvc, element: elementSvc, spirit: spiritSvc, evolution: evolutionSvc}
+	profileMetrics := canonicalProfileMetrics(contentDB, canonicalPublicStats(pool, contentDB, owners))
+	// The title origin route copied above never reads metrics.
+	girlsRanking.Metrics = profileMetrics
 	fight, fightReady, err := canonicalCombat(pool, runner, contentDB, owners)
 	if err != nil {
 		log.Fatalf("I7C-5B Combat composition: %v", err)
@@ -476,10 +479,10 @@ func main() {
 	if e := registerProfileFeedback(ctx, pool, runner, authority, receipts, contentDB, router); e != nil {
 		log.Fatal(e)
 	}
-	if e := registerPublicProfile(ctx, pool, runner, authority, receipts, contentDB, router); e != nil {
+	if e := registerPublicProfile(ctx, pool, runner, authority, receipts, contentDB, profileMetrics, router); e != nil {
 		log.Fatalf("PublicProfile startup: %v", e)
 	}
-	if e := registerPublicProfileReads(ctx, pool, runner, authority, receipts, contentDB, displayService, router); e != nil {
+	if e := registerPublicProfileReads(ctx, pool, runner, authority, receipts, contentDB, displayService, profileMetrics, router); e != nil {
 		log.Fatal(e)
 	}
 	if e := registerPlayerDisplay(ctx, pool, contentDB, router, stockruntime.PlayerDisplayDispatcher{Authority: authority, Service: displayService}); e != nil {

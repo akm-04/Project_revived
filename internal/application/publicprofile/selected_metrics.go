@@ -22,6 +22,7 @@ type CanonicalMetricProvider struct {
 	Creation CanonicalCreationMetricProvider
 	Roster   ca.RosterMetricReader
 	Library  MarriedPopulationReader
+	Force    ForceReader
 }
 
 // Unscoped consumers retain only the historically qualified creation metric.
@@ -45,7 +46,7 @@ func (p CanonicalMetricProvider) ReadMetricsScopeTx(c context.Context, sc tx.Sco
 	}
 	seen := map[int64]bool{}
 	for _, id := range r.IDs {
-		if seen[id] || (id != 1010 && id != 1011 && !isRosterMetric(id)) {
+		if seen[id] || (id != 1007 && id != 1010 && id != 1011 && !isRosterMetric(id)) {
 			return nil, ErrContent
 		}
 		seen[id] = true
@@ -87,9 +88,17 @@ func (p CanonicalMetricProvider) ReadMetricsScopeTx(c context.Context, sc tx.Sco
 			return nil, e
 		}
 	}
+	var force MetricObservation
+	if seen[1007] {
+		if force, e = p.forceMetric(c, coherent, r); e != nil {
+			return nil, e
+		}
+	}
 	for _, id := range r.IDs {
 		if isRosterMetric(id) {
 			out = append(out, roster[id])
+		} else if id == 1007 {
+			out = append(out, force)
 		} else if id == 1010 {
 			out = append(out, married)
 		} else {
@@ -99,6 +108,9 @@ func (p CanonicalMetricProvider) ReadMetricsScopeTx(c context.Context, sc tx.Sco
 	return out, nil
 }
 func validMetricBasis(v MetricObservation) bool {
+	if v.FieldID == 1007 {
+		return v.Owner == "CharacterHero" && v.PrivatePolicy == ForceMetricPolicy && v.Semantics == ForceMetricSemantics && validRosterDigest(v.PopulationDigest) && v.Value >= 0 && v.PopulationVersion > 0 && v.SourceVersion == v.PopulationVersion && v.PetRootVersion == 0 && v.LibraryRootVersion == 0
+	}
 	if isRosterMetric(v.FieldID) {
 		if v.PrivatePolicy != RosterMetricPolicy || v.Semantics != RosterMetricSemantics || !validRosterDigest(v.PopulationDigest) || v.LibraryRootVersion != 0 || v.Value < 0 {
 			return false

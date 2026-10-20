@@ -89,6 +89,15 @@ func canonicalCombat(p *postgres.Pool, r tx.Runner, content contentstore.Store, 
 		}
 		binary = filepath.Join(filepath.Dir(self), "gxb-combat-worker")
 	}
+	stats := canonicalPublicStats(p, content, o)
+	conquer := appconquer.Service{Owner: conquerstore.Store{}, Content: content, Heroes: characterstore.Store{Queryer: p}, Kinds: content, Players: i4store.PlayerRootLocker{}}
+	worker := combatworker.Launcher{Binary: binary, Deadline: 120 * time.Second, AddressSpace: 4 << 30, CPUSeconds: 180, OpenFiles: 64, MaxOutputBytes: 16 << 20, ExpectedCorpus: corpus.ID()}
+	roster := characterstore.HeroBootstrapProjection{Content: content, Library: o.library, Dorm: o.dorm, Book: o.book, Course: o.course, Inscription: o.inscription, Element: o.element, Spirit: o.spirit, Evolution: o.evolution}
+	return combat.Service{Rules: corpus, Keys: keys, Worker: worker, Store: combatstore.Store{}, Content: content, Runner: r, Fresh: p,
+		Inputs: combat.Inputs{Heroes: roster, Pets: characterstore.PetBootstrapProjection{Content: content}, Stats: stats, Awakening: stats.Awakening, Collection: o.library, Conquer: conquer, Stacks: i5store.Store{Queryer: p}}}, true, nil
+}
+
+func canonicalPublicStats(p *postgres.Pool, content contentstore.Store, o topFloorOwners) publicstats.Service {
 	heroes := characterstore.Store{Queryer: p}
 	awakening := apphero.RawAwakeningObservationReader{Heroes: characterstore.Store{}, Births: characterstore.RawAwakeningStore{}}
 	conquer := appconquer.Service{Owner: conquerstore.Store{}, Content: content, Heroes: heroes, Kinds: content, Players: i4store.PlayerRootLocker{}}
@@ -98,12 +107,8 @@ func canonicalCombat(p *postgres.Pool, r tx.Runner, content contentstore.Store, 
 		HeroPractice: apphero.CA8PracticeObservationAdapter{Reader: apphero.PracticeContributionReader{Store: heroes, Content: content}}, PetPractice: apppet.CA8PracticeObservationAdapter{Reader: apppet.PracticeContributionReader{Store: heroes, Content: content}},
 		HeroAppearance: apphero.CA8AppearanceObservationAdapter{Reader: apphero.AppearanceContributionReader{Store: heroes, Content: content}}, PetAppearance: apppet.CA8AppearanceObservationAdapter{Reader: apppet.AppearanceContributionReader{Store: heroes, Content: content}},
 	}
-	stats := publicstats.Service{Owned: owned, Pets: heroes, Content: content, Skills: apphero.RawSkillObservationReader{Store: heroes, Content: content}, Awakening: awakening,
+	return publicstats.Service{Owned: owned, Pets: heroes, Content: content, Skills: apphero.RawSkillObservationReader{Store: heroes, Content: content}, Awakening: awakening,
 		Library: o.library, Dorm: o.dorm, Book: o.book, Courses: o.course, Inscription: o.inscription, Element: o.element, Spirit: o.spirit, Evolution: o.evolution, Conquer: conquer}
-	worker := combatworker.Launcher{Binary: binary, Deadline: 120 * time.Second, AddressSpace: 4 << 30, CPUSeconds: 180, OpenFiles: 64, MaxOutputBytes: 16 << 20, ExpectedCorpus: corpus.ID()}
-	roster := characterstore.HeroBootstrapProjection{Content: content, Library: o.library, Dorm: o.dorm, Book: o.book, Course: o.course, Inscription: o.inscription, Element: o.element, Spirit: o.spirit, Evolution: o.evolution}
-	return combat.Service{Rules: corpus, Keys: keys, Worker: worker, Store: combatstore.Store{}, Content: content, Runner: r, Fresh: p,
-		Inputs: combat.Inputs{Heroes: roster, Pets: characterstore.PetBootstrapProjection{Content: content}, Stats: stats, Awakening: awakening, Collection: o.library, Conquer: conquer, Stacks: i5store.Store{Queryer: p}}}, true, nil
 }
 
 func canonicalOneOnOne(p *postgres.Pool, r tx.Runner, content contentstore.Store, i5db i5store.Store, privileges commerceprivilege.Provider, fight combat.Service, o topFloorOwners) apponeonone.Service {
