@@ -5,7 +5,7 @@ sys.path.insert(0,str(Path(__file__).parent))
 from generate_builtin_content import parse_generated_lua_table as parse
 B=Path(__file__).resolve().parents[1];src=Path(sys.argv[1]);assert hashlib.file_digest(src.open('rb'),'sha256').hexdigest()=='c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf'
 c=json.loads((B/'internal/content/builtin/generated/achievement_catalog.json').read_text());m=json.loads((B/'internal/content/builtin/generated/manifest.json').read_text())
-assert m['compiler_version']=='i7c4fa-achievement-ap' and 'ACHIEVEMENT_CATALOG_I7C4FA' in json.dumps(m)
+assert m['compiler_version'] in ('i7c4fa-achievement-ap','i7c6-cosmetic-origins') and 'ACHIEVEMENT_CATALOG_I7C4FA' in json.dumps(m)
 with zipfile.ZipFile(src)as z:
  read=lambda p:z.read('app-assets/output/assets/src_64/'+p)
  text=lambda p:read(p).decode('utf-8-sig')

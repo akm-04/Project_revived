@@ -24,6 +24,8 @@ type Cosmetic struct {
 	Days      int64  `json:"days"`
 	VIP       int64  `json:"vip"`
 	Price     int64  `json:"price"`
+	// Condition is the title_system condition list; other families carry none.
+	Condition []int64 `json:"condition,omitempty"`
 }
 type DisplayHeroTemplate struct {
 	TableID      int64  `json:"table_id"`

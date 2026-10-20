@@ -21,7 +21,7 @@ from pathlib import Path
 from typing import Any, Iterable
 
 SCHEMA_VERSION = 1
-COMPILER_VERSION = "i7c4fa-achievement-ap"
+COMPILER_VERSION = "i7c6-cosmetic-origins"
 PARSER_VERSION = "lua-generated-v18-guild-invite"
 EXPECTED_SOURCE_ARCHIVE_SHA256 = "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
 SOURCE_PREFIX = "app-assets/output/assets/src_64/"
@@ -186,6 +186,7 @@ SOURCE_MANIFEST.append(('app/windows/HeroGiftBoxWindow.lua','d6065c3d601f5820915
 SOURCE_MANIFEST.append(('app/windows/WhiteAlbumWindow.lua','851a53f588b59d95cfe460f3399ab1a6904fff7714131c358f3c3a73910b6bb9',"LIBRARY_INPUT_SOURCE_AUTHORITY"))
 
 ENABLED_CAPABILITIES = [
+    "COSMETIC_TITLE_CONDITION_I7C6",
     "ACHIEVEMENT_CATALOG_I7C4FA",
     "CHAMPIONS_LEAGUE_I7C5F",
     "CONQUER_MODE_I7C5E",
@@ -2126,7 +2127,9 @@ def build_artifacts(blobs: dict[str, SourceBlob], archive_sha256: str) -> dict[s
         cosmetics.append(dict(family="avatar" if r["avatar_type"]=="1" else "frame",id=int(r["id"]),icon=int(r["icon"]),type=int(r["type"]),partner_id=int(r["partner_id"]),days=int(r["time"]),vip=int(r["vip_level"]),price=int(r["value2"])))
     for family,table in [("title","title_system"),("bubble","chat_bubble")]:
         for r in parse_generated_lua_table(blobs["data/tables/"+table+".lua"].data):
-            cosmetics.append(dict(family=family,id=int(r["id"]),icon=0,type=int(r.get("type","0")),partner_id=0,days=int(r["time"]),vip=0,price=0))
+            row=dict(family=family,id=int(r["id"]),icon=0,type=int(r.get("type","0")),partner_id=0,days=int(r["time"]),vip=0,price=0)
+            if family=="title": row["condition"]=[int(x) for x in r["condition"].split("|")]
+            cosmetics.append(row)
     words=profile_artifact["words"]
     names=[r["text"] for r in sorted(parse_generated_lua_table(blobs["data/tables/random_name.lua"].data),key=lambda r:int(r["id"])) if 2<=len(r["text"])<=16 and not any(w and w in r["text"] for w in words)][:12]
     display_artifact=dict(hero_templates=[dict(table_id=r["table_id"],before_awaken=r["first_table_id"],kind=r["hero_kind"])for r in hero_artifact["templates"]],schema_version=1,policy_id="PLAYER_DISPLAY_V1",rename_cost=100,default_avatar=110001001,default_frame=120001001,default_bubble=10001,cosmetics=cosmetics,names=names,words=words,collection=[110007026,110007027,110007043,110007049])

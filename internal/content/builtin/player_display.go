@@ -25,7 +25,8 @@ type PlayerDisplayCatalog struct {
 		PartnerID int64  `json:"partner_id"`
 		Days      int64  `json:"days"`
 		VIP       int64  `json:"vip"`
-		Price     int64  `json:"price"`
+		Price     int64   `json:"price"`
+		Condition []int64 `json:"condition,omitempty"`
 	} `json:"cosmetics"`
 	Names      []string `json:"names"`
 	Words      []string `json:"words"`
