@@ -40,7 +40,7 @@ func catalogAchievements(p *pg.Pool, counts ach.Counter) ach.Service {
 	content := contentstore.Store{Queryer: p}
 	runner := tx.Runner{DB: p}
 	grants := i5.Service{Runner: runner, Store: values, Content: content, Privileges: i5.BaselinePrivilegeProvider{}, Functions: i5.PetStarterFunctionAnnouncements{}, Directory: i4store.DirectoryLevelProjection{}, Backpack: values, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}, RedeemSecret: []byte("i7c4fa-achievement-native-fixture-secret")}
-	runtime := &ach.Runtime{Timed: gen.TimedRunner{Binder: gen.Binder{Time: pg.AuthoritativeTime{Queryer: p}}, Runner: runner}, Fresh: p, Active: content, Counts: counts, Fence: values, Grants: grants, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}}
+	runtime := &ach.Runtime{Timed: gen.TimedRunner{Binder: gen.Binder{Time: pg.AuthoritativeTime{Queryer: p}}, Runner: runner}, Fresh: p, Active: content, Counts: counts, Fence: values, Grants: grants, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}, Directory: i4store.PlayerDirectoryReader{}, Servers: i4store.ServerNames{}}
 	return ach.Service{Store: achievementstore.Store{}, Content: content, Population: libraryService(p, p), Runtime: runtime}
 }
 
@@ -117,6 +117,17 @@ func TestI7C4FALegacyBackfillPointsClaimsRankAndNotices(t *testing.T) {
 	again, e := lower.Load(ctx, a, op())
 	if e != nil || richer.Rank < 1 || again.Rank <= richer.Rank {
 		t.Fatal("live trophy rank order", again.Rank, richer.Rank, e)
+	}
+	board, e := lower.TrophyBoard(ctx, a)
+	if e != nil || board.MyRank != again.Rank || board.MyPoints != 12500 || board.Region == "" {
+		t.Fatal("trophy board viewer", board, e)
+	}
+	position := map[identity.PlayerID]int64{}
+	for _, row := range board.Rows {
+		position[row.Player] = row.Rank
+	}
+	if position[b.PlayerID] != richer.Rank || position[a.PlayerID] != again.Rank {
+		t.Fatal("trophy board order", position)
 	}
 }
 

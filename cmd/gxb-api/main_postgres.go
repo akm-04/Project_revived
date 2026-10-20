@@ -304,7 +304,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("I7C-5B Combat composition: %v", err)
 	}
-	ranking := stockruntime.RankingDispatcher{Authority: authority, Service: boardRanking}
+	ranking := stockruntime.RankingDispatcher{Authority: authority, Service: boardRanking, Trophy: achievements}
 	if fightReady {
 		topFloor := canonicalTopFloor(pool, runner, contentDB, i5db, privileges, fight, owners)
 		ranking.TopFloor = topFloor

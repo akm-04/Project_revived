@@ -54,6 +54,8 @@ type Runtime struct {
 	Grants      i5.TxGrantSettler
 	Receipts    receipt.Store
 	ReceiptRead receipt.Reader
+	Directory   Directory
+	Servers     Servers
 }
 
 func (r *Runtime) ready() bool {

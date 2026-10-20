@@ -35,7 +35,7 @@ type achievementOwners struct {
 // I7C-4 full stage A: the full-catalog Achievement runtime and its observers.
 func canonicalAchievements(p *postgres.Pool, r tx.Runner, content contentstore.Store, i5db i5store.Store, i5svc appi5.Service, population appachievement.Population, owners achievementOwners) appachievement.Service {
 	counts := appachievement.OwnerCounts{Roster: characterstore.RosterMetricReader{Store: characterstore.Store{}, Content: content}, Kinds: content, Books: owners.books, Conquer: appconquer.Service{Owner: conquerstore.Store{}, Content: content, Heroes: characterstore.Store{Queryer: p}, Kinds: content, Players: i4store.PlayerRootLocker{}}, Courses: owners.courses, Inscriptions: owners.inscriptions, Dorm: owners.dorm}
-	runtime := &appachievement.Runtime{Timed: appgeneration.TimedRunner{Binder: appgeneration.Binder{Time: postgres.AuthoritativeTime{Queryer: p}}, Runner: r}, Fresh: p, Active: content, Counts: counts, Fence: i5db, Grants: i5svc, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}}
+	runtime := &appachievement.Runtime{Timed: appgeneration.TimedRunner{Binder: appgeneration.Binder{Time: postgres.AuthoritativeTime{Queryer: p}}, Runner: r}, Fresh: p, Active: content, Counts: counts, Fence: i5db, Grants: i5svc, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}, Directory: i4store.PlayerDirectoryReader{}, Servers: i4store.ServerNames{}}
 	return appachievement.Service{Store: achievementstore.Store{}, Content: content, Population: population, Runtime: runtime}
 }
 

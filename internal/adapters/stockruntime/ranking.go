@@ -6,6 +6,7 @@ import (
 	arenaprojection "gxb.local/backend/v2/internal/projection/arena"
 	"net/http"
 
+	"gxb.local/backend/v2/internal/application/achievement"
 	"gxb.local/backend/v2/internal/application/realtimeauth"
 	"gxb.local/backend/v2/internal/application/topfloor"
 	"gxb.local/backend/v2/internal/domain/identity"
@@ -20,6 +21,9 @@ import (
 
 type BoardRankingReads interface {
 	ReadBoard(context.Context, rankingdomain.Board, identity.ActorContext, operation.Context) (rankingdomain.BoardSnapshot, error)
+}
+type TrophyRanks interface {
+	TrophyBoard(context.Context, identity.ActorContext) (achievement.TrophyBoard, error)
 }
 type TopFloorRanks interface {
 	RankList(context.Context, identity.ActorContext) (topfloor.RankList, error)
@@ -36,6 +40,7 @@ type RankingDispatcher struct {
 	TopFloor  TopFloorRanks
 	OneOnOne  OneOnOneRanks
 	Arena     ArenaRanks
+	Trophy    TrophyRanks
 }
 
 func (d RankingDispatcher) Dispatch(c context.Context, r httpedge.DispatchRequest) httpedge.Response {
@@ -89,6 +94,15 @@ func (d RankingDispatcher) Dispatch(c context.Context, r httpedge.DispatchReques
 			return fail(http.StatusServiceUnavailable)
 		}
 		body := arenaprojection.RankList(list)
+		body["error_code"] = int64(0)
+		return httpedge.Response{HTTPStatus: http.StatusOK, Body: body}
+	}
+	if subtype == 15 && d.Trophy != nil {
+		list, e := d.Trophy.TrophyBoard(c, a)
+		if e != nil {
+			return fail(http.StatusServiceUnavailable)
+		}
+		body := projection.TrophyList(list)
 		body["error_code"] = int64(0)
 		return httpedge.Response{HTTPStatus: http.StatusOK, Body: body}
 	}

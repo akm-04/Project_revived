@@ -99,19 +99,22 @@ func (Store) MarkNoticesDeliveredTx(c context.Context, t tx.Tx, pid identity.Pla
 	return e
 }
 
-// C4F_LIVE_TROPHY_RANK_V1: 1 + tracked players on the server with more points,
-// or equal points reached earlier, or equal instant and lower id; 0 without points.
-const trophyRankSQL = `WITH points(achievement_id,tier,points) AS (SELECT * FROM unnest($2::bigint[],$3::int[],$4::bigint[])),
+// C4F_LIVE_TROPHY_RANK_V1 orders tracked players on one server by more points,
+// then equal points reached earlier, then lower id; players without points are unranked.
+const trophyTotalsSQL = `WITH points(achievement_id,tier,points) AS (SELECT * FROM unnest($2::bigint[],$3::int[],$4::bigint[])),
 earned AS (
  SELECT r.player_id,100014::bigint AS achievement_id,t.ordinality::int AS tier,(t.value#>>'{}')::timestamptz AS at FROM achievement_roots r CROSS JOIN LATERAL jsonb_array_elements(r.complete_times) WITH ORDINALITY t WHERE r.player_id/100000=$1 AND jsonb_typeof(t.value)='string'
  UNION ALL
  SELECT s.player_id,s.achievement_id,t.ordinality::int,(t.value#>>'{}')::timestamptz FROM achievement_streaks s CROSS JOIN LATERAL jsonb_array_elements(s.complete_times) WITH ORDINALITY t WHERE s.player_id/100000=$1 AND jsonb_typeof(t.value)='string'),
-totals AS (SELECT e.player_id,sum(p.points) AS total,max(e.at) AS reached FROM earned e JOIN points p USING(achievement_id,tier) GROUP BY e.player_id),
-me AS (SELECT total,reached FROM totals WHERE player_id=$5)
+totals AS (SELECT e.player_id,sum(p.points) AS total,max(e.at) AS reached FROM earned e JOIN points p USING(achievement_id,tier) GROUP BY e.player_id)
+`
+
+const trophyRankSQL = trophyTotalsSQL + `,me AS (SELECT total,reached FROM totals WHERE player_id=$5)
 SELECT COALESCE((SELECT 1+(SELECT count(*) FROM totals o WHERE o.total>me.total OR o.total=me.total AND (o.reached<me.reached OR o.reached=me.reached AND o.player_id<$5)) FROM me),0)`
 
-// shortcut: aggregates the server's tier rows per read, add a points projection if 1302 load latency grows.
-func (Store) TrophyRankTx(c context.Context, q tx.Queryer, pid identity.PlayerID, catalog d.Catalog) (int64, error) {
+const trophyTopSQL = trophyTotalsSQL + `SELECT COALESCE(jsonb_agg(jsonb_build_object('Player',player_id,'Points',total) ORDER BY total DESC,reached,player_id),'[]'::jsonb)::text FROM (SELECT * FROM totals ORDER BY total DESC,reached,player_id LIMIT $5) top`
+
+func trophyPoints(catalog d.Catalog) ([]int64, []int32, []int64) {
 	var achievementIDs, points []int64
 	var tiers []int32
 	for _, row := range catalog.Rows {
@@ -119,7 +122,23 @@ func (Store) TrophyRankTx(c context.Context, q tx.Queryer, pid identity.PlayerID
 			achievementIDs, tiers, points = append(achievementIDs, row.ID), append(tiers, int32(i+1)), append(points, value)
 		}
 	}
+	return achievementIDs, tiers, points
+}
+
+// shortcut: aggregates the server's tier rows per read, add a points projection if 1302 load latency grows.
+func (Store) TrophyRankTx(c context.Context, q tx.Queryer, pid identity.PlayerID, catalog d.Catalog) (int64, error) {
+	achievementIDs, tiers, points := trophyPoints(catalog)
 	var rank int64
 	e := q.QueryRow(c, trophyRankSQL, int64(pid)/100000, achievementIDs, tiers, points, int64(pid)).Scan(&rank)
 	return rank, e
+}
+
+func (Store) TrophyTopTx(c context.Context, q tx.Queryer, server identity.LogicalServerID, catalog d.Catalog, limit int) ([]app.TrophyStanding, error) {
+	achievementIDs, tiers, points := trophyPoints(catalog)
+	var raw string
+	if e := q.QueryRow(c, trophyTopSQL, int64(server), achievementIDs, tiers, points, limit).Scan(&raw); e != nil {
+		return nil, e
+	}
+	out := []app.TrophyStanding{}
+	return out, json.Unmarshal([]byte(raw), &out)
 }
