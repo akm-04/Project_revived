@@ -1,0 +1,17 @@
+{
+  "status": "I7C5D_ACCEPTANCE_MATRIX_PLANNED_NOT_RUN",
+  "policy_id": "C5D_ARENA_SEASON_MODE_V1",
+  "rows": [
+    {"id": "D01_CONTENT", "proof": "arena catalog re-derived from source; region_coin/king_coin activation; oracle pins region tables/misc/function 37/achievement 100003/mail texts."},
+    {"id": "D02_ENTRY_SEASON", "proof": "level 60 + 5 girls; season number/open/close from the 2022-10-28 anchor; is_close in the gap; season row once under concurrency."},
+    {"id": "D03_DEFENSE", "proof": "exactly 5 distinct table ids, own or summoned; strongest copy; optional own pet."},
+    {"id": "D04_MATCH_START", "proof": "band widening, defense required, practice pool; START binds the offered opponent and freezes the defender lineup; is_back_battle 1."},
+    {"id": "D05_FIGHT_TERMINAL_ONCE", "proof": "one 5A attempt under campaign 45 with balancing; stars +1/+2, loss floors 10/90/95, lord points, daily coins, streaks, missions, usage, records, achievement once; identical FIGHT replays; unresolved -> empty battle_report then result."},
+    {"id": "D06_DEFENSE_STREAKS", "proof": "third consecutive defense win +1, third loss -3 with floors."},
+    {"id": "D07_PRACTICE_STOP_ABANDON", "proof": "practice changes nothing; STOP and 10-minute abandon settle a loss without report or coins."},
+    {"id": "D08_MISSIONS_EXCHANGE", "proof": "3 weighted slots, progress, claim king_coin, give up, 72000 s refill; exchange costs/limits/award effects."},
+    {"id": "D09_SETTLEMENT", "proof": "season close mail by level for ranked participants, frame/skin pack lines, champion item once; idempotent; next season full reset."},
+    {"id": "D10_HISTORY_RANK", "proof": "769 statistics, 776/777 records/reports, 301 rank_types 6 rows."},
+    {"id": "D11_R2_QUALIFICATION", "proof": "fresh migrate 67, unit/race/vet/oracle/ownership/SBOM/security, populated 66->67 upgrade with content deploy, restore/restart, regressions 5C/5B/5A/4B/4C/2B/3B."}
+  ]
+}
