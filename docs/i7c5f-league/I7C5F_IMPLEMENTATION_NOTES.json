@@ -36,7 +36,8 @@
   "changes_during_review": [
     "Removed unused Sweep duplicate: production Reconciler alone handles staged deadline vs ready genuine resolution after restart",
     "Corrected negative fixture: I5level1 plus valid function91 and forged Directory100 cannot admit; earlier missing-function-only result is narrower",
-    "Daily overflow test fixture corrected using actual source selectedgift and resourcecap; no product-policy change"
+    "Daily overflow test fixture corrected using actual source selectedgift and resourcecap; no product-policy change",
+    "F1 exact real-PG race concurrent-intent test reproduced55P03:5s mode lock queue expires behind canonical snapshot preparation. F2 League-only lock timeout30s/statement60s; transaction120s/operation180s/deadline600s unchanged. Assertions and global abort/unknownCOMMIT rules unchanged."
   ],
   "limits": [
     "Not original server algorithm",

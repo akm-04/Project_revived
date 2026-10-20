@@ -18,8 +18,11 @@ import (
 	"time"
 )
 
+// Canonical combat snapshot preparation holds604. A30s bounded lock queue
+// lets identical concurrent intents converge under race/instrumentation; this
+// changes only this mode, not abort classification or gameplay deadlines.
 func Profile() tx.Profile {
-	return tx.Profile{Name: "champions-league", AcquireTimeout: 2 * time.Second, LockTimeout: 5 * time.Second, StatementTimeout: 30 * time.Second, TransactionTimeout: 120 * time.Second, CleanupTimeout: 2 * time.Second, ReconcileTimeout: 10 * time.Second, OperationTimeout: 180 * time.Second}
+	return tx.Profile{Name: "champions-league", AcquireTimeout: 2 * time.Second, LockTimeout: 30 * time.Second, StatementTimeout: 60 * time.Second, TransactionTimeout: 120 * time.Second, CleanupTimeout: 2 * time.Second, ReconcileTimeout: 10 * time.Second, OperationTimeout: 180 * time.Second}
 }
 func retry() tx.RetryPolicy {
 	return tx.RetryPolicy{MaxAttempts: 6, RetryDefiniteAbort: true, DefiniteAbortBackoffBase: 20 * time.Millisecond, DefiniteAbortBackoffMax: 160 * time.Millisecond}
