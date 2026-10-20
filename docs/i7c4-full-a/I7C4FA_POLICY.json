@@ -1,0 +1,116 @@
+{
+  "policy_id": "C4F_ACHIEVEMENT_CATALOG_AND_AP_V1",
+  "classification": "SOURCE_FACT_PLUS_LABELLED_PRIVATE_POLICY_USER_DECIDED_2026_10_20",
+  "authority": "work/i7c4full/AUTHORIZATION.json answers Q1..Q8 (user, 2026-10-20). Original server algorithms are unrecovered; every rule below that is not a source fact is private policy.",
+  "source_facts": [
+    "achievement.lua: 33 rows 100001..100033, three thresholds and three point values each, is_daily_update, is_hide, stamp",
+    "achievement_level.lua: 10 point levels; point_condition 0,2000,10000..80000; items/item_nums per level (level 1 has none)",
+    "mid.lua: LOAD_ACHIEVEMENT_INFO=1302, GET_ACHIEVEMENT_AWARD=1303; NoticeType.ACHIEVEMENT handled by Achievement.handleNewAchievementNotice(params: achieve_id, complete_time, progress, point_level, total_points, rank)",
+    "Achievement.lua/AchievementWindow.lua: achieve_list[{achieve_id, complete_time[3], progress}], base_info{point_level,total_points,rank,award_status[]}; award_status -1 claimed, 1 claimable, 0 not reached; GET_ACHIEVEMENT_AWARD {} -> {award_status, awards[{table_id,item_num}]}",
+    "rank.lua 2001 'All AP Rank' subtype 8 'All girls' AP: %d' (not realtime); title_system 100001 'No.1 of AP Rank' condition 1, 604800 s"
+  ],
+  "rules": {
+    "R1_STATE_COUNT_ACHIEVEMENTS": {
+      "label": "C4F_OWNED_STATE_COUNT_V1 (private)",
+      "rule": "Ten achievements are high-water tiers over a current canonical count read through the owner's typed read port; tiers are never revoked when the count later falls; progress shown is the current count.",
+      "counts": {
+        "100013": "current distinct owned NORMAL Hero origins (Vows girls = SUPER kind excluded)",
+        "100015": "current owned Heroes with before-awaken table > 0 (same reduction as metric 1009)",
+        "100017": "current owned Pets (same reduction as metric 1002)",
+        "100019": "sum of researched Cabinet book-skill levels in the applied state (each completed study finishes one textbook)",
+        "100021": "Conquer regions opened by validated progress (every region after loop 1, else regions whose last mission is cleared)",
+        "100023": "course subject records with progress 100 across all owned Heroes",
+        "100025": "complete inscription suits currently equipped across all owned Heroes",
+        "100029": "owned dorm rooms excluding the lounge",
+        "100030": "owned dorm rooms with expansion level >= 1"
+      },
+      "note": "100014 keeps C4B_MARRIED_POPULATION_TIER_FACTS_V1; 100016 (skins) moves to Stage C with metric 1003 per user Q2."
+    },
+    "R2_OBSERVATION_TIMING": {
+      "label": "C4F_OBSERVE_AFTER_COMMAND_V1 (private, user Q6)",
+      "rule": "One stock-runtime dispatcher wrapper runs the Achievement observation in its own Serializable transaction after a successful response from the Hero, Pet, Cabinet, Conquer, Course, Inscription and Dorm dispatchers, and again on 1302 load. complete_time is the authoritative instant of the first observation at or after the threshold. A failed observation never alters the command result and is caught up by the next observation."
+    },
+    "R3_LEGACY_BACKFILL": {
+      "label": "C4F_LEGACY_STATE_BACKFILL_V1 (private, user Q5; amends 4B 'never auto-backfill legacy roots')",
+      "rule": "A player without an Achievement root gets one at first observation; state-count achievements and 100014 are evaluated from current canonical state at that instant; streak/period achievements start counting from then. No original complete_time is claimed."
+    },
+    "R4_MODE_NOT_LIVE": {
+      "label": "C4F_MODE_NOT_LIVE_FORWARD_BINDING_V1 (user Q1)",
+      "rule": "Achievements whose owning feature does not exist are listed per definition, never earnable, progress 0 and never counted as earned. MODE_NOT_LIVE (15): 100004 guild activity, 100005 Sky Tower, 100006 boss rank, 100007 Fantasy boss, 100008 Guardian, 100009 Guild War, 100010 campaign stars, 100011 store purchases, 100012 medium vending buy10, 100018 robbery, 100020 academy stories, 100022 mentor graduation, 100024 Memory Maze, 100026 auction, 100027 sorcery war. OWNER_UNKNOWN (2): 100031 Titan, 100033 Butler. Each entry is bound in the PassMap forward-binding registry to its future (mostly I9) owner, which must bind a genuine producer and remove the entry when it ships.",
+      "ids": {
+        "MODE_NOT_LIVE": [
+          100004,
+          100005,
+          100006,
+          100007,
+          100008,
+          100009,
+          100010,
+          100011,
+          100012,
+          100018,
+          100020,
+          100022,
+          100024,
+          100026,
+          100027
+        ],
+        "OWNER_UNKNOWN": [
+          100031,
+          100033
+        ]
+      }
+    },
+    "R5_POINTS_LEVEL_AWARDS": {
+      "label": "C4F_POINT_LEVEL_AWARDS_V1 (private)",
+      "rule": "total_points = sum of points of earned tiers; point_level = highest achievement_level row whose point_condition <= total_points. GET_ACHIEVEMENT_AWARD claims the lowest reached unclaimed level that has items, once, granting its items through I5 with a receipt; award_status per level: -1 claimed (and level 1), 1 reached and unclaimed, 0 not reached."
+    },
+    "R6_TROPHY_RANK": {
+      "label": "C4F_LIVE_TROPHY_RANK_V1 (private, user Q7)",
+      "rule": "base_info.rank = 1 + number of tracked players on the same logical server whose total points are higher, or equal with an earlier points-reached time, or equal time and lower player id; 0 when total points are 0. Computed on read; no snapshot, no title."
+    },
+    "R7_NOTICE17": {
+      "label": "C4F_ACHIEVEMENT_NOTICE_V1 (user Q8)",
+      "rule": "Each newly earned tier records a durable notice intent in the same transaction; a realtime wakeup route publishes notice_type ACHIEVEMENT with the source params. Best effort: delivery failure never revokes a tier."
+    },
+    "R8_AP_METRIC_1007": {
+      "label": "C4F_ALL_GIRLS_AP_V1 (private, user Q3)",
+      "rule": "1007 FORCE = sum over all currently owned Heroes of the qualified I7C-3B public force (Self view) read in the caller's coherent snapshot. Any unavailable Hero rejects the observation; never zero-fill."
+    },
+    "R9_AP_RANKING": {
+      "label": "C4F_PRIVATE_AP_SERVER_RANKING_V1 (private, user Q4)",
+      "rule": "Same scope, cohort, ordering, Monday 00:00 UTC on-demand weekly settlement and 604800 s title as C4C_PRIVATE_GIRLS_SERVER_RANKING_V1, rank subtype 8, score 1007, title 100001 to rank 1 only with positive score."
+    }
+  },
+  "not_claimed": [
+    "Recovered original algorithms",
+    "Full I7C-4 closure (Stage C)",
+    "Skins ranking, 1003/1004/1005/1006, 1840 full11",
+    "Stock-client end-to-end"
+  ],
+  "catalog_split": {
+    "producer_existing": [
+      100001,
+      100002,
+      100003,
+      100014,
+      100028,
+      100032
+    ],
+    "stage_a_state_counts": [
+      100013,
+      100015,
+      100017,
+      100019,
+      100021,
+      100023,
+      100025,
+      100029,
+      100030
+    ],
+    "stage_c": [
+      100016
+    ],
+    "not_live_or_unknown": 17
+  }
+}
