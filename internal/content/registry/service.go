@@ -246,6 +246,13 @@ func (s Service) EnsureBuiltinInstalled(ctx context.Context, op operation.Contex
 			if gotOneOnOne != 1 {
 				return errors.New("content registry one on one count")
 			}
+			gotLeague, err := s.Repo.InsertLeague(tctx, scope.Tx, b)
+			if err != nil {
+				return err
+			}
+			if gotLeague != 1 {
+				return errors.New("content registry league count")
+			}
 			gotArena, err := s.Repo.InsertArena(tctx, scope.Tx, b)
 			if err != nil {
 				return err

@@ -120,6 +120,7 @@ const (
 	WeeklyStreakID   int64 = 100002
 	WinStreakID      int64 = 100028
 	ArenaStreakID    int64 = 100003
+	LeagueDaysID     int64 = 100032
 	StreakTopRank    int64 = 3
 )
 
@@ -131,6 +132,7 @@ type streakProfile struct {
 }
 
 var streakProfiles = map[int64]streakProfile{
+	LeagueDaysID:     {"C5F_LEAGUE_TOP5_DAYS_V2", [3]int64{1, 3, 7}, 0},
 	TopFloorStreakID: {"C5B_TOP_FLOOR_CHALLENGER_STREAK_V1", [3]int64{3, 6, 10}, 1},
 	WeeklyStreakID:   {"C5C_ONE_ON_ONE_DOMINATOR_STREAK_V1", [3]int64{1, 2, 3}, 7},
 	WinStreakID:      {"C5C_ONE_ON_ONE_WIN_STREAK_V1", [3]int64{5, 15, 30}, 0},

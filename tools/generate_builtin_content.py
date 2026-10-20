@@ -21,12 +21,31 @@ from pathlib import Path
 from typing import Any, Iterable
 
 SCHEMA_VERSION = 1
-COMPILER_VERSION = "i7c5e-conquer"
+COMPILER_VERSION = "i7c5f-league"
 PARSER_VERSION = "lua-generated-v18-guild-invite"
 EXPECTED_SOURCE_ARCHIVE_SHA256 = "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
 SOURCE_PREFIX = "app-assets/output/assets/src_64/"
 
 SOURCE_MANIFEST = [
+    ('app/windows/ChampionsRuleWindow.lua', '920440ee43773e27b8caf791cca052b5b5ad4cc50a2ed90639a59fb5eb41f1de', 'I7C5F_LEAGUE_SOURCE_BOUNDARY'),
+    ('app/common/tables/CrossArenaScheduleTable.lua', 'dfbc39038f717389c7391934579f953aa4d778cb5bb1e11abf2eee1da9a05589', 'I7C5F_LEAGUE_SOURCE_BOUNDARY'),
+    ('data/tables/activity.lua', 'bf3234d63b44f8636132cb924752d106dc13199ed40ce5fc0c9b358a07b0e3f9', 'I7C5F_LEAGUE_SOURCE_BOUNDARY'),
+    ('app/model/ChampionsLeague.lua', '0939d843738feeea048649f37d583604c4bf5547bca969022c4b1249b11c53d6', 'I7C5F_LEAGUE_SOURCE_BOUNDARY'),
+    ('app/windows/ChampionsLeagueWinodw.lua', '9c6f8dfa845206bbe881f209c1f7247ad744e31b1ccf6e1f9b5ac63482f5d496', 'I7C5F_LEAGUE_SOURCE_BOUNDARY'),
+    ('app/windows/ChampionsLeagueRankWinodw.lua', '6fdf1e1d8f354a9d15f8e5abb1799182f571930325b9416d085f13181620f377', 'I7C5F_LEAGUE_SOURCE_BOUNDARY'),
+    ('app/windows/ChampionsLeagueSelectTeamWindow.lua', '3d7050e1ba744ba69641189a05712c36a6cbb53b7b3b499bb6a18ccda22647ab', 'I7C5F_LEAGUE_SOURCE_BOUNDARY'),
+    ('app/windows/ChampionsLeagueRecordWindow.lua', '69c431fb9d0bc4303048b3b87ed660ec649b4b2cf3ae4f25fe6a61dd45d150ab', 'I7C5F_LEAGUE_SOURCE_BOUNDARY'),
+    ('app/windows/ChampionsLeagueSwitchGroupWinodw.lua', '84ddea63dbdc8a7367b60390a878a375a8c5337c0d3f8d6b2bed53bc639572e7', 'I7C5F_LEAGUE_SOURCE_BOUNDARY'),
+    ('app/windows/ChampionsHonorRankWindow.lua', 'c383a8efee9b78096c506431b063164839c4b224a42f672a70cc4960ac2b7814', 'I7C5F_LEAGUE_SOURCE_BOUNDARY'),
+    ('app/common/tables/ChampionsLeagueAwardInfoTable.lua', 'b59b43048d1f200b1c4b06c4b6fb76effe8decf5597ce509dd2d67c28190696d', 'I7C5F_LEAGUE_SOURCE_BOUNDARY'),
+    ('app/common/tables/ChampionsLeagueRankAwardInfoTable.lua', '73266a2e73b19ce05bb30616cbe455b33a7650c96baa079f7afb426dd67ae73b', 'I7C5F_LEAGUE_SOURCE_BOUNDARY'),
+    ('data/tables/cross_arena_schedule.lua', 'e6b4bf6d362e2de2daf0ac94c6baacf8b1ac84b9341da80b9bec23cf32ab4258', 'I7C5F_LEAGUE_SOURCE_BOUNDARY'),
+    ('data/tables/cross_arena_daily_reward1.lua', '0ff2ca6f148082068ff62751b4b6149dbf5d8b5b2ff260b88a8c78ee0046ae95', 'I7C5F_LEAGUE_SOURCE_BOUNDARY'),
+    ('data/tables/cross_arena_daily_reward2.lua', '14715befe72e1abfaceaaf7e3ab85cef06626fda383ab29da90828a75685c5c9', 'I7C5F_LEAGUE_SOURCE_BOUNDARY'),
+    ('data/tables/cross_arena_daily_reward3.lua', '74bd8a7af620a026682e0eafaa30f9a8af6c04f7dad6c29bc914cc153d13e043', 'I7C5F_LEAGUE_SOURCE_BOUNDARY'),
+    ('data/tables/cross_arena_final_reward1.lua', '13fb2c7bb695eabf9ed7ee4e05189a91738accb36c22e6359cb638cf13b9894b', 'I7C5F_LEAGUE_SOURCE_BOUNDARY'),
+    ('data/tables/cross_arena_final_reward2.lua', '14e4a1e33c80b591114c0b9c85025c81532fa14d6ef03305254ab272a43b1765', 'I7C5F_LEAGUE_SOURCE_BOUNDARY'),
+    ('data/tables/cross_arena_final_reward3.lua', '6c831fa4a7d1a37e3d23a7068bc147f1a48dd441705a6f77690bcbc58092678d', 'I7C5F_LEAGUE_SOURCE_BOUNDARY'),
     ('app/windows/SelectTeamWindow.lua', '6d57e6bc7251060184190f7be14dcc9a277251673493a5b27e6c67c71cb96561', 'I7C5E_CONQUER_SOURCE_BOUNDARY'),
     ('data/tables/region_arena_level.lua', 'a1a7860cd66acc9a5f5195bb7bf612b3ad786038298185bf0c84dca474c7382a', 'I7C5D_ARENA_SOURCE_BOUNDARY'),
     ('data/tables/region_arena_reward.lua', '0d429b8b80be2c207fcc5c945af75d427464d7d380570129781cf6ec4c941e09', 'I7C5D_ARENA_SOURCE_BOUNDARY'),
@@ -167,6 +186,7 @@ SOURCE_MANIFEST.append(('app/windows/HeroGiftBoxWindow.lua','d6065c3d601f5820915
 SOURCE_MANIFEST.append(('app/windows/WhiteAlbumWindow.lua','851a53f588b59d95cfe460f3399ab1a6904fff7714131c358f3c3a73910b6bb9',"LIBRARY_INPUT_SOURCE_AUTHORITY"))
 
 ENABLED_CAPABILITIES = [
+    "CHAMPIONS_LEAGUE_I7C5F",
     "CONQUER_MODE_I7C5E",
     "ARENA_MODE_I7C5D",
     "ONE_ON_ONE_MODE_I7C5C",
@@ -366,6 +386,7 @@ from achievement_content import build_achievement
 from top_floor_content import build_top_floor
 from one_on_one_content import build_one_on_one
 from arena_content import build_arena
+from league_content import build_league
 from conquer_mode_content import build_conquer_mode
 from course_content import build_course
 class CompileError(ValueError):
@@ -2160,6 +2181,7 @@ def build_artifacts(blobs: dict[str, SourceBlob], archive_sha256: str) -> dict[s
         "top_floor_catalog.json":build_top_floor(blobs,parse_generated_lua_table),
         "one_on_one_catalog.json":build_one_on_one(blobs,parse_generated_lua_table),
         "arena_catalog.json":build_arena(blobs,parse_generated_lua_table),
+        "league_catalog.json":build_league(blobs,parse_generated_lua_table),
         "conquer_mode_catalog.json":build_conquer_mode(blobs,parse_generated_lua_table),
         "achievement_catalog.json":build_achievement(blobs,parse_generated_lua_table),
         "privilege_catalog.json":build_privilege(blobs,parse_generated_lua_table),

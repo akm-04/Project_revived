@@ -3725,6 +3725,90 @@
       ],
       "write_exceptions": [],
       "migration": "migrations/00068_i7c5e_conquer_school.sql"
+    },
+    "content_league_catalogs": {
+      "allowed_query_owners": [
+        "Content"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/contentstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/contentstore/"
+      ],
+      "migration": "migrations/00069_i7c5f_champions_league.sql",
+      "owner": "Content",
+      "write_exceptions": []
+    },
+    "league_competitions": {
+      "allowed_query_owners": [
+        "ChampionsLeague"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/leaguestore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/leaguestore/"
+      ],
+      "migration": "migrations/00069_i7c5f_champions_league.sql",
+      "owner": "ChampionsLeague",
+      "write_exceptions": []
+    },
+    "league_cosmetic_origins": {
+      "allowed_query_owners": [
+        "ChampionsLeague"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/leaguestore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/leaguestore/"
+      ],
+      "migration": "migrations/00069_i7c5f_champions_league.sql",
+      "owner": "ChampionsLeague",
+      "write_exceptions": []
+    },
+    "league_matches": {
+      "allowed_query_owners": [
+        "ChampionsLeague"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/leaguestore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/leaguestore/"
+      ],
+      "migration": "migrations/00069_i7c5f_champions_league.sql",
+      "owner": "ChampionsLeague",
+      "write_exceptions": []
+    },
+    "league_players": {
+      "allowed_query_owners": [
+        "ChampionsLeague"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/leaguestore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/leaguestore/"
+      ],
+      "migration": "migrations/00069_i7c5f_champions_league.sql",
+      "owner": "ChampionsLeague",
+      "write_exceptions": []
+    },
+    "league_settlements": {
+      "allowed_query_owners": [
+        "ChampionsLeague"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/leaguestore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/leaguestore/"
+      ],
+      "migration": "migrations/00069_i7c5f_champions_league.sql",
+      "owner": "ChampionsLeague",
+      "write_exceptions": []
     }
   }
 }

@@ -321,3 +321,9 @@ func (s Service) observePlayerTx(c context.Context, t tx.Tx, id int64, p identit
 	}
 	return s.Store.SaveStreakTx(c, t, next, old)
 }
+
+// ObserveLeagueDaysTx consumes the League owner's cumulative count of unique
+// active-day top5 snapshots. It never counts a read or an unqualified row.
+func (s Service) ObserveLeagueDaysTx(c context.Context, t tx.Tx, p identity.PlayerID, revision string, count int64, at time.Time) error {
+	return s.observeCountTx(c, t, d.LeagueDaysID, p, revision, count, at)
+}

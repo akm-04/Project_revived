@@ -6,7 +6,9 @@ import (
 	"context"
 	"errors"
 	"gxb.local/backend/v2/internal/adapters/postgres/commerceprivilegestore"
+	"gxb.local/backend/v2/internal/adapters/postgres/leaguestore"
 	apparena "gxb.local/backend/v2/internal/application/arena"
+	appleague "gxb.local/backend/v2/internal/application/championsleague"
 	"gxb.local/backend/v2/internal/application/commerceprivilege"
 	apponeonone "gxb.local/backend/v2/internal/application/oneonone"
 	"gxb.local/backend/v2/internal/application/playerdisplay"
@@ -185,7 +187,8 @@ func main() {
 
 	girlsRanking := canonicalGirlsRanking(pool, runner, contentDB, displayService, receipts)
 	// Title origins route by catalog id; the 1 on 1 origin read needs no Combat.
-	displayService.CatalogExternal = playerdisplay.CatalogOriginRoutes{{First: 100059, Last: 100062, Owner: girlsRanking},
+	leagueOrigins := appleague.Service{Store: leaguestore.Store{}, Content: contentDB, Entitlements: i5db}
+	displayService.CatalogExternal = playerdisplay.CatalogOriginRoutes{{Family: "bubble", First: 10002, Last: 10007, Owner: leagueOrigins}, {Family: "title", First: 100104, Last: 100104, Owner: leagueOrigins}, {Family: "title", First: 100111, Last: 100111, Owner: leagueOrigins}, {Family: "title", First: 100114, Last: 100121, Owner: leagueOrigins}, {Family: "title", First: 100059, Last: 100062, Owner: girlsRanking},
 		{First: 100002, Last: 100005, Owner: apponeonone.Service{Store: oneononestore.Store{}, Content: contentDB, Entitlements: i5db}}}
 
 	maxHeroColorPolicy := appi5.PreservationMaxHeroColorProvider{}
@@ -317,12 +320,17 @@ func main() {
 			mustRegister(mid, stockruntime.ArenaDispatcher{Authority: authority, Service: arena})
 		}
 		go runReconcile(ctx, pool, apparena.Reconciler{Service: arena})
+		league := canonicalLeague(pool, runner, contentDB, i5db, i5svc, fight, owners, displayService)
+		for _, mid := range stockruntime.LeagueMIDs {
+			mustRegister(mid, stockruntime.LeagueDispatcher{Authority: authority, Service: league})
+		}
+		go runReconcile(ctx, pool, appleague.Reconciler{Service: league})
 		conquer := canonicalConquer(pool, runner, contentDB, i5db, i5svc, privileges, fight)
 		for _, mid := range stockruntime.ConquerMIDs {
 			mustRegister(mid, stockruntime.ConquerDispatcher{Authority: authority, Service: conquer})
 		}
 	} else {
-		log.Print("I7C-5B/5C/5D/5E Top Floor, 1 on 1, Arena and Conquer School routes not registered: GXB_COMBAT_ENTROPY_KEYS is unset")
+		log.Print("I7C-5B/5C/5D/5E/5F Top Floor, 1 on 1, Arena, Conquer School and Champions League routes not registered: GXB_COMBAT_ENTROPY_KEYS is unset")
 	}
 	mustRegister(301, ranking)
 	lobbyD := stockruntime.LobbyDispatcher{Authority: authority, Tracker: tracker}

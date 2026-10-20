@@ -222,9 +222,9 @@ func (s Service) ReadEligibilityTx(c context.Context, sc ca.CoherentReadScope, q
 					f.Origins = []Origin{{PlayerID: q.PlayerID, Key: "ordinary-stack", Owner: "i5", Family: v.Family, CatalogID: v.ID, Revision: sc.ContentRevision, StateVersion: x.StateVersion}}
 				}
 			}
-			// A bounded title owner can now provide exact positive or complete
+			// A bounded title or bubble owner can provide exact positive or complete
 			// negative facts for one catalog row without claiming the family.
-			if q.Family == "title" && f.Status == Unavailable && s.CatalogExternal != nil {
+			if (q.Family == "title" || q.Family == "bubble") && f.Status == Unavailable && s.CatalogExternal != nil {
 				os, complete, err := s.catalogOrigins(c, sc.Queryer(), q.PlayerID, q.Family, v.ID, sc.ContentRevision, sc.ObservedAt)
 				if err != nil && !errors.Is(err, ErrUnavailable) {
 					return out, err

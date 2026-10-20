@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "status": "CURRENT_CUMULATIVE_CONTENT_GENERATION_LOCK_I7C4A",
+  "status": "CURRENT_CUMULATIVE_CONTENT_GENERATION_LOCK_I7C5F",
   "rule": "Historical validators keep their phase-specific semantic invariants. In cumulative/current mode they may accept only an explicitly registered successor compiler generation at or after their baseline. New generations are append-only review events; registering a generation does not waive capability/count/source/migration/ownership assertions.",
   "generations": [
     {
@@ -250,14 +250,22 @@
       "parser_version": "lua-generated-v18-guild-invite",
       "revision_id": "4b863e66312c1fb0e5ee9839e6b8b195bc9a9ac1edcc396cef464dc93a7833b4",
       "scope": "Conquer School mode catalog (conquer_school_campaign teams/reward, conquer_school_loop reward, misc conquer_*, refresh_cost buy_conquer_cost, function 48, translation CONQUER_SCHOOL_MAIL_*/RULE_TEXT; C5E private policy inputs); prior40payloads otherwise unchanged."
+    },
+    {
+      "ordinal": 37,
+      "stage": "I7C-5F",
+      "compiler_version": "i7c5f-league",
+      "parser_version": "lua-generated-v18-guild-invite",
+      "revision_id": "fa584ba83e7e19a832bf159f760e4c61820b419adc94a87d46e95287066ac044",
+      "scope": "Champions League source catalog and labelled C5F_LEAGUE_PRIVATE_POLICY_V2; source daily/final/gifts/schedule/callers and mail translations. Prior41payloads unchanged. Finite stock-client calendar presentation remains an open stock/effective-client gate."
     }
   ],
   "current": {
-    "ordinal": 36,
-    "stage": "I7C-5E",
-    "compiler_version": "i7c5e-conquer",
+    "ordinal": 37,
+    "stage": "I7C-5F",
+    "compiler_version": "i7c5f-league",
     "parser_version": "lua-generated-v18-guild-invite",
-    "revision_id": "4b863e66312c1fb0e5ee9839e6b8b195bc9a9ac1edcc396cef464dc93a7833b4",
-    "scope": "Conquer School mode catalog (conquer_school_campaign teams/reward, conquer_school_loop reward, misc conquer_*, refresh_cost buy_conquer_cost, function 48, translation CONQUER_SCHOOL_MAIL_*/RULE_TEXT; C5E private policy inputs); prior40payloads otherwise unchanged."
+    "revision_id": "fa584ba83e7e19a832bf159f760e4c61820b419adc94a87d46e95287066ac044",
+    "scope": "Champions League source catalog and labelled C5F_LEAGUE_PRIVATE_POLICY_V2; source daily/final/gifts/schedule/callers and mail translations. Prior41payloads unchanged. Finite stock-client calendar presentation remains an open stock/effective-client gate."
   }
 }

@@ -22,11 +22,13 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres/i4store"
 	"gxb.local/backend/v2/internal/adapters/postgres/i5store"
 	"gxb.local/backend/v2/internal/adapters/postgres/kernelstore"
+	"gxb.local/backend/v2/internal/adapters/postgres/leaguestore"
 	"gxb.local/backend/v2/internal/adapters/postgres/oneononestore"
 	"gxb.local/backend/v2/internal/adapters/postgres/topfloorstore"
 	appachievement "gxb.local/backend/v2/internal/application/achievement"
 	apparena "gxb.local/backend/v2/internal/application/arena"
 	appbook "gxb.local/backend/v2/internal/application/bookskill"
+	appleague "gxb.local/backend/v2/internal/application/championsleague"
 	ca "gxb.local/backend/v2/internal/application/characterasset"
 	apphero "gxb.local/backend/v2/internal/application/characterhero"
 	apppet "gxb.local/backend/v2/internal/application/characterpet"
@@ -42,6 +44,7 @@ import (
 	appinscription "gxb.local/backend/v2/internal/application/inscription"
 	applibrary "gxb.local/backend/v2/internal/application/librarylocal"
 	apponeonone "gxb.local/backend/v2/internal/application/oneonone"
+	"gxb.local/backend/v2/internal/application/playerdisplay"
 	"gxb.local/backend/v2/internal/application/publicstats"
 	appspirit "gxb.local/backend/v2/internal/application/spirit"
 	apptopfloor "gxb.local/backend/v2/internal/application/topfloor"
@@ -155,4 +158,9 @@ func runReconcile(ctx context.Context, p *postgres.Pool, provider appgeneration.
 			log.Printf("%s reconcile: %v", provider.Name(), err)
 		}
 	}
+}
+
+// canonicalLeague reuses the full qualified owned Combat roster/stats pipeline.
+func canonicalLeague(p *postgres.Pool, r tx.Runner, content contentstore.Store, i5db i5store.Store, i5svc appi5.Service, fight combat.Service, o topFloorOwners, display playerdisplay.Service) appleague.Service {
+	return appleague.Service{Timed: appgeneration.TimedRunner{Binder: appgeneration.Binder{Time: postgres.AuthoritativeTime{Queryer: p}}, Runner: r}, Fresh: p, Store: leaguestore.Store{}, Content: content, Fence: i5db, Heroes: fight.Inputs.Heroes, Pets: fight.Inputs.Pets, Directory: i4store.PlayerDirectoryReader{}, Guilds: guildstore.Store{}, Progression: i5db, Combat: fight, Grants: i5svc, Mail: appi5.SettlementMail{Store: i5db}, Achievements: appachievement.Service{Store: achievementstore.Store{}, Content: content, Population: o.library}, Players: i4store.PlayerRootLocker{}, Recipient: display, Entitlements: i5db, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}}
 }
