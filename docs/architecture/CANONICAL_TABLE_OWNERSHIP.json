@@ -3809,6 +3809,34 @@
       "migration": "migrations/00069_i7c5f_champions_league.sql",
       "owner": "ChampionsLeague",
       "write_exceptions": []
+    },
+    "achievement_award_claims": {
+      "owner": "achievement",
+      "allowed_query_owners": [
+        "achievement"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/achievementstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/achievementstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00070_i7c4fa_achievement_catalog_ap.sql"
+    },
+    "achievement_notices": {
+      "owner": "achievement",
+      "allowed_query_owners": [
+        "achievement"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/achievementstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/achievementstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00070_i7c4fa_achievement_catalog_ap.sql"
     }
   }
 }

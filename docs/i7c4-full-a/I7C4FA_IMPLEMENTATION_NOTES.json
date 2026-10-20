@@ -1,0 +1,39 @@
+{
+  "status": "IMPLEMENTED_DEVELOPMENT_CHECKED_FROZEN_QUALIFICATION_PENDING",
+  "node": "ROOT/I7/I7C/I7C-4 (full closure, stage A)",
+  "contract": "C4F_ACHIEVEMENT_CATALOG_AND_AP_V1",
+  "version": "v0.134.0",
+  "migration": "00070_i7c4fa_achievement_catalog_ap.sql",
+  "content_revision": "28d947045438f46ba5bd63707477968674b6d86c5bdb6d495d91cbc467677f3f",
+  "plan_commit": "7cd5f25",
+  "architecture": [
+    "Achievement stays sole earned-tier owner; nine owned-state counts are read through owner typed ports and stored as high-water streak rows (C4F_OWNED_STATE_COUNT_V1); unavailable owner reads are skipped, never zero-filled",
+    "1302 observes every family and reads in one Serializable transaction; owner dispatchers are wrapped to observe their own family after a successful command (C4F_OBSERVE_AFTER_COMMAND_V1)",
+    "1303 claims the lowest reached unclaimed point level once through I5 with a receipt (C4F_POINT_LEVEL_AWARDS_V1)",
+    "Metric 1007 sums rounded Self-view public force over the coherent Hero roster (C4F_ALL_GIRLS_AP_V1)",
+    "Ranking boards are profiles over one shared store: Girls (subtype 37, titles 100059..100062, ranks 1..20) and AP (subtype 8, metric 1007, title 100001 rank 1 only); Girls receipt names and stored generations are unchanged",
+    "Notice 17 intents are written with the earning transaction; a transactional NOTIFY wakes the feature-specific route achievement.notice.v1, which pushes to live World connections and marks delivery at most once",
+    "MID301 rank_types 15 (SubRankType.ACHIEVEMENT_POINT) is a live list in C4F_LIVE_TROPHY_RANK_V1 order"
+  ],
+  "deviations_from_plan": [
+    "P4: points are derived on read from earned tiers; no total_points/points_reached_at root columns were added",
+    "P6: route is feature-specific; the I7A generic-route guards now discount exactly this registration (no generic bus, worker or outbox)",
+    "Added MID301 rank_types 15, which the plan listed as an open note"
+  ],
+  "private_policy": [
+    "C4F_LEGACY_STATE_BACKFILL_V1 (Q5): legacy characters are backfilled from current state at first observation",
+    "C4F_ALL_GIRLS_AP_V1 (Q3), C4F_PRIVATE_AP_SERVER_RANKING_V1 (Q4), C4F_LIVE_TROPHY_RANK_V1 (Q7), C4F_ACHIEVEMENT_NOTICE_V1 (Q8)",
+    "Hidden achievements emit no notice because the client removes them from its list"
+  ],
+  "known_limits": [
+    "An offline player's pending notices wait for that player's next tier wakeup; 1302 remains the converged truth",
+    "Trophy rank aggregates the server's tier rows per read",
+    "Fifteen mode achievements stay MODE_NOT_LIVE with forward I9 bindings (Q1); 100016 waits for Stage C"
+  ],
+  "checks": [
+    "tools/check_i7c4fa_source_oracle.py",
+    "internal/integration/playerdisplay/i7c4fa_achievement_native_test.go",
+    "internal/integration/playerdisplay/i7c4fa_ap_board_native_test.go",
+    "internal/adapters/stockruntime/achievement_notice_test.go"
+  ]
+}

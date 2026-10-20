@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "status": "CURRENT_CUMULATIVE_CONTENT_GENERATION_LOCK_I7C5F",
+  "status": "CURRENT_CUMULATIVE_CONTENT_GENERATION_LOCK_I7C4FA",
   "rule": "Historical validators keep their phase-specific semantic invariants. In cumulative/current mode they may accept only an explicitly registered successor compiler generation at or after their baseline. New generations are append-only review events; registering a generation does not waive capability/count/source/migration/ownership assertions.",
   "generations": [
     {
@@ -258,14 +258,22 @@
       "parser_version": "lua-generated-v18-guild-invite",
       "revision_id": "fa584ba83e7e19a832bf159f760e4c61820b419adc94a87d46e95287066ac044",
       "scope": "Champions League source catalog and labelled C5F_LEAGUE_PRIVATE_POLICY_V2; source daily/final/gifts/schedule/callers and mail translations. Prior41payloads unchanged. Finite stock-client calendar presentation remains an open stock/effective-client gate."
+    },
+    {
+      "ordinal": 38,
+      "stage": "I7C-4 full stage A",
+      "compiler_version": "i7c4fa-achievement-ap",
+      "parser_version": "lua-generated-v18-guild-invite",
+      "revision_id": "28d947045438f46ba5bd63707477968674b6d86c5bdb6d495d91cbc467677f3f",
+      "scope": "Achievement catalog schema 2 adds achievement_level.lua point levels (10 rows, items) under ACHIEVEMENT_CATALOG_I7C4FA; prior payloads unchanged."
     }
   ],
   "current": {
-    "ordinal": 37,
-    "stage": "I7C-5F",
-    "compiler_version": "i7c5f-league",
+    "ordinal": 38,
+    "stage": "I7C-4 full stage A",
+    "compiler_version": "i7c4fa-achievement-ap",
     "parser_version": "lua-generated-v18-guild-invite",
-    "revision_id": "fa584ba83e7e19a832bf159f760e4c61820b419adc94a87d46e95287066ac044",
-    "scope": "Champions League source catalog and labelled C5F_LEAGUE_PRIVATE_POLICY_V2; source daily/final/gifts/schedule/callers and mail translations. Prior41payloads unchanged. Finite stock-client calendar presentation remains an open stock/effective-client gate."
+    "revision_id": "28d947045438f46ba5bd63707477968674b6d86c5bdb6d495d91cbc467677f3f",
+    "scope": "Achievement catalog schema 2 adds achievement_level.lua point levels (10 rows, items) under ACHIEVEMENT_CATALOG_I7C4FA; prior payloads unchanged."
   }
 }
