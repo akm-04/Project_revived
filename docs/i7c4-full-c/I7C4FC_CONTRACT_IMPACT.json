@@ -1,0 +1,29 @@
+{
+  "status": "TARGETED_TRANSITIVE_PREIMPLEMENTATION_REVIEW_COMPLETE",
+  "affected_contract_id": "C4F_COSMETIC_COUNTS_AND_SKINS_V1",
+  "c1_bindings": [
+    {
+      "path": "hot/00_PASSMAP/PASS685_I7C1_PROVIDER_SCOPE_OWNERSHIP_CONTRACT.json",
+      "upheld": "Counts read owner ports (Character appearance, I5 inventory, Achievement, PlayerDisplay facts); Ranking owns the board; no new cosmetic owner.",
+      "sha256": "73f4e5b8e8603a68380be31d4aec7a5f9f10ecd9b68246b56dfb350ae36ea943"
+    },
+    {
+      "path": "hot/00_PASSMAP/PASS685_I7C1_DELIVERY_ACCEPTANCE_CONTRACT.json",
+      "upheld": "Caller-scope composition at pinned content/instant; exact R2 fresh and populated upgrade proof; child closure never accepts the parent alone.",
+      "sha256": "992b38344aef6196e99cd2f17dc8810c2e962017db8de5c1a563890d54cf49a0"
+    },
+    {
+      "path": "hot/00_PASSMAP/PASS685_I7C1_RESEARCH_AMENDMENT_CONTRACT.json",
+      "upheld": "Whole-stage research before code; forward bindings explicit; NOT_LIVE is distinct from a zero claim.",
+      "sha256": "6e29a18a81e820f53a5accd471cf367c625cd48537fa37094f6b17fa0b88b8e9"
+    }
+  ],
+  "successor_obligations": {
+    "CA-IDENTITY": "PRESERVED",
+    "CA-APPEARANCE": "PRESERVED: skin ownership reads entitlements and stacks without changing selection",
+    "CA8-COHERENT-SCOPE": "PRESERVED",
+    "CA8-AVAILABILITY": "PRESERVED: any non-forward-bound unavailable row keeps the family unavailable",
+    "CA-SUPERSESSION": "PRESERVED: forward-bound rows change status only when their owner binds",
+    "CA-PARENT-EXIT": "Full I7C-4 parent closure claimed only after C qualification and its PassMap sync; I7C-E and W2 remain"
+  }
+}

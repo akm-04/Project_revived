@@ -1,0 +1,34 @@
+{
+  "status": "PLANNED",
+  "policy_id": "C4F_COSMETIC_COUNTS_AND_SKINS_V1",
+  "rows": [
+    {
+      "id": "C-A1",
+      "check": "Source oracle: show words 1003..1006, rank 38 score field, titles 100063..100066, achievement 100016, hasSkin predicate, forward-bound lists equal C6 policy"
+    },
+    {
+      "id": "C-A2",
+      "check": "Native: complete family resolves (no UNAVAILABLE) for avatar/frame/title/bubble; an unbound unrouted row keeps it unavailable"
+    },
+    {
+      "id": "C-A3",
+      "check": "Native: 1003 counts entitlement or stack once per model, expired entitlement excluded; 1004 counts earned tiers; 1005/1006 equal ELIGIBLE facts"
+    },
+    {
+      "id": "C-A4",
+      "check": "Native: 1840 returns eleven values; show types accept all eleven"
+    },
+    {
+      "id": "C-A5",
+      "check": "Native: Skins board ranks by 1003, settles 100063..100066 and title is eligible for 7 days"
+    },
+    {
+      "id": "C-A6",
+      "check": "Native: 100016 tiers 1/10/20 from skin count, legacy backfill"
+    },
+    {
+      "id": "C-A7",
+      "check": "Populated 00071 upgrade, content deploy, relocated restore preserve ranking/achievement digests"
+    }
+  ]
+}

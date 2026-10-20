@@ -1,0 +1,45 @@
+{
+  "status": "PLANNED_PREIMPLEMENTATION",
+  "policy_id": "C4F_COSMETIC_COUNTS_AND_SKINS_V1",
+  "stage": "FULL_I7C4_STAGE_C (cosmetic counts, Skins board, 1840 full11, 4A full family, I7C-4 parent closure)",
+  "version_target": "v0.136.0",
+  "migration": "00072_i7c4fc_skins_board.sql (awards title CHECK adds 100063..100066)",
+  "steps": [
+    {
+      "id": "C1",
+      "area": "domain/player + playerdisplay",
+      "work": "Forward-bound registry (C6 lists) in the domain; facts.go resolves forward-bound UNAVAILABLE rows to NOT_LIVE and serves CompleteFamily when nothing else is unavailable; CosmeticCountsTx returns 1005/1006 from complete families."
+    },
+    {
+      "id": "C2",
+      "area": "characterasset/characterstore",
+      "work": "SkinCollectionTx: distinct held skin models from unexpired entitlements and I5 skin-item stacks in the caller scope."
+    },
+    {
+      "id": "C3",
+      "area": "publicprofile",
+      "work": "CanonicalMetricProvider serves 1003 (skins), 1004 (achievement tiers), 1005/1006 (display counts); 1840 returns all eleven; selection accepts all eleven."
+    },
+    {
+      "id": "C4",
+      "area": "ranking",
+      "work": "SkinsBoard (subtype 38, field 1003, titles 100063..100066, score) with its own receipt names; migration 00072; display route for 100063..100066."
+    },
+    {
+      "id": "C5",
+      "area": "achievement",
+      "work": "100016 becomes Qualified owned-state over SkinCollectionTx."
+    },
+    {
+      "id": "C6",
+      "area": "docs/locks/natives",
+      "work": "VERSION v0.136.0, locks, oracle check_i7c4fc_source_oracle.py, notes; natives for each acceptance row."
+    }
+  ],
+  "lock_order": "Unchanged: metrics and counts read in the caller scope; board settlement uses the existing Girls lock path",
+  "explicitly_deferred": [
+    "Forward-bound rows until their I9 owners bind (Q1)",
+    "Photo/Scene 1012/1013",
+    "I7C-E aggregate and stock-client acceptance"
+  ]
+}
