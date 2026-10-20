@@ -1,0 +1,25 @@
+{
+  "status": "REQUIRED_BEFORE_COMPONENT_QUALIFICATION",
+  "contract_id": "C5F_CHAMPIONS_LEAGUE_MODE_V1",
+  "checks": [
+    "Source archive hash/caller/model/table/source-oracle",
+    "Compiler deterministic regeneration zero drift",
+    "Pure boundary before/at/after22:00/21:00/seasons, schedule extrapolation, point conservation/floors/ties",
+    "Actual-owned IDs and spoof/rejected formation, no foreign/synthetic actor",
+    "RealPG fresh admission/defense/fight/server report/points both sides/retry/concurrency/rollback/unknownCOMMIT",
+    "Daily snapshot once/cumulative100032/chest claim once; latewake/restart/reload",
+    "Promotion freeze oldplacement/choice default/current/newseason reset",
+    "Crossserver groups/rank±10/protection reservation expiry/failure",
+    "Final season source rewards/mail once/bubbles expiry/title counters and mirror evidence",
+    "Record retention and expired replay without lostlog",
+    "Populated68upgrade + migration69 idempotence + backupfreshrestore",
+    "Race/vet/arch/static and bounded5A/B/C/D/E affected regressions",
+    "Independent source/code/crossowner/recovery review",
+    "HOT+COLD routing/semantic/lifecycle/manifest/transportrestore checks"
+  ],
+  "not_proven_by_these": [
+    "Original server algorithm",
+    "FullI7C4 or I7C6 closure",
+    "Unmodified stock-client execution"
+  ]
+}

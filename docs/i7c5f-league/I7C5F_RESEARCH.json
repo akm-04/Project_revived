@@ -1,0 +1,66 @@
+{
+  "status": "RESEARCH_COMPLETE_BOUNDED_UNKNOWN_ALGORITHMS_LABELLED",
+  "full_node_path": "ROOT/I7/I7C/I7C-5/I7C-5F",
+  "source_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+  "evidence": [
+    {
+      "kind": "SOURCE_FACT",
+      "path": "app/windows/ChampionsLeagueRankWinodw.lua:initChallengeBtn + ChampionsLeagueSelectTeamWindow.lua:startArenaBattle",
+      "finding": "Actual fight is MID2802, CampaignType.ARENA, server battle_report/report_key; model.startFight names2800 but is not the active caller."
+    },
+    {
+      "kind": "SOURCE_FACT",
+      "path": "app/model/NormalHero.lua:populate/getHeroID; SuperHero.lua:populate/getHeroID; BaseSelectTeamNewWindow.lua:getFormationStr; ChampionsLeague.lua:setDefenseInfo",
+      "finding": "formation is ordered partner_id instances joined by |; pet_id is owned pet identity. No Region Arena table-ID conversion or summoned girls."
+    },
+    {
+      "kind": "SOURCE_FACT",
+      "path": "app/windows/ChampionsLeagueWinodw.lua:initBaseInfo/initDailyAward/addRankItem; data/tables/misc.lua",
+      "finding": "Levels70/90/100 -> C/B/A;2000initial;±10rank;30min protection,3min during21:00..22:00 GMT+8. Dailychest uses22:00boundary,current-day first win and prior-cutoff group/rank."
+    },
+    {
+      "kind": "SOURCE_FACT",
+      "path": "data/tables/cross_arena_daily_reward1..3.lua;cross_arena_final_reward1..3.lua;chat_bubble.lua",
+      "finding": "Numbered daily gift rows; final item/crystal rewards and bubbles10002..10007 rank<=10 and11..50 bygroupC/B/A;2592000seconds. Unnumbered daily table BOM-only and unused by wrapper."
+    },
+    {
+      "kind": "SOURCE_FACT",
+      "path": "app/windows/ChampionsLeagueSwitchGroupWinodw.lua; data/tables/translation.lua:CROSS_ARENA_RULE_TEXT",
+      "finding": "Promotion resets points and exposes old/current final reward choice(use_ori_rank1/0); default old if undecided;daily=currentgroup.30dayseasons, sourcecross_arena_schedule has50 historical dates ending20240619."
+    },
+    {
+      "kind": "SOURCE_FACT",
+      "path": "app/windows/ChampionsLeagueRecordWindow.lua:replayRecord; ChampionsHonorRankWindow.lua",
+      "finding": "Listrecords and optional id replay request share2803; report is [{content:string}]. ReplaycampaignARENA;Honor rows player_info/heros/pet."
+    },
+    {
+      "kind": "SOURCE_FACT",
+      "path": "data/tables/title_system.lua:100104,100111,100114..100121; PASS685_I7C1_ORIGIN_SCOPE_DISPOSITIONS",
+      "finding": "GroupA top10 count2..10 explicit in Chinese;100104LegendaryI first occurrence inference.100078..80 exact profile ambiguous,100087..89 explicitly season2; no automatic historical event reactivation."
+    },
+    {
+      "kind": "SOURCE_FACT",
+      "path": "data/tables/achievement.lua:100032",
+      "finding": "Top5 anyLeagueGroup%d days, thresholds1/3/7; source does not say consecutive."
+    },
+    {
+      "kind": "UNKNOWN",
+      "path": "frozen V1 handlers/state; old_client app source targeted filename search",
+      "finding": "No genuine League owner or matching old-client League files recovered. No original point formula, future schedule, missing-history backfill, exact collision rule or obsolete title activation."
+    }
+  ],
+  "inherited": "selected737 HOT contract cache + COLD_INDEX/MEMORY_RETENTION_CATALOG consulted; query_memory selected5F route cached; COLD is provenance only; no claim of exhaustive corpus audit",
+  "bounded_unknowns": [
+    "Private point transfer formula",
+    "Schedule extrapolation after final source date/opening midnight",
+    "Exact tie collision ordering",
+    "Cumulative versus consecutive top5 day counter",
+    "Ambiguous title078..80 and occurrence087..89 remain child6 profile gates, with genuine rank/counter evidence retained"
+  ],
+  "source_conflicts": [
+    "Unused model.startFight2800 vs active caller2802 resolved in favor of reachable caller",
+    "Reward wrapper ignores bubble_id; raw rows and bubble descriptions independently agree",
+    "English generic top-group title text conflicts with group-specific names and season2 Chinese rows; never infer activation by name alone"
+  ],
+  "sufficient_for": "Bounded genuine recurring League producer, source wire surfaces, versioned explicit private-policy operation design; no original-server algorithm claim"
+}

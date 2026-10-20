@@ -1,0 +1,110 @@
+{
+  "status": "TARGETED_TRANSITIVE_PREIMPLEMENTATION_REVIEW_COMPLETE",
+  "affected_contract_id": "C5F_CHAMPIONS_LEAGUE_MODE_V1",
+  "c1_bindings": [
+    {
+      "path": "hot/00_PASSMAP/PASS685_I7C1_PROVIDER_SCOPE_OWNERSHIP_CONTRACT.json",
+      "sha256": "73f4e5b8e8603a68380be31d4aec7a5f9f10ecd9b68246b56dfb350ae36ea943",
+      "upheld": "Distinct ACADEMY_LEAGUE canonical owner (not territorial AcademyArena); genuine ranks, results and grants. No fake default counters, no fourth HISTORY family."
+    },
+    {
+      "path": "hot/00_PASSMAP/PASS685_I7C1_DELIVERY_ACCEPTANCE_CONTRACT.json",
+      "sha256": "992b38344aef6196e99cd2f17dc8810c2e962017db8de5c1a563890d54cf49a0",
+      "upheld": "Caller-transaction composition through typed ports (I4 roots/directory, I5 grants/costs/mail, Character roster reads); no foreign SQL or nested tx; exact R2 fresh/upgrade/concurrency proof; child GREEN never accepts the parent."
+    },
+    {
+      "path": "hot/00_PASSMAP/PASS685_I7C1_RESEARCH_AMENDMENT_CONTRACT.json",
+      "sha256": "6e29a18a81e820f53a5accd471cf367c625cd48537fa37094f6b17fa0b88b8e9",
+      "upheld": "Whole selected League research before decomposition; explicit bounded private policies, no original-server claim."
+    },
+    {
+      "path": "hot/00_PASSMAP/PASS685_I7C1_SELECTED_PROVIDER_PROFILE.json",
+      "sha256": "967100a4c27bcbeb49c7dd5bf2d194d0f772076b9e05408d29b7e52dad234505",
+      "upheld": "C1selected recurring League origins and counter facts produced; exact ambiguous old title profiles remain named child6 gate rather than blanket inactive."
+    },
+    {
+      "path": "hot/00_PASSMAP/PASS724_I7C1_QUESTION_DISPOSITIONS.json",
+      "sha256": "cb702416bf09cfb65eb7762b45c1be7c37359b298dd68ff587f9e88f9bec77b7",
+      "upheld": "Q_LEAGUE_ORIGIN_PROFILE exact child5F producer/wire/rule profile selected here; child6 ambiguous historic identity gates retained."
+    },
+    {
+      "path": "hot/00_PASSMAP/PASS709_I7C_TOPOLOGY_V5.json",
+      "sha256": "1b87dd43b8fe17c1536a366e08ce834a829ac78d7eebec251d5cca9ab33184db",
+      "upheld": "Leaf I7C-5E output CONQUER_PROGRESSION_WRITER; no renumbering."
+    }
+  ],
+  "inherited_bindings": [
+    {
+      "path": "hot/00_PASSMAP/PASS711_I7C2J_CONQUER_FACT_READ_CONTRACT.json",
+      "sha256": "c16515646df4ca68e73716d00bde8e68e558887509a27c70f7c698fd058d9ca5",
+      "note": "Writer uses LockFactsTx/SaveFactsTx CAS under I4 315; scoped amendment: earlier-revision rows validated against the pinned catalog."
+    },
+    {
+      "path": "hot/00_PASSMAP/PASS418_COMBAT_TRUST_PROFILE_MATRIX.json",
+      "sha256": "668eb055371964f895240d966d458900ac641feb4f0337a5459de0cac608e554"
+    },
+    {
+      "path": "hot/00_PASSMAP/PASS418_COMBAT_ATTEMPT_START_RESULT_RUNTIME_DESIGN.json",
+      "sha256": "494d24864e41297792cb1d5f3dbe029bf4b28d047535f2738b5ce57f1bd820c7"
+    },
+    {
+      "path": "hot/00_PASSMAP/PASS421_LONG_TAIL_ACTIVATION_ENVELOPE_REGISTRY.json",
+      "sha256": "5386eea60774081aba76f25bdf3b878f2f110c5ce7783d9710d068b36a5a43ad"
+    },
+    {
+      "path": "hot/00_PASSMAP/PASS421_FINAL_GAMEPLAY_MODE_REGISTRY.json",
+      "sha256": "451333300a1cb2022bf56016d2e1a319f9743330bfd2c63de7f26c520948a2e3"
+    },
+    {
+      "path": "hot/00_PASSMAP/PASS426_GLOBAL_LOCK_ORDER_AND_CYCLE_AUDIT.json",
+      "sha256": "bfb53ada4fde3b32194ab5f1a935d3afbccef943a55ba5826fb4b8df04625ad7"
+    },
+    {
+      "path": "hot/00_PASSMAP/PASS465_WORKPLACE_TIME_CONTRACT.json",
+      "sha256": "60d0272fafea59ccfb4a03ec86a25b7a46a1f7020b96342a28b9272b2a7f06c6",
+      "note": "Authoritative operation instant only; 05:00 GMT+8 day as the other modes."
+    },
+    {
+      "path": "hot/00_PASSMAP/PASS723_I7C4C_PRIVATE_SERVER_POLICY_AUTHORIZATION.json",
+      "sha256": "8eb6218d87544e57c96c2e435cedb06376d4e46ff3e6491d2d22a4783aacc353"
+    },
+    {
+      "path": "hot/00_PASSMAP/PASS734_I7C5D_POLICY.json",
+      "sha256": "b16a6ad9d128e3afeb80953024254b7bc0023d6657b6b8abf6ab9259242b99db",
+      "note": "Receipted value moves, roster snapshot and settle patterns reused; C5D approval merged from work/i7c5d/PASSMAP_PENDING_MERGE.json."
+    },
+    {
+      "path": "hot/00_PASSMAP/PASS420_PVP_PRIORITY_BINDING_DESIGN.json",
+      "sha256": "9e7dcb40e4eaffbd7958ac734754af011e944295069722026b4bd1c70ea90600"
+    },
+    {
+      "path": "hot/00_PASSMAP/PASS509_PROFILE1_SCOPE_SELECTION.json",
+      "sha256": "649fce1a97ed4bb5bc11b49ee27e0e7d037fc190a5be018f5fd88faaa30d255b"
+    },
+    {
+      "path": "hot/00_PASSMAP/PASS685_I7C1_ORIGIN_SCOPE_DISPOSITIONS.json",
+      "sha256": "3b8746a95299f173659acee5ef76c5b52047524e250a151b98596346cb04cc75"
+    },
+    {
+      "path": "hot/00_PASSMAP/PASS685_I7C1_OWNER_CAPABILITY_DISPOSITIONS.json",
+      "sha256": "26fef136258a744e398699a55936ce145836c05a8e06e000884af7dd7c0a8b65"
+    }
+  ],
+  "successor_obligations": [
+    "Adjudicate ambiguous title078..80 exact activation/profile using genuine League counter/rank facts",
+    "Full selected display-origin handoff, all other origins and aggregate completeness remain6/I7C-E gates"
+  ],
+  "scoped_amendments": [
+    "Achievement100032 cumulative real League daily observations through new typed method; source thresholds unchanged",
+    "PlayerDisplay bounded catalog-origin family routing must include bubble family safely; existing numeric title-range routes must not capture bubble IDs"
+  ],
+  "downstream_consumers": [
+    "I5 mail and values",
+    "PlayerDisplay bubble/title entitlement and scoped origin evidence",
+    "Achievement100032",
+    "canonical Combat snapshots/reports",
+    "I7C6 selected-origin handoff"
+  ],
+  "lock_order": "League root604 serializes mutations and bumps version. Settlement first discovers/sorts and locks all I4 recipient roots315, then604; all I5mail610 deliveries precede all Achievement620 observations and display entitlement inserts; daily chest I5value grants700+ execute in a separate transaction with no later Achievement lock discovery. Fight root604 -> Combat609 only. Every Tx uses positive root/match/receipt semantic evidence for unknown COMMIT, no absence-as-success; no foreign-owner SQL.",
+  "full4_closed": false
+}
