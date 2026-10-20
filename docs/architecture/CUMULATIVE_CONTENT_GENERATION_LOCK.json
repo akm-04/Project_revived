@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "status": "CURRENT_CUMULATIVE_CONTENT_GENERATION_LOCK_I7C4FA",
+  "status": "CURRENT_CUMULATIVE_CONTENT_GENERATION_LOCK_I7C6",
   "rule": "Historical validators keep their phase-specific semantic invariants. In cumulative/current mode they may accept only an explicitly registered successor compiler generation at or after their baseline. New generations are append-only review events; registering a generation does not waive capability/count/source/migration/ownership assertions.",
   "generations": [
     {
@@ -266,14 +266,22 @@
       "parser_version": "lua-generated-v18-guild-invite",
       "revision_id": "28d947045438f46ba5bd63707477968674b6d86c5bdb6d495d91cbc467677f3f",
       "scope": "Achievement catalog schema 2 adds achievement_level.lua point levels (10 rows, items) under ACHIEVEMENT_CATALOG_I7C4FA; prior payloads unchanged."
+    },
+    {
+      "ordinal": 39,
+      "stage": "I7C-4 full stage B (I7C-6)",
+      "compiler_version": "i7c6-cosmetic-origins",
+      "parser_version": "lua-generated-v18-guild-invite",
+      "revision_id": "5f7fe83b1c358a67e1a62fdc2670b1db5c00ef8891efd886d4d6fb5a46a355b7",
+      "scope": "Player display title rows carry the title_system condition list under COSMETIC_TITLE_CONDITION_I7C6 (marriage 30/50, Bookshelf 50/80, villas 30/60/100 feed C6_SELECTED_COSMETIC_ORIGINS_V1); other cosmetic families and all other payloads unchanged."
     }
   ],
   "current": {
-    "ordinal": 38,
-    "stage": "I7C-4 full stage A",
-    "compiler_version": "i7c4fa-achievement-ap",
+    "ordinal": 39,
+    "stage": "I7C-4 full stage B (I7C-6)",
+    "compiler_version": "i7c6-cosmetic-origins",
     "parser_version": "lua-generated-v18-guild-invite",
-    "revision_id": "28d947045438f46ba5bd63707477968674b6d86c5bdb6d495d91cbc467677f3f",
-    "scope": "Achievement catalog schema 2 adds achievement_level.lua point levels (10 rows, items) under ACHIEVEMENT_CATALOG_I7C4FA; prior payloads unchanged."
+    "revision_id": "5f7fe83b1c358a67e1a62fdc2670b1db5c00ef8891efd886d4d6fb5a46a355b7",
+    "scope": "Player display title rows carry the title_system condition list under COSMETIC_TITLE_CONDITION_I7C6 (marriage 30/50, Bookshelf 50/80, villas 30/60/100 feed C6_SELECTED_COSMETIC_ORIGINS_V1); other cosmetic families and all other payloads unchanged."
   }
 }

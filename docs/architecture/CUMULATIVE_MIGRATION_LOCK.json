@@ -1,5 +1,5 @@
 {
-  "highest_migration": "00070_i7c4fa_achievement_catalog_ap.sql",
+  "highest_migration": "00071_i7c6_cosmetic_origins.sql",
   "migrations": {
     "00001_kernel_receipts.sql": "fab5b35f4ca5eee53c62b0b924ec448327e1aa31205015c22e24ee0f2b710fd8",
     "00002_identity_logicalserver_bootstrap.sql": "adff86d27dd1c02e4da0dec6b1aa21f33aaafd4d410849abc76bfeec58a5cd5f",
@@ -70,9 +70,10 @@
     "00067_i7c5d_arena.sql": "9e3ed3e1fbadef836a8e731efeae857ba4ae96fadab5d67d18fa7968453d72e6",
     "00068_i7c5e_conquer_school.sql": "bf2b573ffc61745839bbf8ea2d41bd756848d85b219d23384d7990a98fca8c7c",
     "00069_i7c5f_champions_league.sql": "c07467271ed07fce009989964dc520a02937ef4f32cf902f3b02c4eb13e04641",
-    "00070_i7c4fa_achievement_catalog_ap.sql": "c4ebd8e5ad7a36bc6dc7503072f10094594c6bd5950f85d21e42e27db3afc2a8"
+    "00070_i7c4fa_achievement_catalog_ap.sql": "c4ebd8e5ad7a36bc6dc7503072f10094594c6bd5950f85d21e42e27db3afc2a8",
+    "00071_i7c6_cosmetic_origins.sql": "84ea89724ce520c59a2272987d03cd07eb7ffb62b897b72f17392993f96ded51"
   },
   "rule": "All listed migration bytes are immutable for this cumulative candidate. Historical phase validators remain snapshot-specific; forward schema changes require a new migration. I7A-4A allocates forward-only 00033 for SocialRelation/SocialInbox durable foundations and an I4-owned non-unique discovery index; it performs no Social backfill and activates no stock routes.",
   "schema_version": 1,
-  "status": "CURRENT_CUMULATIVE_MIGRATION_LOCK_I7C4FA"
+  "status": "CURRENT_CUMULATIVE_MIGRATION_LOCK_I7C6"
 }

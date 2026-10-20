@@ -1,0 +1,32 @@
+{
+  "status": "IMPLEMENTED_DEVELOPMENT_CHECKED_FROZEN_QUALIFICATION_PENDING",
+  "node": "ROOT/I7/I7C/I7C-6 (full I7C-4 closure, stage B)",
+  "contract": "C6_SELECTED_COSMETIC_ORIGINS_V1",
+  "version": "v0.135.0",
+  "migration": "00071_i7c6_cosmetic_origins.sql",
+  "content_revision": "5f7fe83b1c358a67e1a62fdc2670b1db5c00ef8891efd886d4d6fb5a46a355b7",
+  "plan_commit": "2476ea3",
+  "architecture": [
+    "B1: player display title rows carry the title_system condition list (compiler i7c6-cosmetic-origins, capability COSMETIC_TITLE_CONDITION_I7C6); tools/check_i7c6_source_oracle.py",
+    "B2: player_library_roots.married_high_water (Library-owned) is raised to the current married count by every Library hero save in the same transaction; migration 00071 seeds legacy roots from their current married count",
+    "B2/B3: playerdisplay.ProgressTitleOrigins proves permanent condition titles from an owner's never-decreasing TitleProgressTx: Library max(high water, current married) for type 5 (100022/100023), BookSkill applied building 4 level for type 6 (100024/100025), Dormhouse DormType.VILLA room count for type 7 (100026..100028); below the condition is a complete negative; an owner without facts leaves the title unavailable",
+    "B4: Arena proves avatar 110006001 from champion settlement rows; StartsAt is the settlement time and the catalog's 60 days set the end; the champion mail item is unchanged and still not a timed origin",
+    "B5: display eligibility facts consult catalog-scoped owners for timed avatar/frame rows (days > 0) as selection already did; cmd/gxb-api routes the four owners; no generic grant path"
+  ],
+  "deviations_from_plan": [
+    "B2: legacy roots are seeded once by migration 00071 from Library's own tables instead of by Backfiller.PlayerTx; Backfiller only creates unmarried hero rows, so it cannot raise the mark"
+  ],
+  "private_policy": [
+    "Keep once earned (user Stage B answer): marriage, Bookshelf and villa titles stay after progress falls; Bookshelf level and villa count never decrease",
+    "At season settlement (user Stage B answer): the champion avatar starts at settlement",
+    "Forward-bound ids stay not live (C6_COSMETIC_FORWARD_BINDINGS_V1)"
+  ],
+  "known_limits": [
+    "Title list read (kind titles) still uses the family-wide origin port, which the product leaves unwired; route-proved titles are visible through eligibility facts and selection, as for League and ranking titles",
+    "Skins board titles 100063..100066 wait for Stage C"
+  ],
+  "checks": [
+    "tools/check_i7c6_source_oracle.py",
+    "internal/integration/playerdisplay/i7c6_cosmetic_origins_native_test.go"
+  ]
+}
