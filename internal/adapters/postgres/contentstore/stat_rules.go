@@ -11,11 +11,18 @@ import (
 	statrules "gxb.local/backend/v2/internal/domain/statrules"
 	"gxb.local/backend/v2/internal/foundation/tx"
 	"io"
+	"sync"
 )
 
 // StatCatalogTx reads only the caller-pinned immutable revision. Registration
 // and controlled deployment/backfill must complete before activation.
+var statCatalogs sync.Map
+
 func (s Store) StatCatalogTx(ctx context.Context, q tx.Queryer, revision string) (statrules.Catalog, error) {
+	return memoCatalog(&statCatalogs, revision, func() (statrules.Catalog, error) { return s.statCatalogTx(ctx, q, revision) })
+}
+
+func (s Store) statCatalogTx(ctx context.Context, q tx.Queryer, revision string) (statrules.Catalog, error) {
 	var out statrules.Catalog
 	if q == nil || len(revision) != 64 {
 		return out, statrules.ErrUnqualified

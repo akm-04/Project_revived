@@ -257,6 +257,6 @@ func (r Reconciler) match(c context.Context, id ids.UUID, op gen.TimedOperation,
 			return s.close(c, m, op.Operation())
 		}
 	}
-	_, err = s.conclude(c, m, op.Operation())
+	_, err = s.conclude(c, m, op.Operation(), time.Time{})
 	return err
 }

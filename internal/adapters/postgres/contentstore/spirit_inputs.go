@@ -11,11 +11,18 @@ import (
 	spirit "gxb.local/backend/v2/internal/domain/spirit"
 	"gxb.local/backend/v2/internal/foundation/tx"
 	"io"
+	"sync"
 )
 
 // SpiritCatalogTx reads only the caller-pinned immutable revision. Registration
 // and controlled deployment/backfill must complete before activation.
+var spiritCatalogs sync.Map
+
 func (s Store) SpiritCatalogTx(ctx context.Context, q tx.Queryer, revision string) (spirit.Catalog, error) {
+	return memoCatalog(&spiritCatalogs, revision, func() (spirit.Catalog, error) { return s.spiritCatalogTx(ctx, q, revision) })
+}
+
+func (s Store) spiritCatalogTx(ctx context.Context, q tx.Queryer, revision string) (spirit.Catalog, error) {
 	var out spirit.Catalog
 	if q == nil || len(revision) != 64 {
 		return out, spirit.ErrUnqualified

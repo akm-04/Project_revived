@@ -11,11 +11,18 @@ import (
 	elementequipment "gxb.local/backend/v2/internal/domain/elementequipment"
 	"gxb.local/backend/v2/internal/foundation/tx"
 	"io"
+	"sync"
 )
 
 // ElementCatalogTx reads only the caller-pinned immutable revision. Registration
 // and controlled deployment/backfill must complete before activation.
+var elementCatalogs sync.Map
+
 func (s Store) ElementCatalogTx(ctx context.Context, q tx.Queryer, revision string) (elementequipment.Catalog, error) {
+	return memoCatalog(&elementCatalogs, revision, func() (elementequipment.Catalog, error) { return s.elementCatalogTx(ctx, q, revision) })
+}
+
+func (s Store) elementCatalogTx(ctx context.Context, q tx.Queryer, revision string) (elementequipment.Catalog, error) {
 	var out elementequipment.Catalog
 	if q == nil || len(revision) != 64 {
 		return out, elementequipment.ErrUnqualified

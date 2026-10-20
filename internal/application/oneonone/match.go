@@ -30,6 +30,8 @@ const (
 	resultWindow = 10 * time.Minute
 	// Private policy: an identical START within this window of the previous one returns it (client retry).
 	replayWindow = time.Minute
+	// Private policy: START answers within this budget, inside the client's 30 s request timeout.
+	startBudget = 25 * time.Second
 )
 
 type StartCommand struct {
@@ -79,6 +81,8 @@ func (s Service) Start(c context.Context, a identity.ActorContext, r StartComman
 		return d.MatchView{}, err
 	}
 	fp := fingerprint(a.PlayerID, r)
+	// The stock client waits 30 s for this form-data request (Backend.lua).
+	deadline := time.Now().Add(startBudget)
 	now, err := s.Timed.Binder.Time.Now(c)
 	if err != nil {
 		return d.MatchView{}, err
@@ -88,18 +92,18 @@ func (s Service) Start(c context.Context, a identity.ActorContext, r StartComman
 		return d.MatchView{}, err
 	}
 	if found && latest.Fingerprint == fp && (latest.Status == d.StatusStarted || now.Sub(latest.StartedAt) < replayWindow) {
-		return s.finish(c, a, latest, op)
+		return s.finish(c, a, latest, op, deadline)
 	}
 	// Server-authoritative results always apply: an abandoned match settles first.
 	if found && latest.Status == d.StatusStarted {
-		if _, err = s.finish(c, a, latest, op); err != nil {
+		if _, err = s.finish(c, a, latest, op, deadline); err != nil {
 			return d.MatchView{}, fmt.Errorf("%w: previous match unresolved", errors.Join(err, d.ErrRefused))
 		}
 	}
 	var m d.Match
 	err = s.mutate(c, op, func() error {
 		evidence := startEvidence{service: s, player: a.PlayerID, fingerprint: fp, since: op.StartedAt}
-		_, res, err := s.Timed.Run(c, op, Profile(), tx.Options{Isolation: tx.RepeatableRead}, retry(), evidence, func(c context.Context, sc gen.TimedScope) error {
+		_, res, err := s.Timed.Run(c, op, matchProfile(), tx.Options{Isolation: tx.RepeatableRead}, retry(), evidence, func(c context.Context, sc gen.TimedScope) error {
 			var err error
 			m, err = s.admit(c, sc, a, r, fp)
 			return err
@@ -112,7 +116,7 @@ func (s Service) Start(c context.Context, a identity.ActorContext, r StartComman
 	if err != nil {
 		return d.MatchView{}, err
 	}
-	return s.finish(c, a, m, op)
+	return s.finish(c, a, m, op, deadline)
 }
 
 type startEvidence struct {
@@ -143,7 +147,9 @@ func (s Service) admit(c context.Context, sc gen.TimedScope, a identity.ActorCon
 	if err := s.Fence.FenceActorTx(c, sc.Tx, a, at); err != nil {
 		return d.Match{}, err
 	}
-	root, found, err := s.Store.ReadCompetitionTx(c, sc.Tx, true)
+	// Admission changes no position, so it does not hold the competition root
+	// while freezing; position changes conflict on the locked player rows.
+	root, found, err := s.Store.ReadCompetitionTx(c, sc.Tx, false)
 	if err != nil || !found {
 		return d.Match{}, errors.Join(err, d.ErrRefused)
 	}
@@ -179,9 +185,7 @@ func (s Service) admit(c context.Context, sc gen.TimedScope, a identity.ActorCon
 	if !d.ValidTeams(r.Formations, rounds) {
 		return d.Match{}, d.ErrInvalid
 	}
-	if _, err = s.teams(c, sc.Tx, a.PlayerID, r.Formations, at, true); err != nil {
-		return d.Match{}, err
-	}
+	// Ownership of every formation member is enforced by the Combat freezer (OWNED_SELF).
 	next, err := catalog.Admit(attacker, at)
 	if err != nil {
 		return d.Match{}, err
@@ -203,22 +207,28 @@ func (s Service) admit(c context.Context, sc gen.TimedScope, a identity.ActorCon
 	if err != nil {
 		return d.Match{}, err
 	}
-	for i := range r.Formations {
-		if i >= len(defense) {
-			m.Rounds = append(m.Rounds, d.Round{})
-			continue
-		}
+	requests := []combat.StartRequest{}
+	for i := range defense {
 		battle := combat.BattleRequest{CampaignType: d.CampaignType, BattleID: d.BattleID, TeamA: participants(cd.OwnedSelf, a.PlayerID, r.Formations[i].Heroes, cd.HeroActor),
 			PetsA: participants(cd.OwnedSelf, a.PlayerID, pet(r.Formations[i]), cd.PetActor), WavesB: [][]combat.Participant{participants(cd.OwnedForeign, r.Enemy, defense[i].Heroes, cd.HeroActor)},
 			PetsB: participants(cd.OwnedForeign, r.Enemy, pet(defense[i]), cd.PetActor)}
-		started, err := s.Combat.StartTx(c, sc.Tx, scope, combat.StartRequest{Actor: a, Locator: roundLocator(id, i+1), GenerationRef: d.ContractID, StartFingerprint: fp, ResultDeadline: at.Add(resultWindow), Battle: battle})
-		if err != nil {
+		requests = append(requests, combat.StartRequest{Actor: a, Locator: roundLocator(id, i+1), GenerationRef: d.ContractID, StartFingerprint: fp, ResultDeadline: at.Add(resultWindow), Battle: battle})
+	}
+	started := []combat.Started{}
+	if len(requests) > 0 {
+		if started, err = s.Combat.StartManyTx(c, sc.Tx, scope, requests); err != nil {
 			return d.Match{}, err
 		}
-		if started.Replayed {
+	}
+	for i := range r.Formations {
+		if i >= len(started) {
+			m.Rounds = append(m.Rounds, d.Round{})
+			continue
+		}
+		if started[i].Replayed {
 			return d.Match{}, d.ErrConflict
 		}
-		m.Rounds = append(m.Rounds, d.Round{AttemptID: started.Attempt.ID})
+		m.Rounds = append(m.Rounds, d.Round{AttemptID: started[i].Attempt.ID})
 	}
 	return m, s.Store.InsertMatchTx(c, sc.Tx, m)
 }
@@ -238,8 +248,9 @@ func participants(origin cd.Origin, owner identity.PlayerID, members []int64, ki
 	return out
 }
 
-func (s Service) finish(c context.Context, a identity.ActorContext, m d.Match, op operation.Context) (d.MatchView, error) {
-	m, err := s.conclude(c, m, op)
+// finish concludes the match within the START budget and builds the result view.
+func (s Service) finish(c context.Context, a identity.ActorContext, m d.Match, op operation.Context, deadline time.Time) (d.MatchView, error) {
+	m, err := s.conclude(c, m, op, deadline)
 	if err != nil {
 		return d.MatchView{}, err
 	}
@@ -249,34 +260,71 @@ func (s Service) finish(c context.Context, a identity.ActorContext, m d.Match, o
 	return s.matchView(c, a, m)
 }
 
-// conclude resolves a started match's rounds in parallel outside locks and
-// settles it once; a permanently failed round closes the match.
-func (s Service) conclude(c context.Context, m d.Match, op operation.Context) (d.Match, error) {
-	if m.Status == d.StatusStarted {
-		errs := make([]error, len(m.Rounds))
-		var wg sync.WaitGroup
-		for i, r := range m.Rounds {
-			if r.Forfeit() {
-				continue
-			}
-			wg.Add(1)
-			go func() {
-				defer wg.Done()
-				_, errs[i] = s.Combat.Resolve(c, op, r.AttemptID)
-			}()
-		}
-		wg.Wait()
-		for _, err := range errs {
-			if errors.Is(err, cd.ErrResolverPermanent) {
-				return m, errors.Join(err, s.close(c, m, op))
-			}
-		}
-		if err := errors.Join(errs...); err != nil {
-			return m, err
-		}
-		return s.settle(c, m, op)
+// ErrUnresolved answers a START whose rounds are still resolving at its
+// deadline; resolution continues detached, an identical START returns the
+// result and the reconcile provider settles it regardless.
+var ErrUnresolved = errors.New("oneonone: match rounds still resolving")
+
+// conclude resolves a started match's rounds in parallel outside locks, on a
+// context detached from the caller so work survives the request, and settles
+// it once; a permanently failed round closes the match. A zero deadline waits.
+func (s Service) conclude(c context.Context, m d.Match, op operation.Context, deadline time.Time) (d.Match, error) {
+	if m.Status != d.StatusStarted {
+		return m, nil
 	}
-	return m, nil
+	flights := []*flight{}
+	for _, r := range m.Rounds {
+		if !r.Forfeit() {
+			flights = append(flights, s.resolveOnce(c, op, r.AttemptID))
+		}
+	}
+	var budget <-chan time.Time
+	if !deadline.IsZero() {
+		timer := time.NewTimer(time.Until(deadline))
+		defer timer.Stop()
+		budget = timer.C
+	}
+	errs := []error{}
+	for _, f := range flights {
+		select {
+		case <-f.done:
+			errs = append(errs, f.err)
+		case <-budget:
+			return m, ErrUnresolved
+		}
+	}
+	for _, err := range errs {
+		if errors.Is(err, cd.ErrResolverPermanent) {
+			return m, errors.Join(err, s.close(c, m, op))
+		}
+	}
+	if err := errors.Join(errs...); err != nil {
+		return m, err
+	}
+	return s.settle(c, m, op)
+}
+
+// flight is one in-process resolution of an attempt; repeated STARTs and the
+// reconcile provider wait on it instead of launching another worker.
+type flight struct {
+	done chan struct{}
+	err  error
+}
+
+var flights sync.Map
+
+func (s Service) resolveOnce(c context.Context, op operation.Context, attempt ids.UUID) *flight {
+	f := &flight{done: make(chan struct{})}
+	if running, loaded := flights.LoadOrStore(attempt, f); loaded {
+		return running.(*flight)
+	}
+	detached := context.WithoutCancel(c)
+	go func() {
+		_, f.err = s.Combat.Resolve(detached, op, attempt)
+		flights.Delete(attempt)
+		close(f.done)
+	}()
+	return f
 }
 
 func (s Service) matchView(c context.Context, a identity.ActorContext, m d.Match) (d.MatchView, error) {
@@ -332,7 +380,7 @@ func (s Service) settle(c context.Context, m d.Match, parent operation.Context) 
 		return d.Match{}, err
 	}
 	err = s.mutate(c, op, func() error {
-		_, _, err := s.Timed.Run(c, op, Profile(), tx.Options{Isolation: tx.RepeatableRead}, retry(), settledMatchEvidence{store: s.Store, reader: s.Fresh, id: m.ID}, func(c context.Context, sc gen.TimedScope) error {
+		_, _, err := s.Timed.Run(c, op, matchProfile(), tx.Options{Isolation: tx.RepeatableRead}, retry(), settledMatchEvidence{store: s.Store, reader: s.Fresh, id: m.ID}, func(c context.Context, sc gen.TimedScope) error {
 			return s.settleMatchTx(c, sc, m.ID)
 		})
 		return err

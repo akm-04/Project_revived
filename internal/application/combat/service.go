@@ -34,6 +34,31 @@ type Started struct {
 // (601..608) before combat's locator lock (609). The scope must witness that
 // same transaction; START commits before any resolver work.
 func (s Service) StartTx(ctx context.Context, t tx.Tx, scope ca.CoherentReadScope, request StartRequest) (Started, error) {
+	return s.start(ctx, t, scope, request, s.newFreezer(scope, request.Actor.PlayerID))
+}
+
+// StartManyTx stages several attempts of one actor in the caller transaction
+// (for example the rounds of one match); owner inputs are read once and shared.
+func (s Service) StartManyTx(ctx context.Context, t tx.Tx, scope ca.CoherentReadScope, requests []StartRequest) ([]Started, error) {
+	if len(requests) == 0 {
+		return nil, d.ErrInvalid
+	}
+	f := s.newFreezer(scope, requests[0].Actor.PlayerID)
+	out := make([]Started, 0, len(requests))
+	for _, r := range requests {
+		if r.Actor != requests[0].Actor {
+			return nil, d.ErrInvalid
+		}
+		started, err := s.start(ctx, t, scope, r, f)
+		if err != nil {
+			return nil, err
+		}
+		out = append(out, started)
+	}
+	return out, nil
+}
+
+func (s Service) start(ctx context.Context, t tx.Tx, scope ca.CoherentReadScope, request StartRequest, f *freezer) (Started, error) {
 	if t == nil || scope.Validate() != nil || scope.Queryer() != tx.Queryer(t) || !request.Actor.PlayerID.Valid() || request.Actor.ContextID.UUID().IsZero() || !request.Locator.Valid() || request.GenerationRef == "" || len(request.StartFingerprint) != 64 || !request.ResultDeadline.After(scope.ObservedAt) {
 		return Started{}, d.ErrInvalid
 	}
@@ -53,7 +78,7 @@ func (s Service) StartTx(ctx context.Context, t tx.Tx, scope ca.CoherentReadScop
 	if err = s.contentPin(ctx, scope); err != nil {
 		return Started{}, err
 	}
-	snapshot, err := s.freeze(ctx, scope, request.Actor.PlayerID, request.Battle)
+	snapshot, err := f.freeze(ctx, request.Battle)
 	if err != nil {
 		return Started{}, err
 	}

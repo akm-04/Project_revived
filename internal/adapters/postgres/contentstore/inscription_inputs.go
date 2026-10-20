@@ -11,11 +11,18 @@ import (
 	inscription "gxb.local/backend/v2/internal/domain/inscription"
 	"gxb.local/backend/v2/internal/foundation/tx"
 	"io"
+	"sync"
 )
 
 // InscriptionCatalogTx reads only the caller-pinned immutable revision. Registration
 // and controlled deployment/backfill must complete before activation.
+var inscriptionCatalogs sync.Map
+
 func (s Store) InscriptionCatalogTx(ctx context.Context, q tx.Queryer, revision string) (inscription.Catalog, error) {
+	return memoCatalog(&inscriptionCatalogs, revision, func() (inscription.Catalog, error) { return s.inscriptionCatalogTx(ctx, q, revision) })
+}
+
+func (s Store) inscriptionCatalogTx(ctx context.Context, q tx.Queryer, revision string) (inscription.Catalog, error) {
 	var out inscription.Catalog
 	if q == nil || len(revision) != 64 {
 		return out, inscription.ErrUnqualified

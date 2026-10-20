@@ -34,6 +34,14 @@ func Profile() tx.Profile {
 	return tx.Profile{Name: "one-on-one", AcquireTimeout: 2 * time.Second, LockTimeout: 5 * time.Second, StatementTimeout: 10 * time.Second, TransactionTimeout: 30 * time.Second, CleanupTimeout: 2 * time.Second, ReconcileTimeout: 10 * time.Second, OperationTimeout: 60 * time.Second}
 }
 
+// matchProfile bounds START and match settlement, which freeze or settle one
+// Combat attempt per round (up to 7) in a single transaction.
+func matchProfile() tx.Profile {
+	p := Profile()
+	p.Name, p.StatementTimeout, p.TransactionTimeout, p.OperationTimeout = "one-on-one-match", 30*time.Second, 120*time.Second, 180*time.Second
+	return p
+}
+
 func retry() tx.RetryPolicy {
 	return tx.RetryPolicy{MaxAttempts: 6, RetryDefiniteAbort: true, DefiniteAbortBackoffBase: 20 * time.Millisecond, DefiniteAbortBackoffMax: 160 * time.Millisecond}
 }

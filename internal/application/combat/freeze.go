@@ -53,8 +53,14 @@ type playerInputs struct {
 	conquer cq.Progress
 }
 
-func (s Service) freeze(ctx context.Context, scope ca.CoherentReadScope, actor identity.PlayerID, request BattleRequest) (d.Snapshot, error) {
-	f := &freezer{service: s, scope: scope, starter: actor, heroes: map[identity.PlayerID]map[string]any{}, pets: map[identity.PlayerID][]any{}, players: map[identity.PlayerID]*playerInputs{}}
+func (s Service) newFreezer(scope ca.CoherentReadScope, actor identity.PlayerID) *freezer {
+	return &freezer{service: s, scope: scope, starter: actor, heroes: map[identity.PlayerID]map[string]any{}, pets: map[identity.PlayerID][]any{}, players: map[identity.PlayerID]*playerInputs{}}
+}
+
+// freeze snapshots one battle; a freezer shared by several battles keeps each
+// owner's inputs read once, and each snapshot lists only its own battle's players.
+func (f *freezer) freeze(ctx context.Context, request BattleRequest) (d.Snapshot, error) {
+	s, scope := f.service, f.scope
 	battle := d.Battle{CampaignType: request.CampaignType, BattleID: request.BattleID, PetsA: []d.Actor{}, PetsB: []d.Actor{}}
 	var err error
 	if battle.TeamA, err = f.actors(ctx, request.TeamA, d.HeroActor); err != nil {
@@ -74,13 +80,26 @@ func (s Service) freeze(ctx context.Context, scope ca.CoherentReadScope, actor i
 		return d.Snapshot{}, err
 	}
 	players := []d.PlayerContext{}
-	for _, p := range f.players {
-		players = append(players, p.context)
+	for pid, p := range f.players {
+		if battlePlayer(request, pid) {
+			players = append(players, p.context)
+		}
 	}
 	sort.Slice(players, func(i, j int) bool { return players[i].Player < players[j].Player })
 	snapshot := d.Snapshot{Schema: d.SnapshotSchema, Contract: d.ContractID, ContentRevision: scope.ContentRevision, CorpusID: s.Rules.ID(), SourceArchiveSHA256: s.Rules.SourceArchiveSHA256(),
 		TrustProfile: d.TrustProfileID, EntropyPolicy: d.EntropyPolicyVersion, AdapterPolicy: d.AdapterPolicyVersion, CollectionPolicy: d.CollectionPolicy, DecidedAt: scope.ObservedAt.UTC(), Battle: battle, Players: players}
 	return snapshot, snapshot.Validate()
+}
+
+func battlePlayer(request BattleRequest, pid identity.PlayerID) bool {
+	for _, group := range append([][]Participant{request.TeamA, request.PetsA, request.PetsB}, request.WavesB...) {
+		for _, p := range group {
+			if p.Origin != d.Template && p.Player == pid {
+				return true
+			}
+		}
+	}
+	return false
 }
 
 func (f *freezer) actors(ctx context.Context, participants []Participant, kind d.ActorKind) ([]d.Actor, error) {

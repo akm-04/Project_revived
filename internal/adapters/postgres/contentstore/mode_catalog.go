@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
+	"sync"
 
 	"gxb.local/backend/v2/internal/content/registry"
 	"gxb.local/backend/v2/internal/foundation/tx"
@@ -58,4 +59,17 @@ func readModeCatalog(ctx context.Context, q tx.Queryer, revision, capability, ta
 		return errModeCatalog
 	}
 	return nil
+}
+
+// memoCatalog keeps a catalog verified once per installed revision; revisions
+// are immutable, so the verified value stays valid for that revision.
+func memoCatalog[T any](cache *sync.Map, revision string, load func() (T, error)) (T, error) {
+	if cached, ok := cache.Load(revision); ok {
+		return cached.(T), nil
+	}
+	out, err := load()
+	if err == nil {
+		cache.Store(revision, out)
+	}
+	return out, err
 }

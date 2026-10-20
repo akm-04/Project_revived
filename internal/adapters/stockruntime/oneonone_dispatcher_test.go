@@ -49,7 +49,9 @@ func (f *oneOnOneFake) Start(_ context.Context, _ identity.ActorContext, r app.S
 	}
 	return d.MatchView{Arena: f.arena(), ReportKeys: []string{"a", "", "c"}, Wins: []int64{1, 1}, Win: true}, nil
 }
-func (f *oneOnOneFake) Report(context.Context, string) ([]byte, error) { return []byte(`{"star":1}`), nil }
+func (f *oneOnOneFake) Report(context.Context, string) ([]byte, error) {
+	return []byte(`{"star":1}`), nil
+}
 func (f *oneOnOneFake) DefenseReportKeys(context.Context, identity.ActorContext) ([]string, error) {
 	return []string{"k1"}, nil
 }

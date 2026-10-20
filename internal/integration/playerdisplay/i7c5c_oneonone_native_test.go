@@ -4,6 +4,7 @@ package playerdisplay_test
 
 import (
 	"context"
+	"errors"
 	"slices"
 	"strconv"
 	"strings"
@@ -92,6 +93,16 @@ func teamsOf(heroes []int64, n int) []d.Team {
 	return out
 }
 
+// startSettled repeats an identical START while its rounds are still resolving, as the stock client's retry does.
+func startSettled(s app.Service, a identity.ActorContext, command app.StartCommand) (d.MatchView, error) {
+	for {
+		m, err := s.Start(ctx, a, command, op())
+		if !errors.Is(err, app.ErrUnresolved) {
+			return m, err
+		}
+	}
+}
+
 func TestI7C5COneOnOneEntryMatchSettlementNative(t *testing.T) {
 	pool := pool(t)
 	defer pool.Close()
@@ -141,13 +152,22 @@ func TestI7C5COneOnOneEntryMatchSettlementNative(t *testing.T) {
 	exec(t, pool, `UPDATE one_on_one_players SET points=4500,state_version=state_version+1 WHERE player_id=$1`, int64(b.PlayerID))
 
 	// C04: candidates are better members of the same group with a defense, across servers.
-	matches, err := s.Match(ctx, a, op())
-	if err != nil || len(matches) == 0 || matches[0].Face.Player != b.PlayerID {
-		t.Fatal("candidates", err, matches)
+	pointsOf := func(pid identity.PlayerID) int64 {
+		return scalar(t, pool, `SELECT points FROM one_on_one_players WHERE player_id=$1`, int64(pid))
 	}
-	if top, err := s.Match(ctx, b, op()); err != nil || len(top) != 0 {
-		t.Fatal("the top of a group has no opponent", err)
+	for _, x := range []identity.ActorContext{a, b} {
+		offered, err := s.Match(ctx, x, op())
+		if err != nil {
+			t.Fatal(err)
+		}
+		for _, o := range offered {
+			if o.Ranked.Level < d.LevelJunior1 || o.Ranked.Points < pointsOf(x.PlayerID) || o.Face.Player == x.PlayerID {
+				t.Fatal("candidates are better members of the same group", o.Ranked)
+			}
+		}
 	}
+	// The fixture pins B as A's offered opponent; the competition may already hold other Juniors (restored databases).
+	exec(t, pool, `UPDATE one_on_one_players SET offered=$2::jsonb,state_version=state_version+1 WHERE player_id=$1`, int64(a.PlayerID), "["+strconv.FormatInt(int64(b.PlayerID), 10)+"]")
 	enemy, err := s.EnemyTeam(ctx, b.PlayerID)
 	if err != nil || len(enemy) != 3 || len(enemy[0].Heroes) != 1 {
 		t.Fatal("GET_ENEMY_TEAM", err, len(enemy))
@@ -161,10 +181,12 @@ func TestI7C5COneOnOneEntryMatchSettlementNative(t *testing.T) {
 	if _, err = s.Start(ctx, a, app.StartCommand{Formations: teamsOf(heroesA, 2), Enemy: b.PlayerID}, op()); err == nil {
 		t.Fatal("two formations accepted against three defense teams")
 	}
-	result, err := s.Start(ctx, a, command, op())
+	started := time.Now()
+	result, err := startSettled(s, a, command)
 	if err != nil {
 		t.Fatal(err)
 	}
+	t.Logf("best-of-three START with resolution and settlement took %s", time.Since(started))
 	if len(result.Wins) < 2 || len(result.Wins) > 3 || len(result.ReportKeys) != len(result.Wins) || result.Arena.Player.TriesLeft != 9 {
 		t.Fatalf("match %+v", result)
 	}
@@ -177,7 +199,7 @@ func TestI7C5COneOnOneEntryMatchSettlementNative(t *testing.T) {
 	if pointsA != 4300+gain || pointsB != 4500-gain {
 		t.Fatalf("Elo points %d %d gain %d", pointsA, pointsB, gain)
 	}
-	replay, err := s.Start(ctx, a, command, op())
+	replay, err := startSettled(s, a, command)
 	if err != nil || replay.Win != result.Win || strings.Join(replay.ReportKeys, ",") != strings.Join(result.ReportKeys, ",") {
 		t.Fatal("identical START must return the recorded match", err)
 	}
@@ -216,13 +238,15 @@ func TestI7C5COneOnOneEntryMatchSettlementNative(t *testing.T) {
 	}
 
 	// C08: a promotion match against a Senior with fewer saved teams forfeits the missing rounds; two wins promote.
+	// Fixture slots are cleared first: restored databases keep earlier runs' Masters/Seniors.
+	exec(t, pool, `UPDATE one_on_one_players SET level=5,slot=NULL,points=3000,state_version=state_version+1 WHERE slot IN (1,501) AND player_id NOT IN ($1,$2)`, int64(a.PlayerID), int64(b.PlayerID))
 	exec(t, pool, `UPDATE one_on_one_players SET level=2,slot=501,teams=$2::jsonb,state_version=state_version+1 WHERE player_id=$1`, int64(b.PlayerID), `[{"heroes":[`+strconv.FormatInt(heroesB[0], 10)+`],"pet":0}]`)
 	exec(t, pool, `UPDATE one_on_one_players SET level=3,points=4900,mode=2,candidates=$2::jsonb,promotion_week=1,state_version=state_version+1 WHERE player_id=$1`, int64(a.PlayerID), "["+strconv.FormatInt(int64(b.PlayerID), 10)+"]")
 	promote := app.StartCommand{Formations: teamsOf(heroesA, 5), Enemy: b.PlayerID}
 	for i := range 3 {
 		exec(t, pool, `UPDATE one_on_one_players SET last_promotion_at=NULL,state_version=state_version+1 WHERE player_id=$1`, int64(a.PlayerID))
 		promote.Formations = teamsOf(heroesA[i:], 5)
-		m, err := s.Start(ctx, a, promote, op())
+		m, err := startSettled(s, a, promote)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -241,6 +265,9 @@ func TestI7C5COneOnOneEntryMatchSettlementNative(t *testing.T) {
 	exec(t, pool, `UPDATE one_on_one_players SET level=1,slot=1,state_version=state_version+1 WHERE player_id=$1`, int64(a.PlayerID))
 	now := time.Now()
 	latest := catalog.LatestSettlement(now)
+	// The fixture replays its own window; earlier runs on the same database settled it already.
+	exec(t, pool, `DELETE FROM one_on_one_settlement_ranks WHERE day>$1`, latest-8)
+	exec(t, pool, `DELETE FROM one_on_one_settlements WHERE day>$1`, latest-8)
 	exec(t, pool, `UPDATE one_on_one_competitions SET settled_through=$1,state_version=state_version+1`, latest-8)
 	settled, err := s.Due(ctx, op())
 	if err != nil || settled < 2 {
