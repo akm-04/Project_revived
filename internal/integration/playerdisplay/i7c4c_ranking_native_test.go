@@ -421,8 +421,11 @@ func TestI7C4CRankingScopedFactsKeepUnrelatedOriginsUnknown(t *testing.T) {
 			t.Fatal("fresh known negative became unknown", f)
 		}
 	}
-	if f := fact4a(t, facts, 100063, 0); f.Status != display.Unavailable {
-		t.Fatal("Ranking owner certified unrelated Skins title", f)
+	if f := fact4a(t, facts, 100063, 0); f.Status != display.Ineligible {
+		t.Fatal("Skins board title is a Ranking-owned known negative", f)
+	}
+	if f := fact4a(t, facts, 100022, 0); f.Status != display.Unavailable {
+		t.Fatal("Ranking owner certified unrelated Library title", f)
 	}
 	if facts.CompleteFamily || len(facts.MissingProviders) == 0 {
 		t.Fatal("partial facts promoted complete", facts)

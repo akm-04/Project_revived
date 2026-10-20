@@ -198,7 +198,8 @@ func TestI7C4ANativeManualCanonicalReplayConsumers(t *testing.T) {
 		}
 	}
 	o := facts4a(t, p, a, rev, "frame")
-	if o.Privilege == nil || o.Privilege.State.VIPLevel != 5 || o.CompleteFamily {
+	// Forward-bound VIP frames read NOT_LIVE (C4F_FULL_FAMILY_V1), so the family is complete.
+	if o.Privilege == nil || o.Privilege.State.VIPLevel != 5 || !o.CompleteFamily {
 		t.Fatal(o)
 	}
 	// I5's existing display directory reconciliation must preserve Commerce VIP.

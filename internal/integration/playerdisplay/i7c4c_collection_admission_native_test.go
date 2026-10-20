@@ -121,6 +121,8 @@ func TestI7C4CCollectionAdmissionStaleInstantRejectsBeforeDebit(t *testing.T) {
 	next := collectionResources(t, p, a, rev, 10001002)
 	s := collectionService(p)
 	stale := op()
+	// Stored instants keep microseconds; two op() calls can share one, so make stale strictly older.
+	stale.StartedAt = stale.StartedAt.Add(-time.Millisecond)
 	if _, e := s.SummonNormal(ctx, a, 10001001, first.Template.FragmentItemID, first.FragmentCount, op()); e != nil {
 		t.Fatal(e)
 	}
