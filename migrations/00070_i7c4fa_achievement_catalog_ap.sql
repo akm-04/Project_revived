@@ -31,3 +31,7 @@ CREATE TABLE achievement_notices(
  UNIQUE(player_id,achievement_id,tier)
 );
 CREATE INDEX achievement_notices_pending ON achievement_notices(player_id) WHERE delivered_at IS NULL;
+-- owner: Ranking
+-- C4F_PRIVATE_AP_SERVER_RANKING_V1 settles title 100001 to rank 1 beside the Girls titles.
+ALTER TABLE ranking_girls_awards DROP CONSTRAINT ranking_girls_awards_title_id_check;
+ALTER TABLE ranking_girls_awards ADD CONSTRAINT ranking_girls_awards_title_id_check CHECK(title_id BETWEEN 100059 AND 100062 OR title_id=100001 AND rank=1);

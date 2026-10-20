@@ -20,17 +20,17 @@ import (
 )
 
 type Store interface {
-	LockGirlsRootTx(context.Context, tx.Tx, identity.LogicalServerID, time.Time) (d.GirlsRoot, error)
-	SaveGirlsRootTx(context.Context, tx.Tx, d.GirlsRoot, int64) error
-	InsertGirlsSnapshotTx(context.Context, tx.Tx, d.GirlsSnapshot) error
-	ReadGirlsSnapshotTx(context.Context, tx.Queryer, identity.LogicalServerID, int64) (d.GirlsSnapshot, bool, error)
-	FindGirlsSnapshotByOperationTx(context.Context, tx.Queryer, ids.UUID) (d.GirlsSnapshot, bool, error)
-	BindGirlsPeriodTx(context.Context, tx.Tx, d.GirlsSnapshot) error
-	PendingGirlsPeriodsTx(context.Context, tx.Queryer, identity.LogicalServerID) ([]d.GirlsPeriod, error)
-	ReadGirlsPeriodTx(context.Context, tx.Queryer, identity.LogicalServerID, time.Time) (d.GirlsPeriod, bool, error)
-	SettleGirlsPeriodTx(context.Context, tx.Tx, d.GirlsSnapshot, d.GirlsPeriod, time.Time) error
-	GirlsAwardEvidenceTx(context.Context, tx.Queryer, identity.PlayerID) ([]d.GirlsAwardEvidence, error)
-	GirlsTrackingTx(context.Context, tx.Queryer, identity.PlayerID, identity.LogicalServerID, time.Time) (bool, error)
+	LockBoardRootTx(context.Context, tx.Tx, d.Board, identity.LogicalServerID, time.Time) (d.BoardRoot, error)
+	SaveBoardRootTx(context.Context, tx.Tx, d.BoardRoot, int64) error
+	InsertBoardSnapshotTx(context.Context, tx.Tx, d.BoardSnapshot) error
+	ReadBoardSnapshotTx(context.Context, tx.Queryer, d.Board, identity.LogicalServerID, int64) (d.BoardSnapshot, bool, error)
+	FindBoardSnapshotByOperationTx(context.Context, tx.Queryer, ids.UUID) (d.BoardSnapshot, bool, error)
+	BindBoardPeriodTx(context.Context, tx.Tx, d.BoardSnapshot) error
+	PendingBoardPeriodsTx(context.Context, tx.Queryer, d.Board, identity.LogicalServerID) ([]d.BoardPeriod, error)
+	ReadBoardPeriodTx(context.Context, tx.Queryer, d.Board, identity.LogicalServerID, time.Time) (d.BoardPeriod, bool, error)
+	SettleBoardPeriodTx(context.Context, tx.Tx, d.BoardSnapshot, d.BoardPeriod, time.Time) error
+	BoardAwardEvidenceTx(context.Context, tx.Queryer, d.Board, identity.PlayerID) ([]d.BoardAwardEvidence, error)
+	BoardTrackingTx(context.Context, tx.Queryer, d.Board, identity.PlayerID, identity.LogicalServerID, time.Time) (bool, error)
 }
 type Cohort interface {
 	ListPlayerRootsTx(context.Context, tx.Queryer) ([]playerroot.Root, error)

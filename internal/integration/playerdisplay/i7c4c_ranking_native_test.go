@@ -126,7 +126,7 @@ func TestI7C4CRankingGenuineCoherentCohortFirstWeeklyWinnersAndReplay(t *testing
 	rankingSummon(t, p, a, rev, 10001001)
 	s := rankingService(p, p)
 	o := op()
-	first, e := s.ReadGirls(ctx, a, o)
+	first, e := s.ReadBoard(ctx, d.GirlsBoard, a, o)
 	if e != nil {
 		t.Fatal(e)
 	}
@@ -140,14 +140,14 @@ func TestI7C4CRankingGenuineCoherentCohortFirstWeeklyWinnersAndReplay(t *testing
 	// the first immutable weekly generation remains the title settlement basis.
 	rankingSummon(t, p, b, rev, 10001001)
 	rankingSummon(t, p, b, rev, 10001002)
-	later, e := s.ReadGirls(ctx, b, op())
+	later, e := s.ReadBoard(ctx, d.GirlsBoard, b, op())
 	if e != nil || later.Generation != first.Generation+1 || later.Entries[0].Metric.Player != b.PlayerID || later.Entries[0].Metric.Value != 2 {
 		t.Fatal(later, e)
 	}
 	if rankingCount(t, p, server, "ranking_girls_awards") != 1 {
 		t.Fatal("weekly winners refreshed")
 	}
-	replay, e := s.ReadGirls(ctx, a, o)
+	replay, e := s.ReadBoard(ctx, d.GirlsBoard, a, o)
 	if e != nil || !reflect.DeepEqual(first, replay) {
 		t.Fatal("historic snapshot receipt changed", e)
 	}
@@ -179,7 +179,7 @@ func TestI7C4CRankingMissingCanonicalParticipantBlocksWholeSnapshot(t *testing.T
 	b := rankingActor(t, p, server, true)
 	exec(t, p, `DELETE FROM player_hero_roots WHERE player_id=$1`, int64(b.PlayerID))
 	s := rankingService(p, p)
-	if _, e := s.RefreshGirls(ctx, a, op()); e == nil {
+	if _, e := s.RefreshBoard(ctx, d.GirlsBoard, a, op()); e == nil {
 		t.Fatal("missing canonical owner omitted or supplied zero")
 	}
 	if rankingCount(t, p, server, "ranking_girls_snapshots") != 0 || rankingCount(t, p, server, "ranking_girls_roots") != 0 {
@@ -197,7 +197,7 @@ func TestI7C4CRankingConcurrentRefreshAndSettlementConverge(t *testing.T) {
 	errs := make(chan error, 4)
 	for i := 0; i < 4; i++ {
 		wg.Add(1)
-		go func() { defer wg.Done(); _, e := s.ReadGirls(ctx, a, op()); errs <- e }()
+		go func() { defer wg.Done(); _, e := s.ReadBoard(ctx, d.GirlsBoard, a, op()); errs <- e }()
 	}
 	wg.Wait()
 	close(errs)
@@ -262,13 +262,13 @@ func TestI7C4CRankingAtomicRecipientRollbackAndRetry(t *testing.T) {
 	a := rankingActor(t, p, server, true)
 	rankingSummon(t, p, a, rev, 10001001)
 	s := rankingService(p, p)
-	snapshot, e := s.RefreshGirls(ctx, a, op())
+	snapshot, e := s.RefreshBoard(ctx, d.GirlsBoard, a, op())
 	if e != nil {
 		t.Fatal(e)
 	}
 	broken := s
 	broken.Recipient = rankingFailRecipient{Inner: s.Recipient}
-	if _, e = broken.SettlePendingGirls(ctx, server, op()); !errors.Is(e, errRankingRecipient) {
+	if _, e = broken.SettlePendingBoard(ctx, d.GirlsBoard, server, op()); !errors.Is(e, errRankingRecipient) {
 		t.Fatal(e)
 	}
 	if rankingCount(t, p, server, "ranking_girls_awards") != 0 {
@@ -278,15 +278,15 @@ func TestI7C4CRankingAtomicRecipientRollbackAndRetry(t *testing.T) {
 	if e = p.QueryRow(ctx, `SELECT count(*) FROM player_cosmetic_entitlements WHERE player_id=$1`, int64(a.PlayerID)).Scan(&mirrors); e != nil || mirrors != 0 {
 		t.Fatal("recipient leaked", mirrors, e)
 	}
-	pending, e := (rankingstore.Store{}).PendingGirlsPeriodsTx(ctx, p, server)
+	pending, e := (rankingstore.Store{}).PendingBoardPeriodsTx(ctx, p, d.GirlsBoard, server)
 	if e != nil || len(pending) != 1 || pending[0].Generation != snapshot.Generation {
 		t.Fatal(pending, e)
 	}
-	result, e := s.SettlePendingGirls(ctx, server, op())
+	result, e := s.SettlePendingBoard(ctx, d.GirlsBoard, server, op())
 	if e != nil || len(result) != 1 || result[0].SnapshotDigest != snapshot.Digest || rankingCount(t, p, server, "ranking_girls_awards") != 1 {
 		t.Fatal(result, e)
 	}
-	again, e := s.SettlePendingGirls(ctx, server, op())
+	again, e := s.SettlePendingBoard(ctx, d.GirlsBoard, server, op())
 	if e != nil || len(again) != 0 || rankingCount(t, p, server, "ranking_girls_awards") != 1 {
 		t.Fatal(again, e)
 	}
@@ -299,15 +299,15 @@ func TestI7C4CRankingUnknownCommitPositiveAndAbsenceUnresolved(t *testing.T) {
 	rankingSummon(t, p, a, rev, 10001001)
 	ambiguous := rankingService(p, metricCommitDB{p, true})
 	o := op()
-	first, e := ambiguous.RefreshGirls(ctx, a, o)
+	first, e := ambiguous.RefreshBoard(ctx, d.GirlsBoard, a, o)
 	if e != nil {
 		t.Fatal(e)
 	}
-	again, e := rankingService(p, p).RefreshGirls(ctx, a, o)
+	again, e := rankingService(p, p).RefreshBoard(ctx, d.GirlsBoard, a, o)
 	if e != nil || !reflect.DeepEqual(first, again) {
 		t.Fatal("unknown commit proof lost", e)
 	}
-	settled, e := ambiguous.SettlePendingGirls(ctx, server, op())
+	settled, e := ambiguous.SettlePendingBoard(ctx, d.GirlsBoard, server, op())
 	if e != nil || len(settled) != 1 || rankingCount(t, p, server, "ranking_girls_awards") != 1 {
 		t.Fatal(settled, e)
 	}
@@ -316,7 +316,7 @@ func TestI7C4CRankingUnknownCommitPositiveAndAbsenceUnresolved(t *testing.T) {
 	otherServer := rankingServer(t, p)
 	other := rankingActor(t, p, otherServer, true)
 	absent := rankingService(p, metricCommitDB{p, false})
-	if _, e = absent.RefreshGirls(ctx, other, op()); e == nil {
+	if _, e = absent.RefreshBoard(ctx, d.GirlsBoard, other, op()); e == nil {
 		t.Fatal("absence treated as positive commit")
 	}
 	if rankingCount(t, p, otherServer, "ranking_girls_snapshots") != 0 || rankingCount(t, p, otherServer, "ranking_girls_roots") != 0 {
@@ -331,7 +331,7 @@ func TestI7C4CRankingFixedExpiryAndUnknownLegacyExpiry(t *testing.T) {
 		a := rankingActor(t, p, server, tracked)
 		rankingSummon(t, p, a, rev, 10001001)
 		s := rankingService(p, p)
-		snapshot, e := s.ReadGirls(ctx, a, op())
+		snapshot, e := s.ReadBoard(ctx, d.GirlsBoard, a, op())
 		if e != nil {
 			t.Fatal(e)
 		}
@@ -340,7 +340,7 @@ func TestI7C4CRankingFixedExpiryAndUnknownLegacyExpiry(t *testing.T) {
 		if _, e = ds.Execute(ctx, a, display.Command{Kind: "title", ID: 100059}, op()); e != nil {
 			t.Fatal(e)
 		}
-		end := snapshot.ObservedAt.Unix() + d.GirlsTitleDuration
+		end := snapshot.ObservedAt.Unix() + d.BoardTitleDuration
 		before, e := ds.ObserveTx(ctx, p, a.PlayerID, rev, time.Unix(end-1, 999999999).UTC())
 		if e != nil || before.TitleID != 100059 || before.TitleEndTime != end {
 			t.Fatal(before, e)
@@ -372,7 +372,7 @@ func TestI7C4CRankingRecipientMismatchIsNotQualifiedOrigin(t *testing.T) {
 	a := rankingActor(t, p, server, true)
 	rankingSummon(t, p, a, rev, 10001001)
 	s := rankingService(p, p)
-	if _, e := s.ReadGirls(ctx, a, op()); e != nil {
+	if _, e := s.ReadBoard(ctx, d.GirlsBoard, a, op()); e != nil {
 		t.Fatal(e)
 	}
 	exec(t, p, `UPDATE player_cosmetic_entitlements SET end_time=end_time+1 WHERE player_id=$1 AND catalog_id=100059`, int64(a.PlayerID))
@@ -389,7 +389,7 @@ func TestI7C4CRankingScopedFactsKeepUnrelatedOriginsUnknown(t *testing.T) {
 	a := rankingActor(t, p, server, true)
 	rankingSummon(t, p, a, rev, 10001001)
 	rank := rankingService(p, p)
-	if _, e := rank.ReadGirls(ctx, a, op()); e != nil {
+	if _, e := rank.ReadBoard(ctx, d.GirlsBoard, a, op()); e != nil {
 		t.Fatal(e)
 	}
 	ds := display4a(p)
@@ -421,8 +421,8 @@ func TestI7C4CRankingScopedFactsKeepUnrelatedOriginsUnknown(t *testing.T) {
 			t.Fatal("fresh known negative became unknown", f)
 		}
 	}
-	if f := fact4a(t, facts, 100001, 0); f.Status != display.Unavailable {
-		t.Fatal("Girls owner certified unrelated AP", f)
+	if f := fact4a(t, facts, 100063, 0); f.Status != display.Unavailable {
+		t.Fatal("Ranking owner certified unrelated Skins title", f)
 	}
 	if facts.CompleteFamily || len(facts.MissingProviders) == 0 {
 		t.Fatal("partial facts promoted complete", facts)

@@ -5,10 +5,11 @@ import (
 	d "gxb.local/backend/v2/internal/domain/ranking"
 )
 
-// GirlsList preserves RankList.lua's nested rank_info/my_rank structure and
-// subtype37 identity. Source/internal snapshot evidence is never a wire field.
-func GirlsList(s d.GirlsSnapshot, viewer identity.PlayerID) (map[string]any, error) {
-	if s.Validate() != nil || !viewer.Valid() {
+// BoardList preserves RankList.lua's nested rank_info/my_rank structure and
+// the board's subtype identity. Source/internal snapshot evidence is never a wire field.
+func BoardList(s d.BoardSnapshot, viewer identity.PlayerID) (map[string]any, error) {
+	board, known := d.BoardOf(s.Policy)
+	if !known || s.Validate() != nil || !viewer.Valid() {
 		return nil, d.ErrSnapshot
 	}
 	rows := []map[string]any{}
@@ -26,5 +27,5 @@ func GirlsList(s d.GirlsSnapshot, viewer identity.PlayerID) (map[string]any, err
 	if !found {
 		return nil, d.ErrSnapshot
 	}
-	return map[string]any{"rank_list": []map[string]any{{"rank_type": int64(37), "rank_info": map[string]any{"my_rank": mine, "rank_info": rows}}}}, nil
+	return map[string]any{"rank_list": []map[string]any{{"rank_type": board.SubType, "rank_info": map[string]any{"my_rank": mine, "rank_info": rows}}}}, nil
 }

@@ -24,8 +24,15 @@ import (
 var ErrUnavailable = errors.New("ranking: unavailable provider or unqualified history")
 var ErrConflict = errors.New("ranking: conflicting scope or immutable proof")
 
-const refreshSchema = "gxb.ranking.girls-refresh.v1"
-const refreshClass = "I7C4C_GIRLS_RANKING_REFRESH"
+// boardReceipt keeps each board's receipt names stable so stored receipts replay.
+type boardReceipt struct{ metricPin, refreshClass, settlementClass string }
+
+var boardReceipts = map[string]boardReceipt{
+	d.GirlsPolicy:            {metricPin: "roster-metrics", refreshClass: "I7C4C_GIRLS_RANKING_REFRESH", settlementClass: "I7C4C_GIRLS_RANKING_WEEKLY_TITLES"},
+	d.AchievementPointPolicy: {metricPin: "force-metric", refreshClass: "I7C4FA_AP_RANKING_REFRESH", settlementClass: "I7C4FA_AP_RANKING_WEEKLY_TITLES"},
+}
+
+func refreshSchema(b d.Board) string { return "gxb.ranking." + b.Name + "-refresh.v1" }
 
 func Profile() tx.Profile {
 	return tx.Profile{Name: "I7C4C_GIRLS_RANKING", AcquireTimeout: 2 * time.Second, LockTimeout: 2 * time.Second, StatementTimeout: 5 * time.Second, TransactionTimeout: 20 * time.Second, CleanupTimeout: 2 * time.Second, ReconcileTimeout: 5 * time.Second, OperationTimeout: 30 * time.Second}
@@ -33,11 +40,11 @@ func Profile() tx.Profile {
 func (s Service) complete() bool {
 	return s.Timed.Runner.DB != nil && s.Timed.Binder.Time != nil && s.Fresh != nil && s.Store != nil && s.Cohort != nil && s.Directory != nil && s.Metrics != nil && s.Content != nil && s.Fence != nil && s.Receipts != nil && s.ReceiptRead != nil
 }
-func refreshIdentity(a identity.ActorContext, o operation.Context) receipt.Identity {
-	return receipt.Identity{OwnerKind: "player", OwnerKey: strconv.FormatInt(int64(a.PlayerID), 10), Domain: "ranking", Operation: "girls-refresh", SemanticKey: o.ID.String()}
+func refreshIdentity(b d.Board, a identity.ActorContext, o operation.Context) receipt.Identity {
+	return receipt.Identity{OwnerKind: "player", OwnerKey: strconv.FormatInt(int64(a.PlayerID), 10), Domain: "ranking", Operation: b.Name + "-refresh", SemanticKey: o.ID.String()}
 }
-func refreshFingerprint(a identity.ActorContext) ([32]byte, error) {
-	return receipt.FingerprintRequest(map[string]any{"player": int64(a.PlayerID), "server": int64(a.LogicalServerID), "subtype": int64(37), "policy": d.GirlsPolicy})
+func refreshFingerprint(b d.Board, a identity.ActorContext) ([32]byte, error) {
+	return receipt.FingerprintRequest(map[string]any{"player": int64(a.PlayerID), "server": int64(a.LogicalServerID), "subtype": b.SubType, "policy": b.Policy})
 }
 func bind(o operation.Context, name, value string) (operation.Context, error) {
 	if got, ok := o.Policies.Get(name); ok {
@@ -51,7 +58,7 @@ func bind(o operation.Context, name, value string) (operation.Context, error) {
 	o.Policies, e = policy.NewSet(refs...)
 	return o, e
 }
-func (s Service) bindRefresh(c context.Context, o operation.Context) (operation.Context, string, error) {
+func (s Service) bindRefresh(c context.Context, b d.Board, o operation.Context) (operation.Context, string, error) {
 	rev, ok := o.Policies.Get("content")
 	var e error
 	if !ok {
@@ -64,11 +71,11 @@ func (s Service) bindRefresh(c context.Context, o operation.Context) (operation.
 	if e != nil {
 		return o, "", e
 	}
-	o, e = bind(o, "roster-metrics", publicprofile.RosterMetricPolicy)
+	o, e = bind(o, boardReceipts[b.Policy].metricPin, b.SourcePolicy)
 	if e != nil {
 		return o, "", e
 	}
-	o, e = bind(o, "ranking", d.GirlsPolicy)
+	o, e = bind(o, "ranking", b.Policy)
 	return o, rev, e
 }
 
@@ -89,7 +96,7 @@ func actorBinding(a identity.ActorContext) refreshActor {
 type refreshRecord struct {
 	Actor     refreshActor
 	Operation operation.Context
-	Snapshot  d.GirlsSnapshot
+	Snapshot  d.BoardSnapshot
 }
 
 func strictDecode(raw []byte, out any) error {
@@ -104,32 +111,32 @@ func strictDecode(raw []byte, out any) error {
 	}
 	return nil
 }
-func (s Service) decodeRefresh(c context.Context, q tx.Queryer, r receipt.Receipt, a identity.ActorContext, o operation.Context, fp [32]byte) (d.GirlsSnapshot, error) {
+func (s Service) decodeRefresh(c context.Context, q tx.Queryer, b d.Board, r receipt.Receipt, a identity.ActorContext, o operation.Context, fp [32]byte) (d.BoardSnapshot, error) {
 	var out refreshRecord
-	if r.Validate() != nil || r.Identity != refreshIdentity(a, o) || r.RequestFingerprint != fp || r.OperationClass != refreshClass || r.ResultSchema != refreshSchema || r.PolicyVersion != d.GirlsPolicy || r.ActorAccountUID != string(a.AccountUID) || r.ContextID != a.ContextID.UUID() || r.OperationStartedAt.UnixMicro() != o.StartedAt.UnixMicro() || strictDecode(r.ResultPayload, &out) != nil {
-		return d.GirlsSnapshot{}, ErrConflict
+	if r.Validate() != nil || r.Identity != refreshIdentity(b, a, o) || r.RequestFingerprint != fp || r.OperationClass != boardReceipts[b.Policy].refreshClass || r.ResultSchema != refreshSchema(b) || r.PolicyVersion != b.Policy || r.ActorAccountUID != string(a.AccountUID) || r.ContextID != a.ContextID.UUID() || r.OperationStartedAt.UnixMicro() != o.StartedAt.UnixMicro() || strictDecode(r.ResultPayload, &out) != nil {
+		return d.BoardSnapshot{}, ErrConflict
 	}
-	if out.Actor != actorBinding(a) || out.Operation.ID != o.ID || !out.Operation.StartedAt.Equal(o.StartedAt) || out.Operation.EntropySeed != o.EntropySeed || !out.Operation.Policies.Equal(r.OperationPolicyRefs) || out.Snapshot.Validate() != nil || out.Snapshot.Server != a.LogicalServerID || out.Snapshot.OperationID != o.ID {
-		return d.GirlsSnapshot{}, ErrConflict
+	if out.Actor != actorBinding(a) || out.Operation.ID != o.ID || !out.Operation.StartedAt.Equal(o.StartedAt) || out.Operation.EntropySeed != o.EntropySeed || !out.Operation.Policies.Equal(r.OperationPolicyRefs) || out.Snapshot.Validate() != nil || out.Snapshot.Policy != b.Policy || out.Snapshot.Server != a.LogicalServerID || out.Snapshot.OperationID != o.ID {
+		return d.BoardSnapshot{}, ErrConflict
 	}
 	for _, x := range o.Policies.Refs() {
 		v, ok := r.OperationPolicyRefs.Get(x.Name)
 		if !ok || v != x.Version {
-			return d.GirlsSnapshot{}, ErrConflict
+			return d.BoardSnapshot{}, ErrConflict
 		}
 	}
-	for k, want := range map[string]string{"ranking": d.GirlsPolicy, "roster-metrics": publicprofile.RosterMetricPolicy, "content": out.Snapshot.Revision} {
+	for k, want := range map[string]string{"ranking": b.Policy, boardReceipts[b.Policy].metricPin: b.SourcePolicy, "content": out.Snapshot.Revision} {
 		got, ok := r.OperationPolicyRefs.Get(k)
 		if !ok || got != want {
-			return d.GirlsSnapshot{}, ErrConflict
+			return d.BoardSnapshot{}, ErrConflict
 		}
 	}
-	stored, ok, e := s.Store.FindGirlsSnapshotByOperationTx(c, q, o.ID)
+	stored, ok, e := s.Store.FindBoardSnapshotByOperationTx(c, q, o.ID)
 	if e != nil {
-		return d.GirlsSnapshot{}, e
+		return d.BoardSnapshot{}, e
 	}
-	if !ok || stored.Digest != out.Snapshot.Digest || stored.Server != out.Snapshot.Server || stored.Generation != out.Snapshot.Generation {
-		return d.GirlsSnapshot{}, ErrConflict
+	if !ok || stored.Policy != b.Policy || stored.Digest != out.Snapshot.Digest || stored.Server != out.Snapshot.Server || stored.Generation != out.Snapshot.Generation {
+		return d.BoardSnapshot{}, ErrConflict
 	}
 	return out.Snapshot, nil
 }
@@ -142,13 +149,13 @@ type timedReceiptResolver struct{ receipt.Resolver }
 func (r timedReceiptResolver) ResolveTimed(c context.Context, _ gen.TimedResolutionRequest) (tx.Resolution, error) {
 	return r.Resolver.Resolve(c, tx.ResolutionRequest{})
 }
-func (s Service) RefreshGirls(c context.Context, a identity.ActorContext, o operation.Context) (d.GirlsSnapshot, error) {
-	var out d.GirlsSnapshot
-	if !s.complete() || !a.PlayerID.Valid() || !a.LogicalServerID.Valid() || !a.AccountUID.Valid() || a.ContextID.UUID().IsZero() || o.ID.IsZero() || o.StartedAt.IsZero() {
+func (s Service) RefreshBoard(c context.Context, b d.Board, a identity.ActorContext, o operation.Context) (d.BoardSnapshot, error) {
+	var out d.BoardSnapshot
+	if _, known := boardReceipts[b.Policy]; !known || !s.complete() || !a.PlayerID.Valid() || !a.LogicalServerID.Valid() || !a.AccountUID.Valid() || a.ContextID.UUID().IsZero() || o.ID.IsZero() || o.StartedAt.IsZero() {
 		return out, ErrUnavailable
 	}
-	id := refreshIdentity(a, o)
-	fp, e := refreshFingerprint(a)
+	id := refreshIdentity(b, a, o)
+	fp, e := refreshFingerprint(b, a)
 	if e != nil {
 		return out, e
 	}
@@ -160,14 +167,14 @@ func (s Service) RefreshGirls(c context.Context, a identity.ActorContext, o oper
 	bound := o
 	rev := ""
 	if has {
-		old, e := s.decodeRefresh(c, s.Fresh, prior, a, o, fp)
+		old, e := s.decodeRefresh(c, s.Fresh, b, prior, a, o, fp)
 		if e != nil {
 			return out, e
 		}
 		rev = old.Revision
 		bound.Policies = prior.OperationPolicyRefs
 	} else {
-		bound, rev, e = s.bindRefresh(c, o)
+		bound, rev, e = s.bindRefresh(c, b, o)
 		if e != nil {
 			return out, e
 		}
@@ -182,7 +189,7 @@ func (s Service) RefreshGirls(c context.Context, a identity.ActorContext, o oper
 			return e
 		}
 		if ok {
-			out, e = s.decodeRefresh(c, sc.Tx, prior, a, o, fp)
+			out, e = s.decodeRefresh(c, sc.Tx, b, prior, a, o, fp)
 			return e
 		}
 		catalog, e := s.Content.ReadPlayerDisplayCatalogTx(c, sc.Tx, rev)
@@ -192,13 +199,13 @@ func (s Service) RefreshGirls(c context.Context, a identity.ActorContext, o oper
 		if catalog.Validate() != nil {
 			return ErrConflict
 		}
-		for title := int64(100059); title <= 100062; title++ {
+		for _, title := range b.Titles {
 			v, ok := catalog.Find("title", title)
-			if !ok || v.Type != 8 || v.Days != d.GirlsTitleDuration {
+			if !ok || v.Type != b.TitleType || v.Days != d.BoardTitleDuration {
 				return ErrConflict
 			}
 		}
-		root, e := s.Store.LockGirlsRootTx(c, sc.Tx, a.LogicalServerID, at)
+		root, e := s.Store.LockBoardRootTx(c, sc.Tx, b, a.LogicalServerID, at)
 		if e != nil {
 			return e
 		}
@@ -211,7 +218,7 @@ func (s Service) RefreshGirls(c context.Context, a identity.ActorContext, o oper
 		}
 		seen := map[identity.PlayerID]bool{}
 		actorPresent := false
-		inputs := []d.GirlsInput{}
+		inputs := []d.BoardInput{}
 		scope := tx.Scope{Tx: sc.Tx, Operation: sc.Operation.Operation(), Attempt: sc.Attempt, Options: sc.Options}
 		// Build/validate the same CA8 witness that is handed to the metric owner.
 		if _, e = ca.NewCoherentReadScope(scope, rev, at); e != nil {
@@ -228,7 +235,7 @@ func (s Service) RefreshGirls(c context.Context, a identity.ActorContext, o oper
 			if r.PlayerID == a.PlayerID {
 				actorPresent = true
 			}
-			ms, e := s.Metrics.ReadMetricsScopeTx(c, scope, publicprofile.MetricRequest{PlayerID: r.PlayerID, IDs: []int64{1001}, ContentRevision: rev, ObservedAt: at})
+			ms, e := s.Metrics.ReadMetricsScopeTx(c, scope, publicprofile.MetricRequest{PlayerID: r.PlayerID, IDs: []int64{b.FieldID}, ContentRevision: rev, ObservedAt: at})
 			if e != nil {
 				return e
 			}
@@ -243,35 +250,35 @@ func (s Service) RefreshGirls(c context.Context, a identity.ActorContext, o oper
 			if !ok || p.Validate() != nil || p.PlayerID != r.PlayerID {
 				return ErrUnavailable
 			}
-			inputs = append(inputs, d.GirlsInput{Metric: d.GirlsMetric{Player: m.PlayerID, Owner: m.Owner, Policy: m.PrivatePolicy, Semantics: m.Semantics, Revision: m.ContentRevision, PopulationDigest: m.PopulationDigest, FieldID: m.FieldID, Value: m.Value, SourceVersion: m.SourceVersion, PopulationVersion: m.PopulationVersion, ObservedAt: m.ObservedAt}, Display: d.GirlsPresentation{Player: p.PlayerID, Name: p.Name, Level: p.Level, AvatarID: p.AvatarID, FrameID: p.AvatarFrameID, ConquerLevel: p.ConquerLevel, ConquerLoopID: p.ConquerLoopID}})
+			inputs = append(inputs, d.BoardInput{Metric: d.BoardMetric{Player: m.PlayerID, Owner: m.Owner, Policy: m.PrivatePolicy, Semantics: m.Semantics, Revision: m.ContentRevision, PopulationDigest: m.PopulationDigest, FieldID: m.FieldID, Value: m.Value, SourceVersion: m.SourceVersion, PopulationVersion: m.PopulationVersion, ObservedAt: m.ObservedAt}, Display: d.BoardPresentation{Player: p.PlayerID, Name: p.Name, Level: p.Level, AvatarID: p.AvatarID, FrameID: p.AvatarFrameID, ConquerLevel: p.ConquerLevel, ConquerLoopID: p.ConquerLoopID}})
 		}
 		if !actorPresent {
 			return ErrConflict
 		}
-		next, snapshot, e := d.BuildGirlsSnapshot(root, at, rev, bound.ID, inputs)
+		next, snapshot, e := d.BuildBoardSnapshot(root, at, rev, bound.ID, inputs)
 		if e != nil {
 			return e
 		}
-		if e = s.Store.InsertGirlsSnapshotTx(c, sc.Tx, snapshot); e != nil {
+		if e = s.Store.InsertBoardSnapshotTx(c, sc.Tx, snapshot); e != nil {
 			return e
 		}
-		if e = s.Store.BindGirlsPeriodTx(c, sc.Tx, snapshot); e != nil {
+		if e = s.Store.BindBoardPeriodTx(c, sc.Tx, snapshot); e != nil {
 			return e
 		}
-		if e = s.Store.SaveGirlsRootTx(c, sc.Tx, next, root.StateVersion); e != nil {
+		if e = s.Store.SaveBoardRootTx(c, sc.Tx, next, root.StateVersion); e != nil {
 			return e
 		}
 		raw, e := json.Marshal(refreshRecord{Actor: actorBinding(a), Operation: bound, Snapshot: snapshot})
 		if e != nil {
 			return e
 		}
-		rr, e := receipt.New(bound, id, refreshClass, refreshSchema, raw, fp)
+		rr, e := receipt.New(bound, id, boardReceipts[b.Policy].refreshClass, refreshSchema(b), raw, fp)
 		if e != nil {
 			return e
 		}
 		rr.ActorAccountUID = string(a.AccountUID)
 		rr.ContextID = a.ContextID.UUID()
-		rr.PolicyVersion = d.GirlsPolicy
+		rr.PolicyVersion = b.Policy
 		if _, e = s.Receipts.PutTx(c, sc.Tx, rr); e != nil {
 			return e
 		}
@@ -279,17 +286,17 @@ func (s Service) RefreshGirls(c context.Context, a identity.ActorContext, o oper
 		return nil
 	})
 	if e != nil {
-		return d.GirlsSnapshot{}, e
+		return d.BoardSnapshot{}, e
 	}
 	if res.Reconciled {
 		r, ok := res.Evidence.(receipt.Receipt)
 		if !ok {
-			return d.GirlsSnapshot{}, ErrConflict
+			return d.BoardSnapshot{}, ErrConflict
 		}
-		return s.decodeRefresh(c, s.Fresh, r, a, o, fp)
+		return s.decodeRefresh(c, s.Fresh, b, r, a, o, fp)
 	}
 	if res.Outcome != tx.DefiniteCommit {
-		return d.GirlsSnapshot{}, ErrUnavailable
+		return d.BoardSnapshot{}, ErrUnavailable
 	}
 	return out, nil
 }

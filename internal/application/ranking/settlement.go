@@ -18,8 +18,7 @@ import (
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
-const settlementSchema = "gxb.ranking.girls-weekly-settlement.v1"
-const settlementClass = "I7C4C_GIRLS_RANKING_WEEKLY_TITLES"
+func settlementSchema(b d.Board) string { return "gxb.ranking." + b.Name + "-weekly-settlement.v1" }
 
 type Settlement struct {
 	Server         identity.LogicalServerID
@@ -28,25 +27,25 @@ type Settlement struct {
 	Generation     int64
 	SnapshotDigest string
 	AppliedAt      time.Time
-	Awards         []d.GirlsAward
+	Awards         []d.BoardAward
 }
 
-func settlementIdentity(server identity.LogicalServerID, week time.Time) receipt.Identity {
-	return receipt.Identity{OwnerKind: "logical-server", OwnerKey: strconv.FormatInt(int64(server), 10), Domain: "ranking", Operation: "girls-weekly-titles", SemanticKey: d.GirlsPolicy + ":" + week.UTC().Format("2006-01-02")}
+func settlementIdentity(b d.Board, server identity.LogicalServerID, week time.Time) receipt.Identity {
+	return receipt.Identity{OwnerKind: "logical-server", OwnerKey: strconv.FormatInt(int64(server), 10), Domain: "ranking", Operation: b.Name + "-weekly-titles", SemanticKey: b.Policy + ":" + week.UTC().Format("2006-01-02")}
 }
-func settlementFingerprint(s d.GirlsSnapshot, p d.GirlsPeriod) ([32]byte, error) {
+func settlementFingerprint(s d.BoardSnapshot, p d.BoardPeriod) ([32]byte, error) {
 	return receipt.FingerprintRequest(map[string]any{"server": int64(s.Server), "policy": s.Policy, "week": p.Week.UTC().Format(time.RFC3339), "generation": s.Generation, "snapshot_digest": s.Digest})
 }
-func awardOrigin(s d.GirlsSnapshot, a d.GirlsAward) playerdisplay.Origin {
+func awardOrigin(s d.BoardSnapshot, a d.BoardAward) playerdisplay.Origin {
 	at := a.StartsAt.UTC()
 	return playerdisplay.Origin{PlayerID: a.Player, Key: a.OriginKey, Owner: "Ranking", Family: "title", CatalogID: a.TitleID, UniqueID: 0, StartsAt: &at, EndTime: a.EndTime, Revision: s.Revision, StateVersion: s.Generation}
 }
-func (s Service) settlementProof(c context.Context, q tx.Queryer, r receipt.Receipt, snapshot d.GirlsSnapshot, p d.GirlsPeriod, fp [32]byte) (Settlement, error) {
+func (s Service) settlementProof(c context.Context, q tx.Queryer, b d.Board, r receipt.Receipt, snapshot d.BoardSnapshot, p d.BoardPeriod, fp [32]byte) (Settlement, error) {
 	var out Settlement
-	if r.Validate() != nil || r.Identity != settlementIdentity(snapshot.Server, p.Week) || r.RequestFingerprint != fp || r.OperationClass != settlementClass || r.ResultSchema != settlementSchema || r.PolicyVersion != d.GirlsPolicy || strictDecode(r.ResultPayload, &out) != nil {
+	if r.Validate() != nil || r.Identity != settlementIdentity(b, snapshot.Server, p.Week) || r.RequestFingerprint != fp || r.OperationClass != boardReceipts[b.Policy].settlementClass || r.ResultSchema != settlementSchema(b) || r.PolicyVersion != b.Policy || strictDecode(r.ResultPayload, &out) != nil {
 		return out, ErrConflict
 	}
-	for k, want := range map[string]string{"content": snapshot.Revision, "ranking": d.GirlsPolicy} {
+	for k, want := range map[string]string{"content": snapshot.Revision, "ranking": b.Policy} {
 		got, ok := r.OperationPolicyRefs.Get(k)
 		if !ok || got != want {
 			return out, ErrConflict
@@ -67,7 +66,7 @@ func (s Service) settlementProof(c context.Context, q tx.Queryer, r receipt.Rece
 	if e != nil || string(raw1) != string(raw2) {
 		return out, ErrConflict
 	}
-	stored, ok, e := s.Store.ReadGirlsPeriodTx(c, q, snapshot.Server, p.Week)
+	stored, ok, e := s.Store.ReadBoardPeriodTx(c, q, b, snapshot.Server, p.Week)
 	if e != nil {
 		return out, e
 	}
@@ -77,20 +76,20 @@ func (s Service) settlementProof(c context.Context, q tx.Queryer, r receipt.Rece
 	return out, nil
 }
 
-// SettlePendingGirls processes only periods already bound to genuine immutable
+// SettlePendingBoard processes only periods already bound to genuine immutable
 // snapshots. A week with no snapshot has no invented winner or retroactive job.
 // This is the private on-demand policy; a future wakeup may call the same owner.
-func (s Service) SettlePendingGirls(c context.Context, server identity.LogicalServerID, parent operation.Context) ([]Settlement, error) {
-	if s.Store == nil || s.Fresh == nil || s.Players == nil || s.Recipient == nil || s.Receipts == nil || s.ReceiptRead == nil || s.Content == nil || s.Timed.Runner.DB == nil || s.Timed.Binder.Time == nil || !server.Valid() || parent.ID.IsZero() || parent.StartedAt.IsZero() {
+func (s Service) SettlePendingBoard(c context.Context, b d.Board, server identity.LogicalServerID, parent operation.Context) ([]Settlement, error) {
+	if _, known := boardReceipts[b.Policy]; !known || s.Store == nil || s.Fresh == nil || s.Players == nil || s.Recipient == nil || s.Receipts == nil || s.ReceiptRead == nil || s.Content == nil || s.Timed.Runner.DB == nil || s.Timed.Binder.Time == nil || !server.Valid() || parent.ID.IsZero() || parent.StartedAt.IsZero() {
 		return nil, ErrUnavailable
 	}
-	pending, e := s.Store.PendingGirlsPeriodsTx(c, s.Fresh, server)
+	pending, e := s.Store.PendingBoardPeriodsTx(c, s.Fresh, b, server)
 	if e != nil {
 		return nil, e
 	}
 	out := []Settlement{}
 	for _, p := range pending {
-		v, e := s.settleGirlsPeriod(c, server, p, parent)
+		v, e := s.settleBoardPeriod(c, b, server, p, parent)
 		if e != nil {
 			return nil, e
 		}
@@ -98,9 +97,9 @@ func (s Service) SettlePendingGirls(c context.Context, server identity.LogicalSe
 	}
 	return out, nil
 }
-func (s Service) settleGirlsPeriod(c context.Context, server identity.LogicalServerID, p d.GirlsPeriod, parent operation.Context) (Settlement, error) {
+func (s Service) settleBoardPeriod(c context.Context, b d.Board, server identity.LogicalServerID, p d.BoardPeriod, parent operation.Context) (Settlement, error) {
 	var out Settlement
-	snapshot, ok, e := s.Store.ReadGirlsSnapshotTx(c, s.Fresh, server, p.Generation)
+	snapshot, ok, e := s.Store.ReadBoardSnapshotTx(c, s.Fresh, b, server, p.Generation)
 	if e != nil {
 		return out, e
 	}
@@ -111,13 +110,13 @@ func (s Service) settleGirlsPeriod(c context.Context, server identity.LogicalSer
 	if e != nil {
 		return out, e
 	}
-	rid := settlementIdentity(server, p.Week)
+	rid := settlementIdentity(b, server, p.Week)
 	prior, has, e := s.Receipts.FindTx(c, s.Fresh, rid)
 	if e != nil {
 		return out, e
 	}
 	if has {
-		return s.settlementProof(c, s.Fresh, prior, snapshot, p, fp)
+		return s.settlementProof(c, s.Fresh, b, prior, snapshot, p, fp)
 	}
 	awards, e := snapshot.Awards()
 	if e != nil {
@@ -133,11 +132,11 @@ func (s Service) settleGirlsPeriod(c context.Context, server identity.LogicalSer
 	if e != nil {
 		return out, e
 	}
-	refs, e := policy.NewSet(policy.Ref{Name: "content", Version: snapshot.Revision}, policy.Ref{Name: "ranking", Version: d.GirlsPolicy})
+	refs, e := policy.NewSet(policy.Ref{Name: "content", Version: snapshot.Revision}, policy.Ref{Name: "ranking", Version: b.Policy})
 	if e != nil {
 		return out, e
 	}
-	child := operation.Context{ID: id, StartedAt: parent.StartedAt, EntropySeed: parent.Derive("ranking-girls-settlement:"+rid.OwnerKey+":"+rid.SemanticKey, 0), Policies: refs}
+	child := operation.Context{ID: id, StartedAt: parent.StartedAt, EntropySeed: parent.Derive("ranking-"+b.Name+"-settlement:"+rid.OwnerKey+":"+rid.SemanticKey, 0), Policies: refs}
 	_, res, e := s.Timed.Run(c, child, Profile(), tx.Options{Isolation: tx.Serializable}, tx.RetryPolicy{MaxAttempts: 8, RetryDefiniteAbort: true, DefiniteAbortBackoffBase: 20 * time.Millisecond, DefiniteAbortBackoffMax: 80 * time.Millisecond}, timedReceiptResolver{receipt.Resolver{Reader: s.ReceiptRead, Identity: rid, Fingerprint: fp}}, func(c context.Context, sc gen.TimedScope) error {
 		at := sc.Operation.DecisionAt()
 		if at.Before(snapshot.ObservedAt) {
@@ -164,10 +163,10 @@ func (s Service) settleGirlsPeriod(c context.Context, server identity.LogicalSer
 				roots[r.PlayerID] = r
 			}
 		}
-		if _, e = s.Store.LockGirlsRootTx(c, sc.Tx, server, at); e != nil {
+		if _, e = s.Store.LockBoardRootTx(c, sc.Tx, b, server, at); e != nil {
 			return e
 		}
-		now, ok, e := s.Store.ReadGirlsPeriodTx(c, sc.Tx, server, p.Week)
+		now, ok, e := s.Store.ReadBoardPeriodTx(c, sc.Tx, b, server, p.Week)
 		if e != nil {
 			return e
 		}
@@ -179,13 +178,13 @@ func (s Service) settleGirlsPeriod(c context.Context, server identity.LogicalSer
 			return e
 		}
 		if has {
-			out, e = s.settlementProof(c, sc.Tx, prior, snapshot, p, fp)
+			out, e = s.settlementProof(c, sc.Tx, b, prior, snapshot, p, fp)
 			return e
 		}
 		if now.SettledAt != nil {
 			return ErrConflict
 		}
-		retained, ok, e := s.Store.ReadGirlsSnapshotTx(c, sc.Tx, server, p.Generation)
+		retained, ok, e := s.Store.ReadBoardSnapshotTx(c, sc.Tx, b, server, p.Generation)
 		if e != nil {
 			return e
 		}
@@ -201,7 +200,7 @@ func (s Service) settleGirlsPeriod(c context.Context, server identity.LogicalSer
 		}
 		for _, a := range awards {
 			v, ok := catalog.Find("title", a.TitleID)
-			if !ok || v.Type != 8 || v.Days != d.GirlsTitleDuration {
+			if !ok || v.Type != b.TitleType || v.Days != d.BoardTitleDuration {
 				return ErrConflict
 			}
 			root, ok := roots[a.Player]
@@ -212,19 +211,19 @@ func (s Service) settleGirlsPeriod(c context.Context, server identity.LogicalSer
 				return e
 			}
 		}
-		if e = s.Store.SettleGirlsPeriodTx(c, sc.Tx, snapshot, now, at); e != nil {
+		if e = s.Store.SettleBoardPeriodTx(c, sc.Tx, snapshot, now, at); e != nil {
 			return e
 		}
-		out = Settlement{Server: server, Policy: d.GirlsPolicy, Week: p.Week, Generation: p.Generation, SnapshotDigest: snapshot.Digest, AppliedAt: at, Awards: awards}
+		out = Settlement{Server: server, Policy: b.Policy, Week: p.Week, Generation: p.Generation, SnapshotDigest: snapshot.Digest, AppliedAt: at, Awards: awards}
 		raw, e := json.Marshal(out)
 		if e != nil {
 			return e
 		}
-		rr, e := receipt.New(child, rid, settlementClass, settlementSchema, raw, fp)
+		rr, e := receipt.New(child, rid, boardReceipts[b.Policy].settlementClass, settlementSchema(b), raw, fp)
 		if e != nil {
 			return e
 		}
-		rr.PolicyVersion = d.GirlsPolicy
+		rr.PolicyVersion = b.Policy
 		_, e = s.Receipts.PutTx(c, sc.Tx, rr)
 		return e
 	})
@@ -236,7 +235,7 @@ func (s Service) settleGirlsPeriod(c context.Context, server identity.LogicalSer
 		if !ok {
 			return Settlement{}, ErrConflict
 		}
-		return s.settlementProof(c, s.Fresh, r, snapshot, p, fp)
+		return s.settlementProof(c, s.Fresh, b, r, snapshot, p, fp)
 	}
 	if res.Outcome != tx.DefiniteCommit {
 		return Settlement{}, ErrUnavailable

@@ -185,10 +185,10 @@ func main() {
 	i5svc := appi5.Service{Runner: runner, Store: i5db, Content: contentDB, Privileges: privileges, Functions: appi5.PetStarterFunctionAnnouncements{}, Directory: i4store.DirectoryLevelProjection{}, Backpack: i5db, Receipts: receipts, ReceiptRead: kernelstore.Reader{Queryer: pool}, RedeemSecret: redeemSecret}
 	displayService := playerdisplay.Service{Runner: runner, Fresh: pool, Time: postgres.AuthoritativeTime{Queryer: pool}, Players: i4store.PlayerRootLocker{}, Fence: i5db, Store: i5db, Content: contentDB, Receipts: receipts, Privileges: privileges, CosmeticPrivileges: privileges, Inventory: i5db, Population: characterstore.DisplayReader{Store: characterstore.Store{Queryer: pool}, Content: contentDB}, Characters: characterstore.DisplayReader{Store: characterstore.Store{Queryer: pool}, Content: contentDB}, Values: appi5.DisplayValueOwner{Store: i5db, Content: contentDB, Grant: i5svc}, Directory: appdir.Reconciler{Source: i5db, Sink: i4store.DirectoryLevelProjection{}}}
 
-	girlsRanking := canonicalGirlsRanking(pool, runner, contentDB, displayService, receipts)
+	boardRanking := canonicalBoardRanking(pool, runner, contentDB, displayService, receipts)
 	// Title origins route by catalog id; the 1 on 1 origin read needs no Combat.
 	leagueOrigins := appleague.Service{Store: leaguestore.Store{}, Content: contentDB, Entitlements: i5db}
-	displayService.CatalogExternal = playerdisplay.CatalogOriginRoutes{{Family: "bubble", First: 10002, Last: 10007, Owner: leagueOrigins}, {Family: "title", First: 100104, Last: 100104, Owner: leagueOrigins}, {Family: "title", First: 100111, Last: 100111, Owner: leagueOrigins}, {Family: "title", First: 100114, Last: 100121, Owner: leagueOrigins}, {Family: "title", First: 100059, Last: 100062, Owner: girlsRanking},
+	displayService.CatalogExternal = playerdisplay.CatalogOriginRoutes{{Family: "bubble", First: 10002, Last: 10007, Owner: leagueOrigins}, {Family: "title", First: 100104, Last: 100104, Owner: leagueOrigins}, {Family: "title", First: 100111, Last: 100111, Owner: leagueOrigins}, {Family: "title", First: 100114, Last: 100121, Owner: leagueOrigins}, {Family: "title", First: 100059, Last: 100062, Owner: boardRanking}, {Family: "title", First: 100001, Last: 100001, Owner: boardRanking},
 		{First: 100002, Last: 100005, Owner: apponeonone.Service{Store: oneononestore.Store{}, Content: contentDB, Entitlements: i5db}}}
 
 	maxHeroColorPolicy := appi5.PreservationMaxHeroColorProvider{}
@@ -299,12 +299,12 @@ func main() {
 	owners := topFloorOwners{library: librarySvc, dorm: dormSvc, book: bookSvc, course: courseSvc, inscription: inscriptionSvc, element: elementSvc, spirit: spiritSvc, evolution: evolutionSvc}
 	profileMetrics := canonicalProfileMetrics(contentDB, canonicalPublicStats(pool, contentDB, owners))
 	// The title origin route copied above never reads metrics.
-	girlsRanking.Metrics = profileMetrics
+	boardRanking.Metrics = profileMetrics
 	fight, fightReady, err := canonicalCombat(pool, runner, contentDB, owners)
 	if err != nil {
 		log.Fatalf("I7C-5B Combat composition: %v", err)
 	}
-	ranking := stockruntime.RankingDispatcher{Authority: authority, Service: girlsRanking}
+	ranking := stockruntime.RankingDispatcher{Authority: authority, Service: boardRanking}
 	if fightReady {
 		topFloor := canonicalTopFloor(pool, runner, contentDB, i5db, privileges, fight, owners)
 		ranking.TopFloor = topFloor

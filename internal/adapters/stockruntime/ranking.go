@@ -10,7 +10,7 @@ import (
 	"gxb.local/backend/v2/internal/application/topfloor"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/domain/oneonone"
-	d "gxb.local/backend/v2/internal/domain/ranking"
+	rankingdomain "gxb.local/backend/v2/internal/domain/ranking"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	oneononeprojection "gxb.local/backend/v2/internal/projection/oneonone"
 	projection "gxb.local/backend/v2/internal/projection/ranking"
@@ -18,8 +18,8 @@ import (
 	"gxb.local/backend/v2/internal/protocol/httpedge"
 )
 
-type GirlsRankingReads interface {
-	ReadGirls(context.Context, identity.ActorContext, operation.Context) (d.GirlsSnapshot, error)
+type BoardRankingReads interface {
+	ReadBoard(context.Context, rankingdomain.Board, identity.ActorContext, operation.Context) (rankingdomain.BoardSnapshot, error)
 }
 type TopFloorRanks interface {
 	RankList(context.Context, identity.ActorContext) (topfloor.RankList, error)
@@ -32,7 +32,7 @@ type ArenaRanks interface {
 }
 type RankingDispatcher struct {
 	Authority realtimeauth.GameplayAuthorityPort
-	Service   GirlsRankingReads
+	Service   BoardRankingReads
 	TopFloor  TopFloorRanks
 	OneOnOne  OneOnOneRanks
 	Arena     ArenaRanks
@@ -92,14 +92,15 @@ func (d RankingDispatcher) Dispatch(c context.Context, r httpedge.DispatchReques
 		body["error_code"] = int64(0)
 		return httpedge.Response{HTTPStatus: http.StatusOK, Body: body}
 	}
-	if subtype != 37 {
+	board, known := rankingdomain.BoardOfSubType(subtype)
+	if !known {
 		return fail(http.StatusNotImplemented)
 	}
-	snapshot, e := d.Service.ReadGirls(c, a, r.Envelope.Operation)
+	snapshot, e := d.Service.ReadBoard(c, board, a, r.Envelope.Operation)
 	if e != nil {
 		return fail(http.StatusServiceUnavailable)
 	}
-	body, e := projection.GirlsList(snapshot, a.PlayerID)
+	body, e := projection.BoardList(snapshot, a.PlayerID)
 	if e != nil {
 		return fail(http.StatusServiceUnavailable)
 	}

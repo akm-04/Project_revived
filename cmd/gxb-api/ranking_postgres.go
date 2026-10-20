@@ -16,6 +16,6 @@ import (
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
-func canonicalGirlsRanking(p *pg.Pool, r tx.Runner, content contentstore.Store, display playerdisplay.Service, receipts receipt.Store) app.Service {
+func canonicalBoardRanking(p *pg.Pool, r tx.Runner, content contentstore.Store, display playerdisplay.Service, receipts receipt.Store) app.Service {
 	return app.Service{Timed: gen.TimedRunner{Binder: gen.Binder{Time: pg.AuthoritativeTime{Queryer: p}}, Runner: r}, Fresh: p, Store: rankingstore.Store{}, Cohort: i4store.PlayerRootLocker{}, Directory: i4store.PlayerDirectoryReader{}, Content: content, Fence: i5store.Store{}, Players: i4store.PlayerRootLocker{}, Recipient: display, Ledger: i5store.Store{}, Receipts: receipts, ReceiptRead: kernelstore.Reader{Queryer: p}}
 }

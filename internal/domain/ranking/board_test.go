@@ -9,18 +9,18 @@ import (
 	"gxb.local/backend/v2/internal/foundation/ids"
 )
 
-func girlsFixture() (GirlsRoot, time.Time, string, ids.UUID) {
+func girlsFixture() (BoardRoot, time.Time, string, ids.UUID) {
 	at := time.Date(2026, 10, 18, 12, 0, 0, 0, time.UTC)
-	r, _ := NewGirlsRoot(1, at)
+	r, _ := NewBoardRoot(GirlsBoard, 1, at)
 	op, _ := ids.NewUUID()
 	return r, at, strings.Repeat("a", 64), op
 }
-func girlsInput(pid, score int64, at time.Time, rev string) GirlsInput {
-	return GirlsInput{Metric: GirlsMetric{Player: identity.PlayerID(pid), Owner: "CharacterHero", Policy: GirlsSourcePolicy, Semantics: GirlsSourceSemantics, Revision: rev, PopulationDigest: strings.Repeat("b", 64), FieldID: 1001, Value: score, SourceVersion: 1, PopulationVersion: 1, ObservedAt: at}, Display: GirlsPresentation{Player: identity.PlayerID(pid), Name: "Player", Level: 1}}
+func girlsInput(pid, score int64, at time.Time, rev string) BoardInput {
+	return BoardInput{Metric: BoardMetric{Player: identity.PlayerID(pid), Owner: "CharacterHero", Policy: GirlsBoard.SourcePolicy, Semantics: GirlsBoard.SourceSemantics, Revision: rev, PopulationDigest: strings.Repeat("b", 64), FieldID: 1001, Value: score, SourceVersion: 1, PopulationVersion: 1, ObservedAt: at}, Display: BoardPresentation{Player: identity.PlayerID(pid), Name: "Player", Level: 1}}
 }
 func TestGirlsObservedRunsDoNotInventFirstReachOrResetForEquipment(t *testing.T) {
 	r, at, rev, op := girlsFixture()
-	n, s, e := BuildGirlsSnapshot(r, at, rev, op, []GirlsInput{girlsInput(9, 2, at, rev), girlsInput(3, 2, at, rev)})
+	n, s, e := BuildBoardSnapshot(r, at, rev, op, []BoardInput{girlsInput(9, 2, at, rev), girlsInput(3, 2, at, rev)})
 	if e != nil || s.Entries[0].Metric.Player != 3 || !s.Entries[0].ScoreSince.Equal(at) {
 		t.Fatal(s, e)
 	}
@@ -31,14 +31,14 @@ func TestGirlsObservedRunsDoNotInventFirstReachOrResetForEquipment(t *testing.T)
 	in.Metric.SourceVersion = 2
 	in.Metric.PopulationVersion = 2
 	in.Metric.PopulationDigest = strings.Repeat("c", 64)
-	n2, s2, e := BuildGirlsSnapshot(n, later, rev, op, []GirlsInput{in, girlsInput(3, 1, later, rev)})
+	n2, s2, e := BuildBoardSnapshot(n, later, rev, op, []BoardInput{in, girlsInput(3, 1, later, rev)})
 	if e != nil || s2.Entries[0].Metric.Player != 9 || !n2.Runs[9].Since.Equal(at) || !n2.Runs[3].Since.Equal(later) {
 		t.Fatal(n2, s2, e)
 	}
 	// Returning to a previous value starts a new current-value run; it is not a
 	// lifetime highwater or the first-ever historical time for that value.
 	later2 := later.Add(time.Hour)
-	_, s3, e := BuildGirlsSnapshot(n2, later2, rev, op, []GirlsInput{girlsInput(3, 2, later2, rev), girlsInput(9, 2, later2, rev)})
+	_, s3, e := BuildBoardSnapshot(n2, later2, rev, op, []BoardInput{girlsInput(3, 2, later2, rev), girlsInput(9, 2, later2, rev)})
 	if e != nil || s3.Entries[0].Metric.Player != 9 || !s3.Entries[1].ScoreSince.Equal(later2) {
 		t.Fatal(s3, e)
 	}
@@ -46,7 +46,7 @@ func TestGirlsObservedRunsDoNotInventFirstReachOrResetForEquipment(t *testing.T)
 		t.Fatal("build mutated earlier root")
 	}
 	newRev := strings.Repeat("d", 64)
-	_, changed, e := BuildGirlsSnapshot(n2, later2, newRev, op, []GirlsInput{girlsInput(9, 2, later2, newRev)})
+	_, changed, e := BuildBoardSnapshot(n2, later2, newRev, op, []BoardInput{girlsInput(9, 2, later2, newRev)})
 	if e != nil || !changed.Entries[0].ScoreSince.Equal(later2) {
 		t.Fatal(changed, e)
 	}
@@ -54,7 +54,7 @@ func TestGirlsObservedRunsDoNotInventFirstReachOrResetForEquipment(t *testing.T)
 func TestGirlsSnapshotRejectsIncompleteConflictingOrTamperedInputs(t *testing.T) {
 	r, at, rev, op := girlsFixture()
 	one := girlsInput(1, 1, at, rev)
-	cases := []GirlsInput{one, one, one, one, one, one}
+	cases := []BoardInput{one, one, one, one, one, one}
 	cases[0].Metric.Owner = "client"
 	cases[1].Metric.ObservedAt = at.Add(time.Second)
 	cases[2].Metric.Policy = "future"
@@ -62,17 +62,17 @@ func TestGirlsSnapshotRejectsIncompleteConflictingOrTamperedInputs(t *testing.T)
 	cases[4].Display.Player = 2
 	cases[5].Metric.Value = -1
 	for _, v := range cases {
-		if _, _, e := BuildGirlsSnapshot(r, at, rev, op, []GirlsInput{v}); e == nil {
+		if _, _, e := BuildBoardSnapshot(r, at, rev, op, []BoardInput{v}); e == nil {
 			t.Fatal("accepted unqualified source", v)
 		}
 	}
-	if _, _, e := BuildGirlsSnapshot(r, at, rev, op, []GirlsInput{one, one}); e == nil {
+	if _, _, e := BuildBoardSnapshot(r, at, rev, op, []BoardInput{one, one}); e == nil {
 		t.Fatal("duplicate subject")
 	}
-	if _, _, e := BuildGirlsSnapshot(r, at.Add(-time.Second), rev, op, []GirlsInput{one}); e != ErrStale {
+	if _, _, e := BuildBoardSnapshot(r, at.Add(-time.Second), rev, op, []BoardInput{one}); e != ErrStale {
 		t.Fatal(e)
 	}
-	_, s, e := BuildGirlsSnapshot(r, at, rev, op, []GirlsInput{one})
+	_, s, e := BuildBoardSnapshot(r, at, rev, op, []BoardInput{one})
 	if e != nil {
 		t.Fatal(e)
 	}
@@ -83,7 +83,7 @@ func TestGirlsSnapshotRejectsIncompleteConflictingOrTamperedInputs(t *testing.T)
 }
 func TestGirlsTitlesUseSourceTiersPositivePopulationAndFixedSnapshotTime(t *testing.T) {
 	r, at, rev, op := girlsFixture()
-	in := []GirlsInput{}
+	in := []BoardInput{}
 	for p := int64(1); p <= 22; p++ {
 		score := int64(1)
 		if p == 22 {
@@ -91,7 +91,7 @@ func TestGirlsTitlesUseSourceTiersPositivePopulationAndFixedSnapshotTime(t *test
 		}
 		in = append(in, girlsInput(p, score, at, rev))
 	}
-	_, s, e := BuildGirlsSnapshot(r, at, rev, op, in)
+	_, s, e := BuildBoardSnapshot(r, at, rev, op, in)
 	if e != nil {
 		t.Fatal(e)
 	}
@@ -108,20 +108,20 @@ func TestGirlsTitlesUseSourceTiersPositivePopulationAndFixedSnapshotTime(t *test
 			t.Fatal(a)
 		}
 	}
-	week, e := GirlsWeek(at)
+	week, e := BoardWeek(at)
 	if e != nil || week.Format(time.RFC3339) != "2026-10-12T00:00:00Z" {
 		t.Fatal(week, e)
 	}
-	next, e := GirlsWeek(at.Add(12 * time.Hour))
+	next, e := BoardWeek(at.Add(12 * time.Hour))
 	if e != nil || next.Format(time.RFC3339) != "2026-10-19T00:00:00Z" {
 		t.Fatal(next, e)
 	}
 	// A time zone on an input instant cannot change the policy's UTC week.
-	zone, e := GirlsWeek(at.In(time.FixedZone("offset", 8*3600)))
+	zone, e := BoardWeek(at.In(time.FixedZone("offset", 8*3600)))
 	if e != nil || !zone.Equal(week) {
 		t.Fatal(zone, e)
 	}
-	_, empty, e := BuildGirlsSnapshot(r, at, rev, op, []GirlsInput{girlsInput(1, 0, at, rev)})
+	_, empty, e := BuildBoardSnapshot(r, at, rev, op, []BoardInput{girlsInput(1, 0, at, rev)})
 	if e != nil {
 		t.Fatal(e)
 	}

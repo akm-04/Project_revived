@@ -42,7 +42,7 @@ func TestI7C4CRankingActualAcquisitionBetweenParticipantsUsesOneSnapshot(t *test
 	s := rankingService(p, p)
 	// Create the Ranking root before interleaving so concurrent owner changes do
 	// not depend on first-root insertion behavior.
-	if _, e := s.RefreshGirls(ctx, a, op()); e != nil {
+	if _, e := s.RefreshBoard(ctx, d.GirlsBoard, a, op()); e != nil {
 		t.Fatal(e)
 	}
 	entered, done := make(chan struct{}), make(chan struct{})
@@ -62,7 +62,7 @@ func TestI7C4CRankingActualAcquisitionBetweenParticipantsUsesOneSnapshot(t *test
 		rankingSummon(t, p, b, rev, 10001002)
 	}()
 
-	snap, e := s.RefreshGirls(ctx, a, op())
+	snap, e := s.RefreshBoard(ctx, d.GirlsBoard, a, op())
 	value := int64(-1)
 	if e != nil {
 		if !errors.Is(e, ca.ErrInvalidCoherentReadScope) && !errors.Is(e, d.ErrStale) {
@@ -86,7 +86,7 @@ func TestI7C4CRankingActualAcquisitionBetweenParticipantsUsesOneSnapshot(t *test
 	case <-time.After(time.Second):
 		t.Fatal("owner command not completed")
 	}
-	next, e := rankingService(p, p).RefreshGirls(ctx, a, op())
+	next, e := rankingService(p, p).RefreshBoard(ctx, d.GirlsBoard, a, op())
 	if e != nil {
 		t.Fatal(e)
 	}

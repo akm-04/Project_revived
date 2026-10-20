@@ -4,6 +4,7 @@ import (
 	"context"
 	appboot "gxb.local/backend/v2/internal/application/bootstrap"
 	"gxb.local/backend/v2/internal/domain/logicalserver"
+	d "gxb.local/backend/v2/internal/domain/ranking"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
@@ -14,7 +15,12 @@ type BootstrapContributor struct{}
 func (BootstrapContributor) Name() string   { return "i7c4c.girls-ranking-origin-history" }
 func (BootstrapContributor) Required() bool { return true }
 func (BootstrapContributor) PersistCharacterBootstrap(c context.Context, t tx.Tx, b logicalserver.BootstrapContext) error {
-	return (Store{}).FreshGirlsTrackingTx(c, t, b.PlayerID, b.LogicalServerID, b.Operation.StartedAt)
+	for _, board := range d.Boards {
+		if e := (Store{}).FreshBoardTrackingTx(c, t, board, b.PlayerID, b.LogicalServerID, b.Operation.StartedAt); e != nil {
+			return e
+		}
+	}
+	return nil
 }
 
 var _ appboot.CharacterBootstrapPersistenceContributor = BootstrapContributor{}

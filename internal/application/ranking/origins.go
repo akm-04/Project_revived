@@ -14,11 +14,12 @@ func sameOrigin(a, b app.Origin) bool {
 	return a.PlayerID == b.PlayerID && a.Key == b.Key && a.Owner == b.Owner && a.Family == b.Family && a.CatalogID == b.CatalogID && a.UniqueID == b.UniqueID && sameStart && a.EndTime == b.EndTime && a.Revision == b.Revision && a.StateVersion == b.StateVersion
 }
 
-// ReadCatalogDisplayOriginsTx proves only this owner's four Girls title rows.
+// ReadCatalogDisplayOriginsTx proves only the requested board's own title rows.
 // Missing legacy history cannot become a complete empty family observation.
 func (s Service) ReadCatalogDisplayOriginsTx(c context.Context, q tx.Queryer, r app.CatalogOriginRequest) (app.CatalogOriginObservation, error) {
 	out := app.CatalogOriginObservation{Request: r, Origins: []app.Origin{}}
-	if q == nil || s.Store == nil || s.Cohort == nil || s.Ledger == nil || s.Content == nil || !r.PlayerID.Valid() || r.Family != "title" || r.CatalogID < 100059 || r.CatalogID > 100062 || r.ObservedAt.Unix() <= 0 || len(r.Revision) != 64 {
+	board, known := d.BoardOfTitle(r.CatalogID)
+	if !known || q == nil || s.Store == nil || s.Cohort == nil || s.Ledger == nil || s.Content == nil || !r.PlayerID.Valid() || r.Family != "title" || r.ObservedAt.Unix() <= 0 || len(r.Revision) != 64 {
 		return out, app.ErrUnavailable
 	}
 	catalog, e := s.Content.ReadPlayerDisplayCatalogTx(c, q, r.Revision)
@@ -26,7 +27,7 @@ func (s Service) ReadCatalogDisplayOriginsTx(c context.Context, q tx.Queryer, r 
 		return out, e
 	}
 	v, ok := catalog.Find(r.Family, r.CatalogID)
-	if !ok || v.Type != 8 || v.Days != d.GirlsTitleDuration {
+	if !ok || v.Type != board.TitleType || v.Days != d.BoardTitleDuration {
 		return out, app.ErrConflict
 	}
 	roots, e := s.Cohort.ListPlayerRootsTx(c, q)
@@ -47,11 +48,11 @@ func (s Service) ReadCatalogDisplayOriginsTx(c context.Context, q tx.Queryer, r 
 	if !server.Valid() {
 		return out, app.ErrUnavailable
 	}
-	tracked, e := s.Store.GirlsTrackingTx(c, q, r.PlayerID, server, r.ObservedAt)
+	tracked, e := s.Store.BoardTrackingTx(c, q, board, r.PlayerID, server, r.ObservedAt)
 	if e != nil {
 		return out, e
 	}
-	evidence, e := s.Store.GirlsAwardEvidenceTx(c, q, r.PlayerID)
+	evidence, e := s.Store.BoardAwardEvidenceTx(c, q, board, r.PlayerID)
 	if e != nil {
 		return out, e
 	}
@@ -76,7 +77,7 @@ func (s Service) ReadCatalogDisplayOriginsTx(c context.Context, q tx.Queryer, r 
 		if m.Validate() != nil || m.PlayerID != r.PlayerID || m.Family != "title" {
 			return out, app.ErrConflict
 		}
-		if m.CatalogID < 100059 || m.CatalogID > 100062 {
+		if !board.HasTitle(m.CatalogID) {
 			continue
 		}
 		own, ok := canonical[m.Key]

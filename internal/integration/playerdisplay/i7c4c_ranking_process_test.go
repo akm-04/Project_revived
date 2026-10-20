@@ -13,6 +13,7 @@ import (
 	"gxb.local/backend/v2/internal/application/publicstats"
 	"gxb.local/backend/v2/internal/domain/character"
 	"gxb.local/backend/v2/internal/domain/identity"
+	d "gxb.local/backend/v2/internal/domain/ranking"
 	"net"
 	"net/http"
 	"net/url"
@@ -41,7 +42,7 @@ func TestI7C4CRankingActualAPIReopenRestartAndDatabaseRestore(t *testing.T) {
 	rankingSummon(t, p, a, rev, 10001001)
 	bearer := displayToken(t, p, a)
 	original := op()
-	first, e := rankingService(p, p).ReadGirls(ctx, a, original)
+	first, e := rankingService(p, p).ReadBoard(ctx, d.GirlsBoard, a, original)
 	if e != nil {
 		t.Fatal(e)
 	}
@@ -171,7 +172,7 @@ func TestI7C4CRankingActualAPIReopenRestartAndDatabaseRestore(t *testing.T) {
 	running = true
 	board(2)
 	// Bind all durable Ranking and recipient/receipt state across relocation.
-	snapshot, e := rankingService(p, p).RefreshGirls(ctx, a, original)
+	snapshot, e := rankingService(p, p).RefreshBoard(ctx, d.GirlsBoard, a, original)
 	if e != nil || !reflect.DeepEqual(snapshot, first) {
 		t.Fatal("restart original receipt", e)
 	}
@@ -218,7 +219,7 @@ func TestI7C4CRankingActualAPIReopenRestartAndDatabaseRestore(t *testing.T) {
 	if after := fingerprint(restored); after != before {
 		t.Fatal("relocated durable state changed", before, after)
 	}
-	recovered, e := rankingService(restored, restored).ReadGirls(ctx, a, original)
+	recovered, e := rankingService(restored, restored).ReadBoard(ctx, d.GirlsBoard, a, original)
 	if e != nil || !reflect.DeepEqual(first, recovered) {
 		t.Fatal("restored immutable snapshot/Kernel receipt", e)
 	}
