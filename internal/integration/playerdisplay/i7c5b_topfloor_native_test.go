@@ -166,6 +166,9 @@ func TestI7C5BTopFloorLadderFightSettlementNative(t *testing.T) {
 	if scalar(t, pool, `SELECT fights FROM top_floor_partner_usage WHERE player_id=$1 AND partner_id=$2`, int64(a.PlayerID), refA.PartnerID) != 1 {
 		t.Fatal("partner usage")
 	}
+	if history, err := s.PublicHistoryTx(ctx, pool, a.PlayerID, time.Now()); err != nil || history.Fights < 1 || len(history.Partners) != 1 || history.Partners[0].PartnerID != refA.PartnerID || history.Partners[0].Fights != 1 {
+		t.Fatal("1829 ARENA history", history, err)
+	}
 
 	// B04: player vs player through the defender's saved defense (OWNED_FOREIGN).
 	exec(t, pool, `UPDATE top_floor_players SET offered=$2::jsonb,state_version=state_version+1 WHERE player_id=$1`, int64(b.PlayerID), `[{"player":`+strconv.FormatInt(int64(a.PlayerID), 10)+`}]`)

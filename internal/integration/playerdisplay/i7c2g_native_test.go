@@ -21,7 +21,6 @@ import (
 	elem "gxb.local/backend/v2/internal/domain/elementequipment"
 	"gxb.local/backend/v2/internal/domain/grant"
 	"gxb.local/backend/v2/internal/domain/identity"
-	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/policy"
 	"gxb.local/backend/v2/internal/foundation/tx"
 	"sync"
@@ -34,19 +33,7 @@ func elementService(p *pg.Pool, db tx.Beginner) app.Service {
 	v := i5store.Store{Queryer: p}
 	run := tx.Runner{DB: db}
 	iv := i5.Service{Runner: run, Store: v, Content: cs, Privileges: i5.BaselinePrivilegeProvider{}, Functions: i5.PetStarterFunctionAnnouncements{}, Directory: i4store.DirectoryLevelProjection{}, Backpack: v, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}, RedeemSecret: []byte("element-native-fixture-secret-000")}
-	return app.Service{MaxHeroColor: conditionalNormal16Policy{}, Timed: gen.TimedRunner{Binder: gen.Binder{Time: pg.AuthoritativeTime{Queryer: p}}, Runner: run}, Reads: tx.Runner{DB: p}, Heroes: characterstore.ElementHeroPort{Store: characterstore.Store{Queryer: p}}, Owner: elementstore.Store{}, Content: cs, Players: i4store.PlayerRootLocker{}, Fence: v, Values: v, Costs: i5.MaterialCostDebiter{Store: v, Content: cs}, Grants: iv, Exchange: iv, Receipts: kernelstore.Store{}}
-}
-
-// Conditional Normal16 policy is test-only: production preserves immutable cap5.
-// Normal fixtures qualify Element transitions conditionally, never the missing producer.
-type conditionalNormal16Policy struct{}
-
-func (conditionalNormal16Policy) MaxHeroColor() int64 { return 16 }
-func (conditionalNormal16Policy) MaxHeroColorPolicyRevision() string {
-	return "TEST_ONLY_CONDITIONAL_NORMAL16"
-}
-func (conditionalNormal16Policy) MaxHeroColorTx(context.Context, tx.Queryer, identity.PlayerID, operation.Context) (int64, error) {
-	return 16, nil
+	return app.Service{Timed: gen.TimedRunner{Binder: gen.Binder{Time: pg.AuthoritativeTime{Queryer: p}}, Runner: run}, Reads: tx.Runner{DB: p}, Heroes: characterstore.ElementHeroPort{Store: characterstore.Store{Queryer: p}}, Owner: elementstore.Store{}, Content: cs, Players: i4store.PlayerRootLocker{}, Fence: v, Values: v, Costs: i5.MaterialCostDebiter{Store: v, Content: cs}, Grants: iv, Exchange: iv, Receipts: kernelstore.Store{}}
 }
 
 func elementFixture(t *testing.T, p *pg.Pool) (identity.ActorContext, string, app.Service) {
@@ -550,44 +537,28 @@ func TestI7C2GAbsentReferencePreflightRacesFirstBinding(t *testing.T) {
 	}
 }
 
-func TestI7C2GProductionNormalGateBeforeAdmissionAndRecovery(t *testing.T) {
+// R11: Element opens on the hero's own colour 16 (MID51 reaches it); the
+// production max_color 5 is only the MID57 one-click split.
+func TestI7C2GProductionNormalSixteenLiveUnderMaxColorFive(t *testing.T) {
 	p := pool(t)
-	a, _, conditional := elementFixture(t, p)
-	production := conditional
-	production.MaxHeroColor = i5.PreservationMaxHeroColorProvider{}
+	a, _, s := elementFixture(t, p)
+	if (i5.PreservationMaxHeroColorProvider{}).MaxHeroColor() != 5 {
+		t.Fatal("max_color policy changed")
+	}
+	elementCmd(t, s, a, app.Command{Family: app.Equip, PartnerID: 1, EquipID: 7, Position: 2})
+	elementCmd(t, s, a, app.Command{Family: app.Enhance, PartnerID: 1, EquipID: 7})
+	exec(t, p, `UPDATE player_heroes SET color=15 WHERE player_id=$1 AND partner_id=1`, int64(a.PlayerID))
 	before := dormStack(t, p, a, 20001407)
-	for _, c := range []app.Command{{Family: app.Equip, PartnerID: 1, EquipID: 7, Position: 2}, {Family: app.Enhance, PartnerID: 1, EquipID: 7}} {
-		if _, e := production.Command(ctx, a, c, op()); !errors.Is(e, app.ErrUnavailable) {
-			t.Fatal("source16 under preservation5 must be unavailable", e)
-		}
+	if _, e := s.Command(ctx, a, app.Command{Family: app.Equip, PartnerID: 1, EquipID: 8, Position: 3}, op()); e == nil {
+		t.Fatal("colour 15 Normal admitted")
 	}
-	var count int
-	if e := p.QueryRow(ctx, `SELECT count(*) FROM player_element_admissions WHERE player_id=$1`, int64(a.PlayerID)).Scan(&count); e != nil {
-		t.Fatal(e)
+	if dormStack(t, p, a, 20001407) != before {
+		t.Fatal("ineligible request charged")
 	}
-	if count != 0 || dormStack(t, p, a, 20001407) != before {
-		t.Fatal("gated request persisted or debited", count)
-	}
-	// Explicit conditional producer; retained receipt recovery must survive a lower current cap.
-	c := app.Command{Family: app.Equip, PartnerID: 1, EquipID: 7, Position: 2}
-	o := op()
-	first, e := conditional.Command(ctx, a, c, o)
-	if e != nil {
-		t.Fatal(e)
-	}
-	after := dormStack(t, p, a, 20001407)
-	got, e := production.Command(ctx, a, c, o)
-	if e != nil || got.OperationID != first.OperationID || dormStack(t, p, a, 20001407) != after {
-		t.Fatal("known receipt recovery", e)
-	}
-	elementCmd(t, production, a, app.Command{Family: app.Unload, PartnerID: 1, Position: 2})
-	elementCmd(t, production, a, app.Command{Family: app.DestroyBound, PartnerID: 1, EquipID: 7})
-	elementCmd(t, production, a, app.Command{Family: app.DestroyBackpack, EquipID: 7})
 }
 func TestI7C2GRejectsContradictoryProgressionBeforeAdmission(t *testing.T) {
 	p := pool(t)
 	a, rev, s := elementFixture(t, p)
-	s.MaxHeroColor = i5.PreservationMaxHeroColorProvider{}
 	eligibleElementHero(t, p, a, rev, 11001, 5, true)
 	exec(t, p, `UPDATE player_progression SET exp=0 WHERE player_id=$1`, int64(a.PlayerID))
 	before := dormStack(t, p, a, 20001407)

@@ -10,6 +10,7 @@ import (
 	"gxb.local/backend/v2/internal/domain/identity"
 	d "gxb.local/backend/v2/internal/domain/topfloor"
 	"gxb.local/backend/v2/internal/foundation/ids"
+	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
 // rankListSize is the private-policy length of the live Top Floor rank list.
@@ -208,4 +209,22 @@ func (r Reconciler) fight(c context.Context, f d.Fight, op gen.TimedOperation, n
 	}
 	_, err = s.finish(c, f, op.Operation())
 	return err
+}
+
+// PublicHistoryTx is the 1829 HISTORY ARENA entry inside the caller's
+// transaction: current ladder rank, lifetime totals and partner usage.
+func (s Service) PublicHistoryTx(c context.Context, q tx.Queryer, pid identity.PlayerID, _ time.Time) (cd.History, error) {
+	if !s.ready() {
+		return cd.History{}, d.ErrUnavailable
+	}
+	p, found, err := s.Store.ReadPlayerTx(c, q, pid, false)
+	if err != nil || !found {
+		return cd.History{}, err
+	}
+	rank, _, err := s.Store.RankOfTx(c, q, p.Server, d.Occupant{Player: pid})
+	if err != nil {
+		return cd.History{}, err
+	}
+	usage, err := s.Store.UsageTx(c, q, pid)
+	return cd.History{Rank: rank, Fights: p.Fights, Wins: p.Wins, Version: p.StateVersion, Partners: usage}, err
 }

@@ -171,6 +171,9 @@ func TestI7C5DArenaEntryFightSettlementNative(t *testing.T) {
 		scalar(t, pool, `SELECT count(*) FROM combat_attempts c JOIN arena_matches m ON m.attempt_id=c.attempt_id WHERE c.state='TERMINAL' AND m.attacker_id=$1`, int64(a.PlayerID)) != 1 {
 		t.Fatal("records, usage and terminal attempt")
 	}
+	if history, err := s.PublicHistoryTx(ctx, pool, a.PlayerID, time.Now()); err != nil || history.Fights != 1 || len(history.Partners) != 5 || history.Partners[0].TableID <= 0 {
+		t.Fatal("1829 REGION_ARENA history", history, err)
+	}
 	if scalar(t, pool, `SELECT COALESCE(max(current),0) FROM achievement_streaks WHERE player_id=$1 AND achievement_id=100003`, int64(a.PlayerID)) != result.Player.KeepWin {
 		t.Fatal("Achievement 100003 follows the attack win streak")
 	}

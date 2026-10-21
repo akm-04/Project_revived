@@ -64,6 +64,7 @@ import (
 	apppet "gxb.local/backend/v2/internal/application/characterpet"
 	apppractice "gxb.local/backend/v2/internal/application/characterpractice"
 	appsavedpreset "gxb.local/backend/v2/internal/application/charactersavedpreset"
+	appconquer "gxb.local/backend/v2/internal/application/conquerschool"
 	appcourse "gxb.local/backend/v2/internal/application/course"
 	appdir "gxb.local/backend/v2/internal/application/directorysync"
 	appdorm "gxb.local/backend/v2/internal/application/dormhouse"
@@ -78,6 +79,7 @@ import (
 	appinscription "gxb.local/backend/v2/internal/application/inscription"
 	applibrary "gxb.local/backend/v2/internal/application/librarylocal"
 	apppublication "gxb.local/backend/v2/internal/application/publication"
+	apppublicprofile "gxb.local/backend/v2/internal/application/publicprofile"
 	apprealtime "gxb.local/backend/v2/internal/application/realtimeauth"
 	"gxb.local/backend/v2/internal/application/socialdismiss"
 	"gxb.local/backend/v2/internal/application/socialfriendbase"
@@ -222,7 +224,7 @@ func main() {
 	bookSvc := appbook.Service{Timed: heroSvc.Timed, Reads: runner, Heroes: characterstore.LibraryHeroPort{Store: heroDB}, Owner: bookstore.Store{}, Content: contentDB, Players: i4store.PlayerRootLocker{}, Fence: i5db, Costs: heroMaterialCosts, Values: i5db, Grants: i5svc, Exchange: i5svc, Receipts: receipts}
 	courseSvc := appcourse.Service{Timed: heroSvc.Timed, Reads: runner, Heroes: characterstore.CourseHeroPort{Store: heroDB}, Owner: coursestore.Store{}, Content: contentDB, Players: i4store.PlayerRootLocker{}, Fence: i5db, Costs: heroMaterialCosts, Values: i5db, Grants: i5svc, Exchange: i5svc, Receipts: receipts, Privileges: privileges}
 	inscriptionSvc := appinscription.Service{Timed: heroSvc.Timed, Reads: runner, Heroes: characterstore.InscriptionHeroPort{Store: heroDB}, Owner: inscriptionstore.Store{}, Content: contentDB, Players: i4store.PlayerRootLocker{}, Fence: i5db, Values: i5db, ValuePlans: i5svc, Eligibility: characterstore.InscriptionHeroPort{Store: heroDB}, Receipts: receipts}
-	elementSvc := appelement.Service{MaxHeroColor: maxHeroColorPolicy, Timed: heroSvc.Timed, Reads: runner, Heroes: characterstore.ElementHeroPort{Store: heroDB}, Owner: elementstore.Store{}, Content: contentDB, Players: i4store.PlayerRootLocker{}, Fence: i5db, Values: i5db, Costs: heroMaterialCosts, Grants: i5svc, Exchange: i5svc, Receipts: receipts}
+	elementSvc := appelement.Service{Timed: heroSvc.Timed, Reads: runner, Heroes: characterstore.ElementHeroPort{Store: heroDB}, Owner: elementstore.Store{}, Content: contentDB, Players: i4store.PlayerRootLocker{}, Fence: i5db, Values: i5db, Costs: heroMaterialCosts, Grants: i5svc, Exchange: i5svc, Receipts: receipts}
 	spiritSvc := appspirit.Service{Mint: domainspirit.V1PreservationPolicy{}, Milestones: domainspirit.V1PreservationPolicy{}, Timed: heroSvc.Timed, Reads: runner, Heroes: characterstore.SpiritHeroPort{Store: heroDB}, Owner: spiritstore.Store{}, Content: contentDB, Players: i4store.PlayerRootLocker{}, Fence: i5db, Values: i5db, Costs: heroMaterialCosts, Receipts: receipts}
 	evolutionSvc := appevolution.Service{Values: i5db, Timed: heroSvc.Timed, Reads: runner, Heroes: characterstore.EvolutionHeroPort{Store: heroDB}, Owner: characterstore.EvolutionStore{}, Content: contentDB, Players: i4store.PlayerRootLocker{}, Fence: i5db, Costs: heroMaterialCosts, Receipts: receipts}
 	i5svc.Spirits = spiritSvc
@@ -303,7 +305,10 @@ func main() {
 	mustRegister(1, boot)
 	mustRegister(192, stockruntime.DiscoveryDispatcher{Realtime: realtime, Tracker: tracker})
 	owners := topFloorOwners{library: librarySvc, dorm: dormSvc, book: bookSvc, course: courseSvc, inscription: inscriptionSvc, element: elementSvc, spirit: spiritSvc, evolution: evolutionSvc}
-	profileMetrics := canonicalProfileMetrics(contentDB, canonicalPublicStats(pool, contentDB, owners), displayService, achievements)
+	publicStats := canonicalPublicStats(pool, contentDB, owners)
+	profileMetrics := canonicalProfileMetrics(contentDB, publicStats, displayService, achievements)
+	profileRecords := apppublicprofile.RosterRecords{Heroes: owners.roster(contentDB), Pets: characterstore.PetBootstrapProjection{Content: contentDB}, Awakening: publicStats.Awakening, Conquer: appconquer.Service{Owner: conquerstore.Store{}, Content: contentDB, Heroes: characterstore.Store{Queryer: pool}, Kinds: contentDB, Players: i4store.PlayerRootLocker{}}}
+	var profileHistory apppublicprofile.HistoryReader
 	// The title origin route copied above never reads metrics.
 	boardRanking.Metrics = profileMetrics
 	fight, fightReady, err := canonicalCombat(pool, runner, contentDB, owners)
@@ -330,6 +335,7 @@ func main() {
 			mustRegister(mid, stockruntime.ArenaDispatcher{Authority: authority, Service: arena})
 		}
 		go runReconcile(ctx, pool, apparena.Reconciler{Service: arena})
+		profileHistory = apppublicprofile.ModeHistory{TopFloor: topFloor, OneOnOne: oneOnOne, Arena: arena, Heroes: fight.Inputs.Heroes}
 		league := canonicalLeague(pool, runner, contentDB, i5db, i5svc, fight, owners, displayService)
 		for _, mid := range stockruntime.LeagueMIDs {
 			mustRegister(mid, stockruntime.LeagueDispatcher{Authority: authority, Service: league})
@@ -488,7 +494,7 @@ func main() {
 	if e := registerPublicProfile(ctx, pool, runner, authority, receipts, contentDB, profileMetrics, router); e != nil {
 		log.Fatalf("PublicProfile startup: %v", e)
 	}
-	if e := registerPublicProfileReads(ctx, pool, runner, authority, receipts, contentDB, displayService, profileMetrics, router); e != nil {
+	if e := registerPublicProfileReads(ctx, pool, runner, authority, receipts, contentDB, displayService, profileMetrics, profileRecords, profileHistory, router); e != nil {
 		log.Fatal(e)
 	}
 	if e := registerPlayerDisplay(ctx, pool, contentDB, router, stockruntime.PlayerDisplayDispatcher{Authority: authority, Service: displayService}); e != nil {

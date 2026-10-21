@@ -66,6 +66,11 @@ type topFloorOwners struct {
 	evolution   appevolution.Service
 }
 
+// roster is the MID1 Heroes composer shared by Combat and public profile records.
+func (o topFloorOwners) roster(content contentstore.Store) characterstore.HeroBootstrapProjection {
+	return characterstore.HeroBootstrapProjection{Content: content, Library: o.library, Dorm: o.dorm, Book: o.book, Course: o.course, Inscription: o.inscription, Element: o.element, Spirit: o.spirit, Evolution: o.evolution}
+}
+
 // canonicalCombat is the first production Combat composition. It stays
 // unavailable (false) until an entropy key ring is configured.
 func canonicalCombat(p *postgres.Pool, r tx.Runner, content contentstore.Store, o topFloorOwners) (combat.Service, bool, error) {
@@ -92,9 +97,8 @@ func canonicalCombat(p *postgres.Pool, r tx.Runner, content contentstore.Store, 
 	stats := canonicalPublicStats(p, content, o)
 	conquer := appconquer.Service{Owner: conquerstore.Store{}, Content: content, Heroes: characterstore.Store{Queryer: p}, Kinds: content, Players: i4store.PlayerRootLocker{}}
 	worker := combatworker.Launcher{Binary: binary, Deadline: 120 * time.Second, AddressSpace: 4 << 30, CPUSeconds: 180, OpenFiles: 64, MaxOutputBytes: 16 << 20, ExpectedCorpus: corpus.ID()}
-	roster := characterstore.HeroBootstrapProjection{Content: content, Library: o.library, Dorm: o.dorm, Book: o.book, Course: o.course, Inscription: o.inscription, Element: o.element, Spirit: o.spirit, Evolution: o.evolution}
 	return combat.Service{Rules: corpus, Keys: keys, Worker: worker, Store: combatstore.Store{}, Content: content, Runner: r, Fresh: p,
-		Inputs: combat.Inputs{Heroes: roster, Pets: characterstore.PetBootstrapProjection{Content: content}, Stats: stats, Awakening: stats.Awakening, Collection: o.library, Conquer: conquer, Stacks: i5store.Store{Queryer: p}}}, true, nil
+		Inputs: combat.Inputs{Heroes: o.roster(content), Pets: characterstore.PetBootstrapProjection{Content: content}, Stats: stats, Awakening: stats.Awakening, Collection: o.library, Conquer: conquer, Stacks: i5store.Store{Queryer: p}}}, true, nil
 }
 
 func canonicalPublicStats(p *postgres.Pool, content contentstore.Store, o topFloorOwners) publicstats.Service {

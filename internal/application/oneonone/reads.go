@@ -260,3 +260,31 @@ func (r Reconciler) match(c context.Context, id ids.UUID, op gen.TimedOperation,
 	_, err = s.conclude(c, m, op.Operation(), time.Time{})
 	return err
 }
+
+// PublicHistoryTx is the 1829 HISTORY SUPER_ARENA entry inside the caller's
+// transaction: server rank, lifetime totals and partner usage.
+func (s Service) PublicHistoryTx(c context.Context, q tx.Queryer, pid identity.PlayerID, _ time.Time) (cd.History, error) {
+	if !s.ready() {
+		return cd.History{}, d.ErrUnavailable
+	}
+	p, totals, found, err := s.Store.ReadPlayerTx(c, q, pid, false)
+	if err != nil || !found {
+		return cd.History{}, err
+	}
+	_, catalog, err := s.catalogTx(c, q)
+	if err != nil {
+		return cd.History{}, err
+	}
+	standings, err := s.Store.StandingsTx(c, q)
+	if err != nil {
+		return cd.History{}, err
+	}
+	var rank int64
+	for _, r := range catalog.Rank(standings) {
+		if r.Player == pid {
+			rank = r.ServerRank
+		}
+	}
+	usage, err := s.Store.UsageTx(c, q, pid)
+	return cd.History{Rank: rank, Fights: totals.Fights, Wins: totals.Wins, Version: p.StateVersion, Partners: usage}, err
+}

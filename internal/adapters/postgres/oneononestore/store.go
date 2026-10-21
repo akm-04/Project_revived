@@ -398,19 +398,20 @@ func (Store) AddUsageTx(c context.Context, t tx.Tx, pid identity.PlayerID, uses 
 	return nil
 }
 
-func (Store) UsageTx(c context.Context, q tx.Queryer, pid identity.PlayerID) ([]cd.PartnerUse, error) {
+func (Store) UsageTx(c context.Context, q tx.Queryer, pid identity.PlayerID) ([]cd.PartnerTotals, error) {
 	var rows []struct {
 		PartnerID int64  `json:"partner_id"`
+		Fights    int64  `json:"fights"`
 		Wins      int64  `json:"wins"`
 		Kills     int64  `json:"kills"`
 		Harms     string `json:"harms"`
 	}
-	if _, e := readJSON(c, q, `SELECT COALESCE(jsonb_agg(jsonb_build_object('partner_id',partner_id,'wins',wins,'kills',kill_count,'harms',harms::text) ORDER BY partner_id),'[]'::jsonb)::text FROM one_on_one_partner_usage WHERE player_id=$1`, &rows, int64(pid)); e != nil {
+	if _, e := readJSON(c, q, `SELECT COALESCE(jsonb_agg(jsonb_build_object('partner_id',partner_id,'fights',fights,'wins',wins,'kills',kill_count,'harms',harms::text) ORDER BY partner_id),'[]'::jsonb)::text FROM one_on_one_partner_usage WHERE player_id=$1`, &rows, int64(pid)); e != nil {
 		return nil, e
 	}
-	out := make([]cd.PartnerUse, 0, len(rows))
+	out := make([]cd.PartnerTotals, 0, len(rows))
 	for _, r := range rows {
-		out = append(out, cd.PartnerUse{PartnerID: r.PartnerID, Wins: r.Wins, Kills: r.Kills, Harms: r.Harms})
+		out = append(out, cd.PartnerTotals{PartnerID: r.PartnerID, Fights: r.Fights, Wins: r.Wins, Kills: r.Kills, Harms: r.Harms})
 	}
 	return out, nil
 }

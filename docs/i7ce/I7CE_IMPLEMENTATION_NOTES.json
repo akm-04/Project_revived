@@ -1,0 +1,28 @@
+{
+  "status": "IMPLEMENTED_DEVELOPMENT_CHECKED_FROZEN_QUALIFICATION_PENDING",
+  "node": "ROOT/I7/I7C/I7C-E (independent aggregate exit barrier)",
+  "contract": "I7CE_PUBLIC_PROFILE_RICH_READS_V1",
+  "version": "v0.137.0",
+  "migration": "00072_i7c4fc_skins_board.sql (unchanged; no migration added)",
+  "content_revision": "5f7fe83b1c358a67e1a62fdc2670b1db5c00ef8891efd886d4d6fb5a46a355b7",
+  "plan_commit": null,
+  "architecture": [
+    "elementequipment Normal gate reads hero colour 16 (xyd.MAX_HERO_COLOR, Red+1 gear promotion) and no longer depends on the CA4-3B max_color policy value 5; max_color stays the one-click MID57 split ceiling",
+    "domain/combat PartnerTotals and History are the public mode performance read shapes; Top Floor, 1 on 1 and Arena owners expose PublicHistoryTx inside the caller transaction",
+    "publicprofile.RosterRecords builds rich showcase records from the MID1 roster composer Combat freezes from, plus known raw twice-awake stage and positive Conquer keys; unknown bases are omitted",
+    "publicprofile.ModeHistory answers 1829 HISTORY subtype 2 (ARENA=Top Floor, SUPER_ARENA=1 on 1, REGION_ARENA=Arena season Lord points); unranked rank omitted, partners no longer owned dropped; BATTLE_RECORD subtype 3 stays fail closed",
+    "history is wired only when the Combat mode owners are wired (GXB_COMBAT_ENTROPY_KEYS); rich records are always wired"
+  ],
+  "natives": [
+    "TestI7C2GProductionNormalSixteenLiveUnderMaxColorFive",
+    "TestI7C5BTopFloorLadderFightSettlementNative (PublicHistoryTx)",
+    "TestI7C5COneOnOneEntryMatchSettlementNative (PublicHistoryTx)",
+    "TestI7C5DArenaEntryFightSettlementNative (PublicHistoryTx)"
+  ],
+  "oracle": "tools/check_i7ce_source_oracle.py",
+  "not_claimed": [
+    "Original server display policy for unranked rank, unowned partners and unnamed players",
+    "BATTLE_RECORD subtype 3 (no source caller; STOCK_COMPATIBILITY_CLOSURE)",
+    "Photo/Scene 1012/1013 and forward-bound rows until their owners bind"
+  ]
+}

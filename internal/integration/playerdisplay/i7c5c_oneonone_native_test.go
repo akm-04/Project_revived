@@ -233,6 +233,12 @@ func TestI7C5COneOnOneEntryMatchSettlementNative(t *testing.T) {
 		scalar(t, pool, `SELECT count(*) FROM one_on_one_partner_usage WHERE player_id=$1`, int64(a.PlayerID)) < 2 {
 		t.Fatal("history facts")
 	}
+	if history, err := s.PublicHistoryTx(ctx, pool, b.PlayerID, time.Now()); err != nil || history.Fights != 1 || history.Version <= 0 {
+		t.Fatal("1829 SUPER_ARENA defender history", history, err)
+	}
+	if history, err := s.PublicHistoryTx(ctx, pool, a.PlayerID, time.Now()); err != nil || len(history.Partners) < 2 || history.Partners[0].Fights < 1 {
+		t.Fatal("1829 SUPER_ARENA partner usage", history, err)
+	}
 	wantStreak := int64(0)
 	if result.Win {
 		wantStreak = 1

@@ -7,14 +7,13 @@ import (
 	elem "gxb.local/backend/v2/internal/domain/elementequipment"
 	"gxb.local/backend/v2/internal/domain/grant"
 	"gxb.local/backend/v2/internal/domain/identity"
-	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/tx"
 	"sort"
 	"strconv"
 	"time"
 )
 
-func (s Service) eligible(ctx context.Context, q tx.Queryer, p identity.PlayerID, id int64, rev string, at time.Time, op operation.Context) (bool, error) {
+func (s Service) eligible(ctx context.Context, q tx.Queryer, p identity.PlayerID, id int64, rev string, at time.Time) (bool, error) {
 	h, e := s.Heroes.ReadHeroByPartnerIDTx(ctx, q, p, id)
 	if e != nil {
 		return false, e
@@ -54,20 +53,8 @@ func (s Service) eligible(ctx context.Context, q tx.Queryer, p identity.PlayerID
 	}
 	switch k {
 	case character.NormalHero:
-		if s.MaxHeroColor == nil {
-			return false, ErrUnavailable
-		}
-		revision, ok := op.Policies.Get("element_max_hero_color")
-		if !ok || revision != s.MaxHeroColor.MaxHeroColorPolicyRevision() {
-			return false, ErrProof
-		}
-		max, e := s.MaxHeroColor.MaxHeroColorTx(ctx, q, p, op)
-		if e != nil {
-			return false, e
-		}
-		if max < 16 {
-			return false, ErrUnavailable
-		}
+		// Source gate is the hero's own colour (xyd.MAX_HERO_COLOR, reached by MID51);
+		// max_color is only the MID57 one-click split and never gates Element.
 		if h.Color != 16 {
 			return false, nil
 		}
@@ -181,7 +168,7 @@ func (s Service) apply(ctx context.Context, t tx.Tx, a identity.ActorContext, d 
 		}
 	}
 	if cmd.Family == Equip || cmd.Family == Enhance {
-		eligible, e := s.eligible(ctx, t, a.PlayerID, cmd.PartnerID, d.ContentRevision, d.DecisionAt, d.Operation)
+		eligible, e := s.eligible(ctx, t, a.PlayerID, cmd.PartnerID, d.ContentRevision, d.DecisionAt)
 		if e != nil {
 			return nil, e
 		}

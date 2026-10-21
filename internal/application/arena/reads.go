@@ -10,6 +10,7 @@ import (
 	cd "gxb.local/backend/v2/internal/domain/combat"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/ids"
+	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
 // rankRows is the number of 301 rank_types 6 rows (C5D policy, as 5C).
@@ -196,4 +197,30 @@ func (r Reconciler) match(c context.Context, id ids.UUID, op gen.TimedOperation,
 	}
 	_, err = s.conclude(c, m, op.Operation(), time.Time{})
 	return true, err
+}
+
+// PublicHistoryTx is the 1829 HISTORY REGION_ARENA entry inside the caller's
+// transaction: season Lord points, season totals and that season's girl usage.
+func (s Service) PublicHistoryTx(c context.Context, q tx.Queryer, pid identity.PlayerID, at time.Time) (cd.History, error) {
+	if !s.ready() {
+		return cd.History{}, d.ErrUnavailable
+	}
+	_, catalog, err := s.catalogTx(c, q)
+	if err != nil {
+		return cd.History{}, err
+	}
+	p, found, err := s.Store.ReadPlayerTx(c, q, pid, false)
+	if err != nil || !found {
+		return cd.History{}, err
+	}
+	p = catalog.Rolled(p, at)
+	usage, err := s.Store.UsageTx(c, q, pid, p.Season)
+	if err != nil {
+		return cd.History{}, err
+	}
+	partners := make([]cd.PartnerTotals, 0, len(usage))
+	for _, u := range usage {
+		partners = append(partners, cd.PartnerTotals{TableID: u.TableID, Fights: u.Fights, Wins: u.Wins, Kills: u.Kills, Harms: u.Harms})
+	}
+	return cd.History{Points: p.Point, Fights: p.TotalFight, Wins: p.WinTimes, Version: p.StateVersion, Partners: partners}, nil
 }

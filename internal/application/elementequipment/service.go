@@ -164,19 +164,18 @@ type DebitPort interface {
 	ApplyMaterialDebitTx(context.Context, tx.Tx, *i5.PreparedMaterialDebit) (i5.MaterialDebitResult, error)
 }
 type Service struct {
-	MaxHeroColor i5.MaxHeroColorPolicyProvider
-	Timed        gen.TimedRunner
-	Reads        tx.Runner
-	Heroes       HeroPort
-	Owner        OwnerPort
-	Content      ContentPort
-	Players      playerroot.TxLocker
-	Fence        ActorFence
-	Values       ValuePort
-	Costs        DebitPort
-	Grants       i5.TxGrantSettler
-	Exchange     i5.TxMaterialExchange
-	Receipts     receipt.Store
+	Timed    gen.TimedRunner
+	Reads    tx.Runner
+	Heroes   HeroPort
+	Owner    OwnerPort
+	Content  ContentPort
+	Players  playerroot.TxLocker
+	Fence    ActorFence
+	Values   ValuePort
+	Costs    DebitPort
+	Grants   i5.TxGrantSettler
+	Exchange i5.TxMaterialExchange
+	Receipts receipt.Store
 }
 
 func (s Service) complete() bool {
@@ -342,19 +341,6 @@ func (s Service) Command(ctx context.Context, a identity.ActorContext, c Command
 	} else {
 		refs = append(refs, policy.Ref{Name: "elementequipment", Version: LifecyclePolicy})
 	}
-	if s.MaxHeroColor != nil {
-		rev := s.MaxHeroColor.MaxHeroColorPolicyRevision()
-		if rev == "" {
-			return Result{}, ErrUnavailable
-		}
-		if v, ok := op.Policies.Get("element_max_hero_color"); ok {
-			if v != rev {
-				return Result{}, ErrProof
-			}
-		} else {
-			refs = append(refs, policy.Ref{Name: "element_max_hero_color", Version: rev})
-		}
-	}
 	if op.Policies, e = policy.NewSet(refs...); e != nil {
 		return Result{}, e
 	}
@@ -383,7 +369,7 @@ func (s Service) Command(ctx context.Context, a identity.ActorContext, c Command
 				return nil
 			}
 			if c.Family == Equip || c.Family == Enhance {
-				ok, e := s.eligible(ctx, sc.Tx, a.PlayerID, c.PartnerID, revision, fresh.DecisionAt, fresh.Operation)
+				ok, e := s.eligible(ctx, sc.Tx, a.PlayerID, c.PartnerID, revision, fresh.DecisionAt)
 				if e != nil {
 					return e
 				}

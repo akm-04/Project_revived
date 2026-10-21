@@ -39,7 +39,7 @@ type profileCharacterBases struct {
 func (b profileCharacterBases) PetBaseObservationTx(c context.Context, q tx.Queryer, p identity.PlayerID, id int64) (characterasset.PetBaseObservation, error) {
 	return b.Pet.PetBaseObservationTx(c, q, p, id)
 }
-func registerPublicProfileReads(c context.Context, p *pg.Pool, r tx.Runner, a realtimeauth.GameplayAuthorityPort, receipts receipt.Store, content contentstore.Store, display playerdisplay.Service, metrics app.CanonicalMetricProvider, router *httpedge.Router) error {
+func registerPublicProfileReads(c context.Context, p *pg.Pool, r tx.Runner, a realtimeauth.GameplayAuthorityPort, receipts receipt.Store, content contentstore.Store, display playerdisplay.Service, metrics app.CanonicalMetricProvider, records app.ShowcaseRecordBuilder, history app.HistoryReader, router *httpedge.Router) error {
 	rev, e := content.ActiveRevision(c, p)
 	if e != nil {
 		return e
@@ -69,8 +69,7 @@ func registerPublicProfileReads(c context.Context, p *pg.Pool, r tx.Runner, a re
 	basic := app.BasicReader{Roots: app.RootService{Store: publicprofilestore.Store{}}, Players: i4store.PlayerRootLocker{}, Fence: i5store.Store{}, PlayerBasis: i5store.Store{}, Relations: socialrelationstore.Store{}, Content: content}
 	fb := feedback.Service{Roots: feedback.RootService{Store: profilefeedbackstore.Store{}}, Content: content, Recipients: i4store.PlayerRootLocker{}, Authors: i5store.Store{}, Display: display}
 	bases := profileCharacterBases{characterhero.BaseObservationReader{Store: characterstore.Store{}, Content: content}, characterpet.BaseObservationReader{Store: characterstore.Store{}}}
-	records := app.UnavailableShowcaseRecords{}
-	reads := app.ReadService{Runner: r, Fresh: p, Time: pg.AuthoritativeTime{Queryer: p}, Content: content, Basic: basic, Display: display, Guilds: guildcore.PublicViewReader{Store: guildstore.Store{}, Invites: invite.Source}, Feedback: fb.Roots, Comments: feedback.CommentService{Base: fb, Store: profilefeedbackstore.Store{}}, Media: publicprofilestore.Store{}, Metrics: metrics, Slots: publicprofilestore.Store{}, Characters: characterasset.PublicShowcaseCharacterReader{RawSkills: characterhero.RawSkillObservationReader{Store: characterstore.Store{}, Content: content}, OwnerComposite: &characterasset.OwnedCompositeBuilder{HeroBase: bases, PetBase: bases}}, Records: records}
+	reads := app.ReadService{Runner: r, Fresh: p, Time: pg.AuthoritativeTime{Queryer: p}, Content: content, Basic: basic, Display: display, Guilds: guildcore.PublicViewReader{Store: guildstore.Store{}, Invites: invite.Source}, Feedback: fb.Roots, Comments: feedback.CommentService{Base: fb, Store: profilefeedbackstore.Store{}}, Media: publicprofilestore.Store{}, Metrics: metrics, Slots: publicprofilestore.Store{}, Characters: characterasset.PublicShowcaseCharacterReader{RawSkills: characterhero.RawSkillObservationReader{Store: characterstore.Store{}, Content: content}, OwnerComposite: &characterasset.OwnedCompositeBuilder{HeroBase: bases, PetBase: bases}}, Records: records, History: history}
 	wire := app.ShowcaseWireService{Timed: gen.TimedRunner{Binder: gen.Binder{Time: pg.AuthoritativeTime{Queryer: p}}, Runner: r}, Reads: r, Fresh: p, Roots: basic.Roots, Players: basic.Players, Fence: basic.Fence, Receipts: receipts, Content: content, Slots: publicprofilestore.Store{}, References: characterstore.Store{}, Bases: bases, Records: records}
 	d := stockruntime.PublicProfileReadDispatcher{Authority: a, Service: reads, Showcase: wire}
 	for _, mid := range []uint16{1829, 1832, 1838, 1840} {
@@ -78,6 +77,6 @@ func registerPublicProfileReads(c context.Context, p *pg.Pool, r tx.Runner, a re
 			return e
 		}
 	}
-	log.Print("PublicProfile component routes: metric1011/emptyshowcase qualified; nonemptyrichdetail and history fail closed until actual producers qualify; full I7B6B remains partial")
+	log.Printf("PublicProfile component routes: metric1011/showcase rich records qualified; history subtype 2 live=%t (needs Combat modes); battle records subtype 3 fail closed", history != nil)
 	return nil
 }

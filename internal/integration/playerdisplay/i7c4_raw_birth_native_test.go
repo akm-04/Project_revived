@@ -15,7 +15,6 @@ import (
 	ca "gxb.local/backend/v2/internal/application/characterasset"
 	hero "gxb.local/backend/v2/internal/application/characterhero"
 	"gxb.local/backend/v2/internal/application/commerceprivilege"
-	"gxb.local/backend/v2/internal/application/i5"
 	"gxb.local/backend/v2/internal/application/publicstats"
 	"gxb.local/backend/v2/internal/domain/character"
 )
@@ -33,7 +32,6 @@ func rawBirthStats(p *pg.Pool) publicstats.Service {
 	inscriptions.Eligibility = characterstore.InscriptionHeroPort{Store: characterstore.Store{Queryer: p}}
 	s.Inscription = inscriptions
 	elements := elementService(p, p)
-	elements.MaxHeroColor = i5.PreservationMaxHeroColorProvider{}
 	s.Element = elements
 	courses := courseService(p, p)
 	courses.Privileges = commerceprivilege.Provider{Store: commerceprivilegestore.Store{}, Content: contentstore.Store{Queryer: p}}

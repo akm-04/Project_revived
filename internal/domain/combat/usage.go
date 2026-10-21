@@ -19,6 +19,27 @@ type PartnerUse struct {
 	Harms string
 }
 
+// PartnerTotals is one partner's accumulated usage row in a mode.
+type PartnerTotals struct {
+	PartnerID int64
+	TableID   int64
+	Fights    int64
+	Wins      int64
+	Kills     int64
+	Harms     string
+}
+
+// History is one player's public performance in a mode (a 1829 HISTORY
+// entry). Rank 0 is unranked; Points is the Arena season Lord points.
+type History struct {
+	Rank     int64
+	Points   int64
+	Fights   int64
+	Wins     int64
+	Version  int64
+	Partners []PartnerTotals
+}
+
 // Usage reads the report's non-summon fighters of one side ("A" challenger,
 // "B" defender) as BattleCreateReport.writeReport recorded them.
 func Usage(report []byte, side string, won bool) ([]PartnerUse, error) {

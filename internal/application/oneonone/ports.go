@@ -45,6 +45,7 @@ type Store interface {
 	RecordTx(context.Context, tx.Queryer, int64) (d.Record, bool, error)
 	RetainedRoundTx(context.Context, tx.Queryer, ids.UUID) (bool, error)
 	AddUsageTx(context.Context, tx.Tx, identity.PlayerID, []cd.PartnerUse) error
+	UsageTx(context.Context, tx.Queryer, identity.PlayerID) ([]cd.PartnerTotals, error)
 	InsertSettlementTx(context.Context, tx.Tx, d.Settlement) error
 	TitlesTx(context.Context, tx.Queryer, identity.PlayerID, int64) ([]d.TitleAward, error)
 }
