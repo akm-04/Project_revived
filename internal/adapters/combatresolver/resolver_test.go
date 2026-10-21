@@ -89,6 +89,28 @@ func TestResolverFailsClosed(t *testing.T) {
 	}
 }
 
+// H-38: a prepared machine holds no attempt data and binds exactly one attempt.
+func TestPreparedMachineIsSingleUseAndFailsClosed(t *testing.T) {
+	corpus, _ := combatcorpus.Load()
+	m, err := prepare(corpus)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer m.state.Close()
+	for _, probe := range []string{"math.random()", "math.randomseed(1)", "os.time()", "os.clock()", "local _ = combat_input.team_a"} {
+		if err = m.run(probe, "prepare probe"); err == nil || !strings.Contains(err.Error(), "COMBAT_PREPARE_") {
+			t.Fatal(probe, err)
+		}
+	}
+	s := templateSnapshot(t, []combat.Actor{TemplateHero(t, 10001001, 1, 1, 1)}, []combat.Actor{TemplateHero(t, 10001002, 1, 1, 1)})
+	if err = m.bind(s, [32]byte{1}); err != nil {
+		t.Fatal(err)
+	}
+	if err = m.bind(s, [32]byte{2}); !errors.Is(err, ErrDeterministic) {
+		t.Fatal("second attempt bound", err)
+	}
+}
+
 func TestEvaluateActorsReturnsSourceTotals(t *testing.T) {
 	corpus, _ := combatcorpus.Load()
 	s := templateSnapshot(t, []combat.Actor{TemplateHero(t, 10001001, 3, 20, 2)}, []combat.Actor{TemplateHero(t, 10001002, 1, 1, 1)})

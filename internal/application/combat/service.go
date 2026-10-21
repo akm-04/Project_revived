@@ -178,6 +178,9 @@ func (s Service) Resolve(ctx context.Context, op operation.Context, attemptID id
 		return Resolved{}, err
 	}
 	output, workerErr := s.Worker.Resolve(ctx, snapshot, attempt.SnapshotHash, root)
+	if errors.Is(workerErr, ErrWorkerSaturated) {
+		return Resolved{}, workerErr
+	}
 	if workerErr != nil {
 		permanent := errors.Is(workerErr, d.ErrResolverPermanent)
 		if !permanent && !errors.Is(workerErr, d.ErrResolverRetryable) {

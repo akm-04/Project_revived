@@ -96,7 +96,11 @@ cc = { c4b = function(r, g, b, a) return { r = r, g = g, b = b, a = a } end }
 tolua = { isnull = function(v) return v == nil end }
 transition = { stopTarget = function() end }
 
-local scene_player = { playerID = input.scene_player }
+-- The scene player is attempt input, so it is bound when the driver begins.
+local scene_player = {}
+function combat_begin()
+	scene_player.playerID = input.scene_player
+end
 xyd.ModelManager = {
 	get = function()
 		return {

@@ -28,6 +28,9 @@ var bootstrapLua string
 //go:embed driver.lua
 var driverLua string
 
+//go:embed prepare.lua
+var prepareLua string
+
 // SparseArrayLimit is the qualified VM profile for sparse numeric source IDs.
 const SparseArrayLimit = 65536
 
@@ -48,6 +51,7 @@ type machine struct {
 	state  *lua.LState
 	corpus *combatcorpus.Corpus
 	stream *combat.Stream
+	osTime int64
 }
 
 func deterministic(format string, args ...any) error {
@@ -129,12 +133,24 @@ func (m *machine) run(code, name string) (err error) {
 }
 
 func newMachine(corpus *combatcorpus.Corpus, snapshot combat.Snapshot, root [32]byte) (*machine, error) {
-	if snapshot.CorpusID != corpus.ID() || snapshot.SourceArchiveSHA256 != corpus.SourceArchiveSHA256() || snapshot.Validate() != nil {
-		return nil, deterministic("snapshot does not match the embedded corpus")
+	m, err := prepare(corpus)
+	if err != nil {
+		return nil, err
 	}
+	if err = m.bind(snapshot, root); err != nil {
+		m.state.Close()
+		return nil, err
+	}
+	return m, nil
+}
+
+// prepare builds the attempt-independent VM, including the source tables the
+// battle would otherwise construct on first use (I8-2B). It reads no attempt
+// data: entropy, clock and combat_input fail closed until bind.
+func prepare(corpus *combatcorpus.Corpus) (*machine, error) {
 	lua.MaxArrayIndex = SparseArrayLimit
 	state := lua.NewState(lua.Options{SkipOpenLibs: true})
-	m := &machine{state: state, corpus: corpus, stream: combat.NewStream(root)}
+	m := &machine{state: state, corpus: corpus}
 	for _, lib := range []struct {
 		name string
 		open lua.LGFunction
@@ -169,7 +185,7 @@ func newMachine(corpus *combatcorpus.Corpus, snapshot combat.Snapshot, root [32]
 	parserModule := state.NewFunction(func(l *lua.LState) int { l.Push(parser); return 1 })
 	state.SetField(preload, "lib.battle.app.common.tables.TableParser", parserModule)
 	state.SetField(preload, "app.common.tables.TableParser", parserModule)
-	m.installEntropy(snapshot)
+	m.installEntropy()
 	state.SetGlobal("combat_json_encode", state.NewFunction(func(l *lua.LState) int {
 		v, err := toJSON(l.CheckAny(1), 0)
 		if err != nil {
@@ -184,23 +200,55 @@ func newMachine(corpus *combatcorpus.Corpus, snapshot combat.Snapshot, root [32]
 		l.Push(lua.LString(raw))
 		return 1
 	}))
-	input, err := inputTable(state, snapshot)
-	if err != nil {
-		state.Close()
-		return nil, err
-	}
+	input := state.NewTable()
+	state.SetMetatable(input, unbound(state, "COMBAT_PREPARE_INPUT_UNBOUND"))
 	state.SetGlobal("combat_input", input)
-	if err = m.run(bootstrapLua, "combat bootstrap"); err != nil {
-		state.Close()
-		return nil, err
+	for _, chunk := range []struct{ code, name string }{{bootstrapLua, "combat bootstrap"}, {prepareLua, "combat prepare"}} {
+		if err := m.run(chunk.code, chunk.name); err != nil {
+			state.Close()
+			return nil, err
+		}
 	}
 	return m, nil
 }
 
-func (m *machine) installEntropy(snapshot combat.Snapshot) {
+// bind attaches the single attempt a machine ever resolves: its snapshot
+// input, entropy stream and frozen decision instant.
+func (m *machine) bind(snapshot combat.Snapshot, root [32]byte) error {
+	if m.stream != nil {
+		return deterministic("machine is already bound to an attempt")
+	}
+	if snapshot.CorpusID != m.corpus.ID() || snapshot.SourceArchiveSHA256 != m.corpus.SourceArchiveSHA256() || snapshot.Validate() != nil {
+		return deterministic("snapshot does not match the embedded corpus")
+	}
+	input, err := inputTable(m.state, snapshot)
+	if err != nil {
+		return err
+	}
+	target := m.state.GetGlobal("combat_input").(*lua.LTable)
+	m.state.SetMetatable(target, lua.LNil)
+	input.ForEach(func(key, value lua.LValue) { target.RawSet(key, value) })
+	m.stream, m.osTime = combat.NewStream(root), snapshot.OSTime()
+	return nil
+}
+
+func unbound(l *lua.LState, reason string) *lua.LTable {
+	guard := l.NewTable()
+	l.SetField(guard, "__index", l.NewFunction(func(l *lua.LState) int {
+		l.RaiseError("%s", reason)
+		return 0
+	}))
+	return guard
+}
+
+func (m *machine) installEntropy() {
 	state := m.state
 	math := state.GetGlobal("math").(*lua.LTable)
 	state.SetField(math, "random", state.NewFunction(func(l *lua.LState) int {
+		if m.stream == nil {
+			l.RaiseError("COMBAT_PREPARE_ENTROPY_UNBOUND")
+			return 0
+		}
 		var value int64
 		var err error
 		switch l.GetTop() {
@@ -222,23 +270,37 @@ func (m *machine) installEntropy(snapshot combat.Snapshot) {
 		return 1
 	}))
 	state.SetField(math, "randomseed", state.NewFunction(func(l *lua.LState) int {
+		if m.stream == nil {
+			l.RaiseError("COMBAT_PREPARE_ENTROPY_UNBOUND")
+			return 0
+		}
 		if err := m.stream.Reseed(float64(l.CheckNumber(1))); err != nil {
 			l.RaiseError("%s", err)
 		}
 		return 0
 	}))
-	osTime := snapshot.OSTime()
 	clock := state.NewTable()
 	state.SetField(clock, "time", state.NewFunction(func(l *lua.LState) int {
+		if m.stream == nil {
+			l.RaiseError("COMBAT_PREPARE_CLOCK_UNBOUND")
+			return 0
+		}
 		if l.GetTop() != 0 {
 			l.RaiseError("COMBAT_ADAPTER_OS_TIME_ARGUMENTS_UNSUPPORTED")
 			return 0
 		}
-		l.Push(lua.LNumber(osTime))
+		l.Push(lua.LNumber(m.osTime))
 		return 1
 	}))
 	// Virtual CPU clock: the only source use reseeds a fighter-local stream.
-	state.SetField(clock, "clock", state.NewFunction(func(l *lua.LState) int { l.Push(lua.LNumber(0)); return 1 }))
+	state.SetField(clock, "clock", state.NewFunction(func(l *lua.LState) int {
+		if m.stream == nil {
+			l.RaiseError("COMBAT_PREPARE_CLOCK_UNBOUND")
+			return 0
+		}
+		l.Push(lua.LNumber(0))
+		return 1
+	}))
 	state.SetGlobal("combat_os", clock)
 }
 

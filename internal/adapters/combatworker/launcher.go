@@ -1,7 +1,10 @@
-// Package combatworker runs one gxb-combat-worker process per resolution with
-// an empty environment and working directory, no inherited descriptors beyond
-// stdio, enforced resource limits, a process-group wall deadline and bounded
-// output. It classifies failures for the Combat owner.
+// Package combatworker runs each resolution in its own single-use
+// gxb-combat-worker process with an empty environment and working directory,
+// no inherited descriptors beyond stdio, enforced resource limits, a
+// process-group wall deadline and bounded output. At most a configured number
+// of worker processes are alive; a spare prepares its attempt-independent
+// state before any attempt is handed to it (I8-2B). It classifies failures for
+// the Combat owner.
 package combatworker
 
 import (
@@ -15,6 +18,7 @@ import (
 	"os"
 	"os/exec"
 	"strconv"
+	"sync"
 	"syscall"
 	"time"
 
@@ -25,7 +29,7 @@ import (
 
 const maxStderrBytes = 64 << 10
 
-type Launcher struct {
+type Limits struct {
 	Binary         string
 	Deadline       time.Duration
 	AddressSpace   uint64
@@ -33,6 +37,34 @@ type Launcher struct {
 	OpenFiles      uint64
 	MaxOutputBytes int64
 	ExpectedCorpus string
+}
+
+func (l Limits) configured() bool {
+	return l.Binary != "" && l.Deadline > 0 && l.AddressSpace != 0 && l.CPUSeconds != 0 && l.OpenFiles != 0 && l.MaxOutputBytes > 0 && len(l.ExpectedCorpus) == 64
+}
+
+// Launcher admits at most `workers` live processes. Every slot token is one
+// live or starting process; an idle spare keeps its token in spares.
+type Launcher struct {
+	limits        Limits
+	admissionWait time.Duration
+	slots         chan struct{}
+	spares        chan *process
+	mutex         sync.Mutex
+	closed        bool
+}
+
+func New(limits Limits, workers int, admissionWait time.Duration) *Launcher {
+	return &Launcher{limits: limits, admissionWait: admissionWait, slots: make(chan struct{}, max(workers, 0)), spares: make(chan *process, max(workers, 0))}
+}
+
+type process struct {
+	command *exec.Cmd
+	workdir string
+	stdin   io.WriteCloser
+	stdout  *cappedBuffer
+	stderr  *cappedBuffer
+	done    chan error
 }
 
 type cappedBuffer struct {
@@ -59,55 +91,155 @@ func permanent(format string, args ...any) error {
 	return fmt.Errorf("%w: %s", d.ErrResolverPermanent, fmt.Sprintf(format, args...))
 }
 
-func (l Launcher) Resolve(ctx context.Context, snapshot []byte, snapshotHash string, root [32]byte) (app.WorkerOutput, error) {
-	if l.Binary == "" || l.Deadline <= 0 || l.AddressSpace == 0 || l.CPUSeconds == 0 || l.OpenFiles == 0 || l.MaxOutputBytes <= 0 || len(l.ExpectedCorpus) != 64 {
+func (l *Launcher) Resolve(ctx context.Context, snapshot []byte, snapshotHash string, root [32]byte) (app.WorkerOutput, error) {
+	if !l.limits.configured() || cap(l.slots) == 0 || l.admissionWait <= 0 {
 		return app.WorkerOutput{}, permanent("launcher limits are not configured")
 	}
 	request, err := json.Marshal(combatresolver.Request{Snapshot: snapshot, SnapshotHash: snapshotHash, EntropyRoot: hex.EncodeToString(root[:])})
 	if err != nil || len(request) > combatresolver.MaxRequestBytes {
 		return app.WorkerOutput{}, permanent("request encoding or bound")
 	}
+	p, err := l.take(ctx)
+	if err != nil {
+		return app.WorkerOutput{}, err
+	}
+	defer l.refill()
+	return l.run(ctx, p, request)
+}
+
+// take hands out an idle spare, or starts a process when a slot is free, and
+// refuses once the admission wait elapses with every slot busy.
+func (l *Launcher) take(ctx context.Context) (*process, error) {
+	timer := time.NewTimer(l.admissionWait)
+	defer timer.Stop()
+	select {
+	case p := <-l.spares:
+		return p, nil
+	case l.slots <- struct{}{}:
+	case <-timer.C:
+		return nil, fmt.Errorf("%w: %d workers busy for %s", app.ErrWorkerSaturated, cap(l.slots), l.admissionWait)
+	case <-ctx.Done():
+		return nil, retryable("admission: %v", ctx.Err())
+	}
+	p, err := l.start()
+	if err != nil {
+		<-l.slots
+		return nil, err
+	}
+	l.fill()
+	return p, nil
+}
+
+// fill starts a spare for every free slot, so only attempts arriving before
+// the first spares finish preparing pay the cold start.
+func (l *Launcher) fill() {
+	for {
+		select {
+		case l.slots <- struct{}{}:
+			l.refill()
+		default:
+			return
+		}
+	}
+}
+
+// refill prepares a spare in the background under a slot token the caller
+// holds; the token passes to the spare.
+// shortcut: a spare is offered as soon as it starts, so an attempt may wait out
+// the rest of its preparation; add a readiness signal if load nears pool capacity.
+func (l *Launcher) refill() {
+	go func() {
+		p, err := l.start()
+		if err != nil {
+			<-l.slots
+			return
+		}
+		l.mutex.Lock()
+		defer l.mutex.Unlock()
+		if l.closed {
+			p.kill()
+			<-l.slots
+			return
+		}
+		l.spares <- p
+	}()
+}
+
+// Close kills idle spares; attempts in flight finish under their own deadline.
+func (l *Launcher) Close() {
+	l.mutex.Lock()
+	defer l.mutex.Unlock()
+	l.closed = true
+	for {
+		select {
+		case p := <-l.spares:
+			p.kill()
+			<-l.slots
+		default:
+			return
+		}
+	}
+}
+
+func (l *Launcher) start() (*process, error) {
 	workdir, err := os.MkdirTemp("", "gxb-combat-worker-")
 	if err != nil {
-		return app.WorkerOutput{}, retryable("workdir: %v", err)
+		return nil, retryable("workdir: %v", err)
 	}
-	defer os.RemoveAll(workdir)
-	deadline, cancel := context.WithTimeout(ctx, l.Deadline)
+	command := exec.Command(l.limits.Binary,
+		"-max-address-space", strconv.FormatUint(l.limits.AddressSpace, 10),
+		"-max-cpu-seconds", strconv.FormatUint(l.limits.CPUSeconds, 10),
+		"-max-open-files", strconv.FormatUint(l.limits.OpenFiles, 10))
+	command.Env = []string{}
+	command.Dir = workdir
+	p := &process{command: command, workdir: workdir, stdout: &cappedBuffer{limit: int(l.limits.MaxOutputBytes) + 1}, stderr: &cappedBuffer{limit: maxStderrBytes}, done: make(chan error, 1)}
+	command.Stdout, command.Stderr = p.stdout, p.stderr
+	command.SysProcAttr = &syscall.SysProcAttr{Setpgid: true, Pdeathsig: syscall.SIGKILL}
+	if p.stdin, err = command.StdinPipe(); err != nil {
+		os.RemoveAll(workdir)
+		return nil, retryable("stdin: %v", err)
+	}
+	if err = command.Start(); err != nil {
+		os.RemoveAll(workdir)
+		return nil, retryable("start: %v", err)
+	}
+	go func() { p.done <- command.Wait() }()
+	return p, nil
+}
+
+func (p *process) kill() {
+	_ = syscall.Kill(-p.command.Process.Pid, syscall.SIGKILL)
+	<-p.done
+	os.RemoveAll(p.workdir)
+}
+
+// run hands one attempt to a taken process; the wall deadline starts here.
+func (l *Launcher) run(ctx context.Context, p *process, request []byte) (app.WorkerOutput, error) {
+	deadline, cancel := context.WithTimeout(ctx, l.limits.Deadline)
 	defer cancel()
-	cmd := exec.Command(l.Binary,
-		"-max-address-space", strconv.FormatUint(l.AddressSpace, 10),
-		"-max-cpu-seconds", strconv.FormatUint(l.CPUSeconds, 10),
-		"-max-open-files", strconv.FormatUint(l.OpenFiles, 10))
-	cmd.Env = []string{}
-	cmd.Dir = workdir
-	cmd.Stdin = bytes.NewReader(request)
-	stdout := &cappedBuffer{limit: int(l.MaxOutputBytes) + 1}
-	stderr := &cappedBuffer{limit: maxStderrBytes}
-	cmd.Stdout, cmd.Stderr = stdout, stderr
-	cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true, Pdeathsig: syscall.SIGKILL}
-	if err = cmd.Start(); err != nil {
-		return app.WorkerOutput{}, retryable("start: %v", err)
-	}
-	done := make(chan error, 1)
-	go func() { done <- cmd.Wait() }()
+	go func() {
+		_, _ = p.stdin.Write(request)
+		_ = p.stdin.Close()
+	}()
+	var err error
 	select {
-	case err = <-done:
+	case err = <-p.done:
+		os.RemoveAll(p.workdir)
 	case <-deadline.Done():
-		_ = syscall.Kill(-cmd.Process.Pid, syscall.SIGKILL)
-		<-done
-		return app.WorkerOutput{}, retryable("wall deadline %s exceeded", l.Deadline)
+		p.kill()
+		return app.WorkerOutput{}, retryable("wall deadline %s exceeded", l.limits.Deadline)
 	}
 	if err != nil {
-		return app.WorkerOutput{}, retryable("worker exit: %v: %s", err, stderr.String())
+		return app.WorkerOutput{}, retryable("worker exit: %v: %s", err, p.stderr.String())
 	}
-	if stdout.overflow || stdout.Len() > int(l.MaxOutputBytes) {
-		return app.WorkerOutput{}, permanent("worker output exceeds %d bytes", l.MaxOutputBytes)
+	if p.stdout.overflow || p.stdout.Len() > int(l.limits.MaxOutputBytes) {
+		return app.WorkerOutput{}, permanent("worker output exceeds %d bytes", l.limits.MaxOutputBytes)
 	}
-	return l.decode(stdout.Bytes())
+	return l.decode(p.stdout.Bytes())
 }
 
 // decode revalidates worker output before it reaches persistence.
-func (l Launcher) decode(raw []byte) (app.WorkerOutput, error) {
+func (l *Launcher) decode(raw []byte) (app.WorkerOutput, error) {
 	var response combatresolver.Response
 	decoder := json.NewDecoder(bytes.NewReader(raw))
 	decoder.DisallowUnknownFields()
@@ -117,8 +249,8 @@ func (l Launcher) decode(raw []byte) (app.WorkerOutput, error) {
 	if _, err := decoder.Token(); !errors.Is(err, io.EOF) {
 		return app.WorkerOutput{}, retryable("trailing worker output")
 	}
-	if response.CorpusID != l.ExpectedCorpus {
-		return app.WorkerOutput{}, permanent("worker corpus %q differs from %q", response.CorpusID, l.ExpectedCorpus)
+	if response.CorpusID != l.limits.ExpectedCorpus {
+		return app.WorkerOutput{}, permanent("worker corpus %q differs from %q", response.CorpusID, l.limits.ExpectedCorpus)
 	}
 	switch response.Status {
 	case combatresolver.StatusPermanent:

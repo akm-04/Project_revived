@@ -12,6 +12,7 @@ import (
 	"testing"
 	"time"
 
+	app "gxb.local/backend/v2/internal/application/combat"
 	"gxb.local/backend/v2/internal/content/combatcorpus"
 	d "gxb.local/backend/v2/internal/domain/combat"
 )
@@ -34,12 +35,22 @@ func TestMain(m *testing.M) {
 	os.Exit(code)
 }
 
-func launcher(t *testing.T) Launcher {
+func limits(t *testing.T) Limits {
 	corpus, err := combatcorpus.Load()
 	if err != nil {
 		t.Fatal(err)
 	}
-	return Launcher{Binary: workerBinary, Deadline: 90 * time.Second, AddressSpace: 4 << 30, CPUSeconds: 120, OpenFiles: 64, MaxOutputBytes: 16 << 20, ExpectedCorpus: corpus.ID()}
+	return Limits{Binary: workerBinary, Deadline: 90 * time.Second, AddressSpace: 4 << 30, CPUSeconds: 120, OpenFiles: 64, MaxOutputBytes: 16 << 20, ExpectedCorpus: corpus.ID()}
+}
+
+func pool(t *testing.T, l Limits, workers int, admissionWait time.Duration) *Launcher {
+	launcher := New(l, workers, admissionWait)
+	t.Cleanup(launcher.Close)
+	return launcher
+}
+
+func launcher(t *testing.T) *Launcher {
+	return pool(t, limits(t), 1, time.Minute)
 }
 
 func hero(t *testing.T, tableID int64) d.Actor {
@@ -70,7 +81,8 @@ func snapshot(t *testing.T, a, b d.Actor) ([]byte, string) {
 
 var root = sha256.Sum256([]byte("worker-test-root"))
 
-// A04: fresh worker processes reproduce identical bytes for one snapshot/root.
+// A04: fresh worker processes reproduce identical bytes for one snapshot/root;
+// the second attempt runs on a spare prepared before it arrived.
 func TestFreshProcessesAreDeterministic(t *testing.T) {
 	raw, hash := snapshot(t, hero(t, 10001001), hero(t, 10001002))
 	l := launcher(t)
@@ -140,20 +152,20 @@ func TestFailureClassification(t *testing.T) {
 	raw, hash := snapshot(t, hero(t, 10001001), hero(t, 10001002))
 	cases := []struct {
 		name   string
-		adjust func(*Launcher)
+		adjust func(*Limits)
 		raw    []byte
 		want   error
 	}{
-		{"wall deadline kill", func(l *Launcher) { l.Deadline = 200 * time.Millisecond }, raw, d.ErrResolverRetryable},
-		{"address space exhaustion", func(l *Launcher) { l.AddressSpace = 96 << 20 }, raw, d.ErrResolverRetryable},
-		{"cpu limit kill", func(l *Launcher) { l.CPUSeconds = 1 }, raw, d.ErrResolverRetryable},
-		{"output cap", func(l *Launcher) { l.MaxOutputBytes = 512 }, raw, d.ErrResolverPermanent},
-		{"tampered snapshot", func(*Launcher) {}, bytes.Replace(raw, []byte(`"star":3`), []byte(`"star":4`), 1), d.ErrResolverPermanent},
+		{"wall deadline kill", func(l *Limits) { l.Deadline = 200 * time.Millisecond }, raw, d.ErrResolverRetryable},
+		{"address space exhaustion", func(l *Limits) { l.AddressSpace = 96 << 20 }, raw, d.ErrResolverRetryable},
+		{"cpu limit kill", func(l *Limits) { l.CPUSeconds = 1 }, raw, d.ErrResolverRetryable},
+		{"output cap", func(l *Limits) { l.MaxOutputBytes = 512 }, raw, d.ErrResolverPermanent},
+		{"tampered snapshot", func(*Limits) {}, bytes.Replace(raw, []byte(`"star":3`), []byte(`"star":4`), 1), d.ErrResolverPermanent},
 	}
 	for _, c := range cases {
-		l := launcher(t)
+		l := limits(t)
 		c.adjust(&l)
-		_, err := l.Resolve(context.Background(), c.raw, hash, root)
+		_, err := pool(t, l, 1, time.Minute).Resolve(context.Background(), c.raw, hash, root)
 		if !errors.Is(err, c.want) {
 			t.Fatalf("%s: got %v", c.name, err)
 		}
@@ -161,5 +173,36 @@ func TestFailureClassification(t *testing.T) {
 	missingRaw, missingHash := snapshot(t, hero(t, 11001042), hero(t, 10001002))
 	if _, err := launcher(t).Resolve(context.Background(), missingRaw, missingHash, root); !errors.Is(err, d.ErrResolverPermanent) {
 		t.Fatal("absent fighter class must be a permanent script failure", err)
+	}
+}
+
+// H-39/H-11: a busy pool refuses within the admission wait instead of queueing
+// without bound, and admits again once a slot frees.
+func TestSaturatedPoolRefusesThenAdmits(t *testing.T) {
+	raw, hash := snapshot(t, hero(t, 10001001), hero(t, 10001002))
+	l := pool(t, limits(t), 1, 300*time.Millisecond)
+	busy := make(chan error, 1)
+	go func() {
+		_, err := l.Resolve(context.Background(), raw, hash, root)
+		busy <- err
+	}()
+	time.Sleep(100 * time.Millisecond)
+	began := time.Now()
+	_, err := l.Resolve(context.Background(), raw, hash, root)
+	if !errors.Is(err, app.ErrWorkerSaturated) || !errors.Is(err, d.ErrResolverRetryable) {
+		t.Fatal("saturated pool admitted or misclassified", err)
+	}
+	if waited := time.Since(began); waited > 2*time.Second {
+		t.Fatal("refusal took", waited)
+	}
+	if err = <-busy; err != nil {
+		t.Fatal(err)
+	}
+	admitted := pool(t, limits(t), 1, time.Minute)
+	if _, err = admitted.Resolve(context.Background(), raw, hash, root); err != nil {
+		t.Fatal(err)
+	}
+	if _, err = New(limits(t), 0, time.Second).Resolve(context.Background(), raw, hash, root); !errors.Is(err, d.ErrResolverPermanent) {
+		t.Fatal("pool without workers must refuse permanently", err)
 	}
 }

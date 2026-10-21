@@ -2,6 +2,7 @@
 -- original server wrapper's sendBattleResult is replaced by report capture.
 local MaxFrames = 1000000
 local input = combat_input
+combat_begin()
 local waves = {}
 for i, wave in ipairs(input.waves_b) do
 	waves[i] = combat_models(wave)

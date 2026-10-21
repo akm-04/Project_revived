@@ -7,6 +7,7 @@ package combat
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	ca "gxb.local/backend/v2/internal/application/characterasset"
@@ -43,8 +44,13 @@ type WorkerOutput struct {
 	EntropyReseeds uint64
 }
 
+// ErrWorkerSaturated refuses an attempt before any worker ran it
+// (I8_WORKER_ADMISSION_V1); the attempt stays untouched and runnable.
+var ErrWorkerSaturated = fmt.Errorf("%w: worker admission saturated", d.ErrResolverRetryable)
+
 // Worker resolves one snapshot in an isolated process. Errors wrap
-// d.ErrResolverRetryable or d.ErrResolverPermanent.
+// d.ErrResolverRetryable or d.ErrResolverPermanent; ErrWorkerSaturated means
+// no worker ran.
 type Worker interface {
 	Resolve(ctx context.Context, snapshot []byte, snapshotHash string, root [32]byte) (WorkerOutput, error)
 }

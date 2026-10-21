@@ -57,7 +57,14 @@ var (
 	combatWorkerErr    error
 )
 
-func combatLauncher(t *testing.T) combatworker.Launcher {
+func combatLauncher(t *testing.T) *combatworker.Launcher {
+	t.Helper()
+	launcher := combatworker.New(combatLimits(t), 3, 5*time.Second)
+	t.Cleanup(launcher.Close)
+	return launcher
+}
+
+func combatLimits(t *testing.T) combatworker.Limits {
 	t.Helper()
 	combatWorkerOnce.Do(func() {
 		dir, err := os.MkdirTemp("", "i7c5a-worker-")
@@ -78,7 +85,7 @@ func combatLauncher(t *testing.T) combatworker.Launcher {
 	if err != nil {
 		t.Fatal(err)
 	}
-	return combatworker.Launcher{Binary: combatWorkerBinary, Deadline: 120 * time.Second, AddressSpace: 4 << 30, CPUSeconds: 180, OpenFiles: 64, MaxOutputBytes: 16 << 20, ExpectedCorpus: corpus.ID()}
+	return combatworker.Limits{Binary: combatWorkerBinary, Deadline: 120 * time.Second, AddressSpace: 4 << 30, CPUSeconds: 180, OpenFiles: 64, MaxOutputBytes: 16 << 20, ExpectedCorpus: corpus.ID()}
 }
 
 type combatKeys struct{ missing bool }
