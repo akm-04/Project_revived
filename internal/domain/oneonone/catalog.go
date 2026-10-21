@@ -16,7 +16,9 @@ const (
 	// Engine CampaignType.SUPER_ARENA and battle.lua 114001 (map "dn").
 	CampaignType int64 = 65
 	BattleID     int64 = 114001
-	TeamSize           = 5
+	// Registered resolver transform: one round as team groups.
+	Transform = "SUPER_ARENA_ROUND_V1"
+	TeamSize  = 5
 )
 
 const (

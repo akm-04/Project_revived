@@ -6,7 +6,7 @@ package combatresolver
 
 import (
 	"bytes"
-	_ "embed"
+	"embed"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -30,6 +30,40 @@ var driverLua string
 
 //go:embed prepare.lua
 var prepareLua string
+
+// Each transforms/<ID>.lua returns the function(fight, input) a battle context
+// names; adding a mode adds a module and never edits the driver (I8-2C).
+//
+//go:embed transforms/*.lua
+var transformFiles embed.FS
+
+var transformsLua, transformIDs = transformRegistry()
+
+// schema1Transforms are the driver's inline branches before I8-2C, frozen for
+// schema 1 snapshots stored earlier; new modes name their transform in the context.
+var schema1Transforms = map[int64]string{45: "REGION_ARENA_SEASON_AWARDS_V1", 65: "SUPER_ARENA_ROUND_V1"}
+
+// transformRegistry compiles the embedded modules into one chunk defining
+// combat_transforms, in file-name order.
+func transformRegistry() (string, map[string]bool) {
+	entries, err := transformFiles.ReadDir("transforms")
+	if err != nil {
+		panic(err)
+	}
+	var chunk strings.Builder
+	ids := map[string]bool{}
+	chunk.WriteString("combat_transforms = {}\n")
+	for _, entry := range entries {
+		id := strings.TrimSuffix(entry.Name(), ".lua")
+		source, err := transformFiles.ReadFile("transforms/" + entry.Name())
+		if err != nil {
+			panic(err)
+		}
+		fmt.Fprintf(&chunk, "combat_transforms[%q] = (function()\n%s\nend)()\n", id, source)
+		ids[id] = true
+	}
+	return chunk.String(), ids
+}
 
 // SparseArrayLimit is the qualified VM profile for sparse numeric source IDs.
 const SparseArrayLimit = 65536
@@ -203,7 +237,7 @@ func prepare(corpus *combatcorpus.Corpus) (*machine, error) {
 	input := state.NewTable()
 	state.SetMetatable(input, unbound(state, "COMBAT_PREPARE_INPUT_UNBOUND"))
 	state.SetGlobal("combat_input", input)
-	for _, chunk := range []struct{ code, name string }{{bootstrapLua, "combat bootstrap"}, {prepareLua, "combat prepare"}} {
+	for _, chunk := range []struct{ code, name string }{{bootstrapLua, "combat bootstrap"}, {transformsLua, "combat transforms"}, {prepareLua, "combat prepare"}} {
 		if err := m.run(chunk.code, chunk.name); err != nil {
 			state.Close()
 			return nil, err
@@ -477,20 +511,51 @@ func luaValue(l *lua.LState, v any) (lua.LValue, error) {
 	return nil, deterministic("unsupported params value %T", v)
 }
 
-func actorList(l *lua.LState, actors []combat.Actor) (*lua.LTable, error) {
+// actorList binds each actor's transform parameters; a schema 1 actor's are its
+// params, where the pre-I8-2C driver read them.
+func actorList(l *lua.LState, actors []combat.Actor, legacy bool) (*lua.LTable, error) {
 	list := l.NewTable()
 	for _, a := range actors {
 		params, err := fromJSON(l, a.Params)
 		if err != nil {
 			return nil, deterministic("actor params: %v", err)
 		}
+		transform, err := parameters(l, a.Transform)
+		if err != nil {
+			return nil, deterministic("actor transform: %v", err)
+		}
+		if legacy {
+			transform = params
+		}
 		row := l.NewTable()
 		row.RawSetString("kind", lua.LString(a.Kind))
 		row.RawSetString("player", lua.LNumber(a.Player))
 		row.RawSetString("params", params)
+		row.RawSetString("transform", transform)
 		list.Append(row)
 	}
 	return list, nil
+}
+
+func parameters(l *lua.LState, raw json.RawMessage) (lua.LValue, error) {
+	if len(raw) == 0 {
+		return l.NewTable(), nil
+	}
+	return fromJSON(l, raw)
+}
+
+// contextTransform names the registered transform a snapshot applies, if any.
+func contextTransform(s combat.Snapshot) (string, json.RawMessage, error) {
+	if s.Schema == combat.LegacySnapshotSchema {
+		return schema1Transforms[s.Battle.CampaignType], nil, nil
+	}
+	if s.Battle.Context == nil {
+		return "", nil, nil
+	}
+	if !transformIDs[s.Battle.Context.Transform] {
+		return "", nil, deterministic("unregistered battle transform %q", s.Battle.Context.Transform)
+	}
+	return s.Battle.Context.Transform, s.Battle.Context.Parameters, nil
 }
 
 func inputTable(l *lua.LState, s combat.Snapshot) (*lua.LTable, error) {
@@ -498,6 +563,19 @@ func inputTable(l *lua.LState, s combat.Snapshot) (*lua.LTable, error) {
 	in.RawSetString("os_time", lua.LNumber(s.OSTime()))
 	in.RawSetString("campaign_type", lua.LNumber(s.Battle.CampaignType))
 	in.RawSetString("battle_id", lua.LNumber(s.Battle.BattleID))
+	transform, transformParameters, err := contextTransform(s)
+	if err != nil {
+		return nil, err
+	}
+	if transform != "" {
+		in.RawSetString("transform", lua.LString(transform))
+	}
+	battleParameters, err := parameters(l, transformParameters)
+	if err != nil {
+		return nil, deterministic("battle transform parameters: %v", err)
+	}
+	in.RawSetString("parameters", battleParameters)
+	legacy := s.Schema == combat.LegacySnapshotSchema
 	scenePlayer := int64(0)
 	for _, a := range s.Battle.TeamA {
 		if a.Player > 0 {
@@ -510,7 +588,7 @@ func inputTable(l *lua.LState, s combat.Snapshot) (*lua.LTable, error) {
 		name   string
 		actors []combat.Actor
 	}{{"team_a", s.Battle.TeamA}, {"pets_a", s.Battle.PetsA}, {"pets_b", s.Battle.PetsB}} {
-		list, err := actorList(l, side.actors)
+		list, err := actorList(l, side.actors, legacy)
 		if err != nil {
 			return nil, err
 		}
@@ -518,7 +596,7 @@ func inputTable(l *lua.LState, s combat.Snapshot) (*lua.LTable, error) {
 	}
 	waves := l.NewTable()
 	for _, wave := range s.Battle.WavesB {
-		list, err := actorList(l, wave)
+		list, err := actorList(l, wave, legacy)
 		if err != nil {
 			return nil, err
 		}

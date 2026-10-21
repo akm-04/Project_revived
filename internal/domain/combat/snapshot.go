@@ -10,13 +10,17 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"regexp"
 	"strconv"
 	"time"
 )
 
 const (
-	ContractID           = "C5A_COMBAT_INPUT_ATTEMPT_RESULT_FOUNDATION_V1"
-	SnapshotSchema       = 1
+	ContractID = "C5A_COMBAT_INPUT_ATTEMPT_RESULT_FOUNDATION_V1"
+	// SnapshotSchema 2 adds the BattleContext (I8-2C). Schema 1 snapshots stored
+	// before it stay valid, carry no context and keep their bytes.
+	SnapshotSchema       = 2
+	LegacySnapshotSchema = 1
 	TrustProfileID       = "SERVER_REPORT_AUTHORITATIVE_V1"
 	TrustProfileVersion  = 1
 	EntropyPolicyVersion = "HMAC_SHA256_COUNTER_LUA_RANDOM_COMPAT_V1"
@@ -72,6 +76,23 @@ type Actor struct {
 	OwnerStateVersion int64           `json:"owner_state_version"`
 	Params            json.RawMessage `json:"params"`
 	BattleTotals      json.RawMessage `json:"battle_totals,omitempty"`
+	// Transform is this actor's parameter object for the battle's registered transform.
+	Transform json.RawMessage `json:"transform,omitempty"`
+}
+
+// BattleContext names the registered mode transform the resolver applies to the
+// populated fight and carries its battle-wide parameter object. A new mode
+// registers a transform module; it never edits the resolver.
+type BattleContext struct {
+	Transform  string          `json:"transform"`
+	Parameters json.RawMessage `json:"parameters,omitempty"`
+}
+
+var transformID = regexp.MustCompile(`^[A-Z][A-Z0-9_]*_V[1-9][0-9]*$`)
+
+func canonicalObject(raw json.RawMessage) bool {
+	canonical, err := CanonicalJSON(raw)
+	return err == nil && bytes.Equal(canonical, raw) && canonical[0] == '{'
 }
 
 // PlayerContext is the per-player state the server branch reads outside params:
@@ -91,6 +112,8 @@ type Battle struct {
 	PetsA        []Actor   `json:"pets_a"`
 	WavesB       [][]Actor `json:"waves_b"`
 	PetsB        []Actor   `json:"pets_b"`
+	// Context is absent for a battle without a mode transform and in schema 1.
+	Context *BattleContext `json:"context,omitempty"`
 }
 
 type Snapshot struct {
@@ -138,15 +161,14 @@ func (a Actor) validate(kind ActorKind, players map[int64]bool) error {
 	if a.Kind != kind || a.TableID <= 0 || a.Identity <= 0 || a.FighterClass == "" || len(a.Params) == 0 {
 		return ErrInvalid
 	}
-	canonical, err := CanonicalJSON(a.Params)
-	if err != nil || !bytes.Equal(canonical, a.Params) || canonical[0] != '{' {
+	if !canonicalObject(a.Params) || (len(a.Transform) != 0 && !canonicalObject(a.Transform)) {
 		return ErrInvalid
 	}
 	var params struct {
 		PlayerID *json.Number `json:"player_id"`
 		TableID  json.Number  `json:"table_id"`
 	}
-	if err = json.Unmarshal(a.Params, &params); err != nil || params.TableID.String() != fmt.Sprint(a.TableID) {
+	if err := json.Unmarshal(a.Params, &params); err != nil || params.TableID.String() != fmt.Sprint(a.TableID) {
 		return ErrInvalid
 	}
 	switch a.Origin {
@@ -165,11 +187,11 @@ func (a Actor) validate(kind ActorKind, players map[int64]bool) error {
 }
 
 func (s Snapshot) Validate() error {
-	if s.Schema != SnapshotSchema || s.Contract != ContractID || len(s.ContentRevision) != 64 || len(s.CorpusID) != 64 || len(s.SourceArchiveSHA256) != 64 || s.TrustProfile != TrustProfileID || s.EntropyPolicy != EntropyPolicyVersion || s.AdapterPolicy != AdapterPolicyVersion || s.CollectionPolicy != CollectionPolicy || s.DecidedAt.IsZero() || s.DecidedAt.Location() != time.UTC {
+	if (s.Schema != SnapshotSchema && s.Schema != LegacySnapshotSchema) || s.Contract != ContractID || len(s.ContentRevision) != 64 || len(s.CorpusID) != 64 || len(s.SourceArchiveSHA256) != 64 || s.TrustProfile != TrustProfileID || s.EntropyPolicy != EntropyPolicyVersion || s.AdapterPolicy != AdapterPolicyVersion || s.CollectionPolicy != CollectionPolicy || s.DecidedAt.IsZero() || s.DecidedAt.Location() != time.UTC {
 		return ErrInvalid
 	}
 	b := s.Battle
-	if b.CampaignType <= 0 || b.BattleID < 0 || len(b.TeamA) == 0 || len(b.WavesB) == 0 {
+	if b.CampaignType <= 0 || b.BattleID < 0 || len(b.TeamA) == 0 || len(b.WavesB) == 0 || !s.contextValid() {
 		return ErrInvalid
 	}
 	players := map[int64]bool{}
@@ -221,6 +243,21 @@ func (s Snapshot) Validate() error {
 		}
 	}
 	return nil
+}
+
+// contextValid admits actor transform parameters only beside a context, and no
+// context in schema 1.
+func (s Snapshot) contextValid() bool {
+	context := s.Battle.Context
+	if context != nil && (s.Schema == LegacySnapshotSchema || !transformID.MatchString(context.Transform) || (len(context.Parameters) != 0 && !canonicalObject(context.Parameters))) {
+		return false
+	}
+	for _, a := range s.actors() {
+		if len(a.Transform) != 0 && context == nil {
+			return false
+		}
+	}
+	return true
 }
 
 // Canonical returns the immutable encoding whose SHA-256 addresses the snapshot.

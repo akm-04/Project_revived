@@ -24,9 +24,9 @@ type Participant struct {
 	Player         identity.PlayerID
 	Identity       int64
 	TemplateParams map[string]any
-	// Overlay adds mode keys (Arena season awards) to the frozen params; it
-	// never replaces a key the owner or template wrote.
-	Overlay map[string]int64
+	// Transform is the actor's parameter object for the battle's registered
+	// mode transform (Arena season awards); it never enters populate params.
+	Transform map[string]int64
 }
 
 type BattleRequest struct {
@@ -36,6 +36,8 @@ type BattleRequest struct {
 	PetsA        []Participant
 	WavesB       [][]Participant
 	PetsB        []Participant
+	// Context names the registered resolver transform of the mode (I8-2C).
+	Context *d.BattleContext
 }
 
 // Keys every qualified overlay writes into a Hero roster row; an absent key
@@ -64,7 +66,7 @@ func (s Service) newFreezer(scope ca.CoherentReadScope, actor identity.PlayerID)
 // owner's inputs read once, and each snapshot lists only its own battle's players.
 func (f *freezer) freeze(ctx context.Context, request BattleRequest) (d.Snapshot, error) {
 	s, scope := f.service, f.scope
-	battle := d.Battle{CampaignType: request.CampaignType, BattleID: request.BattleID, PetsA: []d.Actor{}, PetsB: []d.Actor{}}
+	battle := d.Battle{CampaignType: request.CampaignType, BattleID: request.BattleID, PetsA: []d.Actor{}, PetsB: []d.Actor{}, Context: request.Context}
 	var err error
 	if battle.TeamA, err = f.actors(ctx, request.TeamA, d.HeroActor); err != nil {
 		return d.Snapshot{}, err
@@ -171,22 +173,15 @@ func (f *freezer) template(p Participant) (d.Actor, error) {
 }
 
 func (f *freezer) build(p Participant, params map[string]any) (d.Actor, error) {
-	if len(p.Overlay) > 0 {
-		merged := make(map[string]any, len(params)+len(p.Overlay))
-		for k, v := range params {
-			merged[k] = v
-		}
-		for k, v := range p.Overlay {
-			if _, taken := merged[k]; taken {
-				return d.Actor{}, d.ErrInvalid
-			}
-			merged[k] = v
-		}
-		params = merged
-	}
 	raw, err := d.CanonicalJSON(params)
 	if err != nil {
 		return d.Actor{}, d.ErrInvalid
+	}
+	var transform json.RawMessage
+	if len(p.Transform) > 0 {
+		if transform, err = d.CanonicalJSON(p.Transform); err != nil {
+			return d.Actor{}, d.ErrInvalid
+		}
 	}
 	var shape struct {
 		TableID   json.Number `json:"table_id"`
@@ -216,7 +211,7 @@ func (f *freezer) build(p Participant, params map[string]any) (d.Actor, error) {
 		if !present {
 			return d.Actor{}, fmt.Errorf("%w: %s %d class %q", d.ErrClassUnavailable, table, tableID, class)
 		}
-		return d.Actor{Origin: p.Origin, Kind: p.Kind, Player: int64(p.Player), Identity: p.Identity, TableID: tableID, FighterClass: class, Params: raw}, nil
+		return d.Actor{Origin: p.Origin, Kind: p.Kind, Player: int64(p.Player), Identity: p.Identity, TableID: tableID, FighterClass: class, Params: raw, Transform: transform}, nil
 	}
 	return d.Actor{}, fmt.Errorf("%w: no source row for table_id %d", d.ErrClassUnavailable, tableID)
 }

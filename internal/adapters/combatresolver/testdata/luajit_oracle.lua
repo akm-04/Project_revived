@@ -217,6 +217,7 @@ end
 combat_input = input
 local ok, failure = pcall(function()
 	chunk(read(dir .. "/bootstrap.lua"), "combat bootstrap")()
+	chunk(read(dir .. "/transforms.lua"), "combat transforms")()
 end)
 
 if mode == "load" then

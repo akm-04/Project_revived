@@ -303,7 +303,7 @@ func (s Service) admitFight(c context.Context, a identity.ActorContext, id ids.U
 			if err != nil {
 				return err
 			}
-			battle := combat.BattleRequest{CampaignType: d.CampaignType, BattleID: d.BattleID, TeamA: teamA, PetsA: petsA, WavesB: [][]combat.Participant{teamB}, PetsB: petsB}
+			battle := combat.BattleRequest{CampaignType: d.CampaignType, BattleID: d.BattleID, TeamA: teamA, PetsA: petsA, WavesB: [][]combat.Participant{teamB}, PetsB: petsB, Context: &cd.BattleContext{Transform: d.Transform}}
 			started, err := s.Combat.StartTx(c, sc.Tx, scope, combat.StartRequest{Actor: a, Locator: locator(m.ID), GenerationRef: d.ContractID, StartFingerprint: fp, ResultDeadline: at.Add(resultWindow), Battle: battle})
 			if err != nil {
 				return err
@@ -341,7 +341,7 @@ func (e fightEvidence) ResolveTimed(c context.Context, _ gen.TimedResolutionRequ
 }
 
 // participants resolves frozen lineup girls: the owner's strongest owned
-// copy, or a summoned template girl; season awards ride as Combat overlay keys.
+// copy, or a summoned template girl; season awards ride as transform parameters.
 func (s Service) participants(c context.Context, q tx.Queryer, owner d.Player, pid identity.PlayerID, origin cd.Origin, lineup []d.Fighter, templates d.Templates, at time.Time) ([]combat.Participant, error) {
 	roster, err := s.heroRows(c, q, pid, at)
 	if err != nil {
@@ -353,21 +353,21 @@ func (s Service) participants(c context.Context, q tx.Queryer, owner d.Player, p
 		if !ok && !(origin == cd.OwnedForeign && f.Summon) {
 			continue
 		}
-		var overlay map[string]int64
+		var award map[string]int64
 		if f.AddStar > 0 || f.Awake {
-			overlay = map[string]int64{}
+			award = map[string]int64{}
 			if f.AddStar > 0 {
-				overlay["arena_add_star"] = f.AddStar
+				award["arena_add_star"] = f.AddStar
 			}
 			if f.Awake {
-				overlay["arena_awake"] = 1
+				award["arena_awake"] = 1
 			}
 		}
 		if row == nil {
-			out = append(out, combat.Participant{Origin: cd.Template, Kind: cd.HeroActor, Identity: f.TableID, TemplateParams: summoned(templates, f.TableID), Overlay: overlay})
+			out = append(out, combat.Participant{Origin: cd.Template, Kind: cd.HeroActor, Identity: f.TableID, TemplateParams: summoned(templates, f.TableID), Transform: award})
 			continue
 		}
-		out = append(out, combat.Participant{Origin: origin, Kind: cd.HeroActor, Player: pid, Identity: number(row["partner_id"]), Overlay: overlay})
+		out = append(out, combat.Participant{Origin: origin, Kind: cd.HeroActor, Player: pid, Identity: number(row["partner_id"]), Transform: award})
 	}
 	return out, nil
 }

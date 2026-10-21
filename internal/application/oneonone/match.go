@@ -210,7 +210,7 @@ func (s Service) admit(c context.Context, sc gen.TimedScope, a identity.ActorCon
 	for i := range defense {
 		battle := combat.BattleRequest{CampaignType: d.CampaignType, BattleID: d.BattleID, TeamA: participants(cd.OwnedSelf, a.PlayerID, r.Formations[i].Heroes, cd.HeroActor),
 			PetsA: participants(cd.OwnedSelf, a.PlayerID, pet(r.Formations[i]), cd.PetActor), WavesB: [][]combat.Participant{participants(cd.OwnedForeign, r.Enemy, defense[i].Heroes, cd.HeroActor)},
-			PetsB: participants(cd.OwnedForeign, r.Enemy, pet(defense[i]), cd.PetActor)}
+			PetsB: participants(cd.OwnedForeign, r.Enemy, pet(defense[i]), cd.PetActor), Context: &cd.BattleContext{Transform: d.Transform}}
 		requests = append(requests, combat.StartRequest{Actor: a, Locator: roundLocator(id, i+1), GenerationRef: d.ContractID, StartFingerprint: fp, ResultDeadline: at.Add(resultWindow), Battle: battle})
 	}
 	started := []combat.Started{}

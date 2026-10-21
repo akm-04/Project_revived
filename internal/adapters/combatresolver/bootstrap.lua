@@ -101,6 +101,8 @@ local scene_player = {}
 function combat_begin()
 	scene_player.playerID = input.scene_player
 end
+-- Models a registered mode transform supplies for its engine branch (I8-2C).
+combat_mode_models = {}
 xyd.ModelManager = {
 	get = function()
 		return {
@@ -108,12 +110,13 @@ xyd.ModelManager = {
 				if kind == xyd.ModelType.SELF_PLAYER then
 					return scene_player
 				end
+				-- Every BattleCreateReport ctor loads it; only its result path reads it.
 				if kind == xyd.ModelType.REGION_ARENA then
 					return {}
 				end
-				-- C5C: SUPER_ARENA reads only the current round; each round is its own attempt.
-				if kind == xyd.ModelType.PEAK_ARENA then
-					return { clear = function() end, setCurrentBattleRound = function() end, getCurrentBattleRound = function() return 1 end }
+				local model = combat_mode_models[kind]
+				if model then
+					return model
 				end
 				error("COMBAT_ADAPTER_UNMATERIALIZED_MODEL " .. tostring(kind))
 			end,

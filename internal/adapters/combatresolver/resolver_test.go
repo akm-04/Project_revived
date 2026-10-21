@@ -181,6 +181,7 @@ func TestSuperArenaRoundResolves(t *testing.T) {
 	corpus, _ := combatcorpus.Load()
 	s := templateSnapshot(t, []combat.Actor{TemplateHero(t, 10001001, 3, 20, 2)}, []combat.Actor{TemplateHero(t, 10001002, 3, 20, 2)})
 	s.Battle.CampaignType, s.Battle.BattleID = 65, 114001
+	s.Battle.Context = &combat.BattleContext{Transform: "SUPER_ARENA_ROUND_V1"}
 	root := sha256.Sum256([]byte("super-arena-root"))
 	first, err := Resolve(corpus, s, root)
 	if err != nil {
@@ -197,13 +198,7 @@ func TestSuperArenaRoundResolves(t *testing.T) {
 
 func TestRegionArenaBalancesHeroes(t *testing.T) {
 	corpus, _ := combatcorpus.Load()
-	attacker := TemplateHero(t, 10001001, 3, 20, 2)
-	raw, _ := combat.CanonicalJSON(map[string]any{"player_id": 0, "partner_id": 10001001, "table_id": 10001001, "star": 3, "lev": 20, "color": 2,
-		"skin_ids": map[string]any{}, "current_skin_id": 0, "illusion_skin_id": -1, "spirit_equip": []any{}, "spirit_item": []any{},
-		"practice_attr": []any{0, 0, 0}, "equips": []any{0, 0, 0, 0, 0, 0}, "fumos": []any{0, 0, 0, 0, 0, 0}, "skills": []any{1, 1, 1, 1, 1, 1}, "arena_add_star": 1})
-	attacker.Params = raw
-	s := templateSnapshot(t, []combat.Actor{attacker}, []combat.Actor{TemplateHero(t, 10001002, 3, 20, 2)})
-	s.Battle.CampaignType, s.Battle.BattleID = 45, 111001
+	s := regionArenaAward(t)
 	root := sha256.Sum256([]byte("region-arena-root"))
 	first, err := Resolve(corpus, s, root)
 	if err != nil {
@@ -212,6 +207,22 @@ func TestRegionArenaBalancesHeroes(t *testing.T) {
 	second, err := Resolve(corpus, s, root)
 	if err != nil || !bytes.Equal(first.Report, second.Report) {
 		t.Fatal("region arena battle is not deterministic", err)
+	}
+	// A schema 1 snapshot stored before I8-2C carries the award in params and no context.
+	legacy := regionArenaAward(t)
+	legacy.Schema, legacy.Battle.Context = combat.LegacySnapshotSchema, nil
+	attacker := legacy.Battle.TeamA[0]
+	var params map[string]any
+	if err = json.Unmarshal(attacker.Params, &params); err != nil {
+		t.Fatal(err)
+	}
+	params["arena_add_star"] = 1
+	attacker.Params, _ = combat.CanonicalJSON(params)
+	attacker.Transform = nil
+	legacy.Battle.TeamA = []combat.Actor{attacker}
+	old, err := Resolve(corpus, legacy, root)
+	if err != nil || !bytes.Equal(old.Report, first.Report) {
+		t.Fatal("schema 1 region arena report differs from its context form", err)
 	}
 	var report struct {
 		Fighter map[string]struct {
@@ -235,5 +246,46 @@ func TestRegionArenaBalancesHeroes(t *testing.T) {
 	}
 	if seen != 2 {
 		t.Fatal("balanced level 100 with the season star award", report.Fighter)
+	}
+}
+
+func regionArenaAward(t *testing.T) combat.Snapshot {
+	attacker := TemplateHero(t, 10001001, 3, 20, 2)
+	attacker.Transform = json.RawMessage(`{"arena_add_star":1}`)
+	s := templateSnapshot(t, []combat.Actor{attacker}, []combat.Actor{TemplateHero(t, 10001002, 3, 20, 2)})
+	s.Battle.CampaignType, s.Battle.BattleID = 45, 111001
+	s.Battle.Context = &combat.BattleContext{Transform: "REGION_ARENA_SEASON_AWARDS_V1"}
+	return s
+}
+
+func TestUnregisteredTransformFailsDeterministically(t *testing.T) {
+	corpus, _ := combatcorpus.Load()
+	s := templateSnapshot(t, []combat.Actor{TemplateHero(t, 10001001, 3, 20, 2)}, []combat.Actor{TemplateHero(t, 10001002, 3, 20, 2)})
+	s.Battle.Context = &combat.BattleContext{Transform: "UNREGISTERED_MODE_V1"}
+	if _, err := Resolve(corpus, s, [32]byte{1}); !errors.Is(err, ErrDeterministic) || !strings.Contains(err.Error(), "unregistered battle transform") {
+		t.Fatal("unregistered transform", err)
+	}
+}
+
+func TestEveryTransformModuleCompiles(t *testing.T) {
+	if len(transformIDs) == 0 {
+		t.Fatal("no transform modules embedded")
+	}
+	for _, id := range schema1Transforms {
+		if !transformIDs[id] {
+			t.Fatal("schema 1 transform is not registered", id)
+		}
+	}
+	corpus, _ := combatcorpus.Load()
+	m, err := prepare(corpus)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer m.state.Close()
+	registry := m.state.GetGlobal("combat_transforms").(*lua.LTable)
+	for id := range transformIDs {
+		if registry.RawGetString(id).Type() != lua.LTFunction {
+			t.Fatal("transform module does not return a function", id)
+		}
 	}
 }

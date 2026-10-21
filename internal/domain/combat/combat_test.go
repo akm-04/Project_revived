@@ -99,6 +99,24 @@ func TestSnapshotCanonicalRoundTripAndNegatives(t *testing.T) {
 	if _, err = DecodeSnapshot(raw, fmt.Sprintf("%064x", 0)); !errors.Is(err, ErrIntegrity) {
 		t.Fatal("hash mismatch accepted")
 	}
+	contexts := map[string]func(*Snapshot){
+		"legacy schema 1": func(s *Snapshot) { s.Schema = LegacySnapshotSchema },
+		"transform with parameters": func(s *Snapshot) {
+			s.Battle.Context = &BattleContext{Transform: "REGION_ARENA_SEASON_AWARDS_V1", Parameters: json.RawMessage(`{"a":1}`)}
+			s.Battle.WavesB[0][0].Transform = json.RawMessage(`{"arena_add_star":2}`)
+		},
+	}
+	for name, mutate := range contexts {
+		m := fixtureSnapshot()
+		mutate(&m)
+		raw, hash, err := m.Canonical()
+		if err != nil {
+			t.Fatal(name, err)
+		}
+		if back, err := DecodeSnapshot(raw, hash); err != nil || back.Schema != m.Schema {
+			t.Fatal(name, "round trip", err)
+		}
+	}
 	mutations := []func(*Snapshot){
 		func(s *Snapshot) { s.Battle.TeamA[0].Params = json.RawMessage(`{"table_id":10001001, "player_id":9}`) },
 		func(s *Snapshot) { s.Battle.TeamA[0].Player = 10 },
@@ -110,6 +128,21 @@ func TestSnapshotCanonicalRoundTripAndNegatives(t *testing.T) {
 		},
 		func(s *Snapshot) { s.Battle.WavesB = nil },
 		func(s *Snapshot) { s.DecidedAt = s.DecidedAt.In(time.FixedZone("x", 3600)) },
+		func(s *Snapshot) { s.Schema = 3 },
+		func(s *Snapshot) { s.Battle.TeamA[0].Transform = json.RawMessage(`{"arena_add_star":1}`) },
+		func(s *Snapshot) { s.Battle.Context = &BattleContext{Transform: "region_arena_v1"} },
+		func(s *Snapshot) { s.Battle.Context = &BattleContext{Transform: "REGION_ARENA"} },
+		func(s *Snapshot) {
+			s.Battle.Context = &BattleContext{Transform: "REGION_ARENA_V1", Parameters: json.RawMessage(`{"b":1, "a":2}`)}
+		},
+		func(s *Snapshot) {
+			s.Battle.Context = &BattleContext{Transform: "REGION_ARENA_V1"}
+			s.Battle.TeamA[0].Transform = json.RawMessage(`[1]`)
+		},
+		func(s *Snapshot) {
+			s.Schema = LegacySnapshotSchema
+			s.Battle.Context = &BattleContext{Transform: "REGION_ARENA_V1"}
+		},
 	}
 	for i, mutate := range mutations {
 		m := fixtureSnapshot()

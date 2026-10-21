@@ -17,8 +17,10 @@ const (
 	// Engine CampaignType.REGION_ARENA and MapBattleID.ARENA.
 	CampaignType int64 = 45
 	BattleID     int64 = 111001
-	TeamSize           = 5
-	Missions           = 3
+	// Registered resolver transform: season awards, then region balancing.
+	Transform = "REGION_ARENA_SEASON_AWARDS_V1"
+	TeamSize  = 5
+	Missions  = 3
 	// C5D policy: retained records per player and the abandon window of a started match.
 	RecordsMax     = 20
 	AbandonSeconds = 600

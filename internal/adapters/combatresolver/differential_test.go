@@ -112,6 +112,7 @@ func exportCorpus(t *testing.T, corpus *combatcorpus.Corpus) string {
 		writeFile(t, filepath.Join(dir, "tables", record.Name+".tbl"), tableTokens(t, table))
 	}
 	writeFile(t, filepath.Join(dir, "bootstrap.lua"), []byte(bootstrapLua))
+	writeFile(t, filepath.Join(dir, "transforms.lua"), []byte(transformsLua))
 	writeFile(t, filepath.Join(dir, "driver.lua"), []byte(driverLua))
 	return dir
 }
@@ -369,11 +370,20 @@ func TestLuaJITDifferential(t *testing.T) {
 	t.Run("SUPER_ARENA round", func(t *testing.T) {
 		s := templateSnapshot(t, []combat.Actor{hero(10001001)}, []combat.Actor{hero(10001002)})
 		s.Battle.CampaignType, s.Battle.BattleID = 65, 114001
+		s.Battle.Context = &combat.BattleContext{Transform: "SUPER_ARENA_ROUND_V1"}
 		differential(t, dir, corpus, s, root)
 	})
-	t.Run("REGION_ARENA battle", func(t *testing.T) {
-		s := templateSnapshot(t, []combat.Actor{hero(10001001)}, []combat.Actor{hero(10001002)})
+	t.Run("REGION_ARENA battle with season awards", func(t *testing.T) {
+		award := func(id int64, transform string) combat.Actor {
+			a := hero(id)
+			a.Transform = json.RawMessage(transform)
+			return a
+		}
+		s := templateSnapshot(t, []combat.Actor{award(10001001, `{"arena_add_star":2,"arena_awake":1}`), hero(10001040)},
+			[]combat.Actor{award(10001002, `{"arena_add_star":3,"arena_awake":1}`), hero(10001070)})
 		s.Battle.CampaignType, s.Battle.BattleID = 45, 111001
+		s.Battle.PetsA, s.Battle.PetsB = []combat.Actor{templatePet(t, 10010001)}, []combat.Actor{templatePet(t, 10020001)}
+		s.Battle.Context = &combat.BattleContext{Transform: "REGION_ARENA_SEASON_AWARDS_V1"}
 		differential(t, dir, corpus, s, root)
 	})
 }
