@@ -112,8 +112,8 @@ if args.cumulative:
     if args.compat_scratch:
         need('go.mod')
     else:
-        need('go.mod','go 1.26.0','toolchain go1.27.2')
-        if (R/'.go-version').read_text().strip() != '1.27.2':
+        need('go.mod','go 1.26.0','toolchain go1.27.3')
+        if (R/'.go-version').read_text().strip() != '1.27.3':
             errs.append('current cumulative .go-version pin drift')
     if not (R/'go.sum').exists():
         errs.append('current cumulative go.sum missing')

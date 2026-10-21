@@ -9,12 +9,12 @@
       "name": "Go",
       "kind": "toolchain",
       "module": null,
-      "version": "1.27.2",
+      "version": "1.27.3",
       "license": "BSD-3-Clause",
       "use": "build/runtime toolchain",
       "status": "PINNED_TARGET",
-      "notes": "Official stable patch released 2026-09-01.",
-      "qualification": "APPROVED_SECURITY_PATCH_PIN_SELECTED_PASS660_REQUALIFICATION_PENDING"
+      "notes": "Official stable security patch; fixes GO-2026-6809 (crypto/x509), reachable under the postgres,river tags.",
+      "qualification": "APPROVED_SECURITY_PATCH_PIN_USER_2026-10-21_PORTABLE_TOOLS_R4"
     },
     {
       "name": "PostgreSQL",

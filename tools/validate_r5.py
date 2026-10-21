@@ -78,8 +78,8 @@ need('sql/content/content.sql','InsertContentFunctionGates','ReadContentPlayerPr
 gm=(R/'go.mod').read_text(errors='replace')
 compat_scratch=os.environ.get('GXB_COMPAT_SCRATCH')=='1'
 if not compat_scratch:
-    if 'go 1.26.0' not in gm or 'toolchain go1.27.2' not in gm: errs.append('canonical Go pins drifted')
-    if (R/'.go-version').read_text().strip()!='1.27.2': errs.append('.go-version pin drifted')
+    if 'go 1.26.0' not in gm or 'toolchain go1.27.3' not in gm: errs.append('canonical Go pins drifted')
+    if (R/'.go-version').read_text().strip()!='1.27.3': errs.append('.go-version pin drifted')
 
 if errs:
     print('R5 VALIDATION: FAIL')

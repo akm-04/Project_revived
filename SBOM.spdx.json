@@ -212,7 +212,7 @@
     {
       "SPDXID": "SPDXRef-Qualified-19",
       "name": "Go",
-      "versionInfo": "1.27.2",
+      "versionInfo": "1.27.3",
       "downloadLocation": "NOASSERTION",
       "licenseConcluded": "BSD-3-Clause",
       "licenseDeclared": "BSD-3-Clause",
