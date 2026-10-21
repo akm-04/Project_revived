@@ -10,7 +10,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"maps"
 	"math"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -60,7 +62,11 @@ func Resolve(corpus *combatcorpus.Corpus, snapshot combat.Snapshot, root [32]byt
 		return Result{}, err
 	}
 	defer m.state.Close()
-	if err = m.run(driverLua, "combat driver"); err != nil {
+	return m.resolve()
+}
+
+func (m *machine) resolve() (Result, error) {
+	if err := m.run(driverLua, "combat driver"); err != nil {
 		return Result{}, err
 	}
 	output, ok := m.state.GetGlobal("combat_output").(*lua.LTable)
@@ -137,6 +143,7 @@ func newMachine(corpus *combatcorpus.Corpus, snapshot combat.Snapshot, root [32]
 		state.Push(lua.LString(lib.name))
 		state.Call(1, 0)
 	}
+	state.SetField(state.GetGlobal("table"), "sort", state.NewFunction(sortTable))
 	pkg := state.GetGlobal("package").(*lua.LTable)
 	loaders := state.GetField(pkg, "loaders").(*lua.LTable)
 	for i := loaders.Len(); i >= 2; i-- {
@@ -235,8 +242,78 @@ func (m *machine) installEntropy(snapshot combat.Snapshot) {
 	state.SetGlobal("combat_os", clock)
 }
 
+// sortTable is the Lua 5.1 / LuaJIT auxsort, so equal elements end in the
+// order the source engine gives them; GopherLua's own sort differs on ties.
+func sortTable(l *lua.LState) int {
+	t := l.CheckTable(1)
+	comparator := l.OptFunction(2, nil)
+	less := func(a, b lua.LValue) bool {
+		if comparator == nil {
+			return l.LessThan(a, b)
+		}
+		l.CallByParam(lua.P{Fn: comparator, NRet: 1}, a, b)
+		result := l.Get(-1)
+		l.Pop(1)
+		return lua.LVAsBool(result)
+	}
+	auxsort(l, t, less, 1, t.Len())
+	return 0
+}
+
+func auxsort(l *lua.LState, t *lua.LTable, less func(a, b lua.LValue) bool, low, up int) {
+	swap := func(i, j int) {
+		a, b := t.RawGetInt(i), t.RawGetInt(j)
+		t.RawSetInt(i, b)
+		t.RawSetInt(j, a)
+	}
+	for low < up {
+		if less(t.RawGetInt(up), t.RawGetInt(low)) {
+			swap(low, up)
+		}
+		if up-low == 1 {
+			return
+		}
+		i := (low + up) / 2
+		if less(t.RawGetInt(i), t.RawGetInt(low)) {
+			swap(i, low)
+		} else if less(t.RawGetInt(up), t.RawGetInt(i)) {
+			swap(i, up)
+		}
+		if up-low == 2 {
+			return
+		}
+		pivot := t.RawGetInt(i)
+		swap(i, up-1)
+		i, j := low, up-1
+		for {
+			for i++; less(t.RawGetInt(i), pivot); i++ {
+				if i > up {
+					l.RaiseError("invalid order function for sorting")
+				}
+			}
+			for j--; less(pivot, t.RawGetInt(j)); j-- {
+				if j < low {
+					l.RaiseError("invalid order function for sorting")
+				}
+			}
+			if j < i {
+				break
+			}
+			swap(i, j)
+		}
+		swap(up-1, i)
+		if i-low < up-i {
+			j, i, low = low, i-1, i+1
+		} else {
+			j, i, up = i+1, up, i-1
+		}
+		auxsort(l, t, less, j, i)
+	}
+}
+
 // parseTable is the server TableParser seam: INDEXED rows go to the callback
 // with their keys in ascending row-ID order, NAMED rows alone in source order.
+// Go map keys enter Lua tables sorted so pairs order is pinned (I8-2A F21).
 func (m *machine) parseTable(l *lua.LState) int {
 	name := strings.TrimSuffix(l.CheckString(1), ".lua")
 	callback := l.CheckFunction(2)
@@ -248,8 +325,8 @@ func (m *machine) parseTable(l *lua.LState) int {
 	var keys lua.LValue = lua.LNil
 	if table.Kind == "INDEXED" {
 		k := l.NewTable()
-		for field, index := range table.Keys {
-			k.RawSetString(field, lua.LNumber(index))
+		for _, field := range slices.Sorted(maps.Keys(table.Keys)) {
+			k.RawSetString(field, lua.LNumber(table.Keys[field]))
 		}
 		keys = k
 	}
@@ -287,8 +364,8 @@ func decodeRow(l *lua.LState, kind string, raw json.RawMessage) (*lua.LTable, er
 	if err := json.Unmarshal(raw, &fields); err != nil {
 		return nil, err
 	}
-	for k, v := range fields {
-		t.RawSetString(k, lua.LString(v))
+	for _, k := range slices.Sorted(maps.Keys(fields)) {
+		t.RawSetString(k, lua.LString(fields[k]))
 	}
 	return t, nil
 }
@@ -326,8 +403,8 @@ func luaValue(l *lua.LState, v any) (lua.LValue, error) {
 		return t, nil
 	case map[string]any:
 		t := l.NewTable()
-		for k, item := range x {
-			value, err := luaValue(l, item)
+		for _, k := range slices.Sorted(maps.Keys(x)) {
+			value, err := luaValue(l, x[k])
 			if err != nil {
 				return nil, err
 			}
@@ -367,12 +444,15 @@ func inputTable(l *lua.LState, s combat.Snapshot) (*lua.LTable, error) {
 		}
 	}
 	in.RawSetString("scene_player", lua.LNumber(scenePlayer))
-	for name, actors := range map[string][]combat.Actor{"team_a": s.Battle.TeamA, "pets_a": s.Battle.PetsA, "pets_b": s.Battle.PetsB} {
-		list, err := actorList(l, actors)
+	for _, side := range []struct {
+		name   string
+		actors []combat.Actor
+	}{{"team_a", s.Battle.TeamA}, {"pets_a", s.Battle.PetsA}, {"pets_b", s.Battle.PetsB}} {
+		list, err := actorList(l, side.actors)
 		if err != nil {
 			return nil, err
 		}
-		in.RawSetString(name, list)
+		in.RawSetString(side.name, list)
 	}
 	waves := l.NewTable()
 	for _, wave := range s.Battle.WavesB {
@@ -389,7 +469,8 @@ func inputTable(l *lua.LState, s combat.Snapshot) (*lua.LTable, error) {
 		for attr := 1; attr <= CollectionAttrTypes; attr++ {
 			album.RawSetInt(attr, lua.LNumber(0))
 		}
-		for k, v := range p.CollectionHundredths {
+		for _, k := range slices.Sorted(maps.Keys(p.CollectionHundredths)) {
+			v := p.CollectionHundredths[k]
 			attr, err := strconv.Atoi(k)
 			if err != nil || attr < 1 || attr > CollectionAttrTypes {
 				return nil, deterministic("collection attr type %q", k)
@@ -397,7 +478,8 @@ func inputTable(l *lua.LState, s combat.Snapshot) (*lua.LTable, error) {
 			album.RawSetInt(attr, lua.LNumber(float64(v)/100))
 		}
 		books := l.NewTable()
-		for k, v := range p.ExclusiveBooks {
+		for _, k := range slices.Sorted(maps.Keys(p.ExclusiveBooks)) {
+			v := p.ExclusiveBooks[k]
 			id, err := strconv.ParseInt(k, 10, 64)
 			if err != nil {
 				return nil, deterministic("exclusive book %q", k)
