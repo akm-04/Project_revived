@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"slices"
 	"time"
 
 	ca "gxb.local/backend/v2/internal/application/characterasset"
@@ -32,6 +33,9 @@ type StartRequest struct {
 	Package func(*d.Stream) (any, error)
 	// Challenge replaces Battle for a client-derived minigame (Dodgeball).
 	Challenge *d.Challenge
+	// Members is the room roster, the convener (Actor) first; empty is a
+	// single-member attempt (D24a).
+	Members []identity.PlayerID
 }
 
 type Started struct {
@@ -94,7 +98,11 @@ func (s Service) start(ctx context.Context, t tx.Tx, scope ca.CoherentReadScope,
 	if !profile.Registered() || request.Package != nil && profile.ServerResolution() || unfrozenSummary || undrawnDerivation {
 		return Started{}, d.ErrInvalid
 	}
-	if err := s.Store.LockLocatorTx(ctx, t, request.Locator); err != nil {
+	members, err := request.roster()
+	if err != nil {
+		return Started{}, err
+	}
+	if err = s.Store.LockLocatorTx(ctx, t, request.Locator); err != nil {
 		return Started{}, err
 	}
 	existing, found, err := s.Store.FindUnresolvedTx(ctx, t, request.Locator)
@@ -104,12 +112,15 @@ func (s Service) start(ctx context.Context, t tx.Tx, scope ca.CoherentReadScope,
 	sameKind := found && existing.TrustProfile == profile && existing.Replay == replay && existing.ActorPlayer == int64(request.Actor.PlayerID)
 	sameStage := sameKind && existing.StartFingerprint == request.StartFingerprint && existing.GenerationRef == request.GenerationRef
 	if sameStage {
-		return s.replayStartTx(ctx, t, existing)
+		return s.replayStartTx(ctx, t, existing, members)
 	}
 	if found && !(sameKind && profile.Supersedes()) {
 		return Started{}, d.ErrStartConflict
 	}
 	if err = s.contentPin(ctx, scope); err != nil {
+		return Started{}, err
+	}
+	if err = f.admit(ctx, request.Locator, members, request.Battle); err != nil {
 		return Started{}, err
 	}
 	snapshot, err := f.freeze(ctx, request.Locator, request.Battle, request.Challenge, profile)
@@ -151,6 +162,11 @@ func (s Service) start(ctx context.Context, t tx.Tx, scope ca.CoherentReadScope,
 	if err = s.Store.InsertAttemptTx(ctx, t, attempt); err != nil {
 		return Started{}, err
 	}
+	if len(members) > 0 {
+		if err = s.Store.InsertMembersTx(ctx, t, id, members); err != nil {
+			return Started{}, err
+		}
+	}
 	if request.Package == nil {
 		return started, nil
 	}
@@ -160,7 +176,15 @@ func (s Service) start(ctx context.Context, t tx.Tx, scope ca.CoherentReadScope,
 
 // replayStartTx answers a same-stage START with the frozen attempt and its
 // stored package; nothing is drawn or frozen again (PASS120 DropPlan replay).
-func (s Service) replayStartTx(ctx context.Context, t tx.Tx, existing d.Attempt) (Started, error) {
+// A changed roster is a different START.
+func (s Service) replayStartTx(ctx context.Context, t tx.Tx, existing d.Attempt, members []int64) (Started, error) {
+	stored, err := s.Store.ReadMembersTx(ctx, t, existing.ID)
+	if err != nil {
+		return Started{}, err
+	}
+	if !slices.Equal(stored, members) {
+		return Started{}, d.ErrStartConflict
+	}
 	started := Started{Attempt: existing, Replayed: true}
 	if existing.TrustProfile.ServerResolution() {
 		return started, nil

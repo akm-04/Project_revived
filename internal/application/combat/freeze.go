@@ -55,6 +55,8 @@ type freezer struct {
 	heroes  map[identity.PlayerID]map[string]any
 	pets    map[identity.PlayerID][]any
 	players map[identity.PlayerID]*playerInputs
+	// members are the admitted co-members of the current START (not the convener).
+	members map[identity.PlayerID]bool
 }
 
 type playerInputs struct {
@@ -135,9 +137,10 @@ func (f *freezer) actor(ctx context.Context, locator d.Locator, p Participant) (
 		return f.template(p)
 	}
 	ownedSelf := p.Origin == d.OwnedSelf && p.Player == f.starter
-	ownedForeign := p.Origin == d.OwnedForeign && p.Player != f.starter
+	ownedForeign := p.Origin == d.OwnedForeign && p.Player != f.starter && !f.members[p.Player]
+	ownedMember := p.Origin == d.OwnedMember && f.members[p.Player]
 	borrowed := p.Origin == d.Borrowed && p.Player != f.starter
-	if !p.Player.Valid() || p.Identity <= 0 || p.TemplateParams != nil || p.Provenance != nil || !(ownedSelf || ownedForeign || borrowed) {
+	if !p.Player.Valid() || p.Identity <= 0 || p.TemplateParams != nil || p.Provenance != nil || !(ownedSelf || ownedForeign || ownedMember || borrowed) {
 		return d.Actor{}, d.ErrInvalid
 	}
 	var provenance *d.Provenance

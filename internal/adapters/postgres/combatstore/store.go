@@ -1,6 +1,6 @@
 // Package combatstore owns the Combat tables: locator roots (lock rank 609),
 // immutable snapshots, resolutions and report blobs, the attempt envelope and
-// its START packages and attestations.
+// its START packages and attestations, and member rosters and settlements.
 // Every read re-verifies content hashes before returning domain values.
 package combatstore
 
@@ -255,4 +255,69 @@ func (Store) ReadAttestationTx(c context.Context, q tx.Queryer, attempt ids.UUID
 		return a, d.ErrIntegrity
 	}
 	return a, nil
+}
+
+func (Store) InsertMembersTx(c context.Context, t tx.Tx, attempt ids.UUID, members []int64) error {
+	if t == nil || attempt.IsZero() || len(members) == 0 || d.ValidMembers(members[0], members) != nil {
+		return d.ErrInvalid
+	}
+	for seat, member := range members {
+		if _, err := t.Exec(c, `INSERT INTO combat_attempt_members(attempt_id,seat,member_player_id)VALUES($1,$2,$3)`, attempt.String(), seat, member); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// ReadMembersTx returns the roster by seat; an attempt without one reads empty.
+func (Store) ReadMembersTx(c context.Context, q tx.Queryer, attempt ids.UUID) ([]int64, error) {
+	if q == nil || attempt.IsZero() {
+		return nil, d.ErrInvalid
+	}
+	var raw string
+	if err := q.QueryRow(c, `SELECT COALESCE(jsonb_agg(member_player_id ORDER BY seat),'[]'::jsonb)::text FROM combat_attempt_members WHERE attempt_id=$1`, attempt.String()).Scan(&raw); err != nil {
+		return nil, err
+	}
+	members := []int64{}
+	if err := json.Unmarshal([]byte(raw), &members); err != nil {
+		return nil, d.ErrIntegrity
+	}
+	if len(members) > 0 && d.ValidMembers(members[0], members) != nil {
+		return nil, d.ErrIntegrity
+	}
+	return members, nil
+}
+
+func (Store) InsertMemberSettlementTx(c context.Context, t tx.Tx, s d.MemberSettlement) error {
+	if t == nil || s.Validate() != nil {
+		return d.ErrInvalid
+	}
+	// Under RepeatableRead a racing committed settlement makes DO NOTHING a
+	// serialization failure, so the caller's retry replays instead of failing.
+	tag, err := t.Exec(c, `INSERT INTO combat_member_settlements(attempt_id,member_player_id,semantic_receipt_id,settled_at)VALUES($1,$2,$3,$4) ON CONFLICT DO NOTHING`, s.AttemptID.String(), s.Member, s.SemanticReceiptID, s.SettledAt)
+	if err != nil {
+		return err
+	}
+	if tag.RowsAffected() != 1 {
+		return d.ErrStale
+	}
+	return nil
+}
+
+func (Store) FindMemberSettlementTx(c context.Context, q tx.Queryer, attempt ids.UUID, member int64) (d.MemberSettlement, bool, error) {
+	s := d.MemberSettlement{AttemptID: attempt, Member: member}
+	if q == nil || attempt.IsZero() || member <= 0 {
+		return s, false, d.ErrInvalid
+	}
+	err := q.QueryRow(c, `SELECT semantic_receipt_id,settled_at FROM combat_member_settlements WHERE attempt_id=$1 AND member_player_id=$2`, attempt.String(), member).Scan(&s.SemanticReceiptID, &s.SettledAt)
+	if errors.Is(err, kernelstore.ErrNoRows) {
+		return s, false, nil
+	}
+	if err != nil {
+		return s, false, err
+	}
+	if s.Validate() != nil {
+		return s, true, d.ErrIntegrity
+	}
+	return s, true, nil
 }

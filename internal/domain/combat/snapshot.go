@@ -64,6 +64,9 @@ const (
 	Borrowed Origin = "BORROWED"
 	// Trial is a template-derived actor that never persists (AUDIT-PROFILE-04).
 	Trial Origin = "TRIAL"
+	// OwnedMember is a co-member's owned actor in a multi-participant attempt,
+	// read in the member's own view (I8-6C, D24b).
+	OwnedMember Origin = "OWNED_MEMBER"
 )
 
 // Provenance names the capability and its version that granted a BORROWED or
@@ -200,7 +203,7 @@ func (a Actor) validate(kind ActorKind, players map[int64]bool, schema int) erro
 		return ErrInvalid
 	}
 	provenanced := a.Origin == Borrowed || a.Origin == Trial
-	if provenanced != (a.Provenance != nil) || provenanced && (schema < SnapshotSchema || !a.Provenance.Valid()) {
+	if provenanced != (a.Provenance != nil) || provenanced && (schema < SnapshotSchema || !a.Provenance.Valid()) || a.Origin == OwnedMember && schema < SnapshotSchema {
 		return ErrInvalid
 	}
 	switch a.Origin {
@@ -211,7 +214,7 @@ func (a Actor) validate(kind ActorKind, players map[int64]bool, schema int) erro
 		if a.Player != 0 || a.OwnerStateVersion != 0 || len(a.BattleTotals) != 0 || (params.PlayerID != nil && params.PlayerID.String() != "0") {
 			return ErrInvalid
 		}
-	case OwnedSelf, OwnedForeign, Borrowed:
+	case OwnedSelf, OwnedForeign, Borrowed, OwnedMember:
 		if a.Player <= 0 || !players[a.Player] || a.OwnerStateVersion <= 0 || len(a.BattleTotals) == 0 || params.PlayerID == nil || params.PlayerID.String() != fmt.Sprint(a.Player) {
 			return ErrInvalid
 		}
@@ -319,17 +322,17 @@ func (s Snapshot) challengeValid() error {
 	return nil
 }
 
-// attackerOnlyValid admits BORROWED and TRIAL actors on the attacking side
-// only, and at most one BORROWED Hero and one BORROWED Pet: the stock START
-// carries one rent_formation Hero and one rent_pet_id (D22c); an assist
-// partner fights as SELF_HERO (D23c).
+// attackerOnlyValid admits BORROWED, TRIAL and OWNED_MEMBER actors on the
+// attacking side only, and at most one BORROWED Hero and one BORROWED Pet:
+// the stock START carries one rent_formation Hero and one rent_pet_id (D22c);
+// an assist partner fights as SELF_HERO (D23c).
 func (s Snapshot) attackerOnlyValid() bool {
 	b := s.Battle
 	sideB := append([]Actor{}, b.PetsB...)
 	for _, wave := range b.WavesB {
 		sideB = append(sideB, wave...)
 	}
-	return originCount(sideB, Borrowed)+originCount(sideB, Trial) == 0 && originCount(b.TeamA, Borrowed) <= 1 && originCount(b.PetsA, Borrowed) <= 1
+	return originCount(sideB, Borrowed)+originCount(sideB, Trial)+originCount(sideB, OwnedMember) == 0 && originCount(b.TeamA, Borrowed) <= 1 && originCount(b.PetsA, Borrowed) <= 1
 }
 
 func originCount(actors []Actor, origin Origin) int {

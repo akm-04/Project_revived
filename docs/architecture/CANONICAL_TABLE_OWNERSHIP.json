@@ -3578,6 +3578,34 @@
       "owner": "Combat",
       "write_exceptions": []
     },
+    "combat_attempt_members": {
+      "allowed_query_owners": [
+        "Combat"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/combatstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/combatstore/"
+      ],
+      "migration": "migrations/00075_i8_6c_attempt_members.sql",
+      "owner": "Combat",
+      "write_exceptions": []
+    },
+    "combat_member_settlements": {
+      "allowed_query_owners": [
+        "Combat"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/combatstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/combatstore/"
+      ],
+      "migration": "migrations/00075_i8_6c_attempt_members.sql",
+      "owner": "Combat",
+      "write_exceptions": []
+    },
     "content_arena_catalogs": {
       "owner": "content-registry",
       "allowed_query_owners": [

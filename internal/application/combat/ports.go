@@ -72,6 +72,10 @@ type Store interface {
 	ReadStartPackageTx(context.Context, tx.Queryer, ids.UUID) (d.StartPackage, bool, error)
 	InsertAttestationTx(context.Context, tx.Tx, d.Attestation) error
 	ReadAttestationTx(context.Context, tx.Queryer, ids.UUID) (d.Attestation, error)
+	InsertMembersTx(context.Context, tx.Tx, ids.UUID, []int64) error
+	ReadMembersTx(context.Context, tx.Queryer, ids.UUID) ([]int64, error)
+	InsertMemberSettlementTx(context.Context, tx.Tx, d.MemberSettlement) error
+	FindMemberSettlementTx(context.Context, tx.Queryer, ids.UUID, int64) (d.MemberSettlement, bool, error)
 }
 
 // Content reports the active revision and its manifest source archive.
@@ -122,6 +126,21 @@ type Lending interface {
 	LendTx(context.Context, tx.Tx, ca.CoherentReadScope, Loan) (d.Provenance, error)
 }
 
+// Admission is a START's member roster at its locator, convener first.
+type Admission struct {
+	Convener identity.PlayerID
+	Members  []identity.PlayerID
+	Locator  d.Locator
+}
+
+// Rooms is the SHARED_ROOM_CORE capability owner of member rosters (I9 binds
+// rooms; I8 binds fixtures only). AdmitTx confirms the roster inside the START
+// transaction before any member read, or refuses with d.ErrRoomRefused. A
+// replayed START never calls it.
+type Rooms interface {
+	AdmitTx(context.Context, tx.Tx, ca.CoherentReadScope, Admission) error
+}
+
 // Inputs are the canonical owner read ports used to freeze owned actors.
 type Inputs struct {
 	Heroes     Roster
@@ -133,6 +152,8 @@ type Inputs struct {
 	Stacks     Stacks
 	// Lending admits BORROWED actors; without it START refuses them.
 	Lending Lending
+	// Rooms admits a member roster; without it START refuses one.
+	Rooms Rooms
 }
 
 type Service struct {
