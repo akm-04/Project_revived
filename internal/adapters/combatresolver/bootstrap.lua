@@ -135,6 +135,11 @@ local function model(actor)
 		return pet
 	end
 	local hero = Hero.new()
+	-- D23a: a monster or assist partner is the stock herosB populateWithTableID(id).
+	if actor.table_shaped then
+		hero:populateWithTableID(actor.params.table_id)
+		return hero
+	end
 	hero:populate(actor.params)
 	if actor.player > 0 then
 		hero.selfPlayer = { playerID = actor.player, albumAttr = input.players[actor.player].album }

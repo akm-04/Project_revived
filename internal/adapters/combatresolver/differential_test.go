@@ -401,6 +401,9 @@ func TestLuaJITDifferential(t *testing.T) {
 		_, borrowed := borrowedGenuine(t)
 		differential(t, dir, corpus, borrowed, root)
 	})
+	t.Run("I8-6B assist TRIAL against monster waves", func(t *testing.T) {
+		differential(t, dir, corpus, lineupGenuine(t, 10000), root)
+	})
 }
 
 // loadProof requires every corpus module to give the same require outcome

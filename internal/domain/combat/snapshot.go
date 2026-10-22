@@ -205,6 +205,9 @@ func (a Actor) validate(kind ActorKind, players map[int64]bool, schema int) erro
 	}
 	switch a.Origin {
 	case Template, Trial:
+		if TableShaped(a.Params) && (a.Kind != HeroActor || a.Identity != a.TableID) {
+			return ErrInvalid
+		}
 		if a.Player != 0 || a.OwnerStateVersion != 0 || len(a.BattleTotals) != 0 || (params.PlayerID != nil && params.PlayerID.String() != "0") {
 			return ErrInvalid
 		}
@@ -227,7 +230,7 @@ func (s Snapshot) Validate() error {
 		return s.challengeValid()
 	}
 	b := s.Battle
-	if b.CampaignType <= 0 || b.BattleID < 0 || len(b.TeamA) == 0 || len(b.WavesB) == 0 && !s.enemyUnnamed() || !s.contextValid() || !s.formationValid() || !s.borrowedValid() {
+	if b.CampaignType <= 0 || b.BattleID < 0 || len(b.TeamA) == 0 || len(b.WavesB) == 0 && !s.enemyUnnamed() || !s.contextValid() || !s.formationValid() || !s.attackerOnlyValid() {
 		return ErrInvalid
 	}
 	players := map[int64]bool{}
@@ -316,26 +319,39 @@ func (s Snapshot) challengeValid() error {
 	return nil
 }
 
-// borrowedValid admits BORROWED actors on the attacking side only, at most one
-// Hero and one Pet: the stock START carries one rent_formation Hero and one
-// rent_pet_id (D22c).
-func (s Snapshot) borrowedValid() bool {
+// attackerOnlyValid admits BORROWED and TRIAL actors on the attacking side
+// only, and at most one BORROWED Hero and one BORROWED Pet: the stock START
+// carries one rent_formation Hero and one rent_pet_id (D22c); an assist
+// partner fights as SELF_HERO (D23c).
+func (s Snapshot) attackerOnlyValid() bool {
 	b := s.Battle
-	sideB := borrowedCount(b.PetsB)
+	sideB := append([]Actor{}, b.PetsB...)
 	for _, wave := range b.WavesB {
-		sideB += borrowedCount(wave)
+		sideB = append(sideB, wave...)
 	}
-	return sideB == 0 && borrowedCount(b.TeamA) <= 1 && borrowedCount(b.PetsA) <= 1
+	return originCount(sideB, Borrowed)+originCount(sideB, Trial) == 0 && originCount(b.TeamA, Borrowed) <= 1 && originCount(b.PetsA, Borrowed) <= 1
 }
 
-func borrowedCount(actors []Actor) int {
+func originCount(actors []Actor, origin Origin) int {
 	count := 0
 	for _, a := range actors {
-		if a.Origin == Borrowed {
+		if a.Origin == origin {
 			count++
 		}
 	}
 	return count
+}
+
+// TableShaped reports a TEMPLATE or TRIAL Hero the VM populates with
+// populateWithTableID(table_id) from its source row, as the stock client does
+// for monsters and assist partners (D23a): params are exactly {"table_id": N}.
+func TableShaped(params json.RawMessage) bool {
+	var fields map[string]json.RawMessage
+	if json.Unmarshal(params, &fields) != nil || len(fields) != 1 {
+		return false
+	}
+	_, ok := fields["table_id"]
+	return ok
 }
 
 // enemyUnnamed admits a client-summary snapshot without enemy waves when the

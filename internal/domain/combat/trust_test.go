@@ -103,6 +103,12 @@ func provenanced(origin Origin, player int64) Actor {
 	return a
 }
 
+func tableShaped(a Actor, tableID int64) Actor {
+	a.Params, _ = CanonicalJSON(map[string]any{"table_id": tableID})
+	a.Identity, a.TableID, a.FighterClass = tableID, tableID, "Liru"
+	return a
+}
+
 func TestSnapshotSchema3ProfilesAndProvenance(t *testing.T) {
 	legacy := fixtureSnapshot()
 	legacy.Schema = ContextSnapshotSchema
@@ -114,6 +120,12 @@ func TestSnapshotSchema3ProfilesAndProvenance(t *testing.T) {
 		"client profile": func(s *Snapshot) { s.TrustProfile = ClientFullReportAttested.ID },
 		"borrowed":       func(s *Snapshot) { s.Battle.TeamA = append(s.Battle.TeamA, provenanced(Borrowed, 9)) },
 		"trial":          func(s *Snapshot) { s.Battle.TeamA = append(s.Battle.TeamA, provenanced(Trial, 0)) },
+		"table-shaped trial": func(s *Snapshot) {
+			s.Battle.TeamA = append(s.Battle.TeamA, tableShaped(provenanced(Trial, 0), 80136130))
+		},
+		"table-shaped monster wave": func(s *Snapshot) {
+			s.Battle.WavesB[0] = append(s.Battle.WavesB[0], tableShaped(fixtureActor(Template, 0), 80135005), tableShaped(fixtureActor(Template, 0), 80135005))
+		},
 	}
 	for name, mutate := range accepted {
 		s := fixtureSnapshot()
@@ -140,6 +152,12 @@ func TestSnapshotSchema3ProfilesAndProvenance(t *testing.T) {
 			s.Battle.TeamA = append(s.Battle.TeamA, provenanced(Borrowed, 9), provenanced(Borrowed, 9))
 		},
 		"trial with owner": func(s *Snapshot) { s.Battle.TeamA = append(s.Battle.TeamA, provenanced(Trial, 9)) },
+		"trial enemy":      func(s *Snapshot) { s.Battle.WavesB[0] = append(s.Battle.WavesB[0], provenanced(Trial, 0)) },
+		"table-shaped identity mismatch": func(s *Snapshot) {
+			actor := tableShaped(fixtureActor(Template, 0), 80135005)
+			actor.Identity = 3
+			s.Battle.WavesB[0] = append(s.Battle.WavesB[0], actor)
+		},
 		"owned with provenance": func(s *Snapshot) {
 			s.Battle.TeamA[0].Provenance = &Provenance{Capability: "FRIEND_ASSIST_V1", Reference: "loan/1"}
 		},

@@ -27,6 +27,7 @@ type Rules interface {
 	ID() string
 	SourceArchiveSHA256() string
 	FighterClass(table string, id int64) (class string, present bool, known bool)
+	BattleLineup(fightID int64) (waves [][]int64, assistPartners []int64, err error)
 }
 
 // Keys is the configured entropy key ring. Retired versions stay readable for

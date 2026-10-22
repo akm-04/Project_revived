@@ -14,6 +14,7 @@ import (
 	"fmt"
 	"io"
 	"strconv"
+	"strings"
 	"sync"
 )
 
@@ -25,7 +26,10 @@ const (
 //go:embed generated
 var generatedFS embed.FS
 
-var ErrCorrupt = errors.New("combat corpus: embedded bytes differ from manifest")
+var (
+	ErrCorrupt       = errors.New("combat corpus: embedded bytes differ from manifest")
+	ErrUnknownBattle = errors.New("combat corpus: no battle row for fight id")
+)
 
 type ModuleRecord struct {
 	Name         string `json:"name"`
@@ -75,6 +79,10 @@ type Corpus struct {
 	present  map[string]bool
 	tables   map[string]TableRecord
 	cache    sync.Map
+
+	battleOnce sync.Once
+	battles    map[int64]battle
+	battleErr  error
 }
 
 var (
@@ -201,3 +209,69 @@ func (c *Corpus) FighterClass(table string, id int64) (class string, present boo
 
 // Classes is the fighter-class manifest, for qualification sweeps.
 func (c *Corpus) Classes() FighterClasses { return c.classes }
+
+// battle is one fight of the battle table as the stock BattleTable parses it.
+type battle struct {
+	waves          [][]int64
+	assistPartners []int64
+}
+
+// BattleLineup returns the monster ids of each non-empty wave (fight_1..
+// fight_3) and the assist partners (assist_partner) of a fight; a repeated
+// fight_id keeps its last row, as the stock parser overwrites earlier ones.
+func (c *Corpus) BattleLineup(fightID int64) (waves [][]int64, assistPartners []int64, err error) {
+	c.battleOnce.Do(func() { c.battles, c.battleErr = c.indexBattles() })
+	if c.battleErr != nil {
+		return nil, nil, c.battleErr
+	}
+	row, ok := c.battles[fightID]
+	if !ok {
+		return nil, nil, fmt.Errorf("%w: %d", ErrUnknownBattle, fightID)
+	}
+	return row.waves, row.assistPartners, nil
+}
+
+func (c *Corpus) indexBattles() (map[int64]battle, error) {
+	table, err := c.Table("battle")
+	if err != nil {
+		return nil, err
+	}
+	out := map[int64]battle{}
+	for _, raw := range table.Rows {
+		var row struct {
+			FightID string `json:"fight_id"`
+			Fight1  string `json:"fight_1"`
+			Fight2  string `json:"fight_2"`
+			Fight3  string `json:"fight_3"`
+			Assist  string `json:"assist_partner"`
+		}
+		if err = json.Unmarshal(raw, &row); err != nil {
+			return nil, err
+		}
+		id, err := strconv.ParseInt(row.FightID, 10, 64)
+		if err != nil {
+			return nil, fmt.Errorf("%w: battle fight_id %q", ErrCorrupt, row.FightID)
+		}
+		fight := battle{waves: [][]int64{}, assistPartners: splitNumbers(row.Assist)}
+		for _, field := range []string{row.Fight1, row.Fight2, row.Fight3} {
+			if wave := splitNumbers(field); len(wave) > 0 {
+				fight.waves = append(fight.waves, wave)
+			}
+		}
+		out[id] = fight
+	}
+	return out, nil
+}
+
+// splitNumbers follows xyd.splitToNumber: a part tonumber rejects (an empty
+// trailing part, or a source typo such as "98200304\\98200701") yields nil and
+// adds nothing.
+func splitNumbers(field string) []int64 {
+	out := []int64{}
+	for _, part := range strings.Split(field, "|") {
+		if n, err := strconv.ParseInt(part, 10, 64); err == nil {
+			out = append(out, n)
+		}
+	}
+	return out
+}

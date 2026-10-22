@@ -28,6 +28,9 @@ type Participant struct {
 	// Transform is the actor's parameter object for the battle's registered
 	// mode transform (Arena season awards); it never enters populate params.
 	Transform map[string]int64
+	// Provenance names the content entry a TRIAL actor comes from; only the
+	// lineup providers (AssistTrial) set it.
+	Provenance *d.Provenance
 }
 
 type BattleRequest struct {
@@ -128,13 +131,13 @@ func (f *freezer) actors(ctx context.Context, locator d.Locator, participants []
 }
 
 func (f *freezer) actor(ctx context.Context, locator d.Locator, p Participant) (d.Actor, error) {
-	if p.Origin == d.Template {
+	if p.Origin == d.Template || p.Origin == d.Trial {
 		return f.template(p)
 	}
 	ownedSelf := p.Origin == d.OwnedSelf && p.Player == f.starter
 	ownedForeign := p.Origin == d.OwnedForeign && p.Player != f.starter
 	borrowed := p.Origin == d.Borrowed && p.Player != f.starter
-	if !p.Player.Valid() || p.Identity <= 0 || p.TemplateParams != nil || !(ownedSelf || ownedForeign || borrowed) {
+	if !p.Player.Valid() || p.Identity <= 0 || p.TemplateParams != nil || p.Provenance != nil || !(ownedSelf || ownedForeign || borrowed) {
 		return d.Actor{}, d.ErrInvalid
 	}
 	var provenance *d.Provenance
@@ -198,14 +201,19 @@ func (f *freezer) lend(ctx context.Context, locator d.Locator, p Participant) (d
 	return provenance, nil
 }
 
+// template freezes a TEMPLATE or TRIAL actor from its source params with no
+// owner read; a TRIAL actor never persists and must name its content entry.
 func (f *freezer) template(p Participant) (d.Actor, error) {
-	if p.Player != 0 || p.TemplateParams == nil {
+	trial := p.Origin == d.Trial
+	if p.Player != 0 || p.TemplateParams == nil || trial != p.Provenance.Valid() || !trial && p.Provenance != nil {
 		return d.Actor{}, d.ErrInvalid
 	}
 	if v, ok := p.TemplateParams["player_id"]; ok && fmt.Sprint(v) != "0" {
 		return d.Actor{}, d.ErrInvalid
 	}
-	return f.build(p, p.TemplateParams)
+	a, err := f.build(p, p.TemplateParams)
+	a.Provenance = p.Provenance
+	return a, err
 }
 
 func (f *freezer) build(p Participant, params map[string]any) (d.Actor, error) {
@@ -228,16 +236,18 @@ func (f *freezer) build(p Participant, params map[string]any) (d.Actor, error) {
 		return d.Actor{}, d.ErrInvalid
 	}
 	identity := shape.PartnerID
-	if p.Kind == d.PetActor {
-		identity = shape.PetID
+	tables := []string{"partner", "super_partner", "activity_partner"}
+	tableShaped := d.TableShaped(raw)
+	switch {
+	case tableShaped && p.Kind == d.HeroActor:
+		// Monster ids never collide with partner ids (HeroTable.serverParseMonster).
+		identity, tables = shape.TableID, append([]string{"monster"}, tables...)
+	case p.Kind == d.PetActor:
+		identity, tables = shape.PetID, []string{"pet"}
 	}
 	tableID, err := shape.TableID.Int64()
 	if err != nil || tableID <= 0 || identity.String() != strconv.FormatInt(p.Identity, 10) {
 		return d.Actor{}, d.ErrInvalid
-	}
-	tables := []string{"partner", "super_partner", "activity_partner"}
-	if p.Kind == d.PetActor {
-		tables = []string{"pet"}
 	}
 	for _, table := range tables {
 		class, present, known := f.service.Rules.FighterClass(table, tableID)

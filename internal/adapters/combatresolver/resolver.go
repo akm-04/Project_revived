@@ -255,6 +255,12 @@ func (m *machine) bind(snapshot combat.Snapshot, root [32]byte) error {
 	if snapshot.CorpusID != m.corpus.ID() || snapshot.SourceArchiveSHA256 != m.corpus.SourceArchiveSHA256() || snapshot.Validate() != nil {
 		return deterministic("snapshot does not match the embedded corpus")
 	}
+	// D23f: the stock server engine never walks to a next wave (its
+	// FighterModel keeps no header view and updateWalk2Next has no caller), so a
+	// multi-wave fight is client-run and attested, never resolved here.
+	if len(snapshot.Battle.WavesB) > 1 {
+		return deterministic("multi-wave battle is not server-resolvable")
+	}
 	input, err := inputTable(m.state, snapshot)
 	if err != nil {
 		return err
@@ -531,6 +537,7 @@ func actorList(l *lua.LState, actors []combat.Actor, legacy bool) (*lua.LTable, 
 		row.RawSetString("kind", lua.LString(a.Kind))
 		row.RawSetString("player", lua.LNumber(a.Player))
 		row.RawSetString("params", params)
+		row.RawSetString("table_shaped", lua.LBool(combat.TableShaped(a.Params)))
 		row.RawSetString("transform", transform)
 		list.Append(row)
 	}
