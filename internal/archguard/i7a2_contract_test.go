@@ -135,7 +135,7 @@ func TestI7A2KeepsFeatureProducerAndWakeupRoutesDormant(t *testing.T) {
 			return err
 		}
 		if d.IsDir() {
-			if d.Name() == ".git" || strings.Contains(filepath.ToSlash(path), "/vendor/") {
+			if outsideProduct(root, path, d) || strings.Contains(filepath.ToSlash(path), "/vendor/") {
 				return filepath.SkipDir
 			}
 			return nil

@@ -210,6 +210,19 @@ func repoRoot(t *testing.T) string {
 	return filepath.Clean(filepath.Join(d, "../.."))
 }
 
+// outsideProduct reports directories a whole-repository walk must skip: .git and nested Go modules (I8.5-4 D49: the virtual
+// client is a separate module the product module never builds).
+func outsideProduct(root, path string, d fs.DirEntry) bool {
+	if !d.IsDir() {
+		return false
+	}
+	if d.Name() == ".git" {
+		return true
+	}
+	_, err := os.Stat(filepath.Join(path, "go.mod"))
+	return path != root && err == nil
+}
+
 func TestNoExternalNetworkInsideTransactionOrDomain(t *testing.T) {
 	root := repoRoot(t)
 	for _, base := range []string{filepath.Join(root, "internal", "foundation", "tx"), filepath.Join(root, "internal", "domain"), filepath.Join(root, "internal", "content")} {
@@ -245,10 +258,10 @@ func TestPgxAndRiverRemainAdapterOnly(t *testing.T) {
 		if err != nil {
 			return err
 		}
+		if outsideProduct(root, path, d) {
+			return filepath.SkipDir
+		}
 		if d.IsDir() {
-			if d.Name() == ".git" {
-				return filepath.SkipDir
-			}
 			return nil
 		}
 		if !strings.HasSuffix(path, ".go") {

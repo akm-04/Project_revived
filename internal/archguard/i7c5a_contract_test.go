@@ -77,7 +77,7 @@ func TestI7C5ALuaVMConfinedToResolver(t *testing.T) {
 	root := repoRoot(t)
 	err := filepath.WalkDir(root, func(path string, d fs.DirEntry, err error) error {
 		if err != nil || d.IsDir() || !strings.HasSuffix(path, ".go") {
-			if d != nil && d.IsDir() && d.Name() == ".git" {
+			if d != nil && outsideProduct(root, path, d) {
 				return filepath.SkipDir
 			}
 			return err
