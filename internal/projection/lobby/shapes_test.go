@@ -118,6 +118,26 @@ func TestExplicitMID2784FreshCompatibilityShape(t *testing.T) {
 	}
 }
 
+func TestMID1DetailMID1856MissionListIsTeacherAndStudentLists(t *testing.T) {
+	detail, err := BuildMID1Detail(view(t))
+	if err != nil {
+		t.Fatal(err)
+	}
+	body, ok := detail["1856"].(map[string]any)
+	if !ok {
+		t.Fatalf("MID1 detail 1856=%T, want map", detail["1856"])
+	}
+	missions, ok := body["mission_list"].([]any)
+	if !ok || len(missions) != 2 {
+		t.Fatalf("MID1856 mission_list=%#v, want [teacher, student] lists", body["mission_list"])
+	}
+	for i, list := range missions {
+		if _, ok := list.([]any); !ok {
+			t.Fatalf("MID1856 mission_list[%d]=%T, want list", i, list)
+		}
+	}
+}
+
 func TestExplicitWhiteAlbumMutationMIDsRemainUnsupported(t *testing.T) {
 	for _, mid := range []uint16{72, 2785} {
 		if got, ok := Explicit(mid, view(t)); ok || got != nil {
