@@ -95,6 +95,15 @@ func TestIngestAttributesThroughTheCapability(t *testing.T) {
 	}
 }
 
+func TestIngestRedactsSecretsInClientRows(t *testing.T) {
+	service, store, _ := newService()
+	service.Ingest(context.Background(), UploadRequest{Capability: issue(t, service), Kind: domain.KindErrorLog, Payload: deflate(t, `[{"log":"GET /api?token=abc123&mid=7","dump":"sid=s1","session_token":"x","note":"kept"}]`)})
+	row := store.uploads[0].Rows[0]
+	if row.Log != "GET /api?token=[REDACTED]&mid=7" || row.Dump != "sid=[REDACTED]" || row.Extras["session_token"] != observability.Redacted || row.Extras["note"] != "kept" {
+		t.Fatalf("row=%+v", row)
+	}
+}
+
 func TestIngestNeverGuessesAnOwner(t *testing.T) {
 	service, store, clock := newService()
 	capability := issue(t, service)

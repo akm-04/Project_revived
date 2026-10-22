@@ -15,6 +15,7 @@ import (
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/clock"
 	"gxb.local/backend/v2/internal/foundation/ids"
+	"gxb.local/backend/v2/internal/foundation/observability"
 )
 
 // Attribution names how an upload was tied to a uid (R2, R3).
@@ -181,7 +182,19 @@ func parseUpload(request UploadRequest) (string, []domain.Row) {
 	if err != nil {
 		return QuarantineBadRows, nil
 	}
-	return "", rows
+	return "", redactRows(rows)
+}
+
+// redactRows masks secrets in client text before persistence (I85_CLIENT_LOG_INGEST_V1 R8).
+func redactRows(rows []domain.Row) []domain.Row {
+	for index := range rows {
+		rows[index].Log = observability.RedactText(rows[index].Log)
+		rows[index].Dump = observability.RedactText(rows[index].Dump)
+		if rows[index].Extras != nil {
+			rows[index].Extras = observability.RedactFields(rows[index].Extras)
+		}
+	}
+	return rows
 }
 
 func uploadClass(upload Upload) domain.RetentionClass {
