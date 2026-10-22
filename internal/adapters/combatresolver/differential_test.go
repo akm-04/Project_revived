@@ -3,6 +3,7 @@ package combatresolver
 import (
 	"bytes"
 	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"maps"
@@ -384,6 +385,16 @@ func TestLuaJITDifferential(t *testing.T) {
 		s.Battle.CampaignType, s.Battle.BattleID = 45, 111001
 		s.Battle.PetsA, s.Battle.PetsB = []combat.Actor{templatePet(t, 10010001)}, []combat.Actor{templatePet(t, 10020001)}
 		s.Battle.Context = &combat.BattleContext{Transform: "REGION_ARENA_SEASON_AWARDS_V1"}
+		differential(t, dir, corpus, s, root)
+	})
+	t.Run("I8-3B genuine owned fight", func(t *testing.T) {
+		// Frozen on R2 by TestI8_3BGenuineFullLiveOwnedSnapshotNative (GXB_I8_3B_SNAPSHOT_OUT).
+		raw := readFile(t, filepath.Join("testdata", "i8_3b_owned_snapshot.json"))
+		sum := sha256.Sum256(raw)
+		s, err := combat.DecodeSnapshot(raw, hex.EncodeToString(sum[:]))
+		if err != nil {
+			t.Fatal(err)
+		}
 		differential(t, dir, corpus, s, root)
 	})
 }
