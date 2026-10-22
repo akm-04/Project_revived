@@ -225,7 +225,7 @@ func (s Snapshot) Validate() error {
 		return s.challengeValid()
 	}
 	b := s.Battle
-	if b.CampaignType <= 0 || b.BattleID < 0 || len(b.TeamA) == 0 || len(b.WavesB) == 0 || !s.contextValid() || !s.formationValid() {
+	if b.CampaignType <= 0 || b.BattleID < 0 || len(b.TeamA) == 0 || len(b.WavesB) == 0 && !s.enemyUnnamed() || !s.contextValid() || !s.formationValid() {
 		return ErrInvalid
 	}
 	players := map[int64]bool{}
@@ -312,6 +312,12 @@ func (s Snapshot) challengeValid() error {
 		return ErrInvalid
 	}
 	return nil
+}
+
+// enemyUnnamed admits a client-summary snapshot without enemy waves when the
+// family's START names no enemy (Conquer picks its team client-side, D21a).
+func (s Snapshot) enemyUnnamed() bool {
+	return s.Schema == SnapshotSchema && s.TrustProfile == ClientSummaryAttested.ID && len(s.Battle.Formation) > 0
 }
 
 // contextValid admits actor transform parameters only beside a context, and no

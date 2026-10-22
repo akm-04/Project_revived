@@ -11,11 +11,11 @@ import (
 	"time"
 
 	ca "gxb.local/backend/v2/internal/application/characterasset"
-	conquer "gxb.local/backend/v2/internal/application/conquerschool"
 	lib "gxb.local/backend/v2/internal/application/librarylocal"
 	"gxb.local/backend/v2/internal/application/publicstats"
 	"gxb.local/backend/v2/internal/domain/character"
 	d "gxb.local/backend/v2/internal/domain/combat"
+	cq "gxb.local/backend/v2/internal/domain/conquerschool"
 	"gxb.local/backend/v2/internal/domain/economy"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/ids"
@@ -95,7 +95,7 @@ type Collection interface {
 }
 
 type Conquer interface {
-	FactsTx(context.Context, ca.CoherentReadScope, identity.PlayerID) (conquer.Observation, error)
+	FactsTx(context.Context, ca.CoherentReadScope, identity.PlayerID) (cq.Observation, error)
 }
 
 type Stacks interface {

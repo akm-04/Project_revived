@@ -14,8 +14,8 @@ import (
 const (
 	ModeContractID = "C5E_CONQUER_SCHOOL_MODE_V1"
 	ModePolicyID   = "C5E_CONQUER_PRIVATE_POLICY_V1"
-	// C5E policy bounds of client-attested RESULT summaries.
-	MaxAlive  int64 = 6
+	// MaxDamage is the C5E bound of a RESULT's total damage; the Combat
+	// summary policy (D21e) judges it.
 	MaxDamage int64 = 1_000_000_000_000_000
 )
 
@@ -122,7 +122,8 @@ func (c ModeCatalog) Ended(r Run) bool {
 	return r.CurrentID == r.PassedID || r.Loop > c.MaxLoop
 }
 
-// Attempt is the open START of a mode player; a newer START supersedes it.
+// Attempt is the settled Combat attempt of a RESULT (I8-5D: Combat owns the
+// open attempt; a newer START supersedes it there).
 type Attempt struct {
 	ID        string  `json:"id"`
 	Loop      int64   `json:"loop"`
@@ -142,7 +143,6 @@ type Mode struct {
 	BeatenTeams  []int64           `json:"team_status"`
 	UsedHeroes   []int64           `json:"used_heroes"`
 	UsedPets     []int64           `json:"used_pets"`
-	Attempt      *Attempt          `json:"attempt"`
 	StateVersion int64             `json:"-"`
 	CreatedAt    time.Time         `json:"-"`
 	UpdatedAt    time.Time         `json:"-"`
@@ -154,11 +154,6 @@ func (c ModeCatalog) NewMode(player identity.PlayerID, at time.Time) Mode {
 
 func (m Mode) clone() Mode {
 	m.BeatenTeams, m.UsedHeroes, m.UsedPets = slices.Clone(m.BeatenTeams), slices.Clone(m.UsedHeroes), slices.Clone(m.UsedPets)
-	if m.Attempt != nil {
-		a := *m.Attempt
-		a.Formation = slices.Clone(a.Formation)
-		m.Attempt = &a
-	}
 	return m
 }
 
@@ -172,14 +167,13 @@ func (c ModeCatalog) Rolled(m Mode, at time.Time) Mode {
 }
 
 func (c ModeCatalog) clearMission(m Mode) Mode {
-	m.BeatenTeams, m.UsedHeroes, m.UsedPets, m.Attempt = []int64{}, []int64{}, []int64{}, nil
+	m.BeatenTeams, m.UsedHeroes, m.UsedPets = []int64{}, []int64{}, []int64{}
 	return m
 }
 
-// Start spends one chance and records the attempt for the current mission.
-func (c ModeCatalog) Start(m Mode, r Run, formation []int64, pet int64, attemptID string) (Mode, error) {
-	distinct := len(formation) > 0 && len(formation) <= c.MaxFormation && !slices.Contains(formation, 0) && len(uniq(formation)) == len(formation)
-	if !distinct || pet < 0 || slices.ContainsFunc(formation, func(id int64) bool { return id < 0 }) {
+// Start spends one chance for the current mission; Combat records the attempt.
+func (c ModeCatalog) Start(m Mode, r Run, formation []int64, pet int64) (Mode, error) {
+	if !c.ValidStart(formation, pet) {
 		return m, ErrInvalid
 	}
 	if c.Ended(r) || m.LeftTimes < 1 {
@@ -190,8 +184,14 @@ func (c ModeCatalog) Start(m Mode, r Run, formation []int64, pet int64, attemptI
 	}
 	m = m.clone()
 	m.LeftTimes--
-	m.Attempt = &Attempt{ID: attemptID, Loop: r.Loop, MissionID: r.CurrentID, Formation: slices.Clone(formation), Pet: pet}
 	return m, nil
+}
+
+// ValidStart checks the START shape: distinct positive partner ids within the
+// formation size and no negative pet.
+func (c ModeCatalog) ValidStart(formation []int64, pet int64) bool {
+	distinct := len(formation) > 0 && len(formation) <= c.MaxFormation && !slices.Contains(formation, 0) && len(uniq(formation)) == len(formation)
+	return distinct && pet >= 0 && !slices.ContainsFunc(formation, func(id int64) bool { return id < 0 })
 }
 
 func uniq(values []int64) []int64 {
@@ -222,22 +222,20 @@ type Settlement struct {
 	Attempt    Attempt
 }
 
-// Settle closes the open attempt and recomputes every canonical consequence.
-func (c ModeCatalog) Settle(m Mode, r Run, p Progress, res Result) (Settlement, error) {
-	if res.Damage < 0 || res.Damage > MaxDamage || res.Alive < 0 || res.Alive > MaxAlive || res.Pet < 0 {
-		return Settlement{}, ErrInvalid
-	}
-	a := m.Attempt
+// Settle recomputes every canonical consequence of the RESULT that Combat
+// attested for attempt attemptID of the current mission; Combat has checked the
+// summary's formation, pet, damage and alive against the frozen START.
+func (c ModeCatalog) Settle(m Mode, r Run, p Progress, res Result, attemptID string) (Settlement, error) {
 	mission, known := c.mission(r.CurrentID)
-	if a == nil || c.Ended(r) || !known || a.Loop != r.Loop || a.MissionID != r.CurrentID || res.CampaignID != r.CurrentID {
+	if attemptID == "" || c.Ended(r) || !known || res.CampaignID != r.CurrentID {
 		return Settlement{}, ErrRefused
 	}
-	if res.TeamID < 1 || res.TeamID > mission.Teams || slices.Contains(m.BeatenTeams, res.TeamID) || !slices.Equal(res.Formation, a.Formation) || res.Pet != a.Pet {
+	if res.TeamID < 1 || res.TeamID > mission.Teams || slices.Contains(m.BeatenTeams, res.TeamID) {
 		return Settlement{}, ErrRefused
 	}
+	a := Attempt{ID: attemptID, Loop: r.Loop, MissionID: r.CurrentID, Formation: slices.Clone(res.Formation), Pet: res.Pet}
 	m = m.clone()
-	out := Settlement{Run: r, Progress: p, KeepReport: res.Win && !res.ReportInvalid, Attempt: *m.Attempt}
-	m.Attempt = nil
+	out := Settlement{Run: r, Progress: p, KeepReport: res.Win && !res.ReportInvalid, Attempt: a}
 	if !res.Win {
 		m.Buff = min(m.Buff+1, c.BuffLimit)
 		out.Mode = m
@@ -346,10 +344,13 @@ func (c ModeCatalog) Info(m Mode, r Run) InfoView {
 }
 
 // ResultView answers 1570; Progress and Region are sent only on promotion.
+// Rejected marks a RESULT whose summary Combat rejected: the attempt's close
+// is committed and receipted, and the RESULT is still refused (D21f).
 type ResultView struct {
 	Info     InfoView
 	Promoted bool
 	Rewards  [][2]int64
 	Progress Progress
 	Region   int64
+	Rejected bool
 }

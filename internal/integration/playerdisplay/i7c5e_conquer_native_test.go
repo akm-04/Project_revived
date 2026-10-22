@@ -35,7 +35,7 @@ func conquerMode(t *testing.T, p *pg.Pool) app.Mode {
 		Backpack: values, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}, RedeemSecret: []byte("i7c5e-conquer-native-fixture-secret0")}
 	return app.Mode{Facts: conquerService(p), Timed: gen.TimedRunner{Binder: gen.Binder{Time: pg.AuthoritativeTime{Queryer: p}}, Runner: runner}, Fresh: p, Store: conquerstore.Store{}, Content: content,
 		Fence: values, Functions: values, Privileges: i5.BaselinePrivilegeProvider{}, Costs: i5.MaterialCostDebiter{Store: values, Content: content}, Grants: grants, Mail: i5.SettlementMail{Store: values},
-		Heroes: fight.Inputs.Heroes, Pets: fight.Inputs.Pets, Directory: i4store.PlayerDirectoryReader{}, Projection: i4store.DirectoryLevelProjection{}, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}}
+		Heroes: fight.Inputs.Heroes, Pets: fight.Inputs.Pets, Combat: fight, Directory: i4store.PlayerDirectoryReader{}, Projection: i4store.DirectoryLevelProjection{}, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}}
 }
 
 // conquerPlayer is a level-100 owner with function 48 open and 15 girls.
@@ -179,7 +179,7 @@ func TestI7C5EConquerConcurrencyAndReportViewsNative(t *testing.T) {
 	// E08: two RESULTs of one attempt serialize: one settles, the other is refused; one grant.
 	// The damage grows per run so this run's report outranks earlier runs' equal-alive reports.
 	damage := time.Now().UnixNano() % d.MaxDamage
-	if _, err := s.Start(ctx, a, girls[:3], 0, op()); err != nil {
+	if _, err := s.Start(ctx, a, girls[:6], 0, op()); err != nil {
 		t.Fatal(err)
 	}
 	var wait sync.WaitGroup
@@ -188,7 +188,7 @@ func TestI7C5EConquerConcurrencyAndReportViewsNative(t *testing.T) {
 		wait.Add(1)
 		go func() {
 			defer wait.Done()
-			_, errs[i] = s.Result(ctx, a, d.Result{CampaignID: 10001, TeamID: 1, Win: true, Formation: girls[:3], Alive: 6, Damage: damage}, json.RawMessage(`{"fighter":{}}`), op())
+			_, errs[i] = s.Result(ctx, a, d.Result{CampaignID: 10001, TeamID: 1, Win: true, Formation: girls[:6], Alive: 6, Damage: damage}, json.RawMessage(`{"fighter":{}}`), op())
 		}()
 	}
 	wait.Wait()

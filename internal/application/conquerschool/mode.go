@@ -2,15 +2,20 @@ package conquerschool
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"strconv"
 	"time"
 
+	ca "gxb.local/backend/v2/internal/application/characterasset"
+	"gxb.local/backend/v2/internal/application/combat"
 	gen "gxb.local/backend/v2/internal/application/generation"
 	"gxb.local/backend/v2/internal/application/i5"
 	"gxb.local/backend/v2/internal/application/playerdirectory"
+	cd "gxb.local/backend/v2/internal/domain/combat"
 	d "gxb.local/backend/v2/internal/domain/conquerschool"
 	"gxb.local/backend/v2/internal/domain/grant"
 	"gxb.local/backend/v2/internal/domain/identity"
@@ -26,7 +31,8 @@ import (
 // Mode composes the Conquer School mode (C5E_CONQUER_SCHOOL_MODE_V1) over the
 // I7C-2J facts seam: run and progress change only through PrepareWriteTx and
 // ApplyWriteTx. Lock order: actor fence 315, I4 player root, facts row, mode
-// row, I5 mail 610 and values 700+, directory 740.
+// row, Combat 609, I5 mail 610 and values 700+, directory 740. START and
+// RESULT bind a Combat CLIENT_SUMMARY_ATTESTED attempt (I8-5D).
 type Mode struct {
 	Facts       Service
 	Timed       gen.TimedRunner
@@ -41,6 +47,7 @@ type Mode struct {
 	Mail        Mail
 	Heroes      Roster
 	Pets        Roster
+	Combat      Combat
 	Directory   Directory
 	Projection  Projection
 	Receipts    receipt.Store
@@ -60,6 +67,13 @@ type ModeStore interface {
 type ModeContent interface {
 	ActiveRevision(context.Context, tx.Queryer) (string, error)
 	ConquerModeCatalogTx(context.Context, tx.Queryer, string) (d.ModeCatalog, error)
+}
+
+// Combat is the I8-4 attempt foundation that owns the open START.
+type Combat interface {
+	StartTx(context.Context, tx.Tx, ca.CoherentReadScope, combat.StartRequest) (combat.Started, error)
+	AttestSummaryTx(context.Context, tx.Tx, combat.SummaryRequest) (combat.SummaryAttested, error)
+	CloseTx(context.Context, tx.Tx, combat.TerminalRequest) (combat.Closed, error)
 }
 
 type Fence interface {
@@ -94,6 +108,35 @@ type Projection interface {
 
 const viewMailKind = "CONQUER_SCHOOL_REPORT_VIEW"
 
+// Conquer binding of the Combat attempt (D21, private policy): stock
+// CampaignType CONQUER_SCHOOL, one hour to RESULT, and the summary bounds.
+const (
+	campaignType = 25
+	resultWindow = time.Hour
+	resultKind   = "CONQUER_RESULT"
+	resetKind    = "CONQUER_RESET"
+)
+
+var summaryPolicy = cd.SummaryPolicy{ID: "C5E_CONQUER_SUMMARY_V1", Version: 1, MaxDamage: d.MaxDamage}
+
+func locator(a identity.ActorContext) cd.Locator {
+	return cd.Locator{DomainKind: "CONQUER_SCHOOL", AuthorityScope: fmt.Sprintf("server:%d", a.LogicalServerID), DomainLocator: fmt.Sprintf("player:%d", a.PlayerID)}
+}
+
+// generation scopes an attempt to the run's mission, so a RESULT after the
+// mission moved on drains.
+func generation(r d.Run) string {
+	return fmt.Sprintf("%s/%d/%d", d.ModeContractID, r.Loop, r.CurrentID)
+}
+
+// fingerprint keys START replay on the operation: a retransmit replays without
+// a second chance, a new START supersedes and spends one.
+func fingerprint(a identity.ActorContext, r d.Run, formation []int64, pet int64, op operation.Context) string {
+	raw, _ := json.Marshal(map[string]any{"policy": d.ModeContractID, "player": int64(a.PlayerID), "loop": r.Loop, "mission": r.CurrentID, "formation": formation, "pet": pet, "operation": op.ID.String()})
+	sum := sha256.Sum256(raw)
+	return hex.EncodeToString(sum[:])
+}
+
 func ModeProfile() tx.Profile {
 	return tx.Profile{Name: "conquer-school", AcquireTimeout: 2 * time.Second, LockTimeout: 5 * time.Second, StatementTimeout: 10 * time.Second, TransactionTimeout: 30 * time.Second, CleanupTimeout: 2 * time.Second, ReconcileTimeout: 10 * time.Second, OperationTimeout: 60 * time.Second}
 }
@@ -105,7 +148,7 @@ func retry() tx.RetryPolicy {
 func (s Mode) ready() bool {
 	return s.Facts.Owner != nil && s.Facts.Content != nil && s.Facts.Players != nil && s.Timed.Runner.DB != nil && s.Timed.Binder.Time != nil && s.Fresh != nil &&
 		s.Store != nil && s.Content != nil && s.Fence != nil && s.Functions != nil && s.Privileges != nil && s.Costs != nil && s.Grants != nil && s.Mail != nil &&
-		s.Heroes != nil && s.Pets != nil && s.Directory != nil && s.Projection != nil && s.Receipts != nil && s.ReceiptRead != nil
+		s.Heroes != nil && s.Pets != nil && s.Combat != nil && s.Directory != nil && s.Projection != nil && s.Receipts != nil && s.ReceiptRead != nil
 }
 
 // pin binds the active content revision to the operation once, so the facts
@@ -224,10 +267,19 @@ func (s Mode) Info(c context.Context, a identity.ActorContext, op operation.Cont
 	})
 }
 
-// Reset answers 1573 (user decision "Keep it": chances and buff stay).
+// Reset answers 1573 (user decision "Keep it": chances and buff stay) and
+// withdraws the open Combat attempt, whose RESULT then drains (D21b).
 func (s Mode) Reset(c context.Context, a identity.ActorContext, op operation.Context) (d.InfoView, error) {
-	return s.change(c, a, op, func(_ context.Context, _ gen.TimedScope, st session) (d.Mode, error) {
-		return st.catalog.Reset(st.mode, st.run)
+	return s.change(c, a, op, func(c context.Context, sc gen.TimedScope, st session) (d.Mode, error) {
+		mode, err := st.catalog.Reset(st.mode, st.run)
+		if err != nil {
+			return st.mode, err
+		}
+		request := combat.TerminalRequest{Locator: locator(a), GenerationRef: generation(st.run), TerminalKind: resetKind, SemanticReceiptID: "reset:" + sc.Operation.Operation().ID.String(), At: sc.Operation.DecisionAt()}
+		if _, err = s.Combat.CloseTx(c, sc.Tx, request); err != nil && !errors.Is(err, combat.ErrAttemptNotFound) {
+			return st.mode, err
+		}
+		return mode, nil
 	})
 }
 
@@ -249,8 +301,34 @@ func (s Mode) Start(c context.Context, a identity.ActorContext, formation []int6
 				return st.mode, errors.Join(err, fmt.Errorf("%w: pet %d not owned", d.ErrRefused, pet))
 			}
 		}
-		return st.catalog.Start(st.mode, st.run, formation, pet, sc.Operation.Operation().ID.String())
+		if !st.catalog.ValidStart(formation, pet) {
+			return st.mode, d.ErrInvalid
+		}
+		started, err := s.bind(c, sc, a, st, formation, pet)
+		if err != nil || started.Replayed {
+			return st.mode, err
+		}
+		return st.catalog.Start(st.mode, st.run, formation, pet)
 	})
+}
+
+// bind freezes the START's team and pet into a Combat attempt; the enemy team
+// is chosen client-side, so none is frozen (D21a).
+func (s Mode) bind(c context.Context, sc gen.TimedScope, a identity.ActorContext, st session, formation []int64, pet int64) (combat.Started, error) {
+	at, op := sc.Operation.DecisionAt(), sc.Operation.Operation()
+	scope, err := ca.NewCoherentReadScope(tx.Scope{Tx: sc.Tx, Operation: op, Attempt: sc.Attempt, Options: sc.Options}, st.revision, at)
+	if err != nil {
+		return combat.Started{}, err
+	}
+	battle := combat.BattleRequest{CampaignType: campaignType, BattleID: st.run.CurrentID, PetsA: []combat.Participant{}, Formation: formation}
+	for _, id := range formation {
+		battle.TeamA = append(battle.TeamA, combat.Participant{Origin: cd.OwnedSelf, Kind: cd.HeroActor, Player: a.PlayerID, Identity: id})
+	}
+	if pet > 0 {
+		battle.PetsA = append(battle.PetsA, combat.Participant{Origin: cd.OwnedSelf, Kind: cd.PetActor, Player: a.PlayerID, Identity: pet})
+	}
+	return s.Combat.StartTx(c, sc.Tx, scope, combat.StartRequest{Actor: a, Locator: locator(a), GenerationRef: generation(st.run), StartFingerprint: fingerprint(a, st.run, formation, pet, op),
+		ResultDeadline: at.Add(resultWindow), Battle: battle, TrustProfile: cd.ClientSummaryAttested, Replay: cd.ReplaySpec{Response: cd.ReplayOK}})
 }
 
 func (s Mode) heroRows(c context.Context, q tx.Queryer, pid identity.PlayerID, at time.Time) (map[string]any, error) {
@@ -350,18 +428,30 @@ func (s Mode) Buy(c context.Context, a identity.ActorContext, op operation.Conte
 	return view.Info, err
 }
 
-// Result answers 1570 for the open attempt (CLIENT_SUMMARY_ATTESTED): the
-// server recomputes chances, buff, teams, promotion, rewards and progress.
+// Result answers 1570 for the open Combat attempt (CLIENT_SUMMARY_ATTESTED):
+// Combat judges the summary against the frozen START, then the server
+// recomputes chances, buff, teams, promotion, rewards and progress.
 func (s Mode) Result(c context.Context, a identity.ActorContext, result d.Result, report json.RawMessage, op operation.Context) (d.ResultView, error) {
 	request := map[string]any{"campaign_id": result.CampaignID, "team_id": result.TeamID, "win": result.Win, "formation": result.Formation, "pet": result.Pet,
 		"damage": result.Damage, "alive": result.Alive, "report_invalid": result.ReportInvalid, "report": string(report)}
-	return s.receipted(c, a, op, "result", request, func(c context.Context, sc gen.TimedScope) (d.ResultView, error) {
+	view, err := s.receipted(c, a, op, "result", request, func(c context.Context, sc gen.TimedScope) (d.ResultView, error) {
 		at, current := sc.Operation.DecisionAt(), sc.Operation.Operation()
 		st, err := s.open(c, sc, a)
 		if err != nil {
 			return d.ResultView{}, err
 		}
-		settled, err := st.catalog.Settle(st.mode, st.run, st.progress, result)
+		summary := cd.Summary{Win: result.Win, Damage: result.Damage, Alive: result.Alive, Formation: result.Formation, Pet: result.Pet}
+		attested, err := s.Combat.AttestSummaryTx(c, sc.Tx, combat.SummaryRequest{Locator: locator(a), GenerationRef: generation(st.run), TerminalKind: resultKind, At: at, Policy: summaryPolicy, Summary: summary})
+		if err != nil {
+			return d.ResultView{}, err
+		}
+		if attested.Drained {
+			return d.ResultView{}, fmt.Errorf("%w: no open attempt for this RESULT", d.ErrRefused)
+		}
+		if attested.Attestation.Verdict == cd.VerdictRejected {
+			return d.ResultView{Info: st.catalog.Info(st.mode, st.run), Rejected: true}, nil
+		}
+		settled, err := st.catalog.Settle(st.mode, st.run, st.progress, result, attested.Attempt.ID.String())
 		if err != nil {
 			return d.ResultView{}, err
 		}
@@ -393,6 +483,10 @@ func (s Mode) Result(c context.Context, a identity.ActorContext, result d.Result
 		}
 		return view, err
 	})
+	if err == nil && view.Rejected {
+		err = fmt.Errorf("%w: summary rejected", d.ErrRefused)
+	}
+	return view, err
 }
 
 // keep stores a won fight's report with the owner card and girl snapshots.

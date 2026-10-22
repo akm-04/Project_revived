@@ -70,42 +70,42 @@ func TestModeStartSettleAndPromotion(t *testing.T) {
 	run.CurrentID, run.PassedID = 10002, 10001
 	progress := d.Progress{Level: 1, Loop: 1}
 	m := c.NewMode(100001, at)
-	if _, e := c.Start(m, run, []int64{1, 1}, 0, "a"); !errors.Is(e, d.ErrInvalid) {
+	if _, e := c.Start(m, run, []int64{1, 1}, 0); !errors.Is(e, d.ErrInvalid) {
 		t.Fatal("duplicate girls", e)
 	}
-	if _, e := c.Start(m, run, []int64{1, 2, 3, 4, 5, 6, 7}, 0, "a"); !errors.Is(e, d.ErrInvalid) {
+	if _, e := c.Start(m, run, []int64{1, 2, 3, 4, 5, 6, 7}, 0); !errors.Is(e, d.ErrInvalid) {
 		t.Fatal("seven girls", e)
 	}
-	m, e := c.Start(m, run, []int64{11, 12}, 7, "a1")
-	if e != nil || m.LeftTimes != 9 || m.Attempt.MissionID != 10002 {
+	m, e := c.Start(m, run, []int64{11, 12}, 7)
+	if e != nil || m.LeftTimes != 9 {
 		t.Fatal(m, e)
 	}
-	lost, e := c.Settle(m, run, progress, d.Result{CampaignID: 10002, TeamID: 1, Formation: []int64{11, 12}, Pet: 7})
-	if e != nil || lost.Mode.Buff != 1 || lost.Mode.Attempt != nil || lost.Promoted || lost.KeepReport {
+	lost, e := c.Settle(m, run, progress, d.Result{CampaignID: 10002, TeamID: 1, Formation: []int64{11, 12}, Pet: 7}, "a1")
+	if e != nil || lost.Mode.Buff != 1 || lost.Promoted || lost.KeepReport || lost.Attempt.ID != "a1" || lost.Attempt.MissionID != 10002 {
 		t.Fatal(lost, e)
 	}
-	if _, e = c.Settle(lost.Mode, run, progress, d.Result{CampaignID: 10002, TeamID: 1, Formation: []int64{11, 12}, Pet: 7}); !errors.Is(e, d.ErrRefused) {
-		t.Fatal("settled twice", e)
+	if _, e = c.Settle(lost.Mode, run, progress, d.Result{CampaignID: 10002, TeamID: 1, Formation: []int64{11, 12}, Pet: 7}, ""); !errors.Is(e, d.ErrRefused) {
+		t.Fatal("settled without a Combat attempt", e)
 	}
-	m, _ = c.Start(lost.Mode, run, []int64{11, 12}, 7, "a2")
-	if _, e = c.Settle(m, run, progress, d.Result{CampaignID: 10002, TeamID: 1, Formation: []int64{12, 11}, Pet: 7, Win: true}); !errors.Is(e, d.ErrRefused) {
-		t.Fatal("formation mismatch", e)
+	m, _ = c.Start(lost.Mode, run, []int64{11, 12}, 7)
+	if _, e = c.Settle(m, run, progress, d.Result{CampaignID: 10001, TeamID: 1, Formation: []int64{11, 12}, Pet: 7, Win: true}, "a2"); !errors.Is(e, d.ErrRefused) {
+		t.Fatal("campaign mismatch", e)
 	}
-	if _, e = c.Settle(m, run, progress, d.Result{CampaignID: 10002, TeamID: 1, Formation: []int64{11, 12}, Pet: 7, Win: true, Alive: 7}); !errors.Is(e, d.ErrInvalid) {
-		t.Fatal("alive bound", e)
-	}
-	won, e := c.Settle(m, run, progress, d.Result{CampaignID: 10002, TeamID: 1, Formation: []int64{11, 12}, Pet: 7, Win: true, Alive: 2, Damage: 9})
+	won, e := c.Settle(m, run, progress, d.Result{CampaignID: 10002, TeamID: 1, Formation: []int64{11, 12}, Pet: 7, Win: true, Alive: 2, Damage: 9}, "a2")
 	if e != nil || won.Promoted || !won.KeepReport || !reflect.DeepEqual(won.Mode.BeatenTeams, []int64{1}) || won.Mode.Buff != 1 {
 		t.Fatal(won, e)
 	}
-	if _, e = c.Start(won.Mode, run, []int64{12, 13}, 0, "a3"); !errors.Is(e, d.ErrRefused) {
+	if _, e = c.Settle(won.Mode, run, progress, d.Result{CampaignID: 10002, TeamID: 1, Formation: []int64{13}, Win: true}, "a3"); !errors.Is(e, d.ErrRefused) {
+		t.Fatal("beaten team", e)
+	}
+	if _, e = c.Start(won.Mode, run, []int64{12, 13}, 0); !errors.Is(e, d.ErrRefused) {
 		t.Fatal("used girl", e)
 	}
-	if _, e = c.Start(won.Mode, run, []int64{13}, 7, "a3"); !errors.Is(e, d.ErrRefused) {
+	if _, e = c.Start(won.Mode, run, []int64{13}, 7); !errors.Is(e, d.ErrRefused) {
 		t.Fatal("used pet", e)
 	}
-	m, _ = c.Start(won.Mode, run, []int64{13}, 0, "a3")
-	promoted, e := c.Settle(m, run, progress, d.Result{CampaignID: 10002, TeamID: 2, Formation: []int64{13}, Win: true, ReportInvalid: true})
+	m, _ = c.Start(won.Mode, run, []int64{13}, 0)
+	promoted, e := c.Settle(m, run, progress, d.Result{CampaignID: 10002, TeamID: 2, Formation: []int64{13}, Win: true, ReportInvalid: true}, "a3")
 	if e != nil || !promoted.Promoted || promoted.KeepReport || promoted.Mode.Buff != 0 || promoted.Mode.LeftTimes != 10 || len(promoted.Mode.UsedHeroes) != 0 {
 		t.Fatal(promoted, e)
 	}
@@ -123,11 +123,11 @@ func TestModeLoopTransitionAndEnd(t *testing.T) {
 		wantLoop int64
 	}{{1, d.Run{Loop: 2, CurrentID: 10001, Generation: "g"}, 2}, {8, d.Run{Loop: 9, CurrentID: 10056, PassedID: 10056, Generation: "g"}, 9}} {
 		run := d.Run{Loop: x.loop, CurrentID: 10056, PassedID: 10055, Generation: "g"}
-		m, e := c.Start(c.NewMode(100001, at), run, []int64{1}, 0, "a")
+		m, e := c.Start(c.NewMode(100001, at), run, []int64{1}, 0)
 		if e != nil {
 			t.Fatal(e)
 		}
-		out, e := c.Settle(m, run, d.Progress{Level: 55, Loop: x.loop}, d.Result{CampaignID: 10056, TeamID: 1, Formation: []int64{1}, Win: true})
+		out, e := c.Settle(m, run, d.Progress{Level: 55, Loop: x.loop}, d.Result{CampaignID: 10056, TeamID: 1, Formation: []int64{1}, Win: true}, "a")
 		if e != nil || out.Run != x.wantRun || out.Progress != (d.Progress{Level: 56, Loop: x.wantLoop}) || len(out.Rewards) != 2 || out.Rewards[1] != c.Loops[x.loop-1].Reward {
 			t.Fatal(x.loop, out, e)
 		}
@@ -136,7 +136,7 @@ func TestModeLoopTransitionAndEnd(t *testing.T) {
 		}
 	}
 	ended := d.Run{Loop: 9, CurrentID: 10056, PassedID: 10056, Generation: "g"}
-	if _, e := c.Start(c.NewMode(100001, at), ended, []int64{1}, 0, "a"); !errors.Is(e, d.ErrRefused) {
+	if _, e := c.Start(c.NewMode(100001, at), ended, []int64{1}, 0); !errors.Is(e, d.ErrRefused) {
 		t.Fatal("start after end", e)
 	}
 	if _, e := c.Reset(c.NewMode(100001, at), ended); !errors.Is(e, d.ErrRefused) {
@@ -154,8 +154,8 @@ func TestModeResetBuyBuffCapAndViews(t *testing.T) {
 	if e != nil || reset.Buff != 10 || reset.LeftTimes != 3 || len(reset.BeatenTeams)+len(reset.UsedHeroes)+len(reset.UsedPets) != 0 {
 		t.Fatal(reset, e)
 	}
-	started, _ := c.Start(reset, run, []int64{1}, 0, "a")
-	lost, _ := c.Settle(started, run, d.Progress{Loop: 1}, d.Result{CampaignID: 10001, TeamID: 1, Formation: []int64{1}})
+	started, _ := c.Start(reset, run, []int64{1}, 0)
+	lost, _ := c.Settle(started, run, d.Progress{Loop: 1}, d.Result{CampaignID: 10001, TeamID: 1, Formation: []int64{1}}, "a")
 	if lost.Mode.Buff != 10 {
 		t.Fatal("buff cap", lost.Mode.Buff)
 	}

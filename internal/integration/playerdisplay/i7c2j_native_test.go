@@ -54,10 +54,10 @@ func conquerFixture(t *testing.T, p *pg.Pool) (identity.ActorContext, string, ap
 	}
 	return a, rev, conquerService(p)
 }
-func conquerRead(t *testing.T, p *pg.Pool, s app.Service, a identity.ActorContext, rev string, id int64) (app.HeroInputs, error) {
+func conquerRead(t *testing.T, p *pg.Pool, s app.Service, a identity.ActorContext, rev string, id int64) (d.HeroInputs, error) {
 	t.Helper()
 	o := opPinned(rev)
-	var out app.HeroInputs
+	var out d.HeroInputs
 	_, e := (tx.Runner{DB: p}).Run(ctx, o, app.Profile(), tx.Options{Isolation: tx.RepeatableRead}, tx.RetryPolicy{MaxAttempts: 1}, nil, func(c context.Context, sc tx.Scope) error {
 		scope, e := characterasset.NewCoherentReadScope(sc, rev, time.Now().UTC())
 		if e != nil {

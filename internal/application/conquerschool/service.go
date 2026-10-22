@@ -10,7 +10,6 @@ import (
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/tx"
 	"strings"
-	"time"
 )
 
 type OwnerPort interface {
@@ -35,18 +34,9 @@ type Service struct {
 	Kinds   KindPort
 	Players playerroot.TxLocker
 }
-type Observation struct {
-	Facts           d.Facts
-	ContentRevision string
-	ObservedAt      time.Time
-	Contributions   map[int64]int64
-	Regions         int64
-	RunAvailable    bool
-	RunComplete     bool
-}
 
-func (s Service) FactsTx(ctx context.Context, scope characterasset.CoherentReadScope, p identity.PlayerID) (Observation, error) {
-	var out Observation
+func (s Service) FactsTx(ctx context.Context, scope characterasset.CoherentReadScope, p identity.PlayerID) (d.Observation, error) {
+	var out d.Observation
 	if scope.Validate() != nil || !p.Valid() || s.Owner == nil || s.Content == nil {
 		return out, d.ErrUnqualified
 	}
@@ -84,7 +74,7 @@ func (s Service) FactsTx(ctx context.Context, scope characterasset.CoherentReadS
 	if e != nil {
 		return out, e
 	}
-	out = Observation{Facts: f, ContentRevision: pin, ObservedAt: scope.ObservedAt, Contributions: v, Regions: regions}
+	out = d.Observation{Facts: f, ContentRevision: pin, ObservedAt: scope.ObservedAt, Contributions: v, Regions: regions}
 	out.Facts.Payload = f.Payload.Clone()
 	if f.Payload.Run != nil {
 		out.RunAvailable = true
@@ -93,14 +83,8 @@ func (s Service) FactsTx(ctx context.Context, scope characterasset.CoherentReadS
 	return out, e
 }
 
-type HeroInputs struct {
-	Hero              character.Hero
-	PopulationVersion int64
-	Observation       Observation
-}
-
-func (s Service) HeroInputsTx(ctx context.Context, scope characterasset.CoherentReadScope, ref character.HeroRef) (HeroInputs, error) {
-	var out HeroInputs
+func (s Service) HeroInputsTx(ctx context.Context, scope characterasset.CoherentReadScope, ref character.HeroRef) (d.HeroInputs, error) {
+	var out d.HeroInputs
 	if scope.Validate() != nil || ref.Validate() != nil || s.Heroes == nil || s.Kinds == nil {
 		return out, d.ErrUnqualified
 	}
@@ -130,7 +114,7 @@ func (s Service) HeroInputsTx(ctx context.Context, scope characterasset.Coherent
 	if e != nil {
 		return out, e
 	}
-	return HeroInputs{Hero: h, PopulationVersion: root.StateVersion, Observation: v}, nil
+	return d.HeroInputs{Hero: h, PopulationVersion: root.StateVersion, Observation: v}, nil
 }
 
 // PreparedWrite is the caller-Tx writer seam; the I7C-5E Mode service is its

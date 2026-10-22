@@ -142,10 +142,12 @@ func (a Attempt) Terminate(kind, semanticReceiptID string, at time.Time) (Attemp
 }
 
 // Closable reports whether the owning mode may end the attempt without
-// settlement: its resolution failed permanently or its result deadline passed.
+// settlement: its resolution failed permanently, its result deadline passed,
+// or it is a staged client-run attempt the mode withdraws (D21b).
 func (a Attempt) Closable(at time.Time) bool {
 	expired := !at.Before(a.ResultDeadline)
-	return a.State == Staged && (a.ResolverStatus == ResolverPermanentFailed || expired) || a.State == ResolutionReady && expired
+	withdrawable := a.ResolverStatus == ResolverNotRequired
+	return a.State == Staged && (a.ResolverStatus == ResolverPermanentFailed || expired || withdrawable) || a.State == ResolutionReady && expired
 }
 
 // Close frees the locator slot under the mode's expiry or supersession rule.

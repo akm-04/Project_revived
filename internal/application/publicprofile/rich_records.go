@@ -8,10 +8,10 @@ import (
 	"time"
 
 	"gxb.local/backend/v2/internal/application/characterasset"
-	conquer "gxb.local/backend/v2/internal/application/conquerschool"
 	"gxb.local/backend/v2/internal/application/publicstats"
 	"gxb.local/backend/v2/internal/domain/character"
 	cd "gxb.local/backend/v2/internal/domain/combat"
+	conquer "gxb.local/backend/v2/internal/domain/conquerschool"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )

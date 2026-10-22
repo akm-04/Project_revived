@@ -7,7 +7,6 @@ import (
 	"time"
 
 	ca "gxb.local/backend/v2/internal/application/characterasset"
-	conquer "gxb.local/backend/v2/internal/application/conquerschool"
 	"gxb.local/backend/v2/internal/domain/character"
 	cd "gxb.local/backend/v2/internal/domain/combat"
 	dconquer "gxb.local/backend/v2/internal/domain/conquerschool"
@@ -32,8 +31,8 @@ func (f fakeAwakening) RawAwakeningTx(_ context.Context, _ ca.CoherentReadScope,
 
 type fakeConquer struct{ progress *dconquer.Progress }
 
-func (f fakeConquer) FactsTx(context.Context, ca.CoherentReadScope, identity.PlayerID) (conquer.Observation, error) {
-	return conquer.Observation{Facts: dconquer.Facts{Payload: dconquer.Payload{Kind: "OWNED", Progress: f.progress}}}, nil
+func (f fakeConquer) FactsTx(context.Context, ca.CoherentReadScope, identity.PlayerID) (dconquer.Observation, error) {
+	return dconquer.Observation{Facts: dconquer.Facts{Payload: dconquer.Payload{Kind: "OWNED", Progress: f.progress}}}, nil
 }
 
 type fakeMode struct{ history cd.History }

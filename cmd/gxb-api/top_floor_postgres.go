@@ -132,12 +132,12 @@ func canonicalArena(p *postgres.Pool, r tx.Runner, content contentstore.Store, i
 		Directory: i4store.PlayerDirectoryReader{}, Guilds: guildstore.Store{}, Servers: i4store.ServerNames{}, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}}
 }
 
-// canonicalConquer is the Conquer School mode (client-attested; no Combat attempt).
+// canonicalConquer is the Conquer School mode (client-attested Combat attempt, I8-5D).
 func canonicalConquer(p *postgres.Pool, r tx.Runner, content contentstore.Store, i5db i5store.Store, i5svc appi5.Service, privileges commerceprivilege.Provider, fight combat.Service) appconquer.Mode {
 	facts := appconquer.Service{Owner: conquerstore.Store{}, Content: content, Heroes: characterstore.Store{Queryer: p}, Kinds: content, Players: i4store.PlayerRootLocker{}}
 	return appconquer.Mode{Facts: facts, Timed: appgeneration.TimedRunner{Binder: appgeneration.Binder{Time: postgres.AuthoritativeTime{Queryer: p}}, Runner: r}, Fresh: p, Store: conquerstore.Store{}, Content: content,
 		Fence: i5db, Functions: i5db, Privileges: privileges, Costs: appi5.MaterialCostDebiter{Store: i5db, Content: content}, Grants: i5svc, Mail: appi5.SettlementMail{Store: i5db},
-		Heroes: fight.Inputs.Heroes, Pets: fight.Inputs.Pets, Directory: i4store.PlayerDirectoryReader{}, Projection: i4store.DirectoryLevelProjection{}, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}}
+		Heroes: fight.Inputs.Heroes, Pets: fight.Inputs.Pets, Combat: fight, Directory: i4store.PlayerDirectoryReader{}, Projection: i4store.DirectoryLevelProjection{}, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}}
 }
 
 func canonicalTopFloor(p *postgres.Pool, r tx.Runner, content contentstore.Store, i5db i5store.Store, privileges commerceprivilege.Provider, fight combat.Service, o topFloorOwners) apptopfloor.Service {

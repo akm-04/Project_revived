@@ -4,6 +4,7 @@ package conquerschool
 import (
 	"encoding/hex"
 	"errors"
+	"gxb.local/backend/v2/internal/domain/character"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/ids"
 	"math"
@@ -259,3 +260,23 @@ func (f Facts) Validate(c Catalog) error {
 	return nil
 }
 func (f Facts) Known() bool { return f.Payload.Kind != Unknown && f.Payload.Progress != nil }
+
+// Observation is one coherent read of a player's Conquer facts with the
+// content revision it was observed under.
+type Observation struct {
+	Facts           Facts
+	ContentRevision string
+	ObservedAt      time.Time
+	Contributions   map[int64]int64
+	Regions         int64
+	RunAvailable    bool
+	RunComplete     bool
+}
+
+// HeroInputs is one hero with the population version and Conquer facts it was
+// read under.
+type HeroInputs struct {
+	Hero              character.Hero
+	PopulationVersion int64
+	Observation       Observation
+}

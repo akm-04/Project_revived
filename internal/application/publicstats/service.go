@@ -7,7 +7,6 @@ import (
 	"fmt"
 	book "gxb.local/backend/v2/internal/application/bookskill"
 	ca "gxb.local/backend/v2/internal/application/characterasset"
-	conquer "gxb.local/backend/v2/internal/application/conquerschool"
 	course "gxb.local/backend/v2/internal/application/course"
 	dorm "gxb.local/backend/v2/internal/application/dormhouse"
 	elem "gxb.local/backend/v2/internal/application/elementequipment"
@@ -16,6 +15,7 @@ import (
 	lib "gxb.local/backend/v2/internal/application/librarylocal"
 	spirit "gxb.local/backend/v2/internal/application/spirit"
 	"gxb.local/backend/v2/internal/domain/character"
+	cq "gxb.local/backend/v2/internal/domain/conquerschool"
 	d "gxb.local/backend/v2/internal/domain/dormhouse"
 	"gxb.local/backend/v2/internal/domain/identity"
 	n "gxb.local/backend/v2/internal/domain/statinputs"
@@ -80,7 +80,7 @@ type Evolution interface {
 	CoherentHeroInputsTx(context.Context, ca.CoherentReadScope, character.HeroRef) (evo.HeroInputs, error)
 }
 type Conquer interface {
-	HeroInputsTx(context.Context, ca.CoherentReadScope, character.HeroRef) (conquer.HeroInputs, error)
+	HeroInputsTx(context.Context, ca.CoherentReadScope, character.HeroRef) (cq.HeroInputs, error)
 }
 
 // Awakening is a required Character-owned observation. A caller default
