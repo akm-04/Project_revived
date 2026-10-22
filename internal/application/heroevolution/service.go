@@ -473,9 +473,6 @@ func (s Service) execute(ctx context.Context, d Admission) (Result, error) {
 			if err != nil {
 				return err
 			}
-			if !exists || lane.Operation.ID != d.Operation.ID {
-				return ErrUnavailable
-			}
 			prior, found, err := s.proof(ctx, sc.Tx, d)
 			if err != nil {
 				return err
@@ -483,6 +480,9 @@ func (s Service) execute(ctx context.Context, d Admission) (Result, error) {
 			if found {
 				rejected = prior
 				return nil
+			}
+			if !exists || lane.Operation.ID != d.Operation.ID {
+				return ErrUnavailable
 			}
 			if lane.State != "PENDING" {
 				return ErrUnavailable
