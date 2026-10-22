@@ -51,7 +51,7 @@ func TestDisplayCanonicalCharacterEligibilityAndDestructionRace(t *testing.T) {
 	}
 	exec(t, p, `INSERT INTO player_hero_roots(player_id,next_partner_id,sort_type,state_version,created_at,updated_at)VALUES($1,4,0,1,clock_timestamp(),clock_timestamp())`, int64(a.PlayerID))
 	add := func(partner, table, origin, color, star int64) {
-		exec(t, p, `INSERT INTO player_heroes(player_id,partner_id,table_id,origin_table_id,color,star,level,exp,creation_content_revision,state_version,created_at,updated_at)VALUES($1,$2,$3,$4,$5,$6,1,0,$7,1,clock_timestamp(),clock_timestamp())`, int64(a.PlayerID), partner, table, origin, color, star, rev)
+		exec(t, p, `INSERT INTO player_heroes(player_id,partner_id,table_id,origin_table_id,color,star,level,exp,creation_content_revision,raw_skill_1,raw_skill_2,raw_skill_3,raw_skill_4,raw_skill_5,raw_skill_6,raw_skill_id_1,raw_skill_id_2,raw_skill_id_3,raw_skill_id_4,raw_skill_id_5,raw_skill_id_6,skill_seed_policy_id,state_version,created_at,updated_at)VALUES($1,$2,$3,$4,$5,$6,1,0,$7,1,1,1,1,1,1,0,0,0,0,0,0,'I7C2A_V1_RAW_SKILL_SEED_V1',1,clock_timestamp(),clock_timestamp())`, int64(a.PlayerID), partner, table, origin, color, star, rev)
 	}
 	add(1, normal.PartnerID, normal.PartnerID, 6, 1)
 	add(2, super.PartnerID, super.PartnerID, 1, 1)

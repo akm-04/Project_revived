@@ -8,6 +8,7 @@ import (
 	"gxb.local/backend/v2/internal/content/builtin"
 	"gxb.local/backend/v2/internal/domain/statrules"
 	"gxb.local/backend/v2/internal/foundation/tx"
+	"reflect"
 	"strings"
 	"testing"
 )
@@ -34,8 +35,10 @@ func TestI7C3ANativePinnedCatalogAndPayloadIntegrity(t *testing.T) {
 	if _, err = tr.Exec(ctx, `UPDATE content_stat_rule_catalogs SET payload=jsonb_set(payload,'{policy_id}','"tampered"') WHERE revision_id=$1`, rev); err != nil {
 		t.Fatal(err)
 	}
-	if _, err = s.StatCatalogTx(ctx, tr, rev); err == nil {
-		t.Fatal("payloadhashnotchecked")
+	// Pinned revisions are memoized after the first verified load (I7C-5C); the
+	// payload hash check itself is TestStatCatalogRejectsTamperedPayload.
+	if pinned, err := s.StatCatalogTx(ctx, tr, rev); err != nil || !reflect.DeepEqual(pinned, c) {
+		t.Fatal("pinnedrevisionchanged", err)
 	}
 	if err = tr.Rollback(ctx); err != nil {
 		t.Fatal(err)
