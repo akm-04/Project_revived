@@ -115,9 +115,10 @@ func TestMediaAssignmentReplayAndNoop(t *testing.T) {
 	a := actor(t, p)
 	b := blobs(t)
 	s := mediaService(p, p, b)
+	pinsBefore := countPins(t, b)
 	o := op()
 	one := upload(t, s, a, pngBytes(t, 20), o)
-	if one.History.RootVersion != 1 || one.History.Reference.Asset.MD5 == "" || countPins(t, b) != 0 {
+	if one.History.RootVersion != 1 || one.History.Reference.Asset.MD5 == "" || countPins(t, b) != pinsBefore {
 		t.Fatal("initialversion/protection")
 	}
 	same := upload(t, s, a, pngBytes(t, 20), op())
@@ -178,6 +179,12 @@ func TestMediaUnknownCommitPinsAndGC(t *testing.T) {
 	a := actor(t, p)
 	b := blobs(t)
 	s := mediaService(p, p, b)
+	// The shared root may hold pins from an earlier run; drain its garbage so the counts below are this test's own.
+	drained, e := maintenance(s).Collect(ctx)
+	if e != nil {
+		t.Fatal(e)
+	}
+	pinsBefore := countPins(t, b)
 	original := upload(t, mediaService(p, faultDB{p, true}, b), a, pngBytes(t, 31), op())
 	if original.History.RootVersion != 1 {
 		t.Fatal("positiveACKloss")
@@ -186,7 +193,7 @@ func TestMediaUnknownCommitPinsAndGC(t *testing.T) {
 	if r, e := publish(t, mediaService(p, faultDB{p, false}, b), a, pngBytes(t, 32), unknown); e == nil || r.Schema != "" {
 		t.Fatal("unknownsuccess leaked")
 	}
-	if countPins(t, b) != 1 {
+	if countPins(t, b) != pinsBefore+1 {
 		t.Fatal("unknownpin lost")
 	}
 	abortedOp := op()
@@ -198,7 +205,7 @@ func TestMediaUnknownCommitPinsAndGC(t *testing.T) {
 		t.Fatal(e)
 	}
 	result, e := maintenance(s).Collect(ctx)
-	if e != nil || result.Deleted != 1 || result.UnknownPins != 1 || countPins(t, b) != 1 {
+	if e != nil || result.Deleted != 1 || result.UnknownPins != drained.UnknownPins+1 || countPins(t, b) != pinsBefore+1 {
 		t.Fatal("GCreachability", result, e)
 	}
 	if current(t, p, a).Operation != original.History.Operation {
