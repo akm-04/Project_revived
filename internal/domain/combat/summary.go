@@ -27,10 +27,11 @@ type EnemyStatus struct {
 	HP       int64 `json:"hp"`
 }
 
-// SummaryRecord is the stored attestation summary with the rejection reason.
+// SummaryRecord is the stored attestation evidence (a Summary or a Report)
+// with the rejection reason.
 type SummaryRecord struct {
-	Summary Summary `json:"summary"`
-	Reason  string  `json:"reason,omitempty"`
+	Summary any    `json:"summary"`
+	Reason  string `json:"reason,omitempty"`
 }
 
 // SummaryPolicy is a family's versioned CLIENT_SUMMARY_ATTESTED validator.
@@ -58,19 +59,14 @@ func (p SummaryPolicy) Valid() bool {
 // the verdict with a stable reason code for a rejection (H-27, H-41).
 func (p SummaryPolicy) Judge(snapshot Snapshot, summary Summary) (Verdict, string) {
 	battle := snapshot.Battle
-	frozenPet := int64(0)
-	if len(battle.PetsA) > 0 {
-		frozenPet = battle.PetsA[0].Identity
+	if verdict, reason := judgeFormation(battle, summary.Formation); verdict == VerdictRejected {
+		return verdict, reason
 	}
 	starInRange := summary.Star >= 0 && summary.Star <= p.MaxStar
 	winMatchesStar := !p.WinFromStar || summary.Win == (summary.Star > 0)
 	damageInRange := summary.Damage >= 0 && summary.Damage <= p.MaxDamage
 	switch {
-	case len(battle.Formation) == 0:
-		return VerdictRejected, "FORMATION_NOT_FROZEN"
-	case !slices.Equal(summary.Formation, battle.Formation):
-		return VerdictRejected, "FORMATION_CHANGED"
-	case summary.Pet != frozenPet:
+	case summary.Pet != frozenPet(battle):
 		return VerdictRejected, "PET_CHANGED"
 	case !starInRange:
 		return VerdictRejected, "STAR_OUT_OF_RANGE"
@@ -86,20 +82,44 @@ func (p SummaryPolicy) Judge(snapshot Snapshot, summary Summary) (Verdict, strin
 	return judgeEnemies(battle, summary.Enemies)
 }
 
-func judgeEnemies(battle Battle, enemies []EnemyStatus) (Verdict, string) {
-	frozen := map[int64]bool{}
-	count := 0
+func judgeFormation(battle Battle, formation []int64) (Verdict, string) {
+	switch {
+	case len(battle.Formation) == 0:
+		return VerdictRejected, "FORMATION_NOT_FROZEN"
+	case !slices.Equal(formation, battle.Formation):
+		return VerdictRejected, "FORMATION_CHANGED"
+	}
+	return VerdictAccepted, ""
+}
+
+func frozenPet(battle Battle) int64 {
+	if len(battle.PetsA) == 0 {
+		return 0
+	}
+	return battle.PetsA[0].Identity
+}
+
+func frozenEnemies(battle Battle) map[int64]Actor {
+	frozen := map[int64]Actor{}
 	for _, wave := range battle.WavesB {
 		for _, a := range wave {
-			frozen[a.Identity] = true
-			count++
+			frozen[a.Identity] = a
 		}
+	}
+	return frozen
+}
+
+func judgeEnemies(battle Battle, enemies []EnemyStatus) (Verdict, string) {
+	frozen := frozenEnemies(battle)
+	count := 0
+	for _, wave := range battle.WavesB {
+		count += len(wave)
 	}
 	if len(enemies) > count {
 		return VerdictRejected, "ENEMY_UNKNOWN"
 	}
 	for _, enemy := range enemies {
-		if !frozen[enemy.Identity] {
+		if _, ok := frozen[enemy.Identity]; !ok {
 			return VerdictRejected, "ENEMY_UNKNOWN"
 		}
 		if enemy.HP < 0 {

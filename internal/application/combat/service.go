@@ -567,20 +567,65 @@ type SummaryAttested struct {
 // later attempts never collide; a late old RESULT after a newer START is
 // judged against the newest snapshot (no client token exists).
 func (s Service) AttestSummaryTx(ctx context.Context, t tx.Tx, request SummaryRequest) (SummaryAttested, error) {
-	if t == nil || !request.Locator.Valid() || request.GenerationRef == "" || request.TerminalKind == "" || request.TerminalKind == d.RejectedKind || request.At.IsZero() || !request.Policy.Valid() {
+	if !request.Policy.Valid() {
 		return SummaryAttested{}, d.ErrInvalid
 	}
-	if err := s.Store.LockLocatorTx(ctx, t, request.Locator); err != nil {
+	judge := func(snapshot d.Snapshot) (d.Verdict, string) { return request.Policy.Judge(snapshot, request.Summary) }
+	return s.attestJudgedTx(ctx, t, judgedResult{locator: request.Locator, generation: request.GenerationRef, kind: request.TerminalKind, at: request.At,
+		profile: d.ClientSummaryAttested, validatorID: request.Policy.ID, validatorVersion: request.Policy.Version, evidence: request.Summary, judge: judge})
+}
+
+type ReportRequest struct {
+	Locator       d.Locator
+	GenerationRef string
+	// TerminalKind is the mode's kind for an accepted report; a rejected one
+	// closes as d.RejectedKind.
+	TerminalKind string
+	At           time.Time
+	Policy       d.ReportPolicy
+	Report       d.Report
+}
+
+// AttestReportTx closes the locator's CLIENT_FULL_REPORT_ATTESTED attempt with
+// the family policy's verdict over the frozen snapshot, under the same drain,
+// rejection and receipt rules as AttestSummaryTx. A non-finite report is
+// refused before any write.
+func (s Service) AttestReportTx(ctx context.Context, t tx.Tx, request ReportRequest) (SummaryAttested, error) {
+	if !request.Policy.Valid() || !request.Report.Finite() {
+		return SummaryAttested{}, d.ErrInvalid
+	}
+	judge := func(snapshot d.Snapshot) (d.Verdict, string) { return request.Policy.Judge(snapshot, request.Report) }
+	return s.attestJudgedTx(ctx, t, judgedResult{locator: request.Locator, generation: request.GenerationRef, kind: request.TerminalKind, at: request.At,
+		profile: d.ClientFullReportAttested, validatorID: request.Policy.ID, validatorVersion: request.Policy.Version, evidence: request.Report, judge: judge})
+}
+
+type judgedResult struct {
+	locator          d.Locator
+	generation       string
+	kind             string
+	at               time.Time
+	profile          d.TrustProfile
+	validatorID      string
+	validatorVersion int
+	evidence         any
+	judge            func(d.Snapshot) (d.Verdict, string)
+}
+
+func (s Service) attestJudgedTx(ctx context.Context, t tx.Tx, result judgedResult) (SummaryAttested, error) {
+	if t == nil || !result.locator.Valid() || result.generation == "" || result.kind == "" || result.kind == d.RejectedKind || result.at.IsZero() {
+		return SummaryAttested{}, d.ErrInvalid
+	}
+	if err := s.Store.LockLocatorTx(ctx, t, result.locator); err != nil {
 		return SummaryAttested{}, err
 	}
-	open, found, err := s.Store.FindUnresolvedTx(ctx, t, request.Locator)
+	open, found, err := s.Store.FindUnresolvedTx(ctx, t, result.locator)
 	if err != nil {
 		return SummaryAttested{}, err
 	}
-	if !found || open.GenerationRef != request.GenerationRef || !request.At.Before(open.ResultDeadline) {
+	if !found || open.GenerationRef != result.generation || !result.at.Before(open.ResultDeadline) {
 		return SummaryAttested{Drained: true}, nil
 	}
-	if open.TrustProfile != d.ClientSummaryAttested {
+	if open.TrustProfile != result.profile {
 		return SummaryAttested{}, d.ErrStale
 	}
 	raw, err := s.Store.ReadSnapshotTx(ctx, t, open.SnapshotHash)
@@ -591,8 +636,8 @@ func (s Service) AttestSummaryTx(ctx context.Context, t tx.Tx, request SummaryRe
 	if err != nil {
 		return SummaryAttested{}, err
 	}
-	verdict, reason := request.Policy.Judge(snapshot, request.Summary)
-	kind := request.TerminalKind
+	verdict, reason := result.judge(snapshot)
+	kind := result.kind
 	if verdict == d.VerdictRejected {
 		kind = d.RejectedKind
 	}
@@ -600,15 +645,15 @@ func (s Service) AttestSummaryTx(ctx context.Context, t tx.Tx, request SummaryRe
 	if err != nil {
 		return SummaryAttested{}, err
 	}
-	next, err := current.Attest(kind, "attest:"+current.ID.String(), request.At)
+	next, err := current.Attest(kind, "attest:"+current.ID.String(), result.at)
 	if err != nil {
 		return SummaryAttested{}, err
 	}
-	summary, err := d.CanonicalJSON(d.SummaryRecord{Summary: request.Summary, Reason: reason})
+	summary, err := d.CanonicalJSON(d.SummaryRecord{Summary: result.evidence, Reason: reason})
 	if err != nil {
 		return SummaryAttested{}, fmt.Errorf("%w: %v", d.ErrInvalid, err)
 	}
-	attestation := d.Attestation{AttemptID: next.ID, ValidatorID: request.Policy.ID, ValidatorVersion: request.Policy.Version, Verdict: verdict, Summary: summary, RecordedAt: request.At.UTC()}
+	attestation := d.Attestation{AttemptID: next.ID, ValidatorID: result.validatorID, ValidatorVersion: result.validatorVersion, Verdict: verdict, Summary: summary, RecordedAt: result.at.UTC()}
 	if err = attestation.Validate(); err != nil {
 		return SummaryAttested{}, err
 	}
