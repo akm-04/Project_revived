@@ -186,7 +186,8 @@ func baseline(mid uint16, v BootstrapView) (any, bool) {
 	case 1808:
 		return map[string]any{"self_wish_info": zeroMap()}, true
 	case 1856:
-		return map[string]any{"apply_list": zeroList(), "mission_list": zeroList()}, true
+		// SocialSystem.sortClassMissionList iterates mission_list[1] (teacher) and [2] (student) unguarded.
+		return map[string]any{"apply_list": zeroList(), "mission_list": []any{zeroList(), zeroList()}}, true
 	case 2137:
 		return map[string]any{"study_infos": zeroList()}, true
 	case 2139:
