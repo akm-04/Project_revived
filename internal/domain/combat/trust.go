@@ -20,6 +20,7 @@ type TrustProfile struct {
 type trustRules struct {
 	serverResolution bool
 	supersedes       bool
+	noValue          bool
 }
 
 var (
@@ -37,7 +38,7 @@ var trustProfiles = map[TrustProfile]trustRules{
 	ClientSummaryAttested:      {supersedes: true},
 	ClientFullReportAttested:   {supersedes: true},
 	ServerEntropyClientDerived: {supersedes: true},
-	PracticeNoValue:            {supersedes: true},
+	PracticeNoValue:            {supersedes: true, noValue: true},
 }
 
 func (p TrustProfile) Registered() bool {
@@ -48,6 +49,10 @@ func (p TrustProfile) Registered() bool {
 func (p TrustProfile) ServerResolution() bool { return trustProfiles[p].serverResolution }
 
 func (p TrustProfile) Supersedes() bool { return trustProfiles[p].supersedes }
+
+// SettlesValue is false for a practice profile: no attestation verdict or
+// resolution of it may reach a Grant (PASS418 H-28, HRC-50).
+func (p TrustProfile) SettlesValue() bool { return !trustProfiles[p].noValue }
 
 func registeredProfileID(id string) bool {
 	for profile := range trustProfiles {

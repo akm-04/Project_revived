@@ -28,6 +28,9 @@ const (
 // SupersededKind ends a client-run attempt replaced by a different-stage START.
 const SupersededKind = "SUPERSEDED"
 
+// PracticeKind ends a no-value attempt; it carries no verdict.
+const PracticeKind = "PRACTICE"
+
 // Locator is the mode's source-shaped identity of one START/RESULT family slot.
 // At most one unresolved attempt exists per locator.
 type Locator struct {
@@ -75,7 +78,8 @@ func (a Attempt) Validate() error {
 		return ErrInvalid
 	}
 	chained := !a.SupersedesAttemptID.IsZero()
-	if chained && (a.SupersedesAttemptID == a.ID || !a.TrustProfile.Supersedes()) || a.TerminalKind == SupersededKind && !a.TrustProfile.Supersedes() {
+	practice := a.TerminalKind == PracticeKind && a.TrustProfile.SettlesValue()
+	if chained && (a.SupersedesAttemptID == a.ID || !a.TrustProfile.Supersedes()) || a.TerminalKind == SupersededKind && !a.TrustProfile.Supersedes() || practice {
 		return ErrInvalid
 	}
 	resolved := a.ResolutionHash != ""
@@ -160,13 +164,21 @@ func (a Attempt) Supersede(successor ids.UUID, at time.Time) (Attempt, error) {
 	return a.finish(SupersededKind, "superseded-by:"+successor.String(), at)
 }
 
-// Attest ends a client-run attempt on the mode's validated RESULT within its
-// result deadline.
+// Attest ends a value-bearing client-run attempt on the mode's validated
+// RESULT within its result deadline.
 func (a Attempt) Attest(kind, semanticReceiptID string, at time.Time) (Attempt, error) {
-	if a.State != Staged || a.ResolverStatus != ResolverNotRequired || kind == SupersededKind || !at.Before(a.ResultDeadline) {
+	if a.State != Staged || a.ResolverStatus != ResolverNotRequired || !a.TrustProfile.SettlesValue() || kind == SupersededKind || kind == PracticeKind || !at.Before(a.ResultDeadline) {
 		return a, ErrStale
 	}
 	return a.finish(kind, semanticReceiptID, at)
+}
+
+// EndPractice ends a no-value attempt on its RESULT within its deadline.
+func (a Attempt) EndPractice(at time.Time) (Attempt, error) {
+	if a.State != Staged || a.TrustProfile.SettlesValue() || !at.Before(a.ResultDeadline) {
+		return a, ErrStale
+	}
+	return a.finish(PracticeKind, "practice:"+a.ID.String(), at)
 }
 
 func (a Attempt) finish(kind, semanticReceiptID string, at time.Time) (Attempt, error) {

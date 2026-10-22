@@ -30,6 +30,8 @@ type StartRequest struct {
 	Replay d.ReplaySpec
 	// Package builds a client-run attempt's START package from its own stream.
 	Package func(*d.Stream) (any, error)
+	// Challenge replaces Battle for a client-derived minigame (Dodgeball).
+	Challenge *d.Challenge
 }
 
 type Started struct {
@@ -88,7 +90,8 @@ func (s Service) start(ctx context.Context, t tx.Tx, scope ca.CoherentReadScope,
 		return Started{}, d.ErrInvalid
 	}
 	unfrozenSummary := profile == d.ClientSummaryAttested && len(request.Battle.Formation) == 0
-	if !profile.Registered() || request.Package != nil && profile.ServerResolution() || unfrozenSummary {
+	undrawnDerivation := profile == d.ServerEntropyClientDerived && request.Package == nil
+	if !profile.Registered() || request.Package != nil && profile.ServerResolution() || unfrozenSummary || undrawnDerivation {
 		return Started{}, d.ErrInvalid
 	}
 	if err := s.Store.LockLocatorTx(ctx, t, request.Locator); err != nil {
@@ -109,7 +112,7 @@ func (s Service) start(ctx context.Context, t tx.Tx, scope ca.CoherentReadScope,
 	if err = s.contentPin(ctx, scope); err != nil {
 		return Started{}, err
 	}
-	snapshot, err := f.freeze(ctx, request.Battle, profile)
+	snapshot, err := f.freeze(ctx, request.Battle, request.Challenge, profile)
 	if err != nil {
 		return Started{}, err
 	}
@@ -570,7 +573,9 @@ func (s Service) AttestSummaryTx(ctx context.Context, t tx.Tx, request SummaryRe
 	if !request.Policy.Valid() {
 		return SummaryAttested{}, d.ErrInvalid
 	}
-	judge := func(snapshot d.Snapshot) (d.Verdict, string) { return request.Policy.Judge(snapshot, request.Summary) }
+	judge := func(snapshot d.Snapshot, _ d.DrawPackage) (d.Verdict, string) {
+		return request.Policy.Judge(snapshot, request.Summary)
+	}
 	return s.attestJudgedTx(ctx, t, judgedResult{locator: request.Locator, generation: request.GenerationRef, kind: request.TerminalKind, at: request.At,
 		profile: d.ClientSummaryAttested, validatorID: request.Policy.ID, validatorVersion: request.Policy.Version, evidence: request.Summary, judge: judge})
 }
@@ -594,9 +599,87 @@ func (s Service) AttestReportTx(ctx context.Context, t tx.Tx, request ReportRequ
 	if !request.Policy.Valid() || !request.Report.Finite() {
 		return SummaryAttested{}, d.ErrInvalid
 	}
-	judge := func(snapshot d.Snapshot) (d.Verdict, string) { return request.Policy.Judge(snapshot, request.Report) }
+	judge := func(snapshot d.Snapshot, _ d.DrawPackage) (d.Verdict, string) {
+		return request.Policy.Judge(snapshot, request.Report)
+	}
 	return s.attestJudgedTx(ctx, t, judgedResult{locator: request.Locator, generation: request.GenerationRef, kind: request.TerminalKind, at: request.At,
 		profile: d.ClientFullReportAttested, validatorID: request.Policy.ID, validatorVersion: request.Policy.Version, evidence: request.Report, judge: judge})
+}
+
+type DerivedRequest struct {
+	Locator       d.Locator
+	GenerationRef string
+	// TerminalKind is the mode's kind for accepted claims; rejected ones close
+	// as d.RejectedKind.
+	TerminalKind string
+	At           time.Time
+	Policy       d.DrawPolicy
+	Derivation   d.Derivation
+}
+
+// AttestDerivedTx closes the locator's SERVER_ENTROPY_CLIENT_DERIVED attempt
+// with the claims checked against its stored START draws and frozen challenge,
+// under the AttestSummaryTx drain, rejection and receipt rules. A RESULT under
+// another policy version than the START drew is refused before any write.
+func (s Service) AttestDerivedTx(ctx context.Context, t tx.Tx, request DerivedRequest) (SummaryAttested, error) {
+	if !request.Policy.Valid() {
+		return SummaryAttested{}, d.ErrInvalid
+	}
+	judge := func(snapshot d.Snapshot, pack d.DrawPackage) (d.Verdict, string) {
+		return pack.Judge(snapshot, request.Derivation)
+	}
+	return s.attestJudgedTx(ctx, t, judgedResult{locator: request.Locator, generation: request.GenerationRef, kind: request.TerminalKind, at: request.At,
+		profile: d.ServerEntropyClientDerived, validatorID: request.Policy.ID, validatorVersion: request.Policy.Version, evidence: request.Derivation, judge: judge, draws: &request.Policy})
+}
+
+type PracticeRequest struct {
+	Locator       d.Locator
+	GenerationRef string
+	At            time.Time
+}
+
+type PracticeEnded struct {
+	Attempt d.Attempt
+	// Drained has the AttestSummaryTx meaning: nothing is written.
+	Drained bool
+}
+
+// EndPracticeTx closes the locator's PRACTICE_NO_VALUE attempt on its RESULT
+// as d.PracticeKind with no attestation; nothing it returns carries value.
+func (s Service) EndPracticeTx(ctx context.Context, t tx.Tx, request PracticeRequest) (PracticeEnded, error) {
+	open, drained, err := s.openForResultTx(ctx, t, request.Locator, request.GenerationRef, request.At)
+	if err != nil || drained {
+		return PracticeEnded{Drained: drained}, err
+	}
+	if open.TrustProfile != d.PracticeNoValue {
+		return PracticeEnded{}, d.ErrStale
+	}
+	current, err := s.Store.LockAttemptTx(ctx, t, open.ID)
+	if err != nil {
+		return PracticeEnded{}, err
+	}
+	next, err := current.EndPractice(request.At)
+	if err != nil {
+		return PracticeEnded{}, err
+	}
+	return PracticeEnded{Attempt: next}, s.Store.SaveAttemptTx(ctx, t, next, current.StateVersion)
+}
+
+// openForResultTx locks the locator and finds the attempt a RESULT addresses;
+// drained means none is open for this generation within its deadline.
+func (s Service) openForResultTx(ctx context.Context, t tx.Tx, locator d.Locator, generation string, at time.Time) (d.Attempt, bool, error) {
+	if t == nil || !locator.Valid() || generation == "" || at.IsZero() {
+		return d.Attempt{}, false, d.ErrInvalid
+	}
+	if err := s.Store.LockLocatorTx(ctx, t, locator); err != nil {
+		return d.Attempt{}, false, err
+	}
+	open, found, err := s.Store.FindUnresolvedTx(ctx, t, locator)
+	if err != nil {
+		return d.Attempt{}, false, err
+	}
+	drained := !found || open.GenerationRef != generation || !at.Before(open.ResultDeadline)
+	return open, drained, nil
 }
 
 type judgedResult struct {
@@ -608,22 +691,19 @@ type judgedResult struct {
 	validatorID      string
 	validatorVersion int
 	evidence         any
-	judge            func(d.Snapshot) (d.Verdict, string)
+	judge            func(d.Snapshot, d.DrawPackage) (d.Verdict, string)
+	// draws is the policy a client-derived RESULT is judged under; its START
+	// package must have been drawn by it.
+	draws *d.DrawPolicy
 }
 
 func (s Service) attestJudgedTx(ctx context.Context, t tx.Tx, result judgedResult) (SummaryAttested, error) {
-	if t == nil || !result.locator.Valid() || result.generation == "" || result.kind == "" || result.kind == d.RejectedKind || result.at.IsZero() {
+	if result.kind == "" || result.kind == d.RejectedKind {
 		return SummaryAttested{}, d.ErrInvalid
 	}
-	if err := s.Store.LockLocatorTx(ctx, t, result.locator); err != nil {
-		return SummaryAttested{}, err
-	}
-	open, found, err := s.Store.FindUnresolvedTx(ctx, t, result.locator)
-	if err != nil {
-		return SummaryAttested{}, err
-	}
-	if !found || open.GenerationRef != result.generation || !result.at.Before(open.ResultDeadline) {
-		return SummaryAttested{Drained: true}, nil
+	open, drained, err := s.openForResultTx(ctx, t, result.locator, result.generation, result.at)
+	if err != nil || drained {
+		return SummaryAttested{Drained: drained}, err
 	}
 	if open.TrustProfile != result.profile {
 		return SummaryAttested{}, d.ErrStale
@@ -636,7 +716,11 @@ func (s Service) attestJudgedTx(ctx context.Context, t tx.Tx, result judgedResul
 	if err != nil {
 		return SummaryAttested{}, err
 	}
-	verdict, reason := result.judge(snapshot)
+	pack, err := s.drawPackageTx(ctx, t, open.ID, result.draws)
+	if err != nil {
+		return SummaryAttested{}, err
+	}
+	verdict, reason := result.judge(snapshot, pack)
 	kind := result.kind
 	if verdict == d.VerdictRejected {
 		kind = d.RejectedKind
@@ -661,6 +745,29 @@ func (s Service) attestJudgedTx(ctx context.Context, t tx.Tx, result judgedResul
 		return SummaryAttested{}, err
 	}
 	return SummaryAttested{Attempt: next, Attestation: attestation}, s.Store.InsertAttestationTx(ctx, t, attestation)
+}
+
+// drawPackageTx reads the attempt's START draws when the RESULT is judged
+// under a draw policy; a package of another policy version is ErrStale.
+func (s Service) drawPackageTx(ctx context.Context, t tx.Tx, attempt ids.UUID, policy *d.DrawPolicy) (d.DrawPackage, error) {
+	if policy == nil {
+		return d.DrawPackage{}, nil
+	}
+	stored, found, err := s.Store.ReadStartPackageTx(ctx, t, attempt)
+	if err != nil {
+		return d.DrawPackage{}, err
+	}
+	if !found {
+		return d.DrawPackage{}, d.ErrIntegrity
+	}
+	pack, err := d.DecodeDrawPackage(stored)
+	if err != nil {
+		return d.DrawPackage{}, err
+	}
+	if !policy.Issued(pack) {
+		return d.DrawPackage{}, d.ErrStale
+	}
+	return pack, nil
 }
 
 func (s Service) loadTx(ctx context.Context, q tx.Queryer, attempt d.Attempt) (Resolved, error) {

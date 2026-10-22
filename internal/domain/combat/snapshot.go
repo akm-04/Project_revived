@@ -153,6 +153,8 @@ type Snapshot struct {
 	Players             []PlayerContext `json:"players"`
 	// ProducerProfile pins the battle producer registry (schema 2 only).
 	ProducerProfile string `json:"producer_profile,omitempty"`
+	// Challenge replaces the battle of a client-derived minigame START (D20(a)).
+	Challenge *Challenge `json:"challenge,omitempty"`
 }
 
 // OSTime is the frozen value the VM's os.time returns.
@@ -218,6 +220,9 @@ func (s Snapshot) Validate() error {
 	profile := s.TrustProfile == TrustProfileID || s.Schema == SnapshotSchema && registeredProfileID(s.TrustProfile)
 	if s.Schema < LegacySnapshotSchema || s.Schema > SnapshotSchema || s.Contract != ContractID || len(s.ContentRevision) != 64 || len(s.CorpusID) != 64 || len(s.SourceArchiveSHA256) != 64 || !profile || s.EntropyPolicy != EntropyPolicyVersion || s.AdapterPolicy != AdapterPolicyVersion || s.CollectionPolicy != CollectionPolicy || s.DecidedAt.IsZero() || s.DecidedAt.Location() != time.UTC {
 		return ErrInvalid
+	}
+	if s.Challenge != nil {
+		return s.challengeValid()
 	}
 	b := s.Battle
 	if b.CampaignType <= 0 || b.BattleID < 0 || len(b.TeamA) == 0 || len(b.WavesB) == 0 || !s.contextValid() || !s.formationValid() {
@@ -294,6 +299,17 @@ func (s Snapshot) producersValid() error {
 		if err := profile.CheckOwned(a.Kind, a.Params); err != nil {
 			return fmt.Errorf("%w: %v", ErrInvalid, err)
 		}
+	}
+	return nil
+}
+
+// challengeValid admits a challenge only on a schema 3 client-derived
+// snapshot with no battle, players or producer profile.
+func (s Snapshot) challengeValid() error {
+	b := s.Battle
+	battleless := b.CampaignType == 0 && b.BattleID == 0 && b.Context == nil && len(b.TeamA)+len(b.PetsA)+len(b.WavesB)+len(b.PetsB)+len(b.Formation) == 0
+	if s.Schema != SnapshotSchema || s.TrustProfile != ServerEntropyClientDerived.ID || !battleless || len(s.Players) != 0 || s.ProducerProfile != "" || !s.Challenge.valid() {
+		return ErrInvalid
 	}
 	return nil
 }
