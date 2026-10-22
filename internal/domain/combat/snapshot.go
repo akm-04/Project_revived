@@ -129,6 +129,8 @@ type Snapshot struct {
 	DecidedAt           time.Time       `json:"decided_at"`
 	Battle              Battle          `json:"battle"`
 	Players             []PlayerContext `json:"players"`
+	// ProducerProfile pins the battle producer registry (schema 2 only).
+	ProducerProfile string `json:"producer_profile,omitempty"`
 }
 
 // OSTime is the frozen value the VM's os.time returns.
@@ -240,6 +242,30 @@ func (s Snapshot) Validate() error {
 	for player := range players {
 		if !used[player] {
 			return ErrInvalid
+		}
+	}
+	return s.producersValid()
+}
+
+// producersValid audits owned actors against the pinned producer profile;
+// schema 1 snapshots predate the registry and carry none.
+func (s Snapshot) producersValid() error {
+	if s.Schema == LegacySnapshotSchema {
+		if s.ProducerProfile != "" {
+			return ErrInvalid
+		}
+		return nil
+	}
+	profile, ok := LookupProducerProfile(s.ProducerProfile)
+	if !ok {
+		return ErrInvalid
+	}
+	for _, a := range s.actors() {
+		if a.Origin == Template {
+			continue
+		}
+		if err := profile.CheckOwned(a.Kind, a.Params); err != nil {
+			return fmt.Errorf("%w: %v", ErrInvalid, err)
 		}
 	}
 	return nil

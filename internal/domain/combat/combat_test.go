@@ -66,7 +66,16 @@ func TestEntropyRejectsInexactRanges(t *testing.T) {
 }
 
 func fixtureActor(origin Origin, player int64) Actor {
-	params, _ := CanonicalJSON(map[string]any{"player_id": player, "partner_id": 3, "table_id": 10001001, "star": 1})
+	fields := map[string]any{"player_id": player, "partner_id": 3, "table_id": 10001001, "star": 1}
+	if origin != Template {
+		for _, key := range []string{"fumos", "skin_ids", "skill_book_info", "inscript_items", "courses", "spirit_equip", "spirit_item", "element_equips"} {
+			fields[key] = []any{}
+		}
+		for _, key := range []string{"favor_degree", "house_id", "evo_stage", "twice_awake_stage"} {
+			fields[key] = 0
+		}
+	}
+	params, _ := CanonicalJSON(fields)
 	a := Actor{Origin: origin, Kind: HeroActor, Player: player, Identity: 3, TableID: 10001001, FighterClass: "Lvmeng", Params: params}
 	if origin != Template {
 		a.OwnerStateVersion = 1
@@ -75,8 +84,24 @@ func fixtureActor(origin Origin, player int64) Actor {
 	return a
 }
 
+func withParam(params json.RawMessage, key string, value any) json.RawMessage {
+	var fields map[string]any
+	_ = json.Unmarshal(params, &fields)
+	fields[key] = value
+	out, _ := CanonicalJSON(fields)
+	return out
+}
+
+func withoutParam(params json.RawMessage, key string) json.RawMessage {
+	var fields map[string]any
+	_ = json.Unmarshal(params, &fields)
+	delete(fields, key)
+	out, _ := CanonicalJSON(fields)
+	return out
+}
+
 func fixtureSnapshot() Snapshot {
-	return Snapshot{Schema: SnapshotSchema, Contract: ContractID, ContentRevision: fmt.Sprintf("%064x", 1), CorpusID: fmt.Sprintf("%064x", 2), SourceArchiveSHA256: fmt.Sprintf("%064x", 3),
+	return Snapshot{Schema: SnapshotSchema, ProducerProfile: ProducerProfileID, Contract: ContractID, ContentRevision: fmt.Sprintf("%064x", 1), CorpusID: fmt.Sprintf("%064x", 2), SourceArchiveSHA256: fmt.Sprintf("%064x", 3),
 		TrustProfile: TrustProfileID, EntropyPolicy: EntropyPolicyVersion, AdapterPolicy: AdapterPolicyVersion, CollectionPolicy: CollectionPolicy, DecidedAt: time.Unix(1700000000, 0).UTC(),
 		Battle:  Battle{CampaignType: 1, TeamA: []Actor{fixtureActor(OwnedSelf, 9)}, WavesB: [][]Actor{{fixtureActor(Template, 0)}}},
 		Players: []PlayerContext{{Player: 9, StateVersions: map[string]int64{"hero_root": 1}, CollectionHundredths: map[string]int64{}, ExclusiveBooks: map[string]int64{}}}}
@@ -100,7 +125,7 @@ func TestSnapshotCanonicalRoundTripAndNegatives(t *testing.T) {
 		t.Fatal("hash mismatch accepted")
 	}
 	contexts := map[string]func(*Snapshot){
-		"legacy schema 1": func(s *Snapshot) { s.Schema = LegacySnapshotSchema },
+		"legacy schema 1": func(s *Snapshot) { s.Schema, s.ProducerProfile = LegacySnapshotSchema, "" },
 		"transform with parameters": func(s *Snapshot) {
 			s.Battle.Context = &BattleContext{Transform: "REGION_ARENA_SEASON_AWARDS_V1", Parameters: json.RawMessage(`{"a":1}`)}
 			s.Battle.WavesB[0][0].Transform = json.RawMessage(`{"arena_add_star":2}`)
@@ -140,9 +165,21 @@ func TestSnapshotCanonicalRoundTripAndNegatives(t *testing.T) {
 			s.Battle.TeamA[0].Transform = json.RawMessage(`[1]`)
 		},
 		func(s *Snapshot) {
-			s.Schema = LegacySnapshotSchema
+			s.Schema, s.ProducerProfile = LegacySnapshotSchema, ""
 			s.Battle.Context = &BattleContext{Transform: "REGION_ARENA_V1"}
 		},
+		func(s *Snapshot) { s.ProducerProfile = "" },
+		func(s *Snapshot) { s.ProducerProfile = "I8_BATTLE_PRODUCERS_V0" },
+		func(s *Snapshot) { s.Schema = LegacySnapshotSchema },
+		func(s *Snapshot) { s.Battle.TeamA[0].Params = withParam(s.Battle.TeamA[0].Params, "buffs", []any{}) },
+		func(s *Snapshot) { s.Battle.TeamA[0].Params = withParam(s.Battle.TeamA[0].Params, "is_board", 1) },
+		func(s *Snapshot) {
+			s.Battle.TeamA[0].Params = withParam(s.Battle.TeamA[0].Params, "rune_items", []any{})
+		},
+		func(s *Snapshot) {
+			s.Battle.TeamA[0].Params = withParam(s.Battle.TeamA[0].Params, "twice_awake_stage", 1)
+		},
+		func(s *Snapshot) { s.Battle.TeamA[0].Params = withoutParam(s.Battle.TeamA[0].Params, "favor_degree") },
 	}
 	for i, mutate := range mutations {
 		m := fixtureSnapshot()

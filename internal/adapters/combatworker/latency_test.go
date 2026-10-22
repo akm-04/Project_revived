@@ -74,7 +74,7 @@ func TestResolverLatencyGate(t *testing.T) {
 			}
 			return []d.Actor{templateActor(t, d.PetActor, "pet", id, 3, 20, 2)}
 		}
-		s := d.Snapshot{Schema: d.SnapshotSchema, Contract: d.ContractID, ContentRevision: strings.Repeat("b", 64), CorpusID: corpus.ID(), SourceArchiveSHA256: corpus.SourceArchiveSHA256(),
+		s := d.Snapshot{Schema: d.SnapshotSchema, ProducerProfile: d.ProducerProfileID, Contract: d.ContractID, ContentRevision: strings.Repeat("b", 64), CorpusID: corpus.ID(), SourceArchiveSHA256: corpus.SourceArchiveSHA256(),
 			TrustProfile: d.TrustProfileID, EntropyPolicy: d.EntropyPolicyVersion, AdapterPolicy: d.AdapterPolicyVersion, CollectionPolicy: d.CollectionPolicy,
 			DecidedAt: time.Unix(1700000000, 0).UTC(), Battle: d.Battle{CampaignType: 1, TeamA: team(c.a), WavesB: [][]d.Actor{team(c.b)}, PetsA: pets(10010001), PetsB: pets(10020001)}, Players: []d.PlayerContext{}}
 		raw, hash, err := s.Canonical()

@@ -36,7 +36,7 @@ func templateSnapshot(t testing.TB, a, b []combat.Actor) combat.Snapshot {
 	if err != nil {
 		t.Fatal(err)
 	}
-	return combat.Snapshot{Schema: combat.SnapshotSchema, Contract: combat.ContractID, ContentRevision: strings.Repeat("a", 64), CorpusID: corpus.ID(), SourceArchiveSHA256: corpus.SourceArchiveSHA256(),
+	return combat.Snapshot{Schema: combat.SnapshotSchema, ProducerProfile: combat.ProducerProfileID, Contract: combat.ContractID, ContentRevision: strings.Repeat("a", 64), CorpusID: corpus.ID(), SourceArchiveSHA256: corpus.SourceArchiveSHA256(),
 		TrustProfile: combat.TrustProfileID, EntropyPolicy: combat.EntropyPolicyVersion, AdapterPolicy: combat.AdapterPolicyVersion, CollectionPolicy: combat.CollectionPolicy,
 		DecidedAt: time.Unix(1700000000, 0).UTC(), Battle: combat.Battle{CampaignType: 1, TeamA: a, WavesB: [][]combat.Actor{b}}, Players: []combat.PlayerContext{}}
 }
@@ -210,7 +210,7 @@ func TestRegionArenaBalancesHeroes(t *testing.T) {
 	}
 	// A schema 1 snapshot stored before I8-2C carries the award in params and no context.
 	legacy := regionArenaAward(t)
-	legacy.Schema, legacy.Battle.Context = combat.LegacySnapshotSchema, nil
+	legacy.Schema, legacy.Battle.Context, legacy.ProducerProfile = combat.LegacySnapshotSchema, nil, ""
 	attacker := legacy.Battle.TeamA[0]
 	var params map[string]any
 	if err = json.Unmarshal(attacker.Params, &params); err != nil {

@@ -40,10 +40,6 @@ type BattleRequest struct {
 	Context *d.BattleContext
 }
 
-// Keys every qualified overlay writes into a Hero roster row; an absent key
-// means its provider was inactive, which refuses START instead of defaulting.
-var heroOverlayKeys = []string{"skin_ids", "fumos", "favor_degree", "house_id", "skill_book_info", "inscript_items", "courses", "spirit_equip", "spirit_item", "element_equips", "evo_stage"}
-
 type freezer struct {
 	service Service
 	scope   ca.CoherentReadScope
@@ -92,7 +88,8 @@ func (f *freezer) freeze(ctx context.Context, request BattleRequest) (d.Snapshot
 	}
 	sort.Slice(players, func(i, j int) bool { return players[i].Player < players[j].Player })
 	snapshot := d.Snapshot{Schema: d.SnapshotSchema, Contract: d.ContractID, ContentRevision: scope.ContentRevision, CorpusID: s.Rules.ID(), SourceArchiveSHA256: s.Rules.SourceArchiveSHA256(),
-		TrustProfile: d.TrustProfileID, EntropyPolicy: d.EntropyPolicyVersion, AdapterPolicy: d.AdapterPolicyVersion, CollectionPolicy: d.CollectionPolicy, DecidedAt: scope.ObservedAt.UTC(), Battle: battle, Players: players}
+		TrustProfile: d.TrustProfileID, EntropyPolicy: d.EntropyPolicyVersion, AdapterPolicy: d.AdapterPolicyVersion, CollectionPolicy: d.CollectionPolicy, DecidedAt: scope.ObservedAt.UTC(), Battle: battle, Players: players,
+		ProducerProfile: d.ProducerProfileID}
 	return snapshot, snapshot.Validate()
 }
 
@@ -158,8 +155,14 @@ func (f *freezer) actor(ctx context.Context, p Participant) (d.Actor, error) {
 		return d.Actor{}, err
 	}
 	a, err := f.build(p, params)
+	if err != nil {
+		return d.Actor{}, err
+	}
+	if err = d.CurrentProducerProfile().CheckOwned(a.Kind, a.Params); err != nil {
+		return d.Actor{}, fmt.Errorf("%w: %v", d.ErrProviderUnavailable, err)
+	}
 	a.OwnerStateVersion, a.BattleTotals = result.OwnerStateVersion, totals
-	return a, err
+	return a, nil
 }
 
 func (f *freezer) template(p Participant) (d.Actor, error) {
@@ -233,11 +236,6 @@ func (f *freezer) heroParams(ctx context.Context, p Participant, stateVersion in
 	row, ok := rows[strconv.FormatInt(p.Identity, 10)].(map[string]any)
 	if !ok {
 		return nil, fmt.Errorf("%w: hero %d not in roster", d.ErrProviderUnavailable, p.Identity)
-	}
-	for _, key := range heroOverlayKeys {
-		if _, ok := row[key]; !ok {
-			return nil, fmt.Errorf("%w: hero roster key %s", d.ErrProviderUnavailable, key)
-		}
 	}
 	// No roster overlay emits twice_awake_stage; its canonical owner is the
 	// Character raw awakening observation (COMPLETE is stage 3).

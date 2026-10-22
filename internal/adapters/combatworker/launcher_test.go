@@ -69,7 +69,7 @@ func hero(t *testing.T, tableID int64) d.Actor {
 
 func snapshot(t *testing.T, a, b d.Actor) ([]byte, string) {
 	corpus, _ := combatcorpus.Load()
-	s := d.Snapshot{Schema: d.SnapshotSchema, Contract: d.ContractID, ContentRevision: strings.Repeat("b", 64), CorpusID: corpus.ID(), SourceArchiveSHA256: corpus.SourceArchiveSHA256(),
+	s := d.Snapshot{Schema: d.SnapshotSchema, ProducerProfile: d.ProducerProfileID, Contract: d.ContractID, ContentRevision: strings.Repeat("b", 64), CorpusID: corpus.ID(), SourceArchiveSHA256: corpus.SourceArchiveSHA256(),
 		TrustProfile: d.TrustProfileID, EntropyPolicy: d.EntropyPolicyVersion, AdapterPolicy: d.AdapterPolicyVersion, CollectionPolicy: d.CollectionPolicy,
 		DecidedAt: time.Unix(1700000000, 0).UTC(), Battle: d.Battle{CampaignType: 1, TeamA: []d.Actor{a}, WavesB: [][]d.Actor{{b}}, PetsA: []d.Actor{}, PetsB: []d.Actor{}}, Players: []d.PlayerContext{}}
 	raw, hash, err := s.Canonical()
