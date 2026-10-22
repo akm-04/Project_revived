@@ -199,5 +199,5 @@ func failArena(err error) httpedge.Response {
 	if errors.Is(err, d.ErrRefused) || errors.Is(err, d.ErrInvalid) || errors.Is(err, d.ErrClosed) || errors.Is(err, economy.ErrInsufficientBalance) {
 		return httpedge.Response{HTTPStatus: http.StatusBadRequest, Body: map[string]any{"error": "arena_request_refused"}}
 	}
-	return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Body: map[string]any{"error": "arena_unavailable"}}
+	return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: err, Body: map[string]any{"error": "arena_unavailable"}}
 }

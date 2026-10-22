@@ -300,7 +300,9 @@ func main() {
 	for _, mid := range []uint16{2, 2864, 20480} {
 		mustRegister(mid, prelogin)
 	}
-	boot := stockruntime.BootstrapDispatcher{Bootstrap: bootstrap, Tracker: tracker, ClientLogURL: cfg.ClientLogURL}
+	mux := http.NewServeMux()
+	clientLogs, journal := startClientLog(ctx, pool, authority, cfg.ClientLogURL, txMetrics, mux)
+	boot := stockruntime.BootstrapDispatcher{Bootstrap: bootstrap, Tracker: tracker, LogURLs: clientLogs}
 	mustRegister(18, boot)
 	mustRegister(1, boot)
 	mustRegister(192, stockruntime.DiscoveryDispatcher{Realtime: realtime, Tracker: tracker})
@@ -514,9 +516,8 @@ func main() {
 	}
 	h := httpedge.Handler{
 		Limits: limits.Default(), Admission: admission,
-		Operations: operation.Factory{Clock: clock.System{}}, Router: router,
+		Operations: operation.Factory{Clock: clock.System{}}, Router: router, Journal: journal,
 	}
-	mux := http.NewServeMux()
 	mux.Handle("/", h)
 	if mediaHandler != nil {
 		mux.Handle("/profile-media/", mediaHandler)

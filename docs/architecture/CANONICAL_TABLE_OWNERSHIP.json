@@ -3893,6 +3893,62 @@
       ],
       "write_exceptions": [],
       "migration": "migrations/00070_i7c4fa_achievement_catalog_ap.sql"
+    },
+    "client_log_capabilities": {
+      "allowed_query_owners": [
+        "clientlog"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/clientlogstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/clientlogstore/"
+      ],
+      "migration": "migrations/00076_i8_5_3_client_observability.sql",
+      "owner": "clientlog",
+      "write_exceptions": []
+    },
+    "client_log_uploads": {
+      "allowed_query_owners": [
+        "clientlog"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/clientlogstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/clientlogstore/"
+      ],
+      "migration": "migrations/00076_i8_5_3_client_observability.sql",
+      "owner": "clientlog",
+      "write_exceptions": []
+    },
+    "client_log_rows": {
+      "allowed_query_owners": [
+        "clientlog"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/clientlogstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/clientlogstore/"
+      ],
+      "migration": "migrations/00076_i8_5_3_client_observability.sql",
+      "owner": "clientlog",
+      "write_exceptions": []
+    },
+    "request_journal": {
+      "allowed_query_owners": [
+        "clientlog"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/clientlogstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/clientlogstore/"
+      ],
+      "migration": "migrations/00076_i8_5_3_client_observability.sql",
+      "owner": "clientlog",
+      "write_exceptions": []
     }
   }
 }

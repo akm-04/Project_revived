@@ -10,8 +10,11 @@ import (
 	"strconv"
 
 	appboot "gxb.local/backend/v2/internal/application/bootstrap"
+	"gxb.local/backend/v2/internal/application/clientlog"
+	domainclientlog "gxb.local/backend/v2/internal/domain/clientlog"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/domain/logicalserver"
+	"gxb.local/backend/v2/internal/foundation/observability"
 
 	apprealtime "gxb.local/backend/v2/internal/application/realtimeauth"
 	"gxb.local/backend/v2/internal/projection/lobby"
@@ -71,7 +74,7 @@ func (d LobbyDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRequ
 	if d.PlayerName != nil {
 		name, err = d.PlayerName(ctx, int64(actor.PlayerID))
 		if err != nil {
-			return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Body: map[string]any{"error": "projection_unavailable"}}
+			return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: err, Body: map[string]any{"error": "projection_unavailable"}}
 		}
 	}
 	body, ok := lobby.Explicit(req.Envelope.MID, lobby.BootstrapView{Actor: actor, PlayerName: name, Now: req.Envelope.ReceivedAt})
@@ -132,9 +135,15 @@ func requiredInt64(m map[string]any, key string) (int64, error) {
 // 1. It deliberately ignores any injected gameplay token/region claim for
 // account authority; MID18/MID1 authenticate the explicit SID+login_token pair.
 type BootstrapDispatcher struct {
-	Bootstrap    appboot.RuntimePort
-	Tracker      *lobby.BootTracker
-	ClientLogURL string
+	Bootstrap appboot.RuntimePort
+	Tracker   *lobby.BootTracker
+	LogURLs   ClientLogURLIssuer
+}
+
+// ClientLogURLIssuer mints the per-session MID1 log_url (I85_CLIENT_LOG_INGEST_V1 R2).
+type ClientLogURLIssuer interface {
+	IssueLogURL(context.Context, clientlog.Owner, int32) (string, error)
+	FallbackLogURL() string
 }
 
 func (d BootstrapDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRequest) httpedge.Response {
@@ -175,8 +184,10 @@ func (d BootstrapDispatcher) Dispatch(ctx context.Context, req httpedge.Dispatch
 				_ = d.Tracker.Record(d.Tracker.Correlate(lobby.BootEvent{MID: mid, Kind: lobby.BootEmbedded, Phase: lobby.PhaseServerIntent, At: req.Envelope.ReceivedAt}, out.ContextPlan.Selected.SessionID.UUID().String(), out.ContextPlan.Selected.ID.UUID().String(), ""))
 			}
 		}
+		sessionID := out.ContextPlan.Selected.SessionID.UUID().String()
+		observability.NoteActor(ctx, observability.RequestActor{AccountUID: string(out.UID), PlayerID: int64(out.Player.PlayerID), SessionID: sessionID})
 		return httpedge.Response{HTTPStatus: http.StatusOK, Body: map[string]any{
-			"token": out.Token, "region": int64(out.Region), "log_url": d.ClientLogURL,
+			"token": out.Token, "region": int64(out.Region), "log_url": d.logURL(ctx, out, sessionID),
 			"uid": out.UID, "detail": out.Detail, "is_new": out.IsNew,
 			// These stock-consumed/defaulted sideband fields are source-backed.
 			// server_time is the canonical request-time epoch; the remaining values
@@ -187,6 +198,20 @@ func (d BootstrapDispatcher) Dispatch(ctx context.Context, req httpedge.Dispatch
 	default:
 		return httpedge.Response{HTTPStatus: http.StatusNotImplemented, Body: map[string]any{"error": "not_bootstrap_mid"}}
 	}
+}
+
+// logURL never fails MID1: without a capability the base URL still collects
+// uploads, unattributed (R3).
+func (d BootstrapDispatcher) logURL(ctx context.Context, out appboot.MID1Result, sessionID string) string {
+	if d.LogURLs == nil {
+		return ""
+	}
+	owner := clientlog.Owner{AccountUID: string(out.UID), PlayerID: int64(out.Player.PlayerID), SessionRef: domainclientlog.SessionReference(sessionID)}
+	issued, err := d.LogURLs.IssueLogURL(ctx, owner, out.Region)
+	if err != nil {
+		return d.LogURLs.FallbackLogURL()
+	}
+	return issued
 }
 
 func stringParam(m map[string]any, key string) string {
@@ -206,8 +231,8 @@ func bootstrapFailure(err error) httpedge.Response {
 	case errors.Is(err, logicalserver.ErrObservationRequired):
 		return httpedge.Response{HTTPStatus: http.StatusConflict, Body: map[string]any{"error": "server_observation_required"}}
 	case errors.Is(err, logicalserver.ErrExistingLoginClosed):
-		return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Body: map[string]any{"error": "server_login_closed"}}
+		return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: err, Body: map[string]any{"error": "server_login_closed"}}
 	default:
-		return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Body: map[string]any{"error": "bootstrap_failed"}}
+		return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: err, Body: map[string]any{"error": "bootstrap_failed"}}
 	}
 }

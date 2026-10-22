@@ -88,5 +88,5 @@ func failEvolution(e error) httpedge.Response {
 	if errors.Is(e, app.ErrRejected) || errors.Is(e, ins.ErrInvalid) || errors.Is(e, economy.ErrInsufficientBalance) {
 		return badHero("heroevolution_command_rejected")
 	}
-	return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Body: map[string]any{"error": "heroevolution_unavailable_or_unresolved"}}
+	return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: e, Body: map[string]any{"error": "heroevolution_unavailable_or_unresolved"}}
 }

@@ -19,3 +19,16 @@ func TestRedactionAndMetricCardinality(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+func TestRedactTextMasksSecretValues(t *testing.T) {
+	cases := map[string]string{
+		`{"mid":7,"token":"abc123","region":2}`:      `{"mid":7,"token":"[REDACTED]","region":2}`,
+		`dial failed: login_token=zz9 sid=s1 code=4`: `dial failed: login_token=[REDACTED] sid=[REDACTED] code=4`,
+		`postgres: no rows`:                          `postgres: no rows`,
+	}
+	for in, want := range cases {
+		if got := RedactText(in); got != want {
+			t.Errorf("RedactText(%q) = %q, want %q", in, got, want)
+		}
+	}
+}

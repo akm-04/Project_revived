@@ -11,6 +11,7 @@ import (
 	appidentity "gxb.local/backend/v2/internal/application/identitylifecycle"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/ids"
+	"gxb.local/backend/v2/internal/foundation/observability"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
@@ -149,6 +150,7 @@ func (a RealtimeAuthority) ResolveGameplayBearer(ctx context.Context, raw string
 	if err != nil {
 		return identity.ActorContext{}, ErrGameplayBearerNotLive
 	}
+	observability.NoteActor(ctx, observability.RequestActor{AccountUID: string(actor.AccountUID), PlayerID: int64(actor.PlayerID), SessionID: actor.SessionID.UUID().String()})
 	return actor, nil
 }
 

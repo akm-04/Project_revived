@@ -33,7 +33,7 @@ func (d ActivityDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchR
 	case 229:
 		rows, err := d.Service.List(ctx, actor)
 		if err != nil {
-			return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Body: map[string]any{"error": "activity_projection_unavailable"}}
+			return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: err, Body: map[string]any{"error": "activity_projection_unavailable"}}
 		}
 		return httpedge.Response{HTTPStatus: http.StatusOK, Body: activityproj.List(rows)}
 	case 234:
@@ -43,7 +43,7 @@ func (d ActivityDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchR
 		}
 		row, ok, err := d.Service.Lookup(ctx, actor, id)
 		if err != nil {
-			return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Body: map[string]any{"error": "activity_projection_unavailable"}}
+			return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: err, Body: map[string]any{"error": "activity_projection_unavailable"}}
 		}
 		if !ok {
 			return httpedge.Response{HTTPStatus: http.StatusNotFound, Body: map[string]any{"error": "activity_unavailable"}}

@@ -220,13 +220,13 @@ func practiceFailure(err error) httpedge.Response {
 	var unknown *tx.UnknownCommitError
 	switch {
 	case errors.As(err, &unknown):
-		return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Body: map[string]any{"error": "practice_commit_unknown"}}
+		return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: err, Body: map[string]any{"error": "practice_commit_unknown"}}
 	case errors.As(err, &conflict), errors.Is(err, apppractice.ErrActorStaleVersion), errors.Is(err, apppractice.ErrStaleVersion), errors.Is(err, apppractice.ErrCandidateMissing):
 		return httpedge.Response{HTTPStatus: http.StatusConflict, Body: map[string]any{"error": "practice_state_conflict"}}
 	case errors.Is(err, apppractice.ErrPracticeAdmission), errors.Is(err, apppractice.ErrPracticePrivilege), errors.Is(err, apppractice.ErrPracticeBless), errors.Is(err, appi5.ErrLevelRequirement), errors.Is(err, economy.ErrInsufficientBalance), errors.Is(err, economy.ErrUnknownResource), errors.Is(err, apppractice.ErrAllPracticeAttrsAtCap), errors.Is(err, apppractice.ErrInvalidPracticeMethod), errors.Is(err, apppractice.ErrEmptyRollSupport):
 		return httpedge.Response{HTTPStatus: http.StatusBadRequest, Body: map[string]any{"error": "practice_rejected"}}
 	default:
-		return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Body: map[string]any{"error": "practice_unavailable"}}
+		return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: err, Body: map[string]any{"error": "practice_unavailable"}}
 	}
 }
 

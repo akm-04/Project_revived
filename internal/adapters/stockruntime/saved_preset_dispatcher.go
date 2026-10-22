@@ -105,8 +105,8 @@ func failSavedPreset(err error) httpedge.Response {
 	case errors.Is(err, appsavedpreset.ErrAmbiguousLegacyDelete), errors.Is(err, appsavedpreset.ErrStaleLegacyDelete), errors.As(err, &conflict):
 		return httpedge.Response{HTTPStatus: http.StatusConflict, Body: map[string]any{"error": "saved_preset_conflict"}}
 	case errors.As(err, &unknown):
-		return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Body: map[string]any{"error": "saved_preset_commit_unknown"}}
+		return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: err, Body: map[string]any{"error": "saved_preset_commit_unknown"}}
 	default:
-		return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Body: map[string]any{"error": "saved_preset_failed"}}
+		return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: err, Body: map[string]any{"error": "saved_preset_failed"}}
 	}
 }

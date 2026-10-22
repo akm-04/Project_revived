@@ -108,7 +108,7 @@ func (d PetDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReques
 		}
 		crystal, err := d.Economy.CurrentScalar(ctx, actor.PlayerID, "crystal", req.Envelope.Operation)
 		if err != nil {
-			return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Body: map[string]any{"error": "pet_projection_failed"}}
+			return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: err, Body: map[string]any{"error": "pet_projection_failed"}}
 		}
 		return httpedge.Response{HTTPStatus: http.StatusOK, Body: map[string]any{"economy_": map[string]any{"crystal": crystal}}}
 	case 789:
@@ -430,7 +430,7 @@ func petBad(code string) httpedge.Response {
 func petFail(err error) httpedge.Response {
 	switch {
 	case errors.Is(err, apppet.ErrPetAcquisitionContentInactive), errors.Is(err, apppet.ErrPetProgressionContentInactive), errors.Is(err, apppet.ErrPetEquipmentContentInactive), errors.Is(err, apppet.ErrPetPromotionContentInactive), errors.Is(err, apppet.ErrPetAppearanceContentInactive), errors.Is(err, apppet.ErrPetAwakeningProviderUnavailable):
-		return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Body: map[string]any{"error": "pet_content_inactive"}}
+		return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: err, Body: map[string]any{"error": "pet_content_inactive"}}
 	case errors.Is(err, apppet.ErrPetNotFound):
 		return httpedge.Response{HTTPStatus: http.StatusNotFound, Body: map[string]any{"error": "pet_not_found"}}
 	case errors.Is(err, apppet.ErrPetStillIncubating), errors.Is(err, apppet.ErrPetNotShown), errors.Is(err, apppet.ErrPetTimeDiscontinuity), errors.Is(err, apppet.ErrPetStyleSwitchConflict), errors.Is(err, economy.ErrInsufficientBalance):
@@ -438,7 +438,7 @@ func petFail(err error) httpedge.Response {
 	case errors.Is(err, apppet.ErrPetAppearanceUnavailable), errors.Is(err, apppet.ErrPetExpMax), errors.Is(err, apppet.ErrPetEvolutionUnavailable), errors.Is(err, apppet.ErrPetSkillUnavailable), errors.Is(err, apppet.ErrPetEquipmentUnavailable), errors.Is(err, apppet.ErrPetPromotionUnavailable), errors.Is(err, apppet.ErrPetPromotionPrerequisites), errors.Is(err, apppet.ErrPetPromotionCorruptState), errors.Is(err, apppet.ErrPetPromotionQ1Unsupported):
 		return httpedge.Response{HTTPStatus: http.StatusBadRequest, Body: map[string]any{"error": "pet_operation_rejected"}}
 	default:
-		return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Body: map[string]any{"error": "pet_operation_failed"}}
+		return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: err, Body: map[string]any{"error": "pet_operation_failed"}}
 	}
 }
 

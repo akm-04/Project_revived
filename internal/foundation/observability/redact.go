@@ -1,8 +1,20 @@
 package observability
 
-import "strings"
+import (
+	"regexp"
+	"strings"
+)
 
 const Redacted = "[REDACTED]"
+
+// secretText matches key=value, key: value and "key":"value" pairs whose key
+// carries a secret fragment, in free text such as error chains and raw bodies.
+var secretText = regexp.MustCompile(`(?i)("?[a-z_]*(?:authorization|password|passwd|secret|token|sid|cookie|credential|database_url|dsn)[a-z_]*"?\s*[:=]\s*"?)([^"&\s,}]+)`)
+
+// RedactText masks secret values in free text.
+func RedactText(text string) string {
+	return secretText.ReplaceAllString(text, "${1}"+Redacted)
+}
 
 var secretFragments = []string{"authorization", "password", "passwd", "secret", "token", "sid", "cookie", "credential", "database_url", "dsn", "provider_receipt", "raw_receipt"}
 var contentFragments = []string{"chat_content", "mail_content", "message_body", "user_content"}

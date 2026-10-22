@@ -112,5 +112,5 @@ func failInscription(e error) httpedge.Response {
 	if errors.Is(e, app.ErrRejected) || errors.Is(e, ins.ErrInvalid) || errors.Is(e, economy.ErrInsufficientBalance) {
 		return badHero("inscription_command_rejected")
 	}
-	return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Body: map[string]any{"error": "inscription_unavailable_or_unresolved"}}
+	return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: e, Body: map[string]any{"error": "inscription_unavailable_or_unresolved"}}
 }

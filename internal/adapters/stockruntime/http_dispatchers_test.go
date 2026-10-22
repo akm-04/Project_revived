@@ -2,11 +2,13 @@ package stockruntime
 
 import (
 	"context"
+	"errors"
 	"path/filepath"
 	"testing"
 	"time"
 
 	bootstrap "gxb.local/backend/v2/internal/application/bootstrap"
+	"gxb.local/backend/v2/internal/application/clientlog"
 	apprealtime "gxb.local/backend/v2/internal/application/realtimeauth"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/domain/logicalserver"
@@ -143,7 +145,7 @@ func TestBootstrapDispatcherMID18AndMID1Shapes(t *testing.T) {
 		mid1:  bootstrap.MID1Result{Token: "bearer", Region: 1, UID: identity.AccountUID("20000007"), Detail: map[string]any{"17": map[string]any{}}, IsNew: 1},
 	}
 	tracker := capturedHTTPTracker(t)
-	d := BootstrapDispatcher{Bootstrap: fb, Tracker: tracker, ClientLogURL: "https://logs.invalid/client-log"}
+	d := BootstrapDispatcher{Bootstrap: fb, Tracker: tracker, LogURLs: fixedLogURLs{url: "https://logs.invalid/client-log/capability"}}
 	r18 := env(18, nil, now)
 	r18.Envelope.Operation = operation.Context{StartedAt: now}
 	r18.Envelope.Params = map[string]any{"sid": "s", "login_token": "l"}
@@ -155,10 +157,33 @@ func TestBootstrapDispatcherMID18AndMID1Shapes(t *testing.T) {
 	r1.Envelope.Operation = operation.Context{StartedAt: now}
 	r1.Envelope.Params = map[string]any{"sid": "s", "login_token": "l", "region": int64(1)}
 	got = d.Dispatch(context.Background(), r1)
-	if got.HTTPStatus != 200 || got.Body["token"] != "bearer" || got.Body["uid"] != identity.AccountUID("20000007") || got.Body["log_url"] != "https://logs.invalid/client-log" || got.Body["server_time"] != now.Unix() || got.Body["story_type"] != int64(0) || got.Body["is_debug"] != int64(0) || got.Body["is_old_top"] != int64(0) || len(protocolEvidence(tracker)) != len(lobby.EmbeddedMID1Records) {
+	if got.HTTPStatus != 200 || got.Body["token"] != "bearer" || got.Body["uid"] != identity.AccountUID("20000007") || got.Body["log_url"] != "https://logs.invalid/client-log/capability" || got.Body["server_time"] != now.Unix() || got.Body["story_type"] != int64(0) || got.Body["is_debug"] != int64(0) || got.Body["is_old_top"] != int64(0) || len(protocolEvidence(tracker)) != len(lobby.EmbeddedMID1Records) {
 		t.Fatalf("got=%+v events=%d", got, len(protocolEvidence(tracker)))
 	}
 }
+
+type fixedLogURLs struct {
+	url string
+	err error
+}
+
+func (f fixedLogURLs) IssueLogURL(context.Context, clientlog.Owner, int32) (string, error) {
+	return f.url, f.err
+}
+func (f fixedLogURLs) FallbackLogURL() string { return "https://logs.invalid/client-log" }
+
+func TestBootstrapDispatcherMID1FallsBackToBaseLogURL(t *testing.T) {
+	now := time.Unix(503, 0).UTC()
+	r := env(1, nil, now)
+	r.Envelope.Operation = operation.Context{StartedAt: now}
+	r.Envelope.Params = map[string]any{"sid": "s", "login_token": "l", "region": int64(1)}
+	fb := fakeBootstrap{mid1: bootstrap.MID1Result{Token: "bearer", Region: 1, UID: identity.AccountUID("20000007"), Detail: map[string]any{}}}
+	got := (BootstrapDispatcher{Bootstrap: fb, LogURLs: fixedLogURLs{err: errors.New("store down")}}).Dispatch(context.Background(), r)
+	if got.HTTPStatus != 200 || got.Body["log_url"] != "https://logs.invalid/client-log" {
+		t.Fatalf("%+v", got)
+	}
+}
+
 func TestBootstrapDispatcherMID1EmptyLogURLIsHonestDisabledDefault(t *testing.T) {
 	now := time.Unix(502, 0).UTC()
 	r := env(1, nil, now)

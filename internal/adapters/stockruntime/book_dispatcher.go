@@ -88,5 +88,5 @@ func failBook(e error) httpedge.Response {
 	if errors.Is(e, app.ErrRejected) || errors.Is(e, book.ErrInvalid) || errors.Is(e, economy.ErrInsufficientBalance) {
 		return badHero("book_command_rejected")
 	}
-	return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Body: map[string]any{"error": "book_unavailable_or_unresolved"}}
+	return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: e, Body: map[string]any{"error": "book_unavailable_or_unresolved"}}
 }

@@ -60,7 +60,7 @@ func failAchievement(e error) httpedge.Response {
 	if errors.Is(e, app.ErrNothingToClaim) {
 		return httpedge.Response{HTTPStatus: http.StatusBadRequest, Body: map[string]any{"error": "achievement_nothing_to_claim"}}
 	}
-	return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Body: map[string]any{"error": "achievement_unavailable"}}
+	return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: e, Body: map[string]any{"error": "achievement_unavailable"}}
 }
 
 type AchievementObserver interface {

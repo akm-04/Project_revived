@@ -174,7 +174,7 @@ func (d HeroDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReque
 		}
 		crystal, err := d.Economy.CurrentScalar(ctx, actor.PlayerID, "crystal", req.Envelope.Operation)
 		if err != nil {
-			return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Body: map[string]any{"error": "hero_projection_failed"}}
+			return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: err, Body: map[string]any{"error": "hero_projection_failed"}}
 		}
 		models, states, err := liveStockStrings(got.LIVE)
 		if err != nil {
@@ -345,7 +345,7 @@ func (d HeroDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReque
 		}
 		mana, err := d.Economy.CurrentScalar(ctx, actor.PlayerID, "mana", req.Envelope.Operation)
 		if err != nil {
-			return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Body: map[string]any{"error": "hero_projection_failed"}}
+			return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: err, Body: map[string]any{"error": "hero_projection_failed"}}
 		}
 		equips := make([]any, character.HeroEquipmentSlotCount)
 		for i, v := range got.Equipment {
@@ -371,7 +371,7 @@ func (d HeroDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReque
 		}
 		mana, err := d.Economy.CurrentScalar(ctx, actor.PlayerID, "mana", req.Envelope.Operation)
 		if err != nil {
-			return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Body: map[string]any{"error": "hero_projection_failed"}}
+			return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: err, Body: map[string]any{"error": "hero_projection_failed"}}
 		}
 		levels := make([]any, character.HeroEquipmentSlotCount)
 		for i, v := range got.Levels {
@@ -433,7 +433,7 @@ func (d HeroDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReque
 		}
 		mana, err := d.Economy.CurrentScalar(ctx, actor.PlayerID, "mana", req.Envelope.Operation)
 		if err != nil {
-			return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Body: map[string]any{"error": "hero_projection_failed"}}
+			return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: err, Body: map[string]any{"error": "hero_projection_failed"}}
 		}
 		body["economy_"] = map[string]any{"mana": mana}
 		return httpedge.Response{HTTPStatus: http.StatusOK, Body: body}
@@ -621,10 +621,10 @@ func badHero(code string) httpedge.Response {
 
 func failHero(err error) httpedge.Response {
 	if errors.Is(err, apphero.ErrHeroContentInactive) || errors.Is(err, apphero.ErrAppearanceContentInactive) || errors.Is(err, apphero.ErrHeroProgressionContentInactive) || errors.Is(err, apphero.ErrHeroEquipmentContentInactive) || errors.Is(err, apphero.ErrHeroFumoContentInactive) || errors.Is(err, apphero.ErrHeroPromotionContentInactive) || errors.Is(err, apphero.ErrHeroCapacityUnavailable) {
-		return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Body: map[string]any{"error": "hero_content_inactive"}}
+		return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: err, Body: map[string]any{"error": "hero_content_inactive"}}
 	}
 	if errors.Is(err, apphero.ErrHeroAppearanceUnavailable) || errors.Is(err, apphero.ErrHeroExpMax) || errors.Is(err, apphero.ErrHeroEvolutionUnavailable) || errors.Is(err, apphero.ErrHeroPrerequisites) || errors.Is(err, apphero.ErrHeroNotFound) || errors.Is(err, apphero.ErrHeroCapacityExceeded) || errors.Is(err, apphero.ErrHeroDuplicateOrigin) || errors.Is(err, apphero.ErrHeroAcquisitionInvalid) || errors.Is(err, apphero.ErrHeroVowsLevel) || errors.Is(err, apphero.ErrHeroEquipmentUnavailable) || errors.Is(err, apphero.ErrHeroFumoUnavailable) || errors.Is(err, apphero.ErrHeroPromotionUnavailable) || errors.Is(err, apphero.ErrHeroPromotionPrerequisites) || errors.Is(err, apphero.ErrHeroPromotionCorruptState) {
 		return httpedge.Response{HTTPStatus: http.StatusBadRequest, Body: map[string]any{"error": "hero_operation_rejected"}}
 	}
-	return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Body: map[string]any{"error": "hero_operation_failed"}}
+	return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: err, Body: map[string]any{"error": "hero_operation_failed"}}
 }

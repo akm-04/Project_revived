@@ -299,6 +299,6 @@ func failI5(err error) httpedge.Response {
 	case errors.Is(err, appi5.ErrMailNotFound), errors.Is(err, appi5.ErrObjectiveNotFound):
 		return httpedge.Response{HTTPStatus: http.StatusNotFound, Body: map[string]any{"error": "not_found"}}
 	default:
-		return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Body: map[string]any{"error": "i5_operation_failed"}}
+		return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: err, Body: map[string]any{"error": "i5_operation_failed"}}
 	}
 }

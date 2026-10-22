@@ -149,5 +149,5 @@ func failLeague(e error) httpedge.Response {
 	if errors.Is(e, d.ErrRefused) || errors.Is(e, d.ErrInvalid) {
 		return httpedge.Response{HTTPStatus: http.StatusBadRequest, Body: map[string]any{"error": "league_request_refused"}}
 	}
-	return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Body: map[string]any{"error": "league_unavailable"}}
+	return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: e, Body: map[string]any{"error": "league_unavailable"}}
 }

@@ -350,6 +350,6 @@ func failGuild(err error) httpedge.Response {
 		// source-recovered. Keep them fail-closed instead of fabricating codes.
 		return httpedge.Response{HTTPStatus: http.StatusConflict, Body: map[string]any{"error": "guild_policy_rejected"}}
 	default:
-		return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Body: map[string]any{"error": "guild_operation_failed"}}
+		return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: err, Body: map[string]any{"error": "guild_operation_failed"}}
 	}
 }
