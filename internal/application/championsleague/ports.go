@@ -66,6 +66,7 @@ type Combat interface {
 	TerminalTx(context.Context, tx.Tx, combat.TerminalRequest) (combat.Settled, error)
 	CloseTx(context.Context, tx.Tx, combat.TerminalRequest) (combat.Closed, error)
 	ResultTx(context.Context, tx.Queryer, ids.UUID) (combat.Resolved, error)
+	ReplayTx(context.Context, tx.Queryer, ids.UUID, cd.Retention, time.Time) (combat.Resolved, bool, error)
 	AttemptTx(context.Context, tx.Queryer, ids.UUID) (cd.Attempt, bool, error)
 }
 type Mail interface {

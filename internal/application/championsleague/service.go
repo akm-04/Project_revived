@@ -8,6 +8,7 @@ import (
 	gen "gxb.local/backend/v2/internal/application/generation"
 	"gxb.local/backend/v2/internal/application/i5"
 	d "gxb.local/backend/v2/internal/domain/championsleague"
+	cd "gxb.local/backend/v2/internal/domain/combat"
 	"gxb.local/backend/v2/internal/domain/grant"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/operation"
@@ -86,6 +87,11 @@ func set(players []d.Player, p d.Player) []d.Player {
 	}
 	return append(players, p)
 }
+
+// ReportRetention is the league replay window (D25a private policy; the
+// accepted C5F five days, under the D9 Q6 ceiling).
+var ReportRetention = cd.Retention{ID: "C5F_LEAGUE_REPORT_RETENTION_V1", Version: 1, Window: 5 * 24 * time.Hour}
+
 func (s Service) savePlayer(c context.Context, t tx.Tx, p *d.Player, at time.Time) error {
 	old := p.Version
 	p.Version++
@@ -387,11 +393,11 @@ func (s Service) Execute(c context.Context, a identity.ActorContext, cmd Command
 				if !found {
 					return d.ErrRefused
 				}
-				if out.Match.SettledAt != nil && at.Unix() < out.Match.SettledAt.Unix()+d.ReplaySeconds {
-					v, e := s.Combat.ResultTx(c, sc.Tx, out.Match.Attempt)
-					if e != nil {
-						return e
-					}
+				v, served, e := s.Combat.ReplayTx(c, sc.Tx, out.Match.Attempt, ReportRetention, at)
+				if e != nil {
+					return e
+				}
+				if served {
 					out.Report = v.Report
 				}
 			}

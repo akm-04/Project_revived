@@ -77,6 +77,9 @@ func (s Service) Records(c context.Context, a identity.ActorContext) ([]d.Record
 	return out, nil
 }
 
+// reportRetention is the arena replay window (D25a private policy, at the D9 Q6 ceiling).
+var reportRetention = cd.Retention{ID: "C5D_ARENA_REPORT_RETENTION_V1", Version: 1, Window: cd.RetentionCeiling}
+
 // Report replays a retained record's battle report; an expired key is absent.
 func (s Service) Report(c context.Context, key string) ([]byte, bool, error) {
 	if !s.ready() {
@@ -90,11 +93,12 @@ func (s Service) Report(c context.Context, key string) ([]byte, bool, error) {
 	if err != nil || !retained {
 		return nil, false, err
 	}
-	result, err := s.Combat.ResultTx(c, s.Fresh, id)
+	now, err := s.Timed.Binder.Time.Now(c)
 	if err != nil {
 		return nil, false, err
 	}
-	return result.Report, true, nil
+	result, served, err := s.Combat.ReplayTx(c, s.Fresh, id, reportRetention, now)
+	return result.Report, served, err
 }
 
 // RankList is 301 rank_types 6: the season's top rows and the viewer's place.

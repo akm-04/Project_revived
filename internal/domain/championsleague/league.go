@@ -21,7 +21,6 @@ const (
 	CampaignType  int64 = 3
 	BattleID      int64 = 111001
 	RecordsMax          = 20
-	ReplaySeconds int64 = 5 * 86400
 	ResultSeconds int64 = 600
 )
 

@@ -191,7 +191,7 @@ func TestI7C5FLeagueGenuineFightReplayAndClockNative(t *testing.T) {
 		t.Fatal("replay locator")
 	}
 	// No invented report from the client; expiry leaves durable records intact.
-	clock.Set(fight.Match.SettledAt.Add(time.Duration(d.ReplaySeconds) * time.Second))
+	clock.Set(fight.Match.SettledAt.Add(app.ReportRetention.Window))
 	r = leagueDo(t, s, a, app.Command{Kind: "RECORDS", RecordID: id})
 	if len(r.Report) != 0 || len(r.Records) != 1 {
 		t.Fatal("expired replay lost record")

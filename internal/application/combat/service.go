@@ -257,6 +257,10 @@ type Resolved struct {
 	Report     []byte
 }
 
+// corpusRetired is the permanent failure of a staged attempt whose frozen rules
+// corpus is no longer deployed.
+const corpusRetired = "RULES_CORPUS_RETIRED"
+
 func resolveProfile() tx.Profile {
 	return tx.Profile{Name: "combat-resolution", AcquireTimeout: 2 * time.Second, LockTimeout: 2 * time.Second, StatementTimeout: 5 * time.Second, TransactionTimeout: 10 * time.Second, CleanupTimeout: 2 * time.Second, ReconcileTimeout: 5 * time.Second, OperationTimeout: 20 * time.Second}
 }
@@ -279,6 +283,12 @@ func (s Service) Resolve(ctx context.Context, op operation.Context, attemptID id
 	}
 	if !attempt.Runnable() {
 		return Resolved{Attempt: attempt}, fmt.Errorf("%w: %s", d.ErrResolverPermanent, attempt.ResolverFailure)
+	}
+	// The worker only runs the deployed corpus; an attempt frozen under another
+	// one can never reproduce its battle (D25c).
+	if attempt.RulesCorpusID != s.Rules.ID() {
+		retired := fmt.Errorf("%w: %s", d.ErrResolverPermanent, corpusRetired)
+		return Resolved{}, errors.Join(retired, s.recordFailure(ctx, op, attempt.ID, true, corpusRetired))
 	}
 	snapshot, err := s.Store.ReadSnapshotTx(ctx, s.Fresh, attempt.SnapshotHash)
 	if err != nil {
@@ -823,6 +833,20 @@ func (s Service) ResultTx(ctx context.Context, q tx.Queryer, id ids.UUID) (Resol
 		return Resolved{Attempt: attempt}, d.ErrNotReady
 	}
 	return s.loadTx(ctx, q, attempt)
+}
+
+// ReplayTx serves a player replay of a terminal report while the mode's
+// retention keeps it; false is the mode's out-of-date answer, never a rewrite.
+func (s Service) ReplayTx(ctx context.Context, q tx.Queryer, id ids.UUID, retention d.Retention, now time.Time) (Resolved, bool, error) {
+	if !retention.Valid() || now.IsZero() {
+		return Resolved{}, false, d.ErrInvalid
+	}
+	attempt, found, err := s.Store.ReadAttemptTx(ctx, q, id)
+	if err != nil || !found || !retention.Retains(attempt, now) {
+		return Resolved{}, false, err
+	}
+	resolved, err := s.loadTx(ctx, q, attempt)
+	return resolved, err == nil, err
 }
 
 // AttemptTx reads one attempt so its owning mode can decide closure.

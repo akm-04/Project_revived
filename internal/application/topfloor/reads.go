@@ -65,6 +65,9 @@ func (s Service) face(c context.Context, catalog d.Catalog, server identity.Logi
 	return d.Display{Occupant: o, Name: profile.Name, Level: profile.Level, AvatarID: profile.AvatarID, FrameID: profile.AvatarFrameID, ConquerLevel: profile.ConquerLevel, ConquerLoop: profile.ConquerLoopID}, nil
 }
 
+// reportRetention is the top floor replay window (D25a private policy, at the D9 Q6 ceiling).
+var reportRetention = cd.Retention{ID: "C5B_TOP_FLOOR_REPORT_RETENTION_V1", Version: 1, Window: cd.RetentionCeiling}
+
 // Report replays a fight while any retained record references it; nil is ARENA_RECORD_OUT_OF_DATE.
 func (s Service) Report(c context.Context, key string) ([]byte, error) {
 	if !s.ready() {
@@ -78,11 +81,12 @@ func (s Service) Report(c context.Context, key string) ([]byte, error) {
 	if err != nil || !retained {
 		return nil, err
 	}
-	result, err := s.Combat.ResultTx(c, s.Fresh, id)
+	now, err := s.Timed.Binder.Time.Now(c)
 	if err != nil {
 		return nil, err
 	}
-	return result.Report, nil
+	result, _, err := s.Combat.ReplayTx(c, s.Fresh, id, reportRetention, now)
+	return result.Report, err
 }
 
 // RecordInfo is the opponent of one of the player's own records with its revenge state.
