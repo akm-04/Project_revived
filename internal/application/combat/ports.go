@@ -102,6 +102,25 @@ type Stacks interface {
 	ListStacksTx(context.Context, tx.Queryer, identity.PlayerID) ([]economy.StackState, error)
 }
 
+// Loan asks a lending capability for one lender-owned Hero or Pet to fight for
+// the borrower in the attempt at Locator (stock rent_player_id/rent_formation,
+// rent_pet_player_id/rent_pet_id).
+type Loan struct {
+	Borrower identity.PlayerID
+	Lender   identity.PlayerID
+	Kind     d.ActorKind
+	Identity int64
+	Locator  d.Locator
+}
+
+// Lending is the capability owner of loans (GUILD_RENTAL and activity owners;
+// I8 binds fixtures only). LendTx checks the offer, eligibility and cost under
+// its own fences and commits the use in the START transaction, or refuses with
+// d.ErrLoanRefused. A replayed START never calls it.
+type Lending interface {
+	LendTx(context.Context, tx.Tx, ca.CoherentReadScope, Loan) (d.Provenance, error)
+}
+
 // Inputs are the canonical owner read ports used to freeze owned actors.
 type Inputs struct {
 	Heroes     Roster
@@ -111,6 +130,8 @@ type Inputs struct {
 	Collection Collection
 	Conquer    Conquer
 	Stacks     Stacks
+	// Lending admits BORROWED actors; without it START refuses them.
+	Lending Lending
 }
 
 type Service struct {

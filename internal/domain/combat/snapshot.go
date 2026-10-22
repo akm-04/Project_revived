@@ -45,6 +45,8 @@ var (
 	ErrNotReady            = errors.New("combat: attempt has no resolution")
 	ErrIntegrity           = errors.New("combat: stored combat record failed integrity validation")
 	ErrStale               = errors.New("combat: attempt state version or generation changed")
+	// ErrLoanRefused is a lending capability refusing a BORROWED actor (H-40).
+	ErrLoanRefused = errors.New("combat: loan refused by the lending capability")
 	// ErrResolverRetryable covers crash, timeout and resource kill: identical inputs may succeed.
 	ErrResolverRetryable = errors.New("combat: resolver failed retryably")
 	// ErrResolverPermanent covers deterministic script or validation failure.
@@ -71,7 +73,7 @@ type Provenance struct {
 	Reference  string `json:"reference"`
 }
 
-func (p *Provenance) valid() bool {
+func (p *Provenance) Valid() bool {
 	return p != nil && versionedID.MatchString(p.Capability) && p.Reference != "" && len(p.Reference) <= 256
 }
 
@@ -198,7 +200,7 @@ func (a Actor) validate(kind ActorKind, players map[int64]bool, schema int) erro
 		return ErrInvalid
 	}
 	provenanced := a.Origin == Borrowed || a.Origin == Trial
-	if provenanced != (a.Provenance != nil) || provenanced && (schema < SnapshotSchema || !a.Provenance.valid()) {
+	if provenanced != (a.Provenance != nil) || provenanced && (schema < SnapshotSchema || !a.Provenance.Valid()) {
 		return ErrInvalid
 	}
 	switch a.Origin {
@@ -225,7 +227,7 @@ func (s Snapshot) Validate() error {
 		return s.challengeValid()
 	}
 	b := s.Battle
-	if b.CampaignType <= 0 || b.BattleID < 0 || len(b.TeamA) == 0 || len(b.WavesB) == 0 && !s.enemyUnnamed() || !s.contextValid() || !s.formationValid() {
+	if b.CampaignType <= 0 || b.BattleID < 0 || len(b.TeamA) == 0 || len(b.WavesB) == 0 && !s.enemyUnnamed() || !s.contextValid() || !s.formationValid() || !s.borrowedValid() {
 		return ErrInvalid
 	}
 	players := map[int64]bool{}
@@ -312,6 +314,28 @@ func (s Snapshot) challengeValid() error {
 		return ErrInvalid
 	}
 	return nil
+}
+
+// borrowedValid admits BORROWED actors on the attacking side only, at most one
+// Hero and one Pet: the stock START carries one rent_formation Hero and one
+// rent_pet_id (D22c).
+func (s Snapshot) borrowedValid() bool {
+	b := s.Battle
+	sideB := borrowedCount(b.PetsB)
+	for _, wave := range b.WavesB {
+		sideB += borrowedCount(wave)
+	}
+	return sideB == 0 && borrowedCount(b.TeamA) <= 1 && borrowedCount(b.PetsA) <= 1
+}
+
+func borrowedCount(actors []Actor) int {
+	count := 0
+	for _, a := range actors {
+		if a.Origin == Borrowed {
+			count++
+		}
+	}
+	return count
 }
 
 // enemyUnnamed admits a client-summary snapshot without enemy waves when the

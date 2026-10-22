@@ -135,7 +135,11 @@ func TestSnapshotSchema3ProfilesAndProvenance(t *testing.T) {
 		},
 		"borrowed without provenance": func(s *Snapshot) { s.Battle.TeamA = append(s.Battle.TeamA, fixtureActor(Borrowed, 9)) },
 		"borrowed unknown lender":     func(s *Snapshot) { s.Battle.TeamA = append(s.Battle.TeamA, provenanced(Borrowed, 12)) },
-		"trial with owner":            func(s *Snapshot) { s.Battle.TeamA = append(s.Battle.TeamA, provenanced(Trial, 9)) },
+		"borrowed enemy":              func(s *Snapshot) { s.Battle.WavesB[0] = append(s.Battle.WavesB[0], provenanced(Borrowed, 9)) },
+		"two borrowed heroes": func(s *Snapshot) {
+			s.Battle.TeamA = append(s.Battle.TeamA, provenanced(Borrowed, 9), provenanced(Borrowed, 9))
+		},
+		"trial with owner": func(s *Snapshot) { s.Battle.TeamA = append(s.Battle.TeamA, provenanced(Trial, 9)) },
 		"owned with provenance": func(s *Snapshot) {
 			s.Battle.TeamA[0].Provenance = &Provenance{Capability: "FRIEND_ASSIST_V1", Reference: "loan/1"}
 		},

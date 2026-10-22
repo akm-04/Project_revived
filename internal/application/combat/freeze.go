@@ -14,6 +14,7 @@ import (
 	d "gxb.local/backend/v2/internal/domain/combat"
 	cq "gxb.local/backend/v2/internal/domain/conquerschool"
 	"gxb.local/backend/v2/internal/domain/identity"
+	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
 // Participant names one actor. Owned actors are read from their owners at the
@@ -45,6 +46,7 @@ type BattleRequest struct {
 
 type freezer struct {
 	service Service
+	t       tx.Tx
 	scope   ca.CoherentReadScope
 	starter identity.PlayerID
 	heroes  map[identity.PlayerID]map[string]any
@@ -57,30 +59,30 @@ type playerInputs struct {
 	conquer cq.Progress
 }
 
-func (s Service) newFreezer(scope ca.CoherentReadScope, actor identity.PlayerID) *freezer {
-	return &freezer{service: s, scope: scope, starter: actor, heroes: map[identity.PlayerID]map[string]any{}, pets: map[identity.PlayerID][]any{}, players: map[identity.PlayerID]*playerInputs{}}
+func (s Service) newFreezer(t tx.Tx, scope ca.CoherentReadScope, actor identity.PlayerID) *freezer {
+	return &freezer{service: s, t: t, scope: scope, starter: actor, heroes: map[identity.PlayerID]map[string]any{}, pets: map[identity.PlayerID][]any{}, players: map[identity.PlayerID]*playerInputs{}}
 }
 
 // freeze snapshots one battle; a freezer shared by several battles keeps each
 // owner's inputs read once, and each snapshot lists only its own battle's players.
-func (f *freezer) freeze(ctx context.Context, request BattleRequest, challenge *d.Challenge, profile d.TrustProfile) (d.Snapshot, error) {
+func (f *freezer) freeze(ctx context.Context, locator d.Locator, request BattleRequest, challenge *d.Challenge, profile d.TrustProfile) (d.Snapshot, error) {
 	s, scope := f.service, f.scope
 	battle := d.Battle{CampaignType: request.CampaignType, BattleID: request.BattleID, PetsA: []d.Actor{}, PetsB: []d.Actor{}, Context: request.Context, Formation: request.Formation}
 	var err error
-	if battle.TeamA, err = f.actors(ctx, request.TeamA, d.HeroActor); err != nil {
+	if battle.TeamA, err = f.actors(ctx, locator, request.TeamA, d.HeroActor); err != nil {
 		return d.Snapshot{}, err
 	}
-	if battle.PetsA, err = f.actors(ctx, request.PetsA, d.PetActor); err != nil {
+	if battle.PetsA, err = f.actors(ctx, locator, request.PetsA, d.PetActor); err != nil {
 		return d.Snapshot{}, err
 	}
 	for _, wave := range request.WavesB {
-		actors, err := f.actors(ctx, wave, d.HeroActor)
+		actors, err := f.actors(ctx, locator, wave, d.HeroActor)
 		if err != nil {
 			return d.Snapshot{}, err
 		}
 		battle.WavesB = append(battle.WavesB, actors)
 	}
-	if battle.PetsB, err = f.actors(ctx, request.PetsB, d.PetActor); err != nil {
+	if battle.PetsB, err = f.actors(ctx, locator, request.PetsB, d.PetActor); err != nil {
 		return d.Snapshot{}, err
 	}
 	players := []d.PlayerContext{}
@@ -110,13 +112,13 @@ func battlePlayer(request BattleRequest, pid identity.PlayerID) bool {
 	return false
 }
 
-func (f *freezer) actors(ctx context.Context, participants []Participant, kind d.ActorKind) ([]d.Actor, error) {
+func (f *freezer) actors(ctx context.Context, locator d.Locator, participants []Participant, kind d.ActorKind) ([]d.Actor, error) {
 	out := []d.Actor{}
 	for _, p := range participants {
 		if p.Kind != kind {
 			return nil, d.ErrInvalid
 		}
-		a, err := f.actor(ctx, p)
+		a, err := f.actor(ctx, locator, p)
 		if err != nil {
 			return nil, err
 		}
@@ -125,14 +127,23 @@ func (f *freezer) actors(ctx context.Context, participants []Participant, kind d
 	return out, nil
 }
 
-func (f *freezer) actor(ctx context.Context, p Participant) (d.Actor, error) {
+func (f *freezer) actor(ctx context.Context, locator d.Locator, p Participant) (d.Actor, error) {
 	if p.Origin == d.Template {
 		return f.template(p)
 	}
 	ownedSelf := p.Origin == d.OwnedSelf && p.Player == f.starter
 	ownedForeign := p.Origin == d.OwnedForeign && p.Player != f.starter
-	if !p.Player.Valid() || p.Identity <= 0 || p.TemplateParams != nil || !(ownedSelf || ownedForeign) {
+	borrowed := p.Origin == d.Borrowed && p.Player != f.starter
+	if !p.Player.Valid() || p.Identity <= 0 || p.TemplateParams != nil || !(ownedSelf || ownedForeign || borrowed) {
 		return d.Actor{}, d.ErrInvalid
+	}
+	var provenance *d.Provenance
+	if borrowed {
+		loan, err := f.lend(ctx, locator, p)
+		if err != nil {
+			return d.Actor{}, err
+		}
+		provenance = &loan
 	}
 	if err := f.player(ctx, p.Player); err != nil {
 		return d.Actor{}, err
@@ -167,8 +178,24 @@ func (f *freezer) actor(ctx context.Context, p Participant) (d.Actor, error) {
 	if err = d.CurrentProducerProfile().CheckOwned(a.Kind, a.Params); err != nil {
 		return d.Actor{}, fmt.Errorf("%w: %v", d.ErrProviderUnavailable, err)
 	}
-	a.OwnerStateVersion, a.BattleTotals = result.OwnerStateVersion, totals
+	a.OwnerStateVersion, a.BattleTotals, a.Provenance = result.OwnerStateVersion, totals, provenance
 	return a, nil
+}
+
+// lend asks the lending capability before any lender read, so a refused loan
+// (H-40) touches no owner state.
+func (f *freezer) lend(ctx context.Context, locator d.Locator, p Participant) (d.Provenance, error) {
+	if f.service.Inputs.Lending == nil {
+		return d.Provenance{}, fmt.Errorf("%w: no lending capability", d.ErrProviderUnavailable)
+	}
+	provenance, err := f.service.Inputs.Lending.LendTx(ctx, f.t, f.scope, Loan{Borrower: f.starter, Lender: p.Player, Kind: p.Kind, Identity: p.Identity, Locator: locator})
+	if err != nil {
+		return d.Provenance{}, err
+	}
+	if !provenance.Valid() {
+		return d.Provenance{}, fmt.Errorf("%w: lending provenance", d.ErrProviderUnavailable)
+	}
+	return provenance, nil
 }
 
 func (f *freezer) template(p Participant) (d.Actor, error) {

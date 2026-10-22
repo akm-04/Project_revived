@@ -60,7 +60,7 @@ func (r StartRequest) kind() (d.TrustProfile, d.ReplaySpec, d.ResolverStatus) {
 // (601..608) before combat's locator lock (609). The scope must witness that
 // same transaction; START commits before any resolver work.
 func (s Service) StartTx(ctx context.Context, t tx.Tx, scope ca.CoherentReadScope, request StartRequest) (Started, error) {
-	return s.start(ctx, t, scope, request, s.newFreezer(scope, request.Actor.PlayerID))
+	return s.start(ctx, t, scope, request, s.newFreezer(t, scope, request.Actor.PlayerID))
 }
 
 // StartManyTx stages several attempts of one actor in the caller transaction
@@ -69,7 +69,7 @@ func (s Service) StartManyTx(ctx context.Context, t tx.Tx, scope ca.CoherentRead
 	if len(requests) == 0 {
 		return nil, d.ErrInvalid
 	}
-	f := s.newFreezer(scope, requests[0].Actor.PlayerID)
+	f := s.newFreezer(t, scope, requests[0].Actor.PlayerID)
 	out := make([]Started, 0, len(requests))
 	for _, r := range requests {
 		if r.Actor != requests[0].Actor {
@@ -112,7 +112,7 @@ func (s Service) start(ctx context.Context, t tx.Tx, scope ca.CoherentReadScope,
 	if err = s.contentPin(ctx, scope); err != nil {
 		return Started{}, err
 	}
-	snapshot, err := f.freeze(ctx, request.Battle, request.Challenge, profile)
+	snapshot, err := f.freeze(ctx, request.Locator, request.Battle, request.Challenge, profile)
 	if err != nil {
 		return Started{}, err
 	}
