@@ -160,9 +160,10 @@ func (a Attempt) Supersede(successor ids.UUID, at time.Time) (Attempt, error) {
 	return a.finish(SupersededKind, "superseded-by:"+successor.String(), at)
 }
 
-// Attest ends a client-run attempt on the mode's validated RESULT.
+// Attest ends a client-run attempt on the mode's validated RESULT within its
+// result deadline.
 func (a Attempt) Attest(kind, semanticReceiptID string, at time.Time) (Attempt, error) {
-	if a.State != Staged || a.ResolverStatus != ResolverNotRequired || kind == SupersededKind {
+	if a.State != Staged || a.ResolverStatus != ResolverNotRequired || kind == SupersededKind || !at.Before(a.ResultDeadline) {
 		return a, ErrStale
 	}
 	return a.finish(kind, semanticReceiptID, at)

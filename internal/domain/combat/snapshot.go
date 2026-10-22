@@ -133,6 +133,9 @@ type Battle struct {
 	PetsB        []Actor   `json:"pets_b"`
 	// Context is absent for a battle without a mode transform and in schema 1.
 	Context *BattleContext `json:"context,omitempty"`
+	// Formation is the stock slot-ordered formation a client-run START froze
+	// (0 = empty slot); its summary validator compares the RESULT against it.
+	Formation []int64 `json:"formation,omitempty"`
 }
 
 type Snapshot struct {
@@ -217,7 +220,7 @@ func (s Snapshot) Validate() error {
 		return ErrInvalid
 	}
 	b := s.Battle
-	if b.CampaignType <= 0 || b.BattleID < 0 || len(b.TeamA) == 0 || len(b.WavesB) == 0 || !s.contextValid() {
+	if b.CampaignType <= 0 || b.BattleID < 0 || len(b.TeamA) == 0 || len(b.WavesB) == 0 || !s.contextValid() || !s.formationValid() {
 		return ErrInvalid
 	}
 	players := map[int64]bool{}
@@ -304,6 +307,36 @@ func (s Snapshot) contextValid() bool {
 	}
 	for _, a := range s.actors() {
 		if len(a.Transform) != 0 && context == nil {
+			return false
+		}
+	}
+	return true
+}
+
+// formationValid allows a formation only on a schema 3 client-run snapshot,
+// where its occupied slots name the TeamA heroes in order.
+func (s Snapshot) formationValid() bool {
+	formation := s.Battle.Formation
+	if len(formation) == 0 {
+		return true
+	}
+	if s.Schema != SnapshotSchema || s.TrustProfile == TrustProfileID {
+		return false
+	}
+	occupied := []int64{}
+	for _, identity := range formation {
+		if identity < 0 {
+			return false
+		}
+		if identity > 0 {
+			occupied = append(occupied, identity)
+		}
+	}
+	if len(occupied) != len(s.Battle.TeamA) {
+		return false
+	}
+	for i, a := range s.Battle.TeamA {
+		if a.Identity != occupied[i] {
 			return false
 		}
 	}

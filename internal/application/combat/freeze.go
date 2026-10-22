@@ -38,6 +38,9 @@ type BattleRequest struct {
 	PetsB        []Participant
 	// Context names the registered resolver transform of the mode (I8-2C).
 	Context *d.BattleContext
+	// Formation is the stock slot-ordered formation a client-summary START
+	// freezes for its RESULT validator (0 = empty slot).
+	Formation []int64
 }
 
 type freezer struct {
@@ -62,7 +65,7 @@ func (s Service) newFreezer(scope ca.CoherentReadScope, actor identity.PlayerID)
 // owner's inputs read once, and each snapshot lists only its own battle's players.
 func (f *freezer) freeze(ctx context.Context, request BattleRequest, profile d.TrustProfile) (d.Snapshot, error) {
 	s, scope := f.service, f.scope
-	battle := d.Battle{CampaignType: request.CampaignType, BattleID: request.BattleID, PetsA: []d.Actor{}, PetsB: []d.Actor{}, Context: request.Context}
+	battle := d.Battle{CampaignType: request.CampaignType, BattleID: request.BattleID, PetsA: []d.Actor{}, PetsB: []d.Actor{}, Context: request.Context, Formation: request.Formation}
 	var err error
 	if battle.TeamA, err = f.actors(ctx, request.TeamA, d.HeroActor); err != nil {
 		return d.Snapshot{}, err

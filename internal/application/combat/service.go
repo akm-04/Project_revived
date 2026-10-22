@@ -87,7 +87,8 @@ func (s Service) start(ctx context.Context, t tx.Tx, scope ca.CoherentReadScope,
 	if t == nil || scope.Validate() != nil || scope.Queryer() != tx.Queryer(t) || !request.Actor.PlayerID.Valid() || request.Actor.ContextID.UUID().IsZero() || !request.Locator.Valid() || request.GenerationRef == "" || len(request.StartFingerprint) != 64 || !request.ResultDeadline.After(scope.ObservedAt) {
 		return Started{}, d.ErrInvalid
 	}
-	if !profile.Registered() || request.Package != nil && profile.ServerResolution() {
+	unfrozenSummary := profile == d.ClientSummaryAttested && len(request.Battle.Formation) == 0
+	if !profile.Registered() || request.Package != nil && profile.ServerResolution() || unfrozenSummary {
 		return Started{}, d.ErrInvalid
 	}
 	if err := s.Store.LockLocatorTx(ctx, t, request.Locator); err != nil {
@@ -538,6 +539,83 @@ func (s Service) attestedTx(ctx context.Context, t tx.Tx, request AttestRequest)
 	}
 	attestation, err := s.Store.ReadAttestationTx(ctx, t, done.ID)
 	return Attested{Attempt: done, Attestation: attestation, Replayed: true}, err
+}
+
+type SummaryRequest struct {
+	Locator       d.Locator
+	GenerationRef string
+	// TerminalKind is the mode's kind for an accepted summary; a rejected one
+	// closes as d.RejectedKind.
+	TerminalKind string
+	At           time.Time
+	Policy       d.SummaryPolicy
+	Summary      d.Summary
+}
+
+type SummaryAttested struct {
+	Attempt     d.Attempt
+	Attestation d.Attestation
+	// Drained answers a RESULT matching no open attempt of this generation
+	// within its deadline (a duplicate, unmatched or late RESULT): nothing is
+	// written and the mode answers with its family replay spec (PASS120).
+	Drained bool
+}
+
+// AttestSummaryTx closes the locator's CLIENT_SUMMARY_ATTESTED attempt inside
+// the mode's RESULT transaction with the family policy's verdict over the
+// frozen snapshot. The receipt is the attempt's own, so identical summaries of
+// later attempts never collide; a late old RESULT after a newer START is
+// judged against the newest snapshot (no client token exists).
+func (s Service) AttestSummaryTx(ctx context.Context, t tx.Tx, request SummaryRequest) (SummaryAttested, error) {
+	if t == nil || !request.Locator.Valid() || request.GenerationRef == "" || request.TerminalKind == "" || request.TerminalKind == d.RejectedKind || request.At.IsZero() || !request.Policy.Valid() {
+		return SummaryAttested{}, d.ErrInvalid
+	}
+	if err := s.Store.LockLocatorTx(ctx, t, request.Locator); err != nil {
+		return SummaryAttested{}, err
+	}
+	open, found, err := s.Store.FindUnresolvedTx(ctx, t, request.Locator)
+	if err != nil {
+		return SummaryAttested{}, err
+	}
+	if !found || open.GenerationRef != request.GenerationRef || !request.At.Before(open.ResultDeadline) {
+		return SummaryAttested{Drained: true}, nil
+	}
+	if open.TrustProfile != d.ClientSummaryAttested {
+		return SummaryAttested{}, d.ErrStale
+	}
+	raw, err := s.Store.ReadSnapshotTx(ctx, t, open.SnapshotHash)
+	if err != nil {
+		return SummaryAttested{}, err
+	}
+	snapshot, err := d.DecodeSnapshot(raw, open.SnapshotHash)
+	if err != nil {
+		return SummaryAttested{}, err
+	}
+	verdict, reason := request.Policy.Judge(snapshot, request.Summary)
+	kind := request.TerminalKind
+	if verdict == d.VerdictRejected {
+		kind = d.RejectedKind
+	}
+	current, err := s.Store.LockAttemptTx(ctx, t, open.ID)
+	if err != nil {
+		return SummaryAttested{}, err
+	}
+	next, err := current.Attest(kind, "attest:"+current.ID.String(), request.At)
+	if err != nil {
+		return SummaryAttested{}, err
+	}
+	summary, err := d.CanonicalJSON(d.SummaryRecord{Summary: request.Summary, Reason: reason})
+	if err != nil {
+		return SummaryAttested{}, fmt.Errorf("%w: %v", d.ErrInvalid, err)
+	}
+	attestation := d.Attestation{AttemptID: next.ID, ValidatorID: request.Policy.ID, ValidatorVersion: request.Policy.Version, Verdict: verdict, Summary: summary, RecordedAt: request.At.UTC()}
+	if err = attestation.Validate(); err != nil {
+		return SummaryAttested{}, err
+	}
+	if err = s.Store.SaveAttemptTx(ctx, t, next, current.StateVersion); err != nil {
+		return SummaryAttested{}, err
+	}
+	return SummaryAttested{Attempt: next, Attestation: attestation}, s.Store.InsertAttestationTx(ctx, t, attestation)
 }
 
 func (s Service) loadTx(ctx context.Context, q tx.Queryer, attempt d.Attempt) (Resolved, error) {
