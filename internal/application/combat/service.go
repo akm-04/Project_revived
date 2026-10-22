@@ -23,11 +23,35 @@ type StartRequest struct {
 	StartFingerprint string
 	ResultDeadline   time.Time
 	Battle           BattleRequest
+	// TrustProfile is the mode family's registered profile; zero is the server report.
+	TrustProfile d.TrustProfile
+	// Replay is the family's duplicate-terminal answer; zero is the stored report,
+	// which only a server-resolved attempt has.
+	Replay d.ReplaySpec
+	// Package builds a client-run attempt's START package from its own stream.
+	Package func(*d.Stream) (any, error)
 }
 
 type Started struct {
-	Attempt  d.Attempt
-	Replayed bool
+	Attempt d.Attempt
+	// Package is the stored START package; a replay returns it without drawing.
+	Package    *d.StartPackage
+	Superseded *d.Attempt
+	Replayed   bool
+}
+
+func (r StartRequest) kind() (d.TrustProfile, d.ReplaySpec, d.ResolverStatus) {
+	profile, replay := r.TrustProfile, r.Replay
+	if profile == (d.TrustProfile{}) {
+		profile = d.ServerReport
+	}
+	if replay == (d.ReplaySpec{}) && profile.ServerResolution() {
+		replay = d.ReplaySpec{Response: d.ReplayStoredReport}
+	}
+	if profile.ServerResolution() {
+		return profile, replay, d.ResolverPending
+	}
+	return profile, replay, d.ResolverNotRequired
 }
 
 // StartTx runs inside the mode's START transaction, which holds the mode roots
@@ -59,7 +83,11 @@ func (s Service) StartManyTx(ctx context.Context, t tx.Tx, scope ca.CoherentRead
 }
 
 func (s Service) start(ctx context.Context, t tx.Tx, scope ca.CoherentReadScope, request StartRequest, f *freezer) (Started, error) {
+	profile, replay, status := request.kind()
 	if t == nil || scope.Validate() != nil || scope.Queryer() != tx.Queryer(t) || !request.Actor.PlayerID.Valid() || request.Actor.ContextID.UUID().IsZero() || !request.Locator.Valid() || request.GenerationRef == "" || len(request.StartFingerprint) != 64 || !request.ResultDeadline.After(scope.ObservedAt) {
+		return Started{}, d.ErrInvalid
+	}
+	if !profile.Registered() || request.Package != nil && profile.ServerResolution() {
 		return Started{}, d.ErrInvalid
 	}
 	if err := s.Store.LockLocatorTx(ctx, t, request.Locator); err != nil {
@@ -69,16 +97,18 @@ func (s Service) start(ctx context.Context, t tx.Tx, scope ca.CoherentReadScope,
 	if err != nil {
 		return Started{}, err
 	}
-	if found {
-		if existing.StartFingerprint != request.StartFingerprint || existing.ActorPlayer != int64(request.Actor.PlayerID) || existing.GenerationRef != request.GenerationRef {
-			return Started{}, d.ErrStartConflict
-		}
-		return Started{Attempt: existing, Replayed: true}, nil
+	sameKind := found && existing.TrustProfile == profile && existing.Replay == replay && existing.ActorPlayer == int64(request.Actor.PlayerID)
+	sameStage := sameKind && existing.StartFingerprint == request.StartFingerprint && existing.GenerationRef == request.GenerationRef
+	if sameStage {
+		return s.replayStartTx(ctx, t, existing)
+	}
+	if found && !(sameKind && profile.Supersedes()) {
+		return Started{}, d.ErrStartConflict
 	}
 	if err = s.contentPin(ctx, scope); err != nil {
 		return Started{}, err
 	}
-	snapshot, err := f.freeze(ctx, request.Battle)
+	snapshot, err := f.freeze(ctx, request.Battle, profile)
 	if err != nil {
 		return Started{}, err
 	}
@@ -98,16 +128,73 @@ func (s Service) start(ctx context.Context, t tx.Tx, scope ca.CoherentReadScope,
 		return Started{}, fmt.Errorf("%w: %v", d.ErrKeyUnavailable, err)
 	}
 	// Derive once now so a missing or short key refuses START before commit.
-	if _, err = d.EntropyRoot(key, id, hash); err != nil {
+	root, err := d.EntropyRoot(key, id, hash)
+	if err != nil {
 		return Started{}, err
 	}
 	attempt := d.Attempt{ID: id, Locator: request.Locator, ActorPlayer: int64(request.Actor.PlayerID), GameplayContextID: request.Actor.ContextID.UUID().String(), GenerationRef: request.GenerationRef,
-		StartFingerprint: request.StartFingerprint, SnapshotHash: hash, EntropyKeyVersion: version, RulesCorpusID: s.Rules.ID(),
-		ResolverStatus: d.ResolverPending, State: d.Staged, StartedAt: scope.ObservedAt.UTC(), ResultDeadline: request.ResultDeadline.UTC(), StateVersion: 1}
+		StartFingerprint: request.StartFingerprint, TrustProfile: profile, Replay: replay, SupersedesAttemptID: existing.ID, SnapshotHash: hash, EntropyKeyVersion: version, RulesCorpusID: s.Rules.ID(),
+		ResolverStatus: status, State: d.Staged, StartedAt: scope.ObservedAt.UTC(), ResultDeadline: request.ResultDeadline.UTC(), StateVersion: 1}
 	if err = attempt.Validate(); err != nil {
 		return Started{}, err
 	}
-	return Started{Attempt: attempt}, s.Store.InsertAttemptTx(ctx, t, attempt)
+	started := Started{Attempt: attempt}
+	if found {
+		if started.Superseded, err = s.supersedeTx(ctx, t, existing.ID, id, scope.ObservedAt); err != nil {
+			return Started{}, err
+		}
+	}
+	if err = s.Store.InsertAttemptTx(ctx, t, attempt); err != nil {
+		return Started{}, err
+	}
+	if request.Package == nil {
+		return started, nil
+	}
+	started.Package, err = s.issuePackageTx(ctx, t, id, root, request.Package)
+	return started, err
+}
+
+// replayStartTx answers a same-stage START with the frozen attempt and its
+// stored package; nothing is drawn or frozen again (PASS120 DropPlan replay).
+func (s Service) replayStartTx(ctx context.Context, t tx.Tx, existing d.Attempt) (Started, error) {
+	started := Started{Attempt: existing, Replayed: true}
+	if existing.TrustProfile.ServerResolution() {
+		return started, nil
+	}
+	pack, found, err := s.Store.ReadStartPackageTx(ctx, t, existing.ID)
+	if found {
+		started.Package = &pack
+	}
+	return started, err
+}
+
+func (s Service) supersedeTx(ctx context.Context, t tx.Tx, open, successor ids.UUID, at time.Time) (*d.Attempt, error) {
+	current, err := s.Store.LockAttemptTx(ctx, t, open)
+	if err != nil {
+		return nil, err
+	}
+	next, err := current.Supersede(successor, at)
+	if err != nil {
+		return nil, err
+	}
+	return &next, s.Store.SaveAttemptTx(ctx, t, next, current.StateVersion)
+}
+
+func (s Service) issuePackageTx(ctx context.Context, t tx.Tx, attempt ids.UUID, root [32]byte, build func(*d.Stream) (any, error)) (*d.StartPackage, error) {
+	stream := d.NewStream(d.PackageRoot(root))
+	value, err := build(stream)
+	if err != nil {
+		return nil, err
+	}
+	canonical, err := d.CanonicalJSON(value)
+	if err != nil {
+		return nil, fmt.Errorf("%w: %v", d.ErrInvalid, err)
+	}
+	pack := d.StartPackage{AttemptID: attempt, Policy: d.StartPackagePolicy, Draws: stream.Draws, Canonical: canonical}
+	if err = pack.Validate(); err != nil {
+		return nil, err
+	}
+	return &pack, s.Store.InsertStartPackageTx(ctx, t, pack)
 }
 
 // contentPin requires the operation's pinned revision to be active and built
@@ -156,7 +243,7 @@ func (s Service) Resolve(ctx context.Context, op operation.Context, attemptID id
 	if !found {
 		return Resolved{}, ErrAttemptNotFound
 	}
-	if attempt.State != d.Staged && attempt.ResolutionHash == "" {
+	if attempt.State != d.Staged && attempt.ResolutionHash == "" || attempt.ResolverStatus == d.ResolverNotRequired {
 		return Resolved{Attempt: attempt}, d.ErrNotReady
 	}
 	if attempt.State != d.Staged {
@@ -382,6 +469,75 @@ func (s Service) CloseTx(ctx context.Context, t tx.Tx, request TerminalRequest) 
 		return Closed{}, err
 	}
 	return Closed{Attempt: next}, s.Store.SaveAttemptTx(ctx, t, next, current.StateVersion)
+}
+
+type AttestRequest struct {
+	TerminalRequest
+	ValidatorID      string
+	ValidatorVersion int
+	Verdict          d.Verdict
+	Summary          any
+}
+
+type Attested struct {
+	Attempt     d.Attempt
+	Attestation d.Attestation
+	Replayed    bool
+}
+
+// AttestTx ends the locator's client-run attempt inside the mode's RESULT
+// transaction with the mode validator's verdict. A duplicate with the same
+// semantic receipt returns the stored attestation and the attempt's pinned
+// replay spec, writing nothing (FightExist).
+func (s Service) AttestTx(ctx context.Context, t tx.Tx, request AttestRequest) (Attested, error) {
+	if t == nil || !request.Locator.Valid() || request.GenerationRef == "" || request.TerminalKind == "" || request.SemanticReceiptID == "" || request.At.IsZero() {
+		return Attested{}, d.ErrInvalid
+	}
+	if err := s.Store.LockLocatorTx(ctx, t, request.Locator); err != nil {
+		return Attested{}, err
+	}
+	open, found, err := s.Store.FindUnresolvedTx(ctx, t, request.Locator)
+	if err != nil {
+		return Attested{}, err
+	}
+	if !found {
+		return s.attestedTx(ctx, t, request)
+	}
+	if open.GenerationRef != request.GenerationRef {
+		return Attested{}, d.ErrStale
+	}
+	current, err := s.Store.LockAttemptTx(ctx, t, open.ID)
+	if err != nil {
+		return Attested{}, err
+	}
+	next, err := current.Attest(request.TerminalKind, request.SemanticReceiptID, request.At)
+	if err != nil {
+		return Attested{}, err
+	}
+	summary, err := d.CanonicalJSON(request.Summary)
+	if err != nil {
+		return Attested{}, fmt.Errorf("%w: %v", d.ErrInvalid, err)
+	}
+	attestation := d.Attestation{AttemptID: next.ID, ValidatorID: request.ValidatorID, ValidatorVersion: request.ValidatorVersion, Verdict: request.Verdict, Summary: summary, RecordedAt: request.At.UTC()}
+	if err = attestation.Validate(); err != nil {
+		return Attested{}, err
+	}
+	if err = s.Store.SaveAttemptTx(ctx, t, next, current.StateVersion); err != nil {
+		return Attested{}, err
+	}
+	return Attested{Attempt: next, Attestation: attestation}, s.Store.InsertAttestationTx(ctx, t, attestation)
+}
+
+func (s Service) attestedTx(ctx context.Context, t tx.Tx, request AttestRequest) (Attested, error) {
+	done, found, err := s.Store.FindTerminalTx(ctx, t, request.Locator, request.SemanticReceiptID)
+	if err != nil || !found {
+		return Attested{}, errors.Join(err, ErrAttemptNotFound)
+	}
+	if done.TerminalKind != request.TerminalKind || done.ResolverStatus != d.ResolverNotRequired {
+		return Attested{}, d.ErrStale
+	}
+	attestation, err := s.Store.ReadAttestationTx(ctx, t, done.ID)
+	return Attested{Attempt: done, Attestation: attestation, Replayed: true}, err
 }
 
 func (s Service) loadTx(ctx context.Context, q tx.Queryer, attempt d.Attempt) (Resolved, error) {

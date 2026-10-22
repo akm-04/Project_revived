@@ -1,5 +1,6 @@
 // Package combatstore owns the Combat tables: locator roots (lock rank 609),
-// immutable snapshots, resolutions and report blobs, and the attempt envelope.
+// immutable snapshots, resolutions and report blobs, the attempt envelope and
+// its START packages and attestations.
 // Every read re-verifies content hashes before returning domain values.
 package combatstore
 
@@ -33,14 +34,15 @@ func (Store) LockLocatorTx(c context.Context, t tx.Tx, l d.Locator) error {
 	return t.QueryRow(c, `SELECT 1 FROM combat_locator_roots WHERE domain_kind=$1 AND authority_scope=$2 AND domain_locator=$3 FOR UPDATE`, l.DomainKind, l.AuthorityScope, l.DomainLocator).Scan(&one)
 }
 
-const attemptColumns = `attempt_id::text,domain_kind,authority_scope,domain_locator,actor_player_id,gameplay_context_id::text,generation_ref,start_fingerprint,snapshot_hash,rules_corpus_version,entropy_key_version,resolver_status,COALESCE(resolver_failure,''),state,started_at,result_deadline,state_version,COALESCE(resolution_hash,''),COALESCE(terminal_kind,''),terminal_at,COALESCE(semantic_receipt_id,'')`
+const attemptColumns = `attempt_id::text,domain_kind,authority_scope,domain_locator,actor_player_id,gameplay_context_id::text,generation_ref,start_fingerprint,snapshot_hash,rules_corpus_version,entropy_key_version,resolver_status,COALESCE(resolver_failure,''),state,started_at,result_deadline,state_version,COALESCE(resolution_hash,''),COALESCE(terminal_kind,''),terminal_at,COALESCE(semantic_receipt_id,''),trust_profile_id,trust_profile_version,replay_response,replay_error_code,COALESCE(supersedes_attempt_id::text,'')`
 
 func scanAttempt(row tx.Row) (d.Attempt, bool, error) {
 	var a d.Attempt
-	var id string
-	var status, state string
+	var id, supersedes string
+	var status, state, replay string
 	err := row.Scan(&id, &a.Locator.DomainKind, &a.Locator.AuthorityScope, &a.Locator.DomainLocator, &a.ActorPlayer, &a.GameplayContextID, &a.GenerationRef, &a.StartFingerprint, &a.SnapshotHash, &a.RulesCorpusID, &a.EntropyKeyVersion,
-		&status, &a.ResolverFailure, &state, &a.StartedAt, &a.ResultDeadline, &a.StateVersion, &a.ResolutionHash, &a.TerminalKind, &a.TerminalAt, &a.SemanticReceiptID)
+		&status, &a.ResolverFailure, &state, &a.StartedAt, &a.ResultDeadline, &a.StateVersion, &a.ResolutionHash, &a.TerminalKind, &a.TerminalAt, &a.SemanticReceiptID,
+		&a.TrustProfile.ID, &a.TrustProfile.Version, &replay, &a.Replay.ErrorCode, &supersedes)
 	if errors.Is(err, kernelstore.ErrNoRows) {
 		return a, false, nil
 	}
@@ -50,7 +52,12 @@ func scanAttempt(row tx.Row) (d.Attempt, bool, error) {
 	if a.ID, err = ids.ParseUUID(id); err != nil {
 		return a, true, d.ErrIntegrity
 	}
-	a.ResolverStatus, a.State = d.ResolverStatus(status), d.AttemptState(state)
+	if supersedes != "" {
+		if a.SupersedesAttemptID, err = ids.ParseUUID(supersedes); err != nil {
+			return a, true, d.ErrIntegrity
+		}
+	}
+	a.ResolverStatus, a.State, a.Replay.Response = d.ResolverStatus(status), d.AttemptState(state), d.ReplayResponse(replay)
 	a.StartedAt, a.ResultDeadline = a.StartedAt.UTC(), a.ResultDeadline.UTC()
 	if a.TerminalAt != nil {
 		at := a.TerminalAt.UTC()
@@ -98,8 +105,13 @@ func (Store) InsertAttemptTx(c context.Context, t tx.Tx, a d.Attempt) error {
 	if t == nil || a.Validate() != nil || a.State != d.Staged || a.StateVersion != 1 {
 		return d.ErrInvalid
 	}
-	_, err := t.Exec(c, `INSERT INTO combat_attempts(attempt_id,domain_kind,authority_scope,domain_locator,actor_player_id,gameplay_context_id,generation_ref,start_fingerprint,trust_profile_id,trust_profile_version,snapshot_hash,rules_corpus_version,entropy_policy_version,entropy_key_version,resolver_status,state,started_at,result_deadline,state_version)VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,1)`,
-		a.ID.String(), a.Locator.DomainKind, a.Locator.AuthorityScope, a.Locator.DomainLocator, a.ActorPlayer, a.GameplayContextID, a.GenerationRef, a.StartFingerprint, d.TrustProfileID, d.TrustProfileVersion, a.SnapshotHash, a.RulesCorpusID, d.EntropyPolicyVersion, a.EntropyKeyVersion, string(a.ResolverStatus), string(a.State), a.StartedAt, a.ResultDeadline)
+	var supersedes any
+	if !a.SupersedesAttemptID.IsZero() {
+		supersedes = a.SupersedesAttemptID.String()
+	}
+	_, err := t.Exec(c, `INSERT INTO combat_attempts(attempt_id,domain_kind,authority_scope,domain_locator,actor_player_id,gameplay_context_id,generation_ref,start_fingerprint,trust_profile_id,trust_profile_version,snapshot_hash,rules_corpus_version,entropy_policy_version,entropy_key_version,resolver_status,state,started_at,result_deadline,state_version,replay_response,replay_error_code,supersedes_attempt_id)VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,1,$19,$20,$21)`,
+		a.ID.String(), a.Locator.DomainKind, a.Locator.AuthorityScope, a.Locator.DomainLocator, a.ActorPlayer, a.GameplayContextID, a.GenerationRef, a.StartFingerprint, a.TrustProfile.ID, a.TrustProfile.Version, a.SnapshotHash, a.RulesCorpusID, d.EntropyPolicyVersion, a.EntropyKeyVersion, string(a.ResolverStatus), string(a.State), a.StartedAt, a.ResultDeadline,
+		string(a.Replay.Response), a.Replay.ErrorCode, supersedes)
 	return err
 }
 
@@ -189,4 +201,58 @@ func (Store) ReadResolutionTx(c context.Context, q tx.Queryer, hash string) (d.R
 		return r, nil, d.ErrIntegrity
 	}
 	return r, report, nil
+}
+
+func (Store) InsertStartPackageTx(c context.Context, t tx.Tx, p d.StartPackage) error {
+	if t == nil || p.Validate() != nil {
+		return d.ErrInvalid
+	}
+	_, err := t.Exec(c, `INSERT INTO combat_start_packages(attempt_id,package_policy,package_sha256,draws,canonical)VALUES($1,$2,$3,$4,$5)`, p.AttemptID.String(), p.Policy, p.Hash(), int64(p.Draws), []byte(p.Canonical))
+	return err
+}
+
+func (Store) ReadStartPackageTx(c context.Context, q tx.Queryer, attempt ids.UUID) (d.StartPackage, bool, error) {
+	p := d.StartPackage{AttemptID: attempt}
+	if q == nil || attempt.IsZero() {
+		return p, false, d.ErrInvalid
+	}
+	var hash string
+	var draws int64
+	err := q.QueryRow(c, `SELECT package_policy,package_sha256,draws,canonical FROM combat_start_packages WHERE attempt_id=$1`, attempt.String()).Scan(&p.Policy, &hash, &draws, &p.Canonical)
+	if errors.Is(err, kernelstore.ErrNoRows) {
+		return p, false, nil
+	}
+	if err != nil {
+		return p, false, err
+	}
+	p.Draws = uint64(draws)
+	if p.Validate() != nil || p.Hash() != hash {
+		return p, true, d.ErrIntegrity
+	}
+	return p, true, nil
+}
+
+func (Store) InsertAttestationTx(c context.Context, t tx.Tx, a d.Attestation) error {
+	if t == nil || a.Validate() != nil {
+		return d.ErrInvalid
+	}
+	_, err := t.Exec(c, `INSERT INTO combat_attestations(attempt_id,validator_id,validator_version,verdict,summary_sha256,summary,recorded_at)VALUES($1,$2,$3,$4,$5,$6,$7)`,
+		a.AttemptID.String(), a.ValidatorID, a.ValidatorVersion, string(a.Verdict), a.SummaryHash(), []byte(a.Summary), a.RecordedAt)
+	return err
+}
+
+func (Store) ReadAttestationTx(c context.Context, q tx.Queryer, attempt ids.UUID) (d.Attestation, error) {
+	a := d.Attestation{AttemptID: attempt}
+	if q == nil || attempt.IsZero() {
+		return a, d.ErrInvalid
+	}
+	var hash, verdict string
+	if err := q.QueryRow(c, `SELECT validator_id,validator_version,verdict,summary_sha256,summary,recorded_at FROM combat_attestations WHERE attempt_id=$1`, attempt.String()).Scan(&a.ValidatorID, &a.ValidatorVersion, &verdict, &hash, &a.Summary, &a.RecordedAt); err != nil {
+		return a, err
+	}
+	a.Verdict, a.RecordedAt = d.Verdict(verdict), a.RecordedAt.UTC()
+	if a.Validate() != nil || a.SummaryHash() != hash {
+		return a, d.ErrIntegrity
+	}
+	return a, nil
 }

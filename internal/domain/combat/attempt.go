@@ -21,7 +21,12 @@ const (
 	ResolverReady           ResolverStatus = "READY"
 	ResolverRetryableFailed ResolverStatus = "RETRYABLE_FAILED"
 	ResolverPermanentFailed ResolverStatus = "PERMANENT_FAILED"
+	// ResolverNotRequired marks a client-run attempt; it never runs the resolver.
+	ResolverNotRequired ResolverStatus = "NOT_REQUIRED"
 )
+
+// SupersededKind ends a client-run attempt replaced by a different-stage START.
+const SupersededKind = "SUPERSEDED"
 
 // Locator is the mode's source-shaped identity of one START/RESULT family slot.
 // At most one unresolved attempt exists per locator.
@@ -43,23 +48,34 @@ type Attempt struct {
 	GameplayContextID string
 	GenerationRef     string
 	StartFingerprint  string
-	SnapshotHash      string
-	EntropyKeyVersion string
-	RulesCorpusID     string
-	ResolverStatus    ResolverStatus
-	ResolverFailure   string
-	State             AttemptState
-	StartedAt         time.Time
-	ResultDeadline    time.Time
-	StateVersion      int64
-	ResolutionHash    string
-	TerminalKind      string
-	TerminalAt        *time.Time
-	SemanticReceiptID string
+	TrustProfile      TrustProfile
+	Replay            ReplaySpec
+	// SupersedesAttemptID links the generation chain of one locator.
+	SupersedesAttemptID ids.UUID
+	SnapshotHash        string
+	EntropyKeyVersion   string
+	RulesCorpusID       string
+	ResolverStatus      ResolverStatus
+	ResolverFailure     string
+	State               AttemptState
+	StartedAt           time.Time
+	ResultDeadline      time.Time
+	StateVersion        int64
+	ResolutionHash      string
+	TerminalKind        string
+	TerminalAt          *time.Time
+	SemanticReceiptID   string
 }
 
 func (a Attempt) Validate() error {
 	if a.ID.IsZero() || !a.Locator.Valid() || a.ActorPlayer <= 0 || a.GameplayContextID == "" || len(a.StartFingerprint) != 64 || len(a.SnapshotHash) != 64 || a.EntropyKeyVersion == "" || len(a.RulesCorpusID) != 64 || a.StartedAt.IsZero() || !a.ResultDeadline.After(a.StartedAt) || a.StateVersion <= 0 {
+		return ErrInvalid
+	}
+	if !a.TrustProfile.Registered() || a.TrustProfile.ServerResolution() == (a.ResolverStatus == ResolverNotRequired) || !a.Replay.valid(a.ResolverStatus) {
+		return ErrInvalid
+	}
+	chained := !a.SupersedesAttemptID.IsZero()
+	if chained && (a.SupersedesAttemptID == a.ID || !a.TrustProfile.Supersedes()) || a.TerminalKind == SupersededKind && !a.TrustProfile.Supersedes() {
 		return ErrInvalid
 	}
 	resolved := a.ResolutionHash != ""
@@ -89,7 +105,7 @@ func (a Attempt) Unresolved() bool { return a.State != Terminal }
 
 // FailResolution records a classified worker failure; only RETRYABLE stays runnable.
 func (a Attempt) FailResolution(permanent bool, reason string) (Attempt, error) {
-	if a.State != Staged || a.ResolverStatus == ResolverPermanentFailed || reason == "" {
+	if !a.Runnable() || reason == "" {
 		return a, ErrStale
 	}
 	a.ResolverStatus = ResolverRetryableFailed
@@ -102,7 +118,7 @@ func (a Attempt) FailResolution(permanent bool, reason string) (Attempt, error) 
 }
 
 func (a Attempt) Runnable() bool {
-	return a.State == Staged && a.ResolverStatus != ResolverPermanentFailed
+	return a.State == Staged && a.ResolverStatus != ResolverPermanentFailed && a.ResolverStatus != ResolverNotRequired
 }
 
 func (a Attempt) Resolve(resolutionHash string) (Attempt, error) {
@@ -131,6 +147,22 @@ func (a Attempt) Closable(at time.Time) bool {
 // Close frees the locator slot under the mode's expiry or supersession rule.
 func (a Attempt) Close(kind, semanticReceiptID string, at time.Time) (Attempt, error) {
 	if !a.Closable(at) {
+		return a, ErrStale
+	}
+	return a.finish(kind, semanticReceiptID, at)
+}
+
+// Supersede ends an open client-run attempt replaced by successor's START.
+func (a Attempt) Supersede(successor ids.UUID, at time.Time) (Attempt, error) {
+	if a.State != Staged || !a.TrustProfile.Supersedes() || successor.IsZero() || successor == a.ID {
+		return a, ErrStale
+	}
+	return a.finish(SupersededKind, "superseded-by:"+successor.String(), at)
+}
+
+// Attest ends a client-run attempt on the mode's validated RESULT.
+func (a Attempt) Attest(kind, semanticReceiptID string, at time.Time) (Attempt, error) {
+	if a.State != Staged || a.ResolverStatus != ResolverNotRequired || kind == SupersededKind {
 		return a, ErrStale
 	}
 	return a.finish(kind, semanticReceiptID, at)

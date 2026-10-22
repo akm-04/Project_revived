@@ -17,15 +17,17 @@ import (
 
 const (
 	ContractID = "C5A_COMBAT_INPUT_ATTEMPT_RESULT_FOUNDATION_V1"
-	// SnapshotSchema 2 adds the BattleContext (I8-2C). Schema 1 snapshots stored
-	// before it stay valid, carry no context and keep their bytes.
-	SnapshotSchema       = 2
-	LegacySnapshotSchema = 1
-	TrustProfileID       = "SERVER_REPORT_AUTHORITATIVE_V1"
-	TrustProfileVersion  = 1
-	EntropyPolicyVersion = "HMAC_SHA256_COUNTER_LUA_RANDOM_COMPAT_V1"
-	AdapterPolicyVersion = "SNAPSHOT_ONLY_ADAPTERS_V1"
-	CollectionPolicy     = "C5A_COMBAT_COLLECTION_ATTR_OWNER_SCOPED_V1"
+	// SnapshotSchema 3 adds the attempt's trust profile and BORROWED/TRIAL
+	// provenance (I8-4); schema 2 added the BattleContext (I8-2C). Older
+	// snapshots stay valid under their own rules and keep their bytes.
+	SnapshotSchema        = 3
+	ContextSnapshotSchema = 2
+	LegacySnapshotSchema  = 1
+	TrustProfileID        = "SERVER_REPORT_AUTHORITATIVE_V1"
+	TrustProfileVersion   = 1
+	EntropyPolicyVersion  = "HMAC_SHA256_COUNTER_LUA_RANDOM_COMPAT_V1"
+	AdapterPolicyVersion  = "SNAPSHOT_ONLY_ADAPTERS_V1"
+	CollectionPolicy      = "C5A_COMBAT_COLLECTION_ATTR_OWNER_SCOPED_V1"
 	// AttemptLockRank follows the mode roots 601..608 and precedes I5 Grant 610+.
 	AttemptLockRank uint16 = 609
 	// ExclusiveBookFirst..Last are NormalHero.getZhugeBookSkillNum's item IDs.
@@ -55,7 +57,23 @@ const (
 	OwnedSelf    Origin = "OWNED_SELF"
 	OwnedForeign Origin = "OWNED_FOREIGN"
 	Template     Origin = "TEMPLATE"
+	// Borrowed is another player's owned actor fighting for the borrower; it
+	// keeps the owned shape and names the lender (I8-6A freezes it).
+	Borrowed Origin = "BORROWED"
+	// Trial is a template-derived actor that never persists (AUDIT-PROFILE-04).
+	Trial Origin = "TRIAL"
 )
+
+// Provenance names the capability and its version that granted a BORROWED or
+// TRIAL actor, and the source reference (loan or trial entry) it came from.
+type Provenance struct {
+	Capability string `json:"capability"`
+	Reference  string `json:"reference"`
+}
+
+func (p *Provenance) valid() bool {
+	return p != nil && versionedID.MatchString(p.Capability) && p.Reference != "" && len(p.Reference) <= 256
+}
 
 type ActorKind string
 
@@ -77,7 +95,8 @@ type Actor struct {
 	Params            json.RawMessage `json:"params"`
 	BattleTotals      json.RawMessage `json:"battle_totals,omitempty"`
 	// Transform is this actor's parameter object for the battle's registered transform.
-	Transform json.RawMessage `json:"transform,omitempty"`
+	Transform  json.RawMessage `json:"transform,omitempty"`
+	Provenance *Provenance     `json:"provenance,omitempty"`
 }
 
 // BattleContext names the registered mode transform the resolver applies to the
@@ -88,7 +107,7 @@ type BattleContext struct {
 	Parameters json.RawMessage `json:"parameters,omitempty"`
 }
 
-var transformID = regexp.MustCompile(`^[A-Z][A-Z0-9_]*_V[1-9][0-9]*$`)
+var versionedID = regexp.MustCompile(`^[A-Z][A-Z0-9_]*_V[1-9][0-9]*$`)
 
 func canonicalObject(raw json.RawMessage) bool {
 	canonical, err := CanonicalJSON(raw)
@@ -159,7 +178,7 @@ func (s Snapshot) actors() []Actor {
 	return append(all, s.Battle.PetsB...)
 }
 
-func (a Actor) validate(kind ActorKind, players map[int64]bool) error {
+func (a Actor) validate(kind ActorKind, players map[int64]bool, schema int) error {
 	if a.Kind != kind || a.TableID <= 0 || a.Identity <= 0 || a.FighterClass == "" || len(a.Params) == 0 {
 		return ErrInvalid
 	}
@@ -173,12 +192,16 @@ func (a Actor) validate(kind ActorKind, players map[int64]bool) error {
 	if err := json.Unmarshal(a.Params, &params); err != nil || params.TableID.String() != fmt.Sprint(a.TableID) {
 		return ErrInvalid
 	}
+	provenanced := a.Origin == Borrowed || a.Origin == Trial
+	if provenanced != (a.Provenance != nil) || provenanced && (schema < SnapshotSchema || !a.Provenance.valid()) {
+		return ErrInvalid
+	}
 	switch a.Origin {
-	case Template:
+	case Template, Trial:
 		if a.Player != 0 || a.OwnerStateVersion != 0 || len(a.BattleTotals) != 0 || (params.PlayerID != nil && params.PlayerID.String() != "0") {
 			return ErrInvalid
 		}
-	case OwnedSelf, OwnedForeign:
+	case OwnedSelf, OwnedForeign, Borrowed:
 		if a.Player <= 0 || !players[a.Player] || a.OwnerStateVersion <= 0 || len(a.BattleTotals) == 0 || params.PlayerID == nil || params.PlayerID.String() != fmt.Sprint(a.Player) {
 			return ErrInvalid
 		}
@@ -189,7 +212,8 @@ func (a Actor) validate(kind ActorKind, players map[int64]bool) error {
 }
 
 func (s Snapshot) Validate() error {
-	if (s.Schema != SnapshotSchema && s.Schema != LegacySnapshotSchema) || s.Contract != ContractID || len(s.ContentRevision) != 64 || len(s.CorpusID) != 64 || len(s.SourceArchiveSHA256) != 64 || s.TrustProfile != TrustProfileID || s.EntropyPolicy != EntropyPolicyVersion || s.AdapterPolicy != AdapterPolicyVersion || s.CollectionPolicy != CollectionPolicy || s.DecidedAt.IsZero() || s.DecidedAt.Location() != time.UTC {
+	profile := s.TrustProfile == TrustProfileID || s.Schema == SnapshotSchema && registeredProfileID(s.TrustProfile)
+	if s.Schema < LegacySnapshotSchema || s.Schema > SnapshotSchema || s.Contract != ContractID || len(s.ContentRevision) != 64 || len(s.CorpusID) != 64 || len(s.SourceArchiveSHA256) != 64 || !profile || s.EntropyPolicy != EntropyPolicyVersion || s.AdapterPolicy != AdapterPolicyVersion || s.CollectionPolicy != CollectionPolicy || s.DecidedAt.IsZero() || s.DecidedAt.Location() != time.UTC {
 		return ErrInvalid
 	}
 	b := s.Battle
@@ -216,7 +240,7 @@ func (s Snapshot) Validate() error {
 	}
 	check := func(actors []Actor, kind ActorKind) error {
 		for _, a := range actors {
-			if err := a.validate(kind, players); err != nil {
+			if err := a.validate(kind, players, s.Schema); err != nil {
 				return err
 			}
 		}
@@ -261,7 +285,7 @@ func (s Snapshot) producersValid() error {
 		return ErrInvalid
 	}
 	for _, a := range s.actors() {
-		if a.Origin == Template {
+		if a.Origin == Template || a.Origin == Trial {
 			continue
 		}
 		if err := profile.CheckOwned(a.Kind, a.Params); err != nil {
@@ -275,7 +299,7 @@ func (s Snapshot) producersValid() error {
 // context in schema 1.
 func (s Snapshot) contextValid() bool {
 	context := s.Battle.Context
-	if context != nil && (s.Schema == LegacySnapshotSchema || !transformID.MatchString(context.Transform) || (len(context.Parameters) != 0 && !canonicalObject(context.Parameters))) {
+	if context != nil && (s.Schema == LegacySnapshotSchema || !versionedID.MatchString(context.Transform) || (len(context.Parameters) != 0 && !canonicalObject(context.Parameters))) {
 		return false
 	}
 	for _, a := range s.actors() {

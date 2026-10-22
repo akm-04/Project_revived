@@ -67,6 +67,10 @@ type Store interface {
 	SaveAttemptTx(context.Context, tx.Tx, d.Attempt, int64) error
 	InsertResolutionTx(context.Context, tx.Tx, string, d.Resolution, []byte) error
 	ReadResolutionTx(context.Context, tx.Queryer, string) (d.Resolution, []byte, error)
+	InsertStartPackageTx(context.Context, tx.Tx, d.StartPackage) error
+	ReadStartPackageTx(context.Context, tx.Queryer, ids.UUID) (d.StartPackage, bool, error)
+	InsertAttestationTx(context.Context, tx.Tx, d.Attestation) error
+	ReadAttestationTx(context.Context, tx.Queryer, ids.UUID) (d.Attestation, error)
 }
 
 // Content reports the active revision and its manifest source archive.

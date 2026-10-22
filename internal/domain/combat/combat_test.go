@@ -67,7 +67,7 @@ func TestEntropyRejectsInexactRanges(t *testing.T) {
 
 func fixtureActor(origin Origin, player int64) Actor {
 	fields := map[string]any{"player_id": player, "partner_id": 3, "table_id": 10001001, "star": 1}
-	if origin != Template {
+	if origin != Template && origin != Trial {
 		for _, key := range []string{"fumos", "skin_ids", "skill_book_info", "inscript_items", "courses", "spirit_equip", "spirit_item", "element_equips"} {
 			fields[key] = []any{}
 		}
@@ -77,7 +77,7 @@ func fixtureActor(origin Origin, player int64) Actor {
 	}
 	params, _ := CanonicalJSON(fields)
 	a := Actor{Origin: origin, Kind: HeroActor, Player: player, Identity: 3, TableID: 10001001, FighterClass: "Lvmeng", Params: params}
-	if origin != Template {
+	if origin != Template && origin != Trial {
 		a.OwnerStateVersion = 1
 		a.BattleTotals = json.RawMessage(`{"hp":1}`)
 	}
@@ -153,7 +153,7 @@ func TestSnapshotCanonicalRoundTripAndNegatives(t *testing.T) {
 		},
 		func(s *Snapshot) { s.Battle.WavesB = nil },
 		func(s *Snapshot) { s.DecidedAt = s.DecidedAt.In(time.FixedZone("x", 3600)) },
-		func(s *Snapshot) { s.Schema = 3 },
+		func(s *Snapshot) { s.Schema = SnapshotSchema + 1 },
 		func(s *Snapshot) { s.Battle.TeamA[0].Transform = json.RawMessage(`{"arena_add_star":1}`) },
 		func(s *Snapshot) { s.Battle.Context = &BattleContext{Transform: "region_arena_v1"} },
 		func(s *Snapshot) { s.Battle.Context = &BattleContext{Transform: "REGION_ARENA"} },
@@ -190,10 +190,15 @@ func TestSnapshotCanonicalRoundTripAndNegatives(t *testing.T) {
 	}
 }
 
+func fixtureAttemptEnvelope(start time.Time) Attempt {
+	return Attempt{ID: fixtureAttempt, Locator: Locator{"fixture", "server/1", "slot"}, ActorPlayer: 9, GameplayContextID: "ctx", GenerationRef: "g1", StartFingerprint: fmt.Sprintf("%064x", 4), SnapshotHash: fmt.Sprintf("%064x", 5),
+		TrustProfile: ServerReport, Replay: ReplaySpec{Response: ReplayStoredReport},
+		EntropyKeyVersion: "k1", RulesCorpusID: fmt.Sprintf("%064x", 6), ResolverStatus: ResolverPending, State: Staged, StartedAt: start, ResultDeadline: start.Add(time.Minute), StateVersion: 1}
+}
+
 func TestAttemptLifecycle(t *testing.T) {
 	start := time.Unix(1700000000, 0).UTC()
-	a := Attempt{ID: fixtureAttempt, Locator: Locator{"fixture", "server/1", "slot"}, ActorPlayer: 9, GameplayContextID: "ctx", GenerationRef: "g1", StartFingerprint: fmt.Sprintf("%064x", 4), SnapshotHash: fmt.Sprintf("%064x", 5),
-		EntropyKeyVersion: "k1", RulesCorpusID: fmt.Sprintf("%064x", 6), ResolverStatus: ResolverPending, State: Staged, StartedAt: start, ResultDeadline: start.Add(time.Minute), StateVersion: 1}
+	a := fixtureAttemptEnvelope(start)
 	if err := a.Validate(); err != nil {
 		t.Fatal(err)
 	}

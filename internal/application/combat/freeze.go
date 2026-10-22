@@ -60,7 +60,7 @@ func (s Service) newFreezer(scope ca.CoherentReadScope, actor identity.PlayerID)
 
 // freeze snapshots one battle; a freezer shared by several battles keeps each
 // owner's inputs read once, and each snapshot lists only its own battle's players.
-func (f *freezer) freeze(ctx context.Context, request BattleRequest) (d.Snapshot, error) {
+func (f *freezer) freeze(ctx context.Context, request BattleRequest, profile d.TrustProfile) (d.Snapshot, error) {
 	s, scope := f.service, f.scope
 	battle := d.Battle{CampaignType: request.CampaignType, BattleID: request.BattleID, PetsA: []d.Actor{}, PetsB: []d.Actor{}, Context: request.Context}
 	var err error
@@ -88,7 +88,7 @@ func (f *freezer) freeze(ctx context.Context, request BattleRequest) (d.Snapshot
 	}
 	sort.Slice(players, func(i, j int) bool { return players[i].Player < players[j].Player })
 	snapshot := d.Snapshot{Schema: d.SnapshotSchema, Contract: d.ContractID, ContentRevision: scope.ContentRevision, CorpusID: s.Rules.ID(), SourceArchiveSHA256: s.Rules.SourceArchiveSHA256(),
-		TrustProfile: d.TrustProfileID, EntropyPolicy: d.EntropyPolicyVersion, AdapterPolicy: d.AdapterPolicyVersion, CollectionPolicy: d.CollectionPolicy, DecidedAt: scope.ObservedAt.UTC(), Battle: battle, Players: players,
+		TrustProfile: profile.ID, EntropyPolicy: d.EntropyPolicyVersion, AdapterPolicy: d.AdapterPolicyVersion, CollectionPolicy: d.CollectionPolicy, DecidedAt: scope.ObservedAt.UTC(), Battle: battle, Players: players,
 		ProducerProfile: d.ProducerProfileID}
 	return snapshot, snapshot.Validate()
 }
