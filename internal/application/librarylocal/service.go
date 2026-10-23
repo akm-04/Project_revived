@@ -332,7 +332,7 @@ func (s Service) Command(ctx context.Context, a identity.ActorContext, c Command
 		chosen := fresh
 		var known Result
 		found := false
-		admitResult, admitErr := s.Timed.Runner.Run(ctx, op, Profile(), tx.Options{Isolation: tx.Serializable}, tx.RetryPolicy{MaxAttempts: 5, RetryDefiniteAbort: true, DefiniteAbortBackoffBase: 10 * time.Millisecond, DefiniteAbortBackoffMax: 50 * time.Millisecond}, nil, func(ctx context.Context, sc tx.Scope) error {
+		admitResult, admitErr := s.Timed.Runner.Run(ctx, op, Profile(), tx.Options{Isolation: tx.Serializable}, tx.RetryPolicy{MaxAttempts: 8, RetryDefiniteAbort: true, DefiniteAbortBackoffBase: 20 * time.Millisecond, DefiniteAbortBackoffMax: 80 * time.Millisecond}, nil, func(ctx context.Context, sc tx.Scope) error {
 			if e := s.lockPlan(ctx, sc.Tx, a, c, fresh.DecisionAt); e != nil {
 				return e
 			}
@@ -407,7 +407,7 @@ func (s Service) execute(ctx context.Context, d Admission) (Result, error) {
 		return Result{}, e
 	}
 	var out Result
-	res, e := s.Timed.Runner.Run(ctx, d.Operation, Profile(), tx.Options{Isolation: tx.Serializable}, tx.RetryPolicy{MaxAttempts: 3, RetryDefiniteAbort: true, DefiniteAbortBackoffBase: 5 * time.Millisecond, DefiniteAbortBackoffMax: 30 * time.Millisecond}, resolver{s, d}, func(ctx context.Context, sc tx.Scope) error {
+	res, e := s.Timed.Runner.Run(ctx, d.Operation, Profile(), tx.Options{Isolation: tx.Serializable}, tx.RetryPolicy{MaxAttempts: 8, RetryDefiniteAbort: true, DefiniteAbortBackoffBase: 20 * time.Millisecond, DefiniteAbortBackoffMax: 80 * time.Millisecond}, resolver{s, d}, func(ctx context.Context, sc tx.Scope) error {
 		if e := s.lockPlan(ctx, sc.Tx, a, d.Command, d.DecisionAt); e != nil {
 			return e
 		}
@@ -571,7 +571,7 @@ func (s Service) execute(ctx context.Context, d Admission) (Result, error) {
 	if e != nil && res.Outcome == tx.DefiniteAbort && terminalRejection(e) {
 		// Definite rollback authorizes a terminal rejection record. Unknown outcome never does.
 		rejected := Result{Schema: ResultSchema, Command: d.Command, Actor: d.Actor, OperationID: d.Operation.ID, Entropy: d.Operation.EntropySeed, ContentRevision: d.ContentRevision, DecisionAt: d.DecisionAt, Rejected: e.Error()}
-		marked, markErr := s.Reads.Run(ctx, d.Operation, Profile(), tx.Options{Isolation: tx.Serializable}, tx.RetryPolicy{MaxAttempts: 5, RetryDefiniteAbort: true, DefiniteAbortBackoffBase: 10 * time.Millisecond, DefiniteAbortBackoffMax: 50 * time.Millisecond}, nil, func(ctx context.Context, sc tx.Scope) error {
+		marked, markErr := s.Reads.Run(ctx, d.Operation, Profile(), tx.Options{Isolation: tx.Serializable}, tx.RetryPolicy{MaxAttempts: 8, RetryDefiniteAbort: true, DefiniteAbortBackoffBase: 20 * time.Millisecond, DefiniteAbortBackoffMax: 80 * time.Millisecond}, nil, func(ctx context.Context, sc tx.Scope) error {
 			// Current command's caller has already passed actor admission; keep original receipt identity.
 			if _, err := s.Library.LockRootTx(ctx, sc.Tx, a.PlayerID); err != nil {
 				return err
