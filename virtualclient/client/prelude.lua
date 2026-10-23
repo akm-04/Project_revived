@@ -72,7 +72,11 @@ shared.__index = function(node, key)
 	if value then
 		return value
 	end
-	if names[node]:find("%)") and not native.methods[key] then
+	local engineObject = names[node]:find("%)")
+	if engineObject and not native.methods[key] then
+		return nil
+	end
+	if engineObject and type(rawget(node, "class")) == "table" and native.fields[key] then
 		return nil
 	end
 	if names[node] == "xyd" and native.assigned[key] then
@@ -408,6 +412,9 @@ nodeMethods.stopAction = function(node, action)
 end
 nodeMethods.scheduleUpdateWithPriorityLua = function(node, callback) stateOf(node).update = callback end
 nodeMethods.unscheduleUpdate = function(node) stateOf(node).update = nil end
+-- Node:pause suspends the node's own update, actions and skeleton (not its children); battle hit-stop pauses a hero model.
+nodeMethods.pause = function(node) stateOf(node).suspended = true end
+nodeMethods.resume = function(node) stateOf(node).suspended = nil end
 
 -- Geometry stock layout reads back: a scene fills the window, any other node is 0x0 until sized (no texture sizes headless).
 local frameSize = {width = 1280, height = 720}
@@ -594,7 +601,7 @@ end
 local function advanceSkeletons(delta)
 	for node, skeleton in pairs(skeletons) do
 		local state = graph[node]
-		if state and state.running and not state.destroyed then
+		if state and state.running and not state.destroyed and not state.suspended then
 			for trackIndex, entry in pairs(skeleton.tracks) do
 				advanceTrack(skeleton, trackIndex, entry, delta)
 			end
@@ -970,7 +977,7 @@ function __vc.frame(clock, delta)
 		end
 	end
 	for node, state in pairs(graph) do
-		if state.update and state.running then
+		if state.update and state.running and not state.suspended then
 			invoke(state.update, delta)
 		end
 	end
@@ -980,7 +987,7 @@ function __vc.frame(clock, delta)
 	for _, entry in ipairs(active) do
 		local state = graph[entry.node]
 		local live = not entry.stopped and not (state and state.destroyed)
-		local paused = state ~= nil and not state.running and state.parent ~= nil
+		local paused = state ~= nil and (state.suspended or not state.running and state.parent ~= nil)
 		if live and not paused then
 			local ok, failure = coroutine.resume(entry.routine)
 			if not ok then
@@ -1065,6 +1072,64 @@ cc.kCCHTTPRequestAcceptEncodingIdentity, cc.kCCHTTPRequestAcceptEncodingGzip, cc
 
 -- Native xyd functions and the Android SDK bridge (org/cocos2dx/lua/AppActivity) the stock login uses.
 ccui, ccs, gl, kazmath, ccexp, ccb, sdkbox = proxy("ccui"), proxy("ccs"), proxy("gl"), proxy("kazmath"), proxy("ccexp"), proxy("ccb"), proxy("sdkbox")
+
+-- Textures: a sprite takes the size of its image (file header) or atlas frame (plist sourceSize), as stock layout loops (SplitLine)
+-- measure it; an image or frame that is not on the device makes no sprite, as on cocos2d-x.
+local atlasFrames, frameSizes = {}, setmetatable({}, {__mode = "k"})
+local frameCache = proxy("cc.SpriteFrameCache.getInstance()")
+rawset(frameCache, "addSpriteFrames", function(_, plist)
+	for name, size in pairs(native.atlasFrames(plist) or {}) do
+		atlasFrames[name] = size
+	end
+end)
+rawset(frameCache, "getSpriteFrame", function(_, name)
+	local size = atlasFrames[name]
+	if not size then
+		return nil
+	end
+	local frame = proxy("cc.SpriteFrame(" .. name .. ")")
+	frameSizes[frame] = size
+	return frame
+end)
+rawset(frameCache, "getSpriteFrameByName", frameCache.getSpriteFrame)
+rawset(cc.SpriteFrameCache, "getInstance", function() return frameCache end)
+
+local function textured(class, size)
+	if not size then
+		return nil
+	end
+	local sprite = proxy(names[class] .. ".create()", class)
+	stateOf(sprite).size = {width = size.width, height = size.height}
+	return sprite
+end
+local function imageSize(path)
+	if path:byte(1) == 35 then
+		return atlasFrames[path:sub(2)]
+	end
+	local width, height = native.imageSize(path)
+	if width then
+		return {width = width, height = height}
+	end
+end
+local function createSprite(class, path)
+	if type(path) ~= "string" then
+		return textured(class, {width = 0, height = 0})
+	end
+	return textured(class, imageSize(path))
+end
+for _, class in ipairs({cc.Sprite, ccui.Scale9Sprite}) do
+	rawset(class, "createWithSpriteFrame", function(self, frame) return textured(self, frameSizes[frame]) end)
+	rawset(class, "createWithSpriteFrameName", function(self, name) return textured(self, atlasFrames[name]) end)
+end
+rawset(cc.Sprite, "create", createSprite)
+-- Scale9Sprite:create(capInsets, file) or create(file).
+rawset(ccui.Scale9Sprite, "create", function(self, first, second)
+	if type(first) == "table" then
+		return createSprite(self, second)
+	end
+	return createSprite(self, first)
+end)
+
 xyd = proxy("xyd")
 rawset(xyd, "getVersionName", function() return native.versionName end)
 rawset(xyd, "getPackageName", function() return native.packageName end)
@@ -1129,6 +1194,9 @@ local function createLayout(_, path)
 		local key = "cc.CSLoader.createNode:" .. tostring(path) .. ":" .. tostring(problem)
 		report.missing[key] = (report.missing[key] or 0) + 1
 		return proxy("cc.Node.create()")
+	end
+	for _, atlas in ipairs(description.textures) do
+		frameCache:addSpriteFrames(atlas)
 	end
 	return buildLayout(description)
 end

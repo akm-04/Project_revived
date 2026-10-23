@@ -10,6 +10,7 @@ import (
 
 // Cocos Studio 2.x .csb is a FlatBuffers CSParseBinary. Field indexes below are the CSParseBinary schema's.
 const (
+	binaryTextures = 1
 	binaryNodeTree = 3
 
 	treeClass    = 0
@@ -74,11 +75,40 @@ func (buffer flatBuffer) text(table, index int) (string, error) {
 	if err != nil || position == 0 {
 		return "", err
 	}
+	return buffer.stringAt(position)
+}
+
+func (buffer flatBuffer) stringAt(position int) (string, error) {
 	length, err := buffer.uint32At(position)
 	if err != nil || position+4+length > len(buffer) {
 		return "", errLayout
 	}
 	return string(buffer[position+4 : position+4+length]), nil
+}
+
+// texts reads a vector of strings; empty when the field is absent.
+func (buffer flatBuffer) texts(table, index int) ([]string, error) {
+	vector, err := buffer.reference(table, index)
+	if err != nil || vector == 0 {
+		return nil, err
+	}
+	count, err := buffer.uint32At(vector)
+	if err != nil {
+		return nil, err
+	}
+	var texts []string
+	for element := vector + 4; element < vector+4+4*count; element += 4 {
+		offset, err := buffer.uint32At(element)
+		if err != nil {
+			return nil, err
+		}
+		text, err := buffer.stringAt(element + offset)
+		if err != nil {
+			return nil, err
+		}
+		texts = append(texts, text)
+	}
+	return texts, nil
 }
 
 func (buffer flatBuffer) floats(table, index int) (float64, float64, bool) {
@@ -103,7 +133,21 @@ func layoutTable(state *lua.LState, data []byte) (*lua.LTable, error) {
 	if err != nil || tree == 0 {
 		return nil, errLayout
 	}
-	return buffer.node(state, tree, 0)
+	description, err := buffer.node(state, tree, 0)
+	if err != nil {
+		return nil, err
+	}
+	// The sprite-frame atlases (plists) the layout uses; CSLoader adds them to the SpriteFrameCache before building the nodes.
+	textures, err := buffer.texts(root, binaryTextures)
+	if err != nil {
+		return nil, err
+	}
+	atlases := state.NewTable()
+	for _, texture := range textures {
+		atlases.Append(lua.LString(texture))
+	}
+	description.RawSetString("textures", atlases)
+	return description, nil
 }
 
 func (buffer flatBuffer) node(state *lua.LState, tree, depth int) (*lua.LTable, error) {

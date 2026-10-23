@@ -163,13 +163,16 @@ func (client *Client) install() error {
 	native.RawSetString("decodeBase64", state.NewFunction(decodeBase64))
 	native.RawSetString("layout", state.NewFunction(client.files.loadLayout))
 	native.RawSetString("skeleton", state.NewFunction(client.files.loadSkeleton))
+	native.RawSetString("imageSize", state.NewFunction(client.files.loadImageSize))
+	native.RawSetString("atlasFrames", state.NewFunction(client.files.loadAtlasFrames))
 	native.RawSetString("httpRequest", state.NewFunction(client.network.create))
-	methods, assigned, err := sourceNames(state, client.options.SourceRoot)
+	methods, assigned, fields, err := sourceNames(state, client.options.SourceRoot)
 	if err != nil {
 		return err
 	}
 	native.RawSetString("methods", methods)
 	native.RawSetString("assigned", assigned)
+	native.RawSetString("fields", fields)
 	state.SetGlobal("__native", native)
 	if err := state.DoString(prelude); err != nil {
 		return fmt.Errorf("engine prelude: %w", err)
@@ -328,6 +331,7 @@ var (
 	exportedList   = regexp.MustCompile(`exportMethods_\(\{([^}]*)\}`)
 	exportedMethod = regexp.MustCompile(`"([A-Za-z_][A-Za-z0-9_]*)"`)
 	xydAlias       = regexp.MustCompile(`(?m)^local ([A-Za-z_][A-Za-z0-9_]*) = xyd\s*$`)
+	selfField      = regexp.MustCompile(`\barg_[0-9]+_0\.([A-Za-z_][A-Za-z0-9_]*)\s*=\s*([^=\s][A-Za-z]*)`)
 )
 
 // xydAssignment matches stock setting an xyd field directly or through a file-local alias (BattleCreate: local var_0_12 = xyd).
@@ -339,11 +343,13 @@ func xydAssignment(source []byte) *regexp.Regexp {
 	return regexp.MustCompile(`\b(?:` + strings.Join(receivers, "|") + `)\.([A-Za-z_][A-Za-z0-9_]*)\s*=[^=]`)
 }
 
-// sourceNames reads two name sets from src_64. methods: the names stock calls with ":", the only keys an engine object answers
+// sourceNames reads three name sets from src_64. methods: the names stock calls with ":", the only keys an engine object answers
 // for; names a stock component exports are Lua methods (Component.exportMethods_ installs them only where the target lacks the
 // key). assigned: the xyd fields stock Lua sets itself (directly or through an alias), absent from the native xyd table until stock assigns them.
-func sourceNames(state *lua.LState, root string) (*lua.LTable, *lua.LTable, error) {
-	methods, assigned := state.NewTable(), state.NewTable()
+// fields: the names stock sets as data on a method's self (arg_N_0); on a class instance built over an engine object they live in the
+// tolua peer, so they read nil until set (NewBattleLoadingWindow counts with self.count = self.count or 0).
+func sourceNames(state *lua.LState, root string) (*lua.LTable, *lua.LTable, *lua.LTable, error) {
+	methods, assigned, fields := state.NewTable(), state.NewTable(), state.NewTable()
 	var exported []string
 	err := filepath.WalkDir(root, func(path string, entry fs.DirEntry, err error) error {
 		if err != nil || entry.IsDir() || !strings.HasSuffix(path, ".lua") {
@@ -359,6 +365,11 @@ func sourceNames(state *lua.LState, root string) (*lua.LTable, *lua.LTable, erro
 		for _, match := range xydAssignment(source).FindAllSubmatch(source, -1) {
 			assigned.RawSetString(string(match[1]), lua.LTrue)
 		}
+		for _, match := range selfField.FindAllSubmatch(source, -1) {
+			if string(match[2]) != "function" {
+				fields.RawSetString(string(match[1]), lua.LTrue)
+			}
+		}
 		for _, list := range exportedList.FindAllSubmatch(source, -1) {
 			for _, name := range exportedMethod.FindAllSubmatch(list[1], -1) {
 				exported = append(exported, string(name[1]))
@@ -369,7 +380,7 @@ func sourceNames(state *lua.LState, root string) (*lua.LTable, *lua.LTable, erro
 	for _, name := range exported {
 		methods.RawSetString(name, lua.LNil)
 	}
-	return methods, assigned, err
+	return methods, assigned, fields, err
 }
 
 // SourceDigest hashes a src_64 tree the way PinnedSourceDigest was computed.
