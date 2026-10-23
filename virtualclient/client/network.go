@@ -11,6 +11,7 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 	"time"
 
@@ -28,8 +29,13 @@ type Exchange struct {
 	MID      float64 `json:"mid,omitempty"`
 	Encoding string  `json:"encoding"`
 	Status   int     `json:"status"`
-	Bytes    int     `json:"response_bytes"`
-	Failure  string  `json:"failure,omitempty"`
+	// ErrorCode is the stock error_code of a JSON response body (0 when absent), what stock Backend.lua checks.
+	ErrorCode float64 `json:"error_code,omitempty"`
+	Bytes     int     `json:"response_bytes"`
+	Failure   string  `json:"failure,omitempty"`
+	// NullFields are the JSON paths a response answers null: stock cjson decodes null to the truthy cjson.null, so a consumer
+	// guarding with `if x` or `x or {}` then indexes or adds to userdata.
+	NullFields []string `json:"null_fields,omitempty"`
 }
 
 type formPart struct {
@@ -207,7 +213,35 @@ func (network *network) perform(request *httpRequest) Exchange {
 	}
 	request.status = response.StatusCode
 	exchange.Status, exchange.Bytes = response.StatusCode, len(request.body)
+	var stock struct {
+		ErrorCode float64 `json:"error_code"`
+	}
+	if json.Unmarshal(request.body, &stock) == nil {
+		exchange.ErrorCode = stock.ErrorCode
+	}
+	var decoded any
+	if json.Unmarshal(request.body, &decoded) == nil {
+		exchange.NullFields = nullFields(decoded, "")
+	}
 	return exchange
+}
+
+func nullFields(value any, path string) []string {
+	var found []string
+	switch typed := value.(type) {
+	case nil:
+		return []string{path}
+	case map[string]any:
+		for key, child := range typed {
+			found = append(found, nullFields(child, path+"."+key)...)
+		}
+	case []any:
+		for index, child := range typed {
+			found = append(found, nullFields(child, fmt.Sprintf("%s[%d]", path, index))...)
+		}
+	}
+	sort.Strings(found)
+	return found
 }
 
 // encode builds the body CCHTTPRequest sends: url-encoded POST values joined as given (stock already escapes them), otherwise a

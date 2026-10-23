@@ -111,12 +111,15 @@ func baseline(mid uint16, v BootstrapView) (any, bool) {
 			"buy_glue_times": int64(0), "lvbu_coin": int64(0), "paradise_coin": int64(0), "team_dungeon_coin": int64(0),
 			"ice_core": int64(0), "spirit_stone": int64(0),
 
-			"energy": int64(0), "spirit_energy": int64(0), "invitation": int64(0), "social": int64(0),
+			// No "invitation": stock player.lua has no invitation column, so a present value makes every ECONOMY event
+			// crash in SelfPlayer:getInvitationLimit once Arena is open (I8.5-5 virtual client; V1 suppressed it too).
+			// No "formation" either: stock Arena:getDefenseFormation splits it as an "a|b" string; absent means no defense.
+			"energy": int64(0), "spirit_energy": int64(0), "social": int64(0),
 			"energy_time": int64(0), "spirit_energy_time": int64(0), "invitation_time": int64(0),
 			"max_energy": int64(0), "max_invitation": int64(0), "glory": int64(0), "vip": int64(0),
 			"buy_mana_times": int64(0), "buy_energy_times": int64(0), "buy_spirit_energy_times": int64(0), "buy_skill_times": int64(0),
 
-			"func_ids": zeroList(), "skill_point": int64(0), "skill_time": int64(0), "formation": zeroMap(),
+			"func_ids": zeroList(), "skill_point": int64(0), "skill_time": int64(0),
 			"guide_function_ids": zeroList(), "guide_return_id": int64(0),
 			"save_team": "", "save_team_name": "", "save_pet": "", "message_pushes": zeroMap(),
 

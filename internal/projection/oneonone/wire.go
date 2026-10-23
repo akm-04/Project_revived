@@ -11,11 +11,13 @@ import (
 	d "gxb.local/backend/v2/internal/domain/oneonone"
 )
 
-func unix(t *time.Time) any {
+// putUnix omits an unset time: stock decodes JSON null to the truthy cjson.null, and PeakArena:setCoolTime and
+// PeakArenaWindow add to these times when present.
+func putUnix(out map[string]any, key string, t *time.Time) {
 	if t == nil {
-		return nil
+		return
 	}
-	return t.Unix()
+	out[key] = t.Unix()
 }
 
 func flag(b bool) int64 {
@@ -31,8 +33,11 @@ func RankInfo(r d.Ranked) map[string]any {
 
 func BaseInfo(v d.ArenaView) map[string]any {
 	p := v.Player
-	return map[string]any{"buy_times": p.Purchases, "left_times": p.TriesLeft, "last_fight_time": unix(p.LastFightAt), "last_promote_fight_time": unix(p.LastPromotionAt),
-		"mode": p.Mode, "promote_challenge_times": p.Challenges, "promote_wins": p.PromotionWins, "promote_end_time": unix(v.PromotionEnd)}
+	out := map[string]any{"buy_times": p.Purchases, "left_times": p.TriesLeft, "mode": p.Mode, "promote_challenge_times": p.Challenges, "promote_wins": p.PromotionWins}
+	putUnix(out, "last_fight_time", p.LastFightAt)
+	putUnix(out, "last_promote_fight_time", p.LastPromotionAt)
+	putUnix(out, "promote_end_time", v.PromotionEnd)
+	return out
 }
 
 // Formations encodes teams as generatePartnerIds strings "id|id@pet".

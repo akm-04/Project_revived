@@ -227,6 +227,17 @@ func (client *Client) TapNode(path string) error {
 	return client.state.CallByParam(lua.P{Fn: tap, NRet: 1, Protect: true}, lua.LString(path))
 }
 
+// Call runs a scenario chunk as an engine callback: a Lua error in it, or in stock code it calls, takes the stock
+// __G__TRACKBACK__ path (errorlog, upload) and lands in the report, as an error in a touch handler would.
+func (client *Client) Call(chunk string) error {
+	function, err := client.state.LoadString(chunk)
+	if err != nil {
+		return err
+	}
+	invoke := client.state.GetGlobal("__vc").(*lua.LTable).RawGetString("invoke")
+	return client.state.CallByParam(lua.P{Fn: invoke, NRet: 0, Protect: true}, function)
+}
+
 // rememberRegion writes the meta row stock Meta:persist leaves after a region was chosen, in stock's own schema.
 func rememberRegion(path, sid string, region Region) error {
 	database, err := sql.Open("sqlite", path)
@@ -316,12 +327,21 @@ var (
 	methodCall     = regexp.MustCompile(`:([A-Za-z_][A-Za-z0-9_]*)\s*[("{]`)
 	exportedList   = regexp.MustCompile(`exportMethods_\(\{([^}]*)\}`)
 	exportedMethod = regexp.MustCompile(`"([A-Za-z_][A-Za-z0-9_]*)"`)
-	xydAssignment  = regexp.MustCompile(`\bxyd\.([A-Za-z_][A-Za-z0-9_]*)\s*=[^=]`)
+	xydAlias       = regexp.MustCompile(`(?m)^local ([A-Za-z_][A-Za-z0-9_]*) = xyd\s*$`)
 )
+
+// xydAssignment matches stock setting an xyd field directly or through a file-local alias (BattleCreate: local var_0_12 = xyd).
+func xydAssignment(source []byte) *regexp.Regexp {
+	receivers := []string{"xyd"}
+	for _, alias := range xydAlias.FindAllSubmatch(source, -1) {
+		receivers = append(receivers, string(alias[1]))
+	}
+	return regexp.MustCompile(`\b(?:` + strings.Join(receivers, "|") + `)\.([A-Za-z_][A-Za-z0-9_]*)\s*=[^=]`)
+}
 
 // sourceNames reads two name sets from src_64. methods: the names stock calls with ":", the only keys an engine object answers
 // for; names a stock component exports are Lua methods (Component.exportMethods_ installs them only where the target lacks the
-// key). assigned: the xyd fields stock Lua sets itself, absent from the native xyd table until stock assigns them.
+// key). assigned: the xyd fields stock Lua sets itself (directly or through an alias), absent from the native xyd table until stock assigns them.
 func sourceNames(state *lua.LState, root string) (*lua.LTable, *lua.LTable, error) {
 	methods, assigned := state.NewTable(), state.NewTable()
 	var exported []string
@@ -336,7 +356,7 @@ func sourceNames(state *lua.LState, root string) (*lua.LTable, *lua.LTable, erro
 		for _, match := range methodCall.FindAllSubmatch(source, -1) {
 			methods.RawSetString(string(match[1]), lua.LTrue)
 		}
-		for _, match := range xydAssignment.FindAllSubmatch(source, -1) {
+		for _, match := range xydAssignment(source).FindAllSubmatch(source, -1) {
 			assigned.RawSetString(string(match[1]), lua.LTrue)
 		}
 		for _, list := range exportedList.FindAllSubmatch(source, -1) {

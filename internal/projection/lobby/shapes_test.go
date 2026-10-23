@@ -56,12 +56,20 @@ func TestCriticalWaveSShapes(t *testing.T) {
 	}
 	for _, key := range []string{
 		"exp", "mana", "crystal", "lucky_coin", "arena_coin", "march_coin", "top_coin", "guild_coin", "region_coin", "king_coin",
-		"lvbu_coin", "spirit_stone", "energy", "spirit_energy", "invitation", "social", "energy_time", "spirit_energy_time",
+		"lvbu_coin", "spirit_stone", "energy", "spirit_energy", "social", "energy_time", "spirit_energy_time",
 		"max_energy", "max_invitation", "glory", "vip", "buy_mana_times", "buy_energy_times", "buy_spirit_energy_times", "buy_skill_times",
-		"func_ids", "skill_point", "skill_time", "formation", "save_team", "save_team_name", "save_pet", "message_pushes",
+		"func_ids", "skill_point", "skill_time", "save_team", "save_team_name", "save_pet", "message_pushes",
 	} {
 		if _, ok := player[key]; !ok {
 			t.Fatalf("MID17 missing source-consumed bootstrap field %q", key)
+		}
+	}
+	for key, crash := range map[string]string{
+		"invitation": "SelfPlayer:getInvitationLimit on every ECONOMY event once Arena is open",
+		"formation":  "Arena:getDefenseFormation (it splits a string) when ArenaWindow opens without a defense",
+	} {
+		if _, ok := player[key]; ok {
+			t.Fatalf("MID17 %s crashes stock %s", key, crash)
 		}
 	}
 	mail := d["368"].(map[string]any)

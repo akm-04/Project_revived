@@ -89,6 +89,11 @@ func TestI7C5COneOnOneWireShapes(t *testing.T) {
 		base["last_fight_time"] != int64(1700000000) || base["mode"] != int64(1) || !reflect.DeepEqual(load["defense"], []string{"3|4@9", "5"}) {
 		t.Fatal("LOAD_PEAK_ARENA", load)
 	}
+	for _, key := range []string{"last_promote_fight_time", "promote_end_time"} {
+		if _, ok := base[key]; ok {
+			t.Fatalf("unset %s must be absent: stock decodes null to the truthy cjson.null and adds to it", key)
+		}
+	}
 	call(2481, map[string]any{"formations": []any{"3|4@9", "5", "6"}})
 	if !reflect.DeepEqual(f.teams, []d.Team{{Heroes: []int64{3, 4}, Pet: 9}, {Heroes: []int64{5}}, {Heroes: []int64{6}}}) {
 		t.Fatal("PEAK_CHANGE_TEAMS", f.teams)

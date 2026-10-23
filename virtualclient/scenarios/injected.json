@@ -1,0 +1,3 @@
+{"name":"injected",
+ "steps":["lua:error('vc-injected-lua-error')","wait:5"],"settle_seconds":10,
+ "expect_lua_errors":["vc-injected-lua-error"],"expect_client_log":["vc-injected-lua-error"]}

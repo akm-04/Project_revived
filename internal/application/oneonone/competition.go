@@ -371,6 +371,13 @@ func (s Service) Load(c context.Context, a identity.ActorContext, op operation.C
 				}
 			}
 			next := catalog.Rolled(p, at)
+			if teams := catalog.Level(next.Level).Teams; int64(len(next.Teams)) < teams {
+				roster, err := s.roster(c, sc.Tx, a.PlayerID, at)
+				if err != nil {
+					return err
+				}
+				next.Teams = d.FilledTeams(next.Teams, roster, teams)
+			}
 			if !samePlayer(p, next) {
 				next.StateVersion, next.UpdatedAt = p.StateVersion+1, at
 				if err = s.Store.SavePlayerTx(c, sc.Tx, next, p.StateVersion, d.Totals{}); err != nil {
@@ -531,6 +538,24 @@ func (s Service) heroRows(c context.Context, q tx.Queryer, pid identity.PlayerID
 	body, _ := detail["49"].(map[string]any)
 	rows, _ := body["heros"].(map[string]any)
 	return rows, nil
+}
+
+func (s Service) roster(c context.Context, q tx.Queryer, pid identity.PlayerID, at time.Time) ([]d.RosterHero, error) {
+	rows, err := s.heroRows(c, q, pid, at)
+	if err != nil {
+		return nil, err
+	}
+	out := []d.RosterHero{}
+	for _, raw := range rows {
+		row, _ := raw.(map[string]any)
+		partner, _ := row["partner_id"].(int64)
+		star, _ := row["star"].(int64)
+		level, _ := row["lev"].(int64)
+		if partner > 0 {
+			out = append(out, d.RosterHero{PartnerID: partner, Star: star, Level: level})
+		}
+	}
+	return out, nil
 }
 
 func (s Service) petRows(c context.Context, q tx.Queryer, pid identity.PlayerID, at time.Time) (map[string]map[string]any, error) {

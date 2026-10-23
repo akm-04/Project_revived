@@ -3,6 +3,7 @@ package oneonone
 import (
 	"encoding/json"
 	"os"
+	"reflect"
 	"slices"
 	"testing"
 	"time"
@@ -236,5 +237,22 @@ func TestTeamsAndAdmission(t *testing.T) {
 	p.TriesLeft = 0
 	if p2, cost, err := c.Buy(p, c.Privilege(3), at); err != nil || cost != 50 || p2.TriesLeft != 10 {
 		t.Fatal("buy restores 10")
+	}
+}
+
+func TestFilledTeamsTopsUpWithStrongestUnusedHeroes(t *testing.T) {
+	roster := []RosterHero{{PartnerID: 1, Star: 1, Level: 9}, {PartnerID: 2, Star: 3, Level: 1}, {PartnerID: 3, Star: 1, Level: 9},
+		{PartnerID: 4, Star: 2, Level: 5}, {PartnerID: 5, Star: 1, Level: 1}, {PartnerID: 6, Star: 1, Level: 1}, {PartnerID: 7, Star: 5, Level: 1}}
+	saved := []Team{{Heroes: []int64{7}, Pet: 9}}
+	got := FilledTeams(saved, roster, 3)
+	want := []Team{{Heroes: []int64{7}, Pet: 9}, {Heroes: []int64{2, 4, 1, 3, 5}}, {Heroes: []int64{6}}}
+	if !reflect.DeepEqual(got, want) || !ValidTeams(got, 3) {
+		t.Fatalf("FilledTeams=%v want %v", got, want)
+	}
+	if got := FilledTeams(nil, nil, 3); got == nil || len(got) != 0 {
+		t.Fatalf("an empty roster leaves an empty, non-nil defense: %#v", got)
+	}
+	if got := FilledTeams(want, roster, 2); !reflect.DeepEqual(got, want) {
+		t.Fatalf("saved teams beyond the count are kept: %v", got)
 	}
 }

@@ -178,7 +178,7 @@ func (c Core) MID17OwnedFields() (map[string]any, error) {
 	if err := c.Validate(); err != nil {
 		return nil, err
 	}
-	guide := append([]int64(nil), c.GuideReturn.GuideFunctionIDs...)
+	guide := append([]int64{}, c.GuideReturn.GuideFunctionIDs...)
 	sort.Slice(guide, func(i, j int) bool { return guide[i] < guide[j] })
 	return map[string]any{
 		"player_name":        c.Profile.DisplayName,

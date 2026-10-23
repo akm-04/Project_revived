@@ -23,6 +23,7 @@ const (
 	widgetTag          = 6
 	widgetPosition     = 7
 	widgetSize         = 11
+	widgetTouchEnabled = 15
 	textOptionsContent = 4
 )
 
@@ -91,7 +92,7 @@ func (buffer flatBuffer) floats(table, index int) (float64, float64, bool) {
 }
 
 // layoutTable reads a .csb into the node description the engine model builds nodes from:
-// {class, name, tag, visible, text, x, y, width, height, children}.
+// {class, name, tag, visible, touch, text, x, y, width, height, children}.
 func layoutTable(state *lua.LState, data []byte) (*lua.LTable, error) {
 	buffer := flatBuffer(data)
 	root, err := buffer.uint32At(0)
@@ -171,6 +172,9 @@ func (buffer flatBuffer) describe(description *lua.LTable, tree int, class strin
 	description.RawSetString("visible", lua.LTrue)
 	if position, _ := buffer.field(widget, widgetVisible); position != 0 && position < len(buffer) {
 		description.RawSetString("visible", lua.LBool(buffer[position] != 0))
+	}
+	if position, _ := buffer.field(widget, widgetTouchEnabled); position != 0 && position < len(buffer) && buffer[position] != 0 {
+		description.RawSetString("touch", lua.LTrue)
 	}
 	if x, y, ok := buffer.floats(widget, widgetPosition); ok {
 		description.RawSetString("x", lua.LNumber(x))

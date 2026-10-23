@@ -38,7 +38,7 @@ func (b BootstrapProjection) Claims() []string {
 		"17.lev", "17.exp", "17.max_lev", "17.max_color", "17.story_id", "17.story_state", "17.guide_id",
 		"17.func_ids", "17.guide_function_ids", "17.guide_return_id",
 		"17.energy_time", "17.max_energy", "17.spirit_energy_time", "17.skill_time",
-		"17.invitation_time", "17.max_invitation", "81", "368",
+		"81", "368",
 	}
 	if b.Display != nil {
 		claims = append(claims, "17.title_info", "17.bubble_info")
@@ -173,10 +173,11 @@ func loadPlayerCore(ctx context.Context, q tx.Queryer, pid identity.PlayerID) (p
 	return c, c.Validate()
 }
 
+// stockEconomyFields omits invitation: see the lobby MID17 shape.
 var stockEconomyFields = map[string]struct{}{
 	"mana": {}, "crystal": {}, "lucky_coin": {}, "arena_coin": {}, "march_coin": {}, "top_coin": {}, "guild_coin": {}, "region_coin": {},
 	"king_coin": {}, "honor_coin": {}, "god_war_coin": {}, "friendship_coin": {}, "friend_medal": {}, "summon_coin": {}, "skin_fragment": {}, "glue": {},
-	"lvbu_coin": {}, "paradise_coin": {}, "team_dungeon_coin": {}, "ice_core": {}, "spirit_stone": {}, "energy": {}, "spirit_energy": {}, "skill_point": {}, "invitation": {},
+	"lvbu_coin": {}, "paradise_coin": {}, "team_dungeon_coin": {}, "ice_core": {}, "spirit_stone": {}, "energy": {}, "spirit_energy": {}, "skill_point": {},
 	"social": {}, "glory": {}, "magic_energy": {}, "magic_dust": {}, "magic_liquid": {}, "magic_exp": {}, "degree_cer": {}, "graduate_cer": {}, "patent_cer": {}, "occult_ticket": {}, "tutor_coin": {}, "skin_coin": {},
 }
 
@@ -277,8 +278,6 @@ func (b BootstrapProjection) overlayEconomy(ctx context.Context, q tx.Queryer, p
 			out["spirit_energy_time"] = stockAnchor(m.State.RegenAnchorAt)
 		case "skill_point":
 			out["skill_time"] = stockAnchor(m.State.RegenAnchorAt)
-		case "invitation":
-			out["invitation_time"], out["max_invitation"] = stockAnchor(m.State.RegenAnchorAt), policy.NaturalCap
 		}
 	}
 	return nil

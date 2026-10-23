@@ -1,6 +1,7 @@
 package oneonone
 
 import (
+	"cmp"
 	"slices"
 	"time"
 
@@ -65,6 +66,38 @@ func ValidTeams(teams []Team, count int64) bool {
 		}
 	}
 	return true
+}
+
+// RosterHero is one owned hero as the default defense ranks it.
+type RosterHero struct {
+	PartnerID int64
+	Star      int64
+	Level     int64
+}
+
+// FilledTeams tops the saved teams up to count with unused heroes, five a team, highest star then level first (I8.5 D60 private
+// policy): stock PeakArenaWindow renders every team of the group and has no empty-defense state.
+func FilledTeams(saved []Team, roster []RosterHero, count int64) []Team {
+	used := map[int64]bool{}
+	for _, t := range saved {
+		for _, h := range t.Heroes {
+			used[h] = true
+		}
+	}
+	free := slices.DeleteFunc(slices.Clone(roster), func(h RosterHero) bool { return used[h.PartnerID] })
+	slices.SortFunc(free, func(a, b RosterHero) int {
+		return cmp.Or(cmp.Compare(b.Star, a.Star), cmp.Compare(b.Level, a.Level), cmp.Compare(a.PartnerID, b.PartnerID))
+	})
+	out := append([]Team{}, saved...)
+	for int64(len(out)) < count && len(free) > 0 {
+		size := min(TeamSize, len(free))
+		team := Team{Heroes: []int64{}}
+		for _, h := range free[:size] {
+			team.Heroes = append(team.Heroes, h.PartnerID)
+		}
+		out, free = append(out, team), free[size:]
+	}
+	return out
 }
 
 // Position is a player's place: Master/Senior hold a slot, Juniors rank by points.

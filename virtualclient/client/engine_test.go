@@ -54,15 +54,18 @@ func expect(t *testing.T, client *Client, path string, want lua.LValue) {
 }
 
 func TestSourceNames(t *testing.T) {
-	client := engine(t, `node:hide() view:exportMethods_({"bar"}) node:bar() xyd.lazyFileManager = {} if xyd.other == 1 then end`, nil)
+	client := engine(t, `node:hide() view:exportMethods_({"bar"}) node:bar() xyd.lazyFileManager = {} if xyd.other == 1 then end
+local alias = xyd
+alias.isArenaBattle = true`, nil)
 	run(t, client, `result = {hide = __native.methods.hide, bar = __native.methods.bar, lazy = __native.assigned.lazyFileManager,
-		other = __native.assigned.other, xydLazy = xyd.lazyFileManager, xydOther = xyd.other ~= nil}`)
+		other = __native.assigned.other, xydLazy = xyd.lazyFileManager, xydOther = xyd.other ~= nil, aliased = xyd.isArenaBattle}`)
 	expect(t, client, "result.hide", lua.LTrue)
 	expect(t, client, "result.bar", lua.LNil)
 	expect(t, client, "result.lazy", lua.LTrue)
 	expect(t, client, "result.other", lua.LNil)
 	expect(t, client, "result.xydLazy", lua.LNil)
 	expect(t, client, "result.xydOther", lua.LTrue)
+	expect(t, client, "result.aliased", lua.LNil)
 }
 
 func TestNativeHelpers(t *testing.T) {
@@ -154,4 +157,21 @@ func TestUpdateTreeIsNotWrittenThrough(t *testing.T) {
 	if content, _ := os.ReadFile(shared); string(content) != "tree" {
 		t.Fatalf("shared tree file now %q", content)
 	}
+}
+
+func TestWidgetNativeMethodsAndOverflowErrors(t *testing.T) {
+	client := engine(t, ``, nil)
+	run(t, client, `
+		function ccui.Widget.setTouchEnabled(widget, enabled)
+			tolua.getcfunction(widget, "setTouchEnabled")(widget, enabled)
+		end
+		local widget = ccui.Layout:create()
+		widget:setTouchEnabled(true)
+		result = {touch = widget:isTouchEnabled()}
+		local function deep() return deep() + 1 end
+		result.ok = __vc.invoke(deep)
+		result.errors = #__vc.report.errors`)
+	expect(t, client, "result.touch", lua.LTrue)
+	expect(t, client, "result.ok", lua.LFalse)
+	expect(t, client, "result.errors", lua.LNumber(1))
 }

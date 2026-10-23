@@ -18,6 +18,8 @@ local classes = setmetatable({}, {__mode = "k"})
 local shared = {}
 local nodeMethods = {}
 local nodeBase, widgetBase
+-- widgetMethods are the native ui::Widget methods the engine model implements.
+local widgetMethods = {}
 
 -- A stock run reaches a few hundred proxies; a loop the engine model never ends would create them until memory runs out.
 local proxyLimit = 100000
@@ -46,11 +48,19 @@ local function inherited(node, key)
 	if not (nodeBase and name:find("%)")) then
 		return
 	end
-	for _, base in ipairs({name:sub(1, 5) == "ccui." and widgetBase or nodeBase, nodeBase}) do
-		local value = rawget(base, key)
+	-- As on tolua, a widget finds ccui.Widget methods (stock Lua, then native) before stock Lua cc.Node extensions (NodeEx).
+	if name:sub(1, 5) == "ccui." then
+		local value = rawget(widgetBase, key)
 		if type(value) == "function" then
 			return value
 		end
+		if widgetMethods[key] then
+			return widgetMethods[key]
+		end
+	end
+	local value = rawget(nodeBase, key)
+	if type(value) == "function" then
+		return value
 	end
 end
 
@@ -138,7 +148,13 @@ end
 local function invoke(callback, ...)
 	local arguments = {...}
 	local count = select("#", ...)
-	return xpcall(function() return callback(unpack(arguments, 1, count)) end, reportError)
+	local recorded = #report.errors
+	local results = {xpcall(function() return callback(unpack(arguments, 1, count)) end, reportError)}
+	-- gopher-lua skips the handler on a stack overflow; the error must still fail the run.
+	if not results[1] and #report.errors == recorded then
+		table.insert(report.errors, tostring(results[2]))
+	end
+	return unpack(results, 1, table.maxn(results))
 end
 __vc.invoke = invoke
 
@@ -660,6 +676,9 @@ rawset(director, "getVisibleSize", function() return {width = frameSize.width, h
 rawset(director, "getVisibleOrigin", function() return {x = 0, y = 0} end)
 rawset(director, "getAnimationInterval", function() return 1 / 60 end)
 rawset(director, "getContentScaleFactor", function() return 1 end)
+-- View coordinates have their origin top-left; GL (design) coordinates bottom-left.
+rawset(director, "convertToGL", function(_, point) return {x = point.x, y = frameSize.height - point.y} end)
+rawset(director, "convertToUI", function(_, point) return {x = point.x, y = frameSize.height - point.y} end)
 local view = proxy("cc.Director.getInstance().getOpenGLView()")
 rawset(view, "getFrameSize", function() return {width = frameSize.width, height = frameSize.height} end)
 rawset(view, "getVisibleSize", function() return {width = frameSize.width, height = frameSize.height} end)
@@ -734,13 +753,37 @@ rawset(director, "getEventDispatcher", function() return dispatcher end)
 local function touchAt(x, y)
 	local location = {x = x, y = y}
 	local touch = proxy("cc.Touch()")
-	for _, method in ipairs({"getLocation", "getStartLocation", "getPreviousLocation", "getLocationInView"}) do
+	for _, method in ipairs({"getLocation", "getStartLocation", "getPreviousLocation"}) do
 		rawset(touch, method, function() return {x = location.x, y = location.y} end)
 	end
+	rawset(touch, "getLocationInView", function() return director:convertToUI(location) end)
 	rawset(touch, "getDelta", function() return {x = 0, y = 0} end)
 	rawset(touch, "getId", function() return 0 end)
 	return touch
 end
+-- drawOrder numbers the running scene's nodes in cocos2d-x visit order: negative-z children, the node, then the rest.
+local function drawOrder()
+	local order, count = {}, 0
+	local function visit(node)
+		local children = stateOf(node).children
+		local index = 1
+		while index <= #children and (stateOf(children[index]).zOrder or 0) < 0 do
+			visit(children[index])
+			index = index + 1
+		end
+		count = count + 1
+		order[node] = count
+		for rest = index, #children do
+			visit(children[rest])
+		end
+	end
+	if scenes[#scenes] then
+		visit(scenes[#scenes])
+	end
+	return order
+end
+-- touchOrder is the engine order: fixed priorities below zero, scene-graph listeners front-most (last drawn) first, then fixed
+-- priorities above zero; registration order breaks ties.
 local function touchOrder()
 	local ordered = {}
 	for _, listener in ipairs(listeners) do
@@ -749,15 +792,77 @@ local function touchOrder()
 			table.insert(ordered, listener)
 		end
 	end
+	local drawn = drawOrder()
 	table.sort(ordered, function(left, right)
 		local leftState, rightState = stateOf(left), stateOf(right)
 		if leftState.priority ~= rightState.priority then
 			return leftState.priority < rightState.priority
 		end
+		local leftDrawn, rightDrawn = drawn[leftState.node] or 0, drawn[rightState.node] or 0
+		if leftDrawn ~= rightDrawn then
+			return leftDrawn > rightDrawn
+		end
 		return leftState.order > rightState.order
 	end)
 	return ordered
 end
+
+-- ccui widgets (cocos2d-x ui::Widget): a touch-enabled widget holds a swallowing scene-graph listener; a touch inside it while it
+-- is enabled and shown fires its touch callback (began, then ended) and then its click callback.
+local function shownInTree(node)
+	while node do
+		if stateOf(node).visible == false then
+			return false
+		end
+		node = stateOf(node).parent
+	end
+	return true
+end
+local function widgetHit(widget, touch)
+	if stateOf(widget).enabled == false or not shownInTree(widget) then
+		return false
+	end
+	local x, y = worldOrigin(widget)
+	local size = nodeMethods.getContentSize(widget)
+	local point = touch:getLocation()
+	return point.x >= x and point.x <= x + size.width and point.y >= y and point.y <= y + size.height
+end
+local function widgetEvent(widget, kind)
+	local callback = stateOf(widget).touchCallback
+	if callback then
+		invoke(callback, widget, ccui.TouchEventType[kind])
+	end
+end
+widgetMethods.setTouchEnabled = function(widget, enabled)
+	local state = stateOf(widget)
+	state.touchEnabled = enabled == true
+	if state.touchEnabled and not state.widgetListener then
+		local listener = listenerProxy("cc.EventListenerTouchOneByOne", {touch = true, swallow = true})
+		stateOf(listener).handlers[cc.Handler.EVENT_TOUCH_BEGAN] = function(touch)
+			if not widgetHit(widget, touch) then
+				return false
+			end
+			widgetEvent(widget, "began")
+			return true
+		end
+		stateOf(listener).handlers[cc.Handler.EVENT_TOUCH_ENDED] = function()
+			widgetEvent(widget, "ended")
+			if state.clickCallback then
+				invoke(state.clickCallback, widget)
+			end
+		end
+		state.widgetListener = listener
+		addListener(listener, 0, widget)
+	elseif not state.touchEnabled and state.widgetListener then
+		dispatcher.removeEventListener(dispatcher, state.widgetListener)
+		state.widgetListener = nil
+	end
+end
+widgetMethods.isTouchEnabled = function(widget) return stateOf(widget).touchEnabled == true end
+widgetMethods.setEnabled = function(widget, enabled) stateOf(widget).enabled = enabled end
+widgetMethods.isEnabled = function(widget) return stateOf(widget).enabled ~= false end
+widgetMethods.addTouchEventListener = function(widget, callback) stateOf(widget).touchCallback = callback end
+widgetMethods.addClickEventListener = function(widget, callback) stateOf(widget).clickCallback = callback end
 -- tap is a harness input: one touch began and ended at (x, y) in design coordinates.
 function __vc.tap(x, y)
 	local touch = touchAt(x, y)
@@ -898,7 +1003,14 @@ rawset(tolua, "isnull", function(node)
 	return state ~= nil and state.destroyed == true
 end)
 rawset(tolua, "cast", function(node) return node end)
-rawset(tolua, "getcfunction", function(node, name) return nodeMethods[name] or node[name] end)
+-- The native method is what stock Lua overrides (WidgetEx setTouchEnabled) call through; a widget's comes from the widget model.
+rawset(tolua, "getcfunction", function(node, name)
+	local isWidget = (names[node] or ""):sub(1, 5) == "ccui."
+	if isWidget and widgetMethods[name] then
+		return widgetMethods[name]
+	end
+	return nodeMethods[name] or node[name]
+end)
 rawset(tolua, "type", function(node) return type(node) end)
 local peers = setmetatable({}, {__mode = "k"})
 rawset(tolua, "setpeer", function(node, peer) peers[node] = peer end)
@@ -997,6 +1109,9 @@ local function buildLayout(description)
 	local state = stateOf(node)
 	state.name, state.tag, state.text = description.name, description.tag, description.text
 	state.visible = description.visible ~= false
+	if description.touch and names[node]:sub(1, 5) == "ccui." then
+		widgetMethods.setTouchEnabled(node, true)
+	end
 	if description.width then
 		state.size = {width = description.width, height = description.height}
 	end
