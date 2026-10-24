@@ -64,33 +64,14 @@ func spiritGrant(t *testing.T, p *pg.Pool, a identity.ActorContext, rev string, 
 func spiritFixture(t *testing.T, p *pg.Pool) (identity.ActorContext, string, app.Service) {
 	t.Helper()
 	rev := installed(t, p)
-	a := actor(t, p)
+	a := bornActor(t, p)
 	s := spiritService(p, p)
 	for id := int64(1); id <= 3; id++ {
-		skillHero(t, p, a, rev, 10001000+id, id)
+		bornHero(t, p, a, rev, 10001000+id, id)
 	}
-	tr, e := p.Begin(ctx, tx.Options{})
-	if e != nil {
-		t.Fatal(e)
-	}
-	defer tr.Rollback(ctx)
-	at := time.Now().Add(-time.Hour)
-	owner := spiritstore.Store{}
-	if e = owner.EnsureRootTx(ctx, tr, a.PlayerID, rev, at); e != nil {
-		t.Fatal(e)
-	}
-	for id := int64(1); id <= 3; id++ {
-		if e = owner.EnsureHeroTx(ctx, tr, a.PlayerID, id, at); e != nil {
-			t.Fatal(e)
-		}
-	}
-	if e = tr.Commit(ctx); e != nil {
-		t.Fatal(e)
-	}
-	// Explicit initial fixture rows only; eligibility is then produced by actual I5 EXP Grant.
+	// Level 1 with no EXP and no energy: eligibility is then produced by actual I5 EXP Grant.
 	exec(t, p, `UPDATE player_progression SET level=1,exp=0 WHERE player_id=$1`, int64(a.PlayerID))
-	exec(t, p, `INSERT INTO player_function_state_owners(player_id,state_version,updated_at)VALUES($1,1,clock_timestamp()-interval '1 hour')`, int64(a.PlayerID))
-	exec(t, p, `INSERT INTO player_temporal_resources(player_id,resource_key,stored_amount,regen_anchor_at,state_version,policy_version,content_revision,updated_at)VALUES($1,'energy',0,clock_timestamp()-interval '1 hour',1,$2,$2,clock_timestamp()-interval '1 hour')`, int64(a.PlayerID), rev)
+	exec(t, p, `UPDATE player_temporal_resources SET stored_amount=0 WHERE player_id=$1 AND resource_key='energy'`, int64(a.PlayerID))
 	rule, e := (contentstore.Store{}).ResolveProgressionPolicyTx(ctx, p, rev)
 	if e != nil {
 		t.Fatal(e)

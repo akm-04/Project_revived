@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	pg "gxb.local/backend/v2/internal/adapters/postgres"
+	"gxb.local/backend/v2/internal/adapters/postgres/characterstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/contentstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/dormstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/i5store"
@@ -16,6 +17,7 @@ import (
 	"gxb.local/backend/v2/internal/domain/economy"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/clock"
+	"gxb.local/backend/v2/internal/foundation/ids"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/policy"
 	"gxb.local/backend/v2/internal/foundation/tx"
@@ -56,12 +58,8 @@ func TestDormNativeStockRetentionAndReferencePorts(t *testing.T) {
 	owner := dormstore.Store{Queryer: p}
 	usage := appdorm.FurnitureUsage{Owner: owner, Content: cs}
 	values := i5store.Store{Queryer: p, StackUsage: usage}
-	var fixturePID, fixturePartner int64
-	if e = p.QueryRow(ctx, `SELECT h.player_id,h.partner_id FROM player_heroes h JOIN player_economy_owners e USING(player_id) ORDER BY h.player_id,h.partner_id LIMIT 1`).Scan(&fixturePID, &fixturePartner); e != nil {
-		t.Fatal("accepted49 canonical prerequisite fixture required", e)
-	}
-	pid := identity.PlayerID(fixturePID)
-	ref := character.HeroRef{PlayerID: pid, PartnerID: fixturePartner}
+	ref := ownPlayer(t, ctx, p, bundle.RevisionID())
+	pid := ref.PlayerID
 	tr, e := p.Begin(ctx, tx.Options{Isolation: tx.Serializable})
 	if e != nil {
 		t.Fatal(e)
@@ -201,11 +199,7 @@ func TestDormNativeOldSnapshotStockReservation(t *testing.T) {
 	cs := contentstore.Store{Queryer: p}
 	owner := dormstore.Store{Queryer: p}
 	values := i5store.Store{Queryer: p, StackUsage: appdorm.FurnitureUsage{Owner: owner, Content: cs}}
-	var rawPID int64
-	if e = p.QueryRow(ctx, `SELECT player_id FROM player_economy_owners ORDER BY player_id LIMIT 1`).Scan(&rawPID); e != nil {
-		t.Fatal(e)
-	}
-	pid := identity.PlayerID(rawPID)
+	pid := ownPlayer(t, ctx, p, bundle.RevisionID()).PlayerID
 	setup, e := p.Begin(ctx, tx.Options{Isolation: tx.Serializable})
 	if e != nil {
 		t.Fatal(e)
@@ -358,4 +352,46 @@ func TestDormNativeOldSnapshotStockReservation(t *testing.T) {
 	if e != nil || minimum != 1 {
 		t.Fatal(minimum, e)
 	}
+}
+
+// ownPlayer is a committed player root of its own with an economy owner and one Hero, before any Dorm row exists, so the
+// tests neither depend on nor clean up another fixture's player.
+func ownPlayer(t *testing.T, ctx context.Context, p *pg.Pool, revision string) character.HeroRef {
+	t.Helper()
+	account, e := ids.NewUUID()
+	if e != nil {
+		t.Fatal(e)
+	}
+	tr, e := p.Begin(ctx, tx.Options{Isolation: tx.ReadCommitted})
+	if e != nil {
+		t.Fatal(e)
+	}
+	defer tr.Rollback(ctx)
+	var pid int64
+	if e = tr.QueryRow(ctx, `UPDATE logical_servers SET next_player_id=next_player_id+1 WHERE logical_server_id=1 RETURNING next_player_id-1`).Scan(&pid); e != nil {
+		t.Fatal(e)
+	}
+	rows := []struct {
+		statement string
+		arguments []any
+	}{
+		{`INSERT INTO accounts(account_id,account_uid,status,created_at)VALUES($1,$2,'ACTIVE',clock_timestamp())`, []any{account.String(), account.String()}},
+		{`INSERT INTO players(player_id,account_id,logical_server_id,created_at,bootstrap_profile_version)VALUES($1,$2,1,clock_timestamp(),'dorm-native')`, []any{pid, account.String()}},
+		{`INSERT INTO player_economy_owners(player_id,state_version,created_at)VALUES($1,1,clock_timestamp())`, []any{pid}},
+		{`INSERT INTO player_hero_roots(player_id,next_partner_id,sort_type,state_version,created_at,updated_at)VALUES($1,2,0,1,clock_timestamp(),clock_timestamp())`, []any{pid}},
+	}
+	for _, row := range rows {
+		if _, e = tr.Exec(ctx, row.statement, row.arguments...); e != nil {
+			t.Fatal(e)
+		}
+	}
+	at := time.Now().UTC().Add(-time.Hour)
+	h := character.Hero{PlayerID: identity.PlayerID(pid), PartnerID: 1, TableID: 10001001, OriginTableID: 10001001, Star: 5, Level: 1, Color: 1, CreationContentRevision: revision, RawSkills: character.NewHeroRawSkillSeed(), IllusionSkinID: character.DefaultIllusionSkinID, StateVersion: 1, CreatedAt: at, UpdatedAt: at}
+	if e = (characterstore.Store{}).InsertHeroTx(ctx, tr, h); e != nil {
+		t.Fatal(e)
+	}
+	if e = tr.Commit(ctx); e != nil {
+		t.Fatal(e)
+	}
+	return h.Ref()
 }

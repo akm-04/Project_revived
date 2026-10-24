@@ -5,10 +5,13 @@ package playerdisplay_test
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"gxb.local/backend/v2/internal/adapters/blobstore"
 	pg "gxb.local/backend/v2/internal/adapters/postgres"
+	"gxb.local/backend/v2/internal/adapters/postgres/characterbirth"
 	"gxb.local/backend/v2/internal/adapters/postgres/characterstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/contentstore"
+	"gxb.local/backend/v2/internal/adapters/postgres/nativebirth"
 	ca "gxb.local/backend/v2/internal/application/characterasset"
 	"gxb.local/backend/v2/internal/application/publicstats"
 	"gxb.local/backend/v2/internal/domain/character"
@@ -35,11 +38,20 @@ func TestI7C4CRankingActualAPIReopenRestartAndDatabaseRestore(t *testing.T) {
 	p := pool(t)
 	rev := installed(t, p)
 	server := rankingServer(t, p)
-	a := rankingActor(t, p, server, true)
-	b := rankingActor(t, p, server, true)
-	// Genuine Character acquisition, with the diagnostic capacity authorizer
-	// disclosed by rankingSummon; this is not production acquisition proof.
-	rankingSummon(t, p, a, rev, 10001001)
+	a := bornRankingActor(t, p, server)
+	b := bornRankingActor(t, p, server)
+	// Genuine Character acquisition with the production fresh facets, under the diagnostic capacity authorizer disclosed by
+	// rankingSummon; this is not production acquisition proof.
+	normal, e := (contentstore.Store{Queryer: p}).HeroNormalSummonTx(ctx, p, rev, 10001001)
+	if e != nil {
+		t.Fatal(e)
+	}
+	exec(t, p, `INSERT INTO player_item_stacks(player_id,item_id,quantity,state_version,acquired_at,updated_at)VALUES($1,$2,10000,1,clock_timestamp(),clock_timestamp())`, int64(a.PlayerID), normal.Template.FragmentItemID)
+	heroes := privateHeroService(p)
+	heroes.FreshFacets = characterbirth.FreshHeroFacets()
+	if _, e = heroes.SummonNormal(ctx, a, 10001001, normal.Template.FragmentItemID, normal.FragmentCount, op()); e != nil {
+		t.Fatal(e)
+	}
 	bearer := displayToken(t, p, a)
 	original := op()
 	first, e := rankingService(p, p).ReadBoard(ctx, d.GirlsBoard, a, original)
@@ -162,8 +174,8 @@ func TestI7C4CRankingActualAPIReopenRestartAndDatabaseRestore(t *testing.T) {
 		t.Fatal("genuine ranking title selection", code, out)
 	}
 	code, out = post(2490, map[string]any{})
-	if code == 200 {
-		t.Fatal("partial Girls owner opened whole family picker", out)
+	if code != 200 || !strings.Contains(fmt.Sprint(out["title_list"]), "title_id:100059") {
+		t.Fatal("born ranking player title picker", code, out)
 	}
 	rankingSummon(t, p, a, rev, 10001002)
 	board(2) // A new menu request observes the new canonical count.
@@ -278,14 +290,14 @@ func TestI7C4CRankingActualAPIReopenRestartAndDatabaseRestore(t *testing.T) {
 	if e = restored.QueryRow(ctx, `SELECT player_id FROM players WHERE account_id=$1`, newAccount.String()).Scan(&born); e != nil {
 		t.Fatal(e)
 	}
-	if e = restored.QueryRow(ctx, `SELECT count(*) FROM ranking_girls_birth_tracking WHERE player_id=$1 AND logical_server_id=$2`, born, int64(server)).Scan(&n); e != nil || n != 1 {
+	if e = restored.QueryRow(ctx, `SELECT count(*) FROM ranking_girls_birth_tracking WHERE player_id=$1 AND logical_server_id=$2 AND policy_id=$3`, born, int64(server), d.GirlsPolicy).Scan(&n); e != nil || n != 1 {
 		t.Fatal("missing real fresh tracking", n, e)
 	}
 	code, out = post(1, map[string]any{"sid": sidRaw, "login_token": loginRaw})
 	if code != 200 {
 		t.Fatal("existing login", code, out)
 	}
-	if e = restored.QueryRow(ctx, `SELECT count(*) FROM ranking_girls_birth_tracking WHERE player_id=$1`, born).Scan(&n); e != nil || n != 1 {
+	if e = restored.QueryRow(ctx, `SELECT count(*) FROM ranking_girls_birth_tracking WHERE player_id=$1 AND policy_id=$2`, born, d.GirlsPolicy).Scan(&n); e != nil || n != 1 {
 		t.Fatal("login duplicated birth marker", n, e)
 	}
 
@@ -465,5 +477,24 @@ func TestI7C4CRankingActualAPIReopenRestartAndDatabaseRestore(t *testing.T) {
 		}
 	}
 	t.Log("GENUINE_PRODUCTION_NORMAL59_NO_DIAGNOSTIC_CAPACITY canonical source cost+private policy receipt+all eight fresh facets+currentGirls Ranking+genuine currentforce after gear+restart+relocated restore;64/305 remain gated", born)
-	t.Log("ACTUAL_API_301_SERVER37_REOPEN_RESTART_RELOCATED_PG_RESTORE immutable snapshot receipt/weekly award/recipient provenance preserved; initial legacy participants use diagnostic capacity; new fresh Normal59 is real production policy; whole title picker remains gated", before)
+	t.Log("ACTUAL_API_301_SERVER37_REOPEN_RESTART_RELOCATED_PG_RESTORE immutable snapshot receipt/weekly award/recipient provenance preserved; initial legacy participants use diagnostic capacity; new fresh Normal59 is real production policy; born player title picker opens (D59)", before)
+}
+
+// bornRankingActor is rankingActor's Ranker written by the production birth chain, as the actual API roster reads it.
+func bornRankingActor(t *testing.T, p *pg.Pool, server identity.LogicalServerID) identity.ActorContext {
+	t.Helper()
+	a, account := playerRoot(t, p, server)
+	if e := nativebirth.Persist(ctx, p, account, server, a.PlayerID); e != nil {
+		t.Fatalf("fixture birth: %v", e)
+	}
+	for _, statement := range []string{
+		`UPDATE player_profiles SET display_name='Ranker' WHERE player_id=$1`,
+		`UPDATE player_directory_profiles SET name='Ranker',lev=100 WHERE player_id=$1`,
+		`UPDATE player_progression SET level=100,exp=0 WHERE player_id=$1`,
+		`INSERT INTO player_currency_balances(player_id,resource_key,amount,state_version,updated_at)VALUES($1,'mana',100000000,1,clock_timestamp())
+			ON CONFLICT(player_id,resource_key) DO UPDATE SET amount=excluded.amount`,
+	} {
+		exec(t, p, statement, int64(a.PlayerID))
+	}
+	return a
 }

@@ -280,7 +280,6 @@ func Test6A_G35_G36CatalogAndEntitlementSameTx(t *testing.T) {
 	}
 	item = definition.ItemID
 	transaction.Rollback(ctx)
-	f.sql(`INSERT INTO player_economy_owners(player_id,state_version,created_at)VALUES(100001,1,$1)`, f.at)
 	f.sql(`INSERT INTO player_item_stacks(player_id,item_id,quantity,state_version,acquired_at,updated_at)VALUES(100001,$1,1,3,$2,$2)`, item, f.at)
 	stacks := f.text(`SELECT to_jsonb(t)::text FROM player_item_stacks t WHERE player_id=100001 AND item_id=$1`, item)
 	catalog, e := builtin.Load()

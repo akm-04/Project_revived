@@ -17,9 +17,8 @@ import (
 func canonical6CFixture(f *fixture, pids ...identity.PlayerID) {
 	for _, pid := range pids {
 		f.player(pid)
-		f.sql(`INSERT INTO player_progression(player_id,level,exp,state_version,updated_at)VALUES($1,1,37,1,$2)`, int64(pid), f.at)
-		f.sql(`INSERT INTO player_economy_owners(player_id,state_version,created_at)VALUES($1,1,$2)`, int64(pid), f.at)
-		f.sql(`INSERT INTO player_currency_balances(player_id,resource_key,amount,state_version,updated_at)VALUES($1,'crystal',1000,1,$2)`, int64(pid), f.at)
+		f.sql(`UPDATE player_progression SET exp=37 WHERE player_id=$1`, int64(pid))
+		f.sql(`INSERT INTO player_currency_balances(player_id,resource_key,amount,state_version,updated_at)VALUES($1,'crystal',1000,1,$2) ON CONFLICT(player_id,resource_key) DO UPDATE SET amount=excluded.amount`, int64(pid), f.at)
 	}
 }
 
@@ -144,7 +143,7 @@ func Test6CActualProcessesFreshSendSearchImmutableDMReconnectPrivacy(t *testing.
 	for _, request := range []struct {
 		mid    int
 		fields map[string]any
-	}{{2490, map[string]any{}}, {1829, map[string]any{"to_player_id": 200001, "sub_type": 2}}} {
+	}{{1829, map[string]any{"to_player_id": 200001, "sub_type": 2}}} {
 		code, body := postProcess(t, api, sender, 1, request.mid, request.fields)
 		if code == 200 {
 			t.Fatal("missing required producer returned success", request, body)

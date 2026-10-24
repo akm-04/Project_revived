@@ -39,11 +39,24 @@ func libraryService(p *pg.Pool, db tx.Beginner) app.Service {
 	s.Roster = characterstore.HeroBootstrapProjection{Content: content, Library: s}
 	return s
 }
+
+// libraryFixture keeps a legacy character whose library and later owners are backfilled, not born.
 func libraryFixture(t *testing.T, p *pg.Pool, married bool) (identity.ActorContext, string) {
 	t.Helper()
 	rev := installed(t, p)
 	a := actor(t, p)
-	h := skillHero(t, p, a, rev, 10001001, 1)
+	libraryHero(t, p, a, skillHero(t, p, a, rev, 10001001, 1), married, true)
+	return a, rev
+}
+func bornLibraryFixture(t *testing.T, p *pg.Pool, married bool) (identity.ActorContext, string) {
+	t.Helper()
+	rev := installed(t, p)
+	a := bornActor(t, p)
+	libraryHero(t, p, a, bornHero(t, p, a, rev, 10001001, 1), married, false)
+	return a, rev
+}
+func libraryHero(t *testing.T, p *pg.Pool, a identity.ActorContext, h character.Hero, married, legacy bool) {
+	t.Helper()
 	tr, e := p.Begin(ctx, tx.Options{})
 	if e != nil {
 		t.Fatal(e)
@@ -51,11 +64,13 @@ func libraryFixture(t *testing.T, p *pg.Pool, married bool) (identity.ActorConte
 	defer tr.Rollback(ctx)
 	s := librarystore.Store{}
 	at := time.Now().Add(-time.Minute).UTC()
-	if e = s.EnsurePlayerRootTx(ctx, tr, a.PlayerID, at); e != nil {
-		t.Fatal(e)
-	}
-	if _, e = s.BackfillMissingHeroTx(ctx, tr, h.Ref(), at); e != nil {
-		t.Fatal(e)
+	if legacy {
+		if e = s.EnsurePlayerRootTx(ctx, tr, a.PlayerID, at); e != nil {
+			t.Fatal(e)
+		}
+		if _, e = s.BackfillMissingHeroTx(ctx, tr, h.Ref(), at); e != nil {
+			t.Fatal(e)
+		}
 	}
 	if married {
 		f, e := s.LockHeroTx(ctx, tr, h.Ref())
@@ -78,7 +93,6 @@ func libraryFixture(t *testing.T, p *pg.Pool, married bool) (identity.ActorConte
 		skillBook(t, p, a, id)
 		exec(t, p, `UPDATE player_item_stacks SET quantity=100 WHERE player_id=$1 AND item_id=$2`, int64(a.PlayerID), id)
 	}
-	return a, rev
 }
 func libraryFacts(t *testing.T, p *pg.Pool, a identity.ActorContext) lib.HeroFacts {
 	t.Helper()

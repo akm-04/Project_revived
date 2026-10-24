@@ -6,11 +6,14 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/jackc/pgx/v5"
 
 	"gxb.local/backend/v2/internal/adapters/postgres/contentstore"
+	appi5 "gxb.local/backend/v2/internal/application/i5"
 	"gxb.local/backend/v2/internal/domain/identity"
+	"gxb.local/backend/v2/internal/domain/player"
 	"gxb.local/backend/v2/internal/foundation/ids"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
@@ -152,31 +155,40 @@ func Progress(context context.Context, databaseURL, accountID string, level int6
 	return summons, transaction.Commit(context)
 }
 
-// openFunctions writes the eligibility rows the production level-up writes for the level (i5 Grant: pure-level gates) and the
-// unlock rows stock SelfPlayer:isFuncOpen reads back through MID1 func_ids.
-// shortcut: production announces only Pet Function 38 (I8.5 finding F1), so these unlocks stand in for the announcement I8.5-6
-// adds at the level stock FunctionOpenTable reads; drop them once production announces.
+// openFunctions writes the eligibility and unlock rows the production level-ups to the level write (i5 LevelFunctionOpenings),
+// which stock SelfPlayer:isFuncOpen reads back through MID1 func_ids.
+// shortcut: production announces no composite gate (I8.5 finding F4), so kind 6/7 level gates (OneOnOne 16, Arena 37, 45) open
+// here at their stock level without eligibility; drop this once production announces them.
 func openFunctions(context context.Context, transaction pgx.Tx, content contentstore.Store, revision string, playerID, level int64) error {
 	policy, err := content.ResolveFunctionGatePolicyTx(context, queryer{transaction}, revision)
 	if err != nil {
 		return err
 	}
+	if level < 1 {
+		return nil
+	}
+	now := time.Now().UTC()
+	eligible, unlocks, err := appi5.LevelFunctionOpenings(policy, identity.PlayerID(playerID), level, now)
+	if err != nil {
+		return err
+	}
 	for _, gate := range policy.Gates {
 		openLevel, readable := stockOpenLevel(gate.RawOpenValue)
-		// Gates with an announcement capability (Pet Function 38 grants the starter egg) open only through production.
-		if !readable || openLevel > level || gate.AnnouncementCapability != "NONE" {
+		if gate.GateKind == "PURE_LEVEL" || !readable || openLevel > level || gate.AnnouncementCapability != "NONE" {
 			continue
 		}
-		key := "vc:provision:function:" + gate.SourceFactKey
-		if gate.GateKind == "PURE_LEVEL" {
-			if _, err := transaction.Exec(context, `INSERT INTO player_function_eligibility(player_id,function_id,content_revision,source_fact_key,eligible_at)
-				VALUES($1,$2,$3,$4,clock_timestamp()) ON CONFLICT(player_id,function_id) DO NOTHING`, playerID, gate.FunctionID, revision, key); err != nil {
-				return fmt.Errorf("function %d eligibility: %w", gate.FunctionID, err)
-			}
+		unlocks = append(unlocks, player.FunctionUnlock{PlayerID: identity.PlayerID(playerID), FunctionID: gate.FunctionID, OpenedAt: now, SourceFactKey: "vc:provision:function:" + gate.SourceFactKey, StateVersion: 1})
+	}
+	for _, e := range eligible {
+		if _, err := transaction.Exec(context, `INSERT INTO player_function_eligibility(player_id,function_id,content_revision,source_fact_key,eligible_at)
+			VALUES($1,$2,$3,$4,$5) ON CONFLICT(player_id,function_id) DO NOTHING`, playerID, e.FunctionID, e.ContentRevision, e.SourceFactKey, e.EligibleAt); err != nil {
+			return fmt.Errorf("function %d eligibility: %w", e.FunctionID, err)
 		}
+	}
+	for _, u := range unlocks {
 		if _, err := transaction.Exec(context, `INSERT INTO player_function_unlocks(player_id,function_id,opened_at,source_fact_key,state_version)
-			VALUES($1,$2,clock_timestamp(),$3,1) ON CONFLICT(player_id,function_id) DO NOTHING`, playerID, gate.FunctionID, key); err != nil {
-			return fmt.Errorf("function %d unlock: %w", gate.FunctionID, err)
+			VALUES($1,$2,$3,$4,1) ON CONFLICT(player_id,function_id) DO NOTHING`, playerID, u.FunctionID, u.OpenedAt, u.SourceFactKey); err != nil {
+			return fmt.Errorf("function %d unlock: %w", u.FunctionID, err)
 		}
 	}
 	return nil

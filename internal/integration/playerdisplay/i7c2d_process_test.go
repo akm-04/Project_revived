@@ -7,11 +7,8 @@ import (
 	"compress/zlib"
 	"encoding/json"
 	"gxb.local/backend/v2/internal/adapters/blobstore"
-	"gxb.local/backend/v2/internal/adapters/postgres/dormstore"
-	"gxb.local/backend/v2/internal/adapters/postgres/librarystore"
 	app "gxb.local/backend/v2/internal/application/bookskill"
 	display "gxb.local/backend/v2/internal/application/playerdisplay"
-	"gxb.local/backend/v2/internal/foundation/tx"
 	"mime/multipart"
 	"net"
 	"net/http"
@@ -32,23 +29,7 @@ func TestI7C2DActualAPIBooksAndRestartRoster(t *testing.T) {
 	p := pool(t)
 	a, _, _ := bookFixture(t, p)
 	rev := installed(t, p)
-	h := skillHero(t, p, a, rev, 10001001, 1)
-	tr, e := p.Begin(ctx, tx.Options{})
-	if e != nil {
-		t.Fatal(e)
-	}
-	if e = (dormstore.Store{}).InitFreshHeroTx(ctx, tr, h.Ref(), time.Now().UTC().Add(-time.Hour)); e != nil {
-		t.Fatal(e)
-	}
-	if e = (librarystore.Store{}).EnsurePlayerRootTx(ctx, tr, a.PlayerID, time.Now().UTC().Add(-time.Hour)); e != nil {
-		t.Fatal(e)
-	}
-	if _, e = (librarystore.Store{}).BackfillMissingHeroTx(ctx, tr, h.Ref(), time.Now().UTC().Add(-time.Hour)); e != nil {
-		t.Fatal(e)
-	}
-	if e = tr.Commit(ctx); e != nil {
-		t.Fatal(e)
-	}
+	bornHero(t, p, a, rev, 10001001, 1)
 	bearer := displayToken(t, p, a)
 	listener, e := net.Listen("tcp", "127.0.0.1:0")
 	if e != nil {

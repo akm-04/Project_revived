@@ -23,15 +23,15 @@ type PlayerDisplayDispatcher struct {
 }
 
 func (d PlayerDisplayDispatcher) Dispatch(c context.Context, r httpedge.DispatchRequest) httpedge.Response {
-	fail := func(status int) httpedge.Response {
-		return httpedge.Response{HTTPStatus: status, Body: map[string]any{"error_code": int64(1), "error": "player_display_request_failed"}}
+	fail := func(status int, cause error) httpedge.Response {
+		return httpedge.Response{HTTPStatus: status, Body: map[string]any{"error_code": int64(1), "error": "player_display_request_failed"}, Cause: cause}
 	}
 	if d.Authority == nil || d.Service == nil || r.Envelope.Claims.Token == "" {
-		return fail(http.StatusUnauthorized)
+		return fail(http.StatusUnauthorized, nil)
 	}
 	a, e := d.Authority.ResolveGameplayBearer(c, r.Envelope.Claims.Token, r.Envelope.ReceivedAt)
 	if e != nil || r.Envelope.Claims.Region != int64(a.LogicalServerID) {
-		return fail(http.StatusForbidden)
+		return fail(http.StatusForbidden, e)
 	}
 	q := app.Command{}
 	fields := []string{}
@@ -62,16 +62,16 @@ func (d PlayerDisplayDispatcher) Dispatch(c context.Context, r httpedge.Dispatch
 	case 2493:
 		read = "bubbles"
 	default:
-		return fail(http.StatusNotImplemented)
+		return fail(http.StatusNotImplemented, nil)
 	}
 	for _, key := range []string{"player_id", "to_player_id", "target_player_id"} {
 		if _, yes := r.Envelope.Params[key]; yes {
-			return fail(http.StatusBadRequest)
+			return fail(http.StatusBadRequest, nil)
 		}
 	}
 	for _, key := range fields {
 		if _, yes := r.Envelope.Params[key]; !yes {
-			return fail(http.StatusBadRequest)
+			return fail(http.StatusBadRequest, nil)
 		}
 	}
 	n := func(k string) (int64, error) {
@@ -88,7 +88,7 @@ func (d PlayerDisplayDispatcher) Dispatch(c context.Context, r httpedge.Dispatch
 	if read != "" {
 		out, e := d.Service.Read(c, a, read, r.Envelope.Operation)
 		if e != nil {
-			return fail(http.StatusServiceUnavailable)
+			return fail(http.StatusServiceUnavailable, e)
 		}
 		return httpedge.Response{HTTPStatus: http.StatusOK, Body: out}
 	}
@@ -96,7 +96,7 @@ func (d PlayerDisplayDispatcher) Dispatch(c context.Context, r httpedge.Dispatch
 	case "rename":
 		v, ok := r.Envelope.Params["player_name"].(string)
 		if !ok {
-			return fail(http.StatusBadRequest)
+			return fail(http.StatusBadRequest, nil)
 		}
 		q.Name = v
 	case "avatar":
@@ -120,20 +120,20 @@ func (d PlayerDisplayDispatcher) Dispatch(c context.Context, r httpedge.Dispatch
 		q.ID, e = n("bubble_id")
 	}
 	if e != nil || q.Validate() != nil {
-		return fail(http.StatusBadRequest)
+		return fail(http.StatusBadRequest, nil)
 	}
 	out, e := d.Service.Execute(c, a, q, r.Envelope.Operation)
 	if e != nil {
 		if errors.Is(e, app.ErrRequest) {
-			return fail(http.StatusBadRequest)
+			return fail(http.StatusBadRequest, e)
 		}
 		if errors.Is(e, app.ErrUnavailable) || errors.Is(e, app.ErrConflict) {
-			return fail(http.StatusConflict)
+			return fail(http.StatusConflict, e)
 		}
-		return fail(http.StatusServiceUnavailable)
+		return fail(http.StatusServiceUnavailable, e)
 	}
 	if out.Actor != a || out.Command != q || out.Wire == nil {
-		return fail(http.StatusServiceUnavailable)
+		return fail(http.StatusServiceUnavailable, nil)
 	}
 	return httpedge.Response{HTTPStatus: http.StatusOK, Body: out.Wire}
 }

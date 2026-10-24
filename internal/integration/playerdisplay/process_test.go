@@ -76,7 +76,7 @@ func TestDisplayActualAPIAndRelocatedDatabaseRestore(t *testing.T) {
 	}
 	p := pool(t)
 	installed(t, p)
-	a := actor(t, p)
+	a := bornActor(t, p)
 	bearer := displayToken(t, p, a)
 	s := service(p, p)
 	original := op()
@@ -85,7 +85,7 @@ func TestDisplayActualAPIAndRelocatedDatabaseRestore(t *testing.T) {
 		t.Fatal(e)
 	}
 	// Preserve recipient and unresolved admission as independent durable state.
-	b := actor(t, p)
+	b := bornActor(t, p)
 	broken := service(p, p)
 	broken.Receipts = failReceipt{broken.Receipts}
 	if _, e := broken.Execute(ctx, b, purchase, op()); e == nil {
@@ -158,7 +158,7 @@ func TestDisplayActualAPIAndRelocatedDatabaseRestore(t *testing.T) {
 		mid    int
 		fields map[string]any
 		status int
-	}{{119, map[string]any{}, 200}, {656, map[string]any{"id": 120001007}, 200}, {23, map[string]any{"player_name": "ProcessName"}, 200}, {98, map[string]any{"table_id": 110001002, "avatar_id": 10002004, "avatar_type": 1}, 200}, {100, map[string]any{"avatar_frame_id": 120001001}, 200}, {2492, map[string]any{"title_id": 0, "unique_id": 0}, 200}, {2494, map[string]any{"bubble_id": 10001}, 200}, {2490, map[string]any{}, 503}, {2493, map[string]any{}, 503}, {98, map[string]any{"table_id": 110001002, "avatar_id": 110001002, "avatar_type": 1}, 400}, {23, map[string]any{"player_name": "Forged", "player_id": int64(a.PlayerID)}, 400}} {
+	}{{119, map[string]any{}, 200}, {656, map[string]any{"id": 120001007}, 200}, {23, map[string]any{"player_name": "ProcessName"}, 200}, {98, map[string]any{"table_id": 110001002, "avatar_id": 10002004, "avatar_type": 1}, 200}, {100, map[string]any{"avatar_frame_id": 120001001}, 200}, {2492, map[string]any{"title_id": 0, "unique_id": 0}, 200}, {2494, map[string]any{"bubble_id": 10001}, 200}, {2490, map[string]any{}, 200}, {2493, map[string]any{}, 200}, {98, map[string]any{"table_id": 110001002, "avatar_id": 110001002, "avatar_type": 1}, 400}, {23, map[string]any{"player_name": "Forged", "player_id": int64(a.PlayerID)}, 400}} {
 		code, out := post(test.mid, test.fields)
 		if code != test.status {
 			t.Fatal("source MID", test.mid, code, out)

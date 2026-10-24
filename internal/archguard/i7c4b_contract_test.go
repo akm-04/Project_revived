@@ -11,8 +11,12 @@ func TestI7C4BProductionOwnerAndProducerWiring(t *testing.T) {
 	if e != nil {
 		t.Fatal(e)
 	}
-	s := string(b)
-	for _, v := range []string{"librarySvc.Achievements = appachievement.Service", "achievementstore.BootstrapContributor{Revision: dormBundle.RevisionID()}"} {
+	birth, e := os.ReadFile("../adapters/postgres/characterbirth/contributors.go")
+	if e != nil {
+		t.Fatal(e)
+	}
+	s := string(b) + string(birth)
+	for _, v := range []string{"librarySvc.Achievements = appachievement.Service", "characterbirth.Contributors(contentstore.Store{Queryer: pool}, privileges, dormBundle.RevisionID())", "achievementstore.BootstrapContributor{Revision: revision}"} {
 		if !strings.Contains(s, v) {
 			t.Fatal("missing production achievement wiring", v)
 		}

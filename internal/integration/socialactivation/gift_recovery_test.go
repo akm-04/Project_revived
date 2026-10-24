@@ -102,6 +102,7 @@ func Test7A_RecoverySeedCompare(t *testing.T) {
 		}
 		f.sql(`DELETE FROM gameplay_context_credentials WHERE context_id IN(SELECT context_id FROM gameplay_contexts WHERE player_id=500001)`)
 		f.sql(`DELETE FROM gameplay_contexts WHERE player_id=500001`)
+		clearBirthOwners(f, f.p.Raw(), 500001)
 		f.sql(`DELETE FROM player_directory_profiles WHERE player_id=500001`)
 		f.sql(`DELETE FROM players WHERE player_id=500001`)
 		// Synthetic future immutable gift revision: exact same vector/catalog, no

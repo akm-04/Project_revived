@@ -26,10 +26,10 @@ import (
 	"gxb.local/backend/v2/internal/application/socialinbox"
 	"gxb.local/backend/v2/internal/application/socialrelation"
 	"gxb.local/backend/v2/internal/content/guildpolicy"
-	"gxb.local/backend/v2/internal/domain/guild"
 	gi "gxb.local/backend/v2/internal/domain/guildinvite"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/ids"
+	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/policy"
 	"gxb.local/backend/v2/internal/foundation/tx"
 	"os"
@@ -68,6 +68,13 @@ func TestWorkingP3MaterializeReplaySuppressionAndUnknownCommit(t *testing.T) {
 		t.Fatal(e)
 	}
 	defer p.Close()
+	materializeTargets(t, c, p, seedWorld(t, c, p))
+}
+
+// materializeTargets leaves the world's first Invite (A to actor 7) dismissed, the second (B to actor 7) active and the
+// third (A to actor 6) unmaterialized after an absent UNKNOWN; it returns the third Invite's operation.
+func materializeTargets(t *testing.T, c context.Context, p *postgres.Pool, w world) operation.Context {
+	t.Helper()
 	content := contentstore.Store{}
 	rev, e := content.ActiveRevision(c, p)
 	if e != nil {
@@ -100,18 +107,8 @@ func TestWorkingP3MaterializeReplaySuppressionAndUnknownCommit(t *testing.T) {
 	inbox := socialinboxstore.Store{}
 	rootService := socialrelation.RootService{Store: socialrelationstore.Store{}}
 	service := target.Service{Timed: core.Timed, Reads: tx.Runner{DB: p}, Sources: reader, Players: roots, Roots: rootService, Store: inbox, Receipts: kernel}
-	var leaderA, leaderB, recipient, other int64
-	if e = p.QueryRow(c, `SELECT player_id FROM guild_memberships m JOIN guilds g USING(guild_id) WHERE g.name='nativeA' AND role=1`).Scan(&leaderA); e != nil {
-		t.Fatal(e)
-	}
-	if e = p.QueryRow(c, `SELECT player_id FROM guild_memberships m JOIN guilds g USING(guild_id) WHERE g.name='nativeB' AND role=1`).Scan(&leaderB); e != nil {
-		t.Fatal(e)
-	}
-	if e = p.QueryRow(c, `SELECT max(player_id),max(player_id)-1 FROM players`).Scan(&recipient, &other); e != nil {
-		t.Fatal(e)
-	}
-	actorA := savedActor(t, c, p, identity.PlayerID(leaderA))
-	actorB := savedActor(t, c, p, identity.PlayerID(leaderB))
+	recipient, other := int64(w.actors[7].PlayerID), int64(w.actors[6].PlayerID)
+	actorA, actorB := w.actors[0], w.actors[4]
 	first := mustOp(t, refs)
 	if _, e = core.Invite(c, actorA, identity.PlayerID(recipient), first); e != nil {
 		t.Fatal(e)
@@ -211,18 +208,7 @@ func TestWorkingP3MaterializeReplaySuppressionAndUnknownCommit(t *testing.T) {
 	if e = corrupt.Rollback(c); e != nil {
 		t.Fatal(e)
 	}
-	var joined, retired string
-	if e = p.QueryRow(c, `SELECT s.source_id::text FROM guild_invite_projection_sources s JOIN guild_memberships m ON m.player_id=s.recipient_player_id WHERE s.source_id<>$1::uuid ORDER BY s.source_serial LIMIT 1`, first.ID.String()).Scan(&joined); e != nil {
-		t.Fatal(e)
-	}
-	if e = p.QueryRow(c, `SELECT s.source_id::text FROM guild_invite_projection_sources s JOIN guilds g ON g.guild_id=s.guild_id WHERE g.retired_at IS NOT NULL ORDER BY s.source_serial LIMIT 1`).Scan(&retired); e != nil {
-		t.Fatal(e)
-	}
-	for _, raw := range []string{joined, retired} {
-		id, e := ids.ParseUUID(raw)
-		if e != nil {
-			t.Fatal(e)
-		}
+	for _, id := range []ids.UUID{w.invite.ID, w.retiredInvite.ID} {
 		p, e := service.Materialize(c, id)
 		if e != nil || p.State != gi.Suppressed || p.NoticeID != 0 {
 			t.Fatal("canonical suppression invented Notice", p, e)
@@ -237,6 +223,7 @@ func TestWorkingP3MaterializeReplaySuppressionAndUnknownCommit(t *testing.T) {
 		t.Fatal("presentation joined Guild", ok, e)
 	}
 	t.Log("WORKING_TARGET_ONLY: creation/sameNotice/tombstone, actual positive and absent UNKNOWN, orphan rejection, JOIN/retirement suppression; no full frozen gate credit")
+	return third
 }
 
 func TestWorkingP3LifecycleInvalidationAndUnknownProof(t *testing.T) {
@@ -244,13 +231,15 @@ func TestWorkingP3LifecycleInvalidationAndUnknownProof(t *testing.T) {
 	if dsn == "" {
 		t.Skip("fresh clone of working materialized target fixture required")
 	}
-	c, cancel := context.WithTimeout(context.Background(), time.Minute)
+	c, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
 	defer cancel()
 	p, e := postgres.Open(c, dsn, postgres.PoolSettings{MaxConns: 8, MaxConnLifetime: time.Hour, MaxConnIdleTime: time.Minute, HealthCheckPeriod: time.Minute})
 	if e != nil {
 		t.Fatal(e)
 	}
 	defer p.Close()
+	w := seedWorld(t, c, p)
+	materializeTargets(t, c, p, w)
 	content := contentstore.Store{}
 	rev, e := content.ActiveRevision(c, p)
 	if e != nil {
@@ -284,16 +273,9 @@ func TestWorkingP3LifecycleInvalidationAndUnknownProof(t *testing.T) {
 	rootService := socialrelation.RootService{Store: socialrelationstore.Store{}}
 	service := target.Service{Timed: core.Timed, Reads: tx.Runner{DB: p}, Sources: reader, Players: roots, Roots: rootService, Store: inbox, Receipts: kernel}
 
-	var recipient, gid int64
-	if e = p.QueryRow(c, `SELECT max(player_id) FROM players`).Scan(&recipient); e != nil {
-		t.Fatal(e)
-	}
-	if e = p.QueryRow(c, `SELECT guild_id FROM guilds WHERE name='nativeA'`).Scan(&gid); e != nil {
-		t.Fatal(e)
-	}
-	actor := savedActor(t, c, p, identity.PlayerID(recipient))
+	recipient := int64(w.actors[7].PlayerID)
 	joinOp := mustOp(t, refs)
-	if _, e = core.AcceptInvite(c, actor, guild.ID(gid), joinOp); e != nil {
+	if _, e = core.AcceptInvite(c, w.actors[7], w.guildA, joinOp); e != nil {
 		t.Fatal(e)
 	}
 	marker, e := reader.ReadMarkerEvidenceTx(c, p, joinOp.ID)
@@ -357,12 +339,7 @@ func TestWorkingP3LifecycleInvalidationAndUnknownProof(t *testing.T) {
 	if consumed != 1 || noOp != 1 {
 		t.Fatal("active/dismissed lifecycle cleanup counts", consumed, noOp)
 	}
-	var retiredMarker, retiredSource string
-	if e = p.QueryRow(c, `SELECT m.marker_id::text,s.source_id::text FROM guild_invite_projection_markers m JOIN guild_invite_projection_sources s USING(guild_id) WHERE m.marker_kind='RETIRE' ORDER BY s.source_serial LIMIT 1`).Scan(&retiredMarker, &retiredSource); e != nil {
-		t.Fatal(e)
-	}
-	rm, _ := ids.ParseUUID(retiredMarker)
-	rs, _ := ids.ParseUUID(retiredSource)
+	rm, rs := w.retire.ID, w.retiredInvite.ID
 	uncertain := service
 	uncertain.Timed.Runner.DB = uncertainDB{Pool: p, Committed: false}
 	_, e = uncertain.Invalidate(c, rm, rs)

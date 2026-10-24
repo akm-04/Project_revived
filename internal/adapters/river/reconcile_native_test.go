@@ -11,9 +11,10 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres/kernelstore"
 	gen "gxb.local/backend/v2/internal/application/generation"
 	app "gxb.local/backend/v2/internal/application/guildbroadcast"
+	"gxb.local/backend/v2/internal/content/registry"
 	gb "gxb.local/backend/v2/internal/domain/guildbroadcast"
+	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/clock"
-	"gxb.local/backend/v2/internal/foundation/ids"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/policy"
 	"gxb.local/backend/v2/internal/foundation/receipt"
@@ -36,28 +37,39 @@ func TestRealPendingReconciliationBoundsAndBackwardsClock(t *testing.T) {
 		t.Fatal(e)
 	}
 	defer p.Close()
-	// Clone one previously source-owner-committed fixture's immutable roster and
-	// content under a new occurrence. This fixture deliberately has no job rows.
-	var priorText string
-	if e = p.QueryRow(c, `SELECT source_id::text FROM guild_broadcast_sources WHERE recipient_count=2 ORDER BY decision_at DESC LIMIT 1`).Scan(&priorText); e != nil {
-		t.Fatal(e)
-	}
-	priorID, e := ids.ParseUUID(priorText)
+	// A source of its own under a fresh occurrence, so no prior guild broadcast must exist. It deliberately has no job rows.
+	bundle, e := registry.LoadBuiltinBundle()
 	if e != nil {
 		t.Fatal(e)
 	}
-	source, ok, e := (guildbroadcaststore.Store{}).ReadSourceTx(c, p, priorID)
-	if e != nil || !ok {
-		t.Fatal(ok, e)
+	install, e := (operation.Factory{Clock: clock.System{}}).New(policy.Set{})
+	if e != nil {
+		t.Fatal(e)
+	}
+	if _, e = (registry.Service{Runner: tx.Runner{DB: p}, Repo: contentstore.Store{}, Fresh: p, Providers: registry.DefaultProviderSet()}).EnsureBuiltinInstalled(c, install, bundle); e != nil {
+		t.Fatal(e)
+	}
+	broadcast, e := (contentstore.Store{}).ReadBroadcastPolicy(c, p, bundle.RevisionID())
+	if e != nil {
+		t.Fatal(e)
 	}
 	now, e := (postgres.AuthoritativeTime{Queryer: p}).Now(c)
 	if e != nil {
 		t.Fatal(e)
 	}
-	source.Operation, e = (operation.Factory{Clock: clock.Fixed{T: now}}).New(source.Operation.Policies)
+	now = now.UTC()
+	refs, e := policy.NewSet(policy.Ref{Name: "content", Version: bundle.RevisionID()}, policy.Ref{Name: "guild-core", Version: broadcast.GuildCoreRevision}, policy.Ref{Name: "guild-broadcast", Version: gb.PolicyID})
 	if e != nil {
 		t.Fatal(e)
 	}
+	occurrence, e := (operation.Factory{Clock: clock.Fixed{T: now}}).New(refs)
+	if e != nil {
+		t.Fatal(e)
+	}
+	joined := now.Add(-time.Hour)
+	leader := identity.PlayerID(100001)
+	source := gb.Source{Operation: occurrence, GuildID: 1000001, Server: 1, LeaderID: leader, LeaderName: "leader", NameSnapshotChangedAt: joined, DecisionAt: now, ContentRevision: bundle.RevisionID(), GuildCoreRevision: broadcast.GuildCoreRevision, PolicyID: gb.PolicyID, Request: gb.Request{Title: "title", Content: "body"},
+		Recipients: []gb.Member{{PlayerID: leader, JoinEventID: 1, JoinedAt: joined}, {PlayerID: leader + 1, JoinEventID: 2, JoinedAt: joined}}}
 	due := now.Add(-2 * time.Minute)
 	x, e := p.Begin(c, tx.Options{Isolation: tx.Serializable})
 	if e != nil {

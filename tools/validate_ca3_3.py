@@ -77,7 +77,7 @@ if not args.cumulative:
         if bad in disp: errs.append(f'CA3-3 unexpectedly implements deferred {bad}')
     main=need('cmd/gxb-api/main_postgres.go','[]uint16{134, 780, 781, 782, 786, 787, 789, 791}')
 else:
-    main=need('cmd/gxb-api/main_postgres.go','petD := stockruntime.PetDispatcher','mustRegister(mid, petD)')
+    main=need('cmd/gxb-api/main_postgres.go','stockruntime.PetDispatcher{Authority: authority, Service: petSvc','mustRegister(mid, petD)')
     import re
     m=re.search(r'(?s)for _, mid := range \[\]uint16\{([^}]*)\} \{\s*mustRegister\(mid, petD\)', main)
     if not m: errs.append('cumulative Pet production registration block missing')

@@ -124,8 +124,8 @@ func TestI7C2AActualAPIChoiceAndRestartRoster(t *testing.T) {
 	}
 	p := pool(t)
 	rev := installed(t, p)
-	a := actor(t, p)
-	skillHero(t, p, a, rev, 11001144, 1)
+	a := bornActor(t, p)
+	bornHero(t, p, a, rev, 11001144, 1)
 	skillBook(t, p, a, 50000005)
 	bearer := displayToken(t, p, a)
 	listener, e := net.Listen("tcp", "127.0.0.1:0")

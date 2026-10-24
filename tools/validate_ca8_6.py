@@ -38,7 +38,8 @@ m=re.search(r'type PublicHeroCharacterFacet struct \{(.*?)\n\}',product,re.S)
 if m:
     block=m.group(1)
     skill_lines=[ln.strip() for ln in block.splitlines() if 'Skill' in ln or 'skill' in ln]
-    req(skill_lines==['HeroSkillsDisposition ProviderDisposition'],f'Hero facet gained skill values/fields: {skill_lines}')
+    # I7C-2A added the durable raw-skill observation; anything further still needs its own phase.
+    req(skill_lines==['RawSkills             *HeroRawSkillObservation','HeroSkillsDisposition ProviderDisposition'],f'Hero facet gained skill values/fields: {skill_lines}')
 else:
     req(False,'unable to parse PublicHeroCharacterFacet')
 
@@ -68,8 +69,8 @@ req('run python3 tools/validate_ca8_6.py' in check,'CA8-6 static validator not w
 # tools/check.sh explicitly marks disposable toolchain accommodations with
 # GXB_COMPAT_SCRATCH=1; do not misclassify that diagnostic copy as canonical.
 if os.environ.get('GXB_COMPAT_SCRATCH') != '1':
-    req(file_sha('go.mod')=='313c574368bb56dc570bc3427b65f59b059e492f909fe43b7d0291b5ced21dc4','canonical go.mod pin drift')
-    req(file_sha('go.sum')=='efbf6753542d66e2fefcb2ab5e2ade7c9d28f2206a1113d1eb9568f2cb75808d','canonical go.sum pin drift')
+    req(file_sha('go.mod')=='27868c2a7c77c82970cc5142dd9c54fc779794267ec1dd5b827db28a595a4dac','canonical go.mod pin drift')
+    req(file_sha('go.sum')=='d95362310e0526f9c47774f473f1919bb3900f43019328e339cd17fd2bc56c94','canonical go.sum pin drift')
 
 for d in [ROOT/'migrations', ROOT/'internal/adapters/stockruntime', ROOT/'internal/protocol']:
     if d.exists():

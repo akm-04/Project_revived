@@ -72,9 +72,9 @@ req('run python3 tools/check_ca8_7_source_oracle.py "${GXB_ORACLE_ROOT:-/mnt/dat
 req('run python3 tools/validate_ca8_7.py' in check,'CA8-7 static validator not wired into tools/check.sh')
 
 if os.environ.get('GXB_COMPAT_SCRATCH') != '1':
-    req(file_sha('go.mod')=='313c574368bb56dc570bc3427b65f59b059e492f909fe43b7d0291b5ced21dc4','canonical go.mod pin drift')
-    req(file_sha('go.sum')=='efbf6753542d66e2fefcb2ab5e2ade7c9d28f2206a1113d1eb9568f2cb75808d','canonical go.sum pin drift')
-    req(file_sha('.go-version')=='a8844fbc8c3eb51c26ed00aec4cd5a5a9d647f849c6ead07bcc83ed24c4a7718','canonical .go-version pin drift')
+    req(file_sha('go.mod')=='27868c2a7c77c82970cc5142dd9c54fc779794267ec1dd5b827db28a595a4dac','canonical go.mod pin drift')
+    req(file_sha('go.sum')=='d95362310e0526f9c47774f473f1919bb3900f43019328e339cd17fd2bc56c94','canonical go.sum pin drift')
+    req(file_sha('.go-version')=='55a45ba2851dc159876cb8854f80bf67b9eae781e67ce179708ea2e4f990fcd8','canonical .go-version pin drift')
 
 for d in [ROOT/'migrations', ROOT/'internal/adapters/stockruntime', ROOT/'internal/protocol']:
     if d.exists():

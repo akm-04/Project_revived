@@ -1,5 +1,5 @@
 {
-  "highest_migration": "00075_i8_6c_attempt_members.sql",
+  "highest_migration": "00078_i8_5_6_level_function_announcement.sql",
   "migrations": {
     "00001_kernel_receipts.sql": "fab5b35f4ca5eee53c62b0b924ec448327e1aa31205015c22e24ee0f2b710fd8",
     "00002_identity_logicalserver_bootstrap.sql": "adff86d27dd1c02e4da0dec6b1aa21f33aaafd4d410849abc76bfeec58a5cd5f",
@@ -75,9 +75,12 @@
     "00072_i7c4fc_skins_board.sql": "896ee0a4540baa9652d037d6942f91d9ededec7a8d269c205b1c0eca37c634e2",
     "00073_i8_4_combat_attempt_kinds.sql": "2b81f55f3f61a5cc8e61b5a0b04e2b28b5754855fe893aa0d754bffb3268f001",
     "00074_i8_5d_conquer_attempt_retire.sql": "bdeba1a321c85de47c7adae48e94cfcf957802e0133bbc86a06941a72ec5c57d",
-    "00075_i8_6c_attempt_members.sql": "57a2906b3f4ee2e50f5a18fdf599c560454735c831b0bb45e31fd4e473025c88"
+    "00075_i8_6c_attempt_members.sql": "57a2906b3f4ee2e50f5a18fdf599c560454735c831b0bb45e31fd4e473025c88",
+    "00076_i8_5_3_client_observability.sql": "2419a4d9e1ce602c84aad6e4d2095c671c92797553bc18f9f5996e729a231cc9",
+    "00077_i8_5_6_player_ids_above_robot_range.sql": "fb93f11ac6e3c85580e4397eb36bc9ae62590a62c0f9e13c424d33d34fe0e0d2",
+    "00078_i8_5_6_level_function_announcement.sql": "0b03aa0d6d189cac164517280939a56a0c79cb43d727e9b41597cc7cee5b44ae"
   },
   "rule": "All listed migration bytes are immutable for this cumulative candidate. Historical phase validators remain snapshot-specific; forward schema changes require a new migration. I7A-4A allocates forward-only 00033 for SocialRelation/SocialInbox durable foundations and an I4-owned non-unique discovery index; it performs no Social backfill and activates no stock routes.",
   "schema_version": 1,
-  "status": "CURRENT_CUMULATIVE_MIGRATION_LOCK_I8E"
+  "status": "CURRENT_CUMULATIVE_MIGRATION_LOCK_I8_5_6"
 }

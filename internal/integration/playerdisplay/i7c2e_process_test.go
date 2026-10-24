@@ -7,14 +7,9 @@ import (
 	"compress/zlib"
 	"encoding/json"
 	"gxb.local/backend/v2/internal/adapters/blobstore"
-	"gxb.local/backend/v2/internal/adapters/postgres/bookstore"
-	"gxb.local/backend/v2/internal/adapters/postgres/coursestore"
-	"gxb.local/backend/v2/internal/adapters/postgres/dormstore"
-	"gxb.local/backend/v2/internal/adapters/postgres/librarystore"
 	app "gxb.local/backend/v2/internal/application/course"
 	display "gxb.local/backend/v2/internal/application/playerdisplay"
 	"gxb.local/backend/v2/internal/domain/identity"
-	"gxb.local/backend/v2/internal/foundation/tx"
 	"mime/multipart"
 	"net"
 	"net/http"
@@ -35,35 +30,7 @@ func TestI7C2EActualAPICourseAndRestartRoster(t *testing.T) {
 	p := pool(t)
 	a, _, _ := courseFixture(t, p)
 	rev := installed(t, p)
-	h := skillHero(t, p, a, rev, 11001, 4)
-	tr, e := p.Begin(ctx, tx.Options{})
-	if e != nil {
-		t.Fatal(e)
-	}
-	if e = (bookstore.Store{}).EnsureRootTx(ctx, tr, a.PlayerID, rev, time.Now().Add(-time.Hour)); e != nil {
-		t.Fatal(e)
-	}
-	if e = (librarystore.Store{}).EnsurePlayerRootTx(ctx, tr, a.PlayerID, time.Now().Add(-time.Hour)); e != nil {
-		t.Fatal(e)
-	}
-	for _, id := range []int64{1, 2, 3, 4} {
-		h := skillRead(t, p, a, id)
-		if id == 4 {
-			if e = (coursestore.Store{}).InitFreshHeroTx(ctx, tr, h.Ref(), time.Now().Add(-time.Hour)); e != nil {
-				t.Fatal(e)
-			}
-		}
-		if e = (dormstore.Store{}).InitFreshHeroTx(ctx, tr, h.Ref(), time.Now().Add(-time.Hour)); e != nil {
-			t.Fatal(e)
-		}
-		if _, e = (librarystore.Store{}).BackfillMissingHeroTx(ctx, tr, h.Ref(), time.Now().Add(-time.Hour)); e != nil {
-			t.Fatal(e)
-		}
-	}
-	_ = h
-	if e = tr.Commit(ctx); e != nil {
-		t.Fatal(e)
-	}
+	bornHero(t, p, a, rev, 11001, 4)
 	bearer := displayToken(t, p, a)
 	listener, e := net.Listen("tcp", "127.0.0.1:0")
 	if e != nil {

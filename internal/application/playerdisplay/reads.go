@@ -39,7 +39,7 @@ func (s Service) Read(c context.Context, a identity.ActorContext, kind string, o
 		if kind == "bubbles" {
 			family, key = "bubble", "bubble_list"
 		}
-		origins, e := s.origins(c, sc.Tx, a.PlayerID, family, rev, at)
+		origins, e := s.familyOrigins(c, sc.Tx, a.PlayerID, family, p, rev, at)
 		if e != nil {
 			return e
 		}

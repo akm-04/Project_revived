@@ -41,20 +41,13 @@ func bookService(p *pg.Pool, db tx.Beginner) app.Service {
 func bookFixture(t *testing.T, p *pg.Pool) (identity.ActorContext, string, app.Service) {
 	t.Helper()
 	rev := installed(t, p)
-	a := actor(t, p)
+	a := bornActor(t, p)
 	s := bookService(p, p)
 	tr, e := p.Begin(ctx, tx.Options{Isolation: tx.Serializable})
 	if e != nil {
 		t.Fatal(e)
 	}
 	defer tr.Rollback(ctx)
-	at := time.Now().UTC().Add(-time.Hour)
-	if e = (bookstore.Store{}).EnsureRootTx(ctx, tr, a.PlayerID, rev, at); e != nil {
-		t.Fatal(e)
-	}
-	if e = (dormstore.Store{}).EnsureRootTx(ctx, tr, a.PlayerID, rev, at); e != nil {
-		t.Fatal(e)
-	}
 	o := op()
 	o.Policies, _ = policy.NewSet(policy.Ref{Name: "content", Version: rev})
 	lines := []grant.Line{}

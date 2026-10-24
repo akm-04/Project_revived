@@ -3,9 +3,11 @@ package playerdisplay
 import (
 	"context"
 	"errors"
+	"fmt"
 	"time"
 
 	"gxb.local/backend/v2/internal/domain/identity"
+	"gxb.local/backend/v2/internal/domain/player"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
@@ -53,6 +55,32 @@ func (s Service) catalogOrigins(c context.Context, q tx.Queryer, pid identity.Pl
 	return origins, e == nil, e
 }
 
+// ErrUncovered: no owner produces the catalog id, so this server has no grant path for it (D62).
+var ErrUncovered = fmt.Errorf("%w: no catalog origin owner covers the id", ErrUnavailable)
+
+// familyOrigins answers every origin of a family. Without a whole-family External owner it is the union of the bounded
+// catalog owners; an id no owner covers is absent, not unavailable (D62).
+func (s Service) familyOrigins(c context.Context, q tx.Queryer, pid identity.PlayerID, family string, p player.DisplayCatalog, rev string, at time.Time) ([]Origin, error) {
+	if s.External != nil || s.CatalogExternal == nil {
+		return s.origins(c, q, pid, family, rev, at)
+	}
+	out := []Origin{}
+	for _, v := range p.Cosmetics {
+		if v.Family != family {
+			continue
+		}
+		origins, _, e := s.catalogOrigins(c, q, pid, family, v.ID, rev, at)
+		if errors.Is(e, ErrUncovered) {
+			continue
+		}
+		if e != nil {
+			return nil, e
+		}
+		out = append(out, origins...)
+	}
+	return out, nil
+}
+
 // CatalogOriginRoute names the owner of a contiguous range of catalog ids.
 type CatalogOriginRoute struct {
 	Family      string
@@ -70,5 +98,5 @@ func (routes CatalogOriginRoutes) ReadCatalogDisplayOriginsTx(c context.Context,
 			return route.Owner.ReadCatalogDisplayOriginsTx(c, q, r)
 		}
 	}
-	return CatalogOriginObservation{Request: r, Origins: []Origin{}}, ErrUnavailable
+	return CatalogOriginObservation{Request: r, Origins: []Origin{}}, ErrUncovered
 }

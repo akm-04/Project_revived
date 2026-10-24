@@ -13,12 +13,10 @@ import (
 	"time"
 
 	"gxb.local/backend/v2/internal/adapters/combatresolver"
-	"gxb.local/backend/v2/internal/adapters/postgres/achievementstore"
-	"gxb.local/backend/v2/internal/adapters/postgres/bookstore"
+	"gxb.local/backend/v2/internal/adapters/postgres/characterbirth"
 	"gxb.local/backend/v2/internal/adapters/postgres/characterstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/combatstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/commerceprivilegestore"
-	"gxb.local/backend/v2/internal/adapters/postgres/conquerstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/contentstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/coursestore"
 	"gxb.local/backend/v2/internal/adapters/postgres/dormstore"
@@ -28,10 +26,8 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres/inscriptionstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/kernelstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/librarystore"
-	"gxb.local/backend/v2/internal/adapters/postgres/rankingstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/spiritstore"
 	book "gxb.local/backend/v2/internal/application/bookskill"
-	boot "gxb.local/backend/v2/internal/application/bootstrap"
 	ca "gxb.local/backend/v2/internal/application/characterasset"
 	hero "gxb.local/backend/v2/internal/application/characterhero"
 	pet "gxb.local/backend/v2/internal/application/characterpet"
@@ -103,11 +99,7 @@ func genuinePlayer(t *testing.T, p *pg.Pool, server identity.LogicalServerID) (i
 	b := logicalserver.BootstrapContext{AccountID: accountID, SessionID: sessionID, LogicalServerID: server, PlayerID: identity.PlayerID(pid), Operation: o, BootstrapProfileVersion: "I8_3B_GENUINE_FIXTURE"}
 	cs := contentstore.Store{Queryer: p}
 	privileges := commerceprivilege.Provider{Store: commerceprivilegestore.Store{}, Content: cs}
-	for _, c := range []boot.CharacterBootstrapPersistenceContributor{i5store.PlayerCoreBootstrapContributor{}, i5store.EconomyOwnerBootstrapContributor{Content: cs, Privileges: privileges},
-		characterstore.BootstrapContributor{}, characterstore.PetBootstrapContributor{}, characterstore.SavedPresetBootstrapContributor{}, characterstore.PracticeBootstrapContributor{},
-		librarystore.BootstrapContributor{}, achievementstore.BootstrapContributor{Revision: rev}, rankingstore.BootstrapContributor{}, dormstore.BootstrapContributor{Revision: rev},
-		bookstore.BootstrapContributor{Revision: rev}, coursestore.BootstrapContributor{Revision: rev}, inscriptionstore.BootstrapContributor{Revision: rev}, i5store.InscriptionCertificateBootstrap{},
-		elementstore.BootstrapContributor{Revision: rev}, spiritstore.BootstrapContributor{Revision: rev}, conquerstore.BootstrapContributor{Revision: rev}} {
+	for _, c := range characterbirth.Contributors(cs, privileges, rev) {
 		if err = c.PersistCharacterBootstrap(ctx, tr, b); err != nil {
 			t.Fatal(c.Name(), err)
 		}

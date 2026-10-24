@@ -37,7 +37,7 @@ func rankingServer(t *testing.T, p *pg.Pool) identity.LogicalServerID {
 	for i := 0; i < 20; i++ {
 		u := uuid().Bytes()
 		server := int64(1000 + int(binary.BigEndian.Uint16(u[:2])))
-		tag, e := p.Raw().Exec(ctx, `INSERT INTO logical_servers(logical_server_id,name,first_opened_at,directory_visible,existing_login_allowed,new_character_allowed,next_player_id,max_player_id,state_version,created_at)VALUES($1,'Ranking native',clock_timestamp(),true,true,true,$2,$3,1,clock_timestamp())ON CONFLICT DO NOTHING`, server, server*100000+1, (server+1)*100000-1)
+		tag, e := p.Raw().Exec(ctx, `INSERT INTO logical_servers(logical_server_id,name,first_opened_at,directory_visible,existing_login_allowed,new_character_allowed,next_player_id,max_player_id,state_version,created_at)VALUES($1,'Ranking native',clock_timestamp(),true,true,true,$2,$3,1,clock_timestamp())ON CONFLICT DO NOTHING`, server, server*100000+25001, (server+1)*100000-1)
 		if e != nil {
 			t.Fatal(e)
 		}

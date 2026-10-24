@@ -39,6 +39,8 @@ func TestWorkingP3SourceACKAndProvenCleanupCursor(t *testing.T) {
 		t.Fatal(e)
 	}
 	defer p.Close()
+	w, _ := joinedTargets(t, c, p)
+	guilds := []int64{int64(w.guildA), int64(w.guildB), int64(w.guildC)}
 	store := guildinvitestore.Store{}
 	kernel := kernelstore.Store{}
 	roots := i4store.PlayerRootLocker{}
@@ -88,7 +90,7 @@ func TestWorkingP3SourceACKAndProvenCleanupCursor(t *testing.T) {
 		t.Fatal("canonical pending fallback scanned no work", scanned)
 	}
 	delivery := app.Delivery{Timed: timed, Reads: tx.Runner{DB: p}, Store: store, Sources: reader, Players: roots, Target: service}
-	rows, e := p.Raw().Query(c, `SELECT source_id::text FROM guild_invite_projection_sources ORDER BY source_serial`)
+	rows, e := p.Raw().Query(c, `SELECT source_id::text FROM guild_invite_projection_sources WHERE guild_id=ANY($1) ORDER BY source_serial`, guilds)
 	if e != nil {
 		t.Fatal(e)
 	}
@@ -138,7 +140,7 @@ func TestWorkingP3SourceACKAndProvenCleanupCursor(t *testing.T) {
 		}
 	}
 	cleanup := app.Cleanup{Timed: timed, Reads: tx.Runner{DB: p}, Sources: reader, Store: store, Players: roots, Target: service, Receipts: kernel, Enqueue: queue}
-	rows, e = p.Raw().Query(c, `SELECT marker_id::text FROM guild_invite_projection_markers ORDER BY event_id`)
+	rows, e = p.Raw().Query(c, `SELECT marker_id::text FROM guild_invite_projection_markers WHERE guild_id=ANY($1) ORDER BY event_id`, guilds)
 	if e != nil {
 		t.Fatal(e)
 	}
@@ -229,6 +231,7 @@ func TestWorkingP3SourceACKAndProvenCleanupCursor(t *testing.T) {
 		if e != nil {
 			t.Fatal(e)
 		}
+		defer corrupt.Rollback(c)
 		tag, e := corrupt.Exec(c, sql, covered.String())
 		if e != nil || tag.RowsAffected() != 1 {
 			t.Fatal("populated corrupt fixture", e)

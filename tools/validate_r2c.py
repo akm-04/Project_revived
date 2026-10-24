@@ -18,7 +18,8 @@ ports=need(Path('internal/application/i5/ports.go'),'type TxGrantSettler interfa
 svc=need(Path('internal/application/i5/service.go'),'type GrantTxOptions struct','func (s Service) SettleGrantTx','s.preflightGrantTx','s.acquireGrantLocksTx')
 planner=need(Path('internal/application/i5/grant_lock_plan.go'),'lockkey.CanonicalDedup','grantLockRankMailNamespace','grantLockRankEconomyOwner','grantLockRankScalar','grantLockRankTemporal','grantLockRankStack','grantLockRankEconomyOwner')
 store=need(Path('internal/adapters/postgres/i5store/store.go'),'func (Store) LockEconomyOwnerTx','FROM player_economy_owners','func (Store) LockMailNamespaceCounterTx','INSERT INTO mail_namespace_counters','FOR UPDATE')
-main=need(Path('cmd/gxb-api/main_postgres.go'),'i5store.EconomyOwnerBootstrapContributor{')
+main=need(Path('cmd/gxb-api/main_postgres.go'),'characterbirth.Contributors(')
+need(Path('internal/adapters/postgres/characterbirth/contributors.go'),'i5store.EconomyOwnerBootstrapContributor{')
 tests=need(Path('internal/application/i5/service_test.go'),'TestSettleGrantTxUsesCallerOwnedTransactionWithoutNestedBegin','TestGrantPreflightCanonicalLockOrderIndependentOfLineOrder','TestSettleGrantTxPropagatesExactCallerTransactionToOwner')
 need(Path('internal/foundation/lockkey/lockkey_test.go'),'TestCanonicalDedupCollapsesRepeatedRequirement')
 # Mail/Objectives/Redeem must use the public tx-scoped seam, not private direct settlement.

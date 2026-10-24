@@ -12,6 +12,7 @@ import (
 	"fmt"
 	"gxb.local/backend/v2/internal/adapters/postgres"
 	"gxb.local/backend/v2/internal/adapters/postgres/i4store"
+	"gxb.local/backend/v2/internal/adapters/postgres/nativebirth"
 	"gxb.local/backend/v2/internal/adapters/postgres/socialinboxstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/socialrelationstore"
 	"gxb.local/backend/v2/internal/adapters/socialpresentation"
@@ -64,7 +65,13 @@ func existing(t *testing.T) *fixture {
 	f.at = f.now()
 	return f
 }
-func fresh(t *testing.T) *fixture { f := existing(t); f.sql(`TRUNCATE accounts CASCADE`); return f }
+func fresh(t *testing.T) *fixture {
+	f := existing(t)
+	if e := nativebirth.Reset(ctx, f.p); e != nil {
+		t.Fatal(e)
+	}
+	return f
+}
 
 func (f *fixture) sql(q string, args ...any) {
 	f.t.Helper()
@@ -98,13 +105,22 @@ func (f *fixture) now() time.Time {
 }
 func (f *fixture) player(pid identity.PlayerID) {
 	f.t.Helper()
+	u := f.unbornPlayer(pid)
+	server, _ := sr.CanonicalServer(pid)
+	if e := nativebirth.Persist(ctx, f.p, u, server, pid); e != nil {
+		f.t.Fatalf("fixture birth: %v", e)
+	}
+	f.sql(`UPDATE player_profiles SET display_name=$2 WHERE player_id=$1`, int64(pid), fmt.Sprint(pid))
+}
+func (f *fixture) unbornPlayer(pid identity.PlayerID) ids.UUID {
+	f.t.Helper()
 	u, _ := ids.NewUUID()
 	server, _ := sr.CanonicalServer(pid)
-	f.sql(`INSERT INTO logical_servers(logical_server_id,name,directory_visible,existing_login_allowed,new_character_allowed,next_player_id,max_player_id,created_at) VALUES($1,'fixture',true,true,true,$2,$3,$4) ON CONFLICT DO NOTHING`, int32(server), int64(server)*100000+1, (int64(server)+1)*100000-1, f.at)
+	f.sql(`INSERT INTO logical_servers(logical_server_id,name,directory_visible,existing_login_allowed,new_character_allowed,next_player_id,max_player_id,created_at) VALUES($1,'fixture',true,true,true,$2,$3,$4) ON CONFLICT DO NOTHING`, int32(server), int64(server)*100000+25001, (int64(server)+1)*100000-1, f.at)
 	f.sql(`INSERT INTO accounts(account_id,account_uid,status,created_at) VALUES($1::uuid,$2,'ACTIVE',$3)`, u.String(), fmt.Sprint(pid), f.at)
 	f.sql(`INSERT INTO players(player_id,account_id,logical_server_id,created_at,bootstrap_profile_version) VALUES($1,$2::uuid,$3,$4,'fixture')`, int64(pid), u.String(), int32(server), f.at)
 	f.sql(`INSERT INTO player_directory_profiles(player_id,name,created_at,updated_at) VALUES($1,$2,$3,$3)`, int64(pid), fmt.Sprint(pid), f.at)
-	f.sql(`INSERT INTO player_profiles(player_id,display_name,avatar_id,created_at,updated_at) VALUES($1,$2,110001001,$3,$3)`, int64(pid), fmt.Sprint(pid), f.at)
+	return u
 }
 func actor(pid identity.PlayerID) identity.ActorContext {
 	u, _ := ids.NewUUID()
@@ -170,10 +186,21 @@ func (f *fixture) relationNotices(n int) {
 	}
 }
 func (f *fixture) many(start, n int) {
-	f.sql(`INSERT INTO accounts(account_id,account_uid,status,created_at)SELECT gen_random_uuid(),g::text,'ACTIVE',$3 FROM generate_series($1::int,$2::int)g`, start, start+n-1, f.at)
+	roots, e := nativebirth.NewRoots(identity.PlayerID(start), identity.PlayerID(start+n-1))
+	if e != nil {
+		f.t.Fatal(e)
+	}
+	accounts, players := make([]string, len(roots)), make([]int64, len(roots))
+	for i, root := range roots {
+		accounts[i], players[i] = root.Account.String(), int64(root.Player)
+	}
+	f.sql(`INSERT INTO accounts(account_id,account_uid,status,created_at)SELECT account,player::text,'ACTIVE',$3 FROM unnest($1::uuid[],$2::bigint[]) AS r(account,player)`, accounts, players, f.at)
 	f.sql(`INSERT INTO players(player_id,account_id,logical_server_id,created_at,bootstrap_profile_version)SELECT account_uid::bigint,account_id,(account_uid::bigint/100000)::int,$3,'fixture' FROM accounts WHERE account_uid::bigint BETWEEN $1 AND $2`, start, start+n-1, f.at)
 	f.sql(`INSERT INTO player_directory_profiles(player_id,name,created_at,updated_at)SELECT player_id,player_id::text,$3,$3 FROM players WHERE player_id BETWEEN $1 AND $2`, start, start+n-1, f.at)
-	f.sql(`INSERT INTO player_profiles(player_id,display_name,avatar_id,created_at,updated_at)SELECT player_id,player_id::text,110001001,$3,$3 FROM players WHERE player_id BETWEEN $1 AND $2`, start, start+n-1, f.at)
+	if e := nativebirth.PersistAll(ctx, f.p, roots); e != nil {
+		f.t.Fatalf("fixture birth: %v", e)
+	}
+	f.sql(`UPDATE player_profiles SET display_name=player_id::text WHERE player_id BETWEEN $1 AND $2`, start, start+n-1)
 	f.sql(`INSERT INTO player_social_roots(player_id,created_at,updated_at)SELECT player_id,$3,$3 FROM players WHERE player_id BETWEEN $1 AND $2`, start, start+n-1, f.at)
 }
 func (f *fixture) base() sp.Result {
@@ -330,7 +357,7 @@ func TestC07ActualFKNullDeletionRefillsOlderNotice(t *testing.T) {
 	f := fresh(t)
 	f.player(100001)
 	f.player(200001)
-	f.player(200002)
+	f.unbornPlayer(200002) // deleted below, so it owns no birth rows to unwind
 	f.relationNotices(51)
 	f.notice(52, 200002, "social-relation.request.v1", "100001:200002:1:ACCEPT", 1, f.at.Add(time.Minute))
 	f.sql(`DELETE FROM player_directory_profiles WHERE player_id=200002`)

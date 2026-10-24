@@ -21,7 +21,6 @@ import (
 	"gxb.local/backend/v2/internal/content/guildpolicy"
 	"gxb.local/backend/v2/internal/domain/guild"
 	gi "gxb.local/backend/v2/internal/domain/guildinvite"
-	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/policy"
 	"gxb.local/backend/v2/internal/foundation/tx"
 	"os"
@@ -72,12 +71,10 @@ func TestWorkingP3ConcurrentMaterializeJOINLeaveRetirement(t *testing.T) {
 	cross := i5.CrossOwner{Store: i5db}
 	core := guildcore.Service{Timed: bundle.Target.Timed, Store: gs, Fencer: i5db, PlayerRoots: i4store.PlayerRootLocker{}, Level: cross, Scalar: cross, LevelAndScalar: cross, Receipts: kernel, ReceiptRead: kernelstore.Reader{Queryer: p}, Policy: binding, InviteProjection: &projection}
 	cleanup := app.Cleanup{Timed: core.Timed, Reads: runner, Sources: bundle.Source, Store: store, Players: i4store.PlayerRootLocker{}, Target: bundle.Target, Receipts: kernel, Enqueue: queue}
-	var pid int64
-	p.QueryRow(c, `SELECT max(player_id) FROM players`).Scan(&pid)
-	leader := savedActor(t, c, p, identity.PlayerID(pid))
-	recipient := savedActor(t, c, p, identity.PlayerID(pid-1))
+	w := seedWorld(t, c, p)
+	leader, recipient := w.actors[7], w.actors[6]
 	for iteration := 0; iteration < 4; iteration++ {
-		created, e := core.Create(c, leader, guildcore.CreateRequest{Name: fmt.Sprintf("race%d", iteration), Icon: binding.Policy.GuildIcons[0]}, mustOp(t, policy.Set{}))
+		created, e := core.Create(c, leader, guildcore.CreateRequest{Name: fmt.Sprintf("R%d-%d", leader.PlayerID, iteration), Icon: binding.Policy.GuildIcons[0]}, mustOp(t, policy.Set{}))
 		if e != nil {
 			t.Fatal(e)
 		}

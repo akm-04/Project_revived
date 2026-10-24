@@ -18,7 +18,7 @@ func base(full bool) MID1Command {
 	now := time.Unix(100, 0).UTC()
 	a := identity.Account{ID: aid(1), UID: identity.AccountUID("20000007"), Status: identity.AccountActive}
 	s := identity.Session{ID: sid(2), AccountID: a.ID, AuthProfile: identity.AuthProductionPair, IssuedAt: now, LastActivityAt: now}
-	srv := logicalserver.Server{ID: 1, Name: "Server 1", DirectoryVisible: true, ExistingLoginAllowed: true, NewCharacterAllowed: !full, NextPlayerID: 100001, MaxPlayerID: 199999}
+	srv := logicalserver.Server{ID: 1, Name: "Server 1", DirectoryVisible: true, ExistingLoginAllowed: true, NewCharacterAllowed: !full, NextPlayerID: 125001, MaxPlayerID: 199999}
 	return MID1Command{Account: a, Session: s, Server: srv, Observed: true, NewContextID: cid(3), Operation: operation.Context{ID: u(9), StartedAt: now}, BootstrapProfileVersion: "wave-s-v1", BearerSecret: []byte("0123456789abcdef0123456789abcdef")}
 }
 func TestMID1NewShapeAndStableReplay(t *testing.T) {

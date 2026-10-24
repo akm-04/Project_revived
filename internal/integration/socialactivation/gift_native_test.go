@@ -37,7 +37,6 @@ func giftFixture(t *testing.T) (*fixture, sg.Service, identity.ActorContext, ide
 	f.player(100001)
 	f.player(200001)
 	f.friend(100001, 200001)
-	f.sql(`INSERT INTO player_economy_owners(player_id,state_version,created_at)VALUES(100001,1,$1),(200001,1,$1)`, f.at)
 	a, _ := f.live(100001)
 	b, _ := f.live(200001)
 	_, e := registry.Initialize(ctx, registry.Service{Runner: tx.Runner{DB: f.p}, Repo: contentstore.Store{}, Fresh: f.p, Providers: registry.DefaultProviderSet()}, operation.Factory{Clock: clock.System{}})

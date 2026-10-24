@@ -1,4 +1,4 @@
-//go:build postgres && socialintegration
+//go:build postgres && river && socialintegration
 
 package socialactivation_test
 

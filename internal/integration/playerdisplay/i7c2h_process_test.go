@@ -7,15 +7,9 @@ import (
 	"compress/zlib"
 	"encoding/json"
 	"gxb.local/backend/v2/internal/adapters/blobstore"
-	"gxb.local/backend/v2/internal/adapters/postgres/bookstore"
-	"gxb.local/backend/v2/internal/adapters/postgres/coursestore"
-	"gxb.local/backend/v2/internal/adapters/postgres/dormstore"
-	"gxb.local/backend/v2/internal/adapters/postgres/inscriptionstore"
-	"gxb.local/backend/v2/internal/adapters/postgres/librarystore"
 	display "gxb.local/backend/v2/internal/application/playerdisplay"
 	app "gxb.local/backend/v2/internal/application/spirit"
 	"gxb.local/backend/v2/internal/domain/identity"
-	"gxb.local/backend/v2/internal/foundation/tx"
 	"mime/multipart"
 	"net"
 	"net/http"
@@ -34,35 +28,7 @@ func TestI7C2HActualAPIAllNineCommandsInventoryRosterRestart(t *testing.T) {
 		t.Skip("exact API binary required")
 	}
 	p := pool(t)
-	a, rev, svc := spiritFixture(t, p)
-	tr, e := p.Begin(ctx, tx.Options{})
-	if e != nil {
-		t.Fatal(e)
-	}
-	at := time.Now().Add(-time.Hour)
-	for _, f := range []func() error{func() error { return (inscriptionstore.Store{}).EnsureRootTx(ctx, tr, a.PlayerID, rev, at) }, func() error { return (bookstore.Store{}).EnsureRootTx(ctx, tr, a.PlayerID, rev, at) }, func() error { return (librarystore.Store{}).EnsurePlayerRootTx(ctx, tr, a.PlayerID, at) }, func() error { return (dormstore.Store{}).EnsureRootTx(ctx, tr, a.PlayerID, rev, at) }, func() error { return (coursestore.Store{}).EnsureRootTx(ctx, tr, a.PlayerID, rev, at) }} {
-		if e = f(); e != nil {
-			t.Fatal(e)
-		}
-	}
-	for _, id := range []int64{1, 2, 3} {
-		h := skillRead(t, p, a, id)
-		if e = (inscriptionstore.Store{}).EnsureHeroTx(ctx, tr, a.PlayerID, id, at); e != nil {
-			t.Fatal(e)
-		}
-		if e = (coursestore.Store{}).InitFreshHeroTx(ctx, tr, h.Ref(), at); e != nil {
-			t.Fatal(e)
-		}
-		if e = (dormstore.Store{}).InitFreshHeroTx(ctx, tr, h.Ref(), at); e != nil {
-			t.Fatal(e)
-		}
-		if _, e = (librarystore.Store{}).BackfillMissingHeroTx(ctx, tr, h.Ref(), at); e != nil {
-			t.Fatal(e)
-		}
-	}
-	if e = tr.Commit(ctx); e != nil {
-		t.Fatal(e)
-	}
+	a, _, svc := spiritFixture(t, p)
 	bearer := displayToken(t, p, a)
 	listener, e := net.Listen("tcp", "127.0.0.1:0")
 	if e != nil {

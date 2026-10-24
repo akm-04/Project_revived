@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 from pathlib import Path
+import re
 import sys
 ROOT=Path(__file__).resolve().parents[1]
 errs=[]
@@ -21,7 +22,8 @@ for tok in ['case 60:', 'case 61:', 'case 2979:']:
     req(tok in dispatch, f'CA7-3 dispatcher route missing {tok}')
 for tok in ['case 1893:', 'case 1894:', 'case 1895:']:
     req(tok not in dispatch, f'Pet-owned CA7-5 route leaked into Hero dispatcher: {tok}')
-req('58, 60, 61, 62' in main and '67, 68, 69, 89' in main and '304, 2979' in main, 'CA7-3/4 production registration drift')
+registered = {int(mid) for block in re.findall(r'range \[\]uint16\{([0-9, ]+)\}', main) for mid in block.split(',')}
+req({58, 60, 61, 62, 67, 68, 69, 89, 304, 2979} <= registered, 'CA7-3/4 production registration drift')
 for tok in ['ca7.hero-skin-on', 'ca7.hero-skin-cancel', 'ca7.hero-illusion-select']:
     req(tok in replay, f'CA7-3 replay family missing {tok!r}')
 req('CurrentStateConvergence' in replay, 'MID60 current-state convergence replay classification missing')

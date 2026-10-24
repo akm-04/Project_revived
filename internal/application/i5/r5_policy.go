@@ -3,6 +3,7 @@ package i5
 import (
 	"context"
 	"errors"
+	"fmt"
 	"sort"
 	"time"
 
@@ -56,6 +57,68 @@ func (PetStarterFunctionAnnouncements) Announce(_ context.Context, _ identity.Pl
 		}
 	}
 	return out, nil
+}
+
+// LevelFunctionAnnouncements announces every function whose pure level gate the player reached (D59, PRIVATE_POLICY): stock
+// isFuncOpen reads only announced func_ids. Pet Function 38 keeps its starter-egg capability; modes keep their own checks.
+type LevelFunctionAnnouncements struct{}
+
+func (LevelFunctionAnnouncements) ProviderRevision() string {
+	return "i8.5-6.level.function-announcement.v1"
+}
+func (LevelFunctionAnnouncements) Announce(c context.Context, pid identity.PlayerID, policy FunctionGatePolicy, eligible []player.FunctionEligibility) ([]int64, error) {
+	out, err := PetStarterFunctionAnnouncements{}.Announce(c, pid, policy, eligible)
+	if err != nil {
+		return nil, err
+	}
+	capabilityByID := make(map[int64]string, len(policy.Gates))
+	for _, g := range policy.Gates {
+		capabilityByID[g.FunctionID] = g.AnnouncementCapability
+	}
+	for _, e := range eligible {
+		capability := capabilityByID[e.FunctionID]
+		if capability == "NONE" || capability == "" {
+			out = append(out, e.FunctionID)
+		}
+	}
+	sort.Slice(out, func(i, j int) bool { return out[i] < out[j] })
+	return out, nil
+}
+
+// LevelFunctionOpenings is what a player at level has open through level gates alone, eligible and announced as level-ups would
+// announce them (D59): birth opens level 1. Gates whose announcement grants something (Pet Function 38) open only through the
+// level-up that makes the grant, so they are left out.
+func LevelFunctionOpenings(policy FunctionGatePolicy, pid identity.PlayerID, level int64, now time.Time) ([]player.FunctionEligibility, []player.FunctionUnlock, error) {
+	reached, err := pureLevelEligibility(policy, pid, level, now)
+	if err != nil {
+		return nil, nil, err
+	}
+	announced, err := LevelFunctionAnnouncements{}.Announce(context.Background(), pid, policy, reached)
+	if err != nil {
+		return nil, nil, err
+	}
+	granting, err := PetStarterFunctionAnnouncements{}.Announce(context.Background(), pid, policy, reached)
+	if err != nil {
+		return nil, nil, err
+	}
+	opened := make(map[int64]bool, len(announced))
+	for _, functionID := range announced {
+		opened[functionID] = true
+	}
+	for _, functionID := range granting {
+		delete(opened, functionID)
+	}
+	eligible := make([]player.FunctionEligibility, 0, len(opened))
+	unlocks := make([]player.FunctionUnlock, 0, len(opened))
+	for _, e := range reached {
+		if !opened[e.FunctionID] {
+			continue
+		}
+		e.SourceFactKey = fmt.Sprintf("i8.5-6:function-level:v1:%d:%d", pid, e.FunctionID)
+		eligible = append(eligible, e)
+		unlocks = append(unlocks, player.FunctionUnlock{PlayerID: pid, FunctionID: e.FunctionID, OpenedAt: now.UTC(), SourceFactKey: e.SourceFactKey, StateVersion: 1})
+	}
+	return eligible, unlocks, nil
 }
 
 func ResolveTemporalPolicyTx(ctx context.Context, q tx.Queryer, pid identity.PlayerID, d TemporalDescriptor, progression player.ProgressionPolicy, level int64, now time.Time, privileges PrivilegeSnapshotProvider) (economy.TemporalPolicy, string, error) {

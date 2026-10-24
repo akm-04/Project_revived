@@ -199,6 +199,7 @@ func Test7A_DeletedSenderReceiverRestrictionAndPreparedTx(t *testing.T) {
 	}
 	deletion.Exec(ctx, `DELETE FROM gameplay_context_credentials WHERE context_id IN(SELECT context_id FROM gameplay_contexts WHERE player_id=200001)`)
 	deletion.Exec(ctx, `DELETE FROM gameplay_contexts WHERE player_id=200001`)
+	clearBirthOwners(f, deletion, 200001)
 	deletion.Exec(ctx, `DELETE FROM player_directory_profiles WHERE player_id=200001`)
 	_, e = deletion.Exec(ctx, `DELETE FROM players WHERE player_id=200001`)
 	deletion.Rollback(ctx)
@@ -207,6 +208,7 @@ func Test7A_DeletedSenderReceiverRestrictionAndPreparedTx(t *testing.T) {
 	}
 	f.sql(`DELETE FROM gameplay_context_credentials WHERE context_id IN(SELECT context_id FROM gameplay_contexts WHERE player_id=100001)`)
 	f.sql(`DELETE FROM gameplay_contexts WHERE player_id=100001`)
+	clearBirthOwners(f, f.p.Raw(), 100001)
 	f.sql(`DELETE FROM player_directory_profiles WHERE player_id=100001`)
 	f.sql(`DELETE FROM players WHERE player_id=100001`)
 	got, e := s.Claim(ctx, b, r.NoticeIDs, f.op())

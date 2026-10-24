@@ -35,8 +35,12 @@ type Server struct {
 	RetiredAt            *time.Time
 }
 
+// stockRobotTableLimit: the stock client reads a wire table_id (player id within its region) up to 25000 as a robot team.
+const stockRobotTableLimit = 25000
+
+// BandMin is the first allocatable player id; ids below it would collide with robot team ids on the wire (D63).
 func BandMin(id identity.LogicalServerID) identity.PlayerID {
-	return identity.PlayerID(int64(id)*100000 + 1)
+	return identity.PlayerID(int64(id)*100000 + stockRobotTableLimit + 1)
 }
 func BandMax(id identity.LogicalServerID) identity.PlayerID {
 	return identity.PlayerID((int64(id)+1)*100000 - 1)

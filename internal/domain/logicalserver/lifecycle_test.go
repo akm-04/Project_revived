@@ -8,7 +8,7 @@ import (
 
 func TestFirstOpenedAtNeverResets(t *testing.T) {
 	now := time.Unix(100, 0).UTC()
-	s := Server{ID: 1, Name: "Server 1", NextPlayerID: 100001, MaxPlayerID: 199999, StateVersion: 1}
+	s := Server{ID: 1, Name: "Server 1", NextPlayerID: 125001, MaxPlayerID: 199999, StateVersion: 1}
 	o, e := ApplyLifecycle(s, Open, now)
 	if e != nil || o.FirstOpenedAt == nil {
 		t.Fatal(e)
@@ -28,7 +28,7 @@ func TestFirstOpenedAtNeverResets(t *testing.T) {
 
 func TestRetiredServerIsTerminalAndRepeatIsIdempotent(t *testing.T) {
 	now := time.Unix(200, 0).UTC()
-	s := Server{ID: 1, Name: "Server 1", NextPlayerID: 100001, MaxPlayerID: 199999, StateVersion: 3}
+	s := Server{ID: 1, Name: "Server 1", NextPlayerID: 125001, MaxPlayerID: 199999, StateVersion: 3}
 	r, err := ApplyLifecycle(s, Retired, now)
 	if err != nil {
 		t.Fatal(err)
@@ -50,7 +50,7 @@ func TestRetiredServerIsTerminalAndRepeatIsIdempotent(t *testing.T) {
 
 func TestRetiredServerValidationRejectsAdmissionFlags(t *testing.T) {
 	now := time.Unix(300, 0).UTC()
-	s := Server{ID: 1, Name: "Server 1", NextPlayerID: 100001, MaxPlayerID: 199999, StateVersion: 2, RetiredAt: &now, DirectoryVisible: true}
+	s := Server{ID: 1, Name: "Server 1", NextPlayerID: 125001, MaxPlayerID: 199999, StateVersion: 2, RetiredAt: &now, DirectoryVisible: true}
 	if err := s.Validate(); err == nil {
 		t.Fatal("retired visible server validated")
 	}

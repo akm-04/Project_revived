@@ -22,8 +22,9 @@ i5=need(Path('internal/adapters/postgres/i5store/bootstrap_owner.go'),
     'type PlayerCoreBootstrapContributor struct{}','PersistCharacterBootstrap','INSERT INTO player_profiles','INSERT INTO player_progression',
     'INSERT INTO player_story_cursors','INSERT INTO player_guide_return_state')
 proj=need(Path('internal/adapters/postgres/i5store/bootstrap_projection.go'),
-    'func (BootstrapProjection) Name() string','func (BootstrapProjection) Claims() []string','core, err := loadPlayerCore')
-main=need(Path('cmd/gxb-api/main_postgres.go'),'PersistenceContributors: []appboot.CharacterBootstrapPersistenceContributor{i5store.PlayerCoreBootstrapContributor{}', 'i5store.EconomyOwnerBootstrapContributor{')
+    'BootstrapProjection) Name() string','BootstrapProjection) Claims() []string','core, err := loadPlayerCore')
+main=need(Path('cmd/gxb-api/main_postgres.go'),'PersistenceContributors: characterbirth.Contributors(')
+need(Path('internal/adapters/postgres/characterbirth/contributors.go'),'return []appboot.CharacterBootstrapPersistenceContributor{\n\t\ti5store.PlayerCoreBootstrapContributor{},\n\t\ti5store.EconomyOwnerBootstrapContributor{')
 # R2B contract: I4 store no longer writes I5 owner tables.
 for table in ('player_profiles','player_progression','player_story_cursors','player_guide_return_state'):
     if re.search(rf'(?is)INSERT\s+INTO\s+{table}\b',i4): errs.append(f'RF-007 remains: i4store writes {table}')

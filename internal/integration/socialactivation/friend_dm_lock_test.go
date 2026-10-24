@@ -127,7 +127,6 @@ func (d dmEconomyTrace) LockStackTx(c context.Context, t tx.Tx, id identity.Play
 }
 func Test6A_G10_G13_G35SameTxCompleteOrderedPlan(t *testing.T) {
 	f, s := dmPair(t)
-	f.sql(`INSERT INTO player_economy_owners(player_id,state_version,created_at)VALUES(100001,1,$1)`, f.at)
 	f.sql(`INSERT INTO player_item_stacks(player_id,item_id,quantity,state_version,acquired_at,updated_at)VALUES(100001,190001001,1,1,$1,$1)`, f.at)
 	// The prior catalog fixture initializes the real registry; this independent
 	// fixture invokes the same initialization if tests are filtered separately.

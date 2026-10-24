@@ -20,7 +20,7 @@ for x in ['tx.Serializable','scope.Operation.StartedAt.UTC()','s.Fresh','VerifyR
  if x not in svc:errors.append('missing service contract '+x)
 if not re.search(r'manifest\s+builtin\.Manifest',types):errors.append('bundle metadata not private')
 if 'm.EnabledCapabilities == nil' not in types:errors.append('missing/null capability array accepted')
-if not (api.find('pool.Ping(')<api.find('registry.Initialize(')<api.find('srv.ListenAndServe(')):errors.append('startup admission order wrong')
+if not (api.find('pool.Ping(')<api.find('.ValidateActiveReadiness(')<api.find('srv.ListenAndServe(')):errors.append('startup admission order wrong')
 if 'goose' in api.lower() or 'ActivateBuiltin(' in api or 'ActivateBuiltin(' in startup:errors.append('startup migrates or explicitly switches')
 if 'registry.DefaultProviderSet()' not in api:errors.append('providers not explicit at composition')
 for p in ['internal/content/registry/service_test.go','internal/adapters/postgres/contentstore/store_test.go']:need(p)

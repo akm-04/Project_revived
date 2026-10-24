@@ -773,7 +773,7 @@
     "version": "v0.125.0"
   },
   "language_floor": "go1.26.0",
-  "migration_high_water": "00075_i8_6c_attempt_members.sql",
+  "migration_high_water": "00078_i8_5_6_level_function_announcement.sql",
   "migration_parent_backend_sha256": "73a668580d416fba4275b97898d083b9fdcb12c58773eeb9ceec2b1f3711c58d",
   "native_repair_parent_backend_sha256": "a6bf87421767c5451f69fcf359995d28d91a6c6f861f55422bcdd642583e0141",
   "native_repair_parent_implementation_revision_sha256": "0def8ffc697be0c43a40b3e447c328fee45011e76e9e87a69f17181b777e1c1b",

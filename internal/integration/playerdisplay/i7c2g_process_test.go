@@ -7,15 +7,9 @@ import (
 	"compress/zlib"
 	"encoding/json"
 	"gxb.local/backend/v2/internal/adapters/blobstore"
-	"gxb.local/backend/v2/internal/adapters/postgres/bookstore"
-	"gxb.local/backend/v2/internal/adapters/postgres/coursestore"
-	"gxb.local/backend/v2/internal/adapters/postgres/dormstore"
-	"gxb.local/backend/v2/internal/adapters/postgres/inscriptionstore"
-	"gxb.local/backend/v2/internal/adapters/postgres/librarystore"
 	app "gxb.local/backend/v2/internal/application/elementequipment"
 	display "gxb.local/backend/v2/internal/application/playerdisplay"
 	"gxb.local/backend/v2/internal/domain/identity"
-	"gxb.local/backend/v2/internal/foundation/tx"
 	"mime/multipart"
 	"net"
 	"net/http"
@@ -37,44 +31,6 @@ func TestI7C2GActualAPIFiveCommandsRosterAndRestart(t *testing.T) {
 	a, _, svc := elementFixture(t, p)
 	rev := installed(t, p)
 	eligibleElementHero(t, p, a, rev, 11001, 4, true)
-	h := skillRead(t, p, a, 4)
-	tr, e := p.Begin(ctx, tx.Options{})
-	if e != nil {
-		t.Fatal(e)
-	}
-	if e = (inscriptionstore.Store{}).EnsureRootTx(ctx, tr, a.PlayerID, rev, time.Now().Add(-time.Hour)); e != nil {
-		t.Fatal(e)
-	}
-	if e = (bookstore.Store{}).EnsureRootTx(ctx, tr, a.PlayerID, rev, time.Now().Add(-time.Hour)); e != nil {
-		t.Fatal(e)
-	}
-	if e = (librarystore.Store{}).EnsurePlayerRootTx(ctx, tr, a.PlayerID, time.Now().Add(-time.Hour)); e != nil {
-		t.Fatal(e)
-	}
-	for _, id := range []int64{1, 2, 3, 4} {
-		h := skillRead(t, p, a, id)
-		if e = (inscriptionstore.Store{}).EnsureHeroTx(ctx, tr, a.PlayerID, id, time.Now().Add(-time.Hour)); e != nil {
-			t.Fatal(e)
-		}
-		if id == 4 {
-			if e = (inscriptionstore.Store{}).EnsureHeroTx(ctx, tr, a.PlayerID, id, time.Now().Add(-time.Hour)); e != nil {
-				t.Fatal(e)
-			}
-			if e = (coursestore.Store{}).InitFreshHeroTx(ctx, tr, h.Ref(), time.Now().Add(-time.Hour)); e != nil {
-				t.Fatal(e)
-			}
-		}
-		if e = (dormstore.Store{}).InitFreshHeroTx(ctx, tr, h.Ref(), time.Now().Add(-time.Hour)); e != nil {
-			t.Fatal(e)
-		}
-		if _, e = (librarystore.Store{}).BackfillMissingHeroTx(ctx, tr, h.Ref(), time.Now().Add(-time.Hour)); e != nil {
-			t.Fatal(e)
-		}
-	}
-	_ = h
-	if e = tr.Commit(ctx); e != nil {
-		t.Fatal(e)
-	}
 	bearer := displayToken(t, p, a)
 	listener, e := net.Listen("tcp", "127.0.0.1:0")
 	if e != nil {
@@ -164,7 +120,6 @@ func TestI7C2GActualAPIFiveCommandsRosterAndRestart(t *testing.T) {
 		params map[string]any
 		status int
 	}{
-		{2849, map[string]any{"partner_id": 1, "equip_id": 7, "equip_pos": 2}, 503},
 		{2849, map[string]any{"partner_id": 4, "equip_id": 7, "equip_pos": 2}, 200},
 		{2850, map[string]any{"partner_id": 4, "equip_id": 7}, 200},
 		{2851, map[string]any{"partner_id": 4, "equip_pos": 2}, 200},

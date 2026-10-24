@@ -33,7 +33,6 @@ import (
 	"gxb.local/backend/v2/internal/domain/guild"
 	gi "gxb.local/backend/v2/internal/domain/guildinvite"
 	"gxb.local/backend/v2/internal/domain/identity"
-	"gxb.local/backend/v2/internal/foundation/ids"
 	"gxb.local/backend/v2/internal/foundation/policy"
 	"gxb.local/backend/v2/internal/foundation/tx"
 
@@ -83,6 +82,7 @@ func TestWorkingP4SharedObservationMixedClaimAndInviteReload(t *testing.T) {
 		t.Fatal(e)
 	}
 	defer p.Close()
+	w := seedWorld(t, c, p)
 	// Source-only fixtures intentionally omitted presentation; seed the required
 	// existing owner projections in this disposable consumer fixture only.
 	for _, sql := range []string{
@@ -103,20 +103,7 @@ func TestWorkingP4SharedObservationMixedClaimAndInviteReload(t *testing.T) {
 	if e != nil || !bundle.Present || !bundle.Qualified {
 		t.Fatal(bundle, e)
 	}
-	rows, e := p.Raw().Query(c, `SELECT s.source_id::text FROM guild_invite_projection_sources s LEFT JOIN social_guild_invite_materializations t USING(source_id) WHERE t.source_id IS NULL ORDER BY source_serial`)
-	if e != nil {
-		t.Fatal(e)
-	}
-	var candidate ids.UUID
-	for rows.Next() {
-		var raw string
-		rows.Scan(&raw)
-		candidate, _ = ids.ParseUUID(raw)
-	}
-	rows.Close()
-	if candidate.IsZero() {
-		t.Fatal("no unmaterialized source")
-	}
+	candidate := materializeTargets(t, c, p, w).ID
 	emitter := &inviteEmitter{}
 	target := bundle.Target
 	target.Emitter = emitter

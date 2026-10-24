@@ -46,30 +46,8 @@ func dormService(p *pg.Pool, db tx.Beginner) app.Service {
 func dormFixture(t *testing.T, p *pg.Pool) (identity.ActorContext, string, dorm.Catalog) {
 	t.Helper()
 	rev := installed(t, p)
-	a := actor(t, p)
-	h := skillHero(t, p, a, rev, 10001001, 1)
-	tr, e := p.Begin(ctx, tx.Options{})
-	if e != nil {
-		t.Fatal(e)
-	}
-	defer tr.Rollback(ctx)
-	owner := dormstore.Store{}
-	at := time.Now().UTC().Add(-time.Hour)
-	if e = owner.EnsureRootTx(ctx, tr, a.PlayerID, rev, at); e != nil {
-		t.Fatal(e)
-	}
-	if e = owner.InitFreshHeroTx(ctx, tr, h.Ref(), at); e != nil {
-		t.Fatal(e)
-	}
-	if e = (librarystore.Store{}).EnsurePlayerRootTx(ctx, tr, a.PlayerID, at); e != nil {
-		t.Fatal(e)
-	}
-	if _, e = (librarystore.Store{}).BackfillMissingHeroTx(ctx, tr, h.Ref(), at); e != nil {
-		t.Fatal(e)
-	}
-	if e = tr.Commit(ctx); e != nil {
-		t.Fatal(e)
-	}
+	a := bornActor(t, p)
+	bornHero(t, p, a, rev, 10001001, 1)
 	exec(t, p, `UPDATE player_progression SET level=100 WHERE player_id=$1`, int64(a.PlayerID))
 	for _, f := range []int64{71, 72, 73, 74} {
 		exec(t, p, `INSERT INTO player_function_unlocks(player_id,function_id,source_fact_key,opened_at,state_version)VALUES($1,$2,$3,clock_timestamp()-interval '1 hour',1)`, int64(a.PlayerID), f, fmt.Sprint("i7c2c-explicit-campaign-prerequisite-", f))

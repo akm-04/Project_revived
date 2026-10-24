@@ -28,7 +28,7 @@ func TestI7C2BActualAPILibraryAndRestartRoster(t *testing.T) {
 		t.Skip("exact API binary required")
 	}
 	p := pool(t)
-	a, _ := libraryFixture(t, p, true)
+	a, _ := bornLibraryFixture(t, p, true)
 	bearer := displayToken(t, p, a)
 	listener, e := net.Listen("tcp", "127.0.0.1:0")
 	if e != nil {

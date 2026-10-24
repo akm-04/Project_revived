@@ -48,9 +48,13 @@ func TestPlayerBandAndCapacity(t *testing.T) {
 	if PlayerRegion(199999) != 1 || PlayerRegion(200001) != 2 {
 		t.Fatal("region encoding")
 	}
+	inRobotRange := Server{ID: 1, Name: "Server 1", NextPlayerID: 125000, MaxPlayerID: 199999}
+	if inRobotRange.Validate() == nil {
+		t.Fatal("a cursor inside the stock robot table range was accepted")
+	}
 }
 func TestNewCharacterRequiresObservationAndRollsBackPurePlanOnContributorFailure(t *testing.T) {
-	s := Server{ID: 1, Name: "Server 1", DirectoryVisible: true, ExistingLoginAllowed: true, NewCharacterAllowed: true, NextPlayerID: 100001, MaxPlayerID: 199999}
+	s := Server{ID: 1, Name: "Server 1", DirectoryVisible: true, ExistingLoginAllowed: true, NewCharacterAllowed: true, NextPlayerID: 125001, MaxPlayerID: 199999}
 	if _, e := PlanCharacter(s, au(1), su(2), nil, false, op(), "wave-s-v1", nil); !errors.Is(e, ErrObservationRequired) {
 		t.Fatalf("%v", e)
 	}
@@ -58,13 +62,13 @@ func TestNewCharacterRequiresObservationAndRollsBackPurePlanOnContributorFailure
 	if _, e := PlanCharacter(s, au(1), su(2), nil, true, op(), "wave-s-v1", []BootstrapContributor{c}); e == nil {
 		t.Fatal("required failure accepted")
 	}
-	if s.NextPlayerID != 100001 {
+	if s.NextPlayerID != 125001 {
 		t.Fatal("input cursor mutated on failed plan")
 	}
 }
 func TestExistingOwnerIgnoresNewCharacterFullGate(t *testing.T) {
-	s := Server{ID: 1, Name: "Server 1", DirectoryVisible: true, ExistingLoginAllowed: true, NewCharacterAllowed: false, NextPlayerID: 100002, MaxPlayerID: 199999}
-	p := PlayerRoot{PlayerID: 100001, AccountID: au(1), LogicalServerID: 1}
+	s := Server{ID: 1, Name: "Server 1", DirectoryVisible: true, ExistingLoginAllowed: true, NewCharacterAllowed: false, NextPlayerID: 125002, MaxPlayerID: 199999}
+	p := PlayerRoot{PlayerID: 125001, AccountID: au(1), LogicalServerID: 1}
 	r, e := PlanCharacter(s, au(1), su(2), &p, false, op(), "x", nil)
 	if e != nil || r.Created {
 		t.Fatalf("existing failed %v", e)

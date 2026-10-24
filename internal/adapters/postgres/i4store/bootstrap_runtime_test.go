@@ -112,9 +112,9 @@ func mid1SelectionResultForTest(t *testing.T) appboot.MID1Result {
 	cid := testContextID(t, "22222222-2222-4222-8222-222222222222")
 	sid := testSessionID(t)
 	aid := testAccountID(t, "33333333-3333-4333-8333-333333333333")
-	ctx := identity.GameplayContext{ID: cid, SessionID: sid, AccountID: aid, LogicalServerID: 1, PlayerID: 100001, ContextGeneration: 2, CreatedAt: time.Unix(100, 0).UTC(), LivenessVersion: 1}
-	player := logicalserver.PlayerRoot{PlayerID: 100001, AccountID: aid, LogicalServerID: 1, CreatedAt: time.Unix(10, 0).UTC(), BootstrapProfileVersion: "wave-s-v1", FirstEntryPending: true, StateVersion: 1}
-	server := logicalserver.Server{ID: 1, Name: "Server 1", DirectoryVisible: true, ExistingLoginAllowed: true, NewCharacterAllowed: true, NextPlayerID: 100002, MaxPlayerID: 199999, StateVersion: 1, CreatedAt: time.Unix(1, 0).UTC()}
+	ctx := identity.GameplayContext{ID: cid, SessionID: sid, AccountID: aid, LogicalServerID: 1, PlayerID: 125001, ContextGeneration: 2, CreatedAt: time.Unix(100, 0).UTC(), LivenessVersion: 1}
+	player := logicalserver.PlayerRoot{PlayerID: 125001, AccountID: aid, LogicalServerID: 1, CreatedAt: time.Unix(10, 0).UTC(), BootstrapProfileVersion: "wave-s-v1", FirstEntryPending: true, StateVersion: 1}
+	server := logicalserver.Server{ID: 1, Name: "Server 1", DirectoryVisible: true, ExistingLoginAllowed: true, NewCharacterAllowed: true, NextPlayerID: 125002, MaxPlayerID: 199999, StateVersion: 1, CreatedAt: time.Unix(1, 0).UTC()}
 	return appboot.MID1Result{Region: 1, UID: identity.AccountUID("20000007"), Detail: map[string]any{"stale": true}, IsNew: 1, Player: player, Server: server, ContextPlan: identity.SelectionPlan{Kind: identity.SelectionCoalesced, Selected: ctx}}
 }
 

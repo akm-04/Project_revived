@@ -12,7 +12,6 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres/kernelstore"
 	riveradapter "gxb.local/backend/v2/internal/adapters/river"
 	app "gxb.local/backend/v2/internal/application/guildinvite"
-	"gxb.local/backend/v2/internal/foundation/ids"
 	"gxb.local/backend/v2/internal/foundation/tx"
 	"os"
 	"testing"
@@ -44,11 +43,8 @@ func TestWorkingP3PartialCleanupContinuationRollback(t *testing.T) {
 	if e != nil {
 		t.Fatal(e)
 	}
-	var raw string
-	if e = p.QueryRow(c, `SELECT marker_id::text FROM guild_invite_projection_markers ORDER BY event_id DESC LIMIT 1`).Scan(&raw); e != nil {
-		t.Fatal(e)
-	}
-	id, _ := ids.ParseUUID(raw)
+	_, join := joinedTargets(t, c, p)
+	id := join.ID
 	store := guildinvitestore.Store{}
 	cleanup := app.Cleanup{Timed: bundle.Target.Timed, Reads: runner, Sources: bundle.Source, Store: store, Players: i4store.PlayerRootLocker{}, Target: bundle.Target, Receipts: kernelstore.Store{}, Enqueue: queue}
 	bad := cleanup

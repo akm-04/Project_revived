@@ -141,8 +141,9 @@ def main() -> int:
     if manifest.get("compiler_version")=="i7a7a-social-gift":
         if qualified_social_gift_scalar_delta(ROOT,resource_payload):expected_resource_count=5557
         else:errors.append("unqualified SocialGift scalar delta; historical catalog identity must remain exact")
-    if len(resources)!=expected_resource_count:
-        errors.append(f"resource count={len(resources)} want {expected_resource_count}")
+    # Later content phases append resources; the R4B/I7A-7A catalog stays the floor.
+    if len(resources)<expected_resource_count:
+        errors.append(f"resource count={len(resources)} want at least {expected_resource_count}")
     if len(progression) != 100:
         errors.append(f"progression count={len(progression)} want 100")
     if objectives != []:

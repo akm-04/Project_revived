@@ -64,9 +64,9 @@ func TestI7C2ECourseCoreQualifiedInputs(t *testing.T) {
 func courseFixture(t *testing.T, p *pg.Pool) (identity.ActorContext, string, app.Service) {
 	t.Helper()
 	rev := installed(t, p)
-	a := actor(t, p)
+	a := bornActor(t, p)
 	for id := int64(1); id <= 3; id++ {
-		skillHero(t, p, a, rev, 10001000+id, id)
+		bornHero(t, p, a, rev, 10001000+id, id)
 	}
 	s := courseService(p, p)
 	tr, e := p.Begin(ctx, tx.Options{Isolation: tx.Serializable})
@@ -74,18 +74,6 @@ func courseFixture(t *testing.T, p *pg.Pool) (identity.ActorContext, string, app
 		t.Fatal(e)
 	}
 	defer tr.Rollback(ctx)
-	at := time.Now().UTC().Add(-time.Hour)
-	if e = (coursestore.Store{}).EnsureRootTx(ctx, tr, a.PlayerID, rev, at); e != nil {
-		t.Fatal(e)
-	}
-	if e = (dormstore.Store{}).EnsureRootTx(ctx, tr, a.PlayerID, rev, at); e != nil {
-		t.Fatal(e)
-	}
-	for id := int64(1); id <= 3; id++ {
-		if e = (coursestore.Store{}).InitFreshHeroTx(ctx, tr, character.HeroRef{PlayerID: a.PlayerID, PartnerID: id}, at); e != nil {
-			t.Fatal(e)
-		}
-	}
 	o := op()
 	o.Policies, _ = policy.NewSet(policy.Ref{Name: "content", Version: rev})
 	lines := []grant.Line{{Kind: grant.ScalarCurrency, ResourceKey: "crystal", Amount: 10000000}}
@@ -529,19 +517,6 @@ func TestI7C2ECourseCallerSnapshotAndDormIndependence(t *testing.T) {
 		t.Fatal("new snapshot", e)
 	}
 	h := skillRead(t, p, a, 1)
-	tr, e = p.Begin(ctx, tx.Options{})
-	if e != nil {
-		t.Fatal(e)
-	}
-	for _, id := range []int64{1, 2, 3} {
-		h := skillRead(t, p, a, id)
-		if e = (dormstore.Store{}).InitFreshHeroTx(ctx, tr, h.Ref(), time.Now().Add(-time.Hour)); e != nil {
-			t.Fatal(e)
-		}
-	}
-	if e = tr.Commit(ctx); e != nil {
-		t.Fatal(e)
-	}
 	exec(t, p, `INSERT INTO player_function_unlocks(player_id,function_id,source_fact_key,opened_at,state_version)VALUES($1,71,'i7c2e-explicit-Dorm-prerequisite',clock_timestamp()-interval '1 hour',1)`, int64(a.PlayerID))
 	dormCommand(t, dormService(p, p), a, dorm.Command{Family: dorm.Enter, Partners: []int64{1}, HouseID: 1})
 	courseCmd(t, svc, a, app.Command{Family: app.Enter, PartnerID: 1})

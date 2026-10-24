@@ -324,7 +324,7 @@ func TestI7C2GCoherentReadAndMissingOwnerIsNotAbsence(t *testing.T) {
 
 func eligibleElementHero(t *testing.T, p *pg.Pool, a identity.ActorContext, rev string, table, id int64, super bool) {
 	t.Helper()
-	skillHero(t, p, a, rev, table, id)
+	bornHero(t, p, a, rev, table, id)
 	tr, e := p.Begin(ctx, tx.Options{Isolation: tx.Serializable})
 	if e != nil {
 		t.Fatal(e)
