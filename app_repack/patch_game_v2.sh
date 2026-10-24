@@ -7,11 +7,25 @@
 # probe patches are not needed. MODS=1 also overlays mods/. www.game168.tw (store link of the update dialog) and
 # girls.game168.com.tw (voice-actor web page) are browser links, not server calls, so they stay stock (v1 rewrote them too).
 # Needs Java 17+ and python3; no wine (the decompiled Lua is in origin_lua/).
-# usage: patch_game_v2.sh <engine origin, e.g. http://10.0.2.2:18853> <sdk origin, e.g. http://10.0.2.2:18855/> [build dir]
+# usage: patch_game_v2.sh [engine origin] [sdk origin] [build dir]   (arguments override the configuration below)
 set -euo pipefail
 HERE=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
-ENGINE=${1:?engine origin}
-SDK=${2:?sdk origin}
+
+# --- Configuration: where the patched game connects. Keep one ENGINE_ORIGIN and one SDK_ORIGIN uncommented. ---
+# ENGINE_ORIGIN is gxb-api (default port 18853); SDK_ORIGIN is the login SDK endpoint (default port 18855, keep the trailing /).
+# Android emulator on the same PC (10.0.2.2 is the host as the emulator sees it):
+ENGINE_ORIGIN=http://10.0.2.2:18853
+SDK_ORIGIN=http://10.0.2.2:18855/
+# A phone on your Wi-Fi: use your PC's LAN address (`ip addr` / `ipconfig`), for example:
+# ENGINE_ORIGIN=http://192.168.1.50:18853
+# SDK_ORIGIN=http://192.168.1.50:18855/
+# Your own domain or tunnel (any reverse proxy or tunnel service that forwards to the ports above):
+# ENGINE_ORIGIN=https://engine.example.com
+# SDK_ORIGIN=https://sdk.example.com/
+# --- End of configuration ---
+
+ENGINE=${1:-$ENGINE_ORIGIN}
+SDK=${2:-$SDK_ORIGIN}
 B=$(realpath -m "${3:-$HERE/build_v2}")
 shopt -s nullglob
 APKS=("$HERE"/app/*.apk)
