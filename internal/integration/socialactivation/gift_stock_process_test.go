@@ -117,6 +117,7 @@ func Test7B_ExplicitDeploymentActivationPreservesStartupContract(t *testing.T) {
 	if f.number(`SELECT count(*) FROM gxb_content_revisions WHERE revision_id=$1`, old) != 1 {
 		t.Fatal("accepted35 immutable revision unavailable")
 	}
+	deployed := f.text(`SELECT revision_id FROM gxb_content_activation`)
 	// A qualified old activation restored into this disposable fixture. Generic
 	// API startup must preserve it; only the explicit owning command may switch.
 	f.sql(`UPDATE gxb_content_activation SET revision_id=$1,activation_version=activation_version+1,activated_by='qualified-old-pointer-fixture'`, old)
@@ -145,7 +146,7 @@ func Test7B_ExplicitDeploymentActivationPreservesStartupContract(t *testing.T) {
 	if e != nil {
 		t.Fatal(e, string(raw))
 	}
-	if f.text(`SELECT revision_id FROM gxb_content_activation`) != "808226509f62cf9dbb540cf0c845cab1fffe7f85aaf5a984452b01b894f01565" {
+	if f.text(`SELECT revision_id FROM gxb_content_activation`) != deployed {
 		t.Fatal("owning activation failed", string(raw))
 	}
 	proc.Process.Kill()

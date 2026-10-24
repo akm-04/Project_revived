@@ -35,7 +35,7 @@ TAG_SETS = {'unit': '', 'postgres': 'postgres socialintegration channelintegrati
 BUILD_ONLY_TAG_SETS = {'chi': 'chi'}
 FULL_TAGS = TAG_SETS['river']
 BINARY_COMMANDS = {'API': ('gxb-api', 'postgres,river'), 'REALTIME': ('gxb-realtime', 'postgres'),
-                   'MAINT': ('gxb-profile-media-maint', 'postgres'), 'ACTIVATION': ('gxb-content-gift-activate', 'postgres')}
+                   'MAINT': ('gxb-profile-media-maint', 'postgres'), 'ACTIVATION': ('gxb-content-broadcast-deploy', 'postgres,river')}
 # Variables the gate itself provides to every run, and test outputs that are only written when a freeze tool asks for them.
 MACHINE_VARIABLES = {'GXB_LUAJIT', 'GXB_I7B5B_ASSET_ROOT', 'GXB_I7A8_FULL_ROSTER_PROBE'}
 OPTIONAL_OUTPUT_VARIABLES = {'GXB_I8_3B_SNAPSHOT_OUT'}
