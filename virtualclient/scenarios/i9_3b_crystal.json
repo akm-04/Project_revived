@@ -9,6 +9,9 @@
   10001015
  ],
  "steps": [
+  "lua:local p=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_PLAYER) for _,h in pairs(p:getHeros()) do local hero=h p:addPartnerExp({item_id=50001005,partner_id=hero:getHeroID(),item_num=10,total_num=p:getBackpack():getItemNumByID(50001005)},function(code,req,reply) if code~=xyd.error.OK or not reply.partner_exp then error('vc-training-failed') end hero:setExp(reply.partner_exp,xyd.tables.player:heroMaxLev(p.lev)) p:getBackpack():setItemNumByID(reply.item_id,reply.total_num) end) end",
+  "wait:10",
+  "lua:local p=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_PLAYER) for _,h in pairs(p:getHeros()) do if h:getLevel()<20 then error('vc-training-level-'..tostring(h:getLevel())) end end",
   "wait:5",
   "lua:xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_PLAYER):loadWorldMap(function(code) if code ~= xyd.error.OK then error('vc-world-map-' .. tostring(code)) end xyd.WindowManager.get():openWindow('new_map_detail_window', {campaignID = 100001, campaignType = xyd.CampaignType.NORMAL, star = 0, dailyLimit = 0, resetCount = 0}) end)",
   "wait:5",
@@ -67,7 +70,8 @@
   113,
   114,
   116,
-  117
+  117,
+  55
  ],
  "vip": 5,
  "grants": [
@@ -75,6 +79,11 @@
    "Kind": "SCALAR_CURRENCY",
    "ResourceKey": "crystal",
    "Amount": 500
+  },
+  {
+   "Kind": "STACK_ITEM",
+   "ItemID": 50001005,
+   "Amount": 50
   }
  ]
 }
