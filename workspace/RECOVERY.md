@@ -23,7 +23,7 @@ older PassMap authorities (COLD inside the PassMap zip holds the history), and t
 ## Second copy: the workshop Git repo (branch v2)
 `inputs/Supplimental_Materials/gxb_workshop` (remote akm-04/Project_revived), branch `v2` (v2 only; v1 is on `main`): `backend/` is the v2 backend with its full
 history (merge commit; `git log <merge>^2`), `app_repack/patch_game_v2.sh` builds the emulator APK, `tools/parts` holds the r4 toolchain,
-virtual client kit, Android bundle, stock APK and client baseline split into 90 MB parts (`tools/assemble.sh <dir>` rejoins, checks
+virtual client kit, Android bundle and client baseline split into 90 MB parts (the stock APK is user-supplied, app_repack/app/placeholder.txt) (`tools/assemble.sh <dir>` rejoins, checks
 sha256 and unzips), and `workspace/` holds an ops/ snapshot and this file. The repo copy is refreshed by hand when those artifacts change
 (see its tools/README.md); the files in inputs/ are newer when the two differ.
 
