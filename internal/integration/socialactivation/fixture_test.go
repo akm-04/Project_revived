@@ -99,16 +99,30 @@ func (f *fixture) now() time.Time {
 }
 func (f *fixture) player(pid identity.PlayerID) {
 	f.t.Helper()
+	account, server := f.identityRoots(pid)
+	if e := nativebirth.Persist(ctx, f.p, account, server, pid); e != nil {
+		f.t.Fatalf("fixture birth: %v", e)
+	}
+	f.sql(`UPDATE player_profiles SET display_name=$2 WHERE player_id=$1`, int64(pid), fmt.Sprint(pid))
+}
+
+// legacyPlayer is a player as an old-schema seed (00032, 00035) held one: identity roots and a profile row. The upgrade under test
+// creates the later owner rows, so the current birth chain must not run against the old schema.
+func (f *fixture) legacyPlayer(pid identity.PlayerID) {
+	f.t.Helper()
+	f.identityRoots(pid)
+	f.sql(`INSERT INTO player_profiles(player_id,display_name,avatar_id,created_at,updated_at) VALUES($1,$2,110001001,$3,$3)`, int64(pid), fmt.Sprint(pid), f.at)
+}
+
+func (f *fixture) identityRoots(pid identity.PlayerID) (ids.UUID, identity.LogicalServerID) {
+	f.t.Helper()
 	u, _ := ids.NewUUID()
 	server, _ := sr.CanonicalServer(pid)
 	f.sql(`INSERT INTO logical_servers(logical_server_id,name,directory_visible,existing_login_allowed,new_character_allowed,next_player_id,max_player_id,created_at) VALUES($1,'fixture',true,true,true,$2,$3,$4) ON CONFLICT DO NOTHING`, int32(server), int64(server)*100000+25001, (int64(server)+1)*100000-1, f.at)
 	f.sql(`INSERT INTO accounts(account_id,account_uid,status,created_at) VALUES($1::uuid,$2,'ACTIVE',$3)`, u.String(), fmt.Sprint(pid), f.at)
 	f.sql(`INSERT INTO players(player_id,account_id,logical_server_id,created_at,bootstrap_profile_version) VALUES($1,$2::uuid,$3,$4,'fixture')`, int64(pid), u.String(), int32(server), f.at)
 	f.sql(`INSERT INTO player_directory_profiles(player_id,name,created_at,updated_at) VALUES($1,$2,$3,$3)`, int64(pid), fmt.Sprint(pid), f.at)
-	if e := nativebirth.Persist(ctx, f.p, u, server, pid); e != nil {
-		f.t.Fatalf("fixture birth: %v", e)
-	}
-	f.sql(`UPDATE player_profiles SET display_name=$2 WHERE player_id=$1`, int64(pid), fmt.Sprint(pid))
+	return u, server
 }
 
 // birthOwnerTables restrict players deletion; a deletion fixture clears them so social restrict/set-null rules decide the outcome.

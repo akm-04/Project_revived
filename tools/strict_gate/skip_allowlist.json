@@ -255,6 +255,12 @@
    "reason": "explicit nonempty dump/restore/restart orchestration"
   },
   {
+   "test": "internal/integration/socialactivation.Test7B_DeploymentPopulated35Seed",
+   "kind": "recipe",
+   "owner": "recipe:populated35-deployment",
+   "reason": "I8.5-6: seeds the accepted 00035 players before the populated35 upgrade"
+  },
+  {
    "test": "internal/integration/socialactivation.Test7B_ExplicitDeploymentActivationPreservesStartupContract",
    "kind": "recipe",
    "owner": "recipe:populated35-deployment",

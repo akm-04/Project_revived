@@ -48,7 +48,8 @@ import (
 var ctx = context.Background()
 var at = time.Now().UTC()
 
-func pool(t *testing.T) *pg.Pool {
+// nativeDSN is the one database a test's fixtures and the API process it starts both use.
+func nativeDSN(t *testing.T) string {
 	t.Helper()
 	dsn := os.Getenv("GXB_I7B4B_DSN")
 	if dsn == "" {
@@ -57,7 +58,12 @@ func pool(t *testing.T) *pg.Pool {
 	if dsn == "" {
 		t.Fatal("required exact native DSN missing")
 	}
-	p, e := pg.Open(ctx, dsn, pg.PoolSettings{MaxConns: 16, MaxConnLifetime: time.Hour, MaxConnIdleTime: time.Minute, HealthCheckPeriod: time.Minute})
+	return dsn
+}
+
+func pool(t *testing.T) *pg.Pool {
+	t.Helper()
+	p, e := pg.Open(ctx, nativeDSN(t), pg.PoolSettings{MaxConns: 16, MaxConnLifetime: time.Hour, MaxConnIdleTime: time.Minute, HealthCheckPeriod: time.Minute})
 	if e != nil {
 		t.Fatal(e)
 	}
@@ -853,7 +859,7 @@ func TestPraiseActualAPIProcess(t *testing.T) {
 	addr := listener.Addr().String()
 	listener.Close()
 	cmd := exec.Command(binary)
-	cmd.Env = append(os.Environ(), "GXB_POSTGRES_DSN="+os.Getenv("GXB_I7B4A_DSN"), "GXB_HTTP_ADDR="+addr, "GXB_PUBLIC_ENGINE_URL=http://"+addr+"/engine", "GXB_REALTIME_PUBLIC_HOST=127.0.0.1", "GXB_REALTIME_PUBLIC_PORT=19001", "GXB_CREDENTIAL_DIGEST_SECRET=i7b2b-fixture-digest-key-00001", "GXB_GAMEPLAY_BEARER_SECRET=i7b2b-fixture-bearer-key-00001", "GXB_REDEEM_DIGEST_SECRET=i7b4a-fixture-redeem-key-00001", "GXB_DERIVATION_KEY_ID=i7b2b-native")
+	cmd.Env = append(os.Environ(), "GXB_POSTGRES_DSN="+nativeDSN(t), "GXB_HTTP_ADDR="+addr, "GXB_PUBLIC_ENGINE_URL=http://"+addr+"/engine", "GXB_REALTIME_PUBLIC_HOST=127.0.0.1", "GXB_REALTIME_PUBLIC_PORT=19001", "GXB_CREDENTIAL_DIGEST_SECRET=i7b2b-fixture-digest-key-00001", "GXB_GAMEPLAY_BEARER_SECRET=i7b2b-fixture-bearer-key-00001", "GXB_REDEEM_DIGEST_SECRET=i7b4a-fixture-redeem-key-00001", "GXB_DERIVATION_KEY_ID=i7b2b-native")
 	var output bytes.Buffer
 	cmd.Stdout = &output
 	cmd.Stderr = &output

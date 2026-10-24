@@ -371,6 +371,8 @@ class Gate:
 
     def recipe_populated35_deployment(self, recipe):
         dsn = self.restore('populated35_deployment', self.accepted35_dump())
+        self.recipe_test(recipe, 'seed', './internal/integration/socialactivation', '^Test7B_DeploymentPopulated35Seed$',
+                         {**self.every_dsn(dsn), 'GXB_I7A7B_DEPLOYMENT_MODE': 'seed'})
         self.migrate_current(recipe, dsn)
         self.deploy(recipe, dsn)
         self.recipe_test(recipe, 'deployed', './internal/integration/socialactivation',

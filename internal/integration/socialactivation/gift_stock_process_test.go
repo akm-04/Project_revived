@@ -97,8 +97,19 @@ func Test7B_ProductionGiftHTTPNotifyListenerAndRecovery(t *testing.T) {
 	t.Log("ACTUAL_BINARY_HTTP183 -> committedPGNOTIFYg1 -> dedicatedLISTEN -> WORLDconnWriter;184absolute namedscalar;API/realtime processrestart preservescounts/value")
 }
 
+// Test7B_DeploymentPopulated35Seed populates the accepted 00035 database before the recipe upgrades it: the players the deployment
+// test acts as exist as a 00035 product held them.
+func Test7B_DeploymentPopulated35Seed(t *testing.T) {
+	if os.Getenv("GXB_I7A7B_DEPLOYMENT_MODE") != "seed" {
+		t.Skip("explicit accepted35 seed only")
+	}
+	f := existing(t)
+	f.legacyPlayer(100001)
+	f.legacyPlayer(200001)
+}
+
 func Test7B_ExplicitDeploymentActivationPreservesStartupContract(t *testing.T) {
-	if os.Getenv("GXB_I7A7B_DEPLOYMENT_MODE") == "" {
+	if os.Getenv("GXB_I7A7B_DEPLOYMENT_MODE") != "1" {
 		t.Skip("explicit populated35upgrade database only")
 	}
 	f := existing(t)

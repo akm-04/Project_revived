@@ -166,8 +166,8 @@ func TestD12UpgradePopulated32Seed(t *testing.T) {
 		t.Skip("explicit 00032seed only")
 	}
 	f := existing(t)
-	f.player(100001)
-	f.player(200001)
+	f.legacyPlayer(100001)
+	f.legacyPlayer(200001)
 	a, _ := f.live(100001)
 	f.sql(`INSERT INTO player_social_presence(player_id,last_seen_at,created_at,updated_at)VALUES(100001,$1,$1,$1)`, f.at)
 	f.sql(`INSERT INTO realtime_presence_owner_state(singleton,owner_fence,activated_at)VALUES(true,1,$1)`, f.at)
