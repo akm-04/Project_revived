@@ -306,6 +306,8 @@ func main() {
 	mustRegister(18, boot)
 	mustRegister(1, boot)
 	mustRegister(192, stockruntime.DiscoveryDispatcher{Realtime: realtime, Tracker: tracker})
+	// Login, bootstrap and discovery carry their own full state; every gameplay MID registered from here gets the F17 keys.
+	router.Wrap = func(d httpedge.Dispatcher) httpedge.Dispatcher { return stockruntime.Decorated{Next: d} }
 	owners := topFloorOwners{library: librarySvc, dorm: dormSvc, book: bookSvc, course: courseSvc, inscription: inscriptionSvc, element: elementSvc, spirit: spiritSvc, evolution: evolutionSvc}
 	publicStats := canonicalPublicStats(pool, contentDB, owners)
 	profileMetrics := canonicalProfileMetrics(contentDB, publicStats, displayService, achievements)
@@ -319,7 +321,7 @@ func main() {
 	}
 	ranking := stockruntime.RankingDispatcher{Authority: authority, Service: boardRanking, Trophy: achievements}
 	if fightReady {
-		topFloor := canonicalTopFloor(pool, runner, contentDB, i5db, privileges, fight, owners)
+		topFloor := canonicalTopFloor(pool, runner, contentDB, i5db, i5svc, privileges, fight, owners)
 		ranking.TopFloor = topFloor
 		for _, mid := range stockruntime.TopFloorMIDs {
 			mustRegister(mid, stockruntime.TopFloorDispatcher{Authority: authority, Service: topFloor})
@@ -510,6 +512,12 @@ func main() {
 	mediaHandler, err := registerProfileMedia(ctx, pool, runner, authority, receipts, contentDB, router, cfg.ProfileMediaRoot, cfg.ProfileMediaPublicOrigin)
 	if err != nil {
 		log.Fatalf("Profile media startup: %v", err)
+	}
+	// Registered last: a surface MID that already has its owner's dispatcher keeps it.
+	for _, mid := range stockruntime.InactiveModeMIDs {
+		if _, owned := router.Lookup(mid); !owned {
+			mustRegister(mid, stockruntime.InactiveModeDispatcher{Authority: authority})
+		}
 	}
 	admission, err := httpedge.NewAdmission(256)
 	if err != nil {

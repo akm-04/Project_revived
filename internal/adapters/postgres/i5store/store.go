@@ -15,9 +15,11 @@ import (
 	"gxb.local/backend/v2/internal/domain/grant"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/domain/mail"
+	"gxb.local/backend/v2/internal/domain/modes"
 	"gxb.local/backend/v2/internal/domain/objective"
 	"gxb.local/backend/v2/internal/domain/player"
 	"gxb.local/backend/v2/internal/domain/redeem"
+	"gxb.local/backend/v2/internal/foundation/changes"
 	"gxb.local/backend/v2/internal/foundation/ids"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
@@ -229,13 +231,42 @@ func (Store) SaveScalarTx(ctx context.Context, t tx.Tx, b economy.ScalarBalance,
 		if err != nil {
 			return err
 		}
-		return rowsOne(tag, "scalar insert")
+		if err := rowsOne(tag, "scalar insert"); err != nil {
+			return err
+		}
+		changes.Balance(ctx, b.ResourceKey, b.Amount)
+		return nil
 	}
-	tag, err := t.Exec(ctx, `UPDATE player_currency_balances SET amount=$3,state_version=$4,updated_at=$5 WHERE player_id=$1 AND resource_key=$2 AND state_version=$6`, int64(b.PlayerID), b.ResourceKey, b.Amount, b.StateVersion, b.UpdatedAt.UTC(), b.StateVersion-1)
+	var before int64
+	err := t.QueryRow(ctx, `UPDATE player_currency_balances c SET amount=$3,state_version=$4,updated_at=$5
+		FROM (SELECT amount FROM player_currency_balances WHERE player_id=$1 AND resource_key=$2) o
+		WHERE c.player_id=$1 AND c.resource_key=$2 AND c.state_version=$6 RETURNING o.amount`, int64(b.PlayerID), b.ResourceKey, b.Amount, b.StateVersion, b.UpdatedAt.UTC(), b.StateVersion-1).Scan(&before)
+	if noRows(err) {
+		return fmt.Errorf("scalar update optimistic write affected 0 rows")
+	}
 	if err != nil {
 		return err
 	}
-	return rowsOne(tag, "scalar update")
+	if b.ResourceKey == crystalKey && before > b.Amount {
+		if _, err := t.Exec(ctx, `INSERT INTO player_crystal_spend_days(player_id,game_day,spent) VALUES($1,$2,$3)
+			ON CONFLICT(player_id,game_day) DO UPDATE SET spent=player_crystal_spend_days.spent+excluded.spent`, int64(b.PlayerID), modes.Day(b.UpdatedAt), before-b.Amount); err != nil {
+			return err
+		}
+	}
+	changes.Balance(ctx, b.ResourceKey, b.Amount)
+	return nil
+}
+
+const crystalKey = "crystal"
+
+// CrystalSpentOnDayTx is the crystal total spent on a game day (I9_MODE_FOUNDATION_V1 MF4), read by daily missions 126/127.
+func (Store) CrystalSpentOnDayTx(ctx context.Context, t tx.Tx, pid identity.PlayerID, day int64) (int64, error) {
+	var spent int64
+	err := t.QueryRow(ctx, `SELECT spent FROM player_crystal_spend_days WHERE player_id=$1 AND game_day=$2`, int64(pid), day).Scan(&spent)
+	if noRows(err) {
+		return 0, nil
+	}
+	return spent, err
 }
 func (Store) LockTemporalTx(ctx context.Context, t tx.Tx, pid identity.PlayerID, key string) (economy.TemporalState, bool, error) {
 	var s economy.TemporalState
@@ -334,7 +365,12 @@ func (Store) SaveProgressionTx(ctx context.Context, t tx.Tx, p player.Progressio
 	if err != nil {
 		return err
 	}
-	return rowsOne(tag, "progression")
+	if err := rowsOne(tag, "progression"); err != nil {
+		return err
+	}
+	changes.Balance(ctx, "exp", p.Exp)
+	changes.Balance(ctx, "lev", p.Level)
+	return nil
 }
 
 func (Store) LockFunctionStateTx(ctx context.Context, t tx.Tx, pid identity.PlayerID) (int64, error) {
@@ -369,6 +405,9 @@ func (Store) InsertFunctionUnlockTx(ctx context.Context, t tx.Tx, u player.Funct
 	n := tag.RowsAffected()
 	if n < 0 || n > 1 {
 		return false, fmt.Errorf("function unlock insert affected %d rows", n)
+	}
+	if n == 1 {
+		changes.FunctionOpened(ctx, u.FunctionID)
 	}
 	return n == 1, nil
 }
@@ -519,6 +558,29 @@ FROM player_mission_instances i
 LEFT JOIN objective_definitions d ON i.content_revision IS NULL AND d.program_id=i.program_id AND d.objective_id=i.objective_id AND d.definition_revision=i.definition_revision
 WHERE i.player_id=$1`
 	if err := s.Queryer.QueryRow(ctx, q, int64(pid)).Scan(&raw); err != nil {
+		return nil, nil, err
+	}
+	return decodeObjectiveRows([]byte(raw))
+}
+
+// LockOpenObjectivesTx locks the player's incomplete, unclaimed objective rows for the fact port (I9_MODE_FOUNDATION_V1 MF3).
+func (Store) LockOpenObjectivesTx(ctx context.Context, t tx.Tx, pid identity.PlayerID) ([]objective.Instance, []appi5.ObjectiveDefinition, error) {
+	var raw string
+	q := `WITH locked AS MATERIALIZED (
+ SELECT i.* FROM player_mission_instances i
+ WHERE i.player_id=$1 AND i.claim_state='UNCLAIMED' AND i.completed_at IS NULL
+ ORDER BY i.objective_id,i.generation_id
+ FOR UPDATE OF i
+)
+SELECT COALESCE(jsonb_agg(jsonb_build_object(
+'player_id',i.player_id,'program_id',i.program_id,'objective_id',i.objective_id,'generation_id',i.generation_id,
+'definition_revision',i.definition_revision,'content_revision',COALESCE(i.content_revision,''),'legacy_definition',(i.content_revision IS NULL),
+'progress',i.progress,'completed_at',i.completed_at,'claim_state',i.claim_state,'claimed_at',i.claimed_at,'state_version',i.state_version,
+'family',COALESCE(d.stock_family,0),'strategy',COALESCE(d.strategy,''),'fact',COALESCE(d.accepted_fact_kind,''),'target',COALESCE(d.target,0),
+'reward_plan',COALESCE(d.reward_plan,'{}'::jsonb),'huoyue',COALESCE(d.huoyue,0)) ORDER BY i.objective_id,i.generation_id),'[]'::jsonb)::text
+FROM locked i
+LEFT JOIN objective_definitions d ON i.content_revision IS NULL AND d.program_id=i.program_id AND d.objective_id=i.objective_id AND d.definition_revision=i.definition_revision`
+	if err := t.QueryRow(ctx, q, int64(pid)).Scan(&raw); err != nil {
 		return nil, nil, err
 	}
 	return decodeObjectiveRows([]byte(raw))

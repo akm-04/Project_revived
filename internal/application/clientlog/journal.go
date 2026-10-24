@@ -143,6 +143,8 @@ func outcomeOf(record observability.RequestRecord) domain.Outcome {
 		return domain.OutcomeUnknownMID
 	case observability.RequestUndecodable:
 		return domain.OutcomeUndecodable
+	case observability.RequestInactiveMode:
+		return domain.OutcomeInactiveMode
 	default:
 		return domain.OutcomeOf(record.HTTPStatus, record.ErrorCode)
 	}

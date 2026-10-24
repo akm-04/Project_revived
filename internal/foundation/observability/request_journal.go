@@ -14,6 +14,7 @@ const (
 	RequestUnknownMID
 	RequestUndecodable
 	RequestRejectedAtEdge
+	RequestInactiveMode
 )
 
 // RequestRecord is one stock HTTP request as seen by the edge

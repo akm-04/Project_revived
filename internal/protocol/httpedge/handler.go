@@ -29,6 +29,8 @@ type Response struct {
 	// Cause is the server-side error behind a failure response. It is never
 	// written to the client; the request journal keeps it (I85_REQUEST_JOURNAL_V1 R2).
 	Cause error
+	// Inactive marks the shared inactive mode answer (I9_MODE_FRAMEWORK_V1 F5); the journal records INACTIVE_MODE.
+	Inactive bool
 }
 
 type DispatchRequest struct {
@@ -46,7 +48,11 @@ func (f DispatcherFunc) Dispatch(ctx context.Context, req DispatchRequest) Respo
 	return f(ctx, req)
 }
 
-type Router struct{ handlers map[uint16]Dispatcher }
+type Router struct {
+	handlers map[uint16]Dispatcher
+	// Wrap, when set, wraps every dispatcher registered after it was set.
+	Wrap func(Dispatcher) Dispatcher
+}
 
 func NewRouter() *Router { return &Router{handlers: make(map[uint16]Dispatcher)} }
 func (r *Router) Register(mid uint16, h Dispatcher) error {
@@ -55,6 +61,9 @@ func (r *Router) Register(mid uint16, h Dispatcher) error {
 	}
 	if _, exists := r.handlers[mid]; exists {
 		return wire.NewError(wire.ErrInternal, 500, "duplicate_handler", "duplicate numeric MID binding")
+	}
+	if r.Wrap != nil {
+		h = r.Wrap(h)
 	}
 	r.handlers[mid] = h
 	return nil
@@ -180,6 +189,9 @@ func (h Handler) serve(w http.ResponseWriter, r *http.Request, record *observabi
 		status = http.StatusOK
 	}
 	record.Cause = resp.Cause
+	if resp.Inactive {
+		record.Disposition = observability.RequestInactiveMode
+	}
 	publicCode, hasPublicCode := resp.Body["error"].(string)
 	if record.Cause == nil && status >= http.StatusInternalServerError && hasPublicCode {
 		record.Cause = errors.New(publicCode)

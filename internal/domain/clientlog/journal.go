@@ -14,6 +14,8 @@ const (
 	OutcomeServerError Outcome = "SERVER_ERROR"
 	OutcomeUnknownMID  Outcome = "UNKNOWN_MID"
 	OutcomeUndecodable Outcome = "UNDECODABLE"
+	// OutcomeInactiveMode is a known mode the server has not opened (I9_MODE_FRAMEWORK_V1 F5); routine, not an anomaly.
+	OutcomeInactiveMode Outcome = "INACTIVE_MODE"
 )
 
 // OutcomeOf maps a dispatched response; a stock error_code on HTTP 200 is a
@@ -31,7 +33,7 @@ func OutcomeOf(httpStatus int, errorCode int64) Outcome {
 // Class is the retention class of a journal row (R6).
 func (o Outcome) Class() RetentionClass {
 	switch o {
-	case OutcomeOK:
+	case OutcomeOK, OutcomeInactiveMode:
 		return Routine
 	case OutcomeUnknownMID, OutcomeUndecodable:
 		return Anomaly

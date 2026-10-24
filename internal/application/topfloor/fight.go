@@ -17,6 +17,7 @@ import (
 	cd "gxb.local/backend/v2/internal/domain/combat"
 	"gxb.local/backend/v2/internal/domain/grant"
 	"gxb.local/backend/v2/internal/domain/identity"
+	"gxb.local/backend/v2/internal/domain/objective"
 	d "gxb.local/backend/v2/internal/domain/topfloor"
 	"gxb.local/backend/v2/internal/foundation/ids"
 	"gxb.local/backend/v2/internal/foundation/operation"
@@ -456,6 +457,10 @@ func (s Service) settleTx(c context.Context, sc gen.TimedScope, id ids.UUID) err
 		if err = s.Store.AddUsageTx(c, sc.Tx, side.player, uses); err != nil {
 			return err
 		}
+	}
+	fact := objective.Fact{PlayerID: f.Challenger, SourceDomain: "top-floor", SourceBusinessKey: f.AttemptID.String(), Kind: "TOP_FLOOR_FIGHT", Delta: 1}
+	if err = s.Facts.RecordTx(c, sc.Tx, sc.Operation.Operation(), fact); err != nil {
+		return err
 	}
 	done := f
 	stamp := at.UTC()

@@ -1527,6 +1527,20 @@
       "owner": "typed-economy",
       "write_exceptions": []
     },
+    "player_crystal_spend_days": {
+      "allowed_query_owners": [
+        "typed-economy"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/i5store/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/i5store/"
+      ],
+      "migration": "migrations/00080_i9_2_crystal_spend_days.sql",
+      "owner": "typed-economy",
+      "write_exceptions": []
+    },
     "player_directory_profiles": {
       "allowed_query_owners": [
         "identity/logicalserver/bootstrap",

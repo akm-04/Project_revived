@@ -497,6 +497,13 @@ func (s Service) applyPreparedGrantTx(ctx context.Context, t tx.Tx, actor identi
 			if err != nil {
 				return GrantResult{}, err
 			}
+			if reachesLevelAndVIPGate(*pf.FunctionPolicy, transition.After.Level) {
+				vip, err := s.vipLevelTx(ctx, t, plan.PlayerID, now)
+				if err != nil {
+					return GrantResult{}, err
+				}
+				eligible = append(eligible, levelAndVIPEligibility(*pf.FunctionPolicy, plan.PlayerID, transition.After.Level, vip, now)...)
+			}
 			newEligible := make([]player.FunctionEligibility, 0, len(eligible))
 			functionChanged := false
 			semanticKey := plan.Source.SemanticKey()

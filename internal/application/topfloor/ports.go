@@ -17,6 +17,7 @@ import (
 	"gxb.local/backend/v2/internal/domain/guild"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/domain/mail"
+	"gxb.local/backend/v2/internal/domain/objective"
 	"gxb.local/backend/v2/internal/domain/player"
 	d "gxb.local/backend/v2/internal/domain/topfloor"
 	"gxb.local/backend/v2/internal/foundation/ids"
@@ -95,6 +96,11 @@ type Directory interface {
 	ProfileTx(context.Context, tx.Queryer, identity.PlayerID) (playerdirectory.Profile, bool, error)
 }
 
+// Facts is the objective fact port (I9_MODE_FOUNDATION_V1 MF3); a settled fight advances task_req 106 (D92).
+type Facts interface {
+	RecordTx(context.Context, tx.Tx, operation.Context, ...objective.Fact) error
+}
+
 type Guilds interface {
 	ReadMembershipTx(context.Context, tx.Queryer, identity.PlayerID) (guild.Membership, bool, error)
 	ReadGuildTx(context.Context, tx.Queryer, guild.ID) (guild.Guild, bool, error)
@@ -116,13 +122,14 @@ type Service struct {
 	Pets         Roster
 	Directory    Directory
 	Guilds       Guilds
+	Facts        Facts
 	Receipts     receipt.Store
 	ReceiptRead  receipt.Reader
 }
 
 func (s Service) ready() bool {
 	return s.Timed.Runner.DB != nil && s.Timed.Binder.Time != nil && s.Fresh != nil && s.Store != nil && s.Content != nil && s.Fence != nil && s.Functions != nil && s.Privileges != nil && s.Costs != nil &&
-		s.Mail != nil && s.Achievements != nil && s.Combat != nil && s.Heroes != nil && s.Pets != nil && s.Directory != nil && s.Guilds != nil && s.Receipts != nil && s.ReceiptRead != nil
+		s.Mail != nil && s.Achievements != nil && s.Combat != nil && s.Heroes != nil && s.Pets != nil && s.Directory != nil && s.Guilds != nil && s.Facts != nil && s.Receipts != nil && s.ReceiptRead != nil
 }
 
 type ArenaView struct {

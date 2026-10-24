@@ -91,3 +91,14 @@ func TestJournalKeepsRawEnvelopeOfUnknownAndUndecodableRequests(t *testing.T) {
 		t.Fatalf("undecodable=%+v", undecodable)
 	}
 }
+
+func TestJournalRecordsInactiveModeAnswer(t *testing.T) {
+	journal := &capturedJournal{}
+	response := post(journalHandler(t, journal, func(context.Context, DispatchRequest) Response {
+		return Response{HTTPStatus: http.StatusOK, Body: map[string]any{"error_code": 1}, Inactive: true}
+	}), `{"mid":18}`)
+	record := journal.records[0]
+	if response.Code != http.StatusOK || record.Disposition != observability.RequestInactiveMode || record.ErrorCode != 1 || record.Raw != nil {
+		t.Fatalf("code=%d record=%+v", response.Code, record)
+	}
+}

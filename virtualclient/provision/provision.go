@@ -10,11 +10,21 @@ import (
 
 	"github.com/jackc/pgx/v5"
 
+	"gxb.local/backend/v2/internal/adapters/postgres"
+	"gxb.local/backend/v2/internal/adapters/postgres/commerceprivilegestore"
 	"gxb.local/backend/v2/internal/adapters/postgres/contentstore"
+	"gxb.local/backend/v2/internal/adapters/postgres/i4store"
+	"gxb.local/backend/v2/internal/adapters/postgres/i5store"
+	"gxb.local/backend/v2/internal/adapters/postgres/kernelstore"
+	"gxb.local/backend/v2/internal/application/commerceprivilege"
 	appi5 "gxb.local/backend/v2/internal/application/i5"
+	"gxb.local/backend/v2/internal/domain/grant"
 	"gxb.local/backend/v2/internal/domain/identity"
-	"gxb.local/backend/v2/internal/domain/player"
+	"gxb.local/backend/v2/internal/foundation/audit"
+	"gxb.local/backend/v2/internal/foundation/clock"
 	"gxb.local/backend/v2/internal/foundation/ids"
+	"gxb.local/backend/v2/internal/foundation/operation"
+	"gxb.local/backend/v2/internal/foundation/policy"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
@@ -81,117 +91,127 @@ type Summon struct {
 	StoneNum int64 `json:"stone_num"`
 }
 
-// queryer lets the production content store read through a pgx transaction.
-type queryer struct{ pgx.Tx }
+// provisionOperator is the audited admin identity the virtual client grants under (D88): progression goes through the
+// production I5 owner, so level-ups, function openings and their effects are the ones a real player gets.
+var provisionOperator = appi5.AdminOperator{ID: "virtual-client-provision", ReasonCode: "vc-scenario-progress"}
 
-func (q queryer) QueryRow(context context.Context, query string, arguments ...any) tx.Row {
-	return q.Tx.QueryRow(context, query, arguments...)
-}
-
-// Progress raises the player stock MID1 birthed for the account the way the integration fixtures do (oneOnOnePlayer): the
-// Player Core level, its directory projection and the functions it opens in one transaction, explicit fragment and mana resource rows. Heroes are
-// not inserted: the returned summons are for the stock client to make through MID59, so the production birth runs.
+// Progress raises the player stock MID1 birthed for the account through production owners (I9_MODE_FOUNDATION_V1 MF7): one
+// i5 AdminGrant carries the PLAYER_EXP to the scenario level and the fragments and mana of every summon. Heroes are not
+// inserted: the returned summons are for the stock client to make through MID59, so the production birth runs.
 func Progress(context context.Context, databaseURL, accountID string, level int64, tables []int64) ([]Summon, error) {
-	connection, err := pgx.Connect(context, databaseURL)
+	pool, err := postgres.Open(context, databaseURL, postgres.PoolSettings{MaxConns: 2, MaxConnLifetime: time.Minute, MaxConnIdleTime: time.Minute, HealthCheckPeriod: time.Minute, ApplicationName: "gxb-virtual-client-provision"})
 	if err != nil {
 		return nil, err
 	}
-	defer connection.Close(context)
-	transaction, err := connection.Begin(context)
-	if err != nil {
-		return nil, err
-	}
-	defer transaction.Rollback(context)
+	defer pool.Close()
 	var playerID int64
-	if err := transaction.QueryRow(context, `SELECT player_id FROM players WHERE account_id=$1`, accountID).Scan(&playerID); err != nil {
+	if err := pool.QueryRow(context, `SELECT player_id FROM players WHERE account_id=$1`, accountID).Scan(&playerID); err != nil {
 		return nil, fmt.Errorf("born player: %w", err)
 	}
-	if level > 0 {
-		for _, statement := range []string{
-			`UPDATE player_progression SET level=$2, state_version=state_version+1, updated_at=clock_timestamp() WHERE player_id=$1`,
-			`UPDATE player_directory_profiles SET lev=$2, state_version=state_version+1, updated_at=clock_timestamp() WHERE player_id=$1`,
-		} {
-			if tag, err := transaction.Exec(context, statement, playerID, level); err != nil || tag.RowsAffected() != 1 {
-				return nil, fmt.Errorf("level: %v (rows %d)", err, tag.RowsAffected())
-			}
-		}
-		if tag, err := transaction.Exec(context, `UPDATE player_story_cursors SET guide_id=$2, state_version=state_version+1, updated_at=clock_timestamp()
-			WHERE player_id=$1`, playerID, completedGuideID); err != nil || tag.RowsAffected() != 1 {
-			return nil, fmt.Errorf("guide: %v (rows %d)", err, tag.RowsAffected())
-		}
-	}
-	content := contentstore.Store{}
-	revision, err := content.ActiveRevision(context, queryer{transaction})
+	content := contentstore.Store{Queryer: pool}
+	revision, err := content.ActiveRevision(context, pool)
 	if err != nil {
 		return nil, err
 	}
-	if err := openFunctions(context, transaction, content, revision, playerID, level); err != nil {
-		return nil, err
+	var lines []grant.Line
+	if level > 1 {
+		exp, err := missingExp(context, pool, content, revision, identity.PlayerID(playerID), level)
+		if err != nil {
+			return nil, err
+		}
+		lines = append(lines, grant.Line{Kind: grant.PlayerExp, Amount: exp})
 	}
 	var summons []Summon
 	var mana int64
 	for _, table := range tables {
-		policy, err := content.HeroNormalSummonTx(context, queryer{transaction}, revision, table)
+		policy, err := content.HeroNormalSummonTx(context, pool, revision, table)
 		if err != nil {
 			return nil, fmt.Errorf("summon policy %d: %w", table, err)
 		}
-		if _, err := transaction.Exec(context, `INSERT INTO player_item_stacks(player_id,item_id,quantity,state_version,acquired_at,updated_at)
-			VALUES($1,$2,$3,1,clock_timestamp(),clock_timestamp())
-			ON CONFLICT(player_id,item_id) DO UPDATE SET quantity=player_item_stacks.quantity+excluded.quantity,
-			state_version=player_item_stacks.state_version+1, updated_at=excluded.updated_at`, playerID, policy.Template.FragmentItemID, policy.FragmentCount); err != nil {
-			return nil, fmt.Errorf("fragments %d: %w", table, err)
-		}
+		lines = append(lines, grant.Line{Kind: grant.StackItem, ItemID: policy.Template.FragmentItemID, Amount: policy.FragmentCount})
 		mana += policy.Mana
 		summons = append(summons, Summon{TableID: table, Stone: policy.Template.FragmentItemID, StoneNum: policy.FragmentCount})
 	}
 	if mana > 0 {
-		if _, err := transaction.Exec(context, `INSERT INTO player_currency_balances(player_id,resource_key,amount,state_version,updated_at)
-			VALUES($1,'mana',$2,1,clock_timestamp())
-			ON CONFLICT(player_id,resource_key) DO UPDATE SET amount=player_currency_balances.amount+excluded.amount,
-			state_version=player_currency_balances.state_version+1, updated_at=excluded.updated_at`, playerID, mana); err != nil {
-			return nil, fmt.Errorf("mana: %w", err)
-		}
+		lines = append(lines, grant.Line{Kind: grant.ScalarCurrency, ResourceKey: "mana", Amount: mana})
 	}
-	return summons, transaction.Commit(context)
+	if err := grantLines(context, pool, revision, identity.PlayerID(playerID), lines); err != nil {
+		return nil, err
+	}
+	if level > 0 {
+		return summons, completeTutorials(context, pool, content, revision, playerID, level)
+	}
+	return summons, nil
 }
 
-// openFunctions writes the eligibility and unlock rows the production level-ups to the level write (i5 LevelFunctionOpenings),
-// which stock SelfPlayer:isFuncOpen reads back through MID1 func_ids.
-// shortcut: production announces no composite gate (I8.5 finding F4), so kind 6/7 level gates (OneOnOne 16, Arena 37, 45) open
-// here at their stock level without eligibility; drop this once production announces them.
-func openFunctions(context context.Context, transaction pgx.Tx, content contentstore.Store, revision string, playerID, level int64) error {
-	policy, err := content.ResolveFunctionGatePolicyTx(context, queryer{transaction}, revision)
+// missingExp is the PLAYER_EXP that takes the player from its current cumulative exp to the start of level.
+func missingExp(context context.Context, pool *postgres.Pool, content contentstore.Store, revision string, playerID identity.PlayerID, level int64) (int64, error) {
+	rule, err := content.ResolveProgressionPolicyTx(context, pool, revision)
 	if err != nil {
-		return err
+		return 0, err
 	}
-	if level < 1 {
+	if level < 2 || int(level-2) >= len(rule.Rows) {
+		return 0, fmt.Errorf("level %d outside the progression table", level)
+	}
+	current, err := (i5store.Store{}).ReadProgressionTx(context, pool, playerID)
+	if err != nil {
+		return 0, err
+	}
+	return rule.Rows[level-2].TotalExp - current.Exp, nil
+}
+
+func grantLines(context context.Context, pool *postgres.Pool, revision string, playerID identity.PlayerID, lines []grant.Line) error {
+	if len(lines) == 0 {
 		return nil
 	}
-	now := time.Now().UTC()
-	eligible, unlocks, err := appi5.LevelFunctionOpenings(policy, identity.PlayerID(playerID), level, now)
+	policies, err := policy.NewSet(policy.Ref{Name: "content", Version: revision})
 	if err != nil {
 		return err
+	}
+	request, err := (operation.Factory{Clock: clock.System{}}).New(policies)
+	if err != nil {
+		return err
+	}
+	content := contentstore.Store{Queryer: pool}
+	store := i5store.Store{Queryer: pool}
+	privileges := commerceprivilege.Provider{Store: commerceprivilegestore.Store{}, Content: content}
+	owner := appi5.Service{Runner: tx.Runner{DB: pool}, Store: store, Content: content, Privileges: privileges, Functions: appi5.LevelFunctionAnnouncements{}, Directory: i4store.DirectoryLevelProjection{},
+		Backpack: store, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: pool}, Audit: audit.NopEmitter{}}
+	commandKey := fmt.Sprintf("player-%d-%s", playerID, request.ID)
+	if _, err := owner.AdminGrant(context, provisionOperator, playerID, commandKey, "vc-provision-v1", lines, request); err != nil {
+		return fmt.Errorf("admin grant: %w", err)
+	}
+	return nil
+}
+
+// completeTutorials marks the stock tutorials done and opens the kind 6/7 level gates no production owner announces yet.
+// shortcut: the guide cursor is written directly instead of through stock MID26 SAVE_STORY sent by the client, and kind 6/7 gates
+// (OneOnOne 16, Arena 37, 45) open here without eligibility; drop both once I9-3 drives the tutorial and I9-7 owns those gates.
+func completeTutorials(context context.Context, pool *postgres.Pool, content contentstore.Store, revision string, playerID, level int64) error {
+	policy, err := content.ResolveFunctionGatePolicyTx(context, pool, revision)
+	if err != nil {
+		return err
+	}
+	transaction, err := pool.Begin(context, tx.Options{})
+	if err != nil {
+		return err
+	}
+	defer transaction.Rollback(context)
+	if tag, err := transaction.Exec(context, `UPDATE player_story_cursors SET guide_id=$2, state_version=state_version+1, updated_at=clock_timestamp()
+		WHERE player_id=$1`, playerID, completedGuideID); err != nil || tag.RowsAffected() != 1 {
+		return fmt.Errorf("guide: %v", err)
 	}
 	for _, gate := range policy.Gates {
 		openLevel, readable := stockOpenLevel(gate.RawOpenValue)
 		if gate.GateKind == "PURE_LEVEL" || !readable || openLevel > level || gate.AnnouncementCapability != "NONE" {
 			continue
 		}
-		unlocks = append(unlocks, player.FunctionUnlock{PlayerID: identity.PlayerID(playerID), FunctionID: gate.FunctionID, OpenedAt: now, SourceFactKey: "vc:provision:function:" + gate.SourceFactKey, StateVersion: 1})
-	}
-	for _, e := range eligible {
-		if _, err := transaction.Exec(context, `INSERT INTO player_function_eligibility(player_id,function_id,content_revision,source_fact_key,eligible_at)
-			VALUES($1,$2,$3,$4,$5) ON CONFLICT(player_id,function_id) DO NOTHING`, playerID, e.FunctionID, e.ContentRevision, e.SourceFactKey, e.EligibleAt); err != nil {
-			return fmt.Errorf("function %d eligibility: %w", e.FunctionID, err)
-		}
-	}
-	for _, u := range unlocks {
 		if _, err := transaction.Exec(context, `INSERT INTO player_function_unlocks(player_id,function_id,opened_at,source_fact_key,state_version)
-			VALUES($1,$2,$3,$4,1) ON CONFLICT(player_id,function_id) DO NOTHING`, playerID, u.FunctionID, u.OpenedAt, u.SourceFactKey); err != nil {
-			return fmt.Errorf("function %d unlock: %w", u.FunctionID, err)
+			VALUES($1,$2,clock_timestamp(),$3,1) ON CONFLICT(player_id,function_id) DO NOTHING`, playerID, gate.FunctionID, "vc:provision:function:"+gate.SourceFactKey); err != nil {
+			return fmt.Errorf("function %d unlock: %w", gate.FunctionID, err)
 		}
 	}
-	return nil
+	return transaction.Commit(context)
 }
 
 // stockOpenLevel is the level stock FunctionOpenTable reads from a function.lua "kind|value[|...]" gate: kinds 1, 6 and 7 are

@@ -70,6 +70,9 @@ type scenario struct {
 	Settle float64 `json:"settle_seconds"`
 	// ExpectOK: MIDs the stock client must have sent with HTTP 200 and stock error_code 0.
 	ExpectOK []int `json:"expect_ok"`
+	// ExpectInactive: MIDs the stock client must have sent and the shared inactive dispatcher answered 200 with error_code 1,
+	// journalled INACTIVE_MODE (I9_MODE_FOUNDATION_V1 MF2).
+	ExpectInactive []int `json:"expect_inactive"`
 	// ExpectLuaErrors: each must match at least one Lua error, and every Lua error must match one of them (empty: none at all).
 	ExpectLuaErrors []string `json:"expect_lua_errors"`
 	// ExpectClientLog: text the backend must hold in this account's client log rows; ExpectClientLogAbsent: text it must not.
@@ -252,6 +255,11 @@ func (run run) check(ctx context.Context, accountID string, reached bool, report
 			failures = append(failures, fmt.Sprintf("MID%d not sent or not answered 200 with error_code 0", mid))
 		}
 	}
+	inactive, err := inactiveFailures(ctx, run.databaseURL, accountID, report, run.scenario.ExpectInactive)
+	if err != nil {
+		return failures, err
+	}
+	failures = append(failures, inactive...)
 	for _, exchange := range report.Requests {
 		if exchange.MID > 0 && len(exchange.NullFields) > 0 {
 			failures = append(failures, fmt.Sprintf("MID%d answers JSON null at %s", int(exchange.MID), strings.Join(exchange.NullFields, ", ")))
@@ -279,12 +287,41 @@ func (run run) check(ctx context.Context, accountID string, reached bool, report
 }
 
 func answeredOK(report client.Report, mid int) bool {
+	return answered(report, mid, 0)
+}
+
+func answered(report client.Report, mid int, errorCode int) bool {
 	for _, exchange := range report.Requests {
-		if int(exchange.MID) == mid && exchange.Status == 200 && exchange.ErrorCode == 0 {
+		if int(exchange.MID) == mid && exchange.Status == 200 && int(exchange.ErrorCode) == errorCode {
 			return true
 		}
 	}
 	return false
+}
+
+func inactiveFailures(ctx context.Context, databaseURL, accountUID string, report client.Report, mids []int) ([]string, error) {
+	failures := []string{}
+	if len(mids) == 0 {
+		return failures, nil
+	}
+	connection, err := pgx.Connect(ctx, databaseURL)
+	if err != nil {
+		return failures, err
+	}
+	defer connection.Close(ctx)
+	for _, mid := range mids {
+		if !answered(report, mid, 1) {
+			failures = append(failures, fmt.Sprintf("MID%d not sent or not answered 200 with error_code 1", mid))
+		}
+		var journalled int
+		if err := connection.QueryRow(ctx, `SELECT count(*) FROM request_journal WHERE account_uid=$1 AND mid=$2 AND outcome='INACTIVE_MODE'`, accountUID, mid).Scan(&journalled); err != nil {
+			return failures, err
+		}
+		if journalled == 0 {
+			failures = append(failures, fmt.Sprintf("MID%d has no INACTIVE_MODE journal row", mid))
+		}
+	}
+	return failures, nil
 }
 
 func luaErrorFailures(errors, expected []string) []string {
