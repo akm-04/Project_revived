@@ -4,6 +4,8 @@ package main
 
 import (
 	"context"
+	"log"
+
 	"gxb.local/backend/v2/internal/adapters/postgres"
 	"gxb.local/backend/v2/internal/adapters/postgres/contentstore"
 	"gxb.local/backend/v2/internal/adapters/stockruntime"
@@ -14,6 +16,14 @@ func registerPlayerDisplay(c context.Context, p *postgres.Pool, content contents
 	rev, e := content.ActiveRevision(c, p)
 	if e != nil {
 		return e
+	}
+	good, e := content.HasPublicProfileCapabilityTx(c, p, rev)
+	if e != nil {
+		return e
+	}
+	if !good {
+		log.Printf("Player display routes inactive; required PublicProfile content policy unavailable")
+		return nil
 	}
 	if _, e = content.ReadPlayerDisplayCatalogTx(c, p, rev); e != nil {
 		return e
