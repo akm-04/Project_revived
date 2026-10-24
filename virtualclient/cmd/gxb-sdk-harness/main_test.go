@@ -41,13 +41,26 @@ func TestLoginEnvelopeAndPackageInfoReuse(t *testing.T) {
 		t.Fatalf("package info with a known session cookie issued a new session (%d issued)", issued)
 	}
 
+	restart := func() {
+		response, err := http.PostForm(server.URL+"/server/mobile_api_new", url.Values{"payload": {`{"mid":"65284","payload":{"device_id":"device-a"}}`}})
+		if err != nil {
+			t.Fatal(err)
+		}
+		response.Body.Close()
+	}
+	restart()
+	restart()
+	if issued != 2 {
+		t.Fatalf("a guest device restarting without its cookie must keep its guest (%d issued)", issued)
+	}
+
 	other, err := http.Post(server.URL+"/server/mobile_api_new", "application/json", strings.NewReader(`{"mid":"65319"}`))
 	if err != nil {
 		t.Fatal(err)
 	}
 	plain := map[string]any{}
 	json.NewDecoder(other.Body).Decode(&plain)
-	if plain["status"] != 1.0 || plain["sid"] != nil || issued != 1 {
+	if plain["status"] != 1.0 || plain["sid"] != nil || issued != 2 {
 		t.Fatalf("non-login MID: %v (issued %d)", plain, issued)
 	}
 }

@@ -1,5 +1,6 @@
 // Command gxb-sdk-harness stands in for the Xinyd login SDK server when the rebuilt stock APK runs on an emulator (I8.5-7, D68):
-// every login the Java SDK asks for is a fresh provision.Account session, answered in the envelope V1 proved against the same SDK.
+// every login the Java SDK asks for is a provision.Account session (one per guest device), answered in the envelope V1 proved
+// against the same SDK.
 // It is harness-side like provision (I85_HARNESS_BOUNDARY_V1 R3); product SDK ingress belongs to I11.
 package main
 
@@ -45,10 +46,12 @@ type handler struct {
 	issue    func() (provision.Session, error)
 	mutex    sync.Mutex
 	sessions map[string]provision.Session
+	// shortcut: guests are remembered only while this process runs; persist them if restarts must keep a device's guest.
+	devices map[string]provision.Session
 }
 
 func newHandler(issue func() (provision.Session, error)) http.Handler {
-	sdk := &handler{issue: issue, sessions: map[string]provision.Session{}}
+	sdk := &handler{issue: issue, sessions: map[string]provision.Session{}, devices: map[string]provision.Session{}}
 	mux := http.NewServeMux()
 	mux.HandleFunc("/server/mobile_api_new", sdk.serve)
 	mux.HandleFunc("/server/mobile_api_new/", sdk.serve)
@@ -90,20 +93,32 @@ func (sdk *handler) serve(writer http.ResponseWriter, request *http.Request) {
 	}
 	log.Printf("sdk mid=%s", mid)
 	switch mid {
-	case loginMID, registerMID, anonymousMID, packageInfoMID, loginMID + ".0", registerMID + ".0", anonymousMID + ".0", packageInfoMID + ".0":
-		sdk.login(writer, request)
+	case loginMID, registerMID, loginMID + ".0", registerMID + ".0":
+		sdk.login(writer, request, "")
+	case anonymousMID, packageInfoMID, anonymousMID + ".0", packageInfoMID + ".0":
+		sdk.login(writer, request, deviceID(body))
 	default:
 		writeJSON(writer, success(nil))
 	}
 }
 
-// login answers every login-producing MID with a session; package info keeps the session its cookie names, as V1 did at startup.
-func (sdk *handler) login(writer http.ResponseWriter, request *http.Request) {
+func deviceID(body map[string]any) string {
+	payload, _ := body["payload"].(map[string]any)
+	device, _ := payload["device_id"].(string)
+	return device
+}
+
+// login answers every login-producing MID with a session; package info keeps the session its cookie names, as V1 did at startup,
+// and a guest device (non-empty device) gets its earlier guest back, as the Xinyd SDK does after an app restart.
+func (sdk *handler) login(writer http.ResponseWriter, request *http.Request, device string) {
 	sdk.mutex.Lock()
 	defer sdk.mutex.Unlock()
 	session, known := provision.Session{}, false
 	if cookie, err := request.Cookie(sessionCookie); err == nil {
 		session, known = sdk.sessions[cookie.Value]
+	}
+	if !known && device != "" {
+		session, known = sdk.devices[device]
 	}
 	if !known {
 		issued, err := sdk.issue()
@@ -115,6 +130,9 @@ func (sdk *handler) login(writer http.ResponseWriter, request *http.Request) {
 		session = issued
 		sdk.sessions[session.SID] = session
 		log.Printf("sdk session issued uid=%s", session.AccountID)
+	}
+	if device != "" {
+		sdk.devices[device] = session
 	}
 	username := "guest-" + session.AccountID[:8]
 	for name, value := range map[string]string{sessionCookie: session.SID, "QQWUID": session.AccountID, "QQWUNAME": username, "QQWTOKEN": session.LoginToken} {
