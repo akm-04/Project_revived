@@ -351,6 +351,7 @@ func main() {
 		log.Print("I7C-5B/5C/5D/5E/5F Top Floor, 1 on 1, Arena, Conquer School and Champions League routes not registered: GXB_COMBAT_ENTROPY_KEYS is unset")
 	}
 	mustRegister(301, ranking)
+	mustRegister(121, stockruntime.OperationLogDispatcher{Authority: authority})
 	lobbyD := stockruntime.LobbyDispatcher{Authority: authority, Tracker: tracker}
 	for _, mid := range []uint16{56, 1344, 2754} {
 		mustRegister(mid, lobbyD)
