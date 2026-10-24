@@ -110,3 +110,13 @@ func (s *Set) Functions() []int64 {
 	slices.Sort(out)
 	return out
 }
+
+// Recorded is what ctx's set holds so far (the open transaction attempt's stage), for a reply that must be stored with its
+// F17 keys because its replay bypasses the decorator; empty when the request is not tracked.
+func Recorded(ctx context.Context) (map[string]int64, []int64) {
+	set, _ := ctx.Value(contextKey{}).(*Set)
+	if set == nil {
+		return map[string]int64{}, nil
+	}
+	return set.Balances(), set.Functions()
+}

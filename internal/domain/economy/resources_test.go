@@ -94,6 +94,28 @@ func TestR5RebindLegacyPolicyRejectsAlreadyImmutableOrWrongLegacyPolicy(t *testi
 	}
 }
 
+func TestRepinPolicyMovesImmutableRowToNewerRevisionOnly(t *testing.T) {
+	start := time.Unix(1700000300, 0).UTC()
+	old := TemporalPolicy{Version: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", RegenEvery: 5 * time.Minute, RegenAmount: 1, NaturalCap: 100}
+	newp := TemporalPolicy{Version: "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb", RegenEvery: 5 * time.Minute, RegenAmount: 1, NaturalCap: 100}
+	s := TemporalState{PlayerID: 100001, ResourceKey: "energy", StoredAmount: 40, RegenAnchorAt: anchorUTC(start), PolicyVersion: old.Version, ContentRevision: old.Version, StateVersion: 3, UpdatedAt: start}
+	now := start.Add(12 * time.Minute)
+	got, err := s.RepinPolicy(newp.Version, now, old, newp)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got.StoredAmount != 42 || got.RegenAnchorAt == nil || !got.RegenAnchorAt.Equal(start.Add(10*time.Minute)) || got.ContentRevision != newp.Version || got.PolicyVersion != newp.Version || got.StateVersion != 4 {
+		t.Fatalf("repin lost accrual or remainder: %+v", got)
+	}
+	if _, err := got.RepinPolicy(newp.Version, now, newp, newp); err == nil {
+		t.Fatal("row already on the target revision was repinned")
+	}
+	legacy := TemporalState{PlayerID: 100001, ResourceKey: "energy", StoredAmount: 9, PolicyVersion: "legacy-v1", StateVersion: 2, UpdatedAt: now}
+	if _, err := legacy.RepinPolicy(newp.Version, now, old, newp); err == nil {
+		t.Fatal("legacy row took the immutable repin path")
+	}
+}
+
 func TestR5TemporalAcceptanceRemainderPauseOvercapZeroAndClockRollback(t *testing.T) {
 	start := time.Unix(1700010000, 0).UTC()
 	p := TemporalPolicy{Version: "p1", RegenEvery: 5 * time.Minute, RegenAmount: 1, NaturalCap: 10, AllowExplicitGrantAboveNaturalCap: true}

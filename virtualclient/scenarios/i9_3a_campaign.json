@@ -1,0 +1,18 @@
+{"name":"i9_3a_campaign","level":45,"heroes":[10001001,10001002,10001003,10001004,10001005],
+ "steps":[
+  "wait:5",
+  "lua:xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_PLAYER):loadWorldMap(function(code) if code ~= xyd.error.OK then error('vc-world-map-' .. tostring(code)) end xyd.WindowManager.get():openWindow('new_map_detail_window', {campaignID = 100001, campaignType = xyd.CampaignType.NORMAL, star = 0, dailyLimit = 0, resetCount = 0}) end)",
+  "wait:5",
+  "tap:start",
+  "wait:10",
+  "lua:local cards = {} local function walk(node) if not node:isVisible() then return end if node:getName() == 'layout' then table.insert(cards, node) return end for _, child in ipairs(node:getChildren()) do walk(child) end end walk(xyd.WindowManager.get():getWindow('battle_select_team'):nodeByName('list_layer')) for _, card in ipairs(cards) do local box = card:getCascadeBoundingBox() __vc.tap(box.x + box.width / 2, box.y + box.height / 2) end",
+  "wait:10",
+  "lua:xyd.db.campaignAutoStatus:setCampaignAutoStatus(xyd.CampaignType.NORMAL, true)",
+  "tap:button_battle",
+  "wait:10",
+  "lua:local story = xyd.WindowManager.get():getWindow('story') if story then story:onEnded() end",
+  "wait:240",
+  "lua:local story = xyd.WindowManager.get():getWindow('story') if story then story:onEnded() end",
+  "wait:20",
+  "lua:if not xyd.WindowManager.get():getWindow('battle_win') then error('vc-campaign-not-won') end"],
+ "settle_seconds":10,"expect_ok":[112,113,114]}

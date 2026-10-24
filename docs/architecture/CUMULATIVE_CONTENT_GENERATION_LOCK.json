@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "status": "CURRENT_CUMULATIVE_CONTENT_GENERATION_LOCK_I7C6",
+  "status": "CURRENT_CUMULATIVE_CONTENT_GENERATION_LOCK_I9_3A",
   "rule": "Historical validators keep their phase-specific semantic invariants. In cumulative/current mode they may accept only an explicitly registered successor compiler generation at or after their baseline. New generations are append-only review events; registering a generation does not waive capability/count/source/migration/ownership assertions.",
   "generations": [
     {
@@ -274,14 +274,22 @@
       "parser_version": "lua-generated-v18-guild-invite",
       "revision_id": "5f7fe83b1c358a67e1a62fdc2670b1db5c00ef8891efd886d4d6fb5a46a355b7",
       "scope": "Player display title rows carry the title_system condition list under COSMETIC_TITLE_CONDITION_I7C6 (marriage 30/50, Bookshelf 50/80, villas 30/60/100 feed C6_SELECTED_COSMETIC_ORIGINS_V1); other cosmetic families and all other payloads unchanged."
+    },
+    {
+      "ordinal": 40,
+      "stage": "I9-3A (Campaign)",
+      "compiler_version": "i9-3a-campaign",
+      "parser_version": "lua-generated-v18-guild-invite",
+      "revision_id": "0ca4ca72d28100afe41f4d9e8ac62218607ba7c7ddf1ba64abd5885ecdd3bce4",
+      "scope": "campaign_catalog.json under CAMPAIGN_MODE_I9_3A: campaign.lua Normal/Super/Challenge nodes (429/155/144) from chapter.lua lists, 23 chapters with event columns, 996 campaign_dropbox boxes (8135 rows), 46 star bonus rows, refresh_elite_cost, vip num_elite/quick_sweep, monthly privilege row 1, labelled I9_CAMPAIGN_PRIVATE_POLICY_V1; all other payloads unchanged."
     }
   ],
   "current": {
-    "ordinal": 39,
-    "stage": "I7C-4 full stage B (I7C-6)",
-    "compiler_version": "i7c6-cosmetic-origins",
+    "ordinal": 40,
+    "stage": "I9-3A (Campaign)",
+    "compiler_version": "i9-3a-campaign",
     "parser_version": "lua-generated-v18-guild-invite",
-    "revision_id": "5f7fe83b1c358a67e1a62fdc2670b1db5c00ef8891efd886d4d6fb5a46a355b7",
-    "scope": "Player display title rows carry the title_system condition list under COSMETIC_TITLE_CONDITION_I7C6 (marriage 30/50, Bookshelf 50/80, villas 30/60/100 feed C6_SELECTED_COSMETIC_ORIGINS_V1); other cosmetic families and all other payloads unchanged."
+    "revision_id": "0ca4ca72d28100afe41f4d9e8ac62218607ba7c7ddf1ba64abd5885ecdd3bce4",
+    "scope": "campaign_catalog.json under CAMPAIGN_MODE_I9_3A: campaign.lua Normal/Super/Challenge nodes (429/155/144) from chapter.lua lists, 23 chapters with event columns, 996 campaign_dropbox boxes (8135 rows), 46 star bonus rows, refresh_elite_cost, vip num_elite/quick_sweep, monthly privilege row 1, labelled I9_CAMPAIGN_PRIVATE_POLICY_V1; all other payloads unchanged."
   }
 }

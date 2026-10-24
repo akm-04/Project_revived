@@ -239,6 +239,13 @@ func (s Service) EnsureBuiltinInstalled(ctx context.Context, op operation.Contex
 			if gotTopFloor != 1 {
 				return errors.New("content registry top floor count")
 			}
+			gotCampaign, err := s.Repo.InsertCampaign(tctx, scope.Tx, b)
+			if err != nil {
+				return err
+			}
+			if gotCampaign != 1 {
+				return errors.New("content registry campaign count")
+			}
 			gotOneOnOne, err := s.Repo.InsertOneOnOne(tctx, scope.Tx, b)
 			if err != nil {
 				return err

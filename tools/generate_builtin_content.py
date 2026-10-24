@@ -21,12 +21,17 @@ from pathlib import Path
 from typing import Any, Iterable
 
 SCHEMA_VERSION = 1
-COMPILER_VERSION = "i7c6-cosmetic-origins"
+COMPILER_VERSION = "i9-3a-campaign"
 PARSER_VERSION = "lua-generated-v18-guild-invite"
 EXPECTED_SOURCE_ARCHIVE_SHA256 = "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
 SOURCE_PREFIX = "app-assets/output/assets/src_64/"
 
 SOURCE_MANIFEST = [
+    ('data/tables/campaign.lua', '7a58e878a7171839342a856cd74b512037528438259d036009a7249472504683', 'I9_3A_CAMPAIGN_SOURCE_BOUNDARY'),
+    ('data/tables/chapter.lua', '845e255f90abdd3b9e92ab558ac84bd766f868b300f7ca2992bdce933e0ae844', 'I9_3A_CAMPAIGN_SOURCE_BOUNDARY'),
+    ('data/tables/campaign_dropbox.lua', '374b6b13bae56e2f5ac8d6b884821d2fb448d239871d1992b84bcf365e90404e', 'I9_3A_CAMPAIGN_SOURCE_BOUNDARY'),
+    ('data/tables/campaign_star_bonus.lua', 'b14321b1471c90a761177c06aee5e3d641fcb1df53a1b4c3f2c1df45d1561fe5', 'I9_3A_CAMPAIGN_SOURCE_BOUNDARY'),
+    ('data/tables/monthly_privilege.lua', '4fdc9d5b743c530bca9e943b64a96a87f5502243653c5abdb466a39090ade77b', 'I9_3A_CAMPAIGN_SOURCE_BOUNDARY'),
     ('app/windows/ChampionsRuleWindow.lua', '920440ee43773e27b8caf791cca052b5b5ad4cc50a2ed90639a59fb5eb41f1de', 'I7C5F_LEAGUE_SOURCE_BOUNDARY'),
     ('app/common/tables/CrossArenaScheduleTable.lua', 'dfbc39038f717389c7391934579f953aa4d778cb5bb1e11abf2eee1da9a05589', 'I7C5F_LEAGUE_SOURCE_BOUNDARY'),
     ('data/tables/activity.lua', 'bf3234d63b44f8636132cb924752d106dc13199ed40ce5fc0c9b358a07b0e3f9', 'I7C5F_LEAGUE_SOURCE_BOUNDARY'),
@@ -186,6 +191,7 @@ SOURCE_MANIFEST.append(('app/windows/HeroGiftBoxWindow.lua','d6065c3d601f5820915
 SOURCE_MANIFEST.append(('app/windows/WhiteAlbumWindow.lua','851a53f588b59d95cfe460f3399ab1a6904fff7714131c358f3c3a73910b6bb9',"LIBRARY_INPUT_SOURCE_AUTHORITY"))
 
 ENABLED_CAPABILITIES = [
+    "CAMPAIGN_MODE_I9_3A",
     "COSMETIC_TITLE_CONDITION_I7C6",
     "ACHIEVEMENT_CATALOG_I7C4FA",
     "CHAMPIONS_LEAGUE_I7C5F",
@@ -386,6 +392,7 @@ from stat_input_content import build_stat_inputs
 from privilege_content import build_privilege
 from achievement_content import build_achievement
 from top_floor_content import build_top_floor
+from campaign_content import build_campaign
 from one_on_one_content import build_one_on_one
 from arena_content import build_arena
 from league_content import build_league
@@ -2182,6 +2189,7 @@ def build_artifacts(blobs: dict[str, SourceBlob], archive_sha256: str) -> dict[s
     from dorm_content import build_dorm
     dorm_artifact=build_dorm(blobs,parse_generated_lua_table,pipe_ints,hero_artifact["templates"],partner_keys,partner_rows,super_keys,super_rows,indexed_field,items,CompileError)
     artifacts = {
+        "campaign_catalog.json":build_campaign(blobs,parse_generated_lua_table),
         "top_floor_catalog.json":build_top_floor(blobs,parse_generated_lua_table),
         "one_on_one_catalog.json":build_one_on_one(blobs,parse_generated_lua_table),
         "arena_catalog.json":build_arena(blobs,parse_generated_lua_table),

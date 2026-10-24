@@ -17,6 +17,9 @@ func TestOnlyKeptStagesReachTheRequest(t *testing.T) {
 	inner, innerStage := Stage(committed)
 	FunctionOpened(inner, 7)
 	innerStage.Keep()
+	if balances, functions := Recorded(committed); balances["crystal"] != 40 || !slices.Equal(functions, []int64{7}) {
+		t.Fatalf("recorded stage %v %v", balances, functions)
+	}
 	committedStage.Keep()
 	if got := request.Balances(); len(got) != 2 || got["crystal"] != 40 || got["lev"] != 12 {
 		t.Fatalf("balances %v", got)
@@ -34,4 +37,7 @@ func TestUntrackedRequestRecordsNothing(t *testing.T) {
 	Balance(ctx, "crystal", 1)
 	FunctionOpened(ctx, 1)
 	stage.Keep()
+	if balances, functions := Recorded(ctx); len(balances) != 0 || functions != nil {
+		t.Fatal("untracked recorded")
+	}
 }

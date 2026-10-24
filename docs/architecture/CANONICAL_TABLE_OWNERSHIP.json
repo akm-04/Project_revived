@@ -3963,6 +3963,52 @@
       "migration": "migrations/00076_i8_5_3_client_observability.sql",
       "owner": "clientlog",
       "write_exceptions": []
+    },
+    "content_campaign_catalogs": {
+      "owner": "content-registry",
+      "allowed_query_owners": [
+        "content-registry"
+      ],
+      "allowed_read_paths": [
+        "sql/content/",
+        "internal/adapters/postgres/contentstore/",
+        "internal/adapters/postgres/contentqueries/"
+      ],
+      "allowed_write_paths": [
+        "sql/content/",
+        "internal/adapters/postgres/contentstore/",
+        "internal/adapters/postgres/contentqueries/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00081_i9_3a_campaign.sql"
+    },
+    "campaign_players": {
+      "allowed_query_owners": [
+        "Campaign"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/campaignstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/campaignstore/"
+      ],
+      "migration": "migrations/00081_i9_3a_campaign.sql",
+      "owner": "Campaign",
+      "write_exceptions": []
+    },
+    "campaign_nodes": {
+      "allowed_query_owners": [
+        "Campaign"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/campaignstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/campaignstore/"
+      ],
+      "migration": "migrations/00081_i9_3a_campaign.sql",
+      "owner": "Campaign",
+      "write_exceptions": []
     }
   }
 }

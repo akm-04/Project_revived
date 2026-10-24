@@ -281,11 +281,28 @@ func (Store) SaveTemporalTx(ctx context.Context, t tx.Tx, s economy.TemporalStat
 	if s.RegenAnchorAt != nil {
 		anchor = s.RegenAnchorAt.UTC()
 	}
-	tag, err := t.Exec(ctx, `UPDATE player_temporal_resources SET stored_amount=$3,regen_anchor_at=$4,policy_version=$5,state_version=$6,updated_at=$7 WHERE player_id=$1 AND resource_key=$2 AND state_version=$8`, int64(s.PlayerID), s.ResourceKey, s.StoredAmount, anchor, s.PolicyVersion, s.StateVersion, s.UpdatedAt.UTC(), s.StateVersion-1)
+	tag, err := t.Exec(ctx, `UPDATE player_temporal_resources SET stored_amount=$3,regen_anchor_at=$4,policy_version=$5,state_version=$6,updated_at=$7,content_revision=NULLIF($9,'') WHERE player_id=$1 AND resource_key=$2 AND state_version=$8`, int64(s.PlayerID), s.ResourceKey, s.StoredAmount, anchor, s.PolicyVersion, s.StateVersion, s.UpdatedAt.UTC(), s.StateVersion-1, s.ContentRevision)
 	if err != nil {
 		return err
 	}
-	return rowsOne(tag, "temporal update")
+	if err := rowsOne(tag, "temporal update"); err != nil {
+		return err
+	}
+	changes.Balance(ctx, s.ResourceKey, s.StoredAmount)
+	return nil
+}
+
+// StaleTemporalPlayersTx lists the players holding an immutable temporal row pinned to a revision other than target (D98).
+func (Store) StaleTemporalPlayersTx(ctx context.Context, q tx.Queryer, target string) ([]identity.PlayerID, error) {
+	var ids []int64
+	if err := q.QueryRow(ctx, `SELECT COALESCE(array_agg(DISTINCT player_id ORDER BY player_id),'{}') FROM player_temporal_resources WHERE content_revision IS NOT NULL AND content_revision<>$1`, target).Scan(&ids); err != nil {
+		return nil, err
+	}
+	out := make([]identity.PlayerID, 0, len(ids))
+	for _, id := range ids {
+		out = append(out, identity.PlayerID(id))
+	}
+	return out, nil
 }
 func (Store) RebindTemporalTx(ctx context.Context, t tx.Tx, s economy.TemporalState, expectedVersion int64) error {
 	if s.ContentRevision == "" || s.PolicyVersion == "" || s.StateVersion != expectedVersion+1 {

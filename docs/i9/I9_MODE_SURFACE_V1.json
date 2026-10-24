@@ -651,7 +651,7 @@
    "family": "CAMPAIGN",
    "disposition": "ACTIVE",
    "target": "I9-3",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": "STATE_BACKED"
   },
   {
@@ -660,7 +660,7 @@
    "family": "CAMPAIGN",
    "disposition": "ACTIVE",
    "target": "I9-3",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": "STATE_BACKED"
   },
   {
@@ -669,7 +669,7 @@
    "family": "CAMPAIGN",
    "disposition": "ACTIVE",
    "target": "I9-3",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": "STATE_BACKED"
   },
   {
