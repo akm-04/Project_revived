@@ -1,0 +1,58 @@
+{
+  "schema_version": 1,
+  "pass": "515.0",
+  "phase": "CHARACTER_ASSET_CORE/CA2/CA2-1",
+  "status": "GREEN_FOR_INTERNAL_LOCAL_CHECKPOINT",
+  "evidence_classification": "COMPATIBILITY_COPY_ONLY_FOR_GO_EXECUTION; STATIC_AND_SOURCE_CHECKS_ON_PRODUCT_BYTES; NATIVE_PG_NOT_RUN",
+  "authority_parent": "PASS513_SEALED_CA2_CONTRACT",
+  "source_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+  "content_revision": "e8061a82658033813ee1c182f0f3b062cb0af5b43e21acea7b905e713ad0e964",
+  "canonical_toolchain": {
+    "go_mod_sha256": "313c574368bb56dc570bc3427b65f59b059e492f909fe43b7d0291b5ced21dc4",
+    "go_sum_sha256": "efbf6753542d66e2fefcb2ab5e2ade7c9d28f2206a1113d1eb9568f2cb75808d",
+    "go_version_file_sha256": "a8844fbc8c3eb51c26ed00aec4cd5a5a9d647f849c6ead07bcc83ed24c4a7718",
+    "go": "1.26.0",
+    "toolchain": "go1.27.1"
+  },
+  "compatibility_copy": {
+    "go": "go1.23.2 linux/amd64",
+    "edits": [
+      "go.mod go 1.26.0 -> 1.23.0",
+      "remove toolchain go1.27.1",
+      ".go-version 1.27.1 -> 1.23.2"
+    ],
+    "source_or_test_edits": false,
+    "focused_tests": "PASS",
+    "focused_race": "PASS",
+    "full_vet": "PASS",
+    "package_by_package": {
+      "packages": 89,
+      "failures": 0
+    },
+    "full_go_test": "PASS"
+  },
+  "static_and_source": {
+    "ca2_1_static": "PASS",
+    "schema_query_ownership": "PASS",
+    "sqlc_generation_policy": "PASS",
+    "character_querytext": "PASS",
+    "content_querytext": "PASS",
+    "ca2_1_source_oracle": "PASS",
+    "builtin_content_check": "PASS",
+    "resolved_sbom": "PASS",
+    "r5_cumulative": "PASS",
+    "current_cumulative_candidate": "PASS"
+  },
+  "environment_blocked_not_run": [
+    "exact Go 1.27.1 execution",
+    "native sqlc 1.31.1 regeneration",
+    "Goose migration execution",
+    "PostgreSQL 18.6 migration/query/concurrency/dump-restore",
+    "River semantics",
+    "stock-client/live proof"
+  ],
+  "gate_interpretation": "Pass513 native plan applies exact native/real-PostgreSQL acceptance to the final aggregate CA2 candidate after CA2-1/2/3 local checkpoints; no native evidence is inferred or waived here.",
+  "next_permitted": "Record CA2-1 internal checkpoint acceptance, then CA2-2 only.",
+  "parent_pass514_claimed_implementation_revision_sha256": "ec19ea0ebf5d786ec7892056652aeb637188b217c8e962d3bc3388abdd0c5c63",
+  "parent_pass514_revision_verification": "NOT_REPRODUCIBLE_UNDER_ESTABLISHED_PASS511_CANONICAL_DIGEST_BASIS; archive and changed-file hashes independently verified"
+}

@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "pass": "457.0",
+  "batch": "R2D",
+  "status": "LOCAL_GREEN_R2_COMPLETE_FOUNDATION_REPAIR_CONTINUES",
+  "parent_backend": "Pass456/v0.52.2",
+  "findings": [
+    "RF-022"
+  ],
+  "implemented": [
+    "base player_mission_instances row locked inside materialized candidate CTE",
+    "outer derived query no longer carries misleading FOR UPDATE",
+    "ambiguity/generation/version fail-closed semantics retained",
+    "Objective claim continues through caller-owned R2C Grant seam"
+  ],
+  "local_validation": {
+    "go_test_all": "PASS_GO_1_23_DISPOSABLE_CLONE",
+    "go_vet_all": "PASS_GO_1_23_DISPOSABLE_CLONE",
+    "targeted_race": "PASS",
+    "ownership_strict": "PASS",
+    "r0_through_r2d_validators": "PASS",
+    "foundation_check": "EXPECTED_RED_ONLY_RF_015"
+  },
+  "deferred_live": [
+    "real PostgreSQL concurrent Objective double-claim/row-lock proof"
+  ],
+  "next": "R3 protocol/runtime/evidence hardening",
+  "I6": "BLOCKED_UNTIL_R7_GREEN"
+}

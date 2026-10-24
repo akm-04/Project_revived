@@ -1,0 +1,1495 @@
+--- /mnt/data/gxb510_init/backend/internal/application/i5/grant_lock_plan.go	2026-09-11 00:00:00.000000000 +0000
++++ /mnt/data/gxb-ca1-candidate/internal/application/i5/grant_lock_plan.go	2026-09-11 09:54:57.293001280 +0000
+@@ -39,7 +39,8 @@
+ type grantLockKind uint8
+ 
+ const (
+-	grantLockMailNamespace grantLockKind = iota + 1
++	grantLockPartnerEntity grantLockKind = iota + 1
++	grantLockMailNamespace
+ 	grantLockEconomyOwner
+ 	grantLockProgression
+ 	grantLockScalar
+@@ -63,6 +64,12 @@
+ 	ProgressionPolicy *player.ProgressionPolicy
+ 	FunctionPolicy    *FunctionGatePolicy
+ 	EnergyDescriptor  *TemporalDescriptor
++	Partner           *partnerEntityPrepared
++}
++
++type grantPreflightOptions struct {
++	AllowOverflowMail bool
++	ForceProgression  bool
+ }
+ 
+ func makeGrantKey(rank uint16, owner string, id lockkey.Identity) (lockkey.Key, error) {
+@@ -82,29 +89,35 @@
+ 	return nil
+ }
+ 
+-func (s Service) preflightGrantTx(ctx context.Context, t tx.Tx, plan grant.Plan, contentRevision string, allowOverflowMail bool, nowTime time.Time) (grantPreflight, error) {
++func (s Service) preflightGrantTx(ctx context.Context, t tx.Tx, plan grant.Plan, contentRevision string, opts grantPreflightOptions, nowTime time.Time) (grantPreflight, error) {
+ 	if nowTime.IsZero() {
+ 		return grantPreflight{}, errors.New("grant preflight requires operation time")
+ 	}
+ 	if err := plan.Validate(); err != nil {
+ 		return grantPreflight{}, err
+ 	}
+-	if s.Content == nil {
+-		return grantPreflight{}, errors.New("I5 content runtime unavailable")
+-	}
+ 
+ 	out := grantPreflight{Lines: make([]grantPreparedLine, 0, len(plan.Lines))}
+ 	reqs := make([]grantLockRequirement, 0, 4+len(plan.Lines)*3)
+ 	needsEconomyOwner := false
+ 	needsMailCounter := false
+-	needsProgression := false
++	needsProgression := opts.ForceProgression
+ 	needsFunctionState := false
+ 	needsDirectory := false
+ 
++	requireContent := func() error {
++		if s.Content == nil {
++			return errors.New("I5 content runtime unavailable")
++		}
++		return nil
++	}
+ 	loadProgression := func() (*player.ProgressionPolicy, error) {
+ 		if out.ProgressionPolicy != nil {
+ 			return out.ProgressionPolicy, nil
+ 		}
++		if err := requireContent(); err != nil {
++			return nil, err
++		}
+ 		p, err := s.Content.ResolveProgressionPolicyTx(ctx, t, contentRevision)
+ 		if err != nil {
+ 			return nil, err
+@@ -114,6 +127,21 @@
+ 	}
+ 
+ 	for ordinal, line := range plan.Lines {
++		if line.Kind == grant.PartnerEntity {
++			// Partner/entity content and ownership belong to the typed Character
++			// provider. Do not force the line through the fungible I5 resource
++			// catalog: the accepted catalog intentionally has no PARTNER_ENTITY
++			// resource class.
++			out.Lines = append(out.Lines, grantPreparedLine{Line: line, Ordinal: ordinal})
++			continue
++		}
++		if line.Kind == grant.SpecializedDomain {
++			return grantPreflight{}, ErrUnsupportedGrantDestination
++		}
++		if err := requireContent(); err != nil {
++			return grantPreflight{}, err
++		}
++
+ 		var policy ResourcePolicy
+ 		var err error
+ 		switch line.Kind {
+@@ -133,8 +161,6 @@
+ 				}
+ 				policy, err = s.Content.ResolveResourceTx(ctx, t, state.ContentRevision, line)
+ 			}
+-		case grant.PlayerExp:
+-			policy, err = s.Content.ResolveResourceTx(ctx, t, contentRevision, line)
+ 		default:
+ 			policy, err = s.Content.ResolveResourceTx(ctx, t, contentRevision, line)
+ 		}
+@@ -173,7 +199,7 @@
+ 			if err := appendGrantLock(&reqs, grantLockRankStack, "i5.stack", grantChildIdentity(plan.PlayerID, fmt.Sprintf("%d", line.ItemID)), grantLockStack, "", line.ItemID, 0); err != nil {
+ 				return grantPreflight{}, err
+ 			}
+-			if allowOverflowMail && policy.Stack.OverflowToMail {
++			if opts.AllowOverflowMail && policy.Stack.OverflowToMail {
+ 				needsMailCounter = true
+ 			}
+ 		case grant.PlayerExp:
+@@ -218,14 +244,38 @@
+ 			if err := appendGrantLock(&reqs, grantLockRankTemporal, "i5.temporal", grantChildIdentity(plan.PlayerID, "energy"), grantLockTemporal, "energy", 0, 0); err != nil {
+ 				return grantPreflight{}, err
+ 			}
+-		case grant.PartnerEntity, grant.SpecializedDomain:
+-			return grantPreflight{}, ErrUnsupportedGrantDestination
+ 		default:
+ 			return grantPreflight{}, economy.ErrUnknownResource
+ 		}
+ 		out.Lines = append(out.Lines, grantPreparedLine{Line: line, Policy: policy, Ordinal: ordinal})
+ 	}
+ 
++	batch, err := partnerEntityBatchForPlan(plan, contentRevision)
++	if err != nil {
++		return grantPreflight{}, err
++	}
++	if len(batch.Lines) > 0 {
++		if s.PartnerEntities == nil {
++			return grantPreflight{}, ErrUnsupportedGrantDestination
++		}
++		providerID, providerRevision := s.PartnerEntities.ProviderID(), s.PartnerEntities.ProviderRevision()
++		if err := validatePartnerProviderIdentity(providerID, providerRevision); err != nil {
++			return grantPreflight{}, err
++		}
++		prepared, err := s.PartnerEntities.PreflightPartnerEntityBatchTx(ctx, t, batch)
++		if err != nil {
++			return grantPreflight{}, err
++		}
++		prepared.Locks, err = canonicalPartnerLocks(prepared.Locks)
++		if err != nil {
++			return grantPreflight{}, err
++		}
++		out.Partner = &partnerEntityPrepared{Batch: batch, Preflight: prepared, ProviderID: providerID, ProviderRevision: providerRevision}
++		for _, k := range prepared.Locks {
++			reqs = append(reqs, grantLockRequirement{Key: k, Kind: grantLockPartnerEntity})
++		}
++	}
++
+ 	if needsMailCounter {
+ 		if err := appendGrantLock(&reqs, grantLockRankMailNamespace, "i5.mail-namespace", grantChildIdentity(plan.PlayerID, mail.Normal.String()), grantLockMailNamespace, "", 0, mail.Normal); err != nil {
+ 			return grantPreflight{}, err
+@@ -278,8 +328,23 @@
+ }
+ 
+ func (s Service) acquireGrantLocksTx(ctx context.Context, t tx.Tx, pid identity.PlayerID, pf grantPreflight, now time.Time) error {
++	if pf.Partner != nil {
++		if s.PartnerEntities == nil {
++			return errors.New("partner entity materializer disappeared after preflight")
++		}
++		if s.PartnerEntities.ProviderID() != pf.Partner.ProviderID || s.PartnerEntities.ProviderRevision() != pf.Partner.ProviderRevision {
++			return errors.New("partner entity provider identity/revision changed after preflight")
++		}
++	}
+ 	for _, r := range pf.Locks {
+ 		switch r.Kind {
++		case grantLockPartnerEntity:
++			if pf.Partner == nil || s.PartnerEntities == nil {
++				return errors.New("partner entity lock without prepared provider")
++			}
++			if err := s.PartnerEntities.LockPartnerEntityKeyTx(ctx, t, r.Key); err != nil {
++				return err
++			}
+ 		case grantLockMailNamespace:
+ 			if err := s.Store.LockMailNamespaceCounterTx(ctx, t, pid, r.Namespace); err != nil {
+ 				return err
+--- /mnt/data/gxb510_init/backend/internal/application/i5/grant_receipts.go	2026-09-11 00:00:00.000000000 +0000
++++ /mnt/data/gxb-ca1-candidate/internal/application/i5/grant_receipts.go	2026-09-11 09:56:03.226417351 +0000
+@@ -124,7 +124,7 @@
+ 
+ func decodeGrantReceiptResult(r receipt.Receipt) (GrantResult, error) {
+ 	switch r.ResultSchema {
+-	case "gxb.i5.grant.v1", "gxb.i5.grant.v2":
++	case "gxb.i5.grant.v1", "gxb.i5.grant.v2", "gxb.i5.grant.v3":
+ 		var out GrantResult
+ 		if err := json.Unmarshal(r.ResultPayload, &out); err != nil {
+ 			return GrantResult{}, err
+--- /mnt/data/gxb510_init/backend/internal/application/i5/service.go	2026-09-11 00:00:00.000000000 +0000
++++ /mnt/data/gxb-ca1-candidate/internal/application/i5/service.go	2026-09-11 09:56:40.267209950 +0000
+@@ -84,9 +84,10 @@
+ }
+ 
+ type GrantResult struct {
+-	ReceiptID string        `json:"receipt_id"`
+-	Awards    []Award       `json:"awards"`
+-	Effects   *GrantEffects `json:"effects,omitempty"`
++	ReceiptID        string                 `json:"receipt_id"`
++	Awards           []Award                `json:"awards"`
++	Effects          *GrantEffects          `json:"effects,omitempty"`
++	Materializations []GrantMaterialization `json:"materializations,omitempty"`
+ }
+ 
+ type MailListResult struct {
+@@ -164,18 +165,19 @@
+ }
+ 
+ type Service struct {
+-	Runner       tx.Runner
+-	Store        Store
+-	Content      ContentRuntime
+-	Privileges   PrivilegeSnapshotProvider
+-	Functions    FunctionAnnouncementProvider
+-	Directory    DirectoryLevelProjectionPort
+-	Backpack     BackpackReader
+-	Receipts     receipt.Store
+-	ReceiptRead  receipt.Reader
+-	RedeemSecret []byte
+-	Audit        audit.Emitter
+-	Profile      tx.Profile
++	Runner          tx.Runner
++	Store           Store
++	Content         ContentRuntime
++	Privileges      PrivilegeSnapshotProvider
++	Functions       FunctionAnnouncementProvider
++	Directory       DirectoryLevelProjectionPort
++	Backpack        BackpackReader
++	PartnerEntities PartnerEntityMaterializer
++	Receipts        receipt.Store
++	ReceiptRead     receipt.Reader
++	RedeemSecret    []byte
++	Audit           audit.Emitter
++	Profile         tx.Profile
+ }
+ 
+ var _ TxGrantSettler = Service{}
+@@ -290,14 +292,33 @@
+ 		return GrantResult{}, err
+ 	}
+ 	now := op.StartedAt.UTC()
+-	pf, err := s.preflightGrantTx(ctx, t, plan, contentRevision, allowOverflowMail, now)
++	pf, err := s.preflightGrantTx(ctx, t, plan, contentRevision, grantPreflightOptions{AllowOverflowMail: allowOverflowMail}, now)
+ 	if err != nil {
+ 		return GrantResult{}, err
+ 	}
+ 	if err := s.acquireGrantLocksTx(ctx, t, plan.PlayerID, pf, now); err != nil {
+ 		return GrantResult{}, err
+ 	}
++	// A waiter can observe no receipt before blocking on owner locks and then
++	// resume after the winning semantic transaction commits. Recheck while the
++	// complete owner suffix is held so replay never applies effects twice.
++	if prior, ok, err := s.findGrantReceiptTx(ctx, t, plan, fp); err != nil {
++		return GrantResult{}, err
++	} else if ok {
++		return decodeGrantReceiptResult(prior)
++	}
++	if err := s.validatePartnerEntityLockedTx(ctx, t, pf); err != nil {
++		return GrantResult{}, err
++	}
++	return s.applyPreparedGrantTx(ctx, t, actor, plan, op, allowOverflowMail, contentRevision, pf, id, fp)
++}
+ 
++func (s Service) applyPreparedGrantTx(ctx context.Context, t tx.Tx, actor identity.ActorContext, plan grant.Plan, op operation.Context, allowOverflowMail bool, contentRevision string, pf grantPreflight, id receipt.Identity, fp [32]byte) (GrantResult, error) {
++	now := op.StartedAt.UTC()
++	materializations, err := s.materializePartnerEntityTx(ctx, t, pf, op)
++	if err != nil {
++		return GrantResult{}, err
++	}
+ 	awards := make([]Award, 0, len(plan.Lines))
+ 	effects := &GrantEffects{ContentRevision: contentRevision, PlayerID: int64(plan.PlayerID), OperationID: op.ID.String(), OperationStartedAt: now}
+ 	if s.Functions != nil {
+@@ -531,7 +552,12 @@
+ 			}
+ 			effects.NewFunctionIDs = append(effects.NewFunctionIDs, announced...)
+ 
+-		case grant.PartnerEntity, grant.SpecializedDomain:
++		case grant.PartnerEntity:
++			// The typed provider already materialized the complete batch before
++			// fungible writes. CA1 deliberately emits no generic stock Award for
++			// entity lines; CA2+ must qualify stock projection before activation.
++			continue
++		case grant.SpecializedDomain:
+ 			return GrantResult{}, ErrUnsupportedGrantDestination
+ 		default:
+ 			return GrantResult{}, economy.ErrUnknownResource
+@@ -541,10 +567,17 @@
+ 		}
+ 	}
+ 
+-	out := GrantResult{Awards: awards, Effects: effects}
++	out := GrantResult{Awards: awards, Effects: effects, Materializations: materializations}
++	// Fungible-only grants retain the exact accepted v2 schema. Typed entity
++	// materialization advances only those receipts to v3 so legacy stock paths
++	// remain byte-semantically stable.
++	schema := "gxb.i5.grant.v2"
++	if len(materializations) > 0 {
++		schema = "gxb.i5.grant.v3"
++	}
+ 	// Allocate the receipt first, then make its id part of the terminal payload so
+ 	// replay/reconciliation can reconstruct dependent redemption rows exactly.
+-	rr, err := receipt.New(op, id, "I5_GRANT", "gxb.i5.grant.v2", json.RawMessage(`{"pending":true}`), fp)
++	rr, err := receipt.New(op, id, "I5_GRANT", schema, json.RawMessage(`{"pending":true}`), fp)
+ 	if err != nil {
+ 		return GrantResult{}, err
+ 	}
+@@ -1181,14 +1214,6 @@
+ 			// code by the same subject cannot be distinguished from retry.
+ 			return ErrRedeemInvalid
+ 		}
+-		prog, err := s.Store.LockProgressionTx(txctx, scope.Tx, actor.PlayerID)
+-		if err != nil {
+-			return err
+-		}
+-		ra := redeem.Actor{PlayerID: actor.PlayerID, AccountID: actor.AccountID, LogicalServerID: actor.LogicalServerID, Level: prog.Level}
+-		if err := redeem.Eligible(campaign.Campaign, ra, op.StartedAt.UTC()); err != nil {
+-			return ErrRedeemInvalid
+-		}
+ 		subjectType, subjectID, err := redeemSubject(campaign.Campaign.Subject, actor)
+ 		if err != nil {
+ 			return ErrRedeemInvalid
+@@ -1207,6 +1232,7 @@
+ 				return ErrRedeemInvalid
+ 			}
+ 		}
++
+ 		rewardPlan.PlayerID = actor.PlayerID
+ 		rewardPlan.Source = grant.SourceIdentity{Domain: "redeem", Operation: "redeem", BusinessKey: code.CodeID + ":" + string(subjectType) + ":" + subjectID, Occurrence: "1", PolicyVersion: campaign.Campaign.PolicyVersion}
+ 		prepared, err := s.prepareGrantOperationTx(txctx, scope.Tx, rewardPlan, boundOp)
+@@ -1214,10 +1240,76 @@
+ 			return err
+ 		}
+ 		boundOp = prepared
+-		gr, err := s.SettleGrantTx(txctx, scope.Tx, actor, rewardPlan, boundOp, GrantTxOptions{AllowOverflowMail: true})
++
++		grantID, _, err := rewardPlan.ReceiptIdentities()
+ 		if err != nil {
+ 			return err
+ 		}
++		grantFP, err := receiptFingerprintForGrant(rewardPlan)
++		if err != nil {
++			return err
++		}
++		var (
++			gr              GrantResult
++			grantReplay     bool
++			grantPF         grantPreflight
++			contentRevision string
++		)
++		if prior, ok, err := s.findGrantReceiptTx(txctx, scope.Tx, rewardPlan, grantFP); err != nil {
++			return err
++		} else if ok {
++			gr, err = decodeGrantReceiptResult(prior)
++			if err != nil {
++				return err
++			}
++			grantReplay = true
++		} else {
++			contentRevision, err = requireContentRevision(boundOp)
++			if err != nil {
++				return err
++			}
++			// CA1-R0: Redeem must acquire the complete lower-to-higher Grant
++			// suffix before it reads progression eligibility. Force the accepted
++			// 710 progression lock into that suffix even when the reward itself
++			// does not otherwise depend on progression. This removes the latent
++			// progression(710)->economy(700) inversion in the Pass509 flow.
++			grantPF, err = s.preflightGrantTx(txctx, scope.Tx, rewardPlan, contentRevision, grantPreflightOptions{AllowOverflowMail: true, ForceProgression: true}, op.StartedAt.UTC())
++			if err != nil {
++				return err
++			}
++			if err := s.acquireGrantLocksTx(txctx, scope.Tx, actor.PlayerID, grantPF, op.StartedAt.UTC()); err != nil {
++				return err
++			}
++			// If a semantic winner became visible while this transaction waited
++			// for owner locks, replay it and skip provider/fungible mutation.
++			if prior, ok, err := s.findGrantReceiptTx(txctx, scope.Tx, rewardPlan, grantFP); err != nil {
++				return err
++			} else if ok {
++				gr, err = decodeGrantReceiptResult(prior)
++				if err != nil {
++					return err
++				}
++				grantReplay = true
++			}
++		}
++
++		prog, err := s.Store.LockProgressionTx(txctx, scope.Tx, actor.PlayerID)
++		if err != nil {
++			return err
++		}
++		ra := redeem.Actor{PlayerID: actor.PlayerID, AccountID: actor.AccountID, LogicalServerID: actor.LogicalServerID, Level: prog.Level}
++		if err := redeem.Eligible(campaign.Campaign, ra, op.StartedAt.UTC()); err != nil {
++			return ErrRedeemInvalid
++		}
++		if !grantReplay {
++			if err := s.validatePartnerEntityLockedTx(txctx, scope.Tx, grantPF); err != nil {
++				return err
++			}
++			gr, err = s.applyPreparedGrantTx(txctx, scope.Tx, actor, rewardPlan, boundOp, true, contentRevision, grantPF, grantID, grantFP)
++			if err != nil {
++				return err
++			}
++		}
+ 		redemptionID, err := ids.NewUUID()
+ 		if err != nil {
+ 			return err
+--- /dev/null	2026-09-11 09:05:28.167444662 +0000
++++ /mnt/data/gxb-ca1-candidate/internal/application/i5/partner_materializer.go	2026-09-11 09:55:12.283657370 +0000
+@@ -0,0 +1,246 @@
++package i5
++
++import (
++	"context"
++	"encoding/json"
++	"errors"
++	"fmt"
++	"sort"
++	"strings"
++
++	"gxb.local/backend/v2/internal/domain/grant"
++	"gxb.local/backend/v2/internal/domain/identity"
++	"gxb.local/backend/v2/internal/foundation/lockkey"
++	"gxb.local/backend/v2/internal/foundation/operation"
++	"gxb.local/backend/v2/internal/foundation/tx"
++)
++
++// Character Asset owns the lock band between the accepted I4/Guild suffix and
++// I5 Mail/Economy suffix. CA1 reserves the band; later CA phases allocate leaf
++// ranks only after their owner graphs are qualified.
++const (
++	CharacterAssetLockRankMin uint16 = 400
++	CharacterAssetLockRankMax uint16 = 599
++)
++
++// PartnerEntityLineIdentity is stable replay identity for one semantic Grant
++// line. The source semantic key intentionally excludes content revision, just
++// like the canonical Grant receipt identity; the original ordinal keeps equal
++// lines distinct without inventing an entity-family discriminator.
++type PartnerEntityLineIdentity struct {
++	GrantSemanticKey string `json:"grant_semantic_key"`
++	LineOrdinal      int    `json:"line_ordinal"`
++}
++
++func (i PartnerEntityLineIdentity) Validate() error {
++	if strings.TrimSpace(i.GrantSemanticKey) == "" || i.LineOrdinal < 0 {
++		return errors.New("invalid partner entity line identity")
++	}
++	return nil
++}
++
++// PartnerEntityLine is the CA1-qualified external-materialization request for
++// one existing grant.PartnerEntity line. It deliberately preserves ItemID and
++// Amount without interpreting Amount or treating ItemID as a generic Hero/Pet
++// family discriminator.
++type PartnerEntityLine struct {
++	Identity PartnerEntityLineIdentity `json:"identity"`
++	ItemID   int64                     `json:"item_id"`
++	Amount   int64                     `json:"amount"`
++	Metadata map[string]string         `json:"metadata,omitempty"`
++}
++
++// PartnerEntityBatch is preflighted as one unit so aggregate owner constraints
++// (for example roster capacity) cannot be checked independently per line.
++type PartnerEntityBatch struct {
++	PlayerID        identity.PlayerID   `json:"player_id"`
++	ContentRevision string              `json:"content_revision"`
++	Lines           []PartnerEntityLine `json:"lines"`
++}
++
++// PartnerEntityPreflight contains the complete Character lock set discovered
++// before mutation. The provider cannot add locks during locked validation or
++// materialization because those methods have no lock-discovery return path.
++type PartnerEntityPreflight struct {
++	Locks []lockkey.Key `json:"locks"`
++}
++
++// PartnerEntityMaterialization is the provider-owned typed result for one
++// source line. ResultPayload may contain one or several durable owner IDs; I5
++// stores and replays it but never interprets it as a generic entity identity.
++type PartnerEntityMaterialization struct {
++	LineOrdinal   int             `json:"line_ordinal"`
++	ResultSchema  string          `json:"result_schema"`
++	ResultPayload json.RawMessage `json:"result_payload"`
++}
++
++// GrantMaterialization is the durable I5 receipt envelope. Provider identity
++// and revision are captured by the orchestration layer rather than trusted to
++// provider payload JSON.
++type GrantMaterialization struct {
++	LineOrdinal      int             `json:"line_ordinal"`
++	ProviderID       string          `json:"provider_id"`
++	ProviderRevision string          `json:"provider_revision"`
++	ResultSchema     string          `json:"result_schema"`
++	ResultPayload    json.RawMessage `json:"result_payload"`
++}
++
++// PartnerEntityMaterializer is the only CA1 production-facing destination seam.
++// CA1 installs no concrete production provider. CA2+ may qualify one after its
++// durable owner, content rules, response projection and reconnect behavior pass
++// their own lifecycle gates.
++//
++// Provider methods must not start/commit/rollback transactions, perform
++// outbound network calls while gameplay locks are held, or mutate during
++// PreflightPartnerEntityBatchTx. LockPartnerEntityKeyTx must acquire exactly the
++// supplied key and may not discover another lock.
++type PartnerEntityMaterializer interface {
++	ProviderID() string
++	ProviderRevision() string
++	PreflightPartnerEntityBatchTx(context.Context, tx.Queryer, PartnerEntityBatch) (PartnerEntityPreflight, error)
++	LockPartnerEntityKeyTx(context.Context, tx.Tx, lockkey.Key) error
++	ValidatePartnerEntityBatchLockedTx(context.Context, tx.Tx, PartnerEntityBatch, PartnerEntityPreflight) error
++	MaterializePartnerEntityBatchTx(context.Context, tx.Tx, PartnerEntityBatch, PartnerEntityPreflight, operation.Context) ([]PartnerEntityMaterialization, error)
++}
++
++type partnerEntityPrepared struct {
++	Batch            PartnerEntityBatch
++	Preflight        PartnerEntityPreflight
++	ProviderID       string
++	ProviderRevision string
++}
++
++func cloneMetadata(in map[string]string) map[string]string {
++	if len(in) == 0 {
++		return nil
++	}
++	out := make(map[string]string, len(in))
++	for k, v := range in {
++		out[k] = v
++	}
++	return out
++}
++
++func partnerEntityBatchForPlan(plan grant.Plan, contentRevision string) (PartnerEntityBatch, error) {
++	if err := validateContentRevision(contentRevision); err != nil {
++		return PartnerEntityBatch{}, err
++	}
++	semantic := plan.Source.SemanticKey()
++	lines := make([]PartnerEntityLine, 0, len(plan.Lines))
++	for ordinal, line := range plan.Lines {
++		if line.Kind != grant.PartnerEntity {
++			continue
++		}
++		id := PartnerEntityLineIdentity{GrantSemanticKey: semantic, LineOrdinal: ordinal}
++		if err := id.Validate(); err != nil {
++			return PartnerEntityBatch{}, err
++		}
++		lines = append(lines, PartnerEntityLine{Identity: id, ItemID: line.ItemID, Amount: line.Amount, Metadata: cloneMetadata(line.Metadata)})
++	}
++	if len(lines) == 0 {
++		return PartnerEntityBatch{}, nil
++	}
++	return PartnerEntityBatch{PlayerID: plan.PlayerID, ContentRevision: contentRevision, Lines: lines}, nil
++}
++
++func validatePartnerProviderIdentity(id, revision string) error {
++	if strings.TrimSpace(id) == "" || strings.TrimSpace(revision) == "" {
++		return errors.New("partner entity provider identity/revision required")
++	}
++	return nil
++}
++
++func validateCharacterLockKey(k lockkey.Key) error {
++	if k.DomainRank < CharacterAssetLockRankMin || k.DomainRank > CharacterAssetLockRankMax {
++		return fmt.Errorf("partner entity lock rank %d outside Character Asset band", k.DomainRank)
++	}
++	// CanonicalDedup performs the complete structural key validation. Keep this
++	// function focused on the CA1 ownership-band amendment.
++	return nil
++}
++
++func canonicalPartnerLocks(in []lockkey.Key) ([]lockkey.Key, error) {
++	if len(in) == 0 {
++		return nil, errors.New("partner entity materialization requires a Character owner lock")
++	}
++	for _, k := range in {
++		if err := validateCharacterLockKey(k); err != nil {
++			return nil, err
++		}
++	}
++	out, err := lockkey.CanonicalDedup(in)
++	if err != nil {
++		return nil, err
++	}
++	return out, nil
++}
++
++func validatePartnerMaterializations(lines []PartnerEntityLine, got []PartnerEntityMaterialization) ([]PartnerEntityMaterialization, error) {
++	if len(got) != len(lines) {
++		return nil, fmt.Errorf("partner entity materialization count=%d want=%d", len(got), len(lines))
++	}
++	want := make(map[int]struct{}, len(lines))
++	for _, line := range lines {
++		want[line.Identity.LineOrdinal] = struct{}{}
++	}
++	seen := make(map[int]struct{}, len(got))
++	out := append([]PartnerEntityMaterialization(nil), got...)
++	for _, result := range out {
++		if _, ok := want[result.LineOrdinal]; !ok {
++			return nil, fmt.Errorf("partner entity materialization returned unknown line ordinal %d", result.LineOrdinal)
++		}
++		if _, dup := seen[result.LineOrdinal]; dup {
++			return nil, fmt.Errorf("partner entity materialization duplicated line ordinal %d", result.LineOrdinal)
++		}
++		seen[result.LineOrdinal] = struct{}{}
++		if strings.TrimSpace(result.ResultSchema) == "" || !json.Valid(result.ResultPayload) {
++			return nil, fmt.Errorf("partner entity materialization line %d has invalid typed result", result.LineOrdinal)
++		}
++	}
++	sort.Slice(out, func(i, j int) bool { return out[i].LineOrdinal < out[j].LineOrdinal })
++	return out, nil
++}
++
++func (s Service) validatePartnerEntityLockedTx(ctx context.Context, t tx.Tx, pf grantPreflight) error {
++	if pf.Partner == nil {
++		return nil
++	}
++	if s.PartnerEntities == nil {
++		return errors.New("partner entity materializer unavailable after lock acquisition")
++	}
++	if s.PartnerEntities.ProviderID() != pf.Partner.ProviderID || s.PartnerEntities.ProviderRevision() != pf.Partner.ProviderRevision {
++		return errors.New("partner entity provider identity/revision changed after lock acquisition")
++	}
++	return s.PartnerEntities.ValidatePartnerEntityBatchLockedTx(ctx, t, pf.Partner.Batch, pf.Partner.Preflight)
++}
++
++func (s Service) materializePartnerEntityTx(ctx context.Context, t tx.Tx, pf grantPreflight, op operation.Context) ([]GrantMaterialization, error) {
++	if pf.Partner == nil {
++		return nil, nil
++	}
++	if s.PartnerEntities == nil {
++		return nil, errors.New("partner entity materializer unavailable during apply")
++	}
++	if s.PartnerEntities.ProviderID() != pf.Partner.ProviderID || s.PartnerEntities.ProviderRevision() != pf.Partner.ProviderRevision {
++		return nil, errors.New("partner entity provider identity/revision changed during apply")
++	}
++	got, err := s.PartnerEntities.MaterializePartnerEntityBatchTx(ctx, t, pf.Partner.Batch, pf.Partner.Preflight, op)
++	if err != nil {
++		return nil, err
++	}
++	got, err = validatePartnerMaterializations(pf.Partner.Batch.Lines, got)
++	if err != nil {
++		return nil, err
++	}
++	out := make([]GrantMaterialization, 0, len(got))
++	for _, result := range got {
++		out = append(out, GrantMaterialization{
++			LineOrdinal:      result.LineOrdinal,
++			ProviderID:       pf.Partner.ProviderID,
++			ProviderRevision: pf.Partner.ProviderRevision,
++			ResultSchema:     result.ResultSchema,
++			ResultPayload:    append(json.RawMessage(nil), result.ResultPayload...),
++		})
++	}
++	return out, nil
++}
+--- /dev/null	2026-09-11 09:05:28.167444662 +0000
++++ /mnt/data/gxb-ca1-candidate/internal/application/i5/material_cost.go	2026-09-11 10:11:38.989359406 +0000
+@@ -0,0 +1,211 @@
++package i5
++
++import (
++	"context"
++	"errors"
++	"fmt"
++	"sort"
++	"strings"
++	"time"
++
++	"gxb.local/backend/v2/internal/domain/economy"
++	"gxb.local/backend/v2/internal/domain/grant"
++	"gxb.local/backend/v2/internal/domain/identity"
++	"gxb.local/backend/v2/internal/foundation/operation"
++	"gxb.local/backend/v2/internal/foundation/tx"
++)
++
++// ScalarMaterialCost and StackMaterialCost are deliberately narrow. CA1 does
++// not make Temporal, PlayerExp, PartnerEntity or SpecializedDomain debit-able
++// by generic Character callers.
++type ScalarMaterialCost struct {
++	ResourceKey string
++	Amount      int64
++}
++
++type StackMaterialCost struct {
++	ItemID int64
++	Amount int64
++}
++
++type MaterialCost struct {
++	Scalars []ScalarMaterialCost
++	Stacks  []StackMaterialCost
++}
++
++func (c MaterialCost) validate() error {
++	if len(c.Scalars) == 0 && len(c.Stacks) == 0 {
++		return errors.New("material cost is empty")
++	}
++	seenScalar := make(map[string]struct{}, len(c.Scalars))
++	for _, x := range c.Scalars {
++		if strings.TrimSpace(x.ResourceKey) == "" || x.Amount <= 0 {
++			return errors.New("invalid scalar material cost")
++		}
++		if _, exists := seenScalar[x.ResourceKey]; exists {
++			return fmt.Errorf("duplicate scalar material cost %q", x.ResourceKey)
++		}
++		seenScalar[x.ResourceKey] = struct{}{}
++	}
++	seenStack := make(map[int64]struct{}, len(c.Stacks))
++	for _, x := range c.Stacks {
++		if x.ItemID <= 0 || x.Amount <= 0 {
++			return errors.New("invalid stack material cost")
++		}
++		if _, exists := seenStack[x.ItemID]; exists {
++			return fmt.Errorf("duplicate stack material cost %d", x.ItemID)
++		}
++		seenStack[x.ItemID] = struct{}{}
++	}
++	return nil
++}
++
++type MaterialDebitResult struct {
++	Scalars []economy.ScalarBalance
++	Stacks  []economy.StackState
++}
++
++// TxMaterialCostDebiter is the shared I5-owned CA1 debit composition seam.
++// The caller owns the transaction and semantic receipt. This port acquires only
++// canonical I5 owner/resource locks and never begins, commits or retries a tx.
++type TxMaterialCostDebiter interface {
++	DebitMaterialCostTx(context.Context, tx.Tx, identity.PlayerID, MaterialCost, operation.Context) (MaterialDebitResult, error)
++}
++
++// MaterialCostStore is intentionally narrower than the full I5 Store so later
++// Character domains cannot reach foreign-owner SQL through this seam.
++type MaterialCostStore interface {
++	LockEconomyOwnerTx(context.Context, tx.Tx, identity.PlayerID) error
++	LockScalarTx(context.Context, tx.Tx, identity.PlayerID, string, time.Time) (economy.ScalarBalance, bool, error)
++	SaveScalarTx(context.Context, tx.Tx, economy.ScalarBalance, bool) error
++	LockStackTx(context.Context, tx.Tx, identity.PlayerID, int64, time.Time) (economy.StackState, bool, error)
++	SaveStackTx(context.Context, tx.Tx, economy.StackState, bool) error
++	DeleteStackTx(context.Context, tx.Tx, economy.StackState) error
++}
++
++// MaterialCostDebiter composes immutable I5 content qualification with canonical
++// Economy/Scalar/Stack ownership. It is not wired into any production Character
++// feature in CA1.
++type MaterialCostDebiter struct {
++	Store   MaterialCostStore
++	Content ContentRuntime
++}
++
++var _ TxMaterialCostDebiter = MaterialCostDebiter{}
++
++type preparedScalarDebit struct {
++	Cost   ScalarMaterialCost
++	Policy ResourcePolicy
++}
++
++type preparedStackDebit struct {
++	Cost   StackMaterialCost
++	Policy ResourcePolicy
++}
++
++func (d MaterialCostDebiter) DebitMaterialCostTx(ctx context.Context, t tx.Tx, pid identity.PlayerID, cost MaterialCost, op operation.Context) (MaterialDebitResult, error) {
++	if d.Store == nil || d.Content == nil || t == nil || !pid.Valid() {
++		return MaterialDebitResult{}, errors.New("i5 material debit ports/input incomplete")
++	}
++	if err := cost.validate(); err != nil {
++		return MaterialDebitResult{}, err
++	}
++	contentRevision, err := requireContentRevision(op)
++	if err != nil {
++		return MaterialDebitResult{}, err
++	}
++	now := op.StartedAt.UTC()
++	if now.IsZero() {
++		return MaterialDebitResult{}, errors.New("i5 material debit requires operation time")
++	}
++
++	// Resolve every immutable policy before any gameplay lock/mutation. This is
++	// the same fail-before-mutation discipline used by Grant preflight.
++	scalars := make([]preparedScalarDebit, 0, len(cost.Scalars))
++	for _, x := range cost.Scalars {
++		line := grant.Line{Kind: grant.ScalarCurrency, ResourceKey: x.ResourceKey, Amount: x.Amount}
++		p, err := d.Content.ResolveResourceTx(ctx, t, contentRevision, line)
++		if err != nil {
++			return MaterialDebitResult{}, err
++		}
++		if p.Kind != grant.ScalarCurrency {
++			return MaterialDebitResult{}, economy.ErrUnknownResource
++		}
++		scalars = append(scalars, preparedScalarDebit{Cost: x, Policy: p})
++	}
++	stacks := make([]preparedStackDebit, 0, len(cost.Stacks))
++	for _, x := range cost.Stacks {
++		line := grant.Line{Kind: grant.StackItem, ItemID: x.ItemID, Amount: x.Amount}
++		p, err := d.Content.ResolveResourceTx(ctx, t, contentRevision, line)
++		if err != nil {
++			return MaterialDebitResult{}, err
++		}
++		if p.Kind != grant.StackItem || p.Stack == nil || p.Stack.ItemID != x.ItemID {
++			return MaterialDebitResult{}, economy.ErrUnknownResource
++		}
++		stacks = append(stacks, preparedStackDebit{Cost: x, Policy: p})
++	}
++
++	// Same-rank ordering mirrors the canonical Grant child identities for one
++	// player: scalar key strings and decimal item IDs are compared lexically.
++	sort.Slice(scalars, func(i, j int) bool { return scalars[i].Cost.ResourceKey < scalars[j].Cost.ResourceKey })
++	sort.Slice(stacks, func(i, j int) bool {
++		return fmt.Sprintf("%d", stacks[i].Cost.ItemID) < fmt.Sprintf("%d", stacks[j].Cost.ItemID)
++	})
++
++	if err := d.Store.LockEconomyOwnerTx(ctx, t, pid); err != nil {
++		return MaterialDebitResult{}, err
++	}
++
++	// Lock and calculate every next state before the first write. Transaction
++	// rollback remains a safety net; it is not used to compensate for partial
++	// intentional debit planning.
++	nextScalars := make([]economy.ScalarBalance, 0, len(scalars))
++	for _, x := range scalars {
++		b, exists, err := d.Store.LockScalarTx(ctx, t, pid, x.Cost.ResourceKey, now)
++		if err != nil {
++			return MaterialDebitResult{}, err
++		}
++		if !exists {
++			return MaterialDebitResult{}, economy.ErrUnknownResource
++		}
++		next, err := b.Debit(x.Cost.Amount, now)
++		if err != nil {
++			return MaterialDebitResult{}, err
++		}
++		nextScalars = append(nextScalars, next)
++	}
++	nextStacks := make([]economy.StackState, 0, len(stacks))
++	for _, x := range stacks {
++		st, exists, err := d.Store.LockStackTx(ctx, t, pid, x.Cost.ItemID, now)
++		if err != nil {
++			return MaterialDebitResult{}, err
++		}
++		if !exists {
++			return MaterialDebitResult{}, economy.ErrUnknownResource
++		}
++		adjusted, err := st.Adjust(-x.Cost.Amount, now)
++		if err != nil {
++			return MaterialDebitResult{}, err
++		}
++		nextStacks = append(nextStacks, adjusted.State)
++	}
++
++	for _, next := range nextScalars {
++		if err := d.Store.SaveScalarTx(ctx, t, next, true); err != nil {
++			return MaterialDebitResult{}, err
++		}
++	}
++	for _, next := range nextStacks {
++		if next.Quantity == 0 {
++			if err := d.Store.DeleteStackTx(ctx, t, next); err != nil {
++				return MaterialDebitResult{}, err
++			}
++			continue
++		}
++		if err := d.Store.SaveStackTx(ctx, t, next, true); err != nil {
++			return MaterialDebitResult{}, err
++		}
++	}
++	return MaterialDebitResult{Scalars: nextScalars, Stacks: nextStacks}, nil
++}
+--- /dev/null	2026-09-11 09:05:28.167444662 +0000
++++ /mnt/data/gxb-ca1-candidate/internal/application/i5/ca1_test.go	2026-09-11 10:00:36.929210068 +0000
+@@ -0,0 +1,446 @@
++package i5
++
++import (
++	"bytes"
++	"context"
++	"encoding/json"
++	"errors"
++	"fmt"
++	"strings"
++	"testing"
++	"time"
++
++	"gxb.local/backend/v2/internal/domain/economy"
++	"gxb.local/backend/v2/internal/domain/grant"
++	"gxb.local/backend/v2/internal/domain/identity"
++	"gxb.local/backend/v2/internal/domain/player"
++	"gxb.local/backend/v2/internal/domain/redeem"
++	"gxb.local/backend/v2/internal/foundation/lockkey"
++	"gxb.local/backend/v2/internal/foundation/operation"
++	"gxb.local/backend/v2/internal/foundation/receipt"
++	"gxb.local/backend/v2/internal/foundation/tx"
++)
++
++type ca1Materializer struct {
++	locks            []lockkey.Key
++	preflightCalls   int
++	lockCalls        int
++	validateCalls    int
++	applyCalls       int
++	lastBatch        PartnerEntityBatch
++	trace            *[]string
++	wantTx           tx.Tx
++	wrongTx          bool
++	preflightErr     error
++	validateErr      error
++	applyErr         error
++	results          []PartnerEntityMaterialization
++	providerID       string
++	providerRevision string
++}
++
++func (m *ca1Materializer) ProviderID() string {
++	if m.providerID != "" {
++		return m.providerID
++	}
++	return "ca1-test-partner"
++}
++
++func (m *ca1Materializer) ProviderRevision() string {
++	if m.providerRevision != "" {
++		return m.providerRevision
++	}
++	return "ca1-test-v1"
++}
++
++func (m *ca1Materializer) PreflightPartnerEntityBatchTx(_ context.Context, _ tx.Queryer, batch PartnerEntityBatch) (PartnerEntityPreflight, error) {
++	m.preflightCalls++
++	m.lastBatch = batch
++	if m.preflightErr != nil {
++		return PartnerEntityPreflight{}, m.preflightErr
++	}
++	return PartnerEntityPreflight{Locks: append([]lockkey.Key(nil), m.locks...)}, nil
++}
++
++func (m *ca1Materializer) LockPartnerEntityKeyTx(_ context.Context, got tx.Tx, key lockkey.Key) error {
++	m.lockCalls++
++	if m.wantTx != nil && got != m.wantTx {
++		m.wrongTx = true
++	}
++	if m.trace != nil {
++		*m.trace = append(*m.trace, fmt.Sprintf("character:%d:%s", key.DomainRank, key.OwnerKind))
++	}
++	return nil
++}
++
++func (m *ca1Materializer) ValidatePartnerEntityBatchLockedTx(_ context.Context, got tx.Tx, _ PartnerEntityBatch, _ PartnerEntityPreflight) error {
++	m.validateCalls++
++	if m.wantTx != nil && got != m.wantTx {
++		m.wrongTx = true
++	}
++	return m.validateErr
++}
++
++func (m *ca1Materializer) MaterializePartnerEntityBatchTx(_ context.Context, got tx.Tx, batch PartnerEntityBatch, _ PartnerEntityPreflight, _ operation.Context) ([]PartnerEntityMaterialization, error) {
++	m.applyCalls++
++	if m.wantTx != nil && got != m.wantTx {
++		m.wrongTx = true
++	}
++	if m.applyErr != nil {
++		return nil, m.applyErr
++	}
++	if m.results != nil {
++		return append([]PartnerEntityMaterialization(nil), m.results...), nil
++	}
++	out := make([]PartnerEntityMaterialization, 0, len(batch.Lines))
++	for _, line := range batch.Lines {
++		payload, _ := json.Marshal(map[string]any{"test_instance_ids": []int64{900000 + int64(line.Identity.LineOrdinal)}})
++		out = append(out, PartnerEntityMaterialization{LineOrdinal: line.Identity.LineOrdinal, ResultSchema: "gxb.ca1.test.partner.v1", ResultPayload: payload})
++	}
++	return out, nil
++}
++
++type ca1TraceStore struct {
++	*testStore
++	trace *[]string
++}
++
++func (s *ca1TraceStore) LockEconomyOwnerTx(ctx context.Context, t tx.Tx, pid identity.PlayerID) error {
++	if s.trace != nil {
++		*s.trace = append(*s.trace, "economy-owner")
++	}
++	return s.testStore.LockEconomyOwnerTx(ctx, t, pid)
++}
++
++func (s *ca1TraceStore) LockProgressionTx(ctx context.Context, t tx.Tx, pid identity.PlayerID) (player.Progression, error) {
++	if s.trace != nil {
++		*s.trace = append(*s.trace, "progression")
++	}
++	return s.testStore.LockProgressionTx(ctx, t, pid)
++}
++
++func (s *ca1TraceStore) LockScalarTx(ctx context.Context, t tx.Tx, pid identity.PlayerID, key string, now time.Time) (economy.ScalarBalance, bool, error) {
++	if s.trace != nil {
++		*s.trace = append(*s.trace, "scalar:"+key)
++	}
++	return s.testStore.LockScalarTx(ctx, t, pid, key, now)
++}
++
++func ca1CharacterKey(t *testing.T, rank uint16, owner string, id int64) lockkey.Key {
++	t.Helper()
++	k, err := lockkey.New(rank, owner, lockkey.Int64(id))
++	if err != nil {
++		t.Fatal(err)
++	}
++	return k
++}
++
++func TestCA1PartnerEntityFailClosedDoesNotConsultFungibleCatalog(t *testing.T) {
++	actor := testActor(t)
++	store := &testStore{}
++	content := &testContent{policies: map[grant.LineKind]ResourcePolicy{}}
++	rs := newMemoryReceipts()
++	svc := Service{Store: store, Content: content, Receipts: rs, ReceiptRead: rs}
++	plan := grant.Plan{PlayerID: actor.PlayerID, Source: grant.SourceIdentity{Domain: "test", Operation: "partner", BusinessKey: "p:1", PolicyVersion: "p1"}, Lines: []grant.Line{{Kind: grant.PartnerEntity, ItemID: 7001, Amount: 1}}}
++	_, err := svc.SettleGrantTx(context.Background(), &testTx{}, actor, plan, mustBindTestContent(t, testOperation(10), testContentRevisionA), GrantTxOptions{AllowOverflowMail: true})
++	if !errors.Is(err, ErrUnsupportedGrantDestination) {
++		t.Fatalf("error=%v", err)
++	}
++	content.mu.Lock()
++	resolveCalls := content.resolveCalls
++	content.mu.Unlock()
++	if resolveCalls != 0 {
++		t.Fatalf("PartnerEntity leaked through fungible content resolver: calls=%d", resolveCalls)
++	}
++}
++
++func TestCA1PartnerEntityMixedGrantOrdersLocksAndReplaysTypedResult(t *testing.T) {
++	actor := testActor(t)
++	trace := []string{}
++	base := &testStore{policies: map[grant.LineKind]ResourcePolicy{grant.ScalarCurrency: {Kind: grant.ScalarCurrency, WireTableID: 1, PolicyVersion: "p1"}}}
++	store := &ca1TraceStore{testStore: base, trace: &trace}
++	content := &testContent{policies: base.policies}
++	rs := newMemoryReceipts()
++	callerTx := &testTx{}
++	provider := &ca1Materializer{
++		locks: []lockkey.Key{
++			ca1CharacterKey(t, 450, "character.hero-roster", int64(actor.PlayerID)),
++			ca1CharacterKey(t, 410, "character.hero-allocator", int64(actor.PlayerID)),
++		},
++		trace:  &trace,
++		wantTx: callerTx,
++	}
++	svc := Service{Store: store, Content: content, PartnerEntities: provider, Receipts: rs, ReceiptRead: rs}
++	plan := grant.Plan{
++		PlayerID: actor.PlayerID,
++		Source:   grant.SourceIdentity{Domain: "test", Operation: "mixed-partner", BusinessKey: "grant:1", Occurrence: "slot:1", PolicyVersion: "p1"},
++		Lines: []grant.Line{
++			{Kind: grant.PartnerEntity, ItemID: 7001, Amount: 1, Metadata: map[string]string{"source": "fixture"}},
++			{Kind: grant.ScalarCurrency, ResourceKey: "gold", Amount: 7},
++		},
++	}
++	op := mustBindTestContent(t, testOperation(11), testContentRevisionA)
++	first, err := svc.SettleGrantTx(context.Background(), callerTx, actor, plan, op, GrantTxOptions{AllowOverflowMail: true})
++	if err != nil {
++		t.Fatal(err)
++	}
++	if provider.wrongTx {
++		t.Fatal("provider did not receive exact caller-owned transaction")
++	}
++	if provider.preflightCalls != 1 || provider.lockCalls != 2 || provider.validateCalls != 1 || provider.applyCalls != 1 {
++		t.Fatalf("provider lifecycle preflight=%d locks=%d validate=%d apply=%d", provider.preflightCalls, provider.lockCalls, provider.validateCalls, provider.applyCalls)
++	}
++	if len(provider.lastBatch.Lines) != 1 || provider.lastBatch.Lines[0].Identity.LineOrdinal != 0 || provider.lastBatch.Lines[0].Identity.GrantSemanticKey != plan.Source.SemanticKey() {
++		t.Fatalf("stable line identity=%+v", provider.lastBatch)
++	}
++	if len(trace) < 4 || !strings.HasPrefix(trace[0], "character:410:") || !strings.HasPrefix(trace[1], "character:450:") || trace[2] != "economy-owner" || trace[3] != "scalar:gold" {
++		t.Fatalf("combined lock order=%#v", trace)
++	}
++	if len(first.Materializations) != 1 || first.Materializations[0].LineOrdinal != 0 || first.Materializations[0].ProviderID != provider.ProviderID() || first.Materializations[0].ProviderRevision != provider.ProviderRevision() {
++		t.Fatalf("materializations=%+v", first.Materializations)
++	}
++	if len(first.Awards) != 1 || first.Awards[0].ResourceKey != "gold" || first.Awards[0].ItemNum != 7 {
++		t.Fatalf("CA1 fabricated or lost stock awards: %+v", first.Awards)
++	}
++	if base.scalar.Amount != 7 || base.saveScalarCalls != 1 {
++		t.Fatalf("scalar state=%+v saves=%d", base.scalar, base.saveScalarCalls)
++	}
++	id, err := plan.ReceiptIdentity()
++	if err != nil {
++		t.Fatal(err)
++	}
++	rr, ok, err := rs.Find(context.Background(), id)
++	if err != nil || !ok {
++		t.Fatalf("receipt ok=%v err=%v", ok, err)
++	}
++	if rr.ResultSchema != "gxb.i5.grant.v3" {
++		t.Fatalf("schema=%s", rr.ResultSchema)
++	}
++	content.mu.Lock()
++	resolveCalls := content.resolveCalls
++	content.mu.Unlock()
++	if resolveCalls != 1 {
++		t.Fatalf("expected only scalar content resolution, got %d", resolveCalls)
++	}
++
++	second, err := svc.SettleGrantTx(context.Background(), callerTx, actor, plan, testOperation(12), GrantTxOptions{AllowOverflowMail: true})
++	if err != nil {
++		t.Fatal(err)
++	}
++	if second.ReceiptID != first.ReceiptID || !bytes.Equal(second.Materializations[0].ResultPayload, first.Materializations[0].ResultPayload) {
++		t.Fatalf("typed replay mismatch first=%+v second=%+v", first, second)
++	}
++	if provider.preflightCalls != 1 || provider.applyCalls != 1 || base.saveScalarCalls != 1 {
++		t.Fatalf("replay re-entered provider/owner preflight=%d apply=%d scalar_saves=%d", provider.preflightCalls, provider.applyCalls, base.saveScalarCalls)
++	}
++}
++
++func TestCA1PartnerEntityRejectsLockOutsideReservedBandBeforeMutation(t *testing.T) {
++	actor := testActor(t)
++	store := &testStore{}
++	rs := newMemoryReceipts()
++	provider := &ca1Materializer{locks: []lockkey.Key{ca1CharacterKey(t, 610, "character.bad-rank", int64(actor.PlayerID))}}
++	svc := Service{Store: store, PartnerEntities: provider, Receipts: rs, ReceiptRead: rs}
++	plan := grant.Plan{PlayerID: actor.PlayerID, Source: grant.SourceIdentity{Domain: "test", Operation: "partner", BusinessKey: "bad-rank", PolicyVersion: "p1"}, Lines: []grant.Line{{Kind: grant.PartnerEntity, ItemID: 7001, Amount: 1}}}
++	_, err := svc.SettleGrantTx(context.Background(), &testTx{}, actor, plan, mustBindTestContent(t, testOperation(13), testContentRevisionA), GrantTxOptions{})
++	if err == nil || !strings.Contains(err.Error(), "outside Character Asset band") {
++		t.Fatalf("error=%v", err)
++	}
++	if provider.lockCalls != 0 || provider.validateCalls != 0 || provider.applyCalls != 0 {
++		t.Fatalf("invalid provider progressed past preflight: locks=%d validate=%d apply=%d", provider.lockCalls, provider.validateCalls, provider.applyCalls)
++	}
++}
++
++func TestCA1PartnerEntityInvalidTypedResultFailsBeforeFungibleWrite(t *testing.T) {
++	actor := testActor(t)
++	base := &testStore{policies: map[grant.LineKind]ResourcePolicy{grant.ScalarCurrency: {Kind: grant.ScalarCurrency, WireTableID: 1, PolicyVersion: "p1"}}}
++	content := &testContent{policies: base.policies}
++	rs := newMemoryReceipts()
++	provider := &ca1Materializer{
++		locks:   []lockkey.Key{ca1CharacterKey(t, 420, "character.fixture", int64(actor.PlayerID))},
++		results: []PartnerEntityMaterialization{},
++	}
++	svc := Service{Store: base, Content: content, PartnerEntities: provider, Receipts: rs, ReceiptRead: rs}
++	plan := grant.Plan{PlayerID: actor.PlayerID, Source: grant.SourceIdentity{Domain: "test", Operation: "mixed-partner", BusinessKey: "invalid-result", PolicyVersion: "p1"}, Lines: []grant.Line{{Kind: grant.PartnerEntity, ItemID: 7001, Amount: 1}, {Kind: grant.ScalarCurrency, ResourceKey: "gold", Amount: 4}}}
++	_, err := svc.SettleGrantTx(context.Background(), &testTx{}, actor, plan, mustBindTestContent(t, testOperation(14), testContentRevisionA), GrantTxOptions{})
++	if err == nil || !strings.Contains(err.Error(), "materialization count") {
++		t.Fatalf("error=%v", err)
++	}
++	if base.saveScalarCalls != 0 || base.scalarExists {
++		t.Fatalf("invalid provider result allowed fungible mutation: saves=%d scalar=%+v", base.saveScalarCalls, base.scalar)
++	}
++}
++
++func TestCA1FungibleGrantRetainsV2ReceiptAndOmitsMaterializations(t *testing.T) {
++	actor := testActor(t)
++	store := &testStore{policies: map[grant.LineKind]ResourcePolicy{grant.ScalarCurrency: {Kind: grant.ScalarCurrency, WireTableID: 1, PolicyVersion: "p1"}}}
++	rs := newMemoryReceipts()
++	svc := Service{Store: store, Content: &testContent{policies: store.policies}, Receipts: rs, ReceiptRead: rs}
++	plan := scalarPlan(actor.PlayerID, 3)
++	got, err := svc.SettleGrantTx(context.Background(), &testTx{}, actor, plan, mustBindTestContent(t, testOperation(15), testContentRevisionA), GrantTxOptions{})
++	if err != nil {
++		t.Fatal(err)
++	}
++	if len(got.Materializations) != 0 {
++		t.Fatalf("unexpected materializations=%+v", got.Materializations)
++	}
++	id, _ := plan.ReceiptIdentity()
++	rr, ok, err := rs.Find(context.Background(), id)
++	if err != nil || !ok {
++		t.Fatalf("receipt ok=%v err=%v", ok, err)
++	}
++	if rr.ResultSchema != "gxb.i5.grant.v2" || bytes.Contains(rr.ResultPayload, []byte("materializations")) {
++		t.Fatalf("fungible receipt drift schema=%s payload=%s", rr.ResultSchema, rr.ResultPayload)
++	}
++}
++
++func TestCA1MaterialDebitPlansAllBalancesBeforeFirstWrite(t *testing.T) {
++	actor := testActor(t)
++	now := time.Unix(1700000500, 0).UTC()
++	def := economy.StackDefinition{ItemID: 9001, StackCap: 99}
++	store := &testStore{
++		scalarExists: true,
++		scalar:       economy.ScalarBalance{PlayerID: actor.PlayerID, ResourceKey: "gold", Amount: 10, StateVersion: 2, UpdatedAt: now},
++		stackExists:  true,
++		stack:        economy.StackState{PlayerID: actor.PlayerID, ItemID: 9001, Quantity: 1, StateVersion: 3, AcquiredAt: now.Add(-time.Hour), UpdatedAt: now},
++	}
++	content := &testContent{policies: map[grant.LineKind]ResourcePolicy{
++		grant.ScalarCurrency: {Kind: grant.ScalarCurrency, PolicyVersion: "p1"},
++		grant.StackItem:      {Kind: grant.StackItem, Stack: &def, WireTableID: 9001, PolicyVersion: "p1"},
++	}}
++	debit := MaterialCostDebiter{Store: store, Content: content}
++	_, err := debit.DebitMaterialCostTx(context.Background(), &testTx{}, actor.PlayerID, MaterialCost{Scalars: []ScalarMaterialCost{{ResourceKey: "gold", Amount: 2}}, Stacks: []StackMaterialCost{{ItemID: 9001, Amount: 2}}}, mustBindTestContent(t, operation.Context{ID: testUUID(16), StartedAt: now}, testContentRevisionA))
++	if !errors.Is(err, economy.ErrInsufficientBalance) {
++		t.Fatalf("error=%v", err)
++	}
++	if store.saveScalarCalls != 0 || store.saveStackCalls != 0 || store.deleteStackCalls != 0 || store.scalar.Amount != 10 || store.stack.Quantity != 1 {
++		t.Fatalf("shortage partially wrote state scalar=%+v stack=%+v scalarSaves=%d stackSaves=%d deletes=%d", store.scalar, store.stack, store.saveScalarCalls, store.saveStackCalls, store.deleteStackCalls)
++	}
++	if len(store.lockTrace) < 3 || store.lockTrace[0] != "economy-owner" || store.lockTrace[1] != "scalar:gold" || store.lockTrace[2] != "stack:9001" {
++		t.Fatalf("material lock order=%#v", store.lockTrace)
++	}
++}
++
++func TestCA1MaterialDebitDeletesZeroAndAllowsImportedOverCapSpendDown(t *testing.T) {
++	actor := testActor(t)
++	now := time.Unix(1700000600, 0).UTC()
++	def := economy.StackDefinition{ItemID: 9001, StackCap: 5}
++	content := &testContent{policies: map[grant.LineKind]ResourcePolicy{grant.StackItem: {Kind: grant.StackItem, Stack: &def, WireTableID: 9001, PolicyVersion: "p1"}}}
++
++	zeroStore := &testStore{stackExists: true, stack: economy.StackState{PlayerID: actor.PlayerID, ItemID: 9001, Quantity: 3, StateVersion: 2, AcquiredAt: now.Add(-time.Hour), UpdatedAt: now}}
++	debit := MaterialCostDebiter{Store: zeroStore, Content: content}
++	got, err := debit.DebitMaterialCostTx(context.Background(), &testTx{}, actor.PlayerID, MaterialCost{Stacks: []StackMaterialCost{{ItemID: 9001, Amount: 3}}}, mustBindTestContent(t, operation.Context{ID: testUUID(17), StartedAt: now}, testContentRevisionA))
++	if err != nil {
++		t.Fatal(err)
++	}
++	if zeroStore.stackExists || zeroStore.deleteStackCalls != 1 || len(got.Stacks) != 1 || got.Stacks[0].Quantity != 0 {
++		t.Fatalf("zero-delete result=%+v store=%+v deletes=%d", got, zeroStore.stack, zeroStore.deleteStackCalls)
++	}
++
++	overStore := &testStore{stackExists: true, stack: economy.StackState{PlayerID: actor.PlayerID, ItemID: 9001, Quantity: 10, StateVersion: 4, AcquiredAt: now.Add(-time.Hour), UpdatedAt: now}}
++	debit = MaterialCostDebiter{Store: overStore, Content: content}
++	got, err = debit.DebitMaterialCostTx(context.Background(), &testTx{}, actor.PlayerID, MaterialCost{Stacks: []StackMaterialCost{{ItemID: 9001, Amount: 3}}}, mustBindTestContent(t, operation.Context{ID: testUUID(18), StartedAt: now}, testContentRevisionA))
++	if err != nil {
++		t.Fatal(err)
++	}
++	if overStore.stack.Quantity != 7 || overStore.saveStackCalls != 1 || len(got.Stacks) != 1 || got.Stacks[0].Quantity != 7 {
++		t.Fatalf("over-cap spend-down result=%+v store=%+v saves=%d", got, overStore.stack, overStore.saveStackCalls)
++	}
++}
++
++type ca1RedeemStore struct {
++	*testStore
++	code             RedeemCode
++	campaign         RedeemCampaign
++	reward           grant.Plan
++	redemptionExists bool
++	inserted         int
++	advanced         int
++}
++
++func (s *ca1RedeemStore) LockRedeemByDigestTx(_ context.Context, _ tx.Tx, _ [32]byte) (RedeemCode, RedeemCampaign, grant.Plan, error) {
++	s.mu.Lock()
++	s.lockTrace = append(s.lockTrace, "redeem-source")
++	s.mu.Unlock()
++	return s.code, s.campaign, s.reward, nil
++}
++
++func (s *ca1RedeemStore) FindRedemptionTx(context.Context, tx.Tx, string, string, string, int64) (Redemption, bool, error) {
++	return Redemption{}, s.redemptionExists, nil
++}
++
++func (s *ca1RedeemStore) CountCampaignRedemptionsTx(context.Context, tx.Tx, string) (int64, error) {
++	if s.redemptionExists {
++		return 1, nil
++	}
++	return 0, nil
++}
++
++func (s *ca1RedeemStore) InsertRedemptionTx(_ context.Context, _ tx.Tx, _ Redemption) error {
++	s.inserted++
++	s.redemptionExists = true
++	return nil
++}
++
++func (s *ca1RedeemStore) AdvanceRedeemCodeTx(_ context.Context, _ tx.Tx, _ RedeemCode) error {
++	s.advanced++
++	return nil
++}
++
++func TestCA1RedeemAcquiresGrantSuffixBeforeProgressionEligibility(t *testing.T) {
++	actor := testActor(t)
++	now := time.Unix(1700000700, 0).UTC()
++	base := &testStore{
++		policies:    map[grant.LineKind]ResourcePolicy{grant.ScalarCurrency: {Kind: grant.ScalarCurrency, WireTableID: 1, PolicyVersion: "redeem-v1"}},
++		progression: player.Progression{PlayerID: actor.PlayerID, Level: redeem.StockFunctionLevel, Exp: 0, StateVersion: 1, UpdatedAt: now},
++	}
++	store := &ca1RedeemStore{
++		testStore: base,
++		code:      RedeemCode{CodeID: "00000000-0000-0000-0000-000000000001", CampaignID: "00000000-0000-0000-0000-000000000002", CodeKind: "UNIQUE", Status: "ACTIVE", StateVersion: 1},
++		campaign:  RedeemCampaign{CampaignID: "00000000-0000-0000-0000-000000000002", Campaign: redeem.Campaign{Status: redeem.Active, Subject: redeem.PlayerSubject, PolicyVersion: "redeem-v1"}, RewardBundleRevisionID: "00000000-0000-0000-0000-000000000003", PerSubjectCap: 1},
++		reward:    grant.Plan{Lines: []grant.Line{{Kind: grant.ScalarCurrency, ResourceKey: "gold", Amount: 5}}},
++	}
++	rs := newMemoryReceipts()
++	content := &testContent{activeRevisions: []string{testContentRevisionA}, policies: base.policies}
++	svc := Service{Runner: tx.Runner{DB: &testBeginner{}}, Store: store, Content: content, Receipts: rs, ReceiptRead: rs, RedeemSecret: []byte("0123456789abcdef0123456789abcdef")}
++	op := operation.Context{ID: testUUID(19), StartedAt: now}
++	got, err := svc.Redeem(context.Background(), actor, "VALID-CODE", "test", op)
++	if err != nil {
++		t.Fatal(err)
++	}
++	if len(got.Awards) != 1 || base.scalar.Amount != 5 || store.inserted != 1 || store.advanced != 1 {
++		t.Fatalf("redeem result=%+v scalar=%+v inserted=%d advanced=%d", got, base.scalar, store.inserted, store.advanced)
++	}
++	base.mu.Lock()
++	trace := append([]string(nil), base.lockTrace...)
++	base.mu.Unlock()
++	idxEconomy, idxProgression := -1, -1
++	for i, x := range trace {
++		if x == "economy-owner" && idxEconomy < 0 {
++			idxEconomy = i
++		}
++		if x == "progression" && idxProgression < 0 {
++			idxProgression = i
++		}
++	}
++	if idxEconomy < 0 || idxProgression < 0 || idxEconomy >= idxProgression {
++		t.Fatalf("Redeem retained progression->economy inversion: trace=%#v", trace)
++	}
++}
++
++func TestCA1GrantV3DecoderPreservesTypedPayload(t *testing.T) {
++	payload := json.RawMessage(`{"instance_ids":[101,102]}`)
++	got := GrantResult{ReceiptID: "r", Awards: []Award{}, Materializations: []GrantMaterialization{{LineOrdinal: 2, ProviderID: "hero", ProviderRevision: "rev1", ResultSchema: "hero.v1", ResultPayload: payload}}}
++	raw, err := json.Marshal(got)
++	if err != nil {
++		t.Fatal(err)
++	}
++	r := receipt.Receipt{ResultSchema: "gxb.i5.grant.v3", ResultPayload: raw}
++	decoded, err := decodeGrantReceiptResult(r)
++	if err != nil {
++		t.Fatal(err)
++	}
++	if len(decoded.Materializations) != 1 || !bytes.Equal(decoded.Materializations[0].ResultPayload, payload) {
++		t.Fatalf("decoded=%+v", decoded)
++	}
++}
+--- /dev/null	2026-09-11 09:05:28.167444662 +0000
++++ /mnt/data/gxb-ca1-candidate/tools/check_ca1_source_oracle.py	2026-09-11 10:02:19.592452449 +0000
+@@ -0,0 +1,94 @@
++#!/usr/bin/env python3
++"""CA1 narrow source/oracle drift check.
++
++This is hash + lexical corroboration only. It proves that CA1's deliberately
++narrow PartnerEntity/material-debit seams still align with the exact current
++src_64 and historical v1.164 client evidence used by the research checkpoint.
++It does not prove original-server behavior or authorize CA2+ mechanics.
++"""
++from __future__ import annotations
++
++import fnmatch
++import hashlib
++import json
++import sys
++import zipfile
++from pathlib import Path
++
++ROOT = Path(__file__).resolve().parents[1]
++OROOT = Path(sys.argv[1] if len(sys.argv) > 1 else "/mnt/data")
++LOCK = json.loads((ROOT / "oracles.lock.json").read_text())
++
++
++def sha256_file(path: Path) -> str:
++    h = hashlib.sha256()
++    with path.open("rb") as f:
++        for block in iter(lambda: f.read(1 << 20), b""):
++            h.update(block)
++    return h.hexdigest()
++
++
++def locate(oracle_id: str) -> Path:
++    entry = next(x for x in LOCK["oracles"] if x["id"] == oracle_id)
++    for path in sorted(OROOT.iterdir()):
++        if not path.is_file():
++            continue
++        if not any(fnmatch.fnmatch(path.name, pat) for pat in entry["filename_patterns"]):
++            continue
++        if sha256_file(path) == entry["sha256"]:
++            return path
++    raise SystemExit(f"{oracle_id}: verified oracle not found under {OROOT}")
++
++
++def read(z: zipfile.ZipFile, name: str) -> str:
++    return z.read(name).decode("utf-8-sig", errors="replace")
++
++
++current = locate("current_src64")
++old = locate("old_client")
++errs: list[str] = []
++
++with zipfile.ZipFile(current) as z:
++    item = read(z, "app-assets/output/assets/src_64/app/common/tables/ItemTable.lua")
++    pet = read(z, "app-assets/output/assets/src_64/app/model/Pet.lua")
++    mid = read(z, "app-assets/output/assets/src_64/app/common/network/mid.lua")
++
++with zipfile.ZipFile(old) as z:
++    old_item = read(z, "src/app/common/tables/ItemTable.lua")
++    old_pet = read(z, "src/app/model/Pet.lua")
++    old_mid = read(z, "src/app/common/network/mid.lua")
++
++checks = [
++    ("current ItemTable keeps hero/pet/style mappings distinct", all(x in item for x in [
++        "heroIDs_", "partner_id", "petIDs_", "pet_id", "stylePet_", "style_pet",
++    ])),
++    ("historical ItemTable corroborates distinct hero/pet/style mappings", all(x in old_item for x in [
++        "heroIDs_", "partner_id", "petIDs_", "pet_id", "stylePet_", "style_pet",
++    ])),
++    ("current Pet style state is explicit", "active_style" in pet and "pet_styles" in pet),
++    ("historical Pet style state is explicit", "active_style" in old_pet and "pet_styles" in old_pet),
++    ("current Pet advance/style MIDs are distinct", all(x in mid for x in [
++        "xyd.mid.PET_ADVANCE = 785",
++        "xyd.mid.GET_PET_STYLE_FORM_ITEM = 1893",
++        "xyd.mid.USE_PET_STYLE = 1894",
++        "xyd.mid.CANCEL_PET_STYLE = 1895",
++    ])),
++    ("historical Pet advance/style MIDs corroborate current split", all(x in old_mid for x in [
++        "xyd.mid.PET_ADVANCE = 785",
++        "xyd.mid.GET_PET_STYLE_FORM_ITEM = 1893",
++        "xyd.mid.USE_PET_STYLE = 1894",
++        "xyd.mid.CANCEL_PET_STYLE = 1895",
++    ])),
++]
++for label, ok in checks:
++    if not ok:
++        errs.append(label)
++
++if errs:
++    print("CA1 SOURCE ORACLE CHECK: FAIL")
++    for err in errs:
++        print(" -", err)
++    raise SystemExit(1)
++
++print("CA1 SOURCE ORACLE CHECK: PASS")
++print("verified exact current+historical corpora; lexical evidence keeps partner/pet/style identities distinct; no CA2+ mechanics inferred")
+--- /dev/null	2026-09-11 09:05:28.167444662 +0000
++++ /mnt/data/gxb-ca1-candidate/tools/validate_ca1.py	2026-09-11 10:02:33.185111222 +0000
+@@ -0,0 +1,83 @@
++#!/usr/bin/env python3
++"""Static CA1 implementation-boundary guard."""
++from __future__ import annotations
++
++import re
++import sys
++from pathlib import Path
++
++ROOT = Path(__file__).resolve().parents[1]
++errs: list[str] = []
++
++partner = (ROOT / "internal/application/i5/partner_materializer.go").read_text()
++lockplan = (ROOT / "internal/application/i5/grant_lock_plan.go").read_text()
++service = (ROOT / "internal/application/i5/service.go").read_text()
++material = (ROOT / "internal/application/i5/material_cost.go").read_text()
++receipts = (ROOT / "internal/application/i5/grant_receipts.go").read_text()
++
++# Architectural amendment and production non-activation.
++if "CharacterAssetLockRankMin uint16 = 400" not in partner or "CharacterAssetLockRankMax uint16 = 599" not in partner:
++    errs.append("Character Asset lock band is not frozen at 400..599")
++
++for path in (ROOT / "cmd").glob("**/*.go"):
++    if "PartnerEntities:" in path.read_text(errors="replace"):
++        errs.append(f"production PartnerEntity provider activated in {path.relative_to(ROOT)}")
++
++# CA1 owns no durable Character schema/migration. The exact Pass509 high-water
++# remains authoritative; CA1 itself adds no production migration.
++migrations = sorted((ROOT / "migrations").glob("*.sql"))
++if not migrations or migrations[-1].name != "00013_i6c_guild_replay_repair.sql":
++    errs.append("CA1 unexpectedly changed production migration high-water")
++
++# PartnerEntity must branch outside fungible content and SpecializedDomain stays closed.
++partner_branch = lockplan.find("if line.Kind == grant.PartnerEntity")
++content_resolve = lockplan.find("s.Content.ResolveResourceTx", partner_branch)
++if partner_branch < 0 or content_resolve < 0:
++    errs.append("PartnerEntity/fungible preflight structure missing")
++if "if line.Kind == grant.SpecializedDomain" not in lockplan or "return grantPreflight{}, ErrUnsupportedGrantDestination" not in lockplan:
++    errs.append("SpecializedDomain is not fail-closed in Grant preflight")
++if "case grant.SpecializedDomain:" not in service or "ErrUnsupportedGrantDestination" not in service:
++    errs.append("SpecializedDomain is not fail-closed in Grant apply")
++
++# Entity receipt extension must be additive while fungible v2 remains available.
++if 'schema := "gxb.i5.grant.v2"' not in service or 'schema = "gxb.i5.grant.v3"' not in service:
++    errs.append("conditional Grant v2/v3 receipt split missing")
++if '"gxb.i5.grant.v1", "gxb.i5.grant.v2", "gxb.i5.grant.v3"' not in receipts:
++    errs.append("Grant receipt decoder does not preserve v1/v2 and accept v3")
++
++# Shared material debit remains scalar+stack and contains no SQL/transaction lifecycle.
++for forbidden in ["grant.Temporal", "grant.PlayerExp", "grant.PartnerEntity", "grant.SpecializedDomain"]:
++    # Allowed in comments describing the exclusion; reject operational switch/cost construction only.
++    if re.search(rf"Kind:\s*{re.escape(forbidden)}", material):
++        errs.append(f"material debit operationally includes forbidden kind {forbidden}")
++for pattern, label in [
++    (r"\.Begin\s*\(", "transaction begin"),
++    (r"\.Commit\s*\(", "transaction commit"),
++    (r"\.Rollback\s*\(", "transaction rollback"),
++    (r"(?i)\b(?:SELECT|UPDATE|INSERT|DELETE)\b[^\n]*\b(?:FROM|INTO|SET)\b", "inline SQL"),
++]:
++    if re.search(pattern, material):
++        errs.append(f"material debit contains forbidden {label}")
++
++# Redeem R0 must force progression into the complete suffix before explicit eligibility read.
++redeem_pos = service.find("CA1-R0: Redeem must acquire the complete lower-to-higher Grant")
++forced = service.find("ForceProgression: true", redeem_pos)
++acquire = service.find("s.acquireGrantLocksTx", forced)
++progression = service.find("s.Store.LockProgressionTx", acquire)
++if min(redeem_pos, forced, acquire, progression) < 0 or not (redeem_pos < forced < acquire < progression):
++    errs.append("Redeem CA1-R0 complete-suffix ordering guard missing")
++
++# No CA1 production bootstrap/MID1 registration should appear.
++for path in list((ROOT / "cmd").glob("**/*.go")) + list((ROOT / "internal/adapters/stockruntime").glob("**/*.go")):
++    text = path.read_text(errors="replace")
++    if "PartnerEntityMaterializer" in text or "GrantMaterialization" in text:
++        errs.append(f"CA1 entity seam leaked into stock/bootstrap runtime: {path.relative_to(ROOT)}")
++
++if errs:
++    print("CA1 STATIC BOUNDARY VALIDATION: FAIL")
++    for err in errs:
++        print(" -", err)
++    raise SystemExit(1)
++
++print("CA1 STATIC BOUNDARY VALIDATION: PASS")
++print("no Character durable schema/provider activation; PartnerEntity typed seam + scalar/stack material debit + Redeem R0 remain bounded")

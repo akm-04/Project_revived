@@ -1,0 +1,64 @@
+{
+  "schema_version": 1,
+  "pass": "618.0",
+  "stage": "CAE-MID2784-REPAIR",
+  "status": "LOCAL_ACCEPTANCE_CANDIDATE",
+  "version": "v0.85.1",
+  "parent_backend_archive_sha256": "52e0e6ba719561ddac8d7757769aef2a7c616721e89ab575d848970709a39325",
+  "parent_git": "5c4703259726629a1e5f84015941e2a6f1884306",
+  "pass617_passmap_sha256": "1242014d31229a72b11178450ddf2ddbe7ccf8098c9781560cc85ff5aff79950",
+  "repair_contract_sha256": "affb6243d52cd2d3ee388e4d77e2ce5ee04ed0c90f0f27ba1227909c6feeab6b",
+  "acceptance_matrix_sha256": "0aa9a72ead0cb69f4ade2f33a9e86ec6311d3103221f749c2baaf834c8916592",
+  "repair_authorization_sha256": "66c0b7391e77cd89c6777502507ca459cc00d39e5522c76876658d0807b6da9f",
+  "contract_impact_review_sha256": "51bc79606e01bba4bdbe583a10a1fbd7d290ee07be165b0e0bbe98a4331b1b66",
+  "preimplementation_reality_sha256": "f0aac0d4f9b8ac9f7e1dcee0aa1190c100bf1207257d5364d109f97299e5b890",
+  "implementation_revision_algorithm": "sha256(sorted(path UTF-8 || NUL || final file bytes) over authorized MID2784 repair implementation/test/oracle footprint)",
+  "implementation_revision_sha256": "d974005c829395ee8fbc84cb3964b83d402e47b0126b91d9bce2f4ff00a11165",
+  "changed_implementation_files": [
+    {
+      "path": "internal/adapters/stockruntime/http_dispatchers_test.go",
+      "sha256": "b174f33a0dcc9c5a9b95554a557a80e2c2aca3720e995698d201a0a39799d465",
+      "bytes": 9523
+    },
+    {
+      "path": "internal/projection/lobby/shapes.go",
+      "sha256": "bc1e68beff92ffee975ded76cc89ec2dec7b1870d93521ba351a70ef114b0014",
+      "bytes": 12147
+    },
+    {
+      "path": "internal/projection/lobby/shapes_test.go",
+      "sha256": "979a44313252efe1afd078d8ae0c256e86ce11146e36cdb921325bb5e26402cd",
+      "bytes": 4335
+    },
+    {
+      "path": "tools/check_i4_oracle_wave_s.py",
+      "sha256": "ecd44bd71a5edbc573f4e2520ca60c0a3f363fdd1771a1bf31382b3c072c370d",
+      "bytes": 11536
+    }
+  ],
+  "scope": [
+    "I4/Wave-S MID2784 read-only compatibility projection",
+    "is_award fresh collection length 23 with numeric int64(0) entries",
+    "focused lobby and stockruntime response-shape tests",
+    "current src_64 SelfPlayer/WhiteAlbumWindow + collect_special 1..23 hash/cardinality oracle guard",
+    "runtime registration guard preserves MID2784 while MID72/MID2785 remain unregistered"
+  ],
+  "non_changes": [
+    "no database table/schema/migration",
+    "no White Album durable owner/claim settlement",
+    "no MID72 or MID2785 registration",
+    "no Character Asset durable ownership",
+    "no foreign-owner SQL",
+    "no transaction/receipt semantics",
+    "no timed-gameplay semantics",
+    "no dependency/toolchain pin changes"
+  ],
+  "evidence": {
+    "canonical_static_source": "GREEN",
+    "exact_go_1_27_1_execution": "ENVIRONMENT_BLOCKED_NETWORK_TOOLCHAIN_DOWNLOAD",
+    "compatibility_copy": "GREEN_FOCUSED_TEST_RACE_VET_ARCHGUARD_AND_94_OF_94_PACKAGE_REGRESSION",
+    "postimplementation_reality_check": "GREEN_FOR_TARGETED_MID2784_REPAIR",
+    "classification": "LOCAL_STATIC_PLUS_EXACT_SOURCE_ORACLE_PLUS_COMPATIBILITY_COPY_ONLY; W2_PHYSICAL_STOCK_DEFERRED_UNPASSED"
+  },
+  "migration_high_water": "00030_ca7_2_appearance_foundation.sql"
+}

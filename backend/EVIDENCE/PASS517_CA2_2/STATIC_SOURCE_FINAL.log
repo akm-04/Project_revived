@@ -1,0 +1,52 @@
+===== python3 tools/check_dependency_policy.py =====
+DEPENDENCY POLICY: PASS
+resolved_go_modules 16 qualified_candidates 5
+===== python3 tools/generate_resolved_sbom.py --check =====
+RESOLVED SBOM: PASS
+===== python3 tools/check_sqlc_generation_policy.py =====
+SQLC GENERATION POLICY: PASS
+===== python3 tools/verify_oracles.py --root /mnt/data =====
+PASS current_src64: all-assest-rechecked-1.zip
+PASS v1_pass353: gxb-backend-v0.65.2-pass353.0-portable-dev1-V1-Final.zip
+PASS old_client: gxb-old-client-v1.164.0-research-corpus.zip
+PASS native_apk: latest_apk-smali-full.zip
+PASS pass222_probe: prep-apk-pass222-window-probe.zip
+ORACLE VERIFY: PASS
+===== python3 tools/check_ca2_1_source_oracle.py /mnt/data =====
+CA2-1 SOURCE ORACLE CHECK: PASS
+exact current src_64 corroborates MID49/MID89 private roster shape, Super partner_type, and 8-star effective ceiling
+===== python3 tools/check_ca2_2_source_oracle.py /mnt/data =====
+CA2-2 SOURCE ORACLE CHECK: PASS
+exact current src_64 corroborates MID52/55/63/67 shapes, EXP behavior/items, qualified base-star costs, and Hero piece map basis
+===== python3 tools/generate_builtin_content.py --source-archive /mnt/data/all-assest-rechecked-1.zip --check =====
+R4A CONTENT GENERATION: PASS revision=e5a7c922fd40d42a4354f6200c7e3ea0ca9f00d666527df1b5915b083e0e49fb resources=5556 players=100 functions=99 heroes=568
+===== python3 tools/generate_content_querytext.py --check =====
+CONTENT QUERYTEXT: PASS sha256=77d3717cdfca8e89428be7f7f1d1085e7b16b20a4064b77a66cb65b15c8a29e8
+===== python3 tools/generate_character_querytext.py --check =====
+CHARACTER QUERYTEXT: PASS sha256=a392df564905a60de4f68732a39562c5f0935ec6dadbad33085b8fdb891358ea
+===== python3 tools/generate_kernel_querytext.py --check =====
+KERNEL QUERYTEXT: PASS sha256=74ad9accee063e77323a2eb4a69df394bdcb331ce88e3d789864ffbc904b7511
+===== python3 tools/check_schema_query_ownership.py =====
+SCHEMA/QUERY OWNERSHIP: PASS
+===== python3 tools/validate_ca2_1.py --cumulative =====
+CA2-1 STATIC VALIDATION: PASS (cumulative)
+CA2-1 foundation/projection invariants preserved while qualified CA2-2 routes are present
+===== python3 tools/validate_ca2_2.py =====
+CA2-2 STATIC VALIDATION: PASS
+Hero EXP/base-star progression and MID67 projection are bounded to qualified source/content/I5 owner seams; capacity/acquisition/later mutations remain deferred
+===== python3 tools/validate_r5.py --cumulative =====
+R5 VALIDATION: PASS (CUMULATIVE MODE)
+static progression/temporal/bootstrap/function/directory/receipt/wire/stack R5 seams present; historical compiler pin remains strict outside cumulative mode; native PostgreSQL/River/W2 remain separate
+===== python3 tools/validate_r6.py --cumulative =====
+R6 VALIDATION: PASS (CUMULATIVE MODE)
+static projection/directory/replay/lifecycle/key/single-owner/http/observability R6 seams present; cumulative mode permits later migrations but does not weaken historical R6 pins
+===== python3 tools/validate_current_candidate.py =====
+R6 VALIDATION: PASS (CUMULATIVE MODE)
+static projection/directory/replay/lifecycle/key/single-owner/http/observability R6 seams present; cumulative mode permits later migrations but does not weaken historical R6 pins
+CURRENT CUMULATIVE CANDIDATE VALIDATION: PASS
+historical R6 pins retained; exact forward migration inventory and current release/SBOM version agree
+
+===== GOFMT =====
+gofmt clean
+
+ALL_STATIC_SOURCE_FINAL=PASS

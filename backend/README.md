@@ -1,0 +1,15 @@
+# GXB1 V2 — Pass531 CA3 Work-fix candidate
+
+This candidate is a **normal-chat adjudicated repair of the exact Pass530 candidate after the first strict CA3 aggregate Work run**. The Work run remains PARTIAL/RED and CA3 aggregate acceptance is **not granted**. Pass531 accepts Luna’s two runtime diagnoses but deliberately does not copy Luna’s proposed patch verbatim: it broadens transport normalization to the complete stock-client top-level metadata shape recovered from current `src_64`, applies that rule consistently to strict Pet and already-accepted Hero routes, and changes Pet row locking to distinguish genuine absence from every infrastructure/database error through an explicit `found` result.
+
+Pass531 must return to Work for exact pinned/native/real-PostgreSQL validation of these repairs and for continuation of the mandatory rows that were blocked by the original Pet dispatcher defect. A525-07 stock-client runtime proof, old-Pass525-node drain sequencing, UNKNOWN-COMMIT injection, and controlled timed/revision scenarios remain mandatory and are not waived by this repair.
+
+This candidate is derived from the exact **Pass525 / v0.66.0 CA3-2 local checkpoint** and implements the sealed Pass528 CA3-3 contract on top of the preserved CA3-1/CA3-2 work. It remains a **local candidate only**: combined exact-toolchain, real PostgreSQL/River where applicable, deployment-drain/activation, A525-07 stock recovery, and unmodified stock-client CA3-1/2/3 E2E proof remain mandatory before CA3 aggregate acceptance.
+
+Pass530 implements source-qualified Pet progression for MID786/MID787/MID134/MID791, additive `PET_PROGRESSION_CA3` immutable content, five raw Pet skill levels, I5 two-phase Pet EXP ownership, strict progression wire decoding, and the shared CA3 A525-02/A525-03/A525-04 repairs for MID782 projection, DB-authoritative Pet lifecycle time, and creation-revision incubation policy. The CA3-3 receipt fence is `receipt check -> Pet lock -> receipt recheck -> first mutation`; ration content resolution occurs only after that owner fence.
+
+Normal-chat Go execution is performed only in disposable compatibility copies because canonical pins **Go 1.27.3** while the normal-chat sandbox provides an older Go toolchain. Compatibility-copy results are diagnostic/local evidence only and never substitute for exact pinned-toolchain, PostgreSQL/River, deployment, or stock-client proof. Canonical `go.mod`, `go.sum`, `.go-version`, and release pins stay pristine.
+
+Historical lineage remains explicit: the cumulative **foundation repair** was accepted at **Pass489**, and the later **I6** phase was accepted at Pass509. Pass530 retains those historical invariants while extending Character Asset CA3. A525-06 cumulative-validator maintenance is closed only by preserving those historical checks while explicitly recognizing the later CA3 content-compiler generations; no historical semantic assertion is weakened.
+
+Current Pass530 evidence is under `docs/PASS530_*` and `EVIDENCE/PASS530_CA3_3/`. Earlier CA3 checkpoints remain available under the Pass523/Pass525 evidence records.

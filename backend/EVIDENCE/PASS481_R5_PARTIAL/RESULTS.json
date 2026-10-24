@@ -1,0 +1,77 @@
+[
+  {
+    "check": "go_full",
+    "exit_code": 0,
+    "command": [
+      "/workspace/scratch/954ae618448a/work481/go/bin/go",
+      "test",
+      "./..."
+    ],
+    "evidence_level": "CANONICAL_GO_1_27_1_LOCAL_NO_DATABASE_SERVICE"
+  },
+  {
+    "check": "go_postgres_tag",
+    "exit_code": 0,
+    "command": [
+      "/workspace/scratch/954ae618448a/work481/go/bin/go",
+      "test",
+      "-tags",
+      "postgres",
+      "./..."
+    ],
+    "evidence_level": "CANONICAL_GO_1_27_1_LOCAL_NO_DATABASE_SERVICE"
+  },
+  {
+    "check": "go_race",
+    "exit_code": 0,
+    "command": [
+      "/workspace/scratch/954ae618448a/work481/go/bin/go",
+      "test",
+      "-race",
+      "./internal/domain/player",
+      "./internal/domain/economy",
+      "./internal/adapters/postgres/i5store",
+      "./internal/adapters/postgres/contentstore",
+      "./internal/adapters/postgres/i4store",
+      "./internal/application/bootstrap"
+    ],
+    "evidence_level": "CANONICAL_GO_1_27_1_LOCAL_NO_DATABASE_SERVICE"
+  },
+  {
+    "check": "go_vet",
+    "exit_code": 0,
+    "command": [
+      "/workspace/scratch/954ae618448a/work481/go/bin/go",
+      "vet",
+      "./..."
+    ],
+    "evidence_level": "CANONICAL_GO_1_27_1_LOCAL_NO_DATABASE_SERVICE"
+  },
+  {
+    "check": "schema_ownership",
+    "exit_code": 0,
+    "command": [
+      "python3",
+      "tools/check_schema_query_ownership.py"
+    ],
+    "evidence_level": "STATIC"
+  },
+  {
+    "check": "dependency_policy",
+    "exit_code": 0,
+    "command": [
+      "python3",
+      "tools/check_dependency_policy.py"
+    ],
+    "evidence_level": "STATIC"
+  },
+  {
+    "check": "i5_validation",
+    "exit_code": 1,
+    "command": [
+      "python3",
+      "tools/validate_i5.py"
+    ],
+    "evidence_level": "STATIC"
+  }
+]

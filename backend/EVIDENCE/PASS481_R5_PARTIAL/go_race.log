@@ -1,0 +1,6 @@
+ok  	gxb.local/backend/v2/internal/domain/player	1.020s
+ok  	gxb.local/backend/v2/internal/domain/economy	1.011s
+ok  	gxb.local/backend/v2/internal/adapters/postgres/i5store	(cached)
+ok  	gxb.local/backend/v2/internal/adapters/postgres/contentstore	(cached)
+ok  	gxb.local/backend/v2/internal/adapters/postgres/i4store	(cached)
+ok  	gxb.local/backend/v2/internal/application/bootstrap	(cached)

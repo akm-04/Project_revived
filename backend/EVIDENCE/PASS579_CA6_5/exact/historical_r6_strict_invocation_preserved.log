@@ -1,0 +1,23 @@
+DEPENDENCY POLICY: PASS
+resolved_go_modules 16 qualified_candidates 5
+RESOLVED SBOM: PASS
+SQLC GENERATION POLICY: PASS
+SCHEMA/QUERY OWNERSHIP: PASS
+I1 VALIDATION: PASS
+minimal kernel schema, tx outcome/reconciliation, typed facts, adapter isolation and stage routing verified
+I2 VALIDATION: PASS
+stock HTTP families, generated numeric MID catalog, bounded AMF3/TCP framing, fail-closed dispatch and differential fixtures verified
+I3 VALIDATION: PASS
+typed account/session/context, honest server directory, region-encoded allocator, observation gate, replay-stable MID1 and unknown-COMMIT reconciliation contracts verified
+I4 VALIDATION: PASS
+I5 VALIDATION: PASS
+FOUNDATION TRACE: PASS (10 historical lifecycle records; 24/24 RF findings dispositioned; R0-R7 accepted Pass489; I6 accepted Pass509; 6 future extension limits remain explicit; W2 separate)
+R6 VALIDATION: FAIL
+ - unexpected migration00012: historical R6 contract is no-schema-change unless research is reopened
+ - canonical toolchain pin drift: go.mod
+R6 VALIDATION: PASS (CUMULATIVE MODE)
+static projection/directory/replay/lifecycle/key/single-owner/http/observability R6 seams present; cumulative mode permits later migrations but does not weaken historical R6 pins
+R6 VALIDATION: PASS (CUMULATIVE MODE)
+static projection/directory/replay/lifecycle/key/single-owner/http/observability R6 seams present; cumulative mode permits later migrations but does not weaken historical R6 pins
+CURRENT CUMULATIVE CANDIDATE VALIDATION: PASS
+historical R6 pins retained; exact forward migration inventory and current release/SBOM version agree

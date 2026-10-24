@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "pass": "458.0",
+  "milestone": "R3A",
+  "finding": "RF-008",
+  "local_verdict": "GREEN",
+  "foundation_verdict": "RED_REPAIR_ACTIVE",
+  "I6": "BLOCKED_UNTIL_R7_GREEN",
+  "tests": [
+    "go test ./...",
+    "go vet ./...",
+    "targeted go test -race",
+    "FuzzDecodeBounded",
+    "FuzzEncodeBounded",
+    "FuzzStreamDecoder",
+    "tools/validate_r3a.py"
+  ],
+  "live_deferred": [
+    "R7 load/resource pressure",
+    "final stock wire/client regression"
+  ]
+}

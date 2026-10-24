@@ -1,0 +1,134 @@
+{
+  "status": "PREIMPLEMENTATION_DESIGN_READY_PENDING_NORMAL_SEAL",
+  "decisions": [
+    {
+      "id": "A1",
+      "classification": "IMPLEMENTATION_DECISION_APPLYING_662",
+      "decision": "Owned sparse slot child rows; absent row is0, render exactly6 fixed ordinalslots.",
+      "shape": {
+        "table": "player_public_profile_showcase_slots",
+        "owner": "PublicProfile",
+        "columns": [
+          "player_id bigint",
+          "slot_ordinal smallint",
+          "hero_partner_id bigint nullable",
+          "pet_id bigint nullable"
+        ],
+        "primary_key": [
+          "player_id",
+          "slot_ordinal"
+        ],
+        "checks": [
+          "slot_ordinal1..6",
+          "exactlyone nonnullfamily ref",
+          "presentinstance_id1..2^53-1"
+        ],
+        "foreign_key": "player_id -> PublicProfile root; no foreign asset cascade/foreign-owner SQL",
+        "empty_slots": "No row; clearing removes onlyownedslotrows; retainedroot once created."
+      },
+      "rationale": "Reuses existing391 root child-touch. Six rows maximum; actor-qualified typed asset validation/guard supplies asset integrity, as existingSavedPreset framework. No need redundanttemplate snapshots or additional per-slot lock/version/index kernel."
+    },
+    {
+      "id": "A2",
+      "classification": "INHERITED_CONTRACT_RECONCILIATION",
+      "decision": "Shared391 rootversion; touch once onlyactual selectionchange, absent/all0 no-op nevermaterializesroot; oldpreferences/flags/policy unchanged.",
+      "ports": [
+        "RootService.PrepareRootTx",
+        "PreparedRoot.Existing",
+        "RootService.TouchForChildChangeTx",
+        "new ShowcaseStore.ReadSelectionTx/ReplaceSelectionTx/ReferencesHeroTx/ReferencesPetTx"
+      ],
+      "rationale": "Existing preparedroot binds callerTx; preference assignment receipt proof accepts laterrootversion. Newchild doesnot duplicateowner version or relocate accepted2Bpolicy."
+    },
+    {
+      "id": "A3",
+      "classification": "IMPLEMENTATION_DECISION_APPLYING_REFERENCE_CONTRACT",
+      "decision": "Actor-bound PublicProfileReferenceGuard implements existing HeroRemovalGuard/PetRemovalGuard. Preflight returns stable315+391 keys even absent/unreferenced.",
+      "ports": [
+        "Existing playerroot.TxLocker for315",
+        "PublicProfile Store.LockRootTx for391",
+        "own ShowcaseStore referenceexists underlocks"
+      ],
+      "acquisition": "Complete global plan beforefirstmutation; canonicalizeproviders then deduplicate withcalleradmission keys. PublicProfile provider dispatches315 throughI4typedTxLocker and391 throughownstore. No foreignSQL, no rootinsert onguardread.",
+      "validation": "Exactactor/ref/provider/keyplan validation; orchestration acquires everyplannedkey beforeValidateRemovalLockedTx. Existingframework caller-lock contract preserved; no new lock-witness/proof structure. Rejectreferenced asset, otherwiseadmit. Compose acceptedSavedPreset440 provider; no newdestructivecommand.",
+      "rationale": "FORUPDATE on absent391 alone cannot protect reference creation. Explicit315 plan uses acceptedcreation fence and avoids requiring an unverifiable callerassertion. Only currentPublicProfileprovider claims315 in this providercomposition; future sharedclaim conflict must be reconciled if introduced."
+    },
+    {
+      "id": "A4",
+      "classification": "IMPLEMENTATION_DECISION_APPLYING_662",
+      "decision": "Source-signed DTO -> exact six typed SlotRefs. Use existing finitejson.ExactInteger and selected raw duplicate-key rejection, not the small preferenceID parser.",
+      "validation": [
+        "Preservezero/sign/order; reject nonarray/wronglength/null/fraction/overflow beforeabs",
+        "ActorPID alwaysfromadmittedcontext, notpayload",
+        "Get owner-template identity underlockedqualifiedHero/Petfacet",
+        "Reject samefamily duplicatecurrenttemplate; emptyignored; keepcrossfamilyidentity distinct"
+      ],
+      "rationale": "Preference profileIDs is capped1011 and rejectsnegative values. Existinglosslessinteger helper already handles exponent/integer/maxsafe semantics; no newnumeric parserfoundation required."
+    },
+    {
+      "id": "A5",
+      "classification": "SOURCE_FACT + INHERITED_POLICY",
+      "decision": "Showcase belongs MAIN=1, not HISTORY=2 orSPACE=4. Bothdirectedblocks denyprotectedshowcase/detail. Existing hide2/4 stayslocaltothosesubtypes; selfhiddenreads allowed.",
+      "evidence": [
+        "enums.lua:PlayerCardButtonStyle",
+        "PersonDisplayWindow.createMain callscreateHeroShow",
+        "accepted BasicReader.Eligible and Preferences.HideSubtypes"
+      ],
+      "rationale": "Apply BasicReader.Eligible[1] for protectedselection/detail; do not invent showcasehide toggle fromgenericprofileprivacy. Basic identity/relation staysavailable, SYSTEM otherplayer staysdenied."
+    },
+    {
+      "id": "A6",
+      "classification": "IMPLEMENTATION_DECISION_APPLYING_CA8",
+      "decision": "Selection/index and qualifiedCharacterfacets read in caller witnessedRR/Serializable scope, one exactrevision+stableinstant. No ownTx/clock/ActiveRevision.",
+      "ports": [
+        "BasicReader.ReadBasicTx beforeCharacterkeys forprivacy/admission",
+        "RootService.ReadSnapshotTx",
+        "ShowcaseStore.ReadSelectionTx",
+        "PublicShowcaseCharacterReader.HeroTx/PetTx",
+        "existing CoherentReadScope"
+      ],
+      "index": "1..6 in currentcommittedcaller snapshot; empty -> no detailref; request carriesnorevision. Neverassume previouslydisplayedcardmatchesconcurrent reorder.",
+      "rationale": "ExistingBasicReader maylock lowerroots; invokebeforeCharacterlocks/anymutation, notaslateprovider. Readsnevermaterializeroot orchild."
+    },
+    {
+      "id": "A7",
+      "classification": "IMPLEMENTATION_DECISION_VERSIONED_RECONSTRUCTION_NOT_ORIGINALSERVER",
+      "decision": "Separate immutable Content public_showcase_policy.json / I7B_SHOWCASE_SELECTION_V1 and selection capability PUBLIC_PROFILE_SHOWCASE_SELECTION_I7B3A.",
+      "payload": [
+        "schema/policyID",
+        "slot_count6/sign/family-template exclusion/index policy",
+        "exactsourceSHA bindings",
+        "currentvisible5 asprofilemetadata, notstoragecap",
+        "emptyrecord/order/failclosedwire reconstructionpolicy"
+      ],
+      "reader": "Same callerQueryer/exactrevision, canonicalmanifest/revision/artifacthash, strictpolicyvalidation. Retainedrevision readable. Do notextend strictpublic_profile_policy.json orchangeexistingroot preferencepolicy/receiptgrammar.",
+      "rationale": "Existing2B reader DisallowUnknownFields and exactpolicyvalidation make silentpayloadextension incompatible. New Content-owned artifact/typedport usesacceptedimmutableinfrastructure."
+    },
+    {
+      "id": "A8",
+      "classification": "INHERITED_ACTIVATION_CONTRACT",
+      "decision": "Separate internal ownerassignment qualification from complete successfulwire1832/nonemptycard/1838activation. No newinactiveprofile orwaiver.",
+      "implementation_scope": "Implement typedselectioncommand/read/guard plus source-shapedfacet/slot construction and failclosed adapterboundary. Do notregister/advertise complete1832/1838stocksuccess in production beforeexisting6requiredprovider/consumer gate.",
+      "wire": "Exactly6 orderedrecordslots; empty map{} rather than null/signedID. NonemptyHero/Petrecords onlyfromgenuinequalifiedbuilders. QualifiedPet doesnotautomatically qualifyfullHero/Library/finalstats orallrichprofile.",
+      "mutation_order": "Any actualwirecommand mustqualify requestedresponse+linkedrequiredproviders in samecommandTx beforeownerwrite. Unavailable required provider => existingnon200/error envelope, no selection/root/receipt-success mutation. Fullactivationintegration remains6.",
+      "rationale": "Source click has noindependentgate; visiblecard andrichdetailrequiredness cannotbequalifiedbyemptydefaults or mockproviders."
+    },
+    {
+      "id": "A9",
+      "classification": "INHERITED_TRANSACTION_RECOVERY_CONTRACT",
+      "decision": "One semanticassignment/oneTx/onecommit; existingTimedRunner/admission/receipt resolution; stableDecisionAt and exactpolicy/content refs.",
+      "receipt": "New versioned showcase outcome/class/schema, normalizedsixref fingerprint, actor/context/server/entropy andcontent+showcasepolicy bindings, rootversion/changeflag, signedselection. Distinguish internaltypedoutcome from futurequalifiedwireoutcome byschema/purpose; neverreinterpretinternal receipt aswirequalified.",
+      "replay": "Knownattempt returnsstoredhistoricaloutcome withoutreapplyingrefs or rebuildingfromnewownerstate. Receiptabsence underUNKNOWN is not resubmitpermission. Newnonce-lesssamepacket is newassignment andcanoverwritenewerintent; reconnect/reload reads currentdurablestate.",
+      "projection": "Future6wire receipts retain qualifiedcommitted response+provenance; no newfullwire successclaim in3A.",
+      "rationale": "Preserves existing2B recovery distinction androotversionmonotonic proof withoutmakingcurrentselectionequalhistoricalresult."
+    },
+    {
+      "id": "A10",
+      "classification": "INHERITED_TIME_CONTENT",
+      "decision": "No showcaseTTL/reset/cost/scheduler. StableDBDecisionAt acrossdefiniteabortretry; pinnedcontent/readtime; familyappearanceexpiry reused.",
+      "rationale": "WorkPlace time law andI7A/I7B clocks donot authorizeuniversal05:00 reset ornewownerclock. Ifstableinstant predateslockedrootUpdatedAt, fail/reconcile acceptedstale-timecase; never resample onretry."
+    }
+  ],
+  "new_phase_wide_laws": [],
+  "original_server_truth_claim": false
+}

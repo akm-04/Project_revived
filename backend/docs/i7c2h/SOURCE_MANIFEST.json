@@ -1,0 +1,268 @@
+[
+  {
+    "path": "app/common/enums.lua",
+    "sha256": "15340bd89fe7c6f150ccfd4a5cd2a2f0e8e73c89dfae9ac3388376a4799901f3",
+    "bytes": 80531,
+    "classification": "SOURCE_FACT",
+    "source_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
+  },
+  {
+    "path": "app/common/network/mid.lua",
+    "sha256": "026a20b29d97624979777a68c64c749254031604057ff42aa8f8254c3e35b5af",
+    "bytes": 43121,
+    "classification": "SOURCE_FACT",
+    "source_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
+  },
+  {
+    "path": "app/common/tables/SpiritCampaignTable.lua",
+    "sha256": "11fdd058903b57e6a916cb485d8e28563b6744efcf62d7b6ea4a056d76facc22",
+    "bytes": 4334,
+    "classification": "SOURCE_FACT",
+    "source_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
+  },
+  {
+    "path": "app/common/tables/SpiritEquipTable.lua",
+    "sha256": "da7d311b30ff7b6c14dc5df48b2d72e4b04486934a6abb7e42e314f5a1326432",
+    "bytes": 908,
+    "classification": "SOURCE_FACT",
+    "source_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
+  },
+  {
+    "path": "app/common/tables/SpiritStrthTable.lua",
+    "sha256": "ee385a2db8d6ea4aa72d1191bb7ea50aa0e9929f518af598be3b7ac3abbd34df",
+    "bytes": 1475,
+    "classification": "SOURCE_FACT",
+    "source_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
+  },
+  {
+    "path": "app/common/tables/SpiritSuitTable.lua",
+    "sha256": "d41a26123c263acca89cf14a455252a4d0afe572be0df04452b024c2657b603d",
+    "bytes": 1708,
+    "classification": "SOURCE_FACT",
+    "source_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
+  },
+  {
+    "path": "app/common/tables/SpiritTable.lua",
+    "sha256": "cf56d08c491d2825d1aea3dedd331d7095d63e168ea90e24381b1136b3b58fc7",
+    "bytes": 3213,
+    "classification": "SOURCE_FACT",
+    "source_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
+  },
+  {
+    "path": "app/model/Backpack.lua",
+    "sha256": "953999f81fc43ecd00e587d884c88b6a1ba066e35ff75a20dd698b6cb950af7a",
+    "bytes": 9432,
+    "classification": "SOURCE_FACT",
+    "source_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
+  },
+  {
+    "path": "app/model/NormalHero.lua",
+    "sha256": "125183556caeecc182bf0702dd1f95160c8ba1666a3b97fbb8a7261d30ae0ac9",
+    "bytes": 103561,
+    "classification": "SOURCE_FACT",
+    "source_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
+  },
+  {
+    "path": "app/model/SelfPlayer.lua",
+    "sha256": "163d5893c9522ada412c2b9c4748a80757660fccdf03c8f72cb6edf0838b8eb4",
+    "bytes": 156513,
+    "classification": "SOURCE_FACT",
+    "source_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
+  },
+  {
+    "path": "app/model/SuperHero.lua",
+    "sha256": "b127c2cbef327d3142031bf30daa0af1b45997c6da82fba946d641a86783d622",
+    "bytes": 94188,
+    "classification": "SOURCE_FACT",
+    "source_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
+  },
+  {
+    "path": "app/scenes/BattleCreate.lua",
+    "sha256": "bb9ae19c20ec165eeb7ba5b81a4ce85b6b7fea3a3a7eb278123bb8c0af0bbef9",
+    "bytes": 255277,
+    "classification": "SOURCE_FACT",
+    "source_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
+  },
+  {
+    "path": "app/windows/BattleWinWindow.lua",
+    "sha256": "f3a362765adea6fc5cbd239c8a9801cfef762146ddb1c48c854f0266c7a06096",
+    "bytes": 38042,
+    "classification": "SOURCE_FACT",
+    "source_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
+  },
+  {
+    "path": "app/windows/GiftbagUseWindow.lua",
+    "sha256": "cbc1c0cb373adc68a0c74b42d2aa3d5e28a96f536c80729e22be8fd03c5af600",
+    "bytes": 12748,
+    "classification": "SOURCE_FACT",
+    "source_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
+  },
+  {
+    "path": "app/windows/HeroMainWindow.lua",
+    "sha256": "473b72ec14a81d01d6dbdaa19f92c3d78900f40ca34fa5c8cf46585b76d65414",
+    "bytes": 271948,
+    "classification": "SOURCE_FACT",
+    "source_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
+  },
+  {
+    "path": "app/windows/HunqiAutoFightWindow.lua",
+    "sha256": "7dbd2ca1119286ca5c1d9a01861d3b5738045af9be276d49932cf1ed660bd379",
+    "bytes": 6480,
+    "classification": "SOURCE_FACT",
+    "source_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
+  },
+  {
+    "path": "app/windows/HunqiCampaignRuleWindow.lua",
+    "sha256": "de39392cb6f53cd8ae20f35b4ae804da4abb2206c79e6cd5a5c8cae7002fda45",
+    "bytes": 6282,
+    "classification": "SOURCE_FACT",
+    "source_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
+  },
+  {
+    "path": "app/windows/HunqiCampaignWindow.lua",
+    "sha256": "8c4cdcce8f2f13e875171170a15f3eb07911764bdf3dee53ac905380e35e0a65",
+    "bytes": 16104,
+    "classification": "SOURCE_FACT",
+    "source_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
+  },
+  {
+    "path": "app/windows/HunqiCombConfirmWindow.lua",
+    "sha256": "9df55271cff82f317979f438d446b7d6086d774b775d6de06a4694c329c381d5",
+    "bytes": 2062,
+    "classification": "SOURCE_FACT",
+    "source_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
+  },
+  {
+    "path": "app/windows/HunqiCombEditorWindow.lua",
+    "sha256": "a70ee1e1457c914b846053988ad5fd9183d4c10d451649f739463a633f16fff1",
+    "bytes": 42158,
+    "classification": "SOURCE_FACT",
+    "source_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
+  },
+  {
+    "path": "app/windows/HunqiCombInputNameWindow.lua",
+    "sha256": "21c51bc0deffa2abfb9309be105a5beb92ce4e8bcc7aae4795ee017cc2effb0e",
+    "bytes": 3239,
+    "classification": "SOURCE_FACT",
+    "source_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
+  },
+  {
+    "path": "app/windows/HunqiCombWindow.lua",
+    "sha256": "b882e02c619d9016ffb94f5f015760aca22b286d97ae70553218d0948945fce5",
+    "bytes": 27776,
+    "classification": "SOURCE_FACT",
+    "source_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
+  },
+  {
+    "path": "app/windows/HunqiDetailWindow.lua",
+    "sha256": "583ed17e5862136a6097469d1144cbc306af73928dc74ded01535acc56fa4de1",
+    "bytes": 18748,
+    "classification": "SOURCE_FACT",
+    "source_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
+  },
+  {
+    "path": "app/windows/HunqiEnergyTips.lua",
+    "sha256": "cc629fd9a31a926a985fe505b9d7cf5e19ac6958e6895178f65d5d7e462dbe42",
+    "bytes": 3013,
+    "classification": "SOURCE_FACT",
+    "source_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
+  },
+  {
+    "path": "app/windows/HunqiSortTypeWindow.lua",
+    "sha256": "5f22e7000b7619051f2bb8f72e5cb56a0f9e52ab0511d79ebee592018028ed21",
+    "bytes": 4924,
+    "classification": "SOURCE_FACT",
+    "source_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
+  },
+  {
+    "path": "app/windows/HunqiStrengthenResultWindow.lua",
+    "sha256": "b95d18fdcab7591f813207752df1e3cddb5c3c59d900a9b5f85cb6cf533bdd7c",
+    "bytes": 4875,
+    "classification": "SOURCE_FACT",
+    "source_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
+  },
+  {
+    "path": "app/windows/HunqiStrengthenWindow.lua",
+    "sha256": "9a2acd4bc570b3f7fd81f2d6044c2d3e11235caade2f2694c5aa3bdb39ec536a",
+    "bytes": 24529,
+    "classification": "SOURCE_FACT",
+    "source_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
+  },
+  {
+    "path": "app/windows/HunqiWindow.lua",
+    "sha256": "2f87cc8d6fe80079ac21ae899351ca1eecef016c15bd394f6e32d6d2e631ac84",
+    "bytes": 45653,
+    "classification": "SOURCE_FACT",
+    "source_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
+  },
+  {
+    "path": "data/tables/function.lua",
+    "sha256": "a240254e79ccfd41862f3d6289f4f5fd09280ac3e197f51bc14b896a62c10010",
+    "bytes": 18606,
+    "classification": "SOURCE_FACT",
+    "source_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
+  },
+  {
+    "path": "data/tables/misc.lua",
+    "sha256": "058cf5719421ed71a12083a8c95b0ccded7204bedb5fa1263d508e2fa4257f9a",
+    "bytes": 175945,
+    "classification": "SOURCE_FACT",
+    "source_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
+  },
+  {
+    "path": "data/tables/spirit.lua",
+    "sha256": "1be9bc2eacf2abcff6806d2d9e679ff70c722a1ec1654da4eb54ada6bf00f1e6",
+    "bytes": 16726,
+    "classification": "SOURCE_FACT",
+    "source_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
+  },
+  {
+    "path": "data/tables/spirit_campaign.lua",
+    "sha256": "53a3ee40f9accb749e2992d3306512fdecc63108f84bcd72058224f739024989",
+    "bytes": 16181,
+    "classification": "SOURCE_FACT",
+    "source_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
+  },
+  {
+    "path": "data/tables/spirit_equip.lua",
+    "sha256": "d0522ee3e292a6fd8297fc5c44185ef71141525abc9e61a18ab128478b805a08",
+    "bytes": 18517,
+    "classification": "SOURCE_FACT",
+    "source_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
+  },
+  {
+    "path": "data/tables/spirit_strth.lua",
+    "sha256": "950c5c37792ec2a763d458d8a53d8588dd759cf8dde5f7a023b68b9db5a182b2",
+    "bytes": 4651,
+    "classification": "SOURCE_FACT",
+    "source_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
+  },
+  {
+    "path": "data/tables/spirit_suit.lua",
+    "sha256": "2a0fd1487cabd9945a2298482c90b34e88bc874557a03d3a48a2e3c03b2590d7",
+    "bytes": 3315,
+    "classification": "SOURCE_FACT",
+    "source_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
+  },
+  {
+    "path": "app/common/tables/FunctionOpenTable.lua",
+    "sha256": "0494aed27d769e03924450cd554c759f7245823fa907688dfd9e7766f0481b44",
+    "bytes": 4742,
+    "classification": "SOURCE_FACT",
+    "source_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
+  },
+  {
+    "path": "lib/battle/BaseFighter.lua",
+    "sha256": "b1936373a0404049f100de1ab639661d245c9f2a317ae6fbd443b71b45d538dc",
+    "bytes": 227001,
+    "classification": "SOURCE_FACT",
+    "source_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
+  },
+  {
+    "path": "data/tables/item.lua",
+    "sha256": "59b668c28a372543da0c36d7a8d84291cc5b93fa0d92b7cc389a645e96e7b7cc",
+    "bytes": 2259090,
+    "classification": "SOURCE_FACT",
+    "source_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
+  }
+]

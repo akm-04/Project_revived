@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "pass": "496.0-I6B",
+  "classification": "SOURCE_FACT",
+  "purpose": "Freeze only candidate-bound client facts used by I6B ActivityDirectory. Hashes/lexical markers do not prove reachability, original-server schedules, universal reset policy, or concrete Activity mechanics.",
+  "current_src64": {
+    "Activities.lua": "9de010c147d4c977d393072379eeeeee66c9385d5defa5e7ca1d28ac721fe8d8",
+    "SelfPlayer.lua": "163d5893c9522ada412c2b9c4748a80757660fccdf03c8f72cb6edf0838b8eb4",
+    "Backend.lua": "95378e2b0be8180df6de27e9e430c630bcfe46c080e1f91ef5f6d74bdbb1b840",
+    "mid.lua": "026a20b29d97624979777a68c64c749254031604057ff42aa8f8254c3e35b5af",
+    "HeroCollectWindow.lua": "c6d8cb59b88c2e94413e7eb4009613a95827f9ed61b672d30273886e86f7b06d",
+    "HeroListCell.lua": "0b2f3142f31e6ca39a54a2500908c04c392a0e5dc658410eb1833dde0f78e943"
+  },
+  "old_client": {
+    "Activities.lua": "f1c288491a038636a16e92b125bc01e482a734572b3614db37f9d2bd405a9c4b",
+    "SelfPlayer.lua": "aee7827573d82bb36338512e908eb6883911f4996c6c85f1a6f8b826593def3a",
+    "Backend.lua": "06f481e9358e357019c42fbf7d2cd8e650ba7044a774b182d833aebc85458315",
+    "mid.lua": "c10ab0d38105be79201b6b1682a7fcb36eafa7f09b76002c5b9bf599a968d942"
+  }
+}

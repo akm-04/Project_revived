@@ -1,0 +1,71 @@
+== canonical pin hashes ==
+313c574368bb56dc570bc3427b65f59b059e492f909fe43b7d0291b5ced21dc4  go.mod
+efbf6753542d66e2fefcb2ab5e2ade7c9d28f2206a1113d1eb9568f2cb75808d  go.sum
+a8844fbc8c3eb51c26ed00aec4cd5a5a9d647f849c6ead07bcc83ed24c4a7718  .go-version
+== dependency ==
+DEPENDENCY POLICY: PASS
+resolved_go_modules 16 qualified_candidates 5
+== sqlc policy ==
+SQLC GENERATION POLICY: PASS
+== ownership ==
+SCHEMA/QUERY OWNERSHIP: PASS
+== current candidate ==
+R6 VALIDATION: PASS (CUMULATIVE MODE)
+static projection/directory/replay/lifecycle/key/single-owner/http/observability R6 seams present; cumulative mode permits later migrations but does not weaken historical R6 pins
+CURRENT CUMULATIVE CANDIDATE VALIDATION: PASS
+historical R6 pins retained; exact forward migration inventory and current release/SBOM version agree
+== foundation trace ==
+FOUNDATION TRACE: PASS (10 historical lifecycle records; 24/24 RF findings dispositioned; R0-R7 accepted Pass489; I6 accepted Pass509; 6 future extension limits remain explicit; W2 separate)
+== i1 ==
+I1 VALIDATION: PASS
+minimal kernel schema, tx outcome/reconciliation, typed facts, adapter isolation and stage routing verified
+== i2 ==
+I2 VALIDATION: PASS
+stock HTTP families, generated numeric MID catalog, bounded AMF3/TCP framing, fail-closed dispatch and differential fixtures verified
+== i3 ==
+I3 VALIDATION: PASS
+typed account/session/context, honest server directory, region-encoded allocator, observation gate, replay-stable MID1 and unknown-COMMIT reconciliation contracts verified
+== i4 ==
+I4 VALIDATION: PASS
+== i5 ==
+I5 VALIDATION: PASS
+== ca6-3 source oracle ==
+CA6-3 SOURCE ORACLE CHECK: FAIL
+ - exact current oracle archive missing
+ - exact old oracle archive missing
+ - exact v1 oracle archive missing
+ - current MIDGET_PRACTICE_INFO=124 identity drift
+ - current MIDPRACTICE=125 identity drift
+ - current MIDPRACTICE_SAVE=126 identity drift
+ - current MIDPRACTICE_AUTO=127 identity drift
+ - current MIDWASH_BY_TICKET=128 identity drift
+ - current MIDPET_GET_PRACTICE_INFO=129 identity drift
+ - current MIDPET_PRACTICE=130 identity drift
+ - current MIDPET_PRACTICE_SAVE=131 identity drift
+ - current MIDPET_PRACTICE_AUTO=132 identity drift
+ - current MIDPET_WASH_BY_TICKET=133 identity drift
+ - current MIDPET_USE_EXP_ITEMS=134 identity drift
+ - current manual/save/get wire evidence missing 'xyd.mid.GET_PRACTICE_INFO'
+ - current manual/save/get wire evidence missing 'xyd.mid.PRACTICE'
+ - current manual/save/get wire evidence missing 'xyd.mid.PET_PRACTICE'
+ - current manual/save/get wire evidence missing 'xyd.mid.PRACTICE_SAVE'
+ - current manual/save/get wire evidence missing 'xyd.mid.PET_PRACTICE_SAVE'
+ - current manual/save/get wire evidence missing 'xyd.mid.WASH_BY_TICKET'
+ - current manual/save/get wire evidence missing 'xyd.mid.PET_WASH_BY_TICKET'
+ - current manual/save/get wire evidence missing 'var_30_3.locks = arg_13_0.locks'
+ - current manual/save/get wire evidence missing 'var_30_3.practice_type = arg_13_0.practiceType'
+ - current manual/save/get wire evidence missing 'arg_13_0.changeAttrs = arg_32_1.add_attr'
+ - current manual/save/get wire evidence missing 'arg_13_0.hero:updatePractice(arg_22_1.practice_attr)'
+ - current manual/save/get wire evidence missing 'arg_39_0.lastTime = arg_39_1.last_time'
+ - current manual/save/get wire evidence missing 'arg_39_0.baseCrystal = arg_39_1.base_crystal'
+ - current manual/save/get wire evidence missing 'arg_39_0.baseMana = arg_39_1.base_mana'
+ - current manual/save/get wire evidence missing 'arg_39_0.blessValue = arg_39_1.bless_value'
+ - current AUTO separation evidence missing 'practice_num = arg_10_0.timesNums[arg_10_0.timesFlag]'
+ - current AUTO separation evidence missing 'save_types = arg_10_0.washWayOptioned'
+ - current AUTO separation evidence missing 'var_15_0.locks = arg_10_0.lockOptioned'
+ - current AUTO separation evidence missing 'var_15_0.practice_type = arg_10_0.wayFlag'
+ - current AUTO separation evidence missing 'xyd.mid.PRACTICE_AUTO'
+ - current AUTO separation evidence missing 'xyd.mid.PET_PRACTICE_AUTO'
+ - current AUTO separation evidence missing 'arg_10_0.hero:updatePractice(arg_16_1.practice_attr)'
+ - current PracticeType loader mismatch evidence missing 'arg_2_0.lower_limit'
+ - current PracticeType loader mismatch evidence missing 'arg_2_0.up_limit'

@@ -1,0 +1,234 @@
+{
+  "schema_version": 1,
+  "pass": "447.0",
+  "milestone": "I5",
+  "source_matrix": "Pass415 Wave-E 30-case matrix",
+  "gate_interpretation": "Every frozen case is represented either by executable/structural normal-chat evidence or an explicit W2 real-PostgreSQL/River/stock-client bucket. A deferred live case is not called green.",
+  "counts": {
+    "DEFERRED_W2_REAL_POSTGRESQL": 1,
+    "DEFERRED_W2_REAL_POSTGRESQL_CONCURRENCY": 5,
+    "DEFERRED_W2_STOCK_CLIENT_AND_REAL_DB": 1,
+    "PARTIAL_NORMAL_CHAT_W2_REAL_POSTGRESQL": 3,
+    "PASS_NORMAL_CHAT_STRUCTURAL": 2,
+    "PASS_NORMAL_CHAT_EXECUTABLE": 10,
+    "DEFERRED_W2_REAL_POSTGRESQL_FAULT_INJECTION": 2,
+    "DEFERRED_W2_STOCK_CLIENT_REAL_DB": 1,
+    "DEFERRED_W2_REAL_POSTGRESQL_RIVER": 1,
+    "DEFERRED_W2_REAL_POSTGRESQL_RIVER_RESTART": 1,
+    "DEFERRED_W2_STOCK_CLIENT": 3
+  },
+  "cases": [
+    {
+      "id": "E-PG-01",
+      "requirement": "Fresh character bootstrap commits PlayerCore + required Economy anchors + context atomically; injected failure rolls all back.",
+      "pass447_status": "DEFERRED_W2_REAL_POSTGRESQL",
+      "evidence_or_defer_reason": "I5 bootstrap contributors are in the same Wave-A transaction; injected real-PG rollback remains W2.",
+      "pass415_proof_stage": "real PostgreSQL/concurrency or unmodified stock client at implementation validation checkpoints; mocks/static tests are insufficient where concurrency/wire behavior is asserted"
+    },
+    {
+      "id": "E-PG-02",
+      "requirement": "Concurrent same account/server character creation still converges through Wave-D uniqueness and each Wave-E contributor executes once.",
+      "pass447_status": "DEFERRED_W2_REAL_POSTGRESQL_CONCURRENCY",
+      "evidence_or_defer_reason": "Wave-D uniqueness + I5 contributor integration are present; true concurrent create remains W2.",
+      "pass415_proof_stage": "real PostgreSQL/concurrency or unmodified stock client at implementation validation checkpoints; mocks/static tests are insufficient where concurrency/wire behavior is asserted"
+    },
+    {
+      "id": "E-PG-03",
+      "requirement": "Lost first MID1 followed by retry returns same player/context/token and is_new=1 before tutorial completion.",
+      "pass447_status": "DEFERRED_W2_STOCK_CLIENT_AND_REAL_DB",
+      "evidence_or_defer_reason": "I3 replay-stable MID1 tests remain green and I5 overlays are deterministic; lost-response stock/client proof remains W2.",
+      "pass415_proof_stage": "real PostgreSQL/concurrency or unmodified stock client at implementation validation checkpoints; mocks/static tests are insufficient where concurrency/wire behavior is asserted"
+    },
+    {
+      "id": "E-PG-04",
+      "requirement": "Validated MID26 GUIDE_END commit clears first_entry_pending; lost response does not resurrect it.",
+      "pass447_status": "PARTIAL_NORMAL_CHAT_W2_REAL_POSTGRESQL",
+      "evidence_or_defer_reason": "MID26 terminal guide clearing is transactional and tested structurally; lost-response persistence remains W2.",
+      "pass415_proof_stage": "real PostgreSQL/concurrency or unmodified stock client at implementation validation checkpoints; mocks/static tests are insufficient where concurrency/wire behavior is asserted"
+    },
+    {
+      "id": "E-PG-05",
+      "requirement": "Forged/unknown guide_id cannot unlock function/reward/objective; gameplay milestone owners remain unchanged.",
+      "pass447_status": "PASS_NORMAL_CHAT_STRUCTURAL",
+      "evidence_or_defer_reason": "SaveStory only persists cursor/guide state; no reward/objective/function unlock authority is derived from arbitrary guide_id.",
+      "pass415_proof_stage": "real PostgreSQL/concurrency or unmodified stock client at implementation validation checkpoints; mocks/static tests are insufficient where concurrency/wire behavior is asserted"
+    },
+    {
+      "id": "E-EC-01",
+      "requirement": "Two concurrent debits on one scalar balance cannot overspend; unrelated player resources proceed independently.",
+      "pass447_status": "DEFERRED_W2_REAL_POSTGRESQL_CONCURRENCY",
+      "evidence_or_defer_reason": "Typed scalar debit owner exists; overspend/independent-row concurrency requires real PostgreSQL row locking.",
+      "pass415_proof_stage": "real PostgreSQL/concurrency or unmodified stock client at implementation validation checkpoints; mocks/static tests are insufficient where concurrency/wire behavior is asserted"
+    },
+    {
+      "id": "E-EC-02",
+      "requirement": "Temporal resource materialization uses server clock and retry-stable operation time; concurrent credit/debit preserves one anchor.",
+      "pass447_status": "DEFERRED_W2_REAL_POSTGRESQL_CONCURRENCY",
+      "evidence_or_defer_reason": "Temporal policy/materialization uses operation time; concurrent anchor proof requires real PostgreSQL.",
+      "pass415_proof_stage": "real PostgreSQL/concurrency or unmodified stock client at implementation validation checkpoints; mocks/static tests are insufficient where concurrency/wire behavior is asserted"
+    },
+    {
+      "id": "E-EC-03",
+      "requirement": "Grant of source stack item to below cap credits exact quantity.",
+      "pass447_status": "PASS_NORMAL_CHAT_EXECUTABLE",
+      "evidence_or_defer_reason": "Typed stack domain and Grant tests cover exact below-cap credit behavior.",
+      "pass415_proof_stage": "real PostgreSQL/concurrency or unmodified stock client at implementation validation checkpoints; mocks/static tests are insufficient where concurrency/wire behavior is asserted"
+    },
+    {
+      "id": "E-EC-04",
+      "requirement": "Grant crossing cap with stack_exceed_mail=1 atomically credits fit portion and creates durable overflow entitlement.",
+      "pass447_status": "PARTIAL_NORMAL_CHAT_W2_REAL_POSTGRESQL",
+      "evidence_or_defer_reason": "Executable test proves fit+overflow Mail composition; real-PG atomic crash/concurrency proof remains W2.",
+      "pass415_proof_stage": "real PostgreSQL/concurrency or unmodified stock client at implementation validation checkpoints; mocks/static tests are insufficient where concurrency/wire behavior is asserted"
+    },
+    {
+      "id": "E-EC-05",
+      "requirement": "Crash after source mutation before grant commit exposes no partial durable success.",
+      "pass447_status": "DEFERRED_W2_REAL_POSTGRESQL_FAULT_INJECTION",
+      "evidence_or_defer_reason": "Same-transaction composition is implemented; crash between source mutation and Grant commit requires real-PG fault injection.",
+      "pass415_proof_stage": "real PostgreSQL/concurrency or unmodified stock client at implementation validation checkpoints; mocks/static tests are insufficient where concurrency/wire behavior is asserted"
+    },
+    {
+      "id": "E-EC-06",
+      "requirement": "Ambiguous COMMIT on consumptive source reconciles receipt and never applies Grant twice.",
+      "pass447_status": "PARTIAL_NORMAL_CHAT_W2_REAL_POSTGRESQL",
+      "evidence_or_defer_reason": "Executable ambiguous-COMMIT resolver test proves no replay in harness; I5-table real-PG COMMIT ambiguity remains W2.",
+      "pass415_proof_stage": "real PostgreSQL/concurrency or unmodified stock client at implementation validation checkpoints; mocks/static tests are insufficient where concurrency/wire behavior is asserted"
+    },
+    {
+      "id": "E-GR-01",
+      "requirement": "Generated/entity reward is rejected by generic stack owner and delegated to specialized owner.",
+      "pass447_status": "PASS_NORMAL_CHAT_EXECUTABLE",
+      "evidence_or_defer_reason": "TestSettleGrantRejectsUnimplementedOwnerWithoutMutation proves generic owner fails closed and records no success receipt.",
+      "pass415_proof_stage": "real PostgreSQL/concurrency or unmodified stock client at implementation validation checkpoints; mocks/static tests are insufficient where concurrency/wire behavior is asserted"
+    },
+    {
+      "id": "E-GR-02",
+      "requirement": "Same semantic grant replay reconstructs terminal result; different source business key grants independently.",
+      "pass447_status": "PASS_NORMAL_CHAT_EXECUTABLE",
+      "evidence_or_defer_reason": "Semantic grant replay/conflict tests prove same source reconstructs once; source business identity is part of semantic key.",
+      "pass415_proof_stage": "real PostgreSQL/concurrency or unmodified stock client at implementation validation checkpoints; mocks/static tests are insufficient where concurrency/wire behavior is asserted"
+    },
+    {
+      "id": "E-MA-01",
+      "requirement": "Normal mail false/nil and regional mail true route to distinct compound identities even with same numeric id.",
+      "pass447_status": "PASS_NORMAL_CHAT_EXECUTABLE",
+      "evidence_or_defer_reason": "Mail domain and MID369 wire tests preserve distinct NORMAL/REGION compound identities including false normal namespace.",
+      "pass415_proof_stage": "real PostgreSQL/concurrency or unmodified stock client at implementation validation checkpoints; mocks/static tests are insufficient where concurrency/wire behavior is asserted"
+    },
+    {
+      "id": "E-MA-02",
+      "requirement": "MID369 concurrent duplicate claim grants attachment once and returns stable settled state.",
+      "pass447_status": "DEFERRED_W2_REAL_POSTGRESQL_CONCURRENCY",
+      "evidence_or_defer_reason": "Single-claim semantic receipt and FOR UPDATE path are implemented; duplicate concurrent MID369 requires real PostgreSQL.",
+      "pass415_proof_stage": "real PostgreSQL/concurrency or unmodified stock client at implementation validation checkpoints; mocks/static tests are insufficient where concurrency/wire behavior is asserted"
+    },
+    {
+      "id": "E-MA-03",
+      "requirement": "MID369 claim racing MID370 one-key serializes on mail row and grants once.",
+      "pass447_status": "DEFERRED_W2_REAL_POSTGRESQL_CONCURRENCY",
+      "evidence_or_defer_reason": "MID369 and MID370 lock canonical mail rows; race serialization requires real PostgreSQL.",
+      "pass415_proof_stage": "real PostgreSQL/concurrency or unmodified stock client at implementation validation checkpoints; mocks/static tests are insufficient where concurrency/wire behavior is asserted"
+    },
+    {
+      "id": "E-MA-04",
+      "requirement": "Two distinct MID370 address sets both settle; retransmission of exact set is receipt replay.",
+      "pass447_status": "PASS_NORMAL_CHAT_EXECUTABLE",
+      "evidence_or_defer_reason": "Canonical address-set semantic identity and exact replay behavior are executable; distinct sets have distinct keys.",
+      "pass415_proof_stage": "real PostgreSQL/concurrency or unmodified stock client at implementation validation checkpoints; mocks/static tests are insufficient where concurrency/wire behavior is asserted"
+    },
+    {
+      "id": "E-MA-05",
+      "requirement": "MID370 duplicate IDs in pipe list canonicalize once; conflicting namespace creates two distinct compound addresses only if both rows exist.",
+      "pass447_status": "PASS_NORMAL_CHAT_EXECUTABLE",
+      "evidence_or_defer_reason": "MID370 parser/dispatcher tests canonicalize duplicate IDs and retain namespace as part of compound address.",
+      "pass415_proof_stage": "real PostgreSQL/concurrency or unmodified stock client at implementation validation checkpoints; mocks/static tests are insufficient where concurrency/wire behavior is asserted"
+    },
+    {
+      "id": "E-MA-06",
+      "requirement": "Socket/new-mail notice loss cannot lose durable mail; MID368 reload recovers it.",
+      "pass447_status": "DEFERRED_W2_STOCK_CLIENT_REAL_DB",
+      "evidence_or_defer_reason": "Durable Mail is canonical and MID368 reload reads it; lost realtime notice + client reload remains W2.",
+      "pass415_proof_stage": "real PostgreSQL/concurrency or unmodified stock client at implementation validation checkpoints; mocks/static tests are insufficient where concurrency/wire behavior is asserted"
+    },
+    {
+      "id": "E-MA-07",
+      "requirement": "Overflow-mail claim while stack remains full cannot recurse infinitely or burn entitlement.",
+      "pass447_status": "PASS_NORMAL_CHAT_EXECUTABLE",
+      "evidence_or_defer_reason": "TestMailClaimRefusesRecursiveOverflowAndLeavesMailUnclaimed proves full-stack claim cannot recurse or burn entitlement.",
+      "pass415_proof_stage": "real PostgreSQL/concurrency or unmodified stock client at implementation validation checkpoints; mocks/static tests are insufficient where concurrency/wire behavior is asserted"
+    },
+    {
+      "id": "E-OB-01",
+      "requirement": "Same committed semantic fact delivered twice advances mission once.",
+      "pass447_status": "PASS_NORMAL_CHAT_EXECUTABLE",
+      "evidence_or_defer_reason": "TestObjectiveFactReceiptPreventsDoubleProgress proves one committed semantic fact advances once.",
+      "pass415_proof_stage": "real PostgreSQL/concurrency or unmodified stock client at implementation validation checkpoints; mocks/static tests are insufficient where concurrency/wire behavior is asserted"
+    },
+    {
+      "id": "E-OB-02",
+      "requirement": "Raw retry of unrelated MID with no new source fact cannot progress objective.",
+      "pass447_status": "PASS_NORMAL_CHAT_STRUCTURAL",
+      "evidence_or_defer_reason": "Objective progression is reachable only through typed ApplyObjectiveFactTx, not raw MID dispatch retries.",
+      "pass415_proof_stage": "real PostgreSQL/concurrency or unmodified stock client at implementation validation checkpoints; mocks/static tests are insufficient where concurrency/wire behavior is asserted"
+    },
+    {
+      "id": "E-OB-03",
+      "requirement": "Completed mission reload does not grant; MID161 claim grants once.",
+      "pass447_status": "PASS_NORMAL_CHAT_EXECUTABLE",
+      "evidence_or_defer_reason": "TestObjectiveClaimReplayGrantsOnce separates completion from claim and proves claim replay grants once.",
+      "pass415_proof_stage": "real PostgreSQL/concurrency or unmodified stock client at implementation validation checkpoints; mocks/static tests are insufficient where concurrency/wire behavior is asserted"
+    },
+    {
+      "id": "E-OB-04",
+      "requirement": "Source transaction rollback produces no objective fact/progress.",
+      "pass447_status": "DEFERRED_W2_REAL_POSTGRESQL_FAULT_INJECTION",
+      "evidence_or_defer_reason": "Objective fact hook takes caller transaction; rollback/no-progress needs real-PG source transaction fault injection.",
+      "pass415_proof_stage": "real PostgreSQL/concurrency or unmodified stock client at implementation validation checkpoints; mocks/static tests are insufficient where concurrency/wire behavior is asserted"
+    },
+    {
+      "id": "E-OB-05",
+      "requirement": "Source commit + River worker crash/retry eventually applies async objective once without replaying source mutation.",
+      "pass447_status": "DEFERRED_W2_REAL_POSTGRESQL_RIVER",
+      "evidence_or_defer_reason": "Committed-fact receipt contract is present; River worker crash/retry execution is an I6/W2 real integration proof.",
+      "pass415_proof_stage": "real PostgreSQL/concurrency or unmodified stock client at implementation validation checkpoints; mocks/static tests are insufficient where concurrency/wire behavior is asserted"
+    },
+    {
+      "id": "E-OP-01",
+      "requirement": "Admin mail/grant command uses same canonical Mail/Grant owners and audit/receipt; direct DB edits are absent.",
+      "pass447_status": "PASS_NORMAL_CHAT_EXECUTABLE",
+      "evidence_or_defer_reason": "AdminGrant/AdminSendMail use canonical Grant/Mail owners, semantic receipts, audit emitter, and no direct table-edit API.",
+      "pass415_proof_stage": "real PostgreSQL/concurrency or unmodified stock client at implementation validation checkpoints; mocks/static tests are insufficient where concurrency/wire behavior is asserted"
+    },
+    {
+      "id": "E-RS-01",
+      "requirement": "PostgreSQL process restart recovers player balances/mail/objectives solely from canonical DB + durable jobs/receipts.",
+      "pass447_status": "DEFERRED_W2_REAL_POSTGRESQL_RIVER_RESTART",
+      "evidence_or_defer_reason": "Canonical relational owners/receipts are implemented; process/database restart reconstruction remains W2.",
+      "pass415_proof_stage": "real PostgreSQL/concurrency or unmodified stock client at implementation validation checkpoints; mocks/static tests are insufficient where concurrency/wire behavior is asserted"
+    },
+    {
+      "id": "E-S0-01",
+      "requirement": "Wave-S S0 player/mail hydration returns exact numeric/array/bool empty shapes with no request storm.",
+      "pass447_status": "DEFERRED_W2_STOCK_CLIENT",
+      "evidence_or_defer_reason": "Source differential/static wire checks pass; unmodified-client S0 hydration/quiescence is explicitly deferred to W2.",
+      "pass415_proof_stage": "real PostgreSQL/concurrency or unmodified stock client at implementation validation checkpoints; mocks/static tests are insufficient where concurrency/wire behavior is asserted"
+    },
+    {
+      "id": "E-S3-01",
+      "requirement": "Wave-S S3 fresh player traverses MID1 is_new -> tutorial -> MID26 GUIDE_END -> later MID1 is_new=0.",
+      "pass447_status": "DEFERRED_W2_STOCK_CLIENT",
+      "evidence_or_defer_reason": "Fresh-player MID1\u2192tutorial\u2192MID26\u2192MID1 stock-client sequence remains W2 by Pass445 deferral.",
+      "pass415_proof_stage": "real PostgreSQL/concurrency or unmodified stock client at implementation validation checkpoints; mocks/static tests are insufficient where concurrency/wire behavior is asserted"
+    },
+    {
+      "id": "E-S3-02",
+      "requirement": "Wave-S S3 disconnect before MID26 keeps onboarding replay-safe and does not duplicate starter grants.",
+      "pass447_status": "DEFERRED_W2_STOCK_CLIENT",
+      "evidence_or_defer_reason": "Disconnect-before-MID26 onboarding/replay sequence remains W2 by Pass445 deferral.",
+      "pass415_proof_stage": "real PostgreSQL/concurrency or unmodified stock client at implementation validation checkpoints; mocks/static tests are insufficient where concurrency/wire behavior is asserted"
+    }
+  ],
+  "normal_chat_summary": "All feasible unit/replay/wire/static/oracle/race checks are green. Mechanism claims requiring PostgreSQL row locking, River crash/retry, restart, or unmodified stock client remain deferred to W2.",
+  "client_acceptance": "DEFERRED_TO_W2_NOT_GREEN"
+}

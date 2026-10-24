@@ -1,0 +1,41 @@
+$ python tools/generate_builtin_content.py --source-archive /mnt/data/gxb_sources_generated/all-assest-rechecked-1\(1\).zip --check
+R4A CONTENT GENERATION: PASS revision=bd11a7482062dbaa851f3b495e3dc6efab88085011b3fe75d82105e127bba106 resources=5556 players=100 functions=99 heroes=568 pets=54 equipment=1176 pet_acquisition=27
+$ python tools/check_ca4_1_source_oracle.py /mnt/data/gxb_sources_generated
+R4A CONTENT GENERATION: PASS revision=bd11a7482062dbaa851f3b495e3dc6efab88085011b3fe75d82105e127bba106 resources=5556 players=100 functions=99 heroes=568 pets=54 equipment=1176 pet_acquisition=27
+CA4-1 SOURCE ORACLE CHECK: PASS
+exact current src_64 c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf -> roots=604 closure=1176 recipe_nodes=797 ordered_edges=1934 repeated_recipes=29; generated CA4-1 catalog is byte-regenerable and all closure items remain I5-qualified
+$ python tools/check_ca4_2a_source_oracle.py /mnt/data/gxb_sources_generated
+CA4-2A SOURCE ORACLE CHECK: PASS
+exact current src_64 c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf -> rows=555 positions=53280 ordinary=50504 special=1646 zero=1130 unique ordinary/special=214/164; generated mapping exactly matches independent direct source parse
+$ python tools/generate_content_querytext.py --check
+CONTENT QUERYTEXT: PASS sha256=35edd984e56eeba3c463a54f58f431ac7529695e1de25166a9d88b136142ca1b
+$ python tools/generate_character_querytext.py --check
+CHARACTER QUERYTEXT: PASS hero_sha256=cd2bd0b08166e7e15ac9201c0c6d351fc9e8152818bb9984d34ecc5d845013c8 pet_sha256=5477eed6bdd96afe2c0d3c46681b6fc0aeb83260f011cb95785a72e9d03c10ee
+$ python tools/generate_kernel_querytext.py --check
+KERNEL QUERYTEXT: PASS sha256=74ad9accee063e77323a2eb4a69df394bdcb331ce88e3d789864ffbc904b7511
+$ python tools/generate_resolved_sbom.py --check
+RESOLVED SBOM: PASS
+$ python tools/check_schema_query_ownership.py
+SCHEMA/QUERY OWNERSHIP: PASS
+$ python tools/check_dependency_policy.py
+DEPENDENCY POLICY: PASS
+resolved_go_modules 16 qualified_candidates 5
+$ python tools/check_sqlc_generation_policy.py
+SQLC GENERATION POLICY: PASS
+$ python tools/validate_ca4_1.py
+CA4-1 VALIDATION: PASS
+shared content/I5/Character contracts are present; migration/ownership sealed; later CA4 family mechanics remain absent
+$ python tools/validate_ca4_2c.py
+CA4-2C VALIDATION: PASS
+Normal-Hero MID54/MID62 semantic service and deterministic planner are present; sealed planner oracle is intact; I5 composition is typed; dispatcher/production routing remains deferred to CA4-2D/CA4-5.
+$ python tools/validate_ca3_3.py --cumulative
+CA3-3 VALIDATION: PASS
+Pet progression persistence/content/I5/service/strict-wire/timing seams and contract-specific regression guards are present; live aggregate acceptance remains separate
+$ python tools/validate_r5.py --cumulative
+R5 VALIDATION: PASS (CUMULATIVE MODE)
+static progression/temporal/bootstrap/function/directory/receipt/wire/stack R5 seams present; historical compiler pin remains strict outside cumulative mode; native PostgreSQL/River/W2 remain separate
+$ python tools/validate_current_candidate.py
+R6 VALIDATION: PASS (CUMULATIVE MODE)
+static projection/directory/replay/lifecycle/key/single-owner/http/observability R6 seams present; cumulative mode permits later migrations but does not weaken historical R6 pins
+CURRENT CUMULATIVE CANDIDATE VALIDATION: PASS
+historical R6 pins retained; exact forward migration inventory and current release/SBOM version agree

@@ -1,0 +1,2 @@
+CA4-3A-A VALIDATION: PASS
+immutable Fumo content + six raw Hero Fumo values + cohesive CAS/reload/raw-state projection are present; cumulative later gameplay is permitted only when a qualified later capability is present

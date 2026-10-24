@@ -1,0 +1,18 @@
+=== tools/validate_ca4_1.py ===
+CA4-1 VALIDATION: PASS
+shared content/I5/Character contracts are present; migration/ownership sealed; later CA4 family mechanics remain absent
+=== tools/validate_ca3_3.py ===
+CA3-3 VALIDATION: FAIL
+ - CA3-3 compiler/parser identity drift ('ca4-2a', 'lua-generated-v7-hero-equipment')
+ - historical CA3-3 migration high-water is not 00018
+=== validate_r5 ===
+R5 VALIDATION: FAIL
+ - R5 compiler version drift
+=== validate_r6 ===
+R6 VALIDATION: FAIL
+ - unexpected migration00012: historical R6 contract is no-schema-change unless research is reopened
+ - canonical toolchain pin drift: go.mod
+=== validate_ca3_3 historical expected-red ===
+CA3-3 VALIDATION: FAIL
+ - CA3-3 compiler/parser identity drift ('ca4-2a', 'lua-generated-v7-hero-equipment')
+ - historical CA3-3 migration high-water is not 00018

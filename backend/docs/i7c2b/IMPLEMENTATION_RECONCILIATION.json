@@ -1,0 +1,197 @@
+{
+  "status": "WORKING_IMPLEMENTATION_COMPLETE_TARGETED_CHECKS_PASS_NOT_FROZEN_QUALIFIED_OR_ACCEPTED",
+  "selected_authority": "Pass688",
+  "contract": "I7C2B_LIBRARY_INPUT_LIFECYCLE",
+  "implemented": [
+    "LibraryLocalProgression root/Hero facets/paid-preview/admission lifecycle",
+    "Source-qualified immutable catalog and exact content payload installation",
+    "Controlled typed missing-facet deployment backfill before activation",
+    "Shared fresh Hero creator initializer and bootstrap root in existing owning transactions",
+    "Gift/ring + atomic I5 material cost",
+    "Reconstruction RNG using operation entropy, retained admission/time/content/policies, economic receipt resolution",
+    "Normal and special collection claims and exact raw contribution providers",
+    "Caller-queryer Hero/Library versioned observations and coherent MID1/MID49/836/853/2784 projections",
+    "Stock routes72/840/852/854/2785 with inherited actor authority and private-surface rejection"
+  ],
+  "working_checks": [
+    {
+      "log": "working-native-commands-r2.log",
+      "log_sha256": "9e45ee2d5390228fbd1d6266c65f02aa32471a72d358edd3f8956dd878809db4",
+      "passing_cases": [
+        "GiftMarriageFeedingAndReplay",
+        "BackfillAndSpecialDecimals"
+      ],
+      "scope": "Targeted working evidence; final exact frozen qualification still required"
+    },
+    {
+      "log": "working-native-recovery-r3.log",
+      "log_sha256": "96b3391deefdaa4a6b1a7880f14228201c9049d5e7957cbbf9971b790b2e3f2a",
+      "passing_cases": [
+        "LibraryCollectionPopulationAndRetirement"
+      ],
+      "scope": "Targeted working evidence; final exact frozen qualification still required"
+    },
+    {
+      "log": "working-process-kill-r4.log",
+      "log_sha256": "9916718bd1d6ed83fa03682231998579c7fe79a05ce2fbbd9307f5e4e6e175b0",
+      "passing_cases": [
+        "ProcessKillReopenPaidAdmission"
+      ],
+      "scope": "Targeted working evidence; final exact frozen qualification still required"
+    },
+    {
+      "log": "working-api-library-r2.log",
+      "log_sha256": "70ec2e055aef7f4c7de00ef4ec0be1356b020980c7033d27950cd4b998f1d100",
+      "passing_cases": [
+        "ActualAPILibraryAndRestartRoster"
+      ],
+      "scope": "Targeted working evidence; final exact frozen qualification still required"
+    },
+    {
+      "log": "working-native-boundaries.log",
+      "log_sha256": "1654dc8a4d262b0776030478c933447971a064d0b594e2e49b631f7a9e089cf5",
+      "passing_cases": [
+        "CostRollbackCapsAndBootstrap",
+        "FreshMaterializerAtomicFacet"
+      ],
+      "scope": "Targeted working evidence; final exact frozen qualification still required"
+    },
+    {
+      "log": "working-native-concurrency-r5.log",
+      "log_sha256": "246610f3d0e91a6f168912b7032595c62d89f2c7a4d28fc78150f5e84312af57",
+      "passing_cases": [
+        "RetiredPendingAndReconnectFence"
+      ],
+      "scope": "Targeted working evidence; final exact frozen qualification still required"
+    },
+    {
+      "log": "working-native-concurrency-r6.log",
+      "log_sha256": "0f9b2a671f8210acb1dd48ee1c4b40a05226284065eae8037c74419f025a7775",
+      "passing_cases": [
+        "UnknownRollbackPendingAndConcurrency",
+        "ConcurrentMarriageAndRetirement"
+      ],
+      "scope": "Targeted working evidence; final exact frozen qualification still required"
+    }
+  ],
+  "specific_reconciliation": [
+    "PostgreSQL adapter maps no-rows to kernelstore sentinel; admission/retired Hero readers corrected",
+    "Source collection duplicate instances use distinct canonical origins with common collectionSourceID; fixture corrected without weakening Character uniqueness",
+    "Library2784 replaces inherited neutral Lobby route; duplicate route fixed before API runtime qualification",
+    "Killed-process fixture uses inherited durable Actor serialization; no raw private identity JSON",
+    "Inherited receipt.RecordedAt is owning database insert time; capturedDecisionAt is separately retained/proved, not equated to recording time",
+    "Concrete same-family contention justified finite5-attempt admission/rejection retry with bounded backoff; semantic operation/decision/seed unchanged across retry",
+    "Root captured-time fence prevents a concurrent older operation from moving provider timestamp backwards",
+    "F1 default gate found content->domain import violation; replaced builtin payload with pure content DTO and moved domain binding to contentstore composition edge, preserving exact generated payload bytes",
+    "Existing CA6 registration guard updated to the actual qualified HeroBootstrapProjection constructor with Library typed overlay; assertion remains exact"
+  ],
+  "scope_contract_deltas": "No new requirement or durable contract beyond sealed Pass688 Library lifecycle; no changed inherited migration bytes or tool pins",
+  "limitations": [
+    "User-authorized reconstruction probability policy, not recovered original-server math",
+    "Test-only HeroCapacity qualifier; production nil/inactive MID59/305/I5 partner entity remains inherited deferral",
+    "No full Library/Commerce/Battle/final stat/force/title-frame consumer acceptance",
+    "No physical stock client proof; W2 afterI14 remains unpassed",
+    "Raw providers distinguish caller-selected player/replay scope; foreign nonreplay projection policy remains downstream C3B"
+  ],
+  "remaining": [
+    "Freeze one combined candidate",
+    "Final exact portableR2 qualification: fresh1..49,48->49upgrade/backfill/activation preservation,native/concurrency/process/recovery,affected inherited coverage/source/compiler/security",
+    "Independent child2B reality and contract reconciliation",
+    "One final HOT+COLD child2B closure sync; parent2/C/I7 stay open"
+  ],
+  "f1_qualification_failure": {
+    "candidate": {
+      "candidate_id": "I7C2B-F1",
+      "role": "FROZEN_COMBINED_CANDIDATE_NOT_ACCEPTED_AT_FREEZE",
+      "full_node_path": "ROOT/I7/I7C/I7C-2/I7C-2B",
+      "archive": "gxb-backend-v2-v0.113.0-pass689-i7c2b-f1-frozen-candidate.zip",
+      "artifact": "gxb-backend-v2-v0.113.0-pass689-i7c2b-f1-frozen-candidate.zip",
+      "path": "/home/akm/Chatgpt/2026-10-09/files-mentioned-by-the-user-additional/outputs/gxb-backend-v2-v0.113.0-pass689-i7c2b-f1-frozen-candidate.zip",
+      "sha256": "ddce82ed969f0e59e97b2aa3abe16e9c48672c88a97c6b7ae169f06a0ea75f45",
+      "bytes": 6254425,
+      "version": "v0.113.0",
+      "tree_identity": {
+        "algorithm": "gxb-candidate-tree-v1:path-nul-bytes-sorted-excluding-vcs-python-cache",
+        "file_count_excluding_git": 2405,
+        "product_tree_digest_sha256": "1f572b1df6b32d88875198cac702fc08e5ee5875daff8114255a916c9505be44",
+        "snapshot_entry_count": 2404,
+        "snapshot_manifest_sha256": "75110d3168b0dd67c12f4103c4120510e3735fa0379c08a6f5a0bc63dfe557e4"
+      },
+      "git_head": "9a63f61edf21af238497a47271dbc9d4deef7b76",
+      "git_parent": "325c0e9cb9da5515288967ccc36eb13611d00caf",
+      "working_base_sha256": "d87227d37f1d170823376d6c3b83f41a25d22f2f0491e464577a4d310a4420d8",
+      "accepted_base_sha256": "d87227d37f1d170823376d6c3b83f41a25d22f2f0491e464577a4d310a4420d8",
+      "selected_base_passmap_sha256": "5a8a46003871f745fd9b7fadee41551e5ea7ecf16a12db49031c46abcd0b9def",
+      "product_accepted": false,
+      "qualification": "NOT_RUN_AT_FREEZE",
+      "frozen_root": "/home/akm/Chatgpt/2026-10-09/files-mentioned-by-the-user-additional/work/i7c2b_qualification/frozen-f1/backend",
+      "changed_files": [
+        "BUILD_INFO.json",
+        "SBOM.spdx.json",
+        "SNAPSHOT_INFO.json",
+        "SNAPSHOT_MANIFEST.sha256",
+        "cmd/gxb-api/main_postgres.go",
+        "cmd/gxb-content-broadcast-deploy/main_postgres_river.go",
+        "docs/architecture/CANONICAL_TABLE_OWNERSHIP.json",
+        "docs/architecture/CUMULATIVE_MIGRATION_LOCK.json",
+        "docs/i7c2b/CONTRACT_IMPACT_REVIEW.json",
+        "docs/i7c2b/CONTRACT_INDEX.json",
+        "docs/i7c2b/DESIGN.json",
+        "docs/i7c2b/FEED_RECONSTRUCTION_POLICY.json",
+        "docs/i7c2b/IMPLEMENTATION_RECONCILIATION.json",
+        "docs/i7c2b/LIBRARY_INPUT_LIFECYCLE_CONTRACT.json",
+        "docs/i7c2b/QUALIFICATION_PLAN.json",
+        "docs/i7c2b/RESIDUAL_ROUTES.json",
+        "docs/i7c2b/SCOPE.md",
+        "internal/adapters/postgres/characterstore/hero_projection.go",
+        "internal/adapters/postgres/characterstore/library_backfill.go",
+        "internal/adapters/postgres/characterstore/library_port.go",
+        "internal/adapters/postgres/contentstore/library_inputs.go",
+        "internal/adapters/postgres/contentstore/store.go",
+        "internal/adapters/postgres/contentstore/store_test.go",
+        "internal/adapters/postgres/librarystore/admissions.go",
+        "internal/adapters/postgres/librarystore/bootstrap.go",
+        "internal/adapters/postgres/librarystore/native_test.go",
+        "internal/adapters/postgres/librarystore/projection.go",
+        "internal/adapters/postgres/librarystore/store.go",
+        "internal/adapters/stockruntime/hero_dispatcher.go",
+        "internal/adapters/stockruntime/library_dispatcher.go",
+        "internal/application/characterhero/acquisition.go",
+        "internal/application/characterhero/fresh_facets.go",
+        "internal/application/characterhero/materializer.go",
+        "internal/application/characterhero/service.go",
+        "internal/application/librarylocal/backfill.go",
+        "internal/application/librarylocal/inputs.go",
+        "internal/application/librarylocal/roll_policy.go",
+        "internal/application/librarylocal/roll_policy_test.go",
+        "internal/application/librarylocal/service.go",
+        "internal/content/builtin/catalog.go",
+        "internal/content/builtin/catalog_test.go",
+        "internal/content/builtin/generated/library_input_catalog.json",
+        "internal/content/builtin/generated/manifest.json",
+        "internal/content/builtin/library_inputs.go",
+        "internal/content/registry/service.go",
+        "internal/content/registry/service_test.go",
+        "internal/content/registry/types.go",
+        "internal/domain/librarylocal/catalog.go",
+        "internal/domain/librarylocal/collection.go",
+        "internal/domain/librarylocal/lifecycle_test.go",
+        "internal/domain/librarylocal/relationship.go",
+        "internal/domain/librarylocal/types.go",
+        "internal/foundation/replaycatalog/catalog.go",
+        "internal/integration/playerdisplay/i7c2b_native_test.go",
+        "internal/integration/playerdisplay/i7c2b_process_test.go",
+        "migrations/00049_i7c2b_library_inputs.sql",
+        "tools/generate_builtin_content.py"
+      ],
+      "toolbox_sha256": "e4e194c9627929299577364b953b2468d6118fac4283fd8030f10b5a27456c2b"
+    },
+    "failure": "content layer dependency and stale registration literal",
+    "invalidated": [
+      "catalog/reader mapping and import/registration checks"
+    ],
+    "reusable": [
+      "exact unchanged schema49/upgrade/backfill/deploy preservation subject files; portable tool ZIP/tool integrity"
+    ]
+  }
+}

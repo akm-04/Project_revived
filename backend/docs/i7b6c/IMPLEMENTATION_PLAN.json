@@ -1,0 +1,117 @@
+{
+  "schema_version": 1,
+  "stage": "I7B-6C",
+  "full_node_path": "ROOT/I7/I7B/I7B-6/I7B-6C",
+  "status": "BOUNDED_CONSUMER_COMPONENT_DESIGN_READY_PARENT_PROVIDER_GATES_RETAINED",
+  "topology": "I7B-topology-v6; no further split",
+  "base_pass": "682.0",
+  "base_working_head": "63c3d3acb5b2e8d1d7f6064b18be646c9fb82675",
+  "accepted_backend": "v0.109.0/680 remains accepted; v0.110.0/682 qualified components not product accepted",
+  "contracts": [
+    "I7B1_ARCHITECTURE_PROVIDER",
+    "I7B1_WIRE_PRIVACY_POLICY",
+    "I7B1_TRANSACTION_REFERENCE_REPLAY",
+    "I7B1_MEDIA_FRESHNESS",
+    "I7B1_ACCEPTANCE_EXIT",
+    "I7A6_SUCCESSOR_CONTRACT",
+    "D14"
+  ],
+  "decisions": [
+    {
+      "id": "6C-D01",
+      "capabilities": [
+        "C12",
+        "C13",
+        "C14"
+      ],
+      "owner": "Player effective display + canonical PublicPlayerBasis; I4 registered identity/conquer fields; Presence",
+      "implementation": "Add typed ephemeral canonical presentation composer. Critical reads always use genuine owner fallback, validate profile/progression versions and pinned time/revision. Retain qualified I4 conquer facts; do not invent mode force. Social batching observes one time/revision per transaction. Channel prepare uses same admitted transaction/time; no cache/hint dependency. Production display readers reuse accepted6A policy/Character reader, no invented origins."
+    },
+    {
+      "id": "6C-D02",
+      "capabilities": [
+        "C14"
+      ],
+      "owner": "I5 canonical name candidate selector; I4 identity/discovery composition",
+      "implementation": "Narrow I5-owned bounded exact-name candidate ID port, existing C collation/order/limit. Consumer adapter validates I4 registered profiles; canonical candidate selection handles missed/stale name projection before enrichment. Existing ID bounds/paging remain I4; canonical presentation enriches rows. Rename atomic directory feed unchanged; no additional queue/index/schema."
+    },
+    {
+      "id": "6C-D03",
+      "capabilities": [
+        "C13"
+      ],
+      "owner": "PersonalDMDelivery381",
+      "implementation": "Append optional SenderTitleInfo/SenderBubbleInfo strings with omitempty to existing Intent JSON. Existing field order/bytes unchanged for historic absent fields. Fresh accepted intents capture qualified display before insert; known replay/recovery uses stored snapshot, no re-read or rewrite. Existing payload digest validation, recipient target set, deadlines, privacy, claim/recovery/purge retained. No SQL/schema migration: existing JSONB carries new fields. Never backfill. Legacy absent fields map to historical@@@@/10001@0 only. New nonempty fields validate exact numeric metadata; new publications use source title id@unique@end and bubble id@end. Timed source instant uses existing operation DecisionAt across retries."
+    },
+    {
+      "id": "6C-D04",
+      "capabilities": [
+        "C14"
+      ],
+      "owner": "ProfileFeedback author projections",
+      "implementation": "Optional typed effective Player reader bound in production; comment and praise list author reads receive existing pinned revision/time and verify exact versions, preserving source author shape. Same caller transaction, no read-side mutation. PublicProfile SPACE binds same display reader."
+    },
+    {
+      "id": "6C-D05",
+      "capabilities": [
+        "C14"
+      ],
+      "owner": "Guild read-only view adapter; existing Guild/Player/Presence owners",
+      "implementation": "Bind Guild API views in caller RepeatableRead with one revision/time and canonical presentation directory bridge. Reuse seven existing view operations and ownership/roles, no new Guild facts. MID1 bootstrap uses exact supplied transaction/instant. GuildInvite/social friend rows use common batching; actual source-valid invitations/membership logic unchanged. GuildBroadcast immutable mail name/source not channelchat; retain accepted canonical NameReader and payload unchanged."
+    },
+    {
+      "id": "6C-D06",
+      "capabilities": [
+        "C15"
+      ],
+      "owner": "Existing API/realtime startup composition",
+      "implementation": "Bind new readers at current routes; check display catalog startup in realtime as API already does. No default-success for unavailable required rich profile/metrics/history. Fourteen profile+3116 remain selected, accepted2..5 handlers reused. Structured chat stays existing activation gated; uses same sender reader if later qualified, no new activation/team/channel/privateACK."
+    }
+  ],
+  "scope_exclusions": [
+    "No actual later metric/history/rich facet producer implementation",
+    "No new cosmetic upstream grant/purchase origin qualification",
+    "No old DM/client history rewrite",
+    "No cache architecture, migration, room, ACK or parameter-as-intent identity"
+  ],
+  "coverage": "C12..C15 independent consumer obligations. Complete composite surfaces retain existing6B blockers; no claim of full6C/parent6 exit before required activated consumer providers qualify.",
+  "tests": {
+    "working": [
+      "Targeted canonical display/time/version/search tests; JSON legacy digest and new snapshot persistence; affected wire validation/feedback/Guild tests"
+    ],
+    "frozen": [
+      "One exact combined intended candidate; pinned portableR2 Go1.27.2 PG18.6 River build, native ownership/freshness/search/expiry/DM snapshot recovery",
+      "Actual API+realtime update/new send/read, reconnect/context retirement and dropped hints via canonical fallback",
+      "Both block directions/Guild membership/invite regression affected by new presentation",
+      "Race/vet/static/ownership/release/SBOM/security affected gates; reused unchanged6A/6B/2..5 subjects explicitly bound"
+    ],
+    "limits": [
+      "No component test double establishes actual external origin/metric/rich/history provider qualification",
+      "No physical unmodified-client W2; existing postI14 route retained",
+      "Unchanged migration/media/ref engine proof reused only when no invalidating change"
+    ]
+  },
+  "research_closure_criteria": {
+    "selected_scope_mapped": true,
+    "existing_owner_ports_traced": true,
+    "wire_time_recovery_rules_recovered_or_explicitly_bounded": true,
+    "source_consumers_and_old_V1_disposition": true,
+    "provider_residual_routes_retained": true,
+    "concrete_plan_and_required_proof": true
+  },
+  "new_durable_contracts": [
+    "I7B6C_SENDER_SNAPSHOT_EXTENSION"
+  ],
+  "applied_extensions": [
+    "D14 current ephemeral Player consumer fallback",
+    "Existing381 future-only optional sender snapshot encoding; old bytes preserved"
+  ],
+  "next_actions": [
+    "Normal research/design Pass683 seal before any product edit",
+    "Copy exact working110/F2 into owned6C working tree",
+    "Implement related batch, targeted checks then one candidate freeze",
+    "Exact portable qualification, independent6C/parent6 reality and truthful finalPassMap seal"
+  ],
+  "applied_contract": "APPLIED_CONTRACT.json",
+  "design_refinement": "Namecandidate selection remains timeless canonical name +I4 identity only; final mutable display enriched once atSocial pinned response observation. No extra clock duringselection."
+}

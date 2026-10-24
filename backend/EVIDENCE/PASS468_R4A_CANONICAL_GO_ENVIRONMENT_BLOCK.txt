@@ -1,0 +1,9 @@
+# PASS468 exact canonical Go environment check
+2026-09-07T17:48:10Z
+go: downloading go1.27.1 (linux/amd64)
+go: download go1.27.1: golang.org/toolchain@v0.0.1-go1.27.1.linux-amd64: Get "https://proxy.golang.org/golang.org/toolchain/@v/v0.0.1-go1.27.1.linux-amd64.zip": dial tcp: lookup proxy.golang.org on 168.63.129.16:53: read udp 172.26.39.194:33240->168.63.129.16:53: read: connection refused
+## GOTOOLCHAIN=local go test focused expected environment block
+go: go.mod requires go >= 1.26.0 (running go 1.23.2; GOTOOLCHAIN=local)
+## pinned toolchain check
+go: downloading go1.27.1 (linux/amd64)
+go: download go1.27.1: golang.org/toolchain@v0.0.1-go1.27.1.linux-amd64: Get "https://proxy.golang.org/golang.org/toolchain/@v/v0.0.1-go1.27.1.linux-amd64.zip": dial tcp: lookup proxy.golang.org on 168.63.129.16:53: read udp 172.26.39.194:55862->168.63.129.16:53: i/o timeout

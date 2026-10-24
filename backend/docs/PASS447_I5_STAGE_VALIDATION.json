@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "pass": "447.0",
+  "milestone": "I5",
+  "verdict": "PASS_NORMAL_CHAT_I5_COMPLETE_W2_MECHANISM_GATES_DEFERRED",
+  "checks": {
+    "go_test_all_disposable_go123": "PASS",
+    "go_vet_all_disposable_go123": "PASS",
+    "architecture_guard": "PASS",
+    "targeted_i5_race": "PASS",
+    "grant_mail_objective_replay_tests": "PASS",
+    "admin_operator_owner_audit_tests": "PASS",
+    "i5_validator": "PASS",
+    "i1_i4_regression_validators": "PASS",
+    "i2_i5_source_oracle_differentials": "PASS",
+    "schema_query_ownership": "PASS",
+    "sqlc_generation_policy": "PASS",
+    "dependency_policy": "PASS",
+    "oracle_hashes": "PASS",
+    "mid_registry_and_pass353_wire_fixtures": "PASS",
+    "wave_e_30_case_accounting": "PASS_ALL_30_MAPPED_EXECUTABLE_OR_EXPLICIT_W2_BUCKET",
+    "postgres_tag_local": "NOT_EXECUTED_TO_COMPLETION_PGX_MODULE_NOT_CACHED_NETWORK_DISABLED",
+    "real_postgresql_18_6_i5": "DEFERRED_TO_W2_NOT_PROVED_BY_NORMAL_CHAT",
+    "river_i5_crash_retry_restart": "DEFERRED_TO_W2_NOT_PROVED_BY_NORMAL_CHAT",
+    "stock_client_acceptance": "DEFERRED_TO_W2_NOT_GREEN"
+  },
+  "canonical_go_mod": "go 1.26.0 / toolchain go1.27.1",
+  "local_go_exception": "Only a throwaway copy was patched to go 1.23.0 with no toolchain line; canonical source was never lowered.",
+  "next": "I6 Generation / Scheduler / Guild / shared foundations"
+}

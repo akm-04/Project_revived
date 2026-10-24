@@ -1,0 +1,31 @@
+{
+  "schema": "gxb-research-closure/v1",
+  "stage": "I7A-5B",
+  "status": "RESEARCH_COMPLETE_PREIMPLEMENTATION_DESIGN_READY_FOR_NORMAL_SEAL",
+  "research_complete": true,
+  "decomposition_ready": true,
+  "approved_children_unchanged": [
+    "I7A-5A",
+    "I7A-5B"
+  ],
+  "new_node_proposal": false,
+  "implementation_scope_ready": true,
+  "live_producer_activation_ready": false,
+  "substantive_findings": 20,
+  "schema_variants": 9,
+  "nonzero_types": 8,
+  "sources": "59exactcurrent/historical/V1/acceptedbackendmembers;4370Lua fulltargetscan",
+  "design_blockers": [],
+  "bounded_activation_unknowns": [
+    "Exactfuturecanonicalprovider/subtypenamespace/content/cardinality/Peakwinqualification",
+    "Unknown36863trigger",
+    "Originalserverstructuredlimit/pacing"
+  ],
+  "backend_unchanged": true,
+  "product_tests": "NOT_RUN_I7A5B",
+  "accepted_product": "I7A5A_Pass641only",
+  "no_automatic_parent_acceptance": true,
+  "pass": "642.0",
+  "selected_status": "SELECTED_RESEARCH_DESIGN_WITH_VALIDATED_NORMAL_SEAL_NOT_IMPLEMENTED",
+  "working_recovery_reference": "CP90 exact COLD checkpoint/source/probe caches"
+}

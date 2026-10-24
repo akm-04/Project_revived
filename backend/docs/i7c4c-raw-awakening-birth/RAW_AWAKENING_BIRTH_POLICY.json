@@ -1,0 +1,18 @@
+{
+  "contract_id": "C4C_PRIVATE_CHARACTER_RAW_AWAKENING_BIRTH_V1",
+  "version": 1,
+  "classification": "IMPLEMENTATION_DECISION_PRIVATE_NEW_BIRTH_INITIAL_STATE_NOT_ORIGINAL_SERVER_PROOF",
+  "owner": "CharacterHero owns raw fact, serialized by existing root400/instance410; AwakeningMission remains future transition producer",
+  "rules": [
+    "Only same-transaction actual new Hero creation initializes explicit rawstage0 with immutable named birth policy and exact Hero birth reference/time. No read-time seeding, migration backfill, synthetic legacy zero or arbitrary setter.",
+    "An intrinsic Character-owned facet stores rawstage, facet version and birth provenance. It adds no parallel player/Hero identity, economy owner or existing-owner lock rank. Migration creates empty storage; older Heroes remain unknown.",
+    "Use existing typed fresh facet chain after canonical Hero insert; require valid persistent fresh instance/stateversion1 and same birth instant, one row inserted. Errors roll back Hero, allocator, I5 debit, all facets and semantic receipt.",
+    "Original positive acquisition replay never reruns current birth initialization. Known original receipt success is preserved even when the old Hero has no rawbirth row; missing old raw observation remains unavailable for new stat reads.",
+    "Typed read requires valid witnessed CA8 scope and active canonical Hero ownership; validates exact birth identity/time/policy and current Hero state version within same snapshot, plus pinned content and observed instant. No locks, nested transaction, write, current content discovery or live clock.",
+    "Missing/corrupt/unknown/retired identity is unavailable, never an implied0. Facet version is not confused with current Hero base state version. Returned stat observation matches current base version from same caller snapshot.",
+    "Initial reader qualifies only this genuine birth0 policy. Positive1..3 transitions require future actual AwakeningMission producer/CAS/evidence; source give-up0 belongs to that lifecycle and is not fabricated by birth policy.",
+    "Reuse existing publicstats Hero composer and every existing typed owner/numerical policy unchanged. Genuine fresh nondefault equipment/source mutation may prove recomputation; fixture contribution proof remains conditional.",
+    "Production birth hook activates only existing genuine new-Hero path; it does not activate Vows305/I5Hero/MID64/positive awakening mission/combat/profile1007 or new Ranking subtype.",
+    "C1 and full3B actual2F/2G/2H/2J gates, full4 all11/33Achievement/cosmetic/mode histories remain. This is a prerequisite component, never full acceptance."
+  ]
+}

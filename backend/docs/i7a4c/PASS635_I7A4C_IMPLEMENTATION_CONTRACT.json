@@ -1,0 +1,146 @@
+{
+  "schema_version": 1,
+  "stage": "I7A-4C",
+  "status": "RESEARCH_DESIGN_SELECTED_EFFECTIVE_ONLY_WITH_VALIDATED_PASS635_SEAL",
+  "backend_sha256": "f157f878cd917acd00f555df15f4421d95f97c31fc8cb0d5a6cc9881f95c63db",
+  "backend_git_head": "122dee90f50fd8c9619001b60b7325429cf17d07",
+  "operations": [
+    176,
+    188,
+    189,
+    190
+  ],
+  "stock_activation": false,
+  "runtime_gate_result": "NOT_RUN",
+  "implementation_started": false,
+  "new_migration": null,
+  "migration_high_water": "00033_i7a4a_social_foundation.sql",
+  "inherited_i7a1_index": "00_PASSMAP/PASS622_I7A1_CONTRACT_INDEX.json",
+  "foundation_traceability": "00_PASSMAP/PASS635_I7A4C_DESIGN/FOUNDATION_TRACEABILITY.json",
+  "d14_extension_record": "00_PASSMAP/PASS635_I7A4C_DESIGN/D14_EXTENSION_RECORD.json",
+  "implementation_plan": {
+    "path": "00_PASSMAP/PASS635_I7A4C_DESIGN/IMPLEMENTATION_PLAN.md",
+    "sha256": "74e62ae4fa5e14384fc2abba000190905217e4a4e7c960a31a619539344d8ed8"
+  },
+  "transaction": {
+    "runner": "accepted tx.Runner",
+    "isolation": "REPEATABLE_READ",
+    "read_only_access_mode": false,
+    "durable_semantic_writes": false,
+    "actor_locks": [
+      "I4PlayerRoot315",
+      "existingSocialRoot360"
+    ],
+    "discovered_target_locks": false,
+    "max_attempts": 3,
+    "retry_definite_abort": true,
+    "unknown_resolver": null,
+    "replay_after_negative": false,
+    "result_only_on": "DEFINITE_COMPLETION",
+    "decision_at": "No durable temporal decision occurs; existing4B/I6A semantics unchanged",
+    "response_observation": "One authoritative callerTx observation/attempt; distinct fromDecisionAt"
+  },
+  "notice_window": {
+    "source_families": [
+      "social-relation.request.v1",
+      "social-relation.friendship.v1"
+    ],
+    "filter_before_limit": [
+      "active",
+      "knownrelationfamily",
+      "related_player_id IS NOT NULL"
+    ],
+    "limit": 50,
+    "order": [
+      "notice_time DESC",
+      "notice_id DESC"
+    ],
+    "included_validation": "Notice.Validate and acceptedValidateRelationDescriptor then requiredcanonicalpresentation",
+    "invalid_included_row": "FAIL_COMPLETE_READ_LOCALLY",
+    "orphan_related_null": "RETAIN_DURABLE_OMIT_PROJECTION_NO_CLEANUP",
+    "original_server_policy": "UNKNOWN; explicitcompatibilitychoice"
+  },
+  "recommendation": {
+    "policy": "SOCIAL_RECOMMEND_V1_WITH_FIRST_BOUNDS_ABSOLUTE_PIVOT",
+    "derive_label": "social-recommend-pivot-v1",
+    "ordinal": 0,
+    "entropy_decode": "first8bytes big-endianuint64",
+    "anchor": "firstsuccessfulboundsobservation -> absolutePIDorEMPTY; reuseallinternalretries",
+    "changed_state_equal_results_claim": false,
+    "page_size": 128,
+    "max_fetched": 4096,
+    "max_unique_candidates": 4096,
+    "max_results": 10,
+    "uniform_original_ranking_claim": false
+  },
+  "wire": "Exact full mapping/search/shape/error/time rules in hash-bound plan",
+  "required_matrix": {
+    "path": "00_PASSMAP/PASS635_I7A4C_ACCEPTANCE_MATRIX.json",
+    "sha256": "61f6f1454dc1f94fdec2c7262abb4414b9e245b61abadef548db93ae4197551c"
+  },
+  "deferred": [
+    "MID184/4Dactivation",
+    "MID183/SocialGift",
+    "FriendDM",
+    "Guildinviteauthority",
+    "Recall193/194",
+    "RichI7B/CharacterAsset",
+    "parent4exit",
+    "I7A10/E",
+    "W2"
+  ],
+  "pass": "635.0",
+  "sealed_at_pass": "635.0",
+  "selected_authority": true,
+  "implementation_authorized_by_document": false,
+  "plan_documents": [
+    {
+      "path": "00_PASSMAP/PASS635_I7A4C_DESIGN/D14_EXTENSION_RECORD.json",
+      "sha256": "dd93f8ce1a8c1efa928693b62a9466c11029023421a2d80fdc8e16070647f13b"
+    },
+    {
+      "path": "00_PASSMAP/PASS635_I7A4C_DESIGN/DECISIONS.json",
+      "sha256": "15434cd29797b72ca20eb76ea80353c5e8706a7be8ddcc88d1be7e24104c3e8a"
+    },
+    {
+      "path": "00_PASSMAP/PASS635_I7A4C_DESIGN/EVIDENCE_LEDGER.json",
+      "sha256": "422362063feeb97ec30f4916009b94518f71db4cffd4f1c4ca0abcbec0ce0923"
+    },
+    {
+      "path": "00_PASSMAP/PASS635_I7A4C_DESIGN/FOUNDATION_TRACEABILITY.json",
+      "sha256": "8dbb1b2a093d752322d3bbeac0ad934edfdf1baf0199ac17cdc5a9eb01ed9e5b"
+    },
+    {
+      "path": "00_PASSMAP/PASS635_I7A4C_DESIGN/IMPLEMENTATION_PLAN.md",
+      "sha256": "74e62ae4fa5e14384fc2abba000190905217e4a4e7c960a31a619539344d8ed8"
+    },
+    {
+      "path": "00_PASSMAP/PASS635_I7A4C_DESIGN/NATIVE_READ_TRANSACTION_PROBE.json",
+      "sha256": "1bb7b34c5ec86305cfa3ef981b4baa76e840852b479f2b844b88a2a2fb01b3a9"
+    },
+    {
+      "path": "00_PASSMAP/PASS635_I7A4C_DESIGN/NOTICE_WINDOW_PROBE.json",
+      "sha256": "f5815c02986ce0889eaf30f7bf1dbaaf16845699671397004f8016dc1785664b"
+    },
+    {
+      "path": "00_PASSMAP/PASS635_I7A4C_DESIGN/OPEN_QUESTIONS.json",
+      "sha256": "9fe86d60dcf8013f54da3e405b26a43119b7b61f88a437eb9b47fb7f99d5de7a"
+    },
+    {
+      "path": "00_PASSMAP/PASS635_I7A4C_DESIGN/OWNER_AND_READ_PLAN.md",
+      "sha256": "56ad013a4ca0044f624d24e872d312e0858e7d2a8cfe4affe77b13740cb23d33"
+    },
+    {
+      "path": "00_PASSMAP/PASS635_I7A4C_DESIGN/RECOMMENDATION_MODEL.json",
+      "sha256": "bb9ce1fde533bf519541c4b2b7724467ad2fdbfaa6c9b2335efb5093f24b254b"
+    },
+    {
+      "path": "00_PASSMAP/PASS635_I7A4C_DESIGN/RESEARCH_JOURNAL.jsonl",
+      "sha256": "08eb7b639e45540b1bb242abcae44634b4478cb1e5f89fab0e6dea5c6d7396ea"
+    },
+    {
+      "path": "00_PASSMAP/PASS635_I7A4C_DESIGN/RETRY_ANCHOR_ARITHMETIC_MODEL.json",
+      "sha256": "c7c1520642b1054989be3955981212cf04050acc505c4e450725f02e01a3df71"
+    }
+  ]
+}

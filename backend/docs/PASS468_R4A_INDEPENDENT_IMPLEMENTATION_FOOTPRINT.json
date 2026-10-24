@@ -1,0 +1,170 @@
+{
+  "base_artifact": "gxb-backend-v2-v0.53.2-pass460-r3-complete.zip",
+  "base_sha256": "5b969bc248a06b47eafc3641bb0bf4a203c9d3e96e19f9c4b6801211d9a25f5b",
+  "canonical_go_mod_sha256": "ecafe7641bc26c7ef91bdc5c21a5f71aa432bd162ed6fe1725004b501172a949",
+  "canonical_go_sum_sha256": "efbf6753542d66e2fefcb2ab5e2ade7c9d28f2206a1113d1eb9568f2cb75808d",
+  "changed_file_count": 30,
+  "changes": [
+    {
+      "kind": "MODIFIED",
+      "path": "BUILD_INFO.json",
+      "sha256_after": "17bdd41ebacf232275f6c2a3e72697b2037655b449d5ca97aab691309d21f5bb",
+      "sha256_before": "a1a4ba3c12f9402a541c162017501e7e94c7e1f7f1e200f806c33347ff968485"
+    },
+    {
+      "kind": "ADDED",
+      "path": "EVIDENCE/PASS468_R4A_CANONICAL_GO_ENVIRONMENT_BLOCK.txt",
+      "sha256": "82df7d8edd4851479c626913a370b1cd5fe4191307976d2b485e149bcb721a81"
+    },
+    {
+      "kind": "ADDED",
+      "path": "EVIDENCE/PASS468_R4A_CANONICAL_STATIC_SOURCE_VALIDATION.txt",
+      "sha256": "db3026833746a0c8fbf6c64cfdad3390bc87b2e864843bc010161382fd7cebd7"
+    },
+    {
+      "kind": "ADDED",
+      "path": "EVIDENCE/PASS468_R4A_COMPATIBILITY_COPY_CORE.txt",
+      "sha256": "d4a351f57010f33ab1f604736410e4189cdb83b49657292e81e84bec02f15d2c"
+    },
+    {
+      "kind": "ADDED",
+      "path": "EVIDENCE/PASS468_R4A_COMPATIBILITY_COPY_PACKAGE_SWEEP.txt",
+      "sha256": "983e5e9b2037e82aad9fda666760957e4d895a620059c89d13cb03e73c541826"
+    },
+    {
+      "kind": "ADDED",
+      "path": "EVIDENCE/PASS468_R4A_PHASE_VALIDATOR_STATUS.txt",
+      "sha256": "be3a4a3b3f1e69cb5f86f132c188d5aeed6a09faf8526e1bcb556b60b6a19fe5"
+    },
+    {
+      "kind": "MODIFIED",
+      "path": "SBOM.spdx.json",
+      "sha256_after": "2f6169b595de5ca8e80ab77412208e31658a56873e517eba280e7c4b6fb457bb",
+      "sha256_before": "7adecea070b8e4c6e3208d402d104e96a1171e72fef95da4f1712c34913190df"
+    },
+    {
+      "kind": "MODIFIED",
+      "path": "SNAPSHOT_INFO.json",
+      "sha256_after": "c040a1f3e1e737e78019ee45e2dc50e48a0a4da5ccfa65e46954c01f9b2e21f1",
+      "sha256_before": "54e01def595f3a3fb0650fe22e996e847a00ba755c6fb44125468c3dc93d1f59"
+    },
+    {
+      "kind": "MODIFIED",
+      "path": "SNAPSHOT_MANIFEST.sha256",
+      "sha256_after": "2af0b414e9294ac712bfb760aa5c2081e8c53b820f93b949c42b551c3aabcd01",
+      "sha256_before": "48bd2304f97407b31d4f712d0d449f0c474450d38e0dec05719b54fb6ccc2b24"
+    },
+    {
+      "kind": "ADDED",
+      "path": "docs/PASS468_R4A_EVIDENCE_CLASSIFICATION.json",
+      "sha256": "aa0732726a0128710287b72e03cdd94f690678a7a13d04211aa454cf6ec777bc"
+    },
+    {
+      "kind": "ADDED",
+      "path": "docs/PASS468_R4A_IMPLEMENTATION_REPORT.md",
+      "sha256": "3d5a9bc4e3edbdcb8fc4a13f22305687855e4e85ce59ef0c16f15db61c75a83c"
+    },
+    {
+      "kind": "ADDED",
+      "path": "docs/PASS468_R4A_IMPLEMENTATION_REVISION.json",
+      "sha256": "4ba7f8a9ca5f156e9ab594375cd57f80b5f5711ad8a8256b3deee6309ec57377"
+    },
+    {
+      "kind": "ADDED",
+      "path": "docs/PASS468_R4A_INDEPENDENT_IMPLEMENTATION_FOOTPRINT.json",
+      "sha256": "40c5ec1581e3d716eaa84d927de56334d3bdef1c5f333b2ec024f142bdb5f3f2"
+    },
+    {
+      "kind": "ADDED",
+      "path": "docs/PASS468_R4A_INDEPENDENT_PASS353_REALITY_CHECK.json",
+      "sha256": "db2d1c22a83f748e60a7d32f2ad24aff61c95f8cb44cdd89dc030ccf7fb01372"
+    },
+    {
+      "kind": "ADDED",
+      "path": "docs/PASS468_R4A_INDEPENDENT_REALITY_CHECK.md",
+      "sha256": "4da147a55bbf179f39ecfb70b21b7de25a3f95808790d047a8ddc49daeebc869"
+    },
+    {
+      "kind": "ADDED",
+      "path": "docs/PASS468_R4A_INDEPENDENT_SRC64_REALITY_CHECK.json",
+      "sha256": "10888bbb35965ba617a73bb55ce6200e64f466d4899fe58c98e5ce8cce614e18"
+    },
+    {
+      "kind": "ADDED",
+      "path": "docs/PASS468_R4A_PASS353_CLASSIFICATION_DIFFERENTIAL.json",
+      "sha256": "599c2c77ea2f3dbc5338ea2824a0fc6527830ed5e660c1a414adadc4215a298e"
+    },
+    {
+      "kind": "ADDED",
+      "path": "docs/PASS468_R4A_STAGE_VALIDATION.json",
+      "sha256": "3553c1d7fb3c0c12fffedd0c777d60da0c574aafd9ee27c0b221ce769e756a7f"
+    },
+    {
+      "kind": "MODIFIED",
+      "path": "docs/foundation_repair_status.json",
+      "sha256_after": "7c1535f6d4f29f3e028dda3d278889e801dac1aa6e0368f2904200760f344be7",
+      "sha256_before": "bb39028e03ceedab0e2124f8b4dd4e61ecd261220d0f528d7d1ffa5ea19581e2"
+    },
+    {
+      "kind": "ADDED",
+      "path": "internal/content/builtin/catalog.go",
+      "sha256": "c9cd5f13ca97b63ef33b6c17e025acb6fe7ab5968d34822e52a52f5a99c312b0"
+    },
+    {
+      "kind": "ADDED",
+      "path": "internal/content/builtin/catalog_test.go",
+      "sha256": "10a6b62909387f6d388a503166985b0fb16c92ba1a54566a86a07dda9da0a68b"
+    },
+    {
+      "kind": "ADDED",
+      "path": "internal/content/builtin/generated/manifest.json",
+      "sha256": "9edbce8ce0a0fc6244789b78dd11226a8f7c35f64cce20382f8b3e14feafe5e3"
+    },
+    {
+      "kind": "ADDED",
+      "path": "internal/content/builtin/generated/objective_catalog.json",
+      "sha256": "ff4d225e9328cd108b2afdc449a70327c41326288a49a21cd991c3f548781824"
+    },
+    {
+      "kind": "ADDED",
+      "path": "internal/content/builtin/generated/player_progression.json",
+      "sha256": "9b21a3d9f66cc9eed479d7246f69835c97614c611cc76529543d58f3348a8e08"
+    },
+    {
+      "kind": "ADDED",
+      "path": "internal/content/builtin/generated/resource_catalog.json",
+      "sha256": "ddb2e962832eea93ab3a7f8f6568b2f7d95bb3af32ac86ae90b98d7cb683bfc6"
+    },
+    {
+      "kind": "MODIFIED",
+      "path": "tools/check.sh",
+      "sha256_after": "3d4a7fb48a98f2d42c33f8d2bee941c0e7cce049a7d22fd9a4bee662becd7877",
+      "sha256_before": "8934a4519eb6d6fd03530094dab0fd39879350ed892039c0ff52cbd8b63d3aa9"
+    },
+    {
+      "kind": "ADDED",
+      "path": "tools/check_r4a_pass353_differential.py",
+      "sha256": "0bf92947cfad3d22aac57e1e3c9c911f51594c74f2a6d67cf86985141f7ce2f1"
+    },
+    {
+      "kind": "ADDED",
+      "path": "tools/generate_builtin_content.py",
+      "sha256": "dac4b6a3c5d3dfc36009c8edf031627b78dbd05570fabf78812e8658eeb63c7b"
+    },
+    {
+      "kind": "ADDED",
+      "path": "tools/test_generate_builtin_content.py",
+      "sha256": "31f0e134179542e817fce982cda24dd4565971f8d82ca37ee9ed7aea438e67bd"
+    },
+    {
+      "kind": "ADDED",
+      "path": "tools/validate_r4a.py",
+      "sha256": "553d473028cbf7962acbe483ad6d27d83aa014604caa284eaa7936d7000899b1"
+    }
+  ],
+  "conclusion": "PASS_R4A_SCOPE_ONLY",
+  "critical_runtime_changes": [],
+  "method": "FINAL_FRESH_BASE460_TO_PASS468_TREE_BYTE_DIFF",
+  "schema_version": 2,
+  "unexpected_changes": []
+}

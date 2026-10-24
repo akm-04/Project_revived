@@ -1,0 +1,173 @@
+{
+  "status": "ACCEPTED_PROFILE1_SCOPE_ARTIFACT",
+  "profile": "PERSISTENT_RECONSTRUCTION_PROFILE_1",
+  "authority": "Pass505 remains authority; Pass508 is I6E research only",
+  "decision_principles": [
+    "Select persistent/recurring stock systems and their required compatibility surfaces for Profile 1.",
+    "Finite seasonal/anniversary/event occurrences remain preserved later profiles by default; historical design priority does not imply initial activation.",
+    "A selected family can remain research/provider-gated now, but RELEASE_SCOPE_CLOSURE must later transition it to accepted implementation or an explicit inactive disposition.",
+    "Protocol-incomplete paths are not assigned guessed MIDs; they are explicitly deferred.",
+    "Capability/UI models are not canonical-owner boundaries; retained typed ownership and cross-owner transaction laws remain controlling.",
+    "External payment-provider infrastructure is not fabricated for preservation; canonical Commerce settlement is selected and authenticated manual preservation entitlements use the frozen Pass424 settlement path.",
+    "Per-feature clocks remain typed; no universal 05:00/reset policy is introduced."
+  ],
+  "accepted_foundation_ids": [
+    "FND_IDENTITY_SESSION",
+    "FND_PLAYER_ROOT",
+    "FND_I5_VALUE",
+    "FND_I6A_GENERATION",
+    "FND_I6B_DIRECTORY",
+    "FND_I6C_GUILD",
+    "FND_I6D_REALTIME"
+  ],
+  "selected_family_ids": [
+    "CHAR_HERO_CORE",
+    "CHAR_FORMATION_PRESETS",
+    "CHAR_PET",
+    "CHAR_SUPER_EQUIP",
+    "SOC_RELATION",
+    "SOC_DISCOVERY_COMPAT",
+    "SOC_CHAT_PUBLICATION",
+    "SOC_PUBLIC_PLAYER",
+    "SOC_GUILD_SOCKET_INVALIDATION",
+    "RANKING_PROJECTION_CORE",
+    "I8_TECH_RECOVERY",
+    "BATTLE_STAT_BASE",
+    "I8_COMBAT_CORE",
+    "SHARED_ROOM_CORE",
+    "BATTLE_STAT_EXTENSIONS",
+    "I9N_EVENT_CENTRE_BUILDING",
+    "I9N_DESK_CRAFT",
+    "I9N_PET_CABIN",
+    "I9N_CABINET_BOOK_SKILL",
+    "I9N_NOTICE_BOARD",
+    "I9N_ADMIN_CONVERSION",
+    "I9N_COURSE",
+    "I9N_INSCRIPTION",
+    "I9N_ELEMENT",
+    "I9N_DORM_CORE",
+    "I9N_DORM_SOCIAL",
+    "I9N_LIBRARY_LOCAL",
+    "I9N_LIBRARY_FORUM",
+    "I9N_LIBRARY_PRESENTATION",
+    "I9N_WORKPLACE_CORE",
+    "I9N_WORKPLACE_PURCHASE",
+    "I9N_WORKPLACE_ENCOUNTER",
+    "GUILD_CAMPAIGN",
+    "GUILD_WAR",
+    "GUILD_RENTAL",
+    "GUILD_DRINK_TEA",
+    "GUILD_RANKS",
+    "GUILD_EVENT_LOG",
+    "GUILD_PUBLICATION",
+    "I10A_COMMERCE_CORE",
+    "I10_GACHA_CORE",
+    "I10_SHOP_CORE",
+    "I10_AUCTION",
+    "I10_ENTITY_OUTPUT_INTEGRATION",
+    "COMPAT_GUIDE_CONTINUITY",
+    "COMPAT_MESSAGE_PUSH_PREFS",
+    "COMPAT_FIRST_TOUCH",
+    "COMPAT_AB_COHORT",
+    "COMPAT_UNASSIGNED_27",
+    "I11A_CONTROL_CORE",
+    "I11B_SELECTED_OWNER_INTEGRATION",
+    "I12_GLOBAL_HARDENING",
+    "I13_MIGRATION_REHEARSAL",
+    "CHAR_FUMO",
+    "CHAR_PRACTICE",
+    "CHAR_HERO_FAVOR",
+    "SOC_INDIEGOGO"
+  ],
+  "explicit_deferred_ids": [
+    "CHAR_REP_LOCK",
+    "CHAR_RUNE",
+    "SOC_MENTOR_STUDENT",
+    "I10_MARKET"
+  ],
+  "later_occurrence_ids": [
+    "MODE_ACTIVITY_TUTOR",
+    "MODE_DREAM_WORLD",
+    "MODE_FLAPPY",
+    "MODE_EVENT_LONG_TAIL",
+    "I10_MAGIC_SHOP",
+    "I10_FISH_EVENT_VALUE",
+    "I10_BATTLE_PASS",
+    "I10_RED_ENVELOPE_VALUE",
+    "I10_EVENT_SPECIALISTS"
+  ],
+  "function_surface": {
+    "rows": 99,
+    "counts": {
+      "PROFILE1_REQUIRED": 47,
+      "PROFILE1_COVERED_ACCEPTED_FOUNDATION": 6,
+      "PROFILE1_REQUIRED_RESEARCH_GATED": 4,
+      "PROFILE1_ALIAS_OR_GATE": 23,
+      "LATER_OCCURRENCE_PROFILE": 11,
+      "PROFILE1_COVERED_ACCEPTED_FOUNDATION_PLUS_SELECTED_EXTENSIONS": 1,
+      "EXPLICIT_INACTIVE_NO_REACHABILITY_PROOF": 3,
+      "PRESERVATION_CANDIDATE_RESEARCH_GATED": 2,
+      "DEFERRED_LOW_PRIORITY_RESEARCH_GATED": 1,
+      "PRESERVATION_CANDIDATE_REGION_PROFILE": 1
+    }
+  },
+  "mode_surface": {
+    "rows": 51,
+    "counts": {
+      "PROFILE1_REQUIRED": 29,
+      "LATER_OCCURRENCE_PROFILE": 20,
+      "EXPLICIT_INACTIVE_ALIAS_OR_LEGACY": 2
+    }
+  },
+  "activity_surface": {
+    "rows": 234,
+    "counts": {
+      "UNBOUNDED_OR_EXTERNAL": 46,
+      "FINITE": 188
+    }
+  },
+  "notable_profile_decisions": {
+    "my_class": "Preserved and routed to MentorStudentRelation but excluded from Profile 1 as user-approved low priority.",
+    "rune": "Excluded from Profile 1 until active Rune protocol closure is recovered; no fabricated POWERUP_RUNE/SELL_RUNES IDs.",
+    "hero_rep_lock": "Excluded until missing current numeric protocol bindings are recovered/dispositioned.",
+    "market": "Excluded until undefined LOAD_MARKET request identity is reconciled; MARKET_BUY alone is insufficient.",
+    "activity_tutor_dreamworld_flappy": "Later finite occurrence profiles.",
+    "guild_ecosystem": "Profile 1 selects Guild core plus visible persistent Teams/Guild extensions (Campaign, War, rental, drink/tea, ranks, event log, publication).",
+    "study_dorm_villa": "Profile 1 selects the persistent D06 Study/Workshop/Dorm/House/Villa/Library capability owners.",
+    "indiegogo": "Profile 1 selected persistent social/shared-value capability with its own clock profile.",
+    "external_recharge": "Canonical recharge/VIP settlement selected; unavailable external provider adapters may remain inactive. Manual preservation entitlement must be authenticated and must not masquerade as provider-verified evidence.",
+    "seasonal_events": "Preserved in later occurrence profiles, not discarded."
+  },
+  "schema_version": 1,
+  "pass": "509.0",
+  "source_research": "PASS508_INITIAL_RELEASE_PROFILE_DECISION.json",
+  "authority_note": "Promoted from Pass508 unsealed research after Pass509 I6E reconciliation; feature implementations remain individually lifecycle-gated.",
+  "roadmap_graph": {
+    "nodes": 32,
+    "edges": 79,
+    "acyclic": true
+  },
+  "cross_artifact_consistency": {
+    "status": "PASS",
+    "errors": [],
+    "warnings": [],
+    "counts": {
+      "function_rows": 99,
+      "mode_rows": 51,
+      "activity_rows": 234,
+      "capability_records": 83,
+      "dag_nodes": 32,
+      "dag_edges": 79,
+      "selected_profile_records": 57,
+      "selected_or_artifact_unanchored": 0,
+      "selected_anchor_not_reaching_W2": 0
+    },
+    "invariants": [
+      "Pass505 remains authority; Pass508 remains unsealed research.",
+      "Profile1 selects persistent/recurring systems; finite seasonal occurrences are preserved later profiles by default.",
+      "Every Profile1 selected/artifact capability maps to an acyclic graph anchor that reaches W2.",
+      "Later/deferred/inactive capabilities remain explicit in the whole-product capability ledger and cannot silently disappear.",
+      "No guessed numeric MID is introduced for unresolved protocol paths."
+    ]
+  }
+}

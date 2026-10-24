@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "pass": "460.0",
+  "milestone": "R3C",
+  "findings": [
+    "RF-010",
+    "RF-011"
+  ],
+  "local_verdict": "GREEN_LOCAL_SERVER_EVIDENCE_MODEL",
+  "r3_integrated_verdict": "GREEN_LOCAL_FOUNDATION_STILL_RED",
+  "foundation_verdict": "RED_REPAIR_ACTIVE_RF015_AND_R4_R7_REMAIN",
+  "I6": "BLOCKED_UNTIL_R7_GREEN",
+  "client_acceptance": "DEFERRED_TO_W2_NOT_GREEN",
+  "tests": [
+    "capture-disabled bounded-memory",
+    "finite ring/overflow health",
+    "mixed-run/context rejection",
+    "server/client proof separation",
+    "disconnect/stale-health non-quiescence",
+    "client Lua-exception poisoning",
+    "timer-heavy boundedness",
+    "actual realtime opaque lifecycle correlation",
+    "tools/validate_r3c.py"
+  ],
+  "live_deferred": [
+    "real stock-client CLIENT_CONSUMED/Lua-health evidence",
+    "60-second real Wave-S correlated quiescence",
+    "operational capture I/O/load pressure",
+    "EX-05 multi-process realtime ownership"
+  ],
+  "implementation_commit": "76d4b71d205cb5a2b40945be2de06bc3fabd147b",
+  "aggregate_foundation_check": "RED_EXACTLY_1_FAIL_VALIDATE_I5_RF015",
+  "go_compatibility_validation": {
+    "canonical": "go 1.26.0 / toolchain go1.27.1",
+    "disposable_clone": "Go 1.23 compatibility only",
+    "go_test_all": "PASS",
+    "go_vet_all": "PASS",
+    "targeted_race": "PASS"
+  }
+}

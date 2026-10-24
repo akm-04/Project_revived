@@ -1,0 +1,14 @@
+## go version
+go version go1.23.2 linux/amd64
+## exact local focused attempt
+go: go.mod requires go >= 1.26.0 (running go 1.23.2; GOTOOLCHAIN=local)
+exact_rc=1
+## ordinary exact attempt
+go: downloading go1.27.1 (linux/amd64)
+go: download go1.27.1: golang.org/toolchain@v0.0.1-go1.27.1.linux-amd64: Get "https://proxy.golang.org/golang.org/toolchain/@v/v0.0.1-go1.27.1.linux-amd64.zip": dial tcp: lookup proxy.golang.org on 168.63.129.16:53: read udp 172.26.39.229:51527->168.63.129.16:53: read: connection refused
+ordinary_rc=1
+## postgres binaries
+## postgres processes
+root      138709       0  0 23:31 ?        00:00:00 timeout 30s bash -lc set +e E=/mnt/data/ca6_5_evidence; C=/mnt/data/ca6_5_impl/backend {  echo '## go version'; go version  echo '## exact local focused attempt'; cd "$C"; GOTOOLCHAIN=local go test ./internal/application/characterpractice ./internal/application/characterhero ./internal/application/characterpet ./internal/adapters/postgres/characterstore ./internal/archguard; echo exact_rc=$?  echo '## ordinary exact attempt'; go test ./internal/application/characterasset; echo ordinary_rc=$?  echo '## postgres binaries'; command -v psql || true; command -v pg_isready || true; command -v postgres || true  echo '## postgres processes'; ps -ef | grep -E '[p]ostgres|[p]ostmaster' || true  echo '## db env'; env | grep -E '^(DATABASE_URL|PGHOST|PGPORT|PGUSER|PGDATABASE)=' || true } > "$E/exact_native_environment_ca65.log" 2>&1 cat "$E/exact_native_environment_ca65.log"
+root      138710  138709  0 23:31 ?        00:00:00 bash -lc set +e E=/mnt/data/ca6_5_evidence; C=/mnt/data/ca6_5_impl/backend {  echo '## go version'; go version  echo '## exact local focused attempt'; cd "$C"; GOTOOLCHAIN=local go test ./internal/application/characterpractice ./internal/application/characterhero ./internal/application/characterpet ./internal/adapters/postgres/characterstore ./internal/archguard; echo exact_rc=$?  echo '## ordinary exact attempt'; go test ./internal/application/characterasset; echo ordinary_rc=$?  echo '## postgres binaries'; command -v psql || true; command -v pg_isready || true; command -v postgres || true  echo '## postgres processes'; ps -ef | grep -E '[p]ostgres|[p]ostmaster' || true  echo '## db env'; env | grep -E '^(DATABASE_URL|PGHOST|PGPORT|PGUSER|PGDATABASE)=' || true } > "$E/exact_native_environment_ca65.log" 2>&1 cat "$E/exact_native_environment_ca65.log"
+## db env

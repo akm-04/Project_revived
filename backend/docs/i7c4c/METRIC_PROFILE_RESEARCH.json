@@ -1,0 +1,110 @@
+{
+  "status": "ALL11_RECONCILED_SELECTED1010_SUPPORTED_OTHER9_EXPLICIT_GATES",
+  "metrics": [
+    {
+      "id": 1001,
+      "label": "HERO_NUM",
+      "disposition": "REQUIRED_UNAVAILABLE_NOT_ZERO",
+      "gate": "Current versus lifetime/template/instance/duplicate/retired population unresolved"
+    },
+    {
+      "id": 1002,
+      "label": "PET_NUM",
+      "disposition": "REQUIRED_UNAVAILABLE_NOT_ZERO",
+      "gate": "Current/lifetime/template/instance/birth/style population unresolved"
+    },
+    {
+      "id": 1003,
+      "label": "SKIN_NUM",
+      "disposition": "REQUIRED_UNAVAILABLE_NOT_ZERO",
+      "gate": "Complete origin-qualified skin entitlement/count domain including cross-server grants and expiry unqualified"
+    },
+    {
+      "id": 1004,
+      "label": "ACHIEVE_NUM",
+      "disposition": "REQUIRED_UNAVAILABLE_NOT_ZERO",
+      "gate": "Exact per-earned-tier reduction known; 4B covers only3tiers of100014, other32achievements/history/producer profiles unavailable"
+    },
+    {
+      "id": 1005,
+      "label": "AVATAR_FRAME_NUM",
+      "disposition": "REQUIRED_UNAVAILABLE_NOT_ZERO",
+      "gate": "Base+earned+purchased eligible frames required; complete selected origins/expiry count domain unqualified"
+    },
+    {
+      "id": 1006,
+      "label": "AVATAR_NUM",
+      "disposition": "REQUIRED_UNAVAILABLE_NOT_ZERO",
+      "gate": "Base+derived+owned eligible avatars; complete selected origins/domain unqualified"
+    },
+    {
+      "id": 1007,
+      "label": "FORCE",
+      "disposition": "REQUIRED_UNAVAILABLE_NOT_ZERO",
+      "gate": "Ranking table AllAP vs top5 label exists but no proof metric1007 binds subtype8, population/duplicate/lifetime and final producer completeness unqualified"
+    },
+    {
+      "id": 1008,
+      "label": "STAR",
+      "disposition": "REQUIRED_UNAVAILABLE_NOT_ZERO",
+      "gate": "Rank subtype10 text totalstars suggests sum but no proof1008 binding/population/retirement/duplicate semantics"
+    },
+    {
+      "id": 1009,
+      "label": "AWAKE_NUM",
+      "disposition": "REQUIRED_UNAVAILABLE_NOT_ZERO",
+      "gate": "Rank subtype12 text awakenedgirls does not freeze1009 boolean/stage/template/instance/lifetime population"
+    },
+    {
+      "id": 1010,
+      "label": "WIVE_NUM",
+      "disposition": "IMPLEMENT_EXISTING_TYPED_OWNER_REDUCTION",
+      "gate": "RESOLVED_SELECTED_CURRENT_CANONICAL_LIBRARY_MARRIED_POPULATION"
+    },
+    {
+      "id": 1011,
+      "label": "CREATE_TIME",
+      "disposition": "REUSE_UNCHANGED",
+      "gate": "REUSE_QUALIFIED_I7B6B_CANONICAL_PLAYER_CREATED_AT_UNIX_SECONDS"
+    }
+  ],
+  "source": "person_display_words ranges; enum1001..1011; PersonDisplay/SelectShowType pass server dictionary verbatim. is_random/range_random_nums is presentation data, never player authority.",
+  "exact_boundaries": "1010 counts current canonical married Hero instances via accepted Library MarriedHeroCountTx; no new lifetime or retired history claim. 1011 unchanged.",
+  "ranking_title_origins": [
+    100001,
+    100059,
+    100060,
+    100061,
+    100062,
+    100063,
+    100064,
+    100065,
+    100066
+  ],
+  "ranking_required_profiles": [
+    "AP title100001",
+    "Girls title100059..100062",
+    "Skins title100063..100066"
+  ],
+  "ranking_source": {
+    "load_mid": 301,
+    "request": "rank_types subtypes",
+    "response": "rank_list[].rank_type/rank_info.my_rank/rank_info.rank_info",
+    "presentation": "rank.lua subtype8 AllAP nonrealtime;37Girls/38Skins realtime; title604800 duration"
+  },
+  "ranking_unresolved": [
+    "Metric-to-rank producer binding",
+    "Scope/server/global eligible population and freshness cutoff",
+    "Tie order and deterministic rank positions",
+    "Settlement calendar/generation/reset/timezone",
+    "Whether604800title duration starts settlement/claim/refresh and oldwinner revocation",
+    "Immutable snapshot/replay/grant identity and exact selected title mapping"
+  ],
+  "ranking_activation": "BLOCKED_REQUIRED_4C_PROFILE; no Ranking table/job/routes/rewards invented. Nine selected title origins remain required before full4C/6/parent exit.",
+  "not_claimed": [
+    "Recovered original backend metric/rank algorithm",
+    "Full11 metric availability",
+    "Full4C product closure",
+    "Ranking settlement or title producer qualification"
+  ]
+}

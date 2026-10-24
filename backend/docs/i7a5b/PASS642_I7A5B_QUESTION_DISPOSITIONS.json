@@ -1,0 +1,57 @@
+{
+  "schema": "gxb-question-disposition/v1",
+  "stage": "I7A-5B",
+  "questions": [
+    {
+      "id": "JSON140_SCOPE",
+      "status": "RESOLVED_SCOPED_DESIGN_QUALIFIER",
+      "decision": "Preserveordinary140, selectexplicitfiniteJSON8KiB+fields/caps; noproduceractivation",
+      "evidence": [
+        "B-R06",
+        "B-R08",
+        "B-R10",
+        "B-R11",
+        "00_PASSMAP/PASS642_I7A5B_I7A1_STRUCTURED_LENGTH_QUALIFICATION.json"
+      ]
+    },
+    {
+      "id": "CANONICAL_PRODUCER_READINESS",
+      "status": "RESOLVED_BASELINE_ALL8_ABSENT",
+      "decision": "Defaultnamedtypedports unavailable; no fakeowner; currentcodecs/plannedfixtures areinactiveboundarysupport",
+      "evidence": [
+        "B-R13",
+        "00_PASSMAP/PASS642_I7A5B_D14_EXTENSION_RECORD.json"
+      ]
+    },
+    {
+      "id": "PARENT5_ACCEPTANCE_SCOPE",
+      "status": "RESOLVED_SCOPED_PROPOSED_NORMAL_DESIGN_SELECTION",
+      "decision": "Afteraccepted5B implementation/evidence AND explicitparent composition/realityreview, I7A-5 mayclose scopedchanneltext+finiteinactiveprojectionboundary ifallownergates truthful. RecordliveTEAM/report/scratch/camp falseandfutureactivationdependencies; no automatic5B->parent/10/E/W2acceptance. Untilthen parentfalse.",
+      "evidence": [
+        "B-R18",
+        "00_PASSMAP/PASS642_I7A5B_IMPLEMENTATION_CONTRACT.json"
+      ]
+    },
+    {
+      "id": "PROVIDER_OWNED_REMAINING_QUALIFICATIONS",
+      "status": "DEFERRED_NOT_BLOCKING_INACTIVE_BOUNDARY_IMPLEMENTATION",
+      "decision": "Originalserverpayloadbound/Peakwinencoding/cardinalities/WarCampcamprecipients/legacyreportnamespaceseachremainactivation blockers forlateractualowner, notlicenseforcurrentrelay",
+      "evidence": [
+        "00_PASSMAP/PASS642_I7A5B_STRUCTURED_SCHEMA_CONTRACT.json"
+      ]
+    },
+    {
+      "id": "36863_TRIGGER",
+      "status": "BOUNDED_UNKNOWN_PRODUCER_GATED",
+      "decision": "Remainunknown/inactive; no inventedtrigger",
+      "evidence": [
+        "B-R16"
+      ]
+    }
+  ],
+  "blocking_design_questions": [],
+  "activation_questions_remain": true,
+  "pass": "642.0",
+  "selected_status": "SELECTED_RESEARCH_DESIGN_WITH_VALIDATED_NORMAL_SEAL_NOT_IMPLEMENTED",
+  "working_recovery_reference": "CP90 exact COLD checkpoint/source/probe caches"
+}

@@ -1,0 +1,36 @@
+{
+  "contract_id": "C5D_ARENA_SEASON_MODE_V1",
+  "version": 1,
+  "stage": "I7C-5D",
+  "classification": "SOURCE_FACT + INHERITED_CONTRACT + LABELLED_PRIVATE_SERVER_POLICY (C5D_ARENA_PRIVATE_POLICY_V1), not recovered original-server behaviour where marked",
+  "owner": "Arena (ARENA_REGION: competition root, season player state, defense lineup, offered opponent, open matches, missions, exchange awards, records, partner usage, season settlements). Combat, Character, PlayerDisplay, I5 Grant/Mail, Achievement and Content keep their ownership.",
+  "rules": [
+    "One competition over all logical servers of the deployment (source CROSS_SERVER_45_DAY_SEASON; same shared-ladder decision as 5C). Mutation serializes on the Arena competition root (lock 603) after the actor fence (315) and before Combat (609), I5 Mail (610), Achievement (620) and I5 values (700+); player rows lock in player order.",
+    "Times are GMT+8. Seasons repeat every 45 days from misc region_arena_star_time 20221028 05:00 (user decision 2026-10-20): season n (n >= 1) opens anchor + 45(n-1) days at 05:00 and ranked play closes at 00:00 of its 45th day (source end 20221212 00:00); between close and the next opening INFO answers is_close 1. INFO count = n. The client season window prints the fixed misc dates (no server field).",
+    "Function 37 opens at player level 60 (FunctionOpenTable type 6) with at least 5 owned girls; checked at first INFO, which creates the player's season row.",
+    "Levels: region_arena_level star bounds (s <= 2 -> 1; star[L-1] < s <= star[L]; s >= 95 -> 26 Challenger). A ranked attack win adds 1 star, 2 when the attacker's level is below 20 and the attack win streak before this win is at least 4 (rule 3); stars cap at 95.",
+    "A ranked loss removes 1 star except: stars <= 10 never drop (region_arena_fail_protect); Challenger (95) never drops; a player at or above 90 never drops below 90 (region_arena_upgrade_protect).",
+    "Defense (rule 14): a defender's third consecutive successful defense adds 1 star and restarts the count; the third consecutive failed defense removes 3 stars (same floors) and restarts the count.",
+    "Practice (is_practice / is_test 1, rule 13): no stars, points, streaks, coins, missions, statistics, records or achievements.",
+    "Lord points (Challenger only, rules 6-7): POLICY formula. A Challenger attacker's win adds min(region_add_integral_limit 50, region_base_integral 10 + floor(region_count_param1 0.1 x max(0, defender points - attacker points))); a Challenger attacker's loss removes the same formula with the difference reversed, floored at 0. Defenders' points are unchanged. region_count_param2 0.01 has no inferred role.",
+    "Daily (rule 12, misc region_arena_reward_limit/victory/fild): the first 10 ranked fights per day (day starts 05:00) pay region_coin 50 for a win, 25 for a loss, through I5 at settlement.",
+    "Matching (POLICY, user decision 2026-10-20 widen): MATCH offers one opponent among other season players with a saved defense: ranked picks from the star band [0.8 s, 1.2 s] (region_mate_param1/2), widening by region_mate_infuluence_param 0.1 on each side until non-empty, finally anyone; practice picks from anyone. The pick is deterministic per player, season and match counter.",
+    "Battle: START (772) records the open match for the offered opponent and freezes the defender lineup (5 table ids, pet, season awards); answers is_back_battle 1 so the client sends FIGHT (773). FIGHT freezes one 5A attempt (CampaignType REGION_ARENA 45, battle MapBattleID.ARENA) from the attacker formation (1..5 distinct girls by table id) and the frozen defender lineup; the resolver applies season awards, then the client's formatRegionArenaHeros/formatRegionArenaPets balancing (level 100, grade 16, super girls grade 1, inscriptions cleared, enchant levels 0); timeout: more living girls wins, then more damage (engine getSuperArenaBattleStar).",
+    "FIGHT answers within 15 s (client JSON timeout 20 s); still resolving answers battle_report [] so the client re-sends the same FIGHT after 3 s; resolution continues detached and the reconcile provider settles it regardless.",
+    "STOP (779) and an open match left more than 10 minutes without FIGHT (user decision 2026-10-20) settle as an attacker loss without a battle report: stars/streak/statistics only, no coins, no mission progress, defender unchanged.",
+    "Missions (POLICY): 3 slots from region_mission by weight (distinct ids, deterministic per player and draw); progress from ranked attacks (kills, damage, current attack win streak, wins); a completed mission is claimed for king_coin; claiming or giving up empties the slot; empty slots refill together once now >= mission_time + 72000 (RegionArenaWindow); mission_time is the last change.",
+    "Exchange (848): exchange_type 1 star +1 (refused at full star), 2 awaken (refused when the girl cannot awaken or already is), 3 summon a girl the player does not own and has not summoned; target by base table id; cost region_exchange.cost[times] clamped to the last entry, paid in king_coin through I5; times and awards are per season.",
+    "Season settlement at close (settle-before-mutate): every player with at least one ranked fight in the season gets REGION_ARENA_MAIL by final level from region_arena_reward (region_coin, mana, items; frame 120001216 at level 26; skin pack 50009473 from level 15); the season rank 1 Challenger also gets item 110006001 (misc region_arena_champion_reward). Season rank order: stars, then points, then earlier reach, then player id. The next season starts everyone at 0 stars/points with no awards or exchanges (user decision 2026-10-20 full reset); king_coin and region_coin balances persist.",
+    "History (Q_ARENA_HISTORY_WINDOW, POLICY): INFO/769 statistics (total_fight, win_times, keep_win_times, point, partner usage by table id: fights, wins, damage, kills) are per season from ranked attacks; records keep the 20 newest ranked fights per player (attack and defense, viewer-side win); immutable season settlement rows are retained; PlayerDisplay 1829 stays unactivated.",
+    "Achievement 100003 'Consecutively win %d times in Arena' 5|15|30 is observed from the ranked attack win streak (C5B/5C streak persistence, lock 620, no revocation).",
+    "Ranking: 301 rank_types 6 returns the top 50 of the season order with level, star, point, total_fight, win_times, server and guild display; 775 has no window caller and 774/778 (client-resolved path) are refused.",
+    "Defense: 770 saves exactly 5 distinct girls by table id (own or summoned this season) and an optional own pet. A table id owned in several copies resolves to the strongest copy (star, then level, then lowest partner id) at freeze time (POLICY)."
+  ],
+  "private_policy_id": "C5D_ARENA_PRIVATE_POLICY_V1",
+  "user_decisions_2026_10_20": [
+    "Seasons repeat every 45 days from the 2022-10-28 source season (season number counted from it)",
+    "Full reset to Lv.1 at season start (stars, points, awards, exchanges); king coins kept",
+    "Matching widens until an opponent with a defense is found",
+    "An abandoned started fight counts as a loss after 10 minutes"
+  ]
+}

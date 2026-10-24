@@ -1,0 +1,21 @@
+{
+  "schema": "gxb-i7a5b-implementation/v1",
+  "base_passmap_sha256": "ecf1c20ac133e14f8174129bf1a485e7a05bc59dc489c7608fcfe5ca604916d7",
+  "base_backend_sha256": "e0ff7628b1c226256b0138ddba011cbdbc5f7485f26a680931877e8444e9e456",
+  "direct_user_implementation_authorized": true,
+  "scope": "9finite source-shaped variants for8structuredtypes; typed owner/read/privatepublication boundaries, all productionproducers inactive",
+  "new_contract_qualifications": [
+    "Exact numeric work bounds: token64bytes/exponentabs400 before rational validation",
+    "Reject unpaired UTF16 JSON escapes; preserve emptyScratch arrays separatelyfromnil",
+    "Ownerreceives sameTx+sameDB-authoritative observedAt; positive contentrevision and canonicalevent distinctfromdisplayroom0",
+    "Role-aware subtype validator addedinside oneMID32783 registry; finitefields only"
+  ],
+  "migrations_changed": false,
+  "live_provider_activation": false,
+  "unknown36863_activation": false,
+  "physical_stock_claimed": false,
+  "test_status": "FROZEN_EXACT_GATE_PENDING",
+  "acceptance": "NONE_CANDIDATE_METADATA_ONLY",
+  "parent_closure": "Pending explicit qualified parent review and normal seal",
+  "layer_correction": "Finite protocol-owned wire structs map explicitly at stockruntime adapter edge to application-owned semantic types. I0/D14matrix unchanged; no protocol->application/domain import."
+}

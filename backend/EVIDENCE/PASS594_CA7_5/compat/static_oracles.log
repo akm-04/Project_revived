@@ -1,0 +1,92 @@
+===== python3 tools/check_dependency_policy.py =====
+DEPENDENCY POLICY: PASS
+resolved_go_modules 16 qualified_candidates 5
+
+===== python3 tools/check_content_generation_policy.py =====
+CUMULATIVE CONTENT GENERATION POLICY: PASS
+
+===== python3 tools/generate_resolved_sbom.py --check =====
+RESOLVED SBOM: PASS
+
+===== python3 tools/check_sqlc_generation_policy.py =====
+SQLC GENERATION POLICY: PASS
+
+===== python3 tools/verify_oracles.py --root "$GXB_ORACLE_ROOT" =====
+PASS current_src64: all-assest-rechecked-1.zip
+PASS v1_pass353: gxb-backend-v0.65.2-pass353.0-portable-dev1-V1-Final.zip
+PASS old_client: gxb-old-client-v1.164.0-research-corpus.zip
+PASS native_apk: latest_apk-smali-full.zip
+PASS pass222_probe: prep-apk-pass222-window-probe.zip
+ORACLE VERIFY: PASS
+
+===== python3 tools/check_i2_oracle_wire.py "$GXB_ORACLE_ROOT" =====
+I2 ORACLE WIRE CHECK: PASS
+current Backend/mid/functions + APK QuickHTTP hashes and frozen wire facts verified
+
+===== python3 tools/check_i3_oracle_bootstrap.py "$GXB_ORACLE_ROOT" =====
+I3 ORACLE BOOTSTRAP CHECK: PASS
+verified current MID18/MID1 selection, full/existing-owner gate, player-region formula, stock switch teardown and token replacement
+
+===== python3 tools/check_i4_oracle_wave_s.py "$GXB_ORACLE_ROOT" =====
+I4 ORACLE WAVE-S CHECK: PASS
+verified current src_64 UpdateScene MID20480/MID2 + public MID7/MID2864 + MID1 log_url/server_time/default sidebands + room discovery/TCP_LOGIN/room-entered/heartbeat/reconnect + 20018/1304/Lua truthiness; Pass353 corroborates bootstrap/realtime shapes only
+
+===== python3 tools/check_i5_oracle_player_core.py "$GXB_ORACLE_ROOT" =====
+I5 ORACLE PLAYER-CORE CHECK: PASS
+verified current src_64 player/story/mail/stack/task/redeem facts; old-client MID230 stability; Pass353 mechanisms corroborative only
+
+===== python3 tools/check_i6a_source_oracle.py "$GXB_ORACLE_ROOT" =====
+I6A SOURCE ORACLE CHECK: PASS
+verified candidate-bound current/historical client hashes and reload/time source shape; no server reachability/reset semantics inferred
+
+===== python3 tools/check_i6b_source_oracle.py "$GXB_ORACLE_ROOT" =====
+I6B SOURCE ORACLE CHECK: PASS
+verified current/historical MID229/MID234/bootstrap/error-path hashes and source shape; no Activity mechanics/reset semantics inferred
+
+===== python3 tools/check_i6c_source_oracle.py "$GXB_ORACLE_ROOT" =====
+I6C SOURCE ORACLE CHECK: PASS
+verified Guild MID/request/presentation/policy/message source shape in current + historical corpora; no unrecovered server calendar/succession semantics inferred
+
+===== python3 tools/check_ca3_3_source_oracle.py "$GXB_ORACLE_ROOT" =====
+CA3-3 SOURCE ORACLE CHECK: PASS
+exact current src_64 c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf corroborates Pet progression MIDs, stock wire shapes, evolution/EXP/skill progression sources, and checked-in generated content pins
+
+===== python3 tools/check_ca4_1_source_oracle.py "$GXB_ORACLE_ROOT" =====
+R4A CONTENT GENERATION: PASS revision=ae577b8c9b9770f1d7a7dcf8335d9d36d27a15a687a12a5e5b01d97eca124116 resources=5556 players=100 functions=99 heroes=568 pets=54 equipment=1176 pet_acquisition=27
+CA4-1 SOURCE ORACLE CHECK: PASS
+exact current src_64 c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf -> roots=604 closure=1176 recipe_nodes=797 ordered_edges=1934 repeated_recipes=29; generated CA4-1 catalog is byte-regenerable and all closure items remain I5-qualified
+
+===== python3 tools/check_ca7_3_source_oracle.py =====
+CA7-3 SOURCE ORACLE CHECK: PASS
+current/old client identities pinned; MID60/61/2979 wire/state axes, timed expiry, ordinary combat axis, Pet reachability split, and CA7-4 coexistence preserved
+
+===== python3 tools/check_ca7_4_source_oracle.py =====
+CA7-4 SOURCE ORACLE CHECK: PASS
+current oracle identity pinned; MID68/69 wire, paid LIVE costs/item, economy refresh/retry behavior, positional reload projection and candidate translation preserved
+
+===== python3 tools/check_ca7_5_source_oracle.py =====
+CA7-5 SOURCE ORACLE CHECK: PASS
+current/old oracle bytes pinned; MID1893/1894/1895 wire, callback, reachability, identity and candidate translation preserved
+
+===== python3 tools/generate_mid_registry.py --root "$GXB_ORACLE_ROOT" --check =====
+MID REGISTRY: PASS source_sha256=026a20b29d97624979777a68c64c749254031604057ff42aa8f8254c3e35b5af assignments=1213 unique=1211
+
+===== python3 tools/generate_pass353_wire_fixtures.py --root "$GXB_ORACLE_ROOT" --check =====
+PASS353 WIRE FIXTURES: PASS cases=5
+
+===== python3 tools/generate_kernel_querytext.py --check =====
+KERNEL QUERYTEXT: PASS sha256=74ad9accee063e77323a2eb4a69df394bdcb331ce88e3d789864ffbc904b7511
+
+===== python3 tools/generate_content_querytext.py --check =====
+CONTENT QUERYTEXT: PASS sha256=9709338916a5e4edd9d24f741815a77e0723bb89401574ed87dce9954a722a0c
+
+===== python3 tools/generate_character_querytext.py --check =====
+CHARACTER QUERYTEXT: PASS hero_sha256=74780e7a69490f2a68a9c5f0fe4b662059f50fedd94e8f05798e074141235c6b pet_sha256=07779a3b3acc6ae1ae1c065ffff81dccc3a7477193c5b339d07d06d537c0fd81 preset_sha256=649a7d71bf475e6710bdd28f111a364cc208b5600270e88338fda2d28fb37cd6 practice_sha256=bca19b6a86b90f87e1ba26d994c06929d58fa5bba2b9068ff3cb3cdae66570bf
+
+===== python3 tools/check_schema_query_ownership.py =====
+SCHEMA/QUERY OWNERSHIP: PASS
+
+===== python3 tools/validate_foundation_trace.py =====
+FOUNDATION TRACE: PASS (10 historical lifecycle records; 24/24 RF findings dispositioned; R0-R7 accepted Pass489; I6 accepted Pass509; 6 future extension limits remain explicit; W2 separate)
+
+TOTAL_FAILURES=0

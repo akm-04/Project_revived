@@ -1,0 +1,7 @@
+COMPATIBILITY_COPY_ONLY remaining individually-run race packages:
+$ go test -race ./internal/content/registry -count=1
+ok   gxb.local/backend/v2/internal/content/registry 26.536s
+$ go test -race ./internal/domain/character -count=1
+ok   gxb.local/backend/v2/internal/domain/character 1.009s
+$ go test -race ./internal/projection/pet -count=1
+ok   gxb.local/backend/v2/internal/projection/pet 1.010s

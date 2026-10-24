@@ -1,0 +1,88 @@
+{
+  "status": "I7C5A_IMPLEMENTATION_AMENDMENTS_RECORDED_WITHIN_C5A_POLICY",
+  "policy_id": "C5A_COMBAT_INPUT_ATTEMPT_RESULT_FOUNDATION_V1",
+  "plan": "docs/i7c5a-combat-foundation/I7C5A_PLAN.json (committed 5dde517, unchanged as history)",
+  "amendments": [
+    {
+      "id": "M1_PACKAGE_LAYOUT",
+      "plan_text": "internal/combat/corpus, internal/combat/resolver",
+      "implemented": "internal/content/combatcorpus (embedded generated corpus), internal/adapters/combatresolver (Lua VM, only in the worker), internal/adapters/combatworker (process launcher), internal/application/combat, internal/domain/combat, internal/adapters/postgres/combatstore, cmd/gxb-combat-worker",
+      "reason": "archguard denies new top-level internal layers; the existing content/adapters/application/domain layers express the same ownership without registering a new layer.",
+      "classification": "IMPLEMENTATION_DECISION"
+    },
+    {
+      "id": "M2_NO_PUBLICSTATS_EXTRACTION",
+      "plan_text": "S6 extract the validated owner gather from HeroTx/PetTx",
+      "implemented": "Combat calls the unchanged publicstats HeroTx/PetTx (owner view) for the 3B facet and the existing stock roster composers (characterstore Hero/Pet bootstrap projections with every owner overlay) for source-shaped params, inside the caller's CoherentReadScope. publicstats source bytes are unchanged.",
+      "reason": "Both are existing qualified read paths over the same snapshot; extraction would change accepted 3B code without adding a guarantee D1 needs (single coherent scope, no foreign SQL, no reader locks).",
+      "classification": "IMPLEMENTATION_DECISION"
+    },
+    {
+      "id": "M3_ENTROPY_ROOT_NOT_PERSISTED",
+      "implemented": "Attempts store only the entropy key version. START derives the root once to fail closed on a missing key; Resolve re-derives it from the key ring.",
+      "reason": "A persisted root would let a database reader precompute an unresolved fight; the policy already keeps retired keys for reconstruction.",
+      "classification": "IMPLEMENTATION_DECISION"
+    },
+    {
+      "id": "M4_TWICE_AWAKE_STAGE_PROVIDER",
+      "discovery": "No roster overlay emits twice_awake_stage; NormalHero/SuperHero.populate_ default it to 0 (SOURCE_FACT NormalHero.lua:174).",
+      "implemented": "The materializer sets twice_awake_stage from the Character raw awakening observation (Known, same state version, pinned content/instant), refusing START otherwise.",
+      "reason": "D4: a missing provider must not become a default value.",
+      "classification": "IMPLEMENTATION_DECISION_ON_SOURCE_FACT"
+    },
+    {
+      "id": "M5_SUPER_EQUIP_ENHANCE_TABLE",
+      "discovery": "SuperHero.getEquipAttr -> Item.getEnhanceEquipAttrByLevel reads tables.superEquipEnhance for enhanced Super equipment (Item.lua:110); the research table trace omitted it.",
+      "implemented": "The corpus table closure is computed from every corpus module (utils.lua excluded as a UI helper root) instead of a fixed list: 45 tables including super_equip_enhance. Qualified by the Super Hero equipment-21 differential.",
+      "classification": "SOURCE_FACT"
+    },
+    {
+      "id": "M6_TEXT_TABLE_PARSE",
+      "discovery": "The research TSV parse used csv quoting; source TableParser.decryptParse splits lines, trims with Lua %s and splits on tabs.",
+      "implemented": "Generator reproduces the Lua rules exactly. Differential against the research rows: only trailing empty fields and 15 item desc2 strings with embedded quotes differ (research mangled quotes).",
+      "classification": "SOURCE_FACT"
+    },
+    {
+      "id": "M7_FENLIER_SERVER_INCOMPATIBLE",
+      "discovery": "Fenlier.init calls initAngerProgress (client WindowManager) unconditionally; referenced only by monster rows 12030201/12030204.",
+      "implemented": "Recorded and asserted by the A03 sweep (678/679 referenced classes construct). Not reachable by 5A TEMPLATE kinds (Partner/Pet params). Monster sources remain mode-owned.",
+      "classification": "SOURCE_FACT; bounded UNKNOWN for the owning mode leaf"
+    },
+    {
+      "id": "M8_VIRTUAL_CLOCK",
+      "implemented": "os.time() returns the frozen decision instant (arguments refused); os.clock() returns 0 (only source use reseeds a fighter-local stream, Fububanzang.lua:57).",
+      "classification": "IMPLEMENTATION_DECISION within SNAPSHOT_ONLY_ADAPTERS_V1"
+    },
+    {
+      "id": "M9_STORE_SQL",
+      "plan_text": "combatstore with generated queries",
+      "implemented": "Hand-written owner SQL in combatstore, as in rankingstore; schema/query ownership guard passes. Append-only triggers on snapshots/resolutions/report blobs and an attempt transition guard enforce immutability in PostgreSQL.",
+      "classification": "IMPLEMENTATION_DECISION"
+    },
+    {
+      "id": "M10_REPORT_CONTEXT",
+      "implemented": "The report blob is BattleCreateReport.writeReport output plus hero_collect_attr[player] (all 49 attr types) and zhuge_book_skill_num[player], the server-wrapper keys NormalHero/SuperHero read on ReplayReport.",
+      "classification": "STRONG_INFERENCE from the replay readers; JSON byte compatibility with original cjson is UNKNOWN"
+    },
+    {
+      "id": "M11_CLOSE_UNRESOLVED_ATTEMPT",
+      "discovery": "Reality review of F1: a PERMANENT_FAILED attempt stayed STAGED forever and, with one unresolved attempt per locator and TERMINAL requiring a resolution, blocked its locator permanently.",
+      "contract_basis": "Pass418 attempt_record lists resolution_id/report_blob_id as optional and resolver_status NOT_REQUIRED; modes define supersession/expiry explicitly. F1 was stricter than the inherited envelope.",
+      "implemented": "Attempt.Close and Service.CloseTx: inside the mode transaction, under the rank-609 locator lock, a PERMANENT_FAILED attempt or one at/after its result deadline ends TERMINAL without settlement (an expired RESOLUTION_READY attempt keeps its resolution hash); same semantic receipt replays. Schema checks restated per state plus resolution <=> READY. TerminalTx replay refuses an attempt closed under a different kind.",
+      "affected_consumers": "Every mode leaf 5B..5F (expiry/supersession policy remains mode-owned).",
+      "requalification": "F1 superseded; F2 freeze and full exact R2 qualification.",
+      "classification": "IMPLEMENTATION_DECISION aligned to inherited Pass418 contract"
+    },
+    {
+      "id": "M12_RANDOM_EXACT_INTEGER_ARGUMENTS",
+      "evidence": "Every math.random bound and math.randomseed seed in the corpus is an integer expression (#list, constants, math.ceil, tonumber(os.time()), seed_ counter with os.clock()=0).",
+      "implemented": "Non-integer or non-finite bounds/seeds raise a deterministic PERMANENT failure instead of guessing Lua 5.1 truncation versus LuaJIT real semantics.",
+      "classification": "IMPLEMENTATION_DECISION; original runtime semantics for fractional arguments UNKNOWN and unused"
+    },
+    {
+      "id": "M13_CORPUS_PINNED_PER_ATTEMPT",
+      "implemented": "An attempt resolves only with the corpus it was started under; after a corpus upgrade an unresolved older attempt fails PERMANENT and is closed by the mode (M11). Historical reports stay readable from persisted bytes.",
+      "classification": "IMPLEMENTATION_DECISION"
+    }
+  ]
+}

@@ -1,0 +1,47 @@
+{
+  "full_node_path": "ROOT/I7/I7C/I7C-2/I7C-2C",
+  "sealed_base": {
+    "pass_id": "689.0",
+    "artifact": "gxb-backend-pass-689.0-passmap.zip",
+    "filename": "gxb-backend-pass-689.0-passmap.zip",
+    "path": "/home/akm/Chatgpt/2026-10-09/files-mentioned-by-the-user-additional/outputs/gxb-backend-pass-689.0-passmap.zip",
+    "sha256": "e9bf78821d56247c38bc55be26c4aac52c73d771b2db5391f76497b85e51ec40",
+    "bytes": 301972772,
+    "status": "NESTED_CRC_HASH_FRESH_HOT_PRESEAL_COLD_DEEP_ZERO_REGENERATION_DRIFT_PASS"
+  },
+  "accepted_backend_sha256": "cf5e1ae2bf2735d00daf81c3c614ed37ec8f037aeeb0c2891a952d9d6accccf6",
+  "working_backend_sha256": "cf5e1ae2bf2735d00daf81c3c614ed37ec8f037aeeb0c2891a952d9d6accccf6",
+  "status": "WORKING_RESEARCH_AND_DESIGN_PROPOSAL_NOT_FROZEN",
+  "product_implementation_started": false,
+  "product_gate_credit": false,
+  "routes": [
+    {
+      "capability": "Dorm social visits/random visit/praise/comments/ranking and envelope interactions",
+      "route": "I9N_DORM_SOCIAL and named social/ranking owners; no ownership in DormHouse or scope expansion from window links"
+    },
+    {
+      "capability": "House naming/hiding",
+      "route": "Retained I9N Dorm core presentation/privacy operations; independent of selected growth/equipment/villa raw provider; read projection must respect existing canonical metadata when such owner route activates"
+    },
+    {
+      "capability": "Furniture crafting/material/blueprint/key drop acquisition",
+      "route": "Existing qualified I5 grants/material exchange plus later Workroom/Campaign/event producers; do not fabricate their rewards or accept them from seeded prerequisite fixtures"
+    },
+    {
+      "capability": "Campaign clear -> function unlock71..74",
+      "route": "Canonical Player function read reused; actual campaign result producer is later named gameplay owner/integration. Current pure-level evaluator is insufficient. Retain explicit dependency without broad whole-I8 build prerequisite or campaign bypass"
+    },
+    {
+      "capability": "dorm_furniture_cool_time43200",
+      "route": "Packaged parameter unbound/unconsumed in inspected current/old callers; retain inactive-profile unknown, do not silently activate SAVE cooldown"
+    },
+    {
+      "capability": "Alternate translation2/partner1 profiles",
+      "route": "Retained alternate corpus; English selected current rows and HeroTable partner/super_partner govern this profile; no automatic adoption of unrelated duplicate names"
+    },
+    {
+      "capability": "Villa title entitlement issuance/final battle stats",
+      "route": "I7C-6/I7C-3B from genuine typed facts; 2C alone does not accept these consumers/parent"
+    }
+  ]
+}

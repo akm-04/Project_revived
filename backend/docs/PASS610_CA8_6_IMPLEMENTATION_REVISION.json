@@ -1,0 +1,69 @@
+{
+  "schema_version": 1,
+  "pass": "610.0",
+  "stage": "CA8-6",
+  "status": "LOCAL_ACCEPTANCE_CANDIDATE",
+  "parent_backend_archive_sha256": "999c6bac69c85db2eeb0a7ec37130b3567ac2a1d4b967483aa35c4a43cb377a6",
+  "parent_git": "12ed1007576e3b5174e32067dfe5f966d5c74762",
+  "pass609_authority_sha256": "0fd2d90fe76cb098e5eb2ff581a166ecc06a785db80fdf5933cf98fed047403b",
+  "pass609_research_seal_sha256": "5957812c8d76c80c7ec58498c9ff961b6a4b83d4ddc541da63afd6bdf6b1136c",
+  "pass609_implementation_contract_sha256": "a2b5ecc09386e50b01b81f811df18b58cc151f87f053e45fdf4d7da3c0b256bb",
+  "pass609_acceptance_matrix_sha256": "fd9d9a1f52bc31521a2f08d0ce4ba766404f17c2b6a726f1707a272c36317d41",
+  "implementation_revision_algorithm": "sha256(sorted(path UTF-8 || NUL || final file bytes) over CA8-6 implementation/test/tooling footprint)",
+  "implementation_revision_sha256": "707f38b7690fe098ae64eac0b087ab96352bb10e90aee5c6ab5e17274ff6e34b",
+  "changed_implementation_files": [
+    {
+      "path": "internal/application/characterasset/public_showcase.go",
+      "sha256": "8ad966f00b668a0058018d33033c75b02aa521c7794e6fc53e9db6eb5c73c93c",
+      "bytes": 3564
+    },
+    {
+      "path": "internal/application/characterasset/public_showcase_test.go",
+      "sha256": "15cde0217aea954c75631216fae19060e98d971ec4f3ba20a134caffe5eac8e2",
+      "bytes": 10430
+    },
+    {
+      "path": "internal/archguard/ca8_6_contract_test.go",
+      "sha256": "7afb5a309423e907f6da7f51e0b35cb1480d08094b1d63343b2de06f83025173",
+      "bytes": 3719
+    },
+    {
+      "path": "tools/check.sh",
+      "sha256": "e9321852d08004b9f0dac6f7b723f9eb21e10a6a57618a4d69d86fda2bc68020",
+      "bytes": 4181
+    },
+    {
+      "path": "tools/check_ca8_6_source_oracle.py",
+      "sha256": "f741f79f075a5a7a0fe7888d54ca360510e11da505a1279d7dcd5f972081150a",
+      "bytes": 7947
+    },
+    {
+      "path": "tools/validate_ca8_6.py",
+      "sha256": "7a3acca34dc9c1601ce3bd3eed3e58f2d38b4e5e48c2a3c5e6f29d6f1b694978",
+      "bytes": 5552
+    }
+  ],
+  "scope": [
+    "typed OWNED-only Hero/Pet public-showcase Character facet over OwnedCompositeBuilder",
+    "caller-owned CoherentReadScope and exact persistent HeroRef/PetRef identity",
+    "base-required plus preserved optional Equipment/Practice/Appearance ProviderObservations",
+    "Hero skills explicit status-only UNAVAILABLE_UNQUALIFIED; Pet Skills/Birthday/IsShow remain base facts",
+    "current + V1.164 source-oracle guards and architecture/static validation"
+  ],
+  "non_changes": [
+    "no schema/migration/SQL/new durable owner",
+    "no MID/wire/public-profile selection/privacy/publication/cache/realtime",
+    "no Guild Girls Offer/Tutor-BFF business logic",
+    "no new transaction/lock/receipt/clock/ActiveRevision discovery",
+    "no Bookmark/later-owner assignment",
+    "no final force/stats/CombatSnapshot/hash/RNG/resolver/entity output",
+    "no dependency pin/toolchain change"
+  ],
+  "evidence": {
+    "exact_candidate_execution": "ENVIRONMENT_BLOCKED_GO_1_27_1_DOWNLOAD_UNAVAILABLE",
+    "compatibility_copy": "GREEN_FOCUSED_RACE_VET_FULL_94_PACKAGE_REGRESSION_APPLICATION_RACE",
+    "postimplementation_reality_check": "GREEN",
+    "classification": "LOCAL_STATIC_PLUS_EXACT_SOURCE_ORACLE_PLUS_COMPATIBILITY_COPY_ONLY; CA8-9/CA8-E/W2 remain open"
+  },
+  "migration_high_water": "00030_ca7_2_appearance_foundation.sql"
+}

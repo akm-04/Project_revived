@@ -1,0 +1,45 @@
+{
+  "schema": "gxb-i7a5b-implementation-contract/v1",
+  "stage": "I7A-5B",
+  "base_backend_sha256": "e0ff7628b1c226256b0138ddba011cbdbc5f7485f26a680931877e8444e9e456",
+  "implementation_started": false,
+  "product_accepted": false,
+  "scope": "Finite typedstructuredprojection codecs/selectors, explicitinactiveownerseams/gates, scopedparentcomposition. No mode/report/scratchownerimplementation orliveTEAM/campactivation",
+  "structured_schema_contract": "00_PASSMAP/PASS642_I7A5B_STRUCTURED_SCHEMA_CONTRACT.json",
+  "length_qualification": "00_PASSMAP/PASS642_I7A5B_I7A1_STRUCTURED_LENGTH_QUALIFICATION.json",
+  "extension_record": "00_PASSMAP/PASS642_I7A5B_D14_EXTENSION_RECORD.json",
+  "inherited": [
+    "All14selectedD",
+    "All8frozenI7A1",
+    "12acceptedI7A4",
+    "7acceptedI7A5A"
+  ],
+  "application": "Semantictypedselectors/results, no numericMID/JSON/AMF/socket. ReusechannelchatcallerTx/admission/sender; addseparatestructuredmethod to avoidweakeningordinaryAPI. Ownerports explicitlynilunavailable. NoCanonicalmodeSQL orfakeproductionowner.",
+  "transaction": "ExistingRRreadonlysingleattemptsamecallerTx canonicaltime+admission+sender+ownercheck; nooutputbeforedefinitecompletion; recipientreadlikewise. No locks/writes/receipts/durableintent/quota/history required.",
+  "publication": "ExistingexactHandle/retainedGuildJOIN/currentchecks; useboundeddispatcherandtypedRealtimePublisher9field32783. Shared finiteeventvalidator; no duplicateMIDdescriptor/no secondwriter; noACK/retry/no publishunderTx. WAR_CAMP audiencefilteredbyservercanonicalownercheck beforeSend.",
+  "production_activation": {
+    "nonzero_types": {
+      "1": false,
+      "2": false,
+      "3": false,
+      "4": false,
+      "5": false,
+      "6": false,
+      "7": false,
+      "8": false
+    },
+    "unknown36863": false,
+    "live_TEAM": false,
+    "camp_confidential_delivery": false,
+    "default_owner_ports": "UNAVAILABLE",
+    "ordinary_type0": "REUSE_ACCEPTED5A",
+    "activation_after": "Actualselectedcanonicalowner+source/content/subtypeschema+native proof+owningnormalamendment only"
+  },
+  "budgets": "Reuseaccepted5Acommand5s/prepare3s/publish2s;readonlyprofileacquire500/lock500/statement1500/tx2000/cleanup500/reconcile500/op3000ms; global8/local16workers8. JSONfinitecaps explicit separate8KiB. No new pacing quota or180sec serverlimit.",
+  "migration": "NONE; applied1..33/pins retained",
+  "testing": "DRAFT_ACCEPTANCE_MATRIX all36required rows; fullprovidedofflinebundle nativeexactPG18.6/Go1.27.1 +source crosscheck. Fixturecanonicalowners typedvalidationscopeonly; zero productionproviderqualification",
+  "parent_closure_policy": "Afteraccepted5B implementation/evidence AND explicitparent composition/realityreview, I7A-5 mayclose scopedchanneltext+finiteinactiveprojectionboundary ifallownergates truthful. RecordliveTEAM/report/scratch/camp falseandfutureactivationdependencies; no automatic5B->parent/10/E/W2acceptance. Untilthen parentfalse.",
+  "pass": "642.0",
+  "selected_status": "SELECTED_RESEARCH_DESIGN_WITH_VALIDATED_NORMAL_SEAL_NOT_IMPLEMENTED",
+  "working_recovery_reference": "CP90 exact COLD checkpoint/source/probe caches"
+}

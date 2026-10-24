@@ -1,0 +1,179 @@
+{
+  "schema_version": 1,
+  "pass": "566.0",
+  "stage": "CA5-4",
+  "authority_matrix": "sealed Pass565 PASS565_CA5_4_ACCEPTANCE_MATRIX.json",
+  "result": "GREEN_LOCAL_CA5_4_ACCEPTED_COMPATIBILITY_COPY_ONLY_NATIVE_AGGREGATE_GATE_NOW_DUE_PRE_CA5_E",
+  "cases": [
+    {
+      "id": "A1",
+      "result": "GREEN_COMPATIBILITY_COPY_ONLY",
+      "finding": "Empty-set DTO validation/export test passes."
+    },
+    {
+      "id": "A2",
+      "result": "GREEN_COMPATIBILITY_COPY_ONLY",
+      "finding": "Reference-state reader preserves ordered actor-scoped HeroRefs and optional PetRef."
+    },
+    {
+      "id": "A3",
+      "result": "GREEN_LOCAL_STATIC_PLUS_COMPATIBILITY_COPY",
+      "finding": "DTO excludes Name/formation/mode/battle policy; deep-copy tests pass."
+    },
+    {
+      "id": "A4",
+      "result": "GREEN_COMPATIBILITY_COPY_ONLY",
+      "finding": "Mutation-after-export fixtures prove returned state is independent."
+    },
+    {
+      "id": "A5",
+      "result": "GREEN_COMPATIBILITY_COPY_ONLY",
+      "finding": "Hero preflight returns exactly ca5.saved-presets + actor rank440 root independent of reference existence."
+    },
+    {
+      "id": "A6",
+      "result": "GREEN_COMPATIBILITY_COPY_ONLY",
+      "finding": "Pet preflight returns the same stable actor root plan."
+    },
+    {
+      "id": "A7",
+      "result": "GREEN_COMPATIBILITY_COPY_ONLY",
+      "finding": "Malformed/foreign refs fail closed."
+    },
+    {
+      "id": "A8",
+      "result": "GREEN_LOCAL_STATIC_PLUS_COMPATIBILITY_COPY",
+      "finding": "Guard lock accepts only its bound actor rank440 root; concrete store root lock path reread."
+    },
+    {
+      "id": "A9",
+      "result": "GREEN_COMPATIBILITY_COPY_ONLY",
+      "finding": "Referenced Hero returns ErrReferenceInUse under locked validation."
+    },
+    {
+      "id": "A10",
+      "result": "GREEN_COMPATIBILITY_COPY_ONLY",
+      "finding": "Unreferenced Hero permits validation."
+    },
+    {
+      "id": "A11",
+      "result": "GREEN_COMPATIBILITY_COPY_ONLY",
+      "finding": "Referenced Pet returns ErrReferenceInUse."
+    },
+    {
+      "id": "A12",
+      "result": "GREEN_COMPATIBILITY_COPY_ONLY",
+      "finding": "Unreferenced Pet permits validation."
+    },
+    {
+      "id": "A13",
+      "result": "GREEN_COMPATIBILITY_COPY_ONLY",
+      "finding": "Provider mismatch/empty/extra/wrong-root plans fail closed."
+    },
+    {
+      "id": "A14",
+      "result": "GREEN_LOCAL_STATIC_PLUS_COMPATIBILITY_COPY",
+      "finding": "Two EXISTS queries are saved-preset-owned and touch only preset tables; adapter tests pass."
+    },
+    {
+      "id": "A15",
+      "result": "GREEN_LOCAL_STATIC",
+      "finding": "No 00029 migration or schema change."
+    },
+    {
+      "id": "A16",
+      "result": "GREEN_COMPATIBILITY_COPY_ONLY_RACE",
+      "finding": "Real CA5-3 add-first fixture serializes then future consume rejects under guard."
+    },
+    {
+      "id": "A17",
+      "result": "GREEN_COMPATIBILITY_COPY_ONLY_RACE",
+      "finding": "Future consume-first fixture serializes then later CA5-3 owner validation fails without dangling preset."
+    },
+    {
+      "id": "A18",
+      "result": "GREEN_COMPATIBILITY_COPY_ONLY_RACE",
+      "finding": "Pet source-owner rank430 + root440 structural choreography test passes."
+    },
+    {
+      "id": "A19",
+      "result": "GREEN_COMPATIBILITY_COPY_ONLY",
+      "finding": "Existing CanonicalizeReferenceGuardPlans multi-provider deterministic/duplicate-ownership tests remain green in full suite."
+    },
+    {
+      "id": "A20",
+      "result": "GREEN_LOCAL_STATIC",
+      "finding": "No MID66 dispatcher or production registration."
+    },
+    {
+      "id": "A21",
+      "result": "GREEN_LOCAL_STATIC",
+      "finding": "No Hero/Pet DELETE/consume production implementation."
+    },
+    {
+      "id": "A22",
+      "result": "GREEN_LOCAL_STATIC",
+      "finding": "MID208/209 inactive and 17.formation unclaimed."
+    },
+    {
+      "id": "A23",
+      "result": "GREEN_LOCAL_STATIC",
+      "finding": "No I9 mode state or CA8 composite snapshot owner introduced."
+    },
+    {
+      "id": "A24",
+      "result": "GREEN_LOCAL_STATIC_PLUS_COMPATIBILITY_COPY",
+      "finding": "CA5-2/CA5-3 successor validators pass; CA5-1 architectural guards remain green in full archguard suite."
+    },
+    {
+      "id": "A25",
+      "result": "GREEN_LOCAL_STATIC",
+      "finding": "Schema/query ownership and sqlc generation policy pass on canonical."
+    },
+    {
+      "id": "A26",
+      "result": "GREEN_LOCAL_STATIC_SOURCE_ORACLE",
+      "finding": "Exact current/old/V1/native source-oracle guard passes."
+    },
+    {
+      "id": "A27",
+      "result": "GREEN_COMPATIBILITY_COPY_ONLY",
+      "finding": "Focused application/adapter/arch tests pass on fresh diagnostic copy."
+    },
+    {
+      "id": "A28",
+      "result": "GREEN_COMPATIBILITY_COPY_ONLY_RACE",
+      "finding": "Focused changed-path/concurrency race detector passes after atomic test-fixture repair on fresh copy."
+    },
+    {
+      "id": "A29",
+      "result": "GREEN_COMPATIBILITY_COPY_ONLY",
+      "finding": "Full go test ./..., full go vet ./..., and bounded package-by-package 93/93 pass."
+    },
+    {
+      "id": "A30",
+      "result": "AUTHORIZED_DEFERRED_PRE_CA5_E",
+      "finding": "Exact canonical Go/PostgreSQL/River aggregate gate remains mandatory immediately before CA5-E; current environment probes are blocked, not passed."
+    },
+    {
+      "id": "A31",
+      "result": "AUTHORIZED_DEFERRED_POST_I14",
+      "finding": "Physical unmodified-stock-client W2 remains post-I14 and unchanged."
+    },
+    {
+      "id": "A32",
+      "result": "GREEN_INDEPENDENT_REALITY_CHECK",
+      "finding": "Independent source/contract/code/store/query/concurrency/diff reread finds no destructive/formation ownership leak or defect requiring reopen."
+    }
+  ],
+  "gate_summary": {
+    "local_required_total": 30,
+    "local_required_green": 30,
+    "authorized_deferred_pre_ca5_e": [
+      "A30"
+    ],
+    "authorized_deferred_post_i14": [
+      "A31"
+    ]
+  }
+}

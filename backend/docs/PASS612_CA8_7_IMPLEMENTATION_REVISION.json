@@ -1,0 +1,69 @@
+{
+  "schema_version": 1,
+  "pass": "612.0",
+  "stage": "CA8-7",
+  "status": "LOCAL_ACCEPTANCE_CANDIDATE",
+  "parent_backend_archive_sha256": "ed6f686c01097c2b90405d63d4824deb6047d15981521cdd176ce2e95f2e34b5",
+  "parent_git": "5b7458afbf75c085363c248831b26476cff99823",
+  "pass611_authority_sha256": "c5b27bb797f1bc83254a2a4a6abbb256d30dba2dec127ba18786462b88374015",
+  "pass611_research_seal_sha256": "3fca0c907973b0dbb41d5aff5950db55cf02c812dd683d8f4bd4bd0bd23b581c",
+  "pass611_implementation_contract_sha256": "234dbcda8b75908d3cac6a2bf5ab276e7f1108e406521df4c18fd48865c22c42",
+  "pass611_acceptance_matrix_sha256": "b513bcddddaba87e4024750cbfbffd42b69ec153f93e5f39e547bc7e7d069397",
+  "implementation_revision_algorithm": "sha256(sorted(path UTF-8 || NUL || final file bytes) over CA8-7 implementation/test/tooling footprint)",
+  "implementation_revision_sha256": "b4bb8067255cdcf0ed70925865df76936f45f9a8baf072a2d5cb42092e44623e",
+  "changed_implementation_files": [
+    {
+      "path": "internal/application/characterasset/battle_contribution.go",
+      "sha256": "9703fd3741a3b6bb4aa3598cb74e6984b0119e6588201c605b9d4469ff48ff5d",
+      "bytes": 12067
+    },
+    {
+      "path": "internal/application/characterasset/battle_contribution_test.go",
+      "sha256": "727e3d0eb30831aa44a222c0aec740b30212118cdebc2364d1d0b043e81ff0b6",
+      "bytes": 10385
+    },
+    {
+      "path": "internal/archguard/ca8_7_contract_test.go",
+      "sha256": "3f045090324ffaba66459e056be97490b76cd02dccd60627725f8b6dfefac6de",
+      "bytes": 3637
+    },
+    {
+      "path": "tools/check.sh",
+      "sha256": "73e44e12bfd051c5f3cf9fd254adff3f8e14ebd1bc45aab579b108c53e3c91f5",
+      "bytes": 4296
+    },
+    {
+      "path": "tools/check_ca8_7_source_oracle.py",
+      "sha256": "b844e5fa064830d9c529a29ad57320b7a799167a17b7f811e27f79cfafe5eb16",
+      "bytes": 6658
+    },
+    {
+      "path": "tools/validate_ca8_7.py",
+      "sha256": "601ef0607b1c1de227d82a37e94ed8e391887775fbddf24ad8880dab4946a784",
+      "bytes": 5779
+    }
+  ],
+  "scope": [
+    "schema ca8-7/v1 Character-side battle contribution scope witness over OperationID/ContentRevision/ObservedAt",
+    "separate typed OWNED/BORROWED/TRIAL/NPC_TEMPLATE Hero/Pet facets",
+    "delegation to accepted CA8-3 OwnedCompositeBuilder, CA8-4 BorrowedCompositeBuilder and CA8-5 synthetic materializers",
+    "owned/borrowed Hero skill status-only UNAVAILABLE_UNQUALIFIED; Pet base skills preserved",
+    "current + V1.164 freeze/dependency source-oracle guards and architecture/static validation"
+  ],
+  "non_changes": [
+    "no final stat/force compiler or client getTotalAttr adoption",
+    "no battle profile requiredness or ProviderRequiredButUnavailable assignment",
+    "no CombatSnapshot/hash/RNG/rules/trust/entropy/attempt/resolver ownership",
+    "no foreign-owner reads for Library/Cabinet/Dorm/Inscription/Course/ConquerSchool/WhiteAlbum/Element/Stone/Spirit final stats",
+    "no schema/migration/SQL/write/receipt/outbox/queue/wire/MID/cache/realtime",
+    "no Guild/Tutor rental business logic",
+    "no dependency pin/toolchain change"
+  ],
+  "evidence": {
+    "exact_candidate_execution": "ENVIRONMENT_BLOCKED_GO_1_27_1_DOWNLOAD_UNAVAILABLE",
+    "compatibility_copy": "GREEN_FOCUSED_TEST_RACE_VET_WHOLE_TREE_TEST_VET_APPLICATION_RACE_94_OF_94_PACKAGE_REGRESSION",
+    "postimplementation_reality_check": "GREEN",
+    "classification": "LOCAL_STATIC_PLUS_EXACT_SOURCE_ORACLE_PLUS_COMPATIBILITY_COPY_ONLY; CA8-9/CA8-E/W2 remain open"
+  },
+  "migration_high_water": "00030_ca7_2_appearance_foundation.sql"
+}

@@ -1,0 +1,43 @@
+{
+  "status": "REQUIRED_SOURCE_CONTRACT_AMENDMENT_NOT_OPTIONAL_SCOPE_EXPANSION",
+  "contract": "I7C2E_COURSE_INPUT_LIFECYCLE",
+  "prior_version": 1,
+  "proposed_version": 2,
+  "contradicted_clause": "I7C2E-PROFILE",
+  "prior_claim": "SelfPlayer.heros_ exclusivelyNormal; SuperCourseinactive",
+  "classification": "DISPROVEN",
+  "current_evidence": [
+    {
+      "path": "cache/SRC64/app/model/Hero.lua",
+      "symbol": "populate: metatabledispatchNormal/Super"
+    },
+    {
+      "path": "cache/SRC64/app/model/SelfPlayer.lua",
+      "symbol": "addHero/addHeroWithHeroInfo/getHeros: sharedheros_collection"
+    },
+    {
+      "path": "cache/SRC64/app/windows/CourseSelectHeroWindow.lua",
+      "symbol": "initBaseInfo/checkHeroCannotSelect: sharedcollection, sourcegetCourseSkills"
+    },
+    {
+      "path": "cache/SRC64/app/model/SuperHero.lua",
+      "symbol": "getCourseSkills:2286; getSkillId:1623; samepositive-ID/book_open predicate"
+    },
+    {
+      "path": "cache/SRC64/app/model/NormalHero.lua",
+      "symbol": "getCourseSkills2522: matchingpredicate"
+    }
+  ],
+  "correction": "Selected liveNormal AND Super Heroes use qualifiedpositive source skill IDs plusbook_open sloteligibility; sharedCourseowner/policies/value/replay/time. Pets remainoutsideHeroCourse.",
+  "cause": "Incorrect collection/type inference and missedSuper accessor duringresearch; sourcebytesalreadycached. Nooriginalserver policyunknown introduced.",
+  "parent_scope": "Restores inheritedC1 selectedNormal/Super providercoverage; no newparent/leafIDs or differentproviderarchitecture",
+  "affected": [
+    "Courseeligibility kindrestriction",
+    "HeroCourseInputsTx Superemptyshortcut",
+    "2Esourceprofile/residual/contracts/design/code/docs",
+    "NewSuper native/API/rawconsumerchecks"
+  ],
+  "authorization": "Currentuserdirectphaseimplementation + source-required reconciliation undercanonicalrules/I7C1 researchamendment; nonewreconstructionpolicy requested",
+  "paused": "AffectedSuperprofileimplementation untilnormal695 amendedcontractpublication",
+  "proof_reuse": "Normal lifecycle/value/time/process workingevidence retained; newsourceprofile code specificallyinvalidates oldkindrestriction checks; finalintendedfreeze notyetcreated"
+}

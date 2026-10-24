@@ -1,0 +1,6 @@
+COMPATIBILITY_COPY_ONLY
+origin: exact canonical Pass591 CA7-4 source candidate before release metadata generation
+accommodation: disposable copy only; .go-version 1.27.1 -> 1.23.2; go.mod language 1.26.0 -> 1.23.0; toolchain go1.27.1 -> go1.23.2
+go.sum: unchanged
+canonical toolchain/dependency pins: unchanged
+limitations: not exact Go1.27.1 proof; not real PostgreSQL/River proof; not physical stock-client proof

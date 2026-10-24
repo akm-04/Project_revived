@@ -1,0 +1,6081 @@
+{
+  "schema_version": 1,
+  "pass": "435.0",
+  "stage": "I2",
+  "source": "current src_64 app/common/network/mid.lua",
+  "source_sha256": "026a20b29d97624979777a68c64c749254031604057ff42aa8f8254c3e35b5af",
+  "assignment_count": 1213,
+  "unique_numeric_mid_count": 1211,
+  "classification_source": {
+    "chat": "bit.band(mid,36864)==32768",
+    "gm": "bit.band(mid,36864)==36864",
+    "other": "Backend.request -> webRequest_"
+  },
+  "assignments": [
+    {
+      "symbol": "RETRIEVE_TOKEN",
+      "mid": 1,
+      "line": 3
+    },
+    {
+      "symbol": "QUERY_SERVER_TIME",
+      "mid": 3,
+      "line": 4
+    },
+    {
+      "symbol": "LOAD_GM_QUESTIONS",
+      "mid": 4,
+      "line": 5
+    },
+    {
+      "symbol": "ASK_GM_QUESTION",
+      "mid": 5,
+      "line": 6
+    },
+    {
+      "symbol": "LOAD_REGIONS",
+      "mid": 6,
+      "line": 7
+    },
+    {
+      "symbol": "LOAD_ANNOUNCE",
+      "mid": 7,
+      "line": 8
+    },
+    {
+      "symbol": "LOAD_PLAYER_INFO",
+      "mid": 17,
+      "line": 9
+    },
+    {
+      "symbol": "LOAD_USER_REGIONS",
+      "mid": 18,
+      "line": 10
+    },
+    {
+      "symbol": "LOAD_SCROLLS",
+      "mid": 20,
+      "line": 11
+    },
+    {
+      "symbol": "LOAD_ESSENCES",
+      "mid": 21,
+      "line": 12
+    },
+    {
+      "symbol": "EDIT_PLAYER_NAME",
+      "mid": 23,
+      "line": 13
+    },
+    {
+      "symbol": "SAVE_STORY",
+      "mid": 26,
+      "line": 14
+    },
+    {
+      "symbol": "USE_ENERGY_ITEM",
+      "mid": 27,
+      "line": 15
+    },
+    {
+      "symbol": "DAILY_CONSUNME_LOAD",
+      "mid": 28,
+      "line": 16
+    },
+    {
+      "symbol": "DAILY_CONSUNME",
+      "mid": 29,
+      "line": 17
+    },
+    {
+      "symbol": "FUNCTION_CLICK",
+      "mid": 30,
+      "line": 18
+    },
+    {
+      "symbol": "CLICK_CRAB",
+      "mid": 31,
+      "line": 19
+    },
+    {
+      "symbol": "LOAD_SHOP",
+      "mid": 32,
+      "line": 20
+    },
+    {
+      "symbol": "BUY_SHOP",
+      "mid": 33,
+      "line": 21
+    },
+    {
+      "symbol": "REFRESH_SHOP",
+      "mid": 34,
+      "line": 22
+    },
+    {
+      "symbol": "SHOP_MAGIC_UNLOCK",
+      "mid": 35,
+      "line": 23
+    },
+    {
+      "symbol": "MARKET_BUY",
+      "mid": 36,
+      "line": 24
+    },
+    {
+      "symbol": "LOAD_SHOP_LIST",
+      "mid": 37,
+      "line": 25
+    },
+    {
+      "symbol": "CLOSE_SHOP",
+      "mid": 38,
+      "line": 26
+    },
+    {
+      "symbol": "SET_ALL_SKILL_LEVEL",
+      "mid": 39,
+      "line": 27
+    },
+    {
+      "symbol": "LOAD_HERO",
+      "mid": 48,
+      "line": 28
+    },
+    {
+      "symbol": "LOAD_HEROS",
+      "mid": 49,
+      "line": 29
+    },
+    {
+      "symbol": "SUMMON_HERO",
+      "mid": 50,
+      "line": 30
+    },
+    {
+      "symbol": "POWERUP_HERO",
+      "mid": 51,
+      "line": 31
+    },
+    {
+      "symbol": "EVOLVE_HERO",
+      "mid": 52,
+      "line": 32
+    },
+    {
+      "symbol": "STONE_SUMMON_HERO",
+      "mid": 59,
+      "line": 33
+    },
+    {
+      "symbol": "SET_SKILL_LEVEL",
+      "mid": 53,
+      "line": 34
+    },
+    {
+      "symbol": "SET_HERO_EQUIP",
+      "mid": 54,
+      "line": 35
+    },
+    {
+      "symbol": "USE_EXP_ITEM",
+      "mid": 55,
+      "line": 36
+    },
+    {
+      "symbol": "USE_EXP_ITEMS",
+      "mid": 63,
+      "line": 37
+    },
+    {
+      "symbol": "LOAD_SUMMON_INFO",
+      "mid": 56,
+      "line": 38
+    },
+    {
+      "symbol": "ONE_CLICK_JINJIE",
+      "mid": 57,
+      "line": 39
+    },
+    {
+      "symbol": "ONE_CLICK_EQUIP",
+      "mid": 62,
+      "line": 40
+    },
+    {
+      "symbol": "FUMO",
+      "mid": 58,
+      "line": 41
+    },
+    {
+      "symbol": "EXPAND_HERO_SLOTS",
+      "mid": 64,
+      "line": 42
+    },
+    {
+      "symbol": "LOAD_COLLECTED_HEROS",
+      "mid": 65,
+      "line": 43
+    },
+    {
+      "symbol": "DISMISS_HERO",
+      "mid": 66,
+      "line": 44
+    },
+    {
+      "symbol": "LOAD_HERO_PIECES",
+      "mid": 67,
+      "line": 45
+    },
+    {
+      "symbol": "UNLOCK_DYNAMIC_CARD",
+      "mid": 68,
+      "line": 46
+    },
+    {
+      "symbol": "SHOW_DYNAMIC_CARD",
+      "mid": 69,
+      "line": 47
+    },
+    {
+      "symbol": "ALBUM_PARTNER_UNLOCK",
+      "mid": 72,
+      "line": 48
+    },
+    {
+      "symbol": "LOAD_RUNE",
+      "mid": 80,
+      "line": 49
+    },
+    {
+      "symbol": "LOAD_BACKPACK",
+      "mid": 81,
+      "line": 50
+    },
+    {
+      "symbol": "SELL_ITEM",
+      "mid": 82,
+      "line": 51
+    },
+    {
+      "symbol": "COMPOSE_ITEM",
+      "mid": 83,
+      "line": 52
+    },
+    {
+      "symbol": "EQUIP_RUNE",
+      "mid": 84,
+      "line": 53
+    },
+    {
+      "symbol": "UNEQUIP_RUNE",
+      "mid": 85,
+      "line": 54
+    },
+    {
+      "symbol": "SELL_ITEMS",
+      "mid": 86,
+      "line": 55
+    },
+    {
+      "symbol": "USE_MAGIC_ITEMS",
+      "mid": 87,
+      "line": 56
+    },
+    {
+      "symbol": "BACKPACK_SORT_TYPE",
+      "mid": 88,
+      "line": 57
+    },
+    {
+      "symbol": "SAVA_SORT_TYPE",
+      "mid": 89,
+      "line": 58
+    },
+    {
+      "symbol": "USE_SKILL_POINT_ITEM",
+      "mid": 90,
+      "line": 59
+    },
+    {
+      "symbol": "OPEN_ACT_ITEM",
+      "mid": 91,
+      "line": 60
+    },
+    {
+      "symbol": "USE_GOLDEN_HAND",
+      "mid": 96,
+      "line": 61
+    },
+    {
+      "symbol": "ADD_ENERGY",
+      "mid": 97,
+      "line": 62
+    },
+    {
+      "symbol": "SET_AVATAR_ID",
+      "mid": 98,
+      "line": 63
+    },
+    {
+      "symbol": "BUY_SKILL_POINT",
+      "mid": 99,
+      "line": 64
+    },
+    {
+      "symbol": "LOAD_WORLD_MAP",
+      "mid": 112,
+      "line": 65
+    },
+    {
+      "symbol": "FIGHT",
+      "mid": 113,
+      "line": 66
+    },
+    {
+      "symbol": "FIGHT_RESULT",
+      "mid": 114,
+      "line": 67
+    },
+    {
+      "symbol": "LOAD_TRIAL_INFOS",
+      "mid": 115,
+      "line": 68
+    },
+    {
+      "symbol": "RESET_CAMPAIGN",
+      "mid": 116,
+      "line": 69
+    },
+    {
+      "symbol": "SWEEP_CAMPAIGN",
+      "mid": 117,
+      "line": 70
+    },
+    {
+      "symbol": "GET_BONUS_AWARD",
+      "mid": 118,
+      "line": 71
+    },
+    {
+      "symbol": "GENERATE_PLAYER_NAME",
+      "mid": 119,
+      "line": 72
+    },
+    {
+      "symbol": "GET_COMMENT_AWARD",
+      "mid": 120,
+      "line": 73
+    },
+    {
+      "symbol": "SEND_OPERATION_LOG",
+      "mid": 121,
+      "line": 74
+    },
+    {
+      "symbol": "GET_MAXLEVEL",
+      "mid": 122,
+      "line": 75
+    },
+    {
+      "symbol": "CHALLENGEINFO",
+      "mid": 123,
+      "line": 76
+    },
+    {
+      "symbol": "LOAD_BUILDING",
+      "mid": 144,
+      "line": 77
+    },
+    {
+      "symbol": "OPEN_BUILDING",
+      "mid": 145,
+      "line": 78
+    },
+    {
+      "symbol": "BUILDING_UPGRADE",
+      "mid": 146,
+      "line": 79
+    },
+    {
+      "symbol": "BUILDING_OUTPUT",
+      "mid": 147,
+      "line": 80
+    },
+    {
+      "symbol": "BUILIDNG_PARTNER",
+      "mid": 148,
+      "line": 81
+    },
+    {
+      "symbol": "LOAD_WISH_INFO",
+      "mid": 149,
+      "line": 82
+    },
+    {
+      "symbol": "WISH",
+      "mid": 150,
+      "line": 83
+    },
+    {
+      "symbol": "LOAD_ALL_BUILDING_INFO",
+      "mid": 151,
+      "line": 84
+    },
+    {
+      "symbol": "LOAD_YANWUCHANG_HERO_EXP",
+      "mid": 152,
+      "line": 85
+    },
+    {
+      "symbol": "LOAD_MISSION",
+      "mid": 160,
+      "line": 86
+    },
+    {
+      "symbol": "TAKE_MISSION_AWARD",
+      "mid": 161,
+      "line": 87
+    },
+    {
+      "symbol": "COMPLETE_MISSION",
+      "mid": 162,
+      "line": 88
+    },
+    {
+      "symbol": "OPEN_AWAKE_MISSION",
+      "mid": 163,
+      "line": 89
+    },
+    {
+      "symbol": "GIVE_UP_AWAKE_MISSION",
+      "mid": 164,
+      "line": 90
+    },
+    {
+      "symbol": "OPEN_PET_AWAKE_MISSION",
+      "mid": 165,
+      "line": 91
+    },
+    {
+      "symbol": "GIVE_UP_PET_AWAKE_MISSION",
+      "mid": 166,
+      "line": 92
+    },
+    {
+      "symbol": "OPEN_AWAKE_TWICE_MISSION",
+      "mid": 167,
+      "line": 93
+    },
+    {
+      "symbol": "GIVE_UP_AWAKE_TWICE_MISSION",
+      "mid": 168,
+      "line": 94
+    },
+    {
+      "symbol": "GET_DAY_HUOYUE_AWARD",
+      "mid": 169,
+      "line": 95
+    },
+    {
+      "symbol": "GET_WEEK_HUOYUE_AWARD",
+      "mid": 170,
+      "line": 96
+    },
+    {
+      "symbol": "GET_AWAKE_ITEM",
+      "mid": 171,
+      "line": 97
+    },
+    {
+      "symbol": "LOAD_FRIENDS",
+      "mid": 176,
+      "line": 98
+    },
+    {
+      "symbol": "REQUEST_FRIEND",
+      "mid": 177,
+      "line": 99
+    },
+    {
+      "symbol": "DENY_FRIEND_REQUEST",
+      "mid": 178,
+      "line": 100
+    },
+    {
+      "symbol": "IGNORE_FRIEND_REQUEST",
+      "mid": 179,
+      "line": 101
+    },
+    {
+      "symbol": "ACCEPT_FRIEND_REQUEST",
+      "mid": 180,
+      "line": 102
+    },
+    {
+      "symbol": "DELETE_FRIEND",
+      "mid": 181,
+      "line": 103
+    },
+    {
+      "symbol": "ACCEPT_ALL_FRIEND_REQUEST",
+      "mid": 182,
+      "line": 104
+    },
+    {
+      "symbol": "SEND_SOCIAL_GIFT",
+      "mid": 183,
+      "line": 105
+    },
+    {
+      "symbol": "READ_NOTICE",
+      "mid": 184,
+      "line": 106
+    },
+    {
+      "symbol": "ADD_BLACK_LIST",
+      "mid": 185,
+      "line": 107
+    },
+    {
+      "symbol": "REMOVE_BLACK_LIST",
+      "mid": 186,
+      "line": 108
+    },
+    {
+      "symbol": "CLEAR_BLACK_LIST",
+      "mid": 187,
+      "line": 109
+    },
+    {
+      "symbol": "SEARCH_PLAYER",
+      "mid": 188,
+      "line": 110
+    },
+    {
+      "symbol": "LOAD_FRIEND_INFO",
+      "mid": 189,
+      "line": 111
+    },
+    {
+      "symbol": "GET_RECOMMEND_FRIENDS",
+      "mid": 190,
+      "line": 112
+    },
+    {
+      "symbol": "EXCHANGE_ITEMS",
+      "mid": 191,
+      "line": 113
+    },
+    {
+      "symbol": "LOAD_CHAT_ROOM_INFO",
+      "mid": 192,
+      "line": 114
+    },
+    {
+      "symbol": "recall_friend",
+      "mid": 193,
+      "line": 115
+    },
+    {
+      "symbol": "get_recall_award",
+      "mid": 194,
+      "line": 116
+    },
+    {
+      "symbol": "LOAD_GET_REQUEST_PLAYERS",
+      "mid": 435,
+      "line": 117
+    },
+    {
+      "symbol": "LOAD_BATTLE_FORMATION",
+      "mid": 208,
+      "line": 118
+    },
+    {
+      "symbol": "SET_FORMATION",
+      "mid": 209,
+      "line": 119
+    },
+    {
+      "symbol": "ENTER_BATTLE",
+      "mid": 210,
+      "line": 120
+    },
+    {
+      "symbol": "LOAD_FRIEND_REP_HEROS",
+      "mid": 211,
+      "line": 121
+    },
+    {
+      "symbol": "END_BATTLE",
+      "mid": 212,
+      "line": 122
+    },
+    {
+      "symbol": "BATTLE_REVIVE",
+      "mid": 213,
+      "line": 123
+    },
+    {
+      "symbol": "LOAD_GIFTBOX",
+      "mid": 224,
+      "line": 124
+    },
+    {
+      "symbol": "RECEIVE_GIFT_BOX_ITEM",
+      "mid": 225,
+      "line": 125
+    },
+    {
+      "symbol": "RECEIVE_SOCIAL",
+      "mid": 228,
+      "line": 126
+    },
+    {
+      "symbol": "ACTIVITIES",
+      "mid": 229,
+      "line": 127
+    },
+    {
+      "symbol": "REDEEM_CODE",
+      "mid": 230,
+      "line": 128
+    },
+    {
+      "symbol": "GET_ACTIVITY_REWARD",
+      "mid": 231,
+      "line": 129
+    },
+    {
+      "symbol": "BUY_FUND",
+      "mid": 232,
+      "line": 130
+    },
+    {
+      "symbol": "LOAD_SINGLE_ACTIVITY",
+      "mid": 234,
+      "line": 131
+    },
+    {
+      "symbol": "SEND_RED_ENVELOPE",
+      "mid": 235,
+      "line": 132
+    },
+    {
+      "symbol": "GRAB_RED_ENVELOPE",
+      "mid": 236,
+      "line": 133
+    },
+    {
+      "symbol": "LOAD_RED_ENVELOPE_INFO",
+      "mid": 237,
+      "line": 134
+    },
+    {
+      "symbol": "LOAD_RED_ENVELOPE_LOG",
+      "mid": 238,
+      "line": 135
+    },
+    {
+      "symbol": "BROCAST_SEND_RED_ENVELOPE",
+      "mid": 239,
+      "line": 136
+    },
+    {
+      "symbol": "BROCAST_FINISH_RED_ENVELOPE",
+      "mid": 240,
+      "line": 137
+    },
+    {
+      "symbol": "EXCHAGE_CODE_HERO",
+      "mid": 241,
+      "line": 138
+    },
+    {
+      "symbol": "ACTIVITY_OPEN_SUBJECT",
+      "mid": 242,
+      "line": 139
+    },
+    {
+      "symbol": "ACTIVITY_ANSWER_QUESTION",
+      "mid": 243,
+      "line": 140
+    },
+    {
+      "symbol": "ACTIVITY_SELECT_AWARD",
+      "mid": 244,
+      "line": 141
+    },
+    {
+      "symbol": "SEND_GIFT_PACKETS",
+      "mid": 249,
+      "line": 142
+    },
+    {
+      "symbol": "GRAB_GIFT_PACKETS",
+      "mid": 250,
+      "line": 143
+    },
+    {
+      "symbol": "LOAD_GIFT_PACKETS_INFO",
+      "mid": 251,
+      "line": 144
+    },
+    {
+      "symbol": "LOAD_GIFT_PACKETS_LOG",
+      "mid": 252,
+      "line": 145
+    },
+    {
+      "symbol": "BROCAST_SEND_GIFT_PACKETS",
+      "mid": 253,
+      "line": 146
+    },
+    {
+      "symbol": "BROCAST_FINISH_GIFT_PACKETS",
+      "mid": 254,
+      "line": 147
+    },
+    {
+      "symbol": "LOAD_ARENA",
+      "mid": 272,
+      "line": 148
+    },
+    {
+      "symbol": "LOAD_ARENA_PLAYER_LIST",
+      "mid": 273,
+      "line": 149
+    },
+    {
+      "symbol": "ARENA_REFRESH",
+      "mid": 274,
+      "line": 150
+    },
+    {
+      "symbol": "LOAD_ARENA_NPC_LIST",
+      "mid": 275,
+      "line": 151
+    },
+    {
+      "symbol": "LOAD_ARENA_RANK",
+      "mid": 276,
+      "line": 152
+    },
+    {
+      "symbol": "LOAD_ARENA_DEFENSE",
+      "mid": 277,
+      "line": 153
+    },
+    {
+      "symbol": "SAVE_ARENA_DEFENSE",
+      "mid": 278,
+      "line": 154
+    },
+    {
+      "symbol": "ARENA_FIGHT_RESULT",
+      "mid": 279,
+      "line": 155
+    },
+    {
+      "symbol": "START_FIGHT",
+      "mid": 280,
+      "line": 156
+    },
+    {
+      "symbol": "ARENA_BUY_TICKET",
+      "mid": 281,
+      "line": 157
+    },
+    {
+      "symbol": "ARENA_MODE_INFO",
+      "mid": 282,
+      "line": 158
+    },
+    {
+      "symbol": "ARENA_MODE_ENEMY_LIST",
+      "mid": 283,
+      "line": 159
+    },
+    {
+      "symbol": "ARENA_MODE_DEFENCE",
+      "mid": 284,
+      "line": 160
+    },
+    {
+      "symbol": "ARENA_MODE_FIGHT_PRE",
+      "mid": 285,
+      "line": 161
+    },
+    {
+      "symbol": "ARENA_MODE_FIGHT",
+      "mid": 286,
+      "line": 162
+    },
+    {
+      "symbol": "ARENA_MODE_BUY_TICKET",
+      "mid": 287,
+      "line": 163
+    },
+    {
+      "symbol": "ARENA_RESET_TIMER",
+      "mid": 288,
+      "line": 164
+    },
+    {
+      "symbol": "LOAD_ARENA_FIGHT_RECORDS",
+      "mid": 289,
+      "line": 165
+    },
+    {
+      "symbol": "LOAD_ARENA_FIGHT_REPORT",
+      "mid": 290,
+      "line": 166
+    },
+    {
+      "symbol": "query_arena_formation",
+      "mid": 291,
+      "line": 167
+    },
+    {
+      "symbol": "SEAL_HERO",
+      "mid": 292,
+      "line": 168
+    },
+    {
+      "symbol": "ARENA_GET_RCORD_PLAYER_INFO",
+      "mid": 293,
+      "line": 169
+    },
+    {
+      "symbol": "ARENA_PRE_FIGHT",
+      "mid": 294,
+      "line": 170
+    },
+    {
+      "symbol": "ARENA_MODE_QUERY_FORMATION",
+      "mid": 295,
+      "line": 171
+    },
+    {
+      "symbol": "ARENA_MODE_RESET_TIME",
+      "mid": 296,
+      "line": 172
+    },
+    {
+      "symbol": "ARENA_MODE_RECORD_DETAIL",
+      "mid": 298,
+      "line": 173
+    },
+    {
+      "symbol": "ARENA_MODE_RECORD_PLAYER_INFO",
+      "mid": 299,
+      "line": 174
+    },
+    {
+      "symbol": "ARENA_MODE_SCHEDULE",
+      "mid": 300,
+      "line": 175
+    },
+    {
+      "symbol": "LOAD_RANK_LIST",
+      "mid": 301,
+      "line": 176
+    },
+    {
+      "symbol": "GET_TEST_REPORT",
+      "mid": 302,
+      "line": 177
+    },
+    {
+      "symbol": "UPGRADE_SUPER_EQUIP",
+      "mid": 304,
+      "line": 178
+    },
+    {
+      "symbol": "SUMMON_SUPER_HERO",
+      "mid": 305,
+      "line": 179
+    },
+    {
+      "symbol": "SUPER_HERO_STONE_EXCHANGE",
+      "mid": 306,
+      "line": 180
+    },
+    {
+      "symbol": "LOAD_MARCH",
+      "mid": 336,
+      "line": 181
+    },
+    {
+      "symbol": "RESTART_MARCH",
+      "mid": 337,
+      "line": 182
+    },
+    {
+      "symbol": "MARCH_FIGHT_RESULT",
+      "mid": 338,
+      "line": 183
+    },
+    {
+      "symbol": "MARCH_OPEN_BOX",
+      "mid": 339,
+      "line": 184
+    },
+    {
+      "symbol": "MARCH_START_FIGHT",
+      "mid": 340,
+      "line": 185
+    },
+    {
+      "symbol": "MARCH_OPEN_EXTRA_CHEST",
+      "mid": 341,
+      "line": 186
+    },
+    {
+      "symbol": "MARCH_ADVANCE_SWEEP",
+      "mid": 342,
+      "line": 187
+    },
+    {
+      "symbol": "LOAD_SIGN_INFO",
+      "mid": 352,
+      "line": 188
+    },
+    {
+      "symbol": "SIGN",
+      "mid": 353,
+      "line": 189
+    },
+    {
+      "symbol": "QUERY_CHARGE_DATA",
+      "mid": 354,
+      "line": 190
+    },
+    {
+      "symbol": "LOAD_MAIL_LIST",
+      "mid": 368,
+      "line": 191
+    },
+    {
+      "symbol": "SET_MAIL_READ",
+      "mid": 369,
+      "line": 192
+    },
+    {
+      "symbol": "MAIL_ONEKEY",
+      "mid": 370,
+      "line": 193
+    },
+    {
+      "symbol": "LOAD_INVITE_INFOS",
+      "mid": 384,
+      "line": 194
+    },
+    {
+      "symbol": "GET_INVITE_AWARD",
+      "mid": 385,
+      "line": 195
+    },
+    {
+      "symbol": "SEND_INVITE_CODE",
+      "mid": 386,
+      "line": 196
+    },
+    {
+      "symbol": "CHAT_TO_PLAYER",
+      "mid": 513,
+      "line": 197
+    },
+    {
+      "symbol": "CHAT_FROM_PLAYER",
+      "mid": 514,
+      "line": 198
+    },
+    {
+      "symbol": "CHAT_TO_FRIEND",
+      "mid": 515,
+      "line": 199
+    },
+    {
+      "symbol": "CHAT_FROM_FRIEND",
+      "mid": 516,
+      "line": 200
+    },
+    {
+      "symbol": "TREASURE_LOAD_SP_INFO",
+      "mid": 528,
+      "line": 201
+    },
+    {
+      "symbol": "TREASURE_BUY_SP",
+      "mid": 529,
+      "line": 202
+    },
+    {
+      "symbol": "TREASURE_LOAD_INFO",
+      "mid": 530,
+      "line": 203
+    },
+    {
+      "symbol": "TREASURE_SET_PARTNER",
+      "mid": 531,
+      "line": 204
+    },
+    {
+      "symbol": "TREASURE_FINISH_ONE_TEAM",
+      "mid": 532,
+      "line": 205
+    },
+    {
+      "symbol": "TREASURE_LOG",
+      "mid": 533,
+      "line": 206
+    },
+    {
+      "symbol": "TREASURE_LOAD_MATCH_INFO",
+      "mid": 534,
+      "line": 207
+    },
+    {
+      "symbol": "TREASURE_SAVE_BATTLE_RESULT",
+      "mid": 535,
+      "line": 208
+    },
+    {
+      "symbol": "TREASURE_GET_BATTLE_REPORT",
+      "mid": 536,
+      "line": 209
+    },
+    {
+      "symbol": "TREASURE_GET_BATTLE_RECORD",
+      "mid": 537,
+      "line": 210
+    },
+    {
+      "symbol": "TREASURE_LOAD_ALL_INFO",
+      "mid": 538,
+      "line": 211
+    },
+    {
+      "symbol": "TREASURE_GET_PARTNERS",
+      "mid": 539,
+      "line": 212
+    },
+    {
+      "symbol": "TREASURE_START_FIGHT",
+      "mid": 540,
+      "line": 213
+    },
+    {
+      "symbol": "OLD_PEAK_LOAD_INFO",
+      "mid": 560,
+      "line": 214
+    },
+    {
+      "symbol": "OLD_PEAK_GET_RANKS",
+      "mid": 561,
+      "line": 215
+    },
+    {
+      "symbol": "OLD_PEAK_START_FIGHT",
+      "mid": 562,
+      "line": 216
+    },
+    {
+      "symbol": "OLD_PEAK_BUY_TIMES",
+      "mid": 564,
+      "line": 217
+    },
+    {
+      "symbol": "OLD_PEAK_RESET_TIMES",
+      "mid": 565,
+      "line": 218
+    },
+    {
+      "symbol": "OLD_PEAK_MATCH_ENEMIES",
+      "mid": 566,
+      "line": 219
+    },
+    {
+      "symbol": "OLD_PEAK_CHANGE_TEAMS",
+      "mid": 567,
+      "line": 220
+    },
+    {
+      "symbol": "OLD_PEAK_GET_RECORDS",
+      "mid": 568,
+      "line": 221
+    },
+    {
+      "symbol": "OLD_PEAK_GET_REPORT",
+      "mid": 569,
+      "line": 222
+    },
+    {
+      "symbol": "OLD_PEAK_GET_RANK_INFO",
+      "mid": 570,
+      "line": 223
+    },
+    {
+      "symbol": "OLD_PEAK_PRE_START_FIGHT",
+      "mid": 571,
+      "line": 224
+    },
+    {
+      "symbol": "LOAD_PEAK_ARENA",
+      "mid": 2480,
+      "line": 225
+    },
+    {
+      "symbol": "PEAK_CHANGE_TEAMS",
+      "mid": 2481,
+      "line": 226
+    },
+    {
+      "symbol": "MATCH_ENEMIES",
+      "mid": 2482,
+      "line": 227
+    },
+    {
+      "symbol": "GET_ENEMY_TEAM",
+      "mid": 2483,
+      "line": 228
+    },
+    {
+      "symbol": "PEAK_START_FIGHT",
+      "mid": 2484,
+      "line": 229
+    },
+    {
+      "symbol": "PEAK_RECORDS",
+      "mid": 2485,
+      "line": 230
+    },
+    {
+      "symbol": "BUY_PEAK_TIMES",
+      "mid": 2486,
+      "line": 231
+    },
+    {
+      "symbol": "PEAK_RECORDS_LIST",
+      "mid": 2487,
+      "line": 232
+    },
+    {
+      "symbol": "RESET_PEAK_TIME",
+      "mid": 2488,
+      "line": 233
+    },
+    {
+      "symbol": "PEAK_RECORDS_DETAIL",
+      "mid": 2489,
+      "line": 234
+    },
+    {
+      "symbol": "LOAD_ALL_TEAMS",
+      "mid": 576,
+      "line": 235
+    },
+    {
+      "symbol": "CREATE_TEAM",
+      "mid": 577,
+      "line": 236
+    },
+    {
+      "symbol": "DISSOLUTION_TEAM",
+      "mid": 578,
+      "line": 237
+    },
+    {
+      "symbol": "LOAD_TEAM_BY_ID",
+      "mid": 579,
+      "line": 238
+    },
+    {
+      "symbol": "APPLY_TEAM",
+      "mid": 580,
+      "line": 239
+    },
+    {
+      "symbol": "LOAD_APPLY_LIST_TEAM",
+      "mid": 581,
+      "line": 240
+    },
+    {
+      "symbol": "ACCEPT_APPLY_TEAM",
+      "mid": 582,
+      "line": 241
+    },
+    {
+      "symbol": "REFUSE_APPLY_TEAM",
+      "mid": 583,
+      "line": 242
+    },
+    {
+      "symbol": "LEAVE_TEAM",
+      "mid": 584,
+      "line": 243
+    },
+    {
+      "symbol": "UPDATE_DES_TEAM",
+      "mid": 585,
+      "line": 244
+    },
+    {
+      "symbol": "APPOINT_JOB_TEAM",
+      "mid": 586,
+      "line": 245
+    },
+    {
+      "symbol": "KICK_TEAM",
+      "mid": 587,
+      "line": 246
+    },
+    {
+      "symbol": "MESSAGE_TEAM",
+      "mid": 588,
+      "line": 247
+    },
+    {
+      "symbol": "SETTING_TEAM",
+      "mid": 589,
+      "line": 248
+    },
+    {
+      "symbol": "LOAD_DRINK_INFO",
+      "mid": 590,
+      "line": 249
+    },
+    {
+      "symbol": "BUY_DRINK",
+      "mid": 591,
+      "line": 250
+    },
+    {
+      "symbol": "DO_DRINK",
+      "mid": 592,
+      "line": 251
+    },
+    {
+      "symbol": "LOAD_SENT_HEROS",
+      "mid": 593,
+      "line": 252
+    },
+    {
+      "symbol": "RENT_HERO",
+      "mid": 594,
+      "line": 253
+    },
+    {
+      "symbol": "CANCEL_RENT_HERO",
+      "mid": 595,
+      "line": 254
+    },
+    {
+      "symbol": "LOAD_ALL_TEAM_HEROS",
+      "mid": 596,
+      "line": 255
+    },
+    {
+      "symbol": "PLAYER_LOAD_APPLY_LIST_TEAM",
+      "mid": 598,
+      "line": 256
+    },
+    {
+      "symbol": "CANCEL_APPLY_TEAM",
+      "mid": 599,
+      "line": 257
+    },
+    {
+      "symbol": "LOAD_GUILD_CAMPAIGN_LIST",
+      "mid": 601,
+      "line": 258
+    },
+    {
+      "symbol": "RESET_CHAPTER",
+      "mid": 602,
+      "line": 259
+    },
+    {
+      "symbol": "LOAD_GUILD_MAP",
+      "mid": 603,
+      "line": 260
+    },
+    {
+      "symbol": "GUILD_START_FIGHT",
+      "mid": 604,
+      "line": 261
+    },
+    {
+      "symbol": "LOAD_GUILD_AWARD_LIST",
+      "mid": 605,
+      "line": 262
+    },
+    {
+      "symbol": "APPLY_REWARD",
+      "mid": 606,
+      "line": 263
+    },
+    {
+      "symbol": "GUILD_CHAPTER_DAMAGE_RANK",
+      "mid": 607,
+      "line": 264
+    },
+    {
+      "symbol": "GUILF_ALL_SERVER_DAMAGE_RANK",
+      "mid": 608,
+      "line": 265
+    },
+    {
+      "symbol": "GET_DATA_TEAM",
+      "mid": 609,
+      "line": 266
+    },
+    {
+      "symbol": "GUILD_FIGHT_RESULT",
+      "mid": 610,
+      "line": 267
+    },
+    {
+      "symbol": "OPEN_CHAPTER",
+      "mid": 611,
+      "line": 268
+    },
+    {
+      "symbol": "GET_SELF_GUILD",
+      "mid": 612,
+      "line": 269
+    },
+    {
+      "symbol": "LOAD_GUILD_MAP_DETAIL",
+      "mid": 613,
+      "line": 270
+    },
+    {
+      "symbol": "GUILD_FIGHT_PREPARE",
+      "mid": 614,
+      "line": 271
+    },
+    {
+      "symbol": "GUILD_DISTRIBUTE_RECORD",
+      "mid": 615,
+      "line": 272
+    },
+    {
+      "symbol": "LOAD_RENT_PET",
+      "mid": 618,
+      "line": 273
+    },
+    {
+      "symbol": "RENT_PET",
+      "mid": 619,
+      "line": 274
+    },
+    {
+      "symbol": "CANCEL_RENT_PET",
+      "mid": 620,
+      "line": 275
+    },
+    {
+      "symbol": "LOAD_CAN_RENT_PET_LIST",
+      "mid": 621,
+      "line": 276
+    },
+    {
+      "symbol": "RENT_MEMBERS_PET",
+      "mid": 622,
+      "line": 277
+    },
+    {
+      "symbol": "LOAD_USED_PARTNER",
+      "mid": 623,
+      "line": 278
+    },
+    {
+      "symbol": "GET_REARENA_INFO",
+      "mid": 768,
+      "line": 279
+    },
+    {
+      "symbol": "GET_REARENA_PARTNERS",
+      "mid": 769,
+      "line": 280
+    },
+    {
+      "symbol": "REARENA_MODIFY_DEFENCE",
+      "mid": 770,
+      "line": 281
+    },
+    {
+      "symbol": "REARENA_MATCH_ENEMY",
+      "mid": 771,
+      "line": 282
+    },
+    {
+      "symbol": "REARENA_START_FIGHT",
+      "mid": 772,
+      "line": 283
+    },
+    {
+      "symbol": "REARENA_FIGHT",
+      "mid": 773,
+      "line": 284
+    },
+    {
+      "symbol": "REARENA_END_FIGHT",
+      "mid": 774,
+      "line": 285
+    },
+    {
+      "symbol": "REARENA_LOAD_RANKS",
+      "mid": 775,
+      "line": 286
+    },
+    {
+      "symbol": "REARENA_FIGHT_RECORDS",
+      "mid": 776,
+      "line": 287
+    },
+    {
+      "symbol": "REARENA_FIGHT_REPORT",
+      "mid": 777,
+      "line": 288
+    },
+    {
+      "symbol": "REARENA_PREPARE_FIGHT",
+      "mid": 778,
+      "line": 289
+    },
+    {
+      "symbol": "REARENA_STOP_FIGHT",
+      "mid": 779,
+      "line": 290
+    },
+    {
+      "symbol": "GET_EXCHANGE_AWARD",
+      "mid": 848,
+      "line": 291
+    },
+    {
+      "symbol": "GET_MISSION_AWARD",
+      "mid": 849,
+      "line": 292
+    },
+    {
+      "symbol": "SEND_KITES",
+      "mid": 800,
+      "line": 293
+    },
+    {
+      "symbol": "GRAB_KITES",
+      "mid": 801,
+      "line": 294
+    },
+    {
+      "symbol": "LOAD_KITES_INFO",
+      "mid": 802,
+      "line": 295
+    },
+    {
+      "symbol": "LOAD_KITES_LOG",
+      "mid": 803,
+      "line": 296
+    },
+    {
+      "symbol": "BROCAST_SEND_KITES",
+      "mid": 804,
+      "line": 297
+    },
+    {
+      "symbol": "BROCAST_FINISH_KITES",
+      "mid": 805,
+      "line": 298
+    },
+    {
+      "symbol": "ANS_KITE_QUESTION",
+      "mid": 806,
+      "line": 299
+    },
+    {
+      "symbol": "LOAD_SEND_KITES_LOG",
+      "mid": 807,
+      "line": 300
+    },
+    {
+      "symbol": "LOAD_KITE_KING_INFO",
+      "mid": 808,
+      "line": 301
+    },
+    {
+      "symbol": "SIGN_UP_KITE_KING",
+      "mid": 809,
+      "line": 302
+    },
+    {
+      "symbol": "kITE_KING_VOTE",
+      "mid": 810,
+      "line": 303
+    },
+    {
+      "symbol": "TCP_LOGIN",
+      "mid": 32771,
+      "line": 304
+    },
+    {
+      "symbol": "CHAT_ROOM_ENTERED",
+      "mid": 32779,
+      "line": 305
+    },
+    {
+      "symbol": "SEND_CHAT_MESSAGE",
+      "mid": 32782,
+      "line": 306
+    },
+    {
+      "symbol": "CHAT_MESSAGE",
+      "mid": 32783,
+      "line": 307
+    },
+    {
+      "symbol": "SOCKET_HEARTBEAT",
+      "mid": 32797,
+      "line": 308
+    },
+    {
+      "symbol": "FORCE_RELOAD",
+      "mid": 36855,
+      "line": 309
+    },
+    {
+      "symbol": "GUILD_FIGHT_NOTICE",
+      "mid": 36853,
+      "line": 310
+    },
+    {
+      "symbol": "PLAYER_NOTICE",
+      "mid": 36854,
+      "line": 311
+    },
+    {
+      "symbol": "GM_BROADCAST",
+      "mid": 36856,
+      "line": 312
+    },
+    {
+      "symbol": "RECHARGE",
+      "mid": 36857,
+      "line": 313
+    },
+    {
+      "symbol": "SECRET_DUNGEON_MESSAGE",
+      "mid": 36858,
+      "line": 314
+    },
+    {
+      "symbol": "HERO_EVOLVE_MESSAGE",
+      "mid": 36859,
+      "line": 315
+    },
+    {
+      "symbol": "HERO_SUMMON_MESSAGE",
+      "mid": 36860,
+      "line": 316
+    },
+    {
+      "symbol": "RUNE_MAX_MESSAGE",
+      "mid": 36861,
+      "line": 317
+    },
+    {
+      "symbol": "GIFTBOX_MESSAGE",
+      "mid": 36862,
+      "line": 318
+    },
+    {
+      "symbol": "GUILD_BROADCAST",
+      "mid": 36863,
+      "line": 319
+    },
+    {
+      "symbol": "DIRNK_NOTIF",
+      "mid": 36852,
+      "line": 320
+    },
+    {
+      "symbol": "GUILD_RANK",
+      "mid": 616,
+      "line": 321
+    },
+    {
+      "symbol": "EXCHANGE_DRINK",
+      "mid": 617,
+      "line": 322
+    },
+    {
+      "symbol": "WORLD_BOSS",
+      "mid": 624,
+      "line": 323
+    },
+    {
+      "symbol": "WORLD_BOSS_BUY_TIMES",
+      "mid": 625,
+      "line": 324
+    },
+    {
+      "symbol": "WORLD_BOSS_START_FIGHT",
+      "mid": 626,
+      "line": 325
+    },
+    {
+      "symbol": "WORLD_BOSS_SWEEP",
+      "mid": 628,
+      "line": 326
+    },
+    {
+      "symbol": "WORLD_BOSS_FIGHT_RESULT",
+      "mid": 627,
+      "line": 327
+    },
+    {
+      "symbol": "EXCHANGE_ITEM",
+      "mid": 233,
+      "line": 328
+    },
+    {
+      "symbol": "SKIN_ON",
+      "mid": 60,
+      "line": 329
+    },
+    {
+      "symbol": "SKIN_CANCEL",
+      "mid": 61,
+      "line": 330
+    },
+    {
+      "symbol": "NIAN_BOSS",
+      "mid": 629,
+      "line": 331
+    },
+    {
+      "symbol": "NIAN_BOSS_FIRE",
+      "mid": 634,
+      "line": 332
+    },
+    {
+      "symbol": "THIEF_BOSS_RANK",
+      "mid": 635,
+      "line": 333
+    },
+    {
+      "symbol": "NIAN_BOSS_SWEEP",
+      "mid": 633,
+      "line": 334
+    },
+    {
+      "symbol": "NIAN_BOSS_START_FIGHT",
+      "mid": 631,
+      "line": 335
+    },
+    {
+      "symbol": "NIAN_BOSS_FIGHT_RESULT",
+      "mid": 632,
+      "line": 336
+    },
+    {
+      "symbol": "NIAN_BOSS_BUY_TIMES",
+      "mid": 630,
+      "line": 337
+    },
+    {
+      "symbol": "BUY_AVATAR",
+      "mid": 656,
+      "line": 338
+    },
+    {
+      "symbol": "GET_VIP_AWARD",
+      "mid": 657,
+      "line": 339
+    },
+    {
+      "symbol": "GIVE_UP_REGION_MISSION",
+      "mid": 666,
+      "line": 340
+    },
+    {
+      "symbol": "EDIT_AVATAR_RRAME",
+      "mid": 100,
+      "line": 341
+    },
+    {
+      "symbol": "SAKURA_START_FIGHT",
+      "mid": 245,
+      "line": 342
+    },
+    {
+      "symbol": "SAKURA_FIGHT_RESULT",
+      "mid": 246,
+      "line": 343
+    },
+    {
+      "symbol": "BUY_SAKURA_TIMES",
+      "mid": 247,
+      "line": 344
+    },
+    {
+      "symbol": "SWEEP_SAKURA",
+      "mid": 248,
+      "line": 345
+    },
+    {
+      "symbol": "PETS_GET",
+      "mid": 780,
+      "line": 346
+    },
+    {
+      "symbol": "PET_SUMMON",
+      "mid": 781,
+      "line": 347
+    },
+    {
+      "symbol": "PET_CLEAN_CD",
+      "mid": 782,
+      "line": 348
+    },
+    {
+      "symbol": "PET_EQUIP",
+      "mid": 783,
+      "line": 349
+    },
+    {
+      "symbol": "PET_UPGRADE_SKILL",
+      "mid": 784,
+      "line": 350
+    },
+    {
+      "symbol": "PET_ADVANCE",
+      "mid": 785,
+      "line": 351
+    },
+    {
+      "symbol": "PET_EVOLVE",
+      "mid": 786,
+      "line": 352
+    },
+    {
+      "symbol": "PET_FEED",
+      "mid": 787,
+      "line": 353
+    },
+    {
+      "symbol": "PET_BUY_BOOK",
+      "mid": 788,
+      "line": 354
+    },
+    {
+      "symbol": "PET_SET_SHOW",
+      "mid": 789,
+      "line": 355
+    },
+    {
+      "symbol": "PET_ONE_KEY_UP",
+      "mid": 790,
+      "line": 356
+    },
+    {
+      "symbol": "PET_UPGRADE_ALL_SKILL",
+      "mid": 791,
+      "line": 357
+    },
+    {
+      "symbol": "PET_ONE_KEY_EQUIP",
+      "mid": 792,
+      "line": 358
+    },
+    {
+      "symbol": "GET_PRACTICE_INFO",
+      "mid": 124,
+      "line": 359
+    },
+    {
+      "symbol": "PRACTICE",
+      "mid": 125,
+      "line": 360
+    },
+    {
+      "symbol": "PRACTICE_SAVE",
+      "mid": 126,
+      "line": 361
+    },
+    {
+      "symbol": "PRACTICE_AUTO",
+      "mid": 127,
+      "line": 362
+    },
+    {
+      "symbol": "PET_GET_PRACTICE_INFO",
+      "mid": 129,
+      "line": 363
+    },
+    {
+      "symbol": "PET_PRACTICE",
+      "mid": 130,
+      "line": 364
+    },
+    {
+      "symbol": "PET_PRACTICE_SAVE",
+      "mid": 131,
+      "line": 365
+    },
+    {
+      "symbol": "PET_PRACTICE_AUTO",
+      "mid": 132,
+      "line": 366
+    },
+    {
+      "symbol": "INCUBUS_LOAD_INFO",
+      "mid": 864,
+      "line": 367
+    },
+    {
+      "symbol": "INCUBUS_BUY_TIMES",
+      "mid": 865,
+      "line": 368
+    },
+    {
+      "symbol": "UNLIMIT_START_FIGHT",
+      "mid": 866,
+      "line": 369
+    },
+    {
+      "symbol": "UNLIMIT_FIGHT_RESULT",
+      "mid": 867,
+      "line": 370
+    },
+    {
+      "symbol": "UNLIMIT_TEMP_RESULT",
+      "mid": 868,
+      "line": 371
+    },
+    {
+      "symbol": "INCUBUS_SWEEP",
+      "mid": 869,
+      "line": 372
+    },
+    {
+      "symbol": "MESSAGE_PUSH_ADD",
+      "mid": 1025,
+      "line": 373
+    },
+    {
+      "symbol": "MESSAGE_PUSH_REMOVE",
+      "mid": 1026,
+      "line": 374
+    },
+    {
+      "symbol": "SHUFFLE_SCRATCH_CARD",
+      "mid": 1040,
+      "line": 375
+    },
+    {
+      "symbol": "CHANGE_CARDS_GROUP",
+      "mid": 1041,
+      "line": 376
+    },
+    {
+      "symbol": "BUY_LUCKY_COINS",
+      "mid": 1042,
+      "line": 377
+    },
+    {
+      "symbol": "CHANGE_AUTO_STATUS",
+      "mid": 1043,
+      "line": 378
+    },
+    {
+      "symbol": "GET_BUILDING_LIST",
+      "mid": 1056,
+      "line": 379
+    },
+    {
+      "symbol": "UPGRADE_BUILDING",
+      "mid": 1057,
+      "line": 380
+    },
+    {
+      "symbol": "CANCEL_EVOLVE_BUILDING",
+      "mid": 1058,
+      "line": 381
+    },
+    {
+      "symbol": "GET_CABINET_INFO",
+      "mid": 1059,
+      "line": 382
+    },
+    {
+      "symbol": "LEARN_SKILL",
+      "mid": 1060,
+      "line": 383
+    },
+    {
+      "symbol": "GIVE_UP_LEARN_SKILL",
+      "mid": 1061,
+      "line": 384
+    },
+    {
+      "symbol": "GET_RECYCLE_INFO",
+      "mid": 1072,
+      "line": 385
+    },
+    {
+      "symbol": "RECYCLE_ITEMS",
+      "mid": 1073,
+      "line": 386
+    },
+    {
+      "symbol": "GET_DESKP_INFO",
+      "mid": 1074,
+      "line": 387
+    },
+    {
+      "symbol": "MAKE_ITEM",
+      "mid": 1075,
+      "line": 388
+    },
+    {
+      "symbol": "CANCEL_MAKE_ITEM",
+      "mid": 1076,
+      "line": 389
+    },
+    {
+      "symbol": "SPEED_UP_BUILDING",
+      "mid": 1077,
+      "line": 390
+    },
+    {
+      "symbol": "SPEED_UP_SKILL",
+      "mid": 1078,
+      "line": 391
+    },
+    {
+      "symbol": "CABINET_SKILL_CONFIRM",
+      "mid": 1079,
+      "line": 392
+    },
+    {
+      "symbol": "CONFIRM_BUILDING_UPGRADE",
+      "mid": 1080,
+      "line": 393
+    },
+    {
+      "symbol": "GET_ADMIN_INFO",
+      "mid": 1081,
+      "line": 394
+    },
+    {
+      "symbol": "ADMIN_CONVERSION",
+      "mid": 1082,
+      "line": 395
+    },
+    {
+      "symbol": "GET_NOTICE_BOARD_INFO",
+      "mid": 1083,
+      "line": 396
+    },
+    {
+      "symbol": "RECEIVE_MISSION",
+      "mid": 1084,
+      "line": 397
+    },
+    {
+      "symbol": "GIVE_UP_MISSION",
+      "mid": 1085,
+      "line": 398
+    },
+    {
+      "symbol": "CONFIRM_NEW_AWARD_LOG",
+      "mid": 1086,
+      "line": 399
+    },
+    {
+      "symbol": "GET_NOTICE_BOARD_REPORT",
+      "mid": 1087,
+      "line": 400
+    },
+    {
+      "symbol": "CONFIRM_MAKE_ITEM",
+      "mid": 1088,
+      "line": 401
+    },
+    {
+      "symbol": "ACCELERATE_MAKE_ITEM",
+      "mid": 1089,
+      "line": 402
+    },
+    {
+      "symbol": "GET_PET_ROOM_INFO",
+      "mid": 1090,
+      "line": 403
+    },
+    {
+      "symbol": "MAKE_PET_ITEM",
+      "mid": 1091,
+      "line": 404
+    },
+    {
+      "symbol": "PET_CAMPAIGN_LOAD_INFO",
+      "mid": 816,
+      "line": 405
+    },
+    {
+      "symbol": "PET_CAMPAIGN_SWEEP",
+      "mid": 817,
+      "line": 406
+    },
+    {
+      "symbol": "PET_CAMPAIGN_RECORD_SWEEP_TIME",
+      "mid": 818,
+      "line": 407
+    },
+    {
+      "symbol": "PET_CAMPAIGN_FIGHT",
+      "mid": 819,
+      "line": 408
+    },
+    {
+      "symbol": "PET_CAMPAIGN_BATTLE_RESULT",
+      "mid": 820,
+      "line": 409
+    },
+    {
+      "symbol": "PET_CAMPAIGN_RESTART",
+      "mid": 821,
+      "line": 410
+    },
+    {
+      "symbol": "PET_CAMPAIGN_RED_POINT",
+      "mid": 822,
+      "line": 411
+    },
+    {
+      "symbol": "PET_CAMPAIGN_AWAKE_SWEEP",
+      "mid": 823,
+      "line": 412
+    },
+    {
+      "symbol": "PET_CAMPAIGN_SWEEP_SUPER",
+      "mid": 824,
+      "line": 413
+    },
+    {
+      "symbol": "PET_CAMPAIGN_BUY_SUPER",
+      "mid": 825,
+      "line": 414
+    },
+    {
+      "symbol": "PET_CAMPAIGN_SAVE_SUPER",
+      "mid": 826,
+      "line": 415
+    },
+    {
+      "symbol": "PET_CAMPAIGN_PRACTICE",
+      "mid": 827,
+      "line": 416
+    },
+    {
+      "symbol": "QUERY_FORUM_BY_PAGE",
+      "mid": 832,
+      "line": 417
+    },
+    {
+      "symbol": "ADD_FORUM_LIKE",
+      "mid": 833,
+      "line": 418
+    },
+    {
+      "symbol": "ADD_FORUM_COMMENT",
+      "mid": 834,
+      "line": 419
+    },
+    {
+      "symbol": "SET_BOARD_HERO",
+      "mid": 835,
+      "line": 420
+    },
+    {
+      "symbol": "GET_LIBRARY_INFOS",
+      "mid": 836,
+      "line": 421
+    },
+    {
+      "symbol": "READ_DIALOG",
+      "mid": 837,
+      "line": 422
+    },
+    {
+      "symbol": "GET_HERO_DIALOG",
+      "mid": 838,
+      "line": 423
+    },
+    {
+      "symbol": "BUY_GIFT",
+      "mid": 839,
+      "line": 424
+    },
+    {
+      "symbol": "ADD_FAVOR",
+      "mid": 840,
+      "line": 425
+    },
+    {
+      "symbol": "GET_PARTNER_MISSION",
+      "mid": 841,
+      "line": 426
+    },
+    {
+      "symbol": "GET_HERO_ACT",
+      "mid": 842,
+      "line": 427
+    },
+    {
+      "symbol": "GET_HERO_TALK_AWARD",
+      "mid": 843,
+      "line": 428
+    },
+    {
+      "symbol": "GET_HERO_ACT_AWARD",
+      "mid": 844,
+      "line": 429
+    },
+    {
+      "symbol": "GET_HERO_MISSION_AWARD",
+      "mid": 845,
+      "line": 430
+    },
+    {
+      "symbol": "ACCEPT_HERO_MISSION",
+      "mid": 846,
+      "line": 431
+    },
+    {
+      "symbol": "ABANDON_MISSION",
+      "mid": 847,
+      "line": 432
+    },
+    {
+      "symbol": "GET_SCHOOL_STORY_REWARD",
+      "mid": 851,
+      "line": 433
+    },
+    {
+      "symbol": "HERO_FEED",
+      "mid": 852,
+      "line": 434
+    },
+    {
+      "symbol": "GET_FEED_INFO",
+      "mid": 853,
+      "line": 435
+    },
+    {
+      "symbol": "SAVE_HERO_FEED",
+      "mid": 854,
+      "line": 436
+    },
+    {
+      "symbol": "GET_CG_AWARD",
+      "mid": 855,
+      "line": 437
+    },
+    {
+      "symbol": "UNLOCK_BG",
+      "mid": 856,
+      "line": 438
+    },
+    {
+      "symbol": "SET_BG",
+      "mid": 857,
+      "line": 439
+    },
+    {
+      "symbol": "DRAGON_BOAT_START",
+      "mid": 1045,
+      "line": 440
+    },
+    {
+      "symbol": "DRAGON_BOAT_END_BOAT",
+      "mid": 1046,
+      "line": 441
+    },
+    {
+      "symbol": "DRAGON_BOAT_LOAD_INFO",
+      "mid": 1048,
+      "line": 442
+    },
+    {
+      "symbol": "DRAGON_BOAT_BUY_TIMES",
+      "mid": 1047,
+      "line": 443
+    },
+    {
+      "symbol": "LOAD_CANDLE_INFO",
+      "mid": 1049,
+      "line": 444
+    },
+    {
+      "symbol": "CANDLE_WISH",
+      "mid": 1050,
+      "line": 445
+    },
+    {
+      "symbol": "HERO_SELL_AWARD",
+      "mid": 1051,
+      "line": 446
+    },
+    {
+      "symbol": "START_BEACH",
+      "mid": 1120,
+      "line": 447
+    },
+    {
+      "symbol": "BUY_ATTACK_TIMES",
+      "mid": 1121,
+      "line": 448
+    },
+    {
+      "symbol": "BUY_CRIT",
+      "mid": 1122,
+      "line": 449
+    },
+    {
+      "symbol": "BEACH_ATTACK",
+      "mid": 1123,
+      "line": 450
+    },
+    {
+      "symbol": "BEACH_GIVE_UP",
+      "mid": 1124,
+      "line": 451
+    },
+    {
+      "symbol": "BEACH_POINT_AWARD",
+      "mid": 1125,
+      "line": 452
+    },
+    {
+      "symbol": "BEACH_POINT_BUY",
+      "mid": 1126,
+      "line": 453
+    },
+    {
+      "symbol": "GUILD_WAR_INFO",
+      "mid": 1136,
+      "line": 454
+    },
+    {
+      "symbol": "GUILD_WAR_ENROLL",
+      "mid": 1137,
+      "line": 455
+    },
+    {
+      "symbol": "GUILD_WAR_ADD_TEAM",
+      "mid": 1138,
+      "line": 456
+    },
+    {
+      "symbol": "GUILD_WAR_NOTICE",
+      "mid": 1139,
+      "line": 457
+    },
+    {
+      "symbol": "GUILD_WAR_FIGHT_LIST",
+      "mid": 1140,
+      "line": 458
+    },
+    {
+      "symbol": "GUILD_WAR_CHANGE_PATH",
+      "mid": 1141,
+      "line": 459
+    },
+    {
+      "symbol": "GUILD_WAR_LOAD_PATH",
+      "mid": 1142,
+      "line": 460
+    },
+    {
+      "symbol": "GUILD_WAR_LOAD_TROOP",
+      "mid": 1143,
+      "line": 461
+    },
+    {
+      "symbol": "GUILD_WAR_REPLAY",
+      "mid": 1144,
+      "line": 462
+    },
+    {
+      "symbol": "GUILD_WAR_RANK",
+      "mid": 1145,
+      "line": 463
+    },
+    {
+      "symbol": "GUILD_WAR_RED_POINT",
+      "mid": 1152,
+      "line": 464
+    },
+    {
+      "symbol": "GUILD_WAR_UPDATE_FORCE",
+      "mid": 1153,
+      "line": 465
+    },
+    {
+      "symbol": "GUILD_WAR_ADD_BUFF",
+      "mid": 1154,
+      "line": 466
+    },
+    {
+      "symbol": "Load_Jigsaw_Info",
+      "mid": 1168,
+      "line": 467
+    },
+    {
+      "symbol": "Put_Jigsaw",
+      "mid": 1169,
+      "line": 468
+    },
+    {
+      "symbol": "BROCAST_FINISH_JIGSAW",
+      "mid": 1170,
+      "line": 469
+    },
+    {
+      "symbol": "LOAD_JIGSAW2_INFO",
+      "mid": 1173,
+      "line": 470
+    },
+    {
+      "symbol": "PUT_JIGSAW2",
+      "mid": 1174,
+      "line": 471
+    },
+    {
+      "symbol": "BROCAST_FINISH_JIGSAW2",
+      "mid": 1175,
+      "line": 472
+    },
+    {
+      "symbol": "PLAYOFFS_CREATE_BATTLE_ROOM",
+      "mid": 1280,
+      "line": 473
+    },
+    {
+      "symbol": "PLAYOFFS_READY",
+      "mid": 1281,
+      "line": 474
+    },
+    {
+      "symbol": "PLAYOFFS_CHOOSE_MEMBER",
+      "mid": 1282,
+      "line": 475
+    },
+    {
+      "symbol": "PLAYOFFS_GET_PLAYOFF_INFO",
+      "mid": 1283,
+      "line": 476
+    },
+    {
+      "symbol": "PLAYOFFS_SIGN_UP",
+      "mid": 1284,
+      "line": 477
+    },
+    {
+      "symbol": "PLAYOFFS_GET_SIGN_LIST",
+      "mid": 1285,
+      "line": 478
+    },
+    {
+      "symbol": "PLAYOFFS_GET_GROUP_DETAILS",
+      "mid": 1286,
+      "line": 479
+    },
+    {
+      "symbol": "PLAYOFFS_SET_DECLARATION",
+      "mid": 1287,
+      "line": 480
+    },
+    {
+      "symbol": "PLAYOFFS_SUPPORT",
+      "mid": 1288,
+      "line": 481
+    },
+    {
+      "symbol": "PLAYOFFS_GET_MATCH_LIST",
+      "mid": 1289,
+      "line": 482
+    },
+    {
+      "symbol": "PLAYOFFS_BATTLE",
+      "mid": 1290,
+      "line": 483
+    },
+    {
+      "symbol": "PLAYOFFS_RECORD",
+      "mid": 1291,
+      "line": 484
+    },
+    {
+      "symbol": "PLAYOFFS_REQUEST_ROOM_INFO",
+      "mid": 1292,
+      "line": 485
+    },
+    {
+      "symbol": "PLAYOFFS_CONFIRM_SELECT_TEAM",
+      "mid": 1294,
+      "line": 486
+    },
+    {
+      "symbol": "STAR_TREASURE_INFO",
+      "mid": 1296,
+      "line": 487
+    },
+    {
+      "symbol": "STAR_TREASURE_NEXT",
+      "mid": 1297,
+      "line": 488
+    },
+    {
+      "symbol": "STAR_TREASURE_BUY",
+      "mid": 1298,
+      "line": 489
+    },
+    {
+      "symbol": "STAR_TREASURE_RESTART",
+      "mid": 1299,
+      "line": 490
+    },
+    {
+      "symbol": "STAR_TREASURE_RECORD",
+      "mid": 1300,
+      "line": 491
+    },
+    {
+      "symbol": "LOAD_ACHIEVEMENT_INFO",
+      "mid": 1302,
+      "line": 492
+    },
+    {
+      "symbol": "GET_ACHIEVEMENT_AWARD",
+      "mid": 1303,
+      "line": 493
+    },
+    {
+      "symbol": "GET_OFFLINE_INFO",
+      "mid": 1304,
+      "line": 494
+    },
+    {
+      "symbol": "INVITE_FRIEND_FIGHT",
+      "mid": 1312,
+      "line": 495
+    },
+    {
+      "symbol": "ACCEPT_FRIEND_FIGHT",
+      "mid": 1313,
+      "line": 496
+    },
+    {
+      "symbol": "FRIEND_FIGHT_RECORD",
+      "mid": 1314,
+      "line": 497
+    },
+    {
+      "symbol": "REJECT_FRIEND_FIGHT",
+      "mid": 1315,
+      "line": 498
+    },
+    {
+      "symbol": "FIREWORK_SEND",
+      "mid": 1328,
+      "line": 499
+    },
+    {
+      "symbol": "FIREWORK_TAKE_PHOTO",
+      "mid": 1329,
+      "line": 500
+    },
+    {
+      "symbol": "EXCHANGE_FUSION_ITEM",
+      "mid": 1330,
+      "line": 501
+    },
+    {
+      "symbol": "GET_HALLOWEEN_AWARD_RANK",
+      "mid": 1331,
+      "line": 502
+    },
+    {
+      "symbol": "EXCHANGE_ROLL_ITEM",
+      "mid": 1332,
+      "line": 503
+    },
+    {
+      "symbol": "ILLUSION_LOAD_INFO",
+      "mid": 1344,
+      "line": 504
+    },
+    {
+      "symbol": "ILLUSION_BUY_TIMES",
+      "mid": 1345,
+      "line": 505
+    },
+    {
+      "symbol": "ILLUSION_START_FIGHT",
+      "mid": 1346,
+      "line": 506
+    },
+    {
+      "symbol": "ILLUSION_FIGHT_RESULT",
+      "mid": 1347,
+      "line": 507
+    },
+    {
+      "symbol": "ILLUSION_RANK_LIST",
+      "mid": 1348,
+      "line": 508
+    },
+    {
+      "symbol": "ILLUSION_CREATE_ROOM",
+      "mid": 1349,
+      "line": 509
+    },
+    {
+      "symbol": "ILLUSION_GET_ROOM_INFO",
+      "mid": 1350,
+      "line": 510
+    },
+    {
+      "symbol": "ILLUSION_PREPARE_ROOM",
+      "mid": 1351,
+      "line": 511
+    },
+    {
+      "symbol": "ILLUSION_ENTER_ROOM",
+      "mid": 1352,
+      "line": 512
+    },
+    {
+      "symbol": "ILLUSION_REMOVE_PLAYER",
+      "mid": 1353,
+      "line": 513
+    },
+    {
+      "symbol": "ILLUSION_EXIT_ROOM",
+      "mid": 1354,
+      "line": 514
+    },
+    {
+      "symbol": "ILLUSION_CLEAR_ROOM",
+      "mid": 1355,
+      "line": 515
+    },
+    {
+      "symbol": "ILLUSION_SET_PARTNER",
+      "mid": 1356,
+      "line": 516
+    },
+    {
+      "symbol": "ILLUSION_PREPARE_FIGHT",
+      "mid": 1357,
+      "line": 517
+    },
+    {
+      "symbol": "ILLUSION_START_TEAM_FIGHT",
+      "mid": 1358,
+      "line": 518
+    },
+    {
+      "symbol": "ILLUSION_GET_ROOM_LIST",
+      "mid": 1359,
+      "line": 519
+    },
+    {
+      "symbol": "ILLUSION_INVITE_FRIEND",
+      "mid": 1360,
+      "line": 520
+    },
+    {
+      "symbol": "ILLUSION_INVITE_BROADCAST",
+      "mid": 1361,
+      "line": 521
+    },
+    {
+      "symbol": "ILLUSION_GET_REPORT",
+      "mid": 1362,
+      "line": 522
+    },
+    {
+      "symbol": "ILLUSION_CANCEL_PREPARE",
+      "mid": 1363,
+      "line": 523
+    },
+    {
+      "symbol": "ILLUSION_RANK_HEROS",
+      "mid": 1364,
+      "line": 524
+    },
+    {
+      "symbol": "ILLUSION_INVITE",
+      "mid": 517,
+      "line": 525
+    },
+    {
+      "symbol": "ILLUSION_NOTICE",
+      "mid": 518,
+      "line": 526
+    },
+    {
+      "symbol": "ACTIVITY_BROADCAST",
+      "mid": 4096,
+      "line": 527
+    },
+    {
+      "symbol": "ACTIVITY_LVBU_BROADCAST",
+      "mid": 4099,
+      "line": 528
+    },
+    {
+      "symbol": "SYSTEM_BROADCAST",
+      "mid": 4101,
+      "line": 529
+    },
+    {
+      "symbol": "ACTIVITY_GACHA_BROADCAST",
+      "mid": 4097,
+      "line": 530
+    },
+    {
+      "symbol": "ACTIVITY_FIREWORK",
+      "mid": 4098,
+      "line": 531
+    },
+    {
+      "symbol": "ACTIVITY_LVBU_BROADCAST",
+      "mid": 4099,
+      "line": 532
+    },
+    {
+      "symbol": "SQ_TURNTABLE_BROADCAST",
+      "mid": 4100,
+      "line": 533
+    },
+    {
+      "symbol": "WASH_BY_TICKET",
+      "mid": 128,
+      "line": 534
+    },
+    {
+      "symbol": "PET_WASH_BY_TICKET",
+      "mid": 133,
+      "line": 535
+    },
+    {
+      "symbol": "PET_USE_EXP_ITEMS",
+      "mid": 134,
+      "line": 536
+    },
+    {
+      "symbol": "SINGLE_DAY_RECOMMEND_FELLOWS",
+      "mid": 1376,
+      "line": 537
+    },
+    {
+      "symbol": "SINGLE_DAY_GET_APPLY_LIST",
+      "mid": 1377,
+      "line": 538
+    },
+    {
+      "symbol": "SINGLE_DAY_SEARCH_PLAYERS",
+      "mid": 1378,
+      "line": 539
+    },
+    {
+      "symbol": "SINGLE_DAY_APPLY_FELLOW",
+      "mid": 1379,
+      "line": 540
+    },
+    {
+      "symbol": "SINGLE_DAY_ACCEPT_FELLOW",
+      "mid": 1380,
+      "line": 541
+    },
+    {
+      "symbol": "SINGLE_DAY_CANCEL_APPLY",
+      "mid": 1381,
+      "line": 542
+    },
+    {
+      "symbol": "SINGLE_DAY_REMOVE_FELLOW",
+      "mid": 1382,
+      "line": 543
+    },
+    {
+      "symbol": "SINGLE_DAY_ACCEPT_REMOVE",
+      "mid": 1383,
+      "line": 544
+    },
+    {
+      "symbol": "SINGLE_DAY_DENY_REMOVE",
+      "mid": 1384,
+      "line": 545
+    },
+    {
+      "symbol": "SINGLE_DAY_OPEN_MISSION",
+      "mid": 1385,
+      "line": 546
+    },
+    {
+      "symbol": "SINGLE_DAY_FIGHT_RESULT",
+      "mid": 1386,
+      "line": 547
+    },
+    {
+      "symbol": "SINGLE_DAY_RANK_INFO",
+      "mid": 1387,
+      "line": 548
+    },
+    {
+      "symbol": "REGION_GET_ARENA_INFO",
+      "mid": 1408,
+      "line": 549
+    },
+    {
+      "symbol": "REGION_GET_ENEMY_LIST",
+      "mid": 1409,
+      "line": 550
+    },
+    {
+      "symbol": "REGION_SAVE_DEFENCE_INFO",
+      "mid": 1410,
+      "line": 551
+    },
+    {
+      "symbol": "REGION_START_FIGHT",
+      "mid": 1411,
+      "line": 552
+    },
+    {
+      "symbol": "REGION_FIGHT_RESULT",
+      "mid": 1412,
+      "line": 553
+    },
+    {
+      "symbol": "REGION_BUY_TICKET",
+      "mid": 1413,
+      "line": 554
+    },
+    {
+      "symbol": "REGION_RESET_TIMER",
+      "mid": 1414,
+      "line": 555
+    },
+    {
+      "symbol": "REGION_GET_FIGHT_RECORDS",
+      "mid": 1415,
+      "line": 556
+    },
+    {
+      "symbol": "REGION_GET_FIGHT_REPORT",
+      "mid": 1416,
+      "line": 557
+    },
+    {
+      "symbol": "GET_FORMATION_INFO",
+      "mid": 1417,
+      "line": 558
+    },
+    {
+      "symbol": "REGION_SUPPORT_PLAYER",
+      "mid": 1418,
+      "line": 559
+    },
+    {
+      "symbol": "REGION_GET_PARTNERS_INFO",
+      "mid": 1419,
+      "line": 560
+    },
+    {
+      "symbol": "GET_BOARD_INFO",
+      "mid": 1537,
+      "line": 561
+    },
+    {
+      "symbol": "YUANXIAO_START_COOK",
+      "mid": 1552,
+      "line": 562
+    },
+    {
+      "symbol": "YUANXIAO_FINISH_COOK",
+      "mid": 1553,
+      "line": 563
+    },
+    {
+      "symbol": "SQUARE_TURNTABLE_RAFFLE",
+      "mid": 1554,
+      "line": 564
+    },
+    {
+      "symbol": "SQUARE_TURNTABLEC_RAFFLE",
+      "mid": 1555,
+      "line": 565
+    },
+    {
+      "symbol": "LVBU_RANDOM_TEAM",
+      "mid": 1424,
+      "line": 566
+    },
+    {
+      "symbol": "LVBU_SET_TEAM",
+      "mid": 1425,
+      "line": 567
+    },
+    {
+      "symbol": "LVBU_GO_FORWARD",
+      "mid": 1426,
+      "line": 568
+    },
+    {
+      "symbol": "LVBU_BUY_WALK",
+      "mid": 1427,
+      "line": 569
+    },
+    {
+      "symbol": "LVBU_SUMMON",
+      "mid": 1428,
+      "line": 570
+    },
+    {
+      "symbol": "LVBU_REPAIR",
+      "mid": 1429,
+      "line": 571
+    },
+    {
+      "symbol": "LVBU_EXCHANGE_ITEMS",
+      "mid": 1430,
+      "line": 572
+    },
+    {
+      "symbol": "LVBU_BATTLE",
+      "mid": 1431,
+      "line": 573
+    },
+    {
+      "symbol": "LV_GET_RECORD_LIST",
+      "mid": 1432,
+      "line": 574
+    },
+    {
+      "symbol": "LV_GET_BATTLE_REPORT",
+      "mid": 1433,
+      "line": 575
+    },
+    {
+      "symbol": "LVBU_SET_CURRENT_HERO",
+      "mid": 1434,
+      "line": 576
+    },
+    {
+      "symbol": "LVBU_GIVE_UP_TEAM",
+      "mid": 1435,
+      "line": 577
+    },
+    {
+      "symbol": "LVBU_GET_RANK_INFO",
+      "mid": 1436,
+      "line": 578
+    },
+    {
+      "symbol": "LVBU_SHOP_EXCHANGE",
+      "mid": 1437,
+      "line": 579
+    },
+    {
+      "symbol": "LVBU_GET_CARD",
+      "mid": 1438,
+      "line": 580
+    },
+    {
+      "symbol": "LVBU_SHOW_RULE",
+      "mid": 1536,
+      "line": 581
+    },
+    {
+      "symbol": "INDIEGOGO_GET_FUNDING_LIST",
+      "mid": 1390,
+      "line": 582
+    },
+    {
+      "symbol": "INDIEGOGO_GET_FUNDING_INFO",
+      "mid": 1392,
+      "line": 583
+    },
+    {
+      "symbol": "INDIEGOGO_GET_INFO_BY_ID",
+      "mid": 1393,
+      "line": 584
+    },
+    {
+      "symbol": "INDIEGOGO_RELEASE_FUNDING",
+      "mid": 1394,
+      "line": 585
+    },
+    {
+      "symbol": "INDIEGOGO_INVEST_FUNDING",
+      "mid": 1395,
+      "line": 586
+    },
+    {
+      "symbol": "BUY_EXCLUSIVE_SHOP",
+      "mid": 1396,
+      "line": 587
+    },
+    {
+      "symbol": "INSCRIPTION_MAKE",
+      "mid": 1400,
+      "line": 588
+    },
+    {
+      "symbol": "INSCRIPTION_REBUILD",
+      "mid": 1401,
+      "line": 589
+    },
+    {
+      "symbol": "INSCRIPTION_INSERT",
+      "mid": 1402,
+      "line": 590
+    },
+    {
+      "symbol": "INSCRIPTION_REMOVE",
+      "mid": 1403,
+      "line": 591
+    },
+    {
+      "symbol": "INSCRIPTION_RESOLVE",
+      "mid": 1404,
+      "line": 592
+    },
+    {
+      "symbol": "INSCRIPTION_SAVE_REBUILD",
+      "mid": 1405,
+      "line": 593
+    },
+    {
+      "symbol": "INSCRIPTION_ABANDON_REBUILD",
+      "mid": 1406,
+      "line": 594
+    },
+    {
+      "symbol": "EXCHANGE_MATERIALS",
+      "mid": 1407,
+      "line": 595
+    },
+    {
+      "symbol": "ADD_NEWYEAR_WISH",
+      "mid": 1397,
+      "line": 596
+    },
+    {
+      "symbol": "GET_BULLET_SCREEN",
+      "mid": 1398,
+      "line": 597
+    },
+    {
+      "symbol": "WORLD_NOTICE",
+      "mid": 32784,
+      "line": 598
+    },
+    {
+      "symbol": "GET_CONQUER_SCHOOL_INFO",
+      "mid": 1568,
+      "line": 599
+    },
+    {
+      "symbol": "START_CONQUER_SCHOOL_FIGHT",
+      "mid": 1569,
+      "line": 600
+    },
+    {
+      "symbol": "CONQUER_SCHOOL_FIGHT_RESULT",
+      "mid": 1570,
+      "line": 601
+    },
+    {
+      "symbol": "GET_CONQUER_SCHOOL_REPORT_LIST",
+      "mid": 1571,
+      "line": 602
+    },
+    {
+      "symbol": "GET_CONQUER_SCHOOL_REPORT",
+      "mid": 1572,
+      "line": 603
+    },
+    {
+      "symbol": "RESET_CONQUER_SCHOOL",
+      "mid": 1573,
+      "line": 604
+    },
+    {
+      "symbol": "SAVE_TEAM",
+      "mid": 1793,
+      "line": 605
+    },
+    {
+      "symbol": "FB_SHARE_WEEKLY",
+      "mid": 1794,
+      "line": 606
+    },
+    {
+      "symbol": "RED_PACKETS_RANK",
+      "mid": 1795,
+      "line": 607
+    },
+    {
+      "symbol": "GET_TEA_TALK_INFO",
+      "mid": 1808,
+      "line": 608
+    },
+    {
+      "symbol": "TEA_TALK_QUEST",
+      "mid": 1809,
+      "line": 609
+    },
+    {
+      "symbol": "TEA_TALK_PRESENT",
+      "mid": 1810,
+      "line": 610
+    },
+    {
+      "symbol": "TEA_TALK_CONFIRM_GIFT",
+      "mid": 1811,
+      "line": 611
+    },
+    {
+      "symbol": "COMPOSE_SAKURA_ITEM",
+      "mid": 1824,
+      "line": 612
+    },
+    {
+      "symbol": "OPEN_SAKURA_EVENT",
+      "mid": 1825,
+      "line": 613
+    },
+    {
+      "symbol": "SAKURA_FIGHT_RESULT",
+      "mid": 1826,
+      "line": 614
+    },
+    {
+      "symbol": "GET_CLASS_INFO",
+      "mid": 1856,
+      "line": 615
+    },
+    {
+      "symbol": "APPLY_RELATION",
+      "mid": 1857,
+      "line": 616
+    },
+    {
+      "symbol": "GET_CLASS_FINDING_LIST",
+      "mid": 1858,
+      "line": 617
+    },
+    {
+      "symbol": "ACCEPT_TEACH_APPLY",
+      "mid": 1859,
+      "line": 618
+    },
+    {
+      "symbol": "DENY_TEACH_APPLY",
+      "mid": 1860,
+      "line": 619
+    },
+    {
+      "symbol": "TERMINATE_RELATION",
+      "mid": 1861,
+      "line": 620
+    },
+    {
+      "symbol": "GET_CLASS_MISSION_AWARD",
+      "mid": 1862,
+      "line": 621
+    },
+    {
+      "symbol": "STUDENT_OVER_FIGHT_RESULT",
+      "mid": 1863,
+      "line": 622
+    },
+    {
+      "symbol": "GET_PLAYER_CARD_INFO",
+      "mid": 1829,
+      "line": 623
+    },
+    {
+      "symbol": "PLAYER_CARD_ADD_PRAISE",
+      "mid": 1830,
+      "line": 624
+    },
+    {
+      "symbol": "MODIFY_SHOW_TYPES",
+      "mid": 1831,
+      "line": 625
+    },
+    {
+      "symbol": "MODIFY_SHOW_CASE",
+      "mid": 1832,
+      "line": 626
+    },
+    {
+      "symbol": "HIDE_SUB_TYPE",
+      "mid": 1833,
+      "line": 627
+    },
+    {
+      "symbol": "MODIFY_INTRO",
+      "mid": 1834,
+      "line": 628
+    },
+    {
+      "symbol": "ADD_COMMENT",
+      "mid": 1835,
+      "line": 629
+    },
+    {
+      "symbol": "ADD_COMMENT_PRAISE",
+      "mid": 1836,
+      "line": 630
+    },
+    {
+      "symbol": "GET_SHOWCASE_DETAIL",
+      "mid": 1838,
+      "line": 631
+    },
+    {
+      "symbol": "GET_COMMENT_LIST",
+      "mid": 1839,
+      "line": 632
+    },
+    {
+      "symbol": "GET_ALL_SHOW_TYPE_INFOS",
+      "mid": 1840,
+      "line": 633
+    },
+    {
+      "symbol": "DEL_COMMENT",
+      "mid": 1841,
+      "line": 634
+    },
+    {
+      "symbol": "GET_PRAISE_LIST",
+      "mid": 1842,
+      "line": 635
+    },
+    {
+      "symbol": "UPLOAD_SPACE_AVATAR",
+      "mid": 1844,
+      "line": 636
+    },
+    {
+      "symbol": "BUY_GLUE",
+      "mid": 1845,
+      "line": 637
+    },
+    {
+      "symbol": "FIRST_MAIN_TOUCH",
+      "mid": 1864,
+      "line": 638
+    },
+    {
+      "symbol": "REGION_CASUAL_GET_INFO",
+      "mid": 1872,
+      "line": 639
+    },
+    {
+      "symbol": "REGION_CASUAL_GET_RECORD_LIST",
+      "mid": 1873,
+      "line": 640
+    },
+    {
+      "symbol": "REGION_CASUAL_GET_RECORD_REPORT",
+      "mid": 1874,
+      "line": 641
+    },
+    {
+      "symbol": "REGION_CASUAL_MATCH_ENEMY",
+      "mid": 1875,
+      "line": 642
+    },
+    {
+      "symbol": "REGION_CASUAL_CANCEL_MATCH",
+      "mid": 1876,
+      "line": 643
+    },
+    {
+      "symbol": "REGION_CASUAL_GET_FIGHT_REPORT",
+      "mid": 1877,
+      "line": 644
+    },
+    {
+      "symbol": "GET_PET_STYLE_FORM_ITEM",
+      "mid": 1893,
+      "line": 645
+    },
+    {
+      "symbol": "USE_PET_STYLE",
+      "mid": 1894,
+      "line": 646
+    },
+    {
+      "symbol": "CANCEL_PET_STYLE",
+      "mid": 1895,
+      "line": 647
+    },
+    {
+      "symbol": "WATER_MUSHROOM",
+      "mid": 1888,
+      "line": 648
+    },
+    {
+      "symbol": "START_BOAT2017_FIGHT",
+      "mid": 1904,
+      "line": 649
+    },
+    {
+      "symbol": "SAVA_BOAT2017_FORMATION",
+      "mid": 1905,
+      "line": 650
+    },
+    {
+      "symbol": "Gift_PUSH",
+      "mid": 2048,
+      "line": 651
+    },
+    {
+      "symbol": "Gift_PUSH_SKIN",
+      "mid": 2049,
+      "line": 652
+    },
+    {
+      "symbol": "Gift_PUSH_GAME_START",
+      "mid": 2050,
+      "line": 653
+    },
+    {
+      "symbol": "Gift_PUSH_COUNT",
+      "mid": 2051,
+      "line": 654
+    },
+    {
+      "symbol": "BUY_FUND_NEW",
+      "mid": 2052,
+      "line": 655
+    },
+    {
+      "symbol": "GET_STORY_DROP_PARTNER",
+      "mid": 2064,
+      "line": 656
+    },
+    {
+      "symbol": "SELECT_DATE_HERO",
+      "mid": 2065,
+      "line": 657
+    },
+    {
+      "symbol": "CHANGE_DATE_HERO",
+      "mid": 2066,
+      "line": 658
+    },
+    {
+      "symbol": "SELECT_DATE_HERO_2",
+      "mid": 2067,
+      "line": 659
+    },
+    {
+      "symbol": "CHANGE_DATE_HERO_2",
+      "mid": 2068,
+      "line": 660
+    },
+    {
+      "symbol": "ACADEMY_GET_INFO",
+      "mid": 2080,
+      "line": 661
+    },
+    {
+      "symbol": "ACADEMY_SIGN_UP",
+      "mid": 2081,
+      "line": 662
+    },
+    {
+      "symbol": "ACADEMY_RECRUIT",
+      "mid": 2082,
+      "line": 663
+    },
+    {
+      "symbol": "ACADEMY_RECRUIT_LIST",
+      "mid": 2083,
+      "line": 664
+    },
+    {
+      "symbol": "ACADEMY_SAVE_TEAM",
+      "mid": 2084,
+      "line": 665
+    },
+    {
+      "symbol": "ACADEMY_TEAM_LIST",
+      "mid": 2085,
+      "line": 666
+    },
+    {
+      "symbol": "ACADEMY_MOVE_COMMAND",
+      "mid": 2086,
+      "line": 667
+    },
+    {
+      "symbol": "ACADEMY_CANCEL_COMMAND",
+      "mid": 2087,
+      "line": 668
+    },
+    {
+      "symbol": "ACADEMY_COMMAND_LIST",
+      "mid": 2088,
+      "line": 669
+    },
+    {
+      "symbol": "ACADEMY_RECORD_LIST",
+      "mid": 2089,
+      "line": 670
+    },
+    {
+      "symbol": "ACADEMY_RECORD_DETAIL",
+      "mid": 2090,
+      "line": 671
+    },
+    {
+      "symbol": "ACADEMY_RECORD",
+      "mid": 2091,
+      "line": 672
+    },
+    {
+      "symbol": "APPLY_COURSE",
+      "mid": 2128,
+      "line": 673
+    },
+    {
+      "symbol": "GET_COURSE_INFO",
+      "mid": 2129,
+      "line": 674
+    },
+    {
+      "symbol": "GET_STUDYROOM_INFO",
+      "mid": 2130,
+      "line": 675
+    },
+    {
+      "symbol": "STUDY",
+      "mid": 2131,
+      "line": 676
+    },
+    {
+      "symbol": "SPEED_STUDY",
+      "mid": 2132,
+      "line": 677
+    },
+    {
+      "symbol": "ADD_SKILL",
+      "mid": 2133,
+      "line": 678
+    },
+    {
+      "symbol": "FORGET_COURSE",
+      "mid": 2134,
+      "line": 679
+    },
+    {
+      "symbol": "ENTER_ROOM",
+      "mid": 2135,
+      "line": 680
+    },
+    {
+      "symbol": "LEAVE_ROOM",
+      "mid": 2136,
+      "line": 681
+    },
+    {
+      "symbol": "GET_STUDY_INFOS",
+      "mid": 2137,
+      "line": 682
+    },
+    {
+      "symbol": "CANCEL_STUDY",
+      "mid": 2138,
+      "line": 683
+    },
+    {
+      "symbol": "GET_GIFT_BOX_INFO",
+      "mid": 2139,
+      "line": 684
+    },
+    {
+      "symbol": "INCR_COURESE_EXP",
+      "mid": 2140,
+      "line": 685
+    },
+    {
+      "symbol": "OPEN_GIFT_BOX",
+      "mid": 2141,
+      "line": 686
+    },
+    {
+      "symbol": "CONTINUE_STUDY",
+      "mid": 2142,
+      "line": 687
+    },
+    {
+      "symbol": "CHANGE_PARTNER_SKILL",
+      "mid": 2144,
+      "line": 688
+    },
+    {
+      "symbol": "ZHUGE_SELECT_TEAM",
+      "mid": 2176,
+      "line": 689
+    },
+    {
+      "symbol": "ZHUGE_SET_EXTRA_PARTNER",
+      "mid": 2177,
+      "line": 690
+    },
+    {
+      "symbol": "ZHUGE_SWEEP",
+      "mid": 2178,
+      "line": 691
+    },
+    {
+      "symbol": "ZHUGE_GET_EVENT",
+      "mid": 2179,
+      "line": 692
+    },
+    {
+      "symbol": "ZHUGE_SELECT_BRANCH",
+      "mid": 2180,
+      "line": 693
+    },
+    {
+      "symbol": "ZHUGE_START_ADVENTURE",
+      "mid": 2181,
+      "line": 694
+    },
+    {
+      "symbol": "ZHUGE_RESET_ADVENTURE",
+      "mid": 2182,
+      "line": 695
+    },
+    {
+      "symbol": "ZHUGE_GET_NOTE_INFO",
+      "mid": 2183,
+      "line": 696
+    },
+    {
+      "symbol": "ZHUGE_RAMDOM_TASK",
+      "mid": 2184,
+      "line": 697
+    },
+    {
+      "symbol": "ZHUGE_SELECT_TASK",
+      "mid": 2185,
+      "line": 698
+    },
+    {
+      "symbol": "ZHUGE_COMPLETE_TASK",
+      "mid": 2186,
+      "line": 699
+    },
+    {
+      "symbol": "ZHUGE_GET_RANK_LIST",
+      "mid": 2187,
+      "line": 700
+    },
+    {
+      "symbol": "ZHUGE_SUMMOM",
+      "mid": 2188,
+      "line": 701
+    },
+    {
+      "symbol": "ZHUGE_CHECK_AVOID_DAMAGE",
+      "mid": 2189,
+      "line": 702
+    },
+    {
+      "symbol": "ZHUGE_AVOID_DAMAGE",
+      "mid": 2190,
+      "line": 703
+    },
+    {
+      "symbol": "ZHUGE_BUY_SHOP_ITEMS",
+      "mid": 2191,
+      "line": 704
+    },
+    {
+      "symbol": "ZHUGE_USE_ITEM",
+      "mid": 2192,
+      "line": 705
+    },
+    {
+      "symbol": "ZHUGE_FIGHT_BOSS",
+      "mid": 2193,
+      "line": 706
+    },
+    {
+      "symbol": "ZHUGE_GET_BOSS_INFO",
+      "mid": 2194,
+      "line": 707
+    },
+    {
+      "symbol": "ZHUGE_SELECT_VIP",
+      "mid": 2195,
+      "line": 708
+    },
+    {
+      "symbol": "ZHUGE_RECOVER_ENERGY",
+      "mid": 2196,
+      "line": 709
+    },
+    {
+      "symbol": "ZHUGE_SELECT_DIALOG",
+      "mid": 2197,
+      "line": 710
+    },
+    {
+      "symbol": "ZHUGE_END_DIALOG",
+      "mid": 2198,
+      "line": 711
+    },
+    {
+      "symbol": "ZHUGE_EXCHANGE_SKILL_BOOK",
+      "mid": 2199,
+      "line": 712
+    },
+    {
+      "symbol": "ZHUGE_ADVENTURE_LOG",
+      "mid": 2200,
+      "line": 713
+    },
+    {
+      "symbol": "ZHUGE_ADVENTURE_SPY",
+      "mid": 2201,
+      "line": 714
+    },
+    {
+      "symbol": "ZHUGE_CHANGE_SUMMON_TYPE",
+      "mid": 2202,
+      "line": 715
+    },
+    {
+      "symbol": "ZHUGE_SKIP_ADVENTURE",
+      "mid": 2203,
+      "line": 716
+    },
+    {
+      "symbol": "LOTTERY_SELECT_NUM",
+      "mid": 2208,
+      "line": 717
+    },
+    {
+      "symbol": "LOTTERY_AUTO_SELECT_NUMS",
+      "mid": 2209,
+      "line": 718
+    },
+    {
+      "symbol": "LOTTERY_GET_AWARD_INFOS",
+      "mid": 2210,
+      "line": 719
+    },
+    {
+      "symbol": "LOTTERY_GET_PLAYER_INFO_BY_NUM",
+      "mid": 2211,
+      "line": 720
+    },
+    {
+      "symbol": "LOTTERY_CONSUME_SELECT_NUM",
+      "mid": 2224,
+      "line": 721
+    },
+    {
+      "symbol": "LOTTERY_CONSUME_AUTO_SELECT_NUMS",
+      "mid": 2225,
+      "line": 722
+    },
+    {
+      "symbol": "LOTTERY_CONSUME_GET_AWARD_INFOS",
+      "mid": 2226,
+      "line": 723
+    },
+    {
+      "symbol": "LOTTERY_CONSUME_GET_PLAYER_INFO_BY_NUM",
+      "mid": 2227,
+      "line": 724
+    },
+    {
+      "symbol": "LOTTERY_CONSUME_BUY_ITEM",
+      "mid": 2228,
+      "line": 725
+    },
+    {
+      "symbol": "MEMORIES_OF_SCHOOL_GET_INFO",
+      "mid": 2304,
+      "line": 726
+    },
+    {
+      "symbol": "MEMORIES_OF_SCHOOL_START_GAME",
+      "mid": 2305,
+      "line": 727
+    },
+    {
+      "symbol": "MEMORIES_OF_SCHOOL_SAVE_MAP",
+      "mid": 2306,
+      "line": 728
+    },
+    {
+      "symbol": "MEMORIES_OF_SCHOOL_OPEN_BOX",
+      "mid": 2307,
+      "line": 729
+    },
+    {
+      "symbol": "MEMORIES_OF_SCHOOL_ENTER_NEXT_FLOOR",
+      "mid": 2308,
+      "line": 730
+    },
+    {
+      "symbol": "MEMORIES_OF_SCHOOL_GET_ENEMY_INFO",
+      "mid": 2309,
+      "line": 731
+    },
+    {
+      "symbol": "MEMORIES_OF_SCHOOL_FIGHT_MONSTER",
+      "mid": 2310,
+      "line": 732
+    },
+    {
+      "symbol": "MEMORIES_OF_SCHOOL_FIGHT_PLAYER",
+      "mid": 2311,
+      "line": 733
+    },
+    {
+      "symbol": "MEMORIES_OF_SCHOOL_ABANDON_GAME",
+      "mid": 2312,
+      "line": 734
+    },
+    {
+      "symbol": "MEMORIES_OF_SCHOOL_GET_FINAL_AWARD",
+      "mid": 2313,
+      "line": 735
+    },
+    {
+      "symbol": "MEMORIES_OF_SCHOOL_START_FIGHT",
+      "mid": 2314,
+      "line": 736
+    },
+    {
+      "symbol": "MEMORIES_OF_SCHOOL_REBORN_HERO",
+      "mid": 2315,
+      "line": 737
+    },
+    {
+      "symbol": "CATCH_FISH",
+      "mid": 2320,
+      "line": 738
+    },
+    {
+      "symbol": "BUY_NET",
+      "mid": 2321,
+      "line": 739
+    },
+    {
+      "symbol": "BUY_GOLDFISH_ITEM",
+      "mid": 2322,
+      "line": 740
+    },
+    {
+      "symbol": "GET_GOLDFISH_RANK_LIST",
+      "mid": 2323,
+      "line": 741
+    },
+    {
+      "symbol": "FIGHT_QUIZ_BOSS",
+      "mid": 2324,
+      "line": 742
+    },
+    {
+      "symbol": "GET_QUIZ_RANK_LIST",
+      "mid": 2325,
+      "line": 743
+    },
+    {
+      "symbol": "QUIZ_REVIVE",
+      "mid": 2326,
+      "line": 744
+    },
+    {
+      "symbol": "ANSER_QUIZ",
+      "mid": 2327,
+      "line": 745
+    },
+    {
+      "symbol": "SUMMER_TASK",
+      "mid": 2328,
+      "line": 746
+    },
+    {
+      "symbol": "POPULARITY_POLL",
+      "mid": 2352,
+      "line": 747
+    },
+    {
+      "symbol": "POPULARITY_PREDICT",
+      "mid": 2353,
+      "line": 748
+    },
+    {
+      "symbol": "POPULARITY_POLL_RANK_LIST",
+      "mid": 2354,
+      "line": 749
+    },
+    {
+      "symbol": "POPULARITY_POLL_LIST",
+      "mid": 2355,
+      "line": 750
+    },
+    {
+      "symbol": "POPULARITY_GET_SINGLE_RANK",
+      "mid": 2356,
+      "line": 751
+    },
+    {
+      "symbol": "GET_AUCTION_INFO_BY_TYPE",
+      "mid": 2336,
+      "line": 752
+    },
+    {
+      "symbol": "GET_AUCTION_LOG",
+      "mid": 2337,
+      "line": 753
+    },
+    {
+      "symbol": "AUCTION_BIDDING",
+      "mid": 2338,
+      "line": 754
+    },
+    {
+      "symbol": "GET_INFO",
+      "mid": 2362,
+      "line": 755
+    },
+    {
+      "symbol": "START_CHALLENGE",
+      "mid": 2363,
+      "line": 756
+    },
+    {
+      "symbol": "GET_CAMPAIGN_INFO",
+      "mid": 2364,
+      "line": 757
+    },
+    {
+      "symbol": "GET_MEMBER_STAT_INFO",
+      "mid": 2365,
+      "line": 758
+    },
+    {
+      "symbol": "CREATE_ROOM",
+      "mid": 2366,
+      "line": 759
+    },
+    {
+      "symbol": "JOIN_ROOM",
+      "mid": 2367,
+      "line": 760
+    },
+    {
+      "symbol": "EXIT_ROOM",
+      "mid": 2368,
+      "line": 761
+    },
+    {
+      "symbol": "INVITE_FRIEND",
+      "mid": 2369,
+      "line": 762
+    },
+    {
+      "symbol": "KICK_MEMBER",
+      "mid": 2370,
+      "line": 763
+    },
+    {
+      "symbol": "PREPARE_SINGLE_FIGHT",
+      "mid": 2371,
+      "line": 764
+    },
+    {
+      "symbol": "SINGLE_FIGHT",
+      "mid": 2372,
+      "line": 765
+    },
+    {
+      "symbol": "QUIT_SINGLE_FIGHT",
+      "mid": 2373,
+      "line": 766
+    },
+    {
+      "symbol": "TEAM_FIGHT_INVITE",
+      "mid": 2374,
+      "line": 767
+    },
+    {
+      "symbol": "ACCEPT_TEAM_INVITE",
+      "mid": 2375,
+      "line": 768
+    },
+    {
+      "symbol": "QUIT_TEAM_FIGHT",
+      "mid": 2376,
+      "line": 769
+    },
+    {
+      "symbol": "TEAM_FIGHT",
+      "mid": 2377,
+      "line": 770
+    },
+    {
+      "symbol": "PREPARE_TEAM_FIGHT",
+      "mid": 2378,
+      "line": 771
+    },
+    {
+      "symbol": "START_SINGLE_FIGHT",
+      "mid": 2379,
+      "line": 772
+    },
+    {
+      "symbol": "GET_CAMPAIGN_LOG_LIST",
+      "mid": 2380,
+      "line": 773
+    },
+    {
+      "symbol": "GET_CAMPAIGN_AWARD",
+      "mid": 2381,
+      "line": 774
+    },
+    {
+      "symbol": "GET_TEAM_FIGHT_REPORT",
+      "mid": 2382,
+      "line": 775
+    },
+    {
+      "symbol": "PICK_TEAM_FORMATION",
+      "mid": 2383,
+      "line": 776
+    },
+    {
+      "symbol": "CHANGE_POS",
+      "mid": 2384,
+      "line": 777
+    },
+    {
+      "symbol": "OCCULT_SWEEP",
+      "mid": 2385,
+      "line": 778
+    },
+    {
+      "symbol": "GET_ANNI_FIGHT_HERO_LIST",
+      "mid": 2400,
+      "line": 779
+    },
+    {
+      "symbol": "GET_ANNI_FIGHT_RANK_LIST",
+      "mid": 2401,
+      "line": 780
+    },
+    {
+      "symbol": "GET_ANNI_FIGHT_STAR_AWARD",
+      "mid": 2402,
+      "line": 781
+    },
+    {
+      "symbol": "ANNI_START_FIGHT",
+      "mid": 2403,
+      "line": 782
+    },
+    {
+      "symbol": "GIVE_ANNI_MISSION_ITEM",
+      "mid": 2404,
+      "line": 783
+    },
+    {
+      "symbol": "ANNI_REFRESH_HEROES",
+      "mid": 2405,
+      "line": 784
+    },
+    {
+      "symbol": "GET_FIGHT_MONSTER_DETAILS",
+      "mid": 2406,
+      "line": 785
+    },
+    {
+      "symbol": "ANNI_GIVE_GIFTS",
+      "mid": 2407,
+      "line": 786
+    },
+    {
+      "symbol": "GIVE_FRIEND_LIMIT",
+      "mid": 2408,
+      "line": 787
+    },
+    {
+      "symbol": "GET_ADVENTURE_LIST",
+      "mid": 2416,
+      "line": 788
+    },
+    {
+      "symbol": "GET_ADVENTURE_INFO",
+      "mid": 2417,
+      "line": 789
+    },
+    {
+      "symbol": "BUY_ADVENTURE_ITEM",
+      "mid": 2418,
+      "line": 790
+    },
+    {
+      "symbol": "START_PVP_FIGHT",
+      "mid": 2419,
+      "line": 791
+    },
+    {
+      "symbol": "BUY_ADVENTURE_CARD",
+      "mid": 2420,
+      "line": 792
+    },
+    {
+      "symbol": "START_PARADISE_FIGHT",
+      "mid": 2421,
+      "line": 793
+    },
+    {
+      "symbol": "FIGHT_PARADISE_FIGHT",
+      "mid": 2422,
+      "line": 794
+    },
+    {
+      "symbol": "ADVENTURE_ILLUSION_CREATE_TEAM_ROOM",
+      "mid": 2423,
+      "line": 795
+    },
+    {
+      "symbol": "ADVENTURE_ILLUSION_KICK_MEMBER",
+      "mid": 2424,
+      "line": 796
+    },
+    {
+      "symbol": "ADVENTURE_ILLUSION_JOIN_ROOM",
+      "mid": 2425,
+      "line": 797
+    },
+    {
+      "symbol": "ADVENTURE_ILLUSION_EXIT_ROOM",
+      "mid": 2426,
+      "line": 798
+    },
+    {
+      "symbol": "ADVENTURE_ILLUSION_INVITE_FRIEND",
+      "mid": 2427,
+      "line": 799
+    },
+    {
+      "symbol": "ADVENTURE_ILLUSION_ENTER_TEAM_FIGHT",
+      "mid": 2428,
+      "line": 800
+    },
+    {
+      "symbol": "ADVENTURE_ILLUSION_PICK_TEAM_FIGHT",
+      "mid": 2429,
+      "line": 801
+    },
+    {
+      "symbol": "ADVENTURE_ILLUSION_PREPARE_TEAM_FIGHT",
+      "mid": 2430,
+      "line": 802
+    },
+    {
+      "symbol": "ADVENTURE_DEFENSE_START_ROOM_FIGHT",
+      "mid": 2431,
+      "line": 803
+    },
+    {
+      "symbol": "ADVENTURE_DEFENSE_FIGHT_ROOM_RESULT",
+      "mid": 2410,
+      "line": 804
+    },
+    {
+      "symbol": "ADVENTURE_ILLUSION_TEAM_FIGHT",
+      "mid": 2411,
+      "line": 805
+    },
+    {
+      "symbol": "ADVENTURE_DEFENSE_PREPARE_ROOM_FIGHT",
+      "mid": 2412,
+      "line": 806
+    },
+    {
+      "symbol": "ADVENTURE_DEFENSE_QUIT_ROOM_FIGHT",
+      "mid": 2413,
+      "line": 807
+    },
+    {
+      "symbol": "NEW_TERMS_MAKE_GIFT",
+      "mid": 2432,
+      "line": 808
+    },
+    {
+      "symbol": "NEW_TERMS_GET_CONNECTION_GIFT",
+      "mid": 2433,
+      "line": 809
+    },
+    {
+      "symbol": "NEW_TERMS_SEND_ITEM",
+      "mid": 2434,
+      "line": 810
+    },
+    {
+      "symbol": "NEW_TERMS_GET_CHARM_RANK",
+      "mid": 2435,
+      "line": 811
+    },
+    {
+      "symbol": "NEW_TERMS_GET_CONNECTION_RANK",
+      "mid": 2436,
+      "line": 812
+    },
+    {
+      "symbol": "NEW_TERMS_GET_MAKE_LOGS",
+      "mid": 2437,
+      "line": 813
+    },
+    {
+      "symbol": "NEW_TERMS_GET_RECEIVE_LOGS",
+      "mid": 2438,
+      "line": 814
+    },
+    {
+      "symbol": "NEW_TERMS_GET_RECOMMEND_LIST",
+      "mid": 2439,
+      "line": 815
+    },
+    {
+      "symbol": "WAR_CAMP_APPLY",
+      "mid": 2448,
+      "line": 816
+    },
+    {
+      "symbol": "WAR_CAMP_NEW_TEAM",
+      "mid": 2449,
+      "line": 817
+    },
+    {
+      "symbol": "WAR_CAMP_MODIFY_TEAM",
+      "mid": 2450,
+      "line": 818
+    },
+    {
+      "symbol": "WAR_CAMP_GET_INFOS",
+      "mid": 2451,
+      "line": 819
+    },
+    {
+      "symbol": "WAR_CAMP_FIGHT_BOSS",
+      "mid": 2452,
+      "line": 820
+    },
+    {
+      "symbol": "WAR_CAMP_DEL_TEAM",
+      "mid": 2453,
+      "line": 821
+    },
+    {
+      "symbol": "WAR_CAMP_MOVE_TEAM",
+      "mid": 2454,
+      "line": 822
+    },
+    {
+      "symbol": "WAR_CAMP_REBORN_HERO",
+      "mid": 2455,
+      "line": 823
+    },
+    {
+      "symbol": "WAR_CAMP_BUY_ITEM",
+      "mid": 2456,
+      "line": 824
+    },
+    {
+      "symbol": "WAR_CAMP_GET_HURT_RANK",
+      "mid": 2457,
+      "line": 825
+    },
+    {
+      "symbol": "WAR_CAMP_GET_SCORE_RANK",
+      "mid": 2458,
+      "line": 826
+    },
+    {
+      "symbol": "WAR_CAMP_FIGHT_ENEMY",
+      "mid": 2459,
+      "line": 827
+    },
+    {
+      "symbol": "WAR_CAMP_FIGHT_RECORDS",
+      "mid": 2460,
+      "line": 828
+    },
+    {
+      "symbol": "WAR_CAMP_FIGHT_REPORT",
+      "mid": 2461,
+      "line": 829
+    },
+    {
+      "symbol": "WAR_CAMP_MAP_TEAMS",
+      "mid": 2463,
+      "line": 830
+    },
+    {
+      "symbol": "WAR_CAMP_REBORN_TEAM",
+      "mid": 2440,
+      "line": 831
+    },
+    {
+      "symbol": "WAR_CAMP_BUY_REVIVE_ITEM",
+      "mid": 2441,
+      "line": 832
+    },
+    {
+      "symbol": "CONSUME_GIFT_SUMMON",
+      "mid": 2464,
+      "line": 833
+    },
+    {
+      "symbol": "CHARGE_GIFT_SUMMON",
+      "mid": 2465,
+      "line": 834
+    },
+    {
+      "symbol": "ACTIVITY_BUY_SNOW_BALL",
+      "mid": 2466,
+      "line": 835
+    },
+    {
+      "symbol": "GET_SNOW_BALL_RANK",
+      "mid": 2467,
+      "line": 836
+    },
+    {
+      "symbol": "GET_TITLE_INFO",
+      "mid": 2490,
+      "line": 837
+    },
+    {
+      "symbol": "CHANGE_TITLE",
+      "mid": 2492,
+      "line": 838
+    },
+    {
+      "symbol": "GET_BUBBLE_INFO",
+      "mid": 2493,
+      "line": 839
+    },
+    {
+      "symbol": "CHANGE_BUBBLE",
+      "mid": 2494,
+      "line": 840
+    },
+    {
+      "symbol": "GET_HERO_SCORE",
+      "mid": 2496,
+      "line": 841
+    },
+    {
+      "symbol": "GET_RECOMMEND_INFO",
+      "mid": 2497,
+      "line": 842
+    },
+    {
+      "symbol": "GET_HERO_RECOMMEND_DETAIL",
+      "mid": 2498,
+      "line": 843
+    },
+    {
+      "symbol": "GET_FORCE_RANK_LIST",
+      "mid": 2499,
+      "line": 844
+    },
+    {
+      "symbol": "GET_COURSES_RECOMMEND",
+      "mid": 2500,
+      "line": 845
+    },
+    {
+      "symbol": "GET_HERO_RECOMMEND_SCORES",
+      "mid": 2501,
+      "line": 846
+    },
+    {
+      "symbol": "GET_HOUSE_LIST",
+      "mid": 2512,
+      "line": 847
+    },
+    {
+      "symbol": "OPEN_HOUSE",
+      "mid": 2513,
+      "line": 848
+    },
+    {
+      "symbol": "GET_HOUSE_DETAIL",
+      "mid": 2514,
+      "line": 849
+    },
+    {
+      "symbol": "SAVE_FURNITURES",
+      "mid": 2515,
+      "line": 850
+    },
+    {
+      "symbol": "HOUSE_EQUIP",
+      "mid": 2516,
+      "line": 851
+    },
+    {
+      "symbol": "ENTER_HERO",
+      "mid": 2517,
+      "line": 852
+    },
+    {
+      "symbol": "CHANGE_HOUSE_NAME",
+      "mid": 2518,
+      "line": 853
+    },
+    {
+      "symbol": "VISIT_RANDOM_HOUSE",
+      "mid": 2519,
+      "line": 854
+    },
+    {
+      "symbol": "HIDE_HOUSE",
+      "mid": 2520,
+      "line": 855
+    },
+    {
+      "symbol": "PRAISE_HOUSE",
+      "mid": 2521,
+      "line": 856
+    },
+    {
+      "symbol": "GET_DORM_PRAISE_LIST",
+      "mid": 2522,
+      "line": 857
+    },
+    {
+      "symbol": "COMMENT_HOUSE",
+      "mid": 2523,
+      "line": 858
+    },
+    {
+      "symbol": "GET_DORM_COMMENT_LIST",
+      "mid": 2524,
+      "line": 859
+    },
+    {
+      "symbol": "PRAISE_COMMENT",
+      "mid": 2525,
+      "line": 860
+    },
+    {
+      "symbol": "DELETE_COMMENT",
+      "mid": 2526,
+      "line": 861
+    },
+    {
+      "symbol": "GET_COMFORT_RANK_LIST",
+      "mid": 2527,
+      "line": 862
+    },
+    {
+      "symbol": "ACTIVITY_DA_CALL",
+      "mid": 2544,
+      "line": 863
+    },
+    {
+      "symbol": "SNOW_GACHA",
+      "mid": 2529,
+      "line": 864
+    },
+    {
+      "symbol": "SNOW_ACTIVITY_ADD_EXP",
+      "mid": 2530,
+      "line": 865
+    },
+    {
+      "symbol": "SNOW_ACTIVITY_ADD_ATTR",
+      "mid": 2531,
+      "line": 866
+    },
+    {
+      "symbol": "SNOW_GACHA_EXTRA",
+      "mid": 2532,
+      "line": 867
+    },
+    {
+      "symbol": "SNOW_ACTIVITY_EDIT_DEFENSE",
+      "mid": 2533,
+      "line": 868
+    },
+    {
+      "symbol": "SNOW_ACTIVITY_MATCH_ENEMY",
+      "mid": 2534,
+      "line": 869
+    },
+    {
+      "symbol": "SNOW_ACTIVITY_GET_ENEMY_INFO",
+      "mid": 2535,
+      "line": 870
+    },
+    {
+      "symbol": "SNOW_ACTIVITY_FIGHT_RESULT",
+      "mid": 2536,
+      "line": 871
+    },
+    {
+      "symbol": "SNOW_ACTIVITY_EQUIP_EFFECT",
+      "mid": 2537,
+      "line": 872
+    },
+    {
+      "symbol": "SNOW_ACTIVITY_RANK_LIST",
+      "mid": 2538,
+      "line": 873
+    },
+    {
+      "symbol": "SNOW_ACTIVITY_BATTLE_RECORDS",
+      "mid": 2539,
+      "line": 874
+    },
+    {
+      "symbol": "SNOW_ACTIVITY_GET_REPORT",
+      "mid": 2540,
+      "line": 875
+    },
+    {
+      "symbol": "SNOW_GACHA_BUY",
+      "mid": 2541,
+      "line": 876
+    },
+    {
+      "symbol": "SET_ILLUSION_BET",
+      "mid": 8192,
+      "line": 877
+    },
+    {
+      "symbol": "GET_PIC_NOTICE_INFO",
+      "mid": 8193,
+      "line": 878
+    },
+    {
+      "symbol": "READ_PIC_NOTICE",
+      "mid": 8194,
+      "line": 879
+    },
+    {
+      "symbol": "STICK_BLESS_WORD",
+      "mid": 2545,
+      "line": 880
+    },
+    {
+      "symbol": "STICK_BLESS_BAN",
+      "mid": 2546,
+      "line": 881
+    },
+    {
+      "symbol": "STICK_BLESS_RESET",
+      "mid": 2547,
+      "line": 882
+    },
+    {
+      "symbol": "STICK_BLESS_BUY",
+      "mid": 2542,
+      "line": 883
+    },
+    {
+      "symbol": "STICK_BLESS_RANK",
+      "mid": 2553,
+      "line": 884
+    },
+    {
+      "symbol": "ACTIVITY_ALICE_BOX",
+      "mid": 2548,
+      "line": 885
+    },
+    {
+      "symbol": "VALENTINE_GIVE_GIFT",
+      "mid": 2549,
+      "line": 886
+    },
+    {
+      "symbol": "VALENTINE_GIFT_RANK",
+      "mid": 2550,
+      "line": 887
+    },
+    {
+      "symbol": "NEW_WHITE_DAY_GIFT",
+      "mid": 2551,
+      "line": 888
+    },
+    {
+      "symbol": "NEW_WHITE_DAY_RANK",
+      "mid": 2552,
+      "line": 889
+    },
+    {
+      "symbol": "RED_POINT",
+      "mid": 2560,
+      "line": 890
+    },
+    {
+      "symbol": "AWAKE_MISSION_LIST",
+      "mid": 2561,
+      "line": 891
+    },
+    {
+      "symbol": "SAKURA2018_COMPOSE_ITEM",
+      "mid": 2562,
+      "line": 892
+    },
+    {
+      "symbol": "INVITE_TO_GUILD",
+      "mid": 2563,
+      "line": 893
+    },
+    {
+      "symbol": "ACCEPT_INVITE_TO_GUILD",
+      "mid": 2564,
+      "line": 894
+    },
+    {
+      "symbol": "GET_GUILD_INFO",
+      "mid": 2565,
+      "line": 895
+    },
+    {
+      "symbol": "TEXT_PAPER_QUIZ_START",
+      "mid": 2566,
+      "line": 896
+    },
+    {
+      "symbol": "TEXT_PAPER_QUIZ_ANSWER",
+      "mid": 2567,
+      "line": 897
+    },
+    {
+      "symbol": "SEND_BARRAGE_MESSAGE",
+      "mid": 2568,
+      "line": 898
+    },
+    {
+      "symbol": "SAKURA_WISHES_SUPER_BONUS",
+      "mid": 2569,
+      "line": 899
+    },
+    {
+      "symbol": "ACTIVITY_NEW_CANDLE_WISH",
+      "mid": 2570,
+      "line": 900
+    },
+    {
+      "symbol": "ACTIVITY_NEW_CANDLE_RANK",
+      "mid": 2571,
+      "line": 901
+    },
+    {
+      "symbol": "ACTIVITY_PARTY_STAR_AWARD",
+      "mid": 2572,
+      "line": 902
+    },
+    {
+      "symbol": "DRAGON_BOAT2017_EXCHANGE",
+      "mid": 2573,
+      "line": 903
+    },
+    {
+      "symbol": "DRAGON_BOAT2017_RANK",
+      "mid": 2574,
+      "line": 904
+    },
+    {
+      "symbol": "GET_CHAPTER_GACHA_AWARD",
+      "mid": 2576,
+      "line": 905
+    },
+    {
+      "symbol": "FIGHT_CHAPTER_BOSS",
+      "mid": 2577,
+      "line": 906
+    },
+    {
+      "symbol": "START_CHAPTER_BOSS_FIGHT",
+      "mid": 2578,
+      "line": 907
+    },
+    {
+      "symbol": "CARD_MATCH_NEW_TURN",
+      "mid": 2580,
+      "line": 908
+    },
+    {
+      "symbol": "CARD_MATCH_FLIP",
+      "mid": 2581,
+      "line": 909
+    },
+    {
+      "symbol": "GET_GARDEN_INFO",
+      "mid": 2592,
+      "line": 910
+    },
+    {
+      "symbol": "GARDEN_BUY_FIELD",
+      "mid": 2593,
+      "line": 911
+    },
+    {
+      "symbol": "GARDEN_BUY_SEED",
+      "mid": 2594,
+      "line": 912
+    },
+    {
+      "symbol": "GARDEN_SEEDING",
+      "mid": 2595,
+      "line": 913
+    },
+    {
+      "symbol": "GARDEN_FERTILIZE",
+      "mid": 2596,
+      "line": 914
+    },
+    {
+      "symbol": "GARDEN_WATER",
+      "mid": 2597,
+      "line": 915
+    },
+    {
+      "symbol": "GARDEN_GAIN",
+      "mid": 2598,
+      "line": 916
+    },
+    {
+      "symbol": "GARDEN_BUY_STEAL",
+      "mid": 2599,
+      "line": 917
+    },
+    {
+      "symbol": "GARDEN_LOG",
+      "mid": 2600,
+      "line": 918
+    },
+    {
+      "symbol": "GARDEN_RANK",
+      "mid": 2601,
+      "line": 919
+    },
+    {
+      "symbol": "GARDEN_DUG",
+      "mid": 2602,
+      "line": 920
+    },
+    {
+      "symbol": "GARDEN_EXCHANGE",
+      "mid": 2603,
+      "line": 921
+    },
+    {
+      "symbol": "BREACH_STONE_ADD",
+      "mid": 2608,
+      "line": 922
+    },
+    {
+      "symbol": "BREACH_STONE_EVOLVE",
+      "mid": 2609,
+      "line": 923
+    },
+    {
+      "symbol": "ACTIVITY_CONSUME_EXCHANGE",
+      "mid": 2656,
+      "line": 924
+    },
+    {
+      "symbol": "THIRD_ANNIVERSARY",
+      "mid": 2624,
+      "line": 925
+    },
+    {
+      "symbol": "THIRD_ANNI_WISHING_COIN",
+      "mid": 2625,
+      "line": 926
+    },
+    {
+      "symbol": "LUCKYBAG_AWARD",
+      "mid": 2626,
+      "line": 927
+    },
+    {
+      "symbol": "THIRD_ANNI_DIGLETT_DOUBLE",
+      "mid": 2627,
+      "line": 928
+    },
+    {
+      "symbol": "THIRD_ANNI_DIGLETT_START",
+      "mid": 2628,
+      "line": 929
+    },
+    {
+      "symbol": "THIRD_ANNI_DIGLETT_END",
+      "mid": 2629,
+      "line": 930
+    },
+    {
+      "symbol": "THIRD_ANNI_DIGLETT_EXCHANGE",
+      "mid": 2630,
+      "line": 931
+    },
+    {
+      "symbol": "THIRD_ANNI_DIGLETT_RANK",
+      "mid": 2631,
+      "line": 932
+    },
+    {
+      "symbol": "THIRD_ANNI_MISSION",
+      "mid": 2635,
+      "line": 933
+    },
+    {
+      "symbol": "THIRD_ANNI_MISSION_REWARD",
+      "mid": 2636,
+      "line": 934
+    },
+    {
+      "symbol": "THIRD_ANNI_WORD_REWARD",
+      "mid": 2637,
+      "line": 935
+    },
+    {
+      "symbol": "THIRD_ANNI_WISH",
+      "mid": 2632,
+      "line": 936
+    },
+    {
+      "symbol": "THIRD_ANNI_WISH_LIST",
+      "mid": 2633,
+      "line": 937
+    },
+    {
+      "symbol": "THIRD_ANNI_WISH_AWARD",
+      "mid": 2634,
+      "line": 938
+    },
+    {
+      "symbol": "THIRD_ANNI_WORD_DIARY",
+      "mid": 2652,
+      "line": 939
+    },
+    {
+      "symbol": "THIRD_ANNI_WORD_BEG",
+      "mid": 2653,
+      "line": 940
+    },
+    {
+      "symbol": "THIRD_ANNI_WORD_SEND",
+      "mid": 2654,
+      "line": 941
+    },
+    {
+      "symbol": "THIRD_ANNI_WORD_GET",
+      "mid": 2655,
+      "line": 942
+    },
+    {
+      "symbol": "THIRD_ANNI_WORD_RANK",
+      "mid": 2638,
+      "line": 943
+    },
+    {
+      "symbol": "THIRD_ANNIVERSARY_BOSS_START_FIGHT",
+      "mid": 2640,
+      "line": 944
+    },
+    {
+      "symbol": "THIRD_ANNIVERSARY_BOSS_FIGHT_RESULT",
+      "mid": 2641,
+      "line": 945
+    },
+    {
+      "symbol": "THIRD_ANNIVERSARY_BOSS_RANK",
+      "mid": 2642,
+      "line": 946
+    },
+    {
+      "symbol": "THIRD_ANNIVERSARY_BOSS_PERSON_AWARD",
+      "mid": 2643,
+      "line": 947
+    },
+    {
+      "symbol": "ACTIVITY_CONSUME_EXCHANGE",
+      "mid": 2656,
+      "line": 948
+    },
+    {
+      "symbol": "CV_LINK_ANSWER",
+      "mid": 2657,
+      "line": 949
+    },
+    {
+      "symbol": "MONOPLY_INFO",
+      "mid": 2672,
+      "line": 950
+    },
+    {
+      "symbol": "MONOPLY_DICING",
+      "mid": 2673,
+      "line": 951
+    },
+    {
+      "symbol": "MONOPLY_OPERATE",
+      "mid": 2674,
+      "line": 952
+    },
+    {
+      "symbol": "MONOPOLY_SKIP",
+      "mid": 2675,
+      "line": 953
+    },
+    {
+      "symbol": "MONOPOLY_PIPE_LINK",
+      "mid": 2676,
+      "line": 954
+    },
+    {
+      "symbol": "MONOPOLY_MISSION_AWARD",
+      "mid": 2677,
+      "line": 955
+    },
+    {
+      "symbol": "MONOPOLY_FIGHT_WIN",
+      "mid": 2678,
+      "line": 956
+    },
+    {
+      "symbol": "MONOPOLY_USE_CARD",
+      "mid": 2680,
+      "line": 957
+    },
+    {
+      "symbol": "MONOPOLY_RANK_LIST",
+      "mid": 2681,
+      "line": 958
+    },
+    {
+      "symbol": "MONOPOLY_SHOP_BUY",
+      "mid": 2682,
+      "line": 959
+    },
+    {
+      "symbol": "DECODE_PICK_NUM",
+      "mid": 2688,
+      "line": 960
+    },
+    {
+      "symbol": "DECODE_RANDOM_NUM",
+      "mid": 2689,
+      "line": 961
+    },
+    {
+      "symbol": "DECODE_BUY_SCORE",
+      "mid": 2690,
+      "line": 962
+    },
+    {
+      "symbol": "MONOPOLY_BUY_DICE",
+      "mid": 2691,
+      "line": 963
+    },
+    {
+      "symbol": "EXCHANGE_DORM_KEY",
+      "mid": 2693,
+      "line": 964
+    },
+    {
+      "symbol": "START_EXPAND_HOUSE",
+      "mid": 2694,
+      "line": 965
+    },
+    {
+      "symbol": "FINISH_EXPAND_HOUSE",
+      "mid": 2695,
+      "line": 966
+    },
+    {
+      "symbol": "CHOCOLATE_INFO",
+      "mid": 2704,
+      "line": 967
+    },
+    {
+      "symbol": "CHOCOLATE_SLOT",
+      "mid": 2705,
+      "line": 968
+    },
+    {
+      "symbol": "CHOCOLATE_SLOT_LIST",
+      "mid": 2706,
+      "line": 969
+    },
+    {
+      "symbol": "CHOCOLATE_SLOT_GET_EXTRA",
+      "mid": 2707,
+      "line": 970
+    },
+    {
+      "symbol": "CHOCOLATE_FRUIT_MUL",
+      "mid": 2708,
+      "line": 971
+    },
+    {
+      "symbol": "CHOCOLATE_FRUIT_START",
+      "mid": 2709,
+      "line": 972
+    },
+    {
+      "symbol": "CHOCOLATE_FRUIT_END",
+      "mid": 2710,
+      "line": 973
+    },
+    {
+      "symbol": "CHOCOLATE_FRUIT_EXCHANGE",
+      "mid": 2711,
+      "line": 974
+    },
+    {
+      "symbol": "CHOCOLATE_FRUIT_RANK",
+      "mid": 2712,
+      "line": 975
+    },
+    {
+      "symbol": "CHOCOLATE_UNLOCK_CAMPAIGN",
+      "mid": 2713,
+      "line": 976
+    },
+    {
+      "symbol": "CHOCOLATE_START_FIGHT",
+      "mid": 2714,
+      "line": 977
+    },
+    {
+      "symbol": "CHOCOLATE_FIGHT_RESULT",
+      "mid": 2715,
+      "line": 978
+    },
+    {
+      "symbol": "CHOCOLATE_SWEEP",
+      "mid": 2716,
+      "line": 979
+    },
+    {
+      "symbol": "CHOCOLATE_STAR_AWARD",
+      "mid": 2717,
+      "line": 980
+    },
+    {
+      "symbol": "CHOCOLATE_ENTER_MAP",
+      "mid": 2718,
+      "line": 981
+    },
+    {
+      "symbol": "CHOCOLATE_DRAW_POOL",
+      "mid": 2720,
+      "line": 982
+    },
+    {
+      "symbol": "CHOCOLATE_GO_NEXT",
+      "mid": 2721,
+      "line": 983
+    },
+    {
+      "symbol": "CHOCOLATE_MAP_INFO",
+      "mid": 2722,
+      "line": 984
+    },
+    {
+      "symbol": "CHECK_GAME_STAT",
+      "mid": 2754,
+      "line": 985
+    },
+    {
+      "symbol": "MAGIC_SUMMON_BUY",
+      "mid": 70,
+      "line": 986
+    },
+    {
+      "symbol": "MAGIC_SUMMON_SWITCH_HERO",
+      "mid": 71,
+      "line": 987
+    },
+    {
+      "symbol": "RECALL_PLAYER_SURE",
+      "mid": 2730,
+      "line": 988
+    },
+    {
+      "symbol": "TASK_LOAD_BY_TYPE",
+      "mid": 2736,
+      "line": 989
+    },
+    {
+      "symbol": "TASK_AWAKE_GIVE_UP",
+      "mid": 2737,
+      "line": 990
+    },
+    {
+      "symbol": "TASK_AWAKE_OPEN",
+      "mid": 2738,
+      "line": 991
+    },
+    {
+      "symbol": "TUTOR_INFO",
+      "mid": 2755,
+      "line": 992
+    },
+    {
+      "symbol": "TUTOR_END_CAMPAIGN",
+      "mid": 2757,
+      "line": 993
+    },
+    {
+      "symbol": "TUTOR_RESET_HERO",
+      "mid": 2758,
+      "line": 994
+    },
+    {
+      "symbol": "LOAD_TUTOR_RANK",
+      "mid": 2760,
+      "line": 995
+    },
+    {
+      "symbol": "GET_RENT_HEROS",
+      "mid": 2768,
+      "line": 996
+    },
+    {
+      "symbol": "DISCOUNT_SHOP_BUY",
+      "mid": 2752,
+      "line": 997
+    },
+    {
+      "symbol": "DISCOUNT_SHOP_REFRESH",
+      "mid": 2753,
+      "line": 998
+    },
+    {
+      "symbol": "DISCOUNT_SHOP_GET_TASK",
+      "mid": 2759,
+      "line": 999
+    },
+    {
+      "symbol": "LOVE_LETTER_RAFFLE",
+      "mid": 2725,
+      "line": 1000
+    },
+    {
+      "symbol": "LOVE_LETTER_CHANGE",
+      "mid": 2726,
+      "line": 1001
+    },
+    {
+      "symbol": "LOVE_LETTER_GUARANTEE",
+      "mid": 2727,
+      "line": 1002
+    },
+    {
+      "symbol": "MARKET_GET_CART",
+      "mid": 2762,
+      "line": 1003
+    },
+    {
+      "symbol": "MARKET_ADD_TO_CART",
+      "mid": 2763,
+      "line": 1004
+    },
+    {
+      "symbol": "MARKET_CLEAR_CART",
+      "mid": 2764,
+      "line": 1005
+    },
+    {
+      "symbol": "MARKET_PAY_THE_BILL",
+      "mid": 2765,
+      "line": 1006
+    },
+    {
+      "symbol": "MARKET_DELETE_ITEM",
+      "mid": 2766,
+      "line": 1007
+    },
+    {
+      "symbol": "GET_DREAM_WORLD_INFO",
+      "mid": 2769,
+      "line": 1008
+    },
+    {
+      "symbol": "START_DREAM_WORLD_EXPLORE",
+      "mid": 2770,
+      "line": 1009
+    },
+    {
+      "symbol": "GET_DREAM_WORLD_MAP",
+      "mid": 2771,
+      "line": 1010
+    },
+    {
+      "symbol": "DREAM_WORLD_UPDATE_MAP",
+      "mid": 2772,
+      "line": 1011
+    },
+    {
+      "symbol": "DREAM_WORLD_RESET_COOL_TIME",
+      "mid": 2773,
+      "line": 1012
+    },
+    {
+      "symbol": "DREAM_WORLD_DEAL_EVENT",
+      "mid": 2774,
+      "line": 1013
+    },
+    {
+      "symbol": "DREAM_WORLD_GET_TASK_LIST",
+      "mid": 2776,
+      "line": 1014
+    },
+    {
+      "symbol": "DREAM_WORLD_GET_TASK_AWARD",
+      "mid": 2777,
+      "line": 1015
+    },
+    {
+      "symbol": "DREAM_WORLD_GIVE_UP",
+      "mid": 2778,
+      "line": 1016
+    },
+    {
+      "symbol": "ALBUM_SPECIAL_COLLECT_INFO",
+      "mid": 2784,
+      "line": 1017
+    },
+    {
+      "symbol": "ALBUM_SPECIAL_COLLECT_REWARD",
+      "mid": 2785,
+      "line": 1018
+    },
+    {
+      "symbol": "BUY_CONQUER_TIMES",
+      "mid": 2790,
+      "line": 1019
+    },
+    {
+      "symbol": "CHAMPIONS_LEAGUE_GET_INFO",
+      "mid": 2800,
+      "line": 1020
+    },
+    {
+      "symbol": "CHAMPIONS_LEAGUE_GET_ENEMY",
+      "mid": 2801,
+      "line": 1021
+    },
+    {
+      "symbol": "CHAMPIONS_LEAGUE_FIGHT",
+      "mid": 2802,
+      "line": 1022
+    },
+    {
+      "symbol": "CHAMPIONS_GET_FIGHT_RECORD",
+      "mid": 2803,
+      "line": 1023
+    },
+    {
+      "symbol": "CHAMPIONS_GET_DAILY_AWARD",
+      "mid": 2804,
+      "line": 1024
+    },
+    {
+      "symbol": "CHAMPIONS_SET_DEFENSE_INFO",
+      "mid": 2805,
+      "line": 1025
+    },
+    {
+      "symbol": "CHAMPIONS_SELECT_AWARD_GROUP",
+      "mid": 2806,
+      "line": 1026
+    },
+    {
+      "symbol": "CHAMPIONS_GET_SEASON_TOP",
+      "mid": 2807,
+      "line": 1027
+    },
+    {
+      "symbol": "FOURTH_ANNI_GET_INFO",
+      "mid": 2816,
+      "line": 1028
+    },
+    {
+      "symbol": "FOURTH_ANNI_MAP_CHOOSE_STORY",
+      "mid": 2817,
+      "line": 1029
+    },
+    {
+      "symbol": "FOURTH_ANNI_MAP_RESTART",
+      "mid": 2818,
+      "line": 1030
+    },
+    {
+      "symbol": "FOURTH_ANNI_MAP_GET_AWARD",
+      "mid": 2819,
+      "line": 1031
+    },
+    {
+      "symbol": "FOURTH_ANNI_MAP_BATTLE",
+      "mid": 2820,
+      "line": 1032
+    },
+    {
+      "symbol": "FOURTH_ANNI_UFOCATCHER_REFRESH",
+      "mid": 2821,
+      "line": 1033
+    },
+    {
+      "symbol": "FOURTH_ANNI_UFOCATCHER_AUTO_CATCH",
+      "mid": 2822,
+      "line": 1034
+    },
+    {
+      "symbol": "FOURTH_ANNI_UFOCATCHER_START_CATCH",
+      "mid": 2823,
+      "line": 1035
+    },
+    {
+      "symbol": "FOURTH_ANNI_UFOCATCHER_CATCH",
+      "mid": 2824,
+      "line": 1036
+    },
+    {
+      "symbol": "FOURTH_ANNI_UFOCATCHER_END_CATCH",
+      "mid": 2825,
+      "line": 1037
+    },
+    {
+      "symbol": "FOURTH_ANNI_UFOCATCHER_CATCH_GET_EXTRA",
+      "mid": 2826,
+      "line": 1038
+    },
+    {
+      "symbol": "FOURTH_ANNI_UFOCATCHER_CATCH_LIST",
+      "mid": 2827,
+      "line": 1039
+    },
+    {
+      "symbol": "FOURTH_ANNI_SHOP_BUY",
+      "mid": 2828,
+      "line": 1040
+    },
+    {
+      "symbol": "FOURTH_ANNI_MAP_SWEEP",
+      "mid": 2829,
+      "line": 1041
+    },
+    {
+      "symbol": "FOURTH_ANNI_PAINT_INFO",
+      "mid": 2832,
+      "line": 1042
+    },
+    {
+      "symbol": "FOURTH_ANNI_PAINT_BLOCKS",
+      "mid": 2833,
+      "line": 1043
+    },
+    {
+      "symbol": "FOURTH_ANNI_PAINT_AWARD",
+      "mid": 2834,
+      "line": 1044
+    },
+    {
+      "symbol": "FOURTH_ANNI_PAINT_SAVE",
+      "mid": 2835,
+      "line": 1045
+    },
+    {
+      "symbol": "FOURTH_ANNI_PAINT_RANK_LIST",
+      "mid": 2836,
+      "line": 1046
+    },
+    {
+      "symbol": "FOURTH_ANNI_PAINT_VISIT",
+      "mid": 2837,
+      "line": 1047
+    },
+    {
+      "symbol": "FOURTH_ANNI_PAINT_VOTE",
+      "mid": 2838,
+      "line": 1048
+    },
+    {
+      "symbol": "FOURTH_ANNI_PAINT_VISIT_LIST",
+      "mid": 2839,
+      "line": 1049
+    },
+    {
+      "symbol": "FOURTH_ANNI_PAINT_SET_SHOW",
+      "mid": 2840,
+      "line": 1050
+    },
+    {
+      "symbol": "FOURTH_ANNIVERSARY_GOLD_MUL",
+      "mid": 2844,
+      "line": 1051
+    },
+    {
+      "symbol": "FOURTH_ANNIVERSARY_GOLD_START",
+      "mid": 2842,
+      "line": 1052
+    },
+    {
+      "symbol": "FOURTH_ANNIVERSARY_GOLD_END",
+      "mid": 2843,
+      "line": 1053
+    },
+    {
+      "symbol": "FOURTH_ANNIVERSARY_GOLD_EXCHANGE",
+      "mid": 2846,
+      "line": 1054
+    },
+    {
+      "symbol": "FOURTH_ANNIVERSARY_GOLD_RANK",
+      "mid": 2845,
+      "line": 1055
+    },
+    {
+      "symbol": "SAKURA_WISHES2_SUPER_BONUS",
+      "mid": 2848,
+      "line": 1056
+    },
+    {
+      "symbol": "ELEMENT_EQUIP",
+      "mid": 2849,
+      "line": 1057
+    },
+    {
+      "symbol": "ELEMENT_LEV_UP",
+      "mid": 2850,
+      "line": 1058
+    },
+    {
+      "symbol": "ELEMENT_UNLOAD",
+      "mid": 2851,
+      "line": 1059
+    },
+    {
+      "symbol": "ELEMENT_DESTORY_ON_PARTNER",
+      "mid": 2852,
+      "line": 1060
+    },
+    {
+      "symbol": "ELEMENT_DESTORY_IN_BACKPACK",
+      "mid": 2853,
+      "line": 1061
+    },
+    {
+      "symbol": "GET_PLAYER_GROUP_BY_KEY",
+      "mid": 2864,
+      "line": 1062
+    },
+    {
+      "symbol": "SET_PLAYER_GUIDE_FUNCTION",
+      "mid": 2865,
+      "line": 1063
+    },
+    {
+      "symbol": "SET_PLAYER_RETURN_ID",
+      "mid": 2866,
+      "line": 1064
+    },
+    {
+      "symbol": "POLAR_NIGHT_INFO",
+      "mid": 2880,
+      "line": 1065
+    },
+    {
+      "symbol": "POLAR_NIGHT_CAMPAIGH_INFO",
+      "mid": 2881,
+      "line": 1066
+    },
+    {
+      "symbol": "POLAR_NIGHT_START_FIGHT",
+      "mid": 2882,
+      "line": 1067
+    },
+    {
+      "symbol": "POLAR_NIGHT_FIGHT_RESULT",
+      "mid": 2883,
+      "line": 1068
+    },
+    {
+      "symbol": "POLAR_NIGHT_SWEEP",
+      "mid": 2884,
+      "line": 1069
+    },
+    {
+      "symbol": "POLAR_NIGHT_STAR_AWARDS",
+      "mid": 2885,
+      "line": 1070
+    },
+    {
+      "symbol": "POLAR_NIGHT_FIRST_ENTER",
+      "mid": 2886,
+      "line": 1071
+    },
+    {
+      "symbol": "POLAR_NIGHT_LIGHT_GACHA_DRAW",
+      "mid": 2887,
+      "line": 1072
+    },
+    {
+      "symbol": "POLAR_NIGHT_LIGHT_GACHA_NEXT_POOL",
+      "mid": 2888,
+      "line": 1073
+    },
+    {
+      "symbol": "POLAR_NIGHT_DARK_GACHA_BUY",
+      "mid": 2889,
+      "line": 1074
+    },
+    {
+      "symbol": "POLAR_NIGHT_DARK_GACHA_DRAW",
+      "mid": 2890,
+      "line": 1075
+    },
+    {
+      "symbol": "POLAR_NIGHT_DARK_GACHA_GET_EXTRA",
+      "mid": 2891,
+      "line": 1076
+    },
+    {
+      "symbol": "POLAR_NIGHT_BOSS_RANK",
+      "mid": 2892,
+      "line": 1077
+    },
+    {
+      "symbol": "POLAR_NIGHT_BOSS_START_FIGHT",
+      "mid": 2893,
+      "line": 1078
+    },
+    {
+      "symbol": "POLAR_NIGHT_BOSS_FIGHT_RESULT",
+      "mid": 2894,
+      "line": 1079
+    },
+    {
+      "symbol": "POLAR_NIGHT_BOSS_GET_AWARD",
+      "mid": 2896,
+      "line": 1080
+    },
+    {
+      "symbol": "FLAPPY_BIRD_GET_INFO",
+      "mid": 2912,
+      "line": 1081
+    },
+    {
+      "symbol": "FLAPPY_BIRD_GET_RANK_LIST",
+      "mid": 2913,
+      "line": 1082
+    },
+    {
+      "symbol": "FLAPPY_BIRD_START_GAME",
+      "mid": 2914,
+      "line": 1083
+    },
+    {
+      "symbol": "FLAPPY_BIRD_END_GAME",
+      "mid": 2915,
+      "line": 1084
+    },
+    {
+      "symbol": "FLAPPY_BIRD_POINT_AWARD",
+      "mid": 2916,
+      "line": 1085
+    },
+    {
+      "symbol": "FLAPPY_BIRD_POINT_BUY",
+      "mid": 2917,
+      "line": 1086
+    },
+    {
+      "symbol": "FLAPPY_BIRD_UNLOCK_HERO",
+      "mid": 2918,
+      "line": 1087
+    },
+    {
+      "symbol": "FLAPPY_BIRD_GET_AWARD",
+      "mid": 2919,
+      "line": 1088
+    },
+    {
+      "symbol": "RAGNAROK_INFO",
+      "mid": 2928,
+      "line": 1089
+    },
+    {
+      "symbol": "RAGNAROK_CAMP_INFO",
+      "mid": 2929,
+      "line": 1090
+    },
+    {
+      "symbol": "RAGNAROK_START_FIGHT",
+      "mid": 2930,
+      "line": 1091
+    },
+    {
+      "symbol": "RAGNAROK_FIGHT_RESULT",
+      "mid": 2931,
+      "line": 1092
+    },
+    {
+      "symbol": "RAGNAROK_FIRST_ENTER",
+      "mid": 2932,
+      "line": 1093
+    },
+    {
+      "symbol": "RAGNAROK_MISSION_INFO",
+      "mid": 2933,
+      "line": 1094
+    },
+    {
+      "symbol": "RAGNAROK_MISSION_AWARD",
+      "mid": 2934,
+      "line": 1095
+    },
+    {
+      "symbol": "RAGNAROK_MISSION_CHAT",
+      "mid": 2935,
+      "line": 1096
+    },
+    {
+      "symbol": "RAGNAROK_GACHA",
+      "mid": 2936,
+      "line": 1097
+    },
+    {
+      "symbol": "RAGNAROK_GET_ROOM_LIST",
+      "mid": 2937,
+      "line": 1098
+    },
+    {
+      "symbol": "RAGNAROK_EXCHANGE",
+      "mid": 2938,
+      "line": 1099
+    },
+    {
+      "symbol": "RAGNAROK_SHOP_INFO",
+      "mid": 2939,
+      "line": 1100
+    },
+    {
+      "symbol": "RAGNAROK_SET_ROOM_PUBLIC",
+      "mid": 2940,
+      "line": 1101
+    },
+    {
+      "symbol": "RAGNAROK_QUICK_JOIN_ROOM",
+      "mid": 2941,
+      "line": 1102
+    },
+    {
+      "symbol": "RAGNAROK_BOSS_INFO",
+      "mid": 2944,
+      "line": 1103
+    },
+    {
+      "symbol": "RAGNAROK_RANK_LIST",
+      "mid": 2945,
+      "line": 1104
+    },
+    {
+      "symbol": "RAGNAROK_GET_AWARD",
+      "mid": 2946,
+      "line": 1105
+    },
+    {
+      "symbol": "RAGNAROK_ENTER_SINGLE_FIGHT",
+      "mid": 2947,
+      "line": 1106
+    },
+    {
+      "symbol": "RAGNAROK_START_SINGLE_FIGHT",
+      "mid": 2948,
+      "line": 1107
+    },
+    {
+      "symbol": "RAGNAROK_SINGLE_FIGHT_RESULT",
+      "mid": 2949,
+      "line": 1108
+    },
+    {
+      "symbol": "RAGNAROK_END_SINGLE_FIGHT",
+      "mid": 2950,
+      "line": 1109
+    },
+    {
+      "symbol": "RAGNAROK_CREATE_ROOM",
+      "mid": 2951,
+      "line": 1110
+    },
+    {
+      "symbol": "RAGNAROK_JOIN_ROOM",
+      "mid": 2952,
+      "line": 1111
+    },
+    {
+      "symbol": "RAGNAROK_EXIT_ROOM",
+      "mid": 2953,
+      "line": 1112
+    },
+    {
+      "symbol": "RAGNAROK_KICK_MEMBER",
+      "mid": 2954,
+      "line": 1113
+    },
+    {
+      "symbol": "RAGNAROK_INVITE_FRIEND",
+      "mid": 2955,
+      "line": 1114
+    },
+    {
+      "symbol": "RAGNAROK_ENTER_TEAM_FIGHT",
+      "mid": 2956,
+      "line": 1115
+    },
+    {
+      "symbol": "RAGNAROK_START_TEAM_FIGHT",
+      "mid": 2957,
+      "line": 1116
+    },
+    {
+      "symbol": "RAGNAROK_TEAM_FIGHT_RESULT",
+      "mid": 2958,
+      "line": 1117
+    },
+    {
+      "symbol": "RAGNAROK_FINISH_TEAM_FIGHT",
+      "mid": 2959,
+      "line": 1118
+    },
+    {
+      "symbol": "SANDBAG_INFO",
+      "mid": 2960,
+      "line": 1119
+    },
+    {
+      "symbol": "SANDBAG_ENTER",
+      "mid": 2961,
+      "line": 1120
+    },
+    {
+      "symbol": "SANDBAG_START",
+      "mid": 2962,
+      "line": 1121
+    },
+    {
+      "symbol": "SANDBAG_RESULT",
+      "mid": 2963,
+      "line": 1122
+    },
+    {
+      "symbol": "SANDBAG_FRIEND_INFO",
+      "mid": 2964,
+      "line": 1123
+    },
+    {
+      "symbol": "LUKANG_SUMMON",
+      "mid": 2976,
+      "line": 1124
+    },
+    {
+      "symbol": "LUKANG_EXTRA",
+      "mid": 2977,
+      "line": 1125
+    },
+    {
+      "symbol": "SKIN_SHOP_INFO",
+      "mid": 2980,
+      "line": 1126
+    },
+    {
+      "symbol": "USE_ILLUSION_SKIN_ITEM",
+      "mid": 2979,
+      "line": 1127
+    },
+    {
+      "symbol": "SKIN_SHOP_BUY",
+      "mid": 2981,
+      "line": 1128
+    },
+    {
+      "symbol": "BUY_SHOP_MULTI",
+      "mid": 2982,
+      "line": 1129
+    },
+    {
+      "symbol": "BATTLE_PASS_GET_INFO",
+      "mid": 2984,
+      "line": 1130
+    },
+    {
+      "symbol": "BATTLE_PASS_BUY_LEVEL",
+      "mid": 2985,
+      "line": 1131
+    },
+    {
+      "symbol": "BATTLE_PASS_BUY_LIMIT_PURCHASE",
+      "mid": 2986,
+      "line": 1132
+    },
+    {
+      "symbol": "BATTLE_PASS_GET_AWARD",
+      "mid": 2987,
+      "line": 1133
+    },
+    {
+      "symbol": "BATTLE_PASS_GET_MISSION_AWARD",
+      "mid": 2988,
+      "line": 1134
+    },
+    {
+      "symbol": "ACTIVITY_1220_SUMMON",
+      "mid": 2992,
+      "line": 1135
+    },
+    {
+      "symbol": "GIFT_PUSH_NEW",
+      "mid": 2993,
+      "line": 1136
+    },
+    {
+      "symbol": "GIFT_PUSH_CONDITION_COUNT",
+      "mid": 2994,
+      "line": 1137
+    },
+    {
+      "symbol": "GIFT_PUSH_INFO",
+      "mid": 2995,
+      "line": 1138
+    },
+    {
+      "symbol": "GIFT_PUSH_NEW_CLICK",
+      "mid": 2996,
+      "line": 1139
+    },
+    {
+      "symbol": "CHEST_US_AWARD",
+      "mid": 3002,
+      "line": 1140
+    },
+    {
+      "symbol": "CHEST_US2_AWARD",
+      "mid": 3003,
+      "line": 1141
+    },
+    {
+      "symbol": "ACTIVITY_CONTRACT_BUG_TICKET",
+      "mid": 3004,
+      "line": 1142
+    },
+    {
+      "symbol": "ACTIVITY_CONTRACT_SUMMON",
+      "mid": 3005,
+      "line": 1143
+    },
+    {
+      "symbol": "BALLOON_DRAW_POOL",
+      "mid": 3024,
+      "line": 1144
+    },
+    {
+      "symbol": "BALLOON_NEXT_POOL",
+      "mid": 3025,
+      "line": 1145
+    },
+    {
+      "symbol": "BALLOON_REFRESH_POOL",
+      "mid": 3026,
+      "line": 1146
+    },
+    {
+      "symbol": "BALLOON_MISSION_AWARD",
+      "mid": 3027,
+      "line": 1147
+    },
+    {
+      "symbol": "BALLOON_BUY",
+      "mid": 3028,
+      "line": 1148
+    },
+    {
+      "symbol": "ACTIVITY_FISHING_GET_INFO",
+      "mid": 3009,
+      "line": 1149
+    },
+    {
+      "symbol": "FISH_FIGHT_BET",
+      "mid": 3010,
+      "line": 1150
+    },
+    {
+      "symbol": "FISH_FIGHT_RANK",
+      "mid": 3011,
+      "line": 1151
+    },
+    {
+      "symbol": "FISH_FIGHT_EXCHANGE",
+      "mid": 3012,
+      "line": 1152
+    },
+    {
+      "symbol": "FISH_FIGHT_BUY",
+      "mid": 3013,
+      "line": 1153
+    },
+    {
+      "symbol": "FISH_FIGHT_REPORT",
+      "mid": 3014,
+      "line": 1154
+    },
+    {
+      "symbol": "FISH_FIGHT_BET_INFO",
+      "mid": 3015,
+      "line": 1155
+    },
+    {
+      "symbol": "ACTIVITY_FISHING_START",
+      "mid": 3016,
+      "line": 1156
+    },
+    {
+      "symbol": "ACTIVITY_FISHING_END",
+      "mid": 3017,
+      "line": 1157
+    },
+    {
+      "symbol": "ACTIVITY_FISHING_CHANGE_ROD",
+      "mid": 3018,
+      "line": 1158
+    },
+    {
+      "symbol": "ACTIVITY_FISHING_CHANGE_HOOK",
+      "mid": 3019,
+      "line": 1159
+    },
+    {
+      "symbol": "ACTIVITY_FISHING_CHANGE_BAIT",
+      "mid": 3020,
+      "line": 1160
+    },
+    {
+      "symbol": "ACTIVITY_FISHING_BUY_ITEM",
+      "mid": 3021,
+      "line": 1161
+    },
+    {
+      "symbol": "ACTIVITY_FISHING_COLLECT_INFO",
+      "mid": 3022,
+      "line": 1162
+    },
+    {
+      "symbol": "ACTIVITY_FISHING_COLLECT_AWARD",
+      "mid": 3023,
+      "line": 1163
+    },
+    {
+      "symbol": "ACTIVITY_MONTH_FUND_AWARD",
+      "mid": 3032,
+      "line": 1164
+    },
+    {
+      "symbol": "ACTIVITY_STONE_EXCHANGE_BUY",
+      "mid": 3033,
+      "line": 1165
+    },
+    {
+      "symbol": "ACTIVITY_1068_AWARD",
+      "mid": 3034,
+      "line": 1166
+    },
+    {
+      "symbol": "ACTIVITY_1151_AWARD",
+      "mid": 3035,
+      "line": 1167
+    },
+    {
+      "symbol": "FIFTH_ANNI_GET_INFO",
+      "mid": 3040,
+      "line": 1168
+    },
+    {
+      "symbol": "FIFTH_ANNI_GACHA_LOCK_POOL",
+      "mid": 3041,
+      "line": 1169
+    },
+    {
+      "symbol": "FIFTH_ANNI_GACHA_DRAW_POOL",
+      "mid": 3042,
+      "line": 1170
+    },
+    {
+      "symbol": "FIFTH_ANNI_GACHA_REFRESH_POOL",
+      "mid": 3043,
+      "line": 1171
+    },
+    {
+      "symbol": "FIFTH_ANNI_GACHA_BUY_DRAW_ITEM",
+      "mid": 3044,
+      "line": 1172
+    },
+    {
+      "symbol": "FIFTH_ANNI_MONOPOLY_MOVE",
+      "mid": 3045,
+      "line": 1173
+    },
+    {
+      "symbol": "FIFTH_ANNI_BOSS_START_FIGHT",
+      "mid": 3046,
+      "line": 1174
+    },
+    {
+      "symbol": "FIFTH_ANNI_BOSS_FIGHT_RESULT",
+      "mid": 3047,
+      "line": 1175
+    },
+    {
+      "symbol": "FIFTH_ANNI_BOSS_BUY_CHALLENGE_TIME",
+      "mid": 3048,
+      "line": 1176
+    },
+    {
+      "symbol": "FIFTH_ANNI_BOSS_GET_AWARD",
+      "mid": 3049,
+      "line": 1177
+    },
+    {
+      "symbol": "FIFTH_ANNI_BOSS_GET_ALL_AWARD",
+      "mid": 3050,
+      "line": 1178
+    },
+    {
+      "symbol": "FIFTH_ANNI_BOSS_GET_RANK",
+      "mid": 3051,
+      "line": 1179
+    },
+    {
+      "symbol": "FIFTH_ANNI_BOSS_GET_INFO",
+      "mid": 3052,
+      "line": 1180
+    },
+    {
+      "symbol": "FIFTH_ANNI_PARTY_SEND_GIFT",
+      "mid": 3053,
+      "line": 1181
+    },
+    {
+      "symbol": "FIFTH_ANNI_PARTY_GET_AWARD",
+      "mid": 3054,
+      "line": 1182
+    },
+    {
+      "symbol": "FIFTH_ANNI_PARTY_GET_ALL_AWARDS",
+      "mid": 3072,
+      "line": 1183
+    },
+    {
+      "symbol": "FIFTH_ANNI_PARTY_GET_LOGS",
+      "mid": 3073,
+      "line": 1184
+    },
+    {
+      "symbol": "FIFTH_ANNI_PARTY_GET_SEND_RANK_LIST",
+      "mid": 3074,
+      "line": 1185
+    },
+    {
+      "symbol": "FIFTH_ANNI_PARTY_GET_PLAYER_INFO",
+      "mid": 3075,
+      "line": 1186
+    },
+    {
+      "symbol": "FIFTH_ANNI_PARTY_GET_COLLECTION_INFO",
+      "mid": 3076,
+      "line": 1187
+    },
+    {
+      "symbol": "FIFTH_ANNI_PARTY_GET_COLLECTION_AWARD",
+      "mid": 3077,
+      "line": 1188
+    },
+    {
+      "symbol": "FIFTH_ANNI_PARTY_GET_RANDOM_PLAYERS",
+      "mid": 3078,
+      "line": 1189
+    },
+    {
+      "symbol": "GET_HUNQI_INFO",
+      "mid": 3088,
+      "line": 1190
+    },
+    {
+      "symbol": "HUNQI_ENHANCE",
+      "mid": 3089,
+      "line": 1191
+    },
+    {
+      "symbol": "HUNQI_LOCK",
+      "mid": 3090,
+      "line": 1192
+    },
+    {
+      "symbol": "HUNQI_UNLOCK",
+      "mid": 3091,
+      "line": 1193
+    },
+    {
+      "symbol": "HUNQI_START_FIGHT",
+      "mid": 3092,
+      "line": 1194
+    },
+    {
+      "symbol": "HUNQI_FIGHT_RESULT",
+      "mid": 3093,
+      "line": 1195
+    },
+    {
+      "symbol": "HUNQI_EQUIP",
+      "mid": 3094,
+      "line": 1196
+    },
+    {
+      "symbol": "HUNQI_ONE_KEY_UNEQUIP",
+      "mid": 3095,
+      "line": 1197
+    },
+    {
+      "symbol": "HUNQI_BUY_ENERGY",
+      "mid": 3096,
+      "line": 1198
+    },
+    {
+      "symbol": "HUNQI_GET_CAMPAIGN_INFO",
+      "mid": 3097,
+      "line": 1199
+    },
+    {
+      "symbol": "HUNQI_CREATE",
+      "mid": 3098,
+      "line": 1200
+    },
+    {
+      "symbol": "HUNQI_AUTO_FIGHT",
+      "mid": 3099,
+      "line": 1201
+    },
+    {
+      "symbol": "HUNQI_GET_AUTO_AWRAD",
+      "mid": 3100,
+      "line": 1202
+    },
+    {
+      "symbol": "HUNQI_START_GAME_GET_INFO",
+      "mid": 3101,
+      "line": 1203
+    },
+    {
+      "symbol": "ACTIVITY_1106_AWARD",
+      "mid": 3104,
+      "line": 1204
+    },
+    {
+      "symbol": "ACTIVITY_1124_AWARD",
+      "mid": 3105,
+      "line": 1205
+    },
+    {
+      "symbol": "ACTIVITY_1149_AWARD",
+      "mid": 3106,
+      "line": 1206
+    },
+    {
+      "symbol": "ACTIVITY_1187_AWARD",
+      "mid": 3107,
+      "line": 1207
+    },
+    {
+      "symbol": "ACTIVITY_1206_AWARD",
+      "mid": 3108,
+      "line": 1208
+    },
+    {
+      "symbol": "ACTIVITY_1231_AWARD",
+      "mid": 3109,
+      "line": 1209
+    },
+    {
+      "symbol": "HUNQI_GET_COLLOCATION_INFOS",
+      "mid": 3112,
+      "line": 1210
+    },
+    {
+      "symbol": "HUNQI_SAVE_COLLOCATION",
+      "mid": 3113,
+      "line": 1211
+    },
+    {
+      "symbol": "DEL_COLLOCATION",
+      "mid": 3114,
+      "line": 1212
+    },
+    {
+      "symbol": "APPLY_COLLOCATION",
+      "mid": 3115,
+      "line": 1213
+    },
+    {
+      "symbol": "HERO_COLLOCATION",
+      "mid": 3116,
+      "line": 1214
+    },
+    {
+      "symbol": "EXCHANGE_LVBUSP",
+      "mid": 3117,
+      "line": 1215
+    }
+  ]
+}

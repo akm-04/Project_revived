@@ -1,0 +1,218 @@
+{
+  "source_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+  "files": [
+    {
+      "profile": "EXACT_ARCHIVE_SRC64",
+      "path": "app/model/SelfPlayer.lua",
+      "archive_member": "app-assets/output/assets/src_64/app/model/SelfPlayer.lua",
+      "sha256": "163d5893c9522ada412c2b9c4748a80757660fccdf03c8f72cb6edf0838b8eb4",
+      "bytes": 156513
+    },
+    {
+      "profile": "EXACT_ARCHIVE_SRC64",
+      "path": "app/model/NormalHero.lua",
+      "archive_member": "app-assets/output/assets/src_64/app/model/NormalHero.lua",
+      "sha256": "125183556caeecc182bf0702dd1f95160c8ba1666a3b97fbb8a7261d30ae0ac9",
+      "bytes": 103561
+    },
+    {
+      "profile": "EXACT_ARCHIVE_SRC64",
+      "path": "app/model/SuperHero.lua",
+      "archive_member": "app-assets/output/assets/src_64/app/model/SuperHero.lua",
+      "sha256": "b127c2cbef327d3142031bf30daa0af1b45997c6da82fba946d641a86783d622",
+      "bytes": 94188
+    },
+    {
+      "profile": "EXACT_ARCHIVE_SRC64",
+      "path": "app/model/Task.lua",
+      "archive_member": "app-assets/output/assets/src_64/app/model/Task.lua",
+      "sha256": "d454ae7cb1e28d95d366aae30ba88d83432c974415f263991af6c4190d54bee5",
+      "bytes": 17226
+    },
+    {
+      "profile": "EXACT_ARCHIVE_SRC64",
+      "path": "app/windows/HeroMainWindow.lua",
+      "archive_member": "app-assets/output/assets/src_64/app/windows/HeroMainWindow.lua",
+      "sha256": "473b72ec14a81d01d6dbdaa19f92c3d78900f40ca34fa5c8cf46585b76d65414",
+      "bytes": 271948
+    },
+    {
+      "profile": "EXACT_ARCHIVE_SRC64",
+      "path": "app/windows/TaskAwakeCell.lua",
+      "archive_member": "app-assets/output/assets/src_64/app/windows/TaskAwakeCell.lua",
+      "sha256": "ff133e4afc528f2c5a31e2ec51a88f3ac9e1d3ab6b137f8ddbdff3dec7671ff6",
+      "bytes": 33942
+    },
+    {
+      "profile": "EXACT_ARCHIVE_SRC64",
+      "path": "app/windows/AwakeTwiceSelectTeamWindow.lua",
+      "archive_member": "app-assets/output/assets/src_64/app/windows/AwakeTwiceSelectTeamWindow.lua",
+      "sha256": "5c860b0211739fb80163b2fe174c60117bd178d824fc3a4755c792b629ba19c8",
+      "bytes": 23685
+    },
+    {
+      "profile": "EXACT_ARCHIVE_SRC64",
+      "path": "app/common/tables/StoneEvolutionTable.lua",
+      "archive_member": "app-assets/output/assets/src_64/app/common/tables/StoneEvolutionTable.lua",
+      "sha256": "427a6f74505f5f221026e3695aa7d2506e3eafcbc71918271e5644b544c9dc3f",
+      "bytes": 2790
+    },
+    {
+      "profile": "EXACT_ARCHIVE_SRC64",
+      "path": "app/common/tables/StoneTicketTable.lua",
+      "archive_member": "app-assets/output/assets/src_64/app/common/tables/StoneTicketTable.lua",
+      "sha256": "9e5b079a415f11da581666baf030ee485c726df67d0bacb399629ccf6bc737b0",
+      "bytes": 474
+    },
+    {
+      "profile": "EXACT_ARCHIVE_SRC64",
+      "path": "app/common/tables/HeroTable.lua",
+      "archive_member": "app-assets/output/assets/src_64/app/common/tables/HeroTable.lua",
+      "sha256": "5293207486e52a8dad959b48ea0c90680a335e9144c362d5e9b342b9fd6cef60",
+      "bytes": 47835
+    },
+    {
+      "profile": "EXACT_ARCHIVE_SRC64",
+      "path": "app/common/tables/MissionTable.lua",
+      "archive_member": "app-assets/output/assets/src_64/app/common/tables/MissionTable.lua",
+      "sha256": "1737d7eddc2e7dfa005e43b6105305b9c6d8227d00f47bdc99fb69b96430f577",
+      "bytes": 18426
+    },
+    {
+      "profile": "EXACT_ARCHIVE_SRC64",
+      "path": "app/common/tables/MiscTable.lua",
+      "archive_member": "app-assets/output/assets/src_64/app/common/tables/MiscTable.lua",
+      "sha256": "6579de771dbef3224fcaa9568a8fcfade26209f134acfe3a3e666ecbd6c13cee",
+      "bytes": 75984
+    },
+    {
+      "profile": "EXACT_ARCHIVE_SRC64",
+      "path": "app/common/network/mid.lua",
+      "archive_member": "app-assets/output/assets/src_64/app/common/network/mid.lua",
+      "sha256": "026a20b29d97624979777a68c64c749254031604057ff42aa8f8254c3e35b5af",
+      "bytes": 43121
+    },
+    {
+      "profile": "EXACT_ARCHIVE_SRC64",
+      "path": "app/common/network/Backend.lua",
+      "archive_member": "app-assets/output/assets/src_64/app/common/network/Backend.lua",
+      "sha256": "95378e2b0be8180df6de27e9e430c630bcfe46c080e1f91ef5f6d74bdbb1b840",
+      "bytes": 36252
+    },
+    {
+      "profile": "EXACT_ARCHIVE_SRC64",
+      "path": "app/common/enums.lua",
+      "archive_member": "app-assets/output/assets/src_64/app/common/enums.lua",
+      "sha256": "15340bd89fe7c6f150ccfd4a5cd2a2f0e8e73c89dfae9ac3388376a4799901f3",
+      "bytes": 80531
+    },
+    {
+      "profile": "EXACT_ARCHIVE_SRC64",
+      "path": "data/tables/stone_evolution.lua",
+      "archive_member": "app-assets/output/assets/src_64/data/tables/stone_evolution.lua",
+      "sha256": "3c1935f5e3c0bbce70b89ccf66ed29b2862bec4554bc97f8bf7b8090b56ae82c",
+      "bytes": 386
+    },
+    {
+      "profile": "EXACT_ARCHIVE_SRC64",
+      "path": "data/tables/stone_ticket.lua",
+      "archive_member": "app-assets/output/assets/src_64/data/tables/stone_ticket.lua",
+      "sha256": "b986ce8fd5ef3fd2934a3213b1b6d7782e122fe25fe702a5b5591c0f074f78ff",
+      "bytes": 158
+    },
+    {
+      "profile": "EXACT_ARCHIVE_SRC64",
+      "path": "data/tables/partner.lua",
+      "archive_member": "app-assets/output/assets/src_64/data/tables/partner.lua",
+      "sha256": "a1d3d11e308140e57ed861a2dc0031f562420881405a5ba6f62987df8952bc49",
+      "bytes": 2550282
+    },
+    {
+      "profile": "EXACT_ARCHIVE_SRC64",
+      "path": "data/tables/super_partner.lua",
+      "archive_member": "app-assets/output/assets/src_64/data/tables/super_partner.lua",
+      "sha256": "ddee186ee41361a3674d4764be68efec01fad32d288c9dc84c552df6f1b770ea",
+      "bytes": 48646
+    },
+    {
+      "profile": "EXACT_ARCHIVE_SRC64",
+      "path": "data/tables/awaken_mission.lua",
+      "archive_member": "app-assets/output/assets/src_64/data/tables/awaken_mission.lua",
+      "sha256": "fdbcaf96386a7aa775c23b071bfe9952ef6acfc57982d17300b8308417fdb123",
+      "bytes": 224369
+    },
+    {
+      "profile": "EXACT_ARCHIVE_SRC64",
+      "path": "data/tables/misc.lua",
+      "archive_member": "app-assets/output/assets/src_64/data/tables/misc.lua",
+      "sha256": "058cf5719421ed71a12083a8c95b0ccded7204bedb5fa1263d508e2fa4257f9a",
+      "bytes": 175945
+    },
+    {
+      "profile": "FROZEN_V1_CORROBORATION_NOT_ORIGINAL_SERVER",
+      "path": "gxb_backend/state/hero_advanced_progression_repository.py",
+      "sha256": "8607454a2d8b10619054e5be8b4d7a9bf69b27260dbeefb68c271bffe31b1109",
+      "bytes": 28816
+    },
+    {
+      "profile": "FROZEN_V1_CORROBORATION_NOT_ORIGINAL_SERVER",
+      "path": "gxb_backend/state/hero_entity_mutation_service.py",
+      "sha256": "dd0470be8dbdc2cc7c787a7c0c9cdb890ba5f7587c5a841c5712442204dc4f14",
+      "bytes": 22765
+    },
+    {
+      "profile": "FROZEN_V1_CORROBORATION_NOT_ORIGINAL_SERVER",
+      "path": "gxb_backend/state/hero_repository.py",
+      "sha256": "be7ed885f9e492933be5a051dd20bc52500cab0fd9f08bf655acfac6c2a169ae",
+      "bytes": 36454
+    },
+    {
+      "profile": "FROZEN_V1_CORROBORATION_NOT_ORIGINAL_SERVER",
+      "path": "gxb_backend/state/awakening_mission_service.py",
+      "sha256": "577bb46ccedcafdfd90fb946480c1e2f92ef8f1546b50c69d3a545b54a619d39",
+      "bytes": 33734
+    },
+    {
+      "profile": "FROZEN_V1_CORROBORATION_NOT_ORIGINAL_SERVER",
+      "path": "gxb_backend/state/awakening_state_v2.py",
+      "sha256": "347fb40a79f1aa3e3ffd42df36a4af1f312d7af2a0ba87a74a3f735c372aa538",
+      "bytes": 10797
+    },
+    {
+      "profile": "FROZEN_V1_CORROBORATION_NOT_ORIGINAL_SERVER",
+      "path": "gxb_backend/content/awakening_source_catalog.py",
+      "sha256": "1384eafa9f25092a5ab0a89e6d25f04f5a93703adfc41821f2623dc9168b2dbd",
+      "bytes": 7693
+    },
+    {
+      "profile": "FROZEN_V1_CORROBORATION_NOT_ORIGINAL_SERVER",
+      "path": "docs/PASS73_AWAKENING_BLOOD_AWAKENING_RESEARCH.md",
+      "sha256": "77dacf3a10ed0ca3e101af407cdc02decb953e0ed305df7f58fc24fa92a6e9ae",
+      "bytes": 2734
+    },
+    {
+      "profile": "FROZEN_V1_CORROBORATION_NOT_ORIGINAL_SERVER",
+      "path": "tools/selftest_pass73_advanced_progression.py",
+      "sha256": "1943153a27cf11674e159a58cb2331f2ed76c5004b52738815292de8c8157b96",
+      "bytes": 12876
+    },
+    {
+      "profile": "FROZEN_V1_CORROBORATION_NOT_ORIGINAL_SERVER",
+      "path": "data/hero_advanced_progression_meta.json",
+      "sha256": "3eb940612311f3954f9fa4e2bafc069e4c93390aba7f0cadc0d4bf9cb859f188",
+      "bytes": 1593314
+    },
+    {
+      "profile": "FROZEN_V1_CORROBORATION_NOT_ORIGINAL_SERVER",
+      "path": "data/awakening_compatibility_policy.json",
+      "sha256": "88b0856192e45d437710a314945871f8a88ed4d19b0fffd5bd77ad3c22f17590",
+      "bytes": 3712
+    },
+    {
+      "profile": "FROZEN_V1_CORROBORATION_NOT_ORIGINAL_SERVER",
+      "path": "docs/PASS73_SRC64_FEEDBACK_LOOP.json",
+      "sha256": "76d8fae277a3af0d922412ca3c9800873100392bf57e78cb9db3a38dbc2b630c",
+      "bytes": 2235
+    }
+  ]
+}

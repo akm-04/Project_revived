@@ -1,0 +1,66 @@
+{
+  "id": "I7C2C_DORM_INPUT_LIFECYCLE",
+  "version": 1,
+  "stage": "I7C-2C",
+  "status": "FROZEN_PREIMPLEMENTATION_PENDING_NORMAL_PASS690_PUBLICATION",
+  "classification": "SOURCE_BOUND_RULES_PLUS_USER_APPROVED_RECONSTRUCTION",
+  "clauses": [
+    {
+      "id": "I7C2C-OWNER",
+      "requirement": "DormHouse solely owns real roots/rooms/layouts/occupancy/retained per-Hero Dorm equipment/expansion occurrences/Lounge anchors and fractions. Character owns Hero identity/progression/EXP; I5 owns value and canonical Player functions; content owns qualified immutable rules. Missing required owner differs from true no-room absence."
+    },
+    {
+      "id": "I7C2C-PROFILE",
+      "requirement": "Current79-member source manifest and CONTENT_ROWS govern selected minimum9 operations2512..2517/2693..2695. Four room classes/capacities; current Normal and Super eligibility separately; persistent wire-safe allocated house IDs, real Lounge. No invented flat geometry, furniture instance IDs, live source rediscovery or alternate translation2 rule adoption."
+    },
+    {
+      "id": "I7C2C-LAYOUT",
+      "requirement": "Validate complete packed layout graph, panels/bounds/rotation/stack support/pile/AutoFull/dresser/free resident floor space from source profile. Comfort is placed-entry sum. item_record is usedcount; stock remains total I5 quantity. All layout changes share I5 economy lock; all canonical quantity reduction/delete must reject remaining<used through owning typed usage port, with real race and rollback evidence before activation."
+    },
+    {
+      "id": "I7C2C-REFERENCE",
+      "requirement": "Desired membership is atomic reparent under complete old/new liveHero plus Dormroot lockplan; one purchased room/five Lounge, source nonLounge24h cooldown, Lounge exempt; typed HeroRemovalGuard prevents live referenced retirement/consumption. No generic busy flag or automatic detach. Per-Hero equipment remains across rooms; derived content slot/item, Normalcolor>=16/Supercurrent exemption, slot<=star, level eligibility, exactly one I5 item debit; no effect outside purchased room/Lounge."
+    },
+    {
+      "id": "I7C2C-TIME",
+      "requirement": "User-approved C2C_LOUNGE_EXP_V1 in PRESERVATION_POLICY_PROPOSAL.json governs settlement, fractions/tenhour discard/oldcomfort/currentCharactercap/backward time. Persist canonical anchors/fraction; use captured authoritative instant. Existing Character progression applies EXP; no projection or scheduler creates EXP. Original-server mathematics not claimed."
+    },
+    {
+      "id": "I7C2C-VALUE_REPLAY",
+      "requirement": "User-approved uniform C2C_RANDOM_KEY_V1 uses existing operation RNG and durable admission/receipt outcome. Paid key opening/exchange/equipment/expansion preserve exact semantic outcome/cost/revision/time through retry/unknownCOMMIT. Resolve pending admissions before fresh intent; positive proof required, no blind replay. Resolved stock request may be new paid intent; house_id-only FINISH addresses current occurrence as DESIGN documents. No new global RNG."
+    },
+    {
+      "id": "I7C2C-EXPANSION",
+      "requirement": "Qualified Villa3 expansion rows retain accepted start/duration/revision/occurrence and old applied level. Natural owner GETdetail finalizes once at deadline; early FINISH source125 diamonds per begun15min. Apply new level/area/growth only at completion; no invented cancel/reset. Keys/Cement exchange uses I5 existing qualified mixed exchange and overflow ownership."
+    },
+    {
+      "id": "I7C2C-PORTS",
+      "requirement": "Caller Queryer/Tx, pinned revision/time, population/owner versions, full canonical lockset including Dorm500 before I5 suffix. Typed Player gate/CharacterEXP/I5 stockusage/Dorm rawinput ports only; no foreign-owner SQL, nested Tx or new clocks. Function71..74 read canonical Player facts; prerequisite fixtures do not qualify later Campaign writer. Reuse accepted2A/2B unchanged facts and outcomes."
+    },
+    {
+      "id": "I7C2C-DEPLOY",
+      "requirement": "Fresh/bootstrap and controlled owning backfill seed missing Dormroot/Lounge/facets before feature activation; preserve explicit canonical facts. New migration50/payload with previous25 payloadbytes preserved unless concrete invalidation; API startup does not activate/backfill. Required owner/version/eligibility observations fail closed. MID1/MID49/detail/reload project actual state."
+    },
+    {
+      "id": "I7C2C-ACCEPTANCE",
+      "requirement": "One intended frozen combined candidate and portableR2 exact PG fresh/49upgrade/backfill, source/owner/layout/value/time/concurrency/reference/unknownCOMMIT/process/reload/affected regression plus independent primary-agent reality before leaf acceptance. Reuse valid accepted proof. Dorm social/naming/privacy/Workroom/Campaign/title/finalstats retained named later routes; child GREEN never accepts2/C/I7 or W2."
+    }
+  ],
+  "parent_contracts": [
+    "I7C1_PROVIDER_SCOPE_OWNERSHIP",
+    "I7C1_DELIVERY_ACCEPTANCE",
+    "I7C1_RESEARCH_AMENDMENT"
+  ],
+  "inherited": [
+    "D04",
+    "D06",
+    "D11",
+    "FP01",
+    "CA_CORE616",
+    "I7B1_TRANSACTION_REFERENCE_REPLAY",
+    "I7A1",
+    "WORKPLACE_TIME465",
+    "I5"
+  ],
+  "original_server_formula_claimed": false
+}

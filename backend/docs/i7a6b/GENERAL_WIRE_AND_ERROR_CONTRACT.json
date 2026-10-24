@@ -1,0 +1,98 @@
+{
+  "schema": "gxb-i7a6b-preimplementation-design/v1",
+  "pass": "647.0",
+  "stage": "I7A-6B",
+  "baseline_passmap": "646.0",
+  "baseline_passmap_sha256": "1e9943a4df772785ec46477f5c46a36fa595781a0fdbc91d634a0e9ed4849149",
+  "backend_sha256": "cb46a317b94a00e9983a686e8c97c6bc05b0893b0d65e222337f16a5e5d498d1",
+  "backend_tree": "07d697cc331ba3bfaa2c085a04fabba21df4f94d8abb658dfe89589a767e1403",
+  "status": "RESEARCH_DESIGN_COMPLETE_PRODUCT_NOT_IMPLEMENTED",
+  "implementation_authorized": true,
+  "implementation_started": false,
+  "product_accepted": false,
+  "original_server_truth_claimed": false,
+  "contract_id": "I7A6B_GENERAL_WIRE",
+  "owner": "PersonalDMDelivery + typedHTTP/realtimeedges",
+  "request": {
+    "mid": 513,
+    "transport": "authenticatedHTTP",
+    "required_owner_fields": [
+      "to_player_id",
+      "message"
+    ],
+    "optional_owner_fields": {
+      "channel": "absent or exactinteger1"
+    },
+    "no_other_owner_fields": true,
+    "text": "nonemptyvalidUTF8 <=140Unicode scalars, preserveverbatim;140is inheritedcompatibilitydecision,not newly recoveredGeneralserverlimit",
+    "owner_parser_policy": {
+      "bytes": 2048,
+      "depth": 2,
+      "nodes": 16,
+      "keys": 3,
+      "numeric_token_bytes": 64,
+      "absolute_exponent": 400,
+      "wire_integer_abs_max": 9007199254740991
+    },
+    "reuse": "foundationfinitejson lexical/duplicate/Unicode/exactinteger mechanism; channelchat ordinarytextmeaning; neverFriendwrapper decoder",
+    "unknown_fields": [
+      "type",
+      "msgType",
+      "selectType",
+      "roomID",
+      "np_info",
+      "from_player_id"
+    ],
+    "ordinary_report_looking_text": "plainstring content,not structuredproducer permission"
+  },
+  "response": {
+    "success": "HTTP200 emptyobject onlyfromdefinitecanonicalWRITTEN_BEFORE_DEADLINE receipt",
+    "failure_table": {
+      "malformed": 400,
+      "missingauth": 401,
+      "regionmismatch": 403,
+      "unavailable/offline/blocked/expired/unknown/noeligiblebinding": 409,
+      "admissioncapacity": 503
+    },
+    "error_namespace": "engine/domain body;noinventedoriginalprivateerrorcodes; neverHTTP200error_codeonly",
+    "known_internal_operation": "sameopUUID+digest+senderrecipient resolvesretainedpositivereceipt withoutnewsend;stockrequesthasnoopnonce"
+  },
+  "event": {
+    "mid": 514,
+    "direction": "S2C",
+    "role": "targetWORLD",
+    "fields": [
+      "message",
+      "from_player_id",
+      "from_player_name",
+      "from_player_type",
+      "player_type",
+      "from_player_avatar_id",
+      "from_player_avatar_frame_id",
+      "from_player_lev",
+      "type",
+      "np_info"
+    ],
+    "type": 0,
+    "player_type": "mustmirrorcanonicalfrom_player_type exactly",
+    "player_id_alias": "omitted;notrequiredbyobservedconsumer",
+    "np_info": {
+      "encoding": "JSONstring",
+      "title_info": "@@@@",
+      "bubble_info": "10001@0",
+      "conquer_lev": "canonicalI4",
+      "conquer_loop_id": "canonicalI4"
+    },
+    "sender_echo": "none; senderlocalcallbackownsecho",
+    "default_content_binding": "reusequalifiedaccepted5Aprofileandverifiedmiscdefaultbubble10001;futurechangeddefaultrequirescontentqualification"
+  },
+  "producer_boundary": "NoGeneralemoticon/report/mode interpretation; FriendCOMMON/EMOTICON remainsseparate; noarbitrarystructuredrelay",
+  "source_findings": [
+    "6B-F01",
+    "6B-F02",
+    "6B-F03",
+    "6B-F04",
+    "6B-F06",
+    "6B-F07"
+  ]
+}

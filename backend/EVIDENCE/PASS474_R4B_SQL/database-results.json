@@ -1,0 +1,231 @@
+{
+  "engine": "POSTGRESQL_WASM_DIAGNOSTIC_ONLY",
+  "version": "PostgreSQL 18.3 (PGlite 0.5.4) on wasm32-unknown-linux-gnu, compiled by emcc (Emscripten gcc/clang-like replacement + linker emulating GNU ld) 3.1.74 (1092ec30a3fb1d46b1782ff1b4db5094d3d06ae5), 32-bit",
+  "source_hashes": {
+    "sql/content/content.sql": "05ab7783b11145428662bd553cf8701a9c674c417f76224cdc88036b55343766",
+    "sql/kernel/receipts.sql": "74ad9accee063e77323a2eb4a69df394bdcb331ce88e3d789864ffbc904b7511",
+    "migrations/00001_kernel_receipts.sql": "fab5b35f4ca5eee53c62b0b924ec448327e1aa31205015c22e24ee0f2b710fd8",
+    "migrations/00002_identity_logicalserver_bootstrap.sql": "adff86d27dd1c02e4da0dec6b1aa21f33aaafd4d410849abc76bfeec58a5cd5f",
+    "migrations/00003_identity_account_uid_repair.sql": "f3c3463e85348fe70e3572d84633019461c900dda2e216f223ccdd72f0bf940c",
+    "migrations/00004_player_directory_profile_bootstrap.sql": "c1b6499827a0f61054f0d77aaff46da2655410cb407881c8b734ed58a9b7e31b",
+    "migrations/00005_i5_player_economy_mail_objective_redeem.sql": "7bd5dc3ce5e71dc19fea1d1ab2ff27cb8825d7631650f0a2b65f9a1278fb1059",
+    "migrations/00006_i5_transactional_policies.sql": "b901b0185afd183a6c3973679571746347fc810c102597d298db3331908f1377",
+    "migrations/00007_identity_lifecycle_constraints.sql": "11213cd5fa5b3f917ae9e3077fd6c736657e4bd0b9f4dd6b04a74ee7da1aed4d",
+    "migrations/00008_i5_economy_owner_fence.sql": "b4f9b741bea82cfd08ea3163958fe7811049f4e8a029f33176666aadc8623265",
+    "migrations/00009_r4_immutable_content_revisions.sql": "b67018f5ca39e5ad05379e9df16c52e1cda5eb54918ab0db14319609d76237e4",
+    "migrations/00010_r4_manifest_identity_not_null.sql": "305822dc72d03f6194332b38ee9cea9dba9223282bd8ac75c42aa480a0a4cf01",
+    "internal/content/builtin/generated/manifest.json": "9edbce8ce0a0fc6244789b78dd11226a8f7c35f64cce20382f8b3e14feafe5e3",
+    "internal/content/builtin/generated/resource_catalog.json": "ddb2e962832eea93ab3a7f8f6568b2f7d95bb3af32ac86ae90b98d7cb683bfc6",
+    "internal/content/builtin/generated/player_progression.json": "9b21a3d9f66cc9eed479d7246f69835c97614c611cc76529543d58f3348a8e08",
+    "internal/content/builtin/generated/objective_catalog.json": "ff4d225e9328cd108b2afdc449a70327c41326288a49a21cd991c3f548781824"
+  },
+  "results": [
+    {
+      "name": "fresh_all_migration_SQL_atomic",
+      "result": "PASS",
+      "evidence": {
+        "elapsed_ms": {
+          "1": 31.04,
+          "2": 77.26,
+          "3": 34.6,
+          "4": 11.87,
+          "5": 134.65,
+          "6": 22.99,
+          "7": 18.17,
+          "8": 5.69,
+          "9": 44.04,
+          "10": 3.66
+        },
+        "interpretation": "single-session execution time, NOT production lock-duration proof; raw migration SQL, not goose runner"
+      }
+    },
+    {
+      "name": "upgrade_00008_seed_legacy",
+      "result": "PASS",
+      "evidence": "legacy receipt/temporal/objective rows inserted on schema00008"
+    },
+    {
+      "name": "upgrade_00008_to_00009_preserves_legacy",
+      "result": "PASS",
+      "evidence": "all prior row columns byte-equivalent in JSON representation; only []/NULL added"
+    },
+    {
+      "name": "original_00009_JSON_null_defect_reproduced",
+      "result": "PASS",
+      "evidence": {
+        "accepted_invalid_json_null_fields": [
+          "revision_id",
+          "schema_version",
+          "compiler_version",
+          "parser_version"
+        ],
+        "classification": "CONFIRMED_DEFECT_IN_00009_CORRECTED_BY_00010"
+      }
+    },
+    {
+      "name": "00010_corrupt_upgrade_fails_atomically",
+      "result": "PASS",
+      "evidence": "invalid row preserved; new constraint absent after failed migration; test fixture explicitly removed by harness only"
+    },
+    {
+      "name": "00010_clean_upgrade",
+      "result": "PASS",
+      "evidence": "PASS"
+    },
+    {
+      "name": "legacy_INSERT_after_upgrade_defaults",
+      "result": "PASS",
+      "evidence": "old column lists still accepted; source-shape compatibility only, not old binary execution"
+    },
+    {
+      "name": "strict_manifest_revision_id_null_rejected",
+      "result": "PASS",
+      "evidence": "23514"
+    },
+    {
+      "name": "strict_manifest_revision_id_missing_rejected",
+      "result": "PASS",
+      "evidence": "23514"
+    },
+    {
+      "name": "strict_manifest_revision_id_wrong_type_rejected",
+      "result": "PASS",
+      "evidence": "23514"
+    },
+    {
+      "name": "strict_manifest_schema_version_null_rejected",
+      "result": "PASS",
+      "evidence": "23514"
+    },
+    {
+      "name": "strict_manifest_schema_version_missing_rejected",
+      "result": "PASS",
+      "evidence": "23514"
+    },
+    {
+      "name": "strict_manifest_schema_version_wrong_type_rejected",
+      "result": "PASS",
+      "evidence": "23514"
+    },
+    {
+      "name": "strict_manifest_compiler_version_null_rejected",
+      "result": "PASS",
+      "evidence": "23514"
+    },
+    {
+      "name": "strict_manifest_compiler_version_missing_rejected",
+      "result": "PASS",
+      "evidence": "23514"
+    },
+    {
+      "name": "strict_manifest_compiler_version_wrong_type_rejected",
+      "result": "PASS",
+      "evidence": "23514"
+    },
+    {
+      "name": "strict_manifest_parser_version_null_rejected",
+      "result": "PASS",
+      "evidence": "23514"
+    },
+    {
+      "name": "strict_manifest_parser_version_missing_rejected",
+      "result": "PASS",
+      "evidence": "23514"
+    },
+    {
+      "name": "strict_manifest_parser_version_wrong_type_rejected",
+      "result": "PASS",
+      "evidence": "23514"
+    },
+    {
+      "name": "JSON_boolean_cannot_impersonate_text_column",
+      "result": "PASS",
+      "evidence": "23514"
+    },
+    {
+      "name": "raw_content_queries_install_exact_rows",
+      "result": "PASS",
+      "evidence": {
+        "exact_match": true,
+        "resource_count": 5556,
+        "progression_count": 100,
+        "objective_count": 0
+      }
+    },
+    {
+      "name": "zero_false_negative_source_values_preserved",
+      "result": "PASS",
+      "evidence": {
+        "zero_type": 3,
+        "false_mail": 1117,
+        "negative_source": 13
+      }
+    },
+    {
+      "name": "repeat_revision_insert_is_noop",
+      "result": "PASS"
+    },
+    {
+      "name": "EXCEPT_detects_missing",
+      "result": "PASS"
+    },
+    {
+      "name": "EXCEPT_detects_extra",
+      "result": "PASS"
+    },
+    {
+      "name": "EXCEPT_detects_altered",
+      "result": "PASS"
+    },
+    {
+      "name": "failed_child_insert_rolls_back_revision",
+      "result": "PASS"
+    },
+    {
+      "name": "revision_delete_restricted",
+      "result": "PASS",
+      "evidence": "23001"
+    },
+    {
+      "name": "duplicate_item_identity_rejected",
+      "result": "PASS",
+      "evidence": "23505"
+    },
+    {
+      "name": "temporal_revision_FK_rejects_missing",
+      "result": "PASS",
+      "evidence": "23503"
+    },
+    {
+      "name": "objective_revision_FK_rejects_missing",
+      "result": "PASS",
+      "evidence": "23503"
+    },
+    {
+      "name": "receipt_refs_array_constraint",
+      "result": "PASS",
+      "evidence": "23514"
+    },
+    {
+      "name": "kernel_receipt_SQL_roundtrip_and_policy_not_identity",
+      "result": "PASS",
+      "evidence": "query preserves first receipt and owner policy_version; actual Go strict decode covered separately, not by SQL"
+    },
+    {
+      "name": "activation_bootstrap_and_CAS_SQL",
+      "result": "PASS",
+      "evidence": "SQL predicates verified in one connection; no service or concurrent activation proof"
+    },
+    {
+      "name": "ordinary_transaction_rollback_preserves_activation",
+      "result": "PASS"
+    }
+  ],
+  "limitations": [
+    "No multi-connection/DDL contention/crash/unknown COMMIT proof",
+    "No pg_dump/pg_restore or native durability proof",
+    "Migration SQL directly executed transactionally; goose runner NOT executed",
+    "Old column-list SQL compatibility, NOT Pass468 binary execution",
+    "No R4D/R7/W2 acceptance"
+  ]
+}

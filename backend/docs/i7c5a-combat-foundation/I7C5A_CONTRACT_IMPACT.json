@@ -1,0 +1,45 @@
+{
+  "status": "TARGETED_SOURCE_AND_TRANSITIVE_CONTRACT_IMPACT_REVIEW_RECONCILED_BEFORE_5A_PRODUCT_CODE",
+  "affected_contract_id": "C5A_COMBAT_INPUT_ATTEMPT_RESULT_FOUNDATION_V1",
+  "c1_bindings": [
+    {"path": "hot/00_PASSMAP/PASS685_I7C1_PROVIDER_SCOPE_OWNERSHIP_CONTRACT.json", "sha256": "73f4e5b8e8603a68380be31d4aec7a5f9f10ecd9b68246b56dfb350ae36ea943", "disposition": "PRESERVED_BYTE_IDENTICAL"},
+    {"path": "hot/00_PASSMAP/PASS685_I7C1_DELIVERY_ACCEPTANCE_CONTRACT.json", "sha256": "992b38344aef6196e99cd2f17dc8810c2e962017db8de5c1a563890d54cf49a0", "disposition": "PRESERVED_BYTE_IDENTICAL"},
+    {"path": "hot/00_PASSMAP/PASS685_I7C1_RESEARCH_AMENDMENT_CONTRACT.json", "sha256": "6e29a18a81e820f53a5accd471cf367c625cd48537fa37094f6b17fa0b88b8e9", "disposition": "PRESERVED_BYTE_IDENTICAL"}
+  ],
+  "inherited_bindings": [
+    {"path": "hot/00_PASSMAP/PASS475_DESIGNS/D05.json", "sha256": "20927a3640e39005669601f2154d7425c661ebf1c435dbeb791408e076faf368"},
+    {"path": "hot/00_PASSMAP/PASS418_COMBAT_ATTEMPT_START_RESULT_RUNTIME_DESIGN.json", "sha256": "494d24864e41297792cb1d5f3dbe029bf4b28d047535f2738b5ce57f1bd820c7"},
+    {"path": "hot/00_PASSMAP/PASS418_COMBAT_ENTROPY_DETERMINISM_POLICY_DESIGN.json", "sha256": "e4b18e2cc9f512b3a9ef9c61907f715801f66be8bc3dd4d5b55503252c56a3ff"},
+    {"path": "hot/00_PASSMAP/PASS418_BATTLE_RESOLVER_TECHNOLOGY_FREEZE.json", "sha256": "559828dcc0b1c3379c2e8d53361453a2ab05a4ffc622fe3779b660e8274ea151"},
+    {"path": "hot/00_PASSMAP/PASS418_COMBAT_RESOLUTION_REPORT_MATERIALIZATION_DESIGN.json", "sha256": "3014e1f08e533c1ea6009c7c34e2287d4de5747cd4a7ccd85af066043abed663"},
+    {"path": "hot/00_PASSMAP/PASS426_GLOBAL_LOCK_ORDER_AND_CYCLE_AUDIT.json", "sha256": "bfb53ada4fde3b32194ab5f1a935d3afbccef943a55ba5826fb4b8df04625ad7"},
+    {"path": "hot/00_PASSMAP/PASS715_I7C3B_PUBLIC_STAT_COMPOSITION_CONTRACT.json", "sha256": "9c55a904e15c34ed3176566c79e67b7a0561b89a88688935ed5c47e49fd667f2"},
+    {"path": "hot/00_PASSMAP/PASS724_I7C1_QUESTION_DISPOSITIONS.json", "sha256": "cb702416bf09cfb65eb7762b45c1be7c37359b298dd68ff587f9e88f9bec77b7"}
+  ],
+  "review": [
+    {"contract": "C1 provider scope/ownership", "effect": "Combat consumes qualified owner observations only; every applicable contributor is a real observation or qualified absence. NormalHero/SuperHero/Pet and self/foreign paths stay distinct. Conquer attested writer (5E) and ChampionsLeague origin (5F) are not implemented here."},
+    {"contract": "C1 delivery/acceptance", "effect": "Battle follows D05/420: immutable materialized input, isolated resolver, once-only settlement, historical replay. New DB foundation receives exact R2 fresh/upgrade/reload/rollback/unknown COMMIT/concurrency/recovery proof before any consumer relies on it. Child GREEN never accepts parent."},
+    {"contract": "C1 research amendment / topology V5", "effect": "No topology amendment needed: findings fit 5A scope (selected server-authoritative foundation). Q_SOURCE_DEPENDENCIES (combat use) and Q_MODE_INPUT_PROFILES are dispositioned in I7C5A_RESEARCH.json; stat-use disposition stays with 3A/3B."},
+    {"contract": "D05 battle input/dependency closure", "effect": "Every reachable import/global accounted for by SNAPSHOT_ONLY_ADAPTERS_V1 and class manifest; enabled producers enumerated (equipment, Fumo, practice, book, inscription, Conquer, feed, Course, collection, Element, Spirit, stone evolution, skills); unsupported producer blocks; timed entitlements evaluated at freeze; TEMPLATE origin never inserts owned Heroes. D05 acceptance list is the proof matrix."},
+    {"contract": "418 attempt runtime", "effect": "Minimum attempt record, states and resolver statuses adopted unchanged; START commits before resolver; RESULT cannot create attempts; FightExist convergence is mode-projected from TERMINAL."},
+    {"contract": "418 entropy", "effect": "Adopted unchanged with configured secret key ring (config.Secret); no host RNG/clock in resolver."},
+    {"contract": "418 technology freeze", "effect": "GopherLua v1.1.2 primary candidate in a separate worker process; promotion gate = complete corpus load plus representative fixture fights; adapter may later switch VM without changing domain schema."},
+    {"contract": "418 report materialization", "effect": "Resolution and report blob immutable, hash addressed, persisted before projection; retention and report addresses are mode-owned."},
+    {"contract": "426 global lock order / 417 lockset conventions", "effect": "Mode -> CombatAttempt -> Mode broken by Combat returning immutable facts only. CombatAttempt rank 609; mode roots to select 601..608 in their leaves; Grant 610+ after. Resolver work never holds DB locks. Lock set discovered before mutation, sorted via lockkey.Canonical."},
+    {"contract": "3B public stat composition", "effect": "Gather extracted from HeroTx/PetTx unchanged in behaviour (existing tests unchanged and must pass); combat reads the same gather plus battle totals. 3B foreign-collection display rule untouched; combat collection policy is separate and labelled."},
+    {"contract": "CA8 seam archguards (ca8_5..ca8_8)", "effect": "Direction stays Combat -> Character. No CA8 seam imports combat; guards are not weakened."},
+    {"contract": "I7B1 transaction/reference/replay; Wave-A receipts", "effect": "Reuse tx.Runner, UnknownCommitResolver and receipt.Store. Positive-only unknown COMMIT. Same START/terminal request reconstructs recorded result without paying twice or rerunning combat."},
+    {"contract": "Work Place time contract (465)", "effect": "Decision instant sampled once from PostgreSQL inside START and frozen; StartedAt remains transport time; simulation ticks, worker deadline, result deadline and mode calendars are separate; no generic UTC-day inference."},
+    {"contract": "421 extension ABI / inactive-mode fail-closed", "effect": "No mode is activated by 5A; inactive modes keep failing closed. Foundation is exercised by test-only fixture consumers."},
+    {"contract": "R4 content/schema ownership", "effect": "Existing content artifacts and migrations 00001..00063 remain byte-identical. New combat-owned migration 00064 and schema-owner catalog entry; rules corpus is a separate generated artifact bound to the same source archive."},
+    {"contract": "Dependencies lock / SBOM", "effect": "Adds github.com/yuin/gopher-lua v1.1.2 (MIT, h1:yF/FjE3hD65tBbt0VXLE13HWS9h34fdzJmrWRXwobGA=) to go.mod/go.sum, DEPENDENCIES.lock.json, SBOM and notices; exact R2 toolbox root unchanged, module provided from the retained exact zip through an owned module cache."},
+    {"contract": "Full I7C4 gates", "effect": "Unchanged and OPEN: 5A provides no Achievement 100001/100002/100003/100028/100032, cosmetic origin or ranking history producer; those need genuine 5B/5C/5D/5F."}
+  ],
+  "downstream_consumers": ["5B TopFloor", "5C OneOnOne", "5D RegionArena", "5F ChampionsLeague", "later Campaign/March/Treasure/PetCampaign/Guild and other Wave-H modes via the same typed interfaces (not activated)"],
+  "obligations_recorded_for_other_owners": [
+    "Any future Hero table-ID or Pet awakening producer must enforce row.awaken (missing awakened classes sit behind awaken=0).",
+    "Each mode defines locator, fingerprint, entry cost, opponent/robot mapping, result deadline, retention and settlement in its own leaf."
+  ],
+  "authorization": "Direct user 5A research/design/implementation authorization retained (AUTHORIZATION_RECONCILIATION.json); required owned preimplementation publication gate is mandatory before product code.",
+  "full4_closed": false
+}

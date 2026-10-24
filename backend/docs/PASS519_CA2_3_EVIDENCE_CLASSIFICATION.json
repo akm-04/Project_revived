@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "pass": "519.0",
+  "phase": "CA2-3",
+  "status": "LOCAL_CHECKPOINT_EVIDENCE_CLASSIFIED_AGGREGATE_CA2_NATIVE_PENDING",
+  "claims": [
+    {"classification":"SOURCE_FACT","claim":"Exact current src_64 corroborates MID59/MID305 wire behavior, template initial_star creation, source-qualified Normal summon Mana/fragment costs, Vows prerequisite behavior and Function88 level-100 gate."},
+    {"classification":"RUNTIME_OBSERVED","claim":"Current candidate preserves the repaired CA2-1 durable Hero owner/schema/projection invariants and no prior CA2-1 drift reappeared."},
+    {"classification":"RUNTIME_OBSERVED","claim":"CA2-2 progression/content-pin/receipt behavior remains intact; lexical decimal-string HeroInstance ordering was confirmed as an extension defect and repaired to numeric ordering with HeroRoot-first roster stabilization."},
+    {"classification":"RUNTIME_OBSERVED","claim":"CA2-3 implements diagnostic PartnerEntity materialization, MID59 and MID305 mechanics while production wiring still registers only Hero MIDs 49,52,55,63,67,89 and installs no Hero PartnerEntity provider."},
+    {"classification":"IMPLEMENTATION_DECISION","claim":"Provider identifiers character.hero / ca2-3.v1 and result schema gxb.ca2.hero-materialization.v1 are stable implementation metadata under the existing gxb.i5.grant.v3 semantic receipt."},
+    {"classification":"IMPLEMENTATION_DECISION","claim":"A diagnostic/test-only pure CapacityAuthorizer exercises acquisition allow/deny mechanics; nil authority hard-fails and does not imply unlimited capacity."},
+    {"classification":"UNKNOWN","claim":"Original Hero initial capacity, absolute maximum and MID64 expansion price schedule remain unrecovered; production capacity-dependent acquisition stays fail-closed."},
+    {"classification":"RUNTIME_OBSERVED","claim":"Final canonical source/static/content/querytext/ownership checks pass and deterministic content remains revision e5a7c922fd40d42a4354f6200c7e3ea0ca9f00d666527df1b5915b083e0e49fb."},
+    {"classification":"RUNTIME_OBSERVED","claim":"Fresh toolchain-only compatibility copy passes focused tests, focused race, full vet, full go test and bounded 89/89 package regression, including reload/kind rehydration."},
+    {"classification":"ENVIRONMENT_BLOCKED","claim":"Exact Go1.27.1/sqlc1.31.1/Goose/PostgreSQL18.6/applicable River/stock-client aggregate proof is not established in normal chat and remains the next mandatory CA2 gate."}
+  ]
+}

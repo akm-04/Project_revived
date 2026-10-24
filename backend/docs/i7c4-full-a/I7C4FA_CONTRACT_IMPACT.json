@@ -1,0 +1,21 @@
+{
+  "status": "TARGETED_TRANSITIVE_PREIMPLEMENTATION_REVIEW_COMPLETE",
+  "affected_contract_id": "C4F_ACHIEVEMENT_CATALOG_AND_AP_V1",
+  "c1_bindings": [
+    {"path": "hot/00_PASSMAP/PASS685_I7C1_PROVIDER_SCOPE_OWNERSHIP_CONTRACT.json", "sha256": "73f4e5b8e8603a68380be31d4aec7a5f9f10ecd9b68246b56dfb350ae36ea943", "upheld": "Achievement stays sole earned-tier owner; counts stay with Character/Cabinet/Conquer/Course/Inscription/Dorm and are read through typed ports; Ranking owns boards over qualified metrics; no second count authority (root points aggregate is Achievement's own derived tier sum)."},
+    {"path": "hot/00_PASSMAP/PASS685_I7C1_DELIVERY_ACCEPTANCE_CONTRACT.json", "sha256": "992b38344aef6196e99cd2f17dc8810c2e962017db8de5c1a563890d54cf49a0", "upheld": "Caller-transaction composition, pinned content, authoritative instant; no foreign SQL; exact R2 fresh/upgrade/concurrency proof; child GREEN never accepts the parent (full I7C-4 closes only at Stage C)."},
+    {"path": "hot/00_PASSMAP/PASS685_I7C1_RESEARCH_AMENDMENT_CONTRACT.json", "sha256": "6e29a18a81e820f53a5accd471cf367c625cd48537fa37094f6b17fa0b88b8e9", "upheld": "Whole-stage research before code; user decisions Q1..Q8 recorded before planning; unknowns labelled private or OWNER_UNKNOWN."},
+    {"path": "hot/00_PASSMAP/PASS685_I7C1_SELECTED_PROVIDER_PROFILE.json", "sha256": "967100a4c27bcbeb49c7dd5bf2d194d0f772076b9e05408d29b7e52dad234505", "upheld": "Metrics 1001..1011 strict exit preserved: 1007 added here; 1003..1006 remain unavailable until Stage C, never zero-filled."},
+    {"path": "hot/00_PASSMAP/PASS740_I7C1_QUESTION_DISPOSITIONS.json", "sha256": "a14de4656e16570ef39e23cb504ba85ba29620aa9ab9c7a306f31509c5f937aa", "upheld": "Q_METRIC_REDUCTIONS: 1007 private formula by user decision Q3. Q_ELIGIBLE_COUNT_DOMAIN untouched (Stage C)."},
+    {"path": "hot/00_PASSMAP/PASS709_I7C_TOPOLOGY_V5.json", "sha256": "1b87dd43b8fe17c1536a366e08ce834a829ac78d7eebec251d5cca9ab33184db", "upheld": "No renumbering; work is under I7C-4B/4C; I7C-6 stays a separate leaf (Stage B)."}
+  ],
+  "inherited_bindings": [
+    {"path": "hot/00_PASSMAP/PASS719_I7C4B_ACHIEVEMENT_TIER_FACT_CONTRACT.json", "sha256": "f6ab07276d4cb5107cb28b6dee095353b8248473bf9a5f4bf42228b09ba8ca23", "note": "AMENDED by user Q5/Q6: legacy roots backfilled from current state at first observation; state-count tiers observed after commands (not inside the source transaction). Married-population hook for 100014 unchanged. Award claim now defined (C4F_POINT_LEVEL_AWARDS_V1)."},
+    {"path": "hot/00_PASSMAP/PASS721_I7C4C_SELECTED_METRIC_CONTRACT.json", "sha256": "eb059925f73238a03d78dbd05f39577169020db661ea4febd0633c7aaf8d218a", "note": "Scoped provider pattern reused for 1007; unscoped calls still cannot activate it."},
+    {"path": "hot/00_PASSMAP/PASS723_I7C4C_PRIVATE_METRIC_RANKING_POLICY.json", "sha256": "8ee3e0e8a92e965b33bc3adc2aa11bf2a346ec641ad36785582f0805a85e3b2e", "note": "Pure comparator and explicit cohort reused."},
+    {"path": "hot/00_PASSMAP/PASS725_I7C4C_PRIVATE_GIRLS_RANKING_POLICY.json", "sha256": "195d593958e3701636e68675c0aa02e1ded363b4a3dcd18466ffb8983a54214d", "note": "AP board copies calendar, settlement, retention and delivery rules (user Q4); Girls policy identity and stored generations unchanged."},
+    {"path": "hot/00_PASSMAP/PASS662_I7B1_TRANSACTION_REFERENCE_REPLAY_CONTRACT.json", "sha256": "e054ac74d533e318434a618a2d57420975ce41ad07022e765943bc1c426d5ef0", "note": "1303 claim and AP refresh are receipted; replay returns stored result."},
+    {"path": "hot/00_PASSMAP/PASS662_I7B1_WIRE_PRIVACY_POLICY_CONTRACT.json", "sha256": "099f0456edafefcca2c2e85a5d49fdfcb2308c526188971def2f9bbb63eac143", "note": "1302 is self-only; trophy rank exposes a position, not other players' data."},
+    {"path": "hot/00_PASSMAP/PASS465_WORKPLACE_TIME_CONTRACT.json", "sha256": "60d0272fafea59ccfb4a03ec86a25b7a46a1f7020b96342a28b9272b2a7f06c6", "note": "Authoritative DB instant only; no daily reset is introduced (no daily achievement is live)."}
+  ]
+}

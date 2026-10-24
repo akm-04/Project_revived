@@ -1,0 +1,2 @@
+{"name":"guild","level":32,
+ "steps":["wait:5","tap:guild","wait:10"],"settle_seconds":20,"expect_ok":[612]}

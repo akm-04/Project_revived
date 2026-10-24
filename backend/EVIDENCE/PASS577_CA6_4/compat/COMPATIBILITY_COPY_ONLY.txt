@@ -1,0 +1,1 @@
+Only disposable-clone accommodations were permitted: go.mod language floor 1.26.0 -> 1.23.0, remove toolchain go1.27.1, and .go-version 1.27.1 -> 1.23.2. Canonical go.mod/go.sum/.go-version remained byte-identical to Pass575. No adapted tree was copied back.

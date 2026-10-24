@@ -1,0 +1,50 @@
+{
+  "contract_id": "C5F_CHAMPIONS_LEAGUE_MODE_V1",
+  "policy_id": "C5F_LEAGUE_PRIVATE_POLICY_V2",
+  "schema_version": 1,
+  "status": "SELECTED_AFTER_COMPLETED_RESEARCH_FAIRNESS_REVIEW_AMENDMENT_GATE_PENDING",
+  "authority_basis": "Current human direct implementation approval plus preserved instruction to reconstruct unavailable server algorithms as labelled private-server policy; source mechanics and inherited C1/418/420/421/426/465 contracts control.",
+  "scope": "Single cross-server ACADEMY_LEAGUE owner: admission/info, actual-owned defense/opponent/fight, points/protection/groups, daily cutoff/chest, final-season mail/bubble/title origin facts, bounded logs/replays and HonorRoom; no territorial AcademyArena, new HISTORY family, shops/Titan or full I9/parent closure.",
+  "source_rules": {
+    "function": 91,
+    "level_groups": [
+      70,
+      90,
+      100
+    ],
+    "initial_points": 2000,
+    "opponent_radius": 10,
+    "normal_protection_seconds": 1800,
+    "frenzy_protection_seconds": 180,
+    "frenzy_local_seconds": [
+      75600,
+      79200
+    ],
+    "daily_cutoff_local_seconds": 79200,
+    "bubble_duration_seconds": 2592000,
+    "season_days": 30,
+    "reward_tables": "numbered1..3 exact; no guessed gifts/IDs"
+  },
+  "private_rules": {
+    "points": "Private logistic transfer: min(loser.points, clamp(min2,max36, round-half-up(36/(1+10^((winner.points-loser.points)/400))))). Clamp exponent difference to±1600 for bounded evaluation; scale400/min2/rounding are explicit policy,36 source parameter only. Equal ratings18, a2400winner over2000gains3, upset33. Conserve total points and floor0; no VIP/force/spend modifiers. Mathematical fairness review precedes this selection; original formula remains UNKNOWN.",
+    "ties": "Points descending, current score first reached timestamp ascending; exact-time collisions use persisted deterministic SHA256(season:group:player) key. Stable randomness, no coin flip on every read.",
+    "calendar": "Source schedule dates at00:00 GMT+8, explicit intervals; after last date repeat30days. Private selection: competition closes at next opening minus3calendar days00:00, then rest(stage2) until next opening(stage1). Source date-minus3 is a display clue, boundary/inclusivity unrecovered. Final rewards at competition close; next-season reset only at next opening. No historical awards on owner initialization, no replay of old finiteevents. Owner-specific22:00day and21:00..22:00frenzy, half-open boundaries; stale-time mutation refused.",
+    "participation": "Only admitted canonical players with at least one genuine attack or defense result qualify daily/final rewards. No robots or synthetic rank counters. An empty cohort is qualified empty, no invented entries.",
+    "daily": "Chronological22:00 immutable snapshots from committed standings only. Top5 count is cumulative qualifying active-day count, source thresholds1/3/7; current group once/day, no increments during rest, no double promotion counting. Late wakeup carries unchanged real standings only for active periods. Chest uses previous cutoff group/rank and a current-day actual win strictly after cutoff in Unix seconds; claim once/day, no backlog. First cutoff absence uses source special first-win gift90035181. Source gift.lua expanded to exact I5-supported items/scalars; scalar sidebands and overflow accurately projected.",
+    "promotion": "On acting, synchronize canonical level unless an unresolved fight must finish/void first. Promote only upward, reset current points2000 and current-group participation. Freeze immediately previous group score/tie/time/participation, not guaranteed ordinal rank; later promotion replaces selectable fallback with immediately previous group (private repeated-promotion decision). At final cutoff recompute old-group rank against current/eligible retained-score competition; ori_rank preview uses that live final cohort. Default selects previous group; explicit use_ori_rank0 current. One final reward profile/player/season. Daily counts and matches use current group only. Preserve all relevant placement/counter evidence for6.",
+    "fight": "MID2802 combines admission+server resolution+terminal. Durable per-attacker pending match and selected enemy; identical retry resumes/returns same result until a fresh2801 selection/2800 menu load after completion opens next intent. Concurrent identical requests never duplicate attempts. Protection is reserved at admission; failure closes with no points/rewards and releases only its own reservation.15s wire budget returns empty report_key while worker continues;10min deadline closes unavailable attempts. No client win/report accepted.",
+    "boundary": "Cutoff event order is chronological DAY then SEASON_CLOSE then ROLL as their actual timestamps dictate. At competition close snapshot only already committed terminals, mail/grants/counters once, freeze season results; no new fights/progression during rest. ROLL resets2000 at next opening and preserves defense/lifetime counters. Pending fights from closed season/group are terminally voided without score/reward effects; no worker under locks. Missing original clock profile remains private, not a claim of original timing.",
+    "cosmetics": "Source final selected-group rank<=10/50 grants correct bubble from competition cutoff for2592000seconds; late wakeup never extends. Selected final GroupA top10 increments genuine lifetime season-count once;104/111/114..121 atcounts1..10, each permanent once,104first mapping labelled inference/private choice. No arbitrary new counter window.078..80 exact profile unresolved at6;087..89 finite season2 not reactivated; real canonical evidence retained. Bound positive origin proof and mirror agreement, no unsupported complete legacy-family absence claim.",
+    "recovery": "League root604 serializes mutations and bumps version. Settlement first discovers/sorts and locks all I4 recipient roots315, then604; all I5mail610 deliveries precede all Achievement620 observations and display entitlement inserts; daily chest I5value grants700+ execute in a separate transaction with no later Achievement lock discovery. Fight root604 -> Combat609 only. Every Tx uses positive root/match/receipt semantic evidence for unknown COMMIT, no absence-as-success; no foreign-owner SQL.",
+    "retention": "20 newest records per player; reports from canonical5A, available for5days after terminal as private policy; records survive report expiry and return explicit empty replay. No custom duplicate report payload owner; no fourth HISTORY family. HonorRoom returns prior-season frozen final top10 current group.",
+    "stock_client_limit": "Finite CrossArenaScheduleTable cannot display true dates beyond source row50 and has YYYYMMDD integer subtraction. Do not fabricate season_count or overwrite client assets. Existing unmodified-stock-client/effective-client acceptance remains OPEN with this exact issue, alongside already-deferred live execution. Core producer qualification cannot imply stock-date compatibility/fullI7C4/I7C6/release acceptance."
+  },
+  "child6_obligations": [
+    "Adjudicate ambiguous title078..80 exact activation/profile using genuine League counter/rank facts",
+    "Full selected display-origin handoff, all other origins and aggregate completeness remain6/I7C-E gates"
+  ],
+  "full4_closed": false,
+  "contract_version": 2,
+  "supersedes": "owned738 C5F_LEAGUE_PRIVATE_POLICY_V1 draft; no qualified5F product existed",
+  "human_basis": "User2026-10-20 authorizes reconstruction and requires policy after completed research with fairness considered. Full implementation authorization persists."
+}

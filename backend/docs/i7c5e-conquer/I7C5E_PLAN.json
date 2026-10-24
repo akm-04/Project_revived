@@ -1,0 +1,21 @@
+{
+  "status": "PLAN_COMMITTED_PREIMPLEMENTATION",
+  "policy_id": "C5E_CONQUER_SCHOOL_MODE_V1",
+  "base_product_commit": "ddfd05b",
+  "steps": [
+    "Content: tools/conquer_content.py + generator artifact conquer_mode_catalog.json (capability CONQUER_MODE_I7C5E), builtin profile, registry, contentstore insert/verify/read, pins.",
+    "Domain conquerschool: Mode catalog, Player mode state (day roll, chances, buys, buff, teams, used), Attempt, Start/Settle/Promote/Reset/Buy rules, report score, region count; 2J FactsTx revision amendment.",
+    "Migration 00068: conquer_school_players, conquer_school_attempts, conquer_school_reports, conquer_school_report_views; ownership/lock docs.",
+    "Store conquerstore: mode rows, attempts, reports, views.",
+    "I4 directory conquer projection port (CAS like VIP projection).",
+    "Application conquerschool Mode service: Info, Start, Result, Reset, Buy, Reports, Report (receipted value moves).",
+    "Projection + stockruntime dispatcher for 1568-1573, 2790; MID1 17 conquer overlay; wiring in cmd/gxb-api.",
+    "Tests: domain unit, dispatcher wire, native PostgreSQL (fresh progression to promotion and loop change, combat contribution after promotion, earlier-revision facts readable, concurrency, report view reward cap).",
+    "Version v0.132.0, freeze F1, portable R2 qualification, reality review, closure PassMap sync."
+  ],
+  "open_gates_after_5e": [
+    "Full I7C-4 aggregate gates",
+    "I7C-5F",
+    "Unactivated broadcast 3005"
+  ]
+}

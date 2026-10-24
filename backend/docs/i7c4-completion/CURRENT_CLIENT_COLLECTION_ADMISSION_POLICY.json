@@ -1,0 +1,19 @@
+{
+  "contract_id": "C4C_PRIVATE_CURRENT_CLIENT_COLLECTION_ADMISSION_V1",
+  "version": 1,
+  "classification": "IMPLEMENTATION_DECISION_PRIVATE_SERVER_POLICY_CURRENT_CLIENT_PROFILE_NOT_ORIGINAL_SERVER_CAPACITY_ALGORITHM",
+  "scope": "Canonical Normal MID59 production acquisition first; Vows305 and generic I5 Hero PartnerEntity activation remain separately gated until their actual consumer gates qualify. No MID64 paid expansion or gacha feature activated by this policy.",
+  "semantics": "No separately purchased girl-roster slots in the chosen current-client preservation profile. Finite admission universe is the exact pinned Content Hero-origin catalog, one active canonical Hero per origin. Existing retained legacy owned origins are preserved; union with current catalog supplies accounting, not a fabricated gameplay limit.",
+  "owner": "CharacterHero retains roster root400/allocator/instance identity; Content retains immutable source-origin catalog. No new durable capacity owner or capacity table.",
+  "rules": [
+    "Read current canonical owned population only under existing HeroRoot400 lock in caller Serializable transaction. Validate IDs/unique origins and candidate origin independently of presentation/client counts.",
+    "New typed Content reader lists exact positive unique root-origin templates table_id=origin_table_id at pinned revision; missing/empty/malformed/unavailable source is an error, never unlimited permission or zero.",
+    "Candidate must exist in the pinned catalog and not already be owned. Admission count cannot exceed finite union of canonical existing origins and pinned catalog; no arbitrary player-number/VIP/slot price invented.",
+    "Pin policy identity with operation content before new effects; store compact catalog/population/candidate provenance in new acquisition receipts. Resolve old positive receipts using original policy/content before current-policy discovery; do not reinterpret original results or recompute current roster on replay.",
+    "Existing diagnostic CapacityAuthorizer remains unchanged for legacy conditional tests; production installs only named typed policy path. Nil both policies remains hard failure.",
+    "Reuse exact existing source summon costs, source template identity/star/raw skills, I5 material debit and fresh Hero facet chain; no new economics or raw Blood Awakening implied.",
+    "MID59 stock request/response/callback remains unchanged and internal admission provenance never leaks to StockHero. Retain no-client-nonce retry limitation.",
+    "Saved-team capacity is a separate system; old unqualified MID64 expansion stays unavailable, no false success.",
+    "No full4/fullstats/Achievement/future producer gate waiver. Prior conditional proofs remain labeled; new actual production acquisition proof required."
+  ]
+}

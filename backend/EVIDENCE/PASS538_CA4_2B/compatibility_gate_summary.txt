@@ -1,0 +1,10 @@
+COMPATIBILITY_COPY_ONLY
+Origin: fresh copy of canonical CA4-2B candidate.
+Accommodation: go.mod go 1.26.0 -> 1.23.0; removed clone-only toolchain go1.27.1; .go-version 1.27.1 -> 1.23.2.
+Canonical source/product/assertion edits in clone: none.
+Focused internal/application/i5 HeroEquipment tests: GREEN.
+Focused race internal/application/i5 HeroEquipment tests: GREEN.
+go vet ./internal/application/i5: GREEN.
+internal/archguard: GREEN.
+Bounded package-by-package go test: 92/92 GREEN (see compatibility_package_regression.txt; wrapper emitted a TERM warning after completion, with TOTAL=92 FAIL=0).
+Not exact Go 1.27.1, PostgreSQL, River, or W2 proof.

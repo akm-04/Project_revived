@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "pass": "562.0",
+  "stage": "CA5-2",
+  "facts": [
+    {
+      "classification": "RUNTIME_OBSERVED",
+      "statement": "Fresh compatibility copy focused tests/race/vet, full go test ./... and full go vet ./... completed GREEN under only the declared Go toolchain accommodation."
+    },
+    {
+      "classification": "RUNTIME_OBSERVED",
+      "statement": "Exact local execution with canonical pins is environment-blocked because installed Go is 1.23.2 while go.mod requires >=1.26/toolchain 1.27.1."
+    },
+    {
+      "classification": "IMPLEMENTATION_DECISION",
+      "statement": "CA5-2 canonical persistence is normalized root/lane/Hero-reference relational state with one root revision and wire strings derived only at projection."
+    },
+    {
+      "classification": "IMPLEMENTATION_DECISION",
+      "statement": "Legacy import requires CA2/CA3-produced source-to-target mappings and quarantines unresolved aggregate state rather than assuming numeric identity."
+    },
+    {
+      "classification": "UNKNOWN",
+      "statement": "Exact original-server enforcement of VIP capacity/name/team-size policies remains unknown and is not encoded as CA5-2 persistence authority."
+    },
+    {
+      "classification": "UNKNOWN",
+      "statement": "Real PostgreSQL migration/backfill/bootstrap/CAS/row-lock behavior for the accumulated CA5 candidate remains pending the mandatory pre-CA5-E Work/native aggregate gate."
+    }
+  ],
+  "supersedes_none": true
+}

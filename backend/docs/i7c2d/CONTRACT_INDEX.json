@@ -1,0 +1,18 @@
+{
+  "status": "FROZEN_PENDING_NORMAL692_SEAL",
+  "selected_contracts": [
+    {
+      "contract_id": "I7C2D_BOOK_INPUT_LIFECYCLE",
+      "path": "BOOK_INPUT_LIFECYCLE_CONTRACT.json",
+      "sha256": "c53d3a80f85405a363bd15da73ac1f2783db95eabbe2953a3027d2ce3fea82f7"
+    }
+  ],
+  "inherited_indexes": [
+    "00_PASSMAP/PASS685_I7C1_CONTRACT_INDEX.json",
+    "00_PASSMAP/PASS686_I7C2A_CONTRACT_INDEX.json",
+    "00_PASSMAP/PASS688_I7C2B_CONTRACT_INDEX.json",
+    "00_PASSMAP/PASS690_I7C2C_CONTRACT_INDEX.json",
+    "00_PASSMAP/PASS662_I7B1_CONTRACT_INDEX.json",
+    "00_PASSMAP/PASS660_I7A1_CONTRACT_INDEX.json"
+  ]
+}

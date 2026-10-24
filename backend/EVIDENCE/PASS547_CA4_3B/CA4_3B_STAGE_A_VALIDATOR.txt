@@ -1,0 +1,2 @@
+CA4-3B STAGE A VALIDATION: PASS
+immutable restoration source facts, forward-only schema ownership, exact-revision runtime seams, and revisioned nonlocking max_color preservation policy are present

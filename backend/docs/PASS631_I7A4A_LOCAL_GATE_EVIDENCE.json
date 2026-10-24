@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "pass": "631.0",
+  "stage": "I7A-4A",
+  "result": "GREEN_LOCAL_IMPLEMENTATION_COMPLETE_REAL_PG_PENDING",
+  "parent_git": "565faf0b1c5e1fad619fb986d2b6245136255253",
+  "implementation_source_commit": "7d6c3723f1a03b8605c002833e262a45853d130a",
+  "canonical": {
+    "go_pins": "go 1.26.0 / toolchain go1.27.1 / .go-version 1.27.1 unchanged",
+    "go_mod_sha256": "313c574368bb56dc570bc3427b65f59b059e492f909fe43b7d0291b5ced21dc4",
+    "go_sum_sha256": "efbf6753542d66e2fefcb2ab5e2ade7c9d28f2206a1113d1eb9568f2cb75808d",
+    "go_version_sha256": "a8844fbc8c3eb51c26ed00aec4cd5a5a9d647f849c6ead07bcc83ed24c4a7718",
+    "static_i7a4a": "GREEN",
+    "schema_query_ownership": "GREEN",
+    "current_cumulative_candidate": "GREEN",
+    "foundation_validators": "GREEN_R0_R4D_I1_I5",
+    "source_oracles": "GREEN_I2_I3_I4_I5_I6A_I6B_I6C",
+    "historical_r5_r6_snapshot_pin": "PRE_EXISTING_AUTHORIZED_NON_REGRESSION_EXCEPTION_NO_METADATA_ROLLBACK",
+    "exact_go_execution": "ENVIRONMENT_BLOCKED",
+    "exact_go_limitation": "Sandbox Go1.23.2 cannot fetch pinned Go1.27.1; no product failure inferred.",
+    "real_postgresql_goose": "ENVIRONMENT_BLOCKED",
+    "real_postgresql_limitation": "No PostgreSQL or Goose binaries in local sandbox; mandatory external I7A-4A exit proof remains pending."
+  },
+  "compatibility_copy": {
+    "label": "COMPATIBILITY_COPY_ONLY",
+    "go": "1.23.2",
+    "only_environment_edits": [
+      "go.mod language floor temporarily lowered in disposable copy",
+      "toolchain go1.27.1 line removed only in disposable copy",
+      ".go-version adjusted only in disposable copy"
+    ],
+    "focused_tests": "GREEN",
+    "focused_race": "GREEN",
+    "go_vet_all": "GREEN",
+    "full_go_test_all": "GREEN"
+  },
+  "exit_gate": {
+    "fresh_00001_to_00033_goose": "PENDING_EXTERNAL_REAL_POSTGRESQL",
+    "populated_00032_to_00033_upgrade": "PENDING_EXTERNAL_REAL_POSTGRESQL",
+    "restore_sequence_schema": "PENDING_EXTERNAL_REAL_POSTGRESQL",
+    "ownership_static": "GREEN",
+    "lock_rank_static": "GREEN",
+    "i4_domain_neutral_discovery": "GREEN",
+    "no_route_activation": "GREEN"
+  },
+  "classification": "LOCAL_IMPLEMENTATION_COMPLETE_NOT_I7A4A_EXIT_ACCEPTED"
+}

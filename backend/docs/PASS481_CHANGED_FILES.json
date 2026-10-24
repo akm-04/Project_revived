@@ -1,0 +1,46 @@
+[
+  {
+    "path": "cmd/gxb-api/main_postgres.go",
+    "sha256": "fd459fe3b067a5e9e8a2c599998c71c9ee5b7d3971f833e798805158801ca5fe"
+  },
+  {
+    "path": "internal/adapters/postgres/contentstore/bootstrap_binding.go",
+    "sha256": "2e8e065aa3a339ae10b4c50c71cc21caa3d9d2ea9b241f103e889b8ee2df5b4a"
+  },
+  {
+    "path": "internal/adapters/postgres/contentstore/bootstrap_binding_test.go",
+    "sha256": "11b017e92532b12b3b794887fca54ea62b5e76f4c7bec93fabbf9db7f8fa3550"
+  },
+  {
+    "path": "internal/adapters/postgres/i4store/bootstrap_runtime.go",
+    "sha256": "564d73745533038971c3c24c1bc068758896b2747f77ff28f5f3a40913f523bc"
+  },
+  {
+    "path": "internal/adapters/postgres/i5store/stack_delete_test.go",
+    "sha256": "00ad40cd0cce26fae3c3b707b53b4f7b5e8e93991e26b2a6369d5afac9060d0f"
+  },
+  {
+    "path": "internal/adapters/postgres/i5store/store.go",
+    "sha256": "70a10a50f8f0ad95a3fb127882ac6a8bd667f4679e5d6d00279edf617d5606e9"
+  },
+  {
+    "path": "internal/application/bootstrap/persistence_contributor.go",
+    "sha256": "54aa2bdd7367d4c40e4e74cb62431037fabfa42e4ad8567deb0bd10f2de9b28f"
+  },
+  {
+    "path": "internal/domain/economy/stack_adjustment.go",
+    "sha256": "fcb43c0cc5b0fe91f8dacd710c8a76d946059f7de8ef8ac691af4fec8ad2a1dc"
+  },
+  {
+    "path": "internal/domain/economy/stack_adjustment_test.go",
+    "sha256": "f89511b26a6146cd7ebbd04581b6a3b9953a6da7f71da3b761761d0d499d004d"
+  },
+  {
+    "path": "internal/domain/player/progression_policy.go",
+    "sha256": "42abff89fcbc3b0068cb4ecdb1cf0961fc078801ba0df29725715b399332b691"
+  },
+  {
+    "path": "internal/domain/player/progression_policy_test.go",
+    "sha256": "607cd1529122a7d2bc8c3aaf8ee549a0e9b825f54636976e1d9563881934754c"
+  }
+]

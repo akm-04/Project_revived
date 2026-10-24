@@ -1,0 +1,63 @@
+{
+  "schema_version": 1,
+  "pass": "635.0",
+  "stage": "I7A-4C",
+  "status": "SELECTED_4C_PACK_EFFECTIVE_WITH_VALIDATED_SEAL",
+  "contracts": [
+    {
+      "path": "00_PASSMAP/PASS635_I7A4C_IMPLEMENTATION_CONTRACT.json",
+      "sha256": "d5aeec3f278c95ee8483f50a9ccecc3a0de97b5b3fb51459738a42e293fd381a"
+    },
+    {
+      "path": "00_PASSMAP/PASS635_I7A4C_ACCEPTANCE_MATRIX.json",
+      "sha256": "61f6f1454dc1f94fdec2c7262abb4414b9e245b61abadef548db93ae4197551c"
+    },
+    {
+      "path": "00_PASSMAP/PASS635_I7A4C_PREIMPLEMENTATION_REALITY_CHECK.json",
+      "sha256": "3dc136a98af7d3e6258f0ecd85774805db6d3c094837292d3ab4c07656c788f7"
+    },
+    {
+      "path": "00_PASSMAP/PASS635_I7A4C_RESEARCH_CLOSURE.json",
+      "sha256": "572381158a97f2bca512f63ee6fd4e8dfaf928d58b396743694bdb92f19681c6"
+    },
+    {
+      "path": "00_PASSMAP/PASS635_I7A4C_DESIGN/IMPLEMENTATION_PLAN.md",
+      "sha256": "74e62ae4fa5e14384fc2abba000190905217e4a4e7c960a31a619539344d8ed8"
+    },
+    {
+      "path": "00_PASSMAP/PASS635_I7A4C_SOURCE_EVIDENCE.json",
+      "sha256": "9006f18a82f86d0ea962c3f611ac007cf966201f12a34437f8473421d142bc63"
+    },
+    {
+      "path": "00_PASSMAP/PASS635_I7A4C_DESIGN/FOUNDATION_TRACEABILITY.json",
+      "sha256": "8dbb1b2a093d752322d3bbeac0ad934edfdf1baf0199ac17cdc5a9eb01ed9e5b"
+    },
+    {
+      "path": "00_PASSMAP/PASS635_I7A4C_DESIGN/D14_EXTENSION_RECORD.json",
+      "sha256": "dd93f8ce1a8c1efa928693b62a9466c11029023421a2d80fdc8e16070647f13b"
+    },
+    {
+      "path": "00_PASSMAP/PASS635_I7A4C_CONTRACT_AMENDMENT.json",
+      "sha256": "cd24f9e41ad24bbb54ced572eb04a7ac14c791cb7dee298a60c968517686f772"
+    },
+    {
+      "path": "00_PASSMAP/PASS635_I7A4C_IMPLEMENTATION_AUTHORIZATION.json",
+      "sha256": "96b1c1bc265539feaf37788ac572fcc77a17513869c43def5aa1974414e7d593"
+    },
+    {
+      "path": "00_PASSMAP/PASS635_I7A4C_RECOVERY_LOCATION.json",
+      "sha256": "2c3e3bebebe01dcb2ba9d5431005514079d7821edc09f688584403cc2e94c14c"
+    },
+    {
+      "path": "00_PASSMAP/PASS635_I7A4C_CONTRACT_IMPACT_REVIEW.json",
+      "sha256": "780d68697d2f3dcf4d0983d6499f45d43dd176b692506cc0c91c470fa1f11d57"
+    }
+  ],
+  "inherited_i7a1_index": "00_PASSMAP/PASS622_I7A1_CONTRACT_INDEX.json",
+  "inherited_i7a4_index": "00_PASSMAP/PASS630_I7A4_CONTRACT_INDEX.json",
+  "accepted_predecessor": "00_PASSMAP/PASS634_I7A4B_ACCEPTANCE_RECORD.json",
+  "backend_sha256": "f157f878cd917acd00f555df15f4421d95f97c31fc8cb0d5a6cc9881f95c63db",
+  "stock_visibility": false,
+  "no_migration_required": true,
+  "registry_rule": "Selectionthrough existingObjectRegistry; thispackindexis notcompetingcurrent-stateauthority."
+}

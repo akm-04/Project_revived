@@ -1,0 +1,94 @@
+{
+  "schema_version": 1,
+  "subject": "Future exact frozen4A candidate, not accepted670",
+  "toolbox_sha256": "e4e194c9627929299577364b953b2468d6118fac4283fd8030f10b5a27456c2b",
+  "cases": [
+    {
+      "id": "A01",
+      "requirement": "Domain/store absentread, firstmaterialization/version/CAS/no-op uniqueness",
+      "status": "NOT_RUN",
+      "basis": "Frozen662 + applicable inherited contracts + actualsource requirements",
+      "limits": "No stage4A product code exists yet"
+    },
+    {
+      "id": "A02",
+      "requirement": "RealPG fresh44 + upgrade43 existing1..43 unchanged, Up-only ownership/query guards",
+      "status": "NOT_RUN",
+      "basis": "Frozen662 + applicable inherited contracts + actualsource requirements",
+      "limits": "No stage4A product code exists yet"
+    },
+    {
+      "id": "A03",
+      "requirement": "Native sameactor concurrentpraise once + differentactors currentcount, opposite-target sortedlock plans; earlier-bound DecisionAt acquiring392 later preserves first praise time and monotonic root metadata",
+      "status": "NOT_RUN",
+      "basis": "Frozen662 + applicable inherited contracts + actualsource requirements",
+      "limits": "No stage4A product code exists yet"
+    },
+    {
+      "id": "A04",
+      "requirement": "Bothdirectedblocks/self/foreignnonexistenttarget/revokedcontext/region/forgedactor rejected, blockrace",
+      "status": "NOT_RUN",
+      "basis": "Frozen662 + applicable inherited contracts + actualsource requirements",
+      "limits": "No stage4A product code exists yet"
+    },
+    {
+      "id": "A05",
+      "requirement": "Fresh repeats current authoritativecount/bit; firsttime/version unchanged; knownoperation proof binding/retainedpolicy/corruptoutcome",
+      "status": "NOT_RUN",
+      "basis": "Frozen662 + applicable inherited contracts + actualsource requirements",
+      "limits": "No stage4A product code exists yet"
+    },
+    {
+      "id": "A06",
+      "requirement": "Definiteabort stableDecisionAt, rollback nofact, unknownreceipt found/missing notblindresubmit; concurrentcurrentread afterreconciliation",
+      "status": "NOT_RUN",
+      "basis": "Frozen662 + applicable inherited contracts + actualsource requirements",
+      "limits": "No stage4A product code exists yet"
+    },
+    {
+      "id": "A07",
+      "requirement": "MID1842 selftarget only, integer/pagebounds/stalehint/emptyarray, deterministictimestamp ties, >20rows, genuineauthorbasis andmissingprovider failure",
+      "status": "NOT_RUN",
+      "basis": "Frozen662 + applicable inherited contracts + actualsource requirements",
+      "limits": "No stage4A product code exists yet"
+    },
+    {
+      "id": "A08",
+      "requirement": "No read-side writes; currenttypedcount/rootversion/rev/time; authorbasis coherence no late low-ranklocking",
+      "status": "NOT_RUN",
+      "basis": "Frozen662 + applicable inherited contracts + actualsource requirements",
+      "limits": "No stage4A product code exists yet"
+    },
+    {
+      "id": "A09",
+      "requirement": "ActualAPIprocess rawJSON duplicate/fraction/exponent/null/forgedfields, exact1830/1842 callbacks/sourceprojections",
+      "status": "NOT_RUN",
+      "basis": "Frozen662 + applicable inherited contracts + actualsource requirements",
+      "limits": "No stage4A product code exists yet"
+    },
+    {
+      "id": "A10",
+      "requirement": "Native reload/PGrestart/dumprestore exactroot/praise/receipt/policy; actoridentity absence/corruption preservefacts",
+      "status": "NOT_RUN",
+      "basis": "Frozen662 + applicable inherited contracts + actualsource requirements",
+      "limits": "No stage4A product code exists yet"
+    },
+    {
+      "id": "A11",
+      "requirement": "Frozenexact R2 affecteddefault/race/vet/build/module/staticarchitecture/query/migration/replay/SBOM/security checks required by existing gate",
+      "status": "NOT_RUN",
+      "basis": "Frozen662 + applicable inherited contracts + actualsource requirements",
+      "limits": "No stage4A product code exists yet"
+    },
+    {
+      "id": "A12",
+      "requirement": "Independent source/owner/code/recovery reality, evidenceclassification/scopedacceptance + parent4B/6/E obligations retained",
+      "status": "NOT_RUN",
+      "basis": "Frozen662 + applicable inherited contracts + actualsource requirements",
+      "limits": "No stage4A product code exists yet"
+    }
+  ],
+  "early_gate": "4A native ownerfoundation mustqualify before4Bconsumes392root",
+  "reuse": "Unchanged prior670qualification remains baseline; parent4sourceprobe11PASS reused. No effect/candidate evidence implied for new4A. Identify changedfile/behavior and priorresultinvalidated before anyrepeat.",
+  "frozen_rule": "Targetedchecks duringcode; oneintended combinedcandidate for finalgate; fix actualfailures thenrepeat onlyinvalidatedportion. No extraacceptancerequirements added."
+}

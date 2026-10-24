@@ -1,0 +1,38 @@
+{
+  "status": "I7C5C_IMPLEMENTATION_RECONCILIATION",
+  "contract_id": "C5C_ONE_ON_ONE_MODE_V1",
+  "private_policy_additions": [
+    "Title notification: the I5 settlement-mail seam requires attachments, so LEGEND_KUAFU_MAIL (text only) is not sent; Sunday titles reach players only as PlayerDisplay title origins.",
+    "A match ends as soon as its winner is decided (user-approved 2026-10-20): every round is frozen at START, then each wave resolves in parallel the fewest rounds that could decide the match; rounds after the decision are never simulated and their Combat attempts stay STAGED without a result. Report keys, wins, usage and history cover only the played rounds.",
+    "A match whose round can no longer resolve is closed without result and keeps its consumed try or promotion chance; a different START while an earlier match is open first finishes that match.",
+    "An identical START within 60 s of the previous one (or while it is open) returns the recorded match; results are due within 10 min.",
+    "GET_ENEMY_TEAM serves any competitor (the rank list opens it), hiding the last team_hide teams; missing teams render empty.",
+    "The rank lists (301 rank_types 3 global, 4 server) show the top 50; score is the slot for Master/Senior and points for Juniors.",
+    "Record detail (2489) serves any retained record, including records shared through chat; an expired record answers {}.",
+    "2485 without a report key returns the round report keys of the player's retained defense records, newest first.",
+    "A defender's saved teams beyond the group's team count are ignored (first N used); a Junior demoted by a promotion swap keeps its saved teams.",
+    "Records keep a viewer-side is_win (the record owner's result), as Top Floor does.",
+    "START answers within 25 s (the stock client waits 30 s for this form-data request); rounds still resolving then answer unavailable/unresolved, resolution continues detached and deduplicated per attempt in-process, an identical START returns the settled result and the reconcile provider settles it regardless (worst case: Master best-of-seven with 5-hero teams)."
+  ],
+  "deviations_from_plan": [
+    "PlayerDisplay CatalogExternalOrigins is a CatalogOriginRoutes router (girls ranking 100059-100062, 1 on 1 100002-100005); the 1 on 1 origin read is composed without Combat so titles stay readable when the combat key ring is absent.",
+    "Combat usage parsing (combat.Usage/PartnerUse) moved from domain/topfloor to domain/combat so both modes share one report parser; Top Floor behaviour unchanged (5B native tests rerun).",
+    "contentstore.readModeCatalog is the shared strict reader for game-mode catalogs (Top Floor and 1 on 1).",
+    "gxb-api runReconcile is one 30 s loop per mode provider (Top Floor, 1 on 1).",
+    "Junior players hold slot NULL so the deferrable (competition_id, slot) uniqueness spans Master/Senior only (found by native tests).",
+    "Achievement streaks are keyed by (player, achievement); 100001 Top Floor rows unchanged.",
+    "Combat resolver adapter (SNAPSHOT_ONLY_ADAPTERS_V1 unchanged): bootstrap now materializes a PEAK_ARENA model stub and the driver passes {team1=...} groups only for CampaignType 65, which previously failed closed (COMBAT_ADAPTER_UNMATERIALIZED_MODEL); every other campaign's snapshot replays byte-identically and the rules corpus id is unaffected.",
+    "combat.StartManyTx (5A amendment) stages all of a match's rounds with one shared freezer; each snapshot lists only its own battle's players.",
+    "contentstore memoizes the spirit, element, inscription and stat catalogs per immutable revision (they were decoded on every hero stat read).",
+    "START admission reads the competition root without locking it (admission changes no position; position changes conflict on the locked player rows); settlement and transitions lock it."
+  ],
+  "known_limitations": [
+    "One competition over all logical servers serializes every 1 on 1 mutation on the competition root (lock 602); adequate for private-server scale.",
+    "Standings are computed from the full competitor list on each read (no rank index); adequate for private-server scale.",
+    "1829 SUPER_ARENA history projection, the exchange shop (ShopType.TOP) and old Peak MIDs 560-571 stay unactivated.",
+    "Promotion success after the locked opponent has left the target group still swaps with that opponent's current position (rare; no extra guard).",
+    "Worst-case Master/Senior matches with full 5-hero teams need a second identical START (or the reconcile provider) to deliver the result; resolution of a 5v5 round takes about 22 s on 12 cores (5A engine cost).",
+    "A close match (for example 2-1, 3-2 or 4-3) needs one to three further resolution waves, so a Master/Senior START reaches the 25 s budget more often than a sweep; the identical retry or the reconcile provider returns the result."
+  ],
+  "lock_order": "actor fence 315 -> 1 on 1 competition root 602 (settlement, transitions, match settlement; START admission reads it unlocked) -> 1 on 1 player rows (player order) -> Combat locator 609 -> I5 mail 610 -> Achievement 620 -> I5 value 700+; scheduled settlements and promotion transitions each run in their own transaction before any competition mutation (settle-before-mutate)."
+}

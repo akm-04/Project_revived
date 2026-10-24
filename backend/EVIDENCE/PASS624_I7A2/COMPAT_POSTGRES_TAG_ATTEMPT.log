@@ -1,0 +1,5 @@
+PostgreSQL tagged concrete adapter compatibility attempt
+go: downloading github.com/jackc/pgx/v5 v5.10.0
+internal/adapters/postgres/pgx_adapter.go:10:2: module lookup disabled by GOPROXY=off
+internal/adapters/postgres/pgx_adapter.go:11:2: module lookup disabled by GOPROXY=off
+exit=1

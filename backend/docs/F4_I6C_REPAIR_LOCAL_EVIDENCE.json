@@ -1,0 +1,52 @@
+{
+  "base_backend_sha256": "e5bb29ddd61ffd9fccfc761f7727f46b1de938144e05f27a1aabb6e1756a4322",
+  "canonical_static_checks": [
+    "validate_current_candidate.py PASS",
+    "generate_resolved_sbom.py --check PASS",
+    "check_schema_query_ownership.py PASS",
+    "check_dependency_policy.py PASS",
+    "check_sqlc_generation_policy.py PASS",
+    "check_i6a_source_oracle.py PASS",
+    "check_i6b_source_oracle.py PASS",
+    "check_i6c_source_oracle.py PASS"
+  ],
+  "canonical_toolchain": {
+    "go_mod": "go 1.26.0 + toolchain go1.27.1",
+    "go_version_file": "1.27.1",
+    "modified": false
+  },
+  "classification": "canonical implementation + COMPATIBILITY_COPY_ONLY local diagnostics; not native PostgreSQL/River proof",
+  "compatibility_copy": {
+    "accommodation": "clone-only go language 1.23.0, remove toolchain directive, .go-version 1.23.2",
+    "go_runtime": "go1.23.2",
+    "label": "COMPATIBILITY_COPY_ONLY",
+    "log": "EVIDENCE/F4_COMPATIBILITY_COPY_FOCUSED_FINAL.log",
+    "result": "GREEN"
+  },
+  "discovery_during_implementation": "Compatibility-copy diagnostics exposed three stale validator assumptions about clone-only Go toolchain accommodation (R6 cumulative, R4D, R5). All were repaired as F06 maintenance; canonical/default validation remains strict.",
+  "external_audit_sha256": "a6234eaf9cd5a3f029259140a0166c0529e9b174e4572c61a102b7f0ed0c9e7f",
+  "f1_checkpoint_sha256": "c87133200b1e377d27d6a81c2d65ee86a1dd4161906fd80dfa004b6cd267199e",
+  "f2_checkpoint_sha256": "b8c3b195f50cf7b1ae85a5b2ff6a6c6390edd2b5378e1996a96a122676c02316",
+  "focused_compat_checks": [
+    "gofmt PASS",
+    "go test guildcore/guildstore/replaycatalog/archguard PASS",
+    "go vet same packages PASS",
+    "cumulative validator PASS in explicit compatibility-scratch mode",
+    "schema/query/dependency/sqlc/I6 source oracle checks PASS"
+  ],
+  "lane": "F4",
+  "limitations": [
+    "No exact Go 1.27.1 execution in this sandbox",
+    "No live PostgreSQL/River gate in F4",
+    "No dump/restore in F4",
+    "F5 bounded/full local regression still pending",
+    "F6 exact native PostgreSQL requalification mandatory"
+  ],
+  "maintenance_discoveries": [
+    "Cumulative validator initially rejected explicit clone-only toolchain accommodation; added --compat-scratch path without weakening canonical/default validation.",
+    "F5 preflight then exposed identical toolchain-only false failures in historical validate_r4d.py and validate_r5.py; both now honor GXB_COMPAT_SCRATCH=1 only for toolchain assertions while retaining all semantic/migration invariants."
+  ],
+  "passmap_authority_sha256": "c4f9708612d88241e3c71a8aa35ca0df464e33f9882d9f45710714e102366ade",
+  "schema_version": 1,
+  "status": "IMPLEMENTATION_COMPLETE_LOCAL_FOCUSED_DIAGNOSTICS_GREEN_F5_PENDING"
+}

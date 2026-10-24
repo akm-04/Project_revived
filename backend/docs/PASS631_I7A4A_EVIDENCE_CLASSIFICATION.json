@@ -1,0 +1,65 @@
+{
+  "schema_version": 1,
+  "pass": "631.0",
+  "stage": "I7A-4A",
+  "status": "POSTIMPLEMENTATION_LOCAL_EVIDENCE_CLASSIFIED_EXTERNAL_GATE_PENDING",
+  "claims": [
+    {
+      "claim": "Pass629 parent archive/Git identity and Pass630 authorization",
+      "classification": "SOURCE_FACT",
+      "evidence": "sealed Pass630 authority plus exact local hash/Git verification"
+    },
+    {
+      "claim": "00033 schema/owner/I4 discovery foundation",
+      "classification": "IMPLEMENTATION_DECISION",
+      "evidence": "Pass630 frozen contract plus Pass631 committed implementation"
+    },
+    {
+      "claim": "current/effective Social wire facts used to bound schema/discovery",
+      "classification": "SOURCE_FACT",
+      "evidence": "Pass630 source-wire/oracle research records"
+    },
+    {
+      "claim": "canonical static/foundation/source-oracle requalification",
+      "classification": "RUNTIME_OBSERVED",
+      "conditions": "local canonical-tree Python/static validators; no exact Go execution"
+    },
+    {
+      "claim": "focused/race/vet/full Go execution",
+      "classification": "RUNTIME_OBSERVED",
+      "conditions": "COMPATIBILITY_COPY_ONLY on Go1.23.2"
+    },
+    {
+      "claim": "exact Go1.27.1 candidate execution",
+      "classification": "UNKNOWN",
+      "conditions": "ENVIRONMENT_BLOCKED locally"
+    },
+    {
+      "claim": "real PostgreSQL/Goose fresh/upgrade/restore semantics for 00033",
+      "classification": "UNKNOWN",
+      "conditions": "mandatory external gate pending"
+    },
+    {
+      "claim": "I7A-4A exit accepted",
+      "classification": "UNKNOWN",
+      "conditions": "must await exact external gate and independent adjudication"
+    },
+    {
+      "claim": "W2 stock-client physical acceptance",
+      "classification": "UNKNOWN",
+      "conditions": "deferred downstream"
+    }
+  ],
+  "disproven_or_repaired": [
+    {
+      "claim": "initial I7A-4A archguard may forbid CreationFence uniqueness constraint names",
+      "classification": "DISPROVEN",
+      "disposition": "test guard corrected before product commit; actual CreationFence contract requires stable constraint identity"
+    },
+    {
+      "claim": "social_notices notice_time must be >= created_at",
+      "classification": "DISPROVEN",
+      "disposition": "overconstraint removed before product commit so later typed providers may materialize older source events"
+    }
+  ]
+}

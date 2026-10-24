@@ -1,0 +1,19 @@
+{
+  "id": "I7C2C_CONTRACT_INDEX",
+  "status": "FROZEN_PENDING_NORMAL_PASS690_SEAL",
+  "selected_contracts": [
+    {
+      "contract_id": "I7C2C_DORM_INPUT_LIFECYCLE",
+      "path": "DORM_INPUT_LIFECYCLE_CONTRACT.json",
+      "sha256": "04070b4313aaeaddbbec8203da8d6a025473e7c9c8749475e5906b9977dbbab2"
+    }
+  ],
+  "inherited_indexes": [
+    "00_PASSMAP/PASS685_I7C1_CONTRACT_INDEX.json",
+    "00_PASSMAP/PASS686_I7C2A_CONTRACT_INDEX.json",
+    "00_PASSMAP/PASS688_I7C2B_CONTRACT_INDEX.json",
+    "00_PASSMAP/PASS662_I7B1_CONTRACT_INDEX.json",
+    "00_PASSMAP/PASS660_I7A1_CONTRACT_INDEX.json"
+  ],
+  "future_handoff": "DORM_INPUTS/VILLA_COUNT; no parent acceptance"
+}

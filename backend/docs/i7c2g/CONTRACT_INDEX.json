@@ -1,0 +1,12 @@
+{
+  "status": "SELECTED_FROZEN_DIRECT_USER_AUTHORIZED",
+  "selected_contracts": [
+    {
+      "contract_id": "I7C2G_ELEMENT_INPUT_LIFECYCLE",
+      "version": 2,
+      "path": "docs/i7c2g/ELEMENT_INPUT_LIFECYCLE_CONTRACT.json",
+      "sha256": "bbc4f303018019d5c327255779ca255d6b52803ea254517d975aa06514595527"
+    }
+  ],
+  "inherited": "All3 frozen I7C1 contracts, accepted2A..2E, qualified2F conditional core and transitive foundations remain active"
+}

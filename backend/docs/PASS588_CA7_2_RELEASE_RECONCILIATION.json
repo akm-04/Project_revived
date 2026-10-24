@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "pass": "588.0",
+  "stage": "CA7-2",
+  "status": "RELEASE_RECONCILIATION_RETEST_PENDING_NOT_ACCEPTED",
+  "parent_candidate_sha256": "37af5065f4e3f65449ff842f2990b6dead344c1e3dfe5d6fc7914d337d6de3b8",
+  "parent_gate1_evidence_sha256": "b59277c4d59a1c2622809a62f46605442232d77a380e97af7eeba2a3a75fe73e",
+  "runtime_semantics_changed": false,
+  "migration_00030_changed": false,
+  "content_revision": "ae577b8c9b9770f1d7a7dcf8335d9d36d27a15a687a12a5e5b01d97eca124116",
+  "repair_scope": [
+    "resolved SBOM regeneration/current version",
+    "cumulative migration lock advance to exact 00030",
+    "central append-only cumulative content-generation successor policy",
+    "retained R5/CA3-3/CA4-1 current cumulative validator reconciliation",
+    "Pass588 release metadata",
+    "retest handoff exact-identity wrapper correction"
+  ],
+  "foundation_recheck": {
+    "I0": "dependency/layering unchanged; dependency policy GREEN; archguard GREEN in compatibility execution",
+    "I1": "GREEN",
+    "I2": "validator GREEN + exact source-oracle GREEN",
+    "I3": "validator GREEN + exact source-oracle GREEN",
+    "I4": "validator GREEN + exact source-oracle GREEN",
+    "I5": "validator GREEN + exact source-oracle GREEN",
+    "I6A": "exact source-oracle GREEN",
+    "I6B": "exact source-oracle GREEN",
+    "I6C": "exact source-oracle GREEN",
+    "foundation_trace": "GREEN"
+  },
+  "normal_chat_result": "GREEN_WITH_COMPATIBILITY_COPY_EXECUTION; EXACT_RETEST_REQUIRED",
+  "next": "Luna Pass588 exact release/native delta retest; CA7-3 blocked pending adjudication"
+}

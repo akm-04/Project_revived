@@ -1,0 +1,307 @@
+{
+  "schema_version": 1,
+  "pass": "566.0",
+  "phase": "CA5-4 Reference Fencing & Revisioned Reference Provider local closure",
+  "authority_parent": "sealed Pass565 CA5-4 research/implementation contract/acceptance matrix plus explicit user implementation authorization",
+  "parent_backend_sha256": "c47455fc7c31d4c43fe3c58daf9bd9b8225cc9534cddfcadbee0848b89885448",
+  "parent_implementation_revision_sha256": "02bfe7accdf7c55700a56f150dc1b1bb8c28637f281d2c3f92c4c2b79174455f",
+  "parent_passmap_sha256": "cb1b8e6ee55faef1b62e973db9dbc1be842ad61ac141902e7295c6edeb9bef3e",
+  "source_oracles": {
+    "current": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+    "historical": "d0a4815507fd4626ac5749f2f6efae554d3a4bef717793f155f58c8bed7170b1",
+    "frozen_v1": "31729d5c5e4509c2c89eaa1e8203cf1570afe87e18ed2610b944e457a9946b15",
+    "native": "fcc0f03e5973dd41a190a4bd390a8c4c5185f5f7cf2d4eeb0bcad696cfee7517"
+  },
+  "result": "GREEN_LOCAL_CA5_4_ACCEPTED_COMPATIBILITY_COPY_ONLY_NATIVE_AGGREGATE_GATE_NOW_DUE_PRE_CA5_E",
+  "implementation_scope": [
+    "immutable revision-qualified SavedPresetReferenceState exporter",
+    "two saved-preset-owned indexed reference-existence reads",
+    "concrete actor-bound ca5.saved-presets Hero/Pet reverse-reference guard provider",
+    "real test-only future-consumer concurrency fixtures against CA5-3 shared locks",
+    "CA5-4 static/source-oracle validation tooling",
+    "test-only atomic counter repair required for truthful race qualification"
+  ],
+  "explicit_non_scope": [
+    "no MID66 activation",
+    "no Hero/Pet destructive production endpoint",
+    "no migration/schema change",
+    "no MID208/209",
+    "no 17.formation ownership",
+    "no I9 mode state",
+    "no CA8 composite snapshot",
+    "no client-only representative/lock/defense dismissal policy"
+  ],
+  "canonical_environment": {
+    "canonical_pins_changed": false,
+    "exact_candidate_attempt": "ENVIRONMENT_BLOCKED",
+    "reason": "canonical go.mod requires Go >=1.26/toolchain go1.27.1; local toolchain is Go1.23.2"
+  },
+  "compatibility_copy_only": {
+    "environment": "Go1.23.2 linux/amd64",
+    "accommodation": [
+      "go.mod language/toolchain adapted only in disposable copy",
+      ".go-version adapted only in disposable copy"
+    ],
+    "go_sum_changed": false,
+    "results": [
+      "focused tests GREEN",
+      "focused race GREEN after test-only atomic counter repair",
+      "focused vet GREEN",
+      "CA5-2/3/4 validators GREEN",
+      "schema/query ownership GREEN",
+      "sqlc policy GREEN",
+      "four-oracle source guard GREEN",
+      "go test ./... GREEN",
+      "go vet ./... GREEN",
+      "bounded package regression 93/93 GREEN"
+    ],
+    "postgres_tag": "ENVIRONMENT_BLOCKED by unavailable pgx/v5 with module lookup disabled"
+  },
+  "deferred_mandatory": [
+    "exact canonical Go1.27.1 execution",
+    "real PostgreSQL row-lock/reference-existence/CA5-3 CAS integration semantics",
+    "River only where accumulated CA5 uses it",
+    "accumulated CA5 exact/native Work gate immediately before CA5-E",
+    "physical unmodified-stock-client W2 post-I14"
+  ],
+  "evidence_logs": {
+    "compat/bounded_package_regression.log": {
+      "bytes": 6242,
+      "sha256": "af897caa12d64e917d4300913309026c5c82b10efeed00c971e329b729d8f605"
+    },
+    "compat/environment.log": {
+      "bytes": 191,
+      "sha256": "2772053dc237c43c40be3a93a4322db0f85dca8b164ffe7821fa11e97fc03110"
+    },
+    "compat/focused_race.log": {
+      "bytes": 313,
+      "sha256": "ea44949cf264cab54fde9aa070528dd8035d73a414d58a1e89543886beb064e3"
+    },
+    "compat/focused_tests.log": {
+      "bytes": 314,
+      "sha256": "080b1fca16e44b0da57c2c3c47c8447622d223a1a2adc8051c31de291badf14a"
+    },
+    "compat/focused_vet.log": {
+      "bytes": 41,
+      "sha256": "12805c87f8e91537734ccdc7bad1ba4828205ce9ebbdc3d83ec40c846a0ca0f1"
+    },
+    "compat/full_test.log": {
+      "bytes": 6121,
+      "sha256": "b614581c716aff2298c466d88cd421f79a1a994287524863dc423aa8c661a5ac"
+    },
+    "compat/full_vet.log": {
+      "bytes": 15,
+      "sha256": "ae68518f95424ae9ed03e785bb1ba5165facb22b6fe6716eaacedcda4fd9983d"
+    },
+    "compat/go_mod_adaptation.diff": {
+      "bytes": 177,
+      "sha256": "fdc7d4f3f4e93d4931c558728d302184112546e456135fb4c4553dda813d5804"
+    },
+    "compat/go_version_adaptation.diff": {
+      "bytes": 77,
+      "sha256": "12b5b75bc2f811d0e7fb51c266b5ebe71778402bbd240549d2c9ac3dd03ffe62"
+    },
+    "compat/postgres_tag_environment_probe.log": {
+      "bytes": 220,
+      "sha256": "c8feb186e8b636c71c841d8e186ec1c58779a904f21a10c25f605d8a7980817c"
+    },
+    "exact/canonical_pins.sha256": {
+      "bytes": 224,
+      "sha256": "09258115a50e6f15790612a06bbc268adaad80b0a6ba4a8dd21330fdc19b51cb"
+    },
+    "exact/check_ca5_4_source_oracle.log": {
+      "bytes": 232,
+      "sha256": "f70d5d1ab6d87ba6806110f94e3cef661d8ddf968fe27f634dff3ed7b2d881c9"
+    },
+    "exact/check_schema_query_ownership.log": {
+      "bytes": 29,
+      "sha256": "1d0eeef6e9a6aa5cc1a1abe4142a636a77896063f26ad65229891ff176bbf754"
+    },
+    "exact/check_sqlc_generation_policy.log": {
+      "bytes": 29,
+      "sha256": "6b6e72c3e9efb996f2aacbeb53ec73955d3652e0699c7b83a035fa39ea1744f4"
+    },
+    "exact/exact_go_environment_probe.log": {
+      "bytes": 72,
+      "sha256": "c82ba0d52a0a181094dd790d435616a2def13900579c3c3f3af72522c3a909cf"
+    },
+    "exact/parent_candidate_diff.txt": {
+      "bytes": 1904,
+      "sha256": "25db01401374a9b9fb942eebae0fba273ebb626f160dab0a2a4556fba497a49f"
+    },
+    "exact/validate_ca5_2.log": {
+      "bytes": 181,
+      "sha256": "ba511353907e4d48e8342da027dd42c21d9eede9c245c3e5adfbc54683a41ef9"
+    },
+    "exact/validate_ca5_3.log": {
+      "bytes": 143,
+      "sha256": "4966a757e5a649d1be15e31cfb5e80cdbb1f7b8b1694fceaf90b1e72537b4275"
+    },
+    "exact/validate_ca5_4.log": {
+      "bytes": 178,
+      "sha256": "cfd2925d37dbf7b7fded5744274b2d121c50286b2e48e125a55dec7d744774d6"
+    }
+  },
+  "acceptance_cases": [
+    {
+      "id": "A1",
+      "result": "GREEN_COMPATIBILITY_COPY_ONLY",
+      "finding": "Empty-set DTO validation/export test passes."
+    },
+    {
+      "id": "A2",
+      "result": "GREEN_COMPATIBILITY_COPY_ONLY",
+      "finding": "Reference-state reader preserves ordered actor-scoped HeroRefs and optional PetRef."
+    },
+    {
+      "id": "A3",
+      "result": "GREEN_LOCAL_STATIC_PLUS_COMPATIBILITY_COPY",
+      "finding": "DTO excludes Name/formation/mode/battle policy; deep-copy tests pass."
+    },
+    {
+      "id": "A4",
+      "result": "GREEN_COMPATIBILITY_COPY_ONLY",
+      "finding": "Mutation-after-export fixtures prove returned state is independent."
+    },
+    {
+      "id": "A5",
+      "result": "GREEN_COMPATIBILITY_COPY_ONLY",
+      "finding": "Hero preflight returns exactly ca5.saved-presets + actor rank440 root independent of reference existence."
+    },
+    {
+      "id": "A6",
+      "result": "GREEN_COMPATIBILITY_COPY_ONLY",
+      "finding": "Pet preflight returns the same stable actor root plan."
+    },
+    {
+      "id": "A7",
+      "result": "GREEN_COMPATIBILITY_COPY_ONLY",
+      "finding": "Malformed/foreign refs fail closed."
+    },
+    {
+      "id": "A8",
+      "result": "GREEN_LOCAL_STATIC_PLUS_COMPATIBILITY_COPY",
+      "finding": "Guard lock accepts only its bound actor rank440 root; concrete store root lock path reread."
+    },
+    {
+      "id": "A9",
+      "result": "GREEN_COMPATIBILITY_COPY_ONLY",
+      "finding": "Referenced Hero returns ErrReferenceInUse under locked validation."
+    },
+    {
+      "id": "A10",
+      "result": "GREEN_COMPATIBILITY_COPY_ONLY",
+      "finding": "Unreferenced Hero permits validation."
+    },
+    {
+      "id": "A11",
+      "result": "GREEN_COMPATIBILITY_COPY_ONLY",
+      "finding": "Referenced Pet returns ErrReferenceInUse."
+    },
+    {
+      "id": "A12",
+      "result": "GREEN_COMPATIBILITY_COPY_ONLY",
+      "finding": "Unreferenced Pet permits validation."
+    },
+    {
+      "id": "A13",
+      "result": "GREEN_COMPATIBILITY_COPY_ONLY",
+      "finding": "Provider mismatch/empty/extra/wrong-root plans fail closed."
+    },
+    {
+      "id": "A14",
+      "result": "GREEN_LOCAL_STATIC_PLUS_COMPATIBILITY_COPY",
+      "finding": "Two EXISTS queries are saved-preset-owned and touch only preset tables; adapter tests pass."
+    },
+    {
+      "id": "A15",
+      "result": "GREEN_LOCAL_STATIC",
+      "finding": "No 00029 migration or schema change."
+    },
+    {
+      "id": "A16",
+      "result": "GREEN_COMPATIBILITY_COPY_ONLY_RACE",
+      "finding": "Real CA5-3 add-first fixture serializes then future consume rejects under guard."
+    },
+    {
+      "id": "A17",
+      "result": "GREEN_COMPATIBILITY_COPY_ONLY_RACE",
+      "finding": "Future consume-first fixture serializes then later CA5-3 owner validation fails without dangling preset."
+    },
+    {
+      "id": "A18",
+      "result": "GREEN_COMPATIBILITY_COPY_ONLY_RACE",
+      "finding": "Pet source-owner rank430 + root440 structural choreography test passes."
+    },
+    {
+      "id": "A19",
+      "result": "GREEN_COMPATIBILITY_COPY_ONLY",
+      "finding": "Existing CanonicalizeReferenceGuardPlans multi-provider deterministic/duplicate-ownership tests remain green in full suite."
+    },
+    {
+      "id": "A20",
+      "result": "GREEN_LOCAL_STATIC",
+      "finding": "No MID66 dispatcher or production registration."
+    },
+    {
+      "id": "A21",
+      "result": "GREEN_LOCAL_STATIC",
+      "finding": "No Hero/Pet DELETE/consume production implementation."
+    },
+    {
+      "id": "A22",
+      "result": "GREEN_LOCAL_STATIC",
+      "finding": "MID208/209 inactive and 17.formation unclaimed."
+    },
+    {
+      "id": "A23",
+      "result": "GREEN_LOCAL_STATIC",
+      "finding": "No I9 mode state or CA8 composite snapshot owner introduced."
+    },
+    {
+      "id": "A24",
+      "result": "GREEN_LOCAL_STATIC_PLUS_COMPATIBILITY_COPY",
+      "finding": "CA5-2/CA5-3 successor validators pass; CA5-1 architectural guards remain green in full archguard suite."
+    },
+    {
+      "id": "A25",
+      "result": "GREEN_LOCAL_STATIC",
+      "finding": "Schema/query ownership and sqlc generation policy pass on canonical."
+    },
+    {
+      "id": "A26",
+      "result": "GREEN_LOCAL_STATIC_SOURCE_ORACLE",
+      "finding": "Exact current/old/V1/native source-oracle guard passes."
+    },
+    {
+      "id": "A27",
+      "result": "GREEN_COMPATIBILITY_COPY_ONLY",
+      "finding": "Focused application/adapter/arch tests pass on fresh diagnostic copy."
+    },
+    {
+      "id": "A28",
+      "result": "GREEN_COMPATIBILITY_COPY_ONLY_RACE",
+      "finding": "Focused changed-path/concurrency race detector passes after atomic test-fixture repair on fresh copy."
+    },
+    {
+      "id": "A29",
+      "result": "GREEN_COMPATIBILITY_COPY_ONLY",
+      "finding": "Full go test ./..., full go vet ./..., and bounded package-by-package 93/93 pass."
+    },
+    {
+      "id": "A30",
+      "result": "AUTHORIZED_DEFERRED_PRE_CA5_E",
+      "finding": "Exact canonical Go/PostgreSQL/River aggregate gate remains mandatory immediately before CA5-E; current environment probes are blocked, not passed."
+    },
+    {
+      "id": "A31",
+      "result": "AUTHORIZED_DEFERRED_POST_I14",
+      "finding": "Physical unmodified-stock-client W2 remains post-I14 and unchanged."
+    },
+    {
+      "id": "A32",
+      "result": "GREEN_INDEPENDENT_REALITY_CHECK",
+      "finding": "Independent source/contract/code/store/query/concurrency/diff reread finds no destructive/formation ownership leak or defect requiring reopen."
+    }
+  ]
+}

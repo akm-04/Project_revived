@@ -1,0 +1,20 @@
+===== go test -count=1 ./internal/application/characterpet =====
+ok  	gxb.local/backend/v2/internal/application/characterpet	0.050s
+
+===== go test -count=1 ./internal/application/characterpractice =====
+ok  	gxb.local/backend/v2/internal/application/characterpractice	0.005s
+
+===== go test -count=1 ./internal/adapters/stockruntime =====
+ok  	gxb.local/backend/v2/internal/adapters/stockruntime	0.402s
+
+===== go test -count=1 ./internal/adapters/postgres/characterstore =====
+ok  	gxb.local/backend/v2/internal/adapters/postgres/characterstore	0.002s
+
+===== go test -count=1 ./internal/foundation/replaycatalog =====
+ok  	gxb.local/backend/v2/internal/foundation/replaycatalog	0.001s
+
+===== go test -count=1 ./internal/archguard =====
+ok  	gxb.local/backend/v2/internal/archguard	0.031s
+
+===== go test -count=1 ./cmd/gxb-api =====
+?   	gxb.local/backend/v2/cmd/gxb-api	[no test files]

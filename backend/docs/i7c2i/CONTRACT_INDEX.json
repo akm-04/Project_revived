@@ -1,0 +1,35 @@
+{
+  "status": "SELECTED_CONTRACT_IMPLEMENTED_EXACT_QUALIFICATION_PENDING",
+  "selected_contracts": [
+    {
+      "contract_id": "I7C2I_EVOLUTION_INPUT_LIFECYCLE",
+      "version": 2,
+      "path": "docs/i7c2i/EVOLUTION_INPUT_LIFECYCLE_CONTRACT.json",
+      "sha256": "206e9add3d92df0945e4f2423f304ab6bbd038d76e7db6adeee55527543f7513"
+    }
+  ],
+  "inherited": "All3 I7C1 contracts and prior qualified scoped provider contracts retained unchanged",
+  "bindings": [
+    {
+      "contract_id": "I7C1_PROVIDER_SCOPE_OWNERSHIP",
+      "path": "00_PASSMAP/PASS685_I7C1_PROVIDER_SCOPE_OWNERSHIP_CONTRACT.json",
+      "working_path": "I7C1_PROVIDER_SCOPE_OWNERSHIP_CONTRACT.json",
+      "sha256": "73f4e5b8e8603a68380be31d4aec7a5f9f10ecd9b68246b56dfb350ae36ea943",
+      "sole_registry_binding": "PASS"
+    },
+    {
+      "contract_id": "I7C1_DELIVERY_ACCEPTANCE",
+      "path": "00_PASSMAP/PASS685_I7C1_DELIVERY_ACCEPTANCE_CONTRACT.json",
+      "working_path": "I7C1_DELIVERY_ACCEPTANCE_CONTRACT.json",
+      "sha256": "992b38344aef6196e99cd2f17dc8810c2e962017db8de5c1a563890d54cf49a0",
+      "sole_registry_binding": "PASS"
+    },
+    {
+      "contract_id": "I7C1_RESEARCH_AMENDMENT",
+      "path": "00_PASSMAP/PASS685_I7C1_RESEARCH_AMENDMENT_CONTRACT.json",
+      "working_path": "I7C1_RESEARCH_AMENDMENT_CONTRACT.json",
+      "sha256": "6e29a18a81e820f53a5accd471cf367c625cd48537fa37094f6b17fa0b88b8e9",
+      "sole_registry_binding": "PASS"
+    }
+  ]
+}

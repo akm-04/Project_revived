@@ -1,0 +1,7 @@
+{"name":"topfloor_battle","level":60,"heroes":[10001001,10001002,10001003,10001004,10001005],
+ "steps":["window:sub_arena","tap:arena_node","wait:10","tap:enemy_pos1/challenge_button","wait:5","tap:ok_btn","wait:5",
+  "tap:enemy_pos1/challenge_button","wait:10",
+  "lua:local cards = {} local function walk(node) if not node:isVisible() then return end if node:getName() == 'layout' then table.insert(cards, node) return end for _, child in ipairs(node:getChildren()) do walk(child) end end walk(xyd.WindowManager.get():getWindow('arena_select_team'):nodeByName('list_layer')) for _, card in ipairs(cards) do local box = card:getCascadeBoundingBox() __vc.tap(box.x + box.width / 2, box.y + box.height / 2) end",
+  "wait:10","tap:button_battle","wait:120",
+  "lua:local windows = xyd.WindowManager.get() if not (windows:getWindow('battle_win') or windows:getWindow('battle_lose')) then error('vc-battle-unfinished') end"],
+ "settle_seconds":10,"expect_ok":[59,272,23,291,294,280]}

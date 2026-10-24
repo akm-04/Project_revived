@@ -1,0 +1,25 @@
+{
+  "status": "SOURCE_AND_CONTRACT_RECONCILED_BEFORE_AFFECTED_REPAIR",
+  "failed_candidate_sha256": "9d737f74313cd3cce80af2446c689b23efa8397b38afe053ce844f76e28b2931",
+  "source": {
+    "path": "app/model/PersonDisplay.lua:updateInfo/updateBasicInfo/getPlayerInfo; PersonDisplayWindow.loadInfo",
+    "artifact_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+    "classification": "SOURCE_FACT cachedbasicreplacement; STRONG_INFERENCE completeSYSTEMbasicrefresh avoidsMAINcachewipe, notoriginalservertruth"
+  },
+  "contradicted_design": "681SYSTEMselfonlybasic/preferences isinsufficient when src_64refresh replacesbasiccache andleavesMAINloaded",
+  "existing_contract": "I7B1_WIRE_PRIVACY_POLICY sourcecompatiblecallbacks/no missingrequireddata; SYSTEMselfonly retained",
+  "repair": "SYSTEMself usescompletequalifiedbasicprojectionafterprivacy, withsameavailabilitygates asMAIN. Do not returnpartialsuccess thatresets sourcecache. Missingrichproviders stillblockaffectedselfrefresh.",
+  "authorization": "Existinguser6Bimplementation plusfrozenwire/sourcecontract; routinecorrectnessrepair withinapprovedscope, no newowner/contract/waiver",
+  "fixture_defect": "Guildcommandfixturefixedglobalat+2s canbeearlier thanlater operation.StartedAt undercombinedrace run. Use actual PGTimeAuthority forcommands, keep explicitexpiry boundary onlyinreadonlyprovider observation.",
+  "invalidated_evidence": [
+    {
+      "changed": "composition.go SYSTEM branch",
+      "prior": "F1Test6BCoherent passed butomittedselfSYSTEM cachecase; rerunwithaddedregression. NewAPI previouslyNOT_RUN."
+    },
+    {
+      "changed": "guild_view_test.go commandclock",
+      "prior": "F1Guild failed; rerunexactrepairedfixture. ProductGuildview unchanged."
+    }
+  ],
+  "reusable_evidence": "F1Test6BWireatomic/replay/unknown/concurrency runtimepassed; showcase_wire/identity/receipt productbytes unchanged; retain exactF1subject. F1buildnotfullF2build."
+}

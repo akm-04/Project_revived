@@ -1,0 +1,11 @@
+{
+  "node_path": "ROOT/I7/I7C/I7C-2/I7C-2D",
+  "recorded_utc": "2026-10-13T22:00:19.275930+00:00",
+  "status": "DIRECT_USER_APPROVED",
+  "question_item": "call_362efb1cd2dd45abbb17711a586dedf6:0",
+  "answer": "Approve this V1 reconstruction policy",
+  "policies": [
+    "C2D_V1_BUILDING_SEEDS_AND_JOB_REFUNDS_V1"
+  ],
+  "original_server_truth": false
+}

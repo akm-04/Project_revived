@@ -1,0 +1,141 @@
+{
+  "schema_version": 2,
+  "pass": "592.0",
+  "stage": "CA7-5",
+  "status": "PREIMPLEMENTATION_ACCEPTANCE_MATRIX_FROZEN_GREEN_CANDIDATE",
+  "accepted_parent_rows": [
+    "A05_NORMALIZE",
+    "A15_MID1893",
+    "A16_MID1894_1895"
+  ],
+  "rows": [
+    {
+      "id": "A15_01_SOURCE_ORACLE",
+      "title": "Exact client/source binding",
+      "must_prove": "Pin Pass591 backend and exact current/old-client oracle identities; prove MID1893/1894/1895 requests/results, local item removal, style identity/family resolution, and cancel-before-switch reachability.",
+      "classification": "CONTRACT_ACCEPTANCE",
+      "status": "REQUIRED_NOT_YET_IMPLEMENTED"
+    },
+    {
+      "id": "A15_02_QUALIFICATION",
+      "title": "Style/Pet identity qualification",
+      "must_prove": "Style item must exist in bound CHARACTER_APPEARANCE_CA7 revision; resolve style_pet origin to the unique owned concrete Pet; after Pet lock revalidate Player/Pet/origin; keep instance/origin/style/display identities distinct.",
+      "classification": "CONTRACT_ACCEPTANCE",
+      "status": "REQUIRED_NOT_YET_IMPLEMENTED"
+    },
+    {
+      "id": "A15_03_FIRST_ACQUIRE",
+      "title": "First acquisition grant-only",
+      "must_prove": "First MID1893 debits exactly one style item, grants keyed ownership, preserves pre-operation effective active_style (does not auto-select), returns canonical active_style+sorted pet_styles, and advances Pet state_version exactly once.",
+      "classification": "CONTRACT_ACCEPTANCE",
+      "status": "REQUIRED_NOT_YET_IMPLEMENTED"
+    },
+    {
+      "id": "A15_04_ACQUIRE_CONVERGENCE",
+      "title": "Fresh repeat/lost-response convergence",
+      "must_prove": "Fresh identical MID1893 after effective ownership succeeds without second debit/entitlement/version transition when raw state is canonical; same-operation receipt replay and UNKNOWN-COMMIT never double-debit; bounded stale-second-client local removal residual is documented rather than fixed by invented protocol or extra server debit.",
+      "classification": "CONTRACT_ACCEPTANCE",
+      "status": "REQUIRED_NOT_YET_IMPLEMENTED"
+    },
+    {
+      "id": "A15_05_STALE_NORMALIZATION",
+      "title": "Stale raw selector normalization",
+      "must_prove": "If raw active_style is positive but effective projection is 0, MID1893 persists the pre-operation effective selector while granting/converging so acquisition cannot accidentally revive stale state; entitlement+selector normalization uses one Pet-owned composite CAS.",
+      "classification": "CONTRACT_ACCEPTANCE",
+      "status": "REQUIRED_NOT_YET_IMPLEMENTED"
+    },
+    {
+      "id": "A15_06_I5_LOCK_ORDER",
+      "title": "Typed I5 composition",
+      "must_prove": "Pet430 owner lock and in-tx receipt recheck precede I5 stack lock/debit; only first acquisition debits; stale/racing insufficient stack causes no Character write/receipt.",
+      "classification": "CONTRACT_ACCEPTANCE",
+      "status": "REQUIRED_NOT_YET_IMPLEMENTED"
+    },
+    {
+      "id": "A16_01_SELECT",
+      "title": "Owned style selection",
+      "must_prove": "MID1894 from effective active=0 selects an effectively owned/revision/family-qualified style using one Pet CAS and returns active_style.",
+      "classification": "CONTRACT_ACCEPTANCE",
+      "status": "REQUIRED_NOT_YET_IMPLEMENTED"
+    },
+    {
+      "id": "A16_02_DIRECT_SWITCH",
+      "title": "Cancel-before-switch conflict",
+      "must_prove": "MID1894 for a different style while another effective style is active fails as state conflict and performs no write/receipt-success/debit; after MID1895 cancel the selection may succeed.",
+      "classification": "CONTRACT_ACCEPTANCE",
+      "status": "REQUIRED_NOT_YET_IMPLEMENTED"
+    },
+    {
+      "id": "A16_03_CANCEL",
+      "title": "Explicit cancel",
+      "must_prove": "MID1895 assigns active_style=0. Raw 0 is successful no-op; any raw positive value, including stale/unqualified raw state, is cleared with one Pet CAS. Stock success body is empty.",
+      "classification": "CONTRACT_ACCEPTANCE",
+      "status": "REQUIRED_NOT_YET_IMPLEMENTED"
+    },
+    {
+      "id": "A16_04_NOOP_VERSION",
+      "title": "Idempotence and owner version",
+      "must_prove": "Same-style select and already-zero cancel converge with terminal same-attempt receipts but no Pet state_version change; actual mutations advance exactly once.",
+      "classification": "CONTRACT_ACCEPTANCE",
+      "status": "REQUIRED_NOT_YET_IMPLEMENTED"
+    },
+    {
+      "id": "A16_05_WIRE_ERRORS",
+      "title": "Strict stock wire/error mapping",
+      "must_prove": "Use strict integral numeric Pet parser and exact allowed params. Missing Pet -> 404. Invalid/unqualified/unowned/wrong-family -> 400. Different-style active conflict and I5 insufficiency -> 409. Content unavailable -> 503. Invent no Pet-style numeric stock error codes.",
+      "classification": "CONTRACT_ACCEPTANCE",
+      "status": "REQUIRED_NOT_YET_IMPLEMENTED"
+    },
+    {
+      "id": "A16_06_RECEIPTS",
+      "title": "D11 identity/fingerprint/results",
+      "must_prove": "Register ca7.pet-style-acquire CURRENT_STATE_CONVERGENCE consumptive; ca7.pet-style-select/cancel PARAMETER_STATE_ASSIGNMENT. Fingerprints bind exact semantic request fields; same op with changed parameters conflicts; all operations perform pre-transaction, early in-transaction and post-Pet-lock receipt checks as applicable; receipts survive UNKNOWN-COMMIT.",
+      "classification": "CONTRACT_ACCEPTANCE",
+      "status": "REQUIRED_NOT_YET_IMPLEMENTED"
+    },
+    {
+      "id": "A16_07_CONCURRENCY",
+      "title": "Concurrency matrix",
+      "must_prove": "Prove same-item acquire consumes once; same-style select bumps once; different-style selects race to one winner+one conflict; select/cancel ordering is serializable; acquire/select ordering is deterministic; cross-Pet operations preserve Pet-before-I5 ordering.",
+      "classification": "CONTRACT_ACCEPTANCE",
+      "status": "REQUIRED_NOT_YET_IMPLEMENTED"
+    },
+    {
+      "id": "A16_08_PRACTICE",
+      "title": "CA6 Practice fence",
+      "must_prove": "Actual style mutation changes Pet state_version and makes a pending Pet Practice proposal stale; semantic no-op preserves version and leaves proposal valid.",
+      "classification": "CONTRACT_ACCEPTANCE",
+      "status": "REQUIRED_NOT_YET_IMPLEMENTED"
+    },
+    {
+      "id": "A16_09_RELOAD",
+      "title": "Reload/effective projection",
+      "must_prove": "Mutation results and reconnect reload derive from the same keyed durable entitlements + effective projection; owned styles are deterministic ascending item IDs; active_style is 0 or effectively owned/qualified; malformed client arrays are never ingested.",
+      "classification": "CONTRACT_ACCEPTANCE",
+      "status": "REQUIRED_NOT_YET_IMPLEMENTED"
+    },
+    {
+      "id": "A16_10_SCHEMA_OWNERSHIP",
+      "title": "Architecture/schema fence",
+      "must_prove": "Pet remains sole durable owner; no Cosmetics aggregate/foreign-owner SQL/new migration; use existing CA7-2 tables/content plus narrow Pet composite mutation seam; CA7-6+ remains absent.",
+      "classification": "CONTRACT_ACCEPTANCE",
+      "status": "REQUIRED_NOT_YET_IMPLEMENTED"
+    },
+    {
+      "id": "A16_10A_STALE_CLIENT_RESIDUAL",
+      "title": "Stale second-client convergence residual",
+      "must_prove": "A fresh already-owned MID1893 performs no server debit even though a stale stock client may locally remove one item after success; implementation must not add a second debit or invented response discriminator. Document this bounded compatibility residual.",
+      "classification": "CONTRACT_ACCEPTANCE",
+      "status": "REQUIRED_NOT_YET_IMPLEMENTED"
+    },
+    {
+      "id": "A16_11_LOCAL_PROOF",
+      "title": "Local implementation proof gate",
+      "must_prove": "After implementation: canonical static/source-oracle/query/ownership guards plus focused behavior/race/vet and bounded package regression. Compatibility-copy execution is labeled and does not satisfy CA7-7 native aggregate or W2 stock proof.",
+      "classification": "CONTRACT_ACCEPTANCE",
+      "status": "REQUIRED_NOT_YET_IMPLEMENTED"
+    }
+  ],
+  "implementation_authorized": false,
+  "contract": "00_PASSMAP/PASS592_CA7_5_IMPLEMENTATION_CONTRACT.md"
+}

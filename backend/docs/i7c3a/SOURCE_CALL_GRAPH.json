@@ -1,0 +1,2632 @@
+{
+  "scope": "Selected stat/force entrypoints and same-model reachable helpers; full source files cached. This is static reachability, not runtime load proof.",
+  "methods": [
+    {
+      "model": "NormalHero",
+      "method": "getTotalAttrWithOutBook",
+      "path": "app/model/NormalHero.lua",
+      "calls": [
+        "getAD",
+        "getADBaoji",
+        "getAP",
+        "getConquerSchoolAttr",
+        "getCoursesAttr",
+        "getElementAttr",
+        "getEquipAttr",
+        "getEquipFumoAttr",
+        "getFeedAttr",
+        "getHujia",
+        "getInscriptionAttr",
+        "getJinjieEquipAttr",
+        "getMainAttr",
+        "getMaxHP",
+        "getMokang",
+        "getSkill2Attr",
+        "getSkillAttr",
+        "getSpiritEquipsAttr",
+        "getStoneEvolutionAttr",
+        "getTableID",
+        "getTotalPracticeAttr",
+        "getWhiteAlbumAttr"
+      ],
+      "tables": [],
+      "globals": []
+    },
+    {
+      "model": "NormalHero",
+      "method": "getWhiteAlbumAttr",
+      "path": "app/model/NormalHero.lua",
+      "calls": [],
+      "tables": [],
+      "globals": [
+        "next"
+      ]
+    },
+    {
+      "model": "NormalHero",
+      "method": "getTotalPracticeAttr",
+      "path": "app/model/NormalHero.lua",
+      "calls": [
+        "getPracticeAttr",
+        "getPracticeAwardAttr"
+      ],
+      "tables": [],
+      "globals": []
+    },
+    {
+      "model": "NormalHero",
+      "method": "getPracticeAwardAttr",
+      "path": "app/model/NormalHero.lua",
+      "calls": [],
+      "tables": [],
+      "globals": []
+    },
+    {
+      "model": "NormalHero",
+      "method": "getPracticeAttr",
+      "path": "app/model/NormalHero.lua",
+      "calls": [],
+      "tables": [],
+      "globals": []
+    },
+    {
+      "model": "NormalHero",
+      "method": "getTableID",
+      "path": "app/model/NormalHero.lua",
+      "calls": [],
+      "tables": [],
+      "globals": []
+    },
+    {
+      "model": "NormalHero",
+      "method": "getStoneEvolutionAttr",
+      "path": "app/model/NormalHero.lua",
+      "calls": [
+        "getEvoAttrPoints",
+        "getEvoStage"
+      ],
+      "tables": [
+        "stoneEvolution"
+      ],
+      "globals": []
+    },
+    {
+      "model": "NormalHero",
+      "method": "getEvoStage",
+      "path": "app/model/NormalHero.lua",
+      "calls": [],
+      "tables": [],
+      "globals": []
+    },
+    {
+      "model": "NormalHero",
+      "method": "getEvoAttrPoints",
+      "path": "app/model/NormalHero.lua",
+      "calls": [],
+      "tables": [],
+      "globals": []
+    },
+    {
+      "model": "NormalHero",
+      "method": "getSpiritEquipsAttr",
+      "path": "app/model/NormalHero.lua",
+      "calls": [
+        "getSpiritEquips",
+        "getSpiritEquipsAttr",
+        "getSpiritSuitID"
+      ],
+      "tables": [],
+      "globals": [
+        "ipairs",
+        "isClient"
+      ]
+    },
+    {
+      "model": "NormalHero",
+      "method": "getSpiritSuitID",
+      "path": "app/model/NormalHero.lua",
+      "calls": [
+        "getSpiritEquips"
+      ],
+      "tables": [
+        "spiritEquip"
+      ],
+      "globals": [
+        "ipairs",
+        "isClient",
+        "pairs",
+        "table"
+      ]
+    },
+    {
+      "model": "NormalHero",
+      "method": "getSpiritEquips",
+      "path": "app/model/NormalHero.lua",
+      "calls": [],
+      "tables": [],
+      "globals": []
+    },
+    {
+      "model": "NormalHero",
+      "method": "getSkillAttr",
+      "path": "app/model/NormalHero.lua",
+      "calls": [
+        "getSkillLevelByID",
+        "getTableID"
+      ],
+      "tables": [],
+      "globals": [
+        "ipairs",
+        "next",
+        "print",
+        "table"
+      ]
+    },
+    {
+      "model": "NormalHero",
+      "method": "getSkillLevelByID",
+      "path": "app/model/NormalHero.lua",
+      "calls": [
+        "getBookShelfSkillLevel",
+        "getExtraSkillLevel",
+        "getSkillId",
+        "getSkillLevel",
+        "getTableID"
+      ],
+      "tables": [],
+      "globals": [
+        "ipairs",
+        "isClient"
+      ]
+    },
+    {
+      "model": "NormalHero",
+      "method": "getSkillLevel",
+      "path": "app/model/NormalHero.lua",
+      "calls": [],
+      "tables": [],
+      "globals": [
+        "isClient"
+      ]
+    },
+    {
+      "model": "NormalHero",
+      "method": "getSkillId",
+      "path": "app/model/NormalHero.lua",
+      "calls": [
+        "getTableID"
+      ],
+      "tables": [],
+      "globals": [
+        "next"
+      ]
+    },
+    {
+      "model": "NormalHero",
+      "method": "getExtraSkillLevel",
+      "path": "app/model/NormalHero.lua",
+      "calls": [
+        "getConquerSchoolAttr",
+        "getCoursesAttr",
+        "getEquipAttr",
+        "getInscriptionAttr",
+        "getJinjieEquipAttr",
+        "getPracticeAwardAttr",
+        "getSkillBookAttr",
+        "getWhiteAlbumAttr"
+      ],
+      "tables": [],
+      "globals": []
+    },
+    {
+      "model": "NormalHero",
+      "method": "getSkillBookAttr",
+      "path": "app/model/NormalHero.lua",
+      "calls": [],
+      "tables": [],
+      "globals": [
+        "pairs",
+        "tonumber"
+      ]
+    },
+    {
+      "model": "NormalHero",
+      "method": "getJinjieEquipAttr",
+      "path": "app/model/NormalHero.lua",
+      "calls": [
+        "getColor",
+        "getEquipAttrByType",
+        "getEquipList"
+      ],
+      "tables": [],
+      "globals": [
+        "pairs"
+      ]
+    },
+    {
+      "model": "NormalHero",
+      "method": "getEquipList",
+      "path": "app/model/NormalHero.lua",
+      "calls": [
+        "awakeTwiceStage",
+        "getColor",
+        "getTableID"
+      ],
+      "tables": [],
+      "globals": [
+        "ipairs",
+        "table"
+      ]
+    },
+    {
+      "model": "NormalHero",
+      "method": "getColor",
+      "path": "app/model/NormalHero.lua",
+      "calls": [],
+      "tables": [],
+      "globals": []
+    },
+    {
+      "model": "NormalHero",
+      "method": "awakeTwiceStage",
+      "path": "app/model/NormalHero.lua",
+      "calls": [],
+      "tables": [],
+      "globals": []
+    },
+    {
+      "model": "NormalHero",
+      "method": "getEquipAttrByType",
+      "path": "app/model/NormalHero.lua",
+      "calls": [],
+      "tables": [],
+      "globals": []
+    },
+    {
+      "model": "NormalHero",
+      "method": "getInscriptionAttr",
+      "path": "app/model/NormalHero.lua",
+      "calls": [
+        "getInscriptionAttrByType",
+        "getInscriptionSuitAttr"
+      ],
+      "tables": [],
+      "globals": [
+        "pairs"
+      ]
+    },
+    {
+      "model": "NormalHero",
+      "method": "getInscriptionSuitAttr",
+      "path": "app/model/NormalHero.lua",
+      "calls": [
+        "getSuitInfo"
+      ],
+      "tables": [
+        "inscriptionSuit"
+      ],
+      "globals": [
+        "pairs"
+      ]
+    },
+    {
+      "model": "NormalHero",
+      "method": "getSuitInfo",
+      "path": "app/model/NormalHero.lua",
+      "calls": [
+        "getInscriptItems"
+      ],
+      "tables": [
+        "inscriptionSuit"
+      ],
+      "globals": [
+        "ipairs"
+      ]
+    },
+    {
+      "model": "NormalHero",
+      "method": "getInscriptItems",
+      "path": "app/model/NormalHero.lua",
+      "calls": [],
+      "tables": [],
+      "globals": []
+    },
+    {
+      "model": "NormalHero",
+      "method": "getInscriptionAttrByType",
+      "path": "app/model/NormalHero.lua",
+      "calls": [],
+      "tables": [
+        "item"
+      ],
+      "globals": []
+    },
+    {
+      "model": "NormalHero",
+      "method": "getEquipAttr",
+      "path": "app/model/NormalHero.lua",
+      "calls": [
+        "getColor",
+        "getEquipAttrByType",
+        "getEquipList",
+        "getHouseEquipAttr"
+      ],
+      "tables": [],
+      "globals": [
+        "pairs"
+      ]
+    },
+    {
+      "model": "NormalHero",
+      "method": "getHouseEquipAttr",
+      "path": "app/model/NormalHero.lua",
+      "calls": [
+        "getEquipAttrByType",
+        "getHouseEquipsList",
+        "getStar"
+      ],
+      "tables": [],
+      "globals": [
+        "pairs"
+      ]
+    },
+    {
+      "model": "NormalHero",
+      "method": "getStar",
+      "path": "app/model/NormalHero.lua",
+      "calls": [],
+      "tables": [],
+      "globals": []
+    },
+    {
+      "model": "NormalHero",
+      "method": "getHouseEquipsList",
+      "path": "app/model/NormalHero.lua",
+      "calls": [
+        "getDormEquipItemByIndex"
+      ],
+      "tables": [],
+      "globals": [
+        "table"
+      ]
+    },
+    {
+      "model": "NormalHero",
+      "method": "getDormEquipItemByIndex",
+      "path": "app/model/NormalHero.lua",
+      "calls": [
+        "getDormItemList"
+      ],
+      "tables": [],
+      "globals": []
+    },
+    {
+      "model": "NormalHero",
+      "method": "getDormItemList",
+      "path": "app/model/NormalHero.lua",
+      "calls": [
+        "getFirstTableID"
+      ],
+      "tables": [],
+      "globals": []
+    },
+    {
+      "model": "NormalHero",
+      "method": "getFirstTableID",
+      "path": "app/model/NormalHero.lua",
+      "calls": [
+        "beforeAwakenID",
+        "getTableID",
+        "isAwaken"
+      ],
+      "tables": [],
+      "globals": []
+    },
+    {
+      "model": "NormalHero",
+      "method": "isAwaken",
+      "path": "app/model/NormalHero.lua",
+      "calls": [
+        "getTableID"
+      ],
+      "tables": [],
+      "globals": []
+    },
+    {
+      "model": "NormalHero",
+      "method": "beforeAwakenID",
+      "path": "app/model/NormalHero.lua",
+      "calls": [
+        "getTableID"
+      ],
+      "tables": [],
+      "globals": []
+    },
+    {
+      "model": "NormalHero",
+      "method": "getCoursesAttr",
+      "path": "app/model/NormalHero.lua",
+      "calls": [],
+      "tables": [
+        "objectBook"
+      ],
+      "globals": [
+        "pairs",
+        "tonumber"
+      ]
+    },
+    {
+      "model": "NormalHero",
+      "method": "getConquerSchoolAttr",
+      "path": "app/model/NormalHero.lua",
+      "calls": [],
+      "tables": [
+        "conquerSchool",
+        "conquerSchoolCampaign"
+      ],
+      "globals": [
+        "tonumber"
+      ]
+    },
+    {
+      "model": "NormalHero",
+      "method": "getBookShelfSkillLevel",
+      "path": "app/model/NormalHero.lua",
+      "calls": [],
+      "tables": [
+        "bookShelfTable"
+      ],
+      "globals": []
+    },
+    {
+      "model": "NormalHero",
+      "method": "getSkill2Attr",
+      "path": "app/model/NormalHero.lua",
+      "calls": [
+        "skillAttr2AD",
+        "skillAttr2AP",
+        "skillAttr2Baoji",
+        "skillAttr2HP",
+        "skillAttr2Hujia",
+        "skillAttr2Mokang"
+      ],
+      "tables": [],
+      "globals": []
+    },
+    {
+      "model": "NormalHero",
+      "method": "skillAttr2Mokang",
+      "path": "app/model/NormalHero.lua",
+      "calls": [
+        "getSkillAttr"
+      ],
+      "tables": [],
+      "globals": []
+    },
+    {
+      "model": "NormalHero",
+      "method": "skillAttr2Hujia",
+      "path": "app/model/NormalHero.lua",
+      "calls": [
+        "getSkillAttr"
+      ],
+      "tables": [],
+      "globals": []
+    },
+    {
+      "model": "NormalHero",
+      "method": "skillAttr2HP",
+      "path": "app/model/NormalHero.lua",
+      "calls": [
+        "getSkillAttr"
+      ],
+      "tables": [],
+      "globals": []
+    },
+    {
+      "model": "NormalHero",
+      "method": "skillAttr2Baoji",
+      "path": "app/model/NormalHero.lua",
+      "calls": [
+        "getSkillAttr"
+      ],
+      "tables": [],
+      "globals": []
+    },
+    {
+      "model": "NormalHero",
+      "method": "skillAttr2AP",
+      "path": "app/model/NormalHero.lua",
+      "calls": [
+        "getSkillAttr"
+      ],
+      "tables": [],
+      "globals": []
+    },
+    {
+      "model": "NormalHero",
+      "method": "skillAttr2AD",
+      "path": "app/model/NormalHero.lua",
+      "calls": [
+        "getHeroType",
+        "getSkillAttr"
+      ],
+      "tables": [],
+      "globals": []
+    },
+    {
+      "model": "NormalHero",
+      "method": "getHeroType",
+      "path": "app/model/NormalHero.lua",
+      "calls": [
+        "getTableID"
+      ],
+      "tables": [],
+      "globals": []
+    },
+    {
+      "model": "NormalHero",
+      "method": "getMokang",
+      "path": "app/model/NormalHero.lua",
+      "calls": [
+        "getMainAttr",
+        "getTableID"
+      ],
+      "tables": [],
+      "globals": [
+        "math"
+      ]
+    },
+    {
+      "model": "NormalHero",
+      "method": "getMainAttr",
+      "path": "app/model/NormalHero.lua",
+      "calls": [
+        "getColor",
+        "getConquerSchoolAttr",
+        "getCoursesAttr",
+        "getElementAttr",
+        "getEquipAttr",
+        "getEquipFumoAttr",
+        "getGrowAttr",
+        "getInscriptionAttr",
+        "getJinjieEquipAttr",
+        "getLevel",
+        "getSkillBookAttr",
+        "getSpiritEquipsAttr",
+        "getStar",
+        "getStoneEvolutionAttr",
+        "getTableID",
+        "getTotalPracticeAttr"
+      ],
+      "tables": [],
+      "globals": []
+    },
+    {
+      "model": "NormalHero",
+      "method": "getLevel",
+      "path": "app/model/NormalHero.lua",
+      "calls": [],
+      "tables": [],
+      "globals": []
+    },
+    {
+      "model": "NormalHero",
+      "method": "getGrowAttr",
+      "path": "app/model/NormalHero.lua",
+      "calls": [
+        "getBookShelfAttr",
+        "getFavorAttrGrowth",
+        "getHouseAttrGrowthByType"
+      ],
+      "tables": [],
+      "globals": []
+    },
+    {
+      "model": "NormalHero",
+      "method": "getHouseAttrGrowthByType",
+      "path": "app/model/NormalHero.lua",
+      "calls": [],
+      "tables": [
+        "dormExpand"
+      ],
+      "globals": [
+        "next"
+      ]
+    },
+    {
+      "model": "NormalHero",
+      "method": "getFavorAttrGrowth",
+      "path": "app/model/NormalHero.lua",
+      "calls": [
+        "getFavorLev"
+      ],
+      "tables": [
+        "libraryAmour"
+      ],
+      "globals": []
+    },
+    {
+      "model": "NormalHero",
+      "method": "getFavorLev",
+      "path": "app/model/NormalHero.lua",
+      "calls": [
+        "getFavorDegree",
+        "getFavorState"
+      ],
+      "tables": [
+        "libraryAmour"
+      ],
+      "globals": []
+    },
+    {
+      "model": "NormalHero",
+      "method": "getFavorState",
+      "path": "app/model/NormalHero.lua",
+      "calls": [
+        "getFavorDegree",
+        "getTableID",
+        "isHeroMarried"
+      ],
+      "tables": [
+        "misc"
+      ],
+      "globals": []
+    },
+    {
+      "model": "NormalHero",
+      "method": "isHeroMarried",
+      "path": "app/model/NormalHero.lua",
+      "calls": [],
+      "tables": [],
+      "globals": []
+    },
+    {
+      "model": "NormalHero",
+      "method": "getFavorDegree",
+      "path": "app/model/NormalHero.lua",
+      "calls": [],
+      "tables": [],
+      "globals": []
+    },
+    {
+      "model": "NormalHero",
+      "method": "getBookShelfAttr",
+      "path": "app/model/NormalHero.lua",
+      "calls": [
+        "getLevel",
+        "getStar",
+        "getTableID"
+      ],
+      "tables": [
+        "bookShelfTable"
+      ],
+      "globals": []
+    },
+    {
+      "model": "NormalHero",
+      "method": "getEquipFumoAttr",
+      "path": "app/model/NormalHero.lua",
+      "calls": [
+        "getColor",
+        "getEquipFumoAttrByType",
+        "getEquipList"
+      ],
+      "tables": [],
+      "globals": [
+        "ipairs",
+        "next"
+      ]
+    },
+    {
+      "model": "NormalHero",
+      "method": "getEquipFumoAttrByType",
+      "path": "app/model/NormalHero.lua",
+      "calls": [],
+      "tables": [],
+      "globals": []
+    },
+    {
+      "model": "NormalHero",
+      "method": "getElementAttr",
+      "path": "app/model/NormalHero.lua",
+      "calls": [
+        "getElementEquipActiveRate",
+        "getElementEquips",
+        "getExclusiveElementAttr"
+      ],
+      "tables": [],
+      "globals": [
+        "tonumber"
+      ]
+    },
+    {
+      "model": "NormalHero",
+      "method": "getExclusiveElementAttr",
+      "path": "app/model/NormalHero.lua",
+      "calls": [
+        "checkIsZhuge",
+        "getZhugeBookSkillNum"
+      ],
+      "tables": [],
+      "globals": []
+    },
+    {
+      "model": "NormalHero",
+      "method": "getZhugeBookSkillNum",
+      "path": "app/model/NormalHero.lua",
+      "calls": [],
+      "tables": [],
+      "globals": [
+        "isClient",
+        "pairs",
+        "require"
+      ]
+    },
+    {
+      "model": "NormalHero",
+      "method": "checkIsZhuge",
+      "path": "app/model/NormalHero.lua",
+      "calls": [],
+      "tables": [],
+      "globals": []
+    },
+    {
+      "model": "NormalHero",
+      "method": "getElementEquips",
+      "path": "app/model/NormalHero.lua",
+      "calls": [
+        "getHeroID",
+        "getTableID"
+      ],
+      "tables": [],
+      "globals": []
+    },
+    {
+      "model": "NormalHero",
+      "method": "getHeroID",
+      "path": "app/model/NormalHero.lua",
+      "calls": [],
+      "tables": [],
+      "globals": []
+    },
+    {
+      "model": "NormalHero",
+      "method": "getElementEquipActiveRate",
+      "path": "app/model/NormalHero.lua",
+      "calls": [
+        "getElementType",
+        "getFirstTableID"
+      ],
+      "tables": [],
+      "globals": []
+    },
+    {
+      "model": "NormalHero",
+      "method": "getElementType",
+      "path": "app/model/NormalHero.lua",
+      "calls": [
+        "getElementEquips",
+        "getTableID"
+      ],
+      "tables": [],
+      "globals": []
+    },
+    {
+      "model": "NormalHero",
+      "method": "getMaxHP",
+      "path": "app/model/NormalHero.lua",
+      "calls": [
+        "getMainAttr",
+        "getTableID"
+      ],
+      "tables": [],
+      "globals": [
+        "math"
+      ]
+    },
+    {
+      "model": "NormalHero",
+      "method": "getHujia",
+      "path": "app/model/NormalHero.lua",
+      "calls": [
+        "getMainAttr",
+        "getTableID"
+      ],
+      "tables": [],
+      "globals": [
+        "math"
+      ]
+    },
+    {
+      "model": "NormalHero",
+      "method": "getFeedAttr",
+      "path": "app/model/NormalHero.lua",
+      "calls": [],
+      "tables": [
+        "libraryFeedAttr"
+      ],
+      "globals": [
+        "pairs"
+      ]
+    },
+    {
+      "model": "NormalHero",
+      "method": "getAP",
+      "path": "app/model/NormalHero.lua",
+      "calls": [
+        "getMainAttr",
+        "getTableID"
+      ],
+      "tables": [],
+      "globals": [
+        "math"
+      ]
+    },
+    {
+      "model": "NormalHero",
+      "method": "getADBaoji",
+      "path": "app/model/NormalHero.lua",
+      "calls": [
+        "getMainAttr",
+        "getTableID"
+      ],
+      "tables": [],
+      "globals": [
+        "math"
+      ]
+    },
+    {
+      "model": "NormalHero",
+      "method": "getAD",
+      "path": "app/model/NormalHero.lua",
+      "calls": [
+        "getHeroType",
+        "getMainAttr",
+        "getTableID"
+      ],
+      "tables": [],
+      "globals": [
+        "math"
+      ]
+    },
+    {
+      "model": "NormalHero",
+      "method": "getZhandouli",
+      "path": "app/model/NormalHero.lua",
+      "calls": [
+        "getBasicForce",
+        "getBookSkillForce",
+        "getConquerSchoolForce",
+        "getCoursesForce",
+        "getEquipForce",
+        "getFeedForce",
+        "getInscriptionForce",
+        "getSkillForce",
+        "getStoneEvolutionForce",
+        "getWhiteAlbumForce"
+      ],
+      "tables": [],
+      "globals": [
+        "math"
+      ]
+    },
+    {
+      "model": "NormalHero",
+      "method": "getWhiteAlbumForce",
+      "path": "app/model/NormalHero.lua",
+      "calls": [],
+      "tables": [
+        "attr"
+      ],
+      "globals": [
+        "next",
+        "pairs",
+        "tonumber"
+      ]
+    },
+    {
+      "model": "NormalHero",
+      "method": "getStoneEvolutionForce",
+      "path": "app/model/NormalHero.lua",
+      "calls": [
+        "getStoneEvolutionAttr"
+      ],
+      "tables": [
+        "attr"
+      ],
+      "globals": []
+    },
+    {
+      "model": "NormalHero",
+      "method": "getSkillForce",
+      "path": "app/model/NormalHero.lua",
+      "calls": [
+        "getTableID",
+        "isAwakeTwice",
+        "isAwaken"
+      ],
+      "tables": [],
+      "globals": [
+        "tonumber"
+      ]
+    },
+    {
+      "model": "NormalHero",
+      "method": "isAwakeTwice",
+      "path": "app/model/NormalHero.lua",
+      "calls": [],
+      "tables": [],
+      "globals": []
+    },
+    {
+      "model": "NormalHero",
+      "method": "getInscriptionForce",
+      "path": "app/model/NormalHero.lua",
+      "calls": [
+        "getSuitInfo"
+      ],
+      "tables": [
+        "inscription",
+        "inscriptionSuit",
+        "item"
+      ],
+      "globals": [
+        "pairs"
+      ]
+    },
+    {
+      "model": "NormalHero",
+      "method": "getFeedForce",
+      "path": "app/model/NormalHero.lua",
+      "calls": [],
+      "tables": [
+        "attr",
+        "libraryFeedAttr"
+      ],
+      "globals": [
+        "pairs"
+      ]
+    },
+    {
+      "model": "NormalHero",
+      "method": "getEquipForce",
+      "path": "app/model/NormalHero.lua",
+      "calls": [
+        "getElementAttrJustForShow",
+        "getEquipAttr",
+        "getEquipFumoAttr",
+        "getJinjieEquipAttr",
+        "getSpiritEquipsAttr",
+        "getTotalPracticeAttr"
+      ],
+      "tables": [
+        "attr"
+      ],
+      "globals": []
+    },
+    {
+      "model": "NormalHero",
+      "method": "getElementAttrJustForShow",
+      "path": "app/model/NormalHero.lua",
+      "calls": [
+        "getElementEquipActiveRate",
+        "getElementEquips"
+      ],
+      "tables": [],
+      "globals": [
+        "tonumber"
+      ]
+    },
+    {
+      "model": "NormalHero",
+      "method": "getCoursesForce",
+      "path": "app/model/NormalHero.lua",
+      "calls": [],
+      "tables": [
+        "objectBook"
+      ],
+      "globals": [
+        "pairs",
+        "tonumber"
+      ]
+    },
+    {
+      "model": "NormalHero",
+      "method": "getConquerSchoolForce",
+      "path": "app/model/NormalHero.lua",
+      "calls": [
+        "getConquerSchoolAttr"
+      ],
+      "tables": [
+        "attr"
+      ],
+      "globals": []
+    },
+    {
+      "model": "NormalHero",
+      "method": "getBookSkillForce",
+      "path": "app/model/NormalHero.lua",
+      "calls": [
+        "getSkillBookAttr"
+      ],
+      "tables": [
+        "attr"
+      ],
+      "globals": []
+    },
+    {
+      "model": "NormalHero",
+      "method": "getBasicForce",
+      "path": "app/model/NormalHero.lua",
+      "calls": [
+        "getColor",
+        "getGrowAttr",
+        "getLevel",
+        "getStar",
+        "getTableID"
+      ],
+      "tables": [
+        "attr"
+      ],
+      "globals": []
+    },
+    {
+      "model": "NormalHero",
+      "method": "getTotalAttr",
+      "path": "app/model/NormalHero.lua",
+      "calls": [
+        "getAD",
+        "getADBaoji",
+        "getAP",
+        "getBattleInscriptionAttr",
+        "getConquerSchoolAttr",
+        "getCoursesAttr",
+        "getElementAttr",
+        "getEquipAttr",
+        "getEquipFumoAttr",
+        "getFeedAttr",
+        "getHujia",
+        "getJinjieEquipAttr",
+        "getMainAttr",
+        "getMaxHP",
+        "getMokang",
+        "getSkill2Attr",
+        "getSkillAttr",
+        "getSkillBookAttr",
+        "getSpiritEquipsAttr",
+        "getStoneEvolutionAttr",
+        "getTableID",
+        "getTotalPracticeAttr",
+        "getWhiteAlbumAttr"
+      ],
+      "tables": [],
+      "globals": []
+    },
+    {
+      "model": "NormalHero",
+      "method": "getBattleInscriptionAttr",
+      "path": "app/model/NormalHero.lua",
+      "calls": [
+        "getBattleInscriptionAttrByType",
+        "getInscriptionSuitAttr"
+      ],
+      "tables": [],
+      "globals": [
+        "pairs"
+      ]
+    },
+    {
+      "model": "NormalHero",
+      "method": "getBattleInscriptionAttrByType",
+      "path": "app/model/NormalHero.lua",
+      "calls": [],
+      "tables": [
+        "item"
+      ],
+      "globals": []
+    },
+    {
+      "model": "SuperHero",
+      "method": "getTotalAttrWithOutBook",
+      "path": "app/model/SuperHero.lua",
+      "calls": [
+        "getAD",
+        "getADBaoji",
+        "getAP",
+        "getConquerSchoolAttr",
+        "getCoursesAttr",
+        "getElementAttr",
+        "getEquipAttr",
+        "getEquipFumoAttr",
+        "getFeedAttr",
+        "getHujia",
+        "getInscriptionAttr",
+        "getJinjieEquipAttr",
+        "getMainAttr",
+        "getMaxHP",
+        "getMokang",
+        "getSkill2Attr",
+        "getSkillAttr",
+        "getSpiritEquipsAttr",
+        "getStoneEvolutionAttr",
+        "getTableID",
+        "getTotalPracticeAttr",
+        "getWhiteAlbumAttr"
+      ],
+      "tables": [],
+      "globals": []
+    },
+    {
+      "model": "SuperHero",
+      "method": "getWhiteAlbumAttr",
+      "path": "app/model/SuperHero.lua",
+      "calls": [],
+      "tables": [],
+      "globals": [
+        "next"
+      ]
+    },
+    {
+      "model": "SuperHero",
+      "method": "getTotalPracticeAttr",
+      "path": "app/model/SuperHero.lua",
+      "calls": [
+        "getPracticeAttr",
+        "getPracticeAwardAttr"
+      ],
+      "tables": [],
+      "globals": []
+    },
+    {
+      "model": "SuperHero",
+      "method": "getPracticeAwardAttr",
+      "path": "app/model/SuperHero.lua",
+      "calls": [],
+      "tables": [],
+      "globals": []
+    },
+    {
+      "model": "SuperHero",
+      "method": "getPracticeAttr",
+      "path": "app/model/SuperHero.lua",
+      "calls": [],
+      "tables": [],
+      "globals": []
+    },
+    {
+      "model": "SuperHero",
+      "method": "getTableID",
+      "path": "app/model/SuperHero.lua",
+      "calls": [],
+      "tables": [],
+      "globals": []
+    },
+    {
+      "model": "SuperHero",
+      "method": "getStoneEvolutionAttr",
+      "path": "app/model/SuperHero.lua",
+      "calls": [
+        "getEvoAttrPoints",
+        "getEvoStage"
+      ],
+      "tables": [
+        "stoneEvolution"
+      ],
+      "globals": []
+    },
+    {
+      "model": "SuperHero",
+      "method": "getEvoStage",
+      "path": "app/model/SuperHero.lua",
+      "calls": [],
+      "tables": [],
+      "globals": []
+    },
+    {
+      "model": "SuperHero",
+      "method": "getEvoAttrPoints",
+      "path": "app/model/SuperHero.lua",
+      "calls": [],
+      "tables": [],
+      "globals": []
+    },
+    {
+      "model": "SuperHero",
+      "method": "getSpiritEquipsAttr",
+      "path": "app/model/SuperHero.lua",
+      "calls": [
+        "getSpiritEquips",
+        "getSpiritEquipsAttr",
+        "getSpiritSuitID"
+      ],
+      "tables": [],
+      "globals": [
+        "ipairs",
+        "isClient"
+      ]
+    },
+    {
+      "model": "SuperHero",
+      "method": "getSpiritSuitID",
+      "path": "app/model/SuperHero.lua",
+      "calls": [
+        "getSpiritEquips"
+      ],
+      "tables": [
+        "spiritEquip"
+      ],
+      "globals": [
+        "ipairs",
+        "isClient",
+        "pairs",
+        "table"
+      ]
+    },
+    {
+      "model": "SuperHero",
+      "method": "getSpiritEquips",
+      "path": "app/model/SuperHero.lua",
+      "calls": [],
+      "tables": [],
+      "globals": []
+    },
+    {
+      "model": "SuperHero",
+      "method": "getSkillAttr",
+      "path": "app/model/SuperHero.lua",
+      "calls": [
+        "getSkillLevelByID",
+        "getTableID"
+      ],
+      "tables": [],
+      "globals": [
+        "ipairs",
+        "next",
+        "print",
+        "table"
+      ]
+    },
+    {
+      "model": "SuperHero",
+      "method": "getSkillLevelByID",
+      "path": "app/model/SuperHero.lua",
+      "calls": [
+        "getBookShelfSkillLevel",
+        "getExtraSkillLevel",
+        "getSkillId",
+        "getSkillLevel",
+        "getTableID"
+      ],
+      "tables": [],
+      "globals": [
+        "ipairs",
+        "isClient"
+      ]
+    },
+    {
+      "model": "SuperHero",
+      "method": "getSkillLevel",
+      "path": "app/model/SuperHero.lua",
+      "calls": [],
+      "tables": [],
+      "globals": [
+        "isClient"
+      ]
+    },
+    {
+      "model": "SuperHero",
+      "method": "getSkillId",
+      "path": "app/model/SuperHero.lua",
+      "calls": [
+        "getTableID"
+      ],
+      "tables": [],
+      "globals": [
+        "next"
+      ]
+    },
+    {
+      "model": "SuperHero",
+      "method": "getExtraSkillLevel",
+      "path": "app/model/SuperHero.lua",
+      "calls": [
+        "getConquerSchoolAttr",
+        "getCoursesAttr",
+        "getEquipAttr",
+        "getInscriptionAttr",
+        "getJinjieEquipAttr",
+        "getPracticeAwardAttr",
+        "getSkillBookAttr",
+        "getWhiteAlbumAttr"
+      ],
+      "tables": [],
+      "globals": []
+    },
+    {
+      "model": "SuperHero",
+      "method": "getSkillBookAttr",
+      "path": "app/model/SuperHero.lua",
+      "calls": [],
+      "tables": [],
+      "globals": [
+        "pairs",
+        "tonumber"
+      ]
+    },
+    {
+      "model": "SuperHero",
+      "method": "getJinjieEquipAttr",
+      "path": "app/model/SuperHero.lua",
+      "calls": [
+        "getColor",
+        "getEquipAttrByType",
+        "getEquipList"
+      ],
+      "tables": [],
+      "globals": [
+        "next",
+        "pairs"
+      ]
+    },
+    {
+      "model": "SuperHero",
+      "method": "getEquipList",
+      "path": "app/model/SuperHero.lua",
+      "calls": [
+        "awakeTwiceStage",
+        "getColor",
+        "getTableID"
+      ],
+      "tables": [],
+      "globals": [
+        "ipairs",
+        "table"
+      ]
+    },
+    {
+      "model": "SuperHero",
+      "method": "getColor",
+      "path": "app/model/SuperHero.lua",
+      "calls": [],
+      "tables": [],
+      "globals": []
+    },
+    {
+      "model": "SuperHero",
+      "method": "awakeTwiceStage",
+      "path": "app/model/SuperHero.lua",
+      "calls": [],
+      "tables": [],
+      "globals": []
+    },
+    {
+      "model": "SuperHero",
+      "method": "getEquipAttrByType",
+      "path": "app/model/SuperHero.lua",
+      "calls": [],
+      "tables": [],
+      "globals": []
+    },
+    {
+      "model": "SuperHero",
+      "method": "getInscriptionAttr",
+      "path": "app/model/SuperHero.lua",
+      "calls": [
+        "getInscriptionAttrByType",
+        "getInscriptionSuitAttr"
+      ],
+      "tables": [],
+      "globals": [
+        "pairs"
+      ]
+    },
+    {
+      "model": "SuperHero",
+      "method": "getInscriptionSuitAttr",
+      "path": "app/model/SuperHero.lua",
+      "calls": [
+        "getSuitInfo"
+      ],
+      "tables": [
+        "inscriptionSuit"
+      ],
+      "globals": [
+        "pairs"
+      ]
+    },
+    {
+      "model": "SuperHero",
+      "method": "getSuitInfo",
+      "path": "app/model/SuperHero.lua",
+      "calls": [
+        "getInscriptItems"
+      ],
+      "tables": [
+        "inscriptionSuit"
+      ],
+      "globals": [
+        "ipairs"
+      ]
+    },
+    {
+      "model": "SuperHero",
+      "method": "getInscriptItems",
+      "path": "app/model/SuperHero.lua",
+      "calls": [],
+      "tables": [],
+      "globals": []
+    },
+    {
+      "model": "SuperHero",
+      "method": "getInscriptionAttrByType",
+      "path": "app/model/SuperHero.lua",
+      "calls": [],
+      "tables": [
+        "item"
+      ],
+      "globals": []
+    },
+    {
+      "model": "SuperHero",
+      "method": "getEquipAttr",
+      "path": "app/model/SuperHero.lua",
+      "calls": [
+        "getEquipEnhanceAttr",
+        "getHouseEquipAttr"
+      ],
+      "tables": [],
+      "globals": []
+    },
+    {
+      "model": "SuperHero",
+      "method": "getHouseEquipAttr",
+      "path": "app/model/SuperHero.lua",
+      "calls": [
+        "getEquipAttrByType",
+        "getHouseEquipsList",
+        "getStar"
+      ],
+      "tables": [],
+      "globals": [
+        "pairs"
+      ]
+    },
+    {
+      "model": "SuperHero",
+      "method": "getStar",
+      "path": "app/model/SuperHero.lua",
+      "calls": [],
+      "tables": [],
+      "globals": []
+    },
+    {
+      "model": "SuperHero",
+      "method": "getHouseEquipsList",
+      "path": "app/model/SuperHero.lua",
+      "calls": [
+        "getDormEquipItemByIndex"
+      ],
+      "tables": [],
+      "globals": [
+        "table"
+      ]
+    },
+    {
+      "model": "SuperHero",
+      "method": "getDormEquipItemByIndex",
+      "path": "app/model/SuperHero.lua",
+      "calls": [
+        "getDormItemList"
+      ],
+      "tables": [],
+      "globals": []
+    },
+    {
+      "model": "SuperHero",
+      "method": "getDormItemList",
+      "path": "app/model/SuperHero.lua",
+      "calls": [
+        "getFirstTableID"
+      ],
+      "tables": [],
+      "globals": []
+    },
+    {
+      "model": "SuperHero",
+      "method": "getFirstTableID",
+      "path": "app/model/SuperHero.lua",
+      "calls": [
+        "beforeAwakenID",
+        "getTableID",
+        "isAwaken"
+      ],
+      "tables": [],
+      "globals": []
+    },
+    {
+      "model": "SuperHero",
+      "method": "isAwaken",
+      "path": "app/model/SuperHero.lua",
+      "calls": [
+        "getTableID"
+      ],
+      "tables": [],
+      "globals": []
+    },
+    {
+      "model": "SuperHero",
+      "method": "beforeAwakenID",
+      "path": "app/model/SuperHero.lua",
+      "calls": [
+        "getTableID"
+      ],
+      "tables": [],
+      "globals": []
+    },
+    {
+      "model": "SuperHero",
+      "method": "getEquipEnhanceAttr",
+      "path": "app/model/SuperHero.lua",
+      "calls": [
+        "getColor",
+        "getEquipEnhanceAttrByType",
+        "getEquipList"
+      ],
+      "tables": [],
+      "globals": [
+        "next",
+        "pairs"
+      ]
+    },
+    {
+      "model": "SuperHero",
+      "method": "getEquipEnhanceAttrByType",
+      "path": "app/model/SuperHero.lua",
+      "calls": [],
+      "tables": [],
+      "globals": []
+    },
+    {
+      "model": "SuperHero",
+      "method": "getCoursesAttr",
+      "path": "app/model/SuperHero.lua",
+      "calls": [],
+      "tables": [
+        "objectBook"
+      ],
+      "globals": [
+        "pairs",
+        "tonumber"
+      ]
+    },
+    {
+      "model": "SuperHero",
+      "method": "getConquerSchoolAttr",
+      "path": "app/model/SuperHero.lua",
+      "calls": [],
+      "tables": [
+        "conquerSchool",
+        "conquerSchoolCampaign"
+      ],
+      "globals": [
+        "tonumber"
+      ]
+    },
+    {
+      "model": "SuperHero",
+      "method": "getBookShelfSkillLevel",
+      "path": "app/model/SuperHero.lua",
+      "calls": [],
+      "tables": [
+        "bookShelfTable"
+      ],
+      "globals": []
+    },
+    {
+      "model": "SuperHero",
+      "method": "getSkill2Attr",
+      "path": "app/model/SuperHero.lua",
+      "calls": [
+        "skillAttr2AD",
+        "skillAttr2AP",
+        "skillAttr2Baoji",
+        "skillAttr2HP",
+        "skillAttr2Hujia",
+        "skillAttr2Mokang"
+      ],
+      "tables": [],
+      "globals": []
+    },
+    {
+      "model": "SuperHero",
+      "method": "skillAttr2Mokang",
+      "path": "app/model/SuperHero.lua",
+      "calls": [
+        "getSkillAttr"
+      ],
+      "tables": [],
+      "globals": []
+    },
+    {
+      "model": "SuperHero",
+      "method": "skillAttr2Hujia",
+      "path": "app/model/SuperHero.lua",
+      "calls": [
+        "getSkillAttr"
+      ],
+      "tables": [],
+      "globals": []
+    },
+    {
+      "model": "SuperHero",
+      "method": "skillAttr2HP",
+      "path": "app/model/SuperHero.lua",
+      "calls": [
+        "getSkillAttr"
+      ],
+      "tables": [],
+      "globals": []
+    },
+    {
+      "model": "SuperHero",
+      "method": "skillAttr2Baoji",
+      "path": "app/model/SuperHero.lua",
+      "calls": [
+        "getSkillAttr"
+      ],
+      "tables": [],
+      "globals": []
+    },
+    {
+      "model": "SuperHero",
+      "method": "skillAttr2AP",
+      "path": "app/model/SuperHero.lua",
+      "calls": [
+        "getSkillAttr"
+      ],
+      "tables": [],
+      "globals": []
+    },
+    {
+      "model": "SuperHero",
+      "method": "skillAttr2AD",
+      "path": "app/model/SuperHero.lua",
+      "calls": [
+        "getHeroType",
+        "getSkillAttr"
+      ],
+      "tables": [],
+      "globals": []
+    },
+    {
+      "model": "SuperHero",
+      "method": "getHeroType",
+      "path": "app/model/SuperHero.lua",
+      "calls": [
+        "getTableID"
+      ],
+      "tables": [],
+      "globals": []
+    },
+    {
+      "model": "SuperHero",
+      "method": "getMokang",
+      "path": "app/model/SuperHero.lua",
+      "calls": [
+        "getMainAttr",
+        "getTableID"
+      ],
+      "tables": [],
+      "globals": [
+        "math"
+      ]
+    },
+    {
+      "model": "SuperHero",
+      "method": "getMainAttr",
+      "path": "app/model/SuperHero.lua",
+      "calls": [
+        "getColor",
+        "getConquerSchoolAttr",
+        "getCoursesAttr",
+        "getEquipAttr",
+        "getEquipFumoAttr",
+        "getGrowAttr",
+        "getInscriptionAttr",
+        "getJinjieEquipAttr",
+        "getLevel",
+        "getSkillBookAttr",
+        "getStar",
+        "getStoneEvolutionAttr",
+        "getTableID",
+        "getTotalPracticeAttr"
+      ],
+      "tables": [],
+      "globals": []
+    },
+    {
+      "model": "SuperHero",
+      "method": "getLevel",
+      "path": "app/model/SuperHero.lua",
+      "calls": [],
+      "tables": [],
+      "globals": []
+    },
+    {
+      "model": "SuperHero",
+      "method": "getGrowAttr",
+      "path": "app/model/SuperHero.lua",
+      "calls": [
+        "getBookShelfAttr",
+        "getFavorAttrGrowth",
+        "getHouseAttrGrowthByType"
+      ],
+      "tables": [],
+      "globals": []
+    },
+    {
+      "model": "SuperHero",
+      "method": "getHouseAttrGrowthByType",
+      "path": "app/model/SuperHero.lua",
+      "calls": [],
+      "tables": [
+        "dormExpand"
+      ],
+      "globals": [
+        "next"
+      ]
+    },
+    {
+      "model": "SuperHero",
+      "method": "getFavorAttrGrowth",
+      "path": "app/model/SuperHero.lua",
+      "calls": [
+        "getFavorLev"
+      ],
+      "tables": [
+        "libraryAmour"
+      ],
+      "globals": []
+    },
+    {
+      "model": "SuperHero",
+      "method": "getFavorLev",
+      "path": "app/model/SuperHero.lua",
+      "calls": [
+        "getFavorDegree",
+        "getFavorState"
+      ],
+      "tables": [
+        "libraryAmour"
+      ],
+      "globals": []
+    },
+    {
+      "model": "SuperHero",
+      "method": "getFavorState",
+      "path": "app/model/SuperHero.lua",
+      "calls": [
+        "getFavorDegree",
+        "getTableID",
+        "isHeroMarried"
+      ],
+      "tables": [
+        "misc"
+      ],
+      "globals": []
+    },
+    {
+      "model": "SuperHero",
+      "method": "isHeroMarried",
+      "path": "app/model/SuperHero.lua",
+      "calls": [],
+      "tables": [],
+      "globals": []
+    },
+    {
+      "model": "SuperHero",
+      "method": "getFavorDegree",
+      "path": "app/model/SuperHero.lua",
+      "calls": [],
+      "tables": [],
+      "globals": []
+    },
+    {
+      "model": "SuperHero",
+      "method": "getBookShelfAttr",
+      "path": "app/model/SuperHero.lua",
+      "calls": [
+        "getLevel",
+        "getStar",
+        "getTableID"
+      ],
+      "tables": [
+        "bookShelfTable"
+      ],
+      "globals": []
+    },
+    {
+      "model": "SuperHero",
+      "method": "getEquipFumoAttr",
+      "path": "app/model/SuperHero.lua",
+      "calls": [
+        "getColor",
+        "getEquipList"
+      ],
+      "tables": [],
+      "globals": []
+    },
+    {
+      "model": "SuperHero",
+      "method": "getMaxHP",
+      "path": "app/model/SuperHero.lua",
+      "calls": [
+        "getMainAttr",
+        "getTableID"
+      ],
+      "tables": [],
+      "globals": [
+        "math"
+      ]
+    },
+    {
+      "model": "SuperHero",
+      "method": "getHujia",
+      "path": "app/model/SuperHero.lua",
+      "calls": [
+        "getMainAttr",
+        "getTableID"
+      ],
+      "tables": [],
+      "globals": [
+        "math"
+      ]
+    },
+    {
+      "model": "SuperHero",
+      "method": "getFeedAttr",
+      "path": "app/model/SuperHero.lua",
+      "calls": [],
+      "tables": [
+        "libraryFeedAttr"
+      ],
+      "globals": [
+        "pairs"
+      ]
+    },
+    {
+      "model": "SuperHero",
+      "method": "getElementAttr",
+      "path": "app/model/SuperHero.lua",
+      "calls": [
+        "getElementEquipActiveRate",
+        "getElementEquips"
+      ],
+      "tables": [],
+      "globals": [
+        "tonumber"
+      ]
+    },
+    {
+      "model": "SuperHero",
+      "method": "getElementEquips",
+      "path": "app/model/SuperHero.lua",
+      "calls": [
+        "getHeroID",
+        "getTableID"
+      ],
+      "tables": [],
+      "globals": []
+    },
+    {
+      "model": "SuperHero",
+      "method": "getHeroID",
+      "path": "app/model/SuperHero.lua",
+      "calls": [],
+      "tables": [],
+      "globals": []
+    },
+    {
+      "model": "SuperHero",
+      "method": "getElementEquipActiveRate",
+      "path": "app/model/SuperHero.lua",
+      "calls": [
+        "getElementType",
+        "getFirstTableID"
+      ],
+      "tables": [],
+      "globals": []
+    },
+    {
+      "model": "SuperHero",
+      "method": "getElementType",
+      "path": "app/model/SuperHero.lua",
+      "calls": [
+        "getElementEquips",
+        "getTableID"
+      ],
+      "tables": [],
+      "globals": []
+    },
+    {
+      "model": "SuperHero",
+      "method": "getAP",
+      "path": "app/model/SuperHero.lua",
+      "calls": [
+        "getMainAttr",
+        "getTableID"
+      ],
+      "tables": [],
+      "globals": [
+        "math"
+      ]
+    },
+    {
+      "model": "SuperHero",
+      "method": "getADBaoji",
+      "path": "app/model/SuperHero.lua",
+      "calls": [
+        "getMainAttr",
+        "getTableID"
+      ],
+      "tables": [],
+      "globals": [
+        "math"
+      ]
+    },
+    {
+      "model": "SuperHero",
+      "method": "getAD",
+      "path": "app/model/SuperHero.lua",
+      "calls": [
+        "getHeroType",
+        "getMainAttr",
+        "getTableID"
+      ],
+      "tables": [],
+      "globals": [
+        "math"
+      ]
+    },
+    {
+      "model": "SuperHero",
+      "method": "getZhandouli",
+      "path": "app/model/SuperHero.lua",
+      "calls": [
+        "getBasicForce",
+        "getBookSkillForce",
+        "getConquerSchoolForce",
+        "getCoursesForce",
+        "getEquipForce",
+        "getFeedForce",
+        "getInscriptionForce",
+        "getSkillForce",
+        "getStoneEvolutionForce",
+        "getWhiteAlbumForce"
+      ],
+      "tables": [],
+      "globals": [
+        "math"
+      ]
+    },
+    {
+      "model": "SuperHero",
+      "method": "getWhiteAlbumForce",
+      "path": "app/model/SuperHero.lua",
+      "calls": [],
+      "tables": [
+        "attr"
+      ],
+      "globals": [
+        "next",
+        "pairs",
+        "tonumber"
+      ]
+    },
+    {
+      "model": "SuperHero",
+      "method": "getStoneEvolutionForce",
+      "path": "app/model/SuperHero.lua",
+      "calls": [
+        "getStoneEvolutionAttr"
+      ],
+      "tables": [
+        "attr"
+      ],
+      "globals": []
+    },
+    {
+      "model": "SuperHero",
+      "method": "getSkillForce",
+      "path": "app/model/SuperHero.lua",
+      "calls": [
+        "getTableID",
+        "isAwakeTwice",
+        "isAwaken"
+      ],
+      "tables": [],
+      "globals": [
+        "tonumber"
+      ]
+    },
+    {
+      "model": "SuperHero",
+      "method": "isAwakeTwice",
+      "path": "app/model/SuperHero.lua",
+      "calls": [],
+      "tables": [],
+      "globals": []
+    },
+    {
+      "model": "SuperHero",
+      "method": "getInscriptionForce",
+      "path": "app/model/SuperHero.lua",
+      "calls": [
+        "getSuitInfo"
+      ],
+      "tables": [
+        "inscription",
+        "inscriptionSuit",
+        "item"
+      ],
+      "globals": [
+        "pairs"
+      ]
+    },
+    {
+      "model": "SuperHero",
+      "method": "getFeedForce",
+      "path": "app/model/SuperHero.lua",
+      "calls": [],
+      "tables": [
+        "attr",
+        "libraryFeedAttr"
+      ],
+      "globals": [
+        "pairs"
+      ]
+    },
+    {
+      "model": "SuperHero",
+      "method": "getEquipForce",
+      "path": "app/model/SuperHero.lua",
+      "calls": [
+        "getElementAttr",
+        "getEquipAttr",
+        "getEquipFumoAttr",
+        "getJinjieEquipAttr",
+        "getSpiritEquipsAttr",
+        "getTotalPracticeAttr"
+      ],
+      "tables": [
+        "attr"
+      ],
+      "globals": []
+    },
+    {
+      "model": "SuperHero",
+      "method": "getCoursesForce",
+      "path": "app/model/SuperHero.lua",
+      "calls": [],
+      "tables": [
+        "objectBook"
+      ],
+      "globals": [
+        "pairs",
+        "tonumber"
+      ]
+    },
+    {
+      "model": "SuperHero",
+      "method": "getConquerSchoolForce",
+      "path": "app/model/SuperHero.lua",
+      "calls": [
+        "getConquerSchoolAttr"
+      ],
+      "tables": [
+        "attr"
+      ],
+      "globals": []
+    },
+    {
+      "model": "SuperHero",
+      "method": "getBookSkillForce",
+      "path": "app/model/SuperHero.lua",
+      "calls": [
+        "getSkillBookAttr"
+      ],
+      "tables": [
+        "attr"
+      ],
+      "globals": []
+    },
+    {
+      "model": "SuperHero",
+      "method": "getBasicForce",
+      "path": "app/model/SuperHero.lua",
+      "calls": [
+        "getColor",
+        "getGrowAttr",
+        "getLevel",
+        "getStar",
+        "getTableID"
+      ],
+      "tables": [
+        "attr"
+      ],
+      "globals": []
+    },
+    {
+      "model": "SuperHero",
+      "method": "getTotalAttr",
+      "path": "app/model/SuperHero.lua",
+      "calls": [
+        "getAD",
+        "getADBaoji",
+        "getAP",
+        "getBattleInscriptionAttr",
+        "getConquerSchoolAttr",
+        "getCoursesAttr",
+        "getElementAttr",
+        "getEquipAttr",
+        "getEquipFumoAttr",
+        "getFeedAttr",
+        "getHujia",
+        "getJinjieEquipAttr",
+        "getMainAttr",
+        "getMaxHP",
+        "getMokang",
+        "getSkill2Attr",
+        "getSkillAttr",
+        "getSkillBookAttr",
+        "getSpiritEquipsAttr",
+        "getStoneEvolutionAttr",
+        "getTableID",
+        "getTotalPracticeAttr",
+        "getWhiteAlbumAttr"
+      ],
+      "tables": [],
+      "globals": []
+    },
+    {
+      "model": "SuperHero",
+      "method": "getBattleInscriptionAttr",
+      "path": "app/model/SuperHero.lua",
+      "calls": [
+        "getBattleInscriptionAttrByType",
+        "getInscriptionSuitAttr"
+      ],
+      "tables": [],
+      "globals": [
+        "pairs"
+      ]
+    },
+    {
+      "model": "SuperHero",
+      "method": "getBattleInscriptionAttrByType",
+      "path": "app/model/SuperHero.lua",
+      "calls": [],
+      "tables": [
+        "item"
+      ],
+      "globals": []
+    },
+    {
+      "model": "Pet",
+      "method": "getZhandouli",
+      "path": "app/model/Pet.lua",
+      "calls": [
+        "getBasicForce",
+        "getEquipForce",
+        "getSkillForce"
+      ],
+      "tables": [],
+      "globals": []
+    },
+    {
+      "model": "Pet",
+      "method": "getSkillForce",
+      "path": "app/model/Pet.lua",
+      "calls": [
+        "getTableID"
+      ],
+      "tables": [],
+      "globals": [
+        "tonumber"
+      ]
+    },
+    {
+      "model": "Pet",
+      "method": "getTableID",
+      "path": "app/model/Pet.lua",
+      "calls": [],
+      "tables": [],
+      "globals": []
+    },
+    {
+      "model": "Pet",
+      "method": "getEquipForce",
+      "path": "app/model/Pet.lua",
+      "calls": [
+        "getEquipAttr",
+        "getJinjieEquipAttr",
+        "getTotalPracticeAttr"
+      ],
+      "tables": [
+        "attr"
+      ],
+      "globals": []
+    },
+    {
+      "model": "Pet",
+      "method": "getTotalPracticeAttr",
+      "path": "app/model/Pet.lua",
+      "calls": [
+        "getPracticeAttr",
+        "getPracticeAwardAttr"
+      ],
+      "tables": [],
+      "globals": []
+    },
+    {
+      "model": "Pet",
+      "method": "getPracticeAwardAttr",
+      "path": "app/model/Pet.lua",
+      "calls": [],
+      "tables": [],
+      "globals": []
+    },
+    {
+      "model": "Pet",
+      "method": "getPracticeAttr",
+      "path": "app/model/Pet.lua",
+      "calls": [],
+      "tables": [],
+      "globals": []
+    },
+    {
+      "model": "Pet",
+      "method": "getJinjieEquipAttr",
+      "path": "app/model/Pet.lua",
+      "calls": [
+        "getColor",
+        "getEquipAttrByType",
+        "getEquipList"
+      ],
+      "tables": [],
+      "globals": [
+        "pairs"
+      ]
+    },
+    {
+      "model": "Pet",
+      "method": "getEquipList",
+      "path": "app/model/Pet.lua",
+      "calls": [
+        "getColor",
+        "getTableID"
+      ],
+      "tables": [],
+      "globals": [
+        "ipairs",
+        "table"
+      ]
+    },
+    {
+      "model": "Pet",
+      "method": "getColor",
+      "path": "app/model/Pet.lua",
+      "calls": [],
+      "tables": [],
+      "globals": []
+    },
+    {
+      "model": "Pet",
+      "method": "getEquipAttrByType",
+      "path": "app/model/Pet.lua",
+      "calls": [],
+      "tables": [],
+      "globals": []
+    },
+    {
+      "model": "Pet",
+      "method": "getEquipAttr",
+      "path": "app/model/Pet.lua",
+      "calls": [
+        "getColor",
+        "getEquipAttrByType",
+        "getEquipList"
+      ],
+      "tables": [],
+      "globals": [
+        "pairs"
+      ]
+    },
+    {
+      "model": "Pet",
+      "method": "getBasicForce",
+      "path": "app/model/Pet.lua",
+      "calls": [
+        "getColor",
+        "getLevel",
+        "getStar",
+        "getTableID"
+      ],
+      "tables": [
+        "attr"
+      ],
+      "globals": []
+    },
+    {
+      "model": "Pet",
+      "method": "getStar",
+      "path": "app/model/Pet.lua",
+      "calls": [],
+      "tables": [],
+      "globals": []
+    },
+    {
+      "model": "Pet",
+      "method": "getLevel",
+      "path": "app/model/Pet.lua",
+      "calls": [],
+      "tables": [],
+      "globals": []
+    },
+    {
+      "model": "Pet",
+      "method": "getTotalAttr",
+      "path": "app/model/Pet.lua",
+      "calls": [
+        "getAD",
+        "getADBaoji",
+        "getAP",
+        "getEquipAttr",
+        "getHujia",
+        "getJinjieEquipAttr",
+        "getMainAttr",
+        "getMaxHP",
+        "getMokang",
+        "getSkill2Attr",
+        "getSkillAttr",
+        "getTableID",
+        "getTotalPracticeAttr"
+      ],
+      "tables": [],
+      "globals": []
+    },
+    {
+      "model": "Pet",
+      "method": "getSkillAttr",
+      "path": "app/model/Pet.lua",
+      "calls": [
+        "getSkillLevelByID",
+        "getTableID"
+      ],
+      "tables": [],
+      "globals": [
+        "ipairs",
+        "next",
+        "print",
+        "table"
+      ]
+    },
+    {
+      "model": "Pet",
+      "method": "getSkillLevelByID",
+      "path": "app/model/Pet.lua",
+      "calls": [
+        "getPetStarSkillLevel",
+        "getSkillId",
+        "getSkillLevel",
+        "getTableID"
+      ],
+      "tables": [],
+      "globals": [
+        "ipairs"
+      ]
+    },
+    {
+      "model": "Pet",
+      "method": "getSkillLevel",
+      "path": "app/model/Pet.lua",
+      "calls": [],
+      "tables": [],
+      "globals": []
+    },
+    {
+      "model": "Pet",
+      "method": "getSkillId",
+      "path": "app/model/Pet.lua",
+      "calls": [
+        "getTableID"
+      ],
+      "tables": [],
+      "globals": []
+    },
+    {
+      "model": "Pet",
+      "method": "getPetStarSkillLevel",
+      "path": "app/model/Pet.lua",
+      "calls": [
+        "checkSkillChange"
+      ],
+      "tables": [],
+      "globals": []
+    },
+    {
+      "model": "Pet",
+      "method": "checkSkillChange",
+      "path": "app/model/Pet.lua",
+      "calls": [],
+      "tables": [],
+      "globals": []
+    },
+    {
+      "model": "Pet",
+      "method": "getSkill2Attr",
+      "path": "app/model/Pet.lua",
+      "calls": [
+        "skillAttr2AD",
+        "skillAttr2AP",
+        "skillAttr2Baoji",
+        "skillAttr2HP",
+        "skillAttr2Hujia",
+        "skillAttr2Mokang"
+      ],
+      "tables": [],
+      "globals": []
+    },
+    {
+      "model": "Pet",
+      "method": "skillAttr2Mokang",
+      "path": "app/model/Pet.lua",
+      "calls": [
+        "getSkillAttr"
+      ],
+      "tables": [],
+      "globals": []
+    },
+    {
+      "model": "Pet",
+      "method": "skillAttr2Hujia",
+      "path": "app/model/Pet.lua",
+      "calls": [
+        "getSkillAttr"
+      ],
+      "tables": [],
+      "globals": []
+    },
+    {
+      "model": "Pet",
+      "method": "skillAttr2HP",
+      "path": "app/model/Pet.lua",
+      "calls": [
+        "getSkillAttr"
+      ],
+      "tables": [],
+      "globals": []
+    },
+    {
+      "model": "Pet",
+      "method": "skillAttr2Baoji",
+      "path": "app/model/Pet.lua",
+      "calls": [
+        "getSkillAttr"
+      ],
+      "tables": [],
+      "globals": []
+    },
+    {
+      "model": "Pet",
+      "method": "skillAttr2AP",
+      "path": "app/model/Pet.lua",
+      "calls": [
+        "getSkillAttr"
+      ],
+      "tables": [],
+      "globals": []
+    },
+    {
+      "model": "Pet",
+      "method": "skillAttr2AD",
+      "path": "app/model/Pet.lua",
+      "calls": [
+        "getSkillAttr"
+      ],
+      "tables": [],
+      "globals": []
+    },
+    {
+      "model": "Pet",
+      "method": "getMokang",
+      "path": "app/model/Pet.lua",
+      "calls": [
+        "getMainAttr",
+        "getTableID"
+      ],
+      "tables": [],
+      "globals": []
+    },
+    {
+      "model": "Pet",
+      "method": "getMainAttr",
+      "path": "app/model/Pet.lua",
+      "calls": [
+        "getColor",
+        "getEquipAttr",
+        "getJinjieEquipAttr",
+        "getLevel",
+        "getStar",
+        "getTableID",
+        "getTotalPracticeAttr"
+      ],
+      "tables": [],
+      "globals": []
+    },
+    {
+      "model": "Pet",
+      "method": "getMaxHP",
+      "path": "app/model/Pet.lua",
+      "calls": [
+        "getMainAttr",
+        "getTableID"
+      ],
+      "tables": [],
+      "globals": []
+    },
+    {
+      "model": "Pet",
+      "method": "getHujia",
+      "path": "app/model/Pet.lua",
+      "calls": [
+        "getMainAttr",
+        "getTableID"
+      ],
+      "tables": [],
+      "globals": []
+    },
+    {
+      "model": "Pet",
+      "method": "getAP",
+      "path": "app/model/Pet.lua",
+      "calls": [
+        "getMainAttr",
+        "getTableID"
+      ],
+      "tables": [],
+      "globals": []
+    },
+    {
+      "model": "Pet",
+      "method": "getADBaoji",
+      "path": "app/model/Pet.lua",
+      "calls": [
+        "getMainAttr",
+        "getTableID"
+      ],
+      "tables": [],
+      "globals": []
+    },
+    {
+      "model": "Pet",
+      "method": "getAD",
+      "path": "app/model/Pet.lua",
+      "calls": [
+        "getMainAttr",
+        "getTableID"
+      ],
+      "tables": [],
+      "globals": []
+    }
+  ],
+  "missing_server_modules": [
+    "lib/battle/app/model/Item.lua",
+    "lib/spirit/spirit_item.lua"
+  ],
+  "missing_verified": [
+    true,
+    true
+  ]
+}

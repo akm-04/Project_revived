@@ -1,0 +1,9 @@
+PASS459 R3B LOCAL VALIDATION
+Focused stockruntime/realtime/realtimeauth: PASS
+Repository go test ./...: PASS in disposable Go1.23 clone
+go vet ./...: PASS
+Targeted race: PASS
+net.Pipe slowloris/admission/auth-query/liveness-query/heartbeat-idle: PASS
+Bounded single-writer/backpressure: PASS
+Canonical go.mod remains go1.26.0 / toolchain go1.27.1
+postgres-tag exact build not executed in this sandbox because pgx module download is unavailable; R7 live gate retained.

@@ -1,0 +1,151 @@
+\n===== env GOTOOLCHAIN=local go test -count=1 ./... =====
+?   	gxb.local/backend/v2/cmd/gxb-admin	[no test files]
+?   	gxb.local/backend/v2/cmd/gxb-api	[no test files]
+?   	gxb.local/backend/v2/cmd/gxb-realtime	[no test files]
+?   	gxb.local/backend/v2/cmd/gxb-wave-s-report	[no test files]
+?   	gxb.local/backend/v2/cmd/gxb-worker	[no test files]
+?   	gxb.local/backend/v2/internal/adapters/blobstore	[no test files]
+?   	gxb.local/backend/v2/internal/adapters/pass353diff	[no test files]
+?   	gxb.local/backend/v2/internal/adapters/postgres	[no test files]
+?   	gxb.local/backend/v2/internal/adapters/postgres/contentqueries	[no test files]
+?   	gxb.local/backend/v2/internal/adapters/postgres/identitystore	[no test files]
+?   	gxb.local/backend/v2/internal/adapters/postgres/kernelqueries	[no test files]
+ok  	gxb.local/backend/v2/internal/adapters/postgres/contentstore	0.047s
+ok  	gxb.local/backend/v2/internal/adapters/postgres/i4store	0.006s
+ok  	gxb.local/backend/v2/internal/adapters/postgres/i5store	0.003s
+?   	gxb.local/backend/v2/internal/adapters/provider	[no test files]
+?   	gxb.local/backend/v2/internal/adapters/river	[no test files]
+?   	gxb.local/backend/v2/internal/adapters/stockfixtures	[no test files]
+ok  	gxb.local/backend/v2/internal/adapters/postgres/kernelstore	0.003s
+?   	gxb.local/backend/v2/internal/domain/combat	[no test files]
+?   	gxb.local/backend/v2/internal/domain/commerce	[no test files]
+?   	gxb.local/backend/v2/internal/domain/control	[no test files]
+?   	gxb.local/backend/v2/internal/domain/generation	[no test files]
+ok  	gxb.local/backend/v2/internal/adapters/stockruntime	0.417s
+ok  	gxb.local/backend/v2/internal/application/bootstrap	0.002s
+ok  	gxb.local/backend/v2/internal/application/i5	0.006s
+ok  	gxb.local/backend/v2/internal/application/identitylifecycle	0.003s
+ok  	gxb.local/backend/v2/internal/application/realtimeauth	0.004s
+ok  	gxb.local/backend/v2/internal/archguard	0.017s
+ok  	gxb.local/backend/v2/internal/content/builtin	0.076s
+?   	gxb.local/backend/v2/internal/domain/guild	[no test files]
+?   	gxb.local/backend/v2/internal/domain/modes	[no test files]
+?   	gxb.local/backend/v2/internal/domain/profile	[no test files]
+?   	gxb.local/backend/v2/internal/domain/social	[no test files]
+?   	gxb.local/backend/v2/internal/foundation/audit	[no test files]
+?   	gxb.local/backend/v2/internal/foundation/clock	[no test files]
+ok  	gxb.local/backend/v2/internal/content/registry	0.908s
+ok  	gxb.local/backend/v2/internal/domain/economy	0.002s
+ok  	gxb.local/backend/v2/internal/domain/grant	0.005s
+ok  	gxb.local/backend/v2/internal/domain/identity	0.004s
+ok  	gxb.local/backend/v2/internal/domain/logicalserver	0.002s
+ok  	gxb.local/backend/v2/internal/domain/mail	0.007s
+ok  	gxb.local/backend/v2/internal/domain/objective	0.002s
+ok  	gxb.local/backend/v2/internal/domain/player	0.003s
+ok  	gxb.local/backend/v2/internal/domain/realtimeauth	0.002s
+ok  	gxb.local/backend/v2/internal/domain/redeem	0.002s
+ok  	gxb.local/backend/v2/internal/foundation/config	0.002s
+ok  	gxb.local/backend/v2/internal/foundation/ids	0.007s
+ok  	gxb.local/backend/v2/internal/foundation/lockkey	0.003s
+ok  	gxb.local/backend/v2/internal/foundation/obligation	0.002s
+ok  	gxb.local/backend/v2/internal/foundation/observability	0.002s
+ok  	gxb.local/backend/v2/internal/foundation/operation	0.003s
+ok  	gxb.local/backend/v2/internal/foundation/policy	0.004s
+ok  	gxb.local/backend/v2/internal/foundation/receipt	0.002s
+ok  	gxb.local/backend/v2/internal/foundation/tx	0.007s
+?   	gxb.local/backend/v2/internal/projection/ota	[no test files]
+?   	gxb.local/backend/v2/internal/projection/publication	[no test files]
+?   	gxb.local/backend/v2/internal/projection/publicplayer	[no test files]
+?   	gxb.local/backend/v2/internal/projection/ranking	[no test files]
+?   	gxb.local/backend/v2/internal/projection/realtimeview	[no test files]
+ok  	gxb.local/backend/v2/internal/projection/lobby	0.105s
+ok  	gxb.local/backend/v2/internal/protocol/amf3	0.002s
+?   	gxb.local/backend/v2/internal/protocol/limits	[no test files]
+?   	gxb.local/backend/v2/internal/protocol/observe	[no test files]
+ok  	gxb.local/backend/v2/internal/protocol/httpedge	0.007s
+ok  	gxb.local/backend/v2/internal/protocol/mids	0.002s
+?   	gxb.local/backend/v2/internal/protocol/wire	[no test files]
+ok  	gxb.local/backend/v2/internal/protocol/realtime	0.002s
+STATUS=0
+\n===== env GOTOOLCHAIN=local go test -count=1 -race ./internal/domain/economy ./internal/application/i5 ./internal/adapters/postgres/i5store ./internal/application/bootstrap ./internal/content/registry =====
+ok  	gxb.local/backend/v2/internal/domain/economy	1.010s
+ok  	gxb.local/backend/v2/internal/application/i5	1.026s
+ok  	gxb.local/backend/v2/internal/adapters/postgres/i5store	1.022s
+ok  	gxb.local/backend/v2/internal/application/bootstrap	1.013s
+ok  	gxb.local/backend/v2/internal/content/registry	5.812s
+STATUS=0
+\n===== env GOTOOLCHAIN=local go vet ./... =====
+STATUS=0
+\n===== env GOTOOLCHAIN=local go test -count=1 ./internal/archguard =====
+ok  	gxb.local/backend/v2/internal/archguard	0.016s
+STATUS=0
+
+===== package-by-package bounded regression =====
+PKG gxb.local/backend/v2/cmd/gxb-admin ... PASS
+PKG gxb.local/backend/v2/cmd/gxb-api ... PASS
+PKG gxb.local/backend/v2/cmd/gxb-realtime ... PASS
+PKG gxb.local/backend/v2/cmd/gxb-wave-s-report ... PASS
+PKG gxb.local/backend/v2/cmd/gxb-worker ... PASS
+PKG gxb.local/backend/v2/internal/adapters/blobstore ... PASS
+PKG gxb.local/backend/v2/internal/adapters/pass353diff ... PASS
+PKG gxb.local/backend/v2/internal/adapters/postgres ... PASS
+PKG gxb.local/backend/v2/internal/adapters/postgres/contentqueries ... PASS
+PKG gxb.local/backend/v2/internal/adapters/postgres/contentstore ... PASS
+PKG gxb.local/backend/v2/internal/adapters/postgres/i4store ... PASS
+PKG gxb.local/backend/v2/internal/adapters/postgres/i5store ... PASS
+PKG gxb.local/backend/v2/internal/adapters/postgres/identitystore ... PASS
+PKG gxb.local/backend/v2/internal/adapters/postgres/kernelqueries ... PASS
+PKG gxb.local/backend/v2/internal/adapters/postgres/kernelstore ... PASS
+PKG gxb.local/backend/v2/internal/adapters/provider ... PASS
+PKG gxb.local/backend/v2/internal/adapters/river ... PASS
+PKG gxb.local/backend/v2/internal/adapters/stockfixtures ... PASS
+PKG gxb.local/backend/v2/internal/adapters/stockruntime ... PASS
+PKG gxb.local/backend/v2/internal/application/bootstrap ... PASS
+PKG gxb.local/backend/v2/internal/application/i5 ... PASS
+PKG gxb.local/backend/v2/internal/application/identitylifecycle ... PASS
+PKG gxb.local/backend/v2/internal/application/realtimeauth ... PASS
+PKG gxb.local/backend/v2/internal/archguard ... PASS
+PKG gxb.local/backend/v2/internal/content/builtin ... PASS
+PKG gxb.local/backend/v2/internal/content/registry ... PASS
+PKG gxb.local/backend/v2/internal/domain/combat ... PASS
+PKG gxb.local/backend/v2/internal/domain/commerce ... PASS
+PKG gxb.local/backend/v2/internal/domain/control ... PASS
+PKG gxb.local/backend/v2/internal/domain/economy ... PASS
+PKG gxb.local/backend/v2/internal/domain/generation ... PASS
+PKG gxb.local/backend/v2/internal/domain/grant ... PASS
+PKG gxb.local/backend/v2/internal/domain/guild ... PASS
+PKG gxb.local/backend/v2/internal/domain/identity ... PASS
+PKG gxb.local/backend/v2/internal/domain/logicalserver ... PASS
+PKG gxb.local/backend/v2/internal/domain/mail ... PASS
+PKG gxb.local/backend/v2/internal/domain/modes ... PASS
+PKG gxb.local/backend/v2/internal/domain/objective ... PASS
+PKG gxb.local/backend/v2/internal/domain/player ... PASS
+PKG gxb.local/backend/v2/internal/domain/profile ... PASS
+PKG gxb.local/backend/v2/internal/domain/realtimeauth ... PASS
+PKG gxb.local/backend/v2/internal/domain/redeem ... PASS
+PKG gxb.local/backend/v2/internal/domain/social ... PASS
+PKG gxb.local/backend/v2/internal/foundation/audit ... PASS
+PKG gxb.local/backend/v2/internal/foundation/clock ... PASS
+PKG gxb.local/backend/v2/internal/foundation/config ... PASS
+PKG gxb.local/backend/v2/internal/foundation/ids ... PASS
+PKG gxb.local/backend/v2/internal/foundation/lockkey ... PASS
+PKG gxb.local/backend/v2/internal/foundation/obligation ... PASS
+PKG gxb.local/backend/v2/internal/foundation/observability ... PASS
+PKG gxb.local/backend/v2/internal/foundation/operation ... PASS
+PKG gxb.local/backend/v2/internal/foundation/policy ... PASS
+PKG gxb.local/backend/v2/internal/foundation/receipt ... PASS
+PKG gxb.local/backend/v2/internal/foundation/tx ... PASS
+PKG gxb.local/backend/v2/internal/projection/lobby ... PASS
+PKG gxb.local/backend/v2/internal/projection/ota ... PASS
+PKG gxb.local/backend/v2/internal/projection/publication ... PASS
+PKG gxb.local/backend/v2/internal/projection/publicplayer ... PASS
+PKG gxb.local/backend/v2/internal/projection/ranking ... PASS
+PKG gxb.local/backend/v2/internal/projection/realtimeview ... PASS
+PKG gxb.local/backend/v2/internal/protocol/amf3 ... PASS
+PKG gxb.local/backend/v2/internal/protocol/httpedge ... PASS
+PKG gxb.local/backend/v2/internal/protocol/limits ... PASS
+PKG gxb.local/backend/v2/internal/protocol/mids ... PASS
+PKG gxb.local/backend/v2/internal/protocol/observe ... PASS
+PKG gxb.local/backend/v2/internal/protocol/realtime ... PASS
+PKG gxb.local/backend/v2/internal/protocol/wire ... PASS
+OVERALL_COMPAT3=0

@@ -1,0 +1,48 @@
+{
+  "pass": "652.0",
+  "stage": "I7A-8A",
+  "status": "SELECTED_PREIMPLEMENTATION_CONTRACT_REQUIRES_VALIDATED_NORMAL652_SEAL",
+  "implementation_authorized": false,
+  "implementation_started": false,
+  "product_accepted": false,
+  "base_backend_sha256": "12d5c1b21658df0458eefdd9e9b8a96215ca0e04343699fb756311409ecb3478",
+  "schema_version": 1,
+  "contract_id": "I7A8A_WORKER_RECOVERY_CONTRACT",
+  "queue": "guild.materialization",
+  "routes": [
+    {
+      "kind": "guild.broadcast.mail.v1",
+      "profile": "guild-broadcast-mail-v1",
+      "reference": "exactOccurrenceUUID/recipient +derivedSemanticKey; strictcanonicalJSONrefs only"
+    },
+    {
+      "kind": "guild.broadcast.reconcile.v1",
+      "profile": "guild-broadcast-mail-v1",
+      "reference": "boundedownerreconciliation wakeup; no mutablecanonical payload"
+    }
+  ],
+  "api": "AddnarrowInsertOnlyRiverfactory noQueues/noStart; strictselectedqueue/kind/profile/reference beforeInsertTx. No worker executesinAPI. postgreswithoutRiver keeps588inactive/old7groupbehavior.",
+  "worker": "ExistingRuntime/DispatchRegistry/one staticgxb_obligationworker; concreteroutes only. Unknownkind/profile/ref errors never success; oldunregistered owners notactivated. Buildpostgres,river required; fallbacknotproductionready.",
+  "readiness": [
+    "ExplicitpinnedRiver0.47.0deploymentMigrateUp+Validate; nomigrationsingenericAPIstartup/contentpointer mutation",
+    "Worker refusesempty/incomplete handlers/schemas/sourceMailports; supportsactivecompatiblecontent/oldimmutable source revisions",
+    "ReusePGsessionownerguardmechanism withdistinctworkerkey; preserveRealtimekey; secondworkerrefused/loss-cancelsruntime; idempotentcanonicalcommandsprotectinflightoverlap",
+    "4workers queue operationalbound, perjob30soperationbudget andRiverTimeout45s, softstop15s; existingGuild12s/Tx8s andI5profiles preserved; reportnotgameplaydeadlines"
+  ],
+  "reconciliation": [
+    "OnequalifiedGuildBroadcastprovider through existingReconcileKernel; DBTimebinding, context30s, batchdefault32/max1000",
+    "ScanonlyownerPENDINGbindings withkeyset/missing-progress schedule; terminalrows never requeued",
+    "LastEnqueueAt/NextWakeupAt are deliveryaccelerationmetadata, not settlement; boundedDBUTCnot-before60s reducesduplicatejobs; backwardsclock cannotreopen terminalstate",
+    "Every30sprocess/River periodicwake only; durablependingfacts survivejobsdiscard/delete; existingcanonicalownerprovider recreateseligiblemissingwork",
+    "Queueuniqueness/jobID/completion never substitutesMailreceipt/sourceack; duplicatejobdeliveriesexpected",
+    "SourceUUIDgone/corruptBroadcast failsclosed/operatorrepair; Guildretired/leaderdeparted aftercommit doesnotcancelowedMail; deletedrecipient classifiedbytargetproof only"
+  ],
+  "delivery_failures": "No compensatingMaildelete/regrant; retryexactreference withcanonicalowner. Unknownroute remainsobservableerror; failed/discardedjob leavespending source truthful.",
+  "proof": [
+    "RealPG/River mandatory product gate, rollback/commit-before-run",
+    "Workerprocesskill afterMailcommitbeforeAck/lease rescue/redelivery",
+    "Missingjob/discard/stale/duplicate/profile/ref tampering; partialrecipient resume",
+    "Source+targetsamebackup/nonemptyupgrade/sequence/historyepoch prerequisites; restorehole conflicts",
+    "Singleworkerownerloss/drain/restart; API/RTregression; no physicalW2 claim"
+  ]
+}

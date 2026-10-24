@@ -1,0 +1,5 @@
+## focused tests after race-fixture repair
+ok  	gxb.local/backend/v2/internal/application/characterasset	0.004s
+ok  	gxb.local/backend/v2/internal/application/charactersavedpreset	0.011s
+ok  	gxb.local/backend/v2/internal/adapters/postgres/characterstore	0.029s
+ok  	gxb.local/backend/v2/internal/archguard	0.176s

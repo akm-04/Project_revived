@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "pass": "452.0",
+  "stage": "R1B",
+  "status": "PASS_R1B_LOCAL_GREEN_FOUNDATION_STILL_RED",
+  "behavior_changed": true,
+  "foundation_status": "RED_REPAIR_ACTIVE",
+  "I6": "BLOCKED",
+  "resolved_findings": ["RF-001", "RF-002", "RF-003"],
+  "normal_chat_evidence": [
+    "go test ./...",
+    "go vet ./...",
+    "targeted go test -race i4store/bootstrap/identity/logicalserver/tx/receipt",
+    "validate_r1b.py",
+    "aggregate foundation check RED only known RF-007/RF-015 classes"
+  ],
+  "live_deferred": [
+    "real PostgreSQL shared/exclusive logical-server lock behavior",
+    "real concurrent first-character creation/serialization retry",
+    "real ambiguous-response current-hydration reconstruction",
+    "stock-client current MID1 hydration acceptance remains W2"
+  ],
+  "next": "REPLAN_R2_R3"
+}

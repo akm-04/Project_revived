@@ -1,0 +1,4 @@
+classification=COMPATIBILITY_COPY_ONLY
+edit=go.mod language/toolchain accommodation only
+ok  	gxb.local/backend/v2/internal/application/characterasset	(cached)
+ok  	gxb.local/backend/v2/internal/archguard	(cached)

@@ -1,0 +1,15 @@
+{
+  "status": "MANDATORY_EXACT_CANDIDATE_AFTER_IMPLEMENTATION",
+  "toolbox_sha256": "e4e194c9627929299577364b953b2468d6118fac4283fd8030f10b5a27456c2b",
+  "tests": [
+    "Exact33source rows/tiers/hash and old36payload preservation",
+    "Fresh61/populated60 upgrade; oldrowmultiset preservation and repeatdeploy zerochange",
+    "ActualcanonicalHero acquisition, favor gifts and ringdebit => real tiers1/10/20; earned/unearned and point/objective-row distinction",
+    "Source replay/contentpin/restart/reload/concurrency/rollback/unknownCOMMIT positiveproof",
+    "Missinglegacy unknown, no backfill, oldcontent replay/noop, strictunavailable fullcatalog read",
+    "RootCAS/eventpayload conflicts, owner/time/pin scope negativecases",
+    "Allunits/affectedrace/vet/fuzz/source/ownership/static/dependencysecurity",
+    "Dumprestore/restart and coherentoutput preservation, independentprimaryreality"
+  ],
+  "candidate_role": "Latestworking qualified core; lastaccepted116 unchanged; no parentacceptance"
+}

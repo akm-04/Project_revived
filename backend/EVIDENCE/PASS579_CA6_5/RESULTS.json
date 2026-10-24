@@ -1,0 +1,71 @@
+{
+  "authority_passmap": {
+    "artifact": "gxb-backend-pass-578.0-passmap.zip",
+    "sha256": "001a24617ad700d0971997e4445ca72fa7254fd4fe3847fec2ff3bfd6ab854b4"
+  },
+  "classification": {
+    "candidate_reference_model": "GREEN_35615_VECTORS",
+    "compatibility_copy_changed_area_race": "GREEN",
+    "compatibility_copy_focused_test": "GREEN",
+    "compatibility_copy_focused_vet": "GREEN",
+    "compatibility_copy_full_test": "GREEN",
+    "compatibility_copy_full_vet": "GREEN",
+    "exact_go_1_27_1_execution": "ENVIRONMENT_BLOCKED_TOOLCHAIN_DOWNLOAD_UNAVAILABLE",
+    "exact_source_oracle_ca6_5": "GREEN",
+    "exact_static_foundation": "GREEN",
+    "physical_stock_client": "W2_DEFERRED",
+    "real_postgresql": "ENVIRONMENT_BLOCKED_NOT_AVAILABLE"
+  },
+  "logs": {
+    "REALITY_CHECK.md": {
+      "bytes": 5780,
+      "sha256": "540128564ecf71cd6b9aec056074e3eacc283b6da8c5341ae39b31839c6271df"
+    },
+    "compat/compat_ca65_final2_focused_test_vet_race.log": {
+      "bytes": 1239,
+      "sha256": "3d2470287de15eff172f6cf9d0b15653134e9be01d11c1c6190cb7067c0e1936"
+    },
+    "compat/compat_ca65_final2_full_test.log": {
+      "bytes": 6280,
+      "sha256": "1b6a900bb665d65bdf9ab103fca1e9864d99ce7a986c7eba4de2669424a0c905"
+    },
+    "compat/compat_ca65_final2_full_vet.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "compat/compat_ca65_final2_identity.log": {
+      "bytes": 19,
+      "sha256": "da41c68ffe80a22a2f50244456893818ed9d7f00547d535d40e11dabbd83d234"
+    },
+    "exact/canonical_pins_ca65_final.sha256": {
+      "bytes": 311,
+      "sha256": "0455d86e7a1ce47a2c6431dc5ecb1d0c59aed14f4d1e30af72e017beb49e73cf"
+    },
+    "exact/exact_final_ca65.log": {
+      "bytes": 2474,
+      "sha256": "5fcbd40d1dc76752154378db42399d72bbde967ddda782cc832e67e9c6299c72"
+    },
+    "exact/exact_native_environment_ca65.log": {
+      "bytes": 2425,
+      "sha256": "0f6aaccbc35f4f33b5c3ceb66fe0a5284c986cb5832c59dd20614d9dc59b7805"
+    },
+    "exact/exact_source_ca65_final.log": {
+      "bytes": 3868,
+      "sha256": "5c8ec7d91ac5171ade4c5d6387baad1a5e620e207a4604759826a4b107004ab4"
+    },
+    "exact/historical_r6_strict_invocation_preserved.log": {
+      "bytes": 1597,
+      "sha256": "e772cb033583537f4aeeb5f5ee8d03c2ebd5f0b97bae04ae83994ba568a6ddac"
+    }
+  },
+  "mandatory_future_gate": "CA6-6 exact accumulated Go1.27.1 + real PostgreSQL aggregate gate remains mandatory; local/compatibility-copy evidence cannot satisfy it.",
+  "migration_high_water": "00029_ca6_2_practice_foundation.sql",
+  "parent_backend": {
+    "artifact": "gxb-backend-v2-v0.79.0-pass577-ca6-4-local-accepted.zip",
+    "sha256": "8424874a909c9ddc733e54821bd7be7cf06411571919e3633cd4270c9eea7713"
+  },
+  "pass": "579.0",
+  "schema_version": 1,
+  "stage": "CA6-5",
+  "status": "LOCAL_ACCEPTED_COMPATIBILITY_COPY_ONLY_EXACT_NATIVE_AGGREGATE_DEFERRED_CA6_6"
+}

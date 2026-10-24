@@ -1,0 +1,437 @@
+{
+  "added_files": [
+    {
+      "path": "EVIDENCE/PASS523_CA3_1/COMPATIBILITY_COPY_GO_MOD.diff",
+      "sha256": "c744af9031d3155f930e7948d3d3c12b1ed4acd3f380ceb59f091a6632aa048e",
+      "size": 320
+    },
+    {
+      "path": "EVIDENCE/PASS523_CA3_1/TOOL_ENVIRONMENT.txt",
+      "sha256": "6aa6edd2b556a9945b77fc5882f32731370b3f5acaa7efbf87ac7a020b6d215a",
+      "size": 471
+    },
+    {
+      "path": "EVIDENCE/PASS523_CA3_1/compat_focused_go_test.log",
+      "sha256": "707afd056c7a3d6a4344d646da22d9796e4716b6223c31f604bfe0c73b88c596",
+      "size": 535
+    },
+    {
+      "path": "EVIDENCE/PASS523_CA3_1/compat_full_go_test.log",
+      "sha256": "2baf30d31df4e16f9538297b2b6b6391a5134333a357ad0b6cb733899750a5ed",
+      "size": 6065
+    },
+    {
+      "path": "EVIDENCE/PASS523_CA3_1/compat_go_vet.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    {
+      "path": "EVIDENCE/PASS523_CA3_1/compat_postgres_tagged_build.exitcode",
+      "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+      "size": 2
+    },
+    {
+      "path": "EVIDENCE/PASS523_CA3_1/compat_postgres_tagged_build.log",
+      "sha256": "daacb70c516078a8541f18ce9985fc8c99089a3c282c61b7fe94b04c46f1a13e",
+      "size": 608
+    },
+    {
+      "path": "EVIDENCE/PASS523_CA3_1/compat_race.log",
+      "sha256": "2bde59ed8b99764ac7c4becacfa7df6f540fc632ea769ed7e537d32aea6f42ce",
+      "size": 451
+    },
+    {
+      "path": "EVIDENCE/PASS523_CA3_1/content_generator_tests.log",
+      "sha256": "97b4d8f3db4bbbfb8efdce94f5d6ed602bfc6198e10ad34532612d1be9fc32e4",
+      "size": 836
+    },
+    {
+      "path": "EVIDENCE/PASS523_CA3_1/content_source_check.log",
+      "sha256": "4f93af82ce07db6589087e0cadaf01c33641c77d9d44b8a31981b2fdb76960b8",
+      "size": 162
+    },
+    {
+      "path": "EVIDENCE/PASS523_CA3_1/schema_query_ownership.log",
+      "sha256": "1d0eeef6e9a6aa5cc1a1abe4142a636a77896063f26ad65229891ff176bbf754",
+      "size": 29
+    },
+    {
+      "path": "EVIDENCE/PASS523_CA3_1/validate_ca2_1_cumulative.log",
+      "sha256": "1ee160f72b531db04f56813326cd26d2ca1beaf46e484b8a9edd1f1a69de97c4",
+      "size": 170
+    },
+    {
+      "path": "EVIDENCE/PASS523_CA3_1/validate_ca3_1.log",
+      "sha256": "2ccaf89228191027785f2087a1612bd5f068a25f5a7f55f8ec1b133f4ff5c368",
+      "size": 137
+    },
+    {
+      "path": "EVIDENCE/PASS523_CA3_1/validate_current_candidate.log",
+      "sha256": "395b1545fba3b9bf51bc38e5ab9d5ea9ca382c41f1cd5fd64fdf4b3b09827209",
+      "size": 365
+    },
+    {
+      "path": "docs/PASS522_CA3_1_EVIDENCE_CLASSIFICATION.json",
+      "sha256": "919aa52efabb45ebbb28386669414a84637d951673857876d22751e05b583872",
+      "size": 3258
+    },
+    {
+      "path": "docs/PASS522_CA3_1_IMPLEMENTATION_CONTRACT.json",
+      "sha256": "57eb66d3c2df30502738ffc6701871dbb259019ddd4490fb252a2430351daeb8",
+      "size": 10549
+    },
+    {
+      "path": "docs/PASS522_CA3_1_INDEPENDENT_PREIMPLEMENTATION_REALITY_CHECK.md",
+      "sha256": "c54b2894f09056abe8ba0d82d936a18f8212ccb2de2c0a6f46f522252b523ed1",
+      "size": 7777
+    },
+    {
+      "path": "docs/PASS522_CA3_1_PREIMPLEMENTATION_RESEARCH_CLOSURE.md",
+      "sha256": "76e4bafb052e87e8ffacb457b46caff858a14c399dbcac48a9c9c8f4dda46789",
+      "size": 7847
+    },
+    {
+      "path": "docs/PASS522_CA3_1_STAGED_IMPLEMENTATION_PLAN.json",
+      "sha256": "b1468568065c1365bf65dc89b2df42dc8fbaed2436c3964a512f04bd3ebe22aa",
+      "size": 2525
+    },
+    {
+      "path": "docs/PASS523_CA3_1_INDEPENDENT_POSTIMPLEMENTATION_REALITY_CHECK.md",
+      "sha256": "3a24e281acb5b163528f94f4d9a17c6bc55dedcc2c26be0dd09e49940ded5b3f",
+      "size": 6321
+    },
+    {
+      "path": "docs/PASS523_CA3_1_LOCAL_GATE_EVIDENCE.json",
+      "sha256": "773597f1013cb5065ef167896f343331fc3415794828632de1ec1028f4fd5cdf",
+      "size": 2126
+    },
+    {
+      "path": "docs/PASS523_CA3_1_NATIVE_WORK_PROMPT.txt",
+      "sha256": "e433fb467a63eb2c93cce3152432210d1159ab615a13859a941e30671d94a5f7",
+      "size": 8392
+    },
+    {
+      "path": "internal/adapters/postgres/characterstore/pet.go",
+      "sha256": "739d907b55f6d0c2229d06e51307a36129eb7f18a910377004e29b0f0e2deda4",
+      "size": 7111
+    },
+    {
+      "path": "internal/adapters/postgres/characterstore/pet_projection.go",
+      "sha256": "9f30dbf5c2a6508281c95c0965f734ead98053c83002e803b0158ad6d06d35dd",
+      "size": 1160
+    },
+    {
+      "path": "internal/adapters/stockruntime/pet_dispatcher.go",
+      "sha256": "6d4a418687c1816b0b0e74b8ba19f42df9752fca4d02e28d88f1000496b28ea3",
+      "size": 2521
+    },
+    {
+      "path": "internal/adapters/stockruntime/pet_dispatcher_test.go",
+      "sha256": "99397e97e858d26b59685ecdf03306f392faf4cd1ffc3417c3bd62d815594116",
+      "size": 1974
+    },
+    {
+      "path": "internal/application/characterpet/service.go",
+      "sha256": "91ede2c0f635fc05aba8dd3cada2a6e8b30fc302aeffe07da602a063440c2223",
+      "size": 953
+    },
+    {
+      "path": "internal/application/characterpet/service_test.go",
+      "sha256": "79141930c96be39016e979dd3f3c62720b6eff1bd58b1f1fdb3f65b1bfec5f81",
+      "size": 2255
+    },
+    {
+      "path": "internal/content/builtin/generated/pet_core_catalog.json",
+      "sha256": "83e65a3a926960aaaa82b596c50d80b747200644622f253d4fe45daa2d3821a4",
+      "size": 6014
+    },
+    {
+      "path": "internal/domain/character/pet.go",
+      "sha256": "e7817582591630c2fbd3751657a73aa9de8002344607bdd8e813c74a1909aa0d",
+      "size": 2581
+    },
+    {
+      "path": "internal/domain/character/pet_test.go",
+      "sha256": "062e9e5fc58b9a464234bcc5d465558ab99788ef4d417478019ccdeee1aae02e",
+      "size": 1365
+    },
+    {
+      "path": "internal/projection/pet/stock.go",
+      "sha256": "da4aa5fb707fbc8347893cb5b007c5a91ec29acbb49dba06df81fbb5b556346c",
+      "size": 1421
+    },
+    {
+      "path": "internal/projection/pet/stock_test.go",
+      "sha256": "fa095fa2bf47c2cc2eaefc44df69a0454e55c1b8f3b6fcea333bc210bb9f508b",
+      "size": 1808
+    },
+    {
+      "path": "migrations/00016_ca3_pet_foundation.sql",
+      "sha256": "9f903d74139c4fa83b08f3d290b39ac095f43437dc46c63eecfa64929d74a33a",
+      "size": 2422
+    },
+    {
+      "path": "sql/character/pet.sql",
+      "sha256": "30acb2946a10a9d83052a192415c19e0a42a95353dbe366204b0a8ad62c8e06c",
+      "size": 2126
+    },
+    {
+      "path": "tools/validate_ca3_1.py",
+      "sha256": "1ee7b21b3543010a651732abd52e510a13719aa08c825a095947a0f311cee3f9",
+      "size": 5263
+    }
+  ],
+  "candidate": {
+    "file_count_in_scope": 877,
+    "label": "v0.65.0-pass523-ca3-1 local candidate"
+  },
+  "changed_files": [
+    {
+      "candidate": {
+        "sha256": "8a04dae3373dbf8fda23017fac1d1b646b5628621f05027e159ab56adfc9522d",
+        "size": 1352
+      },
+      "parent": {
+        "sha256": "70f151dca54275459e1a04b9ec1b5135147f457725b9f7afcf621ba3c951f506",
+        "size": 1485
+      },
+      "path": "README.md"
+    },
+    {
+      "candidate": {
+        "sha256": "1f351190b014a14a15368d499de759d15b0f136477071837ee32b6ee4e5e8dd9",
+        "size": 11644
+      },
+      "parent": {
+        "sha256": "9805a9a7c49f1ad153b8025ab57fb6b7006462a5c7a36cfe31f353ec9bf02fac",
+        "size": 11644
+      },
+      "path": "SBOM.spdx.json"
+    },
+    {
+      "candidate": {
+        "sha256": "b0b7b0a28fc700006987c3ed99bb970d05976af4e5aad32197c366bd51e17c73",
+        "size": 12286
+      },
+      "parent": {
+        "sha256": "5cf666b262aa770eb5b9fe6af5638c9412065c9c3acde139b07954576254d5a9",
+        "size": 12002
+      },
+      "path": "cmd/gxb-api/main_postgres.go"
+    },
+    {
+      "candidate": {
+        "sha256": "550a8edfe27be48756dac69503f39538630f21fff2f8821d82ea385a3f487e7e",
+        "size": 30771
+      },
+      "parent": {
+        "sha256": "14ced43391e1581fa55a22bc92848d3ab73580680aca208a76844d1dd60443ac",
+        "size": 29043
+      },
+      "path": "docs/architecture/CANONICAL_TABLE_OWNERSHIP.json"
+    },
+    {
+      "candidate": {
+        "sha256": "72aba24e5068a2d36a327f5456847aa67073628925b813877f7dc45dabde85e9",
+        "size": 2152
+      },
+      "parent": {
+        "sha256": "96696a9f2e01332902c128e1ccc72043e827e557c0ac509e07d2b0c641a073d8",
+        "size": 2058
+      },
+      "path": "docs/architecture/CUMULATIVE_MIGRATION_LOCK.json"
+    },
+    {
+      "candidate": {
+        "sha256": "4af4ab3b1fc666e76fdc9aa69d69d2cb759168883730b9066dc827041e9c17ac",
+        "size": 4470
+      },
+      "parent": {
+        "sha256": "fb6806d893c832d16250687112636e3f02e88f18492d44ceb500a4d67d182632",
+        "size": 2332
+      },
+      "path": "internal/adapters/postgres/characterqueries/querytext_gen.go"
+    },
+    {
+      "candidate": {
+        "sha256": "c0143d505635bc7e3ced03d8ba518b92606e53f406d7d8f5124a54dd730103d2",
+        "size": 24842
+      },
+      "parent": {
+        "sha256": "0a565f40bec924e1d06ca2375d1d12a7208ba8d9d92ba31527aceeb0f01d80cf",
+        "size": 23380
+      },
+      "path": "internal/adapters/postgres/contentqueries/querytext_gen.go"
+    },
+    {
+      "candidate": {
+        "sha256": "e85048112386e3e6491f35b42b3695fd1e07b182f5e4c4eb4c9433379b379a73",
+        "size": 17030
+      },
+      "parent": {
+        "sha256": "ff7c6cbda893c5650f3d0116990728aca9444db510e1a7a2d99dba9a9d878db8",
+        "size": 16682
+      },
+      "path": "internal/adapters/postgres/contentstore/store.go"
+    },
+    {
+      "candidate": {
+        "sha256": "e34a31acd55e7af868e2726d5045b128b34dc36a4539231b83b4fe2ddd874eaa",
+        "size": 11187
+      },
+      "parent": {
+        "sha256": "3f1d081e8db95dfecdbe657c1c9ea6522f1689d96755b1712a73624268282e82",
+        "size": 11099
+      },
+      "path": "internal/adapters/postgres/contentstore/store_test.go"
+    },
+    {
+      "candidate": {
+        "sha256": "64b1fe5ab6d950125d716632cc3dfb1267ca1210644f4e1dc7d93cf6e8cf755d",
+        "size": 20008
+      },
+      "parent": {
+        "sha256": "65de3188205e06c6f023f152e65a33c29424b0510c36fe9329ef7f4c83fbf265",
+        "size": 18007
+      },
+      "path": "internal/content/builtin/catalog.go"
+    },
+    {
+      "candidate": {
+        "sha256": "ed1052d7d9420c1060b6b6aaadbb464fe99eff24f18a2829e5f98173a6d13b00",
+        "size": 3629
+      },
+      "parent": {
+        "sha256": "b27f38fd55c7b5914dc47af701e6d484476b4baa301c5cb228c665df179d136f",
+        "size": 2708
+      },
+      "path": "internal/content/builtin/catalog_test.go"
+    },
+    {
+      "candidate": {
+        "sha256": "67bb4a32e6dbf1054545f54269f8f20646e8d8d82d3ea3b849e9ac3ba9f00c21",
+        "size": 5766
+      },
+      "parent": {
+        "sha256": "68567e4c74bfc6d074e793cf7e192f4d2a404c03e22920e81c9133d6d40780df",
+        "size": 5313
+      },
+      "path": "internal/content/builtin/generated/manifest.json"
+    },
+    {
+      "candidate": {
+        "sha256": "da7e4ddaa5a86928a3013c4ad87095f2ba730c815247f056eb31678d8548c1bc",
+        "size": 10268
+      },
+      "parent": {
+        "sha256": "571b10cc8f62520ed34b13c5c5217bf49244b7b10e63922efe32f59ba97437b5",
+        "size": 10043
+      },
+      "path": "internal/content/registry/service.go"
+    },
+    {
+      "candidate": {
+        "sha256": "7cd7224751bd40ec616017a1dcc6dc618c987ad7c4229bfcc9fd0a2b5d753d2e",
+        "size": 14171
+      },
+      "parent": {
+        "sha256": "3cb3a781f3846ddb5b8b571d51b6ab9398a9ab2fa82ec275c9865af01fd4b621",
+        "size": 13928
+      },
+      "path": "internal/content/registry/service_test.go"
+    },
+    {
+      "candidate": {
+        "sha256": "dd94507e5d0e23f2ff180832e90508e20019ba36fac9b4035a15936e010ed680",
+        "size": 9462
+      },
+      "parent": {
+        "sha256": "66ce492dd7340eec678bd2d93681ffdd20837e466ff6339778dfe5a13ebee63f",
+        "size": 8909
+      },
+      "path": "internal/content/registry/types.go"
+    },
+    {
+      "candidate": {
+        "sha256": "b231a1bc0922cc9eb5ebe15520ab60e54fb9cbe482cdeddb6cc78f4ff20f0c76",
+        "size": 24988
+      },
+      "parent": {
+        "sha256": "f36bcd07763a5d1115c7d37544165a15336a752eb1700c017afca6d0f575c1ab",
+        "size": 23522
+      },
+      "path": "sql/content/content.sql"
+    },
+    {
+      "candidate": {
+        "sha256": "41558aa803098b1d252b636add023ba749ff4686c1cd45a53dd88ba952372de5",
+        "size": 8509
+      },
+      "parent": {
+        "sha256": "d49ddbffd00532f6e727075373829c9937e76aaa24625b54bedfffe496139353",
+        "size": 8306
+      },
+      "path": "tools/check_schema_query_ownership.py"
+    },
+    {
+      "candidate": {
+        "sha256": "7f902be7eb6079759b4485373482247be6ed16e4a75034fec6629449fb105cd4",
+        "size": 44404
+      },
+      "parent": {
+        "sha256": "900b7fcf3027e7897947ed02b3e8eb8f628926c66440cc45d3d9f039557d7ce4",
+        "size": 41116
+      },
+      "path": "tools/generate_builtin_content.py"
+    },
+    {
+      "candidate": {
+        "sha256": "854c672980b92d7705386ff5dbadacd9ebec2234ddef4ad05afc052041836d1f",
+        "size": 2052
+      },
+      "parent": {
+        "sha256": "87c124f4fbc13f8a260feaef2f2dca5d1db1747f290fcbc3abc2d6af07ad7478",
+        "size": 1496
+      },
+      "path": "tools/generate_character_querytext.py"
+    }
+  ],
+  "deleted_files": [],
+  "excluded_paths": [
+    "BUILD_INFO.json",
+    "SNAPSHOT_INFO.json",
+    "SNAPSHOT_MANIFEST.sha256",
+    "docs/PASS523_CA3_1_IMPLEMENTATION_DIFF.json",
+    "docs/PASS523_CA3_1_IMPLEMENTATION_REVISION.json"
+  ],
+  "generated_utc": "2026-09-12T11:49:35Z",
+  "parent": {
+    "file_count_in_scope": 841,
+    "label": "v0.64.1-pass520 accepted under Pass521"
+  },
+  "schema": "gxb.pass523.ca3_1.implementation_product_diff.v2",
+  "scope_note": "Product/evidence diff. Excludes __pycache__/*.pyc plus volatile identity/self files BUILD_INFO.json, SNAPSHOT_INFO.json, SNAPSHOT_MANIFEST.sha256, docs/PASS523_CA3_1_IMPLEMENTATION_REVISION.json, and this diff file. Those are verified separately by snapshot/revision guards.",
+  "summary": {
+    "added": 36,
+    "changed": 19,
+    "deleted": 0,
+    "unchanged_common": 822
+  },
+  "toolchain_module_pins": {
+    ".go-version": {
+      "candidate_sha256": "a8844fbc8c3eb51c26ed00aec4cd5a5a9d647f849c6ead07bcc83ed24c4a7718",
+      "identical": true,
+      "parent_sha256": "a8844fbc8c3eb51c26ed00aec4cd5a5a9d647f849c6ead07bcc83ed24c4a7718"
+    },
+    "go.mod": {
+      "candidate_sha256": "313c574368bb56dc570bc3427b65f59b059e492f909fe43b7d0291b5ced21dc4",
+      "identical": true,
+      "parent_sha256": "313c574368bb56dc570bc3427b65f59b059e492f909fe43b7d0291b5ced21dc4"
+    },
+    "go.sum": {
+      "candidate_sha256": "efbf6753542d66e2fefcb2ab5e2ade7c9d28f2206a1113d1eb9568f2cb75808d",
+      "identical": true,
+      "parent_sha256": "efbf6753542d66e2fefcb2ab5e2ade7c9d28f2206a1113d1eb9568f2cb75808d"
+    }
+  }
+}

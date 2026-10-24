@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "pass": "520.0",
+  "canonical_static_source": "PASS",
+  "compatibility_copy_only": {
+    "go": "1.23.2",
+    "changed_files": [".go-version", "go.mod"],
+    "focused_tests": "PASS",
+    "focused_race": "PASS",
+    "go_test_all": "PASS",
+    "go_vet_all": "PASS",
+    "package_regression": {"passed": 89, "failed": 0}
+  },
+  "native_exact_candidate_pending": true,
+  "remaining_mandatory_native_scope": [
+    "pinned sqlc generate on Pass520 exact archive",
+    "real PostgreSQL Hero mutation/duplicate/allocator contention",
+    "real PostgreSQL CA2-2 progression concurrency",
+    "diagnostic capacity-allow CA2-3 mutation paths",
+    "cross-stage Hero lock races",
+    "forced ambiguous PostgreSQL COMMIT recovery",
+    "stock-client proof when executable effective client is available"
+  ]
+}

@@ -1,0 +1,4 @@
+ok  	gxb.local/backend/v2/internal/domain/character	(cached)
+ok  	gxb.local/backend/v2/internal/application/charactersavedpreset	(cached)
+ok  	gxb.local/backend/v2/internal/adapters/postgres/characterstore	(cached)
+ok  	gxb.local/backend/v2/internal/archguard	(cached)

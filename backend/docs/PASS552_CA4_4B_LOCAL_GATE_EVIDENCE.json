@@ -1,0 +1,242 @@
+{
+  "schema_version": 1,
+  "pass": "552.0",
+  "phase": "CA4-4B Pet Advance/Reset + Equipment/Fumo Restoration local closure",
+  "result": "GREEN_LOCAL_CA4_4B_ACCEPTED_COMPATIBILITY_COPY_ONLY_NATIVE_AGGREGATE_DEFERRED",
+  "authority_research_pass": "551.0",
+  "source_oracle_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+  "old_client_archive_sha256": "d0a4815507fd4626ac5749f2f6efae554d3a4bef717793f155f58c8bed7170b1",
+  "parent_backend_sha256": "a0c8b3e60f8de8f6ad2b79467a1495ebef3587f538b9a7540c899c1b1f9e2b69",
+  "parent_implementation_revision_sha256": "3fb4b20840136725334c6e8c3c68974339f805e53dc474775a6adab1a4802ef5",
+  "canonical_pins_unchanged": true,
+  "exact_candidate_execution": {
+    "result": "ENVIRONMENT_BLOCKED",
+    "reason": "Go 1.27.1 toolchain download blocked by sandbox DNS/network; canonical go.mod/go.sum/.go-version unchanged"
+  },
+  "compatibility_copy": {
+    "classification": "COMPATIBILITY_COPY_ONLY",
+    "only_edit": "go.mod go 1.26.0 -> 1.23.0 and removal of toolchain go1.27.1; go.sum and .go-version identical"
+  },
+  "green_checks": [
+    "CA4-4B current+old source guard",
+    "builtin content deterministic generation",
+    "character query generation",
+    "content query generation",
+    "five-oracle verification",
+    "dependency policy",
+    "schema/query ownership",
+    "sqlc generation policy",
+    "archguard",
+    "focused behavior",
+    "focused race",
+    "focused vet",
+    "go test ./internal/...",
+    "go vet ./internal/...",
+    "go test ./cmd/...",
+    "cumulative candidate validator after migration-lock/SBOM repair"
+  ],
+  "release_integrity_repairs": [
+    "extended cumulative migration lock through 00026 with exact hashes",
+    "regenerated resolved SBOM to current v0.72.0 identity"
+  ],
+  "acceptance_cases": [
+    {
+      "id": "A01",
+      "requirement": "exact request shapes `{pet_id}` for MID785/MID790; reject extras/malformed.",
+      "result": "GREEN",
+      "finding": "MID785 and MID790 dispatcher tests enforce exact pet_id-only shapes and reject malformed/extra fields."
+    },
+    {
+      "id": "A02",
+      "requirement": "owned+shown Pet and Pet430 lock precede mutable resource suffix.",
+      "result": "GREEN",
+      "finding": "CharacterPet is locked through Pet430 before the mutable I5 settlement suffix; explicit prepare-hook tests prove ordering."
+    },
+    {
+      "id": "A03",
+      "requirement": "immutable current-topology lookup for all three slots and exact content revision.",
+      "result": "GREEN",
+      "finding": "All three slots resolve through immutable current topology/content revision b36ac5…; deterministic source guard and generator check are GREEN."
+    },
+    {
+      "id": "A04",
+      "requirement": "durable raw Fumo three-slot nonnegative vector; independent of equip bits; reconnect exact.",
+      "result": "GREEN",
+      "finding": "CharacterPet durably owns three independent nonnegative raw Fumo values; PostgreSQL read/write plus StockPrivate/MID780 projection tests are GREEN."
+    },
+    {
+      "id": "A05",
+      "requirement": "cohesive CharacterPet CAS includes color/progression/skills/equipment/Fumo/state_version; no side writer.",
+      "result": "GREEN",
+      "finding": "The cohesive CharacterPet state-version CAS now covers color, progression, skills, equipment and all three Fumo values with no side writer."
+    },
+    {
+      "id": "A06",
+      "requirement": "MID785 rejects color16 and missing ordinary collected prerequisite.",
+      "result": "GREEN",
+      "finding": "MID785 rejects max color and rejects missing ordinary collected prerequisites before mutation."
+    },
+    {
+      "id": "A07",
+      "requirement": "MID785 ignores special/empty slots for ordinary prerequisite.",
+      "result": "GREEN",
+      "finding": "Special/Awakening and empty slots are excluded from ordinary promotion prerequisites."
+    },
+    {
+      "id": "A08",
+      "requirement": "promotion clears ordinary equip/Fumo only, preserves Awakening and empty-slot state.",
+      "result": "GREEN",
+      "finding": "Promotion clears ordinary equipment/Fumo only while preserving special/Awakening and empty-slot state."
+    },
+    {
+      "id": "A09",
+      "requirement": "q1 ordinary raw>0 fails closed; no destruction/refund invention.",
+      "result": "GREEN",
+      "finding": "q1 ordinary raw Fumo greater than zero fails closed; q1 zero remains allowed."
+    },
+    {
+      "id": "A10",
+      "requirement": "restoration eligibility includes ordinary raw Fumo even when equip bit=0.",
+      "result": "GREEN",
+      "finding": "Restoration eligibility includes ordinary raw Fumo even when the equipment bit is zero."
+    },
+    {
+      "id": "A11",
+      "requirement": "special/empty raw Fumo excluded from refund and preserved.",
+      "result": "GREEN",
+      "finding": "Special/empty raw Fumo is excluded from restoration and preserved."
+    },
+    {
+      "id": "A12",
+      "requirement": "source fractions q2..q6 exact rationals; denominations exact source order/values.",
+      "result": "GREEN",
+      "finding": "Neutral I5 restoration policy retains exact q2..q6 source-qualified rational fractions and source-order denominations."
+    },
+    {
+      "id": "A13",
+      "requirement": "aggregate-floor-once/greedy compatibility policy numeric vectors pass.",
+      "result": "GREEN",
+      "finding": "Adversarial vectors prove aggregate-floor-once semantics and deterministic greedy 200→60→10 decomposition."
+    },
+    {
+      "id": "A14",
+      "requirement": "MID785 no debit path; restoration-only grant + Pet transition atomic.",
+      "result": "GREEN",
+      "finding": "MID785 uses no debit path; restoration grant and Pet transition share one transaction."
+    },
+    {
+      "id": "A15",
+      "requirement": "MID790 fresh no-missing ordinary rejects.",
+      "result": "GREEN",
+      "finding": "MID790 rejects a fresh request when there is no missing ordinary equipment to advance/collect."
+    },
+    {
+      "id": "A16",
+      "requirement": "MID790 all-or-nothing missing ordinary plan; rejected slot reservations do not mutate/escape.",
+      "result": "GREEN",
+      "finding": "MID790 computes the complete missing-ordinary set all-or-nothing; rejected reservations do not escape into mutation."
+    },
+    {
+      "id": "A17",
+      "requirement": "CA4-4A recursive recipe/equality semantics reused; no parallel recipe system.",
+      "result": "GREEN",
+      "finding": "The accepted CA4-4A recursive recipe/equality planner is reused; no second recipe authority was introduced."
+    },
+    {
+      "id": "A18",
+      "requirement": "partnerExp planning quirk + real Pet progression/cap reused.",
+      "result": "GREEN",
+      "finding": "Accepted partnerExp planning compatibility and real Pet progression/cap application are reused."
+    },
+    {
+      "id": "A19",
+      "requirement": "potion order compatibility decision reused.",
+      "result": "GREEN",
+      "finding": "Accepted deterministic potion order 50001087→50001088→50001089 is reused."
+    },
+    {
+      "id": "A20",
+      "requirement": "MID790 color<16 promotion branch increments exactly one; clears ordinary; restoration from all destroyed ordinary Fumo.",
+      "result": "GREEN",
+      "finding": "MID790 color<16 promotion applies one color increment, ordinary clear, and restoration from all destroyed ordinary Fumo in the same operation."
+    },
+    {
+      "id": "A21",
+      "requirement": "MID790 color16 collect branch does not change color/Fumo and produces no restoration.",
+      "result": "GREEN",
+      "finding": "MID790 color16 collect leaves color/Fumo unchanged and creates no restoration award."
+    },
+    {
+      "id": "A22",
+      "requirement": "full potential stack closure before mutation; no late lock discovery; identity collisions absent.",
+      "result": "GREEN",
+      "finding": "Promotion-resource preparation closes the full potential stack before mutation and reuses existing owner-qualified lock/resource seams."
+    },
+    {
+      "id": "A23",
+      "requirement": "stock wire projects only restore_items when applicable; no economy_.mana or invented branch/state fields.",
+      "result": "GREEN",
+      "finding": "Stock wire returns only restore_items when present; no economy_.mana or invented branch/state fields are projected."
+    },
+    {
+      "id": "A24",
+      "requirement": "same-operation outer receipt replay exact; no second debit/grant/CAS.",
+      "result": "GREEN",
+      "finding": "Same-operation outer semantic receipt replay returns the committed result without second debit, grant or CAS."
+    },
+    {
+      "id": "A25",
+      "requirement": "ambiguous COMMIT + matching outer receipt resolves committed; receipt absence UNKNOWN/no blind replay.",
+      "result": "GREEN",
+      "finding": "Ambiguous COMMIT reconciles through matching outer receipt; receipt absence remains UNKNOWN with no blind replay."
+    },
+    {
+      "id": "A26",
+      "requirement": "nested restoration receipt without matching outer transition fails closed.",
+      "result": "GREEN",
+      "finding": "A preexisting nested restoration receipt without the matching outer transition fails closed."
+    },
+    {
+      "id": "A27",
+      "requirement": "body failure/late failure rolls back resource debit, restoration grant, and Pet CAS together.",
+      "result": "GREEN",
+      "finding": "Late/body failure tests roll back resource debit, restoration grant and Pet CAS together."
+    },
+    {
+      "id": "A28",
+      "requirement": "fresh HTTP retry revalidates canonical state; cross-request exactly-once explicitly unsupported.",
+      "result": "GREEN",
+      "finding": "A fresh operation after success revalidates canonical state; cross-request exactly-once is not claimed."
+    },
+    {
+      "id": "A29",
+      "requirement": "raw skill persistence not mutated by advance solely for color unlock; client reveals existing raw levels.",
+      "result": "GREEN",
+      "finding": "Advance does not mutate persisted raw skills merely to reveal color-gated client presentation."
+    },
+    {
+      "id": "A30",
+      "requirement": "activity modifiers remain identity unless Pet-specific qualification exists; Hero-only double-refund not imported.",
+      "result": "GREEN",
+      "finding": "No Pet-specific activity modifier was source-qualified; Hero-only double-refund behavior is not imported."
+    },
+    {
+      "id": "A31",
+      "requirement": "source-oracle current+old client behaviors and item/misc hashes guarded.",
+      "result": "GREEN",
+      "finding": "Deterministic current+old source guard and five-oracle lock are GREEN, including MID785/MID790, Fumo clear/collect and restore_items evidence."
+    },
+    {
+      "id": "A32",
+      "requirement": "CA4-4B future CA4-5/CA4-E obligations unchanged; exact Go/Postgres/River CA4 aggregate gate remains open.",
+      "result": "GREEN_DEFERRED_GATE_PRESERVED",
+      "finding": "Exact Go1.27.1 plus real PostgreSQL/River accumulated CA4 gate remains OPEN and mandatory before CA4-E; W2 stock proof remains deferred."
+    }
+  ],
+  "open_gates": [
+    "exact Go1.27.1 executable proof",
+    "real PostgreSQL/River accumulated CA4 gate mandatory pre-CA4-E",
+    "physical stock-client W2 proof"
+  ],
+  "next_frontier": "CA4-5 Super Hero / Super Equipment PRE_IMPLEMENTATION_RESEARCH_RECONCILIATION"
+}

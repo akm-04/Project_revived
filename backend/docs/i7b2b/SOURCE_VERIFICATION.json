@@ -1,0 +1,40 @@
+{
+  "archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+  "members": [
+    {
+      "path": "app/model/PersonDisplay.lua",
+      "archive_member": "app-assets/output/assets/src_64/app/model/PersonDisplay.lua",
+      "sha256": "022fcbf39167ac9197ce5034b32fd5833016742744ad3de118ceacf6f808cfb8",
+      "classification": "SOURCE_FACT",
+      "scope": "Targeted2B source bytes verified; static not runtime"
+    },
+    {
+      "path": "app/model/FilterWordManager.lua",
+      "archive_member": "app-assets/output/assets/src_64/app/model/FilterWordManager.lua",
+      "sha256": "e961a9a0029c90cce75d8deee23d066ba4d74bc133e733625dae5b43e0c34783",
+      "classification": "SOURCE_FACT",
+      "scope": "Targeted2B source bytes verified; static not runtime"
+    },
+    {
+      "path": "app/common/network/Backend.lua",
+      "archive_member": "app-assets/output/assets/src_64/app/common/network/Backend.lua",
+      "sha256": "95378e2b0be8180df6de27e9e430c630bcfe46c080e1f91ef5f6d74bdbb1b840",
+      "classification": "SOURCE_FACT",
+      "scope": "Targeted2B source bytes verified; static not runtime"
+    },
+    {
+      "path": "data/tables/name.lua",
+      "archive_member": "app-assets/output/assets/src_64/data/tables/name.lua",
+      "sha256": "2254bb1bb4283199a112cb94a7e14e82ac28cd29e3a19e281d11faf23d9ec316",
+      "classification": "SOURCE_FACT",
+      "scope": "Targeted2B source bytes verified; static not runtime"
+    },
+    {
+      "path": "data/tables/person_display_words.lua",
+      "archive_member": "app-assets/output/assets/src_64/data/tables/person_display_words.lua",
+      "sha256": "ca342990ff24d8c5a4c12b270401c276b3e29597d43555f30978a2c5162afeb6",
+      "classification": "SOURCE_FACT",
+      "scope": "Targeted2B source bytes verified; static not runtime"
+    }
+  ]
+}

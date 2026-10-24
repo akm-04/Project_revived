@@ -1,0 +1,55 @@
+{
+  "ca5_2_implementation_authorized": false,
+  "ca5_2_research_permitted_after_passmap_seal": true,
+  "cases": [
+    {
+      "id": "A1_CANDIDATE",
+      "result": "GREEN"
+    },
+    {
+      "id": "A2_TYPED_REFS",
+      "result": "GREEN"
+    },
+    {
+      "id": "A3_LOCK_KEYS",
+      "result": "GREEN"
+    },
+    {
+      "id": "A4_REFERENCE_OWNERS",
+      "result": "GREEN"
+    },
+    {
+      "id": "A5_GUARD_ABI",
+      "result": "GREEN"
+    },
+    {
+      "id": "A6_ROOT_LIFECYCLE",
+      "result": "GREEN_FOUNDATION_ONLY"
+    },
+    {
+      "id": "A7_ACTIVATION_NEGATIVES",
+      "result": "GREEN"
+    },
+    {
+      "id": "A8_ARCHITECTURE",
+      "result": "GREEN"
+    },
+    {
+      "id": "A9_LOCAL_TESTS",
+      "result": "GREEN_COMPATIBILITY_COPY_ONLY"
+    },
+    {
+      "id": "A10_EXACT_NATIVE",
+      "result": "AUTHORIZED_DEFERRED_PRE_CA5_E"
+    },
+    {
+      "id": "A11_REALITY_SEAL",
+      "result": "GREEN_LOCAL_PENDING_PASSMAP_SEAL"
+    }
+  ],
+  "matrix": "Pass559 CA5-1 acceptance matrix",
+  "native_gate": "DEFERRED_MANDATORY_CA5_AGGREGATE_PRE_CA5_E_WORK_GATE",
+  "pass": "560.0",
+  "result": "GREEN_LOCAL_WITH_A10_AUTHORIZED_DEFERRED",
+  "schema_version": 1
+}

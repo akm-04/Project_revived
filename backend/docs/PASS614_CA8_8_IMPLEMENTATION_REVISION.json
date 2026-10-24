@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "pass": "614.0",
+  "stage": "CA8-8",
+  "status": "LOCAL_ACCEPTANCE_CANDIDATE",
+  "parent_backend_archive_sha256": "0be3877bc3c8206f11b7b51c0a9771c98a30c7f34bda3d3b57065cc3aca907a4",
+  "parent_git": "ad01fd6d9c99b7c02f8bff3b13501b69d60654c5",
+  "pass613_authority_sha256": "ba816d750abe7307ef11e8ee3d0c58948b02b1d4981885bca2c0653d725a9a9a",
+  "pass613_implementation_contract_sha256": "6b412fb40d3a2e368142bb3ed1cbc3c48fd085c943c2df1c51f793cbed39f7b4",
+  "pass613_acceptance_matrix_sha256": "f68b8d419a0ab529bcd62c8924b07039119253907a21f05bdcd4c8cb193a61d5",
+  "pass613_research_closure_sha256": "ba3ae8b9c412517bdb345de610a698ca91d269e59dcc64542ea6f923b917a53b",
+  "implementation_revision_algorithm": "sha256(sorted(path UTF-8 || NUL || final file bytes) over CA8-8 implementation/test/tooling footprint)",
+  "implementation_revision_sha256": "170ef04b488fe28aa80a6d69949a3b00beccec7a63cf7cc3c0de419acc44c20d",
+  "changed_implementation_files": [
+    {"path":"internal/application/characterasset/mode_guild.go","sha256":"4e8c56c350545c0206640391574c915e5e8ce777f52c6c9873a4389412dcbc44","bytes":3966},
+    {"path":"internal/application/characterasset/mode_guild_test.go","sha256":"24be3d4c96198f468f7b545e1478370d9ff7618df4817cd08cc11599b90d0de8","bytes":10001},
+    {"path":"internal/archguard/ca8_8_contract_test.go","sha256":"981dc2b08607cd2bef76f392dd47be9e86d8f4ab470dc374737facfbbe571e1e","bytes":4228},
+    {"path":"tools/check.sh","sha256":"49597ca41d744653ee17e17e859437a7a7a5f904d0a6e3aa419df915ebf2eb1d","bytes":4411},
+    {"path":"tools/check_ca8_8_source_oracle.py","sha256":"6bc1dd9c8beedd6d1d2c44a763ce60c5857cd1d81976297239d58471922a076c","bytes":5385},
+    {"path":"tools/validate_ca8_8.py","sha256":"d773a83e02881d17927ddfce68d55ed6a39dde9936832c7340d151de0690bd3c","bytes":5127}
+  ],
+  "scope": [
+    "thin ModeGuildCharacterReader over accepted CA5 saved-reference state and CA8-4 qualified borrowed projection",
+    "exact three-method API: SavedPresetReferencesTx, BorrowedHeroTx, BorrowedPetTx",
+    "caller-owned CoherentReadScope preserved without nested transaction/time/content discovery",
+    "exact lender HeroRef/PetRef and opaque BorrowedCapabilityProvenance preservation",
+    "current + V1.164 source-oracle fence against raw rental-family normalization inside Character Asset"
+  ],
+  "non_changes": [
+    "no OwnedHeroTx/OwnedPetTx mode-Guild wrapper or fourth CA8-8 method",
+    "no selected/current formation, mode/season or Guild membership/rental business authority",
+    "no raw stock rent/tutor/anniversary wire parsing or universal rental token",
+    "no schema/migration/SQL/write/lock/receipt/outbox/queue/cache/realtime/network",
+    "no CombatSnapshot/final-stat/RNG/rules/attempt/resolver authority",
+    "no dependency pin/toolchain change"
+  ],
+  "evidence": {
+    "exact_candidate_execution": "ENVIRONMENT_BLOCKED_GO_1_27_1_DOWNLOAD_UNAVAILABLE_AND_LOCAL_GO_1_23_2_BELOW_GO_1_26_MINIMUM",
+    "canonical_static_source": "GREEN",
+    "compatibility_copy": "GREEN_FOCUSED_TEST_RACE_VET_WHOLE_TREE_TEST_VET_APPLICATION_RACE_94_OF_94_PACKAGE_REGRESSION",
+    "postimplementation_reality_check": "GREEN",
+    "classification": "LOCAL_STATIC_PLUS_EXACT_SOURCE_ORACLE_PLUS_COMPATIBILITY_COPY_ONLY; CA8-9/CA8-E/W2 remain open"
+  },
+  "migration_high_water": "00030_ca7_2_appearance_foundation.sql"
+}

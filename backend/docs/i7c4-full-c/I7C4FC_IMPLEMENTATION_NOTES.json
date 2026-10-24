@@ -1,0 +1,30 @@
+{
+  "status": "IMPLEMENTED_DEVELOPMENT_CHECKED_FROZEN_QUALIFICATION_PENDING",
+  "node": "ROOT/I7/I7C/I7C-4 (full closure, stage C)",
+  "contract": "C4F_COSMETIC_COUNTS_AND_SKINS_V1",
+  "version": "v0.136.0",
+  "migration": "00072_i7c4fc_skins_board.sql",
+  "content_revision": "5f7fe83b1c358a67e1a62fdc2670b1db5c00ef8891efd886d4d6fb5a46a355b7",
+  "plan_commit": "ddbcf10",
+  "architecture": [
+    "domain/player owns the C6_COSMETIC_FORWARD_BINDINGS_V1 registry (86 titles, bubble 10008, timed and nonbaseline VIP frames); PlayerDisplay resolves those UNAVAILABLE rows to NOT_LIVE and serves CompleteFamily only when no other row is unavailable",
+    "PlayerDisplay owns SkinCollectionTx (1003) and CosmeticCountTx (1005 frames, 1006 avatar entries) in the caller's coherent scope",
+    "Achievement owns TrophyCountTx (1004) and 100016 as a C4F_OWNED_STATE_COUNT_V1 streak over SkinCollectionTx",
+    "PublicProfile CanonicalMetricProvider serves all eleven show types; 1840 omits fields with UNKNOWN basis",
+    "Ranking SkinsBoard (subtype 38, field 1003, titles 100063..100066, row score) reuses the Girls store, calendar and award table; boards declare their SourceOwner",
+    "contentstore appearance lookups now detect the pgx adapter's kernelstore.ErrNoRows (pre-existing latent bug: a non-skin item surfaced as an error instead of ok=false)"
+  ],
+  "natives": [
+    "TestI7C4FCCompleteFamiliesResolveOrStayUnavailable",
+    "TestI7C4FCSkinTrophyAndCosmeticMetrics",
+    "TestI7C4FCSkinsAchievementBackfillsFromSkinCount",
+    "TestI7C4FCSkinsBoardRanksAndTitlesSevenDays",
+    "TestI7C4CActualAPIMetricSelectionReadAndRestart (full11 with 1007 omitted for a legacy hero; 1004 selectable)"
+  ],
+  "oracle": "tools/check_i7c4fc_source_oracle.py",
+  "not_claimed": [
+    "Original server skin/frame/avatar counting and Skins ranking algorithms",
+    "Photo/Scene 1012/1013",
+    "Forward-bound rows until their I9 owners bind"
+  ]
+}

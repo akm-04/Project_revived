@@ -1,0 +1,60 @@
+COMPATIBILITY_COPY_ONLY
+$ go version
+go version go1.23.2 linux/amd64
+$ go test -mod=mod ./internal/application/characterpet ./internal/application/i5 ./internal/content/builtin ./internal/content/registry ./internal/application/bootstrap ./internal/adapters/stockruntime
+ok  	gxb.local/backend/v2/internal/application/characterpet	(cached)
+ok  	gxb.local/backend/v2/internal/application/i5	(cached)
+ok  	gxb.local/backend/v2/internal/content/builtin	(cached)
+ok  	gxb.local/backend/v2/internal/content/registry	(cached)
+ok  	gxb.local/backend/v2/internal/application/bootstrap	(cached)
+ok  	gxb.local/backend/v2/internal/adapters/stockruntime	(cached)
+$ go test -race -mod=mod ./internal/application/characterpet ./internal/application/i5
+ok  	gxb.local/backend/v2/internal/application/characterpet	1.011s
+ok  	gxb.local/backend/v2/internal/application/i5	1.025s
+$ go vet -mod=mod ./internal/application/characterpet ./internal/application/i5 ./internal/content/builtin ./internal/content/registry ./internal/application/bootstrap ./internal/adapters/stockruntime
+$ go test -mod=mod ./internal/domain/... ./internal/application/... ./internal/content/... ./internal/projection/...
+ok  	gxb.local/backend/v2/internal/domain/activity	0.002s
+?   	gxb.local/backend/v2/internal/domain/combat	[no test files]
+?   	gxb.local/backend/v2/internal/domain/commerce	[no test files]
+?   	gxb.local/backend/v2/internal/domain/control	[no test files]
+ok  	gxb.local/backend/v2/internal/domain/character	0.002s
+ok  	gxb.local/backend/v2/internal/domain/economy	0.002s
+?   	gxb.local/backend/v2/internal/domain/guild	[no test files]
+ok  	gxb.local/backend/v2/internal/domain/generation	0.002s
+ok  	gxb.local/backend/v2/internal/domain/grant	0.003s
+ok  	gxb.local/backend/v2/internal/domain/identity	0.002s
+?   	gxb.local/backend/v2/internal/domain/modes	[no test files]
+ok  	gxb.local/backend/v2/internal/domain/logicalserver	0.004s
+ok  	gxb.local/backend/v2/internal/domain/mail	0.001s
+ok  	gxb.local/backend/v2/internal/domain/objective	0.007s
+?   	gxb.local/backend/v2/internal/domain/profile	[no test files]
+ok  	gxb.local/backend/v2/internal/domain/player	0.002s
+?   	gxb.local/backend/v2/internal/domain/social	[no test files]
+ok  	gxb.local/backend/v2/internal/domain/realtimeauth	0.003s
+ok  	gxb.local/backend/v2/internal/domain/redeem	0.004s
+ok  	gxb.local/backend/v2/internal/application/activitydirectory	0.005s
+ok  	gxb.local/backend/v2/internal/application/bootstrap	(cached)
+ok  	gxb.local/backend/v2/internal/application/characterhero	0.005s
+ok  	gxb.local/backend/v2/internal/application/characterpet	(cached)
+ok  	gxb.local/backend/v2/internal/application/directorysync	0.005s
+ok  	gxb.local/backend/v2/internal/application/generation	0.004s
+ok  	gxb.local/backend/v2/internal/application/guildcore	0.002s
+ok  	gxb.local/backend/v2/internal/application/guildview	0.002s
+ok  	gxb.local/backend/v2/internal/application/i5	(cached)
+?   	gxb.local/backend/v2/internal/application/playerdirectory	[no test files]
+ok  	gxb.local/backend/v2/internal/application/identitylifecycle	0.006s
+ok  	gxb.local/backend/v2/internal/application/playerroot	0.002s
+?   	gxb.local/backend/v2/internal/projection/activity	[no test files]
+ok  	gxb.local/backend/v2/internal/application/realtimeauth	0.002s
+ok  	gxb.local/backend/v2/internal/content/builtin	(cached)
+ok  	gxb.local/backend/v2/internal/content/guildpolicy	0.002s
+ok  	gxb.local/backend/v2/internal/content/registry	(cached)
+ok  	gxb.local/backend/v2/internal/projection/backpack	0.006s
+ok  	gxb.local/backend/v2/internal/projection/hero	0.003s
+?   	gxb.local/backend/v2/internal/projection/ota	[no test files]
+?   	gxb.local/backend/v2/internal/projection/publication	[no test files]
+?   	gxb.local/backend/v2/internal/projection/publicplayer	[no test files]
+?   	gxb.local/backend/v2/internal/projection/ranking	[no test files]
+?   	gxb.local/backend/v2/internal/projection/realtimeview	[no test files]
+ok  	gxb.local/backend/v2/internal/projection/lobby	0.049s
+ok  	gxb.local/backend/v2/internal/projection/pet	0.002s

@@ -1,0 +1,254 @@
+{
+  "schema_version": 1,
+  "pass": "594.0",
+  "phase": "CA7-5 Pet home-style entitlement, selection & cancel semantics local closure",
+  "authority": "Pass593 HOT/CURRENT migration authority over sealed Pass592 CA7-5 research and accepted Pass591 backend",
+  "authority_passmap_outer_sha256": "4b20ad7ea6375f0a62d7c9bacab51f1279f4406d94be11b11feffb416d4ec972",
+  "parent_accepted_backend_sha256": "25e9958b956e5be6da45c0c327e457e9dbd096396e7be95cfe19de7d568511a8",
+  "parent_accepted_git_head": "5ba75ec17ba07b585c1fa67ef5b5fb74ef627ef3",
+  "migration_checkpoint_git_head": "8ed145aedf302b6e845d552f52737286c68e3a42",
+  "content_revision": "ae577b8c9b9770f1d7a7dcf8335d9d36d27a15a687a12a5e5b01d97eca124116",
+  "result": "GREEN_LOCAL_CA7_5_ACCEPTANCE_CANDIDATE_COMPATIBILITY_COPY_ONLY_NATIVE_AGGREGATE_DEFERRED_TO_CA7_7",
+  "canonical_environment": {
+    "canonical_pins_changed": false,
+    "exact_go_execution": "ENVIRONMENT_BLOCKED",
+    "reason": "Pinned Go1.27.1 toolchain cannot be downloaded because proxy.golang.org DNS/network is unavailable in this sandbox.",
+    "static_source_query_ownership": "GREEN_ON_PRISTINE_CANONICAL"
+  },
+  "compatibility_copy_only": {
+    "environment": "Go1.23.2 linux/amd64",
+    "edits": [
+      ".go-version 1.27.1 -> 1.23.2",
+      "go.mod go 1.26.0 -> 1.23.0",
+      "go.mod toolchain go1.27.1 -> go1.23.2"
+    ],
+    "go_sum_changed": false,
+    "focused": "GREEN",
+    "race": "GREEN",
+    "vet": "GREEN",
+    "bounded_package_regression": "94_OF_94_GREEN",
+    "limitations": [
+      "does not satisfy exact Go1.27.1 execution",
+      "does not satisfy real PostgreSQL/River CA7-7 aggregate proof",
+      "does not satisfy W2 physical stock-client proof"
+    ]
+  },
+  "acceptance_matrix": {
+    "A15_01_SOURCE_ORACLE": {
+      "result": "GREEN_CANONICAL_STATIC_SOURCE_BOUND",
+      "proof": [
+        "docs/PASS592_CA7_5_SOURCE_EVIDENCE.json",
+        "tools/check_ca7_5_source_oracle.py",
+        "EVIDENCE/PASS594_CA7_5/exact/canonical_static_gate.log"
+      ],
+      "note": "Current src_64 and v1.164 bytes are pinned; MID1893/1894/1895 identities, callbacks, local item removal, identity mapping and cancel-before-switch reachability remain source-bound."
+    },
+    "A15_02_QUALIFICATION": {
+      "result": "GREEN_COMPATIBILITY_EXECUTED_PLUS_STATIC",
+      "proof": [
+        "internal/application/characterpet/appearance_style_service.go",
+        "internal/application/characterpet/appearance_style_service_test.go"
+      ],
+      "tests": [
+        "TestCA75RejectsUnownedOrWrongFamilySelectionWithoutReceipt"
+      ],
+      "note": "Bound revision resolves style item to canonical Pet origin, then unique owned Pet is owner-locked and Player/origin identity revalidated."
+    },
+    "A15_03_FIRST_ACQUIRE": {
+      "result": "GREEN_COMPATIBILITY_EXECUTED",
+      "tests": [
+        "TestCA75AcquireGrantOnlyConsumesOncePreservesActiveAndSortsStyles",
+        "TestCA75SavePetAppearanceMutationTxEntitlementAndSelectorShareOneOwnerCAS"
+      ],
+      "note": "First acquisition debits once, grants without auto-select, preserves effective selector, sorts styles and advances one Pet CAS."
+    },
+    "A15_04_ACQUIRE_CONVERGENCE": {
+      "result": "GREEN_COMPATIBILITY_EXECUTED",
+      "tests": [
+        "TestCA75AcquireFreshOwnedConvergesWithoutDebitOrVersionBump",
+        "TestCA75ReceiptFingerprintConflictAndReplayDoNotReapply",
+        "TestCA75UnknownCommitAcquireReconcilesReceiptWithoutSecondDebit"
+      ],
+      "note": "Fresh repeat re-evaluates current state with no second debit/version transition; same-operation replay/UNKNOWN-COMMIT is receipt-backed."
+    },
+    "A15_05_STALE_NORMALIZATION": {
+      "result": "GREEN_COMPATIBILITY_EXECUTED",
+      "tests": [
+        "TestCA75AcquireNormalizesStaleRawSelectorBeforeGrant",
+        "TestCA75AcquireOwnedStyleNormalizesDifferentStaleRawSelectorWithoutDebit",
+        "TestCA75SavePetAppearanceMutationTxNormalizationOnlyUsesExactlyOneCAS"
+      ],
+      "note": "Raw stale selectors normalize to pre-operation effective selector with exactly one owner CAS."
+    },
+    "A15_06_I5_LOCK_ORDER": {
+      "result": "GREEN_COMPATIBILITY_EXECUTED_PLUS_STATIC",
+      "tests": [
+        "TestCA75AcquireInsufficientItemOccursAfterPetLockAndWritesNothing",
+        "TestCA75CrossPetAcquireHoldsSeparatePetLocksBeforeI5"
+      ],
+      "note": "Pet430 precedes typed I5 debit. Insufficiency after lock leaves Character/receipt unchanged."
+    },
+    "A16_01_SELECT": {
+      "result": "GREEN_COMPATIBILITY_EXECUTED",
+      "tests": [
+        "TestCA75SelectConflictCancelAndNoopVersionSemantics"
+      ],
+      "note": "Owned/revision/family-qualified style selects from effective active=0 with one Pet CAS."
+    },
+    "A16_02_DIRECT_SWITCH": {
+      "result": "GREEN_COMPATIBILITY_EXECUTED",
+      "tests": [
+        "TestCA75SelectConflictCancelAndNoopVersionSemantics"
+      ],
+      "note": "Different-style direct switch conflicts; explicit cancel permits subsequent selection."
+    },
+    "A16_03_CANCEL": {
+      "result": "GREEN_COMPATIBILITY_EXECUTED",
+      "tests": [
+        "TestCA75SelectConflictCancelAndNoopVersionSemantics",
+        "TestCA75CancelClearsStaleRawPositiveSelectorEvenWhenEffectiveAlreadyZero",
+        "TestCA75PetStyleMIDsStrictWireAndStockProjection"
+      ],
+      "note": "Raw zero is no-op; any positive raw selector clears via one Pet CAS; stock body is empty."
+    },
+    "A16_04_NOOP_VERSION": {
+      "result": "GREEN_COMPATIBILITY_EXECUTED",
+      "tests": [
+        "TestCA75SelectConflictCancelAndNoopVersionSemantics",
+        "TestCA75ConcurrentSameStyleSelectBumpsOnce"
+      ],
+      "note": "Semantic no-ops preserve Pet state_version; actual mutations increment exactly once."
+    },
+    "A16_05_WIRE_ERRORS": {
+      "result": "GREEN_COMPATIBILITY_EXECUTED",
+      "tests": [
+        "TestCA75PetStyleMIDsStrictWireAndStockProjection",
+        "TestCA75PetStyleMIDsRejectMalformedAndInventedParams",
+        "TestCA75PetStyleErrorTransportMapping"
+      ],
+      "note": "Strict numeric semantic parameters and exact success bodies; 400/404/409/503 V2 mappings preserved without invented stock numeric codes."
+    },
+    "A16_06_RECEIPTS": {
+      "result": "GREEN_COMPATIBILITY_EXECUTED_PLUS_STATIC",
+      "tests": [
+        "TestCA75ReceiptFingerprintConflictAndReplayDoNotReapply",
+        "TestCA75SelectAndCancelReceiptFingerprintsBindExactSemanticParams",
+        "TestCA75UnknownCommitAcquireReconcilesReceiptWithoutSecondDebit",
+        "TestCA75UnknownCommitSelectReconcilesReceiptWithoutSecondMutation",
+        "TestCA75UnknownCommitCancelReconcilesReceiptWithoutSecondMutation"
+      ],
+      "note": "D11 families/fingerprints/results are registered; pre-tx, early in-tx and post-Pet-lock rechecks retained; UNKNOWN-COMMIT converges via receipt."
+    },
+    "A16_07_CONCURRENCY": {
+      "result": "GREEN_COMPATIBILITY_EXECUTED",
+      "tests": [
+        "TestCA75ConcurrentFreshSameItemAcquireConsumesAndMutatesOnce",
+        "TestCA75ConcurrentSameStyleSelectBumpsOnce",
+        "TestCA75ConcurrentDifferentStyleSelectOneWinnerOneConflict",
+        "TestCA75ConcurrentSelectCancelSerializableOrdering",
+        "TestCA75ConcurrentAcquireSelectInitiallyUnownedSerializesDeterministically",
+        "TestCA75CrossPetAcquireHoldsSeparatePetLocksBeforeI5"
+      ],
+      "note": "Frozen concurrency matrix is covered at service/transaction seam level in disposable compatibility execution."
+    },
+    "A16_08_PRACTICE": {
+      "result": "GREEN_COMPATIBILITY_EXECUTED_PLUS_CODE_REREAD",
+      "tests": [
+        "TestCA75PetStateVersionMutationStalesPracticeProposalWhileSemanticNoopPreservesIt"
+      ],
+      "note": "CA6 SAVE locks the same Pet owner and compares captured ActorStateVersion; real CA7-5 mutation stales proposal, semantic no-op does not."
+    },
+    "A16_09_RELOAD": {
+      "result": "GREEN_COMPATIBILITY_EXECUTED",
+      "tests": [
+        "TestCA75ReloadProjectionTracksMutationAndNoopStateVersion"
+      ],
+      "note": "Acquire/select/cancel reload derives from keyed entitlements plus effective projection; deterministic ascending style IDs and active membership invariant retained."
+    },
+    "A16_10_SCHEMA_OWNERSHIP": {
+      "result": "GREEN_CANONICAL_STATIC_PLUS_COMPATIBILITY_STORE_TESTS",
+      "tests": [
+        "TestCA75SavePetAppearanceMutationTxEntitlementAndSelectorShareOneOwnerCAS",
+        "TestCA75SavePetAppearanceMutationTxNormalizationOnlyUsesExactlyOneCAS",
+        "TestCA75SavePetAppearanceMutationTxLostCASFailsAfterChildWrite",
+        "TestCA75SavePetActiveStyleTxUsesOwnerCASOnly",
+        "TestCA75AppearanceActivationPreservesOwnerAndSuccessorFences"
+      ],
+      "note": "Pet remains sole owner; no Cosmetics aggregate, foreign-owner SQL or new migration; existing CA7-2 storage reused."
+    },
+    "A16_10A_STALE_CLIENT_RESIDUAL": {
+      "result": "GREEN_DOCUMENTED_COMPATIBILITY_POLICY",
+      "proof": [
+        "docs/PASS592_CA7_5_IMPLEMENTATION_CONTRACT.md",
+        "internal/foundation/replaycatalog/catalog.go"
+      ],
+      "note": "Fresh already-owned acquisition performs no server debit; stale-client local removal residual remains documented rather than “fixed” by invented wire state or double debit."
+    },
+    "A16_11_LOCAL_PROOF": {
+      "result": "GREEN_LOCAL_WITH_EXPLICIT_DEFERRED_NATIVE_AND_W2",
+      "proof": [
+        "EVIDENCE/PASS594_CA7_5/exact/canonical_static_gate.log",
+        "EVIDENCE/PASS594_CA7_5/compat/focused.log",
+        "EVIDENCE/PASS594_CA7_5/compat/race_vet.log",
+        "EVIDENCE/PASS594_CA7_5/compat/package_regression_part1.log",
+        "EVIDENCE/PASS594_CA7_5/compat/package_regression_part2.log"
+      ],
+      "note": "Canonical static/source/query/ownership gates green; focused/race/vet and 94-package bounded regression green in COMPATIBILITY_COPY_ONLY. Exact Go1.27.1 is ENVIRONMENT_BLOCKED; CA7-7 native PostgreSQL/River and W2 stock proof remain mandatory deferred."
+    }
+  },
+  "deferred_mandatory": [
+    "CA7-7 exact/native accumulated real PostgreSQL/River gate",
+    "W2 physical unmodified-stock-client proof"
+  ],
+  "evidence_logs": {
+    "EVIDENCE/PASS594_CA7_5/compat/EXECUTION_CLASSIFICATION.txt": {
+      "bytes": 640,
+      "sha256": "9eb025f231daf1804caed5fd92f44f5c4b2c76512cd89aaf77837ca0d23f98f2"
+    },
+    "EVIDENCE/PASS594_CA7_5/compat/focused.log": {
+      "bytes": 885,
+      "sha256": "594b460646871eaf1cd2855fdc6bbabd2f9b24a6f904c1d1e6f88ff349cea6d8"
+    },
+    "EVIDENCE/PASS594_CA7_5/compat/package_regression_part1.log": {
+      "bytes": 3221,
+      "sha256": "2d91cce7547a2349f123ae12317292188f64a20127185f1ad9c5bab10e5928cb"
+    },
+    "EVIDENCE/PASS594_CA7_5/compat/package_regression_part2.log": {
+      "bytes": 2947,
+      "sha256": "0a8c9fd37865ef90b39c1ddd1b6c40179f9031a5bc03046c2923e2d28fcb7925"
+    },
+    "EVIDENCE/PASS594_CA7_5/compat/race_vet.log": {
+      "bytes": 849,
+      "sha256": "e2a17ce885865f6ba13c5ba0438fae2714e5f669375488dd445b10a83f17dfa0"
+    },
+    "EVIDENCE/PASS594_CA7_5/compat/static_oracles.log": {
+      "bytes": 5557,
+      "sha256": "75c729577822fb6cf088568d104e2a4c65ca07f42bc1e4768f88329a0f1d396f"
+    },
+    "EVIDENCE/PASS594_CA7_5/compat/validators_part1.log": {
+      "bytes": 3163,
+      "sha256": "cfeb681ea975da0044b8519fb4fa92032c8d9b7a16240e020a0643bf332ef616"
+    },
+    "EVIDENCE/PASS594_CA7_5/compat/validators_part2_with_expected_pin_only_failures.log": {
+      "bytes": 2232,
+      "sha256": "9dfccc06c62f94df73ca044970ce722c615045bcd8f53e16c9e63870bdc0a25e"
+    },
+    "EVIDENCE/PASS594_CA7_5/exact/canonical_static_gate.log": {
+      "bytes": 3404,
+      "sha256": "7d86d171f1e55f65112a012e43af3ab0d94c2be793f05c900969f76b091a450e"
+    },
+    "EVIDENCE/PASS594_CA7_5/exact/connected_candidate_preseal_before_release_metadata.log": {
+      "bytes": 359,
+      "sha256": "ba2f840111d5d238310d3009ecb5861f1104a8cb1346d097713155569d568445"
+    },
+    "EVIDENCE/PASS594_CA7_5/exact/exact_go_attempt.log": {
+      "bytes": 315,
+      "sha256": "85d73f5af26efdf999a02150236b3cf081d936963a00f9f9bea49986904f7731"
+    },
+    "EVIDENCE/PASS594_CA7_5/exact/source_binding.sha256": {
+      "bytes": 934,
+      "sha256": "24a5a0f0f1472d5142942adb3b0ebb421317bfeb16d6bb25060aeb81e408ea18"
+    }
+  },
+  "independent_reality_check": "docs/PASS594_CA7_5_INDEPENDENT_POSTIMPLEMENTATION_REALITY_CHECK.md"
+}

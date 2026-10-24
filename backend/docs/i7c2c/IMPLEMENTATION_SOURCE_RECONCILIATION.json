@@ -1,0 +1,12 @@
+{
+  "classification": "SOURCE_FACT",
+  "oracle_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+  "member": "app-assets/output/assets/src_64/app/windows/SellDetailWindow.lua",
+  "sha256": "cdb8e1ffde40e173219886a9de0c0ca4905b9d3965e3e8c9dc00026b765b360f",
+  "lines": "358-378",
+  "discriminator": "Room key exchange consumer handles response.awards via SelfPlayer.handleRewards; raw internal MaterialExchangeResult is not the wire body",
+  "repair": "Return existing I5 Restoration.Awards at awards; retain native economic receipt and overflow ownership unchanged",
+  "scope_delta": false,
+  "new_contract": false,
+  "prior_check_invalidated": "Exchange callback wire result (not covered by earlier native quantity assertion); exact new HTTP exchange proof required"
+}

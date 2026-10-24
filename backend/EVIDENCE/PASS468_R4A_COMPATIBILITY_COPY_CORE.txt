@@ -1,0 +1,9 @@
+# PASS468 R4A compatibility-copy validation
+2026-09-07T17:40:13Z
+go version go1.23.2 linux/amd64
+--- go.mod diff from canonical documented externally
+## go test focused
+ok  	gxb.local/backend/v2/internal/content/builtin	(cached)
+## go test race focused
+ok  	gxb.local/backend/v2/internal/content/builtin	(cached)
+## go vet all

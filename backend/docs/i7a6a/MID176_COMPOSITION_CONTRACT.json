@@ -1,0 +1,36 @@
+{
+  "schema": "gxb-i7a6a-design/v1",
+  "pass": "645.0",
+  "stage": "I7A-6A",
+  "status": "PREIMPLEMENTATION_DESIGN_NO_PRODUCT_AUTHORIZATION",
+  "baseline_passmap": "644.0",
+  "baseline_passmap_sha256": "c786b95f60301abb1d9f5502d5d1f6b6a109281d90c01bbbabd6e58a2941e81a",
+  "backend_sha256": "60b90871802e1f75e0bf08261d6df07dc3c030b9a1c50ffbcfe0092d7e698f02",
+  "backend_tree": "1be8d601037bd203bb4faa7bc4cd1aae3cf2d3ba57d2b1dc4cd670bb9e4e03ab",
+  "implementation_authorized": false,
+  "implementation_started": false,
+  "product_accepted": false,
+  "original_server_truth_claimed": false,
+  "classification": "IMPLEMENTATION_DECISION / explicit owner-scoped READ_SNAPSHOT qualification",
+  "amends": "I7A4 zero-semantic-write projection baseline only for actual owner-enabled MID176 offline branch; every other social read retains existing effect",
+  "preflight": "FriendDM-owned read-only bounded manifest: inboxRootVersion/absence, at most50 logicalpending occurrence IDs + senderIDs + delivery versions. Manifest is planning data, not authorization/output. Capture empty/absent case too.",
+  "same_tx_steps": [
+    "Validate existing I4 trusted actor and preflight finite plan; group all recipient+sender315 roots by canonical logicalserver and globally order before opening mutations.",
+    "Caller opens one RepeatableRead READWRITE tx; acquire all315 groups, then all applicable360 roots,361 pairs,recipient->sender363 rows in total order. Existing missing-root behavior is fail closed, no SocialRelation EnsureRoot.",
+    "Read provider snapshots and old Social relation/notices/presentation in sameTx. Preserve empty TxReader/additive DB observer contract. Planned lower-ranked provider locks must be closed before380; no future generic providers.",
+    "Lock existing FriendDM recipient380 or prove absence protected by315. Re-read inbox version and exact pending manifest. Any mismatch, omitted sender or set growth aborts BEFORE mutation and re-preflights/replans in canonical order; bounded3 preflight attempts then409, no subset drain.",
+    "Obtain DB observation, validate privacy/content identities and lease eligibility; construct fully typed private result, including all original base collections and boot correlation. No reauthorization via Presence any-role.",
+    "First semantic writes only now: expire/fence leases if needed, terminalize revoked/overflow rows, atomically mark eligible rowsOFFLINE_PROJECTED and persist internal projection receipt/root version. No relation, quota, notice, Gift, Recall or discovery owner mutation.",
+    "Definite commit or authoritative known-operation positive resolution releases private typed result through explicit adapter->projection->protocol bridge. Abort/unknown yields no offline payload, no hint, no false200.",
+    "HTTP encoding/network happens after lock release. Response loss retains selected D11 lost-presentation residual."
+  ],
+  "provider_entitlement_on_reload": "No re-debit or re-entitlement of sender inventory for committed emoticon occurrences; pinned immutable definition/reference continues to be valid or fail closed on missing/corrupt content. Recipient needs no item entitlement.",
+  "no_owner_case": "typed inactive owner branch preserves current empty array and zero writes; not an ordinary feature success substitute",
+  "not_changed": [
+    "MID179 IgnoreRequests semantics",
+    "188/189/190 discovery/list read effects",
+    "all Social placeholders except owner-enabled176 offline",
+    "BootExplicitHTTP176 correlation",
+    "existing accepted I7A5 channel wire/payload bounds"
+  ]
+}

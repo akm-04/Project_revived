@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "pass": "459.0",
+  "milestone": "R3B",
+  "finding": "RF-009",
+  "local_verdict": "GREEN",
+  "foundation_verdict": "RED_REPAIR_ACTIVE",
+  "I6": "BLOCKED_UNTIL_R7_GREEN",
+  "tests": [
+    "go test ./...",
+    "go vet ./...",
+    "targeted -race",
+    "net.Pipe slowloris/admission/query/idle tests",
+    "writer backpressure",
+    "tools/validate_r3b.py"
+  ],
+  "live_deferred": [
+    "postgres-tag exact build due sandbox dependency cache",
+    "real socket/fd/load pressure",
+    "real authority query deadline behavior"
+  ],
+  "implementation_commit": "68ebe9f0662b1dceab44a083453d5d1aceadc32e"
+}

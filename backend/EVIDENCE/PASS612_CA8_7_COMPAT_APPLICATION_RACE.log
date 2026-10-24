@@ -1,0 +1,17 @@
+$ go test -race ./internal/application/...
+ok  	gxb.local/backend/v2/internal/application/activitydirectory	(cached)
+ok  	gxb.local/backend/v2/internal/application/bootstrap	(cached)
+ok  	gxb.local/backend/v2/internal/application/characterasset	(cached)
+ok  	gxb.local/backend/v2/internal/application/characterhero	(cached)
+ok  	gxb.local/backend/v2/internal/application/characterpet	(cached)
+ok  	gxb.local/backend/v2/internal/application/characterpractice	(cached)
+ok  	gxb.local/backend/v2/internal/application/charactersavedpreset	(cached)
+ok  	gxb.local/backend/v2/internal/application/directorysync	(cached)
+ok  	gxb.local/backend/v2/internal/application/generation	(cached)
+ok  	gxb.local/backend/v2/internal/application/guildcore	(cached)
+ok  	gxb.local/backend/v2/internal/application/guildview	(cached)
+?   	gxb.local/backend/v2/internal/application/playerdirectory	[no test files]
+ok  	gxb.local/backend/v2/internal/application/i5	(cached)
+ok  	gxb.local/backend/v2/internal/application/identitylifecycle	(cached)
+ok  	gxb.local/backend/v2/internal/application/playerroot	(cached)
+ok  	gxb.local/backend/v2/internal/application/realtimeauth	(cached)

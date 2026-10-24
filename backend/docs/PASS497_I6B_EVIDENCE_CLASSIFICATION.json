@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "pass": "497.0",
+  "node": "I6B",
+  "status": "PHASE_ACCEPTED",
+  "original_candidate": {
+    "artifact": "gxb-backend-v2-v0.58.0-pass496-i6b-implementation-checkpoint2.zip",
+    "sha256": "c69e1b0e6ea56071e2b28d10a24735ed6b21fcdf53b5b876b971f9db0746bb78",
+    "classification": "GREEN_EXACT_GATE_NO_REPAIR_REQUIRED"
+  },
+  "work_evidence": {
+    "artifact": "gxb-pass496-i6b-work-evidence-final.zip",
+    "sha256": "2d7b4d0098b9d93285a1e02666be06cc5e1315c68f59801a54ee0ad19e2ed159",
+    "classification": "GREEN_EXACT_GATE"
+  },
+  "proof": {
+    "exact_go_1_27_1": "GREEN",
+    "module_closure": "GREEN",
+    "untagged_tests_vet": "GREEN",
+    "focused_race": "GREEN",
+    "postgres_tag_compile_test_vet_race": "GREEN",
+    "postgres_river_tag_composition": "GREEN",
+    "source_oracles_i6a_i6b": "GREEN",
+    "architecture_static_security": "GREEN",
+    "candidate_tree_integrity": "GREEN",
+    "production_vcs_build": "ENVIRONMENT_ARCHIVE_ACCOMMODATION_BUILDVCS_FALSE_GREEN"
+  },
+  "not_required": {
+    "i6b_specific_postgresql_behavioral_campaign": "NOT_REQUIRED_BY_PASS495_CONTRACT_DEFERRED_AGGREGATE_TO_I6D"
+  },
+  "bounded_limitations": [
+    "ZIP extraction lacks .git metadata, so unadapted VCS stamping cannot prove a VCS-backed release build.",
+    "Broader unrelated v1_pass353/native_apk/pass222 supplemental oracle checks were not present in the Work bundle; required current/historical I6A/I6B source oracles passed."
+  ],
+  "migration_00012_present": false,
+  "phase_accepted": true,
+  "next": "I6C_PRE_IMPLEMENTATION_RESEARCH_RECONCILIATION"
+}

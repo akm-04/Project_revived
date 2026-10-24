@@ -1,0 +1,189 @@
+[1/94] gxb.local/backend/v2/cmd/gxb-admin
+?   	gxb.local/backend/v2/cmd/gxb-admin	[no test files]
+[2/94] gxb.local/backend/v2/cmd/gxb-api
+?   	gxb.local/backend/v2/cmd/gxb-api	[no test files]
+[3/94] gxb.local/backend/v2/cmd/gxb-realtime
+?   	gxb.local/backend/v2/cmd/gxb-realtime	[no test files]
+[4/94] gxb.local/backend/v2/cmd/gxb-wave-s-report
+?   	gxb.local/backend/v2/cmd/gxb-wave-s-report	[no test files]
+[5/94] gxb.local/backend/v2/cmd/gxb-worker
+?   	gxb.local/backend/v2/cmd/gxb-worker	[no test files]
+[6/94] gxb.local/backend/v2/internal/adapters/blobstore
+?   	gxb.local/backend/v2/internal/adapters/blobstore	[no test files]
+[7/94] gxb.local/backend/v2/internal/adapters/guildpolicybridge
+?   	gxb.local/backend/v2/internal/adapters/guildpolicybridge	[no test files]
+[8/94] gxb.local/backend/v2/internal/adapters/guildwire
+?   	gxb.local/backend/v2/internal/adapters/guildwire	[no test files]
+[9/94] gxb.local/backend/v2/internal/adapters/pass353diff
+?   	gxb.local/backend/v2/internal/adapters/pass353diff	[no test files]
+[10/94] gxb.local/backend/v2/internal/adapters/postgres
+ok  	gxb.local/backend/v2/internal/adapters/postgres	(cached)
+[11/94] gxb.local/backend/v2/internal/adapters/postgres/activitystore
+ok  	gxb.local/backend/v2/internal/adapters/postgres/activitystore	(cached)
+[12/94] gxb.local/backend/v2/internal/adapters/postgres/characterqueries
+?   	gxb.local/backend/v2/internal/adapters/postgres/characterqueries	[no test files]
+[13/94] gxb.local/backend/v2/internal/adapters/postgres/characterstore
+ok  	gxb.local/backend/v2/internal/adapters/postgres/characterstore	(cached)
+[14/94] gxb.local/backend/v2/internal/adapters/postgres/contentqueries
+?   	gxb.local/backend/v2/internal/adapters/postgres/contentqueries	[no test files]
+[15/94] gxb.local/backend/v2/internal/adapters/postgres/contentstore
+ok  	gxb.local/backend/v2/internal/adapters/postgres/contentstore	(cached)
+[16/94] gxb.local/backend/v2/internal/adapters/postgres/guildprojection
+?   	gxb.local/backend/v2/internal/adapters/postgres/guildprojection	[no test files]
+[17/94] gxb.local/backend/v2/internal/adapters/postgres/guildstore
+?   	gxb.local/backend/v2/internal/adapters/postgres/guildstore	[no test files]
+[18/94] gxb.local/backend/v2/internal/adapters/postgres/i4store
+ok  	gxb.local/backend/v2/internal/adapters/postgres/i4store	(cached)
+[19/94] gxb.local/backend/v2/internal/adapters/postgres/i5store
+ok  	gxb.local/backend/v2/internal/adapters/postgres/i5store	(cached)
+[20/94] gxb.local/backend/v2/internal/adapters/postgres/identitystore
+?   	gxb.local/backend/v2/internal/adapters/postgres/identitystore	[no test files]
+[21/94] gxb.local/backend/v2/internal/adapters/postgres/kernelqueries
+?   	gxb.local/backend/v2/internal/adapters/postgres/kernelqueries	[no test files]
+[22/94] gxb.local/backend/v2/internal/adapters/postgres/kernelstore
+ok  	gxb.local/backend/v2/internal/adapters/postgres/kernelstore	(cached)
+[23/94] gxb.local/backend/v2/internal/adapters/provider
+?   	gxb.local/backend/v2/internal/adapters/provider	[no test files]
+[24/94] gxb.local/backend/v2/internal/adapters/river
+?   	gxb.local/backend/v2/internal/adapters/river	[no test files]
+[25/94] gxb.local/backend/v2/internal/adapters/stockfixtures
+?   	gxb.local/backend/v2/internal/adapters/stockfixtures	[no test files]
+[26/94] gxb.local/backend/v2/internal/adapters/stockruntime
+ok  	gxb.local/backend/v2/internal/adapters/stockruntime	(cached)
+[27/94] gxb.local/backend/v2/internal/application/activitydirectory
+ok  	gxb.local/backend/v2/internal/application/activitydirectory	(cached)
+[28/94] gxb.local/backend/v2/internal/application/bootstrap
+ok  	gxb.local/backend/v2/internal/application/bootstrap	(cached)
+[29/94] gxb.local/backend/v2/internal/application/characterasset
+ok  	gxb.local/backend/v2/internal/application/characterasset	(cached)
+[30/94] gxb.local/backend/v2/internal/application/characterhero
+ok  	gxb.local/backend/v2/internal/application/characterhero	(cached)
+[31/94] gxb.local/backend/v2/internal/application/characterpet
+ok  	gxb.local/backend/v2/internal/application/characterpet	(cached)
+[32/94] gxb.local/backend/v2/internal/application/characterpractice
+ok  	gxb.local/backend/v2/internal/application/characterpractice	(cached)
+[33/94] gxb.local/backend/v2/internal/application/charactersavedpreset
+ok  	gxb.local/backend/v2/internal/application/charactersavedpreset	(cached)
+[34/94] gxb.local/backend/v2/internal/application/directorysync
+ok  	gxb.local/backend/v2/internal/application/directorysync	(cached)
+[35/94] gxb.local/backend/v2/internal/application/generation
+ok  	gxb.local/backend/v2/internal/application/generation	(cached)
+[36/94] gxb.local/backend/v2/internal/application/guildcore
+ok  	gxb.local/backend/v2/internal/application/guildcore	(cached)
+[37/94] gxb.local/backend/v2/internal/application/guildview
+ok  	gxb.local/backend/v2/internal/application/guildview	(cached)
+[38/94] gxb.local/backend/v2/internal/application/i5
+ok  	gxb.local/backend/v2/internal/application/i5	(cached)
+[39/94] gxb.local/backend/v2/internal/application/identitylifecycle
+ok  	gxb.local/backend/v2/internal/application/identitylifecycle	(cached)
+[40/94] gxb.local/backend/v2/internal/application/playerdirectory
+?   	gxb.local/backend/v2/internal/application/playerdirectory	[no test files]
+[41/94] gxb.local/backend/v2/internal/application/playerroot
+ok  	gxb.local/backend/v2/internal/application/playerroot	(cached)
+[42/94] gxb.local/backend/v2/internal/application/realtimeauth
+ok  	gxb.local/backend/v2/internal/application/realtimeauth	(cached)
+[43/94] gxb.local/backend/v2/internal/archguard
+ok  	gxb.local/backend/v2/internal/archguard	0.040s
+[44/94] gxb.local/backend/v2/internal/content/builtin
+ok  	gxb.local/backend/v2/internal/content/builtin	(cached)
+[45/94] gxb.local/backend/v2/internal/content/guildpolicy
+ok  	gxb.local/backend/v2/internal/content/guildpolicy	(cached)
+[46/94] gxb.local/backend/v2/internal/content/registry
+ok  	gxb.local/backend/v2/internal/content/registry	(cached)
+[47/94] gxb.local/backend/v2/internal/domain/activity
+ok  	gxb.local/backend/v2/internal/domain/activity	(cached)
+[48/94] gxb.local/backend/v2/internal/domain/character
+ok  	gxb.local/backend/v2/internal/domain/character	(cached)
+[49/94] gxb.local/backend/v2/internal/domain/combat
+?   	gxb.local/backend/v2/internal/domain/combat	[no test files]
+[50/94] gxb.local/backend/v2/internal/domain/commerce
+?   	gxb.local/backend/v2/internal/domain/commerce	[no test files]
+[51/94] gxb.local/backend/v2/internal/domain/control
+?   	gxb.local/backend/v2/internal/domain/control	[no test files]
+[52/94] gxb.local/backend/v2/internal/domain/economy
+ok  	gxb.local/backend/v2/internal/domain/economy	(cached)
+[53/94] gxb.local/backend/v2/internal/domain/generation
+ok  	gxb.local/backend/v2/internal/domain/generation	(cached)
+[54/94] gxb.local/backend/v2/internal/domain/grant
+ok  	gxb.local/backend/v2/internal/domain/grant	(cached)
+[55/94] gxb.local/backend/v2/internal/domain/guild
+?   	gxb.local/backend/v2/internal/domain/guild	[no test files]
+[56/94] gxb.local/backend/v2/internal/domain/identity
+ok  	gxb.local/backend/v2/internal/domain/identity	(cached)
+[57/94] gxb.local/backend/v2/internal/domain/logicalserver
+ok  	gxb.local/backend/v2/internal/domain/logicalserver	(cached)
+[58/94] gxb.local/backend/v2/internal/domain/mail
+ok  	gxb.local/backend/v2/internal/domain/mail	(cached)
+[59/94] gxb.local/backend/v2/internal/domain/modes
+?   	gxb.local/backend/v2/internal/domain/modes	[no test files]
+[60/94] gxb.local/backend/v2/internal/domain/objective
+ok  	gxb.local/backend/v2/internal/domain/objective	(cached)
+[61/94] gxb.local/backend/v2/internal/domain/player
+ok  	gxb.local/backend/v2/internal/domain/player	(cached)
+[62/94] gxb.local/backend/v2/internal/domain/profile
+?   	gxb.local/backend/v2/internal/domain/profile	[no test files]
+[63/94] gxb.local/backend/v2/internal/domain/realtimeauth
+ok  	gxb.local/backend/v2/internal/domain/realtimeauth	(cached)
+[64/94] gxb.local/backend/v2/internal/domain/redeem
+ok  	gxb.local/backend/v2/internal/domain/redeem	(cached)
+[65/94] gxb.local/backend/v2/internal/domain/social
+?   	gxb.local/backend/v2/internal/domain/social	[no test files]
+[66/94] gxb.local/backend/v2/internal/foundation/audit
+?   	gxb.local/backend/v2/internal/foundation/audit	[no test files]
+[67/94] gxb.local/backend/v2/internal/foundation/clock
+?   	gxb.local/backend/v2/internal/foundation/clock	[no test files]
+[68/94] gxb.local/backend/v2/internal/foundation/config
+ok  	gxb.local/backend/v2/internal/foundation/config	(cached)
+[69/94] gxb.local/backend/v2/internal/foundation/ids
+ok  	gxb.local/backend/v2/internal/foundation/ids	(cached)
+[70/94] gxb.local/backend/v2/internal/foundation/lockkey
+ok  	gxb.local/backend/v2/internal/foundation/lockkey	(cached)
+[71/94] gxb.local/backend/v2/internal/foundation/obligation
+ok  	gxb.local/backend/v2/internal/foundation/obligation	(cached)
+[72/94] gxb.local/backend/v2/internal/foundation/observability
+ok  	gxb.local/backend/v2/internal/foundation/observability	(cached)
+[73/94] gxb.local/backend/v2/internal/foundation/operation
+ok  	gxb.local/backend/v2/internal/foundation/operation	(cached)
+[74/94] gxb.local/backend/v2/internal/foundation/policy
+ok  	gxb.local/backend/v2/internal/foundation/policy	(cached)
+[75/94] gxb.local/backend/v2/internal/foundation/receipt
+ok  	gxb.local/backend/v2/internal/foundation/receipt	(cached)
+[76/94] gxb.local/backend/v2/internal/foundation/replaycatalog
+ok  	gxb.local/backend/v2/internal/foundation/replaycatalog	(cached)
+[77/94] gxb.local/backend/v2/internal/foundation/tx
+ok  	gxb.local/backend/v2/internal/foundation/tx	(cached)
+[78/94] gxb.local/backend/v2/internal/projection/activity
+?   	gxb.local/backend/v2/internal/projection/activity	[no test files]
+[79/94] gxb.local/backend/v2/internal/projection/backpack
+ok  	gxb.local/backend/v2/internal/projection/backpack	(cached)
+[80/94] gxb.local/backend/v2/internal/projection/hero
+ok  	gxb.local/backend/v2/internal/projection/hero	(cached)
+[81/94] gxb.local/backend/v2/internal/projection/lobby
+ok  	gxb.local/backend/v2/internal/projection/lobby	(cached)
+[82/94] gxb.local/backend/v2/internal/projection/ota
+?   	gxb.local/backend/v2/internal/projection/ota	[no test files]
+[83/94] gxb.local/backend/v2/internal/projection/pet
+ok  	gxb.local/backend/v2/internal/projection/pet	(cached)
+[84/94] gxb.local/backend/v2/internal/projection/publication
+?   	gxb.local/backend/v2/internal/projection/publication	[no test files]
+[85/94] gxb.local/backend/v2/internal/projection/publicplayer
+?   	gxb.local/backend/v2/internal/projection/publicplayer	[no test files]
+[86/94] gxb.local/backend/v2/internal/projection/ranking
+?   	gxb.local/backend/v2/internal/projection/ranking	[no test files]
+[87/94] gxb.local/backend/v2/internal/projection/realtimeview
+?   	gxb.local/backend/v2/internal/projection/realtimeview	[no test files]
+[88/94] gxb.local/backend/v2/internal/protocol/amf3
+ok  	gxb.local/backend/v2/internal/protocol/amf3	(cached)
+[89/94] gxb.local/backend/v2/internal/protocol/httpedge
+ok  	gxb.local/backend/v2/internal/protocol/httpedge	(cached)
+[90/94] gxb.local/backend/v2/internal/protocol/limits
+?   	gxb.local/backend/v2/internal/protocol/limits	[no test files]
+[91/94] gxb.local/backend/v2/internal/protocol/mids
+ok  	gxb.local/backend/v2/internal/protocol/mids	(cached)
+[92/94] gxb.local/backend/v2/internal/protocol/observe
+?   	gxb.local/backend/v2/internal/protocol/observe	[no test files]
+[93/94] gxb.local/backend/v2/internal/protocol/realtime
+ok  	gxb.local/backend/v2/internal/protocol/realtime	(cached)
+[94/94] gxb.local/backend/v2/internal/protocol/wire
+?   	gxb.local/backend/v2/internal/protocol/wire	[no test files]
+BOUNDED_REGRESSION_PASS=94/94

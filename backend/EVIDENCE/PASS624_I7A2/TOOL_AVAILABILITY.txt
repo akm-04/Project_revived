@@ -1,0 +1,4 @@
+staticcheck=NOT_AVAILABLE
+sqlc=NOT_AVAILABLE
+golangci-lint=NOT_AVAILABLE
+govulncheck=NOT_AVAILABLE

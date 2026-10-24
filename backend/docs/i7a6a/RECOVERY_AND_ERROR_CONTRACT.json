@@ -1,0 +1,81 @@
+{
+  "schema": "gxb-i7a6a-design/v1",
+  "pass": "645.0",
+  "stage": "I7A-6A",
+  "status": "PREIMPLEMENTATION_DESIGN_NO_PRODUCT_AUTHORIZATION",
+  "baseline_passmap": "644.0",
+  "baseline_passmap_sha256": "c786b95f60301abb1d9f5502d5d1f6b6a109281d90c01bbbabd6e58a2941e81a",
+  "backend_sha256": "60b90871802e1f75e0bf08261d6df07dc3c030b9a1c50ffbcfe0092d7e698f02",
+  "backend_tree": "1be8d601037bd203bb4faa7bc4cd1aae3cf2d3ba57d2b1dc4cd670bb9e4e03ab",
+  "implementation_authorized": false,
+  "implementation_started": false,
+  "product_accepted": false,
+  "original_server_truth_claimed": false,
+  "classification": "IMPLEMENTATION_DECISION + SOURCE_FACT",
+  "route": "finite FriendDM wakeup {recipient,occurrence internal ref,version}; registered on existing realtimewakeup registry/listener; payload never text/profile/credentials/facts. Always owner-reload and stale-ref reject.",
+  "startup": "accepted process advisory owner->existing canonical realtimeOwnerFence->all finite route registrations->listener ready->bounded initial reconciliation->TCP accepting/readiness. Shutdown/fatal canonical-listener failure closes registry/writers and joins listener/reconcile workers.",
+  "policy": {
+    "id": "FRIEND_DM_RECONCILE_V1",
+    "recipient_page": 64,
+    "worker_slots": 8,
+    "max_scheduled_recipients": 64,
+    "occurrences_per_recipient": 50,
+    "tick_seconds": 1,
+    "publication_wait_seconds": 2,
+    "transaction_operation_seconds_max": 5,
+    "manifest_attempts_max": 3,
+    "sweep": "persistent-in-process keyset cursor over indexed pending-recipient roots with sweep high-water; advance even if offline/failed; wrap and start new finite sweep; new rows below cursor join next sweep",
+    "notifications": "separate coalesced bounded hints never reset/saturate periodic fair lane; no unbounded goroutine perref",
+    "no_world": "skip live attempt without claiming; retain pending for176. Do not equate any-role Presence withWORLD.",
+    "ordering": "one active recipient delivery preparation slot; finite oldest-first attempt batches; perwriter enqueue order only, no global cross-session/client-consumption order guarantee",
+    "capacity": "conditional eventual convergence for finite/stable load and healthy DB/writers; measure backlog/backpressure, not unconditional latency promise"
+  },
+  "claim_routing": "shared single owner exact admitted targetWORLD handles; capped by existingMaxConnections, send outside locks/lifecycle mutexes. I4 fresh liveness/handle equality check precedes queue; ownerFence changing makes stale claim/finalization ineffective.",
+  "stock_http_table": [
+    {
+      "case": "515 durable acceptance",
+      "http": 200,
+      "body": "server_time from committed acceptance; client callbackOK; no sender push"
+    },
+    {
+      "case": "invalid raw/shape/numeric/Unicode",
+      "http": 400,
+      "body": "existing bounded error convention; callbackERROR; no occurrence"
+    },
+    {
+      "case": "missing/invalid auth or actor",
+      "http": 401,
+      "body": "existing authFailure; no private target detail"
+    },
+    {
+      "case": "self/missing target/notfriend/recipient block/entitlement absent/provider gated",
+      "http": 409,
+      "body": "bounded private_unavailable; callbackERROR; no occurrence. Numeric1 is existing generic diagnostic only if needed; no invented private stock code"
+    },
+    {
+      "case": "definite abort or preflight exhaustion",
+      "http": 409,
+      "body": "bounded unavailable; no result/private hint"
+    },
+    {
+      "case": "unknown commit unresolved",
+      "http": 409,
+      "body": "bounded unavailable/unknown telemetry internally; no OK/payload/publication and no claim of no acceptance"
+    },
+    {
+      "case": "target offline after515 acceptance",
+      "http": 200,
+      "body": "durable acceptance already complete; pending recovery, not live-delivery promise"
+    }
+  ],
+  "stock_error_constraint": "Backend.lua uses HTTPstatus for callback success; never HTTP200 + error_code-only rejection for private endpoints. Non200 may still present error diagnostics; no automatic original-server code claim.",
+  "accepted_social_review_obligation": "Targeted source/model review of existing socialFailure HTTP200 StockError paths required before changing those routes or claiming full stock compatibility. This seal records finding; no unsolicited product repair/native acceptance revocation.",
+  "scope_not_closed": [
+    "General513 completion deadline/latewrite policyQ04",
+    "General514 aliasesQ09",
+    "actual privateREPORT/mode producersQ08",
+    "I7A10",
+    "I7A-E",
+    "W2"
+  ]
+}

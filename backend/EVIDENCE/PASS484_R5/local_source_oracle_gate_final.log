@@ -1,0 +1,81 @@
+===== python3 tools/check_dependency_policy.py =====
+DEPENDENCY POLICY: PASS
+resolved_go_modules 15 qualified_candidates 5
+===== python3 tools/generate_resolved_sbom.py --check =====
+RESOLVED SBOM: PASS
+===== python3 tools/check_sqlc_generation_policy.py =====
+SQLC GENERATION POLICY: PASS
+===== python3 tools/check_connected_candidate.py =====
+SQLC GENERATION POLICY: PASS
+DEPENDENCY POLICY: PASS
+resolved_go_modules 15 qualified_candidates 5
+RESOLVED SBOM: PASS
+CONNECTED CANDIDATE STATIC PRESEAL: PASS
+===== python3 tools/generate_kernel_querytext.py --check =====
+KERNEL QUERYTEXT: PASS sha256=74ad9accee063e77323a2eb4a69df394bdcb331ce88e3d789864ffbc904b7511
+===== python3 tools/generate_content_querytext.py --check =====
+CONTENT QUERYTEXT: PASS sha256=411bf16367d94e4e0ce34fa9eb6035c312754f158c5c34a6fc9d3dbc0da50a32
+===== python3 tools/check_schema_query_ownership.py =====
+SCHEMA/QUERY OWNERSHIP: PASS
+===== python3 tools/validate_foundation_trace.py =====
+FOUNDATION TRACE: PASS (10 lifecycle records; 7 open RFs remain explicit; I6 blocked)
+===== python3 tools/validate_r4a.py --source-archive /mnt/data/all-assest-rechecked-1.zip =====
+test_exact_archive_is_deterministic_and_matches_checked_in (__main__.ExactArchiveTests.test_exact_archive_is_deterministic_and_matches_checked_in) ... ok
+test_encoded_item_fixture (__main__.ParserTests.test_encoded_item_fixture) ... ok
+test_generated_lua_table_fixture (__main__.ParserTests.test_generated_lua_table_fixture) ... ok
+test_generated_lua_table_rejects_expression (__main__.ParserTests.test_generated_lua_table_rejects_expression) ... ok
+test_member_hash_mismatch_fails_even_when_outer_hash_matches_test_archive (__main__.ParserTests.test_member_hash_mismatch_fails_even_when_outer_hash_matches_test_archive) ... ok
+test_source_archive_hash_mismatch_fails (__main__.ParserTests.test_source_archive_hash_mismatch_fails) ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 0.548s
+
+OK
+R4A CONTENT GENERATION: PASS revision=050e93ca758d4c3b85b24cfca2f33c0d808005dcda21a2eca2325839fffae3f0 resources=5556 players=100 functions=99
+R4A VALIDATION: PASS
+===== python3 tools/validate_r4b.py =====
+CONTENT QUERYTEXT: PASS sha256=411bf16367d94e4e0ce34fa9eb6035c312754f158c5c34a6fc9d3dbc0da50a32
+SCHEMA/QUERY OWNERSHIP: PASS
+SQLC GENERATION POLICY: PASS
+R4C STATIC VALIDATION: PASS; executable and real-PG acceptance are separate evidence
+KERNEL QUERYTEXT: PASS sha256=74ad9accee063e77323a2eb4a69df394bdcb331ce88e3d789864ffbc904b7511
+SCHEMA/QUERY OWNERSHIP: PASS
+R4B VALIDATION: PASS
+resource_rows 5556 progression_rows 100 objective_rows 0
+===== python3 tools/validate_r4c.py =====
+CONTENT QUERYTEXT: PASS sha256=411bf16367d94e4e0ce34fa9eb6035c312754f158c5c34a6fc9d3dbc0da50a32
+SCHEMA/QUERY OWNERSHIP: PASS
+SQLC GENERATION POLICY: PASS
+R4C STATIC VALIDATION: PASS; executable and real-PG acceptance are separate evidence
+===== python3 tools/validate_r4d.py =====
+R4D VALIDATION: PASS
+immutable revision binding/replay/exact-read/restart guards present; R5 temporal/bootstrap remains intentionally out of scope
+===== python3 tools/validate_r5.py =====
+R5 VALIDATION: PASS
+static progression/temporal/bootstrap/function/directory/receipt/wire/stack R5 seams present; native PostgreSQL/River/W2 remain separate
+===== python3 tools/verify_oracles.py --root /mnt/data =====
+PASS current_src64: all-assest-rechecked-1.zip
+PASS v1_pass353: gxb-backend-v0.65.2-pass353.0-portable-dev1-V1-Final.zip
+PASS old_client: gxb-old-client-v1.164.0-research-corpus.zip
+PASS native_apk: latest_apk-smali-full.zip
+PASS pass222_probe: prep-apk-pass222-window-probe.zip
+ORACLE VERIFY: PASS
+===== python3 tools/check_i2_oracle_wire.py /mnt/data =====
+I2 ORACLE WIRE CHECK: PASS
+current Backend/mid/functions + APK QuickHTTP hashes and frozen wire facts verified
+===== python3 tools/check_i3_oracle_bootstrap.py /mnt/data =====
+I3 ORACLE BOOTSTRAP CHECK: PASS
+verified current MID18/MID1 selection, full/existing-owner gate, player-region formula, stock switch teardown and token replacement
+===== python3 tools/check_i4_oracle_wave_s.py /mnt/data =====
+I4 ORACLE WAVE-S CHECK: PASS
+verified current src_64 UpdateScene MID20480/MID2 + public MID7/MID2864 + MID1 log_url/server_time/default sidebands + room discovery/TCP_LOGIN/room-entered/heartbeat/reconnect + 20018/1304/Lua truthiness; Pass353 corroborates bootstrap/realtime shapes only
+===== python3 tools/check_i5_oracle_player_core.py /mnt/data =====
+I5 ORACLE PLAYER-CORE CHECK: PASS
+verified current src_64 player/story/mail/stack/task/redeem facts; old-client MID230 stability; Pass353 mechanisms corroborative only
+===== python3 tools/generate_mid_registry.py --root /mnt/data --check =====
+MID REGISTRY: PASS source_sha256=026a20b29d97624979777a68c64c749254031604057ff42aa8f8254c3e35b5af assignments=1213 unique=1211
+===== python3 tools/generate_pass353_wire_fixtures.py --root /mnt/data --check =====
+PASS353 WIRE FIXTURES: PASS cases=5
+===== bash -lc test -z "$(gofmt -l $(find internal cmd -name "*.go" -type f))" && echo GOFMT PASS =====
+GOFMT PASS
+FINAL_LOCAL_SOURCE_ORACLE_GATE=PASS

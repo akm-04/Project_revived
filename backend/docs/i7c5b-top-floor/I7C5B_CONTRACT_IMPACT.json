@@ -1,0 +1,28 @@
+{
+  "status": "I7C5B_CONTRACT_IMPACT_REVIEWED_C1_PRESERVED_SCOPED_AMENDMENTS_DECLARED",
+  "affected_contract_id": "C5B_TOP_FLOOR_MODE_V1",
+  "c1_bindings": [
+    {"path": "hot/00_PASSMAP/PASS685_I7C1_PROVIDER_SCOPE_OWNERSHIP_CONTRACT.json", "sha256": "73f4e5b8e8603a68380be31d4aec7a5f9f10ecd9b68246b56dfb350ae36ea943", "upheld": "TopFloor is the canonical owner of its ladder/state/history facts; canonical owner observations only, never defaults; three HISTORY families stay distinct and 1829 stays unactivated until all are qualified."},
+    {"path": "hot/00_PASSMAP/PASS685_I7C1_DELIVERY_ACCEPTANCE_CONTRACT.json", "sha256": "992b38344aef6196e99cd2f17dc8810c2e962017db8de5c1a563890d54cf49a0", "upheld": "Caller-transaction coherent composition, no foreign SQL or nested transaction or I/O under locks; battle follows D05/418/420 through the 5A foundation; new DB foundation gets exact R2 fresh/upgrade/restore/unknown-COMMIT/concurrency proof; child GREEN never accepts the parent."},
+    {"path": "hot/00_PASSMAP/PASS685_I7C1_RESEARCH_AMENDMENT_CONTRACT.json", "sha256": "6e29a18a81e820f53a5accd471cf367c625cd48537fa37094f6b17fa0b88b8e9", "upheld": "Whole-leaf research completed before code; numerical/initialization unknowns routed to the labelled private policy under the user rule (PASS723) with this impact record; no topology renumbering."},
+    {"path": "hot/00_PASSMAP/PASS724_I7C1_QUESTION_DISPOSITIONS.json", "sha256": "cb702416bf09cfb65eb7762b45c1be7c37359b298dd68ff587f9e88f9bec77b7", "upheld": "Q_TOP_FLOOR_HISTORY_WINDOW is closed for this leaf by the labelled history policy (lifetime from producer start, both sides, per-partner usage from reports, last 10 records); not claimed as original."},
+    {"path": "hot/00_PASSMAP/PASS709_I7C_TOPOLOGY_V5.json", "sha256": "1b87dd43b8fe17c1536a366e08ce834a829ac78d7eebec251d5cca9ab33184db", "upheld": "Leaf I7C-5B scope: actual qualifying result/counter/generation, typed observations, history totals/partner use, selected rank/reward origins from immutable settlement; excludes other I9 modes and rank-manufactured counters."}
+  ],
+  "inherited_bindings": [
+    {"path": "hot/00_PASSMAP/PASS418_COMBAT_ATTEMPT_START_RESULT_RUNTIME_DESIGN.json", "sha256": "494d24864e41297792cb1d5f3dbe029bf4b28d047535f2738b5ce57f1bd820c7"},
+    {"path": "hot/00_PASSMAP/PASS419_ASYNC_PVP_FAMILY_FOUNDATION_DESIGN.json", "sha256": "9a2106dce7179971ee43df39fdd8a14e6bc909edd920f2f325eb6fb2482262d6"},
+    {"path": "hot/00_PASSMAP/PASS420_PRIORITY_GAMEPLAY_MODE_BINDING_REGISTRY.json", "sha256": "0b23969fd918d674813d72d949c0fd9720634e0e0dda2df0dfe85b2b5505735a", "note": "Pass420 cites a 10-minute cooldown from help text; source data misc arena_cooldown 300 and ArenaWindow (lastMatchTime+300) win. Recorded as a source conflict, data selected."},
+    {"path": "hot/00_PASSMAP/PASS421_FINAL_GAMEPLAY_MODE_REGISTRY.json", "sha256": "451333300a1cb2022bf56016d2e1a319f9743330bfd2c63de7f26c520948a2e3"},
+    {"path": "hot/00_PASSMAP/PASS426_GLOBAL_LOCK_ORDER_AND_CYCLE_AUDIT.json", "sha256": "bfb53ada4fde3b32194ab5f1a935d3afbccef943a55ba5826fb4b8df04625ad7"},
+    {"path": "hot/00_PASSMAP/PASS723_I7C4C_PRIVATE_SERVER_POLICY_AUTHORIZATION.json", "sha256": "8eb6218d87544e57c96c2e435cedb06376d4e46ff3e6491d2d22a4783aacc353", "note": "User rule applied to 5B by precedent with its mandatory actions."},
+    {"path": "hot/00_PASSMAP/PASS728_I7C5A_POLICY.json", "sha256": "161fe48207a0523cab792c7dbfab1058baf5ddf782a37ce1056d1a8d38d82559", "note": "Consumed unchanged: START/Resolve/TerminalTx/CloseTx; TEMPLATE robots; campaign_type ARENA."}
+  ],
+  "scoped_amendments": [
+    {"owner": "Achievement (I7C-4B contract I7C4B_ACHIEVEMENT_TIER_FACTS)", "change": "Add a typed Top Floor streak producer qualifying source row 100001 (3/6/10 days); other 31 rows stay unavailable; same persistence, lock rank 620 and no reward/value grant.", "requalification": "4B marriage path unchanged; new 100001 native tests."},
+    {"owner": "I5 Mail", "change": "Add a narrow producer settlement-mail seam: one mail with grant attachments per (source kind, source key, recipient) inside the caller transaction, semantic receipt idempotent, namespace lock 610.", "requalification": "Existing mail tests unchanged; new idempotence/unknown-COMMIT tests."},
+    {"owner": "Content compiler", "change": "arena_coin settlement_activation ENABLED_R4; new top_floor catalog; new content revision.", "requalification": "Content generation policy, source oracles, all suites on the new revision."},
+    {"owner": "Ranking stock dispatcher (MID 301)", "change": "Serve rank_type 1 from TopFloor alongside existing 37.", "requalification": "Girls 37 path unchanged."}
+  ],
+  "downstream_consumers": ["I7C-4 full: Achievement 100001 producer and frame 120001004 origin", "1829 HISTORY ARENA family (gated until 5C/5D)", "Future arena shop spending arena_coin"],
+  "full4_closed": false
+}

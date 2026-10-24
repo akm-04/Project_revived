@@ -1,0 +1,41 @@
+{
+  "whole_parent": "Pass712 reused",
+  "status": "RESEARCH_COMPLETE",
+  "findings": [
+    {
+      "id": "SKILL_LEVEL_PATHS",
+      "source": [
+        "app/model/NormalHero.lua:getSkillLevelByID/getSkillForce/getExtraSkillLevel",
+        "app/model/SuperHero.lua:same",
+        "app/model/Pet.lua:getSkillLevelByID/getPetStarSkillLevel/getSkillForce"
+      ],
+      "finding": "Force uses derived raw slot levels; flat BUFF_SELF uses separately clamped getSkillLevelByID plus Hero extra levels. Pet star bonus affects clamp; no Hero extras applied to Pet. 3A SkillNumbers supplied effective levels are not canonical owner resolution. Materialize attr and force separately; preserve 3A primitive interface."
+    },
+    {
+      "id": "COLLECTION_VIEW",
+      "source": [
+        "app/model/NormalHero.lua:getWhiteAlbumAttr/getWhiteAlbumForce"
+      ],
+      "finding": "Ordinary foreign view has no album attrs/force; self uses own canonical Library; replay uses explicit target report collection with branch distinction. Do not inject viewer or target global collection into foreign display."
+    },
+    {
+      "id": "EQUIPMENT",
+      "source": [
+        "app/model/Item.lua:getAttr/getEnhanceEquipAttrByLevel/getFumoLev/getFumoAttr",
+        "app/model/NormalHero.lua:getJinjieEquipAttr/getEquipAttr",
+        "app/model/Pet.lua:getJinjieEquipAttr"
+      ],
+      "finding": "Normal/Super prior colors exclude awaken item, Pet includes all prior colors. Super equipment applies enhance rate, Fumo structural zero. Normal/Pet Fumo uses cumulative stages from raw points; reuse canonical CA4 threshold policy. Dorm house equipment contributes to equipment method."
+    },
+    {
+      "id": "OWNER_PORTS",
+      "classification": "IMPLEMENTATION_DECISION",
+      "finding": "Compose existing typed owner inputs within witnessed CoherentReadScope; exact same queryer, revision, instant, target and Hero state identity. No foreign SQL, nested transaction or stat durable owner. Missing owner/unknown does not become zero."
+    },
+    {
+      "id": "REMAINING_GATES",
+      "classification": "UNKNOWN",
+      "finding": "Full selected output qualification versus independent core closure must retain prior2F eligibility/2G Normal cap/2H actual origins/2I blood awakening/2J actual5E gates. Need explicit profiles and acceptance adjudication before plan freeze. Do not substitute storage fixtures for actual producer proof."
+    }
+  ]
+}

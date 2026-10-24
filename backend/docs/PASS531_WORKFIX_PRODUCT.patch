@@ -1,0 +1,479 @@
+--- pass530/internal/adapters/stockruntime/request_params.go
++++ pass531/internal/adapters/stockruntime/request_params.go
+@@ -0,0 +1,23 @@
++package stockruntime
++
++// onlyStockGameplayParams validates top-level command parameters while
++// allowing the fields Backend.lua injects into every ordinary stock HTTP
++// request. These fields are envelope/client metadata, not invented gameplay
++// command arguments. Nested gameplay objects must continue using their strict
++// command-local validators.
++func onlyStockGameplayParams(params map[string]any, allowed ...string) bool {
++	set := make(map[string]struct{}, len(allowed))
++	for _, k := range allowed {
++		set[k] = struct{}{}
++	}
++	for k := range params {
++		switch k {
++		case "mid", "token", "region", "v_", "app_v", "platform":
++			continue
++		}
++		if _, ok := set[k]; !ok {
++			return false
++		}
++	}
++	return true
++}
+--- pass530/internal/adapters/stockruntime/pet_dispatcher.go
++++ pass531/internal/adapters/stockruntime/pet_dispatcher.go
+@@ -51,7 +51,7 @@
+ 	}
+ 	switch req.Envelope.MID {
+ 	case 780:
+-		if len(req.Envelope.Params) != 0 {
++		if !onlyStockGameplayParams(req.Envelope.Params) {
+ 			return petBad("invalid_pet_roster")
+ 		}
+ 		_, pets, err := d.Service.Roster(ctx, actor)
+@@ -64,7 +64,7 @@
+ 		}
+ 		return httpedge.Response{HTTPStatus: http.StatusOK, Body: body}
+ 	case 781:
+-		if !onlyPetParams(req.Envelope.Params, "table_id") {
++		if !onlyStockGameplayParams(req.Envelope.Params, "table_id") {
+ 			return petBad("invalid_pet_summon")
+ 		}
+ 		tableID, err := requiredInt64(req.Envelope.Params, "table_id")
+@@ -81,7 +81,7 @@
+ 		}
+ 		return httpedge.Response{HTTPStatus: http.StatusOK, Body: body}
+ 	case 782:
+-		if !onlyPetParams(req.Envelope.Params, "pet_id") {
++		if !onlyStockGameplayParams(req.Envelope.Params, "pet_id") {
+ 			return petBad("invalid_pet_clean_cd")
+ 		}
+ 		petID, err := requiredInt64(req.Envelope.Params, "pet_id")
+@@ -100,7 +100,7 @@
+ 		}
+ 		return httpedge.Response{HTTPStatus: http.StatusOK, Body: map[string]any{"economy_": map[string]any{"crystal": crystal}}}
+ 	case 789:
+-		if !onlyPetParams(req.Envelope.Params, "pet_id") {
++		if !onlyStockGameplayParams(req.Envelope.Params, "pet_id") {
+ 			return petBad("invalid_pet_set_show")
+ 		}
+ 		petID, err := requiredInt64(req.Envelope.Params, "pet_id")
+@@ -112,7 +112,7 @@
+ 		}
+ 		return httpedge.Response{HTTPStatus: http.StatusOK, Body: map[string]any{}}
+ 	case 786: // PET_EVOLVE
+-		if !onlyPetParams(req.Envelope.Params, "pet_id") {
++		if !onlyStockGameplayParams(req.Envelope.Params, "pet_id") {
+ 			return petBad("invalid_pet_evolve")
+ 		}
+ 		petID, err := requiredPetInt64(req.Envelope.Params, "pet_id")
+@@ -124,7 +124,7 @@
+ 		}
+ 		return httpedge.Response{HTTPStatus: http.StatusOK, Body: map[string]any{}}
+ 	case 787: // PET_FEED
+-		if !onlyPetParams(req.Envelope.Params, "pet_id", "item_id", "item_num") {
++		if !onlyStockGameplayParams(req.Envelope.Params, "pet_id", "item_id", "item_num") {
+ 			return petBad("invalid_pet_feed")
+ 		}
+ 		petID, e1 := requiredPetInt64(req.Envelope.Params, "pet_id")
+@@ -138,7 +138,7 @@
+ 		}
+ 		return httpedge.Response{HTTPStatus: http.StatusOK, Body: map[string]any{}}
+ 	case 134: // PET_USE_EXP_ITEMS
+-		if !onlyPetParams(req.Envelope.Params, "pet_id", "items") {
++		if !onlyStockGameplayParams(req.Envelope.Params, "pet_id", "items") {
+ 			return petBad("invalid_pet_exp_items")
+ 		}
+ 		petID, err := requiredPetInt64(req.Envelope.Params, "pet_id")
+@@ -154,7 +154,7 @@
+ 		}
+ 		return httpedge.Response{HTTPStatus: http.StatusOK, Body: map[string]any{}}
+ 	case 791: // PET_UPGRADE_ALL_SKILL
+-		if !onlyPetParams(req.Envelope.Params, "pet_id", "skill_colors", "skill_counts") {
++		if !onlyStockGameplayParams(req.Envelope.Params, "pet_id", "skill_colors", "skill_counts") {
+ 			return petBad("invalid_pet_skills")
+ 		}
+ 		petID, err := requiredPetInt64(req.Envelope.Params, "pet_id")
+--- pass530/internal/adapters/stockruntime/pet_dispatcher_test.go
++++ pass531/internal/adapters/stockruntime/pet_dispatcher_test.go
+@@ -81,6 +81,27 @@
+ 	rows := resp.Body["pets"].([]any)
+ 	if len(rows) != 1 || rows[0].(map[string]any)["pet_id"] != int64(9) {
+ 		t.Fatalf("body=%#v", resp.Body)
++	}
++}
++
++func TestPetDispatcherAcceptsStockEnvelopeMetadataButRejectsUnknownGameplayField(t *testing.T) {
++	actor := actorForHTTP(t)
++	now := time.Unix(101, 0).UTC()
++	pet := character.Pet{PlayerID: actor.PlayerID, PetID: 9, TableID: 10030001, OriginTableID: 10030001, Star: 1, Level: 1, Exp: 0, Color: 1, Birthday: 1700000000, IsShow: true, Skills: character.DefaultPetSkillLevels(), CreationContentRevision: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", StateVersion: 1, CreatedAt: now, UpdatedAt: now}
++	d := PetDispatcher{Authority: httpAuthority{actor}, Service: &petServiceFake{pets: []character.Pet{pet}}}
++	req := env(780, nil, now)
++	req.Envelope.Params = map[string]any{
++		"mid": int64(780), "token": "bearer", "region": int64(1),
++		"v_": "1", "app_v": "1.164.0", "platform": int64(3),
++	}
++	resp := d.Dispatch(context.Background(), req)
++	if resp.HTTPStatus != 200 {
++		t.Fatalf("stock envelope metadata rejected: status=%d body=%#v", resp.HTTPStatus, resp.Body)
++	}
++	req.Envelope.Params["invented"] = true
++	resp = d.Dispatch(context.Background(), req)
++	if resp.HTTPStatus != 400 {
++		t.Fatalf("invented gameplay field accepted: status=%d body=%#v", resp.HTTPStatus, resp.Body)
+ 	}
+ }
+ 
+--- pass530/internal/adapters/stockruntime/hero_dispatcher.go
++++ pass531/internal/adapters/stockruntime/hero_dispatcher.go
+@@ -57,7 +57,7 @@
+ 		}
+ 		return httpedge.Response{HTTPStatus: http.StatusOK, Body: body}
+ 	case 52: // EVOLVE_HERO
+-		if !onlyHeroParams(req.Envelope.Params, "partner_id") {
++		if !onlyStockGameplayParams(req.Envelope.Params, "partner_id") {
+ 			return badHero("invalid_hero_evolve")
+ 		}
+ 		partnerID, err := requiredInt64(req.Envelope.Params, "partner_id")
+@@ -69,7 +69,7 @@
+ 		}
+ 		return httpedge.Response{HTTPStatus: http.StatusOK, Body: map[string]any{}}
+ 	case 55: // USE_EXP_ITEM
+-		if !onlyHeroParams(req.Envelope.Params, "item_id", "partner_id", "item_num", "total_num") {
++		if !onlyStockGameplayParams(req.Envelope.Params, "item_id", "partner_id", "item_num", "total_num") {
+ 			return badHero("invalid_hero_exp_item")
+ 		}
+ 		itemID, e1 := requiredInt64(req.Envelope.Params, "item_id")
+@@ -85,7 +85,7 @@
+ 		}
+ 		return httpedge.Response{HTTPStatus: http.StatusOK, Body: map[string]any{"item_id": itemID, "partner_exp": got.Exp, "total_num": got.Remaining[itemID]}}
+ 	case 63: // USE_EXP_ITEMS
+-		if !onlyHeroParams(req.Envelope.Params, "items", "partner_id") {
++		if !onlyStockGameplayParams(req.Envelope.Params, "items", "partner_id") {
+ 			return badHero("invalid_hero_exp_items")
+ 		}
+ 		partnerID, err := requiredInt64(req.Envelope.Params, "partner_id")
+@@ -101,7 +101,7 @@
+ 		}
+ 		return httpedge.Response{HTTPStatus: http.StatusOK, Body: map[string]any{}}
+ 	case 59: // STONE_SUMMON_HERO (implemented for CA2-3 diagnostics; production router remains unregistered)
+-		if !onlyHeroParams(req.Envelope.Params, "table_id", "stone", "stone_num") {
++		if !onlyStockGameplayParams(req.Envelope.Params, "table_id", "stone", "stone_num") {
+ 			return badHero("invalid_hero_summon")
+ 		}
+ 		tableID, e1 := requiredInt64(req.Envelope.Params, "table_id")
+@@ -120,7 +120,7 @@
+ 		}
+ 		return httpedge.Response{HTTPStatus: http.StatusOK, Body: body}
+ 	case 305: // SUMMON_SUPER_HERO / Vows (diagnostic only; not production-registered)
+-		if !onlyHeroParams(req.Envelope.Params, "table_id") {
++		if !onlyStockGameplayParams(req.Envelope.Params, "table_id") {
+ 			return badHero("invalid_vows_create")
+ 		}
+ 		tableID, err := requiredInt64(req.Envelope.Params, "table_id")
+@@ -137,7 +137,7 @@
+ 		}
+ 		return httpedge.Response{HTTPStatus: http.StatusOK, Body: map[string]any{"partner_info": partner}}
+ 	case 67: // LOAD_HERO_PIECES
+-		if len(req.Envelope.Params) != 0 {
++		if !onlyStockGameplayParams(req.Envelope.Params) {
+ 			return badHero("invalid_hero_pieces")
+ 		}
+ 		pieces, err := d.Service.HeroPieces(ctx, actor)
+--- pass530/internal/adapters/stockruntime/hero_ca2_3_test.go
++++ pass531/internal/adapters/stockruntime/hero_ca2_3_test.go
+@@ -88,3 +88,22 @@
+ 		t.Fatalf("invented MID305 field accepted: %+v", bad)
+ 	}
+ }
++
++func TestHeroDispatcherAcceptsStockEnvelopeMetadataButRejectsUnknownGameplayField(t *testing.T) {
++	svc := &ca23HeroService{}
++	d := HeroDispatcher{Authority: httpAuthority{actorForHTTP(t)}, Service: svc}
++	params := map[string]any{
++		"table_id": int64(1001), "stone": int64(4001), "stone_num": int64(10),
++		"mid": int64(59), "token": "bearer", "region": int64(1),
++		"v_": "1", "app_v": "1.164.0", "platform": int64(3),
++	}
++	r := d.Dispatch(context.Background(), heroReq(t, 59, params))
++	if r.HTTPStatus != 200 {
++		t.Fatalf("stock envelope metadata rejected: %+v", r)
++	}
++	params["invented"] = true
++	r = d.Dispatch(context.Background(), heroReq(t, 59, params))
++	if r.HTTPStatus != 400 {
++		t.Fatalf("invented gameplay field accepted: %+v", r)
++	}
++}
+--- pass530/internal/application/characterpet/service.go
++++ pass531/internal/application/characterpet/service.go
+@@ -21,7 +21,7 @@
+ 	SavePetRootFreeHatchTx(context.Context, tx.Tx, character.PetRoot, int64) error
+ 	InsertPetTx(context.Context, tx.Tx, character.Pet) error
+ 	FindPetByOriginTx(context.Context, tx.Queryer, identity.PlayerID, int64) (character.Pet, bool, error)
+-	LockPetByIDTx(context.Context, tx.Tx, identity.PlayerID, int64) (character.Pet, error)
++	LockPetByIDTx(context.Context, tx.Tx, identity.PlayerID, int64) (character.Pet, bool, error)
+ 	SavePetShowStateTx(context.Context, tx.Tx, character.Pet, int64) error
+ 	SavePetProgressionTx(context.Context, tx.Tx, character.Pet, int64) error
+ }
+--- pass530/internal/application/characterpet/progression.go
++++ pass531/internal/application/characterpet/progression.go
+@@ -220,8 +220,11 @@
+ 			out, err = decodeEvolveReceipt(prior)
+ 			return err
+ 		}
+-		pet, err := s.Store.LockPetByIDTx(txctx, scope.Tx, actor.PlayerID, petID)
+-		if err != nil {
++		pet, found, err := s.Store.LockPetByIDTx(txctx, scope.Tx, actor.PlayerID, petID)
++		if err != nil {
++			return err
++		}
++		if !found {
+ 			return ErrPetNotFound
+ 		}
+ 		// A waiter may have missed an uncommitted receipt before blocking on the
+@@ -335,8 +338,11 @@
+ 			out, err = decodeExpReceipt(prior)
+ 			return err
+ 		}
+-		pet, err := s.Store.LockPetByIDTx(txctx, scope.Tx, actor.PlayerID, petID)
+-		if err != nil {
++		pet, found, err := s.Store.LockPetByIDTx(txctx, scope.Tx, actor.PlayerID, petID)
++		if err != nil {
++			return err
++		}
++		if !found {
+ 			return ErrPetNotFound
+ 		}
+ 		if prior, ok, err := progressionReceiptReplayTx(txctx, s.Receipts, scope.Tx, id, fp); err != nil {
+@@ -473,8 +479,11 @@
+ 			out, err = decodeSkillReceipt(prior)
+ 			return err
+ 		}
+-		pet, err := s.Store.LockPetByIDTx(txctx, scope.Tx, actor.PlayerID, petID)
+-		if err != nil {
++		pet, found, err := s.Store.LockPetByIDTx(txctx, scope.Tx, actor.PlayerID, petID)
++		if err != nil {
++			return err
++		}
++		if !found {
+ 			return ErrPetNotFound
+ 		}
+ 		if prior, ok, err := progressionReceiptReplayTx(txctx, s.Receipts, scope.Tx, id, fp); err != nil {
+--- pass530/internal/application/characterpet/hatch.go
++++ pass531/internal/application/characterpet/hatch.go
+@@ -91,8 +91,11 @@
+ 		if err != nil {
+ 			return err
+ 		}
+-		pet, err := s.Store.LockPetByIDTx(txctx, scope.Tx, actor.PlayerID, petID)
+-		if err != nil {
++		pet, found, err := s.Store.LockPetByIDTx(txctx, scope.Tx, actor.PlayerID, petID)
++		if err != nil {
++			return err
++		}
++		if !found {
+ 			return ErrPetNotFound
+ 		}
+ 		result = HatchResult{PetID: petID, IsShow: true}
+@@ -199,8 +202,11 @@
+ 			}
+ 			return nil
+ 		}
+-		pet, err := s.Store.LockPetByIDTx(txctx, scope.Tx, actor.PlayerID, petID)
+-		if err != nil {
++		pet, found, err := s.Store.LockPetByIDTx(txctx, scope.Tx, actor.PlayerID, petID)
++		if err != nil {
++			return err
++		}
++		if !found {
+ 			return ErrPetNotFound
+ 		}
+ 		bound := rawOp
+--- pass530/internal/application/characterpet/ca3_2_test.go
++++ pass531/internal/application/characterpet/ca3_2_test.go
+@@ -61,9 +61,11 @@
+ }
+ 
+ type caStore struct {
+-	root      character.PetRoot
+-	byID      map[int64]character.Pet
+-	onLockPet func()
++	root       character.PetRoot
++	byID       map[int64]character.Pet
++	onLockPet  func()
++	lockErrors []error
++	lockCalls  int
+ }
+ 
+ func (s *caStore) ReadPetRoot(context.Context, identity.PlayerID) (character.PetRoot, error) {
+@@ -103,15 +105,20 @@
+ 	}
+ 	return character.Pet{}, false, nil
+ }
+-func (s *caStore) LockPetByIDTx(_ context.Context, _ tx.Tx, _ identity.PlayerID, id int64) (character.Pet, error) {
++func (s *caStore) LockPetByIDTx(_ context.Context, _ tx.Tx, _ identity.PlayerID, id int64) (character.Pet, bool, error) {
++	s.lockCalls++
+ 	if s.onLockPet != nil {
+ 		s.onLockPet()
+ 	}
++	if len(s.lockErrors) > 0 {
++		err := s.lockErrors[0]
++		s.lockErrors = s.lockErrors[1:]
++		if err != nil {
++			return character.Pet{}, false, err
++		}
++	}
+ 	p, ok := s.byID[id]
+-	if !ok {
+-		return character.Pet{}, errors.New("missing")
+-	}
+-	return p, nil
++	return p, ok, nil
+ }
+ func (s *caStore) SavePetShowStateTx(_ context.Context, _ tx.Tx, p character.Pet, _ int64) error {
+ 	s.byID[p.PetID] = p
+@@ -298,3 +305,39 @@
+ 		t.Fatal("deadline did not show Pet")
+ 	}
+ }
++
++func TestPetLockDefiniteAbortRetriesAndMissingRemainsSemantic(t *testing.T) {
++	svc, st, _, _, tm := caService(t)
++	actor := caActor(t)
++	tm.at = time.Unix(100, 0).UTC()
++	p, err := svc.Summon(context.Background(), actor, 10030001, caOp(t, "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa", 100))
++	if err != nil {
++		t.Fatal(err)
++	}
++	p.IsShow = true
++	st.byID[p.PetID] = p
++	st.lockCalls = 0
++	st.lockErrors = []error{tx.MarkDefiniteAbort(errors.New("serialization abort")), nil}
++	tm.at = time.Unix(101, 0).UTC()
++	if err := svc.SetShow(context.Background(), actor, p.PetID, caOp(t, "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb", 101)); err != nil {
++		t.Fatalf("definite abort was not retried: %v", err)
++	}
++	if st.lockCalls != 2 {
++		t.Fatalf("lock calls=%d want 2", st.lockCalls)
++	}
++
++	infra := errors.New("connection lost")
++	st.lockCalls = 0
++	st.lockErrors = []error{infra}
++	if err := svc.SetShow(context.Background(), actor, p.PetID, caOp(t, "cccccccc-cccc-4ccc-8ccc-cccccccccccc", 102)); !errors.Is(err, infra) {
++		t.Fatalf("infrastructure error masked as semantic result: %v", err)
++	}
++	if st.lockCalls != 1 {
++		t.Fatalf("ordinary infrastructure error unexpectedly retried: calls=%d", st.lockCalls)
++	}
++
++	st.lockErrors = nil
++	if err := svc.SetShow(context.Background(), actor, 9999, caOp(t, "dddddddd-dddd-4ddd-8ddd-dddddddddddd", 103)); !errors.Is(err, ErrPetNotFound) {
++		t.Fatalf("missing Pet did not map to ErrPetNotFound: %v", err)
++	}
++}
+--- pass530/internal/adapters/postgres/characterstore/pet.go
++++ pass531/internal/adapters/postgres/characterstore/pet.go
+@@ -195,11 +195,18 @@
+ 	}
+ 	return scanPet(q.QueryRow(ctx, characterqueries.ReadPetByID, int64(pid), petID))
+ }
+-func (Store) LockPetByIDTx(ctx context.Context, t tx.Tx, pid identity.PlayerID, petID int64) (character.Pet, error) {
++func (Store) LockPetByIDTx(ctx context.Context, t tx.Tx, pid identity.PlayerID, petID int64) (character.Pet, bool, error) {
+ 	if t == nil || !pid.Valid() || petID <= 0 {
+-		return character.Pet{}, errors.New("character store: invalid Pet lock")
+-	}
+-	return scanPet(t.QueryRow(ctx, characterqueries.LockPetByID, int64(pid), petID))
++		return character.Pet{}, false, errors.New("character store: invalid Pet lock")
++	}
++	p, err := scanPet(t.QueryRow(ctx, characterqueries.LockPetByID, int64(pid), petID))
++	if errors.Is(err, kernelstore.ErrNoRows) {
++		return character.Pet{}, false, nil
++	}
++	if err != nil {
++		return character.Pet{}, false, err
++	}
++	return p, true, nil
+ }
+ 
+ type PetBootstrapContributor struct{}
+--- pass530/internal/adapters/postgres/characterstore/pet_lock_test.go
++++ pass531/internal/adapters/postgres/characterstore/pet_lock_test.go
+@@ -0,0 +1,38 @@
++package characterstore
++
++import (
++	"context"
++	"errors"
++	"testing"
++
++	"gxb.local/backend/v2/internal/adapters/postgres/kernelstore"
++	"gxb.local/backend/v2/internal/domain/identity"
++	"gxb.local/backend/v2/internal/foundation/tx"
++)
++
++type petLockTestRow struct{ err error }
++
++func (r petLockTestRow) Scan(...any) error { return r.err }
++
++type petLockTestTx struct{ err error }
++
++func (t petLockTestTx) QueryRow(context.Context, string, ...any) tx.Row {
++	return petLockTestRow{err: t.err}
++}
++func (petLockTestTx) Exec(context.Context, string, ...any) (tx.CommandTag, error) {
++	return nil, errors.New("unexpected exec")
++}
++func (petLockTestTx) Commit(context.Context) error   { return nil }
++func (petLockTestTx) Rollback(context.Context) error { return nil }
++
++func TestLockPetByIDTxSeparatesMissingFromInfrastructureFailure(t *testing.T) {
++	_, found, err := (Store{}).LockPetByIDTx(context.Background(), petLockTestTx{err: kernelstore.ErrNoRows}, identity.PlayerID(7), 9)
++	if err != nil || found {
++		t.Fatalf("missing row classification: found=%v err=%v", found, err)
++	}
++	infra := errors.New("connection lost")
++	_, found, err = (Store{}).LockPetByIDTx(context.Background(), petLockTestTx{err: infra}, identity.PlayerID(7), 9)
++	if found || !errors.Is(err, infra) {
++		t.Fatalf("infrastructure error masked: found=%v err=%v", found, err)
++	}
++}
+--- pass530/tools/validate_ca3_3.py
++++ pass531/tools/validate_ca3_3.py
+@@ -44,8 +44,10 @@
+ # Three mutation families each need pre-lock and post-lock transaction receipt fences.
+ if prog.count('progressionReceiptReplayTx(') < 7: # helper definition + >=6 calls
+     errs.append('progression mutation receipt fence count too small')
+-pos_lock=prog.find('pet, err := s.Store.LockPetByIDTx')
+-if pos_lock < 0: errs.append('Pet lock missing from progression service')
++pos_lock=prog.find('pet, found, err := s.Store.LockPetByIDTx')
++if pos_lock < 0: errs.append('typed Pet lock/found contract missing from progression service')
++if prog.count('pet, found, err := s.Store.LockPetByIDTx') < 3 or prog.count('if !found {') < 3:
++    errs.append('progression Pet lock does not separate missing rows from infrastructure errors')
+ # EXP source lookup must occur after a lock in the useExp function.
+ use=prog[prog.find('func (s Service) useExp'):prog.find('func (s Service) UpgradeSkills')]
+ if use:
+@@ -64,6 +66,9 @@
+     'internal/application/characterpet/acquisition.go':('DecisionAt()','CreationContentRevision','StartedAt'),
+     'internal/application/characterpet/hatch.go':('DecisionAt()','CreationContentRevision'),
+ }.items(): need(rel,*toks)
++hatch=read('internal/application/characterpet/hatch.go')
++if hatch.count('pet, found, err := s.Store.LockPetByIDTx') < 2 or hatch.count('if !found {') < 2:
++    errs.append('timed Pet lock does not separate missing rows from infrastructure errors')
+ 
+ own=json.loads(read('docs/architecture/CANONICAL_TABLE_OWNERSHIP.json') or '{}')
+ for table in ('gxb_content_pet_progression','gxb_content_pet_skill_slots','gxb_content_pet_exp','gxb_content_pet_exp_items','gxb_content_pet_skill_books','gxb_content_pet_skill_slot_policy','gxb_content_pet_evolution','gxb_content_pet_progression_policy'):
+@@ -77,7 +82,7 @@
+ # Focused regression tests must exist for the contract-specific repairs.
+ need('internal/application/characterpet/progression_test.go','TestProgressionMutationsRecheckReceiptAfterPetLock','TestFeedLocksPetBeforeResolvingRationContent')
+ need('internal/application/i5/pet_progression_test.go','PreparePetExpDebitTx','ApplyPetExpDebitTx')
+-need('internal/adapters/stockruntime/pet_dispatcher_test.go','TestPetProgressionRejectsStringTypedIntegers')
++need('internal/adapters/stockruntime/pet_dispatcher_test.go','TestPetProgressionRejectsStringTypedIntegers','TestPetDispatcherAcceptsStockEnvelopeMetadataButRejectsUnknownGameplayField')
+ 
+ if errs:
+     print('CA3-3 VALIDATION: FAIL')

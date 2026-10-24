@@ -1,0 +1,912 @@
+{
+  "stage": "I7C-2G",
+  "status": "TARGETED_PREIMPLEMENTATION_IMPACT_REVIEW_COMPLETE",
+  "accepted_evidence_invalidated": [],
+  "new_durable_contracts": [
+    "I7C2G_ELEMENT_INPUT_LIFECYCLE"
+  ],
+  "basis": [
+    "Direct user entire2G lifecycle authorization",
+    "Whole2G source/current owner review completed",
+    "No edits to inherited active contract bytes"
+  ],
+  "c1_review": [
+    {
+      "path": "00_PASSMAP/PASS685_I7C1_PROVIDER_SCOPE_OWNERSHIP_CONTRACT.json",
+      "sha256": "73f4e5b8e8603a68380be31d4aec7a5f9f10ecd9b68246b56dfb350ae36ea943",
+      "disposition": "PRESERVED",
+      "rationale": "ElementEquipment owns versioned player root and per-Hero active four slots/levels and disjoint bound-backup map. Row ID, I5 item ID, Hero partner ID and template first ID remain distinct. No Element instance ID is invented."
+    },
+    {
+      "path": "00_PASSMAP/PASS685_I7C1_DELIVERY_ACCEPTANCE_CONTRACT.json",
+      "sha256": "992b38344aef6196e99cd2f17dc8810c2e962017db8de5c1a563890d54cf49a0",
+      "disposition": "PRESERVED",
+      "rationale": "Consume one qualified I5 Element stack only when first binding; unload/replacement retain prior item and level as inactive backup; reactivation transfers from backup without a second debit. A template occurs at most once in a Hero active+backup union; the same inventory template can independently bind to different Heroes using different actual stock."
+    },
+    {
+      "path": "00_PASSMAP/PASS685_I7C1_RESEARCH_AMENDMENT_CONTRACT.json",
+      "sha256": "6e29a18a81e820f53a5accd471cf367c625cd48537fa37094f6b17fa0b88b8e9",
+      "disposition": "PRESERVED",
+      "rationale": "Slot1 Core/SPCore; slots2..4 Normal. SPCore requires genuine Character OriginTableID match. Enhance bound active or backup item one level, cap10, with exact current-level source cost. Destroy one owned backpack item at level0 or one active/backup item at actual level, refund exact source rows through I5 once."
+    }
+  ],
+  "i7a4_obligations": [
+    {
+      "id": "I7A4-OWNERS_TX_LOCK",
+      "disposition": "PRESERVED",
+      "rationale": "Element retains live Character identity, typed owner/query/transaction seams, immutable revision/time, reference guard and receipt recovery. Active and backup differ; public/foreign/synthetic scopes are not conflated. No Social/Publication/media change; no new final-stat or parent acceptance. Existing consumer/parent obligations remain required.",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS700_I7C2G_DESIGN.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS700_I7C2G_OPERATION_TRACES.json"
+        }
+      ],
+      "prior_review_evidence": [
+        {
+          "path": "00_PASSMAP/PASS699_I7C2F_CONTRACT_IMPACT_REVIEW.json"
+        }
+      ]
+    },
+    {
+      "id": "I7A4-GENERATION_D11",
+      "disposition": "PRESERVED",
+      "rationale": "Element retains live Character identity, typed owner/query/transaction seams, immutable revision/time, reference guard and receipt recovery. Active and backup differ; public/foreign/synthetic scopes are not conflated. No Social/Publication/media change; no new final-stat or parent acceptance. Existing consumer/parent obligations remain required.",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS700_I7C2G_DESIGN.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS700_I7C2G_OPERATION_TRACES.json"
+        }
+      ],
+      "prior_review_evidence": [
+        {
+          "path": "00_PASSMAP/PASS699_I7C2F_CONTRACT_IMPACT_REVIEW.json"
+        }
+      ]
+    },
+    {
+      "id": "I7A4-TIME_QUOTA",
+      "disposition": "PRESERVED",
+      "rationale": "Element retains live Character identity, typed owner/query/transaction seams, immutable revision/time, reference guard and receipt recovery. Active and backup differ; public/foreign/synthetic scopes are not conflated. No Social/Publication/media change; no new final-stat or parent acceptance. Existing consumer/parent obligations remain required.",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS700_I7C2G_DESIGN.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS700_I7C2G_OPERATION_TRACES.json"
+        }
+      ],
+      "prior_review_evidence": [
+        {
+          "path": "00_PASSMAP/PASS699_I7C2F_CONTRACT_IMPACT_REVIEW.json"
+        }
+      ]
+    },
+    {
+      "id": "I7A4-NOTICE_ID_SOURCE",
+      "disposition": "PRESERVED",
+      "rationale": "Element retains live Character identity, typed owner/query/transaction seams, immutable revision/time, reference guard and receipt recovery. Active and backup differ; public/foreign/synthetic scopes are not conflated. No Social/Publication/media change; no new final-stat or parent acceptance. Existing consumer/parent obligations remain required.",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS700_I7C2G_DESIGN.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS700_I7C2G_OPERATION_TRACES.json"
+        }
+      ],
+      "prior_review_evidence": [
+        {
+          "path": "00_PASSMAP/PASS699_I7C2F_CONTRACT_IMPACT_REVIEW.json"
+        }
+      ]
+    },
+    {
+      "id": "I7A4-NULL_AND_WINDOW",
+      "disposition": "PRESERVED",
+      "rationale": "Element retains live Character identity, typed owner/query/transaction seams, immutable revision/time, reference guard and receipt recovery. Active and backup differ; public/foreign/synthetic scopes are not conflated. No Social/Publication/media change; no new final-stat or parent acceptance. Existing consumer/parent obligations remain required.",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS700_I7C2G_DESIGN.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS700_I7C2G_OPERATION_TRACES.json"
+        }
+      ],
+      "prior_review_evidence": [
+        {
+          "path": "00_PASSMAP/PASS699_I7C2F_CONTRACT_IMPACT_REVIEW.json"
+        }
+      ]
+    },
+    {
+      "id": "I7A4-READ_SNAPSHOT",
+      "disposition": "PRESERVED",
+      "rationale": "Element retains live Character identity, typed owner/query/transaction seams, immutable revision/time, reference guard and receipt recovery. Active and backup differ; public/foreign/synthetic scopes are not conflated. No Social/Publication/media change; no new final-stat or parent acceptance. Existing consumer/parent obligations remain required.",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS700_I7C2G_DESIGN.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS700_I7C2G_OPERATION_TRACES.json"
+        }
+      ],
+      "prior_review_evidence": [
+        {
+          "path": "00_PASSMAP/PASS699_I7C2F_CONTRACT_IMPACT_REVIEW.json"
+        }
+      ]
+    },
+    {
+      "id": "I7A4-DISCOVERY_ANCHOR",
+      "disposition": "PRESERVED",
+      "rationale": "Element retains live Character identity, typed owner/query/transaction seams, immutable revision/time, reference guard and receipt recovery. Active and backup differ; public/foreign/synthetic scopes are not conflated. No Social/Publication/media change; no new final-stat or parent acceptance. Existing consumer/parent obligations remain required.",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS700_I7C2G_DESIGN.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS700_I7C2G_OPERATION_TRACES.json"
+        }
+      ],
+      "prior_review_evidence": [
+        {
+          "path": "00_PASSMAP/PASS699_I7C2F_CONTRACT_IMPACT_REVIEW.json"
+        }
+      ]
+    },
+    {
+      "id": "I7A4-AUTH_BOOT_ACTIVATION",
+      "disposition": "PRESERVED",
+      "rationale": "Element retains live Character identity, typed owner/query/transaction seams, immutable revision/time, reference guard and receipt recovery. Active and backup differ; public/foreign/synthetic scopes are not conflated. No Social/Publication/media change; no new final-stat or parent acceptance. Existing consumer/parent obligations remain required.",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS700_I7C2G_DESIGN.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS700_I7C2G_OPERATION_TRACES.json"
+        }
+      ],
+      "prior_review_evidence": [
+        {
+          "path": "00_PASSMAP/PASS699_I7C2F_CONTRACT_IMPACT_REVIEW.json"
+        }
+      ]
+    },
+    {
+      "id": "I7A4-WIRE_GUARDS",
+      "disposition": "PRESERVED",
+      "rationale": "Element retains live Character identity, typed owner/query/transaction seams, immutable revision/time, reference guard and receipt recovery. Active and backup differ; public/foreign/synthetic scopes are not conflated. No Social/Publication/media change; no new final-stat or parent acceptance. Existing consumer/parent obligations remain required.",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS700_I7C2G_DESIGN.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS700_I7C2G_OPERATION_TRACES.json"
+        }
+      ],
+      "prior_review_evidence": [
+        {
+          "path": "00_PASSMAP/PASS699_I7C2F_CONTRACT_IMPACT_REVIEW.json"
+        }
+      ]
+    },
+    {
+      "id": "I7A4-CANONICAL_HINT_WORLD",
+      "disposition": "PRESERVED",
+      "rationale": "Element retains live Character identity, typed owner/query/transaction seams, immutable revision/time, reference guard and receipt recovery. Active and backup differ; public/foreign/synthetic scopes are not conflated. No Social/Publication/media change; no new final-stat or parent acceptance. Existing consumer/parent obligations remain required.",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS700_I7C2G_DESIGN.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS700_I7C2G_OPERATION_TRACES.json"
+        }
+      ],
+      "prior_review_evidence": [
+        {
+          "path": "00_PASSMAP/PASS699_I7C2F_CONTRACT_IMPACT_REVIEW.json"
+        }
+      ]
+    },
+    {
+      "id": "I7A4-POSTCOMMIT_RECOVERY",
+      "disposition": "PRESERVED",
+      "rationale": "Element retains live Character identity, typed owner/query/transaction seams, immutable revision/time, reference guard and receipt recovery. Active and backup differ; public/foreign/synthetic scopes are not conflated. No Social/Publication/media change; no new final-stat or parent acceptance. Existing consumer/parent obligations remain required.",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS700_I7C2G_DESIGN.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS700_I7C2G_OPERATION_TRACES.json"
+        }
+      ],
+      "prior_review_evidence": [
+        {
+          "path": "00_PASSMAP/PASS699_I7C2F_CONTRACT_IMPACT_REVIEW.json"
+        }
+      ]
+    },
+    {
+      "id": "I7A4-FUTURE_PROVIDER_EXTENSION",
+      "disposition": "PRESERVED",
+      "rationale": "Element retains live Character identity, typed owner/query/transaction seams, immutable revision/time, reference guard and receipt recovery. Active and backup differ; public/foreign/synthetic scopes are not conflated. No Social/Publication/media change; no new final-stat or parent acceptance. Existing consumer/parent obligations remain required.",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS700_I7C2G_DESIGN.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS700_I7C2G_OPERATION_TRACES.json"
+        }
+      ],
+      "prior_review_evidence": [
+        {
+          "path": "00_PASSMAP/PASS699_I7C2F_CONTRACT_IMPACT_REVIEW.json"
+        }
+      ]
+    }
+  ],
+  "i7a5a_obligations": [
+    {
+      "id": "I7A5A-EXACT_HANDLE_ROLE",
+      "disposition": "PRESERVED",
+      "rationale": "Element retains live Character identity, typed owner/query/transaction seams, immutable revision/time, reference guard and receipt recovery. Active and backup differ; public/foreign/synthetic scopes are not conflated. No Social/Publication/media change; no new final-stat or parent acceptance. Existing consumer/parent obligations remain required.",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS700_I7C2G_DESIGN.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS700_I7C2G_OPERATION_TRACES.json"
+        }
+      ],
+      "prior_review_evidence": [
+        {
+          "path": "00_PASSMAP/PASS699_I7C2F_CONTRACT_IMPACT_REVIEW.json"
+        }
+      ]
+    },
+    {
+      "id": "I7A5A-GUILD_JOIN_INCARNATION",
+      "disposition": "PRESERVED",
+      "rationale": "Element retains live Character identity, typed owner/query/transaction seams, immutable revision/time, reference guard and receipt recovery. Active and backup differ; public/foreign/synthetic scopes are not conflated. No Social/Publication/media change; no new final-stat or parent acceptance. Existing consumer/parent obligations remain required.",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS700_I7C2G_DESIGN.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS700_I7C2G_OPERATION_TRACES.json"
+        }
+      ],
+      "prior_review_evidence": [
+        {
+          "path": "00_PASSMAP/PASS699_I7C2F_CONTRACT_IMPACT_REVIEW.json"
+        }
+      ]
+    },
+    {
+      "id": "I7A5A-CANONICAL_SENDER_WIRE",
+      "disposition": "PRESERVED",
+      "rationale": "Element retains live Character identity, typed owner/query/transaction seams, immutable revision/time, reference guard and receipt recovery. Active and backup differ; public/foreign/synthetic scopes are not conflated. No Social/Publication/media change; no new final-stat or parent acceptance. Existing consumer/parent obligations remain required.",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS700_I7C2G_DESIGN.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS700_I7C2G_OPERATION_TRACES.json"
+        }
+      ],
+      "prior_review_evidence": [
+        {
+          "path": "00_PASSMAP/PASS699_I7C2F_CONTRACT_IMPACT_REVIEW.json"
+        }
+      ]
+    },
+    {
+      "id": "I7A5A-CALLER_TX_OBSERVATION",
+      "disposition": "PRESERVED",
+      "rationale": "Element retains live Character identity, typed owner/query/transaction seams, immutable revision/time, reference guard and receipt recovery. Active and backup differ; public/foreign/synthetic scopes are not conflated. No Social/Publication/media change; no new final-stat or parent acceptance. Existing consumer/parent obligations remain required.",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS700_I7C2G_DESIGN.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS700_I7C2G_OPERATION_TRACES.json"
+        }
+      ],
+      "prior_review_evidence": [
+        {
+          "path": "00_PASSMAP/PASS699_I7C2F_CONTRACT_IMPACT_REVIEW.json"
+        }
+      ]
+    },
+    {
+      "id": "I7A5A-BOUNDED_FANOUT_OUTCOME",
+      "disposition": "PRESERVED",
+      "rationale": "Element retains live Character identity, typed owner/query/transaction seams, immutable revision/time, reference guard and receipt recovery. Active and backup differ; public/foreign/synthetic scopes are not conflated. No Social/Publication/media change; no new final-stat or parent acceptance. Existing consumer/parent obligations remain required.",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS700_I7C2G_DESIGN.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS700_I7C2G_OPERATION_TRACES.json"
+        }
+      ],
+      "prior_review_evidence": [
+        {
+          "path": "00_PASSMAP/PASS699_I7C2F_CONTRACT_IMPACT_REVIEW.json"
+        }
+      ]
+    },
+    {
+      "id": "I7A5A-EPHEMERAL_NO_REPLAY",
+      "disposition": "PRESERVED",
+      "rationale": "Element retains live Character identity, typed owner/query/transaction seams, immutable revision/time, reference guard and receipt recovery. Active and backup differ; public/foreign/synthetic scopes are not conflated. No Social/Publication/media change; no new final-stat or parent acceptance. Existing consumer/parent obligations remain required.",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS700_I7C2G_DESIGN.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS700_I7C2G_OPERATION_TRACES.json"
+        }
+      ],
+      "prior_review_evidence": [
+        {
+          "path": "00_PASSMAP/PASS699_I7C2F_CONTRACT_IMPACT_REVIEW.json"
+        }
+      ]
+    },
+    {
+      "id": "I7A5A-FUTURE_PRODUCER_GATE",
+      "disposition": "PRESERVED",
+      "rationale": "Element retains live Character identity, typed owner/query/transaction seams, immutable revision/time, reference guard and receipt recovery. Active and backup differ; public/foreign/synthetic scopes are not conflated. No Social/Publication/media change; no new final-stat or parent acceptance. Existing consumer/parent obligations remain required.",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS700_I7C2G_DESIGN.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS700_I7C2G_OPERATION_TRACES.json"
+        }
+      ],
+      "prior_review_evidence": [
+        {
+          "path": "00_PASSMAP/PASS699_I7C2F_CONTRACT_IMPACT_REVIEW.json"
+        }
+      ]
+    }
+  ],
+  "i7a5b_obligations": [
+    {
+      "id": "I7A5B-FINITE_VARIANTS",
+      "disposition": "PRESERVED",
+      "rationale": "Element retains live Character identity, typed owner/query/transaction seams, immutable revision/time, reference guard and receipt recovery. Active and backup differ; public/foreign/synthetic scopes are not conflated. No Social/Publication/media change; no new final-stat or parent acceptance. Existing consumer/parent obligations remain required.",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS700_I7C2G_DESIGN.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS700_I7C2G_OPERATION_TRACES.json"
+        }
+      ],
+      "prior_review_evidence": [
+        {
+          "path": "00_PASSMAP/PASS699_I7C2F_CONTRACT_IMPACT_REVIEW.json"
+        }
+      ]
+    },
+    {
+      "id": "I7A5B-ORDINARY140_STRUCTURED_QUALIFIER",
+      "disposition": "PRESERVED",
+      "rationale": "Element retains live Character identity, typed owner/query/transaction seams, immutable revision/time, reference guard and receipt recovery. Active and backup differ; public/foreign/synthetic scopes are not conflated. No Social/Publication/media change; no new final-stat or parent acceptance. Existing consumer/parent obligations remain required.",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS700_I7C2G_DESIGN.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS700_I7C2G_OPERATION_TRACES.json"
+        }
+      ],
+      "prior_review_evidence": [
+        {
+          "path": "00_PASSMAP/PASS699_I7C2F_CONTRACT_IMPACT_REVIEW.json"
+        }
+      ]
+    },
+    {
+      "id": "I7A5B-CANONICAL_OWNER_ACTIVATION",
+      "disposition": "PRESERVED",
+      "rationale": "Element retains live Character identity, typed owner/query/transaction seams, immutable revision/time, reference guard and receipt recovery. Active and backup differ; public/foreign/synthetic scopes are not conflated. No Social/Publication/media change; no new final-stat or parent acceptance. Existing consumer/parent obligations remain required.",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS700_I7C2G_DESIGN.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS700_I7C2G_OPERATION_TRACES.json"
+        }
+      ],
+      "prior_review_evidence": [
+        {
+          "path": "00_PASSMAP/PASS699_I7C2F_CONTRACT_IMPACT_REVIEW.json"
+        }
+      ]
+    },
+    {
+      "id": "I7A5B-CAMP_AUDIENCE_AUTHORITY",
+      "disposition": "PRESERVED",
+      "rationale": "Element retains live Character identity, typed owner/query/transaction seams, immutable revision/time, reference guard and receipt recovery. Active and backup differ; public/foreign/synthetic scopes are not conflated. No Social/Publication/media change; no new final-stat or parent acceptance. Existing consumer/parent obligations remain required.",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS700_I7C2G_DESIGN.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS700_I7C2G_OPERATION_TRACES.json"
+        }
+      ],
+      "prior_review_evidence": [
+        {
+          "path": "00_PASSMAP/PASS699_I7C2F_CONTRACT_IMPACT_REVIEW.json"
+        }
+      ]
+    },
+    {
+      "id": "I7A5B-REFERENCE_NAMESPACE",
+      "disposition": "PRESERVED",
+      "rationale": "Element retains live Character identity, typed owner/query/transaction seams, immutable revision/time, reference guard and receipt recovery. Active and backup differ; public/foreign/synthetic scopes are not conflated. No Social/Publication/media change; no new final-stat or parent acceptance. Existing consumer/parent obligations remain required.",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS700_I7C2G_DESIGN.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS700_I7C2G_OPERATION_TRACES.json"
+        }
+      ],
+      "prior_review_evidence": [
+        {
+          "path": "00_PASSMAP/PASS699_I7C2F_CONTRACT_IMPACT_REVIEW.json"
+        }
+      ]
+    },
+    {
+      "id": "I7A5B-SCOPED_PARENT_ROLLUP",
+      "disposition": "PRESERVED",
+      "rationale": "Element retains live Character identity, typed owner/query/transaction seams, immutable revision/time, reference guard and receipt recovery. Active and backup differ; public/foreign/synthetic scopes are not conflated. No Social/Publication/media change; no new final-stat or parent acceptance. Existing consumer/parent obligations remain required.",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS700_I7C2G_DESIGN.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS700_I7C2G_OPERATION_TRACES.json"
+        }
+      ],
+      "prior_review_evidence": [
+        {
+          "path": "00_PASSMAP/PASS699_I7C2F_CONTRACT_IMPACT_REVIEW.json"
+        }
+      ]
+    },
+    {
+      "id": "I7A5B-WIRE_NAMESPACE_AND_UNKNOWN_PRODUCER",
+      "disposition": "PRESERVED",
+      "rationale": "Element retains live Character identity, typed owner/query/transaction seams, immutable revision/time, reference guard and receipt recovery. Active and backup differ; public/foreign/synthetic scopes are not conflated. No Social/Publication/media change; no new final-stat or parent acceptance. Existing consumer/parent obligations remain required.",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS700_I7C2G_DESIGN.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS700_I7C2G_OPERATION_TRACES.json"
+        }
+      ],
+      "prior_review_evidence": [
+        {
+          "path": "00_PASSMAP/PASS699_I7C2F_CONTRACT_IMPACT_REVIEW.json"
+        }
+      ]
+    },
+    {
+      "id": "I7A5B-LEXICAL_NUMERIC_UNICODE",
+      "disposition": "PRESERVED",
+      "rationale": "Element retains live Character identity, typed owner/query/transaction seams, immutable revision/time, reference guard and receipt recovery. Active and backup differ; public/foreign/synthetic scopes are not conflated. No Social/Publication/media change; no new final-stat or parent acceptance. Existing consumer/parent obligations remain required.",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS700_I7C2G_DESIGN.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS700_I7C2G_OPERATION_TRACES.json"
+        }
+      ],
+      "prior_review_evidence": [
+        {
+          "path": "00_PASSMAP/PASS699_I7C2F_CONTRACT_IMPACT_REVIEW.json"
+        }
+      ]
+    },
+    {
+      "id": "I7A5B-EDGE_BRIDGE",
+      "disposition": "PRESERVED",
+      "rationale": "Element retains live Character identity, typed owner/query/transaction seams, immutable revision/time, reference guard and receipt recovery. Active and backup differ; public/foreign/synthetic scopes are not conflated. No Social/Publication/media change; no new final-stat or parent acceptance. Existing consumer/parent obligations remain required.",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS700_I7C2G_DESIGN.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS700_I7C2G_OPERATION_TRACES.json"
+        }
+      ],
+      "prior_review_evidence": [
+        {
+          "path": "00_PASSMAP/PASS699_I7C2F_CONTRACT_IMPACT_REVIEW.json"
+        }
+      ]
+    },
+    {
+      "id": "I7A5B-OWNER_OBSERVATION",
+      "disposition": "PRESERVED",
+      "rationale": "Element retains live Character identity, typed owner/query/transaction seams, immutable revision/time, reference guard and receipt recovery. Active and backup differ; public/foreign/synthetic scopes are not conflated. No Social/Publication/media change; no new final-stat or parent acceptance. Existing consumer/parent obligations remain required.",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS700_I7C2G_DESIGN.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS700_I7C2G_OPERATION_TRACES.json"
+        }
+      ],
+      "prior_review_evidence": [
+        {
+          "path": "00_PASSMAP/PASS699_I7C2F_CONTRACT_IMPACT_REVIEW.json"
+        }
+      ]
+    },
+    {
+      "id": "I7A5B-CANONICAL_EVENT_AND_INACTIVE_CONSTRUCTOR",
+      "disposition": "PRESERVED",
+      "rationale": "Element retains live Character identity, typed owner/query/transaction seams, immutable revision/time, reference guard and receipt recovery. Active and backup differ; public/foreign/synthetic scopes are not conflated. No Social/Publication/media change; no new final-stat or parent acceptance. Existing consumer/parent obligations remain required.",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS700_I7C2G_DESIGN.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS700_I7C2G_OPERATION_TRACES.json"
+        }
+      ],
+      "prior_review_evidence": [
+        {
+          "path": "00_PASSMAP/PASS699_I7C2F_CONTRACT_IMPACT_REVIEW.json"
+        }
+      ]
+    }
+  ],
+  "obligations": [
+    {
+      "id": "CA-MATERIALIZE",
+      "disposition": "PRESERVED",
+      "rationale": "Element retains live Character identity, typed owner/query/transaction seams, immutable revision/time, reference guard and receipt recovery. Active and backup differ; public/foreign/synthetic scopes are not conflated. No Social/Publication/media change; no new final-stat or parent acceptance. Existing consumer/parent obligations remain required.",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS700_I7C2G_DESIGN.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS700_I7C2G_OPERATION_TRACES.json"
+        }
+      ],
+      "prior_review_evidence": [
+        {
+          "path": "00_PASSMAP/PASS699_I7C2F_CONTRACT_IMPACT_REVIEW.json"
+        }
+      ]
+    },
+    {
+      "id": "CA-IDENTITY",
+      "disposition": "PRESERVED",
+      "rationale": "Element retains live Character identity, typed owner/query/transaction seams, immutable revision/time, reference guard and receipt recovery. Active and backup differ; public/foreign/synthetic scopes are not conflated. No Social/Publication/media change; no new final-stat or parent acceptance. Existing consumer/parent obligations remain required.",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS700_I7C2G_DESIGN.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS700_I7C2G_OPERATION_TRACES.json"
+        }
+      ],
+      "prior_review_evidence": [
+        {
+          "path": "00_PASSMAP/PASS699_I7C2F_CONTRACT_IMPACT_REVIEW.json"
+        }
+      ]
+    },
+    {
+      "id": "CA-EQUIPMENT",
+      "disposition": "PRESERVED",
+      "rationale": "Element retains live Character identity, typed owner/query/transaction seams, immutable revision/time, reference guard and receipt recovery. Active and backup differ; public/foreign/synthetic scopes are not conflated. No Social/Publication/media change; no new final-stat or parent acceptance. Existing consumer/parent obligations remain required.",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS700_I7C2G_DESIGN.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS700_I7C2G_OPERATION_TRACES.json"
+        }
+      ],
+      "prior_review_evidence": [
+        {
+          "path": "00_PASSMAP/PASS699_I7C2F_CONTRACT_IMPACT_REVIEW.json"
+        }
+      ]
+    },
+    {
+      "id": "CA-REFERENCE-GUARDS",
+      "disposition": "PRESERVED",
+      "rationale": "Element retains live Character identity, typed owner/query/transaction seams, immutable revision/time, reference guard and receipt recovery. Active and backup differ; public/foreign/synthetic scopes are not conflated. No Social/Publication/media change; no new final-stat or parent acceptance. Existing consumer/parent obligations remain required.",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS700_I7C2G_DESIGN.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS700_I7C2G_OPERATION_TRACES.json"
+        }
+      ],
+      "prior_review_evidence": [
+        {
+          "path": "00_PASSMAP/PASS699_I7C2F_CONTRACT_IMPACT_REVIEW.json"
+        }
+      ]
+    },
+    {
+      "id": "CA-PRACTICE",
+      "disposition": "PRESERVED",
+      "rationale": "Element retains live Character identity, typed owner/query/transaction seams, immutable revision/time, reference guard and receipt recovery. Active and backup differ; public/foreign/synthetic scopes are not conflated. No Social/Publication/media change; no new final-stat or parent acceptance. Existing consumer/parent obligations remain required.",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS700_I7C2G_DESIGN.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS700_I7C2G_OPERATION_TRACES.json"
+        }
+      ],
+      "prior_review_evidence": [
+        {
+          "path": "00_PASSMAP/PASS699_I7C2F_CONTRACT_IMPACT_REVIEW.json"
+        }
+      ]
+    },
+    {
+      "id": "CA-APPEARANCE",
+      "disposition": "PRESERVED",
+      "rationale": "Element retains live Character identity, typed owner/query/transaction seams, immutable revision/time, reference guard and receipt recovery. Active and backup differ; public/foreign/synthetic scopes are not conflated. No Social/Publication/media change; no new final-stat or parent acceptance. Existing consumer/parent obligations remain required.",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS700_I7C2G_DESIGN.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS700_I7C2G_OPERATION_TRACES.json"
+        }
+      ],
+      "prior_review_evidence": [
+        {
+          "path": "00_PASSMAP/PASS699_I7C2F_CONTRACT_IMPACT_REVIEW.json"
+        }
+      ]
+    },
+    {
+      "id": "CA8-COHERENT-SCOPE",
+      "disposition": "PRESERVED",
+      "rationale": "Element retains live Character identity, typed owner/query/transaction seams, immutable revision/time, reference guard and receipt recovery. Active and backup differ; public/foreign/synthetic scopes are not conflated. No Social/Publication/media change; no new final-stat or parent acceptance. CA8 input requires witnessed coherent scope and unavailable is never zero.",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS700_I7C2G_DESIGN.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS700_I7C2G_OPERATION_TRACES.json"
+        }
+      ],
+      "prior_review_evidence": [
+        {
+          "path": "00_PASSMAP/PASS699_I7C2F_CONTRACT_IMPACT_REVIEW.json"
+        }
+      ]
+    },
+    {
+      "id": "CA8-OWNED",
+      "disposition": "PRESERVED",
+      "rationale": "Element retains live Character identity, typed owner/query/transaction seams, immutable revision/time, reference guard and receipt recovery. Active and backup differ; public/foreign/synthetic scopes are not conflated. No Social/Publication/media change; no new final-stat or parent acceptance. CA8 input requires witnessed coherent scope and unavailable is never zero.",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS700_I7C2G_DESIGN.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS700_I7C2G_OPERATION_TRACES.json"
+        }
+      ],
+      "prior_review_evidence": [
+        {
+          "path": "00_PASSMAP/PASS699_I7C2F_CONTRACT_IMPACT_REVIEW.json"
+        }
+      ]
+    },
+    {
+      "id": "CA8-BORROWED",
+      "disposition": "PRESERVED",
+      "rationale": "Element retains live Character identity, typed owner/query/transaction seams, immutable revision/time, reference guard and receipt recovery. Active and backup differ; public/foreign/synthetic scopes are not conflated. No Social/Publication/media change; no new final-stat or parent acceptance. CA8 input requires witnessed coherent scope and unavailable is never zero.",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS700_I7C2G_DESIGN.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS700_I7C2G_OPERATION_TRACES.json"
+        }
+      ],
+      "prior_review_evidence": [
+        {
+          "path": "00_PASSMAP/PASS699_I7C2F_CONTRACT_IMPACT_REVIEW.json"
+        }
+      ]
+    },
+    {
+      "id": "CA8-SYNTHETIC",
+      "disposition": "PRESERVED",
+      "rationale": "Element retains live Character identity, typed owner/query/transaction seams, immutable revision/time, reference guard and receipt recovery. Active and backup differ; public/foreign/synthetic scopes are not conflated. No Social/Publication/media change; no new final-stat or parent acceptance. CA8 input requires witnessed coherent scope and unavailable is never zero.",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS700_I7C2G_DESIGN.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS700_I7C2G_OPERATION_TRACES.json"
+        }
+      ],
+      "prior_review_evidence": [
+        {
+          "path": "00_PASSMAP/PASS699_I7C2F_CONTRACT_IMPACT_REVIEW.json"
+        }
+      ]
+    },
+    {
+      "id": "CA8-PUBLIC",
+      "disposition": "PRESERVED",
+      "rationale": "Element retains live Character identity, typed owner/query/transaction seams, immutable revision/time, reference guard and receipt recovery. Active and backup differ; public/foreign/synthetic scopes are not conflated. No Social/Publication/media change; no new final-stat or parent acceptance. CA8 input requires witnessed coherent scope and unavailable is never zero.",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS700_I7C2G_DESIGN.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS700_I7C2G_OPERATION_TRACES.json"
+        }
+      ],
+      "prior_review_evidence": [
+        {
+          "path": "00_PASSMAP/PASS699_I7C2F_CONTRACT_IMPACT_REVIEW.json"
+        }
+      ]
+    },
+    {
+      "id": "CA8-BATTLE",
+      "disposition": "PRESERVED",
+      "rationale": "Element retains live Character identity, typed owner/query/transaction seams, immutable revision/time, reference guard and receipt recovery. Active and backup differ; public/foreign/synthetic scopes are not conflated. No Social/Publication/media change; no new final-stat or parent acceptance. CA8 input requires witnessed coherent scope and unavailable is never zero.",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS700_I7C2G_DESIGN.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS700_I7C2G_OPERATION_TRACES.json"
+        }
+      ],
+      "prior_review_evidence": [
+        {
+          "path": "00_PASSMAP/PASS699_I7C2F_CONTRACT_IMPACT_REVIEW.json"
+        }
+      ]
+    },
+    {
+      "id": "CA8-MODE-GUILD",
+      "disposition": "PRESERVED",
+      "rationale": "Element retains live Character identity, typed owner/query/transaction seams, immutable revision/time, reference guard and receipt recovery. Active and backup differ; public/foreign/synthetic scopes are not conflated. No Social/Publication/media change; no new final-stat or parent acceptance. CA8 input requires witnessed coherent scope and unavailable is never zero.",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS700_I7C2G_DESIGN.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS700_I7C2G_OPERATION_TRACES.json"
+        }
+      ],
+      "prior_review_evidence": [
+        {
+          "path": "00_PASSMAP/PASS699_I7C2F_CONTRACT_IMPACT_REVIEW.json"
+        }
+      ]
+    },
+    {
+      "id": "CA8-AVAILABILITY",
+      "disposition": "PRESERVED",
+      "rationale": "Element retains live Character identity, typed owner/query/transaction seams, immutable revision/time, reference guard and receipt recovery. Active and backup differ; public/foreign/synthetic scopes are not conflated. No Social/Publication/media change; no new final-stat or parent acceptance. CA8 input requires witnessed coherent scope and unavailable is never zero.",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS700_I7C2G_DESIGN.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS700_I7C2G_OPERATION_TRACES.json"
+        }
+      ],
+      "prior_review_evidence": [
+        {
+          "path": "00_PASSMAP/PASS699_I7C2F_CONTRACT_IMPACT_REVIEW.json"
+        }
+      ]
+    },
+    {
+      "id": "CA-SUPERSESSION",
+      "disposition": "PRESERVED",
+      "rationale": "Element retains live Character identity, typed owner/query/transaction seams, immutable revision/time, reference guard and receipt recovery. Active and backup differ; public/foreign/synthetic scopes are not conflated. No Social/Publication/media change; no new final-stat or parent acceptance. Existing consumer/parent obligations remain required.",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS700_I7C2G_DESIGN.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS700_I7C2G_OPERATION_TRACES.json"
+        }
+      ],
+      "prior_review_evidence": [
+        {
+          "path": "00_PASSMAP/PASS699_I7C2F_CONTRACT_IMPACT_REVIEW.json"
+        }
+      ]
+    },
+    {
+      "id": "CA-PARENT-EXIT",
+      "disposition": "PRESERVED",
+      "rationale": "Element retains live Character identity, typed owner/query/transaction seams, immutable revision/time, reference guard and receipt recovery. Active and backup differ; public/foreign/synthetic scopes are not conflated. No Social/Publication/media change; no new final-stat or parent acceptance. Existing consumer/parent obligations remain required.",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS700_I7C2G_DESIGN.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS700_I7C2G_OPERATION_TRACES.json"
+        }
+      ],
+      "prior_review_evidence": [
+        {
+          "path": "00_PASSMAP/PASS699_I7C2F_CONTRACT_IMPACT_REVIEW.json"
+        }
+      ]
+    },
+    {
+      "id": "CA-WHITE-ALBUM",
+      "disposition": "PRESERVED",
+      "rationale": "Element retains live Character identity, typed owner/query/transaction seams, immutable revision/time, reference guard and receipt recovery. Active and backup differ; public/foreign/synthetic scopes are not conflated. No Social/Publication/media change; no new final-stat or parent acceptance. Existing consumer/parent obligations remain required.",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS700_I7C2G_DESIGN.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS700_I7C2G_OPERATION_TRACES.json"
+        }
+      ],
+      "prior_review_evidence": [
+        {
+          "path": "00_PASSMAP/PASS699_I7C2F_CONTRACT_IMPACT_REVIEW.json"
+        }
+      ]
+    },
+    {
+      "id": "CA-BOOKMARK",
+      "disposition": "PRESERVED",
+      "rationale": "Element retains live Character identity, typed owner/query/transaction seams, immutable revision/time, reference guard and receipt recovery. Active and backup differ; public/foreign/synthetic scopes are not conflated. No Social/Publication/media change; no new final-stat or parent acceptance. Existing consumer/parent obligations remain required.",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS700_I7C2G_DESIGN.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS700_I7C2G_OPERATION_TRACES.json"
+        }
+      ],
+      "prior_review_evidence": [
+        {
+          "path": "00_PASSMAP/PASS699_I7C2F_CONTRACT_IMPACT_REVIEW.json"
+        }
+      ]
+    }
+  ],
+  "requalification": [
+    "New54 fresh/populated53->54 upgrade/backfill repeat/restore",
+    "Character FreshFacet/MID1/roster and stable reference race",
+    "All5 strict commands/values/replay/admission/UNKNOWN/process",
+    "Content30th catalog exact compiler/active/current metadata/ownership",
+    "2F affected composition regression, no full2F promotion"
+  ]
+}

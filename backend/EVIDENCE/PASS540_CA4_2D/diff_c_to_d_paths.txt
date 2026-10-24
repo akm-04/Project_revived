@@ -1,0 +1,7 @@
+Only in ca4_2a_work/backend/EVIDENCE: PASS540_CA4_2D
+Files ca4_2c_parent_exact/cmd/gxb-api/main_postgres.go and ca4_2a_work/backend/cmd/gxb-api/main_postgres.go differ
+Files ca4_2c_parent_exact/internal/adapters/stockruntime/hero_ca2_3_test.go and ca4_2a_work/backend/internal/adapters/stockruntime/hero_ca2_3_test.go differ
+Only in ca4_2a_work/backend/internal/adapters/stockruntime: hero_ca4_2_test.go
+Files ca4_2c_parent_exact/internal/adapters/stockruntime/hero_dispatcher.go and ca4_2a_work/backend/internal/adapters/stockruntime/hero_dispatcher.go differ
+Only in ca4_2a_work/backend/internal/archguard: ca4_2_contract_test.go
+Only in ca4_2a_work/backend/tools: validate_ca4_2d.py

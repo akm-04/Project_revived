@@ -1,0 +1,6 @@
+=== PASS591 CA7-4 FINAL COMPATIBILITY_COPY_ONLY focused race ===
+2026-09-20T10:53:54Z
+ok  	gxb.local/backend/v2/internal/application/characterhero	(cached)
+ok  	gxb.local/backend/v2/internal/adapters/stockruntime	(cached)
+ok  	gxb.local/backend/v2/internal/adapters/postgres/characterstore	(cached)
+ok  	gxb.local/backend/v2/internal/foundation/replaycatalog	(cached)

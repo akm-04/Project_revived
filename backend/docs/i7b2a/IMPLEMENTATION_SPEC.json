@@ -1,0 +1,151 @@
+{
+  "schema_version": 1,
+  "pass": "663.0",
+  "spec_id": "I7B2A_IMPLEMENTATION_V1",
+  "node": "I7B-2A",
+  "full_node_path": "ROOT/I7/I7B/I7B-2/I7B-2A",
+  "status": "FROZEN_RESEARCH_DESIGN_NOT_PRODUCT_IMPLEMENTED",
+  "research_complete": true,
+  "preimplementation_reality_green": true,
+  "implementation_authorized": false,
+  "implementation_started": false,
+  "backend_baseline": {
+    "role": "ACCEPTED_AND_UNCHANGED_WORKING_BACKEND",
+    "filename": "gxb-backend-v2-v0.100.1-pass661-i7a-accepted.zip",
+    "sha256": "03164b1dcaecc43e5ca1af55af51b95bd8dd8d15562de4585c4af18e68d956c9",
+    "bytes": 5735308
+  },
+  "source": {
+    "archive": "all-assest-rechecked-1.zip",
+    "sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+    "parent_evidence": "00_PASSMAP/PASS663_I7B2_RESEARCH/COVERAGE.json",
+    "leaf_ledger": "00_PASSMAP/PASS663_I7B2A_RESEARCH/SOURCE_CODE_LEDGER.json",
+    "limit": "Source/staticacceptedcode + scopedpastcorroboration, no originalserver/newnativeclientruntimeproof"
+  },
+  "inherits": [
+    "I7B1_ARCHITECTURE_PROVIDER",
+    "I7B1_WIRE_PRIVACY_POLICY",
+    "I7B1_TRANSACTION_REFERENCE_REPLAY",
+    "I7B1_MEDIA_FRESHNESS",
+    "I7B1_ACCEPTANCE_EXIT",
+    "I7A1_PHASE_ARCHITECTURE_CONTRACT",
+    "I7A1_TRANSACTION_LOCK_EFFECT_CONTRACT",
+    "I7A1_MIGRATION_RESTORE_PROOF_CONTRACT",
+    "D02",
+    "D03",
+    "D04",
+    "D10",
+    "D11",
+    "D14"
+  ],
+  "scope": "Stock-invisible durablePublicProfile foundation/ownerreadinterfaces only; no MIDactivation or newpublicDTO/compiler/projection/media/feedback/Characterproductcode",
+  "schema": {
+    "table": "player_public_profile_roots",
+    "owner": "public-profile",
+    "columns": {
+      "player_id": "bigintPK referencesplayers(player_id) defaultNO ACTION; no newhard-deleteworkflow",
+      "intro": "textNOTNULL defaultempty; char_length<=40; PGUTF8domain validation",
+      "show_type_ids": "bigint[]NOTNULL defaultempty; one-dimensional/one-basedor empty, noNULLmembers, cardinality<=4, subset1001..1011, uniqueness",
+      "hide_subtypes": "smallint[]NOTNULL defaultempty; one-dimensional/one-basedor empty,noNULLmembers, subset2/4 cardinality<=2, uniqueness",
+      "share_switch": "smallintNOTNULL default0 constrained0/1",
+      "is_first_time": "smallintNOTNULL default0 constrained0/1",
+      "state_version": "bigintNOTNULL positive; persistedversion0 forbidden",
+      "policy_version": "textNOTNULL exactvalidatedprofilepolicy",
+      "created_at": "timestamptzNOTNULL durableUTCrootcreation",
+      "updated_at": "timestamptzNOTNULL >=created_at"
+    },
+    "constraints": "SQL+domain validation. Array uniqueness atbounded4/2 canusepairwiseCHECKs/no genericSQLfunction or newrank. Emptyarrays distinctfromNULL. PKname player_public_profile_roots_pkey exactlymatchesCreationFence.",
+    "absence_fence": "I4/playerroot315 +PKunique before391 discovery. MissingFORUPDATErowalone isnotfence. No duplicateIDallocator; canonicalPIDPK.",
+    "migration": "Nextunused00040_i7b2a_public_profile_foundation.sql afteractualhighwater39; recheckatimplementation; forward-only. No backfill/readtouch, no DOWN.",
+    "ownership": "Newtablequeriesonly internal/adapters/postgres/publicprofilestore/. Canonicalownership registry addsone owner; noforeignSQLexception. ExistingI5read staysinsidei5store. InlineownerSQL allowedbyacceptedSocial pattern; no newcompiler/querygeneratorrequired forroot.",
+    "historical_lock_fix": "On newcandidate appendexactaccepted39hash thennew40 to cumulative lock; preservealloldmigrationbytes andsuppliedacceptedarchive.",
+    "future_facts_excluded": [
+      "showcaseassetrefchildren",
+      "bookmark",
+      "feedbackobjects",
+      "avatarblobref",
+      "metricvalues",
+      "Playername/avatar/frame/level/functions/creationduplicates"
+    ]
+  },
+  "policy": {
+    "policy_version": "I7B_PUBLIC_V1",
+    "source_binding": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+    "classification": "IMPLEMENTATION_DECISION_APPLYING_FROZEN_CONTRACT_AND_APPROVED_CP185_PLAN",
+    "intro": "UTF8<=40Unicode scalar values;NUL rejectedbecause PostgreSQLtext cannotstoreit; actualmoderation requiredat2B consumer, no unmoderatedHTTProute in2A",
+    "show_ids": "Ordered0..4 uniqueIDs1001..1011; IDsstoredonly, nometrics/materializedcounts. Qualificationofselectedmetric response belongs2B/6.",
+    "hide_ids": "Canonicalunique subset2/4;max2; values sortedforstablecodec/eq. Current sourcepickerskip1/3 verifiedCP185.",
+    "share_first_flags": "Bothdefault0; storedreadfields0/1 withno writecommandhere. Existingrowflags preservedwhenassigningactual3preferences. No read-side guideack/toggle orbootstrapfacts duplicate.",
+    "absence": "Present=false/Version0/defaultemptyvalues andzerorowtimes areephemeral observation, never persistedzero-version or fakehistoricalcreatedrow. NonexistentcanonicalPlayerfailsatI4 admission, notfakeemptyplayer.",
+    "no_op": "No effectivechangeno rootrow/version/timewrite. A knowninternalattempt canstill recordcompletedno-op inexistingreceipt withPresent=false/Version0 result; replay cannotdelete/create newerroot.",
+    "time": "StableDBDecisionAt viaexistingTimedRunner; no dailyreset. ExistingUpdatedAt newer->staledecisionrejection, equalityversionordered; observationtime distinctfromdurableDecisionAt."
+  },
+  "ports": [
+    {
+      "port": "ReadSnapshotTx",
+      "owner": "PublicProfile",
+      "arguments": "caller tx.Scope, playerID, exactrevision, oneObservedAt",
+      "behavior": "Require witnessed RR/Serializable, validcaller/op/revision/time; readownerrow via callerQueryer. Missingrow returnsPresent=false/version0/defaultPreferences andzerorowtimestamps; no INSERT/touch/clock/ActiveRevision."
+    },
+    {
+      "port": "PreparePreferencesTx",
+      "owner": "PublicProfile",
+      "arguments": "caller tx.Tx and validated I4 playerroot.Root undercallerheld315",
+      "behavior": "Acquire391ownerrow afterallrequiredlowerkeys; captureexisting/absentstate andexactcallerTx inprivatepreparedtoken, copyarrays toavoidaliasing. No creationeffect."
+    },
+    {
+      "port": "ApplyPreferencesTx",
+      "owner": "PublicProfile",
+      "arguments": "samecallerTx, preparedtoken, validated desiredpreferencefields, stableDecisionAt",
+      "behavior": "Purevalidate40scalartext/noNUL, uniquesourceIDs<=4 andhide2/4; preserveunassignedfields/flags. Compareeffectivevalues: no-op->unchangedpresent/version orabsentversion0 withoutrow. Firstnon-noop->INSERTversion1/UTCnow under315+PKunique. Existingchange->CASexpectedversion+1, overflow/staleDecisionAt rejected, CreatedAt preserved. Never acquirelowerkeys orcommit/receipt independently."
+    },
+    {
+      "port": "PrepareRootTx/TouchForChildChangeTx",
+      "owner": "PublicProfile",
+      "arguments": "samepreparedroot andstableDecisionAt",
+      "behavior": "Use391 rootversion for laterownedchildchanges; no asset/media/feedbackplaceholder rows oractivechild writerhere. Later3/5 composeexistingqualifiedroot, alllowerprofilekeys before400+assetlocks. Source-required future seam; no additionalrank/proofkernel."
+    },
+    {
+      "port": "PublicPlayerBasisReader.ReadPublicPlayerBasisTx",
+      "owner": "I5 Player",
+      "arguments": "caller Queryer +playerID; consumer providesRR/Serializable scope",
+      "behavior": "Additiveowner-local read ofplayer_profiles JOINplayer_progression andsorted player_function_unlocks. ValidateexactplayerID/profile/progression andeachfunctionrowversion, sourcefact andopenedAt; canonicalCreatedAt retained. No I4directoryfallback, owntransaction, poolfallback, clock/contentdiscovery, story/guide/economy/fullbootstraploador refactor."
+    },
+    {
+      "port": "Receipt.Store/Reader/Resolver",
+      "owner": "existingKernelReceipt",
+      "arguments": "existing callertransaction/known internalopID andfingerprint",
+      "behavior": "Reuseexistinggxb_operation_receipts (not operation_receipts) andreceipt.New/PutTx/FindTx/Resolver; callercomposesoutcome withroot effect inone transaction. Presence validatesidentity/fingerprint/schema/actor/context/policy refs; absenceUNKNOWN. 2A qualifies atomicseam; actualMIDresultpayload/schema frozenin2B, no parallelreceiptframework."
+    }
+  ],
+  "transaction_contract": "Caller owns singleboundedtransaction, exactactor/session/context fenceusingexistingI5semantics then315roots; completecanonicalLockKeyplan orderedbeforefirstmutation. Pureports neverbegin/commit. SharedTimedRunner/receipt res Evidence decodedonlyafterdefinite/reconciledcommit, missingreceiptUNKNOWN, no resultleak. Captureonecontentrevision/readinstant andwitnessedRR/Serializable forcompositeobservations.",
+  "native_matrix": "00_PASSMAP/PASS663_I7B2A_NATIVE_GATE_PLAN.json",
+  "planned_changed_files": [
+    "migrations/00040_i7b2a_public_profile_foundation.sql",
+    "internal/domain/profile/doc.go",
+    "internal/domain/profile/preferences.go",
+    "internal/application/publicprofile/ports.go",
+    "internal/application/publicprofile/root.go",
+    "internal/application/publicprofile/locks.go",
+    "internal/application/publicprofile/reads.go",
+    "internal/adapters/postgres/publicprofilestore/store.go",
+    "internal/application/i5/public_player_basis.go",
+    "internal/adapters/postgres/i5store/public_player_basis.go",
+    "docs/architecture/CANONICAL_TABLE_OWNERSHIP.json",
+    "docs/architecture/CUMULATIVE_MIGRATION_LOCK.json",
+    "internal/integration/publicprofilefoundation/*_test.go",
+    "docs/i7b2a/design-and-gate records"
+  ],
+  "planned_unchanged": [
+    "acceptedmigrations1..39 bytes",
+    "privatei5 loadPlayerCore/bootstraploader",
+    "I4directory/sync/runtime",
+    "Socialownershipcommands/storebehavior",
+    "Characterasset owners/ref/retirement",
+    "existingcontentcompiler/revisions andpinnedtoolchain",
+    "HTTProute/strictJSON/stockruntimeAPI registration"
+  ],
+  "activation": "No profileMIDactivated. 2B/3/4/5/6 mustnot consumeunqualifiednewroot. FullI7B/E/W2 gates retained; rootcomponentproof isnotconsumerqualification.",
+  "receipt_result_boundary": "No speculativewire schema freezein2A; nativecomponentfixtureusesexistingreceipt API toprove root+outcomeatomicity andcommitclassification. 2B owns realcommand resultreceipt schema/qualifiedmetrics withoutsecondreceiptstore oradditionaltransaction.",
+  "design_only": true
+}

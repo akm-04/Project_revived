@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "pass": "455.0",
+  "batch": "R2B",
+  "status": "LOCAL_GREEN_FOUNDATION_REPAIR_CONTINUES",
+  "parent_backend": "Pass454/v0.52.0",
+  "finding": "RF-007",
+  "implemented": [
+    "transaction-aware required character bootstrap persistence contributor seam",
+    "I5 Player Core owner bootstrap moved out of i4store",
+    "fresh MID1 projection after same-tx owner persistence",
+    "declared MID1 projection claims with collision rejection",
+    "strict table ownership RF-007 allow-list removed"
+  ],
+  "local_validation": {
+    "go_test_all": "PASS_GO_1_23_DISPOSABLE_CLONE",
+    "go_vet_all": "PASS_GO_1_23_DISPOSABLE_CLONE",
+    "targeted_race": "PASS",
+    "ownership_strict": "PASS",
+    "r0_through_r2b_validators": "PASS",
+    "foundation_check": "EXPECTED_RED_ONLY_RF_015"
+  },
+  "deferred_live": [
+    "real PostgreSQL character creation/contributor rollback and concurrency proof at R7"
+  ],
+  "next": "R2C caller-owned Grant composition and actual creation fences",
+  "I6": "BLOCKED_UNTIL_R7_GREEN"
+}

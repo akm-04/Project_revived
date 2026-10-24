@@ -1,0 +1,17 @@
+{
+  "status": "CONCRETE_5B_TOP_FLOOR_PLAN_PREIMPLEMENTATION_GATE_PENDING",
+  "policy_id": "C5B_TOP_FLOOR_MODE_V1",
+  "base_product_commit": "be9aa9ff1a3c65dc1821a0b0bace3d9d39400b5d",
+  "steps": [
+    "S0 Commit research/policy/impact/plan/acceptance docs; cumulative checkpoint; owned authority 730 from 729 with contract index, HOT preseal, COLD --deep, sole-contract query, restore drill.",
+    "S1 Content: tools/top_floor_content.py compiles top_floor_catalog.json (arena_reward rows, misc constants, vip num_arena/arena_reset, refresh_cost buy_arena_cost, robot teams + robot_hero, random_name parts); compiler enables arena_coin; tools/check_i7c5b_source_oracle.py pins the source members/facts; Go catalog type and contentstore read.",
+    "S2 internal/domain/topfloor: GMT+8 day/cutoff/freeze policy, ladder entries, player state (tickets, buys, cooldown, best rank, defense, offered opponents), admission rules, rank swap, best-rank reward (Arena.getRankReward), daily reward lines, opponent bands, robot actor params/display, records, history accumulation, streak. Pure.",
+    "S3 migration 00065 + internal/adapters/postgres/topfloorstore: ladder roots/entries, player states, attempts-by-locator binding, records, day settlements and per-player rows, history totals and partner usage; ownership catalog entries.",
+    "S4 internal/application/topfloor service: Load (entry), PlayerList (refresh), SaveDefense, PreFight, Start (5A StartTx + async Resolve kick + same-START replay/terminal settle), BuyTicket, ResetTimer, Records, Report, RecordPlayerInfo, Formation, RankList, SealHero refusal, SettleDay (snapshot, mails, streak producer), Reconcile provider (pending days, abandoned attempts).",
+    "S5 I5 settlement-mail seam; S6 Achievement 100001 streak producer.",
+    "S7 stockruntime TopFloor dispatcher + MID 301 rank_type 1; wiring in cmd/gxb-api (combat launcher, key ring config, services) and gxb-worker reconcile provider.",
+    "S8 Tests: domain unit; native START/retry/settle vs robot and player, freeze/ticket/cooldown/buy/reset, swap and stale candidate, concurrent challenges, daily settlement idempotence + mail + frame + 100001 tiers, best-rank reward, records/report retention, abandoned-attempt reconcile, unknown COMMIT; stock process wire shapes; migration fresh/upgrade/restore.",
+    "S9 Freeze once, exact portable R2 qualification, reality check, evidence reconciliation, PassMap closure (owned 731)."
+  ],
+  "open_gates_after_5b": ["1829 history projection (needs 5C/5D)", "Arena shop spending", "ARENA_MODE variant", "Stock-client end-to-end", "Full I7C4"]
+}

@@ -1,0 +1,74 @@
+{
+  "schema_version": 1,
+  "pass": "522.0",
+  "phase": "CA3",
+  "internal_stage": "CA3-1",
+  "status": "PREIMPLEMENTATION_RESEARCH_GREEN_SEAL_CANDIDATE",
+  "backend_changed": false,
+  "implementation_changed": false,
+  "claims": [
+    {
+      "classification": "SOURCE_FACT",
+      "claim": "Collected Pet identity uses a persistent pet_id distinct from table_id, and current/awakened template identity is source-linked by first_table_id/awaken_table_id."
+    },
+    {
+      "classification": "SOURCE_FACT",
+      "claim": "MID1 embedded MID780 and explicit MID780 both hydrate the private Pet roster through Pet.populate; is_show is the effective client born/display fact."
+    },
+    {
+      "classification": "SOURCE_FACT",
+      "claim": "The current Pet table contains 54 rows in 27 base/awakened origin families and source initial stars include values 1 and 3."
+    },
+    {
+      "classification": "RUNTIME_OBSERVED",
+      "claim": "Exact Pass520 routes MID780 through LobbyDispatcher and its unopened-domain Wave-S projection returns pets=[]."
+    },
+    {
+      "classification": "RUNTIME_OBSERVED",
+      "claim": "Exact Pass520 reserves Character lock ranks 400/410 for Hero and leaves 420-599 unassigned; bootstrap/detail contributor and immutable content activation seams are already present."
+    },
+    {
+      "classification": "IMPLEMENTATION_DECISION",
+      "claim": "Use PetRoot rank 420, PetInstance rank 430, a per-player positive monotonic pet_id allocator beginning at 1, and UNIQUE(player_id, origin_table_id)."
+    },
+    {
+      "classification": "IMPLEMENTATION_DECISION",
+      "claim": "Persist birthday and is_show as passive Pet-core reload facts; do not create an independent is_born canonical state without stronger evidence."
+    },
+    {
+      "classification": "IMPLEMENTATION_DECISION",
+      "claim": "CA3-1 compiles/installs PET_CORE_CA3 content but upgraded databases may retain an older active revision; CA3-1 roster reads remain startable and future Pet creation/mutation fails closed without a qualified Pet-capable revision."
+    },
+    {
+      "classification": "DISPROVEN",
+      "claim": "MAX_PET_NUMBER=1 establishes owned Pet roster capacity."
+    },
+    {
+      "classification": "UNKNOWN",
+      "claim": "Original Pet allocator start and owned Pet roster capacity remain unrecovered."
+    },
+    {
+      "classification": "UNKNOWN",
+      "claim": "Starter Ross occurrence/free-hatch recovery semantics and independent original-server is_born meaning remain unrecovered and are outside CA3-1."
+    }
+  ],
+  "proof_scope": [
+    "Pass521 authority/design reread",
+    "exact current src_64 and v1.164 differential source reconciliation",
+    "exact Pass520 accepted-backend architecture inspection",
+    "content activation/upgrade-law reconciliation",
+    "independent preimplementation reality review"
+  ],
+  "not_proven": [
+    "CA3-1 code exists",
+    "migration 00016 executes",
+    "PostgreSQL CA3-1 behavior",
+    "stock-client live CA3 compatibility",
+    "CA3-2 acquisition/hatch semantics",
+    "CA3-3 progression semantics",
+    "CA3 phase acceptance",
+    "Character Asset parent acceptance",
+    "W2"
+  ],
+  "decision": "AUTHORIZE_CA3_1_IMPLEMENTATION_AFTER_PASS522_HOT_COLD_RESEARCH_SEAL"
+}

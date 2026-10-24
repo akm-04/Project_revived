@@ -1,0 +1,36 @@
+=== environment ===
+2026-09-08T06:05:02Z
+/usr/local/go/bin/go
+go version go1.23.2 linux/amd64
+/usr/bin/pg_config
+PostgreSQL 17.10 (Debian 17.10-0+deb13u1)
+=== canonical pins ===
+ecafe7641bc26c7ef91bdc5c21a5f71aa432bd162ed6fe1725004b501172a949  /mnt/data/gxb_r4d_recon/backend/go.mod
+efbf6753542d66e2fefcb2ab5e2ade7c9d28f2206a1113d1eb9568f2cb75808d  /mnt/data/gxb_r4d_recon/backend/go.sum
+a8844fbc8c3eb51c26ed00aec4cd5a5a9d647f849c6ead07bcc83ed24c4a7718  /mnt/data/gxb_r4d_recon/backend/.go-version
+=== migrations ===
+b67018f5ca39e5ad05379e9df16c52e1cda5eb54918ab0db14319609d76237e4  /mnt/data/gxb_r4d_recon/backend/migrations/00009_r4_immutable_content_revisions.sql
+305822dc72d03f6194332b38ee9cea9dba9223282bd8ac75c42aa480a0a4cf01  /mnt/data/gxb_r4d_recon/backend/migrations/00010_r4_manifest_identity_not_null.sql
+=== active=true operational scan ===
+=== r4d static validator ===
+R4D VALIDATION: PASS
+immutable revision binding/replay/exact-read/restart guards present; R5 temporal/bootstrap remains intentionally out of scope
+=== connected candidate static ===
+SQLC GENERATION POLICY: PASS
+DEPENDENCY POLICY: PASS
+resolved_go_modules 15 qualified_candidates 5
+RESOLVED SBOM: PASS
+CONNECTED CANDIDATE STATIC PRESEAL: PASS
+=== connected candidate execute expected environment block ===
+SQLC GENERATION POLICY: PASS
+DEPENDENCY POLICY: PASS
+resolved_go_modules 15 qualified_candidates 5
+RESOLVED SBOM: PASS
+CONNECTED CANDIDATE STATIC PRESEAL: PASS
+CONNECTED CANDIDATE PRESEAL: FAIL
+ - sqlc not found for --execute
+execute_rc=1
+=== pinned toolchain check ===
+go: downloading go1.27.1 (linux/amd64)
+go: download go1.27.1: golang.org/toolchain@v0.0.1-go1.27.1.linux-amd64: Get "https://proxy.golang.org/golang.org/toolchain/@v/v0.0.1-go1.27.1.linux-amd64.zip": dial tcp: lookup proxy.golang.org on 168.63.129.16:53: read udp 172.26.39.202:55001->168.63.129.16:53: read: connection refused
+pinned_rc=1

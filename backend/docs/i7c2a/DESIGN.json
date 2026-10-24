@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "pass": "686.0",
+  "phase": "I7C",
+  "stage": "I7C-2A",
+  "full_node_path": "ROOT/I7/I7C/I7C-2/I7C-2A",
+  "sealed_base_sha256": "c06d73821a33b856bd16b61ef3b1a69d1c8472740b47263fe454ad7d5bb0dce2",
+  "accepted_backend_sha256": "a3aabb725a4a66df91133aa1c543d30ee263e3e93f590ad7ca25981f3c4ba7c6",
+  "working_backend_sha256": "f46f8dff7c546a24ba399dba3c210653684d9dfc411673ef62263c1040822014",
+  "product_implementation_authorized": false,
+  "product_implementation_started": false,
+  "product_tests": "NOT_RUN_RESEARCH_DESIGN_UNCHANGED_PRODUCT",
+  "status": "READY_RECONCILED_PREIMPLEMENTATION_DESIGN_NOT_IMPLEMENTED",
+  "owner": "Existing CharacterHero aggregate and player_heroes row",
+  "schema": {
+    "next_migration": "00048_i7c2a_hero_raw_skills.sql (planned, not created)",
+    "columns": "six bigint raw_skill_N, six bigint raw_skill_id_N, skill_seed_policy_id text; fixed-size domain arrays [6]int64, nonnegative raw values/IDs, no invented growth/max-level rule",
+    "policy_binding": "I7C2A_V1_RAW_SKILL_SEED_V1; immutable seed decision identity retained with owner fact and receipt",
+    "backfill": "Owned atomic migration from schema00047; stage nullable new fields, fill only absent facts, validate complete fixed shape, make NOT NULL. Preserve explicit zero/nondefault facts; malformed partial facts must fail/report rather than be overwritten as a missing whole facet. No external V1 save importer is authorized.",
+    "version": "Increment Hero state_version once for introduced canonical facet, never change partner_id/root allocator/base progression. Capture one migration transaction instant for changed updated_at; it is migration metadata, not gameplay clock settlement. Immutable saved operation/media outcomes retain original owner versions. Upgrade must be an exclusive/controlled migration before new traffic; no runtime double backfill.",
+    "down": "Existing forward migration policy governs; do not claim destructive column removal is a safe recovery after writes. Backup/restore qualified upgrade fixture under inherited migration gates."
+  },
+  "ports": {
+    "store": "Extend existing InsertHero/read/list/lock/scan queries. Dedicated SaveHeroSkillChoiceTx uses owner-version CAS and changes selected ID only; other SaveHeroState methods preserve all raw fields.",
+    "content": "Extend existing immutable ContentRegistry generator/bundle/store with narrow Hero skill-ID/choice catalog and exact seed/choice policy identity; validate references against current partner/super_partner/skill and approved V1 mappings. No alternate content registry, Buff/stat compiler or database in this stage. Reuse compiler source parsers. Preserve partner vs partner1 provenance; do not hardcode the three-choice profile as all current stock truth.",
+    "observation": "Typed RawHeroSkillsTx returns canonical six arrays + Hero version/policy. A content-qualified ID observation separately resolves ordinary IDs or special override/defaults at the caller-pinned revision. Showcase may expose raw qualification while finalStats remains unavailable until3B.",
+    "inventory": "Reuse I5 typed Tx-owned LockStackTx/owner observation or narrow read gate adapter to it; do not debit books, write inventory SQL in Character, or introduce a new inventory owner."
+  },
+  "transactions": {
+    "root": "Existing generation.TimedRunner, actor lifecycle fence and player root acquisition, existing global owner/resource ordering, lock Hero and relevant I5 book state under the same transaction; choose captured decision instant after required locks under inherited time contract.",
+    "replay": "Fingerprint partner_id,skill_index,skill_item with stable policy/content binding. Same operation key/different payload conflicts; receipt returns the six IDs at that operation, not newer live state. Use inherited unknown-COMMIT receipt adjudication; no guessed success.",
+    "same_choice": "Idempotent same-value choice preserves state_version if unchanged, but success still validates owned Hero/book at first execution and records a replayable outcome; preserve book quantity.",
+    "actor_scope": "Every mutation/read binds actor PlayerID and typed owned Hero; foreign ID, retired/invalid actor, stale time/version/content and unsupported identity fail closed."
+  },
+  "receipt_compatibility": {
+    "acquisition_v1": "Existing acquisitionReceipt has no skills. Keep old bytes unchanged. Explicit legacy schema decoder materializes authorized six-one/six-zero snapshot for the historical response before Hero.Validate, never reads live Hero to patch replay.",
+    "acquisition_v2": "New receipt schema/version includes fixed raw arrays/policy snapshot with base identity/version. Missing/partial fields in v2 are invalid, not silently defaulted.",
+    "other_receipts": "Audit existing receipt structs that serialize or reconstruct Hero after domain changes; preserve old snapshots with schema-specific decoding and exact wire outputs. Do not bulk rewrite receipt rows.",
+    "source_response": "MID2144 returns skill_ids only as caller expects; stock roster returns canonical skills/skill_ids. Do not wire derived default skill IDs into raw override array."
+  },
+  "implementation_batch": [
+    "Forward-only owner/content migration and domain/query/store/codegen extension",
+    "Atomic seed in common creation path and legacy/new receipt compatibility",
+    "Source-bound content/typed raw reader and stock projection extension",
+    "Bounded V1-preserving MID2144 owner composition/dispatch and receipt recovery",
+    "Affected tests, frozen candidate, portable R2 qualification and independent source/contract review"
+  ],
+  "excluded": [
+    "MID53/39 general skill-level progression and point purchase/recovery; explicit future expansion",
+    "Stat/force/battle algorithms (3A/3B)",
+    "Bookshelf2D, Horcrux2H, twice-awake allocated evolution2I",
+    "Product implementation in this research/design turn"
+  ],
+  "size": "MEDIUM_PLUS: one existing aggregate, one forward migration/content section, three creation paths and one bounded choice command; no additional split justified",
+  "future_amendment_rule": "If implementation reveals contradictory policy/content or a missing critical owner gate, checkpoint it and reconcile under frozen C1; no silent policy replacement."
+}

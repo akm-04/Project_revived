@@ -1,0 +1,32 @@
+{
+  "contract_id": "I7A8A_GUILD_QUEUE_BINDING_V1",
+  "classification": "IMPLEMENTATION_DECISION",
+  "status": "RECONCILED_BEFORE_AFFECTED_REAL_INSERT_RETEST",
+  "source_library": "River0.47.0 pinned self-contained toolbox",
+  "evidence": "client.go:2343-2353 validateQueueName; realInsertTx rejected guild.materialization with expectedletters/numbers/underscores/hyphens error",
+  "contradicted_literal_assumption": "Selected652workercontract queueguild.materialization cannot be used directly as a River physical queue name.",
+  "decision": "Retain guild.materialization as application obligation queue. NarrowGuildinsert-only adapter maps its two finite kinds to physicalRiverguild_materialization; jobArgs.queue retains applicationname. Soleobligationworker rejects knownGuild kinds on anotherphysicalqueue and rejects queue/profile/reference mismatch before dispatch. Productionruntime must configure only explicitphysicalGuildqueue. No suppliedRiver/library edit; no universal queue rewriting; no businessidentity fromjobID.",
+  "affected_consumers": [
+    "Guildsource/atomicInsertTx",
+    "productionworkerqueueconfiguration",
+    "reconcilewakeup",
+    "future8Bfiniteworkerextension",
+    "A10/A11/A12/A26/A34"
+  ],
+  "authorization_basis": "Directfullphase implementation/reconciliation delegation; standing architectural mechanism ownership; preserve canonicalapplicationcontract and qualify required physicaldeployment binding.",
+  "required_proof": [
+    "realpinnedRiver physicalqueue insert/commit/rollback",
+    "workerphysical/logicaltamperreject",
+    "4worker physicalconfiguration/readiness",
+    "crash/recovery exactreference proof"
+  ],
+  "unpassed": "Full frozen-candidate matrix and physical/parent acceptance remain NOT_RUN. Unfrozen working production worker process, hard-kill recovery and owner loss were executed and passed as scoped proof; do not promote them to exact-candidate acceptance.",
+  "publication_obligation": "Register additivequeuebindingcontract in solePassMapregistry beforecontinuingaffectedpath; retainunchanged652pack andtruthful literalcontradiction evidence.",
+  "scoped_runtime_evidence": [
+    "continuation/logs/p5-worker-process-proof.json",
+    "continuation/logs/p5-worker-crash-proof.json",
+    "continuation/logs/p5-worker-owner-loss-proof.json",
+    "continuation/logs/p5-worker-lease-rescue-proof.json",
+    "continuation/logs/p5-api-worker-http-proof.json"
+  ]
+}

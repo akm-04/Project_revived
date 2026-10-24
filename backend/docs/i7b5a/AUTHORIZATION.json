@@ -1,0 +1,13 @@
+{
+  "node": "I7B-5A",
+  "full_node_path": "ROOT/I7/I7B/I7B-5/I7B-5A",
+  "split_approved": true,
+  "research_authorized": true,
+  "research_complete": true,
+  "design_complete": true,
+  "implementation_authorized": true,
+  "implementation_started": true,
+  "product_accepted": false,
+  "authority_basis": "Current human explicitly authorizes I7B-5A implementation, portableR2 qualification, reconciliation and final scopedclosure publication; no5B implementation",
+  "next": "Implement frozen675 scopeddesign then qualify/reconcile/close5A"
+}

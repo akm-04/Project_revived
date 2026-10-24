@@ -1,0 +1,29 @@
+{
+  "node": "I7B-5B",
+  "classification": "IMPLEMENTATION_DECISIONS_WITHIN_FROZEN662",
+  "research_reused": [
+    "Parent5 CP235/236 fullsource/native/V1/COLD sweep andapprovedtopology-v5",
+    "CP243/Pass676 exact5A bytefoundation qualification; no productchange invalidatedit",
+    "I7B1 fivefrozencontracts andexisting315/391/KernelReceipt/timedrunner inspected at676"
+  ],
+  "new_gap_dispositions": {
+    "Q03": "I7B_PROFILE_MEDIA_URL_V1: trusted configured literalhttp origin, no credentials/query/fragment; serverURL /profile-media/<existing internal operation UUID>/<SHA256>.png, anonymous immutable bearer-by-possession capability. Route reads onlycommitted PublicProfile history; no clientpathauthority. Block/hide control laterprofile discovery throughexistingtypedprivacy, cannotrevokecachedbytes/capabilityURLs. OriginalserverURL/accesspolicy UNKNOWN; no customclientnonce/header.",
+    "Q04": "PublicProfile owns currentref and append-only operationhistory, KernelReceipt owns terminaloutcome; exactsamecallerTx315->391. SHA256-identicalcurrentdesiredstate preserves rootversion/currentURL while newknownoperation retains history+receipt. Oldknownoperation returnsoriginaloutcome withoutresettingcurrentref. UNKNOWNpinprotected indefinitely untilverifiedpositivehistory+receipt commit; receiptabscence cannotunpin/reexecute. No comment occurrencequeue needed fordesiredstateassignment.",
+    "Q06": "Offline operator maintenance: stop API/publishers andGC, then holdexclusive5Amaintenance lease; collect coherenttypedDBcurrent/history/receiptmanifest, closeDBscope beforebytevalidation/export; include allimmutableblobs+pins+format andDBdump inchecksummedbundle. Restoreonlyoffline intoemptyDB/blobdestination; verifyhashes andtypedrefs/receipts/pins beforeAPI/GC restart. Missing/corruptreferencedblob fails; no DB-only/livehotbackupclaim."
+  },
+  "source_limits": [
+    "No originalserverURL authorization/expiry/retention recovered",
+    "No physicalAndroid/W2 proof; existingnamedgate retained",
+    "Full1829 richDTO/cache/derivedsender freshness remains6/E; typedcanonicalmedia provider supplied5B"
+  ],
+  "rejected": [
+    "Trust clientMD5/filename/MIME",
+    "HTTPS URLs withcurrentliteralhttp loader",
+    "Treat receiptmiss asabort",
+    "Fresh clockrebind after391 staleDecisionAt",
+    "Deletehistory tosavebytes",
+    "Foreign-owner SQL or blob I/O undergameplaylocks",
+    "Clonecomment consumptivereplaylane fordesiredstateupload"
+  ],
+  "memory_repairs": "Parentquestionrecords still sayPENDING_NORMAL675/5Adesignblocked; selected676 supersedesthosecreationlabels. Normalize selected5Bdispositions duringnextpublication, preservehistoricalbytes."
+}

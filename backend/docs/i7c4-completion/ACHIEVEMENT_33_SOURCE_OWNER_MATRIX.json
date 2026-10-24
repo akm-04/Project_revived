@@ -1,0 +1,583 @@
+{
+  "status": "ALL33_SOURCE_ROWS_ACCOUNTED_NO_NEW_FACT_PRODUCER_QUALIFICATION",
+  "source": {
+    "path": "data/tables/achievement.lua",
+    "sha256": "f6d89a716ed5f60c4b3e4616ff5c6728632a0d2614c93644be1125a1f9db1462"
+  },
+  "rows": [
+    {
+      "source": {
+        "id": "100001",
+        "name": "Challenger",
+        "desc": "Never drop out top 3 on TF in %d days",
+        "tip": "I dare you to fight with me!",
+        "condition": "3|6|10",
+        "icon": "images/achievement/100001_icon_",
+        "points": "500|1000|1500",
+        "is_daily_update": "0",
+        "is_hide": "0",
+        "stamp": "0"
+      },
+      "classification": "SOURCE_FACT_FOR_ROW_ONLY_PRIVATE_REDUCER_NOT_ADOPTED",
+      "owner_route": "I7C-5B Top Floor position history",
+      "availability": "ACTUAL_PRODUCER_OR_IDENTITY_PROFILE_UNQUALIFIED_NO_DEFAULT_ZERO"
+    },
+    {
+      "source": {
+        "id": "100002",
+        "name": "Dominator",
+        "desc": "Never drop out top 3 on 1 on 1 in %d week(s)",
+        "tip": "1 on 1?So easy.",
+        "condition": "1|2|3",
+        "icon": "images/achievement/100002_icon_",
+        "points": "500|1000|1500",
+        "is_daily_update": "0",
+        "is_hide": "0",
+        "stamp": "0"
+      },
+      "classification": "SOURCE_FACT_FOR_ROW_ONLY_PRIVATE_REDUCER_NOT_ADOPTED",
+      "owner_route": "I7C-5C 1 on 1 position history",
+      "availability": "ACTUAL_PRODUCER_OR_IDENTITY_PROFILE_UNQUALIFIED_NO_DEFAULT_ZERO"
+    },
+    {
+      "source": {
+        "id": "100003",
+        "name": "Skilled Master",
+        "desc": "Consecutively win %d times in Arena",
+        "tip": "\"Are you god in your server?\",\"No,I am god in all servers!\"",
+        "condition": "5|15|30",
+        "icon": "images/achievement/100003_icon_",
+        "points": "500|1000|1500",
+        "is_daily_update": "0",
+        "is_hide": "0",
+        "stamp": "0"
+      },
+      "classification": "SOURCE_FACT_FOR_ROW_ONLY_PRIVATE_REDUCER_NOT_ADOPTED",
+      "owner_route": "I7C-5D Arena streak result history",
+      "availability": "ACTUAL_PRODUCER_OR_IDENTITY_PROFILE_UNQUALIFIED_NO_DEFAULT_ZERO"
+    },
+    {
+      "source": {
+        "id": "100004",
+        "name": "Friendship",
+        "desc": "Highest damage reaches %d*10K in guild activity",
+        "tip": "The principal sees you～",
+        "condition": "100|500|1000",
+        "icon": "images/achievement/100004_icon_",
+        "points": "500|1000|1500",
+        "is_daily_update": "0",
+        "is_hide": "0",
+        "stamp": "0"
+      },
+      "classification": "SOURCE_FACT_FOR_ROW_ONLY_PRIVATE_REDUCER_NOT_ADOPTED",
+      "owner_route": "Guild activity damage result owner",
+      "availability": "ACTUAL_PRODUCER_OR_IDENTITY_PROFILE_UNQUALIFIED_NO_DEFAULT_ZERO"
+    },
+    {
+      "source": {
+        "id": "100005",
+        "name": "Hero",
+        "desc": "Reach %d floors in Sky Tower",
+        "tip": "Wow,you reached sky high～",
+        "condition": "50|80|100",
+        "icon": "images/achievement/100005_icon_",
+        "points": "500|1000|1500",
+        "is_daily_update": "0",
+        "is_hide": "0",
+        "stamp": "0"
+      },
+      "classification": "SOURCE_FACT_FOR_ROW_ONLY_PRIVATE_REDUCER_NOT_ADOPTED",
+      "owner_route": "Sky Tower clear owner",
+      "availability": "ACTUAL_PRODUCER_OR_IDENTITY_PROFILE_UNQUALIFIED_NO_DEFAULT_ZERO"
+    },
+    {
+      "source": {
+        "id": "100006",
+        "name": "Invincible",
+        "desc": "Achieve  personal damage rank top 3 of %d boss(es)",
+        "tip": "Come,let's dream together!",
+        "condition": "1|3|6",
+        "icon": "images/achievement/100006_icon_",
+        "points": "500|1000|1500",
+        "is_daily_update": "0",
+        "is_hide": "0",
+        "stamp": "0"
+      },
+      "classification": "SOURCE_FACT_FOR_ROW_ONLY_PRIVATE_REDUCER_NOT_ADOPTED",
+      "owner_route": "Boss damage rank settlement owner",
+      "availability": "ACTUAL_PRODUCER_OR_IDENTITY_PROFILE_UNQUALIFIED_NO_DEFAULT_ZERO"
+    },
+    {
+      "source": {
+        "id": "100007",
+        "name": "Dreamer",
+        "desc": "Damage reaches 5 million toward %d Fantasy Bosses",
+        "tip": "Day dreams for mortals are what I can do everyday day.",
+        "condition": "1|3|6",
+        "icon": "images/achievement/100007_icon_",
+        "points": "500|1000|1500",
+        "is_daily_update": "0",
+        "is_hide": "0",
+        "stamp": "0"
+      },
+      "classification": "SOURCE_FACT_FOR_ROW_ONLY_PRIVATE_REDUCER_NOT_ADOPTED",
+      "owner_route": "Fantasy boss damage owner",
+      "availability": "ACTUAL_PRODUCER_OR_IDENTITY_PROFILE_UNQUALIFIED_NO_DEFAULT_ZERO"
+    },
+    {
+      "source": {
+        "id": "100008",
+        "name": "Guardian",
+        "desc": "Reach %d waves in Guardian",
+        "tip": "Don't forget to ask the girls out after protecting them.",
+        "condition": "25|36|48",
+        "icon": "images/achievement/100008_icon_",
+        "points": "500|1000|1500",
+        "is_daily_update": "0",
+        "is_hide": "1",
+        "stamp": "0"
+      },
+      "classification": "SOURCE_FACT_FOR_ROW_ONLY_PRIVATE_REDUCER_NOT_ADOPTED",
+      "owner_route": "Guardian wave result owner",
+      "availability": "ACTUAL_PRODUCER_OR_IDENTITY_PROFILE_UNQUALIFIED_NO_DEFAULT_ZERO"
+    },
+    {
+      "source": {
+        "id": "100009",
+        "name": "Team Power",
+        "desc": "Guild wins %d times in 1 season of Guild War",
+        "tip": "Two heads are better than one.",
+        "condition": "1|4|8",
+        "icon": "images/achievement/100009_icon_",
+        "points": "500|1000|1500",
+        "is_daily_update": "0",
+        "is_hide": "0",
+        "stamp": "0"
+      },
+      "classification": "SOURCE_FACT_FOR_ROW_ONLY_PRIVATE_REDUCER_NOT_ADOPTED",
+      "owner_route": "Guild War season win owner",
+      "availability": "ACTUAL_PRODUCER_OR_IDENTITY_PROFILE_UNQUALIFIED_NO_DEFAULT_ZERO"
+    },
+    {
+      "source": {
+        "id": "100010",
+        "name": "All A+!",
+        "desc": "Clear all campaigns and earn %d stars",
+        "tip": "Last stage is the gate of devs' home?",
+        "condition": "100|600|1200",
+        "icon": "images/achievement/100010_icon_",
+        "points": "500|1000|1500",
+        "is_daily_update": "0",
+        "is_hide": "0",
+        "stamp": "0"
+      },
+      "classification": "SOURCE_FACT_FOR_ROW_ONLY_PRIVATE_REDUCER_NOT_ADOPTED",
+      "owner_route": "Campaign clear/star result owner",
+      "availability": "ACTUAL_PRODUCER_OR_IDENTITY_PROFILE_UNQUALIFIED_NO_DEFAULT_ZERO"
+    },
+    {
+      "source": {
+        "id": "100011",
+        "name": "Great Customer",
+        "desc": "Buy %d times items from stores in 1 day",
+        "tip": "I have nothing to do but shopping!",
+        "condition": "10|100|200",
+        "icon": "images/achievement/100011_icon_",
+        "points": "500|1000|1500",
+        "is_daily_update": "1",
+        "is_hide": "0",
+        "stamp": "0"
+      },
+      "classification": "SOURCE_FACT_FOR_ROW_ONLY_PRIVATE_REDUCER_NOT_ADOPTED",
+      "owner_route": "Commerce store purchase event owner/day window",
+      "availability": "ACTUAL_PRODUCER_OR_IDENTITY_PROFILE_UNQUALIFIED_NO_DEFAULT_ZERO"
+    },
+    {
+      "source": {
+        "id": "100012",
+        "name": "Thirst",
+        "desc": "Get %d girls in 1 \"buy 10\" of medium vending",
+        "tip": "Wash your hands before you do it～",
+        "condition": "3|4|5",
+        "icon": "images/achievement/100012_icon_",
+        "points": "500|1000|1500",
+        "is_daily_update": "0",
+        "is_hide": "0",
+        "stamp": "0"
+      },
+      "classification": "SOURCE_FACT_FOR_ROW_ONLY_PRIVATE_REDUCER_NOT_ADOPTED",
+      "owner_route": "Summon medium buy10 occurrence outcome owner",
+      "availability": "ACTUAL_PRODUCER_OR_IDENTITY_PROFILE_UNQUALIFIED_NO_DEFAULT_ZERO"
+    },
+    {
+      "source": {
+        "id": "100013",
+        "name": "A Plan",
+        "desc": "Own %d girls (Excluding Vows Girls)",
+        "tip": "Satisfy all the girls or you will live a sad life.",
+        "condition": "10|50|150",
+        "icon": "images/achievement/100013_icon_",
+        "points": "500|1000|1500",
+        "is_daily_update": "0",
+        "is_hide": "0",
+        "stamp": "0"
+      },
+      "classification": "SOURCE_FACT_FOR_ROW_ONLY_PRIVATE_REDUCER_NOT_ADOPTED",
+      "owner_route": "CharacterHero",
+      "required_work": "Current Normal-Hero population excluding Super/Vows; reuse owned-origin identities; historical highwater needs all acquisition/retirement/materializer hooks",
+      "availability": "CURRENT_OWNER_SEAM_REQUIRES_NEW_FACT_PROFILE_AND_GENUINE_HOOK_PROOF"
+    },
+    {
+      "source": {
+        "id": "100014",
+        "name": "Love&Vow",
+        "desc": "Engage with %d girl(s)",
+        "tip": "When can we have babies?",
+        "condition": "1|10|20",
+        "icon": "images/achievement/100014_icon_",
+        "points": "500|1000|1500",
+        "is_daily_update": "0",
+        "is_hide": "0",
+        "stamp": "0"
+      },
+      "classification": "SOURCE_FACT_FOR_ROW_ONLY_PRIVATE_REDUCER_NOT_ADOPTED",
+      "owner_route": "Library",
+      "required_work": "Qualified100014 canonical marriage hook, preserve existing root/history/receipt",
+      "availability": "QUALIFIED_3_TIERS_ONLY"
+    },
+    {
+      "source": {
+        "id": "100015",
+        "name": "Summoner ",
+        "desc": "Awaken %d girls",
+        "tip": "Take care of girls,maybe they will follow you home.",
+        "condition": "1|30|50",
+        "icon": "images/achievement/100015_icon_",
+        "points": "500|1000|1500",
+        "is_daily_update": "0",
+        "is_hide": "0",
+        "stamp": "0"
+      },
+      "classification": "SOURCE_FACT_FOR_ROW_ONLY_PRIVATE_REDUCER_NOT_ADOPTED",
+      "owner_route": "CharacterHero/content",
+      "required_work": "Current beforeAwaken predicate available; actual awakened-table transition writer qualification still required",
+      "availability": "CURRENT_OWNER_SEAM_REQUIRES_NEW_FACT_PROFILE_AND_GENUINE_HOOK_PROOF"
+    },
+    {
+      "source": {
+        "id": "100016",
+        "name": "Well-Dressed",
+        "desc": "Own %d skins",
+        "tip": "How does it feel like of hanging out with girls?(A single puppy's question)",
+        "condition": "1|10|20",
+        "icon": "images/achievement/100016_icon_",
+        "points": "500|1000|1500",
+        "is_daily_update": "0",
+        "is_hide": "0",
+        "stamp": "0"
+      },
+      "classification": "SOURCE_FACT_FOR_ROW_ONLY_PRIVATE_REDUCER_NOT_ADOPTED",
+      "owner_route": "Character appearance",
+      "required_work": "Owned effective eligible skin keys; permanent/timed SkinOn and trusted permanent materializer; not selected skin only",
+      "availability": "CURRENT_OWNER_SEAM_REQUIRES_NEW_FACT_PROFILE_AND_GENUINE_HOOK_PROOF"
+    },
+    {
+      "source": {
+        "id": "100017",
+        "name": "Tamer ",
+        "desc": "Own %d pet(s)",
+        "tip": "Want a QB?",
+        "condition": "2|8|15",
+        "icon": "images/achievement/100017_icon_",
+        "points": "500|1000|1500",
+        "is_daily_update": "0",
+        "is_hide": "0",
+        "stamp": "0"
+      },
+      "classification": "SOURCE_FACT_FOR_ROW_ONLY_PRIVATE_REDUCER_NOT_ADOPTED",
+      "owner_route": "CharacterPet",
+      "required_work": "Summon and successful hatch insert canonical Pet; eggs/style/essence not extra Pet; preserve stable origin",
+      "availability": "CURRENT_OWNER_SEAM_REQUIRES_NEW_FACT_PROFILE_AND_GENUINE_HOOK_PROOF"
+    },
+    {
+      "source": {
+        "id": "100018",
+        "name": "Workaholic",
+        "desc": "Succeed robbing %d times today",
+        "tip": "When can I raid something cooler!",
+        "condition": "10|20|30",
+        "icon": "images/achievement/100018_icon_",
+        "points": "500|1000|1500",
+        "is_daily_update": "1",
+        "is_hide": "0",
+        "stamp": "1"
+      },
+      "classification": "SOURCE_FACT_FOR_ROW_ONLY_PRIVATE_REDUCER_NOT_ADOPTED",
+      "owner_route": "Robbery successful result/day window",
+      "availability": "ACTUAL_PRODUCER_OR_IDENTITY_PROFILE_UNQUALIFIED_NO_DEFAULT_ZERO"
+    },
+    {
+      "source": {
+        "id": "100019",
+        "name": "Scholar",
+        "desc": "Finish %d textbook(s) ",
+        "tip": "I was never this hard-working in high school!",
+        "condition": "1|15|30",
+        "icon": "images/achievement/100019_icon_",
+        "points": "500|1000|1500",
+        "is_daily_update": "0",
+        "is_hide": "0",
+        "stamp": "0"
+      },
+      "classification": "SOURCE_FACT_FOR_ROW_ONLY_PRIVATE_REDUCER_NOT_ADOPTED",
+      "owner_route": "Cabinet/Bookskill",
+      "required_work": "Finish-textbook exact reducer requires explicit private policy; state.Skills + pinned BookRule.Skills/Star; command and persistent read settlement",
+      "availability": "CURRENT_OWNER_SEAM_REQUIRES_NEW_FACT_PROFILE_AND_GENUINE_HOOK_PROOF"
+    },
+    {
+      "source": {
+        "id": "100020",
+        "name": "Know-All",
+        "desc": "Complete %d academy stories",
+        "tip": "If you saw any stories about girls,tell devs and we will let others know!",
+        "condition": "1|15|30",
+        "icon": "images/achievement/100020_icon_",
+        "points": "500|1000|1500",
+        "is_daily_update": "0",
+        "is_hide": "0",
+        "stamp": "0"
+      },
+      "classification": "SOURCE_FACT_FOR_ROW_ONLY_PRIVATE_REDUCER_NOT_ADOPTED",
+      "owner_route": "Academy story completion owner",
+      "availability": "ACTUAL_PRODUCER_OR_IDENTITY_PROFILE_UNQUALIFIED_NO_DEFAULT_ZERO"
+    },
+    {
+      "source": {
+        "id": "100021",
+        "name": "Academy Superior ",
+        "desc": "Clear %d regions in Conquest",
+        "tip": "Dominate the academy? I am the very person, am I not?",
+        "condition": "1|3|5",
+        "icon": "images/achievement/100021_icon_",
+        "points": "500|1000|1500",
+        "is_daily_update": "0",
+        "is_hide": "0",
+        "stamp": "0"
+      },
+      "classification": "SOURCE_FACT_FOR_ROW_ONLY_PRIVATE_REDUCER_NOT_ADOPTED",
+      "owner_route": "Conquer actual clear writer I7C-5E prerequisite",
+      "availability": "ACTUAL_PRODUCER_OR_IDENTITY_PROFILE_UNQUALIFIED_NO_DEFAULT_ZERO"
+    },
+    {
+      "source": {
+        "id": "100022",
+        "name": "Pupils Everywhere",
+        "desc": "have %d student(s) graduated",
+        "tip": "Remember visiting me time to time,my kid",
+        "condition": "1|3|5",
+        "icon": "images/achievement/100022_icon_",
+        "points": "500|1000|1500",
+        "is_daily_update": "0",
+        "is_hide": "0",
+        "stamp": "0"
+      },
+      "classification": "SOURCE_FACT_FOR_ROW_ONLY_PRIVATE_REDUCER_NOT_ADOPTED",
+      "owner_route": "Mentor/student graduation owner",
+      "availability": "ACTUAL_PRODUCER_OR_IDENTITY_PROFILE_UNQUALIFIED_NO_DEFAULT_ZERO"
+    },
+    {
+      "source": {
+        "id": "100023",
+        "name": "Knowledge Master",
+        "desc": "Complete %d subjects study",
+        "tip": "I don't know I love studying this much.",
+        "condition": "50|200|500",
+        "icon": "images/achievement/100024_icon_",
+        "points": "500|1000|1500",
+        "is_daily_update": "0",
+        "is_hide": "0",
+        "stamp": "0"
+      },
+      "classification": "SOURCE_FACT_FOR_ROW_ONLY_PRIVATE_REDUCER_NOT_ADOPTED",
+      "owner_route": "Course",
+      "required_work": "Canonical successful subject-completion event count; bounded logs cannot reconstruct legacy total; read applies without saving, command persists settlement",
+      "availability": "CURRENT_OWNER_SEAM_REQUIRES_NEW_FACT_PROFILE_AND_GENUINE_HOOK_PROOF"
+    },
+    {
+      "source": {
+        "id": "100024",
+        "name": "Good Memory ",
+        "desc": "Pass 10 BGs' %d floors of Memory Maze ",
+        "tip": "What do you do with that much feather…",
+        "condition": "1|2|3",
+        "icon": "images/achievement/100025_icon_",
+        "points": "500|1000|1500",
+        "is_daily_update": "0",
+        "is_hide": "0",
+        "stamp": "0"
+      },
+      "classification": "SOURCE_FACT_FOR_ROW_ONLY_PRIVATE_REDUCER_NOT_ADOPTED",
+      "owner_route": "Memory Maze per-BG floor-clear owner",
+      "availability": "ACTUAL_PRODUCER_OR_IDENTITY_PROFILE_UNQUALIFIED_NO_DEFAULT_ZERO"
+    },
+    {
+      "source": {
+        "id": "100025",
+        "name": "Academy Legend",
+        "desc": "Obtain %d set medals",
+        "tip": "I'm looking for the legendary medals, too.",
+        "condition": "1|15|30",
+        "icon": "images/achievement/100023_icon_",
+        "points": "500|1000|1500",
+        "is_daily_update": "0",
+        "is_hide": "0",
+        "stamp": "0"
+      },
+      "classification": "SOURCE_FACT_FOR_ROW_ONLY_PRIVATE_REDUCER_NOT_ADOPTED",
+      "owner_route": "Inscription/I5 candidate",
+      "required_work": "Source inscription rows40001/50001 named 2/3 set medal; precise owned-item vs completed suit predicate still unresolved; no blanket aggregate adopted",
+      "availability": "CURRENT_OWNER_SEAM_REQUIRES_NEW_FACT_PROFILE_AND_GENUINE_HOOK_PROOF"
+    },
+    {
+      "source": {
+        "id": "100026",
+        "name": "Hammer Price",
+        "desc": "Win %d auction(s)",
+        "tip": "My hands were sweaty already before the hammer lands～",
+        "condition": "1|15|30",
+        "icon": "images/achievement/100026_icon_",
+        "points": "500|1000|1500",
+        "is_daily_update": "0",
+        "is_hide": "0",
+        "stamp": "0"
+      },
+      "classification": "SOURCE_FACT_FOR_ROW_ONLY_PRIVATE_REDUCER_NOT_ADOPTED",
+      "owner_route": "Auction award/settlement owner",
+      "availability": "ACTUAL_PRODUCER_OR_IDENTITY_PROFILE_UNQUALIFIED_NO_DEFAULT_ZERO"
+    },
+    {
+      "source": {
+        "id": "100027",
+        "name": "Sorcery Master",
+        "desc": "Pass all stages in %d different sorcery war campaign",
+        "tip": "Follow the master of sorcery, young man!",
+        "condition": "1|3|5",
+        "icon": "images/achievement/100027_icon_",
+        "points": "500|1000|1500",
+        "is_daily_update": "0",
+        "is_hide": "0",
+        "stamp": "0"
+      },
+      "classification": "SOURCE_FACT_FOR_ROW_ONLY_PRIVATE_REDUCER_NOT_ADOPTED",
+      "owner_route": "Sorcery War campaign clear owner",
+      "availability": "ACTUAL_PRODUCER_OR_IDENTITY_PROFILE_UNQUALIFIED_NO_DEFAULT_ZERO"
+    },
+    {
+      "source": {
+        "id": "100028",
+        "name": "Smash 'em all",
+        "desc": "Achieve a %d win-streak in global 1 on 1",
+        "tip": "Well, its pretty easy to handle 10 of you, no, I mean 100.",
+        "condition": "5|15|30",
+        "icon": "images/achievement/100028_icon_",
+        "points": "500|1000|1500",
+        "is_daily_update": "0",
+        "is_hide": "0",
+        "stamp": "0"
+      },
+      "classification": "SOURCE_FACT_FOR_ROW_ONLY_PRIVATE_REDUCER_NOT_ADOPTED",
+      "owner_route": "I7C-5C global 1 on 1 streak owner",
+      "availability": "ACTUAL_PRODUCER_OR_IDENTITY_PROFILE_UNQUALIFIED_NO_DEFAULT_ZERO"
+    },
+    {
+      "source": {
+        "id": "100029",
+        "name": "Houselord",
+        "desc": "Own %d room(s) in villa",
+        "tip": "Come,let's live in my villa.",
+        "condition": "5|10|15",
+        "icon": "images/achievement/100029_icon_",
+        "points": "500|1000|1500",
+        "is_daily_update": "0",
+        "is_hide": "0",
+        "stamp": "0"
+      },
+      "classification": "SOURCE_FACT_FOR_ROW_ONLY_PRIVATE_REDUCER_NOT_ADOPTED",
+      "owner_route": "Dorm",
+      "required_work": "Reuse VillaCountTx MainType4; source wording rooms vs villas needs explicit reducer mapping",
+      "availability": "CURRENT_OWNER_SEAM_REQUIRES_NEW_FACT_PROFILE_AND_GENUINE_HOOK_PROOF"
+    },
+    {
+      "source": {
+        "id": "100030",
+        "name": "Villa Tycoon",
+        "desc": "Extended %d Villas",
+        "tip": "This is where I rule!",
+        "condition": "5|10|15",
+        "icon": "images/achievement/100030_icon_",
+        "points": "500|1000|1500",
+        "is_daily_update": "0",
+        "is_hide": "0",
+        "stamp": "0"
+      },
+      "classification": "SOURCE_FACT_FOR_ROW_ONLY_PRIVATE_REDUCER_NOT_ADOPTED",
+      "owner_route": "Dorm",
+      "required_work": "Need canonical expanded-villa predicate and source count policy; do not count sum of expansion levels by guess",
+      "availability": "CURRENT_OWNER_SEAM_REQUIRES_NEW_FACT_PROFILE_AND_GENUINE_HOOK_PROOF"
+    },
+    {
+      "source": {
+        "id": "100031",
+        "name": "Big Shot",
+        "desc": "Obtain %d Titan",
+        "tip": "No matter how many, I can stand it!",
+        "condition": "1|5|10",
+        "icon": "images/achievement/100031_icon_",
+        "points": "500|1000|1500",
+        "is_daily_update": "0",
+        "is_hide": "0",
+        "stamp": "0"
+      },
+      "classification": "SOURCE_FACT_FOR_ROW_ONLY_PRIVATE_REDUCER_NOT_ADOPTED",
+      "owner_route": "Super-Hero candidate",
+      "required_work": "misc taitan_* links Titan context to SuperPartnerWindow and essence50001666; achievement exact predicate unrecovered; item quantity is not owned Super-Hero count",
+      "availability": "CURRENT_OWNER_SEAM_REQUIRES_NEW_FACT_PROFILE_AND_GENUINE_HOOK_PROOF"
+    },
+    {
+      "source": {
+        "id": "100032",
+        "name": "Champions League",
+        "desc": "TOP 5 in any Champions League Group for %d days",
+        "tip": "May I hold your Crown for a while? ",
+        "condition": "1|3|7",
+        "icon": "images/achievement/100032_icon_",
+        "points": "500|1000|1500",
+        "is_daily_update": "0",
+        "is_hide": "0",
+        "stamp": "0"
+      },
+      "classification": "SOURCE_FACT_FOR_ROW_ONLY_PRIVATE_REDUCER_NOT_ADOPTED",
+      "owner_route": "I7C-5F Champions League placement/day history",
+      "availability": "ACTUAL_PRODUCER_OR_IDENTITY_PROFILE_UNQUALIFIED_NO_DEFAULT_ZERO"
+    },
+    {
+      "source": {
+        "id": "100033",
+        "name": "Hi, master!",
+        "desc": "Own %d Butler(s)",
+        "tip": "I will always protect, serve and arrive whenever summoned by you, my master.",
+        "condition": "1|5|10",
+        "icon": "images/achievement/100033_icon_",
+        "points": "500|1000|1500",
+        "is_daily_update": "0",
+        "is_hide": "1",
+        "stamp": "0"
+      },
+      "classification": "SOURCE_FACT_FOR_ROW_ONLY_PRIVATE_REDUCER_NOT_ADOPTED",
+      "owner_route": "Butler identity/owner UNKNOWN; hidden flag is presentation, not inactivity",
+      "availability": "ACTUAL_PRODUCER_OR_IDENTITY_PROFILE_UNQUALIFIED_NO_DEFAULT_ZERO"
+    }
+  ],
+  "unavailable_is_not_zero": true,
+  "full_catalog_qualified": false
+}

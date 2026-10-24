@@ -1,0 +1,8 @@
+=== EXACT UNTOUCHED CANDIDATE ATTEMPT ===
+2026-09-09T06:05:06Z
+go version go1.23.2 linux/amd64
+ecafe7641bc26c7ef91bdc5c21a5f71aa432bd162ed6fe1725004b501172a949  go.mod
+efbf6753542d66e2fefcb2ab5e2ade7c9d28f2206a1113d1eb9568f2cb75808d  go.sum
+a8844fbc8c3eb51c26ed00aec4cd5a5a9d647f849c6ead07bcc83ed24c4a7718  .go-version
+go: go.mod requires go >= 1.26.0 (running go 1.23.2; GOTOOLCHAIN=local)
+EXIT_CODE=1

@@ -1,0 +1,9 @@
+{
+  "app/model/SocialSystem.lua": "ec5bea26bbdcbb67ca2ea80ab5ad7e9fb53ee613a3ffcbb13ae5dfef9ddf0502",
+  "app/windows/SocialSystemWindow.lua": "5d0c3e1e20d69b7009ff52bf94ad438c6a133c8b099301d951bd1e413b90f112",
+  "app/windows/TeacherWindow.lua": "da16ccc3c688987caf3f6f47fb733d513fc207242556a7c1f2b5643b93527a60",
+  "app/common/network/Backend.lua": "95378e2b0be8180df6de27e9e430c630bcfe46c080e1f91ef5f6d74bdbb1b840",
+  "app/model/SelfPlayer.lua": "163d5893c9522ada412c2b9c4748a80757660fccdf03c8f72cb6edf0838b8eb4",
+  "app/common/enums.lua": "15340bd89fe7c6f150ccfd4a5cd2a2f0e8e73c89dfae9ac3388376a4799901f3",
+  "app/common/network/mid.lua": "026a20b29d97624979777a68c64c749254031604057ff42aa8f8254c3e35b5af"
+}

@@ -1,0 +1,156 @@
+GXB1 V2 — PASS511 CA1 NATIVE/REAL-POSTGRESQL GATE
+=================================================
+
+ROLE
+----
+Act as the execution/test worker for an already implemented CA1 candidate. Do not redesign gameplay and do not promote evidence to semantic authority. Normal-chat head agent will adjudicate results. You may make a product fix only if a demonstrated defect requires it; any fix must be separately reported, source/design reconciled, and the final exact tested candidate returned.
+
+AUTHORITY / BOUNDARY
+--------------------
+- Last sealed semantic authority: Pass509 HOT/CURRENT.
+- Pass510/Pass511 Character Asset materials are unsealed until normal-chat adjudication and final seal.
+- CA1 only: Asset Kernel, transaction composition, typed PartnerEntity materialization seam, scalar+stack material debit seam, and CA1-R0 Redeem complete-suffix ordering repair.
+- No CA2 Hero owner/schema/gameplay, no Pet gameplay, no equipment/Fumo, formation, Practice, cosmetics, starter fabrication, Gacha outcome selection, or SpecializedDomain activation.
+- No production Character materializer should be wired in CA1.
+- Zero Client Modification remains the default acceptance target; CA1 activates no stock entity award route.
+
+INPUT IDENTITY
+--------------
+Before executing tests, SHA-256 the attached candidate ZIP and record the hash. Extract exactly once to a canonical test directory. Record a recursive candidate manifest before and after testing; test execution must not silently edit release files.
+
+Read:
+- BUILD_INFO.json
+- SNAPSHOT_INFO.json
+- docs/PASS511_CA1_IMPLEMENTATION_CONTRACT.md
+- docs/PASS511_CA1_INDEPENDENT_REALITY_CHECK.md
+- EVIDENCE/PASS511_CA1/*
+- exact Pass509 D01/D03 evidence if provided in the accompanying migration/additional-materials bundle.
+
+PINNED TOOLS
+------------
+Use the candidate's pins, without editing go.mod/go.sum/.go-version/toolchain directives:
+- Go toolchain: 1.27.1
+- PostgreSQL: 18.6
+- sqlc: 1.31.1
+- River: v0.47.0 from go.mod (regression coverage; CA1 adds no River behavior)
+
+If an exact pin cannot be obtained, report ENVIRONMENT_BLOCKED. Do not modify the candidate to make the exact gate pass.
+
+PHASE A — IDENTITY / STATIC / EXACT NATIVE
+------------------------------------------
+Run and capture full stdout/stderr + exit status:
+
+1. `go version` and relevant `go env`.
+2. `go mod verify`.
+3. `gofmt -d` over changed Go files; must be empty.
+4. `go test ./internal/application/i5`
+5. `go test -race ./internal/application/i5`
+6. `go vet ./internal/application/i5`
+7. `go test ./...`
+8. `go test -race ./...`
+9. `go vet ./...`
+10. package-by-package `go test` sweep with package list recorded.
+11. `python3 tools/validate_ca1.py`
+12. `python3 tools/check_ca1_source_oracle.py <directory-containing-exact-oracles>` if exact input corpora are available.
+13. `python3 tools/check_schema_query_ownership.py`
+14. `python3 tools/check_sqlc_generation_policy.py`
+15. `python3 tools/check_dependency_policy.py`
+16. `python3 tools/validate_i5.py`
+17. `python3 tools/validate_r5.py`
+18. `sqlc version` and a no-diff regeneration/verification according to repository policy. Do not accept generated drift.
+19. `go test -tags postgres ./...`
+20. `go build -tags postgres ./cmd/gxb-api`
+21. `go build -tags postgres ./cmd/gxb-realtime`
+22. `go test -tags 'postgres river' ./...`
+
+`tools/validate_r6.py` is historical/superseded for current Pass509+: it already fails on untouched Pass509 due old migration/toolchain assumptions. Record it only as historical if executed; do not "fix" product code to satisfy it.
+
+PHASE B — REAL POSTGRESQL 18.6 CA1 HARNESS
+-------------------------------------------
+Use a real PostgreSQL 18.6 instance. SQLite/mocks are not evidence for this phase. Apply the exact canonical migrations through 00013 using the repository's qualified migration workflow. Record DB version, migration history and schema hash/checks.
+
+CA1 deliberately has no production Character tables/provider. Build the real-DB test fixture outside release source, or in an isolated test-only copy/harness. The fixture must:
+- implement `PartnerEntityMaterializer` using real PostgreSQL rows solely for test evidence;
+- expose a deterministic per-player Character namespace/instance table in a TEST schema or temporary schema;
+- lock exactly provider-declared 400–599 keys;
+- enforce unique `(grant_semantic_key,line_ordinal)` identity in the fixture so duplicate materialization is observable;
+- never alter release migrations or production schema;
+- use the caller's exact transaction;
+- permit forced late errors for rollback tests.
+
+Required real-DB cases:
+
+B1. MIXED ATOMIC SETTLEMENT
+- One semantic Grant with PartnerEntity + scalar + stack.
+- Verify one Character fixture instance/materialization, exact scalar/stack effect and one Grant receipt in the same transaction.
+- Verify receipt schema v3 and typed payload.
+- Reconnect/new pool and replay: exact original typed result; no second instance/economic settlement.
+
+B2. SAME-SEMANTIC CONCURRENCY
+- At least two concurrent sessions issue the same semantic mixed entity Grant.
+- Force overlap around Character/I5 locks.
+- Expected: one committed materialization/economic settlement; other call converges by replay or qualified SERIALIZABLE retry/reconciliation; no duplicate entity; no blind retry after unknown commit.
+
+B3. LATE PROVIDER FAILURE ROLLBACK
+- Provider fixture acquires declared locks, mutates its fixture row, then returns a forced error before Grant receipt completion.
+- Verify entire transaction rolls back: no fixture row, no scalar/stack change, no Grant receipt.
+
+B4. AGGREGATE PREFLIGHT/CAPACITY FAILURE
+- Provider preflight rejects a multi-line batch as a unit.
+- Verify no Character/I5 mutation and no receipt.
+
+B5. UNDECLARED/INVALID LOCK DEFENSE
+- Fixture attempts/returns a key outside 400–599: planner must reject before mutation.
+- If feasible, instrument fixture to demonstrate that CA1 never asks it to lock an undeclared key.
+
+B6. REDEEM LOCK-ORDER REPRODUCER (MANDATORY)
+Construct the exact same-player contention pattern that motivated CA1-R0:
+- T1: MID230/Redeem path with progression eligibility plus a reward requiring Economy and preferably a test PartnerEntity as well.
+- T2: ordinary Grant requiring Economy + Progression (e.g. a mixed scalar/PlayerExp plan qualified by current content fixture).
+- Synchronize/barrier the sessions so old Pass509 ordering would be capable of 710->700 versus 700->710 conflict.
+- On the CA1 candidate verify the lock acquisition order is lower-to-higher and the run converges without a PostgreSQL deadlock.
+- Run enough repetitions to make scheduling evidence meaningful; record SQLSTATE/retry counts. Serialization abort/retry may be valid; deadlock from inverted owner order is not.
+
+If practical, run the same harness against untouched Pass509 only as differential evidence to demonstrate the old call ordering/deadlock opportunity. Do NOT require the historical baseline to deadlock deterministically to prove the static inversion.
+
+B7. MATERIAL DEBIT
+Using real I5 rows in one caller-owned transaction:
+- scalar + multiple stacks;
+- shortage in final resource => no persistent writes after rollback;
+- stack exactly to zero => row deleted according to accepted semantics;
+- imported over-cap stack can spend down;
+- concurrent debit of same player/resource set converges without negative balance.
+
+B8. DIFFERENT-PLAYER INDEPENDENCE
+Concurrent entity/material debit on different players should not share the same Character/I5 owner locks unnecessarily.
+
+PHASE C — REGRESSION / ARCHITECTURE
+----------------------------------
+- Confirm no release migration beyond 00013.
+- Confirm no production `PartnerEntities:` wiring.
+- Confirm stock/bootstrap/MID1 paths unchanged.
+- Confirm `SpecializedDomain` remains fail-closed.
+- Confirm no outbound network/provider call occurs while gameplay locks are held in any CA1 code. The test provider itself must be local DB-only.
+- Confirm no foreign-owner SQL was added to Character-facing application code.
+- Confirm source/oracle files were not modified.
+
+PHASE D — RETURN PACKAGE
+------------------------
+Return one report ZIP containing:
+- exact input candidate ZIP hash and extracted-tree manifest;
+- tool versions;
+- PostgreSQL server version and migration state;
+- full raw logs for every command;
+- per-test JSON summary with PASS/FAIL/NOT_RUN and evidence class;
+- real-DB harness source/scripts kept outside release candidate;
+- DB dump or test-schema dump sufficient to audit terminal state;
+- any built binaries generated by exact candidate, with hashes;
+- final candidate ZIP if and only if product bytes were changed to repair a demonstrated defect;
+- complete diff for any product change;
+- a concise `AGENT_HANDOFF.md` stating candidate identity, results, limitations and next action.
+
+Do not declare CA1 accepted/sealed. Report either:
+- `CA1 NATIVE/REAL-DB GATE: GREEN CANDIDATE FOR NORMAL-CHAT ADJUDICATION`, or
+- exact blocking/failing cases with evidence.
+
+Do not modify PassMap HOT/COLD semantic authority in Work mode.

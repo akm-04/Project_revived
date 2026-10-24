@@ -1,0 +1,234 @@
+{
+  "status": "IMPLEMENTED_EXACT_QUALIFICATION_PENDING",
+  "operations": [
+    {
+      "mid": 3089,
+      "name": "ENHANCE",
+      "request_keys": [
+        "spirit_id",
+        "spirit_ids"
+      ],
+      "effects": "Materialized targetinstance; atomically consume actualunlocked/unbound/unreferencedfodders +I5mana; unknownmilestoneprovider gated",
+      "response": "Updatedtargetinstance body",
+      "source": "CurrentHunqi callers +Backpack/NormalHero/SuperHero tables",
+      "contract": "I7C2H_SPIRIT_INPUT_LIFECYCLE",
+      "owner": "SpiritInstance withtypedCharacter/I5/Content composition",
+      "transaction": "Character400/sorted410 ->Spirit580/590 ->I5suffix",
+      "receipt": "RetainedSpiritlane andsemanticUUID, knownproofbefore newintent exceptread3112",
+      "reload": "MID81Spiritinventory +HeroMID1/rosterfullymaterializedpayload;no foreignfallback",
+      "consumer": "SPIRIT_INPUTS ->3A/3B qualifiedadapter thenselectedconsumers",
+      "required_proof": [
+        "rollback/UNKNOWN/replay/concurrency",
+        "sourceexactshape/reload",
+        "owner/reference/coherentread"
+      ],
+      "implemented": true,
+      "conditional_core_qualified": false,
+      "scope": "Canonical Spirit core under versioned V1 reconstruction; whole Gift/Trial/parents/W2 remain outside",
+      "source_genuine_origin_qualified": false
+    },
+    {
+      "mid": 3090,
+      "name": "LOCK",
+      "request_keys": [
+        "spirit_id"
+      ],
+      "effects": "Setownedlock=1, idempotentstate",
+      "response": "{}",
+      "source": "CurrentHunqi callers +Backpack/NormalHero/SuperHero tables",
+      "contract": "I7C2H_SPIRIT_INPUT_LIFECYCLE",
+      "owner": "SpiritInstance withtypedCharacter/I5/Content composition",
+      "transaction": "Character400/sorted410 ->Spirit580/590 ->I5suffix",
+      "receipt": "RetainedSpiritlane andsemanticUUID, knownproofbefore newintent exceptread3112",
+      "reload": "MID81Spiritinventory +HeroMID1/rosterfullymaterializedpayload;no foreignfallback",
+      "consumer": "SPIRIT_INPUTS ->3A/3B qualifiedadapter thenselectedconsumers",
+      "required_proof": [
+        "rollback/UNKNOWN/replay/concurrency",
+        "sourceexactshape/reload",
+        "owner/reference/coherentread"
+      ],
+      "implemented": true,
+      "conditional_core_qualified": false,
+      "scope": "Canonical Spirit core under versioned V1 reconstruction; whole Gift/Trial/parents/W2 remain outside",
+      "source_genuine_origin_qualified": false
+    },
+    {
+      "mid": 3091,
+      "name": "UNLOCK",
+      "request_keys": [
+        "spirit_id"
+      ],
+      "effects": "Setownedlock=0, recoveryavailable",
+      "response": "{}",
+      "source": "CurrentHunqi callers +Backpack/NormalHero/SuperHero tables",
+      "contract": "I7C2H_SPIRIT_INPUT_LIFECYCLE",
+      "owner": "SpiritInstance withtypedCharacter/I5/Content composition",
+      "transaction": "Character400/sorted410 ->Spirit580/590 ->I5suffix",
+      "receipt": "RetainedSpiritlane andsemanticUUID, knownproofbefore newintent exceptread3112",
+      "reload": "MID81Spiritinventory +HeroMID1/rosterfullymaterializedpayload;no foreignfallback",
+      "consumer": "SPIRIT_INPUTS ->3A/3B qualifiedadapter thenselectedconsumers",
+      "required_proof": [
+        "rollback/UNKNOWN/replay/concurrency",
+        "sourceexactshape/reload",
+        "owner/reference/coherentread"
+      ],
+      "implemented": true,
+      "conditional_core_qualified": false,
+      "scope": "Canonical Spirit core under versioned V1 reconstruction; whole Gift/Trial/parents/W2 remain outside",
+      "source_genuine_origin_qualified": false
+    },
+    {
+      "mid": 3094,
+      "name": "EQUIP",
+      "request_keys": [
+        "partner_id",
+        "spirit_id",
+        "pos"
+      ],
+      "effects": "Sourcecompatibletargetslotbind/replace/unequip0; rejectcrossHero source fordirectequip",
+      "response": "spirit_equip:sixnumbers",
+      "source": "CurrentHunqi callers +Backpack/NormalHero/SuperHero tables",
+      "contract": "I7C2H_SPIRIT_INPUT_LIFECYCLE",
+      "owner": "SpiritInstance withtypedCharacter/I5/Content composition",
+      "transaction": "Character400/sorted410 ->Spirit580/590 ->I5suffix",
+      "receipt": "RetainedSpiritlane andsemanticUUID, knownproofbefore newintent exceptread3112",
+      "reload": "MID81Spiritinventory +HeroMID1/rosterfullymaterializedpayload;no foreignfallback",
+      "consumer": "SPIRIT_INPUTS ->3A/3B qualifiedadapter thenselectedconsumers",
+      "required_proof": [
+        "rollback/UNKNOWN/replay/concurrency",
+        "sourceexactshape/reload",
+        "owner/reference/coherentread"
+      ],
+      "implemented": true,
+      "conditional_core_qualified": false,
+      "scope": "Canonical Spirit core under versioned V1 reconstruction; whole Gift/Trial/parents/W2 remain outside",
+      "source_genuine_origin_qualified": false
+    },
+    {
+      "mid": 3095,
+      "name": "ALL_OFF",
+      "request_keys": [
+        "partner_id"
+      ],
+      "effects": "Clearallbindings withoutconsumption",
+      "response": "spirit_equip:sixzeros",
+      "source": "CurrentHunqi callers +Backpack/NormalHero/SuperHero tables",
+      "contract": "I7C2H_SPIRIT_INPUT_LIFECYCLE",
+      "owner": "SpiritInstance withtypedCharacter/I5/Content composition",
+      "transaction": "Character400/sorted410 ->Spirit580/590 ->I5suffix",
+      "receipt": "RetainedSpiritlane andsemanticUUID, knownproofbefore newintent exceptread3112",
+      "reload": "MID81Spiritinventory +HeroMID1/rosterfullymaterializedpayload;no foreignfallback",
+      "consumer": "SPIRIT_INPUTS ->3A/3B qualifiedadapter thenselectedconsumers",
+      "required_proof": [
+        "rollback/UNKNOWN/replay/concurrency",
+        "sourceexactshape/reload",
+        "owner/reference/coherentread"
+      ],
+      "implemented": true,
+      "conditional_core_qualified": false,
+      "scope": "Canonical Spirit core under versioned V1 reconstruction; whole Gift/Trial/parents/W2 remain outside",
+      "source_genuine_origin_qualified": false
+    },
+    {
+      "mid": 3112,
+      "name": "GET_PROGRAMS",
+      "request_keys": [],
+      "effects": "Coherentownprogramread; noadmissionmutation",
+      "response": "arrayof{id,name,collocation:sixnumbers}",
+      "source": "CurrentHunqi callers +Backpack/NormalHero/SuperHero tables",
+      "contract": "I7C2H_SPIRIT_INPUT_LIFECYCLE",
+      "owner": "SpiritInstance withtypedCharacter/I5/Content composition",
+      "transaction": "Character400/sorted410 ->Spirit580/590 ->I5suffix",
+      "receipt": "RetainedSpiritlane andsemanticUUID, knownproofbefore newintent exceptread3112",
+      "reload": "MID81Spiritinventory +HeroMID1/rosterfullymaterializedpayload;no foreignfallback",
+      "consumer": "SPIRIT_INPUTS ->3A/3B qualifiedadapter thenselectedconsumers",
+      "required_proof": [
+        "rollback/UNKNOWN/replay/concurrency",
+        "sourceexactshape/reload",
+        "owner/reference/coherentread"
+      ],
+      "implemented": true,
+      "conditional_core_qualified": false,
+      "scope": "Canonical Spirit core under versioned V1 reconstruction; whole Gift/Trial/parents/W2 remain outside",
+      "source_genuine_origin_qualified": false
+    },
+    {
+      "mid": 3113,
+      "name": "SAVE_PROGRAM",
+      "request_keys": [
+        "name",
+        "collocation",
+        "id?"
+      ],
+      "effects": "Parseexact6pipe;1..10UTF8name;nonemptyuniqueownedrefs/positioncompat;uniqueprogramname;source20limit;monotonicID",
+      "response": "{id}",
+      "source": "CurrentHunqi callers +Backpack/NormalHero/SuperHero tables",
+      "contract": "I7C2H_SPIRIT_INPUT_LIFECYCLE",
+      "owner": "SpiritInstance withtypedCharacter/I5/Content composition",
+      "transaction": "Character400/sorted410 ->Spirit580/590 ->I5suffix",
+      "receipt": "RetainedSpiritlane andsemanticUUID, knownproofbefore newintent exceptread3112",
+      "reload": "MID81Spiritinventory +HeroMID1/rosterfullymaterializedpayload;no foreignfallback",
+      "consumer": "SPIRIT_INPUTS ->3A/3B qualifiedadapter thenselectedconsumers",
+      "required_proof": [
+        "rollback/UNKNOWN/replay/concurrency",
+        "sourceexactshape/reload",
+        "owner/reference/coherentread"
+      ],
+      "implemented": true,
+      "conditional_core_qualified": false,
+      "scope": "Canonical Spirit core under versioned V1 reconstruction; whole Gift/Trial/parents/W2 remain outside",
+      "source_genuine_origin_qualified": false
+    },
+    {
+      "mid": 3114,
+      "name": "DELETE_PROGRAM",
+      "request_keys": [
+        "id"
+      ],
+      "effects": "Removeprogram andderivedretentionreferences; doesnotdetachHero",
+      "response": "{}",
+      "source": "CurrentHunqi callers +Backpack/NormalHero/SuperHero tables",
+      "contract": "I7C2H_SPIRIT_INPUT_LIFECYCLE",
+      "owner": "SpiritInstance withtypedCharacter/I5/Content composition",
+      "transaction": "Character400/sorted410 ->Spirit580/590 ->I5suffix",
+      "receipt": "RetainedSpiritlane andsemanticUUID, knownproofbefore newintent exceptread3112",
+      "reload": "MID81Spiritinventory +HeroMID1/rosterfullymaterializedpayload;no foreignfallback",
+      "consumer": "SPIRIT_INPUTS ->3A/3B qualifiedadapter thenselectedconsumers",
+      "required_proof": [
+        "rollback/UNKNOWN/replay/concurrency",
+        "sourceexactshape/reload",
+        "owner/reference/coherentread"
+      ],
+      "implemented": true,
+      "conditional_core_qualified": false,
+      "scope": "Canonical Spirit core under versioned V1 reconstruction; whole Gift/Trial/parents/W2 remain outside",
+      "source_genuine_origin_qualified": false
+    },
+    {
+      "mid": 3115,
+      "name": "APPLY_PROGRAM",
+      "request_keys": [
+        "id",
+        "partner_id"
+      ],
+      "effects": "AtomicdetachselectedSpiritIDs fromotherHeroes theninstalltarget; source/target preplannedtypedlocks",
+      "response": "{}",
+      "source": "CurrentHunqi callers +Backpack/NormalHero/SuperHero tables",
+      "contract": "I7C2H_SPIRIT_INPUT_LIFECYCLE",
+      "owner": "SpiritInstance withtypedCharacter/I5/Content composition",
+      "transaction": "Character400/sorted410 ->Spirit580/590 ->I5suffix",
+      "receipt": "RetainedSpiritlane andsemanticUUID, knownproofbefore newintent exceptread3112",
+      "reload": "MID81Spiritinventory +HeroMID1/rosterfullymaterializedpayload;no foreignfallback",
+      "consumer": "SPIRIT_INPUTS ->3A/3B qualifiedadapter thenselectedconsumers",
+      "required_proof": [
+        "rollback/UNKNOWN/replay/concurrency",
+        "sourceexactshape/reload",
+        "owner/reference/coherentread"
+      ],
+      "implemented": true,
+      "conditional_core_qualified": false,
+      "scope": "Canonical Spirit core under versioned V1 reconstruction; whole Gift/Trial/parents/W2 remain outside",
+      "source_genuine_origin_qualified": false
+    }
+  ]
+}

@@ -1,0 +1,293 @@
+{
+  "schema": "gxb-i7a5b-structured-schemas/v1",
+  "stage": "I7A-5B",
+  "schemas": [
+    {
+      "id": "REPORT_ARENA_REFERENCE_V1",
+      "type": 1,
+      "channels": [
+        0,
+        2,
+        4
+      ],
+      "fields": {
+        "player_id": "positive_exact_integer",
+        "player_name": "utf8_string",
+        "enemy_name": "utf8_string",
+        "time": "nonnegative_exact_integer",
+        "is_attack": "integer_0_or_1",
+        "id": "positive_exact_integer"
+      },
+      "producer": [
+        "ArenaRecordWindow.lua",
+        "NewArenaRecordWindow.lua",
+        "ChampionsLeagueRecordWindow.lua",
+        "WarCampRecordsWindow.lua"
+      ],
+      "consumer": "MessageManager.lua fallback LOAD_ARENA_FIGHT_RECORDS with fighter_id=player_id,id=id",
+      "ownership_gap": "WarCamp/Champions use same fallback selector but canonical namespace/read-handler interoperability is not evidenced; future owner must explicitly qualify subtype or remain inactive",
+      "owner": "future selected arena/battle record owner; subtype namespace is provider-owned",
+      "activation": "INACTIVE_PROVIDER_UNAVAILABLE",
+      "evidence_class": "SOURCE_VISIBLE_SCHEMA_PLUS_EXPLICIT_FINITE_RECONSTRUCTION_POLICY",
+      "production_provider_present": false,
+      "live_gameplay_proved": false
+    },
+    {
+      "id": "REPORT_PEAK_REFERENCE_V1",
+      "type": 1,
+      "channels": [
+        0,
+        2,
+        4
+      ],
+      "fields": {
+        "player_id": "positive_exact_integer",
+        "player_name": "utf8_string",
+        "enemy_name": "utf8_string",
+        "time": "nonnegative_exact_integer",
+        "isAttack": "boolean",
+        "record_id": "positive_exact_integer",
+        "isWin": "boolean",
+        "attackInfo": {
+          "player_id": "positive_exact_integer",
+          "player_name": "utf8_string",
+          "lev": "positive_exact_integer",
+          "avatar_id": "nonnegative_exact_integer",
+          "avatar_frame_id": "nonnegative_exact_integer",
+          "conquer_lev": "nonnegative_exact_integer",
+          "conquer_loop_id": "positive_exact_integer"
+        },
+        "defendInfo": {
+          "player_id": "positive_exact_integer",
+          "player_name": "utf8_string",
+          "lev": "positive_exact_integer",
+          "avatar_id": "nonnegative_exact_integer",
+          "avatar_frame_id": "nonnegative_exact_integer",
+          "conquer_lev": "nonnegative_exact_integer",
+          "conquer_loop_id": "positive_exact_integer"
+        }
+      },
+      "producer": [
+        "ArenaRecordWindow.lua",
+        "NewArenaRecordWindow.lua"
+      ],
+      "consumer": "MessageManager getPeakRecordsDetail(player_id,record_id) then PeakArenaReportWindow profile fields",
+      "ownership_gap": "isAttack source is boolean comparison; isWin comes from owner response and exact original encoding is unrecovered. Planned canonical bool is a reconstruction choice; inactive parser may record bool/0/1 forms but provider activation must freeze safe Lua-visible normalization",
+      "owner": "future selected PeakArena record owner",
+      "activation": "INACTIVE_PROVIDER_UNAVAILABLE",
+      "evidence_class": "SOURCE_VISIBLE_SCHEMA_PLUS_EXPLICIT_FINITE_RECONSTRUCTION_POLICY",
+      "production_provider_present": false,
+      "live_gameplay_proved": false
+    },
+    {
+      "id": "LUCKY_SCRATCH_REFERENCE_V1",
+      "type": 2,
+      "channels": [
+        0,
+        2,
+        4
+      ],
+      "fields": {
+        "player_id": "positive_exact_integer",
+        "player_name": "utf8_string",
+        "share_gua": "integer_1",
+        "rand_card_group": "array_positive_exact_integers_max64",
+        "card_group": "array_positive_exact_integers_max64",
+        "scratch_status": "array_nonnegative_exact_integers_max64"
+      },
+      "producer": [
+        "ScratchCardRecordWindow.lua",
+        "RecordShareMenuWindow.lua"
+      ],
+      "consumer": "MessageManager share_gua branch -> ScratchCardRecordWindow; arrays are indexed/iterated, never bare maps",
+      "ownership_gap": "Exact activity-produced cardinalities/reward semantics remain future owner qualification; max64 is finite design budget, not original content truth",
+      "owner": "future scratch-card activity/share owner",
+      "activation": "INACTIVE_PROVIDER_UNAVAILABLE",
+      "evidence_class": "SOURCE_VISIBLE_SCHEMA_PLUS_EXPLICIT_FINITE_RECONSTRUCTION_POLICY",
+      "production_provider_present": false,
+      "live_gameplay_proved": false
+    },
+    {
+      "id": "ILLUSION_INVITE_V1",
+      "type": 3,
+      "channels": [
+        2,
+        4
+      ],
+      "fields": {
+        "room_id": "positive_exact_integer",
+        "type": "integer_3",
+        "boss_name": "utf8_string",
+        "room_lev": "positive_exact_integer"
+      },
+      "producer": [
+        "IllusionInviteWindow.lua"
+      ],
+      "consumer": "MessageManager guild or SERVICE->TEAM; room_id join target; room_lev/content level predicate",
+      "owner": "future Illusion room owner",
+      "activation": "INACTIVE_PROVIDER_UNAVAILABLE",
+      "evidence_class": "SOURCE_VISIBLE_SCHEMA_PLUS_EXPLICIT_FINITE_RECONSTRUCTION_POLICY",
+      "production_provider_present": false,
+      "live_gameplay_proved": false
+    },
+    {
+      "id": "OCCULT_INVITE_V1",
+      "type": 4,
+      "channels": [
+        2,
+        4
+      ],
+      "fields": {
+        "room_id": "positive_exact_integer",
+        "type": "integer_4",
+        "chapter_id": "positive_exact_integer",
+        "force": "nonnegative_exact_integer"
+      },
+      "producer": [
+        "OccultInviteWindow.lua"
+      ],
+      "consumer": "MessageManager guild or SERVICE->TEAM; chapter content lookup, force and room_id join",
+      "owner": "future Occult room owner",
+      "activation": "INACTIVE_PROVIDER_UNAVAILABLE",
+      "evidence_class": "SOURCE_VISIBLE_SCHEMA_PLUS_EXPLICIT_FINITE_RECONSTRUCTION_POLICY",
+      "production_provider_present": false,
+      "live_gameplay_proved": false
+    },
+    {
+      "id": "ADVENTURE_ILLUSION_INVITE_V1",
+      "type": 5,
+      "channels": [
+        2,
+        4
+      ],
+      "fields": {
+        "room_id": "positive_exact_integer",
+        "type": "integer_5",
+        "boss_name": "utf8_string",
+        "room_lev": "positive_exact_integer"
+      },
+      "producer": [
+        "AdventureIllusionInviteWindow.lua"
+      ],
+      "consumer": "MessageManager guild or SERVICE->TEAM; AdventureEvent Illusion join",
+      "owner": "future AdventureEvent Illusion room owner",
+      "activation": "INACTIVE_PROVIDER_UNAVAILABLE",
+      "evidence_class": "SOURCE_VISIBLE_SCHEMA_PLUS_EXPLICIT_FINITE_RECONSTRUCTION_POLICY",
+      "production_provider_present": false,
+      "live_gameplay_proved": false
+    },
+    {
+      "id": "ADVENTURE_DEFENSE_INVITE_V1",
+      "type": 6,
+      "channels": [
+        2,
+        4
+      ],
+      "fields": {
+        "room_id": "positive_exact_integer",
+        "type": "integer_6",
+        "room_lev": "positive_exact_integer"
+      },
+      "producer": [
+        "AdventureDefenseInviteWindow.lua"
+      ],
+      "consumer": "MessageManager guild or SERVICE->TEAM; AdventureEvent Defense join",
+      "owner": "future AdventureEvent Defense room owner",
+      "activation": "INACTIVE_PROVIDER_UNAVAILABLE",
+      "evidence_class": "SOURCE_VISIBLE_SCHEMA_PLUS_EXPLICIT_FINITE_RECONSTRUCTION_POLICY",
+      "production_provider_present": false,
+      "live_gameplay_proved": false
+    },
+    {
+      "id": "WAR_CAMP_BODY_V1",
+      "type": 7,
+      "channels": [
+        4
+      ],
+      "fields": {
+        "type": "integer_7",
+        "message": "utf8_string_common40_or_positive_exact_emoticon_id",
+        "msgType": "integer_0_or_1",
+        "selectType": "integer_5",
+        "roomID": "nonnegative_exact_integer_zero_is_source_default",
+        "camp": "nonnegative_exact_integer"
+      },
+      "producer": [
+        "GroupChatWnd.lua",
+        "GroupChatNewWnd.lua"
+      ],
+      "consumer": "GroupChat/GroupChatNew SERVICE event, selection/room/camp local display filters; MessageManager skips7",
+      "ownership_gap": "WarCampChatWindow does not pass room_id, so GroupChat defaults roomID=0; zero is source-visible display selector, not canonicalevent authority. Original server camp recipient policy unrecovered. Proposed owner-authenticated target audience (all-camp0 or exactcamp) must be resolved by canonical sender AND recipient owner reads, never broadcast-to-service then rely on UI filters",
+      "owner": "future WarCamp room/camp owner",
+      "activation": "INACTIVE_PROVIDER_UNAVAILABLE",
+      "evidence_class": "SOURCE_VISIBLE_SCHEMA_PLUS_EXPLICIT_FINITE_RECONSTRUCTION_POLICY",
+      "production_provider_present": false,
+      "live_gameplay_proved": false
+    },
+    {
+      "id": "RAGNAROK_INVITE_V1",
+      "type": 8,
+      "channels": [
+        2,
+        4
+      ],
+      "fields": {
+        "room_id": "positive_exact_integer",
+        "type": "integer_8",
+        "boss_name": "utf8_string",
+        "room_lev": "positive_exact_integer"
+      },
+      "producer": [
+        "RagnarokInviteWindow.lua"
+      ],
+      "consumer": "MessageManager guild or SERVICE->TEAM; activity and room eligibility remain mode owner",
+      "owner": "future Ragnarok room owner",
+      "activation": "INACTIVE_PROVIDER_UNAVAILABLE",
+      "evidence_class": "SOURCE_VISIBLE_SCHEMA_PLUS_EXPLICIT_FINITE_RECONSTRUCTION_POLICY",
+      "production_provider_present": false,
+      "live_gameplay_proved": false
+    }
+  ],
+  "schema_count": 9,
+  "nonzero_types": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8
+  ],
+  "outer_fields": [
+    "message",
+    "channel",
+    "type",
+    "token",
+    "region"
+  ],
+  "ordinary_type0_unchanged": true,
+  "outer_sender_or_room_authority_forbidden": true,
+  "wire_push": "Existing32783 nine-field canonical sender envelope, exacttype plus reconstructed JSON-string message; np_info unchanged inactive canonicalI4/I5. No TEAM physicalrole/newMID/ACK/time envelope invented",
+  "strict_json": "UTF8 valid oneobject only, no duplicate/unknownkeys, no trailingtokens/nullrequiredfields/nonfinite/fractional/unsafeinteger; do not accept cross-variant REPORT selectors",
+  "string_limits_policy": "Display strings <=256Unicodecodepoints (finite safety budget, canonicalowner may require narrower qualifiedcontent closure); groupCOMMON body <=40Unicodecodepoints, emoticon positiveinteger content-qualified",
+  "container_limits_policy": {
+    "encoded_json_bytes": 8192,
+    "max_depth": 4,
+    "max_total_object_keys": 64,
+    "max_total_container_values": 512,
+    "max_array_values_per_field": 64,
+    "exact_integer_max": 9007199254740991
+  },
+  "limits_classification": "EXPLICIT_RECONSTRUCTION_SAFETY_POLICY_NOT_ORIGINAL_SERVER_LIMITS",
+  "unknown36863": {
+    "status": "PRODUCER_GATED_UNKNOWN",
+    "producer_trigger": "UNRECOVERED",
+    "plan": "Retain separate source shape contract; no productionregistration/wire emit/auth trigger under5B",
+    "not_588_mail": true
+  },
+  "live_activation": "Requires selected canonicalowner/schema/source/content/actualruntime proof and owningnormalamendment. Nil/defaultproviders failclosed; fakecomponentprovider neverproductionqualification",
+  "pass": "642.0",
+  "selected_status": "SELECTED_RESEARCH_DESIGN_WITH_VALIDATED_NORMAL_SEAL_NOT_IMPLEMENTED",
+  "working_recovery_reference": "CP90 exact COLD checkpoint/source/probe caches"
+}

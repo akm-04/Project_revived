@@ -1,0 +1,2 @@
+$ go test ./internal/adapters/postgres/characterstore
+ok  	gxb.local/backend/v2/internal/adapters/postgres/characterstore	(cached)

@@ -1,0 +1,689 @@
+package registry
+
+import (
+	"bytes"
+	"context"
+	"encoding/hex"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"io"
+	"sort"
+	"strings"
+	"time"
+
+	"gxb.local/backend/v2/internal/content/builtin"
+	"gxb.local/backend/v2/internal/foundation/tx"
+)
+
+const (
+	ActivationSlot = "content"
+	BootstrapActor = "builtin-bootstrap"
+)
+
+var supportedCapabilities = [...]string{
+	"COSMETIC_TITLE_CONDITION_I7C6",
+	"ACHIEVEMENT_CATALOG_I7C4FA",
+	"CHAMPIONS_LEAGUE_I7C5F",
+	"CONQUER_MODE_I7C5E",
+	"ONE_ON_ONE_MODE_I7C5C",
+	"ARENA_MODE_I7C5D",
+	"TOP_FLOOR_MODE_I7C5B",
+	"ACHIEVEMENT_TIER_FACTS_I7C4B",
+	"COSMETIC_PRIVILEGE_I7C4A",
+	"STAT_INPUTS_I7C3B",
+	"STAT_RULES_I7C3A",
+	"CONQUER_INPUTS_I7C2J",
+	"EVOLUTION_INPUTS_I7C2I",
+	"SPIRIT_INPUTS_I7C2H",
+	"ELEMENT_INPUTS_I7C2G",
+	"INSCRIPTION_INPUTS_I7C2F",
+	"COURSE_INPUTS_I7C2E",
+	"BOOK_INPUTS_I7C2D",
+	"DORM_INPUTS_I7C2C",
+	"LIBRARY_INPUTS_I7C2B",
+	"PLAYER_DISPLAY_I7B6A",
+	"PUBLIC_PROFILE_SHOWCASE_SELECTION_I7B3A",
+	"PUBLIC_PROFILE_PREFERENCES_I7B2B",
+	"GUILD_BROADCAST_I7A8A",
+	"GUILD_INVITE_PRESENTATION_I7A8B",
+	"QUALIFIED_ORDINARY_STACK_ITEM_DEFINITIONS",
+	"SCALAR_CRYSTAL",
+	"SCALAR_MANA",
+	"PLAYER_EXP_R5",
+	"TEMPORAL_ENERGY_R5",
+	"TEMPORAL_SPIRIT_ENERGY_R5",
+	"TEMPORAL_SKILL_POINT_R5",
+	"FUNCTION_LEVEL_ELIGIBILITY_R5",
+	"HERO_CORE_CA2", "HERO_RAW_SKILLS_I7C2A",
+	"HERO_PROGRESSION_CA2",
+	"PET_CORE_CA3",
+	"PET_ACQUISITION_CA3",
+	"PET_PROGRESSION_CA3",
+	"EQUIPMENT_PRIMITIVES_CA4",
+	"HERO_EQUIPMENT_CA4_2",
+	"HERO_FUMO_CA4_3A",
+	"HERO_PROMOTION_RESTORATION_CA4_3B",
+	"PET_EQUIPMENT_CA4_4A",
+	"PET_PROMOTION_RESTORATION_CA4_4B",
+	"SUPER_EQUIPMENT_CA4_5",
+	"PRACTICE_CA6",
+	"CHARACTER_APPEARANCE_CA7",
+	"FRIEND_DM_EMOTICON_I7A6A",
+	"SOCIAL_GIFT_I7A7A",
+}
+
+type Bundle struct {
+	topFloorJSON                              []byte
+	oneOnOneJSON                              []byte
+	conquerModeJSON                           []byte
+	leagueJSON                                []byte
+	arenaJSON                                 []byte
+	achievementJSON                           []byte
+	privilegeJSON                             []byte
+	statInputsJSON                            []byte
+	statRulesJSON                             []byte
+	conquerInputsJSON                         []byte
+	evolutionInputsJSON                       []byte
+	spiritInputsJSON                          []byte
+	elementInputsJSON                         []byte
+	inscriptionInputsJSON                     []byte
+	courseInputsJSON                          []byte
+	bookInputsJSON                            []byte
+	dormInputsJSON                            []byte
+	libraryInputsJSON                         []byte
+	playerDisplayJSON                         []byte
+	publicShowcaseJSON                        []byte
+	publicProfileJSON                         []byte
+	guildInviteJSON                           []byte
+	guildBroadcastJSON                        []byte
+	socialGiftJSON                            []byte
+	emoticonsJSON                             []byte
+	manifest                                  builtin.Manifest
+	manifestJSON                              []byte
+	resourcesJSON                             []byte
+	progressionJSON                           []byte
+	functionGatesJSON                         []byte
+	objectivesJSON                            []byte
+	heroCoreJSON                              []byte
+	petCoreJSON                               []byte
+	petAcquisitionJSON                        []byte
+	petProgressionJSON                        []byte
+	equipmentPrimitivesJSON                   []byte
+	heroEquipmentJSON                         []byte
+	superEquipmentJSON                        []byte
+	heroFumoJSON                              []byte
+	heroPromotionRestorationJSON              []byte
+	petEquipmentJSON                          []byte
+	petPromotionRestorationJSON               []byte
+	practiceJSON                              []byte
+	appearanceJSON                            []byte
+	resourceCount                             int64
+	progressionCount                          int64
+	functionGateCount                         int64
+	objectiveCount                            int64
+	heroCount                                 int64
+	petCount                                  int64
+	petAcquisitionCount                       int64
+	petProgressionCount                       int64
+	equipmentPrimitiveCount                   int64
+	heroEquipmentCount                        int64
+	superEquipmentCount                       int64
+	heroFumoTargetCount                       int64
+	heroFumoMaterialCount                     int64
+	heroPromotionRestorationEquipmentCount    int64
+	heroPromotionRestorationFractionCount     int64
+	heroPromotionRestorationDenominationCount int64
+	petEquipmentCount                         int64
+	petPromotionRestorationEquipmentCount     int64
+	practiceCount                             int64
+	appearanceCount                           int64
+}
+
+func LoadBuiltinBundle() (Bundle, error) {
+	cat, err := builtin.Load()
+	if err != nil {
+		return Bundle{}, err
+	}
+	manifest, err := builtin.GeneratedFile("manifest.json")
+	if err != nil {
+		return Bundle{}, err
+	}
+	resources, err := builtin.GeneratedFile("resource_catalog.json")
+	if err != nil {
+		return Bundle{}, err
+	}
+	progression, err := builtin.GeneratedFile("player_progression.json")
+	if err != nil {
+		return Bundle{}, err
+	}
+	functions, err := builtin.GeneratedFile("function_gates.json")
+	if err != nil {
+		return Bundle{}, err
+	}
+	objectives, err := builtin.GeneratedFile("objective_catalog.json")
+	if err != nil {
+		return Bundle{}, err
+	}
+	heroCore, err := builtin.GeneratedFile("hero_core_catalog.json")
+	if err != nil {
+		return Bundle{}, err
+	}
+	petCore, err := builtin.GeneratedFile("pet_core_catalog.json")
+	if err != nil {
+		return Bundle{}, err
+	}
+	petAcquisition, err := builtin.GeneratedFile("pet_acquisition_catalog.json")
+	if err != nil {
+		return Bundle{}, err
+	}
+	petProgression, err := builtin.GeneratedFile("pet_progression_catalog.json")
+	if err != nil {
+		return Bundle{}, err
+	}
+	equipmentPrimitives, err := builtin.GeneratedFile("equipment_primitives_catalog.json")
+	if err != nil {
+		return Bundle{}, err
+	}
+	heroEquipment, err := builtin.GeneratedFile("hero_equipment_catalog.json")
+	if err != nil {
+		return Bundle{}, err
+	}
+	superEquipment, err := builtin.GeneratedFile("super_equipment_catalog.json")
+	if err != nil {
+		return Bundle{}, err
+	}
+	heroFumo, err := builtin.GeneratedFile("hero_fumo_catalog.json")
+	if err != nil {
+		return Bundle{}, err
+	}
+	heroPromotionRestoration, err := builtin.GeneratedFile("hero_promotion_restoration_catalog.json")
+	if err != nil {
+		return Bundle{}, err
+	}
+	petEquipment, err := builtin.GeneratedFile("pet_equipment_catalog.json")
+	if err != nil {
+		return Bundle{}, err
+	}
+	petPromotionRestoration, err := builtin.GeneratedFile("pet_promotion_restoration_catalog.json")
+	if err != nil {
+		return Bundle{}, err
+	}
+	practice, err := builtin.GeneratedFile("practice_catalog.json")
+	if err != nil {
+		return Bundle{}, err
+	}
+	appearance, err := builtin.GeneratedFile("appearance_catalog.json")
+	if err != nil {
+		return Bundle{}, err
+	}
+	emoticons, err := builtin.GeneratedFile("emoticon_catalog.json")
+	if err != nil {
+		return Bundle{}, err
+	}
+	broadcast, err := builtin.GeneratedFile("guild_broadcast_policy.json")
+	if err != nil {
+		return Bundle{}, err
+	}
+	socialGift, err := builtin.GeneratedFile("social_gift_catalog.json")
+	if err != nil {
+		return Bundle{}, err
+	}
+	invite, err := builtin.GeneratedFile("guild_invite_policy.json")
+	if err != nil {
+		return Bundle{}, err
+	}
+	publicShowcase, err := builtin.GeneratedFile("public_showcase_policy.json")
+	if err != nil {
+		return Bundle{}, err
+	}
+	var showcase builtin.PublicShowcasePolicy
+	decoder := json.NewDecoder(bytes.NewReader(publicShowcase))
+	decoder.DisallowUnknownFields()
+	if err = decoder.Decode(&showcase); err != nil {
+		return Bundle{}, err
+	}
+	if err = showcase.Validate(); err != nil {
+		return Bundle{}, err
+	}
+	publicProfile, err := builtin.GeneratedFile("public_profile_policy.json")
+	if err != nil {
+		return Bundle{}, err
+	}
+	display, err := builtin.GeneratedFile("player_display_catalog.json")
+	if err != nil {
+		return Bundle{}, err
+	}
+	courseInputs, err := builtin.GeneratedFile("course_input_catalog.json")
+	if err != nil {
+		return Bundle{}, err
+	}
+	bookInputs, err := builtin.GeneratedFile("book_input_catalog.json")
+	if err != nil {
+		return Bundle{}, err
+	}
+	dormInputs, err := builtin.GeneratedFile("dorm_input_catalog.json")
+	if err != nil {
+		return Bundle{}, err
+	}
+	libraryInputs, err := builtin.GeneratedFile("library_input_catalog.json")
+	if err != nil {
+		return Bundle{}, err
+	}
+	inscriptionInputs, err := builtin.GeneratedFile("inscription_input_catalog.json")
+	if err != nil {
+		return Bundle{}, err
+	}
+	elementInputs, err := builtin.GeneratedFile("element_input_catalog.json")
+	if err != nil {
+		return Bundle{}, err
+	}
+	spiritInputs, err := builtin.GeneratedFile("spirit_input_catalog.json")
+	if err != nil {
+		return Bundle{}, err
+	}
+	evolutionInputs, err := builtin.GeneratedFile("evolution_input_catalog.json")
+	if err != nil {
+		return Bundle{}, err
+	}
+	conquerInputs, err := builtin.GeneratedFile("conquer_input_catalog.json")
+	if err != nil {
+		return Bundle{}, err
+	}
+	statRules, err := builtin.GeneratedFile("stat_rule_catalog.json")
+	if err != nil {
+		return Bundle{}, err
+	}
+	statInputs, err := builtin.GeneratedFile("stat_input_catalog.json")
+	if err != nil {
+		return Bundle{}, err
+	}
+	privilege, err := builtin.GeneratedFile("privilege_catalog.json")
+	if err != nil {
+		return Bundle{}, err
+	}
+	achievement, err := builtin.GeneratedFile("achievement_catalog.json")
+	if err != nil {
+		return Bundle{}, err
+	}
+	topFloor, err := builtin.GeneratedFile("top_floor_catalog.json")
+	if err != nil {
+		return Bundle{}, err
+	}
+	oneOnOne, err := builtin.GeneratedFile("one_on_one_catalog.json")
+	if err != nil {
+		return Bundle{}, err
+	}
+	league, err := builtin.GeneratedFile("league_catalog.json")
+	if err != nil {
+		return Bundle{}, err
+	}
+	arena, err := builtin.GeneratedFile("arena_catalog.json")
+	if err != nil {
+		return Bundle{}, err
+	}
+	conquerMode, err := builtin.GeneratedFile("conquer_mode_catalog.json")
+	if err != nil {
+		return Bundle{}, err
+	}
+	b := Bundle{
+		topFloorJSON:                           append([]byte(nil), topFloor...),
+		oneOnOneJSON:                           append([]byte(nil), oneOnOne...),
+		conquerModeJSON:                        append([]byte(nil), conquerMode...),
+		leagueJSON:                             append([]byte(nil), league...),
+		arenaJSON:                              append([]byte(nil), arena...),
+		achievementJSON:                        append([]byte(nil), achievement...),
+		privilegeJSON:                          append([]byte(nil), privilege...),
+		statInputsJSON:                         append([]byte(nil), statInputs...),
+		statRulesJSON:                          append([]byte(nil), statRules...),
+		conquerInputsJSON:                      append([]byte(nil), conquerInputs...),
+		evolutionInputsJSON:                    append([]byte(nil), evolutionInputs...),
+		spiritInputsJSON:                       append([]byte(nil), spiritInputs...),
+		elementInputsJSON:                      append([]byte(nil), elementInputs...),
+		inscriptionInputsJSON:                  append([]byte(nil), inscriptionInputs...),
+		courseInputsJSON:                       append([]byte(nil), courseInputs...),
+		bookInputsJSON:                         append([]byte(nil), bookInputs...),
+		dormInputsJSON:                         append([]byte(nil), dormInputs...),
+		libraryInputsJSON:                      append([]byte(nil), libraryInputs...),
+		playerDisplayJSON:                      append([]byte(nil), display...),
+		publicShowcaseJSON:                     append([]byte(nil), publicShowcase...),
+		publicProfileJSON:                      append([]byte(nil), publicProfile...),
+		guildInviteJSON:                        append([]byte(nil), invite...),
+		guildBroadcastJSON:                     append([]byte(nil), broadcast...),
+		socialGiftJSON:                         append([]byte(nil), socialGift...),
+		emoticonsJSON:                          append([]byte(nil), emoticons...),
+		manifest:                               cat.Manifest,
+		manifestJSON:                           append([]byte(nil), manifest...),
+		resourcesJSON:                          append([]byte(nil), resources...),
+		progressionJSON:                        append([]byte(nil), progression...),
+		functionGatesJSON:                      append([]byte(nil), functions...),
+		objectivesJSON:                         append([]byte(nil), objectives...),
+		heroCoreJSON:                           append([]byte(nil), heroCore...),
+		petCoreJSON:                            append([]byte(nil), petCore...),
+		petAcquisitionJSON:                     append([]byte(nil), petAcquisition...),
+		petProgressionJSON:                     append([]byte(nil), petProgression...),
+		equipmentPrimitivesJSON:                append([]byte(nil), equipmentPrimitives...),
+		heroEquipmentJSON:                      append([]byte(nil), heroEquipment...),
+		superEquipmentJSON:                     append([]byte(nil), superEquipment...),
+		heroFumoJSON:                           append([]byte(nil), heroFumo...),
+		heroPromotionRestorationJSON:           append([]byte(nil), heroPromotionRestoration...),
+		petEquipmentJSON:                       append([]byte(nil), petEquipment...),
+		petPromotionRestorationJSON:            append([]byte(nil), petPromotionRestoration...),
+		practiceJSON:                           append([]byte(nil), practice...),
+		appearanceJSON:                         append([]byte(nil), appearance...),
+		resourceCount:                          int64(len(cat.Resources.Resources)),
+		progressionCount:                       int64(len(cat.PlayerProgression.Rows)),
+		functionGateCount:                      int64(len(cat.FunctionGates.Gates)),
+		objectiveCount:                         int64(len(cat.Objectives.Definitions)),
+		heroCount:                              int64(len(cat.HeroCore.Templates)),
+		petCount:                               int64(len(cat.PetCore.Templates)),
+		petAcquisitionCount:                    int64(len(cat.PetAcquisition.Templates)),
+		petProgressionCount:                    int64(len(cat.PetProgression.Templates)),
+		equipmentPrimitiveCount:                int64(len(cat.EquipmentPrimitives.Items)),
+		heroEquipmentCount:                     int64(len(cat.HeroEquipment.Positions)),
+		superEquipmentCount:                    int64(len(cat.SuperEquipment.Positions)),
+		heroFumoTargetCount:                    int64(len(cat.HeroFumo.Targets)),
+		heroFumoMaterialCount:                  int64(len(cat.HeroFumo.Materials)),
+		heroPromotionRestorationEquipmentCount: int64(len(cat.HeroPromotionRestoration.EligibleEquipment)),
+		heroPromotionRestorationFractionCount:  int64(len(cat.HeroPromotionRestoration.QualityFractions)),
+		heroPromotionRestorationDenominationCount: int64(len(cat.HeroPromotionRestoration.Denominations)),
+		petEquipmentCount:                         int64(len(cat.PetEquipment.Positions)),
+		petPromotionRestorationEquipmentCount:     int64(len(cat.PetPromotionRestoration.EligibleEquipment)),
+		practiceCount:                             int64(len(cat.Practice.Methods) + len(cat.Practice.Locks) + len(cat.Practice.VIPBless) + len(cat.Practice.HeroThresholds) + len(cat.Practice.PetThresholds) + 1),
+		appearanceCount:                           int64(len(cat.Appearance.QualifiedSkinDefinitions) + len(cat.Appearance.QualifiedSkinAcquisitionItems) + len(cat.Appearance.PaidLIVEDefinitions) + len(cat.Appearance.PetHomeStyleDefinitions)),
+	}
+	if err := b.Validate(); err != nil {
+		return Bundle{}, err
+	}
+	return b, nil
+}
+
+func (b Bundle) Validate() error {
+	if len(b.manifest.RevisionID) != 64 || strings.ToLower(b.manifest.RevisionID) != b.manifest.RevisionID {
+		return errors.New("content registry: invalid bundle revision id")
+	}
+	if raw, err := hex.DecodeString(b.manifest.RevisionID); err != nil || len(raw) != 32 {
+		return errors.New("content registry: bundle revision id is not SHA-256 hex")
+	}
+	if b.manifest.SchemaVersion != builtin.SchemaVersion {
+		return fmt.Errorf("content registry: unsupported bundle schema %d", b.manifest.SchemaVersion)
+	}
+	for name, raw := range map[string][]byte{"league": b.leagueJSON, "conquer-mode": b.conquerModeJSON, "arena": b.arenaJSON, "one-on-one": b.oneOnOneJSON, "top-floor": b.topFloorJSON, "achievement": b.achievementJSON, "privilege": b.privilegeJSON, "stat-inputs": b.statInputsJSON, "stat-rules": b.statRulesJSON, "conquer-inputs": b.conquerInputsJSON, "evolution-inputs": b.evolutionInputsJSON, "spirit-inputs": b.spiritInputsJSON, "element-inputs": b.elementInputsJSON, "inscription-inputs": b.inscriptionInputsJSON, "course-inputs": b.courseInputsJSON, "book-inputs": b.bookInputsJSON, "dorm-inputs": b.dormInputsJSON, "library-inputs": b.libraryInputsJSON, "manifest": b.manifestJSON, "resources": b.resourcesJSON, "progression": b.progressionJSON, "functions": b.functionGatesJSON, "objectives": b.objectivesJSON, "hero-core": b.heroCoreJSON, "pet-core": b.petCoreJSON, "pet-acquisition": b.petAcquisitionJSON, "pet-progression": b.petProgressionJSON, "equipment-primitives": b.equipmentPrimitivesJSON, "hero-equipment": b.heroEquipmentJSON, "super-equipment": b.superEquipmentJSON, "hero-fumo": b.heroFumoJSON, "hero-promotion-restoration": b.heroPromotionRestorationJSON, "pet-equipment": b.petEquipmentJSON, "pet-promotion-restoration": b.petPromotionRestorationJSON, "practice": b.practiceJSON, "appearance": b.appearanceJSON, "emoticons": b.emoticonsJSON, "social-gift": b.socialGiftJSON, "guild-invite": b.guildInviteJSON, "guild-broadcast": b.guildBroadcastJSON} {
+		if len(raw) == 0 || !json.Valid(raw) {
+			return fmt.Errorf("content registry: invalid %s JSON", name)
+		}
+	}
+	if b.resourceCount < 0 || b.progressionCount < 0 || b.functionGateCount < 0 || b.objectiveCount < 0 || b.heroCount < 0 || b.petCount < 0 || b.petAcquisitionCount < 0 || b.petProgressionCount < 0 || b.equipmentPrimitiveCount < 0 || b.heroEquipmentCount < 0 || b.superEquipmentCount < 0 || b.heroFumoTargetCount < 0 || b.heroFumoMaterialCount < 0 || b.heroPromotionRestorationEquipmentCount < 0 || b.heroPromotionRestorationFractionCount < 0 || b.heroPromotionRestorationDenominationCount < 0 || b.petEquipmentCount < 0 || b.petPromotionRestorationEquipmentCount < 0 || b.practiceCount < 0 || b.appearanceCount < 0 {
+		return errors.New("content registry: invalid negative catalog count")
+	}
+	return nil
+}
+
+func (b Bundle) GuildInviteJSON() []byte     { return append([]byte(nil), b.guildInviteJSON...) }
+func (b Bundle) AchievementJSON() []byte     { return append([]byte(nil), b.achievementJSON...) }
+func (b Bundle) TopFloorJSON() []byte        { return append([]byte(nil), b.topFloorJSON...) }
+func (b Bundle) OneOnOneJSON() []byte        { return append([]byte(nil), b.oneOnOneJSON...) }
+func (b Bundle) LeagueJSON() []byte          { return append([]byte(nil), b.leagueJSON...) }
+func (b Bundle) ArenaJSON() []byte           { return append([]byte(nil), b.arenaJSON...) }
+func (b Bundle) ConquerModeJSON() []byte     { return append([]byte(nil), b.conquerModeJSON...) }
+func (b Bundle) PrivilegeJSON() []byte       { return append([]byte(nil), b.privilegeJSON...) }
+func (b Bundle) StatInputsJSON() []byte      { return append([]byte(nil), b.statInputsJSON...) }
+func (b Bundle) StatRulesJSON() []byte       { return append([]byte(nil), b.statRulesJSON...) }
+func (b Bundle) ConquerInputsJSON() []byte   { return append([]byte(nil), b.conquerInputsJSON...) }
+func (b Bundle) EvolutionInputsJSON() []byte { return append([]byte(nil), b.evolutionInputsJSON...) }
+func (b Bundle) SpiritInputsJSON() []byte    { return append([]byte(nil), b.spiritInputsJSON...) }
+func (b Bundle) ElementInputsJSON() []byte   { return append([]byte(nil), b.elementInputsJSON...) }
+func (b Bundle) InscriptionInputsJSON() []byte {
+	return append([]byte(nil), b.inscriptionInputsJSON...)
+}
+func (b Bundle) CourseInputsJSON() []byte   { return append([]byte(nil), b.courseInputsJSON...) }
+func (b Bundle) BookInputsJSON() []byte     { return append([]byte(nil), b.bookInputsJSON...) }
+func (b Bundle) DormInputsJSON() []byte     { return append([]byte(nil), b.dormInputsJSON...) }
+func (b Bundle) LibraryInputsJSON() []byte  { return append([]byte(nil), b.libraryInputsJSON...) }
+func (b Bundle) PlayerDisplayJSON() []byte  { return append([]byte(nil), b.playerDisplayJSON...) }
+func (b Bundle) PublicShowcaseJSON() []byte { return append([]byte(nil), b.publicShowcaseJSON...) }
+func (b Bundle) PublicProfileJSON() []byte  { return append([]byte(nil), b.publicProfileJSON...) }
+func (b Bundle) GuildBroadcastJSON() []byte { return append([]byte(nil), b.guildBroadcastJSON...) }
+func (b Bundle) SocialGiftJSON() []byte     { return append([]byte(nil), b.socialGiftJSON...) }
+func (b Bundle) EmoticonsJSON() []byte      { return append([]byte(nil), b.emoticonsJSON...) }
+func (b Bundle) RevisionID() string         { return b.manifest.RevisionID }
+func (b Bundle) SchemaVersion() int         { return b.manifest.SchemaVersion }
+func (b Bundle) CompilerVersion() string    { return b.manifest.CompilerVersion }
+func (b Bundle) ParserVersion() string      { return b.manifest.ParserVersion }
+func (b Bundle) ManifestJSON() []byte       { return append([]byte(nil), b.manifestJSON...) }
+func (b Bundle) ResourcesJSON() []byte      { return append([]byte(nil), b.resourcesJSON...) }
+func (b Bundle) ProgressionJSON() []byte    { return append([]byte(nil), b.progressionJSON...) }
+func (b Bundle) FunctionGatesJSON() []byte  { return append([]byte(nil), b.functionGatesJSON...) }
+func (b Bundle) ObjectivesJSON() []byte     { return append([]byte(nil), b.objectivesJSON...) }
+func (b Bundle) HeroCoreJSON() []byte       { return append([]byte(nil), b.heroCoreJSON...) }
+func (b Bundle) PetCoreJSON() []byte        { return append([]byte(nil), b.petCoreJSON...) }
+func (b Bundle) PetAcquisitionJSON() []byte { return append([]byte(nil), b.petAcquisitionJSON...) }
+func (b Bundle) PetProgressionJSON() []byte { return append([]byte(nil), b.petProgressionJSON...) }
+func (b Bundle) EquipmentPrimitivesJSON() []byte {
+	return append([]byte(nil), b.equipmentPrimitivesJSON...)
+}
+func (b Bundle) HeroEquipmentJSON() []byte  { return append([]byte(nil), b.heroEquipmentJSON...) }
+func (b Bundle) SuperEquipmentJSON() []byte { return append([]byte(nil), b.superEquipmentJSON...) }
+func (b Bundle) HeroFumoJSON() []byte       { return append([]byte(nil), b.heroFumoJSON...) }
+func (b Bundle) HeroPromotionRestorationJSON() []byte {
+	return append([]byte(nil), b.heroPromotionRestorationJSON...)
+}
+func (b Bundle) PetEquipmentJSON() []byte { return append([]byte(nil), b.petEquipmentJSON...) }
+func (b Bundle) PetPromotionRestorationJSON() []byte {
+	return append([]byte(nil), b.petPromotionRestorationJSON...)
+}
+func (b Bundle) PracticeJSON() []byte   { return append([]byte(nil), b.practiceJSON...) }
+func (b Bundle) AppearanceJSON() []byte { return append([]byte(nil), b.appearanceJSON...) }
+func (b Bundle) ExpectedCounts() (resources, progression, functions, objectives, heroes, pets, petAcquisition, petProgression, equipmentPrimitives, heroEquipment, superEquipment, heroFumoTargets, heroFumoMaterials, heroPromotionRestorationEquipment, heroPromotionRestorationFractions, heroPromotionRestorationDenominations, petEquipment, petPromotionRestorationEquipment, practice, appearance int64) {
+	return b.resourceCount, b.progressionCount, b.functionGateCount, b.objectiveCount, b.heroCount, b.petCount, b.petAcquisitionCount, b.petProgressionCount, b.equipmentPrimitiveCount, b.heroEquipmentCount, b.superEquipmentCount, b.heroFumoTargetCount, b.heroFumoMaterialCount, b.heroPromotionRestorationEquipmentCount, b.heroPromotionRestorationFractionCount, b.heroPromotionRestorationDenominationCount, b.petEquipmentCount, b.petPromotionRestorationEquipmentCount, b.practiceCount, b.appearanceCount
+}
+
+type ProviderSet struct{ names map[string]struct{} }
+
+func NewProviderSet(names ...string) (ProviderSet, error) {
+	m := make(map[string]struct{}, len(names))
+	for _, raw := range names {
+		n := strings.TrimSpace(raw)
+		if n == "" || n != raw {
+			return ProviderSet{}, errors.New("content registry: blank capability")
+		}
+		if _, ok := m[n]; ok {
+			return ProviderSet{}, fmt.Errorf("content registry: duplicate capability %q", n)
+		}
+		m[n] = struct{}{}
+	}
+	return ProviderSet{names: m}, nil
+}
+
+func DefaultProviderSet() ProviderSet {
+	p, err := NewProviderSet(supportedCapabilities[:]...)
+	if err != nil {
+		panic(err)
+	}
+	return p
+}
+
+func (p ProviderSet) SupportsAll(names []string) error {
+	seen := make(map[string]struct{}, len(names))
+	for _, raw := range names {
+		n := strings.TrimSpace(raw)
+		if n == "" || n != raw {
+			return errors.New("content registry: active manifest contains blank capability")
+		}
+		if _, ok := seen[n]; ok {
+			return fmt.Errorf("content registry: active manifest duplicate capability %q", n)
+		}
+		seen[n] = struct{}{}
+		if _, ok := p.names[n]; !ok {
+			return fmt.Errorf("content registry: unsupported capability %q", n)
+		}
+	}
+	return nil
+}
+
+func (p ProviderSet) Names() []string {
+	out := make([]string, 0, len(p.names))
+	for n := range p.names {
+		out = append(out, n)
+	}
+	sort.Strings(out)
+	return out
+}
+
+type ActivationIdentity struct {
+	RevisionID  string
+	Version     int64
+	ActivatedAt time.Time
+	ActivatedBy string
+}
+
+func (a ActivationIdentity) Validate() error {
+	if a.RevisionID == "" || a.Version <= 0 {
+		return errors.New("content registry: invalid activation identity")
+	}
+	return nil
+}
+
+type ActiveSummary struct {
+	Activation    ActivationIdentity
+	SchemaVersion int
+	ManifestJSON  []byte
+}
+
+type Verification struct {
+	TopFloorCount                             int64
+	OneOnOneCount                             int64
+	LeagueCount                               int64
+	ArenaCount                                int64
+	ConquerModeCount                          int64
+	AchievementCount                          int64
+	PrivilegeCount                            int64
+	StatInputsCount                           int64
+	StatRulesCount                            int64
+	ConquerInputsCount                        int64
+	EvolutionInputsCount                      int64
+	SpiritInputsCount                         int64
+	ElementInputsCount                        int64
+	InscriptionInputsCount                    int64
+	CourseInputsCount                         int64
+	BookInputsCount                           int64
+	DormInputsCount                           int64
+	LibraryInputsCount                        int64
+	PlayerDisplayCount                        int64
+	PublicShowcaseCount                       int64
+	PublicProfileCount                        int64
+	GuildInviteCount                          int64
+	GuildBroadcastCount                       int64
+	EmoticonCount                             int64
+	Exact                                     bool
+	ResourceCount                             int64
+	ProgressionCount                          int64
+	FunctionGateCount                         int64
+	ObjectiveCount                            int64
+	HeroCount                                 int64
+	PetCount                                  int64
+	PetAcquisitionCount                       int64
+	PetProgressionCount                       int64
+	EquipmentPrimitiveCount                   int64
+	HeroEquipmentCount                        int64
+	SuperEquipmentCount                       int64
+	HeroFumoTargetCount                       int64
+	HeroFumoMaterialCount                     int64
+	HeroPromotionRestorationEquipmentCount    int64
+	HeroPromotionRestorationFractionCount     int64
+	HeroPromotionRestorationDenominationCount int64
+	PetEquipmentCount                         int64
+	PetPromotionRestorationEquipmentCount     int64
+	PracticeCount                             int64
+	AppearanceCount                           int64
+}
+
+func (v Verification) Matches(b Bundle) bool {
+	r, p, f, o, h, pet, petAcquisition, petProgression, equipmentPrimitives, heroEquipment, superEquipment, heroFumoTargets, heroFumoMaterials, restorationEquipment, restorationFractions, restorationDenominations, petEquipment, petRestorationEquipment, practice, appearance := b.ExpectedCounts()
+	return v.LeagueCount == 1 && v.ConquerModeCount == 1 && v.ArenaCount == 1 && v.OneOnOneCount == 1 && v.TopFloorCount == 1 && v.AchievementCount == 1 && v.PrivilegeCount == 1 && v.StatInputsCount == 1 && v.StatRulesCount == 1 && v.ConquerInputsCount == 1 && v.EvolutionInputsCount == 1 && v.SpiritInputsCount == 1 && v.ElementInputsCount == 1 && v.InscriptionInputsCount == 1 && v.CourseInputsCount == 1 && v.BookInputsCount == 1 && v.DormInputsCount == 1 && v.LibraryInputsCount == 1 && v.PlayerDisplayCount == 1 && v.PublicShowcaseCount == 1 && v.PublicProfileCount == 1 && v.GuildInviteCount == 1 && v.GuildBroadcastCount == 1 && v.Exact && v.EmoticonCount == 85 && v.ResourceCount == r && v.ProgressionCount == p && v.FunctionGateCount == f && v.ObjectiveCount == o && v.HeroCount == h && v.PetCount == pet && v.PetAcquisitionCount == petAcquisition && v.PetProgressionCount == petProgression && v.EquipmentPrimitiveCount == equipmentPrimitives && v.HeroEquipmentCount == heroEquipment && v.SuperEquipmentCount == superEquipment && v.HeroFumoTargetCount == heroFumoTargets && v.HeroFumoMaterialCount == heroFumoMaterials && v.HeroPromotionRestorationEquipmentCount == restorationEquipment && v.HeroPromotionRestorationFractionCount == restorationFractions && v.HeroPromotionRestorationDenominationCount == restorationDenominations && v.PetEquipmentCount == petEquipment && v.PetPromotionRestorationEquipmentCount == petRestorationEquipment && v.PracticeCount == practice && v.AppearanceCount == appearance
+}
+
+// Repository is the canonical content-registry persistence port. It receives
+// caller-owned transactions/queryers and never starts/commits transactions.
+type Repository interface {
+	LockRegistry(context.Context, tx.Tx) error
+	TryInsertRevision(context.Context, tx.Tx, Bundle) (bool, error)
+	InsertResources(context.Context, tx.Tx, Bundle) (int64, error)
+	InsertProgression(context.Context, tx.Tx, Bundle) (int64, error)
+	InsertFunctionGates(context.Context, tx.Tx, Bundle) (int64, error)
+	InsertObjectives(context.Context, tx.Tx, Bundle) (int64, error)
+	InsertHeroCore(context.Context, tx.Tx, Bundle) (int64, error)
+	InsertPetCore(context.Context, tx.Tx, Bundle) (int64, error)
+	InsertPetAcquisition(context.Context, tx.Tx, Bundle) (int64, error)
+	InsertPetProgression(context.Context, tx.Tx, Bundle) (int64, error)
+	InsertEquipmentPrimitives(context.Context, tx.Tx, Bundle) (int64, error)
+	InsertHeroEquipment(context.Context, tx.Tx, Bundle) (int64, error)
+	InsertSuperEquipment(context.Context, tx.Tx, Bundle) (int64, error)
+	InsertHeroFumo(context.Context, tx.Tx, Bundle) (targets int64, materials int64, err error)
+	InsertHeroPromotionRestoration(context.Context, tx.Tx, Bundle) (equipment int64, fractions int64, denominations int64, err error)
+	InsertPetEquipment(context.Context, tx.Tx, Bundle) (int64, error)
+	InsertPetPromotionRestoration(context.Context, tx.Tx, Bundle) (int64, error)
+	InsertPractice(context.Context, tx.Tx, Bundle) (int64, error)
+	InsertAppearance(context.Context, tx.Tx, Bundle) (int64, error)
+	InsertAchievement(context.Context, tx.Tx, Bundle) (int64, error)
+	InsertTopFloor(context.Context, tx.Tx, Bundle) (int64, error)
+	InsertOneOnOne(context.Context, tx.Tx, Bundle) (int64, error)
+	InsertLeague(context.Context, tx.Tx, Bundle) (int64, error)
+	InsertArena(context.Context, tx.Tx, Bundle) (int64, error)
+	InsertConquerMode(context.Context, tx.Tx, Bundle) (int64, error)
+	InsertPrivilege(context.Context, tx.Tx, Bundle) (int64, error)
+	InsertStatInputs(context.Context, tx.Tx, Bundle) (int64, error)
+	InsertStatRules(context.Context, tx.Tx, Bundle) (int64, error)
+	InsertConquerInputs(context.Context, tx.Tx, Bundle) (int64, error)
+	InsertEvolutionInputs(context.Context, tx.Tx, Bundle) (int64, error)
+	InsertSpiritInputs(context.Context, tx.Tx, Bundle) (int64, error)
+	InsertElementInputs(context.Context, tx.Tx, Bundle) (int64, error)
+	InsertInscriptionInputs(context.Context, tx.Tx, Bundle) (int64, error)
+	InsertCourseInputs(context.Context, tx.Tx, Bundle) (int64, error)
+	InsertBookInputs(context.Context, tx.Tx, Bundle) (int64, error)
+	InsertDormInputs(context.Context, tx.Tx, Bundle) (int64, error)
+	InsertLibraryInputs(context.Context, tx.Tx, Bundle) (int64, error)
+	InsertPlayerDisplay(context.Context, tx.Tx, Bundle) (int64, error)
+	InsertPublicShowcase(context.Context, tx.Tx, Bundle) (int64, error)
+	InsertPublicProfile(context.Context, tx.Tx, Bundle) (int64, error)
+	InsertGuildBroadcast(context.Context, tx.Tx, Bundle) (int64, error)
+	InsertGuildInvite(context.Context, tx.Tx, Bundle) (int64, error)
+	InsertSocialGift(context.Context, tx.Tx, Bundle) (int64, error)
+	InsertEmoticons(context.Context, tx.Tx, Bundle) (int64, error)
+	VerifyRevision(context.Context, tx.Queryer, Bundle) (Verification, error)
+	ReadActivation(context.Context, tx.Queryer) (ActivationIdentity, bool, error)
+	ReadActiveSummary(context.Context, tx.Queryer) (ActiveSummary, bool, error)
+	BootstrapActivation(context.Context, tx.Tx, string, time.Time, string) (bool, error)
+	ActivateCAS(context.Context, tx.Tx, string, time.Time, string, ActivationIdentity) (bool, error)
+}
+
+// DecodeManifestStrict decodes the durable manifest for readiness checks.
+func DecodeManifestStrict(raw []byte) (builtin.Manifest, error) {
+	var m builtin.Manifest
+	dec := json.NewDecoder(bytes.NewReader(raw))
+	dec.DisallowUnknownFields()
+	if err := dec.Decode(&m); err != nil {
+		return m, fmt.Errorf("content registry: decode active manifest: %w", err)
+	}
+	if err := requireEOF(dec); err != nil {
+		return m, err
+	}
+	if len(m.RevisionID) != 64 || m.SchemaVersion <= 0 || m.EnabledCapabilities == nil {
+		return m, errors.New("content registry: active manifest missing revision/schema")
+	}
+	if _, err := hex.DecodeString(m.RevisionID); err != nil || strings.ToLower(m.RevisionID) != m.RevisionID {
+		return m, errors.New("content registry: active revision must be SHA256 hex")
+	}
+	return m, nil
+}
+func requireEOF(dec *json.Decoder) error {
+	var x any
+	err := dec.Decode(&x)
+	if err == io.EOF {
+		return nil
+	}
+	if err != nil {
+		return fmt.Errorf("content registry: trailing manifest JSON: %w", err)
+	}
+	return errors.New("content registry: trailing manifest JSON")
+}

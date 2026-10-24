@@ -1,0 +1,3 @@
+classification=COMPATIBILITY_COPY_ONLY
+ok  	gxb.local/backend/v2/internal/application/characterasset	(cached)
+ok  	gxb.local/backend/v2/internal/archguard	1.252s

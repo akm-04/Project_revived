@@ -1,0 +1,47 @@
+ok  	gxb.local/backend/v2/internal/domain/character	0.001s
+?   	gxb.local/backend/v2/internal/domain/combat	[no test files]
+?   	gxb.local/backend/v2/internal/domain/commerce	[no test files]
+?   	gxb.local/backend/v2/internal/domain/control	[no test files]
+ok  	gxb.local/backend/v2/internal/domain/economy	0.002s
+ok  	gxb.local/backend/v2/internal/domain/generation	0.001s
+ok  	gxb.local/backend/v2/internal/domain/grant	0.001s
+?   	gxb.local/backend/v2/internal/domain/guild	[no test files]
+ok  	gxb.local/backend/v2/internal/domain/identity	0.001s
+ok  	gxb.local/backend/v2/internal/domain/logicalserver	0.001s
+ok  	gxb.local/backend/v2/internal/domain/mail	0.001s
+?   	gxb.local/backend/v2/internal/domain/modes	[no test files]
+ok  	gxb.local/backend/v2/internal/domain/objective	0.001s
+ok  	gxb.local/backend/v2/internal/domain/player	0.002s
+?   	gxb.local/backend/v2/internal/domain/profile	[no test files]
+ok  	gxb.local/backend/v2/internal/domain/realtimeauth	0.001s
+ok  	gxb.local/backend/v2/internal/domain/redeem	0.001s
+?   	gxb.local/backend/v2/internal/domain/social	[no test files]
+?   	gxb.local/backend/v2/internal/foundation/audit	[no test files]
+?   	gxb.local/backend/v2/internal/foundation/clock	[no test files]
+ok  	gxb.local/backend/v2/internal/foundation/config	0.001s
+ok  	gxb.local/backend/v2/internal/foundation/ids	0.001s
+ok  	gxb.local/backend/v2/internal/foundation/lockkey	0.001s
+ok  	gxb.local/backend/v2/internal/foundation/obligation	0.001s
+ok  	gxb.local/backend/v2/internal/foundation/observability	0.002s
+ok  	gxb.local/backend/v2/internal/foundation/operation	0.001s
+ok  	gxb.local/backend/v2/internal/foundation/policy	0.002s
+ok  	gxb.local/backend/v2/internal/foundation/receipt	0.001s
+ok  	gxb.local/backend/v2/internal/foundation/replaycatalog	0.002s
+ok  	gxb.local/backend/v2/internal/foundation/tx	0.007s
+?   	gxb.local/backend/v2/internal/projection/activity	[no test files]
+ok  	gxb.local/backend/v2/internal/projection/backpack	0.001s
+ok  	gxb.local/backend/v2/internal/projection/hero	0.002s
+ok  	gxb.local/backend/v2/internal/projection/lobby	0.047s
+?   	gxb.local/backend/v2/internal/projection/ota	[no test files]
+ok  	gxb.local/backend/v2/internal/projection/pet	0.001s
+?   	gxb.local/backend/v2/internal/projection/publication	[no test files]
+?   	gxb.local/backend/v2/internal/projection/publicplayer	[no test files]
+?   	gxb.local/backend/v2/internal/projection/ranking	[no test files]
+?   	gxb.local/backend/v2/internal/projection/realtimeview	[no test files]
+ok  	gxb.local/backend/v2/internal/protocol/amf3	0.002s
+ok  	gxb.local/backend/v2/internal/protocol/httpedge	0.010s
+?   	gxb.local/backend/v2/internal/protocol/limits	[no test files]
+ok  	gxb.local/backend/v2/internal/protocol/mids	0.002s
+?   	gxb.local/backend/v2/internal/protocol/observe	[no test files]
+ok  	gxb.local/backend/v2/internal/protocol/realtime	0.002s
+?   	gxb.local/backend/v2/internal/protocol/wire	[no test files]

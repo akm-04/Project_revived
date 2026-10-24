@@ -1,0 +1,62 @@
+{
+  "schema_version": 1,
+  "stage": "I7A-8A",
+  "selected_passmap_archive_sha256": "9283cd932f67d6fd68bae8c976b2c758bdf5a97bea4deb16cd44a397b0c06313",
+  "accepted_base_backend_sha256": "12d5c1b21658df0458eefdd9e9b8a96215ca0e04343699fb756311409ecb3478",
+  "contracts": {
+    "i7a8a_implementation_contract": {
+      "path": "docs/i7a8a/PASS652_I7A8A_IMPLEMENTATION_CONTRACT.json",
+      "sha256": "16acc22ab2da585d2d3ed3c39852c2a793a5c0f7318a83eb57360559692c49c3"
+    },
+    "i7a8a_data_identity_receipt_contract": {
+      "path": "docs/i7a8a/PASS652_I7A8A_DATA_IDENTITY_RECEIPT_CONTRACT.json",
+      "sha256": "57f25389b31db2b65223796817ce7e3d0236a432aa2d75267bc9be3a9c7198a1"
+    },
+    "i7a8a_worker_recovery_contract": {
+      "path": "docs/i7a8a/PASS652_I7A8A_WORKER_RECOVERY_CONTRACT.json",
+      "sha256": "2f6372fe5ab9622554b28f901746feef01f0e07b3e7ec05f0211f20d01941b29"
+    },
+    "i7a8a_wire_time_content_policy": {
+      "path": "docs/i7a8a/PASS652_I7A8A_WIRE_TIME_CONTENT_POLICY.json",
+      "sha256": "9b7dc5fdd482db3cfbe5e7b1c20c14a77d77d502bb8d3f44a2c2cd8a4b0a355e"
+    },
+    "i7a8a_d14_extension_record": {
+      "path": "docs/i7a8a/PASS652_I7A8A_D14_EXTENSION_RECORD.json",
+      "sha256": "c57980db5d0e10471bf08ce8a8a9aa261a9e5a0d81133460736a9e1f9d0a7b66"
+    },
+    "i7a8a_acceptance_matrix": {
+      "path": "docs/i7a8a/PASS652_I7A8A_ACCEPTANCE_MATRIX.json",
+      "sha256": "f399e462cb9db1a2b5efd4948a91e5cab5e479bba5868b24300cde898ba2c5b0"
+    },
+    "i7a8a_name_snapshot_contract": {
+      "path": "docs/i7a8a/PASS653_I7A8A_NAME_SNAPSHOT_CONSERVATIVE_CONTRACT.json",
+      "sha256": "eafca811508b260fa7a5db56ec41a39515a75fb787ff1be671ae4e0b939965ea"
+    },
+    "i7a8a_context_precision_contract": {
+      "path": "docs/i7a8a/PASS653_I7A8A_OPERATION_CONTEXT_PRECISION_CONTRACT.json",
+      "sha256": "cf478cb00b6a15c80c21603a6ec8075907ce9576dd39851e746f5d830dd369de"
+    },
+    "i7a8a_queue_binding_contract": {
+      "path": "docs/i7a8a/PASS653_I7A8A_QUEUE_BINDING_CONTRACT.json",
+      "sha256": "c159201b0d0825aa268bdf7cbcaf3ca58ac8e0f3d94f88292e8b06616b5b95a8"
+    },
+    "i7a8a_pg_text_storage_contract": {
+      "path": "docs/i7a8a/PASS653_I7A8A_PG_TEXT_STORAGE_CONTRACT.json",
+      "sha256": "b0ae6ca911927d0e059c1c45c2334b8155aad0634f289df16c53834306fb073f"
+    },
+    "i7a8a_jsonb_reference_contract": {
+      "path": "docs/i7a8a/PASS653_I7A8A_RIVER_JSONB_REFERENCE_CONTRACT.json",
+      "sha256": "a32d0dfc68c23f2b677e787ee227d4ec4b69cd962450709e65ba590045537537"
+    },
+    "i7a8a_recipient_absence_contract": {
+      "path": "docs/i7a8a/PASS653_I7A8A_RECIPIENT_ABSENCE_CONTRACT.json",
+      "sha256": "5e64ef0a11eb0ff774c2a55f216c90223911c4994e1983c86c53f3ad8215a74f"
+    }
+  },
+  "authorization": "Direct human continuation: finish8A, then8B research/design/preimplementation sync and implementation, exact toolbox tests/reconciliation, parent8 reality and closure. Original653 implementation authority covers8A; human scope extension covers8B after prerequisites.",
+  "forward_migration": "00037_guild_broadcast.sql",
+  "content_revision": "23568c270aff64db6ccb2084f7e8bf969c6b3adf90ef2adfb49688acf14b235c",
+  "activation": "Explicit owning River/content deployment; generic API preserves existing pointer and keeps588 inactive for old catalog or postgres-only build.",
+  "scope": "Guild broadcast fixed source -> I5 Mail; finite mail/reconcile worker; no new Social writes, MAIL2 producer, globalI7A10/E/W2 acceptance or8B implementation in this candidate.",
+  "acceptance_at_creation": "PENDING_EXACT_CANDIDATE_ALL38_PLUS_SUPPLEMENTS_AND_NORMAL_PASSMAP_PUBLICATION"
+}

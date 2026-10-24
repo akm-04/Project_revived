@@ -1,0 +1,13 @@
+I7A-5A ordinary channel chat is implemented from the exact selected Pass640 contract, following direct user authorization on 2026-10-07. This is a frozen gate candidate; metadata alone accepts no product. Acceptance is governed by the subsequent owning normal PassMap seal.
+
+The single writer, immutable incoming generation and admitted Guild JOIN remain the transport capabilities. Canonical actor, Guild and presentation reads compose existing I4/I5/I6C owner readers on one bounded RepeatableRead READONLY caller transaction per preparation/recipient, with MaxAttempts1 and output private until definite commit. No canonical chat write, migration, gameplay lock, foreign SQL, history, replay, ACK or durable quota is introduced.
+
+The ordinary request is strict32782 with channel0/2/4 matching physical role, UTF8 message1..140 Unicodecodepoints preserved, optional discarded token/canonicalregion and type0/default. Wellformed1..8 remain provider-gated; unknown/malformed discriminators close. The canonical32783 seq0 payload uses inactive title@@@@ andbubble10001@0. I7B entitlement and5B structuredproducer activation remain gated.
+
+Finite engineering defaults are16message slots,8globalworkers,8localworkers permessage, existingMaxConnections snapshotbound,3s preparation/2s publication under5s command and finite transaction cleanup. Saturation/overflow cannot silently truncate recipients; no automatic room retry follows any enqueue. Observed transport write is not clientconsumption. Caller deadline/errors retain outcomeuncertainty; an admitted frame may complete later.
+
+Mandatory exactcandidate native acceptance tests are TestChatA01 throughA26 plusA28/A29 in internal/integration/socialactivation/channel_native_test.go under tags postgres socialintegration channelintegration. Fault-scheduled transport and realread-commitreply injection are explicitly labelled and retain realPostgreSQL andrealTCP beneath the schedule. A27 comprises canonical static/source/pin/import guards. A30/A31 require external postimplementation review, contractharvest and normal owningseal; they cannot be proven by this document.
+
+The legacy I6D dormancy assertion now permits only hash-bound selected5A activation; all unrelated worker/River dormancy and owner/wire checks remain. This is an applicability update to a historical phase guard, not blanket permission to activate future features. All14D and8I7A1 selected sources and migrations1..33 remain unchanged.
+
+I7A5B/parent5/I7A10/E/W2 are unpassed. SERVICE scope/capacity and delivery uncertainty are qualified reconstruction policy, not original-server truth. Physical stock execution is not implied by nativeTCP tests.

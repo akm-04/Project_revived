@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "status": "GREEN_EXACT_NATIVE_I6C_REPAIR_REQUALIFICATION",
+  "tested_candidate_sha256": "c0b84f3a4ed4663f9343d6916cde6a30322115d791b31a9922c8cfdf26a95518",
+  "tested_candidate_version": "v0.59.3",
+  "tested_implementation_revision_sha256": "9383d75b86a475c8c1d85a01f38d1d2479ad713afc60489026a95092bcbe6155",
+  "evidence": {
+    "initial_native_report_sha256": "fd6f3afeb54f6841c6f6b1142f6cc12808418cb9ef52de70e99690bbd1ec68aa",
+    "targeted_delta_sha256": "fbd6d3a5fdc0e0f39f865608ae343df3d124996dc40050c43bbd86f010c63611",
+    "final_micro_delta_sha256": "275abdf2a37207a7da7058977d6bbe1e0aae3dfd90e0cabf5e59318ff953e184"
+  },
+  "native_toolchain": {
+    "go": "1.27.1",
+    "postgresql": "18.6",
+    "goose": "3.27.3",
+    "sqlc": "1.31.1",
+    "govulncheck": "1.7.0",
+    "pgx_v5": "5.10.0",
+    "river": "0.47.0"
+  },
+  "conclusion": "F6 closed only after Normal Chat identified and Luna completed the targeted delta plus final micro-delta. No product bytes changed during F6.",
+  "limitations": "This is I6C repair requalification, not I6D/I6E acceptance."
+}

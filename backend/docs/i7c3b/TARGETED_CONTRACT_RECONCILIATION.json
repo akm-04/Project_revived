@@ -1,0 +1,13 @@
+{
+  "classification": "IMPLEMENTATION_DECISION",
+  "status": "AFFECTED_PATH_RECONCILED_BEFORE_EDIT",
+  "evidence": "Library input ports checked Hero/fact times but omitted root timestamps; stat CA8 single-instant composition requires no future root observations",
+  "preserved_contract": "I7C1 coherent scope and WorkPlace time contract; no ownership, wire, receipt, economy or reset amendment",
+  "repair": "Reject root timestamps after captured instant. Add typed Pet raw owner read alongside CA8 facet for timestamp/state matching.",
+  "authorization": "Current user implementation/reconciliation approval",
+  "required_requalification": [
+    "stale root unit proof",
+    "native3B pinned observation/reload/no-write",
+    "existing Library regression"
+  ]
+}

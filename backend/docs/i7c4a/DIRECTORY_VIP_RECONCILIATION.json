@@ -1,0 +1,20 @@
+{
+  "status": "TARGETED_D14_EXTENSION_RECONCILED_BEFORE_AFFECTED_DIRECTORY_CODE",
+  "evidence": [
+    "directorysync.CanonicalSnapshot explicitly excludesVIP and I4sink preservesit",
+    "I4 player_directory_profiles has derivedvip; newcanonicalpositiveVIP mustnot leaveit0"
+  ],
+  "contract_disposition": "PreserveexistingI4projectionownership and extendtypedD14port; noforeignSQL ornewtruth owner. Highlevel C1/readreload/canonicalowner rules unchanged.",
+  "extension": "I4-owned PrepareVIPProjectionTx acquiresexistingdirectory740 beforefirstmutation andreturns lockedApply; Composer executesafterI5prepared700/721, atomicallywithprivilege andreceipt.",
+  "affected_consumers": [
+    "MID18 directory VIP",
+    "Social/public basic directory reads",
+    "Allcurrentdirectoryname/level/avatar writers mustcontinuepreservingVIP"
+  ],
+  "authorization": "Direct4Aimplementationapproval covers narrow typedcanonicalprivilegerequiredprojection extension",
+  "required_proof": [
+    "Nativeimport->directoryVIP samevalue",
+    "ReuseddirectorywriterspreserveVIP",
+    "Rollback/unknowncommit/replay atomicwithdirectoryCAS"
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "stage": "I7C-3A",
+  "research_authorized": true,
+  "design_authorized": true,
+  "implementation_authorized": true,
+  "implementation_started": false,
+  "basis": "Current direct user request for whole I7C3A research, planning/checkpoint, implementation, exact portableR2 tests/reconciliation/reality/finalPassMap closure without intermediate stop",
+  "gate": "Research/plan complete plus selected preimplementation publication gate required before coding",
+  "does_not_authorize": "I7C-3B implementation or later combat/public activation"
+}

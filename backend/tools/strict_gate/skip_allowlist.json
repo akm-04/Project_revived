@@ -1,0 +1,306 @@
+{
+ "contract": "I85_STRICT_GATE_V1 R3",
+ "rule": "A test may skip only when listed. child_helper: its owner (parent test) must pass or be known debt in the same run. recipe/provision/reference_host: a run labelled with the owner prefix must pass it. excluded_from_suites: passed to go test -skip in the suites.",
+ "entries": [
+  {
+   "test": "internal/adapters/blobstore.TestNativeHelper",
+   "kind": "child_helper",
+   "owners": [
+    "internal/adapters/blobstore.TestNativeProcessKillRestartAndProtectedInventory"
+   ],
+   "reason": "subprocess-only"
+  },
+  {
+   "test": "internal/adapters/combatworker.TestResolverLatencyGate",
+   "kind": "reference_host",
+   "owner": "reference-host:latency",
+   "reason": "I8-2B M3: host-dependent p95 bound; the gate runs it once, serially, on the reference host",
+   "excluded_from_suites": true
+  },
+  {
+   "test": "internal/adapters/river.TestPreparePublicationRiver",
+   "kind": "provision",
+   "owner": "provision:",
+   "reason": "I7A9 River fixture preparer; the gate runs it on the river set before the suite"
+  },
+  {
+   "test": "internal/integration/playerdisplay.TestDisplayKillHelper",
+   "kind": "child_helper",
+   "owners": [
+    "internal/integration/playerdisplay.TestDisplayProcessKillValueCommitBoundaries"
+   ],
+   "reason": "process helper"
+  },
+  {
+   "test": "internal/integration/playerdisplay.TestI7C2AProcessHelper",
+   "kind": "child_helper",
+   "owners": [
+    "internal/integration/playerdisplay.TestI7C2AProcessKillReopenRecovery"
+   ],
+   "reason": "child process only"
+  },
+  {
+   "test": "internal/integration/playerdisplay.TestI7C2BProcessHelper",
+   "kind": "child_helper",
+   "owners": [
+    "internal/integration/playerdisplay.TestI7C2BProcessKillReopenPaidAdmission"
+   ],
+   "reason": "child only"
+  },
+  {
+   "test": "internal/integration/playerdisplay.TestI7C2CProcessHelper",
+   "kind": "child_helper",
+   "owners": [
+    "internal/integration/playerdisplay.TestI7C2CProcessKillReopenRandomPaidAdmission"
+   ],
+   "reason": "child only"
+  },
+  {
+   "test": "internal/integration/playerdisplay.TestI7C2DProcessHelper",
+   "kind": "child_helper",
+   "owners": [
+    "internal/integration/playerdisplay.TestI7C2DProcessKillReopenRandomPaidAdmission"
+   ],
+   "reason": "child only"
+  },
+  {
+   "test": "internal/integration/playerdisplay.TestI7C2EProcessHelper",
+   "kind": "child_helper",
+   "owners": [
+    "internal/integration/playerdisplay.TestI7C2EProcessKillReopenPaidEnrollment"
+   ],
+   "reason": "child only"
+  },
+  {
+   "test": "internal/integration/playerdisplay.TestI7C2FProcessHelper",
+   "kind": "child_helper",
+   "owners": [
+    "internal/integration/playerdisplay.TestI7C2FProcessKillReopenPaidRebuild"
+   ],
+   "reason": "child only"
+  },
+  {
+   "test": "internal/integration/playerdisplay.TestI7C2GProcessHelper",
+   "kind": "child_helper",
+   "owners": [
+    "internal/integration/playerdisplay.TestI7C2GProcessKillReopenPaidRebuild"
+   ],
+   "reason": "child only"
+  },
+  {
+   "test": "internal/integration/playerdisplay.TestI7C2HProcessHelper",
+   "kind": "child_helper",
+   "owners": [
+    "internal/integration/playerdisplay.TestI7C2HProcessKillReopenPaidRebuild"
+   ],
+   "reason": "child only"
+  },
+  {
+   "test": "internal/integration/playerdisplay.TestI7C2IProcessHelper",
+   "kind": "child_helper",
+   "owners": [
+    "internal/integration/playerdisplay.TestI7C2IProcessKillReopenAppliedPoints"
+   ],
+   "reason": "child only"
+  },
+  {
+   "test": "internal/integration/playerdisplay.TestI7C2JProcessHelper",
+   "kind": "child_helper",
+   "owners": [
+    "internal/integration/playerdisplay.TestI7C2JProcessKillReopenCallerReceiptAndFoundation"
+   ],
+   "reason": "child only"
+  },
+  {
+   "test": "internal/integration/playerdisplay.TestI7C4ANativeUpgradeTemporalUsesOriginalDescriptor",
+   "kind": "recipe",
+   "owner": "recipe:populated59-upgrade",
+   "reason": "populated59upgrade/restore profile only; required in that matrix"
+  },
+  {
+   "test": "internal/integration/playerdisplay.TestI7C4BProcessHelper",
+   "kind": "child_helper",
+   "owners": [
+    "internal/integration/playerdisplay.TestI7C4BProcessKillReopenMarriageFact"
+   ],
+   "reason": "child only"
+  },
+  {
+   "test": "internal/integration/playerdisplay.TestI7C5FLeagueRecoveredRowsNative",
+   "kind": "recipe",
+   "owner": "recipe:league-recovered",
+   "reason": "populated relocated league probe without a skip guard; fails by design on a fresh database (I8-2C/3A/3B closures)",
+   "excluded_from_suites": true
+  },
+  {
+   "test": "internal/integration/profilefeedback.TestCommentKilledTransactionHelper",
+   "kind": "child_helper",
+   "owners": [
+    "internal/integration/profilefeedback.TestCommentKilledProcessRollbackRecovery"
+   ],
+   "reason": "killhelper"
+  },
+  {
+   "test": "internal/integration/profilefeedback.TestCommentProcessPendingHelper",
+   "kind": "child_helper",
+   "owners": [
+    "internal/integration/profilefeedback.TestCommentIndependentProcessPendingRecovery"
+   ],
+   "reason": "processhelper"
+  },
+  {
+   "test": "internal/integration/profilefeedback.TestCommentRestoreSeed",
+   "kind": "recipe",
+   "owner": "recipe:restored-reload-profilefeedback",
+   "reason": "final restore seed"
+  },
+  {
+   "test": "internal/integration/profilefeedback.TestCommentRestoredReload",
+   "kind": "recipe",
+   "owner": "recipe:restored-reload-profilefeedback",
+   "reason": "restore/restart gate"
+  },
+  {
+   "test": "internal/integration/profilefeedback.TestPraiseProcessHelper",
+   "kind": "child_helper",
+   "owners": [
+    "internal/integration/profilefeedback.TestPraiseIndependentProcesses"
+   ],
+   "reason": "subprocess only"
+  },
+  {
+   "test": "internal/integration/profilefeedback.TestPraiseRestoredReload",
+   "kind": "recipe",
+   "owner": "recipe:restored-reload-profilefeedback",
+   "reason": "restore/restart gate"
+  },
+  {
+   "test": "internal/integration/profilemedia.TestMediaKilledHelper",
+   "kind": "child_helper",
+   "owners": [
+    "internal/integration/profilemedia.TestMediaProcessKillBeforeAndAfterCommit"
+   ],
+   "reason": "OSkillhelper only"
+  },
+  {
+   "test": "internal/integration/publication.TestPreparePublicationProcess",
+   "kind": "provision",
+   "owner": "provision:",
+   "reason": "I7A9 fixture preparer; the gate runs it on every database set before the suite"
+  },
+  {
+   "test": "internal/integration/publicprofilecommands.TestProcessHelper",
+   "kind": "child_helper",
+   "owners": [
+    "internal/integration/publicprofilecommands.TestIndependentProcessCommandsAndReload"
+   ],
+   "reason": "OS-subprocess helper only"
+  },
+  {
+   "test": "internal/integration/publicprofilecommands.TestRestoredTypedOwnerPolicyReceiptReload",
+   "kind": "recipe",
+   "owner": "recipe:restored-reload-publicprofilecommands",
+   "reason": "requires actual qualificationrestore/restart flag"
+  },
+  {
+   "test": "internal/integration/publicshowcase.TestBookmarkProcessHelper",
+   "kind": "child_helper",
+   "owners": [
+    "internal/integration/publicshowcase.TestBookmarkIndependentProcessReload"
+   ],
+   "reason": "only actual subprocess helper"
+  },
+  {
+   "test": "internal/integration/publicshowcase.TestBookmarkRestoredReload",
+   "kind": "recipe",
+   "owner": "recipe:restored-reload-publicshowcase",
+   "reason": "restore/restart helper"
+  },
+  {
+   "test": "internal/integration/publicshowcase.TestProcessHelper",
+   "kind": "child_helper",
+   "owners": [
+    "internal/integration/publicshowcase.TestIndependentProcessAssignmentsAndReload"
+   ],
+   "reason": "subprocess helper"
+  },
+  {
+   "test": "internal/integration/publicshowcase.TestRestoredSelectionPolicyReceiptReload",
+   "kind": "recipe",
+   "owner": "recipe:restored-reload-publicshowcase",
+   "reason": "restore/restart gate"
+  },
+  {
+   "test": "internal/integration/socialactivation.Test6B_G07MigrationRecoveryFixture",
+   "kind": "recipe",
+   "owner": "recipe:dm-migration-fixture",
+   "reason": "auxiliary seed/restore helper executed separately with explicit migration fixture mode"
+  },
+  {
+   "test": "internal/integration/socialactivation.Test7A_RecoverySeedCompare",
+   "kind": "recipe",
+   "owner": "recipe:gift-recovery",
+   "reason": "explicit dump/restore orchestration only; ordinary suite is not restore proof"
+  },
+  {
+   "test": "internal/integration/socialactivation.Test7A_UpgradeActivationCompatibility",
+   "kind": "recipe",
+   "owner": "recipe:accepted35-upgrade",
+   "reason": "explicit accepted35 upgrade database only"
+  },
+  {
+   "test": "internal/integration/socialactivation.Test7B_CombinedRecoverySeedCompare",
+   "kind": "recipe",
+   "owner": "recipe:combined-recovery",
+   "reason": "explicit nonempty dump/restore/restart orchestration"
+  },
+  {
+   "test": "internal/integration/socialactivation.Test7B_DeploymentPopulated35Seed",
+   "kind": "recipe",
+   "owner": "recipe:populated35-deployment",
+   "reason": "I8.5-6: seeds the accepted 00035 players before the populated35 upgrade"
+  },
+  {
+   "test": "internal/integration/socialactivation.Test7B_ExplicitDeploymentActivationPreservesStartupContract",
+   "kind": "recipe",
+   "owner": "recipe:populated35-deployment",
+   "reason": "explicit populated35upgrade database only"
+  },
+  {
+   "test": "internal/integration/socialactivation.TestD12UpgradePopulated32Compare",
+   "kind": "recipe",
+   "owner": "recipe:populated32-upgrade",
+   "reason": "explicit 00033compare only"
+  },
+  {
+   "test": "internal/integration/socialactivation.TestD12UpgradePopulated32Seed",
+   "kind": "recipe",
+   "owner": "recipe:populated32-upgrade",
+   "reason": "explicit 00032seed only"
+  },
+  {
+   "test": "internal/integration/socialprojection.TestC21RecoveryCompare",
+   "kind": "recipe",
+   "owner": "recipe:socialprojection-recovery",
+   "reason": "explicit recovery compare mode only"
+  },
+  {
+   "test": "internal/integration/socialprojection.TestC21RecoverySeed",
+   "kind": "recipe",
+   "owner": "recipe:socialprojection-recovery",
+   "reason": "explicit recovery seed mode only"
+  },
+  {
+   "test": "internal/integration/socialrelation.TestRecoveryReadOnlyReplayProof",
+   "kind": "recipe",
+   "owner": "recipe:socialrelation-recovery",
+   "reason": "standalone restart/restore harness supplies record path"
+  },
+  {
+   "test": "internal/integration/socialrelation.TestRecoverySeed",
+   "kind": "recipe",
+   "owner": "recipe:socialrelation-recovery",
+   "reason": "standalone restart/restore harness supplies record path"
+  }
+ ]
+}

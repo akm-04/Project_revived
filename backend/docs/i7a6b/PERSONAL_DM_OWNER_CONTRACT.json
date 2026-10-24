@@ -1,0 +1,74 @@
+{
+  "schema": "gxb-i7a6b-preimplementation-design/v1",
+  "pass": "647.0",
+  "stage": "I7A-6B",
+  "baseline_passmap": "646.0",
+  "baseline_passmap_sha256": "1e9943a4df772785ec46477f5c46a36fa595781a0fdbc91d634a0e9ed4849149",
+  "backend_sha256": "cb46a317b94a00e9983a686e8c97c6bc05b0893b0d65e222337f16a5e5d498d1",
+  "backend_tree": "07d697cc331ba3bfaa2c085a04fabba21df4f94d8abb658dfe89589a767e1403",
+  "status": "RESEARCH_DESIGN_COMPLETE_PRODUCT_NOT_IMPLEMENTED",
+  "implementation_authorized": true,
+  "implementation_started": false,
+  "product_accepted": false,
+  "original_server_truth_claimed": false,
+  "contract_id": "I7A6B_PERSONAL_DM_OWNER",
+  "owner": "PersonalDMDelivery",
+  "does_not_own": [
+    "FriendDMoccurrences/176offlinehistory",
+    "SocialRelationblocks/friendships",
+    "I4sessions/sockets",
+    "I5PlayerType",
+    "clientSQLitechatrecords"
+  ],
+  "planned_schema": {
+    "migration": "00035_personal_dm_delivery.sql PROPOSED_NAME_ONLY; actualcurrenthighwater34unchanged",
+    "tables": {
+      "personal_dm_intents": "immutableopUUID/digest/sender/recipient/accepted_at/expires_at/policy_id/payloadbindingdigest; noaccounttoken",
+      "personal_dm_payloads": "ephemeralordinarytext/minimalsendersnapshot/capturedWORLDbindings; purgeafterterminal/expiry,notrestoredasnewmessage",
+      "personal_dm_delivery": "state/version/claimgeneration/ownerfence/lease/last_observed_at/attemptmarker/positivecompletionproof; minimalterminalreceiptretained"
+    },
+    "neutral": "no rows inventedonupgrade/bootstrap;nopayloadimportfromclienthistory/V1"
+  },
+  "lock_rank": {
+    "rank": 381,
+    "namespace": "personal-dm.intent",
+    "key": "canonicalUUIDstringorder",
+    "new_row_fence": "I4sender315 +uniqueoperationUUIDconstraint; onlyspecificknowncreationabortcanretry",
+    "status_only_expiry": "ownerlocal381; noSocial/I5mutation"
+  },
+  "states": [
+    "PENDING",
+    "CLAIMED",
+    "ATTEMPTING",
+    "WRITTEN_BEFORE_DEADLINE",
+    "UNDELIVERED",
+    "EXPIRED",
+    "PRIVACY_SUPPRESSED",
+    "ADMISSION_RETIRED",
+    "TIME_INVALID",
+    "UNKNOWN"
+  ],
+  "transitions": {
+    "accept": "PENDING onlyafterfullread/lockpreparation;privateuntildefinitecommit",
+    "claim": "PENDING->CLAIMED,lease2s cappedstrictlybyexpires;generation/epoch/currentcapturedtargetset",
+    "claimexpiry_noattempt": "CLAIMED->PENDING onlywhenstillunexpired/sameepoch/originaladmission; no networkattemptmarker",
+    "admit": "CLAIMED->ATTEMPTING commitsdefinitely BEFOREanyexistingwriterenqueue",
+    "positive": "ATTEMPTING->WRITTEN_BEFORE_DEADLINE iffreshprivacy/fence andboundedactualSendnil completionproof;atomicpositive canonicalreceipt",
+    "other_attempt": "ATTEMPTING->UNDELIVERED/UNKNOWN/EXPIRED/PRIVACY_SUPPRESSED/ADMISSION_RETIRED/TIME_INVALID; neverPENDING again",
+    "ambiguous_restart": "ATTEMPTING neverresends; UNKNOWNterminal orEXPIRED",
+    "terminal": "monotone; exactknownpositive receiptmayrecoverHTTPresultwithoutnetwork; no statusresurrection"
+  },
+  "unknown_commit": {
+    "accept": "positiveintentidentity permitsstatuswait/hint;absence/unknown forbidsoutput/hint/replay",
+    "claim": "unknownclaim meansnoenqueue;canonicalreconciliation only",
+    "attemptmarker": "unknownmarker meansnoenqueue; cannotblindlyrepeatattempt",
+    "finish": "positivecanonicalWRITTENreceiptcanrecover;unknownstatus meansnon200; noresend"
+  },
+  "retention": {
+    "transport_lifetime_seconds": 8,
+    "tombstones": "minimalopUUID/digest/result/expiry/proofretained; absenceisnot replaypermission",
+    "payload": "boundedcleanupatterminal andexpired; onreadbeforepurgeexpiry gatespublication; retainedunexpiredpayloaddoesnotconstitutehistoryendpoint",
+    "storage_growth_limit": "Minimal receipts have durable storage growth; finite deletion/compaction requires separate explicit D11/D13 qualification. No absence permits replay."
+  },
+  "D11_residual": "lostHTTPresponse/newnonce-lessresubmit canproduce anotherintent; crashafteractualwrite beforestatus orprivacyrevocation canleavepresentationwithoutHTTPsuccess; noexactlyoncepromise"
+}

@@ -1,0 +1,58 @@
+{
+  "status": "TARGETED_SOURCE_AND_TRANSITIVE_CONTRACT_IMPACT_REVIEW_RECONCILED_BEFORE_NEW_OWNER_CODE",
+  "c1_bindings": [
+    {
+      "path": "hot/00_PASSMAP/PASS685_I7C1_PROVIDER_SCOPE_OWNERSHIP_CONTRACT.json",
+      "sha256": "73f4e5b8e8603a68380be31d4aec7a5f9f10ecd9b68246b56dfb350ae36ea943",
+      "disposition": "PRESERVED_BYTE_IDENTICAL"
+    },
+    {
+      "path": "hot/00_PASSMAP/PASS685_I7C1_DELIVERY_ACCEPTANCE_CONTRACT.json",
+      "sha256": "992b38344aef6196e99cd2f17dc8810c2e962017db8de5c1a563890d54cf49a0",
+      "disposition": "PRESERVED_BYTE_IDENTICAL"
+    },
+    {
+      "path": "hot/00_PASSMAP/PASS685_I7C1_RESEARCH_AMENDMENT_CONTRACT.json",
+      "sha256": "6e29a18a81e820f53a5accd471cf367c625cd48537fa37094f6b17fa0b88b8e9",
+      "disposition": "PRESERVED_BYTE_IDENTICAL"
+    }
+  ],
+  "review": [
+    {
+      "contract": "C1/3B mandatory raw attestation",
+      "effect": "Implement genuine new birth event owner attestation; preserve no synthetic0/3 and all nondefault/legacy/full gates. Existing Awaken port reused."
+    },
+    {
+      "contract": "Character identity/allocator/retirement",
+      "effect": "Stable Player/Partner identity and active Hero ownership precede read; no reused IDs. Intrinsic facet may remain provenance after retirement, but inactive Hero fails. No new retire writer is invented."
+    },
+    {
+      "contract": "I1 positive receipts",
+      "effect": "Same callerTx initialization under original operation; old positive receipts still original and do not run new hook/backfill. UnknownCOMMIT positive-only."
+    },
+    {
+      "contract": "I4/I5 lock hierarchy and values",
+      "effect": "No new existing-owner/player locks; only insert unpublished local facet after real Hero insert. Same rollback with I5 material debit, no foreign SQL or additional costs."
+    },
+    {
+      "contract": "2A..2J/local facts",
+      "effect": "Reuse current chain and independent evolution facet. Blood raw0 distinct from evolution stage1; no Inscription eligibility stage3 fabricated."
+    },
+    {
+      "contract": "CA8/PublicStats",
+      "effect": "Typed readonly witnessed snapshot; current Hero version versus intrinsic facet version distinct. Existing numerical adapters/content/source profile unchanged. No richer public wire or replay activation."
+    },
+    {
+      "contract": "R4/schema ownership/recovery",
+      "effect": "New empty Character-owned table migration63 proposed; schema ownership catalog/guards updated through owning generation, previous migrations/content37payload bytes remain. Exact populated62->63, repeat migrate, restart/relocatedrestore required."
+    },
+    {
+      "contract": "4C metric1007",
+      "effect": "Existing private policy checked-sum all current qualified Hero force only, no Pet/top5/clientforce. This birth fact alone cannot activate aggregate; fullpopulation/unavailable contributors still gate."
+    }
+  ],
+  "authorization": "Direct user full4 research/design/implementation/privatepolicy authority retained; required new preimplementation publication gate still mandatory before product edits.",
+  "full4_closed": false,
+  "next5a_started": false,
+  "affected_contract_id": "C4C_PRIVATE_CHARACTER_RAW_AWAKENING_BIRTH_V1"
+}

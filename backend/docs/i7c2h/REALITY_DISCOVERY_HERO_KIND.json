@@ -1,0 +1,14 @@
+{
+  "status": "NEW_DEFECT_REPRODUCED_AND_CANONICAL_REPAIR_APPLIED_PENDING_TARGETED_PROOF",
+  "candidate_at_discovery": "4110f3850321a413ceea1424642eb739d1d587525b99ce0cc131d58efce67878",
+  "classification": "RUNTIME_OBSERVED",
+  "evidence": "logs/reality-kind-counterexample.log",
+  "reproduction": "New assertion added to canonical F1 code before repair; source projection unchanged at reproduction. This is diagnostic added-test evidence, not an unmodified F1 gate.",
+  "defect": "HeroSpiritInputsTx validated kind through liveHero but returned a separately loaded persistent Hero whose non-durable Kind was unresolved.",
+  "fix": "Resolve returned Hero.Kind from same pinned content/queryer and call Hero.Validate. No durable state, wire shape, locking, source, policy or schema change.",
+  "required_requalification": [
+    "ExactF2 provider/nativeH matrix, affected race/vet/arch, candidate identity",
+    "Preserve/reuse only F1 evidence whose tested subject and assumptions are unchanged"
+  ],
+  "product_acceptance": false
+}

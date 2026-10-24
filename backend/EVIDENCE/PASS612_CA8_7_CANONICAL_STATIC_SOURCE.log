@@ -1,0 +1,23 @@
+$ sha256sum go.mod go.sum .go-version
+313c574368bb56dc570bc3427b65f59b059e492f909fe43b7d0291b5ced21dc4  go.mod
+efbf6753542d66e2fefcb2ab5e2ade7c9d28f2206a1113d1eb9568f2cb75808d  go.sum
+a8844fbc8c3eb51c26ed00aec4cd5a5a9d647f849c6ead07bcc83ed24c4a7718  .go-version
+$ python3 tools/check_ca8_7_source_oracle.py /mnt/data/ca87_oracle_root
+CA8-7 SOURCE ORACLE CHECK: PASS
+current/V1.164 freeze and skill dependencies, current-only Hero producer deltas, stable Pet dependency surface, synthetic profile shape and client-local attrMD5 boundary preserved; no historical server final compiler claimed
+$ python3 tools/validate_ca8_7.py
+CA8-7 VALIDATION: PASS
+typed Character battle handoff, narrow scope witness, accepted CA8-3/4/5 reuse, Hero-skill unavailability, downstream I8 boundary and canonical pins preserved
+$ python3 tools/check_dependency_policy.py
+DEPENDENCY POLICY: PASS
+resolved_go_modules 16 qualified_candidates 5
+$ python3 tools/check_content_generation_policy.py
+CUMULATIVE CONTENT GENERATION POLICY: PASS
+$ python3 tools/check_sqlc_generation_policy.py
+SQLC GENERATION POLICY: PASS
+$ python3 tools/check_schema_query_ownership.py
+SCHEMA/QUERY OWNERSHIP: PASS
+$ python3 tools/generate_character_querytext.py --check
+CHARACTER QUERYTEXT: PASS hero_sha256=74780e7a69490f2a68a9c5f0fe4b662059f50fedd94e8f05798e074141235c6b pet_sha256=07779a3b3acc6ae1ae1c065ffff81dccc3a7477193c5b339d07d06d537c0fd81 preset_sha256=649a7d71bf475e6710bdd28f111a364cc208b5600270e88338fda2d28fb37cd6 practice_sha256=bca19b6a86b90f87e1ba26d994c06929d58fa5bba2b9068ff3cb3cdae66570bf
+$ gofmt -l changed CA8-7 Go files
+$ git diff --check

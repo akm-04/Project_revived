@@ -1,0 +1,18 @@
+{
+  "from": "pass530",
+  "to": "luna",
+  "added": [],
+  "modified": [
+    "internal/adapters/stockruntime/pet_dispatcher.go",
+    "internal/adapters/stockruntime/pet_dispatcher_test.go",
+    "internal/application/characterpet/acquisition.go",
+    "internal/application/characterpet/hatch.go",
+    "internal/application/characterpet/progression.go"
+  ],
+  "deleted": [],
+  "counts": {
+    "added": 0,
+    "modified": 5,
+    "deleted": 0
+  }
+}

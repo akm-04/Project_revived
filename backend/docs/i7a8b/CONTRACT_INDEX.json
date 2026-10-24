@@ -1,0 +1,184 @@
+{
+  "pass": "655.0",
+  "stage": "I7A-8B",
+  "status": "COMPLETED_WHOLE_RESEARCH_DESIGN_PROPOSED_NORMAL_SELECTION",
+  "selected_contracts": [
+    {
+      "id": "B1",
+      "path": "00_PASSMAP/PASS655_I7A8B_OWNER_SOURCE_SCHEMA_POLICY_CONTRACT.json",
+      "sha256": "4673df2e7b95accf58359a813eb052675f3052e3f794385a6fe44f0afa196c9e"
+    },
+    {
+      "id": "B2",
+      "path": "00_PASSMAP/PASS655_I7A8B_TARGET_CLEANUP_RECOVERY_CONTRACT.json",
+      "sha256": "c6eeac84fce0e0ec874f8d3168facb24d059697118b7be668d2ef2b2695f520b"
+    },
+    {
+      "id": "B3",
+      "path": "00_PASSMAP/PASS655_I7A8B_QUALIFIED_WINDOW_OBSERVATION_CONTRACT.json",
+      "sha256": "4f60c6a43676c61950923ef6b427e88c6b5e0a19cedd3023efad6a10e7a9e17c"
+    },
+    {
+      "id": "B4",
+      "path": "00_PASSMAP/PASS655_I7A8B_MIXED184_WIRE_RELOAD_CONTRACT.json",
+      "sha256": "06b6cf5f75ac047a0c29c5a2b100e764dfad785501b5fa871da90a949d5a8a43"
+    },
+    {
+      "id": "B5",
+      "path": "00_PASSMAP/PASS655_I7A8B_WORKER_ACTIVATION_RESTORE_CONTRACT.json",
+      "sha256": "74cedc9ed411dbc84c63ea41907f6f08b4c2caa53379db76600a616ef93eddf8"
+    },
+    {
+      "id": "B6",
+      "path": "00_PASSMAP/PASS655_I7A8B_ACCEPTANCE_PARENT_SUCCESSOR_CONTRACT.json",
+      "sha256": "e2c30b5e39d763fd2c6af0b69722b09270656dcc366e10bdde4c863010f4e07f"
+    }
+  ],
+  "required_original8A_contracts": [
+    {
+      "id": "I7A8A_IMPLEMENTATION_CONTRACT",
+      "path": "00_PASSMAP/PASS652_I7A8A_IMPLEMENTATION_CONTRACT.json",
+      "sha256": "16acc22ab2da585d2d3ed3c39852c2a793a5c0f7318a83eb57360559692c49c3"
+    },
+    {
+      "id": "I7A8A_SOURCE_MAIL_CONTRACT",
+      "path": "00_PASSMAP/PASS652_I7A8A_DATA_IDENTITY_RECEIPT_CONTRACT.json",
+      "sha256": "57f25389b31db2b65223796817ce7e3d0236a432aa2d75267bc9be3a9c7198a1"
+    },
+    {
+      "id": "I7A8A_WORKER_RECOVERY_CONTRACT",
+      "path": "00_PASSMAP/PASS652_I7A8A_WORKER_RECOVERY_CONTRACT.json",
+      "sha256": "2f6372fe5ab9622554b28f901746feef01f0e07b3e7ec05f0211f20d01941b29"
+    },
+    {
+      "id": "I7A8A_WIRE_TIME_CONTENT_POLICY",
+      "path": "00_PASSMAP/PASS652_I7A8A_WIRE_TIME_CONTENT_POLICY.json",
+      "sha256": "9b7dc5fdd482db3cfbe5e7b1c20c14a77d77d502bb8d3f44a2c2cd8a4b0a355e"
+    },
+    {
+      "id": "I7A8A_D14_EXTENSION_RECORD",
+      "path": "00_PASSMAP/PASS652_I7A8A_D14_EXTENSION_RECORD.json",
+      "sha256": "c57980db5d0e10471bf08ce8a8a9aa261a9e5a0d81133460736a9e1f9d0a7b66"
+    },
+    {
+      "id": "I7A8A_ACCEPTANCE_MATRIX",
+      "path": "00_PASSMAP/PASS652_I7A8A_ACCEPTANCE_MATRIX.json",
+      "sha256": "f399e462cb9db1a2b5efd4948a91e5cab5e479bba5868b24300cde898ba2c5b0"
+    }
+  ],
+  "inherited_bindings": [
+    {
+      "id": "D01",
+      "path": "00_PASSMAP/PASS463_DESIGNS/D01.json",
+      "sha256": "34ddc24af8cd3028366b1c672ead2a1ed1cad2207c5adc80cc151f45edbc851e"
+    },
+    {
+      "id": "D02",
+      "path": "00_PASSMAP/PASS475_DESIGNS/D02.json",
+      "sha256": "bfbe47718fdbee32df8fe7eec5439bce69e2c906b386c9dfd06706ae352cecfb"
+    },
+    {
+      "id": "D03",
+      "path": "00_PASSMAP/PASS475_DESIGNS/D03.json",
+      "sha256": "77cfe501bb874e862702d7553aafa2a748b67b38bc2679d9b5f6967cee8e423a"
+    },
+    {
+      "id": "D04",
+      "path": "00_PASSMAP/PASS463_DESIGNS/D04.json",
+      "sha256": "639a75c504c31e55ab7309854050610029f056a20a5d4704129759b2a3ed41b5"
+    },
+    {
+      "id": "D05",
+      "path": "00_PASSMAP/PASS475_DESIGNS/D05.json",
+      "sha256": "20927a3640e39005669601f2154d7425c661ebf1c435dbeb791408e076faf368"
+    },
+    {
+      "id": "D06",
+      "path": "00_PASSMAP/PASS475_DESIGNS/D06.json",
+      "sha256": "35edbb372ea726e4eb1077b9cd36b7bc0169a8c3b46572efac8be38745ff023f"
+    },
+    {
+      "id": "D07",
+      "path": "00_PASSMAP/PASS475_DESIGNS/D07.json",
+      "sha256": "29042b4691e5af17c7ce7f0ce08b52eaf3c4d393ec459b01775d01b738c06c95"
+    },
+    {
+      "id": "D08",
+      "path": "00_PASSMAP/PASS463_DESIGNS/D08.json",
+      "sha256": "71d4a9884bf9c2692ee3313edd3367a8db89c91a2dc0af197eee420fb7c175fd"
+    },
+    {
+      "id": "D09",
+      "path": "00_PASSMAP/PASS475_DESIGNS/D09.json",
+      "sha256": "8ebdecc274b084c103169dea764d16267a3a08db3d357b36b960e42bae1fdd82"
+    },
+    {
+      "id": "D10",
+      "path": "00_PASSMAP/PASS475_DESIGNS/D10.json",
+      "sha256": "5f44fded332a3b37459e7e2ba12a906ada4187dabb0a9b153a01cea959fe4932"
+    },
+    {
+      "id": "D11",
+      "path": "00_PASSMAP/PASS475_DESIGNS/D11.json",
+      "sha256": "c939268d7e67a73edbb849cb1c00b847adc0f09d07e4418e5e2bbc90ab39b62b"
+    },
+    {
+      "id": "D12",
+      "path": "00_PASSMAP/PASS463_DESIGNS/D12.json",
+      "sha256": "ffe22db54162940466e909a298c5c5907a2a0bd14fb597991c64357981c74f72"
+    },
+    {
+      "id": "D13",
+      "path": "00_PASSMAP/PASS463_DESIGNS/D13.json",
+      "sha256": "323563f4f2af0d53c1f6ffdf99d7bb28bec241bb60d1e883e24aac2858cf2745"
+    },
+    {
+      "id": "D14",
+      "path": "00_PASSMAP/PASS463_DESIGNS/D14.json",
+      "sha256": "45cd98a6ac2735b108122d60d593d96786f498d198c0a590d59ed39d999c8c62"
+    },
+    {
+      "id": "I7A1_PHASE_ARCHITECTURE_CONTRACT",
+      "path": "00_PASSMAP/PASS622_I7A1_PHASE_ARCHITECTURE_CONTRACT.json",
+      "sha256": "c870861afc84378d18b62d867823a3fb9969cf04452067479f8776f7aac96362"
+    },
+    {
+      "id": "I7A1_TRANSACTION_LOCK_EFFECT_CONTRACT",
+      "path": "00_PASSMAP/PASS622_I7A1_TRANSACTION_LOCK_EFFECT_CONTRACT.json",
+      "sha256": "c4e11cbab1a7193fd7575229f76a1322128273047d599e08deac7993959f85f8"
+    },
+    {
+      "id": "I7A1_DELIVERY_RECOVERY_WIRE_CONTRACT",
+      "path": "00_PASSMAP/PASS622_I7A1_DELIVERY_RECOVERY_WIRE_CONTRACT.json",
+      "sha256": "80964805f03f8b6f9d3324283a82248db512db57950a9fc1e2ffe6f00b0729b6"
+    },
+    {
+      "id": "I7A1_TIME_CONTENT_POLICY_REGISTER",
+      "path": "00_PASSMAP/PASS622_I7A1_TIME_CONTENT_POLICY_REGISTER.json",
+      "sha256": "4b4cb9801cb35a9cab4cd11f706abf2c28be6addcc00297eb524e0fbb9face5a"
+    },
+    {
+      "id": "I7A1_MIGRATION_RESTORE_PROOF_CONTRACT",
+      "path": "00_PASSMAP/PASS622_I7A1_MIGRATION_RESTORE_PROOF_CONTRACT.json",
+      "sha256": "11d72e984bee246982cafd0e849f206aabb5e6a42d5393b50042be87b5896e88"
+    },
+    {
+      "id": "I7A1_STAGE_ACCEPTANCE_CONTRACT",
+      "path": "00_PASSMAP/PASS622_I7A1_STAGE_ACCEPTANCE_CONTRACT.json",
+      "sha256": "a4266a4234d83db34ba3fa0e58599c8764385260b1a87b5ca057d3b64fbb5a55"
+    },
+    {
+      "id": "I7A1_EVIDENCE_CLASSIFICATION",
+      "path": "00_PASSMAP/PASS622_I7A1_EVIDENCE_CLASSIFICATION.json",
+      "sha256": "f129b63c7afe95f5f6850ddbb81868eb1eba82c956240f2dd5f017617cc56457"
+    },
+    {
+      "id": "I7A1_PREIMPLEMENTATION_REALITY_CHECK",
+      "path": "00_PASSMAP/PASS622_I7A1_PREIMPLEMENTATION_REALITY_CHECK.json",
+      "sha256": "62d75cc680b3ae8570f355b9c03ae2e99703e4809cc2e8dfa77d61dfb4879d96"
+    }
+  ],
+  "backend_sha256": "40cd6059e301598e193a84c10521b1f825b1ddf41fced9c4b40fcace7cbe7260",
+  "implementation_started": false,
+  "product_accepted": false
+}

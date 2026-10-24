@@ -1,0 +1,164 @@
+{
+  "schema_version": 1,
+  "policy_id": "C4C_PRIVATE_METRIC_RANKING_V1",
+  "status": "ADOPTED_PRIVATE_SERVER_DESIGN_IMPLEMENTATION_PENDING",
+  "classification": "IMPLEMENTATION_DECISION_WITH_SOURCE_FACT_AND_PLAYER_RECOLLECTION_SUPPORT",
+  "authority": "Directuserpermitsprivatealgorithmswhenoriginalunrecovered; no newpermissionneeded",
+  "metrics": {
+    "1001": {
+      "owner": "CharacterHero",
+      "reducer": "COUNT_DISTINCT_CURRENT_OWNED_ORIGIN_TABLE_ID",
+      "population": "CurrentcanonicalownedNormal+SuperHero records; no retired/history/scrollstack/trial/borrowed/NPC. DuplicateOriginID failsintegrity, neverdoublecounts.",
+      "lifecycle": "Newuniqueownedgirladds1; duplicate->scrollandstar-evolveadd0; tabletransformationpreservesOriginTableID identity; genuinefinalretirementremovescurrentrecord."
+    },
+    "1002": {
+      "owner": "CharacterPet",
+      "reducer": "COUNT_DISTINCT_CURRENT_OWNED_ORIGIN_TABLE_ID",
+      "population": "CanonicalownedPet records; egg/essencestacksanduncreatedincubationsnotownedpetrecords; variants/stylesarenotextraPets."
+    },
+    "1008": {
+      "owner": "CharacterHero",
+      "reducer": "CHECKED_SUM_CURRENT_OWNED_HERO_STAR",
+      "population": "Same1001population; bothNormal/Super; excludePetstars; no lifetime highwater."
+    },
+    "1009": {
+      "owner": "CharacterHero + pinned content",
+      "reducer": "COUNT_CURRENT_HERO_BEFORE_AWAKEN_MAPPING_POSITIVE",
+      "population": "Same1001population; bothNormal/Super. Eachawakenedgirlcounts1, blood/twicestagedoesnotaddanother; no colorguess."
+    },
+    "1007": {
+      "owner": "QualifiedPublicStatProvider",
+      "reducer": "CHECKED_SUM_FINAL_PUBLIC_HERO_FORCE",
+      "population": "Same1001population, eachqualifiedfinalpublicHeroForceintegeronce. NoPet/borrowed/trial/NPC/fallback/clientstoredforce; unavailable contributor blocksaggregate.",
+      "freshness": "Profilecurrentreadwithversions; separatelyconfiguredRankingrefresh. Existing3Bcompleteproviderqualification remainsrequired."
+    },
+    "1003": {
+      "owner": "CharacterAppearance + complete eligible origin providers",
+      "reducer": "COUNT_DISTINCT_EFFECTIVE_ELIGIBLE_SKIN_KEYS",
+      "key": "QualifiedcanonicalHeroOrigin+skinModelID; sourcecrossservergrantincluded; activeexpiredentitlementnotcounted; defaultskinID0notanunlock.",
+      "availability": "Completeorigin/domainwitnessrequired; existing4Apartialcoveragecannotbeassumedcomplete."
+    },
+    "1004": {
+      "owner": "Achievement",
+      "reducer": "COUNT_DISTINCT_EARNED_ACHIEVEMENT_TIER",
+      "key": "AchievementID+tier1/2/3, complete_timepositive; independentofrewardclaim/points. Current33definitionsrequirecompletecoverage, selected3tierscannotpromotetocomplete.",
+      "points_chest": "Separatereductionoftierpoints+sourcepointlevelthresholds+once-onlyclaim; completehistory/producer/awardwire stillowning4Bwork."
+    },
+    "1005": {
+      "owner": "PlayerDisplay + complete eligibility",
+      "reducer": "COUNT_DISTINCT_EFFECTIVE_ELIGIBLE_FRAME_CATALOG_ID",
+      "population": "Includequalifiedbase,earned,purchasedframes; currentselectionandstackquantityareirrelevant; fullorigin/expiryavailabilityrequired."
+    },
+    "1006": {
+      "owner": "PlayerDisplay + complete eligibility",
+      "reducer": "COUNT_DISTINCT_EFFECTIVE_ELIGIBLE_AVATAR_CATALOG_ID",
+      "population": "Qualifiedbase+Hero-derived+ownedavatars, catalogIDdedup; no defaultcatalogsize orselectedavataronly."
+    },
+    "1010": {
+      "reducer": "REUSE_QUALIFIED722_CURRENT_LIBRARY_MARRIED_HERO_POPULATION"
+    },
+    "1011": {
+      "reducer": "REUSE_QUALIFIED_CANONICAL_PLAYER_CREATED_AT_UNIX_SECONDS"
+    }
+  },
+  "ordering_profiles": {
+    "MONOTONIC_PROGRESS_FIRST_REACH_V1": {
+      "order": [
+        "score DESC",
+        "first_achieved_at ASC",
+        "stable_subject_id ASC"
+      ],
+      "time": "Trustedownerfirstreachforcurrenthighestscore, immutableonreplay; no clienttimestamp. Reusablewithinexplicitmodeprofile/cohort; notautomaticallyactivateexistingPvP modes."
+    },
+    "CURRENT_STAT_OBSERVED_V1": {
+      "order": [
+        "score DESC",
+        "score_observed_since ASC",
+        "stable_subject_id ASC"
+      ],
+      "time": "Snapshotownerpreservesfirstobservationwhilecurrentvalueunchanged, resetswhenvalue/basispolicychanges. Observationtimeexplicitlynotoriginalachievementtime; no fakehistoricaldates. Fullcohortcoverage/immutablegenerationrequired."
+    },
+    "PVP_AUTHORITATIVE_POSITION": {
+      "order": "Usemode-ownedrank/resultcontract; neverreplaceArena/TF/1on1withcollectionsortbyassociation."
+    },
+    "CURRENT_STAT_FIRST_REACH_V1": {
+      "order": [
+        "score DESC",
+        "score_reached_at ASC",
+        "stable_subject_id ASC"
+      ],
+      "time": "Trustedownerrecordoflatesttransitionintocurrentscore; preservewhileunchanged, resetwhenvaluechangesincludingdecrease/reacquire. HistoricfirstreachnotreconstructablefromrowUpdatedAt. UseexplicitOBSERVEDbootstrapprofileuntilgenuinehistoryavailable. ApplieschosenGirls/Pets/Starsprofilesbyprivatepolicy, notoriginalserverproof."
+    }
+  },
+  "refresh_profiles": {
+    "PROFILE_FIELDS": "RECOMPUTE_CALLER_COHERENT_SNAPSHOT",
+    "COLLECTION_REALTIME_FLAGS": "FRESH_ON_OPEN_REQUEST: RankList.loadRankList clearsis_realtimecachedentries; noobservedpolltimerorbutton. Close/reopenfetchesrealtimeboards; otherboardsmayreusecacheuntilforceclear. Serverdoesnotpushnewrefreshwire.",
+    "NON_REALTIME_AP_RECOMMENDATION": "Configurableboundedcache; proposeddefault900seconds. Privatechoice, nothistoricalrecovery, no frozenpopularityfakealgorithm. NeverusecachetosupplyqualifiedcurrentprofileAP.",
+    "TOP_FLOOR_LIVE": "Distinctmode: investigateownproducer/socketcontractbeforeclaimingautomaticon-screenupdates; namealoneinsufficient."
+  },
+  "title_policy": {
+    "implementation": "DESIGN_ONLY_NOT_NEW_GRANT_ACTIVATION",
+    "duration": "Source604800seconds preserved",
+    "girls_tiers": {
+      "100059": [
+        1,
+        1
+      ],
+      "100060": [
+        2,
+        2
+      ],
+      "100061": [
+        3,
+        3
+      ],
+      "100062": [
+        4,
+        20
+      ]
+    },
+    "skins_tiers": {
+      "100063": [
+        1,
+        1
+      ],
+      "100064": [
+        2,
+        2
+      ],
+      "100065": [
+        3,
+        3
+      ],
+      "100066": [
+        4,
+        20
+      ]
+    },
+    "per_hero_ap": "Source-compatibleprivatebindingcandidate title100001 unique_id=currentHeroTableID fromper-girlAPprofile; do notawardfromoverallAllAPboard withoutseparateexplicitbinding.",
+    "settlement": "Explicitversionedcalendar/scope/cohort/tie/replaypolicybeforeactivation. SourceRecommendationMondayandSundayTFsnapshotlinkrequiresowningmodeboundary; notsilentlyreplacedbyFantasy22:00.",
+    "tuning": "Stableprofile IDs + immutablepolicy/content revision; futuretuningnewversion, retainoldreceipts/snapshots/expiry. No mutableconfigrewriteshistory."
+  },
+  "implementation_scope": "Next127component: actualtyped1001/1002/1008/1009currentpopulationproviders +pureorderingprofiles. Othermetricreductionsdefinedbut unavailableuntilcompletecanonicalproviders; no source ororiginalalgorithmunknownblocksadoptedrosterformulas.",
+  "not_claimed": [
+    "Originalservermetric/rankalgorithms",
+    "Completecosmetic/Achievement/forceproducercoverage",
+    "ActiveRankingsettlementornewtitlegrant",
+    "Full4C/parent/W2acceptance"
+  ],
+  "tie_policy": {
+    "default": "STABLE_SUBJECT_ID_ASC",
+    "optional": "PERSISTED_LOTTERY_PRIORITY_ASC",
+    "rule": "Nofreshcoinfliponcomparison/request. Optionalrandomprioritysampledoncebyowningdurablesnapshotpolicy,retainedwithgenerationandreceipt; stableIDfallback. ComparatorneverdrawsRNG; pairwisecoinflipswouldbreaktransitivity."
+  },
+  "scope_policy": {
+    "required": "ExplicitScope{SERVER,GLOBAL,serverID,cohortID,policyVersion}beforecomparison; rejectmixedscope/cohort/policy rows; no defaultglobal",
+    "source_confirmed": {
+      "rank1003": "1on1GLOBAL",
+      "rank1004": "1on1SERVER"
+    },
+    "private_collection_default": "SERVER is proposedprivatechoiceforGirls/Pets/Stars; activationrequiresrecordedprofile/cohort; sourceuncertain",
+    "sky_tower": "SERVER byplayerrecollection/privatepolicy; sourceSKYCITY_RULEhasnotie/scopeclause",
+    "pets": "Profilefield1002exists; examinedrankcataloghasnoPetsownedboardsodonotinventwiretype"
+  }
+}

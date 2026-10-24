@@ -1,0 +1,136 @@
+{
+  "authority_parent": "sealed Pass546 CA4-3B research closure + Stage0 design checkpoint + explicit user authorization to proceed directly into implementation",
+  "canonical_environment": {
+    "exact_candidate_attempt": "ENVIRONMENT_BLOCKED",
+    "go_mod_sha256": "313c574368bb56dc570bc3427b65f59b059e492f909fe43b7d0291b5ced21dc4",
+    "go_sum_sha256": "efbf6753542d66e2fefcb2ab5e2ade7c9d28f2206a1113d1eb9568f2cb75808d",
+    "go_version_sha256": "a8844fbc8c3eb51c26ed00aec4cd5a5a9d647f849c6ead07bcc83ed24c4a7718",
+    "reason": "installed Go 1.23.2 cannot execute canonical go>=1.26/toolchain go1.27.1 and sandbox network cannot fetch the pinned toolchain"
+  },
+  "canonical_static": [
+    "CA4-3B Stage A validator GREEN",
+    "CA4-3B Stage C validator GREEN",
+    "CA4-3B Stage D validator GREEN",
+    "CA4-3A-A cumulative validator GREEN",
+    "CA4-3A-B cumulative validator GREEN",
+    "immutable content regeneration GREEN",
+    "content query-text freshness GREEN",
+    "character query-text freshness GREEN",
+    "schema/query ownership GREEN"
+  ],
+  "compatibility_copy_only": {
+    "accommodation": [
+      "disposable copy only: .go-version 1.27.1 -> 1.23.2",
+      "go.mod language lowered to installed toolchain compatibility",
+      "toolchain directive removed in disposable copy only"
+    ],
+    "canonical_pins_changed": false,
+    "environment": "Go 1.23.2 linux/amd64",
+    "results": [
+      "focused tests GREEN",
+      "focused race GREEN",
+      "go vet GREEN",
+      "broad internal regression GREEN",
+      "PostgreSQL adapter unit packages GREEN",
+      "concurrent waiter nested-receipt race GREEN"
+    ]
+  },
+  "compatibility_policies": [
+    {
+      "classification": "IMPLEMENTATION_DECISION",
+      "historical_truth_claimed": false,
+      "id": "P0_FUMO_RESTORE_V1_AGGREGATE_FLOOR_GREEDY_SOURCE_ORDER"
+    },
+    {
+      "classification": "IMPLEMENTATION_DECISION",
+      "historical_truth_claimed": false,
+      "id": "GXB1_PRESERVATION_MAX_HERO_COLOR_V1",
+      "value": 5
+    }
+  ],
+  "content_revision": "6a9727da99a03a596625aafb9579c91ac1edec13ec8d02b7701a44c7a5d9a9fe",
+  "deferred_mandatory": [
+    "exact Go 1.27.1 execution",
+    "real PostgreSQL migration/restore/locking/replay/concurrency",
+    "River where accumulated CA4 depends on it",
+    "aggregate native gate at CA4_AGGREGATE_PRE_CA4_E_NATIVE_WORK_GATE",
+    "W2 physical unmodified-stock-client proof"
+  ],
+  "implemented": [
+    "immutable source-derived Hero promotion restoration catalog and forward-only migration 00022",
+    "versioned nonlocking PlayerProgression max_color preservation policy projected through MID17 and bound into MID57 policy provenance",
+    "I5 strict prepared restoration settlement with pre-lock/post-lock/apply semantic receipt checks",
+    "I5 Hero-promotion resource union preparation with canonical Mail/Economy/PlayerProgression/Mana/Stack ordering, collision rejection, bounded snapshot and subset apply",
+    "MID51 POWERUP_HERO cohesive Normal-Hero promotion, ordinary-equipment/Fumo clear, special-equipment/Fumo preservation and restoration receipt/recovery",
+    "MID57 ONE_CLICK_JINJIE all-or-nothing complete resource planning, below-cap promotion branch and at/above-cap collect-only branch",
+    "single Hero StateVersion increment/CAS per MID51/MID57 semantic operation",
+    "outer Character Hero receipt as sole ambiguous-COMMIT authority with branch-safe replay",
+    "MID49 derived six-element fumo_levels reconnect projection from durable raw Fumo and one pinned active immutable revision",
+    "sparse stock MID51/MID57 response projection with receipt-carried ManaAfter and no postcommit scalar read",
+    "production registration of MID51 and MID57 only; MID54/MID62 remain deferred"
+  ],
+  "independent_postimplementation": "143/143 GREEN",
+  "next_frontier": "CA4-4A Pet Equipment MID783/MID792 PRE_IMPLEMENTATION_RESEARCH_RECONCILIATION",
+  "out_of_scope_preserved": [
+    "MID122 GET_MAXLEVEL activation/schema",
+    "Activity1016 activation/multiplier semantics",
+    "MID54/MID62 production registration until CA4-5",
+    "Pet equipment/advance/reset (CA4-4A/4B)",
+    "Super equipment (CA4-5)",
+    "durable Spirit/Horcrux lifecycle (I8_TECH)"
+  ],
+  "parent_backend_sha256": "439ae89d888bb92abf99d2a7eddaeae0eb086749383049d4d8d4052d7eb30653",
+  "parent_ca4_status": "OPEN; native aggregate gate remains mandatory pre-CA4-E",
+  "parent_implementation_revision_sha256": "d914e320bfc3e58e9d2ec5b7362d7e7b5ae858d1fb5093285372ecb81263d31c",
+  "parent_passmap_sha256": "698c1ad42fed7437853414d5246bbcaa2efd75776a2531baee62669c562c59d8",
+  "pass": "547.0",
+  "phase": "CA4-3B Hero Promotion / Reset MID51/MID57 local closure",
+  "result": "GREEN_LOCAL_CA4_3B_ACCEPTED_COMPATIBILITY_COPY_ONLY_NATIVE_AGGREGATE_DEFERRED",
+  "route_status": {
+    "mid29_registered": false,
+    "mid51_registered": true,
+    "mid54_registered": false,
+    "mid57_registered": true,
+    "mid58_registered": true,
+    "mid62_registered": false,
+    "registered_hero_mids": [
+      49,
+      51,
+      52,
+      55,
+      57,
+      58,
+      63,
+      67,
+      89
+    ]
+  },
+  "schema_version": 1,
+  "source_qualified_facts": {
+    "hero_main_window_sha256": "473b72ec14a81d01d6dbdaa19f92c3d78900f40ca34fa5c8cf46585b76d65414",
+    "normal_hero_sha256": "125183556caeecc182bf0702dd1f95160c8ba1666a3b97fbb8a7261d30ae0ac9",
+    "quality_distribution": {
+      "2": 35,
+      "3": 35,
+      "4": 65,
+      "5": 42,
+      "6": 18
+    },
+    "refund_denominations": [
+      {
+        "item_id": 50001007,
+        "value": 200
+      },
+      {
+        "item_id": 50001006,
+        "value": 60
+      },
+      {
+        "item_id": 50001003,
+        "value": 10
+      }
+    ],
+    "refund_eligible_equipment_count": 195,
+    "self_player_sha256": "163d5893c9522ada412c2b9c4748a80757660fccdf03c8f72cb6edf0838b8eb4"
+  }
+}

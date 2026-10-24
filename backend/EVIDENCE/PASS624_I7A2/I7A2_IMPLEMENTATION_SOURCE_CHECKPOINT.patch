@@ -1,0 +1,2391 @@
+From 1f0d7629fe93043c7fc4befbfe85d7f158851068 Mon Sep 17 00:00:00 2001
+From: GXB Preservation <gxb-preservation@local.invalid>
+Date: Sun, 4 Oct 2026 13:11:47 +0000
+Subject: [PATCH] Implement I7A-2 realtime publication foundation
+
+---
+ .../postgres/i5store/player_type_test.go      |  48 +++
+ internal/adapters/postgres/i5store/store.go   |  22 ++
+ internal/adapters/postgres/realtime_wakeup.go |  75 +++++
+ .../adapters/postgres/realtime_wakeup_core.go | 102 +++++++
+ .../adapters/postgres/realtime_wakeup_test.go | 143 +++++++++
+ .../stockruntime/realtime_publisher.go        |  62 ++++
+ .../stockruntime/realtime_publisher_test.go   |  77 +++++
+ .../stockruntime/realtime_registry.go         | 275 ++++++++++++++++++
+ .../stockruntime/realtime_registry_test.go    | 255 ++++++++++++++++
+ .../adapters/stockruntime/realtime_server.go  |  56 +---
+ .../adapters/stockruntime/realtime_writer.go  |  28 +-
+ .../application/playerpresentation/service.go |  66 +++++
+ .../playerpresentation/service_test.go        |  57 ++++
+ .../application/realtimewakeup/registry.go    | 165 +++++++++++
+ .../realtimewakeup/registry_test.go           |  76 +++++
+ internal/archguard/i7a2_contract_test.go      | 167 +++++++++++
+ internal/projection/lobby/shapes.go           |   5 +-
+ internal/projection/lobby/shapes_test.go      |  16 +
+ internal/protocol/httpedge/decode_test.go     |   9 +
+ internal/protocol/mids/registry.go            |  27 +-
+ .../protocol/mids/registry_special_test.go    |  12 +
+ internal/protocol/realtime/frame_test.go      |   5 +
+ internal/protocol/realtime/s2c_registry.go    | 255 ++++++++++++++++
+ .../protocol/realtime/s2c_registry_test.go    | 106 +++++++
+ 24 files changed, 2050 insertions(+), 59 deletions(-)
+ create mode 100644 internal/adapters/postgres/i5store/player_type_test.go
+ create mode 100644 internal/adapters/postgres/realtime_wakeup.go
+ create mode 100644 internal/adapters/postgres/realtime_wakeup_core.go
+ create mode 100644 internal/adapters/postgres/realtime_wakeup_test.go
+ create mode 100644 internal/adapters/stockruntime/realtime_publisher.go
+ create mode 100644 internal/adapters/stockruntime/realtime_publisher_test.go
+ create mode 100644 internal/adapters/stockruntime/realtime_registry.go
+ create mode 100644 internal/adapters/stockruntime/realtime_registry_test.go
+ create mode 100644 internal/application/playerpresentation/service.go
+ create mode 100644 internal/application/playerpresentation/service_test.go
+ create mode 100644 internal/application/realtimewakeup/registry.go
+ create mode 100644 internal/application/realtimewakeup/registry_test.go
+ create mode 100644 internal/archguard/i7a2_contract_test.go
+ create mode 100644 internal/protocol/realtime/s2c_registry.go
+ create mode 100644 internal/protocol/realtime/s2c_registry_test.go
+
+diff --git a/internal/adapters/postgres/i5store/player_type_test.go b/internal/adapters/postgres/i5store/player_type_test.go
+new file mode 100644
+index 0000000..5e1a56a
+--- /dev/null
++++ b/internal/adapters/postgres/i5store/player_type_test.go
+@@ -0,0 +1,48 @@
++package i5store
++
++import (
++	"context"
++	"testing"
++
++	"gxb.local/backend/v2/internal/adapters/postgres/kernelstore"
++	"gxb.local/backend/v2/internal/domain/identity"
++	"gxb.local/backend/v2/internal/foundation/tx"
++)
++
++type playerTypeQueryer struct{ row tx.Row }
++
++func (q playerTypeQueryer) QueryRow(context.Context, string, ...any) tx.Row { return q.row }
++
++type playerTypeRow struct {
++	pid int64
++	typ int64
++	err error
++}
++
++func (r playerTypeRow) Scan(dest ...any) error {
++	if r.err != nil {
++		return r.err
++	}
++	*(dest[0].(*int64)) = r.pid
++	*(dest[1].(*int64)) = r.typ
++	return nil
++}
++
++func TestPlayerTypeReadPreservesCanonicalInt64WithoutRangeInference(t *testing.T) {
++	s := Store{Queryer: playerTypeQueryer{row: playerTypeRow{pid: 100001, typ: -9}}}
++	got, ok, err := s.PlayerType(context.Background(), identity.PlayerID(100001))
++	if err != nil || !ok || got != -9 {
++		t.Fatalf("got=%d ok=%v err=%v", got, ok, err)
++	}
++}
++
++func TestPlayerTypeReadMissingAndOwnerMismatchFailClosed(t *testing.T) {
++	s := Store{Queryer: playerTypeQueryer{row: playerTypeRow{err: kernelstore.ErrNoRows}}}
++	if got, ok, err := s.PlayerType(context.Background(), identity.PlayerID(100001)); err != nil || ok || got != 0 {
++		t.Fatalf("missing got=%d ok=%v err=%v", got, ok, err)
++	}
++	s = Store{Queryer: playerTypeQueryer{row: playerTypeRow{pid: 100002, typ: 3}}}
++	if _, ok, err := s.PlayerType(context.Background(), identity.PlayerID(100001)); err == nil || ok {
++		t.Fatalf("owner mismatch ok=%v err=%v", ok, err)
++	}
++}
+diff --git a/internal/adapters/postgres/i5store/store.go b/internal/adapters/postgres/i5store/store.go
+index 4f91f4f..50bd48a 100644
+--- a/internal/adapters/postgres/i5store/store.go
++++ b/internal/adapters/postgres/i5store/store.go
+@@ -938,3 +938,25 @@ func (Store) LockPlayerLevelTx(ctx context.Context, t tx.Tx, pid identity.Player
+ 	}
+ 	return p.Level, nil
+ }
++
++// PlayerType exposes the narrow I5-owned presentation read required by I7A.
++// It deliberately returns the canonical int64 verbatim; no source-qualified
++// PlayerType range exists in the active contract.
++func (s Store) PlayerType(ctx context.Context, pid identity.PlayerID) (int64, bool, error) {
++	if s.Queryer == nil || !pid.Valid() {
++		return 0, false, errors.New("invalid player type read")
++	}
++	var rawPID int64
++	var playerType int64
++	err := s.Queryer.QueryRow(ctx, `SELECT player_id,player_type FROM player_profiles WHERE player_id=$1`, int64(pid)).Scan(&rawPID, &playerType)
++	if noRows(err) {
++		return 0, false, nil
++	}
++	if err != nil {
++		return 0, false, err
++	}
++	if identity.PlayerID(rawPID) != pid {
++		return 0, false, errors.New("player type owner mismatch")
++	}
++	return playerType, true, nil
++}
+diff --git a/internal/adapters/postgres/realtime_wakeup.go b/internal/adapters/postgres/realtime_wakeup.go
+new file mode 100644
+index 0000000..f6f25d4
+--- /dev/null
++++ b/internal/adapters/postgres/realtime_wakeup.go
+@@ -0,0 +1,75 @@
++//go:build postgres
++
++package postgres
++
++import (
++	"context"
++	"errors"
++	"fmt"
++	"time"
++
++	"github.com/jackc/pgx/v5/pgxpool"
++	appwakeup "gxb.local/backend/v2/internal/application/realtimewakeup"
++)
++
++type pgWakeupFactory struct{ pool *Pool }
++
++func (f pgWakeupFactory) Acquire(ctx context.Context) (wakeupSession, error) {
++	if f.pool == nil || f.pool.raw == nil {
++		return nil, errors.New("nil PostgreSQL pool for realtime wakeup listener")
++	}
++	conn, err := f.pool.raw.Acquire(ctx)
++	if err != nil {
++		return nil, err
++	}
++	return &pgWakeupSession{conn: conn}, nil
++}
++
++type pgWakeupSession struct{ conn *pgxpool.Conn }
++
++func (s *pgWakeupSession) Listen(ctx context.Context) error {
++	if s == nil || s.conn == nil {
++		return errors.New("nil realtime wakeup session")
++	}
++	_, err := s.conn.Exec(ctx, `LISTEN gxb1_realtime_wakeup_v1`)
++	return normalize(err)
++}
++func (s *pgWakeupSession) Wait(ctx context.Context) (string, error) {
++	if s == nil || s.conn == nil {
++		return "", errors.New("nil realtime wakeup session")
++	}
++	n, err := s.conn.Conn().WaitForNotification(ctx)
++	if err != nil {
++		return "", normalize(err)
++	}
++	if n.Channel != RealtimeWakeupChannel {
++		return "", fmt.Errorf("unexpected realtime wakeup channel %q", n.Channel)
++	}
++	return n.Payload, nil
++}
++func (s *pgWakeupSession) Close() {
++	if s != nil && s.conn != nil {
++		s.conn.Release()
++		s.conn = nil
++	}
++}
++
++// RealtimeWakeupListener uses an independently acquired PostgreSQL session. It
++// never borrows RealtimeOwnerGuard.conn and therefore cannot alter advisory-lock
++// ownership semantics.
++type RealtimeWakeupListener struct {
++	Pool       *Pool
++	Registry   appwakeup.Registry
++	RetryDelay time.Duration
++}
++
++func (l RealtimeWakeupListener) Run(ctx context.Context) error {
++	delay := l.RetryDelay
++	if delay == 0 {
++		delay = DefaultRealtimeWakeupRetryDelay
++	}
++	if delay < 0 {
++		return errors.New("negative realtime wakeup retry delay")
++	}
++	return runRealtimeWakeupListener(ctx, pgWakeupFactory{pool: l.Pool}, l.Registry, delay)
++}
+diff --git a/internal/adapters/postgres/realtime_wakeup_core.go b/internal/adapters/postgres/realtime_wakeup_core.go
+new file mode 100644
+index 0000000..563d8fe
+--- /dev/null
++++ b/internal/adapters/postgres/realtime_wakeup_core.go
+@@ -0,0 +1,102 @@
++package postgres
++
++import (
++	"context"
++	"errors"
++	"time"
++
++	appwakeup "gxb.local/backend/v2/internal/application/realtimewakeup"
++	"gxb.local/backend/v2/internal/foundation/tx"
++)
++
++// RealtimeWakeupChannel is a V2 mechanism namespace, not recovered gameplay
++// truth. No production route is activated by I7A-2 merely because this channel
++// and listener foundation exist.
++const RealtimeWakeupChannel = "gxb1_realtime_wakeup_v1"
++
++const DefaultRealtimeWakeupRetryDelay = 250 * time.Millisecond
++
++// EmitRealtimeWakeup emits only a bounded reference envelope. Passing the
++// caller-owned transaction Execer preserves PostgreSQL's commit-coupled NOTIFY
++// behavior when a future owner emits after its canonical state mutation.
++func EmitRealtimeWakeup(ctx context.Context, exec tx.Execer, e appwakeup.Envelope) error {
++	if exec == nil {
++		return errors.New("nil realtime wakeup execer")
++	}
++	payload, err := e.Encode()
++	if err != nil {
++		return err
++	}
++	_, err = exec.Exec(ctx, `SELECT pg_notify($1,$2)`, RealtimeWakeupChannel, string(payload))
++	return err
++}
++
++type wakeupSession interface {
++	Listen(context.Context) error
++	Wait(context.Context) (string, error)
++	Close()
++}
++
++type wakeupFactory interface {
++	Acquire(context.Context) (wakeupSession, error)
++}
++
++func runRealtimeWakeupListener(ctx context.Context, factory wakeupFactory, registry appwakeup.Registry, retryDelay time.Duration) error {
++	if factory == nil || retryDelay < 0 {
++		return errors.New("invalid realtime wakeup listener configuration")
++	}
++	for {
++		if err := ctx.Err(); err != nil {
++			return err
++		}
++		session, err := factory.Acquire(ctx)
++		if err == nil {
++			retry, runErr := consumeRealtimeWakeups(ctx, session, registry)
++			session.Close()
++			if !retry {
++				return runErr
++			}
++			err = runErr
++		}
++		if err := ctx.Err(); err != nil {
++			return err
++		}
++		if retryDelay == 0 {
++			continue
++		}
++		t := time.NewTimer(retryDelay)
++		select {
++		case <-ctx.Done():
++			if !t.Stop() {
++				<-t.C
++			}
++			return ctx.Err()
++		case <-t.C:
++		}
++	}
++}
++
++// consumeRealtimeWakeups returns retry=true only for connection/listener loss.
++// Malformed/unknown route input fails closed to the caller rather than being
++// silently discarded as if canonical delivery had succeeded.
++func consumeRealtimeWakeups(ctx context.Context, session wakeupSession, registry appwakeup.Registry) (bool, error) {
++	if session == nil {
++		return true, errors.New("nil realtime wakeup session")
++	}
++	if err := session.Listen(ctx); err != nil {
++		return true, err
++	}
++	for {
++		payload, err := session.Wait(ctx)
++		if err != nil {
++			return true, err
++		}
++		e, err := appwakeup.Decode([]byte(payload))
++		if err != nil {
++			return false, err
++		}
++		if err := registry.Dispatch(ctx, e); err != nil {
++			return false, err
++		}
++	}
++}
+diff --git a/internal/adapters/postgres/realtime_wakeup_test.go b/internal/adapters/postgres/realtime_wakeup_test.go
+new file mode 100644
+index 0000000..b603014
+--- /dev/null
++++ b/internal/adapters/postgres/realtime_wakeup_test.go
+@@ -0,0 +1,143 @@
++package postgres
++
++import (
++	"context"
++	"errors"
++	"sync"
++	"testing"
++	"time"
++
++	appwakeup "gxb.local/backend/v2/internal/application/realtimewakeup"
++	"gxb.local/backend/v2/internal/foundation/tx"
++)
++
++type fakeWakeupFactory struct {
++	mu       sync.Mutex
++	sessions []wakeupSession
++	acquires int
++}
++
++func (f *fakeWakeupFactory) Acquire(context.Context) (wakeupSession, error) {
++	f.mu.Lock()
++	defer f.mu.Unlock()
++	f.acquires++
++	if len(f.sessions) == 0 {
++		return nil, errors.New("no fake session")
++	}
++	s := f.sessions[0]
++	f.sessions = f.sessions[1:]
++	return s, nil
++}
++
++type fakeWakeupSession struct {
++	listenErr error
++	payloads  []string
++	waitErr   error
++	closed    bool
++}
++
++func (s *fakeWakeupSession) Listen(context.Context) error { return s.listenErr }
++func (s *fakeWakeupSession) Wait(context.Context) (string, error) {
++	if len(s.payloads) > 0 {
++		p := s.payloads[0]
++		s.payloads = s.payloads[1:]
++		return p, nil
++	}
++	if s.waitErr != nil {
++		return "", s.waitErr
++	}
++	return "", context.Canceled
++}
++func (s *fakeWakeupSession) Close() { s.closed = true }
++
++func encodedWakeup(t *testing.T, route, ref string) string {
++	t.Helper()
++	b, err := (appwakeup.Envelope{Version: 1, Route: route, Ref: ref}).Encode()
++	if err != nil {
++		t.Fatal(err)
++	}
++	return string(b)
++}
++
++func TestRealtimeWakeupListenerReconnectsConnectionLossThenDispatchesCanonicalReloadRoute(t *testing.T) {
++	ctx, cancel := context.WithCancel(context.Background())
++	defer cancel()
++	lost := errors.New("connection lost")
++	s1 := &fakeWakeupSession{waitErr: lost}
++	s2 := &fakeWakeupSession{payloads: []string{encodedWakeup(t, "social.friend", "p:7")}, waitErr: context.Canceled}
++	factory := &fakeWakeupFactory{sessions: []wakeupSession{s1, s2}}
++	var got string
++	registry, err := appwakeup.NewRegistry(appwakeup.Registration{Route: "social.friend", Handler: appwakeup.RouteHandlerFunc(func(_ context.Context, ref string) error {
++		got = ref
++		cancel()
++		return nil
++	})})
++	if err != nil {
++		t.Fatal(err)
++	}
++	err = runRealtimeWakeupListener(ctx, factory, registry, 0)
++	if !errors.Is(err, context.Canceled) {
++		t.Fatalf("run err=%v", err)
++	}
++	if got != "p:7" || factory.acquires != 2 || !s1.closed || !s2.closed {
++		t.Fatalf("got=%q acquires=%d closed1=%v closed2=%v", got, factory.acquires, s1.closed, s2.closed)
++	}
++}
++
++func TestRealtimeWakeupListenerFailsClosedOnUnknownRouteWithoutReconnectLoop(t *testing.T) {
++	empty, _ := appwakeup.NewRegistry()
++	s := &fakeWakeupSession{payloads: []string{encodedWakeup(t, "unknown.route", "x")}}
++	factory := &fakeWakeupFactory{sessions: []wakeupSession{s}}
++	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
++	defer cancel()
++	err := runRealtimeWakeupListener(ctx, factory, empty, 0)
++	if !errors.Is(err, appwakeup.ErrUnknownRoute) {
++		t.Fatalf("err=%v", err)
++	}
++	if factory.acquires != 1 || !s.closed {
++		t.Fatalf("acquires=%d closed=%v", factory.acquires, s.closed)
++	}
++}
++
++type wakeupCommandTag struct{}
++
++func (wakeupCommandTag) RowsAffected() int64 { return 1 }
++
++type wakeupExecer struct {
++	query string
++	args  []any
++	calls int
++	err   error
++}
++
++func (e *wakeupExecer) Exec(_ context.Context, query string, args ...any) (tx.CommandTag, error) {
++	e.calls++
++	e.query = query
++	e.args = append([]any(nil), args...)
++	return wakeupCommandTag{}, e.err
++}
++
++func TestEmitRealtimeWakeupUsesCallerExecerAndReferenceEnvelopeOnly(t *testing.T) {
++	exec := &wakeupExecer{}
++	envelope := appwakeup.Envelope{Version: appwakeup.EnvelopeVersion, Route: "social.friend", Ref: "p:7"}
++	if err := EmitRealtimeWakeup(context.Background(), exec, envelope); err != nil {
++		t.Fatal(err)
++	}
++	if exec.calls != 1 || exec.query != `SELECT pg_notify($1,$2)` || len(exec.args) != 2 || exec.args[0] != RealtimeWakeupChannel {
++		t.Fatalf("unexpected pg_notify call calls=%d query=%q args=%#v", exec.calls, exec.query, exec.args)
++	}
++	payload, ok := exec.args[1].(string)
++	if !ok {
++		t.Fatalf("payload type=%T", exec.args[1])
++	}
++	got, err := appwakeup.Decode([]byte(payload))
++	if err != nil || got != envelope {
++		t.Fatalf("decoded=%+v err=%v", got, err)
++	}
++	if err := EmitRealtimeWakeup(context.Background(), exec, appwakeup.Envelope{Version: 99, Route: "social.friend", Ref: "p:7"}); !errors.Is(err, appwakeup.ErrInvalidEnvelope) {
++		t.Fatalf("invalid envelope err=%v", err)
++	}
++	if exec.calls != 1 {
++		t.Fatalf("invalid envelope reached execer calls=%d", exec.calls)
++	}
++}
+diff --git a/internal/adapters/stockruntime/realtime_publisher.go b/internal/adapters/stockruntime/realtime_publisher.go
+new file mode 100644
+index 0000000..b22b290
+--- /dev/null
++++ b/internal/adapters/stockruntime/realtime_publisher.go
+@@ -0,0 +1,62 @@
++package stockruntime
++
++import (
++	"context"
++	"errors"
++
++	"gxb.local/backend/v2/internal/protocol/limits"
++	wireRT "gxb.local/backend/v2/internal/protocol/realtime"
++)
++
++var ErrInvalidRealtimePublicationHandle = errors.New("invalid realtime publication handle")
++
++// RealtimePublisher is the protocol/adapter-edge publisher. It validates wire
++// schema and physical role before using the existing per-socket writer handle.
++// It owns no gameplay truth and contains no durable retry queue.
++type RealtimePublisher struct {
++	Registry wireRT.EventRegistry
++	Limits   limits.Config
++}
++
++func (p RealtimePublisher) config() (limits.Config, error) {
++	cfg := p.Limits
++	if cfg.RealtimeBufferedBytes == 0 {
++		cfg = limits.Default()
++	}
++	if err := cfg.Validate(); err != nil {
++		return limits.Config{}, err
++	}
++	return cfg, nil
++}
++
++func (p RealtimePublisher) PublishDirect(ctx context.Context, h SessionHandle, mid uint16, params any) error {
++	meta, ok := h.Metadata()
++	if !ok {
++		return ErrInvalidRealtimePublicationHandle
++	}
++	role := protocolRole(meta.PhysicalRole)
++	if err := p.Registry.ValidateDirect(mid, role, params); err != nil {
++		return err
++	}
++	cfg, err := p.config()
++	if err != nil {
++		return err
++	}
++	return h.Send(ctx, wireRT.Frame{MID: mid, Sequence: 0, Params: params}, cfg)
++}
++
++func (p RealtimePublisher) PublishNotice(ctx context.Context, h SessionHandle, parent uint16, namespace wireRT.NoticeNamespace, params any) error {
++	meta, ok := h.Metadata()
++	if !ok {
++		return ErrInvalidRealtimePublicationHandle
++	}
++	role := protocolRole(meta.PhysicalRole)
++	if err := p.Registry.ValidateNotice(parent, namespace, role, params); err != nil {
++		return err
++	}
++	cfg, err := p.config()
++	if err != nil {
++		return err
++	}
++	return h.Send(ctx, wireRT.Frame{MID: parent, Sequence: 0, Params: params}, cfg)
++}
+diff --git a/internal/adapters/stockruntime/realtime_publisher_test.go b/internal/adapters/stockruntime/realtime_publisher_test.go
+new file mode 100644
+index 0000000..147feb2
+--- /dev/null
++++ b/internal/adapters/stockruntime/realtime_publisher_test.go
+@@ -0,0 +1,77 @@
++package stockruntime
++
++import (
++	"context"
++	"errors"
++	"net"
++	"testing"
++	"time"
++
++	domainrt "gxb.local/backend/v2/internal/domain/realtimeauth"
++	"gxb.local/backend/v2/internal/protocol/amf3"
++	"gxb.local/backend/v2/internal/protocol/limits"
++	"gxb.local/backend/v2/internal/protocol/mids"
++	wireRT "gxb.local/backend/v2/internal/protocol/realtime"
++)
++
++func TestRealtimePublisherValidatesBeforeUsingExistingWriter(t *testing.T) {
++	reg, err := wireRT.NewEventRegistry([]wireRT.DirectRegistration{{
++		MID: mids.MIDChatFromPlayer, Roles: []wireRT.Role{wireRT.World}, Validate: wireRT.RequireAMF3Object,
++	}}, nil)
++	if err != nil {
++		t.Fatal(err)
++	}
++	publisher := RealtimePublisher{Registry: reg, Limits: limits.Default()}
++	connections := NewConnectionRegistry()
++	admission := registryAdmission(t, "33333333-3333-4333-8333-333333333333", 100001, domainrt.World, 1)
++	server, client := net.Pipe()
++	defer client.Close()
++	writer, err := newConnWriter(context.Background(), server, limits.Default(), time.Second)
++	if err != nil {
++		t.Fatal(err)
++	}
++	h, err := connections.Replace(admission, writer)
++	if err != nil {
++		t.Fatal(err)
++	}
++	defer connections.Remove(h)
++
++	if err := publisher.PublishDirect(context.Background(), h, mids.MIDChatFromFriend, &amf3.Object{}); !errors.Is(err, wireRT.ErrUnknownS2CSchema) {
++		t.Fatalf("unregistered publication err=%v", err)
++	}
++
++	readDone := make(chan wireRT.Frame, 1)
++	readErr := make(chan error, 1)
++	go func() {
++		buf := make([]byte, 4096)
++		n, err := client.Read(buf)
++		if err != nil {
++			readErr <- err
++			return
++		}
++		dec, _ := wireRT.NewStreamDecoder(limits.Default())
++		frames, err := dec.Feed(buf[:n])
++		if err != nil || len(frames) != 1 {
++			if err == nil {
++				err = errors.New("unexpected frame count")
++			}
++			readErr <- err
++			return
++		}
++		readDone <- frames[0]
++	}()
++	payload := &amf3.Object{Properties: []amf3.Property{{Name: "player_id", Value: 100001.0}}}
++	if err := publisher.PublishDirect(context.Background(), h, mids.MIDChatFromPlayer, payload); err != nil {
++		t.Fatal(err)
++	}
++	select {
++	case f := <-readDone:
++		if f.MID != mids.MIDChatFromPlayer {
++			t.Fatalf("published MID=%d", f.MID)
++		}
++	case err := <-readErr:
++		t.Fatal(err)
++	case <-time.After(time.Second):
++		t.Fatal("publication not written")
++	}
++}
+diff --git a/internal/adapters/stockruntime/realtime_registry.go b/internal/adapters/stockruntime/realtime_registry.go
+new file mode 100644
+index 0000000..9ad7274
+--- /dev/null
++++ b/internal/adapters/stockruntime/realtime_registry.go
+@@ -0,0 +1,275 @@
++package stockruntime
++
++import (
++	"context"
++	"errors"
++	"net"
++	"sort"
++	"sync"
++
++	"gxb.local/backend/v2/internal/domain/identity"
++	domainrt "gxb.local/backend/v2/internal/domain/realtimeauth"
++	"gxb.local/backend/v2/internal/protocol/limits"
++	wireRT "gxb.local/backend/v2/internal/protocol/realtime"
++)
++
++var (
++	ErrRealtimeSessionRetired = errors.New("realtime session handle retired")
++	ErrInvalidRealtimeSession = errors.New("invalid realtime session registration")
++)
++
++type registryKey struct {
++	Context identity.ContextID
++	Role    domainrt.PhysicalRole
++}
++
++type playerRoleKey struct {
++	Player identity.PlayerID
++	Role   domainrt.PhysicalRole
++}
++
++type roomRoleKey struct {
++	Room int64
++	Role domainrt.PhysicalRole
++}
++
++// SessionMetadata is the immutable admission/liveness snapshot attached to one
++// physical realtime socket generation. It is routing evidence only; canonical
++// gameplay and identity truth remain with their existing owners.
++type SessionMetadata struct {
++	AccountID              identity.AccountID
++	AccountUID             identity.AccountUID
++	SessionID              identity.SessionID
++	ContextID              identity.ContextID
++	LogicalServerID        identity.LogicalServerID
++	PlayerID               identity.PlayerID
++	ContextGeneration      int64
++	SessionLivenessVersion int64
++	ContextLivenessVersion int64
++	PhysicalRole           domainrt.PhysicalRole
++	RoomID                 int64
++	RegistryGeneration     uint64
++}
++
++func (m SessionMetadata) valid() bool {
++	return !m.AccountID.UUID().IsZero() && m.AccountUID.Valid() && !m.SessionID.UUID().IsZero() &&
++		!m.ContextID.UUID().IsZero() && m.LogicalServerID.Valid() && m.PlayerID.Valid() &&
++		m.ContextGeneration > 0 && m.SessionLivenessVersion > 0 && m.ContextLivenessVersion > 0 &&
++		m.PhysicalRole.Valid() && m.RoomID > 0 && m.RegistryGeneration > 0
++}
++
++type registrySession struct {
++	meta   SessionMetadata
++	writer *connWriter
++	conn   net.Conn
++
++	lifecycle sync.Mutex
++	retired   bool
++}
++
++// SessionHandle is an immutable feature-facing publication capability. It never
++// exposes net.Conn or permits construction of another writer. A snapshotted
++// handle remains safe across replacement: once retirement linearizes, new Send
++// calls fail with ErrRealtimeSessionRetired.
++type SessionHandle struct{ session *registrySession }
++
++func (h SessionHandle) Valid() bool { return h.session != nil && h.session.meta.valid() }
++func (h SessionHandle) Metadata() (SessionMetadata, bool) {
++	if !h.Valid() {
++		return SessionMetadata{}, false
++	}
++	return h.session.meta, true
++}
++func (h SessionHandle) RegistryGeneration() uint64 {
++	if h.session == nil {
++		return 0
++	}
++	return h.session.meta.RegistryGeneration
++}
++func (h SessionHandle) Send(ctx context.Context, frame wireRT.Frame, cfg limits.Config) error {
++	if h.session == nil || h.session.writer == nil {
++		return ErrRealtimeSessionRetired
++	}
++	s := h.session
++	// The lifecycle mutex protects only admission into the existing writer
++	// queue. It is deliberately released before waiting for conn.Write so that
++	// retirement can close the private socket and interrupt blocked I/O.
++	s.lifecycle.Lock()
++	if s.retired {
++		s.lifecycle.Unlock()
++		return ErrRealtimeSessionRetired
++	}
++	done, err := s.writer.enqueue(ctx, frame, cfg)
++	s.lifecycle.Unlock()
++	if err != nil {
++		return err
++	}
++	return s.writer.await(ctx, done)
++}
++
++func (s *registrySession) retire() {
++	if s == nil {
++		return
++	}
++	s.lifecycle.Lock()
++	if s.retired {
++		s.lifecycle.Unlock()
++		return
++	}
++	s.retired = true
++	s.lifecycle.Unlock()
++
++	// Closing the socket first interrupts an in-progress/blocked writer. The
++	// writer owns every conn.Write; the registry only owns private teardown.
++	if s.conn != nil {
++		_ = s.conn.Close()
++	}
++	if s.writer != nil {
++		s.writer.Close()
++	}
++}
++
++// ConnectionRegistry is the process-local I4 index of admitted physical
++// realtime sockets. The authoritative primary identity remains context+role;
++// secondary indices are delivery projections and never collapse all contexts
++// for one player into a global winner.
++type ConnectionRegistry struct {
++	mu       sync.Mutex
++	next     uint64
++	by       map[registryKey]*registrySession
++	byPlayer map[playerRoleKey]map[uint64]*registrySession
++	byRoom   map[roomRoleKey]map[uint64]*registrySession
++}
++
++func NewConnectionRegistry() *ConnectionRegistry {
++	return &ConnectionRegistry{
++		by:       make(map[registryKey]*registrySession),
++		byPlayer: make(map[playerRoleKey]map[uint64]*registrySession),
++		byRoom:   make(map[roomRoleKey]map[uint64]*registrySession),
++	}
++}
++
++// Replace installs the newest generation for context+physical-role. Registry
++// mutation and index removal occur under r.mu; socket/writer teardown occurs
++// only after that mutex is released.
++func (r *ConnectionRegistry) Replace(admission domainrt.Admission, writer *connWriter) (SessionHandle, error) {
++	if r == nil || writer == nil || writer.conn == nil || !admission.Role.Valid() || admission.RoomID <= 0 {
++		return SessionHandle{}, ErrInvalidRealtimeSession
++	}
++	a := admission.Actor
++	if a.AccountID.UUID().IsZero() || !a.AccountUID.Valid() || a.SessionID.UUID().IsZero() || a.ContextID.UUID().IsZero() ||
++		!a.LogicalServerID.Valid() || !a.PlayerID.Valid() || a.ContextGeneration <= 0 || a.SessionLivenessVersion <= 0 || a.ContextLivenessVersion <= 0 {
++		return SessionHandle{}, ErrInvalidRealtimeSession
++	}
++
++	key := registryKey{Context: a.ContextID, Role: admission.Role}
++	var old *registrySession
++
++	r.mu.Lock()
++	r.next++
++	s := &registrySession{meta: SessionMetadata{
++		AccountID: a.AccountID, AccountUID: a.AccountUID, SessionID: a.SessionID, ContextID: a.ContextID,
++		LogicalServerID: a.LogicalServerID, PlayerID: a.PlayerID, ContextGeneration: a.ContextGeneration,
++		SessionLivenessVersion: a.SessionLivenessVersion, ContextLivenessVersion: a.ContextLivenessVersion,
++		PhysicalRole: admission.Role, RoomID: admission.RoomID, RegistryGeneration: r.next,
++	}, writer: writer, conn: writer.conn}
++	old = r.by[key]
++	if old != nil {
++		r.removeIndicesLocked(old)
++	}
++	r.by[key] = s
++	r.addIndicesLocked(s)
++	r.mu.Unlock()
++
++	if old != nil && old != s {
++		old.retire()
++	}
++	return SessionHandle{session: s}, nil
++}
++
++// Remove deletes only the exact generation represented by h. A stale ServeConn
++// defer cannot remove a newer replacement for the same context+role.
++func (r *ConnectionRegistry) Remove(h SessionHandle) {
++	if r == nil || h.session == nil {
++		return
++	}
++	s := h.session
++	key := registryKey{Context: s.meta.ContextID, Role: s.meta.PhysicalRole}
++	removed := false
++	r.mu.Lock()
++	if cur := r.by[key]; cur == s && cur.meta.RegistryGeneration == s.meta.RegistryGeneration {
++		delete(r.by, key)
++		r.removeIndicesLocked(s)
++		removed = true
++	}
++	r.mu.Unlock()
++	if removed {
++		s.retire()
++	}
++}
++
++func (r *ConnectionRegistry) ByPlayerRole(playerID identity.PlayerID, role domainrt.PhysicalRole) []SessionHandle {
++	if r == nil || !playerID.Valid() || !role.Valid() {
++		return nil
++	}
++	r.mu.Lock()
++	out := snapshotSessions(r.byPlayer[playerRoleKey{Player: playerID, Role: role}])
++	r.mu.Unlock()
++	return out
++}
++
++func (r *ConnectionRegistry) ByRoomRole(roomID int64, role domainrt.PhysicalRole) []SessionHandle {
++	if r == nil || roomID <= 0 || !role.Valid() {
++		return nil
++	}
++	r.mu.Lock()
++	out := snapshotSessions(r.byRoom[roomRoleKey{Room: roomID, Role: role}])
++	r.mu.Unlock()
++	return out
++}
++
++func (r *ConnectionRegistry) addIndicesLocked(s *registrySession) {
++	pk := playerRoleKey{Player: s.meta.PlayerID, Role: s.meta.PhysicalRole}
++	if r.byPlayer[pk] == nil {
++		r.byPlayer[pk] = make(map[uint64]*registrySession)
++	}
++	r.byPlayer[pk][s.meta.RegistryGeneration] = s
++	rk := roomRoleKey{Room: s.meta.RoomID, Role: s.meta.PhysicalRole}
++	if r.byRoom[rk] == nil {
++		r.byRoom[rk] = make(map[uint64]*registrySession)
++	}
++	r.byRoom[rk][s.meta.RegistryGeneration] = s
++}
++
++func (r *ConnectionRegistry) removeIndicesLocked(s *registrySession) {
++	pk := playerRoleKey{Player: s.meta.PlayerID, Role: s.meta.PhysicalRole}
++	if bucket := r.byPlayer[pk]; bucket != nil {
++		delete(bucket, s.meta.RegistryGeneration)
++		if len(bucket) == 0 {
++			delete(r.byPlayer, pk)
++		}
++	}
++	rk := roomRoleKey{Room: s.meta.RoomID, Role: s.meta.PhysicalRole}
++	if bucket := r.byRoom[rk]; bucket != nil {
++		delete(bucket, s.meta.RegistryGeneration)
++		if len(bucket) == 0 {
++			delete(r.byRoom, rk)
++		}
++	}
++}
++
++func snapshotSessions(in map[uint64]*registrySession) []SessionHandle {
++	if len(in) == 0 {
++		return nil
++	}
++	gens := make([]uint64, 0, len(in))
++	for gen := range in {
++		gens = append(gens, gen)
++	}
++	sort.Slice(gens, func(i, j int) bool { return gens[i] < gens[j] })
++	out := make([]SessionHandle, 0, len(gens))
++	for _, gen := range gens {
++		out = append(out, SessionHandle{session: in[gen]})
++	}
++	return out
++}
+diff --git a/internal/adapters/stockruntime/realtime_registry_test.go b/internal/adapters/stockruntime/realtime_registry_test.go
+new file mode 100644
+index 0000000..4db8407
+--- /dev/null
++++ b/internal/adapters/stockruntime/realtime_registry_test.go
+@@ -0,0 +1,255 @@
++package stockruntime
++
++import (
++	"context"
++	"errors"
++	"io"
++	"net"
++	"sync"
++	"testing"
++	"time"
++
++	"gxb.local/backend/v2/internal/domain/identity"
++	domainrt "gxb.local/backend/v2/internal/domain/realtimeauth"
++	"gxb.local/backend/v2/internal/foundation/ids"
++	"gxb.local/backend/v2/internal/protocol/amf3"
++	"gxb.local/backend/v2/internal/protocol/limits"
++	"gxb.local/backend/v2/internal/protocol/mids"
++	wireRT "gxb.local/backend/v2/internal/protocol/realtime"
++)
++
++func registryAdmission(t *testing.T, contextUUID string, player identity.PlayerID, role domainrt.PhysicalRole, room int64) domainrt.Admission {
++	t.Helper()
++	accountUUID, err := ids.ParseUUID("11111111-1111-4111-8111-111111111111")
++	if err != nil {
++		t.Fatal(err)
++	}
++	sessionUUID, err := ids.ParseUUID("22222222-2222-4222-8222-222222222222")
++	if err != nil {
++		t.Fatal(err)
++	}
++	ctxUUID, err := ids.ParseUUID(contextUUID)
++	if err != nil {
++		t.Fatal(err)
++	}
++	accountID, _ := identity.AccountIDFrom(accountUUID)
++	sessionID, _ := identity.SessionIDFrom(sessionUUID)
++	contextID, _ := identity.ContextIDFrom(ctxUUID)
++	return domainrt.Admission{Role: role, RoomID: room, Actor: identity.ActorContext{
++		AccountID: accountID, AccountUID: identity.AccountUID("20000007"), SessionID: sessionID,
++		ContextID: contextID, LogicalServerID: 1, PlayerID: player, ContextGeneration: 3,
++		SessionLivenessVersion: 4, ContextLivenessVersion: 5,
++	}}
++}
++
++func newRegistryPipeWriter(t *testing.T) (*connWriter, net.Conn, net.Conn) {
++	t.Helper()
++	server, client := net.Pipe()
++	w, err := newConnWriter(context.Background(), server, limits.Default(), time.Second)
++	if err != nil {
++		server.Close()
++		client.Close()
++		t.Fatal(err)
++	}
++	return w, server, client
++}
++
++func TestConnectionRegistryReplacementRetiresSnapshottedHandle(t *testing.T) {
++	r := NewConnectionRegistry()
++	admission := registryAdmission(t, "33333333-3333-4333-8333-333333333333", 100001, domainrt.World, 1)
++
++	w1, _, client1 := newRegistryPipeWriter(t)
++	defer client1.Close()
++	h1, err := r.Replace(admission, w1)
++	if err != nil {
++		t.Fatal(err)
++	}
++	meta, ok := h1.Metadata()
++	if !ok || meta.PlayerID != 100001 || meta.PhysicalRole != domainrt.World || meta.RoomID != 1 || meta.RegistryGeneration == 0 {
++		t.Fatalf("bad metadata ok=%v meta=%+v", ok, meta)
++	}
++
++	w2, _, client2 := newRegistryPipeWriter(t)
++	defer client2.Close()
++	h2, err := r.Replace(admission, w2)
++	if err != nil {
++		t.Fatal(err)
++	}
++	if h2.RegistryGeneration() <= h1.RegistryGeneration() {
++		t.Fatalf("replacement generation old=%d new=%d", h1.RegistryGeneration(), h2.RegistryGeneration())
++	}
++	if err := h1.Send(context.Background(), wireRT.Frame{MID: mids.MIDChatRoomEntered, Params: &amf3.Object{}}, limits.Default()); !errors.Is(err, ErrRealtimeSessionRetired) {
++		t.Fatalf("stale handle send err=%v", err)
++	}
++	got := r.ByPlayerRole(100001, domainrt.World)
++	if len(got) != 1 || got[0].RegistryGeneration() != h2.RegistryGeneration() {
++		t.Fatalf("player index after replacement=%v", generations(got))
++	}
++
++	r.Remove(h1) // stale remover must not delete the replacement.
++	got = r.ByRoomRole(1, domainrt.World)
++	if len(got) != 1 || got[0].RegistryGeneration() != h2.RegistryGeneration() {
++		t.Fatalf("stale remove deleted replacement: %v", generations(got))
++	}
++	r.Remove(h2)
++	if got := r.ByPlayerRole(100001, domainrt.World); len(got) != 0 {
++		t.Fatalf("removed handle still indexed: %v", generations(got))
++	}
++	if err := h2.Send(context.Background(), wireRT.Frame{MID: mids.MIDChatRoomEntered, Params: &amf3.Object{}}, limits.Default()); !errors.Is(err, ErrRealtimeSessionRetired) {
++		t.Fatalf("removed handle send err=%v", err)
++	}
++}
++
++func TestConnectionRegistryKeepsSamePlayerAcrossContexts(t *testing.T) {
++	r := NewConnectionRegistry()
++	admissions := []domainrt.Admission{
++		registryAdmission(t, "33333333-3333-4333-8333-333333333331", 100001, domainrt.World, 1),
++		registryAdmission(t, "33333333-3333-4333-8333-333333333332", 100001, domainrt.World, 1),
++	}
++	var handles []SessionHandle
++	var clients []net.Conn
++	for _, admission := range admissions {
++		w, _, client := newRegistryPipeWriter(t)
++		h, err := r.Replace(admission, w)
++		if err != nil {
++			t.Fatal(err)
++		}
++		handles = append(handles, h)
++		clients = append(clients, client)
++	}
++	defer func() {
++		for _, c := range clients {
++			_ = c.Close()
++		}
++	}()
++	got := r.ByPlayerRole(100001, domainrt.World)
++	if len(got) != 2 {
++		t.Fatalf("same player contexts collapsed: %v", generations(got))
++	}
++	room := r.ByRoomRole(1, domainrt.World)
++	if len(room) != 2 {
++		t.Fatalf("room index=%v", generations(room))
++	}
++	if got[0].RegistryGeneration() >= got[1].RegistryGeneration() {
++		t.Fatalf("snapshot order is not stable: %v", generations(got))
++	}
++	r.Remove(handles[0])
++	if got := r.ByPlayerRole(100001, domainrt.World); len(got) != 1 || got[0].RegistryGeneration() != handles[1].RegistryGeneration() {
++		t.Fatalf("remaining player handles=%v", generations(got))
++	}
++	r.Remove(handles[1])
++}
++
++func TestConnectionRegistryReplacementInterruptsBlockedOldWriteWithoutHoldingRegistryMutex(t *testing.T) {
++	r := NewConnectionRegistry()
++	admission := registryAdmission(t, "33333333-3333-4333-8333-333333333333", 100001, domainrt.World, 1)
++	blocking := newBlockingWriteConn()
++	w1, err := newConnWriter(context.Background(), blocking, limits.Default(), time.Second)
++	if err != nil {
++		t.Fatal(err)
++	}
++	h1, err := r.Replace(admission, w1)
++	if err != nil {
++		t.Fatal(err)
++	}
++
++	sendDone := make(chan error, 1)
++	go func() {
++		sendDone <- h1.Send(context.Background(), wireRT.Frame{MID: mids.MIDChatRoomEntered, Params: &amf3.Object{}}, limits.Default())
++	}()
++	select {
++	case <-blocking.writeStarted:
++	case <-time.After(time.Second):
++		t.Fatal("old writer did not enter blocked write")
++	}
++
++	w2, _, client2 := newRegistryPipeWriter(t)
++	defer client2.Close()
++	replaceDone := make(chan struct{})
++	var h2 SessionHandle
++	var replaceErr error
++	go func() {
++		h2, replaceErr = r.Replace(admission, w2)
++		close(replaceDone)
++	}()
++
++	// The new generation must become observable without waiting for the blocked
++	// old conn.Write, proving the registry mutex is not held during retirement.
++	deadline := time.Now().Add(250 * time.Millisecond)
++	visible := false
++	for time.Now().Before(deadline) {
++		got := r.ByPlayerRole(100001, domainrt.World)
++		if len(got) == 1 && got[0].RegistryGeneration() > h1.RegistryGeneration() {
++			visible = true
++			break
++		}
++		time.Sleep(time.Millisecond)
++	}
++	if !visible {
++		t.Fatal("new generation never became visible while old write was blocked")
++	}
++
++	// Retirement owns the private socket close, so replacement must interrupt
++	// that old blocked write and complete without an external release signal.
++	select {
++	case <-replaceDone:
++		if replaceErr != nil {
++			t.Fatal(replaceErr)
++		}
++	case <-time.After(time.Second):
++		t.Fatal("replacement did not interrupt blocked old write")
++	}
++	select {
++	case err := <-sendDone:
++		if err == nil {
++			t.Fatal("retired blocked send unexpectedly succeeded")
++		}
++	case <-time.After(time.Second):
++		t.Fatal("blocked old send did not terminate after retirement")
++	}
++	if err := h1.Send(context.Background(), wireRT.Frame{MID: mids.MIDChatRoomEntered, Params: &amf3.Object{}}, limits.Default()); !errors.Is(err, ErrRealtimeSessionRetired) {
++		t.Fatalf("stale handle post-retirement send err=%v", err)
++	}
++	r.Remove(h2)
++}
++
++func generations(in []SessionHandle) []uint64 {
++	out := make([]uint64, 0, len(in))
++	for _, h := range in {
++		out = append(out, h.RegistryGeneration())
++	}
++	return out
++}
++
++type blockingWriteConn struct {
++	writeStarted chan struct{}
++	releaseWrite chan struct{}
++	closed       chan struct{}
++	startOnce    sync.Once
++	closeOnce    sync.Once
++}
++
++func newBlockingWriteConn() *blockingWriteConn {
++	return &blockingWriteConn{writeStarted: make(chan struct{}), releaseWrite: make(chan struct{}), closed: make(chan struct{})}
++}
++func (c *blockingWriteConn) Read([]byte) (int, error) { return 0, io.EOF }
++func (c *blockingWriteConn) Write(p []byte) (int, error) {
++	c.startOnce.Do(func() { close(c.writeStarted) })
++	select {
++	case <-c.releaseWrite:
++		return len(p), nil
++	case <-c.closed:
++		return 0, net.ErrClosed
++	}
++}
++func (c *blockingWriteConn) Close() error                     { c.closeOnce.Do(func() { close(c.closed) }); return nil }
++func (c *blockingWriteConn) LocalAddr() net.Addr              { return registryDummyAddr("local") }
++func (c *blockingWriteConn) RemoteAddr() net.Addr             { return registryDummyAddr("remote") }
++func (c *blockingWriteConn) SetDeadline(time.Time) error      { return nil }
++func (c *blockingWriteConn) SetReadDeadline(time.Time) error  { return nil }
++func (c *blockingWriteConn) SetWriteDeadline(time.Time) error { return nil }
++
++type registryDummyAddr string
++
++func (d registryDummyAddr) Network() string { return string(d) }
++func (d registryDummyAddr) String() string  { return string(d) }
+diff --git a/internal/adapters/stockruntime/realtime_server.go b/internal/adapters/stockruntime/realtime_server.go
+index 1c1db06..b9ae533 100644
+--- a/internal/adapters/stockruntime/realtime_server.go
++++ b/internal/adapters/stockruntime/realtime_server.go
+@@ -6,7 +6,6 @@ import (
+ 	"fmt"
+ 	"io"
+ 	"net"
+-	"sync"
+ 	"time"
+ 
+ 	app "gxb.local/backend/v2/internal/application/realtimeauth"
+@@ -42,50 +41,6 @@ type RealtimeServer struct {
+ 	Dispatcher ClientFrameDispatcher
+ }
+ 
+-type registryKey struct {
+-	Context string
+-	Role    domainrt.PhysicalRole
+-}
+-
+-type registryEntry struct {
+-	Conn net.Conn
+-	ID   uint64
+-}
+-
+-type ConnectionRegistry struct {
+-	mu   sync.Mutex
+-	next uint64
+-	by   map[registryKey]registryEntry
+-}
+-
+-func NewConnectionRegistry() *ConnectionRegistry {
+-	return &ConnectionRegistry{by: make(map[registryKey]registryEntry)}
+-}
+-func (r *ConnectionRegistry) Replace(key registryKey, conn net.Conn) uint64 {
+-	if r == nil {
+-		return 0
+-	}
+-	r.mu.Lock()
+-	defer r.mu.Unlock()
+-	r.next++
+-	id := r.next
+-	if old, ok := r.by[key]; ok && old.Conn != nil && old.Conn != conn {
+-		_ = old.Conn.Close()
+-	}
+-	r.by[key] = registryEntry{Conn: conn, ID: id}
+-	return id
+-}
+-func (r *ConnectionRegistry) Remove(key registryKey, id uint64) {
+-	if r == nil || id == 0 {
+-		return
+-	}
+-	r.mu.Lock()
+-	defer r.mu.Unlock()
+-	if cur, ok := r.by[key]; ok && cur.ID == id {
+-		delete(r.by, key)
+-	}
+-}
+-
+ func (s RealtimeServer) runtimeConfig() (limits.Config, RealtimePolicy, error) {
+ 	cfg := s.Limits
+ 	if cfg.RealtimeBufferedBytes == 0 {
+@@ -131,15 +86,14 @@ func (s RealtimeServer) ServeConn(ctx context.Context, conn net.Conn) error {
+ 	var gate *wireRT.Gate
+ 	roleKey := ""
+ 	var admitted *app.Admission
+-	var regKey registryKey
+-	var regID uint64
++	var regHandle SessionHandle
+ 	var sessionTag, contextTag, connectionTag string
+ 	defer func() {
+ 		if s.Tracker != nil && contextTag != "" && roleKey != "" {
+ 			_ = s.Tracker.Record(lobby.BootEvent{Kind: lobby.BootClientClosed, Phase: lobby.PhaseClientState, At: time.Now().UTC(), Key: roleKey, SessionTag: sessionTag, ContextTag: contextTag, ConnectionTag: connectionTag})
+ 		}
+ 		if s.Registry != nil {
+-			s.Registry.Remove(regKey, regID)
++			s.Registry.Remove(regHandle)
+ 		}
+ 	}()
+ 
+@@ -196,9 +150,11 @@ func (s RealtimeServer) ServeConn(ctx context.Context, conn net.Conn) error {
+ 					admitted = &copyAdmission
+ 					lastClientActivity = now
+ 					nextLiveness = now.Add(policy.LivenessInterval)
+-					regKey = registryKey{Context: admission.Domain.Actor.ContextID.UUID().String(), Role: admission.Domain.Role}
+ 					if s.Registry != nil {
+-						regID = s.Registry.Replace(regKey, conn)
++						regHandle, err = s.Registry.Replace(admission.Domain, writer)
++						if err != nil {
++							return err
++						}
+ 					}
+ 					if s.Tracker != nil {
+ 						sessionTag, contextTag = s.Tracker.CorrelationTags(admission.Domain.Actor.SessionID.UUID().String(), admission.Domain.Actor.ContextID.UUID().String())
+diff --git a/internal/adapters/stockruntime/realtime_writer.go b/internal/adapters/stockruntime/realtime_writer.go
+index 9c8640e..d6d2ff4 100644
+--- a/internal/adapters/stockruntime/realtime_writer.go
++++ b/internal/adapters/stockruntime/realtime_writer.go
+@@ -62,25 +62,43 @@ func (w *connWriter) release(n int) {
+ }
+ 
+ func (w *connWriter) Send(ctx context.Context, frame wireRT.Frame, cfg limits.Config) error {
+-	b, err := wireRT.EncodeFrameWithConfig(frame, cfg)
++	done, err := w.enqueue(ctx, frame, cfg)
+ 	if err != nil {
+ 		return err
+ 	}
++	return w.await(ctx, done)
++}
++
++// enqueue performs bounded frame admission without waiting for network I/O.
++// I7A-2 session retirement uses this narrow seam to linearize "may this stale
++// handle enqueue?" without holding a lifecycle mutex while conn.Write blocks.
++func (w *connWriter) enqueue(ctx context.Context, frame wireRT.Frame, cfg limits.Config) (<-chan error, error) {
++	b, err := wireRT.EncodeFrameWithConfig(frame, cfg)
++	if err != nil {
++		return nil, err
++	}
+ 	if err := w.reserve(len(b)); err != nil {
+-		return err
++		return nil, err
+ 	}
+ 	req := outboundWrite{data: b, done: make(chan error, 1)}
+ 	select {
+ 	case w.queue <- req:
++		return req.done, nil
+ 	case <-ctx.Done():
+ 		w.release(len(b))
+-		return ctx.Err()
++		return nil, ctx.Err()
+ 	default:
+ 		w.release(len(b))
+-		return wireRT.ErrQueueFull
++		return nil, wireRT.ErrQueueFull
++	}
++}
++
++func (w *connWriter) await(ctx context.Context, done <-chan error) error {
++	if done == nil {
++		return ErrRealtimeWriterClosed
+ 	}
+ 	select {
+-	case err := <-req.done:
++	case err := <-done:
+ 		return err
+ 	case <-ctx.Done():
+ 		return ctx.Err()
+diff --git a/internal/application/playerpresentation/service.go b/internal/application/playerpresentation/service.go
+new file mode 100644
+index 0000000..d2796e0
+--- /dev/null
++++ b/internal/application/playerpresentation/service.go
+@@ -0,0 +1,66 @@
++package playerpresentation
++
++import (
++	"context"
++	"errors"
++
++	"gxb.local/backend/v2/internal/application/playerdirectory"
++	"gxb.local/backend/v2/internal/domain/identity"
++)
++
++var ErrInvalidMinimalPresentation = errors.New("invalid minimal player presentation")
++
++// PlayerTypeReader is the narrow I5-owned read seam required by I7A. It exposes
++// only canonical PlayerType and deliberately carries no wire/protocol concerns.
++type PlayerTypeReader interface {
++	PlayerType(context.Context, identity.PlayerID) (int64, bool, error)
++}
++
++type Minimal struct {
++	PlayerID      identity.PlayerID
++	Name          string
++	Level         int64
++	AvatarID      int64
++	AvatarFrameID int64
++	ConquerLevel  int64
++	ConquerLoopID int64
++	PlayerType    int64
++}
++
++func (m Minimal) Validate() error {
++	if !m.PlayerID.Valid() || m.Level < 1 || m.AvatarID < 0 || m.AvatarFrameID < 0 || m.ConquerLevel < 0 || m.ConquerLoopID < 0 {
++		return ErrInvalidMinimalPresentation
++	}
++	// PlayerType intentionally has no inferred range. Canonical I5 storage is
++	// returned verbatim until source/original-server evidence qualifies one.
++	return nil
++}
++
++type Service struct {
++	Directory playerdirectory.Reader
++	Types     PlayerTypeReader
++}
++
++func (s Service) Read(ctx context.Context, pid identity.PlayerID) (Minimal, bool, error) {
++	if s.Directory == nil || s.Types == nil || !pid.Valid() {
++		return Minimal{}, false, ErrInvalidMinimalPresentation
++	}
++	profile, ok, err := s.Directory.Profile(ctx, pid)
++	if err != nil || !ok {
++		return Minimal{}, ok, err
++	}
++	playerType, ok, err := s.Types.PlayerType(ctx, pid)
++	if err != nil || !ok {
++		return Minimal{}, ok, err
++	}
++	out := Minimal{
++		PlayerID: profile.PlayerID, Name: profile.Name, Level: profile.Level,
++		AvatarID: profile.AvatarID, AvatarFrameID: profile.AvatarFrameID,
++		ConquerLevel: profile.ConquerLevel, ConquerLoopID: profile.ConquerLoopID,
++		PlayerType: playerType,
++	}
++	if err := out.Validate(); err != nil {
++		return Minimal{}, false, err
++	}
++	return out, true, nil
++}
+diff --git a/internal/application/playerpresentation/service_test.go b/internal/application/playerpresentation/service_test.go
+new file mode 100644
+index 0000000..4179c28
+--- /dev/null
++++ b/internal/application/playerpresentation/service_test.go
+@@ -0,0 +1,57 @@
++package playerpresentation
++
++import (
++	"context"
++	"errors"
++	"testing"
++
++	"gxb.local/backend/v2/internal/application/playerdirectory"
++	"gxb.local/backend/v2/internal/domain/identity"
++)
++
++type directoryStub struct {
++	profile playerdirectory.Profile
++	ok      bool
++	err     error
++}
++
++func (s directoryStub) Profile(context.Context, identity.PlayerID) (playerdirectory.Profile, bool, error) {
++	return s.profile, s.ok, s.err
++}
++
++type typeStub struct {
++	value int64
++	ok    bool
++	err   error
++}
++
++func (s typeStub) PlayerType(context.Context, identity.PlayerID) (int64, bool, error) {
++	return s.value, s.ok, s.err
++}
++
++func TestMinimalPresentationComposesI4AndI5WithoutInventingPlayerTypeRange(t *testing.T) {
++	pid := identity.PlayerID(100001)
++	s := Service{
++		Directory: directoryStub{profile: playerdirectory.Profile{PlayerID: pid, Name: "A", Level: 12, AvatarID: 110001001, AvatarFrameID: 9, ConquerLevel: 2, ConquerLoopID: 3}, ok: true},
++		Types:     typeStub{value: -7, ok: true},
++	}
++	got, ok, err := s.Read(context.Background(), pid)
++	if err != nil || !ok {
++		t.Fatalf("ok=%v err=%v", ok, err)
++	}
++	if got.PlayerID != pid || got.Name != "A" || got.Level != 12 || got.AvatarID != 110001001 || got.AvatarFrameID != 9 || got.ConquerLevel != 2 || got.ConquerLoopID != 3 || got.PlayerType != -7 {
++		t.Fatalf("got=%+v", got)
++	}
++}
++
++func TestMinimalPresentationPropagatesOwnerAbsenceAndErrors(t *testing.T) {
++	pid := identity.PlayerID(100001)
++	boom := errors.New("boom")
++	if _, ok, err := (Service{Directory: directoryStub{ok: false}, Types: typeStub{ok: true}}).Read(context.Background(), pid); err != nil || ok {
++		t.Fatalf("directory absence ok=%v err=%v", ok, err)
++	}
++	profile := playerdirectory.Profile{PlayerID: pid, Level: 1, AvatarID: 1}
++	if _, ok, err := (Service{Directory: directoryStub{profile: profile, ok: true}, Types: typeStub{err: boom}}).Read(context.Background(), pid); !errors.Is(err, boom) || ok {
++		t.Fatalf("type error ok=%v err=%v", ok, err)
++	}
++}
+diff --git a/internal/application/realtimewakeup/registry.go b/internal/application/realtimewakeup/registry.go
+new file mode 100644
+index 0000000..d24efdf
+--- /dev/null
++++ b/internal/application/realtimewakeup/registry.go
+@@ -0,0 +1,165 @@
++package realtimewakeup
++
++import (
++	"bytes"
++	"context"
++	"encoding/json"
++	"errors"
++	"fmt"
++	"io"
++	"reflect"
++	"strings"
++	"unicode/utf8"
++)
++
++const (
++	EnvelopeVersion   = 1
++	MaxRouteBytes     = 64
++	MaxReferenceBytes = 256
++	MaxEnvelopeBytes  = 512
++)
++
++var (
++	ErrInvalidEnvelope    = errors.New("invalid realtime wakeup envelope")
++	ErrInvalidRoute       = errors.New("invalid realtime wakeup route")
++	ErrDuplicateRoute     = errors.New("duplicate realtime wakeup route")
++	ErrUnknownRoute       = errors.New("unknown realtime wakeup route")
++	ErrInvalidRouteHandle = errors.New("invalid realtime wakeup route handler")
++)
++
++// Envelope is deliberately reference-only. It carries no gameplay value,
++// reward payload or occurrence count; the selected route must reload canonical
++// owner/feature delivery intent before deciding whether anything is published.
++type Envelope struct {
++	Version int    `json:"v"`
++	Route   string `json:"route"`
++	Ref     string `json:"ref"`
++}
++
++func (e Envelope) Validate() error {
++	if e.Version != EnvelopeVersion || !validToken(e.Route, MaxRouteBytes) || !validReference(e.Ref) {
++		return ErrInvalidEnvelope
++	}
++	return nil
++}
++
++func (e Envelope) Encode() ([]byte, error) {
++	if err := e.Validate(); err != nil {
++		return nil, err
++	}
++	b, err := json.Marshal(e)
++	if err != nil {
++		return nil, err
++	}
++	if len(b) > MaxEnvelopeBytes {
++		return nil, ErrInvalidEnvelope
++	}
++	return b, nil
++}
++
++func Decode(b []byte) (Envelope, error) {
++	if len(b) == 0 || len(b) > MaxEnvelopeBytes {
++		return Envelope{}, ErrInvalidEnvelope
++	}
++	dec := json.NewDecoder(bytes.NewReader(b))
++	dec.DisallowUnknownFields()
++	var e Envelope
++	if err := dec.Decode(&e); err != nil {
++		return Envelope{}, fmt.Errorf("%w: %v", ErrInvalidEnvelope, err)
++	}
++	var extra any
++	if err := dec.Decode(&extra); !errors.Is(err, io.EOF) {
++		return Envelope{}, ErrInvalidEnvelope
++	}
++	if err := e.Validate(); err != nil {
++		return Envelope{}, err
++	}
++	return e, nil
++}
++
++// RouteHandler owns canonical reload and delivery-intent fencing for one exact
++// route. The wakeup reference is never permission to apply gameplay state.
++type RouteHandler interface {
++	ReloadAndDeliver(context.Context, string) error
++}
++
++type RouteHandlerFunc func(context.Context, string) error
++
++func (f RouteHandlerFunc) ReloadAndDeliver(ctx context.Context, ref string) error {
++	if f == nil {
++		return ErrInvalidRouteHandle
++	}
++	return f(ctx, ref)
++}
++
++type Registration struct {
++	Route   string
++	Handler RouteHandler
++}
++
++type Registry struct{ handlers map[string]RouteHandler }
++
++// NewRegistry freezes the finite route set. Passing no registrations is valid
++// and is the I7A-2 production state until an owning feature explicitly activates
++// a route with its canonical reload semantics.
++func NewRegistry(in ...Registration) (Registry, error) {
++	m := make(map[string]RouteHandler, len(in))
++	for _, reg := range in {
++		if !validToken(reg.Route, MaxRouteBytes) || nilHandler(reg.Handler) {
++			return Registry{}, ErrInvalidRoute
++		}
++		if _, exists := m[reg.Route]; exists {
++			return Registry{}, fmt.Errorf("%w: %s", ErrDuplicateRoute, reg.Route)
++		}
++		m[reg.Route] = reg.Handler
++	}
++	return Registry{handlers: m}, nil
++}
++
++func (r Registry) Dispatch(ctx context.Context, e Envelope) error {
++	if err := e.Validate(); err != nil {
++		return err
++	}
++	h, ok := r.handlers[e.Route]
++	if !ok {
++		return fmt.Errorf("%w: %s", ErrUnknownRoute, e.Route)
++	}
++	return h.ReloadAndDeliver(ctx, e.Ref)
++}
++
++func validToken(s string, max int) bool {
++	if s == "" || s != strings.TrimSpace(s) || len(s) > max || !utf8.ValidString(s) {
++		return false
++	}
++	for _, r := range s {
++		if !((r >= 'a' && r <= 'z') || (r >= 'A' && r <= 'Z') || (r >= '0' && r <= '9') || r == '.' || r == '_' || r == '-') {
++			return false
++		}
++	}
++	return true
++}
++
++func validReference(s string) bool {
++	if s == "" || s != strings.TrimSpace(s) || len(s) > MaxReferenceBytes || !utf8.ValidString(s) {
++		return false
++	}
++	for _, r := range s {
++		if r < 0x20 || r == 0x7f {
++			return false
++		}
++	}
++	return true
++}
++
++func nilHandler(h RouteHandler) bool {
++	if h == nil {
++		return true
++	}
++	v := reflect.ValueOf(h)
++	switch v.Kind() {
++	case reflect.Chan, reflect.Func, reflect.Interface, reflect.Map, reflect.Ptr, reflect.Slice:
++		return v.IsNil()
++	default:
++		return false
++	}
++}
+diff --git a/internal/application/realtimewakeup/registry_test.go b/internal/application/realtimewakeup/registry_test.go
+new file mode 100644
+index 0000000..b6eee95
+--- /dev/null
++++ b/internal/application/realtimewakeup/registry_test.go
+@@ -0,0 +1,76 @@
++package realtimewakeup
++
++import (
++	"context"
++	"errors"
++	"strings"
++	"testing"
++)
++
++func TestEnvelopeIsBoundedVersionedAndReferenceOnly(t *testing.T) {
++	e := Envelope{Version: EnvelopeVersion, Route: "social.friend", Ref: "player:100001"}
++	b, err := e.Encode()
++	if err != nil {
++		t.Fatal(err)
++	}
++	got, err := Decode(b)
++	if err != nil || got != e {
++		t.Fatalf("got=%+v err=%v", got, err)
++	}
++	for _, raw := range [][]byte{
++		[]byte(`{"v":2,"route":"social.friend","ref":"x"}`),
++		[]byte(`{"v":1,"route":"social.friend","ref":"x","value":99}`),
++		[]byte(`{"v":1,"route":"social friend","ref":"x"}`),
++		[]byte(`{"v":1,"route":"social.friend","ref":""}`),
++		[]byte(strings.Repeat("x", MaxEnvelopeBytes+1)),
++	} {
++		if _, err := Decode(raw); !errors.Is(err, ErrInvalidEnvelope) {
++			t.Fatalf("raw=%q err=%v", raw, err)
++		}
++	}
++}
++
++func TestRegistryStartsEmptyAndRoutesOnlyExactCanonicalReloadHandler(t *testing.T) {
++	empty, err := NewRegistry()
++	if err != nil {
++		t.Fatal(err)
++	}
++	e := Envelope{Version: 1, Route: "social.friend", Ref: "p:7"}
++	if err := empty.Dispatch(context.Background(), e); !errors.Is(err, ErrUnknownRoute) {
++		t.Fatalf("empty registry err=%v", err)
++	}
++	var got string
++	r, err := NewRegistry(Registration{Route: "social.friend", Handler: RouteHandlerFunc(func(_ context.Context, ref string) error {
++		got = ref
++		return nil
++	})})
++	if err != nil {
++		t.Fatal(err)
++	}
++	if err := r.Dispatch(context.Background(), e); err != nil {
++		t.Fatal(err)
++	}
++	if got != "p:7" {
++		t.Fatalf("ref=%q", got)
++	}
++	if _, err := NewRegistry(
++		Registration{Route: "social.friend", Handler: RouteHandlerFunc(func(context.Context, string) error { return nil })},
++		Registration{Route: "social.friend", Handler: RouteHandlerFunc(func(context.Context, string) error { return nil })},
++	); !errors.Is(err, ErrDuplicateRoute) {
++		t.Fatalf("duplicate route err=%v", err)
++	}
++}
++
++type nilRouteHandler struct{}
++
++func (*nilRouteHandler) ReloadAndDeliver(context.Context, string) error { return nil }
++
++func TestRegistryRejectsTypedNilHandler(t *testing.T) {
++	var h *nilRouteHandler
++	if _, err := NewRegistry(Registration{Route: "social.friend", Handler: h}); !errors.Is(err, ErrInvalidRoute) {
++		t.Fatalf("typed nil handler err=%v", err)
++	}
++	if _, err := NewRegistry(Registration{Route: "social.friend", Handler: RouteHandlerFunc(nil)}); !errors.Is(err, ErrInvalidRoute) {
++		t.Fatalf("nil function handler err=%v", err)
++	}
++}
+diff --git a/internal/archguard/i7a2_contract_test.go b/internal/archguard/i7a2_contract_test.go
+new file mode 100644
+index 0000000..297305b
+--- /dev/null
++++ b/internal/archguard/i7a2_contract_test.go
+@@ -0,0 +1,167 @@
++package archguard
++
++import (
++	"go/ast"
++	"go/parser"
++	"go/token"
++	"io/fs"
++	"os"
++	"path/filepath"
++	"strconv"
++	"strings"
++	"testing"
++)
++
++func TestI7A2SessionHandleDoesNotExposeRawConnectionState(t *testing.T) {
++	root := repoRoot(t)
++	path := filepath.Join(root, "internal", "adapters", "stockruntime", "realtime_registry.go")
++	f, err := parser.ParseFile(token.NewFileSet(), path, nil, 0)
++	if err != nil {
++		t.Fatal(err)
++	}
++	found := false
++	for _, decl := range f.Decls {
++		gd, ok := decl.(*ast.GenDecl)
++		if !ok || gd.Tok != token.TYPE {
++			continue
++		}
++		for _, spec := range gd.Specs {
++			ts, ok := spec.(*ast.TypeSpec)
++			if !ok || ts.Name.Name != "SessionHandle" {
++				continue
++			}
++			found = true
++			st, ok := ts.Type.(*ast.StructType)
++			if !ok {
++				t.Fatal("SessionHandle is no longer a struct")
++			}
++			for _, field := range st.Fields.List {
++				for _, name := range field.Names {
++					if ast.IsExported(name.Name) {
++						t.Fatalf("SessionHandle exposes field %q; feature callers must receive immutable capability only", name.Name)
++					}
++				}
++			}
++		}
++	}
++	if !found {
++		t.Fatal("SessionHandle type not found")
++	}
++}
++
++func TestI7A2OnlyCanonicalWriterTouchesConnWrite(t *testing.T) {
++	root := repoRoot(t)
++	base := filepath.Join(root, "internal", "adapters", "stockruntime")
++	var offenders []string
++	err := filepath.WalkDir(base, func(path string, d fs.DirEntry, err error) error {
++		if err != nil {
++			return err
++		}
++		if d.IsDir() || !strings.HasSuffix(path, ".go") || strings.HasSuffix(path, "_test.go") {
++			return nil
++		}
++		b, err := os.ReadFile(path)
++		if err != nil {
++			return err
++		}
++		if strings.Contains(string(b), "conn.Write(") && filepath.Base(path) != "realtime_writer.go" {
++			rel, _ := filepath.Rel(root, path)
++			offenders = append(offenders, filepath.ToSlash(rel))
++		}
++		return nil
++	})
++	if err != nil {
++		t.Fatal(err)
++	}
++	if len(offenders) != 0 {
++		t.Fatalf("non-canonical realtime writers found: %v", offenders)
++	}
++}
++
++func TestI7A2ApplicationSeamsRemainProtocolAndPersistenceFree(t *testing.T) {
++	root := repoRoot(t)
++	for _, pkg := range []string{"playerpresentation", "realtimewakeup"} {
++		base := filepath.Join(root, "internal", "application", pkg)
++		err := filepath.WalkDir(base, func(path string, d fs.DirEntry, err error) error {
++			if err != nil {
++				return err
++			}
++			if d.IsDir() || !strings.HasSuffix(path, ".go") || strings.HasSuffix(path, "_test.go") {
++				return nil
++			}
++			f, err := parser.ParseFile(token.NewFileSet(), path, nil, parser.ImportsOnly)
++			if err != nil {
++				return err
++			}
++			for _, im := range f.Imports {
++				imp, _ := strconv.Unquote(im.Path.Value)
++				if strings.Contains(imp, "/internal/protocol/") || strings.Contains(imp, "/internal/adapters/") || strings.HasPrefix(imp, "github.com/jackc/pgx") || strings.HasPrefix(imp, "github.com/riverqueue/") {
++					rel, _ := filepath.Rel(root, path)
++					t.Errorf("%s imports edge/persistence dependency %q", filepath.ToSlash(rel), imp)
++				}
++			}
++			b, err := os.ReadFile(path)
++			if err != nil {
++				return err
++			}
++			upper := strings.ToUpper(string(b))
++			for _, marker := range []string{"SELECT ", "INSERT ", "UPDATE ", "DELETE ", "PG_NOTIFY("} {
++				if strings.Contains(upper, marker) {
++					rel, _ := filepath.Rel(root, path)
++					t.Errorf("%s contains persistence marker %q", filepath.ToSlash(rel), marker)
++				}
++			}
++			return nil
++		})
++		if err != nil {
++			t.Fatal(err)
++		}
++	}
++}
++
++func TestI7A2KeepsFeatureProducerAndWakeupRoutesDormant(t *testing.T) {
++	root := repoRoot(t)
++	var offenders []string
++	err := filepath.WalkDir(root, func(path string, d fs.DirEntry, err error) error {
++		if err != nil {
++			return err
++		}
++		if d.IsDir() {
++			if d.Name() == ".git" || strings.Contains(filepath.ToSlash(path), "/vendor/") {
++				return filepath.SkipDir
++			}
++			return nil
++		}
++		if !strings.HasSuffix(path, ".go") || strings.HasSuffix(path, "_test.go") {
++			return nil
++		}
++		b, err := os.ReadFile(path)
++		if err != nil {
++			return err
++		}
++		s := string(b)
++		// I7A-2 installs mechanisms and source descriptors only. Domain-owned
++		// producers/routes activate in later owning stages with their exact
++		// recovery and schema contracts.
++		for _, marker := range []string{
++			"realtime.DirectRegistration{",
++			"realtime.NoticeRegistration{",
++			"wireRT.DirectRegistration{",
++			"wireRT.NoticeRegistration{",
++			"realtimewakeup.Registration{",
++			"appwakeup.Registration{",
++		} {
++			if strings.Contains(s, marker) {
++				rel, _ := filepath.Rel(root, path)
++				offenders = append(offenders, filepath.ToSlash(rel)+": "+marker)
++			}
++		}
++		return nil
++	})
++	if err != nil {
++		t.Fatal(err)
++	}
++	if len(offenders) != 0 {
++		t.Fatalf("I7A-2 unexpectedly activates a deferred producer/route: %v", offenders)
++	}
++}
+diff --git a/internal/projection/lobby/shapes.go b/internal/projection/lobby/shapes.go
+index b5a74a4..53ee595 100644
+--- a/internal/projection/lobby/shapes.go
++++ b/internal/projection/lobby/shapes.go
+@@ -127,10 +127,11 @@ func baseline(mid uint16, v BootstrapView) (any, bool) {
+ 			"guild_id": int64(0), "main_scene_type": int64(0),
+ 
+ 			"magic_energy": int64(0), "magic_dust": int64(0), "magic_liquid": int64(0), "magic_exp": int64(0),
+-			"degree_cer": int64(0), "graduate_cer": int64(0), "patent_cer": int64(0), "title_info": zeroMap(),
++			"degree_cer": int64(0), "graduate_cer": int64(0), "patent_cer": int64(0),
++			"title_info": map[string]any{"title_id": int64(0), "unique_id": int64(0), "end_time": int64(0)},
+ 			"vip_awards": zeroList(), "conquer_lev": int64(0), "conquer_loop_id": int64(1), "conquer_region": int64(0),
+ 			"first_main_touch": int64(0), "occult_ticket": int64(0), "tutor_coin": int64(0), "skin_coin": int64(0),
+-			"bubble_info": zeroMap(), "crab_times": int64(0),
++			"bubble_info": map[string]any{"bubble_id": int64(10001), "end_time": int64(0)}, "crab_times": int64(0),
+ 			"story_id": int64(0), "story_state": int64(0), "guide_id": int64(0),
+ 		}, true
+ 	case 49:
+diff --git a/internal/projection/lobby/shapes_test.go b/internal/projection/lobby/shapes_test.go
+index 6b46314..1dcffab 100644
+--- a/internal/projection/lobby/shapes_test.go
++++ b/internal/projection/lobby/shapes_test.go
+@@ -125,3 +125,19 @@ func TestExplicitWhiteAlbumMutationMIDsRemainUnsupported(t *testing.T) {
+ 		}
+ 	}
+ }
++
++func TestI7A2MID17InactiveTitleAndBubbleCompatibility(t *testing.T) {
++	d, err := BuildMID1Detail(view(t))
++	if err != nil {
++		t.Fatal(err)
++	}
++	player := d["17"].(map[string]any)
++	title, ok := player["title_info"].(map[string]any)
++	if !ok || title["title_id"] != int64(0) || title["unique_id"] != int64(0) || title["end_time"] != int64(0) {
++		t.Fatalf("inactive title_info=%#v", player["title_info"])
++	}
++	bubble, ok := player["bubble_info"].(map[string]any)
++	if !ok || bubble["bubble_id"] != int64(10001) || bubble["end_time"] != int64(0) {
++		t.Fatalf("inactive bubble_info=%#v", player["bubble_info"])
++	}
++}
+diff --git a/internal/protocol/httpedge/decode_test.go b/internal/protocol/httpedge/decode_test.go
+index bf2b2cd..8ca88bf 100644
+--- a/internal/protocol/httpedge/decode_test.go
++++ b/internal/protocol/httpedge/decode_test.go
+@@ -274,3 +274,12 @@ func TestHandlerResponseEncodingFailureDoesNotRedispatch(t *testing.T) {
+ 		t.Fatalf("body=%v", body)
+ 	}
+ }
++
++func TestI7A2LowNumberRealtimePushesAreNotOrdinaryHTTP(t *testing.T) {
++	for _, mid := range []uint16{514, 516} {
++		_, edgeErr := Decode(ordinaryRequest(t, fmt.Sprintf(`{"mid":%d}`, mid)), limits.Default())
++		if edgeErr == nil || edgeErr.HTTPStatus != http.StatusBadRequest {
++			t.Fatalf("mid=%d unexpectedly accepted as ordinary HTTP: %v", mid, edgeErr)
++		}
++	}
++}
+diff --git a/internal/protocol/mids/registry.go b/internal/protocol/mids/registry.go
+index 921364a..c0688f8 100644
+--- a/internal/protocol/mids/registry.go
++++ b/internal/protocol/mids/registry.go
+@@ -29,6 +29,15 @@ const (
+ )
+ 
+ const (
++	MIDChatFromPlayer  uint16 = 514
++	MIDChatFromFriend  uint16 = 516
++	MIDSendChatMessage uint16 = 32782
++	MIDChatMessage     uint16 = 32783
++	MIDWorldNotice     uint16 = 32784
++	MIDPlayerNotice    uint16 = 36854
++	MIDForceReload     uint16 = 36855
++	MIDGuildBroadcast  uint16 = 36863
++
+ 	MIDTCPLogin          uint16 = 32771
+ 	MIDChatRoomEntered   uint16 = 32779
+ 	MIDSocketHeartbeat   uint16 = 32797
+@@ -89,12 +98,26 @@ func Lookup(mid uint16) (Descriptor, bool) {
+ 		d.Encoding = Ordinary
+ 	}
+ 	switch mid {
+-	case MIDTCPLogin, MIDSocketHeartbeat:
++	case MIDTCPLogin, MIDSocketHeartbeat, MIDSendChatMessage:
+ 		d.Direction = C2S
+-		d.Status = ProtocolImplemented
++		if mid == MIDTCPLogin || mid == MIDSocketHeartbeat {
++			d.Status = ProtocolImplemented
++		}
+ 	case MIDChatRoomEntered:
+ 		d.Direction = S2C
+ 		d.Status = ProtocolImplemented
++	case MIDChatFromPlayer, MIDChatFromFriend:
++		// These low-number events are explicit source-proven realtime pushes and
++		// therefore override the generic numeric-plane heuristic.
++		d.Transport = TCP
++		d.Encoding = AMF3
++		d.Direction = S2C
++		d.Status = ResearchedUnimplemented
++	case MIDChatMessage, MIDWorldNotice, MIDPlayerNotice, MIDForceReload, MIDGuildBroadcast:
++		d.Transport = TCP
++		d.Encoding = AMF3
++		d.Direction = S2C
++		d.Status = ResearchedUnimplemented
+ 	}
+ 	return d, true
+ }
+diff --git a/internal/protocol/mids/registry_special_test.go b/internal/protocol/mids/registry_special_test.go
+index 7911228..8a88735 100644
+--- a/internal/protocol/mids/registry_special_test.go
++++ b/internal/protocol/mids/registry_special_test.go
+@@ -13,3 +13,15 @@ func TestUpdateScenePlaneMIDsAreKnownHTTPOrdinary(t *testing.T) {
+ 		t.Fatalf("aliases=%v", got)
+ 	}
+ }
++
++func TestI7A2SourceProvenRealtimePushDescriptorOverrides(t *testing.T) {
++	for _, mid := range []uint16{MIDChatFromPlayer, MIDChatFromFriend, MIDChatMessage, MIDWorldNotice, MIDPlayerNotice, MIDForceReload, MIDGuildBroadcast} {
++		d, ok := Lookup(mid)
++		if !ok || d.Transport != TCP || d.Direction != S2C || d.Encoding != AMF3 || d.Status != ResearchedUnimplemented {
++			t.Fatalf("mid=%d descriptor=%+v ok=%v", mid, d, ok)
++		}
++	}
++	if d, ok := Lookup(MIDSendChatMessage); !ok || d.Transport != TCP || d.Direction != C2S || d.Encoding != AMF3 {
++		t.Fatalf("MID32782 descriptor=%+v ok=%v", d, ok)
++	}
++}
+diff --git a/internal/protocol/realtime/frame_test.go b/internal/protocol/realtime/frame_test.go
+index 4f1979a..5574c61 100644
+--- a/internal/protocol/realtime/frame_test.go
++++ b/internal/protocol/realtime/frame_test.go
+@@ -85,6 +85,11 @@ func TestGateAndQueue(t *testing.T) {
+ 	if err := g.ObserveClientFrame(Frame{MID: mids.MIDChatRoomEntered, Params: &amf3.Object{}}); !errors.Is(err, ErrWrongDirection) {
+ 		t.Fatalf("err=%v", err)
+ 	}
++	for _, mid := range []uint16{mids.MIDChatFromPlayer, mids.MIDChatFromFriend, mids.MIDChatMessage, mids.MIDWorldNotice, mids.MIDPlayerNotice, mids.MIDForceReload, mids.MIDGuildBroadcast} {
++		if err := g.ObserveClientFrame(Frame{MID: mid, Params: &amf3.Object{}}); !errors.Is(err, ErrWrongDirection) {
++			t.Fatalf("S2C mid=%d anti-spoof err=%v", mid, err)
++		}
++	}
+ 	q, _ := NewWriteQueue(1, 100)
+ 	if err := q.Push(make([]byte, 50)); err != nil {
+ 		t.Fatal(err)
+diff --git a/internal/protocol/realtime/s2c_registry.go b/internal/protocol/realtime/s2c_registry.go
+new file mode 100644
+index 0000000..056ff33
+--- /dev/null
++++ b/internal/protocol/realtime/s2c_registry.go
+@@ -0,0 +1,255 @@
++package realtime
++
++import (
++	"errors"
++	"fmt"
++	"math"
++
++	"gxb.local/backend/v2/internal/protocol/amf3"
++	"gxb.local/backend/v2/internal/protocol/mids"
++)
++
++var (
++	ErrInvalidS2CRegistration = errors.New("invalid realtime S2C registration")
++	ErrDuplicateS2CSchema     = errors.New("duplicate realtime S2C schema")
++	ErrUnknownS2CSchema       = errors.New("unknown realtime S2C schema")
++	ErrWrongS2CRole           = errors.New("realtime S2C role not allowed")
++	ErrInvalidS2CPayload      = errors.New("invalid realtime S2C payload")
++)
++
++type PayloadValidator func(any) error
++
++type DirectRegistration struct {
++	MID      uint16
++	Roles    []Role
++	Validate PayloadValidator
++}
++
++type NoticeNamespace string
++
++const (
++	NoticeNamespaceGeneric NoticeNamespace = "NOTICE_TYPE"
++	NoticeNamespaceFriend  NoticeNamespace = "FRIEND_NOTICE_TYPE"
++)
++
++func (n NoticeNamespace) Valid() bool {
++	return n == NoticeNamespaceGeneric || n == NoticeNamespaceFriend
++}
++
++type NoticeRegistration struct {
++	ParentMID  uint16
++	Namespace  NoticeNamespace
++	NoticeType int64
++	Roles      []Role
++	Validate   PayloadValidator
++}
++
++type directSchema struct {
++	roles    map[Role]struct{}
++	validate PayloadValidator
++}
++
++type noticeKey struct {
++	parent    uint16
++	namespace NoticeNamespace
++	typeID    int64
++}
++
++type noticeSchema struct {
++	roles    map[Role]struct{}
++	validate PayloadValidator
++}
++
++// EventRegistry is immutable after construction. Descriptor presence does not
++// activate a producer: publication requires an explicit exact schema entry.
++type EventRegistry struct {
++	direct  map[uint16]directSchema
++	notices map[noticeKey]noticeSchema
++}
++
++func NewEventRegistry(direct []DirectRegistration, notices []NoticeRegistration) (EventRegistry, error) {
++	out := EventRegistry{direct: make(map[uint16]directSchema, len(direct)), notices: make(map[noticeKey]noticeSchema, len(notices))}
++	for _, reg := range direct {
++		allowed, ok := SourceDirectRoles(reg.MID)
++		if !ok || reg.Validate == nil {
++			return EventRegistry{}, ErrInvalidS2CRegistration
++		}
++		roles, err := validateRoleSubset(reg.Roles, allowed)
++		if err != nil {
++			return EventRegistry{}, err
++		}
++		if _, exists := out.direct[reg.MID]; exists {
++			return EventRegistry{}, fmt.Errorf("%w: MID %d", ErrDuplicateS2CSchema, reg.MID)
++		}
++		out.direct[reg.MID] = directSchema{roles: roles, validate: reg.Validate}
++	}
++	for _, reg := range notices {
++		if !noticeParent(reg.ParentMID) || !reg.Namespace.Valid() || reg.Validate == nil {
++			return EventRegistry{}, ErrInvalidS2CRegistration
++		}
++		roles, err := validateRoles(reg.Roles)
++		if err != nil {
++			return EventRegistry{}, err
++		}
++		key := noticeKey{parent: reg.ParentMID, namespace: reg.Namespace, typeID: reg.NoticeType}
++		if _, exists := out.notices[key]; exists {
++			return EventRegistry{}, fmt.Errorf("%w: parent=%d namespace=%s notice_type=%d", ErrDuplicateS2CSchema, reg.ParentMID, reg.Namespace, reg.NoticeType)
++		}
++		out.notices[key] = noticeSchema{roles: roles, validate: reg.Validate}
++	}
++	return out, nil
++}
++
++// SourceDirectRoles returns the stock-source physical role policy for direct
++// server pushes selected by the I7A-2 contract. It is descriptor evidence, not
++// producer activation.
++func SourceDirectRoles(mid uint16) ([]Role, bool) {
++	var roles []Role
++	switch mid {
++	case mids.MIDChatFromPlayer, mids.MIDChatFromFriend, mids.MIDForceReload:
++		roles = []Role{World}
++	case mids.MIDChatMessage:
++		roles = []Role{World, Guild, Service}
++	case mids.MIDGuildBroadcast:
++		roles = []Role{Guild}
++	default:
++		return nil, false
++	}
++	d, ok := mids.Lookup(mid)
++	if !ok || d.Transport != mids.TCP || d.Direction != mids.S2C || d.Encoding != mids.AMF3 {
++		return nil, false
++	}
++	return append([]Role(nil), roles...), true
++}
++
++func (r EventRegistry) ValidateDirect(mid uint16, role Role, payload any) error {
++	if !role.Valid() {
++		return ErrWrongS2CRole
++	}
++	schema, ok := r.direct[mid]
++	if !ok {
++		return fmt.Errorf("%w: MID %d", ErrUnknownS2CSchema, mid)
++	}
++	if _, ok := schema.roles[role]; !ok {
++		return fmt.Errorf("%w: MID %d role=%s", ErrWrongS2CRole, mid, role)
++	}
++	if err := schema.validate(payload); err != nil {
++		return fmt.Errorf("%w: MID %d: %v", ErrInvalidS2CPayload, mid, err)
++	}
++	return nil
++}
++
++func (r EventRegistry) ValidateNotice(parent uint16, namespace NoticeNamespace, role Role, payload any) error {
++	if !role.Valid() || !namespace.Valid() || !noticeParent(parent) {
++		return ErrInvalidS2CPayload
++	}
++	typeID, err := noticeType(payload)
++	if err != nil {
++		return err
++	}
++	key := noticeKey{parent: parent, namespace: namespace, typeID: typeID}
++	schema, ok := r.notices[key]
++	if !ok {
++		return fmt.Errorf("%w: parent=%d namespace=%s notice_type=%d", ErrUnknownS2CSchema, parent, namespace, typeID)
++	}
++	if _, ok := schema.roles[role]; !ok {
++		return fmt.Errorf("%w: parent=%d role=%s", ErrWrongS2CRole, parent, role)
++	}
++	if err := schema.validate(payload); err != nil {
++		return fmt.Errorf("%w: parent=%d notice_type=%d: %v", ErrInvalidS2CPayload, parent, typeID, err)
++	}
++	return nil
++}
++
++func RequireAMF3Object(v any) error {
++	o, ok := v.(*amf3.Object)
++	if !ok || o == nil {
++		return errors.New("AMF3 object required")
++	}
++	_, err := o.StrictMap()
++	return err
++}
++
++func noticeType(v any) (int64, error) {
++	o, ok := v.(*amf3.Object)
++	if !ok || o == nil {
++		return 0, fmt.Errorf("%w: notice payload must be AMF3 object", ErrInvalidS2CPayload)
++	}
++	m, err := o.StrictMap()
++	if err != nil {
++		return 0, fmt.Errorf("%w: %v", ErrInvalidS2CPayload, err)
++	}
++	raw, ok := m["notice_type"]
++	if !ok {
++		return 0, fmt.Errorf("%w: notice_type missing", ErrInvalidS2CPayload)
++	}
++	switch x := raw.(type) {
++	case int:
++		return int64(x), nil
++	case int32:
++		return int64(x), nil
++	case int64:
++		return x, nil
++	case uint:
++		if uint64(x) > math.MaxInt64 {
++			return 0, fmt.Errorf("%w: notice_type overflow", ErrInvalidS2CPayload)
++		}
++		return int64(x), nil
++	case uint32:
++		return int64(x), nil
++	case uint64:
++		if x > math.MaxInt64 {
++			return 0, fmt.Errorf("%w: notice_type overflow", ErrInvalidS2CPayload)
++		}
++		return int64(x), nil
++	case float64:
++		if math.IsNaN(x) || math.IsInf(x, 0) || x != math.Trunc(x) || x < math.MinInt64 || x > math.MaxInt64 {
++			return 0, fmt.Errorf("%w: notice_type must be integral", ErrInvalidS2CPayload)
++		}
++		return int64(x), nil
++	default:
++		return 0, fmt.Errorf("%w: notice_type type %T", ErrInvalidS2CPayload, raw)
++	}
++}
++
++func noticeParent(mid uint16) bool {
++	if mid != mids.MIDWorldNotice && mid != mids.MIDPlayerNotice {
++		return false
++	}
++	d, ok := mids.Lookup(mid)
++	return ok && d.Transport == mids.TCP && d.Direction == mids.S2C && d.Encoding == mids.AMF3
++}
++
++func validateRoleSubset(in, allowed []Role) (map[Role]struct{}, error) {
++	roles, err := validateRoles(in)
++	if err != nil {
++		return nil, err
++	}
++	allow := make(map[Role]struct{}, len(allowed))
++	for _, r := range allowed {
++		allow[r] = struct{}{}
++	}
++	for r := range roles {
++		if _, ok := allow[r]; !ok {
++			return nil, fmt.Errorf("%w: role %s contradicts source policy", ErrInvalidS2CRegistration, r)
++		}
++	}
++	return roles, nil
++}
++
++func validateRoles(in []Role) (map[Role]struct{}, error) {
++	if len(in) == 0 {
++		return nil, ErrInvalidS2CRegistration
++	}
++	roles := make(map[Role]struct{}, len(in))
++	for _, r := range in {
++		if !r.Valid() {
++			return nil, ErrInvalidS2CRegistration
++		}
++		if _, exists := roles[r]; exists {
++			return nil, ErrInvalidS2CRegistration
++		}
++		roles[r] = struct{}{}
++	}
++	return roles, nil
++}
+diff --git a/internal/protocol/realtime/s2c_registry_test.go b/internal/protocol/realtime/s2c_registry_test.go
+new file mode 100644
+index 0000000..ebaf72b
+--- /dev/null
++++ b/internal/protocol/realtime/s2c_registry_test.go
+@@ -0,0 +1,106 @@
++package realtime
++
++import (
++	"errors"
++	"reflect"
++	"testing"
++
++	"gxb.local/backend/v2/internal/protocol/amf3"
++	"gxb.local/backend/v2/internal/protocol/mids"
++)
++
++func TestSourceDirectRolesAreSourceBoundAndDescriptorsAreS2C(t *testing.T) {
++	cases := []struct {
++		mid   uint16
++		roles []Role
++	}{
++		{mids.MIDChatFromPlayer, []Role{World}},
++		{mids.MIDChatFromFriend, []Role{World}},
++		{mids.MIDChatMessage, []Role{World, Guild, Service}},
++		{mids.MIDForceReload, []Role{World}},
++		{mids.MIDGuildBroadcast, []Role{Guild}},
++	}
++	for _, tc := range cases {
++		got, ok := SourceDirectRoles(tc.mid)
++		if !ok || !reflect.DeepEqual(got, tc.roles) {
++			t.Fatalf("mid=%d roles=%v ok=%v", tc.mid, got, ok)
++		}
++		d, ok := mids.Lookup(tc.mid)
++		if !ok || d.Transport != mids.TCP || d.Direction != mids.S2C || d.Encoding != mids.AMF3 {
++			t.Fatalf("mid=%d descriptor=%+v ok=%v", tc.mid, d, ok)
++		}
++	}
++	if _, ok := SourceDirectRoles(mids.MIDWorldNotice); ok {
++		t.Fatal("generic notice inherited a direct-event role policy")
++	}
++}
++
++func TestEventRegistryDirectSchemasFailClosed(t *testing.T) {
++	empty, err := NewEventRegistry(nil, nil)
++	if err != nil {
++		t.Fatal(err)
++	}
++	obj := &amf3.Object{}
++	if err := empty.ValidateDirect(mids.MIDChatFromPlayer, World, obj); !errors.Is(err, ErrUnknownS2CSchema) {
++		t.Fatalf("unregistered direct err=%v", err)
++	}
++	reg, err := NewEventRegistry([]DirectRegistration{{MID: mids.MIDChatFromPlayer, Roles: []Role{World}, Validate: RequireAMF3Object}}, nil)
++	if err != nil {
++		t.Fatal(err)
++	}
++	if err := reg.ValidateDirect(mids.MIDChatFromPlayer, World, obj); err != nil {
++		t.Fatal(err)
++	}
++	if err := reg.ValidateDirect(mids.MIDChatFromPlayer, Guild, obj); !errors.Is(err, ErrWrongS2CRole) {
++		t.Fatalf("wrong role err=%v", err)
++	}
++	if err := reg.ValidateDirect(mids.MIDChatFromPlayer, World, map[string]any{}); !errors.Is(err, ErrInvalidS2CPayload) {
++		t.Fatalf("invalid payload err=%v", err)
++	}
++	if _, err := NewEventRegistry([]DirectRegistration{{MID: mids.MIDChatFromPlayer, Roles: []Role{Guild}, Validate: RequireAMF3Object}}, nil); !errors.Is(err, ErrInvalidS2CRegistration) {
++		t.Fatalf("source-contradicting role registration err=%v", err)
++	}
++	if _, err := NewEventRegistry([]DirectRegistration{
++		{MID: mids.MIDChatFromPlayer, Roles: []Role{World}, Validate: RequireAMF3Object},
++		{MID: mids.MIDChatFromPlayer, Roles: []Role{World}, Validate: RequireAMF3Object},
++	}, nil); !errors.Is(err, ErrDuplicateS2CSchema) {
++		t.Fatalf("duplicate direct err=%v", err)
++	}
++}
++
++func TestEventRegistryNoticeSchemasUseParentNamespaceAndType(t *testing.T) {
++	payload := &amf3.Object{Properties: []amf3.Property{{Name: "notice_type", Value: 7.0}}}
++	empty, _ := NewEventRegistry(nil, nil)
++	if err := empty.ValidateNotice(mids.MIDPlayerNotice, NoticeNamespaceGeneric, World, payload); !errors.Is(err, ErrUnknownS2CSchema) {
++		t.Fatalf("zero registrations err=%v", err)
++	}
++	reg, err := NewEventRegistry(nil, []NoticeRegistration{
++		{ParentMID: mids.MIDPlayerNotice, Namespace: NoticeNamespaceGeneric, NoticeType: 7, Roles: []Role{World}, Validate: RequireAMF3Object},
++		{ParentMID: mids.MIDPlayerNotice, Namespace: NoticeNamespaceFriend, NoticeType: 7, Roles: []Role{Guild}, Validate: RequireAMF3Object},
++	})
++	if err != nil {
++		t.Fatal(err)
++	}
++	if err := reg.ValidateNotice(mids.MIDPlayerNotice, NoticeNamespaceGeneric, World, payload); err != nil {
++		t.Fatal(err)
++	}
++	if err := reg.ValidateNotice(mids.MIDPlayerNotice, NoticeNamespaceFriend, World, payload); !errors.Is(err, ErrWrongS2CRole) {
++		t.Fatalf("namespace separation/wrong role err=%v", err)
++	}
++	if err := reg.ValidateNotice(mids.MIDWorldNotice, NoticeNamespaceGeneric, World, payload); !errors.Is(err, ErrUnknownS2CSchema) {
++		t.Fatalf("parent separation err=%v", err)
++	}
++	if err := reg.ValidateNotice(mids.MIDPlayerNotice, NoticeNamespaceGeneric, World, &amf3.Object{}); !errors.Is(err, ErrInvalidS2CPayload) {
++		t.Fatalf("missing notice_type err=%v", err)
++	}
++	fractional := &amf3.Object{Properties: []amf3.Property{{Name: "notice_type", Value: 7.5}}}
++	if err := reg.ValidateNotice(mids.MIDPlayerNotice, NoticeNamespaceGeneric, World, fractional); !errors.Is(err, ErrInvalidS2CPayload) {
++		t.Fatalf("fractional notice_type err=%v", err)
++	}
++	if _, err := NewEventRegistry(nil, []NoticeRegistration{
++		{ParentMID: mids.MIDPlayerNotice, Namespace: NoticeNamespaceGeneric, NoticeType: 7, Roles: []Role{World}, Validate: RequireAMF3Object},
++		{ParentMID: mids.MIDPlayerNotice, Namespace: NoticeNamespaceGeneric, NoticeType: 7, Roles: []Role{World}, Validate: RequireAMF3Object},
++	}); !errors.Is(err, ErrDuplicateS2CSchema) {
++		t.Fatalf("duplicate notice err=%v", err)
++	}
++}
+-- 
+2.47.3
+

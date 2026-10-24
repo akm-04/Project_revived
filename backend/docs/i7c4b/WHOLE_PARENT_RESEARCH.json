@@ -1,0 +1,11 @@
+{
+  "status": "INHERITED_WHOLE_I7C4_BOUNDARIES_CONFIRMED_FOR_4B",
+  "base": "Pass718 4A whole-parent research",
+  "amendment_required": false,
+  "boundaries": {
+    "4A": "Cosmetic/privilege eligibility canonical facts",
+    "4B": "Earned bronze/silver/gold facts with selectedgenuineproducer; unavailable others",
+    "4C": "Exact metric domain/reductions/ranking/fullselected origin qualifications"
+  },
+  "no_topology_renumbering": true
+}

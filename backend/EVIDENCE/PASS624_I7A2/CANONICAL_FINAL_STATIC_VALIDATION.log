@@ -1,0 +1,14 @@
+== git diff --check ==
+== sbom check ==
+RESOLVED SBOM: PASS
+== dependency policy ==
+DEPENDENCY POLICY: PASS
+resolved_go_modules 16 qualified_candidates 5
+== sqlc generation policy ==
+SQLC GENERATION POLICY: PASS
+== kernel querytext ==
+KERNEL QUERYTEXT: PASS sha256=74ad9accee063e77323a2eb4a69df394bdcb331ce88e3d789864ffbc904b7511
+== schema query ownership ==
+SCHEMA/QUERY OWNERSHIP: PASS
+== foundation trace ==
+FOUNDATION TRACE: PASS (10 historical lifecycle records; 24/24 RF findings dispositioned; R0-R7 accepted Pass489; I6 accepted Pass509; 6 future extension limits remain explicit; W2 separate)

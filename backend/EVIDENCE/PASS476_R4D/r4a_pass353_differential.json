@@ -1,0 +1,62 @@
+{
+  "conclusion": "PASS_NO_BOUNDED_CONTRADICTION",
+  "evidence_class": "CORROBORATIVE_DIFFERENTIAL_ONLY_NOT_V2_AUTHORITY",
+  "horcrux": {
+    "interpretation": "count agreement corroborates R4A fail-closed specialized-owner boundary; V1 materialization policy is not imported",
+    "pass353_type24_templates": 378,
+    "r4a_type24_specialized_rows": 378
+  },
+  "item_source_sha256": "59b668c28a372543da0c36d7a8d84291cc5b93fa0d92b7cc389a645e96e7b7cc",
+  "item_stack": {
+    "mismatch_count": 0,
+    "mismatches": [],
+    "r4a_catalog_item_rows": 5540,
+    "source_positive_stack_rows": 5540,
+    "source_row_count": 5838
+  },
+  "limitations": [
+    "Pass353 is a frozen reconstruction/oracle, not original-server truth.",
+    "This differential does not authorize V1 persistence, formulas, handlers, temporal transitions, or specialized-owner implementation in V2.",
+    "Current src_64 hashes and the Pass467 implementation contract remain R4A authority."
+  ],
+  "pass353_archive_sha256": "31729d5c5e4509c2c89eaa1e8203cf1570afe87e18ed2610b944e457a9946b15",
+  "r4a_content_revision": "77d0b329b0e4c6199fe8484837e025923ca89bf7dc8ebcdd96efa361bbea98b1",
+  "resource_owner_corroboration": {
+    "crystal": {
+      "migration_readiness": "FOUNDATION_READY",
+      "owner_service": "EconomyLedger",
+      "semantic_class": "durable_fungible"
+    },
+    "energy": {
+      "migration_readiness": "FOUNDATION_READY",
+      "owner_service": "EnergyResourceOwner",
+      "semantic_class": "timer_recovery"
+    },
+    "exp": {
+      "migration_readiness": "FOUNDATION_READY",
+      "owner_service": "PlayerProgressionService",
+      "semantic_class": "monotonic_progression"
+    },
+    "invitation": {
+      "migration_readiness": "DEFER_ARENA",
+      "owner_service": "ArenaInvitationResourceOwner",
+      "semantic_class": "timer_recovery_source_drift"
+    },
+    "mana": {
+      "migration_readiness": "FOUNDATION_READY",
+      "owner_service": "EconomyLedger",
+      "semantic_class": "durable_fungible"
+    },
+    "skill_point": {
+      "migration_readiness": "FOUNDATION_READY",
+      "owner_service": "SkillPointResourceOwner",
+      "semantic_class": "timer_recovery"
+    },
+    "spirit_energy": {
+      "migration_readiness": "FOUNDATION_READY",
+      "owner_service": "SpiritEnergyResourceOwner",
+      "semantic_class": "timer_recovery"
+    }
+  },
+  "schema_version": 1
+}

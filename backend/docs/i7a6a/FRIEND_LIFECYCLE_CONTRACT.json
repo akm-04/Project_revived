@@ -1,0 +1,45 @@
+{
+  "schema": "gxb-i7a6a-design/v1",
+  "pass": "645.0",
+  "stage": "I7A-6A",
+  "status": [
+    "PENDING",
+    "TRANSPORT_WRITE_RECORDED",
+    "OFFLINE_PROJECTED",
+    "RETENTION_SUPPRESSED",
+    "PRIVACY_SUPPRESSED"
+  ],
+  "baseline_passmap": "644.0",
+  "baseline_passmap_sha256": "c786b95f60301abb1d9f5502d5d1f6b6a109281d90c01bbbabd6e58a2941e81a",
+  "backend_sha256": "60b90871802e1f75e0bf08261d6df07dc3c030b9a1c50ffbcfe0092d7e698f02",
+  "backend_tree": "1be8d601037bd203bb4faa7bc4cd1aae3cf2d3ba57d2b1dc4cd670bb9e4e03ab",
+  "implementation_authorized": false,
+  "implementation_started": false,
+  "product_accepted": false,
+  "original_server_truth_claimed": false,
+  "classification": "IMPLEMENTATION_DECISION refining FRIEND_DM_PENDING_V1 without policy replacement",
+  "owner": "FriendDM only, immutable occurrences separate from mutable recipient delivery state and projection receipt",
+  "occurrence": "server internal operation UUID stable for known internal retries; actor/recipient, recipient sequence, accepted DB time, canonical payload, content revision/policy, privacy binding immutable",
+  "claim": "lease overlay on logicalPENDING; exact claimGeneration + existing realtimeOwnerFence + expiryUTC; never a sixth durable logical state",
+  "retention": "newest50 logicalPENDING per recipient, including active claims. Admission/expiry/failure/suppression/drain/finalization enforce same invariant under380. Overflow terminalizes oldest sequence, clears lease and advances generation; immutable evidence stays.",
+  "lease_policy": {
+    "id": "FRIEND_DM_CLAIM_V1",
+    "duration_seconds": 30,
+    "expiry": "now>=expiresUTC, equality expired",
+    "renewal": "none; bounded single attempt",
+    "decision_time": "I6 DB-bound retry-stable operation instant; after-lock DB observation rejects stale preparation beyond2s rather than silently rebinding retry",
+    "finalization": "fresh operation/DB instant strictly before expiry, same claim generation + owner fence, stillPENDING; else no-op/stale result",
+    "clock_jumps": "backward observation never reopens expired or terminal state; backward below accepted/last decision fail closed; forward can expire early with documented duplicate residual; no synchronized-clock promise"
+  },
+  "live": "claim commits before any network attempt. Revalidate current privacy/handle/owner fence and observe queued bytes only through existing connWriter.Send. >=1 observed actual target write success may finalize TRANSPORT_WRITE_RECORDED. No success/expired lease returns pending unless terminally suppressed.",
+  "offline": "176 under complete lock plan returns ordinary eligible non-actively-leased pending oldest first; atomically marksOFFLINE_PROJECTED and records exact internal projection-operation references/observation. No drain on179.",
+  "known_operation": "lookup owner occurrence/projection receipt by exact internal op ID before new mutation; authoritative positive committed resolution may recover same private result. Unknown/absence does not authorize blind replay or network publication.",
+  "nonce_less_stock_retry": "a new HTTP request can create a new occurrence; do not text-hash collapse. A new176 request does not replay previously projected rows. Existing D11 residuals stay explicit.",
+  "residuals": [
+    "Crash after write before finalization or lost completion/claim expiry can duplicate via later recovery",
+    "Late frame can arrive after privacy/retention suppression; suppression is canonical state, not byte cancellation",
+    "Lost committed176 response may lose stock presentation; no ACK/server-ID exactly-once guarantee"
+  ],
+  "missing_root": "absent recipient owner380 is read absent without EnsureRoot; existing I4 recipient315 serializes creation. New owner root/sequence allocation happens only in mutation section after all planned locks/provider reads. Existing roots use380 row lock; no late re-lock after first mutation.",
+  "restore": "retain immutable payloads, sequence monotonicity, state versions, privacy fences and terminal receipts; expire stale leases from authoritative DB time and changed process-owner fence, then reapply newest50 without resurrecting tombstones. No ageTTL or imported client history."
+}

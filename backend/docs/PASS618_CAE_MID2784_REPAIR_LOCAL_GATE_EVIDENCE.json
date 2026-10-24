@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "pass": "618.0",
+  "stage": "CAE-MID2784-REPAIR",
+  "status": "GREEN_LOCAL_GATE_WITH_EXACT_TOOLCHAIN_ENVIRONMENT_BLOCKED",
+  "version": "v0.85.1",
+  "authority": {
+    "pass617_passmap_sha256": "1242014d31229a72b11178450ddf2ddbe7ccf8098c9781560cc85ff5aff79950",
+    "repair_contract_sha256": "affb6243d52cd2d3ee388e4d77e2ce5ee04ed0c90f0f27ba1227909c6feeab6b",
+    "acceptance_matrix_sha256": "0aa9a72ead0cb69f4ade2f33a9e86ec6311d3103221f749c2baaf834c8916592",
+    "repair_authorization_sha256": "66c0b7391e77cd89c6777502507ca459cc00d39e5522c76876658d0807b6da9f",
+    "contract_impact_review_sha256": "51bc79606e01bba4bdbe583a10a1fbd7d290ee07be165b0e0bbe98a4331b1b66",
+    "preimplementation_reality_sha256": "f0aac0d4f9b8ac9f7e1dcee0aa1190c100bf1207257d5364d109f97299e5b890"
+  },
+  "requirements": {
+    "R01": "GREEN: MID2784 is_award is collection/list",
+    "R02": "GREEN: length exactly 23",
+    "R03": "GREEN: all fresh entries numeric int64(0)",
+    "R04": "GREEN: exact current SelfPlayer/WhiteAlbumWindow consumption and collect_special hash/cardinality bound by oracle",
+    "R05": "GREEN: MID72/MID2785 remain unsupported/unregistered",
+    "R06": "GREEN: no schema/persistence/transaction/receipt/owner changes",
+    "R07": "GREEN: canonical go.mod/go.sum/.go-version unchanged",
+    "R08": "GREEN canonical static/source-oracle; focused test/race/vet GREEN in compatibility copy; exact Go1.27.1 ENVIRONMENT_BLOCKED",
+    "R09": "GREEN 94/94 package-by-package regression COMPATIBILITY_COPY_ONLY",
+    "R10": "GREEN independent post-fix reality check",
+    "R11": "PASSMAP_PARENT_CLOSURE_NOT_ENCODED_AS_PRODUCT_TEST; requires authoritative HOT+COLD closure/seal"
+  },
+  "canonical_pins": {
+    "go_mod_sha256": "313c574368bb56dc570bc3427b65f59b059e492f909fe43b7d0291b5ced21dc4",
+    "go_sum_sha256": "efbf6753542d66e2fefcb2ab5e2ade7c9d28f2206a1113d1eb9568f2cb75808d",
+    "go_version_sha256": "a8844fbc8c3eb51c26ed00aec4cd5a5a9d647f849c6ead07bcc83ed24c4a7718"
+  },
+  "execution": {
+    "exact_go1_27_1": "ENVIRONMENT_BLOCKED_NETWORK_TOOLCHAIN_DOWNLOAD",
+    "compatibility_copy_accommodation": "disposable clone go.mod only: go 1.26.0 + toolchain go1.27.1 -> go 1.23.0; canonical unchanged",
+    "focused_tests": "GREEN",
+    "focused_race": "GREEN",
+    "full_vet": "GREEN",
+    "archguard": "GREEN",
+    "bounded_package_regression": "94/94 GREEN",
+    "classification": "COMPATIBILITY_COPY_ONLY"
+  },
+  "real_infrastructure": {
+    "postgresql": "NOT_RUN_NOT_REQUIRED_FOR_THIS_READ_ONLY_SHAPE_REPAIR_LOCAL_GATE",
+    "river": "NOT_RUN_NOT_REQUIRED_FOR_THIS_READ_ONLY_SHAPE_REPAIR_LOCAL_GATE",
+    "physical_stock_client_w2": "DEFERRED_UNPASSED"
+  },
+  "evidence_files": [
+    "EVIDENCE/PASS618_CAE_MID2784_REPAIR/EXACT_GO1_27_1_ATTEMPT.log",
+    "EVIDENCE/PASS618_CAE_MID2784_REPAIR/COMPATIBILITY_COPY_94_PACKAGE_REGRESSION.log",
+    "EVIDENCE/PASS618_CAE_MID2784_REPAIR/POSTFIX_REALITY_CHECK_WORKSPACE_SOURCE.txt"
+  ]
+}

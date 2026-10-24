@@ -1,0 +1,74 @@
+{
+  "status": "SUFFICIENT_FOR_BOUNDED1010_CORE_IMPLEMENTATION_FULL4C_BLOCKED",
+  "full_phase_closed": false,
+  "whole_scope_researched": true,
+  "selected_core_supported": true,
+  "original_algorithm": "Notrecoveredforother9metricsorRankingsettlement; noinventedformula",
+  "remaining": {
+    "status": "SUFFICIENT_BOUNDED_CORE_RESEARCH_FULL_PROFILE_GATES_RETAINED",
+    "resolved": [
+      "1010owner/population/typedport",
+      "1011reuse",
+      "No stored metricprojection needed for directrecompute",
+      "Whole4 boundaries unchanged"
+    ],
+    "unresolved": [
+      {
+        "id": 1001,
+        "label": "HERO_NUM",
+        "disposition": "REQUIRED_UNAVAILABLE_NOT_ZERO",
+        "gate": "Current versus lifetime/template/instance/duplicate/retired population unresolved"
+      },
+      {
+        "id": 1002,
+        "label": "PET_NUM",
+        "disposition": "REQUIRED_UNAVAILABLE_NOT_ZERO",
+        "gate": "Current/lifetime/template/instance/birth/style population unresolved"
+      },
+      {
+        "id": 1003,
+        "label": "SKIN_NUM",
+        "disposition": "REQUIRED_UNAVAILABLE_NOT_ZERO",
+        "gate": "Complete origin-qualified skin entitlement/count domain including cross-server grants and expiry unqualified"
+      },
+      {
+        "id": 1004,
+        "label": "ACHIEVE_NUM",
+        "disposition": "REQUIRED_UNAVAILABLE_NOT_ZERO",
+        "gate": "Exact per-earned-tier reduction known; 4B covers only3tiers of100014, other32achievements/history/producer profiles unavailable"
+      },
+      {
+        "id": 1005,
+        "label": "AVATAR_FRAME_NUM",
+        "disposition": "REQUIRED_UNAVAILABLE_NOT_ZERO",
+        "gate": "Base+earned+purchased eligible frames required; complete selected origins/expiry count domain unqualified"
+      },
+      {
+        "id": 1006,
+        "label": "AVATAR_NUM",
+        "disposition": "REQUIRED_UNAVAILABLE_NOT_ZERO",
+        "gate": "Base+derived+owned eligible avatars; complete selected origins/domain unqualified"
+      },
+      {
+        "id": 1007,
+        "label": "FORCE",
+        "disposition": "REQUIRED_UNAVAILABLE_NOT_ZERO",
+        "gate": "Ranking table AllAP vs top5 label exists but no proof metric1007 binds subtype8, population/duplicate/lifetime and final producer completeness unqualified"
+      },
+      {
+        "id": 1008,
+        "label": "STAR",
+        "disposition": "REQUIRED_UNAVAILABLE_NOT_ZERO",
+        "gate": "Rank subtype10 text totalstars suggests sum but no proof1008 binding/population/retirement/duplicate semantics"
+      },
+      {
+        "id": 1009,
+        "label": "AWAKE_NUM",
+        "disposition": "REQUIRED_UNAVAILABLE_NOT_ZERO",
+        "gate": "Rank subtype12 text awakenedgirls does not freeze1009 boolean/stage/template/instance/lifetime population"
+      }
+    ],
+    "ranking": "METRIC_PROFILE_RESEARCH.json requiredprofiles/unresolved; no inventedpolicies"
+  },
+  "implementation_started": false
+}

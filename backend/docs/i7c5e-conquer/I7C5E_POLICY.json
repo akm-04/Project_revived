@@ -1,0 +1,34 @@
+{
+  "contract_id": "C5E_CONQUER_SCHOOL_MODE_V1",
+  "version": 1,
+  "stage": "I7C-5E",
+  "classification": "SOURCE_FACT_PLUS_LABELLED_PRIVATE_POLICY_UNDER_INHERITED_C1_418_421_426_C2J",
+  "owner": "CONQUER_SCHOOL (domain/conquerschool, application/conquerschool, postgres/conquerstore); same owner as I7C-2J; trust profile CLIENT_SUMMARY_ATTESTED",
+  "rules": [
+    "SOURCE_FACT: function 48 'Conquest' opens at player level 100 (functions level 1|100); every mode call except report reads requires it.",
+    "SOURCE_FACT: MIDs 1568 GET_CONQUER_SCHOOL_INFO, 1569 START, 1570 RESULT (zlib multipart), 1571 REPORT_LIST, 1572 REPORT, 1573 RESET, 2790 BUY_CONQUER_TIMES; info fields conquer_loop_id, current_id, passed_id, left_times, is_buff_on, report_award_times, team_status, used_heroes, used_pets, buy_conquer_times.",
+    "SOURCE_FACT: 56 missions in 5 regions, 1..5 enemy teams per mission (non-empty teamN), any team order; misc conquer_school_challenge_num 10, conquer_buff_lev_limit 10, conquer_school_hurt_param 0.01, conquer_school_max_loop 8, conquer_buy_limit 10, conquer_school_battle_report_reward 50000, conquer_school_battle_report_reward_limit 10, conquer_school_battle_report_num_limit 3, conquer_report_rank_ratio 1e9; refresh_cost buy_conquer_cost; mission reward_item/num; loop reward_item/num.",
+    "IMPLEMENTATION_DECISION: the run (loop, current_id, passed_id) is the 2J facts Run; progress (conquer_lev, conquer_loop_id) is the 2J facts Progress; both change only through the owner's PrepareWriteTx/ApplyWriteTx in the caller transaction. The first INFO of an INITIAL_NO_PROGRESS player creates run {loop 1, current 10001, passed 0} with progress unchanged.",
+    "STRONG_INFERENCE (client getLoopBy shows loop-1 at level 56): clearing mission lev L sets conquer_lev = L; clearing mission 56 (next_id 0) also sets conquer_loop_id = loop+1 and restarts the run at the first mission; after loop 8 the run ends with current_id = passed_id = last mission and conquer_loop_id 9.",
+    "CLIENT_SUMMARY_ATTESTED (PASS418): START records an attempt (formation partner ids, pet, loop, mission); RESULT settles only the player's open attempt; is_win, total_damage, alive_num and the report are client attested; the server bounds them (alive 0..6, damage 0..1e15, report JSON object for a stored report) and recomputes every canonical consequence. A newer START supersedes an unsettled attempt (its chance stays spent).",
+    "Private policy (user decision 2026-10-20 'Daily + new mission'): left_times is 10 and refills at 05:00 GMT+8 each day and when a mission is cleared; START consumes one chance.",
+    "Private policy: START requires a not-ended run, a chance, 1..6 distinct owned partner ids not used in a won fight of this mission, and an owned unused pet or none; RESULT requires campaign_id = current mission, an existing unbeaten team, and the attempt's formation and pet.",
+    "Private policy: a won fight marks the team beaten and its girls and pet used for the mission; a lost fight adds one defeat buff level up to 10 (+1% per level shown by the client); report_invalid = 1 is settled but its report is not kept.",
+    "Private policy: beating every team of the mission promotes: the mission reward (and on mission 56 the loop reward) is granted through I5 and answered as awards; team status, used girls/pets and the buff reset; chances refill; the directory projection conquer_lev/conquer_loop_id is updated in the same transaction.",
+    "Private policy (user decision 'Keep it'): RESET clears beaten teams and used girls/pets of the current mission only; chances and buff stay; refused once the run has ended.",
+    "Private policy: BUY_CONQUER_TIMES requires an active monthly privilege card, fewer than 10 buys today (05:00 GMT+8 day), costs the next refresh_cost buy_conquer_cost in crystal and adds one chance.",
+    "Private policy: conquer_region is the number of regions whose attributes are open for the progress (the 2J Evaluate region rule): 0..5.",
+    "Private policy (user decision 'Best: survivors then damage'): won fights with a valid report are kept per (loop, mission, team) across servers; REPORT_LIST answers the 3 best by alive_num x 1e9 + total_damage, ties to the earlier report; other reports of that key are pruned.",
+    "Private policy (user decision 'Full mode'): the first view of another player's report by a viewer on a 05:00 GMT+8 day mails its owner 50000 gold (mana) with CONQUER_SCHOOL_MAIL_* text (count 1), at most 10 rewarded views per owner per day; report_award_times is the owner's rewarded views today.",
+    "IMPLEMENTATION_DECISION: MID1 17.conquer_lev/conquer_loop_id/conquer_region are projected from the owner's known facts; UNKNOWN_LEGACY players keep the stock defaults and the mode refuses them (no inferred progress).",
+    "Contract amendment (defect, I7C2J_CONQUER_FACT_READ): a facts row written under an earlier registered content revision is validated against the operation's pinned catalog instead of being refused; the row's revision is provenance (other owners keep creation_revision the same way).",
+    "Unactivated: SystemBroadcast 3005 (conquer broadcast), conquer_school_ratio / conquer_school_reward tables (no client reader), privilege_left_card_day MID1 projection (not owned here)."
+  ],
+  "private_policy_id": "C5E_CONQUER_PRIVATE_POLICY_V1",
+  "user_decisions_2026_10_20": {
+    "surfaces": "Full mode",
+    "chances": "Daily + new mission",
+    "reports": "Best: survivors then damage",
+    "buff_on_reset": "Keep it"
+  }
+}

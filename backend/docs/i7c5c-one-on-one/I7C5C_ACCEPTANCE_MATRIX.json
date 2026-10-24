@@ -1,0 +1,58 @@
+{
+  "status": "I7C5C_ACCEPTANCE_MATRIX_PLANNED_NOT_RUN",
+  "policy_id": "C5C_ONE_ON_ONE_MODE_V1",
+  "rows": [
+    {
+      "id": "C01_CONTENT",
+      "proof": "one_on_one catalog re-derived from source; top_coin activation; oracle pins legend tables/misc/vip/refresh_cost/messages 30002/30003."
+    },
+    {
+      "id": "C02_ENTRY",
+      "proof": "level 55 + 15 girls required; entrant Junior 3 4300 points once; concurrent entries unique."
+    },
+    {
+      "id": "C03_TEAMS",
+      "proof": "team count by group, 1..5 heroes, unique heroes/pets, owned refs; hidden teams in GET_ENEMY_TEAM."
+    },
+    {
+      "id": "C04_ADMISSION",
+      "proof": "08:00-22:00 window (30002 in-band), tries/buy/cost/VIP/monthly card, cooldown 60/300 and paid reset, candidate offered and still in group."
+    },
+    {
+      "id": "C05_MATCH",
+      "proof": "Bo3/5/7 rounds via 5A attempts under campaign 65/battle 114001, majority stop, forfeit, report keys served by 2485; repeated START returns the same match."
+    },
+    {
+      "id": "C06_TERMINAL_ONCE",
+      "proof": "Master/Senior swap when defender better; Junior Elo with floor; level follows points; concurrent settlement applies once; stale candidate refused."
+    },
+    {
+      "id": "C07_SETTLEMENT",
+      "proof": "Wed/Sun 22:00 snapshot; one mail per ranked player with legend_reward lines by server rank; frame mail once; idempotent across worker/request."
+    },
+    {
+      "id": "C08_PROMOTION",
+      "proof": "Fri 21:00 open with vacancy fill, mode 2 candidates/lock/3 chances/2 wins/1 h cooldown, swap at success, Sat 21:00 close."
+    },
+    {
+      "id": "C09_TITLES",
+      "proof": "Sunday titles 100002-100005 by global rank as PlayerDisplay origins with 604800 s end."
+    },
+    {
+      "id": "C10_ACHIEVEMENTS",
+      "proof": "100002 weekly top-3 streak tiers 1/2/3; 100028 attack win streak 5/15/30; no revocation; 100001 unchanged."
+    },
+    {
+      "id": "C11_HISTORY_RECORDS",
+      "proof": "both sides counted; per-round partner usage; last 20 records; record list/detail/share shapes."
+    },
+    {
+      "id": "C12_RANK_LISTS",
+      "proof": "301 rank_types 3 (global) and 4 (server) with rank_level and display rows."
+    },
+    {
+      "id": "C13_R2_QUALIFICATION",
+      "proof": "fresh migrate 66, unit/race/vet/oracle/ownership/SBOM/security, populated 65->66 upgrade with content deploy, restore/restart, regressions 5B/5A/4B/4C/2B/3B/guild mail."
+    }
+  ]
+}

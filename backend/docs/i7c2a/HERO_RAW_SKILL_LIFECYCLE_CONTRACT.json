@@ -1,0 +1,61 @@
+{
+  "schema_version": 1,
+  "pass": "686.0",
+  "phase": "I7C",
+  "stage": "I7C-2A",
+  "full_node_path": "ROOT/I7/I7C/I7C-2/I7C-2A",
+  "sealed_base_sha256": "c06d73821a33b856bd16b61ef3b1a69d1c8472740b47263fe454ad7d5bb0dce2",
+  "accepted_backend_sha256": "a3aabb725a4a66df91133aa1c543d30ee263e3e93f590ad7ca25981f3c4ba7c6",
+  "working_backend_sha256": "f46f8dff7c546a24ba399dba3c210653684d9dfc411673ef62263c1040822014",
+  "product_implementation_authorized": false,
+  "product_implementation_started": false,
+  "product_tests": "NOT_RUN_RESEARCH_DESIGN_UNCHANGED_PRODUCT",
+  "contract_id": "I7C2A_HERO_RAW_SKILL_LIFECYCLE",
+  "title": "Canonical Hero raw skill lifecycle and authorized V1 preservation policy",
+  "status": "FROZEN_RESEARCH_DESIGN_NOT_PRODUCT_QUALIFICATION",
+  "classification": "IMPLEMENTATION_DECISION_DIRECT_USER_POLICY_AUTHORIZATION_WITH_SOURCE_AND_INHERITED_CONTRACT_RECONCILIATION",
+  "rules": [
+    "CharacterHero is the sole canonical owner of six raw skill levels and six raw override IDs. Store them with the existing Hero; Pet skills retain their accepted owner and lifecycle. No PublicProfile copy becomes gameplay truth.",
+    "Fresh Hero acquisition and prepared materialization atomically seed six raw levels of 1 and six zero no-override IDs under policy I7C2A_V1_RAW_SKILL_SEED_V1. Backfill only missing V2 skill facts; preserve explicit nondefault facts, identity, allocator, unrelated progression and immutable historical operation outcomes. This is a directly authorized V1 reconstruction policy, not original-server initialization proof.",
+    "Raw levels/IDs remain distinct from source-derived offsets, color/awakening unlocks, ordinary/default skill IDs, basic attack level and twice-awake progression. Source-absent content cannot be replaced by a guessed default or an unavailable provider reported as qualified absence.",
+    "Selected special producer MID2144 reuses the approved V1 KongMing policy: owned awakened Hero11001144, slot5, exact five book-to-skill mappings, positive owned book quantity as a nonconsuming gate, canonical six-ID response. Use existing I5 inventory owner through typed transaction ports; no foreign SQL or independent nested transaction.",
+    "Use inherited actor/lifecycle fencing, player/Hero/resource lock order, captured-time discipline, owner-version CAS and semantic request fingerprint/receipt recovery. Replaying an old or new operation returns its saved outcome even if live skill state changed; never substitute a live reread for the original receipt.",
+    "Bootstrap/MID49 and coherent Character/Showcase reads project real canonical raw facts after qualification. Content-qualified derived IDs are a separate typed observation with explicit revision/profile. Raw fact qualification does not accept stat/force, full Showcase, histories, I7C or I7.",
+    "MID53/39 skill-level increases and skill-point purchase/recovery remain explicit adjacent future owner routes under existing I5/Temporal contracts unless subsequently selected by a justified amendment. This minimal raw-fact and KongMing choice stage does not waive later scope or activate these commands. New contrary source/profile/contract evidence must be reported for the user decision under the approved V1 policy route."
+  ],
+  "extends": [
+    "I7C1_PROVIDER_SCOPE_OWNERSHIP",
+    "I7C1_DELIVERY_ACCEPTANCE",
+    "I7C1_RESEARCH_AMENDMENT",
+    "I7B1_TRANSACTION_REFERENCE_REPLAY",
+    "D04",
+    "D06",
+    "PASS616_CHARACTER_ASSET_CORE_CONTRACT"
+  ],
+  "inherited_authority_paths": [
+    "00_PASSMAP/PASS662_I7B1_ARCHITECTURE_PROVIDER_CONTRACT.json",
+    "00_PASSMAP/PASS662_I7B1_ACCEPTANCE_EXIT_CONTRACT.json",
+    "00_PASSMAP/PASS662_I7B1_TRANSACTION_REFERENCE_REPLAY_CONTRACT.json",
+    "00_PASSMAP/PASS662_I7B1_WIRE_PRIVACY_POLICY_CONTRACT.json",
+    "00_PASSMAP/PASS662_I7B1_MEDIA_FRESHNESS_CONTRACT.json",
+    "00_PASSMAP/PASS616_CHARACTER_ASSET_CORE_CONTRACT.json",
+    "00_PASSMAP/PASS463_DESIGNS/D04.json",
+    "00_PASSMAP/PASS475_DESIGNS/D05.json",
+    "00_PASSMAP/PASS475_DESIGNS/D06.json",
+    "00_PASSMAP/PASS475_DESIGNS/D07.json",
+    "00_PASSMAP/PASS465_WORKPLACE_TIME_CONTRACT.json",
+    "00_PASSMAP/PASS509_PROFILE1_SCOPE_SELECTION.json"
+  ],
+  "source_evidence": [
+    "i7c2a/CONTENT_ROWS.json",
+    "i7c2a/INIT_BACKFILL_RESEARCH.json",
+    "i7c2a/SPECIAL_CHOICES_RESEARCH.json",
+    "i7c2a/V1_POLICY_AUTHORIZATION.json"
+  ],
+  "acceptance_obligations": [
+    "Real PostgreSQL fresh/upgrade/acquisition/materialization/choice/reload atomicity and receipt recovery",
+    "Affected inherited source/owner/transaction/projection regressions on the exact candidate using portable R2",
+    "Independent changed-contract/source reality check; parent exit remains separate"
+  ],
+  "scope_limit": "No product implementation or acceptance. No general skill-point economy or full battle-stat compiler in this leaf."
+}

@@ -1,0 +1,106 @@
+{
+  "source_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+  "source_prefix": "app-assets/output/assets/src_64/",
+  "excerpts": [
+    {
+      "finding": "6B-F01",
+      "role": "current",
+      "path": "app/windows/ChatWindow.lua",
+      "sha256": "f6d1014e5ced715de0d06e3443d01c73ffa99adce78862566cd95aff26043eec",
+      "line_start": 744,
+      "line_end": 750,
+      "excerpt": "\t\t\tif arg_32_0.toPlayerID ~= 0 then\n\t\t\t\tvar_32_5 = {\n\t\t\t\t\tmessage = var_32_2,\n\t\t\t\t\tto_player_id = arg_32_0.toPlayerID\n\t\t\t\t}\n\n\t\t\t\txyd.Backend.get():request(xyd.mid.CHAT_TO_PLAYER, var_32_5, function(arg_38_0, arg_38_1, arg_38_2)"
+    },
+    {
+      "finding": "6B-F01",
+      "role": "current",
+      "path": "app/windows/TeamConnectPresidentWindow.lua",
+      "sha256": "171124dc6018cbc32919b248c82e9d1409d9e7f6b8cb3a27793e940601446c01",
+      "line_start": 50,
+      "line_end": 60,
+      "excerpt": "\t\t\t\tparams = {\n\t\t\t\t\tchannel = 1,\n\t\t\t\t\tmessage = arg_4_0.message,\n\t\t\t\t\tto_player_id = arg_4_0.p_id\n\t\t\t\t}\n\n\t\t\t\tlocal var_5_1 = arg_4_0.message\n\n\t\t\t\txyd.Backend.get():request(xyd.mid.CHAT_TO_PLAYER, params, function(arg_6_0, arg_6_1, arg_6_2)\n\t\t\t\t\tif arg_6_0 == xyd.error.OK then\n\t\t\t\t\t\txyd.EventDispatcher.get():dispatchEvent({"
+    },
+    {
+      "finding": "6B-F02",
+      "role": "current",
+      "path": "app/common/network/Backend.lua",
+      "sha256": "95378e2b0be8180df6de27e9e430c630bcfe46c080e1f91ef5f6d74bdbb1b840",
+      "line_start": 558,
+      "line_end": 567,
+      "excerpt": "\t\tend\n\n\t\tprint(string.format(\"Received from web code(%d) -- %s\", var_31_1, string.sub(var_31_2, 0, 3000)))\n\n\t\tif var_31_1 ~= 200 then\n\t\t\treturn var_23_3(json.decode(var_31_0), xyd.error.ERROR)\n\t\tend\n\n\t\tvar_23_3(json.decode(var_31_0), xyd.error.OK)\n\tend"
+    },
+    {
+      "finding": "6B-F02",
+      "role": "current",
+      "path": "app/windows/ChatWindow.lua",
+      "sha256": "f6d1014e5ced715de0d06e3443d01c73ffa99adce78862566cd95aff26043eec",
+      "line_start": 750,
+      "line_end": 773,
+      "excerpt": "\t\t\t\txyd.Backend.get():request(xyd.mid.CHAT_TO_PLAYER, var_32_5, function(arg_38_0, arg_38_1, arg_38_2)\n\t\t\t\t\tif arg_38_0 == xyd.error.OK then\n\t\t\t\t\t\tlocal var_38_0 = xyd.ModelManager.get():loadModel(xyd.ModelType.CHAT_BUBBLE)\n\t\t\t\t\t\tlocal var_38_1 = {\n\t\t\t\t\t\t\ttitle_info = tostring(var_32_0.titleInfo.title_id) .. \"@\" .. tostring(var_32_0.titleInfo.unique_id) .. \"@\" .. tostring(var_32_0.titleInfo.end_time),\n\t\t\t\t\t\t\tbubble_info = tostring(var_38_0:getBubbleID())\n\t\t\t\t\t\t}\n\t\t\t\t\t\tlocal var_38_2 = json.encode(var_38_1)\n\n\t\t\t\t\t\txyd.EventDispatcher.get():dispatchEvent({\n\t\t\t\t\t\t\tname = xyd.event.PERSONAL_CHAT_MESSAGE,\n\t\t\t\t\t\t\tparams = {\n\t\t\t\t\t\t\t\tmessage = var_32_2,\n\t\t\t\t\t\t\t\tfrom_player_id = var_32_0.playerID,\n\t\t\t\t\t\t\t\tfrom_player_name = var_32_0.playerName,\n\t\t\t\t\t\t\t\tfrom_player_type = var_32_0.playerType,\n\t\t\t\t\t\t\t\tfrom_player_avatar_id = var_32_0:getMyCurrentAvatarID(),\n\t\t\t\t\t\t\t\tfrom_player_avatar_frame_id = var_32_0.avatarFrame,\n\t\t\t\t\t\t\t\tfrom_player_lev = var_32_0.lev,\n\t\t\t\t\t\t\t\tnp_info = var_38_2\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t})\n\t\t\t\t\tend\n\t\t\t\tend)"
+    },
+    {
+      "finding": "6B-F03",
+      "role": "current",
+      "path": "app/common/network/Backend.lua",
+      "sha256": "95378e2b0be8180df6de27e9e430c630bcfe46c080e1f91ef5f6d74bdbb1b840",
+      "line_start": 957,
+      "line_end": 960,
+      "excerpt": "\t\telseif arg_47_2 == xyd.mid.CHAT_MESSAGE then\n\t\t\tvar_47_0(xyd.event.CHAT_ROOM_MESSAGE, arg_47_3)\n\t\telseif arg_47_2 == xyd.mid.CHAT_FROM_PLAYER then\n\t\t\tvar_47_0(xyd.event.PERSONAL_CHAT_MESSAGE, arg_47_3)"
+    },
+    {
+      "finding": "6B-F03",
+      "role": "current",
+      "path": "app/model/MessageManager.lua",
+      "sha256": "493f6452938f038d201462771228744559aa8f446f1233bc0228f2de6db17a46",
+      "line_start": 1528,
+      "line_end": 1536,
+      "excerpt": "\targ_53_0:registerEvent(xyd.event.PERSONAL_CHAT_MESSAGE, function(arg_57_0)\n\t\tif not arg_53_0.blockList_[arg_57_0.params.player_id] and not arg_53_0.blockList_[arg_57_0.params.from_player_id] then\n\t\t\targ_53_0:showMsg(arg_53_0.PERSONAL_CHANNEL, arg_57_0.params)\n\t\t\targ_53_0:appendMsg_(arg_53_0.PERSONAL_CHANNEL, arg_53_0:genChatMessage(arg_57_0.params.np_info, arg_57_0.params.from_player_id, arg_57_0.params.from_player_name, arg_57_0.params.message, arg_57_0.params.from_player_type, arg_57_0.params.type, false, nil, nil, nil, nil, arg_57_0.params.from_player_avatar_id, arg_57_0.params.from_player_avatar_frame_id, arg_57_0.params.from_player_lev), arg_57_0.params.from_player_avatar_id)\n\t\t\targ_53_0:saveChatMessgeToDB(arg_57_0.params.np_info, arg_53_0.PERSONAL_CHANNEL, arg_57_0.params.from_player_id, arg_57_0.params.from_player_name, arg_57_0.params.message, arg_57_0.params.type, arg_57_0.params.from_player_avatar_id, arg_57_0.params.from_player_avatar_frame_id, arg_57_0.params.from_player_lev, arg_57_0.params.player_type)\n\n\t\t\targ_53_0.isNews[arg_53_0.PERSONAL_CHANNEL] = true\n\n\t\t\targ_53_0:notifyChatWindow(arg_53_0.PERSONAL_CHANNEL, arg_57_0.params.from_player_id, arg_57_0.params.from_player_name)"
+    },
+    {
+      "finding": "6B-F05",
+      "role": "current",
+      "path": "data/tables/chat_config.lua",
+      "sha256": "5662a0144955cec95150e78767d49a467bf2842d9a2f6cba9a4bbaea8ba8edfa",
+      "line_start": 13,
+      "line_end": 22,
+      "excerpt": "\t\t{\n\t\t\t\"1\",\n\t\t\t\"1\",\n\t\t\t\"30\"\n\t\t},\n\t\t{\n\t\t\t\"2\",\n\t\t\t\"1\",\n\t\t\t\"30\"\n\t\t},"
+    },
+    {
+      "finding": "6B-F05",
+      "role": "current",
+      "path": "app/model/MessageManager.lua",
+      "sha256": "493f6452938f038d201462771228744559aa8f446f1233bc0228f2de6db17a46",
+      "line_start": 2001,
+      "line_end": 2029,
+      "excerpt": "\t\t\tchannelID = arg_91_2 or 0,\n\t\t\ttime = xyd.ServerTime.get():getServerTime() or 0,\n\t\t\tmessage = arg_91_5 or \"\",\n\t\t\tmessageType = arg_91_6 or 0,\n\t\t\tspeakerID = arg_91_3 or 0,\n\t\t\tspeakerName = var_91_4 or \"\",\n\t\t\tspeakerLev = var_91_3 or 0,\n\t\t\tspeakerAvatar = var_91_1 or 0,\n\t\t\tspeakerFrame = var_91_2 or 0\n\t\t}\n\n\t\tif arg_91_10 and type(arg_91_10) == \"number\" then\n\t\t\tvar_91_5.isGM = arg_91_10\n\t\telse\n\t\t\tvar_91_5.isGM = 0\n\t\tend\n\n\t\txyd.db.chatMessages:addChatMessage(var_91_5)\n\t\ttable.insert(arg_91_0.dbMessageList_[arg_91_2], var_91_5)\n\n\t\tif #arg_91_0.dbMessageList_[arg_91_2] > xyd.tables.chatConfig:maxRecordNum(arg_91_2) then\n\t\t\tlocal var_91_6 = arg_91_0.dbMessageList_[arg_91_2][1].id\n\n\t\t\ttable.remove(arg_91_0.dbMessageList_[arg_91_2], 1)\n\t\t\txyd.db.chatMessages:deleteChatMessage(var_91_6)\n\t\tend\n\tend\nend\n"
+    },
+    {
+      "finding": "6B-F06",
+      "role": "current",
+      "path": "app/model/MessageManager.lua",
+      "sha256": "493f6452938f038d201462771228744559aa8f446f1233bc0228f2de6db17a46",
+      "line_start": 1089,
+      "line_end": 1125,
+      "excerpt": "function var_0_0.genChatMessage(arg_51_0, arg_51_1, arg_51_2, arg_51_3, arg_51_4, arg_51_5, arg_51_6, arg_51_7, arg_51_8, arg_51_9, arg_51_10, arg_51_11, arg_51_12, arg_51_13, arg_51_14, arg_51_15)\n\tlocal var_51_0 = display.newNode()\n\tlocal var_51_1 = {}\n\tlocal var_51_2\n\tlocal var_51_3 = xyd.AssetLoader.get():loadNodeFromJson(\"windows/chat_window/chat_item.csb\")\n\tlocal var_51_4 = var_51_3:getChildByName(\"container\")\n\tlocal var_51_5 = json.decode(arg_51_1)\n\tlocal var_51_6 = xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_PLAYER)\n\tlocal var_51_7 = arg_51_12\n\tlocal var_51_8 = arg_51_13\n\tlocal var_51_9 = arg_51_14 or \"\"\n\tlocal var_51_10 = arg_51_3\n\tlocal var_51_11 = 0\n\tlocal var_51_12\n\tlocal var_51_13\n\tlocal var_51_14\n\n\tif var_51_5 and var_51_5.bubble_info then\n\t\tvar_51_14 = xyd.splitToNumber(var_51_5.bubble_info, \"@\")[1] or xyd.tables.misc:getValue(\"default_bubble\")\n\telse\n\t\tvar_51_14 = xyd.tables.misc:getValue(\"default_bubble\")\n\tend\n\n\tif var_51_9 == 0 then\n\t\tvar_51_9 = \"\"\n\tend\n\n\tif var_51_5 and var_51_5.conquer_lev then\n\t\tvar_51_11 = tonumber(var_51_5.conquer_lev) or 0\n\t\tvar_51_12 = tonumber(var_51_5.conquer_loop_id) or 1\n\tend\n\n\tif arg_51_2 == var_51_6.playerID then\n\t\tvar_51_10 = var_51_6.playerName\n\t\tvar_51_7 = var_51_6:getMyCurrentAvatarID()\n\t\tvar_51_8 = var_51_6.avatarFrame\n\t\tvar_51_9 = var_51_6.lev"
+    },
+    {
+      "finding": "6B-F06",
+      "role": "current",
+      "path": "data/tables/misc.lua",
+      "sha256": "058cf5719421ed71a12083a8c95b0ccded7204bedb5fa1263d508e2fa4257f9a",
+      "line_start": 9177,
+      "line_end": 9182,
+      "excerpt": "\t\t{\n\t\t\t\"default_bubble\",\n\t\t\t\"10001\",\n\t\t\t\"2\",\n\t\t\t\"\u9ed8\u8a8d\u6c23\u6ce1\u6846\"\n\t\t},"
+    },
+    {
+      "finding": "6B-F07",
+      "role": "current",
+      "path": "app/windows/TeamConnectPresidentWindow.lua",
+      "sha256": "171124dc6018cbc32919b248c82e9d1409d9e7f6b8cb3a27793e940601446c01",
+      "line_start": 58,
+      "line_end": 75,
+      "excerpt": "\t\t\t\txyd.Backend.get():request(xyd.mid.CHAT_TO_PLAYER, params, function(arg_6_0, arg_6_1, arg_6_2)\n\t\t\t\t\tif arg_6_0 == xyd.error.OK then\n\t\t\t\t\t\txyd.EventDispatcher.get():dispatchEvent({\n\t\t\t\t\t\t\tname = xyd.event.PERSONAL_CHAT_MESSAGE,\n\t\t\t\t\t\t\tparams = {\n\t\t\t\t\t\t\t\tmessage = var_5_1,\n\t\t\t\t\t\t\t\tfrom_player_id = var_5_0.playerID,\n\t\t\t\t\t\t\t\tplayer_name = var_5_0.playerName\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t})\n\t\t\t\t\t\txyd.WindowManager.get():openWindow(\"toast\", {\n\t\t\t\t\t\t\tmessage = var_0_2:translation(\"SEND_OK\")\n\t\t\t\t\t\t})\n\t\t\t\t\tend\n\n\t\t\t\t\txyd.WindowManager.get():closeWindow(arg_4_0)\n\t\t\t\tend)\n\t\t\telse"
+    }
+  ],
+  "classification": "STATIC_SOURCE_FACT_NOT_ORIGINAL_SERVER_TRUTH_OR_PHYSICAL_W2"
+}

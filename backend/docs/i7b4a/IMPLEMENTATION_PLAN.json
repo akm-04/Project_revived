@@ -1,0 +1,62 @@
+{
+  "schema_version": 1,
+  "node": "I7B-4A",
+  "full_node_path": "ROOT/I7/I7B/I7B-4/I7B-4A",
+  "status": "RESEARCH_DESIGN_FROZEN_PENDING_IMPLEMENTATION_AUTHORIZATION",
+  "implementation_authorized": false,
+  "implementation_started": false,
+  "accepted_base": "Pass670/v0.104.0 migration43; exact BASE_BINDINGS.json",
+  "policy": "I7B_PROFILE_PRAISE_V1 fixed owner code policy; original unknowns labelled; frozen662 unchanged",
+  "planned_packages": [
+    {
+      "owner": "ProfileFeedback",
+      "path": "internal/domain/profilefeedback",
+      "change": "Root/praise domain validation and fixed policy; one canonical actor-target fact, absent default and version/no-op semantics"
+    },
+    {
+      "owner": "ProfileFeedback",
+      "path": "internal/application/profilefeedback",
+      "change": "Root/preparedTx + narrow store/read ports, command/private receipt and current coherent count/history observation; complete actor-target315/relations/391/392 lock plan"
+    },
+    {
+      "owner": "ProfileFeedback persistence",
+      "path": "internal/adapters/postgres/profilefeedbackstore + migrations/00044_i7b4a_profile_praise.sql",
+      "change": "Own root/praise SQL only; no foreign tables. PK root target; praise PK(target,actor), stable first UTC time; history index(target,time DESC,actor DESC); FK/root binding and CAS validation. ExactDDL emitted only during implementation."
+    },
+    {
+      "owner": "ProtocolEdge/stock composition",
+      "path": "internal/adapters/stockruntime/profile_feedback.go + internal/protocol/httpedge/social_json.go + cmd/gxb-api/profile_feedback_postgres.go",
+      "change": "Finite exact1830/1842 request/raw duplicate-key/numeric admission; existing bearer/region authority; only two routes; standard finite error_code1 failure. Wire projector never exposes private receipt."
+    },
+    {
+      "owner": "PublicProfile consumer + replay metadata",
+      "path": "internal/application/publicprofile + internal/foundation/replaycatalog + docs/architecture/ownership/query/migration coverage",
+      "change": "Add narrow typed praise observation consumer seam without import cycle or foreign SQL; replay census classifies intrinsic actor-target fact and known-operation receipt. No activefull1829 route."
+    }
+  ],
+  "operation_trace": {
+    "1830": "exact source fields -> authenticated actor/context/region -> TimedRunner stableDecisionAt/content -> sorted315 actor+target and existingSocial360/361/363 -> targetPublicProfile391 basic eligibility -> Feedback392 preparedroot -> receipt validate or insert canonicalunique praise/touch once -> private terminalreceipt + current scopedcount/bit -> finitewire; unknown only existingfresh authoritative reconciliation",
+    "1842": "exact self-addressed params -> authenticated actor currentcontext -> coherentRR/Serializable pinnedrev/instant -> self315/391 thenFeedback392 read -> countallcanonicalrows/order/page -> read-only typedI4/I5 authors under same snapshot, no late315authorlocks -> source-shapedgenuineidentity/time/total arrays; no root writes"
+  },
+  "typed_interfaces": [
+    "I4 playerroot.TxLocker and RecipientReader, I5 ActorFencer/PublicPlayerBasisReader",
+    "SocialRelation existing caller-Tx root/block/candidate ports",
+    "PublicProfile BasicReader/RootService current target eligibility; no other-owner mutation",
+    "generation.TimedRunner, tx.Runner, kernel receipt Store/Reader, retained public content policy",
+    "Feedback Store + scoped current observations; future4B additive sameownerroot; PublicProfile interface uses domain/typed DTO to avoid app import cycle"
+  ],
+  "lock_effects": "Canonical plan before first write; deduplicate/sort all touched315 IDs and direction keys. Both actor/target and cross-server identity validated. No child per-objectrank/new kernel. Author list reads via typed read-only ports, no extra locking lower ranks after392. No foreignSQL/nestedTx/network/queues/blob/economy under locks. Reads never materialize PublicProfile orFeedback roots.",
+  "receipt_shape": "Private knownoperation ID + request fingerprint + exact Actor/account/context/server/start/entropy + fixed policy/retained rev + original praise pair/time/rootversion/DecisionAt. Current observation bound separately to target/currentversion/rev/readinstant; fingerprint alone is not intent. No new stock nonce or credentials in terminal payload.",
+  "migration_restore": "44 forward only; existing1..43 unchanged. Preserve row times/pairs/rootversions/terminalreceipts + selectedretainedContent after dump/restore/restart. No new wire allocator for praise. Proven missing author fails affectedprovider without deletingfact.",
+  "implementation_sequence": [
+    "Create an owned backend copy of accepted670 after explicit authorization",
+    "Batch domain/store/migration/owner ports and focused tests; then command/receipt/read composition and exact two stockroutes",
+    "Cross-check exact src_64 and frozen662 after changes; targeted native working checks",
+    "Freeze one exact combined4A candidate; portableR2 native/process/restore/concurrency/affectedregression; classifyevidence",
+    "Independent source/owner/code/recovery review and scoped4A PassMap acceptance; onlythen4B consumesroot"
+  ],
+  "acceptance_matrix": "ACCEPTANCE_MATRIX.json",
+  "contract_impact_review": "CONTRACT_IMPACT_REVIEW.json",
+  "parent_and_later_obligations": "4B comments/recovery and explicit4parentexit; full1829/consumerfreshness6, wholeI7B-E/I7/W2 unpassed",
+  "shared_target_time": "Stable DecisionAt may precede root creation by a concurrently winning command. Praise first time remains that operation instant; root UpdatedAt=max(previous,DecisionAt), rootversion distinguishes inserts. Receipt proof validates canonical target/fact and version ancestry, not a false shared-root-created-before-DecisionAt premise."
+}

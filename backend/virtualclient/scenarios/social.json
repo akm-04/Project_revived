@@ -1,0 +1,2 @@
+{"name":"social","level":20,
+ "steps":["window:social_system","wait:10"],"settle_seconds":15,"expect_ok":[176]}

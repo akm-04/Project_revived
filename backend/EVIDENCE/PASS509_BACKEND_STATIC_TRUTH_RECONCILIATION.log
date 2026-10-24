@@ -1,0 +1,52 @@
+== FOUNDATION/CURRENT ==
+RESOLVED SBOM: PASS
+FOUNDATION TRACE: PASS (10 historical lifecycle records; 24/24 RF findings dispositioned; R0-R7 accepted Pass489; I6 accepted Pass509; 6 future extension limits remain explicit; W2 separate)
+R0 VALIDATION: PASS (historical R0 guard preserved; cumulative foundation repair accepted at Pass489)
+R1A VALIDATION: PASS
+panic-safe transaction finalization and authoritative-negative semantics verified structurally
+R1B VALIDATION: PASS
+MID1 immutable selection receipt/current hydration/secret retention and shared-vs-exclusive server fence verified structurally
+R2A VALIDATION: PASS
+transactional provider/session/revocation lifecycle, coalesced optional activity, key seam and cross-identity constraints verified structurally
+R2B VALIDATION: PASS
+transaction-aware owner bootstrap, same-tx canonical projection, projection claims and RF-007 ownership closure verified structurally
+R2C VALIDATION: PASS
+caller-owned Grant seam, preflight canonical lock planning, durable creation fence and non-fabricating owner bootstrap verified
+R2D VALIDATION: PASS
+R3A VALIDATION: PASS
+R3B VALIDATION: PASS
+R3C VALIDATION: PASS
+R4A VALIDATION: PASS
+CONTENT QUERYTEXT: PASS sha256=411bf16367d94e4e0ce34fa9eb6035c312754f158c5c34a6fc9d3dbc0da50a32
+SCHEMA/QUERY OWNERSHIP: PASS
+SQLC GENERATION POLICY: PASS
+R4C STATIC VALIDATION: PASS; executable and real-PG acceptance are separate evidence
+KERNEL QUERYTEXT: PASS sha256=74ad9accee063e77323a2eb4a69df394bdcb331ce88e3d789864ffbc904b7511
+SCHEMA/QUERY OWNERSHIP: PASS
+R4B VALIDATION: PASS
+resource_rows 5556 progression_rows 100 objective_rows 0
+CONTENT QUERYTEXT: PASS sha256=411bf16367d94e4e0ce34fa9eb6035c312754f158c5c34a6fc9d3dbc0da50a32
+SCHEMA/QUERY OWNERSHIP: PASS
+SQLC GENERATION POLICY: PASS
+R4C STATIC VALIDATION: PASS; executable and real-PG acceptance are separate evidence
+R4D VALIDATION: PASS
+immutable revision binding/replay/exact-read/restart guards present; R5 temporal/bootstrap remains intentionally out of scope
+R5 VALIDATION: PASS
+static progression/temporal/bootstrap/function/directory/receipt/wire/stack R5 seams present; native PostgreSQL/River/W2 remain separate
+R6 VALIDATION: PASS (CUMULATIVE MODE)
+static projection/directory/replay/lifecycle/key/single-owner/http/observability R6 seams present; cumulative mode permits later migrations but does not weaken historical R6 pins
+R6 VALIDATION: PASS (CUMULATIVE MODE)
+static projection/directory/replay/lifecycle/key/single-owner/http/observability R6 seams present; cumulative mode permits later migrations but does not weaken historical R6 pins
+CURRENT CUMULATIVE CANDIDATE VALIDATION: PASS
+historical R6 pins retained; exact forward migration inventory and current release/SBOM version agree
+== POLICIES/ORACLES ==
+DEPENDENCY POLICY: PASS
+resolved_go_modules 16 qualified_candidates 5
+SQLC GENERATION POLICY: PASS
+SCHEMA/QUERY OWNERSHIP: PASS
+PASS current_src64: all-assest-rechecked-1.zip
+PASS v1_pass353: gxb-backend-v0.65.2-pass353.0-portable-dev1-V1-Final.zip
+PASS old_client: gxb-old-client-v1.164.0-research-corpus.zip
+PASS native_apk: latest_apk-smali-full.zip
+PASS pass222_probe: prep-apk-pass222-window-probe.zip
+ORACLE VERIFY: PASS

@@ -1,0 +1,30 @@
+{
+  "pass": "652.0",
+  "stage": "I7A-8A",
+  "status": "SELECTED_PREIMPLEMENTATION_CONTRACT_REQUIRES_VALIDATED_NORMAL652_SEAL",
+  "implementation_authorized": false,
+  "implementation_started": false,
+  "product_accepted": false,
+  "base_backend_sha256": "12d5c1b21658df0458eefdd9e9b8a96215ca0e04343699fb756311409ecb3478",
+  "schema_version": 1,
+  "contract_id": "I7A8A_WIRE_TIME_CONTENT_POLICY",
+  "mid": 588,
+  "request": "exactly title/content JSONstrings; rawduplicatekeys/unknownkeys/type/invalidUTF8 failwholeinput beforemap",
+  "response": "HTTP200 {} onlyafterdefiniteGuildsource+recipientjobscommit; allrejections/unknown/sourceconflicts non200. No inventednumericGuildcodes; HTTPsuccess doesnotclaimallMailalreadydelivered.",
+  "policy_id": "GUILD_BROADCAST_STOCK_TEXTLEN_V1",
+  "length": "Literalcurrentxyd.getTextLen validUTF8bytewalk ->integerhalfunit weights; title<=20/body<=200half-units; rawbytes<=80/800; bothnonempty; no trim/NFC/profanity/silenttruncation. PreserveUTF8lead-boundaryquirks.",
+  "calendar": "No dailyquota/reset/throttle or Mailexpiry invented; source DBtimeonce+immutablecreated time; WorkPlace05:00 notgeneralized.",
+  "content": "Addonefiniteguild_broadcast_policy compiledsource row through existingimmutablecontentregistry; pin10/100/textalgorithm-sourceSHA/GuildcoreMemberCap+revision. Preserveallprior18builtinpayloads/rows. Oldactivecatalog lacksrow =>588inactive; explicitdeploymentownerCASactivatecompatiblecontent, genericstartup preservespointer.",
+  "mail_view": "Existing368/list+bootstrapMailcounts canonicalsource-shaped fields: id,is_region false,category0,title,from,content,created_time,is_new/is_shown; attach/expired_time omitted forselectedno-value/noexpiry record.",
+  "notification_disposition": {
+    "generic_MAIL2_producer": "INACTIVE_IN8A_SELECTED_BOUNDED_DEFERRAL",
+    "basis": "SealedI7A1 requirescanonicalMailmaterialization, notincrementalpush. SourceSelfPlayer incrementsperhint andhasno durableACK/identity. Avoidinventingexactlyoncecounterproducer.",
+    "consumer": "368andbootstrapreads reflectcanonicalMail; immediatepush-drivenredpointlatency remainsbounded/unqualified",
+    "future": "Anyactivation requiresownfiniteI4notice schema/currentWORLDwriter/proof+duplicatecounterresidual qualification; no fourthbus/r1/g1changein8A."
+  },
+  "known_unknowns": [
+    "Originalserver588codes/category/expiry/throttle beyondselectedpolicy",
+    "Nonce-lessnewintentperfectdedupe",
+    "Physicalunmodifiedclient Mailnotification behavior notrun"
+  ]
+}

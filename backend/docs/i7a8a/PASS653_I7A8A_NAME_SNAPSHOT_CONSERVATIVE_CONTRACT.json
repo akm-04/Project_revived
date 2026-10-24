@@ -1,0 +1,24 @@
+{
+  "contract_id": "I7A8A_NAME_SNAPSHOT_CONSERVATIVE_V1",
+  "classification": "IMPLEMENTATION_DECISION",
+  "status": "RECONCILED_BEFORE_AFFECTED_SOURCE_IMPLEMENTATION",
+  "base_backend_sha256": "12d5c1b21658df0458eefdd9e9b8a96215ca0e04343699fb756311409ecb3478",
+  "finding": "No name-specific changed-at fact exists. player_directory_profiles.updated_at changes on the canonical directory feed, including level/avatar updates. New source-model nonemptyLeaderName restriction was also unsupported and removed.",
+  "evidence": [
+    "migrations/00004_player_directory_profile_bootstrap.sql:player_directory_profiles",
+    "internal/adapters/postgres/i4store/directory_level_projection.go:ApplyCanonicalLevelTx",
+    "internal/adapters/postgres/i4store/bootstrap_runtime.go:InsertDirectoryProfile",
+    "internal/domain/player/core.go:Profile"
+  ],
+  "affected_contract": "PASS652_I7A8A_DATA_IDENTITY_RECEIPT_CONTRACT.json source-time name fence; PASS652_I7A8A_D14_EXTENSION_RECORD.json I4 name snapshot",
+  "decision": "I4 typed NameSnapshot retains Name/PlayerID/Server plus conservative directory ChangedAt. Reject fresh source if ChangedAt exceeds boundDBDecisionAt. Persist name_snapshot_changed_at; do not call it a rename-specific timestamp. Empty canonical name is allowed without fabricated fallback. Known committed source keeps its immutable old snapshot.",
+  "residual": "Level/avatar projection changes after bound time may conservatively reject a fresh submit; no false success with a known-newer name snapshot. Timestamp reliability is inherited from accepted directory feed; exact original-server naming rules remain unknown.",
+  "authorization_basis": "Standing targeted contract reconciliation autonomy and latest direct fullI7A8 instruction; preserve existingowner/typedport/time law; no foundation rewrite or speculative name backfill.",
+  "required_proof": [
+    "typed owner SQL/read consistency",
+    "newer snapshot fails before source mutation",
+    "empty canonical name retained",
+    "knownoperation replay retains snapshot after name/role change"
+  ],
+  "publication_obligation": "Additive contract selected in owned653R3 registry; immutable652six-contractpack remains preserved; finalfullphase owningseal stillrequired."
+}

@@ -1,0 +1,4 @@
+=== check_ca7_3_source_oracle retained ===
+2026-09-20T10:54:33Z
+CA7-3 SOURCE ORACLE CHECK: PASS
+current/old client identities pinned; MID60/61/2979 wire/state axes, timed expiry, ordinary combat axis, Pet reachability split, and CA7-4 coexistence preserved

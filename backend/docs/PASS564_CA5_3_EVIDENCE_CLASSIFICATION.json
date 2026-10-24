@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "pass": "564.0",
+  "stage": "CA5-3",
+  "facts": [
+    {
+      "classification": "SOURCE_FACT",
+      "statement": "Effective current src_64 MID1793 full create/adjust and modern delete carry team/name/pet strings; retained HeroPresetWindow delete omits pet_str. Historical v1.164 has the two-string lineage and no saved-pet field."
+    },
+    {
+      "classification": "UNKNOWN",
+      "statement": "Original-server resolution of a legacy omitted-pet delete when duplicate Hero/name candidates imply divergent surviving Pet state is information-theoretically unrecoverable from the request and remains UNKNOWN."
+    },
+    {
+      "classification": "IMPLEMENTATION_DECISION",
+      "statement": "CA5-3 resolves legacy omission against locked canonical state, accepts only a unique complete canonical result, and fails closed on divergent outcomes."
+    },
+    {
+      "classification": "IMPLEMENTATION_DECISION",
+      "statement": "MID1793 uses existing typed actor-scoped Hero/Pet locks at ranks 410/430 plus saved-preset root rank440, whole-body definite-abort replanning, current-state convergence and op-scoped same-attempt semantic receipts."
+    },
+    {
+      "classification": "RUNTIME_OBSERVED",
+      "statement": "Fresh compatibility copy whose only changes are go.mod language/toolchain and .go-version passes focused tests, focused race, focused vet, full go test ./..., full go vet ./..., concrete characterstore tests, and 93/93 package regression."
+    },
+    {
+      "classification": "RUNTIME_OBSERVED",
+      "statement": "Exact canonical Go execution is environment-blocked because local Go is 1.23.2 while canonical go.mod requires >=1.26/toolchain 1.27.1."
+    },
+    {
+      "classification": "RUNTIME_OBSERVED",
+      "statement": "PostgreSQL-tagged production compilation is environment-blocked because pgx/v5 is not present in local module cache and module lookup is disabled/no network is available."
+    },
+    {
+      "classification": "UNKNOWN",
+      "statement": "Real PostgreSQL row-lock/serialization/CAS/receipt visibility semantics for the accumulated CA5 candidate remain pending the mandatory pre-CA5-E exact/native Work gate."
+    }
+  ],
+  "supersedes_none": true
+}

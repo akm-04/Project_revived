@@ -1,0 +1,256 @@
+{
+  "schema": "gxb-i7a5b-source-binding/v1",
+  "members": [
+    {
+      "class": "CURRENT_LUA_SOURCE_FACT_NOT_ORIGINAL_SERVER_TRUTH",
+      "archive": "all-assest-rechecked-1.zip",
+      "archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+      "member": "app-assets/output/assets/src_64/app/common/enums.lua",
+      "cache": "source_cache/current/app/common/enums.lua",
+      "sha256": "15340bd89fe7c6f150ccfd4a5cd2a2f0e8e73c89dfae9ac3388376a4799901f3"
+    },
+    {
+      "class": "CURRENT_LUA_SOURCE_FACT_NOT_ORIGINAL_SERVER_TRUTH",
+      "archive": "all-assest-rechecked-1.zip",
+      "archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+      "member": "app-assets/output/assets/src_64/app/common/network/Backend.lua",
+      "cache": "source_cache/current/app/common/network/Backend.lua",
+      "sha256": "95378e2b0be8180df6de27e9e430c630bcfe46c080e1f91ef5f6d74bdbb1b840"
+    },
+    {
+      "class": "CURRENT_LUA_SOURCE_FACT_NOT_ORIGINAL_SERVER_TRUTH",
+      "archive": "all-assest-rechecked-1.zip",
+      "archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+      "member": "app-assets/output/assets/src_64/app/common/network/mid.lua",
+      "cache": "source_cache/current/app/common/network/mid.lua",
+      "sha256": "026a20b29d97624979777a68c64c749254031604057ff42aa8f8254c3e35b5af"
+    },
+    {
+      "class": "CURRENT_LUA_SOURCE_FACT_NOT_ORIGINAL_SERVER_TRUTH",
+      "archive": "all-assest-rechecked-1.zip",
+      "archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+      "member": "app-assets/output/assets/src_64/app/model/MessageManager.lua",
+      "cache": "source_cache/current/app/model/MessageManager.lua",
+      "sha256": "493f6452938f038d201462771228744559aa8f446f1233bc0228f2de6db17a46"
+    },
+    {
+      "class": "CURRENT_LUA_SOURCE_FACT_NOT_ORIGINAL_SERVER_TRUTH",
+      "archive": "all-assest-rechecked-1.zip",
+      "archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+      "member": "app-assets/output/assets/src_64/app/windows/ChatWindow.lua",
+      "cache": "source_cache/current/app/windows/ChatWindow.lua",
+      "sha256": "f6d1014e5ced715de0d06e3443d01c73ffa99adce78862566cd95aff26043eec"
+    },
+    {
+      "class": "CURRENT_LUA_SOURCE_FACT_NOT_ORIGINAL_SERVER_TRUTH",
+      "archive": "all-assest-rechecked-1.zip",
+      "archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+      "member": "app-assets/output/assets/src_64/app/windows/RecordShareMenuWindow.lua",
+      "cache": "source_cache/current/app/windows/RecordShareMenuWindow.lua",
+      "sha256": "62bd8504afbb513f91591980c6bc06d7461e715e54acbb5115d11467d4d4a143"
+    },
+    {
+      "class": "CURRENT_LUA_SOURCE_FACT_NOT_ORIGINAL_SERVER_TRUTH",
+      "archive": "all-assest-rechecked-1.zip",
+      "archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+      "member": "app-assets/output/assets/src_64/app/windows/ArenaRecordWindow.lua",
+      "cache": "source_cache/current/app/windows/ArenaRecordWindow.lua",
+      "sha256": "62615dcbf8d59f4bd64150901ea0cfc1ff25b24cddeaa9b7a8122d84d13b341a"
+    },
+    {
+      "class": "CURRENT_LUA_SOURCE_FACT_NOT_ORIGINAL_SERVER_TRUTH",
+      "archive": "all-assest-rechecked-1.zip",
+      "archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+      "member": "app-assets/output/assets/src_64/app/windows/NewArenaRecordWindow.lua",
+      "cache": "source_cache/current/app/windows/NewArenaRecordWindow.lua",
+      "sha256": "74e057dbe8bdb84c075fab911886b79b11bec65873ed6887ab033ea426f88abb"
+    },
+    {
+      "class": "CURRENT_LUA_SOURCE_FACT_NOT_ORIGINAL_SERVER_TRUTH",
+      "archive": "all-assest-rechecked-1.zip",
+      "archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+      "member": "app-assets/output/assets/src_64/app/windows/ChampionsLeagueRecordWindow.lua",
+      "cache": "source_cache/current/app/windows/ChampionsLeagueRecordWindow.lua",
+      "sha256": "69c431fb9d0bc4303048b3b87ed660ec649b4b2cf3ae4f25fe6a61dd45d150ab"
+    },
+    {
+      "class": "CURRENT_LUA_SOURCE_FACT_NOT_ORIGINAL_SERVER_TRUTH",
+      "archive": "all-assest-rechecked-1.zip",
+      "archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+      "member": "app-assets/output/assets/src_64/app/windows/WarCampRecordsWindow.lua",
+      "cache": "source_cache/current/app/windows/WarCampRecordsWindow.lua",
+      "sha256": "cdfbf058d9538f96a098cbf17bbab0de143a4bdb74955c964e8e76943ff0143f"
+    },
+    {
+      "class": "CURRENT_LUA_SOURCE_FACT_NOT_ORIGINAL_SERVER_TRUTH",
+      "archive": "all-assest-rechecked-1.zip",
+      "archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+      "member": "app-assets/output/assets/src_64/app/windows/ScratchCardRecordWindow.lua",
+      "cache": "source_cache/current/app/windows/ScratchCardRecordWindow.lua",
+      "sha256": "69ee32f4e63252e1ce92be33bbd758c51b9c2db1948545f49e55e67a03edb2e7"
+    },
+    {
+      "class": "CURRENT_LUA_SOURCE_FACT_NOT_ORIGINAL_SERVER_TRUTH",
+      "archive": "all-assest-rechecked-1.zip",
+      "archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+      "member": "app-assets/output/assets/src_64/app/windows/PeakArenaReportWindow.lua",
+      "cache": "source_cache/current/app/windows/PeakArenaReportWindow.lua",
+      "sha256": "b28bc10b302c603a7c8b55f9a8a394de086ef67e507bb4d5f1a17cad4ecc0cf8"
+    },
+    {
+      "class": "CURRENT_LUA_SOURCE_FACT_NOT_ORIGINAL_SERVER_TRUTH",
+      "archive": "all-assest-rechecked-1.zip",
+      "archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+      "member": "app-assets/output/assets/src_64/app/windows/IllusionInviteWindow.lua",
+      "cache": "source_cache/current/app/windows/IllusionInviteWindow.lua",
+      "sha256": "d16287d8065e23fe3b418e8ef3d001b1c0754a4e1821977b74b3aa3977dee8ab"
+    },
+    {
+      "class": "CURRENT_LUA_SOURCE_FACT_NOT_ORIGINAL_SERVER_TRUTH",
+      "archive": "all-assest-rechecked-1.zip",
+      "archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+      "member": "app-assets/output/assets/src_64/app/windows/OccultInviteWindow.lua",
+      "cache": "source_cache/current/app/windows/OccultInviteWindow.lua",
+      "sha256": "ec1b6ad8827d1141cd2a60b5a7413e664c33946e0c4125efa85972ff7eddba4d"
+    },
+    {
+      "class": "CURRENT_LUA_SOURCE_FACT_NOT_ORIGINAL_SERVER_TRUTH",
+      "archive": "all-assest-rechecked-1.zip",
+      "archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+      "member": "app-assets/output/assets/src_64/app/windows/AdventureIllusionInviteWindow.lua",
+      "cache": "source_cache/current/app/windows/AdventureIllusionInviteWindow.lua",
+      "sha256": "45a9e0b5eaed138e2cb99917b867a001971d8456fa32831f97aae5f61dad4dba"
+    },
+    {
+      "class": "CURRENT_LUA_SOURCE_FACT_NOT_ORIGINAL_SERVER_TRUTH",
+      "archive": "all-assest-rechecked-1.zip",
+      "archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+      "member": "app-assets/output/assets/src_64/app/windows/AdventureDefenseInviteWindow.lua",
+      "cache": "source_cache/current/app/windows/AdventureDefenseInviteWindow.lua",
+      "sha256": "b194af453bbd09b87cccc4903a89017bca9e85b9d517ccc84ab3c6c59405cc16"
+    },
+    {
+      "class": "CURRENT_LUA_SOURCE_FACT_NOT_ORIGINAL_SERVER_TRUTH",
+      "archive": "all-assest-rechecked-1.zip",
+      "archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+      "member": "app-assets/output/assets/src_64/app/windows/RagnarokInviteWindow.lua",
+      "cache": "source_cache/current/app/windows/RagnarokInviteWindow.lua",
+      "sha256": "65129eec77b8c7b4e3f7c8560907a5fc02a442c9e6663ba962e27fe0a771151e"
+    },
+    {
+      "class": "CURRENT_LUA_SOURCE_FACT_NOT_ORIGINAL_SERVER_TRUTH",
+      "archive": "all-assest-rechecked-1.zip",
+      "archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+      "member": "app-assets/output/assets/src_64/app/windows/GroupChatWnd.lua",
+      "cache": "source_cache/current/app/windows/GroupChatWnd.lua",
+      "sha256": "6cef1f7d9889f54f3accbe972fece72e902cdbfa23a1c3a5e9ad412dc338ad41"
+    },
+    {
+      "class": "CURRENT_LUA_SOURCE_FACT_NOT_ORIGINAL_SERVER_TRUTH",
+      "archive": "all-assest-rechecked-1.zip",
+      "archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+      "member": "app-assets/output/assets/src_64/app/windows/GroupChatNewWnd.lua",
+      "cache": "source_cache/current/app/windows/GroupChatNewWnd.lua",
+      "sha256": "ba3b07b08907dfd92cb90526fa848638c42ae6d2af2d1b19f45667acd8a1df79"
+    },
+    {
+      "class": "CURRENT_LUA_SOURCE_FACT_NOT_ORIGINAL_SERVER_TRUTH",
+      "archive": "all-assest-rechecked-1.zip",
+      "archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+      "member": "app-assets/output/assets/src_64/app/windows/WarCampChatWindow.lua",
+      "cache": "source_cache/current/app/windows/WarCampChatWindow.lua",
+      "sha256": "2c5d3dcfd07d89be4a28fe7c71a55cb0d9df324fa4fd451f1efcdaf1c22097b7"
+    },
+    {
+      "class": "CURRENT_LUA_SOURCE_FACT_NOT_ORIGINAL_SERVER_TRUTH",
+      "archive": "all-assest-rechecked-1.zip",
+      "archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+      "member": "app-assets/output/assets/src_64/app/model/Illusion.lua",
+      "cache": "source_cache/current/app/model/Illusion.lua",
+      "sha256": "072f8825ac48cb311f93a3eb71dbe2f0e23ead9e6391fc67f680fbc70e9e527a"
+    },
+    {
+      "class": "CURRENT_LUA_SOURCE_FACT_NOT_ORIGINAL_SERVER_TRUTH",
+      "archive": "all-assest-rechecked-1.zip",
+      "archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+      "member": "app-assets/output/assets/src_64/app/model/Occult.lua",
+      "cache": "source_cache/current/app/model/Occult.lua",
+      "sha256": "748c6b2606fdbd0ee434f87b6761a8391df9c5236ccee110e302281651ab2b47"
+    },
+    {
+      "class": "CURRENT_LUA_SOURCE_FACT_NOT_ORIGINAL_SERVER_TRUTH",
+      "archive": "all-assest-rechecked-1.zip",
+      "archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+      "member": "app-assets/output/assets/src_64/app/model/AdventureEvent.lua",
+      "cache": "source_cache/current/app/model/AdventureEvent.lua",
+      "sha256": "b7c2a98663571f7c544219e21a7ad776f8cc32528837725d10a338c48ddafe6b"
+    },
+    {
+      "class": "CURRENT_LUA_SOURCE_FACT_NOT_ORIGINAL_SERVER_TRUTH",
+      "archive": "all-assest-rechecked-1.zip",
+      "archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+      "member": "app-assets/output/assets/src_64/app/model/Ragnarok.lua",
+      "cache": "source_cache/current/app/model/Ragnarok.lua",
+      "sha256": "befc27e4f43733620727310d6b2b69debc83dcab28e5ab853c6f146e7626493d"
+    },
+    {
+      "class": "CURRENT_LUA_SOURCE_FACT_NOT_ORIGINAL_SERVER_TRUTH",
+      "archive": "all-assest-rechecked-1.zip",
+      "archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+      "member": "app-assets/output/assets/src_64/app/model/WarCamp.lua",
+      "cache": "source_cache/current/app/model/WarCamp.lua",
+      "sha256": "7fb27c63dbe0f8b085769548c97ea27d110ab827d07b01269d9884c71120074e"
+    },
+    {
+      "class": "CURRENT_LUA_SOURCE_FACT_NOT_ORIGINAL_SERVER_TRUTH",
+      "archive": "all-assest-rechecked-1.zip",
+      "archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+      "member": "app-assets/output/assets/src_64/app/model/Activities.lua",
+      "cache": "source_cache/current/app/model/Activities.lua",
+      "sha256": "9de010c147d4c977d393072379eeeeee66c9385d5defa5e7ca1d28ac721fe8d8"
+    },
+    {
+      "class": "CURRENT_LUA_SOURCE_FACT_NOT_ORIGINAL_SERVER_TRUTH",
+      "archive": "all-assest-rechecked-1.zip",
+      "archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+      "member": "app-assets/output/assets/src_64/app/common/tables/MiscTable.lua",
+      "cache": "source_cache/current/app/common/tables/MiscTable.lua",
+      "sha256": "6579de771dbef3224fcaa9568a8fcfade26209f134acfe3a3e666ecbd6c13cee"
+    },
+    {
+      "class": "CURRENT_LUA_SOURCE_FACT_NOT_ORIGINAL_SERVER_TRUTH",
+      "archive": "all-assest-rechecked-1.zip",
+      "archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+      "member": "app-assets/output/assets/src_64/data/tables/misc.lua",
+      "cache": "source_cache/current/data/tables/misc.lua",
+      "sha256": "058cf5719421ed71a12083a8c95b0ccded7204bedb5fa1263d508e2fa4257f9a"
+    },
+    {
+      "class": "CURRENT_LUA_SOURCE_FACT_NOT_ORIGINAL_SERVER_TRUTH",
+      "archive": "all-assest-rechecked-1.zip",
+      "archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+      "member": "app-assets/output/assets/src_64/data/tables/misc1.lua",
+      "cache": "source_cache/current/data/tables/misc1.lua",
+      "sha256": "c225fd212e8ee9bf6de0b83a12871f5b35e939bf66c671e699a4dcaec7caf6d5"
+    },
+    {
+      "class": "CURRENT_LUA_SOURCE_FACT_NOT_ORIGINAL_SERVER_TRUTH",
+      "archive": "all-assest-rechecked-1.zip",
+      "archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+      "member": "app-assets/output/assets/src_64/app/common/tables/IllusionCampaignTable.lua",
+      "cache": "source_cache/current/app/common/tables/IllusionCampaignTable.lua",
+      "sha256": "cf73906ae46667a0b9f7121171062cb64d23d52768e542d8bdb263c2f8f18728"
+    },
+    {
+      "class": "CURRENT_LUA_SOURCE_FACT_NOT_ORIGINAL_SERVER_TRUTH",
+      "archive": "all-assest-rechecked-1.zip",
+      "archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+      "member": "app-assets/output/assets/src_64/app/common/tables/CreatsChapterSelectTable.lua",
+      "cache": "source_cache/current/app/common/tables/CreatsChapterSelectTable.lua",
+      "sha256": "813136c9a4c13ddddb0a6962dfe04d8cad90f9bd549f5a456ca315cb30bc082f"
+    }
+  ],
+  "outer_assets_sha256": "b04eab34b8041e455aaac31557d9cbadb1a9280f41d2a7f31ba452d0696be87e",
+  "current_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+  "original_server_truth": false
+}

@@ -1,0 +1,15 @@
+{
+  "schema": "gxb-research-design-seal/v1",
+  "pass": "642.0",
+  "stage": "I7A-5B",
+  "status": "RESEARCH_DESIGN_SELECTED_WITH_VALIDATED_HOT_COLD_SEAL",
+  "contract_index": "00_PASSMAP/PASS642_I7A5B_CONTRACT_INDEX.json",
+  "research_closure": "00_PASSMAP/PASS642_I7A5B_RESEARCH_CLOSURE.json",
+  "preimplementation_reality": "00_PASSMAP/PASS642_I7A5B_PREIMPLEMENTATION_REALITY_CHECK.json",
+  "checkpoint": "00_PASSMAP/PASS642_I7A5B_RECOVERY_LOCATION.json",
+  "implementation_authorization": "00_PASSMAP/PASS642_I7A5B_IMPLEMENTATION_AUTHORIZATION_RECORD.json",
+  "backend_sha256": "e0ff7628b1c226256b0138ddba011cbdbc5f7485f26a680931877e8444e9e456",
+  "product_gate": "NOT_RUN",
+  "product_acceptance": false,
+  "implementation_started": false
+}

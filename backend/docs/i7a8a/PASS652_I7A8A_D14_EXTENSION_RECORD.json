@@ -1,0 +1,79 @@
+{
+  "pass": "652.0",
+  "stage": "I7A-8A",
+  "status": "SELECTED_PREIMPLEMENTATION_CONTRACT_REQUIRES_VALIDATED_NORMAL652_SEAL",
+  "implementation_authorized": false,
+  "implementation_started": false,
+  "product_accepted": false,
+  "base_backend_sha256": "12d5c1b21658df0458eefdd9e9b8a96215ca0e04343699fb756311409ecb3478",
+  "schema_version": 1,
+  "contract_id": "I7A8A_D14_EXTENSION_RECORD",
+  "changes": [
+    {
+      "owner": "GuildBroadcast/I6C",
+      "add": "SourceService/Store immutableoccurrence/bindings/receipt/ack/reconciler; owner-localListMembershipsTx and sourceReaderTx",
+      "consumers": [
+        "588API",
+        "GuildBroadcastworker",
+        "I5SourceMailreader",
+        "8BfuturefiniteWorkeraddition"
+      ],
+      "migration": "neutralGuildBroadcastV1; preserveGuildinvite/membershipevents",
+      "locks": "310/315/320/350 preclose; separatedestination"
+    },
+    {
+      "owner": "I4PlayerCore",
+      "add": "NarrowNameSnapshotTx{Name,ChangedAt,PlayerID,Server} andtypedabsence proofthroughexisting315locker",
+      "consumers": [
+        "588source",
+        "I5GuildSourceMail"
+      ],
+      "migration": "no newPlayerownership/table",
+      "locks": "existing315"
+    },
+    {
+      "owner": "I5Mail",
+      "add": "FixedDeliverGuildSourceMail/ReadGuildSourceMailProof withsourceReaderport declaredI5; noAdmin/freeform/Grant",
+      "consumers": [
+        "GuildBroadcasthandler/Ackproof",
+        "8Aexactgates"
+      ],
+      "migration": "reusecounter/record/sourceunique/receipts; addonlynarrowreadmethods",
+      "locks": "315->610"
+    },
+    {
+      "owner": "I1/RiverAdapter",
+      "add": "InsertOnlyconstructor/readiness/finiteGuildregistrations/Reconcilekernel provider; runtimeworkercomposition",
+      "consumers": [
+        "APIproducer",
+        "gxb-worker",
+        "future8Bfiniteaddition"
+      ],
+      "migration": "pinnedRiverdeployment schema version trackedseparately",
+      "locks": "InsertTx source; executoraftercommit"
+    },
+    {
+      "owner": "PGoperationalownermechanism",
+      "add": "Finiteworkeradvisorykey/guard viaexistingRT mechanism; preserveRTwrapper/key",
+      "consumers": [
+        "gxb-worker",
+        "RTregressions"
+      ],
+      "migration": "none",
+      "locks": "dedicatedsession only; notgameplay"
+    },
+    {
+      "owner": "ContentRegistry/Compiler",
+      "add": "Immutableone-rowGuildBroadcastpolicy/typedreader/readiness andexplicitactivationcommand",
+      "consumers": [
+        "sourcepolicy",
+        "workerold-sourceproof",
+        "588readiness"
+      ],
+      "migration": "appendcatalog; existingregistry/CAS",
+      "locks": "contentowner; nevergenericAPIpointerchange"
+    }
+  ],
+  "compatibility": "Old7/oldGuildroutes retaincontracts/shape; 8Btype10 remainsinactive; approved8B boundaries unchanged; nogenericneweventbus/ledger/foreign-table repository.",
+  "required_evidence": "Exactnewcandidate scopedD14/ownership/lock/static/source/realPG+River/recovery/RT/contentcompiler invariants; allNOT_RUN now."
+}

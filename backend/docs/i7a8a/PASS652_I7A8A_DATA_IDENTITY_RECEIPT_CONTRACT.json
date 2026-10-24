@@ -1,0 +1,55 @@
+{
+  "pass": "652.0",
+  "stage": "I7A-8A",
+  "status": "SELECTED_PREIMPLEMENTATION_CONTRACT_REQUIRES_VALIDATED_NORMAL652_SEAL",
+  "implementation_authorized": false,
+  "implementation_started": false,
+  "product_accepted": false,
+  "base_backend_sha256": "12d5c1b21658df0458eefdd9e9b8a96215ca0e04343699fb756311409ecb3478",
+  "schema_version": 1,
+  "contract_id": "I7A8A_SOURCE_MAIL_CONTRACT",
+  "source_owner": "I6CGuildBroadcast",
+  "source_identity": "CanonicalOccurrenceUUID=sourceOperationID; knowninternalUUID replay same immutablebody/fingerprint; eachnonce-lessfreshHTTPsubmit getsnewUUID",
+  "source_facts": [
+    "gid/server/leaderPID +I4namesnapshot+nameChangedAt",
+    "SourceOperationStartedAt/EntropySeed32/PolicyRefs +boundUTCDecisionAt",
+    "pinnedContentRev/GuildCoreRev/textprofile/title/content",
+    "source-timeroster sortedcanonicalPlayerIDs<=existingMemberCap50 inclleader; recipientmembershipincarnation snapshot forprovenance",
+    "perrecipient immutablebinding plusPENDING/DELIVERED/RECIPIENT_GONE ack/proof schedulingmetadata"
+  ],
+  "source_lock_plan": [
+    "Resolveknownreceipt/source positiveproof first underauthenticatedActor; do notrequirecurrentroleafterprovencommittedsameop",
+    "Newcommand existingGuildroot310 ->allrosterPlayerRoots315 sorted ->actor/allneededMembership320 ->Guildaudit350; discoverclosure before firstmutation; stale roster abort/replan beforemutation",
+    "NarrowI4NameReaderTx beforemutation; currentroleLeader,activeGuild/sameServer/policy/roster revalidation",
+    "Persistoccurrence+allrecipientbindings+Guildreceipt+perrecipientQueue.InsertTx inonecommit; no I5MailwriteinsideGuildsourceTx"
+  ],
+  "time": "DBDecisionAt pinnedonce; rejectfreshsnapshot Guild.UpdatedAt/member.JoinedAt/nameChangedAt afterboundDecisionAt. Knowncommittedreplay usesstoredfacts. No job timeor newday rewrites sourceCreatedAt.",
+  "mail_owner": "I5Mail",
+  "mail_reference": "fixedGuildSource UUID +canonicalrecipient; sourceKind GUILD_BROADCAST; targetreceiptownerplayer/PID/domainguild-source-mail/operationmaterialize/semanticUUID",
+  "target_lock_plan": [
+    "TypedGuildBroadcastSourceReaderTx readsimmutablecanonicalbinding only,noGuildlocks",
+    "I4PlayerRoot315 ->I5NORMALnamespace610 completebeforecreatecounter/record/receipt",
+    "NoAttachments/Grant/economy/progression locks; no Social mutation"
+  ],
+  "target_invariants": [
+    "NORMAL/category0/AnyPlatform/showntrue/noattachments/noexpires; sourceDecisionAt ascreated_time; pinnedfromname/title/body/policy",
+    "Exactsourcefingerprint conflict failclosed; Mailrecord+receipt atomic; positiveunknowncommit proofvalidatesboth",
+    "Knownreplay retainswireID/mailUUID/read/shown state; no newcounterallocation",
+    "WireID1..2^53-1; failbeforeallocationoverflow androllback",
+    "ReceiptDELIVERED+missingMail whileplayerexists =>restoreholeCONFLICT; no recreate",
+    "Already-boundrecipientI4typedNotFound+nonreuse =>terminalRECIPIENT_GONE noMail/no namespace creation; genericQueryerror/servermismatch notGone",
+    "HistoricalDELIVERED receipt +recipientlaterdeleted canretaincompletedmeaning throughtypedabsence; no grant/recreate"
+  ],
+  "source_ack": [
+    "AfterMailtargetdefinitecompletion, GuildownerAckTx validatesI5typedsourceproof thenmarksbindingterminal/proofref; no distributedTx",
+    "CrashbetweenMailcommit/sourceack leavesPENDING; worker/reconciler retry exactref ->sameMailproof ->ack",
+    "Sourceack withoutmatchingtargetproof failsclosed; no opaquejobid success authority"
+  ],
+  "migration": [
+    "Neutralforwardphysicalfilenames allocatedfromcurrent36 duringimplementation; schemaGUILD_BROADCAST_V1",
+    "RetainimmutableNumeric source/sender/recipient IDs evenafterdeletion; no CASCADElossofacceptedoccurrence/binding/receipt; nullableliveFKmirrorifneeded",
+    "Do not backfill588facts/Mail/obligations fromV1/invites/audit timestamps",
+    "Samebackup source+bindings+Mail+receipt+sequences; partialrestoreholes blockwrites"
+  ],
+  "unknown_commit": "Positivecompleteproofonly; absencealoneUNKNOWN; no blindredo/no widenedfoundationRetryPolicy; holdexactoperationacrossdefiniteaborts."
+}

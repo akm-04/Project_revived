@@ -1,0 +1,7 @@
+ok  	gxb.local/backend/v2/internal/foundation/policy	1.207s
+ok  	gxb.local/backend/v2/internal/foundation/receipt	1.157s
+ok  	gxb.local/backend/v2/internal/adapters/postgres/kernelstore	1.157s
+ok  	gxb.local/backend/v2/internal/content/builtin	3.238s
+ok  	gxb.local/backend/v2/internal/content/registry	16.438s
+ok  	gxb.local/backend/v2/internal/adapters/postgres/contentstore	2.460s
+ok  	gxb.local/backend/v2/internal/archguard	1.456s

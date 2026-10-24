@@ -1,0 +1,10 @@
+PASS447 I5 POSTGRES-TAG LOCAL EXECUTION BOUNDARY
+2026-09-06T17:53:13Z
+go version go1.23.2 linux/amd64
+Canonical repo remains go1.26/toolchain1.27.1; this disposable copy is go1.23 only.
++ GOPROXY=off GOTOOLCHAIN=local go test -tags postgres ./...
+go: downloading github.com/jackc/pgx/v5 v5.10.0
+internal/adapters/postgres/pgx_adapter.go:10:2: module lookup disabled by GOPROXY=off
+internal/adapters/postgres/pgx_adapter.go:11:2: module lookup disabled by GOPROXY=off
+exit_code=1
+Result classification: NOT_EXECUTED_TO_COMPLETION because required pgx module bytes are unavailable in local module cache and outbound module resolution is disabled. This is not PostgreSQL proof.

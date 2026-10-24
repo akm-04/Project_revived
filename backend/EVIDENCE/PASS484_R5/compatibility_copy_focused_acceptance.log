@@ -1,0 +1,104 @@
+=== RUN   TestScalarDebitNeverTrustsProjectedBalance
+--- PASS: TestScalarDebitNeverTrustsProjectedBalance (0.00s)
+=== RUN   TestTemporalMaterializeUsesSuppliedServerTimeAndCap
+--- PASS: TestTemporalMaterializeUsesSuppliedServerTimeAndCap (0.00s)
+=== RUN   TestStackOverflowMailIsExplicitAndNoSilentLoss
+--- PASS: TestStackOverflowMailIsExplicitAndNoSilentLoss (0.00s)
+=== RUN   TestR5RebindLegacyPolicyMaterializesOldPolicyBeforeImmutableBoundary
+--- PASS: TestR5RebindLegacyPolicyMaterializesOldPolicyBeforeImmutableBoundary (0.00s)
+=== RUN   TestR5RebindLegacyPolicyChangedCadenceStartsNewCadenceAtBoundary
+--- PASS: TestR5RebindLegacyPolicyChangedCadenceStartsNewCadenceAtBoundary (0.00s)
+=== RUN   TestR5RebindLegacyPolicyRejectsAlreadyImmutableOrWrongLegacyPolicy
+--- PASS: TestR5RebindLegacyPolicyRejectsAlreadyImmutableOrWrongLegacyPolicy (0.00s)
+=== RUN   TestR5TemporalAcceptanceRemainderPauseOvercapZeroAndClockRollback
+--- PASS: TestR5TemporalAcceptanceRemainderPauseOvercapZeroAndClockRollback (0.00s)
+=== RUN   TestR5TemporalAcceptanceKnownCapIncreaseRearmsAtBoundary
+--- PASS: TestR5TemporalAcceptanceKnownCapIncreaseRearmsAtBoundary (0.00s)
+=== RUN   TestR5StackAdjustment
+--- PASS: TestR5StackAdjustment (0.00s)
+PASS
+ok  	gxb.local/backend/v2/internal/domain/economy	0.009s
+=== RUN   TestSettleGrantSemanticReplayCreditsExactlyOnce
+--- PASS: TestSettleGrantSemanticReplayCreditsExactlyOnce (0.00s)
+=== RUN   TestSettleGrantRejectsUnimplementedOwnerWithoutMutation
+--- PASS: TestSettleGrantRejectsUnimplementedOwnerWithoutMutation (0.00s)
+=== RUN   TestSettleGrantSameSemanticIdentityDifferentRequestConflicts
+--- PASS: TestSettleGrantSameSemanticIdentityDifferentRequestConflicts (0.00s)
+=== RUN   TestSettleGrantAmbiguousCommitReconcilesWithoutReplay
+--- PASS: TestSettleGrantAmbiguousCommitReconcilesWithoutReplay (0.00s)
+=== RUN   TestStackOverflowCreatesDurableMailAndOnlyFitsCanonicalStack
+--- PASS: TestStackOverflowCreatesDurableMailAndOnlyFitsCanonicalStack (0.00s)
+=== RUN   TestMailClaimRefusesRecursiveOverflowAndLeavesMailUnclaimed
+--- PASS: TestMailClaimRefusesRecursiveOverflowAndLeavesMailUnclaimed (0.00s)
+=== RUN   TestGrantResultReceiptPayloadRoundTrips
+--- PASS: TestGrantResultReceiptPayloadRoundTrips (0.00s)
+=== RUN   TestAdminGrantUsesCanonicalGrantWithoutGameplayFenceAndAudits
+--- PASS: TestAdminGrantUsesCanonicalGrantWithoutGameplayFenceAndAudits (0.00s)
+=== RUN   TestAdminSendMailUsesMailOwnerAndSemanticReplay
+--- PASS: TestAdminSendMailUsesMailOwnerAndSemanticReplay (0.00s)
+=== RUN   TestObjectiveFactReceiptPreventsDoubleProgress
+--- PASS: TestObjectiveFactReceiptPreventsDoubleProgress (0.00s)
+=== RUN   TestObjectiveClaimReplayGrantsOnce
+--- PASS: TestObjectiveClaimReplayGrantsOnce (0.00s)
+=== RUN   TestSettleGrantTxUsesCallerOwnedTransactionWithoutNestedBegin
+--- PASS: TestSettleGrantTxUsesCallerOwnedTransactionWithoutNestedBegin (0.00s)
+=== RUN   TestGrantPreflightCanonicalLockOrderIndependentOfLineOrder
+--- PASS: TestGrantPreflightCanonicalLockOrderIndependentOfLineOrder (0.00s)
+=== RUN   TestSettleGrantTxPropagatesExactCallerTransactionToOwner
+--- PASS: TestSettleGrantTxPropagatesExactCallerTransactionToOwner (0.00s)
+=== RUN   TestObjectiveStockClaimReplayGrantsOnce
+--- PASS: TestObjectiveStockClaimReplayGrantsOnce (0.00s)
+=== RUN   TestSettleGrantRetryPinsFirstBoundContentRevision
+--- PASS: TestSettleGrantRetryPinsFirstBoundContentRevision (0.00s)
+=== RUN   TestSettleGrantLegacyV1ReceiptReplaysWithoutActiveContentLookup
+--- PASS: TestSettleGrantLegacyV1ReceiptReplaysWithoutActiveContentLookup (0.00s)
+=== RUN   TestSettleGrantConflictingV2AndV1ReceiptsFailClosedBeforeContentLookup
+--- PASS: TestSettleGrantConflictingV2AndV1ReceiptsFailClosedBeforeContentLookup (0.00s)
+=== RUN   TestGrantReceiptPersistsBoundContentPolicyRef
+--- PASS: TestGrantReceiptPersistsBoundContentPolicyRef (0.00s)
+=== RUN   TestContentBackedObjectiveClaimUsesPersistedRevisionForDefinitionAndNestedGrant
+--- PASS: TestContentBackedObjectiveClaimUsesPersistedRevisionForDefinitionAndNestedGrant (0.00s)
+=== RUN   TestAdjustStackOverCapSpendAndSemanticReplayProtectsRecreatedRow
+--- PASS: TestAdjustStackOverCapSpendAndSemanticReplayProtectsRecreatedRow (0.00s)
+=== RUN   TestAdjustStackExactZeroDeletesAndShortageIsAtomic
+--- PASS: TestAdjustStackExactZeroDeletesAndShortageIsAtomic (0.00s)
+=== RUN   TestAdjustStackAbsentNegativeDoesNotCreateRow
+--- PASS: TestAdjustStackAbsentNegativeDoesNotCreateRow (0.00s)
+=== RUN   TestObjectiveOuterV1ReplayProjectsCurrentCanonicalEconomy
+--- PASS: TestObjectiveOuterV1ReplayProjectsCurrentCanonicalEconomy (0.00s)
+=== RUN   TestObjectiveOuterV1PlayerExpReplayProjectsCanonicalProgressionWithoutR5SideEffects
+--- PASS: TestObjectiveOuterV1PlayerExpReplayProjectsCanonicalProgressionWithoutR5SideEffects (0.00s)
+=== RUN   TestObjectiveOuterUnknownSchemaFailsClosed
+--- PASS: TestObjectiveOuterUnknownSchemaFailsClosed (0.00s)
+=== RUN   TestObjectiveOuterReplayAfterInterveningGrantProjectsFreshEconomy
+--- PASS: TestObjectiveOuterReplayAfterInterveningGrantProjectsFreshEconomy (0.00s)
+=== RUN   TestR5PlayerExpCompositeCrossesLevelsAndUpdatesEnergyEligibilityDirectory
+--- PASS: TestR5PlayerExpCompositeCrossesLevelsAndUpdatesEnergyEligibilityDirectory (0.00s)
+=== RUN   TestR5PlayerExpDirectoryFailureRollsBackAndWritesNoReceipt
+--- PASS: TestR5PlayerExpDirectoryFailureRollsBackAndWritesNoReceipt (0.00s)
+=== RUN   TestR5TemporalRebindRepeatAndRestartReplayExactlyOnce
+--- PASS: TestR5TemporalRebindRepeatAndRestartReplayExactlyOnce (0.00s)
+=== RUN   TestR5TemporalRebindUnknownCommitDoesNotBlindlyRetryAndLaterReceiptRecovers
+--- PASS: TestR5TemporalRebindUnknownCommitDoesNotBlindlyRetryAndLaterReceiptRecovers (0.00s)
+=== RUN   TestR5TemporalRebindImmutableStateWithoutReceiptFailsClosed
+--- PASS: TestR5TemporalRebindImmutableStateWithoutReceiptFailsClosed (0.00s)
+=== RUN   TestR5PlayerExpMixedRevisionRejectsBeforeMutation
+--- PASS: TestR5PlayerExpMixedRevisionRejectsBeforeMutation (0.00s)
+=== RUN   TestR5TemporalRebindMissingLegacyPolicyFailsBeforeMutation
+--- PASS: TestR5TemporalRebindMissingLegacyPolicyFailsBeforeMutation (0.00s)
+PASS
+ok  	gxb.local/backend/v2/internal/application/i5	0.006s
+=== RUN   TestPlayerCoreBootstrapContributorOwnsExactlyPlayerCoreTables
+--- PASS: TestPlayerCoreBootstrapContributorOwnsExactlyPlayerCoreTables (0.00s)
+=== RUN   TestBootstrapProjectionClaimsAreStableAndUnique
+--- PASS: TestBootstrapProjectionClaimsAreStableAndUnique (0.00s)
+=== RUN   TestObjectiveStockClaimLocksBaseMissionRowsInsideCandidateCTE
+--- PASS: TestObjectiveStockClaimLocksBaseMissionRowsInsideCandidateCTE (0.00s)
+=== RUN   TestR5StackZeroDeletesWithExpectedVersion
+--- PASS: TestR5StackZeroDeletesWithExpectedVersion (0.00s)
+=== RUN   TestR5TemporalRebindUsesLegacyOnlyOptimisticCAS
+--- PASS: TestR5TemporalRebindUsesLegacyOnlyOptimisticCAS (0.00s)
+=== RUN   TestR5StockAnchorProjectsNullAsNumericZero
+--- PASS: TestR5StockAnchorProjectsNullAsNumericZero (0.00s)
+PASS
+ok  	gxb.local/backend/v2/internal/adapters/postgres/i5store	0.001s

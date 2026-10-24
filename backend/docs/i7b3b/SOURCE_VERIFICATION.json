@@ -1,0 +1,55 @@
+{
+  "current": [
+    {
+      "path": "app/model/NormalHero.lua",
+      "sha256": "125183556caeecc182bf0702dd1f95160c8ba1666a3b97fbb8a7261d30ae0ac9",
+      "classification": "SOURCE_FACT",
+      "source": "locked current src64 archive c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
+    },
+    {
+      "path": "app/model/SuperHero.lua",
+      "sha256": "b127c2cbef327d3142031bf30daa0af1b45997c6da82fba946d641a86783d622",
+      "classification": "SOURCE_FACT",
+      "source": "locked current src64 archive c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
+    },
+    {
+      "path": "app/model/SelfPlayer.lua",
+      "sha256": "163d5893c9522ada412c2b9c4748a80757660fccdf03c8f72cb6edf0838b8eb4",
+      "classification": "SOURCE_FACT",
+      "source": "locked current src64 archive c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
+    },
+    {
+      "path": "app/windows/HeroListCell.lua",
+      "sha256": "0b2f3142f31e6ca39a54a2500908c04c392a0e5dc658410eb1833dde0f78e943",
+      "classification": "SOURCE_FACT",
+      "source": "locked current src64 archive c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
+    },
+    {
+      "path": "app/windows/HeroListWindow.lua",
+      "sha256": "6128b1924caf12a1b191c9a59defabc9bbfdb0b98666f7885da20b1a7245b8ac",
+      "classification": "SOURCE_FACT",
+      "source": "locked current src64 archive c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
+    },
+    {
+      "path": "app/windows/HeroMainWindow.lua",
+      "sha256": "473b72ec14a81d01d6dbdaa19f92c3d78900f40ca34fa5c8cf46585b76d65414",
+      "classification": "SOURCE_FACT",
+      "source": "locked current src64 archive c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
+    },
+    {
+      "path": "app/windows/SelectTeamNewWindow.lua",
+      "sha256": "0fabc7b70c2acf48765c41b414e3cae7504f567cb6fbe344b0f98456ed18667a",
+      "classification": "SOURCE_FACT",
+      "source": "locked current src64 archive c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
+    },
+    {
+      "path": "app/common/network/mid.lua",
+      "sha256": "026a20b29d97624979777a68c64c749254031604057ff42aa8f8254c3e35b5af",
+      "classification": "SOURCE_FACT",
+      "source": "locked current src64 archive c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
+    }
+  ],
+  "scope": "Desired0/1 callback, default/load/full replacement, icon/filter/formation source consumers; parent source census/cold/native/V1 corroboration reused with recorded limitations.",
+  "runtime": "NOT_RUN",
+  "original_server": "UNKNOWN"
+}

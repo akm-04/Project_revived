@@ -1,0 +1,5 @@
+Direct human instruction received during this continuation:
+
+Please continue where you left off, if you havent finished previous tasks (reconstruction, research, pre-implementation and passmap sync) finish them then get started on i7a-8b's implementation. once finish implementing, test it with gxb-backend-v2-e2e-tools-self-contained-linux-amd64.zip and reconcile. dont forget to cross check src_64 and honour previously set contracts on i7a-1 and others during implementation. proceed as you haveplanned, once fully done, do a final reality check of full i7a-8 phase, especially checking if all contracts were fullfilled, and if new contracts were introduced in this i7a-8 phase, add them to passmap's contract registry during. Finish it off with passmap sync to reflect phase i7a-8 closure.
+
+Disposition: 8B implementation now authorized after prerequisite8A and8B research/design/publication gates; fullparent8 review/closure in scope. No automatic gate pass. This direct human scope supersedes prior8B implementation=false prospectively; it does not retrospectively edit653R2/R3 authorization records.

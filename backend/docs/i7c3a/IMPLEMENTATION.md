@@ -1,0 +1,7 @@
+# I7C-3A stat rules and materialized adapters
+
+The compiler binds current src_64 source expressions, initial attributes/star growth, attribute weights, constants, flat buff and skill data. The pure numerical engine preserves separate Normal/Super/Pet totals, Hero without-book detail paths, independent force and Pet Fumo label calculations. It copies its catalog, produces detached results, and rejects missing or unknown contributions and nonfinite numbers. No database, clock, network, mutable viewer model or Lua runtime is available to it.
+
+This is an explicit V2 snapshot adapter. Its observation references bind supplied numerical provenance; they do not certify a canonical owner or legitimate absence. I7C-3B must construct the target actor's complete snapshot from existing coherent typed owners, with one revision and observation instant, and qualify source-specific upstream materialization and required nondefault inputs. Computational fixtures intentionally substitute upstream leaf values and are not genuine provider proof. No public endpoint or combat resolver is activated.
+
+Missing historical server Item and Spirit modules remain unrecovered. The selected stat boundary uses fully materialized canonical equipment and target Spirit observations. This does not qualify historical server semantics, combat imports, RNG or physical client compatibility. Existing provider gates and parent exits remain open.

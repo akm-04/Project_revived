@@ -1,0 +1,92 @@
+{
+  "status": "TARGETED_TRANSITIVE_PREIMPLEMENTATION_REVIEW_COMPLETE",
+  "affected_contract_id": "C5E_CONQUER_SCHOOL_MODE_V1",
+  "c1_bindings": [
+    {
+      "path": "hot/00_PASSMAP/PASS685_I7C1_PROVIDER_SCOPE_OWNERSHIP_CONTRACT.json",
+      "sha256": "73f4e5b8e8603a68380be31d4aec7a5f9f10ecd9b68246b56dfb350ae36ea943",
+      "upheld": "CONQUER_SCHOOL stays the single owner of progress/run/mode facts; directory and MID1 values are projections; no second Conquer owner or universal resolver."
+    },
+    {
+      "path": "hot/00_PASSMAP/PASS685_I7C1_DELIVERY_ACCEPTANCE_CONTRACT.json",
+      "sha256": "992b38344aef6196e99cd2f17dc8810c2e962017db8de5c1a563890d54cf49a0",
+      "upheld": "Caller-transaction composition through typed ports (I4 roots/directory, I5 grants/costs/mail, Character roster reads); no foreign SQL or nested tx; exact R2 fresh/upgrade/concurrency proof; child GREEN never accepts the parent."
+    },
+    {
+      "path": "hot/00_PASSMAP/PASS685_I7C1_RESEARCH_AMENDMENT_CONTRACT.json",
+      "sha256": "6e29a18a81e820f53a5accd471cf367c625cd48537fa37094f6b17fa0b88b8e9",
+      "upheld": "Whole-leaf research before code; unknowns routed to labelled private policy with user decisions 2026-10-20."
+    },
+    {
+      "path": "hot/00_PASSMAP/PASS685_I7C1_SELECTED_PROVIDER_PROFILE.json",
+      "sha256": "967100a4c27bcbeb49c7dd5bf2d194d0f772076b9e05408d29b7e52dad234505",
+      "upheld": "Conquer progression conquer_lev/conquer_loop_id now has a genuine producer; contributions keep the 2J Evaluate rule; absence stays owner-established."
+    },
+    {
+      "path": "hot/00_PASSMAP/PASS724_I7C1_QUESTION_DISPOSITIONS.json",
+      "sha256": "cb702416bf09cfb65eb7762b45c1be7c37359b298dd68ff587f9e88f9bec77b7",
+      "upheld": "Q_CONQUER_PRODUCER_PROFILE child writer freeze delivered by C5E with CLIENT_SUMMARY_ATTESTED."
+    },
+    {
+      "path": "hot/00_PASSMAP/PASS709_I7C_TOPOLOGY_V5.json",
+      "sha256": "1b87dd43b8fe17c1536a366e08ce834a829ac78d7eebec251d5cca9ab33184db",
+      "upheld": "Leaf I7C-5E output CONQUER_PROGRESSION_WRITER; no renumbering."
+    }
+  ],
+  "inherited_bindings": [
+    {
+      "path": "hot/00_PASSMAP/PASS711_I7C2J_CONQUER_FACT_READ_CONTRACT.json",
+      "sha256": "c16515646df4ca68e73716d00bde8e68e558887509a27c70f7c698fd058d9ca5",
+      "note": "Writer uses LockFactsTx/SaveFactsTx CAS under I4 315; scoped amendment: earlier-revision rows validated against the pinned catalog."
+    },
+    {
+      "path": "hot/00_PASSMAP/PASS418_COMBAT_TRUST_PROFILE_MATRIX.json",
+      "sha256": "668eb055371964f895240d966d458900ac641feb4f0337a5459de0cac608e554"
+    },
+    {
+      "path": "hot/00_PASSMAP/PASS418_COMBAT_ATTEMPT_START_RESULT_RUNTIME_DESIGN.json",
+      "sha256": "494d24864e41297792cb1d5f3dbe029bf4b28d047535f2738b5ce57f1bd820c7"
+    },
+    {
+      "path": "hot/00_PASSMAP/PASS421_LONG_TAIL_ACTIVATION_ENVELOPE_REGISTRY.json",
+      "sha256": "5386eea60774081aba76f25bdf3b878f2f110c5ce7783d9710d068b36a5a43ad"
+    },
+    {
+      "path": "hot/00_PASSMAP/PASS421_FINAL_GAMEPLAY_MODE_REGISTRY.json",
+      "sha256": "451333300a1cb2022bf56016d2e1a319f9743330bfd2c63de7f26c520948a2e3"
+    },
+    {
+      "path": "hot/00_PASSMAP/PASS426_GLOBAL_LOCK_ORDER_AND_CYCLE_AUDIT.json",
+      "sha256": "bfb53ada4fde3b32194ab5f1a935d3afbccef943a55ba5826fb4b8df04625ad7"
+    },
+    {
+      "path": "hot/00_PASSMAP/PASS465_WORKPLACE_TIME_CONTRACT.json",
+      "sha256": "60d0272fafea59ccfb4a03ec86a25b7a46a1f7020b96342a28b9272b2a7f06c6",
+      "note": "Authoritative operation instant only; 05:00 GMT+8 day as the other modes."
+    },
+    {
+      "path": "hot/00_PASSMAP/PASS723_I7C4C_PRIVATE_SERVER_POLICY_AUTHORIZATION.json",
+      "sha256": "8eb6218d87544e57c96c2e435cedb06376d4e46ff3e6491d2d22a4783aacc353"
+    },
+    {
+      "path": "hot/00_PASSMAP/PASS734_I7C5D_POLICY.json",
+      "sha256": "b16a6ad9d128e3afeb80953024254b7bc0023d6657b6b8abf6ab9259242b99db",
+      "note": "Receipted value moves, roster snapshot and settle patterns reused; C5D approval merged from work/i7c5d/PASSMAP_PENDING_MERGE.json."
+    }
+  ],
+  "successor_obligations": [
+    "Combat freeze and public stats read the new progress through the unchanged FactsTx seam.",
+    "Directory/chat/guild surfaces show conquer_lev from the directory projection."
+  ],
+  "scoped_amendments": [
+    "I7C2J_CONQUER_FACT_READ: revision-equality read refusal replaced by validation against the pinned catalog (defect)."
+  ],
+  "downstream_consumers": [
+    "combat freeze (conquer contributions)",
+    "publicstats hero inputs",
+    "MID1 17 conquer keys",
+    "player directory (chat, guild, social, friend lists)"
+  ],
+  "lock_order": "actor fence 315 -> I4 player root (2J PrepareWriteTx) -> Conquer facts row -> Conquer mode row/attempt -> I5 mail 610 -> I5 values 700+ -> directory 740; report view: viewer fence 315 -> view row -> owner Conquer mode row -> owner I5 mail 610.",
+  "full4_closed": false
+}

@@ -1,0 +1,92 @@
+{
+  "status": "WORKING_IMPLEMENTATION_COMPLETE_TARGETED_PASS_FINAL_GATES_REMAIN",
+  "selected_authority": "Pass692",
+  "contract": "I7C2D_BOOK_INPUT_LIFECYCLE",
+  "implemented": [
+    "Canonical player-global Book building/learned/finite-job root and durable admission",
+    "Exact src64 54books399skills112buildings24costs; Normal/Super raw inputs and source special/decimal metadata",
+    "Eleven stock operations including approved book-only fragment recipes",
+    "Closed typed I5 debit/grant/refund/speed union; existing scalar and stock owners",
+    "Captured DB decision time, original job revision/intent/cost; once natural completion; pure applied due observation",
+    "Forward migration51, required bootstrap and owning missing-only backfill before activation",
+    "MID1 buildings and single-owner Character roster overlays, no read/startup repair"
+  ],
+  "working_checks": [
+    {
+      "log": "working-prerequisites-r3.log",
+      "sha256": "fa314f7e2f660f223dc20daad9234e2c4caf2971c47c24ff082466dce9b6a85e",
+      "passing_cases": [
+        "BookPrerequisitesBuildingLadderAndRefund"
+      ]
+    },
+    {
+      "log": "working-boundaries-r1.log",
+      "sha256": "f1be7ccf32ee6c82c511a15f306694484ffe5584a79e4cd787c270f0293fe8ca",
+      "passing_cases": [
+        "BookFullShelfProgressionAndSourceThresholds"
+      ]
+    },
+    {
+      "log": "working-boundaries-r2.log",
+      "sha256": "cb4361eab69ef3394497beba1aa21819d4025d3806c4d2097d892b38cf4e7099",
+      "passing_cases": [
+        "BookUnknownCommitRollbackAndActor",
+        "BookMemoirPagesRefundAndRecipeOverrides"
+      ]
+    },
+    {
+      "log": "working-api-r7.log",
+      "sha256": "7935cd5b49a0013cec476e4638d0511ef7ffaf370c66a75a4ed71fec1df263c2",
+      "passing_cases": [
+        "ActualAPIBooksAndRestartRoster"
+      ]
+    },
+    {
+      "log": "working-natural-profiles.log",
+      "sha256": "4e6a7f603f80d6c0a944596bd1909e3451e4a1549ed80a3c919606458aa915c5",
+      "passing_cases": [
+        "BookNaturalCompletionPureInputsAndHeroProfiles"
+      ]
+    },
+    {
+      "log": "working-fresh.log",
+      "sha256": "d0a0340994cbdc218953cc7cc7bb328ce468151bfd477c0cf9598909752ed319",
+      "passing_cases": [
+        "FreshBootstrapAndActualAcquisitionRequiredFacets"
+      ]
+    },
+    {
+      "log": "working-job-race.log",
+      "sha256": "51cdaecd6f555d67eb27ab4aeab0c9082ff7269a273bb340886f46beefc76cbb",
+      "passing_cases": [
+        "BookConcurrentJobTransitions"
+      ]
+    },
+    {
+      "log": "working-api-process-r3.log",
+      "sha256": "75e46f6685c7f5c4d47a3f741a54fba561b1d7d12cc113fed236fbb36fe4c7c3",
+      "passing_cases": [
+        "ProcessKillReopenRandomPaidAdmission"
+      ]
+    }
+  ],
+  "specific_reconciliation": [
+    "Source recipe conflict approved40/45 no invented gold; client callback stale fragment count until Backpack reload retained at W2",
+    "Four existing I5 scalar definitions qualified by concrete missing-cost failure; prior25 content payloads unchanged",
+    "Cabinet upgrade forbidden during research by JunkChestWindow source; actual Cabinet cut time fixtures corrected",
+    "ActualAPI duplicate1056 binding and standard protocol field validation fixed; existing shared validator reused",
+    "API fixture supplies required inherited Library facet; production reads do not fabricate missing data",
+    "BookInputsTx Stored/Applied-from-due/MaterializationDue pins accepted intent, owner version/time/revision; pure query does not mutate"
+  ],
+  "limitations": [
+    "Approved reconstruction seed/refund/recipe rules not original-server truth",
+    "No final stat/effect/title producer acceptance; later3B/4C/6 obligated",
+    "Stock W2afterI14 and all parent exits remain open",
+    "Test-only acquisition capacity and explicit source input fixtures retain existing limitations"
+  ],
+  "remaining": [
+    "One frozen combined candidate R2 finalqualification",
+    "Independent primary source/code/contracts reality",
+    "Normal child2D closure PassMap sync"
+  ]
+}

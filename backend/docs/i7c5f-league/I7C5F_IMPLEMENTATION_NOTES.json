@@ -1,0 +1,48 @@
+{
+  "status": "IMPLEMENTED_DEVELOPMENT_CHECKED_FROZEN_QUALIFICATION_PENDING",
+  "node": "ROOT/I7/I7C/I7C-5/I7C-5F",
+  "contract": "C5F_CHAMPIONS_LEAGUE_MODE_V1",
+  "contract_version": 2,
+  "policy": "C5F_LEAGUE_PRIVATE_POLICY_V2",
+  "research_plan_commit": "dc3264037cf44ae17ea612015db93310aa17044d",
+  "controlled_research_gate": "owned739",
+  "architecture": [
+    "One ChampionsLeague owner; global competition and canonical player rows serialize gameplay; existing actual-owned5A combat provider and isolated worker reused",
+    "Canonical I5 progression/function91 gate admission; Directory only projects presentation",
+    "Cutoffs acquire sorted I4roots315 before League604 and all player rows before Combat609; source reward mail610 before Achievement620; daily grant700 isolated",
+    "Durable receipts and fingerprint/intent identity; positive unknown COMMIT; pending retry empty report key; durable reconciler and detached wakeup",
+    "Canonical origin binds immutable settlement/placement/count and exact I5 mirror; scoped title and bubble facts do not assert whole-family history"
+  ],
+  "source": [
+    "Eight active MIDs2800..2807; FIGHT2802 owned partner_id pipe formation; Campaign3/map111001",
+    "Exact daily/final tables, gift expansion, bubbles10002..10007/source30dayduration, source mail translations",
+    "Source finite schedule/calendar presentation is not corrected or hidden by fake season_count"
+  ],
+  "private_policy": [
+    "Post-source calendar30days,3calendar-dayrest,22GMT+8daycutoff",
+    "2000initial; conserved logistic transfer K36,scale400,min2,floorzero,half-up and clamp\u00b11600; deterministic first-reached tie order",
+    "Previous-group retained-score fallback reranked at final; only genuine participants qualify, one chosen profile",
+    "Lifetime cumulative top5days100032 and top10GroupA season counters; explicit ten-title104,111,114..121 profile, no legacy backfill",
+    "20visible records and5dayreportaccess; durable genuine combat records retained"
+  ],
+  "development": {
+    "native_first_four": "PASS real PG18.6 and isolated worker; ten genuine seasons/title1..10; rollback/unknownCOMMIT; promotion",
+    "daily": "PASS concurrent once claim and actual I5overflowMail after valid fresh win; sourcegift50001005cap9999 fixture",
+    "bubble": "PASS canonical eligibility/selection/expiry through existing PlayerDisplay",
+    "wire": "PASS all8 shapes and malformed/spoof refusal",
+    "build": "PASS production postgres,river",
+    "static": "PASS ownership/archguard targeted; snapshot validation pending intentional freeze"
+  },
+  "changes_during_review": [
+    "Removed unused Sweep duplicate: production Reconciler alone handles staged deadline vs ready genuine resolution after restart",
+    "Corrected negative fixture: I5level1 plus valid function91 and forged Directory100 cannot admit; earlier missing-function-only result is narrower",
+    "Daily overflow test fixture corrected using actual source selectedgift and resourcecap; no product-policy change",
+    "F1 exact real-PG race concurrent-intent test reproduced55P03:5s mode lock queue expires behind canonical snapshot preparation. F2 League-only lock timeout30s/statement60s; transaction120s/operation180s/deadline600s unchanged. Assertions and global abort/unknownCOMMIT rules unchanged."
+  ],
+  "limits": [
+    "Not original server algorithm",
+    "Not unmodified-stock-client proof; finite rules date table can misrender future dates",
+    "Full I7C4, I7C6 ambiguous historical title profiles/handoff, I7C-E and release acceptance remain OPEN"
+  ],
+  "tests_remaining": "Intended frozen exact portable R2 matrix, populated68upgrade/restore and independent reality/evidence review"
+}

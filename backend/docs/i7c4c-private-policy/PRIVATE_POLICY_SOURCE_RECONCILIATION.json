@@ -1,0 +1,91 @@
+{
+  "status": "TARGETED_RECONCILIATION_COMPLETE_FOR_CURRENT_ROSTER_METRICS_AND_ORDERING_CORE",
+  "files": [
+    {
+      "corpus": "V1",
+      "path": "state/summon_duplicate_conversion.py",
+      "sha256": "91df74a2fb4ea302d52ecd19c03644a79d046d9116a612fd3a11220e8833089c"
+    },
+    {
+      "corpus": "V1",
+      "path": "state/summon_duplicate_policy.py",
+      "sha256": "e660cab8a715170918c4b57b5d5ba52b74346610960ccf792245f99e887e843c"
+    },
+    {
+      "corpus": "V1",
+      "path": "state/summon_result_plan.py",
+      "sha256": "b3e12f041e3d650e32d3f54d6c5a969185505cdf48d0fdb9f816ed5f73525822"
+    },
+    {
+      "corpus": "V1",
+      "path": "state/hero_progression_repository.py",
+      "sha256": "a4ab2b4f9aa7846507b09f0e0c90c2f98c2fef7a2e567a1cde140e117e8a3377"
+    },
+    {
+      "corpus": "V1",
+      "path": "state/hero_entity_mutation_service.py",
+      "sha256": "dd0470be8dbdc2cc7c787a7c0c9cdb890ba5f7587c5a841c5712442204dc4f14"
+    },
+    {
+      "corpus": "SRC64",
+      "path": "app/model/SelfPlayer.lua",
+      "sha256": "163d5893c9522ada412c2b9c4748a80757660fccdf03c8f72cb6edf0838b8eb4"
+    },
+    {
+      "corpus": "SRC64",
+      "path": "app/model/NormalHero.lua",
+      "sha256": "125183556caeecc182bf0702dd1f95160c8ba1666a3b97fbb8a7261d30ae0ac9"
+    },
+    {
+      "corpus": "SRC64",
+      "path": "app/model/SuperHero.lua",
+      "sha256": "b127c2cbef327d3142031bf30daa0af1b45997c6da82fba946d641a86783d622"
+    },
+    {
+      "corpus": "SRC64",
+      "path": "app/model/Achievement.lua",
+      "sha256": "21997595c3bf71fde46029d8cfc31473dab8f3f39d94b480e3d3e6555a453d50"
+    },
+    {
+      "corpus": "SRC64",
+      "path": "app/windows/AchievementWindow.lua",
+      "sha256": "f9a89b8f13dc7888278acb74eb8f5ee5d78dafa36c02a8223eeb4c25c0d91fed"
+    },
+    {
+      "corpus": "SRC64",
+      "path": "app/windows/PersonDisplayWindow.lua",
+      "sha256": "22a0c02172eabec1d9728d18293273c8e2aa9e6c8e5b1a4bf3af2feae14f158c"
+    },
+    {
+      "corpus": "SRC64",
+      "path": "app/model/HeroRecommend.lua",
+      "sha256": "969229b11f80851bb52a93d31b020ada486f4451bb2a5976d2a186f88e72fc4e"
+    },
+    {
+      "corpus": "SRC64",
+      "path": "app/common/utils.lua",
+      "sha256": "6e56c7342e889d7ae8d41fe47cb06f66832227efe702f3863f693ee7ba84ffad"
+    }
+  ],
+  "findings": [
+    "V1ConfiguredSummonDuplicateConversionResolver yieldsTO_STONE onlyfragmentitem/quantity, noHeroidentity; rulequantitiesadvertisedhistoricalvideoevidence, notprivateRNG",
+    "V1evolve_heroMID52 debitsownscroll+Mana andmutatesexistingHero star; updatescollectedrecordmaxstar",
+    "CurrentSelfPlayerevolveHero sendsstablepartner_id, consumesownscrollafterOK; to_stone processedseparatelyfromnewHero",
+    "BothNormalHero.isAwaken andSuperHero.isAwaken testbeforeAwaken(currentTableID)>0. Do notreuseNormal-onlyavatarpredicateforgeneralAwakenmetric",
+    "AchievementhandleNewAchievementNotice setsisHasNewNotice andMainSceneTopredmark; windowpointbar uses total_points/nextlevelcondition andaward_status",
+    "Recommendation model partitionsSX/currentnormal data; per-Hero AP titleusesHeroTableIDimage suffix; generictitle100001unique_id carriesimagekey, sourceoriginassignment stillnotruntimeproven"
+  ],
+  "web_research": [
+    {
+      "url": "https://gachazone.com/girls-x-battle-beginner-guide/",
+      "role": "HISTORICAL_GXB1_PLAYER_GUIDE_CORROBORATION_ONLY",
+      "finding": "2016-eraTopFloor/1on1,Pet/SkyTowerandscrollcontext; noexactmetric/rankalgorithm"
+    },
+    {
+      "url": "https://girls-x-battle.fandom.com/wiki/Elite_Sky_Tower",
+      "role": "GXB1_COMMUNITY_REFERENCE_ONLY_SEARCH_RESULT",
+      "finding": "SpecificSkyTower/ElitePetcontext; directdomainaccessrobotsblocked, noalgorithmclaimed"
+    }
+  ],
+  "excluded": "SearchresultsaboutGirlsXBattle2/Graduate/foddergirls areexcluded. Onlineplayerguides donotfreezeoriginalserver algorithms."
+}

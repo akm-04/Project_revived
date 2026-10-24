@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "pass": "434.0",
+  "stage": "I1",
+  "version": "v0.10.0",
+  "status": "PASS_WITH_LIVE_POSTGRESQL_RIVER_AND_CONNECTED_TOOLCHAIN_PROOF_DEFERRED_TO_THEIR_FROZEN_GATES",
+  "product_behavior_claimed": false,
+  "pass353_copied_into_v2": false,
+  "offline_checks": {
+    "dependency_policy": "PASS",
+    "direct_sbom_consistency": "PASS",
+    "oracle_hash_verification": "PASS",
+    "schema_query_ownership": "PASS",
+    "unit_property_tests": "PASS",
+    "go_vet": "PASS",
+    "architecture_guard": "PASS",
+    "wave_s_fixture_shape": "PASS",
+    "src64_v1_bounded_crosscheck": "PASS"
+  },
+  "implemented_contracts": {
+    "stable_operation_context": "PASS",
+    "retry_stable_entropy_policy_refs": "PASS",
+    "typed_lock_total_order": "PASS",
+    "missing_row_creation_fence_contract": "PASS",
+    "bounded_admission_and_transaction_profiles": "PASS",
+    "40001_40P01_definite_abort_retry_classifier": "PASS",
+    "unknown_commit_no_blind_replay": "PASS",
+    "authoritative_reconciliation_interface": "PASS",
+    "reconciliation_survives_caller_cancellation": "PASS",
+    "semantic_receipt_replay_conflict": "PASS",
+    "same_tx_fact_appender_port": "PASS",
+    "same_tx_durable_obligation_port": "PASS",
+    "minimal_kernel_receipt_schema": "PASS",
+    "pgx_driver_isolation_adapter": "IMPLEMENTED_BUILD_TAGGED_PENDING_CONNECTED_COMPILE",
+    "river_adapter": "IMPLEMENTED_BUILD_TAGGED_PENDING_CONNECTED_COMPILE_AND_W1_RUNTIME",
+    "bounded_observability_redaction": "PASS"
+  },
+  "connected_toolchain_pending": [
+    "exact Go 1.27.1 build/test/vet including postgres and river build tags",
+    "resolved go.sum and transitive SBOM/license verification",
+    "govulncheck on resolved dependency graph",
+    "sqlc v1.31.1 generation and generated-code compile",
+    "goose v3.27.3 migration parse/execution"
+  ],
+  "w1_after_i4_pending": [
+    "PostgreSQL 18.6 real migration execution",
+    "real isolation/row-lock/missing-row-fence tests",
+    "40001/40P01 bounded retry under real PostgreSQL",
+    "ambiguous-COMMIT and authoritative-writer reconciliation probes",
+    "pool timeout/backpressure/cancellation behavior",
+    "River same-transaction visibility/rollback/crash/redelivery behavior",
+    "stock-client Wave-S gate after I4"
+  ],
+  "local_go_version": "go version go1.23.2 linux/amd64",
+  "work_mode_policy": "W1 remains after I4; W2 remains after I14",
+  "next_stage": "I2 protocol edge / stock wire compatibility",
+  "work_mode_environment_precheck": "OPERATOR_REPORTED_READY; exact Pass434 tagged build and W1 runtime tests not yet executed",
+  "implementation_commit": "27eb174187ff388258cc1ca8ccae3af4f3d6ff21"
+}

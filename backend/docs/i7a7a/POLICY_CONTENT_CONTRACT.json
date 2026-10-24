@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "pass": "649.0",
+  "stage": "I7A-7A",
+  "phase": "I7A",
+  "status": "SELECTED_PREIMPLEMENTATION_DESIGN_WITH_VALIDATED_NORMAL_PASS649_SEAL",
+  "classification": "IMPLEMENTATION_DECISION_UNLESS_EXPLICIT_SOURCE_FACT",
+  "implementation_started": false,
+  "product_accepted": false,
+  "base_backend_sha256": "2fa5d71e52c1246580eb5eba39ed7f7ca687bb446deca3bbd1af555b25d529da",
+  "base_passmap_sha256": "d2eba13ca5bb91c333309726f134729ca314225506a56d729ed95646b2d3841b",
+  "node_path": [
+    "ROOT",
+    "I7",
+    "I7A",
+    "I7A-7",
+    "I7A-7A"
+  ],
+  "contract_id": "I7A7A_POLICY_CONTENT_CONTRACT",
+  "policies": {
+    "SOCIAL_GIFT_DAY_V1": {
+      "timezone": "fixed GMT+8, no DST",
+      "boundary": "00:00",
+      "send_cap": 10,
+      "receive_claim_cap": 10,
+      "evidence": "Existing selected I7A1 IMPLEMENTATION_DECISION; original reset hour UNKNOWN"
+    },
+    "SOCIAL_GIFT_ENTITLEMENT_V1": {
+      "send_eligibility": "Current active canonical friendship and recipient does not block sender. Reuse FriendDMPrivacyProvider behind narrow GiftEligibility port; do not introduce foreign Social SQL. Sender block is not silently generalized. Master nonfriend/intimacy is unqualified.",
+      "after_issue": "Recipient owns issued entitlement: later friendship/block changes do not revoke it",
+      "retention": "No invented TTL; older unclaimed entitlements remain claimable; notice window50 is presentation only",
+      "same_day_duplicate": "A new nonce-less HTTP operation for the same sender/recipient/day is conflict, not successful send; exact original internal operation may resolve positively",
+      "day_crossing": "A delayed new HTTP183 resubmit after day boundary can be a new gift; no universal exactly-once intent guarantee"
+    },
+    "SOCIAL_GIFT_CLAIM_BATCH_V1": {
+      "ids": "Positive safe-integer IDs; preserve first occurrence order and deduplicate before plan; no gameplay-size cap50",
+      "unknown": "Missing/foreign recipient IDs and inactive future family IDs ignored, never acknowledged as owned or used to grant. Relation-only recognized dismissed IDs preserve accepted184 compatibility. Owned typed Gift notice with missing/mismatched transfer is fatal consistency conflict.",
+      "atomic": "Any recognized Gift already claimed by another operation, invalid source/content, quota overflow or clock regression fails entire mixed operation before mutation; no partial relation dismissals. Empty recognized gift portion does not call I5.",
+      "mixed": "Preflight relation notices and gifts together. Retain relation-only semantics. UnknownIDs never bypass a recognized Gift conflict."
+    }
+  },
+  "source_equivalence": "All100 current friend_dailygift rows have complete equivalent reward vectors, 5 friendship_coin and no other value fields. Description is not reward value. Selector UNKNOWN; compiler fails closed on any nonuniform supported revision.",
+  "content_extension": {
+    "resource_key": "friendship_coin",
+    "kind": "SCALAR_CURRENCY",
+    "source_asset_id": null,
+    "wire_table_id": 0,
+    "activation": "ENABLED_R4 using existing scalar runtime mechanism; only this new named scalar is newly enabled",
+    "evidence": "enums/gift/Backend economy_ and SelfPlayer sideband; asset.lua has no numeric reward ID",
+    "compiler": "Add a bounded explicit named scalar allowlist rule and social_gift_catalog with complete equivalence fingerprint, source hashes, policies and schema. New immutable manifest/revision through existing content registry. Retain old revisions and do not rewrite applied manifests/migrations."
+  },
+  "binding": {
+    "admission": "Before gameplay TimedRunner, a short bounded read-only content admission transaction uses existing ContentRuntime.ActiveRevision and exact typed GiftCatalog provider; bind policy.Ref{Name:content,Version:revision} with existing policy.NewSet. An already bound content revision must match. Never call private i5.bindContentRevision or manufacture a revision. This admission transaction ends before owner locks.",
+    "retry": "Freeze selected immutable content revision and source reward snapshot before retry; TimedRunner operation policies unchanged across attempts/resolver. No resampling on abort.",
+    "claim": "Aggregate immutable issued amounts. Current bound revision must still explicitly support same named scalar semantics; source reward revision remains per transfer. Mixed issue revisions with equivalent vector are allowed; any unsupported/nonuniform/mismatched vector fails without consuming anything. Grant receipt records settlement revision distinct from issue reward revision.",
+    "replay": "Positive exact known committed batch reads its immutable result without re-evaluating today active content; fresh projection may still fail independently. Applied scalar balance is never recredited due to changed policy revision."
+  },
+  "creation_time_workpaper_status": "PREIMPLEMENTATION_DESIGN_NORMAL_SELECTION_PENDING",
+  "authority_condition": "Valid owning HOT649 content seal and sole ObjectRegistry selection; this is design authority only, not product acceptance"
+}

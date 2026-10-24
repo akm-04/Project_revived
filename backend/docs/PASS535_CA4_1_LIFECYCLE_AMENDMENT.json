@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "pass": "535.0",
+  "phase": "CA4",
+  "internal_stage": "CA4-1",
+  "title": "Native proof deferral to aggregate pre-CA4-E Work gate",
+  "authority": "USER_AUTHORIZED_IN_NORMAL_CHAT_2026-09-14",
+  "status": "ACTIVE_LIFECYCLE_AMENDMENT",
+  "amends": "Pass534 CA4-1 acceptance matrix A3 native-PostgreSQL subproof and A8 native gate timing only",
+  "local_stage_acceptance_rule": {
+    "allowed": true,
+    "requires": [
+      "canonical static/source/query/architecture guards GREEN",
+      "normal-chat compatibility-copy focused tests/race/vet GREEN",
+      "bounded package-by-package regression GREEN",
+      "independent postimplementation reality check GREEN",
+      "HOT+COLD PassMap seal preserving deferred native obligations"
+    ],
+    "does_not_claim": [
+      "exact Go 1.27.1 execution",
+      "pinned sqlc 1.31.1 generation execution",
+      "real PostgreSQL 18.6 migration/upgrade/restore/concurrency behavior",
+      "real River execution",
+      "physical unmodified stock-client proof"
+    ]
+  },
+  "deferred_mandatory_gate": {
+    "name": "CA4_AGGREGATE_PRE_CA4_E_NATIVE_WORK_GATE",
+    "timing": "after CA4-1 through CA4-5 local implementation/reality closure and before CA4-E aggregate exit acceptance",
+    "must_include": [
+      "exact canonical Go/toolchain lineage",
+      "pinned sqlc generation/verification where applicable",
+      "real PostgreSQL migration from accepted pre-CA4 schema through all CA4 migrations",
+      "restore/restart/mixed-version/deployment-law checks required by accumulated CA4 schema",
+      "real PostgreSQL lock/replay/concurrency checks for accumulated CA4 transactions",
+      "River only for accumulated CA4 paths that actually depend on River",
+      "aggregate CA4 end-to-end service/runtime checks",
+      "preserved W2 stock-client obligations remain separately mandatory at their routed lifecycle point"
+    ],
+    "cannot_be_waived_by": "normal-chat COMPATIBILITY_COPY_ONLY evidence"
+  },
+  "effect": "CA4-1 may be locally accepted and CA4-2 research may begin after Pass535 seal; native obligations remain OPEN/DEFERRED, not PASS. CA4-E cannot accept until the aggregate native Work gate is GREEN and reconciled in normal chat."
+}

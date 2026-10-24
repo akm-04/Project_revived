@@ -1,0 +1,61 @@
+{
+  "base_artifact": "gxb-backend-v2-v0.53.2-pass460-r3-complete.zip",
+  "base_commit": "76d4b71d205cb5a2b40945be2de06bc3fabd147b",
+  "base_sha256": "5b969bc248a06b47eafc3641bb0bf4a203c9d3e96e19f9c4b6801211d9a25f5b",
+  "canonical_go": "go 1.26.0 / toolchain go1.27.1",
+  "canonical_go_execution": "ENVIRONMENT_BLOCKED_NORMAL_CHAT",
+  "canonical_static": {
+    "I2_oracle": "PASS",
+    "I3_oracle": "PASS",
+    "I4_oracle": "PASS",
+    "I5_oracle": "PASS",
+    "R0_R3C": "PASS",
+    "R4A": "PASS",
+    "connected_candidate_static": "PASS",
+    "dependency_policy": "PASS",
+    "foundation_trace": "PASS",
+    "oracle_verify": "PASS",
+    "pass353_bounded_differential": "PASS",
+    "r4a_exact_source": "PASS",
+    "schema_query_ownership": "PASS",
+    "sqlc_policy": "PASS"
+  },
+  "compatibility_copy": {
+    "changes": [
+      "go 1.26.0 -> go 1.23.0",
+      "removed toolchain go1.27.1 directive"
+    ],
+    "classification": "COMPATIBILITY_COPY_ONLY",
+    "focused_race": "PASS",
+    "focused_test": "PASS",
+    "go": "1.23.2",
+    "go_vet_all": "PASS",
+    "package_sweep": "64/64 PASS"
+  },
+  "content_revision": "77d0b329b0e4c6199fe8484837e025923ca89bf7dc8ebcdd96efa361bbea98b1",
+  "expected_existing_red": {
+    "validate_i5": [
+      "RF-015 required EconomyBootstrapContributor production seam missing",
+      "RF-015 required temporal-resource bootstrap persistence path missing"
+    ]
+  },
+  "foundation_verdict": "RED_REPAIR_ACTIVE_R4B_D_R5_R7_REMAIN",
+  "implementation_revision_sha256": "362769d710b76dfd73f90cda0662ae4ebe15a8ac6d76878b5f7f2e8aeb6a965f",
+  "independent_reality": {
+    "pass353": "PASS_NO_BOUNDED_ORACLE_CONTRADICTION",
+    "scope": "PASS_R4A_SCOPE_ONLY",
+    "src64": "PASS_NO_SOURCE_CONTRADICTION"
+  },
+  "live_deferred": [
+    "exact Go 1.27.1 exact-candidate run",
+    "real PostgreSQL/River R7 repaired-foundation proof",
+    "W2 stock-client CLIENT_CONSUMED/Lua-health/comprehensive acceptance"
+  ],
+  "local_verdict": "GREEN_LOCAL_R4A_BOUNDED",
+  "milestone": "R4A",
+  "next": "R4B migration 00009 immutable content revision/activation and policy-evidence persistence; do not start R4C before R4B tested/reality-checked.",
+  "overall_r4_verdict": "IMPLEMENTATION_IN_PROGRESS_R4B_D_REMAIN",
+  "pass": "468.0",
+  "schema_version": 1,
+  "version": "v0.54.0"
+}

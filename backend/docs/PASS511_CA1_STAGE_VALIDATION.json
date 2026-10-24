@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "pass": "511.0",
+  "phase": "CA1_ASSET_KERNEL",
+  "stage": "IMPLEMENTATION_TEST_GATE",
+  "result": "GREEN_FOR_NATIVE_GATE_NOT_ACCEPTED",
+  "local_compatibility_gate": "GREEN_COMPATIBILITY_COPY_ONLY",
+  "canonical_static_gate": "GREEN",
+  "exact_native_gate": "NOT_RUN_ENVIRONMENT_BLOCKED",
+  "real_postgresql_gate": "NOT_RUN_ENVIRONMENT_BLOCKED",
+  "independent_reality_check": "PRE_NATIVE_GREEN_WITH_EXPLICIT_NATIVE_LIMITATION",
+  "evidence_classification": "LOCAL_CANDIDATE_ONLY",
+  "passmap_seal": "BLOCKED_UNTIL_NATIVE_REAL_DB_GREEN",
+  "ca2_authorized": false,
+  "next": "CA1_NATIVE_EXACT_TOOLCHAIN_AND_REAL_POSTGRESQL_TEST_GATE"
+}

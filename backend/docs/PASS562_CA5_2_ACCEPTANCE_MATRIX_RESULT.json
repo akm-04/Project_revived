@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "pass": "562.0",
+  "stage": "CA5-2",
+  "result": "GREEN_LOCAL_CA5_2_ACCEPTED_COMPATIBILITY_COPY_ONLY_NATIVE_AGGREGATE_DEFERRED_PRE_CA5_E",
+  "cases": [
+    {
+      "id": "A1_CANDIDATE",
+      "result": "GREEN",
+      "finding": "Exact Pass560 v0.73.0 parent used; canonical go.mod/go.sum/.go-version remain byte-identical."
+    },
+    {
+      "id": "A2_SCHEMA_OWNER",
+      "result": "GREEN",
+      "finding": "00028 adds normalized player-scoped root/lane/Hero rows, rank-440 root backfill and CA5-4 lookup indexes; no cross-owner Hero/Pet foreign keys."
+    },
+    {
+      "id": "A3_ROOT_LIFECYCLE",
+      "result": "GREEN_LOCAL_STATIC",
+      "finding": "Existing V2 roots backfill in 00028 and required SavedPresetBootstrapContributor is wired for new MID1 character creation; real PostgreSQL rollback proof deferred to native aggregate gate."
+    },
+    {
+      "id": "A4_STORE_CAS",
+      "result": "GREEN_LOCAL",
+      "finding": "Store exposes atomic aggregate read, root lock, root ensure and whole-aggregate replacement with expected-version CAS; child tables are not exposed as independent application authority."
+    },
+    {
+      "id": "A5_MID1_PROJECTION",
+      "result": "GREEN",
+      "finding": "MID1 contributor claims exactly 17.save_team, 17.save_team_name, 17.save_pet; 17.formation remains unclaimed."
+    },
+    {
+      "id": "A6_LEGACY_IMPORT",
+      "result": "GREEN_LOCAL",
+      "finding": "Legacy adapter requires explicit Hero/Pet source-to-target mappers, quarantines unresolved/nonprojectable aggregate state, verifies typed target refs, and refuses overwrite of a different non-empty target."
+    },
+    {
+      "id": "A7_SUCCESSOR_SEAM",
+      "result": "GREEN",
+      "finding": "Reference collection/union/coverage helpers support CA5-3 old-union-desired planning without activating mutation routing."
+    },
+    {
+      "id": "A8_QUERY_OWNERSHIP",
+      "result": "GREEN",
+      "finding": "preset.sql is generated into querytext, character/saved-preset ownership is registered, cumulative migration lock includes 00028, schema/query and sqlc-generation guards are GREEN."
+    },
+    {
+      "id": "A9_SCOPE_NEGATIVES",
+      "result": "GREEN",
+      "finding": "No MID1793/208/209 route, replay/receipt registration, reverse-removal guard, 17.formation claim, I9 state or CA8 composite snapshot."
+    },
+    {
+      "id": "A10_LOCAL_TESTS",
+      "result": "GREEN_COMPATIBILITY_COPY_ONLY",
+      "finding": "Focused tests/race/vet and full go test ./... + go vet ./... are GREEN in a fresh two-file toolchain-accommodated copy."
+    },
+    {
+      "id": "A11_EXACT_NATIVE",
+      "result": "AUTHORIZED_DEFERRED_PRE_CA5_E",
+      "finding": "Exact executable candidate is environment-blocked here; user-authorized accumulated live/native Work gate remains mandatory immediately before CA5-E and is not marked passed."
+    },
+    {
+      "id": "A12_REALITY",
+      "result": "GREEN_LOCAL_PENDING_PASSMAP_SEAL",
+      "finding": "Independent postimplementation reread found no D01/D04/D13 or stage-boundary contradiction; Pass562 HOT+COLD seal required before CA5-3 implementation."
+    }
+  ],
+  "native_gate": "DEFERRED_MANDATORY_CA5_AGGREGATE_PRE_CA5_E_WORK_GATE",
+  "next": "CA5-3 PRE_IMPLEMENTATION_RESEARCH_RECONCILIATION"
+}

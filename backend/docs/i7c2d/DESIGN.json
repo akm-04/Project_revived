@@ -1,0 +1,67 @@
+{
+  "status": "FROZEN_PREIMPLEMENTATION_PENDING_NORMAL_PASS692_SEAL",
+  "node_path": "ROOT/I7/I7C/I7C-2/I7C-2D",
+  "ready": true,
+  "freeze_blockers": [],
+  "accepted_backend_sha256": "8c7ce57a4aadeb3a582917dff70ffee75140cadde1d43dccd57e832e94e88119",
+  "planned_migration": "00051_i7c2d_book_inputs.sql",
+  "owner_packages": {
+    "domain": "internal/domain/bookskill",
+    "application": "internal/application/bookskill",
+    "postgres": "internal/adapters/postgres/bookstore",
+    "wire": "stockruntime book dispatcher",
+    "content": "builtin source DTO plus contentstore binder"
+  },
+  "root_lock_rank": 510,
+  "selected_mids": [
+    83,
+    1056,
+    1057,
+    1058,
+    1059,
+    1060,
+    1061,
+    1077,
+    1078,
+    1079,
+    1080
+  ],
+  "canonical_state": [
+    "One player root/version/lastobserved, selected buildings1/3/4 level/job/recent notification",
+    "Global skillId->learnedlevel; one active research accepted target/time/revision/cost/occurrence, recent skill acknowledgment",
+    "Per operation durable admission/result; no Hero facet needed since facts template-global"
+  ],
+  "policy": "PRESERVATION_POLICY.json",
+  "typed_seams": "OWNER_DEPENDENCY_MAP.json",
+  "transaction_plan": [
+    "D06 BookSkillProgression canonical player owner; EventCentre aggregate is projection only",
+    "Reuse actor/time/receipt/admission, sorted full I5 plan before writes; source snapshots captured before locks",
+    "No foreign-owner SQL or nested Tx; Bookstore reads only own schema. Character roster overlays via typed caller snapshot port",
+    "No generic timer loop/new RNG; all selected jobs finite deterministic accepted snapshots",
+    "Missing root/version/content fails closed; missing-only bootstrap/backfill before activation and canonical publication",
+    "Book producer83 necessary per source; prior generic unsupported routes stay unsupported",
+    "Existing rawskill/Library/Dorm facts and migrations1..50 unchanged"
+  ],
+  "batches": [
+    "Source-qualified DTO/compiler/catalog and pure domain transitions/rounding/wire",
+    "Ownschema51/store/bootstrap/missing-only backfill, typed snapshot inputs",
+    "Durable admission/value service + book-only83 mixedexchange/readroutes and stock/API hydration integration",
+    "New focused unit/native/API/process concurrency/recovery proof; batch fixes then freeze once"
+  ],
+  "normalization": "Owner requests materialize due snapshots once before new command. Pure caller Queryer inputs expose applied canonical levels and pending accepted job separately; no mutation, clock, active revision or inferred zero. Later consumer must explicitly honor finite-job materialization boundary under typed owner composition; acceptance will reconcile this seam against produced code before freezing candidate.",
+  "source_profile_limits": [
+    "No book item level85 Hero requirement: inspected caller validates Cabinet star/possession/prereqs, not generic item equipment level",
+    "No original-server refund/init math claimed",
+    "No new Hero acquisition/retirement authority or duplicate origin policy",
+    "Current special nodes preserved as facts; final battle resolver/stat calculations belong later consumers"
+  ],
+  "qualification_limits": [
+    "Source/static crosscheck is not native gate",
+    "Conditional genuine I5-granted input proof does not claim all later shop/campaign origins implemented",
+    "Stock W2 unpassed; parents open"
+  ],
+  "recipe_reconciliation": "RECIPE_POLICY_AUTHORIZATION.json",
+  "scope_amendments": [
+    "Two absentbookrecipes use matching fragment40/45 withzeroMana; stocklocalfragment-reloadlimitation retained; no broad item producer activation"
+  ]
+}

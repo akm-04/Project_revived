@@ -1,0 +1,9 @@
+?   	gxb.local/backend/v2/cmd/gxb-api	[no test files]
+?   	gxb.local/backend/v2/internal/adapters/postgres	[no test files]
+?   	gxb.local/backend/v2/internal/adapters/postgres/contentqueries	[no test files]
+ok  	gxb.local/backend/v2/internal/adapters/postgres/contentstore	(cached)
+ok  	gxb.local/backend/v2/internal/adapters/postgres/i4store	(cached)
+ok  	gxb.local/backend/v2/internal/adapters/postgres/i5store	(cached)
+?   	gxb.local/backend/v2/internal/adapters/postgres/identitystore	[no test files]
+?   	gxb.local/backend/v2/internal/adapters/postgres/kernelqueries	[no test files]
+ok  	gxb.local/backend/v2/internal/adapters/postgres/kernelstore	(cached)

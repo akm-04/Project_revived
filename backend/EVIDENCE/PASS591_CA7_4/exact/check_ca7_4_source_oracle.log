@@ -1,0 +1,4 @@
+=== check_ca7_4_source_oracle ===
+2026-09-20T10:54:12Z
+CA7-4 SOURCE ORACLE CHECK: PASS
+current oracle identity pinned; MID68/69 wire, paid LIVE costs/item, economy refresh/retry behavior, positional reload projection and candidate translation preserved

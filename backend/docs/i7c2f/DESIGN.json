@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "node_path": "ROOT/I7/I7C/I7C-2/I7C-2F",
+  "status": "IMPLEMENTED_CONDITIONAL_CORE_FINAL_QUALIFICATION_PENDING",
+  "research_complete": true,
+  "design_complete": true,
+  "full_operation_freeze_ready": true,
+  "implementation_authorized": true,
+  "implementation_started": true,
+  "accepted_backend_sha256": "d8d586f85ec6b186c49545eccd550aa75cb92a86741c795b6427d38e017ed9b9",
+  "planned_migration": "00053_i7c2f_inscription_inputs.sql",
+  "migration_created": true,
+  "logical_owner": "InscriptionProgression",
+  "owner_packages": {
+    "domain": "internal/domain/inscription",
+    "application": "internal/application/inscription",
+    "postgres": "internal/adapters/postgres/inscriptionstore",
+    "content": "Content-owned immutable source catalog/compiler",
+    "wire": "stockruntime Inscription dispatcher"
+  },
+  "proposed_lock_ranks": {
+    "root": 540,
+    "hero_facet": 550
+  },
+  "canonical_state": [
+    "player_inscription_roots: version/policy and lane counters, one retained pending occurrence with frozen source/candidates/generation provenance",
+    "player_inscription_heroes: HeroRef plus three typed applied template slots, facet version and qualified content/provenance",
+    "player_inscription_admissions: player/family actor/operation/decision/content/entropy/outcome receipts and unresolved lane fence",
+    "I5 owns degree_cer/graduate_cer/patent_cer scalar balances and all medal/Star/heart stock; no duplicate Inscription wallet/inventory",
+    "Content owns immutable 29th catalog payload; prior28 catalog bytes and migrations1..52 retained unless exact affected evidence requires amendment"
+  ],
+  "applied_observation": "Immutable-by-copy raw IDs/slot/suit facts, exact revision/DecisionAt/player population/live-Hero/facet/root versions and qualified dispositions; item display/battle metadata distinct, no final-stat authority",
+  "eligibility": "CharacterHero owns twice_awake_stage. I7C-2I must reconcile the narrowly named eligibility producer separately from evo_stage; absent upstream capability blocks live insertion/forge eligibility and full downstream qualification.",
+  "value_composition": "Reuse TxMaterialCostDebiter, TxGrantSettler, preflightGrantTx/canonicalGrantLockRequirements, source occurrence receipts and overflow Mail. Add a narrow I5-owned opaque PreparedInscriptionValueTx adapter for debit plus scalar/stack credits; no foreign-owner SQL or exposed mutable Store. Preserve existing stack-only MaterialExchange and collision guard. Reforge same-result proposal excludes original.",
+  "lock_plan": [
+    "Admission/fence + Player root315; Character population400 and touched live Hero410 or owner-qualified eligibility snapshot revalidation; Inscription root540/facet550; full I5 suffix610/700/720/722/730 as required in canonical order",
+    "Forge/rebuild eligibility population witness must be acquired/revalidated before lower owner root540; cannot discover another Hero410 after Inscription locks",
+    "After pending candidate chosen under root, all possible family support/returned stacks/overflow namespace are planned before writes/entropy; no entropy-dependent late lock acquisition",
+    "Fresh unpublished facets use existing FreshFacetChain insert-only semantics, no existing lower root lock after an I5 suffix; backfill is separate owning command, never API startup"
+  ],
+  "reference_policy": "Proposed guard rejects removal with applied bindings; stable root planned even if currently no reference, exact Hero410 serialization plus locked revalidation. No always-busy boolean or automatic detach.",
+  "projection": "Inscription roster/MID1 key49 overlay through existing HeroBootstrapProjection and coherent caller queryer; I5 named certificate params and current economy_ values; no duplicate extra_drops_ for caller-applied rewards",
+  "time": "Stable UTC operation instant, stale/backward-time rejection under locked version/time policy. No new reset/scheduler/expiry. Pending retention proposal persistent until explicit lifecycle resolution.",
+  "policy_ref": "POLICY_PROPOSALS.json",
+  "operation_traces": "OPERATION_TRACES.json",
+  "qualification_plan": "QUALIFICATION_PLAN.json",
+  "contract_impact_review": "CONTRACT_IMPACT_REVIEW.json",
+  "prerequisites": [
+    "Genuine upstream raw blood-stage producer required before full live/consumer acceptance"
+  ],
+  "batches": [
+    "Typed source catalog and pure transition rules; forward53 proposal only until authorization",
+    "I5 certificate qualification/seed/projection and opaque prepared value adapter; Character reference/fresh facet ports",
+    "Retained admission/replay + all8 command paths and applied/bootstrap observation",
+    "Targeted affected checks, intended candidate freeze once, required exact R2 realPG/process/recovery/source/regression/reality, then scoped closure"
+  ],
+  "residual_routes": "RESIDUAL_ROUTES.json",
+  "core_vs_full": "Conditional core implementation/test boundary can be authorized independently; actual upstream producer is never replaced by fixture/zero/unavailable as qualified absence.",
+  "policies_adopted": true
+}

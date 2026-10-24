@@ -1,0 +1,179 @@
+{
+  "schema_version": 1,
+  "parent_backend_sha256": "ce4fac462385cae26c4844eb32cd8d3ea105a162336ca31225d24dffce49ab2b",
+  "status": "UNSEALED_CA2_1_IMPLEMENTATION_MIGRATION",
+  "changed_file_count": 34,
+  "implementation_revision_sha256": "ec19ea0ebf5d786ec7892056652aeb637188b217c8e962d3bc3388abdd0c5c63",
+  "files": [
+    {
+      "path": "cmd/gxb-api/main_postgres.go",
+      "sha256": "41d71ad924e86dd5f3a70935e9c1a46666fb00f2eb1647b87ae80dc47ca71878",
+      "state": "present"
+    },
+    {
+      "path": "docs/architecture/CANONICAL_TABLE_OWNERSHIP.json",
+      "sha256": "ab70f250c174eb37572e129553a8ef2a62df1e359e4eff7ec19eb38d8641bedd",
+      "state": "present"
+    },
+    {
+      "path": "docs/architecture/CUMULATIVE_MIGRATION_LOCK.json",
+      "sha256": "a8ec3443398cd557ba2d512e22bfc8ff3fe594079899f26d61af20f3e2c87ae5",
+      "state": "present"
+    },
+    {
+      "path": "internal/adapters/postgres/characterqueries/querytext_gen.go",
+      "sha256": "1ca33b219794548c76432ec2765def5e02c78d62d82cfb8c9b67918eaae01943",
+      "state": "present"
+    },
+    {
+      "path": "internal/adapters/postgres/characterstore/bootstrap_projection.go",
+      "sha256": "5f207a9ccd4c87ac456df0faf46ab81cc981255c3d96275769c869d0d0fcb91e",
+      "state": "present"
+    },
+    {
+      "path": "internal/adapters/postgres/characterstore/store.go",
+      "sha256": "b918047bc2c884d18d9d62645555484a12dd4c6525eb669fbb739b9f378e1a29",
+      "state": "present"
+    },
+    {
+      "path": "internal/adapters/postgres/contentqueries/querytext_gen.go",
+      "sha256": "d894efd451e239d4bea0de590c16b991a1a79db89e66cbcd217d51ed5f0149b2",
+      "state": "present"
+    },
+    {
+      "path": "internal/adapters/postgres/contentstore/store.go",
+      "sha256": "ca04e126840a147894796b3336adae086a83e2c5f0751f28910430915fc87ef3",
+      "state": "present"
+    },
+    {
+      "path": "internal/adapters/postgres/contentstore/store_test.go",
+      "sha256": "63c528923f7d2e875380a702d11335faabfa9b7d1b340e3ca4bad24feddbd8a8",
+      "state": "present"
+    },
+    {
+      "path": "internal/adapters/stockruntime/hero_dispatcher.go",
+      "sha256": "6984576eec7394d8208031620aeb3f78d692776aecd256198f587cbdebb96e01",
+      "state": "present"
+    },
+    {
+      "path": "internal/application/characterhero/service.go",
+      "sha256": "3a4635685e22e241fda29da3b5c5ac3522eb52021ca672ff971adb973ed967f1",
+      "state": "present"
+    },
+    {
+      "path": "internal/application/characterhero/service_test.go",
+      "sha256": "444506c40e10a2be4d54b53eb973f4519f049e38b5969eb83c6ec041a878c89a",
+      "state": "present"
+    },
+    {
+      "path": "internal/content/builtin/catalog.go",
+      "sha256": "de6576d2460b04785ecf08cf0b4216b88ac6577623a4ed5b0ba40644ed9ff4f2",
+      "state": "present"
+    },
+    {
+      "path": "internal/content/builtin/catalog_test.go",
+      "sha256": "b1828efaef718431baeead49049095d3e13ab95235cce945fee14b49de126544",
+      "state": "present"
+    },
+    {
+      "path": "internal/content/builtin/generated/hero_core_catalog.json",
+      "sha256": "9dba061124a8e72acf3547c01f103fc0a73dae012b8af1acff6601af6c1bc2d3",
+      "state": "present"
+    },
+    {
+      "path": "internal/content/builtin/generated/manifest.json",
+      "sha256": "e574f17043dbbca762b81290e74328c6471f9225aebc6d648c5c11e2bb79e69c",
+      "state": "present"
+    },
+    {
+      "path": "internal/content/registry/service.go",
+      "sha256": "571b10cc8f62520ed34b13c5c5217bf49244b7b10e63922efe32f59ba97437b5",
+      "state": "present"
+    },
+    {
+      "path": "internal/content/registry/service_test.go",
+      "sha256": "3cb3a781f3846ddb5b8b571d51b6ab9398a9ab2fa82ec275c9865af01fd4b621",
+      "state": "present"
+    },
+    {
+      "path": "internal/content/registry/types.go",
+      "sha256": "0b08963b98dde220d120e46b7c211b62f1cd5fdd08bb6f7a117fd3ba47271fe7",
+      "state": "present"
+    },
+    {
+      "path": "internal/domain/character/hero.go",
+      "sha256": "7d1fc20e07948a2282d4a39d1d8cabb1905240f628af03707bde71ff3cf38781",
+      "state": "present"
+    },
+    {
+      "path": "internal/domain/character/hero_test.go",
+      "sha256": "65198afabad551bf3b3aa193455bdd900f756d59680297a79a82e63564522646",
+      "state": "present"
+    },
+    {
+      "path": "internal/projection/hero/stock.go",
+      "sha256": "a08cd45d4dd4f3ce47eb69ef2fabd0d147557090dd5985524b46d70b634dfe62",
+      "state": "present"
+    },
+    {
+      "path": "internal/projection/hero/stock_test.go",
+      "sha256": "554124c23d157a1d549943e2ea75fb1cf71c7fcda76fe036924cfbd16fee6dde",
+      "state": "present"
+    },
+    {
+      "path": "migrations/00014_ca2_hero_foundation.sql",
+      "sha256": "57443af040cb6a75b2b87b591ac682eed18b84a1347483f85a36f5b81016ceb1",
+      "state": "present"
+    },
+    {
+      "path": "sql/character/hero.sql",
+      "sha256": "5a6ef90a9c1e09193edb6232e68b7bae2624949dd621d47dfe30fe4fa4b54e74",
+      "state": "present"
+    },
+    {
+      "path": "sql/content/content.sql",
+      "sha256": "b35af50c84668598d4e658e65f90a6a97f3ca42ed7182a3e9f2b5288163d70dd",
+      "state": "present"
+    },
+    {
+      "path": "sqlc.yaml",
+      "sha256": "04fd492bd82affdde9102a8970870446f96f526c3149af49c5c1a1229bac7021",
+      "state": "present"
+    },
+    {
+      "path": "tools/check_ca2_1_source_oracle.py",
+      "sha256": "689d05936d78bd63fb439cded1f98558be161701ccaed8f5f2faa7c9ee32af49",
+      "state": "present"
+    },
+    {
+      "path": "tools/check_schema_query_ownership.py",
+      "sha256": "d49ddbffd00532f6e727075373829c9937e76aaa24625b54bedfffe496139353",
+      "state": "present"
+    },
+    {
+      "path": "tools/check_sqlc_generation_policy.py",
+      "sha256": "21966460fdcfdfc45c01a09bdebbedd2ba0d181761270811be270be6d32f5a60",
+      "state": "present"
+    },
+    {
+      "path": "tools/generate_builtin_content.py",
+      "sha256": "826367db3e6c22f22a26d3934dc2fa02c3d2943d4f98648acd2f920a12624639",
+      "state": "present"
+    },
+    {
+      "path": "tools/generate_character_querytext.py",
+      "sha256": "87c124f4fbc13f8a260feaef2f2dca5d1db1747f290fcbc3abc2d6af07ad7478",
+      "state": "present"
+    },
+    {
+      "path": "tools/validate_ca2_1.py",
+      "sha256": "142495ccccc6b42bd7bcb0d821458249a6f807f9103faf3318e5ac804fb50e7d",
+      "state": "present"
+    },
+    {
+      "path": "tools/validate_current_candidate.py",
+      "sha256": "2223eaa8c7d72a0852006bb468f22bd1d6b619e1edee191b97d666c164b2df2a",
+      "state": "present"
+    }
+  ]
+}

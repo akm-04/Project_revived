@@ -1,0 +1,29 @@
+{
+  "base_backend_sha256": "73be570480ecaf47f86a0e39d0a33c5d29c2a6179fe91c6b4aa71bf0668f2273",
+  "product_delta": [
+    {
+      "path": "migrations/00010_r4_manifest_identity_not_null.sql",
+      "sha256": "305822dc72d03f6194332b38ee9cea9dba9223282bd8ac75c42aa480a0a4cf01",
+      "previous_sha256": null
+    },
+    {
+      "path": "tools/validate_r4b.py",
+      "sha256": "e61c15e7c7cd86779bb6e95dda2e85f78a3c9ad393405cbc8ea233fe84c1a4e4",
+      "previous_sha256": "bbd525fd7b02c0851339ad9792b36430b0d61c8d597476efc7f780cf5cd873da"
+    },
+    {
+      "path": "tools/validate_r4c.py",
+      "sha256": "d422c216caecc42c7a0ed6ab3f0e1b92761b3be7e93127c2069cfa8fc01b2057",
+      "previous_sha256": "d4df3e1d55f2050d99e27c3009c681bbfa4cc64049141a74802d1f838d192c16"
+    }
+  ],
+  "implementation_revision_sha256": "12193054e2cb312820406176a708c26947de48734eab4df3179a0ca741892ea9",
+  "basis": "SHA256 compact sorted-key JSON product_delta; documentation/metadata/evidence separately bound by snapshot manifest and ZIP SHA256",
+  "unchanged": [
+    "all00001..00009 migrations",
+    "all internal Go/runtime/source files",
+    "go.mod",
+    "go.sum",
+    "all runtime query SQL"
+  ]
+}

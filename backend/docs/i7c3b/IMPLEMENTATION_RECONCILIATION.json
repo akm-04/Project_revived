@@ -1,0 +1,39 @@
+{
+  "status": "IMPLEMENTED_TARGETED_WORKING_PROOF_PASS_EXACT_FROZEN_QUALIFICATION_NEXT",
+  "scope": "Read-only canonical owned stat composition core; Pet independent, Hero conditional with genuine raw awakening required",
+  "source_skill_vectors": 75,
+  "source_skill_attributes": 3675,
+  "source_skill_force_checks": 75,
+  "source_equipment_vectors": 27,
+  "source_equipment_attributes": 3969,
+  "prior_payloads_unchanged": 34,
+  "prior_migrations_unchanged": 58,
+  "content_revision": "3c23b1550c548174feac9a3487a24174673d44508c716e5908176db5ed93b4b3",
+  "migration": "00059_i7c3b_stat_inputs.sql",
+  "qualified_working_paths": [
+    "real Pet Summon/replay and canonical RR/read-only stat read",
+    "CA8 coherent conditional Hero all2A..2J owner reads, no genuine blood-stage producer invented",
+    "nondefault Pet Practice single application",
+    "nondefault book400HP/without-book unchanged; course23.5Str; self collection unavailable failure/foreign source structuralzero",
+    "block privacy before selected stat provider",
+    "payload hash rejection and rollback; stale Library root rejection"
+  ],
+  "repairs_before_freeze": [
+    "source Super first four skill slots unconditional",
+    "accepted CA6 contribution already includes raw Practice",
+    "root future timestamp rejection for Library input observations",
+    "catalog identity/update test fixtures for new35th payload",
+    "native setup corrected to reuse existing Element facet and canonical social roots"
+  ],
+  "full_live_hero_qualified": false,
+  "full_product_accepted": false,
+  "physicalW2": false,
+  "remaining_gates": [
+    "genuine Character raw blood awakening attestation",
+    "prior2Feligibility/2GNormal cap5/2Hactualorigin/2Jactual5E selected nondefault delivery",
+    "replay immutable snapshot5A, full public rich profile/metrics/history",
+    "parent I7C-E/I7B-E/I7 and physicalW2"
+  ],
+  "exact_qualification": "NOT_RUN_UNTIL_CANDIDATE_FREEZE",
+  "reality": "SEPARATE_REVIEW_PENDING"
+}

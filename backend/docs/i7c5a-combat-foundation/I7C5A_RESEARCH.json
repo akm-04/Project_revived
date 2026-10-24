@@ -1,0 +1,34 @@
+{
+  "status": "I7C5A_RESEARCH_SUFFICIENT_FOR_FOUNDATION_PLAN_NOT_PRODUCT_QUALIFICATION",
+  "node": "ROOT/I7/I7C/I7C-5/I7C-5A",
+  "base_product_commit": "63905b659a553574d17570c54a1ebf45405739b7",
+  "source_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+  "research_root": "work/i7c5a/research (cumulative checkpoint r04 and later)",
+  "established": [
+    "Whole I7C5 consumer/trust/locator/time boundary: WHOLE_I7C5_SCOPE_REVIEW.md. 5B/5C/5D/5F are server-report-authoritative PvP consumers; 5E Conquer stays a separate attested profile; mode ranks/rewards/history/calendars are mode-owned.",
+    "Source runtime: 730 battle/report/model files parse with BOM normalization and load under pinned GopherLua v1.1.2 with explicit adapters; recovered NormalHero construction and the source engine completed a headless two-template fight repeated byte-identically in two fresh processes under the inherited HMAC counter entropy shape (SOURCE_FIGHT_RESEARCH_RECONCILIATION.json). Diagnostic only.",
+    "Source data: 40 table classes / 44 data tables traced; all 30905 Monster rows x 99 columns equal the recovered source TableParser decoder.",
+    "Fighter classes: FIGHTER_CLASS_REACHABILITY_ADJUDICATION.json. Resolution is import(lib.battle.fighters. .. class_name) with no fallback. 72 referenced classes are absent from every supplied layer; all missing Partner/Pet awakened rows sit behind awaken=0 (164/164 and 20/20 gate-open rows have classes); 80000229 is a client-only visual; remaining missing monster classes have no static lineup/summon reference.",
+    "Snapshot inputs: COMBAT_SNAPSHOT_INPUT_TRACE.md. Server branch consumes the 57-key partner_info param shape and recomputes totals in-VM; complete seam set is Item (public dual-target module), spirit_item (unreachable when spirit_item params are complete), backpack (Zhuge exclusive book count 50000001..50000025), selfPlayer (nil on server; white-album attr), and report keys hero_collect_attr / zhuge_book_skill_num.",
+    "Canonical providers: publicstats.HeroTx/PetTx (3B) already gather and validate every required owner observation in one CA8 CoherentReadScope; owners already serialize the same source keys for stock roster overlays.",
+    "Infrastructure to reuse: tx.Runner with UnknownCommitResolver, receipt.Store/Resolver, operation.Context, lockkey ranks (600 used by GirlsRanking, 601..609 free), content revision manifest with source_archive_sha256, config.Secret.",
+    "Selected robot data (robot, robot_hero, top_robot, top_robot_hero, top_robot_team) has no client consumer: server-side template actors whose param mapping (e.g. top robot equips '1|1|1|1|1|1') is UNKNOWN and mode-owned."
+  ],
+  "question_dispositions": {
+    "Q_SOURCE_DEPENDENCIES_combat_use": "RESOLVED_FOR_5A_COMBAT_BY_SPECIFIED_SNAPSHOT_ONLY_ADAPTERS: Item -> public app.model.Item (dual-target source; combat attr methods are table-only; backpack-dependent UI helpers unreachable from lib/battle and fail closed); spirit_item -> unreachable with complete frozen spirit_item, retained as throwing guard; backpack -> frozen per-owner exclusive book count; selfPlayer -> frozen per-owner album attr under C5A_COMBAT_COLLECTION_ATTR_OWNER_SCOPED_V1. Stat-use disposition remains with 3B/3A unchanged.",
+    "Q_MODE_INPUT_PROFILES": "RESOLVED_FOR_FOUNDATION: actor origins OWNED_SELF, OWNED_FOREIGN (frozen at START) and TEMPLATE (mode-supplied fully specified params validated against pinned content/class manifest); trust profile SERVER_REPORT_AUTHORITATIVE_V1 only. BORROWED and CLIENT_ATTESTED profiles have no selected 5A consumer and are not implemented; each mode leaf supplies its locator, fingerprint, costs, robot mapping and settlement."
+  },
+  "unknown_bounded": [
+    "Original server RNG/seed/order and anti-cheat (inherited 418: V2 policy only).",
+    "Whether the original server applied the defender's collection attr (private policy C5A_COMBAT_COLLECTION_ATTR_OWNER_SCOPED_V1).",
+    "Original replay retention count/TTL (mode-owned; five days is only a user example).",
+    "Robot/template param mappings and dynamic mode-owned monster sources (mode leaves).",
+    "GopherLua equivalence to the original runtime beyond executed fixtures (promotion gate in 418 technology freeze)."
+  ],
+  "rejected": [
+    "Generic fallback fighter class or inferring inactivity from is_show",
+    "yangwan case adapter (row is behind awaken=0)",
+    "Porting combat rules to Go before equivalence evidence; reusing V1 placeholder victory handlers",
+    "Injecting 3B totals into the VM in place of source getTotalAttr"
+  ]
+}

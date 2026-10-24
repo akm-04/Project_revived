@@ -1,0 +1,25 @@
+$ python3 tools/validate_ca1.py
+CA1 STATIC BOUNDARY VALIDATION: PASS
+no Character durable schema/provider activation; PartnerEntity typed seam + scalar/stack material debit + Redeem R0 remain bounded
+$ python3 tools/check_ca1_source_oracle.py /mnt/data
+CA1 SOURCE ORACLE CHECK: PASS
+verified exact current+historical corpora; lexical evidence keeps partner/pet/style identities distinct; no CA2+ mechanics inferred
+$ python3 tools/verify_oracles.py --root /mnt/data
+PASS current_src64: all-assest-rechecked-1.zip
+PASS v1_pass353: gxb-backend-v0.65.2-pass353.0-portable-dev1-V1-Final.zip
+PASS old_client: gxb-old-client-v1.164.0-research-corpus.zip
+PASS native_apk: latest_apk-smali-full.zip
+PASS pass222_probe: prep-apk-pass222-window-probe.zip
+ORACLE VERIFY: PASS
+$ python3 tools/check_schema_query_ownership.py
+SCHEMA/QUERY OWNERSHIP: PASS
+$ python3 tools/check_sqlc_generation_policy.py
+SQLC GENERATION POLICY: PASS
+$ python3 tools/check_dependency_policy.py
+DEPENDENCY POLICY: PASS
+resolved_go_modules 16 qualified_candidates 5
+$ python3 tools/validate_i5.py
+I5 VALIDATION: PASS
+$ python3 tools/validate_r5.py
+R5 VALIDATION: PASS
+static progression/temporal/bootstrap/function/directory/receipt/wire/stack R5 seams present; native PostgreSQL/River/W2 remain separate

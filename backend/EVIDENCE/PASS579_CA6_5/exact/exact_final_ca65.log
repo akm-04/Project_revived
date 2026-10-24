@@ -1,0 +1,82 @@
+DEPENDENCY POLICY: PASS
+resolved_go_modules 16 qualified_candidates 5
+RESOLVED SBOM: PASS
+SQLC GENERATION POLICY: PASS
+SCHEMA/QUERY OWNERSHIP: PASS
+I1 VALIDATION: PASS
+minimal kernel schema, tx outcome/reconciliation, typed facts, adapter isolation and stage routing verified
+I2 VALIDATION: PASS
+stock HTTP families, generated numeric MID catalog, bounded AMF3/TCP framing, fail-closed dispatch and differential fixtures verified
+I3 VALIDATION: PASS
+typed account/session/context, honest server directory, region-encoded allocator, observation gate, replay-stable MID1 and unknown-COMMIT reconciliation contracts verified
+I4 VALIDATION: PASS
+I5 VALIDATION: PASS
+FOUNDATION TRACE: PASS (10 historical lifecycle records; 24/24 RF findings dispositioned; R0-R7 accepted Pass489; I6 accepted Pass509; 6 future extension limits remain explicit; W2 separate)
+R6 VALIDATION: PASS (CUMULATIVE MODE)
+static projection/directory/replay/lifecycle/key/single-owner/http/observability R6 seams present; cumulative mode permits later migrations but does not weaken historical R6 pins
+R6 VALIDATION: PASS (CUMULATIVE MODE)
+static projection/directory/replay/lifecycle/key/single-owner/http/observability R6 seams present; cumulative mode permits later migrations but does not weaken historical R6 pins
+CURRENT CUMULATIVE CANDIDATE VALIDATION: PASS
+historical R6 pins retained; exact forward migration inventory and current release/SBOM version agree
+CA6-5 SOURCE ORACLE CHECK: PASS
+current+old MID1 Hero hydration/reducer/timer evidence pinned; real Hero duplicate-target tables=26; candidate key49/contribution/routing translation matches
+{
+  "status": "GREEN",
+  "boundary_vectors_checked": 35615,
+  "examples": [
+    {
+      "family": "HERO",
+      "table_id": 10001003,
+      "applied": [
+        200,
+        200,
+        200
+      ],
+      "result": [
+        [
+          1,
+          200
+        ],
+        [
+          2,
+          200
+        ],
+        [
+          3,
+          200
+        ],
+        [
+          4,
+          2500
+        ],
+        [
+          5,
+          60
+        ]
+      ]
+    },
+    {
+      "family": "PET",
+      "synthetic_duplicate": true,
+      "result": [
+        [
+          1,
+          260
+        ],
+        [
+          2,
+          10
+        ],
+        [
+          3,
+          10
+        ],
+        [
+          4,
+          50
+        ]
+      ]
+    }
+  ],
+  "result_sha256": "02fcf9d7947627bbe259afd817435a60461d4ad412a59800c67c56b567fb20a0"
+}

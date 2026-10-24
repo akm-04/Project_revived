@@ -1,0 +1,21 @@
+{
+ "status":"IMPLEMENTED_WORKING_NOT_FROZEN_NOT_ACCEPTED",
+ "gate_base":"Selectedsealed665 after research/design/human authorization",
+ "existing_contracts_unchanged":true,
+ "applied_contract_details":[
+  "I7B1exactrevision/owner/version/time applied to Contentreader andMetricObservation; only1011productionqualified",
+  "D02Contentcompiler/registry retainsimmutable publicprofilepolicy withnewforward41; noPublicProfile duplicateContentowner",
+  "I7B1/I7A1+sameTx/time/recovery: stableDecisionAt, sameActor/context/server, entropy/policy refs andnormalizedfingerprint in strictresult schema; positiveproofvalidatesretainedrootversionwithoutreapplyingoldpreferences",
+  "BothSocialblockdirections andglobal315 sort withper-ID canonicalserver admissions; noFriendDM reuse andno readmutations",
+  "HTTP200 onlydefinite/reconciledcommit; finite rawJSONselectedselector extension ensuresduplicates/surrogates cannot enter profile callbacks"
+ ],
+ "concrete_working_repairs":[
+  "Compiler tabletype filter wasinvalidselected-ID logic; frozen1001..1011 allowlistqualifiedagainstexact13rows;1012/13 remainunselected",
+  "New capability includedinbuiltin andregistryexactlists; newcontentrevision testpin updated withoutweakeninghash assertions",
+  "New41FK correctedtoactualgxb_content_revisions; historical1..40 untouched",
+  "Nativefixture usesexistingPool.Raw().Exec andexactopaqueidentitytransport; notproductionownerSQL"
+ ],
+ "prior_evidence_invalidation":"NewContentartifact/compiler/registry/table/activecapability require newqualification. Newcommands/transport/basicprivacy proof notpreviouslyrun. Accepted2Aroot/typedI5basis/schema40 unchanged; reuse16rows subjectreview atcombinedfreeze. Existingtransaction/receipt genericframework unchanged.",
+ "tests_current":"Workingdomain/content/registry/wire/finiteJSON pass; nativecommands/metrics/replay/privacy/bothblocks/crossserver pass. Exactcandidatefinalgate notrun.",
+ "residuals":"Nonce-less lateoldassignment mayoverwrite newerstate. Nativecjsonempty/officialmoderation/firstview behavior remainsunknown withexplicitcompatibilitypolicy. Full11metrics/richsourceMIDs/providerqualification remains6; nofullI7B/I7/W2 acceptance."
+}

@@ -1,0 +1,15 @@
+{
+  "status": "WORKING_SOURCE_COMPILE_BINDING_REGISTRY_UNIT_PASS",
+  "prior_revision": "bd65e241444542ac3124d7772c3c304fc68607b9f888f357463e4355712a9707",
+  "revision": "a71d2207c765cb604a581ebd6744708f2d16a6fed816fba68495190ed8b3cc91",
+  "changed_payloads": [
+    "dorm_input_catalog.json",
+    "manifest.json"
+  ],
+  "source_members": 94,
+  "payloads": 26,
+  "all_25_prior_payloads_unchanged": true,
+  "new_source_fields": "Existing misc.lua house_key_green/blue and *_id lists: 14 exchangeable fixed/random keys; 25/50 Cement per key",
+  "evidence": "commands-content-architecture-working.log",
+  "limitations": "Working state only; exact candidate compiler and deployment qualification pending"
+}

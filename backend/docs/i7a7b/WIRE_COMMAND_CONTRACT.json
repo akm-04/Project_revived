@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "pass": "650.0",
+  "stage": "I7A-7B",
+  "node_path": [
+    "ROOT",
+    "I7",
+    "I7A",
+    "I7A-7",
+    "I7A-7B"
+  ],
+  "status": "SELECTED_7B_RESEARCH_DESIGN_REQUIRES_VALIDATED_FINAL650_SEAL",
+  "classification": "IMPLEMENTATION_DECISION_UNLESS_EXPLICIT_SOURCE_FACT",
+  "implementation_started": false,
+  "product_accepted": false,
+  "backend_sha256": "4f3a64bec275a2532a4cff9d6b5680d09d4c84b63147797f02fee48e2ead408d",
+  "sealed_base_passmap_sha256": "6f41f3c7b2e7937a89dc728ec11ef95973ebfc2129546434a16559d793bd6987",
+  "contract_id": "I7A7B_WIRE_COMMAND_CONTRACT",
+  "wire": {
+    "183": {
+      "request": "player_id positive canonical exact integer; no nonce/amount/reward/source fields",
+      "success": "HTTP200 {} only after definite or complete positive reconciliation; optional master_info omitted",
+      "failure": "non200 for every gift failure; never HTTP200 error_code for gift failure",
+      "reload": "After commit sender friend_list and recipient friend_notice only"
+    },
+    "184": {
+      "request": "notice_ids positive wire-safe integer array, duplicate JSON keys rejected, stable first-occurrence dedup; no invented50 request cap",
+      "dispatch": "Use accepted Gift Claim for all mixed/recognized gift requests; preserve relation-only semantics and empty ids[], unknown/foreign/future ignored under owner rules",
+      "success": "ids array plus awards[] for gift settlement; fresh absolute economy_.friendship_coin postcommit via existing CurrentScalarProjectionPort; no numeric table_id or scalar delta masquerading as award",
+      "failure": "non200 on batch conflict/quota/owner/content/preflight/commit/reconciliation failures; relation notices cannot commit if gift portion fails",
+      "postcommit_failure": "Non200 and retained committed entitlement/receipt; no compensating value or blind retry. Internal known-operation recovery only."
+    }
+  },
+  "edge": "Extend one canonical raw decoder before map materialization; strict integer decoding disallows floats, strings, bool, nested/null; preserve transport token/region validation. Validate scalar nonnegative exact safe JSON integer <=2^53-1 or fail response after settlement; no fake clamp. Parent request context bounds authority+command+projection.",
+  "selected_authority": true,
+  "selection_requires_validated_owning650_seal": true,
+  "relation_compatibility": "Gift Claim supports relation-only requests, but its content admission requires qualifiedGiftcatalog. Preserve legacy relation-only availability when Gift stock group inactive through existingDismissal; after fullgroup activation, one GiftClaim coordinator handles whole184 set. Do not decide gift absence in an unlocked pre-read and then dismiss mixedvalue; no fallback after GiftClaim error. Relation-only success retains ids[] without unnecessary scalar/awards sideband; Amount>0 positivelysettled/replayed claim requires scalar projection."
+}

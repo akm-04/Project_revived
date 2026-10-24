@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "pass": "686.0",
+  "phase": "I7C",
+  "stage": "I7C-2A",
+  "full_node_path": "ROOT/I7/I7C/I7C-2/I7C-2A",
+  "sealed_base_sha256": "c06d73821a33b856bd16b61ef3b1a69d1c8472740b47263fe454ad7d5bb0dce2",
+  "accepted_backend_sha256": "a3aabb725a4a66df91133aa1c543d30ee263e3e93f590ad7ca25981f3c4ba7c6",
+  "working_backend_sha256": "f46f8dff7c546a24ba399dba3c210653684d9dfc411673ef62263c1040822014",
+  "product_implementation_authorized": false,
+  "product_implementation_started": false,
+  "product_tests": "NOT_RUN_RESEARCH_DESIGN_UNCHANGED_PRODUCT",
+  "status": "PLANNED_NOT_EXECUTED",
+  "toolbox": {
+    "filename": "gxb-backend-v2-e2e-tools-r2-go1.27.2-linux-amd64.zip",
+    "sha256": "e4e194c9627929299577364b953b2468d6118fac4283fd8030f10b5a27456c2b"
+  },
+  "candidate_rule": "Batch implementation/targeted fixes; freeze intended exact candidate once for required final qualification. Preserve accepted109/working111 and active candidate roles separately.",
+  "required": [
+    "Fresh PG acquisitions, grants, retry, rollback and allocator concurrency",
+    "00047 -> new schema upgrade; base identity/version/allocator/receipt preservation",
+    "Foreign Hero, base/non-KongMing, wrong slot/item/missing book, concurrent ownership change, exact receipt replay and unknown commit",
+    "MID1/MID49 reload, public raw reader coherence and no false final-stat qualification",
+    "Affected progression/preservation/retirement and version-consistent reads; no new unrelated retirement route",
+    "Content/source identity, raw-vs-derived separation, Normal/Super/Pet distinction",
+    "Real PostgreSQL/process reopen after commit, rollback and unknown commit; restart projection/bootstrap convergence",
+    "Portable R2 required backend checks, source-oracle/canonical content/query ownership/vet/race as affected by implementation",
+    "Semantic source/contract reality check and selected consumer handoff before2A product acceptance"
+  ],
+  "reuse": "Reuse unchanged I7A, CA8/Pet and111/F3 component evidence with explicit invalidation map. No prior tests rerun in this research turn.",
+  "limitations": [
+    "All planned tests NOT_RUN until implementation authorized and candidate exists",
+    "W2 physical stock client remains deferred after I14; no claim it passed",
+    "I7C-E/I7B6/B-E/I7 gates remain required and unpassed"
+  ]
+}

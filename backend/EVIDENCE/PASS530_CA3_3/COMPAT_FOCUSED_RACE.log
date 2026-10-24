@@ -1,0 +1,20 @@
+==> go test -race ./internal/application/characterpet
+ok  	gxb.local/backend/v2/internal/application/characterpet	(cached)
+==> go test -race ./internal/application/i5
+ok  	gxb.local/backend/v2/internal/application/i5	(cached)
+==> go test -race ./internal/adapters/stockruntime
+ok  	gxb.local/backend/v2/internal/adapters/stockruntime	(cached)
+==> go test -race ./internal/application/generation
+ok  	gxb.local/backend/v2/internal/application/generation	(cached)
+==> go test -race ./internal/content/registry
+ok  	gxb.local/backend/v2/internal/content/registry	(cached)
+==> go test -race ./internal/content/builtin
+ok  	gxb.local/backend/v2/internal/content/builtin	(cached)
+==> go test -race ./internal/adapters/postgres/contentstore
+ok  	gxb.local/backend/v2/internal/adapters/postgres/contentstore	(cached)
+==> go test -race ./internal/domain/character
+ok  	gxb.local/backend/v2/internal/domain/character	(cached)
+==> go test -race ./internal/projection/pet
+ok  	gxb.local/backend/v2/internal/projection/pet	(cached)
+==> go test -race ./internal/archguard
+ok  	gxb.local/backend/v2/internal/archguard	(cached)

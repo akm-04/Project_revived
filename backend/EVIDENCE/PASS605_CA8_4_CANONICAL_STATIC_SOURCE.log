@@ -1,0 +1,20 @@
+CA8-4 canonical static/source gate
+internal/application/characterasset/borrowed_composite.go sha256=ff19dbb5c976caf175b2493f0e79f5b5a16a39e689df9b39cba56968d4adffba bytes=7058
+internal/application/characterasset/borrowed_composite_test.go sha256=ddf704ad82ce69af078ce7f7a8bb6dacdeed27805fc857a20b2ef20e80595f38 bytes=13312
+internal/archguard/ca8_4_contract_test.go sha256=0accc98a13c6a6c9a1b27a02cf705c316cfa3e4ba77294992d5514056aca4d33 bytes=2406
+raw_rental GREEN
+foreign_owner_import GREEN
+tx_runner GREEN
+sql GREEN
+lock_receipt GREEN
+clock GREEN
+borrower GREEN
+requiredness_assignment GREEN
+src64 hero_lender_plus_actor GREEN
+src64 hero_alias_lender_plus_actor GREEN
+src64 pet_lender_plus_actor GREEN
+src64 rental_cache_separate_hero GREEN
+src64 rental_cache_separate_pet GREEN
+src64 hero_model_has_player_partner GREEN
+src64 pet_model_has_player_pet GREEN
+RESULT GREEN

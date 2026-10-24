@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "pass": "435.0",
+  "stage": "I2",
+  "version": "v0.20.0",
+  "status": "PASS",
+  "source_oracles": {
+    "current_Backend_sha256": "95378e2b0be8180df6de27e9e430c630bcfe46c080e1f91ef5f6d74bdbb1b840",
+    "current_mid_sha256": "026a20b29d97624979777a68c64c749254031604057ff42aa8f8254c3e35b5af",
+    "current_functions_sha256": "88d28150e9c8735f3aecf2cbeff5f60cede5e45edb50060478a7a80714a93378",
+    "QuickHTTPInterface_sha256": "ed934299d89031f5d0c9c49c7dd47f9056398b0175fa31cb1b3996eaed16e439",
+    "Pass353_archive_sha256": "31729d5c5e4509c2c89eaa1e8203cf1570afe87e18ed2610b944e457a9946b15"
+  },
+  "implemented": {
+    "numeric_mid_catalog_generated_from_current_source": "PASS",
+    "ordinary_http_exactly_one_decode_layer": "PASS",
+    "seven_zlib_multipart_families": "PASS",
+    "mid1844_streaming_upload_duplicate_policy": "PASS",
+    "http_unknown_404_unimplemented_501": "PASS",
+    "preoperation_503_saturation": "PASS",
+    "bounded_json_zlib_multipart_upload": "PASS",
+    "xinyoudi_amf3_project_codec": "PASS",
+    "native_10_byte_tcp_frame": "PASS",
+    "native_65536_payload_limit": "PASS",
+    "fragmentation_coalescing": "PASS",
+    "preauth_tcp_login_gate": "PASS",
+    "bounded_writer_queue": "PASS",
+    "sanitized_unknown_observation": "PASS",
+    "pass353_byte_differential": "PASS",
+    "goamf3_runtime_authority": "REJECTED_DIFFERENTIAL_ONLY",
+    "chi_adapter": "IMPLEMENTED_BUILD_TAGGED_PENDING_CONNECTED_COMPILE"
+  },
+  "normal_chat_checks": {
+    "unit_seed_fuzz_tests": "PASS",
+    "race_tests_protocol_and_archguard": "PASS",
+    "oracle_wire_check": "PASS",
+    "mid_registry_drift_check": "PASS",
+    "pass353_fixture_drift_check": "PASS",
+    "architecture_guard": "PASS"
+  },
+  "honest_deferrals": [
+    "exact Go 1.27.1 chi-tagged compile in connected environment",
+    "real socket saturation/slow-consumer tuning at W1",
+    "unmodified stock-client Wave-S runtime at W1",
+    "PostgreSQL/River proofs remain W1 after I4"
+  ],
+  "next_stage": "I3 identity / session / logical-server / character bootstrap",
+  "work_mode_gate": "W1 remains after I4",
+  "implementation_commit": "c5cd96fa4acadd295d9823a5722dca6a099a9535",
+  "local_go_version": "go version go1.23.2 linux/amd64",
+  "work_mode_environment_precheck": "OPERATOR_REPORTED_READY with Go 1.27.1/PostgreSQL 18.6/sqlc/goose/govulncheck and cached dependencies; W1 remains after I4"
+}

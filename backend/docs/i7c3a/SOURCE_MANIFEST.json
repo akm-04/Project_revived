@@ -1,0 +1,130 @@
+{
+  "source_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+  "files": [
+    {
+      "path": "app/model/NormalHero.lua",
+      "sha256": "125183556caeecc182bf0702dd1f95160c8ba1666a3b97fbb8a7261d30ae0ac9",
+      "bytes": 103561
+    },
+    {
+      "path": "app/model/SuperHero.lua",
+      "sha256": "b127c2cbef327d3142031bf30daa0af1b45997c6da82fba946d641a86783d622",
+      "bytes": 94188
+    },
+    {
+      "path": "app/model/Pet.lua",
+      "sha256": "214f4dcd93d0e494408d14a225810134c2e72a0dedd18a935a27dc62e0c00660",
+      "bytes": 44665
+    },
+    {
+      "path": "app/model/Hero.lua",
+      "sha256": "3e296d4d6dcf71c10ac7391e4ad228ca84c2ee856b7ff2d3c02a3595cf68f2e0",
+      "bytes": 2277
+    },
+    {
+      "path": "app/model/Item.lua",
+      "sha256": "af46a18cad788aa903464237821262ffc51fc73db5bb666287407c90922248f5",
+      "bytes": 14048
+    },
+    {
+      "path": "app/common/tables/AttrTable.lua",
+      "sha256": "6e6d76cc6cdcd916ab662446c258228f76bba5ccabe24c582290ae32547346af",
+      "bytes": 1336
+    },
+    {
+      "path": "app/common/tables/HeroTable.lua",
+      "sha256": "5293207486e52a8dad959b48ea0c90680a335e9144c362d5e9b342b9fd6cef60",
+      "bytes": 47835
+    },
+    {
+      "path": "app/common/tables/SkillTable.lua",
+      "sha256": "0184d2ea9bc63a93438f1f0029e4703e8979afd2101959d5a567f1859bd9befc",
+      "bytes": 20543
+    },
+    {
+      "path": "app/common/tables/DBuffTable.lua",
+      "sha256": "7241fd7cb60ac8a39fec196dd53a11561b8c8813f0e9261169fada4b7ab5d6be",
+      "bytes": 14680
+    },
+    {
+      "path": "app/common/const.lua",
+      "sha256": "29bfca03fb8094710ae2e3b6b752e0f6413b7086b17032f0c17abad79b048854",
+      "bytes": 2397
+    },
+    {
+      "path": "app/common/enums.lua",
+      "sha256": "15340bd89fe7c6f150ccfd4a5cd2a2f0e8e73c89dfae9ac3388376a4799901f3",
+      "bytes": 80531
+    },
+    {
+      "path": "lib/battle/requireServer.lua",
+      "sha256": "b5d6398960e1b67f7806456f7571f5855689aeb3739b73df1e70275b8560f721",
+      "bytes": 1077
+    },
+    {
+      "path": "lib/battle/framework/cocos.lua",
+      "sha256": "4e5feea45d6f014dbebf47de6feea3df3baba788a989ff8c605881bc9ed829dd",
+      "bytes": 12362
+    },
+    {
+      "path": "app/windows/HeroattributWindow.lua",
+      "sha256": "5a650d24f9ed9d31c5a1dc8aff614363c5feb4ce204179972922bfac361ecb2e",
+      "bytes": 88211
+    },
+    {
+      "path": "app/windows/PetAttributeWindow.lua",
+      "sha256": "8eef73e763bf8564c572d640949a8cd8ca6e1555112d497f81329be38268dfeb",
+      "bytes": 51628
+    },
+    {
+      "path": "app/windows/PetMainWindow.lua",
+      "sha256": "fcebe7e4fa742d8a176c8da10502c410e5031720023369bebed01c7da3a99832",
+      "bytes": 107215
+    },
+    {
+      "path": "app/common/tables/ItemTable.lua",
+      "sha256": "1f846972f29a55ee2dbb90f2cb9b0124eaeaa90646c3c66644ab66e231c37f00",
+      "bytes": 19905
+    },
+    {
+      "path": "lib/battle/Buff.lua",
+      "sha256": "57b6f90f6bedd665eac88fb70b958cc49c22b1f11ba0dbb5f2013fd3ade93ef4",
+      "bytes": 25068
+    },
+    {
+      "path": "app/common/tables/TableParser.lua",
+      "sha256": "98f70cc1337278f2338d6d2ed6049b2c3b0b26b247ded0a2dd044b6cc62d0586",
+      "bytes": 2613
+    },
+    {
+      "path": "data/tables/attr.lua",
+      "sha256": "2b1d1fcc48f96a5caf83d938d15da586f62f4f3973cf825cfd9c67f121890aae",
+      "bytes": 4591
+    },
+    {
+      "path": "data/tables/buff.lua",
+      "sha256": "2c3ce443dda2e46f405156ea7da92862fadf7aaa173ca8cf729eb1cc2945c886",
+      "bytes": 952806
+    },
+    {
+      "path": "data/tables/partner.lua",
+      "sha256": "a1d3d11e308140e57ed861a2dc0031f562420881405a5ba6f62987df8952bc49",
+      "bytes": 2550282
+    },
+    {
+      "path": "data/tables/super_partner.lua",
+      "sha256": "ddee186ee41361a3674d4764be68efec01fad32d288c9dc84c552df6f1b770ea",
+      "bytes": 48646
+    },
+    {
+      "path": "data/tables/pet.lua",
+      "sha256": "bc974045ec92fd7c0ebb2655d635d1b057eee7f74a871cfa2316b511ad55986e",
+      "bytes": 119982
+    },
+    {
+      "path": "data/tables/skill.lua",
+      "sha256": "7a2123ac10cb7f1ac0cd4da3fa8d3a076d1042cbc01e44c218ab4ea0b77ba45a",
+      "bytes": 3282534
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+ok  	gxb.local/backend/v2/internal/application/activitydirectory	1.031s
+ok  	gxb.local/backend/v2/internal/application/bootstrap	1.019s
+ok  	gxb.local/backend/v2/internal/application/characterasset	1.020s
+ok  	gxb.local/backend/v2/internal/application/characterhero	2.093s
+ok  	gxb.local/backend/v2/internal/application/characterpet	1.841s
+ok  	gxb.local/backend/v2/internal/application/characterpractice	1.045s
+ok  	gxb.local/backend/v2/internal/application/charactersavedpreset	1.026s
+ok  	gxb.local/backend/v2/internal/application/directorysync	1.012s
+ok  	gxb.local/backend/v2/internal/application/generation	1.020s
+ok  	gxb.local/backend/v2/internal/application/guildcore	1.052s
+ok  	gxb.local/backend/v2/internal/application/guildview	1.024s
+?   	gxb.local/backend/v2/internal/application/playerdirectory	[no test files]
+ok  	gxb.local/backend/v2/internal/application/i5	1.053s
+ok  	gxb.local/backend/v2/internal/application/identitylifecycle	1.026s
+ok  	gxb.local/backend/v2/internal/application/playerroot	1.018s
+ok  	gxb.local/backend/v2/internal/application/realtimeauth	1.020s
+ok  	gxb.local/backend/v2/internal/archguard	1.333s

@@ -1,0 +1,3 @@
+go version go1.23.2 linux/amd64
+canonical requires go >=1.26.0 and toolchain go1.27.1
+compatibility copy changes only go.mod language/toolchain declarations and .go-version; go.sum unchanged

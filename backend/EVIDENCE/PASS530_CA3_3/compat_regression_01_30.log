@@ -1,0 +1,90 @@
+[1/91] gxb.local/backend/v2/cmd/gxb-admin
+?   	gxb.local/backend/v2/cmd/gxb-admin	[no test files]
+PASS gxb.local/backend/v2/cmd/gxb-admin
+[2/91] gxb.local/backend/v2/cmd/gxb-api
+?   	gxb.local/backend/v2/cmd/gxb-api	[no test files]
+PASS gxb.local/backend/v2/cmd/gxb-api
+[3/91] gxb.local/backend/v2/cmd/gxb-realtime
+?   	gxb.local/backend/v2/cmd/gxb-realtime	[no test files]
+PASS gxb.local/backend/v2/cmd/gxb-realtime
+[4/91] gxb.local/backend/v2/cmd/gxb-wave-s-report
+?   	gxb.local/backend/v2/cmd/gxb-wave-s-report	[no test files]
+PASS gxb.local/backend/v2/cmd/gxb-wave-s-report
+[5/91] gxb.local/backend/v2/cmd/gxb-worker
+?   	gxb.local/backend/v2/cmd/gxb-worker	[no test files]
+PASS gxb.local/backend/v2/cmd/gxb-worker
+[6/91] gxb.local/backend/v2/internal/adapters/blobstore
+?   	gxb.local/backend/v2/internal/adapters/blobstore	[no test files]
+PASS gxb.local/backend/v2/internal/adapters/blobstore
+[7/91] gxb.local/backend/v2/internal/adapters/guildpolicybridge
+?   	gxb.local/backend/v2/internal/adapters/guildpolicybridge	[no test files]
+PASS gxb.local/backend/v2/internal/adapters/guildpolicybridge
+[8/91] gxb.local/backend/v2/internal/adapters/guildwire
+?   	gxb.local/backend/v2/internal/adapters/guildwire	[no test files]
+PASS gxb.local/backend/v2/internal/adapters/guildwire
+[9/91] gxb.local/backend/v2/internal/adapters/pass353diff
+?   	gxb.local/backend/v2/internal/adapters/pass353diff	[no test files]
+PASS gxb.local/backend/v2/internal/adapters/pass353diff
+[10/91] gxb.local/backend/v2/internal/adapters/postgres
+ok  	gxb.local/backend/v2/internal/adapters/postgres	0.002s
+PASS gxb.local/backend/v2/internal/adapters/postgres
+[11/91] gxb.local/backend/v2/internal/adapters/postgres/activitystore
+ok  	gxb.local/backend/v2/internal/adapters/postgres/activitystore	0.002s
+PASS gxb.local/backend/v2/internal/adapters/postgres/activitystore
+[12/91] gxb.local/backend/v2/internal/adapters/postgres/characterqueries
+?   	gxb.local/backend/v2/internal/adapters/postgres/characterqueries	[no test files]
+PASS gxb.local/backend/v2/internal/adapters/postgres/characterqueries
+[13/91] gxb.local/backend/v2/internal/adapters/postgres/characterstore
+?   	gxb.local/backend/v2/internal/adapters/postgres/characterstore	[no test files]
+PASS gxb.local/backend/v2/internal/adapters/postgres/characterstore
+[14/91] gxb.local/backend/v2/internal/adapters/postgres/contentqueries
+?   	gxb.local/backend/v2/internal/adapters/postgres/contentqueries	[no test files]
+PASS gxb.local/backend/v2/internal/adapters/postgres/contentqueries
+[15/91] gxb.local/backend/v2/internal/adapters/postgres/contentstore
+ok  	gxb.local/backend/v2/internal/adapters/postgres/contentstore	0.040s
+PASS gxb.local/backend/v2/internal/adapters/postgres/contentstore
+[16/91] gxb.local/backend/v2/internal/adapters/postgres/guildprojection
+?   	gxb.local/backend/v2/internal/adapters/postgres/guildprojection	[no test files]
+PASS gxb.local/backend/v2/internal/adapters/postgres/guildprojection
+[17/91] gxb.local/backend/v2/internal/adapters/postgres/guildstore
+?   	gxb.local/backend/v2/internal/adapters/postgres/guildstore	[no test files]
+PASS gxb.local/backend/v2/internal/adapters/postgres/guildstore
+[18/91] gxb.local/backend/v2/internal/adapters/postgres/i4store
+ok  	gxb.local/backend/v2/internal/adapters/postgres/i4store	0.003s
+PASS gxb.local/backend/v2/internal/adapters/postgres/i4store
+[19/91] gxb.local/backend/v2/internal/adapters/postgres/i5store
+ok  	gxb.local/backend/v2/internal/adapters/postgres/i5store	0.002s
+PASS gxb.local/backend/v2/internal/adapters/postgres/i5store
+[20/91] gxb.local/backend/v2/internal/adapters/postgres/identitystore
+?   	gxb.local/backend/v2/internal/adapters/postgres/identitystore	[no test files]
+PASS gxb.local/backend/v2/internal/adapters/postgres/identitystore
+[21/91] gxb.local/backend/v2/internal/adapters/postgres/kernelqueries
+?   	gxb.local/backend/v2/internal/adapters/postgres/kernelqueries	[no test files]
+PASS gxb.local/backend/v2/internal/adapters/postgres/kernelqueries
+[22/91] gxb.local/backend/v2/internal/adapters/postgres/kernelstore
+ok  	gxb.local/backend/v2/internal/adapters/postgres/kernelstore	0.002s
+PASS gxb.local/backend/v2/internal/adapters/postgres/kernelstore
+[23/91] gxb.local/backend/v2/internal/adapters/provider
+?   	gxb.local/backend/v2/internal/adapters/provider	[no test files]
+PASS gxb.local/backend/v2/internal/adapters/provider
+[24/91] gxb.local/backend/v2/internal/adapters/river
+?   	gxb.local/backend/v2/internal/adapters/river	[no test files]
+PASS gxb.local/backend/v2/internal/adapters/river
+[25/91] gxb.local/backend/v2/internal/adapters/stockfixtures
+?   	gxb.local/backend/v2/internal/adapters/stockfixtures	[no test files]
+PASS gxb.local/backend/v2/internal/adapters/stockfixtures
+[26/91] gxb.local/backend/v2/internal/adapters/stockruntime
+ok  	gxb.local/backend/v2/internal/adapters/stockruntime	0.397s
+PASS gxb.local/backend/v2/internal/adapters/stockruntime
+[27/91] gxb.local/backend/v2/internal/application/activitydirectory
+ok  	gxb.local/backend/v2/internal/application/activitydirectory	0.002s
+PASS gxb.local/backend/v2/internal/application/activitydirectory
+[28/91] gxb.local/backend/v2/internal/application/bootstrap
+ok  	gxb.local/backend/v2/internal/application/bootstrap	0.002s
+PASS gxb.local/backend/v2/internal/application/bootstrap
+[29/91] gxb.local/backend/v2/internal/application/characterhero
+ok  	gxb.local/backend/v2/internal/application/characterhero	0.003s
+PASS gxb.local/backend/v2/internal/application/characterhero
+[30/91] gxb.local/backend/v2/internal/application/characterpet
+ok  	gxb.local/backend/v2/internal/application/characterpet	0.003s
+PASS gxb.local/backend/v2/internal/application/characterpet

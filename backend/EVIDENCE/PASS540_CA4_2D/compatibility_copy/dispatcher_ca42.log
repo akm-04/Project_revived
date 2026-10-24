@@ -1,0 +1,10 @@
+=== RUN   TestCA42MID54MinimalSuccessAndAlreadyEquippedRecovery
+--- PASS: TestCA42MID54MinimalSuccessAndAlreadyEquippedRecovery (0.00s)
+=== RUN   TestCA42MID54StrictShapeAndSemanticRejection
+--- PASS: TestCA42MID54StrictShapeAndSemanticRejection (0.00s)
+=== RUN   TestCA42MID62ProjectsCanonicalEquipsAndCurrentManaForNoWork
+--- PASS: TestCA42MID62ProjectsCanonicalEquipsAndCurrentManaForNoWork (0.00s)
+=== RUN   TestCA42MID62StrictShapeAndProjectionFailure
+--- PASS: TestCA42MID62StrictShapeAndProjectionFailure (0.00s)
+PASS
+ok  	gxb.local/backend/v2/internal/adapters/stockruntime	0.002s

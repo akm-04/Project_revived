@@ -1,0 +1,8 @@
+{
+  "status": "I7C5B_RESEARCH_SUFFICIENT_FOR_SCOPED_IMPLEMENTATION",
+  "records": ["work/i7c5b/research/TOP_FLOOR_SOURCE_RESEARCH.md", "work/i7c5b/research/TOP_FLOOR_RESEARCH_DECISIONS.md"],
+  "source_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+  "negative_results": ["Frozen V1 handlers/arena.py are stubs (no algorithm corroboration)", "ArenaRefreshWindow calls a nonexistent model method (dead)", "274/275/277 have no client sender", "FRONT_ARENA_BATTLE=false disables the 279 client-report path"],
+  "source_conflicts": ["Help text 10-minute cooldown vs misc arena_cooldown 300 and ArenaWindow lastMatchTime+300: data selected"],
+  "unknown_to_private_policy": ["Opponent selection formula", "Robot ladder placement and robot actor/display mapping", "New player entry rank", "Seal-hero opening rule", "Record/report retention", "History accounting window (Q_TOP_FLOOR_HISTORY_WINDOW)"]
+}

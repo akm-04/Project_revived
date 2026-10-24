@@ -1,0 +1,60 @@
+01 PASS source_oracle_hash 
+02 PASS vector_hash 
+03 PASS embedded_vector_hash 
+04 PASS go_version_pin 
+05 PASS go_mod_pin 
+06 PASS go_sum_pin 
+07 PASS content_revision_in_build 
+08 PASS fumo_catalog_present 
+09 PASS six_raw_fumo_domain 
+10 PASS fumo_columns_present 
+11 PASS no_durable_fumo_level_columns 
+12 PASS service_feedfumo 
+13 PASS service_normal_family_validation 
+14 PASS service_collected_slot_check 
+15 PASS service_cap_check 
+16 PASS service_duplicate_counts 
+17 PASS service_raw_supply_mul 
+18 PASS service_credit_cap 
+19 PASS service_mana_credited 
+20 PASS service_prepare_i5 
+21 PASS service_full_occurrence_debit 
+22 PASS service_apply_i5 
+23 PASS service_one_cas 
+24 PASS service_receipt_find 
+25 PASS service_receipt_put 
+26 PASS service_no_time_dedupe 
+27 PASS service_derived_levels 
+28 PASS service_only_target_fumo_mutation 
+29 PASS no_fumo_level_persistence_in_service 
+30 PASS dispatcher_mid58_case 
+31 PASS dispatcher_strict_params 
+32 PASS dispatcher_calls_feed 
+33 PASS dispatcher_projects_mana 
+34 PASS dispatcher_projects_fumo 
+35 PASS dispatcher_projects_levels 
+36 PASS production_mid58_registered [49, 52, 55, 58, 63, 67, 89]
+37 PASS production_mid54_unregistered [49, 52, 55, 58, 63, 67, 89]
+38 PASS production_mid62_unregistered [49, 52, 55, 58, 63, 67, 89]
+39 PASS production_mid29_unregistered [49, 52, 55, 58, 63, 67, 89]
+40 PASS production_mid51_unregistered [49, 52, 55, 58, 63, 67, 89]
+41 PASS production_mid57_unregistered [49, 52, 55, 58, 63, 67, 89]
+42 PASS content_fumo_target_lookup 
+43 PASS content_fumo_material_lookup 
+44 PASS test_vector_count 
+45 PASS test_vector_hash 
+46 PASS test_receipt_replay 
+47 PASS stage_validator_present 
+48 PASS archguard_present 
+49 PASS no_mid29_fumo_service 
+50 PASS no_ca4_3b_new_service 
+51 PASS exact_attempt_blocked 
+52 PASS focused_green 
+53 PASS race_green 
+54 PASS regression_92 
+55 PASS vet_green_zero_output 
+56 PASS arch_green 
+57 PASS contract_mentions_mid58 
+58 PASS contract_excludes_mid29 
+59 PASS contract_excludes_mid51_57 
+RESULT 59/59 GREEN

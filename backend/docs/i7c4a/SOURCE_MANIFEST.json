@@ -1,0 +1,92 @@
+[
+  {
+    "path": "app/windows/NewChangeAvatarWindow.lua",
+    "sha256": "bae9e0d91a76a2adcf087510f408ec3a4524be104483aa713ad357a29e65d7e1",
+    "source_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+    "status": "EXACT_PRIMARY_SOURCE_CACHED_NOT_WHOLE_FILE_ANALYSIS_CLAIM"
+  },
+  {
+    "path": "app/windows/ChangeAvatarWindow.lua",
+    "sha256": "72f97f5b3003d97d8cdb7f5ff6cd9419f385d172537365efe3a0b64f3c424853",
+    "source_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+    "status": "EXACT_PRIMARY_SOURCE_CACHED_NOT_WHOLE_FILE_ANALYSIS_CLAIM"
+  },
+  {
+    "path": "app/windows/ChangeAvatarFrameWindow.lua",
+    "sha256": "0178a7ddbf75bac45eab066cb92d9485a6a11507eeb5cc1faac1db01e1d6052d",
+    "source_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+    "status": "EXACT_PRIMARY_SOURCE_CACHED_NOT_WHOLE_FILE_ANALYSIS_CLAIM"
+  },
+  {
+    "path": "app/model/ChangeAvatar.lua",
+    "sha256": "159fd3ef56b0c05a3fa90fb2c2d83e7dc697e32b85ed8298f9e7d2b025dcf290",
+    "source_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+    "status": "EXACT_PRIMARY_SOURCE_CACHED_NOT_WHOLE_FILE_ANALYSIS_CLAIM"
+  },
+  {
+    "path": "app/model/SelfPlayer.lua",
+    "sha256": "163d5893c9522ada412c2b9c4748a80757660fccdf03c8f72cb6edf0838b8eb4",
+    "source_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+    "status": "EXACT_PRIMARY_SOURCE_CACHED_NOT_WHOLE_FILE_ANALYSIS_CLAIM"
+  },
+  {
+    "path": "app/model/NormalHero.lua",
+    "sha256": "125183556caeecc182bf0702dd1f95160c8ba1666a3b97fbb8a7261d30ae0ac9",
+    "source_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+    "status": "EXACT_PRIMARY_SOURCE_CACHED_NOT_WHOLE_FILE_ANALYSIS_CLAIM"
+  },
+  {
+    "path": "app/model/SuperHero.lua",
+    "sha256": "b127c2cbef327d3142031bf30daa0af1b45997c6da82fba946d641a86783d622",
+    "source_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+    "status": "EXACT_PRIMARY_SOURCE_CACHED_NOT_WHOLE_FILE_ANALYSIS_CLAIM"
+  },
+  {
+    "path": "app/model/Achievement.lua",
+    "sha256": "21997595c3bf71fde46029d8cfc31473dab8f3f39d94b480e3d3e6555a453d50",
+    "source_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+    "status": "EXACT_PRIMARY_SOURCE_CACHED_NOT_WHOLE_FILE_ANALYSIS_CLAIM"
+  },
+  {
+    "path": "app/model/ChatBubble.lua",
+    "sha256": "838195998451f53933bfba539a459cd37b95172ac13150d9ecc8d6d95f64f3e6",
+    "source_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+    "status": "EXACT_PRIMARY_SOURCE_CACHED_NOT_WHOLE_FILE_ANALYSIS_CLAIM"
+  },
+  {
+    "path": "app/model/Backpack.lua",
+    "sha256": "953999f81fc43ecd00e587d884c88b6a1ba066e35ff75a20dd698b6cb950af7a",
+    "source_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+    "status": "EXACT_PRIMARY_SOURCE_CACHED_NOT_WHOLE_FILE_ANALYSIS_CLAIM"
+  },
+  {
+    "path": "app/common/tables/AvatarTable.lua",
+    "sha256": "e8af19f860d60c2b7f6c136de2bf0114420a6dc25ca35260ff8573a987522790",
+    "source_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+    "status": "EXACT_PRIMARY_SOURCE_CACHED_NOT_WHOLE_FILE_ANALYSIS_CLAIM"
+  },
+  {
+    "path": "app/common/tables/VipTable.lua",
+    "sha256": "573e26d035d2f97d61ac0e31affa0755dbd8125131a81d69522aeebeb23ed068",
+    "source_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+    "status": "EXACT_PRIMARY_SOURCE_CACHED_NOT_WHOLE_FILE_ANALYSIS_CLAIM"
+  },
+  {
+    "path": "app/common/tables/MonthlyPrivilegeTable.lua",
+    "sha256": "0c46fc12c834b051a6848c84bb4f46dfb21203738ceaada668dca9541815c125",
+    "source_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+    "status": "EXACT_PRIMARY_SOURCE_CACHED_NOT_WHOLE_FILE_ANALYSIS_CLAIM"
+  },
+  {
+    "path": "app/common/tables/TitleSystemTable.lua",
+    "sha256": "d821c0add324ad687365e8fd9de82cf98dfb9dd68082f3210948fcd3e0ec4362",
+    "source_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+    "status": "EXACT_PRIMARY_SOURCE_CACHED_NOT_WHOLE_FILE_ANALYSIS_CLAIM"
+  },
+  {
+    "path": "app/common/tables/ChatBubbleTable.lua",
+    "sha256": "7b9d4d41b1987fefce4b474ddfd83ea65b93adfae1b4fcdb55f3966714b39350",
+    "source_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+    "status": "EXACT_PRIMARY_SOURCE_CACHED_NOT_WHOLE_FILE_ANALYSIS_CLAIM"
+  }
+]

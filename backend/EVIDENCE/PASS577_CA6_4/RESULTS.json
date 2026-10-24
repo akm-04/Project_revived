@@ -1,0 +1,76 @@
+{
+  "classification": {
+    "compatibility_copy_auto_fuzz": "GREEN_328283_EXECUTIONS_RECORDED",
+    "compatibility_copy_changed_area_shuffle20": "GREEN",
+    "compatibility_copy_focused_race": "GREEN",
+    "compatibility_copy_focused_test": "GREEN",
+    "compatibility_copy_focused_vet": "GREEN",
+    "compatibility_copy_full_test": "GREEN",
+    "compatibility_copy_full_vet": "GREEN",
+    "compatibility_copy_remaining_race_batches": "GREEN_EXCEPT_CONTENT_REGISTRY_TIMEOUT_NOT_CLAIMED",
+    "compatibility_copy_whole_tree_race": "PARTIAL_TIMEOUT_NOT_CLAIMED_CONTENT_REGISTRY_REMAINS_TIMEOUT",
+    "exact_go_1_27_1_execution": "ENVIRONMENT_BLOCKED_TOOLCHAIN_DOWNLOAD_UNAVAILABLE",
+    "exact_static_source_oracle": "GREEN",
+    "physical_stock_client": "W2_DEFERRED",
+    "real_postgresql": "ENVIRONMENT_BLOCKED_NOT_AVAILABLE"
+  },
+  "logs": {
+    "REALITY_CHECK.md": {
+      "bytes": 5353,
+      "sha256": "c089ff0170508afb882297c34bf4f6bf97c66cfd177b7cc6e26bbd57800ff056"
+    },
+    "compat/COMPATIBILITY_COPY_ONLY.txt": {
+      "bytes": 259,
+      "sha256": "1689e3265e313090775c0cb9ca331c07375bbf230cf0ea1e39ce2fa38ed9c567"
+    },
+    "compat/focused_test_vet_race.log": {
+      "bytes": 439,
+      "sha256": "05e0ab9b1192318386b5fc46c971ec7227b79f48c5dde75315731354dee503b2"
+    },
+    "compat/full_race_partial_timeout.log": {
+      "bytes": 4366,
+      "sha256": "793e95cc2c00b40debacd7d48c4718c211db942f5cb4bf9514f4e0c121ed8e6d"
+    },
+    "compat/full_test_vet.log": {
+      "bytes": 6227,
+      "sha256": "823df4049eb2031cd194d3400b081048794ee7417fb83e7cadf17d1f0cadaf55"
+    },
+    "compat/race_remaining_nonregistry.log": {
+      "bytes": 3197,
+      "sha256": "c7755334636e81b067e6db2e5371404bdab9b3bb2b036503e39f2cf03d753435"
+    },
+    "compat/race_remaining_packages.txt": {
+      "bytes": 1468,
+      "sha256": "e8526ffadbf8ea89c00351fc12fd19483e6ec3dfb64c27671a358a93af6aa532"
+    },
+    "compat/shuffle_and_fuzz.log": {
+      "bytes": 869,
+      "sha256": "eae0d3a6e19b1e1c540750a145edb339bccf2e8a0153f51e9b1784f1e73608c8"
+    },
+    "exact/canonical_pins.sha256": {
+      "bytes": 332,
+      "sha256": "165ed1dddc0e7cdc08021cba4b3d0b7df22befeba4ea5ab7b09453a2ef6606d6"
+    },
+    "exact/environment_probe.log": {
+      "bytes": 1130,
+      "sha256": "5565a66aa8f0d9e965f3f4ea08dc6ef1e9306b424403c6abed1a88147f745c26"
+    },
+    "exact/source_foundations.log": {
+      "bytes": 3016,
+      "sha256": "a53d7b645e5c267c259e12454e7880f1e4ed486cfbd3fe6d257f31bc4b2dcfbb"
+    },
+    "exact/static_core.log": {
+      "bytes": 1866,
+      "sha256": "632492568874144def1230a74c8f78c0e5b6baf5c295fd2dfee8c6817dfa4302"
+    },
+    "exact/static_final.log": {
+      "bytes": 1224,
+      "sha256": "1d1c3def7ec9e83b271839e3a972ab8b650a3b772ca391d68c17098c09dd50b9"
+    }
+  },
+  "mandatory_future_gate": "CA6-6 exact accumulated Go1.27.1 + real PostgreSQL aggregate gate remains mandatory; local/compatibility-copy evidence cannot satisfy it.",
+  "pass": "577.0",
+  "schema_version": 1,
+  "stage": "CA6-4",
+  "status": "LOCAL_ACCEPTED_COMPATIBILITY_COPY_ONLY_EXACT_NATIVE_AGGREGATE_DEFERRED_CA6_6"
+}

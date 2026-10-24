@@ -1,0 +1,34 @@
+{
+  "id": "C2D_FRAGMENT_RECIPES_V1",
+  "status": "DIRECT_USER_AUTHORIZED_RECONSTRUCTION",
+  "recorded_utc": "2026-10-14T01:47:37.944288+00:00",
+  "answer": "Approve fragment-row recipes and record the client limitation",
+  "scope": [
+    {
+      "book_id": 130001020,
+      "name": "Trident",
+      "fragment_id": 140001020,
+      "count": 40
+    },
+    {
+      "book_id": 130001021,
+      "name": "Magic Girl",
+      "fragment_id": 140001021,
+      "count": 45
+    }
+  ],
+  "cost_mana": 0,
+  "classification": "IMPLEMENTATION_DECISION_FROM_CONFLICTING_SOURCE_ROWS_NOT_ORIGINAL_SERVER_PROOF",
+  "evidence": [
+    "BOOK_ITEM_ROWS.json: book.compose/compose_num both0 vsfragment.compose_item anditem_num",
+    "SRC64 SelfPlayer.makeItem reads outputbook recipe for local deduction",
+    "FragmentMake checks inputfragment item_num"
+  ],
+  "client_limitation": "Successful stock compose addsbook but emptybookrecipe leaves localfragment count stale untilBackpackreload. Server consumes40/45 once; no inventclient patch or perfect stockproof. W2afterI14 remainsnotpassed.",
+  "contract_impact": "Necessary source-recipe adjudication under frozen692 Book lifecycle PROFILE/VALUE and parent amendmentcontract; no new owner,topology,lock,acceptance requirement or durablecontract. Add policy as producerprofile appendix at next normal product/evidence seal.",
+  "requalification": [
+    "Changed newbook_catalog payload/revision and newBook recipe tests",
+    "No prior26payload or accepted2A/B/C algorithm invalidation"
+  ],
+  "authorization": "Latest direct user explicit reply after question call_3d? See verbatim answer in this record; no implementation reapproval needed"
+}

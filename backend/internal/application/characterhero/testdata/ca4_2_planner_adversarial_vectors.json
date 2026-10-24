@@ -1,0 +1,571 @@
+{
+  "mapping_sha256": "bbeb58baedfa604bdb520827dcfb5079683fe8c154b3e8c409a320d8a30ac241",
+  "potion_iteration_interpretation": "LITERAL_LIST_ORDER_COMPATIBILITY_INTERPRETATION_BECAUSE_SOURCE_USES_PAIRS",
+  "schema_version": 1,
+  "source_basis": "current src_64 HeroMainWindow.checkOneKeyEquips + Pass535 CA4-1 generated content",
+  "status": "RESEARCH_ORACLE_NOT_PRODUCTION",
+  "vectors": [
+    {
+      "expected": {
+        "mana_debit": 0,
+        "max_exp_shortfall": 0,
+        "potion_debits": {},
+        "potion_exp_granted": 0,
+        "selected": [
+          1,
+          2
+        ],
+        "stack_debits": {
+          "20001005": 2
+        }
+      },
+      "input": {
+        "color": 1,
+        "equipped": [
+          0,
+          0,
+          1,
+          1,
+          1,
+          1
+        ],
+        "hero_exp_total": 1844095,
+        "hero_level": 100,
+        "inventory": {
+          "20001005": 2
+        },
+        "mana": 0,
+        "player_level": 100,
+        "table_id": 10001001
+      },
+      "name": "DIRECT_SHARED_TARGET_TWO_COPIES",
+      "notes": "Slots 1 and 2 both map to direct-only item 20001005. Shared reservation requires two copies; no composition Mana."
+    },
+    {
+      "expected": {
+        "mana_debit": 0,
+        "max_exp_shortfall": 0,
+        "potion_debits": {},
+        "potion_exp_granted": 0,
+        "selected": [
+          1
+        ],
+        "stack_debits": {
+          "20001005": 1
+        }
+      },
+      "input": {
+        "color": 1,
+        "equipped": [
+          0,
+          0,
+          1,
+          1,
+          1,
+          1
+        ],
+        "hero_exp_total": 1844095,
+        "hero_level": 100,
+        "inventory": {
+          "20001005": 1
+        },
+        "mana": 0,
+        "player_level": 100,
+        "table_id": 10001001
+      },
+      "name": "RESERVATION_COLLISION_ONE_COPY",
+      "notes": "Fixed slot order 1->6 means slot1 consumes the only direct copy; slot2 cannot reserve it again."
+    },
+    {
+      "expected": {
+        "mana_debit": 300,
+        "max_exp_shortfall": 0,
+        "potion_debits": {},
+        "potion_exp_granted": 0,
+        "selected": [
+          3,
+          4
+        ],
+        "stack_debits": {
+          "20001003": 1,
+          "20001005": 1,
+          "20001021": 1,
+          "30001003": 1
+        }
+      },
+      "input": {
+        "color": 3,
+        "equipped": [
+          1,
+          1,
+          0,
+          0,
+          1,
+          1
+        ],
+        "hero_exp_total": 1844095,
+        "hero_level": 100,
+        "inventory": {
+          "20001003": 1,
+          "20001005": 1,
+          "20001021": 1,
+          "30001003": 1
+        },
+        "mana": 1000000000,
+        "player_level": 100,
+        "table_id": 10001001
+      },
+      "name": "DIRECT_THEN_COMPOSE_SAME_TARGET",
+      "notes": "Slots 3/4 map to recipe item 20001021. First reserves the one direct target; second sees target quantity equal prior reservation and recursively composes another."
+    },
+    {
+      "expected": {
+        "mana_debit": 0,
+        "max_exp_shortfall": 0,
+        "potion_debits": {},
+        "potion_exp_granted": 0,
+        "selected": [
+          3
+        ],
+        "stack_debits": {
+          "20001021": 1
+        }
+      },
+      "input": {
+        "color": 3,
+        "equipped": [
+          1,
+          1,
+          0,
+          0,
+          1,
+          1
+        ],
+        "hero_exp_total": 1844095,
+        "hero_level": 100,
+        "inventory": {
+          "20001003": 1,
+          "20001005": 1,
+          "20001021": 1,
+          "30001003": 1
+        },
+        "mana": 299,
+        "player_level": 100,
+        "table_id": 10001001
+      },
+      "name": "CUMULATIVE_MANA_EXACT_MINUS_ONE",
+      "notes": "First slot is direct and costs zero Mana. Second requires composition and is rejected when total composition Mana exceeds available Mana by exactly one."
+    },
+    {
+      "expected": {
+        "mana_debit": 300,
+        "max_exp_shortfall": 0,
+        "potion_debits": {},
+        "potion_exp_granted": 0,
+        "selected": [
+          3,
+          4
+        ],
+        "stack_debits": {
+          "20001003": 1,
+          "20001005": 1,
+          "20001021": 1,
+          "30001003": 1
+        }
+      },
+      "input": {
+        "color": 3,
+        "equipped": [
+          1,
+          1,
+          0,
+          0,
+          1,
+          1
+        ],
+        "hero_exp_total": 1844095,
+        "hero_level": 100,
+        "inventory": {
+          "20001003": 1,
+          "20001005": 1,
+          "20001021": 1,
+          "30001003": 1
+        },
+        "mana": 300,
+        "player_level": 100,
+        "table_id": 10001001
+      },
+      "name": "CUMULATIVE_MANA_EXACT_BOUNDARY",
+      "notes": "Same state at exact composition-Mana boundary; second slot is accepted."
+    },
+    {
+      "expected": {
+        "mana_debit": 300,
+        "max_exp_shortfall": 0,
+        "potion_debits": {},
+        "potion_exp_granted": 0,
+        "selected": [
+          5
+        ],
+        "stack_debits": {
+          "20001006": 2,
+          "20001007": 1
+        }
+      },
+      "input": {
+        "color": 2,
+        "equipped": [
+          1,
+          1,
+          1,
+          1,
+          0,
+          1
+        ],
+        "hero_exp_total": 1844095,
+        "hero_level": 100,
+        "inventory": {
+          "20001006": 2,
+          "20001007": 1
+        },
+        "mana": 300,
+        "player_level": 100,
+        "table_id": 10001003
+      },
+      "name": "REPEATED_COMPONENT_EDGE_PRESERVED",
+      "notes": "Recipe 20001022 has ordered edges [20001007, 20001006, 20001006]; repeated component identity must debit two units of 20001006."
+    },
+    {
+      "expected": {
+        "mana_debit": 357900,
+        "max_exp_shortfall": 0,
+        "potion_debits": {},
+        "potion_exp_granted": 0,
+        "selected": [
+          2
+        ],
+        "stack_debits": {
+          "20001003": 8,
+          "20001008": 1,
+          "20001009": 8,
+          "20001025": 1,
+          "30001001": 8,
+          "60001003": 5,
+          "60001005": 45,
+          "60001038": 80,
+          "70001003": 5,
+          "70001009": 40
+        }
+      },
+      "input": {
+        "color": 12,
+        "equipped": [
+          1,
+          0,
+          1,
+          1,
+          1,
+          1
+        ],
+        "hero_exp_total": 1844095,
+        "hero_level": 100,
+        "inventory": {
+          "20001003": 8,
+          "20001008": 1,
+          "20001009": 8,
+          "20001025": 1,
+          "30001001": 8,
+          "60001003": 5,
+          "60001005": 45,
+          "60001038": 80,
+          "70001003": 5,
+          "70001009": 40
+        },
+        "mana": 357900,
+        "player_level": 100,
+        "table_id": 10001002
+      },
+      "name": "DEPTH_SIX_RECURSIVE_COMPOSITION",
+      "notes": "Current CA4-1 source graph maximum observed recipe depth is six. Exact leaf inventory and Mana should permit the slot."
+    },
+    {
+      "expected": {
+        "mana_debit": 0,
+        "max_exp_shortfall": 0,
+        "potion_debits": {},
+        "potion_exp_granted": 0,
+        "selected": [],
+        "stack_debits": {}
+      },
+      "input": {
+        "color": 12,
+        "equipped": [
+          1,
+          0,
+          1,
+          1,
+          1,
+          1
+        ],
+        "hero_exp_total": 1844095,
+        "hero_level": 100,
+        "inventory": {
+          "20001003": 8,
+          "20001008": 1,
+          "20001009": 8,
+          "20001025": 1,
+          "30001001": 8,
+          "60001003": 5,
+          "60001005": 45,
+          "60001038": 80,
+          "70001003": 5,
+          "70001009": 40
+        },
+        "mana": 357899,
+        "player_level": 100,
+        "table_id": 10001002
+      },
+      "name": "DEPTH_SIX_MANA_EXACT_MINUS_ONE",
+      "notes": "Same depth-six recipe with one less Mana must reject without reserving/debiting any materials."
+    },
+    {
+      "expected": {
+        "mana_debit": 0,
+        "max_exp_shortfall": 0,
+        "potion_debits": {},
+        "potion_exp_granted": 0,
+        "selected": [],
+        "stack_debits": {}
+      },
+      "input": {
+        "color": 12,
+        "equipped": [
+          0,
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "hero_exp_total": 1844095,
+        "hero_level": 100,
+        "inventory": {},
+        "mana": 1000000000,
+        "player_level": 100,
+        "table_id": 10001042
+      },
+      "name": "ZERO_MAPPING_NONCANDIDATE",
+      "notes": "Current partner.lua slot1 is explicit zero mapping; it is not missing content and must not be selected."
+    },
+    {
+      "expected": {
+        "mana_debit": 0,
+        "max_exp_shortfall": 0,
+        "potion_debits": {},
+        "potion_exp_granted": 0,
+        "selected": [],
+        "stack_debits": {}
+      },
+      "input": {
+        "color": 12,
+        "equipped": [
+          0,
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "hero_exp_total": 1844095,
+        "hero_level": 100,
+        "inventory": {
+          "20001185": 1
+        },
+        "mana": 1000000000,
+        "player_level": 100,
+        "table_id": 10001001
+      },
+      "name": "SPECIAL_MAPPING_NONCANDIDATE",
+      "notes": "Slot1 maps to a current special/Awakening item; CA4-2 ordinary planner excludes it even when directly owned."
+    },
+    {
+      "expected": {
+        "mana_debit": 0,
+        "max_exp_shortfall": 0,
+        "potion_debits": {},
+        "potion_exp_granted": 0,
+        "selected": [
+          5
+        ],
+        "stack_debits": {
+          "20001022": 1
+        }
+      },
+      "input": {
+        "color": 2,
+        "equipped": [
+          1,
+          1,
+          1,
+          1,
+          0,
+          1
+        ],
+        "hero_exp_total": 1844095,
+        "hero_level": 100,
+        "inventory": {
+          "20001022": 1
+        },
+        "mana": 0,
+        "player_level": 100,
+        "table_id": 10001003
+      },
+      "name": "DIRECT_COPY_PREFERRED_OVER_COMPOSITION",
+      "notes": "A directly owned target is reserved instead of recursively composing its recipe, so composition Mana is zero."
+    },
+    {
+      "expected": {
+        "mana_debit": 0,
+        "max_exp_shortfall": 0,
+        "potion_debits": {},
+        "potion_exp_granted": 0,
+        "selected": [],
+        "stack_debits": {}
+      },
+      "input": {
+        "color": 1,
+        "equipped": [
+          0,
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "hero_exp_total": 0,
+        "hero_level": 1,
+        "inventory": {
+          "20001005": 1
+        },
+        "mana": 0,
+        "player_level": 1,
+        "table_id": 10001001
+      },
+      "name": "PLAYER_HERO_CAP_BLOCKS_SLOT",
+      "notes": "Required Hero level is 2; canonical player progression hero_lev cap is checked independently of current Hero EXP/material availability."
+    },
+    {
+      "expected": {
+        "mana_debit": 0,
+        "max_exp_shortfall": 25,
+        "potion_debits": {
+          "50001001": 1
+        },
+        "potion_exp_granted": 60,
+        "selected": [
+          1
+        ],
+        "stack_debits": {
+          "20001005": 1,
+          "50001001": 1
+        }
+      },
+      "input": {
+        "color": 1,
+        "equipped": [
+          0,
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "hero_exp_total": 0,
+        "hero_level": 1,
+        "inventory": {
+          "20001005": 1,
+          "50001001": 1
+        },
+        "mana": 0,
+        "player_level": 100,
+        "table_id": 10001001
+      },
+      "name": "EXP_POTION_FINAL_STACK_OVERSHOOT",
+      "notes": "Slot requires level2. EXP shortfall is 25, but smallest listed potion grants 60, so one potion is debited and 60 actual EXP is applied."
+    },
+    {
+      "expected": {
+        "mana_debit": 0,
+        "max_exp_shortfall": 25,
+        "potion_debits": {
+          "50005182": 1
+        },
+        "potion_exp_granted": 10000,
+        "selected": [
+          1,
+          5
+        ],
+        "stack_debits": {
+          "20001001": 1,
+          "20001005": 1,
+          "50005182": 1
+        }
+      },
+      "input": {
+        "color": 1,
+        "equipped": [
+          0,
+          1,
+          1,
+          1,
+          0,
+          1
+        ],
+        "hero_exp_total": 0,
+        "hero_level": 1,
+        "inventory": {
+          "20001001": 1,
+          "20001005": 1,
+          "50005182": 999
+        },
+        "mana": 0,
+        "player_level": 100,
+        "table_id": 10001001
+      },
+      "name": "MULTISLOT_EXP_USES_MAX_NOT_SUM",
+      "notes": "Open slots 1/5 require levels 2/1. Potion requirement is maximum cumulative-EXP shortfall across selected slots, not their sum."
+    },
+    {
+      "expected": {
+        "mana_debit": 0,
+        "max_exp_shortfall": 0,
+        "potion_debits": {},
+        "potion_exp_granted": 0,
+        "selected": [],
+        "stack_debits": {}
+      },
+      "input": {
+        "color": 1,
+        "equipped": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "hero_exp_total": 1844095,
+        "hero_level": 100,
+        "inventory": {
+          "20001005": 99,
+          "50001001": 99
+        },
+        "mana": 12345,
+        "player_level": 100,
+        "table_id": 10001001
+      },
+      "name": "CANONICAL_NO_WORK_RETRY",
+      "notes": "Models lost-response cross-request replay after first commit: canonical state has no unequipped candidates, therefore no new debit. Service must still return success with canonical slots and current Mana projection."
+    }
+  ]
+}

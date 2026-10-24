@@ -1,0 +1,204 @@
+{
+  "candidate_binding": {
+    "backend_archive_sha256": "bdbb3c2ec795036e3ec4f97d33d57257133249f73c4f0aa2828de0540adbc9af",
+    "backend_git_head": "1b40629950996ade1ff0da841c5a53910080a22f",
+    "backend_product_tree_sha256": "002fc2a73fdff1866b153028febd32ad52ef7b905dfc5acac0d8756e8dce753c",
+    "current_src64_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+    "frozen_v1_archive_sha256": "31729d5c5e4509c2c89eaa1e8203cf1570afe87e18ed2610b944e457a9946b15",
+    "old_client_v1_164_archive_sha256": "d0a4815507fd4626ac5749f2f6efae554d3a4bef717793f155f58c8bed7170b1",
+    "passmap_sha256": "3b91544a74d177d3d8ca5dacca7e4fb0a6fbdecda5606f4f16d449fe08300431"
+  },
+  "differential_limits": {
+    "current_apk": "String/native inspection did not produce stronger semantic evidence than current Lua source.",
+    "frozen_v1": "Contains newer corroborative src_64/placeholders but is not original-server truth and has no authoritative MID68/69 implementation.",
+    "old_client_v1_164": "No MID68/69/dynamic-card feature found; useful only as a lower-bound age differential, not semantic proof."
+  },
+  "document": "PASS590_CA7_4_SOURCE_ORACLE_R1",
+  "file_hashes": {
+    "Backend.lua": "95378e2b0be8180df6de27e9e430c630bcfe46c080e1f91ef5f6d74bdbb1b840",
+    "HeroMainWindow.lua": "473b72ec14a81d01d6dbdaa19f92c3d78900f40ca34fa5c8cf46585b76d65414",
+    "NormalHero.lua": "125183556caeecc182bf0702dd1f95160c8ba1666a3b97fbb8a7261d30ae0ac9",
+    "SelfPlayer.lua": "163d5893c9522ada412c2b9c4748a80757660fccdf03c8f72cb6edf0838b8eb4",
+    "SkinDynamicTable.lua": "b41bcc1fd5ded9fc26463ddc8080b1dd1920bf0bd0ba387c1e2dc9b23090bf71",
+    "SuperHero.lua": "b127c2cbef327d3142031bf30daa0af1b45997c6da82fba946d641a86783d622",
+    "appearance_catalog.json": "9ec001f390cdec66b3e63013c0ee734660f64befa4f80c30721577bc783c381a",
+    "appearance_projection.go": "9626482daca15bada5385e3f0c1334d4b0b8238abc3ad745d56902018ae3ba43",
+    "characterstore/appearance.go": "55900f83e704eb23c76e043e750f366e87c39e560209cfefbfc6938ec4ae4610",
+    "httpedge/handler.go": "7bad3dec9f81cd957a8cadba4f4ccbcb2201f41f24fa2427980d980579b7c38a",
+    "i5/material_cost.go": "cc3a63f82edcc68f9c4222fc2b84139d9cd33391d04f954e14c804e4ecbbfa3c",
+    "i5/scalar_projection.go": "16523cd4268a65d026b723f6abd8aebfbf8193703b9ecbf23a5abc12e90f5a08",
+    "mid.lua": "026a20b29d97624979777a68c64c749254031604057ff42aa8f8254c3e35b5af",
+    "misc.lua": "058cf5719421ed71a12083a8c95b0ccded7204bedb5fa1263d508e2fa4257f9a",
+    "replaycatalog/catalog.go": "41b6f5115f1acd83c7200a6c97a33e876ecceba3e365b378d2f9b34663d778d1",
+    "skin_dynamic.lua": "defe867b01dc6cc0a1eb8dd5ce8c259bc76c2b4aa15427199b040d30fe4fb920",
+    "stockruntime/hero_dispatcher.go": "a8e6f63fd4a760c5c240e2c2209e39de45948ffebdf30c3dc58b436722555227",
+    "stockruntime/http_dispatchers.go": "bbfe1a169f2a25a11f1e0e5b059158abbc09708683450ebaf9be0cfdb88cef06",
+    "stockruntime/request_params.go": "54755103e56310d34b349076213389c0a6374ebd7734ab86b0e782ddd8765f4d",
+    "utils.lua": "6e56c7342e889d7ae8d41fe47cb06f66832227efe702f3863f693ee7ba84ffad"
+  },
+  "findings": [
+    {
+      "claim": "MID68 is UNLOCK_DYNAMIC_CARD and MID69 is SHOW_DYNAMIC_CARD.",
+      "classification": "SOURCE_FACT",
+      "evidence": {
+        "file": "mid.lua",
+        "line_68": 46,
+        "line_69": 47
+      },
+      "id": "S01"
+    },
+    {
+      "claim": "MID68 stock request is partner_id+model_id; HTTP-200 callback replaces both unlocked_dynamic_card and dynamic_card_state arrays.",
+      "classification": "SOURCE_FACT",
+      "evidence": {
+        "file": "NormalHero.lua",
+        "line": 2791
+      },
+      "id": "S02"
+    },
+    {
+      "claim": "MID69 stock request is partner_id+model_id+numeric is_show computed as 1-current; HTTP-200 callback ignores response data and writes the requested bit locally.",
+      "classification": "SOURCE_FACT",
+      "evidence": {
+        "file": "NormalHero.lua",
+        "line": 2831
+      },
+      "id": "S03"
+    },
+    {
+      "claim": "Paid LIVE UI is gated by dynamicType(model)==2 and uses skinDynamic cost/count plus misc dymisic_item; it prechecks backpack and selfPlayer.crystal.",
+      "classification": "SOURCE_FACT",
+      "evidence": {
+        "file": "HeroMainWindow.lua",
+        "line": 1374
+      },
+      "id": "S04"
+    },
+    {
+      "claim": "On successful MID68 callback the client removes only the activation item locally; no callback-local Crystal subtraction occurs.",
+      "classification": "SOURCE_FACT",
+      "evidence": {
+        "file": "HeroMainWindow.lua",
+        "line": 1394
+      },
+      "id": "S05"
+    },
+    {
+      "claim": "dynamicType 0 is hidden, type1 is automatically visible, type2 requires unlock plus show state 1.",
+      "classification": "SOURCE_FACT",
+      "evidence": {
+        "file": "utils.lua",
+        "line": 7050
+      },
+      "id": "S06"
+    },
+    {
+      "claim": "splitToNumber treats LIVE reload strings positionally and can yield nil for malformed/empty tokens; arrays are not robust authority.",
+      "classification": "SOURCE_FACT",
+      "evidence": {
+        "file": "utils.lua",
+        "line": 383
+      },
+      "id": "S07"
+    },
+    {
+      "claim": "Generic successful web responses process economy_ before command callback.",
+      "classification": "SOURCE_FACT",
+      "evidence": {
+        "file": "Backend.lua",
+        "line": 737
+      },
+      "id": "S08"
+    },
+    {
+      "claim": "SelfPlayer economy handler assigns crystal from economy_.crystal.",
+      "classification": "SOURCE_FACT",
+      "evidence": {
+        "file": "SelfPlayer.lua",
+        "line": 1079
+      },
+      "id": "S09"
+    },
+    {
+      "claim": "Transport failure retry reissues the same MID and params through a fresh webRequest_ invocation; stock supplies no idempotency nonce.",
+      "classification": "SOURCE_FACT",
+      "evidence": {
+        "file": "Backend.lua",
+        "line": 520
+      },
+      "id": "S10"
+    },
+    {
+      "claim": "The HTTP edge creates a new operation.Context for every inbound POST before decode, so each stock HTTP retry receives a new operation ID.",
+      "classification": "SOURCE_FACT",
+      "evidence": {
+        "file": "httpedge/handler.go",
+        "line": 85
+      },
+      "id": "S11"
+    },
+    {
+      "claim": "Current compiled content contains exactly 12 paid LIVE definitions, all with positive Crystal cost and activation item 50005171/count.",
+      "classification": "SOURCE_FACT",
+      "evidence": {
+        "count": 12,
+        "file": "appearance_catalog.json",
+        "models": [
+          10001001,
+          10001051,
+          10001118,
+          11001074,
+          11001079,
+          40001074,
+          40001109,
+          40001110,
+          40001124,
+          40001211,
+          40002049,
+          40011040
+        ]
+      },
+      "id": "S12"
+    },
+    {
+      "claim": "misc dymisic_item resolves to 50005171.",
+      "classification": "SOURCE_FACT",
+      "evidence": {
+        "file": "misc.lua",
+        "line": 7144
+      },
+      "id": "S13"
+    },
+    {
+      "claim": "V2 durable LIVE is keyed Hero+model state and effective projection is NormalHero-only, revision-qualified, wrong-origin filtered, unique, and model-sorted.",
+      "classification": "SOURCE_FACT",
+      "evidence": {
+        "file": "appearance_projection.go",
+        "line": 194
+      },
+      "id": "S14"
+    },
+    {
+      "claim": "SaveHeroLIVEEntitlementTx upserts one Hero-owned LIVE row then advances Hero appearance state_version exactly once via CAS.",
+      "classification": "SOURCE_FACT",
+      "evidence": {
+        "file": "characterstore/appearance.go",
+        "line": 183
+      },
+      "id": "S15"
+    },
+    {
+      "claim": "I5 material debit is caller-transaction composition and can debit scalar+stack atomically; CurrentScalarProjectionPort is explicitly transient and outside semantic receipts.",
+      "classification": "ACCEPTED_INFRASTRUCTURE_FACT",
+      "evidence": {
+        "files": [
+          "i5/material_cost.go",
+          "i5/scalar_projection.go"
+        ]
+      },
+      "id": "S16"
+    }
+  ],
+  "schema_version": 1,
+  "status": "RESEARCH_EVIDENCE_ONLY_NOT_AUTHORITY"
+}

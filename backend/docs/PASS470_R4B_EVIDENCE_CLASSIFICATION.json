@@ -1,0 +1,49 @@
+{
+  "entries": [
+    {
+      "claim": "Exact current src_64 archive/member hashes and R4A source-derived row boundaries remain unchanged and compatible with the R4B relational schema.",
+      "classification": "SOURCE_FACT",
+      "evidence": "EVIDENCE/PASS470_R4B_INDEPENDENT_REALITY_CHECK.txt",
+      "id": "P470-E1"
+    },
+    {
+      "claim": "Frozen Pass353 independently corroborates the bounded stack/owner/defer classifications used by the sealed R4A content; it is not V2 authority.",
+      "classification": "STRONG_INFERENCE",
+      "evidence": "EVIDENCE/PASS470_R4B_INDEPENDENT_REALITY_CHECK.txt",
+      "id": "P470-E2"
+    },
+    {
+      "claim": "Migration 00009 is expand-compatible storage only; immutable content rows are content-registry owned, receipt policy refs are kernel-owned execution evidence, and legacy content_revision columns remain nullable without backfill.",
+      "classification": "IMPLEMENTATION_DECISION",
+      "evidence": "migrations/00009_r4_immutable_content_revisions.sql; docs/architecture/CANONICAL_TABLE_OWNERSHIP.json; sql/kernel/receipts.sql",
+      "id": "P470-E3"
+    },
+    {
+      "claim": "Disposable Go 1.23.2 compatibility copy passes focused race, go vet ./..., 64/64 packages, and R4B validator.",
+      "classification": "RUNTIME_OBSERVED",
+      "evidence": "EVIDENCE/PASS470_R4B_COMPATIBILITY_COPY_FINAL.txt",
+      "id": "P470-E4",
+      "limitation": "COMPATIBILITY_COPY_ONLY"
+    },
+    {
+      "claim": "Canonical static/source/oracle R0-R4B validation passes; I5 remains RED only on pre-existing RF-015 R5-scoped gaps.",
+      "classification": "RUNTIME_OBSERVED",
+      "evidence": "EVIDENCE/PASS470_R4B_CANONICAL_STATIC_VALIDATION.txt; EVIDENCE/PASS470_R4B_I5_EXPECTED_RED.txt",
+      "id": "P470-E5"
+    },
+    {
+      "claim": "Fresh Pass468-to-R4B byte audit shows only bounded R4B schema/ownership/kernel receipt/tooling changes and no R4C/R4D/I5/Grant/httpedge/module-pin leakage.",
+      "classification": "SOURCE_FACT",
+      "evidence": "EVIDENCE/PASS470_R4B_SCOPE_REALITY_CHECK.txt",
+      "id": "P470-E6"
+    },
+    {
+      "claim": "Exact Go1.27.1 and real PostgreSQL behavior are not executed in normal chat. End-R4 Work PostgreSQL test and mandatory R7 PostgreSQL/River gates remain pending.",
+      "classification": "UNKNOWN",
+      "evidence": "EVIDENCE/PASS470_R4B_ENVIRONMENT_BLOCK.txt",
+      "id": "P470-E7"
+    }
+  ],
+  "pass": "470.0",
+  "schema_version": 1
+}

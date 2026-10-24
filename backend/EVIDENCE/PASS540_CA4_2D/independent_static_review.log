@@ -1,0 +1,23 @@
+=== ownership scan ===
+no foreign-owner SQL/content table marker in CharacterHero equipment implementation
+=== route set ===
+220:	heroD := stockruntime.HeroDispatcher{Authority: authority, Service: heroSvc, Economy: heroEconomyProjection}
+221:	for _, mid := range []uint16{49, 52, 55, 63, 67, 89} {
+=== dispatcher branches ===
+79:	case 54: // SET_HERO_EQUIP (CA4-2 diagnostic branch; production remains unregistered)
+93:			return httpedge.Response{HTTPStatus: http.StatusOK, Body: map[string]any{"error_code": int64(30001)}}
+96:	case 62: // ONE_KEY_HERO_EQUIP (CA4-2 diagnostic branch; production remains unregistered)
+111:		mana, err := d.Economy.CurrentScalar(ctx, actor.PlayerID, "mana", req.Envelope.Operation)
+119:		return httpedge.Response{HTTPStatus: http.StatusOK, Body: map[string]any{"equips": equips, "economy_": map[string]any{"mana": mana}}}
+=== persistent projection ===
+internal/projection/hero/stock.go:16:	equips := make([]any, character.HeroEquipmentSlotCount)
+internal/projection/hero/stock.go:17:	for i, v := range h.Equipment {
+internal/projection/hero/stock.go:18:		equips[i] = v
+internal/projection/hero/stock.go:22:		"skills": skills, "skill_ids": append([]any(nil), zero6...), "equips": equips, "fumos": append([]any(nil), zero6...),
+internal/adapters/postgres/characterstore/ca4_2a_test.go:42:		Equipment: character.HeroEquipmentSlots{1, 0, 1, 0, 1, 0}, CreationContentRevision: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", StateVersion: 4, CreatedAt: now, UpdatedAt: now}
+internal/adapters/postgres/characterstore/ca4_2a_test.go:51:	h.Equipment[1] = 1
+internal/adapters/postgres/characterstore/ca4_2a_test.go:57:	want := []any{int64(h.PlayerID), h.PartnerID, h.Star, h.Level, h.Exp, h.Equipment[0], h.Equipment[1], h.Equipment[2], h.Equipment[3], h.Equipment[4], h.Equipment[5], h.UpdatedAt.UTC(), old}
+internal/adapters/postgres/characterstore/store.go:81:		h.Equipment[0], h.Equipment[1], h.Equipment[2], h.Equipment[3], h.Equipment[4], h.Equipment[5],
+internal/adapters/postgres/characterstore/store.go:131:		h := character.Hero{PlayerID: identity.PlayerID(x.PlayerID), PartnerID: x.PartnerID, TableID: x.TableID, OriginTableID: x.OriginTableID, Star: x.Star, Level: x.Level, Exp: x.Exp, Color: x.Color, Equipment: character.HeroEquipmentSlots{x.Equip1, x.Equip2, x.Equip3, x.Equip4, x.Equip5, x.Equip6}, CreationContentRevision: x.CreationContentRevision, StateVersion: x.StateVersion, CreatedAt: x.CreatedAt.UTC(), UpdatedAt: x.UpdatedAt.UTC()}
+internal/adapters/postgres/characterstore/store.go:144:		&h.Equipment[0], &h.Equipment[1], &h.Equipment[2], &h.Equipment[3], &h.Equipment[4], &h.Equipment[5],
+internal/adapters/postgres/characterstore/store.go:196:		h.Equipment[0], h.Equipment[1], h.Equipment[2], h.Equipment[3], h.Equipment[4], h.Equipment[5],

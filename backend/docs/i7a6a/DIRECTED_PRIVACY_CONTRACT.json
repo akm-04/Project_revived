@@ -1,0 +1,29 @@
+{
+  "schema": "gxb-i7a6a-design/v1",
+  "pass": "645.0",
+  "stage": "I7A-6A",
+  "status": "PREIMPLEMENTATION_DESIGN_NO_PRODUCT_AUTHORIZATION",
+  "baseline_passmap": "644.0",
+  "baseline_passmap_sha256": "c786b95f60301abb1d9f5502d5d1f6b6a109281d90c01bbbabd6e58a2941e81a",
+  "backend_sha256": "60b90871802e1f75e0bf08261d6df07dc3c030b9a1c50ffbcfe0092d7e698f02",
+  "backend_tree": "1be8d601037bd203bb4faa7bc4cd1aae3cf2d3ba57d2b1dc4cd670bb9e4e03ab",
+  "implementation_authorized": false,
+  "implementation_started": false,
+  "product_accepted": false,
+  "original_server_truth_claimed": false,
+  "classification": "IMPLEMENTATION_DECISION applying selected I7A1 directed block law",
+  "port": "SocialRelation-owned TxPrivateBindingReader/Planner, additive to discovery projection reader; no foreign SQL",
+  "binding": {
+    "sender": "canonical PlayerID/logicalserver",
+    "recipient": "canonical PlayerID/logicalserver",
+    "friendship_generation": "positive currently active pair generation",
+    "recipient_block_state_version": "0 for absent row, otherwise nonnegative monotone version with active=false",
+    "recipient_block_generation": "retain generation for evidence, version is revocation fence"
+  },
+  "admission": "both canonical roots and active friendship; reject self, missing target/root, recipient->sender active block. Sender->recipient block is not a generalized denial.",
+  "revalidation": "at live claim and pre-enqueue observation, and at offline drain, require active exact friendship generation and unchanged inactive recipient->sender block version. Refriend or add/remove cycle terminalizes old occurrence as PRIVACY_SUPPRESSED.",
+  "no_sender_online_requirement": "Sender HTTP actor must be live at515 admission; later delivery does not require old sender session online. Target writer needs current admitted WORLD generation and fresh I4 liveness.",
+  "boundary": "No socket I/O under gameplay locks. Privacy check/release then queue admission is explicitly non-atomic with subsequent relation commit. In-memory exact-generation fencing controls enqueue; later block cannot retract admitted bytes.",
+  "lock_order": "close globally sorted canonical I4 roots315 for both/all senders then SocialRoots360, sorted Friendship361, directed recipient->sender Block363, recipientInbox380; no quota/request/inbox notice writes",
+  "recovery": "suppression is permanent evidence; no automatic unblocking/refriending resurrects suppressed occurrences; restoring tombstones/generations preserves meaning"
+}

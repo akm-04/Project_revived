@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "pass": "522.0",
+  "phase": "CA3",
+  "status": "APPROVED_INTERNAL_IMPLEMENTATION_STAGING",
+  "roadmap_semantics": "CA3-1/2/3 are internal implementation stages, not new top-level Character Asset phases or independent CA3 phase seals.",
+  "stages": [
+    {
+      "id": "CA3-1",
+      "title": "Pet Identity, Owner, Roster & Projection Foundation",
+      "scope": [
+        "migration 00016",
+        "Pet root/instances + backfill/bootstrap",
+        "PET_CORE_CA3 deterministic content",
+        "pet_id allocator/origin-lineage uniqueness",
+        "MID1 embedded 780 + explicit MID780",
+        "typed Pet reference/summary seam"
+      ],
+      "entry": "Pass522 research/contract seal",
+      "exit": [
+        "focused unit/static/sqlc/query-owner checks",
+        "compiler/content verification",
+        "bootstrap/reload/projection parity",
+        "race/vet/bounded regression",
+        "independent stage reality checkpoint"
+      ],
+      "next": "CA3-2 only after CA3-1 evidence checkpoint is GREEN"
+    },
+    {
+      "id": "CA3-2",
+      "title": "Acquisition, Starter Occurrence & Hatch/Show Lifecycle",
+      "research_status": "OPEN",
+      "scope_candidate": [
+        "MID781 ordinary acquisition",
+        "one-time starter Ross entitlement/function-38 composition",
+        "birthday/incubation lifecycle",
+        "MID782 acceleration including first-free-hatch entitlement",
+        "MID789 natural/explicit show transition",
+        "same-attempt receipt/recovery and reconnect behavior"
+      ],
+      "entry": "CA3-1 GREEN checkpoint plus targeted CA3-2 research closure",
+      "next": "CA3-3 only after CA3-2 checkpoint where dependencies are satisfied"
+    },
+    {
+      "id": "CA3-3",
+      "title": "Self-contained Pet Base Progression",
+      "research_status": "OPEN_STRONG_PROGRESS",
+      "scope_candidate": [
+        "MID786 star evolution",
+        "MID787/MID134 Pet EXP",
+        "MID791 live skill batching if final contract closes",
+        "raw five-slot skill persistence if/when activated"
+      ],
+      "explicit_deferral": "MID785/MID790 full activation waits CA4 equipment/Fumo composition",
+      "entry": "prior stage checkpoint plus CA3-3 targeted research closure"
+    }
+  ],
+  "implementation_rule": "At every stage: exact-current source reconciliation -> implementation -> focused test gate -> independent reality check -> evidence checkpoint. Discoveries that change owner boundaries reopen targeted research before affected code advances."
+}

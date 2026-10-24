@@ -1,0 +1,6 @@
+ok  	gxb.local/backend/v2/internal/application/characterasset	1.011s
+ok  	gxb.local/backend/v2/internal/application/characterhero	1.700s
+ok  	gxb.local/backend/v2/internal/application/characterpet	1.489s
+ok  	gxb.local/backend/v2/internal/application/characterpractice	1.031s
+ok  	gxb.local/backend/v2/internal/application/charactersavedpreset	1.021s
+ok  	gxb.local/backend/v2/internal/archguard	1.216s

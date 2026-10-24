@@ -1,0 +1,1 @@
+### go vet ./internal/application/characterpet ./internal/adapters/stockruntime ./internal/application/i5 ./internal/adapters/postgres/characterstore ./internal/adapters/postgres/i5store ./internal/adapters/postgres/contentstore ./internal/content/builtin ./internal/content/registry

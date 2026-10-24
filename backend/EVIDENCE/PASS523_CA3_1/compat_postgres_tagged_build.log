@@ -1,0 +1,3 @@
+go: downloading github.com/jackc/pgx/v5 v5.10.0
+internal/adapters/postgres/pgx_adapter.go:10:2: github.com/jackc/pgx/v5@v5.10.0: Get "https://proxy.golang.org/github.com/jackc/pgx/v5/@v/v5.10.0.zip": dial tcp: lookup proxy.golang.org on 168.63.129.16:53: read udp 172.26.39.233:38730->168.63.129.16:53: read: connection refused
+internal/adapters/postgres/pgx_adapter.go:11:2: github.com/jackc/pgx/v5@v5.10.0: Get "https://proxy.golang.org/github.com/jackc/pgx/v5/@v/v5.10.0.zip": dial tcp: lookup proxy.golang.org on 168.63.129.16:53: read udp 172.26.39.233:38730->168.63.129.16:53: read: connection refused

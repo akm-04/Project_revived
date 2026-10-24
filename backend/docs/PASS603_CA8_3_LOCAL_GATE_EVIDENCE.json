@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "pass": "603.0",
+  "stage": "CA8-3",
+  "result": "GREEN_LOCAL",
+  "evidence_classification": "COMPATIBILITY_COPY_ONLY_PLUS_CANONICAL_STATIC_AND_EXACT_SOURCE_ORACLES",
+  "acceptance_matrix": {
+    "A01": "GREEN",
+    "A02": "GREEN",
+    "A03": "GREEN",
+    "A04": "GREEN",
+    "A05": "GREEN",
+    "A06": "GREEN",
+    "A07": "GREEN",
+    "A08": "GREEN",
+    "A09": "GREEN",
+    "A10": "GREEN",
+    "A11": "GREEN",
+    "A12": "GREEN",
+    "A13": "GREEN",
+    "A14": "GREEN",
+    "A15": "GREEN",
+    "A16": "GREEN"
+  },
+  "canonical": {
+    "go_mod_sha256": "313c574368bb56dc570bc3427b65f59b059e492f909fe43b7d0291b5ced21dc4",
+    "go_sum_sha256": "efbf6753542d66e2fefcb2ab5e2ade7c9d28f2206a1113d1eb9568f2cb75808d",
+    "go_version_sha256": "a8844fbc8c3eb51c26ed00aec4cd5a5a9d647f849c6ead07bcc83ed24c4a7718",
+    "pins": "go 1.26.0 / toolchain go1.27.1 unchanged",
+    "static_source_log": "EVIDENCE/PASS603_CA8_3_CANONICAL_STATIC_SOURCE.log",
+    "baseline_noise_log": "EVIDENCE/PASS603_CA8_3_BASELINE_STALE_ORACLES.log",
+    "source_oracle_current_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+    "source_oracle_old_client_sha256": "d0a4815507fd4626ac5749f2f6efae554d3a4bef717793f155f58c8bed7170b1",
+    "source_oracle_v1_sha256": "31729d5c5e4509c2c89eaa1e8203cf1570afe87e18ed2610b944e457a9946b15"
+  },
+  "compatibility_copy": {
+    "go": "1.23.2",
+    "whole_tree_test": "GREEN",
+    "whole_tree_vet": "GREEN",
+    "race_coverage": "GREEN_BOUNDED_ALL_REPOSITORY_PACKAGE_FAMILIES; internal/content/registry aggregate process timed out but all 9 registry tests passed individually under -race",
+    "label": "COMPATIBILITY_COPY_ONLY",
+    "logs": [
+      "EVIDENCE/PASS603_CA8_3_COMPAT_FULL_TEST.log",
+      "EVIDENCE/PASS603_CA8_3_COMPAT_FULL_VET.log",
+      "EVIDENCE/PASS603_CA8_3_COMPAT_RACE_APP.log",
+      "EVIDENCE/PASS603_CA8_3_COMPAT_RACE_IO.log",
+      "EVIDENCE/PASS603_CA8_3_COMPAT_RACE_DOMAIN_FOUNDATION.log",
+      "EVIDENCE/PASS603_CA8_3_COMPAT_RACE_CONTENT_FAST.log",
+      "EVIDENCE/PASS603_CA8_3_COMPAT_RACE_REGISTRY_PART1.log",
+      "EVIDENCE/PASS603_CA8_3_COMPAT_RACE_REGISTRY_PART2.log"
+    ]
+  },
+  "historical_validator_noise": [
+    "CA4-5 source oracle reports only generated-content-revision drift; identical on untouched Pass602 baseline",
+    "CA6-5 source oracle reports only Pet production route family drift; identical on untouched Pass602 baseline"
+  ],
+  "native_gate": "DEFERRED_MANDATORY_CA8_9_EXACT_NATIVE_POSTGRESQL_AGGREGATE",
+  "w2": "DEFERRED_UNPASSED"
+}

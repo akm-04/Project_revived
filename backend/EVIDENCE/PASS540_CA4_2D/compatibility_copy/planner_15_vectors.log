@@ -1,0 +1,34 @@
+=== RUN   TestOneKeyPlannerMatchesSealedPass536AdversarialVectors
+=== RUN   TestOneKeyPlannerMatchesSealedPass536AdversarialVectors/DIRECT_SHARED_TARGET_TWO_COPIES
+=== RUN   TestOneKeyPlannerMatchesSealedPass536AdversarialVectors/RESERVATION_COLLISION_ONE_COPY
+=== RUN   TestOneKeyPlannerMatchesSealedPass536AdversarialVectors/DIRECT_THEN_COMPOSE_SAME_TARGET
+=== RUN   TestOneKeyPlannerMatchesSealedPass536AdversarialVectors/CUMULATIVE_MANA_EXACT_MINUS_ONE
+=== RUN   TestOneKeyPlannerMatchesSealedPass536AdversarialVectors/CUMULATIVE_MANA_EXACT_BOUNDARY
+=== RUN   TestOneKeyPlannerMatchesSealedPass536AdversarialVectors/REPEATED_COMPONENT_EDGE_PRESERVED
+=== RUN   TestOneKeyPlannerMatchesSealedPass536AdversarialVectors/DEPTH_SIX_RECURSIVE_COMPOSITION
+=== RUN   TestOneKeyPlannerMatchesSealedPass536AdversarialVectors/DEPTH_SIX_MANA_EXACT_MINUS_ONE
+=== RUN   TestOneKeyPlannerMatchesSealedPass536AdversarialVectors/ZERO_MAPPING_NONCANDIDATE
+=== RUN   TestOneKeyPlannerMatchesSealedPass536AdversarialVectors/SPECIAL_MAPPING_NONCANDIDATE
+=== RUN   TestOneKeyPlannerMatchesSealedPass536AdversarialVectors/DIRECT_COPY_PREFERRED_OVER_COMPOSITION
+=== RUN   TestOneKeyPlannerMatchesSealedPass536AdversarialVectors/PLAYER_HERO_CAP_BLOCKS_SLOT
+=== RUN   TestOneKeyPlannerMatchesSealedPass536AdversarialVectors/EXP_POTION_FINAL_STACK_OVERSHOOT
+=== RUN   TestOneKeyPlannerMatchesSealedPass536AdversarialVectors/MULTISLOT_EXP_USES_MAX_NOT_SUM
+=== RUN   TestOneKeyPlannerMatchesSealedPass536AdversarialVectors/CANONICAL_NO_WORK_RETRY
+--- PASS: TestOneKeyPlannerMatchesSealedPass536AdversarialVectors (0.07s)
+    --- PASS: TestOneKeyPlannerMatchesSealedPass536AdversarialVectors/DIRECT_SHARED_TARGET_TWO_COPIES (0.00s)
+    --- PASS: TestOneKeyPlannerMatchesSealedPass536AdversarialVectors/RESERVATION_COLLISION_ONE_COPY (0.00s)
+    --- PASS: TestOneKeyPlannerMatchesSealedPass536AdversarialVectors/DIRECT_THEN_COMPOSE_SAME_TARGET (0.00s)
+    --- PASS: TestOneKeyPlannerMatchesSealedPass536AdversarialVectors/CUMULATIVE_MANA_EXACT_MINUS_ONE (0.00s)
+    --- PASS: TestOneKeyPlannerMatchesSealedPass536AdversarialVectors/CUMULATIVE_MANA_EXACT_BOUNDARY (0.00s)
+    --- PASS: TestOneKeyPlannerMatchesSealedPass536AdversarialVectors/REPEATED_COMPONENT_EDGE_PRESERVED (0.00s)
+    --- PASS: TestOneKeyPlannerMatchesSealedPass536AdversarialVectors/DEPTH_SIX_RECURSIVE_COMPOSITION (0.00s)
+    --- PASS: TestOneKeyPlannerMatchesSealedPass536AdversarialVectors/DEPTH_SIX_MANA_EXACT_MINUS_ONE (0.00s)
+    --- PASS: TestOneKeyPlannerMatchesSealedPass536AdversarialVectors/ZERO_MAPPING_NONCANDIDATE (0.00s)
+    --- PASS: TestOneKeyPlannerMatchesSealedPass536AdversarialVectors/SPECIAL_MAPPING_NONCANDIDATE (0.00s)
+    --- PASS: TestOneKeyPlannerMatchesSealedPass536AdversarialVectors/DIRECT_COPY_PREFERRED_OVER_COMPOSITION (0.00s)
+    --- PASS: TestOneKeyPlannerMatchesSealedPass536AdversarialVectors/PLAYER_HERO_CAP_BLOCKS_SLOT (0.00s)
+    --- PASS: TestOneKeyPlannerMatchesSealedPass536AdversarialVectors/EXP_POTION_FINAL_STACK_OVERSHOOT (0.00s)
+    --- PASS: TestOneKeyPlannerMatchesSealedPass536AdversarialVectors/MULTISLOT_EXP_USES_MAX_NOT_SUM (0.00s)
+    --- PASS: TestOneKeyPlannerMatchesSealedPass536AdversarialVectors/CANONICAL_NO_WORK_RETRY (0.00s)
+PASS
+ok  	gxb.local/backend/v2/internal/application/characterhero	0.074s

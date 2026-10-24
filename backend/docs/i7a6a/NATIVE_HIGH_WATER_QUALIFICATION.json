@@ -1,0 +1,21 @@
+{
+  "schema": "gxb-targeted-contract-qualification/v1",
+  "scope": "Historical Channel5A native cumulative high-water fixture",
+  "evidence": "R2 exact native TestChatA26NativeMigrationSchemaAndIdempotentComposition failed solely at literal33 highwater; all6A native behaviors passed",
+  "rejected_archive_sha256": "f57b8675b9c0dcacef1cac2af6af2c7345a4a888cfb34949c02baf89904f0c63",
+  "contradicted_assumption": "No migration added by Channel5A/5B is a phase snapshot invariant, not a ban on later authorized FriendDM6A neutral expansion",
+  "selected_contracts": [
+    "Pass622 I7A1 migration/restore law",
+    "Pass645 FriendDM neutral future migration plan",
+    "D13 forward-only cumulative migration inventory"
+  ],
+  "amendment": "Retain33 historical default; permit precisely34 only under exact6Aselection, and verify fixed prior1..33 baseline inventory and every prior migration byte",
+  "affected_consumers": [
+    "Native Channel5A regression fixture",
+    "current cumulative migration/ownership gates"
+  ],
+  "authorization_basis": "Direct human implementation/test/reconcile authorization,2026-10-08; selected645neutralmigration scope",
+  "assertions_weakened": false,
+  "omitted_tests": false,
+  "required_requalification": "New exact frozen archive, fresh migration and complete same native/static/race/connected gate; no compatibility-copy acceptance"
+}

@@ -1,0 +1,84 @@
+{
+  "full_node_path": "ROOT/I7/I7C/I7C-2/I7C-2C",
+  "sealed_base": {
+    "pass_id": "689.0",
+    "artifact": "gxb-backend-pass-689.0-passmap.zip",
+    "filename": "gxb-backend-pass-689.0-passmap.zip",
+    "path": "/home/akm/Chatgpt/2026-10-09/files-mentioned-by-the-user-additional/outputs/gxb-backend-pass-689.0-passmap.zip",
+    "sha256": "e9bf78821d56247c38bc55be26c4aac52c73d771b2db5391f76497b85e51ec40",
+    "bytes": 301972772,
+    "status": "NESTED_CRC_HASH_FRESH_HOT_PRESEAL_COLD_DEEP_ZERO_REGENERATION_DRIFT_PASS"
+  },
+  "accepted_backend_sha256": "cf5e1ae2bf2735d00daf81c3c614ed37ec8f037aeeb0c2891a952d9d6accccf6",
+  "working_backend_sha256": "cf5e1ae2bf2735d00daf81c3c614ed37ec8f037aeeb0c2891a952d9d6accccf6",
+  "status": "WORKING_RESEARCH_AND_DESIGN_PROPOSAL_NOT_FROZEN",
+  "product_implementation_started": false,
+  "product_gate_credit": false,
+  "toolbox": {
+    "role": "portable_R2_qualification_toolbox_executed",
+    "filename": "gxb-backend-v2-e2e-tools-r2-go1.27.2-linux-amd64.zip",
+    "sha256": "e4e194c9627929299577364b953b2468d6118fac4283fd8030f10b5a27456c2b",
+    "bytes": 629670623,
+    "retained_path_hint": "/home/akm/Chatgpt/2026-10-09/files-mentioned-by-the-user-additional/outputs/gxb-backend-v2-e2e-tools-r2-go1.27.2-linux-amd64.zip",
+    "root": "gxb-e2e-self-contained",
+    "required_for_research_resume": false,
+    "availability_this_reply": "EXISTS_SIZE_MATCH",
+    "recovery": "PinnedR2toolboxwasverified/extracted/executed: Go1.27.2/PG18.6/nativeprocess/race/vet/static/security; seeQUALIFICATION.json.",
+    "required_for": "RUNTIME_QUALIFICATION"
+  },
+  "matrix": [
+    {
+      "id": "CONTENT_SOURCE",
+      "coverage": "Exact selected source rows; prior25 payloads unchanged; current/old differential classified; Random policy labeled reconstruction",
+      "status": "NOT_RUN_NO_PRODUCT_CODE_CHANGE"
+    },
+    {
+      "id": "DOMAIN",
+      "coverage": "Geometry/panels/parent links/flip/pile/AutoFull/dresser/resident-free-space; comfort/expansion thresholds; Normal/Super equipment gates; checked EXP fractions/cap/backward policy; random outcomes retained",
+      "status": "NOT_RUN_NO_PRODUCT_CODE_CHANGE"
+    },
+    {
+      "id": "PG_OWNER",
+      "coverage": "Fresh/upgraded owner/backfill and preserve-explicit rows; genuine command mutations from canonical owning prerequisites; typed raw fields/count reload; absent/unqualified distinction",
+      "status": "NOT_RUN_NO_PRODUCT_CODE_CHANGE"
+    },
+    {
+      "id": "PG_VALUE",
+      "coverage": "One key/material/cost debit; deficient funds/stock rollback; Cement exchange/overflow; placed furniture never exceeds owned total across houses and cannot be consumed underneath layout",
+      "status": "NOT_RUN_NO_PRODUCT_CODE_CHANGE"
+    },
+    {
+      "id": "PG_REFERENCE",
+      "coverage": "Move from source room, source cooldown and destination capacity, multi-Hero Lounge, self/foreign/dead rejection; concurrent move/equip/retirement/stock consume preserves refs",
+      "status": "NOT_RUN_NO_PRODUCT_CODE_CHANGE"
+    },
+    {
+      "id": "PG_TIME",
+      "coverage": "Lounge long offline/ten-hour bound, fractional frequent reads, old/new comfort, cap and clock jumps; expansion due-1/due/due+1, early skipceil900, no duplicate finalization, old occurrence/current nonce ambiguity",
+      "status": "NOT_RUN_NO_PRODUCT_CODE_CHANGE"
+    },
+    {
+      "id": "RECOVERY_PROCESS",
+      "coverage": "UnknownCOMMIT positive proof/absenceUnknown, deterministic admission seed/outcome, kill/reopen, receipts and occurrences across backup/restore; actual API bootstrap/roster and restart",
+      "status": "NOT_RUN_NO_PRODUCT_CODE_CHANGE"
+    },
+    {
+      "id": "AFFECTED_REGRESSION",
+      "coverage": "Hero EXP/equipment/ref integrity; I5 quantity/debit/grant/exchange/function eligibility; accepted2A and2B when content revision or roster/bootstrap code changed",
+      "status": "NOT_RUN_NO_PRODUCT_CODE_CHANGE"
+    },
+    {
+      "id": "MANDATORY_EXACT_CANDIDATE",
+      "coverage": "PortableR2 default suite, affected race/vet/ownership/static/query/schema/source checks, native/process/recovery and fresh+upgrade deployment. Reuse pinned dependency/security evidence only if unchanged exact subject. One freeze after working checks",
+      "status": "NOT_RUN_NO_PRODUCT_CODE_CHANGE"
+    },
+    {
+      "id": "INDEPENDENT_REALITY",
+      "coverage": "Reread source/contracts/produced code and wiring; reconcile each obligation to actual evidence; record later Campaign/stockW2/aggregate limits; closure only for delivered qualified scope",
+      "status": "NOT_RUN_NO_PRODUCT_CODE_CHANGE"
+    }
+  ],
+  "candidate": null,
+  "physicalW2": "Deferred afterI14, not passed",
+  "predecessor_runtime_tests": "Reused sealed689 unchanged, no reruns this turn"
+}

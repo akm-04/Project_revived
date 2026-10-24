@@ -1,0 +1,17 @@
+Classification: COMPATIBILITY_COPY_ONLY
+Origin: fresh disposable clones of the exact canonical CA4-2A candidate.
+Environment: local Go 1.23.2 linux/amd64.
+Only environment accommodations in clones:
+- go.mod: go 1.26.0 -> go 1.23.0
+- go.mod: removed toolchain go1.27.1
+- .go-version: 1.27.1 -> 1.23.2
+Canonical product/assertion edits in compatibility clones: none.
+Final results:
+- focused touched-package go test: GREEN
+- focused touched-package go test -race: GREEN
+- go vet ./...: GREEN
+- internal/archguard: GREEN
+- bounded package-by-package go test: 92/92 GREEN
+- generator/query/source-oracle/schema/dependency/sqlc/cumulative validators: GREEN on pristine canonical
+Canonical .go-version/go.mod/go.sum remained byte-identical to Pass535 parent.
+Limitations: does not satisfy exact Go 1.27.1, PostgreSQL 18.6, sqlc 1.31.1 native generation, River, or W2 stock-client proof.

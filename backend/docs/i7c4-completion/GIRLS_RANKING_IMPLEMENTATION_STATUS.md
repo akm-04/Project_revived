@@ -1,0 +1,15 @@
+# Working Girls Ranking implementation
+
+This branch implements the private server Girls leaderboard and its four title origins. It is unfinished full I7C-4 work, not whole phase closure or a new accepted release. VERSION remains the qualified baseline until the intended candidate freeze.
+
+The score reuses the qualified canonical distinct owned Hero metric1001. Complete I4 server cohorts are read in one witnessed Serializable snapshot. Snapshot generations, source provenance, observed-score run timestamps and first weekly settlement generations are immutable. The private Monday UTC on-demand policy grants the first coherent snapshot's positive-score top20 winners, with source title IDs100059..100062 and a fixed604800-second duration. This calendar and observed-score ordering are explicit private policy, not a recovered original algorithm.
+
+MID301 accepts subtype37 and uses the recovered nested rank_list/rank_info shape. Requests for unsupported or mixed profiles fail explicitly. Actual API reopening, restart and PostgreSQL backup/relocated restore passed. Unmodified recovered client model/cache-close functions consumed real API responses under stubbed engine dependencies; full stockclient execution remains separate.
+
+Ranking award truth and PlayerDisplay recipient mirrors commit together. Canonical awards, fixed expiry and exact catalog-scoped positive/complete-negative observations are validated. The tracking marker is inserted only through I4 fresh-character bootstrap; an injected required-contributor failure rolled back the actual MID1 character allocation. Legacy unknowns stay unavailable and complete title/bubble pickers stay gated.
+
+Targeted working-source native PostgreSQL18.6/race checks cover genuine Hero command inputs with the disclosed diagnostic capacity authorizer, snapshot/replay, concurrency, atomic recipient rollback/retry, injected unknown COMMIT outcomes, expiry boundaries, mirror mismatch, scoped read facts, API and restore. A real acquisition interleave forced Serializable retry; the old fixed instant was safely rejected and no partial snapshot escaped. Production Hero capacity remains nil and is not qualified by that diagnostic authorizer.
+
+The initial receipt identity serialization defect is repaired using explicit UUID/scalar fields, preserving strict actor checks. Initial failure logs and corrected evidence are retained in the cumulative checkpoint. No second reviewer, full client acceptance, release qualification or full4 closure is claimed.
+
+Detailed evidence and exact working test subjects: cumulative checkpoint work/full4_research/GIRLS_WORKING_RUNTIME_AND_REALITY_REVIEW.json, SUBJECT_*.json, subject_manifests/, WORKING_API_BINARY.json and RANKING_SOURCE_CONSUMER_EXECUTION.json. The checkpoint uses sealed Pass724 as its base and requires no earlier checkpoint chain. Other five profile metrics, full Achievement and cosmetic/force coverage, AP/Skins Ranking and genuine selected history/origin gates remain open. I7C5 is queued only.

@@ -1,0 +1,356 @@
+{
+  "pass": "655.0",
+  "stage": "I7A-8B",
+  "classification": "REQUIRED_NEW_COMBINED_CANDIDATE_GATE_NOT_EXECUTED",
+  "rows": [
+    {
+      "id": "B01",
+      "requirement": "Exact combined clean candidate identity/head/tree/snapshot, canonical pins and all20 previous content payloads/migrations1..37 unchanged",
+      "status": "NOT_RUN_ON_NEW_COMBINED_CANDIDATE",
+      "evidence": [],
+      "candidate_sha256": null
+    },
+    {
+      "id": "B02",
+      "requirement": "Five locked oracles and directsrc64 type10/MID/wire crosscheck with precise static/original-server limits",
+      "status": "NOT_RUN_ON_NEW_COMBINED_CANDIDATE",
+      "evidence": [],
+      "candidate_sha256": null
+    },
+    {
+      "id": "B03",
+      "requirement": "Retained Invite pair cursor seeds legacy/current generations and survives delete/reissue without backfill",
+      "status": "NOT_RUN_ON_NEW_COMBINED_CANDIDATE",
+      "evidence": [],
+      "candidate_sha256": null
+    },
+    {
+      "id": "B04",
+      "requirement": "Cursor malformed-witness/int64 exhaustion and rollback do not create Invite/source/job/receipt",
+      "status": "NOT_RUN_ON_NEW_COMBINED_CANDIDATE",
+      "evidence": [],
+      "candidate_sha256": null
+    },
+    {
+      "id": "B05",
+      "requirement": "Invite exact expiry uses strict boundary and preserves original quota/lifetime/permission/server checks",
+      "status": "NOT_RUN_ON_NEW_COMBINED_CANDIDATE",
+      "evidence": [],
+      "candidate_sha256": null
+    },
+    {
+      "id": "B06",
+      "requirement": "Invite first source+send event+core receipt+allbindings+enqueue atomic; duplicate same live generation no newsource",
+      "status": "NOT_RUN_ON_NEW_COMBINED_CANDIDATE",
+      "evidence": [],
+      "candidate_sha256": null
+    },
+    {
+      "id": "B07",
+      "requirement": "Create exact JOIN event/source marker and enqueue atomic with full plan/level/debit; rollback all",
+      "status": "NOT_RUN_ON_NEW_COMBINED_CANDIDATE",
+      "evidence": [],
+      "candidate_sha256": null
+    },
+    {
+      "id": "B08",
+      "requirement": "OpenApplyOrJoin exact JOIN event/source marker and enqueue atomic with full plan; no marker for mere application",
+      "status": "NOT_RUN_ON_NEW_COMBINED_CANDIDATE",
+      "evidence": [],
+      "candidate_sha256": null
+    },
+    {
+      "id": "B09",
+      "requirement": "AcceptApplication exact JOIN event/source marker and enqueue atomic with full plan; rollback old application/membership preserved",
+      "status": "NOT_RUN_ON_NEW_COMBINED_CANDIDATE",
+      "evidence": [],
+      "candidate_sha256": null
+    },
+    {
+      "id": "B10",
+      "requirement": "AcceptInvite exact JOIN event/source marker and enqueue atomic with full plan; strictexpiry/level rollback",
+      "status": "NOT_RUN_ON_NEW_COMBINED_CANDIDATE",
+      "evidence": [],
+      "candidate_sha256": null
+    },
+    {
+      "id": "B11",
+      "requirement": "Dissolve exact retirement/event/source marker atomic; all child preparation before effects; unchanged solo/leader admission",
+      "status": "NOT_RUN_ON_NEW_COMBINED_CANDIDATE",
+      "evidence": [],
+      "candidate_sha256": null
+    },
+    {
+      "id": "B12",
+      "requirement": "Known core replay and positiveUNKNOWN validate complete source/marker/core receipt pairs; missing/orphan mismatch fails",
+      "status": "NOT_RUN_ON_NEW_COMBINED_CANDIDATE",
+      "evidence": [],
+      "candidate_sha256": null
+    },
+    {
+      "id": "B13",
+      "requirement": "Absent/unavailable/partialUNKNOWN never retries source effect or creates targetvalue",
+      "status": "NOT_RUN_ON_NEW_COMBINED_CANDIDATE",
+      "evidence": [],
+      "candidate_sha256": null
+    },
+    {
+      "id": "B14",
+      "requirement": "Legacy unprojected Invite/event and old active content produce no type10 historical backfill",
+      "status": "NOT_RUN_ON_NEW_COMBINED_CANDIDATE",
+      "evidence": [],
+      "candidate_sha256": null
+    },
+    {
+      "id": "B15",
+      "requirement": "Target315→360→370 complete prepared plan; no retained Guild lock/foreignSQL/socket/economy/Mail effect",
+      "status": "NOT_RUN_ON_NEW_COMBINED_CANDIDATE",
+      "evidence": [],
+      "candidate_sha256": null
+    },
+    {
+      "id": "B16",
+      "requirement": "Eligible first target Notice+materialization proof atomically uses exact tuple/issue time/guild name and wiresafe ID",
+      "status": "NOT_RUN_ON_NEW_COMBINED_CANDIDATE",
+      "evidence": [],
+      "candidate_sha256": null
+    },
+    {
+      "id": "B17",
+      "requirement": "Target replay preserves Notice ID/dismissal/root namespace; no duplicate or resurrection",
+      "status": "NOT_RUN_ON_NEW_COMBINED_CANDIDATE",
+      "evidence": [],
+      "candidate_sha256": null
+    },
+    {
+      "id": "B18",
+      "requirement": "Expired/replaced/laterJOIN/retired source target suppression retains terminal proof without Notice",
+      "status": "NOT_RUN_ON_NEW_COMBINED_CANDIDATE",
+      "evidence": [],
+      "candidate_sha256": null
+    },
+    {
+      "id": "B19",
+      "requirement": "Honest recipientGone uses retained I4 allocator witness; queryerror/rolledbackcursorhole doesnot terminalize",
+      "status": "NOT_RUN_ON_NEW_COMBINED_CANDIDATE",
+      "evidence": [],
+      "candidate_sha256": null
+    },
+    {
+      "id": "B20",
+      "requirement": "Deleted inviter/recipient historicaltarget proof retained with accurately labeled fixture restrictions",
+      "status": "NOT_RUN_ON_NEW_COMBINED_CANDIDATE",
+      "evidence": [],
+      "candidate_sha256": null
+    },
+    {
+      "id": "B21",
+      "requirement": "Target orphan/missing expected Notice/source/context/fingerprint corruptions fail without recreation",
+      "status": "NOT_RUN_ON_NEW_COMBINED_CANDIDATE",
+      "evidence": [],
+      "candidate_sha256": null
+    },
+    {
+      "id": "B22",
+      "requirement": "Target positiveUNKNOWN fullproof only and absentUNKNOWN no ACK permission",
+      "status": "NOT_RUN_ON_NEW_COMBINED_CANDIDATE",
+      "evidence": [],
+      "candidate_sha256": null
+    },
+    {
+      "id": "B23",
+      "requirement": "Separate sourceACK validates exact typedtarget proof; mismatched proof/UNKNOWNACK fail closed",
+      "status": "NOT_RUN_ON_NEW_COMBINED_CANDIDATE",
+      "evidence": [],
+      "candidate_sha256": null
+    },
+    {
+      "id": "B24",
+      "requirement": "RealSIGKILL targetcommit-beforeACK and combinedworkerrestart converge with same Notice/proof",
+      "status": "NOT_RUN_ON_NEW_COMBINED_CANDIDATE",
+      "evidence": [],
+      "candidate_sha256": null
+    },
+    {
+      "id": "B25",
+      "requirement": "JOIN then leave invalidates earlier issue forever; newissue binds latestJOIN; membershipVersion reuse irrelevant",
+      "status": "NOT_RUN_ON_NEW_COMBINED_CANDIDATE",
+      "evidence": [],
+      "candidate_sha256": null
+    },
+    {
+      "id": "B26",
+      "requirement": "Cleanup scans32/default finite1000 max with immutable high-water; large retirement fanout/partial page repeats do not skip",
+      "status": "NOT_RUN_ON_NEW_COMBINED_CANDIDATE",
+      "evidence": [],
+      "candidate_sha256": null
+    },
+    {
+      "id": "B27",
+      "requirement": "Cleanup targetproof/sourcecursorACK crash recovery is idempotent; new post-marker issues excluded",
+      "status": "NOT_RUN_ON_NEW_COMBINED_CANDIDATE",
+      "evidence": [],
+      "candidate_sha256": null
+    },
+    {
+      "id": "B28",
+      "requirement": "Materialize/cleanup/retirement concurrent races end with no visible invalid Invite or target resurrection",
+      "status": "NOT_RUN_ON_NEW_COMBINED_CANDIDATE",
+      "evidence": [],
+      "candidate_sha256": null
+    },
+    {
+      "id": "B29",
+      "requirement": "Canonical pending recovery replaces lost River jobs without legacybackfill or terminal reenqueue",
+      "status": "NOT_RUN_ON_NEW_COMBINED_CANDIDATE",
+      "evidence": [],
+      "candidate_sha256": null
+    },
+    {
+      "id": "B30",
+      "requirement": "Qualified128-page/4096/50 merged window refills past invalid newer type10; saturation and ordering bounds unchanged",
+      "status": "NOT_RUN_ON_NEW_COMBINED_CANDIDATE",
+      "evidence": [],
+      "candidate_sha256": null
+    },
+    {
+      "id": "B31",
+      "requirement": "One shared DB observation after all Guild reads drives expiry/Presence/Gift; empty selection no secondclock",
+      "status": "NOT_RUN_ON_NEW_COMBINED_CANDIDATE",
+      "evidence": [],
+      "candidate_sha256": null
+    },
+    {
+      "id": "B32",
+      "requirement": "MID176 knownreplay current Social/type10 plus originalprivate messages; Guildfailure prevents FriendDM drain",
+      "status": "NOT_RUN_ON_NEW_COMBINED_CANDIDATE",
+      "evidence": [],
+      "candidate_sha256": null
+    },
+    {
+      "id": "B33",
+      "requirement": "Mixed184 first dedup Relation/Gift/type10 wholebatch preflight; oneaggregate GiftGrant/freshscalar preserved",
+      "status": "NOT_RUN_ON_NEW_COMBINED_CANDIDATE",
+      "evidence": [],
+      "candidate_sha256": null
+    },
+    {
+      "id": "B34",
+      "requirement": "Mixed184 malformed recognizedtype10 rolls back every Gift/dismissal/scalar/root effect; type10 no Grant/join/cancel/hint",
+      "status": "NOT_RUN_ON_NEW_COMBINED_CANDIDATE",
+      "evidence": [],
+      "candidate_sha256": null
+    },
+    {
+      "id": "B35",
+      "requirement": "Complete184 positive replay recognizes consumedtype10 after source lifecycle/deletedrelatedplayer without regrant",
+      "status": "NOT_RUN_ON_NEW_COMBINED_CANDIDATE",
+      "evidence": [],
+      "candidate_sha256": null
+    },
+    {
+      "id": "B36",
+      "requirement": "Actual HTTP2563/2564/176/189/184 strict authenticated source-shaped request/result and wire arrays",
+      "status": "NOT_RUN_ON_NEW_COMBINED_CANDIDATE",
+      "evidence": [],
+      "candidate_sha256": null
+    },
+    {
+      "id": "B37",
+      "requirement": "Finite u1 canonical codec rejects malformed/forged; exact old r1/g1 byte encodings unchanged",
+      "status": "NOT_RUN_ON_NEW_COMBINED_CANDIDATE",
+      "evidence": [],
+      "candidate_sha256": null
+    },
+    {
+      "id": "B38",
+      "requirement": "Guild reload canonical issue/marker/target/root/generation/member/expiry sourcequalification; stalerefs suppress",
+      "status": "NOT_RUN_ON_NEW_COMBINED_CANDIDATE",
+      "evidence": [],
+      "candidate_sha256": null
+    },
+    {
+      "id": "B39",
+      "requirement": "Actual currentWORLD stocktype140 friend_notice delivery through existing writer; stale/replaced/unauthorized handles rejected",
+      "status": "NOT_RUN_ON_NEW_COMBINED_CANDIDATE",
+      "evidence": [],
+      "candidate_sha256": null
+    },
+    {
+      "id": "B40",
+      "requirement": "First definite targetchange only emits existing bounded postcommit hint; replay/unknownpositive/184 no extra hint",
+      "status": "NOT_RUN_ON_NEW_COMBINED_CANDIDATE",
+      "evidence": [],
+      "candidate_sha256": null
+    },
+    {
+      "id": "B41",
+      "requirement": "Existinglistener restart/overflow/coalescing/regression with Guild purpose; no fourthbus/gameplay payload authority",
+      "status": "NOT_RUN_ON_NEW_COMBINED_CANDIDATE",
+      "evidence": [],
+      "candidate_sha256": null
+    },
+    {
+      "id": "B42",
+      "requirement": "CombinedGuildworker finite routes/physicalqueue/4workers/owner refusal+loss+drain and strict actual malformed jobs",
+      "status": "NOT_RUN_ON_NEW_COMBINED_CANDIDATE",
+      "evidence": [],
+      "candidate_sha256": null
+    },
+    {
+      "id": "B43",
+      "requirement": "API/worker exact schema/provider/capability readiness fail before sideeffects; startup no migrate/activate",
+      "status": "NOT_RUN_ON_NEW_COMBINED_CANDIDATE",
+      "evidence": [],
+      "candidate_sha256": null
+    },
+    {
+      "id": "B44",
+      "requirement": "Older active catalog pointer and old scopedcapabilities preserved; exact compatible explicitdeploy/CAS only",
+      "status": "NOT_RUN_ON_NEW_COMBINED_CANDIDATE",
+      "evidence": [],
+      "candidate_sha256": null
+    },
+    {
+      "id": "B45",
+      "requirement": "Populated accepted37→38 neutralupgrade preserves allpriorrows/sequences/contentpointer; newtablesempty/nullbindings nobackfill",
+      "status": "NOT_RUN_ON_NEW_COMBINED_CANDIDATE",
+      "evidence": [],
+      "candidate_sha256": null
+    },
+    {
+      "id": "B46",
+      "requirement": "Wholejointbackup restore pendingissues/partialcleanup/dismissals/Mail/Gift/Friend/General/content/receipts/River/cursors; secondrestart no duplicates",
+      "status": "NOT_RUN_ON_NEW_COMBINED_CANDIDATE",
+      "evidence": [],
+      "candidate_sha256": null
+    },
+    {
+      "id": "B47",
+      "requirement": "All applicable38 qualified8A requirement regressions reexecuted/reconciled on exact combinedcandidate",
+      "status": "NOT_RUN_ON_NEW_COMBINED_CANDIDATE",
+      "evidence": [],
+      "candidate_sha256": null
+    },
+    {
+      "id": "B48",
+      "requirement": "Primary full8A+8B C01-C14/22foundations/all4/5/6/7/8A successors/newcontracts realityreview and registryharvest",
+      "status": "NOT_RUN_ON_NEW_COMBINED_CANDIDATE",
+      "evidence": [],
+      "candidate_sha256": null
+    },
+    {
+      "id": "B49",
+      "requirement": "Owning unaccepted preflight freshnestedHOT/COLD semanticnegative checks plus final explicitbothchildren/parent8 normalclosure; global10/E/W2 remainunpassed",
+      "status": "NOT_RUN_ON_NEW_COMBINED_CANDIDATE",
+      "evidence": [],
+      "candidate_sha256": null
+    }
+  ],
+  "candidate": null,
+  "base_accepted_backend_sha256": "40cd6059e301598e193a84c10521b1f825b1ddf41fced9c4b40fcace7cbe7260",
+  "exact_toolbox_sha256": "8c70a433b9c85fe7ba0e5acee7dd1047e0748c0651c67249050dc999806bdaea",
+  "i7a8b_accepted": false,
+  "parent8_accepted": false,
+  "required8Aregression_matrix": "00_PASSMAP/PASS654_ACCEPTANCE_MATRIX_R1.json"
+}

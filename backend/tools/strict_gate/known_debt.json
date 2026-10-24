@@ -1,0 +1,6 @@
+{
+ "contract": "I85_STRICT_GATE_V1 R4",
+ "source": "I8.5 R8 census at 74141a1 (work/i8_5/research/debt-sweep-74141a1*/DEBT_SWEEP.json)",
+ "rule": "Only these tests may fail. The list only shrinks from the I8.5-2 baseline (117 R8 + D40 extensions): the gate is RED when an entry passes everywhere. I8.5-6 emptied it: any new failure is RED.",
+ "entries": []
+}

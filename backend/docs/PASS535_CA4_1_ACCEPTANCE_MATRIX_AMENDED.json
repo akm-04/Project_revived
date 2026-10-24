@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "pass": "535.0",
+  "phase": "CA4-1",
+  "status": "LOCAL_STAGE_ACCEPTED_NATIVE_AGGREGATE_DEFERRED",
+  "amends": "PASS534_CA4_1_ACCEPTANCE_MATRIX.json timing for native PostgreSQL/exact-toolchain proof only",
+  "gates": [
+    {"id":"A1_SCOPE","local_status":"PASS","aggregate_native_status":"NOT_APPLICABLE"},
+    {"id":"A2_CONTENT","local_status":"PASS","aggregate_native_status":"content runtime activation/migration portion rechecked in aggregate Work gate"},
+    {"id":"A3_MIGRATION","local_status":"PASS_STATIC_STRUCTURE_ONLY","aggregate_native_status":"DEFERRED_MANDATORY_PRE_CA4_E","note":"real PostgreSQL forward/upgrade/restore/mixed-version proof remains OPEN"},
+    {"id":"A4_D01_EXCHANGE","local_status":"PASS_COMPATIBILITY_COPY_ONLY_PLUS_CANONICAL_STATIC","aggregate_native_status":"DEFERRED_MANDATORY_PRE_CA4_E","note":"real PostgreSQL lock/concurrency/replay proof remains OPEN"},
+    {"id":"A5_RECEIPTS","local_status":"PASS_COMPATIBILITY_COPY_ONLY_PLUS_STATIC","aggregate_native_status":"DEFERRED_MANDATORY_PRE_CA4_E","note":"real transaction/UNKNOWN-COMMIT persistence proof remains OPEN"},
+    {"id":"A6_ARCHITECTURE","local_status":"PASS","aggregate_native_status":"NOT_APPLICABLE"},
+    {"id":"A7_TESTS","local_status":"PASS_COMPATIBILITY_COPY_ONLY","aggregate_native_status":"exact canonical-toolchain execution deferred"},
+    {"id":"A8_NATIVE","local_status":"AUTHORIZED_DEFERRAL_NOT_PASS","aggregate_native_status":"DEFERRED_MANDATORY_PRE_CA4_E"},
+    {"id":"A9_REALITY","local_status":"PASS","aggregate_native_status":"CA4-E still requires aggregate reality after native Work gate"}
+  ],
+  "local_acceptance_effect": "CA4-1 is locally accepted and CA4-2 preimplementation research is permitted. CA4-2 implementation remains blocked until its own research contract/reality gate. No aggregate/native claim is made.",
+  "hard_stop": "CA4-E acceptance is forbidden until CA4_AGGREGATE_PRE_CA4_E_NATIVE_WORK_GATE is GREEN and normal-chat reconciliation preserves all deferred obligations."
+}

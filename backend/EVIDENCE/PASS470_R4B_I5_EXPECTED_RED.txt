@@ -1,0 +1,3 @@
+I5 VALIDATION: FAIL
+ - RF-015 required EconomyBootstrapContributor production seam missing
+ - RF-015 required temporal-resource bootstrap persistence path missing

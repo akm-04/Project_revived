@@ -1,0 +1,15 @@
+{
+  "role": "REUSE_PARENT_EXACT_SOURCE_WITH_TARGETED4B_CALLER_REVIEW",
+  "parent": "stage4/SOURCE_VERIFICATION.json",
+  "archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+  "current_members": {
+    "app/model/PersonDisplay.lua": "022fcbf39167ac9197ce5034b32fd5833016742744ad3de118ceacf6f808cfb8",
+    "app/windows/PersonDisplayWindow.lua": "22a0c02172eabec1d9728d18293273c8e2aa9e6c8e5b1a4bf3af2feae14f158c"
+  },
+  "targeted_symbols": [
+    "updateSpaceInfo/getCommentInfos/removeComment/addComment/delComment/addCommentPraise/getCommentList",
+    "initSpaceCell reaction params ownerID, author identity, deletecallbackcount; sendcomment30/filter"
+  ],
+  "unchanged_probe": "Parent elevenPASS Lua source method probe reused; no newruntime/proof claim",
+  "limits": "Source facts + design decisions, not originalserver/physicalstock"
+}

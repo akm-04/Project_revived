@@ -1,0 +1,112 @@
+{
+  "schema_version": 1,
+  "pass": "566.0",
+  "stage": "CA5-4",
+  "parent_backend_sha256": "c47455fc7c31d4c43fe3c58daf9bd9b8225cc9534cddfcadbee0848b89885448",
+  "authority_passmap_sha256": "cb1b8e6ee55faef1b62e973db9dbc1be842ad61ac141902e7295c6edeb9bef3e",
+  "content_revision": "bd60196a4394206204f63180884efe70ee84abaf085416b2620e29ece84cb953",
+  "product_and_qualification_change_count": 15,
+  "changes": [
+    {
+      "status": "MODIFIED",
+      "path": "internal/adapters/postgres/characterqueries/querytext_gen.go",
+      "before_sha256": "d586e96020163100e07ff2a1766a6089fd5145bdc842ac20288e6a066fbeb2d8",
+      "after_sha256": "66f758e7a008a42335310f74ef7b5fbc256f20a6fe005e6efd491adea884318f"
+    },
+    {
+      "status": "MODIFIED",
+      "path": "internal/adapters/postgres/characterstore/saved_preset.go",
+      "before_sha256": "a7bc590e73eae712357cf2d3954eadbbb2e3753886a51870d865c9d6aa9ad452",
+      "after_sha256": "1b5eb8077e915277c48213435200af26be90532462646f70572c28c284a07677"
+    },
+    {
+      "status": "MODIFIED",
+      "path": "internal/adapters/postgres/characterstore/saved_preset_test.go",
+      "before_sha256": "184c3f264658526012997e5ec0972cdef9173d31d1cc964093b17d2493ac2e9c",
+      "after_sha256": "324264e1798bb050663217a61bbd466ca6f3cdf4789ff5d42158aef645ee685f"
+    },
+    {
+      "status": "ADDED",
+      "path": "internal/application/characterasset/saved_preset_reference_state.go",
+      "before_sha256": null,
+      "after_sha256": "3b4765532440aa39e2f8cb436fc0f0db5f7845442e32a92b5391ab2506517924"
+    },
+    {
+      "status": "ADDED",
+      "path": "internal/application/characterasset/saved_preset_reference_state_test.go",
+      "before_sha256": null,
+      "after_sha256": "8937eca4c436e3822e2531573b7e576e52077892839fecf8d501070acefd1ec1"
+    },
+    {
+      "status": "ADDED",
+      "path": "internal/application/charactersavedpreset/reference_guard.go",
+      "before_sha256": null,
+      "after_sha256": "e0f5ab80ea0a43dd6da76a3965eff8ee87e8b65046ce6ef3522d9a7c9e363b5e"
+    },
+    {
+      "status": "ADDED",
+      "path": "internal/application/charactersavedpreset/reference_guard_concurrency_test.go",
+      "before_sha256": null,
+      "after_sha256": "ba2ede58e933445d876eeade22a6d54e2cf981261313fded098fff67be99dde5"
+    },
+    {
+      "status": "ADDED",
+      "path": "internal/application/charactersavedpreset/reference_guard_test.go",
+      "before_sha256": null,
+      "after_sha256": "2e5b6e3a432f049339ec3b8249cf5401e32b7f0066bafef21ff6d0dc3a6b3d9b"
+    },
+    {
+      "status": "ADDED",
+      "path": "internal/application/charactersavedpreset/reference_state.go",
+      "before_sha256": null,
+      "after_sha256": "b0305007d9b4e1098bc125ca963923f8cd7a43ea203cf67b43cc47be86ccacbc"
+    },
+    {
+      "status": "ADDED",
+      "path": "internal/application/charactersavedpreset/reference_state_test.go",
+      "before_sha256": null,
+      "after_sha256": "0e46ea73fc319cf2a8503084eb02be55fa1136f4ed0d983049b4398004e304dc"
+    },
+    {
+      "status": "MODIFIED",
+      "path": "internal/application/charactersavedpreset/service_test.go",
+      "before_sha256": "d645db2c0be8dd88f613e5ad448075551291811b47070911c5b39e2501201a0a",
+      "after_sha256": "f204db5ab45572d5842b4e76f2e4006cc40d1a09813c12b4a504225b3b8645de"
+    },
+    {
+      "status": "ADDED",
+      "path": "internal/archguard/ca5_4_contract_test.go",
+      "before_sha256": null,
+      "after_sha256": "1b63030854beae8474435bae074d4408b22eb3a1d0575f599be99527334fd409"
+    },
+    {
+      "status": "MODIFIED",
+      "path": "sql/character/preset.sql",
+      "before_sha256": "9ae09910d754d49a46ed48ff0438d890ee59fa91a80094292754f951f90a233f",
+      "after_sha256": "649a7d71bf475e6710bdd28f111a364cc208b5600270e88338fda2d28fb37cd6"
+    },
+    {
+      "status": "ADDED",
+      "path": "tools/check_ca5_4_source_oracle.py",
+      "before_sha256": null,
+      "after_sha256": "7461a7a46c9a2712699d75aedd590d41bca1bea06d03f75ebb7b0369429105b6"
+    },
+    {
+      "status": "ADDED",
+      "path": "tools/validate_ca5_4.py",
+      "before_sha256": null,
+      "after_sha256": "09d2f005c2c9342e3015ad57de0449fef7e0d7ae46f4224aa8774e2da5970dd4"
+    }
+  ],
+  "negative_findings": [
+    "no migration 00029/schema change",
+    "no MID66 dispatcher/registration",
+    "no Hero/Pet DELETE/consume production path",
+    "MID208/209 remain inactive",
+    "17.formation remains unclaimed",
+    "no I9 mode state",
+    "no CA8 composite snapshot",
+    "canonical go.mod/go.sum/.go-version unchanged"
+  ],
+  "closure_repair": "Inherited CA5-3 presetFence test bookkeeping counter changed to atomic after fresh CA5-4 focused race rerun exposed a test-only data race; no product behavior changed."
+}

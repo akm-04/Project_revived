@@ -1,0 +1,53 @@
+{
+  "status": "SOURCE_FRAGMENT_EXECUTION_OBSERVED_NOT_FULL_STOCK_CLIENT_OR_PRODUCT_RUNTIME",
+  "engine": "Lua 5.4.6  Copyright (C) 1994-2023 Lua.org, PUC-Rio",
+  "source_fragment_hashes": {
+    "getItemByID": "2913b8f1b5af3549693a292ea9cbf93375e764581862cedcc3b98768b448e22d",
+    "setItemNumByID": "a10b463d626c57a0459addb906fff21651101e884e0ea76832cc29200db6724f",
+    "addItemsByID": "5d70f94c32a0bd64100393435b6cbadc6b27e3788748fdea7d0bb7895a98b1d2",
+    "handleRewardsWithoutShow": "c02b4c95404677e15056d1c30da7669025f260b805a23bfe2f4c553ccb30c6ed",
+    "exact_claim_callback_tail": "f45da9aeefd9d545535308c8c843b34146187e3512dbdc0c8c4c1f9668fde862"
+  },
+  "cases": [
+    {
+      "before": 0,
+      "grant_delta": 2,
+      "wire_item_num": 2,
+      "after_handle_rewards": 2,
+      "final_client_balance": 2,
+      "shown_reward_amount": 2
+    },
+    {
+      "before": 7,
+      "grant_delta": 2,
+      "wire_item_num": 2,
+      "after_handle_rewards": 9,
+      "final_client_balance": 2,
+      "shown_reward_amount": 2
+    },
+    {
+      "before": 7,
+      "grant_delta": 2,
+      "wire_item_num": 9,
+      "after_handle_rewards": 16,
+      "final_client_balance": 9,
+      "shown_reward_amount": 9
+    },
+    {
+      "before": 998,
+      "grant_delta": 2,
+      "wire_item_num": 999,
+      "after_handle_rewards": 999,
+      "final_client_balance": 999,
+      "shown_reward_amount": 999
+    }
+  ],
+  "scope": "ActualunmodifiedBackpackget/set/addItemsByID,SelfPlayer.handleRewardsWithoutShow,claimcallbacktail; stubbedengine/UI/catalogdependencies andhandleRewardsdelegatesWithoutShow. OnlyordinaryStackItem paths, notrewardgrantsettlement.",
+  "finding": "Forpreexistingbalance7andgrant2,delta2responseleavesclientbalance2;postbalance9responseleavescorrectbalance9butshows9asrewardandtransientbalance16. Thesamewireitem_numcannotrepresentbothdeltaandpostbalanceunlessoldbalance0.",
+  "design_constraints": [
+    "Do notchangegenericI5Award.ItemNumdelta contract",
+    "1303-specificprojectioncouldusepostbalanceforordinaryfirststackwithdocumentedvisualamountlimitation; requiresownpolicy andsrc64qualification",
+    "Overflowmailmustnotappearinlineasadditionalgrantedinventory; finalquantitymustmatchcanonicalI5result",
+    "No claimthattheseisolatedfunctionexecutionsprovefullstockclientorR2backendacceptance"
+  ]
+}

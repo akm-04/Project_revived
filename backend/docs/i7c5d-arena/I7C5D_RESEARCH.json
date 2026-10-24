@@ -1,0 +1,36 @@
+{
+  "status": "I7C5D_RESEARCH_SUFFICIENT_FOR_SCOPED_IMPLEMENTATION",
+  "records": [
+    "work/i7c5d/research/ARENA_SOURCE_RESEARCH.md",
+    "work/i7c5d/research/ARENA_PROVISIONAL_DESIGN.md"
+  ],
+  "source_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+  "user_decisions_2026_10_20": [
+    "Repeat 45-day seasons from the source season (count from 2022-10-28)",
+    "Full reset to Lv.1 at season start",
+    "Matching widens until an opponent is found",
+    "Abandoned started fight counts as a loss"
+  ],
+  "negative_results": [
+    "ID_ARENA (272..281, Arena.lua) is Top Floor; Arena is RegionArena 768-779 (history enum 3)",
+    "region_arena_reward_new has no client reader (rank-based table unused)",
+    "775 REARENA_LOAD_RANKS has no window caller; ranking goes through 301 rank_types 6",
+    "774/778 serve only the client-resolved path (is_back_battle 0)",
+    "Login 1408 detail entry optional",
+    "No Arena title in title_system; Achievement 100003 is the Arena achievement",
+    "1408-1419 REGION_* are the retired alias (PASS421)"
+  ],
+  "source_conflicts": [
+    "Rule 16 balancing text ('top to same lv' for skill/gear) vs client-resolved battles that keep own skill levels and gear after formatRegionArenaHeros; the client path is selected"
+  ],
+  "unknown_to_private_policy": [
+    "Season calendar beyond the single source season",
+    "Lord point formula",
+    "Matching use of region_mate params",
+    "Mission generation and refill",
+    "Duplicate-copy resolution by table id",
+    "History accounting window (Q_ARENA_HISTORY_WINDOW)",
+    "Record retention",
+    "Settlement eligibility"
+  ]
+}

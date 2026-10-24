@@ -1,0 +1,78 @@
+{
+  "schema_version": 1,
+  "pass": "535.0",
+  "phase": "CA4",
+  "internal_stage": "CA4-1",
+  "candidate_version": "v0.68.0-candidate",
+  "authority_pass": "534.0",
+  "authority_passmap_sha256": "70f2e539269f0421102e0a95b7d661dc48bf695df825d2f51e5bc3529b275ac3",
+  "parent_backend_sha256": "e0a989eee4940cbfaf22218c669c1463b78b97953b1c25756892ce4c90ebf3f0",
+  "parent_implementation_revision_sha256": "8544956462ae690ee003d811c00ad14740d4e492d06c3cd1b80e1e0208b6cb31",
+  "source_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+  "content_revision": "94dcb8ba3603e96e15f6840db05c9869fda2fc4260003af37d88316fb8758684",
+  "result": "GREEN_LOCAL_STAGE_ACCEPTANCE_NATIVE_AGGREGATE_GATE_DEFERRED",
+  "implemented": [
+    "EQUIPMENT_PRIMITIVES_CA4 under the existing immutable content authority",
+    "content-only migration 00019_ca4_equipment_primitives.sql",
+    "ordered equipment recipe primitives preserving 1-based source ordinals and repeated edges",
+    "I5-owned combined MaterialCost + stack-only Grant Prepare/Apply exchange seam",
+    "family-qualified Hero/Pet/Super slot/template contracts",
+    "typed borrowed PlayerProgression max_color dependency",
+    "restoration modifier extension seam",
+    "borrowed SpiritRef only",
+    "raw future stat/export observation contract"
+  ],
+  "canonical_static": [
+    "CA4-1 exact source oracle PASS: 604 roots, 1176 closure, 797 recipe nodes, 1934 ordered edges, 29 repeated-component recipes",
+    "generated content/query text PASS",
+    "schema/query ownership PASS",
+    "dependency policy/SBOM/sqlc policy PASS",
+    "connected candidate static preseal PASS",
+    "R5 cumulative PASS on pristine canonical",
+    "CA3-3 cumulative PASS on pristine canonical",
+    "CA4-1 validator PASS",
+    "current cumulative candidate validator PASS"
+  ],
+  "compatibility_copy_only": {
+    "origin": "fresh disposable clone of exact canonical CA4-1 candidate after final test correction",
+    "environment": "local Go 1.23.2 linux/amd64",
+    "environment_edits": [
+      "go.mod go 1.26.0 -> 1.23.0",
+      "remove toolchain go1.27.1",
+      ".go-version 1.27.1 -> 1.23.2"
+    ],
+    "canonical_product_or_assertion_edits_in_clone": false,
+    "results": [
+      "strengthened focused tests PASS",
+      "focused go test -race PASS",
+      "bounded package-by-package go test 92/92 PASS",
+      "bounded package-by-package go vet 92/92 PASS",
+      "integrated source/oracle/query/schema/go test/go vet/I1-I5 checks GREEN before outer execution timeout in historical validators",
+      "remaining historical validators separately rechecked; R5 canonical-pin check intentionally evaluated on pristine canonical"
+    ]
+  },
+  "implementation_findings_repaired_before_final_clone": [
+    "recipe ordinal validator originally allowed ordinal 0; canonical fixed to require source-qualified 1-based ordinal",
+    "retained CA3-3/R5 cumulative guards originally treated legitimate CA4-1 content compiler evolution as drift; cumulative mode amended without weakening historical snapshot pins"
+  ],
+  "checker_findings": [
+    "first independent postimplementation checker run RED due checker path/test-literal/location assumptions; checker corrected against actual repository organization before verdict",
+    "final independent postimplementation checker 42/42 PASS"
+  ],
+  "deferred_mandatory": [
+    "exact canonical Go 1.27.1 execution",
+    "pinned sqlc 1.31.1 native generation/verification where applicable",
+    "real PostgreSQL 18.6 migration/upgrade/restore/concurrency",
+    "real River where an accumulated CA4 path depends on River",
+    "aggregate CA4 end-to-end service/runtime Work gate before CA4-E"
+  ],
+  "not_claimed": [
+    "native PostgreSQL correctness",
+    "exact canonical-toolchain execution",
+    "River proof",
+    "CA4-2 or later mechanics",
+    "physical stock-client proof",
+    "CA4 aggregate/CA4-E acceptance"
+  ],
+  "evidence_directory": "EVIDENCE/PASS535_CA4_1"
+}

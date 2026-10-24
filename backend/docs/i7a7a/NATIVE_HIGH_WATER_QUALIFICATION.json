@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "scope": "Existing cumulative channel native migration assertion; additive qualified36",
+  "prior_35_lock_sha256": "5b967469ce8e2c07c052835deda66b625c78f92b0844575778ee521207746e8c",
+  "five_gift_selection_sha256": "7ede2d6b281aa44cb6a98b0095bb9b4981fd2c6a0425e982b79643990a85d500",
+  "exact_new_high_water": 36,
+  "historical_floors_33_34_35_preserved": true,
+  "all_prior_hashes_verified": true,
+  "assertions_waived": false,
+  "reason": "Authorized additive neutral forward-only SocialGift migration36; byte identities1..35 unchanged; no route activation."
+}

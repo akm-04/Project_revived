@@ -1,0 +1,66 @@
+{
+  "status": "COMPLETE_CORE_BASELINE_ADOPTED_EXPLICIT_RECONSTRUCTION",
+  "classification": "IMPLEMENTATION_DECISION",
+  "policy_revision": "C2H_V1_PRESERVATION_ROLL_V1",
+  "policies": [
+    {
+      "id": "HPD-001",
+      "disposition": "ADOPT_OWNER_FACTS_MAP_TO_V2_TYPED_SPIRIT_OWNER"
+    },
+    {
+      "id": "HPD-002",
+      "disposition": "ADOPT_MONOTONIC_IDS_V2_SAFEJSON_NO_SPECULATIVE_LEGACY_REPAIR"
+    },
+    {
+      "id": "HPD-003",
+      "disposition": "ADOPT_UNIFORM_MAIN_FORCED_NO_DRAW"
+    },
+    {
+      "id": "HPD-004",
+      "disposition": "ADOPT_POSITIONAL_SUBCOUNT_WEIGHTS_FORCED_NO_DRAW"
+    },
+    {
+      "id": "HPD-005",
+      "disposition": "ADOPT_DISTINCT_UNIFORM_SUBS_PRESERVE_ORDER_ALLOW_MAIN_ATTR_MATCH"
+    },
+    {
+      "id": "HPD-006",
+      "disposition": "ADOPT_SOURCE_EXACT_BASE_NO_HIDDEN_VARIANCE"
+    },
+    {
+      "id": "HPD-007",
+      "disposition": "ADOPT_ASCENDING_MILESTONES_BALANCED_FORCED_ADD_IMPROVE"
+    },
+    {
+      "id": "HPD-008",
+      "disposition": "ADOPT_FULL_GAIN_COST_CAPPED_STORED_EXP"
+    },
+    {
+      "id": "HPD-009",
+      "disposition": "DEFER_TRIAL_REPEAT_POLICY_TO_QUALIFIED_MODE_OWNER"
+    },
+    {
+      "id": "HPD-010",
+      "disposition": "RETAIN_TRIAL_ENTRY_SOFT_CAP_NO_GENERIC_MINT_TRUNCATION"
+    },
+    {
+      "id": "HPD-011",
+      "disposition": "DEFER_GIFT_ORIGIN_OTA_BRIDGE_HOTA001_NOT_SILENTLY_IMPORTED"
+    },
+    {
+      "id": "HPD-012",
+      "disposition": "DEFER_GIFT_9199043_OVERLAY_TO_GIFT_OWNER_KEEP_RAW_IMMUTABLE"
+    },
+    {
+      "id": "HPD-013",
+      "disposition": "RECONCILE_TEXT_POLICY_NO_SUIT_BONUS_WITH_ACTUAL_UNFILTERED_V1_AND_CURRENT_HELPER_NO_V2_BLANKET_SUPPRESSION"
+    }
+  ],
+  "oath": "V1 HPD013 declares no suit bonus, but shipped NormalHero helper includes every family and raw1011 attr1=100; no1011 suppression found in owned V1 code. V2 preserves actual current helper/suit row, materialized stats, and fourpiece identifier; combat special effects remain later. Do not claim textual policy was demonstrated server stat behavior.",
+  "restart": "V1 fixed ownedHero stale empty spirit_item by omission and Backpack fallback. V2 uses six fully materialized slot payloads from coherent owner scope for bothself/foreign; restart tests require every nonzero ID resolve to exact instance, empty slots {}. This is projection-only, no duplicate durable authority.",
+  "rng": "Reuse V2 operation.Context.Derive, named V1 main/count/selector/action/new/improve domains and pernamespace ordinals, deterministic retry, unbiased bounded draw, forced choices no draw. No new RNG framework. V1 ephemeral SystemEntropy differs; do not promise sequence identity across architectures.",
+  "receipt": "Keep V2 retained semanticUUID/UNKNOWN lifecycle. V1 permanent target+fodder receipt corroborates exactly-once intent, not a reason to replace V2 semanticIDs with request hashes.",
+  "linked_modes": "GodsTrial manual/auto/energy/day/progress/drop settlement remain outside2H. It depends on same specializedSpirit materializer and exactmaterialized stats. Gift owns outer template selection and anomalies; Spirit owns inner generated instance. Vow acquisition is separate Character system.",
+  "historical_runtime": "PASS172 acceptance JSON records resmoke/restart/packs/equip/strength15/campaign, debugzip ae9c91c8a1e35c08f182afcc4aefddc019644a2770330f4a522d35a0a06d2fef. Inherited V1 evidence only; exactV2 proof required.",
+  "no_new_whole_mode_activation": true
+}

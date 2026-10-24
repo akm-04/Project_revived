@@ -1,0 +1,63 @@
+{
+  "schema": "gxb-i7a5-substage-roadmap/v1",
+  "pass": "642.0",
+  "status": "APPROVED_SPLIT_5A_ACCEPTED_5B_RESEARCH_DESIGN_READY_PARENT_OPEN",
+  "parent": "I7A-5",
+  "baseline_phasewide_topology": "00_PASSMAP/PASS621_I7A_INTERNAL_STAGE_ROADMAP.json",
+  "approval": {
+    "schema": "gxb-i7a5-approved-decomposition/v1",
+    "status": "USER_APPROVED_PENDING_NORMAL_SEAL",
+    "approval_source": "Latest direct user message in this chat",
+    "approved_plan_checkpoint": {
+      "filename": "gxb1-checkpoint-79-i7a5-research.zip",
+      "sha256": "c6ef258b966d8d24273fe8634eccc8bb7236f0c7fe903e6cdf195cc117873065"
+    },
+    "children": [
+      {
+        "id": "I7A-5A",
+        "scope": "Authenticated ordinary WORLD/GUILD/SERVICE channel text",
+        "depends_on": [
+          "I7A-2",
+          "I7A-3"
+        ]
+      },
+      {
+        "id": "I7A-5B",
+        "scope": "Typed structured projections, provider gates and parent composition/reality review",
+        "depends_on": [
+          "I7A-5A"
+        ]
+      }
+    ],
+    "original_plan": "DECOMPOSITION_REVIEW.md and DRAFT_IMPLEMENTATION_PLAN.md copied byte-identical from CP79; prior proposed labels are historical pending normal selection.",
+    "implementation_authorization": "Checkpoint confers none. Normal5A design/lifecycle seal must express next step truthfully."
+  },
+  "stages": [
+    {
+      "id": "I7A-5A",
+      "parent_id": "I7A-5",
+      "title": "Authenticated ordinary channel text",
+      "depends_on": [
+        "I7A-2",
+        "I7A-3"
+      ],
+      "status": "ACCEPTED_EXACT_RUNTIME_PASS641",
+      "acceptance_record": "00_PASSMAP/PASS641_I7A5A_ACCEPTANCE_RECORD.json"
+    },
+    {
+      "id": "I7A-5B",
+      "parent_id": "I7A-5",
+      "title": "Typed structured projections, provider gates and parent composition",
+      "depends_on": [
+        "I7A-5A"
+      ],
+      "status": "RESEARCH_DESIGN_COMPLETE_IMPLEMENTATION_NOT_STARTED",
+      "contract_index": "00_PASSMAP/PASS642_I7A5B_CONTRACT_INDEX.json",
+      "live_producers": false
+    }
+  ],
+  "parent_rollup": "EXPLICIT_PARENT_GATE_AFTER_BOTH_CHILD_EXITS; no automatic parent/wholephase/stockacceptance",
+  "whole_phase_numbering_unchanged": true,
+  "implementation_authorized": false,
+  "no_blanket_I7A4_dependency": true
+}

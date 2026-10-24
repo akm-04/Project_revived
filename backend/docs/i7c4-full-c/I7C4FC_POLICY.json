@@ -1,0 +1,18 @@
+{
+  "policy_id": "C4F_COSMETIC_COUNTS_AND_SKINS_V1",
+  "classification": "SOURCE_FACT_PLUS_LABELLED_PRIVATE_POLICY (from approved Q1/Q2/Q4/Q5; no new user question)",
+  "rules": {
+    "C4F_FULL_FAMILY_V1": "A complete-family read resolves every catalog row: ELIGIBLE / INELIGIBLE from a qualified owner, or NOT_LIVE for a C6_COSMETIC_FORWARD_BINDINGS_V1 row. Any other UNAVAILABLE row keeps the whole family unavailable (never zero).",
+    "C4F_SKIN_COLLECTION_V1": "1003 = distinct skin models the player holds: an unexpired hero skin entitlement, or an I5 stack > 0 of any skin item of that model (SelfPlayer.hasSkin). Private: model dedup.",
+    "C4F_TROPHY_COUNT_V1": "1004 = earned achievement tiers (each of bronze/silver/gold counts once). A legacy player whose Achievement root was never observed reports 0 at population version 0 until the first observation.",
+    "C4F_COSMETIC_COUNT_V1": "1005 = ELIGIBLE frame facts; 1006 = ELIGIBLE (avatar, category) facts, one per avatar window section entry, both over the complete family at the observation instant. Private: section dedup.",
+    "C4F_PRIVATE_SKINS_SERVER_RANKING_V1": "Rank subtype 38 over metric 1003 with the Girls calendar, cohort, top-20 and 7-day titles 100063 (1), 100064 (2), 100065 (3), 100066 (4..20); row field score.",
+    "C4F_SKINS_ACHIEVEMENT_V1": "100016 joins C4F_OWNED_STATE_COUNT_V1 over the 1003 count (high-water tiers, legacy backfill from current state).",
+    "C4F_SHOW_TYPES_FULL11_V1": "1840 reads each of 1001..1011 and returns every value whose canonical basis is known; a field UNKNOWN for this player (e.g. 1007 over legacy heroes without a raw birth) is omitted, never zeroed, and SQL failures still fail the read. Show-type selection accepts all eleven and still fails closed per selected field.",
+    "C4F_SKINS_BOARD_LEGACY_V1": "Legacy players enter the Skins board the same way they enter Girls/AP: the ranking bootstrap contributor tracks fresh characters only."
+  },
+  "not_claimed": [
+    "Original server skin/frame/avatar counting and Skins ranking algorithms",
+    "Photo/Scene (1012/1013)"
+  ]
+}

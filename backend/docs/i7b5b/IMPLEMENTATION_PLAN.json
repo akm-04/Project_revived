@@ -1,0 +1,48 @@
+{
+  "node": "I7B-5B",
+  "status": "RESEARCH_DESIGN_READY_PENDING_NORMAL677_PUBLICATION",
+  "authorization": "Direct currentuser research->design->implementation authorization; publicationgate stillrequired",
+  "scope": [
+    "MID1844 actoraddressed boundedPNG preparedviaaccepted5A",
+    "Canonical391currentref/append-onlyoperationhistory andatomicKernelReceipt",
+    "Knownop/unknowncommit androotversion stableDecisionAt semantics",
+    "Anonymouscommitted immutableURL GET withactualMD5 bytes",
+    "SafeGC typedownerreachability plusunknownprotection",
+    "OfflinejointDB/blob/pin backuprestore; fullparent5 reality"
+  ],
+  "ports": [
+    "PublicProfile.MediaStore: ReadCurrentTx,ReadHistoryTx,WriteAssignmentTx,ListMediaTx exactcallerTx; SQLonlypublicprofilestore",
+    "KernelReceipt domainoperation inventory via narrowkernelstore typedReader (noforeignSQL)",
+    "MediaService consumes5A PreparedAsset beforeenteringcallerTx; memory-onlybinding insideTx; closeafterTx",
+    "GET reads qualifiedhistory outsidebyteI/O; Maintenance holdsEX, allDBscopesclosebeforefilesystemoperations"
+  ],
+  "schema": "Forward00046_i7b5b_profile_media.sql; referencespointtosameplayerhistory withFK andvalidatedmetadata/ownerconstraints, nochanges1..45",
+  "time": "Ingestfirst; generation.TimedRunner bindsDecisionAt afteringest; inherited315->391/noearlierUpdatedAt; no newreset/value/purchase effect",
+  "implementation_order": [
+    "Seal677 designandrecordAUTHORIZED_NOT_STARTED",
+    "Copy676accepted intoowned5Bworkingtree",
+    "Batchschema/typedrefs/receipts/mediaapplication plusHTTP/runtimeactivation",
+    "AddownedofflineGC/backuprestoretools anddocumentation",
+    "Targetednative/HTTP/concurrency/failure/recoverychecks",
+    "Freezeonecombinedcandidate; exactportableR2qualification/nativeprocess/jointrestore +affectedinheritedregression",
+    "Reconcile5Aretainedproof and5Bnewproof, independentparent5reality,onefinal678sync/contractharvest"
+  ],
+  "later_routes": [
+    "5->6 mediafacet/URL/md5/version qualifiedprovider",
+    "6/E fullpublicdiscovery privacy/freshness andremainingproviders",
+    "PhysicalstockW2 remainsnamedlatergate"
+  ],
+  "bounded_unknowns": [
+    "Originalservermedia limits/moderation/URLauth",
+    "No powercut orcrossreplica globalcap evidence"
+  ],
+  "research_closure_criteria": {
+    "all_parent5_capabilities_dispositioned": true,
+    "unrecovered_current_wire_rules_bounded": true,
+    "owners_and_exactTx_dependencies_resolved": true,
+    "Q03_Q04_Q06_implementable_choices_recorded": true,
+    "accepted5A_usedwithoutreproving": true,
+    "nativeGC/jointrestoreexitdefined": true,
+    "no_new_node_or_scope": true
+  }
+}

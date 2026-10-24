@@ -1,0 +1,14 @@
+=== stockruntime+arch shuffle x20 ===
+ok  	gxb.local/backend/v2/internal/adapters/stockruntime	8.041s
+ok  	gxb.local/backend/v2/internal/archguard	0.820s
+=== AUTO fuzz 15s ===
+fuzz: elapsed: 0s, gathering baseline coverage: 0/59 completed
+fuzz: elapsed: 0s, gathering baseline coverage: 59/59 completed, now fuzzing with 5 workers
+fuzz: elapsed: 3s, execs: 56432 (18805/sec), new interesting: 1 (total: 60)
+fuzz: elapsed: 6s, execs: 124456 (22677/sec), new interesting: 1 (total: 60)
+fuzz: elapsed: 9s, execs: 191832 (22460/sec), new interesting: 1 (total: 60)
+fuzz: elapsed: 12s, execs: 260441 (22871/sec), new interesting: 1 (total: 60)
+fuzz: elapsed: 15s, execs: 328283 (22611/sec), new interesting: 1 (total: 60)
+fuzz: elapsed: 15s, execs: 328283 (0/sec), new interesting: 1 (total: 60)
+PASS
+ok  	gxb.local/backend/v2/internal/application/characterpractice	15.099s

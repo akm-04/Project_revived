@@ -1,0 +1,13 @@
+{
+  "status": "FROZEN",
+  "toolbox": "exact immutable R2 Go1.27.2 PG18.6",
+  "checks": [
+    "unit, race, vet and bounded fuzz for identity/requiredness/detachment/finite arithmetic",
+    "source-oracle actual Lua nondefault model/skill/equipment/owner leaf differentials",
+    "canonical owner read composition in witnessed native transaction; missing/stale/mismatch/private denied, zero writes",
+    "all existing affected architecture/sql/migration/content/ownership/offline/security guards",
+    "exact candidate fresh59 and populated58upgrade; oldtable hashes preserved, rollback/redeploy/idempotence",
+    "dump/restore plus PG stop/reopen and detached qualified Pet reload consistency",
+    "separate primary code/contracts/source reality; actual producer evidence versus fixtures explicit"
+  ]
+}

@@ -1,0 +1,7 @@
+=== FOCUSED RACE W4D ===
+ok  	gxb.local/backend/v2/internal/application/i5	1.040s
+ok  	gxb.local/backend/v2/internal/application/characterasset	1.022s
+ok  	gxb.local/backend/v2/internal/content/builtin	2.459s
+ok  	gxb.local/backend/v2/internal/content/registry	9.179s
+ok  	gxb.local/backend/v2/internal/adapters/postgres/contentstore	1.448s
+ok  	gxb.local/backend/v2/internal/archguard	1.121s

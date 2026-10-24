@@ -1,0 +1,18 @@
+{
+  "status": "MANDATORY_EXACT_CANDIDATE_AFTER_IMPLEMENTATION",
+  "portable_sha256": "e4e194c9627929299577364b953b2468d6118fac4283fd8030f10b5a27456c2b",
+  "tests": [
+    "Allunit, affectedrace,vet,boundedfuzz,sourcecompiler/manifestpriorpayloadbytepreservation",
+    "Actualsource avatar predicates/equality/visibility/collection/VIPthreshold boundaries",
+    "Alltypes/base/Normal/Super/awaken/skin/collection/stack/purchase/timed/VIP native realnondefault owner paths",
+    "Manualimport nolegacyfallback, replay/contentpin/changedtarget/charge/reason/policy conflicts, concurrency androllback/unknowncommit",
+    "RR readonly coherentpopulation versions, wrongtarget/pin/futuretime/missingowner failclosed; wholefamily/count unavailable",
+    "Exactfresh60 andpopulated59->60 preservingoldrows/contentonce/repeatdeployzerochange",
+    "Dump/restore/restart rowhash andeligibility/VIP output continuity; earlierqualified59dump reused asbaseline",
+    "Architecture/ownership/migrationlock/dependency/security andindependentreality",
+    "NonbaselineVIP cannot leaveotherconsumers atbaseline0: Course/Practice/I5snapshot/MID1 allsamecanonicallevel",
+    "Skillpointcap boundary settlesoldcap beforechange, preservesqualifiedrunningremainder/rearmsatcap and atomicrollback/receipt recovery"
+  ],
+  "no_new_stock_route": true,
+  "stockW2": "UNPASSED_AFTER_I14"
+}

@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "pass": "649.0",
+  "stage": "I7A-7A",
+  "phase": "I7A",
+  "status": "SELECTED_PREIMPLEMENTATION_DESIGN_WITH_VALIDATED_NORMAL_PASS649_SEAL",
+  "classification": "IMPLEMENTATION_DECISION_UNLESS_EXPLICIT_SOURCE_FACT",
+  "implementation_started": false,
+  "product_accepted": false,
+  "base_backend_sha256": "2fa5d71e52c1246580eb5eba39ed7f7ca687bb446deca3bbd1af555b25d529da",
+  "base_passmap_sha256": "d2eba13ca5bb91c333309726f134729ca314225506a56d729ed95646b2d3841b",
+  "node_path": [
+    "ROOT",
+    "I7",
+    "I7A",
+    "I7A-7",
+    "I7A-7A"
+  ],
+  "contract_id": "I7A7A_TRANSACTION_GRANT_CONTRACT",
+  "reuse": [
+    "generation.TimedRunner",
+    "playerroot.TxLocker",
+    "SocialRelation FriendDMPrivacyProvider via narrow typed port",
+    "SocialInbox finite Prepare/Apply pattern and notice sequence",
+    "i5.Service.SettleGrantTx",
+    "I5 receipt source semantic identities and content runtime"
+  ],
+  "send_plan": [
+    "Authenticate at existing I4 edge; canonicalize all I4 root groups315 before any Social lock",
+    "Read/lock both SocialRoot360, Friendship361 and recipient->sender Block363 via GiftEligibility",
+    "Close typed Notice source370 and both current GiftEpoch371 keys (include discovered latest named fence under360 if needed) and exact Transfer372 absent/present fence in canonical order",
+    "Validate full identity/content/time/quota/source/profile/root version plan; build private caller-Tx-bound prepared objects, all locks and reads before first mutation",
+    "Apply epoch create/touch, one immutable transfer and Inbox type4 notice through typed owner ports plus root revision touches in same serializable transaction; sequence gaps are allowed on abort, safe-wire notice ID required",
+    "Commit before any network/response projection; no send-side scalar credit"
+  ],
+  "claim_plan": [
+    "Authenticate actor and lock I4 actor315 then SocialRoot360",
+    "Deduplicate explicit IDs and lock all Notice370 in canonical order; discover typed exact sources without foreign owner SQL",
+    "Close current/latest recipient GiftEpoch371 then all exact transfer372 keys canonical order; validate entire mixed source/identity/time/quota/content plan and immutable membership",
+    "Build ONE aggregate ScalarCurrency line amount=sum issued snapshots, <=50 under receive cap10. Source{Domain:social-gift,Operation:claim-batch,BusinessKey:recipient,Occurrence:stable operationID,PolicyVersion:SOCIAL_GIFT_CLAIM_BATCH_V1}. No parameter-hash entitlement.",
+    "Call SettleGrantTx ONCE in same Tx with AllowOverflowMail:false. It preflights/acquires I5 economy700+scalar720 suffix before first Grant mutation; no source mutation has occurred. Keep stack strict-restoration API unchanged.",
+    "After Grant completes, apply already-prepared owner changes only: claimant epoch, transfer claims, typed notice dismissals, relation dismissal, root touch, immutable claim operation/receipt link. No new lower/equal distinct lock acquisition. Existing I5 same-key recheck is retained, never a new resource discovery.",
+    "All post-Grant failures roll back Grant and all source facts. Commit/reconciliation precedes any postcommit absolute economy read"
+  ],
+  "private_prepared_plan": "Prepared values bind exact caller tx identity and all expected row versions/source descriptors; Apply rejects other transaction, mutation of membership, unprepared caller or stale optimistic witness. SocialGift does not export generic Grant/economy tables.",
+  "time": "DBDecisionAt bound once for quota/facts/clock guards. Operation.StartedAt and entropy/policy context retain accepted transport/I5 receipt meaning. Scalar credit may reject StartedAt before existing balance updated_at; fail whole Tx, do not change either timestamp to make it pass.",
+  "profiles": {
+    "command": "Reuse serializable Social command profile, max3 definite-abort attempts, no authoritative-negative replay for unknown commit; shared deadline and existing finite HTTP JSON body budget",
+    "capacity": "Do not impose50 IDs as gameplay cap. Parse finite JSON and process only within existing command deadline/engineering body budget; cancel/timeout is failure without committed effects. Internal typed API also checks command context. Diagnostic scan budget for7B projection is engineering, not value expiry."
+  },
+  "missing_ports": [
+    "Finite GiftEligibility adapter over existing FriendDMPrivacyProvider, preserving recipient direction",
+    "SocialGiftStore lock/read/apply/receipt methods and pure snapshot port",
+    "SocialInbox Gift-only typed descriptor/materializer/consume methods; never weaken RelationDescriptor validators",
+    "Typed immutable GiftCatalog provider implemented by existing content owner adapter"
+  ],
+  "actor_security": "Do not trust arbitrary actor struct from HTTP. Existing I4 admission/identity lifecycle fencing remains required before coordinator; tests must exercise current/rotated/revoked contexts rather than only Validate fields.",
+  "creation_time_workpaper_status": "PREIMPLEMENTATION_DESIGN_NORMAL_SELECTION_PENDING",
+  "authority_condition": "Valid owning HOT649 content seal and sole ObjectRegistry selection; this is design authority only, not product acceptance"
+}

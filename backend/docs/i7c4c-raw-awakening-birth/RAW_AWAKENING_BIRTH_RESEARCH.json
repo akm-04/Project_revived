@@ -1,0 +1,92 @@
+{
+  "status": "TARGETED_FOLLOWUP_RESEARCH_RECONCILED_GENUINE_NEW_BIRTH_ONLY_NOT_FULL_BLOOD_LIFECYCLE",
+  "base_working_product_commit": "d5810205386756673cb96fc1efd7c93d933af6ba",
+  "reused_memory": [
+    "FORCE_INPUT_PASSMAP_REUSE.json",
+    "FRESH_TRACKING_HYPOTHESIS_ADJUDICATION.json",
+    "force_input_cache/PASS715_I7C3B_PUBLIC_STAT_COMPOSITION_CONTRACT.json",
+    "force_input_cache/PASS709_I7C2I_TWICE_AWAKE_RECONCILIATION.json"
+  ],
+  "records": [
+    {
+      "corpus_role": "EXACT_SRC64_SOURCE_FACT",
+      "path": "app/model/NormalHero.lua",
+      "sha256": "125183556caeecc182bf0702dd1f95160c8ba1666a3b97fbb8a7261d30ae0ac9",
+      "finding": "populate twice_awake_stage fallback0; fallback not owner attestation"
+    },
+    {
+      "corpus_role": "EXACT_SRC64_SOURCE_FACT",
+      "path": "app/model/SuperHero.lua",
+      "sha256": "b127c2cbef327d3142031bf30daa0af1b45997c6da82fba946d641a86783d622",
+      "finding": "same raw field/fallback; Normal/Super distinct and no future Vows activation inferred"
+    },
+    {
+      "corpus_role": "EXACT_SRC64_SOURCE_FACT",
+      "path": "app/model/Task.lua",
+      "sha256": "d454ae7cb1e28d95d366aae30ba88d83432c974415f263991af6c4190d54bee5",
+      "finding": "openAwakeTask applies source stage, giveUpTask resets to0; 0 is real stage vocabulary, not proof missing durable state is known0"
+    },
+    {
+      "corpus_role": "FROZEN_V1_CORROBORATIVE_NOT_ORIGINAL_OR_V2_QUALIFICATION",
+      "path": "state/hero_repository.py",
+      "sha256": "be7ed885f9e492933be5a051dd20bc52500cab0fd9f08bf655acfac6c2a169ae",
+      "finding": "normalization setdefault(twice_awake_stage,0); reject copying this legacy/default behavior into V2 qualified reader"
+    },
+    {
+      "corpus_role": "FROZEN_V1_CORROBORATIVE_NOT_ORIGINAL_OR_V2_QUALIFICATION",
+      "path": "state/hero_entity_mutation_service.py",
+      "sha256": "dd0470be8dbdc2cc7c787a7c0c9cdb890ba5f7587c5a841c5712442204dc4f14",
+      "finding": "SET_TWICE_AWAKE_STAGE is Character mutation path, distinct from STONE_EVOLUTION stages"
+    },
+    {
+      "corpus_role": "FROZEN_V1_CORROBORATIVE_NOT_ORIGINAL_OR_V2_QUALIFICATION",
+      "path": "state/awakening_mission_service.py",
+      "sha256": "577bb46ccedcafdfd90fb946480c1e2f92ef8f1546b50c69d3a545b54a619d39",
+      "finding": "mission producer governs positive stages; existing cached709 reconstruction retained, no new whole combat research"
+    },
+    {
+      "corpus_role": "CURRENT_IMPLEMENTATION_STATIC_FACT",
+      "path": "internal/application/publicstats/service.go",
+      "sha256": "5867be62c87cd675b8c11328de8dbddad385d4c5e5dfab79a7a8a59dbc6acf0e",
+      "finding": "HeroTx requires genuine raw observation matching current Hero state version/content/time; all other leaf qualification remains"
+    },
+    {
+      "corpus_role": "CURRENT_IMPLEMENTATION_STATIC_FACT",
+      "path": "internal/application/characterhero/fresh_facets.go",
+      "sha256": "a19a4466b84f9fa6fa1323857422018e4ea44cfc9f8753d2b7f08cf7f2810043",
+      "finding": "new unpublished Hero insert -> typed local fresh facets in caller transaction; no lower-ranked existing-owner lock after I5"
+    },
+    {
+      "corpus_role": "CURRENT_IMPLEMENTATION_STATIC_FACT",
+      "path": "internal/application/characterhero/acquisition.go",
+      "sha256": "2274cf996b3b3fc7aa0f7ab35305335e0e82fe3da714060199a072e5eb960ba5",
+      "finding": "productionNormal59 now real private admission; fresh insert/facets/debit/receipt sameTx; old receipt replay does not rerun initializer"
+    },
+    {
+      "corpus_role": "CURRENT_IMPLEMENTATION_STATIC_FACT",
+      "path": "internal/application/characterhero/materializer.go",
+      "sha256": "ab389cb5479d1be071eccb2c67d224451119ad948a95827a5936b1da2c7eb90d",
+      "finding": "same newHero/insertFreshHero seam but I5 Hero provider remains unregistered"
+    },
+    {
+      "corpus_role": "CURRENT_IMPLEMENTATION_STATIC_FACT",
+      "path": "internal/adapters/postgres/characterstore/evolution.go",
+      "sha256": "4cfeff4e8f8da9c0df88908cc7414c9c907e36a214afafc842c6c68bdf6eef4d",
+      "finding": "canonical intrinsic facet precedent separate state version serialized by Character root400/Hero410; existing rows are not raw awakening facts"
+    },
+    {
+      "corpus_role": "CURRENT_IMPLEMENTATION_STATIC_FACT",
+      "path": "internal/integration/playerdisplay/i7c3b_stats_test.go",
+      "sha256": "1bf69300cb54e0cd9235c5fd44c61688515788cfae235d1dc97f6226f0daef9e",
+      "finding": "conditional fixture currently returns raw0; actual new provider proof must replace fixture for new test, preserve old conditional evidence labels"
+    }
+  ],
+  "discovery": "ProductionNormal59 prerequisite is now implemented/tested, so genuine new Hero birth is available. A durable Character-owned birth fact can establish new rawstage0; source fallback and V1 setdefault cannot establish legacy absence.",
+  "not_adopted": [
+    "Infer existing raw0 from missing row, client missing field, ordinary star/stone evolution stage, appearance or raw-skill seed",
+    "Treat fresh birth attestation as full3B/4C closure or positive1..3 mission producer",
+    "Use current live owners to reconstruct replay battle input",
+    "Start queuedI7C5/Unlimited gameplay to fill positive-stage producer in this bounded work"
+  ],
+  "scope": "Fresh actual Character-owned birth fact plus typed CA8 read consumed by existing pure stat composer; positive AwakeningMission/Unlimited path remains separate required dependency."
+}

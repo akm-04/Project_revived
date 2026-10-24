@@ -1,0 +1,2 @@
+{"name":"clean",
+ "steps":["wait:5"],"settle_seconds":10,"expect_client_log_absent":["vc-injected-lua-error"]}

@@ -1,0 +1,111 @@
+{
+  "schema_version": 1,
+  "pass": "602.0",
+  "stage": "CA8-2",
+  "status": "LOCAL_ACCEPTANCE_CANDIDATE",
+  "parent_backend_archive_sha256": "3dd02ea37e07995f81df18fbf259633db11f478a1be67d5dfd59344309a9d155",
+  "parent_git": "49f3f8295f7c9c5d7eacbab1c151343072e00548",
+  "ca8_1_contract_package_sha256": "5cf110f5b6c137e29a1c32fe413dd8b2039e2b00d192605e40ee2f22cf13f3cd",
+  "implementation_revision_algorithm": "sha256(sorted(path UTF-8 || NUL || final file bytes) over CA8-2 implementation/test footprint)",
+  "implementation_revision_sha256": "55943e44e4ab64039880d48ee69e00a09ddfb229f732c4c83dfbc5481df3ed0e",
+  "changed_implementation_files": [
+    {
+      "path": "internal/adapters/postgres/contentstore/pet_equipment.go",
+      "sha256": "d9c34a10fb10506ff8973368c15387f73dd2d4efbc0b963635a8f3c4fa14c365",
+      "bytes": 4939
+    },
+    {
+      "path": "internal/application/characterasset/ca8_foundation.go",
+      "sha256": "079fc8682bdba465b8ec90c5b4d2e97fd8646eeb97d3518995a1052ee2cd69ec",
+      "bytes": 6469
+    },
+    {
+      "path": "internal/application/characterasset/ca8_foundation_test.go",
+      "sha256": "c8c98bdb88e618650b87fc19dec885f131ae934dce2aeb3620e1d1293fae2627",
+      "bytes": 4192
+    },
+    {
+      "path": "internal/application/characterhero/base_observation.go",
+      "sha256": "bb6897c82c6dfce067bc58564c3d7e9784cece15f04c1791a6a2cb624e0fa7ce",
+      "bytes": 2014
+    },
+    {
+      "path": "internal/application/characterhero/base_observation_test.go",
+      "sha256": "341f9e4bdf5621b56fdee21fdb4b3cd5d6e6372abbfd1b2fc3010f66257e92cf",
+      "bytes": 2524
+    },
+    {
+      "path": "internal/application/characterhero/equipment_state.go",
+      "sha256": "e8c1974f6a3c5364ef64aa6da15942f34bf33a974ae9aa8fcf87305b357d1d3d",
+      "bytes": 3454
+    },
+    {
+      "path": "internal/application/characterhero/equipment_state_test.go",
+      "sha256": "5b41db4a7b8dd5399d5abb9d67180927e7e1ed9201e72a75d30112edfb4ea1b1",
+      "bytes": 5494
+    },
+    {
+      "path": "internal/application/characterpet/base_observation.go",
+      "sha256": "a3fcd4c2b3bf9ebb83de4aa9f94716480493daf601bee3cda09e715f0833533e",
+      "bytes": 1680
+    },
+    {
+      "path": "internal/application/characterpet/base_observation_test.go",
+      "sha256": "e489bdc0fab212ee555db49081983e4e988b55c82da62e69576162c32c4dbb84",
+      "bytes": 1436
+    },
+    {
+      "path": "internal/application/characterpet/equipment_state.go",
+      "sha256": "1486eac06bd776f7a8116ebcbe7a535af46765774bceaf7387f4a5f5e2118e7a",
+      "bytes": 2866
+    },
+    {
+      "path": "internal/application/characterpet/equipment_state_test.go",
+      "sha256": "51bef2eeee80154b4e4350d1a29ef95dcf47ff8215b9a363df58264f01f9ddbb",
+      "bytes": 2978
+    },
+    {
+      "path": "internal/application/generation/transaction.go",
+      "sha256": "447e040ab30b9a09f7701585324457ba63d62cbe0ee681fe481be76d1fac364d",
+      "bytes": 3233
+    },
+    {
+      "path": "internal/application/generation/transaction_test.go",
+      "sha256": "aa59cadb8422d24b24f4d475d031c8e0826f55753de4796a613da02f2688072e",
+      "bytes": 8442
+    },
+    {
+      "path": "internal/foundation/tx/runner.go",
+      "sha256": "e77f03032da106b94dbb2345ea5f1c4a1153499fb2bc21823faf9a5da37502cf",
+      "bytes": 10441
+    },
+    {
+      "path": "internal/foundation/tx/runner_test.go",
+      "sha256": "cd23667ee9fd1aba65e96fa709695231f1c4701492a650b5fdcddaa9e864faf8",
+      "bytes": 12670
+    },
+    {
+      "path": "internal/foundation/tx/types.go",
+      "sha256": "7fd62bdff111be7847e2f756d186be11edf83da9e5686ea8dfc790c5d271e1eb",
+      "bytes": 5052
+    }
+  ],
+  "scope": [
+    "add exact tx.Options witness to tx.Scope and generation.TimedScope without changing transaction semantics",
+    "add CA8 coherent-read scope requiring caller-owned REPEATABLE_READ or SERIALIZABLE transaction plus exact revision/operation/observation instant",
+    "add narrow CA2 Hero and CA3 Pet immutable base observations",
+    "add CA4-deferred Pet RawEquipmentState caller-queryer adapter",
+    "keep Hero equipment revision capability check on caller queryer",
+    "add distinct actor-origin and provider-disposition vocabulary only"
+  ],
+  "non_changes": [
+    "no schema or migration",
+    "no MID or wire change",
+    "no receipt family",
+    "no new durable owner",
+    "no battle resolver/final stats",
+    "no borrowed/synthetic business implementation",
+    "no dependency pin/toolchain change"
+  ],
+  "migration_high_water": "00030_ca7_2_appearance_foundation.sql"
+}

@@ -1,0 +1,166 @@
+{
+  "acceptance_cases": [
+    {
+      "finding": "Exact Pass555 parent was used; eight-file product diff reviewed; canonical pins are byte-identical.",
+      "id": "A1_CANDIDATE",
+      "result": "GREEN"
+    },
+    {
+      "finding": "HeroRef owner-scoped parity with PetRef implemented and tested; refs contain identity only.",
+      "id": "A2_TYPED_REFS",
+      "result": "GREEN"
+    },
+    {
+      "finding": "Hero 410 / Pet 430 / saved-preset root 440 keys are deterministic, composite and canonically orderable; mismatch tests are present.",
+      "id": "A3_LOCK_KEYS",
+      "result": "GREEN"
+    },
+    {
+      "finding": "Narrow PostgreSQL owner adapters validate expected typed ref + key before owner-row locking; not-found is typed and infrastructure errors propagate.",
+      "id": "A4_REFERENCE_OWNERS",
+      "result": "GREEN"
+    },
+    {
+      "finding": "Read-only preflight plan, non-empty stable locks, duplicate provider/lock rejection and locked revalidation ABI implemented; no detach API.",
+      "id": "A5_GUARD_ABI",
+      "result": "GREEN"
+    },
+    {
+      "finding": "Rank/key contract is implemented with no schema; CA5-2 retains mandatory root backfill/bootstrap prerequisite.",
+      "id": "A6_ROOT_LIFECYCLE",
+      "result": "GREEN_FOUNDATION_ONLY"
+    },
+    {
+      "finding": "No MID1793/208/209 route, MID1 saved-team claim, replay registration, MID66/removal activation, I9 mode state or CA8 composite snapshot.",
+      "id": "A7_ACTIVATION_NEGATIVES",
+      "result": "GREEN"
+    },
+    {
+      "finding": "No foreign-owner SQL or second transaction/receipt framework; archguard constrains CA5-1 scope.",
+      "id": "A8_ARCHITECTURE",
+      "result": "GREEN"
+    },
+    {
+      "finding": "Focused/race/vet, stockruntime, related packages, all-package regression, full go test and full go vet are GREEN in the minimal Go-1.23 diagnostic copy; full-tree race did not complete and is not claimed.",
+      "id": "A9_LOCAL_TESTS",
+      "result": "GREEN_COMPATIBILITY_COPY_ONLY"
+    },
+    {
+      "finding": "Exact executable candidate is ENVIRONMENT_BLOCKED in normal chat by unavailable Go1.27.1; user explicitly directed dedicated live Work-mode aggregate testing immediately before CA5-E. This gate remains mandatory and is not marked passed.",
+      "id": "A10_EXACT_NATIVE",
+      "result": "AUTHORIZED_DEFERRED_PRE_CA5_E"
+    },
+    {
+      "finding": "Independent postimplementation reread found no D01/D04/D11 or scope contradiction; Pass560 HOT+COLD seal still required before CA5-2 implementation.",
+      "id": "A11_REALITY_SEAL",
+      "result": "GREEN_LOCAL_PENDING_PASSMAP_SEAL"
+    }
+  ],
+  "authority_parent": "sealed Pass559 CA5-1 research/contract/acceptance matrix plus explicit user authorization to implement and defer dedicated live aggregate testing until immediately before CA5-E",
+  "canonical_environment": {
+    "canonical_pins_changed": false,
+    "exact_candidate_attempt": "ENVIRONMENT_BLOCKED",
+    "exact_toolchain_attempt_log": "EVIDENCE/PASS560_CA5_1/exact_toolchain_attempt.log",
+    "reason": "canonical go.mod requires Go >=1.26 and toolchain go1.27.1; sandbox has Go1.23.2 and cannot resolve/download proxy.golang.org"
+  },
+  "compatibility_copy_only": {
+    "accommodation": [
+      "go.mod language/toolchain adapted only in disposable copy",
+      ".go-version adapted only in disposable copy"
+    ],
+    "canonical_pins_changed": false,
+    "environment": "Go1.23.2 linux/amd64",
+    "full_tree_race": "NOT_CLAIMED; command exceeded sandbox execution window before completion",
+    "results": [
+      "focused CA5-1 race GREEN",
+      "focused/full go vet GREEN",
+      "related Hero/Pet/I5/bootstrap tests+races GREEN",
+      "stockruntime regression GREEN",
+      "87 internal packages package-by-package GREEN",
+      "go test ./... GREEN",
+      "go vet ./... GREEN"
+    ]
+  },
+  "deferred_mandatory": [
+    "exact canonical Go1.27.1 execution",
+    "real PostgreSQL row-lock/concurrency semantics for accumulated CA5",
+    "River only where later accumulated CA5 uses it",
+    "CA5 aggregate live Work gate immediately before CA5-E per user direction",
+    "physical stock-client W2 remains at its preexisting post-I14 gate"
+  ],
+  "evidence_logs": {
+    "compat_focused_race.log": {
+      "bytes": 255,
+      "sha256": "4ed750fb05f62ad37606234793c59f2ddb2e3b1d0956700afcf82b7f588ec137"
+    },
+    "compat_focused_vet.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "compat_full_go_test.log": {
+      "bytes": 6131,
+      "sha256": "01b0423aaacd0229cba7b09f329dc2b1a5bf58586962c1a34d922e0907211f89"
+    },
+    "compat_full_go_vet.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "compat_full_race.log": {
+      "bytes": 3875,
+      "sha256": "0a107aa1b3f88c9f5880dda32d5672524aed1eb38d94bb5cc8bdb5e1b5f317fb"
+    },
+    "compat_package_regression.log": {
+      "bytes": 5761,
+      "sha256": "c00d5ffaa796ad364463d137916ede119b4022740d712a992d9ff87f5f13f50e"
+    },
+    "compat_related_race.log": {
+      "bytes": 256,
+      "sha256": "8c2d2eaac7f24746710c01f4887331428cc7ec657c83643ff2e151f3060f05f2"
+    },
+    "compat_related_test.log": {
+      "bytes": 256,
+      "sha256": "e4bd9ff3f1422e524de5d8ddbb6c359f3284cceed3a37061c71f13f426bfddc7"
+    },
+    "compat_stockruntime_test.log": {
+      "bytes": 64,
+      "sha256": "f969799ba199b83a97e377877ccd7cecc56e798274171463124697b8b9fe9aa2"
+    },
+    "exact_static_identity.log": {
+      "bytes": 1634,
+      "sha256": "6a4ddf47f57ead61de9c834f631c6a964c1184339088b5f5b46ba60eb3b22ef4"
+    },
+    "exact_static_scope_guard.log": {
+      "bytes": 3056,
+      "sha256": "fa660cb384b15edf9ecbe9b78d0bf5f7faeec7cf76846af71ef8e7abbecef5b4"
+    },
+    "exact_toolchain_attempt.log": {
+      "bytes": 469,
+      "sha256": "d1f5622476d62d0efb862d40c3c73fc54d428dd3e719f28b743bb5497e2ba1c7"
+    }
+  },
+  "explicit_non_scope": [
+    "no schema/migration/root persistence",
+    "no MID1793/208/209 activation",
+    "no MID1 saved-team or formation ownership",
+    "no replay/receipt activation",
+    "no Hero/Pet removal/MID66 activation",
+    "no I9 mode state",
+    "no CA8 composite snapshot"
+  ],
+  "implementation_scope": [
+    "actor-scoped HeroRef + Hero.Ref parity",
+    "410/430/440 deterministic reference/root lock-key foundation",
+    "narrow Hero/Pet reference owner ports and PostgreSQL adapters",
+    "reference guard preflight/canonicalization/locked-validation contracts",
+    "CA5-1 architecture/scope guards"
+  ],
+  "next_frontier": "CA5-2 Saved-Preset Canonical State, Persistence, Migration & Reload PRE_IMPLEMENTATION_RESEARCH_RECONCILIATION",
+  "parent_backend_sha256": "25b0f55e65432f385171e6108235fa7004e34737421c533b4c6c50ee1381a69f",
+  "parent_implementation_revision_sha256": "2cae5c2132bbdc926bd5be754ed1c704813fd85e3afc35dd84ad659541b0eddd",
+  "parent_passmap_sha256": "39ea5facec191d7c2a5498e21ecc86953ab10c620f257dc010ffb6ad90d5bfec",
+  "pass": "560.0",
+  "phase": "CA5-1 Formation/Reference Foundation local closure",
+  "result": "GREEN_LOCAL_CA5_1_ACCEPTED_COMPATIBILITY_COPY_ONLY_NATIVE_AGGREGATE_DEFERRED_PRE_CA5_E",
+  "schema_version": 1,
+  "source_oracle_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
+}

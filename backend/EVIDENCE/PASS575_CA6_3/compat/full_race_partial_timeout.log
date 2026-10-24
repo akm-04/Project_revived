@@ -1,0 +1,63 @@
+?   	gxb.local/backend/v2/cmd/gxb-admin	[no test files]
+?   	gxb.local/backend/v2/cmd/gxb-api	[no test files]
+?   	gxb.local/backend/v2/cmd/gxb-realtime	[no test files]
+?   	gxb.local/backend/v2/cmd/gxb-wave-s-report	[no test files]
+?   	gxb.local/backend/v2/cmd/gxb-worker	[no test files]
+?   	gxb.local/backend/v2/internal/adapters/blobstore	[no test files]
+?   	gxb.local/backend/v2/internal/adapters/guildpolicybridge	[no test files]
+?   	gxb.local/backend/v2/internal/adapters/guildwire	[no test files]
+?   	gxb.local/backend/v2/internal/adapters/pass353diff	[no test files]
+?   	gxb.local/backend/v2/internal/adapters/postgres/characterqueries	[no test files]
+?   	gxb.local/backend/v2/internal/adapters/postgres/contentqueries	[no test files]
+ok  	gxb.local/backend/v2/internal/adapters/postgres	1.019s
+ok  	gxb.local/backend/v2/internal/adapters/postgres/activitystore	1.023s
+ok  	gxb.local/backend/v2/internal/adapters/postgres/characterstore	1.017s
+?   	gxb.local/backend/v2/internal/adapters/postgres/guildprojection	[no test files]
+?   	gxb.local/backend/v2/internal/adapters/postgres/guildstore	[no test files]
+?   	gxb.local/backend/v2/internal/adapters/postgres/identitystore	[no test files]
+?   	gxb.local/backend/v2/internal/adapters/postgres/kernelqueries	[no test files]
+?   	gxb.local/backend/v2/internal/adapters/provider	[no test files]
+?   	gxb.local/backend/v2/internal/adapters/river	[no test files]
+?   	gxb.local/backend/v2/internal/adapters/stockfixtures	[no test files]
+ok  	gxb.local/backend/v2/internal/adapters/postgres/contentstore	3.802s
+ok  	gxb.local/backend/v2/internal/adapters/postgres/i4store	1.068s
+ok  	gxb.local/backend/v2/internal/adapters/postgres/i5store	1.021s
+ok  	gxb.local/backend/v2/internal/adapters/postgres/kernelstore	1.026s
+ok  	gxb.local/backend/v2/internal/adapters/stockruntime	1.484s
+ok  	gxb.local/backend/v2/internal/application/activitydirectory	1.053s
+ok  	gxb.local/backend/v2/internal/application/bootstrap	1.020s
+ok  	gxb.local/backend/v2/internal/application/characterasset	1.026s
+ok  	gxb.local/backend/v2/internal/application/characterhero	2.289s
+ok  	gxb.local/backend/v2/internal/application/characterpet	1.793s
+ok  	gxb.local/backend/v2/internal/application/characterpractice	1.050s
+ok  	gxb.local/backend/v2/internal/application/charactersavedpreset	1.041s
+ok  	gxb.local/backend/v2/internal/application/directorysync	1.032s
+ok  	gxb.local/backend/v2/internal/application/generation	1.023s
+?   	gxb.local/backend/v2/internal/application/playerdirectory	[no test files]
+ok  	gxb.local/backend/v2/internal/application/guildcore	1.073s
+ok  	gxb.local/backend/v2/internal/application/guildview	1.019s
+ok  	gxb.local/backend/v2/internal/application/i5	1.052s
+ok  	gxb.local/backend/v2/internal/application/identitylifecycle	1.035s
+ok  	gxb.local/backend/v2/internal/application/playerroot	1.011s
+ok  	gxb.local/backend/v2/internal/application/realtimeauth	1.017s
+ok  	gxb.local/backend/v2/internal/archguard	1.216s
+?   	gxb.local/backend/v2/internal/domain/combat	[no test files]
+?   	gxb.local/backend/v2/internal/domain/commerce	[no test files]
+?   	gxb.local/backend/v2/internal/domain/control	[no test files]
+?   	gxb.local/backend/v2/internal/domain/guild	[no test files]
+?   	gxb.local/backend/v2/internal/domain/modes	[no test files]
+?   	gxb.local/backend/v2/internal/domain/profile	[no test files]
+?   	gxb.local/backend/v2/internal/domain/social	[no test files]
+?   	gxb.local/backend/v2/internal/foundation/audit	[no test files]
+?   	gxb.local/backend/v2/internal/foundation/clock	[no test files]
+?   	gxb.local/backend/v2/internal/projection/activity	[no test files]
+?   	gxb.local/backend/v2/internal/projection/ota	[no test files]
+?   	gxb.local/backend/v2/internal/projection/publication	[no test files]
+?   	gxb.local/backend/v2/internal/projection/publicplayer	[no test files]
+?   	gxb.local/backend/v2/internal/projection/ranking	[no test files]
+?   	gxb.local/backend/v2/internal/projection/realtimeview	[no test files]
+?   	gxb.local/backend/v2/internal/protocol/limits	[no test files]
+?   	gxb.local/backend/v2/internal/protocol/observe	[no test files]
+?   	gxb.local/backend/v2/internal/protocol/wire	[no test files]
+ok  	gxb.local/backend/v2/internal/content/builtin	17.576s
+ok  	gxb.local/backend/v2/internal/content/guildpolicy	1.024s

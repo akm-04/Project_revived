@@ -1,0 +1,4 @@
+ok  	gxb.local/backend/v2/internal/content/builtin	(cached)
+ok  	gxb.local/backend/v2/internal/content/registry	(cached)
+ok  	gxb.local/backend/v2/internal/adapters/postgres/contentstore	(cached)
+ok  	gxb.local/backend/v2/internal/archguard	(cached)

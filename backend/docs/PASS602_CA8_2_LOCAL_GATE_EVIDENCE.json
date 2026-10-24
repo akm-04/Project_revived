@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "pass": "602.0",
+  "stage": "CA8-2",
+  "result": "GREEN_LOCAL",
+  "evidence_classification": "COMPATIBILITY_COPY_ONLY_PLUS_CANONICAL_STATIC_SOURCE_ORACLE",
+  "acceptance_matrix": {
+    "A1": "GREEN",
+    "A2": "GREEN",
+    "A3": "GREEN",
+    "A4": "GREEN",
+    "A5": "GREEN",
+    "A6": "GREEN",
+    "A7": "GREEN",
+    "A8": "GREEN",
+    "A9": "GREEN",
+    "A10": "GREEN"
+  },
+  "canonical": {
+    "go_mod_sha256": "313c574368bb56dc570bc3427b65f59b059e492f909fe43b7d0291b5ced21dc4",
+    "go_sum_sha256": "efbf6753542d66e2fefcb2ab5e2ade7c9d28f2206a1113d1eb9568f2cb75808d",
+    "pins": "go 1.26.0 / toolchain go1.27.1 unchanged",
+    "static_source_log": "EVIDENCE/PASS602_CA8_2_CANONICAL_STATIC_SOURCE.log",
+    "source_oracle_current_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+    "source_oracle_old_client_sha256": "d0a4815507fd4626ac5749f2f6efae554d3a4bef717793f155f58c8bed7170b1"
+  },
+  "compatibility_copy": {
+    "go": "1.23.2",
+    "full_test": "GREEN",
+    "full_race": "GREEN",
+    "full_vet": "GREEN",
+    "label": "COMPATIBILITY_COPY_ONLY"
+  },
+  "known_historical_validator_noise": "Old non-cumulative CA4 validators fail identically on accepted baseline; current cumulative/affected validators and exact source oracles are GREEN.",
+  "native_gate": "DEFERRED_MANDATORY_CA8_9_EXACT_NATIVE_POSTGRESQL_AGGREGATE",
+  "w2": "DEFERRED_UNPASSED"
+}

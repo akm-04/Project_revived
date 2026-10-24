@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "contract_id": "I7B6C_SENDER_SNAPSHOT_EXTENSION",
+  "stage": "I7B-6C",
+  "status": "IMPLEMENTED_PENDING_EXACT_FROZEN_QUALIFICATION",
+  "classification": "SOURCE_FACT + IMPLEMENTATION_DECISION",
+  "extends": [
+    "I7A6_SUCCESSOR_CONTRACT",
+    "I7B1_MEDIA_FRESHNESS",
+    "I7B1_TRANSACTION_REFERENCE_REPLAY",
+    "D14"
+  ],
+  "owner": "PersonalDMDelivery381",
+  "scope": "Future captured sender cosmetic metadata only; existing deadline/target/context/status/recovery authority unchanged",
+  "rules": [
+    "New intents capture qualified effective Player title/bubble at the caller pinned DecisionAt and revision before insert",
+    "SenderTitleInfo and SenderBubbleInfo are optional JSON string fields appended with omitempty. Historical absent fields retain exact legacy serializer bytes/digest; no backfill or rewrite",
+    "Chat title string title_id@unique_id@end_time (unique_id0 allowed by current source); no title@@@@. Bubble string bubble_id@end_time. Positive IDs, nonnegative normalized expiry, exact wire-safe decimal integers",
+    "Known operation replay, pending recovery and actual delivery use committed sender snapshot. Never consult current cosmetics to refresh an old intent",
+    "Absent historic metadata uses original@@@@/10001@0 creation-time baseline at projection only. New unavailable required origin fails capture rather than synthesizing a successful rich snapshot",
+    "Existing private target bindings, deadline8s, completion proof, claim/epoch/privacy/status/purge semantics unchanged"
+  ],
+  "source_evidence": [
+    "source/current/app/model/MessageManager.lua:genTitleInfo/genChatMessage",
+    "source/current/app/windows/NewChangeAvatarWindow.lua:unique_id0 branch",
+    "LEGACY_PAYLOAD_PROVENANCE.json"
+  ],
+  "implementation_files": [
+    "internal/application/generaldm/types.go",
+    "internal/application/generaldm/service.go",
+    "internal/adapters/stockruntime/general_dm_delivery.go"
+  ],
+  "acceptance_obligations": "Existing required6C/381 affected native/process/payload-recovery gates apply; no additional gate invented",
+  "new_canonical_owner": false,
+  "migration": null,
+  "actual_cosmetic_upstream_qualification": false,
+  "full_parent_acceptance": false
+}

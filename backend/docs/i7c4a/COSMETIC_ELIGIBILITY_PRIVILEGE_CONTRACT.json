@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "contract_id": "I7C4A_COSMETIC_ELIGIBILITY_PRIVILEGE",
+  "stage": "I7C-4A",
+  "version": 1,
+  "status": "FROZEN_FOR_DIRECTLY_AUTHORIZED_IMPLEMENTATION",
+  "classification": "SOURCE_FACT + IMPLEMENTATION_DECISION + INHERITED_CONTRACT",
+  "rules": [
+    "Reuse I5/Player display selection,656 purchase, Grant and immutable cosmetic entitlement recipient; no competing cosmetic ownership or public generic grant endpoint.",
+    "Expose caller-witnessed CA8 RR/Serializable scope, exact content policy, target identity, observedAt, owner/population versions and per-catalog eligibility facts. Entitlement, eligibility, selection and count are distinct. Do not implement1003/1005/1006 metric reductions in4A.",
+    "Keep base, Normal/Super/current awaken/beforeAwaken, effective skin, four-skin collection, permanent stacks, explicit timed entitlement, purchased andVIP predicates distinct. Qualified absence needs canonical owner presence. Timed start is not stackAcquiredAt. Source visibility never makes an origin active/inactive.",
+    "Hero appearance remains active at equality under CA7; avatar/frame days*86400 and title/bubble seconds expire at equality under Player display. Use origin-pinned catalog for prior grants, no clock/discovery/nestedtransaction in read paths.",
+    "Canonical Privilege/Commerce owns cumulative qualifying charge and derivedVIP0..15 under pinned src64 threshold table. Physical module commerceprivilege/store owns its new row; Player display consumes typed observations and never queries it directly. Existing provisional R5VIP0 provider remains unchanged and never qualifies nonbaseline truth.",
+    "Manual snapshot import is an explicit preservation policy, not recovered server mutation: trusted AdminOperator/capability/reason/policy plus stable semantic key and targetserver/player binding supplies an absolute nonnegative canonical qualifying-charge snapshot. No product history/diamonds/provider verification is fabricated. I11 authentication/transport remains its owning future gate; callers must already be authorized. No new public admin or recharge endpoint.",
+    "Missing privilege row is UNKNOWN/unavailable, never inferredVIP0. No automatic legacy backfill. Explicit manual import may establish initial state, must not decrease knowncharge (refund/clawback unknown). Same value is a no-op with receipt; semantic change advances privilegeversion once; preserve provenance. Read validates pinned creation-policy charge/VIP, provider identity and observation time.",
+    "Manual imports use existing I4recipient/playerroot315, canonical TxRunner, DB-authoritative decisioninstant stable perattempt, kernel semantic receipt keyed by issuer/key independent of target/content revision, fingerprint-bound target/charge/reason/policy. Replay before fresh content binding; cross-target reuse conflicts; receipt miss on unknownCOMMIT is unresolved, never proof of abort. Audit via existing port; future durable I11audit not claimed.",
+    "Canonical privileged state must not coexist with baselineVIP0 in other consumers. Provide one existing I5 PrivilegeSnapshotProvider facade: retain explicitly provisional baseline compatibility only for absent canonical root (never qualifiedcosmeticVIP); known manual root supplies actualVIP/source skill_max and explicitly qualified monthly-absence profile. Wire I5, Hero/Practice/Course, bootstrap and display to this facade. Nonbaseline manualimport requires explicit MonthlyState=QUALIFIED_ABSENT; active monthly products are not implemented or defaulted.",
+    "Before a VIP change that changes skill-point natural cap, compose a narrow I5-owned prepared effect: lock existing Economy700/Temporal721 before first mutation; resolve the temporal row own pinneddescriptor; materialize elapsed time under OLDcap, then apply newcap with existing TemporalState.ApplyLevelTransition(award=0). Preserve cadence/remainder/overcap/paused behavior and perform one CAS/version step. Never apply newcap retroactively or duplicate temporal ownership. Atomic with privilege row and kernel receipt; failure rolls everything back.",
+    "Add Commerce-owned MID1 vip/charge observation for present qualified canonical manual state so client reload cannot retain contradictory baselineVIP0. Existing inactive baseline remains untouched for absent roots; neither baseline compatibility nor missingrow becomes a qualified4Aabsence.",
+    "Read core facts across avatar/frame and typed existing entitled title/bubble metadata, with per-row unresolved origin/coverage markers. Complete family/count requests fail closed while selected mode/occurrence/ranking/skin-title origins are unqualified; no blanket empty qualified family. Preserve current source/catalog extension type13 as no-row question.",
+    "Actual6A purchase/permanent and CA7 skin producer paths plus real manual privilege application import qualify selected non-default core inputs in native tests. A Qualified=true stub, directSQL nonbaselineVIP or External/Privilege test double is not genuine origin proof.",
+    "New immutable privilege catalog and forward migration60; all35 old payloads/migrations1..59/module pins unchanged. New60tables have explicitContent versusCommerce ownership. No cross-ownerSQL.",
+    "Qualification uses exact unmodified R2 Go1.27.2/PG18.6, sourceboundary/differential/domain/race/fuzz/vet/ownership/static/security checks, real fresh60/populated59->60/replay/conflict/concurrency/rollback/unknowncommit/reload/restore/restart and independent source/contract/code reality. All later4B/4C/6/modes/parents/W2 gates remain explicit."
+  ],
+  "manual_policy": "C4A_MANUAL_PRIVILEGE_SNAPSHOT_V1",
+  "manual_authority_capability": "commerce.entitlement.manual_preservation",
+  "not_claimed": [
+    "Externalpaymentverification",
+    "AuthenticatedI11transport/durableoperatoraudit",
+    "Allcatalogoriginactivation",
+    "Fullcosmeticcount/familyqualification beforelater origins",
+    "ParentI7C/I7B/I7/W2acceptance"
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "validate_foundation_trace.py": 0,
+  "validate_i1.py": 0,
+  "validate_i2.py": 0,
+  "validate_i3.py": 0,
+  "validate_i4.py": 0,
+  "validate_i5.py": 1,
+  "validate_r0.py": 0,
+  "validate_r1a.py": 0,
+  "validate_r1b.py": 0,
+  "validate_r2a.py": 0,
+  "validate_r2b.py": 0,
+  "validate_r2c.py": 0,
+  "validate_r2d.py": 0,
+  "validate_r3a.py": 0,
+  "validate_r3b.py": 0,
+  "validate_r3c.py": 0,
+  "validate_r4b.py": 0,
+  "validate_r4c.py": 0,
+  "check_connected_candidate.py": 0
+}

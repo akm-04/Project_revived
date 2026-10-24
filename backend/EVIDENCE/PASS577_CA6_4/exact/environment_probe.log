@@ -1,0 +1,15 @@
+=== canonical pin hashes ===
+313c574368bb56dc570bc3427b65f59b059e492f909fe43b7d0291b5ced21dc4  go.mod
+efbf6753542d66e2fefcb2ab5e2ade7c9d28f2206a1113d1eb9568f2cb75808d  go.sum
+a8844fbc8c3eb51c26ed00aec4cd5a5a9d647f849c6ead07bcc83ed24c4a7718  .go-version
+=== installed go ===
+go: downloading go1.27.1 (linux/amd64)
+go: download go1.27.1: golang.org/toolchain@v0.0.1-go1.27.1.linux-amd64: Get "https://proxy.golang.org/golang.org/toolchain/@v/v0.0.1-go1.27.1.linux-amd64.zip": dial tcp: lookup proxy.golang.org on 168.63.129.16:53: read udp 172.26.39.229:50380->168.63.129.16:53: read: connection refused
+=== exact local toolchain attempt ===
+go: go.mod requires go >= 1.26.0 (running go 1.23.2; GOTOOLCHAIN=local)
+exact_local_exit=1
+=== canonical ordinary toolchain attempt ===
+go: downloading go1.27.1 (linux/amd64)
+go: download go1.27.1: golang.org/toolchain@v0.0.1-go1.27.1.linux-amd64: Get "https://proxy.golang.org/golang.org/toolchain/@v/v0.0.1-go1.27.1.linux-amd64.zip": dial tcp: lookup proxy.golang.org on 168.63.129.16:53: read udp 172.26.39.229:48144->168.63.129.16:53: i/o timeout
+ordinary_exit=1
+=== postgres tools ===

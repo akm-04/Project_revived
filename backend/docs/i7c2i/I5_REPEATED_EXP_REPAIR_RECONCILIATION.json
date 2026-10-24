@@ -1,0 +1,38 @@
+{
+  "status": "REPAIRED_WORKING_NATIVE_AND_I5_RACE_GREEN_EXACT_CANDIDATE_REQUALIFICATION_PENDING",
+  "classification": "RUNTIME_OBSERVED + IMPLEMENTATION_DECISION",
+  "counterexample": "logs/native-working-v2-eligibility-boundaries.log: realI5EXP79 succeeds, subsequentrealEXP80 rollsback function provider announced unqualified function",
+  "counterexample_sha256": "df3c5c61244dce91580e9987fc067bc494305647e0cfcd3ffdf949ec5bb6aeed",
+  "source": "internal/application/i5/service.go: newEligible contains newly inserted sourcefacts; byID validatesonlynewEligible butAnnounce receivesall currentlyeligible including38 frompriorgrant",
+  "original_source_sha256": "ffbb0f411f4afb6f59ee62acb00f52a44411d6095a9c429f2e8e515ce9f96db9",
+  "existing_contracts": [
+    "00_PASSMAP/PASS485_R5_PHASE_CLOSURE.md",
+    "I5 FunctionAnnouncementProvider and PetStarterFunctionAnnouncements",
+    "Canonicaleligibility/unlock uniqueness perPlayer/function; newEligible/newlyUnlocked grant effects only"
+  ],
+  "repair": "Offer newly inserted eligibilityfacts to existingannouncementprovider, keeping byIDvalidation andallunlock/receipt/rollback checks. Previously eligiblefunctions do not turn into newannouncements duringlaterEXP grants.",
+  "amendment_required": false,
+  "rationale": "Restoreexistingnew-fact/idempotentannouncementcontract; no newcapability/type/function/providerrevision, no newlifecycle orlock/valueowner. Existingbootstrapstarteractivation remainsowningexplicitpath.",
+  "affected_consumers": [
+    "AnyI5PlayerEXPgrant afterfunction38alreadyeligible",
+    "2I genuinePlayer80sourcequalification",
+    "ExistingPetstarteronfirsteligibility"
+  ],
+  "authorization": "Directcurrentuserfullimplementation/reconcile scope andstandingrule to repairdemonstrated affectedaccepteddefect",
+  "required_requalification": [
+    "ExistingI5 unit/race/vet inclunqualifiedannouncementrejection/retainedreceipt/failureatomicity",
+    "RealPGsequential79->80 grants bothsucceed, no secondstarteregg/unlock",
+    "Exactcandidate2I native/process/API/upgrade/restore/replay scopes"
+  ],
+  "unaffected": [
+    "All prior31contentpayloadbytes",
+    "Migrations1..55",
+    "No genericfunctionactivation orchangedNONE policy",
+    "Historicalacceptedbaseline identity retained"
+  ],
+  "repaired_source_sha256": "cfa0c3799f5d78e7e4af1ac34d4a088eb6c62e6497b137d3b65877e2f8fbcc84",
+  "repair_validation": [
+    "logs/i5-repeat-exp-repair-unit-race.log",
+    "logs/native-working-v2-repeat-exp-repair.log"
+  ]
+}

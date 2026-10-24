@@ -1,0 +1,11 @@
+test_exact_archive_is_deterministic_and_matches_checked_in (__main__.ExactArchiveTests.test_exact_archive_is_deterministic_and_matches_checked_in) ... ok
+test_encoded_item_fixture (__main__.ParserTests.test_encoded_item_fixture) ... ok
+test_generated_lua_table_fixture (__main__.ParserTests.test_generated_lua_table_fixture) ... ok
+test_generated_lua_table_rejects_expression (__main__.ParserTests.test_generated_lua_table_rejects_expression) ... ok
+test_member_hash_mismatch_fails_even_when_outer_hash_matches_test_archive (__main__.ParserTests.test_member_hash_mismatch_fails_even_when_outer_hash_matches_test_archive) ... ok
+test_source_archive_hash_mismatch_fails (__main__.ParserTests.test_source_archive_hash_mismatch_fails) ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 2.971s
+
+OK

@@ -1,0 +1,17 @@
+{
+  "status": "SUFFICIENT_FOR_SELECTED_CORE_PREIMPLEMENTATION",
+  "source_original_algorithm": "UNKNOWN; no V1 algorithm recovered",
+  "selected_policy": "C4B_MARRIED_POPULATION_TIER_FACTS_V1",
+  "approval": "Direct user4B lifecycle authorization; no additionalpermission needed",
+  "implementation_started": false,
+  "publication_gate": "Owned719 canonical/soleRegistry/preseal/COLDdeep before code",
+  "remaining": [
+    "Original server achievement algorithm",
+    "Legacy completion-history import",
+    "Other32 achievement producers and daily reset policies",
+    "Award claim or points/ranking metric algorithm",
+    "Public1302/1303/CHECK route activation",
+    "Retirement/lifetime marriage history reconstruction",
+    "Fullconsumer/parent/W2 acceptance"
+  ]
+}

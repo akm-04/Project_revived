@@ -1,0 +1,195 @@
+{
+  "conclusion": "PASS_NO_SOURCE_CONTRADICTION",
+  "direct_source_facts": {
+    "asset_ids": {
+      "crystal": -1,
+      "energy": -16,
+      "exp": -15,
+      "mana": -2
+    },
+    "item_rows": 5838,
+    "misc": {
+      "energy_incr_time": "300",
+      "invitation_incr_time": "1800",
+      "skill_point_incr_time": "300",
+      "spirit_energy_minute": "360",
+      "spirit_energy_up_limit": "180"
+    },
+    "player_levels_first_last": [
+      1,
+      100
+    ],
+    "player_rows": 100,
+    "positive_stack_rows": 5540,
+    "positive_type0_rows": 3,
+    "positive_type24_rows": 378,
+    "type3_rows": 291,
+    "type3_with_positive_partner_id": 291
+  },
+  "errors": [],
+  "generated_crosscheck": {
+    "crystal": {
+      "catalog_status": "QUALIFIED",
+      "class": "SCALAR_CURRENCY",
+      "definition_key": "scalar_currency:crystal",
+      "resource_key": "crystal",
+      "settlement_activation": "ENABLED_R4",
+      "source_asset_id": -1
+    },
+    "energy": {
+      "cap_rule": "PLAYER_LEVEL_ENERGY",
+      "catalog_status": "QUALIFIED",
+      "class": "TEMPORAL",
+      "definition_key": "temporal:energy",
+      "regen_amount": 1,
+      "regen_seconds": 300,
+      "resource_key": "energy",
+      "settlement_activation": "R5_REQUIRED",
+      "source_asset_id": -16
+    },
+    "generated_player_rows": 100,
+    "invitation": {
+      "cap_rule": "UNRESOLVED",
+      "catalog_status": "PARTIAL",
+      "class": "TEMPORAL",
+      "definition_key": "temporal:invitation",
+      "regen_amount": 1,
+      "regen_seconds": 1800,
+      "resource_key": "invitation",
+      "settlement_activation": "FAIL_CLOSED"
+    },
+    "mana": {
+      "catalog_status": "QUALIFIED",
+      "class": "SCALAR_CURRENCY",
+      "definition_key": "scalar_currency:mana",
+      "resource_key": "mana",
+      "settlement_activation": "ENABLED_R4",
+      "source_asset_id": -2
+    },
+    "manifest_diagnostics": {
+      "asset_named_rows": 13,
+      "enabled_stack_items": 5159,
+      "item_rows": 5838,
+      "objective_builtin_rows": 0,
+      "player_rows": 100,
+      "positive_stack_items": 5540,
+      "specialized_type24_items": 378,
+      "type3_partner_scrolls": 291,
+      "unqualified_type0_stack_items": 3
+    },
+    "skill_point": {
+      "cap_rule": "VIP_PLUS_MONTHLY_PRIVILEGE",
+      "catalog_status": "QUALIFIED",
+      "class": "TEMPORAL",
+      "definition_key": "temporal:skill_point",
+      "regen_amount": 1,
+      "regen_seconds": 300,
+      "resource_key": "skill_point",
+      "settlement_activation": "R5_REQUIRED"
+    },
+    "spirit_energy": {
+      "cap_rule": "STATIC",
+      "catalog_status": "QUALIFIED",
+      "class": "TEMPORAL",
+      "definition_key": "temporal:spirit_energy",
+      "regen_amount": 1,
+      "regen_seconds": 360,
+      "resource_key": "spirit_energy",
+      "settlement_activation": "R5_REQUIRED",
+      "static_cap": 180
+    }
+  },
+  "method": "INDEPENDENT_DIRECT_SOURCE_PARSE_NOT_R4A_COMPILER",
+  "schema_version": 1,
+  "source_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+  "source_member_hash_checks": [
+    {
+      "extracted_sha256": "1f846972f29a55ee2dbb90f2cb9b0124eaeaa90646c3c66644ab66e231c37f00",
+      "manifest_sha256": "1f846972f29a55ee2dbb90f2cb9b0124eaeaa90646c3c66644ab66e231c37f00",
+      "match": true,
+      "path": "app/common/tables/ItemTable.lua",
+      "zip_equals_extracted": true,
+      "zip_sha256": "1f846972f29a55ee2dbb90f2cb9b0124eaeaa90646c3c66644ab66e231c37f00"
+    },
+    {
+      "extracted_sha256": "59b668c28a372543da0c36d7a8d84291cc5b93fa0d92b7cc389a645e96e7b7cc",
+      "manifest_sha256": "59b668c28a372543da0c36d7a8d84291cc5b93fa0d92b7cc389a645e96e7b7cc",
+      "match": true,
+      "path": "data/tables/item.lua",
+      "zip_equals_extracted": true,
+      "zip_sha256": "59b668c28a372543da0c36d7a8d84291cc5b93fa0d92b7cc389a645e96e7b7cc"
+    },
+    {
+      "extracted_sha256": "953999f81fc43ecd00e587d884c88b6a1ba066e35ff75a20dd698b6cb950af7a",
+      "manifest_sha256": "953999f81fc43ecd00e587d884c88b6a1ba066e35ff75a20dd698b6cb950af7a",
+      "match": true,
+      "path": "app/model/Backpack.lua",
+      "zip_equals_extracted": true,
+      "zip_sha256": "953999f81fc43ecd00e587d884c88b6a1ba066e35ff75a20dd698b6cb950af7a"
+    },
+    {
+      "extracted_sha256": "163d5893c9522ada412c2b9c4748a80757660fccdf03c8f72cb6edf0838b8eb4",
+      "manifest_sha256": "163d5893c9522ada412c2b9c4748a80757660fccdf03c8f72cb6edf0838b8eb4",
+      "match": true,
+      "path": "app/model/SelfPlayer.lua",
+      "zip_equals_extracted": true,
+      "zip_sha256": "163d5893c9522ada412c2b9c4748a80757660fccdf03c8f72cb6edf0838b8eb4"
+    },
+    {
+      "extracted_sha256": "9feedb4360090c1c7d5e20853ca2cdbdd85670cc276c3b56a2bb7a4a429b569f",
+      "manifest_sha256": "9feedb4360090c1c7d5e20853ca2cdbdd85670cc276c3b56a2bb7a4a429b569f",
+      "match": true,
+      "path": "app/common/tables/PlayerTable.lua",
+      "zip_equals_extracted": true,
+      "zip_sha256": "9feedb4360090c1c7d5e20853ca2cdbdd85670cc276c3b56a2bb7a4a429b569f"
+    },
+    {
+      "extracted_sha256": "1b6b6b0557b0d2cb33b34dc37c25e4a12ae4fbd71f1476d6ac463267a1278345",
+      "manifest_sha256": "1b6b6b0557b0d2cb33b34dc37c25e4a12ae4fbd71f1476d6ac463267a1278345",
+      "match": true,
+      "path": "data/tables/player.lua",
+      "zip_equals_extracted": true,
+      "zip_sha256": "1b6b6b0557b0d2cb33b34dc37c25e4a12ae4fbd71f1476d6ac463267a1278345"
+    },
+    {
+      "extracted_sha256": "6579de771dbef3224fcaa9568a8fcfade26209f134acfe3a3e666ecbd6c13cee",
+      "manifest_sha256": "6579de771dbef3224fcaa9568a8fcfade26209f134acfe3a3e666ecbd6c13cee",
+      "match": true,
+      "path": "app/common/tables/MiscTable.lua",
+      "zip_equals_extracted": true,
+      "zip_sha256": "6579de771dbef3224fcaa9568a8fcfade26209f134acfe3a3e666ecbd6c13cee"
+    },
+    {
+      "extracted_sha256": "058cf5719421ed71a12083a8c95b0ccded7204bedb5fa1263d508e2fa4257f9a",
+      "manifest_sha256": "058cf5719421ed71a12083a8c95b0ccded7204bedb5fa1263d508e2fa4257f9a",
+      "match": true,
+      "path": "data/tables/misc.lua",
+      "zip_equals_extracted": true,
+      "zip_sha256": "058cf5719421ed71a12083a8c95b0ccded7204bedb5fa1263d508e2fa4257f9a"
+    },
+    {
+      "extracted_sha256": "15340bd89fe7c6f150ccfd4a5cd2a2f0e8e73c89dfae9ac3388376a4799901f3",
+      "manifest_sha256": "15340bd89fe7c6f150ccfd4a5cd2a2f0e8e73c89dfae9ac3388376a4799901f3",
+      "match": true,
+      "path": "app/common/enums.lua",
+      "zip_equals_extracted": true,
+      "zip_sha256": "15340bd89fe7c6f150ccfd4a5cd2a2f0e8e73c89dfae9ac3388376a4799901f3"
+    },
+    {
+      "extracted_sha256": "27bf1679f32a6f44f6bd90a51335d8fded1c7d9f7f2793bd02b0100e7f9d15ea",
+      "manifest_sha256": "27bf1679f32a6f44f6bd90a51335d8fded1c7d9f7f2793bd02b0100e7f9d15ea",
+      "match": true,
+      "path": "app/common/tables/AssetTable.lua",
+      "zip_equals_extracted": true,
+      "zip_sha256": "27bf1679f32a6f44f6bd90a51335d8fded1c7d9f7f2793bd02b0100e7f9d15ea"
+    },
+    {
+      "extracted_sha256": "6d113c94d9ff57dfd4d209720ff0f597a418f13e5f49bc3b1aba4594a59d5b96",
+      "manifest_sha256": "6d113c94d9ff57dfd4d209720ff0f597a418f13e5f49bc3b1aba4594a59d5b96",
+      "match": true,
+      "path": "data/tables/asset.lua",
+      "zip_equals_extracted": true,
+      "zip_sha256": "6d113c94d9ff57dfd4d209720ff0f597a418f13e5f49bc3b1aba4594a59d5b96"
+    }
+  ]
+}

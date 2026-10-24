@@ -1,0 +1,21 @@
+{
+  "status": "PLANNED_PREIMPLEMENTATION",
+  "policy_id": "C4F_ACHIEVEMENT_CATALOG_AND_AP_V1",
+  "stage": "FULL_I7C4_STAGE_A (achievement catalog + AP); Stage B = I7C-6; Stage C = cosmetic metrics, Skins, 1840, parent closure",
+  "version_target": "v0.134.0",
+  "migration": "00070_i7c4fa_achievement_catalog_ap.sql",
+  "steps": [
+    {"id": "P1", "area": "content", "work": "Compile achievement_level.lua (10 rows) into the achievement catalog payload under a new capability; source oracle tools/check_i7c4fa_source_oracle.py (33 rows, level table, MIDs 1302/1303, rank 2001 subtype 8, title 100001, notice type)."},
+    {"id": "P2", "area": "domain/achievement", "work": "Add the nine C4F_OWNED_STATE_COUNT_V1 profiles to the existing count profile map (step 0, tiers never revoked); add catalog status per definition (QUALIFIED / MODE_NOT_LIVE / OWNER_UNKNOWN / STAGE_C); pure points, point level, award status and claim rules; pure trophy-rank comparator."},
+    {"id": "P3", "area": "application/achievement", "work": "ObserveOwnedStateTx(player): read the nine counts through owner typed ports in the caller's coherent scope, lazily create a legacy root (C4F_LEGACY_STATE_BACKFILL_V1), apply 100014 married population, update streak rows, maintain root points aggregate and record notice intents for new tiers. Read1302 (list + base_info + live rank) and Claim1303 (lowest claimable level, I5 grant, receipt replay)."},
+    {"id": "P4", "area": "adapters/postgres/achievementstore + migration 00070", "work": "Extend achievement_streaks profile CHECK; achievement_roots total_points/points_reached_at; achievement_award_claims; achievement_notices intent table + pg_notify wakeup."},
+    {"id": "P5", "area": "adapters/stockruntime", "work": "AchievementDispatcher for 1302/1303 (replacing the lobby facade for 1302); AchievementObserving wrapper around Hero, Pet, Cabinet, Conquer, Course, Inscription and Dorm dispatchers."},
+    {"id": "P6", "area": "cmd/gxb-realtime", "work": "Achievement notice wakeup route publishing notice_type ACHIEVEMENT with source params, marking delivery."},
+    {"id": "P7", "area": "publicprofile metrics", "work": "Metric 1007 C4F_ALL_GIRLS_AP_V1 through publicstats HeroTx over the coherent roster; validated observation basis."},
+    {"id": "P8", "area": "ranking", "work": "Generalize the Girls board into a board profile (policy, subtype, metric, titles); add AP board subtype 8 / metric 1007 / title 100001 rank 1; widen ranking award title CHECK; MID301 accepts subtype 8."},
+    {"id": "P9", "area": "passmap", "work": "Forward-binding registry of 17 not-live/unknown achievements to future owners (contract C4F_ACHIEVEMENT_FORWARD_BINDINGS_V1)."},
+    {"id": "P10", "area": "tests", "work": "Domain unit, wire shapes, native PostgreSQL (fresh player, legacy backfill, concurrency, replay, upgrade 69->70, content deploy), archguard, portable R2 matrix."}
+  ],
+  "lock_order": "Achievement root 620 acquired in its own observation transaction after owner commits; claim takes I4 player root 315, Achievement 620, then I5 700+ grant; ranking keeps I4 315 before Ranking 600.",
+  "explicitly_deferred": ["100016 skins, metrics 1003/1004/1005/1006, Skins board, 1840 all11 (Stage C)", "I7C-6 origins (Stage B)", "not-live modes (I9, forward bound)"]
+}

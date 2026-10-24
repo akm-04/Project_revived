@@ -1,0 +1,12 @@
+{
+  "status": "SELECTED_IMPLEMENTED_RECONSTRUCTION_POLICY_CORE_EXACT_QUALIFICATION_PENDING",
+  "selected_contracts": [
+    {
+      "contract_id": "I7C2H_SPIRIT_INPUT_LIFECYCLE",
+      "version": 3,
+      "path": "docs/i7c2h/SPIRIT_INPUT_LIFECYCLE_CONTRACT.json",
+      "sha256": "eb35c8f872e09cb358deb6a9d376de7042f43a5cbe8ccc50b2e39b07a2790e97"
+    }
+  ],
+  "inherited": "All3 I7C1 contracts, accepted2A..2E, qualified2F/2G scoped core and transitive foundations retained unchanged"
+}

@@ -1,0 +1,20 @@
+PASS605 CA8-4 COMPATIBILITY SUMMARY
+
+Canonical exact candidate:
+- Base Git: 76013e467b00ee973e570180cf84114e0d12a88e (Pass603 accepted)
+- Canonical Go pins unchanged: go 1.26.0 / toolchain go1.27.1 / .go-version 1.27.1
+- Exact candidate execution attempted first and ENVIRONMENT_BLOCKED because the sandbox cannot download Go 1.27.1 from proxy.golang.org.
+- No canonical dependency/toolchain accommodation was made.
+
+Disposable compatibility copy only:
+- Local Go: 1.23.2
+- Accommodation: go.mod go directive changed to 1.23.0 and toolchain directive removed in disposable copy only.
+- Focused characterasset + archguard test: GREEN
+- Focused race: GREEN
+- Focused vet: GREEN
+- Whole-tree go test ./...: GREEN
+- Whole-tree go vet ./...: GREEN
+- Package-by-package regression: 94 packages GREEN
+- go test -race ./internal/application/...: GREEN
+
+Classification: COMPATIBILITY_COPY_ONLY. These results do not satisfy exact/native/PostgreSQL/River/stock-client proof. CA8-9 and CA8-E remain mandatory; W2 remains deferred/unpassed.

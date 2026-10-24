@@ -1,0 +1,2 @@
+I4 ORACLE WAVE-S CHECK: PASS
+verified current src_64 MID1 log_url/server_time/default sidebands + room discovery/TCP_LOGIN/room-entered/heartbeat/reconnect + 20018/1304/Lua truthiness; Pass353 corroborates bootstrap/realtime shapes only

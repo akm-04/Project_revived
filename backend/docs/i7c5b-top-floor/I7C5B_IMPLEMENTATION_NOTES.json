@@ -1,0 +1,25 @@
+{
+  "status": "I7C5B_IMPLEMENTATION_RECONCILIATION",
+  "contract_id": "C5B_TOP_FLOOR_MODE_V1",
+  "private_policy_additions": [
+    "Robot teams: robot_hero 10001032 referenced by 72 level-10 teams is absent from source and is dropped (no team becomes empty); source equip flags have no recovered item mapping, so robots field no equipment and skill levels 1.",
+    "Rank-1 frame 120001004 (stack cap 1, no overflow) travels in its own TOP_FLOOR_DAILY_FRAME mail at most once per player and server, so the daily TOP_FLOOR_DAILY mail always stays claimable.",
+    "Best-rank reward mail: title 'Top Floor Best Rank Reward' (source names none), sender arena_mail_sender, one mail per settled fight (source key = attempt id).",
+    "START replay: an identical START (same formation, pet, enemy, revenge flag) while the fight is open or within 60 s of its start returns the same attempt/result; result deadline 10 min; a fight whose attempt can no longer resolve is closed without result and keeps its consumed ticket.",
+    "Opponent refresh (273) is free and unlimited; the refresh counter resets with the 05:00 ticket day. A robot whose wire table_id equals an offered player's is skipped because START names table_id only.",
+    "Live rank list (301 rank_type 1) shows ranks 1..50; robots use wire id team + region*100000.",
+    "Report retention: a report answers while any retained record (last 10 per player) references it."
+  ],
+  "deviations_from_plan": [
+    "The settlement/abandoned-fight reconcile provider runs in gxb-api every 30 s (combat launcher, entropy key ring and owner inputs are composed there), not in gxb-worker. It implements generation.ReconcileProvider and can move.",
+    "Top Floor routes and the first production Combat composition register only when GXB_COMBAT_ENTROPY_KEYS / GXB_COMBAT_ENTROPY_KEY_CURRENT are configured (fail closed); GXB_COMBAT_WORKER_BINARY defaults to gxb-combat-worker beside gxb-api.",
+    "START pins the active content revision on its operation when the request carries none (bootstrap binder pattern), so all owner reads observe one revision.",
+    "Cumulative migration lock repaired to list 00062-00064 (pre-existing omission) and 00065."
+  ],
+  "known_limitations": [
+    "Player ids are allocated from server*100000+1, so real players can have table_id <= 25000, which the stock client classifies as robots; enemy rows then carry each hero's template table_id in partner_id so hero display stays correct, but robot-only client paths (e.g. avatar click) may treat such players as robots. Identity allocation is outside I7C-5B.",
+    "1829 HISTORY projection, ARENA_MODE (282-300), 274/275/276/277/279 and the arena shop remain unactivated.",
+    "Seal hero (292) is refused: the opening rule is UNKNOWN."
+  ],
+  "lock_order": "actor fence 315 -> Top Floor ladder root 601 (then Top Floor player rows) -> Combat locator 609 -> I5 mail namespace 610 -> Achievement 620 -> I5 value 700+; daily settlement runs in its own transaction before any ladder mutation (settle-before-mutate)."
+}

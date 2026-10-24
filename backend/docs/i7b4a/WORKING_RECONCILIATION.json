@@ -1,0 +1,25 @@
+{
+  "scope": "TARGETED_IMPLEMENTATION_WORKING_NOT_FINAL_QUALIFICATION",
+  "native_passed": [
+    "Absent/noop/current/receipt corruption",
+    "Prepared caller binding/CAS/rollback",
+    "Same/different actor concurrency, opposite targets, earlier-bound sharedtime",
+    "Both blocks/self/missing/context/region/revocation",
+    "Abort stabletime + UNKNOWN found/miss",
+    "23-row paging/ties/genuinecurrentauthors/missingbasis/retiredauthor",
+    "Strict rawHTTP wire callbacks",
+    "Independent processes/reload",
+    "Retainedpolicy/missingactivation/corruptpolicy/knownACKloss",
+    "Concurrent reconciliation currentcount and RR snapshot",
+    "Blockrace/canonical cross-server"
+  ],
+  "fixes": [
+    "Tx Queryer has QueryRow only; bounded ordered JSON aggregate for page",
+    "Shared receipt RecordedAt DB write time is >= boundDecisionAt, not equal",
+    "Test fixture canonical Social table and pointer identity corrected",
+    "Retired-author fixture must delete its gameplay context before canonical Player deletion; actual I4 FK honored. Repaired before final qualification. F1 superseded; product bytes unchanged."
+  ],
+  "reused": "Source11PASS parentmodel probe and locked source evidence; accepted670/662/I7A1+/D11/D14 foundations unchanged except affected composition metadata/edge regressions needed",
+  "final": "NOT_RUN",
+  "static": "Schema/query ownership PASS; connected preseal snapshot drift expected until freeze"
+}

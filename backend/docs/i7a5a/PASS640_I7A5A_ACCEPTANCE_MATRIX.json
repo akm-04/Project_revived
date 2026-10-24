@@ -1,0 +1,268 @@
+{
+  "schema": "gxb-i7a5a-acceptance/v1",
+  "status": "MANDATORY_PLANNED_NOT_RUN",
+  "baseline": {
+    "passmap_pass": "639.0",
+    "passmap_sha256": "bba6823a34ba41c445c017f0347e8488eb2b54cc548a9a5797c890f74e3a9bbf",
+    "backend_archive": "gxb-backend-v2-v0.91.0-pass638-i7a4d-accepted.zip",
+    "backend_sha256": "2fdbdfb9f4a97f5acf2a9e3fcf4efd42fd964edf59e91c7d6b88ecc97f4e57a1",
+    "backend_tree_sha256": "58aa9e6c2f4db113b690d15b1b68b6ba1dbb744883715ca26d0c126b27b662bc",
+    "src64_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+    "checkpoint_parent": {
+      "filename": "gxb1-checkpoint-80-i7a5a-research.zip",
+      "sha256": "82d6875e62da561a387121e38380b6c6ba38821545222d0b940c885d8cef838a"
+    }
+  },
+  "rows": [
+    {
+      "id": "A01",
+      "name": "Three roles native auth/read/write/selfecho",
+      "mandatory": true,
+      "status": "NOT_RUN",
+      "proof_class": "EXACT_CANDIDATE_NATIVE_POSTGRESQL_AND_REAL_TCP",
+      "candidate": "Future frozen5Aimplementation candidate; never baseline proof substitution"
+    },
+    {
+      "id": "A02",
+      "name": "Full channel/role forgery crossproduct",
+      "mandatory": true,
+      "status": "NOT_RUN",
+      "proof_class": "EXACT_CANDIDATE_NATIVE_POSTGRESQL_AND_REAL_TCP",
+      "candidate": "Future frozen5Aimplementation candidate; never baseline proof substitution"
+    },
+    {
+      "id": "A03",
+      "name": "Strict AMF duplicate/extra/unknown/type/numeric safety",
+      "mandatory": true,
+      "status": "NOT_RUN",
+      "proof_class": "EXACT_CANDIDATE_NATIVE_POSTGRESQL_AND_REAL_TCP",
+      "candidate": "Future frozen5Aimplementation candidate; never baseline proof substitution"
+    },
+    {
+      "id": "A04",
+      "name": "NonemptyUTF8 140/141 and multibyte/whitespace/emotion",
+      "mandatory": true,
+      "status": "NOT_RUN",
+      "proof_class": "EXACT_CANDIDATE_NATIVE_POSTGRESQL_AND_REAL_TCP",
+      "candidate": "Future frozen5Aimplementation candidate; never baseline proof substitution"
+    },
+    {
+      "id": "A05",
+      "name": "Envelope region bindsactor/token cannot replace identity",
+      "mandatory": true,
+      "status": "NOT_RUN",
+      "proof_class": "EXACT_CANDIDATE_NATIVE_POSTGRESQL_AND_REAL_TCP",
+      "candidate": "Future frozen5Aimplementation candidate; never baseline proof substitution"
+    },
+    {
+      "id": "A06",
+      "name": "Canonical sender and safe np_info inactivecosmetics",
+      "mandatory": true,
+      "status": "NOT_RUN",
+      "proof_class": "EXACT_CANDIDATE_NATIVE_POSTGRESQL_AND_REAL_TCP",
+      "candidate": "Future frozen5Aimplementation candidate; never baseline proof substitution"
+    },
+    {
+      "id": "A07",
+      "name": "MissingI4/I5/unrepresentable profile failclosed",
+      "mandatory": true,
+      "status": "NOT_RUN",
+      "proof_class": "EXACT_CANDIDATE_NATIVE_POSTGRESQL_AND_REAL_TCP",
+      "candidate": "Future frozen5Aimplementation candidate; never baseline proof substitution"
+    },
+    {
+      "id": "A08",
+      "name": "Exact sender old handle/context replacement fence",
+      "mandatory": true,
+      "status": "NOT_RUN",
+      "proof_class": "EXACT_CANDIDATE_NATIVE_POSTGRESQL_AND_REAL_TCP",
+      "candidate": "Future frozen5Aimplementation candidate; never baseline proof substitution"
+    },
+    {
+      "id": "A09",
+      "name": "Recipient I4 expiry/revocation before periodic tick",
+      "mandatory": true,
+      "status": "NOT_RUN",
+      "proof_class": "EXACT_CANDIDATE_NATIVE_POSTGRESQL_AND_REAL_TCP",
+      "candidate": "Future frozen5Aimplementation candidate; never baseline proof substitution"
+    },
+    {
+      "id": "A10",
+      "name": "GUILD exact JOIN leave/rejoin both sender/recipient",
+      "mandatory": true,
+      "status": "NOT_RUN",
+      "proof_class": "EXACT_CANDIDATE_NATIVE_POSTGRESQL_AND_REAL_TCP",
+      "candidate": "Future frozen5Aimplementation candidate; never baseline proof substitution"
+    },
+    {
+      "id": "A11",
+      "name": "NoGuild provider dependency WORLD/SERVICE",
+      "mandatory": true,
+      "status": "NOT_RUN",
+      "proof_class": "EXACT_CANDIDATE_NATIVE_POSTGRESQL_AND_REAL_TCP",
+      "candidate": "Future frozen5Aimplementation candidate; never baseline proof substitution"
+    },
+    {
+      "id": "A12",
+      "name": "WORLD/GUILD isolation and explicit SERVICE99999 crossserver scope",
+      "mandatory": true,
+      "status": "NOT_RUN",
+      "proof_class": "EXACT_CANDIDATE_NATIVE_POSTGRESQL_AND_REAL_TCP",
+      "candidate": "Future frozen5Aimplementation candidate; never baseline proof substitution"
+    },
+    {
+      "id": "A13",
+      "name": "Multi-context player registry semantics",
+      "mandatory": true,
+      "status": "NOT_RUN",
+      "proof_class": "EXACT_CANDIDATE_NATIVE_POSTGRESQL_AND_REAL_TCP",
+      "candidate": "Future frozen5Aimplementation candidate; never baseline proof substitution"
+    },
+    {
+      "id": "A14",
+      "name": "ReadOnlyRR callerTx/singlecommit/no semanticSQL/no gameplaylocks",
+      "mandatory": true,
+      "status": "NOT_RUN",
+      "proof_class": "EXACT_CANDIDATE_NATIVE_POSTGRESQL_AND_REAL_TCP",
+      "candidate": "Future frozen5Aimplementation candidate; never baseline proof substitution"
+    },
+    {
+      "id": "A15",
+      "name": "FreshDBtime and definitecompletion/unknownread abort",
+      "mandatory": true,
+      "status": "NOT_RUN",
+      "proof_class": "EXACT_CANDIDATE_NATIVE_POSTGRESQL_AND_REAL_TCP",
+      "candidate": "Future frozen5Aimplementation candidate; never baseline proof substitution"
+    },
+    {
+      "id": "A16",
+      "name": "Single writer and no network under Tx/registry mutex",
+      "mandatory": true,
+      "status": "NOT_RUN",
+      "proof_class": "EXACT_CANDIDATE_NATIVE_POSTGRESQL_AND_REAL_TCP",
+      "candidate": "Future frozen5Aimplementation candidate; never baseline proof substitution"
+    },
+    {
+      "id": "A17",
+      "name": "Slow/full/error peer bounded failure isolation",
+      "mandatory": true,
+      "status": "NOT_RUN",
+      "proof_class": "EXACT_CANDIDATE_NATIVE_POSTGRESQL_AND_REAL_TCP",
+      "candidate": "Future frozen5Aimplementation candidate; never baseline proof substitution"
+    },
+    {
+      "id": "A18",
+      "name": "Global16message/8worker shutdown/overflow bounds",
+      "mandatory": true,
+      "status": "NOT_RUN",
+      "proof_class": "EXACT_CANDIDATE_NATIVE_POSTGRESQL_AND_REAL_TCP",
+      "candidate": "Future frozen5Aimplementation candidate; never baseline proof substitution"
+    },
+    {
+      "id": "A19",
+      "name": "Partial delivery no retry/no ACK/no consumption claim",
+      "mandatory": true,
+      "status": "NOT_RUN",
+      "proof_class": "EXACT_CANDIDATE_NATIVE_POSTGRESQL_AND_REAL_TCP",
+      "candidate": "Future frozen5Aimplementation candidate; never baseline proof substitution"
+    },
+    {
+      "id": "A20",
+      "name": "Timeout admitted late write outcome-unknown regression",
+      "mandatory": true,
+      "status": "NOT_RUN",
+      "proof_class": "EXACT_CANDIDATE_NATIVE_POSTGRESQL_AND_REAL_TCP",
+      "candidate": "Future frozen5Aimplementation candidate; never baseline proof substitution"
+    },
+    {
+      "id": "A21",
+      "name": "Concurrent per-writer ordering without global sequence promise",
+      "mandatory": true,
+      "status": "NOT_RUN",
+      "proof_class": "EXACT_CANDIDATE_NATIVE_POSTGRESQL_AND_REAL_TCP",
+      "candidate": "Future frozen5Aimplementation candidate; never baseline proof substitution"
+    },
+    {
+      "id": "A22",
+      "name": "Type1..8 valid producer-gated/unknown malformed close",
+      "mandatory": true,
+      "status": "NOT_RUN",
+      "proof_class": "EXACT_CANDIDATE_NATIVE_POSTGRESQL_AND_REAL_TCP",
+      "candidate": "Future frozen5Aimplementation candidate; never baseline proof substitution"
+    },
+    {
+      "id": "A23",
+      "name": "Restart no replay/no durable schema",
+      "mandatory": true,
+      "status": "NOT_RUN",
+      "proof_class": "EXACT_CANDIDATE_NATIVE_POSTGRESQL_AND_REAL_TCP",
+      "candidate": "Future frozen5Aimplementation candidate; never baseline proof substitution"
+    },
+    {
+      "id": "A24",
+      "name": "Actual productiondispatcher/typed32783wiring and HTTP route rejection",
+      "mandatory": true,
+      "status": "NOT_RUN",
+      "proof_class": "EXACT_CANDIDATE_NATIVE_POSTGRESQL_AND_REAL_TCP",
+      "candidate": "Future frozen5Aimplementation candidate; never baseline proof substitution"
+    },
+    {
+      "id": "A25",
+      "name": "ExistingPresence heartbeatonly/ownerfence and Socialreload retained",
+      "mandatory": true,
+      "status": "NOT_RUN",
+      "proof_class": "EXACT_CANDIDATE_NATIVE_POSTGRESQL_AND_REAL_TCP",
+      "candidate": "Future frozen5Aimplementation candidate; never baseline proof substitution"
+    },
+    {
+      "id": "A26",
+      "name": "Fresh migration1..33/idempotence schema unchanged",
+      "mandatory": true,
+      "status": "NOT_RUN",
+      "proof_class": "EXACT_CANDIDATE_NATIVE_POSTGRESQL_AND_REAL_TCP",
+      "candidate": "Future frozen5Aimplementation candidate; never baseline proof substitution"
+    },
+    {
+      "id": "A27",
+      "name": "Exact candidate source/pins/static/import/owner guards",
+      "mandatory": true,
+      "status": "NOT_RUN",
+      "proof_class": "CANONICAL_STATIC_PINS_SOURCE_OWNER_IMPORTS",
+      "candidate": "Future frozen5Aimplementation candidate; never baseline proof substitution"
+    },
+    {
+      "id": "A28",
+      "name": "Focused unit/race/nativePG+TCP proof identity",
+      "mandatory": true,
+      "status": "NOT_RUN",
+      "proof_class": "EXACT_CANDIDATE_NATIVE_POSTGRESQL_AND_REAL_TCP",
+      "candidate": "Future frozen5Aimplementation candidate; never baseline proof substitution"
+    },
+    {
+      "id": "A29",
+      "name": "Crash/reconnect/context retirement native lifecycle",
+      "mandatory": true,
+      "status": "NOT_RUN",
+      "proof_class": "EXACT_CANDIDATE_NATIVE_POSTGRESQL_AND_REAL_TCP",
+      "candidate": "Future frozen5Aimplementation candidate; never baseline proof substitution"
+    },
+    {
+      "id": "A30",
+      "name": "Separate mandatorypostimplementationreality+evidence+normalexitseal",
+      "mandatory": true,
+      "status": "NOT_RUN",
+      "proof_class": "SEPARATE_METHOD_REALITY_EVIDENCE_LIFECYCLE_NORMAL_SEAL",
+      "candidate": "Future frozen5Aimplementation candidate; never baseline proof substitution"
+    },
+    {
+      "id": "A31",
+      "name": "Parent5/5B/I7A10/E/W2 not silentlyaccepted",
+      "mandatory": true,
+      "status": "NOT_RUN",
+      "proof_class": "SEPARATE_METHOD_REALITY_EVIDENCE_LIFECYCLE_NORMAL_SEAL",
+      "candidate": "Future frozen5Aimplementation candidate; never baseline proof substitution"
+    }
+  ],
+  "pass": "640.0",
+  "selected_status": "SELECTED_WITH_VALIDATED_NORMAL_RESEARCH_DESIGN_SEAL_NOT_IMPLEMENTED"
+}

@@ -1,0 +1,18 @@
+{
+  "node_path": "ROOT/I7/I7C/I7C-2/I7C-2C",
+  "status": "DIRECT_USER_AUTHORIZED_RECONSTRUCTION",
+  "recorded_utc": "2026-10-13T16:37:20.236855+00:00",
+  "answers": [
+    {
+      "policy_id": "C2C_LOUNGE_EXP_V1",
+      "question_item": "call_732048a9f0654b4cb0f74d320afe35b2:0",
+      "verbatim": "yes I approve of your reconstruction policy. There's no way to retrieve original server probablities, as such we should make a policy and continue. please continue, start by reading agent.md for rules"
+    },
+    {
+      "policy_id": "C2C_RANDOM_KEY_V1",
+      "question_item": "call_732048a9f0654b4cb0f74d320afe35b2:1",
+      "verbatim": "Approve uniform selection as reconstruction"
+    }
+  ],
+  "scope": "Exactly the checkpointed two policies; neither approval claims original-server settlement or weights; no parent product acceptance"
+}

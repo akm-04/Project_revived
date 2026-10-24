@@ -1,0 +1,31 @@
+classification=COMPATIBILITY_COPY_ONLY
+canonical_go_mod_unchanged=true
+clone_only_accommodation=go.mod go1.26.0->1.23.0; toolchain directive removed; .go-version->1.23.2
+go version go1.23.2 linux/amd64
+== gofmt ==
+PASS
+== focused go test ==
+?   	gxb.local/backend/v2/internal/adapters/postgres/guildstore	[no test files]
+ok  	gxb.local/backend/v2/internal/application/guildcore	0.003s
+ok  	gxb.local/backend/v2/internal/foundation/replaycatalog	0.003s
+ok  	gxb.local/backend/v2/internal/archguard	0.028s
+== focused go vet ==
+== cumulative validator ==
+R6 VALIDATION: PASS (CUMULATIVE COMPATIBILITY-SCRATCH MODE)
+static projection/directory/replay/lifecycle/key/single-owner/http/observability R6 seams present; cumulative mode permits later migrations but does not weaken historical R6 pins
+CURRENT CUMULATIVE CANDIDATE VALIDATION: PASS
+historical R6 pins retained; exact forward migration inventory and current release/SBOM version agree; COMPATIBILITY_COPY_ONLY toolchain accommodation explicitly excluded from canonical/native proof
+== schema/query ownership ==
+SCHEMA/QUERY OWNERSHIP: PASS
+== dependency policy ==
+DEPENDENCY POLICY: PASS
+resolved_go_modules 16 qualified_candidates 5
+== sqlc generation policy ==
+SQLC GENERATION POLICY: PASS
+== I6 source oracles ==
+I6A SOURCE ORACLE CHECK: PASS
+verified candidate-bound current/historical client hashes and reload/time source shape; no server reachability/reset semantics inferred
+I6B SOURCE ORACLE CHECK: PASS
+verified current/historical MID229/MID234/bootstrap/error-path hashes and source shape; no Activity mechanics/reset semantics inferred
+I6C SOURCE ORACLE CHECK: PASS
+verified Guild MID/request/presentation/policy/message source shape in current + historical corpora; no unrecovered server calendar/succession semantics inferred

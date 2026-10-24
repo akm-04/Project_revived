@@ -1,0 +1,2 @@
+### python3 tools/generate_builtin_content.py --source-archive /mnt/data/gxb552_recon/oracle_inputs/all-assest-rechecked-1.zip --check
+R4A CONTENT GENERATION: PASS revision=b36ac5cac34e64ed980f8c5beb3437e1bfceb34a55400b2af50620d09e87b8eb resources=5556 players=100 functions=99 heroes=568 pets=54 equipment=1176 pet_acquisition=27

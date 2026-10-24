@@ -1,0 +1,18 @@
+[
+  {
+    version: 'PostgreSQL 18.3 (PGlite 0.5.4) on wasm32-unknown-linux-gnu, compiled by emcc (Emscripten gcc/clang-like replacement + linker emulating GNU ld) 3.1.74 (1092ec30a3fb1d46b1782ff1b4db5094d3d06ae5), 32-bit'
+  }
+]
+migrated 00001_kernel_receipts.sql
+migrated 00002_identity_logicalserver_bootstrap.sql
+migrated 00003_identity_account_uid_repair.sql
+migrated 00004_player_directory_profile_bootstrap.sql
+migrated 00005_i5_player_economy_mail_objective_redeem.sql
+migrated 00006_i5_transactional_policies.sql
+migrated 00007_identity_lifecycle_constraints.sql
+migrated 00008_i5_economy_owner_fence.sql
+migrated 00009_r4_immutable_content_revisions.sql
+DEFECT_NULL_ACCEPTED revision_id
+DEFECT_NULL_ACCEPTED schema_version
+DEFECT_NULL_ACCEPTED compiler_version
+DEFECT_NULL_ACCEPTED parser_version

@@ -1,0 +1,60 @@
+[36/91] gxb.local/backend/v2/internal/application/identitylifecycle
+ok  	gxb.local/backend/v2/internal/application/identitylifecycle	0.002s
+[37/91] gxb.local/backend/v2/internal/application/playerdirectory
+?   	gxb.local/backend/v2/internal/application/playerdirectory	[no test files]
+[38/91] gxb.local/backend/v2/internal/application/playerroot
+ok  	gxb.local/backend/v2/internal/application/playerroot	0.002s
+[39/91] gxb.local/backend/v2/internal/application/realtimeauth
+ok  	gxb.local/backend/v2/internal/application/realtimeauth	0.002s
+[40/91] gxb.local/backend/v2/internal/archguard
+ok  	gxb.local/backend/v2/internal/archguard	0.028s
+[41/91] gxb.local/backend/v2/internal/content/builtin
+ok  	gxb.local/backend/v2/internal/content/builtin	0.091s
+[42/91] gxb.local/backend/v2/internal/content/guildpolicy
+ok  	gxb.local/backend/v2/internal/content/guildpolicy	0.002s
+[43/91] gxb.local/backend/v2/internal/content/registry
+ok  	gxb.local/backend/v2/internal/content/registry	0.623s
+[44/91] gxb.local/backend/v2/internal/domain/activity
+ok  	gxb.local/backend/v2/internal/domain/activity	0.002s
+[45/91] gxb.local/backend/v2/internal/domain/character
+ok  	gxb.local/backend/v2/internal/domain/character	0.002s
+[46/91] gxb.local/backend/v2/internal/domain/combat
+?   	gxb.local/backend/v2/internal/domain/combat	[no test files]
+[47/91] gxb.local/backend/v2/internal/domain/commerce
+?   	gxb.local/backend/v2/internal/domain/commerce	[no test files]
+[48/91] gxb.local/backend/v2/internal/domain/control
+?   	gxb.local/backend/v2/internal/domain/control	[no test files]
+[49/91] gxb.local/backend/v2/internal/domain/economy
+ok  	gxb.local/backend/v2/internal/domain/economy	0.002s
+[50/91] gxb.local/backend/v2/internal/domain/generation
+ok  	gxb.local/backend/v2/internal/domain/generation	0.003s
+[51/91] gxb.local/backend/v2/internal/domain/grant
+ok  	gxb.local/backend/v2/internal/domain/grant	0.002s
+[52/91] gxb.local/backend/v2/internal/domain/guild
+?   	gxb.local/backend/v2/internal/domain/guild	[no test files]
+[53/91] gxb.local/backend/v2/internal/domain/identity
+ok  	gxb.local/backend/v2/internal/domain/identity	0.002s
+[54/91] gxb.local/backend/v2/internal/domain/logicalserver
+ok  	gxb.local/backend/v2/internal/domain/logicalserver	0.002s
+[55/91] gxb.local/backend/v2/internal/domain/mail
+ok  	gxb.local/backend/v2/internal/domain/mail	0.002s
+[56/91] gxb.local/backend/v2/internal/domain/modes
+?   	gxb.local/backend/v2/internal/domain/modes	[no test files]
+[57/91] gxb.local/backend/v2/internal/domain/objective
+ok  	gxb.local/backend/v2/internal/domain/objective	0.003s
+[58/91] gxb.local/backend/v2/internal/domain/player
+ok  	gxb.local/backend/v2/internal/domain/player	0.002s
+[59/91] gxb.local/backend/v2/internal/domain/profile
+?   	gxb.local/backend/v2/internal/domain/profile	[no test files]
+[60/91] gxb.local/backend/v2/internal/domain/realtimeauth
+ok  	gxb.local/backend/v2/internal/domain/realtimeauth	0.002s
+[61/91] gxb.local/backend/v2/internal/domain/redeem
+ok  	gxb.local/backend/v2/internal/domain/redeem	0.002s
+[62/91] gxb.local/backend/v2/internal/domain/social
+?   	gxb.local/backend/v2/internal/domain/social	[no test files]
+[63/91] gxb.local/backend/v2/internal/foundation/audit
+?   	gxb.local/backend/v2/internal/foundation/audit	[no test files]
+[64/91] gxb.local/backend/v2/internal/foundation/clock
+?   	gxb.local/backend/v2/internal/foundation/clock	[no test files]
+[65/91] gxb.local/backend/v2/internal/foundation/config
+ok  	gxb.local/backend/v2/internal/foundation/config	0.003s

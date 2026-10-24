@@ -1,0 +1,64 @@
+{
+  "schema_version": 1,
+  "node": "I7B-6A",
+  "full_node_path": "ROOT/I7/I7B/I7B-6/I7B-6A",
+  "status": "RESEARCH_DESIGN_READY_PENDING_NORMAL679_PUBLICATION",
+  "classification": "SOURCE_FACT + IMPLEMENTATION_DECISION + UNKNOWN",
+  "product_implementation_authorized": false,
+  "product_implementation_started": false,
+  "product_accepted": false,
+  "title": "Playerdisplay/cosmeticownerseams preimplementation plan",
+  "frozen_parent_contracts": "Five662 unchanged; selected678accepted2..5 andI7A/CA reused",
+  "scope": [
+    "BASE_AVATAR_FRAME",
+    "HERO_SUPER_AWAKEN",
+    "SKIN_COLLECTION",
+    "VIP_FRAME",
+    "PERMANENT_INVENTORY_AVATAR_FRAME",
+    "TIMED_INVENTORY",
+    "TITLE",
+    "BUBBLE",
+    "PURCHASE_656",
+    "RENAME_23",
+    "NAME_119"
+  ],
+  "implementation_sequence": [
+    "ExtendexistingPlayerdomain/application ports forcallerTx publicdisplay/family observations; reusebasis/I5actorfence/playerroot315/typedCharacter andI4directorysink. No newgenericPublicProfileroot.",
+    "Addsource-derivedimmutabledisplaycatalog/default/name policies viatheexistingR4compiler/contentruntime; preserveoldimmutablecontentrevisionbytes andrecordcompiler-generation lineage, forwardcapability only. Catalogmetadata !=ownedentitlement.",
+    "Forwardmigration00047 only formissingPlayer-ownedselectiondescriptor/title/bubble/timed-entitlement/admissionfacts; retainexistingPlayerprofilecanonicalavatar/frame/name columns, avoidduplicatedowner. Everyphysicaltableownedinexistingregistry; use315fenceddomainplan plusI5existingtypedlockbands; no arbitrarynewrankjustfor6A.",
+    "Buildread/desiredassignment flows98/100/2490/2492/2493/2494 withstrictqualifiedoriginread/validity, boundedsourcepayload. Unknownfamilyorigin/provider failsaffectedactivation ratherthanemptylist/zero-success. Existinglegacydisplay unaffected untilgenuineassignment.",
+    "Implement23/119typedPlayerdisplaynamepolicy.23usesonecanonicalPlayerupdate andI5typeddebit+receipt. Chargedrenameand656valueoriginsneedcompletepreplannedlocks andscopedunknownadmission; noforeigntableSQL/nestedcommit.",
+    "Expose656composabletypedpurchase/recipientseam onlywhenexactsourceprice/resource/recipientqualified. Actualpurchase/grantoriginsretaincanonicalvalueowner; fullCommerce/Activityimplementationnotin6A. No automaticadmin/testfixtureproductiongrant orallcatalogentitlement.",
+    "ReconcilePlayerupdateandI4owneddirectoryatomically inexactcallerSerializableTx beforeprivateoutputrelease. Keepaftercommit hints optional. Add6B/6Ctypedobservations withoutchangingacceptedMinimalsemantics orhistoricalDM payload.",
+    "Targetedworkingtests, thenfreezeoneintended6Acandidate andrequiredportableR2/native/process/recovery gate beforedownstreamdurablefoundationuse. Noaffectedoldproofrerunwithoutinvalidation. Independentcode/source/contractreality beforeacceptance."
+  ],
+  "files_to_change_proposed": [
+    "internal/domain/player/*display/cosmetic*",
+    "internal/application/i5 narrowownerports orPlayerdisplay applicationmodule",
+    "internal/adapters/postgres/i5store narrowownedqueries",
+    "internal/application/directorysync existingtypedprojectionreuse",
+    "internal/adapters/stockruntime Playerdisplay endpoints",
+    "cmd/gxb-api Playerdisplaycomposition",
+    "internal/content/builtin andadapters/postgres/contentstore displaycatalog/policy",
+    "tools/generate_builtin_content.py generationlineage",
+    "migrations/00047_i7b6a_player_display.sql",
+    "existingtableownership/migrationlock/source/contractsdocs"
+  ],
+  "transaction": {
+    "admission": "ExactI4/I5actor/context/playerroot315; stableDecisionAt/pinnedcontent beforeeffects; qualifiedeligibility inexactcallercoherentscope",
+    "locks": "Preplantouchedkeysbeforefirstmutation; Characterfacts throughaccepted315/400.. guards asneeded; I5Economy700/scalar720/stack722/directory740 retaincanonicalorder. Do notdiscoverlowerlocksaftergrant/debit; noforeignSQL/nestedsemanticTx. NarrowownedProfileSQLserializedbyexisting315 rootfence.",
+    "commit": "SinglecallerSerializablesemanticTx updatescanonicalPlayer+necessarymetadata+I4typedfeed+I5debit/grant+KernelReceipt exactlyonce. Preparatoryadmissionjournalnoeconomicfact; unknownproofcannotbereceiptmissalone.",
+    "read": "CallerRR/Serializable; noActiveRevision/clockdiscovery insideprovider; unknown/absent/inactive/qualifiedseparate. Effectivefallback responseonlydoesnotdeleteentitlement."
+  },
+  "authorization": {
+    "research_design_authorized": true,
+    "implementation_authorized": false,
+    "implementation_started": false,
+    "basis": "Latestuserrequestsapprovedsplit/6AresearchdesignandnormalPassMapsync, notproductcode"
+  },
+  "external_activation_limits": [
+    "VIP/timedinventory/title/bubbleorigin qualification",
+    "Ten6Bmetric/rich/historygatesnotmovedintounqualified6A success"
+  ],
+  "no_whole_later_phase_prerequisite": true
+}

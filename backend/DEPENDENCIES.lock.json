@@ -1,0 +1,230 @@
+{
+  "schema_version": 1,
+  "pass": "438.0-I4",
+  "generated": "2026-09-06",
+  "policy": "Reuse infrastructure aggressively; never outsource GXB truth blindly.",
+  "resolution": "Direct and indirect runtime Go modules are frozen from the Pass438 W1 Go 1.27.1 `go mod tidy` closure; qualified future/test tools remain separately listed.",
+  "dependencies": [
+    {
+      "name": "Go",
+      "kind": "toolchain",
+      "module": null,
+      "version": "1.27.3",
+      "license": "BSD-3-Clause",
+      "use": "build/runtime toolchain",
+      "status": "PINNED_TARGET",
+      "notes": "Official stable security patch; fixes GO-2026-6809 (crypto/x509), reachable under the postgres,river tags.",
+      "qualification": "APPROVED_SECURITY_PATCH_PIN_USER_2026-10-21_PORTABLE_TOOLS_R4"
+    },
+    {
+      "name": "PostgreSQL",
+      "kind": "service",
+      "module": null,
+      "version": "18.6",
+      "license": "PostgreSQL",
+      "use": "sole V2 gameplay authority",
+      "status": "PINNED_W1_TARGET",
+      "notes": "Stable supported release; PostgreSQL 19 is beta and excluded."
+    },
+    {
+      "name": "pgx/pgxpool",
+      "kind": "runtime",
+      "module": "github.com/jackc/pgx/v5",
+      "version": "v5.10.0",
+      "license": "MIT",
+      "use": "native PostgreSQL driver/pool",
+      "status": "PINNED_I1_BUILD_TAG_CANDIDATE",
+      "notes": "Use native pgx/pgxpool path; avoid database/sql prepared-statement path implicated by open issue #2640."
+    },
+    {
+      "name": "sqlc",
+      "kind": "build-tool",
+      "module": "github.com/sqlc-dev/sqlc",
+      "version": "v1.31.1",
+      "license": "MIT",
+      "use": "typed SQL generation",
+      "status": "QUALIFIED_CANDIDATE"
+    },
+    {
+      "name": "goose",
+      "kind": "build-tool",
+      "module": "github.com/pressly/goose/v3",
+      "version": "v3.27.3",
+      "license": "MIT",
+      "use": "schema migrations",
+      "status": "QUALIFIED_CANDIDATE",
+      "notes": "v3.27.2 included x/crypto and x/net security-advisory dependency upgrades; v3.27.3 adds further dependency updates."
+    },
+    {
+      "name": "River",
+      "kind": "runtime",
+      "module": "github.com/riverqueue/river",
+      "version": "v0.47.0",
+      "license": "MPL-2.0",
+      "use": "durable obligation execution/wakeup adapter only",
+      "status": "PINNED_I1_BUILD_TAG_CANDIDATE",
+      "notes": "Pinned at v0.47.0; MPL-2.0 obligations tracked. Pass438 W1 diagnostic probe proved the adapter seam after mechanical package repair; exact-candidate W1 rerun remains required."
+    },
+    {
+      "name": "chi",
+      "kind": "runtime",
+      "module": "github.com/go-chi/chi/v5",
+      "version": "v5.3.1",
+      "license": "MIT",
+      "use": "HTTP routing only",
+      "status": "PINNED_I2_BUILD_TAG_CANDIDATE",
+      "notes": "Thin router adapter only; exact tagged compile deferred to connected W1 environment."
+    },
+    {
+      "name": "Testcontainers for Go",
+      "kind": "test",
+      "module": "github.com/testcontainers/testcontainers-go",
+      "version": "v0.44.0",
+      "license": "MIT",
+      "use": "real PostgreSQL integration environments in connected/Work mode",
+      "status": "QUALIFIED_CANDIDATE"
+    },
+    {
+      "name": "OpenTelemetry Go",
+      "kind": "runtime",
+      "module": "go.opentelemetry.io/otel",
+      "version": "v1.45.0",
+      "license": "Apache-2.0 AND BSD-3-Clause components",
+      "use": "traces/metrics instrumentation API/SDK",
+      "status": "QUALIFIED_CANDIDATE"
+    },
+    {
+      "name": "Prometheus Go client",
+      "kind": "runtime",
+      "module": "github.com/prometheus/client_golang",
+      "version": "v1.24.1",
+      "license": "Apache-2.0",
+      "use": "Prometheus metrics exposition",
+      "status": "QUALIFIED_CANDIDATE"
+    },
+    {
+      "name": "goAMF3",
+      "kind": "differential-candidate",
+      "module": "github.com/breign/goAMF3",
+      "version": "v1.0.2",
+      "license": "MIT-0",
+      "use": "I2 differential codec candidate only",
+      "status": "NOT_RUNTIME_APPROVED",
+      "notes": "Pass435 keeps project-owned bounded Xinyoudi codec; goAMF3 remains differential-only."
+    },
+    {
+      "name": "GopherLua",
+      "kind": "runtime",
+      "module": "github.com/yuin/gopher-lua",
+      "version": "v1.1.2",
+      "license": "MIT",
+      "use": "Lua 5.1 VM inside the isolated I7C-5A combat worker only",
+      "status": "PINNED_I7C5A_COMBAT_WORKER",
+      "notes": "h1:yF/FjE3hD65tBbt0VXLE13HWS9h34fdzJmrWRXwobGA=; confined to internal/adapters/combatresolver by archguard; io/os/debug/channel libraries are never opened. Offline module source: retained proxy work/i7c5a/goproxy (zip sha256 recorded in the I7C-5A evidence)."
+    }
+  ],
+  "resolved_go_modules": [
+    {
+      "module": "github.com/go-chi/chi/v5",
+      "version": "v5.3.1",
+      "license": "MIT",
+      "direct": true
+    },
+    {
+      "module": "github.com/jackc/pgx/v5",
+      "version": "v5.10.0",
+      "license": "MIT",
+      "direct": true
+    },
+    {
+      "module": "github.com/riverqueue/river",
+      "version": "v0.47.0",
+      "license": "MPL-2.0",
+      "direct": true
+    },
+    {
+      "module": "github.com/riverqueue/river/riverdriver/riverpgxv5",
+      "version": "v0.47.0",
+      "license": "MPL-2.0",
+      "direct": true
+    },
+    {
+      "module": "github.com/yuin/gopher-lua",
+      "version": "v1.1.2",
+      "license": "MIT",
+      "direct": true
+    },
+    {
+      "module": "github.com/jackc/pgpassfile",
+      "version": "v1.0.0",
+      "license": "MIT",
+      "direct": false
+    },
+    {
+      "module": "github.com/jackc/pgservicefile",
+      "version": "v0.0.0-20240606120523-5a60cdf6a761",
+      "license": "MIT",
+      "direct": false
+    },
+    {
+      "module": "github.com/jackc/puddle/v2",
+      "version": "v2.2.2",
+      "license": "MIT",
+      "direct": false
+    },
+    {
+      "module": "github.com/riverqueue/river/riverdriver",
+      "version": "v0.47.0",
+      "license": "MPL-2.0",
+      "direct": false
+    },
+    {
+      "module": "github.com/riverqueue/river/rivershared",
+      "version": "v0.47.0",
+      "license": "MPL-2.0",
+      "direct": false
+    },
+    {
+      "module": "github.com/riverqueue/river/rivertype",
+      "version": "v0.47.0",
+      "license": "MPL-2.0",
+      "direct": false
+    },
+    {
+      "module": "github.com/tidwall/gjson",
+      "version": "v1.19.0",
+      "license": "MIT",
+      "direct": false
+    },
+    {
+      "module": "github.com/tidwall/match",
+      "version": "v1.2.0",
+      "license": "MIT",
+      "direct": false
+    },
+    {
+      "module": "github.com/tidwall/pretty",
+      "version": "v1.2.1",
+      "license": "MIT",
+      "direct": false
+    },
+    {
+      "module": "github.com/tidwall/sjson",
+      "version": "v1.2.5",
+      "license": "MIT",
+      "direct": false
+    },
+    {
+      "module": "golang.org/x/sync",
+      "version": "v0.22.0",
+      "license": "BSD-3-Clause",
+      "direct": false
+    },
+    {
+      "module": "golang.org/x/text",
+      "version": "v0.41.0",
+      "license": "BSD-3-Clause",
+      "direct": false
+    }
+  ]
+}

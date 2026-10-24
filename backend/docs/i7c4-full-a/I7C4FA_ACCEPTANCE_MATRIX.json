@@ -1,0 +1,15 @@
+{
+  "status": "PLANNED",
+  "policy_id": "C4F_ACHIEVEMENT_CATALOG_AND_AP_V1",
+  "rows": [
+    {"id": "A1", "check": "Source oracle: 33 achievement rows and 10 level rows exact; MIDs 1302/1303; rank 2001 subtype 8; title 100001; notice ACHIEVEMENT params"},
+    {"id": "A2", "check": "Domain unit: nine state-count profiles, tiers never revoked, points/level/award status/claim order, trophy rank tie order, not-live entries never earnable"},
+    {"id": "A3", "check": "Wire shapes 1302/1303 and AP 301 subtype 8; invalid requests never reach the owner; wrapper never changes the wrapped response"},
+    {"id": "A4", "check": "Native: fresh player gains heroes/pets/rooms -> tiers earned after the command with progress; 1302 list/base_info/rank; 1303 claims lowest level once with I5 grant and receipt replay"},
+    {"id": "A5", "check": "Native: legacy player without root backfilled from current state at first observation; streaks start then"},
+    {"id": "A6", "check": "Native: notice intent recorded per new tier and published by the realtime route"},
+    {"id": "A7", "check": "Native: 1007 equals the sum of per-Hero public force; AP board snapshot, weekly settlement, title 100001 to rank 1 only, replay"},
+    {"id": "A8", "check": "Native: concurrent claims and observations serialize; failed observation leaves the command result intact"},
+    {"id": "A9", "check": "Portable R2: build, vet, archguard, race, migrations fresh and upgrade 69->70 with content deploy, full regression"}
+  ]
+}

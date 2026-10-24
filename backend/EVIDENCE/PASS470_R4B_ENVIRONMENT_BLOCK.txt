@@ -1,0 +1,13 @@
+PASS470 R4B CANONICAL ENVIRONMENT LIMITATIONS
+go_version=psql=NOT_FOUND
+postgres=NOT_FOUND
+goose=NOT_FOUND
+sqlc=NOT_FOUND
+docker=NOT_FOUND
+canonical_module:
+module gxb.local/backend/v2
+
+go 1.26.0
+
+toolchain go1.27.1
+RESULT=CANONICAL_GO_AND_REAL_POSTGRESQL_NOT_RUN_ENVIRONMENT_BLOCKED; COMPATIBILITY_COPY_ONLY diagnostics recorded separately; end-R4 Work PostgreSQL gate preserved; R7 remains mandatory.

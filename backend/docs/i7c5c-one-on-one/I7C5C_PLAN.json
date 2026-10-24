@@ -1,0 +1,23 @@
+{
+  "status": "CONCRETE_5C_ONE_ON_ONE_PLAN_PREIMPLEMENTATION_GATE_PENDING",
+  "policy_id": "C5C_ONE_ON_ONE_MODE_V1",
+  "base_product_commit": "d3b7eaad08a484444e9add551071a0c6bb324667",
+  "steps": [
+    "S0 Commit research/policy/impact/plan/acceptance docs; cumulative checkpoint; owned authority 732 from 731 with contract index, C5B policy approval record, HOT preseal, COLD --deep, sole-contract query, restore drill.",
+    "S1 Content: tools/one_on_one_content.py compiles one_on_one_catalog.json (legend_arena_rank, legend_reward, misc legend_*/top_refresh_cost, vip num_top/top_reset, refresh_cost buy_top_cost, mail texts); compiler enables top_coin; Go catalog type, registry bundle/verify, contentstore read; source oracle tools/check_i7c5c_source_oracle.py.",
+    "S2 internal/domain/oneonone: calendar (day 05:00, open 08:00-22:00, Wed/Sun 22:00 settlements, Fri/Sat 21:00 promotion), groups/levels, global/server order, Elo, candidate bands, match majority, promotion state machine, vacancy fill, reward lines, titles, streaks, records, history usage. Pure with unit tests.",
+    "S3 migration 00066 + internal/adapters/postgres/oneononestore: competition root, players, matches+rounds, records, settlements (+rows), promotions, partner usage; ownership entries; migration lock.",
+    "S4 internal/application/oneonone: Load(entry), ChangeTeams, Match(refresh), EnemyTeam, Start (freeze N round attempts, parallel resolve, terminal settle), Report, RecordsList, RecordDetail, Buy, Reset, RankList (3/4), settlements, promotion open/close, reconcile provider; title origin provider.",
+    "S5 Combat resolver adapter for campaign 65; S6 Achievement 100002/100028 producers; S7 PlayerDisplay catalog-origin router.",
+    "S8 projection/oneonone wire shapes; stockruntime dispatcher 2480-2489 and 301 rank_types 3/4; gxb-api composition and reconcile.",
+    "S9 Native PG/River tests (entry, teams, start/settle once, concurrency, settlement idempotence, promotion, titles, streaks, reload); regressions 5B/5A/4B/4C.",
+    "S10 Freeze I7C5C-F1 v0.130.0; exact portable R2 qualification incl. 65->66 populated upgrade with content deploy; reality review; owned733 closure; checkpoint."
+  ],
+  "open_gates_after_5c": [
+    "1829 HISTORY projection (needs 5D)",
+    "Exchange shop (ShopType.TOP)",
+    "5D-5F",
+    "full I7C-4",
+    "stock-client E2E"
+  ]
+}

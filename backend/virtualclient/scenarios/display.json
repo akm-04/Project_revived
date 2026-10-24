@@ -1,0 +1,2 @@
+{"name":"display","level":20,
+ "steps":["window:new_change_avatar","wait:3","tap:btn_change_title","wait:10"],"settle_seconds":15,"expect_ok":[1302]}

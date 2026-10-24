@@ -1,0 +1,365 @@
+{
+  "schema_version": 1,
+  "pass": "530.0",
+  "phase": "CA3-3",
+  "basis": "exact regular files excluding .git/__pycache__/*.pyc/SNAPSHOT_MANIFEST.sha256",
+  "product_parent_pass525_archive_sha256": "32efc7f7a503d9c7807970ffdf39733a6d4f8cfbe442a0df5a5a1e79fe552723",
+  "pass529_wip_parent_archive_sha256": "a2d195d3cdb92300a9463851dd4b373b76d78615e46b57825dd2f8641cbaf1d4",
+  "counts": {
+    "added": 25,
+    "modified": 37,
+    "deleted": 0
+  },
+  "added": [
+    {
+      "path": "EVIDENCE/PASS530_CA3_3/CANONICAL_PYTHON_VALIDATORS_PART1.log",
+      "sha256": "1dd60bf03710368aebb9e6d65c3b46258d523b6112fd704ccb8b19f2813ba6b6",
+      "bytes": 2807
+    },
+    {
+      "path": "EVIDENCE/PASS530_CA3_3/CANONICAL_STATIC_PREIDENTITY.log",
+      "sha256": "6e16b1c5e2391c0c1bde506c139e23d13fe02f572fabfc5bab64c08720f3aa61",
+      "bytes": 2164
+    },
+    {
+      "path": "EVIDENCE/PASS530_CA3_3/COMPAT_FOCUSED_RACE.log",
+      "sha256": "06192d7a7e420da6ee88181631f4260805aedea4d3455f850399da8e0d759f56",
+      "bytes": 1112
+    },
+    {
+      "path": "EVIDENCE/PASS530_CA3_3/COMPAT_FOCUSED_VET.log",
+      "sha256": "ff7dbe6bac9f0c16ead93a5e12cef9b3d20c4115759a0a162f54538abc61ba77",
+      "bytes": 68
+    },
+    {
+      "path": "EVIDENCE/PASS530_CA3_3/COMPAT_INTEGRATED_CHECK_PARTIAL_TIMEOUT.log",
+      "sha256": "c627d92073f717ab00a822203b2aa3613714a99e6446d42e4a60d8474303663a",
+      "bytes": 10850
+    },
+    {
+      "path": "EVIDENCE/PASS530_CA3_3/compat_regression_01_30.log",
+      "sha256": "a3ae53a0984f04ae5af3ba94c0f0d0ddb67819f924424bf30953f94f3b1fd4d3",
+      "bytes": 5691
+    },
+    {
+      "path": "EVIDENCE/PASS530_CA3_3/compat_regression_31_60.log",
+      "sha256": "1a9eeb8f4f5d177f590a732171e4c6e79502372a6a58407ae9821556a8046233",
+      "bytes": 5139
+    },
+    {
+      "path": "EVIDENCE/PASS530_CA3_3/compat_regression_61_91.log",
+      "sha256": "e2ddbf7b2024287f5c1ddceb203e04ab84986e309f84493e6118a039c8cb985a",
+      "bytes": 5359
+    },
+    {
+      "path": "docs/PASS530_CA3_3_EVIDENCE_CLASSIFICATION.json",
+      "sha256": "2b8ee745b82fcbf2569267dda55a22e494d19a82ada28f7159a6b1aaff65db90",
+      "bytes": 1647
+    },
+    {
+      "path": "docs/PASS530_CA3_3_IMPLEMENTATION_REPORT.md",
+      "sha256": "8c488a59367ad94ff2df6fad4a023337392391cc9c94c248bed9d2a7498a1939",
+      "bytes": 2650
+    },
+    {
+      "path": "docs/PASS530_CA3_3_INDEPENDENT_POSTIMPLEMENTATION_REALITY_CHECK.md",
+      "sha256": "3c09438391504fda553cdc9904eac075e24e75790fa2a15a47bf30917d2773ce",
+      "bytes": 5520
+    },
+    {
+      "path": "docs/PASS530_CA3_3_LOCAL_GATE_EVIDENCE.json",
+      "sha256": "a0c69c8126d4045edb408e5fa0515d7af868baf5b9d44401b700dfe5c467b776",
+      "bytes": 2389
+    },
+    {
+      "path": "docs/PASS530_CA3_AGGREGATE_WORK_PROMPT.txt",
+      "sha256": "e5bc8083452ae906b874699b54726febaec9220bfd0145dbf0e045816931cd7b",
+      "bytes": 17074
+    },
+    {
+      "path": "internal/adapters/postgres/contentstore/pet_progression.go",
+      "sha256": "8b72253ee7a369bd4ab7c25e4b6eae58fa40a409dcd63ad35b63799f8efc4c40",
+      "bytes": 6492
+    },
+    {
+      "path": "internal/application/characterpet/progression.go",
+      "sha256": "f4cde99bbdd8bc50a9baa10a7890a785635e5790912a7625b5fe2fa8b1deb277",
+      "bytes": 19127
+    },
+    {
+      "path": "internal/application/characterpet/progression_test.go",
+      "sha256": "7b6675424a9a21b0ad9d04776696111632b93475429582e354491165266bc0e1",
+      "bytes": 12230
+    },
+    {
+      "path": "internal/application/characterpet/progression_types.go",
+      "sha256": "ed5d413bdb39919e856ffc4eb666565f9eddeec51e66febfa155c3526f3d4f07",
+      "bytes": 2077
+    },
+    {
+      "path": "internal/application/characterpet/timed_receipt.go",
+      "sha256": "a88ae8bc387ccf48d0044b46bc3dd954f10d3cedd56d65ea3e5cfde10eed7a13",
+      "bytes": 925
+    },
+    {
+      "path": "internal/application/i5/pet_progression.go",
+      "sha256": "4e84c05c21b9e9503531e30565487a51e3a1923af3eae6391b13416ccbee5709",
+      "bytes": 4982
+    },
+    {
+      "path": "internal/application/i5/pet_progression_test.go",
+      "sha256": "a2ceac57c4f0073cb435cb9e02b031399dacfef0121e6fb8a781c2efea697521",
+      "bytes": 4269
+    },
+    {
+      "path": "internal/application/i5/scalar_projection.go",
+      "sha256": "16523cd4268a65d026b723f6abd8aebfbf8193703b9ecbf23a5abc12e90f5a08",
+      "bytes": 1893
+    },
+    {
+      "path": "internal/content/builtin/generated/pet_progression_catalog.json",
+      "sha256": "a8a00f76d0bc9d49ad48da84e54e660ab9457fe33fdcf0beb3bce7ef8155af28",
+      "bytes": 33003
+    },
+    {
+      "path": "migrations/00018_ca3_pet_progression.sql",
+      "sha256": "6b1815fae0ee54f92daa9cff90264a1930cb4c5481251e186a2bf9a21ead7829",
+      "bytes": 3288
+    },
+    {
+      "path": "tools/check_ca3_3_source_oracle.py",
+      "sha256": "33955207083bf80af736cf9cfa14b83e979b17f2f3374dbea8b2ef00ad354baa",
+      "bytes": 6694
+    },
+    {
+      "path": "tools/validate_ca3_3.py",
+      "sha256": "29ac96134ef24bedc6807df271174447eacc792cfe5772ad780aa4c4a5c3b379",
+      "bytes": 5997
+    }
+  ],
+  "modified": [
+    {
+      "path": "BUILD_INFO.json",
+      "parent_sha256": "d2ac561c86248d4aec720d5244a9a57f3985b1bc0d90ed8411ee4b33be855293",
+      "candidate_sha256": "48ed1400760886242690d6e5370607d71bd5bd92311cad8a06f04aeca93275d1",
+      "candidate_bytes": 6991
+    },
+    {
+      "path": "README.md",
+      "parent_sha256": "dca659d13bfc55a4d26a9e330a42960c776ba66c7e7d430230d3f9dca71a1bcc",
+      "candidate_sha256": "5d1f77ca54f65ba9f570b4239f983fbf0c29f61daab05088a2fc881a07ce7828",
+      "candidate_bytes": 2051
+    },
+    {
+      "path": "SBOM.spdx.json",
+      "parent_sha256": "db23fc960c949a40f603810f822e9d894619a0855d8e2fb1adc5711ad15abc64",
+      "candidate_sha256": "494ff5c194e108e8f875a04030830861e68ce3d9c9c495185202a4c348f18543",
+      "candidate_bytes": 11644
+    },
+    {
+      "path": "SNAPSHOT_INFO.json",
+      "parent_sha256": "66552f6fb7f78dbf4e0f7f921c1bd49dda27761b25e0f233be5c40410fe2014b",
+      "candidate_sha256": "ce66f26277113f31ba7923cc7d71aeae29d6a474dfa3c5ae62d169908a9d6a94",
+      "candidate_bytes": 4832
+    },
+    {
+      "path": "cmd/gxb-api/main_postgres.go",
+      "parent_sha256": "83c20c66127a11bc088d4e231b7e779510febc0749648eba42bb43f4e70a2253",
+      "candidate_sha256": "b0b398c4bc79d9fbfc0cd6f1b6ae5e7f59b4bd90b66b9459efab1a2ef1de813a",
+      "candidate_bytes": 13164
+    },
+    {
+      "path": "docs/architecture/CANONICAL_TABLE_OWNERSHIP.json",
+      "parent_sha256": "49d076b3eed7f1e87a07359c6db74ce27bf9c0dbb5475b623b0bc6d46af1af19",
+      "candidate_sha256": "aa201c0fdcb1e367a7fe339adcf57bf1c3b9de6fadeca2a3b5ae6c1c46691538",
+      "candidate_bytes": 36539
+    },
+    {
+      "path": "docs/architecture/CUMULATIVE_MIGRATION_LOCK.json",
+      "parent_sha256": "de5f9e5b7cb7e9def16be355a34578a582e51a1a656f4b6a8de06f6627b9942d",
+      "candidate_sha256": "7dc0212b0a5dda698d1ed77fb367dc06362ea7d4117fa2428a7da214582dcd7d",
+      "candidate_bytes": 2363
+    },
+    {
+      "path": "internal/adapters/postgres/characterqueries/querytext_gen.go",
+      "parent_sha256": "ce412217ac87e245d27df76bc2ef5e14289d14529eef170dfd223df415879b27",
+      "candidate_sha256": "f584c256a6f2f09085e3d16b71c00ff3e376053d311b2035061c211905a5a625",
+      "candidate_bytes": 5357
+    },
+    {
+      "path": "internal/adapters/postgres/characterstore/pet.go",
+      "parent_sha256": "f8c09601444249ccdef749f512129c756bd1bcf4cd54a4c7ba3b827bfcfbc73d",
+      "candidate_sha256": "3c549087b532fe6c9eee9d689665fee8ddc6a96759c7c70351922c8a127a6973",
+      "candidate_bytes": 9815
+    },
+    {
+      "path": "internal/adapters/postgres/contentqueries/querytext_gen.go",
+      "parent_sha256": "395cb28d25f3dc8afd3e460088ed9949a24dfe181ff456cd24fd15d397fe4292",
+      "candidate_sha256": "cb0be5a4a4a447810773a7fed5ec9903872d10de0d4fd690e20fbe42aec8eb4a",
+      "candidate_bytes": 37114
+    },
+    {
+      "path": "internal/adapters/postgres/contentstore/hero_progression.go",
+      "parent_sha256": "0ddb9f834d79d568893fc01a80c8279f23e4f374234e2b27b91d87ac876daf51",
+      "candidate_sha256": "c3104c5fd6aa2be99895179c0d082b2dde53ab05d12cc48093c9c7b43e857d3c",
+      "candidate_bytes": 10710
+    },
+    {
+      "path": "internal/adapters/postgres/contentstore/pet_acquisition.go",
+      "parent_sha256": "63da4b9e58a5d65c392bdf6ba9c9ce8d8fd682f44836b887c866d45c86ee82f8",
+      "candidate_sha256": "62f58efbfb8a83d3f51a2c02debf46d453cb5f8fd56d50327e462651dc600bc3",
+      "candidate_bytes": 3316
+    },
+    {
+      "path": "internal/adapters/postgres/contentstore/store.go",
+      "parent_sha256": "176d6df6dfc3d02840f4ca40af0ff6df13bc52d9e57f33a9e93708998f0d1e1b",
+      "candidate_sha256": "865caad01eaee0acc9a81f62278ad198f110e8fba64750f5582d7929636a5319",
+      "candidate_bytes": 17802
+    },
+    {
+      "path": "internal/adapters/postgres/contentstore/store_test.go",
+      "parent_sha256": "e15de19179d3ea6c97737ce37654e47c06ea13f858d6409e88478de53956e05a",
+      "candidate_sha256": "fd9e8814f806f46401406ecf33904f979c6fa898d1f9b8144c4f951ad99d7f27",
+      "candidate_bytes": 11405
+    },
+    {
+      "path": "internal/adapters/stockruntime/pet_dispatcher.go",
+      "parent_sha256": "74d31ca14b160354a19bf0ea9aa7ab20b79e07c77146e1bb775511028e8dffd6",
+      "candidate_sha256": "d40cd374762c1d8147b9f83970457eddb38cc697f6ea1ef3101ca76e68ed20cb",
+      "candidate_bytes": 12251
+    },
+    {
+      "path": "internal/adapters/stockruntime/pet_dispatcher_test.go",
+      "parent_sha256": "b04b6f71c112055afe513673dd6be848c445b5e16a0bd8a3967e76724a23fdc7",
+      "candidate_sha256": "5608ea945217ad2c6340155a9365bd42ef5f112317c82d2ce459fa2cea1e4b5e",
+      "candidate_bytes": 8042
+    },
+    {
+      "path": "internal/application/characterpet/acquisition.go",
+      "parent_sha256": "52a942331a3587ea25cf31ae92ec7fb85164d10fa6ed7c1bb9c4669ca07e6383",
+      "candidate_sha256": "18cf0a16af11d02f67a2e9cdaac5c0be761aecefb608aa3387f60041503d2bd1",
+      "candidate_bytes": 8760
+    },
+    {
+      "path": "internal/application/characterpet/ca3_2_test.go",
+      "parent_sha256": "35520761195201f3b5952c6383af55321cc6085fac76901449fd2b4e499efdbe",
+      "candidate_sha256": "f7c1b42b2b4fa08bbc6d453aa1b4a2b5f390d4a5e64f98cce0598b019ea23307",
+      "candidate_bytes": 10961
+    },
+    {
+      "path": "internal/application/characterpet/hatch.go",
+      "parent_sha256": "9475ca3974a064d5d8179f7f8ab2460b7b8bd3494bd688af30a303b3a49c02f0",
+      "candidate_sha256": "0898a6b548c88becbe8fc8b33072ff682ff0a8b6d94699916aa3094f7842fc0a",
+      "candidate_bytes": 7940
+    },
+    {
+      "path": "internal/application/characterpet/service.go",
+      "parent_sha256": "6c854d05dca026d433b6b5a6816f547351091be4583f381bc03cc9a15efbfe38",
+      "candidate_sha256": "107acc08b617eb3608fdc26559c2049a3329a62890278cd83441f86a5d3ba50d",
+      "candidate_bytes": 4926
+    },
+    {
+      "path": "internal/application/characterpet/service_test.go",
+      "parent_sha256": "1897a96011f808f3f0eb8fca72099a48a60b086b695c7801d0c99979cbd46d97",
+      "candidate_sha256": "2c1289c525de1e79df5bcd9c041c9e97f9bb21a8df328e64d750eb2be78bf9e3",
+      "candidate_bytes": 2305
+    },
+    {
+      "path": "internal/application/i5/pet_acquisition.go",
+      "parent_sha256": "4fd3b81bd7197f4dc23281be5e5892033ee9e4cb6902718550f5f87839a5e772",
+      "candidate_sha256": "406efa6a93494a9445adb8e4bbb2f0cc078be11137131a4009ce21f517048acb",
+      "candidate_bytes": 4074
+    },
+    {
+      "path": "internal/content/builtin/catalog.go",
+      "parent_sha256": "e72a820e39b26951cae6670d3abb55270c582668729ce8611d6c3119398c4906",
+      "candidate_sha256": "0c8127ce0b5c4ca0d59051cea7107cd2d2e99147a10d0357a0c41f067d6f2a7e",
+      "candidate_bytes": 28151
+    },
+    {
+      "path": "internal/content/builtin/catalog_test.go",
+      "parent_sha256": "c4ef0788d0dc8a9f9caa46302c9cb5d53991c8d0a65c17441c75b9dbd4b3ee26",
+      "candidate_sha256": "f62508d23dbec9db64cbd4c9c69c3d41a12721fb2a7d5e9f2d5aa95b961883b4",
+      "candidate_bytes": 3905
+    },
+    {
+      "path": "internal/content/builtin/generated/manifest.json",
+      "parent_sha256": "1132dac2b924c250a3fe8c0df37f5e61e414c79b0444e8cd7c7b03593b80ebe7",
+      "candidate_sha256": "cc5f9dd710c7c56c0bf884352e03e0b797599fd32b5aff16019d6080a7dfecbf",
+      "candidate_bytes": 7733
+    },
+    {
+      "path": "internal/content/registry/service.go",
+      "parent_sha256": "45f3621cc2f1dbe2eacfbe99706304233ae068d1b5e580988d77d899c156e2fb",
+      "candidate_sha256": "87238c08a486e139b3f14ed851ee32f79e33e489a3d178f5452cee4753572c06",
+      "candidate_bytes": 10888
+    },
+    {
+      "path": "internal/content/registry/service_test.go",
+      "parent_sha256": "fd5d5e5cb97d18341eace4ecec0a78d765675cbec3d3d89e2177e6b60a9bd93e",
+      "candidate_sha256": "45282fd2c05c0cca15ad2d043ba6367088dce38482ee7df89353bcbfed877526",
+      "candidate_bytes": 14758
+    },
+    {
+      "path": "internal/content/registry/types.go",
+      "parent_sha256": "018ded9a81324803653cd162ae7d3818527d3dbafcb34c297caef1aad0b97886",
+      "candidate_sha256": "fa1b7a1ff1230f3b19a0313c8732f21eefa35ac6bb12215b147ca0b71114c8a1",
+      "candidate_bytes": 10927
+    },
+    {
+      "path": "internal/domain/character/pet.go",
+      "parent_sha256": "b6c03910e23f0dc66ebc2cbba5c8a15378e033c6189fcc39d837434474d90231",
+      "candidate_sha256": "57d1237de1807cfd381865506c17838a4f12de27792295f679b37d90e67a697b",
+      "candidate_bytes": 2987
+    },
+    {
+      "path": "internal/domain/character/pet_test.go",
+      "parent_sha256": "062e9e5fc58b9a464234bcc5d465558ab99788ef4d417478019ccdeee1aae02e",
+      "candidate_sha256": "82e7777cdfd6dd30c4534bab387978eada4bacc23c704b8acddff41107c53037",
+      "candidate_bytes": 1398
+    },
+    {
+      "path": "internal/projection/pet/stock.go",
+      "parent_sha256": "da4aa5fb707fbc8347893cb5b007c5a91ec29acbb49dba06df81fbb5b556346c",
+      "candidate_sha256": "c319f7cddf7f8dc450c7c7543893e45024cabfaaa7eebb5431a694e502777a93",
+      "candidate_bytes": 1436
+    },
+    {
+      "path": "internal/projection/pet/stock_test.go",
+      "parent_sha256": "fa095fa2bf47c2cc2eaefc44df69a0454e55c1b8f3b6fcea333bc210bb9f508b",
+      "candidate_sha256": "dc8b366b27e0b733f445532f76e55a7a6d673957105753b9e59d8bca679505f1",
+      "candidate_bytes": 1851
+    },
+    {
+      "path": "sql/character/pet.sql",
+      "parent_sha256": "03ecef32de0cf6f89dd0e2183bc11102b88e36bd9f2c51d7ee54cc6150f25139",
+      "candidate_sha256": "5477eed6bdd96afe2c0d3c46681b6fc0aeb83260f011cb95785a72e9d03c10ee",
+      "candidate_bytes": 3042
+    },
+    {
+      "path": "sql/content/content.sql",
+      "parent_sha256": "35971782d697c984492598e6d56eb499a06a09cacc84ca43e160b80cd153467b",
+      "candidate_sha256": "5c2e28d1c4e8a6e552be9d4996ed7d29718c3a5f2b996219d7883d6ceac871e5",
+      "candidate_bytes": 37308
+    },
+    {
+      "path": "tools/check.sh",
+      "parent_sha256": "90d82250f38f826b850bd230813236c5093cd383c6bd4fffd5379131d03c467e",
+      "candidate_sha256": "acbdaf123b00795128065b3383c558c9d84d150e124dc320ab2392dc70b2046e",
+      "candidate_bytes": 3425
+    },
+    {
+      "path": "tools/generate_builtin_content.py",
+      "parent_sha256": "8a49ffeeab0fa546e58e32abb7cc24b3c16262a506b4342e8cacdc005c4aab5d",
+      "candidate_sha256": "31c24340de2a062ef0d94a5df27f44d1b03ce23090b55cc5e7e5cedc76abfbfe",
+      "candidate_bytes": 61766
+    },
+    {
+      "path": "tools/validate_r5.py",
+      "parent_sha256": "cb5ed29a775f0bd6cd3ee4df5e361443ecd8ed993867a7cb3c3ecdb414637aa1",
+      "candidate_sha256": "85585a539c1a9a634fe04424727f6bf13458dd5f0bdaa06c5ac7d488c9de7b1b",
+      "candidate_bytes": 6233
+    }
+  ],
+  "deleted": []
+}

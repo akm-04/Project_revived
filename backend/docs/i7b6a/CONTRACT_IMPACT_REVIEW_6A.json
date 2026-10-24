@@ -1,0 +1,848 @@
+{
+  "schema_version": 1,
+  "node": "I7B-6A",
+  "full_node_path": "ROOT/I7/I7B/I7B-6/I7B-6A",
+  "status": "RECONCILED679_RESEARCH_DESIGN_NOT_PRODUCT",
+  "classification": "SOURCE_FACT + IMPLEMENTATION_DECISION + UNKNOWN",
+  "product_implementation_authorized": false,
+  "product_implementation_started": false,
+  "product_accepted": false,
+  "rows": [
+    {
+      "id": "I7B1_ARCHITECTURE_PROVIDER",
+      "disposition": "PRESERVED",
+      "application": "Playercanonicaldisplay/entitlementseparatefromPublicProfile/media/Character; valueoriginsnottransferred"
+    },
+    {
+      "id": "I7B1_WIRE_PRIVACY_POLICY",
+      "disposition": "PRESERVED",
+      "application": "BasiccanonicalExp shape resolved explicit, protectedfieldsstilldenied; source98tuple/titlepayloadstrings retained; full11exitunchanged"
+    },
+    {
+      "id": "I7B1_TRANSACTION_REFERENCE_REPLAY",
+      "disposition": "PRESERVED",
+      "application": "315thenCharacter/I5knownranks preplanned; noclockrebind/noIOundergameplaylocks/unknownnotabort"
+    },
+    {
+      "id": "I7B1_MEDIA_FRESHNESS",
+      "disposition": "PRESERVED",
+      "application": "Newqualifiedobservations/sourceversions/time; directoryfeedtyped; historicalDM untouched"
+    },
+    {
+      "id": "I7B1_ACCEPTANCE_EXIT",
+      "disposition": "PRESERVED",
+      "application": "6Aownerqualificationnotall6activation; earlyrealPGnewfoundation andparent/E gates retained"
+    },
+    {
+      "id": "CA-IDENTITY/OWNED/APPEARANCE/COHERENT-SCOPE/AVAILABILITY/SUPERSESSION",
+      "disposition": "PRESERVED",
+      "application": "QualifiedsameTxOWNEDfacts; noOriginTableIDguessedbeforeAwaken/foreignsourcegrants/finalstatseffects"
+    },
+    {
+      "id": "CA-PRACTICE/BOOKMARK/PARENT-EXIT",
+      "disposition": "PRESERVED",
+      "application": "NoPractice/bookmarkwrites; references/destructiveguardandseparateparentsunchanged"
+    },
+    {
+      "id": "D03/D04/D10/D11/D14 +I7A1/I7A4",
+      "disposition": "PRESERVED",
+      "application": "Entitlement/selection/effectiveprojectionseparate; nameofactorcanonical/deriveddirectory; familyexpiry/nonce-lessvalueambiguityexplicit"
+    },
+    {
+      "id": "WORKPLACE_528_540",
+      "disposition": "PRESERVED",
+      "application": "Read465timecontract; stablerequestinstant/stalehandlingapplied, noWorkPlacedaily/reset rules imported"
+    }
+  ],
+  "new_durable_contracts": [],
+  "D14": "D14_EXTENSION_PLAN.json proposednarrowPlayerownedtable/ports/compilerforwardcapability changes, notimplemented/frozenparentwaiver",
+  "requalification_invalidations": [],
+  "i7a4_obligations": [
+    {
+      "id": "I7A4-OWNERS_TX_LOCK",
+      "disposition": "PRESERVED",
+      "rationale": "Player/Economy/Character/directory typedcallerTx complete315->Character->700..740lockplan; noforeignSQL",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS639_I7A4_SUCCESSOR_CONTRACT.json",
+          "sha256": "b620690bcc59cec62141a8e79af466edbbc023ab6b91c8f2aa7447ace395b05e"
+        },
+        {
+          "path": "00_PASSMAP/PASS662_I7B1_ARCHITECTURE_PROVIDER_CONTRACT.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS662_I7B1_TRANSACTION_REFERENCE_REPLAY_CONTRACT.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS679_I7B6A_RESEARCH/IMPLEMENTATION_PLAN.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS679_I7B6A_RESEARCH/PORT_CONTRACT.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS679_I7B6A_RESEARCH/D14_EXTENSION_PLAN.json"
+        }
+      ]
+    },
+    {
+      "id": "I7A4-GENERATION_D11",
+      "disposition": "PRESERVED",
+      "rationale": "Canonicalactor admission + receipt replay preserved; consumptive unresolvedlane identityisnotpayloadfingerprint;desiredcommandsnoqueue",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS639_I7A4_SUCCESSOR_CONTRACT.json",
+          "sha256": "b620690bcc59cec62141a8e79af466edbbc023ab6b91c8f2aa7447ace395b05e"
+        },
+        {
+          "path": "00_PASSMAP/PASS662_I7B1_ARCHITECTURE_PROVIDER_CONTRACT.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS662_I7B1_TRANSACTION_REFERENCE_REPLAY_CONTRACT.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS679_I7B6A_RESEARCH/IMPLEMENTATION_PLAN.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS679_I7B6A_RESEARCH/PORT_CONTRACT.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS679_I7B6A_RESEARCH/D14_EXTENSION_PLAN.json"
+        }
+      ]
+    },
+    {
+      "id": "I7A4-TIME_QUOTA",
+      "disposition": "PRESERVED",
+      "rationale": "stableDecisionAt/pinnedcontent; qualifiedfamilyexpiry; noWorkPlacedaily/resetrule ornewSocialquota",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS639_I7A4_SUCCESSOR_CONTRACT.json",
+          "sha256": "b620690bcc59cec62141a8e79af466edbbc023ab6b91c8f2aa7447ace395b05e"
+        },
+        {
+          "path": "00_PASSMAP/PASS662_I7B1_ARCHITECTURE_PROVIDER_CONTRACT.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS662_I7B1_TRANSACTION_REFERENCE_REPLAY_CONTRACT.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS679_I7B6A_RESEARCH/IMPLEMENTATION_PLAN.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS679_I7B6A_RESEARCH/PORT_CONTRACT.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS679_I7B6A_RESEARCH/D14_EXTENSION_PLAN.json"
+        }
+      ]
+    },
+    {
+      "id": "I7A4-NOTICE_ID_SOURCE",
+      "disposition": "PRESERVED",
+      "rationale": "No noticeIDs/source migration, canonicaldisplaychangesonlyexistingtypedfeed",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS639_I7A4_SUCCESSOR_CONTRACT.json",
+          "sha256": "b620690bcc59cec62141a8e79af466edbbc023ab6b91c8f2aa7447ace395b05e"
+        },
+        {
+          "path": "00_PASSMAP/PASS662_I7B1_ARCHITECTURE_PROVIDER_CONTRACT.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS662_I7B1_TRANSACTION_REFERENCE_REPLAY_CONTRACT.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS679_I7B6A_RESEARCH/IMPLEMENTATION_PLAN.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS679_I7B6A_RESEARCH/PORT_CONTRACT.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS679_I7B6A_RESEARCH/D14_EXTENSION_PLAN.json"
+        }
+      ]
+    },
+    {
+      "id": "I7A4-NULL_AND_WINDOW",
+      "disposition": "PRESERVED",
+      "rationale": "Requiredorigin unavailablefailsaffectedactivation; nofakezero/empty list; privacyblockedbasicidentitynotprotectedcontent",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS639_I7A4_SUCCESSOR_CONTRACT.json",
+          "sha256": "b620690bcc59cec62141a8e79af466edbbc023ab6b91c8f2aa7447ace395b05e"
+        },
+        {
+          "path": "00_PASSMAP/PASS662_I7B1_ARCHITECTURE_PROVIDER_CONTRACT.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS662_I7B1_TRANSACTION_REFERENCE_REPLAY_CONTRACT.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS679_I7B6A_RESEARCH/IMPLEMENTATION_PLAN.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS679_I7B6A_RESEARCH/PORT_CONTRACT.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS679_I7B6A_RESEARCH/D14_EXTENSION_PLAN.json"
+        }
+      ]
+    },
+    {
+      "id": "I7A4-READ_SNAPSHOT",
+      "disposition": "PRESERVED",
+      "rationale": "Callertransactioncoherent owner observations/version/revision/time; noforeignrawSQL",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS639_I7A4_SUCCESSOR_CONTRACT.json",
+          "sha256": "b620690bcc59cec62141a8e79af466edbbc023ab6b91c8f2aa7447ace395b05e"
+        },
+        {
+          "path": "00_PASSMAP/PASS662_I7B1_ARCHITECTURE_PROVIDER_CONTRACT.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS662_I7B1_TRANSACTION_REFERENCE_REPLAY_CONTRACT.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS679_I7B6A_RESEARCH/IMPLEMENTATION_PLAN.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS679_I7B6A_RESEARCH/PORT_CONTRACT.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS679_I7B6A_RESEARCH/D14_EXTENSION_PLAN.json"
+        }
+      ]
+    },
+    {
+      "id": "I7A4-DISCOVERY_ANCHOR",
+      "disposition": "PRESERVED",
+      "rationale": "ExistingcanonicalI4directorysink consumesPlayerupdates; acceptednonuniquenamesearchpreserved;freshness6C",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS639_I7A4_SUCCESSOR_CONTRACT.json",
+          "sha256": "b620690bcc59cec62141a8e79af466edbbc023ab6b91c8f2aa7447ace395b05e"
+        },
+        {
+          "path": "00_PASSMAP/PASS662_I7B1_ARCHITECTURE_PROVIDER_CONTRACT.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS662_I7B1_TRANSACTION_REFERENCE_REPLAY_CONTRACT.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS679_I7B6A_RESEARCH/IMPLEMENTATION_PLAN.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS679_I7B6A_RESEARCH/PORT_CONTRACT.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS679_I7B6A_RESEARCH/D14_EXTENSION_PLAN.json"
+        }
+      ]
+    },
+    {
+      "id": "I7A4-AUTH_BOOT_ACTIVATION",
+      "disposition": "PRESERVED",
+      "rationale": "Existingauthenticatedactor/bootstrapacceptedbaseline; noall-cataloggrant/inferredretroactiveentitlement;selectedoriginactivationmustqualify",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS639_I7A4_SUCCESSOR_CONTRACT.json",
+          "sha256": "b620690bcc59cec62141a8e79af466edbbc023ab6b91c8f2aa7447ace395b05e"
+        },
+        {
+          "path": "00_PASSMAP/PASS662_I7B1_ARCHITECTURE_PROVIDER_CONTRACT.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS662_I7B1_TRANSACTION_REFERENCE_REPLAY_CONTRACT.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS679_I7B6A_RESEARCH/IMPLEMENTATION_PLAN.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS679_I7B6A_RESEARCH/PORT_CONTRACT.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS679_I7B6A_RESEARCH/D14_EXTENSION_PLAN.json"
+        }
+      ]
+    },
+    {
+      "id": "I7A4-WIRE_GUARDS",
+      "disposition": "PRESERVED",
+      "rationale": "MID98tableID/iconID/type andtitlepayloadseparated; currentcatalogwirechecks; no newmessageprotocol",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS639_I7A4_SUCCESSOR_CONTRACT.json",
+          "sha256": "b620690bcc59cec62141a8e79af466edbbc023ab6b91c8f2aa7447ace395b05e"
+        },
+        {
+          "path": "00_PASSMAP/PASS662_I7B1_ARCHITECTURE_PROVIDER_CONTRACT.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS662_I7B1_TRANSACTION_REFERENCE_REPLAY_CONTRACT.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS679_I7B6A_RESEARCH/IMPLEMENTATION_PLAN.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS679_I7B6A_RESEARCH/PORT_CONTRACT.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS679_I7B6A_RESEARCH/D14_EXTENSION_PLAN.json"
+        }
+      ]
+    },
+    {
+      "id": "I7A4-CANONICAL_HINT_WORLD",
+      "disposition": "PRESERVED",
+      "rationale": "Projectionderivedfromcanonicalqualifiedownerfacts; timedexpirydependsdecisiontimeevenunchangedversion",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS639_I7A4_SUCCESSOR_CONTRACT.json",
+          "sha256": "b620690bcc59cec62141a8e79af466edbbc023ab6b91c8f2aa7447ace395b05e"
+        },
+        {
+          "path": "00_PASSMAP/PASS662_I7B1_ARCHITECTURE_PROVIDER_CONTRACT.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS662_I7B1_TRANSACTION_REFERENCE_REPLAY_CONTRACT.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS679_I7B6A_RESEARCH/IMPLEMENTATION_PLAN.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS679_I7B6A_RESEARCH/PORT_CONTRACT.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS679_I7B6A_RESEARCH/D14_EXTENSION_PLAN.json"
+        }
+      ]
+    },
+    {
+      "id": "I7A4-POSTCOMMIT_RECOVERY",
+      "disposition": "PRESERVED",
+      "rationale": "Knownreceiptoriginalresult; unknowncommitnotabort; durableadmissiononlyconsumptive; noI/Oundergameplaylocks",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS639_I7A4_SUCCESSOR_CONTRACT.json",
+          "sha256": "b620690bcc59cec62141a8e79af466edbbc023ab6b91c8f2aa7447ace395b05e"
+        },
+        {
+          "path": "00_PASSMAP/PASS662_I7B1_ARCHITECTURE_PROVIDER_CONTRACT.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS662_I7B1_TRANSACTION_REFERENCE_REPLAY_CONTRACT.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS679_I7B6A_RESEARCH/IMPLEMENTATION_PLAN.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS679_I7B6A_RESEARCH/PORT_CONTRACT.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS679_I7B6A_RESEARCH/D14_EXTENSION_PLAN.json"
+        }
+      ]
+    },
+    {
+      "id": "I7A4-FUTURE_PROVIDER_EXTENSION",
+      "disposition": "PRESERVED",
+      "rationale": "6Atypeddisplay/familyobservations consumed6B/C; missingrequiredoriginremainsactivationandexitgate",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS639_I7A4_SUCCESSOR_CONTRACT.json",
+          "sha256": "b620690bcc59cec62141a8e79af466edbbc023ab6b91c8f2aa7447ace395b05e"
+        },
+        {
+          "path": "00_PASSMAP/PASS662_I7B1_ARCHITECTURE_PROVIDER_CONTRACT.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS662_I7B1_TRANSACTION_REFERENCE_REPLAY_CONTRACT.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS679_I7B6A_RESEARCH/IMPLEMENTATION_PLAN.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS679_I7B6A_RESEARCH/PORT_CONTRACT.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS679_I7B6A_RESEARCH/D14_EXTENSION_PLAN.json"
+        }
+      ]
+    }
+  ],
+  "i7a5a_obligations": [
+    {
+      "id": "I7A5A-EXACT_HANDLE_ROLE",
+      "disposition": "PRESERVED",
+      "rationale": "InheritedSocial/InboxowninglawunchangedbyPlayerdisplaydesign; newconsumerintegration6Ccannotrewritecommittedintents oractivationgates",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS641_I7A5A_SUCCESSOR_CONTRACT.json",
+          "sha256": "b13e4d208b9ca78b1a694382b7e7c11d84cad345a3f5d25174ead22ead8b82db"
+        },
+        {
+          "path": "00_PASSMAP/PASS662_I7B1_ARCHITECTURE_PROVIDER_CONTRACT.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS662_I7B1_TRANSACTION_REFERENCE_REPLAY_CONTRACT.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS679_I7B6A_RESEARCH/IMPLEMENTATION_PLAN.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS679_I7B6A_RESEARCH/PORT_CONTRACT.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS679_I7B6A_RESEARCH/D14_EXTENSION_PLAN.json"
+        }
+      ]
+    },
+    {
+      "id": "I7A5A-GUILD_JOIN_INCARNATION",
+      "disposition": "PRESERVED",
+      "rationale": "InheritedSocial/InboxowninglawunchangedbyPlayerdisplaydesign; newconsumerintegration6Ccannotrewritecommittedintents oractivationgates",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS641_I7A5A_SUCCESSOR_CONTRACT.json",
+          "sha256": "b13e4d208b9ca78b1a694382b7e7c11d84cad345a3f5d25174ead22ead8b82db"
+        },
+        {
+          "path": "00_PASSMAP/PASS662_I7B1_ARCHITECTURE_PROVIDER_CONTRACT.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS662_I7B1_TRANSACTION_REFERENCE_REPLAY_CONTRACT.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS679_I7B6A_RESEARCH/IMPLEMENTATION_PLAN.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS679_I7B6A_RESEARCH/PORT_CONTRACT.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS679_I7B6A_RESEARCH/D14_EXTENSION_PLAN.json"
+        }
+      ]
+    },
+    {
+      "id": "I7A5A-CANONICAL_SENDER_WIRE",
+      "disposition": "PRESERVED",
+      "rationale": "InheritedSocial/InboxowninglawunchangedbyPlayerdisplaydesign; newconsumerintegration6Ccannotrewritecommittedintents oractivationgates",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS641_I7A5A_SUCCESSOR_CONTRACT.json",
+          "sha256": "b13e4d208b9ca78b1a694382b7e7c11d84cad345a3f5d25174ead22ead8b82db"
+        },
+        {
+          "path": "00_PASSMAP/PASS662_I7B1_ARCHITECTURE_PROVIDER_CONTRACT.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS662_I7B1_TRANSACTION_REFERENCE_REPLAY_CONTRACT.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS679_I7B6A_RESEARCH/IMPLEMENTATION_PLAN.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS679_I7B6A_RESEARCH/PORT_CONTRACT.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS679_I7B6A_RESEARCH/D14_EXTENSION_PLAN.json"
+        }
+      ]
+    },
+    {
+      "id": "I7A5A-CALLER_TX_OBSERVATION",
+      "disposition": "PRESERVED",
+      "rationale": "InheritedSocial/InboxowninglawunchangedbyPlayerdisplaydesign; newconsumerintegration6Ccannotrewritecommittedintents oractivationgates",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS641_I7A5A_SUCCESSOR_CONTRACT.json",
+          "sha256": "b13e4d208b9ca78b1a694382b7e7c11d84cad345a3f5d25174ead22ead8b82db"
+        },
+        {
+          "path": "00_PASSMAP/PASS662_I7B1_ARCHITECTURE_PROVIDER_CONTRACT.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS662_I7B1_TRANSACTION_REFERENCE_REPLAY_CONTRACT.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS679_I7B6A_RESEARCH/IMPLEMENTATION_PLAN.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS679_I7B6A_RESEARCH/PORT_CONTRACT.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS679_I7B6A_RESEARCH/D14_EXTENSION_PLAN.json"
+        }
+      ]
+    },
+    {
+      "id": "I7A5A-BOUNDED_FANOUT_OUTCOME",
+      "disposition": "PRESERVED",
+      "rationale": "InheritedSocial/InboxowninglawunchangedbyPlayerdisplaydesign; newconsumerintegration6Ccannotrewritecommittedintents oractivationgates",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS641_I7A5A_SUCCESSOR_CONTRACT.json",
+          "sha256": "b13e4d208b9ca78b1a694382b7e7c11d84cad345a3f5d25174ead22ead8b82db"
+        },
+        {
+          "path": "00_PASSMAP/PASS662_I7B1_ARCHITECTURE_PROVIDER_CONTRACT.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS662_I7B1_TRANSACTION_REFERENCE_REPLAY_CONTRACT.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS679_I7B6A_RESEARCH/IMPLEMENTATION_PLAN.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS679_I7B6A_RESEARCH/PORT_CONTRACT.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS679_I7B6A_RESEARCH/D14_EXTENSION_PLAN.json"
+        }
+      ]
+    },
+    {
+      "id": "I7A5A-EPHEMERAL_NO_REPLAY",
+      "disposition": "PRESERVED",
+      "rationale": "InheritedSocial/InboxowninglawunchangedbyPlayerdisplaydesign; newconsumerintegration6Ccannotrewritecommittedintents oractivationgates",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS641_I7A5A_SUCCESSOR_CONTRACT.json",
+          "sha256": "b13e4d208b9ca78b1a694382b7e7c11d84cad345a3f5d25174ead22ead8b82db"
+        },
+        {
+          "path": "00_PASSMAP/PASS662_I7B1_ARCHITECTURE_PROVIDER_CONTRACT.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS662_I7B1_TRANSACTION_REFERENCE_REPLAY_CONTRACT.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS679_I7B6A_RESEARCH/IMPLEMENTATION_PLAN.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS679_I7B6A_RESEARCH/PORT_CONTRACT.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS679_I7B6A_RESEARCH/D14_EXTENSION_PLAN.json"
+        }
+      ]
+    },
+    {
+      "id": "I7A5A-FUTURE_PRODUCER_GATE",
+      "disposition": "PRESERVED",
+      "rationale": "InheritedSocial/InboxowninglawunchangedbyPlayerdisplaydesign; newconsumerintegration6Ccannotrewritecommittedintents oractivationgates",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS641_I7A5A_SUCCESSOR_CONTRACT.json",
+          "sha256": "b13e4d208b9ca78b1a694382b7e7c11d84cad345a3f5d25174ead22ead8b82db"
+        },
+        {
+          "path": "00_PASSMAP/PASS662_I7B1_ARCHITECTURE_PROVIDER_CONTRACT.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS662_I7B1_TRANSACTION_REFERENCE_REPLAY_CONTRACT.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS679_I7B6A_RESEARCH/IMPLEMENTATION_PLAN.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS679_I7B6A_RESEARCH/PORT_CONTRACT.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS679_I7B6A_RESEARCH/D14_EXTENSION_PLAN.json"
+        }
+      ]
+    }
+  ],
+  "i7a5b_obligations": [
+    {
+      "id": "I7A5B-FINITE_VARIANTS",
+      "disposition": "PRESERVED",
+      "rationale": "InheritedSocial/InboxowninglawunchangedbyPlayerdisplaydesign; newconsumerintegration6Ccannotrewritecommittedintents oractivationgates",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS643_I7A5B_SUCCESSOR_CONTRACT.json",
+          "sha256": "5094210edcbd54dddb2ea9a26695856703f228120291d0bfb9fd1fd23960ff81"
+        },
+        {
+          "path": "00_PASSMAP/PASS662_I7B1_ARCHITECTURE_PROVIDER_CONTRACT.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS662_I7B1_TRANSACTION_REFERENCE_REPLAY_CONTRACT.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS679_I7B6A_RESEARCH/IMPLEMENTATION_PLAN.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS679_I7B6A_RESEARCH/PORT_CONTRACT.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS679_I7B6A_RESEARCH/D14_EXTENSION_PLAN.json"
+        }
+      ]
+    },
+    {
+      "id": "I7A5B-ORDINARY140_STRUCTURED_QUALIFIER",
+      "disposition": "PRESERVED",
+      "rationale": "InheritedSocial/InboxowninglawunchangedbyPlayerdisplaydesign; newconsumerintegration6Ccannotrewritecommittedintents oractivationgates",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS643_I7A5B_SUCCESSOR_CONTRACT.json",
+          "sha256": "5094210edcbd54dddb2ea9a26695856703f228120291d0bfb9fd1fd23960ff81"
+        },
+        {
+          "path": "00_PASSMAP/PASS662_I7B1_ARCHITECTURE_PROVIDER_CONTRACT.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS662_I7B1_TRANSACTION_REFERENCE_REPLAY_CONTRACT.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS679_I7B6A_RESEARCH/IMPLEMENTATION_PLAN.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS679_I7B6A_RESEARCH/PORT_CONTRACT.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS679_I7B6A_RESEARCH/D14_EXTENSION_PLAN.json"
+        }
+      ]
+    },
+    {
+      "id": "I7A5B-CANONICAL_OWNER_ACTIVATION",
+      "disposition": "PRESERVED",
+      "rationale": "InheritedSocial/InboxowninglawunchangedbyPlayerdisplaydesign; newconsumerintegration6Ccannotrewritecommittedintents oractivationgates",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS643_I7A5B_SUCCESSOR_CONTRACT.json",
+          "sha256": "5094210edcbd54dddb2ea9a26695856703f228120291d0bfb9fd1fd23960ff81"
+        },
+        {
+          "path": "00_PASSMAP/PASS662_I7B1_ARCHITECTURE_PROVIDER_CONTRACT.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS662_I7B1_TRANSACTION_REFERENCE_REPLAY_CONTRACT.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS679_I7B6A_RESEARCH/IMPLEMENTATION_PLAN.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS679_I7B6A_RESEARCH/PORT_CONTRACT.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS679_I7B6A_RESEARCH/D14_EXTENSION_PLAN.json"
+        }
+      ]
+    },
+    {
+      "id": "I7A5B-CAMP_AUDIENCE_AUTHORITY",
+      "disposition": "PRESERVED",
+      "rationale": "InheritedSocial/InboxowninglawunchangedbyPlayerdisplaydesign; newconsumerintegration6Ccannotrewritecommittedintents oractivationgates",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS643_I7A5B_SUCCESSOR_CONTRACT.json",
+          "sha256": "5094210edcbd54dddb2ea9a26695856703f228120291d0bfb9fd1fd23960ff81"
+        },
+        {
+          "path": "00_PASSMAP/PASS662_I7B1_ARCHITECTURE_PROVIDER_CONTRACT.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS662_I7B1_TRANSACTION_REFERENCE_REPLAY_CONTRACT.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS679_I7B6A_RESEARCH/IMPLEMENTATION_PLAN.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS679_I7B6A_RESEARCH/PORT_CONTRACT.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS679_I7B6A_RESEARCH/D14_EXTENSION_PLAN.json"
+        }
+      ]
+    },
+    {
+      "id": "I7A5B-REFERENCE_NAMESPACE",
+      "disposition": "PRESERVED",
+      "rationale": "InheritedSocial/InboxowninglawunchangedbyPlayerdisplaydesign; newconsumerintegration6Ccannotrewritecommittedintents oractivationgates",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS643_I7A5B_SUCCESSOR_CONTRACT.json",
+          "sha256": "5094210edcbd54dddb2ea9a26695856703f228120291d0bfb9fd1fd23960ff81"
+        },
+        {
+          "path": "00_PASSMAP/PASS662_I7B1_ARCHITECTURE_PROVIDER_CONTRACT.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS662_I7B1_TRANSACTION_REFERENCE_REPLAY_CONTRACT.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS679_I7B6A_RESEARCH/IMPLEMENTATION_PLAN.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS679_I7B6A_RESEARCH/PORT_CONTRACT.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS679_I7B6A_RESEARCH/D14_EXTENSION_PLAN.json"
+        }
+      ]
+    },
+    {
+      "id": "I7A5B-SCOPED_PARENT_ROLLUP",
+      "disposition": "PRESERVED",
+      "rationale": "InheritedSocial/InboxowninglawunchangedbyPlayerdisplaydesign; newconsumerintegration6Ccannotrewritecommittedintents oractivationgates",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS643_I7A5B_SUCCESSOR_CONTRACT.json",
+          "sha256": "5094210edcbd54dddb2ea9a26695856703f228120291d0bfb9fd1fd23960ff81"
+        },
+        {
+          "path": "00_PASSMAP/PASS662_I7B1_ARCHITECTURE_PROVIDER_CONTRACT.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS662_I7B1_TRANSACTION_REFERENCE_REPLAY_CONTRACT.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS679_I7B6A_RESEARCH/IMPLEMENTATION_PLAN.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS679_I7B6A_RESEARCH/PORT_CONTRACT.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS679_I7B6A_RESEARCH/D14_EXTENSION_PLAN.json"
+        }
+      ]
+    },
+    {
+      "id": "I7A5B-WIRE_NAMESPACE_AND_UNKNOWN_PRODUCER",
+      "disposition": "PRESERVED",
+      "rationale": "InheritedSocial/InboxowninglawunchangedbyPlayerdisplaydesign; newconsumerintegration6Ccannotrewritecommittedintents oractivationgates",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS643_I7A5B_SUCCESSOR_CONTRACT.json",
+          "sha256": "5094210edcbd54dddb2ea9a26695856703f228120291d0bfb9fd1fd23960ff81"
+        },
+        {
+          "path": "00_PASSMAP/PASS662_I7B1_ARCHITECTURE_PROVIDER_CONTRACT.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS662_I7B1_TRANSACTION_REFERENCE_REPLAY_CONTRACT.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS679_I7B6A_RESEARCH/IMPLEMENTATION_PLAN.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS679_I7B6A_RESEARCH/PORT_CONTRACT.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS679_I7B6A_RESEARCH/D14_EXTENSION_PLAN.json"
+        }
+      ]
+    },
+    {
+      "id": "I7A5B-LEXICAL_NUMERIC_UNICODE",
+      "disposition": "PRESERVED",
+      "rationale": "InheritedSocial/InboxowninglawunchangedbyPlayerdisplaydesign; newconsumerintegration6Ccannotrewritecommittedintents oractivationgates",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS643_I7A5B_SUCCESSOR_CONTRACT.json",
+          "sha256": "5094210edcbd54dddb2ea9a26695856703f228120291d0bfb9fd1fd23960ff81"
+        },
+        {
+          "path": "00_PASSMAP/PASS662_I7B1_ARCHITECTURE_PROVIDER_CONTRACT.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS662_I7B1_TRANSACTION_REFERENCE_REPLAY_CONTRACT.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS679_I7B6A_RESEARCH/IMPLEMENTATION_PLAN.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS679_I7B6A_RESEARCH/PORT_CONTRACT.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS679_I7B6A_RESEARCH/D14_EXTENSION_PLAN.json"
+        }
+      ]
+    },
+    {
+      "id": "I7A5B-EDGE_BRIDGE",
+      "disposition": "PRESERVED",
+      "rationale": "InheritedSocial/InboxowninglawunchangedbyPlayerdisplaydesign; newconsumerintegration6Ccannotrewritecommittedintents oractivationgates",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS643_I7A5B_SUCCESSOR_CONTRACT.json",
+          "sha256": "5094210edcbd54dddb2ea9a26695856703f228120291d0bfb9fd1fd23960ff81"
+        },
+        {
+          "path": "00_PASSMAP/PASS662_I7B1_ARCHITECTURE_PROVIDER_CONTRACT.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS662_I7B1_TRANSACTION_REFERENCE_REPLAY_CONTRACT.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS679_I7B6A_RESEARCH/IMPLEMENTATION_PLAN.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS679_I7B6A_RESEARCH/PORT_CONTRACT.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS679_I7B6A_RESEARCH/D14_EXTENSION_PLAN.json"
+        }
+      ]
+    },
+    {
+      "id": "I7A5B-OWNER_OBSERVATION",
+      "disposition": "PRESERVED",
+      "rationale": "InheritedSocial/InboxowninglawunchangedbyPlayerdisplaydesign; newconsumerintegration6Ccannotrewritecommittedintents oractivationgates",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS643_I7A5B_SUCCESSOR_CONTRACT.json",
+          "sha256": "5094210edcbd54dddb2ea9a26695856703f228120291d0bfb9fd1fd23960ff81"
+        },
+        {
+          "path": "00_PASSMAP/PASS662_I7B1_ARCHITECTURE_PROVIDER_CONTRACT.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS662_I7B1_TRANSACTION_REFERENCE_REPLAY_CONTRACT.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS679_I7B6A_RESEARCH/IMPLEMENTATION_PLAN.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS679_I7B6A_RESEARCH/PORT_CONTRACT.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS679_I7B6A_RESEARCH/D14_EXTENSION_PLAN.json"
+        }
+      ]
+    },
+    {
+      "id": "I7A5B-CANONICAL_EVENT_AND_INACTIVE_CONSTRUCTOR",
+      "disposition": "PRESERVED",
+      "rationale": "InheritedSocial/InboxowninglawunchangedbyPlayerdisplaydesign; newconsumerintegration6Ccannotrewritecommittedintents oractivationgates",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS643_I7A5B_SUCCESSOR_CONTRACT.json",
+          "sha256": "5094210edcbd54dddb2ea9a26695856703f228120291d0bfb9fd1fd23960ff81"
+        },
+        {
+          "path": "00_PASSMAP/PASS662_I7B1_ARCHITECTURE_PROVIDER_CONTRACT.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS662_I7B1_TRANSACTION_REFERENCE_REPLAY_CONTRACT.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS679_I7B6A_RESEARCH/IMPLEMENTATION_PLAN.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS679_I7B6A_RESEARCH/PORT_CONTRACT.json"
+        },
+        {
+          "path": "00_PASSMAP/PASS679_I7B6A_RESEARCH/D14_EXTENSION_PLAN.json"
+        }
+      ]
+    }
+  ],
+  "inherits": "00_PASSMAP/PASS662_I7B1_CONTRACT_IMPACT_REVIEW.json",
+  "local_cache": "cache/hot/00_PASSMAP/PASS662_I7B1_CONTRACT_IMPACT_REVIEW.json"
+}

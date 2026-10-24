@@ -1,0 +1,369 @@
+{
+  "schema": "gxb-i7a5b-evidence/v1",
+  "findings": [
+    {
+      "id": "B-R01",
+      "finding": "SERVICE-to-TEAM source dispatch types3,4,5,6,8;TEAM is logical5, physicalSERVICE4",
+      "evidence": [
+        {
+          "class": "CURRENT_LUA_SOURCE_FACT_NOT_ORIGINAL_SERVER_TRUTH",
+          "cache": "source_cache/current/app/model/MessageManager.lua",
+          "sha256": "493f6452938f038d201462771228744559aa8f446f1233bc0228f2de6db17a46",
+          "lines": [
+            1559,
+            1584
+          ],
+          "observation": "five typed SERVICE branches;7ignored"
+        }
+      ]
+    },
+    {
+      "id": "B-R02",
+      "finding": "WAR_CAMP has distinct scalar/string keys and confidentiality-sensitive client filters",
+      "evidence": [
+        {
+          "class": "CURRENT_LUA_SOURCE_FACT_NOT_ORIGINAL_SERVER_TRUTH",
+          "cache": "source_cache/current/app/windows/GroupChatWnd.lua",
+          "sha256": "6cef1f7d9889f54f3accbe972fece72e902cdbfa23a1c3a5e9ad412dc338ad41",
+          "lines": [
+            186,
+            214
+          ],
+          "observation": "camelcase roomID/selectType and camp"
+        },
+        {
+          "class": "CURRENT_LUA_SOURCE_FACT_NOT_ORIGINAL_SERVER_TRUTH",
+          "cache": "source_cache/current/app/windows/GroupChatWnd.lua",
+          "sha256": "6cef1f7d9889f54f3accbe972fece72e902cdbfa23a1c3a5e9ad412dc338ad41",
+          "lines": [
+            694,
+            712
+          ],
+          "observation": "client filter is not server authorization"
+        }
+      ]
+    },
+    {
+      "id": "B-R03",
+      "finding": "Illusion/AdventureIllusion/Ragnarok share same invite shape; different canonical owners",
+      "evidence": [
+        {
+          "class": "CURRENT_LUA_SOURCE_FACT_NOT_ORIGINAL_SERVER_TRUTH",
+          "cache": "source_cache/current/app/windows/IllusionInviteWindow.lua",
+          "sha256": "d16287d8065e23fe3b418e8ef3d001b1c0754a4e1821977b74b3aa3977dee8ab",
+          "lines": [
+            59,
+            74
+          ],
+          "observation": "4fieldinvitation;GUILD/SERVICE"
+        }
+      ]
+    },
+    {
+      "id": "B-R04",
+      "finding": "Occult fields chapter_id/force differ; chapter lookup is typed content",
+      "evidence": [
+        {
+          "class": "CURRENT_LUA_SOURCE_FACT_NOT_ORIGINAL_SERVER_TRUTH",
+          "cache": "source_cache/current/app/windows/OccultInviteWindow.lua",
+          "sha256": "ec1b6ad8827d1141cd2a60b5a7413e664c33946e0c4125efa85972ff7eddba4d",
+          "lines": [
+            58,
+            72
+          ],
+          "observation": "no boss_name/room_lev"
+        }
+      ]
+    },
+    {
+      "id": "B-R05",
+      "finding": "Defense omits boss_name; do not force common invite struct with absent required fields",
+      "evidence": [
+        {
+          "class": "CURRENT_LUA_SOURCE_FACT_NOT_ORIGINAL_SERVER_TRUTH",
+          "cache": "source_cache/current/app/windows/AdventureDefenseInviteWindow.lua",
+          "sha256": "b194af453bbd09b87cccc4903a89017bca9e85b9d517ccc84ab3c6c59405cc16",
+          "lines": [
+            65,
+            78
+          ],
+          "observation": "3fieldinvitation"
+        }
+      ]
+    },
+    {
+      "id": "B-R06",
+      "finding": "Report type1 has fallback id/is_attack and Peak record_id/nestedprofiles/isAttack/isWin variants",
+      "evidence": [
+        {
+          "class": "CURRENT_LUA_SOURCE_FACT_NOT_ORIGINAL_SERVER_TRUTH",
+          "cache": "source_cache/current/app/windows/ArenaRecordWindow.lua",
+          "sha256": "62615dcbf8d59f4bd64150901ea0cfc1ff25b24cddeaa9b7a8122d84d13b341a",
+          "lines": [
+            294,
+            308
+          ],
+          "observation": "legacy"
+        },
+        {
+          "class": "CURRENT_LUA_SOURCE_FACT_NOT_ORIGINAL_SERVER_TRUTH",
+          "cache": "source_cache/current/app/windows/ArenaRecordWindow.lua",
+          "sha256": "62615dcbf8d59f4bd64150901ea0cfc1ff25b24cddeaa9b7a8122d84d13b341a",
+          "lines": [
+            751,
+            767
+          ],
+          "observation": "Peakvariant"
+        }
+      ]
+    },
+    {
+      "id": "B-R07",
+      "finding": "Peak downstream consumes seven profile fields, not only player_id/conquer_lev",
+      "evidence": [
+        {
+          "class": "CURRENT_LUA_SOURCE_FACT_NOT_ORIGINAL_SERVER_TRUTH",
+          "cache": "source_cache/current/app/windows/PeakArenaReportWindow.lua",
+          "sha256": "b28bc10b302c603a7c8b55f9a8a394de086ef67e507bb4d5f1a17cad4ecc0cf8",
+          "lines": [
+            84,
+            115
+          ],
+          "observation": "name/level/avatar/conquer display"
+        }
+      ]
+    },
+    {
+      "id": "B-R08",
+      "finding": "LuckyCoin2 actually scratch-card share shape; arrays required",
+      "evidence": [
+        {
+          "class": "CURRENT_LUA_SOURCE_FACT_NOT_ORIGINAL_SERVER_TRUTH",
+          "cache": "source_cache/current/app/windows/ScratchCardRecordWindow.lua",
+          "sha256": "69ee32f4e63252e1ce92be33bbd758c51b9c2db1948545f49e55e67a03edb2e7",
+          "lines": [
+            83,
+            102
+          ],
+          "observation": "share_gua and3arrays"
+        },
+        {
+          "class": "CURRENT_LUA_SOURCE_FACT_NOT_ORIGINAL_SERVER_TRUTH",
+          "cache": "source_cache/current/app/model/MessageManager.lua",
+          "sha256": "493f6452938f038d201462771228744559aa8f446f1233bc0228f2de6db17a46",
+          "lines": [
+            567,
+            578
+          ],
+          "observation": "clickprojection"
+        }
+      ]
+    },
+    {
+      "id": "B-R09",
+      "finding": "Shared menu exposes0,2,4 channels; REPORT default1 or explicit scratch2",
+      "evidence": [
+        {
+          "class": "CURRENT_LUA_SOURCE_FACT_NOT_ORIGINAL_SERVER_TRUTH",
+          "cache": "source_cache/current/app/windows/RecordShareMenuWindow.lua",
+          "sha256": "62bd8504afbb513f91591980c6bc06d7461e715e54acbb5115d11467d4d4a143",
+          "lines": [
+            7,
+            29
+          ],
+          "observation": "defaulttype1 andworldsend"
+        },
+        {
+          "class": "CURRENT_LUA_SOURCE_FACT_NOT_ORIGINAL_SERVER_TRUTH",
+          "cache": "source_cache/current/app/windows/RecordShareMenuWindow.lua",
+          "sha256": "62bd8504afbb513f91591980c6bc06d7461e715e54acbb5115d11467d4d4a143",
+          "lines": [
+            66,
+            78
+          ],
+          "observation": "servicesend"
+        }
+      ]
+    },
+    {
+      "id": "B-R10",
+      "finding": "Ordinary inputcontent140 is not a source JSON envelope cap",
+      "evidence": [
+        {
+          "class": "CURRENT_LUA_SOURCE_FACT_NOT_ORIGINAL_SERVER_TRUTH",
+          "cache": "source_cache/current/app/common/tables/MiscTable.lua",
+          "sha256": "6579de771dbef3224fcaa9568a8fcfade26209f134acfe3a3e666ecbd6c13cee",
+          "lines": [
+            305,
+            309
+          ],
+          "observation": "chat_limit_words"
+        },
+        {
+          "class": "CURRENT_LUA_SOURCE_FACT_NOT_ORIGINAL_SERVER_TRUTH",
+          "cache": "source_cache/current/app/windows/RecordShareMenuWindow.lua",
+          "sha256": "62bd8504afbb513f91591980c6bc06d7461e715e54acbb5115d11467d4d4a143",
+          "lines": [
+            21,
+            28
+          ],
+          "observation": "structuredstring forwarded withoutordinaryeditor"
+        }
+      ]
+    },
+    {
+      "id": "B-R11",
+      "finding": "WAR_CAMP inner commontext editor truncates40; emoticon uses numericID",
+      "evidence": [
+        {
+          "class": "CURRENT_LUA_SOURCE_FACT_NOT_ORIGINAL_SERVER_TRUTH",
+          "cache": "source_cache/current/app/windows/GroupChatWnd.lua",
+          "sha256": "6cef1f7d9889f54f3accbe972fece72e902cdbfa23a1c3a5e9ad412dc338ad41",
+          "lines": [
+            313,
+            321
+          ],
+          "observation": "40char"
+        },
+        {
+          "class": "CURRENT_LUA_SOURCE_FACT_NOT_ORIGINAL_SERVER_TRUTH",
+          "cache": "source_cache/current/app/windows/GroupChatWnd.lua",
+          "sha256": "6cef1f7d9889f54f3accbe972fece72e902cdbfa23a1c3a5e9ad412dc338ad41",
+          "lines": [
+            387,
+            396
+          ],
+          "observation": "positivecontentemotionid"
+        }
+      ]
+    },
+    {
+      "id": "B-R12",
+      "finding": "Current fullscan21symboloccurrences includes1MIDdeclaration;20 executable/symboluses agree earlier inventory;11sharemenusites",
+      "evidence": [
+        {
+          "path": "evidence/CURRENT_CALLSITE_INVENTORY.json",
+          "sha256": "9475833f5e5b6526f363b4d36389be97eed814b4dd13756520f3a5c77c11ddb2",
+          "class": "REPRODUCIBLE_CURRENT_SOURCE_INVENTORY"
+        }
+      ]
+    },
+    {
+      "id": "B-R13",
+      "finding": "No canonicalmode/record/scratch/campproducer in exact accepted941 productionassembly; character illusioncosmetics not mode room",
+      "evidence": [
+        {
+          "path": "evidence/PRODUCER_READINESS_STATIC_SCAN.json",
+          "sha256": "0e0d82118f95d259ae644c32252c0fd2fa53f3d936c330502861b4dcf6ecd349",
+          "class": "ACCEPTED_BACKEND_STATIC_READINESS_NOT_ORIGINAL_SERVER_TRUTH"
+        }
+      ]
+    },
+    {
+      "id": "B-R14",
+      "finding": "V1 HTTPchat module routesMID32782toTCP; no reportownerqualification inferred from V1 scaffold",
+      "evidence": [
+        {
+          "cache": "source_cache/v1/gxb_backend/handlers/chat.py",
+          "sha256": "e5814cd89676cf6b9d6780b9e86b08b2b7fb09c786058bd0e5258e827c0080db",
+          "class": "V1_CORROBORATION_ONLY"
+        }
+      ]
+    },
+    {
+      "id": "B-R15",
+      "finding": "Historicalclient corroboratesinvite/group/scratch schemas; source lineage notoriginalservertruth",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS642_I7A5B_INPUT_CAPTURE.json",
+          "sha256": "2bac40806d0350c97f07b9d5df29fd00e85ff93a53ecdc7221a98cf309576b47",
+          "class": "HISTORICAL_MEMBER_CORROBORATION"
+        }
+      ]
+    },
+    {
+      "id": "B-R16",
+      "finding": "36863 remainsconsumer-only unknowntrigger; no implicitGuildMail588mapping",
+      "evidence": [
+        {
+          "class": "CURRENT_LUA_SOURCE_FACT_NOT_ORIGINAL_SERVER_TRUTH",
+          "cache": "source_cache/current/app/model/MessageManager.lua",
+          "sha256": "493f6452938f038d201462771228744559aa8f446f1233bc0228f2de6db17a46",
+          "lines": [
+            1586,
+            1594
+          ],
+          "observation": "from_player fields/msg guildbroadcast"
+        }
+      ]
+    },
+    {
+      "id": "B-R17",
+      "finding": "HelpercheckShareTimes180seconds has no callsite in MessageManager/currentselectedcorpus; no new server cooldown invented",
+      "evidence": [
+        {
+          "class": "CURRENT_LUA_SOURCE_FACT_NOT_ORIGINAL_SERVER_TRUTH",
+          "cache": "source_cache/current/app/model/MessageManager.lua",
+          "sha256": "493f6452938f038d201462771228744559aa8f446f1233bc0228f2de6db17a46",
+          "lines": [
+            217,
+            226
+          ],
+          "observation": "clienthelper function alone"
+        }
+      ]
+    },
+    {
+      "id": "B-R18",
+      "finding": "Scopedinactiveprovider support permitted byapprovedsplit; noLiveTEAMacceptedflag",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS641_I7A5_INTERNAL_STAGE_ROADMAP.json",
+          "sha256": "8228a7de247f81a9944c26db6f0a492754e818a87cec62680a8dedbec9957ce1",
+          "class": "ACCEPTED_SCOPE_CONTRACT_641"
+        }
+      ]
+    },
+    {
+      "id": "B-R20",
+      "finding": "WarCampChatWindow supplies no room_id: GroupChat roomID defaults0; positive-only rule would rejectcurrentproducer. Actualevent incarnation mustcome from canonicalowner notdisplay0",
+      "evidence": [
+        {
+          "class": "CURRENT_LUA_SOURCE_FACT_NOT_ORIGINAL_SERVER_TRUTH",
+          "cache": "source_cache/current/app/windows/WarCampChatWindow.lua",
+          "sha256": "2c5d3dcfd07d89be4a28fe7c71a55cb0d9df324fa4fd451f1efcdaf1c22097b7",
+          "lines": [
+            100,
+            115
+          ],
+          "observation": "no room_id field"
+        },
+        {
+          "class": "CURRENT_LUA_SOURCE_FACT_NOT_ORIGINAL_SERVER_TRUTH",
+          "cache": "source_cache/current/app/windows/GroupChatWnd.lua",
+          "sha256": "6cef1f7d9889f54f3accbe972fece72e902cdbfa23a1c3a5e9ad412dc338ad41",
+          "lines": [
+            17,
+            30
+          ],
+          "observation": "roomID default0"
+        }
+      ]
+    },
+    {
+      "id": "B-R19",
+      "finding": "641 currentimpact selected_status inheriteddesignlabel conflicts with owningpostimplementationstatus; new642currentreview will classifydesign/current and preserve641 bytes",
+      "evidence": [
+        {
+          "path": "00_PASSMAP/PASS641_I7A5A_CONTRACT_IMPACT_REVIEW.json",
+          "sha256": "d575c8cce0a3d2637bb13eea69dcb3f1077ca1f5bf00859cf5996f329bd9c718",
+          "class": "MEMORYBANK_LABEL_FINDING_NOT_PRODUCTDEFECT"
+        }
+      ]
+    }
+  ],
+  "facts_not_promoted_to_original_server_truth": true,
+  "pass": "642.0",
+  "selected_status": "SELECTED_RESEARCH_DESIGN_WITH_VALIDATED_NORMAL_SEAL_NOT_IMPLEMENTED",
+  "working_recovery_reference": "CP90 exact COLD checkpoint/source/probe caches"
+}

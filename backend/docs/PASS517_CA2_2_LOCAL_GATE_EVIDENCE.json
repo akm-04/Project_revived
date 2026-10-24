@@ -1,0 +1,84 @@
+{
+  "adjudication": "CA2-2_INTERNAL_LOCAL_CHECKPOINT_GREEN; aggregate CA2 remains OPEN; CA2-3 remains NOT_STARTED until Pass517 seal advances only to targeted research/reconciliation.",
+  "authority": {
+    "pass516_passmap_sha256": "0080e4da666096d17ea6d41318bf8b88e503f9b3326cd870ed2238caabe8d3c1",
+    "research": "PASS516_CA2_2_PREIMPLEMENTATION_RESEARCH_CLOSURE.md + PASS516_CA2_2_IMPLEMENTATION_PLAN.json",
+    "source_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
+  },
+  "behavioral_coverage": [
+    "source cumulative Hero EXP clamp and level derivation",
+    "player-qualified Hero max-level clamp",
+    "effective star ceiling 8",
+    "content revision pin survives definite-abort retry and active-revision change",
+    "matching UNKNOWN-COMMIT receipt reconciles without reapply",
+    "UNKNOWN-COMMIT absence is not blind-retried",
+    "Normal target-star Mana/fragment costs",
+    "Super low-star prerequisite-only evolution",
+    "Super 5->6 80M Mana/no fragment",
+    "Super 6->7 and 7->8 Mana+fragment costs",
+    "prerequisite/debit failure does not persist Hero progression",
+    "MID67 canonical I5 stack projection",
+    "MID49 persisted star/level/exp projection"
+  ],
+  "canonical_static_source": {
+    "checks": [
+      "dependency policy",
+      "resolved SBOM check",
+      "sqlc generation policy",
+      "all five external oracle hashes",
+      "CA2-1 source oracle",
+      "CA2-2 source oracle",
+      "deterministic builtin content --check",
+      "Content/Character/Kernel querytext --check",
+      "schema/query ownership",
+      "CA2-1 cumulative",
+      "CA2-2 static validator",
+      "R5 cumulative with strict historical mode preserved",
+      "R6 cumulative/current candidate",
+      "gofmt"
+    ],
+    "log": "EVIDENCE/PASS517_CA2_2/STATIC_SOURCE_FINAL.log",
+    "post_metadata_log": "EVIDENCE/PASS517_CA2_2/STATIC_SOURCE_POST_METADATA.log",
+    "post_metadata_sha256": "9c16fe21d8c119d3b56f71198025ab3f4c8f0a8d80cf3ace221837470286aed8",
+    "result": "PASS",
+    "sha256": "0334ef35645f279f53c9337be6d93e3e876e0351bf1b53cf809c5965af95049b"
+  },
+  "compatibility_copy": {
+    "changes": [
+      "go.mod go 1.26.0 -> 1.23.0",
+      "go.mod toolchain go1.27.1 -> go1.23.2",
+      ".go-version 1.27.1 -> 1.23.2"
+    ],
+    "classification": "COMPATIBILITY_COPY_ONLY",
+    "diff_file": "EVIDENCE/PASS517_CA2_2/COMPATIBILITY_DIFF.json",
+    "external_log_hashes": "EVIDENCE/PASS517_CA2_2/EXTERNAL_LOG_SHA256SUMS.txt",
+    "local_go": "go1.23.2",
+    "results": "focused PASS; focused race PASS; go vet ./... PASS; go test ./... PASS; bounded package sweep 89/89 PASS"
+  },
+  "content": {
+    "acquisition_mappings": 291,
+    "capability": "HERO_PROGRESSION_CA2",
+    "compiler_version": "ca2-2",
+    "hero_exp_items": 5,
+    "hero_exp_rows": 100,
+    "hero_templates": 568,
+    "revision": "e5a7c922fd40d42a4354f6200c7e3ea0ca9f00d666527df1b5915b083e0e49fb",
+    "schema_version": 1
+  },
+  "limitations": [
+    "exact Go 1.27.1 NOT_RUN",
+    "real PostgreSQL 18.6 migration/query/concurrency NOT_RUN",
+    "real River semantics NOT_RUN",
+    "stock-client end-to-end NOT_RUN",
+    "aggregate CA2 NOT ACCEPTED"
+  ],
+  "parent_backend": {
+    "artifact": "gxb-backend-v2-v0.62.1-pass515-ca2-1-local-checkpoint.zip",
+    "implementation_revision_sha256": "48f64500533f063ed0a457c5132a726da56cd9b639095ec1ab41f6168820c5e1",
+    "sha256": "4491c79a3aa195211c1a3b840079d897b93b1699a15c6846e1513e87a9fe78f3"
+  },
+  "pass": "517.0",
+  "phase": "CHARACTER_ASSET_CORE/CA2/CA2-2",
+  "schema_version": 1,
+  "status": "LOCAL_GATE_GREEN_PENDING_IMMUTABLE_IDENTITY_AND_PASSMAP_SEAL"
+}

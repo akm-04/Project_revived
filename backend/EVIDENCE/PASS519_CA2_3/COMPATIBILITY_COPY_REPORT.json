@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "classification": "COMPATIBILITY_COPY_ONLY",
+  "canonical_source_test_tree": "/mnt/data/ca23_impl/backend at pre-evidence packaging freeze",
+  "compatibility_copy": "/mnt/data/ca23_reality_final_compat",
+  "local_go": "go1.23.2 linux/amd64",
+  "changes": [
+    "go.mod: go 1.26.0 + toolchain go1.27.1 -> go 1.23.0 with no toolchain line",
+    ".go-version: 1.27.1 -> 1.23.2"
+  ],
+  "canonical_product_or_test_diff_at_execution": [
+    ".go-version",
+    "go.mod"
+  ],
+  "focused_tests": "PASS",
+  "focused_race": "PASS",
+  "go_vet_all": "PASS",
+  "go_test_all": "PASS",
+  "bounded_package_regression": {
+    "packages": 89,
+    "failures": 0,
+    "result": "PASS"
+  },
+  "limitations": [
+    "not exact Go1.27.1",
+    "not real PostgreSQL18.6",
+    "not River runtime proof",
+    "not stock-client proof"
+  ],
+  "note": "Evidence/metadata files were added to canonical after this execution; no product or test source changed afterward."
+}

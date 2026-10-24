@@ -1,0 +1,108 @@
+{
+  "role": "REUSE_PARENT_EXACT_SOURCE_EVIDENCE_WITH_TARGETED_4A_REVIEW",
+  "parent_ledger": "stage4/SOURCE_VERIFICATION.json",
+  "current_source_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+  "files": [
+    {
+      "profile": "current_src64",
+      "archive_member": "app-assets/output/assets/src_64/app/model/PersonDisplay.lua",
+      "path": "source/current/app/model/PersonDisplay.lua",
+      "sha256": "022fcbf39167ac9197ce5034b32fd5833016742744ad3de118ceacf6f808cfb8",
+      "bytes": 19959,
+      "verification": "EXACT_MEMBER_MATCH_LOCKED_CORPUS"
+    },
+    {
+      "profile": "current_src64",
+      "archive_member": "app-assets/output/assets/src_64/app/windows/PersonDisplayWindow.lua",
+      "path": "source/current/app/windows/PersonDisplayWindow.lua",
+      "sha256": "22a0c02172eabec1d9728d18293273c8e2aa9e6c8e5b1a4bf3af2feae14f158c",
+      "bytes": 90211,
+      "verification": "EXACT_MEMBER_MATCH_LOCKED_CORPUS"
+    },
+    {
+      "profile": "current_src64",
+      "archive_member": "app-assets/output/assets/src_64/app/windows/PersonPraiseWindow.lua",
+      "path": "source/current/app/windows/PersonPraiseWindow.lua",
+      "sha256": "0078caadef6d59b2a4259d00116f14185b0506512844a8b2f8aa7113205c23d5",
+      "bytes": 4784,
+      "verification": "EXACT_MEMBER_MATCH_LOCKED_CORPUS"
+    },
+    {
+      "profile": "current_src64",
+      "archive_member": "app-assets/output/assets/src_64/app/common/enums.lua",
+      "path": "source/current/app/common/enums.lua",
+      "sha256": "15340bd89fe7c6f150ccfd4a5cd2a2f0e8e73c89dfae9ac3388376a4799901f3",
+      "bytes": 80531,
+      "verification": "EXACT_MEMBER_MATCH_LOCKED_CORPUS"
+    },
+    {
+      "profile": "current_src64",
+      "archive_member": "app-assets/output/assets/src_64/app/common/network/mid.lua",
+      "path": "source/current/app/common/network/mid.lua",
+      "sha256": "026a20b29d97624979777a68c64c749254031604057ff42aa8f8254c3e35b5af",
+      "bytes": 43121,
+      "verification": "EXACT_MEMBER_MATCH_LOCKED_CORPUS"
+    },
+    {
+      "profile": "current_src64",
+      "archive_member": "app-assets/output/assets/src_64/app/common/network/Backend.lua",
+      "path": "source/current/app/common/network/Backend.lua",
+      "sha256": "95378e2b0be8180df6de27e9e430c630bcfe46c080e1f91ef5f6d74bdbb1b840",
+      "bytes": 36252,
+      "verification": "EXACT_MEMBER_MATCH_LOCKED_CORPUS"
+    },
+    {
+      "profile": "old164",
+      "archive_member": "src/app/model/PersonDisplay.lua",
+      "path": "source/old164/app/model/PersonDisplay.lua",
+      "sha256": "022fcbf39167ac9197ce5034b32fd5833016742744ad3de118ceacf6f808cfb8",
+      "bytes": 19959,
+      "same_as_current": true,
+      "authority": "CORROBORATION_ONLY_NOT_ACTIVE_PROFILE"
+    },
+    {
+      "profile": "old164",
+      "archive_member": "src/app/windows/PersonDisplayWindow.lua",
+      "path": "source/old164/app/windows/PersonDisplayWindow.lua",
+      "sha256": "dbe7ae0f8c4ea304fa3b4e065010584cf5d1d6bf97fdd1fbb11dce80d248ae99",
+      "bytes": 92146,
+      "same_as_current": false,
+      "authority": "CORROBORATION_ONLY_NOT_ACTIVE_PROFILE"
+    },
+    {
+      "profile": "old164",
+      "archive_member": "src/app/windows/PersonPraiseWindow.lua",
+      "path": "source/old164/app/windows/PersonPraiseWindow.lua",
+      "sha256": "9ea5b4c2e11689b93b607eb99d995f4999af409e1b4c71b3e893bb2085c3d17e",
+      "bytes": 4680,
+      "same_as_current": false,
+      "authority": "CORROBORATION_ONLY_NOT_ACTIVE_PROFILE"
+    },
+    {
+      "profile": "old164",
+      "archive_member": "src/app/common/network/Backend.lua",
+      "path": "source/old164/app/common/network/Backend.lua",
+      "sha256": "06f481e9358e357019c42fbf7d2cd8e650ba7044a774b182d833aebc85458315",
+      "bytes": 34916,
+      "same_as_current": false,
+      "authority": "CORROBORATION_ONLY_NOT_ACTIVE_PROFILE"
+    },
+    {
+      "profile": "old164",
+      "archive_member": "src/app/common/enums.lua",
+      "path": "source/old164/app/common/enums.lua",
+      "sha256": "2e6efaef4689e7417ded883905218ce15536503e0170beb11d51e0171acf4e32",
+      "bytes": 67086,
+      "same_as_current": false,
+      "authority": "CORROBORATION_ONLY_NOT_ACTIVE_PROFILE"
+    }
+  ],
+  "reviewed_4A_symbols": [
+    "PersonDisplay.addPraise/getPraiseList/updatePraiseList/updateBasicInfo",
+    "PersonPraiseWindow.initHideCell/scrollListener",
+    "PersonDisplayWindow MAIN and SPACE praise callbacks; checkBtnIsHide/checkFunctionOpen",
+    "Backend nonce-less retry prompt; selected effective MID declarations"
+  ],
+  "prior_source_probe": "stage4/PROFILE_CORROBORATION.json + stage4/evidence/source_feedback_probe.log, 11PASS unchanged; no rerun",
+  "limits": "Exact source/static and host method probe; not original-server, stock network or physical W2 proof"
+}

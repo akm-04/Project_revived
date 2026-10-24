@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "pass": "523.0",
+  "phase": "CA3",
+  "internal_stage": "CA3-1",
+  "candidate_version": "v0.65.0-candidate",
+  "authority_pass": "522.0",
+  "authority_hot_sha256": "695377d5678861b83e9c93a4101d9a67e6469250a590fdd680b80c2eb43affbc",
+  "parent_backend_sha256": "58dc3f31d3e8ae82ea302cad4d7dcce2c958d9218c4e423f4af97a5cf018f830",
+  "parent_implementation_revision_sha256": "3813d389f577a90c9771f396a197c8ea926e0a602869e656bed2d557b5c01686",
+  "content_revision": "e9c310ac5a258e49cbf6e0a1a81a55a631706229b179617d66af9af78c225a25",
+  "result": "GREEN_LOCAL_CANDIDATE_WITH_EXPLICIT_NATIVE_ENVIRONMENT_GAPS",
+  "exact_canonical_static_checks": [
+    "tools/check_schema_query_ownership.py: PASS",
+    "tools/validate_ca3_1.py: PASS",
+    "tools/validate_current_candidate.py: PASS",
+    "tools/validate_ca2_1.py --cumulative: PASS",
+    "tools/generate_builtin_content.py --source-archive exact_src64 --check: PASS",
+    "GXB_R4A_SOURCE_ARCHIVE=exact_src64 tools/test_generate_builtin_content.py: 6/6 PASS",
+    "Character and Content querytext regeneration: byte-identical"
+  ],
+  "compatibility_copy_only": {
+    "origin": "fresh copy of exact canonical CA3-1 candidate",
+    "only_environment_edit": "go.mod go 1.26.0 -> 1.23.0 and removal of toolchain go1.27.1",
+    "assertions_or_product_files_weakened": false,
+    "results": [
+      "focused changed-package go test: PASS",
+      "go test ./... bounded full regression: PASS",
+      "focused go test -race: PASS",
+      "go vet ./...: PASS"
+    ]
+  },
+  "environment_blocked": [
+    "exact canonical Go 1.27.1 execution",
+    "sqlc 1.31.1 generation: binary unavailable",
+    "postgres-tagged compile: pgx/v5 module unavailable and sandbox network blocked",
+    "real PostgreSQL execution/migration/query proof",
+    "River/native exact-candidate proof where applicable",
+    "stock-client live proof"
+  ],
+  "not_claimed": [
+    "CA3-1 phase acceptance",
+    "CA3 aggregate acceptance",
+    "real PostgreSQL correctness",
+    "exact canonical toolchain proof",
+    "stock-client compatibility",
+    "CA3-2 or CA3-3 implementation",
+    "W2"
+  ]
+}

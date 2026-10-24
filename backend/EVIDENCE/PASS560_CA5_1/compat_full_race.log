@@ -1,0 +1,56 @@
+?   	gxb.local/backend/v2/cmd/gxb-admin	[no test files]
+?   	gxb.local/backend/v2/cmd/gxb-api	[no test files]
+?   	gxb.local/backend/v2/cmd/gxb-realtime	[no test files]
+?   	gxb.local/backend/v2/cmd/gxb-wave-s-report	[no test files]
+?   	gxb.local/backend/v2/cmd/gxb-worker	[no test files]
+?   	gxb.local/backend/v2/internal/adapters/blobstore	[no test files]
+?   	gxb.local/backend/v2/internal/adapters/guildpolicybridge	[no test files]
+?   	gxb.local/backend/v2/internal/adapters/guildwire	[no test files]
+?   	gxb.local/backend/v2/internal/adapters/pass353diff	[no test files]
+?   	gxb.local/backend/v2/internal/adapters/postgres/characterqueries	[no test files]
+?   	gxb.local/backend/v2/internal/adapters/postgres/contentqueries	[no test files]
+ok  	gxb.local/backend/v2/internal/adapters/postgres	1.021s
+ok  	gxb.local/backend/v2/internal/adapters/postgres/activitystore	1.024s
+ok  	gxb.local/backend/v2/internal/adapters/postgres/characterstore	(cached)
+?   	gxb.local/backend/v2/internal/adapters/postgres/guildprojection	[no test files]
+?   	gxb.local/backend/v2/internal/adapters/postgres/guildstore	[no test files]
+?   	gxb.local/backend/v2/internal/adapters/postgres/identitystore	[no test files]
+?   	gxb.local/backend/v2/internal/adapters/postgres/kernelqueries	[no test files]
+?   	gxb.local/backend/v2/internal/adapters/provider	[no test files]
+?   	gxb.local/backend/v2/internal/adapters/river	[no test files]
+?   	gxb.local/backend/v2/internal/adapters/stockfixtures	[no test files]
+ok  	gxb.local/backend/v2/internal/adapters/postgres/contentstore	3.911s
+ok  	gxb.local/backend/v2/internal/adapters/postgres/i4store	1.015s
+ok  	gxb.local/backend/v2/internal/adapters/postgres/i5store	1.025s
+ok  	gxb.local/backend/v2/internal/adapters/postgres/kernelstore	1.062s
+ok  	gxb.local/backend/v2/internal/adapters/stockruntime	1.440s
+ok  	gxb.local/backend/v2/internal/application/activitydirectory	1.037s
+ok  	gxb.local/backend/v2/internal/application/bootstrap	(cached)
+ok  	gxb.local/backend/v2/internal/application/characterasset	(cached)
+ok  	gxb.local/backend/v2/internal/application/characterhero	(cached)
+ok  	gxb.local/backend/v2/internal/application/characterpet	(cached)
+ok  	gxb.local/backend/v2/internal/application/directorysync	1.017s
+ok  	gxb.local/backend/v2/internal/application/generation	1.016s
+?   	gxb.local/backend/v2/internal/application/playerdirectory	[no test files]
+ok  	gxb.local/backend/v2/internal/application/guildcore	1.046s
+ok  	gxb.local/backend/v2/internal/application/guildview	1.016s
+ok  	gxb.local/backend/v2/internal/application/i5	(cached)
+ok  	gxb.local/backend/v2/internal/application/identitylifecycle	1.021s
+ok  	gxb.local/backend/v2/internal/application/playerroot	1.017s
+ok  	gxb.local/backend/v2/internal/application/realtimeauth	1.022s
+ok  	gxb.local/backend/v2/internal/archguard	(cached)
+?   	gxb.local/backend/v2/internal/domain/combat	[no test files]
+?   	gxb.local/backend/v2/internal/domain/commerce	[no test files]
+?   	gxb.local/backend/v2/internal/domain/control	[no test files]
+?   	gxb.local/backend/v2/internal/domain/guild	[no test files]
+?   	gxb.local/backend/v2/internal/domain/modes	[no test files]
+?   	gxb.local/backend/v2/internal/domain/profile	[no test files]
+?   	gxb.local/backend/v2/internal/domain/social	[no test files]
+?   	gxb.local/backend/v2/internal/foundation/audit	[no test files]
+?   	gxb.local/backend/v2/internal/foundation/clock	[no test files]
+?   	gxb.local/backend/v2/internal/projection/activity	[no test files]
+?   	gxb.local/backend/v2/internal/projection/ota	[no test files]
+?   	gxb.local/backend/v2/internal/projection/publication	[no test files]
+?   	gxb.local/backend/v2/internal/projection/publicplayer	[no test files]
+?   	gxb.local/backend/v2/internal/projection/ranking	[no test files]
+?   	gxb.local/backend/v2/internal/projection/realtimeview	[no test files]

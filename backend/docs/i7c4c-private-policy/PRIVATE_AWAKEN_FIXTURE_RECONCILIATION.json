@@ -1,0 +1,79 @@
+{
+  "status": "SOURCE_FACT_NATIVE_FIXTURE_ASSUMPTION_DISPROVEN_PRODUCT_PREDICATE_UNCHANGED",
+  "rows": [
+    {
+      "id": "11001",
+      "first_table_id": "0",
+      "awaken_table_id": "0"
+    },
+    {
+      "id": "11002",
+      "first_table_id": "0",
+      "awaken_table_id": "0"
+    },
+    {
+      "id": "11003",
+      "first_table_id": "0",
+      "awaken_table_id": "0"
+    },
+    {
+      "id": "11004",
+      "first_table_id": "0",
+      "awaken_table_id": "0"
+    },
+    {
+      "id": "11005",
+      "first_table_id": "0",
+      "awaken_table_id": "0"
+    },
+    {
+      "id": "11006",
+      "first_table_id": "0",
+      "awaken_table_id": "0"
+    },
+    {
+      "id": "11007",
+      "first_table_id": "0",
+      "awaken_table_id": "0"
+    },
+    {
+      "id": "11008",
+      "first_table_id": "0",
+      "awaken_table_id": "0"
+    },
+    {
+      "id": "11009",
+      "first_table_id": "0",
+      "awaken_table_id": "0"
+    },
+    {
+      "id": "11010",
+      "first_table_id": "0",
+      "awaken_table_id": "0"
+    },
+    {
+      "id": "11011",
+      "first_table_id": "0",
+      "awaken_table_id": "0"
+    },
+    {
+      "id": "11012",
+      "first_table_id": "0",
+      "awaken_table_id": "0"
+    },
+    {
+      "id": "11013",
+      "first_table_id": "0",
+      "awaken_table_id": "0"
+    },
+    {
+      "id": "11014",
+      "first_table_id": "0",
+      "awaken_table_id": "0"
+    }
+  ],
+  "sha256": "ddee186ee41361a3674d4764be68efec01fad32d288c9dc84c552df6f1b770ea",
+  "finding": "All14currentSuperrowsfirst_table_id=0, awaken_table_id=0; SuperHero.isAwaken stillsamegenericpredicate. Do notfabricateawakenedSuperfixture ormodifycontenttoobtainone.",
+  "repair": "NativefixtureusesrealNormalawaken+realnonawakenedSuper; expects1awaken,2girls; unitpredicatepositivegenericcase remains. No productcode/content/schema change.",
+  "required_requalification": "FreshF2candidateidentity +correctednativecase; retainF1exactpassingproofonbyteunchangedimplementation/binaries/scopeswithexplicitreusebinding."
+}

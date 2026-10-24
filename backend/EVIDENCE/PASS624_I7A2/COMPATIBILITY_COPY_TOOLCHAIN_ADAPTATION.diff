@@ -1,0 +1,21 @@
+diff --git a/.go-version b/.go-version
+index 08002f8..14bee92 100644
+--- a/.go-version
++++ b/.go-version
+@@ -1 +1 @@
+-1.27.1
++1.23.2
+diff --git a/go.mod b/go.mod
+index d31d591..9b0e0f2 100644
+--- a/go.mod
++++ b/go.mod
+@@ -1,8 +1,7 @@
+ module gxb.local/backend/v2
+ 
+-go 1.26.0
++go 1.23.0
+ 
+-toolchain go1.27.1
+ 
+ require (
+ 	github.com/go-chi/chi/v5 v5.3.1

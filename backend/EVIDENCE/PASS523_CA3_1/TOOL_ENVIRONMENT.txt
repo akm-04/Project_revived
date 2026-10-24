@@ -1,0 +1,15 @@
+canonical .go-version:
+1.27.1
+canonical go.mod sha256:
+313c574368bb56dc570bc3427b65f59b059e492f909fe43b7d0291b5ced21dc4  /mnt/data/gxb-backend-v2-v0.65.0-pass523-ca3-1-candidate/go.mod
+canonical go.sum sha256:
+efbf6753542d66e2fefcb2ab5e2ade7c9d28f2206a1113d1eb9568f2cb75808d  /mnt/data/gxb-backend-v2-v0.65.0-pass523-ca3-1-candidate/go.sum
+host go:
+go version go1.23.2 linux/amd64
+sqlc:
+NOT_AVAILABLE
+goose:
+NOT_AVAILABLE
+postgres binary:
+NOT_AVAILABLE
+pgx module cache:

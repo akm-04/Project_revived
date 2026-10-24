@@ -1,0 +1,24 @@
+{
+  "status": "CONCRETE_5D_ARENA_PLAN_PREIMPLEMENTATION_GATE_PENDING",
+  "policy_id": "C5D_ARENA_SEASON_MODE_V1",
+  "base_product_commit": "48bb354",
+  "steps": [
+    "S0 Commit research/policy/impact/plan/acceptance docs; cumulative checkpoint; owned authority 734 from 733 with contract index, C5C approval + rule-4 merge (PASSMAP_PENDING_MERGE), HOT preseal, COLD --deep, sole-contract query, restore drill.",
+    "S1 Content: tools/arena_content.py compiles arena_catalog.json (region_arena_level/reward/notice, region_mission, region_exchange, misc region_*, function 37, mail texts); compiler enables region_coin and king_coin; Go catalog type, registry bundle/verify, contentstore read; oracle tools/check_i7c5d_source_oracle.py.",
+    "S2 internal/domain/arena: calendar (45-day seasons, 05:00 day, close gap), levels/stars/protections, lord points, defense streaks, matching bands, missions, exchanges, settlement lines, season order, records. Pure with unit tests.",
+    "S3 migration 00067 + internal/adapters/postgres/arenastore: competition root, season players, matches, records, partner usage, settlements (+rows); achievement profile 100003; ownership entries; migration lock.",
+    "S4 Combat: shared resolution flights helper; Participant arena adjustments; resolver driver campaign 45 balancing.",
+    "S5 internal/application/arena: Info(entry), Partners, ModifyDefence, Match, Start, Fight (freeze, bounded resolve, terminal settle), Stop, Records, Report, missions (give up/claim), exchange, RankList(6), season settlement, reconcile provider (settlements, abandoned matches, unresolved attempts).",
+    "S6 Achievement 100003 producer.",
+    "S7 projection/arena wire shapes; stockruntime dispatcher 768-779, 666, 848, 849 and 301 rank_types 6; gxb-api composition and reconcile.",
+    "S8 Native PG/River tests (entry, defense, match/start/fight/settle once, practice, stop/abandon, protections, defense streaks, missions/exchange, settlement/mail/champion, rank list, reload); regressions 5C/5B/5A/4B.",
+    "S9 Freeze I7C5D-F1 v0.131.0; exact portable R2 qualification incl. 66->67 populated upgrade with content deploy; reality review; owned 735 closure; checkpoint."
+  ],
+  "open_gates_after_5d": [
+    "1829 HISTORY projection activation",
+    "Arena shop (region shop) and Playoffs",
+    "5E-5F",
+    "full I7C-4",
+    "stock-client E2E"
+  ]
+}

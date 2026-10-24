@@ -1,0 +1,8 @@
+=== FINAL FOCUSED TESTS W4D ===
+ok  	gxb.local/backend/v2/internal/application/i5	0.008s
+ok  	gxb.local/backend/v2/internal/application/characterasset	0.003s
+ok  	gxb.local/backend/v2/internal/domain/character	0.002s
+ok  	gxb.local/backend/v2/internal/content/builtin	0.386s
+ok  	gxb.local/backend/v2/internal/content/registry	1.544s
+ok  	gxb.local/backend/v2/internal/adapters/postgres/contentstore	0.128s
+ok  	gxb.local/backend/v2/internal/archguard	0.046s

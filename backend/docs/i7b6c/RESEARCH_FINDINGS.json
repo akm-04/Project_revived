@@ -1,0 +1,50 @@
+{
+  "classification": "STATIC_NOT_RUNTIME",
+  "findings": [
+    {
+      "id": "6C-F01",
+      "source": "MessageManager.lua:genTitleInfo/genChatMessage",
+      "classification": "SOURCE_FACT",
+      "finding": "Chat title_info uses title_id@unique_id@end_time; absent title sentinel@@@@, bubble_info first @ component consumed. np_info stored in client history; new-event metadata must be server qualified."
+    },
+    {
+      "id": "6C-F02",
+      "source": "socialpresentation/transaction_reader.go;channelchatread/reader.go",
+      "classification": "IMPLEMENTATION_INSPECTION",
+      "finding": "Minimal readers trust derived name/level/avatar/frame; channel/DM payload has fixed default title/bubble. Requires canonical effective reads at pinned time/revision."
+    },
+    {
+      "id": "6C-F03",
+      "source": "i4store/directory_discovery.go; playerdisplay/commands.go",
+      "classification": "IMPLEMENTATION_INSPECTION",
+      "finding": "Name changes reconcile directory atomically; discovery selection uses directory name before enrichment. Canonical I5 candidate fallback needed for stale/missed projection; preserve I4 identity-bound validation."
+    },
+    {
+      "id": "6C-F04",
+      "source": "generaldmstore/store.go:find/InsertTx",
+      "classification": "IMPLEMENTATION_INSPECTION",
+      "finding": "Payload JSON hashed after typed marshal. Additive future snapshot fields must omit empty fields so old payload re-marshalling preserves digest; retain old intent and delivery semantics."
+    },
+    {
+      "id": "6C-F05",
+      "source": "profilefeedback/comment_service.go:row;service.go:Read",
+      "classification": "IMPLEMENTATION_INSPECTION",
+      "finding": "Author identity canonical but selected avatar/frame not effective expiry. Pass caller revision/time to typed display reader, same scope."
+    },
+    {
+      "id": "6C-F06",
+      "source": "guildprojection/bootstrap.go;cmd/gxb-api main guildView",
+      "classification": "IMPLEMENTATION_INSPECTION",
+      "finding": "Guild roster/applicant/leader display uses Directory only; bound canonical display bridge needed without foreign owner SQL or ownership change."
+    },
+    {
+      "id": "6C-F07",
+      "source": "PASS620 MINIMAL_PRESENTATION_SEAM.md vs frozen662/accepted680",
+      "classification": "SOURCE_FACT_AND_RECONCILIATION",
+      "finding": "Pre-I7B default title/bubble fallback intentionally accepted only before qualified cosmetics. Retain old immutable DM defaults; future qualified sender extends narrow owner observation. No requirement for new caches/hints."
+    }
+  ],
+  "research_remaining": [],
+  "provider_blockers": "Inherited6B ten metrics/rich/history unqualified; cosmetic external origins retain actualqualification gates",
+  "source_consumer_disposition": "Current Player/Friend subclass narrow identity shapes unchanged; current MessageManager exactnp; oldmetadata corroborates; V1chat onlystub. Later/mixedmodel Guild repHero source does not override acceptedGuildview protocol. Existing source ledger679 plus accepted Social188 contracts reused."
+}

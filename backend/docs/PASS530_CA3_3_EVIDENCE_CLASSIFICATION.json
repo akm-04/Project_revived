@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "pass": "530.0",
+  "phase": "CA3-3",
+  "result": "GREEN_LOCAL_CANDIDATE_ONLY_CA3_AGGREGATE_NOT_ACCEPTED",
+  "source_fact": [
+    "Pass528 CA3-3 sealed implementation contract and acceptance matrix control gameplay mechanics",
+    "exact current src_64 SHA256 c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+    "source-qualified MIDs 786/787/134/791 and generated progression rows/cardinalities"
+  ],
+  "runtime_observed": [
+    "canonical static/source/compiler/query/ownership/preseal checks green",
+    "receipt lock/recheck order and I5 two-phase seams inspected in produced code",
+    "canonical go.mod/go.sum/.go-version retain pinned release bytes"
+  ],
+  "compatibility_copy_only": [
+    "focused race green for ten changed/foundation packages",
+    "focused vet green",
+    "bounded package regression green 91/91",
+    "integrated check green through Go/I1-I5 before outer timeout; remaining historical validators separately green"
+  ],
+  "strong_inference": [
+    "no unresolved CA3-3 gameplay mechanic or source contradiction remains after independent reality check"
+  ],
+  "not_run": [
+    "exact Go 1.27.1 candidate execution",
+    "pinned sqlc 1.31.1 generation/execution proof",
+    "real PostgreSQL 18.6 migration/restore/mixed-writer/concurrency proof",
+    "old-node drain and new-binary-only CAS activation",
+    "A525-07 stock no-reload/reload recovery",
+    "unmodified stock-client combined CA3-1/CA3-2/CA3-3 E2E"
+  ],
+  "not_claimed": [
+    "CA3 aggregate acceptance",
+    "stock-client compatibility",
+    "release acceptance",
+    "CA4 or later Pet feature activation"
+  ]
+}

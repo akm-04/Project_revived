@@ -1,0 +1,287 @@
+{
+  "schema_version": 1,
+  "status": "CURRENT_CUMULATIVE_CONTENT_GENERATION_LOCK_I7C6",
+  "rule": "Historical validators keep their phase-specific semantic invariants. In cumulative/current mode they may accept only an explicitly registered successor compiler generation at or after their baseline. New generations are append-only review events; registering a generation does not waive capability/count/source/migration/ownership assertions.",
+  "generations": [
+    {
+      "ordinal": 1,
+      "stage": "R5",
+      "compiler_version": "r5-1",
+      "parser_version": null
+    },
+    {
+      "ordinal": 2,
+      "stage": "CA2-1",
+      "compiler_version": "ca2-1",
+      "parser_version": null
+    },
+    {
+      "ordinal": 3,
+      "stage": "CA2-2",
+      "compiler_version": "ca2-2",
+      "parser_version": null
+    },
+    {
+      "ordinal": 4,
+      "stage": "CA2-3",
+      "compiler_version": "ca2-3",
+      "parser_version": null
+    },
+    {
+      "ordinal": 5,
+      "stage": "CA3-1",
+      "compiler_version": "ca3-1",
+      "parser_version": "lua-generated-v3-pet"
+    },
+    {
+      "ordinal": 6,
+      "stage": "CA3-2",
+      "compiler_version": "ca3-2",
+      "parser_version": "lua-generated-v4-pet-acquisition"
+    },
+    {
+      "ordinal": 7,
+      "stage": "CA3-3",
+      "compiler_version": "ca3-3",
+      "parser_version": "lua-generated-v5-pet-progression"
+    },
+    {
+      "ordinal": 8,
+      "stage": "CA4-1",
+      "compiler_version": "ca4-1",
+      "parser_version": "lua-generated-v6-equipment-primitives"
+    },
+    {
+      "ordinal": 9,
+      "stage": "CA4-2A",
+      "compiler_version": "ca4-2a",
+      "parser_version": "lua-generated-v7-hero-equipment"
+    },
+    {
+      "ordinal": 10,
+      "stage": "CA4-3A",
+      "compiler_version": "ca4-3a",
+      "parser_version": "lua-generated-v8-hero-fumo"
+    },
+    {
+      "ordinal": 11,
+      "stage": "CA4-3B",
+      "compiler_version": "ca4-3b",
+      "parser_version": "lua-generated-v9-hero-promotion-restoration"
+    },
+    {
+      "ordinal": 12,
+      "stage": "CA4-4A",
+      "compiler_version": "ca4-4a-i1",
+      "parser_version": "lua-generated-v10-pet-equipment"
+    },
+    {
+      "ordinal": 13,
+      "stage": "CA4-4B",
+      "compiler_version": "ca4-4b-i1",
+      "parser_version": "lua-generated-v11-pet-restoration"
+    },
+    {
+      "ordinal": 14,
+      "stage": "CA4-5",
+      "compiler_version": "ca4-5-i1",
+      "parser_version": "lua-generated-v12-super-equipment"
+    },
+    {
+      "ordinal": 15,
+      "stage": "CA6-2",
+      "compiler_version": "ca6-2-practice-foundation",
+      "parser_version": "lua-generated-v13-practice"
+    },
+    {
+      "ordinal": 16,
+      "stage": "CA7-2",
+      "compiler_version": "ca7-2-appearance-foundation",
+      "parser_version": "lua-generated-v14-appearance"
+    },
+    {
+      "ordinal": 17,
+      "stage": "I7A-6A",
+      "compiler_version": "i7a6a-emoticon",
+      "parser_version": "lua-generated-v15-emoticon"
+    },
+    {
+      "ordinal": 18,
+      "stage": "I7A-7A",
+      "compiler_version": "i7a7a-social-gift",
+      "parser_version": "lua-generated-v16-social-gift"
+    },
+    {
+      "ordinal": 19,
+      "stage": "I7A-8A",
+      "compiler_version": "i7a8a-guild-broadcast",
+      "parser_version": "lua-generated-v17-guild-broadcast"
+    },
+    {
+      "ordinal": 20,
+      "stage": "I7A-8B",
+      "compiler_version": "i7a8b-guild-invite",
+      "parser_version": "lua-generated-v18-guild-invite"
+    },
+    {
+      "ordinal": 21,
+      "stage": "I7B-6A",
+      "compiler_version": "i7b6a-player-display",
+      "parser_version": "lua-generated-v18-guild-invite",
+      "revision_id": "bd1f4ceac82c016cd7282ed02a4d851029ac791df9776db3c5ce5569626a03b0",
+      "scope": "Forward source-derived display/name/cosmetic catalog; previousimmutable revisions unchanged"
+    },
+    {
+      "ordinal": 22,
+      "stage": "I7C-2D",
+      "compiler_version": "i7c2d-book-inputs",
+      "parser_version": "lua-generated-v18-guild-invite",
+      "revision_id": "7441492510c3869e2ad1c9fcdd99a2cb9bd5d0d2a223be5a5ca77d84c558884c",
+      "scope": "Book inputs and four existing I5 named scalar definitions; prior25 payloads unchanged"
+    },
+    {
+      "ordinal": 23,
+      "stage": "I7C-2E",
+      "compiler_version": "i7c2e-course-inputs",
+      "parser_version": "lua-generated-v18-guild-invite",
+      "revision_id": "4e2540adfef4dd01d5a19d709aa35b8306ab11717705de77dca82a50fb54f93c",
+      "scope": "New rawCoursecatalog only; prior27payloadsbyteidentical; 31sourceboundarymembersadded"
+    },
+    {
+      "ordinal": 24,
+      "stage": "I7C-2F",
+      "compiler_version": "i7c2f-inscription-inputs",
+      "parser_version": "lua-generated-v18-guild-invite",
+      "revision_id": "2fb1b3bd7fa1a9cdf719ed0646a9dc4a6e59a938e7b1f1b4eb49f65f3fb2e136",
+      "scope": "Inscription source catalog and exactly three named certificate scalars; old resource rows and 27 prior payloads preserved"
+    },
+    {
+      "ordinal": 25,
+      "stage": "I7C-2G",
+      "compiler_version": "i7c2g-element-inputs",
+      "parser_version": "lua-generated-v18-guild-invite",
+      "revision_id": "b55f0900f2cff611313a5a4a88e03d3c2f034625c4a06c5f3bfe490b04f477bd",
+      "scope": "Element catalog only; all29 prior payloads and existingI5 resources unchanged"
+    },
+    {
+      "ordinal": 26,
+      "stage": "I7C-2H",
+      "compiler_version": "i7c2h-spirit-inputs",
+      "parser_version": "lua-generated-v18-guild-invite",
+      "revision_id": "f5547b0455f529a3869512ef84d493b455947c0598f8e27be62117159e6d385c",
+      "scope": "Spirit source catalog only; prior30payloads and I5resources unchanged. Unknownmint/milestone productionpolicies gated."
+    },
+    {
+      "ordinal": 27,
+      "stage": "I7C-2I",
+      "compiler_version": "i7c2i-evolution-inputs",
+      "parser_version": "lua-generated-v18-guild-invite",
+      "revision_id": "e56814fdac078d6b47deb99c96f39c2770e812e0d054bdf146ddd63ee591262f",
+      "scope": "Stone evolution source catalog only; prior31 payloads immutable. Genuine blood mission producer remains qualification-gated."
+    },
+    {
+      "ordinal": 28,
+      "stage": "I7C-2J",
+      "compiler_version": "i7c2j-conquer-inputs",
+      "parser_version": "lua-generated-v18-guild-invite",
+      "revision_id": "9aba2815bc7f91793129c151224986c5240df883c1a2dc33dc5cccfc78bf8e15",
+      "scope": "Conquer source contribution/read catalog only; prior32 payloads immutable. Genuine5E attestedwriter remains qualification-gated."
+    },
+    {
+      "ordinal": 29,
+      "stage": "I7C-3A",
+      "compiler_version": "i7c3a-stat-rules",
+      "parser_version": "lua-generated-v18-guild-invite",
+      "revision_id": "c320a1a9c430e6fdf79ec162eeead787a1677143dccc758af4d1b7264eb925f2",
+      "scope": "Exact stat arithmetic/content and detached numeric adapter; prior33payloads unchanged.3B genuine publicownerqualification separate."
+    },
+    {
+      "ordinal": 30,
+      "stage": "I7C-3B",
+      "compiler_version": "i7c3b-stat-inputs",
+      "parser_version": "lua-generated-v18-guild-invite",
+      "revision_id": "3c23b1550c548174feac9a3487a24174673d44508c716e5908176db5ed93b4b3",
+      "scope": "Source numeric equipment/skill input catalog; prior34payloads unchanged; owner qualification separate."
+    },
+    {
+      "ordinal": 31,
+      "stage": "I7C-4A",
+      "compiler_version": "i7c4a-cosmetic-privilege",
+      "parser_version": "lua-generated-v18-guild-invite",
+      "revision_id": "2a44f1c205ab6d8e9da0c42c9ab994644c3ec41a689fb13414b2899afbb27559",
+      "scope": "Source VIP thresholds/skill caps only; prior35payloads immutable. Manual preservation authority explicitly separate from payment."
+    },
+    {
+      "ordinal": 32,
+      "stage": "I7C-4B",
+      "compiler_version": "i7c4b-achievement-facts",
+      "parser_version": "lua-generated-v18-guild-invite",
+      "revision_id": "fec70d3ad6ca36b08f54ccc81fefe9dbc7380aaf94d2cb14a9009e1ab60664f0",
+      "scope": "33 source achievement definitions; selected100014 genuineproducer, other32 explicitly unavailable; prior36payloads unchanged."
+    },
+    {
+      "ordinal": 33,
+      "stage": "I7C-5B",
+      "compiler_version": "i7c5b-top-floor",
+      "parser_version": "lua-generated-v18-guild-invite",
+      "revision_id": "368455bea9adc0f1f06ba54bf5e90e07d7d30a45d19d723dc3c2e2fe56615ad0",
+      "scope": "Top Floor catalog (arena_reward, misc, vip, refresh_cost, robot, robot_hero, random_name; C5B private ladder policy inputs); arena_coin ENABLED_R4 as Top Floor income owner; prior37payloads otherwise unchanged."
+    },
+    {
+      "ordinal": 34,
+      "stage": "I7C-5C",
+      "compiler_version": "i7c5c-one-on-one",
+      "parser_version": "lua-generated-v18-guild-invite",
+      "revision_id": "bc12206a9236f744d50d205a927fdc8050d9dfc1f7dd13bc59fe8169cb1787ce",
+      "scope": "1 on 1 catalog (legend_arena_rank, legend_reward, misc legend_*/top_refresh_cost, vip num_top/top_reset, refresh_cost buy_top_cost, title_system 100002-100005, translation LEGEND_MAIL_*, message 30002; C5C private policy inputs); top_coin ENABLED_R4 as 1 on 1 income owner; prior38payloads otherwise unchanged."
+    },
+    {
+      "ordinal": 35,
+      "stage": "I7C-5D",
+      "compiler_version": "i7c5d-arena",
+      "parser_version": "lua-generated-v18-guild-invite",
+      "revision_id": "d9c6bcc458c00e66da9ab2c86e319c0d04c3536eba13267a3121769d9c5a8e5d",
+      "scope": "Arena catalog (region_arena_level/reward/notice, region_mission, region_exchange, misc region_*, function 37, translation REGION_ARENA_MAIL_*/RULE3; C5D private policy inputs); region_coin and king_coin ENABLED_R4 as Arena income owner; prior39payloads otherwise unchanged."
+    },
+    {
+      "ordinal": 36,
+      "stage": "I7C-5E",
+      "compiler_version": "i7c5e-conquer",
+      "parser_version": "lua-generated-v18-guild-invite",
+      "revision_id": "4b863e66312c1fb0e5ee9839e6b8b195bc9a9ac1edcc396cef464dc93a7833b4",
+      "scope": "Conquer School mode catalog (conquer_school_campaign teams/reward, conquer_school_loop reward, misc conquer_*, refresh_cost buy_conquer_cost, function 48, translation CONQUER_SCHOOL_MAIL_*/RULE_TEXT; C5E private policy inputs); prior40payloads otherwise unchanged."
+    },
+    {
+      "ordinal": 37,
+      "stage": "I7C-5F",
+      "compiler_version": "i7c5f-league",
+      "parser_version": "lua-generated-v18-guild-invite",
+      "revision_id": "fa584ba83e7e19a832bf159f760e4c61820b419adc94a87d46e95287066ac044",
+      "scope": "Champions League source catalog and labelled C5F_LEAGUE_PRIVATE_POLICY_V2; source daily/final/gifts/schedule/callers and mail translations. Prior41payloads unchanged. Finite stock-client calendar presentation remains an open stock/effective-client gate."
+    },
+    {
+      "ordinal": 38,
+      "stage": "I7C-4 full stage A",
+      "compiler_version": "i7c4fa-achievement-ap",
+      "parser_version": "lua-generated-v18-guild-invite",
+      "revision_id": "28d947045438f46ba5bd63707477968674b6d86c5bdb6d495d91cbc467677f3f",
+      "scope": "Achievement catalog schema 2 adds achievement_level.lua point levels (10 rows, items) under ACHIEVEMENT_CATALOG_I7C4FA; prior payloads unchanged."
+    },
+    {
+      "ordinal": 39,
+      "stage": "I7C-4 full stage B (I7C-6)",
+      "compiler_version": "i7c6-cosmetic-origins",
+      "parser_version": "lua-generated-v18-guild-invite",
+      "revision_id": "5f7fe83b1c358a67e1a62fdc2670b1db5c00ef8891efd886d4d6fb5a46a355b7",
+      "scope": "Player display title rows carry the title_system condition list under COSMETIC_TITLE_CONDITION_I7C6 (marriage 30/50, Bookshelf 50/80, villas 30/60/100 feed C6_SELECTED_COSMETIC_ORIGINS_V1); other cosmetic families and all other payloads unchanged."
+    }
+  ],
+  "current": {
+    "ordinal": 39,
+    "stage": "I7C-4 full stage B (I7C-6)",
+    "compiler_version": "i7c6-cosmetic-origins",
+    "parser_version": "lua-generated-v18-guild-invite",
+    "revision_id": "5f7fe83b1c358a67e1a62fdc2670b1db5c00ef8891efd886d4d6fb5a46a355b7",
+    "scope": "Player display title rows carry the title_system condition list under COSMETIC_TITLE_CONDITION_I7C6 (marriage 30/50, Bookshelf 50/80, villas 30/60/100 feed C6_SELECTED_COSMETIC_ORIGINS_V1); other cosmetic families and all other payloads unchanged."
+  }
+}

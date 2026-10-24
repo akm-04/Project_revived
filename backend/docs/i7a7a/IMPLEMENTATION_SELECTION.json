@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "stage": "I7A-7A",
+  "full_node_path": [
+    "ROOT",
+    "I7",
+    "I7A",
+    "I7A-7",
+    "I7A-7A"
+  ],
+  "sealed_design_base": {
+    "artifact": "gxb-backend-pass-649.0-passmap.zip",
+    "sha256": "6f41f3c7b2e7937a89dc728ec11ef95973ebfc2129546434a16559d793bd6987"
+  },
+  "accepted_backend_base": {
+    "artifact": "gxb-backend-v2-v0.95.1-pass648-i7a6b-accepted.zip",
+    "sha256": "2fa5d71e52c1246580eb5eba39ed7f7ca687bb446deca3bbd1af555b25d529da",
+    "head": "2c17a4cfb70b8e14963121d358aeefd13b82fbde"
+  },
+  "authorization": "Latest direct human message authorizes7A implementation/exacttest/reconciliation, deferredPassMapsync and7Bresearch/design afterqualified7A",
+  "candidate_acceptance": "NONE; frozen pending metadata is creation provenance. Final qualified acceptance requires exact test identity and normal PassMap seal.",
+  "public_activation": "183/gift4/reload remain off;184 remains accepted relation-only",
+  "parent_acceptance": "I7A-7/I7A-10/E and physicalstockW2 notpassed",
+  "contract_files": {
+    "OWNER_SCHEMA_CONTRACT.json": "f015d29f5eb80bcd6efff1c9a8ccaa10c937b5d0e99b99604a9a6cc1770503e5",
+    "POLICY_CONTENT_CONTRACT.json": "cbbe591137979609efa3bec36a138f3e02d7532ccbfbbd456d8bb3360f3d8132",
+    "TRANSACTION_GRANT_CONTRACT.json": "5e6cef0cc8249667140e106f3d03fd8d134b533d6daccc96f840def34dab2250",
+    "REPLAY_RESTORE_CONTRACT.json": "fbcd8e70e83de32134e20691e02505fb9f551caddc0411784af4c125fc322361",
+    "WIRE_ACTIVATION_SUCCESSOR_CONTRACT.json": "076c2abfedb64245d1a431e4c9b52c03477a9ce80540c9811f19045bf2922aef"
+  },
+  "implementation_deltas": [
+    "I4 ValidateActor compares actual AccountUID in existing owner adapter",
+    "I5 adds friendship_coin-only preflight for scalar timestamp/version regression",
+    "Transfer UUID derived from stable operation entropy and operationID label; distinct from send operation and GenerationID",
+    "Forward-only00036 honors canonical foundation; earlier working Down prototype removed before freeze",
+    "Pure GiftSnapshotTx returns day/counts/sent recipients without refreshing epochs",
+    "10 competing sends permit bounded authoritative abort outcomes, verified empty source then separate fresh operation resubmission; no unknown-COMMIT replay",
+    "Send locks both current/latest sender and recipient GiftEpoch371 keys in canonical order, creates/touches both named fences and derives counts only from transfers",
+    "R1 explicitly rejected in final I7A1/649 reread for missing recipient epoch lock; exactR2 supersedes it",
+    "Inherited native fixture truncates gift child plus notices together; current migration assertion advances35to36, preserving existing behavior checks",
+    "Single finite parent deadline covers existing I4 admission, replay/content read transactions and the complete gameplay command; reconciliation keeps foundation cleanup bounds",
+    "Gift-only Inbox consumption is privately prepared with exact caller Tx and source descriptor before Grant, then applied after one aggregate settlement; wrongTx/unprepared/substituted-source native negatives required"
+  ],
+  "wire_time_evidence": "Static src_64 and corroborative historical/V1 do not prove original server. GMT+8 and recipient-block rule are selected implementation policies.",
+  "migration_high_water": 36
+}

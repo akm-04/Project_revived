@@ -1,0 +1,11 @@
+{
+  "node": "I7B-4B",
+  "status": "PROPOSED_REQUIRED_OWNER_EXTENSION_NOT_PRODUCT",
+  "owner": "ProfileFeedback",
+  "reference_integrity": "globalnonreusecommentID; immutablecardowner/author, ownedrootFK; tombstones retained; reaction FKretainedcomment; typedI4/I5 reads, no foreignplayerFK/SQL",
+  "control_records": "Exact operation identity + pending/terminal state retained, actor singlepending index; 315fence + stateCAS prevents cancelledlateworker",
+  "failure": "finite existingerror_code1; no partial success; missingrequiredproviders failpage",
+  "consumers": "MID1835/1836/1839/1841; typedSPACE6; parent4/E/W2 residual",
+  "migration": "45 Up-only;44baselineupgrade+sequence/tombstone/operation/receipt/Contentdumprestore and independentrestart",
+  "proof": "ACCEPTANCE_MATRIX.json B01..B13"
+}

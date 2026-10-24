@@ -1,0 +1,21 @@
+?   	gxb.local/backend/v2/internal/domain/combat	[no test files]
+?   	gxb.local/backend/v2/internal/domain/commerce	[no test files]
+?   	gxb.local/backend/v2/internal/domain/control	[no test files]
+?   	gxb.local/backend/v2/internal/domain/economy	[no test files]
+?   	gxb.local/backend/v2/internal/domain/generation	[no test files]
+?   	gxb.local/backend/v2/internal/domain/grant	[no test files]
+?   	gxb.local/backend/v2/internal/domain/guild	[no test files]
+ok  	gxb.local/backend/v2/internal/domain/identity	(cached)
+?   	gxb.local/backend/v2/internal/domain/mail	[no test files]
+ok  	gxb.local/backend/v2/internal/domain/logicalserver	(cached)
+?   	gxb.local/backend/v2/internal/domain/modes	[no test files]
+?   	gxb.local/backend/v2/internal/domain/objective	[no test files]
+?   	gxb.local/backend/v2/internal/domain/player	[no test files]
+?   	gxb.local/backend/v2/internal/domain/profile	[no test files]
+?   	gxb.local/backend/v2/internal/domain/social	[no test files]
+ok  	gxb.local/backend/v2/internal/domain/realtimeauth	(cached)
+ok  	gxb.local/backend/v2/internal/application/bootstrap	(cached)
+ok  	gxb.local/backend/v2/internal/application/realtimeauth	(cached)
+ok  	gxb.local/backend/v2/internal/adapters/stockruntime	(cached)
+ok  	gxb.local/backend/v2/internal/projection/lobby	(cached)
+ok  	gxb.local/backend/v2/internal/foundation/tx	(cached)

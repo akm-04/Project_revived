@@ -1,0 +1,20 @@
+{
+  "subject": "Exactfrozen5Bcombinedcandidate plusuninvalidated5Ascopedproof",
+  "cases": {
+    "B01": "Fresh46 and45->46upgrade/constraints/current/history/reload",
+    "B02": "PNG multipart actualMD5/URL/GET sourcecallback andfilenameMD5untrusted",
+    "B03": "Auth/region/forgedtarget/malformed/blobfailure no refwrite",
+    "B04": "Samebytes no-op, replacementversion, stableDecisionAt staleabort, concurrent315/391assignment",
+    "B05": "Knownop oldoutcomeno reset, fingerprintconflict/revocation, unknowncommit positiveproof/missprotected",
+    "B06": "Processdeath before/after DBcommit, restart durablepin/ref/receipt resolution",
+    "B07": "GC protects current/history/receipt/unknownpins andnewpublishercoordination, deletesonlysafeorphans",
+    "B08": "Offlinejointdump+blob+pinbundle relocate/restart; missing/corruptbytes rejection, DB-only not accepted",
+    "B09": "Affectedpublicprofile/HTTP/API/default/race/vet/ownership/security gates"
+  },
+  "reused": "5AA01..A08 exact676 unmodifiedblobstore; parent5 current/old/native10sourceassertions remainvalid",
+  "limitations": [
+    "No physicalstockAndroid/W2",
+    "No livehotsnapshot/powerfailureclaim",
+    "No whole6/E acceptance"
+  ]
+}

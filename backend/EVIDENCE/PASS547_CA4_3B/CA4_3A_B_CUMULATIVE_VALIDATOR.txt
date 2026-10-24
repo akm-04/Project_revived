@@ -1,0 +1,2 @@
+CA4-3A-B VALIDATION: PASS
+MID58 service/receipt/I5 debit/dispatcher/Mana projection/production registration present; qualified CA4-3B promotion is permitted while Quick Fumo and MID54/62 activation remain absent

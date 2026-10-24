@@ -1,0 +1,34 @@
+{
+  "status": "PLANNED",
+  "policy_id": "C5E_CONQUER_SCHOOL_MODE_V1",
+  "rows": [
+    {
+      "id": "A1",
+      "check": "Content oracle: 56 missions, team counts, rewards, loop rewards, misc values, buy costs exact from src_64"
+    },
+    {
+      "id": "A2",
+      "check": "Domain unit: chances day/promotion refill, buff cap, team/used rules, promotion, loop 56 transition, end at loop 9, reset, buy, report score"
+    },
+    {
+      "id": "A3",
+      "check": "Wire shapes 1568-1573/2790 and invalid requests never reach the owner"
+    },
+    {
+      "id": "A4",
+      "check": "Native: fresh Lv100 player plays mission 1 to promotion; facts progress/run, directory, MID1 17 keys, I5 grants, receipts"
+    },
+    {
+      "id": "A5",
+      "check": "Native: combat freeze conquer contribution reflects promoted progress; facts written under an earlier revision remain readable after a content deploy"
+    },
+    {
+      "id": "A6",
+      "check": "Native: concurrent RESULT/START serialize; replayed RESULT does not double grant; report view reward capped at 10/day"
+    },
+    {
+      "id": "A7",
+      "check": "Portable R2: build, vet, archguard, race, migrations fresh/upgrade 67->68, content deploy, full regression"
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+ok  	gxb.local/backend/v2/internal/domain/character	(cached)
+ok  	gxb.local/backend/v2/internal/projection/pet	(cached)
+ok  	gxb.local/backend/v2/internal/application/characterpet	(cached)
+ok  	gxb.local/backend/v2/internal/content/builtin	(cached)
+ok  	gxb.local/backend/v2/internal/content/registry	(cached)
+ok  	gxb.local/backend/v2/internal/adapters/postgres/contentstore	(cached)
+ok  	gxb.local/backend/v2/internal/adapters/stockruntime	(cached)

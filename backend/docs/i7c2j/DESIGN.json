@@ -1,0 +1,28 @@
+{
+  "status": "IMPLEMENTED_WORKING_NATIVE_GREEN_EXACT_CANDIDATE_QUALIFICATION_PENDING",
+  "owner": "CONQUER_SCHOOL",
+  "physical": [
+    "internal/domain/conquerschool",
+    "internal/application/conquerschool",
+    "internal/adapters/postgres/conquerstore"
+  ],
+  "schema": {
+    "player_conquer_facts": "PlayerFK, version, knownkind, progress/runJSON, policy/contentrevision, originoperation/reference, created/updated timestamps",
+    "content_conquer_input_catalogs": "Immutable sourcepayload keyedrevision"
+  },
+  "migration": "00057_i7c2j_conquer_facts.sql",
+  "initialization": "RequiredMID1PersistenceContributor createsinitialsameTx; explicitdeploymentmissinglegacyunknown",
+  "write": "TypedLock/SaveCAS callerTx port; no exposed mode command/admission ornewreceiptmechanism",
+  "read": "Qualifiedprogress read + optionalrun observation + CoherentHeroInputsTx reused witnessedCA8scope",
+  "wire": "No ConquerMIDs activated; existinginactivebaseline unchanged; source-shaped progress fields returned bytypedprovider forlater3B/5E integration",
+  "implementation_sequence": [
+    "Domain/sourcecompiler andContentcatalog",
+    "Canonicalownerstore/bootstrap/typedI4enumeration/backfill",
+    "Coherentcontributionprovider andqualifiedwriterextensionport",
+    "Focusedchecks thenfreeze121/final711candidate",
+    "ExactR2native/upgrade/restore/source/static/race/vet/fuzz; primaryreality/final711seal"
+  ],
+  "no_new_topology_edges": true,
+  "implementation_started": true,
+  "implementation_complete": true
+}

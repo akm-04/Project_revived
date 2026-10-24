@@ -1,0 +1,11 @@
+FOCUSED TEST
+ok  	gxb.local/backend/v2/internal/adapters/stockruntime	0.402s
+ok  	gxb.local/backend/v2/internal/adapters/postgres/characterstore	0.002s
+ok  	gxb.local/backend/v2/internal/application/characterpet	0.004s
+ok  	gxb.local/backend/v2/internal/foundation/tx	0.008s
+FOCUSED RACE
+ok  	gxb.local/backend/v2/internal/adapters/stockruntime	1.420s
+ok  	gxb.local/backend/v2/internal/adapters/postgres/characterstore	1.011s
+ok  	gxb.local/backend/v2/internal/application/characterpet	1.020s
+ok  	gxb.local/backend/v2/internal/foundation/tx	1.023s
+FOCUSED VET

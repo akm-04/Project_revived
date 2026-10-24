@@ -1,0 +1,7 @@
+=== PASS487 R6 POSTGRES-TAG COMPILE ATTEMPT (COMPATIBILITY COPY) ===
+2026-09-09T06:07:59Z
+go version go1.23.2 linux/amd64
+go: downloading github.com/jackc/pgx/v5 v5.10.0
+internal/adapters/postgres/pgx_adapter.go:10:2: module lookup disabled by GOPROXY=off
+internal/adapters/postgres/pgx_adapter.go:11:2: module lookup disabled by GOPROXY=off
+EXIT_CODE=1

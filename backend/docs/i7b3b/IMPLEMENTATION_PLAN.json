@@ -1,0 +1,29 @@
+{
+  "contract_id": "I7B3B_IMPLEMENTATION_SPEC_V1",
+  "status": "READY_PENDING_NORMAL_RESEARCH_DESIGN_SEAL",
+  "full_node_path": "ROOT/I7/I7B/I7B-3/I7B-3B",
+  "existing_contracts": [
+    "00_PASSMAP/PASS662_I7B1_CONTRACT_INDEX.json",
+    "00_PASSMAP/PASS662_I7B1_ARCHITECTURE_PROVIDER_CONTRACT.json",
+    "00_PASSMAP/PASS662_I7B1_TRANSACTION_REFERENCE_REPLAY_CONTRACT.json",
+    "00_PASSMAP/PASS662_I7B1_WIRE_PRIVACY_POLICY_CONTRACT.json",
+    "00_PASSMAP/PASS662_I7B1_MEDIA_FRESHNESS_CONTRACT.json",
+    "00_PASSMAP/PASS662_I7B1_ACCEPTANCE_EXIT_CONTRACT.json",
+    "00_PASSMAP/PASS668_I7B3A_APPLIED_CONTRACT_EXTENSION.json",
+    "00_PASSMAP/PASS668_I7B3A_ACCEPTANCE_RECORD.json",
+    "00_PASSMAP/PASS667_I7B_TOPOLOGY.json"
+  ],
+  "steps": [
+    "Canonical player_heroes.is_like smallint NOT NULL DEFAULT0 CHECK0/1, migration43. CharacterHero owns metadata; no PublicProfile bookmark table, no Pet bookmark, existing state_version+UpdatedAt only on actual change.",
+    "Standalone CharacterHero BookmarkService and narrow BookmarkStore avoid widening unrelated HeroServicePort. MID3116 desired bit+positive exactsafe partner_id, strict stock params. Actor admission, complete315/410 preflight using existing typed locks before mutation, one caller Serializable Tx; no gameplay/Content formula or new clock/reset/cost.",
+    "Existing TimedRunner/receipt. Fixed code policy I7B_HERO_BOOKMARK_V1 bound in operation refs; this metadata has no content-dependent mechanics. Strict private outcome actor/context/server/entropy/start/decision/ref/value/version bindings; known replay authenticated, never reapplies. UNKNOWN absence stays UNKNOWN. New nonce-less occurrence may overwrite newer intent. Definite-abort DecisionAt stable; stale timestamp rejected.",
+    "Append is_like to canonical SELECT/scanner and JSON roster; insert defaults0. Existing partial UPDATEs preserve column. StockHero includes real0/1 for Normal/Super and therefore roster/MID1/full diagnostic Hero paths. SelfPlayer whole replacement gets the genuine field. Preserve59/305 production restrictions.",
+    "CharacterHero BookmarkObservationReader consumes caller CoherentReadScope with ref/version/content/time. New PublicProfile ReadSelectedWithBookmarkTx composes accepted ReadSelectedTx then genuine Hero bookmark on same RR/Serializable scope; exactref/version/time/revision match or fail. Pet has no bookmark. ExistingCA8 owns no bookmark and remains unchanged. Full rich1832/1838 activation stays6.",
+    "Native fresh43/upgrade42, Normal/Super desired/noop/version/ownership/malformed/replay/revocation/unknown/abort/races, canonical49/MID1, sameHero metadata preservation and composedselection/privacy/coherentversion; process/restart/scopedrestore. Exact Lua model methods/populate/callback and filter/formation predicates distinct from physicalstock proof. Unaffected668 evidence reused; changedscanner/serializer requires affectedCharacter regression only."
+  ],
+  "accepted_baseline": "676bccb8d9f108612461291576228504d7f251af1a4e63e7df90460dc3433d93",
+  "migration": "00043_i7b3b_hero_bookmark.sql",
+  "product_implementation_authorized": true,
+  "product_implementation_started": false,
+  "new_phase_wide_laws": []
+}

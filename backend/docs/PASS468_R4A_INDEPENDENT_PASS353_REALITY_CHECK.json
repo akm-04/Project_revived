@@ -1,0 +1,187 @@
+{
+  "conclusion": "PASS_NO_BOUNDED_ORACLE_CONTRADICTION",
+  "direct_oracle_facts": {
+    "code_observations": {
+      "economy_ledger_present": true,
+      "reward_service_mentions_horcrux": true,
+      "reward_service_mentions_stack_exceed_mail": false,
+      "temporal_invitation_no_cap_branch": true,
+      "temporal_natural_cap_energy": true,
+      "temporal_natural_cap_skill": true,
+      "temporal_natural_cap_spirit": true,
+      "temporal_policy_service_present": true
+    },
+    "horcrux_template_count": 378,
+    "item_stack_row_count": 5838,
+    "item_stack_source_sha256": "59b668c28a372543da0c36d7a8d84291cc5b93fa0d92b7cc389a645e96e7b7cc",
+    "oracle_sha256": "31729d5c5e4509c2c89eaa1e8203cf1570afe87e18ed2610b944e457a9946b15",
+    "positive_stack_rows": 5540,
+    "selected_resource_descriptors": {
+      "arena_coin": {
+        "cap_policy": "NONE",
+        "migration_readiness": "REGISTER_METADATA_NOW_MUTATE_WHEN_DOMAIN_MIGRATES",
+        "owner_service": "EconomyLedger",
+        "projection_path": "economy_.arena_coin",
+        "semantic_class": "durable_fungible",
+        "temporal_policy_key": "NONE"
+      },
+      "crystal": {
+        "cap_policy": "NONE",
+        "migration_readiness": "FOUNDATION_READY",
+        "owner_service": "EconomyLedger",
+        "projection_path": "economy_.crystal",
+        "semantic_class": "durable_fungible",
+        "temporal_policy_key": "NONE"
+      },
+      "energy": {
+        "cap_policy": "NATURAL_CAP_TABLE_DERIVED_NOT_HARD_MAX",
+        "migration_readiness": "FOUNDATION_READY",
+        "owner_service": "EnergyResourceOwner",
+        "projection_path": "economy_.energy",
+        "semantic_class": "timer_recovery",
+        "temporal_policy_key": "regen.energy.300s"
+      },
+      "exp": {
+        "cap_policy": "NONE",
+        "migration_readiness": "FOUNDATION_READY",
+        "owner_service": "PlayerProgressionService",
+        "projection_path": "economy_.exp",
+        "semantic_class": "monotonic_progression",
+        "temporal_policy_key": "NONE"
+      },
+      "guild_coin": {
+        "cap_policy": "NONE",
+        "migration_readiness": "REGISTER_METADATA_NOW_MUTATE_WHEN_DOMAIN_MIGRATES",
+        "owner_service": "EconomyLedger",
+        "projection_path": "economy_.guild_coin",
+        "semantic_class": "durable_fungible",
+        "temporal_policy_key": "NONE"
+      },
+      "invitation": {
+        "cap_policy": "NATURAL_CAP_SOURCE_DRIFT_FAIL_CLOSED",
+        "migration_readiness": "DEFER_ARENA",
+        "owner_service": "ArenaInvitationResourceOwner",
+        "projection_path": "economy_.invitation",
+        "semantic_class": "timer_recovery_source_drift",
+        "temporal_policy_key": "regen.invitation.1800s.source_drift"
+      },
+      "mana": {
+        "cap_policy": "NONE",
+        "migration_readiness": "FOUNDATION_READY",
+        "owner_service": "EconomyLedger",
+        "projection_path": "economy_.mana",
+        "semantic_class": "durable_fungible",
+        "temporal_policy_key": "NONE"
+      },
+      "march_coin": {
+        "cap_policy": "NONE",
+        "migration_readiness": "REGISTER_METADATA_NOW_MUTATE_WHEN_DOMAIN_MIGRATES",
+        "owner_service": "EconomyLedger",
+        "projection_path": "economy_.march_coin",
+        "semantic_class": "durable_fungible",
+        "temporal_policy_key": "NONE"
+      },
+      "region_coin": {
+        "cap_policy": "NONE",
+        "migration_readiness": "REGISTER_METADATA_NOW_MUTATE_WHEN_DOMAIN_MIGRATES",
+        "owner_service": "EconomyLedger",
+        "projection_path": "economy_.region_coin",
+        "semantic_class": "durable_fungible",
+        "temporal_policy_key": "NONE"
+      },
+      "skill_point": {
+        "cap_policy": "NATURAL_CAP_VIP_DERIVED_NOT_HARD_MAX",
+        "migration_readiness": "FOUNDATION_READY",
+        "owner_service": "SkillPointResourceOwner",
+        "projection_path": "economy_.skill_point",
+        "semantic_class": "timer_recovery",
+        "temporal_policy_key": "regen.skill_point.300s.vip_cap"
+      },
+      "spirit_energy": {
+        "cap_policy": "NATURAL_CAP_180_NOT_HARD_MAX",
+        "migration_readiness": "FOUNDATION_READY",
+        "owner_service": "SpiritEnergyResourceOwner",
+        "projection_path": "economy_.spirit_energy",
+        "semantic_class": "timer_recovery",
+        "temporal_policy_key": "regen.spirit_energy.360s.fixed180"
+      },
+      "top_coin": {
+        "cap_policy": "NONE",
+        "migration_readiness": "REGISTER_METADATA_NOW_MUTATE_WHEN_DOMAIN_MIGRATES",
+        "owner_service": "EconomyLedger",
+        "projection_path": "economy_.top_coin",
+        "semantic_class": "durable_fungible",
+        "temporal_policy_key": "NONE"
+      }
+    }
+  },
+  "errors": [],
+  "evidence_class": "CORROBORATIVE_DIFFERENTIAL_ONLY_NOT_V2_AUTHORITY",
+  "limitations": [
+    "Pass353 is a frozen reconstruction/oracle and is not original-server authority.",
+    "Agreement is used only to detect contradictions on bounded classifications; V1 persistence/formulas/handlers are not imported.",
+    "Current src_64 and Pass467 R4 contract remain implementation authority."
+  ],
+  "method": "INDEPENDENT_DIRECT_PASS353_ORACLE_READ_NOT_R4A_DIFFERENTIAL_SCRIPT",
+  "r4a_boundary_crosscheck": {
+    "arena_coin": {
+      "catalog_status": "QUALIFIED",
+      "class": "SCALAR_CURRENCY",
+      "definition_key": "scalar_currency:arena_coin",
+      "resource_key": "arena_coin",
+      "settlement_activation": "OWNER_REQUIRED",
+      "source_asset_id": -3
+    },
+    "crystal": {
+      "catalog_status": "QUALIFIED",
+      "class": "SCALAR_CURRENCY",
+      "definition_key": "scalar_currency:crystal",
+      "resource_key": "crystal",
+      "settlement_activation": "ENABLED_R4",
+      "source_asset_id": -1
+    },
+    "exp": {
+      "catalog_status": "QUALIFIED",
+      "class": "PLAYER_EXP",
+      "definition_key": "player_exp:exp",
+      "resource_key": "exp",
+      "settlement_activation": "R5_REQUIRED",
+      "source_asset_id": -15
+    },
+    "guild_coin": {
+      "catalog_status": "QUALIFIED",
+      "class": "SCALAR_CURRENCY",
+      "definition_key": "scalar_currency:guild_coin",
+      "resource_key": "guild_coin",
+      "settlement_activation": "OWNER_REQUIRED",
+      "source_asset_id": -7
+    },
+    "invitation": {
+      "cap_rule": "UNRESOLVED",
+      "catalog_status": "PARTIAL",
+      "class": "TEMPORAL",
+      "definition_key": "temporal:invitation",
+      "regen_amount": 1,
+      "regen_seconds": 1800,
+      "resource_key": "invitation",
+      "settlement_activation": "FAIL_CLOSED"
+    },
+    "mana": {
+      "catalog_status": "QUALIFIED",
+      "class": "SCALAR_CURRENCY",
+      "definition_key": "scalar_currency:mana",
+      "resource_key": "mana",
+      "settlement_activation": "ENABLED_R4",
+      "source_asset_id": -2
+    },
+    "march_coin": {
+      "catalog_status": "QUALIFIED",
+      "class": "SCALAR_CURRENCY",
+      "definition_key": "scalar_currency:march_coin",
+      "resource_key": "march_coin",
+      "settlement_activation": "OWNER_REQUIRED",
+      "source_asset_id": -4
+    }
+  },
+  "schema_version": 1
+}

@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "pass": "605.0",
+  "stage": "CA8-4",
+  "status": "LOCAL_ACCEPTANCE_CANDIDATE",
+  "parent_backend_archive_sha256": "4b25e915991a03efb7e14b884eb8193a6c0ff767325b5c9ecc7ebb44a1786f07",
+  "parent_git": "76013e467b00ee973e570180cf84114e0d12a88e",
+  "pass604_authority_sha256": "9b2036b96d2fb389e9c3bf2b71042d69bc748d000a5087ed414050360a015280",
+  "pass604_research_seal_sha256": "c1ea4ad3849e3f3a7eba6993e67f4031ad8a5f1a5c824b8a881768e6c67631fd",
+  "pass604_implementation_contract_sha256": "90e5605a90fa410073a003b33d9bae9a0df7747ffc2e5c28680da7fd0dd8b7c6",
+  "pass604_acceptance_matrix_sha256": "a67232686fe73511cc29661ba5b2a5ba1f0449d835548ef015123425b492d4b6",
+  "implementation_revision_algorithm": "sha256(sorted(path UTF-8 || NUL || final file bytes) over CA8-4 implementation/test footprint)",
+  "implementation_revision_sha256": "c6548d8cfb64acb97b44e4bba1eba8f845b9982aac69c1ca0fd1f01b60356af5",
+  "changed_implementation_files": [
+    {
+      "path": "internal/application/characterasset/borrowed_composite.go",
+      "sha256": "ff19dbb5c976caf175b2493f0e79f5b5a16a39e689df9b39cba56968d4adffba",
+      "bytes": 7058
+    },
+    {
+      "path": "internal/application/characterasset/borrowed_composite_test.go",
+      "sha256": "f797e5231a8e78560267b594d9af5207ef29d7cadbeab4755784fa49c898d589",
+      "bytes": 14596
+    },
+    {
+      "path": "internal/archguard/ca8_4_contract_test.go",
+      "sha256": "0accc98a13c6a6c9a1b27a02cf705c316cfa3e4ba77294992d5514056aca4d33",
+      "bytes": 2406
+    }
+  ],
+  "scope": [
+    "typed already-qualified borrowed Hero/Pet references with exact lender-scoped HeroRef/PetRef",
+    "opaque V2 provider/capability provenance preserved exactly without claiming stock wire representation",
+    "read-only borrowed materialization reusing accepted CA8-3 owner composition under the same caller CoherentReadScope",
+    "Origin=BORROWED projection with exact CA8-3 state/content/time/provider coherence and defensive cloning",
+    "fail-closed invalid qualification/lender/coherence/provider behavior"
+  ],
+  "non_changes": [
+    "no schema or migration",
+    "no MID or wire change",
+    "no receipt family",
+    "no new durable owner",
+    "no nested transaction or transaction runner",
+    "no borrower roster/inventory ownership transfer or copied durable actor",
+    "no rental membership/eligibility/cost/mana/use/revocation policy",
+    "no mode HP/MP state",
+    "no direct guild/modes dependency or foreign-owner SQL",
+    "no tutor/synthetic implementation",
+    "no dependency pin/toolchain change"
+  ],
+  "migration_high_water": "00030_ca7_2_appearance_foundation.sql"
+}

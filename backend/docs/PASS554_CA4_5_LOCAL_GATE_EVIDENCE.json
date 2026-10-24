@@ -1,0 +1,313 @@
+{
+  "schema_version": 1,
+  "pass": "554.0",
+  "phase": "CA4-5 Super Hero / Super Equipment local closure",
+  "result": "GREEN_LOCAL_CA4_5_ACCEPTED_COMPATIBILITY_COPY_ONLY_NATIVE_CA4_AGGREGATE_DEFERRED",
+  "authority_research_pass": "553.0",
+  "authority_passmap_sha256": "27b8fcecd05ae04d0c5645ba7b070c58209b718a38fab692261fad2a76221c87",
+  "parent_backend_sha256": "755393ce3f0b31f3a5141d74ffd3fa70ae55402359a517ee93b711eb2a28d0c6",
+  "source_oracle_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+  "old_client_archive_sha256": "d0a4815507fd4626ac5749f2f6efae554d3a4bef717793f155f58c8bed7170b1",
+  "frozen_v1_sha256": "31729d5c5e4509c2c89eaa1e8203cf1570afe87e18ed2610b944e457a9946b15",
+  "content_revision": "6ba22017fab270d38fbb68ab30bea0afe61442a979f74084fd7f5027a184e116",
+  "migration_high_water": "00027_ca4_5_super_equipment_content.sql",
+  "canonical_pins_unchanged": true,
+  "exact_candidate_execution": {
+    "result": "ENVIRONMENT_BLOCKED",
+    "reason": "Go 1.27.1 toolchain download blocked by sandbox DNS/network; canonical go.mod/go.sum/.go-version unchanged"
+  },
+  "compatibility_copy": {
+    "classification": "COMPATIBILITY_COPY_ONLY",
+    "accommodation": "go.mod go 1.26.0 -> 1.23.0; toolchain line removed; .go-version -> 1.23.2"
+  },
+  "green_checks": [
+    "CA4-5 aggregate validator",
+    "current+old+V1-bounded source guard",
+    "exact builtin content deterministic generation",
+    "character/content query generation",
+    "dependency policy",
+    "schema/query ownership",
+    "sqlc generation policy",
+    "cumulative candidate validator",
+    "connected candidate static preseal",
+    "focused behavior/recovery/projection",
+    "critical race",
+    "full internal regression",
+    "full internal/cmd vet",
+    "cmd regression"
+  ],
+  "acceptance_cases": [
+    {
+      "id": "A01",
+      "requirement": "Exact MID54 {partner_id,equip_index}, MID62 {partner_id}, MID304 {partner_id,equip_index,enhance_times}; reject malformed/extras.",
+      "status": "REQUIRED",
+      "result": "GREEN",
+      "finding": "Stock dispatcher tests enforce exact MID54/MID62/MID304 shapes and reject missing, invalid, or extra gameplay fields."
+    },
+    {
+      "id": "A02",
+      "requirement": "Content revision binding covers exact fixed six-slot Super topology and enhancement policy; 14 templates/84 positions/12 base IDs.",
+      "status": "REQUIRED",
+      "result": "GREEN",
+      "finding": "Generated SUPER_EQUIPMENT_CA4_5 catalog is deterministic at revision 6ba22017\u2026 with 14 templates, 84 positions, and 12 unique base items."
+    },
+    {
+      "id": "A03",
+      "requirement": "All Super base positions resolve to accepted equipment primitives; direct equip enforces required level89 and one finished-item debit.",
+      "status": "REQUIRED",
+      "result": "GREEN",
+      "finding": "Super MID54 resolves the fixed slot to the existing CA4-1 primitive, enforces required level 89, and debits exactly one finished base item."
+    },
+    {
+      "id": "A04",
+      "requirement": "Super direct MID54 does not recursively compose and does not charge recipe Mana.",
+      "status": "REQUIRED",
+      "result": "GREEN",
+      "finding": "Super MID54 uses direct stack debit only; aggregate validator proves no recipe-edge traversal, recursive composition, or Mana scalar debit in EquipItem."
+    },
+    {
+      "id": "A05",
+      "requirement": "Normal MID54 behavior/invariants remain unchanged and regression GREEN.",
+      "status": "REQUIRED",
+      "result": "GREEN",
+      "finding": "Existing Normal MID54 behavior/replay/stock-wire tests remain GREEN in focused and full regression."
+    },
+    {
+      "id": "A06",
+      "requirement": "Family-qualified receipt replay accepts Super raw values >1 while Normal receipts still reject >1.",
+      "status": "REQUIRED",
+      "result": "GREEN",
+      "finding": "Receipt decoder keeps Normal v1 ValidateNormal() semantics while Super v2 accepts nonnegative enhancement values with family=SUPER."
+    },
+    {
+      "id": "A07",
+      "requirement": "Family/result mismatch or tampered receipt fails closed.",
+      "status": "REQUIRED",
+      "result": "GREEN",
+      "finding": "Family mismatch, invalid partner/equipment values, and malformed Super receipt payloads fail closed."
+    },
+    {
+      "id": "A08",
+      "requirement": "Super MID54 raw slot 0->1; other five slots and non-equipment Hero state unchanged.",
+      "status": "REQUIRED",
+      "result": "GREEN",
+      "finding": "Super MID54 performs only selected raw-slot 0\u21921; explicit test proves unrelated enhanced slots plus star/level/exp/color/Fumo/origin remain unchanged."
+    },
+    {
+      "id": "A09",
+      "requirement": "Already-equipped Super MID54 is zero-effect/no second debit and preserves stock 30001-compatible semantics.",
+      "status": "REQUIRED",
+      "result": "GREEN",
+      "finding": "Already-equipped Super MID54 is zero-effect, performs no debit/CAS, and stock dispatcher preserves error_code 30001 compatibility."
+    },
+    {
+      "id": "A10",
+      "requirement": "MID54 same-operation replay never double-debits or double-CASes.",
+      "status": "REQUIRED",
+      "result": "GREEN",
+      "finding": "Same-operation Super MID54 replay returns the committed receipt without a second debit or Hero save."
+    },
+    {
+      "id": "A11",
+      "requirement": "MID54 ambiguous COMMIT converges only through matching receipt; absent receipt UNKNOWN/no blind replay.",
+      "status": "REQUIRED",
+      "result": "GREEN",
+      "finding": "Super MID54 ambiguous COMMIT reconciles through matching outer receipt; absent receipt returns UNKNOWN with no blind replay."
+    },
+    {
+      "id": "A12",
+      "requirement": "MID62 Normal production path matches accepted CA4-2 behavior.",
+      "status": "REQUIRED",
+      "result": "GREEN",
+      "finding": "Normal MID62 production registration reuses accepted CA4-2 path; existing projection/Mana/no-work tests remain GREEN."
+    },
+    {
+      "id": "A13",
+      "requirement": "MID62 Super family fails closed; no hidden activation from method presence alone.",
+      "status": "REQUIRED",
+      "result": "GREEN",
+      "finding": "Super family reaches validateNormalHeroForEquipment and fails closed; no current-source-hidden Super MID62 activation was added."
+    },
+    {
+      "id": "A14",
+      "requirement": "MID304 rejects non-Super family.",
+      "status": "REQUIRED",
+      "result": "GREEN",
+      "finding": "MID304 rejects non-Super templates before resource mutation."
+    },
+    {
+      "id": "A15",
+      "requirement": "MID304 rejects slot outside1..6, uncollected raw0, enhance_times<=0, effective star outside1..8.",
+      "status": "REQUIRED",
+      "result": "GREEN",
+      "finding": "MID304 wire/service reject slots outside 1..6, raw0/uncollected, enhance_times<=0, and effective-client-inactive star9+ before debit."
+    },
+    {
+      "id": "A16",
+      "requirement": "MID304 cap boundaries exact: stars1-5 cap10, star6 cap20, star7 cap30, star8 cap40.",
+      "status": "REQUIRED",
+      "result": "GREEN",
+      "finding": "Tests prove exact effective caps: stars1\u20135=10, star6=20, star7=30, star8=40."
+    },
+    {
+      "id": "A17",
+      "requirement": "MID304 rejects cap crossing atomically before debit.",
+      "status": "REQUIRED",
+      "result": "GREEN",
+      "finding": "Cap crossing is rejected before debit/save; explicit tests assert zero mutation."
+    },
+    {
+      "id": "A18",
+      "requirement": "MID304 single-level debit is one duplicate mapped base item for every reachable tier.",
+      "status": "REQUIRED",
+      "result": "GREEN",
+      "finding": "Single-level tests at reachable tier boundaries prove one duplicate mapped base item per enhancement level."
+    },
+    {
+      "id": "A19",
+      "requirement": "MID304 multi-level debit equals enhance_times across 10/20/30 boundaries within effective star cap.",
+      "status": "REQUIRED",
+      "result": "GREEN",
+      "finding": "Cross-tier multi-level test 9\u219231 proves debit count equals enhance_times across 10/20/30 boundaries."
+    },
+    {
+      "id": "A20",
+      "requirement": "MID304 charges no Mana and consumes no recipe components directly.",
+      "status": "REQUIRED",
+      "result": "GREEN",
+      "finding": "MID304 uses stack-only MaterialCost; source/product guards prove no Mana/scalar debit and no recipe-component consumption."
+    },
+    {
+      "id": "A21",
+      "requirement": "MID304 increments only selected raw slot by enhance_times; raw encoding remains enhancement+1.",
+      "status": "REQUIRED",
+      "result": "GREEN",
+      "finding": "MID304 increments only the selected raw slot by enhance_times; unrelated raw slots survive unchanged."
+    },
+    {
+      "id": "A22",
+      "requirement": "MID304 response is empty success projection; no invented economy/state fields.",
+      "status": "REQUIRED",
+      "result": "GREEN",
+      "finding": "MID304 dispatcher returns exact empty success body; no economy/state fields are invented."
+    },
+    {
+      "id": "A23",
+      "requirement": "MID304 same-operation receipt replay is exact-once.",
+      "status": "REQUIRED",
+      "result": "GREEN",
+      "finding": "Same-operation MID304 receipt replay is exact-once with no second debit/CAS."
+    },
+    {
+      "id": "A24",
+      "requirement": "MID304 late receipt failure rolls back stack debit and Hero CAS together.",
+      "status": "REQUIRED",
+      "result": "GREEN",
+      "finding": "Late outer-receipt failure test rolls Hero state and stack debit back together."
+    },
+    {
+      "id": "A25",
+      "requirement": "MID304 ambiguous COMMIT with matching receipt returns committed result; no receipt => UNKNOWN/no blind replay.",
+      "status": "REQUIRED",
+      "result": "GREEN",
+      "finding": "Ambiguous COMMIT returns committed result only through matching outer receipt; receipt absence yields UnknownCommit/no blind retry."
+    },
+    {
+      "id": "A26",
+      "requirement": "Concurrent same-Hero equip/enhance requests serialize/revalidate and cannot lose slot updates.",
+      "status": "REQUIRED",
+      "result": "GREEN",
+      "finding": "Race-clean concurrent MID54+MID304 and concurrent MID304 tests serialize same-Hero updates without lost slots."
+    },
+    {
+      "id": "A27",
+      "requirement": "Reconnect/private/roster projection preserves all six raw Super equipment values including >1.",
+      "status": "REQUIRED",
+      "result": "GREEN",
+      "finding": "Stock projection already preserves arbitrary nonnegative raw equipment values; new MID49 reconnect test proves enhanced Super values 1/2/11/21/31/40 survive roster projection."
+    },
+    {
+      "id": "A28",
+      "requirement": "No new durable Super player-state table/owner/foreign-owner SQL appears.",
+      "status": "REQUIRED",
+      "result": "GREEN",
+      "finding": "Only immutable gxb_content_super_equipment_* tables were added; ownership/query guards are GREEN and no new player Super state table/foreign-owner SQL exists."
+    },
+    {
+      "id": "A29",
+      "requirement": "No Spirit/Horcrux persistent-instance mutation appears in CA4-5 code path.",
+      "status": "REQUIRED",
+      "result": "GREEN",
+      "finding": "Whole-diff/source guard finds no Spirit/Horcrux read/write/allocation/lock/enhance path in CA4-5 production code."
+    },
+    {
+      "id": "A30",
+      "requirement": "Physical star9/10 content remains inactive under accepted effective-client star8 gate.",
+      "status": "REQUIRED",
+      "result": "GREEN",
+      "finding": "Generated caps retain physical stars9/10 as effective_client_reachable=false; MaxHeroStar remains 8 and star9 service test rejects before debit."
+    },
+    {
+      "id": "A31",
+      "requirement": "Deterministic source guard pins current Super source identities/topology/star/enhancement facts.",
+      "status": "REQUIRED",
+      "result": "GREEN",
+      "finding": "Deterministic current-source guard pins source archive/member hashes, MID54/62/304 identities, raw encoding, enhancement tier behavior, and catalog revision."
+    },
+    {
+      "id": "A32",
+      "requirement": "Frozen V1 Horcrux may be cited only as corroborative/differential architecture evidence; compatibility RNG policy is not promoted to source fact.",
+      "status": "REQUIRED",
+      "result": "GREEN",
+      "finding": "Old client remains non-discriminating for MID304 and V1 Horcrux evidence is checked only as bounded corroborative architecture evidence."
+    },
+    {
+      "id": "A33",
+      "requirement": "Operation entropy foundation remains untouched; CA4-5 performs no random draw.",
+      "status": "REQUIRED",
+      "result": "GREEN",
+      "finding": "Operation entropy foundation is unchanged; static guards prove no .Derive() or random draw in MID54/MID304 CA4-5 paths."
+    },
+    {
+      "id": "A34",
+      "requirement": "Focused behavioral tests, receipt/recovery tests, race, vet/static, ownership/query/generator/source-oracle checks GREEN where executable.",
+      "status": "REQUIRED",
+      "result": "GREEN",
+      "finding": "Focused behavior/recovery/projection tests, critical race, vet/static, ownership/query, generator, and source-oracle checks are GREEN where executable."
+    },
+    {
+      "id": "A35",
+      "requirement": "Bounded broader internal/cmd regression GREEN under normal-chat protocol.",
+      "status": "REQUIRED",
+      "result": "GREEN",
+      "finding": "Fresh compatibility copy passed go test ./internal/..., go vet ./internal/... ./cmd/..., and go test ./cmd/... ."
+    },
+    {
+      "id": "A36",
+      "requirement": "Exact unmodified candidate attempted first; any adapted run labeled COMPATIBILITY_COPY_ONLY.",
+      "status": "REQUIRED",
+      "result": "GREEN",
+      "finding": "Unmodified canonical candidate was attempted first and is ENVIRONMENT_BLOCKED solely by unavailable Go1.27.1 toolchain download; adapted execution is COMPATIBILITY_COPY_ONLY."
+    },
+    {
+      "id": "A37",
+      "requirement": "Exact Go1.27.1/PostgreSQL/River accumulated CA4 gate remains OPEN and mandatory after CA4-5 before CA4-E.",
+      "status": "REQUIRED",
+      "result": "GREEN_DEFERRED_GATE_PRESERVED",
+      "finding": "Exact Go1.27.1 + real PostgreSQL/River accumulated CA4 gate remains OPEN and mandatory before CA4-E."
+    },
+    {
+      "id": "A38",
+      "requirement": "W2 stock-client physical proof and I8_TECH Spirit/Horcrux remain open and are not marked passed.",
+      "status": "REQUIRED",
+      "result": "GREEN_DEFERRED_GATE_PRESERVED",
+      "finding": "W2 physical stock-client proof and I8_TECH Spirit/Horcrux remain explicitly OPEN/deferred and are not marked passed."
+    }
+  ],
+  "open_gates": [
+    "exact Go1.27.1 execution",
+    "real PostgreSQL/River accumulated CA4 gate",
+    "W2 physical stock-client proof",
+    "I8_TECH Spirit/Horcrux lifecycle"
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "pass": "446.0",
+  "milestone": "I5-A",
+  "authority": "current packaged src_64 active implementation oracle; Pass353 corroborative/differential only",
+  "current_src64": {
+    "SelfPlayer.lua": "163d5893c9522ada412c2b9c4748a80757660fccdf03c8f72cb6edf0838b8eb4",
+    "Mailbox.lua": "3232f5c4b7c8dc60bf2c76249813d684959e4970040890ea2d0a3f544516ba14",
+    "MailboxWindow.lua": "f53ec450208d799ba8954ba50ce4f6a92793664ea2f85190c281132bea2b7a7d",
+    "Task.lua": "d454ae7cb1e28d95d366aae30ba88d83432c974415f263991af6c4190d54bee5",
+    "Backpack.lua": "953999f81fc43ecd00e587d884c88b6a1ba066e35ff75a20dd698b6cb950af7a",
+    "ItemTable.lua": "1f846972f29a55ee2dbb90f2cb9b0124eaeaa90646c3c66644ab66e231c37f00",
+    "ExchangeCodeWindow.lua": "9dba1ee00ca273cebe2592917b5b354e873b5504c243084fa86120fde306fdbb",
+    "Backend.lua": "95378e2b0be8180df6de27e9e430c630bcfe46c080e1f91ef5f6d74bdbb1b840",
+    "mid.lua": "026a20b29d97624979777a68c64c749254031604057ff42aa8f8254c3e35b5af",
+    "StoryData.lua": "3ff4a6624fa36ce1cf92cc6a27c5934fbe04ae0559db6fc2a807d1b0cdb4cd83"
+  },
+  "bounded_unknowns_preserved": [
+    "exact fresh-character starting nonzero resource balances",
+    "historical normal-vs-region hidden mail ownership meaning",
+    "historical mail/overflow expiry and purge duration",
+    "official redeem campaign cardinality/account-vs-player/global cap policy"
+  ]
+}

@@ -1,0 +1,63 @@
+{
+  "status": "GREEN_PRE_FREEZE_CODE_SOURCE_CONTRACT_REVIEW_NOT_PRODUCT_ACCEPTANCE",
+  "reviewer": "Sameprimaryagent separateinspection; no delegatedreviewerclaim",
+  "checks": [
+    "APPLIED_MIGRATIONS1_45_UNCHANGED_FORWARD46_ONLY",
+    "CANONICAL_PORTABLE_R2_PINS_UNCHANGED",
+    "5A_PHYSICAL_FOUNDATION_UNMODIFIED_ACCEPTED676_PROOF_VALID",
+    "INHERITED_ROOT_PREFERENCE_PRIVACY_SHOWCASE_BEHAVIOR_UNCHANGED",
+    "APPLICATION_TYPED_OWNER_COMPOSITION_NO_FOREIGN_SQL_OR_BLOB_IO"
+  ],
+  "findings": {
+    "MID1844": "Bodynonempty avatar_file_path/avatar_md5_code; actualbyteMD5 andnativePNG producer inheritedparent5/sourcehash locked",
+    "wire": "Boundedmultipart,token/region fromexistingparsedclaims; filename/path/MD5ignoredasauthority; no privateclientnonce/header",
+    "time": "PreparedoutsideTx; stableTimedRunnerDecisionAt;315->391 preexistingroot; staleexplicitrefusal",
+    "references": "Current+append-onlyhistory belongPublicProfile; immutablemetadata, noPlayeravatar98/frame100/Character changes",
+    "receipt": "SameTx root/current/history/KernelReceipt; retainedstrictknownoutcome neverresetscurrent; unknownreceiptmiss retainsphysicalpin",
+    "GET": "Anonymouscommitted immutablecapabilityURL withactualvalidatedbytes; acquisitionoutsideDBscope; sourceblocking/hide discovery belongs6, cachedbyteaccesscannotbe revoked",
+    "GC": "EXleasepreventsnewpublication; coherenttypedowner+receiptproof thenclosedDBscope beforeinventory/unpin/delete; unknownprotectionindefinite; historical/current refsneverdeleted",
+    "backup": "Explicitofflineprocedure;DBdump+allvalidatedblobs+pins+format+typedmanifest+hashes, no overwrite; strictpostrestore coherence beforeactivation, APIstartupvalidatesallrefs",
+    "recovery": "NativeSIGKILL before/aftercommit andactualAPI->CLIbackup->newDB/rootrestore->sameURLGET observed; no powercut/physicalAndroidclaim",
+    "providers": "ReadMediaTx scopedwitness/canonicalreference/version; fullrich1829/cache/freshness/privacydiscovery remains6/E"
+  },
+  "source_bindings": [
+    {
+      "path": "work/i7b5/source/current/app/model/PersonDisplay.lua",
+      "sha256": "022fcbf39167ac9197ce5034b32fd5833016742744ad3de118ceacf6f808cfb8"
+    },
+    {
+      "path": "work/i7b5/source/current/app/common/ui/OnlineImageSprite.lua",
+      "sha256": "bc330465fbf17f95038da72e260e949d0a5f468a6f78e067d2c411f4125d0933"
+    },
+    {
+      "path": "work/i7b5/source/current/app/common/network/Backend.lua",
+      "sha256": "95378e2b0be8180df6de27e9e430c630bcfe46c080e1f91ef5f6d74bdbb1b840"
+    },
+    {
+      "path": "work/i7b5/source/current/app/windows/PersonDisplayWindow.lua",
+      "sha256": "22a0c02172eabec1d9728d18293273c8e2aa9e6c8e5b1a4bf3af2feae14f158c"
+    },
+    {
+      "path": "work/i7b5/source/native/smali/com/xyd/platform/android/utility/PhotoClipWindow$3.smali",
+      "sha256": "d04f45d9f5cf32c69d973b54f054ad9b6cd2ee7eab1caea13823fdc6edc10262"
+    }
+  ],
+  "source_proof": "Parent5 current/old/native/V1/COLD proof reused; staticimplementationcrosschecknotnewstockruntimeproof",
+  "qualified_working_cases": [
+    "Assignment/noop/knownreplay/auth",
+    "UnknownACKpositive/miss pins andGC",
+    "StableDecisionAt/concurrentassignments",
+    "MID1844multipart+actualbyteMD5/GET/errors",
+    "SIGKILLbefore/afterDBcommit andpinreconciliation",
+    "MaintenanceEXpublicationexclusion",
+    "Jointbackup/relocatedrestore/missingcorruptintegrity",
+    "Receiptwritefailure atomicrollback",
+    "ActualAPI/CLIbackup/restore/newDB/blobroot/restartsameURL"
+  ],
+  "new_durable_contracts_proposed": [
+    "I7B5B_APPLIED_PROFILE_MEDIA_REFERENCE_RECOVERY_V1"
+  ],
+  "phasewide_contracts_unchanged": true,
+  "final_frozen_qualification": "PENDING",
+  "parent5_acceptance": "PENDING_FINAL_QUALIFICATION_AND_PARENT_REALITY"
+}

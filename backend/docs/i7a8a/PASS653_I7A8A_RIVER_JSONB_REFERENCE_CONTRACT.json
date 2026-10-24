@@ -1,0 +1,17 @@
+{
+  "contract_id": "I7A8A_GUILD_RIVER_JSONB_REFERENCE_V1",
+  "classification": "IMPLEMENTATION_DECISION",
+  "status": "RECONCILED_BEFORE_WORKER_RETEST",
+  "finding": "Real River worker rejects producer-valid job references because PostgreSQL JSONB emits reordered keys and spacing. No target Mail was created; source recipients stayed PENDING.",
+  "evidence": "continuation/logs/p5-worker-jsonb-reference-diagnostic.log and real river_job errors; pinned River stores jobArgs as JSONB.",
+  "decision": "Producer still requires exact canonical JSON bytes before InsertTx. Only the two finite Guild routes use a stored-reference decoder at the River boundary: enforce exact keys, raw duplicate rejection, valid canonical UUID, exact integer canonical recipient, semantic key derivation, logical and physical queue, profile and scope; then re-encode the known reference shape for application dispatch. Unknown fields/types/route/profile/queue/reference are observable errors. Normalized job data never supplies title, roster, timestamps, content or settlement authority; target source/receipt/Mail proof remains mandatory.",
+  "affected_contract": "PASS652_I7A8A_WORKER_RECOVERY_CONTRACT.json strict canonical JSON reference transport; supplement qualifies JSONB representation without weakening raw producer or owner semantic proof.",
+  "required_gate": [
+    "real persisted JSONB reaches owner and ACK",
+    "producer duplicate/reference tampering fails before insert",
+    "stored unknown/duplicate/wrong type/UUID/recipient/semantic/profile/queue rejection",
+    "reconcile scope JSONB form accepted only for exact finite value"
+  ],
+  "authorization_basis": "Direct human full implementation/reconciliation and contract registry delegation; unchanged selected652 pack retained with explicit transport amendment.",
+  "product_accepted": false
+}

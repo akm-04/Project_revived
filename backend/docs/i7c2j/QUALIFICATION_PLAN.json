@@ -1,0 +1,72 @@
+{
+  "status": "FROZEN_EXACT_R2_FOUNDATION_MATRIX",
+  "checks": [
+    {
+      "id": "J01",
+      "check": "Exactsourcecurrent15/V1/oldboundaries and421Conquer-vsCONQUEST"
+    },
+    {
+      "id": "J02",
+      "check": "5region56campaign8loop sourcevectors/alllevelthresholds,NormalSuper/sourcetranslationconflict"
+    },
+    {
+      "id": "J03",
+      "check": "Unknown/missing/invalid/foreign/stale/copies failclosed"
+    },
+    {
+      "id": "J04",
+      "check": "ActualfreshMID1createsinitialConquerrowwithoperation/content/provenance; no readwrites"
+    },
+    {
+      "id": "J05",
+      "check": "Legacy56->57 createsunknownonly; no copieddirectoryprogress, repeatnochange"
+    },
+    {
+      "id": "J06",
+      "check": "TypedcallerTxsaveCAS/rollback/version/conflict/replay withunchangedcanonicalvalues"
+    },
+    {
+      "id": "J07",
+      "check": "RealPGRRsnapshot vsconcurrentwriter/coherentwitness/contentref andHeroKind"
+    },
+    {
+      "id": "J08",
+      "check": "UNKNOWNcommit andreceiptresolve/create replay; no blindsecondwrite"
+    },
+    {
+      "id": "J09",
+      "check": "SIGKILL/reopen durablefoundation+receipt effects"
+    },
+    {
+      "id": "J10",
+      "check": "Inactive1568..1573/2790remainfailclosed; no inventedfullinfo"
+    },
+    {
+      "id": "J11",
+      "check": "Fresh57/populated56upgrade oldrows exactexceptGoose/activation;32priorpayloads/1..56migrations unchanged"
+    },
+    {
+      "id": "J12",
+      "check": "Backup/restoreallrowhashes+retainedreceipt replay no durablechange"
+    },
+    {
+      "id": "J13",
+      "check": "Allunit/affectedI4bootstrap/Character/Content/arch/race/vet/source/fuzz"
+    },
+    {
+      "id": "J14",
+      "check": "PortableR2exactpins/offlinemoduleverify/security"
+    },
+    {
+      "id": "J15",
+      "check": "Primaryseparatereality/qualificationvsgenuine5Ewriter boundary"
+    },
+    {
+      "id": "J16",
+      "check": "FinalHOT/COLDsemanticseal/freshzero-drift archive"
+    }
+  ],
+  "toolbox": "gxb-backend-v2-e2e-tools-r2-go1.27.2-linux-amd64.zip",
+  "genuine_5e_writer_qualified": false,
+  "physicalW2": false
+}

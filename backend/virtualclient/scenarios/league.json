@@ -1,0 +1,2 @@
+{"name":"league","level":70,"heroes":[10001001,10001002,10001003,10001004,10001005],
+ "steps":["window:sub_arena","tap:cross_arena_node","wait:10"],"settle_seconds":35,"expect_ok":[59,2800]}

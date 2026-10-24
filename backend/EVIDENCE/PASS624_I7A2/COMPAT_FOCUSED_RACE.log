@@ -1,0 +1,6 @@
+ok  	gxb.local/backend/v2/internal/adapters/stockruntime	1.418s
+ok  	gxb.local/backend/v2/internal/adapters/postgres	1.011s
+ok  	gxb.local/backend/v2/internal/protocol/realtime	1.015s
+ok  	gxb.local/backend/v2/internal/application/playerpresentation	1.009s
+ok  	gxb.local/backend/v2/internal/application/realtimewakeup	1.013s
+ok  	gxb.local/backend/v2/internal/projection/lobby	1.245s

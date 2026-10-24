@@ -1,0 +1,12 @@
+{
+  "status": "TARGETED_SOURCE_CONTRADICTION_RECONCILED",
+  "evidence": "src_64/NewChangeAvatarWindow.lua:239..320 and1144..1204",
+  "finding": "Inventory branch is additive to skin/collection/VIP eligibility. Historical eligible helper returned early on a failed Hero/VIP branch, excluding separately valid permanent ownership.",
+  "repair": "Preserve OR of source branches. Actual canonical permanent stack can independently qualify type7/type11/VIPframe. No-start/timed missing proof remains unavailable; this is not permission to infer timed start from stackAcquiredAt.",
+  "affected": [
+    "I7B6Aselection/reload",
+    "I7C4Acorefacts"
+  ],
+  "authorization": "Directfull4Alifecycle+standingtargetedcontradictionrepair",
+  "proof": "NativeactualI5AdminGrantpermanentstack separatefromVIP/skin andsourcepredicateunit/differential"
+}

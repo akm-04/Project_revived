@@ -1,0 +1,107 @@
+{
+  "schema_version": 1,
+  "pass": "564.0",
+  "stage": "CA5-3",
+  "parent_backend_sha256": "c357c29fcb5c3c90e0dde0de8149769474eaa317246ee69200f3d0bfa4ad616b",
+  "authority_passmap_sha256": "ca1a6c9b8d8c7c74fbf98f3f79e7fe28d6fde945b5ba1d36c73576f60e35ecdc",
+  "product_and_qualification_change_count": 15,
+  "changes": [
+    {
+      "status": "MODIFIED",
+      "path": "cmd/gxb-api/main_postgres.go",
+      "before_sha256": "8b17ae285762e88ff164bba4aeb4e5b5d4221f225dea859fb5e7c69086144e44",
+      "after_sha256": "34e7f420558999f15cce2856056f61f69f3e6a03c2353065227b093ece6f9c18"
+    },
+    {
+      "status": "ADDED",
+      "path": "internal/adapters/stockruntime/saved_preset_dispatcher.go",
+      "before_sha256": null,
+      "after_sha256": "6f3d5483471e44daff5737a0d1632ead7ced9e98441454f727bc731b9c3a728f"
+    },
+    {
+      "status": "ADDED",
+      "path": "internal/adapters/stockruntime/saved_preset_dispatcher_test.go",
+      "before_sha256": null,
+      "after_sha256": "21b7affd8664812afd963ed332f2859796c18e13be2c1da4c3a23a8b0820cb94"
+    },
+    {
+      "status": "ADDED",
+      "path": "internal/application/charactersavedpreset/command_codec.go",
+      "before_sha256": null,
+      "after_sha256": "c45af854f901985d623605af4465ad64cd97ef1920cfcfadd7420993fc229995"
+    },
+    {
+      "status": "ADDED",
+      "path": "internal/application/charactersavedpreset/command_codec_test.go",
+      "before_sha256": null,
+      "after_sha256": "19fd366050bb9405e0078d80b81860fd0b9f6abdd23484ed98f4e2466f477537"
+    },
+    {
+      "status": "ADDED",
+      "path": "internal/application/charactersavedpreset/service.go",
+      "before_sha256": null,
+      "after_sha256": "344bffef5c1d568ae7f0fe96edc8bb6b6a05d250c7e6cf7150555c18da4abab5"
+    },
+    {
+      "status": "ADDED",
+      "path": "internal/application/charactersavedpreset/service_test.go",
+      "before_sha256": null,
+      "after_sha256": "d645db2c0be8dd88f613e5ad448075551291811b47070911c5b39e2501201a0a"
+    },
+    {
+      "status": "MODIFIED",
+      "path": "internal/archguard/ca5_1_contract_test.go",
+      "before_sha256": "673558ffcc9be73378ab96656210db9a290928211e231a58fbdde501a2f2a316",
+      "after_sha256": "7851377d4d4bbd3d92e522b13b22c573d9ae3019a9f595a347888037a5fe9fc4"
+    },
+    {
+      "status": "MODIFIED",
+      "path": "internal/archguard/ca5_2_contract_test.go",
+      "before_sha256": "9d9e08fdd825dcadbae73ac60f1640826f322e2701e1810925ac69c71f299649",
+      "after_sha256": "4aa0800b808d6e75b417a4e4cfa779168be85847fc96fdad868c1e35290be280"
+    },
+    {
+      "status": "ADDED",
+      "path": "internal/archguard/ca5_3_contract_test.go",
+      "before_sha256": null,
+      "after_sha256": "46c1c8a392780b836bfefb4194207c3818b7bea099c840b1228acedf269c165c"
+    },
+    {
+      "status": "MODIFIED",
+      "path": "internal/foundation/replaycatalog/catalog.go",
+      "before_sha256": "ac7eeaca86494905cee72abfc9c9b05d35f5bf615068e7e23ab7432c068a701d",
+      "after_sha256": "a2e6ab63f7cea58fcab1132471ddab86e6697f2ad734a30ef50a26717e67eedb"
+    },
+    {
+      "status": "MODIFIED",
+      "path": "internal/foundation/replaycatalog/catalog_test.go",
+      "before_sha256": "0668e9be71d22eaaf27031e20f7e6430d76897fc5c5259de02c7bb41e5fc84c4",
+      "after_sha256": "427f5c90ba6479a847e3bac3c6c004d0ebdf82052fbfe3e7ec6b131be5c28b51"
+    },
+    {
+      "status": "ADDED",
+      "path": "tools/check_ca5_3_source_oracle.py",
+      "before_sha256": null,
+      "after_sha256": "021c108696b1ccc872d3c06b49db550c5f44c64753f52ab986d82310e9968614"
+    },
+    {
+      "status": "MODIFIED",
+      "path": "tools/validate_ca5_2.py",
+      "before_sha256": "572bd5b53f69f8cd36fd7eb95cb7b75962522eaf3c7504fd46e995c5b38e2cc9",
+      "after_sha256": "41b513cd029b4ebdfe593b8145c4b0b7fda8a72acea5d93bdbd91197cdc9629e"
+    },
+    {
+      "status": "ADDED",
+      "path": "tools/validate_ca5_3.py",
+      "before_sha256": null,
+      "after_sha256": "a943ca4cf446f98cca1a1fe9724a1c2684aab88bd92cec921709b21e78a6f771"
+    }
+  ],
+  "negative_findings": [
+    "no migration added",
+    "no MID208/209 activation",
+    "no 17.formation claim",
+    "no CA5-4 reverse-removal guard activation",
+    "canonical go.mod/go.sum/.go-version unchanged"
+  ]
+}

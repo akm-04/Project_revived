@@ -1,0 +1,71 @@
+{
+  "status": "RESEARCH_COMPLETE_POLICY_QUESTIONS_PENDING_USER",
+  "date": "2026-10-20",
+  "author": "Claude Opus 5.5 (taking over from GPT 6.1 sol after I7C-5F)",
+  "user_request": "gpt 6.1 sol apparently completed next sub stage. can you verify the progress? we are supposed to close off i7c-4 completely after i7c-5 is done, did he do that? if not, please continue and finish any remaining tasks he might've left incomplete",
+  "verification_of_5f": {
+    "sealed_passmap_740_sha256": "879cff0c7bd20e79c8c25a8feeeeb45cebc53c306721293c4bdbfee0f24fa903 (matches)",
+    "working_backend_133_sha256": "b08c09fda3b2f72b7d3586dfa21f3e38d42aeb432c5c55b944a12ad5697e140b (matches)",
+    "checkpoint_r10_sha256": "8ab7c8b43ac495d14c6d62b18e8ad8912297eccd1c1c3008f9b66ba0ab0f9d70 (matches)",
+    "backend_git": "3fca245 clean, migration 00069, content fa584ba8",
+    "passmap_guard_740": "FAIL only from a local tools/__pycache__ created after sealing (not in the sealed ZIP); removed; PASS",
+    "i7c5_leaves": "5A..5F all core closed; I7C-5 has no further leaves in PASS709 topology V5",
+    "i7c4_full_closure_done": false
+  },
+  "full4_open_gates": {
+    "I7C-4A": "SELECTED_ACTUAL_COSMETIC_MODE_CARD_OCCURRENCE_RANKING_TITLE_ORIGINS_AND_FULL_FAMILY_COUNTS",
+    "I7C-4B": "OTHER_SELECTED_ACHIEVEMENT_PRODUCERS_LEGACY_HISTORY_AND_FULL_CATALOG_METRIC_AWARD_WIRE (only 100014 at 4B; 5B..5F added 100001/100002/100003/100028/100032)",
+    "I7C-4C": "metrics 1003 SKIN_NUM, 1004 ACHIEVE_NUM, 1005 AVATAR_FRAME_NUM, 1006 AVATAR_NUM, 1007 FORCE unavailable; AP (title 100001) and Skins (titles 100063..100066, rank subtype 38) ranking profiles absent; 1840 full11 discovery not qualified. Girls ranking (subtype 37, titles 100059..100062) already implemented."
+  },
+  "achievement_catalog_33": {
+    "producer_done": [100001, 100002, 100003, 100014, 100028, 100032],
+    "owner_exists_hook_needed": {
+      "100013": "Own N girls excluding vows (CharacterHero)",
+      "100015": "Awaken N girls (CharacterHero)",
+      "100016": "Own N skins (Character appearance)",
+      "100017": "Own N pets (CharacterPet)",
+      "100019": "Finish N textbooks (bookskill)",
+      "100021": "Clear N regions in Conquest (conquerschool, 5E)",
+      "100023": "Complete N subjects (course)",
+      "100025": "Obtain N set medals (inscription)",
+      "100029": "Own N villa rooms (dormhouse)",
+      "100030": "Extended N villas (dormhouse)",
+      "100031": "Obtain N Titans (super Hero)"
+    },
+    "owner_absent_unbuilt_mode": {
+      "100004": "guild activity damage",
+      "100005": "Sky Tower",
+      "100006": "boss damage rank",
+      "100007": "Fantasy boss",
+      "100008": "Guardian",
+      "100009": "Guild War",
+      "100010": "campaign stars",
+      "100011": "store purchases per day (no store owner)",
+      "100012": "medium vending buy10 (only fragment summon exists)",
+      "100018": "robbery",
+      "100020": "academy stories",
+      "100022": "mentor graduation",
+      "100024": "Memory Maze",
+      "100026": "auction",
+      "100027": "sorcery war",
+      "100033": "butler (owner UNKNOWN)"
+    }
+  },
+  "structural_findings": [
+    "Literal full I7C-4 closure under the 662 strict exit is impossible today: 16 of 33 achievements belong to modes not built (I9), and the standing rule forbids a default zero for unavailable producers. Closure needs a user policy for how not-live modes count.",
+    "1003/1005/1006 and 4A full-family counts depend on cosmetic origins that topology assigns to I7C-6 (COMPLETE_SELECTED_COSMETIC_ORIGINS). Closing 4 before 6 needs a policy that counts currently existing origins and lets 6 add origins later.",
+    "1007 FORCE binding is not recovered: rank 2001 'All girls' AP' vs rank 2002 'Total AP of top 5'. Qualified per-Hero public force exists (I7C-3B publicstats).",
+    "Ranking infrastructure (snapshots, weekly titles, MID301 nested shape) exists for Girls and can be reused for AP and Skins."
+  ],
+  "questions_for_user": [
+    "Q1 How should full I7C-4 treat the 16 achievements whose modes are not built?",
+    "Q2 Close cosmetic counts 1003/1005/1006 over currently existing origins, or do I7C-6 first?",
+    "Q3 Which AP definition binds metric 1007 and the AP rank/title 100001?",
+    "Q4 Reuse the Girls ranking calendar/scope/top20/7-day policy for Skins and AP?"
+  ],
+  "proposed_private_policy_defaults_pending_approval": {
+    "achievement_legacy_history": "Count/state achievements (own N girls etc.) are evaluated from current canonical state at first evaluation after deployment and on each owner mutation; tiers are permanent once earned. Event/streak achievements have no retroactive history before their producer existed.",
+    "not_live_modes": "Recorded per definition as MODE_NOT_LIVE with a versioned activation list; no tier can be earned; ACHIEVE_NUM counts earned tiers only; activation happens when the owning mode ships.",
+    "cosmetic_counts": "1003 = currently owned unexpired skins from the canonical appearance owner; 1005/1006 = catalog entries that pass the accepted 4A eligibility predicate at the observed instant."
+  }
+}

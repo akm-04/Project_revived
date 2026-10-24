@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "pass": "530.0",
+  "phase": "CA3",
+  "internal_stage": "CA3-3",
+  "candidate_version": "v0.67.0-candidate",
+  "authority_pass": "529.0",
+  "authority_passmap_sha256": "5017321025bf15663f9e0cbc031a744d2145d08751ea42b7aad5ada468ac3364",
+  "pass529_wip_backend_sha256": "a2d195d3cdb92300a9463851dd4b373b76d78615e46b57825dd2f8641cbaf1d4",
+  "product_parent_pass525_sha256": "32efc7f7a503d9c7807970ffdf39733a6d4f8cfbe442a0df5a5a1e79fe552723",
+  "last_phase_accepted_pass520_sha256": "58dc3f31d3e8ae82ea302cad4d7dcce2c958d9218c4e423f4af97a5cf018f830",
+  "source_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+  "content_revision": "0c76be19146fbd477a7f63aac3cb955335f4529090906c13447ef54872da9931",
+  "result": "GREEN_LOCAL_CANDIDATE_COMBINED_CA3_WORK_GATE_REQUIRED",
+  "canonical_static": [
+    "generate_builtin_content exact src_64 --check PASS",
+    "CA3-3 source oracle PASS",
+    "kernel/content/character querytext --check PASS",
+    "schema/query ownership PASS",
+    "R0 PASS",
+    "R5 cumulative PASS",
+    "CA3-3 validator PASS",
+    "current cumulative candidate PASS",
+    "dependency/SBOM/sqlc policies PASS",
+    "connected candidate static preseal PASS"
+  ],
+  "compatibility_copy_only": {
+    "environment": "Go 1.23.2 linux/amd64",
+    "edits": ["go.mod go 1.26.0 -> 1.23.0", "removed toolchain go1.27.1", ".go-version -> 1.23.2"],
+    "product_or_assertion_edits": false,
+    "results": [
+      "focused race ten packages PASS",
+      "focused vet ten packages PASS",
+      "bounded package-by-package Go regression 91/91 PASS",
+      "go test ./... PASS inside integrated check",
+      "go vet ./... emitted no diagnostics inside integrated check"
+    ]
+  },
+  "integrated_check_note": "tools/check.sh reached retained historical Python validation after all source/oracle/query/ownership/Go/I1-I5 checks were green, then outer execution cap interrupted it; remaining historical validators were executed separately and green. Do not call the single integrated invocation complete.",
+  "deferred_work_gates": [
+    "exact canonical Go 1.27.1",
+    "pinned sqlc 1.31.1",
+    "real PostgreSQL 18.6 migration/restore/mixed-version/concurrency",
+    "River where applicable to exercised path",
+    "deployment drain/CAS activation",
+    "A525-07 stock recovery",
+    "unmodified stock-client combined CA3 E2E"
+  ]
+}

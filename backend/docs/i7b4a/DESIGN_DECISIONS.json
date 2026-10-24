@@ -1,0 +1,77 @@
+{
+  "schema_version": 1,
+  "node": "I7B-4A",
+  "status": "DESIGN_READY_NOT_IMPLEMENTED",
+  "decisions": [
+    {
+      "id": "A-OWNER",
+      "classification": "IMPLEMENTATION_DECISION + INHERITED_CONTRACT",
+      "decision": "ProfileFeedback owns root/version and immutable first actor-target praise rows. PublicProfile owns only its existing preferences; no duplicate count or praise table in Player/SocialInbox. Count derived from canonical praise rows, not a second persisted counter.",
+      "basis": "I7B1_ARCHITECTURE_PROVIDER; owner map and accepted PublicProfile/Player ports"
+    },
+    {
+      "id": "A-HISTORY",
+      "classification": "IMPLEMENTATION_DECISION",
+      "decision": "MID1842 is authenticated actor incoming praise history. Read-local order praise_time DESC then actor_player_id DESC; unique target/actor makes ties deterministic. start zero-based ordinary loaded praise length; current source offset20, permit positive offset<=20; reject negative/nonintegral/unsafe start and nonintegral/negative optional total_num. total_num is hint only; current total derived from all canonical rows. No daily reset, history TTL, new quota or cursor.",
+      "basis": "Exact PersonDisplay684-720 and PersonPraise85-133; frozen662 add-once/no-reset and paging law. Original praise ordering UNKNOWN; finite compatibility choice."
+    },
+    {
+      "id": "A-BLOCKED-ROW",
+      "classification": "IMPLEMENTATION_DECISION + INHERITED_CONTRACT",
+      "decision": "Viewer-target privacy is applied to the requested card. MID1842 targets self, so it returns retained own received facts; neither direction of a later block erases history or filters offsets/count. A row contains genuine minimal basic public identity only, not the author's protected profile/details. Subsequent1830 to a blocked target is denied. No foreign feedback/detail interaction is introduced by reading the self-addressed history.",
+      "basis": "Frozen662 identity/relation-only basic projection remains available; blocks deny protected interactions; source1842 no target. Selected PublicProfile BasicReader self eligibility and I5 public basis."
+    },
+    {
+      "id": "A-MISSING-ROW",
+      "classification": "INHERITED_CONTRACT_RECONCILIATION",
+      "decision": "Use accepted I4 RecipientReader to validate author identity/root/server when needed and I5 PublicPlayerBasisReader for name/avatar/frame/level. Qualified non-reused absence or missing/corrupt required basis cannot yield invented identity or silently drop a history row: fail the affected page/provider. Retain praise facts/count. Never recreate an author from directory cache or issue owner-delete from profile read.",
+      "basis": "I7B1_ARCHITECTURE_PROVIDER strict required producer failure; current accepted I4 allocator-backed absence and I5 basis. No new player-retirement architecture."
+    },
+    {
+      "id": "A-WIRE",
+      "classification": "SOURCE_FACT + IMPLEMENTATION_DECISION",
+      "decision": "1830 {to_player_id} -> {praise_num,is_has_praise};1830 self target forbidden, both directed blocks denied. No originating subtype in request; MAIN remains1 and hideSPACE4 cannot invent globalpraise denial.1842 {start,offset,total_num?}, no supplied target -> {praise_list:[{player_info:{player_id,player_name,avatar_id,avatar_frame_id,lev,region},praise_time}],total_num}. region from accepted canonical logical server mapping; praise_time UTC Unix seconds. Required ints remain wire-safe. Empty lists are JSON arrays; no credentials/receipt metadata in wire.",
+      "basis": "Exact current model/window; repeated1830 returns current authoritative count/bit per frozen662"
+    },
+    {
+      "id": "A-REPEAT",
+      "classification": "INHERITED_CONTRACT + IMPLEMENTATION_DECISION",
+      "decision": "Permanent unique actor/target praise key governs add-once fact across requests/contexts. Fresh authenticated stock repeat uses a fresh internal operation, returns current canonical count/bit, preserves original praise time and root version on no-op. Receipt for a known internal operation validates exact actor/account/context/server, request fingerprint, ID/start/entropy, retained content/policy and original fact/root version; private terminal outcome is distinct from current observation. Never expose a stale retained count as a fresh current-state observation.",
+      "basis": "D11 + I7B1_TRANSACTION_REFERENCE_REPLAY/WIRE_PRIVACY; existing private receipt patterns"
+    },
+    {
+      "id": "A-RECOVERY",
+      "classification": "INHERITED_CONTRACT_RECONCILIATION",
+      "decision": "Use existing tx.Runner/TimedRunner and typed receipt resolver. Same known operation never mutates twice. Definite-abort retries retain DecisionAt. UNKNOWN COMMIT reconciles on authoritative writer; missing receipt remains UNKNOWN and cannot re-execute. Found valid receipt proves terminal outcome; return a current coherent praise observation with its own read witness, retaining original command DecisionAt/provenance separately. In normal known-receipt retry, admit actor then validate/read in the single caller transaction. In ambiguous-commit reconciliation, the existing mandatory fresh read transaction supplies the current observation; no extra mutating transaction or parallel replay service. Unresolved command never returns success.",
+      "basis": "Existing receipt Resolver, PublicProfile commandResolver fresh witnessed read, D11/662. Add-once praise has intrinsic unique fact; no comment ambiguity lane needed4A."
+    },
+    {
+      "id": "A-TIME-CONTENT",
+      "classification": "INHERITED_CONTRACT + IMPLEMENTATION_DECISION",
+      "decision": "No praise formulas, rewards, moderation or new content table required. Fixed versioned code policy I7B_PROFILE_PRAISE_V1 records existing frozen compatibility choices; existing exact I7B_PUBLIC_V1 retained Content used by PublicProfile admission/read composition. Orchestrator supplies one exact content revision and DB authoritative observation/decision instant; providers do not discover ActiveRevision/clock or begin Tx. Do not alter strict accepted40-codepoint policy or55word corpus. Concurrent commands can acquire a shared target root in an order different from their already-bound DecisionAt. Preserve each first praise timestamp/DecisionAt; root bookkeeping UpdatedAt is max(previous UpdatedAt, DecisionAt), with version increment for each actual insert. Do not require a later-created shared root to predate an earlier-bound command, and do not resample the operation time.",
+      "basis": "Frozen662 time/content/provider law; accepted3B fixed code policy precedent; no WorkPlace/Social daily rule imported."
+    },
+    {
+      "id": "A-ROOT",
+      "classification": "INHERITED_CONTRACT + IMPLEMENTATION_DECISION",
+      "decision": "Absent feedback root is qualified empty, version0, no read-side writes. First actual praise materializes positive-version root and unique fact atomically behind existing315 parent fence, then392 owner lock/SQL uniqueness; subsequent inserts CAS/touch same root, no-op preserves version/timestamps. Do not touch PublicProfile391 version for feedback changes: one separate owner version is observed by6. Reuse prepared caller-Tx binding pattern, not an untyped shared repository.",
+      "basis": "Frozen392 independent owner; accepted root absent/materialization semantics; one canonical durable owner"
+    },
+    {
+      "id": "A-SCOPE",
+      "classification": "INHERITED_CONTRACT_RECONCILIATION",
+      "decision": "New forward migration44 contains only Feedback root/praise tables, unique keys/indexes. Existing1..43 immutable, Up-only per connected-candidate law. No speculative comment schema, allocator, lane or moderation30 code in4A. Typed praise observation ready for6; full1829 and broad API/realtime freshness remains6/E, not a new waiver.4B consumes qualified392root; parent4 not automatically accepted.",
+      "basis": "Approved CP219/CP220 split; topology-v3 parent contract and accepted43 migration highwater"
+    }
+  ],
+  "new_durable_phasewide_contracts": [],
+  "original_unknowns": [
+    "Original praise ordering/repeat/error/history retention remains unrecovered; fixed private policy is not original-server truth"
+  ],
+  "rejected": [
+    "Filtered history changes raw offsets/count; no source requirement to erase facts on block",
+    "Historical cached name/avatar/level or fallback default identity",
+    "Persisted PublicProfile feedback counter or SocialInbox store",
+    "Speculative4B pendinglane/schema or a new foundation-only child"
+  ]
+}

@@ -1,0 +1,78 @@
+{
+  "schema_version": 1,
+  "stage": "I7B-6B",
+  "status": "FROZEN_COMPONENT_IMPLEMENTATION_PLAN_REQUIRED_ACTIVATION_BLOCKERS",
+  "scope": "Approvedv6 C04..C11; nofurtherdecomposition; buildindependentcoherentcomponents, neveracceptfull6B withoutrequiredproducers",
+  "authorization": "Latestuserdirectapproval research/design thenimplementation",
+  "architecture": [
+    {
+      "operation": "1829",
+      "design": "OnecallerRR/Serializable operation/revision/instant; BasicReaderoncebeforefeedback392/assets400. CanonicalPlayerExp addition; effective6Adisplay; typedGuildcurrentview; targetpreferences snapshot. MAINsixorderedholes/nonemptyqualifiedbuilder, selectedqualifiedmetrics, praise/media. SPACEacceptedcomments/media afterprivacy. HISTORY/record actualtypedprovider gate, noemptyfakehistory. SYSTEMselfonly completequalifiedbasicrefresh (samecache asMAIN); no partialsuccessclearing cache. HELPlocal unsupported."
+    },
+    {
+      "operation": "1838",
+      "design": "Currentcommitted1basedslot; acceptedownedfacetreader + qualifiedrichrecordbuilder; directrecord response. Missingqualifiedrichproducer => existingerror."
+    },
+    {
+      "operation": "1840",
+      "design": "Onlycanonical1011 currentlyregistered; string-keyedmap; tenmissingmetricsremainexitblocker. Persistedunavailablechoices fail1829/1831."
+    },
+    {
+      "operation": "1832",
+      "design": "Newwirecommandreceiptclass/schema storingoriginalsixrecords withselection insideonesemanticTx; reuseacceptedpreflight/ref/lock/root infrastructure; buildrequiredrecords beforeanymutation. Internalassignmentreceipthistoryunchanged. UNKNOWN usesexactwireproof nofreshprojection/replaywrite."
+    },
+    {
+      "operation": "Guild",
+      "design": "Narrowguildcorepublicview callsReadMembershipTx/ReadGuildTx andGuildInviteImmutableReader withcallerTx/time; positiveinviteDecisionAtonlyvalidsourceactorGuild->target, no targetnoticeSQL. No Guildlockneeded forRR read; no nestedTx/foreignSQL."
+    }
+  ],
+  "qualification": [
+    {
+      "id": "B01",
+      "scope": "Coherence/privacy",
+      "tests": "realPG self/other/eitherdirectedblock/hide2/4/SYSTEMotherdenial; no rootwriteonread; content/time/providerbind; canonicalexp andeffectivecosmetics"
+    },
+    {
+      "id": "B02",
+      "scope": "Showcase",
+      "tests": "sixholes/currentreorder/index/ownedreference/providerfailbeforemutation/originalwireknownreplay/unknownresolver. Productionmissingrichproviderfailclosed; injectedproviders are componentproofonly"
+    },
+    {
+      "id": "B03",
+      "scope": "Guild",
+      "tests": "members/nonmembers/memberroles/retiredGuild/staleorjoined/expired/reissuedinvite currentvalidity; ownerTx noSQLduplication"
+    },
+    {
+      "id": "B04",
+      "scope": "Wire",
+      "tests": "nativeAPIactorbinding/exactrequests/absentMAIN/defaultsubtype/SPACE/comments/mediaurl/privacy/stringmetricmap/read-only1840; processrestart/DBrecovery relevantnewwireoutcome only"
+    },
+    {
+      "id": "B05",
+      "scope": "Portableexactcomponentcandidate",
+      "tests": "R2Go1.27.2 PG18.6 native/race/vet/architecture/query/static/security affectedcoverage; inheritedmigrations/source/restoreproof reuse exactunchanged subjects"
+    }
+  ],
+  "required_blockers": [
+    "1001..1010unqualifiedmetrics/formulas",
+    "HeroSkillandfinalstatsnamedprovidersunqualified",
+    "RequiredhistoryArena/SuperArena/RegionArenaunqualified",
+    "Remainingrich120fieldsbranchspecificconsumerqualification retainedfrom679; no blanketinactivewaiver"
+  ],
+  "reused_foundations": [
+    "I7B1fivefrozen662contracts",
+    "I7A1transaction/time/acceptance andI6GuildInvitevalidity",
+    "CA8read-onlyfacets/unavailableHeroSkills + Characterownedrefs/removalguards",
+    "AcceptedI7B2root/3showcase/4feedback/5media/6Acanonicaldisplay"
+  ],
+  "product_migrations": "NONE_PLANNED schema47 unchanged",
+  "out_of_scope": [
+    "Newmetricformula/skill/historyowners",
+    "NewclientMID/nonces/channels",
+    "6Cdirectory/realtimefreshness",
+    "Full6B/parent6/wholeBacceptancewithoutproducers"
+  ],
+  "new_durable_contracts": [],
+  "closure": "Componentqualification remainsPARTIAL_REQUIRED_PRODUCERS_BLOCKED. Full6B research activation readiness notdeclared; stableplannedstage unchanged.",
+  "repair_reconciliation": "REPAIR_RECONCILIATION.json"
+}

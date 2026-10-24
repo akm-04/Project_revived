@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "stage": "I7A-7B",
+  "selected_passmap_sha256": "8899d06b8042ee3fa1c611a33d7fa5b778fa237b02a16b227694137348c715dd",
+  "accepted_backend_sha256": "4f3a64bec275a2532a4cff9d6b5680d09d4c84b63147797f02fee48e2ead408d",
+  "contracts": {
+    "WIRE_COMMAND_CONTRACT": "fd8b5e0a146ae6d2888d1cf76ba4823f8d3efc934ed0ec53b140948106179f3f",
+    "PROJECTION_WINDOW_CONTRACT": "c7512829f4ce8f580ee18fd410f91301ae6f41e7af9e2a5e0b7d97e1012b3877",
+    "RELOAD_AUTHORITY_CONTRACT": "cd3703bc193a5902bea5bb64b8453b5bfdd89f88c3340d9e8c758e4eb5356dfe",
+    "COMPOSITION_RECOVERY_CONTRACT": "95060b8e0df5f594ee8dfbd250d2268aa7673683e8cccffa6a3873e9163372a2",
+    "ACCEPTANCE_PARENT_CONTRACT": "0f1dfd5863c231de36d9d417e00fadb3d4f481230c8557c85071ea99e93e2e0a"
+  },
+  "authorization": "2026-10-09 explicit human implementation/exacttoolbox/whole7closure request",
+  "corepolicy_delta": false,
+  "schema_delta": false,
+  "qualified_successor": "finite15routes onlywhen complete Gift group and active catalog qualified;historical14routes and r1 preserved wheninactive",
+  "activation": "explicit owning deployment command; APIstartup never switches existing pointer",
+  "public_group": "SOCIAL_GIFT_STOCK_I7A7B",
+  "global_I7A_10_E_W2_passed": false,
+  "acceptance_at_creation": "PENDING_EXACT_CANDIDATE_AND_NORMAL_PASSMAP_SEAL"
+}

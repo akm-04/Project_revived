@@ -1,0 +1,6 @@
+SQLC GENERATION POLICY: PASS
+DEPENDENCY POLICY: PASS
+resolved_go_modules 16 qualified_candidates 5
+RESOLVED SBOM: PASS
+CONNECTED CANDIDATE IDENTITY: gxb-candidate-tree-v1:path-nul-bytes-sorted-excluding-vcs-python-cache 3809e7bfd6983470f8571ee9d1bed8ce6438381ae4a400c4f06ec503fe04fc3c files 1701 snapshot_entries 1700
+CONNECTED CANDIDATE STATIC PRESEAL: PASS
