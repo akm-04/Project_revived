@@ -106,6 +106,7 @@ func Test7B_DeploymentPopulated35Seed(t *testing.T) {
 	f := existing(t)
 	f.legacyPlayer(100001)
 	f.legacyPlayer(200001)
+	f.friend(100001, 200001)
 }
 
 func Test7B_ExplicitDeploymentActivationPreservesStartupContract(t *testing.T) {
