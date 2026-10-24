@@ -458,7 +458,7 @@ func (s Service) settleTx(c context.Context, sc gen.TimedScope, id ids.UUID) err
 			return err
 		}
 	}
-	fact := objective.Fact{PlayerID: f.Challenger, SourceDomain: "top-floor", SourceBusinessKey: f.AttemptID.String(), Kind: "TOP_FLOOR_FIGHT", Delta: 1}
+	fact := objective.Fact{PlayerID: f.Challenger, SourceDomain: "top-floor", SourceBusinessKey: f.AttemptID.String(), Kind: objective.PVPFightKind, Delta: 1}
 	if err = s.Facts.RecordTx(c, sc.Tx, sc.Operation.Operation(), fact); err != nil {
 		return err
 	}

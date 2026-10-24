@@ -21,6 +21,7 @@ import (
 	"gxb.local/backend/v2/internal/domain/guild"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/domain/mail"
+	"gxb.local/backend/v2/internal/domain/objective"
 	"gxb.local/backend/v2/internal/domain/player"
 	"gxb.local/backend/v2/internal/foundation/ids"
 	"gxb.local/backend/v2/internal/foundation/operation"
@@ -73,6 +74,11 @@ type Values interface {
 	ReadScalarTx(context.Context, tx.Queryer, identity.PlayerID, string) (economy.ScalarBalance, bool, error)
 }
 
+// Facts is the objective fact port (I9_MODE_FOUNDATION_V1 MF3); a settled fight is a PVP_FIGHT (task_req 106, D92).
+type Facts interface {
+	RecordTx(context.Context, tx.Tx, operation.Context, ...objective.Fact) error
+}
+
 type Achievements interface {
 	ObserveArenaWinStreakTx(context.Context, tx.Tx, identity.PlayerID, string, int64, time.Time) error
 }
@@ -116,6 +122,7 @@ type Service struct {
 	Values       Values
 	Mail         Mail
 	Achievements Achievements
+	Facts        Facts
 	Combat       Combat
 	Heroes       Roster
 	Pets         Roster
@@ -128,6 +135,6 @@ type Service struct {
 
 func (s Service) ready() bool {
 	return s.Timed.Runner.DB != nil && s.Timed.Binder.Time != nil && s.Fresh != nil && s.Store != nil && s.Content != nil && s.Fence != nil && s.Costs != nil && s.Grants != nil &&
-		s.Values != nil && s.Mail != nil && s.Achievements != nil && s.Combat != nil && s.Heroes != nil && s.Pets != nil && s.Directory != nil && s.Guilds != nil && s.Servers != nil &&
+		s.Values != nil && s.Mail != nil && s.Achievements != nil && s.Facts != nil && s.Combat != nil && s.Heroes != nil && s.Pets != nil && s.Directory != nil && s.Guilds != nil && s.Servers != nil &&
 		s.Receipts != nil && s.ReceiptRead != nil
 }

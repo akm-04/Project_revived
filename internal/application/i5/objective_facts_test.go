@@ -29,9 +29,9 @@ func TestObjectiveFactsAdvanceMatchingKindOncePerFact(t *testing.T) {
 	instance := func(id int64) objective.Instance {
 		return objective.Instance{PlayerID: actor.PlayerID, ProgramID: "daily", ObjectiveID: id, GenerationID: "day", DefinitionRevision: "r1", ClaimState: objective.Unclaimed, StateVersion: 1}
 	}
-	open := &openObjectives{instances: []objective.Instance{instance(10006), instance(10002)}, definitions: []ObjectiveDefinition{definition(10006, "TOP_FLOOR_FIGHT"), definition(10002, "CAMPAIGN_NORMAL_CLEAR")}}
+	open := &openObjectives{instances: []objective.Instance{instance(10006), instance(10002)}, definitions: []ObjectiveDefinition{definition(10006, objective.PVPFightKind), definition(10002, "CAMPAIGN_NORMAL_CLEAR")}}
 	port := ObjectiveFacts{Owner: Service{Store: store, Receipts: receipts, ReceiptRead: receipts}, Open: open}
-	fact := objective.Fact{PlayerID: actor.PlayerID, SourceDomain: "top-floor", SourceBusinessKey: "attempt-1", Kind: "TOP_FLOOR_FIGHT", Delta: 1}
+	fact := objective.Fact{PlayerID: actor.PlayerID, SourceDomain: "top-floor", SourceBusinessKey: "attempt-1", Kind: objective.PVPFightKind, Delta: 1}
 	for attempt := byte(0); attempt < 2; attempt++ {
 		if err := port.RecordTx(context.Background(), &testTx{}, testOperation(80+attempt), fact); err != nil {
 			t.Fatal(err)

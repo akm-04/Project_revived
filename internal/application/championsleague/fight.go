@@ -12,6 +12,7 @@ import (
 	d "gxb.local/backend/v2/internal/domain/championsleague"
 	cd "gxb.local/backend/v2/internal/domain/combat"
 	"gxb.local/backend/v2/internal/domain/identity"
+	"gxb.local/backend/v2/internal/domain/objective"
 	"gxb.local/backend/v2/internal/foundation/ids"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/tx"
@@ -267,6 +268,10 @@ func (s Service) terminal(c context.Context, id ids.UUID, parent operation.Conte
 			}
 		} else {
 			a, b, m.Delta = cat.Attack(a, b, m.Win, at)
+			fact := objective.Fact{PlayerID: m.Attacker, SourceDomain: "champions-league", SourceBusinessKey: m.ID.String(), Kind: objective.PVPFightKind, Delta: 1}
+			if e = s.Facts.RecordTx(c, sc.Tx, sc.Operation.Operation(), fact); e != nil {
+				return e
+			}
 		}
 		// Global root serializes both rows; preserve lock/key order for all writers.
 		if a.ID < b.ID {

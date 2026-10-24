@@ -15,6 +15,7 @@ import (
 	gen "gxb.local/backend/v2/internal/application/generation"
 	cd "gxb.local/backend/v2/internal/domain/combat"
 	"gxb.local/backend/v2/internal/domain/identity"
+	"gxb.local/backend/v2/internal/domain/objective"
 	d "gxb.local/backend/v2/internal/domain/oneonone"
 	"gxb.local/backend/v2/internal/foundation/ids"
 	"gxb.local/backend/v2/internal/foundation/operation"
@@ -456,6 +457,10 @@ func (s Service) settleMatchTx(c context.Context, sc gen.TimedScope, id ids.UUID
 		}
 	}
 	if err = s.Achievements.ObserveOneOnOneWinStreakTx(c, sc.Tx, m.Attacker, revision, attacker.WinStreak, at); err != nil {
+		return err
+	}
+	fact := objective.Fact{PlayerID: m.Attacker, SourceDomain: "one-on-one", SourceBusinessKey: m.ID.String(), Kind: objective.PVPFightKind, Delta: 1}
+	if err = s.Facts.RecordTx(c, sc.Tx, sc.Operation.Operation(), fact); err != nil {
 		return err
 	}
 	done2 := m

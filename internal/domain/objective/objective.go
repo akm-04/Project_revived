@@ -41,6 +41,9 @@ type Fact struct {
 	Value             int64
 }
 
+// PVPFightKind is one finished fight in a lobby PK mode: Top Floor, 1on1, ranked Arena and Champion League (task_req 106, D92).
+const PVPFightKind = "PVP_FIGHT"
+
 func (f Fact) Validate() error {
 	if !f.PlayerID.Valid() || strings.TrimSpace(f.SourceDomain) == "" || strings.TrimSpace(f.SourceBusinessKey) == "" || strings.TrimSpace(f.Kind) == "" {
 		return errors.New("invalid objective fact")
