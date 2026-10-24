@@ -1,0 +1,5 @@
+__pycache__/
+*.pyc
+# build outputs and the stock APK (kept split in tools/ instead)
+app_repack/build_v2/
+app_repack/app/*.apk
