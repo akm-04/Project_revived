@@ -1,0 +1,1 @@
+place the stock APK (Girls X Battle 1.631.0, e.g. from APKPure) to be patched in this folder; patch_game_v2.sh needs exactly one *.apk here
