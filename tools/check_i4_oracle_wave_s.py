@@ -104,14 +104,19 @@ missing=[fld for fld in src_fields if f'"{fld}"' not in shape_text]
 if missing: errs.append('I4 MID17 structural projection missing current SelfPlayer fields: '+','.join(missing))
 # Preserve the current read-only registration boundary for the White Album repair.
 # Parse hard-coded registration lists/direct registrations in the production router;
-# MID2784 must remain present while mutation MIDs 72/2785 remain unregistered.
+# MID2784 remains present; I7 Library now owns mutations 72/2785 (D66/D109).
 api_text=(ROOT/'cmd/gxb-api/main_postgres.go').read_text()
 registered={int(x) for x in re.findall(r'mustRegister\(\s*(\d+)\s*,', api_text)}
 for body in re.findall(r'for _, mid := range \[\]uint16\{([^}]*)\}\s*\{\s*mustRegister\(mid,', api_text, re.S):
  registered.update(int(x) for x in re.findall(r'\d+', body))
 if 2784 not in registered: errs.append('I4 production router lost MID2784 registration')
-for forbidden_mid in (72,2785):
- if forbidden_mid in registered: errs.append(f'I4 production router unexpectedly registers White Album mutation MID{forbidden_mid}')
+# D66/D109: I7 qualified Library now owns the formerly forbidden mutations.
+def library_routes(text):
+ groups=re.findall(r'for _, mid := range \[\]uint16\{([^}]+)\}\s*\{\s*mustRegister\(mid, libraryD\)', text, re.S)
+ return {int(value) for group in groups for value in re.findall(r'\d+', group)}
+if not {72,2784,2785} <= library_routes(api_text): errs.append('I4 Library route ownership drift')
+assert not library_routes('for _, mid := range []uint16{72,2785} { mustRegister(mid, heroD) }')
+assert 2785 not in library_routes('for _, mid := range []uint16{72,2784} { mustRegister(mid, libraryD) }')
 # V1 is corroborative/differential only: verify its recovered realtime/MID192 facts,
 # never import its private architecture or stubs into V2.
 with zipfile.ZipFile(v1) as z:

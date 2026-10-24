@@ -33,6 +33,7 @@ func campaignMode(t *testing.T, p *pg.Pool) app.Mode {
 		Backpack: values, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}, RedeemSecret: []byte("i9-3a-campaign-native-fixture-secret")}
 	return app.Mode{Timed: gen.TimedRunner{Binder: gen.Binder{Time: pg.AuthoritativeTime{Queryer: p}}, Runner: runner}, Fresh: p, Store: campaignstore.Store{}, Content: content,
 		Fence: values, Functions: values, Directory: i4store.PlayerDirectoryReader{}, Heroes: characterstore.CampaignHeroPort{Store: heroes}, HeroExp: hero.Service{ProgressionStore: heroes, Progression: content},
+		Privileges: privilegeProvider(p), Costs: i5.MaterialCostDebiter{Store: values, Content: content}, Progression: values,
 		Combat: combatService(t, p), Energy: owner, Grants: owner, Stages: owner, Facts: i5.ObjectiveFacts{Owner: owner, Open: values}, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}}
 }
 

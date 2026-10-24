@@ -48,10 +48,17 @@ type Mode struct {
 	Combat      Combat
 	Energy      i5.TxTemporalDebiter
 	Grants      Grants
+	Privileges  i5.PrivilegeSnapshotProvider
+	Costs       i5.TxMaterialCostDebiter
+	Progression Progression
 	Stages      Stages
 	Facts       Facts
 	Receipts    receipt.Store
 	ReceiptRead receipt.Reader
+}
+
+type Progression interface {
+	ReadProgressionTx(context.Context, tx.Queryer, identity.PlayerID) (player.Progression, error)
 }
 
 type Store interface {
@@ -63,6 +70,7 @@ type Store interface {
 type Content interface {
 	ActiveRevision(context.Context, tx.Queryer) (string, error)
 	CampaignCatalogTx(context.Context, tx.Queryer, string) (d.Catalog, error)
+	ResolveProgressionPolicyTx(context.Context, tx.Queryer, string) (player.ProgressionPolicy, error)
 }
 
 type Fence interface {

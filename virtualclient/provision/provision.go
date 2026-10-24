@@ -20,6 +20,7 @@ import (
 	appi5 "gxb.local/backend/v2/internal/application/i5"
 	"gxb.local/backend/v2/internal/domain/grant"
 	"gxb.local/backend/v2/internal/domain/identity"
+	"gxb.local/backend/v2/internal/domain/privilege"
 	"gxb.local/backend/v2/internal/foundation/audit"
 	"gxb.local/backend/v2/internal/foundation/clock"
 	"gxb.local/backend/v2/internal/foundation/ids"
@@ -223,4 +224,44 @@ func stockOpenLevel(raw string) (int64, bool) {
 	}
 	level, err := strconv.ParseInt(fields[1], 10, 64)
 	return level, err == nil
+}
+
+// Configure grants scenario resources and imports VIP through the production owners (D88), after stock birth.
+func Configure(ctx context.Context, databaseURL, accountID string, vip int64, lines []grant.Line) error {
+	if vip == 0 && len(lines) == 0 {
+		return nil
+	}
+	pool, err := postgres.Open(ctx, databaseURL, postgres.PoolSettings{MaxConns: 2, MaxConnLifetime: time.Minute, MaxConnIdleTime: time.Minute, HealthCheckPeriod: time.Minute, ApplicationName: "gxb-vc-configure"})
+	if err != nil {
+		return err
+	}
+	defer pool.Close()
+	var pid, server int64
+	if err = pool.QueryRow(ctx, `SELECT player_id,logical_server_id FROM players WHERE account_id=$1`, accountID).Scan(&pid, &server); err != nil {
+		return err
+	}
+	content := contentstore.Store{Queryer: pool}
+	revision, err := content.ActiveRevision(ctx, pool)
+	if err != nil {
+		return err
+	}
+	if vip != 0 {
+		catalog, err := content.PrivilegeCatalogTx(ctx, pool, revision)
+		if err != nil {
+			return err
+		}
+		if vip < 0 || vip >= int64(len(catalog.Rows)) {
+			return fmt.Errorf("invalid scenario VIP %d", vip)
+		}
+		svc := commerceprivilege.Service{Runner: tx.Runner{DB: pool}, Fresh: pool, Time: postgres.AuthoritativeTime{Queryer: pool}, Players: i4store.PlayerRootLocker{}, Store: commerceprivilegestore.Store{}, Content: content, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: pool}, Effects: appi5.PrivilegeTransitionOwner{Store: i5store.Store{}, Content: content}, Directory: i4store.DirectoryLevelProjection{}, Audit: audit.NopEmitter{}}
+		request, err := (operation.Factory{Clock: clock.System{}}).New(policy.Set{})
+		if err != nil {
+			return err
+		}
+		_, err = svc.ImportManual(ctx, commerceprivilege.Authority{Operator: provisionOperator, Capability: privilege.ManualCapability, PolicyVersion: privilege.ManualPolicy}, commerceprivilege.Import{PlayerID: identity.PlayerID(pid), LogicalServerID: identity.LogicalServerID(server), CommandKey: "vc-vip-" + request.ID.String(), Charge: catalog.Rows[vip].Charge, MonthlyState: privilege.MonthlyAbsent}, request)
+		if err != nil {
+			return err
+		}
+	}
+	return grantLines(ctx, pool, revision, identity.PlayerID(pid), lines)
 }

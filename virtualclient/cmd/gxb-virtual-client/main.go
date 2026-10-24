@@ -13,6 +13,7 @@ import (
 
 	"github.com/jackc/pgx/v5"
 
+	"gxb.local/backend/v2/internal/domain/grant"
 	"gxb.local/backend/v2/virtualclient/client"
 	"gxb.local/backend/v2/virtualclient/provision"
 )
@@ -62,8 +63,10 @@ func main() {
 type scenario struct {
 	Name string `json:"name"`
 	// Level and Heroes progress the player stock MID1 births; the stock client then summons each hero through MID59.
-	Level  int64   `json:"level"`
-	Heroes []int64 `json:"heroes"`
+	Level  int64        `json:"level"`
+	VIP    int64        `json:"vip"`
+	Grants []grant.Line `json:"grants"`
+	Heroes []int64      `json:"heroes"`
 	// Steps: "tap:<node path or XxY>", "window:<stock window>[ <json params>]", "lua:<chunk>", "wait:<seconds>".
 	Steps []string `json:"steps"`
 	// Settle is virtual seconds run after the last step (stock ErrorLogPoster uploads every 30 s).
@@ -135,7 +138,7 @@ func (run run) play() ([]string, error) {
 		Report   client.Report      `json:"report"`
 		Failures []string           `json:"failures"`
 	}{Account: session.AccountID, Scenario: run.scenario.Name, Failures: []string{}}
-	progressed := run.scenario.Level > 0 || len(run.scenario.Heroes) > 0
+	progressed := run.scenario.Level > 0 || len(run.scenario.Heroes) > 0 || run.scenario.VIP > 0 || len(run.scenario.Grants) > 0
 	if progressed {
 		// A returning player: the first boot lets stock MID1 birth the player, the harness progresses it, the second boot loads it.
 		birth, err := run.boot(session)
@@ -151,6 +154,11 @@ func (run run) play() ([]string, error) {
 		}
 		if output.Summons, err = provision.Progress(ctx, run.databaseURL, session.AccountID, run.scenario.Level, run.scenario.Heroes); err != nil {
 			return nil, fmt.Errorf("progress: %w", err)
+		}
+	}
+	if progressed {
+		if err := provision.Configure(ctx, run.databaseURL, session.AccountID, run.scenario.VIP, run.scenario.Grants); err != nil {
+			return nil, err
 		}
 	}
 	virtual, err := run.boot(session)

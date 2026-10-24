@@ -10,16 +10,19 @@ import (
 	d "gxb.local/backend/v2/internal/domain/campaign"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/operation"
+	"gxb.local/backend/v2/internal/foundation/receipt"
 	"gxb.local/backend/v2/internal/protocol/httpedge"
 )
 
-// CampaignMIDs are the I9-3A campaign MIDs (mid.lua 112 LOAD_WORLD_MAP, 113 FIGHT, 114 FIGHT_RESULT).
-var CampaignMIDs = []uint16{112, 113, 114}
+// CampaignMIDs are the I9-3A/B world, fight/result, Super reset and sweep MIDs.
+var CampaignMIDs = []uint16{112, 113, 114, 116, 117}
 
 // fightExist is battleConst.errorIdFightExist, which BattleCreate.campaignResult accepts with a full body (F4e).
 const fightExist = 30005
 
 type CampaignPort interface {
+	Sweep(context.Context, identity.ActorContext, app.Sweep, operation.Context) (map[string]any, error)
+	Reset(context.Context, identity.ActorContext, app.Reset, operation.Context) (map[string]any, error)
 	Load(context.Context, identity.ActorContext, operation.Context) (map[string]any, error)
 	Fight(context.Context, identity.ActorContext, app.Fight, operation.Context) (map[string]any, error)
 	Result(context.Context, identity.ActorContext, app.Result, operation.Context) (app.Settled, error)
@@ -57,6 +60,27 @@ func (o CampaignDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchR
 			return bad
 		}
 		body, err := o.Service.Fight(ctx, a, request, op)
+		if err != nil {
+			return failCampaign(err)
+		}
+		return okI5(body)
+	case 116:
+		id, idOK := topFloorInteger(p, "campaign_id", true)
+		kind, kindOK := topFloorInteger(p, "campaign_type", true)
+		if !idOK || !kindOK || kind != d.Super || !onlyStockGameplayParams(p, "campaign_id", "campaign_type") {
+			return bad
+		}
+		body, err := o.Service.Reset(ctx, a, app.Reset{CampaignID: id, Type: kind}, op)
+		if err != nil {
+			return failCampaign(err)
+		}
+		return okI5(body)
+	case 117:
+		request, valid := campaignSweep(p)
+		if !valid {
+			return bad
+		}
+		body, err := o.Service.Sweep(ctx, a, request, op)
 		if err != nil {
 			return failCampaign(err)
 		}
@@ -111,11 +135,25 @@ func campaignResult(p map[string]any) (app.Result, bool) {
 }
 
 func failCampaign(err error) httpedge.Response {
-	if errors.Is(err, d.ErrInvalid) {
+	var conflict *receipt.ConflictError
+	if errors.Is(err, d.ErrInvalid) || errors.As(err, &conflict) {
 		return badHero("campaign_invalid_parameter")
 	}
 	if errors.Is(err, d.ErrRefused) {
 		return httpedge.Response{HTTPStatus: http.StatusOK, Body: map[string]any{"error_code": int64(1)}}
 	}
 	return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: err, Body: map[string]any{"error": "campaign_unavailable"}}
+}
+
+// campaignSweep reads SweepWindow's forwarded stock params; UI-only compose keys do not affect awards.
+func campaignSweep(p map[string]any) (app.Sweep, bool) {
+	id, a := topFloorInteger(p, "campaign_id", true)
+	kind, b := topFloorInteger(p, "campaign_type", true)
+	count, c := topFloorInteger(p, "sweep_num", true)
+	method, e := topFloorInteger(p, "sweep_type", true)
+	_, awake := topFloorInteger(p, "awake_mission", false)
+	_, compose := topFloorInteger(p, "itemComposeID", false)
+	_, need := topFloorInteger(p, "needItemComposeNum", false)
+	allowed := onlyStockGameplayParams(p, "campaign_id", "campaign_type", "sweep_num", "sweep_type", "awake_mission", "itemComposeID", "needItemComposeNum")
+	return app.Sweep{CampaignID: id, Type: kind, Count: count, Kind: method}, a && b && c && e && awake && compose && need && allowed && (kind == d.Normal || kind == d.Super) && count >= 1 && count <= 10 && (method == 1 || method == 2)
 }
