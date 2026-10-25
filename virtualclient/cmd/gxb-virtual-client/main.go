@@ -67,7 +67,7 @@ type scenario struct {
 	VIP    int64        `json:"vip"`
 	Grants []grant.Line `json:"grants"`
 	Heroes []int64      `json:"heroes"`
-	// Steps: "tap:<node path or XxY>", "window:<stock window>[ <json params>]", "lua:<chunk>", "wait:<seconds>".
+	// Steps: "tap:<node path or XxY>", "window:<stock window>[ <json params>]", "lua:<chunk>", "wait:<seconds>", "relogin" (same account/device, fresh Lua VM).
 	Steps []string `json:"steps"`
 	// Settle is virtual seconds run after the last step (stock ErrorLogPoster uploads every 30 s).
 	Settle float64 `json:"settle_seconds"`
@@ -132,6 +132,7 @@ func (run run) play() ([]string, error) {
 	output := struct {
 		Account  string             `json:"account_id"`
 		Scenario string             `json:"scenario,omitempty"`
+		Sessions []client.Report    `json:"sessions,omitempty"`
 		Birth    *client.Report     `json:"birth,omitempty"`
 		Summons  []provision.Summon `json:"summons,omitempty"`
 		Reached  bool               `json:"reached"`
@@ -161,16 +162,40 @@ func (run run) play() ([]string, error) {
 			return nil, err
 		}
 	}
-	virtual, err := run.boot(session)
-	if err != nil {
-		return nil, err
+	groups := [][]string{{}}
+	for _, step := range run.scenario.Steps {
+		if step == "relogin" {
+			groups = append(groups, []string{})
+		} else {
+			groups[len(groups)-1] = append(groups[len(groups)-1], step)
+		}
 	}
-	defer virtual.Close()
-	output.Reached = virtual.InScene("MainScene")
-	if output.Reached {
-		err = run.steps(virtual, output.Summons)
+	for i, group := range groups {
+		virtual, bootErr := run.boot(session)
+		if bootErr != nil {
+			err = bootErr
+			break
+		}
+		output.Reached = virtual.InScene("MainScene")
+		segment := run
+		segment.scenario.Steps = group
+		summons := output.Summons
+		if i > 0 {
+			summons = nil
+		}
+		if i < len(groups)-1 {
+			segment.scenario.Settle = 0
+		}
+		if output.Reached {
+			err = segment.steps(virtual, summons)
+		}
+		output.Sessions = append(output.Sessions, virtual.Report())
+		virtual.Close()
+		if err != nil || !output.Reached {
+			break
+		}
 	}
-	output.Report = virtual.Report()
+	output.Report = mergeReports(output.Sessions)
 	if err == nil {
 		output.Failures, err = run.check(ctx, session.AccountID, output.Reached, output.Report)
 	}
@@ -386,4 +411,24 @@ func clientLog(ctx context.Context, databaseURL, accountUID string) (string, err
 	var logged string
 	err = connection.QueryRow(ctx, `SELECT coalesce(string_agg(log || E'\n' || dump, E'\n'), '') FROM client_log_rows WHERE account_uid=$1`, accountUID).Scan(&logged)
 	return logged, err
+}
+
+// mergeReports keeps errors and requests from every login subject to the same assertions.
+func mergeReports(sessions []client.Report) client.Report {
+	out := client.Report{Missing: map[string]float64{}}
+	for _, r := range sessions {
+		out.SourceDigest = r.SourceDigest
+		out.VirtualTime += r.VirtualTime
+		out.Proxies += r.Proxies
+		out.Scenes = append(out.Scenes, r.Scenes...)
+		out.Requests = append(out.Requests, r.Requests...)
+		out.LuaErrors = append(out.LuaErrors, r.LuaErrors...)
+		out.Unreadable = append(out.Unreadable, r.Unreadable...)
+		out.SDKCalls = append(out.SDKCalls, r.SDKCalls...)
+		out.Exited = out.Exited || r.Exited
+		for name, count := range r.Missing {
+			out.Missing[name] += count
+		}
+	}
+	return out
 }

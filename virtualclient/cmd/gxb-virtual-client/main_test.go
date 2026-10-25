@@ -45,3 +45,10 @@ func TestUnknownStep(t *testing.T) {
 		t.Fatal("unknown step kind accepted")
 	}
 }
+
+func TestReloginReportRetainsEarlierErrorsAndRequests(t *testing.T) {
+	r := mergeReports([]client.Report{{Requests: []client.Exchange{{MID: 118, Status: 200}}, LuaErrors: []string{"first login failure"}, Proxies: 10, Missing: map[string]float64{"x": 2}}, {Requests: []client.Exchange{{MID: 122, Status: 200}}, Proxies: 20, Missing: map[string]float64{"x": 3}}})
+	if !answeredOK(r, 118) || !answeredOK(r, 122) || len(luaErrorFailures(r.LuaErrors, nil)) != 1 || r.Proxies != 30 || r.Missing["x"] != 5 {
+		t.Fatalf("lost session evidence: %+v", r)
+	}
+}
