@@ -290,14 +290,22 @@
       "parser_version": "lua-generated-v18-guild-invite",
       "revision_id": "5f18b58e22b4e764b182d65b5abf6d11f0565ea57436bffaff8c9d69d1d91f7f",
       "scope": "Twelve exact fixed chapter Gacha gift vectors from gift.lua and source map node sizes for displayed star eligibility; other source gameplay payloads unchanged."
+    },
+    {
+      "ordinal": 42,
+      "stage": "I9-3D (Campaign trials)",
+      "compiler_version": "i9-3d-campaign-trials",
+      "parser_version": "lua-generated-v18-guild-invite",
+      "revision_id": "64366487ec8ed3e7574a64a002fde76b5bfe4e41ad76e019fda00733dc8c1ffa",
+      "scope": "Cumulative campaign trials catalog: Daily, Prophecy, Cloud and Challenge source admission, schedules, dropboxes and trial-consumption inputs; existing campaign awards and all unrelated payloads retained."
     }
   ],
   "current": {
-    "ordinal": 41,
-    "stage": "I9-3C (Campaign awards)",
-    "compiler_version": "i9-3c-campaign-awards",
+    "ordinal": 42,
+    "stage": "I9-3D (Campaign trials)",
+    "compiler_version": "i9-3d-campaign-trials",
     "parser_version": "lua-generated-v18-guild-invite",
-    "revision_id": "5f18b58e22b4e764b182d65b5abf6d11f0565ea57436bffaff8c9d69d1d91f7f",
-    "scope": "Twelve exact fixed chapter Gacha gift vectors from gift.lua and source map node sizes for displayed star eligibility; other source gameplay payloads unchanged."
+    "revision_id": "64366487ec8ed3e7574a64a002fde76b5bfe4e41ad76e019fda00733dc8c1ffa",
+    "scope": "Cumulative campaign trials catalog: Daily, Prophecy, Cloud and Challenge source admission, schedules, dropboxes and trial-consumption inputs; existing campaign awards and all unrelated payloads retained."
   }
 }
