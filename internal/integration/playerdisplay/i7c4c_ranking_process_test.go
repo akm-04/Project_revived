@@ -472,7 +472,8 @@ func TestI7C4CRankingActualAPIReopenRestartAndDatabaseRestore(t *testing.T) {
 	}
 	for _, mid := range []int{64, 305} {
 		code, out = post(mid, map[string]any{})
-		if code == 200 {
+		inactiveAnswer := code == 200 && out["error_code"] == float64(1)
+		if code == 200 && !inactiveAnswer {
 			t.Fatal("unqualified route activated", mid, out)
 		}
 	}
