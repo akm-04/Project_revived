@@ -284,8 +284,13 @@ func (s Mode) deliver(c context.Context, sc gen.TimedScope, a identity.ActorCont
 	if err = s.settle(c, sc, a, "classic", append(lines, extra...)); err != nil {
 		return nil, err
 	}
+	return rows, s.recordPull(c, sc, a, slots)
+}
+
+// recordPull is the purchase's one SUMMON fact (G9) in the settling transaction.
+func (s Mode) recordPull(c context.Context, sc gen.TimedScope, a identity.ActorContext, slots []d.Slot) error {
 	current := sc.Operation.Operation()
-	return rows, s.Facts.RecordTx(c, sc.Tx, current, objective.Fact{PlayerID: a.PlayerID, SourceDomain: "summon", SourceBusinessKey: current.ID.String(), Kind: SummonKind, Delta: int64(len(slots))})
+	return s.Facts.RecordTx(c, sc.Tx, current, objective.Fact{PlayerID: a.PlayerID, SourceDomain: "summon", SourceBusinessKey: current.ID.String(), Kind: SummonKind, Delta: int64(len(slots))})
 }
 
 // MagicPull is a 70 request: summon_time 1 or 10 for the stored Magic target partner_id.
@@ -326,7 +331,7 @@ func (s Mode) Magic(c context.Context, a identity.ActorContext, q MagicPull, op 
 		if err = s.settle(c, sc, a, "magic", lines); err != nil {
 			return nil, state, err
 		}
-		return out, state, nil
+		return out, state, s.recordPull(c, sc, a, slots)
 	})
 }
 
