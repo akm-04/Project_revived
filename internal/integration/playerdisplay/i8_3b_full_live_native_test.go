@@ -138,7 +138,7 @@ func grantGenuine(t *testing.T, p *pg.Pool, a identity.ActorContext, rev, name s
 	}
 }
 
-// genuineHeroService is the production Hero composition (cmd/gxb-api main_postgres).
+// genuineHeroService retains the qualified historical cap5 profile; I9 tests select V2 explicitly.
 func genuineHeroService(p *pg.Pool) hero.Service {
 	runner := tx.Runner{DB: p}
 	store, content := characterstore.Store{Queryer: p}, contentstore.Store{Queryer: p}

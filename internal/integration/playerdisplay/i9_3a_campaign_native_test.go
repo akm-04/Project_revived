@@ -5,6 +5,8 @@ package playerdisplay_test
 import (
 	"errors"
 	"fmt"
+	"gxb.local/backend/v2/internal/adapters/postgres/dailyconsumestore"
+	"gxb.local/backend/v2/internal/application/dailyconsume"
 	"testing"
 	"time"
 
@@ -34,10 +36,10 @@ func campaignMode(t *testing.T, p *pg.Pool) app.Mode {
 	runner := tx.Runner{DB: p}
 	owner := i5.Service{Runner: runner, Store: values, Content: content, Privileges: i5.BaselinePrivilegeProvider{}, Functions: i5.PetStarterFunctionAnnouncements{}, Directory: i4store.DirectoryLevelProjection{},
 		Backpack: values, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}, RedeemSecret: []byte("i9-3a-campaign-native-fixture-secret")}
-	return app.Mode{Timed: gen.TimedRunner{Binder: gen.Binder{Time: pg.AuthoritativeTime{Queryer: p}}, Runner: runner}, Fresh: p, Store: campaignstore.Store{}, Content: content,
+	return app.Mode{Daily: dailyconsume.Service{Store: dailyconsumestore.Store{}, Costs: i5.MaterialCostDebiter{Store: values, Content: content}}, Timed: gen.TimedRunner{Binder: gen.Binder{Time: pg.AuthoritativeTime{Queryer: p}}, Runner: runner}, Fresh: p, Store: campaignstore.Store{}, Content: content,
 		Fence: values, Functions: values, Directory: i4store.PlayerDirectoryReader{}, Heroes: characterstore.CampaignHeroPort{Store: heroes}, HeroExp: hero.Service{ProgressionStore: heroes, Progression: content},
 		StoryWire: heroproj.StockHero, StoryHeroes: hero.Service{AcquisitionStore: heroes, Acquisition: content, CollectionAdmission: hero.CatalogCollectionAdmission{Content: content}, FreshFacets: characterbirth.FreshHeroFacets()},
-		Pets: pet.Service{Store: heroes, Progression: content}, MaxColor: i5.PreservationMaxHeroColorProvider{},
+		Pets: pet.Service{Store: heroes, Progression: content}, MaxColor: i5.CurrentMaxHeroColorProvider{},
 		Privileges: privilegeProvider(p), Costs: i5.MaterialCostDebiter{Store: values, Content: content}, Progression: values,
 		Combat: combatService(t, p), Energy: owner, Grants: owner, Stages: owner, Facts: i5.ObjectiveFacts{Owner: owner, Open: values}, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}}
 }

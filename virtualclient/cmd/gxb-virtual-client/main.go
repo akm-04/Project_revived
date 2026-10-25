@@ -67,6 +67,8 @@ type scenario struct {
 	VIP    int64        `json:"vip"`
 	Grants []grant.Line `json:"grants"`
 	Heroes []int64      `json:"heroes"`
+	// ChallengeFixture seeds declared prior clears through the Campaign store; it is not gameplay-origin proof.
+	ChallengeFixture bool `json:"challenge_fixture"`
 	// Steps: "tap:<node path or XxY>", "window:<stock window>[ <json params>]", "lua:<chunk>", "wait:<seconds>", "relogin" (same account/device, fresh Lua VM).
 	Steps []string `json:"steps"`
 	// Settle is virtual seconds run after the last step (stock ErrorLogPoster uploads every 30 s).
@@ -139,21 +141,36 @@ func (run run) play() ([]string, error) {
 		Report   client.Report      `json:"report"`
 		Failures []string           `json:"failures"`
 	}{Account: session.AccountID, Scenario: run.scenario.Name, Failures: []string{}}
-	progressed := run.scenario.Level > 0 || len(run.scenario.Heroes) > 0 || run.scenario.VIP > 0 || len(run.scenario.Grants) > 0
+	progressed := run.scenario.ChallengeFixture || run.scenario.Level > 0 || len(run.scenario.Heroes) > 0 || run.scenario.VIP > 0 || len(run.scenario.Grants) > 0
 	if progressed {
 		// A returning player: the first boot lets stock MID1 birth the player, the harness progresses it, the second boot loads it.
 		birth, err := run.boot(session)
 		if err != nil {
 			return nil, err
 		}
-		report := birth.Report()
-		output.Birth = &report
 		reached := birth.InScene("MainScene")
+		// A progressed fixture declares completed tutorials through the stock MID26 owner; fresh level-0 walks do not.
+		if reached && run.scenario.Level > 0 {
+			if err := birth.Call("local s=xyd.StoryData.get() s:setGuideID(100503,true) s:persist()"); err != nil {
+				birth.Close()
+				return nil, fmt.Errorf("progressed tutorial fixture: %w", err)
+			}
+			if err := birth.Run(run.wait, nil); err != nil {
+				birth.Close()
+				return nil, err
+			}
+		}
+		report := birth.Report()
+		if run.scenario.Level > 0 && !answeredOK(report, 26) {
+			birth.Close()
+			return nil, fmt.Errorf("progressed fixture MID26 was not acknowledged")
+		}
+		output.Birth = &report
 		birth.Close()
 		if !reached {
 			return nil, fmt.Errorf("birth boot never reached MainScene")
 		}
-		if output.Summons, err = provision.Progress(ctx, run.databaseURL, session.AccountID, run.scenario.Level, run.scenario.Heroes); err != nil {
+		if output.Summons, err = provision.Progress(ctx, run.databaseURL, session.AccountID, run.scenario.Level, run.scenario.Heroes, run.scenario.ChallengeFixture); err != nil {
 			return nil, fmt.Errorf("progress: %w", err)
 		}
 	}

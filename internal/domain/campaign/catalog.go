@@ -28,18 +28,21 @@ var (
 )
 
 type Node struct {
-	ID         int64 `json:"id"`
-	Type       int64 `json:"type"`
-	MapType    int64 `json:"map_type"` // Source node size, distinct from wire Type; zero is legacy content.
-	Chapter    int64 `json:"chapter"`
-	OpenLevel  int64 `json:"open_level"`
-	EnergyCost int64 `json:"energy_cost"`
-	DefeatCost int64 `json:"defeat_cost"`
-	PartnerExp int64 `json:"partner_exp"`
-	ManaGain   int64 `json:"mana_gain"`
-	StarGift   int64 `json:"star_gift"`
-	DailyLimit int64 `json:"daily_limit"`
-	FirstBox   int64 `json:"first_box"`
+	SelfTeam       []int64 `json:"self_team,omitempty"`
+	ChallengeMode  int64   `json:"challenge_mode,omitempty"`
+	ExcludedHeroes []int64 `json:"excluded_heroes,omitempty"`
+	ID             int64   `json:"id"`
+	Type           int64   `json:"type"`
+	MapType        int64   `json:"map_type"` // Source node size, distinct from wire Type; zero is legacy content.
+	Chapter        int64   `json:"chapter"`
+	OpenLevel      int64   `json:"open_level"`
+	EnergyCost     int64   `json:"energy_cost"`
+	DefeatCost     int64   `json:"defeat_cost"`
+	PartnerExp     int64   `json:"partner_exp"`
+	ManaGain       int64   `json:"mana_gain"`
+	StarGift       int64   `json:"star_gift"`
+	DailyLimit     int64   `json:"daily_limit"`
+	FirstBox       int64   `json:"first_box"`
 	// RepeatBox is 0 where the source dropbox id has no rows (UNKNOWN: no repeat drop).
 	RepeatBox     int64      `json:"repeat_box"`
 	Next          []int64    `json:"next"`
@@ -103,25 +106,28 @@ type PrivatePolicy struct {
 }
 
 type Catalog struct {
-	SchemaVersion           int           `json:"schema_version"`
-	ContractID              string        `json:"contract_id"`
-	PolicyID                string        `json:"policy_id"`
-	FirstNormalID           int64         `json:"first_normal_id"`
-	SuperFunctionID         int64         `json:"super_function_id"`
-	ChallengeGateCampaignID int64         `json:"challenge_gate_campaign_id"`
-	ExpMultiplier           int64         `json:"exp_multiplier"`
-	SweepCardItemID         int64         `json:"sweep_card_item_id"`
-	NormalSweepMax          int64         `json:"normal_sweep_max"`
-	PrivatePolicy           PrivatePolicy `json:"private_policy"`
-	AbsentRepeatBoxes       []int64       `json:"absent_repeat_box_campaigns"`
-	Monthly                 Monthly       `json:"monthly"`
-	Chapters                []Chapter     `json:"chapters"`
-	Nodes                   []Node        `json:"nodes"`
-	DropBoxes               []DropBox     `json:"drop_boxes"`
-	ChapterGifts            []ChapterGift `json:"chapter_gifts"`
-	StarBonus               []StarBonus   `json:"star_bonus"`
-	EliteResetCosts         []int64       `json:"elite_reset_costs"`
-	VIP                     []VIP         `json:"vip"`
+	TrialGroups             []TrialGroup    `json:"trial_groups"`
+	HeroFactions            map[int64]int64 `json:"hero_factions"`
+	DailyConsumes           []DailyConsume  `json:"daily_consumes"`
+	SchemaVersion           int             `json:"schema_version"`
+	ContractID              string          `json:"contract_id"`
+	PolicyID                string          `json:"policy_id"`
+	FirstNormalID           int64           `json:"first_normal_id"`
+	SuperFunctionID         int64           `json:"super_function_id"`
+	ChallengeGateCampaignID int64           `json:"challenge_gate_campaign_id"`
+	ExpMultiplier           int64           `json:"exp_multiplier"`
+	SweepCardItemID         int64           `json:"sweep_card_item_id"`
+	NormalSweepMax          int64           `json:"normal_sweep_max"`
+	PrivatePolicy           PrivatePolicy   `json:"private_policy"`
+	AbsentRepeatBoxes       []int64         `json:"absent_repeat_box_campaigns"`
+	Monthly                 Monthly         `json:"monthly"`
+	Chapters                []Chapter       `json:"chapters"`
+	Nodes                   []Node          `json:"nodes"`
+	DropBoxes               []DropBox       `json:"drop_boxes"`
+	ChapterGifts            []ChapterGift   `json:"chapter_gifts"`
+	StarBonus               []StarBonus     `json:"star_bonus"`
+	EliteResetCosts         []int64         `json:"elite_reset_costs"`
+	VIP                     []VIP           `json:"vip"`
 
 	nodes  map[int64]int
 	boxes  map[int64]int
@@ -132,8 +138,8 @@ type Catalog struct {
 // relies on the Normal and Super chains being linear in catalog order.
 func (c *Catalog) Validate() error {
 	profile := c.SchemaVersion == 1 && c.ContractID == ContractID && c.PolicyID == PolicyID && c.FirstNormalID == 100001 && c.SuperFunctionID == 31 &&
-		c.ChallengeGateCampaignID == 1600016 && c.ExpMultiplier == 3 && c.PrivatePolicy.ResultWindowSeconds > 0 && len(c.Chapters) == 23 && len(c.Nodes) == 728 &&
-		len(c.DropBoxes) == 996 && len(c.StarBonus) == 46 && len(c.EliteResetCosts) == 330 && len(c.VIP) == 16 && (len(c.ChapterGifts) == 0 || len(c.ChapterGifts) == 12)
+		c.ChallengeGateCampaignID == 1600016 && c.ExpMultiplier == 3 && c.PrivatePolicy.ResultWindowSeconds > 0 && len(c.Chapters) == 23 && ((len(c.Nodes) == 728 && len(c.TrialGroups) == 0 && len(c.DropBoxes) == 996) || (len(c.Nodes) == 857 && len(c.TrialGroups) == 14 && len(c.DropBoxes) == 1233 && len(c.HeroFactions) == 569 && len(c.DailyConsumes) == 10)) &&
+		len(c.StarBonus) == 46 && len(c.EliteResetCosts) == 330 && len(c.VIP) == 16 && (len(c.ChapterGifts) == 0 || len(c.ChapterGifts) == 12)
 	if !profile {
 		return fmt.Errorf("%w: catalog profile", ErrUnavailable)
 	}
@@ -148,6 +154,9 @@ func (c *Catalog) Validate() error {
 		_, repeat := c.boxes[n.RepeatBox]
 		if _, duplicate := c.nodes[n.ID]; duplicate || n.FirstBox != 0 && !first || n.RepeatBox != 0 && !repeat || n.EnergyCost < 0 || n.DefeatCost < 0 || n.MapType < 0 {
 			return fmt.Errorf("%w: node %d", ErrUnavailable, n.ID)
+		}
+		if Cloud(n.Type) && len(n.SelfTeam) != 5 {
+			return fmt.Errorf("%w: Cloud source team", ErrUnavailable)
 		}
 		c.nodes[n.ID] = i
 		c.chains[n.Type] = append(c.chains[n.Type], n.ID)
@@ -164,6 +173,40 @@ func (c *Catalog) Validate() error {
 		if related, ok := c.Node(c.Nodes[c.nodes[id]].Related); !ok || related.Type != Normal {
 			return fmt.Errorf("%w: super node %d related", ErrUnavailable, id)
 		}
+	}
+	for _, g := range c.TrialGroups {
+		if g.DailyLimit <= 0 || len(g.Nodes) == 0 || g.LastID != g.Nodes[len(g.Nodes)-1] || len(c.Chain(g.ID)) != len(g.Nodes) {
+			return fmt.Errorf("%w: trial group %d", ErrUnavailable, g.ID)
+		}
+		for _, id := range g.Nodes {
+			n, ok := c.Node(id)
+			if !ok || n.Type != g.ID {
+				return fmt.Errorf("%w: trial node %d", ErrUnavailable, id)
+			}
+		}
+		if g.NextID != 0 {
+			if next, ok := c.Group(g.NextID); !ok || next.NextID == 0 {
+				return fmt.Errorf("%w: prophecy cycle", ErrUnavailable)
+			}
+		} else {
+			if len(g.Weekdays) == 0 || g.ConsumeID < 3 || g.ConsumeID > 10 {
+				return fmt.Errorf("%w: trial calendar/purchase", ErrUnavailable)
+			}
+			for _, day := range g.Weekdays {
+				if day < 1 || day > 7 {
+					return fmt.Errorf("%w: trial weekday", ErrUnavailable)
+				}
+			}
+		}
+	}
+	seen := map[int64]bool{}
+	for _, id := range c.Chain(Challenge) {
+		n, _ := c.Node(id)
+		related, ok := c.Node(n.Related)
+		if !ok || related.Type != Normal || n.Previous != 0 && !seen[n.Previous] {
+			return fmt.Errorf("%w: Challenge graph", ErrUnavailable)
+		}
+		seen[id] = true
 	}
 	for i, v := range c.VIP {
 		if v.Level != int64(i) {

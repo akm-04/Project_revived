@@ -4009,6 +4009,20 @@
       "migration": "migrations/00081_i9_3a_campaign.sql",
       "owner": "Campaign",
       "write_exceptions": []
+    },
+    "daily_consumption_players": {
+      "owner": "DailyConsumption",
+      "migration": "migrations/00083_i9_3d_trials.sql",
+      "allowed_query_owners": [
+        "DailyConsumption"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/dailyconsumestore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/dailyconsumestore/"
+      ],
+      "write_exceptions": []
     }
   }
 }

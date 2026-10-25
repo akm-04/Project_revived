@@ -6,7 +6,7 @@
  "rule": "I9_MODE_FRAMEWORK_V1 F3: ACTIVE(target stage) is live by that stage's exit; INACTIVE_D79 and INACTIVE_SUPERSEDED and LATER(target phase) answer through the shared inactive dispatcher (F5); DELIVERED is already live.",
  "source": "work/i9/research/MODE_MAP.json via work/i9/research/scripts/mode_surface.py",
  "family_notes": {
-  "TIME_TRAVEL_TRIAL": "Campaign types 11-22 and Cloud City 40-42 fight through 113/114; this family holds 115 only.",
+  "TIME_TRAVEL_TRIAL": "Source trial11-15, prophecy16-21,Cloud40-42.22 Sakura excluded.115 plus123 prophecy forecast; chapter Challenge24 separate.",
   "MENTOR_STUDENT": "Provisional: roadmap marked mentor deferred (I7R19); I9-10 research confirms it or moves it LATER with a D-number (D85 permits either).",
   "RUNE": "Provisional: client rune UI presence is unchecked; I9-11 research confirms ACTIVE or INACTIVE.",
   "LEGACY_BUILDINGS": "Old building screens; I9-11 decides per MID: compatibility read or INACTIVE.",
@@ -159,8 +159,9 @@
    "family": "GOLDEN_HAND",
    "disposition": "ACTIVE",
    "target": "I9-11",
-   "v2": "unimplemented",
-   "v1": "STATE_BACKED"
+   "v2": "IMPLEMENTED_I9_3D_DAILY_COUNTER_READ",
+   "v1": "STATE_BACKED",
+   "note": "D125 canonical ten-slot daily owner read; I9-11 writer providers1/2 still open."
   },
   {
    "mid": 29,
@@ -168,8 +169,9 @@
    "family": "GOLDEN_HAND",
    "disposition": "ACTIVE",
    "target": "I9-11",
-   "v2": "unimplemented",
-   "v1": "STATE_BACKED"
+   "v2": "IMPLEMENTED_I9_3D_TRIAL_PURCHASES_ONLY",
+   "v1": "STATE_BACKED",
+   "note": "D125 consume3..10 only;1/2 bounded refusal pending I9-11 providers."
   },
   {
    "mid": 30,
@@ -678,7 +680,7 @@
    "family": "TIME_TRAVEL_TRIAL",
    "disposition": "ACTIVE",
    "target": "I9-3",
-   "v2": "unimplemented",
+   "v2": "IMPLEMENTED_I9_3D",
    "v1": "STATE_BACKED"
   },
   {
@@ -751,7 +753,7 @@
    "family": "CAMPAIGN",
    "disposition": "ACTIVE",
    "target": "I9-3",
-   "v2": "unimplemented",
+   "v2": "IMPLEMENTED_I9_3D",
    "v1": "LITERAL_STUB"
   },
   {

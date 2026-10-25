@@ -11,13 +11,16 @@ import (
 	"github.com/jackc/pgx/v5"
 
 	"gxb.local/backend/v2/internal/adapters/postgres"
+	"gxb.local/backend/v2/internal/adapters/postgres/campaignstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/commerceprivilegestore"
 	"gxb.local/backend/v2/internal/adapters/postgres/contentstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/i4store"
 	"gxb.local/backend/v2/internal/adapters/postgres/i5store"
 	"gxb.local/backend/v2/internal/adapters/postgres/kernelstore"
+	appcampaign "gxb.local/backend/v2/internal/application/campaign"
 	"gxb.local/backend/v2/internal/application/commerceprivilege"
 	appi5 "gxb.local/backend/v2/internal/application/i5"
+	campaign "gxb.local/backend/v2/internal/domain/campaign"
 	"gxb.local/backend/v2/internal/domain/grant"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/domain/privilege"
@@ -81,10 +84,6 @@ func Account(context context.Context, databaseURL string, digestSecret []byte) (
 	return result, transaction.Commit(context)
 }
 
-// completedGuideID is stock xyd.GuideStoryType.GUIDE_PET_THREE: a progressed player has finished the main, skill, arena and pet
-// tutorials, which otherwise capture every touch (GuideWindow) once their function opens.
-const completedGuideID = 100503
-
 // Summon is one stone summon (stock MID59 STONE_SUMMON_HERO) the stock client makes itself once Progress granted its fragments.
 type Summon struct {
 	TableID  int64 `json:"table_id"`
@@ -99,7 +98,10 @@ var provisionOperator = appi5.AdminOperator{ID: "virtual-client-provision", Reas
 // Progress raises the player stock MID1 birthed for the account through production owners (I9_MODE_FOUNDATION_V1 MF7): one
 // i5 AdminGrant carries the PLAYER_EXP to the scenario level and the fragments and mana of every summon. Heroes are not
 // inserted: the returned summons are for the stock client to make through MID59, so the production birth runs.
-func Progress(context context.Context, databaseURL, accountID string, level int64, tables []int64) ([]Summon, error) {
+func Progress(context context.Context, databaseURL, accountID string, level int64, tables []int64, challengeFixture bool) ([]Summon, error) {
+	if challengeFixture && level < 80 {
+		return nil, fmt.Errorf("Challenge fixture requires level >=80")
+	}
 	pool, err := postgres.Open(context, databaseURL, postgres.PoolSettings{MaxConns: 2, MaxConnLifetime: time.Minute, MaxConnIdleTime: time.Minute, HealthCheckPeriod: time.Minute, ApplicationName: "gxb-virtual-client-provision"})
 	if err != nil {
 		return nil, err
@@ -139,8 +141,13 @@ func Progress(context context.Context, databaseURL, accountID string, level int6
 	if err := grantLines(context, pool, revision, identity.PlayerID(playerID), lines); err != nil {
 		return nil, err
 	}
+	if challengeFixture {
+		if err := seedChallengeFixture(context, pool, content, revision, identity.PlayerID(playerID)); err != nil {
+			return nil, err
+		}
+	}
 	if level > 0 {
-		return summons, completeTutorials(context, pool, content, revision, playerID, level)
+		return summons, openDeferredFunctionFixtures(context, pool, content, revision, playerID, level)
 	}
 	return summons, nil
 }
@@ -185,10 +192,9 @@ func grantLines(context context.Context, pool *postgres.Pool, revision string, p
 	return nil
 }
 
-// completeTutorials marks the stock tutorials done and opens the kind 6/7 level gates no production owner announces yet.
-// shortcut: the guide cursor is written directly instead of through stock MID26 SAVE_STORY sent by the client, and kind 6/7 gates
-// (OneOnOne 16, Arena 37, 45) open here without eligibility; drop both once I9-3 drives the tutorial and I9-7 owns those gates.
-func completeTutorials(context context.Context, pool *postgres.Pool, content contentstore.Store, revision string, playerID, level int64) error {
+// completeTutorials opens only kind 6/7 level-gate fixtures.
+// shortcut: kind 6/7 gates have no qualified eligibility owner until I9-7; this is not tutorial proof.
+func openDeferredFunctionFixtures(context context.Context, pool *postgres.Pool, content contentstore.Store, revision string, playerID, level int64) error {
 	policy, err := content.ResolveFunctionGatePolicyTx(context, pool, revision)
 	if err != nil {
 		return err
@@ -198,10 +204,6 @@ func completeTutorials(context context.Context, pool *postgres.Pool, content con
 		return err
 	}
 	defer transaction.Rollback(context)
-	if tag, err := transaction.Exec(context, `UPDATE player_story_cursors SET guide_id=$2, state_version=state_version+1, updated_at=clock_timestamp()
-		WHERE player_id=$1`, playerID, completedGuideID); err != nil || tag.RowsAffected() != 1 {
-		return fmt.Errorf("guide: %v", err)
-	}
 	for _, gate := range policy.Gates {
 		openLevel, readable := stockOpenLevel(gate.RawOpenValue)
 		if gate.GateKind == "PURE_LEVEL" || !readable || openLevel > level || gate.AnnouncementCapability != "NONE" {
@@ -264,4 +266,41 @@ func Configure(ctx context.Context, databaseURL, accountID string, vip int64, li
 		}
 	}
 	return grantLines(ctx, pool, revision, identity.PlayerID(pid), lines)
+}
+
+// seedChallengeFixture supplies only declared preconditions for the source Challenge UI consumer test (D134).
+// shortcut: these Normal clears are fixture data, not genuine campaign-origin proof.
+func seedChallengeFixture(ctx context.Context, pool *postgres.Pool, content contentstore.Store, revision string, pid identity.PlayerID) error {
+	policies, err := policy.NewSet(policy.Ref{Name: "content", Version: revision})
+	if err != nil {
+		return err
+	}
+	op, err := (operation.Factory{Clock: clock.System{}}).New(policies)
+	if err != nil {
+		return err
+	}
+	store := campaignstore.Store{}
+	_, err = (tx.Runner{DB: pool}).Run(ctx, op, appcampaign.ModeProfile(), tx.Options{Isolation: tx.Serializable}, tx.RetryPolicy{MaxAttempts: 3, RetryDefiniteAbort: true}, nil, func(c context.Context, sc tx.Scope) error {
+		cat, e := content.CampaignCatalogTx(c, sc.Tx, revision)
+		if e != nil {
+			return e
+		}
+		r, e := store.LockTx(c, sc.Tx, pid, sc.Operation.StartedAt)
+		if e != nil {
+			return e
+		}
+		if r.PendingGeneration != "" {
+			return fmt.Errorf("Challenge fixture refuses active pending battle")
+		}
+		ids := []int64{cat.ChallengeGateCampaignID, 100001, 100002, 100004}
+		for _, id := range ids {
+			n, ok := cat.Node(id)
+			if !ok || n.Type != campaign.Normal {
+				return fmt.Errorf("invalid Challenge fixture Normal node %d", id)
+			}
+			r.Progress = r.Progress.WithNode(campaign.NodeState{CampaignID: id, Star: 3})
+		}
+		return store.SaveTx(c, sc.Tx, pid, r, ids, sc.Operation.StartedAt)
+	})
+	return err
 }

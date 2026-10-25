@@ -21,12 +21,24 @@ from pathlib import Path
 from typing import Any, Iterable
 
 SCHEMA_VERSION = 1
-COMPILER_VERSION = "i9-3c-campaign-awards"
+COMPILER_VERSION = "i9-3d-campaign-trials"
 PARSER_VERSION = "lua-generated-v18-guild-invite"
 EXPECTED_SOURCE_ARCHIVE_SHA256 = "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
 SOURCE_PREFIX = "app-assets/output/assets/src_64/"
 
 SOURCE_MANIFEST = [
+    ('app/windows/MapDetailWindow.lua', '5a137edc609f9d2082c5df6bf50ef05b6ef54642a7ba5bf6dca8fe0f1c4c3898', 'I9_3D_CLOUD_PET_SOURCE_BOUNDARY'),
+    ('app/windows/SelectPetTeamWindow.lua', 'f41b0edb1d9486969d8e14c781a7d99c8a44d96bfa13c5c4518e5260984dbab1', 'I9_3D_CLOUD_PET_SOURCE_BOUNDARY'),
+    ('data/tables/monster.lua', '44d5ca1524384c758a0f2d4f103e04b6aed6ffbe7b894c786b6cea0209164e5f', 'I9_3D_CHALLENGE_ADMISSION_SOURCE_BOUNDARY'),
+    ('data/tables/battle.lua', '73f9ebe94dea67620b343b593ae970a0f548c8962fe731924b9ac2ff6d0e8f33', 'I9_3D_CHALLENGE_ADMISSION_SOURCE_BOUNDARY'),
+    ('app/windows/SelectTeamNewWindow.lua', '0fabc7b70c2acf48765c41b414e3cae7504f567cb6fbe344b0f98456ed18667a', 'I9_3D_TRIAL_SOURCE_BOUNDARY'),
+    ('app/windows/MonsterProphecyWindow.lua', 'adc456b851ebef1c9035355338c75515799ade8532833ad840cb687ddfb9ded9', 'I9_3D_TRIAL_SOURCE_BOUNDARY'),
+    ('app/windows/SelectCloudDifficultWindow.lua', '8e297a978dde6192e9c5e6396bfe4f9db136f2b40eccb0364d1c6b4f63f8cccd', 'I9_3D_TRIAL_SOURCE_BOUNDARY'),
+    ('app/windows/SelectTrialWindow.lua', 'c307015708cd77de9dfd298a0c609d49e91ad7b80c5fd3294d39da320cccff6d', 'I9_3D_TRIAL_SOURCE_BOUNDARY'),
+    ('app/windows/TimeTravelWindow.lua', '6b46ff69a31d24910822347e98d8b3f7c341f19ed99a2e463d7f237cd508adbe', 'I9_3D_TRIAL_SOURCE_BOUNDARY'),
+    ('data/tables/daily_consume.lua', '79f7a2bdd1495c699d8bb606606488a4b0a47d0fd87c0457469a49248be44fe6', 'I9_3D_TRIAL_SOURCE_BOUNDARY'),
+    ('data/tables/challenge_config.lua', 'c38764bddb97fc9c8153bf077a84a6fb07c94c9e628c6336d9bb7020c57b501a', 'I9_3D_TRIAL_SOURCE_BOUNDARY'),
+    ('data/tables/trial_config.lua', 'ee127f1edc7bf668b749ed34b49469cc2ff2ef4ec2ad048d7423769b75047c2b', 'I9_3D_TRIAL_SOURCE_BOUNDARY'),
     ('data/tables/campaign.lua', '7a58e878a7171839342a856cd74b512037528438259d036009a7249472504683', 'I9_3A_CAMPAIGN_SOURCE_BOUNDARY'),
     ('data/tables/chapter.lua', '845e255f90abdd3b9e92ab558ac84bd766f868b300f7ca2992bdce933e0ae844', 'I9_3A_CAMPAIGN_SOURCE_BOUNDARY'),
     ('data/tables/campaign_dropbox.lua', '374b6b13bae56e2f5ac8d6b884821d2fb448d239871d1992b84bcf365e90404e', 'I9_3A_CAMPAIGN_SOURCE_BOUNDARY'),
@@ -2189,7 +2201,7 @@ def build_artifacts(blobs: dict[str, SourceBlob], archive_sha256: str) -> dict[s
     from dorm_content import build_dorm
     dorm_artifact=build_dorm(blobs,parse_generated_lua_table,pipe_ints,hero_artifact["templates"],partner_keys,partner_rows,super_keys,super_rows,indexed_field,items,CompileError)
     artifacts = {
-        "campaign_catalog.json":build_campaign(blobs,parse_generated_lua_table),
+        "campaign_catalog.json":build_campaign(blobs,parse_generated_lua_table,parse_base64_indexed_lua_table,indexed_field),
         "top_floor_catalog.json":build_top_floor(blobs,parse_generated_lua_table),
         "one_on_one_catalog.json":build_one_on_one(blobs,parse_generated_lua_table),
         "arena_catalog.json":build_arena(blobs,parse_generated_lua_table),

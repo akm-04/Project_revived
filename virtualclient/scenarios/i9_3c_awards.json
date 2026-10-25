@@ -411,7 +411,7 @@
   "wait:1",
   "lua:local w=xyd.WindowManager.get():getWindow('chapter_gacha') local n=w.gachaBtn local b=n:getCascadeBoundingBox() local e={x=b.x+b.width/2,y=b.y+b.height/2} local ls=n._LuaListeners[cc.NODE_TOUCH_EVENT] if type(ls)~='table' then error('vc-no-gacha-listeners') end for _,l in ipairs(ls) do e.name='began' l.listener_(e) e.name='ended' l.listener_(e) end",
   "wait:1",
-  "lua:local p=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_PLAYER) if not __vc_story_choice or p.normal_bonus_id~=2 or p.chapterEvents[1].open_times~=1 then error('vc-awards-state') end xyd.Backend.get():request(xyd.mid.GET_MAXLEVEL,{},function(code,r) if code~=xyd.error.OK or r.max_lev~=100 or r.max_color~=5 then error('vc-caps') end end)"
+  "lua:local p=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_PLAYER) if not __vc_story_choice or p.normal_bonus_id~=2 or p.chapterEvents[1].open_times~=1 then error('vc-awards-state') end xyd.Backend.get():request(xyd.mid.GET_MAXLEVEL,{},function(code,r) if code~=xyd.error.OK or r.max_lev~=100 or r.max_color~=7 then error('vc-caps') end end)"
  ],
  "settle_seconds": 10,
  "expect_ok": [

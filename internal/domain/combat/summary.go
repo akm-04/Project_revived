@@ -38,8 +38,10 @@ type SummaryRecord struct {
 // Its bounds are private policy (I8_CLIENT_SUMMARY_BOUNDS_V1): the original
 // server's checks are UNKNOWN. A changed bound is a new version, never an edit.
 type SummaryPolicy struct {
-	ID      string
-	Version int
+	// OmitParticipantEcho is for source families whose RESULT sends neither formation nor support pet.
+	OmitParticipantEcho bool
+	ID                  string
+	Version             int
 	// MaxStar bounds the star rating; zero means the family's RESULT carries none.
 	MaxStar int64
 	// WinFromStar makes a positive star the win (campaign families).
@@ -59,15 +61,22 @@ func (p SummaryPolicy) Valid() bool {
 // the verdict with a stable reason code for a rejection (H-27, H-41).
 func (p SummaryPolicy) Judge(snapshot Snapshot, summary Summary) (Verdict, string) {
 	battle := snapshot.Battle
-	if verdict, reason := judgeFormation(battle, summary.Formation); verdict == VerdictRejected {
-		return verdict, reason
+	if p.OmitParticipantEcho {
+		if len(summary.Formation) != 0 || summary.Pet != 0 {
+			return VerdictRejected, "UNEXPECTED_PARTICIPANT_ECHO"
+		}
+	} else {
+		if verdict, reason := judgeFormation(battle, summary.Formation); verdict == VerdictRejected {
+			return verdict, reason
+		}
+		if summary.Pet != frozenPet(battle) {
+			return VerdictRejected, "PET_CHANGED"
+		}
 	}
 	starInRange := summary.Star >= 0 && summary.Star <= p.MaxStar
 	winMatchesStar := !p.WinFromStar || summary.Win == (summary.Star > 0)
 	damageInRange := summary.Damage >= 0 && summary.Damage <= p.MaxDamage
 	switch {
-	case summary.Pet != frozenPet(battle):
-		return VerdictRejected, "PET_CHANGED"
 	case !starInRange:
 		return VerdictRejected, "STAR_OUT_OF_RANGE"
 	case !winMatchesStar:

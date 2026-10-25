@@ -15,12 +15,14 @@ import (
 )
 
 // CampaignMIDs are the I9-3A/B world, fight/result, Super reset and sweep MIDs.
-var CampaignMIDs = []uint16{112, 113, 114, 116, 117, 118, 122, 2064, 2576}
+var CampaignMIDs = []uint16{28, 29, 112, 113, 114, 115, 123, 116, 117, 118, 122, 2064, 2576}
 
 // fightExist is battleConst.errorIdFightExist, which BattleCreate.campaignResult accepts with a full body (F4e).
 const fightExist = 30005
 
 type CampaignPort interface {
+	TrialLoad(context.Context, identity.ActorContext, uint16, operation.Context) (map[string]any, error)
+	BuyTrial(context.Context, identity.ActorContext, int64, operation.Context) (map[string]any, error)
 	Bonus(context.Context, identity.ActorContext, int64, operation.Context) (map[string]any, error)
 	ChapterAward(context.Context, identity.ActorContext, int64, operation.Context) (map[string]any, error)
 	StoryAward(context.Context, identity.ActorContext, app.StoryChoice, operation.Context) (map[string]any, error)
@@ -49,6 +51,25 @@ func (o CampaignDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchR
 	p, op := req.Envelope.Params, req.Envelope.Operation
 	bad := badHero("campaign_invalid_parameter")
 	switch req.Envelope.MID {
+	case 28, 115, 123:
+		if !onlyStockGameplayParams(p) {
+			return bad
+		}
+		body, err := o.Service.TrialLoad(ctx, a, req.Envelope.MID, op)
+		if err != nil {
+			return failCampaign(err)
+		}
+		return okI5(body)
+	case 29:
+		id, valid := topFloorInteger(p, "consume_id", true)
+		if !valid || id < 1 || id > 10 || !onlyStockGameplayParams(p, "consume_id", "partner_id", "equip_index") {
+			return bad
+		}
+		body, err := o.Service.BuyTrial(ctx, a, id, op)
+		if err != nil {
+			return failCampaign(err)
+		}
+		return okI5(body)
 	case 112:
 		if !onlyStockGameplayParams(p) {
 			return bad
@@ -153,15 +174,25 @@ func campaignFight(p map[string]any) (app.Fight, bool) {
 	kind, kindOK := topFloorInteger(p, "campaign_type", true)
 	pet, petOK := topFloorInteger(p, "pet_id", false)
 	formation, formationOK := topFloorFormation(p["formation"])
+	pets := []int64{}
+	if d.Cloud(kind) {
+		formationOK = p["formation"] == "" && pet == 0
+		pets, petOK = topFloorFormation(p["pet_formation"])
+	}
 	rentHero, rentHeroOK := topFloorInteger(p, "rent_player_id", false)
 	rentPet, rentPetOK := topFloorInteger(p, "rent_pet_player_id", false)
-	allowed := onlyStockGameplayParams(p, "campaign_id", "campaign_type", "formation", "pet_id", "rent_player_id", "rent_formation", "rent_pet_player_id", "rent_pet_id")
+	allowed := onlyStockGameplayParams(p, "campaign_id", "campaign_type", "formation", "pet_id", "rent_player_id", "rent_formation", "rent_pet_player_id", "rent_pet_id", "pet_formation")
 	// shortcut: borrowed heroes and pets (I8-6A) are refused as malformed; route them through Combat Borrowed when friend rent lands.
 	rented := rentHero != 0 || rentPet != 0
 	if !allowed || !idOK || !kindOK || !petOK || !formationOK || !rentHeroOK || !rentPetOK || rented {
 		return app.Fight{}, false
 	}
-	return app.Fight{CampaignID: id, Type: kind, Formation: formation, Pet: pet}, true
+	if d.Cloud(kind) {
+		formation = nil
+	} else if _, present := p["pet_formation"]; present {
+		return app.Fight{}, false
+	}
+	return app.Fight{CampaignID: id, Type: kind, Formation: formation, Pet: pet, PetFormation: pets}, true
 }
 
 // campaignResult reads BattleCreate.campaignResult's 114.
@@ -171,6 +202,10 @@ func campaignResult(p map[string]any) (app.Result, bool) {
 	star, starOK := topFloorInteger(p, "star", true)
 	pet, petOK := topFloorInteger(p, "pet_id", false)
 	formation, formationOK := topFloorFormation(p["formation"])
+	if d.Cloud(kind) {
+		formation = nil
+		formationOK = (p["formation"] == nil || p["formation"] == "") && pet == 0
+	}
 	// shortcut: awake_mission, pet_awaken_mission and assist_partner are accepted and ignored until the I9-4 awakening owner reads them.
 	allowed := onlyStockGameplayParams(p, "campaign_id", "campaign_type", "star", "formation", "pet_id", "awake_mission", "pet_awaken_mission", "assist_partner")
 	if !allowed || !idOK || !kindOK || !starOK || !petOK || !formationOK {

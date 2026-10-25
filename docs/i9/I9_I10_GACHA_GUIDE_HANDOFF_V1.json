@@ -1,0 +1,36 @@
+{
+ "contract_id": "I9_I10_GACHA_GUIDE_HANDOFF_V1",
+ "version": 1,
+ "authorization": "D133 explicit current user: keep gacha in dedicated phase and carry remaining guide walk toI10; register so it is linked atI10.",
+ "classification": "AUTHORIZED_DEPENDENCY_CARRY_NOT_COMPLETED_GUIDE_PROOF",
+ "from": "I9-3",
+ "to": "I10",
+ "source_bindings": {
+  "src_64_archive_sha256": "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf",
+  "paths": [
+   "app/windows/MainSceneMiddleWindow.lua:Summon node callback",
+   "app/windows/SummonWindow.lua:ctor/smallMachineSetUp/playGuide",
+   "app/model/SelfPlayer.lua:loadSummonInfo/getHotSummonStone",
+   "app/common/tables/HeroTable.lua:initialStar/npcSpeak",
+   "app/common/network/mid.lua:LOAD_SUMMON_INFO56/SUMMON_HERO50"
+  ]
+ },
+ "observed_dependency": "Legacy lobby MID56 shape returns mana_id0/pet_id0/partner_id0. Source SummonWindow tries HeroTable.initialStar(0) and cannot complete setup. Do not treat that compatibility shape as qualified gacha.",
+ "i9_exit": [
+  "Remove provisioner direct guide-cursor SQL; progressed fixtures use production story owner and remain labelled fixtures.",
+  "Prove fresh level0 source opening battle-to-lobby path with no guide cursor forcing, no skipped step on that path and SAVE_STORY OK.",
+  "Record the post-lobby gacha-dependent guide walk as carried, never PASS. No fake featured-girl IDs or successful draw placeholder.",
+  "Keep separately named I9-4 mission and I9-9 rental obligations; this carry does not move them toI10."
+ ],
+ "i10_entry": [
+  "Retrieve this contract and I10-GACHA-STRONG-GUIDE-LINK obligation before researching/implementing gacha.",
+  "Trace source MID56 feature IDs/cooldowns, MID50 draw and source guide-defined free draws, receipts, client roster/animation and source guide transitions. Reuse canonical Character/I5 ports.",
+  "Replace legacy placeholder read only as part of the real gacha provider, not a frontend bypass.",
+  "Continue from a fresh unmodified tutorial player through the Summon-dependent guide sequence. Use production owners; all SAVE_STORY requests must succeed, including source fractional ids where reachable.",
+  "Re-run affected login-prefetch/tutorial and campaign regressions; identify effective client and exact candidate. Link proof in contract/obligation registry and retire carry only after reconciliation."
+ ],
+ "unknowns": [
+  "Original gacha algorithms are not inferred from this handoff; research and policy reconciliation belongs toI10."
+ ],
+ "evidence": "work/i9/research/campaign_tutorial/gacha_scope_conflict/CONFLICT.json and raw probe6 report/log"
+}

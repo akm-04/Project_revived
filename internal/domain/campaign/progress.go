@@ -18,6 +18,7 @@ type NodeState struct {
 }
 
 type Progress struct {
+	TrialWins     map[int64]modes.Counter
 	Nodes         map[int64]NodeState
 	ChapterClaims map[int64]int64
 	StoryClaims   map[int64]json.RawMessage
@@ -58,11 +59,22 @@ type Record struct {
 // open and advance by Super clears; the related Normal clear gates the fight, not
 // the row (V1 Pass128, D104).
 func (c Catalog) Opened(p Progress, kind int64, superOpen bool) []int64 {
-	// shortcut: Challenge rows stay empty until I9-3D projects its branching graph.
-	if kind == Challenge || kind == Super && !superOpen {
+	if kind == Super && !superOpen {
 		return nil
 	}
 	var out []int64
+	if kind == Challenge {
+		if p.State(c.ChallengeGateCampaignID).Star == 0 {
+			return nil
+		}
+		for _, id := range c.Chain(kind) {
+			n, _ := c.Node(id)
+			if p.State(n.Related).Star > 0 && (n.Previous == 0 || p.State(n.Previous).Star > 0) {
+				out = append(out, id)
+			}
+		}
+		return out
+	}
 	for _, id := range c.Chain(kind) {
 		out = append(out, id)
 		if p.State(id).Star == 0 {
@@ -94,10 +106,10 @@ func (c Catalog) Remaining(p Progress, n Node, day int64) int64 {
 // level, and for Super the related Normal clear and the daily limit.
 func (c Catalog) Admit(p Progress, kind, id, level, day int64, superOpen bool) (Node, error) {
 	n, ok := c.Node(id)
-	if !ok || n.Type != kind || kind != Normal && kind != Super {
+	if !ok || n.Type != kind || kind != Normal && kind != Super && kind != Challenge {
 		return Node{}, fmt.Errorf("%w: campaign %d type %d", ErrInvalid, id, kind)
 	}
-	if !c.isOpened(p, kind, id, superOpen) || level < n.OpenLevel {
+	if !c.isOpened(p, kind, id, superOpen) || level < n.OpenLevel || kind == Challenge && level < 80 {
 		return Node{}, fmt.Errorf("%w: campaign %d closed", ErrRefused, id)
 	}
 	if kind == Super && (p.State(n.Related).Star == 0 || c.Remaining(p, n, day) <= 0) {
@@ -111,6 +123,9 @@ func (c Catalog) Admit(p Progress, kind, id, level, day int64, superOpen bool) (
 func (n Node) BattleBox(p Progress) int64 {
 	if p.State(n.ID).Star == 0 {
 		return n.FirstBox
+	}
+	if n.Type == Challenge {
+		return 0
 	}
 	return n.RepeatBox
 }

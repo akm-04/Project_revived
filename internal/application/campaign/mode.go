@@ -11,6 +11,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"sort"
 	"strconv"
 	"time"
 
@@ -37,6 +38,7 @@ import (
 )
 
 type Mode struct {
+	Daily       DailyConsumption
 	Timed       gen.TimedRunner
 	Fresh       tx.Queryer
 	Store       Store
@@ -93,6 +95,7 @@ type Directory interface {
 // Heroes locks a formation hero (rank 410) before the campaign row; a hero not owned refuses with ErrRefused.
 type Heroes interface {
 	LockHeroByPartnerIDTx(context.Context, tx.Tx, identity.PlayerID, int64) (character.Hero, error)
+	ListHeroesTx(context.Context, tx.Queryer, identity.PlayerID) ([]character.Hero, error)
 }
 
 // HeroExp is Character's same-transaction exp credit, capped by the player level (D99).
@@ -120,10 +123,11 @@ type Facts interface {
 
 // Fight is a 113 request; rented heroes and pets are refused by the dispatcher.
 type Fight struct {
-	CampaignID int64
-	Type       int64
-	Formation  []int64
-	Pet        int64
+	PetFormation []int64
+	CampaignID   int64
+	Type         int64
+	Formation    []int64
+	Pet          int64
 }
 
 // Result is a 114 request; the client-computed star is the whole summary (D82).
@@ -166,8 +170,12 @@ func generation(kind, id int64) string {
 // fingerprint keys START replay on the stage and team, not the operation: a
 // retransmitted 113 replays, a changed team supersedes so Combat judges the 114
 // team against the one frozen last (the row keeps the stage's drops either way).
-func fingerprint(a identity.ActorContext, kind, id int64, formation []int64, pet int64) string {
-	raw, _ := json.Marshal(map[string]any{"policy": d.ContractID, "player": int64(a.PlayerID), "type": kind, "campaign": id, "formation": formation, "pet": pet})
+func fingerprint(a identity.ActorContext, kind, id int64, formation []int64, pet int64, pets []int64) string {
+	fields := map[string]any{"policy": d.ContractID, "player": int64(a.PlayerID), "type": kind, "campaign": id, "formation": formation, "pet": pet}
+	if d.Cloud(kind) {
+		fields["pet_formation"] = pets
+	}
+	raw, _ := json.Marshal(fields)
 	sum := sha256.Sum256(raw)
 	return hex.EncodeToString(sum[:])
 }
@@ -207,6 +215,8 @@ type view struct {
 	catalog   d.Catalog
 	revision  string
 	superOpen bool
+	trialOpen bool
+	cloudOpen bool
 	day       int64
 }
 
@@ -220,7 +230,15 @@ func (s Mode) read(c context.Context, q tx.Queryer, pid identity.PlayerID, revis
 		return view{}, err
 	}
 	superOpen := eligible && fact.FunctionID == catalog.SuperFunctionID && !at.Before(fact.EligibleAt)
-	return view{catalog: catalog, revision: revision, superOpen: superOpen, day: modes.Day(at)}, nil
+	trialOpen, err := s.functionOpen(c, q, pid, 7, at)
+	if err != nil {
+		return view{}, err
+	}
+	cloudOpen, err := s.functionOpen(c, q, pid, 42, at)
+	if err != nil {
+		return view{}, err
+	}
+	return view{catalog: catalog, revision: revision, superOpen: superOpen, trialOpen: trialOpen, cloudOpen: cloudOpen, day: modes.Day(at)}, nil
 }
 
 // World is the one projection of 112 and MID1 detail["112"] (F13, C2).
@@ -271,6 +289,78 @@ func (s Mode) lockFormation(c context.Context, t tx.Tx, pid identity.PlayerID, f
 	return heroes, nil
 }
 
+func (s Mode) lockFightFormation(c context.Context, t tx.Tx, pid identity.PlayerID, r Fight) ([]int64, error) {
+	if !d.Cloud(r.Type) {
+		if len(r.PetFormation) > 0 {
+			return nil, d.ErrInvalid
+		}
+		return s.lockFormation(c, t, pid, r.Formation)
+	}
+	if len(r.Formation) > 0 || r.Pet != 0 || len(r.PetFormation) < 1 || len(r.PetFormation) > 5 {
+		return nil, d.ErrInvalid
+	}
+	if s.Pets == nil {
+		return nil, d.ErrUnavailable
+	}
+	ids := append([]int64{}, r.PetFormation...)
+	sort.Slice(ids, func(i, j int) bool { return ids[i] < ids[j] })
+	for i, id := range ids {
+		if id <= 0 || i > 0 && id == ids[i-1] {
+			return nil, d.ErrInvalid
+		}
+		if e := s.Pets.LockCampaignPetTx(c, t, pid, id); e != nil {
+			if errors.Is(e, apppet.ErrPetNotFound) {
+				return nil, d.ErrRefused
+			}
+			return nil, e
+		}
+	}
+	return []int64{}, nil
+}
+
+// checkFormation reads Character facts; RESULT calls it only after terminal replay.
+func (s Mode) checkFormation(c context.Context, q tx.Queryer, pid identity.PlayerID, ids []int64, catalog d.Catalog, kind, nodeID int64) error {
+	if kind == d.Normal || kind == d.Super || d.Cloud(kind) {
+		return nil
+	}
+	roster, err := s.Heroes.ListHeroesTx(c, q, pid)
+	if err != nil {
+		return err
+	}
+	node, ok := catalog.Node(nodeID)
+	if !ok {
+		return d.ErrInvalid
+	}
+	if kind == d.Challenge && (node.ChallengeMode < 1 || node.ChallengeMode > 8) {
+		return d.ErrUnavailable
+	}
+	purple := false
+	for _, hero := range roster {
+		purple = purple || hero.Color >= 7
+		for _, id := range ids {
+			if hero.PartnerID == id {
+				if !catalog.AllowFaction(kind, hero.TableID) {
+					return d.ErrRefused
+				}
+				if kind == d.Challenge {
+					for _, excluded := range node.ExcludedHeroes {
+						if hero.TableID == excluded {
+							return d.ErrRefused
+						}
+					}
+				}
+			}
+		}
+	}
+	if kind == d.Challenge && (node.ChallengeMode == 6 && len(ids) != 1 || (node.ChallengeMode == 1 || node.ChallengeMode == 3) && len(ids) > 4) {
+		return d.ErrRefused
+	}
+	if kind >= 16 && kind <= 21 && !purple {
+		return d.ErrRefused
+	}
+	return nil
+}
+
 // Fight answers 113: admission (F6), a CLIENT_SUMMARY_ATTESTED attempt, the
 // energy preview and the stage's drops, frozen on the campaign row (C4, C6).
 func (s Mode) Fight(c context.Context, a identity.ActorContext, request Fight, op operation.Context) (map[string]any, error) {
@@ -289,8 +379,11 @@ func (s Mode) Fight(c context.Context, a identity.ActorContext, request Fight, o
 		if err != nil {
 			return err
 		}
-		heroes, err := s.lockFormation(c, sc.Tx, a.PlayerID, request.Formation)
+		heroes, err := s.lockFightFormation(c, sc.Tx, a.PlayerID, request)
 		if err != nil {
+			return err
+		}
+		if err = s.checkFormation(c, sc.Tx, a.PlayerID, heroes, v.catalog, request.Type, request.CampaignID); err != nil {
 			return err
 		}
 		if request.Pet > 0 {
@@ -312,7 +405,7 @@ func (s Mode) Fight(c context.Context, a identity.ActorContext, request Fight, o
 		if err != nil || !found {
 			return errors.Join(err, d.ErrUnavailable)
 		}
-		node, err := v.catalog.Admit(record.Progress, request.Type, request.CampaignID, profile.Level, v.day, v.superOpen)
+		node, err := s.admit(c, sc.Tx, a.PlayerID, v, record, request.Type, request.CampaignID, profile.Level)
 		if err != nil {
 			return err
 		}
@@ -360,11 +453,20 @@ func (s Mode) start(c context.Context, sc gen.TimedScope, a identity.ActorContex
 	if request.Pet > 0 {
 		battle.PetsA = append(battle.PetsA, combat.Participant{Origin: cd.OwnedSelf, Kind: cd.PetActor, Player: a.PlayerID, Identity: request.Pet})
 	}
+	if d.Cloud(node.Type) {
+		battle.Formation = append([]int64{}, node.SelfTeam...)
+		for _, id := range node.SelfTeam {
+			battle.TeamA = append(battle.TeamA, combat.Participant{Origin: cd.Template, Kind: cd.HeroActor, Identity: id, TemplateParams: map[string]any{"table_id": id}})
+		}
+		for _, id := range request.PetFormation {
+			battle.PetsA = append(battle.PetsA, combat.Participant{Origin: cd.OwnedSelf, Kind: cd.PetActor, Player: a.PlayerID, Identity: id})
+		}
+	}
 	box := node.BattleBox(progress)
 	drops := func(stream *cd.Stream) (any, error) { return v.catalog.Drop(box, stream), nil }
 	window := time.Duration(v.catalog.PrivatePolicy.ResultWindowSeconds) * time.Second
 	return s.Combat.StartTx(c, sc.Tx, scope, combat.StartRequest{Actor: a, Locator: locator(a), GenerationRef: generation(node.Type, node.ID),
-		StartFingerprint: fingerprint(a, node.Type, node.ID, request.Formation, request.Pet), ResultDeadline: at.Add(window), Battle: battle,
+		StartFingerprint: fingerprint(a, node.Type, node.ID, request.Formation, request.Pet, request.PetFormation), ResultDeadline: at.Add(window), Battle: battle,
 		TrustProfile: cd.ClientSummaryAttested, Replay: cd.ReplaySpec{Response: cd.ReplayOK}, Package: drops})
 }
 
@@ -437,9 +539,16 @@ func (s Mode) settle(c context.Context, sc gen.TimedScope, a identity.ActorConte
 	if err != nil {
 		return Settled{}, false, err
 	}
-	heroes, err := s.lockFormation(c, sc.Tx, a.PlayerID, request.Formation)
-	if err != nil {
-		return Settled{}, false, err
+	heroes := []int64{}
+	if d.Cloud(request.Type) {
+		if len(request.Formation) > 0 || request.Pet != 0 {
+			return Settled{}, false, d.ErrInvalid
+		}
+	} else {
+		heroes, err = s.lockFormation(c, sc.Tx, a.PlayerID, request.Formation)
+		if err != nil {
+			return Settled{}, false, err
+		}
 	}
 	if request.Pet > 0 {
 		if s.Pets == nil {
@@ -458,7 +567,11 @@ func (s Mode) settle(c context.Context, sc gen.TimedScope, a identity.ActorConte
 	}
 	stage := generation(request.Type, request.CampaignID)
 	summary := cd.Summary{Star: request.Star, Win: request.Star > 0, Formation: request.Formation, Pet: request.Pet}
-	attested, err := s.Combat.AttestSummaryTx(c, sc.Tx, combat.SummaryRequest{Locator: locator(a), GenerationRef: stage, TerminalKind: resultKind, At: at, Policy: summaryPolicy, Summary: summary})
+	selectedPolicy := summaryPolicy
+	if d.Cloud(request.Type) {
+		selectedPolicy = cd.SummaryPolicy{ID: "CAMPAIGN_CLOUD_SUMMARY_V1", Version: 1, MaxStar: d.MaxStar, WinFromStar: true, OmitParticipantEcho: true}
+	}
+	attested, err := s.Combat.AttestSummaryTx(c, sc.Tx, combat.SummaryRequest{Locator: locator(a), GenerationRef: stage, TerminalKind: resultKind, At: at, Policy: selectedPolicy, Summary: summary})
 	if err != nil {
 		return Settled{}, false, err
 	}
@@ -468,9 +581,21 @@ func (s Mode) settle(c context.Context, sc gen.TimedScope, a identity.ActorConte
 	if attested.Attestation.Verdict == cd.VerdictRejected {
 		return Settled{}, true, nil
 	}
+	if err = s.checkFormation(c, sc.Tx, a.PlayerID, heroes, v.catalog, request.Type, request.CampaignID); err != nil {
+		return Settled{}, false, err
+	}
 	node, found := v.catalog.Node(request.CampaignID)
 	if !found {
 		return Settled{}, false, d.ErrInvalid
+	}
+	if _, trial := v.catalog.Group(request.Type); trial {
+		profile, found, e := s.Directory.ProfileTx(c, sc.Tx, a.PlayerID)
+		if e != nil || !found {
+			return Settled{}, false, errors.Join(e, d.ErrUnavailable)
+		}
+		if _, e = s.admit(c, sc.Tx, a.PlayerID, v, record, request.Type, request.CampaignID, profile.Level); e != nil {
+			return Settled{}, false, e
+		}
 	}
 	outcome, err := v.catalog.Settle(record.Progress, node, request.Star, v.day, v.superOpen)
 	if err != nil {
@@ -496,6 +621,17 @@ func (s Mode) settle(c context.Context, sc gen.TimedScope, a identity.ActorConte
 		rows = append(rows, v.catalog.Row(outcome.Progress, touched, v.day))
 	}
 	body["campaigns"] = rows
+	if g, trial := v.catalog.Group(node.Type); trial {
+		buys, e := s.trialBuys(c, sc.Tx, a.PlayerID, v.day)
+		if e != nil {
+			return Settled{}, false, e
+		}
+		key := "trial"
+		if g.NextID != 0 {
+			key = "challenge"
+		}
+		body[key] = v.catalog.TrialRow(outcome.Progress, g, v.day, buys[g.ConsumeID], v.groupOpen(g))
+	}
 	balances, functions := changes.Recorded(c)
 	stored := map[string]any{"economy_": balances}
 	if len(functions) > 0 {
@@ -598,7 +734,13 @@ func (s Mode) reward(c context.Context, sc gen.TimedScope, a identity.ActorConte
 			return err
 		}
 	}
-	kind := NormalWinKind
+	kind := "CAMPAIGN_TRIAL_WIN"
+	if node.Type == d.Normal {
+		kind = NormalWinKind
+	}
+	if node.Type == d.Challenge {
+		kind = "CAMPAIGN_CHALLENGE_WIN"
+	}
 	if node.Type == d.Super {
 		kind = SuperWinKind
 	}
@@ -606,7 +748,7 @@ func (s Mode) reward(c context.Context, sc gen.TimedScope, a identity.ActorConte
 }
 
 func (Mode) Name() string     { return "i9-3a.campaign-world" }
-func (Mode) Claims() []string { return []string{"112"} }
+func (Mode) Claims() []string { return []string{"112", "115"} }
 
 // OverlayMID1 writes detail["112"] through World, replacing the lobby placeholder.
 func (s Mode) OverlayMID1(c context.Context, q tx.Queryer, a identity.ActorContext, _ bool, at time.Time, detail map[string]any) error {
@@ -622,5 +764,10 @@ func (s Mode) OverlayMID1(c context.Context, q tx.Queryer, a identity.ActorConte
 		return err
 	}
 	detail["112"] = world
+	trials, err := s.TrialWorld(c, q, a.PlayerID, revision, at)
+	if err != nil {
+		return err
+	}
+	detail["115"] = trials
 	return nil
 }

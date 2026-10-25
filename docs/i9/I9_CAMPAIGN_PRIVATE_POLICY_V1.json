@@ -16,7 +16,10 @@
   "D118: large/boss displayed map nodes contribute stars; small nodes contribute progression clears only. Strong source/table inference; original server formula remains unrecovered. Legacy generation40 with absent map size retains its old projection behavior, but new bonus claims fail closed without source eligibility metadata.",
   "D123: Challenge24 opens at level80 after Normal1600016, with related Normal clear and cleared graph parent; seven roots. First-clear drops only.",
   "D124: group quota consumes on wins only and resets at modes.Day; future stored counter periods refuse. Prophecy rotates one source successor per day, group16 on game day0. Both START and new RESULT enforce current eligibility; drained duplicates replay first. Source last_campaign_100 is the global-cap release ceiling. Original anchor and loss rule remain UNKNOWN.",
-  "D125: canonical DailyConsumption counters for source IDs3..10 add one purchased group use, cost20 crystals, once per game day. IDs1/2 refuse until their providers exist. Campaign605 precedes DailyConsumption605 then I5; no reverse writer. Campaign owns wins, DailyConsumption owns buys."
+  "D125: canonical DailyConsumption counters for source IDs3..10 add one purchased group use, cost20 crystals, once per game day. IDs1/2 refuse until their providers exist. Campaign605 precedes DailyConsumption605 then I5; no reverse writer. Campaign owns wins, DailyConsumption owns buys.",
+  "D126 source guard reconciliation: Chapter Challenge Protect/KillSteal excludes the supplied NPC matching Hero and before/after-awaken variants, max4 owned slots; OneHeroKillAll exactly1. Other combat objectives remain D82 client summary. Prophecy current unborrowed path requires an owned purple Hero; guild-only availability stays deferred with rentals (PRIVATE_POLICY boundary).",
+  "D128: Cloud uses source NPC placeholders with selected owned pets; RESULT omits participant echoes. CAMPAIGN_CLOUD_SUMMARY_V1 preserves frozen START and bounded star, no fabricated replay or owned EXP.",
+  "D130/D131: select immutable PlayerProgression cap7 V2 to allow true source purple; original cap/schedule UNKNOWN, V1 cap5 retained historically, MID51 and Element own-color16 paths remain unchanged (D135)."
  ],
  "evidence": "work/i9/stages/I9-3/RESEARCH_3C.md; D103,D106,D107,D115-D117; D118/R7"
 }

@@ -7,10 +7,12 @@ import (
 	"errors"
 	"gxb.local/backend/v2/internal/adapters/postgres/arenastore"
 	"gxb.local/backend/v2/internal/adapters/postgres/commerceprivilegestore"
+	"gxb.local/backend/v2/internal/adapters/postgres/dailyconsumestore"
 	"gxb.local/backend/v2/internal/adapters/postgres/leaguestore"
 	apparena "gxb.local/backend/v2/internal/application/arena"
 	appleague "gxb.local/backend/v2/internal/application/championsleague"
 	"gxb.local/backend/v2/internal/application/commerceprivilege"
+	"gxb.local/backend/v2/internal/application/dailyconsume"
 	apponeonone "gxb.local/backend/v2/internal/application/oneonone"
 	"gxb.local/backend/v2/internal/application/playerdisplay"
 	apptopfloor "gxb.local/backend/v2/internal/application/topfloor"
@@ -198,9 +200,9 @@ func main() {
 		{First: 100002, Last: 100005, Owner: apponeonone.Service{Store: oneononestore.Store{}, Content: contentDB, Entitlements: i5db}},
 		{Family: "avatar", First: 110006001, Last: 110006001, Owner: apparena.Service{Store: arenastore.Store{}, Content: contentDB}}}
 
-	maxHeroColorPolicy := appi5.PreservationMaxHeroColorProvider{}
+	maxHeroColorPolicy := appi5.CurrentMaxHeroColorProvider{}
 	heroDB := characterstore.Store{Queryer: pool}
-	campaignWorld := appcampaign.Mode{Store: campaignstore.Store{}, Content: contentDB, Functions: i5db}
+	campaignWorld := appcampaign.Mode{Daily: dailyconsume.Service{Store: dailyconsumestore.Store{}, Costs: appi5.MaterialCostDebiter{Store: i5db, Content: contentDB}}, Store: campaignstore.Store{}, Content: contentDB, Functions: i5db}
 	savedPresetSvc := appsavedpreset.MutationService{Runner: runner, Store: heroDB, Fencer: i5db, References: appsavedpreset.ReferenceOwners{Heroes: heroDB, Pets: heroDB}, Receipts: receipts, ReceiptRead: kernelstore.Reader{Queryer: pool}}
 	heroEconomy := appi5.HeroProgressionDebiter{Store: i5db, Content: contentDB}
 	heroMaterialCosts := appi5.MaterialCostDebiter{Store: i5db, Content: contentDB}

@@ -39,8 +39,24 @@ func (c Catalog) Settle(p Progress, n Node, star, day int64, superOpen bool) (Ou
 		}
 		state.Wins = wins
 	}
+	if _, trial := c.Group(n.Type); trial {
+		var err error
+		p, err = p.withTrialWin(n.Type, day)
+		if err != nil {
+			return Outcome{}, err
+		}
+	}
 	state.Star = max(state.Star, star)
 	out.Progress = p.with(state)
-	out.Touched = append([]int64{n.ID}, c.Opened(out.Progress, n.Type, superOpen)[len(before):]...)
+	out.Touched = []int64{n.ID}
+	seen := make(map[int64]bool, len(before))
+	for _, id := range before {
+		seen[id] = true
+	}
+	for _, id := range c.Opened(out.Progress, n.Type, superOpen) {
+		if !seen[id] && id != n.ID {
+			out.Touched = append(out.Touched, id)
+		}
+	}
 	return out, nil
 }

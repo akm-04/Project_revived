@@ -1,0 +1,514 @@
+{
+ "name": "i9_3d_challenge_loss",
+ "level": 100,
+ "heroes": [
+  10001062,
+  10001009,
+  10001012,
+  10001014
+ ],
+ "challenge_fixture": true,
+ "grants": [
+  {
+   "Kind": "STACK_ITEM",
+   "ItemID": 50005182,
+   "Amount": 772
+  },
+  {
+   "Kind": "SCALAR_CURRENCY",
+   "ResourceKey": "mana",
+   "Amount": 20000000
+  },
+  {
+   "Kind": "STACK_ITEM",
+   "ItemID": 20001001,
+   "Amount": 3
+  },
+  {
+   "Kind": "STACK_ITEM",
+   "ItemID": 20001002,
+   "Amount": 8
+  },
+  {
+   "Kind": "STACK_ITEM",
+   "ItemID": 20001003,
+   "Amount": 2
+  },
+  {
+   "Kind": "STACK_ITEM",
+   "ItemID": 20001004,
+   "Amount": 1
+  },
+  {
+   "Kind": "STACK_ITEM",
+   "ItemID": 20001005,
+   "Amount": 2
+  },
+  {
+   "Kind": "STACK_ITEM",
+   "ItemID": 20001006,
+   "Amount": 2
+  },
+  {
+   "Kind": "STACK_ITEM",
+   "ItemID": 20001007,
+   "Amount": 3
+  },
+  {
+   "Kind": "STACK_ITEM",
+   "ItemID": 20001008,
+   "Amount": 2
+  },
+  {
+   "Kind": "STACK_ITEM",
+   "ItemID": 20001010,
+   "Amount": 2
+  },
+  {
+   "Kind": "STACK_ITEM",
+   "ItemID": 20001011,
+   "Amount": 1
+  },
+  {
+   "Kind": "STACK_ITEM",
+   "ItemID": 20001012,
+   "Amount": 9
+  },
+  {
+   "Kind": "STACK_ITEM",
+   "ItemID": 20001013,
+   "Amount": 1
+  },
+  {
+   "Kind": "STACK_ITEM",
+   "ItemID": 20001014,
+   "Amount": 8
+  },
+  {
+   "Kind": "STACK_ITEM",
+   "ItemID": 20001016,
+   "Amount": 2
+  },
+  {
+   "Kind": "STACK_ITEM",
+   "ItemID": 20001017,
+   "Amount": 2
+  },
+  {
+   "Kind": "STACK_ITEM",
+   "ItemID": 20001018,
+   "Amount": 4
+  },
+  {
+   "Kind": "STACK_ITEM",
+   "ItemID": 20001020,
+   "Amount": 1
+  },
+  {
+   "Kind": "STACK_ITEM",
+   "ItemID": 20001021,
+   "Amount": 5
+  },
+  {
+   "Kind": "STACK_ITEM",
+   "ItemID": 20001022,
+   "Amount": 1
+  },
+  {
+   "Kind": "STACK_ITEM",
+   "ItemID": 20001024,
+   "Amount": 3
+  },
+  {
+   "Kind": "STACK_ITEM",
+   "ItemID": 20001025,
+   "Amount": 3
+  },
+  {
+   "Kind": "STACK_ITEM",
+   "ItemID": 20001026,
+   "Amount": 2
+  },
+  {
+   "Kind": "STACK_ITEM",
+   "ItemID": 20001028,
+   "Amount": 4
+  },
+  {
+   "Kind": "STACK_ITEM",
+   "ItemID": 20001030,
+   "Amount": 2
+  },
+  {
+   "Kind": "STACK_ITEM",
+   "ItemID": 20001031,
+   "Amount": 3
+  },
+  {
+   "Kind": "STACK_ITEM",
+   "ItemID": 20001034,
+   "Amount": 4
+  },
+  {
+   "Kind": "STACK_ITEM",
+   "ItemID": 20001036,
+   "Amount": 1
+  },
+  {
+   "Kind": "STACK_ITEM",
+   "ItemID": 20001039,
+   "Amount": 1
+  },
+  {
+   "Kind": "STACK_ITEM",
+   "ItemID": 20001040,
+   "Amount": 2
+  },
+  {
+   "Kind": "STACK_ITEM",
+   "ItemID": 20001041,
+   "Amount": 2
+  },
+  {
+   "Kind": "STACK_ITEM",
+   "ItemID": 20001042,
+   "Amount": 4
+  },
+  {
+   "Kind": "STACK_ITEM",
+   "ItemID": 20001043,
+   "Amount": 1
+  },
+  {
+   "Kind": "STACK_ITEM",
+   "ItemID": 20001045,
+   "Amount": 2
+  },
+  {
+   "Kind": "STACK_ITEM",
+   "ItemID": 20001047,
+   "Amount": 3
+  },
+  {
+   "Kind": "STACK_ITEM",
+   "ItemID": 20001048,
+   "Amount": 3
+  },
+  {
+   "Kind": "STACK_ITEM",
+   "ItemID": 20001049,
+   "Amount": 2
+  },
+  {
+   "Kind": "STACK_ITEM",
+   "ItemID": 20001050,
+   "Amount": 3
+  },
+  {
+   "Kind": "STACK_ITEM",
+   "ItemID": 20001052,
+   "Amount": 2
+  },
+  {
+   "Kind": "STACK_ITEM",
+   "ItemID": 20001054,
+   "Amount": 4
+  },
+  {
+   "Kind": "STACK_ITEM",
+   "ItemID": 20001055,
+   "Amount": 2
+  },
+  {
+   "Kind": "STACK_ITEM",
+   "ItemID": 20001056,
+   "Amount": 1
+  },
+  {
+   "Kind": "STACK_ITEM",
+   "ItemID": 20001058,
+   "Amount": 1
+  },
+  {
+   "Kind": "STACK_ITEM",
+   "ItemID": 20001059,
+   "Amount": 2
+  },
+  {
+   "Kind": "STACK_ITEM",
+   "ItemID": 20001060,
+   "Amount": 2
+  },
+  {
+   "Kind": "STACK_ITEM",
+   "ItemID": 20001061,
+   "Amount": 3
+  },
+  {
+   "Kind": "STACK_ITEM",
+   "ItemID": 20001063,
+   "Amount": 1
+  },
+  {
+   "Kind": "STACK_ITEM",
+   "ItemID": 20001065,
+   "Amount": 2
+  },
+  {
+   "Kind": "STACK_ITEM",
+   "ItemID": 20001067,
+   "Amount": 2
+  },
+  {
+   "Kind": "STACK_ITEM",
+   "ItemID": 20001068,
+   "Amount": 1
+  },
+  {
+   "Kind": "STACK_ITEM",
+   "ItemID": 20001070,
+   "Amount": 5
+  },
+  {
+   "Kind": "STACK_ITEM",
+   "ItemID": 20001071,
+   "Amount": 2
+  },
+  {
+   "Kind": "STACK_ITEM",
+   "ItemID": 20001072,
+   "Amount": 2
+  },
+  {
+   "Kind": "STACK_ITEM",
+   "ItemID": 20001073,
+   "Amount": 2
+  },
+  {
+   "Kind": "STACK_ITEM",
+   "ItemID": 20001074,
+   "Amount": 2
+  },
+  {
+   "Kind": "STACK_ITEM",
+   "ItemID": 20001075,
+   "Amount": 5
+  },
+  {
+   "Kind": "STACK_ITEM",
+   "ItemID": 20001081,
+   "Amount": 1
+  },
+  {
+   "Kind": "STACK_ITEM",
+   "ItemID": 20001082,
+   "Amount": 2
+  },
+  {
+   "Kind": "STACK_ITEM",
+   "ItemID": 20001083,
+   "Amount": 1
+  },
+  {
+   "Kind": "STACK_ITEM",
+   "ItemID": 20001084,
+   "Amount": 2
+  },
+  {
+   "Kind": "STACK_ITEM",
+   "ItemID": 20001085,
+   "Amount": 2
+  },
+  {
+   "Kind": "STACK_ITEM",
+   "ItemID": 20001086,
+   "Amount": 1
+  },
+  {
+   "Kind": "STACK_ITEM",
+   "ItemID": 20001087,
+   "Amount": 2
+  },
+  {
+   "Kind": "STACK_ITEM",
+   "ItemID": 20001089,
+   "Amount": 1
+  },
+  {
+   "Kind": "STACK_ITEM",
+   "ItemID": 20001090,
+   "Amount": 2
+  },
+  {
+   "Kind": "STACK_ITEM",
+   "ItemID": 20001094,
+   "Amount": 1
+  },
+  {
+   "Kind": "STACK_ITEM",
+   "ItemID": 20001097,
+   "Amount": 2
+  },
+  {
+   "Kind": "STACK_ITEM",
+   "ItemID": 20001098,
+   "Amount": 2
+  },
+  {
+   "Kind": "STACK_ITEM",
+   "ItemID": 20001100,
+   "Amount": 1
+  },
+  {
+   "Kind": "STACK_ITEM",
+   "ItemID": 20001104,
+   "Amount": 1
+  },
+  {
+   "Kind": "STACK_ITEM",
+   "ItemID": 20001105,
+   "Amount": 1
+  },
+  {
+   "Kind": "STACK_ITEM",
+   "ItemID": 20001109,
+   "Amount": 1
+  }
+ ],
+ "steps": [
+  "lua:local p=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_PLAYER) for _,h in pairs(p:getHeros()) do local hero=h p:addPartnerExp({item_id=50005182,partner_id=hero:getHeroID(),item_num=193,total_num=p:getBackpack():getItemNumByID(50005182)},function(code,req,reply) if code~=xyd.error.OK or not reply.partner_exp then error('vc-training-failed') end hero:setExp(reply.partner_exp,xyd.tables.player:heroMaxLev(p.lev)) p:getBackpack():setItemNumByID(reply.item_id,reply.total_num) end) end",
+  "wait:3",
+  "lua:local p=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_PLAYER) for _,h in pairs(p:getHeros()) do if h:getTableID()==10001062 then h:oneKeyPowerUp(function(code) if code~=xyd.error.OK then error('vc-challenge-equipment-'..tostring(code)) end end) break end end",
+  "wait:2",
+  "lua:local p=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_PLAYER) for _,h in pairs(p:getHeros()) do if h:getTableID()==10001009 then h:oneKeyPowerUp(function(code) if code~=xyd.error.OK then error('vc-challenge-equipment-'..tostring(code)) end end) break end end",
+  "wait:2",
+  "lua:local p=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_PLAYER) for _,h in pairs(p:getHeros()) do if h:getTableID()==10001012 then h:oneKeyPowerUp(function(code) if code~=xyd.error.OK then error('vc-challenge-equipment-'..tostring(code)) end end) break end end",
+  "wait:2",
+  "lua:local p=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_PLAYER) for _,h in pairs(p:getHeros()) do if h:getTableID()==10001014 then h:oneKeyPowerUp(function(code) if code~=xyd.error.OK then error('vc-challenge-equipment-'..tostring(code)) end end) break end end",
+  "wait:2",
+  "lua:local p=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_PLAYER) for _,h in pairs(p:getHeros()) do if h:getTableID()==10001062 then h:oneKeyPowerUp(function(code) if code~=xyd.error.OK then error('vc-challenge-equipment-'..tostring(code)) end end) break end end",
+  "wait:2",
+  "lua:local p=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_PLAYER) for _,h in pairs(p:getHeros()) do if h:getTableID()==10001009 then h:oneKeyPowerUp(function(code) if code~=xyd.error.OK then error('vc-challenge-equipment-'..tostring(code)) end end) break end end",
+  "wait:2",
+  "lua:local p=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_PLAYER) for _,h in pairs(p:getHeros()) do if h:getTableID()==10001012 then h:oneKeyPowerUp(function(code) if code~=xyd.error.OK then error('vc-challenge-equipment-'..tostring(code)) end end) break end end",
+  "wait:2",
+  "lua:local p=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_PLAYER) for _,h in pairs(p:getHeros()) do if h:getTableID()==10001014 then h:oneKeyPowerUp(function(code) if code~=xyd.error.OK then error('vc-challenge-equipment-'..tostring(code)) end end) break end end",
+  "wait:2",
+  "lua:local p=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_PLAYER) for _,h in pairs(p:getHeros()) do if h:getTableID()==10001062 then h:oneKeyPowerUp(function(code) if code~=xyd.error.OK then error('vc-challenge-equipment-'..tostring(code)) end end) break end end",
+  "wait:2",
+  "lua:local p=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_PLAYER) for _,h in pairs(p:getHeros()) do if h:getTableID()==10001009 then h:oneKeyPowerUp(function(code) if code~=xyd.error.OK then error('vc-challenge-equipment-'..tostring(code)) end end) break end end",
+  "wait:2",
+  "lua:local p=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_PLAYER) for _,h in pairs(p:getHeros()) do if h:getTableID()==10001012 then h:oneKeyPowerUp(function(code) if code~=xyd.error.OK then error('vc-challenge-equipment-'..tostring(code)) end end) break end end",
+  "wait:2",
+  "lua:local p=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_PLAYER) for _,h in pairs(p:getHeros()) do if h:getTableID()==10001014 then h:oneKeyPowerUp(function(code) if code~=xyd.error.OK then error('vc-challenge-equipment-'..tostring(code)) end end) break end end",
+  "wait:2",
+  "lua:local p=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_PLAYER) for _,h in pairs(p:getHeros()) do if h:getTableID()==10001062 then h:oneKeyPowerUp(function(code) if code~=xyd.error.OK then error('vc-challenge-equipment-'..tostring(code)) end end) break end end",
+  "wait:2",
+  "lua:local p=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_PLAYER) for _,h in pairs(p:getHeros()) do if h:getTableID()==10001009 then h:oneKeyPowerUp(function(code) if code~=xyd.error.OK then error('vc-challenge-equipment-'..tostring(code)) end end) break end end",
+  "wait:2",
+  "lua:local p=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_PLAYER) for _,h in pairs(p:getHeros()) do if h:getTableID()==10001012 then h:oneKeyPowerUp(function(code) if code~=xyd.error.OK then error('vc-challenge-equipment-'..tostring(code)) end end) break end end",
+  "wait:2",
+  "lua:local p=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_PLAYER) for _,h in pairs(p:getHeros()) do if h:getTableID()==10001014 then h:oneKeyPowerUp(function(code) if code~=xyd.error.OK then error('vc-challenge-equipment-'..tostring(code)) end end) break end end",
+  "wait:2",
+  "lua:local p=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_PLAYER) for _,h in pairs(p:getHeros()) do if h:getTableID()==10001062 then h:oneKeyPowerUp(function(code) if code~=xyd.error.OK then error('vc-challenge-equipment-'..tostring(code)) end end) break end end",
+  "wait:2",
+  "lua:local p=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_PLAYER) for _,h in pairs(p:getHeros()) do if h:getTableID()==10001009 then h:oneKeyPowerUp(function(code) if code~=xyd.error.OK then error('vc-challenge-equipment-'..tostring(code)) end end) break end end",
+  "wait:2",
+  "lua:local p=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_PLAYER) for _,h in pairs(p:getHeros()) do if h:getTableID()==10001012 then h:oneKeyPowerUp(function(code) if code~=xyd.error.OK then error('vc-challenge-equipment-'..tostring(code)) end end) break end end",
+  "wait:2",
+  "lua:local p=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_PLAYER) for _,h in pairs(p:getHeros()) do if h:getTableID()==10001014 then h:oneKeyPowerUp(function(code) if code~=xyd.error.OK then error('vc-challenge-equipment-'..tostring(code)) end end) break end end",
+  "wait:2",
+  "lua:local p=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_PLAYER) for _,h in pairs(p:getHeros()) do if h:getTableID()==10001062 then h:oneKeyPowerUp(function(code) if code~=xyd.error.OK then error('vc-challenge-equipment-'..tostring(code)) end end) break end end",
+  "wait:2",
+  "lua:local p=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_PLAYER) for _,h in pairs(p:getHeros()) do if h:getTableID()==10001009 then h:oneKeyPowerUp(function(code) if code~=xyd.error.OK then error('vc-challenge-equipment-'..tostring(code)) end end) break end end",
+  "wait:2",
+  "lua:local p=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_PLAYER) for _,h in pairs(p:getHeros()) do if h:getTableID()==10001012 then h:oneKeyPowerUp(function(code) if code~=xyd.error.OK then error('vc-challenge-equipment-'..tostring(code)) end end) break end end",
+  "wait:2",
+  "lua:local p=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_PLAYER) for _,h in pairs(p:getHeros()) do if h:getTableID()==10001014 then h:oneKeyPowerUp(function(code) if code~=xyd.error.OK then error('vc-challenge-equipment-'..tostring(code)) end end) break end end",
+  "wait:2",
+  "lua:local p=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_PLAYER) for _,h in pairs(p:getHeros()) do if h:getTableID()==10001062 then h:oneKeyPowerUp(function(code) if code~=xyd.error.OK then error('vc-challenge-cap-equip-'..tostring(code)) end end) break end end",
+  "wait:2",
+  "lua:local p=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_PLAYER) for _,h in pairs(p:getHeros()) do if h:getTableID()==10001009 then h:oneKeyPowerUp(function(code) if code~=xyd.error.OK then error('vc-challenge-cap-equip-'..tostring(code)) end end) break end end",
+  "wait:2",
+  "lua:local p=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_PLAYER) for _,h in pairs(p:getHeros()) do if h:getTableID()==10001012 then h:oneKeyPowerUp(function(code) if code~=xyd.error.OK then error('vc-challenge-cap-equip-'..tostring(code)) end end) break end end",
+  "wait:2",
+  "lua:local p=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_PLAYER) for _,h in pairs(p:getHeros()) do if h:getTableID()==10001014 then h:oneKeyPowerUp(function(code) if code~=xyd.error.OK then error('vc-challenge-cap-equip-'..tostring(code)) end end) break end end",
+  "wait:2",
+  "lua:local p=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_PLAYER) p:loadWorldMap(function(code) if code~=xyd.error.OK then error('vc-challenge-map-load') end local wm=xyd.WindowManager.get() wm:openWindow('map_window',{chapter_type=xyd.CampaignType.NORMAL}) end)",
+  "wait:3",
+  "tap:menu_plus",
+  "wait:3",
+  "tap:menu_3",
+  "wait:3",
+  "lua:local w=xyd.WindowManager.get():getWindow('map_window') if not w or w.chapterType~=xyd.CampaignType.CHALLENGE or not w.campaignOpenState[4] or not w:nodeByName('menu_plus'):isVisible() then error('vc-challenge-map') end w:openMapDetailWindow({campaignID=24111,campaignType=xyd.CampaignType.CHALLENGE,star=0,dailyLimit=0,resetCount=0})",
+  "wait:3",
+  "tap:start",
+  "wait:3",
+  "lua:local w=xyd.WindowManager.get():getWindow('battle_select_team') if not w then error('vc-no-team') end local cards={} local function walk(n) if not n:isVisible() then return end if n:getName()=='layout' then table.insert(cards,n) return end for _,c in ipairs(n:getChildren()) do walk(c) end end walk(w:nodeByName('list_layer')) for _,n in ipairs(cards) do local b=n:getCascadeBoundingBox() __vc.tap(b.x+b.width/2,b.y+b.height/2) end",
+  "wait:2",
+  "lua:xyd.db.campaignAutoStatus:setCampaignAutoStatus(xyd.CampaignType.CHALLENGE,true)",
+  "tap:button_battle",
+  "wait:10",
+  "lua:local wm=xyd.WindowManager.get() if wm:getWindow('hero_show') then wm:closeWindow('hero_show') end local story=wm:getWindow('story') if story then story:onEnded() end",
+  "wait:10",
+  "lua:local wm=xyd.WindowManager.get() if wm:getWindow('hero_show') then wm:closeWindow('hero_show') end local story=wm:getWindow('story') if story then story:onEnded() end",
+  "wait:10",
+  "lua:local wm=xyd.WindowManager.get() if wm:getWindow('hero_show') then wm:closeWindow('hero_show') end local story=wm:getWindow('story') if story then story:onEnded() end",
+  "wait:10",
+  "lua:local wm=xyd.WindowManager.get() if wm:getWindow('hero_show') then wm:closeWindow('hero_show') end local story=wm:getWindow('story') if story then story:onEnded() end",
+  "wait:10",
+  "lua:local wm=xyd.WindowManager.get() if wm:getWindow('hero_show') then wm:closeWindow('hero_show') end local story=wm:getWindow('story') if story then story:onEnded() end",
+  "wait:10",
+  "lua:local wm=xyd.WindowManager.get() if wm:getWindow('hero_show') then wm:closeWindow('hero_show') end local story=wm:getWindow('story') if story then story:onEnded() end",
+  "wait:10",
+  "lua:local wm=xyd.WindowManager.get() if wm:getWindow('hero_show') then wm:closeWindow('hero_show') end local story=wm:getWindow('story') if story then story:onEnded() end",
+  "wait:10",
+  "lua:local wm=xyd.WindowManager.get() if wm:getWindow('hero_show') then wm:closeWindow('hero_show') end local story=wm:getWindow('story') if story then story:onEnded() end",
+  "wait:10",
+  "lua:local wm=xyd.WindowManager.get() if wm:getWindow('hero_show') then wm:closeWindow('hero_show') end local story=wm:getWindow('story') if story then story:onEnded() end",
+  "wait:10",
+  "lua:local wm=xyd.WindowManager.get() if wm:getWindow('hero_show') then wm:closeWindow('hero_show') end local story=wm:getWindow('story') if story then story:onEnded() end",
+  "wait:10",
+  "lua:local wm=xyd.WindowManager.get() if wm:getWindow('hero_show') then wm:closeWindow('hero_show') end local story=wm:getWindow('story') if story then story:onEnded() end",
+  "wait:10",
+  "lua:local wm=xyd.WindowManager.get() if wm:getWindow('hero_show') then wm:closeWindow('hero_show') end local story=wm:getWindow('story') if story then story:onEnded() end",
+  "wait:10",
+  "lua:local wm=xyd.WindowManager.get() if wm:getWindow('hero_show') then wm:closeWindow('hero_show') end local story=wm:getWindow('story') if story then story:onEnded() end",
+  "wait:10",
+  "lua:local wm=xyd.WindowManager.get() if wm:getWindow('hero_show') then wm:closeWindow('hero_show') end local story=wm:getWindow('story') if story then story:onEnded() end",
+  "wait:10",
+  "lua:local wm=xyd.WindowManager.get() if wm:getWindow('hero_show') then wm:closeWindow('hero_show') end local story=wm:getWindow('story') if story then story:onEnded() end",
+  "wait:10",
+  "lua:local wm=xyd.WindowManager.get() if wm:getWindow('hero_show') then wm:closeWindow('hero_show') end local story=wm:getWindow('story') if story then story:onEnded() end",
+  "wait:10",
+  "lua:local wm=xyd.WindowManager.get() if wm:getWindow('hero_show') then wm:closeWindow('hero_show') end local story=wm:getWindow('story') if story then story:onEnded() end",
+  "wait:10",
+  "lua:local wm=xyd.WindowManager.get() if wm:getWindow('hero_show') then wm:closeWindow('hero_show') end local story=wm:getWindow('story') if story then story:onEnded() end",
+  "wait:10",
+  "lua:local wm=xyd.WindowManager.get() if wm:getWindow('hero_show') then wm:closeWindow('hero_show') end local story=wm:getWindow('story') if story then story:onEnded() end",
+  "wait:10",
+  "lua:local wm=xyd.WindowManager.get() if wm:getWindow('hero_show') then wm:closeWindow('hero_show') end local story=wm:getWindow('story') if story then story:onEnded() end",
+  "wait:10",
+  "lua:local wm=xyd.WindowManager.get() if wm:getWindow('hero_show') then wm:closeWindow('hero_show') end local story=wm:getWindow('story') if story then story:onEnded() end",
+  "wait:10",
+  "lua:local wm=xyd.WindowManager.get() if wm:getWindow('hero_show') then wm:closeWindow('hero_show') end local story=wm:getWindow('story') if story then story:onEnded() end",
+  "wait:10",
+  "lua:local wm=xyd.WindowManager.get() if wm:getWindow('hero_show') then wm:closeWindow('hero_show') end local story=wm:getWindow('story') if story then story:onEnded() end",
+  "wait:10",
+  "lua:local wm=xyd.WindowManager.get() if wm:getWindow('hero_show') then wm:closeWindow('hero_show') end local story=wm:getWindow('story') if story then story:onEnded() end",
+  "wait:10",
+  "lua:local wm=xyd.WindowManager.get() if not wm:getWindow('battle_lose') then error('vc-challenge-loss-window') end",
+  "lua:local wm=xyd.WindowManager.get() local w=wm:getWindow('battle_win') or wm:getWindow('battle_lose') local n=w.returnBtn_ if not n then error('vc-no-battle-return') end local b=n:getCascadeBoundingBox() local e={x=b.x+b.width/2,y=b.y+b.height/2} local ls=n._LuaListeners[cc.NODE_TOUCH_EVENT] if type(ls)~='table' then error('vc-no-return-listener') end for _,l in ipairs(ls) do e.name='began' l.listener_(e) e.name='ended' l.listener_(e) end",
+  "wait:3",
+  "relogin",
+  "wait:3",
+  "lua:local p=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_PLAYER) p:loadWorldMap(function(code) if code~=xyd.error.OK then error('vc-challenge-reload-load') end if not p.worldMaps_[24111] or p.worldMaps_[24111].star~=0 or p.worldMaps_[24112] or p.worldMaps_[24121] then error('vc-challenge-reload') end end)"
+ ],
+ "expect_ok": [
+  112,
+  113,
+  114,
+  26,
+  57
+ ]
+}

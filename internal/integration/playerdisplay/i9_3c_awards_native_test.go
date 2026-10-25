@@ -126,7 +126,7 @@ func TestI9_3CAwardsNative(t *testing.T) {
 		t.Fatal("story reconnect after result", err)
 	}
 	caps, err := s.Caps(ctx, a, op())
-	if err != nil || caps["max_lev"] != int64(100) || caps["max_color"] != int64(5) {
+	if err != nil || caps["max_lev"] != int64(100) || caps["max_color"] != int64(7) {
 		t.Fatal(caps, err)
 	}
 	world, err := s.Load(ctx, a, op())

@@ -114,3 +114,24 @@ func TestAttestRefusedPastDeadline(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+func TestCloudSummaryOmittedEchoDoesNotRelaxOtherPolicies(t *testing.T) {
+	s := summarySnapshot()
+	m := acceptedSummary()
+	m.Formation = nil
+	m.Pet = 0
+	m.Damage = 0
+	strict := SummaryPolicy{ID: "CAMPAIGN_SUMMARY_V1", Version: 1, MaxStar: 3, WinFromStar: true}
+	if v, _ := strict.Judge(s, m); v != VerdictRejected {
+		t.Fatal("strict formation omitted")
+	}
+	cloud := SummaryPolicy{ID: "CAMPAIGN_CLOUD_SUMMARY_V1", Version: 1, MaxStar: 3, WinFromStar: true, OmitParticipantEcho: true}
+	if v, r := cloud.Judge(s, m); v != VerdictAccepted {
+		t.Fatal(r)
+	}
+	for _, bad := range []Summary{{Star: 4, Win: true}, {Star: 3, Win: false}, {Star: 3, Win: true, Pet: 7}, {Star: 3, Win: true, Formation: []int64{3}}} {
+		if v, _ := cloud.Judge(s, bad); v != VerdictRejected {
+			t.Fatal("invalid Cloud summary", bad)
+		}
+	}
+}
