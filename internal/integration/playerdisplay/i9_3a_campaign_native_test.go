@@ -10,6 +10,7 @@ import (
 
 	pg "gxb.local/backend/v2/internal/adapters/postgres"
 	"gxb.local/backend/v2/internal/adapters/postgres/campaignstore"
+	"gxb.local/backend/v2/internal/adapters/postgres/characterbirth"
 	"gxb.local/backend/v2/internal/adapters/postgres/characterstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/contentstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/i4store"
@@ -17,11 +18,13 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres/kernelstore"
 	app "gxb.local/backend/v2/internal/application/campaign"
 	hero "gxb.local/backend/v2/internal/application/characterhero"
+	pet "gxb.local/backend/v2/internal/application/characterpet"
 	gen "gxb.local/backend/v2/internal/application/generation"
 	"gxb.local/backend/v2/internal/application/i5"
 	d "gxb.local/backend/v2/internal/domain/campaign"
 	"gxb.local/backend/v2/internal/foundation/changes"
 	"gxb.local/backend/v2/internal/foundation/tx"
+	heroproj "gxb.local/backend/v2/internal/projection/hero"
 )
 
 func campaignMode(t *testing.T, p *pg.Pool) app.Mode {
@@ -33,6 +36,8 @@ func campaignMode(t *testing.T, p *pg.Pool) app.Mode {
 		Backpack: values, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}, RedeemSecret: []byte("i9-3a-campaign-native-fixture-secret")}
 	return app.Mode{Timed: gen.TimedRunner{Binder: gen.Binder{Time: pg.AuthoritativeTime{Queryer: p}}, Runner: runner}, Fresh: p, Store: campaignstore.Store{}, Content: content,
 		Fence: values, Functions: values, Directory: i4store.PlayerDirectoryReader{}, Heroes: characterstore.CampaignHeroPort{Store: heroes}, HeroExp: hero.Service{ProgressionStore: heroes, Progression: content},
+		StoryWire: heroproj.StockHero, StoryHeroes: hero.Service{AcquisitionStore: heroes, Acquisition: content, CollectionAdmission: hero.CatalogCollectionAdmission{Content: content}, FreshFacets: characterbirth.FreshHeroFacets()},
+		Pets: pet.Service{Store: heroes, Progression: content}, MaxColor: i5.PreservationMaxHeroColorProvider{},
 		Privileges: privilegeProvider(p), Costs: i5.MaterialCostDebiter{Store: values, Content: content}, Progression: values,
 		Combat: combatService(t, p), Energy: owner, Grants: owner, Stages: owner, Facts: i5.ObjectiveFacts{Owner: owner, Open: values}, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}}
 }

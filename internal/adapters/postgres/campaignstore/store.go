@@ -29,7 +29,7 @@ type nodeRow struct {
 
 const readSQL = `SELECT p.normal_bonus_id,p.super_bonus_id,p.pending_generation,COALESCE(p.pending_items::text,'[]'),p.last_generation,COALESCE(p.last_result::text,''),p.state_version,
 COALESCE((SELECT jsonb_agg(jsonb_build_object('campaign_id',n.campaign_id,'star',n.star,'win_day',n.win_day,'wins',n.wins,'reset_day',n.reset_day,'resets',n.resets,'partner_drop',n.partner_drop))
-FROM campaign_nodes n WHERE n.player_id=p.player_id),'[]'::jsonb)::text FROM campaign_players p WHERE p.player_id=$1`
+FROM campaign_nodes n WHERE n.player_id=p.player_id),'[]'::jsonb)::text,p.chapter_claims::text,p.story_claims::text FROM campaign_players p WHERE p.player_id=$1`
 
 // ReadTx is the unlocked read for projections; an absent row is the new-player map.
 func (Store) ReadTx(c context.Context, q tx.Queryer, p identity.PlayerID) (d.Record, error) {
@@ -50,8 +50,8 @@ func (Store) LockTx(c context.Context, t tx.Tx, p identity.PlayerID, at time.Tim
 
 func scan(row tx.Row) (d.Record, error) {
 	var r d.Record
-	var pending, result, nodes string
-	if err := row.Scan(&r.Progress.NormalBonusID, &r.Progress.SuperBonusID, &r.PendingGeneration, &pending, &r.LastGeneration, &result, &r.StateVersion, &nodes); err != nil {
+	var pending, result, nodes, chapters, stories string
+	if err := row.Scan(&r.Progress.NormalBonusID, &r.Progress.SuperBonusID, &r.PendingGeneration, &pending, &r.LastGeneration, &result, &r.StateVersion, &nodes, &chapters, &stories); err != nil {
 		return d.Record{}, err
 	}
 	if err := json.Unmarshal([]byte(pending), &r.PendingItems); err != nil {
@@ -59,6 +59,12 @@ func scan(row tx.Row) (d.Record, error) {
 	}
 	if result != "" {
 		r.LastResult = json.RawMessage(result)
+	}
+	if err := json.Unmarshal([]byte(chapters), &r.Progress.ChapterClaims); err != nil {
+		return r, err
+	}
+	if err := json.Unmarshal([]byte(stories), &r.Progress.StoryClaims); err != nil {
+		return r, err
 	}
 	var rows []nodeRow
 	if err := json.Unmarshal([]byte(nodes), &rows); err != nil {
@@ -85,8 +91,22 @@ func (Store) SaveTx(c context.Context, t tx.Tx, p identity.PlayerID, r d.Record,
 	if r.LastResult != nil {
 		result = string(r.LastResult)
 	}
-	tag, err := t.Exec(c, `UPDATE campaign_players SET normal_bonus_id=$2,super_bonus_id=$3,pending_generation=$4,pending_items=$5::jsonb,last_generation=$6,last_result=$7::jsonb,state_version=state_version+1,updated_at=$8
-WHERE player_id=$1 AND state_version=$9`, int64(p), r.Progress.NormalBonusID, r.Progress.SuperBonusID, r.PendingGeneration, pending, r.LastGeneration, result, at, r.StateVersion)
+	chapters, err := json.Marshal(r.Progress.ChapterClaims)
+	if err != nil {
+		return err
+	}
+	if string(chapters) == "null" {
+		chapters = []byte("{}")
+	}
+	stories, err := json.Marshal(r.Progress.StoryClaims)
+	if err != nil {
+		return err
+	}
+	if string(stories) == "null" {
+		stories = []byte("{}")
+	}
+	tag, err := t.Exec(c, `UPDATE campaign_players SET normal_bonus_id=$2,super_bonus_id=$3,pending_generation=$4,pending_items=$5::jsonb,last_generation=$6,last_result=$7::jsonb,state_version=state_version+1,updated_at=$8,chapter_claims=$10::jsonb,story_claims=$11::jsonb
+WHERE player_id=$1 AND state_version=$9`, int64(p), r.Progress.NormalBonusID, r.Progress.SuperBonusID, r.PendingGeneration, pending, r.LastGeneration, result, at, r.StateVersion, string(chapters), string(stories))
 	if err != nil {
 		return err
 	}

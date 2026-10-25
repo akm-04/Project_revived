@@ -38,7 +38,7 @@ def build_campaign(blobs, parse):
                     absent_repeat.append(campaign_id)
                     repeat_box = 0
                 used_boxes.update(b for b in (first_box, repeat_box) if b)
-                nodes.append(dict(id=campaign_id, type=wire, chapter=chapter['id'], open_level=int(r['open_lv']), energy_cost=int(r['energy_cost']),
+                nodes.append(dict(id=campaign_id, type=wire, map_type=(3 if int(r['is_boss'] or 0) else int(r['campaign_type'])), chapter=chapter['id'], open_level=int(r['open_lv']), energy_cost=int(r['energy_cost']),
                                   defeat_cost=int(r['defeat_cost']), partner_exp=int(r['partner_exp']), mana_gain=int(r['mana_gain']),
                                   star_gift=int(r['star_gift']), daily_limit=int(r['daily_limit']), first_box=first_box, repeat_box=repeat_box,
                                   next=_ids(r['next_campaign_id']), previous=int(r['last_campaign_id']), related=int(r['relate_campaign_id']),
@@ -57,12 +57,29 @@ def build_campaign(blobs, parse):
                   for r in sorted(table('campaign_star_bonus'), key=lambda r: int(r['bonus_id']))]
     if len(star_bonus) != 46:
         raise ValueError('campaign star bonus profile drift')
+    # D118: only displayed large/boss nodes carry stars; every chapter threshold matches.
+    for kind in (1, 2):
+        cumulative = 0
+        bonuses = [b for b in star_bonus if b['type'] == kind]
+        for ch, bonus in zip(chapters, bonuses):
+            cumulative += 3 * sum(n['chapter'] == ch['id'] and n['type'] == kind and n['map_type'] != 1 for n in nodes)
+            if cumulative != bonus['star_num']:
+                raise ValueError('Campaign displayed-star threshold drift')
     elite_reset_costs = [int(r['refresh_elite_cost']) for r in sorted(table('refresh_cost'), key=lambda r: int(r['id']))]
     vip = [dict(level=int(r['id']), num_elite=int(r['num_elite']), quick_sweep=int(r['quick_sweep']))
            for r in sorted(table('vip'), key=lambda r: int(r['id']))]
     monthly = {r['id']: r for r in table('monthly_privilege')}['1']
     if len(elite_reset_costs) != 330 or elite_reset_costs[0] != 20 or [v['level'] for v in vip] != list(range(16)) or monthly['num_elite'] != '3':
         raise ValueError('campaign reset/VIP profile drift')
+    gifts = {int(r['id']): r for r in table('gift')}
+    chapter_gifts = []
+    for gid in sorted({g for ch in chapters if ch['event_type'] == 1 for g in ch['event_gift']}):
+        g = gifts[gid]
+        if any(v not in ('', '0') for k, v in g.items() if k not in ('id', 'desc', 'items', 'item_nums')):
+            raise ValueError('Unsupported Campaign gift columns: %d' % gid)
+        chapter_gifts.append(dict(id=gid, items=_pairs(g['items'], g['item_nums'])))
+    if len(chapter_gifts) != 12:
+        raise ValueError('Campaign chapter gift profile drift')
     return dict(schema_version=1, contract_id='I9_CAMPAIGN_V1', policy_id='I9_CAMPAIGN_PRIVATE_POLICY_V1',
                 first_normal_id=100001, super_function_id=31, challenge_gate_campaign_id=1600016, exp_multiplier=3,
                 sweep_card_item_id=50001013, normal_sweep_max=10,
@@ -70,4 +87,4 @@ def build_campaign(blobs, parse):
                                     labels=['result_window_seconds PRIVATE_POLICY D103', 'sweep_crystal_per_card PRIVATE_POLICY C7',
                                             'absent repeat dropboxes UNKNOWN: no repeat drop']),
                 absent_repeat_box_campaigns=absent_repeat, monthly=dict(num_elite=int(monthly['num_elite']), quick_sweep=int(monthly['quick_sweep'])),
-                chapters=chapters, nodes=nodes, drop_boxes=drop_boxes, star_bonus=star_bonus, elite_reset_costs=elite_reset_costs, vip=vip)
+                chapter_gifts=chapter_gifts, chapters=chapters, nodes=nodes, drop_boxes=drop_boxes, star_bonus=star_bonus, elite_reset_costs=elite_reset_costs, vip=vip)

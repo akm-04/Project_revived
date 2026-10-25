@@ -30,6 +30,7 @@ var (
 type Node struct {
 	ID         int64 `json:"id"`
 	Type       int64 `json:"type"`
+	MapType    int64 `json:"map_type"` // Source node size, distinct from wire Type; zero is legacy content.
 	Chapter    int64 `json:"chapter"`
 	OpenLevel  int64 `json:"open_level"`
 	EnergyCost int64 `json:"energy_cost"`
@@ -67,6 +68,11 @@ type Chapter struct {
 type DropBox struct {
 	ID   int64      `json:"id"`
 	Rows [][2]int64 `json:"rows"`
+}
+
+type ChapterGift struct {
+	ID    int64      `json:"id"`
+	Items [][2]int64 `json:"items"`
 }
 
 type StarBonus struct {
@@ -112,6 +118,7 @@ type Catalog struct {
 	Chapters                []Chapter     `json:"chapters"`
 	Nodes                   []Node        `json:"nodes"`
 	DropBoxes               []DropBox     `json:"drop_boxes"`
+	ChapterGifts            []ChapterGift `json:"chapter_gifts"`
 	StarBonus               []StarBonus   `json:"star_bonus"`
 	EliteResetCosts         []int64       `json:"elite_reset_costs"`
 	VIP                     []VIP         `json:"vip"`
@@ -121,12 +128,12 @@ type Catalog struct {
 	chains map[int64][]int64
 }
 
-// Validate checks the generation-40 profile and builds the lookups; opening
+// Validate retains generation40 reads (no ChapterGifts) and checks the current profile and builds the lookups; opening
 // relies on the Normal and Super chains being linear in catalog order.
 func (c *Catalog) Validate() error {
 	profile := c.SchemaVersion == 1 && c.ContractID == ContractID && c.PolicyID == PolicyID && c.FirstNormalID == 100001 && c.SuperFunctionID == 31 &&
 		c.ChallengeGateCampaignID == 1600016 && c.ExpMultiplier == 3 && c.PrivatePolicy.ResultWindowSeconds > 0 && len(c.Chapters) == 23 && len(c.Nodes) == 728 &&
-		len(c.DropBoxes) == 996 && len(c.StarBonus) == 46 && len(c.EliteResetCosts) == 330 && len(c.VIP) == 16
+		len(c.DropBoxes) == 996 && len(c.StarBonus) == 46 && len(c.EliteResetCosts) == 330 && len(c.VIP) == 16 && (len(c.ChapterGifts) == 0 || len(c.ChapterGifts) == 12)
 	if !profile {
 		return fmt.Errorf("%w: catalog profile", ErrUnavailable)
 	}
@@ -139,7 +146,7 @@ func (c *Catalog) Validate() error {
 	for i, n := range c.Nodes {
 		_, first := c.boxes[n.FirstBox]
 		_, repeat := c.boxes[n.RepeatBox]
-		if _, duplicate := c.nodes[n.ID]; duplicate || n.FirstBox != 0 && !first || n.RepeatBox != 0 && !repeat || n.EnergyCost < 0 || n.DefeatCost < 0 {
+		if _, duplicate := c.nodes[n.ID]; duplicate || n.FirstBox != 0 && !first || n.RepeatBox != 0 && !repeat || n.EnergyCost < 0 || n.DefeatCost < 0 || n.MapType < 0 {
 			return fmt.Errorf("%w: node %d", ErrUnavailable, n.ID)
 		}
 		c.nodes[n.ID] = i

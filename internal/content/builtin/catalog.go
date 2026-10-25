@@ -883,7 +883,7 @@ func validateManifest(raw []byte, manifest *Manifest) error {
 	if manifest.CompilerVersion == "i7c6-cosmetic-origins" {
 		expectedSources, expectedArtifacts = 286, 42
 	}
-	if manifest.CompilerVersion == "i9-3a-campaign" {
+	if manifest.CompilerVersion == "i9-3a-campaign" || manifest.CompilerVersion == "i9-3c-campaign-awards" {
 		expectedSources, expectedArtifacts = 291, 43
 	}
 	if manifest.CompilerVersion == "i7c5e-conquer" {

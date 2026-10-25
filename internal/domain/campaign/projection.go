@@ -45,9 +45,9 @@ func (c Catalog) rows(p Progress, ids []int64, day int64) []any {
 }
 
 // Info places each cursor on the last opened node of its chain and sums the
-// stars of that node's chapter; a closed Super chain answers zeros (V1).
+// cumulative stars of that type; a closed Super chain answers zeros (V1).
 func (c Catalog) Info(p Progress, superOpen bool) ChapterInfo {
-	info := ChapterInfo{NormalBonusID: p.NormalBonusID, SuperBonusID: p.SuperBonusID}
+	info := ChapterInfo{NormalBonusID: c.BonusCursor(p, Normal), SuperBonusID: c.BonusCursor(p, Super)}
 	info.NormalCampaignID, info.NormalChapterID, info.NormalStars = c.cursor(p, Normal, superOpen)
 	info.SuperCampaignID, info.SuperChapterID, info.SuperStars = c.cursor(p, Super, superOpen)
 	return info
@@ -59,13 +59,7 @@ func (c Catalog) cursor(p Progress, kind int64, superOpen bool) (int64, int64, i
 		return 0, 0, 0
 	}
 	frontier, _ := c.Node(opened[len(opened)-1])
-	var stars int64
-	for _, id := range c.Chain(kind) {
-		if n, _ := c.Node(id); n.Chapter == frontier.Chapter {
-			stars += p.State(id).Star
-		}
-	}
-	return frontier.ID, frontier.Chapter, stars
+	return frontier.ID, frontier.Chapter, c.TotalStars(p, kind)
 }
 
 // World is the one projection behind 112 and MID1 detail["112"] (C2, F13): the
@@ -73,7 +67,7 @@ func (c Catalog) cursor(p Progress, kind int64, superOpen bool) (int64, int64, i
 func (c Catalog) World(p Progress, superOpen bool, day int64) map[string]any {
 	info := c.Info(p, superOpen).Fields()
 	body := map[string]any{"normal": c.rows(p, c.Opened(p, Normal, superOpen), day), "super": c.rows(p, c.Opened(p, Super, superOpen), day),
-		"challenge": c.rows(p, c.Opened(p, Challenge, superOpen), day), "chapter_events": []any{}, "chapter_info": info}
+		"challenge": c.rows(p, c.Opened(p, Challenge, superOpen), day), "chapter_events": c.ChapterEvents(p), "chapter_info": info}
 	for key, value := range info {
 		body[key] = value
 	}

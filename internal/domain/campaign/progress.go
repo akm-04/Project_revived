@@ -19,6 +19,8 @@ type NodeState struct {
 
 type Progress struct {
 	Nodes         map[int64]NodeState
+	ChapterClaims map[int64]int64
+	StoryClaims   map[int64]json.RawMessage
 	NormalBonusID int64
 	SuperBonusID  int64
 }
@@ -112,3 +114,6 @@ func (n Node) BattleBox(p Progress) int64 {
 	}
 	return n.RepeatBox
 }
+
+// WithNode preserves auxiliary entitlements when the caller marks a story reward.
+func (p Progress) WithNode(n NodeState) Progress { return p.with(n) }

@@ -15,6 +15,7 @@ import (
 	"time"
 
 	ca "gxb.local/backend/v2/internal/application/characterasset"
+	apppet "gxb.local/backend/v2/internal/application/characterpet"
 	"gxb.local/backend/v2/internal/application/combat"
 	gen "gxb.local/backend/v2/internal/application/generation"
 	"gxb.local/backend/v2/internal/application/i5"
@@ -45,6 +46,10 @@ type Mode struct {
 	Directory   Directory
 	Heroes      Heroes
 	HeroExp     HeroExp
+	StoryHeroes StoryHeroes
+	StoryWire   func(character.Hero) (map[string]any, error)
+	Pets        Pets
+	MaxColor    i5.MaxHeroColorPolicyProvider
 	Combat      Combat
 	Energy      i5.TxTemporalDebiter
 	Grants      Grants
@@ -288,6 +293,17 @@ func (s Mode) Fight(c context.Context, a identity.ActorContext, request Fight, o
 		if err != nil {
 			return err
 		}
+		if request.Pet > 0 {
+			if s.Pets == nil {
+				return d.ErrUnavailable
+			}
+			if err := s.Pets.LockCampaignPetTx(c, sc.Tx, a.PlayerID, request.Pet); err != nil {
+				if errors.Is(err, apppet.ErrPetNotFound) {
+					return d.ErrRefused
+				}
+				return err
+			}
+		}
 		record, err := s.Store.LockTx(c, sc.Tx, a.PlayerID, at)
 		if err != nil {
 			return err
@@ -388,7 +404,7 @@ func (s Mode) Result(c context.Context, a identity.ActorContext, request Result,
 		if err != nil {
 			return err
 		}
-		r.PolicyVersion, r.ActorAccountUID, r.ContextID = d.ContractID, string(a.AccountUID), a.ContextID.UUID()
+		r.PolicyVersion, r.ActorAccountUID, r.ContextID = d.PolicyID, string(a.AccountUID), a.ContextID.UUID()
 		_, err = s.Receipts.PutTx(c, sc.Tx, r)
 		return err
 	})
@@ -425,6 +441,17 @@ func (s Mode) settle(c context.Context, sc gen.TimedScope, a identity.ActorConte
 	if err != nil {
 		return Settled{}, false, err
 	}
+	if request.Pet > 0 {
+		if s.Pets == nil {
+			return Settled{}, false, d.ErrUnavailable
+		}
+		if err := s.Pets.LockCampaignPetTx(c, sc.Tx, a.PlayerID, request.Pet); err != nil {
+			if errors.Is(err, apppet.ErrPetNotFound) {
+				return Settled{}, false, d.ErrRefused
+			}
+			return Settled{}, false, err
+		}
+	}
 	record, err := s.Store.LockTx(c, sc.Tx, a.PlayerID, at)
 	if err != nil {
 		return Settled{}, false, err
@@ -455,12 +482,15 @@ func (s Mode) settle(c context.Context, sc gen.TimedScope, a identity.ActorConte
 	body := map[string]any{"is_win": 0, "result": 0, "items": []any{}}
 	if outcome.Win {
 		body["is_win"], body["result"] = 1, 1
-		if err = s.reward(c, sc, a, v, node, outcome, record, heroes, attested.Attempt.ID.String(), body); err != nil {
+		if err = s.reward(c, sc, a, v, node, outcome, record, heroes, attested.Attempt.ID.String(), request.Pet, body); err != nil {
 			return Settled{}, false, err
 		}
 	}
 	info := v.catalog.Info(outcome.Progress, v.superOpen)
 	body["chapter_info"] = info.Fields()
+	if event := v.catalog.ChapterEvent(outcome.Progress, node.Chapter); event != nil {
+		body["chapter_event"] = event
+	}
 	rows := make([]any, 0, len(outcome.Touched))
 	for _, touched := range outcome.Touched {
 		rows = append(rows, v.catalog.Row(outcome.Progress, touched, v.day))
@@ -512,7 +542,7 @@ func (s Mode) debit(c context.Context, sc gen.TimedScope, pid identity.PlayerID,
 // reward grants a win's value (mana, player exp, star_gift, frozen drops),
 // then hero exp at the player level after that exp, the kind-2 openings of a
 // first Normal clear and the objective fact.
-func (s Mode) reward(c context.Context, sc gen.TimedScope, a identity.ActorContext, v view, node d.Node, outcome d.Outcome, record d.Record, heroes []int64, attempt string, body map[string]any) error {
+func (s Mode) reward(c context.Context, sc gen.TimedScope, a identity.ActorContext, v view, node d.Node, outcome d.Outcome, record d.Record, heroes []int64, attempt string, petID int64, body map[string]any) error {
 	at, current := sc.Operation.DecisionAt(), sc.Operation.Operation()
 	lines := []grant.Line{}
 	if outcome.Mana > 0 {
@@ -556,6 +586,13 @@ func (s Mode) reward(c context.Context, sc gen.TimedScope, a identity.ActorConte
 		exps = append(exps, map[string]any{"partner_id": id, "exp": hero.Exp})
 	}
 	body["exps"] = exps
+	if petID > 0 && outcome.PartnerExp > 0 {
+		pet, err := s.Pets.CreditCampaignEXPTx(c, sc.Tx, a.PlayerID, petID, outcome.PartnerExp, level, v.revision, at)
+		if err != nil {
+			return err
+		}
+		body["pet_exps"] = []any{map[string]any{"pet_id": pet.PetID, "exp": pet.Exp}}
+	}
 	if node.Type == d.Normal && outcome.FirstClear {
 		if _, err = s.Stages.OpenStageFunctionsTx(c, sc.Tx, a.PlayerID, v.revision, node.ID, at); err != nil {
 			return err

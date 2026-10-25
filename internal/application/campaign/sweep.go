@@ -150,10 +150,22 @@ func (s Mode) purchase(c context.Context, a identity.ActorContext, name string, 
 		return nil, err
 	}
 	var out map[string]any
-	_, result, err := s.Timed.Run(c, op, ModeProfile(), tx.Options{Isolation: tx.RepeatableRead}, retry(), timedReceipt{receipt.Resolver{Reader: s.ReceiptRead, Identity: id, Fingerprint: fingerprint}}, func(c context.Context, sc gen.TimedScope) error {
+	isolation := tx.RepeatableRead
+	if name == "story-award" {
+		isolation = tx.Serializable
+	}
+	_, result, err := s.Timed.Run(c, op, ModeProfile(), tx.Options{Isolation: isolation}, retry(), timedReceipt{receipt.Resolver{Reader: s.ReceiptRead, Identity: id, Fingerprint: fingerprint}}, func(c context.Context, sc gen.TimedScope) error {
 		at := sc.Operation.DecisionAt()
 		if err := s.Fence.FenceActorTx(c, sc.Tx, a, at); err != nil {
 			return err
+		}
+		if name == "story-award" {
+			if s.StoryHeroes == nil {
+				return d.ErrUnavailable
+			}
+			if err := s.StoryHeroes.LockStoryRosterTx(c, sc.Tx, a.PlayerID); err != nil {
+				return err
+			}
 		}
 		record, err := s.Store.LockTx(c, sc.Tx, a.PlayerID, at)
 		if err != nil {

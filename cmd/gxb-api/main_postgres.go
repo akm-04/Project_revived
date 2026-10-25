@@ -100,6 +100,7 @@ import (
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/policy"
 	"gxb.local/backend/v2/internal/foundation/tx"
+	heroproj "gxb.local/backend/v2/internal/projection/hero"
 	"gxb.local/backend/v2/internal/projection/lobby"
 	"gxb.local/backend/v2/internal/protocol/httpedge"
 	"gxb.local/backend/v2/internal/protocol/limits"
@@ -350,6 +351,8 @@ func main() {
 		go runReconcile(ctx, pool, appleague.Reconciler{Service: league})
 		conquer := canonicalConquer(pool, runner, contentDB, i5db, i5svc, privileges, fight)
 		campaign := canonicalCampaign(pool, runner, contentDB, i5db, i5svc, heroSvc, fight)
+		campaign.StoryHeroes, campaign.Pets, campaign.MaxColor = heroSvc, petSvc, maxHeroColorPolicy
+		campaign.StoryWire = heroproj.StockHero
 		for _, mid := range stockruntime.CampaignMIDs {
 			mustRegister(mid, stockruntime.CampaignDispatcher{Authority: authority, Service: campaign})
 		}

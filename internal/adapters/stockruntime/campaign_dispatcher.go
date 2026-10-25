@@ -15,12 +15,16 @@ import (
 )
 
 // CampaignMIDs are the I9-3A/B world, fight/result, Super reset and sweep MIDs.
-var CampaignMIDs = []uint16{112, 113, 114, 116, 117}
+var CampaignMIDs = []uint16{112, 113, 114, 116, 117, 118, 122, 2064, 2576}
 
 // fightExist is battleConst.errorIdFightExist, which BattleCreate.campaignResult accepts with a full body (F4e).
 const fightExist = 30005
 
 type CampaignPort interface {
+	Bonus(context.Context, identity.ActorContext, int64, operation.Context) (map[string]any, error)
+	ChapterAward(context.Context, identity.ActorContext, int64, operation.Context) (map[string]any, error)
+	StoryAward(context.Context, identity.ActorContext, app.StoryChoice, operation.Context) (map[string]any, error)
+	Caps(context.Context, identity.ActorContext, operation.Context) (map[string]any, error)
 	Sweep(context.Context, identity.ActorContext, app.Sweep, operation.Context) (map[string]any, error)
 	Reset(context.Context, identity.ActorContext, app.Reset, operation.Context) (map[string]any, error)
 	Load(context.Context, identity.ActorContext, operation.Context) (map[string]any, error)
@@ -50,6 +54,47 @@ func (o CampaignDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchR
 			return bad
 		}
 		body, err := o.Service.Load(ctx, a, op)
+		if err != nil {
+			return failCampaign(err)
+		}
+		return okI5(body)
+	case 118:
+		kind, valid := topFloorInteger(p, "bonus_type", true)
+		if !valid || (kind != d.Normal && kind != d.Super) || !onlyStockGameplayParams(p, "bonus_type") {
+			return bad
+		}
+		body, err := o.Service.Bonus(ctx, a, kind, op)
+		if err != nil {
+			return failCampaign(err)
+		}
+		return okI5(body)
+	case 122:
+		if !onlyStockGameplayParams(p) {
+			return bad
+		}
+		body, err := o.Service.Caps(ctx, a, op)
+		if err != nil {
+			return failCampaign(err)
+		}
+		return okI5(body)
+	case 2576:
+		chapter, valid := topFloorInteger(p, "chapter_id", true)
+		if !valid || chapter <= 0 || !onlyStockGameplayParams(p, "chapter_id") {
+			return bad
+		}
+		body, err := o.Service.ChapterAward(ctx, a, chapter, op)
+		if err != nil {
+			return failCampaign(err)
+		}
+		return okI5(body)
+	case 2064:
+		id, x := topFloorInteger(p, "campaign_id", true)
+		kind, y := topFloorInteger(p, "campaign_type", true)
+		partner, z := topFloorInteger(p, "story_drop_partner", true)
+		if !x || !y || !z || id <= 0 || partner <= 0 || kind != d.Normal || !onlyStockGameplayParams(p, "campaign_id", "campaign_type", "story_drop_partner") {
+			return bad
+		}
+		body, err := o.Service.StoryAward(ctx, a, app.StoryChoice{CampaignID: id, Type: kind, Partner: partner}, op)
 		if err != nil {
 			return failCampaign(err)
 		}

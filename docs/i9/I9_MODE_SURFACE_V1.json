@@ -705,7 +705,7 @@
    "family": "CAMPAIGN",
    "disposition": "ACTIVE",
    "target": "I9-3",
-   "v2": "unimplemented",
+   "v2": "IMPLEMENTED_I9_3C",
    "v1": "LITERAL_STUB"
   },
   {
@@ -742,7 +742,7 @@
    "family": "CAMPAIGN",
    "disposition": "ACTIVE",
    "target": "I9-3",
-   "v2": "unimplemented",
+   "v2": "IMPLEMENTED_I9_3C",
    "v1": "STATE_BACKED"
   },
   {
@@ -5549,7 +5549,7 @@
    "family": "CAMPAIGN",
    "disposition": "ACTIVE",
    "target": "I9-3",
-   "v2": "unimplemented",
+   "v2": "IMPLEMENTED_I9_3C",
    "v1": "STATE_BACKED"
   },
   {
@@ -7835,7 +7835,7 @@
    "family": "CAMPAIGN",
    "disposition": "ACTIVE",
    "target": "I9-3",
-   "v2": "unimplemented",
+   "v2": "IMPLEMENTED_I9_3C",
    "v1": null
   },
   {

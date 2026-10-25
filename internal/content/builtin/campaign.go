@@ -11,6 +11,7 @@ type CampaignCatalog struct {
 	SchemaVersion   int               `json:"schema_version"`
 	ContractID      string            `json:"contract_id"`
 	PolicyID        string            `json:"policy_id"`
+	ChapterGifts    []json.RawMessage `json:"chapter_gifts"`
 	Chapters        []json.RawMessage `json:"chapters"`
 	Nodes           []json.RawMessage `json:"nodes"`
 	DropBoxes       []json.RawMessage `json:"drop_boxes"`
@@ -20,7 +21,7 @@ type CampaignCatalog struct {
 }
 
 func (c CampaignCatalog) Validate() error {
-	if c.SchemaVersion != 1 || c.ContractID != "I9_CAMPAIGN_V1" || c.PolicyID != "I9_CAMPAIGN_PRIVATE_POLICY_V1" || len(c.Chapters) != 23 || len(c.Nodes) != 728 || len(c.DropBoxes) != 996 || len(c.StarBonus) != 46 || len(c.EliteResetCosts) != 330 || len(c.VIP) != 16 {
+	if c.SchemaVersion != 1 || c.ContractID != "I9_CAMPAIGN_V1" || c.PolicyID != "I9_CAMPAIGN_PRIVATE_POLICY_V1" || len(c.Chapters) != 23 || len(c.Nodes) != 728 || len(c.DropBoxes) != 996 || len(c.StarBonus) != 46 || len(c.EliteResetCosts) != 330 || len(c.VIP) != 16 || len(c.ChapterGifts) != 12 {
 		return errors.New("campaign catalog profile")
 	}
 	return nil

@@ -282,14 +282,22 @@
       "parser_version": "lua-generated-v18-guild-invite",
       "revision_id": "0ca4ca72d28100afe41f4d9e8ac62218607ba7c7ddf1ba64abd5885ecdd3bce4",
       "scope": "campaign_catalog.json under CAMPAIGN_MODE_I9_3A: campaign.lua Normal/Super/Challenge nodes (429/155/144) from chapter.lua lists, 23 chapters with event columns, 996 campaign_dropbox boxes (8135 rows), 46 star bonus rows, refresh_elite_cost, vip num_elite/quick_sweep, monthly privilege row 1, labelled I9_CAMPAIGN_PRIVATE_POLICY_V1; all other payloads unchanged."
+    },
+    {
+      "ordinal": 41,
+      "stage": "I9-3C (Campaign awards)",
+      "compiler_version": "i9-3c-campaign-awards",
+      "parser_version": "lua-generated-v18-guild-invite",
+      "revision_id": "5f18b58e22b4e764b182d65b5abf6d11f0565ea57436bffaff8c9d69d1d91f7f",
+      "scope": "Twelve exact fixed chapter Gacha gift vectors from gift.lua and source map node sizes for displayed star eligibility; other source gameplay payloads unchanged."
     }
   ],
   "current": {
-    "ordinal": 40,
-    "stage": "I9-3A (Campaign)",
-    "compiler_version": "i9-3a-campaign",
+    "ordinal": 41,
+    "stage": "I9-3C (Campaign awards)",
+    "compiler_version": "i9-3c-campaign-awards",
     "parser_version": "lua-generated-v18-guild-invite",
-    "revision_id": "0ca4ca72d28100afe41f4d9e8ac62218607ba7c7ddf1ba64abd5885ecdd3bce4",
-    "scope": "campaign_catalog.json under CAMPAIGN_MODE_I9_3A: campaign.lua Normal/Super/Challenge nodes (429/155/144) from chapter.lua lists, 23 chapters with event columns, 996 campaign_dropbox boxes (8135 rows), 46 star bonus rows, refresh_elite_cost, vip num_elite/quick_sweep, monthly privilege row 1, labelled I9_CAMPAIGN_PRIVATE_POLICY_V1; all other payloads unchanged."
+    "revision_id": "5f18b58e22b4e764b182d65b5abf6d11f0565ea57436bffaff8c9d69d1d91f7f",
+    "scope": "Twelve exact fixed chapter Gacha gift vectors from gift.lua and source map node sizes for displayed star eligibility; other source gameplay payloads unchanged."
   }
 }
