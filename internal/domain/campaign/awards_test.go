@@ -83,3 +83,15 @@ func TestDisplayedStarsMatchEveryChapterBonus(t *testing.T) {
 		}
 	}
 }
+
+func TestLegacyContentCannotQualifyNewBonusClaims(t *testing.T) {
+	c := loadCatalog(t)
+	p := Progress{Nodes: map[int64]NodeState{}}
+	for i, n := range c.Nodes {
+		c.Nodes[i].MapType = 0
+		p.Nodes[n.ID] = NodeState{CampaignID: n.ID, Star: 3}
+	}
+	if _, _, err := c.ClaimBonus(p, Normal); !errors.Is(err, ErrUnavailable) {
+		t.Fatal("legacy content granted a bonus without source star eligibility", err)
+	}
+}

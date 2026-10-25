@@ -33,6 +33,12 @@ func (c Catalog) ClaimBonus(p Progress, kind int64) (Progress, StarBonus, error)
 	if kind != Normal && kind != Super {
 		return p, StarBonus{}, ErrInvalid
 	}
+	// Legacy content lacks source map sizes; it can be read but cannot qualify new bonus claims.
+	for _, n := range c.Nodes {
+		if n.Type == kind && n.MapType == 0 {
+			return p, StarBonus{}, ErrUnavailable
+		}
+	}
 	id := c.BonusCursor(p, kind)
 	for _, b := range c.StarBonus {
 		if b.ID != id || b.Type != kind {

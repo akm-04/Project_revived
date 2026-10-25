@@ -13,7 +13,7 @@
   "D116: first durable story choice per campaign requires matching live113 before114, preserving exact claim body. Existing origin returns the canonical Hero without a duplicate or extra value. New Hero uses Serializable caller transaction, HeroRoot400, qualified catalog collection admission and all fresh facets. Persist internal admission proof; never expose it on the stock wire. Generic I5 materializer and Vows remain separately gated.",
   "D117: a participating owned shown Pet receives partner_exp on a win under its canonical source progression cap; no loss EXP and no potion debit. Exact original Pet amount UNKNOWN.",
   "Campaign receipts record this policy id/version and pinned content. Generation40 numeric private block remains readable in immutable historical content; new generation41 retains the same existing numeric values. This contract is a rule declaration, not a second mutable configuration.",
-  "D118: large/boss displayed map nodes contribute stars; small nodes contribute progression clears only. Strong source/table inference; original server formula remains unrecovered. Legacy generation40 with absent map size retains old content behavior."
+  "D118: large/boss displayed map nodes contribute stars; small nodes contribute progression clears only. Strong source/table inference; original server formula remains unrecovered. Legacy generation40 with absent map size retains its old projection behavior, but new bonus claims fail closed without source eligibility metadata."
  ],
  "evidence": "work/i9/stages/I9-3/RESEARCH_3C.md; D103,D106,D107,D115-D117; D118/R7"
 }
