@@ -451,7 +451,7 @@ func (d HeroDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReque
 			return failHero(err)
 		}
 		return httpedge.Response{HTTPStatus: http.StatusOK, Body: map[string]any{}}
-	case 305: // SUMMON_SUPER_HERO / Vows (diagnostic only; not production-registered)
+	case 305: // SUMMON_SUPER_HERO / Vows (I9-3F)
 		if !onlyStockGameplayParams(req.Envelope.Params, "table_id") {
 			return badHero("invalid_vows_create")
 		}

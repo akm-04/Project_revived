@@ -8,8 +8,8 @@
   "I9-3F": "Premium: MID50 type 4 (SX, VIP gate), MID70/71 (Magic), MID305/306 (Vows); MID59 and MID781 regression."
  },
  "owners": {
-  "state": "Summon owns summon_players (one row per player, free timers, milestone counters, pity) and summon_tuning (operator overlay singleton); migration 00084.",
-  "content": "content_summon_catalogs: generated summon_catalog.json (tools/summon_content.py, content generation 43) from summon.lua, dropbox.lua, misc.lua, partner.lua, soul_casket.lua, magic_summon_list.lua, magic_drop_rate.lua plus I9_GACHA_PRIVATE_POLICY_V1.",
+  "state": "Summon owns summon_players (one row per player, free timers, milestone counters, pity) and summon_tuning (operator overlay singleton); migration 00084. I9-3F reuses sx_target, sx_pity and magic_target (no migration).",
+  "content": "content_summon_catalogs: generated summon_catalog.json (tools/summon_content.py, content generation 43, premium rows and super_partner heroes at generation 44) from summon.lua, dropbox.lua, misc.lua, partner.lua, soul_casket.lua, magic_summon_list.lua, magic_drop_rate.lua, super_partner.lua plus I9_GACHA_PRIVATE_POLICY_V1.",
   "value": "Costs through I5 DebitMaterialCostTx (mana, crystal, ticket items); items and fragments through I5 SettleGrantTx domain summon; heroes through characterhero AwardStoryPartnerTx (unique origin, collection admission, fresh facets).",
   "code": "internal/domain/summon (pure rules), internal/application/summon (Mode), internal/adapters/postgres/summonstore, internal/adapters/stockruntime/summon_dispatcher.go, internal/adapters/postgres/characterbirth/companion.go"
  },
@@ -23,17 +23,19 @@
   "G7 Featured: Medium featured overlay and its 56-girl cohort plus 58-girl extension, SX main ids per 7-day block and second ids per day are a fixed-seed calendar on modes.Day GMT+8 (D142).",
   "G8 Operator hook: summon_tuning.payload (versioned JSON) overlays rates, pity, extension weight, machine cohorts and pinned featured/main/second ids. Catalog.Tune validates it; an invalid overlay is logged and the source policy is served. Pool row weights inside dropbox pools are not tunable (shortcut, I11).",
   "G9 Facts: every committed pull records one SUMMON objective fact with Delta = slots pulled in the settling transaction (task_req 17, I9-MISSION-SUMMON-FACT). Partner 18 (specific girl owned) is high-water from player_heroes.",
-  "G10 Surface: 50 and 56 ACTIVE (I9-3E); 70, 71, 305, 306 ACTIVE at I9-3F; the 21 event-gacha MIDs stay LATER with their seasonal events (D138) and must reuse internal/domain/summon draw rules and this receipt pattern when they land."
+  "G10 Surface: 50 and 56 ACTIVE (I9-3E); 70, 71, 305, 306 ACTIVE at I9-3F; the 21 event-gacha MIDs stay LATER with their seasonal events (D138) and must reuse internal/domain/summon draw rules and this receipt pattern when they land.",
+  "G11 Premium (I9-3F): 50 type 4 is SX (388 crystal, VIP >= 9 from the I5 privilege snapshot else refused, summon_index 1|2 selects main_ids hotspot, 6 rows: one item from each pool 200007..200011 plus a dynamic slot by class weight, hotspot pity 25). 70 {summon_time 1|10, partner_id} needs the stored, owned Magic target and answers result rows plus stick_items [{item_id,item_num}] of the target's stone; 71 {partner_id} stores an owned Magic list target and answers {partner_id}; 305 {table_id} creates the Vows hero through characterhero.CreateVows (prerequisites, one 5-star, level gate, production collection admission); 306 {table_id,times} debits essence 50001666 x super_scroll_cost x times and answers {awards:[{table_id: scroll, item_num: times}]}. SX class weights, hotspot share and pity are operator tunable (G8)."
  ],
  "obligations": [
   "I11-GACHA-OPERATOR-TUNING: the operator tool edits summon_tuning through Catalog.Tune validation (never raw SQL), shows the active overlay and the served rotation, and audits every change.",
   "I10-EVENT-GACHA-REUSE: seasonal event gachas (D138 list) reuse the summon domain, receipts, fragment rule and the I5 value owners; no second draw implementation.",
   "I9-4-SUMMON-FACT-PROOF: I9-4 proves one task_req 17 mission row moves from a real MID50 pull (I9-MISSION-PRODUCERS).",
-  "I9-3F-PREMIUM: SX, Magic and Vows replace the 3E shortcut refusal for type 4 and button 33 before the I9-3 close."
+  "I9-3F-PREMIUM: DISCHARGED at I9-3F (v0.146.0, generation 44): SX, Magic and Vows replaced the 3E shortcut refusal; native TestI9_3FPremiumNative and VC i9_3f_premium."
  ],
  "unknowns": [
   "Original server gacha math, the moment Aquaris was granted and the summon_reward quantity are UNKNOWN; the numbers are I9_GACHA_PRIVATE_POLICY_V1.",
-  "Whether task_req 17 counted pulls or summon actions is UNKNOWN; I9 counts pulls (D148)."
+  "Whether task_req 17 counted pulls or summon actions is UNKNOWN; I9 counts pulls (D148).",
+  "Magic Juice 50005182 and the SX summon_reward 50001005 were never awarded by V1; their original grant rule is UNKNOWN and I9 does not award them."
  ],
- "evidence": "work/i9/stages/I9-3/PLAN_3E.md, RESEARCH_3E.md, research_3e/stock/i9_3e_summon, backend internal/integration/playerdisplay/i9_3e_summon_native_test.go, internal/domain/summon/summon_test.go"
+ "evidence": "work/i9/stages/I9-3/PLAN_3E.md, RESEARCH_3E.md, research_3e/stock/i9_3e_summon, backend internal/integration/playerdisplay/i9_3e_summon_native_test.go, internal/domain/summon/summon_test.go, work/i9/stages/I9-3/PLAN_3F.md, internal/integration/playerdisplay/i9_3f_premium_native_test.go, internal/domain/summon/premium_test.go"
 }

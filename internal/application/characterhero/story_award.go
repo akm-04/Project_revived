@@ -19,6 +19,15 @@ func (s Service) LockStoryRosterTx(c context.Context, t tx.Tx, pid identity.Play
 	return err
 }
 
+// OwnsOriginTx tells whether the roster holds the origin in any form (awakened included); the caller holds HeroRoot400.
+func (s Service) OwnsOriginTx(c context.Context, t tx.Tx, pid identity.PlayerID, origin int64) (bool, error) {
+	if s.AcquisitionStore == nil {
+		return false, ErrHeroAcquisitionInvalid
+	}
+	heroes, err := s.AcquisitionStore.ListHeroesTx(c, t, pid)
+	return hasOrigin(heroes, origin), err
+}
+
 // AwardStoryPartnerTx uses the existing unique roster, admission and fresh-birth
 // path. The caller holds HeroRoot400 and owns the durable campaign entitlement.
 func (s Service) AwardStoryPartnerTx(c context.Context, t tx.Tx, pid identity.PlayerID, tableID int64, revision string, op operation.Context) (character.Hero, *character.CollectionAdmissionProof, error) {

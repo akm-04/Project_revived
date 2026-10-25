@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "status": "CURRENT_CUMULATIVE_CONTENT_GENERATION_LOCK_I9_3E",
+  "status": "CURRENT_CUMULATIVE_CONTENT_GENERATION_LOCK_I9_3F",
   "rule": "Historical validators keep their phase-specific semantic invariants. In cumulative/current mode they may accept only an explicitly registered successor compiler generation at or after their baseline. New generations are append-only review events; registering a generation does not waive capability/count/source/migration/ownership assertions.",
   "generations": [
     {
@@ -306,14 +306,22 @@
       "parser_version": "lua-generated-v18-guild-invite",
       "revision_id": "8522617e0568aa0dbbd7fe0232c1e532e588c8f33f8d96b2e2eb5f3a1a98fe92",
       "scope": "Cumulative Vending catalog (I9_GACHA_V1 + I9_GACHA_PRIVATE_POLICY_V1): summon buttons, milestone counters, dropbox pools, summonable heroes, soul caskets, magic summon list and rates, vow inputs; all unrelated payloads retained."
+    },
+    {
+      "ordinal": 44,
+      "stage": "I9-3F (Premium Vending)",
+      "compiler_version": "i9-3f-premium-gacha",
+      "parser_version": "lua-generated-v18-guild-invite",
+      "revision_id": "a224bed37200b154bebd09ca558d185f5e072a1ca6af4c1a05d2d40022db70ad",
+      "scope": "Cumulative Vending catalog plus I9-3F inputs: super_partner (Vows) heroes as Magic targets and MID306 scrolls (vows.table_ids), SX static pools and Magic byproduct pool ids; all unrelated payloads retained."
     }
   ],
   "current": {
-    "ordinal": 43,
-    "stage": "I9-3E (Vending gacha)",
-    "compiler_version": "i9-3e-gacha",
+    "ordinal": 44,
+    "stage": "I9-3F (Premium Vending)",
+    "compiler_version": "i9-3f-premium-gacha",
     "parser_version": "lua-generated-v18-guild-invite",
-    "revision_id": "8522617e0568aa0dbbd7fe0232c1e532e588c8f33f8d96b2e2eb5f3a1a98fe92",
-    "scope": "Cumulative Vending catalog (I9_GACHA_V1 + I9_GACHA_PRIVATE_POLICY_V1): summon buttons, milestone counters, dropbox pools, summonable heroes, soul caskets, magic summon list and rates, vow inputs; all unrelated payloads retained."
+    "revision_id": "a224bed37200b154bebd09ca558d185f5e072a1ca6af4c1a05d2d40022db70ad",
+    "scope": "Cumulative Vending catalog plus I9-3F inputs: super_partner (Vows) heroes as Magic targets and MID306 scrolls (vows.table_ids), SX static pools and Magic byproduct pool ids; all unrelated payloads retained."
   }
 }

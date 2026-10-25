@@ -30,15 +30,20 @@ def build_summon(blobs, parse, parse_indexed, field):
     if free != dict(mana_period=600, mana_num=5, crystal_period=165600, sx_guarantee=25) or vows != dict(essence_item_id=50001666, super_scroll_cost=100):
         raise ValueError('Vending misc profile drift')
 
-    keys, rows = parse_indexed(blobs['data/tables/partner.lua'].data)
     heroes = {}
-    for row_id, vals in rows.items():
-        table_id = int(field(keys, vals, 'id', row_id=row_id))
-        if table_id >= 11000000:
-            continue
-        heroes[table_id] = dict(table_id=table_id, initial_star=int(field(keys, vals, 'ini_star', row_id=row_id) or 1),
-                                stone_item_id=int(field(keys, vals, 'stone_id', row_id=row_id) or 0),
-                                sx=field(keys, vals, 'is_sx', row_id=row_id) == '1')
+    # super_partner rows are the Vows heroes (Magic targets, MID306 scrolls); they carry no is_sx.
+    for name in ('partner', 'super_partner'):
+        keys, rows = parse_indexed(blobs['data/tables/' + name + '.lua'].data)
+        for row_id, vals in rows.items():
+            table_id = int(field(keys, vals, 'id', row_id=row_id))
+            if table_id >= 11000000:
+                continue
+            heroes[table_id] = dict(table_id=table_id, initial_star=int(field(keys, vals, 'ini_star', row_id=row_id) or 1),
+                                    stone_item_id=int(field(keys, vals, 'stone_id', row_id=row_id) or 0),
+                                    sx=name == 'partner' and field(keys, vals, 'is_sx', row_id=row_id) == '1')
+            if name == 'super_partner':
+                vows.setdefault('table_ids', []).append(table_id)
+    vows['table_ids'].sort()
 
     summons = {int(r['id']): r for r in table('summon')}
     buttons, counters, wanted = [], {}, set()
@@ -95,10 +100,16 @@ def build_summon(blobs, parse, parse_indexed, field):
                     num_rates=_numbers(r['num_rate']), weight=int(r['weight'])) for r in sorted(table('soul_casket'), key=lambda r: int(r['id']))]
     magic_list = _ids(table('magic_summon_list')[0]['get_hero_id'])
     magic_rates = [[int(r['num']), int(r['rate'])] for r in sorted(table('magic_drop_rate'), key=lambda r: int(r['id']))]
+    sx_pools, magic_pool = _ids(summons[4]['dropbox']), _ids(summons[33]['dropbox'])
     if magic_rates != [[5, 87], [10, 10], [25, 2], [50, 1]] or len(buttons) != 14 or len(pools) != 18:
         raise ValueError('Vending button/pool/magic profile drift: %d buttons %d pools' % (len(buttons), len(pools)))
+    if sx_pools != [200007, 200008, 200009, 200010, 200011] or magic_pool != [700008]:
+        raise ValueError('SX/Magic pool drift: %r %r' % (sx_pools, magic_pool))
+    if any(heroes.get(h, {}).get('stone_item_id', 0) <= 0 for h in magic_list):
+        raise ValueError('Magic target lacks a fragment item')
     return dict(schema_version=1, contract_id='I9_GACHA_V1', policy_id=policy['contract_id'],
                 policy_sha256=hashlib.sha256(raw_policy).hexdigest(), free=free, reward=dict(item_id=int(summons[1]['summon_reward']), item_num=policy['tutorial']['first_small_slot_reward_num']),
                 buttons=buttons, counters=counters, pools=pools, heroes=[heroes[h] for h in sorted(heroes)],
                 policy={k: policy[k] for k in ('classic', 'tutorial', 'display', 'rotation', 'sx', 'magic', 'cohorts')},
-                soul_caskets=caskets, magic_heroes=magic_list, magic_rates=magic_rates, vows=vows)
+                soul_caskets=caskets, magic_heroes=magic_list, magic_rates=magic_rates, vows=vows,
+                sx_pools=sx_pools, magic_pool=magic_pool[0])

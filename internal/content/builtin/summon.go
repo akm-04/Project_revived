@@ -19,7 +19,7 @@ type SummonCatalog struct {
 }
 
 func (c SummonCatalog) Validate() error {
-	if c.SchemaVersion != 1 || c.ContractID != "I9_GACHA_V1" || c.PolicyID != "I9_GACHA_PRIVATE_POLICY_V1" || len(c.Buttons) != 14 || len(c.Pools) != 18 || len(c.Heroes) != 277 || len(c.SoulCaskets) == 0 || len(c.MagicHeroes) == 0 {
+	if c.SchemaVersion != 1 || c.ContractID != "I9_GACHA_V1" || c.PolicyID != "I9_GACHA_PRIVATE_POLICY_V1" || len(c.Buttons) != 14 || len(c.Pools) != 18 || len(c.Heroes) != 291 || len(c.SoulCaskets) == 0 || len(c.MagicHeroes) == 0 {
 		return errors.New("summon catalog profile")
 	}
 	return nil

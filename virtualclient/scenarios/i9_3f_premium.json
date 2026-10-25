@@ -1,0 +1,31 @@
+{
+ "name": "i9_3f_premium",
+ "level": 10,
+ "vip": 9,
+ "grants": [
+  {
+   "Kind": "SCALAR_CURRENCY",
+   "ResourceKey": "crystal",
+   "Amount": 1000
+  },
+  {
+   "Kind": "STACK_ITEM",
+   "ItemID": 50001666,
+   "Amount": 100
+  }
+ ],
+ "steps": [
+  "lua:local p=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_PLAYER) p:loadSummonInfo({},function(code) if code~=xyd.error.OK then error('vc-summon-info-'..tostring(code)) end xyd.WindowManager.get():openWindow('summon',{}) end)",
+  "wait:8",
+  "lua:local w=xyd.WindowManager.get():getWindow('summon') if not w then error('vc-summon-window') end w:stoneSummon(1)",
+  "wait:8",
+  "lua:xyd.Backend.get():request(xyd.mid.MAGIC_SUMMON_SWITCH_HERO,{partner_id=10001001},function(code,reply) if code~=xyd.error.OK or reply.partner_id~=10001001 then error('vc-magic-switch-'..tostring(code)) end end)",
+  "wait:5",
+  "lua:xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_PLAYER):magicSummonHero({summon_time=1,partner_id=10001001},function(code,reply) if code~=xyd.error.OK or #reply.stick_items~=1 or reply.stick_items[1].item_num~=5 then error('vc-magic-buy-'..tostring(code)) end end)",
+  "wait:8",
+  "lua:local p=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_PLAYER) xyd.Backend.get():request(xyd.mid.SUPER_HERO_STONE_EXCHANGE,{table_id=11001,times=1},function(code,reply) if code~=xyd.error.OK or #reply.awards~=1 then error('vc-vows-exchange-'..tostring(code)) end p:handleRewards(reply.awards) end)",
+  "wait:5"
+ ],
+ "settle_seconds": 10,
+ "expect_ok": [50, 56, 70, 71, 306]
+}

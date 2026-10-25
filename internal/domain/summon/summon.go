@@ -7,7 +7,6 @@ package summon
 import (
 	"crypto/sha256"
 	"encoding/binary"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"strconv"
@@ -94,9 +93,8 @@ type Policy struct {
 		FirstSmallSlotRewardNum int64  `json:"first_small_slot_reward_num"`
 		Rule                    string `json:"rule"`
 	} `json:"tutorial"`
-	// SX and Magic are typed by I9-3F, which serves them.
-	SX      json.RawMessage `json:"sx"`
-	Magic   json.RawMessage `json:"magic"`
+	SX      SXPolicy    `json:"sx"`
+	Magic   MagicPolicy `json:"magic"`
 	Display struct {
 		ManaID int64 `json:"mana_id"`
 		PetID  int64 `json:"pet_id"`
@@ -128,16 +126,17 @@ type Catalog struct {
 		ItemID  int64 `json:"item_id"`
 		ItemNum int64 `json:"item_num"`
 	} `json:"reward"`
-	Buttons  []Button           `json:"buttons"`
-	Counters map[string]Counter `json:"counters"`
-	Pools    []Pool             `json:"pools"`
-	Heroes   []Hero             `json:"heroes"`
-	Policy   Policy             `json:"policy"`
-	// Soul caskets, the magic list and rates and vows are I9-3F inputs.
-	SoulCaskets json.RawMessage `json:"soul_caskets"`
-	MagicHeroes []int64         `json:"magic_heroes"`
-	MagicRates  [][2]int64      `json:"magic_rates"`
-	Vows        json.RawMessage `json:"vows"`
+	Buttons     []Button           `json:"buttons"`
+	Counters    map[string]Counter `json:"counters"`
+	Pools       []Pool             `json:"pools"`
+	Heroes      []Hero             `json:"heroes"`
+	Policy      Policy             `json:"policy"`
+	SoulCaskets []Casket           `json:"soul_caskets"`
+	MagicHeroes []int64            `json:"magic_heroes"`
+	MagicRates  [][2]int64         `json:"magic_rates"`
+	Vows        Vows               `json:"vows"`
+	SXPools     []int64            `json:"sx_pools"`
+	MagicPool   int64              `json:"magic_pool"`
 
 	pools  map[int64]Pool
 	heroes map[int64]Hero
@@ -193,7 +192,7 @@ func (c *Catalog) Validate() error {
 	if len(c.Policy.Cohorts.MediumFeatured) == 0 || c.Policy.Classic.MediumFeatured.Pity <= 0 || c.Policy.Rotation.SXMainDays <= 0 || len(c.Policy.Cohorts.SX) < 5 {
 		return errors.New("summon: policy profile")
 	}
-	return nil
+	return c.validatePremium()
 }
 
 func (c *Catalog) Button(kind, index int64) (Button, bool) {

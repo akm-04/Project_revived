@@ -18,13 +18,13 @@
  "counts": {
   "by_disposition": {
    "DELIVERED": 185,
-   "ACTIVE": 458,
-   "LATER": 505,
+   "ACTIVE": 462,
+   "LATER": 501,
    "INACTIVE_SUPERSEDED": 11,
    "INACTIVE_D79": 23
   },
   "active_by_stage": {
-   "I9-3": 13,
+   "I9-3": 17,
    "I9-4": 18,
    "I9-5": 33,
    "I9-6": 33,
@@ -471,18 +471,18 @@
    "mid": 70,
    "name": "MAGIC_SUMMON_BUY",
    "family": "SUMMON_GACHA",
-   "disposition": "LATER",
-   "target": "I10",
-   "v2": "unimplemented",
+   "disposition": "ACTIVE",
+   "target": "I9-3",
+   "v2": "implemented",
    "v1": "STATE_BACKED"
   },
   {
    "mid": 71,
    "name": "MAGIC_SUMMON_SWITCH_HERO",
    "family": "SUMMON_GACHA",
-   "disposition": "LATER",
-   "target": "I10",
-   "v2": "unimplemented",
+   "disposition": "ACTIVE",
+   "target": "I9-3",
+   "v2": "implemented",
    "v1": "STATE_BACKED"
   },
   {
@@ -1795,18 +1795,18 @@
    "mid": 305,
    "name": "SUMMON_SUPER_HERO",
    "family": "SUMMON_GACHA",
-   "disposition": "LATER",
-   "target": "I10",
-   "v2": "unimplemented",
+   "disposition": "ACTIVE",
+   "target": "I9-3",
+   "v2": "implemented",
    "v1": "STATE_BACKED"
   },
   {
    "mid": 306,
    "name": "SUPER_HERO_STONE_EXCHANGE",
    "family": "SUMMON_GACHA",
-   "disposition": "LATER",
-   "target": "I10",
-   "v2": "unimplemented",
+   "disposition": "ACTIVE",
+   "target": "I9-3",
+   "v2": "implemented",
    "v1": "STATE_BACKED"
   },
   {

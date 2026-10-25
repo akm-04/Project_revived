@@ -108,8 +108,9 @@ func TestI7C4CCollectionAdmissionCanonicalPolicyAndLegacyReceiptReplay(t *testin
 	if discovery.Calls != 0 {
 		t.Fatal("old positive receipt attempted current discovery", discovery.Calls)
 	}
-	if _, e = collectionService(p).CreateVows(ctx, a, 11001, op()); !errors.Is(e, hero.ErrHeroCapacityUnavailable) {
-		t.Fatal("Normal policy silently activated Vows", e)
+	// D152: Vows reaches the same collection admission; this roster still lacks its prerequisites.
+	if _, e = collectionService(p).CreateVows(ctx, a, 11001, op()); !errors.Is(e, hero.ErrHeroPrerequisites) {
+		t.Fatal("Vows through collection admission", e)
 	}
 }
 

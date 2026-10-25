@@ -11,6 +11,7 @@ import (
 	"gxb.local/backend/v2/internal/domain/character"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/operation"
+	"gxb.local/backend/v2/internal/foundation/policy"
 	"gxb.local/backend/v2/internal/foundation/receipt"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
@@ -252,8 +253,8 @@ func (s Service) SummonNormal(ctx context.Context, actor identity.ActorContext, 
 }
 
 func (s Service) CreateVows(ctx context.Context, actor identity.ActorContext, tableID int64, op operation.Context) (character.Hero, error) {
-	// The current-client private admission rollout qualifies Normal59 only.
-	if s.Capacity == nil {
+	// I9-3F: production admits Vows through the catalog collection policy, as Normal59 does.
+	if s.Capacity == nil && s.CollectionAdmission == nil {
 		return character.Hero{}, ErrHeroCapacityUnavailable
 	}
 	if err := s.validateAcquisition(); err != nil {
@@ -265,6 +266,12 @@ func (s Service) CreateVows(ctx context.Context, actor identity.ActorContext, ta
 	boundOp, revision, err := s.bindProgressionContent(ctx, op)
 	if err != nil {
 		return character.Hero{}, err
+	}
+	if s.CollectionAdmission != nil {
+		refs := append(boundOp.Policies.Refs(), policy.Ref{Name: character.CollectionAdmissionPolicyRef, Version: character.CollectionAdmissionPolicy})
+		if boundOp.Policies, err = policy.NewSet(refs...); err != nil {
+			return character.Hero{}, err
+		}
 	}
 	id := heroReceiptID(actor, "create-vows", boundOp)
 	fp, err := receipt.FingerprintRequest(map[string]any{"table_id": tableID})
@@ -356,7 +363,7 @@ func (s Service) CreateVows(ctx context.Context, actor identity.ActorContext, ta
 		if level < requiredLevel {
 			return ErrHeroVowsLevel
 		}
-		if err := s.Capacity.AuthorizeHeroAddition(actor.PlayerID, len(heroes), 1); err != nil {
+		if err := s.admitVows(txctx, scope.Tx, root, heroes, tableID, revision, boundOp); err != nil {
 			return err
 		}
 		at := character.HeroAcquisitionTemplate{TableID: tableID, OriginTableID: tableID, Kind: character.SuperHero, InitialStar: tmpl.InitialStar, FragmentItemID: tmpl.FragmentItemID}
@@ -399,4 +406,15 @@ func sortedPartnerIDs(in []int64) []int64 {
 	out := append([]int64(nil), in...)
 	sort.Slice(out, func(i, j int) bool { return out[i] < out[j] })
 	return out
+}
+
+func (s Service) admitVows(c context.Context, t tx.Tx, root character.HeroRoot, heroes []character.Hero, tableID int64, revision string, op operation.Context) error {
+	if s.CollectionAdmission == nil {
+		return s.Capacity.AuthorizeHeroAddition(root.PlayerID, len(heroes), 1)
+	}
+	proof, err := s.CollectionAdmission.AuthorizeCollectionOriginTx(c, t, root, heroes, tableID, revision, op)
+	if err == nil && proof.Validate() != nil {
+		err = ErrHeroCapacityUnavailable
+	}
+	return err
 }

@@ -30,7 +30,7 @@ func summonMode(p *pg.Pool) app.Mode {
 	values, content, heroes := i5store.Store{Queryer: p}, contentstore.Store{Queryer: p}, characterstore.Store{Queryer: p}
 	return app.Mode{Timed: gen.TimedRunner{Binder: gen.Binder{Time: pg.AuthoritativeTime{Queryer: p}}, Runner: tx.Runner{DB: p}}, Fresh: p, Store: summonstore.Store{}, Content: content, Fence: values,
 		Heroes:   hero.Service{AcquisitionStore: heroes, Acquisition: content, CollectionAdmission: hero.CatalogCollectionAdmission{Content: content}, FreshFacets: characterbirth.FreshHeroFacets()},
-		HeroWire: heroproj.StockHero, Grants: compositeI5(p), Costs: i5.MaterialCostDebiter{Store: values, Content: content}, Facts: i5.ObjectiveFacts{Owner: compositeI5(p), Open: values}, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}}
+		HeroWire: heroproj.StockHero, Grants: compositeI5(p), Costs: i5.MaterialCostDebiter{Store: values, Content: content}, Facts: i5.ObjectiveFacts{Owner: compositeI5(p), Open: values}, Privileges: i5.BaselinePrivilegeProvider{}, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}}
 }
 
 func summonRows(t *testing.T, body map[string]any) []map[string]any {
@@ -111,7 +111,7 @@ func TestI9_3ESummonNative(t *testing.T) {
 		t.Fatal("ticket pull without a ticket", e)
 	}
 	if _, e = s.Summon(ctx, a, app.Pull{Type: 4, Index: 1}, op()); !errors.Is(e, d.ErrRefused) {
-		t.Fatal("SX waits for I9-3F", e)
+		t.Fatal("SX below VIP 9", e)
 	}
 	if _, e = s.Summon(ctx, a, app.Pull{Type: 9, Index: 1}, op()); !errors.Is(e, d.ErrInvalid) {
 		t.Fatal("unknown button", e)

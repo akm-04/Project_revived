@@ -1,6 +1,7 @@
 // Package summon composes Vending (I9_GACHA_V1): LOAD_SUMMON_INFO (56, also
-// MID1 detail["56"]) and SUMMON_HERO (50). Lock order: actor fence 315, hero
-// root 400, summon row, I5 700+; loads take no lock.
+// MID1 detail["56"]), SUMMON_HERO (50, classic and SX), Magic (70, 71) and the
+// Vows scroll exchange (306). Lock order: actor fence 315, hero root 400,
+// summon row, I5 700+; loads take no lock.
 package summon
 
 import (
@@ -40,6 +41,7 @@ type Mode struct {
 	Grants      Grants
 	Costs       i5.TxMaterialCostDebiter
 	Facts       Facts
+	Privileges  i5.PrivilegeSnapshotProvider
 	Receipts    receipt.Store
 	ReceiptRead receipt.Reader
 }
@@ -64,6 +66,7 @@ type Fence interface {
 // origin was already owned and nothing was created (D116).
 type Heroes interface {
 	LockStoryRosterTx(context.Context, tx.Tx, identity.PlayerID) error
+	OwnsOriginTx(context.Context, tx.Tx, identity.PlayerID, int64) (bool, error)
 	AwardStoryPartnerTx(context.Context, tx.Tx, identity.PlayerID, int64, string, operation.Context) (character.Hero, *character.CollectionAdmissionProof, error)
 }
 
@@ -94,7 +97,7 @@ func retry() tx.RetryPolicy {
 
 func (s Mode) ready() bool {
 	return s.Timed.Runner.DB != nil && s.Timed.Binder.Time != nil && s.Fresh != nil && s.Store != nil && s.Content != nil && s.Fence != nil &&
-		s.Heroes != nil && s.HeroWire != nil && s.Grants != nil && s.Costs != nil && s.Facts != nil && s.Receipts != nil && s.ReceiptRead != nil
+		s.Heroes != nil && s.HeroWire != nil && s.Grants != nil && s.Costs != nil && s.Facts != nil && s.Privileges != nil && s.Receipts != nil && s.ReceiptRead != nil
 }
 
 func (s Mode) pin(c context.Context, op operation.Context) (operation.Context, error) {
@@ -196,16 +199,18 @@ func (s Mode) OverlayMID1(c context.Context, q tx.Queryer, a identity.ActorConte
 	return nil
 }
 
-// Summon answers 50 for the classic buttons (Small, Medium, tickets).
+// sxType is SummonType.Stone; its summon_index selects main_ids[index-1] as the hotspot.
+const sxType = 4
+
+// Summon answers 50 for the classic buttons (Small, Medium, tickets) and SX.
 func (s Mode) Summon(c context.Context, a identity.ActorContext, q Pull, op operation.Context) (map[string]any, error) {
 	return s.purchase(c, a, "classic", q, op, func(c context.Context, sc gen.TimedScope, v view, state d.State) (map[string]any, d.State, error) {
-		b, ok := v.catalog.Button(q.Type, q.Index)
-		if !ok {
-			return nil, state, d.ErrInvalid
+		if q.Type == sxType {
+			return s.sx(c, sc, a, v, state, q.Index)
 		}
-		if b.Family == d.SX || b.Family == d.Magic {
-			// shortcut: SX (type 4) and Magic (33) belong to I9-3F; refuse until they land there.
-			return nil, state, d.ErrRefused
+		b, ok := v.catalog.Button(q.Type, q.Index)
+		if !ok || b.Family == d.Magic {
+			return nil, state, d.ErrInvalid
 		}
 		now := sc.Operation.DecisionAt()
 		state, err := v.catalog.Admit(b, state, now.Unix(), v.day)
@@ -221,23 +226,143 @@ func (s Mode) Summon(c context.Context, a identity.ActorContext, q Pull, op oper
 		if err != nil {
 			return nil, state, err
 		}
-		rows, lines, err := s.materialize(c, sc, a.PlayerID, &v.catalog, v.revision, slots)
-		if err != nil {
-			return nil, state, err
-		}
-		out := map[string]any{"result": rows}
+		out := map[string]any{}
+		extra := []grant.Line{}
 		if firstSmall && state.Counters[d.Small] >= 1 {
-			lines = append(lines, grant.Line{Kind: grant.StackItem, ItemID: v.catalog.Reward.ItemID, Amount: v.catalog.Reward.ItemNum})
+			extra = append(extra, grant.Line{Kind: grant.StackItem, ItemID: v.catalog.Reward.ItemID, Amount: v.catalog.Reward.ItemNum})
 			out["reward"] = map[string]any{"item_id": v.catalog.Reward.ItemID, "item_num": v.catalog.Reward.ItemNum}
 		}
-		if err = s.settle(c, sc, a, "classic", lines); err != nil {
-			return nil, state, err
-		}
-		if err = s.Facts.RecordTx(c, sc.Tx, current, objective.Fact{PlayerID: a.PlayerID, SourceDomain: "summon", SourceBusinessKey: current.ID.String(), Kind: SummonKind, Delta: int64(len(slots))}); err != nil {
+		if out["result"], err = s.deliver(c, sc, a, v, slots, extra); err != nil {
 			return nil, state, err
 		}
 		out["summon_info"] = info(&v.catalog, state, v.day)
 		return out, state, nil
+	})
+}
+
+// sx is a type 4 purchase: VIP gate, crystal, five static items and the dynamic slot (V1 sx_private_v2).
+func (s Mode) sx(c context.Context, sc gen.TimedScope, a identity.ActorContext, v view, state d.State, selector int64) (map[string]any, d.State, error) {
+	b, ok := v.catalog.Button(sxType, 1)
+	main := v.catalog.Rotation(v.day).Main
+	if !ok || selector < 1 || selector > int64(len(main)) {
+		return nil, state, d.ErrInvalid
+	}
+	snapshot, err := s.Privileges.SnapshotTx(c, sc.Tx, a.PlayerID, sc.Operation.DecisionAt())
+	if err != nil {
+		return nil, state, err
+	}
+	if snapshot.VIPLevel < v.catalog.Policy.SX.VIPMin {
+		return nil, state, fmt.Errorf("%w: SX needs VIP %d", d.ErrRefused, v.catalog.Policy.SX.VIPMin)
+	}
+	if err = s.debit(c, sc, a.PlayerID, b); err != nil {
+		return nil, state, err
+	}
+	slots, state := v.catalog.DrawSX(state, main[selector-1], cd.NewStream(sc.Operation.Operation().Derive("summon.sx/v1", 0)))
+	rows, err := s.deliver(c, sc, a, v, slots, nil)
+	if err != nil {
+		return nil, state, err
+	}
+	return map[string]any{"result": rows, "summon_info": info(&v.catalog, state, v.day)}, state, nil
+}
+
+// deliver materializes the slots, settles their items with extra and records one SUMMON fact per slot.
+func (s Mode) deliver(c context.Context, sc gen.TimedScope, a identity.ActorContext, v view, slots []d.Slot, extra []grant.Line) ([]any, error) {
+	rows, lines, err := s.materialize(c, sc, a.PlayerID, &v.catalog, v.revision, slots)
+	if err != nil {
+		return nil, err
+	}
+	if err = s.settle(c, sc, a, "classic", append(lines, extra...)); err != nil {
+		return nil, err
+	}
+	current := sc.Operation.Operation()
+	return rows, s.Facts.RecordTx(c, sc.Tx, current, objective.Fact{PlayerID: a.PlayerID, SourceDomain: "summon", SourceBusinessKey: current.ID.String(), Kind: SummonKind, Delta: int64(len(slots))})
+}
+
+// MagicPull is a 70 request: summon_time 1 or 10 for the stored Magic target partner_id.
+type MagicPull struct {
+	Times  int64
+	Target int64
+}
+
+// magicType is the summon.lua row of Magic; summon_time 1 is index 1, 10 is index 2.
+const magicType = 33
+
+// Magic answers 70: byproduct items in result, the target's fragments in stick_items.
+func (s Mode) Magic(c context.Context, a identity.ActorContext, q MagicPull, op operation.Context) (map[string]any, error) {
+	return s.purchase(c, a, "magic", q, op, func(c context.Context, sc gen.TimedScope, v view, state d.State) (map[string]any, d.State, error) {
+		index := map[int64]int64{1: 1, 10: 2}[q.Times]
+		b, known := v.catalog.Button(magicType, index)
+		stone, target := v.catalog.MagicFragment(q.Target)
+		if !known || !target {
+			return nil, state, d.ErrInvalid
+		}
+		if state.MagicTarget != q.Target {
+			return nil, state, fmt.Errorf("%w: Magic target is not the stored one", d.ErrRefused)
+		}
+		if err := s.requireOwned(c, sc, a.PlayerID, q.Target); err != nil {
+			return nil, state, err
+		}
+		if err := s.debit(c, sc, a.PlayerID, b); err != nil {
+			return nil, state, err
+		}
+		slots, fragments := v.catalog.DrawMagic(b, cd.NewStream(sc.Operation.Operation().Derive("summon.magic/v1", 0)))
+		rows, lines, err := s.materialize(c, sc, a.PlayerID, &v.catalog, v.revision, slots)
+		if err != nil {
+			return nil, state, err
+		}
+		if err = s.settle(c, sc, a, "magic", append(lines, grant.Line{Kind: grant.StackItem, ItemID: stone, Amount: fragments})); err != nil {
+			return nil, state, err
+		}
+		return map[string]any{"result": rows, "stick_items": []any{map[string]any{"item_id": stone, "item_num": fragments}}}, state, nil
+	})
+}
+
+// SwitchMagic answers 71: the Magic target must be an owned Magic list hero.
+func (s Mode) SwitchMagic(c context.Context, a identity.ActorContext, target int64, op operation.Context) (map[string]any, error) {
+	return s.purchase(c, a, "magic-target", target, op, func(c context.Context, sc gen.TimedScope, v view, state d.State) (map[string]any, d.State, error) {
+		if _, ok := v.catalog.MagicFragment(target); !ok {
+			return nil, state, d.ErrInvalid
+		}
+		if err := s.requireOwned(c, sc, a.PlayerID, target); err != nil {
+			return nil, state, err
+		}
+		state.MagicTarget = target
+		return map[string]any{"partner_id": target}, state, nil
+	})
+}
+
+func (s Mode) requireOwned(c context.Context, sc gen.TimedScope, pid identity.PlayerID, origin int64) error {
+	owned, err := s.Heroes.OwnsOriginTx(c, sc.Tx, pid, origin)
+	if err == nil && !owned {
+		err = fmt.Errorf("%w: hero %d not owned", d.ErrRefused, origin)
+	}
+	return err
+}
+
+// VowsExchange is a 306 request.
+type VowsExchange struct {
+	TableID int64
+	Times   int64
+}
+
+// maxVowsTimes bounds one exchange well inside int64 essence arithmetic.
+const maxVowsTimes = 100000
+
+// ExchangeVows answers 306: essence for scrolls of a Vows hero.
+func (s Mode) ExchangeVows(c context.Context, a identity.ActorContext, q VowsExchange, op operation.Context) (map[string]any, error) {
+	return s.purchase(c, a, "vows-exchange", q, op, func(c context.Context, sc gen.TimedScope, v view, state d.State) (map[string]any, d.State, error) {
+		scroll, ok := v.catalog.VowsScroll(q.TableID)
+		if !ok || q.Times < 1 || q.Times > maxVowsTimes {
+			return nil, state, d.ErrInvalid
+		}
+		cost := i5.MaterialCost{Stacks: []i5.StackMaterialCost{{ItemID: v.catalog.Vows.EssenceItemID, Amount: v.catalog.Vows.ScrollCost * q.Times}}}
+		if _, err := s.Costs.DebitMaterialCostTx(c, sc.Tx, a.PlayerID, cost, sc.Operation.Operation()); err != nil {
+			return nil, state, purchaseError(err)
+		}
+		if err := s.settle(c, sc, a, "vows-exchange", []grant.Line{{Kind: grant.StackItem, ItemID: scroll, Amount: q.Times}}); err != nil {
+			return nil, state, err
+		}
+		return map[string]any{"awards": []any{map[string]any{"table_id": scroll, "item_num": q.Times}}}, state, nil
 	})
 }
 
