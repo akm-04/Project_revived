@@ -50,7 +50,7 @@ need(Path('internal/adapters/stockruntime/i5_dispatcher.go'),
      'stockMailNamespace','StockRepresentableBulkAwards','applySettlementProjection')
 need(Path('internal/application/bootstrap/detail_contributor.go'),'type MID1DetailContributor interface','OverlayMID1')
 need(Path('internal/adapters/postgres/i5store/bootstrap_projection.go'),'OverlayMID1','player_profiles','player_progression')
-need(Path('cmd/gxb-api/main_postgres.go'),'GXB_REDEEM_DIGEST_SECRET','i5store.Store','appi5.Service','I5Dispatcher','[]uint16{26, 81, 161, 230, 368, 369, 370, 2736}')
+need(Path('cmd/gxb-api/main_postgres.go'),'GXB_REDEEM_DIGEST_SECRET','i5store.Store','appi5.Service','I5Dispatcher','[]uint16{26, 81, 161, 230, 368, 369, 370, 2736, 2865, 2866}')
 need(Path('internal/application/i5/service_test.go'),
      'TestSettleGrantSemanticReplayCreditsExactlyOnce',
      'TestSettleGrantAmbiguousCommitReconcilesWithoutReplay',

@@ -38,11 +38,18 @@ func (d PreloginDispatcher) Dispatch(_ context.Context, req httpedge.DispatchReq
 		return httpedge.Response{HTTPStatus: http.StatusOK, Body: map[string]any{"contents": "{\"contents\":[]}"}}
 	case 2864: // GET_PLAYER_GROUP_BY_KEY: source consumes a JSON scalar.
 		key, _ := req.Envelope.Params["unique_key"].(string)
-		if strings.EqualFold(strings.TrimSpace(key), "mtspy") {
-			return httpedge.Response{HTTPStatus: http.StatusOK, JSON: "B"}
-		}
-		return httpedge.Response{HTTPStatus: http.StatusOK, JSON: "A"}
+		return httpedge.Response{HTTPStatus: http.StatusOK, JSON: tutorialGroup(key)}
 	default:
 		return httpedge.Response{HTTPStatus: http.StatusNotImplemented, Body: map[string]any{"error": "not_prelogin_mid"}}
 	}
+}
+
+// tutorialGroup selects the abtest.lua arm that keeps every tutorial on (D111):
+// mtspy A shows function-opening weak guides, n7gso B shows newcomer cards.
+// Unknown keys keep A, the client's own fallback when the reply is late.
+func tutorialGroup(key string) string {
+	if strings.EqualFold(strings.TrimSpace(key), "n7gso") {
+		return "B"
+	}
+	return "A"
 }

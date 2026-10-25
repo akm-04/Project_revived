@@ -120,7 +120,7 @@ func baseline(mid uint16, v BootstrapView) (any, bool) {
 			"buy_mana_times": int64(0), "buy_energy_times": int64(0), "buy_spirit_energy_times": int64(0), "buy_skill_times": int64(0),
 
 			"func_ids": zeroList(), "skill_point": int64(0), "skill_time": int64(0),
-			"guide_function_ids": zeroList(), "guide_return_id": int64(0),
+			"guide_function_ids": zeroMap(), "guide_return_id": int64(0),
 			"save_team": "", "save_team_name": "", "save_pet": "", "message_pushes": zeroMap(),
 
 			"arena_beat_flag": int64(0), "month_card_start": int64(0), "month_card_end": int64(0),

@@ -44,3 +44,41 @@ func TestSaveStoryGuideEndIsPresentationMarkerOnly(t *testing.T) {
 		t.Fatalf("replay mutated version: %+v", again)
 	}
 }
+
+func TestGuideFunctionsProjectAsStringKeyedCompletionMap(t *testing.T) {
+	now := time.Unix(1700000000, 0).UTC()
+	core := CompatibilityBootstrap(identity.PlayerID(100001), now)
+	guide, err := CompleteGuideFunction(core.GuideReturn, 18, now.Add(time.Second))
+	if err != nil {
+		t.Fatal(err)
+	}
+	guide, err = CompleteGuideFunction(guide, 17, now.Add(2*time.Second))
+	if err != nil {
+		t.Fatal(err)
+	}
+	again, err := CompleteGuideFunction(guide, 17, now.Add(3*time.Second))
+	if err != nil || again.StateVersion != guide.StateVersion || guide.StateVersion != 3 {
+		t.Fatalf("guide=%+v again=%+v err=%v", guide, again, err)
+	}
+	if len(guide.GuideFunctionIDs) != 2 || guide.GuideFunctionIDs[0] != 17 || len(core.GuideReturn.GuideFunctionIDs) != 0 {
+		t.Fatalf("ids=%v original=%v", guide.GuideFunctionIDs, core.GuideReturn.GuideFunctionIDs)
+	}
+	core.GuideReturn = guide
+	fields, err := core.MID17OwnedFields()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := fields["guide_function_ids"].(map[string]int64); len(got) != 2 || got["17"] != 1 || got["18"] != 1 {
+		t.Fatalf("guide_function_ids=%#v", got)
+	}
+	if _, err := CompleteGuideFunction(guide, 0, now); err == nil {
+		t.Fatal("zero guide function id accepted")
+	}
+	back, err := SetGuideReturn(guide, 10900202, now.Add(4*time.Second))
+	if err != nil || back.GuideReturnID != 10900202 || back.StateVersion != 4 {
+		t.Fatalf("return=%+v err=%v", back, err)
+	}
+	if _, err := SetGuideReturn(back, -1, now); err == nil {
+		t.Fatal("negative guide return id accepted")
+	}
+}

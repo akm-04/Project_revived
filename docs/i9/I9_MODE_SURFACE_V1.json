@@ -9230,7 +9230,7 @@
    "family": "STOCK_COMPAT_MISC",
    "disposition": "ACTIVE",
    "target": "I9-11",
-   "v2": "unimplemented",
+   "v2": "IMPLEMENTED_I9_TUTORIAL",
    "v1": "STATE_BACKED"
   },
   {
@@ -9239,7 +9239,7 @@
    "family": "STOCK_COMPAT_MISC",
    "disposition": "ACTIVE",
    "target": "I9-11",
-   "v2": "unimplemented",
+   "v2": "IMPLEMENTED_I9_TUTORIAL",
    "v1": "STATE_BACKED"
   },
   {

@@ -19,7 +19,7 @@ need(Path('internal/adapters/postgres/i4store/realtime_authority.go'),'ResolveGa
 need(Path('internal/projection/lobby/shapes.go'),'EmbeddedMID1Records','1304','is_enroll')
 need(Path('internal/projection/lobby/manifest.go'),'func NewBootTracker() *BootTracker','60 * time.Second','BootHeartbeat','BootLegitTimer')
 need(Path('cmd/gxb-api/main_postgres.go'),'//go:build postgres','mustRegister(18','mustRegister(1','mustRegister(192','[]uint16{2, 2864, 20480}','GXB_PUBLIC_ENGINE_URL')
-need(Path('internal/adapters/stockruntime/prelogin.go'),'MIDCenterDiscovery','MIDVersionCheck','"contents": "{\\"contents\\":[]}"','JSON: "B"','JSON: "A"')
+need(Path('internal/adapters/stockruntime/prelogin.go'),'MIDCenterDiscovery','MIDVersionCheck','"contents": "{\\"contents\\":[]}"','JSON: tutorialGroup(key)','return "B"','return "A"')
 need(Path('internal/protocol/mids/registry.go'),'MIDVersionCheck','MIDCenterDiscovery','sourcePlaneAliases')
 need(Path('cmd/gxb-realtime/main_postgres.go'),'//go:build postgres','NewConnectionRegistry','EvidenceConfigFromEnv','RunHealthPulses')
 need(Path('tools/check_i4_oracle_wave_s.py'),'I4 ORACLE WAVE-S CHECK: PASS')

@@ -165,6 +165,8 @@ type Store interface {
 	LockStoryTx(context.Context, tx.Tx, identity.PlayerID) (player.StoryCursor, error)
 	SaveStoryTx(context.Context, tx.Tx, player.StoryCursor, int64) error
 	ClearFirstEntryPendingTx(context.Context, tx.Tx, identity.PlayerID) error
+	LockGuideReturnTx(context.Context, tx.Tx, identity.PlayerID) (player.GuideReturnState, error)
+	SaveGuideReturnTx(context.Context, tx.Tx, player.GuideReturnState, int64) error
 
 	ReadScalarTx(context.Context, tx.Queryer, identity.PlayerID, string) (economy.ScalarBalance, bool, error)
 	ReadTemporalTx(context.Context, tx.Queryer, identity.PlayerID, string) (economy.TemporalState, bool, error)

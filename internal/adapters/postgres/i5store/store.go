@@ -83,6 +83,18 @@ func (Store) SaveStoryTx(ctx context.Context, t tx.Tx, s player.StoryCursor, old
 	}
 	return rowsOne(tag, "story")
 }
+func (Store) LockGuideReturnTx(ctx context.Context, t tx.Tx, pid identity.PlayerID) (player.GuideReturnState, error) {
+	var out player.GuideReturnState
+	err := t.QueryRow(ctx, `SELECT player_id,guide_return_id,guide_function_ids,state_version,updated_at FROM player_guide_return_state WHERE player_id=$1 FOR UPDATE`, int64(pid)).Scan((*int64)(&out.PlayerID), &out.GuideReturnID, &out.GuideFunctionIDs, &out.StateVersion, &out.UpdatedAt)
+	return out, err
+}
+func (Store) SaveGuideReturnTx(ctx context.Context, t tx.Tx, g player.GuideReturnState, old int64) error {
+	tag, err := t.Exec(ctx, `UPDATE player_guide_return_state SET guide_return_id=$2,guide_function_ids=$3,state_version=$4,updated_at=$5 WHERE player_id=$1 AND state_version=$6`, int64(g.PlayerID), g.GuideReturnID, g.GuideFunctionIDs, g.StateVersion, g.UpdatedAt.UTC(), old)
+	if err != nil {
+		return err
+	}
+	return rowsOne(tag, "guide return")
+}
 func (Store) ClearFirstEntryPendingTx(ctx context.Context, t tx.Tx, pid identity.PlayerID) error {
 	_, err := t.Exec(ctx, `UPDATE players SET first_entry_pending=false,state_version=state_version+1 WHERE player_id=$1 AND first_entry_pending=true`, int64(pid))
 	return err

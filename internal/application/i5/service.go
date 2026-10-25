@@ -753,6 +753,80 @@ func (s Service) SaveStory(ctx context.Context, actor identity.ActorContext, sto
 	return err
 }
 
+// SaveGuideFunction marks a weak guide finished or skipped (MID2865).
+func (s Service) SaveGuideFunction(ctx context.Context, actor identity.ActorContext, functionID int64, op operation.Context) (player.GuideReturnState, error) {
+	return s.saveGuide(ctx, actor, "save-guide-function", functionID, op, func(g player.GuideReturnState) (player.GuideReturnState, error) {
+		return player.CompleteGuideFunction(g, functionID, op.StartedAt)
+	})
+}
+
+// SaveGuideReturn stores the weak-guide resume step (MID2866).
+func (s Service) SaveGuideReturn(ctx context.Context, actor identity.ActorContext, returnID int64, op operation.Context) (player.GuideReturnState, error) {
+	return s.saveGuide(ctx, actor, "save-guide-return", returnID, op, func(g player.GuideReturnState) (player.GuideReturnState, error) {
+		return player.SetGuideReturn(g, returnID, op.StartedAt)
+	})
+}
+
+// saveGuide keys receipts by operation, not value: a later identical value
+// after a different one must apply again, while an exact retry replays.
+func (s Service) saveGuide(ctx context.Context, actor identity.ActorContext, name string, value int64, op operation.Context, apply func(player.GuideReturnState) (player.GuideReturnState, error)) (player.GuideReturnState, error) {
+	var out player.GuideReturnState
+	if err := s.validate(); err != nil {
+		return out, err
+	}
+	id := receipt.Identity{OwnerKind: "player", OwnerKey: strconv.FormatInt(int64(actor.PlayerID), 10), Domain: "player-core", Operation: name, SemanticKey: op.ID.String()}
+	fp, err := receipt.FingerprintRequest(map[string]any{"value": value})
+	if err != nil {
+		return out, err
+	}
+	res, err := s.Runner.Run(ctx, op, s.profile(), tx.Options{Isolation: tx.Serializable}, tx.RetryPolicy{MaxAttempts: 3, RetryDefiniteAbort: true, AllowReplayAfterAuthoritativeNegative: true}, receipt.Resolver{Reader: s.ReceiptRead, Identity: id, Fingerprint: fp}, func(txctx context.Context, scope tx.Scope) error {
+		if err := s.Store.FenceActorTx(txctx, scope.Tx, actor, op.StartedAt); err != nil {
+			return err
+		}
+		if prior, ok, err := s.Receipts.FindTx(txctx, scope.Tx, id); err != nil {
+			return err
+		} else if ok {
+			if !bytes.Equal(prior.RequestFingerprint[:], fp[:]) {
+				return &receipt.ConflictError{Identity: id}
+			}
+			return json.Unmarshal(prior.ResultPayload, &out)
+		}
+		cur, err := s.Store.LockGuideReturnTx(txctx, scope.Tx, actor.PlayerID)
+		if err != nil {
+			return err
+		}
+		next, err := apply(cur)
+		if err != nil {
+			return err
+		}
+		if next.StateVersion != cur.StateVersion {
+			if err := s.Store.SaveGuideReturnTx(txctx, scope.Tx, next, cur.StateVersion); err != nil {
+				return err
+			}
+		}
+		raw, err := json.Marshal(next)
+		if err != nil {
+			return err
+		}
+		rr, err := receipt.New(op, id, "I5_PLAYER_CORE", "gxb.i5.guide.v1", raw, fp)
+		if err != nil {
+			return err
+		}
+		rr.ActorAccountUID, rr.ContextID, rr.PolicyVersion = string(actor.AccountUID), actor.ContextID.UUID(), "i9-tutorial-guide-v1"
+		_, err = s.Receipts.PutTx(txctx, scope.Tx, rr)
+		out = next
+		return err
+	})
+	if err == nil && res.Reconciled {
+		stored, ok := res.Evidence.(receipt.Receipt)
+		if !ok {
+			return out, errors.New("guide receipt evidence missing")
+		}
+		err = json.Unmarshal(stored.ResultPayload, &out)
+	}
+	return out, err
+}
+
 func (s Service) ListBackpack(ctx context.Context, actor identity.ActorContext) ([]economy.StackState, error) {
 	if s.Backpack == nil || !actor.PlayerID.Valid() {
 		return nil, errors.New("backpack list input invalid")

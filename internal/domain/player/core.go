@@ -3,7 +3,9 @@ package player
 import (
 	"errors"
 	"math"
+	"slices"
 	"sort"
+	"strconv"
 	"time"
 
 	"gxb.local/backend/v2/internal/domain/identity"
@@ -116,6 +118,46 @@ func (g GuideReturnState) Validate() error {
 	}
 	return nil
 }
+
+// FunctionMap is the stock wire shape: xyd.checkFirstInGuide and
+// MarchSweepWindow index guide_function_ids by tostring(id).
+func (g GuideReturnState) FunctionMap() map[string]int64 {
+	out := make(map[string]int64, len(g.GuideFunctionIDs))
+	for _, id := range g.GuideFunctionIDs {
+		out[strconv.FormatInt(id, 10)] = 1
+	}
+	return out
+}
+
+// CompleteGuideFunction records a finished or skipped weak guide (MID2865).
+func CompleteGuideFunction(g GuideReturnState, functionID int64, now time.Time) (GuideReturnState, error) {
+	if functionID <= 0 || now.IsZero() {
+		return g, errors.New("invalid guide function id")
+	}
+	if slices.Contains(g.GuideFunctionIDs, functionID) {
+		return g, nil
+	}
+	g.GuideFunctionIDs = append(slices.Clone(g.GuideFunctionIDs), functionID)
+	slices.Sort(g.GuideFunctionIDs)
+	g.StateVersion++
+	g.UpdatedAt = now.UTC()
+	return g, nil
+}
+
+// SetGuideReturn stores the weak-guide resume step (MID2866).
+func SetGuideReturn(g GuideReturnState, returnID int64, now time.Time) (GuideReturnState, error) {
+	if returnID < 0 || now.IsZero() {
+		return g, errors.New("invalid guide return id")
+	}
+	if g.GuideReturnID == returnID {
+		return g, nil
+	}
+	g.GuideReturnID = returnID
+	g.StateVersion++
+	g.UpdatedAt = now.UTC()
+	return g, nil
+}
+
 func (u FunctionUnlock) Validate() error {
 	if !u.PlayerID.Valid() || u.FunctionID <= 0 || u.OpenedAt.IsZero() || u.SourceFactKey == "" || u.StateVersion <= 0 {
 		return errors.New("invalid function unlock")
@@ -178,8 +220,6 @@ func (c Core) MID17OwnedFields() (map[string]any, error) {
 	if err := c.Validate(); err != nil {
 		return nil, err
 	}
-	guide := append([]int64{}, c.GuideReturn.GuideFunctionIDs...)
-	sort.Slice(guide, func(i, j int) bool { return guide[i] < guide[j] })
 	return map[string]any{
 		"player_name":        c.Profile.DisplayName,
 		"player_type":        c.Profile.PlayerType,
@@ -191,7 +231,7 @@ func (c Core) MID17OwnedFields() (map[string]any, error) {
 		"story_state":        c.Story.StoryState,
 		"guide_id":           c.Story.GuideID,
 		"func_ids":           c.FunctionIDs(),
-		"guide_function_ids": guide,
+		"guide_function_ids": c.GuideReturn.FunctionMap(),
 		"guide_return_id":    c.GuideReturn.GuideReturnID,
 	}, nil
 }

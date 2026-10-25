@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"math"
 	"net/http"
 	"strconv"
 	"strings"
@@ -15,6 +16,7 @@ import (
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/domain/mail"
 	"gxb.local/backend/v2/internal/domain/objective"
+	"gxb.local/backend/v2/internal/domain/player"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	backpackproj "gxb.local/backend/v2/internal/projection/backpack"
 	"gxb.local/backend/v2/internal/protocol/httpedge"
@@ -24,6 +26,8 @@ import (
 // easily faked in stock-wire tests.
 type I5ServicePort interface {
 	SaveStory(context.Context, identity.ActorContext, int64, int64, int64, operation.Context) error
+	SaveGuideFunction(context.Context, identity.ActorContext, int64, operation.Context) (player.GuideReturnState, error)
+	SaveGuideReturn(context.Context, identity.ActorContext, int64, operation.Context) (player.GuideReturnState, error)
 	ListBackpack(context.Context, identity.ActorContext) ([]economy.StackState, error)
 	ListMail(context.Context, identity.ActorContext, time.Time, int) (appi5.MailListResult, error)
 	ClaimMail(context.Context, identity.ActorContext, mail.Address, operation.Context) (appi5.MID369Result, error)
@@ -54,7 +58,7 @@ func (d I5Dispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRequest
 	case 26: // SAVE_STORY
 		storyID, e1 := requiredInt64(req.Envelope.Params, "story_id")
 		storyState, e2 := requiredInt64(req.Envelope.Params, "story_state")
-		guideID, e3 := requiredInt64(req.Envelope.Params, "guide_id")
+		guideID, e3 := storyGuideID(req.Envelope.Params)
 		if e1 != nil || e2 != nil || e3 != nil || storyID < 0 || storyState < 0 || guideID < 0 {
 			return badI5("invalid_story")
 		}
@@ -62,6 +66,26 @@ func (d I5Dispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRequest
 			return failI5(err)
 		}
 		return okI5(map[string]any{})
+	case 2865: // SET_PLAYER_GUIDE_FUNCTION
+		functionID, err := requiredInt64(req.Envelope.Params, "guide_function_id")
+		if err != nil || functionID <= 0 {
+			return badI5("invalid_guide_function")
+		}
+		guide, err := d.Service.SaveGuideFunction(ctx, actor, functionID, req.Envelope.Operation)
+		if err != nil {
+			return failI5(err)
+		}
+		return okI5(map[string]any{"guide_function_ids": guide.FunctionMap(), "guide_return_id": guide.GuideReturnID})
+	case 2866: // SET_PLAYER_RETURN_ID
+		returnID, err := requiredInt64(req.Envelope.Params, "guide_return_id")
+		if err != nil || returnID < 0 {
+			return badI5("invalid_guide_return")
+		}
+		guide, err := d.Service.SaveGuideReturn(ctx, actor, returnID, req.Envelope.Operation)
+		if err != nil {
+			return failI5(err)
+		}
+		return okI5(map[string]any{"guide_return_id": guide.GuideReturnID})
 	case 81: // LOAD_BACKPACK
 		if d.SpiritBackpack != nil {
 			body, e := d.SpiritBackpack.Backpack(ctx, actor, req.Envelope.Operation)
@@ -301,4 +325,18 @@ func failI5(err error) httpedge.Response {
 	default:
 		return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: err, Body: map[string]any{"error": "i5_operation_failed"}}
 	}
+}
+
+// storyGuideID floors fractional guide sub-steps (enums.lua GUIDE_SKILL_THREE =
+// 100200.1) like V1's int(); the client keeps the exact step in its local cursor.
+func storyGuideID(params map[string]any) (int64, error) {
+	raw, present := params["guide_id"]
+	if !present {
+		return 0, errors.New("missing guide_id")
+	}
+	value, err := strconv.ParseFloat(fmt.Sprint(raw), 64)
+	if err != nil || math.IsNaN(value) || math.IsInf(value, 0) || value < 0 || value > 1<<53 {
+		return 0, fmt.Errorf("invalid guide_id %v", raw)
+	}
+	return int64(math.Floor(value)), nil
 }

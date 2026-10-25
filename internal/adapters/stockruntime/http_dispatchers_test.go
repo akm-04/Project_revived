@@ -228,13 +228,11 @@ func TestPreloginDispatcherStockShapes(t *testing.T) {
 	if announce.HTTPStatus != 200 || announce.Body["contents"] != "{\"contents\":[]}" {
 		t.Fatalf("announce=%+v", announce)
 	}
-	ab := d.Dispatch(context.Background(), mk(2864, map[string]any{"unique_key": "mtspy"}))
-	if ab.HTTPStatus != 200 || ab.JSON != "B" {
-		t.Fatalf("mtspy=%+v", ab)
-	}
-	other := d.Dispatch(context.Background(), mk(2864, map[string]any{"unique_key": "other"}))
-	if other.JSON != "A" {
-		t.Fatalf("other=%+v", other)
+	for key, want := range map[string]string{"mtspy": "A", "n7gso": "B", " N7GSO ": "B", "other": "A"} {
+		ab := d.Dispatch(context.Background(), mk(2864, map[string]any{"unique_key": key}))
+		if ab.HTTPStatus != 200 || ab.JSON != want {
+			t.Fatalf("%q=%+v want %s", key, ab, want)
+		}
 	}
 }
 
