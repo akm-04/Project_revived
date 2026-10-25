@@ -1,0 +1,101 @@
+{
+ "schema_version": 1,
+ "contract_id": "I9_CAMPAIGN_V1",
+ "version": 1,
+ "node": "ROOT/I9/I9-3",
+ "status": "FROZEN_I9_1",
+ "extends": [
+  "I9_MODE_FRAMEWORK_V1",
+  "I8_PARENT_CONTRACT_V1"
+ ],
+ "label_rule": "PRIVATE_POLICY marks a private-server invention; UNKNOWN marks stock behaviour not recovered.",
+ "title": "Campaign family: world map, Normal/Super/Challenge battles, sweep, reset, star bonus, story drop, chapter events, time travel",
+ "mids": {
+  "112": "LOAD_WORLD_MAP",
+  "113": "FIGHT",
+  "114": "FIGHT_RESULT",
+  "115": "LOAD_TRIAL_INFOS",
+  "116": "RESET_CAMPAIGN",
+  "117": "SWEEP_CAMPAIGN",
+  "118": "GET_BONUS_AWARD",
+  "122": "GET_MAXLEVEL",
+  "123": "CHALLENGEINFO",
+  "2064": "GET_STORY_DROP_PARTNER",
+  "2576": "GET_CHAPTER_GACHA_AWARD"
+ },
+ "wire_types": {
+  "1": "Normal",
+  "2": "Super (elite)",
+  "24": "Challenge",
+  "11-21, 40-42": "Time Travel trials, rotating Prophecy and Cloud;22 Sakura excluded (D122)"
+ },
+ "content": "campaign.lua, chapter.lua, campaign_dropbox.lua, dropbox.lua, campaign_star_bonus.lua, battle.lua (enemy lineups), refresh_cost.lua, vip.lua, monthly privilege table, trial.lua, trial_config.lua, trial_drop_array.lua, time_travel.lua; loaded per F2 as a campaign catalog plus a separate campaign policy document for PRIVATE_POLICY values.",
+ "rules": [
+  "C1 State. One campaign player row set per player (rank 605, F14): per wire type the opened nodes {campaign_id, star 0-3, daily_limit, reset_count, counter day}, chapter_info {normal/super chapter_id, campaign_id, stars, bonus_id}, chapter event records, claimed story drops, trial rows. A node exists only once opened; the first Normal node is 100001.",
+  "C2 Projection. One projection function answers 112, MID1 detail[\"112\"] and the campaigns/chapter_info parts of 114, 116 and 118. Rows: normal/super/challenge [{campaign_id, star, daily_limit, reset_count, is_partner_drop (Normal only)}], chapter_events, chapter_info. The eight chapter_info fields are written both inside chapter_info and at the top level, because SelfPlayer.worldMapLoginEvent_ (MID1) reads them top level and worldMapEvent_ (112) reads chapter_info (RESEARCH C2; whether stock did this is UNKNOWN, both readers are satisfied).",
+  "C3 Opening. Normal: a win opens next_campaign_id. Super: function 31 gate, and the Super node opens when its related Normal node (relate_campaign_id) is cleared (V1 Pass128 rule mirrored from the stock UI). Challenge (24): opens after Normal 1600016 has star > 0 and walks chapter.lua challenge lists (V1 projection). Stage clears also feed D64 kind-2 function openings through the I9-2 seam.",
+  "C4 FIGHT 113. Request {campaign_id, campaign_type, formation, pet_id?, rent_player_id?, rent_formation?, rent_pet_player_id?, rent_pet_id?}. Admission (F6): node open, wire type matches the catalog, Super daily_limit > 0, energy >= energy_cost (preview only, nothing debited), formation heroes owned or BORROWED through I8-6A. It opens a CLIENT_SUMMARY_ATTESTED_V1 attempt (locator CAMPAIGN/server:N/player:N), draws drops per C6 and freezes them with the reward plan on the attempt, and answers {battle_id, report: {}, seed, enemy_info: {}, items: [{item_id, item_num}]}. Same campaign and type while the attempt is open replays the frozen answer (I8 sticky START); a different stage supersedes it.",
+  "C5 FIGHT_RESULT 114. Request {campaign_id, star, campaign_type, formation, pet_id?, awake_mission? | pet_awaken_mission?, assist_partner?}. star is bounded 0..3 by SummaryPolicy CAMPAIGN_SUMMARY_V1 (win iff star > 0); no report exists to verify (the client simulates locally), so the server owns every value and the client only chooses the star (D82: accept the client star within SummaryPolicy, no plausibility check). Settlement in one transaction: energy debit energy_cost on a win or defeat_cost on a loss; on a win star = max(old, new), Super daily_limit - 1, frozen init_dropbox on first clear and repeat dropbox on later wins (C6, D81/D100), mana_gain gold, player exp = energy_cost x 3 (SelfPlayer:getExpMulti returns 3), partner_exp to each formation hero, star_gift crystals on the first 3-star, next node opened, pet exp to the pet (pet_exps), objective facts (102 Normal or 103 Super clear count, story stage high water) through F11, deltas returned through F17, awakening objective checked by the I9-4 owner. Reply: {is_win, result, chapter_info (C2), chapter_event?, campaigns [touched rows; star 0 marks newly opened], trial?, challenge?, pet_exps?, items: [], assist_awards?, star_crystal?}. A repeated 114 for a settled attempt answers error_code 30005 with the stored full body (114's reader accepts it). A 114 without a matching open attempt is a family terminal drain: HTTP 200 {error_code: 1} and no value.",
+  "C6 Drops (D81: the user confirmed this is the original server law and V1 drop rates were built on it). One law for every channel: for each source row q, r = divmod(increase_rate, 10000); q copies are guaranteed and one Derive draw gives one more copy with probability r / 10000 (Bernoulli when the rate is under 10000). First clear uses init_dropbox; repeat battles and sweeps use dropbox. Challenge first clear grants rate / 10000 copies deterministically (V1). Entropy label campaign.drop.<channel>/v1, ordinal = row index (F10). V1 dropped nothing on repeat battles; that V1 gap is not carried over.",
+  "C7 Sweep 117 (D106 source reconciliation). Request {campaign_id, campaign_type 1|2, sweep_num, sweep_type 1 ITEM_SWEEP|2 CRYSTAL_SWEEP, awake_mission?, itemComposeID?, needItemComposeNum?}. Node must be opened and star=3, Normal count 1..10, Super count<=daily_limit; multi requires vip.quick_sweep or active monthly card. ITEM pays N cards item50001013; CRYSTAL pays N crystals and consumes no cards. Energy cost N*energy_cost. Each run grants source sweep_reward plus repeat dropbox (C6) and mana_gain; economys.exp is base energy_cost. Account EXP mirrors SweepWindow low-level simulation (1x while simulated pre-run level<=10, thereafter3x; D106 PRIVATE_POLICY backed by source/V1). No formation or direct partner EXP. Reply {items: per-run lists, economys: per-run {exp,mana}, additional:[], campaign:row} plus F17 owner totals. No Combat attempt or star gift. Receipt per operation and one win fact per sweep; distinct stock requests carry no sweep nonce and remain separate operations. Awakening inputs await I9-4D.",
+  "C8 Reset 116. Request {campaign_id, campaign_type = 2}. Allowed resets per day = vip.num_elite + monthly privilege num_elite (D80; allowance 0..25 by VIP, + 3 with the card per prior research). Cost refresh_cost.refreshEliteCost(reset_count + 1) crystals through I5 (D76). Restores daily_limit to the catalog value, reset_count + 1. Reply {campaign_id, star, daily_limit, reset_count}. daily_limit and reset_count refresh lazily at the 05:00 GMT+8 day (F7). D107: source UI requests only exhausted Super rows; initial unexhausted rows refuse. A previously reset unexhausted row returns its current projection without another debit (V1 natural-postcondition compatibility policy), while an identical operation receipt replays exactly. VIP/monthly state is read from the existing canonical privilege provider; 3B does not add monthly activation.",
+  "C9 Star bonus 118. Request {bonus_type 1 Normal | 2 Super}. Allowed when the player's total stars of that type reach star_num of the current bonus_id; grants award_crystal, award_mana and award_id x award_num through I5, advances bonus_id to next_bonus_id. Reply {chapter_info with the bonus ids, awards [{table_id, item_num}]}. NO_BATTLE. V1 was a stub; this is new. D114/D118: displayed stars are cumulative across all chapters of the type, counting only source map sizes2/3 (small nodes retain progression clear only); first cursor1/101, terminal successor remains exhausted, never reinitializes.",
+  "C10 Story drop2064 and chapter Gacha2576 (D114-D116).2064 runs during the matching nonexpired Normal113 BEFORE114; chosen partner must be a source option. One stable first-choice award per campaign through the existing Character acquisition owner, replayed on retry; owned origins return the canonical Hero without another grant (PRIVATE_POLICY).2576 accepts chapter_id for event_type1 only. Indexed source conditions unlock indexed fixed gift vectors; one claim per condition, claims and I5 value atomic. chapter_event has chapter_id,is_open,open_times,left_times,val,cost;112/MID1 and114 share projection. Boss event types use distinct later MIDs2577/2578;2576 never grants their gifts. Official unlock algorithm UNKNOWN; indexed reconstruction PRIVATE_POLICY_D115.",
+  "C11 Reads (D122-D125).122 returns canonical caps (D114).115 and MID1 detail[\"115\"] share trial_info {trials,campaigns} and challenge_info {challenges,campaigns}; group rows {id,left_times,is_open,max_times,last_id}.123 returns current prophecy row first for the next-three forecast. Chapter Challenge24 is separate. Trial11-15/40-42 and prophecy16-21 fight through113/114. Source faction/function/level/weekday and Cloud predecessor guards apply. Group wins consume quota; canonical DailyConsumption3..10 purchases add one use via28/29. Calendar/rotation/result-boundary private policy and owner/lock amendment are specified in D123-D125 and PLAN_3D.md.",
+  "C12 Proof. VC scenarios: new player -> 1-1 fight -> result -> next node; Super reset with VIP seeded; sweep x10 with cards and with crystals; star bonus claim; replay 113 and duplicate 114 (30005); 114 without an attempt. The journal shows no UNKNOWN_MID or SERVER_ERROR for the eleven MIDs."
+ ],
+ "leaves": {
+  "I9-3A": "Catalog and projection (C1-C3, 112, MID1) plus 113/114 for Normal and Super (C4-C6)",
+  "I9-3B": "Sweep, reset, VIP columns (C7-C8)",
+  "I9-3C": "Star bonus, story drop, chapter events (C9-C10), 122",
+  "I9-3D": "Challenge, Time Travel trials, Cloud City (C3 Challenge, C11)"
+ },
+ "sources": [
+  "work/i9/stages/I9-1/RESEARCH.md sections C, D, W",
+  "V1 oracle work/i9/research/v1_main world_repository.py, campaign_drop_planner.py, campaign_drop_policy.json, campaign_repeat_rng_policy.json",
+  "src_64 SelectTeamWindow, BattleCreate.campaignResult, NewMapDetailWindow, SweepWindow, MapWindow, BattleSpecialStory, ChapterGachaWindow, SelfPlayer"
+ ],
+ "decisions": [
+  "D81",
+  "D82"
+ ],
+ "amendments": [
+  {
+   "decision": "D106",
+   "rules": [
+    "C5",
+    "C7"
+   ],
+   "evidence": "work/i9/stages/I9-3/RESEARCH_3B.md R1-R3"
+  },
+  {
+   "decision": "D107",
+   "rules": [
+    "C8"
+   ],
+   "evidence": "work/i9/stages/I9-3/RESEARCH_3B.md R4"
+  },
+  {
+   "decision": "D114-D117",
+   "rules": [
+    "C2",
+    "C5",
+    "C9",
+    "C10",
+    "C11"
+   ],
+   "evidence": "work/i9/stages/I9-3/RESEARCH_3C.md"
+  },
+  {
+   "decision": "D122-D125",
+   "rules": [
+    "C1",
+    "C3",
+    "C4",
+    "C5",
+    "C11"
+   ],
+   "evidence": "work/i9/stages/I9-3/PLAN_3D.md"
+  }
+ ]
+}
