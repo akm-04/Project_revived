@@ -125,8 +125,9 @@ func (f *fixture) identityRoots(pid identity.PlayerID) (ids.UUID, identity.Logic
 	return u, server
 }
 
-// birthOwnerTables restrict players deletion; a deletion fixture clears them so social restrict/set-null rules decide the outcome.
-var birthOwnerTables = []string{"ranking_girls_birth_tracking", "achievement_roots", "commerce_privilege_roots", "player_conquer_facts", "player_spirit_roots", "player_element_roots", "player_inscription_roots", "player_course_roots", "player_book_roots", "player_public_profile_roots"}
+// birthOwnerTables restrict players deletion (the hero facet rows come from the I9-3E birth companion); a deletion fixture clears
+// them so social restrict/set-null rules decide the outcome.
+var birthOwnerTables = []string{"player_hero_evolution", "player_hero_evolution_admissions", "player_hero_raw_awakening", "player_spirit_heroes", "player_element_heroes", "player_inscription_heroes", "player_course_heroes", "ranking_girls_birth_tracking", "achievement_roots", "commerce_privilege_roots", "player_conquer_facts", "player_spirit_roots", "player_element_roots", "player_inscription_roots", "player_course_roots", "player_book_roots", "player_public_profile_roots"}
 
 func clearBirthOwners[Tag any](f *fixture, q interface {
 	Exec(context.Context, string, ...any) (Tag, error)

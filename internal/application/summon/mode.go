@@ -156,7 +156,7 @@ func info(catalog *d.Catalog, s d.State, day int64) map[string]any {
 	out := map[string]any{
 		"mana_free_time": s.ManaFreeTime, "crystal_free_time": s.CrystalFreeTime, "mana_free_num": s.ManaFreeNum,
 		"main_ids": rotation.Main, "second_ids": rotation.Second, "partner_id": rotation.Partner,
-		"mana_id": catalog.Policy.Display.ManaID, "pet_id": catalog.Policy.Display.PetID,
+		"mana_id": catalog.Policy.Display.ManaID, "pet_id": rotation.Pet,
 	}
 	if s.MagicTarget > 0 {
 		out["directional_show_id"] = s.MagicTarget
@@ -227,12 +227,11 @@ func (s Mode) Summon(c context.Context, a identity.ActorContext, q Pull, op oper
 			return nil, state, err
 		}
 		out := map[string]any{}
-		extra := []grant.Line{}
+		itemID, amount := v.catalog.Juice(b)
 		if firstSmall && state.Counters[d.Small] >= 1 {
-			extra = append(extra, grant.Line{Kind: grant.StackItem, ItemID: v.catalog.Reward.ItemID, Amount: v.catalog.Reward.ItemNum})
-			out["reward"] = map[string]any{"item_id": v.catalog.Reward.ItemID, "item_num": v.catalog.Reward.ItemNum}
+			itemID, amount = v.catalog.Reward.ItemID, v.catalog.Reward.ItemNum
 		}
-		if out["result"], err = s.deliver(c, sc, a, v, slots, extra); err != nil {
+		if out["result"], err = s.deliver(c, sc, a, v, slots, reward(itemID, amount, out)); err != nil {
 			return nil, state, err
 		}
 		out["summon_info"] = info(&v.catalog, state, v.day)
@@ -258,11 +257,22 @@ func (s Mode) sx(c context.Context, sc gen.TimedScope, a identity.ActorContext, 
 		return nil, state, err
 	}
 	slots, state := v.catalog.DrawSX(state, main[selector-1], cd.NewStream(sc.Operation.Operation().Derive("summon.sx/v1", 0)))
-	rows, err := s.deliver(c, sc, a, v, slots, nil)
-	if err != nil {
+	out := map[string]any{}
+	itemID, amount := v.catalog.Juice(b)
+	if out["result"], err = s.deliver(c, sc, a, v, slots, reward(itemID, amount, out)); err != nil {
 		return nil, state, err
 	}
-	return map[string]any{"result": rows, "summon_info": info(&v.catalog, state, v.day)}, state, nil
+	out["summon_info"] = info(&v.catalog, state, v.day)
+	return out, state, nil
+}
+
+// reward answers the purchase's juice (D155) in out["reward"] and returns its grant; a zero amount pays nothing.
+func reward(itemID, amount int64, out map[string]any) []grant.Line {
+	if itemID <= 0 || amount <= 0 {
+		return nil
+	}
+	out["reward"] = map[string]any{"item_id": itemID, "item_num": amount}
+	return []grant.Line{{Kind: grant.StackItem, ItemID: itemID, Amount: amount}}
 }
 
 // deliver materializes the slots, settles their items with extra and records one SUMMON fact per slot.
@@ -310,10 +320,13 @@ func (s Mode) Magic(c context.Context, a identity.ActorContext, q MagicPull, op 
 		if err != nil {
 			return nil, state, err
 		}
-		if err = s.settle(c, sc, a, "magic", append(lines, grant.Line{Kind: grant.StackItem, ItemID: stone, Amount: fragments})); err != nil {
+		out := map[string]any{"result": rows, "stick_items": []any{map[string]any{"item_id": stone, "item_num": fragments}}}
+		itemID, amount := v.catalog.Juice(b)
+		lines = append(append(lines, grant.Line{Kind: grant.StackItem, ItemID: stone, Amount: fragments}), reward(itemID, amount, out)...)
+		if err = s.settle(c, sc, a, "magic", lines); err != nil {
 			return nil, state, err
 		}
-		return map[string]any{"result": rows, "stick_items": []any{map[string]any{"item_id": stone, "item_num": fragments}}}, state, nil
+		return out, state, nil
 	})
 }
 

@@ -60,6 +60,9 @@ func TestI9_3FPremiumNative(t *testing.T) {
 	if e = p.QueryRow(ctx, `SELECT (SELECT amount FROM player_currency_balances WHERE player_id=$1 AND resource_key='crystal'),(SELECT count(*) FROM player_heroes WHERE player_id=$1 AND origin_table_id=$2)`, int64(a.PlayerID), hotspot).Scan(&crystal, &owned); e != nil || crystal != 0 || owned != 1 {
 		t.Fatal("25 SX purchases cost 388 each and the pity guarantees the hotspot", crystal, owned, e)
 	}
+	if got := stackQuantity(t, p, a.PlayerID, 50001005); got != 25 {
+		t.Fatal("one SX Juice per purchase (D155)", got)
+	}
 
 	b := companionActor(t, p)
 	exec(t, p, `UPDATE player_progression SET level=100 WHERE player_id=$1`, int64(b.PlayerID))
@@ -99,7 +102,7 @@ func TestI9_3FPremiumNative(t *testing.T) {
 	}
 	stone, _ := catalog.MagicFragment(11001)
 	body, e := s.Magic(ctx, b, app.MagicPull{Times: 1, Target: 11001}, op())
-	if e != nil || len(summonRows(t, body)) != 1 || fmt.Sprint(body["stick_items"]) != fmt.Sprintf("[map[item_id:%d item_num:5]]", stone) || stackQuantity(t, p, b.PlayerID, stone) != 5 {
+	if e != nil || len(summonRows(t, body)) != 1 || fmt.Sprint(body["stick_items"]) != fmt.Sprintf("[map[item_id:%d item_num:5]]", stone) || stackQuantity(t, p, b.PlayerID, stone) != 5 || fmt.Sprint(body["reward"]) != "map[item_id:50005182 item_num:1]" {
 		t.Fatal("70 single", body, e)
 	}
 	if body, e = s.Magic(ctx, b, app.MagicPull{Times: 10, Target: 11001}, op()); e != nil || len(summonRows(t, body)) != 10 || stackQuantity(t, p, b.PlayerID, stone) <= 5 {

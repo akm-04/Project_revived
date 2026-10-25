@@ -898,7 +898,7 @@ func validateManifest(raw []byte, manifest *Manifest) error {
 	if manifest.CompilerVersion == "i9-3d-campaign-trials" {
 		expectedSources, expectedArtifacts = 303, 43
 	}
-	if manifest.CompilerVersion == "i9-3e-gacha" || manifest.CompilerVersion == "i9-3f-premium-gacha" {
+	if manifest.CompilerVersion == "i9-3e-gacha" || manifest.CompilerVersion == "i9-3f-premium-gacha" || manifest.CompilerVersion == "i9-3-vending-juice" {
 		expectedSources, expectedArtifacts = 309, 44
 	}
 	if len(manifest.Sources) != expectedSources {

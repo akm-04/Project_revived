@@ -9,24 +9,30 @@ import (
 // tool): zero or empty fields keep I9_GACHA_PRIVATE_POLICY_V1. Pins replace the
 // daily featured calendar while set.
 type Tuning struct {
-	Version           int64            `json:"version"`
-	SmallSuperChance  int64            `json:"small_super_chance_per_10000"`
-	MediumSuperChance int64            `json:"medium_super_chance_per_10000"`
-	FeaturedChance    int64            `json:"medium_featured_chance_per_10000"`
-	FeaturedPity      int64            `json:"medium_featured_pity_slots"`
-	ExtensionWeight   int64            `json:"medium_extension_weight"`
-	MediumFeatured    []int64          `json:"medium_featured_cohort"`
-	MediumExtension   []int64          `json:"medium_extension_cohort"`
-	SXCohort          []int64          `json:"sx_cohort"`
-	Partner           int64            `json:"partner_id"`
-	Main              []int64          `json:"main_ids"`
-	Second            []int64          `json:"second_ids"`
-	SXClassWeights    map[string]int64 `json:"sx_class_weights"`
-	SXHotspotShare    int64            `json:"sx_hotspot_share_per_10000"`
-	SXHotspotPity     int64            `json:"sx_hotspot_pity"`
+	Version           int64   `json:"version"`
+	SmallSuperChance  int64   `json:"small_super_chance_per_10000"`
+	MediumSuperChance int64   `json:"medium_super_chance_per_10000"`
+	FeaturedChance    int64   `json:"medium_featured_chance_per_10000"`
+	FeaturedPity      int64   `json:"medium_featured_pity_slots"`
+	ExtensionWeight   int64   `json:"medium_extension_weight"`
+	MediumFeatured    []int64 `json:"medium_featured_cohort"`
+	MediumExtension   []int64 `json:"medium_extension_cohort"`
+	SXCohort          []int64 `json:"sx_cohort"`
+	Partner           int64   `json:"partner_id"`
+	Pet               int64   `json:"pet_id"`
+	// JuicePerPull is a pointer so the operator can set 0 (no juice); nil keeps the source policy.
+	JuicePerPull   *int64           `json:"juice_per_pull"`
+	Main           []int64          `json:"main_ids"`
+	Second         []int64          `json:"second_ids"`
+	SXClassWeights map[string]int64 `json:"sx_class_weights"`
+	SXHotspotShare int64            `json:"sx_hotspot_share_per_10000"`
+	SXHotspotPity  int64            `json:"sx_hotspot_pity"`
 }
 
 var errTuning = errors.New("summon: operator tuning")
+
+// maxJuicePerPull bounds the overlay so a typo cannot flood backpacks (a 100-pull Small purchase pays 100 x this).
+const maxJuicePerPull = 100
 
 // Tune returns the catalog with t applied; a rejected overlay leaves the source policy in force for the caller to report.
 func (c Catalog) Tune(t Tuning) (Catalog, error) {
@@ -35,7 +41,7 @@ func (c Catalog) Tune(t Tuning) (Catalog, error) {
 			return c, errTuning
 		}
 	}
-	if t.FeaturedPity < 0 || t.ExtensionWeight < 0 || t.SXHotspotPity < 0 {
+	if t.FeaturedPity < 0 || t.ExtensionWeight < 0 || t.SXHotspotPity < 0 || (t.JuicePerPull != nil && (*t.JuicePerPull < 0 || *t.JuicePerPull > maxJuicePerPull)) {
 		return c, errTuning
 	}
 	if t.SXClassWeights != nil && validClassWeights(t.SXClassWeights) != nil {
@@ -55,7 +61,10 @@ func (c Catalog) Tune(t Tuning) (Catalog, error) {
 	if t.SXClassWeights != nil {
 		p.SX.ClassWeights = t.SXClassWeights
 	}
-	if err := c.summonable(append(append([]int64{t.Partner}, p.Cohorts.MediumFeatured...), p.Cohorts.MediumExtension...), false); err != nil {
+	if t.JuicePerPull != nil {
+		p.Juice.PerPull = *t.JuicePerPull
+	}
+	if err := c.summonable(append(append([]int64{t.Partner, t.Pet}, p.Cohorts.MediumFeatured...), p.Cohorts.MediumExtension...), false); err != nil {
 		return c, err
 	}
 	if err := c.summonable(append(append(append([]int64(nil), p.Cohorts.SX...), t.Main...), t.Second...), true); err != nil {

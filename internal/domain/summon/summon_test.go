@@ -183,3 +183,44 @@ func TestOperatorTuning(t *testing.T) {
 		}
 	}
 }
+
+func TestShowcaseRotatesApartFromTheRateUpAndJuicePerPull(t *testing.T) {
+	c := load(t)
+	pets := map[int64]bool{}
+	for day := int64(400); day < 430; day++ {
+		r := c.Rotation(day)
+		if r.Pet == 0 || r.Pet == r.Partner {
+			t.Fatal("showcase must be a featured girl other than the rate-up", day, r)
+		}
+		pets[r.Pet] = true
+	}
+	if len(pets) < 5 {
+		t.Fatal("showcase does not rotate", pets)
+	}
+	pinned := c.Policy.Cohorts.MediumFeatured[2]
+	tuned, err := c.Tune(Tuning{Pet: pinned, Partner: c.Policy.Cohorts.MediumFeatured[3]})
+	if err != nil || tuned.Rotation(9).Pet != pinned {
+		t.Fatal("showcase pin", err)
+	}
+
+	small, _ := c.Button(1, 4)
+	sx, _ := c.Button(4, 1)
+	magicTen, _ := c.Button(33, 2)
+	for _, want := range []struct {
+		b            Button
+		item, amount int64
+	}{{small, 50001002, 100}, {sx, 50001005, 1}, {magicTen, 50005182, 10}} {
+		if item, amount := c.Juice(want.b); item != want.item || amount != want.amount {
+			t.Fatal("juice", want.b, item, amount)
+		}
+	}
+	zero := int64(0)
+	off, err := c.Tune(Tuning{JuicePerPull: &zero})
+	if _, amount := off.Juice(small); err != nil || amount != 0 {
+		t.Fatal("operator juice off", amount, err)
+	}
+	flood := int64(maxJuicePerPull + 1)
+	if _, err = c.Tune(Tuning{JuicePerPull: &flood}); err == nil {
+		t.Fatal("unbounded juice accepted")
+	}
+}

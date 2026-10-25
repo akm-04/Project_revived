@@ -8,7 +8,7 @@
  "provenance": "V1 frozen backend work/i9/research/v1_main (6b24b2f) data/summon_private_server_policy.json, medium_legacy_private_policy.json, summon_featured_catalog.json, sx_soul_box_private_policy.json, magic_summon_private_policy.json, summon_duplicate_conversion_policy.json, tutorial_summon_meta.json; decisions D138-D146.",
  "rules": [
   "Original server gacha math is UNKNOWN. Every number here is private policy ported from V1 or added by D140, D142 and D143; source table values come from summon.lua, dropbox.lua, misc.lua, soul_casket.lua, magic_summon_list.lua and magic_drop_rate.lua.",
-  "D139: Aquaris is granted at birth. D140: mana_free_num refills to the misc value on a new modes.Day. D142: featured rotation is a fixed-seed calendar on modes.Day. D143: tickets and discounts use Medium ordinary selection without a milestone counter. D144: exactly-once by operation receipt. D145: per-operation derived random stream. D146: only the tutorial Small pull pays summon_reward."
+  "D139: Aquaris is granted at birth. D140: mana_free_num refills to the misc value on a new modes.Day. D142: featured rotation is a fixed-seed calendar on modes.Day. D143: tickets and discounts use Medium ordinary selection without a milestone counter. D144: exactly-once by operation receipt. D145: per-operation derived random stream. D146 (superseded by D155): the tutorial Small pull pays summon_reward x10. D154: the Medium showcase pet_id rotates daily from the Medium featured cohort and never equals that day's partner_id. D155: every purchase pays its summon.lua row summon_reward x juice.per_pull per pulled slot (SX counts one per purchase); the tutorial Small pull pays the tutorial amount instead."
  ],
  "classic": {
   "small": {
@@ -40,8 +40,7 @@
   "rule": "The first Small slot (counter milestone 1, pool 200005) is Lavia and the first Medium free slot (milestone 1, pool 200006) is Pandaria by source; the pull that fills Small slot 1 also pays summon.lua row 1 summon_reward x10 (D146)."
  },
  "display": {
-  "mana_id": 10001002,
-  "pet_id": 10001001
+  "mana_id": 10001002
  },
  "rotation": {
   "seed": "gxb-private-server-featured-v1",
@@ -258,5 +257,9 @@
    10001274,
    10001275
   ]
+ },
+ "juice": {
+  "per_pull": 1,
+  "rule": "D155: summon.lua summon_reward of the purchased row (Small 50001002, Medium and tickets 50001004, SX 50001005, Magic 50005182) x per_pull x pulled slots; SX counts one per purchase. Operator overlay juice_per_pull (0 disables)."
  }
 }

@@ -54,7 +54,8 @@ def build_summon(blobs, parse, parse_indexed, field):
             raise ValueError('summon.lua cost/num drift: %d' % row_id)
         cost_type, item = int(r['cost_type'] or 0), int(r['summon_item'] or 0)
         for index, (cost, pulls) in enumerate(zip(costs, nums), 1):
-            button = dict(type=row_id, index=index, family=family, pulls=pulls, free=cost == 0, mana=0, crystal=0, item_id=0, item_num=0)
+            button = dict(type=row_id, index=index, family=family, pulls=pulls, free=cost == 0, mana=0, crystal=0, item_id=0, item_num=0,
+                          reward_item_id=int(r['summon_reward'] or 0))
             if cost_type == 1 and cost:
                 button['mana'] = cost
             if cost_type == 2 and cost:
@@ -105,11 +106,13 @@ def build_summon(blobs, parse, parse_indexed, field):
         raise ValueError('Vending button/pool/magic profile drift: %d buttons %d pools' % (len(buttons), len(pools)))
     if sx_pools != [200007, 200008, 200009, 200010, 200011] or magic_pool != [700008]:
         raise ValueError('SX/Magic pool drift: %r %r' % (sx_pools, magic_pool))
+    if any(b['reward_item_id'] <= 0 for b in buttons):
+        raise ValueError('Vending button lacks a summon_reward juice')
     if any(heroes.get(h, {}).get('stone_item_id', 0) <= 0 for h in magic_list):
         raise ValueError('Magic target lacks a fragment item')
     return dict(schema_version=1, contract_id='I9_GACHA_V1', policy_id=policy['contract_id'],
                 policy_sha256=hashlib.sha256(raw_policy).hexdigest(), free=free, reward=dict(item_id=int(summons[1]['summon_reward']), item_num=policy['tutorial']['first_small_slot_reward_num']),
                 buttons=buttons, counters=counters, pools=pools, heroes=[heroes[h] for h in sorted(heroes)],
-                policy={k: policy[k] for k in ('classic', 'tutorial', 'display', 'rotation', 'sx', 'magic', 'cohorts')},
+                policy={k: policy[k] for k in ('classic', 'tutorial', 'display', 'rotation', 'sx', 'magic', 'cohorts', 'juice')},
                 soul_caskets=caskets, magic_heroes=magic_list, magic_rates=magic_rates, vows=vows,
                 sx_pools=sx_pools, magic_pool=magic_pool[0])

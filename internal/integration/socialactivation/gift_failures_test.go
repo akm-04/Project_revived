@@ -197,6 +197,7 @@ func Test7A_DeletedSenderReceiverRestrictionAndPreparedTx(t *testing.T) {
 	if e != nil {
 		t.Fatal(e)
 	}
+	defer deletion.Rollback(ctx)
 	deletion.Exec(ctx, `DELETE FROM gameplay_context_credentials WHERE context_id IN(SELECT context_id FROM gameplay_contexts WHERE player_id=200001)`)
 	deletion.Exec(ctx, `DELETE FROM gameplay_contexts WHERE player_id=200001`)
 	clearBirthOwners(f, deletion, 200001)

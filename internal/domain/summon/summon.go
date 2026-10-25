@@ -48,6 +48,8 @@ type Button struct {
 	Crystal int64  `json:"crystal"`
 	ItemID  int64  `json:"item_id"`
 	ItemNum int64  `json:"item_num"`
+	// RewardItemID is the row's summon_reward juice (D155).
+	RewardItemID int64 `json:"reward_item_id"`
 }
 
 // Counter is a family's result-slot counter: slot n draws Pools[i] when n == Milestones[i].
@@ -97,8 +99,11 @@ type Policy struct {
 	Magic   MagicPolicy `json:"magic"`
 	Display struct {
 		ManaID int64 `json:"mana_id"`
-		PetID  int64 `json:"pet_id"`
 	} `json:"display"`
+	Juice struct {
+		PerPull int64  `json:"per_pull"`
+		Rule    string `json:"rule"`
+	} `json:"juice"`
 	Rotation struct {
 		Seed       string `json:"seed"`
 		SXMainDays int64  `json:"sx_main_days"`
@@ -189,7 +194,7 @@ func (c *Catalog) Validate() error {
 			}
 		}
 	}
-	if len(c.Policy.Cohorts.MediumFeatured) == 0 || c.Policy.Classic.MediumFeatured.Pity <= 0 || c.Policy.Rotation.SXMainDays <= 0 || len(c.Policy.Cohorts.SX) < 5 {
+	if len(c.Policy.Cohorts.MediumFeatured) == 0 || c.Policy.Classic.MediumFeatured.Pity <= 0 || c.Policy.Rotation.SXMainDays <= 0 || len(c.Policy.Cohorts.SX) < 5 || c.Policy.Juice.PerPull < 0 {
 		return errors.New("summon: policy profile")
 	}
 	return c.validatePremium()
@@ -416,9 +421,10 @@ func (c Counter) special(n int64) (int64, bool) {
 	return 0, false
 }
 
-// Rotation is the featured calendar shown on MID56 (D142).
+// Rotation is the featured calendar shown on MID56 (D142); Pet is the Medium showcase girl beside the rate-up list (D154).
 type Rotation struct {
 	Partner int64
+	Pet     int64
 	Main    []int64
 	Second  []int64
 }
@@ -437,7 +443,20 @@ func (c *Catalog) Rotation(day int64) Rotation {
 	if len(c.tuning.Main) > 0 {
 		r.Main, r.Second = c.tuning.Main, c.tuning.Second
 	}
+	r.Pet = c.tuning.Pet
+	if r.Pet == 0 || r.Pet == r.Partner {
+		r.Pet = c.choose("medium-showcase", day, c.Policy.Cohorts.MediumFeatured, 1, []int64{r.Partner})[0]
+	}
 	return r
+}
+
+// Juice is the summon_reward a purchase of b pays (D155): per_pull per pulled slot, one per SX purchase.
+func (c *Catalog) Juice(b Button) (itemID, amount int64) {
+	slots := b.Pulls
+	if b.Family == SX {
+		slots = 1
+	}
+	return b.RewardItemID, slots * c.Policy.Juice.PerPull
 }
 
 // choose draws n distinct cohort members by a fixed-seed hash of label and period.

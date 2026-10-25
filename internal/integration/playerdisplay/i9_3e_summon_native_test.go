@@ -55,7 +55,7 @@ func TestI9_3ESummonNative(t *testing.T) {
 	}
 	s := summonMode(p)
 	info, e := s.Load(ctx, a, op())
-	if e != nil || fmt.Sprint(info["mana_free_num"]) != "5" || fmt.Sprint(info["crystal_free_time"]) != "0" || len(info["main_ids"].([]int64)) != 2 || info["partner_id"].(int64) == 0 {
+	if e != nil || fmt.Sprint(info["mana_free_num"]) != "5" || fmt.Sprint(info["crystal_free_time"]) != "0" || len(info["main_ids"].([]int64)) != 2 || info["partner_id"].(int64) == 0 || info["pet_id"].(int64) == 0 || info["pet_id"] == info["partner_id"] {
 		t.Fatal("fresh 56", info, e)
 	}
 
@@ -74,8 +74,8 @@ func TestI9_3ESummonNative(t *testing.T) {
 	}
 	body, e = s.Summon(ctx, a, app.Pull{Type: 3, Index: 1}, op())
 	rows = summonRows(t, body)
-	if e != nil || len(rows) != 1 || fmt.Sprint(rows[0]["table_id"]) != "10001003" || body["reward"] != nil {
-		t.Fatal("Medium free tutorial pull is Pandaria", body, e)
+	if e != nil || len(rows) != 1 || fmt.Sprint(rows[0]["table_id"]) != "10001003" || fmt.Sprint(body["reward"]) != "map[item_id:50001004 item_num:1]" {
+		t.Fatal("Medium free tutorial pull is Pandaria with one Medium Juice (D155)", body, e)
 	}
 	if _, e = s.Summon(ctx, a, app.Pull{Type: 3, Index: 1}, op()); !errors.Is(e, d.ErrRefused) {
 		t.Fatal("Medium free inside 46 h", e)
