@@ -246,6 +246,13 @@ func (s Service) EnsureBuiltinInstalled(ctx context.Context, op operation.Contex
 			if gotCampaign != 1 {
 				return errors.New("content registry campaign count")
 			}
+			gotSummon, err := s.Repo.InsertSummon(tctx, scope.Tx, b)
+			if err != nil {
+				return err
+			}
+			if gotSummon != 1 {
+				return errors.New("content registry summon count")
+			}
 			gotOneOnOne, err := s.Repo.InsertOneOnOne(tctx, scope.Tx, b)
 			if err != nil {
 				return err

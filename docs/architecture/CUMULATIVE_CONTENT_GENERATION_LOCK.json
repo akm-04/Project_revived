@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "status": "CURRENT_CUMULATIVE_CONTENT_GENERATION_LOCK_I9_3A",
+  "status": "CURRENT_CUMULATIVE_CONTENT_GENERATION_LOCK_I9_3E",
   "rule": "Historical validators keep their phase-specific semantic invariants. In cumulative/current mode they may accept only an explicitly registered successor compiler generation at or after their baseline. New generations are append-only review events; registering a generation does not waive capability/count/source/migration/ownership assertions.",
   "generations": [
     {
@@ -298,14 +298,22 @@
       "parser_version": "lua-generated-v18-guild-invite",
       "revision_id": "64366487ec8ed3e7574a64a002fde76b5bfe4e41ad76e019fda00733dc8c1ffa",
       "scope": "Cumulative campaign trials catalog: Daily, Prophecy, Cloud and Challenge source admission, schedules, dropboxes and trial-consumption inputs; existing campaign awards and all unrelated payloads retained."
+    },
+    {
+      "ordinal": 43,
+      "stage": "I9-3E (Vending gacha)",
+      "compiler_version": "i9-3e-gacha",
+      "parser_version": "lua-generated-v18-guild-invite",
+      "revision_id": "8522617e0568aa0dbbd7fe0232c1e532e588c8f33f8d96b2e2eb5f3a1a98fe92",
+      "scope": "Cumulative Vending catalog (I9_GACHA_V1 + I9_GACHA_PRIVATE_POLICY_V1): summon buttons, milestone counters, dropbox pools, summonable heroes, soul caskets, magic summon list and rates, vow inputs; all unrelated payloads retained."
     }
   ],
   "current": {
-    "ordinal": 42,
-    "stage": "I9-3D (Campaign trials)",
-    "compiler_version": "i9-3d-campaign-trials",
+    "ordinal": 43,
+    "stage": "I9-3E (Vending gacha)",
+    "compiler_version": "i9-3e-gacha",
     "parser_version": "lua-generated-v18-guild-invite",
-    "revision_id": "64366487ec8ed3e7574a64a002fde76b5bfe4e41ad76e019fda00733dc8c1ffa",
-    "scope": "Cumulative campaign trials catalog: Daily, Prophecy, Cloud and Challenge source admission, schedules, dropboxes and trial-consumption inputs; existing campaign awards and all unrelated payloads retained."
+    "revision_id": "8522617e0568aa0dbbd7fe0232c1e532e588c8f33f8d96b2e2eb5f3a1a98fe92",
+    "scope": "Cumulative Vending catalog (I9_GACHA_V1 + I9_GACHA_PRIVATE_POLICY_V1): summon buttons, milestone counters, dropbox pools, summonable heroes, soul caskets, magic summon list and rates, vow inputs; all unrelated payloads retained."
   }
 }

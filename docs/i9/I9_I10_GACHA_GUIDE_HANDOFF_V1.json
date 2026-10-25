@@ -32,5 +32,10 @@
  "unknowns": [
   "Original gacha algorithms are not inferred from this handoff; research and policy reconciliation belongs toI10."
  ],
- "evidence": "work/i9/research/campaign_tutorial/gacha_scope_conflict/CONFLICT.json and raw probe6 report/log"
+ "evidence": "work/i9/research/campaign_tutorial/gacha_scope_conflict/CONFLICT.json and raw probe6 report/log",
+ "retarget": {
+  "decision": "D137 (current user, 2026-10-25) supersedes D133: the gacha is ported inside I9-3 (leaves 3E and 3F) and the i10_entry items are discharged there, not at I10.",
+  "discharged_by": "I9_GACHA_V1 (3E: genuine MID56/MID50, tutorial pulls, legacy lobby 56 shape replaced by the summon MID1 overlay)",
+  "remaining_before_i9_3_close": "Fresh unmodified tutorial player walk 100102 -> 100116 -> first campaign battle on the VC and Android with all SAVE_STORY OK (obligation I10-GACHA-STRONG-GUIDE-LINK, applies to I9-3)."
+ }
 }

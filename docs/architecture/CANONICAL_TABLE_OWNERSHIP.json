@@ -4023,6 +4023,52 @@
         "internal/adapters/postgres/dailyconsumestore/"
       ],
       "write_exceptions": []
+    },
+    "content_summon_catalogs": {
+      "owner": "content-registry",
+      "allowed_query_owners": [
+        "content-registry"
+      ],
+      "allowed_read_paths": [
+        "sql/content/",
+        "internal/adapters/postgres/contentstore/",
+        "internal/adapters/postgres/contentqueries/"
+      ],
+      "allowed_write_paths": [
+        "sql/content/",
+        "internal/adapters/postgres/contentstore/",
+        "internal/adapters/postgres/contentqueries/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00084_i9_3e_summon.sql"
+    },
+    "summon_players": {
+      "owner": "Summon",
+      "migration": "migrations/00084_i9_3e_summon.sql",
+      "allowed_query_owners": [
+        "Summon"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/summonstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/summonstore/"
+      ],
+      "write_exceptions": []
+    },
+    "summon_tuning": {
+      "owner": "Summon",
+      "migration": "migrations/00084_i9_3e_summon.sql",
+      "allowed_query_owners": [
+        "Summon"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/summonstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/summonstore/"
+      ],
+      "write_exceptions": []
     }
   }
 }

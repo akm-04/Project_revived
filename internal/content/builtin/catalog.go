@@ -490,6 +490,7 @@ type EmoticonCatalog struct {
 }
 type Catalog struct {
 	Campaign                 CampaignCatalog
+	Summon                   SummonCatalog
 	TopFloor                 TopFloorCatalog
 	OneOnOne                 OneOnOneCatalog
 	League                   LeagueCatalog
@@ -632,6 +633,10 @@ func Load() (*Catalog, error) {
 	if err := decodeAndVerify("campaign_catalog.json", manifest.ArtifactSHA256s, &campaign); err != nil {
 		return nil, err
 	}
+	var summon SummonCatalog
+	if err := decodeAndVerify("summon_catalog.json", manifest.ArtifactSHA256s, &summon); err != nil {
+		return nil, err
+	}
 	var topFloor TopFloorCatalog
 	if err := decodeAndVerify("top_floor_catalog.json", manifest.ArtifactSHA256s, &topFloor); err != nil {
 		return nil, err
@@ -734,6 +739,7 @@ func Load() (*Catalog, error) {
 	}
 	catalog := &Catalog{
 		Campaign:                 campaign,
+		Summon:                   summon,
 		TopFloor:                 topFloor,
 		OneOnOne:                 oneOnOne,
 		League:                   league,
@@ -892,6 +898,9 @@ func validateManifest(raw []byte, manifest *Manifest) error {
 	if manifest.CompilerVersion == "i9-3d-campaign-trials" {
 		expectedSources, expectedArtifacts = 303, 43
 	}
+	if manifest.CompilerVersion == "i9-3e-gacha" {
+		expectedSources, expectedArtifacts = 309, 44
+	}
 	if len(manifest.Sources) != expectedSources {
 		return fmt.Errorf("builtin content: expected %d source records, got %d", expectedSources, len(manifest.Sources))
 	}
@@ -917,6 +926,9 @@ func validateManifest(raw []byte, manifest *Manifest) error {
 
 func validateCatalog(c *Catalog) error {
 	if err := c.Campaign.Validate(); err != nil {
+		return err
+	}
+	if err := c.Summon.Validate(); err != nil {
 		return err
 	}
 	if err := c.TopFloor.Validate(); err != nil {
@@ -1644,7 +1656,7 @@ func validateCatalog(c *Catalog) error {
 
 	caps := append([]string(nil), c.Manifest.EnabledCapabilities...)
 	sort.Strings(caps)
-	wantCaps := []string{"CAMPAIGN_MODE_I9_3A", "COSMETIC_TITLE_CONDITION_I7C6", "ACHIEVEMENT_CATALOG_I7C4FA", "CHAMPIONS_LEAGUE_I7C5F", "CONQUER_MODE_I7C5E", "ARENA_MODE_I7C5D", "ONE_ON_ONE_MODE_I7C5C", "TOP_FLOOR_MODE_I7C5B", "ACHIEVEMENT_TIER_FACTS_I7C4B", "COSMETIC_PRIVILEGE_I7C4A", "STAT_INPUTS_I7C3B", "STAT_RULES_I7C3A", "CONQUER_INPUTS_I7C2J", "EVOLUTION_INPUTS_I7C2I", "SPIRIT_INPUTS_I7C2H", "ELEMENT_INPUTS_I7C2G", "INSCRIPTION_INPUTS_I7C2F", "COURSE_INPUTS_I7C2E", "BOOK_INPUTS_I7C2D", "DORM_INPUTS_I7C2C", "LIBRARY_INPUTS_I7C2B", "CHARACTER_APPEARANCE_CA7", "EQUIPMENT_PRIMITIVES_CA4", "FRIEND_DM_EMOTICON_I7A6A", "FUNCTION_LEVEL_ELIGIBILITY_R5", "GUILD_BROADCAST_I7A8A", "GUILD_INVITE_PRESENTATION_I7A8B", "HERO_CORE_CA2", "HERO_EQUIPMENT_CA4_2", "HERO_FUMO_CA4_3A", "HERO_PROGRESSION_CA2", "HERO_PROMOTION_RESTORATION_CA4_3B", "HERO_RAW_SKILLS_I7C2A", "PET_ACQUISITION_CA3", "PET_CORE_CA3", "PET_EQUIPMENT_CA4_4A", "PET_PROGRESSION_CA3", "PET_PROMOTION_RESTORATION_CA4_4B", "PLAYER_DISPLAY_I7B6A", "PLAYER_EXP_R5", "PRACTICE_CA6", "PUBLIC_PROFILE_PREFERENCES_I7B2B", "PUBLIC_PROFILE_SHOWCASE_SELECTION_I7B3A", "QUALIFIED_ORDINARY_STACK_ITEM_DEFINITIONS", "SCALAR_CRYSTAL", "SCALAR_MANA", "SOCIAL_GIFT_I7A7A", "SUPER_EQUIPMENT_CA4_5", "TEMPORAL_ENERGY_R5", "TEMPORAL_SKILL_POINT_R5", "TEMPORAL_SPIRIT_ENERGY_R5"}
+	wantCaps := []string{"SUMMON_GACHA_I9_3E", "CAMPAIGN_MODE_I9_3A", "COSMETIC_TITLE_CONDITION_I7C6", "ACHIEVEMENT_CATALOG_I7C4FA", "CHAMPIONS_LEAGUE_I7C5F", "CONQUER_MODE_I7C5E", "ARENA_MODE_I7C5D", "ONE_ON_ONE_MODE_I7C5C", "TOP_FLOOR_MODE_I7C5B", "ACHIEVEMENT_TIER_FACTS_I7C4B", "COSMETIC_PRIVILEGE_I7C4A", "STAT_INPUTS_I7C3B", "STAT_RULES_I7C3A", "CONQUER_INPUTS_I7C2J", "EVOLUTION_INPUTS_I7C2I", "SPIRIT_INPUTS_I7C2H", "ELEMENT_INPUTS_I7C2G", "INSCRIPTION_INPUTS_I7C2F", "COURSE_INPUTS_I7C2E", "BOOK_INPUTS_I7C2D", "DORM_INPUTS_I7C2C", "LIBRARY_INPUTS_I7C2B", "CHARACTER_APPEARANCE_CA7", "EQUIPMENT_PRIMITIVES_CA4", "FRIEND_DM_EMOTICON_I7A6A", "FUNCTION_LEVEL_ELIGIBILITY_R5", "GUILD_BROADCAST_I7A8A", "GUILD_INVITE_PRESENTATION_I7A8B", "HERO_CORE_CA2", "HERO_EQUIPMENT_CA4_2", "HERO_FUMO_CA4_3A", "HERO_PROGRESSION_CA2", "HERO_PROMOTION_RESTORATION_CA4_3B", "HERO_RAW_SKILLS_I7C2A", "PET_ACQUISITION_CA3", "PET_CORE_CA3", "PET_EQUIPMENT_CA4_4A", "PET_PROGRESSION_CA3", "PET_PROMOTION_RESTORATION_CA4_4B", "PLAYER_DISPLAY_I7B6A", "PLAYER_EXP_R5", "PRACTICE_CA6", "PUBLIC_PROFILE_PREFERENCES_I7B2B", "PUBLIC_PROFILE_SHOWCASE_SELECTION_I7B3A", "QUALIFIED_ORDINARY_STACK_ITEM_DEFINITIONS", "SCALAR_CRYSTAL", "SCALAR_MANA", "SOCIAL_GIFT_I7A7A", "SUPER_EQUIPMENT_CA4_5", "TEMPORAL_ENERGY_R5", "TEMPORAL_SKILL_POINT_R5", "TEMPORAL_SPIRIT_ENERGY_R5"}
 	sort.Strings(wantCaps)
 	if len(caps) != len(wantCaps) {
 		return fmt.Errorf("builtin content: enabled capability count drift: %v", caps)

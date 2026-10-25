@@ -620,6 +620,14 @@ func (r repo) InsertCampaign(_ context.Context, x tx.Tx, b Bundle) (int64, error
 	return 1, nil
 }
 
+func (r repo) InsertSummon(_ context.Context, x tx.Tx, b Bundle) (int64, error) {
+	t := x.(*modelTx)
+	v := t.installed[b.RevisionID()]
+	v.SummonCount = 1
+	t.installed[b.RevisionID()] = v
+	return 1, nil
+}
+
 func (r repo) InsertTopFloor(_ context.Context, x tx.Tx, b Bundle) (int64, error) {
 	t := x.(*modelTx)
 	v := t.installed[b.RevisionID()]

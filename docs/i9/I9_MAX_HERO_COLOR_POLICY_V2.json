@@ -1,11 +1,11 @@
 {
  "contract_id": "I9_MAX_HERO_COLOR_POLICY_V2",
  "version": 2,
- "classification": "PRIVATE_POLICY_WITH_SOURCE_PREREQUISITE",
+ "classification": "PRIVATE_POLICY",
  "authorization": "D130 prerequisite reconciliation and D131 explicit current user approval to correct the private-server policy to align with source purple7; retain original-server UNKNOWN boundaries.",
  "source_fact": "EquipQuality.PURPLE is7, BLUE1 is5. Prophecy source PreperationBattlePreWindow requires own or rental purple. Rental-only path remains deferred.",
  "supersedes": "Active production selection of GXB1_PRESERVATION_MAX_HERO_COLOR_V1 value5; retain immutable V1 provider and historical proof.",
- "policy": "Current production immutable nonlocking exposed max_color7 and MID57 one-click promotion/collect split, revision GXB1_PRESERVATION_MAX_HERO_COLOR_V2. Smallest one-click setting satisfying the active source-backed Prophecy prerequisite. Original server setting/schedule UNKNOWN. MID51 retains its separately qualified color<16 promotion contract; this is not a universal hard growth cap.",
+ "policy": "Current production immutable nonlocking exposed max_color7 and MID57 one-click promotion/collect split, revision GXB1_PRESERVATION_MAX_HERO_COLOR_V2. D136: chosen so MID57 one-click promotes through purple and the client shows tiers up to purple; not a Prophecy prerequisite, because stock MID51 (not gated by maxHeroColor) already reaches purple and 16 under value 5. Original server setting/schedule UNKNOWN. MID51 retains its separately qualified color<16 promotion contract; this is not a universal hard growth cap.",
  "owner": "PlayerProgression/I5 existing MaxHeroColorPolicyProvider; same selected provider instance feeds MID17, MID122 and Character MID57 policy provenance.",
  "boundaries": [
   "No mutable max-color row, clock or schedule. No new migration.",

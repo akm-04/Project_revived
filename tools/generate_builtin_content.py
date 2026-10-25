@@ -21,12 +21,18 @@ from pathlib import Path
 from typing import Any, Iterable
 
 SCHEMA_VERSION = 1
-COMPILER_VERSION = "i9-3d-campaign-trials"
+COMPILER_VERSION = "i9-3e-gacha"
 PARSER_VERSION = "lua-generated-v18-guild-invite"
 EXPECTED_SOURCE_ARCHIVE_SHA256 = "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
 SOURCE_PREFIX = "app-assets/output/assets/src_64/"
 
 SOURCE_MANIFEST = [
+    ('data/tables/summon.lua', 'e34ac8b360d0a623b4c846251e71db939d3920e9769ab40889c656904a39183d', 'I9_3E_GACHA_SOURCE_BOUNDARY'),
+    ('data/tables/dropbox.lua', '82bcde6486b711f393bf74e54c6ac28239c04fb2d78adf3fd23ff56c1183e2cb', 'I9_3E_GACHA_SOURCE_BOUNDARY'),
+    ('data/tables/soul_casket.lua', 'ce7022526f6fe234dee67fe584c92ac18c0814c009401ca45dc254a74c9d08d6', 'I9_3E_GACHA_SOURCE_BOUNDARY'),
+    ('data/tables/magic_summon_list.lua', '14923b52552e3ff02b1bcbd733df13458f3071559dc5fd36be81d9241ab98e50', 'I9_3E_GACHA_SOURCE_BOUNDARY'),
+    ('data/tables/magic_drop_rate.lua', '8828e1639bc07e1653fea7c86b5113e6ccfd756f3e66549a459ab8fbc3ce5c9a', 'I9_3E_GACHA_SOURCE_BOUNDARY'),
+    ('app/windows/SummonWindow.lua', 'ff7a49683fa9d47bd031f9f2625d2901a652a4ae305486ad6c2f481f9aa214af', 'I9_3E_GACHA_SOURCE_BOUNDARY'),
     ('app/windows/MapDetailWindow.lua', '5a137edc609f9d2082c5df6bf50ef05b6ef54642a7ba5bf6dca8fe0f1c4c3898', 'I9_3D_CLOUD_PET_SOURCE_BOUNDARY'),
     ('app/windows/SelectPetTeamWindow.lua', 'f41b0edb1d9486969d8e14c781a7d99c8a44d96bfa13c5c4518e5260984dbab1', 'I9_3D_CLOUD_PET_SOURCE_BOUNDARY'),
     ('data/tables/monster.lua', '44d5ca1524384c758a0f2d4f103e04b6aed6ffbe7b894c786b6cea0209164e5f', 'I9_3D_CHALLENGE_ADMISSION_SOURCE_BOUNDARY'),
@@ -203,6 +209,7 @@ SOURCE_MANIFEST.append(('app/windows/HeroGiftBoxWindow.lua','d6065c3d601f5820915
 SOURCE_MANIFEST.append(('app/windows/WhiteAlbumWindow.lua','851a53f588b59d95cfe460f3399ab1a6904fff7714131c358f3c3a73910b6bb9',"LIBRARY_INPUT_SOURCE_AUTHORITY"))
 
 ENABLED_CAPABILITIES = [
+    "SUMMON_GACHA_I9_3E",
     "CAMPAIGN_MODE_I9_3A",
     "COSMETIC_TITLE_CONDITION_I7C6",
     "ACHIEVEMENT_CATALOG_I7C4FA",
@@ -405,6 +412,7 @@ from privilege_content import build_privilege
 from achievement_content import build_achievement
 from top_floor_content import build_top_floor
 from campaign_content import build_campaign
+from summon_content import build_summon
 from one_on_one_content import build_one_on_one
 from arena_content import build_arena
 from league_content import build_league
@@ -2202,6 +2210,7 @@ def build_artifacts(blobs: dict[str, SourceBlob], archive_sha256: str) -> dict[s
     dorm_artifact=build_dorm(blobs,parse_generated_lua_table,pipe_ints,hero_artifact["templates"],partner_keys,partner_rows,super_keys,super_rows,indexed_field,items,CompileError)
     artifacts = {
         "campaign_catalog.json":build_campaign(blobs,parse_generated_lua_table,parse_base64_indexed_lua_table,indexed_field),
+        "summon_catalog.json":build_summon(blobs,parse_generated_lua_table,parse_base64_indexed_lua_table,indexed_field),
         "top_floor_catalog.json":build_top_floor(blobs,parse_generated_lua_table),
         "one_on_one_catalog.json":build_one_on_one(blobs,parse_generated_lua_table),
         "arena_catalog.json":build_arena(blobs,parse_generated_lua_table),

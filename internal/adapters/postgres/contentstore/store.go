@@ -211,6 +211,12 @@ func (Store) VerifyRevision(ctx context.Context, q tx.Queryer, b registry.Bundle
 		return registry.Verification{}, err
 	}
 	v.Exact = v.Exact && campaignExact
+	var summonExact bool
+	err = q.QueryRow(ctx, verifySummonSQL, b.RevisionID(), string(b.SummonJSON())).Scan(&summonExact, &v.SummonCount)
+	if err != nil {
+		return registry.Verification{}, err
+	}
+	v.Exact = v.Exact && summonExact
 	var oneOnOneExact bool
 	err = q.QueryRow(ctx, verifyOneOnOneSQL, b.RevisionID(), string(b.OneOnOneJSON())).Scan(&oneOnOneExact, &v.OneOnOneCount)
 	if err != nil {

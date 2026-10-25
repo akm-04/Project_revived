@@ -1,0 +1,39 @@
+{
+ "contract_id": "I9_GACHA_V1",
+ "version": 1,
+ "classification": "SOURCE_BOUND_CONTRACT",
+ "authorization": "D137 (current user, 2026-10-25): port the whole V1 gacha into I9-3 as leaves 3E and 3F, complete and not stubbed; D138 scope; user 2026-10-25: keep the V1 event-girl Medium overlay and SX rotations and leave operator hooks for rates and machine rosters.",
+ "stages": {
+  "I9-3E": "Classic Vending: MID56 (and MID1 detail[\"56\"]), MID50 types 1, 2, 3, 6, 7, 10, 11, tutorial pulls, birth companion, duplicates, featured overlay and rotation, operator tuning overlay.",
+  "I9-3F": "Premium: MID50 type 4 (SX, VIP gate), MID70/71 (Magic), MID305/306 (Vows); MID59 and MID781 regression."
+ },
+ "owners": {
+  "state": "Summon owns summon_players (one row per player, free timers, milestone counters, pity) and summon_tuning (operator overlay singleton); migration 00084.",
+  "content": "content_summon_catalogs: generated summon_catalog.json (tools/summon_content.py, content generation 43) from summon.lua, dropbox.lua, misc.lua, partner.lua, soul_casket.lua, magic_summon_list.lua, magic_drop_rate.lua plus I9_GACHA_PRIVATE_POLICY_V1.",
+  "value": "Costs through I5 DebitMaterialCostTx (mana, crystal, ticket items); items and fragments through I5 SettleGrantTx domain summon; heroes through characterhero AwardStoryPartnerTx (unique origin, collection admission, fresh facets).",
+  "code": "internal/domain/summon (pure rules), internal/application/summon (Mode), internal/adapters/postgres/summonstore, internal/adapters/stockruntime/summon_dispatcher.go, internal/adapters/postgres/characterbirth/companion.go"
+ },
+ "rules": [
+  "G1 Wire: 56 takes no params and answers mana_free_time, crystal_free_time, mana_free_num, main_ids (2 SX), second_ids (3 SX), mana_id, partner_id, pet_id and directional_show_id only when a magic target exists. 50 takes summon_type (required) and summon_index (absent = 1) and answers result[] (hero rows: stock hero projection plus is_partner true; duplicate rows: table_id stone, item_num, to_stone true; item rows: table_id, item_num), reward only on the tutorial Small pull, summon_info and economy_.",
+  "G2 Refusals: unknown button is HTTP 400; refused admission (timer, count, balance, hero capacity, unported family) is HTTP 200 {error_code 1, result []}; anything else 503 summon_unavailable. No partial pull is ever committed.",
+  "G3 Exactly once: one operation receipt per pull (domain summon, gxb.summon.pull.v1); the draw stream is derived from the operation, so a retry or unknown COMMIT replays the stored rows (D144, D145).",
+  "G4 Lock order: actor fence, HeroRoot 400 (LockStoryRosterTx), summon_players row, I5 rows, open objectives. Loads (56, MID1 overlay) take no lock and never create the state row.",
+  "G5 Duplicates: an owned origin, or one gained earlier in the same pull, becomes stone_id fragments 7/14/30 by initial star (D116, D141).",
+  "G6 Tutorial: the first Small pull is Lavia 10001002 plus summon_reward 50001002 x10, the first Medium free pull is Pandaria 10001003 (summon.lua summon_special milestones); Aquaris 10001001 is granted at birth (D139). The client guide 100102 to 100116 runs unchanged (I9-TUTORIAL-ALWAYS-ON).",
+  "G7 Featured: Medium featured overlay and its 56-girl cohort plus 58-girl extension, SX main ids per 7-day block and second ids per day are a fixed-seed calendar on modes.Day GMT+8 (D142).",
+  "G8 Operator hook: summon_tuning.payload (versioned JSON) overlays rates, pity, extension weight, machine cohorts and pinned featured/main/second ids. Catalog.Tune validates it; an invalid overlay is logged and the source policy is served. Pool row weights inside dropbox pools are not tunable (shortcut, I11).",
+  "G9 Facts: every committed pull records one SUMMON objective fact with Delta = slots pulled in the settling transaction (task_req 17, I9-MISSION-SUMMON-FACT). Partner 18 (specific girl owned) is high-water from player_heroes.",
+  "G10 Surface: 50 and 56 ACTIVE (I9-3E); 70, 71, 305, 306 ACTIVE at I9-3F; the 21 event-gacha MIDs stay LATER with their seasonal events (D138) and must reuse internal/domain/summon draw rules and this receipt pattern when they land."
+ ],
+ "obligations": [
+  "I11-GACHA-OPERATOR-TUNING: the operator tool edits summon_tuning through Catalog.Tune validation (never raw SQL), shows the active overlay and the served rotation, and audits every change.",
+  "I10-EVENT-GACHA-REUSE: seasonal event gachas (D138 list) reuse the summon domain, receipts, fragment rule and the I5 value owners; no second draw implementation.",
+  "I9-4-SUMMON-FACT-PROOF: I9-4 proves one task_req 17 mission row moves from a real MID50 pull (I9-MISSION-PRODUCERS).",
+  "I9-3F-PREMIUM: SX, Magic and Vows replace the 3E shortcut refusal for type 4 and button 33 before the I9-3 close."
+ ],
+ "unknowns": [
+  "Original server gacha math, the moment Aquaris was granted and the summon_reward quantity are UNKNOWN; the numbers are I9_GACHA_PRIVATE_POLICY_V1.",
+  "Whether task_req 17 counted pulls or summon actions is UNKNOWN; I9 counts pulls (D148)."
+ ],
+ "evidence": "work/i9/stages/I9-3/PLAN_3E.md, RESEARCH_3E.md, research_3e/stock/i9_3e_summon, backend internal/integration/playerdisplay/i9_3e_summon_native_test.go, internal/domain/summon/summon_test.go"
+}
