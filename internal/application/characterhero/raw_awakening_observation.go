@@ -39,6 +39,8 @@ func (r RawAwakeningObservationReader) RawAwakeningTx(c context.Context, sc ca.C
 		return out, character.ErrRawAwakeningUnavailable
 	}
 	producer := fmt.Sprintf("CharacterHero/%s/%d/%d/facet%d/%s", f.BirthPolicy, ref.PlayerID, ref.PartnerID, f.Version, f.BirthAt.UTC().Format(time.RFC3339Nano))
- if f.Version > 1 { producer = f.ProducerReference }
- return ca.HeroRawAwakeningObservation{Ref: ref, StateVersion: h.StateVersion, ContentRevision: sc.ContentRevision, ObservedAt: sc.ObservedAt, Known: true, RawStage: f.RawStage, ProducerReference: producer}, nil
+	if f.Version > 1 {
+		producer = f.ProducerReference
+	}
+	return ca.HeroRawAwakeningObservation{Ref: ref, StateVersion: h.StateVersion, ContentRevision: sc.ContentRevision, ObservedAt: sc.ObservedAt, Known: true, RawStage: f.RawStage, ProducerReference: producer}, nil
 }
