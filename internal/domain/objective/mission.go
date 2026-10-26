@@ -3,6 +3,7 @@ package objective
 import (
 	"errors"
 	"fmt"
+	"hash/fnv"
 	"time"
 
 	"gxb.local/backend/v2/internal/domain/grant"
@@ -17,16 +18,44 @@ type MissionPrerequisite struct {
 }
 
 type MissionPresentation struct {
-	DetailType      int64      `json:"detail_type"`
-	Condition       int64      `json:"condition"`
-	Parameters      []int64    `json:"parameters"`
-	Next            int64      `json:"next"`
-	DeferredUntil   string     `json:"deferred_until"`
-	BaseReward      grant.Plan `json:"base_reward"`
-	BattlepassScore int64      `json:"battlepass_score"`
-	VIPSweepReward  bool       `json:"vip_sweep_reward"`
-	VIPSweepItemID  int64      `json:"vip_sweep_item_id"`
-	VIPSweepByLevel []int64    `json:"vip_sweep_by_level,omitempty"`
+	DetailType      int64               `json:"detail_type"`
+	Condition       int64               `json:"condition"`
+	Parameters      []int64             `json:"parameters"`
+	Next            int64               `json:"next"`
+	DeferredUntil   string              `json:"deferred_until"`
+	BaseReward      grant.Plan          `json:"base_reward"`
+	BattlepassScore int64               `json:"battlepass_score"`
+	VIPSweepReward  bool                `json:"vip_sweep_reward"`
+	VIPSweepItemID  int64               `json:"vip_sweep_item_id"`
+	VIPSweepByLevel []int64             `json:"vip_sweep_by_level,omitempty"`
+	InscriptionPool []InscriptionChoice `json:"inscription_pool,omitempty"`
+}
+
+type InscriptionChoice struct {
+	ItemID int64 `json:"item_id"`
+	Weight int64 `json:"weight"`
+}
+
+// InscriptionFor picks the row's inscription item for one player and generation. The source table names a weighted pool;
+// how the original server drew from it is UNKNOWN, so the pick is a stable hash (PRIVATE_POLICY D186) that needs no storage.
+func (m MissionDefinition) InscriptionFor(playerID int64, generation string) int64 {
+	total := int64(0)
+	for _, choice := range m.Presentation.InscriptionPool {
+		total += choice.Weight
+	}
+	if total <= 0 {
+		return 0
+	}
+	hash := fnv.New64a()
+	fmt.Fprintf(hash, "%d:%d:%s", playerID, m.ObjectiveID, generation)
+	point := int64(hash.Sum64() % uint64(total))
+	for _, choice := range m.Presentation.InscriptionPool {
+		if point < choice.Weight {
+			return choice.ItemID
+		}
+		point -= choice.Weight
+	}
+	return 0
 }
 
 func (m MissionDefinition) RewardFor(level, maximumLevel, vipLevel int64) (grant.Plan, error) {

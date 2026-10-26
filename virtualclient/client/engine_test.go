@@ -96,7 +96,11 @@ func TestNativeHelpers(t *testing.T) {
 		node:setContentSize(4, 5)
 		node:setName("layer")
 		local copy = node:clone()
-		result.cloneWidth, result.cloneName = copy:getContentSize().width, copy:getName()`)
+		result.cloneWidth, result.cloneName = copy:getContentSize().width, copy:getName()
+		clone = function(object) return {} end
+		local items = clone({node, {node}})
+		result.cloneKeepsEngineObject = items[1] == node and items[2][1] == node and items[2] ~= nil`)
+	expect(t, client, "result.cloneKeepsEngineObject", lua.LTrue)
 	expect(t, client, "result.hex", lua.LNumber(255))
 	expect(t, client, "result.plainHex", lua.LNumber(255))
 	expect(t, client, "result.decimal", lua.LNumber(12))

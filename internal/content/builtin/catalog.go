@@ -127,6 +127,10 @@ type ObjectivePresentation struct {
 	VIPSweepReward  bool                `json:"vip_sweep_reward"`
 	VIPSweepItemID  int64               `json:"vip_sweep_item_id"`
 	VIPSweepByLevel []int64             `json:"vip_sweep_by_level,omitempty"`
+	InscriptionPool []struct {
+		ItemID int64 `json:"item_id"`
+		Weight int64 `json:"weight"`
+	} `json:"inscription_pool"`
 }
 type ObjectiveDefinition struct {
 	ProgramID          string                `json:"program_id"`
@@ -964,7 +968,7 @@ func validateManifest(raw []byte, manifest *Manifest) error {
 	if manifest.CompilerVersion == "i9-4a-missions" || manifest.CompilerVersion == "i9-4a-mission-reconciliation" {
 		expectedSources, expectedArtifacts = 314, 44
 	}
-	if manifest.CompilerVersion == "i9-4b-activity" {
+	if manifest.CompilerVersion == "i9-4b-activity" || manifest.CompilerVersion == "i9-4b-inscription-missions" {
 		expectedSources, expectedArtifacts = 319, 44
 	}
 	if len(manifest.Sources) != expectedSources {

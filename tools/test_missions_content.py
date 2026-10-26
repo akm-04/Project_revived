@@ -30,6 +30,9 @@ class MissionCompilerTests(unittest.TestCase):
         self.assertEqual(rows[30014]['prerequisite_policy']['unavailable_reason'], 'UNKNOWN_SOURCE_CAMPAIGN_200114')
         self.assertEqual(rows[10014]['presentation']['deferred_until'], 'I10_COMMERCE_ACTIVE_ENTITLEMENTS')
         self.assertEqual(rows[30001]['presentation']['parameters'], [100019, 2])
+        self.assertEqual(len(rows[10031]['presentation']['inscription_pool']), 12)
+        self.assertIn(dict(item_id=160400101, weight=8), rows[10031]['presentation']['inscription_pool'])
+        self.assertEqual(rows[10002]['presentation']['inscription_pool'], [])
 
     def test_unknown_condition_and_broken_chain_refused(self):
         source = gen.parse_generated_lua_table(self.blobs['data/tables/mission.lua'].data)

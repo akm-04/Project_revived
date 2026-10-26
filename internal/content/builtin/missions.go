@@ -122,6 +122,11 @@ func validateMissionRow(row ObjectiveDefinition) error {
 	if row.Presentation.VIPSweepReward && (kind != 113 || row.Presentation.VIPSweepItemID != 50001013 || len(row.Presentation.VIPSweepByLevel) != 16) {
 		return errors.New("invalid mission VIP profile")
 	}
+	for _, choice := range row.Presentation.InscriptionPool {
+		if choice.ItemID <= 0 || choice.Weight <= 0 {
+			return errors.New("invalid mission inscription pool")
+		}
+	}
 	return nil
 }
 

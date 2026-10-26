@@ -104,6 +104,10 @@ func MissionProjection(view MissionView, at time.Time, family objective.StockFam
 	partner := map[string]any{}
 	partnerHooks := []any{}
 	marks := map[int64]bool{}
+	definitions := make(map[int64]objective.MissionDefinition, len(view.Definitions))
+	for _, definition := range view.Definitions {
+		definitions[definition.ObjectiveID] = definition
+	}
 	for _, instance := range view.Instances {
 		if instance.ClaimState == objective.Claimed && !missionEntitlement(instance.ObjectiveID, view.Definitions) {
 			continue
@@ -127,7 +131,11 @@ func MissionProjection(view MissionView, at time.Time, family objective.StockFam
 			rows, _ := partner[key].([]any)
 			partner[key] = append(rows, missionRow(instance))
 		} else {
-			byFamily[f] = append(byFamily[f], missionRow(instance))
+			row := missionRow(instance)
+			if item := definitions[instance.ObjectiveID].InscriptionFor(int64(instance.PlayerID), instance.GenerationID); item > 0 {
+				row["inscript_id"] = item
+			}
+			byFamily[f] = append(byFamily[f], row)
 		}
 	}
 	list := func(f objective.StockFamily) any {
@@ -287,6 +295,9 @@ func (s Service) ClaimMission(ctx context.Context, actor identity.ActorContext, 
 		plan, err := definition.RewardFor(progression.Level, int64(len(rule.Rows)), privilege.VIPLevel)
 		if err != nil {
 			return err
+		}
+		if item := selected.InscriptionFor(int64(actor.PlayerID), generation); item > 0 {
+			plan.Lines = append(plan.Lines, grant.Line{Kind: grant.StackItem, ItemID: item, Amount: 1})
 		}
 		claimOp, err := missionRewardOperation(timed.Operation(), instance.ContentRevision)
 		if err != nil {

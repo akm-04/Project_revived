@@ -94,3 +94,21 @@ func TestMissionRewardSelectsOneLevelAlternativeAndPinnedVIPQuantity(t *testing.
 		t.Fatal("invalid progression accepted")
 	}
 }
+
+func TestInscriptionForIsStableWeightedAndEmptyWithoutPool(t *testing.T) {
+	definition := MissionDefinition{ObjectiveID: 10031, Presentation: MissionPresentation{InscriptionPool: []InscriptionChoice{{ItemID: 160400101, Weight: 8}, {ItemID: 160400102, Weight: 8}, {ItemID: 160400201, Weight: 0}}}}
+	seen := map[int64]bool{}
+	for player := int64(1); player <= 64; player++ {
+		item := definition.InscriptionFor(player, "day:2026-10-26")
+		if item != definition.InscriptionFor(player, "day:2026-10-26") {
+			t.Fatal("pick is not stable")
+		}
+		seen[item] = true
+	}
+	if len(seen) != 2 || !seen[160400101] || !seen[160400102] {
+		t.Fatalf("picks = %v", seen)
+	}
+	if item := (MissionDefinition{ObjectiveID: 10002}).InscriptionFor(1, "day:2026-10-26"); item != 0 {
+		t.Fatalf("no pool pick = %d", item)
+	}
+}

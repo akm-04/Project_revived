@@ -66,6 +66,18 @@ def rewards(row, suffix):
     return dict(Source=dict(PolicyVersion='I9_MISSIONS_V1'), Lines=lines)
 
 
+def inscription_pool(row, inscriptions):
+    family = int(row['inscription'] or 0)
+    if (family > 0) != (row['show_award'] == 'inscript'):
+        raise ValueError('Mission inscription award drift')
+    if not family:
+        return []
+    items, weights = numbers(inscriptions[family]['item_id']), numbers(inscriptions[family]['rand'])
+    if len(items) != len(weights) or any(value <= 0 for value in items + weights):
+        raise ValueError('Mission inscription pool drift')
+    return [dict(item_id=item, weight=weight) for item, weight in zip(items, weights)]
+
+
 def build_missions(blobs, parse):
     rows = sorted(parse(blobs['data/tables/mission.lua'].data), key=lambda row: int(row['id']))
     if Counter(int(row['new_type']) for row in rows) != {1: 35, 2: 184, 4: 250, 6: 7}:
@@ -73,6 +85,7 @@ def build_missions(blobs, parse):
     functions = {int(row['id']): row for row in parse(blobs['data/tables/function.lua'].data)}
     if functions[84]['open_control'] != '1':
         raise ValueError('Mission reward column selection drift')
+    inscriptions = {int(row['id']): row for row in parse(blobs['data/tables/inscription.lua'].data)}
     definitions = []
     for row in rows:
         family, kind = int(row['new_type']), int(row['task_req'])
@@ -112,7 +125,8 @@ def build_missions(blobs, parse):
                                 presentation=dict(condition=kind, parameters=parameters, next=following, detail_type=int(row['detail_type']),
                                                   deferred_until=deferred, base_reward=rewards(row, ''),
                                                   battlepass_score=int(row['battlepass_score'] or 0),
-                                                  vip_sweep_reward=kind == 113, vip_sweep_item_id=int(row['award_id_new']) if kind == 113 else 0)))
+                                                  vip_sweep_reward=kind == 113, vip_sweep_item_id=int(row['award_id_new']) if kind == 113 else 0,
+                                                  inscription_pool=inscription_pool(row, inscriptions))))
     by_id = {row['objective_id']: row for row in definitions}
     if len(by_id) != 476:
         raise ValueError('Duplicate mission id')

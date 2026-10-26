@@ -1217,3 +1217,28 @@ setmetatable(_G, {__index = function(_, key)
 	rawset(_G, key, value)
 	return value
 end})
+-- On a device engine objects are tolua userdata, which framework clone() hands back unchanged; proxies are tables, so the stock
+-- clone would copy them into unregistered tables. The same deep copy, passing engine objects through.
+getmetatable(_G).__newindex = function(globals, key, value)
+	if key == "clone" and type(value) == "function" then
+		value = function(object)
+			local copies = {}
+			local function copy(item)
+				if type(item) ~= "table" or names[item] then
+					return item
+				end
+				if copies[item] then
+					return copies[item]
+				end
+				local result = {}
+				copies[item] = result
+				for field, entry in pairs(item) do
+					result[copy(field)] = copy(entry)
+				end
+				return setmetatable(result, getmetatable(item))
+			end
+			return copy(object)
+		end
+	end
+	rawset(globals, key, value)
+end

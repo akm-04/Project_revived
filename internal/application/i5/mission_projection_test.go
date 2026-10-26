@@ -57,3 +57,22 @@ func TestActivityFlagsAndReadyChestRedmark(t *testing.T) {
 		t.Fatalf("stock flags %v", flags)
 	}
 }
+
+func TestInscriptionDailyRowCarriesInscriptID(t *testing.T) {
+	at := time.Unix(100000, 0).UTC()
+	root, err := objective.NewMissionRoot(100001, at)
+	if err != nil {
+		t.Fatal(err)
+	}
+	definition := objective.MissionDefinition{ObjectiveID: 10031, Presentation: objective.MissionPresentation{InscriptionPool: []objective.InscriptionChoice{{ItemID: 160400101, Weight: 8}}}}
+	view := MissionView{Root: root, Definitions: []objective.MissionDefinition{definition}, Instances: []objective.Instance{
+		{PlayerID: 100001, ProgramID: "mission:1", ObjectiveID: 10031, GenerationID: "day:1"},
+		{PlayerID: 100001, ProgramID: "mission:1", ObjectiveID: 10002, GenerationID: "day:1"}}}
+	rows := MissionProjection(view, at, objective.Daily)["mission_list"].([]any)
+	if rows[0].(map[string]any)["inscript_id"] != int64(160400101) {
+		t.Fatal(rows)
+	}
+	if _, ok := rows[1].(map[string]any)["inscript_id"]; ok {
+		t.Fatal(rows)
+	}
+}
