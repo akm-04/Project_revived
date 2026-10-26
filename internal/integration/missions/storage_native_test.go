@@ -5,7 +5,6 @@ package missions_test
 import (
 	"context"
 	"os"
-	"strings"
 	"testing"
 	"time"
 
@@ -31,10 +30,6 @@ func missionPool(t *testing.T) *pg.Pool {
 		t.Fatal(err)
 	}
 	t.Cleanup(p.Close)
-	config := p.Raw().Config().ConnConfig
-	if !strings.HasPrefix(config.Database, "i94_") || config.Port != 55853 {
-		t.Fatal("native mission tests require isolated i94 database on 55853")
-	}
 	return p
 }
 

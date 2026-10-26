@@ -942,7 +942,7 @@
    "family": "MISSIONS_DAILY_WEEKLY",
    "disposition": "ACTIVE",
    "target": "I9-4",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": "STATE_BACKED"
   },
   {
@@ -1023,7 +1023,7 @@
    "family": "MISSIONS_DAILY_WEEKLY",
    "disposition": "ACTIVE",
    "target": "I9-4",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": "LITERAL_STUB"
   },
   {
@@ -1032,7 +1032,7 @@
    "family": "MISSIONS_DAILY_WEEKLY",
    "disposition": "ACTIVE",
    "target": "I9-4",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": "LITERAL_STUB"
   },
   {

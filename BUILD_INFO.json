@@ -811,7 +811,7 @@
   "target_postgresql": "18.6",
   "target_sqlc": "1.31.1",
   "toolbox_archive_sha256": "e4e194c9627929299577364b953b2468d6118fac4283fd8030f10b5a27456c2b",
-  "version": "v0.147.0",
+  "version": "v0.148.0",
   "w2_claimed": false,
   "i7c5b_contract": "docs/i7c5b-top-floor/I7C5B_POLICY.json",
   "i7c5b_preimplementation_pass": "730.0",
