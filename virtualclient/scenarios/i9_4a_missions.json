@@ -28,5 +28,8 @@
   "wait:8",
   "lua:local w = xyd.WindowManager.get():getWindow('summon') if not w then error('vc-summon-window') end w:goldSummon(1)",
   "wait:8",
-  "lua:local row = xyd.ModelManager.get():loadModel(xyd.ModelType.TASK).tasks[xyd.TaskType.DAILY][10009] if not row or row.count ~= 1 then error('vc-daily-10009-after-pull-' .. tostring(row and row.count)) end"],
- "settle_seconds":10,"expect_ok":[2736,161,112,113,114,50,56]}
+  "lua:local row = xyd.ModelManager.get():loadModel(xyd.ModelType.TASK).tasks[xyd.TaskType.DAILY][10009] if not row or row.count ~= 1 then error('vc-daily-10009-after-pull-' .. tostring(row and row.count)) end",
+  "lua:xyd.Backend.get():request(162, {})",
+  "wait:5",
+  "lua:local row = xyd.ModelManager.get():loadModel(xyd.ModelType.TASK).tasks[xyd.TaskType.DAILY][10009] if not row or row.count ~= 1 or row.is_complete == 1 and row.is_reward == 1 then error('vc-162-mutated-10009') end"],
+ "settle_seconds":10,"expect_ok":[2736,161,112,113,114,50,56],"expect_inactive":[162]}
