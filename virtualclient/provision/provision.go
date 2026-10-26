@@ -131,6 +131,14 @@ func Progress(context context.Context, databaseURL, accountID string, level int6
 		if err != nil {
 			return nil, fmt.Errorf("summon policy %d: %w", table, err)
 		}
+		// The I9-3E birth companion is already owned, and MID59 refuses an owned origin.
+		var owned bool
+		if err := pool.QueryRow(context, `SELECT EXISTS(SELECT 1 FROM player_heroes WHERE player_id=$1 AND origin_table_id=$2)`, playerID, policy.Template.OriginTableID).Scan(&owned); err != nil {
+			return nil, fmt.Errorf("owned hero %d: %w", table, err)
+		}
+		if owned {
+			continue
+		}
 		lines = append(lines, grant.Line{Kind: grant.StackItem, ItemID: policy.Template.FragmentItemID, Amount: policy.FragmentCount})
 		mana += policy.Mana
 		summons = append(summons, Summon{TableID: table, Stone: policy.Template.FragmentItemID, StoneNum: policy.FragmentCount})
