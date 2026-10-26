@@ -323,3 +323,52 @@ func TestSignInNativeSourceHeroFreshFacetsAndDuplicate(t *testing.T) {
 		t.Fatal("duplicate Hero created", count, err)
 	}
 }
+
+func TestSignInNativeCrystalAwardWireAndCustody(t *testing.T) {
+	p := missionPool(t)
+	ctx := context.Background()
+	at := time.Date(2026, 11, 1, 12, 0, 0, 0, time.UTC)
+	a := runtimeActor(t, p, at)
+	clock := &missionClock{at: at}
+	s := runtimeService(p, clock)
+	content := contentstore.Store{Queryer: p}
+	s.SignIn = &i5.SignInRuntime{Store: i5store.Store{Queryer: p}, Content: content}
+	revision, err := content.ActiveRevision(ctx, p)
+	if err != nil {
+		t.Fatal(err)
+	}
+	catalog, err := content.SignInCatalogTx(ctx, p, revision)
+	if err != nil {
+		t.Fatal(err)
+	}
+	month, err := catalog.Month(11)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var before int64
+	if err = p.QueryRow(ctx, `SELECT COALESCE((SELECT amount FROM player_currency_balances WHERE player_id=$1 AND resource_key='crystal'),0)`, int64(a.PlayerID)).Scan(&before); err != nil {
+		t.Fatal(err)
+	}
+	for _, award := range month.Awards {
+		body, err := s.ClaimSignIn(ctx, a, runtimeOperation(t, clock.at))
+		if err != nil {
+			t.Fatal(err)
+		}
+		if award.Crystal > 0 {
+			wire := body["award"].(map[string]any)
+			if wire["table_id"] != int64(-1) || wire["item_num"] != award.Crystal || wire["to_stone"] != false {
+				t.Fatal("Crystal wire", body)
+			}
+			var after int64
+			if err = p.QueryRow(ctx, `SELECT amount FROM player_currency_balances WHERE player_id=$1 AND resource_key='crystal'`, int64(a.PlayerID)).Scan(&after); err != nil || after-before != award.Crystal {
+				t.Fatal("Crystal custody", before, after, err)
+			}
+			if body["economy_"] == nil {
+				t.Fatal("Crystal balance sideband missing", body)
+			}
+			return
+		}
+		clock.at = clock.at.Add(24 * time.Hour)
+	}
+	t.Fatal("source month lacks Crystal proof row")
+}
