@@ -38,5 +38,7 @@ func (r RawAwakeningObservationReader) RawAwakeningTx(c context.Context, sc ca.C
 	if f.Validate() != nil || f.Ref != ref || f.CreationContentRevision != h.CreationContentRevision || !f.BirthAt.Equal(h.CreatedAt) || sc.ObservedAt.Before(f.UpdatedAt) {
 		return out, character.ErrRawAwakeningUnavailable
 	}
-	return ca.HeroRawAwakeningObservation{Ref: ref, StateVersion: h.StateVersion, ContentRevision: sc.ContentRevision, ObservedAt: sc.ObservedAt, Known: true, RawStage: f.RawStage, ProducerReference: fmt.Sprintf("CharacterHero/%s/%d/%d/facet%d/%s", f.BirthPolicy, ref.PlayerID, ref.PartnerID, f.Version, f.BirthAt.UTC().Format(time.RFC3339Nano))}, nil
+	producer := fmt.Sprintf("CharacterHero/%s/%d/%d/facet%d/%s", f.BirthPolicy, ref.PlayerID, ref.PartnerID, f.Version, f.BirthAt.UTC().Format(time.RFC3339Nano))
+ if f.Version > 1 { producer = f.ProducerReference }
+ return ca.HeroRawAwakeningObservation{Ref: ref, StateVersion: h.StateVersion, ContentRevision: sc.ContentRevision, ObservedAt: sc.ObservedAt, Known: true, RawStage: f.RawStage, ProducerReference: producer}, nil
 }

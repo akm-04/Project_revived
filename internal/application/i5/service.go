@@ -168,6 +168,7 @@ func projectionGrants(explicit []GrantResult, awards []Award) []GrantResult {
 }
 
 type Service struct {
+	Awakening       *AwakeningRuntime
 	SignIn          *SignInRuntime
 	Missions        *MissionMaterializer
 	MissionTime     gen.TimeAuthority

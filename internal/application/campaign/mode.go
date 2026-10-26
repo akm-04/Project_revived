@@ -5,6 +5,7 @@
 package campaign
 
 import (
+	"bytes"
 	"context"
 	"crypto/sha256"
 	"encoding/hex"
@@ -38,6 +39,7 @@ import (
 )
 
 type Mode struct {
+	Awakening   i5.AwakeningCampaignPort
 	Daily       DailyConsumption
 	Timed       gen.TimedRunner
 	Fresh       tx.Queryer
@@ -133,11 +135,13 @@ type Fight struct {
 
 // Result is a 114 request; the client-computed star is the whole summary (D82).
 type Result struct {
-	CampaignID int64
-	Type       int64
-	Star       int64
-	Formation  []int64
-	Pet        int64
+	AwakeMission    int64
+	PetAwakeMission int64
+	CampaignID      int64
+	Type            int64
+	Star            int64
+	Formation       []int64
+	Pet             int64
 }
 
 // Settled is a 114 answer; Duplicate replays the stored body with error_code 30005 (F4e).
@@ -410,7 +414,7 @@ func (s Mode) Fight(c context.Context, a identity.ActorContext, request Fight, o
 		if err != nil {
 			return err
 		}
-		started, err := s.start(c, sc, a, v, node, record.Progress, heroes, request)
+		started, err := s.start(c, sc, a, v, node, record, heroes, request)
 		if err != nil {
 			return err
 		}
@@ -427,21 +431,48 @@ func (s Mode) Fight(c context.Context, a identity.ActorContext, request Fight, o
 				return d.ErrUnavailable
 			}
 			record.PendingGeneration, record.PendingItems = stage, []d.Item{}
-			if err = json.Unmarshal(started.Package.Canonical, &record.PendingItems); err != nil {
-				return err
+			items, frozen, e := readAwakeningPackage(started.Package.Canonical)
+			if e != nil {
+				return e
 			}
+			record.PendingItems = items
+			record.PendingAwakening = frozen
 			if err = s.Store.SaveTx(c, sc.Tx, a.PlayerID, record, nil, at); err != nil {
 				return err
 			}
 		}
-		out = map[string]any{"battle_id": 1, "report": map[string]any{}, "seed": 1, "enemy_info": map[string]any{}, "items": record.PendingItems}
+		if record.PendingGeneration == stage && started.Package != nil {
+			_, frozen, e := readAwakeningPackage(started.Package.Canonical)
+			if e != nil {
+				return e
+			}
+			if !bytes.Equal(frozen, record.PendingAwakening) {
+				record.PendingAwakening = frozen
+				if err = s.Store.SaveTx(c, sc.Tx, a.PlayerID, record, nil, at); err != nil {
+					return err
+				}
+			}
+		}
+		preview := append([]d.Item{}, record.PendingItems...)
+		frozen, e := readAwakeningPending(record.PendingAwakening)
+		if e != nil {
+			return e
+		}
+		if frozen != nil {
+			for _, drop := range frozen.Drops {
+				if drop.Count > 0 {
+					preview = append(preview, d.Item{ItemID: drop.ItemID, Num: drop.Count})
+				}
+			}
+		}
+		out = map[string]any{"battle_id": 1, "report": map[string]any{}, "seed": 1, "enemy_info": map[string]any{}, "items": preview}
 		return nil
 	})
 	return out, err
 }
 
 // start opens the stage's attempt; the enemy lineup is client-side, so none is frozen.
-func (s Mode) start(c context.Context, sc gen.TimedScope, a identity.ActorContext, v view, node d.Node, progress d.Progress, heroes []int64, request Fight) (combat.Started, error) {
+func (s Mode) start(c context.Context, sc gen.TimedScope, a identity.ActorContext, v view, node d.Node, record d.Record, heroes []int64, request Fight) (combat.Started, error) {
 	at, op := sc.Operation.DecisionAt(), sc.Operation.Operation()
 	scope, err := ca.NewCoherentReadScope(tx.Scope{Tx: sc.Tx, Operation: op, Attempt: sc.Attempt, Options: sc.Options}, v.revision, at)
 	if err != nil {
@@ -463,8 +494,34 @@ func (s Mode) start(c context.Context, sc gen.TimedScope, a identity.ActorContex
 			battle.PetsA = append(battle.PetsA, combat.Participant{Origin: cd.OwnedSelf, Kind: cd.PetActor, Player: a.PlayerID, Identity: id})
 		}
 	}
-	box := node.BattleBox(progress)
-	drops := func(stream *cd.Stream) (any, error) { return v.catalog.Drop(box, stream), nil }
+	box := node.BattleBox(record.Progress)
+	frozen, err := s.freezeAwakening(c, sc.Tx, a.PlayerID, node, record.Progress, v.day, request.Formation, request.Pet)
+	if err != nil {
+		return combat.Started{}, err
+	}
+	drops := func(stream *cd.Stream) (any, error) {
+		if frozen == nil {
+			return v.catalog.Drop(box, stream), nil
+		}
+		next := *frozen
+		items := []d.Item{}
+		if record.PendingGeneration == generation(node.Type, node.ID) {
+			items = append(items, record.PendingItems...)
+			old, e := readAwakeningPending(record.PendingAwakening)
+			if e != nil {
+				return nil, e
+			}
+			if old != nil {
+				next.Drops = old.Drops
+			} else {
+				next.Drops = nil
+			}
+		} else {
+			items = v.catalog.Drop(box, stream)
+			next = next.Draw(stream)
+		}
+		return awakeningStartPackage{Items: items, Awakening: &next}, nil
+	}
 	window := time.Duration(v.catalog.PrivatePolicy.ResultWindowSeconds) * time.Second
 	return s.Combat.StartTx(c, sc.Tx, scope, combat.StartRequest{Actor: a, Locator: locator(a), GenerationRef: generation(node.Type, node.ID),
 		StartFingerprint: fingerprint(a, node.Type, node.ID, request.Formation, request.Pet, request.PetFormation), ResultDeadline: at.Add(window), Battle: battle,
@@ -487,8 +544,16 @@ func (s Mode) Result(c context.Context, a identity.ActorContext, request Result,
 		return out, err
 	}
 	id := receipt.Identity{OwnerKind: "player", OwnerKey: strconv.FormatInt(int64(a.PlayerID), 10), Domain: "campaign", Operation: "result", SemanticKey: op.ID.String()}
-	fingerprint, err := receipt.FingerprintRequest(map[string]any{"player": int64(a.PlayerID), "operation": "result", "campaign_id": request.CampaignID, "type": request.Type,
-		"star": request.Star, "formation": request.Formation, "pet": request.Pet})
+	fields := map[string]any{"player": int64(a.PlayerID), "operation": "result", "campaign_id": request.CampaignID, "type": request.Type,
+		"star": request.Star, "formation": request.Formation, "pet": request.Pet}
+	// Preserve receipt fingerprints of pre-awakening requests with no markers.
+	if request.AwakeMission != 0 {
+		fields["awake_mission"] = request.AwakeMission
+	}
+	if request.PetAwakeMission != 0 {
+		fields["pet_awaken_mission"] = request.PetAwakeMission
+	}
+	fingerprint, err := receipt.FingerprintRequest(fields)
 	if err != nil {
 		return out, err
 	}
@@ -598,11 +663,21 @@ func (s Mode) settle(c context.Context, sc gen.TimedScope, a identity.ActorConte
 			return Settled{}, false, e
 		}
 	}
-	c, err = s.Facts.PrepareTx(c, sc.Tx, a.PlayerID, sc.Operation)
+	outcome, err := v.catalog.Settle(record.Progress, node, request.Star, v.day, v.superOpen)
 	if err != nil {
 		return Settled{}, false, err
 	}
-	outcome, err := v.catalog.Settle(record.Progress, node, request.Star, v.day, v.superOpen)
+	awakeChanges, err := s.settleAwakening(c, sc.Tx, a.PlayerID, request, &record, outcome.Win)
+	if err != nil {
+		return Settled{}, false, err
+	}
+	if outcome.Win && outcome.FirstClear {
+		state := outcome.Progress.State(node.ID)
+		day := v.day
+		state.FirstClearDay = &day
+		outcome.Progress.Nodes[node.ID] = state
+	}
+	c, err = s.Facts.PrepareTx(c, sc.Tx, a.PlayerID, sc.Operation)
 	if err != nil {
 		return Settled{}, false, err
 	}
@@ -610,6 +685,9 @@ func (s Mode) settle(c context.Context, sc gen.TimedScope, a identity.ActorConte
 		return Settled{}, false, err
 	}
 	body := map[string]any{"is_win": 0, "result": 0, "items": []any{}}
+	for key, value := range awakeChanges {
+		body[key] = value
+	}
 	if outcome.Win {
 		body["is_win"], body["result"] = 1, 1
 		if err = s.reward(c, sc, a, v, node, outcome, record, heroes, attested.Attempt.ID.String(), request.Pet, body); err != nil {

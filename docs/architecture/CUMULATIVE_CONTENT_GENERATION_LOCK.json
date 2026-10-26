@@ -362,14 +362,22 @@
       "parser_version": "lua-generated-v18-guild-invite",
       "revision_id": "36d9c7b641e39ca8abf07b0202534f796f7c0b4be0f8849f81f508284bb6709b",
       "scope": "D89 twelve newest source months; monthly owner and first/bonus entitlements. Existing mission and resource rows unchanged."
+    },
+    {
+      "ordinal": 51,
+      "stage": "I9-4D awakening missions",
+      "compiler_version": "i9-4d-awakening",
+      "parser_version": "lua-generated-v18-guild-invite",
+      "revision_id": "c15cdd873a3a169d62a5b429d39f5b3721d26f5c5ff23db4edaf1d357981ebfe",
+      "scope": "Source-shaped ordinary/Blood/pet mission definitions, Wish blacklists, source campaign drop references and explicit reconstruction policy. Existing resource/calendar/ordinary mission definitions unchanged."
     }
   ],
   "current": {
-    "ordinal": 50,
-    "stage": "I9-4C monthly sign-in",
-    "compiler_version": "i9-4c-signin",
+    "ordinal": 51,
+    "stage": "I9-4D awakening missions",
+    "compiler_version": "i9-4d-awakening",
     "parser_version": "lua-generated-v18-guild-invite",
-    "revision_id": "36d9c7b641e39ca8abf07b0202534f796f7c0b4be0f8849f81f508284bb6709b",
-    "scope": "D89 twelve newest source months; monthly owner and first/bonus entitlements. Existing mission and resource rows unchanged."
+    "revision_id": "c15cdd873a3a169d62a5b429d39f5b3721d26f5c5ff23db4edaf1d357981ebfe",
+    "scope": "Source-shaped ordinary/Blood/pet mission definitions, Wish blacklists, source campaign drop references and explicit reconstruction policy. Existing resource/calendar/ordinary mission definitions unchanged."
   }
 }

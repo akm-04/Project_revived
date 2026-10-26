@@ -18,20 +18,21 @@ import (
 type Store struct{}
 
 type nodeRow struct {
-	ClearCountFloor int64 `json:"clear_count_floor"`
-	ClearCountExact bool  `json:"clear_count_exact"`
-	CampaignID      int64 `json:"campaign_id"`
-	Star            int64 `json:"star"`
-	WinDay          int64 `json:"win_day"`
-	Wins            int64 `json:"wins"`
-	ResetDay        int64 `json:"reset_day"`
-	Resets          int64 `json:"resets"`
-	PartnerDrop     bool  `json:"partner_drop"`
+	FirstClearDay   *int64 `json:"first_clear_day"`
+	ClearCountFloor int64  `json:"clear_count_floor"`
+	ClearCountExact bool   `json:"clear_count_exact"`
+	CampaignID      int64  `json:"campaign_id"`
+	Star            int64  `json:"star"`
+	WinDay          int64  `json:"win_day"`
+	Wins            int64  `json:"wins"`
+	ResetDay        int64  `json:"reset_day"`
+	Resets          int64  `json:"resets"`
+	PartnerDrop     bool   `json:"partner_drop"`
 }
 
 const readSQL = `SELECT p.normal_bonus_id,p.super_bonus_id,p.pending_generation,COALESCE(p.pending_items::text,'[]'),p.last_generation,COALESCE(p.last_result::text,''),p.state_version,
-COALESCE((SELECT jsonb_agg(jsonb_build_object('campaign_id',n.campaign_id,'clear_count_floor',n.clear_count_floor,'clear_count_exact',n.clear_count_exact,'star',n.star,'win_day',n.win_day,'wins',n.wins,'reset_day',n.reset_day,'resets',n.resets,'partner_drop',n.partner_drop))
-FROM campaign_nodes n WHERE n.player_id=p.player_id),'[]'::jsonb)::text,p.chapter_claims::text,p.story_claims::text,p.trial_wins::text FROM campaign_players p WHERE p.player_id=$1`
+COALESCE((SELECT jsonb_agg(jsonb_build_object('campaign_id',n.campaign_id,'first_clear_day',n.first_clear_day,'clear_count_floor',n.clear_count_floor,'clear_count_exact',n.clear_count_exact,'star',n.star,'win_day',n.win_day,'wins',n.wins,'reset_day',n.reset_day,'resets',n.resets,'partner_drop',n.partner_drop))
+FROM campaign_nodes n WHERE n.player_id=p.player_id),'[]'::jsonb)::text,p.chapter_claims::text,p.story_claims::text,p.trial_wins::text,COALESCE(p.pending_awakening::text,'') FROM campaign_players p WHERE p.player_id=$1`
 
 // ReadTx is the unlocked read for projections; an absent row is the new-player map.
 func (Store) ReadTx(c context.Context, q tx.Queryer, p identity.PlayerID) (d.Record, error) {
@@ -52,9 +53,15 @@ func (Store) LockTx(c context.Context, t tx.Tx, p identity.PlayerID, at time.Tim
 
 func scan(row tx.Row) (d.Record, error) {
 	var r d.Record
-	var pending, result, nodes, chapters, stories, trials string
-	if err := row.Scan(&r.Progress.NormalBonusID, &r.Progress.SuperBonusID, &r.PendingGeneration, &pending, &r.LastGeneration, &result, &r.StateVersion, &nodes, &chapters, &stories, &trials); err != nil {
+	var pending, result, nodes, chapters, stories, trials, awakening string
+	if err := row.Scan(&r.Progress.NormalBonusID, &r.Progress.SuperBonusID, &r.PendingGeneration, &pending, &r.LastGeneration, &result, &r.StateVersion, &nodes, &chapters, &stories, &trials, &awakening); err != nil {
 		return d.Record{}, err
+	}
+	if awakening != "" {
+		if !json.Valid([]byte(awakening)) {
+			return r, errors.New("invalid awakening pending")
+		}
+		r.PendingAwakening = json.RawMessage(awakening)
 	}
 	if err := json.Unmarshal([]byte(pending), &r.PendingItems); err != nil {
 		return d.Record{}, err
@@ -77,7 +84,7 @@ func scan(row tx.Row) (d.Record, error) {
 	}
 	r.Progress.Nodes = make(map[int64]d.NodeState, len(rows))
 	for _, n := range rows {
-		r.Progress.Nodes[n.CampaignID] = d.NodeState{CampaignID: n.CampaignID, Star: n.Star, Wins: modes.Counter{Period: n.WinDay, Used: n.Wins},
+		r.Progress.Nodes[n.CampaignID] = d.NodeState{FirstClearDay: n.FirstClearDay, CampaignID: n.CampaignID, Star: n.Star, Wins: modes.Counter{Period: n.WinDay, Used: n.Wins},
 			Resets: modes.Counter{Period: n.ResetDay, Used: n.Resets}, PartnerDrop: n.PartnerDrop, ClearCountFloor: n.ClearCountFloor, ClearCountExact: n.ClearCountExact}
 	}
 	return r, nil
@@ -85,7 +92,13 @@ func scan(row tx.Row) (d.Record, error) {
 
 // SaveTx writes the locked record and upserts the changed nodes.
 func (Store) SaveTx(c context.Context, t tx.Tx, p identity.PlayerID, r d.Record, changed []int64, at time.Time) error {
-	var pending, result any
+	var pending, result, awakening any
+	if len(r.PendingAwakening) > 0 {
+		if !json.Valid(r.PendingAwakening) {
+			return errors.New("invalid awakening pending")
+		}
+		awakening = string(r.PendingAwakening)
+	}
 	if r.PendingGeneration != "" {
 		raw, err := json.Marshal(r.PendingItems)
 		if err != nil {
@@ -117,8 +130,8 @@ func (Store) SaveTx(c context.Context, t tx.Tx, p identity.PlayerID, r d.Record,
 	if string(trials) == "null" {
 		trials = []byte("{}")
 	}
-	tag, err := t.Exec(c, `UPDATE campaign_players SET normal_bonus_id=$2,super_bonus_id=$3,pending_generation=$4,pending_items=$5::jsonb,last_generation=$6,last_result=$7::jsonb,state_version=state_version+1,updated_at=$8,chapter_claims=$10::jsonb,story_claims=$11::jsonb,trial_wins=$12::jsonb
-WHERE player_id=$1 AND state_version=$9`, int64(p), r.Progress.NormalBonusID, r.Progress.SuperBonusID, r.PendingGeneration, pending, r.LastGeneration, result, at, r.StateVersion, string(chapters), string(stories), string(trials))
+	tag, err := t.Exec(c, `UPDATE campaign_players SET normal_bonus_id=$2,super_bonus_id=$3,pending_generation=$4,pending_items=$5::jsonb,last_generation=$6,last_result=$7::jsonb,state_version=state_version+1,updated_at=$8,chapter_claims=$10::jsonb,story_claims=$11::jsonb,trial_wins=$12::jsonb,pending_awakening=$13::jsonb
+WHERE player_id=$1 AND state_version=$9`, int64(p), r.Progress.NormalBonusID, r.Progress.SuperBonusID, r.PendingGeneration, pending, r.LastGeneration, result, at, r.StateVersion, string(chapters), string(stories), string(trials), awakening)
 	if err != nil {
 		return err
 	}
@@ -128,7 +141,7 @@ WHERE player_id=$1 AND state_version=$9`, int64(p), r.Progress.NormalBonusID, r.
 	rows := make([]nodeRow, 0, len(changed))
 	for _, id := range changed {
 		n := r.Progress.State(id)
-		rows = append(rows, nodeRow{CampaignID: id, Star: n.Star, WinDay: n.Wins.Period, Wins: n.Wins.Used, ResetDay: n.Resets.Period, Resets: n.Resets.Used, PartnerDrop: n.PartnerDrop, ClearCountFloor: n.ClearCountFloor, ClearCountExact: n.ClearCountExact})
+		rows = append(rows, nodeRow{FirstClearDay: n.FirstClearDay, CampaignID: id, Star: n.Star, WinDay: n.Wins.Period, Wins: n.Wins.Used, ResetDay: n.Resets.Period, Resets: n.Resets.Used, PartnerDrop: n.PartnerDrop, ClearCountFloor: n.ClearCountFloor, ClearCountExact: n.ClearCountExact})
 	}
 	if len(rows) == 0 {
 		return nil
@@ -137,8 +150,8 @@ WHERE player_id=$1 AND state_version=$9`, int64(p), r.Progress.NormalBonusID, r.
 	if err != nil {
 		return err
 	}
-	_, err = t.Exec(c, `INSERT INTO campaign_nodes(player_id,campaign_id,star,win_day,wins,reset_day,resets,partner_drop,clear_count_floor,clear_count_exact)
-SELECT $1,campaign_id,star,win_day,wins,reset_day,resets,partner_drop,clear_count_floor,clear_count_exact FROM jsonb_to_recordset($2::jsonb) AS x(campaign_id bigint,star smallint,win_day bigint,wins bigint,reset_day bigint,resets bigint,partner_drop boolean,clear_count_floor bigint,clear_count_exact boolean)
-ON CONFLICT(player_id,campaign_id) DO UPDATE SET star=EXCLUDED.star,win_day=EXCLUDED.win_day,wins=EXCLUDED.wins,reset_day=EXCLUDED.reset_day,resets=EXCLUDED.resets,partner_drop=EXCLUDED.partner_drop,clear_count_floor=EXCLUDED.clear_count_floor,clear_count_exact=EXCLUDED.clear_count_exact`, int64(p), string(raw))
+	_, err = t.Exec(c, `INSERT INTO campaign_nodes(player_id,campaign_id,star,win_day,wins,reset_day,resets,partner_drop,clear_count_floor,clear_count_exact,first_clear_day)
+SELECT $1,campaign_id,star,win_day,wins,reset_day,resets,partner_drop,clear_count_floor,clear_count_exact,first_clear_day FROM jsonb_to_recordset($2::jsonb) AS x(campaign_id bigint,star smallint,win_day bigint,wins bigint,reset_day bigint,resets bigint,partner_drop boolean,clear_count_floor bigint,clear_count_exact boolean,first_clear_day bigint)
+ON CONFLICT(player_id,campaign_id) DO UPDATE SET star=EXCLUDED.star,win_day=EXCLUDED.win_day,wins=EXCLUDED.wins,reset_day=EXCLUDED.reset_day,resets=EXCLUDED.resets,partner_drop=EXCLUDED.partner_drop,clear_count_floor=EXCLUDED.clear_count_floor,clear_count_exact=EXCLUDED.clear_count_exact,first_clear_day=COALESCE(campaign_nodes.first_clear_day,EXCLUDED.first_clear_day)`, int64(p), string(raw))
 	return err
 }

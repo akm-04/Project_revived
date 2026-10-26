@@ -968,8 +968,8 @@
    "name": "OPEN_AWAKE_MISSION",
    "family": "AWAKENING_MISSIONS",
    "disposition": "ACTIVE",
-   "target": "I9-4",
-   "v2": "unimplemented",
+   "target": "I9-4D",
+   "v2": "implemented",
    "v1": "STATE_BACKED"
   },
   {
@@ -977,8 +977,8 @@
    "name": "GIVE_UP_AWAKE_MISSION",
    "family": "AWAKENING_MISSIONS",
    "disposition": "ACTIVE",
-   "target": "I9-4",
-   "v2": "unimplemented",
+   "target": "I9-4D",
+   "v2": "implemented",
    "v1": "STATE_BACKED"
   },
   {
@@ -986,8 +986,8 @@
    "name": "OPEN_PET_AWAKE_MISSION",
    "family": "AWAKENING_MISSIONS",
    "disposition": "ACTIVE",
-   "target": "I9-4",
-   "v2": "unimplemented",
+   "target": "I9-4D",
+   "v2": "implemented",
    "v1": "LITERAL_STUB"
   },
   {
@@ -995,8 +995,8 @@
    "name": "GIVE_UP_PET_AWAKE_MISSION",
    "family": "AWAKENING_MISSIONS",
    "disposition": "ACTIVE",
-   "target": "I9-4",
-   "v2": "unimplemented",
+   "target": "I9-4D",
+   "v2": "implemented",
    "v1": "LITERAL_STUB"
   },
   {
@@ -1004,8 +1004,8 @@
    "name": "OPEN_AWAKE_TWICE_MISSION",
    "family": "AWAKENING_MISSIONS",
    "disposition": "ACTIVE",
-   "target": "I9-4",
-   "v2": "unimplemented",
+   "target": "I9-4D",
+   "v2": "implemented",
    "v1": "STATE_BACKED"
   },
   {
@@ -1013,8 +1013,8 @@
    "name": "GIVE_UP_AWAKE_TWICE_MISSION",
    "family": "AWAKENING_MISSIONS",
    "disposition": "ACTIVE",
-   "target": "I9-4",
-   "v2": "unimplemented",
+   "target": "I9-4D",
+   "v2": "implemented",
    "v1": "STATE_BACKED"
   },
   {
@@ -1040,8 +1040,8 @@
    "name": "GET_AWAKE_ITEM",
    "family": "AWAKENING_MISSIONS",
    "disposition": "ACTIVE",
-   "target": "I9-4",
-   "v2": "unimplemented",
+   "target": "I9-4D",
+   "v2": "implemented",
    "v1": "STATE_BACKED"
   },
   {
@@ -3425,19 +3425,21 @@
    "mid": 866,
    "name": "UNLIMIT_START_FIGHT",
    "family": "INCUBUS_UNLIMITED",
-   "disposition": "INACTIVE_D79",
-   "target": null,
-   "v2": "unimplemented",
-   "v1": "STATE_BACKED"
+   "disposition": "ACTIVE",
+   "target": "I9-4D",
+   "v2": "implemented",
+   "v1": "STATE_BACKED",
+   "note": "Blood awakening branch only: twice_awake_mission required; generic Infinity remains deferred I9-8 and other inactive MIDs unchanged. D193."
   },
   {
    "mid": 867,
    "name": "UNLIMIT_FIGHT_RESULT",
    "family": "INCUBUS_UNLIMITED",
-   "disposition": "INACTIVE_D79",
-   "target": null,
-   "v2": "unimplemented",
-   "v1": "STATE_BACKED"
+   "disposition": "ACTIVE",
+   "target": "I9-4D",
+   "v2": "implemented",
+   "v1": "STATE_BACKED",
+   "note": "Blood awakening branch only: twice_awake_mission required; generic Infinity remains deferred I9-8 and other inactive MIDs unchanged. D193."
   },
   {
    "mid": 868,
@@ -7710,8 +7712,8 @@
    "name": "AWAKE_MISSION_LIST",
    "family": "AWAKENING_MISSIONS",
    "disposition": "ACTIVE",
-   "target": "I9-4",
-   "v2": "unimplemented",
+   "target": "I9-4D",
+   "v2": "implemented",
    "v1": "STATE_BACKED"
   },
   {
@@ -8592,8 +8594,8 @@
    "name": "TASK_AWAKE_GIVE_UP",
    "family": "AWAKENING_MISSIONS",
    "disposition": "ACTIVE",
-   "target": "I9-4",
-   "v2": "unimplemented",
+   "target": "I9-4D",
+   "v2": "implemented",
    "v1": "STATE_BACKED"
   },
   {
@@ -8601,8 +8603,8 @@
    "name": "TASK_AWAKE_OPEN",
    "family": "AWAKENING_MISSIONS",
    "disposition": "ACTIVE",
-   "target": "I9-4",
-   "v2": "unimplemented",
+   "target": "I9-4D",
+   "v2": "implemented",
    "v1": "STATE_BACKED"
   },
   {

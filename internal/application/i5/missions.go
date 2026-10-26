@@ -44,6 +44,7 @@ type MissionObservations interface {
 }
 
 type MissionMaterializer struct {
+	Awakening    AwakeningStore
 	Activity     MissionActivityCatalog
 	Store        MissionStore
 	Catalog      MissionCatalog
@@ -51,10 +52,11 @@ type MissionMaterializer struct {
 }
 
 type MissionView struct {
-	Activity    *objective.ActivityCatalog
-	Root        objective.MissionRoot
-	Instances   []objective.Instance
-	Definitions []objective.MissionDefinition
+	AwakeningReady bool
+	Activity       *objective.ActivityCatalog
+	Root           objective.MissionRoot
+	Instances      []objective.Instance
+	Definitions    []objective.MissionDefinition
 }
 
 func (m MissionMaterializer) MaterializeTx(ctx context.Context, t tx.Tx, scope MissionScope) (MissionView, error) {
@@ -147,6 +149,13 @@ func (m MissionMaterializer) MaterializeTx(ctx context.Context, t tx.Tx, scope M
 			return MissionView{}, err
 		}
 		view.Activity = activity
+	}
+	if m.Awakening != nil {
+		a, err := m.Awakening.ReadAwakeningTx(ctx, t, scope.PlayerID)
+		if err != nil {
+			return MissionView{}, err
+		}
+		view.AwakeningReady = awakeningReady(a)
 	}
 	return view, nil
 }

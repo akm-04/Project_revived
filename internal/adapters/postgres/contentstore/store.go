@@ -70,8 +70,9 @@ func (Store) InsertObjectives(ctx context.Context, t tx.Tx, b registry.Bundle) (
 		return 0, err
 	}
 	var data struct {
-		Activity json.RawMessage `json:"activity_chests"`
-		SignIn   json.RawMessage `json:"monthly_signin"`
+		Activity  json.RawMessage `json:"activity_chests"`
+		SignIn    json.RawMessage `json:"monthly_signin"`
+		Awakening json.RawMessage `json:"awakening"`
 	}
 	if err = json.Unmarshal(b.ObjectivesJSON(), &data); err != nil {
 		return 0, err
@@ -92,6 +93,15 @@ func (Store) InsertObjectives(ctx context.Context, t tx.Tx, b registry.Bundle) (
 		}
 		if tag.RowsAffected() != 1 {
 			return 0, errors.New("sign-in content insert failed")
+		}
+	}
+	if len(data.Awakening) > 0 && string(data.Awakening) != "null" {
+		tag, err := t.Exec(ctx, `INSERT INTO content_awakening_catalogs(revision_id,payload)VALUES($1,$2::jsonb)`, b.RevisionID(), string(data.Awakening))
+		if err != nil {
+			return 0, err
+		}
+		if tag.RowsAffected() != 1 {
+			return 0, errors.New("awakening content insert failed")
 		}
 	}
 	return n, nil

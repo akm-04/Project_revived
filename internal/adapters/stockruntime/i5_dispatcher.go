@@ -49,7 +49,13 @@ type SignInServicePort interface {
 	ReadSignIn(context.Context, identity.ActorContext, operation.Context) (map[string]any, error)
 	ClaimSignIn(context.Context, identity.ActorContext, operation.Context) (map[string]any, error)
 }
+type AwakeningServicePort interface {
+	ReadAwakening(context.Context, identity.ActorContext, operation.Context) (map[string]any, error)
+	ChangeAwakening(context.Context, identity.ActorContext, string, int64, int64, operation.Context) (map[string]any, error)
+	ClaimAwakening(context.Context, identity.ActorContext, int64, operation.Context) (map[string]any, bool, error)
+}
 type I5Dispatcher struct {
+	Awakening      AwakeningServicePort
 	SignIn         SignInServicePort
 	Missions       MissionServicePort
 	SpiritBackpack SpiritBackpackProjector
@@ -66,6 +72,8 @@ func (d I5Dispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRequest
 		return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Body: map[string]any{"error": "i5_unavailable"}}
 	}
 	switch req.Envelope.MID {
+	case 163, 164, 165, 166, 167, 168, 171, 2561, 2737, 2738:
+		return d.dispatchAwakening(ctx, actor, req)
 	case 352, 353:
 		if d.SignIn == nil {
 			return failI5(errors.New("sign-in unavailable"))
@@ -210,11 +218,35 @@ func (d I5Dispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRequest
 		if err != nil {
 			return failI5(err)
 		}
+		if d.Awakening != nil {
+			awake, e := d.Awakening.ReadAwakening(ctx, actor, req.Envelope.Operation)
+			if e != nil {
+				return failI5(e)
+			}
+			for _, k := range []string{"awake_mission_", "twice_awake_mission_", "pet_awake_mission_"} {
+				body[k] = awake[k]
+			}
+		}
 		return okI5(body)
 	case 2736: // TASK_LOAD_BY_TYPE
 		familyRaw, err := requiredInt64(req.Envelope.Params, "mission_type")
+		// Task.loadTaskByType is also the stock timed-event listener.
+		raw := req.Envelope.Params["mission_type"]
+		if raw == nil {
+			familyRaw, err = int64(objective.Daily), nil
+		}
+		if event, ok := raw.(map[string]any); ok && len(event) == 1 && event["name"] == "__update_mission_ontime__" {
+			familyRaw, err = int64(objective.Daily), nil
+		}
 		if err != nil || familyRaw < int64(objective.Daily) || familyRaw > int64(objective.Challenge) {
 			return badI5("invalid_mission_type")
+		}
+		if familyRaw == 5 && d.Awakening != nil {
+			body, e := d.Awakening.ReadAwakening(ctx, actor, req.Envelope.Operation)
+			if e != nil {
+				return failI5(e)
+			}
+			return okI5(body)
 		}
 		if d.Missions != nil {
 			body, err := d.Missions.ReadMissions(ctx, actor, objective.StockFamily(familyRaw), req.Envelope.Operation)
@@ -232,6 +264,15 @@ func (d I5Dispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRequest
 		tableID, err := requiredInt64(req.Envelope.Params, "table_id")
 		if err != nil || tableID <= 0 {
 			return badI5("invalid_mission_id")
+		}
+		if d.Awakening != nil {
+			body, handled, e := d.Awakening.ClaimAwakening(ctx, actor, tableID, req.Envelope.Operation)
+			if e != nil {
+				return failI5(e)
+			}
+			if handled {
+				return okI5(body)
+			}
 		}
 		generation := ""
 		if raw, ok := req.Envelope.Params["hero_table_id"]; ok {
@@ -384,7 +425,7 @@ func badI5(code string) httpedge.Response {
 	return httpedge.Response{HTTPStatus: http.StatusBadRequest, Body: map[string]any{"error": code}}
 }
 func failI5(err error) httpedge.Response {
-	if errors.Is(err, objective.ErrSignRefused) {
+	if errors.Is(err, objective.ErrSignRefused) || errors.Is(err, objective.ErrAwakeningRefused) {
 		return okI5(map[string]any{"error_code": int64(1)})
 	}
 	switch {
@@ -413,4 +454,62 @@ func storyGuideID(params map[string]any) (int64, error) {
 		return 0, fmt.Errorf("invalid guide_id %v", raw)
 	}
 	return int64(math.Floor(value)), nil
+}
+
+func (d I5Dispatcher) dispatchAwakening(ctx context.Context, actor identity.ActorContext, req httpedge.DispatchRequest) httpedge.Response {
+	if d.Awakening == nil {
+		return failI5(errors.New("awakening unavailable"))
+	}
+	mid, p := req.Envelope.MID, req.Envelope.Params
+	if mid == 2561 {
+		if !onlyStockGameplayParams(p) {
+			return badI5("invalid_awakening_read")
+		}
+		body, e := d.Awakening.ReadAwakening(ctx, actor, req.Envelope.Operation)
+		if e != nil {
+			return failI5(e)
+		}
+		return okI5(body)
+	}
+	action := "open"
+	var id, kind int64
+	if mid == 171 {
+		n, e := requiredInt64(p, "item_num")
+		if e != nil || n != 1 || !onlyStockGameplayParams(p, "item_num") {
+			return badI5("invalid_awakening_wish")
+		}
+		action = "wish"
+	} else if mid == 2737 || mid == 2738 {
+		var e1, e2 error
+		id, e1 = requiredInt64(p, "mission_id")
+		kind, e2 = requiredInt64(p, "awake_type")
+		if e1 != nil || e2 != nil || id <= 0 || kind < 1 || kind > 3 || !onlyStockGameplayParams(p, "mission_id", "awake_type") {
+			return badI5("invalid_awakening_mission")
+		}
+		if mid == 2737 {
+			action = "cancel"
+		}
+	} else {
+		var e error
+		id, e = requiredInt64(p, "table_id")
+		if e != nil || id <= 0 || !onlyStockGameplayParams(p, "table_id") {
+			return badI5("invalid_awakening_mission")
+		}
+		switch mid {
+		case 163, 164:
+			kind = 1
+		case 165, 166:
+			kind = 3
+		case 167, 168:
+			kind = 2
+		}
+		if mid == 164 || mid == 166 || mid == 168 {
+			action = "cancel"
+		}
+	}
+	body, e := d.Awakening.ChangeAwakening(ctx, actor, action, id, kind, req.Envelope.Operation)
+	if e != nil {
+		return failI5(e)
+	}
+	return okI5(body)
 }

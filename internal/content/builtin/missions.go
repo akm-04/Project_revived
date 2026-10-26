@@ -1,11 +1,45 @@
 package builtin
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 )
 
 func validateMissions(c ObjectiveCatalog) error {
+	// Source compiler validates topology; the runtime owner validates its full typed catalog.
+	var awakening struct {
+		Definitions []struct {
+			ID   int64 `json:"id"`
+			Type int64 `json:"type"`
+		} `json:"definitions"`
+		PrivatePolicy struct {
+			ID                       string `json:"policy_id"`
+			Version                  int    `json:"version"`
+			FirstClearDelayDays      int64  `json:"first_clear_delay_days"`
+			BloodResultWindowSeconds int64  `json:"blood_result_window_seconds"`
+			GuardWitnessOnly         bool   `json:"guard_witness_only"`
+		} `json:"private_policy"`
+	}
+	if err := json.Unmarshal(c.Awakening, &awakening); err != nil {
+		return errors.New("builtin content: awakening catalog missing or invalid")
+	}
+	countsAwake := map[int64]int{}
+	ids := map[int64]bool{}
+	for _, row := range awakening.Definitions {
+		if row.ID <= 0 || ids[row.ID] {
+			return errors.New("builtin content: duplicate or invalid awakening identity")
+		}
+		ids[row.ID] = true
+		countsAwake[row.Type]++
+	}
+	if countsAwake[1] != 465 || countsAwake[2] != 162 || countsAwake[3] != 40 || len(awakening.Definitions) != 667 {
+		return errors.New("builtin content: awakening census drift")
+	}
+	p := awakening.PrivatePolicy
+	if p.ID != "I9_AWAKENING_MISSIONS_V1" || p.Version != 1 || p.FirstClearDelayDays != 1 || p.BloodResultWindowSeconds != 3600 || !p.GuardWitnessOnly {
+		return errors.New("builtin content: awakening policy drift")
+	}
 	if c.Status != "I9_4_MISSION_CATALOG" || len(c.Definitions) != 476 {
 		return errors.New("builtin content: mission profile drift")
 	}

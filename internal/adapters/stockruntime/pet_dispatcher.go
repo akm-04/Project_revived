@@ -178,7 +178,11 @@ func (d PetDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReques
 		if got.AlreadyEquipped {
 			return httpedge.Response{HTTPStatus: http.StatusOK, Body: map[string]any{"error_code": int64(30001)}}
 		}
-		return httpedge.Response{HTTPStatus: http.StatusOK, Body: map[string]any{}}
+		body := map[string]any{}
+		for k, v := range got.MissionChanges {
+			body[k] = v
+		}
+		return httpedge.Response{HTTPStatus: http.StatusOK, Body: body}
 	case 785: // PET_ADVANCE (CA4-4B)
 		if !onlyStockGameplayParams(req.Envelope.Params, "pet_id") {
 			return petBad("invalid_pet_advance")

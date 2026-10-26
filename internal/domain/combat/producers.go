@@ -8,7 +8,8 @@ import (
 // ProducerProfileID names the frozen battle producer registry a schema 2
 // snapshot pins (D05: an unsupported enabled producer blocks START; an absent
 // feature is declared inactive). A registry change takes a new ID.
-const ProducerProfileID = "I8_BATTLE_PRODUCERS_V1"
+const LegacyProducerProfileID = "I8_BATTLE_PRODUCERS_V1"
+const ProducerProfileID = "I9_AWAKENING_BATTLE_PRODUCERS_V1"
 
 type ProducerStatus string
 
@@ -34,7 +35,7 @@ type ProducerProfile struct {
 	Producers []Producer
 }
 
-var producerProfiles = map[string]ProducerProfile{ProducerProfileID: {ID: ProducerProfileID, Producers: []Producer{
+var producerProfiles = map[string]ProducerProfile{LegacyProducerProfileID: {ID: LegacyProducerProfileID, Producers: []Producer{
 	{ID: "HERO_CORE", Status: ProducerActive, Owner: "CharacterHero stock projection (Normal: fumo_levels; Super: partner_type)",
 		HeroKeys: []string{"partner_id", "table_id", "star", "lev", "exp", "color", "skills", "skill_ids", "equips", "fumos", "fumo_levels", "is_like", "practice_attr", "partner_type"}, Required: []string{"fumos"}},
 	{ID: "COMBAT_OWNER", Status: ProducerActive, Owner: "Combat freezer owner identity", HeroKeys: []string{"player_id"}, PetKeys: []string{"player_id"}},
@@ -58,6 +59,21 @@ var producerProfiles = map[string]ProducerProfile{ProducerProfileID: {ID: Produc
 	{ID: "HERO_ROW_BUFFS", Status: ProducerDeclaredInactive, Owner: "no qualified owner; original hero-row buffs content UNKNOWN", HeroKeys: []string{"buffs"}},
 	{ID: "HERO_DISPLAY", Status: ProducerDeclaredInactive, Owner: "display-only model fields with no battle reader", HeroKeys: []string{"is_board", "board_card", "board_model_id", "force", "region_arena_times"}},
 }}}
+
+func init() {
+	legacy := producerProfiles[LegacyProducerProfileID]
+	current := ProducerProfile{ID: ProducerProfileID, Producers: append([]Producer(nil), legacy.Producers...)}
+	for i := range current.Producers {
+		switch current.Producers[i].ID {
+		case "RAW_AWAKENING":
+			current.Producers[i].Owner = "CharacterHero birth provenance and I9 AwakeningMission CAS transitions"
+		case "TWICE_AWAKE_POSITIVE":
+			current.Producers[i].Status = ProducerActive
+			current.Producers[i].Owner = "I9_AWAKENING_MISSIONS_V1 through coherent CharacterHero raw observation"
+		}
+	}
+	producerProfiles[ProducerProfileID] = current
+}
 
 // LookupProducerProfile returns a registered profile; pinned IDs stay registered.
 func LookupProducerProfile(id string) (ProducerProfile, bool) {
@@ -88,7 +104,7 @@ func (p Producer) KeysFor(kind ActorKind) []string {
 }
 
 // CheckOwned refuses owned-actor params that carry a key no producer owns, a
-// key of a declared-inactive producer, a positive twice-awake stage, or that
+// key of a declared-inactive producer, an unsupported twice-awake stage, or that
 // miss a key an active producer always writes.
 func (p ProducerProfile) CheckOwned(kind ActorKind, params json.RawMessage) error {
 	var fields map[string]json.RawMessage
@@ -115,8 +131,14 @@ func (p ProducerProfile) CheckOwned(kind ActorKind, params json.RawMessage) erro
 			}
 		}
 	}
-	if stage, ok := fields["twice_awake_stage"]; ok && string(stage) != "0" {
-		return fmt.Errorf("twice_awake_stage %s comes from the declared-inactive TWICE_AWAKE_POSITIVE producer", stage)
+	if stage, ok := fields["twice_awake_stage"]; ok {
+		if p.ID == LegacyProducerProfileID && string(stage) != "0" {
+			return fmt.Errorf("twice_awake_stage %s comes from the declared-inactive TWICE_AWAKE_POSITIVE producer", stage)
+		}
+		var raw int64
+		if err := json.Unmarshal(stage, &raw); err != nil || raw < 0 || raw > 3 || string(stage) == "null" {
+			return fmt.Errorf("invalid twice_awake_stage %s", stage)
+		}
 	}
 	return nil
 }

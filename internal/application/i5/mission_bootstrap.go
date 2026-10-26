@@ -50,6 +50,13 @@ func (m MissionBootstrap) OverlayMID1(ctx context.Context, q tx.Queryer, actor i
 		}
 		view.Activity = activity
 	}
+	if m.Owner.Missions.Awakening != nil {
+		a, err := m.Owner.Missions.Awakening.ReadAwakeningTx(ctx, q, actor.PlayerID)
+		if err != nil {
+			return err
+		}
+		view.AwakeningReady = awakeningReady(a)
+	}
 	detail["160"] = MissionProjection(view, at, 0)
 	return nil
 }

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"sort"
 	"strconv"
+	"strings"
 
 	ca "gxb.local/backend/v2/internal/application/characterasset"
 	lib "gxb.local/backend/v2/internal/application/librarylocal"
@@ -289,6 +290,9 @@ func (f *freezer) heroParams(ctx context.Context, p Participant, stateVersion in
 	awakening, err := f.service.Inputs.Awakening.RawAwakeningTx(ctx, f.scope, ref)
 	if err != nil {
 		return nil, fmt.Errorf("%w: raw awakening: %v", d.ErrProviderUnavailable, err)
+	}
+	if awakening.RawStage > 0 && !strings.HasPrefix(awakening.ProducerReference, "I9_AWAKENING_MISSIONS_V1/") {
+		return nil, fmt.Errorf("%w: positive raw awakening has no mission producer", d.ErrProviderUnavailable)
 	}
 	if !awakening.Known || awakening.Ref != ref || awakening.StateVersion != stateVersion || awakening.ContentRevision != f.scope.ContentRevision || !awakening.ObservedAt.Equal(f.scope.ObservedAt) || awakening.RawStage < 0 || awakening.RawStage > 3 {
 		return nil, fmt.Errorf("%w: raw awakening unqualified", d.ErrProviderUnavailable)

@@ -71,6 +71,8 @@ type scenario struct {
 	ChallengeFixture bool `json:"challenge_fixture"`
 	// SignInBonusFixture is declared prior-month progress, not proof of earning login rewards.
 	SignInBonusFixture bool `json:"signin_bonus_fixture"`
+	// AwakeningFixture declares prior progression of the fresh birth companion; never mission completion.
+	AwakeningFixture bool `json:"awakening_fixture"`
 	// Steps: "tap:<node path or XxY>", "window:<stock window>[ <json params>]", "lua:<chunk>", "wait:<seconds>", "relogin" (same account/device, fresh Lua VM).
 	Steps []string `json:"steps"`
 	// Settle is virtual seconds run after the last step (stock ErrorLogPoster uploads every 30 s).
@@ -143,7 +145,7 @@ func (run run) play() ([]string, error) {
 		Report   client.Report      `json:"report"`
 		Failures []string           `json:"failures"`
 	}{Account: session.AccountID, Scenario: run.scenario.Name, Failures: []string{}}
-	progressed := run.scenario.SignInBonusFixture || run.scenario.ChallengeFixture || run.scenario.Level > 0 || len(run.scenario.Heroes) > 0 || run.scenario.VIP > 0 || len(run.scenario.Grants) > 0
+	progressed := run.scenario.AwakeningFixture || run.scenario.SignInBonusFixture || run.scenario.ChallengeFixture || run.scenario.Level > 0 || len(run.scenario.Heroes) > 0 || run.scenario.VIP > 0 || len(run.scenario.Grants) > 0
 	if progressed {
 		// A returning player: the first boot lets stock MID1 birth the player, the harness progresses it, the second boot loads it.
 		birth, err := run.boot(session)
@@ -183,6 +185,11 @@ func (run run) play() ([]string, error) {
 	}
 	if run.scenario.SignInBonusFixture {
 		if err := provision.SignInBonusFixture(ctx, run.databaseURL, session.AccountID); err != nil {
+			return nil, err
+		}
+	}
+	if run.scenario.AwakeningFixture {
+		if err := provision.AwakeningFixture(ctx, run.databaseURL, session.AccountID); err != nil {
 			return nil, err
 		}
 	}

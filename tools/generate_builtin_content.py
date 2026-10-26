@@ -21,12 +21,21 @@ from pathlib import Path
 from typing import Any, Iterable
 
 SCHEMA_VERSION = 1
-COMPILER_VERSION = "i9-4c-signin"
+COMPILER_VERSION = "i9-4d-awakening"
 PARSER_VERSION = "lua-generated-v18-guild-invite"
 EXPECTED_SOURCE_ARCHIVE_SHA256 = "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
 SOURCE_PREFIX = "app-assets/output/assets/src_64/"
 
 SOURCE_MANIFEST = [
+    ('data/tables/awaken_mission.lua', 'fdbcaf96386a7aa775c23b071bfe9952ef6acfc57982d17300b8308417fdb123', 'I9_4D_AWAKENING_SOURCE_BOUNDARY'),
+    ('data/tables/bloodline_mission.lua', 'b773cd8ebb0936c76c7ad0727a5d9efa67e87b748f508c3cd66147f075b81299', 'I9_4D_AWAKENING_SOURCE_BOUNDARY'),
+    ('data/tables/pet_awaken_mission.lua', 'fc769406c22fbd880894cbd5b2697a3612335a19a58176486c69463913c95f0b', 'I9_4D_AWAKENING_SOURCE_BOUNDARY'),
+    ('data/tables/bloodline_incubus.lua', 'f94ddd675f3ba1d45f20d8c9df3e9ade37e5bc0bec50c30b66a033ffa1c79b10', 'I9_4D_AWAKENING_SOURCE_BOUNDARY'),
+    ('data/tables/bloodline_incubus_monster.lua', 'c8c05e6799f896d2cbca9ccc21902963c540360da0458d73507427e6588106ec', 'I9_4D_AWAKENING_SOURCE_BOUNDARY'),
+    ('app/windows/TaskAwakeCell.lua', 'ff133e4afc528f2c5a31e2ec51a88f3ac9e1d3ab6b137f8ddbdff3dec7671ff6', 'I9_4D_AWAKENING_SOURCE_BOUNDARY'),
+    ('app/windows/AwakeTwiceSelectTeamWindow.lua', '5c860b0211739fb80163b2fe174c60117bd178d824fc3a4755c792b629ba19c8', 'I9_4D_AWAKENING_SOURCE_BOUNDARY'),
+    ('app/scenes/BattleUnlimit.lua', '18379155319fee810eb645bccf0ec299c4fe720ae0380e6c222f596a452dc6be', 'I9_4D_AWAKENING_SOURCE_BOUNDARY'),
+
     ('data/tables/sign_in.lua', 'b1ed79e1edd36d6ee62c31281328a074abe23af86ed099128b90f6d4b50ce6c5', "I9_4C_SIGNIN_SOURCE_BOUNDARY"),
     ('data/tables/sign_in_partner.lua', '3dcad83b72fbf3d832bc11b507eacc4a7cfc520254497daf7de43f045f2c09a7', "I9_4C_SIGNIN_SOURCE_BOUNDARY"),
     ('app/windows/SignInWindow.lua', 'a879fb4be8e8d468f7c5bd76cfa3f0c816fa32a9d5147c0abb7c0fdc19de63d4', "I9_4C_SIGNIN_SOURCE_BOUNDARY"),
@@ -225,7 +234,7 @@ SOURCE_MANIFEST.append(('app/windows/WhiteAlbumWindow.lua','851a53f588b59d95cfe4
 
 ENABLED_CAPABILITIES = [
     "MISSION_CATALOG_I9_4A",
-    "SCALAR_MARCH_COIN_I9_4A", "MISSION_ACTIVITY_I9_4B", "MONTHLY_SIGNIN_I9_4C", "SCALAR_GUILD_COIN_I9_4B", "DODGE_TICKET_STACK_I9_4B",
+    "SCALAR_MARCH_COIN_I9_4A", "MISSION_ACTIVITY_I9_4B", "MONTHLY_SIGNIN_I9_4C", "AWAKENING_MISSIONS_I9_4D", "SCALAR_GUILD_COIN_I9_4B", "DODGE_TICKET_STACK_I9_4B",
     "SUMMON_GACHA_I9_3E",
     "CAMPAIGN_MODE_I9_3A",
     "COSMETIC_TITLE_CONDITION_I7C6",
@@ -430,6 +439,7 @@ from achievement_content import build_achievement
 from top_floor_content import build_top_floor
 from campaign_content import build_campaign
 from summon_content import build_summon
+from awakening_content import build_awakening
 from signin_content import build_signin
 from missions_content import build_missions
 from one_on_one_content import build_one_on_one
@@ -2097,6 +2107,20 @@ def build_artifacts(blobs: dict[str, SourceBlob], archive_sha256: str) -> dict[s
 
     objective_artifact = build_missions(blobs, parse_generated_lua_table)
     objective_artifact["monthly_signin"] = build_signin(blobs, parse_generated_lua_table)
+    objective_artifact["awakening"] = build_awakening(blobs, parse_generated_lua_table)
+    # Awakening extends existing Character/value identities; it creates no alternate catalog.
+    awakening_heroes = {r["table_id"] for r in templates}
+    awakening_pets = {r["table_id"] for r in pet_templates}
+    awakening_items = {r["item_id"] for r in equipment_items}
+    awakening_stacks = {r["item_id"] for r in resources if r.get("class") == "STACK_ITEM" and r.get("settlement_activation") == "ENABLED_R4"}
+    for definition in objective_artifact["awakening"]["definitions"]:
+        identities = awakening_pets if definition["type"] == 3 else awakening_heroes
+        if definition["before"] not in identities or definition["after"] not in identities:
+            raise CompileError("Unqualified awakening Character template")
+        if definition["item"] and definition["item"] not in awakening_items:
+            raise CompileError("Unqualified awakening equipment identity")
+        if any(item and item not in awakening_stacks for item in [definition["material"], *definition["delete_items"]]):
+            raise CompileError("Unqualified awakening stack identity")
     for month in objective_artifact["monthly_signin"]["months"]:
         for award in month["awards"]:
             item = award["award_item_id"]

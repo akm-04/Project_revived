@@ -43,6 +43,10 @@ func (s Mode) Sweep(c context.Context, a identity.ActorContext, q Sweep, op oper
 		if err != nil {
 			return nil, err
 		}
+		frozen, err := s.freezeAwakening(c, sc.Tx, a.PlayerID, n, r.Progress, v.day, nil, 0)
+		if err != nil {
+			return nil, err
+		}
 		current := sc.Operation.Operation()
 		if err = s.debit(c, sc, a.PlayerID, n.EnergyCost*q.Count); err != nil {
 			return nil, err
@@ -75,7 +79,15 @@ func (s Mode) Sweep(c context.Context, a identity.ActorContext, q Sweep, op oper
 			for _, award := range n.SweepReward {
 				row = append(row, d.Item{ItemID: award[0], Num: award[1]})
 			}
-			row = append(row, v.catalog.Drop(n.RepeatBox, cd.NewStream(current.Derive("campaign.drop.sweep/v1", uint64(i))))...)
+			stream := cd.NewStream(current.Derive("campaign.drop.sweep/v1", uint64(i)))
+			row = append(row, v.catalog.Drop(n.RepeatBox, stream)...)
+			if frozen != nil {
+				for _, drop := range frozen.Draw(stream).Drops {
+					if drop.Count > 0 {
+						row = append(row, d.Item{ItemID: drop.ItemID, Num: drop.Count})
+					}
+				}
+			}
 			items = append(items, row)
 			economys = append(economys, map[string]any{"exp": n.EnergyCost, "mana": n.ManaGain})
 			for _, item := range row {

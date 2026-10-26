@@ -4131,6 +4131,36 @@
       ],
       "write_exceptions": [],
       "migration": "migrations/00088_i9_4_signin.sql"
+    },
+    "content_awakening_catalogs": {
+      "owner": "content-registry",
+      "allowed_query_owners": [
+        "content-registry"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/contentstore/",
+        "sql/content/",
+        "internal/adapters/postgres/contentqueries/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/contentstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00089_i9_4_awakening.sql"
+    },
+    "player_awakening_roots": {
+      "owner": "objective-core",
+      "allowed_query_owners": [
+        "objective-core"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/i5store/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/i5store/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00089_i9_4_awakening.sql"
     }
   }
 }

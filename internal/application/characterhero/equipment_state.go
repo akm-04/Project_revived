@@ -31,8 +31,9 @@ type EquipmentStateContent interface {
 // raw value N>0 => enhancement N-1. It neither owns final battle stats nor
 // mutates gameplay state.
 type EquipmentStateReader struct {
-	Store   EquipmentStateStore
-	Content EquipmentStateContent
+	Awakening *AwakeningPositionResolver
+	Store     EquipmentStateStore
+	Content   EquipmentStateContent
 }
 
 func (r EquipmentStateReader) RawEquipmentStateTx(ctx context.Context, q tx.Queryer, pid identity.PlayerID, partnerID int64, revision string) (characterasset.RawEquipmentState, error) {
@@ -80,15 +81,22 @@ func (r EquipmentStateReader) RawEquipmentStateTx(ctx context.Context, q tx.Quer
 				return characterasset.RawEquipmentState{}, err
 			}
 			row := characterasset.RawEquipmentSlot{Slot: slot, RawFumo: rawFumo}
-			if v != 0 {
+			if v != 0 || r.Awakening != nil {
 				pos, err := r.Content.HeroEquipmentPositionTx(ctx, q, revision, h.TableID, h.Color, slot)
 				if err != nil {
 					return characterasset.RawEquipmentState{}, err
 				}
-				if !pos.ItemID.Valid() {
-					return characterasset.RawEquipmentState{}, errors.New("character hero: collected slot contradicts current content mapping")
+				base := pos.ItemID
+				pos, err = r.Awakening.ResolveTx(ctx, q, h, revision, pos)
+				if err != nil {
+					return characterasset.RawEquipmentState{}, err
 				}
-				row.TemplateID = pos.ItemID
+				if v != 0 || pos.ItemID != base {
+					if !pos.ItemID.Valid() {
+						return characterasset.RawEquipmentState{}, errors.New("character hero: collected slot contradicts current content mapping")
+					}
+					row.TemplateID = pos.ItemID
+				}
 			}
 			out.Slots = append(out.Slots, row)
 		}

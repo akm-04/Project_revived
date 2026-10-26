@@ -76,3 +76,17 @@ func TestInscriptionDailyRowCarriesInscriptID(t *testing.T) {
 		t.Fatal(rows)
 	}
 }
+
+func TestAwakeningBadgeComposesWithOtherTaskBadges(t *testing.T) {
+	at := time.Unix(100000, 0).UTC()
+	view := MissionView{AwakeningReady: true, Instances: []objective.Instance{{ProgramID: "mission:6", ObjectiveID: 70001, GenerationID: "hero:123", CompletedAt: &at}}}
+	marks := MissionProjection(view, at, 0)["redmarks_"].(map[string]any)["27"].(map[string]any)["redmark_list"].([]int64)
+	if len(marks) != 2 || marks[0] != 2705 || marks[1] != 2706 {
+		t.Fatal(marks)
+	}
+	view.AwakeningReady = false
+	marks = MissionProjection(view, at, 0)["redmarks_"].(map[string]any)["27"].(map[string]any)["redmark_list"].([]int64)
+	if len(marks) != 1 || marks[0] != 2706 {
+		t.Fatal("unrelated badge cleared", marks)
+	}
+}

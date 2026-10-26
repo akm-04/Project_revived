@@ -54,6 +54,9 @@ type HeroRosterView struct {
 }
 
 type Service struct {
+	AwakeningPositions        *AwakeningPositionResolver
+	AwakeningEquipment        appi5.AwakeningEquipmentPort
+	Awakening                 AwakeningMutationStore
 	FreshFacets               HeroLocalFacetInitializer
 	Runner                    tx.Runner
 	Timed                     appgeneration.TimedRunner

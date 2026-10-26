@@ -9,8 +9,9 @@ import (
 
 // NodeState is one played node; a node without a state is unplayed (star 0).
 type NodeState struct {
-	CampaignID int64
-	Star       int64
+	FirstClearDay *int64
+	CampaignID    int64
+	Star          int64
 	// Wins and Resets are the Super daily_limit spend and elite resets of the game day (F7).
 	Wins            modes.Counter
 	Resets          modes.Counter
@@ -48,6 +49,7 @@ func (p Progress) with(s NodeState) Progress {
 // Record is the player's campaign state, the drops frozen by the open FIGHT, and the
 // last settled FIGHT_RESULT, which a duplicate 114 of the same generation replays (F4e).
 type Record struct {
+	PendingAwakening  json.RawMessage
 	Progress          Progress
 	PendingGeneration string
 	PendingItems      []Item

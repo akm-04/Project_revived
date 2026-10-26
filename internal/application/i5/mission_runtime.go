@@ -104,6 +104,9 @@ func MissionProjection(view MissionView, at time.Time, family objective.StockFam
 	partner := map[string]any{}
 	partnerHooks := []any{}
 	marks := map[int64]bool{}
+	if view.AwakeningReady {
+		marks[2705] = true
+	}
 	definitions := make(map[int64]objective.MissionDefinition, len(view.Definitions))
 	for _, definition := range view.Definitions {
 		definitions[definition.ObjectiveID] = definition
@@ -151,6 +154,9 @@ func MissionProjection(view MissionView, at time.Time, family objective.StockFam
 	out := map[string]any{"extra_info": map[string]any{"daily_left_time": max(int64(0), modes.DayBegins(view.Root.Day+1).Unix()-at.Unix()), "huoyue_info": info}}
 	if family != 0 {
 		out["mission_list"] = list(family)
+		if family == objective.Daily {
+			out["daily_mission_"] = out["mission_list"]
+		}
 		return out
 	}
 	for f, key := range map[objective.StockFamily]string{objective.Daily: "daily_mission_", objective.GrowMain: "mainline_mission_", objective.Story: "story_mission_", objective.Partner: "partner_mission_"} {
@@ -173,7 +179,7 @@ func MissionProjection(view MissionView, at time.Time, family objective.StockFam
 		}
 	}
 	redmarkList := []int64{}
-	for _, id := range []int64{2701, 2702, 2704, 2706} {
+	for _, id := range []int64{2701, 2702, 2704, 2705, 2706} {
 		if marks[id] {
 			redmarkList = append(redmarkList, id)
 		}

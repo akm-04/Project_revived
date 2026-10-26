@@ -935,6 +935,7 @@ SELECT
   AND NOT EXISTS(SELECT 1 FROM appearance_live_missing) AND NOT EXISTS(SELECT 1 FROM appearance_live_extra)
   AND NOT EXISTS(SELECT 1 FROM appearance_style_missing) AND NOT EXISTS(SELECT 1 FROM appearance_style_extra)
   AND (NOT ($9::jsonb ? 'monthly_signin') OR EXISTS(SELECT 1 FROM content_monthly_signin_catalogs WHERE revision_id=$1 AND payload=$9::jsonb->'monthly_signin'))
+  AND (NOT ($9::jsonb ? 'awakening') OR EXISTS(SELECT 1 FROM content_awakening_catalogs WHERE revision_id=$1 AND payload=$9::jsonb->'awakening'))
   AS exact_match,
   (SELECT count(*)::bigint FROM stored_resources) AS resource_count,
   (SELECT count(*)::bigint FROM stored_progression) AS progression_count,

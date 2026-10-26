@@ -327,7 +327,11 @@ func (d HeroDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReque
 		if got.AlreadyEquipped {
 			return httpedge.Response{HTTPStatus: http.StatusOK, Body: map[string]any{"error_code": int64(30001)}}
 		}
-		return httpedge.Response{HTTPStatus: http.StatusOK, Body: map[string]any{}}
+		body := map[string]any{}
+		for k, v := range got.MissionChanges {
+			body[k] = v
+		}
+		return httpedge.Response{HTTPStatus: http.StatusOK, Body: body}
 	case 62: // ONE_KEY_HERO_EQUIP (CA4-5 production-qualified Normal-only wire)
 		if !onlyStockGameplayParams(req.Envelope.Params, "partner_id") {
 			return badHero("invalid_hero_one_key_equip")

@@ -21,14 +21,16 @@ type tag int64
 func (t tag) RowsAffected() int64 { return int64(t) }
 
 type recording struct {
-	bySQL    map[string][]any
-	calls    []string
-	callArgs [][]any
-	sql      string
-	args     []any
-	values   []any
-	n        int64
-	err      error
+	execCalls []string
+	execArgs  [][]any
+	bySQL     map[string][]any
+	calls     []string
+	callArgs  [][]any
+	sql       string
+	args      []any
+	values    []any
+	n         int64
+	err       error
 }
 
 func (r *recording) QueryRow(_ context.Context, sql string, args ...any) tx.Row {
@@ -57,6 +59,8 @@ func (r *recording) Scan(dest ...any) error {
 func (r *recording) Exec(_ context.Context, sql string, args ...any) (tx.CommandTag, error) {
 	r.sql = sql
 	r.args = args
+	r.execCalls = append(r.execCalls, sql)
+	r.execArgs = append(r.execArgs, args)
 	return tag(r.n), r.err
 }
 func (r *recording) Commit(context.Context) error   { return errors.New("store must not commit") }
@@ -89,14 +93,18 @@ func TestBundleQueriesUseExactRawBytes(t *testing.T) {
 		}
 		if c.sql == contentqueries.InsertContentObjectives {
 			var payload struct {
-				Activity json.RawMessage `json:"activity_chests"`
-				SignIn   json.RawMessage `json:"monthly_signin"`
+				Activity  json.RawMessage `json:"activity_chests"`
+				SignIn    json.RawMessage `json:"monthly_signin"`
+				Awakening json.RawMessage `json:"awakening"`
 			}
 			if err := json.Unmarshal(c.raw, &payload); err != nil {
 				t.Fatal(err)
 			}
-			if q.sql != "INSERT INTO content_monthly_signin_catalogs(revision_id,payload) VALUES($1,$2::jsonb)" || !reflect.DeepEqual(q.args, []any{b.RevisionID(), string(payload.SignIn)}) {
-				t.Fatal("activity content input mismatch")
+			if q.sql != "INSERT INTO content_awakening_catalogs(revision_id,payload)VALUES($1,$2::jsonb)" || !reflect.DeepEqual(q.args, []any{b.RevisionID(), string(payload.Awakening)}) {
+				t.Fatal("awakening content input mismatch")
+			}
+			if len(q.execCalls) < 3 || q.execCalls[len(q.execCalls)-2] != "INSERT INTO content_monthly_signin_catalogs(revision_id,payload) VALUES($1,$2::jsonb)" || !reflect.DeepEqual(q.execArgs[len(q.execArgs)-2], []any{b.RevisionID(), string(payload.SignIn)}) {
+				t.Fatal("sign-in content input mismatch")
 			}
 			q.sql = q.calls[len(q.calls)-1]
 			q.args = q.callArgs[len(q.callArgs)-1]
