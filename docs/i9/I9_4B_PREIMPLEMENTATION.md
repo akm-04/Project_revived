@@ -1,0 +1,41 @@
+# I9-4B research and implementation plan
+
+Status: RESEARCH_SUFFICIENT_FOR_BOUNDED_IMPLEMENTATION. Implementation is authorized by the current user after this research/design checkpoint. This is not shared contract publication, leaf acceptance or a PassMap seal. I9-4A runtime exists on bbc664d; mandatory VC/tutorial/shared publication and rebase remain fenced by Claude's I9-3 close. Preserve those gates while continuing the user's queued4B work.
+
+## Selected authority and dependencies
+
+Base is sealed786, I9_MISSIONS_V1 M7 and M3/M8, framework F7/F8/F9/F11/F17 and I9-1 ownership/time/receipt contracts. Existing I5 objective root stores day/week medals and chest claims. I5 owns every value grant; Content owns immutable source definitions; Campaign/Vending/PvP own their facts. Source and tool identities remain in ../INPUTS.json. Do not edit shared I9-3/PassMap/ops or use VC/shared checkpoint/seal before CLOSED+787. Research cache SOURCE_ROWS.json binds exact src_64 rows, not src_32. The first inventory chose byte-identical src_32 table members; it was corrected to explicit src_64 before policy or implementation.
+
+## Discriminating findings
+
+1. SOURCE_FACT: TaskWindow.lua:789-797 selects MissionRewardTable.gift below maxTeamLev, gift2 at max. This contradicts inherited M7/D90 function84 selection. Source daily thresholds are30/60/90/120/150; week500/1000. MissionRewardTable offsets week ids by5 only for UI display; MID170 requests index1/2, not6/7.
+2. SOURCE_FACT: TaskWindow.lua:724 requires day_award[index] ==0 to show claimable. Task.lua setters write1 at that index. Wire must have five day flags and two week flags, including zeros; storage can keep claimed id sets. An empty list or a list of claimed ids is not the source wire shape.
+3. SOURCE_FACT: all12referenced gifts have fixed vectors, no dropbox/random draws. Both third daily gifts include badge240, vip6, ex_badge120. utils.lua:2207 maps badge to guild_coin. GiftTable exposes vip/exBadge, but current GiftTipsWindow does not display those fields and no current gift exBadge caller was recovered. The analogous mission reward helper adds exCoin at vip threshold. Exact original-server gift bonus rule is UNKNOWN; no silent field omission is allowed.
+4. SOURCE_FACT: fifth daily gift includes50001979. The exact item is Dodge ticket, explicitly described for dodge ball, stack9999 and overflow-to-mail1, type0. misc.dodge_ticket and ThrowSandbagChooseWindow.lua:12 read it from the ordinary backpack. This qualifies storage/receipt/overflow for this exact ticket; it does not qualify all type0items or the I10 Dodge game. Every other chest item is already qualified ordinary stack data.
+5. SOURCE_FACT: V1 handlers/tasks.py huoyue_award is a stub. V2 has I5 grants, not the generic gift opener assumed by M7 prose. Compile these fixed source gifts into the existing I5 value plan; keep source gift identities and use one SettleGrantTx, not a second writer or an unrelated SocialGift mechanism.
+6. SOURCE_FACT: delivered Top Floor,1on1,rankedArena,League producers emit PVP_FIGHT inside terminal transactions. Preparation now precedes I5 value suffixes. Practice Arena emits no fact. Consumer106 is enabled at4B. Canonical I5 CrystalSpentOnDayTx already records spend;126/127 use that port with modes.Day, never parse requests or sum another owner's tables.
+7. Pending reader bindings are integrations, not versioned formulas. Already-created47instances retain their content/target/reward pins; explicitly resolve only the I9-4B deferred binding once the4B runtime is installed. Otherwise old daily106/126/127rows would remain deferred forever.
+8. Old MissionRewardTable has the same day/week id routing. Cached client mission help supplies no server bonus algorithm. Online GXB1 searches found https://urgametips.com/girls-x-battle-tips-walkthrough-guide/ (2016) and https://gachazone.com/girls-x-battle-beginner-guide/ (2016 guide reprint): daily rewards, free Small Vending pulls and UTC+8 corroboration only. No source-backed replacement for the missing gift bonus algorithm was found. GXB2 results were excluded.
+
+## Working source amendments and private policy
+
+D182: correct redmarks_ to function27 records {function_id,redmark_list}, task ids2701/2702/2704/2706; distinguish partner list map from the common-hook nested shape. I9-4A working code corrected; no accepted wire guard is weakened.
+D183: replace D90's unsupported function84 chest selector with the client pre-claim level/max selector. Use the existing content-owned immutable catalog, I5 progression snapshot, root fence, grant and receipts. Wire claimed flags are fixed zero/one arrays.
+D184: PRIVATE_POLICY only for unrecovered gift bonus: base badge maps to guild_coin; VIP>=source vip threshold adds source ex_badge (240+120 atVIP6), preserving the analogous mission bonus convention. Retain both fields, rule identity and UNKNOWN original-server classification. This is bounded to selected activity gifts; no payment/VIP state is fabricated. Source item50001979 qualifies only ordinary stack custody, not event gameplay.
+D185: resolve the named I9-4B pending input binding in the runtime only after its typed spend reader and PvP consumer are wired; preserve every instance content pin and old receipts. Real47->48 native proof is required.
+
+## Implementation reach and transaction walk
+
+- Compiler: pin daily/week/TaskWindow/GiftTips/ThrowSandbag sources, compile seven chest rules and exact fixed gift plans into objective_catalog.activity_chests; keep476mission definitions. Qualify guild_coin income and exact Dodge ticket custody with named capabilities. Reject unsupported/nonzero gift vectors and broken references. New generation48; retain old generations unmodified.
+- Content storage: one forward Content-owned immutable activity-catalog table, migration87 and ownership/migration-lock entries. Extend existing InsertObjectives to store the nested activity payload in the same deployment transaction; expose a typed exact-revision read. No second gameplay table/owner.
+- Objective domain: chest rule/catalog validation and reward choice; use the existing mission root claim sets and F7 day/week. Daily claims fence the root; week claims use week occurrence. Receipt lookup precedes eligibility and reward selection. Check threshold and index; grant source/occurrence includes kind/index/day-or-week. Same transaction settles I5 grant, claimed flag/root version and outer receipt. Replay cannot reselect the other level or VIP branch. Root rollover resets daily/week only at existing boundaries. No production clock override.
+- Runtime: enable106 and spend126/127 through the existing fact/materialization path. Read-only snapshots stay side-effect free. Add169/170 to I5 dispatcher and production registration. Return source-compatible awards/huoyue_info; merge state through the same staged response decorator. Preserve4Alegacy claims and receipt schemas.
+- Consumers: update projection flags and chest-ready daily redmark; do not counterfeit Awakening or later-stage bindings. Old47deferred rows need explicit4B resolution tests, not content rebinding.
+
+## Required proof
+
+Compiler positives/negative vectors and deterministic check; content/registry/architecture guards; native threshold refusal,invalidindex,success,repeat,concurrentonce,rollback,unknown-COMMIT,day andMonday rollover,VIPthreshold,premax/maxreward,exactold47instancecontentandreceiptpins; ledger spend count and each allowed PvP kind, no practice. All changed-package units/race/vet and applicable schema/ownership checks. After Claude fence lifts, rebase onto final close, publish source amendments, run stock UI VC for169/170and all four real PvP modes/Practice exclusion plus4A campaign/summon/tutorial, journal/reality/surface/contract walk; no acceptance before those gates. Full stage strict/Android/aggregate obligations remain4D/stage close; none are waived.
+
+## Remaining unknowns and boundaries
+
+Original gift VIP bonus algorithm remains unrecovered. The source DayChest level selector is clear. Ticket custody is qualified from source, Dodge gameplay stays I10. Unknown200114and active-commerce-card bindings remain4A/I10 records. No new random policy, global gift opener, global type0relaxation, scheduler or new value owner is needed.

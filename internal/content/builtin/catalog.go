@@ -11,8 +11,6 @@ import (
 	"reflect"
 	"sort"
 	"strings"
-
-	"gxb.local/backend/v2/internal/domain/objective"
 )
 
 const (
@@ -101,7 +99,49 @@ type FunctionGateCatalog struct {
 	Source        string         `json:"source"`
 }
 
-type ObjectiveDefinition = objective.MissionDefinition
+type ObjectiveRewardPlan struct {
+	Source struct{ PolicyVersion string }
+	Lines  []struct {
+		Kind        string
+		ResourceKey string `json:",omitempty"`
+		ItemID      int64  `json:",omitempty"`
+		Amount      int64
+		Domain      string            `json:",omitempty"`
+		Metadata    map[string]string `json:",omitempty"`
+	}
+}
+type ObjectivePrerequisite struct {
+	Gate              []int64 `json:"gate"`
+	Previous          int64   `json:"previous"`
+	DeferredUntil     string  `json:"deferred_until"`
+	UnavailableReason string  `json:"unavailable_reason"`
+}
+type ObjectivePresentation struct {
+	DetailType      int64               `json:"detail_type"`
+	Condition       int64               `json:"condition"`
+	Parameters      []int64             `json:"parameters"`
+	Next            int64               `json:"next"`
+	DeferredUntil   string              `json:"deferred_until"`
+	BaseReward      ObjectiveRewardPlan `json:"base_reward"`
+	BattlepassScore int64               `json:"battlepass_score"`
+	VIPSweepReward  bool                `json:"vip_sweep_reward"`
+	VIPSweepItemID  int64               `json:"vip_sweep_item_id"`
+	VIPSweepByLevel []int64             `json:"vip_sweep_by_level,omitempty"`
+}
+type ObjectiveDefinition struct {
+	ProgramID          string                `json:"program_id"`
+	Family             int64                 `json:"stock_family"`
+	ObjectiveID        int64                 `json:"objective_id"`
+	DefinitionRevision string                `json:"definition_revision"`
+	Strategy           string                `json:"strategy"`
+	AcceptedFactKind   string                `json:"accepted_fact_kind"`
+	Target             int64                 `json:"target"`
+	GenerationKind     string                `json:"generation_kind"`
+	Prerequisite       ObjectivePrerequisite `json:"prerequisite_policy"`
+	Reward             ObjectiveRewardPlan   `json:"reward_plan"`
+	Huoyue             int64                 `json:"huoyue"`
+	Presentation       ObjectivePresentation `json:"presentation"`
+}
 
 type ObjectiveCatalog struct {
 	Definitions   []ObjectiveDefinition `json:"definitions"`
