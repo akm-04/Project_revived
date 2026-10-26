@@ -239,6 +239,13 @@ func (s Service) EnsureBuiltinInstalled(ctx context.Context, op operation.Contex
 			if gotTopFloor != 1 {
 				return errors.New("content registry top floor count")
 			}
+			gotMarch, err := s.Repo.InsertMarch(tctx, scope.Tx, b)
+			if err != nil {
+				return err
+			}
+			if gotMarch != 1 {
+				return errors.New("content registry march count")
+			}
 			gotCampaign, err := s.Repo.InsertCampaign(tctx, scope.Tx, b)
 			if err != nil {
 				return err

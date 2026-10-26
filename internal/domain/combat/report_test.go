@@ -117,3 +117,26 @@ func FuzzReportJudge(f *testing.F) {
 		}
 	})
 }
+
+func TestMarchCompleteReportDoesNotAcceptAnEmptyEnemyWin(t *testing.T) {
+	p := marchPolicy
+	p.ID = "MARCH_REPORT_V1"
+	p.CompleteEnemies = true
+	p.LivingWinner = true
+	r := acceptedReport()
+	r.Enemies = nil
+	if verdict, reason := p.Judge(reportSnapshot(), r); verdict != VerdictRejected || reason != "ENEMY_MISSING" {
+		t.Fatal(verdict, reason)
+	}
+	r = acceptedReport()
+	r.Allies[0].HP = 0
+	if verdict, reason := p.Judge(reportSnapshot(), r); verdict != VerdictRejected || reason != "WIN_WITHOUT_SURVIVOR" {
+		t.Fatal(verdict, reason)
+	}
+	// Existing policy versions retain their declared coverage semantics.
+	r = acceptedReport()
+	r.Enemies = nil
+	if verdict, reason := marchPolicy.Judge(reportSnapshot(), r); verdict != VerdictAccepted {
+		t.Fatal(verdict, reason)
+	}
+}

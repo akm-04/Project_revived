@@ -243,6 +243,12 @@ func (Store) VerifyRevision(ctx context.Context, q tx.Queryer, b registry.Bundle
 		return registry.Verification{}, err
 	}
 	v.Exact = v.Exact && topFloorExact
+	var marchExact bool
+	err = q.QueryRow(ctx, verifyMarchSQL, b.RevisionID(), string(b.MarchJSON())).Scan(&marchExact, &v.MarchCount)
+	if err != nil {
+		return registry.Verification{}, err
+	}
+	v.Exact = v.Exact && marchExact
 	var campaignExact bool
 	err = q.QueryRow(ctx, verifyCampaignSQL, b.RevisionID(), string(b.CampaignJSON())).Scan(&campaignExact, &v.CampaignCount)
 	if err != nil {

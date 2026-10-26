@@ -55,7 +55,10 @@ type ReportPolicy struct {
 	Pet       bool
 	// WinClearsEnemies makes a win require every reported enemy at zero hp.
 	WinClearsEnemies bool
-	MaxHP            float64
+	// CompleteEnemies and LivingWinner are opt-in for new family policy versions.
+	CompleteEnemies bool
+	LivingWinner    bool
+	MaxHP           float64
 	// HPPerFrozen, when positive, caps an actor's hp at this multiple of its
 	// frozen HP attribute; buffs may raise the stock hp limit.
 	HPPerFrozen float64
@@ -96,6 +99,18 @@ func (p ReportPolicy) Judge(snapshot Snapshot, report Report) (Verdict, string) 
 		return a, ok
 	}, "ENEMY"); verdict == VerdictRejected {
 		return verdict, reason
+	}
+	if p.CompleteEnemies && len(report.Enemies) != len(enemies) {
+		return VerdictRejected, "ENEMY_MISSING"
+	}
+	if p.LivingWinner && report.Win {
+		alive := false
+		for _, ally := range report.Allies {
+			alive = alive || ally.HP > 0
+		}
+		if !alive {
+			return VerdictRejected, "WIN_WITHOUT_SURVIVOR"
+		}
 	}
 	if p.WinClearsEnemies && report.Win {
 		for _, enemy := range report.Enemies {

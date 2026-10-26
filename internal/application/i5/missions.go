@@ -234,5 +234,8 @@ func (m MissionMaterializer) materializeOne(ctx context.Context, t tx.Tx, scope 
 }
 
 func (m MissionMaterializer) bindingAvailable(definition objective.MissionDefinition) bool {
-	return definition.Presentation.DeferredUntil == "" || m.Activity != nil && definition.Presentation.DeferredUntil == "I9-4B"
+	// Old daily instances retain their definition/reward revision when a producer ships.
+	return definition.Presentation.DeferredUntil == "" ||
+		m.Activity != nil && definition.Presentation.DeferredUntil == "I9-4B" ||
+		definition.Presentation.DeferredUntil == "I9-5" && definition.AcceptedFactKind == "MARCH_FINISHED"
 }

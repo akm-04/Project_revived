@@ -293,8 +293,8 @@
   "character_asset_core_parent_status_at_backend_packaging": "PENDING_PASSMAP_CLOSURE_REVIEW",
   "commit": "ed63e7dcdd0e04f9153f1b1f54fe96ae85ceab51",
   "commit_role": "PARENT_ACCEPTED_PASS643_COMMIT; exact final I7A6A product HEAD/tree/archive are bound externally in PassMap and gate evidence to avoid self-reference",
-  "content_revision": "c15cdd873a3a169d62a5b429d39f5b3721d26f5c5ff23db4edaf1d357981ebfe",
-  "current_migration_high_water": "00087_i9_4_mission_chests.sql",
+  "content_revision": "628b0036830f7432adc96d9f908d3e383efd3d8c7a33e349e9a2e769da81a98e",
+  "current_migration_high_water": "00090_i9_5a_march.sql",
   "current_stage": "I9_4AB_RUNTIME_IMPLEMENTED_CLOSURE_FENCED",
   "evidence": "Pass587 Gate-1 runtime evidence b59277c4d59a1c2622809a62f46605442232d77a380e97af7eeba2a3a75fe73e + Pass588 normal-chat I0-I6/source-oracle/release-reconciliation checks; exact Pass588 retest still required.",
   "external_audit_sha256": "a6234eaf9cd5a3f029259140a0166c0529e9b174e4572c61a102b7f0ed0c9e7f",
@@ -736,7 +736,7 @@
     "version": "v0.125.0"
   },
   "language_floor": "go1.26.0",
-  "migration_high_water": "00089_i9_4_awakening.sql",
+  "migration_high_water": "00090_i9_5a_march.sql",
   "migration_parent_backend_sha256": "73a668580d416fba4275b97898d083b9fdcb12c58773eeb9ceec2b1f3711c58d",
   "native_repair_parent_backend_sha256": "a6bf87421767c5451f69fcf359995d28d91a6c6f861f55422bcdd642583e0141",
   "native_repair_parent_implementation_revision_sha256": "0def8ffc697be0c43a40b3e447c328fee45011e76e9e87a69f17181b777e1c1b",
@@ -766,9 +766,9 @@
   "schema_version": 1,
   "snapshot": "D10 Publication immutable revisions/items, canonical scope and PostgreSQL visibility, read markers, source-shaped7/1537/8193/8194; inherited8 accepted656 preserved.",
   "stage": "I9-4C",
-  "status": "FROZEN_NOT_ACCEPTED_I9_4C_LEAF_QUALIFICATION",
+  "status": "I9_5A_IMPLEMENTATION_FOCUSED_QUALIFICATION_PENDING",
   "toolbox_archive_sha256": "e4e194c9627929299577364b953b2468d6118fac4283fd8030f10b5a27456c2b",
-  "version": "v0.150.0",
+  "version": "v0.151.0",
   "w2_claimed": false,
   "i7c5b_contract": "docs/i7c5b-top-floor/I7C5B_POLICY.json",
   "i7c5b_preimplementation_pass": "730.0",
@@ -880,5 +880,22 @@
     "content_revision": "36d9c7b641e39ca8abf07b0202534f796f7c0b4be0f8849f81f508284bb6709b",
     "seven_day": "LATER_I10",
     "product_accepted_at_creation": false
+  },
+  "i9_5a": {
+    "status": "IMPLEMENTATION_FOCUSED_TESTS_IN_PROGRESS_NOT_STAGE_ACCEPTANCE",
+    "contract": "docs/i9/I9_MARCH_V1.json",
+    "policy": "docs/i9/I9_MARCH_PRIVATE_POLICY_V1.json",
+    "base_commit": "76bc01c942e87e91e976a36440a6af3ca64f5394",
+    "content_generation": 52,
+    "mids": [
+      336,
+      337,
+      338,
+      339,
+      340,
+      341,
+      342
+    ],
+    "qualification_owner": "Claude per I9 split handoff"
   }
 }

@@ -4161,6 +4161,34 @@
       ],
       "write_exceptions": [],
       "migration": "migrations/00089_i9_4_awakening.sql"
+    },
+    "content_march_catalogs": {
+      "owner": "content-registry",
+      "migration": "migrations/00090_i9_5a_march.sql",
+      "allowed_query_owners": [
+        "content-registry"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/contentstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/contentstore/"
+      ],
+      "write_exceptions": []
+    },
+    "march_players": {
+      "owner": "march",
+      "migration": "migrations/00090_i9_5a_march.sql",
+      "allowed_query_owners": [
+        "march"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/marchstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/marchstore/"
+      ],
+      "write_exceptions": []
     }
   }
 }

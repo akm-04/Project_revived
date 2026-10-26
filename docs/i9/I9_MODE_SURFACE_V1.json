@@ -1817,8 +1817,9 @@
    "family": "CHAMPION_MARCH",
    "disposition": "ACTIVE",
    "target": "I9-5",
-   "v2": "unimplemented",
-   "v1": "STATE_BACKED"
+   "v2": "implemented",
+   "v1": "STATE_BACKED",
+   "implementation": "I9-5A working candidate; qualification pending"
   },
   {
    "mid": 337,
@@ -1826,8 +1827,9 @@
    "family": "CHAMPION_MARCH",
    "disposition": "ACTIVE",
    "target": "I9-5",
-   "v2": "unimplemented",
-   "v1": "LITERAL_STUB"
+   "v2": "implemented",
+   "v1": "LITERAL_STUB",
+   "implementation": "I9-5A working candidate; qualification pending"
   },
   {
    "mid": 338,
@@ -1835,8 +1837,9 @@
    "family": "CHAMPION_MARCH",
    "disposition": "ACTIVE",
    "target": "I9-5",
-   "v2": "unimplemented",
-   "v1": "LITERAL_STUB"
+   "v2": "implemented",
+   "v1": "LITERAL_STUB",
+   "implementation": "I9-5A working candidate; qualification pending"
   },
   {
    "mid": 339,
@@ -1844,8 +1847,9 @@
    "family": "CHAMPION_MARCH",
    "disposition": "ACTIVE",
    "target": "I9-5",
-   "v2": "unimplemented",
-   "v1": "LITERAL_STUB"
+   "v2": "implemented",
+   "v1": "LITERAL_STUB",
+   "implementation": "I9-5A working candidate; qualification pending"
   },
   {
    "mid": 340,
@@ -1853,8 +1857,9 @@
    "family": "CHAMPION_MARCH",
    "disposition": "ACTIVE",
    "target": "I9-5",
-   "v2": "unimplemented",
-   "v1": "LITERAL_STUB"
+   "v2": "implemented",
+   "v1": "LITERAL_STUB",
+   "implementation": "I9-5A working candidate; qualification pending"
   },
   {
    "mid": 341,
@@ -1862,8 +1867,9 @@
    "family": "CHAMPION_MARCH",
    "disposition": "ACTIVE",
    "target": "I9-5",
-   "v2": "unimplemented",
-   "v1": "LITERAL_STUB"
+   "v2": "implemented",
+   "v1": "LITERAL_STUB",
+   "implementation": "I9-5A working candidate; qualification pending"
   },
   {
    "mid": 342,
@@ -1871,8 +1877,9 @@
    "family": "CHAMPION_MARCH",
    "disposition": "ACTIVE",
    "target": "I9-5",
-   "v2": "unimplemented",
-   "v1": "LITERAL_STUB"
+   "v2": "implemented",
+   "v1": "LITERAL_STUB",
+   "implementation": "I9-5A working candidate; qualification pending"
   },
   {
    "mid": 352,

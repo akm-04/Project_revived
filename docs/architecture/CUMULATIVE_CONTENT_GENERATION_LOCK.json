@@ -370,14 +370,22 @@
       "parser_version": "lua-generated-v18-guild-invite",
       "revision_id": "c15cdd873a3a169d62a5b429d39f5b3721d26f5c5ff23db4edaf1d357981ebfe",
       "scope": "Source-shaped ordinary/Blood/pet mission definitions, Wish blacklists, source campaign drop references and explicit reconstruction policy. Existing resource/calendar/ordinary mission definitions unchanged."
+    },
+    {
+      "ordinal": 52,
+      "stage": "I9-5A Champion March",
+      "compiler_version": "i9-5a-march",
+      "parser_version": "lua-generated-v18-guild-invite",
+      "revision_id": "628b0036830f7432adc96d9f908d3e383efd3d8c7a33e349e9a2e769da81a98e",
+      "scope": "Source Champion catalog and labelled reconstruction policy; existing catalogs unchanged."
     }
   ],
   "current": {
-    "ordinal": 51,
-    "stage": "I9-4D awakening missions",
-    "compiler_version": "i9-4d-awakening",
+    "ordinal": 52,
+    "stage": "I9-5A Champion March",
+    "compiler_version": "i9-5a-march",
     "parser_version": "lua-generated-v18-guild-invite",
-    "revision_id": "c15cdd873a3a169d62a5b429d39f5b3721d26f5c5ff23db4edaf1d357981ebfe",
-    "scope": "Source-shaped ordinary/Blood/pet mission definitions, Wish blacklists, source campaign drop references and explicit reconstruction policy. Existing resource/calendar/ordinary mission definitions unchanged."
+    "revision_id": "628b0036830f7432adc96d9f908d3e383efd3d8c7a33e349e9a2e769da81a98e",
+    "scope": "Source Champion catalog and labelled reconstruction policy; existing catalogs unchanged."
   }
 }
