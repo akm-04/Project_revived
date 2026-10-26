@@ -65,3 +65,7 @@ These choices resolve the earlier open design alternatives. Publish the source c
 - Reconcile109with the delivered Vending purchase owner. Do not equate it blindly to every girl slot: Magic and other fragment paths need the G9 producer finding resolved first. Prove the required classic50mission17 path and the daily109purchase delta from real UI operations. The exact producer fix must be based on Claude's final code after rebase, not the stale working copy.
 
 Implementation is authorized after this controlling research/design amendment is published. No further user approval is needed for routine implementation, tests or4Aclosure. The current fence still prevents that publication and shared VC execution. The only external dependency currently blocking this transition is Claude's I9-3 close/seal787; preserve this plan and rebase onto his final commit when available.
+
+## Implementation authorization update (2026-10-26)
+
+The current user and updated handoff section1 explicitly authorize isolated implementation now on i9-4. This supersedes the r02 wait-before-coding next action. Shared preimplementation publication and D170+ merge follow seal787 and rebase; no shared VC/checkpoint/seal operations before that point. Upstream d9bc262/7e63a23 fixes Magic SUMMON and must be preserved on rebase. No phase acceptance is implied.

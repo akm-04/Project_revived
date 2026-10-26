@@ -21,12 +21,17 @@ from pathlib import Path
 from typing import Any, Iterable
 
 SCHEMA_VERSION = 1
-COMPILER_VERSION = "i9-3-vending-juice"
+COMPILER_VERSION = "i9-4a-missions"
 PARSER_VERSION = "lua-generated-v18-guild-invite"
 EXPECTED_SOURCE_ARCHIVE_SHA256 = "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
 SOURCE_PREFIX = "app-assets/output/assets/src_64/"
 
 SOURCE_MANIFEST = [
+    ('data/tables/mission.lua', '337cb2a66ac6963e7d2e24dcc293df02d24fca8cbb6a40d838915f60ebc436bd', 'I9_4A_MISSION_SOURCE_BOUNDARY'),
+    ('app/model/Task.lua', 'd454ae7cb1e28d95d366aae30ba88d83432c974415f263991af6c4190d54bee5', 'I9_4A_MISSION_SOURCE_BOUNDARY'),
+    ('app/common/tables/MissionTable.lua', '1737d7eddc2e7dfa005e43b6105305b9c6d8227d00f47bdc99fb69b96430f577', 'I9_4A_MISSION_SOURCE_BOUNDARY'),
+    ('app/windows/TaskDailyCell.lua', '8cca56bc5e7ef67672c65c53708210c7cdda70cced9274b4e3099ca0158198db', 'I9_4A_MISSION_SOURCE_BOUNDARY'),
+    ('app/windows/TaskGrowCell.lua', '0895864ee207e6d6d285289809abea083e3dc6a32d4596e5e18a8e8890960340', 'I9_4A_MISSION_SOURCE_BOUNDARY'),
     ('data/tables/summon.lua', 'e34ac8b360d0a623b4c846251e71db939d3920e9769ab40889c656904a39183d', 'I9_3E_GACHA_SOURCE_BOUNDARY'),
     ('data/tables/dropbox.lua', '82bcde6486b711f393bf74e54c6ac28239c04fb2d78adf3fd23ff56c1183e2cb', 'I9_3E_GACHA_SOURCE_BOUNDARY'),
     ('data/tables/soul_casket.lua', 'ce7022526f6fe234dee67fe584c92ac18c0814c009401ca45dc254a74c9d08d6', 'I9_3E_GACHA_SOURCE_BOUNDARY'),
@@ -209,6 +214,7 @@ SOURCE_MANIFEST.append(('app/windows/HeroGiftBoxWindow.lua','d6065c3d601f5820915
 SOURCE_MANIFEST.append(('app/windows/WhiteAlbumWindow.lua','851a53f588b59d95cfe460f3399ab1a6904fff7714131c358f3c3a73910b6bb9',"LIBRARY_INPUT_SOURCE_AUTHORITY"))
 
 ENABLED_CAPABILITIES = [
+    "MISSION_CATALOG_I9_4A",
     "SUMMON_GACHA_I9_3E",
     "CAMPAIGN_MODE_I9_3A",
     "COSMETIC_TITLE_CONDITION_I7C6",
@@ -413,6 +419,7 @@ from achievement_content import build_achievement
 from top_floor_content import build_top_floor
 from campaign_content import build_campaign
 from summon_content import build_summon
+from missions_content import build_missions
 from one_on_one_content import build_one_on_one
 from arena_content import build_arena
 from league_content import build_league
@@ -2071,11 +2078,7 @@ def build_artifacts(blobs: dict[str, SourceBlob], archive_sha256: str) -> dict[s
         "vip_bless":vip_bless,
     }
 
-    objective_artifact = {
-        "definitions": [],
-        "schema_version": SCHEMA_VERSION,
-        "status": "BUILTIN_ACTIVATION_EMPTY_UNQUALIFIED_MAPPING",
-    }
+    objective_artifact = build_missions(blobs, parse_generated_lua_table)
 
     emoticons=[]
     for row in parse_generated_lua_table(blobs["data/tables/emoticon.lua"].data):
@@ -2262,7 +2265,7 @@ def build_artifacts(blobs: dict[str, SourceBlob], archive_sha256: str) -> dict[s
         "enabled_stack_items": enabled_stack,
         "item_rows": len(items),
         "function_rows": len(function_gates),
-        "objective_builtin_rows": 0,
+        "objective_builtin_rows": len(objective_artifact["definitions"]),
         "player_rows": len(progression_rows),
         "positive_stack_items": positive_stack,
         "specialized_type24_items": specialized_type24,

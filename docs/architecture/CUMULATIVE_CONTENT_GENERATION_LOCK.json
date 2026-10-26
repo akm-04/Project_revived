@@ -322,14 +322,22 @@
       "parser_version": "lua-generated-v18-guild-invite",
       "revision_id": "4958207bed0275873a0861cafe9df2b68218d9b17b6ce34b10ec4716dd8f0d28",
       "scope": "Cumulative Vending catalog plus per-button summon_reward juice (reward_item_id), policy juice.per_pull and the rotating Medium showcase (display.pet_id removed, D154/D155); all unrelated payloads retained."
+    },
+    {
+      "ordinal": 46,
+      "stage": "I9-4A (Mission catalog; runtime integration in progress)",
+      "compiler_version": "i9-4a-missions",
+      "parser_version": "lua-generated-v18-guild-invite",
+      "revision_id": "66762c48b1fe8d159cad99fc100706d8a6d14982275a9491c38bf5fd7479e1b3",
+      "scope": "476 source mission definitions with explicit prerequisite, occurrence, deferred-producer, reward and condition metadata; 16 VIP sweep-card rows. Other gameplay payloads unchanged."
     }
   ],
   "current": {
-    "ordinal": 45,
-    "stage": "I9-3 close (Vending showcase and juice)",
-    "compiler_version": "i9-3-vending-juice",
+    "ordinal": 46,
+    "stage": "I9-4A (Mission catalog; runtime integration in progress)",
+    "compiler_version": "i9-4a-missions",
     "parser_version": "lua-generated-v18-guild-invite",
-    "revision_id": "4958207bed0275873a0861cafe9df2b68218d9b17b6ce34b10ec4716dd8f0d28",
-    "scope": "Cumulative Vending catalog plus per-button summon_reward juice (reward_item_id), policy juice.per_pull and the rotating Medium showcase (display.pet_id removed, D154/D155); all unrelated payloads retained."
+    "revision_id": "66762c48b1fe8d159cad99fc100706d8a6d14982275a9491c38bf5fd7479e1b3",
+    "scope": "476 source mission definitions with explicit prerequisite, occurrence, deferred-producer, reward and condition metadata; 16 VIP sweep-card rows. Other gameplay payloads unchanged."
   }
 }

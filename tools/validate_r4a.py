@@ -80,7 +80,7 @@ def check_static() -> list[str]:
         "type3_partner_scrolls": 291,
         "unqualified_type0_stack_items": 3,
         "player_rows": 100,
-        "objective_builtin_rows": 0,
+        "objective_builtin_rows": 476,
     }
     for key, want in expected_counts.items():
         if diagnostics.get(key) != want:
@@ -91,15 +91,19 @@ def check_static() -> list[str]:
         errors.append("player progression levels drift/non-contiguous")
     if any(prow[i]["total_exp"] > prow[i + 1]["total_exp"] for i in range(max(0, len(prow) - 1))):
         errors.append("player total_exp is non-monotonic")
-    if objectives.get("definitions") != [] or objectives.get("status") != "BUILTIN_ACTIVATION_EMPTY_UNQUALIFIED_MAPPING":
-        errors.append("built-in Objective activation is not empty/fail-closed")
+    mission_rows = objectives.get("definitions") or []
+    if objectives.get("status") != "I9_4_MISSION_CATALOG" or len(mission_rows) != 476:
+        errors.append("I9-4 mission catalog profile drift")
+    families = {family: sum(row.get("stock_family") == family for row in mission_rows) for family in (1, 2, 4, 6)}
+    if families != {1: 35, 2: 184, 4: 250, 6: 7}:
+        errors.append("I9-4 mission family count drift")
 
     go = (ROOT / "internal/content/builtin/catalog.go").read_text()
     for needle in (
         "//go:embed generated/*.json",
         "ExpectedSourceArchiveSHA256",
         "canonical_manifest_without_revision_id",
-        "BUILTIN_ACTIVATION_EMPTY_UNQUALIFIED_MAPPING",
+        "validateMissions",
         "PLAYER_LEVEL_ENERGY",
         "VIP_PLUS_MONTHLY_PRIVILEGE",
     ):
