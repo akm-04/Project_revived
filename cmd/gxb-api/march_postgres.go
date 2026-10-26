@@ -22,5 +22,5 @@ import (
 
 func canonicalMarch(p *pg.Pool, r tx.Runner, content contentstore.Store, values i5store.Store, grants i5.Service, heroes hero.Service, fight combat.Service, opponents top.Service) march.Mode {
 	return march.Mode{Timed: gen.TimedRunner{Binder: gen.Binder{Time: pg.AuthoritativeTime{Queryer: p}}, Runner: r}, Fresh: p, Store: marchstore.Store{}, Content: content, Fence: values, Functions: values, Directory: i4store.PlayerDirectoryReader{},
-		Heroes: heroes, HeroLocks: characterstore.MarchHeroPort{Store: characterstore.Store{Queryer: p}}, Roster: fight.Inputs.Heroes, HeroWire: heroproj.StockHero, Opponents: opponents, Combat: fight, Facts: i5.ObjectiveFacts{Owner: grants, Open: values}, Grants: grants, Costs: i5.MaterialCostDebiter{Store: values, Content: content}, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}}
+		Heroes: heroes, HeroLocks: characterstore.MarchHeroPort{Store: characterstore.Store{Queryer: p}}, Roster: fight.Inputs.Heroes, HeroWire: heroproj.StockHero, Opponents: opponents, Combat: fight, Stats: fight.Inputs.Stats, Facts: i5.ObjectiveFacts{Owner: grants, Open: values}, Grants: grants, Costs: i5.MaterialCostDebiter{Store: values, Content: content}, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}}
 }

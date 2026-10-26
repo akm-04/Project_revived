@@ -79,6 +79,7 @@ type Mode struct {
 	Roster      Roster
 	HeroWire    func(character.Hero) (map[string]any, error)
 	Opponents   Opponents
+	Stats       combat.Stats
 	Combat      Combat
 	Facts       Facts
 	Grants      Grants

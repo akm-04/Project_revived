@@ -81,9 +81,29 @@ func (s Mode) initialize(c context.Context, sc gen.TimedScope, a identity.ActorC
 		return err
 	}
 	forces := []int64{}
-	for _, raw := range rows {
-		if row, ok := raw.(map[string]any); ok {
-			forces = append(forces, number(row["force"]))
+	for key := range rows {
+		id, err := strconv.ParseInt(key, 10, 64)
+		if err != nil || id <= 0 {
+			return d.ErrUnavailable
+		}
+		force, err := s.force(c, sc, a, character.HeroRef{PlayerID: a.PlayerID, PartnerID: id}, v.revision)
+		if err != nil {
+			return err
+		}
+		forces = append(forces, force)
+	}
+	for i := range candidates {
+		e := &candidates[i]
+		if e.Robot != 0 {
+			continue
+		}
+		e.Force = 0
+		for _, row := range e.Heroes {
+			force, err := s.force(c, sc, a, character.HeroRef{PlayerID: identity.PlayerID(e.Player), PartnerID: number(row["source_partner_id"])}, v.revision)
+			if err != nil {
+				return err
+			}
+			e.Force += force
 		}
 	}
 	sort.Slice(forces, func(i, j int) bool { return forces[i] > forces[j] })

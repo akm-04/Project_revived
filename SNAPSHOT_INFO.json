@@ -766,7 +766,7 @@
   "schema_version": 1,
   "snapshot": "D10 Publication immutable revisions/items, canonical scope and PostgreSQL visibility, read markers, source-shaped7/1537/8193/8194; inherited8 accepted656 preserved.",
   "stage": "I9-4C",
-  "status": "I9_5A_IMPLEMENTATION_FOCUSED_QUALIFICATION_PENDING",
+  "status": "IMPLEMENTED_NOT_STAGE_ACCEPTED_I9_5A",
   "toolbox_archive_sha256": "e4e194c9627929299577364b953b2468d6118fac4283fd8030f10b5a27456c2b",
   "version": "v0.151.0",
   "w2_claimed": false,
@@ -882,7 +882,6 @@
     "product_accepted_at_creation": false
   },
   "i9_5a": {
-    "status": "IMPLEMENTATION_FOCUSED_TESTS_IN_PROGRESS_NOT_STAGE_ACCEPTANCE",
     "contract": "docs/i9/I9_MARCH_V1.json",
     "policy": "docs/i9/I9_MARCH_PRIVATE_POLICY_V1.json",
     "base_commit": "76bc01c942e87e91e976a36440a6af3ca64f5394",
@@ -896,6 +895,9 @@
       341,
       342
     ],
-    "qualification_owner": "Claude per I9 split handoff"
+    "qualification_owner": "Claude per I9 split handoff",
+    "created_status": "IMPLEMENTATION_FOCUSED_TESTS_IN_PROGRESS_NOT_STAGE_ACCEPTANCE",
+    "status": "IMPLEMENTED_FOCUSED_GATES_NOT_STAGE_ACCEPTANCE",
+    "force_repair": "D256 qualified publicstats port; no roster force fallback"
   }
 }

@@ -20,10 +20,6 @@ func (s Mode) Advance(c context.Context, a identity.ActorContext, q Fight, op op
 		if err := s.admitFormation(c, sc, a, *r, q.Formation, true); err != nil {
 			return nil, err
 		}
-		rows, err := s.roster(c, sc, a)
-		if err != nil {
-			return nil, err
-		}
 		locked, _ := c.Value(lockedHeroesKey{}).(map[int64]character.Hero)
 		recommended := map[int64]bool{}
 		for _, id := range r.Recommend {
@@ -34,13 +30,9 @@ func (s Mode) Advance(c context.Context, a identity.ActorContext, q Fight, op op
 			if id == 0 {
 				continue
 			}
-			row, ok := rows[strconv.FormatInt(id, 10)].(map[string]any)
-			if !ok {
-				return nil, d.ErrRefused
-			}
-			force := number(row["force"])
-			if force < 0 || force > 100000000000 {
-				return nil, d.ErrRefused
+			force, err := s.force(c, sc, a, character.HeroRef{PlayerID: a.PlayerID, PartnerID: id}, v.revision)
+			if err != nil {
+				return nil, err
 			}
 			if recommended[locked[id].OriginTableID] {
 				force *= 2

@@ -57,7 +57,7 @@ func (r timedReceipt) ResolveTimed(c context.Context, q gen.TimedResolutionReque
 	return r.Resolve(c, tx.ResolutionRequest{Operation: q.Operation.Operation(), CommitError: q.CommitError, Attempt: q.Attempt})
 }
 func (s Mode) pin(c context.Context, op operation.Context) (operation.Context, error) {
-	if s.Timed.Runner.DB == nil || s.Fresh == nil || s.Content == nil || s.Store == nil || s.Fence == nil || s.Functions == nil || s.Heroes == nil || s.HeroLocks == nil || s.Roster == nil || s.Opponents == nil || s.Combat == nil || s.Facts == nil || s.Grants == nil || s.Costs == nil || s.Receipts == nil || s.ReceiptRead == nil || s.Directory == nil || s.HeroWire == nil {
+	if s.Timed.Runner.DB == nil || s.Fresh == nil || s.Content == nil || s.Store == nil || s.Fence == nil || s.Functions == nil || s.Heroes == nil || s.HeroLocks == nil || s.Roster == nil || s.Opponents == nil || s.Combat == nil || s.Facts == nil || s.Grants == nil || s.Costs == nil || s.Receipts == nil || s.ReceiptRead == nil || s.Directory == nil || s.HeroWire == nil || s.Stats == nil {
 		return op, d.ErrUnavailable
 	}
 	if _, ok := op.Policies.Get("content"); ok {

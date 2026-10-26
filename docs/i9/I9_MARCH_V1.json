@@ -22,7 +22,7 @@
   "rules": [
     "C1 Exact source catalog: 15 roads, 36 Vanguard levels, recommendation pools, source summon rows 5/12 and eight weighted boxes; every referenced hero/item resolves to canonical enabled content. Compiler manifests preserve source hashes and new cumulative generation.",
     "C2 One March run owner at rank 605; load 336 and MID1 detail 336 share one projection. Match snapshots persist until explicit Reset; reads never reroll opponents/rewards.",
-    "C3 Actor fence and function gate precede formation, family and cost admission. Normal formation contains 1..5 owned alive girls of valid source level. Vanguard has exactly five level-65+ girls and requires academy65+, no previous manual battle, one use per run; forged force has no authority.",
+    "C3 Actor fence and function gate precede formation, family and cost admission. Normal formation contains 1..5 owned alive girls of valid source level. Vanguard has exactly five level-65+ girls and requires academy65+, no previous manual battle, one use per run; forged force has no authority. Power comes from the qualified publicstats owner in a coherent read scope, never an optional roster/display field.",
     "C4 D250 binds START340/RESULT338 to Combat CLIENT_FULL_REPORT_ATTESTED_V1 with a versioned March ReportPolicy, complete actor coverage, bounded HP/SP/rebirth, frozen formation, at least one living ally and all enemies dead for a win. Same START replays; no RESULT creates an attempt. Preserve partial enemy losses and own survivor HP/SP, and timeout-zero states.",
     "C5 Daily F7 allowance refresh does not discard run progress. Explicit Reset consumes one current-day entitlement and creates new generation; first initialization is free (D251 private policy). Dead girls remain unusable until Reset. Reagents expire on F7 day and cannot be overspent.",
     "C6 Chest339 requires its actually won current stage and settles once before advancing. Extra341 requires >=9 wins, one claim per run, cost50 through I5 and source row12 count3. No forged stage/negative amount/ineligible claim grants value.",
@@ -49,7 +49,8 @@
   "private_policy_decisions": [
     "D251",
     "D252",
-    "D253"
+    "D253",
+    "D256"
   ],
   "amendments": [
     "D250 user-approved March-only I9 parent trust-card correction"

@@ -21,6 +21,7 @@ import (
 	app "gxb.local/backend/v2/internal/application/march"
 	"gxb.local/backend/v2/internal/application/missioninputs"
 	cd "gxb.local/backend/v2/internal/domain/combat"
+	"gxb.local/backend/v2/internal/domain/grant"
 	"gxb.local/backend/v2/internal/domain/identity"
 	d "gxb.local/backend/v2/internal/domain/march"
 	"gxb.local/backend/v2/internal/domain/objective"
@@ -39,7 +40,7 @@ func marchMode(t *testing.T, p *pg.Pool) app.Mode {
 	owner.MissionFresh = p
 	owner.MissionTime = pg.AuthoritativeTime{Queryer: p}
 	owner.Missions = &i5.MissionMaterializer{Store: values, Catalog: content, Activity: content, Observations: missioninputs.Reader{Spending: values, Heroes: characterstore.Store{Queryer: p}, Progression: values, Campaigns: campaignstore.Store{}, Privileges: privilegeProvider(p), Books: bookService(p, p)}}
-	return app.Mode{Timed: gen.TimedRunner{Binder: gen.Binder{Time: pg.AuthoritativeTime{Queryer: p}}, Runner: tx.Runner{DB: p}}, Fresh: p, Store: marchstore.Store{}, Content: content, Fence: values, Functions: values, Directory: i4store.PlayerDirectoryReader{}, Heroes: ownerSummoner(p), HeroLocks: characterstore.MarchHeroPort{Store: characterstore.Store{Queryer: p}}, Roster: fight.Inputs.Heroes, HeroWire: heroproj.StockHero, Opponents: topFloorService(t, p), Combat: fight, Facts: i5.ObjectiveFacts{Owner: owner, Open: values}, Grants: owner, Costs: i5.MaterialCostDebiter{Store: values, Content: content}, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}}
+	return app.Mode{Timed: gen.TimedRunner{Binder: gen.Binder{Time: pg.AuthoritativeTime{Queryer: p}}, Runner: tx.Runner{DB: p}}, Fresh: p, Store: marchstore.Store{}, Content: content, Fence: values, Functions: values, Directory: i4store.PlayerDirectoryReader{}, Heroes: ownerSummoner(p), HeroLocks: characterstore.MarchHeroPort{Store: characterstore.Store{Queryer: p}}, Roster: fight.Inputs.Heroes, HeroWire: heroproj.StockHero, Opponents: topFloorService(t, p), Combat: fight, Stats: fight.Inputs.Stats, Facts: i5.ObjectiveFacts{Owner: owner, Open: values}, Grants: owner, Costs: i5.MaterialCostDebiter{Store: values, Content: content}, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}}
 }
 func marchRecord(t *testing.T, p *pg.Pool, a identity.ActorContext) d.Run {
 	t.Helper()
@@ -260,6 +261,27 @@ func TestI9_5AMarchNativeAllStagesExtraAndConcurrentValue(t *testing.T) {
 			if err = p.QueryRow(ctx, `SELECT amount FROM player_currency_balances WHERE player_id=$1 AND resource_key='crystal'`, int64(a.PlayerID)).Scan(&before); err != nil {
 				t.Fatal(err)
 			}
+			// Spend through the canonical owner, then prove a failed purchase does not consume the chest.
+			tr, e := p.Begin(ctx, tx.Options{Isolation: tx.Serializable})
+			if e != nil {
+				t.Fatal(e)
+			}
+			if e = (i5store.Store{}).FenceActorTx(ctx, tr, a, time.Now().UTC()); e != nil {
+				tr.Rollback(ctx)
+				t.Fatal(e)
+			}
+			_, e = s.Costs.DebitMaterialCostTx(ctx, tr, a.PlayerID, i5.MaterialCost{Scalars: []i5.ScalarMaterialCost{{ResourceKey: "crystal", Amount: before}}}, opPinned(rev))
+			if e != nil {
+				tr.Rollback(ctx)
+				t.Fatal(e)
+			}
+			if e = tr.Commit(ctx); e != nil {
+				t.Fatal(e)
+			}
+			if _, e = s.Extra(ctx, a, op()); !errors.Is(e, d.ErrRefused) || marchRecord(t, p, a).Extra {
+				t.Fatal("insufficient Mystic purchase consumed chest", e)
+			}
+			grantGenuine(t, p, a, rev, "march-mystic-fixture", []grant.Line{{Kind: grant.ScalarCurrency, ResourceKey: "crystal", Amount: before}})
 			good, bad := marchPair(t, func() (map[string]any, error) { return s.Extra(ctx, a, op()) })
 			if good != 1 || bad != 1 {
 				t.Fatal("Mystic double spend", good, bad)
@@ -466,7 +488,7 @@ func TestI9_5AMarchNativeRealDefenseSnapshotsDoNotMutateOpponent(t *testing.T) {
 	}
 	r := marchRecord(t, p, a)
 	for _, enemy := range r.Enemies {
-		if enemy.Player <= 0 || enemy.Player == int64(a.PlayerID) || enemy.Robot != 0 || enemy.Heroes["1"] == nil {
+		if enemy.Player <= 0 || enemy.Player == int64(a.PlayerID) || enemy.Robot != 0 || enemy.Force <= 0 || enemy.Heroes["1"] == nil {
 			t.Fatal("same-server real defense not matched", enemy)
 		}
 	}
