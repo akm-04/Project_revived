@@ -12,9 +12,11 @@ type NodeState struct {
 	CampaignID int64
 	Star       int64
 	// Wins and Resets are the Super daily_limit spend and elite resets of the game day (F7).
-	Wins        modes.Counter
-	Resets      modes.Counter
-	PartnerDrop bool
+	Wins            modes.Counter
+	Resets          modes.Counter
+	PartnerDrop     bool
+	ClearCountFloor int64
+	ClearCountExact bool
 }
 
 type Progress struct {
@@ -30,7 +32,7 @@ func (p Progress) State(id int64) NodeState {
 	if s, ok := p.Nodes[id]; ok {
 		return s
 	}
-	return NodeState{CampaignID: id}
+	return NodeState{CampaignID: id, ClearCountExact: true}
 }
 
 func (p Progress) with(s NodeState) Progress {

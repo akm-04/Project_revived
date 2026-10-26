@@ -22,7 +22,7 @@ const (
 )
 
 var supportedCapabilities = [...]string{
-	"MISSION_CATALOG_I9_4A",
+	"MISSION_CATALOG_I9_4A", "SCALAR_MARCH_COIN_I9_4A",
 	"SUMMON_GACHA_I9_3E",
 	"CAMPAIGN_MODE_I9_3A",
 	"COSMETIC_TITLE_CONDITION_I7C6",

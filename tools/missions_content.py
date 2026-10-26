@@ -81,7 +81,7 @@ def build_missions(blobs, parse):
             raise ValueError('Invalid mission condition parameters')
         if gate != [0] and gate != [9] and (len(gate) != 2 or gate[0] not in (1, 2, 3, 4, 5, 6, 7, 8) or gate[1] <= 0):
             raise ValueError('Unknown mission gate')
-        target = parameters[-1] if kind == 19 else parameters[0]
+        target = parameters[-1] if kind in (15, 19) else parameters[0]
         deferred = ''
         if kind in DELTA:
             strategy, (fact, deferred) = 'COMMITTED_DELTA', DELTA[kind]
@@ -93,20 +93,26 @@ def build_missions(blobs, parse):
             strategy, fact = 'TEMPORAL_ENTITLEMENT', ENTITLEMENTS[kind]
         else:
             raise ValueError('Unknown mission condition kind: %d' % kind)
-        if kind in (15, 18, 111, 118):
+        if kind in (18, 111, 118):
             target = 1
         if target <= 0 or (kind in (15, 19, 111) and len(parameters) != 2) or (kind not in (15, 19, 111) and len(parameters) != 1):
             raise ValueError('Mission condition arity/target drift')
+        if kind in (110, 129, 130, 131):
+            deferred = 'I10_COMMERCE_ACTIVE_ENTITLEMENTS'
+        gate_deferred = 'I10_COMMERCE_ACTIVE_ENTITLEMENTS' if gate[0] in (4, 6, 7, 8) else ''
+        unavailable = 'UNKNOWN_SOURCE_CAMPAIGN_200114' if gate == [2, 200114] else ''
+        if int(row['march_coin_new'] or 0) > 0 and row['detail_type'] != '6':
+            raise ValueError('Unqualified non-growth March Coin reward')
         previous, following = int(row['task_id']), int(row['next_task_id'])
         definitions.append(dict(program_id='mission:%d' % family, stock_family=family, objective_id=int(row['id']),
                                 definition_revision='I9_MISSIONS_V1', strategy=strategy, accepted_fact_kind=fact, target=target,
                                 generation_kind='DAY' if family == 1 else 'HERO' if family == 6 else 'LIFETIME',
-                                prerequisite_policy=dict(gate=gate, previous=previous),
+                                prerequisite_policy=dict(gate=gate, previous=previous, deferred_until=gate_deferred, unavailable_reason=unavailable),
                                 reward_plan=rewards(row, '_new'), huoyue=int(row['medal'] or 0),
-                                presentation=dict(condition=kind, parameters=parameters, next=following,
+                                presentation=dict(condition=kind, parameters=parameters, next=following, detail_type=int(row['detail_type']),
                                                   deferred_until=deferred, base_reward=rewards(row, ''),
                                                   battlepass_score=int(row['battlepass_score'] or 0),
-                                                  vip_sweep_reward=kind == 113)))
+                                                  vip_sweep_reward=kind == 113, vip_sweep_item_id=int(row['award_id_new']) if kind == 113 else 0)))
     by_id = {row['objective_id']: row for row in definitions}
     if len(by_id) != 476:
         raise ValueError('Duplicate mission id')
@@ -124,4 +130,5 @@ def build_missions(blobs, parse):
            for row in parse(blobs['data/tables/vip.lua'].data)]
     if sorted(row['level'] for row in vip) != list(range(16)):
         raise ValueError('Mission VIP profile drift')
-    return dict(schema_version=1, status='I9_4_MISSION_CATALOG', definitions=definitions, vip=vip)
+    by_id[10015]['presentation']['vip_sweep_by_level'] = [row['sweep_card'] for row in sorted(vip, key=lambda row: row['level'])]
+    return dict(schema_version=1, status='I9_4_MISSION_CATALOG', definitions=definitions)

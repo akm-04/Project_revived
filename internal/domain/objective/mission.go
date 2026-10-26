@@ -10,11 +10,14 @@ import (
 )
 
 type MissionPrerequisite struct {
-	Gate     []int64 `json:"gate"`
-	Previous int64   `json:"previous"`
+	Gate              []int64 `json:"gate"`
+	Previous          int64   `json:"previous"`
+	DeferredUntil     string  `json:"deferred_until"`
+	UnavailableReason string  `json:"unavailable_reason"`
 }
 
 type MissionPresentation struct {
+	DetailType      int64      `json:"detail_type"`
 	Condition       int64      `json:"condition"`
 	Parameters      []int64    `json:"parameters"`
 	Next            int64      `json:"next"`
@@ -22,6 +25,31 @@ type MissionPresentation struct {
 	BaseReward      grant.Plan `json:"base_reward"`
 	BattlepassScore int64      `json:"battlepass_score"`
 	VIPSweepReward  bool       `json:"vip_sweep_reward"`
+	VIPSweepItemID  int64      `json:"vip_sweep_item_id"`
+	VIPSweepByLevel []int64    `json:"vip_sweep_by_level,omitempty"`
+}
+
+func (m MissionDefinition) RewardFor(level, maximumLevel, vipLevel int64) (grant.Plan, error) {
+	if level < 1 || maximumLevel < level || vipLevel < 0 {
+		return grant.Plan{}, errors.New("invalid mission reward observation")
+	}
+	plan := m.Reward
+	plan.Lines = make([]grant.Line, 0, len(m.Reward.Lines)+1)
+	for _, line := range m.Reward.Lines {
+		if m.Presentation.DetailType == 6 && (level == maximumLevel && line.Kind == grant.PlayerExp || level < maximumLevel && line.ResourceKey == "march_coin") {
+			continue
+		}
+		plan.Lines = append(plan.Lines, line)
+	}
+	if m.Presentation.VIPSweepReward {
+		if vipLevel >= int64(len(m.Presentation.VIPSweepByLevel)) || m.Presentation.VIPSweepItemID <= 0 {
+			return grant.Plan{}, errors.New("mission VIP sweep reward unavailable")
+		}
+		if count := m.Presentation.VIPSweepByLevel[vipLevel]; count > 0 {
+			plan.Lines = append(plan.Lines, grant.Line{Kind: grant.StackItem, ItemID: m.Presentation.VIPSweepItemID, Amount: count})
+		}
+	}
+	return plan, nil
 }
 
 type MissionDefinition struct {
@@ -83,6 +111,24 @@ func (m MissionDefinition) Validate() error {
 	}
 	if kind == 111 && (parameters[0] >= parameters[1] || parameters[1] > 86400) || kind == 118 && parameters[0] >= 86400 {
 		return errors.New("invalid mission meal window")
+	}
+	if deferred := m.Prerequisite.DeferredUntil; deferred != "" && (deferred != "I10_COMMERCE_ACTIVE_ENTITLEMENTS" || !(m.Prerequisite.Gate[0] == 4 || m.Prerequisite.Gate[0] >= 6 && m.Prerequisite.Gate[0] <= 8)) {
+		return errors.New("invalid mission prerequisite binding")
+	}
+	if unavailable := m.Prerequisite.UnavailableReason; unavailable != "" && (unavailable != "UNKNOWN_SOURCE_CAMPAIGN_200114" || m.ObjectiveID != 30014 || len(m.Prerequisite.Gate) != 2 || m.Prerequisite.Gate[0] != 2 || m.Prerequisite.Gate[1] != 200114) {
+		return errors.New("invalid mission unavailable-source binding")
+	}
+	if m.Presentation.VIPSweepReward {
+		if kind != 113 || m.Presentation.VIPSweepItemID != 50001013 || len(m.Presentation.VIPSweepByLevel) != 16 {
+			return errors.New("invalid mission VIP reward profile")
+		}
+		for _, count := range m.Presentation.VIPSweepByLevel {
+			if count < 0 {
+				return errors.New("invalid mission VIP reward quantity")
+			}
+		}
+	} else if m.Presentation.VIPSweepItemID != 0 || len(m.Presentation.VIPSweepByLevel) != 0 {
+		return errors.New("unexpected mission VIP reward profile")
 	}
 	for _, plan := range []grant.Plan{m.Reward, m.Presentation.BaseReward} {
 		if plan.Source.PolicyVersion != "I9_MISSIONS_V1" {

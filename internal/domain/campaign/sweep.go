@@ -2,6 +2,7 @@ package campaign
 
 import (
 	"fmt"
+	"math"
 
 	"gxb.local/backend/v2/internal/domain/modes"
 	"gxb.local/backend/v2/internal/domain/player"
@@ -23,16 +24,19 @@ func (c Catalog) Sweep(p Progress, n Node, count, kind, day, vip int64, monthly 
 	if modes.AdmitSweep(p.State(n.ID).Star, count, limit) != nil || count > 1 && c.VIP[vip].QuickSweep == 0 && !monthly {
 		return p, ErrRefused
 	}
+	state := p.State(n.ID)
+	if state.ClearCountFloor > math.MaxInt64-count {
+		return p, ErrUnavailable
+	}
+	state.ClearCountFloor += count
 	if n.Type == Super {
-		state := p.State(n.ID)
 		var err error
 		state.Wins, err = state.Wins.Use(day, count, n.DailyLimit)
 		if err != nil {
 			return p, ErrRefused
 		}
-		return p.with(state), nil
 	}
-	return p, nil
+	return p.with(state), nil
 }
 
 // Reset buys an exhausted Super block. An already-reset, unexhausted row

@@ -2,6 +2,7 @@ package campaign
 
 import (
 	"errors"
+	"math"
 	"testing"
 
 	"gxb.local/backend/v2/internal/domain/modes"
@@ -71,5 +72,39 @@ func TestSweepEXPClientBoundary(t *testing.T) {
 	exp, err = c.SweepEXP(n, 10, player.Progression{Level: 45, Exp: 999}, rule)
 	if err != nil || exp != 180 {
 		t.Fatal("high level", exp, err)
+	}
+}
+
+func TestClearCountTracksWinsAndSweepRunsAcrossDailyReset(t *testing.T) {
+	c := loadCatalog(t)
+	n, _ := c.Node(100001)
+	p := Progress{}
+	won, err := c.Settle(p, n, 3, 100, false)
+	if err != nil || won.Progress.State(n.ID).ClearCountFloor != 1 || !won.Progress.State(n.ID).ClearCountExact {
+		t.Fatalf("first clear: %+v %v", won.Progress.State(n.ID), err)
+	}
+	lost, err := c.Settle(won.Progress, n, 0, 100, false)
+	if err != nil || lost.Progress.State(n.ID).ClearCountFloor != 1 {
+		t.Fatal("loss changed clear count", err)
+	}
+	swept, err := c.Sweep(won.Progress, n, 3, 1, 101, 15, false)
+	if err != nil || swept.State(n.ID).ClearCountFloor != 4 || won.Progress.State(n.ID).ClearCountFloor != 1 {
+		t.Fatalf("sweep count/input mutation: %+v %v", swept.State(n.ID), err)
+	}
+	if refused, err := c.Sweep(swept, n, 11, 1, 101, 15, false); err == nil || refused.State(n.ID).ClearCountFloor != 4 {
+		t.Fatal("refused sweep changed count", err)
+	}
+	legacy := won.Progress.State(n.ID)
+	legacy.ClearCountExact = false
+	upgraded, err := c.Sweep(won.Progress.with(legacy), n, 1, 1, 102, 0, false)
+	if err != nil || upgraded.State(n.ID).ClearCountExact || upgraded.State(n.ID).ClearCountFloor != 2 {
+		t.Fatal("unproven historical count became exact", err)
+	}
+	legacy.ClearCountFloor = math.MaxInt64
+	if _, err := c.Sweep(won.Progress.with(legacy), n, 1, 1, 102, 0, false); err == nil {
+		t.Fatal("clear count overflow accepted")
+	}
+	if _, err := c.Settle(won.Progress.with(legacy), n, 3, 102, false); err == nil {
+		t.Fatal("settlement overflow accepted")
 	}
 }

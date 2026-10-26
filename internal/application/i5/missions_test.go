@@ -14,13 +14,15 @@ import (
 )
 
 type missionMemory struct {
-	root        objective.MissionRoot
-	rows        map[string]objective.Instance
-	definitions []objective.MissionDefinition
-	value       int64
-	gate        bool
-	heroes      []int64
-	inserts     int
+	root             objective.MissionRoot
+	rows             map[string]objective.Instance
+	definitions      []objective.MissionDefinition
+	catalogs         map[string][]objective.MissionDefinition
+	observedRevision string
+	value            int64
+	gate             bool
+	heroes           []int64
+	inserts          int
 }
 
 func (m *missionMemory) LockMissionRootTx(_ context.Context, _ tx.Tx, player identity.PlayerID, at time.Time) (objective.MissionRoot, error) {
@@ -73,14 +75,41 @@ func (m *missionMemory) SaveObjectiveTx(_ context.Context, _ tx.Tx, row objectiv
 	m.rows[key] = row
 	return nil
 }
-func (m *missionMemory) MissionDefinitionsTx(context.Context, tx.Queryer, string) ([]objective.MissionDefinition, error) {
+func (m *missionMemory) MissionDefinitionsTx(_ context.Context, _ tx.Queryer, revision string) ([]objective.MissionDefinition, error) {
+	if m.catalogs != nil {
+		return m.catalogs[revision], nil
+	}
 	return m.definitions, nil
 }
 func (m *missionMemory) MissionPartnerTemplatesTx(context.Context, tx.Queryer, MissionScope) ([]int64, error) {
 	return m.heroes, nil
 }
-func (m *missionMemory) ObserveMissionTx(context.Context, tx.Queryer, MissionScope, objective.MissionDefinition, int64) (MissionObservation, error) {
+func (m *missionMemory) ObserveMissionTx(_ context.Context, _ tx.Queryer, scope MissionScope, _ objective.MissionDefinition, _ int64) (MissionObservation, error) {
+	m.observedRevision = scope.ContentRevision
 	return MissionObservation{GatePassed: m.gate, Value: m.value}, nil
+}
+
+func TestMissionMaterializationKeepsPinnedDefinitionAfterContentActivation(t *testing.T) {
+	ctx := context.Background()
+	old := testMission(objective.GrowMain, 1)
+	current := old
+	current.Target = 100
+	scope := MissionScope{PlayerID: 100001, ContentRevision: testContentRevisionA, DecisionAt: time.Unix(1000, 0)}
+	memory := &missionMemory{rows: map[string]objective.Instance{}, gate: true, value: 1, catalogs: map[string][]objective.MissionDefinition{testContentRevisionA: {old}, testContentRevisionB: {current}}}
+	materializer := MissionMaterializer{Store: memory, Catalog: memory, Observations: memory}
+	if _, err := materializer.MaterializeTx(ctx, &testTx{}, scope); err != nil {
+		t.Fatal(err)
+	}
+	scope.ContentRevision = testContentRevisionB
+	memory.value = old.Target
+	view, err := materializer.MaterializeTx(ctx, &testTx{}, scope)
+	if err != nil || len(view.Instances) != 1 || view.Instances[0].ContentRevision != testContentRevisionA || view.Instances[0].CompletedAt == nil || memory.observedRevision != testContentRevisionA {
+		t.Fatalf("pinned mission was reinterpreted: %+v %v", view, err)
+	}
+	delete(memory.catalogs, testContentRevisionA)
+	if _, err := materializer.MaterializeTx(ctx, &testTx{}, scope); !errors.Is(err, ErrObjectiveNotFound) {
+		t.Fatalf("missing pinned definition did not refuse: %v", err)
+	}
 }
 
 func testMission(family objective.StockFamily, id int64) objective.MissionDefinition {

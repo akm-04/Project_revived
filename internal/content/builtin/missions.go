@@ -8,7 +8,7 @@ import (
 )
 
 func validateMissions(c ObjectiveCatalog) error {
-	if c.Status != "I9_4_MISSION_CATALOG" || len(c.Definitions) != 476 || len(c.VIP) != 16 {
+	if c.Status != "I9_4_MISSION_CATALOG" || len(c.Definitions) != 476 {
 		return errors.New("builtin content: mission profile drift")
 	}
 	byID := make(map[int64]ObjectiveDefinition, len(c.Definitions))
@@ -40,11 +40,6 @@ func validateMissions(c ObjectiveCatalog) error {
 				return errors.New("builtin content: mission chain cycle")
 			}
 			seen[node.ObjectiveID] = true
-		}
-	}
-	for index, row := range c.VIP {
-		if row.Level != int64(index) || row.SweepCard < 0 {
-			return errors.New("builtin content: mission VIP sweep-card profile drift")
 		}
 	}
 	return nil

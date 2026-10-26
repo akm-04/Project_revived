@@ -1282,11 +1282,18 @@ func (s Service) ClaimObjectiveByID(ctx context.Context, actor identity.ActorCon
 // The caller supplies a definition selected from canonical content policy; raw
 // MIDs are never facts and this function does not open a nested transaction.
 func (s Service) ApplyObjectiveFactTx(ctx context.Context, t tx.Tx, def ObjectiveDefinition, inst objective.Instance, fact objective.Fact, op operation.Context) (objective.Instance, bool, error) {
+	return s.applyObjectiveFactAtTx(ctx, t, def, inst, fact, op, op.StartedAt, "")
+}
+
+func (s Service) applyObjectiveFactAtTx(ctx context.Context, t tx.Tx, def ObjectiveDefinition, inst objective.Instance, fact objective.Fact, op operation.Context, at time.Time, missionRevision string) (objective.Instance, bool, error) {
 	key, err := fact.Key()
 	if err != nil {
 		return objective.Instance{}, false, err
 	}
 	id := receipt.Identity{OwnerKind: "player", OwnerKey: strconv.FormatInt(int64(fact.PlayerID), 10), Domain: "objective-fact", Operation: def.Definition.ProgramID, SemanticKey: key + ":" + strconv.FormatInt(def.Definition.ObjectiveID, 10)}
+	if missionRevision != "" {
+		id.SemanticKey += ":" + inst.GenerationID
+	}
 	fp, _ := receipt.FingerprintRequest(fact)
 	if prior, ok, err := s.Receipts.FindTx(ctx, t, id); err != nil {
 		return objective.Instance{}, false, err
@@ -1301,6 +1308,13 @@ func (s Service) ApplyObjectiveFactTx(ctx context.Context, t tx.Tx, def Objectiv
 		if err != nil {
 			return objective.Instance{}, false, err
 		}
+		if missionRevision != "" {
+			bound, ok := op.Policies.Get(missionContentPolicyRefName)
+			if !ok || bound != missionRevision || !isMissionInstance(inst, def) {
+				return objective.Instance{}, false, ErrContentRevisionConflict
+			}
+			revision = missionRevision
+		}
 		if revision != inst.ContentRevision {
 			return objective.Instance{}, false, ErrContentRevisionConflict
 		}
@@ -1309,7 +1323,7 @@ func (s Service) ApplyObjectiveFactTx(ctx context.Context, t tx.Tx, def Objectiv
 		return objective.Instance{}, false, err
 	}
 	old := inst.StateVersion
-	next, changed, err := objective.ApplyFact(inst, def.Definition, fact, op.StartedAt)
+	next, changed, err := objective.ApplyFact(inst, def.Definition, fact, at)
 	if err != nil || !changed {
 		return next, changed, err
 	}

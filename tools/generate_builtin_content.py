@@ -21,7 +21,7 @@ from pathlib import Path
 from typing import Any, Iterable
 
 SCHEMA_VERSION = 1
-COMPILER_VERSION = "i9-4a-missions"
+COMPILER_VERSION = "i9-4a-mission-reconciliation"
 PARSER_VERSION = "lua-generated-v18-guild-invite"
 EXPECTED_SOURCE_ARCHIVE_SHA256 = "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
 SOURCE_PREFIX = "app-assets/output/assets/src_64/"
@@ -215,6 +215,7 @@ SOURCE_MANIFEST.append(('app/windows/WhiteAlbumWindow.lua','851a53f588b59d95cfe4
 
 ENABLED_CAPABILITIES = [
     "MISSION_CATALOG_I9_4A",
+    "SCALAR_MARCH_COIN_I9_4A",
     "SUMMON_GACHA_I9_3E",
     "CAMPAIGN_MODE_I9_3A",
     "COSMETIC_TITLE_CONDITION_I7C6",
@@ -929,7 +930,7 @@ def build_artifacts(blobs: dict[str, SourceBlob], archive_sha256: str) -> dict[s
         else:
             cls = "SCALAR_CURRENCY"
             status = "QUALIFIED" if name in economy_names else "SOURCE_KNOWN"
-            activation = "ENABLED_R4" if name in {"mana", "crystal", "arena_coin"} else "OWNER_REQUIRED"
+            activation = "ENABLED_R4" if name in {"mana", "crystal", "arena_coin", "march_coin"} else "OWNER_REQUIRED"
         resources.append({
             "catalog_status": status,
             "class": cls,

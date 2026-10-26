@@ -1,6 +1,9 @@
 package campaign
 
-import "fmt"
+import (
+	"fmt"
+	"math"
+)
 
 // Outcome is one settled FIGHT_RESULT. Touched are the campaign ids the reply
 // lists: the fought node and any node the result opened (star 0).
@@ -27,6 +30,10 @@ func (c Catalog) Settle(p Progress, n Node, star, day int64, superOpen bool) (Ou
 		return Outcome{Progress: p, Touched: []int64{n.ID}, Energy: n.DefeatCost}, nil
 	}
 	state := p.State(n.ID)
+	if state.ClearCountFloor == math.MaxInt64 {
+		return Outcome{}, ErrUnavailable
+	}
+	state.ClearCountFloor++
 	before := c.Opened(p, n.Type, superOpen)
 	out := Outcome{Win: true, FirstClear: state.Star == 0, Energy: n.EnergyCost, Mana: n.ManaGain, PlayerExp: n.EnergyCost * c.ExpMultiplier, PartnerExp: n.PartnerExp}
 	if state.Star < MaxStar && star == MaxStar {

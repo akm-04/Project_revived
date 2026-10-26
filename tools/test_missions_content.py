@@ -25,7 +25,10 @@ class MissionCompilerTests(unittest.TestCase):
         self.assertEqual(rows[10011]['reward_plan']['Lines'], [dict(Kind='TEMPORAL', ResourceKey='energy', Amount=120)])
         self.assertEqual(rows[10002]['reward_plan']['Lines'], [])
         self.assertEqual(rows[10015]['presentation']['vip_sweep_reward'], True)
-        self.assertEqual(rows[30001]['target'], 1)
+        self.assertEqual(rows[30001]['target'], 2)
+        self.assertEqual(rows[40005]['target'], 3)
+        self.assertEqual(rows[30014]['prerequisite_policy']['unavailable_reason'], 'UNKNOWN_SOURCE_CAMPAIGN_200114')
+        self.assertEqual(rows[10014]['presentation']['deferred_until'], 'I10_COMMERCE_ACTIVE_ENTITLEMENTS')
         self.assertEqual(rows[30001]['presentation']['parameters'], [100019, 2])
 
     def test_unknown_condition_and_broken_chain_refused(self):

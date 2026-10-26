@@ -88,6 +88,7 @@ func (m MissionMaterializer) MaterializeTx(ctx context.Context, t tx.Tx, scope M
 	if err != nil {
 		return MissionView{}, err
 	}
+	catalogs := map[string][]objective.MissionDefinition{scope.ContentRevision: definitions}
 	instances, err := m.Store.ListMissionInstancesTx(ctx, t, scope.PlayerID)
 	if err != nil {
 		return MissionView{}, err
@@ -115,7 +116,7 @@ func (m MissionMaterializer) MaterializeTx(ctx context.Context, t tx.Tx, scope M
 			if definition.Family == objective.Partner && hero <= 0 {
 				return MissionView{}, errors.New("invalid partner mission template identity")
 			}
-			instance, exists, err := m.materializeOne(ctx, t, scope, definition, hero, byOccurrence)
+			instance, exists, err := m.materializeOne(ctx, t, scope, definition, hero, byOccurrence, catalogs)
 			if err != nil {
 				return MissionView{}, err
 			}
@@ -144,7 +145,7 @@ func missionOccurrence(id int64, generation string) string {
 	return fmt.Sprintf("%d:%s", id, generation)
 }
 
-func (m MissionMaterializer) materializeOne(ctx context.Context, t tx.Tx, scope MissionScope, definition objective.MissionDefinition, hero int64, instances map[string]objective.Instance) (objective.Instance, bool, error) {
+func (m MissionMaterializer) materializeOne(ctx context.Context, t tx.Tx, scope MissionScope, definition objective.MissionDefinition, hero int64, instances map[string]objective.Instance, catalogs map[string][]objective.MissionDefinition) (objective.Instance, bool, error) {
 	generation, err := definition.MissionGeneration(scope.DecisionAt, hero)
 	if err != nil {
 		return objective.Instance{}, false, err
@@ -152,6 +153,30 @@ func (m MissionMaterializer) materializeOne(ctx context.Context, t tx.Tx, scope 
 	instance, exists := instances[missionOccurrence(definition.ObjectiveID, generation)]
 	if exists && instance.ClaimState == objective.Claimed {
 		return instance, true, nil
+	}
+	if exists && instance.ContentRevision != scope.ContentRevision {
+		pinned, ok := catalogs[instance.ContentRevision]
+		if !ok {
+			pinned, err = m.Catalog.MissionDefinitionsTx(ctx, t, instance.ContentRevision)
+			if err != nil {
+				return objective.Instance{}, false, err
+			}
+			catalogs[instance.ContentRevision] = pinned
+		}
+		found := false
+		for _, candidate := range pinned {
+			if candidate.ObjectiveID == instance.ObjectiveID && candidate.ProgramID == instance.ProgramID && candidate.DefinitionRevision == instance.DefinitionRevision {
+				definition, found = candidate, true
+				break
+			}
+		}
+		if !found {
+			return objective.Instance{}, false, ErrObjectiveNotFound
+		}
+		if err := definition.Validate(); err != nil {
+			return objective.Instance{}, false, err
+		}
+		scope.ContentRevision = instance.ContentRevision
 	}
 	if previous := definition.Prerequisite.Previous; !exists && previous != 0 && instances[missionOccurrence(previous, generation)].ClaimState != objective.Claimed {
 		return objective.Instance{}, false, nil
@@ -169,9 +194,6 @@ func (m MissionMaterializer) materializeOne(ctx context.Context, t tx.Tx, scope 
 	if !exists {
 		instance = objective.Instance{PlayerID: scope.PlayerID, ProgramID: definition.ProgramID, ObjectiveID: definition.ObjectiveID, GenerationID: generation,
 			DefinitionRevision: definition.DefinitionRevision, ContentRevision: scope.ContentRevision, ClaimState: objective.Unclaimed, StateVersion: 1}
-	}
-	if instance.ContentRevision != scope.ContentRevision {
-		return objective.Instance{}, false, ErrContentRevisionConflict
 	}
 	core, err := definition.Definition()
 	if err != nil {

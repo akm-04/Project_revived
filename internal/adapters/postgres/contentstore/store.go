@@ -651,7 +651,7 @@ func (Store) ResolveObjectiveTx(ctx context.Context, q tx.Queryer, revision, pro
 	if err != nil {
 		return appi5.ObjectiveDefinition{}, err
 	}
-	plan, err := decodeContentGrantPlan([]byte(rewardJSON))
+	plan, err := decodeContentGrantPlan([]byte(rewardJSON), definitionRevision == "I9_MISSIONS_V1" && program == fmt.Sprintf("mission:%d", family))
 	if err != nil {
 		return appi5.ObjectiveDefinition{}, err
 	}
@@ -682,12 +682,12 @@ func contentObjectiveStrategy(s string) (objective.Strategy, error) {
 	}
 }
 
-func decodeContentGrantPlan(raw []byte) (grant.Plan, error) {
+func decodeContentGrantPlan(raw []byte, mission bool) (grant.Plan, error) {
 	var p grant.Plan
 	if err := json.Unmarshal(raw, &p); err != nil {
 		return grant.Plan{}, err
 	}
-	if p.Source.PolicyVersion == "" || len(p.Lines) == 0 {
+	if p.Source.PolicyVersion == "" || len(p.Lines) == 0 && !(mission && p.Source.PolicyVersion == "I9_MISSIONS_V1") {
 		return grant.Plan{}, errors.New("content store: objective reward plan incomplete")
 	}
 	for _, line := range p.Lines {

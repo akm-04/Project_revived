@@ -330,14 +330,22 @@
       "parser_version": "lua-generated-v18-guild-invite",
       "revision_id": "66762c48b1fe8d159cad99fc100706d8a6d14982275a9491c38bf5fd7479e1b3",
       "scope": "476 source mission definitions with explicit prerequisite, occurrence, deferred-producer, reward and condition metadata; 16 VIP sweep-card rows. Other gameplay payloads unchanged."
+    },
+    {
+      "ordinal": 47,
+      "stage": "I9-4A (Mission source reconciliation; runtime integration in progress)",
+      "compiler_version": "i9-4a-mission-reconciliation",
+      "parser_version": "lua-generated-v18-guild-invite",
+      "revision_id": "5ca02bec78f825851fe6ec575977606a3280d15118f8c9900c7dcb66a204f62d",
+      "scope": "Correct campaign clear-count targets, pin VIP sweep quantities inside the mission definition, retain growth EXP/March Coin alternatives for claim-time selection, qualify March Coin scalar, and name unavailable commerce/source bindings. No mission runtime routes activated."
     }
   ],
   "current": {
-    "ordinal": 46,
-    "stage": "I9-4A (Mission catalog; runtime integration in progress)",
-    "compiler_version": "i9-4a-missions",
+    "ordinal": 47,
+    "stage": "I9-4A (Mission source reconciliation; runtime integration in progress)",
+    "compiler_version": "i9-4a-mission-reconciliation",
     "parser_version": "lua-generated-v18-guild-invite",
-    "revision_id": "66762c48b1fe8d159cad99fc100706d8a6d14982275a9491c38bf5fd7479e1b3",
-    "scope": "476 source mission definitions with explicit prerequisite, occurrence, deferred-producer, reward and condition metadata; 16 VIP sweep-card rows. Other gameplay payloads unchanged."
+    "revision_id": "5ca02bec78f825851fe6ec575977606a3280d15118f8c9900c7dcb66a204f62d",
+    "scope": "Correct campaign clear-count targets, pin VIP sweep quantities inside the mission definition, retain growth EXP/March Coin alternatives for claim-time selection, qualify March Coin scalar, and name unavailable commerce/source bindings. No mission runtime routes activated."
   }
 }
