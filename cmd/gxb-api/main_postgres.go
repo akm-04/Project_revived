@@ -530,7 +530,10 @@ func main() {
 		log.Fatalf("Player display startup: %v", e)
 	}
 	i5d := stockruntime.I5Dispatcher{Authority: authority, Service: i5svc, Missions: i5svc, SpiritBackpack: stockruntime.SpiritBackpackProjection{Service: spiritSvc}}
-	for _, mid := range []uint16{26, 81, 160, 161, 169, 170, 230, 368, 369, 370, 2736, 2865, 2866} {
+	for _, mid := range []uint16{26, 81, 161, 230, 368, 369, 370, 2736, 2865, 2866} {
+		mustRegister(mid, i5d)
+	}
+	for _, mid := range []uint16{160, 169, 170} {
 		mustRegister(mid, i5d)
 	}
 	mediaHandler, err := registerProfileMedia(ctx, pool, runner, authority, receipts, contentDB, router, cfg.ProfileMediaRoot, cfg.ProfileMediaPublicOrigin)
