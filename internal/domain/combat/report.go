@@ -96,7 +96,7 @@ func (p ReportPolicy) Judge(snapshot Snapshot, report Report) (Verdict, string) 
 	enemies := frozenEnemies(battle)
 	if verdict, reason := p.judgeStatuses(report.Enemies, func(s ActorStatus) (Actor, bool) {
 		a, ok := enemies[s.Identity]
-		return a, ok
+		return a, ok && (!p.CompleteEnemies || s.Player == a.Player)
 	}, "ENEMY"); verdict == VerdictRejected {
 		return verdict, reason
 	}

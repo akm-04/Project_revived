@@ -133,6 +133,11 @@ func TestMarchCompleteReportDoesNotAcceptAnEmptyEnemyWin(t *testing.T) {
 	if verdict, reason := p.Judge(reportSnapshot(), r); verdict != VerdictRejected || reason != "WIN_WITHOUT_SURVIVOR" {
 		t.Fatal(verdict, reason)
 	}
+	r = acceptedReport()
+	r.Enemies[0].Player = 123
+	if verdict, reason := p.Judge(reportSnapshot(), r); verdict != VerdictRejected || reason != "ENEMY_UNKNOWN" {
+		t.Fatal("foreign enemy player identity accepted", verdict, reason)
+	}
 	// Existing policy versions retain their declared coverage semantics.
 	r = acceptedReport()
 	r.Enemies = nil
