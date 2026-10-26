@@ -736,7 +736,7 @@
     "version": "v0.125.0"
   },
   "language_floor": "go1.26.0",
-  "migration_high_water": "00084_i9_3e_summon.sql",
+  "migration_high_water": "00087_i9_4_mission_chests.sql",
   "migration_parent_backend_sha256": "73a668580d416fba4275b97898d083b9fdcb12c58773eeb9ceec2b1f3711c58d",
   "native_repair_parent_backend_sha256": "a6bf87421767c5451f69fcf359995d28d91a6c6f861f55422bcdd642583e0141",
   "native_repair_parent_implementation_revision_sha256": "0def8ffc697be0c43a40b3e447c328fee45011e76e9e87a69f17181b777e1c1b",
@@ -869,7 +869,8 @@
   "i9_4_superseded_current_labels": {
     "status": "FROZEN_NOT_ACCEPTED_PARENT_QUALIFICATION_PENDING_AT_CREATION",
     "stage": "I9-3F",
-    "next_action": "ExactR2 publicstat core/Pet native/upgrade/restore qualification, primaryreality/final715sync. Hero blood-stage and prior actualproducer/parent/W2 gates remain."
+    "next_action": "ExactR2 publicstat core/Pet native/upgrade/restore qualification, primaryreality/final715sync. Hero blood-stage and prior actualproducer/parent/W2 gates remain.",
+    "migration_high_water": "00084_i9_3e_summon.sql"
   },
   "version_role": "Inherited I9-3 base release label; isolated i9-4 working branch, not a release candidate."
 }

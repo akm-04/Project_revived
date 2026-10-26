@@ -75,16 +75,25 @@ def check_static() -> list[str]:
     expected_counts = {
         "item_rows": 5838,
         "positive_stack_items": 5540,
-        "enabled_stack_items": 5159,
+        "enabled_stack_items": 5160,
         "specialized_type24_items": 378,
         "type3_partner_scrolls": 291,
-        "unqualified_type0_stack_items": 3,
+        "unqualified_type0_stack_items": 2,
         "player_rows": 100,
         "objective_builtin_rows": 476,
     }
     for key, want in expected_counts.items():
         if diagnostics.get(key) != want:
             errors.append(f"diagnostic {key}={diagnostics.get(key)!r}, want {want}")
+
+    # Only the source-qualified Dodge ticket changes the former type0 boundary.
+    ticket = by_key.get("stack_item:50001979") or {}
+    if ticket.get("class") != "STACK_ITEM" or ticket.get("settlement_activation") != "ENABLED_R4" or ticket.get("reason") != "DODGE_TICKET_STACK_ONLY_I9_4B" or ticket.get("stack_cap") != 9999:
+        errors.append("exact Dodge ticket custody boundary drift")
+    qualified = [r for r in rows if r.get("reason") == "DODGE_TICKET_STACK_ONLY_I9_4B"]
+    unknown = [r for r in rows if r.get("reason") == "ITEM_TYPE_ZERO_UNQUALIFIED"]
+    if len(qualified) != 1 or len(unknown) != 2 or any(r.get("settlement_activation") != "FAIL_CLOSED" for r in unknown):
+        errors.append("type0 qualification exceeded the single audited ticket")
 
     prow = players.get("rows") or []
     if [r.get("lev") for r in prow] != list(range(1, 101)):

@@ -40,7 +40,7 @@ func (Store) MissionActivityCatalogTx(ctx context.Context, q tx.Queryer, revisio
 	}
 	var raw string
 	var required bool
-	if err := q.QueryRow(ctx, `SELECT COALESCE(a.payload::text,''),COALESCE(r.manifest->'capabilities' ? 'MISSION_ACTIVITY_I9_4B',false)
+	if err := q.QueryRow(ctx, `SELECT COALESCE(a.payload::text,''),COALESCE(r.manifest->'enabled_capabilities' ? 'MISSION_ACTIVITY_I9_4B',false)
  FROM gxb_content_revisions r LEFT JOIN content_mission_activity_catalogs a USING(revision_id) WHERE r.revision_id=$1`, revision).Scan(&raw, &required); err != nil {
 		return nil, err
 	}

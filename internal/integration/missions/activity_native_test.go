@@ -381,3 +381,27 @@ func TestActivityNativeGrantRollsBackWithClaimFlag(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+func TestActivityNativeMissingRequiredPayloadIsRefused(t *testing.T) {
+	p := missionPool(t)
+	ctx := context.Background()
+	catalog, err := builtin.Load()
+	if err != nil {
+		t.Fatal(err)
+	}
+	tr, err := p.Begin(ctx, tx.Options{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer tr.Rollback(ctx)
+	if _, err = tr.Exec(ctx, `DELETE FROM content_mission_activity_catalogs WHERE revision_id=$1`, catalog.RevisionID()); err != nil {
+		t.Fatal(err)
+	}
+	if _, err = (contentstore.Store{}).MissionActivityCatalogTx(ctx, tr, catalog.RevisionID()); err == nil {
+		t.Fatal("declared activity payload silently omitted")
+	}
+	old, err := (contentstore.Store{}).MissionActivityCatalogTx(ctx, tr, "5ca02bec78f825851fe6ec575977606a3280d15118f8c9900c7dcb66a204f62d")
+	if err != nil || old != nil {
+		t.Fatalf("old47 optional payload %#v %v", old, err)
+	}
+}

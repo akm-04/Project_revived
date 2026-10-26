@@ -6,7 +6,8 @@ import re
 import subprocess
 import sys
 from pathlib import Path
-from content_generation_policy import qualified_social_gift_scalar_delta
+from content_generation_policy import qualified_social_gift_scalar_delta, registered_compiler_successor
+from validate_r4a import check_static as check_builtin_content
 
 ROOT = Path(__file__).resolve().parents[1]
 MIG = ROOT / "migrations/00009_r4_immutable_content_revisions.sql"
@@ -23,6 +24,14 @@ CLASSES = {"SCALAR_CURRENCY", "TEMPORAL", "STACK_ITEM", "PLAYER_EXP", "SPECIALIZ
 CATALOG = {"QUALIFIED", "SOURCE_KNOWN", "PARTIAL"}
 ACTIVATION = {"ENABLED_R4", "OWNER_REQUIRED", "R5_REQUIRED", "ENABLED_R5", "FAIL_CLOSED"}
 CAP_RULES = {"STATIC", "PLAYER_LEVEL_ENERGY", "VIP_PLUS_MONTHLY_PRIVILEGE", "UNRESOLVED"}
+
+
+def objective_profile_errors(manifest: dict, objectives: list) -> list[str]:
+    if not objectives:
+        return []
+    if "MISSION_CATALOG_I9_4A" not in manifest.get("enabled_capabilities", []) or not registered_compiler_successor(ROOT, manifest.get("compiler_version"), "i9-4a-missions"):
+        return ["built-in objectives require the registered I9 mission content profile"]
+    return check_builtin_content()
 
 
 def resource_shape_errors(row: dict) -> list[str]:
@@ -146,8 +155,7 @@ def main() -> int:
         errors.append(f"resource count={len(resources)} want at least {expected_resource_count}")
     if len(progression) != 100:
         errors.append(f"progression count={len(progression)} want 100")
-    if objectives != []:
-        errors.append("built-in objective closure must remain empty")
+    errors.extend(objective_profile_errors(manifest, objectives))
     seen_resource: set[tuple[str, str]] = set()
     seen_item: set[int] = set()
     for row in resources:
