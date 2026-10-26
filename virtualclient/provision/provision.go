@@ -200,7 +200,7 @@ func grantLines(context context.Context, pool *postgres.Pool, revision string, p
 	return nil
 }
 
-// completeTutorials opens only kind 6/7 level-gate fixtures.
+// openDeferredFunctionFixtures opens only kind 6/7 level-gate fixtures; it never writes a guide or story cursor.
 // shortcut: kind 6/7 gates have no qualified eligibility owner until I9-7; this is not tutorial proof.
 func openDeferredFunctionFixtures(context context.Context, pool *postgres.Pool, content contentstore.Store, revision string, playerID, level int64) error {
 	policy, err := content.ResolveFunctionGatePolicyTx(context, pool, revision)
