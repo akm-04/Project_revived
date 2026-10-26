@@ -314,7 +314,7 @@
   "commit": "ed63e7dcdd0e04f9153f1b1f54fe96ae85ceab51",
   "commit_role": "PARENT_ACCEPTED_PASS643_COMMIT; exact final I7A6A product HEAD/tree/archive are bound externally in PassMap and gate evidence to avoid self-reference",
   "content_revision": "66762c48b1fe8d159cad99fc100706d8a6d14982275a9491c38bf5fd7479e1b3",
-  "current_migration_high_water": "00084_i9_3e_summon.sql",
+  "current_migration_high_water": "00085_i9_4_mission_root.sql",
   "current_stage": "I9_4A_IMPLEMENTATION_IN_PROGRESS_NOT_FROZEN",
   "evidence": "Pass587 Gate-1 runtime evidence b59277c4d59a1c2622809a62f46605442232d77a380e97af7eeba2a3a75fe73e + Pass588 normal-chat I0-I6/source-oracle/release-reconciliation checks; exact Pass588 retest still required.",
   "external_audit_sha256": "a6234eaf9cd5a3f029259140a0166c0529e9b174e4572c61a102b7f0ed0c9e7f",

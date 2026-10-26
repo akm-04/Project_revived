@@ -4069,6 +4069,20 @@
         "internal/adapters/postgres/summonstore/"
       ],
       "write_exceptions": []
+    },
+    "player_mission_roots": {
+      "allowed_query_owners": [
+        "objective-core"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/i5store/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/i5store/"
+      ],
+      "migration": "migrations/00085_i9_4_mission_root.sql",
+      "owner": "objective-core",
+      "write_exceptions": []
     }
   }
 }
