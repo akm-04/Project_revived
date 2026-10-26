@@ -41,3 +41,15 @@ func TestUntrackedRequestRecordsNothing(t *testing.T) {
 		t.Fatal("untracked recorded")
 	}
 }
+
+func TestMissionFieldsFollowCommitAndDiscardRules(t *testing.T) {
+	ctx, request := Track(context.Background())
+	aborted, _ := Stage(ctx)
+	Missions(aborted, map[string]any{"daily_mission_": "aborted"})
+	committed, stage := Stage(ctx)
+	Missions(committed, map[string]any{"daily_mission_": "committed"})
+	stage.Keep()
+	if got := request.MissionFields(); got["daily_mission_"] != "committed" {
+		t.Fatalf("mission attempt leak: %v", got)
+	}
+}

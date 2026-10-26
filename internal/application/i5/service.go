@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	gen "gxb.local/backend/v2/internal/application/generation"
 	"math"
 	"strconv"
 	"strings"
@@ -167,6 +168,9 @@ func projectionGrants(explicit []GrantResult, awards []Award) []GrantResult {
 }
 
 type Service struct {
+	Missions        *MissionMaterializer
+	MissionTime     gen.TimeAuthority
+	MissionFresh    tx.Queryer
 	Runner          tx.Runner
 	Store           Store
 	Content         ContentRuntime

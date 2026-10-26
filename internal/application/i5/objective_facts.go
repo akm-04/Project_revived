@@ -30,6 +30,11 @@ func (f ObjectiveFacts) RecordTx(ctx context.Context, t tx.Tx, op operation.Cont
 		if err := fact.Validate(); err != nil {
 			return err
 		}
+		if f.Owner.Missions != nil {
+			if err := f.recordMission(ctx, t, op, fact); err != nil {
+				return err
+			}
+		}
 		if err := f.record(ctx, t, op, fact); err != nil {
 			return err
 		}
@@ -43,6 +48,9 @@ func (f ObjectiveFacts) record(ctx context.Context, t tx.Tx, op operation.Contex
 		return err
 	}
 	for index, instance := range instances {
+		if instance.DefinitionRevision == "I9_MISSIONS_V1" {
+			continue
+		}
 		definition, err := f.Owner.resolveObjectiveDefinitionTx(ctx, t, instance, stored[index])
 		if err != nil {
 			return err

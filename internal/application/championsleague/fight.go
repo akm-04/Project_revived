@@ -259,6 +259,10 @@ func (s Service) terminal(c context.Context, id ids.UUID, parent operation.Conte
 			}
 			m.Win = v.Resolution.Outcome.Star > 0
 		}
+		c, e = s.Facts.PrepareTx(c, sc.Tx, m.Attacker, sc.Operation)
+		if e != nil {
+			return e
+		}
 		m.Status = "SETTLED"
 		if void {
 			m.Status = "CLOSED"

@@ -24,6 +24,24 @@ func (d Decorated) Dispatch(ctx context.Context, req httpedge.DispatchRequest) h
 	}
 	mergeEconomy(response.Body, set.Balances())
 	mergeNewFunctions(response.Body, set.Functions())
+	for key, value := range set.MissionFields() {
+		if key == "redmarks_" {
+			if existing, ok := response.Body[key].(map[string]any); ok {
+				merged := map[string]any{}
+				for k, v := range value.(map[string]any) {
+					merged[k] = v
+				}
+				for k, v := range existing {
+					merged[k] = v
+				}
+				response.Body[key] = merged
+				continue
+			}
+		}
+		if _, written := response.Body[key]; !written {
+			response.Body[key] = value
+		}
+	}
 	return response
 }
 

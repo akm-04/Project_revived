@@ -40,7 +40,12 @@ type I5ServicePort interface {
 type SpiritBackpackProjector interface {
 	Backpack(context.Context, identity.ActorContext, operation.Context) (map[string]any, error)
 }
+type MissionServicePort interface {
+	ReadMissions(context.Context, identity.ActorContext, objective.StockFamily, operation.Context) (map[string]any, error)
+	ClaimMission(context.Context, identity.ActorContext, int64, string, operation.Context) (appi5.ObjectiveClaimResult, error)
+}
 type I5Dispatcher struct {
+	Missions       MissionServicePort
 	SpiritBackpack SpiritBackpackProjector
 	Authority      apprealtime.GameplayAuthorityPort
 	Service        I5ServicePort
@@ -156,10 +161,26 @@ func (d I5Dispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRequest
 		body := map[string]any{"awards": awards, "mail_list": map[string]any{"mail_list": wire, "total": got.Mail.Total, "new_mail_total": got.Mail.NewMailTotal}}
 		applySettlementProjection(body, got.Projection)
 		return okI5(body)
+	case 160:
+		if d.Missions == nil {
+			return failI5(errors.New("mission runtime unavailable"))
+		}
+		body, err := d.Missions.ReadMissions(ctx, actor, 0, req.Envelope.Operation)
+		if err != nil {
+			return failI5(err)
+		}
+		return okI5(body)
 	case 2736: // TASK_LOAD_BY_TYPE
 		familyRaw, err := requiredInt64(req.Envelope.Params, "mission_type")
 		if err != nil || familyRaw < int64(objective.Daily) || familyRaw > int64(objective.Challenge) {
 			return badI5("invalid_mission_type")
+		}
+		if d.Missions != nil {
+			body, err := d.Missions.ReadMissions(ctx, actor, objective.StockFamily(familyRaw), req.Envelope.Operation)
+			if err != nil {
+				return failI5(err)
+			}
+			return okI5(body)
 		}
 		instances, _, err := d.Service.ListObjectives(ctx, actor, objective.StockFamily(familyRaw), req.Envelope.ReceivedAt)
 		if err != nil {
@@ -179,7 +200,14 @@ func (d I5Dispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRequest
 			}
 			generation = "hero:" + strconv.FormatInt(h, 10)
 		}
-		got, err := d.Service.ClaimObjectiveByID(ctx, actor, tableID, generation, req.Envelope.Operation)
+		var got appi5.ObjectiveClaimResult
+		var claimErr error
+		if d.Missions != nil {
+			got, claimErr = d.Missions.ClaimMission(ctx, actor, tableID, generation, req.Envelope.Operation)
+		} else {
+			got, claimErr = d.Service.ClaimObjectiveByID(ctx, actor, tableID, generation, req.Envelope.Operation)
+		}
+		err = claimErr
 		if err != nil {
 			return failI5(err)
 		}
@@ -316,6 +344,8 @@ func badI5(code string) httpedge.Response {
 }
 func failI5(err error) httpedge.Response {
 	switch {
+	case errors.Is(err, appi5.ErrMissionRefused):
+		return okI5(map[string]any{"error_code": int64(1)})
 	case errors.Is(err, appi5.ErrRedeemInvalid):
 		return httpedge.Response{HTTPStatus: http.StatusBadRequest, Body: map[string]any{"error": "invalid_redeem"}}
 	case errors.Is(err, appi5.ErrMailStackFull):

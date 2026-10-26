@@ -16,6 +16,7 @@ type Set struct {
 	parent    *Set
 	balances  map[string]int64
 	functions map[int64]struct{}
+	missions  map[string]any
 }
 
 // Track starts the change set of a request.
@@ -40,7 +41,7 @@ func (s *Set) Keep() {
 		return
 	}
 	s.mutex.Lock()
-	balances, functions := s.balances, s.functions
+	balances, functions, missions := s.balances, s.functions, s.missions
 	s.mutex.Unlock()
 	s.parent.mutex.Lock()
 	defer s.parent.mutex.Unlock()
@@ -49,6 +50,9 @@ func (s *Set) Keep() {
 	}
 	for id := range functions {
 		s.parent.addFunction(id)
+	}
+	if missions != nil {
+		s.parent.missions = missions
 	}
 }
 
@@ -119,4 +123,31 @@ func Recorded(ctx context.Context) (map[string]int64, []int64) {
 		return map[string]int64{}, nil
 	}
 	return set.Balances(), set.Functions()
+}
+
+func Missions(ctx context.Context, fields map[string]any) {
+	set, _ := ctx.Value(contextKey{}).(*Set)
+	if set == nil {
+		return
+	}
+	set.mutex.Lock()
+	defer set.mutex.Unlock()
+	set.missions = fields
+}
+func (s *Set) MissionFields() map[string]any {
+	s.mutex.Lock()
+	defer s.mutex.Unlock()
+	out := map[string]any{}
+	for k, v := range s.missions {
+		out[k] = v
+	}
+	return out
+}
+
+func RecordedMissions(ctx context.Context) map[string]any {
+	set, _ := ctx.Value(contextKey{}).(*Set)
+	if set == nil {
+		return nil
+	}
+	return set.MissionFields()
 }

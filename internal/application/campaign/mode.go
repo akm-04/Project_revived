@@ -118,6 +118,7 @@ type Stages interface {
 }
 
 type Facts interface {
+	PrepareTx(context.Context, tx.Tx, identity.PlayerID, gen.TimedOperation) (context.Context, error)
 	RecordTx(context.Context, tx.Tx, operation.Context, ...objective.Fact) error
 }
 
@@ -597,6 +598,10 @@ func (s Mode) settle(c context.Context, sc gen.TimedScope, a identity.ActorConte
 			return Settled{}, false, e
 		}
 	}
+	c, err = s.Facts.PrepareTx(c, sc.Tx, a.PlayerID, sc.Operation)
+	if err != nil {
+		return Settled{}, false, err
+	}
 	outcome, err := v.catalog.Settle(record.Progress, node, request.Star, v.day, v.superOpen)
 	if err != nil {
 		return Settled{}, false, err
@@ -646,6 +651,33 @@ func (s Mode) settle(c context.Context, sc gen.TimedScope, a identity.ActorConte
 	}
 	next := d.Record{Progress: outcome.Progress, LastGeneration: stage, LastResult: raw, StateVersion: record.StateVersion}
 	if err = s.Store.SaveTx(c, sc.Tx, a.PlayerID, next, []int64{node.ID}, at); err != nil {
+		return Settled{}, false, err
+	}
+	if outcome.Win {
+		kind := "CAMPAIGN_TRIAL_WIN"
+		if node.Type == d.Normal {
+			kind = NormalWinKind
+		}
+		if node.Type == d.Challenge {
+			kind = "CAMPAIGN_CHALLENGE_WIN"
+		}
+		if node.Type == d.Super {
+			kind = SuperWinKind
+		}
+		if err = s.Facts.RecordTx(c, sc.Tx, current, objective.Fact{PlayerID: a.PlayerID, SourceDomain: "campaign", SourceBusinessKey: attested.Attempt.ID.String(), Kind: kind, Delta: 1}); err != nil {
+			return Settled{}, false, err
+		}
+	}
+
+	for key, value := range changes.RecordedMissions(c) {
+		stored[key] = value
+	}
+	next.LastResult, err = json.Marshal(stored)
+	if err != nil {
+		return Settled{}, false, err
+	}
+	next.StateVersion++
+	if err = s.Store.SaveTx(c, sc.Tx, a.PlayerID, next, nil, at); err != nil {
 		return Settled{}, false, err
 	}
 	return Settled{Body: body}, false, nil
@@ -734,17 +766,7 @@ func (s Mode) reward(c context.Context, sc gen.TimedScope, a identity.ActorConte
 			return err
 		}
 	}
-	kind := "CAMPAIGN_TRIAL_WIN"
-	if node.Type == d.Normal {
-		kind = NormalWinKind
-	}
-	if node.Type == d.Challenge {
-		kind = "CAMPAIGN_CHALLENGE_WIN"
-	}
-	if node.Type == d.Super {
-		kind = SuperWinKind
-	}
-	return s.Facts.RecordTx(c, sc.Tx, current, objective.Fact{PlayerID: a.PlayerID, SourceDomain: "campaign", SourceBusinessKey: attempt, Kind: kind, Delta: 1})
+	return nil
 }
 
 func (Mode) Name() string     { return "i9-3a.campaign-world" }

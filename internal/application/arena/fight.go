@@ -498,6 +498,10 @@ func (s Service) settleMatchTx(c context.Context, sc gen.TimedScope, id ids.UUID
 		}
 		outcome.Win, report = settled.Resolution.Outcome.Star > 0, settled.Report
 	}
+	c, err = s.Facts.PrepareTx(c, sc.Tx, m.Attacker, sc.Operation)
+	if err != nil {
+		return err
+	}
 	// A season that turned over during the fight leaves practice and stale-season fights without effects.
 	ranked := !m.Practice && m.Season == attacker.Season
 	if ranked {

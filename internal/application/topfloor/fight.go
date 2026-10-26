@@ -411,6 +411,10 @@ func (s Service) settleTx(c context.Context, sc gen.TimedScope, id ids.UUID) err
 	if err != nil {
 		return err
 	}
+	c, err = s.Facts.PrepareTx(c, sc.Tx, f.Challenger, sc.Operation)
+	if err != nil {
+		return err
+	}
 	cp := players[f.Challenger]
 	outcome := catalog.Decide(settled.Resolution.Outcome.Star, challenger.Rank, defender.Rank, cp.BestRank)
 	if outcome.ChallengerAfter != challenger.Rank {

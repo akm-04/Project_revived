@@ -98,6 +98,7 @@ type Directory interface {
 
 // Facts is the objective fact port (I9_MODE_FOUNDATION_V1 MF3); a settled fight is a PVP_FIGHT (task_req 106, D92).
 type Facts interface {
+	PrepareTx(context.Context, tx.Tx, identity.PlayerID, gen.TimedOperation) (context.Context, error)
 	RecordTx(context.Context, tx.Tx, operation.Context, ...objective.Fact) error
 }
 

@@ -92,14 +92,14 @@ func (s Mode) Sweep(c context.Context, a identity.ActorContext, q Sweep, op oper
 		if n.Type == d.Super {
 			kind = SuperWinKind
 		}
+		r.Progress = next
+		if err = s.Store.SaveTx(c, sc.Tx, a.PlayerID, r, []int64{n.ID}, sc.Operation.DecisionAt()); err != nil {
+			return nil, err
+		}
 		for i := int64(0); i < q.Count; i++ {
 			if err = s.Facts.RecordTx(c, sc.Tx, current, objective.Fact{PlayerID: a.PlayerID, SourceDomain: "campaign", SourceBusinessKey: fmt.Sprintf("%s/%d", current.ID, i), Kind: kind, Delta: 1}); err != nil {
 				return nil, err
 			}
-		}
-		r.Progress = next
-		if err = s.Store.SaveTx(c, sc.Tx, a.PlayerID, r, []int64{n.ID}, sc.Operation.DecisionAt()); err != nil {
-			return nil, err
 		}
 		return map[string]any{"items": items, "economys": economys, "additional": []any{}, "campaign": v.catalog.Row(next, n.ID, v.day)}, nil
 	})
@@ -194,11 +194,18 @@ func (s Mode) purchase(c context.Context, a identity.ActorContext, name string, 
 		if err != nil {
 			return err
 		}
+		c, err = s.Facts.PrepareTx(c, sc.Tx, a.PlayerID, sc.Operation)
+		if err != nil {
+			return err
+		}
 		out, err = apply(c, sc, v, record, progress.Level, privilege)
 		if err != nil {
 			return err
 		}
 		balances, functions := changes.Recorded(c)
+		for key, value := range changes.RecordedMissions(c) {
+			out[key] = value
+		}
 		out["economy_"] = balances
 		if len(functions) > 0 {
 			out["new_funcs_"] = functions

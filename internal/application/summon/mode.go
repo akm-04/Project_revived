@@ -71,6 +71,7 @@ type Heroes interface {
 }
 
 type Facts interface {
+	PrepareTx(context.Context, tx.Tx, identity.PlayerID, gen.TimedOperation) (context.Context, error)
 	RecordTx(context.Context, tx.Tx, operation.Context, ...objective.Fact) error
 }
 
@@ -287,10 +288,10 @@ func (s Mode) deliver(c context.Context, sc gen.TimedScope, a identity.ActorCont
 	return rows, s.recordPull(c, sc, a, slots)
 }
 
-// recordPull is the purchase's one SUMMON fact (G9) in the settling transaction.
+// recordPull records the purchase's SUMMON fact (G9) and juice purchase fact (D181) in the settling transaction.
 func (s Mode) recordPull(c context.Context, sc gen.TimedScope, a identity.ActorContext, slots []d.Slot) error {
 	current := sc.Operation.Operation()
-	return s.Facts.RecordTx(c, sc.Tx, current, objective.Fact{PlayerID: a.PlayerID, SourceDomain: "summon", SourceBusinessKey: current.ID.String(), Kind: SummonKind, Delta: int64(len(slots))})
+	return s.Facts.RecordTx(c, sc.Tx, current, objective.Fact{PlayerID: a.PlayerID, SourceDomain: "summon", SourceBusinessKey: current.ID.String(), Kind: SummonKind, Delta: int64(len(slots))}, objective.Fact{PlayerID: a.PlayerID, SourceDomain: "summon", SourceBusinessKey: current.ID.String(), Kind: "VENDING_JUICE_PURCHASED", Delta: int64(len(slots))})
 }
 
 // MagicPull is a 70 request: summon_time 1 or 10 for the stored Magic target partner_id.
@@ -505,6 +506,10 @@ func (s Mode) purchase(c context.Context, a identity.ActorContext, name string, 
 			}
 			return json.Unmarshal(stored.ResultPayload, &out)
 		}
+		c, err = s.Facts.PrepareTx(c, sc.Tx, a.PlayerID, sc.Operation)
+		if err != nil {
+			return err
+		}
 		out, state, err = apply(c, sc, v, state)
 		if err != nil {
 			return err
@@ -513,6 +518,9 @@ func (s Mode) purchase(c context.Context, a identity.ActorContext, name string, 
 			return err
 		}
 		balances, functions := changes.Recorded(c)
+		for key, value := range changes.RecordedMissions(c) {
+			out[key] = value
+		}
 		out["economy_"] = balances
 		if len(functions) > 0 {
 			out["new_funcs_"] = functions

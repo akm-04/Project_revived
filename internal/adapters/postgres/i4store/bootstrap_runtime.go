@@ -11,6 +11,7 @@ import (
 
 	"gxb.local/backend/v2/internal/adapters/postgres/kernelstore"
 	appboot "gxb.local/backend/v2/internal/application/bootstrap"
+	gen "gxb.local/backend/v2/internal/application/generation"
 	appidentity "gxb.local/backend/v2/internal/application/identitylifecycle"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/domain/logicalserver"
@@ -136,6 +137,7 @@ type BootstrapService struct {
 	BootstrapProfileVersion string
 	Contributors            []logicalserver.BootstrapContributor
 	PersistenceContributors []appboot.CharacterBootstrapPersistenceContributor
+	LoginTime               gen.TimeAuthority
 	LoginReconcilers        []appboot.CharacterLoginReconciler
 	OperationBinder         appboot.CharacterBootstrapOperationBinder
 	DetailContributors      []appboot.MID1DetailContributor
@@ -269,6 +271,16 @@ func (s BootstrapService) MID1(ctx context.Context, req appboot.RuntimeMID1Reque
 		return appboot.MID1Result{}, err
 	}
 
+	decisionAt := req.Operation.StartedAt
+	if len(s.LoginReconcilers) > 0 {
+		if s.LoginTime == nil {
+			return appboot.MID1Result{}, errors.New("login durable time authority required")
+		}
+		decisionAt, err = s.LoginTime.Now(ctx)
+		if err != nil {
+			return appboot.MID1Result{}, err
+		}
+	}
 	dynamic := &dynamicReceiptResolver{Reader: s.ReceiptReader}
 	var out appboot.MID1Result
 	boundOp := req.Operation
@@ -352,7 +364,7 @@ func (s BootstrapService) MID1(ctx context.Context, req appboot.RuntimeMID1Reque
 			if err := validateStoredMID1Selection(prior, planned, selectedKey.ID); err != nil {
 				return err
 			}
-			if err := appboot.ApplyLoginReconcilers(txctx, scope.Tx, actor, boundOp, s.LoginReconcilers); err != nil {
+			if err := appboot.ApplyLoginReconcilers(txctx, scope.Tx, actor, boundOp, decisionAt, s.LoginReconcilers); err != nil {
 				return err
 			}
 			if s.DirectoryReconciler != nil {
@@ -360,7 +372,7 @@ func (s BootstrapService) MID1(ctx context.Context, req appboot.RuntimeMID1Reque
 					return err
 				}
 			}
-			if err := s.projectMID1Detail(txctx, scope.Tx, actor, req.Operation.StartedAt, &planned); err != nil {
+			if err := s.projectMID1Detail(txctx, scope.Tx, actor, decisionAt, &planned); err != nil {
 				return err
 			}
 			out = planned
@@ -388,7 +400,7 @@ func (s BootstrapService) MID1(ctx context.Context, req appboot.RuntimeMID1Reque
 			}
 		}
 
-		if err := appboot.ApplyLoginReconcilers(txctx, scope.Tx, actor, boundOp, s.LoginReconcilers); err != nil {
+		if err := appboot.ApplyLoginReconcilers(txctx, scope.Tx, actor, boundOp, decisionAt, s.LoginReconcilers); err != nil {
 			return err
 		}
 
@@ -402,7 +414,7 @@ func (s BootstrapService) MID1(ctx context.Context, req appboot.RuntimeMID1Reque
 
 		// Projection happens only after all required canonical owner rows exist in
 		// this transaction, so a fresh player is hydrated from persisted truth.
-		if err := s.projectMID1Detail(txctx, scope.Tx, actor, req.Operation.StartedAt, &planned); err != nil {
+		if err := s.projectMID1Detail(txctx, scope.Tx, actor, decisionAt, &planned); err != nil {
 			return err
 		}
 
@@ -433,7 +445,7 @@ func (s BootstrapService) MID1(ctx context.Context, req appboot.RuntimeMID1Reque
 	}
 	if runResult.Reconciled {
 		if stored, ok := runResult.Evidence.(receipt.Receipt); ok {
-			return s.hydrateCommittedMID1(ctx, req, stored)
+			return s.hydrateCommittedMID1(ctx, req, stored, decisionAt)
 		}
 	}
 	return out, nil
@@ -947,7 +959,7 @@ func validateStoredMID1Selection(stored receipt.Receipt, current appboot.MID1Res
 	}
 }
 
-func (s BootstrapService) hydrateCommittedMID1(ctx context.Context, req appboot.RuntimeMID1Request, stored receipt.Receipt) (appboot.MID1Result, error) {
+func (s BootstrapService) hydrateCommittedMID1(ctx context.Context, req appboot.RuntimeMID1Request, stored receipt.Receipt, decisionAt time.Time) (appboot.MID1Result, error) {
 	var out appboot.MID1Result
 	// Reconciliation has already proved the write receipt committed. This second
 	// transaction is read-only current hydration; it must not replay the old stock
@@ -1000,7 +1012,7 @@ func (s BootstrapService) hydrateCommittedMID1(ctx context.Context, req appboot.
 			return err
 		}
 		out = appboot.MID1Result{Token: token, Region: int32(server.ID), UID: account.UID, IsNew: logicalserver.MID1IsNew(*player), Player: *player, Server: server, ContextPlan: identity.SelectionPlan{Kind: identity.SelectionCoalesced, Selected: *live}}
-		if err := s.projectMID1Detail(txctx, scope.Tx, actor, req.Operation.StartedAt, &out); err != nil {
+		if err := s.projectMID1Detail(txctx, scope.Tx, actor, decisionAt, &out); err != nil {
 			return err
 		}
 		return validateStoredMID1Selection(stored, out, storedKeyID)

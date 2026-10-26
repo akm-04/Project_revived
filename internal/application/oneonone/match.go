@@ -438,6 +438,10 @@ func (s Service) settleMatchTx(c context.Context, sc gen.TimedScope, id ids.UUID
 			}
 		}
 	}
+	c, err = s.Facts.PrepareTx(c, sc.Tx, m.Attacker, sc.Operation)
+	if err != nil {
+		return err
+	}
 	attacker, defender, outcome := catalog.Decide(m, players[m.Attacker], players[m.Defender], wins, win, at)
 	for _, side := range []struct {
 		before, after d.Player
