@@ -293,7 +293,7 @@
   "character_asset_core_parent_status_at_backend_packaging": "PENDING_PASSMAP_CLOSURE_REVIEW",
   "commit": "ed63e7dcdd0e04f9153f1b1f54fe96ae85ceab51",
   "commit_role": "PARENT_ACCEPTED_PASS643_COMMIT; exact final I7A6A product HEAD/tree/archive are bound externally in PassMap and gate evidence to avoid self-reference",
-  "content_revision": "d9b1c731a9efc936ab2cbadfda84d64177196d9329902d763a2b97b6c56b117d",
+  "content_revision": "36d9c7b641e39ca8abf07b0202534f796f7c0b4be0f8849f81f508284bb6709b",
   "current_migration_high_water": "00087_i9_4_mission_chests.sql",
   "current_stage": "I9_4AB_RUNTIME_IMPLEMENTED_CLOSURE_FENCED",
   "evidence": "Pass587 Gate-1 runtime evidence b59277c4d59a1c2622809a62f46605442232d77a380e97af7eeba2a3a75fe73e + Pass588 normal-chat I0-I6/source-oracle/release-reconciliation checks; exact Pass588 retest still required.",

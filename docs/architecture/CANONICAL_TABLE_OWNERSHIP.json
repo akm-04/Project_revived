@@ -4122,7 +4122,9 @@
         "content-registry"
       ],
       "allowed_read_paths": [
-        "internal/adapters/postgres/contentstore/"
+        "internal/adapters/postgres/contentstore/",
+        "sql/content/",
+        "internal/adapters/postgres/contentqueries/"
       ],
       "allowed_write_paths": [
         "internal/adapters/postgres/contentstore/"

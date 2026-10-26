@@ -1,5 +1,5 @@
 {
-  "highest_migration": "00087_i9_4_mission_chests.sql",
+  "highest_migration": "00088_i9_4_signin.sql",
   "migrations": {
     "00001_kernel_receipts.sql": "fab5b35f4ca5eee53c62b0b924ec448327e1aa31205015c22e24ee0f2b710fd8",
     "00002_identity_logicalserver_bootstrap.sql": "adff86d27dd1c02e4da0dec6b1aa21f33aaafd4d410849abc76bfeec58a5cd5f",
@@ -87,9 +87,10 @@
     "00084_i9_3e_summon.sql": "040c9554dbba9e0339164f37d6218de562a303e1a5035a0f41097c26fa2b6388",
     "00085_i9_4_mission_root.sql": "f6c50a81a55831097e59294ee4310b5430e1579e904405b4ae4d44eb52000332",
     "00086_i9_4_campaign_clear_counts.sql": "861d66486a860c86d802231e6ca74d5300375509ddd47c7608735966a272a2ed",
-    "00087_i9_4_mission_chests.sql": "b0964d0db83e53b6bb561aafcdbf69da65c43763ab7f5188f190da3e6777aabf"
+    "00087_i9_4_mission_chests.sql": "b0964d0db83e53b6bb561aafcdbf69da65c43763ab7f5188f190da3e6777aabf",
+    "00088_i9_4_signin.sql": "a62fb3619c2dbc2555f8edf44fb5a8974fa3de132c3f3e397afe781f0616e227"
   },
   "rule": "All listed migration bytes are immutable for this cumulative candidate. Historical phase validators remain snapshot-specific; forward schema changes require a new migration. I7A-4A allocates forward-only 00033 for SocialRelation/SocialInbox durable foundations and an I4-owned non-unique discovery index; it performs no Social backfill and activates no stock routes.",
   "schema_version": 1,
-  "status": "CURRENT_CUMULATIVE_MIGRATION_LOCK_I9_4B_WORKING"
+  "status": "CURRENT_CUMULATIVE_MIGRATION_LOCK_I9_4C"
 }

@@ -148,6 +148,10 @@ func (s Service) ClaimSignIn(ctx context.Context, actor identity.ActorContext, o
 		if err != nil {
 			return err
 		}
+		pinned, err := bindContentRevisionForSign(timed.Operation(), root.ContentRevision)
+		if err != nil {
+			return err
+		}
 		catalog, err := s.SignIn.Content.SignInCatalogTx(ctx, tr.Tx, root.ContentRevision)
 		if err != nil {
 			return err
@@ -174,7 +178,7 @@ func (s Service) ClaimSignIn(ctx context.Context, actor identity.ActorContext, o
 			if award.ItemNum != 1 || s.SignIn.Heroes == nil || s.SignIn.HeroWire == nil {
 				return errors.New("sign-in Hero owner unavailable")
 			}
-			hero, admission, err := s.SignIn.Heroes.AwardStoryPartnerTx(ctx, tr.Tx, actor.PlayerID, award.ItemID, root.ContentRevision, timed.Operation())
+			hero, admission, err := s.SignIn.Heroes.AwardStoryPartnerTx(ctx, tr.Tx, actor.PlayerID, award.ItemID, root.ContentRevision, pinned)
 			if err != nil {
 				return err
 			}
@@ -202,10 +206,6 @@ func (s Service) ClaimSignIn(ctx context.Context, actor identity.ActorContext, o
 		out = signInResult{Award: wire, Count: next.Count, Signed: next.Signed}
 		if len(lines) > 0 {
 			// The entitlement pins the month's content, even if another revision is active now.
-			pinned, err := bindContentRevisionForSign(timed.Operation(), root.ContentRevision)
-			if err != nil {
-				return err
-			}
 			plan := grant.Plan{PlayerID: actor.PlayerID, Source: grant.SourceIdentity{Domain: "objective", Operation: "sign-in", BusinessKey: "monthly", Occurrence: occurrence, PolicyVersion: "I9_MONTHLY_SIGNIN_V1"}, Lines: lines}
 			granted, err := s.SettleGrantTx(ctx, tr.Tx, actor, plan, pinned, GrantTxOptions{AllowOverflowMail: true})
 			if err != nil {

@@ -276,7 +276,12 @@ func TestSignInNativeSourceHeroFreshFacetsAndDuplicate(t *testing.T) {
 	content := contentstore.Store{Queryer: p}
 	heroes := characterstore.Store{Queryer: p}
 	s.SignIn = &i5.SignInRuntime{Store: i5store.Store{Queryer: p}, Content: signHeroCatalog{content}, Heroes: characterhero.Service{AcquisitionStore: heroes, Acquisition: content, CollectionAdmission: characterhero.CatalogCollectionAdmission{Content: content}, FreshFacets: characterbirth.FreshHeroFacets()}, HeroWire: heroproj.StockHero}
-	body, err := s.ClaimSignIn(ctx, a, runtimeOperation(t, at))
+	if _, err := s.ReadSignIn(ctx, a, runtimeOperation(t, at)); err != nil {
+		t.Fatal(err)
+	}
+	admission := runtimeOperation(t, at)
+	admission.Policies, _ = policy.NewSet(policy.Ref{Name: "content", Version: "d9b1c731a9efc936ab2cbadfda84d64177196d9329902d763a2b97b6c56b117d"})
+	body, err := s.ClaimSignIn(ctx, a, admission)
 	if err != nil {
 		t.Fatal(err)
 	}
