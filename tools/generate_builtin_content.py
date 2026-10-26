@@ -21,12 +21,17 @@ from pathlib import Path
 from typing import Any, Iterable
 
 SCHEMA_VERSION = 1
-COMPILER_VERSION = "i9-4b-inscription-missions"
+COMPILER_VERSION = "i9-4c-signin"
 PARSER_VERSION = "lua-generated-v18-guild-invite"
 EXPECTED_SOURCE_ARCHIVE_SHA256 = "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
 SOURCE_PREFIX = "app-assets/output/assets/src_64/"
 
 SOURCE_MANIFEST = [
+    ('data/tables/sign_in.lua', 'b1ed79e1edd36d6ee62c31281328a074abe23af86ed099128b90f6d4b50ce6c5', "I9_4C_SIGNIN_SOURCE_BOUNDARY"),
+    ('data/tables/sign_in_partner.lua', '3dcad83b72fbf3d832bc11b507eacc4a7cfc520254497daf7de43f045f2c09a7', "I9_4C_SIGNIN_SOURCE_BOUNDARY"),
+    ('app/windows/SignInWindow.lua', 'a879fb4be8e8d468f7c5bd76cfa3f0c816fa32a9d5147c0abb7c0fdc19de63d4', "I9_4C_SIGNIN_SOURCE_BOUNDARY"),
+    ('app/windows/SignInItem.lua', '24dd08f8966a88566c348e3c5f20624366b73b0ba8c20f6c250bb3180583dbac', "I9_4C_SIGNIN_SOURCE_BOUNDARY"),
+    ('app/windows/SignInDescWindow.lua', '28259123e9e7ac6909e815566b17eb611697713fc777ca9bae225d8e5438a5a5', "I9_4C_SIGNIN_SOURCE_BOUNDARY"),
     ('data/tables/mission_reward_daily.lua', '4e7940f695e1b50f2d68c7c71430da388eeb01e4333f37c179157db64f7b7842', "I9_4B_ACTIVITY_SOURCE_BOUNDARY"),
     ('data/tables/mission_reward_week.lua', '20986d20785af114b23ad7355bb3763dd0e7d8b93ecc678fd6ea8a30472e73d4', "I9_4B_ACTIVITY_SOURCE_BOUNDARY"),
     ('app/windows/TaskWindow.lua', 'd518b80d3037924bf0eeb77542df2ddd01585253248b5f7dc562d3fad114f10c', "I9_4B_ACTIVITY_SOURCE_BOUNDARY"),
@@ -220,7 +225,7 @@ SOURCE_MANIFEST.append(('app/windows/WhiteAlbumWindow.lua','851a53f588b59d95cfe4
 
 ENABLED_CAPABILITIES = [
     "MISSION_CATALOG_I9_4A",
-    "SCALAR_MARCH_COIN_I9_4A", "MISSION_ACTIVITY_I9_4B", "SCALAR_GUILD_COIN_I9_4B", "DODGE_TICKET_STACK_I9_4B",
+    "SCALAR_MARCH_COIN_I9_4A", "MISSION_ACTIVITY_I9_4B", "MONTHLY_SIGNIN_I9_4C", "SCALAR_GUILD_COIN_I9_4B", "DODGE_TICKET_STACK_I9_4B",
     "SUMMON_GACHA_I9_3E",
     "CAMPAIGN_MODE_I9_3A",
     "COSMETIC_TITLE_CONDITION_I7C6",
@@ -425,6 +430,7 @@ from achievement_content import build_achievement
 from top_floor_content import build_top_floor
 from campaign_content import build_campaign
 from summon_content import build_summon
+from signin_content import build_signin
 from missions_content import build_missions
 from one_on_one_content import build_one_on_one
 from arena_content import build_arena
@@ -2090,6 +2096,12 @@ def build_artifacts(blobs: dict[str, SourceBlob], archive_sha256: str) -> dict[s
     }
 
     objective_artifact = build_missions(blobs, parse_generated_lua_table)
+    objective_artifact["monthly_signin"] = build_signin(blobs, parse_generated_lua_table)
+    for month in objective_artifact["monthly_signin"]["months"]:
+        for award in month["awards"]:
+            item = award["award_item_id"]
+            if item > 0 and not any(r.get("item_id") == item and r.get("settlement_activation") == "ENABLED_R4" and r.get("class") == "STACK_ITEM" for r in resources):
+                raise CompileError(f"Unqualified sign-in reward {item}")
 
     emoticons=[]
     for row in parse_generated_lua_table(blobs["data/tables/emoticon.lua"].data):

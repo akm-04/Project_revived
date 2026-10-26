@@ -90,11 +90,12 @@ func TestBundleQueriesUseExactRawBytes(t *testing.T) {
 		if c.sql == contentqueries.InsertContentObjectives {
 			var payload struct {
 				Activity json.RawMessage `json:"activity_chests"`
+				SignIn   json.RawMessage `json:"monthly_signin"`
 			}
 			if err := json.Unmarshal(c.raw, &payload); err != nil {
 				t.Fatal(err)
 			}
-			if q.sql != "INSERT INTO content_mission_activity_catalogs(revision_id,payload) VALUES($1,$2::jsonb)" || !reflect.DeepEqual(q.args, []any{b.RevisionID(), string(payload.Activity)}) {
+			if q.sql != "INSERT INTO content_monthly_signin_catalogs(revision_id,payload) VALUES($1,$2::jsonb)" || !reflect.DeepEqual(q.args, []any{b.RevisionID(), string(payload.SignIn)}) {
 				t.Fatal("activity content input mismatch")
 			}
 			q.sql = q.calls[len(q.calls)-1]

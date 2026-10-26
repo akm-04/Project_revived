@@ -34,3 +34,29 @@ func TestMissionCatalogRejectsUnknownConditionsAndBrokenChains(t *testing.T) {
 		})
 	}
 }
+
+func TestMonthlySignInCatalogRejectsMissingAndInvalidRewards(t *testing.T) {
+	raw, err := GeneratedFile("objective_catalog.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, fault := range []string{"missing", "duplicate month", "both rewards", "bad VIP"} {
+		var c ObjectiveCatalog
+		if err = json.Unmarshal(raw, &c); err != nil {
+			t.Fatal(err)
+		}
+		switch fault {
+		case "missing":
+			c.MonthlySignIn = nil
+		case "duplicate month":
+			c.MonthlySignIn.Months[1].Month = 1
+		case "both rewards":
+			c.MonthlySignIn.Months[0].Awards[0].Crystal = 99
+		case "bad VIP":
+			c.MonthlySignIn.Months[0].Awards[0].DoubleVIP = 16
+		}
+		if validateMissions(c) == nil {
+			t.Fatal("invalid calendar accepted", fault)
+		}
+	}
+}

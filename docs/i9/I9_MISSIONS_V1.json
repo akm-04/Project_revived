@@ -1,0 +1,71 @@
+{
+ "schema_version": 1,
+ "contract_id": "I9_MISSIONS_V1",
+ "version": 1,
+ "node": "ROOT/I9/I9-4",
+ "status": "FROZEN_I9_1",
+ "extends": [
+  "I9_MODE_FRAMEWORK_V1"
+ ],
+ "label_rule": "PRIVATE_POLICY marks a private-server invention; UNKNOWN marks stock behaviour not recovered.",
+ "title": "Missions family: daily, growth, story and partner missions, daily/weekly activity (huoyue) chests, monthly and 7-day sign-in, awakening missions",
+ "mids": {
+  "160": "LOAD_MISSION",
+  "161": "TAKE_MISSION_AWARD",
+  "162": "COMPLETE_MISSION",
+  "169": "GET_DAY_HUOYUE_AWARD",
+  "170": "GET_WEEK_HUOYUE_AWARD",
+  "2736": "TASK_LOAD_BY_TYPE",
+  "352": "LOAD_SIGN_INFO",
+  "353": "SIGN",
+  "163": "OPEN_AWAKE_MISSION",
+  "164": "GIVE_UP_AWAKE_MISSION",
+  "165": "OPEN_PET_AWAKE_MISSION",
+  "166": "GIVE_UP_PET_AWAKE_MISSION",
+  "167": "OPEN_AWAKE_TWICE_MISSION",
+  "168": "GIVE_UP_AWAKE_TWICE_MISSION",
+  "171": "GET_AWAKE_ITEM",
+  "2561": "AWAKE_MISSION_LIST",
+  "2737": "TASK_AWAKE_GIVE_UP",
+  "2738": "TASK_AWAKE_OPEN"
+ },
+ "content": "mission.lua (476 rows: new_type 1 daily 35, 2 growth 184, 4 story 250, 6 partner 7), mission_reward_daily.lua (5 day chests by medal 30..150), mission_reward_week.lua (2 week chests by medal 500/1000), sign_in.lua + sign_in_partner.lua (monthly calendar 2015-06..2023-12), sign_7day.lua (7 rows), awaken_mission.lua, pet_awaken_mission.lua, function.lua (function 84 ID_REWARD_CHANGE selects the _new reward columns), vip.lua, monthly/week/energy/privilege card tables. One missions catalog (F2) replaces the empty objective_catalog.json (status BUILTIN_ACTIVATION_EMPTY_UNQUALIFIED_MAPPING).",
+ "rules": [
+  "M1 Owner. The existing V2 objective owner (internal/domain/objective, i5 Service ListObjectives/ClaimObjective/ApplyObjectiveFactTx) is the missions owner; I9-4 fills it instead of adding a second one. Families report facts only through the I9-2 fact port (F11); the owner never reads family tables, so every gate below that needs other state (level, campaign star, hero quality, card activity) reads it through the owning service's read port in the same transaction.",
+  "M2 Catalog. tools/missions_content.py compiles mission.lua into objective definitions: {table_id, family = new_type (1 DAILY, 2 GROW, 4 STORY, 6 PARTNER), visibility gate req, chain previous task_id / next_task_id, condition task_req, target task_num, rewards, medal, vip_exp, battlepass_score}. req gates: 0 none, 1|N player level >= N, 2|C campaign C cleared, 3|N VIP >= N, 4 monthly card, 6 week card, 7 energy card, 8 privilege card, 9 partner owned, 5|N level >= N (the two diamond-spend rows). Rewards use the _new columns when function 84 is open for the player (V1 Pass30 open_control rule), else the base columns: money -> gold, diamond -> crystal, soul, exp -> player exp, badge -> guild coin, march_coin, award_id x num, vip_exp. battlepass_score is recorded on the fact but not granted until the I10 battle pass owner exists (obligation I9-MISSION-BP-SCORE).",
+  "M3 Condition kinds (task_req) and the fact each needs. Count kinds (Delta strategy): 101 golden hand use (I9-11), 102 Normal campaign win or sweep (I9-3), 103 Super campaign win or sweep (I9-3), 104 quiz (I9-10 course), 105 trial/challenge finish (I9-3D), 106 PK fight (client opens Top Floor, LOAD 272; counts Top Floor, 1on1, ranked Arena and Champion League fights as PVP_FIGHT, D92/D97), 107 skill upgrade (I9-11 hero asset), 108 gear enchant (I9-11), 109 random EXP-juice buy (I9-11 shop), 114 Champion March finish (I9-5), 115 workplace team sent (I9-5), 116 battle girl lent (I9-9), 117 guild activity (I9-9), 119 Infinity boss defeat (I9-8), 120 Sky City battle (pet campaign window, I9-5 producer, D92), 121 pet feed (I9-11), 123 tea party donate (I9-9), 124 intimacy improve (I9-10 dorm), 125 voyage mission (I9-10), 126/127 diamonds spent (high-water from the I5 per-day spend ledger CrystalSpentOnDayTx, D92), 132 Gods Trial challenge cleared (I9-6), 2 promote any girl (I9-11), 17 summons (I10 gacha owner; progress stays 0 until then, obligation I9-MISSION-SUMMON-FACT). High-water kinds (HighWaterFromCanonicalState, recomputed from the owner's read port): 3-14, 23, 24 best girl quality, 16 academy level, 19 cabinet level, 20 textbooks finished, 15 story stage (task_num 'campaign_id|campaign_type' cleared), 18 specific girl owned (task_num hero table id), partner 21 level and 22 quality of the bound girl. Entitlement kinds (complete while the entitlement is active today): 110 monthly card, 113 VIP raid tickets, 129 week card, 130 energy card, 131 privilege card. Time-window kinds 111 and 118: complete while the GMT+8 second of day lies in the window from the previous row's end to task_num (MissionTable mealTimeTable_ rule); the reward is stamina via the I5 temporal owner.",
+  "M4 Materialization. Daily rows exist for the F7 day: created lazily on the first 160/2736/MID1 read of a new day, from every DAILY definition whose gate passes; yesterday's unclaimed daily rows are dropped. Growth, story and partner chains hold one live row per chain: the first row whose task_id is 0 (or whose predecessor is claimed), created when its gate passes; claiming a row creates next_task_id. High-water rows are evaluated at creation, so a player who already meets a target sees it complete at once. Partner rows exist per owned girl that a partner chain names (mission_list for type 6 is the map hero_id -> rows). There are no weekly rows in mission.lua; type 3 answers an empty mission_list (UNKNOWN whether stock had weekly rows in a hot update).",
+  "M5 Reads. 2736 {mission_type} -> {mission_list: [{table_id, is_complete, is_reward, is_going, value, awake_type?}] (type 6: map hero_id -> rows), extra_info: {daily_left_time (seconds to the next 05:00 GMT+8), huoyue_info: {day_huoyue, day_award [claimed chest ids], week_huoyue, week_award}}}. 160 {} answers the same fields for every family in one body (LOAD_MISSION bootstrap). MID1 detail carries the same projection for the lobby (F13).",
+  "M6 Claim 161 {table_id[, hero_table_id]}. Allowed when the row is complete and unclaimed; grants M2 rewards through I5 Grants.SettleGrantTx, adds medal to day_huoyue and week_huoyue, marks is_reward = 1 and creates next_task_id for a chain. Reply {awards: [{table_id, item_num}], economy_ (common hook), and the touched family delta (daily_mission_, mainline_mission_, story_mission_, partner_mission_)}. Entitlement rows (110, 113, 129, 130, 131) stay listed with is_reward = 1; the client removes the others itself. A claim of a claimed row replays its receipt; a claim of an incomplete row is error_code 1 (F4 b).",
+  "M7 Activity chests 169 {index} and 170 {index}. day chest index i (mission_reward_daily) is claimable when day_huoyue >= medal and not yet claimed today; it grants gift_exp or gift_march_coin by the player's function 84 state (PRIVATE_POLICY: gift_exp before function 84 opens, gift_march_coin after; stock rule UNKNOWN). week chest index i (mission_reward_week) is claimable when week_huoyue >= medal for the F7 week (Monday 05:00 GMT+8, D84). Gifts open through the I5 gift owner already used by mail awards. Reply {awards, huoyue_info}.",
+  "M8 Piggyback. Every response whose transaction changed mission rows carries the changed rows under the client's hook names (daily_mission_, mainline_mission_, story_mission_, partner_mission_, awake_mission_, twice_awake_mission_, pet_awake_mission_) and the mission red mark in redmarks_, through the I9-2 response decorator (F17). The objective owner returns the deltas; the dispatcher never builds them.",
+  "M9 Monthly sign-in 352 {} -> {awards: [{award_item_id, award_item_num, award_crystal, double_vip_lv}] for the month, is_signed, sign_times, month, partner_id, is_skin}; 353 {} signs today: first sign of the day grants row sign_times + 1; a second sign the same day is allowed once when vip >= double_vip_lv of that row and grants it again (SignInWindow rule). Reply {award: {table_id, item_num, is_partner?}, is_signed, sign_times}. Calendar (PRIVATE_POLICY): sign_in.lua has 2015-10..2023-09 only; the live month M of year Y uses the table rows of month M in the newest table year that has month M; sign_times resets at the first F7 day of each calendar month (GMT+8). A partner award goes through the hero acquisition owner (duplicate becomes shards by the existing I4 rule).",
+  "M10 7-day sign-in (sign_7day.lua, newbie welfare). Day n (1..7) of the account's F7 days since creation is claimable once; award_gift_id x award_gift_num through the gift owner. Its MIDs live in the welfare activity family; I9-4C research fixes which activity id and MIDs carry it and whether it is ACTIVE in I9 or LATER I10 (UNKNOWN until then).",
+  "M11 Awakening missions (163-168, 171, 2561, 2737, 2738). Opening an awakening mission for a girl creates the awaken_mission.lua / pet_awaken_mission.lua rows for her stage; progress comes from campaign 114/117 (awake_mission and pet_awaken_mission parameters, I9-3) and other facts; giving up deletes the rows and refunds nothing beyond giveUpDelItems; 171 grants the awakening item when all rows are complete. The existing I4 awakening owner keeps hero state; I9-4D research fixes the wire shapes from AwakeWindow/MissionTable before code (V1 AwakeningMissionService is the oracle).",
+  "M12 Proof. VC: new player daily list after the 05:00 day turn; Normal campaign win -> 102 progress delta on the 114 response; claim -> huoyue -> day chest; story 15 row completes from an already cleared stage; sign-in once and VIP double; awakening open/give up. Journal shows no UNKNOWN_MID or SERVER_ERROR for the family's MIDs."
+ ],
+ "leaves": {
+  "I9-4A": "Catalog compiler, materialization, reads 160/2736/MID1, claim 161, piggyback deltas (M1-M6, M8) with the I9-3 campaign facts",
+  "I9-4B": "Activity chests 169/170 and the remaining count-fact consumers in delivered modes (PK fights 106 (PVP_FIGHT) via the I9-2 fact port, diamonds spent 126/127 via the spend ledger; 120 moves to I9-5)",
+  "I9-4C": "Monthly sign-in 352/353 and the 7-day welfare research (M9-M10)",
+  "I9-4D": "Awakening missions (M11)"
+ },
+ "obligations": [
+  "I9-MISSION-BP-SCORE: battlepass_score accrual waits for the I10 battle pass owner; the fact keeps the value",
+  "I9-MISSION-SUMMON-FACT: task_req 17 and 109 facts come from the I9-3 Vending producer (D170; recordPull records SUMMON and VENDING_JUICE_PURCHASED in the settling transaction). DISCHARGED at I9-4: SUMMON binding unit-proved, the shared RecordTx path proved end to end by row 10009 in VC i9_4a_missions",
+  "I9-MISSION-PRODUCERS: each I9 stage that owns a producing family (M3) emits its facts and proves one mission row moving in its VC scenario"
+ ],
+ "sources": [
+  "src_64 app/model/Task.lua, app/common/tables/MissionTable.lua, MissionRewardTable.lua, SevenDayLoginTable.lua, SignInWindow.lua, SelfPlayer.loadSignInfo, MainScene sign_in, MapTaskWindow, Backend.lua common hooks",
+  "V1 oracle mission_repository.py (story 80001 only), handlers/tasks.py (other families were stubs), awakening_mission_service.py",
+  "V2 internal/domain/objective, internal/content/builtin/generated/objective_catalog.json"
+ ],
+ "amendments": [
+  "I9-2 (D92, 2026-10-24): task_req 106 is any PK fight (D97 amendment: Top Floor, 1on1, ranked Arena, Champion League; producers in I9-2), 120 is the pet campaign Sky City (I9-5), 126/127 read the I5 per-day crystal spend ledger.",
+  "I9-4A (D170, D171, D173, D175, D179, D181; 2026-10-26): M3 task_req 17 is produced by the I9-3 Vending owner, not I10. M5 row progress is the source count field. M2 money maps to canonical mana (no gold owner); rewards use the _new columns because function 84 open_control is 1 in source. task_req 109 (mission 10009) counts Vending draw slots per purchase (PRIVATE_POLICY D181; original UNKNOWN). Story STAGE_COUNT rows (task_req 15) target parameter 2 (clear count), not 1: the earlier campaign_id|type reading is DISPROVEN.",
+  "I9-4A (D172, D174, D176, D177, D178, D180): meal windows 111/118 use source start/end and are revalidated at claim; objective locks are prepared before producer value locks inside the I5 order; mission instances keep their content revision and the fact consumer binds that exact revision; monthly/week/energy/privilege card gates and entitlements are named I10 commerce bindings (never fabricated); growth-return rows select exp before max level and March Coin at max at claim; claim binds content and decision time once at admission.",
+  "I9-4B (D182-D185): redmarks_ use function 27 records {function_id, redmark_list} with task ids 2701/2702/2704/2706. M7 chest reward choice uses the client level/max selector (supersedes the D90 function 84 assumption). Gift badge maps to guild_coin and VIP >= the gift's vip threshold adds ex_badge (PRIVATE_POLICY D184; original UNKNOWN). 106 counts Top Floor, 1on1, Arena and Champion League fights, never practice (D92/D97).",
+  "I9-4B (D186, 2026-10-26): the two diamond-spend daily rows 10031/10032 (show_award inscript) pay one inscription item drawn from the source inscription family (inscription.lua 40001/50001, rand weights). The row carries it as inscript_id and the claim grants it. The pick is a stable hash of player, objective and day (PRIVATE_POLICY; how the original drew it is UNKNOWN). Without inscript_id the stock task window crashes.",
+  "I9-4C research (D187-D189): M9 source range is2015-06..2023-12, with identical duplicate November2016 rows; D89 newest source year per month remains unchanged. M10 is research-resolved LATER I10 for legacy1182 and new1200 via231/234; current help counts actual login days, superseding the tentative elapsed-account-age assertion. Monthly sign-in uses exact-operation receipts and distinct daily first/bonus entitlements; empty353 cannot distinguish new-operation transport retry from intentional VIP bonus. Implementation is authorized by current user after the recorded research/design checkpoint; no product closure yet."
+ ]
+}

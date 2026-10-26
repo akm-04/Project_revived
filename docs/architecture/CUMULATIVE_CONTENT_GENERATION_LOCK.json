@@ -354,14 +354,22 @@
       "parser_version": "lua-generated-v18-guild-invite",
       "revision_id": "d9b1c731a9efc936ab2cbadfda84d64177196d9329902d763a2b97b6c56b117d",
       "scope": "Daily missions 10031/10032 carry their source inscription pool (inscription.lua 40001/50001: item ids and rand weights) so the row can present and grant inscript_id. Other definitions unchanged."
+    },
+    {
+      "ordinal": 50,
+      "stage": "I9-4C monthly sign-in",
+      "compiler_version": "i9-4c-signin",
+      "parser_version": "lua-generated-v18-guild-invite",
+      "revision_id": "36d9c7b641e39ca8abf07b0202534f796f7c0b4be0f8849f81f508284bb6709b",
+      "scope": "D89 twelve newest source months; monthly owner and first/bonus entitlements. Existing mission and resource rows unchanged."
     }
   ],
   "current": {
-    "ordinal": 49,
-    "stage": "I9-4B inscription mission rewards",
-    "compiler_version": "i9-4b-inscription-missions",
+    "ordinal": 50,
+    "stage": "I9-4C monthly sign-in",
+    "compiler_version": "i9-4c-signin",
     "parser_version": "lua-generated-v18-guild-invite",
-    "revision_id": "d9b1c731a9efc936ab2cbadfda84d64177196d9329902d763a2b97b6c56b117d",
-    "scope": "Daily missions 10031/10032 carry their source inscription pool (inscription.lua 40001/50001: item ids and rand weights) so the row can present and grant inscript_id. Other definitions unchanged."
+    "revision_id": "36d9c7b641e39ca8abf07b0202534f796f7c0b4be0f8849f81f508284bb6709b",
+    "scope": "D89 twelve newest source months; monthly owner and first/bonus entitlements. Existing mission and resource rows unchanged."
   }
 }

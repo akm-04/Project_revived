@@ -4101,6 +4101,34 @@
       ],
       "write_exceptions": [],
       "migration": "migrations/00087_i9_4_mission_chests.sql"
+    },
+    "player_signin_roots": {
+      "owner": "objective-core",
+      "allowed_query_owners": [
+        "objective-core"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/i5store/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/i5store/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00088_i9_4_signin.sql"
+    },
+    "content_monthly_signin_catalogs": {
+      "owner": "content-registry",
+      "allowed_query_owners": [
+        "content-registry"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/contentstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/contentstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00088_i9_4_signin.sql"
     }
   }
 }

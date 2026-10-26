@@ -17,6 +17,9 @@ func validateMissions(c ObjectiveCatalog) error {
 			return err
 		}
 	}
+	if err := validateSignIn(c.MonthlySignIn); err != nil {
+		return err
+	}
 	byID := make(map[int64]ObjectiveDefinition, len(c.Definitions))
 	counts := map[int64]int{}
 	lastID := int64(0)
@@ -159,6 +162,23 @@ func validateActivityCatalog(c ActivityCatalog) error {
 			return errors.New("invalid activity rule content")
 		}
 		rules[key] = true
+	}
+	return nil
+}
+
+func validateSignIn(c *SignCatalog) error {
+	if c == nil || len(c.Months) != 12 {
+		return errors.New("builtin: monthly sign-in catalog missing")
+	}
+	for i, m := range c.Months {
+		if m.Month != int64(i+1) || m.SourceYear < 2015 || m.PartnerID <= 0 || (m.IsSkin != 0 && m.IsSkin != 1) || len(m.Awards) < 28 || len(m.Awards) > 31 {
+			return errors.New("builtin: invalid sign-in month")
+		}
+		for _, a := range m.Awards {
+			if a.DoubleVIP < -1 || a.DoubleVIP > 15 || (a.ItemID > 0) == (a.Crystal > 0) || a.ItemID > 0 && a.ItemNum <= 0 {
+				return errors.New("builtin: invalid sign-in reward")
+			}
+		}
 	}
 	return nil
 }

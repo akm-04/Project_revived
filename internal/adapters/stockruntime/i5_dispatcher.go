@@ -45,7 +45,12 @@ type MissionServicePort interface {
 	ReadMissions(context.Context, identity.ActorContext, objective.StockFamily, operation.Context) (map[string]any, error)
 	ClaimMission(context.Context, identity.ActorContext, int64, string, operation.Context) (appi5.ObjectiveClaimResult, error)
 }
+type SignInServicePort interface {
+	ReadSignIn(context.Context, identity.ActorContext, operation.Context) (map[string]any, error)
+	ClaimSignIn(context.Context, identity.ActorContext, operation.Context) (map[string]any, error)
+}
 type I5Dispatcher struct {
+	SignIn         SignInServicePort
 	Missions       MissionServicePort
 	SpiritBackpack SpiritBackpackProjector
 	Authority      apprealtime.GameplayAuthorityPort
@@ -61,6 +66,24 @@ func (d I5Dispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRequest
 		return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Body: map[string]any{"error": "i5_unavailable"}}
 	}
 	switch req.Envelope.MID {
+	case 352, 353:
+		if d.SignIn == nil {
+			return failI5(errors.New("sign-in unavailable"))
+		}
+		if !onlyStockGameplayParams(req.Envelope.Params) {
+			return badI5("invalid_sign_in")
+		}
+		var body map[string]any
+		var err error
+		if req.Envelope.MID == 352 {
+			body, err = d.SignIn.ReadSignIn(ctx, actor, req.Envelope.Operation)
+		} else {
+			body, err = d.SignIn.ClaimSignIn(ctx, actor, req.Envelope.Operation)
+		}
+		if err != nil {
+			return failI5(err)
+		}
+		return okI5(body)
 	case 26: // SAVE_STORY
 		storyID, e1 := requiredInt64(req.Envelope.Params, "story_id")
 		storyState, e2 := requiredInt64(req.Envelope.Params, "story_state")
@@ -361,6 +384,9 @@ func badI5(code string) httpedge.Response {
 	return httpedge.Response{HTTPStatus: http.StatusBadRequest, Body: map[string]any{"error": code}}
 }
 func failI5(err error) httpedge.Response {
+	if errors.Is(err, objective.ErrSignRefused) {
+		return okI5(map[string]any{"error_code": int64(1)})
+	}
 	switch {
 	case errors.Is(err, appi5.ErrMissionRefused):
 		return okI5(map[string]any{"error_code": int64(1)})

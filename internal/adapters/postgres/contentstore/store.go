@@ -71,6 +71,7 @@ func (Store) InsertObjectives(ctx context.Context, t tx.Tx, b registry.Bundle) (
 	}
 	var data struct {
 		Activity json.RawMessage `json:"activity_chests"`
+		SignIn   json.RawMessage `json:"monthly_signin"`
 	}
 	if err = json.Unmarshal(b.ObjectivesJSON(), &data); err != nil {
 		return 0, err
@@ -82,6 +83,15 @@ func (Store) InsertObjectives(ctx context.Context, t tx.Tx, b registry.Bundle) (
 		}
 		if tag.RowsAffected() != 1 {
 			return 0, errors.New("activity content insert failed")
+		}
+	}
+	if len(data.SignIn) > 0 && string(data.SignIn) != "null" {
+		tag, err := t.Exec(ctx, `INSERT INTO content_monthly_signin_catalogs(revision_id,payload) VALUES($1,$2::jsonb)`, b.RevisionID(), string(data.SignIn))
+		if err != nil {
+			return 0, err
+		}
+		if tag.RowsAffected() != 1 {
+			return 0, errors.New("sign-in content insert failed")
 		}
 	}
 	return n, nil

@@ -773,7 +773,7 @@
     "version": "v0.125.0"
   },
   "language_floor": "go1.26.0",
-  "migration_high_water": "00087_i9_4_mission_chests.sql",
+  "migration_high_water": "00088_i9_4_signin.sql",
   "migration_parent_backend_sha256": "73a668580d416fba4275b97898d083b9fdcb12c58773eeb9ceec2b1f3711c58d",
   "native_repair_parent_backend_sha256": "a6bf87421767c5451f69fcf359995d28d91a6c6f861f55422bcdd642583e0141",
   "native_repair_parent_implementation_revision_sha256": "0def8ffc697be0c43a40b3e447c328fee45011e76e9e87a69f17181b777e1c1b",
@@ -805,13 +805,13 @@
   "sbom_created_at": "2026-10-09T10:31:06Z",
   "schema_version": 1,
   "snapshot": "D10 Publication immutable revisions/items, canonical scope and PostgreSQL visibility, read markers, source-shaped7/1537/8193/8194; inherited8 accepted656 preserved.",
-  "stage": "I9-4B",
-  "status": "WORKING_NOT_ACCEPTED_I9_4AB_LOCAL_QUALIFICATION",
+  "stage": "I9-4C",
+  "status": "WORKING_NOT_ACCEPTED_I9_4C_QUALIFICATION_IN_PROGRESS",
   "target_go": "1.27.1",
   "target_postgresql": "18.6",
   "target_sqlc": "1.31.1",
   "toolbox_archive_sha256": "e4e194c9627929299577364b953b2468d6118fac4283fd8030f10b5a27456c2b",
-  "version": "v0.148.0",
+  "version": "v0.149.0",
   "w2_claimed": false,
   "i7c5b_contract": "docs/i7c5b-top-floor/I7C5B_POLICY.json",
   "i7c5b_preimplementation_pass": "730.0",
@@ -915,5 +915,13 @@
     "next_action": "ExactR2 publicstat core/Pet native/upgrade/restore qualification, primaryreality/final715sync. Hero blood-stage and prior actualproducer/parent/W2 gates remain.",
     "migration_high_water": "00084_i9_3e_summon.sql"
   },
-  "version_role": "Inherited I9-3 base release label; isolated i9-4 working branch, not a release candidate."
+  "version_role": "Current monthly sign-in implementation; native component proof recorded, stock UI and final leaf qualification pending.",
+  "i9_4c": {
+    "accepted_base_git_head": "7134eacc35b6656fb43ef18244a96ea079c93d96",
+    "research_publication": "789.0",
+    "content_generation": 50,
+    "content_revision": "36d9c7b641e39ca8abf07b0202534f796f7c0b4be0f8849f81f508284bb6709b",
+    "seven_day": "LATER_I10",
+    "product_accepted_at_creation": false
+  }
 }
