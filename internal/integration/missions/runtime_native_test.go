@@ -10,13 +10,16 @@ import (
 	"time"
 
 	pg "gxb.local/backend/v2/internal/adapters/postgres"
+	"gxb.local/backend/v2/internal/adapters/postgres/bookstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/campaignstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/characterstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/commerceprivilegestore"
 	"gxb.local/backend/v2/internal/adapters/postgres/contentstore"
+	"gxb.local/backend/v2/internal/adapters/postgres/i4store"
 	"gxb.local/backend/v2/internal/adapters/postgres/i5store"
 	"gxb.local/backend/v2/internal/adapters/postgres/kernelstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/nativebirth"
+	"gxb.local/backend/v2/internal/application/bookskill"
 	"gxb.local/backend/v2/internal/application/commerceprivilege"
 	gen "gxb.local/backend/v2/internal/application/generation"
 	"gxb.local/backend/v2/internal/application/i5"
@@ -70,7 +73,14 @@ func runtimeActor(t *testing.T, p *pg.Pool, at time.Time) identity.ActorContext 
 	if err = nativebirth.PersistBare(ctx, p, accountUUID, 1, pid); err != nil {
 		t.Fatal(err)
 	}
-	if _, err = p.Raw().Exec(ctx, `UPDATE player_progression SET level=10,exp=0,updated_at=$2 WHERE player_id=$1`, int64(pid), at.Add(-time.Hour)); err != nil {
+	catalog, err := builtin.Load()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err = p.Raw().Exec(ctx, `UPDATE player_progression SET level=10,exp=$3,updated_at=$2 WHERE player_id=$1`, int64(pid), at.Add(-time.Hour), catalog.PlayerProgression.Rows[8].TotalExp); err != nil {
+		t.Fatal(err)
+	}
+	if _, err = p.Raw().Exec(ctx, `INSERT INTO player_directory_profiles(player_id,name,lev,avatar_id,avatar_frame_id,vip,conquer_lev,state_version,created_at,updated_at) VALUES($1,'i94',10,110001001,0,0,0,1,$2,$2)`, int64(pid), at.Add(-time.Hour)); err != nil {
 		t.Fatal(err)
 	}
 	aid, _ := identity.AccountIDFrom(accountUUID)
@@ -83,8 +93,8 @@ func runtimeService(p *pg.Pool, time *missionClock) i5.Service {
 	store := i5store.Store{Queryer: p}
 	content := contentstore.Store{Queryer: p}
 	privileges := commerceprivilege.Provider{Store: commerceprivilegestore.Store{}, Content: content}
-	materializer := &i5.MissionMaterializer{Store: store, Catalog: content, Observations: missioninputs.Reader{Heroes: characterstore.Store{Queryer: p}, Progression: store, Campaigns: campaignstore.Store{}, Privileges: privileges}}
-	return i5.Service{Runner: tx.Runner{DB: p}, Store: store, Content: content, Privileges: privileges, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}, Functions: i5.LevelFunctionAnnouncements{}, Missions: materializer, MissionTime: time, MissionFresh: p}
+	materializer := &i5.MissionMaterializer{Activity: content, Store: store, Catalog: content, Observations: missioninputs.Reader{Heroes: characterstore.Store{Queryer: p}, Progression: store, Campaigns: campaignstore.Store{}, Privileges: privileges, Spending: store, Books: bookskill.Service{Owner: bookstore.Store{}, Content: content}}}
+	return i5.Service{Runner: tx.Runner{DB: p}, Store: store, Content: content, Privileges: privileges, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}, Functions: i5.LevelFunctionAnnouncements{}, Directory: i4store.DirectoryLevelProjection{}, Backpack: store, Missions: materializer, MissionTime: time, MissionFresh: p}
 }
 
 func runtimeOperation(t *testing.T, at time.Time) operation.Context {

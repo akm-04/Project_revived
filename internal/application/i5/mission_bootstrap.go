@@ -42,6 +42,14 @@ func (m MissionBootstrap) OverlayMID1(ctx context.Context, q tx.Queryer, actor i
 	if err != nil {
 		return err
 	}
-	detail["160"] = MissionProjection(MissionView{Root: root, Instances: instances, Definitions: definitions}, at, 0)
+	view := MissionView{Root: root, Instances: instances, Definitions: definitions}
+	if m.Owner.Missions.Activity != nil {
+		activity, err := m.Owner.Missions.Activity.MissionActivityCatalogTx(ctx, q, revision)
+		if err != nil {
+			return err
+		}
+		view.Activity = activity
+	}
+	detail["160"] = MissionProjection(view, at, 0)
 	return nil
 }

@@ -4083,6 +4083,24 @@
       "migration": "migrations/00085_i9_4_mission_root.sql",
       "owner": "objective-core",
       "write_exceptions": []
+    },
+    "content_mission_activity_catalogs": {
+      "owner": "content-registry",
+      "allowed_query_owners": [
+        "content-registry"
+      ],
+      "allowed_read_paths": [
+        "sql/content/",
+        "internal/adapters/postgres/contentstore/",
+        "internal/adapters/postgres/contentqueries/"
+      ],
+      "allowed_write_paths": [
+        "sql/content/",
+        "internal/adapters/postgres/contentstore/",
+        "internal/adapters/postgres/contentqueries/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00087_i9_4_mission_chests.sql"
     }
   }
 }

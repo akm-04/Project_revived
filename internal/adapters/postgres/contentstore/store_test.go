@@ -83,8 +83,22 @@ func TestBundleQueriesUseExactRawBytes(t *testing.T) {
 	}{{s.InsertResources, contentqueries.InsertContentResources, b.ResourcesJSON(), 5557}, {s.InsertProgression, contentqueries.InsertContentPlayerProgression, b.ProgressionJSON(), 100}, {s.InsertFunctionGates, contentqueries.InsertContentFunctionGates, b.FunctionGatesJSON(), 99}, {s.InsertObjectives, contentqueries.InsertContentObjectives, b.ObjectivesJSON(), 476}, {s.InsertHeroCore, contentqueries.InsertContentHeroCore, b.HeroCoreJSON(), 568}, {s.InsertPetCore, contentqueries.InsertContentPetCore, b.PetCoreJSON(), 54}, {s.InsertPetAcquisition, contentqueries.InsertContentPetAcquisition, b.PetAcquisitionJSON(), 27}, {s.InsertPetProgression, contentqueries.InsertContentPetProgression, b.PetProgressionJSON(), 54}, {s.InsertEquipmentPrimitives, contentqueries.InsertContentEquipmentPrimitives, b.EquipmentPrimitivesJSON(), 1176}, {s.InsertHeroEquipment, contentqueries.InsertContentHeroEquipment, b.HeroEquipmentJSON(), 53280}, {s.InsertSuperEquipment, contentqueries.InsertContentSuperEquipment, b.SuperEquipmentJSON(), 84}, {s.InsertPetEquipment, contentqueries.InsertContentPetEquipment, b.PetEquipmentJSON(), 2592}, {s.InsertPetPromotionRestoration, contentqueries.InsertContentPetPromotionRestoration, b.PetPromotionRestorationJSON(), 73}, {s.InsertPractice, contentqueries.InsertContentPractice, b.PracticeJSON(), 1889}, {s.InsertAppearance, contentqueries.InsertContentAppearance, b.AppearanceJSON(), 542}, {s.InsertEmoticons, contentqueries.InsertContentEmoticons, b.EmoticonsJSON(), 85}}
 	for _, c := range cases {
 		q.values = []any{c.n}
+		q.n = 1
 		if got, err := c.call(ctx, q, b); err != nil || got != c.n {
 			t.Fatal(got, err)
+		}
+		if c.sql == contentqueries.InsertContentObjectives {
+			var payload struct {
+				Activity json.RawMessage `json:"activity_chests"`
+			}
+			if err := json.Unmarshal(c.raw, &payload); err != nil {
+				t.Fatal(err)
+			}
+			if q.sql != "INSERT INTO content_mission_activity_catalogs(revision_id,payload) VALUES($1,$2::jsonb)" || !reflect.DeepEqual(q.args, []any{b.RevisionID(), string(payload.Activity)}) {
+				t.Fatal("activity content input mismatch")
+			}
+			q.sql = q.calls[len(q.calls)-1]
+			q.args = q.callArgs[len(q.callArgs)-1]
 		}
 		if q.sql != c.sql || !reflect.DeepEqual(q.args, []any{b.RevisionID(), string(c.raw)}) {
 			t.Fatal("query input mismatch")
@@ -285,5 +299,20 @@ func TestHeroKindUsesExactRevisionAndTable(t *testing.T) {
 	}
 	if q.sql != contentqueries.ReadHeroTemplateKind || !reflect.DeepEqual(q.args, []any{revision, int64(12000001)}) {
 		t.Fatalf("Hero kind lookup not exact-revision qualified: sql=%q args=%v", q.sql, q.args)
+	}
+}
+
+func TestActivityReadDistinguishesOldRevisionFromMissingRequiredPayload(t *testing.T) {
+	q := &recording{values: []any{"", false}}
+	revision := "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+	if got, err := (Store{}).MissionActivityCatalogTx(context.Background(), q, revision); err != nil || got != nil {
+		t.Fatalf("legacy revision: %#v %v", got, err)
+	}
+	q.values = []any{"", true}
+	if _, err := (Store{}).MissionActivityCatalogTx(context.Background(), q, revision); err == nil {
+		t.Fatal("missing required payload accepted")
+	}
+	if _, err := (Store{}).MissionActivityCatalogTx(context.Background(), nil, revision); err == nil {
+		t.Fatal("nil reader accepted")
 	}
 }

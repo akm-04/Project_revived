@@ -44,12 +44,14 @@ type MissionObservations interface {
 }
 
 type MissionMaterializer struct {
+	Activity     MissionActivityCatalog
 	Store        MissionStore
 	Catalog      MissionCatalog
 	Observations MissionObservations
 }
 
 type MissionView struct {
+	Activity    *objective.ActivityCatalog
 	Root        objective.MissionRoot
 	Instances   []objective.Instance
 	Definitions []objective.MissionDefinition
@@ -138,7 +140,15 @@ func (m MissionMaterializer) MaterializeTx(ctx context.Context, t tx.Tx, scope M
 		}
 		return slices.Compare([]byte(a.GenerationID), []byte(b.GenerationID))
 	})
-	return MissionView{Root: root, Instances: instances, Definitions: definitions}, nil
+	view := MissionView{Root: root, Instances: instances, Definitions: definitions}
+	if m.Activity != nil {
+		activity, err := m.Activity.MissionActivityCatalogTx(ctx, t, scope.ContentRevision)
+		if err != nil {
+			return MissionView{}, err
+		}
+		view.Activity = activity
+	}
+	return view, nil
 }
 
 func missionOccurrence(id int64, generation string) string {
@@ -200,7 +210,7 @@ func (m MissionMaterializer) materializeOne(ctx context.Context, t tx.Tx, scope 
 		return objective.Instance{}, false, err
 	}
 	next := instance
-	if core.Strategy != objective.CommittedDeltaFact && definition.Presentation.DeferredUntil == "" {
+	if core.Strategy != objective.CommittedDeltaFact && m.bindingAvailable(definition) {
 		next, _, err = objective.ApplyFact(instance, core, objective.Fact{PlayerID: scope.PlayerID, SourceDomain: "objective-observation", SourceBusinessKey: missionOccurrence(instance.ObjectiveID, generation), Kind: core.AcceptedFactKind, Value: observation.Value}, scope.DecisionAt)
 		if err != nil {
 			return objective.Instance{}, false, err
@@ -212,4 +222,8 @@ func (m MissionMaterializer) materializeOne(ctx context.Context, t tx.Tx, scope 
 		err = m.Store.SaveObjectiveTx(ctx, t, next, instance.StateVersion)
 	}
 	return next, true, err
+}
+
+func (m MissionMaterializer) bindingAvailable(definition objective.MissionDefinition) bool {
+	return definition.Presentation.DeferredUntil == "" || m.Activity != nil && definition.Presentation.DeferredUntil == "I9-4B"
 }

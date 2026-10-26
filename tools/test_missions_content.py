@@ -4,7 +4,7 @@ from pathlib import Path
 import unittest
 
 import generate_builtin_content as gen
-from missions_content import build_missions, rewards
+from missions_content import build_missions, build_activity, rewards
 
 
 class MissionCompilerTests(unittest.TestCase):
@@ -40,6 +40,21 @@ class MissionCompilerTests(unittest.TestCase):
                 return rows if data == self.blobs['data/tables/mission.lua'].data else gen.parse_generated_lua_table(data)
             with self.subTest(column=column), self.assertRaises(ValueError):
                 build_missions(self.blobs, parse)
+
+    def test_activity_fixed_gifts_and_unqualified_fields(self):
+        activity = build_activity(self.blobs, gen.parse_generated_lua_table)
+        self.assertEqual([r['medal'] for r in activity['rules']], [30, 60, 90, 120, 150, 500, 1000])
+        gifts = {row['id']: row for row in activity['gifts']}
+        self.assertEqual((gifts[90080003]['vip_threshold'], gifts[90080003]['vip_bonus']), (6, 120))
+        self.assertIn(dict(Kind='STACK_ITEM', ItemID=50001979, Amount=1), gifts[90080005]['plan']['Lines'])
+        source = gen.parse_generated_lua_table(self.blobs['data/tables/gift.lua'].data)
+        for field, value in [('unreviewed_bonus', '1'), ('exp', '-1'), ('vip', '16'), ('item_nums', '1|2|3|4|5|6|7|8')]:
+            rows = copy.deepcopy(source)
+            next(r for r in rows if r['id'] == '90080003')[field] = value
+            def parse(data):
+                return rows if data == self.blobs['data/tables/gift.lua'].data else gen.parse_generated_lua_table(data)
+            with self.subTest(field=field), self.assertRaises(ValueError):
+                build_activity(self.blobs, parse)
 
     def test_reward_zero_is_not_fabricated(self):
         row = gen.parse_generated_lua_table(self.blobs['data/tables/mission.lua'].data)[0]

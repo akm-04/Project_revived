@@ -21,12 +21,17 @@ from pathlib import Path
 from typing import Any, Iterable
 
 SCHEMA_VERSION = 1
-COMPILER_VERSION = "i9-4a-mission-reconciliation"
+COMPILER_VERSION = "i9-4b-activity"
 PARSER_VERSION = "lua-generated-v18-guild-invite"
 EXPECTED_SOURCE_ARCHIVE_SHA256 = "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
 SOURCE_PREFIX = "app-assets/output/assets/src_64/"
 
 SOURCE_MANIFEST = [
+    ('data/tables/mission_reward_daily.lua', '4e7940f695e1b50f2d68c7c71430da388eeb01e4333f37c179157db64f7b7842', "I9_4B_ACTIVITY_SOURCE_BOUNDARY"),
+    ('data/tables/mission_reward_week.lua', '20986d20785af114b23ad7355bb3763dd0e7d8b93ecc678fd6ea8a30472e73d4', "I9_4B_ACTIVITY_SOURCE_BOUNDARY"),
+    ('app/windows/TaskWindow.lua', 'd518b80d3037924bf0eeb77542df2ddd01585253248b5f7dc562d3fad114f10c', "I9_4B_ACTIVITY_SOURCE_BOUNDARY"),
+    ('app/windows/GiftTipsWindow.lua', '834288f99b1379d45352e685cd5a576b6c8751feeaa574ddc3db2673844c3a2b', "I9_4B_ACTIVITY_SOURCE_BOUNDARY"),
+    ('app/windows/ThrowSandbagChooseWindow.lua', '8e23f602101027dd451ce60d589a354e4e9215df1d105404102a779e87ea3efc', "I9_4B_ACTIVITY_SOURCE_BOUNDARY"),
     ('data/tables/mission.lua', '337cb2a66ac6963e7d2e24dcc293df02d24fca8cbb6a40d838915f60ebc436bd', 'I9_4A_MISSION_SOURCE_BOUNDARY'),
     ('app/model/Task.lua', 'd454ae7cb1e28d95d366aae30ba88d83432c974415f263991af6c4190d54bee5', 'I9_4A_MISSION_SOURCE_BOUNDARY'),
     ('app/common/tables/MissionTable.lua', '1737d7eddc2e7dfa005e43b6105305b9c6d8227d00f47bdc99fb69b96430f577', 'I9_4A_MISSION_SOURCE_BOUNDARY'),
@@ -215,7 +220,7 @@ SOURCE_MANIFEST.append(('app/windows/WhiteAlbumWindow.lua','851a53f588b59d95cfe4
 
 ENABLED_CAPABILITIES = [
     "MISSION_CATALOG_I9_4A",
-    "SCALAR_MARCH_COIN_I9_4A",
+    "SCALAR_MARCH_COIN_I9_4A", "MISSION_ACTIVITY_I9_4B", "SCALAR_GUILD_COIN_I9_4B", "DODGE_TICKET_STACK_I9_4B",
     "SUMMON_GACHA_I9_3E",
     "CAMPAIGN_MODE_I9_3A",
     "COSMETIC_TITLE_CONDITION_I7C6",
@@ -930,7 +935,7 @@ def build_artifacts(blobs: dict[str, SourceBlob], archive_sha256: str) -> dict[s
         else:
             cls = "SCALAR_CURRENCY"
             status = "QUALIFIED" if name in economy_names else "SOURCE_KNOWN"
-            activation = "ENABLED_R4" if name in {"mana", "crystal", "arena_coin", "march_coin"} else "OWNER_REQUIRED"
+            activation = "ENABLED_R4" if name in {"mana", "crystal", "arena_coin", "march_coin", "guild_coin"} else "OWNER_REQUIRED"
         resources.append({
             "catalog_status": status,
             "class": cls,
@@ -1020,6 +1025,11 @@ def build_artifacts(blobs: dict[str, SourceBlob], archive_sha256: str) -> dict[s
             definition["definition_key"] = f"specialized:item:{item_id}"
             definition["settlement_activation"] = "FAIL_CLOSED"
             definition["specialized_owner"] = "HORCRUX_GENERATED_OWNER_REQUIRED"
+        elif item_type == 0 and item_id == 50001979:
+            if row.get("name") != "Dodge ticket" or stack != 9999 or row.get("gifts") != "0" or row.get("compose") != "0":
+                raise CompileError("Dodge ticket custody profile drift")
+            definition["reason"] = "DODGE_TICKET_STACK_ONLY_I9_4B"
+            enabled_stack += 1
         elif item_type == 0:
             fail_closed_unknown_type += 1
             definition["catalog_status"] = "PARTIAL"

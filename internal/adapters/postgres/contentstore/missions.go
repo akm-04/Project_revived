@@ -33,3 +33,29 @@ FROM gxb_content_objective_definitions d WHERE revision_id=$1 AND definition_rev
 	}
 	return definitions, nil
 }
+
+func (Store) MissionActivityCatalogTx(ctx context.Context, q tx.Queryer, revision string) (*objective.ActivityCatalog, error) {
+	if q == nil || len(revision) != 64 {
+		return nil, errors.New("content store: activity revision/queryer required")
+	}
+	var raw string
+	var required bool
+	if err := q.QueryRow(ctx, `SELECT COALESCE(a.payload::text,''),COALESCE(r.manifest->'capabilities' ? 'MISSION_ACTIVITY_I9_4B',false)
+ FROM gxb_content_revisions r LEFT JOIN content_mission_activity_catalogs a USING(revision_id) WHERE r.revision_id=$1`, revision).Scan(&raw, &required); err != nil {
+		return nil, err
+	}
+	if raw == "" {
+		if required {
+			return nil, errors.New("content store: required activity payload missing")
+		}
+		return nil, nil
+	}
+	var out objective.ActivityCatalog
+	if err := json.Unmarshal([]byte(raw), &out); err != nil {
+		return nil, err
+	}
+	if err := out.Validate(); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}

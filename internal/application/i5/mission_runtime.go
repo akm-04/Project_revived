@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"math"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -138,7 +139,7 @@ func MissionProjection(view MissionView, at time.Time, family objective.StockFam
 		}
 		return byFamily[f]
 	}
-	info := map[string]any{"day_huoyue": view.Root.DayHuoyue, "week_huoyue": view.Root.WeekHuoyue, "day_award": view.Root.DayAward, "week_award": view.Root.WeekAward}
+	info := map[string]any{"day_huoyue": view.Root.DayHuoyue, "week_huoyue": view.Root.WeekHuoyue, "day_award": claimFlags(view.Root.DayAward, 5), "week_award": claimFlags(view.Root.WeekAward, 2)}
 	out := map[string]any{"extra_info": map[string]any{"daily_left_time": max(int64(0), modes.DayBegins(view.Root.Day+1).Unix()-at.Unix()), "huoyue_info": info}}
 	if family != 0 {
 		out["mission_list"] = list(family)
@@ -149,6 +150,18 @@ func MissionProjection(view MissionView, at time.Time, family objective.StockFam
 			out[key] = partnerHooks
 		} else {
 			out[key] = list(f)
+		}
+	}
+	if view.Activity != nil {
+		for _, rule := range view.Activity.Rules {
+			points, claimed := view.Root.DayHuoyue, view.Root.DayAward
+			if rule.Period == "WEEK" {
+				points, claimed = view.Root.WeekHuoyue, view.Root.WeekAward
+			}
+			if points >= rule.Medal && !slices.Contains(claimed, rule.Index) {
+				marks[2701] = true
+				break
+			}
 		}
 	}
 	redmarkList := []int64{}
@@ -252,7 +265,7 @@ func (s Service) ClaimMission(ctx context.Context, actor identity.ActorContext, 
 		if err != nil {
 			return err
 		}
-		if !observation.GatePassed || definition.Presentation.DeferredUntil != "" || definition.Strategy == "TEMPORAL_ENTITLEMENT" && observation.Value < definition.Target {
+		if !observation.GatePassed || !s.Missions.bindingAvailable(definition) || definition.Strategy == "TEMPORAL_ENTITLEMENT" && observation.Value < definition.Target {
 			return ErrMissionRefused
 		}
 		next, err := objective.Claim(instance, scope.DecisionAt)

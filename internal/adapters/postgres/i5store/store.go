@@ -272,7 +272,7 @@ func (Store) SaveScalarTx(ctx context.Context, t tx.Tx, b economy.ScalarBalance,
 const crystalKey = "crystal"
 
 // CrystalSpentOnDayTx is the crystal total spent on a game day (I9_MODE_FOUNDATION_V1 MF4), read by daily missions 126/127.
-func (Store) CrystalSpentOnDayTx(ctx context.Context, t tx.Tx, pid identity.PlayerID, day int64) (int64, error) {
+func (Store) CrystalSpentOnDayTx(ctx context.Context, t tx.Queryer, pid identity.PlayerID, day int64) (int64, error) {
 	var spent int64
 	err := t.QueryRow(ctx, `SELECT spent FROM player_crystal_spend_days WHERE player_id=$1 AND game_day=$2`, int64(pid), day).Scan(&spent)
 	if noRows(err) {

@@ -104,7 +104,7 @@ func (f ObjectiveFacts) recordMission(ctx context.Context, t tx.Tx, op operation
 		if definition.Presentation.Condition == 105 && fact.Kind == "CAMPAIGN_CHALLENGE_WIN" {
 			consumerFact.Kind = definition.AcceptedFactKind
 		}
-		if definition.Strategy != "COMMITTED_DELTA" || definition.AcceptedFactKind != consumerFact.Kind || definition.Presentation.DeferredUntil != "" {
+		if definition.Strategy != "COMMITTED_DELTA" || definition.AcceptedFactKind != consumerFact.Kind || !f.Owner.Missions.bindingAvailable(definition) {
 			continue
 		}
 		core, err := definition.Definition()

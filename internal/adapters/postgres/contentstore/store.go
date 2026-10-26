@@ -66,7 +66,25 @@ func (Store) InsertObjectives(ctx context.Context, t tx.Tx, b registry.Bundle) (
 	}
 	var n int64
 	err := t.QueryRow(ctx, contentqueries.InsertContentObjectives, b.RevisionID(), string(b.ObjectivesJSON())).Scan(&n)
-	return n, err
+	if err != nil {
+		return 0, err
+	}
+	var data struct {
+		Activity json.RawMessage `json:"activity_chests"`
+	}
+	if err = json.Unmarshal(b.ObjectivesJSON(), &data); err != nil {
+		return 0, err
+	}
+	if len(data.Activity) > 0 && string(data.Activity) != "null" {
+		tag, err := t.Exec(ctx, `INSERT INTO content_mission_activity_catalogs(revision_id,payload) VALUES($1,$2::jsonb)`, b.RevisionID(), string(data.Activity))
+		if err != nil {
+			return 0, err
+		}
+		if tag.RowsAffected() != 1 {
+			return 0, errors.New("activity content insert failed")
+		}
+	}
+	return n, nil
 }
 func (Store) InsertHeroCore(ctx context.Context, t tx.Tx, b registry.Bundle) (int64, error) {
 	if t == nil {

@@ -10,7 +10,7 @@ func TestLoadGeneratedCatalog(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if got, want := c.RevisionID(), "5ca02bec78f825851fe6ec575977606a3280d15118f8c9900c7dcb66a204f62d"; got != want {
+	if got, want := c.RevisionID(), "aecc10b2c89b5a8e955e76bc057bf3d2f1671109d020633631097bd5ff2eacc8"; got != want {
 		t.Fatalf("revision id = %s, want %s", got, want)
 	}
 	if got, want := len(c.PlayerProgression.Rows), 100; got != want {
@@ -90,8 +90,26 @@ func TestSpecializedAndUnknownItemsFailClosed(t *testing.T) {
 			}
 		}
 	}
-	if type24 != 378 || type0 != 3 {
-		t.Fatalf("specialized/type0 counts = %d/%d, want 378/3", type24, type0)
+	if type24 != 378 || type0 != 2 {
+		t.Fatalf("specialized/type0 counts = %d/%d, want 378/2", type24, type0)
+	}
+}
+
+func TestActivityContentAndExactDodgeTicketBoundary(t *testing.T) {
+	c, err := Load()
+	if err != nil {
+		t.Fatal(err)
+	}
+	ticket, ok := c.ResourceByDefinitionKey("stack_item:50001979")
+	if !ok || ticket.Reason != "DODGE_TICKET_STACK_ONLY_I9_4B" || ticket.SettlementActivation == "FAIL_CLOSED" {
+		t.Fatalf("ticket: %#v", ticket)
+	}
+	if c.Objectives.ActivityChests == nil {
+		t.Fatal("missing activity content")
+	}
+	c.Objectives.ActivityChests = nil
+	if err := validateMissions(c.Objectives); err == nil {
+		t.Fatal("missing activity payload accepted")
 	}
 }
 

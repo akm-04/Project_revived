@@ -25,3 +25,35 @@ func TestMissionPartnerReadAndCommonHookHaveTheirOwnSourceShapes(t *testing.T) {
 		t.Fatal(hook)
 	}
 }
+
+func TestActivityFlagsAndReadyChestRedmark(t *testing.T) {
+	at := time.Unix(100000, 0).UTC()
+	root, err := objective.NewMissionRoot(100001, at)
+	if err != nil {
+		t.Fatal(err)
+	}
+	root.DayHuoyue = 30
+	root.WeekHuoyue = 500
+	view := MissionView{Root: root, Activity: &objective.ActivityCatalog{Rules: []objective.ActivityRule{{Period: "DAY", Index: 1, Medal: 30}, {Period: "WEEK", Index: 1, Medal: 500}}}}
+	marked := func() bool {
+		body := MissionProjection(view, at, 0)
+		marks := body["redmarks_"].(map[string]any)["27"].(map[string]any)["redmark_list"].([]int64)
+		return len(marks) == 1 && marks[0] == 2701
+	}
+	if !marked() {
+		t.Fatal("ready chest missing daily redmark")
+	}
+	view.Root.DayAward = []int64{1}
+	if !marked() {
+		t.Fatal("weekly chest missing daily redmark")
+	}
+	view.Root.WeekAward = []int64{1}
+	if marked() {
+		t.Fatal("claimed chest still marked")
+	}
+	info := MissionProjection(view, at, objective.Daily)["extra_info"].(map[string]any)["huoyue_info"].(map[string]any)
+	flags := info["day_award"].([]int64)
+	if len(flags) != 5 || flags[0] != 1 || flags[1] != 0 {
+		t.Fatalf("stock flags %v", flags)
+	}
+}

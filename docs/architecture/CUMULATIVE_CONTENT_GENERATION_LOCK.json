@@ -338,14 +338,22 @@
       "parser_version": "lua-generated-v18-guild-invite",
       "revision_id": "5ca02bec78f825851fe6ec575977606a3280d15118f8c9900c7dcb66a204f62d",
       "scope": "Correct campaign clear-count targets, pin VIP sweep quantities inside the mission definition, retain growth EXP/March Coin alternatives for claim-time selection, qualify March Coin scalar, and name unavailable commerce/source bindings. No mission runtime routes activated."
+    },
+    {
+      "ordinal": 48,
+      "stage": "I9-4B activity chests (working, unaccepted)",
+      "compiler_version": "i9-4b-activity",
+      "parser_version": "lua-generated-v18-guild-invite",
+      "revision_id": "aecc10b2c89b5a8e955e76bc057bf3d2f1671109d020633631097bd5ff2eacc8",
+      "scope": "Seven source chest rules and twelve fixed gifts; explicit VIP bonus policy, exact Dodge ticket custody, Guild Coin scalar. Existing mission definitions remain pinned."
     }
   ],
   "current": {
-    "ordinal": 47,
-    "stage": "I9-4A (Mission source reconciliation; runtime integration in progress)",
-    "compiler_version": "i9-4a-mission-reconciliation",
+    "ordinal": 48,
+    "stage": "I9-4B activity chests (working, unaccepted)",
+    "compiler_version": "i9-4b-activity",
     "parser_version": "lua-generated-v18-guild-invite",
-    "revision_id": "5ca02bec78f825851fe6ec575977606a3280d15118f8c9900c7dcb66a204f62d",
-    "scope": "Correct campaign clear-count targets, pin VIP sweep quantities inside the mission definition, retain growth EXP/March Coin alternatives for claim-time selection, qualify March Coin scalar, and name unavailable commerce/source bindings. No mission runtime routes activated."
+    "revision_id": "aecc10b2c89b5a8e955e76bc057bf3d2f1671109d020633631097bd5ff2eacc8",
+    "scope": "Seven source chest rules and twelve fixed gifts; explicit VIP bonus policy, exact Dodge ticket custody, Guild Coin scalar. Existing mission definitions remain pinned."
   }
 }

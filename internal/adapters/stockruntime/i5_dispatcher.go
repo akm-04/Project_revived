@@ -41,6 +41,7 @@ type SpiritBackpackProjector interface {
 	Backpack(context.Context, identity.ActorContext, operation.Context) (map[string]any, error)
 }
 type MissionServicePort interface {
+	ClaimActivityChest(context.Context, identity.ActorContext, string, int64, operation.Context) (map[string]any, error)
 	ReadMissions(context.Context, identity.ActorContext, objective.StockFamily, operation.Context) (map[string]any, error)
 	ClaimMission(context.Context, identity.ActorContext, int64, string, operation.Context) (appi5.ObjectiveClaimResult, error)
 }
@@ -160,6 +161,23 @@ func (d I5Dispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRequest
 		}
 		body := map[string]any{"awards": awards, "mail_list": map[string]any{"mail_list": wire, "total": got.Mail.Total, "new_mail_total": got.Mail.NewMailTotal}}
 		applySettlementProjection(body, got.Projection)
+		return okI5(body)
+	case 169, 170:
+		if d.Missions == nil {
+			return failI5(errors.New("mission runtime unavailable"))
+		}
+		index, err := requiredInt64(req.Envelope.Params, "index")
+		if err != nil {
+			return okI5(map[string]any{"error_code": int64(1)})
+		}
+		period := "DAY"
+		if req.Envelope.MID == 170 {
+			period = "WEEK"
+		}
+		body, err := d.Missions.ClaimActivityChest(ctx, actor, period, index, req.Envelope.Operation)
+		if err != nil {
+			return failI5(err)
+		}
 		return okI5(body)
 	case 160:
 		if d.Missions == nil {

@@ -9,6 +9,14 @@ func validateMissions(c ObjectiveCatalog) error {
 	if c.Status != "I9_4_MISSION_CATALOG" || len(c.Definitions) != 476 {
 		return errors.New("builtin content: mission profile drift")
 	}
+	if c.ActivityChests == nil {
+		return errors.New("builtin content: activity catalog missing")
+	}
+	if c.ActivityChests != nil {
+		if err := validateActivityCatalog(*c.ActivityChests); err != nil {
+			return err
+		}
+	}
 	byID := make(map[int64]ObjectiveDefinition, len(c.Definitions))
 	counts := map[int64]int{}
 	lastID := int64(0)
@@ -113,6 +121,39 @@ func validateMissionRow(row ObjectiveDefinition) error {
 	}
 	if row.Presentation.VIPSweepReward && (kind != 113 || row.Presentation.VIPSweepItemID != 50001013 || len(row.Presentation.VIPSweepByLevel) != 16) {
 		return errors.New("invalid mission VIP profile")
+	}
+	return nil
+}
+
+func validateActivityCatalog(c ActivityCatalog) error {
+	if len(c.Rules) != 7 || len(c.Gifts) != 12 {
+		return errors.New("invalid activity content profile")
+	}
+	gifts := map[int64]bool{}
+	rules := map[string]bool{}
+	for _, g := range c.Gifts {
+		if g.ID <= 0 || gifts[g.ID] || g.Plan.Source.PolicyVersion != "I9_ACTIVITY_CHESTS_V1" || len(g.Plan.Lines) == 0 || g.VIPThreshold < 0 || g.VIPThreshold > 15 || g.VIPBonus < 0 {
+			return errors.New("invalid activity gift content")
+		}
+		gifts[g.ID] = true
+		for _, line := range g.Plan.Lines {
+			if line.Amount <= 0 {
+				return errors.New("invalid activity gift amount")
+			}
+		}
+	}
+	for _, r := range c.Rules {
+		limit := int64(5)
+		if r.Period == "WEEK" {
+			limit = 2
+		} else if r.Period != "DAY" {
+			return errors.New("invalid activity period")
+		}
+		key := fmt.Sprintf("%s:%d", r.Period, r.Index)
+		if r.Index < 1 || r.Index > limit || r.Medal <= 0 || rules[key] || !gifts[r.GiftEXP] || !gifts[r.GiftMarch] {
+			return errors.New("invalid activity rule content")
+		}
+		rules[key] = true
 	}
 	return nil
 }

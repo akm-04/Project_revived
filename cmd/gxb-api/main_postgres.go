@@ -242,7 +242,7 @@ func main() {
 		playerdisplay.CatalogOriginRoute{Family: "title", First: 100024, Last: 100025, Owner: playerdisplay.ProgressTitleOrigins{Owner: "BookSkill", TitleType: 6, Content: contentDB, Progress: bookSvc}},
 		playerdisplay.CatalogOriginRoute{Family: "title", First: 100026, Last: 100028, Owner: playerdisplay.ProgressTitleOrigins{Owner: "Dormhouse", TitleType: 7, Content: contentDB, Progress: dormSvc}})
 
-	i5svc.Missions = &appi5.MissionMaterializer{Store: i5db, Catalog: contentDB, Observations: missioninputs.Reader{Heroes: heroDB, Progression: i5db, Campaigns: campaignstore.Store{}, Books: bookSvc, Privileges: privileges}}
+	i5svc.Missions = &appi5.MissionMaterializer{Activity: contentDB, Store: i5db, Catalog: contentDB, Observations: missioninputs.Reader{Spending: i5db, Heroes: heroDB, Progression: i5db, Campaigns: campaignstore.Store{}, Books: bookSvc, Privileges: privileges}}
 	i5svc.MissionTime = postgres.AuthoritativeTime{Queryer: pool}
 	i5svc.MissionFresh = pool
 	librarySvc.Roster = characterstore.HeroBootstrapProjection{Content: contentDB, Library: librarySvc, Dorm: dormSvc, Book: bookSvc, Course: courseSvc, Inscription: inscriptionSvc, Element: elementSvc, Spirit: spiritSvc, Evolution: evolutionSvc}
@@ -530,7 +530,7 @@ func main() {
 		log.Fatalf("Player display startup: %v", e)
 	}
 	i5d := stockruntime.I5Dispatcher{Authority: authority, Service: i5svc, Missions: i5svc, SpiritBackpack: stockruntime.SpiritBackpackProjection{Service: spiritSvc}}
-	for _, mid := range []uint16{26, 81, 160, 161, 230, 368, 369, 370, 2736, 2865, 2866} {
+	for _, mid := range []uint16{26, 81, 160, 161, 169, 170, 230, 368, 369, 370, 2736, 2865, 2866} {
 		mustRegister(mid, i5d)
 	}
 	mediaHandler, err := registerProfileMedia(ctx, pool, runner, authority, receipts, contentDB, router, cfg.ProfileMediaRoot, cfg.ProfileMediaPublicOrigin)

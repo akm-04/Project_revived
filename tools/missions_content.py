@@ -131,4 +131,45 @@ def build_missions(blobs, parse):
     if sorted(row['level'] for row in vip) != list(range(16)):
         raise ValueError('Mission VIP profile drift')
     by_id[10015]['presentation']['vip_sweep_by_level'] = [row['sweep_card'] for row in sorted(vip, key=lambda row: row['level'])]
-    return dict(schema_version=1, status='I9_4_MISSION_CATALOG', definitions=definitions)
+    return dict(schema_version=1, status='I9_4_MISSION_CATALOG', definitions=definitions, activity_chests=build_activity(blobs, parse))
+
+
+def build_activity(blobs, parse):
+    gifts = {int(row['id']): row for row in parse(blobs['data/tables/gift.lua'].data)}
+    rules, needed = [], set()
+    for period, path, expected in [('DAY', 'mission_reward_daily.lua', [30, 60, 90, 120, 150]),
+                                    ('WEEK', 'mission_reward_week.lua', [500, 1000])]:
+        rows = sorted(parse(blobs['data/tables/' + path].data), key=lambda row: int(row['id']))
+        if [int(row['id']) for row in rows] != list(range(1, len(expected) + 1)) or [int(row['medal']) for row in rows] != expected:
+            raise ValueError('Activity chest source profile drift')
+        for row in rows:
+            first, second = (int(row['gift_exp']), int(row['gift_march_coin'])) if period == 'DAY' else (int(row['gift']), int(row['gift']))
+            needed.update((first, second))
+            rules.append(dict(period=period, index=int(row['id']), medal=int(row['medal']), gift_exp=first, gift_march=second))
+    definitions = []
+    allowed = {'id', 'name', 'desc', 'items', 'item_nums', 'exp', 'march_coin', 'badge', 'vip', 'ex_badge'}
+    for gift_id in sorted(needed):
+        row = gifts[gift_id]
+        if any(value not in ('', '0') for key, value in row.items() if key not in allowed):
+            raise ValueError('Unqualified activity gift field')
+        lines = []
+        items, counts = numbers(row['items']), numbers(row['item_nums'])
+        if len(items) != len(counts) or any(value <= 0 for value in items + counts):
+            raise ValueError('Activity gift item vector drift')
+        lines.extend(dict(Kind='STACK_ITEM', ItemID=item, Amount=count) for item, count in zip(items, counts))
+        for column, kind, resource in [('exp', 'PLAYER_EXP', None), ('march_coin', 'SCALAR_CURRENCY', 'march_coin'), ('badge', 'SCALAR_CURRENCY', 'guild_coin')]:
+            value = int(row[column] or 0)
+            if value < 0:
+                raise ValueError('Negative activity reward')
+            if value:
+                line = dict(Kind=kind, Amount=value)
+                if resource:
+                    line['ResourceKey'] = resource
+                lines.append(line)
+        threshold, bonus = int(row['vip'] or 0), int(row['ex_badge'] or 0)
+        if threshold < 0 or threshold > 15 or bonus < 0 or bonus and threshold == 0:
+            raise ValueError('Activity gift VIP profile drift')
+        definitions.append(dict(id=gift_id, plan=dict(Source=dict(PolicyVersion='I9_ACTIVITY_CHESTS_V1'), Lines=lines), vip_threshold=threshold, vip_bonus=bonus))
+    if len(definitions) != 12:
+        raise ValueError('Activity fixed gift count drift')
+    return dict(rules=rules, gifts=definitions)

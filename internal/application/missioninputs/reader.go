@@ -10,6 +10,7 @@ import (
 	"gxb.local/backend/v2/internal/domain/campaign"
 	"gxb.local/backend/v2/internal/domain/character"
 	"gxb.local/backend/v2/internal/domain/identity"
+	"gxb.local/backend/v2/internal/domain/modes"
 	"gxb.local/backend/v2/internal/domain/objective"
 	"gxb.local/backend/v2/internal/domain/player"
 	"gxb.local/backend/v2/internal/foundation/tx"
@@ -28,7 +29,11 @@ type Books interface {
 	BookInputsTx(context.Context, tx.Queryer, bookskill.InputScope) (bookskill.Inputs, error)
 }
 
+type CrystalSpending interface {
+	CrystalSpentOnDayTx(context.Context, tx.Queryer, identity.PlayerID, int64) (int64, error)
+}
 type Reader struct {
+	Spending    CrystalSpending
 	Heroes      Heroes
 	Progression Progression
 	Campaigns   Campaigns
@@ -57,11 +62,19 @@ func (r Reader) ObserveMissionTx(ctx context.Context, q tx.Queryer, scope i5.Mis
 		return i5.MissionObservation{}, err
 	}
 	out := i5.MissionObservation{GatePassed: true}
-	if definition.Strategy == "COMMITTED_DELTA" || definition.Presentation.DeferredUntil != "" {
+	if definition.Strategy == "COMMITTED_DELTA" || definition.Presentation.DeferredUntil != "" && !(definition.Presentation.DeferredUntil == "I9-4B" && r.Spending != nil) {
 		return out, nil
 	}
 	kind, parameters := definition.Presentation.Condition, definition.Presentation.Parameters
 	switch {
+	case kind == 126 || kind == 127:
+		if r.Spending == nil {
+			return out, errors.New("mission spend reader unavailable")
+		}
+		out.Value, err = r.Spending.CrystalSpentOnDayTx(ctx, q, scope.PlayerID, modes.Day(scope.DecisionAt))
+		if err != nil {
+			return out, err
+		}
 	case kind == 15:
 		if r.Campaigns == nil {
 			return out, errors.New("mission campaign reader unavailable")
