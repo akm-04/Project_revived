@@ -70,6 +70,9 @@ func (s Service) signInProjection(ctx context.Context, q tx.Queryer, root object
 	if err != nil {
 		return nil, err
 	}
+	if root.Count > int64(len(month.Awards)) {
+		return nil, errors.New("sign-in count exceeds pinned calendar")
+	}
 	return map[string]any{"awards": month.Awards, "is_signed": root.Signed, "sign_times": root.Count, "month": month.Month, "partner_id": month.PartnerID, "is_skin": month.IsSkin}, nil
 }
 func (s Service) ReadSignIn(ctx context.Context, actor identity.ActorContext, op operation.Context) (map[string]any, error) {
@@ -134,7 +137,7 @@ func (s Service) ClaimSignIn(ctx context.Context, actor identity.ActorContext, o
 				return &receipt.ConflictError{Identity: id}
 			}
 			replay = true
-			return json.Unmarshal(prior.ResultPayload, &out)
+			return decodeSignInResult(prior, id, fingerprint, &out)
 		}
 		if s.SignIn.Heroes != nil {
 			if err := s.SignIn.Heroes.LockStoryRosterTx(ctx, tr.Tx, actor.PlayerID); err != nil {
@@ -233,7 +236,7 @@ func (s Service) ClaimSignIn(ctx context.Context, actor identity.ActorContext, o
 		if !ok {
 			return nil, errors.New("sign-in recovery evidence missing")
 		}
-		if err = json.Unmarshal(record.ResultPayload, &out); err != nil {
+		if err = decodeSignInResult(record, id, fingerprint, &out); err != nil {
 			return nil, err
 		}
 		replay = true
@@ -252,6 +255,19 @@ func (s Service) ClaimSignIn(ctx context.Context, actor identity.ActorContext, o
 		}
 	}
 	return body, nil
+}
+
+func decodeSignInResult(r receipt.Receipt, id receipt.Identity, fp [32]byte, out *signInResult) error {
+	if r.Validate() != nil || r.Identity != id || r.RequestFingerprint != fp || r.OperationClass != "I5_OBJECTIVE" || r.ResultSchema != "gxb.i5.sign-in.v1" {
+		return errors.New("invalid sign-in receipt")
+	}
+	if err := json.Unmarshal(r.ResultPayload, out); err != nil {
+		return err
+	}
+	if out.Award == nil || out.Count < 1 || out.Count > 31 || out.Signed < 1 || out.Signed > 2 {
+		return errors.New("invalid sign-in receipt result")
+	}
+	return nil
 }
 
 func bindContentRevisionForSign(op operation.Context, revision string) (operation.Context, error) {
