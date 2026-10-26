@@ -354,6 +354,8 @@ func inactiveFailures(ctx context.Context, databaseURL, accountUID string, repor
 	if len(mids) == 0 {
 		return failures, nil
 	}
+	// The API journal flushes in batches every 250 ms (D46), so rows for the last replies may not be written yet.
+	time.Sleep(time.Second)
 	connection, err := pgx.Connect(ctx, databaseURL)
 	if err != nil {
 		return failures, err
