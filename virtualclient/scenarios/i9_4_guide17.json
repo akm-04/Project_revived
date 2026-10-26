@@ -1,0 +1,23 @@
+{
+ "name": "i9_4_guide17",
+ "level": 7,
+ "steps": [
+  "wait:5",
+  "lua:local g=xyd.WindowManager.get():getWindow('guide_new') if not g or g.nowFuncID~=17 or g.nowGuideID~=10901401 then error('guide17-mission-'..tostring(g and g.nowGuideID)) end local function hit(g,n) local b=n:getCascadeBoundingBox() local o=n:getParent():convertToWorldSpace(cc.p(b.x,b.y)) for i=1,9 do for j=1,9 do local x,y=o.x+b.width*i/10,o.y+b.height*j/10 if g:isTouchInContent(x,y) then return x,y end end end error('guide17-no-hole-point-'..g.nowGuideID) end __vc.tap(hit(g,xyd.WindowManager.get():getWindow('main_scene_bottom'):nodeByName('mission')))",
+  "wait:5",
+  "lua:local g=xyd.WindowManager.get():getWindow('guide_new') if not g or g.nowFuncID~=17 or g.nowGuideID~=10901402 then error('guide17-grow-'..tostring(g and g.nowGuideID)) end local x,y=g.content_:getPositionX(),g.content_:getPositionY() if not g:isTouchInContent(x,y) then error('guide17-grow-hole') end __vc.tap(x,y) local w=xyd.WindowManager.get():getWindow('task') w.task:setCurTaskType(xyd.TaskType.GROW) w.task:loadTaskByType(nil, function() w:updateRight() end)",
+  "wait:5",
+  "lua:local g=xyd.WindowManager.get():getWindow('guide_new') if not g or g.nowFuncID~=17 or g.nowGuideID~=10901403 then error('guide17-final-'..tostring(g and g.nowGuideID)) end local v=cc.Director:getInstance():getVisibleSize() __vc.tap(g.content_:getPositionX()+(v.width-xyd.STAGE_WIDTH)/2,g.content_:getPositionY()+(v.height-xyd.STAGE_HEIGHT)/2)",
+  "wait:5",
+  "lua:if xyd.WindowManager.get():getWindow('guide_new') then error('guide17-not-completed') end",
+  "relogin",
+  "wait:5",
+  "lua:if not xyd.selfPlayer.guideFuncList['17'] or xyd.selfPlayer.guideFuncList['17']==0 then error('guide17-not-persisted') end"
+ ],
+ "settle_seconds": 5,
+ "expect_ok": [
+  2736,
+  2865
+ ],
+ "note": "Growth tab: the VC lays the task sidebar out off-screen, so step 10901402 taps the guide hole and runs the stock sidebar ended-callback body (TaskWindow.onRegisterButton). Steps 10901401/10901403 are real taps."
+}
