@@ -10,6 +10,20 @@
   ],
   "original_algorithm": "UNKNOWN; exact stock constants and preview coefficients retained separately",
   "parameters": {
+    "initial_sp": 50,
+    "drink_item_id": 50001002,
+    "diary_limit": 50,
+    "max_combat_crew": 5,
+    "bonus_level": 42,
+    "bonus_min": 20,
+    "bonus_max": 40,
+    "bonus_per_day": 1,
+    "rival_campaign_type": 6,
+    "rival_battle_id": 113001,
+    "attempt_lifetime_seconds": 315360000,
+    "exclude_sx_scrolls": true
+  },
+  "notes": {
     "initial_sp": "natural_cap_on_first_access_only",
     "sp_initialization": "I5 owner lazy initialization for both new and existing players; no reset on load",
     "event_rate_policy": "source rate plus trait 2 chest increment or trait 4 rival increment; clamp at 100; zero-rate districts remain zero",

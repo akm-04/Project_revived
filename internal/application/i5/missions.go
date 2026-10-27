@@ -237,5 +237,5 @@ func (m MissionMaterializer) bindingAvailable(definition objective.MissionDefini
 	// Old daily instances retain their definition/reward revision when a producer ships.
 	return definition.Presentation.DeferredUntil == "" ||
 		m.Activity != nil && definition.Presentation.DeferredUntil == "I9-4B" ||
-		definition.Presentation.DeferredUntil == "I9-5" && definition.AcceptedFactKind == "MARCH_FINISHED"
+		definition.Presentation.DeferredUntil == "I9-5" && (definition.AcceptedFactKind == "MARCH_FINISHED" || definition.AcceptedFactKind == "WORKPLACE_TEAM_SENT")
 }

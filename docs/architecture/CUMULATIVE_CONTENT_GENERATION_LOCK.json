@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "status": "CURRENT_CUMULATIVE_CONTENT_GENERATION_LOCK_I9_3_CLOSE",
+  "status": "CURRENT_CUMULATIVE_CONTENT_GENERATION_LOCK_I9_5B",
   "rule": "Historical validators keep their phase-specific semantic invariants. In cumulative/current mode they may accept only an explicitly registered successor compiler generation at or after their baseline. New generations are append-only review events; registering a generation does not waive capability/count/source/migration/ownership assertions.",
   "generations": [
     {
@@ -378,14 +378,22 @@
       "parser_version": "lua-generated-v18-guild-invite",
       "revision_id": "628b0036830f7432adc96d9f908d3e383efd3d8c7a33e349e9a2e769da81a98e",
       "scope": "Source Champion catalog and labelled reconstruction policy; existing catalogs unchanged."
+    },
+    {
+      "ordinal": 53,
+      "stage": "I9-5B Work Place",
+      "compiler_version": "i9-5b-workplace",
+      "parser_version": "lua-generated-v18-guild-invite",
+      "revision_id": "7db76b6aa867177425223bac75b4d5dfb4a2310d94f45f0afe99718cf82498cd",
+      "scope": "Current district jobs, I5 workplace_sp and labelled automatic-event policy; D257 legacy supersession."
     }
   ],
   "current": {
-    "ordinal": 52,
-    "stage": "I9-5A Champion March",
-    "compiler_version": "i9-5a-march",
+    "ordinal": 53,
+    "stage": "I9-5B Work Place",
+    "compiler_version": "i9-5b-workplace",
     "parser_version": "lua-generated-v18-guild-invite",
-    "revision_id": "628b0036830f7432adc96d9f908d3e383efd3d8c7a33e349e9a2e769da81a98e",
-    "scope": "Source Champion catalog and labelled reconstruction policy; existing catalogs unchanged."
+    "revision_id": "7db76b6aa867177425223bac75b4d5dfb4a2310d94f45f0afe99718cf82498cd",
+    "scope": "Current district jobs, I5 workplace_sp and labelled automatic-event policy; D257 legacy supersession."
   }
 }

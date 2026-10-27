@@ -2013,16 +2013,16 @@
    "family": "WORKPLACE_TREASURE",
    "disposition": "ACTIVE",
    "target": "I9-5",
-   "v2": "unimplemented",
+   "v2": "workplace_i9_5b",
    "v1": null
   },
   {
    "mid": 529,
    "name": "TREASURE_BUY_SP",
    "family": "WORKPLACE_TREASURE",
-   "disposition": "ACTIVE",
-   "target": "I9-5",
-   "v2": "unimplemented",
+   "disposition": "INACTIVE_SUPERSEDED",
+   "target": null,
+   "v2": "inactive_d257_legacy_manual_raid",
    "v1": null
   },
   {
@@ -2031,7 +2031,7 @@
    "family": "WORKPLACE_TREASURE",
    "disposition": "ACTIVE",
    "target": "I9-5",
-   "v2": "unimplemented",
+   "v2": "workplace_i9_5b",
    "v1": "STATE_BACKED"
   },
   {
@@ -2040,7 +2040,7 @@
    "family": "WORKPLACE_TREASURE",
    "disposition": "ACTIVE",
    "target": "I9-5",
-   "v2": "unimplemented",
+   "v2": "workplace_i9_5b",
    "v1": null
   },
   {
@@ -2049,7 +2049,7 @@
    "family": "WORKPLACE_TREASURE",
    "disposition": "ACTIVE",
    "target": "I9-5",
-   "v2": "unimplemented",
+   "v2": "workplace_i9_5b",
    "v1": null
   },
   {
@@ -2058,61 +2058,70 @@
    "family": "WORKPLACE_TREASURE",
    "disposition": "ACTIVE",
    "target": "I9-5",
-   "v2": "unimplemented",
+   "v2": "workplace_i9_5b",
    "v1": null
   },
   {
    "mid": 534,
    "name": "TREASURE_LOAD_MATCH_INFO",
    "family": "WORKPLACE_TREASURE",
-   "disposition": "ACTIVE",
-   "target": "I9-5",
-   "v2": "unimplemented",
+   "disposition": "INACTIVE_SUPERSEDED",
+   "target": null,
+   "v2": "inactive_d257_legacy_manual_raid",
+   "v1": null
+  },
+  {
+   "mid": 535,
+   "name": "TREASURE_SAVE_BATTLE_RESULT",
+   "family": "WORKPLACE_TREASURE",
+   "disposition": "INACTIVE_SUPERSEDED",
+   "target": null,
+   "v2": "inactive_d257_legacy_manual_raid",
    "v1": null
   },
   {
    "mid": 536,
    "name": "TREASURE_GET_BATTLE_REPORT",
    "family": "WORKPLACE_TREASURE",
-   "disposition": "ACTIVE",
-   "target": "I9-5",
-   "v2": "unimplemented",
+   "disposition": "INACTIVE_SUPERSEDED",
+   "target": null,
+   "v2": "inactive_d257_legacy_manual_raid",
    "v1": null
   },
   {
    "mid": 537,
    "name": "TREASURE_GET_BATTLE_RECORD",
    "family": "WORKPLACE_TREASURE",
-   "disposition": "ACTIVE",
-   "target": "I9-5",
-   "v2": "unimplemented",
+   "disposition": "INACTIVE_SUPERSEDED",
+   "target": null,
+   "v2": "inactive_d257_legacy_manual_raid",
    "v1": null
   },
   {
    "mid": 538,
    "name": "TREASURE_LOAD_ALL_INFO",
    "family": "WORKPLACE_TREASURE",
-   "disposition": "ACTIVE",
-   "target": "I9-5",
-   "v2": "unimplemented",
+   "disposition": "INACTIVE_SUPERSEDED",
+   "target": null,
+   "v2": "inactive_d257_legacy_manual_raid",
    "v1": null
   },
   {
    "mid": 539,
    "name": "TREASURE_GET_PARTNERS",
    "family": "WORKPLACE_TREASURE",
-   "disposition": "ACTIVE",
-   "target": "I9-5",
-   "v2": "unimplemented",
+   "disposition": "INACTIVE_SUPERSEDED",
+   "target": null,
+   "v2": "inactive_d257_legacy_manual_raid",
    "v1": null
   },
   {
    "mid": 540,
    "name": "TREASURE_START_FIGHT",
    "family": "WORKPLACE_TREASURE",
-   "disposition": "ACTIVE",
-   "target": "I9-5",
-   "v2": "unimplemented",
+   "disposition": "INACTIVE_SUPERSEDED",
+   "target": null,
+   "v2": "inactive_d257_legacy_manual_raid",
    "v1": null
   },
   {

@@ -347,6 +347,11 @@ func main() {
 	ranking := stockruntime.RankingDispatcher{Authority: authority, Service: boardRanking, Trophy: achievements}
 	if fightReady {
 		topFloor := canonicalTopFloor(pool, runner, contentDB, i5db, i5svc, privileges, fight, owners)
+		workplace := canonicalWorkplace(pool, runner, contentDB, i5db, i5svc, heroSvc, fight, topFloor)
+		for _, mid := range stockruntime.WorkplaceMIDs {
+			mustRegister(mid, observing(authority, achievements, "Hero", stockruntime.WorkplaceDispatcher{Authority: authority, Service: workplace}))
+		}
+
 		march := canonicalMarch(pool, runner, contentDB, i5db, i5svc, heroSvc, fight, topFloor)
 		for _, mid := range stockruntime.MarchMIDs {
 			mustRegister(mid, observing(authority, achievements, "Hero", stockruntime.MarchDispatcher{Authority: authority, Service: march}))

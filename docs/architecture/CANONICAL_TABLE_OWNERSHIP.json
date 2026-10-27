@@ -4189,6 +4189,34 @@
         "internal/adapters/postgres/marchstore/"
       ],
       "write_exceptions": []
+    },
+    "content_workplace_catalogs": {
+      "owner": "content-registry",
+      "migration": "migrations/00091_i9_5b_workplace.sql",
+      "allowed_query_owners": [
+        "content-registry"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/contentstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/contentstore/"
+      ],
+      "write_exceptions": []
+    },
+    "workplace_players": {
+      "owner": "workplace",
+      "migration": "migrations/00091_i9_5b_workplace.sql",
+      "allowed_query_owners": [
+        "workplace"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/workplacestore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/workplacestore/"
+      ],
+      "write_exceptions": []
     }
   }
 }

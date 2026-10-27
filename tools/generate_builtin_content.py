@@ -21,7 +21,7 @@ from pathlib import Path
 from typing import Any, Iterable
 
 SCHEMA_VERSION = 1
-COMPILER_VERSION = "i9-5a-march"
+COMPILER_VERSION = "i9-5b-workplace"
 PARSER_VERSION = "lua-generated-v18-guild-invite"
 EXPECTED_SOURCE_ARCHIVE_SHA256 = "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
 SOURCE_PREFIX = "app-assets/output/assets/src_64/"
@@ -237,7 +237,7 @@ ENABLED_CAPABILITIES = [
     "SCALAR_MARCH_COIN_I9_4A", "MISSION_ACTIVITY_I9_4B", "MONTHLY_SIGNIN_I9_4C", "AWAKENING_MISSIONS_I9_4D", "SCALAR_GUILD_COIN_I9_4B", "DODGE_TICKET_STACK_I9_4B",
     "SUMMON_GACHA_I9_3E",
     "CAMPAIGN_MODE_I9_3A",
-    "CHAMPION_MARCH_I9_5A",
+    "CHAMPION_MARCH_I9_5A", "WORKPLACE_I9_5B",
     "COSMETIC_TITLE_CONDITION_I7C6",
     "ACHIEVEMENT_CATALOG_I7C4FA",
     "CHAMPIONS_LEAGUE_I7C5F",
@@ -443,6 +443,15 @@ SOURCE_MANIFEST.append(('data/tables/march_advance.lua', 'efd627223ba3e7777a90f0
 SOURCE_MANIFEST.append(('data/tables/march_recommend_hero.lua', 'ed4dd7fbb6fa11f97b31f7408e62d4510e4052eab5d803e62e67193b6eced3a9', 'I9_5A_MARCH_SOURCE_BOUNDARY'))
 
 from campaign_content import build_campaign
+SOURCE_MANIFEST.append(('data/tables/treasure_location.lua', '809c1a781a95448c8b79e2cc9264dc4a1b166ea9d34c628b6fdcddae2436ff68', 'I9_5B_WORKPLACE_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/treasure_type.lua', '99830d9e6b0c978ce9cb0d6894b83641d0d06b763fd4252bb3a18f9fa23c4390', 'I9_5B_WORKPLACE_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/treasure_skill.lua', 'aaccec7b7555b7e4361fe9cd2bb3c204eb02be50ff101da7b9c9c9d4982f485a', 'I9_5B_WORKPLACE_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('app/model/Treasure.lua', 'db53340bae6cfdaa95f660340ed532286b2ee29564b138302256785d878ae2b6', 'I9_5B_WORKPLACE_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('app/windows/TreasureWindow.lua', '1d3d795cc5c60d8011c9511b9d5554917e45465c919d4c65747423ecd815d6c0', 'I9_5B_WORKPLACE_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('app/windows/TreasurePrepareWindow.lua', 'c4fb7ebc597686cc0ee5e1412cf90b39a7eec2408e10e07af32420de815e08e9', 'I9_5B_WORKPLACE_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('app/windows/TreasureRewardWindow.lua', 'e4dab2cf5caa25baff80f0c5b195772877a453e13145941f7b5b6ca132d76d38', 'I9_5B_WORKPLACE_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('app/windows/TreasureDiaryWindow.lua', 'aa01854c16b0de8c49d9b08d99529b223b83910d1f0b4f62bcedde36f923bc4a', 'I9_5B_WORKPLACE_SOURCE_BOUNDARY'))
+from workplace_content import build_workplace
 from march_content import build_march
 from summon_content import build_summon
 from awakening_content import build_awakening
@@ -995,6 +1004,7 @@ def build_artifacts(blobs: dict[str, SourceBlob], archive_sha256: str) -> dict[s
         ("energy", misc_int("energy_incr_time"), "PLAYER_LEVEL_ENERGY", None, "QUALIFIED", "ENABLED_R5"),
         ("spirit_energy", misc_int("spirit_energy_minute"), "STATIC", misc_int("spirit_energy_up_limit"), "QUALIFIED", "ENABLED_R5"),
         ("skill_point", misc_int("skill_point_incr_time"), "VIP_PLUS_MONTHLY_PRIVILEGE", None, "QUALIFIED", "ENABLED_R5"),
+        ("workplace_sp", misc_int("treasure_sp_interval"), "STATIC", misc_int("treasure_sp_limit"), "QUALIFIED", "ENABLED_R5"),
         ("invitation", misc_int("invitation_incr_time"), "UNRESOLVED", None, "PARTIAL", "FAIL_CLOSED"),
     ]
     for name, seconds, cap_rule, static_cap, status, activation in temporal_defs:
@@ -2265,6 +2275,7 @@ def build_artifacts(blobs: dict[str, SourceBlob], archive_sha256: str) -> dict[s
     from dorm_content import build_dorm
     dorm_artifact=build_dorm(blobs,parse_generated_lua_table,pipe_ints,hero_artifact["templates"],partner_keys,partner_rows,super_keys,super_rows,indexed_field,items,CompileError)
     artifacts = {
+        "workplace_catalog.json":build_workplace(blobs,parse_generated_lua_table,parse_base64_indexed_lua_table,indexed_field,resources),
         "march_catalog.json":build_march(blobs,parse_generated_lua_table,parse_base64_indexed_lua_table,indexed_field,resources),
         "campaign_catalog.json":build_campaign(blobs,parse_generated_lua_table,parse_base64_indexed_lua_table,indexed_field),
         "summon_catalog.json":build_summon(blobs,parse_generated_lua_table,parse_base64_indexed_lua_table,indexed_field),
