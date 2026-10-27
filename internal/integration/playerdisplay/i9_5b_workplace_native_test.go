@@ -22,6 +22,7 @@ import (
 	cd "gxb.local/backend/v2/internal/domain/combat"
 	"gxb.local/backend/v2/internal/domain/identity"
 	d "gxb.local/backend/v2/internal/domain/workplace"
+	"gxb.local/backend/v2/internal/foundation/changes"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"sync"
 	"testing"
@@ -58,6 +59,7 @@ func workplaceOperation(q d.Quote, chests int, rival bool, ordinal uint64) opera
 	}
 }
 func TestI9_5BWorkplaceNativeLifecycle(t *testing.T) {
+	ctx, tracked := changes.Track(ctx)
 	p := pool(t)
 	a, revision := bornActor(t, p), installed(t, p)
 	clock := &workplaceTime{at: time.Now().UTC().Add(time.Second)}
@@ -281,6 +283,9 @@ func TestI9_5BWorkplaceNativeLifecycle(t *testing.T) {
 	}
 	if _, err = s.Load(ctx, a, op()); err != nil {
 		t.Fatal("reload", err)
+	}
+	if _, present := tracked.Balances()[i5.WorkplaceSPKey]; present {
+		t.Fatal("dedicated SP leaked into global response decorator")
 	}
 	t.Log("source crew", h.OriginTableID, "team", location.ID, "automatic result", final.Diary[0]["is_win"])
 	// Prior owned roster fixtures only; the job, real battle and rival reward are still earned.

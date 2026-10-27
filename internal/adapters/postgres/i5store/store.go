@@ -300,7 +300,10 @@ func (Store) SaveTemporalTx(ctx context.Context, t tx.Tx, s economy.TemporalStat
 	if err := rowsOne(tag, "temporal update"); err != nil {
 		return err
 	}
-	changes.Balance(ctx, s.ResourceKey, s.StoredAmount)
+	// Work Place has its own sp_info/client model, not a global ECONOMY field.
+	if s.ResourceKey != appi5.WorkplaceSPKey {
+		changes.Balance(ctx, s.ResourceKey, s.StoredAmount)
+	}
 	return nil
 }
 
