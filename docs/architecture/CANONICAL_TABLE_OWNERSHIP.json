@@ -4217,6 +4217,34 @@
         "internal/adapters/postgres/workplacestore/"
       ],
       "write_exceptions": []
+    },
+    "content_pet_campaign_catalogs": {
+      "allowed_query_owners": [
+        "content-registry"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/contentstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/contentstore/"
+      ],
+      "migration": "migrations/00092_i9_5c_petcampaign.sql",
+      "owner": "content-registry",
+      "write_exceptions": []
+    },
+    "petcampaign_players": {
+      "allowed_query_owners": [
+        "petcampaign"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/petcampaignstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/petcampaignstore/"
+      ],
+      "migration": "migrations/00092_i9_5c_petcampaign.sql",
+      "owner": "petcampaign",
+      "write_exceptions": []
     }
   }
 }

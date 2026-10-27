@@ -239,6 +239,13 @@ func (s Service) EnsureBuiltinInstalled(ctx context.Context, op operation.Contex
 			if gotTopFloor != 1 {
 				return errors.New("content registry top floor count")
 			}
+			gotPetCampaign, err := s.Repo.InsertPetCampaign(tctx, scope.Tx, b)
+			if err != nil {
+				return err
+			}
+			if gotPetCampaign != 1 {
+				return errors.New("content registry pet campaign count")
+			}
 			gotWorkplace, err := s.Repo.InsertWorkplace(tctx, scope.Tx, b)
 			if err != nil {
 				return err

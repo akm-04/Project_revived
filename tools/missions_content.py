@@ -20,7 +20,7 @@ DELTA = {
     116: ('HERO_LENT', 'I9-9'),
     117: ('GUILD_ACTIVITY', 'I9-9'),
     119: ('INFINITY_BOSS_DEFEATED', 'I9-8'),
-    120: ('SKY_CITY_BATTLE', 'I9-5'),
+    120: ('SKY_CITY_BATTLE', ''),
     121: ('PET_FED', 'I9-11'),
     123: ('TEA_PARTY_DONATED', 'I9-9'),
     124: ('INTIMACY_IMPROVED', 'I9-10'),

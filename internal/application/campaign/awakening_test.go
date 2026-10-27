@@ -3,6 +3,7 @@ package campaign
 import (
 	"context"
 	"encoding/json"
+	"gxb.local/backend/v2/internal/application/i5"
 	"strings"
 	"testing"
 
@@ -59,5 +60,31 @@ func TestAwakeningStartPackageLegacyAndExactContext(t *testing.T) {
 	}
 	if _, _, e = readAwakeningPackage([]byte(`{"items":[]}`)); e == nil {
 		t.Fatal("missing occurrence silently invented")
+	}
+}
+
+func TestPetAwakeningPendingEnvelopeKeepsOrdinaryContextSeparate(t *testing.T) {
+	occurrence := objective.AwakeInstance{Mission: 10001002, Type: 3, OwnerID: 7, Generation: 2, Revision: strings.Repeat("a", 64)}
+	frozen := i5.AwakeningPetContext{Occurrence: occurrence, Campaign: 41002, Formation: []int64{7}}
+	raw, e := json.Marshal(awakeningStartPackage{Items: []d.Item{}, PetAwakening: &frozen})
+	if e != nil {
+		t.Fatal(e)
+	}
+	_, pending, e := readAwakeningPackage(raw)
+	if e != nil {
+		t.Fatal(e)
+	}
+	generic, e := readAwakeningPending(pending)
+	if e != nil || generic != nil {
+		t.Fatal("pet context laundered through ordinary/Blood", generic, e)
+	}
+	pet, e := readPetAwakeningPending(pending)
+	if e != nil || pet == nil || pet.Occurrence.Generation != 2 || pet.Campaign != 41002 {
+		t.Fatal(pet, e)
+	}
+	frozen.Occurrence.Type = 2
+	raw, _ = json.Marshal(awakeningStartPackage{Items: []d.Item{}, PetAwakening: &frozen})
+	if _, _, e = readAwakeningPackage(raw); e == nil {
+		t.Fatal("non-pet occurrence accepted")
 	}
 }

@@ -293,9 +293,9 @@
   "character_asset_core_parent_status_at_backend_packaging": "PENDING_PASSMAP_CLOSURE_REVIEW",
   "commit": "ed63e7dcdd0e04f9153f1b1f54fe96ae85ceab51",
   "commit_role": "PARENT_ACCEPTED_PASS643_COMMIT; exact final I7A6A product HEAD/tree/archive are bound externally in PassMap and gate evidence to avoid self-reference",
-  "content_revision": "7db76b6aa867177425223bac75b4d5dfb4a2310d94f45f0afe99718cf82498cd",
-  "current_migration_high_water": "00091_i9_5b_workplace.sql",
-  "current_stage": "I9_5B_IMPLEMENTATION_FOCUSED_GATES",
+  "content_revision": "676279251de66e199adcaca7c7b17c5e4d5458367a635b5a89ce443db02986c3",
+  "current_migration_high_water": "00092_i9_5c_petcampaign.sql",
+  "current_stage": "I9_5C_IMPLEMENTATION_FOCUSED_GATES",
   "evidence": "Pass587 Gate-1 runtime evidence b59277c4d59a1c2622809a62f46605442232d77a380e97af7eeba2a3a75fe73e + Pass588 normal-chat I0-I6/source-oracle/release-reconciliation checks; exact Pass588 retest still required.",
   "external_audit_sha256": "a6234eaf9cd5a3f029259140a0166c0529e9b174e4572c61a102b7f0ed0c9e7f",
   "f1_research_checkpoint_sha256": "c87133200b1e377d27d6a81c2d65ee86a1dd4161906fd80dfa004b6cd267199e",
@@ -736,7 +736,7 @@
     "version": "v0.125.0"
   },
   "language_floor": "go1.26.0",
-  "migration_high_water": "00091_i9_5b_workplace.sql",
+  "migration_high_water": "00092_i9_5c_petcampaign.sql",
   "migration_parent_backend_sha256": "73a668580d416fba4275b97898d083b9fdcb12c58773eeb9ceec2b1f3711c58d",
   "native_repair_parent_backend_sha256": "a6bf87421767c5451f69fcf359995d28d91a6c6f861f55422bcdd642583e0141",
   "native_repair_parent_implementation_revision_sha256": "0def8ffc697be0c43a40b3e447c328fee45011e76e9e87a69f17181b777e1c1b",
@@ -765,10 +765,10 @@
   "sbom_created_at": "2026-10-09T10:31:06Z",
   "schema_version": 1,
   "snapshot": "I9-5B Work Place district jobs; sole job owner, I5 SP/grants/objectives, real Combat automatic rivals; not stage acceptance.",
-  "stage": "I9-5B",
-  "status": "IMPLEMENTED_NOT_STAGE_ACCEPTED_I9_5A",
+  "stage": "I9-5C",
+  "status": "IMPLEMENTATION_FOCUSED_GATES_IN_PROGRESS_NOT_STAGE_ACCEPTED",
   "toolbox_archive_sha256": "e4e194c9627929299577364b953b2468d6118fac4283fd8030f10b5a27456c2b",
-  "version": "v0.152.0",
+  "version": "v0.153.0",
   "w2_claimed": false,
   "i7c5b_contract": "docs/i7c5b-top-floor/I7C5B_POLICY.json",
   "i7c5b_preimplementation_pass": "730.0",
@@ -872,7 +872,7 @@
     "next_action": "ExactR2 publicstat core/Pet native/upgrade/restore qualification, primaryreality/final715sync. Hero blood-stage and prior actualproducer/parent/W2 gates remain.",
     "migration_high_water": "00084_i9_3e_summon.sql"
   },
-  "version_role": "I9-5B working implementation; focused proof only; Claude owns stage qualification and acceptance.",
+  "version_role": "I9-5C working implementation; focused proof only; Claude owns stage qualification and acceptance.",
   "i9_4c": {
     "accepted_base_git_head": "7134eacc35b6656fb43ef18244a96ea079c93d96",
     "research_publication": "789.0",
@@ -900,7 +900,7 @@
     "status": "IMPLEMENTED_FOCUSED_GATES_NOT_STAGE_ACCEPTANCE",
     "force_repair": "D256 qualified publicstats port; no roster force fallback"
   },
-  "content_generation": 53,
+  "content_generation": 54,
   "i9_5b": {
     "contract": "docs/i9/I9_WORKPLACE_V1.json",
     "policy": "docs/i9/I9_WORKPLACE_PRIVATE_POLICY_V1.json",
@@ -916,5 +916,26 @@
     "created_status": "IMPLEMENTATION_FOCUSED_GATES_IN_PROGRESS_NOT_ACCEPTED",
     "qualification_owner": "Claude per I9 split handoff",
     "status": "IMPLEMENTED_SCENARIO_BLOCKED_FOCUSED_GATES_NOT_STAGE_ACCEPTANCE"
+  },
+  "i9_5c": {
+    "contract": "docs/i9/I9_PET_CAMPAIGN_V1.json",
+    "base_commit": "d2d02d08833113074e38bc5fc9fd690a6c1f0c0b",
+    "content_generation": 54,
+    "mids": [
+      816,
+      817,
+      818,
+      819,
+      820,
+      821,
+      822,
+      823,
+      824,
+      825,
+      826,
+      827
+    ],
+    "qualification_owner": "Claude per I9 split handoff",
+    "created_status": "IMPLEMENTATION_FOCUSED_GATES_IN_PROGRESS_NOT_ACCEPTED"
   }
 }

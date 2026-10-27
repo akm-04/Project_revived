@@ -39,31 +39,32 @@ import (
 )
 
 type Mode struct {
-	Awakening   i5.AwakeningCampaignPort
-	Daily       DailyConsumption
-	Timed       gen.TimedRunner
-	Fresh       tx.Queryer
-	Store       Store
-	Content     Content
-	Fence       Fence
-	Functions   Functions
-	Directory   Directory
-	Heroes      Heroes
-	HeroExp     HeroExp
-	StoryHeroes StoryHeroes
-	StoryWire   func(character.Hero) (map[string]any, error)
-	Pets        Pets
-	MaxColor    i5.MaxHeroColorPolicyProvider
-	Combat      Combat
-	Energy      i5.TxTemporalDebiter
-	Grants      Grants
-	Privileges  i5.PrivilegeSnapshotProvider
-	Costs       i5.TxMaterialCostDebiter
-	Progression Progression
-	Stages      Stages
-	Facts       Facts
-	Receipts    receipt.Store
-	ReceiptRead receipt.Reader
+	PetAwakening i5.AwakeningPetPort
+	Awakening    i5.AwakeningCampaignPort
+	Daily        DailyConsumption
+	Timed        gen.TimedRunner
+	Fresh        tx.Queryer
+	Store        Store
+	Content      Content
+	Fence        Fence
+	Functions    Functions
+	Directory    Directory
+	Heroes       Heroes
+	HeroExp      HeroExp
+	StoryHeroes  StoryHeroes
+	StoryWire    func(character.Hero) (map[string]any, error)
+	Pets         Pets
+	MaxColor     i5.MaxHeroColorPolicyProvider
+	Combat       Combat
+	Energy       i5.TxTemporalDebiter
+	Grants       Grants
+	Privileges   i5.PrivilegeSnapshotProvider
+	Costs        i5.TxMaterialCostDebiter
+	Progression  Progression
+	Stages       Stages
+	Facts        Facts
+	Receipts     receipt.Store
+	ReceiptRead  receipt.Reader
 }
 
 type Progression interface {
@@ -499,7 +500,18 @@ func (s Mode) start(c context.Context, sc gen.TimedScope, a identity.ActorContex
 	if err != nil {
 		return combat.Started{}, err
 	}
+	var petAwakening *i5.AwakeningPetContext
+	if d.Cloud(node.Type) && s.PetAwakening != nil {
+		petAwakening, err = s.PetAwakening.FreezeAwakeningPetTx(c, sc.Tx, a.PlayerID, node.ID, request.PetFormation)
+		if err != nil {
+			return combat.Started{}, err
+		}
+	}
 	drops := func(stream *cd.Stream) (any, error) {
+		if petAwakening != nil {
+			return awakeningStartPackage{Items: v.catalog.Drop(box, stream), PetAwakening: petAwakening}, nil
+		}
+
 		if frozen == nil {
 			return v.catalog.Drop(box, stream), nil
 		}

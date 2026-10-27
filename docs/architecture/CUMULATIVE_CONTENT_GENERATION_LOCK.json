@@ -386,14 +386,22 @@
       "parser_version": "lua-generated-v18-guild-invite",
       "revision_id": "7db76b6aa867177425223bac75b4d5dfb4a2310d94f45f0afe99718cf82498cd",
       "scope": "Current district jobs, I5 workplace_sp and labelled automatic-event policy; D257 legacy supersession."
+    },
+    {
+      "ordinal": 54,
+      "stage": "I9-5C Sky Tower",
+      "compiler_version": "i9-5c-petcampaign",
+      "parser_version": "lua-generated-v18-guild-invite",
+      "revision_id": "676279251de66e199adcaca7c7b17c5e4d5458367a635b5a89ce443db02986c3",
+      "scope": "Source120 floors, starless tower lifecycle and typed pet awakening origins; user-approved D261/D262."
     }
   ],
   "current": {
-    "ordinal": 53,
-    "stage": "I9-5B Work Place",
-    "compiler_version": "i9-5b-workplace",
+    "ordinal": 54,
+    "stage": "I9-5C Sky Tower",
+    "compiler_version": "i9-5c-petcampaign",
     "parser_version": "lua-generated-v18-guild-invite",
-    "revision_id": "7db76b6aa867177425223bac75b4d5dfb4a2310d94f45f0afe99718cf82498cd",
-    "scope": "Current district jobs, I5 workplace_sp and labelled automatic-event policy; D257 legacy supersession."
+    "revision_id": "676279251de66e199adcaca7c7b17c5e4d5458367a635b5a89ce443db02986c3",
+    "scope": "Source120 floors, starless tower lifecycle and typed pet awakening origins; user-approved D261/D262."
   }
 }

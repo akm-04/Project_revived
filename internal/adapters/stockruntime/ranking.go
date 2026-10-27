@@ -34,13 +34,17 @@ type OneOnOneRanks interface {
 type ArenaRanks interface {
 	RankList(context.Context, identity.ActorContext) (arena.RankList, error)
 }
+type PetCampaignRanks interface {
+	RankList(context.Context, identity.ActorContext, operation.Context) (map[string]any, error)
+}
 type RankingDispatcher struct {
-	Authority realtimeauth.GameplayAuthorityPort
-	Service   BoardRankingReads
-	TopFloor  TopFloorRanks
-	OneOnOne  OneOnOneRanks
-	Arena     ArenaRanks
-	Trophy    TrophyRanks
+	PetCampaign PetCampaignRanks
+	Authority   realtimeauth.GameplayAuthorityPort
+	Service     BoardRankingReads
+	TopFloor    TopFloorRanks
+	OneOnOne    OneOnOneRanks
+	Arena       ArenaRanks
+	Trophy      TrophyRanks
 }
 
 func (d RankingDispatcher) Dispatch(c context.Context, r httpedge.DispatchRequest) httpedge.Response {
@@ -69,6 +73,13 @@ func (d RankingDispatcher) Dispatch(c context.Context, r httpedge.DispatchReques
 	subtype, e := feedbackInteger(types[0], 1, 9007199254740991)
 	if e != nil {
 		return fail(http.StatusBadRequest)
+	}
+	if subtype == 22 && d.PetCampaign != nil {
+		body, e := d.PetCampaign.RankList(c, a, r.Envelope.Operation)
+		if e != nil {
+			return fail(http.StatusServiceUnavailable)
+		}
+		return okI5(body)
 	}
 	if subtype == 1 && d.TopFloor != nil {
 		list, e := d.TopFloor.RankList(c, a)

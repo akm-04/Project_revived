@@ -148,7 +148,7 @@ func canonicalConquer(p *postgres.Pool, r tx.Runner, content contentstore.Store,
 }
 
 func canonicalCampaign(p *postgres.Pool, r tx.Runner, content contentstore.Store, i5db i5store.Store, i5svc appi5.Service, heroes apphero.Service, fight combat.Service) appcampaign.Mode {
-	return appcampaign.Mode{Awakening: i5svc, Daily: dailyconsume.Service{Store: dailyconsumestore.Store{}, Costs: appi5.MaterialCostDebiter{Store: i5db, Content: content}}, Timed: appgeneration.TimedRunner{Binder: appgeneration.Binder{Time: postgres.AuthoritativeTime{Queryer: p}}, Runner: r}, Fresh: p, Store: campaignstore.Store{}, Content: content,
+	return appcampaign.Mode{PetAwakening: i5svc, Awakening: i5svc, Daily: dailyconsume.Service{Store: dailyconsumestore.Store{}, Costs: appi5.MaterialCostDebiter{Store: i5db, Content: content}}, Timed: appgeneration.TimedRunner{Binder: appgeneration.Binder{Time: postgres.AuthoritativeTime{Queryer: p}}, Runner: r}, Fresh: p, Store: campaignstore.Store{}, Content: content,
 		Fence: i5db, Functions: i5db, Directory: i4store.PlayerDirectoryReader{}, Heroes: characterstore.CampaignHeroPort{Store: characterstore.Store{Queryer: p}}, HeroExp: heroes, Combat: fight,
 		Privileges: i5svc.Privileges, Costs: appi5.MaterialCostDebiter{Store: i5db, Content: content}, Progression: i5db,
 		Energy: i5svc, Grants: i5svc, Stages: i5svc, Facts: appi5.ObjectiveFacts{Owner: i5svc, Open: i5db}, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}}

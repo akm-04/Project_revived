@@ -18,22 +18,22 @@
  "counts": {
   "by_disposition": {
    "DELIVERED": 185,
-   "ACTIVE": 463,
+   "ACTIVE": 454,
    "LATER": 501,
-   "INACTIVE_SUPERSEDED": 12,
+   "INACTIVE_SUPERSEDED": 22,
    "INACTIVE_D79": 21
   },
   "active_by_stage": {
-   "I9-10": 112,
    "I9-11": 72,
    "I9-3": 17,
    "I9-4": 7,
    "I9-4D": 12,
-   "I9-5": 33,
-   "I9-6": 33,
+   "I9-10": 112,
    "I9-7": 57,
+   "I9-5": 24,
    "I9-8": 74,
-   "I9-9": 46
+   "I9-9": 46,
+   "I9-6": 33
   }
  },
  "mids": [
@@ -2912,10 +2912,12 @@
    "mid": 784,
    "name": "PET_UPGRADE_SKILL",
    "family": "PET_CAMPAIGN",
-   "disposition": "ACTIVE",
+   "disposition": "INACTIVE_SUPERSEDED",
    "target": "I9-5",
    "v2": "unimplemented",
-   "v1": "STATE_BACKED"
+   "v1": "STATE_BACKED",
+   "decision": "D261",
+   "reason": "User-approved supersession: current skill UI uses791; no current/old caller for784/788."
   },
   {
    "mid": 785,
@@ -2948,10 +2950,12 @@
    "mid": 788,
    "name": "PET_BUY_BOOK",
    "family": "PET_CAMPAIGN",
-   "disposition": "ACTIVE",
+   "disposition": "INACTIVE_SUPERSEDED",
    "target": "I9-5",
    "v2": "unimplemented",
-   "v1": "STATE_BACKED"
+   "v1": "STATE_BACKED",
+   "decision": "D261",
+   "reason": "User-approved supersession: current skill UI uses791; no current/old caller for784/788."
   },
   {
    "mid": 789,

@@ -205,7 +205,7 @@ func (s Mode) awards(c context.Context, sc gen.TimedScope, a identity.ActorConte
 	if len(lines) > 0 {
 		op := sc.Operation.Operation()
 		plan := grant.Plan{PlayerID: a.PlayerID, Source: grant.SourceIdentity{Domain: "march", Operation: name, BusinessKey: fmt.Sprintf("march:%s:%s", op.ID.String(), name), Occurrence: op.ID.String(), PolicyVersion: d.PolicyID}, Lines: lines}
-		if _, err = s.Grants.SettleGrantTx(c, sc.Tx, a, plan, op, i5.GrantTxOptions{}); err != nil {
+		if _, err = s.Grants.SettleGrantTx(c, sc.Tx, a, plan, op, i5.GrantTxOptions{AllowOverflowMail: true}); err != nil {
 			return nil, err
 		}
 	}

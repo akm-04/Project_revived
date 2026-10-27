@@ -21,12 +21,19 @@ from pathlib import Path
 from typing import Any, Iterable
 
 SCHEMA_VERSION = 1
-COMPILER_VERSION = "i9-5b-workplace"
+COMPILER_VERSION = "i9-5c-petcampaign"
 PARSER_VERSION = "lua-generated-v18-guild-invite"
 EXPECTED_SOURCE_ARCHIVE_SHA256 = "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
 SOURCE_PREFIX = "app-assets/output/assets/src_64/"
 
 SOURCE_MANIFEST = [
+    ('app/common/tables/PetCampaignTable.lua', '2e861f3f191a53ecc75591a2f5eff7fc8def36440cec5e80999f95d2faec231a', 'I9_5C_PET_CAMPAIGN_SOURCE_BOUNDARY'),
+    ('app/windows/PetSweepingWindow.lua', 'cb7be4474630e9b3faf170f8e07fece4e06996734cb367ef4424dd76ce410d2e', 'I9_5C_PET_CAMPAIGN_SOURCE_BOUNDARY'),
+    ('app/windows/PetCampaignRuleWindow.lua', 'e18ed641ecd4aff882b6f0027a36e7a9a8dacda593dfc2f1128be9a7f0bd572f', 'I9_5C_PET_CAMPAIGN_SOURCE_BOUNDARY'),
+    ('app/windows/PetCampaignAwardWindow.lua', 'e4cfce539795064fe94bf32744821ff8dc744fd226ce848865109b5af29c3d81', 'I9_5C_PET_CAMPAIGN_SOURCE_BOUNDARY'),
+    ('app/windows/PetCampaignWindow.lua', '6a8eac1bd1072e9f33af4f8f3d60fc07d91f030dee796b9e53cd3465948d0162', 'I9_5C_PET_CAMPAIGN_SOURCE_BOUNDARY'),
+    ('app/model/PetCampaign.lua', '58e227cc064f17948343116ce5b021ab9f27bbe733be2b4a0724f1fd8845e3f0', 'I9_5C_PET_CAMPAIGN_SOURCE_BOUNDARY'),
+    ('data/tables/pet_campaign.lua', '20ff4f17c12b2af3400abb81b8b993620614f0d501ab4e307dc4b9b544d5d74a', 'I9_5C_PET_CAMPAIGN_SOURCE_BOUNDARY'),
     ('data/tables/awaken_mission.lua', 'fdbcaf96386a7aa775c23b071bfe9952ef6acfc57982d17300b8308417fdb123', 'I9_4D_AWAKENING_SOURCE_BOUNDARY'),
     ('data/tables/bloodline_mission.lua', 'b773cd8ebb0936c76c7ad0727a5d9efa67e87b748f508c3cd66147f075b81299', 'I9_4D_AWAKENING_SOURCE_BOUNDARY'),
     ('data/tables/pet_awaken_mission.lua', 'fc769406c22fbd880894cbd5b2697a3612335a19a58176486c69463913c95f0b', 'I9_4D_AWAKENING_SOURCE_BOUNDARY'),
@@ -237,7 +244,7 @@ ENABLED_CAPABILITIES = [
     "SCALAR_MARCH_COIN_I9_4A", "MISSION_ACTIVITY_I9_4B", "MONTHLY_SIGNIN_I9_4C", "AWAKENING_MISSIONS_I9_4D", "SCALAR_GUILD_COIN_I9_4B", "DODGE_TICKET_STACK_I9_4B",
     "SUMMON_GACHA_I9_3E",
     "CAMPAIGN_MODE_I9_3A",
-    "CHAMPION_MARCH_I9_5A", "WORKPLACE_I9_5B",
+    "CHAMPION_MARCH_I9_5A", "WORKPLACE_I9_5B", "PET_CAMPAIGN_I9_5C",
     "COSMETIC_TITLE_CONDITION_I7C6",
     "ACHIEVEMENT_CATALOG_I7C4FA",
     "CHAMPIONS_LEAGUE_I7C5F",
@@ -452,6 +459,7 @@ SOURCE_MANIFEST.append(('app/windows/TreasurePrepareWindow.lua', 'c4fb7ebc597686
 SOURCE_MANIFEST.append(('app/windows/TreasureRewardWindow.lua', 'e4dab2cf5caa25baff80f0c5b195772877a453e13145941f7b5b6ca132d76d38', 'I9_5B_WORKPLACE_SOURCE_BOUNDARY'))
 SOURCE_MANIFEST.append(('app/windows/TreasureDiaryWindow.lua', 'aa01854c16b0de8c49d9b08d99529b223b83910d1f0b4f62bcedde36f923bc4a', 'I9_5B_WORKPLACE_SOURCE_BOUNDARY'))
 from workplace_content import build_workplace
+from petcampaign_content import build_petcampaign
 from march_content import build_march
 from summon_content import build_summon
 from awakening_content import build_awakening
@@ -2275,6 +2283,7 @@ def build_artifacts(blobs: dict[str, SourceBlob], archive_sha256: str) -> dict[s
     from dorm_content import build_dorm
     dorm_artifact=build_dorm(blobs,parse_generated_lua_table,pipe_ints,hero_artifact["templates"],partner_keys,partner_rows,super_keys,super_rows,indexed_field,items,CompileError)
     artifacts = {
+        "pet_campaign_catalog.json":build_petcampaign(blobs,parse_generated_lua_table,resources),
         "workplace_catalog.json":build_workplace(blobs,parse_generated_lua_table,parse_base64_indexed_lua_table,indexed_field,resources),
         "march_catalog.json":build_march(blobs,parse_generated_lua_table,parse_base64_indexed_lua_table,indexed_field,resources),
         "campaign_catalog.json":build_campaign(blobs,parse_generated_lua_table,parse_base64_indexed_lua_table,indexed_field),
