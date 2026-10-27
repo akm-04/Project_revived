@@ -129,6 +129,8 @@ func leagueScalar(t *testing.T, p *pg.Pool, sql string, args ...any) int64 {
 func TestI7C5FLeagueGenuineFightReplayAndClockNative(t *testing.T) {
 	p := pool(t)
 	s, clock, cat, a, b, ha, _ := leagueActors(t, p)
+	facts := countPVPFights(s.Facts.(i5.ObjectiveFacts))
+	s.Facts = facts
 	// A projection-only level cannot establish admission.
 	low, lowRev, _ := combatOwner(t, p, rankingServer(t, p))
 	exec(t, p, `UPDATE player_directory_profiles SET lev=100 WHERE player_id=$1`, int64(low.PlayerID))
@@ -169,6 +171,9 @@ func TestI7C5FLeagueGenuineFightReplayAndClockNative(t *testing.T) {
 	replay := leagueDo(t, s, a, app.Command{Kind: "FIGHT", Enemy: b.PlayerID, Lineup: d.Lineup{Heroes: []int64{ha}}})
 	if replay.Match.ID != fight.Match.ID || string(replay.Report) != string(fight.Report) {
 		t.Fatal("retry changed battle")
+	}
+	if facts.of(a.PlayerID) != 1 {
+		t.Fatal("a Champion League fight and its replays are one PVP_FIGHT fact", facts.of(a.PlayerID))
 	}
 	players, e := s.Store.PlayersTx(ctx, p, false)
 	if e != nil {

@@ -95,6 +95,8 @@ func TestI7C5DArenaEntryFightSettlementNative(t *testing.T) {
 	pool := pool(t)
 	defer pool.Close()
 	s := arenaService(t, pool)
+	facts := countPVPFights(s.Facts.(i5.ObjectiveFacts))
+	s.Facts = facts
 	a, _ := oneOnOnePlayer(t, pool, rankingServer(t, pool))
 	b, _ := oneOnOnePlayer(t, pool, rankingServer(t, pool))
 	catalog := arenaCatalog(t, pool)
@@ -188,12 +190,18 @@ func TestI7C5DArenaEntryFightSettlementNative(t *testing.T) {
 	if err != nil || len(partners.Usage) != 5 || partners.Player.TotalFight != 1 {
 		t.Fatal("partners", err)
 	}
+	if facts.of(a.PlayerID) != 1 {
+		t.Fatal("a ranked arena fight is one PVP_FIGHT fact", facts.of(a.PlayerID))
+	}
 
 	// D07: practice changes nothing; STOP and an abandoned START settle a loss without a battle.
 	exec(t, pool, `UPDATE arena_players SET star=12 WHERE player_id=$1`, int64(a.PlayerID))
 	practice := arenaFight(t, s, a, b.PlayerID, true)
 	if practice.Player.Star != 12 || practice.Player.TotalFight != 1 || len(practice.Report) == 0 || scalar(t, pool, `SELECT count(*) FROM arena_records WHERE owner_player_id IN ($1,$2)`, int64(a.PlayerID), int64(b.PlayerID)) != 2 {
 		t.Fatalf("practice %+v", practice.Player)
+	}
+	if facts.of(a.PlayerID) != 1 {
+		t.Fatal("an arena practice fight counted as a PVP_FIGHT fact")
 	}
 	if _, err = s.Match(ctx, a, false, op()); err != nil {
 		t.Fatal(err)

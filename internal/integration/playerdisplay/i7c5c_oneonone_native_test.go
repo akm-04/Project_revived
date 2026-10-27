@@ -108,6 +108,8 @@ func TestI7C5COneOnOneEntryMatchSettlementNative(t *testing.T) {
 	pool := pool(t)
 	defer pool.Close()
 	s := oneOnOneService(t, pool)
+	facts := countPVPFights(s.Facts.(i5.ObjectiveFacts))
+	s.Facts = facts
 	a, heroesA := oneOnOnePlayer(t, pool, rankingServer(t, pool))
 	b, heroesB := oneOnOnePlayer(t, pool, rankingServer(t, pool))
 	catalog := oneOnOneCatalog(t, pool)
@@ -190,6 +192,9 @@ func TestI7C5COneOnOneEntryMatchSettlementNative(t *testing.T) {
 	t.Logf("best-of-three START with resolution and settlement took %s (rounds %v)", time.Since(started), result.Wins)
 	if len(result.Wins) < 2 || len(result.Wins) > 3 || len(result.ReportKeys) != len(result.Wins) || result.Arena.Player.TriesLeft != 9 {
 		t.Fatalf("match %+v", result)
+	}
+	if facts.of(a.PlayerID) != 1 {
+		t.Fatal("a settled 1on1 match is one PVP_FIGHT fact", facts.of(a.PlayerID))
 	}
 	gain := catalog.Gain(4300, 4500)
 	if !result.Win {

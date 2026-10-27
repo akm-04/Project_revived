@@ -167,7 +167,6 @@ func TestI7C2JActualAPIFreshConquerAtomicityAndInactiveMode(t *testing.T) {
 		{2608, map[string]any{"partner_id": 1, "attr_id": 4, "add_num": 1, "cost_item": 41001}, 400},
 		{2608, map[string]any{"partner_id": 1, "attr_id": 4, "add_num": true, "cost_item": 40001001}, 400},
 		{2609, map[string]any{"partner_id": 1, "twice_awake_stage": 3}, 400},
-		{2738, map[string]any{"mission_id": 1, "awake_type": 2}, 501},
 	} {
 		code, out := post(step.mid, step.params)
 		if code != step.status {
@@ -179,6 +178,10 @@ func TestI7C2JActualAPIFreshConquerAtomicityAndInactiveMode(t *testing.T) {
 				t.Fatal("callback or duplicate cost projection", out)
 			}
 		}
+	}
+	// I9-4D activated TASK_AWAKE_OPEN: an unknown awakening mission is a stock refusal, not 501.
+	if code, out := post(2738, map[string]any{"mission_id": 1, "awake_type": 2}); code != 200 || out.(map[string]any)["error_code"] == float64(0) || out.(map[string]any)["error_code"] == nil {
+		t.Fatal("MID2738", code, out)
 	}
 	code, inventory := post(81, map[string]any{})
 	if code != 200 {
