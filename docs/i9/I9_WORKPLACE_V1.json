@@ -1,0 +1,23 @@
+{
+  "contract_id": "I9_WORKPLACE_V1",
+  "version": 1,
+  "status": "WORKING_DESIGN_NOT_ACCEPTED",
+  "authority": "I9_MODE_FRAMEWORK_V1 F1-F17; WORKPLACE_528_540; user-approved D257 surface amendment; split handoff",
+  "active_mids": [528, 530, 531, 532, 533],
+  "superseded_mids": [529, 534, 535, 536, 537, 538, 539, 540],
+  "clauses": {
+    "C1": "Current district job profile; no client patch, manual robbery or legacy result acceptance. Superseded routes use the existing inactive dispatcher. Preserve raw MID 535 and the legacy evidence.",
+    "C2": "Exact source content: six districts, 35 jobs, 114 base-girl memberships, transformed coefficients, VIP reward multipliers, 91 grantable chest IDs, source prerequisites, base duration/cost and traits. Label original equations not recovered as PRIVATE_POLICY.",
+    "C3": "Actor, function 9, source job prerequisite, canonical owned identities and district membership are admitted before spend. Reject aliases/duplicates/foreign actors/forged cost; lock identity roots before family rank 605. Freeze reward inputs at dispatch.",
+    "C4": "Work Place SP is an I5 temporal resource: cap 50, one per 1200 seconds. Extend content, initialization/backfill, repin, read projection and debit together. No parallel SP owner; no mapping to campaign energy despite the UI's -3 icon.",
+    "C5": "One durable occurrence per dispatch, one stable operation time and derived random channels. Persist participants, accepted start/duration, content/policy, reward plan, event snapshot and settlement identity. No expiry auto-grant.",
+    "C6": "Readiness is strictly now > start+duration. Daily bonus generation uses modes.Day; started jobs cross that boundary intact. Preserve SP remainder/cap and canonical rollback semantics. Worker work occurs outside gameplay locks.",
+    "C7": "Claim settles the occurrence and any Combat terminal plus I5 grant atomically; typed facts WORKPLACE_TEAM_SENT occur once at dispatch. Replays, unknown COMMIT and concurrent claims cannot grant twice. Current mission binding activates only the qualified fact.",
+    "C8": "D11 bounded stock compatibility: identical dispatch while working replays without charge; changed dispatch while working refuses; idle slot admits the next occurrence. FINISH resolves the currently due occurrence, or its last committed receipt when idle. Late old FINISH after a new occurrence is due is intrinsically ambiguous; record this residual without perfect-intent claims. Internal occurrence identifiers fence stale jobs.",
+    "C9": "All replies follow F4 and the exact current readers: full team rows, array partners, totals, strict timestamps, sp_info amount/anchor, normal_award, explicit numeric externa_crystal_award and empty object battle_award/chest_award when absent. Diary uses the same committed reward data. Reuse the common response decorator.",
+    "C10": "Automatic rival rewards require a real qualified Combat provider, frozen inputs and durable outcome; no fabricated win/report or external legacy SAVE acceptance. Research feasibility under server resolver before enabling. Original selection/economic equations remain PRIVATE_POLICY, not original truth.",
+    "C11": "Work Place exposes typed occupancy for future Lending I9-9; current jobs use canonical owned girls and immutable dispatch snapshots. Upgrade/stat changes do not mutate accepted reward inputs. No foreign-owner SQL or new global reservation subsystem.",
+    "C12": "Focused proof includes native success/refusal/replay/concurrency per mutation, SP and strict due boundaries, offline/restart, time jumps, slot reuse, nonce-less residual policy, overflow Mail, source/contract walk, one fresh-db stock UI scenario and exact version/snapshot identity. Full-stage qualification and seal remain with Claude."
+  },
+  "preimplementation_limit": "C10 provider feasibility must pass before automatic-event activation; this draft and checkpoint do not satisfy implementation or acceptance proof."
+}

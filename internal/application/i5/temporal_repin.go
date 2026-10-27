@@ -17,7 +17,7 @@ import (
 // Every content generation moves the active revision while temporal rows keep the revision they were written under, and
 // grants refuse a mixed revision (PASS480). The deployment re-pins them explicitly (D98); activation alone still migrates nothing.
 
-var repinnedTemporalKeys = []string{"energy", "skill_point", "spirit_energy"}
+var repinnedTemporalKeys = []string{"energy", "skill_point", "spirit_energy", WorkplaceSPKey}
 
 type StaleTemporalDirectory interface {
 	StaleTemporalPlayersTx(context.Context, tx.Queryer, string) ([]identity.PlayerID, error)

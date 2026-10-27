@@ -1,0 +1,27 @@
+{
+  "contract_id": "I9_WORKPLACE_PRIVATE_POLICY_V1",
+  "version": 1,
+  "classification": "PRIVATE_POLICY",
+  "status": "IMPLEMENTATION_IN_PROGRESS_NOT_ACCEPTED",
+  "decisions": [
+    "D258",
+    "D259",
+    "D260"
+  ],
+  "original_algorithm": "UNKNOWN; exact stock constants and preview coefficients retained separately",
+  "parameters": {
+    "initial_sp": "natural_cap_on_first_access_only",
+    "sp_initialization": "I5 owner lazy initialization for both new and existing players; no reset on load",
+    "event_rate_policy": "source rate plus trait 2 chest increment or trait 4 rival increment; clamp at 100; zero-rate districts remain zero",
+    "rival_provider": "real SERVER_REPORT Combat attempt; up to five strongest selected crew against source-qualified copied robot team; no manual battle or other-player mutation",
+    "chest_selection": "uniform source job list with source quantities",
+    "rival_reward": "one source-list reward only on actual server-resolved win",
+    "daily_bonus": "one eligible district per player per modes.Day at academy 42+, quantity 20..40 inclusive times source VIP factor, accepted occurrence persists across days",
+    "scroll_pool": "normal non-SX eligible Work Place base girls, canonical source stone items; original pool unknown",
+    "drink_item_id": 50001002,
+    "seasonal_reward_multiplier": 1,
+    "diary_retention": 50,
+    "nonce_less_dispatch": "identical working dispatch replays; different working dispatch refuses; idle accepts next occurrence",
+    "nonce_less_finish": "current due occurrence or last receipt while idle; arbitrarily delayed old intent after a reused slot is due cannot be distinguished"
+  }
+}
