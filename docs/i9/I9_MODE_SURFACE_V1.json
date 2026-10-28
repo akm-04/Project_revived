@@ -2013,7 +2013,7 @@
    "family": "WORKPLACE_TREASURE",
    "disposition": "ACTIVE",
    "target": "I9-5",
-   "v2": "workplace_i9_5b",
+   "v2": "implemented",
    "v1": null
   },
   {
@@ -2031,7 +2031,7 @@
    "family": "WORKPLACE_TREASURE",
    "disposition": "ACTIVE",
    "target": "I9-5",
-   "v2": "workplace_i9_5b",
+   "v2": "implemented",
    "v1": "STATE_BACKED"
   },
   {
@@ -2040,7 +2040,7 @@
    "family": "WORKPLACE_TREASURE",
    "disposition": "ACTIVE",
    "target": "I9-5",
-   "v2": "workplace_i9_5b",
+   "v2": "implemented",
    "v1": null
   },
   {
@@ -2049,7 +2049,7 @@
    "family": "WORKPLACE_TREASURE",
    "disposition": "ACTIVE",
    "target": "I9-5",
-   "v2": "workplace_i9_5b",
+   "v2": "implemented",
    "v1": null
   },
   {
@@ -2058,7 +2058,7 @@
    "family": "WORKPLACE_TREASURE",
    "disposition": "ACTIVE",
    "target": "I9-5",
-   "v2": "workplace_i9_5b",
+   "v2": "implemented",
    "v1": null
   },
   {

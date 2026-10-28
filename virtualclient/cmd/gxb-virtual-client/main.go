@@ -73,7 +73,10 @@ type scenario struct {
 	SignInBonusFixture bool `json:"signin_bonus_fixture"`
 	// AwakeningFixture declares prior progression of the fresh birth companion; never mission completion.
 	AwakeningFixture bool `json:"awakening_fixture"`
-	// Steps: "tap:<node path or XxY>", "window:<stock window>[ <json params>]", "lua:<chunk>", "wait:<seconds>", "relogin" (same account/device, fresh Lua VM).
+	// PetAwakeningFixture declares one prior hatched level-90 pet; never mission completion.
+	PetAwakeningFixture bool `json:"pet_awakening_fixture"`
+	// Steps: "tap:<node path or XxY>", "window:<stock window>[ <json params>]", "lua:<chunk>", "wait:<seconds>", "relogin" (same account/device, fresh Lua VM),
+	// "relogin-after:<file>" (a relogin that first waits in wall time until <file> exists, so an operator can move the host clock).
 	Steps []string `json:"steps"`
 	// Settle is virtual seconds run after the last step (stock ErrorLogPoster uploads every 30 s).
 	Settle float64 `json:"settle_seconds"`
@@ -145,7 +148,7 @@ func (run run) play() ([]string, error) {
 		Report   client.Report      `json:"report"`
 		Failures []string           `json:"failures"`
 	}{Account: session.AccountID, Scenario: run.scenario.Name, Failures: []string{}}
-	progressed := run.scenario.AwakeningFixture || run.scenario.SignInBonusFixture || run.scenario.ChallengeFixture || run.scenario.Level > 0 || len(run.scenario.Heroes) > 0 || run.scenario.VIP > 0 || len(run.scenario.Grants) > 0
+	progressed := run.scenario.AwakeningFixture || run.scenario.PetAwakeningFixture || run.scenario.SignInBonusFixture || run.scenario.ChallengeFixture || run.scenario.Level > 0 || len(run.scenario.Heroes) > 0 || run.scenario.VIP > 0 || len(run.scenario.Grants) > 0
 	if progressed {
 		// A returning player: the first boot lets stock MID1 birth the player, the harness progresses it, the second boot loads it.
 		birth, err := run.boot(session)
@@ -193,15 +196,27 @@ func (run run) play() ([]string, error) {
 			return nil, err
 		}
 	}
-	groups := [][]string{{}}
+	if run.scenario.PetAwakeningFixture {
+		if err := provision.PetAwakeningFixture(ctx, run.databaseURL, session.AccountID); err != nil {
+			return nil, err
+		}
+	}
+	groups, resumeFiles := [][]string{{}}, []string{""}
 	for _, step := range run.scenario.Steps {
-		if step == "relogin" {
-			groups = append(groups, []string{})
+		resumeFile, delayed := strings.CutPrefix(step, "relogin-after:")
+		if !delayed {
+			resumeFile = ""
+		}
+		if step == "relogin" || delayed {
+			groups, resumeFiles = append(groups, []string{}), append(resumeFiles, resumeFile)
 		} else {
 			groups[len(groups)-1] = append(groups[len(groups)-1], step)
 		}
 	}
 	for i, group := range groups {
+		if err = awaitFile(resumeFiles[i]); err != nil {
+			break
+		}
 		virtual, bootErr := run.boot(session)
 		if bootErr != nil {
 			err = bootErr
@@ -242,6 +257,20 @@ func (run run) play() ([]string, error) {
 		return output.Failures, nil
 	}
 	return output.Failures, os.WriteFile(run.reportPath, append(encoded, '\n'), 0o644)
+}
+
+// awaitFile blocks in wall time until path exists (empty path: no wait), for a host clock moved between two sessions.
+func awaitFile(path string) error {
+	if path == "" {
+		return nil
+	}
+	fmt.Fprintln(os.Stderr, "gxb-virtual-client: waiting for", path)
+	for deadline := time.Now().Add(24 * time.Hour); time.Now().Before(deadline); time.Sleep(10 * time.Second) {
+		if _, err := os.Stat(path); err == nil {
+			return nil
+		}
+	}
+	return fmt.Errorf("relogin-after: %s never appeared", path)
 }
 
 // boot starts one client process on the account's device and plays the boot taps until MainScene or the limit.

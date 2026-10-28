@@ -1,0 +1,32 @@
+{
+  "name": "i9_5c_pet_awakening",
+  "level": 100,
+  "pet_awakening_fixture": true,
+  "note": "Stock Missions Awaken Task tab for a pet chain: the declared prior hatched level-90 Ricky (pet fixture only; no mission, Tower or fragment state is provisioned) makes pet_awake_mission_ 10001001 appear in TaskType.AWAKE as an AwakeType.PET cell; the stock open, the cell's own stage-one Go (Sky Tower pet_campaign) and the opened state survive relog. Fragment drops, gear, Cloud stage two and final claim are native proof (i9_5c_petcampaign_native_test).",
+  "settle_seconds": 5,
+  "steps": [
+    "wait:5",
+    "tap:mission",
+    "wait:5",
+    "lua:local t=xyd.ModelManager.get():loadModel(xyd.ModelType.TASK) t:setCurTaskType(xyd.TaskType.AWAKE) t:loadTaskByType(xyd.TaskType.AWAKE,function(code) if code~=xyd.error.OK then error('pet-awake-read') end xyd.WindowManager.get():getWindow('task'):updateRight() end)",
+    "wait:5",
+    "lua:local t=xyd.ModelManager.get():loadModel(xyd.ModelType.TASK) local r=t.tasks[xyd.TaskType.AWAKE][10001001] if not r or r.is_going~=0 then error('pet-awake-unopened') end local found=nil local function walk(n) if n.tableID==10001001 and n.taskInfo then found=n return end for _,c in ipairs(n:getChildren()) do walk(c) end end walk(xyd.WindowManager.get():getWindow('task')) if not found or found.awakeType~=xyd.AwakeType.PET then error('pet-awake-cell-type') end t:openAwakeTask(10001001,xyd.AwakeType.PET)",
+    "wait:5",
+    "lua:local r=xyd.ModelManager.get():loadModel(xyd.ModelType.TASK).tasks[xyd.TaskType.AWAKE][10001001] if not r or r.is_open~=1 then error('pet-awake-open-state') end",
+    "lua:local t=xyd.ModelManager.get():loadModel(xyd.ModelType.TASK) t:setCurTaskType(xyd.TaskType.AWAKE) t:loadTaskByType(xyd.TaskType.AWAKE,function(code) if code~=xyd.error.OK then error('pet-awake-read') end xyd.WindowManager.get():getWindow('task'):updateRight() end)",
+    "wait:5",
+    "lua:local found=nil local function walk(n) if n.tableID==10001001 and n.taskInfo then found=n return end for _,c in ipairs(n:getChildren()) do walk(c) end end walk(xyd.WindowManager.get():getWindow('task')) if not found then error('pet-awake-cell-after-open') end found:goTargetInStageOne(10001001)",
+    "wait:8",
+    "lua:local wm=xyd.WindowManager.get() local w=wm:getWindow('pet_campaign') if not w then error('pet-awake-go-not-sky-tower') end wm:closeWindow(w)",
+    "wait:3",
+    "relogin",
+    "wait:5",
+    "lua:local t=xyd.ModelManager.get():loadModel(xyd.ModelType.TASK) t:loadTaskByType(xyd.TaskType.AWAKE,function(code) local r=t.tasks[xyd.TaskType.AWAKE][10001001] if code~=xyd.error.OK or not r or r.is_open~=1 then error('pet-awake-relog') end end)",
+    "wait:5"
+  ],
+  "expect_ok": [
+    2736,
+    2738,
+    816
+  ]
+}

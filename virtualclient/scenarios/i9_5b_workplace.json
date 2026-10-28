@@ -2,7 +2,7 @@
   "name": "i9_5b_workplace",
   "level": 100,
   "heroes": [],
-  "note": "Prior academy setup only; Aquaris comes from initial roster. Work Place crew selection invokes the stock cell touch listeners (unnamed virtual widget). No Work Place/job/mission state is provisioned. Backend database clock cannot advance under implementer role; scenario deliberately reports the collection-time limitation after dispatch, mission and diary screens. Claude must finish due collection in stage qualification.",
+  "note": "Prior academy setup only; Aquaris comes from initial roster. Work Place crew selection invokes the stock cell touch listeners (unnamed virtual widget). No Work Place/job/mission state is provisioned. Dispatch, mission 10017, show-team and diary. The 10-hour collection needs a moved host clock and lives in clock/i9_5b_workplace_collect.json, outside the suite.",
   "steps": [
     "window:sub_dev",
     "tap:treasure_node",
@@ -24,7 +24,7 @@
     "wait:2",
     "tap:btn_record",
     "wait:3",
-    "lua:if not xyd.WindowManager.get():getWindow('treasure_diary') then error('vc-workplace-diary') end error('vc-workplace-expiry-environment-blocked-database-clock-10h-job')"
+    "lua:local wm=xyd.WindowManager.get() local w=wm:getWindow('treasure_diary') if not w then error('vc-workplace-diary') end wm:closeWindow(w)"
   ],
   "settle_seconds": 3,
   "expect_ok": [
