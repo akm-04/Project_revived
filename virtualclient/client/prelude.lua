@@ -54,6 +54,9 @@ local function inherited(node, key)
 		if type(value) == "function" then
 			return value
 		end
+		if name:sub(1, 12) == "ccui.Slider." and key == "addEventListener" then
+			return function(widget, callback) widget._sliderCallback = callback end
+		end
 		if widgetMethods[key] then
 			return widgetMethods[key]
 		end
@@ -852,7 +855,15 @@ widgetMethods.setTouchEnabled = function(widget, enabled)
 			widgetEvent(widget, "began")
 			return true
 		end
-		stateOf(listener).handlers[cc.Handler.EVENT_TOUCH_ENDED] = function()
+		stateOf(listener).handlers[cc.Handler.EVENT_TOUCH_ENDED] = function(touch)
+			if widget._sliderCallback then
+				local origin = worldOrigin(widget)
+				local width = nodeMethods.getContentSize(widget).width
+				if width > 0 then
+					nodeMethods.setPercent(widget, math.max(0, math.min(100, (touch:getLocation().x - origin) * 100 / width)))
+					invoke(widget._sliderCallback, widget, 0)
+				end
+			end
 			widgetEvent(widget, "ended")
 			if state.clickCallback then
 				invoke(state.clickCallback, widget)
@@ -1168,7 +1179,7 @@ nodeBase, widgetBase = cc.Node, ccui.Widget
 -- looks children up by name sees what the device sees. An unreadable layout is recorded and yields an empty node.
 local layoutClasses = {Node = "cc.Node", SingleNode = "cc.Node", Sprite = "cc.Sprite", Panel = "ccui.Layout", Button = "ccui.Button",
 	ImageView = "ccui.ImageView", Text = "ccui.Text", LoadingBar = "ccui.LoadingBar", CheckBox = "ccui.CheckBox",
-	TextBMFont = "ccui.TextBMFont", TextField = "ccui.TextField", ListView = "ccui.ListView", PageView = "ccui.PageView"}
+	Slider = "ccui.Slider", TextBMFont = "ccui.TextBMFont", TextField = "ccui.TextField", ListView = "ccui.ListView", PageView = "ccui.PageView"}
 local function buildLayout(description)
 	local node = proxy((layoutClasses[description.class] or "cc.Node") .. ".create()")
 	local state = stateOf(node)

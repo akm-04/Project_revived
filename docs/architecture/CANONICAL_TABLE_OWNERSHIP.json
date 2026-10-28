@@ -4273,6 +4273,34 @@
       "migration": "migrations/00093_i9_6a_gods_trial.sql",
       "owner": "godstrial",
       "write_exceptions": []
+    },
+    "content_dodgeball_catalogs": {
+      "allowed_query_owners": [
+        "content-registry"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/contentstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/contentstore/"
+      ],
+      "migration": "migrations/00094_i9_6b_dodgeball.sql",
+      "owner": "content-registry",
+      "write_exceptions": []
+    },
+    "dodgeball_players": {
+      "allowed_query_owners": [
+        "dodgeball"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/dodgeballstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/dodgeballstore/"
+      ],
+      "migration": "migrations/00094_i9_6b_dodgeball.sql",
+      "owner": "dodgeball",
+      "write_exceptions": []
     }
   }
 }

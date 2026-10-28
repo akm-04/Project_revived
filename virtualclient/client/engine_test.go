@@ -281,3 +281,27 @@ func TestLayoutLoadsItsAtlases(t *testing.T) {
 	expect(t, client, "result.before", lua.LTrue)
 	expect(t, client, "result.after", lua.LTrue)
 }
+
+func TestSliderEventUsesNativeCallbackAndUserPercent(t *testing.T) {
+	client := engine(t, ``, nil)
+	run(t, client, `
+  function cc.Node.addEventListener() error("slider used NodeEx event signature") end
+  local scene, slider = cc.Scene:create(), ccui.Slider:create()
+  slider:setPosition(100,100)
+  slider:setContentSize(200,30)
+  slider:setTouchEnabled(true)
+  scene:addChild(slider)
+  cc.Director:getInstance():runWithScene(scene)
+  result={calls=0}
+  slider:addEventListener(function(sender,event)
+   result.calls=result.calls+1 result.percent=sender:getPercent() result.event=event
+  end)
+  __vc.frame(0,0)
+  __vc.tap(200,115)
+  slider:setPercent(10)
+  result.programmatic=slider:getPercent()`)
+	expect(t, client, "result.calls", lua.LNumber(1))
+	expect(t, client, "result.percent", lua.LNumber(50))
+	expect(t, client, "result.event", lua.LNumber(0))
+	expect(t, client, "result.programmatic", lua.LNumber(10))
+}

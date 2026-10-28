@@ -762,3 +762,11 @@ func (r repo) InsertGodsTrial(_ context.Context, x tx.Tx, b Bundle) (int64, erro
 	t.installed[b.RevisionID()] = v
 	return 1, nil
 }
+
+func (r repo) InsertDodgeball(_ context.Context, x tx.Tx, b Bundle) (int64, error) {
+	t := x.(*modelTx)
+	v := t.installed[b.RevisionID()]
+	v.DodgeballCount = 1
+	t.installed[b.RevisionID()] = v
+	return 1, nil
+}

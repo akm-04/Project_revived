@@ -246,6 +246,13 @@ func (s Service) EnsureBuiltinInstalled(ctx context.Context, op operation.Contex
 			if gotGodsTrial != 1 {
 				return errors.New("content registry gods trial count")
 			}
+			gotDodgeball, err := s.Repo.InsertDodgeball(tctx, scope.Tx, b)
+			if err != nil {
+				return err
+			}
+			if gotDodgeball != 1 {
+				return errors.New("content registry dodgeball count")
+			}
 			gotPetCampaign, err := s.Repo.InsertPetCampaign(tctx, scope.Tx, b)
 			if err != nil {
 				return err

@@ -21,12 +21,23 @@ from pathlib import Path
 from typing import Any, Iterable
 
 SCHEMA_VERSION = 1
-COMPILER_VERSION = "i9-6a-gods-trial"
+COMPILER_VERSION = "i9-6b-dodgeball"
 PARSER_VERSION = "lua-generated-v18-guild-invite"
 EXPECTED_SOURCE_ARCHIVE_SHA256 = "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
 SOURCE_PREFIX = "app-assets/output/assets/src_64/"
 
 SOURCE_MANIFEST = [
+    ('data/tables/dodge_ball.lua', '2f5d4d438a5eeb75e401c412786e6a4a98e5f899f36834b1513f5353f3858865', 'I9_6B_DODGEBALL_SOURCE_BOUNDARY'),
+    ('data/tables/dodge_group.lua', '9442d95bd149a45824a2e55f37d1ba43817dc9d6d7a29eb0fcb0332649431885', 'I9_6B_DODGEBALL_SOURCE_BOUNDARY'),
+    ('data/tables/dodge_buff.lua', '82d91d04f79b2eb4e57c9e863221d2651b905bd79053172d1e94198ce08bc2c4', 'I9_6B_DODGEBALL_SOURCE_BOUNDARY'),
+    ('data/tables/dodge_activity.lua', '58cebb404d0e5bfd9815e8324f61e3e17a589dd3ec34d87cd1bba8e105174802', 'I9_6B_DODGEBALL_SOURCE_BOUNDARY'),
+    ('app/model/ThrowSandbag.lua', 'c69ae35194dc33018274230debc6181f38aafd536d52c3ba55ee821e1fd57be0', 'I9_6B_DODGEBALL_SOURCE_BOUNDARY'),
+    ('app/windows/SubExamWindow.lua', '3a3f2b54f6d52fc53da121b90809d10eac81f2cd6199c838e5aadda5f6212b92', 'I9_6B_DODGEBALL_SOURCE_BOUNDARY'),
+    ('app/windows/ThrowSandbagWindow.lua', 'f679cb6d2b1a6c90fa559722d688e44abb0f575d342afbc8ff7e30903e10e1e1', 'I9_6B_DODGEBALL_SOURCE_BOUNDARY'),
+    ('app/windows/ThrowSandbagMainWindow.lua', 'e4af2f8684c018a9844750650d2ba3e7fbb56bbbf9f359598c1bcc5ba95b8b11', 'I9_6B_DODGEBALL_SOURCE_BOUNDARY'),
+    ('app/windows/ThrowSandbagGuideWindow.lua', 'f4ef44bcd1fc7ec01b2c34b02579525f795f792c0be166eef3b4a6d060ad353a', 'I9_6B_DODGEBALL_SOURCE_BOUNDARY'),
+    ('app/windows/ThrowSandbagInviteWindow.lua', '1b61dec4d2b8325ea77c5b375455c56dbb22378846d1b47915e568dfc4fef755', 'I9_6B_DODGEBALL_SOURCE_BOUNDARY'),
+    ('app/windows/ThrowSandbagResultWindow.lua', '814809bbd9a768d982613a7c2c565aa9fbf12ba4df413ad31759e338cf1deca8', 'I9_6B_DODGEBALL_SOURCE_BOUNDARY'),
     ('app/common/tables/PetCampaignTable.lua', '2e861f3f191a53ecc75591a2f5eff7fc8def36440cec5e80999f95d2faec231a', 'I9_5C_PET_CAMPAIGN_SOURCE_BOUNDARY'),
     ('app/windows/PetSweepingWindow.lua', 'cb7be4474630e9b3faf170f8e07fece4e06996734cb367ef4424dd76ce410d2e', 'I9_5C_PET_CAMPAIGN_SOURCE_BOUNDARY'),
     ('app/windows/PetCampaignRuleWindow.lua', 'e18ed641ecd4aff882b6f0027a36e7a9a8dacda593dfc2f1128be9a7f0bd572f', 'I9_5C_PET_CAMPAIGN_SOURCE_BOUNDARY'),
@@ -244,7 +255,7 @@ ENABLED_CAPABILITIES = [
     "SCALAR_MARCH_COIN_I9_4A", "MISSION_ACTIVITY_I9_4B", "MONTHLY_SIGNIN_I9_4C", "AWAKENING_MISSIONS_I9_4D", "SCALAR_GUILD_COIN_I9_4B", "DODGE_TICKET_STACK_I9_4B",
     "SUMMON_GACHA_I9_3E",
     "CAMPAIGN_MODE_I9_3A",
-    "CHAMPION_MARCH_I9_5A", "WORKPLACE_I9_5B", "PET_CAMPAIGN_I9_5C", "GODS_TRIAL_I9_6A",
+    "CHAMPION_MARCH_I9_5A", "WORKPLACE_I9_5B", "PET_CAMPAIGN_I9_5C", "GODS_TRIAL_I9_6A","DODGEBALL_I9_6B",
     "COSMETIC_TITLE_CONDITION_I7C6",
     "ACHIEVEMENT_CATALOG_I7C4FA",
     "CHAMPIONS_LEAGUE_I7C5F",
@@ -461,6 +472,7 @@ SOURCE_MANIFEST.append(('app/windows/TreasureDiaryWindow.lua', 'aa01854c16b0de8c
 from workplace_content import build_workplace
 from petcampaign_content import build_petcampaign
 from godstrial_content import build_godstrial
+from dodgeball_content import build_dodgeball
 from march_content import build_march
 from summon_content import build_summon
 from awakening_content import build_awakening
@@ -2286,6 +2298,7 @@ def build_artifacts(blobs: dict[str, SourceBlob], archive_sha256: str) -> dict[s
     artifacts = {
         "pet_campaign_catalog.json":build_petcampaign(blobs,parse_generated_lua_table,resources),
         "gods_trial_catalog.json":build_godstrial(blobs,parse_generated_lua_table,items),
+        "dodgeball_catalog.json":build_dodgeball(blobs,parse_generated_lua_table,items,hero_artifact),
         "workplace_catalog.json":build_workplace(blobs,parse_generated_lua_table,parse_base64_indexed_lua_table,indexed_field,resources),
         "march_catalog.json":build_march(blobs,parse_generated_lua_table,parse_base64_indexed_lua_table,indexed_field,resources),
         "campaign_catalog.json":build_campaign(blobs,parse_generated_lua_table,parse_base64_indexed_lua_table,indexed_field),

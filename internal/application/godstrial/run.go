@@ -85,7 +85,7 @@ func (s Mode) run(c context.Context, a identity.ActorContext, name string, reque
 			}
 			return json.Unmarshal(prior.ResultPayload, &out)
 		}
-		// The actor fence serializes this read with all mutations before lower-ranked participant locks.
+		// SERIALIZABLE retries a concurrent replacement of the pre-read participant set.
 		old, _, e := s.Store.ReadTx(c, sc.Tx, a.PlayerID)
 		if e != nil {
 			return e

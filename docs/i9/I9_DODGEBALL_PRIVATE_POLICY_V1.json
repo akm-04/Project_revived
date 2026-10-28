@@ -1,0 +1,40 @@
+{
+  "policy_id": "I9_DODGEBALL_PRIVATE_POLICY_V1",
+  "version": 1,
+  "classification": "PRIVATE_POLICY_NOT_RECOVERED_OFFICIAL_ALGORITHM",
+  "decisions": [
+    "D306",
+    "D307",
+    "D308",
+    "D309"
+  ],
+  "baseline_activity": 0,
+  "baseline_group_quotas": [
+    10,
+    12,
+    2,
+    1
+  ],
+  "marked_choices": 3,
+  "draw_policy": "I9_DODGEBALL_DRAWS_V1",
+  "draw_streams": [
+    "self",
+    "friend"
+  ],
+  "draw_count": 650,
+  "draw_range": [
+    1,
+    1000
+  ],
+  "occurrence_seconds": 3600,
+  "distinct_enter": "new ticket and new occurrence; exact operation receipt replay is free",
+  "result_validation": "bounded successful hit evidence against frozen source and I8 draws; no physics replay",
+  "friend_attribution": "qualifying frozen throw gate; source wire does not transmit per-target friend-hit boolean",
+  "unknowns": [
+    "original board/group sampling law",
+    "original draw range and array length",
+    "collision geometry and actual buff pickup timing",
+    "original seasonal dates"
+  ],
+  "design": "research/I9_6B/DESIGN.md"
+}
