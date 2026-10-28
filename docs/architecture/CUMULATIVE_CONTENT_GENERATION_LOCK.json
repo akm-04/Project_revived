@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "status": "CURRENT_CUMULATIVE_CONTENT_GENERATION_LOCK_I9_5B",
+  "status": "CUMULATIVE_CONTENT_GENERATION_LOCK_I9_6A",
   "rule": "Historical validators keep their phase-specific semantic invariants. In cumulative/current mode they may accept only an explicitly registered successor compiler generation at or after their baseline. New generations are append-only review events; registering a generation does not waive capability/count/source/migration/ownership assertions.",
   "generations": [
     {
@@ -394,14 +394,22 @@
       "parser_version": "lua-generated-v18-guild-invite",
       "revision_id": "676279251de66e199adcaca7c7b17c5e4d5458367a635b5a89ce443db02986c3",
       "scope": "Source120 floors, starless tower lifecycle and typed pet awakening origins; user-approved D261/D262."
+    },
+    {
+      "ordinal": 55,
+      "stage": "I9-6A Gods Trial",
+      "compiler_version": "i9-6a-gods-trial",
+      "parser_version": "lua-generated-v18-guild-invite",
+      "revision_id": "38afcc935cd80bfa513085c279c30dc9d8339dd77fa8455858f2bd360f3e2920",
+      "scope": "Source42 stages and84 dropboxes; existing Spirit specialized materialization and temporal LP owner."
     }
   ],
   "current": {
-    "ordinal": 54,
-    "stage": "I9-5C Sky Tower",
-    "compiler_version": "i9-5c-petcampaign",
+    "ordinal": 55,
+    "stage": "I9-6A Gods Trial",
+    "compiler_version": "i9-6a-gods-trial",
     "parser_version": "lua-generated-v18-guild-invite",
-    "revision_id": "676279251de66e199adcaca7c7b17c5e4d5458367a635b5a89ce443db02986c3",
-    "scope": "Source120 floors, starless tower lifecycle and typed pet awakening origins; user-approved D261/D262."
+    "revision_id": "38afcc935cd80bfa513085c279c30dc9d8339dd77fa8455858f2bd360f3e2920",
+    "scope": "Source42 stages and84 dropboxes; existing Spirit specialized materialization and temporal LP owner."
   }
 }

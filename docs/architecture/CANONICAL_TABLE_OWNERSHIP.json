@@ -4245,6 +4245,34 @@
       "migration": "migrations/00092_i9_5c_petcampaign.sql",
       "owner": "petcampaign",
       "write_exceptions": []
+    },
+    "content_gods_trial_catalogs": {
+      "allowed_query_owners": [
+        "content-registry"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/contentstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/contentstore/"
+      ],
+      "migration": "migrations/00093_i9_6a_gods_trial.sql",
+      "owner": "content-registry",
+      "write_exceptions": []
+    },
+    "godstrial_players": {
+      "allowed_query_owners": [
+        "godstrial"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/godstrialstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/godstrialstore/"
+      ],
+      "migration": "migrations/00093_i9_6a_gods_trial.sql",
+      "owner": "godstrial",
+      "write_exceptions": []
     }
   }
 }

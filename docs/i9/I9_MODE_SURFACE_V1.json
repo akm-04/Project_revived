@@ -18,9 +18,9 @@
  "counts": {
   "by_disposition": {
    "DELIVERED": 185,
-   "ACTIVE": 454,
+   "ACTIVE": 451,
    "LATER": 501,
-   "INACTIVE_SUPERSEDED": 22,
+   "INACTIVE_SUPERSEDED": 25,
    "INACTIVE_D79": 21
   },
   "active_by_stage": {
@@ -33,7 +33,7 @@
    "I9-5": 24,
    "I9-8": 74,
    "I9-9": 46,
-   "I9-6": 33
+   "I9-6": 30
   }
  },
  "mids": [
@@ -10410,9 +10410,9 @@
    "mid": 3088,
    "name": "GET_HUNQI_INFO",
    "family": "GODS_TRIAL_HORCRUX",
-   "disposition": "ACTIVE",
-   "target": "I9-6",
-   "v2": "unimplemented",
+   "disposition": "INACTIVE_SUPERSEDED",
+   "target": null,
+   "v2": "inactive_superseded_D300",
    "v1": null
   },
   {
@@ -10448,8 +10448,8 @@
    "family": "GODS_TRIAL_HORCRUX",
    "disposition": "ACTIVE",
    "target": "I9-6",
-   "v2": "unimplemented",
-   "v1": "LITERAL_STUB"
+   "v2": "implemented",
+   "v1": "DELEGATED_GODS_TRIAL_SERVICE_REFERENCE"
   },
   {
    "mid": 3093,
@@ -10457,8 +10457,8 @@
    "family": "GODS_TRIAL_HORCRUX",
    "disposition": "ACTIVE",
    "target": "I9-6",
-   "v2": "unimplemented",
-   "v1": "LITERAL_STUB"
+   "v2": "implemented",
+   "v1": "DELEGATED_GODS_TRIAL_SERVICE_REFERENCE"
   },
   {
    "mid": 3094,
@@ -10482,9 +10482,9 @@
    "mid": 3096,
    "name": "HUNQI_BUY_ENERGY",
    "family": "GODS_TRIAL_HORCRUX",
-   "disposition": "ACTIVE",
-   "target": "I9-6",
-   "v2": "unimplemented",
+   "disposition": "INACTIVE_SUPERSEDED",
+   "target": null,
+   "v2": "inactive_superseded_D300",
    "v1": null
   },
   {
@@ -10493,16 +10493,16 @@
    "family": "GODS_TRIAL_HORCRUX",
    "disposition": "ACTIVE",
    "target": "I9-6",
-   "v2": "unimplemented",
-   "v1": "LITERAL_STUB"
+   "v2": "implemented",
+   "v1": "DELEGATED_GODS_TRIAL_SERVICE_REFERENCE"
   },
   {
    "mid": 3098,
    "name": "HUNQI_CREATE",
    "family": "GODS_TRIAL_HORCRUX",
-   "disposition": "ACTIVE",
-   "target": "I9-6",
-   "v2": "unimplemented",
+   "disposition": "INACTIVE_SUPERSEDED",
+   "target": null,
+   "v2": "inactive_superseded_D300",
    "v1": null
   },
   {
@@ -10511,8 +10511,8 @@
    "family": "GODS_TRIAL_HORCRUX",
    "disposition": "ACTIVE",
    "target": "I9-6",
-   "v2": "unimplemented",
-   "v1": "LITERAL_STUB"
+   "v2": "implemented",
+   "v1": "DELEGATED_GODS_TRIAL_SERVICE_REFERENCE"
   },
   {
    "mid": 3100,
@@ -10520,8 +10520,8 @@
    "family": "GODS_TRIAL_HORCRUX",
    "disposition": "ACTIVE",
    "target": "I9-6",
-   "v2": "unimplemented",
-   "v1": "LITERAL_STUB"
+   "v2": "implemented",
+   "v1": "DELEGATED_GODS_TRIAL_SERVICE_REFERENCE"
   },
   {
    "mid": 3101,
@@ -10529,8 +10529,8 @@
    "family": "GODS_TRIAL_HORCRUX",
    "disposition": "ACTIVE",
    "target": "I9-6",
-   "v2": "unimplemented",
-   "v1": "STATE_BACKED"
+   "v2": "implemented",
+   "v1": "DELEGATED_GODS_TRIAL_SERVICE_REFERENCE"
   },
   {
    "mid": 3104,

@@ -21,7 +21,7 @@ from pathlib import Path
 from typing import Any, Iterable
 
 SCHEMA_VERSION = 1
-COMPILER_VERSION = "i9-5c-petcampaign"
+COMPILER_VERSION = "i9-6a-gods-trial"
 PARSER_VERSION = "lua-generated-v18-guild-invite"
 EXPECTED_SOURCE_ARCHIVE_SHA256 = "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
 SOURCE_PREFIX = "app-assets/output/assets/src_64/"
@@ -244,7 +244,7 @@ ENABLED_CAPABILITIES = [
     "SCALAR_MARCH_COIN_I9_4A", "MISSION_ACTIVITY_I9_4B", "MONTHLY_SIGNIN_I9_4C", "AWAKENING_MISSIONS_I9_4D", "SCALAR_GUILD_COIN_I9_4B", "DODGE_TICKET_STACK_I9_4B",
     "SUMMON_GACHA_I9_3E",
     "CAMPAIGN_MODE_I9_3A",
-    "CHAMPION_MARCH_I9_5A", "WORKPLACE_I9_5B", "PET_CAMPAIGN_I9_5C",
+    "CHAMPION_MARCH_I9_5A", "WORKPLACE_I9_5B", "PET_CAMPAIGN_I9_5C", "GODS_TRIAL_I9_6A",
     "COSMETIC_TITLE_CONDITION_I7C6",
     "ACHIEVEMENT_CATALOG_I7C4FA",
     "CHAMPIONS_LEAGUE_I7C5F",
@@ -460,6 +460,7 @@ SOURCE_MANIFEST.append(('app/windows/TreasureRewardWindow.lua', 'e4dab2cf5caa25b
 SOURCE_MANIFEST.append(('app/windows/TreasureDiaryWindow.lua', 'aa01854c16b0de8c49d9b08d99529b223b83910d1f0b4f62bcedde36f923bc4a', 'I9_5B_WORKPLACE_SOURCE_BOUNDARY'))
 from workplace_content import build_workplace
 from petcampaign_content import build_petcampaign
+from godstrial_content import build_godstrial
 from march_content import build_march
 from summon_content import build_summon
 from awakening_content import build_awakening
@@ -2284,6 +2285,7 @@ def build_artifacts(blobs: dict[str, SourceBlob], archive_sha256: str) -> dict[s
     dorm_artifact=build_dorm(blobs,parse_generated_lua_table,pipe_ints,hero_artifact["templates"],partner_keys,partner_rows,super_keys,super_rows,indexed_field,items,CompileError)
     artifacts = {
         "pet_campaign_catalog.json":build_petcampaign(blobs,parse_generated_lua_table,resources),
+        "gods_trial_catalog.json":build_godstrial(blobs,parse_generated_lua_table,items),
         "workplace_catalog.json":build_workplace(blobs,parse_generated_lua_table,parse_base64_indexed_lua_table,indexed_field,resources),
         "march_catalog.json":build_march(blobs,parse_generated_lua_table,parse_base64_indexed_lua_table,indexed_field,resources),
         "campaign_catalog.json":build_campaign(blobs,parse_generated_lua_table,parse_base64_indexed_lua_table,indexed_field),

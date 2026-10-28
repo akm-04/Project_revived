@@ -243,6 +243,12 @@ func (Store) VerifyRevision(ctx context.Context, q tx.Queryer, b registry.Bundle
 		return registry.Verification{}, err
 	}
 	v.Exact = v.Exact && topFloorExact
+	var trialExact bool
+	err = q.QueryRow(ctx, verifyGodsTrialSQL, b.RevisionID(), string(b.GodsTrialJSON())).Scan(&trialExact, &v.GodsTrialCount)
+	if err != nil {
+		return registry.Verification{}, err
+	}
+	v.Exact = v.Exact && trialExact
 	var petExact bool
 	err = q.QueryRow(ctx, verifyPetCampaignSQL, b.RevisionID(), string(b.PetCampaignJSON())).Scan(&petExact, &v.PetCampaignCount)
 	if err != nil {

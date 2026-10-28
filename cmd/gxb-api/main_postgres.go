@@ -42,6 +42,7 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres/elementstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/frienddmstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/generaldmstore"
+	"gxb.local/backend/v2/internal/adapters/postgres/godstrialstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/guildprojection"
 	"gxb.local/backend/v2/internal/adapters/postgres/guildstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/i4store"
@@ -80,6 +81,7 @@ import (
 	"gxb.local/backend/v2/internal/application/frienddm"
 	"gxb.local/backend/v2/internal/application/generaldm"
 	appgeneration "gxb.local/backend/v2/internal/application/generation"
+	appgodstrial "gxb.local/backend/v2/internal/application/godstrial"
 	"gxb.local/backend/v2/internal/application/guildcore"
 	appevolution "gxb.local/backend/v2/internal/application/heroevolution"
 	appi5 "gxb.local/backend/v2/internal/application/i5"
@@ -287,7 +289,7 @@ func main() {
 		LoginTime:               postgres.AuthoritativeTime{Queryer: pool},
 		LoginReconcilers:        []appboot.CharacterLoginReconciler{appi5.AwakeningBootstrap{Owner: i5svc}, appi5.SignInBootstrap{Owner: i5svc}, appi5.MissionBootstrap{Owner: i5svc}, appi5.PetStarterLoginReconciler{Store: i5db, Content: contentDB}},
 		OperationBinder:         contentstore.Store{},
-		DetailContributors:      []appboot.MID1DetailContributor{appi5.AwakeningBootstrap{Owner: i5svc}, appi5.SignInBootstrap{Owner: i5svc}, appi5.MissionBootstrap{Owner: i5svc}, commerceprivilege.BootstrapProjection{Provider: privileges}, i5store.BootstrapProjection{Display: displayService, Content: contentstore.Store{Queryer: pool}, Privileges: privileges, MaxHeroColor: maxHeroColorPolicy, Spirit: spiritSvc}, activitystore.BootstrapProjection{Directory: activityDirectory}, guildprojection.BootstrapProjection{}, characterstore.HeroBootstrapProjection{AwakeningPositions: heroSvc.AwakeningPositions, Awakening: heroSvc, Content: contentDB, Library: librarySvc, Dorm: dormSvc, Book: bookSvc, Course: courseSvc, Inscription: inscriptionSvc, Element: elementSvc, Spirit: spiritSvc, Evolution: evolutionSvc}, librarystore.BootstrapProjection{Service: librarySvc}, bookstore.BootstrapProjection{Service: bookSvc, Content: contentDB}, coursestore.BootstrapProjection{Service: courseSvc, Content: contentDB}, characterstore.PetBootstrapProjection{Content: contentDB}, characterstore.SavedPresetBootstrapProjection{}, conquerstore.BootstrapProjection{Content: contentDB}, campaignWorld, vending, appmarch.Mode{Store: marchstore.Store{}}, apppetcampaign.Mode{Store: petcampaignstore.Store{}}},
+		DetailContributors:      []appboot.MID1DetailContributor{appi5.AwakeningBootstrap{Owner: i5svc}, appi5.SignInBootstrap{Owner: i5svc}, appi5.MissionBootstrap{Owner: i5svc}, commerceprivilege.BootstrapProjection{Provider: privileges}, i5store.BootstrapProjection{Display: displayService, Content: contentstore.Store{Queryer: pool}, Privileges: privileges, MaxHeroColor: maxHeroColorPolicy, Spirit: spiritSvc}, activitystore.BootstrapProjection{Directory: activityDirectory}, guildprojection.BootstrapProjection{}, characterstore.HeroBootstrapProjection{AwakeningPositions: heroSvc.AwakeningPositions, Awakening: heroSvc, Content: contentDB, Library: librarySvc, Dorm: dormSvc, Book: bookSvc, Course: courseSvc, Inscription: inscriptionSvc, Element: elementSvc, Spirit: spiritSvc, Evolution: evolutionSvc}, librarystore.BootstrapProjection{Service: librarySvc}, bookstore.BootstrapProjection{Service: bookSvc, Content: contentDB}, coursestore.BootstrapProjection{Service: courseSvc, Content: contentDB}, characterstore.PetBootstrapProjection{Content: contentDB}, characterstore.SavedPresetBootstrapProjection{}, conquerstore.BootstrapProjection{Content: contentDB}, campaignWorld, vending, appmarch.Mode{Store: marchstore.Store{}}, apppetcampaign.Mode{Store: petcampaignstore.Store{}}, appgodstrial.Mode{Store: godstrialstore.Store{}}},
 		DirectoryReconciler:     appdir.Reconciler{Source: i5db, Sink: i4store.DirectoryLevelProjection{}},
 	}
 	authority := i4store.RealtimeAuthority{Queryer: pool, DigestSecret: digestSecret, BearerSecret: bearerSecret, DerivationKeyID: keyID, BearerKeys: bearerKeys}
@@ -349,6 +351,10 @@ func main() {
 	ranking := stockruntime.RankingDispatcher{Authority: authority, Service: boardRanking, Trophy: achievements}
 	if fightReady {
 		topFloor := canonicalTopFloor(pool, runner, contentDB, i5db, i5svc, privileges, fight, owners)
+		godsTrial := canonicalGodsTrial(pool, runner, contentDB, i5db, i5svc, heroSvc, petSvc, fight, spiritSvc)
+		for _, mid := range stockruntime.GodsTrialMIDs {
+			mustRegister(mid, stockruntime.GodsTrialDispatcher{Authority: authority, Service: godsTrial})
+		}
 		petCampaign := canonicalPetCampaign(pool, runner, contentDB, i5db, i5svc, heroSvc, petSvc, fight)
 		ranking.PetCampaign = petCampaign
 		for _, mid := range stockruntime.PetCampaignMIDs {

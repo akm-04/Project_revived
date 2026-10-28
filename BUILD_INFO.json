@@ -313,7 +313,7 @@
   "character_asset_core_parent_status_at_backend_packaging": "PENDING_PASSMAP_CLOSURE_REVIEW",
   "commit": "ed63e7dcdd0e04f9153f1b1f54fe96ae85ceab51",
   "commit_role": "PARENT_ACCEPTED_PASS643_COMMIT; exact final I7A6A product HEAD/tree/archive are bound externally in PassMap and gate evidence to avoid self-reference",
-  "content_revision": "676279251de66e199adcaca7c7b17c5e4d5458367a635b5a89ce443db02986c3",
+  "content_revision": "38afcc935cd80bfa513085c279c30dc9d8339dd77fa8455858f2bd360f3e2920",
   "current_migration_high_water": "00092_i9_5c_petcampaign.sql",
   "current_stage": "I9_5C_IMPLEMENTATION_FOCUSED_GATES",
   "evidence": "Pass587 Gate-1 runtime evidence b59277c4d59a1c2622809a62f46605442232d77a380e97af7eeba2a3a75fe73e + Pass588 normal-chat I0-I6/source-oracle/release-reconciliation checks; exact Pass588 retest still required.",
@@ -773,7 +773,7 @@
     "version": "v0.125.0"
   },
   "language_floor": "go1.26.0",
-  "migration_high_water": "00092_i9_5c_petcampaign.sql",
+  "migration_high_water": "00093_i9_6a_gods_trial.sql",
   "migration_parent_backend_sha256": "73a668580d416fba4275b97898d083b9fdcb12c58773eeb9ceec2b1f3711c58d",
   "native_repair_parent_backend_sha256": "a6bf87421767c5451f69fcf359995d28d91a6c6f861f55422bcdd642583e0141",
   "native_repair_parent_implementation_revision_sha256": "0def8ffc697be0c43a40b3e447c328fee45011e76e9e87a69f17181b777e1c1b",
@@ -805,13 +805,13 @@
   "sbom_created_at": "2026-10-09T10:31:06Z",
   "schema_version": 1,
   "snapshot": "I9-5B Work Place district jobs; sole job owner, I5 SP/grants/objectives, real Combat automatic rivals; not stage acceptance.",
-  "stage": "I9-5C",
+  "stage": "I9-6A",
   "status": "IMPLEMENTATION_FOCUSED_GATES_IN_PROGRESS_NOT_STAGE_ACCEPTED",
   "target_go": "1.27.1",
   "target_postgresql": "18.6",
   "target_sqlc": "1.31.1",
   "toolbox_archive_sha256": "e4e194c9627929299577364b953b2468d6118fac4283fd8030f10b5a27456c2b",
-  "version": "v0.153.0",
+  "version": "v0.154.0",
   "w2_claimed": false,
   "i7c5b_contract": "docs/i7c5b-top-floor/I7C5B_POLICY.json",
   "i7c5b_preimplementation_pass": "730.0",
@@ -915,7 +915,7 @@
     "next_action": "ExactR2 publicstat core/Pet native/upgrade/restore qualification, primaryreality/final715sync. Hero blood-stage and prior actualproducer/parent/W2 gates remain.",
     "migration_high_water": "00084_i9_3e_summon.sql"
   },
-  "version_role": "I9-5C working implementation; focused proof only; Claude owns stage qualification and acceptance.",
+  "version_role": "I9-6A working implementation; focused proof only; Claude owns qualification and acceptance.",
   "i9_4c": {
     "accepted_base_git_head": "7134eacc35b6656fb43ef18244a96ea079c93d96",
     "research_publication": "789.0",
@@ -980,5 +980,21 @@
     ],
     "qualification_owner": "Claude per I9 split handoff",
     "created_status": "IMPLEMENTATION_FOCUSED_GATES_IN_PROGRESS_NOT_ACCEPTED"
+  },
+  "i9_6a": {
+    "contract": "docs/i9/I9_GODS_TRIAL_V1.json",
+    "policy": "docs/i9/I9_GODS_TRIAL_PRIVATE_POLICY_V1.json",
+    "base_commit": "d392933d0cd9721b90b97cecbc8562dfdd9d7362",
+    "content_generation": 55,
+    "mids": [
+      3092,
+      3093,
+      3097,
+      3099,
+      3100,
+      3101
+    ],
+    "created_status": "IMPLEMENTATION_FOCUSED_GATES_IN_PROGRESS_NOT_ACCEPTED",
+    "qualification_owner": "Claude per split handoff"
   }
 }

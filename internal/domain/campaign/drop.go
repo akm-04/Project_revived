@@ -19,8 +19,13 @@ func (c Catalog) Drop(boxID int64, source Uniform) []Item {
 	if !ok {
 		return []Item{}
 	}
+	return DropRows(box.Rows, source)
+}
+
+// DropRows applies the accepted D81 law to a source-ordered dropbox.
+func DropRows(rows [][2]int64, source Uniform) []Item {
 	out := []Item{}
-	for _, row := range box.Rows {
+	for _, row := range rows {
 		count, remainder := row[1]/rateScale, row[1]%rateScale
 		if remainder > 0 && int64(source.Uniform(rateScale)) < remainder {
 			count++

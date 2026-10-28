@@ -1,5 +1,5 @@
 {
-  "highest_migration": "00092_i9_5c_petcampaign.sql",
+  "highest_migration": "00093_i9_6a_gods_trial.sql",
   "migrations": {
     "00001_kernel_receipts.sql": "fab5b35f4ca5eee53c62b0b924ec448327e1aa31205015c22e24ee0f2b710fd8",
     "00002_identity_logicalserver_bootstrap.sql": "adff86d27dd1c02e4da0dec6b1aa21f33aaafd4d410849abc76bfeec58a5cd5f",
@@ -92,9 +92,10 @@
     "00089_i9_4_awakening.sql": "ff05a5a41268990d258b5b56c2b886bf18992f0f0668183ad2b3f61cc7f7a034",
     "00090_i9_5a_march.sql": "2fd84deb2f751aa458af28037482544b0b1f57d8bd99d421eadf53670bbe5cbf",
     "00091_i9_5b_workplace.sql": "eb5b02a895f5fad578bf1e88cbda36431f69012e9b881522d0b46510c7755aab",
-    "00092_i9_5c_petcampaign.sql": "5e62502db7882aaad013a804559c1650ca99d39e36f7a90b43a5ac5742370b74"
+    "00092_i9_5c_petcampaign.sql": "5e62502db7882aaad013a804559c1650ca99d39e36f7a90b43a5ac5742370b74",
+    "00093_i9_6a_gods_trial.sql": "98f1bd8b9d45230a34abeb9f50e4e1f02ba3fe7f464155082840e8dd1da1d663"
   },
   "rule": "All listed migration bytes are immutable for this cumulative candidate. Historical phase validators remain snapshot-specific; forward schema changes require a new migration. I7A-4A allocates forward-only 00033 for SocialRelation/SocialInbox durable foundations and an I4-owned non-unique discovery index; it performs no Social backfill and activates no stock routes.",
   "schema_version": 1,
-  "status": "CUMULATIVE_MIGRATION_LOCK_I9_5C"
+  "status": "CUMULATIVE_MIGRATION_LOCK_I9_6A"
 }
