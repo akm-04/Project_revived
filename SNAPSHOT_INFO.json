@@ -766,7 +766,7 @@
   "schema_version": 1,
   "snapshot": "I9-5B Work Place district jobs; sole job owner, I5 SP/grants/objectives, real Combat automatic rivals; not stage acceptance.",
   "stage": "I9-6A",
-  "status": "IMPLEMENTATION_FOCUSED_GATES_IN_PROGRESS_NOT_STAGE_ACCEPTED",
+  "status": "IMPLEMENTED_FOCUSED_CHECKS_COMPLETE_NOT_STAGE_ACCEPTED",
   "toolbox_archive_sha256": "e4e194c9627929299577364b953b2468d6118fac4283fd8030f10b5a27456c2b",
   "version": "v0.154.0",
   "w2_claimed": false,
@@ -952,6 +952,8 @@
       3101
     ],
     "created_status": "IMPLEMENTATION_FOCUSED_GATES_IN_PROGRESS_NOT_ACCEPTED",
-    "qualification_owner": "Claude per split handoff"
+    "qualification_owner": "Claude per split handoff",
+    "current_status": "IMPLEMENTED_NOT_STAGE_QUALIFIED",
+    "integration_base": "a9737132d4482429e3c60d58300b7b4f7872ba0f"
   }
 }
