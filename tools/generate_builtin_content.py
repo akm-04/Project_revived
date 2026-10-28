@@ -21,12 +21,29 @@ from pathlib import Path
 from typing import Any, Iterable
 
 SCHEMA_VERSION = 1
-COMPILER_VERSION = "i9-6b-dodgeball"
+COMPILER_VERSION = "i9-6c-memoir"
 PARSER_VERSION = "lua-generated-v18-guild-invite"
 EXPECTED_SOURCE_ARCHIVE_SHA256 = "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
 SOURCE_PREFIX = "app-assets/output/assets/src_64/"
 
 SOURCE_MANIFEST = [
+    ('app/model/MemoriesOfSchool.lua', '6bf59801d27aa39afc96fbab02580af7c1c5bc5c5586691459ede6b9e7181193', 'I9_6C_MEMOIR_SOURCE_BOUNDARY'),
+    ('app/common/tables/BattleTable.lua', '4b0893ef16b7908f1be8a3a0ba9427c73448fd82f275b55d8bfaf54bffe3f659', 'I9_6C_MEMOIR_SOURCE_BOUNDARY'),
+    ('app/scenes/BattleCreateReport.lua', '397ab8c281fd713050c93592f1b37b35a5702fed45c61fc47f0bc0420d0f0326', 'I9_6C_MEMOIR_SOURCE_BOUNDARY'),
+    ('app/windows/MemoriesOfSchoolBossInfoWindow.lua', '2195bede545691085e47da1e5ec955b3dab83f3565706ef1a53fbc96bf89d9b1', 'I9_6C_MEMOIR_SOURCE_BOUNDARY'),
+    ('app/windows/MemoriesOfSchoolFinalRewardWindow.lua', 'df1ef8cf58d40895dfb0e420f07b759a5971a637c56e22a1a60a6a27024a4af0', 'I9_6C_MEMOIR_SOURCE_BOUNDARY'),
+    ('app/windows/MemoriesOfSchoolMainWindow.lua', '70117b5bae3a875eceee8a843bea0ea13f1ba841dd14058b69dedd661f72353b', 'I9_6C_MEMOIR_SOURCE_BOUNDARY'),
+    ('app/windows/MemoriesOfSchoolRebornWindow.lua', '5463bdcbd2c61caa2750cff01f94fb85213334ef1e9f286fb0b7018bd1197ebb', 'I9_6C_MEMOIR_SOURCE_BOUNDARY'),
+    ('app/windows/MemoriesOfSchoolTeamInfoWindow.lua', 'ae014f3113056b1eb742863e4a39028f7d60b99b5ab34b3a86f54a8932a52ad3', 'I9_6C_MEMOIR_SOURCE_BOUNDARY'),
+    ('app/windows/MemoriesOfSchoolWindow.lua', '4abacdeca0b2123b42a0527f951b8feb69d668cfe7c8a72f0fed6a1230177b9e', 'I9_6C_MEMOIR_SOURCE_BOUNDARY'),
+    ('app/common/tables/MazeCampaignTable.lua', '57b0cd533655dfbfd139ced65f76bd1d15f94f46cb2e9cfa06889b57a721ab0a', 'I9_6C_MEMOIR_SOURCE_BOUNDARY'),
+    ('app/common/tables/MazeFloorTable.lua', '3b16191115f8ea8f8c08bea3012576dcec0ca455d92b3f60d044af462cd386b9', 'I9_6C_MEMOIR_SOURCE_BOUNDARY'),
+    ('app/common/tables/MazePartnerCampaignTable.lua', 'afb19f218f477c7036ea97240cc5dececd70c82f052d338be3276eda1bbaacb7', 'I9_6C_MEMOIR_SOURCE_BOUNDARY'),
+    ('data/tables/maze.lua', '0d0ca0246cd2896611ee2180a6c37483e81f7a8671f5c2cda9ef6ed4df96338b', 'I9_6C_MEMOIR_SOURCE_BOUNDARY'),
+    ('data/tables/maze_floor.lua', '0c1380a80c01a431a357681c397aa9e668728fef3bcbc0f1e93a7c995f23a9bf', 'I9_6C_MEMOIR_SOURCE_BOUNDARY'),
+    ('data/tables/maze_partner_campaign.lua', '2aea1b67c26d3387635bd379d66507bc0e706dc96ba1c2b30a3cb4d35817b6a5', 'I9_6C_MEMOIR_SOURCE_BOUNDARY'),
+    ('data/tables/maze_campaign.lua', '5970856d119b724c7491cd2ba07f2773d07e63c33436fe94b1aff34a53e5d613', 'I9_6C_MEMOIR_SOURCE_BOUNDARY'),
+
     ('data/tables/dodge_ball.lua', '2f5d4d438a5eeb75e401c412786e6a4a98e5f899f36834b1513f5353f3858865', 'I9_6B_DODGEBALL_SOURCE_BOUNDARY'),
     ('data/tables/dodge_group.lua', '9442d95bd149a45824a2e55f37d1ba43817dc9d6d7a29eb0fcb0332649431885', 'I9_6B_DODGEBALL_SOURCE_BOUNDARY'),
     ('data/tables/dodge_buff.lua', '82d91d04f79b2eb4e57c9e863221d2651b905bd79053172d1e94198ce08bc2c4', 'I9_6B_DODGEBALL_SOURCE_BOUNDARY'),
@@ -255,7 +272,7 @@ ENABLED_CAPABILITIES = [
     "SCALAR_MARCH_COIN_I9_4A", "MISSION_ACTIVITY_I9_4B", "MONTHLY_SIGNIN_I9_4C", "AWAKENING_MISSIONS_I9_4D", "SCALAR_GUILD_COIN_I9_4B", "DODGE_TICKET_STACK_I9_4B",
     "SUMMON_GACHA_I9_3E",
     "CAMPAIGN_MODE_I9_3A",
-    "CHAMPION_MARCH_I9_5A", "WORKPLACE_I9_5B", "PET_CAMPAIGN_I9_5C", "GODS_TRIAL_I9_6A","DODGEBALL_I9_6B",
+    "CHAMPION_MARCH_I9_5A", "WORKPLACE_I9_5B", "PET_CAMPAIGN_I9_5C", "GODS_TRIAL_I9_6A","DODGEBALL_I9_6B", "MEMOIR_I9_6C",
     "COSMETIC_TITLE_CONDITION_I7C6",
     "ACHIEVEMENT_CATALOG_I7C4FA",
     "CHAMPIONS_LEAGUE_I7C5F",
@@ -473,6 +490,7 @@ from workplace_content import build_workplace
 from petcampaign_content import build_petcampaign
 from godstrial_content import build_godstrial
 from dodgeball_content import build_dodgeball
+from memoir_content import build_memoir
 from march_content import build_march
 from summon_content import build_summon
 from awakening_content import build_awakening
@@ -2299,6 +2317,7 @@ def build_artifacts(blobs: dict[str, SourceBlob], archive_sha256: str) -> dict[s
         "pet_campaign_catalog.json":build_petcampaign(blobs,parse_generated_lua_table,resources),
         "gods_trial_catalog.json":build_godstrial(blobs,parse_generated_lua_table,items),
         "dodgeball_catalog.json":build_dodgeball(blobs,parse_generated_lua_table,items,hero_artifact),
+        "memoir_catalog.json":build_memoir(blobs,parse_generated_lua_table,items,hero_artifact),
         "workplace_catalog.json":build_workplace(blobs,parse_generated_lua_table,parse_base64_indexed_lua_table,indexed_field,resources),
         "march_catalog.json":build_march(blobs,parse_generated_lua_table,parse_base64_indexed_lua_table,indexed_field,resources),
         "campaign_catalog.json":build_campaign(blobs,parse_generated_lua_table,parse_base64_indexed_lua_table,indexed_field),

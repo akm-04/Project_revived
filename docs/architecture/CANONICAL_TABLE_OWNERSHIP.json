@@ -4301,6 +4301,34 @@
       "migration": "migrations/00094_i9_6b_dodgeball.sql",
       "owner": "dodgeball",
       "write_exceptions": []
+    },
+    "content_memoir_catalogs": {
+      "allowed_query_owners": [
+        "content-registry"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/contentstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/contentstore/"
+      ],
+      "migration": "migrations/00095_i9_6c_memoir.sql",
+      "owner": "content-registry",
+      "write_exceptions": []
+    },
+    "memoir_players": {
+      "allowed_query_owners": [
+        "memoir"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/memoirstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/memoirstore/"
+      ],
+      "migration": "migrations/00095_i9_6c_memoir.sql",
+      "owner": "memoir",
+      "write_exceptions": []
     }
   }
 }

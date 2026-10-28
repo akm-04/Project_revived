@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "status": "CUMULATIVE_CONTENT_GENERATION_LOCK_I9_6A",
+  "status": "CUMULATIVE_CONTENT_GENERATION_LOCK_I9_6C_WORKING",
   "rule": "Historical validators keep their phase-specific semantic invariants. In cumulative/current mode they may accept only an explicitly registered successor compiler generation at or after their baseline. New generations are append-only review events; registering a generation does not waive capability/count/source/migration/ownership assertions.",
   "generations": [
     {
@@ -410,14 +410,22 @@
       "parser_version": "lua-generated-v18-guild-invite",
       "revision_id": "799f000e64486b0d854879e57c73dbf196fc5625cdc0d7e4922726609e9fc7a6",
       "scope": "Source90 targets,5 groups,6 buffs; frozen I8 entropy and private board/attestation policies D306-D309."
+    },
+    {
+      "ordinal": 57,
+      "stage": "I9-6C Memoir",
+      "compiler_version": "i9-6c-memoir",
+      "parser_version": "lua-generated-v18-guild-invite",
+      "revision_id": "a5d5fc91db5fb659a4140d38b31695c30be1e1bf1f3b5a18949e77a539ce82a5",
+      "scope": "Source3 floors,11 girls,6 bosses,226 fights and75 dropboxes. Working implementation; D310 approved, D311-D315 private policy. Not stage acceptance."
     }
   ],
   "current": {
-    "ordinal": 56,
-    "stage": "I9-6B Dodgeball",
-    "compiler_version": "i9-6b-dodgeball",
+    "ordinal": 57,
+    "stage": "I9-6C Memoir",
+    "compiler_version": "i9-6c-memoir",
     "parser_version": "lua-generated-v18-guild-invite",
-    "revision_id": "799f000e64486b0d854879e57c73dbf196fc5625cdc0d7e4922726609e9fc7a6",
-    "scope": "Source90 targets,5 groups,6 buffs; frozen I8 entropy and private board/attestation policies D306-D309."
+    "revision_id": "a5d5fc91db5fb659a4140d38b31695c30be1e1bf1f3b5a18949e77a539ce82a5",
+    "scope": "Source3 floors,11 girls,6 bosses,226 fights and75 dropboxes. Working implementation; D310 approved, D311-D315 private policy. Not stage acceptance."
   }
 }

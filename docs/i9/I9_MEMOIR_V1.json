@@ -1,0 +1,93 @@
+{
+  "schema_version": 1,
+  "contract_id": "I9_MEMOIR_V1",
+  "version": 1,
+  "node": "ROOT/I9/I9-6/I9-6C",
+  "status": "WORKING_IMPLEMENTATION_CONTRACT_NOT_STAGE_ACCEPTANCE",
+  "parent_amendment": "D310 explicitly user-approved; parent draft awaiting Claude publication",
+  "mids": [
+    2304,
+    2305,
+    2306,
+    2307,
+    2308,
+    2309,
+    2310,
+    2311,
+    2312,
+    2313,
+    2314,
+    2315
+  ],
+  "function_id": 64,
+  "model_type": 61,
+  "campaign_type": 53,
+  "trust": {
+    "monster": "CLIENT_FULL_REPORT_ATTESTED_V1",
+    "player": "SERVER_REPORT_AUTHORITATIVE_V1"
+  },
+  "owners": {
+    "Memoir": "one player row605; map/carry/occurrence/maxima",
+    "Combat": "I8 immutable admission/attestation/server report",
+    "I5": "stamina, crystal, keys, scrolls and other rewards"
+  },
+  "clauses": [
+    {
+      "id": "C1",
+      "rule": "Exact source census and immutable joins; separate identity namespaces."
+    },
+    {
+      "id": "C2",
+      "rule": "Twelve active stock MIDs and source wire; function64 durable eligibility."
+    },
+    {
+      "id": "C3",
+      "rule": "Durable map, movement visibility, guardian entitlement and floor progression."
+    },
+    {
+      "id": "C4",
+      "rule": "Grid-only START freezes eligible canonical actor inputs before attested RESULT selection."
+    },
+    {
+      "id": "C5",
+      "rule": "I8 data-only Memoir report policy validates selected actors and source wave end state; existing policies unchanged."
+    },
+    {
+      "id": "C6",
+      "rule": "Persistent HP/MP/rebirth, death eligibility and paid once-only revival."
+    },
+    {
+      "id": "C7",
+      "rule": "PvP uses server resolution outside locks and persisted final carry via registered transform; no ladder writes."
+    },
+    {
+      "id": "C8",
+      "rule": "Canonical I5 stamina/key/crystal debits and source reward/scroll grants; no preview-as-authority."
+    },
+    {
+      "id": "C9",
+      "rule": "Operation receipts, semantic replay, occurrence generations, rejection/expiry/abandon and crash recovery."
+    },
+    {
+      "id": "C10",
+      "rule": "Canonical lock ordering, coherent owner reads, immutable content and authoritative time."
+    },
+    {
+      "id": "C11",
+      "rule": "Stock local help/tutorial continuity; no invented objective producer or client modification."
+    },
+    {
+      "id": "C12",
+      "rule": "Focused proof plus explicit limits, contract/reality review and checkpoint; Claude owns stage qualification/seal."
+    }
+  ],
+  "private_decisions": [
+    "D311",
+    "D312",
+    "D313",
+    "D314",
+    "D315"
+  ],
+  "design": "research/I9_6C/DESIGN.md",
+  "qualification": "Split handoff section5; all existing stage gates remain. Not a seal."
+}

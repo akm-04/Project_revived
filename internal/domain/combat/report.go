@@ -23,6 +23,7 @@ type Report struct {
 	Pet       int64         `json:"pet,omitempty"`
 	Allies    []ActorStatus `json:"allies"`
 	Enemies   []ActorStatus `json:"enemies"`
+	Round     int           `json:"round,omitempty"`
 }
 
 type ActorStatus struct {
@@ -62,15 +63,26 @@ type ReportPolicy struct {
 	// HPPerFrozen, when positive, caps an actor's hp at this multiple of its
 	// frozen HP attribute; buffs may raise the stock hp limit.
 	HPPerFrozen float64
+	// SelectFrozenRoster admits a RESULT selection when START carried only a grid.
+	SelectFrozenRoster bool
+	// ReportedWave validates the single wave carried by Memoir's status map.
+	ReportedWave bool
 }
 
 func (p ReportPolicy) Valid() bool {
-	return versionedID.MatchString(p.ID) && p.Version > 0 && p.MaxHP > 0 && p.HPPerFrozen >= 0
+	selectionValid := !p.SelectFrozenRoster || p.Formation && p.Pet && p.CompleteEnemies
+	waveValid := !p.ReportedWave || p.CompleteEnemies && p.LivingWinner && p.WinClearsEnemies
+	return versionedID.MatchString(p.ID) && p.Version > 0 && p.MaxHP > 0 && p.HPPerFrozen >= 0 && selectionValid && waveValid
 }
 
 // Judge checks the report against the attempt's frozen snapshot and returns
 // the verdict with a stable reason code for a rejection (H-42, H-43, H-41).
 func (p ReportPolicy) Judge(snapshot Snapshot, report Report) (Verdict, string) {
+	verdict, reason, _ := p.JudgeWithProgress(snapshot, report)
+	return verdict, reason
+}
+
+func (p ReportPolicy) judgeStrict(snapshot Snapshot, report Report) (Verdict, string) {
 	battle := snapshot.Battle
 	if p.Formation {
 		if verdict, reason := judgeFormation(battle, report.Formation); verdict == VerdictRejected {

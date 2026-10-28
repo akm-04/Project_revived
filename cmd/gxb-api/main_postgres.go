@@ -351,6 +351,10 @@ func main() {
 	ranking := stockruntime.RankingDispatcher{Authority: authority, Service: boardRanking, Trophy: achievements}
 	if fightReady {
 		topFloor := canonicalTopFloor(pool, runner, contentDB, i5db, i5svc, privileges, fight, owners)
+		memoir := canonicalMemoir(pool, runner, contentDB, i5db, i5svc, heroSvc, fight, topFloor)
+		for _, mid := range stockruntime.MemoirMIDs {
+			mustRegister(mid, stockruntime.MemoirDispatcher{Authority: authority, Service: memoir})
+		}
 		dodgeball := canonicalDodgeball(pool, runner, contentDB, i5db, i5svc, fight, displayService)
 		for _, mid := range stockruntime.DodgeballMIDs {
 			mustRegister(mid, stockruntime.DodgeballDispatcher{Authority: authority, Service: dodgeball})

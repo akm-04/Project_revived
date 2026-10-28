@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "contract_id": "I9_MEMOIR_PRIVATE_POLICY_V1",
+  "version": 1,
+  "classification": "IMPLEMENTATION_DECISION",
+  "original_server_algorithm": "UNKNOWN",
+  "decision_documents": "research/I9_6C/DESIGN.md D311-D315",
+  "report_policy": "I9_MEMOIR_REPORT_V1",
+  "resolver_transform": "MEMOIR_CARRY_V1",
+  "selection_slots": 5,
+  "result_deadline_seconds": 3600,
+  "max_hp": 1000000000000,
+  "hp_per_frozen": 2,
+  "energy_charge": "admission once; source floor displayed cost",
+  "revive_exhaustion": "REFUSE_AFTER_SOURCE_330",
+  "drop_law": "existing D81 independent quotient plus residual at10000; not original-server claim",
+  "keys": "boss1 large; ordinary/player1 small; reconstructed quantities",
+  "map": "source counts, fixed1/54/53 start/end/guardian, no walls, without-replacement placement",
+  "qualification": "No gates waived"
+}
