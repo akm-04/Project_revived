@@ -28,7 +28,7 @@ func awakeningNative(t *testing.T) (*pg.Pool, i5.Service, identity.ActorContext,
 	t.Helper()
 	p := missionPool(t)
 	ctx := context.Background()
-	at := time.Date(2026, 10, 27, 12, 0, 0, 0, time.UTC)
+	at := upcomingOctober27()
 	actor := runtimeActor(t, p, at)
 	s := runtimeService(p, &missionClock{at: at})
 	content := contentstore.Store{Queryer: p}

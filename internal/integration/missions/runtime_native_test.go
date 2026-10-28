@@ -39,6 +39,17 @@ type missionClock struct{ at time.Time }
 
 func (c *missionClock) Now(context.Context) (time.Time, error) { return c.at, nil }
 
+// upcomingOctober27 is the next source October 27 at noon UTC still ahead of the wall clock: player rows carry
+// clock_timestamp(), and canonical admission refuses roots updated after the operation time.
+func upcomingOctober27() time.Time {
+	now := time.Now().UTC()
+	at := time.Date(now.Year(), time.October, 27, 12, 0, 0, 0, time.UTC)
+	if !at.After(now) {
+		at = at.AddDate(1, 0, 0)
+	}
+	return at
+}
+
 func runtimeActor(t *testing.T, p *pg.Pool, at time.Time) identity.ActorContext {
 	t.Helper()
 	ctx := context.Background()

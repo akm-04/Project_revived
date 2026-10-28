@@ -269,7 +269,7 @@ func (c signHeroCatalog) SignInCatalogTx(ctx context.Context, q tx.Queryer, revi
 func TestSignInNativeSourceHeroFreshFacetsAndDuplicate(t *testing.T) {
 	p := missionPool(t)
 	ctx := context.Background()
-	at := time.Date(2026, 10, 27, 12, 0, 0, 0, time.UTC)
+	at := upcomingOctober27()
 	a := runtimeActor(t, p, at)
 	clock := &missionClock{at: at}
 	s := runtimeService(p, clock)
@@ -294,7 +294,7 @@ func TestSignInNativeSourceHeroFreshFacetsAndDuplicate(t *testing.T) {
 		t.Fatal("fresh Hero", count, err)
 	}
 	// A new source month with the same Hero converts through the existing Vending fragment policy.
-	clock.at = time.Date(2026, 11, 2, 12, 0, 0, 0, time.UTC)
+	clock.at = at.AddDate(0, 0, 6)
 	body, err = s.ClaimSignIn(ctx, a, runtimeOperation(t, clock.at))
 	if err != nil {
 		t.Fatal(err)
