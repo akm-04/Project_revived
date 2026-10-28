@@ -302,20 +302,31 @@ func TestI9_5BWorkplaceNativeLifecycle(t *testing.T) {
 		t.Fatal(err)
 	}
 	request.SP = strongQuote.SP
-	if _, err = s.Dispatch(ctx, a, request, workplaceOperation(strongQuote, len(job.Chests), true, 3)); err != nil {
-		t.Fatal("full crew rival", err)
-	}
-	third := workplaceRecord(t, p, a).Slots[location.ID]
-	clock.at = time.Unix(third.Start+third.Quote.Seconds+1, 0).UTC()
-	if _, err = s.Claim(ctx, a, location.ID, op()); err != nil {
-		t.Fatal("full crew real claim", err)
-	}
-	won := workplaceRecord(t, p, a).Diary[0]
-	if fmt.Sprint(won["is_win"]) != "1" {
-		t.Fatal("full crew fixture did not win real resolver", won)
-	}
-	if award, ok := won["award"].(map[string]any); !ok || len(award["battle_award"].(map[string]any)) == 0 {
-		t.Fatal("real win missing reward", won)
+	// The rival scales to the crew's average level and combat draws real entropy, so one loss is possible.
+	for sequence := uint64(3); ; sequence++ {
+		if sequence > 8 {
+			t.Fatal("full crew fixture lost six real rival battles")
+		}
+		if _, err = s.Dispatch(ctx, a, request, workplaceOperation(strongQuote, len(job.Chests), true, sequence)); err != nil {
+			t.Fatal("full crew rival", err)
+		}
+		attempt := workplaceRecord(t, p, a).Slots[location.ID]
+		clock.at = time.Unix(attempt.Start+attempt.Quote.Seconds+1, 0).UTC()
+		if _, err = s.Claim(ctx, a, location.ID, op()); err != nil {
+			t.Fatal("full crew real claim", err)
+		}
+		result := workplaceRecord(t, p, a).Diary[0]
+		award, ok := result["award"].(map[string]any)
+		if !ok {
+			t.Fatal("real rival result missing award", result)
+		}
+		won := fmt.Sprint(result["is_win"]) == "1"
+		if won != (len(award["battle_award"].(map[string]any)) > 0) {
+			t.Fatal("battle reward does not follow the real outcome", result)
+		}
+		if won {
+			return
+		}
 	}
 }
 
