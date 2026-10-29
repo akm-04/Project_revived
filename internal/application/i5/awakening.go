@@ -205,6 +205,9 @@ func (s Service) ChangeAwakening(ctx context.Context, actor identity.ActorContex
 		if e != nil {
 			return e
 		}
+		if err := s.PrepareCharacterFunctionsTx(ctx, tr.Tx, actor.PlayerID); err != nil {
+			return err
+		}
 		old := root.Version
 		revision := scope.ContentRevision
 		if action == "wish" {
@@ -365,6 +368,9 @@ func (s Service) ChangeAwakening(ctx context.Context, actor identity.ActorContex
 			}
 		}
 		out.Body = body
+		if _, err := s.OpenCharacterFunctionsTx(ctx, tr.Tx, actor.PlayerID, scope.ContentRevision, scope.DecisionAt); err != nil {
+			return err
+		}
 		return s.putAwakeningReceipt(ctx, tr.Tx, actor, timed.Operation(), rid, fp, out)
 	})
 	if e != nil {
@@ -478,8 +484,18 @@ func (b AwakeningBootstrap) ReconcileCharacterLogin(ctx context.Context, t tx.Tx
 	if e := b.Owner.awakeningAvailable(); e != nil {
 		return e
 	}
-	_, e := b.Owner.Awakening.Store.LockAwakeningTx(ctx, t, actor.PlayerID)
-	return e
+	if _, err := b.Owner.Awakening.Store.LockAwakeningTx(ctx, t, actor.PlayerID); err != nil {
+		return err
+	}
+	if err := b.Owner.PrepareCharacterFunctionsTx(ctx, t, actor.PlayerID); err != nil {
+		return err
+	}
+	revision, err := b.Owner.Content.ActiveRevision(ctx, t)
+	if err != nil {
+		return err
+	}
+	_, err = b.Owner.OpenCharacterFunctionsTx(ctx, t, actor.PlayerID, revision, at)
+	return err
 }
 func (b AwakeningBootstrap) OverlayMID1(ctx context.Context, q tx.Queryer, actor identity.ActorContext, _ bool, _ time.Time, detail map[string]any) error {
 	rev, e := b.Owner.Content.ActiveRevision(ctx, q)

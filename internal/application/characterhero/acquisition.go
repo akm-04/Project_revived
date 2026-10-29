@@ -211,6 +211,11 @@ func (s Service) SummonNormal(ctx context.Context, actor identity.ActorContext, 
 			return err
 		}
 
+		if s.CharacterFunctions != nil {
+			if err := s.CharacterFunctions.PrepareCharacterFunctionsTx(txctx, scope.Tx, actor.PlayerID); err != nil {
+				return err
+			}
+		}
 		_, err = s.MaterialCosts.DebitMaterialCostTx(txctx, scope.Tx, actor.PlayerID, appi5.MaterialCost{Scalars: []appi5.ScalarMaterialCost{{ResourceKey: "mana", Amount: policy.Mana}}, Stacks: []appi5.StackMaterialCost{{ItemID: policy.Template.FragmentItemID, Amount: policy.FragmentCount}}}, boundOp)
 		if err != nil {
 			return err
@@ -228,6 +233,11 @@ func (s Service) SummonNormal(ctx context.Context, actor identity.ActorContext, 
 		}
 		if err := s.AcquisitionStore.SaveRootAllocatorTx(txctx, scope.Tx, nextRoot, root.StateVersion); err != nil {
 			return err
+		}
+		if s.CharacterFunctions != nil {
+			if _, err := s.CharacterFunctions.OpenCharacterFunctionsTx(txctx, scope.Tx, actor.PlayerID, revision, boundOp.StartedAt); err != nil {
+				return err
+			}
 		}
 		payload, err := encodeAcquisitionReceipt(h, admission)
 		if err != nil {
@@ -366,6 +376,11 @@ func (s Service) CreateVows(ctx context.Context, actor identity.ActorContext, ta
 		if err := s.admitVows(txctx, scope.Tx, root, heroes, tableID, revision, boundOp); err != nil {
 			return err
 		}
+		if s.CharacterFunctions != nil {
+			if err := s.CharacterFunctions.PrepareCharacterFunctionsTx(txctx, scope.Tx, actor.PlayerID); err != nil {
+				return err
+			}
+		}
 		at := character.HeroAcquisitionTemplate{TableID: tableID, OriginTableID: tableID, Kind: character.SuperHero, InitialStar: tmpl.InitialStar, FragmentItemID: tmpl.FragmentItemID}
 		h, err := newHero(actor.PlayerID, root.NextPartnerID, at, qualifying, revision, boundOp)
 		if err != nil {
@@ -380,6 +395,11 @@ func (s Service) CreateVows(ctx context.Context, actor identity.ActorContext, ta
 		}
 		if err := s.AcquisitionStore.SaveRootAllocatorTx(txctx, scope.Tx, nextRoot, root.StateVersion); err != nil {
 			return err
+		}
+		if s.CharacterFunctions != nil {
+			if _, err := s.CharacterFunctions.OpenCharacterFunctionsTx(txctx, scope.Tx, actor.PlayerID, revision, boundOp.StartedAt); err != nil {
+				return err
+			}
 		}
 		payload, err := encodeAcquisitionReceipt(h)
 		if err != nil {

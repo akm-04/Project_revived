@@ -218,6 +218,9 @@ func (s Service) Execute(c context.Context, a identity.ActorContext, cmd Command
 				settled = season.Number
 			}
 			root = d.Root{Revision: rev, Season: season.Number, SettledSeason: settled, Day: cat.Day(at), Version: 1, CreatedAt: at, UpdatedAt: at}
+			if len(cat.LegacyTitles) > 0 {
+				root.LegacyTitlesSince = at
+			}
 			if e = s.Store.PutRootTx(c, sc.Tx, root, 0); e != nil {
 				return e
 			}
@@ -422,6 +425,9 @@ func (s Service) Execute(c context.Context, a identity.ActorContext, cmd Command
 		old := root.Version
 		root.Version++
 		root.UpdatedAt = at
+		if len(cat.LegacyTitles) > 0 && root.LegacyTitlesSince.IsZero() {
+			root.LegacyTitlesSince = at
+		}
 		if e = s.Store.PutRootTx(c, sc.Tx, root, old); e != nil {
 			return e
 		}

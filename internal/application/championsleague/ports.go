@@ -71,6 +71,7 @@ type Combat interface {
 	AttemptTx(context.Context, tx.Queryer, ids.UUID) (cd.Attempt, bool, error)
 }
 type Mail interface {
+	DeliverLeagueTitleNoticeTx(context.Context, tx.Tx, i5.SettlementMailRequest, int64) (mail.Record, bool, error)
 	DeliverTx(context.Context, tx.Tx, i5.SettlementMailRequest) (mail.Record, bool, error)
 }
 
@@ -87,6 +88,7 @@ type Recipient interface {
 	ReceiveOriginTx(context.Context, tx.Tx, playerroot.Root, playerdisplay.Origin) error
 }
 type Entitlements interface {
+	ReadSourceMailTx(context.Context, tx.Queryer, identity.PlayerID, string, string) (mail.Record, bool, error)
 	ReadDisplayEntitlementsTx(context.Context, tx.Queryer, identity.PlayerID, string) ([]playerdisplay.Origin, error)
 }
 type Service struct {

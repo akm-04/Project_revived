@@ -255,7 +255,7 @@ func TestI7C5FLeagueSeasonOriginsTenRealSeasonsNative(t *testing.T) {
 		}
 		season = cat.SeasonNumbered(season.Number + 1)
 	}
-	if leagueScalar(t, p, `SELECT count(*) FROM league_cosmetic_origins WHERE player_id=$1 AND family='title'`, int64(a.PlayerID)) != 10 {
+	if leagueScalar(t, p, `SELECT count(*) FROM league_cosmetic_origins WHERE player_id=$1 AND family='title' AND catalog_id NOT BETWEEN 100078 AND 100080`, int64(a.PlayerID)) != 10 {
 		t.Fatal("cumulative title profile")
 	}
 	// Exact mirror deletion makes the scoped provider fail closed.

@@ -442,14 +442,22 @@
       "parser_version": "lua-generated-v18-guild-invite",
       "revision_id": "95041090e5496a3da82479b597b44911128811ce3f81365fe441324e12715865",
       "scope": "Source55 gate; D358 private policy; unsealed working implementation."
+    },
+    {
+      "ordinal": 61,
+      "stage": "I9-7D PvP residuals",
+      "compiler_version": "i9-7d-pvp-residuals",
+      "parser_version": "lua-generated-v18-guild-invite",
+      "revision_id": "73390dd0824af3f28a294850aaedc933aa5691c038bc9c40cf736c13ab7b36af",
+      "scope": "Separate legacy League titles; existing ten-title progression retained. D359 approved, D360 private policy, unsealed working implementation."
     }
   ],
   "current": {
-    "ordinal": 60,
-    "stage": "I9-7C Friend Fight",
-    "compiler_version": "i9-7c-friend-fight",
+    "ordinal": 61,
+    "stage": "I9-7D PvP residuals",
+    "compiler_version": "i9-7d-pvp-residuals",
     "parser_version": "lua-generated-v18-guild-invite",
-    "revision_id": "95041090e5496a3da82479b597b44911128811ce3f81365fe441324e12715865",
-    "scope": "Source55 gate; D358 private policy; unsealed working implementation."
+    "revision_id": "73390dd0824af3f28a294850aaedc933aa5691c038bc9c40cf736c13ab7b36af",
+    "scope": "Separate legacy League titles; existing ten-title progression retained. D359 approved, D360 private policy, unsealed working implementation."
   }
 }

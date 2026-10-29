@@ -54,7 +54,7 @@ func i94AwakeningOwners(p *pg.Pool) (i5.Service, hero.Service) {
 	heroes.AwakeningPositions = &hero.AwakeningPositionResolver{Raw: characterstore.RawAwakeningStore{}, Content: content, Queryer: p}
 	heroes.Equipment = content
 	heroes.MaterialCosts = i5.MaterialCostDebiter{Store: values, Content: content}
-	owner := i5.Service{Runner: runner, Store: values, Content: content, Privileges: i5.BaselinePrivilegeProvider{}, Functions: i5.LevelFunctionAnnouncements{}, Directory: i4store.DirectoryLevelProjection{}, Backpack: values, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}, MissionFresh: p, MissionTime: pg.AuthoritativeTime{Queryer: p}, Missions: &i5.MissionMaterializer{Store: values, Catalog: content}}
+	owner := i5.Service{CharacterFunctions: characterstore.FunctionPrerequisites{Store: store, Content: content}, Runner: runner, Store: values, Content: content, Privileges: i5.BaselinePrivilegeProvider{}, Functions: i5.LevelFunctionAnnouncements{}, Directory: i4store.DirectoryLevelProjection{}, Backpack: values, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}, MissionFresh: p, MissionTime: pg.AuthoritativeTime{Queryer: p}, Missions: &i5.MissionMaterializer{Store: values, Catalog: content}}
 	owner.Awakening = &i5.AwakeningRuntime{Store: values, Content: content, Heroes: heroes, Pets: pet.Service{Store: store, Awakening: store, Equipment: content}, Stacks: values, Costs: heroes.MaterialCosts}
 	return owner, heroes
 }
@@ -68,6 +68,8 @@ func TestI9_4DBloodRealCombatAttemptAndTerminal(t *testing.T) {
 	runner := tx.Runner{DB: p}
 	// Declared awakened/progression/equipment fixture; ordinary origin and progression are qualified separately.
 	exec(t, p, `UPDATE player_heroes SET table_id=11001001,level=100,color=15,equip_1=1,equip_2=1,equip_3=1,equip_4=1,equip_5=1,equip_6=1 WHERE player_id=$1 AND partner_id=$2`, int64(actor.PlayerID), ref.PartnerID)
+	// This older explicit Character fixture also needs the production function-state owner for D359.
+	exec(t, p, `INSERT INTO player_function_state_owners(player_id,state_version,updated_at) VALUES($1,1,clock_timestamp()) ON CONFLICT DO NOTHING`, int64(actor.PlayerID))
 	owner, heroes := i94AwakeningOwners(p)
 	heroes.AwakeningEquipment = &owner
 	if _, e := owner.ChangeAwakening(ctx, actor, "open", 2001001, 2, op()); e != nil {
@@ -147,5 +149,8 @@ func TestI9_4DBloodRealCombatAttemptAndTerminal(t *testing.T) {
 	raw, e := (characterstore.RawAwakeningStore{}).ReadRawAwakeningBirthTx(ctx, p, ref)
 	if e != nil || raw.RawStage != 3 {
 		t.Fatal(raw, e)
+	}
+	if count := scalar(t, p, `SELECT count(*) FROM player_function_unlocks WHERE player_id=$1 AND function_id=45`, int64(actor.PlayerID)); count != 1 {
+		t.Fatal("blood completion did not open Emblem", count)
 	}
 }

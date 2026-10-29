@@ -4,14 +4,13 @@ package provision
 import (
 	"context"
 	"fmt"
-	"strconv"
-	"strings"
 	"time"
 
 	"github.com/jackc/pgx/v5"
 
 	"gxb.local/backend/v2/internal/adapters/postgres"
 	"gxb.local/backend/v2/internal/adapters/postgres/campaignstore"
+	"gxb.local/backend/v2/internal/adapters/postgres/characterstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/commerceprivilegestore"
 	"gxb.local/backend/v2/internal/adapters/postgres/contentstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/i4store"
@@ -154,9 +153,6 @@ func Progress(context context.Context, databaseURL, accountID string, level int6
 			return nil, err
 		}
 	}
-	if level > 0 {
-		return summons, openDeferredFunctionFixtures(context, pool, content, revision, playerID, level)
-	}
 	return summons, nil
 }
 
@@ -191,49 +187,13 @@ func grantLines(context context.Context, pool *postgres.Pool, revision string, p
 	content := contentstore.Store{Queryer: pool}
 	store := i5store.Store{Queryer: pool}
 	privileges := commerceprivilege.Provider{Store: commerceprivilegestore.Store{}, Content: content}
-	owner := appi5.Service{Runner: tx.Runner{DB: pool}, Store: store, Content: content, Privileges: privileges, Functions: appi5.LevelFunctionAnnouncements{}, Directory: i4store.DirectoryLevelProjection{},
+	owner := appi5.Service{CharacterFunctions: characterstore.FunctionPrerequisites{Store: characterstore.Store{Queryer: pool}, Content: content}, Runner: tx.Runner{DB: pool}, Store: store, Content: content, Privileges: privileges, Functions: appi5.LevelFunctionAnnouncements{}, Directory: i4store.DirectoryLevelProjection{},
 		Backpack: store, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: pool}, Audit: audit.NopEmitter{}}
 	commandKey := fmt.Sprintf("player-%d-%s", playerID, request.ID)
 	if _, err := owner.AdminGrant(context, provisionOperator, playerID, commandKey, "vc-provision-v1", lines, request); err != nil {
 		return fmt.Errorf("admin grant: %w", err)
 	}
 	return nil
-}
-
-// openDeferredFunctionFixtures opens only kind 6/7 level-gate fixtures; it never writes a guide or story cursor.
-// shortcut: kind 6/7 gates have no qualified eligibility owner until I9-7; this is not tutorial proof.
-func openDeferredFunctionFixtures(context context.Context, pool *postgres.Pool, content contentstore.Store, revision string, playerID, level int64) error {
-	policy, err := content.ResolveFunctionGatePolicyTx(context, pool, revision)
-	if err != nil {
-		return err
-	}
-	transaction, err := pool.Begin(context, tx.Options{})
-	if err != nil {
-		return err
-	}
-	defer transaction.Rollback(context)
-	for _, gate := range policy.Gates {
-		openLevel, readable := stockOpenLevel(gate.RawOpenValue)
-		if gate.GateKind == "PURE_LEVEL" || !readable || openLevel > level || gate.AnnouncementCapability != "NONE" {
-			continue
-		}
-		if _, err := transaction.Exec(context, `INSERT INTO player_function_unlocks(player_id,function_id,opened_at,source_fact_key,state_version)
-			VALUES($1,$2,clock_timestamp(),$3,1) ON CONFLICT(player_id,function_id) DO NOTHING`, playerID, gate.FunctionID, "vc:provision:function:"+gate.SourceFactKey); err != nil {
-			return fmt.Errorf("function %d unlock: %w", gate.FunctionID, err)
-		}
-	}
-	return transaction.Commit(context)
-}
-
-// stockOpenLevel is the level stock FunctionOpenTable reads from a function.lua "kind|value[|...]" gate: kinds 1, 6 and 7 are
-// level gates; stage (2), VIP (3) and the rest are not.
-func stockOpenLevel(raw string) (int64, bool) {
-	fields := strings.Split(raw, "|")
-	if len(fields) < 2 || (fields[0] != "1" && fields[0] != "6" && fields[0] != "7") {
-		return 0, false
-	}
-	level, err := strconv.ParseInt(fields[1], 10, 64)
-	return level, err == nil
 }
 
 // Configure grants scenario resources and imports VIP through the production owners (D88), after stock birth.

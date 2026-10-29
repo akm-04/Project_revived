@@ -1052,7 +1052,7 @@ func validateManifest(raw []byte, manifest *Manifest) error {
 	if manifest.CompilerVersion == "i9-5a-march" {
 		expectedSources, expectedArtifacts = 335, 45
 	}
-	if manifest.CompilerVersion == "i9-7b-tournament-casual" || manifest.CompilerVersion == "i9-7c-friend-fight" {
+	if manifest.CompilerVersion == "i9-7b-tournament-casual" || manifest.CompilerVersion == "i9-7c-friend-fight" || manifest.CompilerVersion == "i9-7d-pvp-residuals" {
 		expectedSources, expectedArtifacts = 384, 50
 	}
 	if len(manifest.Sources) != expectedSources {

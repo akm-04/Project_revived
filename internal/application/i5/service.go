@@ -168,25 +168,26 @@ func projectionGrants(explicit []GrantResult, awards []Award) []GrantResult {
 }
 
 type Service struct {
-	Awakening       *AwakeningRuntime
-	SignIn          *SignInRuntime
-	Missions        *MissionMaterializer
-	MissionTime     gen.TimeAuthority
-	MissionFresh    tx.Queryer
-	Runner          tx.Runner
-	Store           Store
-	Content         ContentRuntime
-	Privileges      PrivilegeSnapshotProvider
-	Functions       FunctionAnnouncementProvider
-	Directory       DirectoryLevelProjectionPort
-	Backpack        BackpackReader
-	PartnerEntities PartnerEntityMaterializer
-	Spirits         SpiritMaterializer
-	Receipts        receipt.Store
-	ReceiptRead     receipt.Reader
-	RedeemSecret    []byte
-	Audit           audit.Emitter
-	Profile         tx.Profile
+	Awakening          *AwakeningRuntime
+	SignIn             *SignInRuntime
+	Missions           *MissionMaterializer
+	MissionTime        gen.TimeAuthority
+	MissionFresh       tx.Queryer
+	Runner             tx.Runner
+	Store              Store
+	Content            ContentRuntime
+	Privileges         PrivilegeSnapshotProvider
+	Functions          FunctionAnnouncementProvider
+	CharacterFunctions CharacterFunctionReader
+	Directory          DirectoryLevelProjectionPort
+	Backpack           BackpackReader
+	PartnerEntities    PartnerEntityMaterializer
+	Spirits            SpiritMaterializer
+	Receipts           receipt.Store
+	ReceiptRead        receipt.Reader
+	RedeemSecret       []byte
+	Audit              audit.Emitter
+	Profile            tx.Profile
 }
 
 var _ TxGrantSettler = Service{}
@@ -642,6 +643,13 @@ func (s Service) applyPreparedGrantTx(ctx context.Context, t tx.Tx, actor identi
 		}
 	}
 
+	if s.CharacterFunctions != nil && (pf.Partner != nil || pf.ProgressionPolicy != nil) {
+		opened, err := s.OpenCharacterFunctionsTx(ctx, t, plan.PlayerID, contentRevision, now)
+		if err != nil {
+			return GrantResult{}, err
+		}
+		effects.NewFunctionIDs = append(effects.NewFunctionIDs, opened...)
+	}
 	out := GrantResult{Awards: awards, Effects: effects, Materializations: materializations}
 	// Fungible-only grants retain the exact accepted v2 schema. Typed entity
 	// materialization advances only those receipts to v3 so legacy stock paths

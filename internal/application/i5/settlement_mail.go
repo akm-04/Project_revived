@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"reflect"
+	"strconv"
 	"strings"
 	"time"
 
@@ -47,7 +48,18 @@ type SettlementMail struct {
 
 // DeliverTx returns the delivered mail and whether it already existed.
 func (m SettlementMail) DeliverTx(ctx context.Context, t tx.Tx, r SettlementMailRequest) (mail.Record, bool, error) {
-	if m.Store == nil || t == nil || !r.Recipient.Valid() || strings.TrimSpace(r.SourceKind) == "" || reservedMailSources[r.SourceKind] || strings.TrimSpace(r.SourceKey) == "" || strings.TrimSpace(r.PolicyVersion) == "" || len(r.Lines) == 0 || r.At.IsZero() {
+	return m.deliverTx(ctx, t, r, false)
+}
+
+func (m SettlementMail) DeliverLeagueTitleNoticeTx(ctx context.Context, t tx.Tx, r SettlementMailRequest, titleID int64) (mail.Record, bool, error) {
+	if titleID < 100078 || titleID > 100080 || r.SourceKind != "CHAMPIONS_LEAGUE_LEGACY_TITLE" || r.SourceKey != strconv.FormatInt(titleID, 10) || len(r.Lines) != 0 {
+		return mail.Record{}, false, errors.New("invalid League title notice")
+	}
+	return m.deliverTx(ctx, t, r, true)
+}
+
+func (m SettlementMail) deliverTx(ctx context.Context, t tx.Tx, r SettlementMailRequest, notice bool) (mail.Record, bool, error) {
+	if m.Store == nil || t == nil || !r.Recipient.Valid() || strings.TrimSpace(r.SourceKind) == "" || reservedMailSources[r.SourceKind] || strings.TrimSpace(r.SourceKey) == "" || strings.TrimSpace(r.PolicyVersion) == "" || (len(r.Lines) == 0 && !notice) || r.At.IsZero() {
 		return mail.Record{}, false, errors.New("i5: settlement mail request incomplete")
 	}
 	for _, line := range r.Lines {

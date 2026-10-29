@@ -365,6 +365,11 @@ func (s Service) preflightGrantTx(ctx context.Context, t tx.Tx, plan grant.Plan,
 		}
 	}
 
+	if s.CharacterFunctions != nil && (out.Partner != nil || needsProgression) {
+		needsEconomyOwner = true
+		needsProgression = true
+		needsFunctionState = true
+	}
 	if needsMailCounter {
 		if err := appendGrantLock(&reqs, grantLockRankMailNamespace, "i5.mail-namespace", grantChildIdentity(plan.PlayerID, mail.Normal.String()), grantLockMailNamespace, "", 0, mail.Normal); err != nil {
 			return grantPreflight{}, err

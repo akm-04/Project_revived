@@ -176,6 +176,9 @@ func (s Service) cutoff(c context.Context, sc gen.TimedScope, ev event) error {
 		return e
 	}
 	settled := d.Settlement{Kind: ev.kind, Number: ev.number, CutoffAt: ev.at, SettledAt: at, Revision: rev, Rows: []d.SettlementRow{}}
+	if len(cat.LegacyTitles) > 0 && root.LegacyTitlesSince.IsZero() {
+		root.LegacyTitlesSince = at
+	}
 	origins := []OriginAward{}
 	changed := map[identity.PlayerID]d.Player{}
 	activeDay := cat.SeasonAt(ev.at.Add(-time.Nanosecond)).Open(ev.at.Add(-time.Nanosecond))
@@ -222,6 +225,22 @@ func (s Service) cutoff(c context.Context, sc gen.TimedScope, ev event) error {
 				origins = append(origins, OriginAward{Origin: playerdisplay.Origin{PlayerID: p.ID, Key: key + ":bubble", Owner: "ChampionsLeague", Family: "bubble", CatalogID: reward.BubbleID, StartsAt: &start, EndTime: start.Unix() + cat.BubbleSeconds, Revision: rev, StateVersion: 1}, Season: ev.number, Placement: place})
 			}
 			if place.Group == 3 && place.Rank <= 10 {
+				existing, err := s.Store.OriginsTx(c, sc.Tx, p.ID)
+				if err != nil {
+					return err
+				}
+				for _, title := range cat.LegacyTitles {
+					if !d.LegacyTitlePlacementEligible(place, ev.at, root.LegacyTitlesSince) {
+						continue
+					}
+					alreadyOwned := slices.ContainsFunc(existing, func(award OriginAward) bool {
+						return award.Origin.Family == "title" && award.Origin.CatalogID == title.Identifier
+					})
+					if alreadyOwned {
+						continue
+					}
+					origins = append(origins, OriginAward{Origin: playerdisplay.Origin{PlayerID: p.ID, Key: fmt.Sprintf("league:legacy-title:%d", title.Identifier), Owner: "ChampionsLeague", Family: "title", CatalogID: title.Identifier, StartsAt: &start, EndTime: 0, Revision: rev, StateVersion: 1}, Season: ev.number, Placement: place, Count: p.TopSeasons + 1})
+				}
 				p.TopSeasons++
 				row.TopSeasons = p.TopSeasons
 				if p.TopSeasons <= int64(len(cat.TitleIDs)) {
@@ -289,6 +308,24 @@ func (s Service) cutoff(c context.Context, sc gen.TimedScope, ev event) error {
 			if e = s.Achievements.ObserveLeagueDaysTx(c, sc.Tx, row.Player, rev, row.QualifyingDays, ev.at); e != nil {
 				return e
 			}
+		}
+	}
+	for _, award := range origins {
+		if !d.IsLegacyTitle(award.Origin.CatalogID) || award.Origin.Family != "title" {
+			continue
+		}
+		titleName := ""
+		for _, title := range cat.LegacyTitles {
+			if title.Identifier == award.Origin.CatalogID {
+				titleName = title.Name
+			}
+		}
+		if titleName == "" {
+			return d.ErrConflict
+		}
+		_, _, err := s.Mail.DeliverLeagueTitleNoticeTx(c, sc.Tx, i5.SettlementMailRequest{Recipient: award.Origin.PlayerID, SourceKind: "CHAMPIONS_LEAGUE_LEGACY_TITLE", SourceKey: strconv.FormatInt(award.Origin.CatalogID, 10), Title: cat.Mail["CROSS_ARENA_MAIL_TITLE"], Sender: cat.Mail["CROSS_ARENA_MAIL_SENDER"], Body: fmt.Sprintf("%s: %s", titleName, "The top 10 in the top group of the Champions League can receive"), PolicyVersion: d.LegacyTitlePolicy, At: ev.at}, award.Origin.CatalogID)
+		if err != nil {
+			return err
 		}
 	}
 	for _, award := range origins {

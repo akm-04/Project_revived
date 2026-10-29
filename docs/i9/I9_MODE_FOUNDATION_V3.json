@@ -1,0 +1,405 @@
+{
+  "schema_version": 1,
+  "contract_id": "I9_MODE_FOUNDATION_V3",
+  "version": 3,
+  "node": "ROOT/I9/I9-2",
+  "status": "WORKING_USER_APPROVED_D359_PENDING_CLAUDE_REGISTRY_MERGE",
+  "extends": [
+    "I9_MODE_FRAMEWORK_V1",
+    "I9_PARENT_CONTRACT_V1",
+    "I85_REQUEST_JOURNAL_V1",
+    "I9_MODE_FOUNDATION_V2"
+  ],
+  "label_rule": "PRIVATE_POLICY marks a private-server invention; UNKNOWN marks stock behaviour not recovered.",
+  "title": "Shared mode foundation: modes law, inactive surface, objective fact port, response decorator, composite function gates, VC provisioning, Wave-I ledger",
+  "rules": [
+    "MF1 Modes law (internal/domain/modes, pure). Day(t) = floor((unix + 28800 - 18000) / 86400) (F7); Week(t) = the Day of the Monday 05:00 GMT+8 that starts t's week (D84). Counter{Period, Used} normalizes lazily: a read in a later period starts at 0. Ladder{Prices, Beyond REFUSE|CLAMP_LAST}.Price(n) is the price of the n-th buy (1-based) as the client RefreshCostTable reads it. Sweep admission for star-bearing modes: star == 3, 1 <= count <= max. Starless Pet Campaign uses durable prior accepted victory: a nonempty normal interval current+1 through lifetime best, or an already cleared elite floor, with its ticket/time/entitlement gates. No stars are fabricated; unchanged AdmitSweep remains for star-bearing modes (D262). Existing family Day helpers move only when their stage edits them, with an equality test.",
+    "MF2 Inactive surface (F5, D83). Generated from I9_MODE_SURFACE_V1: every LATER, INACTIVE_D79 and INACTIVE_SUPERSEDED MID without a registered dispatcher answers HTTP 200 {\"error_code\": 1}, changes nothing, needs no session, and journals outcome INACTIVE_MODE (class ROUTINE, no raw envelope). A MID with a dispatcher keeps it (56, 59, 229, 234, 768, 781, 1537). Migration 00079 widens client_request_journal.outcome.",
+    "MF3 Objective fact port (F11). i5 ObjectiveFacts.RecordTx(ctx, t, facts) locks the player's open objective rows, applies each fact to rows whose definition accepts its kind (objective.ApplyFact, receipt identity objective-fact dedups a fact key) and saves them, inside the producer's transaction. With no matching rows it is a no-op. Producers in I9-2 (D97): every lobby PK mode settlement records kind PVP_FIGHT (objective.PVPFightKind), delta 1, attacker only, business key the fight/match id: Top Floor settleTx, 1on1 settleMatchTx, Arena settleMatchTx (not practice, not forfeit) and Champion League terminal (not void) (task_req 106).",
+    "MF4 Crystal spend ledger (D92). i5store SaveScalarTx records old - new into player_crystal_spend_days(player_id, game_day, spent) whenever crystal decreases, game_day = MF1 Day of the balance's updated_at. I5 read port CrystalSpentOnDayTx(player, day) is what I9-4 reads for task_req 126/127 as high water.",
+    "MF5 Response decorator (F17, D93). foundation/changes keeps a request change set in the context; tx.Runner stages each attempt and keeps it only after a clean commit (ambiguous commits keep nothing). Writers: SaveScalarTx (balance), progression save (exp, lev), function unlock insert (function id). stockruntime.Decorated renders economy_ and new_funcs_ on HTTP 200 object bodies without error_code; keys the dispatcher wrote win; new_funcs_ is the union. Mission deltas and redmarks_ are added by I9-4 through the same change set.",
+    "MF6 Composite function gates (D64, D91). function gate kind 2 '2|S' and kind 3 '3|L|V' are read by i5 from the compiled raw_open_value; the catalog keeps gate_kind UNSUPPORTED_COMPOSITE so the content revision does not move (D95). i5 opens kind 3 on level-up (VIP from the privilege snapshot) and on VIP change (privilege transition effect); i5 OpenStageFunctionsTx(player, normal campaign id) opens kind 2 and is called by I9-3 settlement. Openings write eligibility + unlock rows like pure level gates and record the function ids in the change set (MF5). D359 qualifies source16/37/45: kind6 requires Academy55+15owned girls or60+5owned girls; kind7 Emblem requires a canonical completed blood-awakened normal/super girl at hero level100. I5 owns monotonic eligibility/unlocks/change-set, Character owns typed prerequisite observations. Production acquisition/level/awakening and login recovery replace the VC unlock shortcut. Kinds4/8 and stages absent from campaign.lua93/94 stay closed. No gate is converted to pure level.",
+    "MF7 VC provisioner (D88). virtualclient/provision raises level through i5 AdminGrant PLAYER_EXP lines (production level-up and openings), fragments and mana through AdminGrant, VIP through commerceprivilege ImportManual when a scenario needs it. D359/I9-7D removes direct kind6/7 unlock fixtures after production producer proof. Tutorial cursor retirement remains owned by its existing I9-3 records; this amendment does not change tutorial acceptance.",
+    "MF8 Proof. Unit: Day/Week across 05:00 and Monday, counter rollover, ladder REFUSE/CLAMP_LAST, sweep admission, gate parsing, decorator merge, change-set staging. Native (PostgreSQL): fact recorder dedup, spend ledger, kind-3 on level-up and VIP import, kind-2 opener. VC: every inactive MID of a sample per disposition answers error_code 1 and journals INACTIVE_MODE; a provisioned player levels through AdminGrant and MID1 func_ids show the level gates. Strict gate with r4 tools.",
+    "MF9 Wave-I ledger. Each PASS421 fixture has one owner below; a stage that owns a fixture executes it in its native or VC tests and names the test in its closure."
+  ],
+  "wave_i_ledger": [
+    {
+      "id": 1,
+      "fixture": "inactive known mode mutation",
+      "owner": "I9-2"
+    },
+    {
+      "id": 2,
+      "fixture": "inactive read shape",
+      "owner": "I9-2"
+    },
+    {
+      "id": 3,
+      "fixture": "unknown MID",
+      "owner": "I9-2"
+    },
+    {
+      "id": 4,
+      "fixture": "region alias routing",
+      "owner": "I9-7"
+    },
+    {
+      "id": 5,
+      "fixture": "fish wager routing",
+      "owner": "LATER I10"
+    },
+    {
+      "id": 6,
+      "fixture": "old Peak MID",
+      "owner": "I9-2"
+    },
+    {
+      "id": 7,
+      "fixture": "casual two matcher workers",
+      "owner": "I9-7 (leaf I9-7B; D355 user-approved correction)"
+    },
+    {
+      "id": 8,
+      "fixture": "casual cancel vs match",
+      "owner": "I9-7 (leaf I9-7B; D355 user-approved correction)"
+    },
+    {
+      "id": 9,
+      "fixture": "friend accept vs reject",
+      "owner": "I9-7"
+    },
+    {
+      "id": 10,
+      "fixture": "friend duplicate accept",
+      "owner": "I9-7"
+    },
+    {
+      "id": 11,
+      "fixture": "academy duplicate move command",
+      "owner": "INACTIVE_D79"
+    },
+    {
+      "id": 12,
+      "fixture": "academy command vs phase close",
+      "owner": "INACTIVE_D79"
+    },
+    {
+      "id": 13,
+      "fixture": "star treasure NEXT retry",
+      "owner": "LATER I10"
+    },
+    {
+      "id": 14,
+      "fixture": "star treasure restart retry",
+      "owner": "LATER I10"
+    },
+    {
+      "id": 15,
+      "fixture": "hunqi START retry",
+      "owner": "LATER I10"
+    },
+    {
+      "id": 16,
+      "fixture": "hunqi auto reward crash",
+      "owner": "LATER I10"
+    },
+    {
+      "id": 17,
+      "fixture": "chapter boss late result after rollover",
+      "owner": "LATER I10"
+    },
+    {
+      "id": 18,
+      "fixture": "chapter boss duplicate RESULT",
+      "owner": "LATER I10"
+    },
+    {
+      "id": 19,
+      "fixture": "chocolate fight node duplicate result",
+      "owner": "LATER I10"
+    },
+    {
+      "id": 20,
+      "fixture": "chocolate sweep vs fight",
+      "owner": "LATER I10"
+    },
+    {
+      "id": 21,
+      "fixture": "conquer reset vs result",
+      "owner": "DELIVERED I7 conquer (re-run when I9 edits it)"
+    },
+    {
+      "id": 22,
+      "fixture": "fifth boss simultaneous lethal damage",
+      "owner": "LATER I10"
+    },
+    {
+      "id": 23,
+      "fixture": "quiz answer vs timeout",
+      "owner": "I9-10"
+    },
+    {
+      "id": 24,
+      "fixture": "fish duplicate bet request",
+      "owner": "LATER I10"
+    },
+    {
+      "id": 25,
+      "fixture": "fourth anni node result replay",
+      "owner": "LATER I10"
+    },
+    {
+      "id": 26,
+      "fixture": "lvbu move retry",
+      "owner": "LATER I10"
+    },
+    {
+      "id": 27,
+      "fixture": "monopoly FIGHT_WIN without current fight node",
+      "owner": "LATER I10"
+    },
+    {
+      "id": 28,
+      "fixture": "polar stage/boss result mixup",
+      "owner": "LATER I10"
+    },
+    {
+      "id": 29,
+      "fixture": "sakura sweep vs result",
+      "owner": "LATER I10"
+    },
+    {
+      "id": 30,
+      "fixture": "snow stale candidate result",
+      "owner": "LATER I10"
+    },
+    {
+      "id": 31,
+      "fixture": "third anni late boss result",
+      "owner": "LATER I10"
+    },
+    {
+      "id": 32,
+      "fixture": "unlimited temp result crash",
+      "owner": "INACTIVE_D79"
+    },
+    {
+      "id": 33,
+      "fixture": "war camp two teams capture same city",
+      "owner": "LATER I10"
+    },
+    {
+      "id": 34,
+      "fixture": "war camp fight worker retry",
+      "owner": "LATER I10"
+    },
+    {
+      "id": 35,
+      "fixture": "zhuge branch select retry",
+      "owner": "LATER I10"
+    },
+    {
+      "id": 36,
+      "fixture": "zhuge old boss result after reset",
+      "owner": "LATER I10"
+    },
+    {
+      "id": 37,
+      "fixture": "DB deadlock on mode mutation",
+      "owner": "each attempt-owning I9 stage, first I9-3"
+    },
+    {
+      "id": 38,
+      "fixture": "40001 retry",
+      "owner": "each attempt-owning I9 stage, first I9-3"
+    },
+    {
+      "id": 39,
+      "fixture": "ambiguous COMMIT after settlement",
+      "owner": "each attempt-owning I9 stage, first I9-3"
+    },
+    {
+      "id": 40,
+      "fixture": "auth revoke during result",
+      "owner": "each attempt-owning I9 stage, first I9-3"
+    },
+    {
+      "id": 41,
+      "fixture": "process crash after attempt commit",
+      "owner": "each attempt-owning I9 stage, first I9-3"
+    },
+    {
+      "id": 42,
+      "fixture": "process crash after settlement before reply",
+      "owner": "each attempt-owning I9 stage, first I9-3"
+    },
+    {
+      "id": 43,
+      "fixture": "River duplicate settlement wakeup",
+      "owner": "each attempt-owning I9 stage, first I9-3"
+    },
+    {
+      "id": 44,
+      "fixture": "River stale generation wakeup",
+      "owner": "each attempt-owning I9 stage, first I9-3"
+    },
+    {
+      "id": 45,
+      "fixture": "server clock jump backwards",
+      "owner": "each attempt-owning I9 stage, first I9-3"
+    },
+    {
+      "id": 46,
+      "fixture": "client device time forged",
+      "owner": "I9-2"
+    },
+    {
+      "id": 47,
+      "fixture": "room invite replay",
+      "owner": "LATER I10"
+    },
+    {
+      "id": 48,
+      "fixture": "candidate list stale",
+      "owner": "I9-7"
+    },
+    {
+      "id": 49,
+      "fixture": "borrowed hero changes after START",
+      "owner": "each attempt-owning I9 stage, first I9-3"
+    },
+    {
+      "id": 50,
+      "fixture": "ranking reward worker delayed",
+      "owner": "I9-7"
+    },
+    {
+      "id": 51,
+      "fixture": "mail delivery fails",
+      "owner": "each attempt-owning I9 stage, first I9-3"
+    },
+    {
+      "id": 52,
+      "fixture": "stack overflow during mode grant",
+      "owner": "each attempt-owning I9 stage, first I9-3"
+    },
+    {
+      "id": 53,
+      "fixture": "objective consumer duplicate",
+      "owner": "I9-2"
+    },
+    {
+      "id": 54,
+      "fixture": "mode policy version change mid-attempt",
+      "owner": "each attempt-owning I9 stage, first I9-3"
+    },
+    {
+      "id": 55,
+      "fixture": "event RNG policy rotation",
+      "owner": "LATER I10"
+    },
+    {
+      "id": 56,
+      "fixture": "operator closes event during START",
+      "owner": "LATER I10"
+    },
+    {
+      "id": 57,
+      "fixture": "operator changes rate",
+      "owner": "LATER I10"
+    },
+    {
+      "id": 58,
+      "fixture": "server restart during room",
+      "owner": "LATER I10"
+    },
+    {
+      "id": 59,
+      "fixture": "matcher service unavailable",
+      "owner": "LATER I10"
+    },
+    {
+      "id": 60,
+      "fixture": "report store unavailable after terminal",
+      "owner": "each attempt-owning I9 stage, first I9-3"
+    },
+    {
+      "id": 61,
+      "fixture": "malformed report request",
+      "owner": "each attempt-owning I9 stage, first I9-3"
+    },
+    {
+      "id": 62,
+      "fixture": "cross-server wrong scope",
+      "owner": "each attempt-owning I9 stage, first I9-3"
+    },
+    {
+      "id": 63,
+      "fixture": "guild membership lost before mode commit",
+      "owner": "each attempt-owning I9 stage, first I9-3"
+    },
+    {
+      "id": 64,
+      "fixture": "same result against wrong logical server",
+      "owner": "each attempt-owning I9 stage, first I9-3"
+    },
+    {
+      "id": 65,
+      "fixture": "inactive event mistakenly boot-hydrated",
+      "owner": "I9-10 (event centre hydration)"
+    },
+    {
+      "id": 66,
+      "fixture": "Lua false vs 0 inactive field",
+      "owner": "I9-10 (event centre hydration)"
+    },
+    {
+      "id": 67,
+      "fixture": "new future mode registration",
+      "owner": "LATER I10"
+    },
+    {
+      "id": 68,
+      "fixture": "new event gacha subpath",
+      "owner": "LATER I10"
+    },
+    {
+      "id": 69,
+      "fixture": "new shared boss",
+      "owner": "LATER I10"
+    },
+    {
+      "id": 70,
+      "fixture": "new generated run",
+      "owner": "LATER I10"
+    },
+    {
+      "id": 71,
+      "fixture": "new queue mode",
+      "owner": "LATER I10"
+    },
+    {
+      "id": 72,
+      "fixture": "new room mode",
+      "owner": "LATER I10"
+    }
+  ],
+  "obligations": [
+    "I9-3-KIND2-VC: I9-3 shows a kind-2 function (71 Dorm at 100018) opened in MID1 func_ids after the first clear (D94)",
+    "I9-4-SPEND-HIGHWATER: I9-4 reads CrystalSpentOnDayTx for task_req 126/127",
+    "I9-5-SKY-FACT: I9-5 pet campaign Sky City produces task_req 120 (D92)"
+  ],
+  "decisions": [
+    "D91",
+    "D92",
+    "D93",
+    "D94"
+  ],
+  "sources": [
+    "work/i9/stages/I9-2/RESEARCH.md"
+  ],
+  "supersedes": "I9_MODE_FOUNDATION_V1",
+  "amendment_basis": "D262 user confirms starless Sky Tower clear-only admission; exact source corroboration; all other rules preserved.",
+  "sealed_predecessor_sha256": "70941797b833c4ca177208e28dae1aece4e3ccec6cba921d93e9a58016fab71e"
+}
