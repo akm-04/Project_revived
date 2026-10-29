@@ -20,3 +20,14 @@ func TestReplayIndexesOnlyActualBattlesAndUsesJSONStringContent(t *testing.T) {
 		t.Fatal("report content was not a JSON string")
 	}
 }
+
+func TestReadyNoticeUsesStockPreparedFieldNames(t *testing.T) {
+	view := d.TournamentRoomView{Room: d.TournamentRoom{Ready: [2]bool{true, false}, Selection: d.SelectionRoom{Team: 1}}}
+	body := TournamentRoom(view)
+	if body["A_prepared"] != int64(1) || body["B_prepared"] != int64(0) {
+		t.Fatal(body)
+	}
+	if _, exists := body["A_is_prepared"]; exists {
+		t.Fatal("non-source prepared alias")
+	}
+}

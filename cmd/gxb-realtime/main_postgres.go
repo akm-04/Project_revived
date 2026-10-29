@@ -256,7 +256,14 @@ func run() error {
 		log.Fatal(err)
 	}
 	tournamentNotices := stockruntime.TournamentNoticeHandler{Service: apparena.TournamentNoticeReader{Store: arenastore.Store{}, Queryer: pool, Time: postgres.AuthoritativeTime{Queryer: pool}}, Registry: connectionsRegistry, Publisher: stockruntime.RealtimePublisher{Registry: tournamentEvents, Limits: limits.Default()}, Authority: authority, Time: postgres.AuthoritativeTime{Queryer: pool}, MaxHandles: runtimePolicy.MaxConnections, OnDeliveryError: func(err error) { log.Printf("tournament notice degraded: %v", err) }}
-	wakeups, err := realtimewakeup.NewRegistry(realtimewakeup.Registration{Route: apparena.TournamentNoticeRoute, Handler: tournamentNotices}, realtimewakeup.Registration{Route: postgres.SocialReloadRoute, Handler: socialHandler}, realtimewakeup.Registration{Route: frienddm.WakeupRoute, Handler: friendReconcile}, realtimewakeup.Registration{Route: generaldm.WakeupRoute, Handler: generalReconcile}, realtimewakeup.Registration{Route: achievement.NoticeRoute, Handler: achievementNotices})
+	friendEvents, err := stockruntime.NewFriendFightNoticeRegistry()
+	if err != nil {
+		log.Fatal(err)
+	}
+	friendFightDelivery := tournamentNotices
+	friendFightDelivery.Publisher = stockruntime.RealtimePublisher{Registry: friendEvents, Limits: limits.Default()}
+	friendNotices := stockruntime.FriendFightNoticeHandler{Service: apparena.FriendFightNoticeReader{Store: arenastore.Store{}, Directory: i4store.PlayerDirectoryReader{}, Queryer: pool, Time: postgres.AuthoritativeTime{Queryer: pool}}, Delivery: friendFightDelivery}
+	wakeups, err := realtimewakeup.NewRegistry(realtimewakeup.Registration{Route: apparena.FriendFightNoticeRoute, Handler: friendNotices}, realtimewakeup.Registration{Route: apparena.TournamentNoticeRoute, Handler: tournamentNotices}, realtimewakeup.Registration{Route: postgres.SocialReloadRoute, Handler: socialHandler}, realtimewakeup.Registration{Route: frienddm.WakeupRoute, Handler: friendReconcile}, realtimewakeup.Registration{Route: generaldm.WakeupRoute, Handler: generalReconcile}, realtimewakeup.Registration{Route: achievement.NoticeRoute, Handler: achievementNotices})
 	if err != nil {
 		log.Fatal(err)
 	}

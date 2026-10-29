@@ -397,6 +397,9 @@ func main() {
 		for _, mid := range stockruntime.ArenaMIDs {
 			mustRegister(mid, stockruntime.ArenaDispatcher{Authority: authority, Service: arena})
 		}
+		for _, mid := range stockruntime.FriendFightMIDs {
+			mustRegister(mid, stockruntime.FriendFightDispatcher{Authority: authority, Service: arena})
+		}
 		for _, mid := range stockruntime.TournamentMIDs {
 			mustRegister(mid, stockruntime.TournamentDispatcher{Authority: authority, Service: arena})
 		}

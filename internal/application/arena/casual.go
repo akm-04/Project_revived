@@ -17,7 +17,7 @@ func (service Service) QueueCasual(requestContext context.Context, actor identit
 	if err != nil {
 		return d.CasualEntry{}, err
 	}
-	result, err := service.tournamentCommand(requestContext, actor, operationContext, "casual-queue", operationContext.ID.String(), map[string]any{"player": actor.PlayerID}, func(requestContext context.Context, scope gen.TimedScope, _ d.Catalog) (TournamentCommandResult, error) {
+	result, err := service.tournamentCommand(requestContext, actor, operationContext, "casual-queue", operationContext.ID.String(), map[string]any{"player": actor.PlayerID}, ids.UUID{}, func(requestContext context.Context, scope gen.TimedScope, _ d.Catalog) (TournamentCommandResult, error) {
 		at := scope.Operation.DecisionAt()
 		period := d.CasualPeriodAt(at)
 		if !period.Open(at) {
@@ -54,6 +54,13 @@ func (service Service) QueueCasual(requestContext context.Context, actor identit
 				return TournamentCommandResult{}, err
 			}
 		}
+		busy, err := service.Store.FriendFightBusyTx(requestContext, scope.Tx, actor.PlayerID, at, ids.UUID{})
+		if err != nil {
+			return TournamentCommandResult{}, err
+		}
+		if busy {
+			return TournamentCommandResult{}, d.ErrRefused
+		}
 		entry := d.CasualEntry{Identifier: entryIdentifier, WeekDay: period.WeekDay, Actor: d.AdmissionFrom(actor), Status: d.QueueWaiting, AdmittedAt: at, ExpiresAt: at.Add(d.CasualQueueLifetime), StateVersion: 1}
 		if err := service.Store.SaveCasualEntryTx(requestContext, scope.Tx, entry, 0); err != nil {
 			return TournamentCommandResult{}, err
@@ -67,7 +74,7 @@ func (service Service) QueueCasual(requestContext context.Context, actor identit
 }
 
 func (service Service) CancelCasual(requestContext context.Context, actor identity.ActorContext, operationContext operation.Context) error {
-	_, err := service.tournamentCommand(requestContext, actor, operationContext, "casual-cancel", operationContext.ID.String(), map[string]any{"player": actor.PlayerID}, func(requestContext context.Context, scope gen.TimedScope, _ d.Catalog) (TournamentCommandResult, error) {
+	_, err := service.tournamentCommand(requestContext, actor, operationContext, "casual-cancel", operationContext.ID.String(), map[string]any{"player": actor.PlayerID}, ids.UUID{}, func(requestContext context.Context, scope gen.TimedScope, _ d.Catalog) (TournamentCommandResult, error) {
 		entry, found, err := service.Store.ActiveCasualEntryTx(requestContext, scope.Tx, actor.PlayerID)
 		if err != nil || !found {
 			return TournamentCommandResult{}, err

@@ -150,26 +150,33 @@ func (handler TournamentNoticeHandler) ReloadAndDeliver(requestContext context.C
 		if view.Room.Acknowledged[side] >= view.Room.NoticeVersion {
 			continue
 		}
-		handles := handler.Registry.ByPlayerRole(player, domainrt.World)
-		if len(handles) > handler.MaxHandles {
-			return errors.New("tournament notice connection bound exceeded")
+		if err := handler.deliverPlayer(requestContext, player, frame); err != nil {
+			return err
 		}
-		for _, handle := range handles {
-			metadata, valid := handle.Metadata()
-			if !valid || !handler.Registry.IsCurrent(handle) || metadata.PlayerID != player || metadata.PhysicalRole != domainrt.World || metadata.RoomID != int64(metadata.LogicalServerID) {
-				continue
-			}
-			at, err := handler.Time.Now(requestContext)
-			if err != nil {
-				return err
-			}
-			actor := identity.ActorContext{AccountID: metadata.AccountID, AccountUID: metadata.AccountUID, SessionID: metadata.SessionID, ContextID: metadata.ContextID, LogicalServerID: metadata.LogicalServerID, PlayerID: metadata.PlayerID, ContextGeneration: metadata.ContextGeneration, SessionLivenessVersion: metadata.SessionLivenessVersion, ContextLivenessVersion: metadata.ContextLivenessVersion}
-			if handler.Authority.ValidateActor(requestContext, actor, at) != nil {
-				continue
-			}
-			if err := handler.Publisher.PublishNotice(requestContext, handle, mids.MIDPlayerNotice, rt.NoticeNamespaceGeneric, frame); err != nil && handler.OnDeliveryError != nil {
-				handler.OnDeliveryError(err)
-			}
+	}
+	return nil
+}
+
+func (handler TournamentNoticeHandler) deliverPlayer(requestContext context.Context, player identity.PlayerID, frame *amf3.Object) error {
+	handles := handler.Registry.ByPlayerRole(player, domainrt.World)
+	if len(handles) > handler.MaxHandles {
+		return errors.New("tournament notice connection bound exceeded")
+	}
+	for _, handle := range handles {
+		metadata, valid := handle.Metadata()
+		if !valid || !handler.Registry.IsCurrent(handle) || metadata.PlayerID != player || metadata.PhysicalRole != domainrt.World || metadata.RoomID != int64(metadata.LogicalServerID) {
+			continue
+		}
+		at, err := handler.Time.Now(requestContext)
+		if err != nil {
+			return err
+		}
+		actor := identity.ActorContext{AccountID: metadata.AccountID, AccountUID: metadata.AccountUID, SessionID: metadata.SessionID, ContextID: metadata.ContextID, LogicalServerID: metadata.LogicalServerID, PlayerID: metadata.PlayerID, ContextGeneration: metadata.ContextGeneration, SessionLivenessVersion: metadata.SessionLivenessVersion, ContextLivenessVersion: metadata.ContextLivenessVersion}
+		if handler.Authority.ValidateActor(requestContext, actor, at) != nil {
+			continue
+		}
+		if err := handler.Publisher.PublishNotice(requestContext, handle, mids.MIDPlayerNotice, rt.NoticeNamespaceGeneric, frame); err != nil && handler.OnDeliveryError != nil {
+			handler.OnDeliveryError(err)
 		}
 	}
 	return nil

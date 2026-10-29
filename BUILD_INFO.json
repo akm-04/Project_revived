@@ -315,7 +315,7 @@
   "commit": "ed63e7dcdd0e04f9153f1b1f54fe96ae85ceab51",
   "commit_role": "PARENT_ACCEPTED_PASS643_COMMIT; exact final I7A6A product HEAD/tree/archive are bound externally in PassMap and gate evidence to avoid self-reference",
   "content_generation": 59,
-  "content_revision": "569bbff79e0f901b4c665ca04d3df7f42b510e5c2a904818ef9f1daa307a273e",
+  "content_revision": "95041090e5496a3da82479b597b44911128811ce3f81365fe441324e12715865",
   "current_migration_high_water": "00097_i9_7b_tournament_casual.sql",
   "current_stage": "I9_7B_IMPLEMENTATION_FOCUSED_GATES",
   "evidence": "Pass587 Gate-1 runtime evidence b59277c4d59a1c2622809a62f46605442232d77a380e97af7eeba2a3a75fe73e + Pass588 normal-chat I0-I6/source-oracle/release-reconciliation checks; exact Pass588 retest still required.",
@@ -1061,13 +1061,13 @@
     "version": "v0.125.0"
   },
   "language_floor": "go1.26.0",
-  "migration_high_water": "00097_i9_7b_tournament_casual.sql",
+  "migration_high_water": "00098_i9_7c_friend_fight.sql",
   "migration_parent_backend_sha256": "73a668580d416fba4275b97898d083b9fdcb12c58773eeb9ceec2b1f3711c58d",
   "native_repair_parent_backend_sha256": "a6bf87421767c5451f69fcf359995d28d91a6c6f861f55422bcdd642583e0141",
   "native_repair_parent_implementation_revision_sha256": "0def8ffc697be0c43a40b3e447c328fee45011e76e9e87a69f17181b777e1c1b",
   "native_sqlc_repair": "REPRODUCED_IN_NORMAL_CHAT_FROM_PRISTINE_PASS519",
   "native_work_evidence_sha256": "36fad089f0390e50f3c6650b9dcec11bd30ca996a4cab460cb5de153395179bf",
-  "next": "Qualify this single exact combined candidate; reconcile existing49 obligations and inherited contracts; final parent8 reality review and one normal PassMap closure.",
+  "next": "Finish focused I9-7 leaves under split workflow; Claude owns stage qualification and PassMap seal.",
   "next_action": "Finish I9-7B leaf gates and checkpoint; then I9-7C under split workflow. No seal, strict gate, full VC suite, upgrade, emulator or clock change.",
   "next_stage": "I7A10_EXACT_REPAIRED_CANDIDATE_QUALIFICATION",
   "parent_accepted_implementation_revision_sha256": "b3a8123633fe85155019becd66aed45726e94316aee11b232b1f422e55e5b863",
@@ -1083,7 +1083,7 @@
   "passmap_authority_identity_kind": "CANONICAL_CURRENT_STATE_SHA256_NOT_OUTER_ARCHIVE",
   "passmap_authority_note": "Sealed785 base plus I9-3F working inputs; I9-3F premium vending implementation is not a final I9-3 seal or product acceptance.",
   "passmap_authority_sha256": "f18afcf19daa9b0f76ad05d84548f2b72a113e92204c1697405917c43fcd8663",
-  "passmap_generation": "793_I9_7B_WORKING_BASE_NOT_A_SEAL",
+  "passmap_generation": "793_I9_7C_WORKING_BASE_NOT_A_SEAL",
   "phase": "I9",
   "product_behavior_implemented": "Publication four-MID owner and typed immutable input; read-only boards and public announcements, server picture read markers; no reward or operator workflow.",
   "profile1_scope": "docs/PASS509_PROFILE1_SCOPE_AND_ROADMAP_PROMOTION.json",
@@ -1095,15 +1095,15 @@
   "sbom_created_at": "2026-10-09T10:31:06Z",
   "schema_version": 1,
   "sealed_base_passmap_sha256": "984744a26fa48bbbae5a172fb8a464533af0a159ac188d390ebae735fe40579d",
-  "snapshot": "I9-7B durable Playoffs and Casual queue/selection/Combat/rewards/notices; D357 private policy, not stage acceptance.",
-  "stage": "I9-7B",
+  "snapshot": "I9-7C durable Friend Fight invitation, consent, shared selection and private no-value Combat; D358 private policy.",
+  "stage": "I9-7C",
   "status": "WORKING_IMPLEMENTATION_NOT_STAGE_ACCEPTED",
   "target_go": "1.27.1",
   "target_postgresql": "18.6",
   "target_sqlc": "1.31.1",
   "toolbox_archive_sha256": "e4e194c9627929299577364b953b2468d6118fac4283fd8030f10b5a27456c2b",
-  "version": "v0.158.0",
-  "version_role": "I9-7B working implementation; focused evidence only, Claude owns qualification and acceptance.",
+  "version": "v0.159.0",
+  "version_role": "I9-7C working implementation; Claude owns qualification and acceptance.",
   "w2_claimed": false,
   "i9_7b": {
     "base_commit": "77e8482f812a5ff4d35912f0ff461b65ac9beb0f",
@@ -1117,5 +1117,18 @@
     "created_status": "WORKING_FOCUSED_PROOF_NOT_ACCEPTED",
     "qualification_owner": "Claude per split handoff",
     "client_scope": "VC i97b-r2 PASS: real Arena/Playoffs model fetch and stock schedule rendering in closed stage 8. No positive stock live match or reachable Casual entry claimed."
+  },
+  "i9_7c": {
+    "base_commit": "2fc0218f107a682050f48a0bb781c2a601b84c6e",
+    "accepted_base": {
+      "git_head": "a9737132d4482429e3c60d58300b7b4f7872ba0f",
+      "passmap": 793,
+      "working_with_git_sha256": "9ac9ac61e2a3536680dbe05c40e0522b912c2de6759b58154d23a473553044ed"
+    },
+    "content_generation": 60,
+    "contract": "docs/i9/I9_FRIEND_FIGHT_V1.json",
+    "created_status": "WORKING_FOCUSED_PROOF_NOT_ACCEPTED",
+    "qualification_owner": "Claude per split handoff",
+    "client_scope": "Single-client friend-list/mode/invite scenario; native proof covers peer consent and both battle modes. No two-client live PvP claim."
   }
 }

@@ -58,7 +58,7 @@ func (service Service) SelectTournament(requestContext context.Context, actor id
 		return d.TournamentRoom{}, d.ErrInvalid
 	}
 	semanticKey := fmt.Sprintf("%s:%d:%d", command.Room.String(), command.Team, command.Turn)
-	result, err := service.tournamentCommand(requestContext, actor, operationContext, "select", semanticKey, command, func(requestContext context.Context, scope gen.TimedScope, _ d.Catalog) (TournamentCommandResult, error) {
+	result, err := service.tournamentCommand(requestContext, actor, operationContext, "select", semanticKey, command, command.Room, func(requestContext context.Context, scope gen.TimedScope, _ d.Catalog) (TournamentCommandResult, error) {
 		room, found, err := service.Store.ReadTournamentRoomTx(requestContext, scope.Tx, command.Room, true)
 		if err != nil || !found {
 			return TournamentCommandResult{}, errors.Join(err, d.ErrRefused)
@@ -95,7 +95,7 @@ func (service Service) SelectTournament(requestContext context.Context, actor id
 }
 
 func (service Service) ReadyTournament(requestContext context.Context, actor identity.ActorContext, roomIdentifier ids.UUID, operationContext operation.Context) (d.TournamentRoom, error) {
-	result, err := service.tournamentCommand(requestContext, actor, operationContext, "ready", roomIdentifier.String(), map[string]any{"room": roomIdentifier}, func(requestContext context.Context, scope gen.TimedScope, _ d.Catalog) (TournamentCommandResult, error) {
+	result, err := service.tournamentCommand(requestContext, actor, operationContext, "ready", roomIdentifier.String(), map[string]any{"room": roomIdentifier}, roomIdentifier, func(requestContext context.Context, scope gen.TimedScope, _ d.Catalog) (TournamentCommandResult, error) {
 		room, found, err := service.Store.ReadTournamentRoomTx(requestContext, scope.Tx, roomIdentifier, true)
 		if err != nil || !found {
 			return TournamentCommandResult{}, errors.Join(err, d.ErrRefused)
@@ -125,7 +125,7 @@ func (service Service) AcknowledgeTournament(requestContext context.Context, act
 	if roomIdentifier.IsZero() || version < 1 {
 		return d.ErrInvalid
 	}
-	_, err := service.tournamentCommand(requestContext, actor, operationContext, "acknowledge", roomIdentifier.String()+":"+strconv.FormatInt(version, 10), map[string]any{"room": roomIdentifier, "version": version}, func(requestContext context.Context, scope gen.TimedScope, _ d.Catalog) (TournamentCommandResult, error) {
+	_, err := service.tournamentCommand(requestContext, actor, operationContext, "acknowledge", roomIdentifier.String()+":"+strconv.FormatInt(version, 10), map[string]any{"room": roomIdentifier, "version": version}, roomIdentifier, func(requestContext context.Context, scope gen.TimedScope, _ d.Catalog) (TournamentCommandResult, error) {
 		room, found, err := service.Store.ReadTournamentRoomTx(requestContext, scope.Tx, roomIdentifier, true)
 		if err != nil || !found {
 			return TournamentCommandResult{}, errors.Join(err, d.ErrRefused)

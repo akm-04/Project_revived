@@ -81,13 +81,15 @@ func (Store) SaveTournamentRoomTx(requestContext context.Context, transaction tx
 		return err
 	}
 	if previousVersion == 0 {
-		var season, weekDay any
-		if room.Casual {
+		var season, weekDay, friendInvitation any
+		if room.IsFriendFight() {
+			friendInvitation = room.FriendInvitation.String()
+		} else if room.Casual {
 			weekDay = room.CasualWeekDay
 		} else {
 			season = room.Season
 		}
-		return one(transaction.Exec(requestContext, `INSERT INTO arena_tournament_rooms(room_id,season,casual_week_day,first_player,second_player,status,starts_at,state_version,payload) VALUES($1,$2,$3,$4,$5,$6,$7,1,$8::jsonb)`, room.Identifier.String(), season, weekDay, int64(room.Selection.Players[0]), int64(room.Selection.Players[1]), room.Status, room.StartsAt, payload))
+		return one(transaction.Exec(requestContext, `INSERT INTO arena_tournament_rooms(room_id,season,casual_week_day,friend_invitation_id,first_player,second_player,status,starts_at,state_version,payload) VALUES($1,$2,$3,$4,$5,$6,$7,$8,1,$9::jsonb)`, room.Identifier.String(), season, weekDay, friendInvitation, int64(room.Selection.Players[0]), int64(room.Selection.Players[1]), room.Status, room.StartsAt, payload))
 	}
 	return one(transaction.Exec(requestContext, `UPDATE arena_tournament_rooms SET payload=$3::jsonb,state_version=$4,status=$5 WHERE room_id=$1 AND state_version=$2 AND first_player=$6 AND second_player=$7 AND starts_at=$8`, room.Identifier.String(), previousVersion, payload, room.StateVersion, room.Status, int64(room.Selection.Players[0]), int64(room.Selection.Players[1]), room.StartsAt))
 }

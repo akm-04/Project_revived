@@ -49,10 +49,10 @@ func (service Service) TournamentReport(requestContext context.Context, actor id
 			return err
 		}
 		room, found, err := service.Store.ReadTournamentRoomTx(requestContext, scope.Tx, identifier, false)
-		if err != nil || !found || !room.Casual && room.Stage != stage {
+		if err != nil || !found || !room.Casual && !room.IsFriendFight() && room.Stage != stage {
 			return errors.Join(err, d.ErrRefused)
 		}
-		if room.Casual {
+		if room.Casual || room.IsFriendFight() {
 			if _, err := roomSide(room, actor.PlayerID); err != nil {
 				return err
 			}

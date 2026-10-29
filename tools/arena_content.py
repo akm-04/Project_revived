@@ -73,8 +73,10 @@ def build_arena(blobs, parse):
     rules = translations.pop('REGION_ARENA_RULE3')
     if any(phrase not in rules for phrase in RULE_PHRASES):
         raise ValueError('Arena rule text drift')
+    if misc['friend_battle_level'] != '55':
+        raise ValueError('Friend Fight source level drift')
     return dict(schema_version=1, contract_id='C5D_ARENA_SEASON_MODE_V1', policy_id='C5D_ARENA_PRIVATE_POLICY_V1',
-                function_id=37, required_level=_ints(functions['37']['level'])[1], required_heroes=_ints(functions['37']['level'])[2],
+                friend_battle_level=int(misc['friend_battle_level']), function_id=37, required_level=_ints(functions['37']['level'])[1], required_heroes=_ints(functions['37']['level'])[2],
                 season_anchor=start.isoformat(), season_days=(end - start).days, season_open_seconds=18000, season_close_seconds=0,
                 levels=levels, rewards=rewards, champion_item=champion, upgrade_protect=int(misc['region_arena_upgrade_protect']),
                 fail_protect=int(misc['region_arena_fail_protect']), streak_bonus_below_level=20, streak_bonus_after=4,

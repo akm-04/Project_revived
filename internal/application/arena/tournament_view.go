@@ -3,6 +3,7 @@ package arena
 import (
 	"context"
 	"errors"
+	"gxb.local/backend/v2/internal/foundation/ids"
 	"unicode/utf8"
 
 	gen "gxb.local/backend/v2/internal/application/generation"
@@ -104,7 +105,7 @@ func (service Service) DeclareTournament(requestContext context.Context, actor i
 	if !utf8.ValidString(declaration) || sourceDeclarationLength(declaration) > 2*tournamentDeclarationLimit {
 		return "", d.ErrInvalid
 	}
-	result, err := service.tournamentCommand(requestContext, actor, operationContext, "declaration", operationContext.ID.String(), map[string]any{"declaration": declaration}, func(requestContext context.Context, scope gen.TimedScope, catalog d.Catalog) (TournamentCommandResult, error) {
+	result, err := service.tournamentCommand(requestContext, actor, operationContext, "declaration", operationContext.ID.String(), map[string]any{"declaration": declaration}, ids.UUID{}, func(requestContext context.Context, scope gen.TimedScope, catalog d.Catalog) (TournamentCommandResult, error) {
 		period, found, err := service.Store.ReadTournamentTx(requestContext, scope.Tx, catalog.LatestClosed(scope.Operation.DecisionAt()), true)
 		if err != nil || !found {
 			return TournamentCommandResult{}, errors.Join(err, d.ErrRefused)

@@ -61,7 +61,8 @@ func main() {
 
 // scenario is one I8.5-5 scenario (D55): a provisioned player (D56), steps after MainScene and what the run must show.
 type scenario struct {
-	Name string `json:"name"`
+	FriendFixture bool   `json:"friend_fixture"`
+	Name          string `json:"name"`
 	// Level and Heroes progress the player stock MID1 births; the stock client then summons each hero through MID59.
 	Level  int64        `json:"level"`
 	VIP    int64        `json:"vip"`
@@ -148,7 +149,7 @@ func (run run) play() ([]string, error) {
 		Report   client.Report      `json:"report"`
 		Failures []string           `json:"failures"`
 	}{Account: session.AccountID, Scenario: run.scenario.Name, Failures: []string{}}
-	progressed := run.scenario.AwakeningFixture || run.scenario.PetAwakeningFixture || run.scenario.SignInBonusFixture || run.scenario.ChallengeFixture || run.scenario.Level > 0 || len(run.scenario.Heroes) > 0 || run.scenario.VIP > 0 || len(run.scenario.Grants) > 0
+	progressed := run.scenario.FriendFixture || run.scenario.AwakeningFixture || run.scenario.PetAwakeningFixture || run.scenario.SignInBonusFixture || run.scenario.ChallengeFixture || run.scenario.Level > 0 || len(run.scenario.Heroes) > 0 || run.scenario.VIP > 0 || len(run.scenario.Grants) > 0
 	if progressed {
 		// A returning player: the first boot lets stock MID1 birth the player, the harness progresses it, the second boot loads it.
 		birth, err := run.boot(session)
@@ -198,6 +199,11 @@ func (run run) play() ([]string, error) {
 	}
 	if run.scenario.PetAwakeningFixture {
 		if err := provision.PetAwakeningFixture(ctx, run.databaseURL, session.AccountID); err != nil {
+			return nil, err
+		}
+	}
+	if run.scenario.FriendFixture {
+		if err := provision.FriendFixture(ctx, run.databaseURL, session.AccountID); err != nil {
 			return nil, err
 		}
 	}

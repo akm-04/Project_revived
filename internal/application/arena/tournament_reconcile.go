@@ -24,7 +24,10 @@ func (service Service) ReconcileTournaments(requestContext context.Context, pare
 	if err != nil || catalog.Tournament == nil {
 		return 0, err
 	}
-	applied := 0
+	applied, err := service.ExpireFriendInvitations(requestContext, parent, limit)
+	if err != nil {
+		return applied, err
+	}
 	for applied < limit {
 		operationContext, err := child(parent, "casual-match")
 		if err != nil {

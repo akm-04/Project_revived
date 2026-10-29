@@ -79,6 +79,7 @@ type Exchange struct {
 }
 
 type Catalog struct {
+	FriendBattleLevel     int64              `json:"friend_battle_level,omitempty"`
 	Tournament            *TournamentCatalog `json:"tournament,omitempty"`
 	SchemaVersion         int                `json:"schema_version"`
 	ContractID            string             `json:"contract_id"`
@@ -113,6 +114,9 @@ type Catalog struct {
 }
 
 func (c Catalog) Validate() error {
+	if c.FriendBattleLevel != 0 && c.FriendBattleLevel != 55 {
+		return ErrUnavailable
+	}
 	if c.Tournament != nil && c.Tournament.Validate() != nil {
 		return ErrUnavailable
 	}

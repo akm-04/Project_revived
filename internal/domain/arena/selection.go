@@ -31,11 +31,12 @@ type SelectedFormation struct {
 }
 
 type SelectionRoom struct {
-	Players  [2]identity.PlayerID                     `json:"players"`
-	Teams    [2][SelectionTeamCount]SelectedFormation `json:"teams"`
-	Team     int                                      `json:"team"`
-	Turn     int                                      `json:"turn"`
-	Deadline time.Time                                `json:"deadline"`
+	RequiredTeams int                                      `json:"required_teams,omitempty"`
+	Players       [2]identity.PlayerID                     `json:"players"`
+	Teams         [2][SelectionTeamCount]SelectedFormation `json:"teams"`
+	Team          int                                      `json:"team"`
+	Turn          int                                      `json:"turn"`
+	Deadline      time.Time                                `json:"deadline"`
 }
 
 type SelectionCommand struct {
@@ -53,17 +54,17 @@ func NewSelectionRoom(first, second identity.PlayerID, at time.Time) (SelectionR
 }
 
 func (room SelectionRoom) Validate() error {
-	if !room.Players[0].Valid() || !room.Players[1].Valid() || room.Players[0] == room.Players[1] || room.Team < 1 || room.Team > SelectionTeamCount || room.Turn < 0 || room.Turn > SelectionDoneTurn || room.Deadline.IsZero() {
+	if !room.Players[0].Valid() || !room.Players[1].Valid() || room.Players[0] == room.Players[1] || room.Team < 1 || room.Team > room.TeamCount() || room.Turn < 0 || room.Turn > SelectionDoneTurn || room.Deadline.IsZero() {
 		return ErrInvalid
 	}
-	if room.Turn == SelectionDoneTurn && room.Team != SelectionTeamCount {
+	if (room.RequiredTeams != 0 && room.RequiredTeams != 1 && room.RequiredTeams != SelectionTeamCount) || (room.Turn == SelectionDoneTurn && room.Team != room.TeamCount()) {
 		return ErrInvalid
 	}
 	return nil
 }
 
 func (room SelectionRoom) Complete() bool {
-	return room.Team == SelectionTeamCount && room.Turn == SelectionDoneTurn
+	return room.Team == room.TeamCount() && room.Turn == SelectionDoneTurn
 }
 
 func (room SelectionRoom) Select(command SelectionCommand, roster SelectionRoster, at time.Time) (SelectionRoom, error) {
@@ -215,10 +216,17 @@ func (room SelectionRoom) advance(chosen SelectedFormation, at time.Time) Select
 	side := room.Turn % 2
 	room.Teams[side][room.Team-1] = SelectedFormation{Heroes: slices.Clone(chosen.Heroes), Pet: chosen.Pet}
 	room.Turn++
-	if room.Turn == SelectionDoneTurn && room.Team < SelectionTeamCount {
+	if room.Turn == SelectionDoneTurn && room.Team < room.TeamCount() {
 		room.Team++
 		room.Turn = 0
 	}
 	room.Deadline = at.Add(SelectionTurnLifetime)
 	return room
+}
+
+func (room SelectionRoom) TeamCount() int {
+	if room.RequiredTeams == 0 {
+		return SelectionTeamCount
+	}
+	return room.RequiredTeams
 }

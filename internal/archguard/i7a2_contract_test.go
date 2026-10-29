@@ -125,8 +125,10 @@ const achievementNoticeRoute = "realtimewakeup.Registration{Route: achievement.N
 
 const tournamentNoticeRoute = "realtimewakeup.Registration{Route: apparena.TournamentNoticeRoute, Handler: tournamentNotices}"
 
+const friendFightNoticeRoute = "realtimewakeup.Registration{Route: apparena.FriendFightNoticeRoute, Handler: friendNotices}"
+
 func genericWakeupRoutes(realtime string) int {
-	return strings.Count(realtime, "realtimewakeup.Registration{") - strings.Count(realtime, achievementNoticeRoute) - strings.Count(realtime, tournamentNoticeRoute)
+	return strings.Count(realtime, "realtimewakeup.Registration{") - strings.Count(realtime, achievementNoticeRoute) - strings.Count(realtime, tournamentNoticeRoute) - strings.Count(realtime, friendFightNoticeRoute)
 }
 
 func TestI7A2KeepsFeatureProducerAndWakeupRoutesDormant(t *testing.T) {
@@ -168,12 +170,14 @@ func TestI7A2KeepsFeatureProducerAndWakeupRoutesDormant(t *testing.T) {
 				// I7C-4 full stage A activates exactly one notice schema (17) and its route.
 				achievementSchema := filepath.ToSlash(rel) == "internal/adapters/stockruntime/achievement_notice.go" && marker == "rt.NoticeRegistration{" && strings.Count(s, marker) == 1 && strings.Count(s, "NoticeType:") == 1
 				tournamentSchema := filepath.ToSlash(rel) == "internal/adapters/stockruntime/tournament_notice.go" && marker == "rt.NoticeRegistration{" && strings.Count(s, marker) == 1 && strings.Count(s, "NoticeType:") == 1
-				if achievementSchema || tournamentSchema {
+				friendFightSchema := filepath.ToSlash(rel) == "internal/adapters/stockruntime/friend_fight_notice.go" && marker == "rt.NoticeRegistration{" && strings.Count(s, marker) == 1 && strings.Count(s, "NoticeType:") == 2
+				if achievementSchema || tournamentSchema || friendFightSchema {
 					continue
 				}
 				if marker == "realtimewakeup.Registration{" {
 					s = strings.Replace(s, achievementNoticeRoute, "", 1)
 					s = strings.Replace(s, tournamentNoticeRoute, "", 1)
+					s = strings.Replace(s, friendFightNoticeRoute, "", 1)
 				}
 				allowedGeneralSchema := filepath.ToSlash(rel) == "internal/adapters/stockruntime/general_dm_events.go" && marker == "rt.DirectRegistration{" && strings.Count(s, marker) == 1
 				if allowedGeneralSchema && selectedGeneralDMActivation(t) {
@@ -212,7 +216,7 @@ func TestI97BFiniteTournamentNoticeDoesNotAddGenericTransport(t *testing.T) {
 		t.Fatal(err)
 	}
 	text := string(raw)
-	if strings.Count(text, tournamentNoticeRoute) != 1 || genericWakeupRoutes(text) != 3 {
+	if strings.Count(text, tournamentNoticeRoute) != 1 || strings.Count(text, friendFightNoticeRoute) != 1 || genericWakeupRoutes(text) != 3 {
 		t.Fatal("finite route or generic transport drift")
 	}
 	if genericWakeupRoutes(text+"realtimewakeup.Registration{Route: unexpected}") != 4 {

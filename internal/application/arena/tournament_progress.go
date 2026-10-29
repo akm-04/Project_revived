@@ -16,7 +16,7 @@ func (service Service) SupportTournament(requestContext context.Context, actor i
 	if !target.Valid() {
 		return d.TournamentPeriod{}, d.ErrInvalid
 	}
-	result, err := service.tournamentCommand(requestContext, actor, operationContext, "support", operationContext.ID.String(), map[string]any{"target": target}, func(requestContext context.Context, scope gen.TimedScope, catalog d.Catalog) (TournamentCommandResult, error) {
+	result, err := service.tournamentCommand(requestContext, actor, operationContext, "support", operationContext.ID.String(), map[string]any{"target": target}, ids.UUID{}, func(requestContext context.Context, scope gen.TimedScope, catalog d.Catalog) (TournamentCommandResult, error) {
 		season := catalog.LatestClosed(scope.Operation.DecisionAt())
 		period, found, err := service.Store.ReadTournamentTx(requestContext, scope.Tx, season, true)
 		if err != nil || !found {

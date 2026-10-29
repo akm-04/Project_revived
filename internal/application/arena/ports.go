@@ -14,6 +14,8 @@ import (
 	gen "gxb.local/backend/v2/internal/application/generation"
 	"gxb.local/backend/v2/internal/application/i5"
 	"gxb.local/backend/v2/internal/application/playerdirectory"
+	"gxb.local/backend/v2/internal/application/playerroot"
+	"gxb.local/backend/v2/internal/application/socialrelation"
 	d "gxb.local/backend/v2/internal/domain/arena"
 	cd "gxb.local/backend/v2/internal/domain/combat"
 	"gxb.local/backend/v2/internal/domain/economy"
@@ -30,6 +32,13 @@ import (
 )
 
 type Store interface {
+	ReadFriendInvitationTx(context.Context, tx.Queryer, ids.UUID, bool) (d.FriendInvitation, bool, error)
+	LatestFriendInvitationTx(context.Context, tx.Queryer, identity.PlayerID, identity.PlayerID) (d.FriendInvitation, bool, error)
+	PendingFriendInvitationsForPlayersTx(context.Context, tx.Queryer, identity.PlayerID, identity.PlayerID) ([]d.FriendInvitation, error)
+	FriendFightBusyTx(context.Context, tx.Queryer, identity.PlayerID, time.Time, ids.UUID) (bool, error)
+	DueFriendInvitationsTx(context.Context, tx.Queryer, time.Time, int) ([]ids.UUID, error)
+	SaveFriendInvitationTx(context.Context, tx.Tx, d.FriendInvitation, int64) error
+
 	SettledTournamentsTx(context.Context, tx.Queryer, identity.PlayerID) ([]d.TournamentPeriod, error)
 	WakeTournamentRoomTx(context.Context, tx.Tx, ids.UUID) error
 	ReadCasualSessionTx(context.Context, tx.Queryer, int64, bool) (d.CasualSession, bool, error)
@@ -133,6 +142,8 @@ type Servers interface {
 }
 
 type Service struct {
+	Players      playerroot.TxLocker
+	Friendships  socialrelation.FriendFightPrivacyReader
 	Timed        gen.TimedRunner
 	Fresh        tx.Queryer
 	Store        Store

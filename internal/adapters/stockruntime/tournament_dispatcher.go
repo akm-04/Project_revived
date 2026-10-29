@@ -199,7 +199,7 @@ func (dispatcher TournamentDispatcher) Dispatch(requestContext context.Context, 
 		if err != nil {
 			return failArena(err)
 		}
-		if view.Room.Casual != (request.Envelope.MID == 1877) {
+		if view.Room.IsFriendFight() || view.Room.Casual != (request.Envelope.MID == 1877) {
 			return failArena(d.ErrRefused)
 		}
 		return okI5(projection.TournamentReport(view))

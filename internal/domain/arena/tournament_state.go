@@ -168,31 +168,33 @@ const (
 )
 
 type TournamentRoom struct {
-	NoticeVersion   int64                        `json:"notice_version"`
-	SelectionHeroes [2]map[string]map[string]any `json:"selection_heroes"`
-	SelectionPets   [2]map[string]map[string]any `json:"selection_pets"`
-	Faces           [2]Face                      `json:"faces"`
-	RoundResults    [SelectionTeamCount]int      `json:"round_results"`
-	GenuineBattles  int                          `json:"genuine_battles"`
-	SettledAt       time.Time                    `json:"settled_at"`
-	Identifier      ids.UUID                     `json:"identifier"`
-	Season          int64                        `json:"season"`
-	CasualWeekDay   int64                        `json:"casual_week_day"`
-	Casual          bool                         `json:"casual"`
-	Stage           int                          `json:"stage"`
-	Substage        int                          `json:"substage"`
-	Contest         int                          `json:"contest"`
-	Actors          [2]AdmissionContext          `json:"actors"`
-	Ready           [2]bool                      `json:"ready"`
-	Acknowledged    [2]int64                     `json:"acknowledged"`
-	Selection       SelectionRoom                `json:"selection"`
-	Status          string                       `json:"status"`
-	StartsAt        time.Time                    `json:"starts_at"`
-	ContentRevision string                       `json:"content_revision"`
-	Attempts        []ids.UUID                   `json:"attempts"`
-	Wins            [2]int                       `json:"wins"`
-	Winner          identity.PlayerID            `json:"winner"`
-	StateVersion    int64                        `json:"state_version"`
+	FriendInvitation ids.UUID                     `json:"friend_invitation"`
+	FriendMode       int                          `json:"friend_mode"`
+	NoticeVersion    int64                        `json:"notice_version"`
+	SelectionHeroes  [2]map[string]map[string]any `json:"selection_heroes"`
+	SelectionPets    [2]map[string]map[string]any `json:"selection_pets"`
+	Faces            [2]Face                      `json:"faces"`
+	RoundResults     [SelectionTeamCount]int      `json:"round_results"`
+	GenuineBattles   int                          `json:"genuine_battles"`
+	SettledAt        time.Time                    `json:"settled_at"`
+	Identifier       ids.UUID                     `json:"identifier"`
+	Season           int64                        `json:"season"`
+	CasualWeekDay    int64                        `json:"casual_week_day"`
+	Casual           bool                         `json:"casual"`
+	Stage            int                          `json:"stage"`
+	Substage         int                          `json:"substage"`
+	Contest          int                          `json:"contest"`
+	Actors           [2]AdmissionContext          `json:"actors"`
+	Ready            [2]bool                      `json:"ready"`
+	Acknowledged     [2]int64                     `json:"acknowledged"`
+	Selection        SelectionRoom                `json:"selection"`
+	Status           string                       `json:"status"`
+	StartsAt         time.Time                    `json:"starts_at"`
+	ContentRevision  string                       `json:"content_revision"`
+	Attempts         []ids.UUID                   `json:"attempts"`
+	Wins             [2]int                       `json:"wins"`
+	Winner           identity.PlayerID            `json:"winner"`
+	StateVersion     int64                        `json:"state_version"`
 }
 
 func (room TournamentRoom) Validate() error {
@@ -221,7 +223,10 @@ func (room TournamentRoom) Validate() error {
 	if room.Identifier.IsZero() || room.StateVersion < 1 || len(room.ContentRevision) != 64 || room.StartsAt.IsZero() || room.Selection.Validate() != nil || room.Contest < 1 || room.Contest > 3 || len(room.Attempts) > SelectionTeamCount {
 		return ErrConflict
 	}
-	if !slices.Contains([]string{RoomPreparing, RoomSelecting, RoomFighting, RoomSettled}, room.Status) || !room.Casual && (room.Season < 1 || room.Stage < 3 || room.Stage > 7) {
+	if !slices.Contains([]string{RoomPreparing, RoomSelecting, RoomFighting, RoomSettled}, room.Status) || (!room.Casual && !room.IsFriendFight() && (room.Season < 1 || room.Stage < 3 || room.Stage > 7)) {
+		return ErrConflict
+	}
+	if room.IsFriendFight() && (room.Casual || room.CasualWeekDay != 0 || room.Season != 0 || room.Stage != 0 || (room.FriendMode != 1 && room.FriendMode != 2)) {
 		return ErrConflict
 	}
 	for side, actor := range room.Actors {
@@ -260,7 +265,7 @@ func (room TournamentRoom) PlayedRounds() []int {
 	rounds := []int{}
 	wins := [2]int{}
 	for index, result := range room.RoundResults {
-		if wins[0] >= 2 || wins[1] >= 2 {
+		if wins[0] >= room.RequiredWins() || wins[1] >= room.RequiredWins() {
 			break
 		}
 		if result == RoundUnresolved {
@@ -274,4 +279,13 @@ func (room TournamentRoom) PlayedRounds() []int {
 		}
 	}
 	return rounds
+}
+
+func (room TournamentRoom) IsFriendFight() bool { return !room.FriendInvitation.IsZero() }
+func (room TournamentRoom) RequiredWins() int   { return room.Selection.TeamCount()/2 + 1 }
+func (room TournamentRoom) ContractIdentifier() string {
+	if room.IsFriendFight() {
+		return FriendFightContractIdentifier
+	}
+	return TournamentContractIdentifier
 }

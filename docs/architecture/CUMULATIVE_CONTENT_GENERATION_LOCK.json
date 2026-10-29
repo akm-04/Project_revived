@@ -434,14 +434,22 @@
       "parser_version": "lua-generated-v18-guild-invite",
       "revision_id": "569bbff79e0f901b4c665ca04d3df7f42b510e5c2a904818ef9f1daa307a273e",
       "scope": "Source calendar, stage and reward tables. D357 private reconstruction policy; unsealed working implementation."
+    },
+    {
+      "ordinal": 60,
+      "stage": "I9-7C Friend Fight",
+      "compiler_version": "i9-7c-friend-fight",
+      "parser_version": "lua-generated-v18-guild-invite",
+      "revision_id": "95041090e5496a3da82479b597b44911128811ce3f81365fe441324e12715865",
+      "scope": "Source55 gate; D358 private policy; unsealed working implementation."
     }
   ],
   "current": {
-    "ordinal": 59,
-    "stage": "I9-7B Playoffs and Casual Arena",
-    "compiler_version": "i9-7b-tournament-casual",
+    "ordinal": 60,
+    "stage": "I9-7C Friend Fight",
+    "compiler_version": "i9-7c-friend-fight",
     "parser_version": "lua-generated-v18-guild-invite",
-    "revision_id": "569bbff79e0f901b4c665ca04d3df7f42b510e5c2a904818ef9f1daa307a273e",
-    "scope": "Source calendar, stage and reward tables. D357 private reconstruction policy; unsealed working implementation."
+    "revision_id": "95041090e5496a3da82479b597b44911128811ce3f81365fe441324e12715865",
+    "scope": "Source55 gate; D358 private policy; unsealed working implementation."
   }
 }

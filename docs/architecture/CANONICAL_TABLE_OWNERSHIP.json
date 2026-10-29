@@ -4497,6 +4497,20 @@
       ],
       "write_exceptions": [],
       "migration": "migrations/00097_i9_7b_tournament_casual.sql"
+    },
+    "arena_friend_invitations": {
+      "owner": "Arena",
+      "allowed_query_owners": [
+        "Arena"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/arenastore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/arenastore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00098_i9_7c_friend_fight.sql"
     }
   }
 }

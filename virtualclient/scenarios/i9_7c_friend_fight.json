@@ -1,0 +1,6 @@
+{
+ "name":"i9_7c_friend_fight", "level":55, "friend_fixture":true,
+ "note":"Declares a prior friendship with the one separately prepared real level55 peer. Stock friend-list compare button, mode dialog and invite callback must open waiting. Peer consent and both Combat modes are proved separately by native tests; this single-client scenario does not claim two-client live PvP.",
+ "steps":["window:social_system","wait:10","lua:local s=xyd.ModelManager.get():loadModel(xyd.ModelType.SOCIAL_SYSTEM) assert(s.friendlist and #s.friendlist==1,'vc-friend-fixture-list')","tap:compare_btn","wait:5","lua:assert(xyd.WindowManager.get():getWindow('social_system_select_mode'),'vc-friend-mode-window')","tap:sure_btn","wait:10","lua:assert(xyd.WindowManager.get():getWindow('social_system_waiting'),'vc-friend-waiting-window')"],
+ "settle_seconds":35,"expect_ok":[176,1312]
+}

@@ -131,13 +131,21 @@ func TournamentRecord(room d.TournamentRoom) map[string]any {
 	played := room.PlayedRounds()
 	count := len(played)
 	if room.Status != d.RoomSettled {
-		count = d.SelectionTeamCount
+		count = room.Selection.TeamCount()
 	}
 	kind := int64(2)
 	if room.Casual {
 		kind = 3
 	}
 	row := map[string]any{"record_id": room.Identifier.String(), "A_player_id": int64(room.Selection.Players[0]), "B_player_id": int64(room.Selection.Players[1]), "A_win_times": room.Wins[0], "B_win_times": room.Wins[1], "battle_count": count, "have_battled": flag(room.Status == d.RoomSettled && count > 0), "stage": room.Stage, "sub_stage": room.Substage, "battle_type": kind, "time": room.StartsAt.Unix()}
+	if room.IsFriendFight() {
+		row["model"] = room.FriendMode
+		row["game_type"] = 2
+		if room.Selection.TeamCount() == 1 {
+			row["game_type"] = 1
+		}
+		delete(row, "battle_type")
+	}
 	for team := 0; team < d.SelectionTeamCount; team++ {
 		actual := team
 		if room.Status == d.RoomSettled {
@@ -193,7 +201,7 @@ func TournamentRoom(view d.TournamentRoomView) map[string]any {
 			pets[side] = view.Pets[side][strconv.FormatInt(identifier, 10)]
 		}
 	}
-	body := map[string]any{"room_key": room.SelectionKey(), "stage": room.Selection.Turn, "stage_start_time": room.Selection.Deadline.Add(-d.SelectionTurnLifetime).Unix(), "server_time": view.At.Unix(), "is_open": flag(room.Status != d.RoomPreparing), "A_player_id": int64(room.Selection.Players[0]), "B_player_id": int64(room.Selection.Players[1]), "A_player_info": tournamentFace(room.Faces[0]), "B_player_info": tournamentFace(room.Faces[1]), "A_partners_info": view.Heroes[0], "B_partners_info": view.Heroes[1], "A_pet_info": pets[0], "B_pet_info": pets[1], "A_is_prepared": flag(room.Ready[0]), "B_is_prepared": flag(room.Ready[1]), "params": map[string]any{"team_id": room.Selection.Team, "stage": room.Stage, "record_id": room.Identifier.String(), "record_info": TournamentRecord(room)}}
+	body := map[string]any{"room_key": room.SelectionKey(), "stage": room.Selection.Turn, "stage_start_time": room.Selection.Deadline.Add(-d.SelectionTurnLifetime).Unix(), "server_time": view.At.Unix(), "is_open": flag(room.Status != d.RoomPreparing), "A_player_id": int64(room.Selection.Players[0]), "B_player_id": int64(room.Selection.Players[1]), "A_player_info": tournamentFace(room.Faces[0]), "B_player_info": tournamentFace(room.Faces[1]), "A_partners_info": view.Heroes[0], "B_partners_info": view.Heroes[1], "A_pet_info": pets[0], "B_pet_info": pets[1], "A_prepared": flag(room.Ready[0]), "B_prepared": flag(room.Ready[1]), "params": map[string]any{"team_id": room.Selection.Team, "stage": room.Stage, "record_id": room.Identifier.String(), "record_info": TournamentRecord(room)}}
 	return body
 }
 

@@ -4300,8 +4300,9 @@
    "family": "FRIEND_FIGHT",
    "disposition": "ACTIVE",
    "target": "I9-7",
-   "v2": "unimplemented",
-   "v1": null
+   "v2": "implemented",
+   "v1": null,
+   "implementation": "I9-7C working implementation; unqualified"
   },
   {
    "mid": 1313,
@@ -4309,8 +4310,9 @@
    "family": "FRIEND_FIGHT",
    "disposition": "ACTIVE",
    "target": "I9-7",
-   "v2": "unimplemented",
-   "v1": null
+   "v2": "implemented",
+   "v1": null,
+   "implementation": "I9-7C working implementation; unqualified"
   },
   {
    "mid": 1314,
@@ -4318,8 +4320,9 @@
    "family": "FRIEND_FIGHT",
    "disposition": "ACTIVE",
    "target": "I9-7",
-   "v2": "unimplemented",
-   "v1": null
+   "v2": "implemented",
+   "v1": null,
+   "implementation": "I9-7C working implementation; unqualified"
   },
   {
    "mid": 1315,
@@ -4327,8 +4330,9 @@
    "family": "FRIEND_FIGHT",
    "disposition": "ACTIVE",
    "target": "I9-7",
-   "v2": "unimplemented",
-   "v1": null
+   "v2": "implemented",
+   "v1": null,
+   "implementation": "I9-7C working implementation; unqualified"
   },
   {
    "mid": 1328,

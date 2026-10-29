@@ -9,6 +9,7 @@ import (
 	gen "gxb.local/backend/v2/internal/application/generation"
 	d "gxb.local/backend/v2/internal/domain/arena"
 	"gxb.local/backend/v2/internal/domain/identity"
+	"gxb.local/backend/v2/internal/foundation/ids"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/receipt"
 	"gxb.local/backend/v2/internal/foundation/tx"
@@ -20,7 +21,7 @@ type TournamentCommandResult struct {
 	Room   *d.TournamentRoom   `json:"room,omitempty"`
 }
 
-func (service Service) tournamentCommand(requestContext context.Context, actor identity.ActorContext, operationContext operation.Context, name, semanticKey string, request any, apply func(context.Context, gen.TimedScope, d.Catalog) (TournamentCommandResult, error)) (TournamentCommandResult, error) {
+func (service Service) tournamentCommand(requestContext context.Context, actor identity.ActorContext, operationContext operation.Context, name, semanticKey string, request any, roomIdentifier ids.UUID, apply func(context.Context, gen.TimedScope, d.Catalog) (TournamentCommandResult, error)) (TournamentCommandResult, error) {
 	var result TournamentCommandResult
 	if !service.ready() || !actor.PlayerID.Valid() {
 		return result, d.ErrUnavailable
@@ -52,9 +53,29 @@ func (service Service) tournamentCommand(requestContext context.Context, actor i
 		if catalog.Tournament == nil || catalog.Tournament.Validate() != nil {
 			return d.ErrUnavailable
 		}
-		if err := service.gate(requestContext, scope.Tx, catalog, actor.PlayerID, at); err != nil {
+		friendRoom := false
+		if !roomIdentifier.IsZero() {
+			room, found, err := service.Store.ReadTournamentRoomTx(requestContext, scope.Tx, roomIdentifier, false)
+			if err != nil || !found {
+				return errors.Join(err, d.ErrRefused)
+			}
+			friendRoom = room.IsFriendFight()
+		}
+		if friendRoom {
+			profile, found, err := service.Directory.ProfileTx(requestContext, scope.Tx, actor.PlayerID)
+			if err != nil {
+				return err
+			}
+			if catalog.FriendBattleLevel < 1 {
+				return d.ErrUnavailable
+			}
+			if !found || profile.Level < catalog.FriendBattleLevel {
+				return d.ErrRefused
+			}
+		} else if err := service.gate(requestContext, scope.Tx, catalog, actor.PlayerID, at); err != nil {
 			return err
 		}
+
 		root, found, err := service.Store.ReadCompetitionTx(requestContext, scope.Tx, true)
 		if err != nil || !found {
 			return errors.Join(err, d.ErrRefused)
@@ -93,7 +114,7 @@ func (service Service) tournamentCommand(requestContext context.Context, actor i
 }
 
 func (service Service) EnrollTournament(requestContext context.Context, actor identity.ActorContext, operationContext operation.Context) (d.TournamentPeriod, error) {
-	result, err := service.tournamentCommand(requestContext, actor, operationContext, "enroll", operationContext.ID.String(), map[string]any{"player": actor.PlayerID}, func(requestContext context.Context, scope gen.TimedScope, catalog d.Catalog) (TournamentCommandResult, error) {
+	result, err := service.tournamentCommand(requestContext, actor, operationContext, "enroll", operationContext.ID.String(), map[string]any{"player": actor.PlayerID}, ids.UUID{}, func(requestContext context.Context, scope gen.TimedScope, catalog d.Catalog) (TournamentCommandResult, error) {
 		season := catalog.LatestClosed(scope.Operation.DecisionAt())
 		if season < 1 {
 			return TournamentCommandResult{}, d.ErrRefused

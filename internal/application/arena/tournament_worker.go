@@ -71,7 +71,7 @@ func (service Service) roomWork(requestContext context.Context, identifier ids.U
 		if err != nil {
 			return err
 		}
-		record.PolicyVersion = d.TournamentContractIdentifier
+		record.PolicyVersion = room.ContractIdentifier()
 		_, err = service.Receipts.PutTx(requestContext, scope.Tx, record)
 		return err
 	})

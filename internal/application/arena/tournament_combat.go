@@ -21,8 +21,12 @@ import (
 
 const tournamentTransform = "REGION_ARENA_PLAYOFFS_AWAKE_V1"
 
-func tournamentLocator(room ids.UUID, round int) cd.Locator {
-	return cd.Locator{DomainKind: "ARENA_PLAYOFFS", AuthorityScope: d.CompetitionID, DomainLocator: fmt.Sprintf("%s:%d", room.String(), round)}
+func tournamentLocator(room d.TournamentRoom, round int) cd.Locator {
+	family := "ARENA_PLAYOFFS"
+	if room.IsFriendFight() {
+		family = "FRIEND_FIGHT"
+	}
+	return cd.Locator{DomainKind: family, AuthorityScope: d.CompetitionID, DomainLocator: fmt.Sprintf("%s:%d", room.Identifier.String(), round)}
 }
 
 func tournamentParticipants(player identity.PlayerID, formation d.SelectedFormation, origin cd.Origin) ([]combat.Participant, []combat.Participant) {
@@ -70,7 +74,7 @@ func (service Service) StartTournamentCombat(requestContext context.Context, ide
 				return err
 			}
 		}
-		for round := range d.SelectionTeamCount {
+		for round := range room.Selection.TeamCount() {
 			formations := [2]d.SelectedFormation{room.Selection.Teams[0][round], room.Selection.Teams[1][round]}
 			for side, formation := range formations {
 				if validateRoomFormation(formation, rosters[side]) != nil {
@@ -89,13 +93,21 @@ func (service Service) StartTournamentCombat(requestContext context.Context, ide
 			}
 			first, firstPets := tournamentParticipants(actor.PlayerID, formations[0], cd.OwnedSelf)
 			second, secondPets := tournamentParticipants(room.Selection.Players[1], formations[1], cd.OwnedForeign)
-			battle := combat.BattleRequest{CampaignType: d.CampaignType, BattleID: d.BattleID, TeamA: first, PetsA: firstPets, WavesB: [][]combat.Participant{second}, PetsB: secondPets, Context: &cd.BattleContext{Transform: tournamentTransform}}
+			campaignType := d.CampaignType
+			battleContext := &cd.BattleContext{Transform: tournamentTransform}
+			if room.IsFriendFight() {
+				campaignType = 31
+				if room.FriendMode == 1 {
+					battleContext = nil
+				}
+			}
+			battle := combat.BattleRequest{CampaignType: campaignType, BattleID: d.BattleID, TeamA: first, PetsA: firstPets, WavesB: [][]combat.Participant{second}, PetsB: secondPets, Context: battleContext}
 			payload, err := cd.CanonicalJSON(map[string]any{"room": room.Identifier, "round": round + 1, "teams": formations, "revision": revision})
 			if err != nil {
 				return err
 			}
 			digest := sha256.Sum256(payload)
-			requests = append(requests, combat.StartRequest{Actor: actor, Locator: tournamentLocator(room.Identifier, round+1), GenerationRef: d.TournamentContractIdentifier, StartFingerprint: hex.EncodeToString(digest[:]), ResultDeadline: scope.Operation.DecisionAt().Add(resultWindow), Battle: battle})
+			requests = append(requests, combat.StartRequest{Actor: actor, Locator: tournamentLocator(*room, round+1), GenerationRef: room.ContractIdentifier(), StartFingerprint: hex.EncodeToString(digest[:]), ResultDeadline: scope.Operation.DecisionAt().Add(resultWindow), Battle: battle})
 			requestRounds = append(requestRounds, round)
 		}
 		room.Attempts = make([]ids.UUID, d.SelectionTeamCount)
@@ -147,8 +159,8 @@ func (service Service) ResolveTournamentCombat(requestContext context.Context, i
 		return room, nil
 	}
 	wins := [2]int{}
-	for index, attempt := range room.Attempts {
-		if wins[0] >= 2 || wins[1] >= 2 {
+	for index, attempt := range room.Attempts[:room.Selection.TeamCount()] {
+		if wins[0] >= room.RequiredWins() || wins[1] >= room.RequiredWins() {
 			break
 		}
 		winner := room.RoundResults[index]
@@ -182,13 +194,17 @@ func (service Service) ResolveTournamentCombat(requestContext context.Context, i
 			return d.ErrConflict
 		}
 		current.Wins = [2]int{}
-		for round, attempt := range current.Attempts {
-			if current.Wins[0] >= 2 || current.Wins[1] >= 2 {
+		for round, attempt := range current.Attempts[:current.Selection.TeamCount()] {
+			if current.Wins[0] >= current.RequiredWins() || current.Wins[1] >= current.RequiredWins() {
 				break
 			}
 			winner := current.RoundResults[round]
 			if winner == 0 {
-				settled, err := service.Combat.TerminalTx(requestContext, scope.Tx, combat.TerminalRequest{Locator: tournamentLocator(current.Identifier, round+1), GenerationRef: d.TournamentContractIdentifier, TerminalKind: "ARENA_PLAYOFFS_SETTLED", SemanticReceiptID: fmt.Sprintf("arena-playoffs:%s:%d", current.Identifier.String(), round+1), At: scope.Operation.DecisionAt()})
+				terminalKind, receiptPrefix := "ARENA_PLAYOFFS_SETTLED", "arena-playoffs"
+				if current.IsFriendFight() {
+					terminalKind, receiptPrefix = "FRIEND_FIGHT_SETTLED", "friend-fight"
+				}
+				settled, err := service.Combat.TerminalTx(requestContext, scope.Tx, combat.TerminalRequest{Locator: tournamentLocator(*current, round+1), GenerationRef: current.ContractIdentifier(), TerminalKind: terminalKind, SemanticReceiptID: fmt.Sprintf("%s:%s:%d", receiptPrefix, current.Identifier.String(), round+1), At: scope.Operation.DecisionAt()})
 				if err != nil {
 					return err
 				}
@@ -213,7 +229,7 @@ func (service Service) ResolveTournamentCombat(requestContext context.Context, i
 			current.Winner = current.Selection.Players[1]
 		}
 		at := scope.Operation.DecisionAt()
-		if current.GenuineBattles > 0 {
+		if current.GenuineBattles > 0 && !current.IsFriendFight() {
 			for _, player := range sortedPlayers(current.Selection.Players[0], current.Selection.Players[1]) {
 				if current.Casual {
 					if err := service.Store.AddCasualResultTx(requestContext, scope.Tx, current.CasualWeekDay, player, current.Winner == player, at); err != nil {
