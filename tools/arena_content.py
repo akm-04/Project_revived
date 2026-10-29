@@ -84,3 +84,43 @@ def build_arena(blobs, parse):
                 match_hundredths=[_hundredths(misc['region_mate_param1']), _hundredths(misc['region_mate_param2']), _hundredths(misc['region_mate_infuluence_param'])],
                 hero_level=int(misc['region_hero_level']), hero_grade=int(misc['region_hero_color']),
                 mission_refill_seconds=72000, missions=missions, exchanges=exchanges, mail=translations)
+
+
+def build_tournament(blobs, parse):
+    from datetime import datetime, timedelta, timezone
+
+    def table(name):
+        return parse(blobs['data/tables/' + name + '.lua'].data)
+
+    misc = {row['key']: row['value'] for row in table('misc')}
+    calendar = sorted(table('playoff_time'), key=lambda row: int(row['stage']))
+    if [int(row['stage']) for row in calendar] != list(range(1, 9)):
+        raise ValueError('Playoffs stage identity drift')
+    dates = [datetime(*(int(row[key]) for key in ('year', 'month', 'day', 'hour', 'minute')),
+                      tzinfo=timezone(timedelta(hours=8))) for row in calendar]
+    offsets = [int((value - dates[0]).total_seconds()) for value in dates]
+    if offsets != [0, 86400, 185400, 271800, 275400, 358200, 361800, 365400]:
+        raise ValueError('Playoffs calendar drift')
+    rewards = [dict(rank=int(row['id']), crystal=int(row['diamond']), mana=int(row['mana']))
+               for row in sorted(table('playoff_reward'), key=lambda row: int(row['id']))]
+    casual = [dict(rank=int(row['rank']), crystal=int(row['crystal']), mana=int(row['mana']))
+              for row in sorted(table('relax_match_gift'), key=lambda row: int(row['id']))]
+    if [row['rank'] for row in rewards] != list(range(1, 33)) or len(casual) != 12:
+        raise ValueError('Playoffs/Casual reward coverage drift')
+    if any(row['crystal'] < 0 or row['mana'] < 0 for row in rewards + casual):
+        raise ValueError('Negative tournament reward')
+    if any(left['rank'] >= right['rank'] for left, right in zip(casual, casual[1:])):
+        raise ValueError('Casual reward bands drift')
+    stages = [dict(identifier=int(row['id']), stage=int(row['stage']), substage=int(row['sub_stage']))
+              for row in sorted(table('region_playoff_stage'), key=lambda row: int(row['id']))]
+    if [(row['stage'], row['substage']) for row in stages] != [(1, 0), (3, 1), (3, 2), (3, 3), (4, 0), (5, 0), (6, 1), (7, 1), (7, 2), (7, 3)]:
+        raise ValueError('Playoffs substage drift')
+    if misc['guild_bulletin_limit'] != '40' or misc['guild_bulletin_lower_bound'] != '0':
+        raise ValueError('Playoffs declaration bound drift')
+    coefficients = [int(misc['playoff_support_mana_param' + str(index)]) for index in range(1, 4)]
+    if coefficients != [5000, 580000, 18000000] or (misc['relax_match_begin'], misc['relax_match_end']) != ('64800', '72000'):
+        raise ValueError('Playoffs support or Casual time drift')
+    return dict(contract_id='I9_PVP_TOURNAMENT_CASUAL_V1', policy_id='I9_PVP_TOURNAMENT_CASUAL_POLICY_V1',
+                rules=dict(stage_offsets_seconds=offsets, support_coefficients=coefficients),
+                source_dates=[value.isoformat() for value in dates], stages=stages,
+                rewards=rewards, casual_rewards=casual, casual_open_seconds=64800, casual_close_seconds=72000)

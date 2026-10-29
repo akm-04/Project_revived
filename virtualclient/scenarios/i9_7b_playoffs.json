@@ -1,0 +1,28 @@
+{
+  "name": "i9_7b_playoffs",
+  "level": 60,
+  "note": "Stock Arena entry and Playoffs button fetch the real owner projection. If the current calendar closes entry, the scenario then invokes the unchanged stock schedule window after the genuine model load; this checks controller/render consumption and does not claim in-window PvP, physical reachability or a fabricated entrant. Casual has no current stock entry controller. Native proof separately covers matches and rewards.",
+  "steps": [
+    "window:sub_arena",
+    "tap:region_arena_node",
+    "wait:10",
+    "lua:local w=xyd.WindowManager.get():getWindow('region_arena') assert(w, 'vc-playoffs-region-window-missing')",
+    "tap:btn_game",
+    "wait:10",
+    "lua:local p=xyd.ModelManager.get():loadModel(xyd.ModelType.PLAYOFFS) assert(p.playoff_info and p.playoff_info.stage, 'vc-playoffs-info-missing') print('vc-playoffs-stage',p.playoff_info.stage,p.playoff_info.is_open) if not xyd.WindowManager.get():getWindow('playoffs_schedule_main') then xyd.WindowManager.get():openWindow('playoffs_schedule_main') end",
+    "wait:10",
+    "lua:assert(xyd.WindowManager.get():getWindow('playoffs_schedule_main'),'vc-playoffs-schedule-window-missing')"
+  ],
+  "settle_seconds": 35,
+  "expect_ok": [
+    768,
+    1283
+  ],
+  "heroes": [
+    10001001,
+    10001002,
+    10001003,
+    10001004,
+    10001005
+  ]
+}

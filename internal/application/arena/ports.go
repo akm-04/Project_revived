@@ -30,6 +30,24 @@ import (
 )
 
 type Store interface {
+	SettledTournamentsTx(context.Context, tx.Queryer, identity.PlayerID) ([]d.TournamentPeriod, error)
+	WakeTournamentRoomTx(context.Context, tx.Tx, ids.UUID) error
+	ReadCasualSessionTx(context.Context, tx.Queryer, int64, bool) (d.CasualSession, bool, error)
+	SaveCasualSessionTx(context.Context, tx.Tx, d.CasualSession, int64) error
+	PendingCasualSessionsTx(context.Context, tx.Queryer, time.Time, int) ([]int64, error)
+	PendingTournamentsTx(context.Context, tx.Queryer, int) ([]int64, error)
+	PreviousSeasonRanksTx(context.Context, tx.Queryer, int64) ([]d.TournamentEnrollment, error)
+	ReadTournamentTx(context.Context, tx.Queryer, int64, bool) (d.TournamentPeriod, bool, error)
+	SaveTournamentTx(context.Context, tx.Tx, d.TournamentPeriod, int64) error
+	ReadTournamentRoomTx(context.Context, tx.Queryer, ids.UUID, bool) (d.TournamentRoom, bool, error)
+	SaveTournamentRoomTx(context.Context, tx.Tx, d.TournamentRoom, int64) error
+	TournamentRoomsTx(context.Context, tx.Queryer, int64, identity.PlayerID, bool) ([]d.TournamentRoom, error)
+	DueTournamentRoomsTx(context.Context, tx.Queryer, time.Time, int) ([]ids.UUID, error)
+	ActiveCasualEntryTx(context.Context, tx.Queryer, identity.PlayerID) (d.CasualEntry, bool, error)
+	WaitingCasualEntriesTx(context.Context, tx.Queryer, int64) ([]d.CasualEntry, error)
+	SaveCasualEntryTx(context.Context, tx.Tx, d.CasualEntry, int64) error
+	CasualStandingsTx(context.Context, tx.Queryer, int64) ([]d.CasualStanding, error)
+	AddCasualResultTx(context.Context, tx.Tx, int64, identity.PlayerID, bool, time.Time) error
 	ReadCompetitionTx(context.Context, tx.Queryer, bool) (d.Competition, bool, error)
 	CreateCompetitionTx(context.Context, tx.Tx, d.Competition) error
 	SaveCompetitionTx(context.Context, tx.Tx, d.Competition, int64) error
@@ -85,6 +103,8 @@ type Achievements interface {
 }
 
 type Combat interface {
+	SnapshotTx(context.Context, tx.Queryer, ids.UUID) (cd.Snapshot, error)
+	StartManyTx(context.Context, tx.Tx, ca.CoherentReadScope, []combat.StartRequest) ([]combat.Started, error)
 	StartTx(context.Context, tx.Tx, ca.CoherentReadScope, combat.StartRequest) (combat.Started, error)
 	ResolveDetached(context.Context, operation.Context, ids.UUID) *combat.Flight
 	TerminalTx(context.Context, tx.Tx, combat.TerminalRequest) (combat.Settled, error)

@@ -209,6 +209,7 @@ func main() {
 	leagueOrigins := appleague.Service{Store: leaguestore.Store{}, Content: contentDB, Entitlements: i5db}
 	displayRoutes := playerdisplay.CatalogOriginRoutes{{Family: "bubble", First: 10002, Last: 10007, Owner: leagueOrigins}, {Family: "title", First: 100104, Last: 100104, Owner: leagueOrigins}, {Family: "title", First: 100111, Last: 100111, Owner: leagueOrigins}, {Family: "title", First: 100114, Last: 100121, Owner: leagueOrigins}, {Family: "title", First: 100059, Last: 100066, Owner: boardRanking}, {Family: "title", First: 100001, Last: 100001, Owner: boardRanking},
 		{First: 100002, Last: 100005, Owner: apponeonone.Service{Store: oneononestore.Store{}, Content: contentDB, Entitlements: i5db}},
+		{Family: "frame", First: 120001078, Last: 120001078, Owner: apparena.Service{Store: arenastore.Store{}, Content: contentDB}},
 		{Family: "avatar", First: 110006001, Last: 110006001, Owner: apparena.Service{Store: arenastore.Store{}, Content: contentDB}}}
 
 	maxHeroColorPolicy := appi5.CurrentMaxHeroColorProvider{}
@@ -395,6 +396,9 @@ func main() {
 		ranking.Arena = arena
 		for _, mid := range stockruntime.ArenaMIDs {
 			mustRegister(mid, stockruntime.ArenaDispatcher{Authority: authority, Service: arena})
+		}
+		for _, mid := range stockruntime.TournamentMIDs {
+			mustRegister(mid, stockruntime.TournamentDispatcher{Authority: authority, Service: arena})
 		}
 		go runReconcile(ctx, pool, apparena.Reconciler{Service: arena})
 		profileHistory = apppublicprofile.ModeHistory{TopFloor: topFloor, OneOnOne: oneOnOne, Arena: arena, Heroes: fight.Inputs.Heroes}

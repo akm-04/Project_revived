@@ -177,7 +177,10 @@ func (r Reconciler) Reconcile(c context.Context, op gen.TimedOperation, limit in
 			out.Settled++
 		}
 	}
-	return out, nil
+	tournamentCount, err := s.ReconcileTournaments(c, op.Operation(), max(limit-out.Scanned, 0))
+	out.Scanned += tournamentCount
+	out.Settled += tournamentCount
+	return out, err
 }
 
 func (r Reconciler) match(c context.Context, id ids.UUID, op gen.TimedOperation, now time.Time) (bool, error) {

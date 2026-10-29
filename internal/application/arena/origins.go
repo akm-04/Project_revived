@@ -14,7 +14,7 @@ import (
 // so the history is complete; the champion mail item is a separate stack.
 func (s Service) ReadCatalogDisplayOriginsTx(c context.Context, q tx.Queryer, r app.CatalogOriginRequest) (app.CatalogOriginObservation, error) {
 	out := app.CatalogOriginObservation{Request: r, Origins: []app.Origin{}}
-	if q == nil || s.Store == nil || s.Content == nil || !r.PlayerID.Valid() || r.Family != "avatar" || len(r.Revision) != 64 {
+	if q == nil || s.Store == nil || s.Content == nil || !r.PlayerID.Valid() || (r.Family != "avatar" && r.Family != "frame") || len(r.Revision) != 64 {
 		return out, app.ErrUnavailable
 	}
 	catalog, e := s.Content.ArenaCatalogTx(c, q, r.Revision)
@@ -24,6 +24,25 @@ func (s Service) ReadCatalogDisplayOriginsTx(c context.Context, q tx.Queryer, r 
 	display, e := s.Content.ReadPlayerDisplayCatalogTx(c, q, r.Revision)
 	if e != nil {
 		return out, e
+	}
+	if r.Family == "frame" {
+		row, known := display.Find(r.Family, r.CatalogID)
+		if !known || r.CatalogID != 120001078 || row.Days != -1 {
+			return out, app.ErrConflict
+		}
+		periods, err := s.Store.SettledTournamentsTx(c, q, r.PlayerID)
+		if err != nil {
+			return out, err
+		}
+		for _, period := range periods {
+			if period.SettledAt.IsZero() || period.SettledAt.After(r.ObservedAt) {
+				continue
+			}
+			starts := period.SettledAt.UTC()
+			out.Origins = append(out.Origins, app.Origin{PlayerID: r.PlayerID, Key: fmt.Sprintf("arena:playoffs:%d:champion", period.Season), Owner: "Arena", Family: r.Family, CatalogID: r.CatalogID, StartsAt: &starts, Revision: r.Revision, StateVersion: period.StateVersion})
+		}
+		out.Qualified, out.CompleteHistory = true, true
+		return out, nil
 	}
 	if row, ok := display.Find(r.Family, r.CatalogID); !ok || r.CatalogID != catalog.ChampionItem || row.Days <= 0 {
 		return out, app.ErrConflict

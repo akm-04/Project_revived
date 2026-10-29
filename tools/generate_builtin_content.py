@@ -21,12 +21,16 @@ from pathlib import Path
 from typing import Any, Iterable
 
 SCHEMA_VERSION = 1
-COMPILER_VERSION = "i9-7a-top-floor-task"
+COMPILER_VERSION = "i9-7b-tournament-casual"
 PARSER_VERSION = "lua-generated-v18-guild-invite"
 EXPECTED_SOURCE_ARCHIVE_SHA256 = "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
 SOURCE_PREFIX = "app-assets/output/assets/src_64/"
 
 SOURCE_MANIFEST = [
+    ('data/tables/playoff_time.lua', '7e29b5cb8797c898878457ded7480f084665ca3f6d14f6e5e189ef37e92a8b49', 'I9_7B_TOURNAMENT_CASUAL_SOURCE_BOUNDARY'),
+    ('data/tables/playoff_reward.lua', '7b7895ac46760679a488c0504137864541fb70a6813a98fd167c1f5fb6b8f92a', 'I9_7B_TOURNAMENT_CASUAL_SOURCE_BOUNDARY'),
+    ('data/tables/region_playoff_stage.lua', '562c12cc215e71c93a97c15d1ac3cf5b691f445025a8dfa90b4b2d864e3b0131', 'I9_7B_TOURNAMENT_CASUAL_SOURCE_BOUNDARY'),
+    ('data/tables/relax_match_gift.lua', '7185153b1e293110dc9ac9a7dc420811cee0ab0f6ea87dbd271a6fe6fa8984a9', 'I9_7B_TOURNAMENT_CASUAL_SOURCE_BOUNDARY'),
     ('data/tables/arena_mode.lua', 'ac31d67aefd207e48406b9cefdfd0a9847f433a7090ff07298635ebe52e9c6bc', 'I9_7A_TOP_FLOOR_TASK_SOURCE_BOUNDARY'),
     ('data/tables/arena_mode_schedule.lua', 'aaf4a57a1aeb5ea6bd73b0b66e02eee242528543622b5e7d7bb25fc1155802a6', 'I9_7A_TOP_FLOOR_TASK_SOURCE_BOUNDARY'),
     ('data/tables/arena_mode_reward.lua', '985dc6f01cb909aa52bb5a915372ff0c58c6bf9196e2e653210be0534595a6de', 'I9_7A_TOP_FLOOR_TASK_SOURCE_BOUNDARY'),
@@ -501,7 +505,7 @@ from awakening_content import build_awakening
 from signin_content import build_signin
 from missions_content import build_missions
 from one_on_one_content import build_one_on_one
-from arena_content import build_arena
+from arena_content import build_arena, build_tournament
 from league_content import build_league
 from conquer_mode_content import build_conquer_mode
 from course_content import build_course
@@ -2330,7 +2334,7 @@ def build_artifacts(blobs: dict[str, SourceBlob], archive_sha256: str) -> dict[s
         "summon_catalog.json":build_summon(blobs,parse_generated_lua_table,parse_base64_indexed_lua_table,indexed_field),
         "top_floor_catalog.json":top_floor_artifact,
         "one_on_one_catalog.json":build_one_on_one(blobs,parse_generated_lua_table),
-        "arena_catalog.json":build_arena(blobs,parse_generated_lua_table),
+        "arena_catalog.json":dict(build_arena(blobs,parse_generated_lua_table), tournament=build_tournament(blobs,parse_generated_lua_table)),
         "league_catalog.json":build_league(blobs,parse_generated_lua_table),
         "conquer_mode_catalog.json":build_conquer_mode(blobs,parse_generated_lua_table),
         "achievement_catalog.json":build_achievement(blobs,parse_generated_lua_table),

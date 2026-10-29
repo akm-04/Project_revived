@@ -1567,8 +1567,9 @@
    "family": "TOP_FLOOR_RESIDUAL",
    "disposition": "ACTIVE",
    "target": "I9-7",
-   "v2": "unimplemented",
-   "v1": "STATE_BACKED"
+   "v2": "implemented",
+   "v1": "STATE_BACKED",
+   "implementation": "I9-7B working implementation; unqualified"
   },
   {
    "mid": 277,
@@ -4097,8 +4098,9 @@
    "family": "PLAYOFFS",
    "disposition": "ACTIVE",
    "target": "I9-7",
-   "v2": "unimplemented",
-   "v1": null
+   "v2": "implemented",
+   "v1": null,
+   "implementation": "I9-7B working implementation; unqualified"
   },
   {
    "mid": 1282,
@@ -4106,8 +4108,9 @@
    "family": "PLAYOFFS",
    "disposition": "ACTIVE",
    "target": "I9-7",
-   "v2": "unimplemented",
-   "v1": null
+   "v2": "implemented",
+   "v1": null,
+   "implementation": "I9-7B working implementation; unqualified"
   },
   {
    "mid": 1283,
@@ -4115,8 +4118,9 @@
    "family": "PLAYOFFS",
    "disposition": "ACTIVE",
    "target": "I9-7",
-   "v2": "unimplemented",
-   "v1": null
+   "v2": "implemented",
+   "v1": null,
+   "implementation": "I9-7B working implementation; unqualified"
   },
   {
    "mid": 1284,
@@ -4124,8 +4128,9 @@
    "family": "PLAYOFFS",
    "disposition": "ACTIVE",
    "target": "I9-7",
-   "v2": "unimplemented",
-   "v1": null
+   "v2": "implemented",
+   "v1": null,
+   "implementation": "I9-7B working implementation; unqualified"
   },
   {
    "mid": 1285,
@@ -4133,8 +4138,9 @@
    "family": "PLAYOFFS",
    "disposition": "ACTIVE",
    "target": "I9-7",
-   "v2": "unimplemented",
-   "v1": null
+   "v2": "implemented",
+   "v1": null,
+   "implementation": "I9-7B working implementation; unqualified"
   },
   {
    "mid": 1286,
@@ -4142,8 +4148,9 @@
    "family": "PLAYOFFS",
    "disposition": "ACTIVE",
    "target": "I9-7",
-   "v2": "unimplemented",
-   "v1": null
+   "v2": "implemented",
+   "v1": null,
+   "implementation": "I9-7B working implementation; unqualified"
   },
   {
    "mid": 1287,
@@ -4151,8 +4158,9 @@
    "family": "PLAYOFFS",
    "disposition": "ACTIVE",
    "target": "I9-7",
-   "v2": "unimplemented",
-   "v1": null
+   "v2": "implemented",
+   "v1": null,
+   "implementation": "I9-7B working implementation; unqualified"
   },
   {
    "mid": 1288,
@@ -4160,8 +4168,9 @@
    "family": "PLAYOFFS",
    "disposition": "ACTIVE",
    "target": "I9-7",
-   "v2": "unimplemented",
-   "v1": null
+   "v2": "implemented",
+   "v1": null,
+   "implementation": "I9-7B working implementation; unqualified"
   },
   {
    "mid": 1289,
@@ -4169,8 +4178,9 @@
    "family": "PLAYOFFS",
    "disposition": "ACTIVE",
    "target": "I9-7",
-   "v2": "unimplemented",
-   "v1": null
+   "v2": "implemented",
+   "v1": null,
+   "implementation": "I9-7B working implementation; unqualified"
   },
   {
    "mid": 1290,
@@ -4178,8 +4188,9 @@
    "family": "PLAYOFFS",
    "disposition": "ACTIVE",
    "target": "I9-7",
-   "v2": "unimplemented",
-   "v1": null
+   "v2": "implemented",
+   "v1": null,
+   "implementation": "I9-7B working implementation; unqualified"
   },
   {
    "mid": 1291,
@@ -4187,8 +4198,9 @@
    "family": "PLAYOFFS",
    "disposition": "ACTIVE",
    "target": "I9-7",
-   "v2": "unimplemented",
-   "v1": null
+   "v2": "implemented",
+   "v1": null,
+   "implementation": "I9-7B working implementation; unqualified"
   },
   {
    "mid": 1292,
@@ -4196,8 +4208,9 @@
    "family": "PLAYOFFS",
    "disposition": "ACTIVE",
    "target": "I9-7",
-   "v2": "unimplemented",
-   "v1": null
+   "v2": "implemented",
+   "v1": null,
+   "implementation": "I9-7B working implementation; unqualified"
   },
   {
    "mid": 1294,
@@ -4205,8 +4218,9 @@
    "family": "PLAYOFFS",
    "disposition": "ACTIVE",
    "target": "I9-7",
-   "v2": "unimplemented",
-   "v1": null
+   "v2": "implemented",
+   "v1": null,
+   "implementation": "I9-7B working implementation; unqualified"
   },
   {
    "mid": 1296,
@@ -5449,8 +5463,9 @@
    "family": "ARENA_REGION_RESIDUAL",
    "disposition": "ACTIVE",
    "target": "I9-7",
-   "v2": "unimplemented",
-   "v1": null
+   "v2": "implemented",
+   "v1": null,
+   "implementation": "I9-7B working implementation; unqualified"
   },
   {
    "mid": 1873,
@@ -5458,8 +5473,9 @@
    "family": "ARENA_REGION_RESIDUAL",
    "disposition": "ACTIVE",
    "target": "I9-7",
-   "v2": "unimplemented",
-   "v1": null
+   "v2": "implemented",
+   "v1": null,
+   "implementation": "I9-7B working implementation; unqualified"
   },
   {
    "mid": 1874,
@@ -5467,8 +5483,9 @@
    "family": "ARENA_REGION_RESIDUAL",
    "disposition": "ACTIVE",
    "target": "I9-7",
-   "v2": "unimplemented",
-   "v1": null
+   "v2": "implemented",
+   "v1": null,
+   "implementation": "I9-7B working implementation; unqualified"
   },
   {
    "mid": 1875,
@@ -5476,8 +5493,9 @@
    "family": "ARENA_REGION_RESIDUAL",
    "disposition": "ACTIVE",
    "target": "I9-7",
-   "v2": "unimplemented",
-   "v1": null
+   "v2": "implemented",
+   "v1": null,
+   "implementation": "I9-7B working implementation; unqualified"
   },
   {
    "mid": 1876,
@@ -5485,8 +5503,9 @@
    "family": "ARENA_REGION_RESIDUAL",
    "disposition": "ACTIVE",
    "target": "I9-7",
-   "v2": "unimplemented",
-   "v1": null
+   "v2": "implemented",
+   "v1": null,
+   "implementation": "I9-7B working implementation; unqualified"
   },
   {
    "mid": 1877,
@@ -5494,8 +5513,9 @@
    "family": "ARENA_REGION_RESIDUAL",
    "disposition": "ACTIVE",
    "target": "I9-7",
-   "v2": "unimplemented",
-   "v1": null
+   "v2": "implemented",
+   "v1": null,
+   "implementation": "I9-7B working implementation; unqualified"
   },
   {
    "mid": 1888,

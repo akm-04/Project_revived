@@ -426,14 +426,22 @@
       "parser_version": "lua-generated-v18-guild-invite",
       "revision_id": "258e05bd8658c9ea0c9358a4bac1529c57742c6096fb01c84d124956103be84e",
       "scope": "Source six modes,91 dated weeks,17 rewards; D351-D353 private policies. Working implementation, not stage acceptance."
+    },
+    {
+      "ordinal": 59,
+      "stage": "I9-7B Playoffs and Casual Arena",
+      "compiler_version": "i9-7b-tournament-casual",
+      "parser_version": "lua-generated-v18-guild-invite",
+      "revision_id": "569bbff79e0f901b4c665ca04d3df7f42b510e5c2a904818ef9f1daa307a273e",
+      "scope": "Source calendar, stage and reward tables. D357 private reconstruction policy; unsealed working implementation."
     }
   ],
   "current": {
-    "ordinal": 58,
-    "stage": "I9-7A Top Floor task modes",
-    "compiler_version": "i9-7a-top-floor-task",
+    "ordinal": 59,
+    "stage": "I9-7B Playoffs and Casual Arena",
+    "compiler_version": "i9-7b-tournament-casual",
     "parser_version": "lua-generated-v18-guild-invite",
-    "revision_id": "258e05bd8658c9ea0c9358a4bac1529c57742c6096fb01c84d124956103be84e",
-    "scope": "Source six modes,91 dated weeks,17 rewards; D351-D353 private policies. Working implementation, not stage acceptance."
+    "revision_id": "569bbff79e0f901b4c665ca04d3df7f42b510e5c2a904818ef9f1daa307a273e",
+    "scope": "Source calendar, stage and reward tables. D357 private reconstruction policy; unsealed working implementation."
   }
 }

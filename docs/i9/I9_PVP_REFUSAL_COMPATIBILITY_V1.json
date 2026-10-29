@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "contract_id": "I9_PVP_REFUSAL_COMPATIBILITY_V1",
+  "version": 1,
+  "status": "USER_APPROVED_WORKING_AMENDMENT_PENDING_QUALIFICATION_PUBLICATION",
+  "node": "ROOT/I9/I9-7",
+  "decision": "D356",
+  "authorization": "Explicit user response: Approve the scoped refusal exception (Recommended).",
+  "extends": [
+    "I9_MODE_FRAMEWORK_V1 F4(b)",
+    "CLOSING_CRITERIA A6"
+  ],
+  "scope": "Only newly implemented I9-7 routes whose stock success callback is unsafe on an error-only HTTP 200 body; includes the unaccepted I9-7A task refusal repair. Other accepted families keep their contracts.",
+  "rules": [
+    "R1 A reachable refusal may return HTTP 400 with an error-only body and no nonempty error_msg when HTTP 200 would dispatch the stock success callback. Preserve safe stock-specific error handling where it is actually present.",
+    "R2 Success remains HTTP 200 with genuine owner state. Malformed or forged requests remain HTTP 400; internal failure remains HTTP 503. Refusals must not fabricate successful state, charge, grant or advance gameplay.",
+    "R3 A6 success probes still require HTTP 200. Declared refusal probes may require HTTP 400, but must demonstrate no Lua success-branch error or false successful client transition. Native refusal, exact retry, concurrency, journal and stock UI reachability requirements remain mandatory.",
+    "R4 Current source/effective client is preserved. This exception does not authorize a global Backend.lua patch, waive missing assets, declare a blocked scenario passed or close a stage.",
+    "R5 Claude registers this approved scoped exception and its evidence at I9-7 qualification; the implementation checkpoint does not supersede selected seal 793."
+  ],
+  "source": {
+    "path": "app/common/network/Backend.lua",
+    "sha256": "95378e2b0be8180df6de27e9e430c630bcfe46c080e1f91ef5f6d74bdbb1b840",
+    "symbols": [
+      "webRequest_ var_23_2 (callback precedes error_code handling)",
+      "webRequest_ var_23_6 (HTTP 200 selects xyd.error.OK)"
+    ]
+  },
+  "evidence": [
+    "research/I9_7B/REFUSAL_CONTRACT_AMENDMENT_PROPOSAL.md",
+    "research/I9_7A/VC_EVIDENCE/i9-7a-r3",
+    "research/I9_7A/VC_EVIDENCE/i9-7a-r4"
+  ]
+}

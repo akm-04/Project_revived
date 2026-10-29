@@ -4427,6 +4427,76 @@
       ],
       "write_exceptions": [],
       "migration": "migrations/00096_i9_7a_top_floor_task.sql"
+    },
+    "arena_tournament_periods": {
+      "owner": "Arena",
+      "allowed_query_owners": [
+        "Arena"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/arenastore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/arenastore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00097_i9_7b_tournament_casual.sql"
+    },
+    "arena_tournament_rooms": {
+      "owner": "Arena",
+      "allowed_query_owners": [
+        "Arena"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/arenastore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/arenastore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00097_i9_7b_tournament_casual.sql"
+    },
+    "arena_casual_entries": {
+      "owner": "Arena",
+      "allowed_query_owners": [
+        "Arena"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/arenastore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/arenastore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00097_i9_7b_tournament_casual.sql"
+    },
+    "arena_casual_scores": {
+      "owner": "Arena",
+      "allowed_query_owners": [
+        "Arena"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/arenastore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/arenastore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00097_i9_7b_tournament_casual.sql"
+    },
+    "arena_casual_sessions": {
+      "owner": "Arena",
+      "allowed_query_owners": [
+        "Arena"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/arenastore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/arenastore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00097_i9_7b_tournament_casual.sql"
     }
   }
 }

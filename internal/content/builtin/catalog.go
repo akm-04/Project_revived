@@ -1052,6 +1052,9 @@ func validateManifest(raw []byte, manifest *Manifest) error {
 	if manifest.CompilerVersion == "i9-5a-march" {
 		expectedSources, expectedArtifacts = 335, 45
 	}
+	if manifest.CompilerVersion == "i9-7b-tournament-casual" {
+		expectedSources, expectedArtifacts = 384, 50
+	}
 	if len(manifest.Sources) != expectedSources {
 		return fmt.Errorf("builtin content: expected %d source records, got %d", expectedSources, len(manifest.Sources))
 	}
