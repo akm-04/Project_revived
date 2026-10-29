@@ -27,6 +27,8 @@ import (
 )
 
 type Store interface {
+	TaskStore
+	WeeklyChallengesTx(context.Context, tx.Queryer, identity.PlayerID, time.Time) (int64, error)
 	ReadLadderTx(context.Context, tx.Queryer, identity.LogicalServerID, bool) (d.Ladder, bool, error)
 	CreateLadderTx(context.Context, tx.Tx, d.Ladder) error
 	SaveLadderTx(context.Context, tx.Tx, d.Ladder, int64) error
@@ -93,6 +95,7 @@ type Roster interface {
 }
 
 type Directory interface {
+	ServerMaximumLevelTx(context.Context, tx.Queryer, identity.LogicalServerID) (int64, error)
 	ProfileTx(context.Context, tx.Queryer, identity.PlayerID) (playerdirectory.Profile, bool, error)
 }
 
@@ -134,10 +137,11 @@ func (s Service) ready() bool {
 }
 
 type ArenaView struct {
-	Player     d.Player
-	Rank       int64
-	Enemies    []d.Display
-	ServerTime time.Time
+	WeeklyChallenges int64
+	Player           d.Player
+	Rank             int64
+	Enemies          []d.Display
+	ServerTime       time.Time
 }
 
 type FightView struct {
@@ -149,6 +153,7 @@ type FightView struct {
 }
 
 type RecordView struct {
+	Mode     int64
 	Record   d.Record
 	Self     d.Display
 	Opponent d.Display

@@ -37,3 +37,14 @@ func (PlayerDirectoryReader) ProfileTx(ctx context.Context, q tx.Queryer, pid id
 }
 
 var _ playerdirectory.Reader = PlayerDirectoryReader{}
+
+func (PlayerDirectoryReader) ServerMaximumLevelTx(requestContext context.Context, query tx.Queryer, server identity.LogicalServerID) (int64, error) {
+	if query == nil || !server.Valid() {
+		return 0, errors.New("invalid server directory read")
+	}
+	const playerIDsPerServer = 100000
+	firstPlayer, lastPlayer := int64(server)*playerIDsPerServer, (int64(server)+1)*playerIDsPerServer
+	var level int64
+	err := query.QueryRow(requestContext, `SELECT COALESCE(max(lev),0) FROM player_directory_profiles WHERE player_id >= $1 AND player_id < $2`, firstPlayer, lastPlayer).Scan(&level)
+	return level, err
+}

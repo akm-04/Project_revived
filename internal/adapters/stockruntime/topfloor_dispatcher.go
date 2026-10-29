@@ -91,7 +91,9 @@ func (t TopFloorDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchR
 		if req.Envelope.MID == 273 {
 			return okI5(projection.Enemies(v.Enemies))
 		}
-		return okI5(projection.Arena(v.Player, v.Rank, v.Enemies, v.ServerTime))
+		body := projection.Arena(v.Player, v.Rank, v.Enemies, v.ServerTime)
+		body["fight_times"] = v.WeeklyChallenges
+		return okI5(body)
 	case 278:
 		raw, ok := p["heroIDs"].([]any)
 		pet, petOK := topFloorInteger(p, "pet_id", false)
@@ -135,7 +137,7 @@ func (t TopFloorDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchR
 		}
 		rows := []projection.Record{}
 		for _, r := range records {
-			rows = append(rows, projection.Record{ID: r.Record.ID, Key: r.Record.AttemptID.String(), At: r.Record.At, Attack: r.Record.Attack, Win: r.Record.Win, Self: r.Self, Opponent: r.Opponent})
+			rows = append(rows, projection.Record{Mode: r.Mode, ID: r.Record.ID, Key: r.Record.AttemptID.String(), At: r.Record.At, Attack: r.Record.Attack, Win: r.Record.Win, Self: r.Self, Opponent: r.Opponent})
 		}
 		return okI5(projection.Records(rows))
 	case 290:

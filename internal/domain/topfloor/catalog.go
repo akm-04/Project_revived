@@ -57,34 +57,40 @@ type RobotHero struct {
 }
 
 type Catalog struct {
-	SchemaVersion    int         `json:"schema_version"`
-	ContractID       string      `json:"contract_id"`
-	PolicyID         string      `json:"policy_id"`
-	FunctionID       int64       `json:"function_id"`
-	RequiredLevel    int64       `json:"required_level"`
-	FreeTickets      int64       `json:"free_tickets"`
-	BuyRestore       int64       `json:"buy_restore"`
-	CooldownSeconds  int64       `json:"cooldown_seconds"`
-	ResetCost        int64       `json:"reset_cost"`
-	MatchHundredths  [3]int64    `json:"match_hundredths"`
-	CutoffSeconds    int64       `json:"cutoff_seconds"`
-	FreezeEndSeconds int64       `json:"freeze_end_seconds"`
-	RecordsMax       int64       `json:"records_max"`
-	MailTitle        string      `json:"mail_title"`
-	MailText         string      `json:"mail_text"`
-	MailSender       string      `json:"mail_sender"`
-	RobotAvatarID    int64       `json:"robot_avatar_id"`
-	RobotFrameID     int64       `json:"robot_frame_id"`
-	Rewards          []Reward    `json:"rewards"`
-	VIP              []VIP       `json:"vip"`
-	BuyCosts         []int64     `json:"buy_costs"`
-	Robots           []RobotTeam `json:"robots"`
-	RobotHeroes      []RobotHero `json:"robot_heroes"`
-	FirstNames       []string    `json:"first_names"`
-	LastNames        []string    `json:"last_names"`
+	TaskModes        *TaskModeCatalog `json:"task_modes,omitempty"`
+	SchemaVersion    int              `json:"schema_version"`
+	ContractID       string           `json:"contract_id"`
+	PolicyID         string           `json:"policy_id"`
+	FunctionID       int64            `json:"function_id"`
+	RequiredLevel    int64            `json:"required_level"`
+	FreeTickets      int64            `json:"free_tickets"`
+	BuyRestore       int64            `json:"buy_restore"`
+	CooldownSeconds  int64            `json:"cooldown_seconds"`
+	ResetCost        int64            `json:"reset_cost"`
+	MatchHundredths  [3]int64         `json:"match_hundredths"`
+	CutoffSeconds    int64            `json:"cutoff_seconds"`
+	FreezeEndSeconds int64            `json:"freeze_end_seconds"`
+	RecordsMax       int64            `json:"records_max"`
+	MailTitle        string           `json:"mail_title"`
+	MailText         string           `json:"mail_text"`
+	MailSender       string           `json:"mail_sender"`
+	RobotAvatarID    int64            `json:"robot_avatar_id"`
+	RobotFrameID     int64            `json:"robot_frame_id"`
+	Rewards          []Reward         `json:"rewards"`
+	VIP              []VIP            `json:"vip"`
+	BuyCosts         []int64          `json:"buy_costs"`
+	Robots           []RobotTeam      `json:"robots"`
+	RobotHeroes      []RobotHero      `json:"robot_heroes"`
+	FirstNames       []string         `json:"first_names"`
+	LastNames        []string         `json:"last_names"`
 }
 
 func (c Catalog) Validate() error {
+	if c.TaskModes != nil {
+		if err := c.TaskModes.Validate(); err != nil {
+			return err
+		}
+	}
 	profile := c.SchemaVersion == 1 && c.ContractID == ContractID && c.PolicyID == PolicyID && c.FunctionID == 4 && c.RequiredLevel == 10 && c.FreeTickets == 5 && c.BuyRestore == 5 &&
 		c.CooldownSeconds == 300 && c.ResetCost == 50 && c.MatchHundredths == [3]int64{30, 50, 98} && c.CutoffSeconds == 75600 && c.FreezeEndSeconds == 77400 && c.RecordsMax == 10 &&
 		c.MailTitle != "" && c.MailText != "" && c.MailSender != "" && len(c.Rewards) == 30 && len(c.VIP) == 16 && len(c.BuyCosts) > 0 && len(c.Robots) == RobotTeams && len(c.FirstNames) > 0 && len(c.LastNames) > 0

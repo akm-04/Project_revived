@@ -81,6 +81,22 @@ func (d RankingDispatcher) Dispatch(c context.Context, r httpedge.DispatchReques
 		}
 		return okI5(body)
 	}
+
+	if subtype == 2 && d.TopFloor != nil {
+		service, ok := d.TopFloor.(interface {
+			TaskRankList(context.Context, identity.ActorContext) (topfloor.RankList, error)
+		})
+		if !ok {
+			return fail(http.StatusServiceUnavailable)
+		}
+		list, err := service.TaskRankList(c, a)
+		if err != nil {
+			return fail(http.StatusServiceUnavailable)
+		}
+		body := topfloorprojection.RankList(list.Rows, list.MyRank, a.LogicalServerID)
+		body["rank_list"].([]map[string]any)[0]["rank_type"] = int64(2)
+		return okI5(body)
+	}
 	if subtype == 1 && d.TopFloor != nil {
 		list, e := d.TopFloor.RankList(c, a)
 		if e != nil {

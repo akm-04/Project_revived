@@ -10,7 +10,7 @@ func TestLoadGeneratedCatalog(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if got, want := c.RevisionID(), "a5d5fc91db5fb659a4140d38b31695c30be1e1bf1f3b5a18949e77a539ce82a5"; got != want {
+	if got, want := c.RevisionID(), "258e05bd8658c9ea0c9358a4bac1529c57742c6096fb01c84d124956103be84e"; got != want {
 		t.Fatalf("revision id = %s, want %s", got, want)
 	}
 	if got, want := len(c.PlayerProgression.Rows), 100; got != want {
@@ -562,5 +562,23 @@ func TestSuperEquipmentCA45Catalog(t *testing.T) {
 	}
 	if !found {
 		t.Fatal("SUPER_EQUIPMENT_CA4_5 missing")
+	}
+}
+
+func TestTopFloorTaskCatalogCanonicalJSON(t *testing.T) {
+	raw, err := GeneratedFile("top_floor_catalog.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var decoded any
+	if err = json.Unmarshal(raw, &decoded); err != nil {
+		t.Fatal(err)
+	}
+	canonical, err := json.Marshal(decoded)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(raw) != string(canonical)+"\n" {
+		t.Fatal("top floor runtime hash would reject noncanonical catalog")
 	}
 }

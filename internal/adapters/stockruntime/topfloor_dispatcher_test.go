@@ -26,7 +26,7 @@ var topFloorRobot = d.Display{Occupant: d.Occupant{Robot: 7}, Rank: 9, Name: "Ho
 func (f *topFloorFake) Load(context.Context, identity.ActorContext, operation.Context) (app.ArenaView, error) {
 	f.calls++
 	at := time.Unix(1700000000, 0)
-	return app.ArenaView{Player: d.Player{BestRank: 9, TicketsLeft: 4, Purchases: 1, LastMatchAt: &at, Defense: []int64{3}, Fights: 2}, Rank: 10, Enemies: []d.Display{topFloorRobot}, ServerTime: at}, nil
+	return app.ArenaView{Player: d.Player{BestRank: 9, TicketsLeft: 4, Purchases: 1, LastMatchAt: &at, Defense: []int64{3}, Fights: 2}, Rank: 10, Enemies: []d.Display{topFloorRobot}, ServerTime: at, WeeklyChallenges: 7}, nil
 }
 func (f *topFloorFake) Refresh(c context.Context, a identity.ActorContext, o operation.Context) (app.ArenaView, error) {
 	return f.Load(c, a, o)
@@ -76,6 +76,9 @@ func TestI7C5BTopFloorWireShapes(t *testing.T) {
 		if _, ok := load[key]; !ok {
 			t.Fatal("LOAD_ARENA missing", key)
 		}
+	}
+	if load["fight_times"] != int64(7) {
+		t.Fatal("weekly admission count replaced by lifetime fights", load)
 	}
 	enemy := load["enemies"].([]map[string]any)[0]
 	if enemy["table_id"] != int64(7) || enemy["player_name"] != "Hoper Bao" || load["last_match_time"] != int64(1700000000) {

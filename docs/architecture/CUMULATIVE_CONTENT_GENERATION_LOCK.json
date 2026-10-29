@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "status": "CUMULATIVE_CONTENT_GENERATION_LOCK_I9_6C_WORKING",
+  "status": "CUMULATIVE_CONTENT_GENERATION_LOCK_I9_7A_WORKING",
   "rule": "Historical validators keep their phase-specific semantic invariants. In cumulative/current mode they may accept only an explicitly registered successor compiler generation at or after their baseline. New generations are append-only review events; registering a generation does not waive capability/count/source/migration/ownership assertions.",
   "generations": [
     {
@@ -418,14 +418,22 @@
       "parser_version": "lua-generated-v18-guild-invite",
       "revision_id": "a5d5fc91db5fb659a4140d38b31695c30be1e1bf1f3b5a18949e77a539ce82a5",
       "scope": "Source3 floors,11 girls,6 bosses,226 fights and75 dropboxes. Working implementation; D310 approved, D311-D315 private policy. Not stage acceptance."
+    },
+    {
+      "ordinal": 58,
+      "stage": "I9-7A Top Floor task modes",
+      "compiler_version": "i9-7a-top-floor-task",
+      "parser_version": "lua-generated-v18-guild-invite",
+      "revision_id": "258e05bd8658c9ea0c9358a4bac1529c57742c6096fb01c84d124956103be84e",
+      "scope": "Source six modes,91 dated weeks,17 rewards; D351-D353 private policies. Working implementation, not stage acceptance."
     }
   ],
   "current": {
-    "ordinal": 57,
-    "stage": "I9-6C Memoir",
-    "compiler_version": "i9-6c-memoir",
+    "ordinal": 58,
+    "stage": "I9-7A Top Floor task modes",
+    "compiler_version": "i9-7a-top-floor-task",
     "parser_version": "lua-generated-v18-guild-invite",
-    "revision_id": "a5d5fc91db5fb659a4140d38b31695c30be1e1bf1f3b5a18949e77a539ce82a5",
-    "scope": "Source3 floors,11 girls,6 bosses,226 fights and75 dropboxes. Working implementation; D310 approved, D311-D315 private policy. Not stage acceptance."
+    "revision_id": "258e05bd8658c9ea0c9358a4bac1529c57742c6096fb01c84d124956103be84e",
+    "scope": "Source six modes,91 dated weeks,17 rewards; D351-D353 private policies. Working implementation, not stage acceptance."
   }
 }

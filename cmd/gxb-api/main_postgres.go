@@ -381,6 +381,9 @@ func main() {
 		for _, mid := range stockruntime.TopFloorMIDs {
 			mustRegister(mid, stockruntime.TopFloorDispatcher{Authority: authority, Service: topFloor})
 		}
+		for _, mid := range stockruntime.TopFloorTaskMIDs {
+			mustRegister(mid, stockruntime.TopFloorTaskDispatcher{Authority: authority, Service: topFloor})
+		}
 		go runReconcile(ctx, pool, apptopfloor.Reconciler{Service: topFloor})
 		oneOnOne := canonicalOneOnOne(pool, runner, contentDB, i5db, i5svc, privileges, fight, owners)
 		ranking.OneOnOne = oneOnOne

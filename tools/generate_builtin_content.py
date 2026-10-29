@@ -21,12 +21,16 @@ from pathlib import Path
 from typing import Any, Iterable
 
 SCHEMA_VERSION = 1
-COMPILER_VERSION = "i9-6c-memoir"
+COMPILER_VERSION = "i9-7a-top-floor-task"
 PARSER_VERSION = "lua-generated-v18-guild-invite"
 EXPECTED_SOURCE_ARCHIVE_SHA256 = "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
 SOURCE_PREFIX = "app-assets/output/assets/src_64/"
 
 SOURCE_MANIFEST = [
+    ('data/tables/arena_mode.lua', 'ac31d67aefd207e48406b9cefdfd0a9847f433a7090ff07298635ebe52e9c6bc', 'I9_7A_TOP_FLOOR_TASK_SOURCE_BOUNDARY'),
+    ('data/tables/arena_mode_schedule.lua', 'aaf4a57a1aeb5ea6bd73b0b66e02eee242528543622b5e7d7bb25fc1155802a6', 'I9_7A_TOP_FLOOR_TASK_SOURCE_BOUNDARY'),
+    ('data/tables/arena_mode_reward.lua', '985dc6f01cb909aa52bb5a915372ff0c58c6bf9196e2e653210be0534595a6de', 'I9_7A_TOP_FLOOR_TASK_SOURCE_BOUNDARY'),
+
     ('app/model/MemoriesOfSchool.lua', '6bf59801d27aa39afc96fbab02580af7c1c5bc5c5586691459ede6b9e7181193', 'I9_6C_MEMOIR_SOURCE_BOUNDARY'),
     ('app/common/tables/BattleTable.lua', '4b0893ef16b7908f1be8a3a0ba9427c73448fd82f275b55d8bfaf54bffe3f659', 'I9_6C_MEMOIR_SOURCE_BOUNDARY'),
     ('app/scenes/BattleCreateReport.lua', '397ab8c281fd713050c93592f1b37b35a5702fed45c61fc47f0bc0420d0f0326', 'I9_6C_MEMOIR_SOURCE_BOUNDARY'),
@@ -472,7 +476,7 @@ from stat_content import build_stat_rules
 from stat_input_content import build_stat_inputs
 from privilege_content import build_privilege
 from achievement_content import build_achievement
-from top_floor_content import build_top_floor
+from top_floor_content import build_top_floor, build_task_modes
 SOURCE_MANIFEST.append(('data/tables/march_road.lua', '474778332bf29181e142a0560e70336596b584a81e314d938063fd3dc98d4923', 'I9_5A_MARCH_SOURCE_BOUNDARY'))
 SOURCE_MANIFEST.append(('data/tables/march_advance.lua', 'efd627223ba3e7777a90f03c79b368bfc3e6dbd391764cfdbca3aa706dafd38d', 'I9_5A_MARCH_SOURCE_BOUNDARY'))
 SOURCE_MANIFEST.append(('data/tables/march_recommend_hero.lua', 'ed4dd7fbb6fa11f97b31f7408e62d4510e4052eab5d803e62e67193b6eced3a9', 'I9_5A_MARCH_SOURCE_BOUNDARY'))
@@ -2313,6 +2317,8 @@ def build_artifacts(blobs: dict[str, SourceBlob], archive_sha256: str) -> dict[s
     book_artifact=build_book(blobs,parse_generated_lua_table,items)
     from dorm_content import build_dorm
     dorm_artifact=build_dorm(blobs,parse_generated_lua_table,pipe_ints,hero_artifact["templates"],partner_keys,partner_rows,super_keys,super_rows,indexed_field,items,CompileError)
+    top_floor_artifact = build_top_floor(blobs, parse_generated_lua_table)
+    top_floor_artifact["task_modes"] = build_task_modes(blobs, parse_generated_lua_table, parse_base64_indexed_lua_table, indexed_field)
     artifacts = {
         "pet_campaign_catalog.json":build_petcampaign(blobs,parse_generated_lua_table,resources),
         "gods_trial_catalog.json":build_godstrial(blobs,parse_generated_lua_table,items),
@@ -2322,7 +2328,7 @@ def build_artifacts(blobs: dict[str, SourceBlob], archive_sha256: str) -> dict[s
         "march_catalog.json":build_march(blobs,parse_generated_lua_table,parse_base64_indexed_lua_table,indexed_field,resources),
         "campaign_catalog.json":build_campaign(blobs,parse_generated_lua_table,parse_base64_indexed_lua_table,indexed_field),
         "summon_catalog.json":build_summon(blobs,parse_generated_lua_table,parse_base64_indexed_lua_table,indexed_field),
-        "top_floor_catalog.json":build_top_floor(blobs,parse_generated_lua_table),
+        "top_floor_catalog.json":top_floor_artifact,
         "one_on_one_catalog.json":build_one_on_one(blobs,parse_generated_lua_table),
         "arena_catalog.json":build_arena(blobs,parse_generated_lua_table),
         "league_catalog.json":build_league(blobs,parse_generated_lua_table),

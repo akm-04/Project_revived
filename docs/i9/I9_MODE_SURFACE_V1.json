@@ -18,9 +18,9 @@
  "counts": {
   "by_disposition": {
    "DELIVERED": 185,
-   "ACTIVE": 451,
+   "ACTIVE": 436,
    "LATER": 501,
-   "INACTIVE_SUPERSEDED": 25,
+   "INACTIVE_SUPERSEDED": 40,
    "INACTIVE_D79": 21
   },
   "active_by_stage": {
@@ -29,7 +29,7 @@
    "I9-4": 7,
    "I9-4D": 12,
    "I9-10": 112,
-   "I9-7": 57,
+   "I9-7": 42,
    "I9-5": 24,
    "I9-8": 74,
    "I9-9": 46,
@@ -1545,19 +1545,21 @@
    "mid": 274,
    "name": "ARENA_REFRESH",
    "family": "TOP_FLOOR_RESIDUAL",
-   "disposition": "ACTIVE",
+   "disposition": "INACTIVE_SUPERSEDED",
    "target": "I9-7",
-   "v2": "unimplemented",
-   "v1": "LITERAL_STUB"
+   "v2": "INACTIVE_SUPERSEDED",
+   "v1": "LITERAL_STUB",
+   "decision": "D350"
   },
   {
    "mid": 275,
    "name": "LOAD_ARENA_NPC_LIST",
    "family": "TOP_FLOOR_RESIDUAL",
-   "disposition": "ACTIVE",
+   "disposition": "INACTIVE_SUPERSEDED",
    "target": "I9-7",
-   "v2": "unimplemented",
-   "v1": "STATE_BACKED"
+   "v2": "INACTIVE_SUPERSEDED",
+   "v1": "STATE_BACKED",
+   "decision": "D350"
   },
   {
    "mid": 276,
@@ -1572,10 +1574,11 @@
    "mid": 277,
    "name": "LOAD_ARENA_DEFENSE",
    "family": "TOP_FLOOR_RESIDUAL",
-   "disposition": "ACTIVE",
+   "disposition": "INACTIVE_SUPERSEDED",
    "target": "I9-7",
-   "v2": "unimplemented",
-   "v1": "LITERAL_STUB"
+   "v2": "INACTIVE_SUPERSEDED",
+   "v1": "LITERAL_STUB",
+   "decision": "D350"
   },
   {
    "mid": 278,
@@ -1610,7 +1613,7 @@
    "family": "TOP_FLOOR_RESIDUAL",
    "disposition": "ACTIVE",
    "target": "I9-7",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": "STATE_BACKED"
   },
   {
@@ -1619,7 +1622,7 @@
    "family": "TOP_FLOOR_RESIDUAL",
    "disposition": "ACTIVE",
    "target": "I9-7",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": "LITERAL_STUB"
   },
   {
@@ -1628,7 +1631,7 @@
    "family": "TOP_FLOOR_RESIDUAL",
    "disposition": "ACTIVE",
    "target": "I9-7",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": "LITERAL_STUB"
   },
   {
@@ -1637,7 +1640,7 @@
    "family": "TOP_FLOOR_RESIDUAL",
    "disposition": "ACTIVE",
    "target": "I9-7",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": "LITERAL_STUB"
   },
   {
@@ -1646,7 +1649,7 @@
    "family": "TOP_FLOOR_RESIDUAL",
    "disposition": "ACTIVE",
    "target": "I9-7",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": "LITERAL_STUB"
   },
   {
@@ -1655,7 +1658,7 @@
    "family": "TOP_FLOOR_RESIDUAL",
    "disposition": "ACTIVE",
    "target": "I9-7",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": "LITERAL_STUB"
   },
   {
@@ -1727,7 +1730,7 @@
    "family": "TOP_FLOOR_RESIDUAL",
    "disposition": "ACTIVE",
    "target": "I9-7",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": "STATE_BACKED"
   },
   {
@@ -1736,7 +1739,7 @@
    "family": "TOP_FLOOR_RESIDUAL",
    "disposition": "ACTIVE",
    "target": "I9-7",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": "STATE_BACKED"
   },
   {
@@ -1745,7 +1748,7 @@
    "family": "TOP_FLOOR_RESIDUAL",
    "disposition": "ACTIVE",
    "target": "I9-7",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": "LITERAL_STUB"
   },
   {
@@ -1754,7 +1757,7 @@
    "family": "TOP_FLOOR_RESIDUAL",
    "disposition": "ACTIVE",
    "target": "I9-7",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": "STATE_BACKED"
   },
   {
@@ -1763,7 +1766,7 @@
    "family": "TOP_FLOOR_RESIDUAL",
    "disposition": "ACTIVE",
    "target": "I9-7",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": "STATE_BACKED"
   },
   {
@@ -4082,10 +4085,11 @@
    "mid": 1280,
    "name": "PLAYOFFS_CREATE_BATTLE_ROOM",
    "family": "PLAYOFFS",
-   "disposition": "ACTIVE",
+   "disposition": "INACTIVE_SUPERSEDED",
    "target": "I9-7",
-   "v2": "unimplemented",
-   "v1": null
+   "v2": "INACTIVE_SUPERSEDED",
+   "v1": null,
+   "decision": "D350"
   },
   {
    "mid": 1281,
@@ -4802,100 +4806,111 @@
    "mid": 1408,
    "name": "REGION_GET_ARENA_INFO",
    "family": "ARENA_REGION_RESIDUAL",
-   "disposition": "ACTIVE",
+   "disposition": "INACTIVE_SUPERSEDED",
    "target": "I9-7",
-   "v2": "unimplemented",
-   "v1": null
+   "v2": "INACTIVE_SUPERSEDED",
+   "v1": null,
+   "decision": "D354"
   },
   {
    "mid": 1409,
    "name": "REGION_GET_ENEMY_LIST",
    "family": "ARENA_REGION_RESIDUAL",
-   "disposition": "ACTIVE",
+   "disposition": "INACTIVE_SUPERSEDED",
    "target": "I9-7",
-   "v2": "unimplemented",
-   "v1": null
+   "v2": "INACTIVE_SUPERSEDED",
+   "v1": null,
+   "decision": "D350"
   },
   {
    "mid": 1410,
    "name": "REGION_SAVE_DEFENCE_INFO",
    "family": "ARENA_REGION_RESIDUAL",
-   "disposition": "ACTIVE",
+   "disposition": "INACTIVE_SUPERSEDED",
    "target": "I9-7",
-   "v2": "unimplemented",
-   "v1": null
+   "v2": "INACTIVE_SUPERSEDED",
+   "v1": null,
+   "decision": "D350"
   },
   {
    "mid": 1411,
    "name": "REGION_START_FIGHT",
    "family": "ARENA_REGION_RESIDUAL",
-   "disposition": "ACTIVE",
+   "disposition": "INACTIVE_SUPERSEDED",
    "target": "I9-7",
-   "v2": "unimplemented",
-   "v1": null
+   "v2": "INACTIVE_SUPERSEDED",
+   "v1": null,
+   "decision": "D354"
   },
   {
    "mid": 1413,
    "name": "REGION_BUY_TICKET",
    "family": "ARENA_REGION_RESIDUAL",
-   "disposition": "ACTIVE",
+   "disposition": "INACTIVE_SUPERSEDED",
    "target": "I9-7",
-   "v2": "unimplemented",
-   "v1": null
+   "v2": "INACTIVE_SUPERSEDED",
+   "v1": null,
+   "decision": "D350"
   },
   {
    "mid": 1414,
    "name": "REGION_RESET_TIMER",
    "family": "ARENA_REGION_RESIDUAL",
-   "disposition": "ACTIVE",
+   "disposition": "INACTIVE_SUPERSEDED",
    "target": "I9-7",
-   "v2": "unimplemented",
-   "v1": null
+   "v2": "INACTIVE_SUPERSEDED",
+   "v1": null,
+   "decision": "D350"
   },
   {
    "mid": 1415,
    "name": "REGION_GET_FIGHT_RECORDS",
    "family": "ARENA_REGION_RESIDUAL",
-   "disposition": "ACTIVE",
+   "disposition": "INACTIVE_SUPERSEDED",
    "target": "I9-7",
-   "v2": "unimplemented",
-   "v1": null
+   "v2": "INACTIVE_SUPERSEDED",
+   "v1": null,
+   "decision": "D350"
   },
   {
    "mid": 1416,
    "name": "REGION_GET_FIGHT_REPORT",
    "family": "ARENA_REGION_RESIDUAL",
-   "disposition": "ACTIVE",
+   "disposition": "INACTIVE_SUPERSEDED",
    "target": "I9-7",
-   "v2": "unimplemented",
-   "v1": null
+   "v2": "INACTIVE_SUPERSEDED",
+   "v1": null,
+   "decision": "D350"
   },
   {
    "mid": 1417,
    "name": "GET_FORMATION_INFO",
    "family": "ARENA_REGION_RESIDUAL",
-   "disposition": "ACTIVE",
+   "disposition": "INACTIVE_SUPERSEDED",
    "target": "I9-7",
-   "v2": "unimplemented",
-   "v1": null
+   "v2": "INACTIVE_SUPERSEDED",
+   "v1": null,
+   "decision": "D350"
   },
   {
    "mid": 1418,
    "name": "REGION_SUPPORT_PLAYER",
    "family": "ARENA_REGION_RESIDUAL",
-   "disposition": "ACTIVE",
+   "disposition": "INACTIVE_SUPERSEDED",
    "target": "I9-7",
-   "v2": "unimplemented",
-   "v1": null
+   "v2": "INACTIVE_SUPERSEDED",
+   "v1": null,
+   "decision": "D350"
   },
   {
    "mid": 1419,
    "name": "REGION_GET_PARTNERS_INFO",
    "family": "ARENA_REGION_RESIDUAL",
-   "disposition": "ACTIVE",
+   "disposition": "INACTIVE_SUPERSEDED",
    "target": "I9-7",
-   "v2": "unimplemented",
-   "v1": null
+   "v2": "INACTIVE_SUPERSEDED",
+   "v1": null,
+   "decision": "D350"
   },
   {
    "mid": 1424,

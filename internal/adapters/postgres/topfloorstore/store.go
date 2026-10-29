@@ -11,6 +11,7 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres/kernelstore"
 	cd "gxb.local/backend/v2/internal/domain/combat"
 	"gxb.local/backend/v2/internal/domain/identity"
+	"gxb.local/backend/v2/internal/domain/modes"
 	d "gxb.local/backend/v2/internal/domain/topfloor"
 	"gxb.local/backend/v2/internal/foundation/ids"
 	"gxb.local/backend/v2/internal/foundation/tx"
@@ -493,4 +494,16 @@ func (Store) DueServersTx(c context.Context, q tx.Queryer, day int64) ([]identit
 	var out []identity.LogicalServerID
 	_, e := readJSON(c, q, `SELECT COALESCE(jsonb_agg(logical_server_id ORDER BY logical_server_id),'[]'::jsonb)::text FROM top_floor_ladders WHERE settled_day<$1`, &out, day)
 	return out, e
+}
+
+// WeeklyChallengesTx counts durable admissions, independently of trimmed display history.
+func (Store) WeeklyChallengesTx(requestContext context.Context, query tx.Queryer, player identity.PlayerID, at time.Time) (int64, error) {
+	if query == nil || !player.Valid() || at.IsZero() {
+		return 0, d.ErrInvalid
+	}
+	week := modes.WeekStart(at)
+	var challenges int64
+	err := query.QueryRow(requestContext, `SELECT count(*) FROM top_floor_fights WHERE challenger_id=$1 AND started_at >= $2 AND started_at < $3`,
+		int64(player), modes.DayBegins(week), modes.DayBegins(week+7)).Scan(&challenges)
+	return challenges, err
 }

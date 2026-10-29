@@ -1,8 +1,10 @@
 package topfloor
 
 import (
+	"cmp"
 	"context"
 	"errors"
+	"slices"
 	"time"
 
 	gen "gxb.local/backend/v2/internal/application/generation"
@@ -49,6 +51,30 @@ func (s Service) Records(c context.Context, a identity.ActorContext) ([]RecordVi
 			return nil, err
 		}
 		out = append(out, RecordView{Record: r, Self: self, Opponent: opponent})
+	}
+
+	taskRecords, err := s.Store.TaskRecordsTx(c, s.Fresh, a.PlayerID)
+	if err != nil {
+		return nil, err
+	}
+	for _, record := range taskRecords {
+		opponent, err := s.face(c, catalog, a.LogicalServerID, record.Record.Opponent, now)
+		if err != nil {
+			return nil, err
+		}
+		out = append(out, RecordView{Record: record.Record, Self: self, Opponent: opponent, Mode: record.Mode})
+	}
+	slices.SortFunc(out, func(left, right RecordView) int {
+		if left.Record.At.Equal(right.Record.At) {
+			return cmp.Compare(right.Record.ID, left.Record.ID)
+		}
+		if left.Record.At.After(right.Record.At) {
+			return -1
+		}
+		return 1
+	})
+	if len(out) > int(catalog.RecordsMax) {
+		out = out[:catalog.RecordsMax]
 	}
 	return out, nil
 }
@@ -195,6 +221,40 @@ func (r Reconciler) Reconcile(c context.Context, op gen.TimedOperation, limit in
 	for _, f := range fights {
 		out.Scanned++
 		if err := r.fight(c, f, op, now); err != nil {
+			return out, err
+		}
+		out.Settled++
+	}
+
+	taskServers, err := s.Store.TaskDueServersTx(c, s.Fresh, now)
+	if err != nil {
+		return out, err
+	}
+	for _, server := range taskServers {
+		if out.Scanned >= limit {
+			break
+		}
+		out.Scanned++
+		if err = s.SettleTaskDue(c, server, op.Operation()); err != nil {
+			return out, err
+		}
+	}
+	pending, err := s.Store.OpenTaskFightsTx(c, s.Fresh, now.Add(-openFightGrace), max(limit-out.Scanned, 0))
+	if err != nil {
+		return out, err
+	}
+	for _, fight := range pending {
+		out.Scanned++
+		attempt, found, err := s.Combat.AttemptTx(c, s.Fresh, fight.Fight.AttemptID)
+		if err != nil || !found {
+			return out, errors.Join(err, d.ErrConflict)
+		}
+		if attempt.State == cd.Staged && attempt.Closable(now) {
+			err = s.closeTask(c, fight, op.Operation())
+		} else {
+			_, err = s.finishTask(c, fight, op.Operation())
+		}
+		if err != nil {
 			return out, err
 		}
 		out.Settled++

@@ -4329,6 +4329,104 @@
       "migration": "migrations/00095_i9_6c_memoir.sql",
       "owner": "memoir",
       "write_exceptions": []
+    },
+    "top_floor_task_periods": {
+      "owner": "TopFloor",
+      "allowed_query_owners": [
+        "TopFloor"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/topfloorstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/topfloorstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00096_i9_7a_top_floor_task.sql"
+    },
+    "top_floor_task_ranks": {
+      "owner": "TopFloor",
+      "allowed_query_owners": [
+        "TopFloor"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/topfloorstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/topfloorstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00096_i9_7a_top_floor_task.sql"
+    },
+    "top_floor_task_players": {
+      "owner": "TopFloor",
+      "allowed_query_owners": [
+        "TopFloor"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/topfloorstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/topfloorstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00096_i9_7a_top_floor_task.sql"
+    },
+    "top_floor_task_preferences": {
+      "owner": "TopFloor",
+      "allowed_query_owners": [
+        "TopFloor"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/topfloorstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/topfloorstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00096_i9_7a_top_floor_task.sql"
+    },
+    "top_floor_task_fights": {
+      "owner": "TopFloor",
+      "allowed_query_owners": [
+        "TopFloor"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/topfloorstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/topfloorstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00096_i9_7a_top_floor_task.sql"
+    },
+    "top_floor_task_records": {
+      "owner": "TopFloor",
+      "allowed_query_owners": [
+        "TopFloor"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/topfloorstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/topfloorstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00096_i9_7a_top_floor_task.sql"
+    },
+    "top_floor_task_days": {
+      "owner": "TopFloor",
+      "allowed_query_owners": [
+        "TopFloor"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/topfloorstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/topfloorstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00096_i9_7a_top_floor_task.sql"
     }
   }
 }

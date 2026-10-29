@@ -1,5 +1,6 @@
 """Top Floor source tables plus the labelled C5B private ladder policy inputs."""
 from decimal import Decimal
+from one_on_one_content import _translations
 
 TEAM_COLUMNS = ('robot1', 'robot2', 'robot3', 'robot4', 'robot5')
 
@@ -57,3 +58,49 @@ def build_top_floor(blobs, parse):
                 mail_title=misc['arena_mail_title'], mail_text=misc['arena_mail_text'], mail_sender=misc['arena_mail_sender'],
                 robot_avatar_id=110001001, robot_frame_id=120001001, rewards=rewards, vip=vip, buy_costs=costs,
                 robots=robots, robot_heroes=robot_heroes, first_names=names['0'], last_names=names['1'])
+
+
+def build_task_modes(blobs, parse, parse_indexed, indexed_field):
+    table = lambda name: parse(blobs['data/tables/' + name + '.lua'].data)
+    rules = []
+    for row in sorted(table('arena_mode'), key=lambda row: int(row['id'])):
+        raw_buffs = row['buffs']
+        groups = []
+        if raw_buffs != '0':
+            groups = [_ints(raw_buffs)] if int(row['id']) != 6 else [
+                [int(value) for value in group.split(',')] for group in raw_buffs.split('|')]
+        rules.append(dict(id=int(row['id']), title=row['title'], description=row['desc'], rule_text=row['rule_text'],
+                          hero_slots=int(row['partner_num']), pet_allowed=row['can_pet_join'] == '1',
+                          leader_allowed=row['can_leader_join'] == '1', reset_defense=row['team_reset'] == '1',
+                          banned_tables=[] if row['banned_partner'] == '0' else _ints(row['banned_partner']), buff_groups=groups))
+    schedule = [dict(date=row['id'], mode=int(row['mode']), submode=int(row['submode']))
+                for row in sorted(table('arena_mode_schedule'), key=lambda row: row['id'])]
+    rewards = []
+    for row in sorted(table('arena_mode_reward'), key=lambda row: int(row['id'])):
+        item_ids, quantities = _ints(row['daily_item']), _ints(row['daily_item_num'])
+        if len(item_ids) != len(quantities) or any(
+                item < 0 or quantity < 0 or (item == 0) != (quantity == 0)
+                for item, quantity in zip(item_ids, quantities)):
+            raise ValueError('arena_mode_reward item vector drift')
+        rewards.append(dict(id=int(row['id']), range=int(row['range']), daily_crystal=int(row['daily_diamond']),
+                            daily_mana=int(row['daily_mana']), daily_arena_coin=int(row['daily_arena_coin']),
+                            items=[[item, quantity] for item, quantity in zip(item_ids, quantities) if item > 0],
+                            frame_id=0, best_rank_rate=0))
+    if [rule['id'] for rule in rules] != list(range(1, 7)) or len(schedule) != 91 or len(rewards) != 17:
+        raise ValueError('arena task mode source profile drift')
+    mail = _translations(blobs['data/tables/translation.lua'].data, ('ARENA_MODE_MAIL_TITLE', 'ARENA_MODE_MAIL_TEXT', 'ARENA_MODE_MAIL_SENDER'))
+    camps = {}
+    for name in ('partner', 'super_partner'):
+        keys, rows = parse_indexed(blobs['data/tables/' + name + '.lua'].data)
+        for identity, values in sorted(rows.items()):
+            camp = int(indexed_field(keys, values, 'from', row_id=identity))
+            if camp not in (1, 2, 3, 4) or str(identity) in camps:
+                raise ValueError('arena task mode Hero camp drift')
+            camps[str(identity)] = camp
+    misc = {row['key']: row['value'] for row in table('misc')}
+    return dict(schema_version=1, contract_id='I9_TOP_FLOOR_TASK_MODE_V1', policy_id='I9_TOP_FLOOR_TASK_POLICY_V1',
+                rules=rules, schedule=schedule, rewards=rewards, hero_camps=camps,
+                mail_title=mail['ARENA_MODE_MAIL_TITLE'], mail_text=mail['ARENA_MODE_MAIL_TEXT'], mail_sender=mail['ARENA_MODE_MAIL_SENDER'],
+                entry_rank=int(misc['arena_mode_enter_rank_req']), entry_challenges=int(misc['arena_mode_enter_battle_req']),
+                server_level=int(misc['arena_mode_open_lv_req']), attacking_leader_buff=int(misc['arena_mode_attack_leader_buff']),
+                defending_leader_buff=int(misc['arena_mode_defence_leader_buff']))
