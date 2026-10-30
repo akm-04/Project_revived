@@ -65,10 +65,15 @@ def build_memoir(blobs, parse, items, hero_catalog):
             raise ValueError('Memoir drop law source boundary drift')
         boxes[identifier].append(dict(item=int(row['item_id']), amount=amount, rate=rate))
     fights = {}
+    from generate_combat_corpus import parse_monster
+    monster_keys, monster_rows = parse_monster(blobs['data/tables/monster.lua'].data)
+    summons = {identifier for identifier, row in monster_rows.items() if row[monster_keys['summon_type'] - 1] not in ('', '0')}
     for row in table('battle'):
         identifier = int(row['fight_id'])
         if identifier in fight_identifiers:
-            fights[str(identifier)] = [battle_numbers(row[f'fight_{wave}']) for wave in (1, 2, 3) if row[f'fight_{wave}']]
+            # The stock result report (BattleCreate enemies_status) omits summon-typed fighters such as enemy pets.
+            fights[str(identifier)] = [[unit for unit in battle_numbers(row[f'fight_{wave}']) if unit not in summons]
+                                       for wave in (1, 2, 3) if row[f'fight_{wave}']]
     resources = {int(row['id']): int(row['type']) for row in items}
     used = {row['item'] for group in boxes.values() for row in group}
     used.update(value for gift in gifts for value, _ in gift['items'])

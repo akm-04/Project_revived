@@ -216,7 +216,7 @@ func (mode Mode) MonsterResult(ctx context.Context, actor identity.ActorContext,
 	return mode.run(ctx, actor, "monster_result", request, operationContext, func(ctx context.Context, current scope, state *memoir.State) (map[string]any, error) {
 		pending := state.Pending
 		if pending == nil {
-			return map[string]any{"error_code": int64(combat.FightExistCode)}, nil
+			return fightExistReply(*state), nil
 		}
 		if pending.Kind == memoir.Player || pending.Grid != request.Grid {
 			return nil, memoir.ErrRefused
@@ -227,7 +227,7 @@ func (mode Mode) MonsterResult(ctx context.Context, actor identity.ActorContext,
 		}
 		state.Pending = nil
 		if attested.Drained || attested.Attestation.Verdict == combat.VerdictRejected {
-			return map[string]any{"error_code": int64(combat.FightExistCode)}, nil
+			return fightExistReply(*state), nil
 		}
 		state.ApplyHeroes(request.Report.Allies)
 		statuses := map[int64]combat.ActorStatus{}
@@ -258,6 +258,13 @@ func (mode Mode) MonsterResult(ctx context.Context, actor identity.ActorContext,
 		state.LastGrid, state.LastResult = request.Grid, response
 		return response, nil
 	})
+}
+
+// fightExistReply keeps the projection: the stock fightMonster callback overwrites baseInfo from any 200 reply, error code or not.
+func fightExistReply(state memoir.State) map[string]any {
+	response := projection(state)
+	response["error_code"] = int64(combat.FightExistCode)
+	return response
 }
 
 func enemyStatusProjection(statuses map[int64]combat.ActorStatus) map[int64]map[string]any {

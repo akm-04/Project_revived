@@ -315,7 +315,7 @@
   "commit": "ed63e7dcdd0e04f9153f1b1f54fe96ae85ceab51",
   "commit_role": "PARENT_ACCEPTED_PASS643_COMMIT; exact final I7A6A product HEAD/tree/archive are bound externally in PassMap and gate evidence to avoid self-reference",
   "content_generation": 57,
-  "content_revision": "a5d5fc91db5fb659a4140d38b31695c30be1e1bf1f3b5a18949e77a539ce82a5",
+  "content_revision": "11271745755bc053887e1d7b1628116904a1c962d05f2178eff5d1e9e685e126",
   "current_migration_high_water": "00095_i9_6c_memoir.sql",
   "current_stage": "I9_6B_IMPLEMENTATION_FOCUSED_GATES",
   "evidence": "Pass587 Gate-1 runtime evidence b59277c4d59a1c2622809a62f46605442232d77a380e97af7eeba2a3a75fe73e + Pass588 normal-chat I0-I6/source-oracle/release-reconciliation checks; exact Pass588 retest still required.",
@@ -1054,7 +1054,7 @@
   "target_postgresql": "18.6",
   "target_sqlc": "1.31.1",
   "toolbox_archive_sha256": "e4e194c9627929299577364b953b2468d6118fac4283fd8030f10b5a27456c2b",
-  "version": "v0.156.0",
+  "version": "v0.156.1",
   "version_role": "I9-6C working implementation with focused proof; Claude owns stage qualification and acceptance.",
   "w2_claimed": false
 }

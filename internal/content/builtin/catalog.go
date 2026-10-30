@@ -1031,7 +1031,7 @@ func validateManifest(raw []byte, manifest *Manifest) error {
 	if manifest.CompilerVersion == "i9-4c-signin" {
 		expectedSources, expectedArtifacts = 324, 44
 	}
-	if manifest.CompilerVersion == "i9-6c-memoir" {
+	if manifest.CompilerVersion == "i9-6-memoir-report-wave" {
 		expectedSources, expectedArtifacts = 377, 50
 	}
 	if manifest.CompilerVersion == "i9-6b-dodgeball" {

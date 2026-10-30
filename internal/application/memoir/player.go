@@ -255,7 +255,7 @@ func (mode Mode) resumePlayer(ctx context.Context, actor identity.ActorContext, 
 		for _, status := range allies {
 			health[status.Identity] = status
 		}
-		response["battle_info"] = map[string]any{"battle_report": string(settled.Report), "star": settled.Resolution.Outcome.Star, "health_status": map[string]any{"team_A": health}}
+		response["battle_info"] = map[string]any{"battle_report": string(settled.Report), "star": settled.Resolution.Outcome.Star, "health_status": map[string]any{"team_A": health}, "library_mission_formations": map[string]any{}}
 		response["awards"] = awards
 		state.LastGrid, state.LastResult = pending.Grid, response
 		return response, nil
