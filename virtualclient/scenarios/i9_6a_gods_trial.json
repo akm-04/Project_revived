@@ -29,7 +29,7 @@
     "wait:5",
     "tap:button_battle",
     "wait:120",
-    "lua:local window=xyd.WindowManager.get():getWindow('battle_win') if not window or window.star<1 then error('vc-trial-must-win') end if #window.spiritItems<1 or xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_PLAYER):getBackpack():getSpiritNum()<1 then error('vc-trial-no-horcrux-award') end",
+    "lua:local window=xyd.WindowManager.get():getWindow('battle_win') if not window or window.star<1 then error('vc-trial-must-win') end if #window.spiritItems<1 and #window.items<1 then error('vc-trial-no-first-clear-award') end",
     "lua:local wm=xyd.WindowManager.get() local w=wm:getWindow('battle_win') local n=w.returnBtn_ if not n then error('vc-no-battle-return') end local b=n:getCascadeBoundingBox() local e={x=b.x+b.width/2,y=b.y+b.height/2} local ls=n._LuaListeners[cc.NODE_TOUCH_EVENT] if type(ls)~='table' then error('vc-no-return-listener') end for _,l in ipairs(ls) do e.name='began' l.listener_(e) e.name='ended' l.listener_(e) end",
     "wait:5",
     "lua:local w=xyd.WindowManager.get():getWindow('hunqi_campaign') if w then w:close() end",
