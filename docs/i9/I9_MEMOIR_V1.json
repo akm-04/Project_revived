@@ -89,5 +89,10 @@
     "D315"
   ],
   "design": "research/I9_6C/DESIGN.md",
-  "qualification": "Split handoff section5; all existing stage gates remain. Not a seal."
+  "qualification": "Split handoff section5; all existing stage gates remain. Not a seal.",
+  "stage_close_stock_client_facts": [
+    "2311 reply battle_info carries library_mission_formations (an object): stock SelectTeamNewWindow indexes it (found by the stage-close stock map walk).",
+    "Catalog fight waves omit summon-typed fighters (monster.summon_type not 0, for example enemy pet 98220004): stock BattleCreate enemies_status reports only summonType None, so a wave listing them fails WAVE_IDENTITIES_CHANGED. Content generation 58.",
+    "A rejected or drained 2310 replies with the full projection plus the fight-exist error code: the stock fightMonster callback overwrites baseInfo from any 200 reply."
+  ]
 }
