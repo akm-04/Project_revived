@@ -127,8 +127,27 @@ const tournamentNoticeRoute = "realtimewakeup.Registration{Route: apparena.Tourn
 
 const friendFightNoticeRoute = "realtimewakeup.Registration{Route: apparena.FriendFightNoticeRoute, Handler: friendNotices}"
 
+// The I9-8 family notice routes are feature-specific, each owned by its contract.
+var familyNoticeRoutes = []string{
+	"realtimewakeup.Registration{Route: appillusion.RoomNoticeRoute, Handler: illusionRooms}",
+	"realtimewakeup.Registration{Route: appoccult.RoomNoticeRoute, Handler: occultRooms}",
+	"realtimewakeup.Registration{Route: appadventure.NoticeRoute, Handler: adventureNotices}",
+	"realtimewakeup.Registration{Route: appadventure.RoomNoticeRoute, Handler: adventureRooms}",
+}
+
+var familyNoticeSchemas = map[string]bool{
+	"internal/adapters/stockruntime/illusion_room_notice.go":  true,
+	"internal/adapters/stockruntime/occult_room_notice.go":    true,
+	"internal/adapters/stockruntime/adventure_notice.go":      true,
+	"internal/adapters/stockruntime/adventure_room_notice.go": true,
+}
+
 func genericWakeupRoutes(realtime string) int {
-	return strings.Count(realtime, "realtimewakeup.Registration{") - strings.Count(realtime, achievementNoticeRoute) - strings.Count(realtime, tournamentNoticeRoute) - strings.Count(realtime, friendFightNoticeRoute)
+	generic := strings.Count(realtime, "realtimewakeup.Registration{") - strings.Count(realtime, achievementNoticeRoute) - strings.Count(realtime, tournamentNoticeRoute) - strings.Count(realtime, friendFightNoticeRoute)
+	for _, route := range familyNoticeRoutes {
+		generic -= strings.Count(realtime, route)
+	}
+	return generic
 }
 
 func TestI7A2KeepsFeatureProducerAndWakeupRoutesDormant(t *testing.T) {
@@ -171,10 +190,14 @@ func TestI7A2KeepsFeatureProducerAndWakeupRoutesDormant(t *testing.T) {
 				achievementSchema := filepath.ToSlash(rel) == "internal/adapters/stockruntime/achievement_notice.go" && marker == "rt.NoticeRegistration{" && strings.Count(s, marker) == 1 && strings.Count(s, "NoticeType:") == 1
 				tournamentSchema := filepath.ToSlash(rel) == "internal/adapters/stockruntime/tournament_notice.go" && marker == "rt.NoticeRegistration{" && strings.Count(s, marker) == 1 && strings.Count(s, "NoticeType:") == 1
 				friendFightSchema := filepath.ToSlash(rel) == "internal/adapters/stockruntime/friend_fight_notice.go" && marker == "rt.NoticeRegistration{" && strings.Count(s, marker) == 1 && strings.Count(s, "NoticeType:") == 2
-				if achievementSchema || tournamentSchema || friendFightSchema {
+				familySchema := familyNoticeSchemas[filepath.ToSlash(rel)] && (marker == "rt.NoticeRegistration{" || marker == "rt.DirectRegistration{")
+				if achievementSchema || tournamentSchema || friendFightSchema || familySchema {
 					continue
 				}
 				if marker == "realtimewakeup.Registration{" {
+					for _, route := range familyNoticeRoutes {
+						s = strings.Replace(s, route, "", 1)
+					}
 					s = strings.Replace(s, achievementNoticeRoute, "", 1)
 					s = strings.Replace(s, tournamentNoticeRoute, "", 1)
 					s = strings.Replace(s, friendFightNoticeRoute, "", 1)

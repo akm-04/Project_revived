@@ -30,9 +30,7 @@ func TestCA63BaseAndCA64AutoProductionRoutingIsAtomic(t *testing.T) {
 	if strings.Contains(got, "134") {
 		t.Fatalf("Practice captured foreign PetEXP route: %q", got)
 	}
-	lobbyRE := regexp.MustCompile(`(?s)for _, mid := range \[\]uint16\{([^}]*)\} \{\s*mustRegister\(mid, lobbyD\)`)
-	lm := lobbyRE.FindStringSubmatch(s)
-	if len(lm) != 2 || regexp.MustCompile(`(^|[, ]+)124([, ]+|$)`).MatchString(lm[1]) {
+	if !strings.Contains(s, "mustRegister(2754, lobbyD)") || strings.Count(s, ", lobbyD)") != 1 {
 		t.Fatal("MID124 was not atomically removed from Lobby routing")
 	}
 	petRE := regexp.MustCompile(`(?s)for _, mid := range \[\]uint16\{([^}]*)\} \{\s*mustRegister\(mid, petD\)`)
