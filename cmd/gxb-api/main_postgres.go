@@ -459,7 +459,7 @@ func main() {
 		for _, mid := range stockruntime.OccultMIDs {
 			mustRegister(mid, stockruntime.OccultDispatcher{Authority: authority, Service: occultMode})
 		}
-		adventureMode := canonicalAdventure(pool, runner, contentDB, i5db, i5svc, fight, adventureOpponents{Arena: arena, TopFloor: topFloor}, sharedRooms)
+		adventureMode := canonicalAdventure(pool, runner, contentDB, i5db, i5svc, fight, adventureOpponents{Arena: arena, TopFloor: topFloor}, sharedRooms, heroSvc, heroproj.StockHero)
 		for _, mid := range stockruntime.AdventureMIDs {
 			mustRegister(mid, stockruntime.AdventureDispatcher{Authority: authority, Service: adventureMode})
 		}

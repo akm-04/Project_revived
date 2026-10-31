@@ -255,9 +255,10 @@ func adventureDefenseResult(params map[string]any) (app.ResultRequest, int64, bo
 }
 
 func adventureDefenseStart(params map[string]any) (app.FightRequest, bool) {
-	request, ok := adventureFight(params)
+	formation, formationOK := topFloorFormation(params["formation"])
+	pet, petOK := topFloorInteger(params, "pet_id", false)
 	allowed := onlyStockGameplayParams(params, "formation", "pet_id", "monster_pos", "table_id", "rent_pet_id", "rent_pet_player_id", "rent_formation", "rent_player_id")
-	return request, ok && allowed
+	return app.FightRequest{Formation: formation, PetID: pet}, allowed && formationOK && petOK
 }
 
 func adventurePick(params map[string]any) (app.PickRequest, bool) {

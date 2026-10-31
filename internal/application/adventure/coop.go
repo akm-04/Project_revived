@@ -257,9 +257,19 @@ func (s Mode) SelectCoop(c context.Context, a identity.ActorContext, request Pic
 			if _, owned := roster[strconv.FormatInt(request.PartnerID, 10)]; !owned {
 				return fmt.Errorf("%w: hero %d not owned", d.ErrRefused, request.PartnerID)
 			}
+			tableID := tableIDOf(roster, request.PartnerID)
 			for _, member := range room.Members() {
-				for _, id := range state.Pick(int64(member)).Heroes {
-					if id == request.PartnerID {
+				otherRoster := roster
+				if member != a.PlayerID {
+					if otherRoster, err = s.heroRows(c, sc.Tx, member, at); err != nil {
+						return err
+					}
+				}
+				for index, id := range state.Pick(int64(member)).Heroes {
+					if member == a.PlayerID && int64(index+1) == request.Position {
+						continue
+					}
+					if id > 0 && tableIDOf(otherRoster, id) == tableID {
 						return fmt.Errorf("%w: duplicate hero", d.ErrRefused)
 					}
 				}
@@ -529,6 +539,20 @@ func (s Mode) petRows(c context.Context, q tx.Queryer, player identity.PlayerID,
 		out[fmt.Sprint(row["pet_id"])] = row
 	}
 	return out, nil
+}
+
+func tableIDOf(roster map[string]map[string]any, partnerID int64) int64 {
+	row, found := roster[strconv.FormatInt(partnerID, 10)]
+	if !found {
+		return partnerID
+	}
+	if tableID, ok := row["table_id"].(int64); ok && tableID > 0 {
+		return tableID
+	}
+	if tableID, err := strconv.ParseInt(fmt.Sprint(row["table_id"]), 10, 64); err == nil && tableID > 0 {
+		return tableID
+	}
+	return partnerID
 }
 
 func joinIDs(ids []int64) string {

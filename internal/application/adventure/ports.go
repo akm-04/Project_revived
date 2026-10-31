@@ -13,11 +13,13 @@ import (
 	"gxb.local/backend/v2/internal/application/i5"
 	"gxb.local/backend/v2/internal/application/playerdirectory"
 	"gxb.local/backend/v2/internal/application/sharedroom"
+	"gxb.local/backend/v2/internal/domain/character"
 	"gxb.local/backend/v2/internal/domain/grant"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/domain/illusion"
 	"gxb.local/backend/v2/internal/domain/mail"
 	"gxb.local/backend/v2/internal/domain/player"
+	"gxb.local/backend/v2/internal/domain/summon"
 	"gxb.local/backend/v2/internal/foundation/ids"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/tx"
@@ -38,6 +40,7 @@ type Content interface {
 	ActiveRevision(context.Context, tx.Queryer) (string, error)
 	AdventureCatalogTx(context.Context, tx.Queryer, string) (d.Catalog, error)
 	IllusionCatalogTx(context.Context, tx.Queryer, string) (illusion.Catalog, error)
+	SummonCatalogTx(context.Context, tx.Queryer, string) (summon.Catalog, error)
 }
 
 type Functions interface {
@@ -63,6 +66,13 @@ type Combat interface {
 type Mail interface {
 	DeliverTx(context.Context, tx.Tx, i5.SettlementMailRequest) (mail.Record, bool, error)
 }
+
+// Partners materializes an adventure card's hero through the Character owner.
+type Partners interface {
+	AwardStoryPartnerTx(context.Context, tx.Tx, identity.PlayerID, int64, string, operation.Context) (character.Hero, *character.CollectionAdmissionProof, error)
+}
+
+type HeroWire func(character.Hero) (map[string]any, error)
 
 type Costs interface {
 	DebitMaterialCostTx(context.Context, tx.Tx, identity.PlayerID, i5.MaterialCost, operation.Context) (i5.MaterialDebitResult, error)
@@ -106,12 +116,14 @@ type Mode struct {
 	Rooms     sharedroom.Service
 	RoomStore sharedroom.Store
 	Mail      Mail
+	Partners  Partners
+	HeroWire  HeroWire
 }
 
 func (s Mode) ready() bool {
 	return s.Timed.Binder.Time != nil && s.Timed.Runner.DB != nil && s.Fresh != nil && s.Store != nil && s.Content != nil &&
 		s.Functions != nil && s.Directory != nil && s.Heroes != nil && s.Combat != nil && s.Costs != nil && s.Grants != nil && s.Opponents != nil && s.Wake != nil &&
-		s.Rooms.Store != nil && s.RoomStore != nil && s.Mail != nil
+		s.Rooms.Store != nil && s.RoomStore != nil && s.Mail != nil && s.Partners != nil && s.HeroWire != nil
 }
 
 type FightRequest struct {

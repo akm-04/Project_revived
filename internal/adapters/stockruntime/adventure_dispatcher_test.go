@@ -140,6 +140,38 @@ func TestAdventureDispatcherRoutesAndDuplicates(t *testing.T) {
 	}
 }
 
+func TestAdventureDispatcherRoutesRoomMIDs(t *testing.T) {
+	stub := &adventureStub{}
+	dispatcher := AdventureDispatcher{Authority: httpAuthority{actor: actorForHTTP(t)}, Service: stub}
+	cases := []struct {
+		mid    uint16
+		params map[string]any
+	}{
+		{2410, map[string]any{"star": int64(1), "total_damage": int64(10), "monster_pos": int64(1), "formation": "11", "table_id": int64(10001)}},
+		{2411, map[string]any{}},
+		{2412, map[string]any{"monster_pos": int64(1), "table_id": int64(10001)}},
+		{2413, map[string]any{"monster_pos": int64(1), "table_id": int64(10001)}},
+		{2423, map[string]any{"table_id": int64(10006)}},
+		{2424, map[string]any{"player_id": int64(7002), "table_id": int64(10001)}},
+		{2425, map[string]any{"room_id": int64(9), "table_id": int64(10006)}},
+		{2426, map[string]any{"table_id": int64(10006)}},
+		{2427, map[string]any{"player_id": int64(7002), "table_id": int64(10006)}},
+		{2428, map[string]any{"table_id": int64(10006)}},
+		{2429, map[string]any{"partner_id": int64(11), "pos": int64(1), "table_id": int64(10006)}},
+		{2430, map[string]any{"table_id": int64(10006)}},
+		{2431, map[string]any{"formation": "11", "pet_id": int64(0), "monster_pos": int64(1), "table_id": int64(10001)}},
+	}
+	for _, item := range cases {
+		response := dispatcher.Dispatch(context.Background(), adventureRequest(item.mid, item.params))
+		if response.HTTPStatus != 200 {
+			t.Fatalf("mid %d: %+v", item.mid, response)
+		}
+	}
+	if stub.result.Star != 1 || stub.pick.PartnerID != 11 {
+		t.Fatalf("parsed result %+v pick %+v", stub.result, stub.pick)
+	}
+}
+
 func TestAdventureDispatcherMapsExpiredAndInvalid(t *testing.T) {
 	stub := &adventureStub{err: d.ErrExpired}
 	dispatcher := AdventureDispatcher{Authority: httpAuthority{actor: actorForHTTP(t)}, Service: stub}
