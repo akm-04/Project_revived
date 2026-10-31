@@ -1,0 +1,24 @@
+{
+ "schema_version": 1,
+ "contract_id": "I9_WORLD_BOSS_V1",
+ "node": "ROOT/I9/I9-8/I9-8A",
+ "status": "WORKING_RESEARCH_DESIGN_NOT_STAGE_ACCEPTED",
+ "owner": "WorldBoss occurrence 606, player row 605; I4, Combat, I5, Mail and Ranking keep their ownership",
+ "extends": ["I9_PARENT_CONTRACT_V1", "I9_MODE_FRAMEWORK_V1", "I9_MODE_FOUNDATION_V3"],
+ "mids": [624, 625, 626, 627, 628],
+ "shared_mids": [1, 276],
+ "policy": "I9_WORLD_BOSS_POLICY_V1 / D364 PRIVATE_POLICY",
+ "design": "stages/I9-8/PLAN.md, research/worldboss.md",
+ "clauses": [
+  "C1 Source reply shapes; 624 also in MID1 detail; activity 1026 visible and open at level 48",
+  "C2 One occurrence per logical server; rank order 605 player then 606 occurrence; abort budget 8 attempts 20-80 ms",
+  "C3 Attempt frozen to its occurrence; CLIENT_SUMMARY_ATTESTED_V1 clamped; late result never touches a newer boss",
+  "C4 Counters at modes.Day, buys through PrivilegeSnapshotProvider and I5 with refresh_cost.buy_boss_cost, cap vip.num_boss, +5 attempts",
+  "C5 Sweep is one attempt at best single hit, one per day, no fake battle",
+  "C6 Duplicate 627 or 628 replies 30005 with the full body; never 30021; refusals are 200 error_code with empty error_msg",
+  "C7 Defeat settles exactly once by Commander mail from dungeon_reward; next boss; cycle restarts after 10015",
+  "C8 Daily 22:00 courage increment idempotent per day through the reconcile loop; coefficients in policy document",
+  "C9 Board via 276 boss_rank for all five bosses with my_rank, my_hurt; purple+ heroes only at START",
+  "C10 No mission fact from this mode (D362); declarations, tutorial list, surface, VC scenario"
+ ]
+}
