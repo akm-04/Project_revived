@@ -1,0 +1,51 @@
+{
+  "policy_id": "I9_ILLUSION_POLICY_V1",
+  "version": 1,
+  "classification": "PRIVATE_POLICY_NOT_RECOVERED_OFFICIAL_ALGORITHM",
+  "decisions": [
+    "D366"
+  ],
+  "open_level": 65,
+  "pool_hp": 120000000,
+  "damage_cap": 12000000,
+  "free_chances_per_day": 5,
+  "chances_per_buy": 5,
+  "buy_cost_table": "refresh_cost.buy_paradise_cost",
+  "buy_cap_table": "vip.paradise_buy_num",
+  "window": {
+    "open_second": 28800,
+    "close_second": 79080,
+    "settle_second": 79200,
+    "rest_days": 1,
+    "cycle_days": 2
+  },
+  "cycle_restart_campaign": 100001,
+  "settlement": {
+    "at_second_of_day": 79200,
+    "gold_percent": 20,
+    "community_band_pays_guild_coin": true,
+    "reports_retention_days": 7
+  },
+  "rank": {
+    "key": "best_single_hit",
+    "ties": "shorter_cost_time",
+    "guild": "sum_current_members_daily_best"
+  },
+  "team": {
+    "seats": 3,
+    "master_heroes": 1,
+    "mate_heroes": 2,
+    "mate_pets": false,
+    "unique_hero_table_ids": true,
+    "power_divisor": 30,
+    "level_band": 5,
+    "min_level": 65,
+    "attempt_cost": 0
+  },
+  "shop": "I9-11C",
+  "guild_activity_obligation": "I9-8-ILLUSION-GUILD-ACTIVITY",
+  "receipt": {
+    "policy_id": "policy_id",
+    "version": "policy_version"
+  }
+}

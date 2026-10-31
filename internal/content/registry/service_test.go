@@ -771,6 +771,14 @@ func (r repo) InsertWorldBoss(_ context.Context, x tx.Tx, b Bundle) (int64, erro
 	return 1, nil
 }
 
+func (r repo) InsertIllusion(_ context.Context, x tx.Tx, b Bundle) (int64, error) {
+	t := x.(*modelTx)
+	v := t.installed[b.RevisionID()]
+	v.IllusionCount = 1
+	t.installed[b.RevisionID()] = v
+	return 1, nil
+}
+
 func (r repo) InsertDodgeball(_ context.Context, x tx.Tx, b Bundle) (int64, error) {
 	t := x.(*modelTx)
 	v := t.installed[b.RevisionID()]

@@ -253,6 +253,13 @@ func (s Service) EnsureBuiltinInstalled(ctx context.Context, op operation.Contex
 			if gotWorldBoss != 1 {
 				return errors.New("content registry world boss count")
 			}
+			gotIllusion, err := s.Repo.InsertIllusion(tctx, scope.Tx, b)
+			if err != nil {
+				return err
+			}
+			if gotIllusion != 1 {
+				return errors.New("content registry illusion count")
+			}
 			gotMemoir, err := s.Repo.InsertMemoir(tctx, scope.Tx, b)
 			if err != nil {
 				return err

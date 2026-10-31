@@ -21,7 +21,7 @@ from pathlib import Path
 from typing import Any, Iterable
 
 SCHEMA_VERSION = 1
-COMPILER_VERSION = "i9-8a-world-boss"
+COMPILER_VERSION = "i9-8b-illusion"
 PARSER_VERSION = "lua-generated-v18-guild-invite"
 EXPECTED_SOURCE_ARCHIVE_SHA256 = "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
 SOURCE_PREFIX = "app-assets/output/assets/src_64/"
@@ -280,7 +280,7 @@ ENABLED_CAPABILITIES = [
     "SCALAR_MARCH_COIN_I9_4A", "MISSION_ACTIVITY_I9_4B", "MONTHLY_SIGNIN_I9_4C", "AWAKENING_MISSIONS_I9_4D", "SCALAR_GUILD_COIN_I9_4B", "DODGE_TICKET_STACK_I9_4B",
     "SUMMON_GACHA_I9_3E",
     "CAMPAIGN_MODE_I9_3A",
-    "CHAMPION_MARCH_I9_5A", "WORKPLACE_I9_5B", "PET_CAMPAIGN_I9_5C", "GODS_TRIAL_I9_6A","DODGEBALL_I9_6B", "MEMOIR_I9_6C", "WORLD_BOSS_I9_8A",
+    "CHAMPION_MARCH_I9_5A", "WORKPLACE_I9_5B", "PET_CAMPAIGN_I9_5C", "GODS_TRIAL_I9_6A","DODGEBALL_I9_6B", "MEMOIR_I9_6C", "WORLD_BOSS_I9_8A", "ILLUSION_I9_8B",
     "COSMETIC_TITLE_CONDITION_I7C6",
     "ACHIEVEMENT_CATALOG_I7C4FA",
     "CHAMPIONS_LEAGUE_I7C5F",
@@ -500,6 +500,10 @@ from godstrial_content import build_godstrial
 SOURCE_MANIFEST.append(('data/tables/dungeon_campaign.lua', '93abd029cbbbd9c10142e1dcd1643019eba0d7b9805af93e668476a0152957ec', 'I9_8A_WORLD_BOSS_SOURCE_BOUNDARY'))
 SOURCE_MANIFEST.append(('data/tables/dungeon_reward.lua', 'c80da25821c8113f7a1be2588fb1806d310df513379349334faabc24ab501727', 'I9_8A_WORLD_BOSS_SOURCE_BOUNDARY'))
 from world_boss_content import build_world_boss
+SOURCE_MANIFEST.append(('data/tables/paradise_campaign.lua', '1d278f9cdb169e002fd50e7818ab2e4dae3381c4eee37597c93bd8c76c69a240', 'I9_8B_ILLUSION_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/paradise_person_reward.lua', 'ebbff86a1b3d37b4eb66b214072ed9043838ee3ab5df45a05dff23a0b9b9720f', 'I9_8B_ILLUSION_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/paradise_community_reward.lua', '79001034492ec5a06af1249c025cbd3609d767960841e76c4a85cf8638780104', 'I9_8B_ILLUSION_SOURCE_BOUNDARY'))
+from illusion_content import build_illusion
 from dodgeball_content import build_dodgeball
 from memoir_content import build_memoir
 from march_content import build_march
@@ -2330,6 +2334,7 @@ def build_artifacts(blobs: dict[str, SourceBlob], archive_sha256: str) -> dict[s
         "pet_campaign_catalog.json":build_petcampaign(blobs,parse_generated_lua_table,resources),
         "gods_trial_catalog.json":build_godstrial(blobs,parse_generated_lua_table,items),
         "world_boss_catalog.json":build_world_boss(blobs,parse_generated_lua_table),
+        "illusion_catalog.json":build_illusion(blobs,parse_generated_lua_table),
         "dodgeball_catalog.json":build_dodgeball(blobs,parse_generated_lua_table,items,hero_artifact),
         "memoir_catalog.json":build_memoir(blobs,parse_generated_lua_table,items,hero_artifact),
         "workplace_catalog.json":build_workplace(blobs,parse_generated_lua_table,parse_base64_indexed_lua_table,indexed_field,resources),

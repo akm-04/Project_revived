@@ -474,14 +474,22 @@
       "parser_version": "lua-generated-v18-guild-invite",
       "revision_id": "cc7a6537a0991fe1b937246bdc450a4b4104cedc3511aaca992e81d98d50c87e",
       "scope": "Dungeon campaign, rank reward, misc and translation source facts; D364 policy is separate. Unsealed working implementation."
+    },
+    {
+      "ordinal": 65,
+      "stage": "I9-8B Illusion",
+      "compiler_version": "i9-8b-illusion",
+      "parser_version": "lua-generated-v18-guild-invite",
+      "revision_id": "349bae5b49d1ed1a8c95654b080f66c4e45a9a0bc79a0c5af327854c732586cf",
+      "scope": "Paradise campaign, personal and community reward, misc window/attempt profile and vip/refresh-cost purchase inputs; D366 policy is separate. Shared room payloads unchanged. Unsealed working implementation."
     }
   ],
   "current": {
-    "ordinal": 64,
-    "stage": "I9-8A World Boss",
-    "compiler_version": "i9-8a-world-boss",
+    "ordinal": 65,
+    "stage": "I9-8B Illusion",
+    "compiler_version": "i9-8b-illusion",
     "parser_version": "lua-generated-v18-guild-invite",
-    "revision_id": "cc7a6537a0991fe1b937246bdc450a4b4104cedc3511aaca992e81d98d50c87e",
-    "scope": "Dungeon campaign, rank reward, misc and translation source facts; D364 policy is separate. Unsealed working implementation."
+    "revision_id": "349bae5b49d1ed1a8c95654b080f66c4e45a9a0bc79a0c5af327854c732586cf",
+    "scope": "Paradise campaign, personal and community reward, misc window/attempt profile and vip/refresh-cost purchase inputs; D366 policy is separate. Shared room payloads unchanged. Unsealed working implementation."
   }
 }

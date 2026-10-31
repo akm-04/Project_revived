@@ -4609,6 +4609,104 @@
       ],
       "write_exceptions": [],
       "migration": "migrations/00100_i9_8b_shared_room_illusion.sql"
+    },
+    "content_illusion_catalogs": {
+      "owner": "content-registry",
+      "allowed_query_owners": [
+        "content-registry"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/contentstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/contentstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00100_i9_8b_shared_room_illusion.sql"
+    },
+    "illusion_occurrences": {
+      "owner": "illusion",
+      "allowed_query_owners": [
+        "illusion"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/illusionstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/illusionstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00100_i9_8b_shared_room_illusion.sql"
+    },
+    "illusion_players": {
+      "owner": "illusion",
+      "allowed_query_owners": [
+        "illusion"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/illusionstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/illusionstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00100_i9_8b_shared_room_illusion.sql"
+    },
+    "illusion_occurrence_results": {
+      "owner": "illusion",
+      "allowed_query_owners": [
+        "illusion"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/illusionstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/illusionstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00100_i9_8b_shared_room_illusion.sql"
+    },
+    "illusion_attempts": {
+      "owner": "illusion",
+      "allowed_query_owners": [
+        "illusion"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/illusionstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/illusionstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00100_i9_8b_shared_room_illusion.sql"
+    },
+    "illusion_reports": {
+      "owner": "illusion",
+      "allowed_query_owners": [
+        "illusion"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/illusionstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/illusionstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00100_i9_8b_shared_room_illusion.sql"
+    },
+    "illusion_settlements": {
+      "owner": "illusion",
+      "allowed_query_owners": [
+        "illusion"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/illusionstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/illusionstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00100_i9_8b_shared_room_illusion.sql"
     }
   }
 }
