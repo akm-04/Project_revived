@@ -230,6 +230,10 @@ func (r *ConnectionRegistry) Remove(h SessionHandle) bool {
 	return removed
 }
 
+func (r *ConnectionRegistry) HasWorldConnection(playerID identity.PlayerID) bool {
+	return len(r.ByPlayerRole(playerID, domainrt.World)) > 0
+}
+
 func (r *ConnectionRegistry) ByPlayerRole(playerID identity.PlayerID, role domainrt.PhysicalRole) []SessionHandle {
 	if r == nil || !playerID.Valid() || !role.Valid() {
 		return nil

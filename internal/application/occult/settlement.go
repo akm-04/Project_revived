@@ -42,7 +42,10 @@ func (s Mode) freezeFragment(c context.Context, sc gen.TimedScope, a identity.Ac
 	if err != nil {
 		return err
 	}
-	view.state.Frozen = map[string]json.RawMessage{numberKey(int64(a.PlayerID)): raw}
+	if view.state.Frozen == nil {
+		view.state.Frozen = map[string]json.RawMessage{}
+	}
+	view.state.Frozen[numberKey(int64(a.PlayerID))] = raw
 	return nil
 }
 

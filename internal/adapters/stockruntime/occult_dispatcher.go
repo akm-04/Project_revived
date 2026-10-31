@@ -12,17 +12,16 @@ import (
 	"gxb.local/backend/v2/internal/domain/economy"
 	"gxb.local/backend/v2/internal/domain/identity"
 	d "gxb.local/backend/v2/internal/domain/occult"
+	room "gxb.local/backend/v2/internal/domain/sharedroom"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/receipt"
 	"gxb.local/backend/v2/internal/protocol/httpedge"
 )
 
 // OccultMIDs are the src_64 Occult model MIDs (mid.lua 755-778) of the solo
-// flow. 2381 has no sender in the stock UI and stays inactive (C1); the team
-// room MIDs belong to the Occult team dispatcher.
-var OccultMIDs = []uint16{2362, 2364, 2365, 2366, 2368, 2371, 2372, 2373, 2379, 2380, 2384, 2385}
-
-const occultSoloCampaignType = 2
+// flow and the team room. 2381 has no sender in the stock UI and stays inactive
+// (C1); the co-op fight MIDs belong to the Occult team fight dispatcher.
+var OccultMIDs = []uint16{2362, 2363, 2364, 2365, 2366, 2367, 2368, 2369, 2370, 2371, 2372, 2373, 2379, 2380, 2384, 2385}
 
 type OccultPort interface {
 	Info(context.Context, identity.ActorContext, operation.Context) (map[string]any, error)
@@ -30,6 +29,11 @@ type OccultPort interface {
 	MemberStat(context.Context, identity.ActorContext, identity.PlayerID, operation.Context) (map[string]any, error)
 	Logs(context.Context, identity.ActorContext, operation.Context) (map[string]any, error)
 	CreateSolo(context.Context, identity.ActorContext, int64, operation.Context) (map[string]any, error)
+	CreateTeam(context.Context, identity.ActorContext, int64, operation.Context) (map[string]any, error)
+	JoinRoom(context.Context, identity.ActorContext, int64, operation.Context) (map[string]any, error)
+	Invite(context.Context, identity.ActorContext, identity.PlayerID, operation.Context) (map[string]any, error)
+	Kick(context.Context, identity.ActorContext, identity.PlayerID, operation.Context) (map[string]any, error)
+	StartChallenge(context.Context, identity.ActorContext, operation.Context) (map[string]any, error)
 	ExitRoom(context.Context, identity.ActorContext, int64, operation.Context) (map[string]any, error)
 	Prepare(context.Context, identity.ActorContext, int64, int64, operation.Context) (map[string]any, error)
 	StartFight(context.Context, identity.ActorContext, int64, int64, operation.Context) (map[string]any, error)
@@ -57,11 +61,23 @@ func (o OccultDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReq
 	var body map[string]any
 	var err error
 	switch req.Envelope.MID {
-	case 2362, 2380:
+	case 2362, 2363, 2380:
 		if !onlyStockGameplayParams(params) {
 			return bad
 		}
 		body, err = o.noArgument(ctx, req.Envelope.MID, a, op)
+	case 2367:
+		room, ok := topFloorInteger(params, "room_id", true)
+		if !ok || room <= 0 || !onlyStockGameplayParams(params, "room_id") {
+			return bad
+		}
+		body, err = o.Service.JoinRoom(ctx, a, room, op)
+	case 2369, 2370:
+		member, ok := topFloorInteger(params, "player_id", true)
+		if !ok || member <= 0 || !onlyStockGameplayParams(params, "player_id") {
+			return bad
+		}
+		body, err = o.memberCommand(ctx, req.Envelope.MID, a, identity.PlayerID(member), op)
 	case 2364:
 		campaign, ok := topFloorInteger(params, "campaign_id", true)
 		_, stayOK := topFloorInteger(params, "stay_pos", true)
@@ -117,10 +133,20 @@ func (o OccultDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReq
 }
 
 func (o OccultDispatcher) noArgument(ctx context.Context, mid uint16, a identity.ActorContext, op operation.Context) (map[string]any, error) {
-	if mid == 2362 {
+	switch mid {
+	case 2362:
 		return o.Service.Info(ctx, a, op)
+	case 2363:
+		return o.Service.StartChallenge(ctx, a, op)
 	}
 	return o.Service.Logs(ctx, a, op)
+}
+
+func (o OccultDispatcher) memberCommand(ctx context.Context, mid uint16, a identity.ActorContext, member identity.PlayerID, op operation.Context) (map[string]any, error) {
+	if mid == 2369 {
+		return o.Service.Invite(ctx, a, member, op)
+	}
+	return o.Service.Kick(ctx, a, member, op)
 }
 
 func (o OccultDispatcher) stageCommand(ctx context.Context, mid uint16, a identity.ActorContext, campaign, sub int64, op operation.Context) (map[string]any, error) {
@@ -133,18 +159,18 @@ func (o OccultDispatcher) stageCommand(ctx context.Context, mid uint16, a identi
 	return o.Service.QuitFight(ctx, a, op)
 }
 
-// create reads 2366. Co-op rooms (campaign_type 1) arrive with the team flow, so
-// until then the stock UI gets its ordinary refusal.
+// create reads 2366: campaign_type 1 opens a team room, 2 a solo room.
 func (o OccultDispatcher) create(ctx context.Context, a identity.ActorContext, params map[string]any, op operation.Context) httpedge.Response {
 	chapter, chapterOK := topFloorInteger(params, "chapter_id", true)
 	campaignType, typeOK := topFloorInteger(params, "campaign_type", true)
 	if !chapterOK || !typeOK || chapter <= 0 || campaignType < d.MultiCampaignType || campaignType > d.SingleCampaignType || !onlyStockGameplayParams(params, "chapter_id", "campaign_type") {
 		return badHero("occult_invalid_parameter")
 	}
-	if campaignType != occultSoloCampaignType {
-		return okI5(map[string]any{"error_code": int64(1)})
+	create := o.Service.CreateTeam
+	if campaignType == d.SingleCampaignType {
+		create = o.Service.CreateSolo
 	}
-	body, err := o.Service.CreateSolo(ctx, a, chapter, op)
+	body, err := create(ctx, a, chapter, op)
 	if err != nil {
 		return failOccult(err)
 	}
@@ -199,9 +225,13 @@ func failOccult(err error) httpedge.Response {
 	if errors.Is(err, d.ErrInvalid) || errors.As(err, &conflict) {
 		return badHero("occult_invalid_parameter")
 	}
-	refused := errors.Is(err, d.ErrRefused) || errors.Is(err, economy.ErrInsufficientBalance) || errors.Is(err, sr.ErrNotInRoom) || errors.Is(err, sr.ErrAlreadyInRoom)
-	if refused {
-		return okI5(map[string]any{"error_code": int64(1)})
+	for _, refusal := range occultRefusals {
+		if errors.Is(err, refusal) {
+			return okI5(map[string]any{"error_code": int64(1)})
+		}
 	}
 	return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: err, Body: map[string]any{"error": "occult_unavailable"}}
 }
+
+var occultRefusals = []error{d.ErrRefused, economy.ErrInsufficientBalance, sr.ErrNotInRoom, sr.ErrAlreadyInRoom, sr.ErrNotFound,
+	room.ErrFull, room.ErrKicked, room.ErrExpired, room.ErrClosed, room.ErrNotOwner, room.ErrNotSeated}

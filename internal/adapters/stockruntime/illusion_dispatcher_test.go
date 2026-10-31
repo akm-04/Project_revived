@@ -108,7 +108,7 @@ func TestIllusionConflictMapsToBadRequest(t *testing.T) {
 }
 
 func TestIllusionOneShotNoticesDeliverOnce(t *testing.T) {
-	ledger := NewIllusionNoticeLedger()
+	ledger := NewRoomNoticeLedger()
 	const room, mid = int64(9), uint16(518)
 	players := []identity.PlayerID{1, 2}
 	if got := ledger.undelivered(room, mid, players); len(got) != 2 {

@@ -140,3 +140,27 @@ func TestSubIdIsOneBasedAndBounded(t *testing.T) {
 		}
 	}
 }
+
+type levelDirectory map[identity.PlayerID]int64
+
+func (l levelDirectory) ProfileTx(_ context.Context, _ tx.Queryer, id identity.PlayerID) (playerdirectory.Profile, bool, error) {
+	level, found := l[id]
+	return playerdirectory.Profile{PlayerID: id, Name: "p", Level: level}, found, nil
+}
+
+func TestTeamRoomBandAndGate(t *testing.T) {
+	catalog := loadCatalog(t)
+	mode := Mode{Directory: levelDirectory{1: 90, 2: 95, 3: 96, 4: 84, 5: 85}}
+	cases := []struct {
+		name      string
+		candidate identity.PlayerID
+		owner     identity.PlayerID
+		want      bool
+	}{{"within five", 2, 1, true}, {"six apart", 3, 1, false}, {"below the gate", 4, 5, false}, {"unknown player", 9, 1, false}}
+	for _, c := range cases {
+		err := mode.requireBand(context.Background(), nil, catalog, c.owner, c.candidate)
+		if c.want != (err == nil) || (!c.want && !errors.Is(err, d.ErrRefused)) {
+			t.Fatalf("%s: %v", c.name, err)
+		}
+	}
+}

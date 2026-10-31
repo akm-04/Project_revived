@@ -262,3 +262,18 @@ func TestInvalidPlayersAreRefused(t *testing.T) {
 		t.Fatalf("invalid kick target %v", err)
 	}
 }
+
+func TestExtendLeaseOnlyMovesLaterAndNeverReopens(t *testing.T) {
+	room := testRoom(t, 3, time.Hour)
+	later := testStart.Add(2 * time.Hour)
+	if err := room.ExtendLease(later, testStart); err != nil || !room.ExpiresAt.Equal(later) || room.StateVersion != 2 {
+		t.Fatalf("extend: %v %+v", err, room)
+	}
+	if err := room.ExtendLease(testStart.Add(time.Minute), testStart); !errors.Is(err, ErrInvalid) {
+		t.Fatalf("an earlier lease must be refused: %v", err)
+	}
+	room.close(testStart)
+	if err := room.ExtendLease(later.Add(time.Hour), testStart); !errors.Is(err, ErrClosed) {
+		t.Fatalf("a closed room must stay closed: %v", err)
+	}
+}

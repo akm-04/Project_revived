@@ -78,7 +78,7 @@ func (s Mode) read(c context.Context, a identity.ActorContext, op operation.Cont
 	if err != nil {
 		return snapshot{}, err
 	}
-	if !state.Started() || state.RoomExpired(at.Unix()) {
+	if state.RoomExpired(at.Unix()) {
 		return loaded, nil
 	}
 	loaded.view = &roomView{room: room, state: state, catalog: catalog, scores: scores, at: at}
@@ -179,7 +179,7 @@ func seated(view *roomView, playerID identity.PlayerID) bool {
 }
 
 func reachableCampaign(view *roomView, campaignID int64) (d.Campaign, error) {
-	if view == nil {
+	if view == nil || !view.state.Started() {
 		return d.Campaign{}, d.ErrRefused
 	}
 	for _, campaign := range view.catalog.RoomCampaigns(view.state.ChapterID, view.state.CampaignType) {
@@ -211,7 +211,7 @@ func (s Mode) CreateSolo(c context.Context, a identity.ActorContext, chapterID i
 		return nil, d.ErrInvalid
 	}
 	if loaded.view != nil {
-		return s.heldSolo(c, a, loaded, chapterID)
+		return s.heldRoom(c, a, loaded, chapterID, d.SingleCampaignType)
 	}
 	if loaded.tickets.Tickets < 1 {
 		return nil, economy.ErrInsufficientBalance
@@ -240,8 +240,8 @@ func (s Mode) CreateSolo(c context.Context, a identity.ActorContext, chapterID i
 	return body, nil
 }
 
-func (s Mode) heldSolo(c context.Context, a identity.ActorContext, loaded snapshot, chapterID int64) (map[string]any, error) {
-	if loaded.view.state.ChapterID != chapterID || loaded.view.state.CampaignType != d.SingleCampaignType {
+func (s Mode) heldRoom(c context.Context, a identity.ActorContext, loaded snapshot, chapterID, campaignType int64) (map[string]any, error) {
+	if loaded.view.state.ChapterID != chapterID || loaded.view.state.CampaignType != campaignType {
 		return nil, d.ErrRefused
 	}
 	body, err := s.body(c, a, loaded)
@@ -302,6 +302,11 @@ func (s Mode) ExitRoom(c context.Context, a identity.ActorContext, roomID int64,
 	if _, err = s.Rooms.Leave(c, a, RoomFamilyRef(), op); err != nil {
 		return nil, err
 	}
+	return s.roomChange(c, a, op)
+}
+
+// roomChange answers a room command with the caller's state as a ROOM_CHANGE.
+func (s Mode) roomChange(c context.Context, a identity.ActorContext, op operation.Context) (map[string]any, error) {
 	loaded, err := s.read(c, a, op)
 	if err != nil {
 		return nil, err
@@ -326,6 +331,7 @@ func (s Mode) Prepare(c context.Context, a identity.ActorContext, campaignID, su
 			return nil, err
 		}
 		outcomes := view.state.TriggerEvent(view.catalog, campaign)
+		view.state.RecordEvents(outcomes)
 		autoPass := false
 		for _, outcome := range outcomes {
 			autoPass = autoPass || outcome.Type == d.EventAutoPass

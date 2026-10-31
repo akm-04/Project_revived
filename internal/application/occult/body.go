@@ -58,6 +58,9 @@ func (s Mode) stateBody(c context.Context, q tx.Queryer, a identity.ActorContext
 	body["room_info"] = map[string]any{"owner": int64(view.room.Owner), "members": memberIDs, "member_infos": memberInfos, "chapter_id": state.ChapterID,
 		"room_size": view.room.Capacity, "start_time": state.StartedAt, "campaign_type": state.CampaignType, "is_close": int64(0)}
 	body["hero_stat"] = heroStat
+	if !state.Started() {
+		return body, nil
+	}
 	body["open_campaigns"] = openCampaigns(catalog, state)
 	body["self_dispatch"] = selfDispatch(state, int64(a.PlayerID))
 	return body, nil

@@ -44,6 +44,7 @@ type RunState struct {
 	ClearSettled       bool                             `json:"clear_settled,omitempty"`
 	Frozen             map[string]json.RawMessage       `json:"frozen,omitempty"`
 	ReportID           string                           `json:"report_id,omitempty"`
+	Events             []EventRecord                    `json:"events,omitempty"`
 }
 
 func NewRun(chapterID, campaignType int64) RunState {

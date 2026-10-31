@@ -275,3 +275,39 @@ func TestRoomMapReachabilityEventsAndChapterClear(t *testing.T) {
 		t.Fatal("final campaign cleared clears the chapter")
 	}
 }
+
+func TestTeamRoomRules(t *testing.T) {
+	if !WithinLevelBand(90, 95, 5) || WithinLevelBand(90, 96, 5) || WithinLevelBand(96, 90, 5) {
+		t.Fatal("the level band is five levels either way")
+	}
+	run := NewRun(2, MultiCampaignType)
+	run.Invite(8)
+	run.Invite(8)
+	if len(run.Invites) != 1 || !run.Invited(8) || run.Invited(9) {
+		t.Fatalf("invites %v", run.Invites)
+	}
+	if !run.MayJoin(9, 100) {
+		t.Fatal("a first-time player may join before the start")
+	}
+	run.MarkLeft(9, 100)
+	if run.MayJoin(9, 219) || !run.MayJoin(9, 220) {
+		t.Fatal("re-entry waits 120 seconds")
+	}
+	if err := run.Start(300); err != nil {
+		t.Fatal(err)
+	}
+	if run.MayJoin(10, 1000) || !run.MayJoin(9, 1000) {
+		t.Fatal("after the start only a returning member may join")
+	}
+}
+
+func TestEventLogKeepsTheNewestAndCountsOn(t *testing.T) {
+	run := NewRun(2, MultiCampaignType)
+	for range eventLogLimit + 4 {
+		run.RecordEvents([]EventOutcome{{Type: EventIncreaseDispatch, DispatchLimit: 33}})
+	}
+	last := run.Events[len(run.Events)-1]
+	if len(run.Events) != eventLogLimit || last.Sequence != eventLogLimit+4 || run.Events[0].Sequence != 5 || last.Type != 5 || last.DispatchLimit != 33 {
+		t.Fatalf("events %+v", run.Events)
+	}
+}

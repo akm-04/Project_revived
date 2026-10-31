@@ -6552,8 +6552,9 @@
    "family": "OCCULT_SORCERY_WAR",
    "disposition": "ACTIVE",
    "target": "I9-8",
-   "v2": "unimplemented",
-   "v1": null
+   "v2": "implemented",
+   "v1": null,
+   "implementation": "I9-8C working implementation; unqualified"
   },
   {
    "mid": 2364,
@@ -6591,8 +6592,9 @@
    "family": "OCCULT_SORCERY_WAR",
    "disposition": "ACTIVE",
    "target": "I9-8",
-   "v2": "unimplemented",
-   "v1": null
+   "v2": "implemented",
+   "v1": null,
+   "implementation": "I9-8C working implementation; unqualified"
   },
   {
    "mid": 2368,
@@ -6610,8 +6612,9 @@
    "family": "OCCULT_SORCERY_WAR",
    "disposition": "ACTIVE",
    "target": "I9-8",
-   "v2": "unimplemented",
-   "v1": null
+   "v2": "implemented",
+   "v1": null,
+   "implementation": "I9-8C working implementation; unqualified"
   },
   {
    "mid": 2370,
@@ -6619,8 +6622,9 @@
    "family": "OCCULT_SORCERY_WAR",
    "disposition": "ACTIVE",
    "target": "I9-8",
-   "v2": "unimplemented",
-   "v1": null
+   "v2": "implemented",
+   "v1": null,
+   "implementation": "I9-8C working implementation; unqualified"
   },
   {
    "mid": 2371,

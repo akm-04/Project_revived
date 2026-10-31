@@ -97,8 +97,8 @@ func (Store) SaveRoomTx(ctx context.Context, t tx.Tx, room d.Room) error {
 	if err := room.Validate(); err != nil {
 		return err
 	}
-	tag, err := t.Exec(ctx, `UPDATE shared_rooms SET status=$2,state_version=$3,notice_version=$4,payload=$5::jsonb,updated_at=$6,closed_at=$7 WHERE room_id=$1`,
-		room.ID, string(room.Status), room.StateVersion, room.NoticeVersion, string(room.Payload), room.UpdatedAt, room.ClosedAt)
+	tag, err := t.Exec(ctx, `UPDATE shared_rooms SET status=$2,state_version=$3,notice_version=$4,payload=$5::jsonb,updated_at=$6,closed_at=$7,expires_at=$8 WHERE room_id=$1`,
+		room.ID, string(room.Status), room.StateVersion, room.NoticeVersion, string(room.Payload), room.UpdatedAt, room.ClosedAt, room.ExpiresAt)
 	if err == nil && tag.RowsAffected() != 1 {
 		return d.ErrNotFound
 	}

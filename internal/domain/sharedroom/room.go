@@ -285,6 +285,19 @@ func (r *Room) SetReady(player identity.PlayerID, ready bool, at time.Time) erro
 	return nil
 }
 
+// ExtendLease moves the end of an open room's lease later, never earlier.
+func (r *Room) ExtendLease(expiresAt, at time.Time) error {
+	if r.Status == StatusClosed {
+		return ErrClosed
+	}
+	if expiresAt.Before(r.ExpiresAt) {
+		return ErrInvalid
+	}
+	r.ExpiresAt = expiresAt
+	r.touch(at)
+	return nil
+}
+
 // Expire closes an open room whose lease has ended and reports the close.
 func (r *Room) Expire(at time.Time) bool {
 	if r.Status != StatusOpen || at.Before(r.ExpiresAt) {

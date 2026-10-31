@@ -188,62 +188,64 @@ type IllusionRoomNoticeHandler struct {
 	Authority       realtimeauth.GameplayLivenessPort
 	Time            SocialDeliveryTime
 	MaxHandles      int
-	Delivered       *IllusionNoticeLedger
+	Delivered       *RoomNoticeLedger
 	OnDeliveryError func(error)
 }
 
-// IllusionNoticeLedger remembers each room's one-shot removal and invite notices:
+// RoomNoticeLedger remembers each room's one-shot removal and invite notices:
 // the wakeup carries only the room, and the room keeps departed seats and invites.
 // shortcut: in memory, so a realtime restart repeats them once for a live room;
 // persist delivery if that repeat ever reaches a player seated elsewhere.
-type IllusionNoticeLedger struct {
-	mu    sync.Mutex
-	rooms map[int64]map[illusionOneShot]bool
+type RoomNoticeLedger struct {
+	mu       sync.Mutex
+	rooms    map[int64]map[roomOneShot]bool
+	observed map[int64]*roomObservation
 }
 
-type illusionOneShot struct {
+type roomOneShot struct {
 	mid    uint16
 	player identity.PlayerID
 }
 
-func NewIllusionNoticeLedger() *IllusionNoticeLedger {
-	return &IllusionNoticeLedger{rooms: map[int64]map[illusionOneShot]bool{}}
+func NewRoomNoticeLedger() *RoomNoticeLedger {
+	return &RoomNoticeLedger{rooms: map[int64]map[roomOneShot]bool{}, observed: map[int64]*roomObservation{}}
 }
 
-func (l *IllusionNoticeLedger) undelivered(room int64, mid uint16, players []identity.PlayerID) []identity.PlayerID {
+func (l *RoomNoticeLedger) undelivered(room int64, mid uint16, players []identity.PlayerID) []identity.PlayerID {
 	l.mu.Lock()
 	defer l.mu.Unlock()
 	out := make([]identity.PlayerID, 0, len(players))
 	for _, player := range players {
-		if !l.rooms[room][illusionOneShot{mid, player}] {
+		if !l.rooms[room][roomOneShot{mid, player}] {
 			out = append(out, player)
 		}
 	}
 	return out
 }
 
-func (l *IllusionNoticeLedger) markDelivered(room int64, mid uint16, player identity.PlayerID) {
+func (l *RoomNoticeLedger) markDelivered(room int64, mid uint16, player identity.PlayerID) {
 	l.mu.Lock()
 	defer l.mu.Unlock()
 	if l.rooms[room] == nil {
-		l.rooms[room] = map[illusionOneShot]bool{}
+		l.rooms[room] = map[roomOneShot]bool{}
 	}
-	l.rooms[room][illusionOneShot{mid, player}] = true
+	l.rooms[room][roomOneShot{mid, player}] = true
 }
 
 // reseat lets a player who rejoined be told of a later departure again.
-func (l *IllusionNoticeLedger) reseat(room int64, mid uint16, players []identity.PlayerID) {
+func (l *RoomNoticeLedger) reseat(room int64, mid uint16, players []identity.PlayerID) {
 	l.mu.Lock()
 	defer l.mu.Unlock()
 	for _, player := range players {
-		delete(l.rooms[room], illusionOneShot{mid, player})
+		delete(l.rooms[room], roomOneShot{mid, player})
 	}
 }
 
-func (l *IllusionNoticeLedger) forget(room int64) {
+func (l *RoomNoticeLedger) forget(room int64) {
 	l.mu.Lock()
 	defer l.mu.Unlock()
 	delete(l.rooms, room)
+	delete(l.observed, room)
 }
 
 func (h IllusionRoomNoticeHandler) ReloadAndDeliver(c context.Context, reference string) error {
@@ -323,30 +325,44 @@ func (h IllusionRoomNoticeHandler) deliverInvite(c context.Context, view Illusio
 }
 
 func (h IllusionRoomNoticeHandler) deliver(c context.Context, player identity.PlayerID, mid uint16, frame *amf3.Object) error {
-	handles := h.Registry.ByPlayerRole(player, domainrt.World)
-	if len(handles) > h.MaxHandles {
-		return errors.New("illusion room notice connection bound exceeded")
+	return RoomDelivery{Registry: h.Registry, Publisher: h.Publisher, Authority: h.Authority, Time: h.Time, MaxHandles: h.MaxHandles, OnDeliveryError: h.OnDeliveryError}.Deliver(c, player, mid, frame)
+}
+
+// RoomDelivery publishes one frame to every current world connection of a player.
+type RoomDelivery struct {
+	Registry        *ConnectionRegistry
+	Publisher       RealtimePublisher
+	Authority       realtimeauth.GameplayLivenessPort
+	Time            SocialDeliveryTime
+	MaxHandles      int
+	OnDeliveryError func(error)
+}
+
+func (delivery RoomDelivery) Deliver(c context.Context, player identity.PlayerID, mid uint16, frame *amf3.Object) error {
+	handles := delivery.Registry.ByPlayerRole(player, domainrt.World)
+	if len(handles) > delivery.MaxHandles {
+		return errors.New("room notice connection bound exceeded")
 	}
 	for _, handle := range handles {
 		metadata, valid := handle.Metadata()
-		if !valid || !h.Registry.IsCurrent(handle) || metadata.PlayerID != player || metadata.PhysicalRole != domainrt.World || metadata.RoomID != int64(metadata.LogicalServerID) {
+		if !valid || !delivery.Registry.IsCurrent(handle) || metadata.PlayerID != player || metadata.PhysicalRole != domainrt.World || metadata.RoomID != int64(metadata.LogicalServerID) {
 			continue
 		}
-		at, err := h.Time.Now(c)
+		at, err := delivery.Time.Now(c)
 		if err != nil {
 			return err
 		}
 		actor := identity.ActorContext{AccountID: metadata.AccountID, AccountUID: metadata.AccountUID, SessionID: metadata.SessionID, ContextID: metadata.ContextID, LogicalServerID: metadata.LogicalServerID, PlayerID: metadata.PlayerID, ContextGeneration: metadata.ContextGeneration, SessionLivenessVersion: metadata.SessionLivenessVersion, ContextLivenessVersion: metadata.ContextLivenessVersion}
-		if h.Authority.ValidateActor(c, actor, at) != nil {
+		if delivery.Authority.ValidateActor(c, actor, at) != nil {
 			continue
 		}
 		if mid == mids.MIDIllusionNotice {
-			err = h.Publisher.PublishDirect(c, handle, mid, frame)
+			err = delivery.Publisher.PublishDirect(c, handle, mid, frame)
 		} else {
-			err = h.Publisher.PublishNotice(c, handle, mid, rt.NoticeNamespaceGeneric, frame)
+			err = delivery.Publisher.PublishNotice(c, handle, mid, rt.NoticeNamespaceGeneric, frame)
 		}
-		if err != nil && h.OnDeliveryError != nil {
-			h.OnDeliveryError(err)
+		if err != nil && delivery.OnDeliveryError != nil {
+			delivery.OnDeliveryError(err)
 		}
 	}
 	return nil
@@ -400,7 +416,16 @@ func cloneMessage(base map[string]any) map[string]any {
 }
 
 func illusionFrame(message map[string]any) (*amf3.Object, error) {
-	payload, err := json.Marshal(message)
+	converted, err := amfFromValue(message)
+	if err != nil {
+		return nil, err
+	}
+	return &amf3.Object{Properties: []amf3.Property{{Name: "message", Value: converted}}}, nil
+}
+
+// amfFromValue round-trips a body through JSON so every number keeps its width.
+func amfFromValue(value any) (any, error) {
+	payload, err := json.Marshal(value)
 	if err != nil {
 		return nil, err
 	}
@@ -410,11 +435,7 @@ func illusionFrame(message map[string]any) (*amf3.Object, error) {
 	if err := decoder.Decode(&raw); err != nil {
 		return nil, err
 	}
-	converted, err := tournamentAMF(raw)
-	if err != nil {
-		return nil, err
-	}
-	return &amf3.Object{Properties: []amf3.Property{{Name: "message", Value: converted}}}, nil
+	return tournamentAMF(raw)
 }
 
 func decodeRawNumber(raw json.RawMessage) (any, error) {

@@ -25,6 +25,8 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres/generaldmstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/guildprojection"
 	"gxb.local/backend/v2/internal/adapters/postgres/i4store"
+	"gxb.local/backend/v2/internal/adapters/postgres/i5store"
+	"gxb.local/backend/v2/internal/adapters/postgres/occultstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/presencestore"
 	"gxb.local/backend/v2/internal/adapters/postgres/sharedroomstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/socialgiftstore"
@@ -38,6 +40,7 @@ import (
 	"gxb.local/backend/v2/internal/application/frienddm"
 	"gxb.local/backend/v2/internal/application/generaldm"
 	appgeneration "gxb.local/backend/v2/internal/application/generation"
+	appi5 "gxb.local/backend/v2/internal/application/i5"
 	appidentity "gxb.local/backend/v2/internal/application/identitylifecycle"
 	appillusion "gxb.local/backend/v2/internal/application/illusion"
 	appoccult "gxb.local/backend/v2/internal/application/occult"
@@ -214,7 +217,7 @@ func run() error {
 		return err
 	}
 	channelService := channelchat.Service{Runner: presenceRunner, Operations: presenceOperations, Reader: channelchatread.Reader{},
-		Owners: channelchat.Owners{Illusion: channelchatread.IllusionRoomReader{Store: sharedroomstore.Store{}, Content: contentstore.Store{}}}}
+		Owners: channelchat.Owners{Illusion: channelchatread.IllusionRoomReader{Store: sharedroomstore.Store{}, Content: contentstore.Store{}}, Occult: channelchatread.OccultRoomReader{Store: sharedroomstore.Store{}}}}
 	chatDispatcher, err := stockruntime.NewChannelChatDispatcher(connectionsRegistry, channelService, stockruntime.RealtimePublisher{Registry: chatEvents, Limits: limits.Default()}, stockruntime.DefaultChannelChatPolicy(runtimePolicy.MaxConnections))
 	if err != nil {
 		return err
@@ -274,9 +277,19 @@ func run() error {
 	}
 	illusionRooms := stockruntime.IllusionRoomNoticeHandler{Service: stockruntime.IllusionRoomNoticeReader{Store: sharedroomstore.Store{}, Directory: i4store.PlayerDirectoryReader{}, Queryer: pool},
 		Registry: connectionsRegistry, Publisher: stockruntime.RealtimePublisher{Registry: illusionEvents, Limits: limits.Default()}, Authority: authority,
-		Time: postgres.AuthoritativeTime{Queryer: pool}, MaxHandles: runtimePolicy.MaxConnections, Delivered: stockruntime.NewIllusionNoticeLedger(),
+		Time: postgres.AuthoritativeTime{Queryer: pool}, MaxHandles: runtimePolicy.MaxConnections, Delivered: stockruntime.NewRoomNoticeLedger(),
 		OnDeliveryError: func(err error) { log.Printf("illusion room notice degraded: %v", err) }}
-	wakeups, err := realtimewakeup.NewRegistry(realtimewakeup.Registration{Route: apparena.FriendFightNoticeRoute, Handler: friendNotices}, realtimewakeup.Registration{Route: apparena.TournamentNoticeRoute, Handler: tournamentNotices}, realtimewakeup.Registration{Route: postgres.SocialReloadRoute, Handler: socialHandler}, realtimewakeup.Registration{Route: frienddm.WakeupRoute, Handler: friendReconcile}, realtimewakeup.Registration{Route: generaldm.WakeupRoute, Handler: generalReconcile}, realtimewakeup.Registration{Route: achievement.NoticeRoute, Handler: achievementNotices}, realtimewakeup.Registration{Route: appillusion.RoomNoticeRoute, Handler: illusionRooms}, realtimewakeup.Registration{Route: appoccult.RoomNoticeRoute, Handler: realtimewakeup.RouteHandlerFunc(occultSoloRoomWakeup)})
+	occultEvents, err := stockruntime.NewOccultRoomNoticeRegistry()
+	if err != nil {
+		log.Fatal(err)
+	}
+	occultRooms := stockruntime.OccultRoomNoticeHandler{Service: appoccult.NoticeReader{Rooms: sharedroomstore.Store{}, Content: contentstore.Store{}, Directory: i4store.PlayerDirectoryReader{},
+		Scores: occultstore.Store{}, Tickets: appi5.Service{Store: i5store.Store{}}, Queryer: pool},
+		Delivery: stockruntime.RoomDelivery{Registry: connectionsRegistry, Publisher: stockruntime.RealtimePublisher{Registry: occultEvents, Limits: limits.Default()}, Authority: authority,
+			Time: postgres.AuthoritativeTime{Queryer: pool}, MaxHandles: runtimePolicy.MaxConnections, OnDeliveryError: func(err error) { log.Printf("occult room notice degraded: %v", err) }},
+		Delivered: stockruntime.NewRoomNoticeLedger(),
+		Online:    connectionsRegistry.HasWorldConnection}
+	wakeups, err := realtimewakeup.NewRegistry(realtimewakeup.Registration{Route: apparena.FriendFightNoticeRoute, Handler: friendNotices}, realtimewakeup.Registration{Route: apparena.TournamentNoticeRoute, Handler: tournamentNotices}, realtimewakeup.Registration{Route: postgres.SocialReloadRoute, Handler: socialHandler}, realtimewakeup.Registration{Route: frienddm.WakeupRoute, Handler: friendReconcile}, realtimewakeup.Registration{Route: generaldm.WakeupRoute, Handler: generalReconcile}, realtimewakeup.Registration{Route: achievement.NoticeRoute, Handler: achievementNotices}, realtimewakeup.Registration{Route: appillusion.RoomNoticeRoute, Handler: illusionRooms}, realtimewakeup.Registration{Route: appoccult.RoomNoticeRoute, Handler: occultRooms})
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -391,8 +404,3 @@ func run() error {
 		}(conn)
 	}
 }
-
-// occultSoloRoomWakeup acknowledges a solo room wakeup: the reply to the player's
-// own request already carries the state. shortcut: ROOM_CHANGE pushes to the
-// other seats arrive with the team flow, which replaces this handler.
-func occultSoloRoomWakeup(context.Context, string) error { return nil }

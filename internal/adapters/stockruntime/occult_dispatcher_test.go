@@ -6,14 +6,22 @@ import (
 	"time"
 
 	app "gxb.local/backend/v2/internal/application/occult"
+	sr "gxb.local/backend/v2/internal/application/sharedroom"
+	"gxb.local/backend/v2/internal/domain/economy"
 	"gxb.local/backend/v2/internal/domain/identity"
 	d "gxb.local/backend/v2/internal/domain/occult"
+	"gxb.local/backend/v2/internal/domain/sharedroom"
 	"gxb.local/backend/v2/internal/foundation/operation"
 )
 
 type occultStub struct {
 	err     error
 	created int64
+	teamed  int64
+	joined  int64
+	invited identity.PlayerID
+	kicked  identity.PlayerID
+	started bool
 	settled app.SettleRequest
 }
 
@@ -33,6 +41,26 @@ func (s *occultStub) Logs(context.Context, identity.ActorContext, operation.Cont
 }
 func (s *occultStub) CreateSolo(_ context.Context, _ identity.ActorContext, chapter int64, _ operation.Context) (map[string]any, error) {
 	s.created = chapter
+	return s.reply()
+}
+func (s *occultStub) CreateTeam(_ context.Context, _ identity.ActorContext, chapter int64, _ operation.Context) (map[string]any, error) {
+	s.teamed = chapter
+	return s.reply()
+}
+func (s *occultStub) JoinRoom(_ context.Context, _ identity.ActorContext, room int64, _ operation.Context) (map[string]any, error) {
+	s.joined = room
+	return s.reply()
+}
+func (s *occultStub) Invite(_ context.Context, _ identity.ActorContext, target identity.PlayerID, _ operation.Context) (map[string]any, error) {
+	s.invited = target
+	return s.reply()
+}
+func (s *occultStub) Kick(_ context.Context, _ identity.ActorContext, target identity.PlayerID, _ operation.Context) (map[string]any, error) {
+	s.kicked = target
+	return s.reply()
+}
+func (s *occultStub) StartChallenge(context.Context, identity.ActorContext, operation.Context) (map[string]any, error) {
+	s.started = true
 	return s.reply()
 }
 func (s *occultStub) ExitRoom(context.Context, identity.ActorContext, int64, operation.Context) (map[string]any, error) {
@@ -58,12 +86,12 @@ func (s *occultStub) Sweep(context.Context, identity.ActorContext, int64, operat
 	return s.reply()
 }
 
-func TestOccultEverySoloMIDRoutes(t *testing.T) {
+func TestOccultEveryRoomMIDRoutes(t *testing.T) {
 	now := time.Unix(100, 0).UTC()
 	dispatcher := OccultDispatcher{Authority: httpAuthority{actor: actorForHTTP(t)}, Service: &occultStub{}}
 	stage := func() map[string]any { return map[string]any{"campaign_id": int64(20011), "sub_id": int64(1)} }
 	requests := map[uint16]map[string]any{
-		2362: {}, 2364: {"campaign_id": int64(20011), "stay_pos": int64(20010)}, 2365: {"player_id": int64(100001)},
+		2362: {}, 2363: {}, 2367: {"room_id": int64(7)}, 2369: {"player_id": int64(100002)}, 2370: {"player_id": int64(100002)}, 2364: {"campaign_id": int64(20011), "stay_pos": int64(20010)}, 2365: {"player_id": int64(100001)},
 		2366: {"chapter_id": int64(2), "campaign_type": int64(2)}, 2368: {"room_id": int64(7)}, 2371: stage(), 2373: stage(), 2379: stage(), 2380: {},
 		2372: {"campaign_id": int64(20011), "sub_id": int64(1), "star": int64(3), "formation": "11|12", "hero_status": map[string]any{"11": map[string]any{"hp": float64(90), "mp": float64(40), "is_reborn": float64(0)}}, "monster_status": map[string]any{}},
 		2384: {"stay_pos": int64(20010)}, 2385: {"chapter_id": int64(2)},
@@ -113,13 +141,30 @@ func TestOccultForgedParametersAre400(t *testing.T) {
 	}
 }
 
-func TestOccultCoopCreateIsRefusedUntilTheTeamFlow(t *testing.T) {
+func TestOccultTeamCommandsReachTheService(t *testing.T) {
 	now := time.Unix(100, 0).UTC()
 	stub := &occultStub{}
 	dispatcher := OccultDispatcher{Authority: httpAuthority{actor: actorForHTTP(t)}, Service: stub}
-	got := dispatcher.Dispatch(context.Background(), illusionRequest(2366, map[string]any{"chapter_id": int64(2), "campaign_type": int64(1)}, now))
-	if got.HTTPStatus != 200 || got.Body["error_code"] != int64(1) || stub.created != 0 {
-		t.Fatalf("%d %#v created=%d", got.HTTPStatus, got.Body, stub.created)
+	for mid, params := range map[uint16]map[string]any{
+		2366: {"chapter_id": int64(2), "campaign_type": int64(1)}, 2367: {"room_id": int64(9)}, 2369: {"player_id": int64(100002)}, 2370: {"player_id": int64(100003)}, 2363: {},
+	} {
+		if got := dispatcher.Dispatch(context.Background(), illusionRequest(mid, params, now)); got.HTTPStatus != 200 {
+			t.Fatalf("MID %d: %d %#v", mid, got.HTTPStatus, got.Body)
+		}
+	}
+	if stub.teamed != 2 || stub.created != 0 || stub.joined != 9 || stub.invited != 100002 || stub.kicked != 100003 || !stub.started {
+		t.Fatalf("stub %+v", stub)
+	}
+}
+
+func TestOccultRoomRefusalsAreBareErrorCodes(t *testing.T) {
+	now := time.Unix(100, 0).UTC()
+	for _, refusal := range []error{sharedroom.ErrFull, sharedroom.ErrKicked, sharedroom.ErrNotOwner, sharedroom.ErrExpired, sr.ErrNotFound, economy.ErrInsufficientBalance} {
+		dispatcher := OccultDispatcher{Authority: httpAuthority{actor: actorForHTTP(t)}, Service: &occultStub{err: refusal}}
+		got := dispatcher.Dispatch(context.Background(), illusionRequest(2367, map[string]any{"room_id": int64(7)}, now))
+		if got.HTTPStatus != 200 || got.Body["error_code"] != int64(1) {
+			t.Fatalf("%v: %d %#v", refusal, got.HTTPStatus, got.Body)
+		}
 	}
 }
 
