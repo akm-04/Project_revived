@@ -14,6 +14,8 @@ TEXT_KEYS = (
     'BOSS_RANK_TITLE_4', 'BOSS_RANK_TITLE_5',
 )
 MAIL_KEYS = ('DUNGEON_MAIL_SENDER', 'DUNGEON_KILL_TITLE', 'DUNGEON_KILL_TEXT')
+BUY_COST_HEAD = [50, 100, 200, 300, 400, 500, 1000, 1000, 1000, 1000, 1000, 1000, 1000]
+VIP_LEVELS = 16
 
 
 def _translations(data, keys):
@@ -79,6 +81,14 @@ def build_world_boss(blobs, parse):
     if misc['dungeon_challenge_limit'] != '5' or misc['dungeon_boss_start'] != '0' or misc['dungeon_boss_stop'] != '79080' or misc['element_entrance_display_lv'] != '48':
         raise ValueError('world boss misc profile drift')
 
+    buy_costs = [int(row['buy_boss_cost']) for row in sorted(table('refresh_cost'), key=lambda row: int(row['id'])) if row.get('buy_boss_cost')]
+    if buy_costs[:len(BUY_COST_HEAD)] != BUY_COST_HEAD:
+        raise ValueError('world boss buy cost drift')
+    vip = sorted(table('vip'), key=lambda row: int(row['id']))
+    buy_caps = [int(row['num_boss']) for row in vip]
+    if len(buy_caps) != VIP_LEVELS or buy_caps[0] != 1 or buy_caps != sorted(buy_caps) or len(buy_costs) < buy_caps[-1]:
+        raise ValueError('world boss vip buy cap drift')
+
     texts = _translations(blobs['data/tables/translation.lua'].data, TEXT_KEYS)
     mail = _translations(blobs['data/tables/translation.lua'].data, MAIL_KEYS)
     rank_titles = [texts.pop('BOSS_RANK_TITLE_' + str(index)) for index in range(1, 6)]
@@ -97,6 +107,8 @@ def build_world_boss(blobs, parse):
         window_stop_seconds=int(misc['dungeon_boss_stop']),
         bosses=bosses,
         rank_rewards=rewards,
+        buy_costs=buy_costs,
+        buy_caps=buy_caps,
         mail=dict(sender=mail['DUNGEON_MAIL_SENDER'], title=mail['DUNGEON_KILL_TITLE'], text=mail['DUNGEON_KILL_TEXT']),
         texts=dict(
             title=texts['WORLD_BOSS_TITLE'],

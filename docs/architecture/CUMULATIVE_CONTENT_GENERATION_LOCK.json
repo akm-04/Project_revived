@@ -472,7 +472,7 @@
       "stage": "I9-8A World Boss",
       "compiler_version": "i9-8a-world-boss",
       "parser_version": "lua-generated-v18-guild-invite",
-      "revision_id": "a1a88b08a9b82a106a652b9347b31642b2e200bb9c88f37a03a8a88dccf638e1",
+      "revision_id": "cc7a6537a0991fe1b937246bdc450a4b4104cedc3511aaca992e81d98d50c87e",
       "scope": "Dungeon campaign, rank reward, misc and translation source facts; D364 policy is separate. Unsealed working implementation."
     }
   ],
@@ -481,7 +481,7 @@
     "stage": "I9-8A World Boss",
     "compiler_version": "i9-8a-world-boss",
     "parser_version": "lua-generated-v18-guild-invite",
-    "revision_id": "a1a88b08a9b82a106a652b9347b31642b2e200bb9c88f37a03a8a88dccf638e1",
+    "revision_id": "cc7a6537a0991fe1b937246bdc450a4b4104cedc3511aaca992e81d98d50c87e",
     "scope": "Dungeon campaign, rank reward, misc and translation source facts; D364 policy is separate. Unsealed working implementation."
   }
 }

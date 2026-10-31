@@ -90,6 +90,8 @@ type Catalog struct {
 	WindowStop    int64        `json:"window_stop_seconds"`
 	Bosses        []Boss       `json:"bosses"`
 	RankRewards   []RankReward `json:"rank_rewards"`
+	BuyCosts      []int64      `json:"buy_costs"`
+	BuyCaps       []int64      `json:"buy_caps"`
 	Mail          Mail         `json:"mail"`
 	Texts         Texts        `json:"texts"`
 }
@@ -103,6 +105,14 @@ func (c Catalog) Validate() error {
 	}
 	if len(c.Bosses) != 5 || len(c.RankRewards) != 25 || len(c.Texts.RankTitles) != 5 || c.Mail.Sender == "" || c.Mail.Title == "" || c.Mail.Text == "" {
 		return ErrUnavailable
+	}
+	if len(c.BuyCaps) != 16 || len(c.BuyCosts) < int(c.BuyCaps[len(c.BuyCaps)-1]) {
+		return ErrUnavailable
+	}
+	for level, cap := range c.BuyCaps {
+		if cap < 1 || level > 0 && cap < c.BuyCaps[level-1] {
+			return ErrUnavailable
+		}
 	}
 	for index, boss := range c.Bosses {
 		expected := int64(FirstBossID + index)
@@ -151,6 +161,24 @@ func (c Catalog) Reward(rank int64) RankReward {
 		}
 	}
 	return RankReward{}
+}
+
+// BuyCost is the 1-based refresh_cost.buy_boss_cost entry; zero means the
+// ladder refuses that purchase.
+func (c Catalog) BuyCost(n int64) (int64, bool) {
+	if n < 1 || n > int64(len(c.BuyCosts)) {
+		return 0, false
+	}
+	cost := c.BuyCosts[n-1]
+	return cost, cost > 0
+}
+
+// BuyCap is vip.num_boss for a level, the day's purchase cap.
+func (c Catalog) BuyCap(vip int64) int64 {
+	if vip < 0 || vip >= int64(len(c.BuyCaps)) {
+		return 0
+	}
+	return c.BuyCaps[vip]
 }
 
 // ClampDamage bounds one reported attempt to the damage cap and to the courage

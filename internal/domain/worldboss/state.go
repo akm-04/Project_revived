@@ -1,6 +1,10 @@
 package worldboss
 
-import "time"
+import (
+	"time"
+
+	"gxb.local/backend/v2/internal/domain/modes"
+)
 
 type Occurrence struct {
 	LogicalServerID int64 `json:"logical_server_id"`
@@ -26,6 +30,26 @@ func (o *Occurrence) Accept(c Catalog, reported int64) (int64, error) {
 	accepted := ClampDamage(o.Courage, boss.NeedBrave, reported)
 	o.Courage += accepted
 	return accepted, nil
+}
+
+// Defeat advances every crossed boss threshold and reports the defeated ids in
+// order. The terminal boss starts a new occurrence at the cycle head.
+func (o *Occurrence) Defeat(c Catalog) ([]int64, bool) {
+	defeated := []int64{}
+	for {
+		boss, ok := c.Boss(o.CurrentBoss)
+		if !ok || o.Courage < boss.NeedBrave {
+			return defeated, false
+		}
+		defeated = append(defeated, boss.ID)
+		if boss.NextID == 0 {
+			o.Generation++
+			o.CurrentBoss = FirstBossID
+			o.Courage = 0
+			return defeated, true
+		}
+		o.CurrentBoss = boss.NextID
+	}
 }
 
 // Settle advances every crossed boss threshold. The terminal boss starts a new
@@ -134,6 +158,17 @@ func (a Attempt) Validate() error {
 // Matches keeps a late result bound to the occurrence it was frozen against.
 func (a Attempt) Matches(o Occurrence) bool {
 	return a.LogicalServerID == o.LogicalServerID && a.Generation == o.Generation && a.CampaignID == o.CurrentBoss && !a.Resolved
+}
+
+// CourageDayFor is the most recent 22:00 GMT+8 update in modes.Day terms; a
+// fresh occurrence starts caught up instead of receiving an owed older update.
+func CourageDayFor(at time.Time) int64 {
+	day := modes.Day(at)
+	second := SecondOfDay(at)
+	if second >= 18000 && second < CourageUpdateSecond {
+		return day - 1
+	}
+	return day
 }
 
 // SecondOfDay is the GMT+8 seconds-since-midnight used by the source window.

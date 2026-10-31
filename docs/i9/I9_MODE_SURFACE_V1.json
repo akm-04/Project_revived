@@ -2647,8 +2647,9 @@
    "family": "WORLD_BOSS",
    "disposition": "ACTIVE",
    "target": "I9-8",
-   "v2": "unimplemented",
-   "v1": "STATE_BACKED"
+   "v2": "implemented",
+   "v1": "STATE_BACKED",
+   "implementation": "I9-8A working implementation; unqualified"
   },
   {
    "mid": 625,
@@ -2656,8 +2657,9 @@
    "family": "WORLD_BOSS",
    "disposition": "ACTIVE",
    "target": "I9-8",
-   "v2": "unimplemented",
-   "v1": "LITERAL_STUB"
+   "v2": "implemented",
+   "v1": "LITERAL_STUB",
+   "implementation": "I9-8A working implementation; unqualified"
   },
   {
    "mid": 626,
@@ -2665,8 +2667,9 @@
    "family": "WORLD_BOSS",
    "disposition": "ACTIVE",
    "target": "I9-8",
-   "v2": "unimplemented",
-   "v1": "LITERAL_STUB"
+   "v2": "implemented",
+   "v1": "LITERAL_STUB",
+   "implementation": "I9-8A working implementation; unqualified"
   },
   {
    "mid": 627,
@@ -2674,8 +2677,9 @@
    "family": "WORLD_BOSS",
    "disposition": "ACTIVE",
    "target": "I9-8",
-   "v2": "unimplemented",
-   "v1": "LITERAL_STUB"
+   "v2": "implemented",
+   "v1": "LITERAL_STUB",
+   "implementation": "I9-8A working implementation; unqualified"
   },
   {
    "mid": 628,
@@ -2683,8 +2687,9 @@
    "family": "WORLD_BOSS",
    "disposition": "ACTIVE",
    "target": "I9-8",
-   "v2": "unimplemented",
-   "v1": "LITERAL_STUB"
+   "v2": "implemented",
+   "v1": "LITERAL_STUB",
+   "implementation": "I9-8A working implementation; unqualified"
   },
   {
    "mid": 629,

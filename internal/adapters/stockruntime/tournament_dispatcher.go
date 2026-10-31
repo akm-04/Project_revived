@@ -33,9 +33,15 @@ type TournamentPort interface {
 	AcknowledgeTournament(context.Context, identity.ActorContext, ids.UUID, int64, operation.Context) error
 }
 
+// WorldBossRankPort adds the shared 276 boss_rank aggregate.
+type WorldBossRankPort interface {
+	BossRank(context.Context, identity.ActorContext, operation.Context) ([]map[string]any, error)
+}
+
 type TournamentDispatcher struct {
 	Authority rt.GameplayAuthorityPort
 	Service   TournamentPort
+	WorldBoss WorldBossRankPort
 }
 
 func (dispatcher TournamentDispatcher) Dispatch(requestContext context.Context, request httpedge.DispatchRequest) httpedge.Response {
@@ -253,7 +259,15 @@ func (dispatcher TournamentDispatcher) Dispatch(requestContext context.Context, 
 			return failArena(err)
 		}
 		if request.Envelope.MID == 276 {
-			return okI5(map[string]any{"leisure_arena_rank": projection.CasualRanks(view)})
+			body := map[string]any{"leisure_arena_rank": projection.CasualRanks(view)}
+			if dispatcher.WorldBoss != nil {
+				boards, err := dispatcher.WorldBoss.BossRank(requestContext, actor, operationContext)
+				if err != nil {
+					return failArena(err)
+				}
+				body["boss_rank"] = boards
+			}
+			return okI5(body)
 		}
 		if request.Envelope.MID == 1873 {
 			return okI5(map[string]any{"records": projection.TournamentRecords(view.Rooms, actor.PlayerID, 0)})

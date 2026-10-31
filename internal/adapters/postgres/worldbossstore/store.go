@@ -21,7 +21,7 @@ func (Store) ReadOccurrenceTx(ctx context.Context, q tx.Queryer, serverID int64)
 }
 
 func (Store) LockOccurrenceTx(ctx context.Context, t tx.Tx, serverID int64, at time.Time) (d.Occurrence, error) {
-	if _, err := t.Exec(ctx, `INSERT INTO worldboss_occurrences(logical_server_id,generation,current_boss,courage,courage_day,updated_at)VALUES($1,1,$2,0,0,$3) ON CONFLICT(logical_server_id)DO NOTHING`, serverID, d.FirstBossID, at); err != nil {
+	if _, err := t.Exec(ctx, `INSERT INTO worldboss_occurrences(logical_server_id,generation,current_boss,courage,courage_day,updated_at)VALUES($1,1,$2,0,$3,$4) ON CONFLICT(logical_server_id)DO NOTHING`, serverID, d.FirstBossID, d.CourageDayFor(at), at); err != nil {
 		return d.Occurrence{}, err
 	}
 	occurrence, _, err := readOccurrence(t.QueryRow(ctx, `SELECT logical_server_id,generation,current_boss,courage,courage_day FROM worldboss_occurrences WHERE logical_server_id=$1 FOR UPDATE`, serverID))
@@ -37,6 +37,32 @@ func (Store) SaveOccurrenceTx(ctx context.Context, t tx.Tx, occurrence d.Occurre
 		return d.ErrUnavailable
 	}
 	return err
+}
+
+func (Store) ListOccurrencesTx(ctx context.Context, q tx.Queryer, limit int64) ([]d.Occurrence, error) {
+	if limit < 1 || limit > 1000 {
+		return nil, d.ErrInvalid
+	}
+	var raw string
+	err := q.QueryRow(ctx, `SELECT COALESCE(jsonb_agg(jsonb_build_object('logical_server_id',logical_server_id,'generation',generation,'current_boss',current_boss,'courage',courage,'courage_day',courage_day) ORDER BY logical_server_id),'[]'::jsonb)::text FROM (SELECT logical_server_id,generation,current_boss,courage,courage_day FROM worldboss_occurrences ORDER BY logical_server_id LIMIT $1) listed`, limit).Scan(&raw)
+	if err != nil {
+		return nil, err
+	}
+	var rows []struct {
+		ServerID    int64 `json:"logical_server_id"`
+		Generation  int64 `json:"generation"`
+		CurrentBoss int64 `json:"current_boss"`
+		Courage     int64 `json:"courage"`
+		CourageDay  int64 `json:"courage_day"`
+	}
+	if err = json.Unmarshal([]byte(raw), &rows); err != nil {
+		return nil, err
+	}
+	out := make([]d.Occurrence, 0, len(rows))
+	for _, row := range rows {
+		out = append(out, d.Occurrence{LogicalServerID: row.ServerID, Generation: row.Generation, CurrentBoss: row.CurrentBoss, Courage: row.Courage, CourageDay: row.CourageDay})
+	}
+	return out, nil
 }
 
 func (Store) ReadPlayerTx(ctx context.Context, q tx.Queryer, playerID identity.PlayerID) (d.Player, bool, error) {
@@ -62,6 +88,15 @@ func (Store) SavePlayerTx(ctx context.Context, t tx.Tx, player d.Player, at time
 	return err
 }
 
+func (Store) ReadTotalTx(ctx context.Context, q tx.Queryer, serverID, generation int64, playerID identity.PlayerID) (d.Total, bool, error) {
+	var total d.Total
+	err := q.QueryRow(ctx, `SELECT logical_server_id,generation,player_id,hurt,first_hurt_at FROM worldboss_player_totals WHERE logical_server_id=$1 AND generation=$2 AND player_id=$3`, serverID, generation, int64(playerID)).Scan(&total.LogicalServerID, &total.Generation, &total.PlayerID, &total.Hurt, &total.FirstHurtAt)
+	if errors.Is(err, kernelstore.ErrNoRows) {
+		return d.Total{}, false, nil
+	}
+	return total, err == nil, err
+}
+
 func (Store) LockTotalTx(ctx context.Context, t tx.Tx, serverID, generation int64, playerID identity.PlayerID, at time.Time) (d.Total, error) {
 	if _, err := t.Exec(ctx, `INSERT INTO worldboss_player_totals(logical_server_id,generation,player_id,hurt,first_hurt_at,updated_at)VALUES($1,$2,$3,0,0,$4) ON CONFLICT(logical_server_id,generation,player_id)DO NOTHING`, serverID, generation, int64(playerID), at); err != nil {
 		return d.Total{}, err
@@ -78,7 +113,7 @@ func (Store) SaveTotalTx(ctx context.Context, t tx.Tx, total d.Total, at time.Ti
 }
 
 func (Store) ReadRankTx(ctx context.Context, q tx.Queryer, serverID, generation int64, limit int64) ([]d.RankEntry, error) {
-	if limit < 1 || limit > 1000 {
+	if limit < 1 || limit > 100000 {
 		return nil, d.ErrInvalid
 	}
 	var raw string
@@ -107,6 +142,21 @@ func (Store) InsertAttemptTx(ctx context.Context, t tx.Tx, attempt d.Attempt) er
 	}
 	_, err := t.Exec(ctx, `INSERT INTO worldboss_attempts(attempt_id,player_id,logical_server_id,generation,campaign_id,formation,frozen_at,resolved)VALUES($1,$2,$3,$4,$5,$6,$7,$8)`, attempt.ID, attempt.PlayerID, attempt.LogicalServerID, attempt.Generation, attempt.CampaignID, attempt.Formation, attempt.FrozenAt, attempt.Resolved)
 	return err
+}
+
+func (Store) FindAttemptTx(ctx context.Context, q tx.Queryer, playerID identity.PlayerID, serverID, campaignID int64) (d.Attempt, bool, error) {
+	var attempt d.Attempt
+	err := q.QueryRow(ctx, `SELECT attempt_id,player_id,logical_server_id,generation,campaign_id,formation,frozen_at,resolved FROM worldboss_attempts WHERE player_id=$1 AND logical_server_id=$2 AND campaign_id=$3 ORDER BY frozen_at DESC,attempt_id DESC LIMIT 1`, int64(playerID), serverID, campaignID).Scan(&attempt.ID, &attempt.PlayerID, &attempt.LogicalServerID, &attempt.Generation, &attempt.CampaignID, &attempt.Formation, &attempt.FrozenAt, &attempt.Resolved)
+	if errors.Is(err, kernelstore.ErrNoRows) {
+		return d.Attempt{}, false, nil
+	}
+	return attempt, err == nil, err
+}
+
+func (Store) CountChallengersTx(ctx context.Context, q tx.Queryer, day int64) (int64, error) {
+	var count int64
+	err := q.QueryRow(ctx, `SELECT count(*) FROM worldboss_players WHERE day=$1 AND attempts<$2`, day, d.AttemptsPerDay).Scan(&count)
+	return count, err
 }
 
 func (Store) LockAttemptTx(ctx context.Context, t tx.Tx, attemptID string) (d.Attempt, bool, error) {

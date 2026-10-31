@@ -757,6 +757,11 @@ func (s Mode) settle(c context.Context, sc gen.TimedScope, a identity.ActorConte
 		if err = s.Facts.RecordTx(c, sc.Tx, current, objective.Fact{PlayerID: a.PlayerID, SourceDomain: "campaign", SourceBusinessKey: attested.Attempt.ID.String(), Kind: kind, Delta: 1}); err != nil {
 			return Settled{}, false, err
 		}
+		if group, trial := v.catalog.Group(node.Type); trial && group.NextID != 0 {
+			if err = s.Facts.RecordTx(c, sc.Tx, current, objective.Fact{PlayerID: a.PlayerID, SourceDomain: "campaign", SourceBusinessKey: attested.Attempt.ID.String(), Kind: "INFINITY_BOSS_DEFEATED", Delta: 1}); err != nil {
+				return Settled{}, false, err
+			}
+		}
 	}
 
 	for key, value := range changes.RecordedMissions(c) {
