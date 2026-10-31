@@ -393,6 +393,29 @@ func TestAdmissionRefusesClosedExpiredAndMissingRooms(t *testing.T) {
 	}
 }
 
+func TestUpdateAppliesPayloadAfterRootsAndBeforeTheRoomLock(t *testing.T) {
+	store := newFakeStore()
+	service, _, _ := testService(store)
+	openRoom(t, service)
+	before, applied := false, false
+	_, err := service.Update(context.Background(), actor(10), UpdateRequest{Family: illusionFamily(),
+		Before: func(_ context.Context, _ tx.Tx, room d.Room, _ time.Time) error {
+			before = room.ID == 1
+			return nil
+		},
+		Apply: func(_ context.Context, _ gen.TimedScope, room *d.Room) error {
+			applied = true
+			return room.SetPayload(json.RawMessage(`{"stage":1}`), testAt)
+		},
+	}, testOperation(t))
+	if err != nil || !before || !applied {
+		t.Fatalf("update err=%v before=%v applied=%v", err, before, applied)
+	}
+	if string(store.rooms[1].Payload) != `{"stage":1}` || len(store.wakes) != 2 {
+		t.Fatalf("payload=%s wakes=%+v", store.rooms[1].Payload, store.wakes)
+	}
+}
+
 func TestFamilyValidationAndUnavailableService(t *testing.T) {
 	service, _, _ := testService(newFakeStore())
 	for name, family := range map[string]Family{

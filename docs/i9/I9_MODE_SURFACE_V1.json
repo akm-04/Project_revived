@@ -2010,8 +2010,9 @@
    "family": "ILLUSION_FANTASY",
    "disposition": "ACTIVE",
    "target": "I9-8",
-   "v2": "unimplemented",
-   "v1": null
+   "v2": "implemented",
+   "v1": null,
+   "implementation": "I9-8B working implementation; unqualified"
   },
   {
    "mid": 528,
@@ -4441,8 +4442,9 @@
    "family": "ILLUSION_FANTASY",
    "disposition": "ACTIVE",
    "target": "I9-8",
-   "v2": "unimplemented",
-   "v1": null
+   "v2": "implemented",
+   "v1": null,
+   "implementation": "I9-8B working implementation; unqualified"
   },
   {
    "mid": 1350,
@@ -4450,8 +4452,9 @@
    "family": "ILLUSION_FANTASY",
    "disposition": "ACTIVE",
    "target": "I9-8",
-   "v2": "unimplemented",
-   "v1": null
+   "v2": "implemented",
+   "v1": null,
+   "implementation": "I9-8B working implementation; unqualified"
   },
   {
    "mid": 1351,
@@ -4459,8 +4462,9 @@
    "family": "ILLUSION_FANTASY",
    "disposition": "ACTIVE",
    "target": "I9-8",
-   "v2": "unimplemented",
-   "v1": null
+   "v2": "implemented",
+   "v1": null,
+   "implementation": "I9-8B working implementation; unqualified"
   },
   {
    "mid": 1352,
@@ -4468,8 +4472,9 @@
    "family": "ILLUSION_FANTASY",
    "disposition": "ACTIVE",
    "target": "I9-8",
-   "v2": "unimplemented",
-   "v1": null
+   "v2": "implemented",
+   "v1": null,
+   "implementation": "I9-8B working implementation; unqualified"
   },
   {
    "mid": 1353,
@@ -4477,8 +4482,9 @@
    "family": "ILLUSION_FANTASY",
    "disposition": "ACTIVE",
    "target": "I9-8",
-   "v2": "unimplemented",
-   "v1": null
+   "v2": "implemented",
+   "v1": null,
+   "implementation": "I9-8B working implementation; unqualified"
   },
   {
    "mid": 1354,
@@ -4486,8 +4492,9 @@
    "family": "ILLUSION_FANTASY",
    "disposition": "ACTIVE",
    "target": "I9-8",
-   "v2": "unimplemented",
-   "v1": null
+   "v2": "implemented",
+   "v1": null,
+   "implementation": "I9-8B working implementation; unqualified"
   },
   {
    "mid": 1355,
@@ -4504,8 +4511,9 @@
    "family": "ILLUSION_FANTASY",
    "disposition": "ACTIVE",
    "target": "I9-8",
-   "v2": "unimplemented",
-   "v1": null
+   "v2": "implemented",
+   "v1": null,
+   "implementation": "I9-8B working implementation; unqualified"
   },
   {
    "mid": 1357,
@@ -4513,8 +4521,9 @@
    "family": "ILLUSION_FANTASY",
    "disposition": "ACTIVE",
    "target": "I9-8",
-   "v2": "unimplemented",
-   "v1": null
+   "v2": "implemented",
+   "v1": null,
+   "implementation": "I9-8B working implementation; unqualified"
   },
   {
    "mid": 1358,
@@ -4522,8 +4531,9 @@
    "family": "ILLUSION_FANTASY",
    "disposition": "ACTIVE",
    "target": "I9-8",
-   "v2": "unimplemented",
-   "v1": null
+   "v2": "implemented",
+   "v1": null,
+   "implementation": "I9-8B working implementation; unqualified"
   },
   {
    "mid": 1359,
@@ -4540,8 +4550,9 @@
    "family": "ILLUSION_FANTASY",
    "disposition": "ACTIVE",
    "target": "I9-8",
-   "v2": "unimplemented",
-   "v1": null
+   "v2": "implemented",
+   "v1": null,
+   "implementation": "I9-8B working implementation; unqualified"
   },
   {
    "mid": 1361,
@@ -4558,8 +4569,9 @@
    "family": "ILLUSION_FANTASY",
    "disposition": "ACTIVE",
    "target": "I9-8",
-   "v2": "unimplemented",
-   "v1": null
+   "v2": "implemented",
+   "v1": null,
+   "implementation": "I9-8B working implementation; unqualified"
   },
   {
    "mid": 1363,
@@ -4567,8 +4579,9 @@
    "family": "ILLUSION_FANTASY",
    "disposition": "ACTIVE",
    "target": "I9-8",
-   "v2": "unimplemented",
-   "v1": null
+   "v2": "implemented",
+   "v1": null,
+   "implementation": "I9-8B working implementation; unqualified"
   },
   {
    "mid": 1364,

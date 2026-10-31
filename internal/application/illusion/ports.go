@@ -10,10 +10,14 @@ import (
 	"gxb.local/backend/v2/internal/application/i5"
 	"gxb.local/backend/v2/internal/application/playerdirectory"
 	"gxb.local/backend/v2/internal/application/playerroot"
+	"gxb.local/backend/v2/internal/application/publicstats"
+	"gxb.local/backend/v2/internal/application/sharedroom"
+	"gxb.local/backend/v2/internal/domain/character"
 	"gxb.local/backend/v2/internal/domain/identity"
 	d "gxb.local/backend/v2/internal/domain/illusion"
 	"gxb.local/backend/v2/internal/domain/objective"
 	"gxb.local/backend/v2/internal/domain/player"
+	"gxb.local/backend/v2/internal/foundation/ids"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/receipt"
 	"gxb.local/backend/v2/internal/foundation/tx"
@@ -34,6 +38,8 @@ type Store interface {
 	InsertAttemptTx(context.Context, tx.Tx, d.Attempt) error
 	FindLatestAttemptTx(context.Context, tx.Queryer, identity.PlayerID) (d.Attempt, bool, error)
 	SaveAttemptTx(context.Context, tx.Tx, d.Attempt) error
+	InsertReportTx(context.Context, tx.Tx, string, int64, int64, int64, string, time.Time) error
+	ReadReportTx(context.Context, tx.Queryer, string, time.Time) (string, bool, error)
 }
 
 type Content interface {
@@ -67,6 +73,16 @@ type Heroes interface {
 type Combat interface {
 	StartTx(context.Context, tx.Tx, ca.CoherentReadScope, cb.StartRequest) (cb.Started, error)
 	AttestSummaryTx(context.Context, tx.Tx, cb.SummaryRequest) (cb.SummaryAttested, error)
+	Resolve(context.Context, operation.Context, ids.UUID) (cb.Resolved, error)
+	TerminalTx(context.Context, tx.Tx, cb.TerminalRequest) (cb.Settled, error)
+	SettleMemberTx(context.Context, tx.Tx, cb.MemberSettleRequest) (cb.MemberSettled, error)
+	MonsterWaves(int64) ([][]cb.Participant, error)
+}
+
+// Stats exposes the qualified public force the team window displays and the
+// per-hero power floor uses.
+type Stats interface {
+	HeroTx(context.Context, ca.CoherentReadScope, character.HeroRef, publicstats.View) (publicstats.Result, error)
 }
 
 type Costs interface {
@@ -104,6 +120,10 @@ type Mode struct {
 	Functions   Functions
 	Directory   Directory
 	Heroes      Heroes
+	Pets        Heroes
+	Stats       Stats
+	Rooms       sharedroom.Service
+	RoomStore   sharedroom.Store
 	Combat      Combat
 	Privileges  i5.PrivilegeSnapshotProvider
 	Costs       Costs

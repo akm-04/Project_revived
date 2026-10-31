@@ -29,8 +29,10 @@ const (
 )
 
 const (
-	MIDChatFromPlayer  uint16 = 514
-	MIDChatFromFriend  uint16 = 516
+	MIDChatFromPlayer uint16 = 514
+	MIDChatFromFriend uint16 = 516
+	// MIDIllusionNotice is the stock 518 team-room push.
+	MIDIllusionNotice  uint16 = 518
 	MIDSendChatMessage uint16 = 32782
 	MIDChatMessage     uint16 = 32783
 	MIDWorldNotice     uint16 = 32784
@@ -106,7 +108,7 @@ func Lookup(mid uint16) (Descriptor, bool) {
 	case MIDChatRoomEntered:
 		d.Direction = S2C
 		d.Status = ProtocolImplemented
-	case MIDChatFromPlayer, MIDChatFromFriend:
+	case MIDChatFromPlayer, MIDChatFromFriend, MIDIllusionNotice:
 		// These low-number events are explicit source-proven realtime pushes and
 		// therefore override the generic numeric-plane heuristic.
 		d.Transport = TCP

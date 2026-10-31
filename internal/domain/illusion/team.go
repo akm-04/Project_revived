@@ -3,8 +3,9 @@ package illusion
 import "fmt"
 
 type Hero struct {
-	TableID int64 `json:"table_id"`
-	Power   int64 `json:"power"`
+	TableID   int64 `json:"table_id"`
+	PartnerID int64 `json:"partner_id"`
+	Power     int64 `json:"power"`
 }
 
 // TeamMember is one frozen seat; Members[0] is the master.

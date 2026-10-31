@@ -117,6 +117,58 @@ func (s Service) Join(c context.Context, actor identity.ActorContext, family Fam
 	return room, err
 }
 
+// Update applies a family payload change to the actor's active room under the
+// same fence, root and room locks as the membership commands. Before runs after
+// the roots and before the room lock, so a family can lock its own 605/606 rows
+// in clause C2 order.
+type UpdateRequest struct {
+	Family Family
+	Before func(context.Context, tx.Tx, d.Room, time.Time) error
+	Apply  func(context.Context, gen.TimedScope, *d.Room) error
+}
+
+func (s Service) Update(c context.Context, actor identity.ActorContext, request UpdateRequest, op operation.Context) (d.Room, error) {
+	if err := request.Family.validate(); err != nil {
+		return d.Room{}, err
+	}
+	if request.Apply == nil {
+		return d.Room{}, d.ErrInvalid
+	}
+	var room d.Room
+	err := s.run(c, op, func(c context.Context, sc gen.TimedScope) error {
+		at := sc.Operation.DecisionAt()
+		if err := s.Fence.FenceActorTx(c, sc.Tx, actor, at); err != nil {
+			return err
+		}
+		observed, err := s.activeRoom(c, sc.Tx, actor, request.Family)
+		if err != nil {
+			return err
+		}
+		if err := s.lockRoots(c, sc.Tx, observed.LogicalServerID, append(observed.Members(), actor.PlayerID)); err != nil {
+			return err
+		}
+		if request.Before != nil {
+			if err := request.Before(c, sc.Tx, observed, at); err != nil {
+				return err
+			}
+		}
+		locked, err := s.lockObserved(c, sc.Tx, observed)
+		if err != nil {
+			return err
+		}
+		before := locked.StateVersion
+		if err := request.Apply(c, sc, &locked); err != nil {
+			return err
+		}
+		if err := s.saveAndWake(c, sc.Tx, locked, before, request.Family.Route); err != nil {
+			return err
+		}
+		room = locked
+		return nil
+	})
+	return room, err
+}
+
 // Leave removes the actor from their active room; owner or last leave closes it.
 func (s Service) Leave(c context.Context, actor identity.ActorContext, family Family, op operation.Context) (LeaveResult, error) {
 	if err := family.validate(); err != nil {

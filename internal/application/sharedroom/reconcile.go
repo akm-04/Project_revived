@@ -26,7 +26,7 @@ func (r Reconciler) Name() string { return "shared-room" }
 func (r Reconciler) Reconcile(c context.Context, timed gen.TimedOperation, limit int) (gen.ReconcileResult, error) {
 	out := gen.ReconcileResult{Provider: r.Name()}
 	s := r.Service
-	if !s.ready() || !r.Server.Valid() || limit < 1 || limit > gen.MaxReconcileBatch {
+	if !s.ready() || limit < 1 || limit > gen.MaxReconcileBatch {
 		return out, ErrUnavailable
 	}
 	roomIDs, err := s.Store.ExpiredRoomIDsTx(c, s.Fresh, r.Server, timed.DecisionAt(), limit)

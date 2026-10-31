@@ -28,6 +28,12 @@ func MonsterWaves(rules Rules, fightID int64) ([][]Participant, error) {
 	return out, nil
 }
 
+// MonsterWaves exposes the shared PvE lineup to a mode composing a full
+// server-report battle, so the roster and enemy read stay in Combat.
+func (s Service) MonsterWaves(fightID int64) ([][]Participant, error) {
+	return MonsterWaves(s.Rules, fightID)
+}
+
 // AssistTrial is the fight's assist partner in the 1-based slot of
 // assist_partner as a TRIAL Hero for side A: the player fights with it and
 // never owns it (SelectTeamWindow.checkIsAssistBattle).

@@ -55,6 +55,7 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres/petcampaignstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/presencestore"
 	"gxb.local/backend/v2/internal/adapters/postgres/publicationstore"
+	"gxb.local/backend/v2/internal/adapters/postgres/sharedroomstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/socialgiftstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/socialinboxstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/socialrelationstore"
@@ -87,6 +88,7 @@ import (
 	appevolution "gxb.local/backend/v2/internal/application/heroevolution"
 	appi5 "gxb.local/backend/v2/internal/application/i5"
 	appidentity "gxb.local/backend/v2/internal/application/identitylifecycle"
+	appillusion "gxb.local/backend/v2/internal/application/illusion"
 	appinscription "gxb.local/backend/v2/internal/application/inscription"
 	applibrary "gxb.local/backend/v2/internal/application/librarylocal"
 	appmarch "gxb.local/backend/v2/internal/application/march"
@@ -95,6 +97,7 @@ import (
 	apppublication "gxb.local/backend/v2/internal/application/publication"
 	apppublicprofile "gxb.local/backend/v2/internal/application/publicprofile"
 	apprealtime "gxb.local/backend/v2/internal/application/realtimeauth"
+	appsharedroom "gxb.local/backend/v2/internal/application/sharedroom"
 	"gxb.local/backend/v2/internal/application/socialdismiss"
 	"gxb.local/backend/v2/internal/application/socialfriendbase"
 	"gxb.local/backend/v2/internal/application/socialgift"
@@ -354,8 +357,11 @@ func main() {
 	}
 	ranking := stockruntime.RankingDispatcher{Authority: authority, Service: boardRanking, Trophy: achievements}
 	if fightReady {
+		sharedRooms := appsharedroom.Service{Timed: appgeneration.TimedRunner{Binder: appgeneration.Binder{Time: postgres.AuthoritativeTime{Queryer: pool}}, Runner: runner},
+			Fresh: pool, Store: sharedroomstore.Store{}, Fence: i5db, Players: i4store.PlayerRootLocker{}}
+		fight.Inputs.Rooms = appsharedroom.AdmissionBinding{Store: sharedroomstore.Store{}, Family: appillusion.RoomFamily, Slot: appillusion.RoomSlot}
 		worldBoss := canonicalWorldBoss(pool, runner, contentDB, i5db, i5svc, privileges, fight)
-		illusion := canonicalIllusion(pool, runner, contentDB, i5db, i5svc, privileges, fight, guildDB)
+		illusion := canonicalIllusion(pool, runner, contentDB, i5db, i5svc, privileges, fight, guildDB, sharedRooms)
 		ranking.Illusion = illusion
 		topFloor := canonicalTopFloor(pool, runner, contentDB, i5db, i5svc, privileges, fight, owners)
 		memoir := canonicalMemoir(pool, runner, contentDB, i5db, i5svc, heroSvc, fight, topFloor)
@@ -440,6 +446,10 @@ func main() {
 		for _, mid := range stockruntime.IllusionMIDs {
 			mustRegister(mid, stockruntime.IllusionDispatcher{Authority: authority, Service: illusion})
 		}
+		for _, mid := range stockruntime.IllusionRoomMIDs {
+			mustRegister(mid, stockruntime.IllusionRoomDispatcher{Authority: authority, Service: illusion})
+		}
+		go runReconcile(ctx, pool, appsharedroom.Reconciler{Service: sharedRooms, Routes: map[string]string{appillusion.RoomFamily: appillusion.RoomNoticeRoute}})
 		go runReconcile(ctx, pool, appworldboss.Reconciler{Service: worldBoss})
 	} else {
 		log.Print("I7C-5B/5C/5D/5E/5F Top Floor, 1 on 1, Arena, Conquer School and Champions League routes not registered: GXB_COMBAT_ENTROPY_KEYS is unset")

@@ -255,6 +255,20 @@ func (r *Room) Kick(actor, target identity.PlayerID, at time.Time) error {
 	return nil
 }
 
+// SetPayload replaces the family's opaque room state and stamps a new
+// state/notice version so the wakeup carries the change.
+func (r *Room) SetPayload(payload json.RawMessage, at time.Time) error {
+	if r.Status == StatusClosed {
+		return ErrClosed
+	}
+	if !validPayload(payload) {
+		return ErrInvalid
+	}
+	r.Payload = append(json.RawMessage(nil), payload...)
+	r.touch(at)
+	return nil
+}
+
 func (r *Room) SetReady(player identity.PlayerID, ready bool, at time.Time) error {
 	if err := r.enter(at); err != nil {
 		return err
