@@ -4,6 +4,7 @@ import (
 	"crypto/sha256"
 	"encoding/json"
 	"reflect"
+	"strconv"
 	"testing"
 
 	"gxb.local/backend/v2/internal/content/builtin"
@@ -26,16 +27,57 @@ func sourceCatalog(t *testing.T) Catalog {
 	}
 	return catalog
 }
+func summonTypedFighters(t *testing.T, corpus *combatcorpus.Corpus) map[int64]bool {
+	t.Helper()
+	monsters, err := corpus.Table("monster")
+	if err != nil {
+		t.Fatal(err)
+	}
+	identifierColumn, summonColumn := monsters.Keys["id"]-1, monsters.Keys["summon_type"]-1
+	summons := map[int64]bool{}
+	for _, raw := range monsters.Rows {
+		var row []string
+		if err = json.Unmarshal(raw, &row); err != nil {
+			t.Fatal(err)
+		}
+		if row[summonColumn] == "" || row[summonColumn] == "0" {
+			continue
+		}
+		identifier, err := strconv.ParseInt(row[identifierColumn], 10, 64)
+		if err != nil {
+			t.Fatal(err)
+		}
+		summons[identifier] = true
+	}
+	return summons
+}
 func TestMemoirSourceJoinsUseCanonicalI8Lineups(t *testing.T) {
 	catalog := sourceCatalog(t)
 	corpus, err := combatcorpus.Load()
 	if err != nil {
 		t.Fatal(err)
 	}
+	summons := summonTypedFighters(t, corpus)
+	if !summons[98220004] {
+		t.Fatal("enemy pet Ross is not summon-typed in the corpus")
+	}
 	for identifier, expected := range catalog.Fights {
-		actual, _, err := corpus.BattleLineup(identifier)
-		if err != nil || !reflect.DeepEqual(actual, expected) {
-			t.Fatalf("fight %d: source/corpus divergence %v", identifier, err)
+		lineup, _, err := corpus.BattleLineup(identifier)
+		if err != nil {
+			t.Fatalf("fight %d: %v", identifier, err)
+		}
+		actual := make([][]int64, 0, len(lineup))
+		for _, wave := range lineup {
+			reported := []int64{}
+			for _, fighter := range wave {
+				if !summons[fighter] {
+					reported = append(reported, fighter)
+				}
+			}
+			actual = append(actual, reported)
+		}
+		if !reflect.DeepEqual(actual, expected) {
+			t.Fatalf("fight %d: stock report wave divergence %v != %v", identifier, expected, actual)
 		}
 	}
 	if catalog.Girls[0].Scroll != 40001104 || catalog.ReviveCosts[0] != 100 || catalog.ReviveCosts[329] != 1000 {

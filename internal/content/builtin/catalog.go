@@ -1034,7 +1034,7 @@ func validateManifest(raw []byte, manifest *Manifest) error {
 	if manifest.CompilerVersion == "i9-7a-top-floor-task" {
 		expectedSources, expectedArtifacts = 380, 50
 	}
-	if manifest.CompilerVersion == "i9-6c-memoir" {
+	if manifest.CompilerVersion == "i9-6-memoir-report-wave" {
 		expectedSources, expectedArtifacts = 377, 50
 	}
 	if manifest.CompilerVersion == "i9-6b-dodgeball" {
@@ -1052,7 +1052,7 @@ func validateManifest(raw []byte, manifest *Manifest) error {
 	if manifest.CompilerVersion == "i9-5a-march" {
 		expectedSources, expectedArtifacts = 335, 45
 	}
-	if manifest.CompilerVersion == "i9-7b-tournament-casual" || manifest.CompilerVersion == "i9-7c-friend-fight" || manifest.CompilerVersion == "i9-7d-pvp-residuals" {
+	if manifest.CompilerVersion == "i9-7-stage-merge" || manifest.CompilerVersion == "i9-7b-tournament-casual" || manifest.CompilerVersion == "i9-7c-friend-fight" || manifest.CompilerVersion == "i9-7d-pvp-residuals" {
 		expectedSources, expectedArtifacts = 384, 50
 	}
 	if len(manifest.Sources) != expectedSources {

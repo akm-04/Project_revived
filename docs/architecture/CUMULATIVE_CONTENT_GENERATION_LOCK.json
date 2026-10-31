@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "status": "CUMULATIVE_CONTENT_GENERATION_LOCK_I9_7A_WORKING",
+  "status": "CUMULATIVE_CONTENT_GENERATION_LOCK_I9_7",
   "rule": "Historical validators keep their phase-specific semantic invariants. In cumulative/current mode they may accept only an explicitly registered successor compiler generation at or after their baseline. New generations are append-only review events; registering a generation does not waive capability/count/source/migration/ownership assertions.",
   "generations": [
     {
@@ -421,6 +421,14 @@
     },
     {
       "ordinal": 58,
+      "stage": "I9-6 stage close",
+      "compiler_version": "i9-6-memoir-report-wave",
+      "parser_version": "lua-generated-v18-guild-invite",
+      "revision_id": "11271745755bc053887e1d7b1628116904a1c962d05f2178eff5d1e9e685e126",
+      "scope": "Memoir fight waves exclude summon-typed fighters, matching the stock result report; found by the stage-close stock client map walk."
+    },
+    {
+      "ordinal": 59,
       "stage": "I9-7A Top Floor task modes",
       "compiler_version": "i9-7a-top-floor-task",
       "parser_version": "lua-generated-v18-guild-invite",
@@ -428,7 +436,7 @@
       "scope": "Source six modes,91 dated weeks,17 rewards; D351-D353 private policies. Working implementation, not stage acceptance."
     },
     {
-      "ordinal": 59,
+      "ordinal": 60,
       "stage": "I9-7B Playoffs and Casual Arena",
       "compiler_version": "i9-7b-tournament-casual",
       "parser_version": "lua-generated-v18-guild-invite",
@@ -436,7 +444,7 @@
       "scope": "Source calendar, stage and reward tables. D357 private reconstruction policy; unsealed working implementation."
     },
     {
-      "ordinal": 60,
+      "ordinal": 61,
       "stage": "I9-7C Friend Fight",
       "compiler_version": "i9-7c-friend-fight",
       "parser_version": "lua-generated-v18-guild-invite",
@@ -444,20 +452,28 @@
       "scope": "Source55 gate; D358 private policy; unsealed working implementation."
     },
     {
-      "ordinal": 61,
+      "ordinal": 62,
       "stage": "I9-7D PvP residuals",
       "compiler_version": "i9-7d-pvp-residuals",
       "parser_version": "lua-generated-v18-guild-invite",
       "revision_id": "73390dd0824af3f28a294850aaedc933aa5691c038bc9c40cf736c13ab7b36af",
       "scope": "Separate legacy League titles; existing ten-title progression retained. D359 approved, D360 private policy, unsealed working implementation."
+    },
+    {
+      "ordinal": 63,
+      "stage": "I9-7 stage merge",
+      "compiler_version": "i9-7-stage-merge",
+      "parser_version": "lua-generated-v18-guild-invite",
+      "revision_id": "88e049813b349d539df386453c6db34f6859985e36b5ceae9b27a9ec14f3c960",
+      "scope": "I9-7A-D content joined with the I9-6 close Memoir wave fix. No new source rows."
     }
   ],
   "current": {
-    "ordinal": 61,
-    "stage": "I9-7D PvP residuals",
-    "compiler_version": "i9-7d-pvp-residuals",
+    "ordinal": 63,
+    "stage": "I9-7 stage merge",
+    "compiler_version": "i9-7-stage-merge",
     "parser_version": "lua-generated-v18-guild-invite",
-    "revision_id": "73390dd0824af3f28a294850aaedc933aa5691c038bc9c40cf736c13ab7b36af",
-    "scope": "Separate legacy League titles; existing ten-title progression retained. D359 approved, D360 private policy, unsealed working implementation."
+    "revision_id": "88e049813b349d539df386453c6db34f6859985e36b5ceae9b27a9ec14f3c960",
+    "scope": "I9-7A-D content joined with the I9-6 close Memoir wave fix. No new source rows."
   }
 }

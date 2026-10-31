@@ -295,7 +295,7 @@
   "commit": "ed63e7dcdd0e04f9153f1b1f54fe96ae85ceab51",
   "commit_role": "PARENT_ACCEPTED_PASS643_COMMIT; exact final I7A6A product HEAD/tree/archive are bound externally in PassMap and gate evidence to avoid self-reference",
   "content_generation": 59,
-  "content_revision": "73390dd0824af3f28a294850aaedc933aa5691c038bc9c40cf736c13ab7b36af",
+  "content_revision": "88e049813b349d539df386453c6db34f6859985e36b5ceae9b27a9ec14f3c960",
   "current_migration_high_water": "00097_i9_7b_tournament_casual.sql",
   "current_stage": "I9_7B_IMPLEMENTATION_FOCUSED_GATES",
   "evidence": "Pass587 Gate-1 runtime evidence b59277c4d59a1c2622809a62f46605442232d77a380e97af7eeba2a3a75fe73e + Pass588 normal-chat I0-I6/source-oracle/release-reconciliation checks; exact Pass588 retest still required.",
@@ -1059,7 +1059,7 @@
   "stage": "I9-7D",
   "status": "WORKING_IMPLEMENTATION_NOT_STAGE_ACCEPTED",
   "toolbox_archive_sha256": "e4e194c9627929299577364b953b2468d6118fac4283fd8030f10b5a27456c2b",
-  "version": "v0.160.0",
+  "version": "v0.160.1",
   "version_role": "I9-7D working implementation; Claude owns stage qualification and acceptance.",
   "w2_claimed": false,
   "i9_7b": {

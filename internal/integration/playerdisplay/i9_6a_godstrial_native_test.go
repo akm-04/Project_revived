@@ -158,8 +158,9 @@ func TestI9_6AGodsTrialNative(t *testing.T) {
 	if _, e = s.BeginAuto(ctx, a, cid, 1, op()); e != nil || balance() != charged {
 		t.Fatal("auto retry", e)
 	}
-	if _, e = s.CollectAuto(ctx, a, op()); !errors.Is(e, d.ErrRefused) {
-		t.Fatal("early collect", e)
+	early, e := s.CollectAuto(ctx, a, op())
+	if e != nil || early["error_code"] != int64(1) || early["base_info"] == nil || balance() != charged {
+		t.Fatal("early collect keeps the projection the stock callback reads", early, e)
 	}
 	// A new service and next weekday must still collect the prepaid frozen job.
 	clock.at = clock.at.Add(24 * time.Hour)

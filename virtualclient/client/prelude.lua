@@ -881,6 +881,11 @@ widgetMethods.setEnabled = function(widget, enabled) stateOf(widget).enabled = e
 widgetMethods.isEnabled = function(widget) return stateOf(widget).enabled ~= false end
 widgetMethods.addTouchEventListener = function(widget, callback) stateOf(widget).touchCallback = callback end
 widgetMethods.addClickEventListener = function(widget, callback) stateOf(widget).clickCallback = callback end
+-- fireWidget drives one widget's own touch callback, for a widget an overlapping cell covers only because the VC has no real layout.
+function __vc.fireWidget(widget)
+	widgetEvent(widget, "began")
+	widgetEvent(widget, "ended")
+end
 -- tap is a harness input: one touch began and ended at (x, y) in design coordinates.
 function __vc.tap(x, y)
 	local touch = touchAt(x, y)
@@ -905,7 +910,12 @@ function __vc.tap(x, y)
 		end
 	end
 	report.taps = (report.taps or 0) + 1
-	print("vc tap", x, y, "listeners", #listeners, "touch", #touchOrder(), "claimed", #claimed)
+	local claimedNames = {}
+	for _, listener in ipairs(claimed) do
+		local node = stateOf(listener).node
+		table.insert(claimedNames, node and tostring(stateOf(node).name) or "scene")
+	end
+	print("vc tap", x, y, "listeners", #listeners, "touch", #touchOrder(), "claimed", table.concat(claimedNames, ","))
 	return #claimed
 end
 

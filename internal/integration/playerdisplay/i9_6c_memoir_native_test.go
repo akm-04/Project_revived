@@ -421,6 +421,9 @@ func TestI9_6CMemoirNativePlayerServerResolution(t *testing.T) {
 	if !present || battle["battle_report"] == "" {
 		t.Fatal(response)
 	}
+	if _, formations := battle["library_mission_formations"].(map[string]any); !formations {
+		t.Fatal("stock SelectTeamNewWindow indexes battle_info.library_mission_formations", response)
+	}
 	after := memoirRecord(t, pool, actor)
 	copied, err := combat.CanonicalJSON(after.Opponents)
 	if err != nil || string(before) != string(copied) {

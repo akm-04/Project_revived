@@ -49,6 +49,11 @@ func (s Mode) BeginAuto(c context.Context, a identity.ActorContext, campaign, ti
 		return r.Base(), nil
 	})
 }
+
+// collectRefusal keeps base_info: the stock auto-collect callback overwrites baseInfo from any 200 reply, error code or not.
+func collectRefusal(state d.State) map[string]any {
+	return map[string]any{"error_code": int64(1), "awards": []any{}, "spirit_awards": []any{}, "base_info": state.Base()}
+}
 func (s Mode) CollectAuto(c context.Context, a identity.ActorContext, op operation.Context) (map[string]any, error) {
 	return s.run(c, a, "auto-collect", struct{}{}, nil, 0, op, func(c context.Context, sc gen.TimedScope, v view, r *d.State) (map[string]any, error) {
 		p := r.Auto
@@ -56,10 +61,10 @@ func (s Mode) CollectAuto(c context.Context, a identity.ActorContext, op operati
 			if r.LastAuto != nil {
 				return r.LastAuto, nil
 			}
-			return nil, d.ErrRefused
+			return collectRefusal(*r), nil
 		}
 		if sc.Operation.DecisionAt().Unix() < p.Due {
-			return nil, d.ErrRefused
+			return collectRefusal(*r), nil
 		}
 		if e := s.Mail.LockMailNamespaceCounterTx(c, sc.Tx, a.PlayerID, mail.Normal); e != nil {
 			return nil, e
