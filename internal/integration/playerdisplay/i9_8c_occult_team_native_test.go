@@ -258,6 +258,20 @@ func TestI9_8COccultTeamFightNative(t *testing.T) {
 			t.Fatal("select", err)
 		}
 	}
+	selected, err := s.Info(ctx, a, op())
+	if err != nil {
+		t.Fatal(err)
+	}
+	formations := selected["sub_campaign_info"].(map[string]any)["team_fight_infos"].(map[string]any)
+	for member, raw := range formations {
+		entry := raw.(map[string]any)
+		if _, hasPet := entry["pet"]; hasPet {
+			t.Fatalf("member %s without a pet carries a pet row %#v", member, entry)
+		}
+		if entry["is_prepare"] != int64(0) || len(entry["formation"].([]any)) != 2 {
+			t.Fatalf("member %s team_fight_info %#v", member, entry)
+		}
+	}
 	for _, member := range []identity.ActorContext{a, b, c} {
 		if _, err = s.TeamPrepare(ctx, member, 20002, 1, op()); err != nil {
 			t.Fatal("prepare", err)
@@ -356,7 +370,10 @@ func TestI9_8COccultTeamRoomExpiryNative(t *testing.T) {
 	}
 	roomID := occultRoomID(t, created)
 	exec(t, p, `UPDATE shared_rooms SET created_at=$2::timestamptz-interval '2 seconds',expires_at=$2::timestamptz-interval '1 second' WHERE room_id=$1`, roomID, clock.at)
-	reconciler := appsharedroom.Reconciler{Service: s.Rooms, Server: server, Routes: map[string]string{oc.RoomFamily: oc.RoomNoticeRoute}}
+	if _, err = (appsharedroom.Reconciler{Service: s.Rooms, Routes: map[string]string{oc.RoomFamily: oc.RoomNoticeRoute}}).Reconcile(ctx, mustTimed(t, op(), clock.at), 100); !errors.Is(err, appsharedroom.ErrUnavailable) {
+		t.Fatalf("an unscoped reconciler was allowed: %v", err)
+	}
+	reconciler := appsharedroom.Reconciler{Service: s.Rooms, AllServers: true, Routes: map[string]string{oc.RoomFamily: oc.RoomNoticeRoute}}
 	if _, err = reconciler.Reconcile(ctx, mustTimed(t, op(), clock.at), 100); err != nil {
 		t.Fatal(err)
 	}
@@ -381,6 +398,7 @@ func TestI9_8COccultTeamReportRetentionNative(t *testing.T) {
 		t.Fatal(found, err)
 	}
 	key := "occult-native-retention"
+	exec(t, p, `DELETE FROM occult_reports WHERE report_id=$1`, key)
 	if err = (occultstoreForTest{}).insertReport(ctx, p, key, int64(server), room.ID, int64(owner.PlayerID), clock.at); err != nil {
 		t.Fatal(err)
 	}

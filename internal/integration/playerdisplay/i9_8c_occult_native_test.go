@@ -17,6 +17,7 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres/i5store"
 	"gxb.local/backend/v2/internal/adapters/postgres/kernelstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/occultstore"
+	"gxb.local/backend/v2/internal/adapters/postgres/presencestore"
 	"gxb.local/backend/v2/internal/adapters/postgres/sharedroomstore"
 	"gxb.local/backend/v2/internal/application/characterhero"
 	"gxb.local/backend/v2/internal/application/characterpet"
@@ -57,7 +58,7 @@ func occultMode(t *testing.T, p *pg.Pool, clock gen.TimeAuthority) oc.Mode {
 	fight.Inputs.Rooms = appsharedroom.AdmissionBinding{Store: sharedroomstore.Store{}, Family: oc.RoomFamily, Slot: oc.RoomSlot}
 	owner := occultI5(p)
 	return oc.Mode{Timed: timed, Fresh: p, Store: occultstore.Store{}, Content: content, Fence: values, Players: i4store.PlayerRootLocker{},
-		Functions: values, Directory: i4store.PlayerDirectoryReader{}, Heroes: fight.Inputs.Heroes, Pets: fight.Inputs.Pets,
+		Functions: values, Directory: i4store.PlayerDirectoryReader{}, Presence: presencestore.Store{Queryer: p}, Heroes: fight.Inputs.Heroes, Pets: fight.Inputs.Pets,
 		Rooms: rooms, RoomStore: sharedroomstore.Store{}, Combat: fight, Tickets: owner, Values: owner, Awakening: owner,
 		Facts: i5.ObjectiveFacts{Owner: owner, Open: values}, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}}
 }
@@ -147,18 +148,22 @@ type occultStagePlan struct {
 
 var occultChapterTwoSolo = []occultStagePlan{{20011, 1}, {20012, 2}, {20013, 3}, {20014, 1}, {20015, 1}, {20016, 1}, {20017, 1}, {20018, 1}}
 
-func occultClearChapterTwoSolo(t *testing.T, p *pg.Pool, s oc.Mode, a identity.ActorContext, formation []int64) {
+func occultClearChapterTwoSolo(t *testing.T, p *pg.Pool, s oc.Mode, a identity.ActorContext, formation []int64) oc.SettleResponse {
 	t.Helper()
+	var last oc.SettleResponse
 	for _, plan := range occultChapterTwoSolo {
 		for sub := int64(1); sub <= plan.stages; sub++ {
 			if _, err := s.StartFight(ctx, a, plan.campaign, sub, op()); err != nil {
 				t.Fatalf("chapter 2 fight %d/%d: %v", plan.campaign, sub, err)
 			}
-			if _, err := s.Settle(ctx, a, oc.SettleRequest{CampaignID: plan.campaign, SubID: sub, Star: 3, Formation: formation}, op()); err != nil {
+			var err error
+			last, err = s.Settle(ctx, a, oc.SettleRequest{CampaignID: plan.campaign, SubID: sub, Star: 3, Formation: formation}, op())
+			if err != nil {
 				t.Fatalf("chapter 2 settle %d/%d: %v", plan.campaign, sub, err)
 			}
 		}
 	}
+	return last
 }
 
 func TestI9_8COccultTicketAccrualNative(t *testing.T) {
@@ -268,6 +273,26 @@ func TestI9_8COccultSoloLifecycleNative(t *testing.T) {
 	if _, err = s.ChangePosition(ctx, a, 10015, op()); !errors.Is(err, d.ErrRefused) {
 		t.Fatal("non-start position accepted", err)
 	}
+	state := occultRoomState(t, p, roomID)
+	status := state.HeroStatus[keyOf(int64(a.PlayerID))][keyOf(partner)]
+	if status.HP != 90 || status.MP != 80 || status.LimitHP <= 100 {
+		t.Fatalf("hero_status is not absolute client units: %+v", status)
+	}
+	afterSettle, err := s.Info(ctx, a, op())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if afterSettle["progress"] != int64(0) || afterSettle["room_info"].(map[string]any)["is_close"] != int64(0) {
+		t.Fatalf("an uncleared chapter reported completion %#v", afterSettle)
+	}
+	self := afterSettle["self_dispatch"].(map[string]any)[keyOf(partner)].(map[string]any)
+	if self["hp"] != int64(90) || self["mp"] != int64(80) {
+		t.Fatalf("self_dispatch units %#v", self)
+	}
+	infos := afterSettle["room_info"].(map[string]any)["member_infos"].([]map[string]any)
+	if len(infos) != 1 || infos[0]["is_online"] != int64(0) {
+		t.Fatalf("member_info is_online %#v", infos)
+	}
 	member, err := s.MemberStat(ctx, a, a.PlayerID, op())
 	if err != nil {
 		t.Fatal(err)
@@ -275,12 +300,21 @@ func TestI9_8COccultSoloLifecycleNative(t *testing.T) {
 	if heroes, ok := member["dispatch_heroes"].([]any); !ok || len(heroes) != 1 {
 		t.Fatalf("member stat %#v", member)
 	}
+	dispatchStatus := member["dispatch_status"].(map[string]any)[keyOf(partner)].(map[string]any)
+	if dispatchStatus["hp"] != int64(90) || dispatchStatus["mp"] != int64(80) || dispatchStatus["total_hp"] != status.LimitHP {
+		t.Fatalf("dispatch_status units %#v (limit %d)", dispatchStatus, status.LimitHP)
+	}
 	logs, err := s.Logs(ctx, a, op())
 	if err != nil {
 		t.Fatal(err)
 	}
-	if rows, ok := logs["log_list"].([]json.RawMessage); !ok || len(rows) != 1 {
+	rows, ok := logs["log_list"].([]json.RawMessage)
+	if !ok || len(rows) != 1 {
 		t.Fatalf("logs %#v", logs)
+	}
+	var entry map[string]any
+	if err = json.Unmarshal(rows[0], &entry); err != nil || entry["log_id"] != float64(1) || entry["campaign_id"] != float64(10015) || len(entry["player_ids"].([]any)) != 1 {
+		t.Fatalf("log entry %s %v", rows[0], err)
 	}
 	if _, err = s.Sweep(ctx, a, 1, op()); !errors.Is(err, d.ErrRefused) {
 		t.Fatal("sweep without a best score", err)
@@ -362,7 +396,7 @@ func TestI9_8COccultClearAndSweepNative(t *testing.T) {
 		t.Fatal(err)
 	}
 	roomID := occultRoomID(t, created)
-	occultClearChapterTwoSolo(t, p, s, a, []int64{partner})
+	clearedReply := occultClearChapterTwoSolo(t, p, s, a, []int64{partner})
 	for _, item := range []int64{50010002, 240001002, 40001132, 230001002} {
 		if got := occultItemQuantity(t, p, a.PlayerID, item); got != 1 {
 			t.Fatalf("clear reward %d quantity %d", item, got)
@@ -397,6 +431,23 @@ func TestI9_8COccultClearAndSweepNative(t *testing.T) {
 	}
 	if got := occultTickets(t, p, a.PlayerID); got != 1 {
 		t.Fatalf("sweep ticket %d", got)
+	}
+	if swept["progress"] != int64(1) || swept["occult_ticket"] != int64(1) {
+		t.Fatalf("sweep progress is the chapter fraction, not energy: %#v", swept)
+	}
+	detail := clearedReply.Body["award_info"].(map[string]any)["award_detail"].(map[string]any)
+	if detail["progress"] != int64(1) || detail["is_close"] != int64(1) || clearedReply.Body["progress"] != int64(1) {
+		t.Fatalf("award_detail completion %#v", clearedReply.Body)
+	}
+	cleared, err := s.Info(ctx, a, op())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if cleared["base_info"].(map[string]any)["room_id"] != int64(0) || cleared["progress"] != int64(0) {
+		t.Fatalf("a cleared chapter left a held room %#v", cleared)
+	}
+	if _, held := cleared["room_info"]; held {
+		t.Fatalf("a cleared chapter still reports room_info %#v", cleared)
 	}
 	replay, err := s.Sweep(ctx, a, 2, sweepOperation)
 	if err != nil || len(replay["awards"].([]any)) != 3 {
@@ -567,6 +618,102 @@ func TestI9_8COccultLogicalServersIsolatedNative(t *testing.T) {
 	}
 	if n := scalar(t, p, `SELECT count(*) FROM occult_logs WHERE logical_server_id=$1`, int64(second)); n != 0 {
 		t.Fatal("logs leaked across servers", n)
+	}
+}
+
+func TestI9_8COccultMonsterHPUnitsNative(t *testing.T) {
+	p := pool(t)
+	server := rankingServer(t, p)
+	a, partner := occultOwner(t, p, server, 2)
+	s, _ := occultTestMode(t, p)
+	created, err := s.CreateSolo(ctx, a, 1, op())
+	if err != nil {
+		t.Fatal(err)
+	}
+	roomID := occultRoomID(t, created)
+	waves, err := s.Combat.MonsterWaves(9901201)
+	if err != nil {
+		t.Fatal(err)
+	}
+	posted := map[int64]int64{}
+	monsters := 0
+	for _, wave := range waves {
+		for _, monster := range wave {
+			posted[monster.Identity] = 1
+			monsters++
+		}
+	}
+	if monsters == 0 {
+		t.Fatal("the stage has no monsters")
+	}
+	if _, err = s.StartFight(ctx, a, 10015, 1, op()); err != nil {
+		t.Fatal(err)
+	}
+	settled, err := s.Settle(ctx, a, oc.SettleRequest{CampaignID: 10015, SubID: 1, Star: 0, Formation: []int64{partner}, Monsters: posted}, op())
+	if err != nil || settled.Duplicate {
+		t.Fatalf("loss settle %+v %v", settled, err)
+	}
+	stage := occultRoomState(t, p, roomID).StagesOf(10015)[0]
+	if stage.TotalHP <= 1000 || stage.HP != int64(monsters) || stage.HP > stage.TotalHP {
+		t.Fatalf("stage HP is not absolute: %+v (posted %d)", stage, monsters)
+	}
+	if occultRoomState(t, p, roomID).Cleared(10015) {
+		t.Fatal("a loss cleared the stage")
+	}
+	info, err := s.CampaignInfo(ctx, a, 10015, op())
+	if err != nil {
+		t.Fatal(err)
+	}
+	rows := info["monster_infos"].([][]map[string]any)[0]
+	if len(rows) != monsters {
+		t.Fatalf("monster rows %#v", rows)
+	}
+	for _, row := range rows {
+		if row["hp"] != int64(monsters) || row["total_hp"] != stage.TotalHP || row["monster_id"] == nil || row["partner_id"] == nil {
+			t.Fatalf("campaign monster units %#v", row)
+		}
+	}
+}
+
+func TestI9_8COccultReportPurgeNative(t *testing.T) {
+	p := pool(t)
+	server := rankingServer(t, p)
+	owner, _ := occultOwner(t, p, server, 1)
+	s, clock := occultTestMode(t, p)
+	if _, err := s.CreateTeam(ctx, owner, 2, op()); err != nil {
+		t.Fatal(err)
+	}
+	store := occultstoreForTest{}
+	exec(t, p, `DELETE FROM occult_reports WHERE report_id IN ('occult-purge-a','occult-purge-b','occult-purge-live')`)
+	at := clock.at.Add(-8 * 24 * time.Hour)
+	if err := store.insertReport(ctx, p, "occult-purge-a", int64(server), 900001, int64(owner.PlayerID), at); err != nil {
+		t.Fatal(err)
+	}
+	if err := store.insertReport(ctx, p, "occult-purge-b", int64(server), 900002, int64(owner.PlayerID), at); err != nil {
+		t.Fatal(err)
+	}
+	if err := store.insertReport(ctx, p, "occult-purge-live", int64(server), 900003, int64(owner.PlayerID), clock.at); err != nil {
+		t.Fatal(err)
+	}
+	reconciler := oc.Reconciler{Service: s}
+	result, err := reconciler.Reconcile(ctx, mustTimed(t, op(), clock.at), 1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if result.Scanned != 1 || result.Settled != 1 {
+		t.Fatalf("bounded purge %+v", result)
+	}
+	if got := scalar(t, p, `SELECT count(*) FROM occult_reports WHERE report_id IN ('occult-purge-a','occult-purge-b')`); got != 1 {
+		t.Fatalf("batch limit removed %d expired rows", 2-got)
+	}
+	if _, err = reconciler.Reconcile(ctx, mustTimed(t, op(), clock.at), 100); err != nil {
+		t.Fatal(err)
+	}
+	if got := scalar(t, p, `SELECT count(*) FROM occult_reports WHERE report_id IN ('occult-purge-a','occult-purge-b')`); got != 0 {
+		t.Fatalf("expired reports retained %d", got)
+	}
+	if got := scalar(t, p, `SELECT count(*) FROM occult_reports WHERE report_id='occult-purge-live'`); got != 1 {
+		t.Fatal("a live report was purged")
 	}
 }
 
