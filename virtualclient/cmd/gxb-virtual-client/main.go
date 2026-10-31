@@ -79,6 +79,7 @@ type scenario struct {
 	// Steps: "tap:<node path or XxY>", "window:<stock window>[ <json params>]", "lua:<chunk>", "wait:<seconds>", "relogin" (same account/device, fresh Lua VM),
 	// "relogin-after:<file>" (a relogin that first waits in wall time until <file> exists, so an operator can move the host clock).
 	// "fixture:top_floor_task_rank" (moves the player to rank 150 of the normal ladder, which must already exist).
+	// "fixture:one_on_one_cooling" (starts the cooldown of a player that already loaded 1on1).
 	Steps []string `json:"steps"`
 	// Settle is virtual seconds run after the last step (stock ErrorLogPoster uploads every 30 s).
 	Settle float64 `json:"settle_seconds"`
@@ -337,10 +338,13 @@ func (run run) step(virtual *client.Client, step string) error {
 		}
 		return virtual.Call(fmt.Sprintf("xyd.WindowManager.get():openWindow(%q, json.decode(%q))", name, parameters))
 	case "fixture":
-		if argument != "top_floor_task_rank" {
-			return fmt.Errorf("unknown fixture %q", argument)
+		switch argument {
+		case "top_floor_task_rank":
+			return provision.TopFloorTaskRankFixture(context.Background(), run.databaseURL, run.account)
+		case "one_on_one_cooling":
+			return provision.OneOnOneCoolingFixture(context.Background(), run.databaseURL, run.account)
 		}
-		return provision.TopFloorTaskRankFixture(context.Background(), run.databaseURL, run.account)
+		return fmt.Errorf("unknown fixture %q", argument)
 	case "wait":
 		seconds, err := strconv.ParseFloat(argument, 64)
 		if err != nil {

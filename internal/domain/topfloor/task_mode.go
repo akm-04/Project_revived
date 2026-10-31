@@ -243,6 +243,15 @@ func (rule TaskModeRule) Buffs(camp int64) ([]int64, error) {
 	return slices.Clone(rule.BuffGroups[camp-1]), nil
 }
 
+// TaskEnemyTable reduces the enemy id of stock MID 286: ArenaWindow adds region*stride to the table id for a
+// challenge, while an avenge from ArenaRecordPlayerInfoWindow sends the plain table id.
+func TaskEnemyTable(server, enemy int64) int64 {
+	if enemy/RegionStride == server {
+		return enemy % RegionStride
+	}
+	return enemy
+}
+
 func (catalog TaskModeCatalog) Admit(rank, weeklyChallenges, serverLevel int64) error {
 	if rank < 1 || weeklyChallenges < 0 || serverLevel < 1 {
 		return ErrInvalid

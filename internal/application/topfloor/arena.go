@@ -352,6 +352,10 @@ func (s Service) purchase(c context.Context, a identity.ActorContext, op operati
 	if err != nil {
 		return out, err
 	}
+	op, err = s.pin(c, op)
+	if err != nil {
+		return out, err
+	}
 	_, res, err := s.Timed.Run(c, op, Profile(), tx.Options{Isolation: tx.RepeatableRead}, retry(), timedReceipt{receipt.Resolver{Reader: s.ReceiptRead, Identity: id, Fingerprint: fp}}, func(c context.Context, sc gen.TimedScope) error {
 		at := sc.Operation.DecisionAt()
 		if err := s.Fence.FenceActorTx(c, sc.Tx, a, at); err != nil {

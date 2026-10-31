@@ -197,3 +197,11 @@ func TestTaskModeRobotFormationUsesEligibleSourceTemplates(t *testing.T) {
 		t.Fatal("unknown source camp accepted")
 	}
 }
+
+func TestTaskEnemyTableReducesOnlyTheOwnRegion(t *testing.T) {
+	for _, row := range []struct{ server, enemy, want int64 }{{1, 100032, 32}, {1, 125001, 25001}, {1, 32, 32}, {2, 100032, 100032}, {2, 225001, 25001}} {
+		if got := TaskEnemyTable(row.server, row.enemy); got != row.want {
+			t.Fatalf("TaskEnemyTable(%d, %d) = %d, want %d", row.server, row.enemy, got, row.want)
+		}
+	}
+}

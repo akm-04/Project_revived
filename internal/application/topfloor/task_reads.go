@@ -28,6 +28,10 @@ func (service Service) PurchaseTask(requestContext context.Context, actor identi
 	if err != nil {
 		return domain.Player{}, err
 	}
+	op, err = service.pin(requestContext, op)
+	if err != nil {
+		return domain.Player{}, err
+	}
 	var result domain.Player
 	for settlementRetry := 0; settlementRetry < 2; settlementRetry++ {
 		// A receipt is read under the actor fence before current-period admission.

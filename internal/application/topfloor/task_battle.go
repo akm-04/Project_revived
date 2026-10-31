@@ -49,6 +49,7 @@ func (service Service) StartTask(requestContext context.Context, actor identity.
 	}); err != nil {
 		return FightView{}, err
 	}
+	command.Enemy = domain.TaskEnemyTable(int64(actor.LogicalServerID), command.Enemy)
 	fingerprint := taskFingerprint(actor.PlayerID, command)
 	latest, found, err := service.Store.LatestTaskFightTx(requestContext, service.Fresh, actor.PlayerID)
 	if err != nil {

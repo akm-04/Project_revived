@@ -39,3 +39,17 @@ func TopFloorTaskRankFixture(requestContext context.Context, databaseURL, accoun
 	}
 	return transaction.Commit(requestContext)
 }
+
+// OneOnOneCoolingFixture declares a just-fought 1on1 player; a lone test account has no opponent to fight for real.
+func OneOnOneCoolingFixture(requestContext context.Context, databaseURL, accountID string) error {
+	pool, err := postgres.Open(requestContext, databaseURL, postgres.PoolSettings{MaxConns: 2, MaxConnLifetime: time.Minute, MaxConnIdleTime: time.Minute, HealthCheckPeriod: time.Minute, ApplicationName: "vc-top-floor-fixture"})
+	if err != nil {
+		return err
+	}
+	defer pool.Close()
+	var player int64
+	if err := pool.QueryRow(requestContext, `UPDATE one_on_one_players o SET last_fight_at=now(), state_version=o.state_version+1 FROM players p WHERE o.player_id=p.player_id AND p.account_id=$1 RETURNING o.player_id`, accountID).Scan(&player); err != nil {
+		return fmt.Errorf("one on one fixture needs a loaded player: %w", err)
+	}
+	return nil
+}
