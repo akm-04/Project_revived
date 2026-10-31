@@ -430,3 +430,22 @@ func TestI9_8BIllusionSettlementSurvivesDowntimeNative(t *testing.T) {
 		t.Fatalf("occurrence did not advance campaign=%d day=%d", campaign, next)
 	}
 }
+
+// The stock main scene sends 1344 at every lobby load and indexes paradise_info
+// on any 200, so a player below the unlock must still get the full body.
+func TestI9_8BIllusionInfoAnswersBelowUnlockNative(t *testing.T) {
+	p := pool(t)
+	server := rankingServer(t, p)
+	a, _, _ := combatOwner(t, p, server)
+	s := illusionService(t, p, illusionTime(t), illusionPrivileges{level: 3}, illusionGuildSource{})
+	info, err := s.Info(ctx, a, op())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if info["paradise_info"].(map[string]any)["paradise_id"] != int64(d.FirstCampaignID) {
+		t.Fatalf("info below unlock %#v", info)
+	}
+	if _, err = s.Buy(ctx, a, op()); err == nil {
+		t.Fatal("buy below unlock succeeded")
+	}
+}

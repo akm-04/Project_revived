@@ -22,6 +22,8 @@ var summaryPolicy = cd.SummaryPolicy{ID: "I9_ILLUSION_SUMMARY_V1", Version: 1, M
 
 // Info answers 1344 from canonical state; paradise_id is a real campaign row and
 // count is zero only while the window is open.
+// It answers below the unlock because the stock main scene sends it at every
+// lobby load and indexes paradise_info on any 200.
 func (s Mode) Info(c context.Context, a identity.ActorContext, op operation.Context) (map[string]any, error) {
 	op, err := s.pin(c, op)
 	if err != nil {
@@ -29,9 +31,6 @@ func (s Mode) Info(c context.Context, a identity.ActorContext, op operation.Cont
 	}
 	at, err := s.Timed.Binder.Time.Now(c)
 	if err != nil {
-		return nil, err
-	}
-	if err = s.eligible(c, s.Fresh, a, at); err != nil {
 		return nil, err
 	}
 	occurrence, found, err := s.Store.ReadOccurrenceTx(c, s.Fresh, int64(a.LogicalServerID))
