@@ -60,10 +60,10 @@ func award(f d.Floor, first, vip bool) ([]grant.Line, []map[string]any) {
 	return lines, rows
 }
 func (s Mode) freezeMaterial(c context.Context, sc gen.TimedScope, a identity.ActorContext, floors []d.Floor) (json.RawMessage, error) {
-	routes := []i5.PetMaterialRoute{}
+	routes := []i5.MaterialRoute{}
 	for _, f := range floors {
 		for _, m := range f.Materials {
-			routes = append(routes, i5.PetMaterialRoute{Mission: m.Mission, Item: m.Item, Count: m.Count})
+			routes = append(routes, i5.MaterialRoute{Mission: m.Mission, Item: m.Item, Count: m.Count})
 		}
 	}
 	drop, e := s.Awakening.FreezeAwakeningPetMaterialTx(c, sc.Tx, a.PlayerID, routes)

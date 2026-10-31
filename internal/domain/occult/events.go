@@ -73,3 +73,13 @@ func (s *RunState) eachHero(change func(*HeroStatus)) {
 		}
 	}
 }
+
+// TriggerEvent fires a campaign's event the first time the campaign is
+// prepared; a repeated prepare of the same campaign changes nothing.
+func (s *RunState) TriggerEvent(catalog Catalog, campaign Campaign) []EventOutcome {
+	if campaign.EventID == 0 || slices.Contains(s.EventsDone, campaign.ID) {
+		return nil
+	}
+	s.EventsDone = append(s.EventsDone, campaign.ID)
+	return s.ApplyEvents(catalog, campaign.ID, []int64{campaign.EventID})
+}

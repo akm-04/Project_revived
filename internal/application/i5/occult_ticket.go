@@ -72,3 +72,44 @@ func (s Service) writeOccultScalarTx(ctx context.Context, t tx.Tx, pid identity.
 	}
 	return s.Store.SaveScalarTx(ctx, t, next, current.exists)
 }
+
+// OccultTickets is the ticket count and the energy carried toward the next one.
+type OccultTickets struct{ Tickets, Progress int64 }
+
+// OccultTicketPort is the only way a mode reads or spends Occult tickets.
+type OccultTicketPort interface {
+	OccultTicketsTx(context.Context, tx.Queryer, identity.PlayerID) (OccultTickets, error)
+	DebitOccultTicketTx(context.Context, tx.Tx, identity.PlayerID, operation.Context) (OccultTickets, error)
+}
+
+func (s Service) OccultTicketsTx(ctx context.Context, q tx.Queryer, pid identity.PlayerID) (OccultTickets, error) {
+	if s.Store == nil || q == nil || !pid.Valid() {
+		return OccultTickets{}, errors.New("invalid occult ledger access")
+	}
+	tickets, _, err := s.Store.ReadScalarTx(ctx, q, pid, OccultTicketKey)
+	if err != nil {
+		return OccultTickets{}, err
+	}
+	progress, _, err := s.Store.ReadScalarTx(ctx, q, pid, occultEnergyProgressKey)
+	if err != nil {
+		return OccultTickets{}, err
+	}
+	return OccultTickets{Tickets: tickets.Amount, Progress: progress.Amount}, nil
+}
+
+// DebitOccultTicketTx spends one ticket or fails with ErrInsufficientBalance;
+// the energy carried toward the next ticket is untouched.
+func (s Service) DebitOccultTicketTx(ctx context.Context, t tx.Tx, pid identity.PlayerID, op operation.Context) (OccultTickets, error) {
+	ledger, err := s.lockOccultLedgerTx(ctx, t, pid, op)
+	if err != nil {
+		return OccultTickets{}, err
+	}
+	if ledger.tickets.balance.Amount < 1 {
+		return OccultTickets{}, economy.ErrInsufficientBalance
+	}
+	remaining := ledger.tickets.balance.Amount - 1
+	if err = s.writeOccultScalarTx(ctx, t, pid, OccultTicketKey, ledger.tickets, remaining, op.StartedAt.UTC()); err != nil {
+		return OccultTickets{}, err
+	}
+	return OccultTickets{Tickets: remaining, Progress: ledger.progress.balance.Amount}, nil
+}

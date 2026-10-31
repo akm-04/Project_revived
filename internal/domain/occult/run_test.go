@@ -234,3 +234,44 @@ func TestRunStateRoundTrip(t *testing.T) {
 		t.Fatalf("loaded=%+v err=%v", loaded, err)
 	}
 }
+
+func TestRoomMapReachabilityEventsAndChapterClear(t *testing.T) {
+	catalog := generatedCatalog(t)
+	run := NewRun(2, SingleCampaignType)
+	if err := run.BindRoom(catalog); err != nil {
+		t.Fatal(err)
+	}
+	start, _ := catalog.Campaign(20010)
+	first, _ := catalog.Campaign(20011)
+	later, _ := catalog.Campaign(20012)
+	if !run.Reachable(catalog, start) || !run.Reachable(catalog, first) || run.Reachable(catalog, later) {
+		t.Fatal("only the start point and its unlocks are reachable at first")
+	}
+	for index := range run.Stages["20011"] {
+		run.Stages["20011"][index].HP = 0
+	}
+	if !run.Reachable(catalog, later) || run.ChapterCleared(catalog) {
+		t.Fatal("clearing a campaign opens its unlocks, not the chapter")
+	}
+	eventful, _ := catalog.Campaign(20014)
+	if len(run.TriggerEvent(catalog, eventful)) != 0 {
+		t.Fatal("event 6 is the unread bonus row and does nothing")
+	}
+	autoPass := Campaign{ID: 20012, EventID: int64(EventAutoPass)}
+	if outcomes := run.TriggerEvent(catalog, autoPass); len(outcomes) != 1 || !run.Cleared(20012) {
+		t.Fatalf("auto pass outcomes=%v", outcomes)
+	}
+	if len(run.TriggerEvent(catalog, autoPass)) != 0 {
+		t.Fatal("an event fires once per campaign")
+	}
+	final, _ := catalog.Campaign(20018)
+	if !final.Final() || start.Final() {
+		t.Fatal("final campaign unlocks nothing and is not a start point")
+	}
+	for index := range run.Stages["20018"] {
+		run.Stages["20018"][index].HP = 0
+	}
+	if !run.ChapterCleared(catalog) {
+		t.Fatal("final campaign cleared clears the chapter")
+	}
+}

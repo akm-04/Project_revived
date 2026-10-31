@@ -40,6 +40,7 @@ import (
 	appgeneration "gxb.local/backend/v2/internal/application/generation"
 	appidentity "gxb.local/backend/v2/internal/application/identitylifecycle"
 	appillusion "gxb.local/backend/v2/internal/application/illusion"
+	appoccult "gxb.local/backend/v2/internal/application/occult"
 	apprealtime "gxb.local/backend/v2/internal/application/realtimeauth"
 	"gxb.local/backend/v2/internal/application/realtimewakeup"
 	"gxb.local/backend/v2/internal/application/socialgift"
@@ -275,7 +276,7 @@ func run() error {
 		Registry: connectionsRegistry, Publisher: stockruntime.RealtimePublisher{Registry: illusionEvents, Limits: limits.Default()}, Authority: authority,
 		Time: postgres.AuthoritativeTime{Queryer: pool}, MaxHandles: runtimePolicy.MaxConnections, Delivered: stockruntime.NewIllusionNoticeLedger(),
 		OnDeliveryError: func(err error) { log.Printf("illusion room notice degraded: %v", err) }}
-	wakeups, err := realtimewakeup.NewRegistry(realtimewakeup.Registration{Route: apparena.FriendFightNoticeRoute, Handler: friendNotices}, realtimewakeup.Registration{Route: apparena.TournamentNoticeRoute, Handler: tournamentNotices}, realtimewakeup.Registration{Route: postgres.SocialReloadRoute, Handler: socialHandler}, realtimewakeup.Registration{Route: frienddm.WakeupRoute, Handler: friendReconcile}, realtimewakeup.Registration{Route: generaldm.WakeupRoute, Handler: generalReconcile}, realtimewakeup.Registration{Route: achievement.NoticeRoute, Handler: achievementNotices}, realtimewakeup.Registration{Route: appillusion.RoomNoticeRoute, Handler: illusionRooms})
+	wakeups, err := realtimewakeup.NewRegistry(realtimewakeup.Registration{Route: apparena.FriendFightNoticeRoute, Handler: friendNotices}, realtimewakeup.Registration{Route: apparena.TournamentNoticeRoute, Handler: tournamentNotices}, realtimewakeup.Registration{Route: postgres.SocialReloadRoute, Handler: socialHandler}, realtimewakeup.Registration{Route: frienddm.WakeupRoute, Handler: friendReconcile}, realtimewakeup.Registration{Route: generaldm.WakeupRoute, Handler: generalReconcile}, realtimewakeup.Registration{Route: achievement.NoticeRoute, Handler: achievementNotices}, realtimewakeup.Registration{Route: appillusion.RoomNoticeRoute, Handler: illusionRooms}, realtimewakeup.Registration{Route: appoccult.RoomNoticeRoute, Handler: realtimewakeup.RouteHandlerFunc(occultSoloRoomWakeup)})
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -390,3 +391,8 @@ func run() error {
 		}(conn)
 	}
 }
+
+// occultSoloRoomWakeup acknowledges a solo room wakeup: the reply to the player's
+// own request already carries the state. shortcut: ROOM_CHANGE pushes to the
+// other seats arrive with the team flow, which replaces this handler.
+func occultSoloRoomWakeup(context.Context, string) error { return nil }

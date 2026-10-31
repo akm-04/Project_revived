@@ -38,6 +38,11 @@ type RunState struct {
 	HeroStatus         map[string]map[string]HeroStatus `json:"hero_status,omitempty"`
 	LeftAt             map[string]int64                 `json:"left_at,omitempty"`
 	Invites            []int64                          `json:"invites,omitempty"`
+	StayPositions      map[string]int64                 `json:"stay_positions,omitempty"`
+	EventsDone         []int64                          `json:"events_done,omitempty"`
+	Points             int64                            `json:"points"`
+	ClearSettled       bool                             `json:"clear_settled,omitempty"`
+	Frozen             map[string]json.RawMessage       `json:"frozen,omitempty"`
 	ReportID           string                           `json:"report_id,omitempty"`
 }
 

@@ -93,6 +93,7 @@ import (
 	applibrary "gxb.local/backend/v2/internal/application/librarylocal"
 	appmarch "gxb.local/backend/v2/internal/application/march"
 	"gxb.local/backend/v2/internal/application/missioninputs"
+	appoccult "gxb.local/backend/v2/internal/application/occult"
 	apppetcampaign "gxb.local/backend/v2/internal/application/petcampaign"
 	apppublication "gxb.local/backend/v2/internal/application/publication"
 	apppublicprofile "gxb.local/backend/v2/internal/application/publicprofile"
@@ -363,6 +364,7 @@ func main() {
 		worldBoss := canonicalWorldBoss(pool, runner, contentDB, i5db, i5svc, privileges, fight)
 		illusion := canonicalIllusion(pool, runner, contentDB, i5db, i5svc, privileges, fight, guildDB, sharedRooms)
 		ranking.Illusion = illusion
+		occultMode := canonicalOccult(pool, runner, contentDB, i5db, i5svc, fight, sharedRooms)
 		topFloor := canonicalTopFloor(pool, runner, contentDB, i5db, i5svc, privileges, fight, owners)
 		memoir := canonicalMemoir(pool, runner, contentDB, i5db, i5svc, heroSvc, fight, topFloor)
 		for _, mid := range stockruntime.MemoirMIDs {
@@ -449,7 +451,10 @@ func main() {
 		for _, mid := range stockruntime.IllusionRoomMIDs {
 			mustRegister(mid, stockruntime.IllusionRoomDispatcher{Authority: authority, Service: illusion})
 		}
-		go runReconcile(ctx, pool, appsharedroom.Reconciler{Service: sharedRooms, Routes: map[string]string{appillusion.RoomFamily: appillusion.RoomNoticeRoute}})
+		for _, mid := range stockruntime.OccultMIDs {
+			mustRegister(mid, stockruntime.OccultDispatcher{Authority: authority, Service: occultMode})
+		}
+		go runReconcile(ctx, pool, appsharedroom.Reconciler{Service: sharedRooms, Routes: map[string]string{appillusion.RoomFamily: appillusion.RoomNoticeRoute, appoccult.RoomFamily: appoccult.RoomNoticeRoute}})
 		go runReconcile(ctx, pool, appillusion.Reconciler{Service: illusion})
 		go runReconcile(ctx, pool, appworldboss.Reconciler{Service: worldBoss})
 	} else {

@@ -20,9 +20,9 @@
  "counts": {
   "by_disposition": {
    "DELIVERED": 185,
-   "ACTIVE": 434,
+   "ACTIVE": 433,
    "LATER": 503,
-   "INACTIVE_SUPERSEDED": 40,
+   "INACTIVE_SUPERSEDED": 41,
    "INACTIVE_D79": 21
   },
   "active_by_stage": {
@@ -33,7 +33,7 @@
    "I9-10": 112,
    "I9-7": 42,
    "I9-5": 24,
-   "I9-8": 72,
+   "I9-8": 71,
    "I9-9": 46,
    "I9-6": 30
   }
@@ -6542,8 +6542,9 @@
    "family": "OCCULT_SORCERY_WAR",
    "disposition": "ACTIVE",
    "target": "I9-8",
-   "v2": "unimplemented",
-   "v1": "LITERAL_STUB"
+   "v2": "implemented",
+   "v1": "LITERAL_STUB",
+   "implementation": "I9-8C working implementation; unqualified"
   },
   {
    "mid": 2363,
@@ -6560,8 +6561,9 @@
    "family": "OCCULT_SORCERY_WAR",
    "disposition": "ACTIVE",
    "target": "I9-8",
-   "v2": "unimplemented",
-   "v1": null
+   "v2": "implemented",
+   "v1": null,
+   "implementation": "I9-8C working implementation; unqualified"
   },
   {
    "mid": 2365,
@@ -6569,8 +6571,9 @@
    "family": "OCCULT_SORCERY_WAR",
    "disposition": "ACTIVE",
    "target": "I9-8",
-   "v2": "unimplemented",
-   "v1": null
+   "v2": "implemented",
+   "v1": null,
+   "implementation": "I9-8C working implementation; unqualified"
   },
   {
    "mid": 2366,
@@ -6578,8 +6581,9 @@
    "family": "OCCULT_SORCERY_WAR",
    "disposition": "ACTIVE",
    "target": "I9-8",
-   "v2": "unimplemented",
-   "v1": null
+   "v2": "implemented",
+   "v1": null,
+   "implementation": "I9-8C working implementation; unqualified"
   },
   {
    "mid": 2367,
@@ -6596,8 +6600,9 @@
    "family": "OCCULT_SORCERY_WAR",
    "disposition": "ACTIVE",
    "target": "I9-8",
-   "v2": "unimplemented",
-   "v1": null
+   "v2": "implemented",
+   "v1": null,
+   "implementation": "I9-8C working implementation; unqualified"
   },
   {
    "mid": 2369,
@@ -6623,8 +6628,9 @@
    "family": "OCCULT_SORCERY_WAR",
    "disposition": "ACTIVE",
    "target": "I9-8",
-   "v2": "unimplemented",
-   "v1": null
+   "v2": "implemented",
+   "v1": null,
+   "implementation": "I9-8C working implementation; unqualified"
   },
   {
    "mid": 2372,
@@ -6632,8 +6638,9 @@
    "family": "OCCULT_SORCERY_WAR",
    "disposition": "ACTIVE",
    "target": "I9-8",
-   "v2": "unimplemented",
-   "v1": null
+   "v2": "implemented",
+   "v1": null,
+   "implementation": "I9-8C working implementation; unqualified"
   },
   {
    "mid": 2373,
@@ -6641,8 +6648,9 @@
    "family": "OCCULT_SORCERY_WAR",
    "disposition": "ACTIVE",
    "target": "I9-8",
-   "v2": "unimplemented",
-   "v1": null
+   "v2": "implemented",
+   "v1": null,
+   "implementation": "I9-8C working implementation; unqualified"
   },
   {
    "mid": 2374,
@@ -6695,8 +6703,9 @@
    "family": "OCCULT_SORCERY_WAR",
    "disposition": "ACTIVE",
    "target": "I9-8",
-   "v2": "unimplemented",
-   "v1": null
+   "v2": "implemented",
+   "v1": null,
+   "implementation": "I9-8C working implementation; unqualified"
   },
   {
    "mid": 2380,
@@ -6704,17 +6713,20 @@
    "family": "OCCULT_SORCERY_WAR",
    "disposition": "ACTIVE",
    "target": "I9-8",
-   "v2": "unimplemented",
-   "v1": null
+   "v2": "implemented",
+   "v1": null,
+   "implementation": "I9-8C working implementation; unqualified"
   },
   {
    "mid": 2381,
    "name": "GET_CAMPAIGN_AWARD",
    "family": "OCCULT_SORCERY_WAR",
-   "disposition": "ACTIVE",
+   "disposition": "INACTIVE_SUPERSEDED",
    "target": "I9-8",
-   "v2": "unimplemented",
-   "v1": null
+   "v2": "inactive_refusal",
+   "v1": null,
+   "decision": "D367",
+   "reason": "Function 67 GET_CAMPAIGN_AWARD has a wrapper but no sender anywhere in the stock UI (research/occult.md section 10); request and reply fields are unknown, so no award claim is reconstructed. Reopen only on genuine source sender/consumer evidence."
   },
   {
    "mid": 2382,
@@ -6740,8 +6752,9 @@
    "family": "OCCULT_SORCERY_WAR",
    "disposition": "ACTIVE",
    "target": "I9-8",
-   "v2": "unimplemented",
-   "v1": null
+   "v2": "implemented",
+   "v1": null,
+   "implementation": "I9-8C working implementation; unqualified"
   },
   {
    "mid": 2385,
@@ -6749,8 +6762,9 @@
    "family": "OCCULT_SORCERY_WAR",
    "disposition": "ACTIVE",
    "target": "I9-8",
-   "v2": "unimplemented",
-   "v1": "LITERAL_STUB"
+   "v2": "implemented",
+   "v1": "LITERAL_STUB",
+   "implementation": "I9-8C working implementation; unqualified"
   },
   {
    "mid": 2400,

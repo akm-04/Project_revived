@@ -2,6 +2,7 @@ package i5
 
 import (
 	"context"
+	"errors"
 	"go/ast"
 	"go/parser"
 	"go/token"
@@ -194,5 +195,19 @@ func TestNoEnergyDebitBypassesDebitTemporalTx(t *testing.T) {
 		if !allowed {
 			t.Errorf("player_temporal_resources written outside the i5 store: %s", writer)
 		}
+	}
+}
+
+func TestDebitOccultTicketSpendsOneAndRefusesWithoutAny(t *testing.T) {
+	svc, store, pid, op := occultTicketFixture(t, 100000)
+	store.scalars["occult_ticket"] = economy.ScalarBalance{PlayerID: pid, ResourceKey: "occult_ticket", Amount: 2, StateVersion: 1}
+	store.scalars["occult_energy_progress"] = economy.ScalarBalance{PlayerID: pid, ResourceKey: "occult_energy_progress", Amount: 700, StateVersion: 1}
+	after, err := svc.DebitOccultTicketTx(context.Background(), &testTx{}, pid, op)
+	if err != nil || after.Tickets != 1 || after.Progress != 700 || store.scalars["occult_ticket"].Amount != 1 {
+		t.Fatalf("after=%+v err=%v", after, err)
+	}
+	store.scalars["occult_ticket"] = economy.ScalarBalance{PlayerID: pid, ResourceKey: "occult_ticket", Amount: 0, StateVersion: 2}
+	if _, err = svc.DebitOccultTicketTx(context.Background(), &testTx{}, pid, op); !errors.Is(err, economy.ErrInsufficientBalance) {
+		t.Fatalf("err=%v", err)
 	}
 }

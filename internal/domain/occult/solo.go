@@ -47,6 +47,7 @@ func (s *RunState) ApplySolo(playerID, campaignID int64, index int, report SoloR
 	result.Won = result.Star > 0
 	if result.Won {
 		stage.HP = 0
+		s.Points += result.Score
 	}
 	stage.InBattle = 0
 	return result, nil
