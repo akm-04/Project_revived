@@ -100,7 +100,7 @@ func TestOccurrenceCourageAndDefeat(t *testing.T) {
 	if accepted, err := occurrence.Accept(catalog, 12000000); err != nil || accepted != 10000000 || occurrence.Courage != 20000000 {
 		t.Fatal(accepted, err, occurrence)
 	}
-	if defeated, restarted := occurrence.Settle(catalog); defeated != 1 || restarted || occurrence.CurrentBoss != 10012 || occurrence.Courage != 20000000 {
+	if defeated, restarted := occurrence.Defeat(catalog); len(defeated) != 1 || restarted || occurrence.CurrentBoss != 10012 || occurrence.Courage != 20000000 {
 		t.Fatal(defeated, restarted, occurrence)
 	}
 	if accepted, err := occurrence.Accept(catalog, 12000000); err != nil || accepted != 10000000 || occurrence.Courage != 30000000 {
@@ -108,12 +108,12 @@ func TestOccurrenceCourageAndDefeat(t *testing.T) {
 	}
 	occurrence.CurrentBoss = 10015
 	occurrence.Courage = 100000000
-	if defeated, restarted := occurrence.Settle(catalog); defeated != 1 || !restarted || occurrence.CurrentBoss != 10011 || occurrence.Courage != 0 || occurrence.Generation != 2 {
+	if defeated, restarted := occurrence.Defeat(catalog); len(defeated) != 1 || !restarted || occurrence.CurrentBoss != 10011 || occurrence.Courage != 0 || occurrence.Generation != 2 {
 		t.Fatal(defeated, restarted, occurrence)
 	}
 	occurrence.CurrentBoss = 10011
 	occurrence.Courage = 100000000
-	if defeated, restarted := occurrence.Settle(catalog); defeated != 5 || !restarted || occurrence.Generation != 3 || occurrence.CurrentBoss != 10011 || occurrence.Courage != 0 {
+	if defeated, restarted := occurrence.Defeat(catalog); len(defeated) != 5 || !restarted || occurrence.Generation != 3 || occurrence.CurrentBoss != 10011 || occurrence.Courage != 0 {
 		t.Fatal(defeated, restarted, occurrence)
 	}
 }
@@ -172,7 +172,7 @@ func TestRankOrderAndTies(t *testing.T) {
 	if rank, hurt := RankOf(entries, 9); rank != 0 || hurt != 0 {
 		t.Fatal(rank, hurt)
 	}
-	total := Total{LogicalServerID: 1, Generation: 1, PlayerID: 1}
+	total := Total{PlayerID: 1}
 	total.AddHurt(0, 3)
 	total.AddHurt(10, 4)
 	total.AddHurt(5, 6)
@@ -203,10 +203,5 @@ func TestStartWindowAndAttemptBinding(t *testing.T) {
 	attempt.Generation = 1
 	if attempt.Matches(occurrence) {
 		t.Fatal("late attempt must not match a newer occurrence")
-	}
-	attempt.Generation = 2
-	attempt.Resolved = true
-	if attempt.Matches(occurrence) {
-		t.Fatal("resolved attempt must not match")
 	}
 }

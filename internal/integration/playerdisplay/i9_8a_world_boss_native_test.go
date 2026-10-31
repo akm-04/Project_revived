@@ -48,7 +48,7 @@ func worldBossActor(t *testing.T, p *pg.Pool, server identity.LogicalServerID) (
 
 func worldBossSetPlayer(t *testing.T, p *pg.Pool, player identity.PlayerID, day, attempts, bestHit int64) {
 	t.Helper()
-	exec(t, p, `INSERT INTO worldboss_players(player_id,day,attempts,bought,swept_day,best_hit,best_hit_at,updated_at)VALUES($1,$2,$3,0,0,$4,0,clock_timestamp())
+	exec(t, p, `INSERT INTO worldboss_players(player_id,logical_server_id,challenged_day,day,attempts,bought,swept_day,best_hit,best_hit_at,updated_at)SELECT $1,logical_server_id,0,$2,$3,0,0,$4,0,clock_timestamp() FROM players WHERE player_id=$1
 		ON CONFLICT(player_id)DO UPDATE SET day=$2,attempts=$3,bought=0,swept_day=0,best_hit=$4,best_hit_at=0,updated_at=clock_timestamp()`, int64(player), day, attempts, bestHit)
 }
 
@@ -238,7 +238,7 @@ func TestI9_8AWorldBossSweepNative(t *testing.T) {
 	}
 }
 
-func TestI9_8AWorldBossLateSettlementFencedNative(t *testing.T) {
+func TestI9_8AWorldBossLateSettlementCreditsFrozenBoardNative(t *testing.T) {
 	p := pool(t)
 	server := rankingServer(t, p)
 	late, latePartner := worldBossActor(t, p, server)
@@ -261,15 +261,65 @@ func TestI9_8AWorldBossLateSettlementFencedNative(t *testing.T) {
 		t.Fatal("boss did not advance", boss)
 	}
 	clock.Set(clock.at.Add(time.Minute))
-	_, err := s.Settle(ctx, late, app.ResultRequest{CampaignID: d.FirstBossID, Damage: 100, Formation: []int64{latePartner}}, op())
-	if !errors.Is(err, d.ErrRefused) {
-		t.Fatalf("late settlement was not fenced: %v", err)
+	settled, err := s.Settle(ctx, late, app.ResultRequest{CampaignID: d.FirstBossID, Damage: 100, Formation: []int64{latePartner}}, op())
+	if err != nil || settled.Duplicate || settled.Body["damage"] != int64(100) || settled.Body["total_hurt"] != int64(100) {
+		t.Fatalf("late settlement %+v %v", settled, err)
 	}
-	if total := scalar(t, p, `SELECT count(*) FROM worldboss_player_totals WHERE logical_server_id=$1 AND generation=1 AND player_id=$2`, int64(server), int64(late.PlayerID)); total != 0 {
-		t.Fatal("late settlement wrote a total")
+	if total := scalar(t, p, `SELECT hurt FROM worldboss_player_totals WHERE logical_server_id=$1 AND generation=1 AND boss_id=$2 AND player_id=$3`, int64(server), d.FirstBossID, int64(late.PlayerID)); total != 100 {
+		t.Fatal("late settlement missed its frozen board", total)
+	}
+	if rows := scalar(t, p, `SELECT count(*) FROM worldboss_player_totals WHERE logical_server_id=$1 AND boss_id<>$2 AND player_id=$3`, int64(server), d.FirstBossID, int64(late.PlayerID)); rows != 0 {
+		t.Fatal("late settlement touched the successor board")
 	}
 	if _, _, courage, _ := worldBossOccurrence(t, p, server); courage != d.DamageCap*2 {
 		t.Fatal("late settlement changed courage", courage)
+	}
+	repeated, err := s.Settle(ctx, late, app.ResultRequest{CampaignID: d.FirstBossID, Damage: 999, Formation: []int64{latePartner}}, op())
+	if err != nil || !repeated.Duplicate || repeated.Body["damage"] != int64(100) || repeated.Body["total_hurt"] != int64(100) {
+		t.Fatalf("late duplicate %+v %v", repeated, err)
+	}
+}
+
+func TestI9_8AWorldBossAbandonedStartAndPerBossBoardsNative(t *testing.T) {
+	p := pool(t)
+	server := rankingServer(t, p)
+	a, partner := worldBossActor(t, p, server)
+	clock := worldBossTime(t)
+	s := worldBossService(t, p, clock)
+	formation := []int64{partner}
+	for range 2 {
+		if _, err := s.Start(ctx, a, app.StartRequest{CampaignID: d.FirstBossID, Formation: formation}, op()); err != nil {
+			t.Fatal("start after an abandoned attempt", err)
+		}
+	}
+	if open := scalar(t, p, `SELECT count(*) FROM worldboss_attempts WHERE player_id=$1 AND NOT resolved`, int64(a.PlayerID)); open != 1 {
+		t.Fatal("abandoned attempt kept open", open)
+	}
+	if _, err := s.Settle(ctx, a, app.ResultRequest{CampaignID: d.FirstBossID, Damage: 700, Formation: formation}, op()); err != nil {
+		t.Fatal(err)
+	}
+	boards, err := s.BossRank(ctx, a, op())
+	if err != nil || len(boards) != 5 {
+		t.Fatalf("boards %d %v", len(boards), err)
+	}
+	if boards[0]["my_hurt"] != int64(700) || boards[0]["my_rank"].(int64) < 1 {
+		t.Fatalf("current board %+v", boards[0])
+	}
+	if boards[1]["my_hurt"] != int64(0) || boards[1]["my_rank"] != int64(0) {
+		t.Fatalf("successor board shares the current total %+v", boards[1])
+	}
+}
+
+func TestI9_8AWorldBossSweepRespectsClosedWindowNative(t *testing.T) {
+	p := pool(t)
+	server := rankingServer(t, p)
+	a, _ := worldBossActor(t, p, server)
+	clock := worldBossTime(t)
+	s := worldBossService(t, p, clock)
+	clock.Set(modes.DayBegins(modes.Day(clock.at)).Add(17 * time.Hour)) // 22:00 GMT+8
+	worldBossSetPlayer(t, p, a.PlayerID, modes.Day(clock.at), d.AttemptsPerDay, 500)
+	if _, err := s.Sweep(ctx, a, d.FirstBossID, op()); !errors.Is(err, d.ErrRefused) {
+		t.Fatalf("sweep in the closed window: %v", err)
 	}
 }
 
@@ -404,8 +454,12 @@ func TestI9_8AWorldBossDailyCourageNative(t *testing.T) {
 		ON CONFLICT(logical_server_id)DO UPDATE SET generation=1,current_boss=$2,courage=0,courage_day=$3`, int64(server), d.FirstBossID, updateDay-1)
 	worldBossSetPlayer(t, p, a.PlayerID, modes.Day(clock.at), 2, 0)
 
-	level90 := scalar(t, p, `SELECT count(*) FROM player_directory_profiles WHERE lev>=90`)
-	challengers := scalar(t, p, `SELECT count(*) FROM worldboss_players WHERE day=$1 AND attempts<$2`, modes.Day(clock.at), d.AttemptsPerDay)
+	exec(t, p, `UPDATE worldboss_players SET challenged_day=$2 WHERE player_id=$1`, int64(a.PlayerID), updateDay)
+	level90 := scalar(t, p, `SELECT count(*) FROM player_directory_profiles profile JOIN players player USING(player_id) WHERE player.logical_server_id=$1 AND profile.lev>=90`, int64(server))
+	challengers := scalar(t, p, `SELECT count(*) FROM worldboss_players WHERE logical_server_id=$1 AND challenged_day=$2`, int64(server), updateDay)
+	if challengers < 1 {
+		t.Fatal("challenger not counted")
+	}
 	delta := d.DailyCourage(level90, challengers)
 	timed, err := gen.NewTimedOperation(op(), clock.at)
 	if err != nil {

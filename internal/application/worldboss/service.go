@@ -22,6 +22,7 @@ const (
 	resultKind   = "WORLD_BOSS_RESULT"
 	attemptLimit = time.Hour
 	rankLimit    = 1000
+	boardLimit   = 100
 	mailRanks    = 100000
 )
 
@@ -137,7 +138,7 @@ func (s Mode) open(c context.Context, sc gen.TimedScope, a identity.ActorContext
 	if _, err = s.Players.LockPlayerRootsTx(c, sc.Tx, a.LogicalServerID, []identity.PlayerID{a.PlayerID}); err != nil {
 		return session{}, err
 	}
-	player, err := s.Store.LockPlayerTx(c, sc.Tx, a.PlayerID, at)
+	player, err := s.Store.LockPlayerTx(c, sc.Tx, int64(a.LogicalServerID), a.PlayerID, at)
 	if err != nil {
 		return session{}, err
 	}
@@ -175,7 +176,7 @@ func (s Mode) Info(c context.Context, a identity.ActorContext, _ operation.Conte
 		player = d.Player{PlayerID: int64(a.PlayerID)}
 	}
 	player.Reset(modes.Day(at))
-	rank, hurt, err := s.rankAndHurt(c, s.Fresh, occurrence, a.PlayerID)
+	rank, hurt, err := s.rankAndHurt(c, s.Fresh, occurrence.Board(), a.PlayerID)
 	if err != nil {
 		return nil, err
 	}
@@ -197,24 +198,23 @@ func infoBody(occurrence d.Occurrence, player d.Player, rank, hurt int64) map[st
 	}
 }
 
-// rankAndHurt reads the personal rank from the ordered board but the personal
-// total straight from its row, so a player outside the board limit still sees
-// their history.
-func (s Mode) personalHurt(c context.Context, q tx.Queryer, occurrence d.Occurrence, playerID int64) (int64, error) {
-	total, found, err := s.Store.ReadTotalTx(c, q, occurrence.LogicalServerID, occurrence.Generation, identity.PlayerID(playerID))
+// personalHurt reads the total straight from its row, so a player outside the
+// rank limit still sees their history.
+func (s Mode) personalHurt(c context.Context, q tx.Queryer, board d.Board, playerID identity.PlayerID) (int64, error) {
+	total, found, err := s.Store.ReadTotalTx(c, q, board, playerID)
 	if err != nil || !found {
 		return 0, err
 	}
 	return total.Hurt, nil
 }
 
-func (s Mode) rankAndHurt(c context.Context, q tx.Queryer, occurrence d.Occurrence, playerID identity.PlayerID) (int64, int64, error) {
-	ranks, err := s.rankEntries(c, q, occurrence, rankLimit)
+func (s Mode) rankAndHurt(c context.Context, q tx.Queryer, board d.Board, playerID identity.PlayerID) (int64, int64, error) {
+	ranks, err := s.Store.ReadRankTx(c, q, board, rankLimit)
 	if err != nil {
 		return 0, 0, err
 	}
 	rank, _ := d.RankOf(ranks, int64(playerID))
-	hurt, err := s.personalHurt(c, q, occurrence, int64(playerID))
+	hurt, err := s.personalHurt(c, q, board, playerID)
 	return rank, hurt, err
 }
 
@@ -246,10 +246,6 @@ func (s Mode) preInfo(c context.Context, q tx.Queryer, ranks []d.RankEntry, play
 		return nil, nil
 	}
 	return map[string]any{"player_name": profile.Name, "avatar_id": profile.AvatarID, "avatar_frame_id": profile.AvatarFrameID, "lev": profile.Level, "hurt": ahead.TotalHurt, "pre_rank": int64(position)}, nil
-}
-
-func (s Mode) rankEntries(c context.Context, q tx.Queryer, occurrence d.Occurrence, limit int64) ([]d.RankEntry, error) {
-	return s.Store.ReadRankTx(c, q, occurrence.LogicalServerID, occurrence.Generation, limit)
 }
 
 func validateFormation(formation []int64) error {

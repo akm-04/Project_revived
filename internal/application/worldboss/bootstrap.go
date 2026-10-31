@@ -33,7 +33,7 @@ func (s Mode) OverlayMID1(c context.Context, q tx.Queryer, a identity.ActorConte
 		player = d.Player{PlayerID: int64(a.PlayerID)}
 	}
 	player.Reset(modes.Day(at))
-	rank, hurt, err := s.rankAndHurt(c, q, occurrence, a.PlayerID)
+	rank, hurt, err := s.rankAndHurt(c, q, occurrence.Board(), a.PlayerID)
 	if err != nil {
 		return err
 	}

@@ -14,6 +14,18 @@ type Occurrence struct {
 	CourageDay      int64 `json:"courage_day"`
 }
 
+// Board names one boss's damage ranking inside one occurrence generation.
+type Board struct {
+	LogicalServerID int64
+	Generation      int64
+	BossID          int64
+}
+
+// Board is the ranking the current boss's damage counts toward.
+func (o Occurrence) Board() Board {
+	return Board{LogicalServerID: o.LogicalServerID, Generation: o.Generation, BossID: o.CurrentBoss}
+}
+
 func (o Occurrence) Validate() error {
 	if o.LogicalServerID <= 0 || o.Generation <= 0 || o.CurrentBoss < FirstBossID || o.CurrentBoss > LastBossID || o.Courage < 0 {
 		return ErrInvalid
@@ -52,38 +64,15 @@ func (o *Occurrence) Defeat(c Catalog) ([]int64, bool) {
 	}
 }
 
-// Settle advances every crossed boss threshold. The terminal boss starts a new
-// occurrence at the cycle head with courage 0.
-func (o *Occurrence) Settle(c Catalog) (defeated int, restarted bool) {
-	for {
-		boss, ok := c.Boss(o.CurrentBoss)
-		if !ok || o.Courage < boss.NeedBrave {
-			return defeated, restarted
-		}
-		defeated++
-		if boss.NextID == 0 {
-			o.Generation++
-			o.CurrentBoss = FirstBossID
-			o.Courage = 0
-			return defeated, true
-		}
-		o.CurrentBoss = boss.NextID
-	}
-}
-
-func (o Occurrence) Defeated(c Catalog) bool {
-	boss, ok := c.Boss(o.CurrentBoss)
-	return ok && o.Courage >= boss.NeedBrave
-}
-
 type Player struct {
-	PlayerID  int64 `json:"player_id"`
-	Day       int64 `json:"day"`
-	Attempts  int64 `json:"attempts"`
-	Bought    int64 `json:"bought"`
-	SweptDay  int64 `json:"swept_day"`
-	BestHit   int64 `json:"best_hit"`
-	BestHitAt int64 `json:"best_hit_at"`
+	PlayerID      int64 `json:"player_id"`
+	Day           int64 `json:"day"`
+	Attempts      int64 `json:"attempts"`
+	Bought        int64 `json:"bought"`
+	SweptDay      int64 `json:"swept_day"`
+	BestHit       int64 `json:"best_hit"`
+	BestHitAt     int64 `json:"best_hit_at"`
+	ChallengedDay int64 `json:"challenged_day"`
 }
 
 func (p Player) Validate() error {
@@ -117,11 +106,10 @@ func (p Player) CanSweep() bool {
 }
 
 type Total struct {
-	LogicalServerID int64 `json:"logical_server_id"`
-	Generation      int64 `json:"generation"`
-	PlayerID        int64 `json:"player_id"`
-	Hurt            int64 `json:"hurt"`
-	FirstHurtAt     int64 `json:"first_hurt_at"`
+	Board       Board
+	PlayerID    int64 `json:"player_id"`
+	Hurt        int64 `json:"hurt"`
+	FirstHurtAt int64 `json:"first_hurt_at"`
 }
 
 func (t *Total) AddHurt(damage, at int64) {
@@ -146,6 +134,12 @@ type Attempt struct {
 	Formation       string `json:"formation"`
 	FrozenAt        int64  `json:"frozen_at"`
 	Resolved        bool   `json:"resolved"`
+	Damage          int64  `json:"damage"`
+}
+
+// Board is the ranking this attempt was frozen to, whatever the boss is now.
+func (a Attempt) Board() Board {
+	return Board{LogicalServerID: a.LogicalServerID, Generation: a.Generation, BossID: a.CampaignID}
 }
 
 func (a Attempt) Validate() error {
@@ -155,9 +149,10 @@ func (a Attempt) Validate() error {
 	return nil
 }
 
-// Matches keeps a late result bound to the occurrence it was frozen against.
+// Matches reports whether the attempt still fights the current boss; otherwise
+// its result is late and may only reach its own frozen board.
 func (a Attempt) Matches(o Occurrence) bool {
-	return a.LogicalServerID == o.LogicalServerID && a.Generation == o.Generation && a.CampaignID == o.CurrentBoss && !a.Resolved
+	return a.Board() == o.Board()
 }
 
 // CourageDayFor is the most recent 22:00 GMT+8 update in modes.Day terms; a
@@ -180,8 +175,8 @@ func SecondOfDay(at time.Time) int64 {
 	return second
 }
 
-// StartAllowed reports whether a new START may begin; the 21:58-24:00 window
-// only blocks new attempts.
+// StartAllowed reports whether a new START or sweep may begin; the 21:58-24:00
+// window never blocks the result of a fight already started.
 func StartAllowed(secondOfDay int64) bool {
 	return secondOfDay >= 0 && secondOfDay < ClosedStartSecond
 }

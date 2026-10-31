@@ -30,10 +30,10 @@ func locator(a identity.ActorContext) cd.Locator {
 	return cd.Locator{DomainKind: "WORLD_BOSS", AuthorityScope: fmt.Sprintf("server:%d", a.LogicalServerID), DomainLocator: fmt.Sprintf("player:%d", a.PlayerID)}
 }
 
-// generationRef binds the Combat attempt to the occurrence generation and boss,
-// so a result after the boss advanced drains instead of touching the successor.
-func generationRef(a identity.ActorContext, occurrence d.Occurrence) string {
-	return fmt.Sprintf("WORLD_BOSS/%d/%d/%d", a.LogicalServerID, occurrence.Generation, occurrence.CurrentBoss)
+// generationRef binds the Combat attempt to the board it was frozen to, so a
+// late result attests against that board and never touches the successor.
+func generationRef(board d.Board) string {
+	return fmt.Sprintf("WORLD_BOSS/%d/%d/%d", board.LogicalServerID, board.Generation, board.BossID)
 }
 
 func startFingerprint(a identity.ActorContext, request StartRequest, op operation.Context) string {
@@ -78,7 +78,7 @@ func (s Mode) Buy(c context.Context, a identity.ActorContext, op operation.Conte
 		if _, err = s.Costs.DebitMaterialCostTx(c, sc.Tx, a.PlayerID, i5.MaterialCost{Scalars: []i5.ScalarMaterialCost{{ResourceKey: "crystal", Amount: cost}}}, sc.Operation.Operation()); err != nil {
 			return Response{}, err
 		}
-		rank, hurt, err := s.rankAndHurt(c, sc.Tx, st.occurrence, a.PlayerID)
+		rank, hurt, err := s.rankAndHurt(c, sc.Tx, st.occurrence.Board(), a.PlayerID)
 		if err != nil {
 			return Response{}, err
 		}
@@ -125,6 +125,7 @@ func (s Mode) Start(c context.Context, a identity.ActorContext, request StartReq
 			return Response{}, err
 		}
 		st.player.Attempts--
+		st.player.ChallengedDay = st.day
 		if err = s.Store.SavePlayerTx(c, sc.Tx, st.player, at); err != nil {
 			return Response{}, err
 		}
@@ -144,13 +145,13 @@ func (s Mode) bind(c context.Context, sc gen.TimedScope, a identity.ActorContext
 	for _, id := range formation {
 		battle.TeamA = append(battle.TeamA, cb.Participant{Origin: cd.OwnedSelf, Kind: cd.HeroActor, Player: a.PlayerID, Identity: id})
 	}
-	return s.Combat.StartTx(c, sc.Tx, scope, cb.StartRequest{Actor: a, Locator: locator(a), GenerationRef: generationRef(a, occurrence),
+	return s.Combat.StartTx(c, sc.Tx, scope, cb.StartRequest{Actor: a, Locator: locator(a), GenerationRef: generationRef(occurrence.Board()),
 		StartFingerprint: startFingerprint(a, StartRequest{CampaignID: boss.ID, Formation: formation}, op), ResultDeadline: sc.Operation.DecisionAt().Add(attemptLimit),
 		Battle: battle, TrustProfile: cd.ClientSummaryAttested, Replay: cd.ReplaySpec{Response: cd.ReplayOK}})
 }
 
-// Settle answers 627: the attested damage is clamped, applied once to the
-// frozen occurrence and settled exactly once.
+// Settle answers 627: the attested damage is clamped and settled exactly once.
+// A result for a boss that has since advanced credits only its frozen board.
 func (s Mode) Settle(c context.Context, a identity.ActorContext, request ResultRequest, op operation.Context) (Response, error) {
 	if request.CampaignID < d.FirstBossID || request.CampaignID > d.LastBossID || request.Damage < 0 {
 		return Response{}, d.ErrInvalid
@@ -172,16 +173,13 @@ func (s Mode) Settle(c context.Context, a identity.ActorContext, request ResultR
 		// five-boss cycle cannot be told from a fresh START of the same campaign;
 		// add a client attempt id if the stock wire ever gains one.
 		if found && attempt.Resolved {
-			body, err := s.duplicateSettle(c, sc, st, request)
+			body, err := s.terminalBody(c, sc, attempt.Board(), identity.PlayerID(st.player.PlayerID), attempt.Damage)
 			return Response{Body: body, Duplicate: err == nil}, err
 		}
-		if request.CampaignID != st.occurrence.CurrentBoss {
-			return Response{}, fmt.Errorf("%w: occurrence advanced", d.ErrRefused)
-		}
-		if !found || !attempt.Matches(st.occurrence) {
+		if !found {
 			return Response{}, fmt.Errorf("%w: no open attempt", d.ErrRefused)
 		}
-		attested, err := s.Combat.AttestSummaryTx(c, sc.Tx, cb.SummaryRequest{Locator: locator(a), GenerationRef: generationRef(a, st.occurrence), TerminalKind: resultKind, At: at, Policy: summaryPolicy,
+		attested, err := s.Combat.AttestSummaryTx(c, sc.Tx, cb.SummaryRequest{Locator: locator(a), GenerationRef: generationRef(attempt.Board()), TerminalKind: resultKind, At: at, Policy: summaryPolicy,
 			Summary: cd.Summary{Win: request.Damage > 0, Damage: request.Damage, Formation: request.Formation}})
 		if err != nil {
 			return Response{}, err
@@ -189,19 +187,17 @@ func (s Mode) Settle(c context.Context, a identity.ActorContext, request ResultR
 		if attested.Drained || attested.Attestation.Verdict == cd.VerdictRejected {
 			return Response{}, fmt.Errorf("%w: summary drained or rejected", d.ErrRefused)
 		}
-		accepted, err := st.occurrence.Accept(catalog, request.Damage)
-		if err != nil {
+		current := attempt.Matches(st.occurrence)
+		accepted := request.Damage
+		if current {
+			if accepted, err = st.occurrence.Accept(catalog, request.Damage); err != nil {
+				return Response{}, err
+			}
+		}
+		if err = s.creditBoard(c, sc, attempt.Board(), a.PlayerID, accepted, at); err != nil {
 			return Response{}, err
 		}
-		total, err := s.Store.LockTotalTx(c, sc.Tx, st.occurrence.LogicalServerID, st.occurrence.Generation, a.PlayerID, at)
-		if err != nil {
-			return Response{}, err
-		}
-		total.AddHurt(accepted, at.Unix())
-		if err = s.Store.SaveTotalTx(c, sc.Tx, total, at); err != nil {
-			return Response{}, err
-		}
-		attempt.Resolved = true
+		attempt.Resolved, attempt.Damage = true, accepted
 		if err = s.Store.SaveAttemptTx(c, sc.Tx, attempt); err != nil {
 			return Response{}, err
 		}
@@ -209,12 +205,11 @@ func (s Mode) Settle(c context.Context, a identity.ActorContext, request ResultR
 		if err = s.Store.SavePlayerTx(c, sc.Tx, st.player, at); err != nil {
 			return Response{}, err
 		}
-		body, err := s.settleOccurrence(c, sc, st, catalog, at)
-		if err != nil {
-			return Response{}, err
+		body, err := s.terminalBody(c, sc, attempt.Board(), a.PlayerID, accepted)
+		if err != nil || !current {
+			return Response{Body: body}, err
 		}
-		body["damage"] = accepted
-		return Response{Body: body}, nil
+		return Response{Body: body}, s.settleDefeats(c, sc, st, catalog, at)
 	})
 }
 
@@ -231,8 +226,12 @@ func (s Mode) Sweep(c context.Context, a identity.ActorContext, campaign int64, 
 			return Response{}, err
 		}
 		if st.player.SweptDay == st.day {
-			body, err := s.duplicateSweep(c, sc, st, campaign)
+			board := d.Board{LogicalServerID: st.occurrence.LogicalServerID, Generation: st.occurrence.Generation, BossID: campaign}
+			body, err := s.terminalBody(c, sc, board, a.PlayerID, min(st.player.BestHit, d.DamageCap))
 			return Response{Body: body, Duplicate: err == nil}, err
+		}
+		if !d.StartAllowed(d.SecondOfDay(at)) {
+			return Response{}, fmt.Errorf("%w: world boss window closed", d.ErrRefused)
 		}
 		if campaign != st.occurrence.CurrentBoss {
 			return Response{}, fmt.Errorf("%w: campaign is not the current boss", d.ErrRefused)
@@ -249,71 +248,56 @@ func (s Mode) Sweep(c context.Context, a identity.ActorContext, campaign int64, 
 			return Response{}, fmt.Errorf("%w: no damage room", d.ErrRefused)
 		}
 		st.occurrence.Courage += accepted
-		total, err := s.Store.LockTotalTx(c, sc.Tx, st.occurrence.LogicalServerID, st.occurrence.Generation, a.PlayerID, at)
-		if err != nil {
-			return Response{}, err
-		}
-		total.AddHurt(accepted, at.Unix())
-		if err = s.Store.SaveTotalTx(c, sc.Tx, total, at); err != nil {
+		if err = s.creditBoard(c, sc, st.occurrence.Board(), a.PlayerID, accepted, at); err != nil {
 			return Response{}, err
 		}
 		st.player.SweptDay = st.day
+		st.player.ChallengedDay = st.day
 		st.player.Attempts--
 		if err = s.Store.SavePlayerTx(c, sc.Tx, st.player, at); err != nil {
 			return Response{}, err
 		}
-		body, err := s.settleOccurrence(c, sc, st, catalog, at)
+		body, err := s.terminalBody(c, sc, st.occurrence.Board(), a.PlayerID, accepted)
 		if err != nil {
 			return Response{}, err
 		}
-		body["damage"] = accepted
-		return Response{Body: body}, nil
+		return Response{Body: body}, s.settleDefeats(c, sc, st, catalog, at)
 	})
 }
 
-// settleOccurrence ranks the occurrence after a hit, advances every defeated
-// boss and mails each rank reward once in the same transaction.
-func (s Mode) settleOccurrence(c context.Context, sc gen.TimedScope, st session, catalog d.Catalog, at time.Time) (map[string]any, error) {
-	ranks, err := s.rankEntries(c, sc.Tx, st.occurrence, rankLimit)
+func (s Mode) creditBoard(c context.Context, sc gen.TimedScope, board d.Board, playerID identity.PlayerID, damage int64, at time.Time) error {
+	total, err := s.Store.LockTotalTx(c, sc.Tx, board, playerID, at)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	rank, _ := d.RankOf(ranks, int64(st.player.PlayerID))
-	hurt, err := s.personalHurt(c, sc.Tx, st.occurrence, st.player.PlayerID)
-	if err != nil {
-		return nil, err
-	}
-	pre, err := s.preInfo(c, sc.Tx, ranks, identity.PlayerID(st.player.PlayerID))
-	if err != nil {
-		return nil, err
-	}
-	everyRank, err := s.rankEntries(c, sc.Tx, st.occurrence, mailRanks)
-	if err != nil {
-		return nil, err
-	}
-	generation := st.occurrence.Generation
-	defeated, _ := st.occurrence.Defeat(catalog)
-	if err = s.deliverDefeats(c, sc, st.occurrence.LogicalServerID, catalog, everyRank, generation, defeated, at); err != nil {
-		return nil, err
-	}
-	if err = s.Store.SaveOccurrenceTx(c, sc.Tx, st.occurrence, at); err != nil {
-		return nil, err
-	}
-	body := map[string]any{"total_hurt": hurt, "total_rank": rank}
-	if pre != nil {
-		body["pre_info"] = pre
-	}
-	return body, nil
+	total.AddHurt(damage, at.Unix())
+	return s.Store.SaveTotalTx(c, sc.Tx, total, at)
 }
 
-func (s Mode) deliverDefeats(c context.Context, sc gen.TimedScope, server int64, catalog d.Catalog, ranks []d.RankEntry, generation int64, defeated []int64, at time.Time) error {
-	ordered := d.OrderRank(ranks)
+// settleDefeats advances every defeated boss and mails each of its board's rank
+// rewards once in the same transaction.
+func (s Mode) settleDefeats(c context.Context, sc gen.TimedScope, st session, catalog d.Catalog, at time.Time) error {
+	generation := st.occurrence.Generation
+	defeated, _ := st.occurrence.Defeat(catalog)
+	if err := s.deliverDefeats(c, sc, st.occurrence.LogicalServerID, catalog, generation, defeated, at); err != nil {
+		return err
+	}
+	return s.Store.SaveOccurrenceTx(c, sc.Tx, st.occurrence, at)
+}
+
+// shortcut: every reward mail of a defeat commits inside one 30 s shared-row
+// transaction, split into a settlement outbox if a board outgrows that budget.
+func (s Mode) deliverDefeats(c context.Context, sc gen.TimedScope, server int64, catalog d.Catalog, generation int64, defeated []int64, at time.Time) error {
 	for _, bossID := range defeated {
 		boss, ok := catalog.Boss(bossID)
 		if !ok {
 			return d.ErrUnavailable
 		}
-		for index, entry := range ordered {
+		ranks, err := s.Store.ReadRankTx(c, sc.Tx, d.Board{LogicalServerID: server, Generation: generation, BossID: bossID}, mailRanks)
+		if err != nil {
+			return err
+		}
+		for index, entry := range d.OrderRank(ranks) {
 			reward := catalog.Reward(int64(index + 1))
 			lines := rewardLines(reward, boss)
 			if len(lines) == 0 {
@@ -344,33 +328,27 @@ func rewardLines(reward d.RankReward, boss d.Boss) []grant.Line {
 	return lines
 }
 
-func (s Mode) duplicateSettle(c context.Context, sc gen.TimedScope, st session, request ResultRequest) (map[string]any, error) {
-	ranks, err := s.rankEntries(c, sc.Tx, st.occurrence, rankLimit)
+// terminalBody is the 627/628 reply: the accepted damage and the player's place
+// on the board that damage counted toward.
+func (s Mode) terminalBody(c context.Context, sc gen.TimedScope, board d.Board, playerID identity.PlayerID, damage int64) (map[string]any, error) {
+	ranks, err := s.Store.ReadRankTx(c, sc.Tx, board, rankLimit)
 	if err != nil {
 		return nil, err
 	}
-	rank, _ := d.RankOf(ranks, int64(st.player.PlayerID))
-	hurt, err := s.personalHurt(c, sc.Tx, st.occurrence, st.player.PlayerID)
+	rank, _ := d.RankOf(ranks, int64(playerID))
+	hurt, err := s.personalHurt(c, sc.Tx, board, playerID)
 	if err != nil {
 		return nil, err
 	}
-	pre, err := s.preInfo(c, sc.Tx, ranks, identity.PlayerID(st.player.PlayerID))
+	pre, err := s.preInfo(c, sc.Tx, ranks, playerID)
 	if err != nil {
 		return nil, err
 	}
-	body := map[string]any{"damage": request.Damage, "total_hurt": hurt, "total_rank": rank}
+	body := map[string]any{"damage": damage, "total_hurt": hurt, "total_rank": rank}
 	if pre != nil {
 		body["pre_info"] = pre
 	}
 	return body, nil
-}
-
-func (s Mode) duplicateSweep(c context.Context, sc gen.TimedScope, st session, campaign int64) (map[string]any, error) {
-	damage := st.player.BestHit
-	if damage > d.DamageCap {
-		damage = d.DamageCap
-	}
-	return s.duplicateSettle(c, sc, st, ResultRequest{CampaignID: campaign, Damage: damage})
 }
 
 func formationText(formation []int64) string {

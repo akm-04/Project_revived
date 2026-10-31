@@ -25,16 +25,16 @@ type Store interface {
 	SaveOccurrenceTx(context.Context, tx.Tx, d.Occurrence, time.Time) error
 	ListOccurrencesTx(context.Context, tx.Queryer, int64) ([]d.Occurrence, error)
 	ReadPlayerTx(context.Context, tx.Queryer, identity.PlayerID) (d.Player, bool, error)
-	LockPlayerTx(context.Context, tx.Tx, identity.PlayerID, time.Time) (d.Player, error)
+	LockPlayerTx(context.Context, tx.Tx, int64, identity.PlayerID, time.Time) (d.Player, error)
 	SavePlayerTx(context.Context, tx.Tx, d.Player, time.Time) error
-	LockTotalTx(context.Context, tx.Tx, int64, int64, identity.PlayerID, time.Time) (d.Total, error)
-	ReadTotalTx(context.Context, tx.Queryer, int64, int64, identity.PlayerID) (d.Total, bool, error)
+	LockTotalTx(context.Context, tx.Tx, d.Board, identity.PlayerID, time.Time) (d.Total, error)
+	ReadTotalTx(context.Context, tx.Queryer, d.Board, identity.PlayerID) (d.Total, bool, error)
 	SaveTotalTx(context.Context, tx.Tx, d.Total, time.Time) error
-	ReadRankTx(context.Context, tx.Queryer, int64, int64, int64) ([]d.RankEntry, error)
+	ReadRankTx(context.Context, tx.Queryer, d.Board, int64) ([]d.RankEntry, error)
 	InsertAttemptTx(context.Context, tx.Tx, d.Attempt) error
 	FindAttemptTx(context.Context, tx.Queryer, identity.PlayerID, int64, int64) (d.Attempt, bool, error)
 	SaveAttemptTx(context.Context, tx.Tx, d.Attempt) error
-	CountChallengersTx(context.Context, tx.Queryer, int64) (int64, error)
+	CountChallengersTx(context.Context, tx.Queryer, int64, int64) (int64, error)
 }
 
 type Content interface {
@@ -55,9 +55,9 @@ type Directory interface {
 	ProfileTx(context.Context, tx.Queryer, identity.PlayerID) (playerdirectory.Profile, bool, error)
 }
 
-// Population supplies the level-90 count of the 22:00 courage increment.
+// Population supplies the per-server level-90 count of the 22:00 courage increment.
 type Population interface {
-	LevelAtLeastCountTx(context.Context, tx.Queryer, int64) (int64, error)
+	LevelAtLeastCountTx(context.Context, tx.Queryer, int64, int64) (int64, error)
 }
 
 // Heroes is the stock roster composer (MID1 key 49) used for purple+ checks.
@@ -123,6 +123,5 @@ type Response struct {
 type session struct {
 	occurrence d.Occurrence
 	player     d.Player
-	total      d.Total
 	day        int64
 }

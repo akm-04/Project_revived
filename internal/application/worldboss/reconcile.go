@@ -48,11 +48,11 @@ func (r Reconciler) Reconcile(c context.Context, timed gen.TimedOperation, limit
 			if updateDay <= current.CourageDay {
 				return nil
 			}
-			level90, err := s.Population.LevelAtLeastCountTx(c, sc.Tx, 90)
+			level90, err := s.Population.LevelAtLeastCountTx(c, sc.Tx, current.LogicalServerID, 90)
 			if err != nil {
 				return err
 			}
-			challengers, err := s.Store.CountChallengersTx(c, sc.Tx, updateDay)
+			challengers, err := s.Store.CountChallengersTx(c, sc.Tx, current.LogicalServerID, updateDay)
 			if err != nil {
 				return err
 			}
@@ -62,13 +62,9 @@ func (r Reconciler) Reconcile(c context.Context, timed gen.TimedOperation, limit
 				return err
 			}
 			current.Courage += d.DailyCourage(level90, challengers)
-			ranks, err := s.rankEntries(c, sc.Tx, current, mailRanks)
-			if err != nil {
-				return err
-			}
 			generation := current.Generation
 			defeated, _ := current.Defeat(catalog)
-			if err = s.deliverDefeats(c, sc, current.LogicalServerID, catalog, ranks, generation, defeated, at); err != nil {
+			if err = s.deliverDefeats(c, sc, current.LogicalServerID, catalog, generation, defeated, at); err != nil {
 				return err
 			}
 			current.CourageDay = updateDay

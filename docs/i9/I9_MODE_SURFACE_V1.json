@@ -13,13 +13,15 @@
   "BATTLE_LEGACY_ENVELOPE": "Old battle envelope; I9-11 decides per MID: compatibility read or INACTIVE.",
   "GOLDEN_HAND": "Fixed-price buy through I5 (D76) with vip num_midas; non-gacha normal play (D77).",
   "INVENTORY_ITEM_USE": "Item use and sell (D77); gift opening of loot boxes stays I10 (I7R11).",
-  "SHOP": "Core shop MIDs 32-35, 37, 38, 2982 are ACTIVE I9-11 (D87); skin, event and discount shops stay with I10 owners."
+  "SHOP": "Core shop MIDs 32-35, 37, 38, 2982 are ACTIVE I9-11 (D87); skin, event and discount shops stay with I10 owners.",
+  "ZHUGE_FESTIVAL": "D361: Zhuge adventure MIDs belong to dated activity 1109, not to Adventure.",
+  "OCCULT_SORCERY_WAR": "D361: 2371, 2372, 2373, 2379 are its solo flow."
  },
  "counts": {
   "by_disposition": {
    "DELIVERED": 185,
-   "ACTIVE": 436,
-   "LATER": 501,
+   "ACTIVE": 434,
+   "LATER": 503,
    "INACTIVE_SUPERSEDED": 40,
    "INACTIVE_D79": 21
   },
@@ -31,7 +33,7 @@
    "I9-10": 112,
    "I9-7": 42,
    "I9-5": 24,
-   "I9-8": 74,
+   "I9-8": 72,
    "I9-9": 46,
    "I9-6": 30
   }
@@ -5970,18 +5972,18 @@
   {
    "mid": 2181,
    "name": "ZHUGE_START_ADVENTURE",
-   "family": "ADVENTURE",
-   "disposition": "ACTIVE",
-   "target": "I9-8",
+   "family": "ZHUGE_FESTIVAL",
+   "disposition": "LATER",
+   "target": "I10/I10.5",
    "v2": "unimplemented",
    "v1": null
   },
   {
    "mid": 2182,
    "name": "ZHUGE_RESET_ADVENTURE",
-   "family": "ADVENTURE",
-   "disposition": "ACTIVE",
-   "target": "I9-8",
+   "family": "ZHUGE_FESTIVAL",
+   "disposition": "LATER",
+   "target": "I10/I10.5",
    "v2": "unimplemented",
    "v1": null
   },
@@ -6141,18 +6143,18 @@
   {
    "mid": 2200,
    "name": "ZHUGE_ADVENTURE_LOG",
-   "family": "ADVENTURE",
-   "disposition": "ACTIVE",
-   "target": "I9-8",
+   "family": "ZHUGE_FESTIVAL",
+   "disposition": "LATER",
+   "target": "I10/I10.5",
    "v2": "unimplemented",
    "v1": null
   },
   {
    "mid": 2201,
    "name": "ZHUGE_ADVENTURE_SPY",
-   "family": "ADVENTURE",
-   "disposition": "ACTIVE",
-   "target": "I9-8",
+   "family": "ZHUGE_FESTIVAL",
+   "disposition": "LATER",
+   "target": "I10/I10.5",
    "v2": "unimplemented",
    "v1": null
   },
@@ -6168,9 +6170,9 @@
   {
    "mid": 2203,
    "name": "ZHUGE_SKIP_ADVENTURE",
-   "family": "ADVENTURE",
-   "disposition": "ACTIVE",
-   "target": "I9-8",
+   "family": "ZHUGE_FESTIVAL",
+   "disposition": "LATER",
+   "target": "I10/I10.5",
    "v2": "unimplemented",
    "v1": null
   },
@@ -6600,27 +6602,27 @@
   {
    "mid": 2371,
    "name": "PREPARE_SINGLE_FIGHT",
-   "family": "SINGLE_DAY",
-   "disposition": "LATER",
-   "target": "I10/I10.5",
+   "family": "OCCULT_SORCERY_WAR",
+   "disposition": "ACTIVE",
+   "target": "I9-8",
    "v2": "unimplemented",
    "v1": null
   },
   {
    "mid": 2372,
    "name": "SINGLE_FIGHT",
-   "family": "SINGLE_DAY",
-   "disposition": "LATER",
-   "target": "I10/I10.5",
+   "family": "OCCULT_SORCERY_WAR",
+   "disposition": "ACTIVE",
+   "target": "I9-8",
    "v2": "unimplemented",
    "v1": null
   },
   {
    "mid": 2373,
    "name": "QUIT_SINGLE_FIGHT",
-   "family": "SINGLE_DAY",
-   "disposition": "LATER",
-   "target": "I10/I10.5",
+   "family": "OCCULT_SORCERY_WAR",
+   "disposition": "ACTIVE",
+   "target": "I9-8",
    "v2": "unimplemented",
    "v1": null
   },
@@ -6672,9 +6674,9 @@
   {
    "mid": 2379,
    "name": "START_SINGLE_FIGHT",
-   "family": "SINGLE_DAY",
-   "disposition": "LATER",
-   "target": "I10/I10.5",
+   "family": "OCCULT_SORCERY_WAR",
+   "disposition": "ACTIVE",
+   "target": "I9-8",
    "v2": "unimplemented",
    "v1": null
   },
@@ -10742,8 +10744,8 @@
    "mid": 8192,
    "name": "SET_ILLUSION_BET",
    "family": "ILLUSION_FANTASY",
-   "disposition": "ACTIVE",
-   "target": "I9-8",
+   "disposition": "LATER",
+   "target": "I10/I10.5",
    "v2": "unimplemented",
    "v1": null
   },
