@@ -450,6 +450,7 @@ func main() {
 			mustRegister(mid, stockruntime.IllusionRoomDispatcher{Authority: authority, Service: illusion})
 		}
 		go runReconcile(ctx, pool, appsharedroom.Reconciler{Service: sharedRooms, Routes: map[string]string{appillusion.RoomFamily: appillusion.RoomNoticeRoute}})
+		go runReconcile(ctx, pool, appillusion.Reconciler{Service: illusion})
 		go runReconcile(ctx, pool, appworldboss.Reconciler{Service: worldBoss})
 	} else {
 		log.Print("I7C-5B/5C/5D/5E/5F Top Floor, 1 on 1, Arena, Conquer School and Champions League routes not registered: GXB_COMBAT_ENTROPY_KEYS is unset")

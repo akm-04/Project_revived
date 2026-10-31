@@ -105,6 +105,24 @@ func (Store) ReadRankTx(ctx context.Context, q tx.Queryer, serverID, openDay, li
 	return results, nil
 }
 
+// ListOccurrencesTx lists one bounded batch of logical-server occurrences for
+// the settlement reconciler.
+func (Store) ListOccurrencesTx(ctx context.Context, q tx.Queryer, limit int64) ([]d.Occurrence, error) {
+	if limit < 1 || limit > 10000 {
+		return nil, d.ErrInvalid
+	}
+	var raw string
+	err := q.QueryRow(ctx, `SELECT COALESCE(jsonb_agg(jsonb_build_object('logical_server_id',logical_server_id,'campaign_id',campaign_id,'pool_hp',pool_hp,'pool_hurt',pool_hurt,'open_day',open_day,'settled_open_day',settled_open_day) ORDER BY logical_server_id),'[]'::jsonb)::text FROM (SELECT * FROM illusion_occurrences ORDER BY logical_server_id LIMIT $1) occurrence`, limit).Scan(&raw)
+	if err != nil {
+		return nil, err
+	}
+	var occurrences []d.Occurrence
+	if err = json.Unmarshal([]byte(raw), &occurrences); err != nil {
+		return nil, err
+	}
+	return occurrences, nil
+}
+
 // InsertAttemptTx replaces the player's abandoned open attempt: a new start
 // supersedes it and it can no longer receive a result.
 func (Store) InsertAttemptTx(ctx context.Context, t tx.Tx, attempt d.Attempt) error {

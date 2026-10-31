@@ -31,11 +31,15 @@ func (s Mode) StartTeam(c context.Context, a identity.ActorContext, op operation
 	if err := s.roomReady(); err != nil {
 		return nil, err
 	}
+	op, err := s.pin(c, op)
+	if err != nil {
+		return nil, err
+	}
 	var attemptID string
 	var report []byte
 	var occurrence d.Occurrence
 	var catalog d.Catalog
-	_, err := s.Rooms.Update(c, a, sr.UpdateRequest{Family: RoomFamilyRef(),
+	_, err = s.Rooms.Update(c, a, sr.UpdateRequest{Family: RoomFamilyRef(),
 		Before: func(c context.Context, t tx.Tx, room sharedroom.Room, at time.Time) error {
 			var err error
 			occurrence, catalog, err = s.lockOccurrence(c, t, room.LogicalServerID, at)

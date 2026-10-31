@@ -1,0 +1,80 @@
+{
+ "name": "i9_8b_illusion",
+ "level": 100,
+ "heroes": [
+  10001062,
+  10001009,
+  10001012,
+  10001014,
+  10001015
+ ],
+ "grants": [
+  {
+   "Kind": "SCALAR_CURRENCY",
+   "ResourceKey": "crystal",
+   "Amount": 1000
+  },
+  {
+   "Kind": "STACK_ITEM",
+   "ItemID": 50001005,
+   "Amount": 600
+  },
+  {
+   "Kind": "STACK_ITEM",
+   "ItemID": 20001001,
+   "Amount": 2
+  },
+  {
+   "Kind": "STACK_ITEM",
+   "ItemID": 20001002,
+   "Amount": 2
+  }
+ ],
+ "steps": [
+  "lua:local backend=xyd.Backend.get() local original=backend.request backend.request=function(self,mid,params,cb,showError,skip,showLoading) return original(self,mid,params,function(code,reply) if mid==xyd.mid.ILLUSION_LOAD_INFO then __vc_il_info=reply elseif mid==xyd.mid.ILLUSION_BUY_TIMES then __vc_il_buy=reply elseif mid==xyd.mid.ILLUSION_FIGHT_RESULT then __vc_il_result={code=code,reply=reply} elseif mid==xyd.mid.LOAD_RANK_LIST then __vc_il_rank=reply elseif mid==xyd.mid.ILLUSION_CREATE_ROOM then __vc_il_room={code=code,reply=reply} end if cb then cb(code,reply) end end,showError,skip,showLoading) end",
+  "lua:local il=xyd.ModelManager.get():loadModel(xyd.ModelType.ILLUSION) il:loadIllusionInfos(function(code) if code~=xyd.error.OK then error('vc-il-enter-'..tostring(code)) end end)",
+  "wait:3",
+  "lua:local il=xyd.ModelManager.get():loadModel(xyd.ModelType.ILLUSION) if not __vc_il_info or __vc_il_info.paradise_info.paradise_id~=100001 or __vc_il_info.paradise_info.count~=0 or __vc_il_info.challenge_times~=5 then error('vc-il-enter-state') end if not il.isOpen or il.id~=100001 then error('vc-il-model-state') end",
+  "lua:local il=xyd.ModelManager.get():loadModel(xyd.ModelType.ILLUSION) il:buyTimes(function(code) if code~=xyd.error.OK then error('vc-il-buy-'..tostring(code)) end end)",
+  "wait:3",
+  "lua:local il=xyd.ModelManager.get():loadModel(xyd.ModelType.ILLUSION) if il.times~=10 or il.buyPre~=1 then error('vc-il-buy-state-'..tostring(il.times)..'/'..tostring(il.buyPre)) end",
+  "lua:local il=xyd.ModelManager.get():loadModel(xyd.ModelType.ILLUSION) xyd.WindowManager.get():openWindow(xyd.WindowName.SelectTeamWnd,{type=xyd.SelectTeamType.ILLUSION,isMercenary=false,allTeamHeros={},campaignID=il.id,campaignType=xyd.CampaignType.ELEMENT})",
+  "wait:3",
+  "lua:local w=xyd.WindowManager.get():getWindow('battle_select_team') if not w then error('vc-il-no-team') end local cards={} local function walk(n) if not n:isVisible() then return end if n:getName()=='layout' then table.insert(cards,n) return end for _,c in ipairs(n:getChildren()) do walk(c) end end walk(w:nodeByName('list_layer')) for _,n in ipairs(cards) do local b=n:getCascadeBoundingBox() __vc.tap(b.x+b.width/2,b.y+b.height/2) end",
+  "wait:1",
+  "lua:xyd.db.campaignAutoStatus:setCampaignAutoStatus(8,true)",
+  "tap:button_battle",
+  "lua:local wm=xyd.WindowManager.get() if wm:getWindow('hero_show') then wm:closeWindow('hero_show') end local s=wm:getWindow('story') if s then s:onEnded() end",
+  "wait:10",
+  "lua:local wm=xyd.WindowManager.get() if wm:getWindow('hero_show') then wm:closeWindow('hero_show') end local s=wm:getWindow('story') if s then s:onEnded() end",
+  "wait:10",
+  "lua:local wm=xyd.WindowManager.get() if wm:getWindow('hero_show') then wm:closeWindow('hero_show') end local s=wm:getWindow('story') if s then s:onEnded() end",
+  "wait:10",
+  "lua:local wm=xyd.WindowManager.get() if wm:getWindow('hero_show') then wm:closeWindow('hero_show') end local s=wm:getWindow('story') if s then s:onEnded() end",
+  "wait:10",
+  "lua:local wm=xyd.WindowManager.get() if wm:getWindow('hero_show') then wm:closeWindow('hero_show') end local s=wm:getWindow('story') if s then s:onEnded() end",
+  "wait:10",
+  "lua:local wm=xyd.WindowManager.get() if wm:getWindow('hero_show') then wm:closeWindow('hero_show') end local s=wm:getWindow('story') if s then s:onEnded() end",
+  "wait:10",
+  "lua:if not __vc_il_result then error('vc-il-battle-did-not-settle') end if __vc_il_result.code~=xyd.error.OK then error('vc-il-result-'..tostring(__vc_il_result.code)) end if not __vc_il_result.reply.rank or not __vc_il_result.reply.highest_hurt then error('vc-il-result-body') end",
+  "lua:xyd.WindowManager.get():closeAllWindows() cc.Director:getInstance():popScene()",
+  "wait:5",
+  "lua:local rl=xyd.ModelManager.get():loadModel(xyd.ModelType.RANK_LIST) rl:loadRankList({24},true,function(code) if code~=xyd.error.OK then error('vc-il-board-'..tostring(code)) end end)",
+  "wait:3",
+  "lua:if not __vc_il_rank or not __vc_il_rank.rank_list or #__vc_il_rank.rank_list~=1 then error('vc-il-board-missing') end local row=__vc_il_rank.rank_list[1] if row.rank_type~=24 or type(row.rank_info)~='table' or type(row.rank_info.my_rank)~='table' then error('vc-il-board-shape') end",
+  "lua:local il=xyd.ModelManager.get():loadModel(xyd.ModelType.ILLUSION) il:createHouse(function(code,reply) if code~=xyd.error.OK then error('vc-il-room-'..tostring(code)) end end)",
+  "wait:3",
+  "lua:local il=xyd.ModelManager.get():loadModel(xyd.ModelType.ILLUSION) local room=__vc_il_room and __vc_il_room.reply if not room or type(room.room_id)~='number' or room.room_id<1 then error('vc-il-room-missing') end if il:getRoomID()~=room.room_id or not il:checkIsMaster(il.selfPlayer.playerID) then error('vc-il-room-state') end"
+ ],
+ "settle_seconds": 10,
+ "expect_ok": [
+  1344,
+  1345,
+  1346,
+  1347,
+  1349,
+  301
+ ],
+ "expect_lua_errors": [],
+ "note": "Illusion opens 00:00-13:58 UTC only; this scenario must run inside that window on an open (non-rest) occurrence day. It drives the stock Illusion model and SelectTeamWnd the Illusion windows call (enter 1344, buy 1345, solo fight 1346/1347, rank 301 subtype 24, create room 1349)."
+}

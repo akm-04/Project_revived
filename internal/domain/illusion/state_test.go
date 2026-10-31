@@ -183,6 +183,33 @@ func TestRollAdvancesChainAfterRestDay(t *testing.T) {
 	}
 }
 
+func TestSettlementDueAndAdvance(t *testing.T) {
+	zone := time.FixedZone("GMT+8", 8*3600)
+	open := time.Date(2026, 10, 31, 8, 0, 0, 0, zone)
+	openDay := modes.Day(open)
+	occurrence := NewOccurrence(1, 100001, openDay)
+	occurrence.PoolHurt = 500
+	if occurrence.SettlementDue(open.Add(13*time.Hour + 57*time.Minute + 59*time.Second)) {
+		t.Fatal("21:57:59 is not due")
+	}
+	if !occurrence.SettlementDue(open.Add(14 * time.Hour)) {
+		t.Fatal("22:00 is due")
+	}
+	if !occurrence.SettlementDue(open.Add(24 * time.Hour)) {
+		t.Fatal("a missed settlement is still due on the rest day")
+	}
+	if occurrence.SettlementDue(open.Add(48 * time.Hour)) {
+		t.Fatal("the next occurrence is not due at its 08:00 opening")
+	}
+	if !occurrence.Advance(sourceCatalog(t)) || occurrence.CampaignID != 100002 || occurrence.OpenDay != openDay+CycleDays ||
+		occurrence.SettledOpenDay != openDay || occurrence.PoolHurt != 0 || occurrence.PoolHP != DefaultPoolHP {
+		t.Fatal("advance", occurrence)
+	}
+	if occurrence.SettlementDue(open.Add(48 * time.Hour)) {
+		t.Fatal("an advanced occurrence settles early")
+	}
+}
+
 func TestPlayerChancesBuysAndBestHit(t *testing.T) {
 	catalog := sourceCatalog(t)
 	player := Player{PlayerID: 7}

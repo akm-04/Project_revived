@@ -236,8 +236,12 @@ func (s Mode) SetPartner(c context.Context, a identity.ActorContext, request Par
 	if err := s.roomReady(); err != nil {
 		return nil, err
 	}
+	op, err := s.pin(c, op)
+	if err != nil {
+		return nil, err
+	}
 	var info map[string]any
-	_, err := s.Rooms.Update(c, a, sr.UpdateRequest{Family: RoomFamilyRef(), Apply: func(c context.Context, sc gen.TimedScope, room *sharedroom.Room) error {
+	_, err = s.Rooms.Update(c, a, sr.UpdateRequest{Family: RoomFamilyRef(), Apply: func(c context.Context, sc gen.TimedScope, room *sharedroom.Room) error {
 		state, err := d.LoadRoomState(room.Payload)
 		if err != nil {
 			return err

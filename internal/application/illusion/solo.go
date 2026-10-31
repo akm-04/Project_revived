@@ -200,6 +200,9 @@ func (s Mode) Settle(c context.Context, a identity.ActorContext, request ResultR
 			return Response{}, err
 		}
 		if current {
+			if err = s.Store.SaveOccurrenceTx(c, sc.Tx, st.occurrence, at); err != nil {
+				return Response{}, err
+			}
 			st.player.RecordHit(accepted, request.CostTime)
 			if err = s.Store.SavePlayerTx(c, sc.Tx, st.player, at); err != nil {
 				return Response{}, err

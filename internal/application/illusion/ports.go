@@ -15,6 +15,7 @@ import (
 	"gxb.local/backend/v2/internal/domain/character"
 	"gxb.local/backend/v2/internal/domain/identity"
 	d "gxb.local/backend/v2/internal/domain/illusion"
+	"gxb.local/backend/v2/internal/domain/mail"
 	"gxb.local/backend/v2/internal/domain/objective"
 	"gxb.local/backend/v2/internal/domain/player"
 	"gxb.local/backend/v2/internal/foundation/ids"
@@ -35,6 +36,7 @@ type Store interface {
 	LockResultTx(context.Context, tx.Tx, int64, int64, int64, identity.PlayerID, time.Time) (d.Result, error)
 	SaveResultTx(context.Context, tx.Tx, int64, int64, int64, d.Result, time.Time) error
 	ReadRankTx(context.Context, tx.Queryer, int64, int64, int64) ([]d.Result, error)
+	ListOccurrencesTx(context.Context, tx.Queryer, int64) ([]d.Occurrence, error)
 	InsertAttemptTx(context.Context, tx.Tx, d.Attempt) error
 	FindLatestAttemptTx(context.Context, tx.Queryer, identity.PlayerID) (d.Attempt, bool, error)
 	SaveAttemptTx(context.Context, tx.Tx, d.Attempt) error
@@ -110,6 +112,12 @@ type Guilds interface {
 	GuildSummaries(context.Context, identity.LogicalServerID) ([]GuildSummary, error)
 }
 
+// Mail is the I5 settlement-mail seam; the source key makes one occurrence's
+// reward idempotent for every recipient.
+type Mail interface {
+	DeliverTx(context.Context, tx.Tx, i5.SettlementMailRequest) (mail.Record, bool, error)
+}
+
 type Mode struct {
 	Timed       gen.TimedRunner
 	Fresh       tx.Queryer
@@ -129,6 +137,7 @@ type Mode struct {
 	Costs       Costs
 	Facts       Facts
 	Guilds      Guilds
+	Mail        Mail
 	Receipts    receipt.Store
 	ReceiptRead receipt.Reader
 }
@@ -136,7 +145,7 @@ type Mode struct {
 func (s Mode) ready() bool {
 	return s.Timed.Binder.Time != nil && s.Fresh != nil && s.Store != nil && s.Content != nil && s.Fence != nil && s.Players != nil &&
 		s.Functions != nil && s.Directory != nil && s.Heroes != nil && s.Combat != nil && s.Privileges != nil && s.Costs != nil &&
-		s.Facts != nil && s.Receipts != nil && s.ReceiptRead != nil
+		s.Facts != nil && s.Mail != nil && s.Receipts != nil && s.ReceiptRead != nil
 }
 
 // StartRequest is the stock 1346 request; a mate's pet is never sent by stock.
