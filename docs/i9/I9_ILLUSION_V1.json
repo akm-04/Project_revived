@@ -1,0 +1,53 @@
+{
+ "schema_version": 1,
+ "contract_id": "I9_ILLUSION_V1",
+ "node": "ROOT/I9/I9-8/I9-8B",
+ "status": "WORKING_RESEARCH_DESIGN_NOT_STAGE_ACCEPTED",
+ "owner": "Illusion: player row 605, boss occurrence 606, rooms through SharedRoom; Combat, I5, Mail, Guild and Ranking keep ownership",
+ "extends": [
+  "I9_PARENT_CONTRACT_V1",
+  "I9_MODE_FRAMEWORK_V1",
+  "I9_MODE_FOUNDATION_V3",
+  "I9_SHARED_ROOM_CORE_V1"
+ ],
+ "mids": [
+  518,
+  1344,
+  1345,
+  1346,
+  1347,
+  1349,
+  1350,
+  1351,
+  1352,
+  1353,
+  1354,
+  1356,
+  1357,
+  1358,
+  1360,
+  1362,
+  1363,
+  1364
+ ],
+ "shared_mids": [
+  1,
+  301
+ ],
+ "policy": "I9_ILLUSION_POLICY_V1 / D366 PRIVATE_POLICY",
+ "design": "stages/I9-8/PLAN.md, research/illusion.md, research/seams.md",
+ "clauses": [
+  "C1 MID 1344 leaves LobbyDispatcher; paradise_id is always a real campaign row; never count>=1 with a terminal id",
+  "C2 Function 43 level 65 refused server side. Boss cycle: open 08:00, close 21:58, settle 22:00 GMT+8, one rest day, next boss, chain cycles after the last",
+  "C3 Solo: 5 free chances per modes.Day, consumed at 1346; 1347 attested, clamped to 12,000,000 and remaining pool; duplicate 30005 with full body",
+  "C4 Buys 1345: buy_paradise_cost by buy_times+1, cap vip.paradise_buy_num, +5, through I5",
+  "C5 Team: 3 seats, master 1 hero and pet, mates 2 heroes, no mate pets; ownership, unique table ids, power at least force/30 and level band enforced; no attempt cost; boss bound at create",
+  "C6 Team fight is a server report via one attempt; master only, all ready; report[1].content is a JSON string; report id readable by 1362",
+  "C7 Team score counts as each member's own result; ties by shorter time; settlement per member once",
+  "C8 Rank 24, 25, 26, 27 through MID 301 from a mode-owned list; guild totals from best hits of current members",
+  "C9 22:00 settlement once per occurrence day by mail: rank band row (first range >= rank), gold equal to 20% of daily best hit, kill bonus; guild coin via community band; guild active points obligation to I9-9",
+  "C10 Invite 1360 is friend notice 6 plus chat; 517 stays dead; 518 carries state, 0 closes; 1350 is authoritative on reconnect",
+  "C11 Shop type 12 waits for I9-11C with paradise_coin already live; 8192 is LATER with activity 1134; 1364 reads a member's frozen team",
+  "C12 Emits FANTASY fight fact for Adventure 10006; channelchat Illusion reader filled; no tutorial server field needed (research q2/05)"
+ ]
+}
