@@ -1,0 +1,52 @@
+{
+ "schema_version": 1,
+ "contract_id": "I9_ADVENTURE_V1",
+ "node": "ROOT/I9/I9-8/I9-8D",
+ "status": "WORKING_RESEARCH_DESIGN_NOT_STAGE_ACCEPTED",
+ "owner": "Adventure: occurrence rows, rooms through SharedRoom; Arena read for opponents; Library keeps favor",
+ "extends": [
+  "I9_PARENT_CONTRACT_V1",
+  "I9_MODE_FRAMEWORK_V1",
+  "I9_MODE_FOUNDATION_V3",
+  "I9_SHARED_ROOM_CORE_V1"
+ ],
+ "mids": [
+  2410,
+  2411,
+  2412,
+  2413,
+  2416,
+  2417,
+  2418,
+  2419,
+  2420,
+  2421,
+  2422,
+  2423,
+  2424,
+  2425,
+  2426,
+  2427,
+  2428,
+  2429,
+  2430,
+  2431
+ ],
+ "shared_mids": [
+  1
+ ],
+ "policy": "I9_ADVENTURE_POLICY_V1 / D368 PRIVATE_POLICY",
+ "design": "stages/I9-8/PLAN.md, research/adventure.md",
+ "clauses": [
+  "C1 Function 68 level 11; 2416 also MID1 detail; list is authoritative, finish push idempotent",
+  "C2 Triggers: one observer in objective RecordTx maps fact kinds to events (sweep 10001, PVP_FIGHT 10004, SUMMON 10005, FANTASY 10006) with table rate, Derive entropy, one active per type; rank amendment D369",
+  "C3 Lifetime end = occurrence time + time_limit; reads after expiry refuse with 35029",
+  "C4 10002 favor never fires until I9-10 ships ADD_FAVOR 840 and only for an owned hero below the favor limit (client crash otherwise); 10003 fires when I9-11 shops debit",
+  "C5 Defense 10001: room created on first info for its occurrence, 6 seats, band ±5, 3 monsters, 3 tries per position per occurrence, attested and clamped",
+  "C6 Illusion 10006: single 2421/2422 attested and clamped; co-op 2411 is one server report, same key to all, awards by mail to all",
+  "C7 PVP 10004: opponent from Arena standings within adventure_fight_ranking_section, robot fallback; is_win = star>0 added beside the report, awards in reply",
+  "C8 Shop and card: price recomputed, debit and grant through I5, 2418 piggyback delta",
+  "C9 Pushes notice 33 occur, 34 finish, 32 room_type 2 and 3; owner leave closes and pushes room_id 0",
+  "C10 Zhuge MIDs not here (D361). channelchat AdventureIllusion reader filled"
+ ]
+}
