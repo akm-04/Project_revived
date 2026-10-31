@@ -31,7 +31,7 @@ func (s Mode) OverlayMID1(c context.Context, q tx.Queryer, a identity.ActorConte
 		}
 		return err
 	}
-	body, err := s.listBody(c, q, a.PlayerID, at)
+	body, err := s.listBody(c, q, a, at)
 	if err != nil {
 		return err
 	}

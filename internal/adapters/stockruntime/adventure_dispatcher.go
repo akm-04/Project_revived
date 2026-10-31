@@ -290,14 +290,17 @@ func failAdventure(err error) httpedge.Response {
 	if errors.Is(err, d.ErrInvalid) {
 		return badAdventure()
 	}
-	if errors.Is(err, d.ErrExpired) || errors.Is(err, sr.ErrAlreadyInRoom) {
+	if errors.Is(err, d.ErrExpired) {
 		return okI5(map[string]any{"error_code": int64(adventureExpired)})
 	}
-	if errors.Is(err, d.ErrRefused) || errors.Is(err, d.ErrUnavailable) || errors.Is(err, economy.ErrInsufficientBalance) || errors.Is(err, economy.ErrUnknownResource) ||
-		errors.Is(err, sr.ErrNotInRoom) || errors.Is(err, sr.ErrNotFound) || errors.Is(err, room.ErrFull) || errors.Is(err, room.ErrKicked) ||
+	if errors.Is(err, d.ErrRefused) || errors.Is(err, economy.ErrInsufficientBalance) ||
+		errors.Is(err, sr.ErrNotInRoom) || errors.Is(err, sr.ErrAlreadyInRoom) || errors.Is(err, sr.ErrNotFound) ||
+		errors.Is(err, room.ErrFull) || errors.Is(err, room.ErrKicked) ||
 		errors.Is(err, room.ErrExpired) || errors.Is(err, room.ErrClosed) || errors.Is(err, room.ErrNotOwner) || errors.Is(err, room.ErrNotSeated) {
 		return okI5(map[string]any{"error_code": int64(1)})
 	}
+	// Server failures (including d.ErrUnavailable and economy.ErrUnknownResource)
+	// are F4 503 answers, never a stock refusal body.
 	return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: err, Body: map[string]any{"error": "adventure_unavailable"}}
 }
 

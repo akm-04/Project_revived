@@ -32,11 +32,11 @@ func (s Mode) List(c context.Context, a identity.ActorContext, op operation.Cont
 	if err = s.admit(c, s.Fresh, a, catalog, at); err != nil {
 		return nil, err
 	}
-	return s.listBody(c, s.Fresh, a.PlayerID, at)
+	return s.listBody(c, s.Fresh, a, at)
 }
 
-func (s Mode) listBody(c context.Context, q tx.Queryer, player identity.PlayerID, at time.Time) (map[string]any, error) {
-	occurrences, err := s.Store.ListOccurrencesTx(c, q, player)
+func (s Mode) listBody(c context.Context, q tx.Queryer, a identity.ActorContext, at time.Time) (map[string]any, error) {
+	occurrences, err := s.Store.ListOccurrencesTx(c, q, a.LogicalServerID, a.PlayerID, at, listLimit)
 	if err != nil {
 		return nil, err
 	}
@@ -54,7 +54,7 @@ func (s Mode) listBody(c context.Context, q tx.Queryer, player identity.PlayerID
 		list[strconv.FormatInt(eventType, 10)] = map[string]any{}
 	}
 	for eventType, occurrence := range listed {
-		list[strconv.FormatInt(eventType, 10)] = map[string]any{"event_info": eventBody(occurrence)}
+		list[strconv.FormatInt(eventType, 10)] = eventBody(occurrence)
 	}
 	return map[string]any{"adventure_list": map[string]any{"list": list}}, nil
 }
@@ -97,34 +97,25 @@ func (s Mode) Info(c context.Context, a identity.ActorContext, tableID int64, op
 	if err != nil {
 		return nil, err
 	}
-	detail, err := s.detail(c, a, catalog, occurrence, op)
+	detail, err := s.detail(c, a, catalog, occurrence, at, op)
 	if err != nil {
 		return nil, err
 	}
 	return map[string]any{"detail": detail}, nil
 }
 
-func (s Mode) detail(c context.Context, a identity.ActorContext, catalog d.Catalog, occurrence d.Occurrence, op operation.Context) (map[string]any, error) {
+func (s Mode) detail(c context.Context, a identity.ActorContext, catalog d.Catalog, occurrence d.Occurrence, at time.Time, op operation.Context) (map[string]any, error) {
 	switch occurrence.EventType {
 	case d.EventBattle:
 		enemy, err := s.opponent(c, s.Fresh, a, catalog, eventOrdinal(op, "adventure.pvp.info/v1", occurrence.SourceKey))
 		if err != nil {
 			return nil, err
 		}
-		if !enemy.PlayerID.Valid() {
-			return map[string]any{"enemy_infos": []any{map[string]any{"player_id": int64(0), "player_name": "", "lev": int64(0)}}}, nil
-		}
-		profile, found, err := s.Directory.ProfileTx(c, s.Fresh, enemy.PlayerID)
+		info, err := s.enemyInfo(c, enemy, at)
 		if err != nil {
 			return nil, err
 		}
-		if !found {
-			return map[string]any{"enemy_infos": []any{}}, nil
-		}
-		return map[string]any{"enemy_infos": []any{map[string]any{
-			"player_id": profile.PlayerID, "player_name": profile.Name, "lev": profile.Level,
-			"avatar_id": profile.AvatarID, "avatar_frame_id": profile.AvatarFrameID,
-		}}}, nil
+		return map[string]any{"enemy_infos": info}, nil
 	case d.EventFavor:
 		gifts := catalog.Limits.FavorGiftRandom
 		if len(gifts) == 0 {
@@ -134,6 +125,56 @@ func (s Mode) detail(c context.Context, a identity.ActorContext, catalog d.Catal
 	default:
 		return map[string]any{}, nil
 	}
+}
+
+// enemyInfo is the single 10004 opponent object the battle window draws: the
+// player fields, the hero rows, the pet row and the robot flag.
+func (s Mode) enemyInfo(c context.Context, enemy Opponent, at time.Time) (map[string]any, error) {
+	info := map[string]any{"player_id": int64(0), "player_name": "", "lev": int64(0), "heroes": []any{}, "is_robot": int64(0)}
+	if len(enemy.TemplateHeroes) > 0 {
+		info["is_robot"] = int64(1)
+		heroes := make([]any, 0, len(enemy.TemplateHeroes))
+		for _, participant := range enemy.TemplateHeroes {
+			if participant.TemplateParams != nil {
+				heroes = append(heroes, participant.TemplateParams)
+			}
+		}
+		info["heroes"] = heroes
+		return info, nil
+	}
+	if !enemy.PlayerID.Valid() {
+		return info, nil
+	}
+	profile, found, err := s.Directory.ProfileTx(c, s.Fresh, enemy.PlayerID)
+	if err != nil {
+		return nil, err
+	}
+	if !found {
+		return info, nil
+	}
+	info["player_id"], info["player_name"], info["lev"] = int64(profile.PlayerID), profile.Name, profile.Level
+	info["avatar_id"], info["avatar_frame_id"] = profile.AvatarID, profile.AvatarFrameID
+	roster, err := s.heroRows(c, s.Fresh, enemy.PlayerID, at)
+	if err != nil {
+		return nil, err
+	}
+	heroes := make([]any, 0, len(enemy.Heroes))
+	for _, heroID := range enemy.Heroes {
+		if row, ok := roster[strconv.FormatInt(heroID, 10)]; ok {
+			heroes = append(heroes, row)
+		}
+	}
+	info["heroes"] = heroes
+	if enemy.PetID > 0 {
+		pets, err := s.petRows(c, s.Fresh, enemy.PlayerID, at)
+		if err != nil {
+			return nil, err
+		}
+		if row, ok := pets[strconv.FormatInt(enemy.PetID, 10)]; ok {
+			info["pet"] = row
+		}
+	}
+	return info, nil
 }
 
 func (s Mode) opponent(c context.Context, q tx.Queryer, a identity.ActorContext, catalog d.Catalog, ordinal uint64) (Opponent, error) {

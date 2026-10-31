@@ -362,10 +362,7 @@ func main() {
 	if fightReady {
 		sharedRooms := appsharedroom.Service{Timed: appgeneration.TimedRunner{Binder: appgeneration.Binder{Time: postgres.AuthoritativeTime{Queryer: pool}}, Runner: runner},
 			Fresh: pool, Store: sharedroomstore.Store{}, Fence: i5db, Players: i4store.PlayerRootLocker{}}
-		fight.Inputs.Rooms = appsharedroom.AdmissionRouter{
-			"ILLUSION": {Store: sharedroomstore.Store{}, Family: appillusion.RoomFamily, Slot: appillusion.RoomSlot},
-			"OCCULT":   {Store: sharedroomstore.Store{}, Family: appoccult.RoomFamily, Slot: appoccult.RoomSlot, ConvenerFirst: true},
-		}
+		fight.Inputs.Rooms = stockruntime.NewAdmissionRouter()
 		worldBoss := canonicalWorldBoss(pool, runner, contentDB, i5db, i5svc, privileges, fight)
 		illusion := canonicalIllusion(pool, runner, contentDB, i5db, i5svc, privileges, fight, guildDB, sharedRooms)
 		ranking.Illusion = illusion
@@ -453,13 +450,14 @@ func main() {
 		for _, mid := range stockruntime.IllusionMIDs {
 			mustRegister(mid, stockruntime.IllusionDispatcher{Authority: authority, Service: illusion})
 		}
+		adventureMode := canonicalAdventure(pool, runner, contentDB, i5db, i5svc, fight, adventureOpponents{Arena: arena, TopFloor: topFloor}, sharedRooms, heroSvc, heroproj.StockHero)
+		// 1362 is shared: Illusion answers its own reports, Adventure the co-op ones.
 		for _, mid := range stockruntime.IllusionRoomMIDs {
-			mustRegister(mid, stockruntime.IllusionRoomDispatcher{Authority: authority, Service: illusion})
+			mustRegister(mid, stockruntime.IllusionRoomDispatcher{Authority: authority, Service: illusion, ReportFallback: adventureMode})
 		}
 		for _, mid := range stockruntime.OccultMIDs {
 			mustRegister(mid, stockruntime.OccultDispatcher{Authority: authority, Service: occultMode})
 		}
-		adventureMode := canonicalAdventure(pool, runner, contentDB, i5db, i5svc, fight, adventureOpponents{Arena: arena, TopFloor: topFloor}, sharedRooms, heroSvc, heroproj.StockHero)
 		for _, mid := range stockruntime.AdventureMIDs {
 			mustRegister(mid, stockruntime.AdventureDispatcher{Authority: authority, Service: adventureMode})
 		}
@@ -467,6 +465,7 @@ func main() {
 		go runReconcile(ctx, pool, appillusion.Reconciler{Service: illusion})
 		go runReconcile(ctx, pool, appworldboss.Reconciler{Service: worldBoss})
 		go runReconcile(ctx, pool, appoccult.Reconciler{Service: occultMode})
+		go runReconcile(ctx, pool, appadventure.Reconciler{Service: adventureMode})
 	} else {
 		log.Print("I7C-5B/5C/5D/5E/5F Top Floor, 1 on 1, Arena, Conquer School and Champions League routes not registered: GXB_COMBAT_ENTROPY_KEYS is unset")
 	}

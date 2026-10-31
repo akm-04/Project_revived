@@ -17,11 +17,11 @@ import (
 
 type Store struct{}
 
-const occurrenceColumns = `player_id,event_type,occurred_at,end_time,special_data,source_key,finished_at`
+const occurrenceColumns = `player_id,logical_server_id,event_type,occurred_at,end_time,special_data,source_key,finished_at`
 
 func readOccurrence(row tx.Row) (d.Occurrence, bool, error) {
 	var out d.Occurrence
-	err := row.Scan(&out.PlayerID, &out.EventType, &out.OccurredAt, &out.EndTime, &out.SpecialData, &out.SourceKey, &out.FinishedAt)
+	err := row.Scan(&out.PlayerID, &out.LogicalServerID, &out.EventType, &out.OccurredAt, &out.EndTime, &out.SpecialData, &out.SourceKey, &out.FinishedAt)
 	if errors.Is(err, kernelstore.ErrNoRows) {
 		return d.Occurrence{}, false, nil
 	}
@@ -52,17 +52,23 @@ func (Store) InsertOccurrenceTx(ctx context.Context, t tx.Tx, occurrence d.Occur
 	if err := occurrence.Validate(); err != nil {
 		return false, err
 	}
-	tag, err := t.Exec(ctx, `INSERT INTO adventure_occurrences(player_id,event_type,occurred_at,end_time,special_data,source_key)VALUES($1,$2,$3,$4,$5,$6) ON CONFLICT DO NOTHING`, int64(occurrence.PlayerID), occurrence.EventType, occurrence.OccurredAt.UTC(), occurrence.EndTime.UTC(), occurrence.SpecialData, occurrence.SourceKey)
+	tag, err := t.Exec(ctx, `INSERT INTO adventure_occurrences(player_id,logical_server_id,event_type,occurred_at,end_time,special_data,source_key)VALUES($1,$2,$3,$4,$5,$6,$7) ON CONFLICT DO NOTHING`, int64(occurrence.PlayerID), int32(occurrence.LogicalServerID), occurrence.EventType, occurrence.OccurredAt.UTC(), occurrence.EndTime.UTC(), occurrence.SpecialData, occurrence.SourceKey)
 	if err != nil {
 		return false, err
 	}
 	return tag.RowsAffected() == 1, nil
 }
 
-// ListOccurrencesTx reads one player's occurrences newest first.
-func (Store) ListOccurrencesTx(ctx context.Context, q tx.Queryer, playerID identity.PlayerID) ([]d.Occurrence, error) {
+// ListOccurrencesTx reads one player's occurrences newest first, bounded and
+// scoped to the owner's logical server.
+func (Store) ListOccurrencesTx(ctx context.Context, q tx.Queryer, server identity.LogicalServerID, playerID identity.PlayerID, at time.Time, limit int64) ([]d.Occurrence, error) {
+	if !server.Valid() || at.IsZero() || limit < 1 || limit > 256 {
+		return nil, d.ErrInvalid
+	}
 	var raw string
-	err := q.QueryRow(ctx, `SELECT COALESCE(jsonb_agg(to_jsonb(o) ORDER BY occurred_at DESC),'[]'::jsonb)::text FROM adventure_occurrences o WHERE player_id=$1`, int64(playerID)).Scan(&raw)
+	err := q.QueryRow(ctx, `SELECT COALESCE(jsonb_agg(to_jsonb(o) ORDER BY o.occurred_at DESC),'[]'::jsonb)::text
+FROM (SELECT * FROM adventure_occurrences WHERE player_id=$1 AND logical_server_id=$2
+ORDER BY (finished_at IS NULL AND end_time>$3) DESC, occurred_at DESC LIMIT $4) o`, int64(playerID), int32(server), at.UTC(), limit).Scan(&raw)
 	if err != nil {
 		return nil, err
 	}
@@ -119,4 +125,61 @@ func (Store) SaveAttemptTx(ctx context.Context, t tx.Tx, attempt d.SingleAttempt
 		return d.ErrUnavailable
 	}
 	return err
+}
+
+// RenameAttemptTx moves the pre-inserted 605 placeholder to the Combat attempt
+// id the caller obtained after START, keeping the 605 lock before Combat's 609.
+func (Store) RenameAttemptTx(ctx context.Context, t tx.Tx, from, to string, playerID identity.PlayerID) error {
+	tag, err := t.Exec(ctx, `UPDATE adventure_single_attempts SET attempt_id=$3 WHERE attempt_id=$1 AND player_id=$2`, from, int64(playerID), to)
+	if err == nil && tag.RowsAffected() != 1 {
+		return d.ErrUnavailable
+	}
+	return err
+}
+
+// DeleteAttemptTx removes a placeholder when START replayed an existing attempt.
+func (Store) DeleteAttemptTx(ctx context.Context, t tx.Tx, attemptID string, playerID identity.PlayerID) error {
+	tag, err := t.Exec(ctx, `DELETE FROM adventure_single_attempts WHERE attempt_id=$1 AND player_id=$2`, attemptID, int64(playerID))
+	if err == nil && tag.RowsAffected() != 1 {
+		return d.ErrUnavailable
+	}
+	return err
+}
+
+func (Store) InsertReportTx(ctx context.Context, t tx.Tx, reportID string, serverID, roomID int64, memberIDs []int64, content string, at time.Time) error {
+	_, err := t.Exec(ctx, `INSERT INTO adventure_reports(report_id,logical_server_id,room_id,member_ids,content,created_at,expires_at)VALUES($1,$2,$3,$4,$5,$6,$6::timestamptz+interval '7 days')`, reportID, serverID, roomID, memberIDs, content, at)
+	return err
+}
+
+// ReadReportTx answers only a seated member of the same logical server and only
+// inside the retention window.
+func (Store) ReadReportTx(ctx context.Context, q tx.Queryer, reportID string, serverID int64, playerID identity.PlayerID, at time.Time) (string, bool, error) {
+	var content string
+	err := q.QueryRow(ctx, `SELECT content FROM adventure_reports WHERE report_id=$1 AND logical_server_id=$2 AND $3=ANY(member_ids) AND expires_at>$4`, reportID, serverID, int64(playerID), at).Scan(&content)
+	if errors.Is(err, kernelstore.ErrNoRows) {
+		return "", false, nil
+	}
+	return content, err == nil, err
+}
+
+// PurgeExpiredReportsTx deletes one bounded batch past retention.
+func (Store) PurgeExpiredReportsTx(ctx context.Context, t tx.Tx, at time.Time, limit int64) (int64, error) {
+	if limit < 1 || limit > 10000 {
+		return 0, d.ErrInvalid
+	}
+	tag, err := t.Exec(ctx, `DELETE FROM adventure_reports WHERE report_id IN (SELECT report_id FROM adventure_reports WHERE expires_at<=$1 ORDER BY expires_at,report_id LIMIT $2)`, at, limit)
+	return tag.RowsAffected(), err
+}
+
+// PurgeOccurrencesTx deletes one bounded batch of finished or expired
+// occurrences older than the retention cutoff.
+func (Store) PurgeOccurrencesTx(ctx context.Context, t tx.Tx, cutoff time.Time, limit int64) (int64, error) {
+	if limit < 1 || limit > 10000 {
+		return 0, d.ErrInvalid
+	}
+	tag, err := t.Exec(ctx, `DELETE FROM adventure_occurrences WHERE ctid IN (
+SELECT ctid FROM adventure_occurrences
+WHERE (finished_at IS NOT NULL AND finished_at<=$1) OR (finished_at IS NULL AND end_time<=$1)
+ORDER BY end_time LIMIT $2)`, cutoff, limit)
+	return tag.RowsAffected(), err
 }

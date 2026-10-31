@@ -13,13 +13,14 @@ import (
 // Occurrence is one player's live or finished adventure event. Its end is the
 // occurrence time plus the event time_limit (C3), and the row is insert-only.
 type Occurrence struct {
-	PlayerID    identity.PlayerID `json:"player_id"`
-	EventType   int64             `json:"event_type"`
-	OccurredAt  time.Time         `json:"occurred_at"`
-	EndTime     time.Time         `json:"end_time"`
-	SpecialData int64             `json:"special_data"`
-	SourceKey   string            `json:"source_key"`
-	FinishedAt  *time.Time        `json:"finished_at"`
+	PlayerID        identity.PlayerID        `json:"player_id"`
+	LogicalServerID identity.LogicalServerID `json:"logical_server_id"`
+	EventType       int64                    `json:"event_type"`
+	OccurredAt      time.Time                `json:"occurred_at"`
+	EndTime         time.Time                `json:"end_time"`
+	SpecialData     int64                    `json:"special_data"`
+	SourceKey       string                   `json:"source_key"`
+	FinishedAt      *time.Time               `json:"finished_at"`
 }
 
 // NewOccurrence fixes the event lifetime (C3) and picks the event's
@@ -33,12 +34,13 @@ func NewOccurrence(factKey string, player identity.PlayerID, event Event, at tim
 	}
 	occurred := at.UTC()
 	return Occurrence{
-		PlayerID:    player,
-		EventType:   event.ID,
-		OccurredAt:  occurred,
-		EndTime:     occurred.Add(time.Duration(event.TimeLimitSeconds) * time.Second),
-		SpecialData: specialDataFor(factKey, event.ID),
-		SourceKey:   factKey,
+		PlayerID:        player,
+		LogicalServerID: identity.LogicalServerID(int64(player) / 100000),
+		EventType:       event.ID,
+		OccurredAt:      occurred,
+		EndTime:         occurred.Add(time.Duration(event.TimeLimitSeconds) * time.Second),
+		SpecialData:     specialDataFor(factKey, event.ID),
+		SourceKey:       factKey,
 	}, nil
 }
 
@@ -58,7 +60,8 @@ func specialDataFor(factKey string, eventType int64) int64 {
 }
 
 func (o Occurrence) Validate() error {
-	if !o.PlayerID.Valid() || strings.TrimSpace(o.SourceKey) == "" || o.OccurredAt.IsZero() {
+	if !o.PlayerID.Valid() || !o.LogicalServerID.Valid() || int64(o.PlayerID)/100000 != int64(o.LogicalServerID) ||
+		strings.TrimSpace(o.SourceKey) == "" || o.OccurredAt.IsZero() {
 		return ErrInvalid
 	}
 	event, ok := Profile(o.EventType)

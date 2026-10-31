@@ -28,12 +28,18 @@ import (
 )
 
 type Store interface {
-	ListOccurrencesTx(context.Context, tx.Queryer, identity.PlayerID) ([]d.Occurrence, error)
+	ListOccurrencesTx(context.Context, tx.Queryer, identity.LogicalServerID, identity.PlayerID, time.Time, int64) ([]d.Occurrence, error)
 	ReadOccurrenceTx(context.Context, tx.Queryer, identity.PlayerID, int64) (d.Occurrence, bool, error)
 	FinishOccurrenceTx(context.Context, tx.Tx, identity.PlayerID, int64, time.Time, time.Time) (bool, error)
 	InsertAttemptTx(context.Context, tx.Tx, d.SingleAttempt) error
 	FindLatestAttemptTx(context.Context, tx.Queryer, identity.PlayerID, int64) (d.SingleAttempt, bool, error)
 	SaveAttemptTx(context.Context, tx.Tx, d.SingleAttempt) error
+	RenameAttemptTx(context.Context, tx.Tx, string, string, identity.PlayerID) error
+	DeleteAttemptTx(context.Context, tx.Tx, string, identity.PlayerID) error
+	InsertReportTx(context.Context, tx.Tx, string, int64, int64, []int64, string, time.Time) error
+	ReadReportTx(context.Context, tx.Queryer, string, int64, identity.PlayerID, time.Time) (string, bool, error)
+	PurgeExpiredReportsTx(context.Context, tx.Tx, time.Time, int64) (int64, error)
+	PurgeOccurrencesTx(context.Context, tx.Tx, time.Time, int64) (int64, error)
 }
 
 type Content interface {

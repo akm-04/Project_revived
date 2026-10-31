@@ -30,6 +30,10 @@ const (
 	NoticeRoute = "adventure.notice.v1"
 
 	attemptLimit = 5 * time.Minute
+
+	listLimit           = 64
+	noticeLimit         = 64
+	occurrenceRetention = 7 * 24 * time.Hour
 )
 
 var singleSummaryPolicy = cd.SummaryPolicy{ID: "I9_ADVENTURE_SINGLE_SUMMARY_V1", Version: 1, MaxStar: d.MaxSoloStar, MaxDamage: illusion.DefaultPoolHP}

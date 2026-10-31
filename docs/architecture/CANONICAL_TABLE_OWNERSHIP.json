@@ -4819,6 +4819,20 @@
       ],
       "write_exceptions": [],
       "migration": "migrations/00102_i9_8d_adventure.sql"
+    },
+    "adventure_reports": {
+      "owner": "adventure",
+      "allowed_query_owners": [
+        "adventure"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/adventurestore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/adventurestore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00102_i9_8d_adventure.sql"
     }
   }
 }

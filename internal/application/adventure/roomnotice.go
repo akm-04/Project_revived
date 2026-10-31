@@ -58,6 +58,10 @@ func (s Mode) ReadRoomNotice(c context.Context, reference string) (RoomNotice, b
 	if err != nil {
 		return RoomNotice{}, false, err
 	}
+	out.Invites, err = s.inviteBodies(c, room, state)
+	if err != nil {
+		return RoomNotice{}, false, err
+	}
 	out.Pushes = roomPushes(state, out.Seated)
 	return out, true, nil
 }
@@ -65,7 +69,7 @@ func (s Mode) ReadRoomNotice(c context.Context, reference string) (RoomNotice, b
 func (s Mode) seatedBodies(c context.Context, room sharedroom.Room, state d.RoomState) ([]PlayerBody, error) {
 	var bodies []PlayerBody
 	for _, member := range room.Members() {
-		body, err := s.roomChangeBody(c, room, state)
+		body, err := s.roomChangeBody(c, room, state, member)
 		if err != nil {
 			return nil, err
 		}
@@ -74,11 +78,15 @@ func (s Mode) seatedBodies(c context.Context, room sharedroom.Room, state d.Room
 	return bodies, nil
 }
 
-func (s Mode) roomChangeBody(c context.Context, room sharedroom.Room, state d.RoomState) (map[string]any, error) {
+func (s Mode) roomChangeBody(c context.Context, room sharedroom.Room, state d.RoomState, viewer identity.PlayerID) (map[string]any, error) {
 	var info map[string]any
 	var err error
 	if state.RoomType == d.RoomTypeDefense {
-		info, err = s.defenseRoomInfo(c, s.Fresh, room, state)
+		detail, detailErr := s.defenseDetail(c, s.Fresh, room, state, viewer)
+		if detailErr != nil {
+			return nil, detailErr
+		}
+		info, _ = detail["room_info"].(map[string]any)
 	} else {
 		info, err = s.coopRoomInfo(c, s.Fresh, room, state)
 	}
@@ -87,6 +95,24 @@ func (s Mode) roomChangeBody(c context.Context, room sharedroom.Room, state d.Ro
 	}
 	return map[string]any{"room_id": room.ID, "room_type": state.RoomType, "room_info": info,
 		"self_info": map[string]any{"room_id": room.ID}}, nil
+}
+
+// inviteBodies are the owner's recorded invites, delivered once per invitee as
+// the stock friend notices 8 and 9.
+func (s Mode) inviteBodies(c context.Context, room sharedroom.Room, state d.RoomState) ([]PlayerBody, error) {
+	if room.Status != sharedroom.StatusOpen || len(state.Invites) == 0 {
+		return nil, nil
+	}
+	info, err := s.memberInfo(c, s.Fresh, room.Owner)
+	if err != nil {
+		return nil, err
+	}
+	bodies := make([]PlayerBody, 0, len(state.Invites))
+	for _, invitee := range state.Invites {
+		bodies = append(bodies, PlayerBody{Player: identity.PlayerID(invitee), Body: map[string]any{
+			"notice_id": room.ID, "room_id": room.ID, "player_info": info}})
+	}
+	return bodies, nil
 }
 
 // removedBodies are the room_id 0 changes of seats that no longer sit here. A
@@ -109,7 +135,7 @@ func (s Mode) removedBodies(c context.Context, room sharedroom.Room, state d.Roo
 			continue
 		}
 		bodies = append(bodies, PlayerBody{Player: seat.Player, Body: map[string]any{
-			"room_id": int64(0), "room_type": state.RoomType, "self_info": map[string]any{"room_id": int64(0)}}})
+			"room_id": room.ID, "room_type": state.RoomType, "self_info": map[string]any{"room_id": int64(0)}}})
 	}
 	return bodies, nil
 }

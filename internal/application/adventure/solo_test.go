@@ -18,7 +18,7 @@ type noticeStore struct {
 	rows []d.Occurrence
 }
 
-func (s *noticeStore) ListOccurrencesTx(context.Context, tx.Queryer, identity.PlayerID) ([]d.Occurrence, error) {
+func (s *noticeStore) ListOccurrencesTx(context.Context, tx.Queryer, identity.LogicalServerID, identity.PlayerID, time.Time, int64) ([]d.Occurrence, error) {
 	return s.rows, nil
 }
 func (s *noticeStore) ReadOccurrenceTx(context.Context, tx.Queryer, identity.PlayerID, int64) (d.Occurrence, bool, error) {
@@ -32,6 +32,24 @@ func (s *noticeStore) FindLatestAttemptTx(context.Context, tx.Queryer, identity.
 	return d.SingleAttempt{}, false, nil
 }
 func (s *noticeStore) SaveAttemptTx(context.Context, tx.Tx, d.SingleAttempt) error { return nil }
+func (s *noticeStore) RenameAttemptTx(context.Context, tx.Tx, string, string, identity.PlayerID) error {
+	return nil
+}
+func (s *noticeStore) DeleteAttemptTx(context.Context, tx.Tx, string, identity.PlayerID) error {
+	return nil
+}
+func (s *noticeStore) InsertReportTx(context.Context, tx.Tx, string, int64, int64, []int64, string, time.Time) error {
+	return nil
+}
+func (s *noticeStore) ReadReportTx(context.Context, tx.Queryer, string, int64, identity.PlayerID, time.Time) (string, bool, error) {
+	return "", false, nil
+}
+func (s *noticeStore) PurgeExpiredReportsTx(context.Context, tx.Tx, time.Time, int64) (int64, error) {
+	return 0, nil
+}
+func (s *noticeStore) PurgeOccurrencesTx(context.Context, tx.Tx, time.Time, int64) (int64, error) {
+	return 0, nil
+}
 
 type fixedTime struct{ at time.Time }
 

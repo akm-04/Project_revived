@@ -45,13 +45,18 @@ func (r NoticeReader) ReadNotices(c context.Context, player identity.PlayerID, _
 	if err != nil {
 		return nil, err
 	}
-	occurrences, err := r.Store.ListOccurrencesTx(c, r.Queryer, player)
+	server := identity.LogicalServerID(int64(player) / 100000)
+	occurrences, err := r.Store.ListOccurrencesTx(c, r.Queryer, server, player, at, noticeLimit)
 	if err != nil {
 		return nil, err
 	}
+	cutoff := at.Add(-occurrenceRetention)
 	out := make([]Notice, 0, len(occurrences))
 	for _, occurrence := range occurrences {
 		if occurrence.Finished() {
+			if occurrence.FinishedAt == nil || occurrence.FinishedAt.Before(cutoff) {
+				continue
+			}
 			out = append(out, Notice{Type: NoticeFinish, TableID: occurrence.EventType, OccurredAt: occurrence.OccurredAt})
 			continue
 		}

@@ -9,6 +9,7 @@ import (
 	cd "gxb.local/backend/v2/internal/domain/combat"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/domain/illusion"
+	"gxb.local/backend/v2/internal/foundation/ids"
 	"gxb.local/backend/v2/internal/foundation/operation"
 )
 
@@ -37,6 +38,14 @@ func (s Mode) StartSingle(c context.Context, a identity.ActorContext, request Fi
 		if err != nil {
 			return nil, err
 		}
+		placeholder, err := ids.NewUUID()
+		if err != nil {
+			return nil, err
+		}
+		attempt := d.SingleAttempt{ID: placeholder.String(), PlayerID: a.PlayerID, EventType: d.EventIllusion, OccurredAt: occurrence.OccurredAt, CreatedAt: at}
+		if err = s.Store.InsertAttemptTx(c, sc.Tx, attempt); err != nil {
+			return nil, err
+		}
 		started, err := s.Combat.StartTx(c, sc.Tx, scope, cb.StartRequest{Actor: a, Locator: locator(a, occurrence, "ADVENTURE_ILLUSION"),
 			GenerationRef:    "ADVENTURE_ILLUSION/" + occurrence.SourceKey,
 			StartFingerprint: startFingerprint(a, sc.Operation.Operation().ID.String(), request.Formation),
@@ -47,13 +56,9 @@ func (s Mode) StartSingle(c context.Context, a identity.ActorContext, request Fi
 			return nil, err
 		}
 		if started.Replayed {
-			return map[string]any{}, nil
+			return map[string]any{}, s.Store.DeleteAttemptTx(c, sc.Tx, placeholder.String(), a.PlayerID)
 		}
-		attempt := d.SingleAttempt{ID: started.Attempt.ID.String(), PlayerID: a.PlayerID, EventType: d.EventIllusion, OccurredAt: occurrence.OccurredAt, CreatedAt: at}
-		if err = s.Store.InsertAttemptTx(c, sc.Tx, attempt); err != nil {
-			return nil, err
-		}
-		return map[string]any{}, nil
+		return map[string]any{}, s.Store.RenameAttemptTx(c, sc.Tx, placeholder.String(), started.Attempt.ID.String(), a.PlayerID)
 	})
 }
 
@@ -97,9 +102,14 @@ func (s Mode) SettleSingle(c context.Context, a identity.ActorContext, request R
 			return nil, err
 		}
 		if attested.Drained || attested.Attestation.Verdict == cd.VerdictRejected {
-			return nil, d.ErrRefused
+			response.Duplicate = true
+			return map[string]any{}, nil
 		}
 		star, damage := d.ClampSolo(request.Star, request.Damage, illusion.DefaultPoolHP, 0)
+		attempt.Resolved, attempt.Damage = true, damage
+		if err = s.Store.SaveAttemptTx(c, sc.Tx, attempt); err != nil {
+			return nil, err
+		}
 		awards := []any{}
 		if d.IsWin(star) {
 			reward, lines := giftAwards(catalog, catalog.Limits.IllusionGiftSingle)
@@ -107,10 +117,6 @@ func (s Mode) SettleSingle(c context.Context, a identity.ActorContext, request R
 			if err = s.settleGrant(c, sc, a, "illusion_single", occurrence, lines); err != nil {
 				return nil, err
 			}
-		}
-		attempt.Resolved, attempt.Damage = true, damage
-		if err = s.Store.SaveAttemptTx(c, sc.Tx, attempt); err != nil {
-			return nil, err
 		}
 		if _, err = s.finish(c, sc.Tx, a, occurrence, at); err != nil {
 			return nil, err

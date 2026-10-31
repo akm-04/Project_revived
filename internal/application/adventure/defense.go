@@ -51,11 +51,11 @@ func (s Mode) DefenseInfo(c context.Context, a identity.ActorContext, op operati
 	if err != nil {
 		return nil, err
 	}
-	info, err := s.defenseRoomInfo(c, s.Fresh, room, state)
+	detail, err := s.defenseDetail(c, s.Fresh, room, state, a.PlayerID)
 	if err != nil {
 		return nil, err
 	}
-	return map[string]any{"detail": map[string]any{"room_info": info}}, nil
+	return map[string]any{"detail": detail}, nil
 }
 
 func (s Mode) adventureCatalog(c context.Context, q tx.Queryer, op operation.Context) (d.Catalog, error) {
@@ -98,26 +98,31 @@ func (s Mode) ensureDefenseRoom(c context.Context, a identity.ActorContext, cata
 	return room, nil
 }
 
-func (s Mode) defenseRoomInfo(c context.Context, q tx.Queryer, room sharedroom.Room, state d.RoomState) (map[string]any, error) {
+// defenseDetail is the 2417/2425 defense object and the ROOM_CHANGE room_info:
+// room_info is the member list, the position and kill arrays are siblings, and
+// challenge_times is the viewer's tries array indexed by position.
+func (s Mode) defenseDetail(c context.Context, q tx.Queryer, room sharedroom.Room, state d.RoomState, viewer identity.PlayerID) (map[string]any, error) {
 	ids, infos, err := s.roomMembers(c, q, room)
 	if err != nil {
 		return nil, err
 	}
-	positions := make(map[string]any, d.DefenseMonsterCount)
-	monsters := make(map[string]any, d.DefenseMonsterCount)
+	positions := make([]any, d.DefenseMonsterCount)
+	monsters := make([]any, d.DefenseMonsterCount)
 	for position := 1; position <= d.DefenseMonsterCount; position++ {
 		busy := state.Busy[position-1]
-		positions[strconv.Itoa(position)] = map[string]any{"player_id": busy.Player, "busy_type": busy.Type}
-		monsters[strconv.Itoa(position)] = state.Monsters[position-1].Killer
+		positions[position-1] = map[string]any{"player_id": busy.Player, "busy_type": busy.Type}
+		monsters[position-1] = state.Monsters[position-1].Killer
 	}
-	challenges := map[string]any{}
-	for _, member := range ids {
-		tries := state.TriesOf(member)
-		challenges[strconv.FormatInt(member, 10)] = tries
+	tries := state.TriesOf(int64(viewer))
+	challenges := make([]any, len(tries))
+	for index, value := range tries {
+		challenges[index] = value
 	}
 	return map[string]any{
-		"room_id": room.ID, "table_id": d.EventDefense, "owner": int64(room.Owner),
-		"members": ids, "member_infos": infos, "campaign_id": state.CampaignID,
+		"room_info": map[string]any{
+			"room_id": room.ID, "table_id": d.EventDefense, "owner": int64(room.Owner),
+			"members": ids, "member_infos": infos, "campaign_id": state.CampaignID,
+		},
 		"pos_statuses": positions, "monster_statuses": monsters, "challenge_times": challenges,
 	}, nil
 }
@@ -156,11 +161,7 @@ func (s Mode) EnterDefense(c context.Context, a identity.ActorContext, roomID in
 	if err != nil {
 		return nil, err
 	}
-	info, err := s.defenseRoomInfo(c, s.Fresh, joined, state)
-	if err != nil {
-		return nil, err
-	}
-	return map[string]any{"detail": map[string]any{"room_info": info}}, nil
+	return s.defenseDetail(c, s.Fresh, joined, state, a.PlayerID)
 }
 
 // PrepareDefense answers 2412: one try of a monster position is consumed and the
@@ -272,6 +273,9 @@ func (s Mode) DefenseResult(c context.Context, a identity.ActorContext, request 
 			response.Duplicate = true
 			return nil
 		}
+		if state.Busy[position-1] != (d.BusyState{Player: int64(a.PlayerID), Type: 2}) {
+			return fmt.Errorf("%w: the position was not started by this player", d.ErrRefused)
+		}
 		attested, err := s.Combat.AttestSummaryTx(c, sc.Tx, cb.SummaryRequest{Locator: defenseLocator(*room, position),
 			GenerationRef: defenseGeneration(*room, position), TerminalKind: "ADVENTURE_DEFENSE_RESULT", At: at, Policy: defenseSummaryPolicy,
 			Summary: cd.Summary{Star: request.Star, Win: d.IsWin(request.Star), Damage: request.Damage, Formation: request.Formation}})
@@ -298,7 +302,7 @@ func (s Mode) DefenseResult(c context.Context, a identity.ActorContext, request 
 			state.Monsters[position-1] = d.MonsterState{Killer: killer, Solved: true}
 		}
 		state.AddPush(7, int64(a.PlayerID), true, map[string]any{"room_id": room.ID, "monster_pos": position,
-			"pos_status": map[string]any{"player_id": int64(0), "busy_type": int64(0)}, "monster_status": killer})
+			"pos_status": map[string]any{"player_id": int64(0), "busy_type": int64(0)}, "monster_status": monsterKillers(state)})
 		return s.restoreRoom(sc, room, state)
 	}}, op)
 	if err != nil {
@@ -308,13 +312,21 @@ func (s Mode) DefenseResult(c context.Context, a identity.ActorContext, request 
 	if err != nil {
 		return Response{}, err
 	}
-	info, err := s.defenseRoomInfo(c, s.Fresh, room, state)
+	detail, err := s.defenseDetail(c, s.Fresh, room, state, a.PlayerID)
 	if err != nil {
 		return Response{}, err
 	}
-	body := map[string]any{"favor": map[string]any{}, "exps": int64(0), "tutorCoin": int64(0), "star_crystal": int64(0),
-		"awards": map[string]any{"awards": []any{}}, "room_info": info}
+	body := map[string]any{"favor": map[string]any{}, "exps": []any{}, "tutorCoin": int64(0), "star_crystal": int64(0),
+		"awards": map[string]any{"awards": []any{}}, "room_info": detail["room_info"]}
 	return Response{Body: body, Duplicate: response.Duplicate}, nil
+}
+
+func monsterKillers(state d.RoomState) []any {
+	killers := make([]any, d.DefenseMonsterCount)
+	for position := 0; position < d.DefenseMonsterCount; position++ {
+		killers[position] = state.Monsters[position].Killer
+	}
+	return killers
 }
 
 func (s Mode) InviteDefense(c context.Context, a identity.ActorContext, target identity.PlayerID, op operation.Context) (map[string]any, error) {

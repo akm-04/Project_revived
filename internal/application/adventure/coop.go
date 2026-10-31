@@ -71,7 +71,11 @@ func (s Mode) CreateCoop(c context.Context, a identity.ActorContext, op operatio
 	if err != nil {
 		return nil, err
 	}
-	return s.coopRoomInfo(c, s.Fresh, room, state)
+	info, err := s.coopRoomInfo(c, s.Fresh, room, state)
+	if err != nil {
+		return nil, err
+	}
+	return map[string]any{"room_info": info}, nil
 }
 
 // EnterCoop answers 2425 with the function 43 gate and the level band.
@@ -122,7 +126,11 @@ func (s Mode) EnterCoop(c context.Context, a identity.ActorContext, roomID int64
 	if err != nil {
 		return nil, err
 	}
-	return s.coopRoomInfo(c, s.Fresh, joined, state)
+	info, err := s.coopRoomInfo(c, s.Fresh, joined, state)
+	if err != nil {
+		return nil, err
+	}
+	return map[string]any{"room_info": info}, nil
 }
 
 // InviteCoop answers 2427: the target is appended for the room wakeup.
@@ -204,8 +212,11 @@ func (s Mode) EnterTeamFight(c context.Context, a identity.ActorContext, op oper
 		}
 		selfInfos := map[string]any{}
 		for _, member := range room.Members() {
-			pick := state.Pick(int64(member))
-			selfInfos[strconv.FormatInt(int64(member), 10)] = map[string]any{"formation": joinIDs(pick.Heroes), "pet": pick.PetID, "is_prepare": int64(0)}
+			info, err := s.pickBody(c, sc.Tx, member, sc.Operation.DecisionAt(), state.Pick(int64(member)), 0)
+			if err != nil {
+				return err
+			}
+			selfInfos[strconv.FormatInt(int64(member), 10)] = info
 		}
 		state.Phase = "SELECTING"
 		state.AddPush(2, int64(a.PlayerID), true, map[string]any{"self_infos": selfInfos})
@@ -282,7 +293,11 @@ func (s Mode) SelectCoop(c context.Context, a identity.ActorContext, request Pic
 			pick.Heroes = heroes
 		}
 		state.SetPick(int64(a.PlayerID), pick)
-		state.AddPush(3, int64(a.PlayerID), true, map[string]any{"player_id": int64(a.PlayerID), "self_info": map[string]any{"formation": joinIDs(pick.Heroes), "pet": pick.PetID, "is_prepare": int64(0)}})
+		info, err := s.pickBody(c, sc.Tx, a.PlayerID, at, pick, 0)
+		if err != nil {
+			return err
+		}
+		state.AddPush(3, int64(a.PlayerID), true, map[string]any{"player_id": int64(a.PlayerID), "self_info": info})
 		return s.restoreRoom(sc, room, state)
 	}}, op)
 	if err != nil {
@@ -319,7 +334,11 @@ func (s Mode) PrepareCoop(c context.Context, a identity.ActorContext, op operati
 		if ready {
 			prepare = 1
 		}
-		state.AddPush(4, int64(a.PlayerID), true, map[string]any{"player_id": int64(a.PlayerID), "self_info": map[string]any{"formation": joinIDs(pick.Heroes), "pet": pick.PetID, "is_prepare": prepare}})
+		info, err := s.pickBody(c, sc.Tx, a.PlayerID, sc.Operation.DecisionAt(), pick, prepare)
+		if err != nil {
+			return err
+		}
+		state.AddPush(4, int64(a.PlayerID), true, map[string]any{"player_id": int64(a.PlayerID), "self_info": info})
 		return s.restoreRoom(sc, room, state)
 	}}, op)
 	if err != nil {
@@ -441,6 +460,13 @@ func (s Mode) StartCoop(c context.Context, a identity.ActorContext, op operation
 			}
 		}
 		state.AttemptID, state.ReportID, state.Phase, state.Damage = started.Attempt.ID.String(), started.Attempt.ID.String(), "DONE", damage
+		members := make([]int64, 0, len(room.Members()))
+		for _, member := range room.Members() {
+			members = append(members, int64(member))
+		}
+		if err = s.Store.InsertReportTx(c, sc.Tx, state.ReportID, int64(room.LogicalServerID), room.ID, members, string(report), at); err != nil {
+			return err
+		}
 		state.AddPush(5, int64(a.PlayerID), true, map[string]any{"total_damage": damage, "report_key": state.ReportID})
 		if err = s.restoreRoom(sc, room, state); err != nil {
 			return err
@@ -458,6 +484,26 @@ func (s Mode) StartCoop(c context.Context, a identity.ActorContext, op operation
 		return nil, err
 	}
 	return map[string]any{"battle_report": string(report)}, nil
+}
+
+// GetReport serves 1362 the stored co-op report to a seated member of the
+// same logical server, in the report[1].content envelope the client decodes.
+func (s Mode) GetReport(c context.Context, a identity.ActorContext, reportID string, _ operation.Context) (map[string]any, error) {
+	if s.Store == nil || s.Timed.Binder.Time == nil || reportID == "" {
+		return nil, d.ErrUnavailable
+	}
+	at, err := s.Timed.Binder.Time.Now(c)
+	if err != nil {
+		return nil, err
+	}
+	raw, found, err := s.Store.ReadReportTx(c, s.Fresh, reportID, int64(a.LogicalServerID), a.PlayerID, at)
+	if err != nil {
+		return nil, err
+	}
+	if !found {
+		return nil, d.ErrRefused
+	}
+	return map[string]any{"report": []map[string]any{{"content": raw}}}, nil
 }
 
 func (s Mode) coopBattle(c context.Context, sc gen.TimedScope, room sharedroom.Room, state d.RoomState, campaign illusion.Campaign, at time.Time) (cb.BattleRequest, bool, error) {
@@ -555,14 +601,33 @@ func tableIDOf(roster map[string]map[string]any, partnerID int64) int64 {
 	return partnerID
 }
 
-func joinIDs(ids []int64) string {
-	parts := make([]string, 0, len(ids))
-	for _, id := range ids {
-		if id > 0 {
-			parts = append(parts, strconv.FormatInt(id, 10))
+// pickBody is one member's team-window row: the stock hero rows they froze,
+// their pet row when they have one, and the readiness flag.
+func (s Mode) pickBody(c context.Context, q tx.Queryer, player identity.PlayerID, at time.Time, pick d.RoomPick, prepare int64) (map[string]any, error) {
+	roster, err := s.heroRows(c, q, player, at)
+	if err != nil {
+		return nil, err
+	}
+	formation := make([]any, 0, len(pick.Heroes))
+	for _, heroID := range pick.Heroes {
+		if heroID <= 0 {
+			continue
+		}
+		if row, ok := roster[strconv.FormatInt(heroID, 10)]; ok {
+			formation = append(formation, row)
 		}
 	}
-	return strings.Join(parts, "|")
+	info := map[string]any{"formation": formation, "is_prepare": prepare}
+	if pick.PetID > 0 {
+		pets, err := s.petRows(c, q, player, at)
+		if err != nil {
+			return nil, err
+		}
+		if row, ok := pets[strconv.FormatInt(pick.PetID, 10)]; ok {
+			info["pet"] = row
+		}
+	}
+	return info, nil
 }
 
 func coopLocator(room sharedroom.Room) cd.Locator {

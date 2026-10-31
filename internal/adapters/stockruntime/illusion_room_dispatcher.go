@@ -37,9 +37,16 @@ type IllusionRoomPort interface {
 	GetReport(context.Context, string, operation.Context) (map[string]any, error)
 }
 
+// RoomReportFallback reads a report owned by another room family; 1362 is a
+// shared report reader, so the composition decides which owner answers an id.
+type RoomReportFallback interface {
+	GetReport(context.Context, identity.ActorContext, string, operation.Context) (map[string]any, error)
+}
+
 type IllusionRoomDispatcher struct {
-	Authority rt.GameplayAuthorityPort
-	Service   IllusionRoomPort
+	Authority      rt.GameplayAuthorityPort
+	Service        IllusionRoomPort
+	ReportFallback RoomReportFallback
 }
 
 func (o IllusionRoomDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRequest) httpedge.Response {
@@ -153,6 +160,13 @@ func (o IllusionRoomDispatcher) Dispatch(ctx context.Context, req httpedge.Dispa
 			return bad
 		}
 		body, err := o.Service.GetReport(ctx, reportID, op)
+		if err != nil && o.ReportFallback != nil && errors.Is(err, d.ErrRefused) {
+			fallback, fallbackErr := o.ReportFallback.GetReport(ctx, a, reportID, op)
+			if fallbackErr != nil {
+				return failAdventure(fallbackErr)
+			}
+			return okI5(fallback)
+		}
 		if err != nil {
 			return failIllusionRoom(err)
 		}
