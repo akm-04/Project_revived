@@ -67,8 +67,17 @@ func TestI97ATaskBattleRecoveryNative(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if catalog.Frozen(clock.at) {
-		t.Skip("normal Top Floor freeze; host clock unchanged")
+	const admissionGap = 301 * time.Second
+	walkFrozen := func(start time.Time) bool {
+		for challenge := 0; challenge < 10; challenge++ {
+			if catalog.Frozen(start.Add(time.Duration(challenge) * admissionGap)) {
+				return true
+			}
+		}
+		return false
+	}
+	for walkFrozen(clock.at) {
+		clock.at = clock.at.Add(admissionGap)
 	}
 	exec(t, database, `UPDATE player_directory_profiles SET lev=60 WHERE player_id=$1`, int64(actor.PlayerID))
 	current, err := service.Load(ctx, actor, op())
@@ -96,7 +105,7 @@ func TestI97ATaskBattleRecoveryNative(t *testing.T) {
 		if _, err = service.Start(ctx, actor, application.StartCommand{Formation: []int64{hero.PartnerID}, Enemy: current.Enemies[0].Occupant.TableID()}, op()); err != nil {
 			t.Fatalf("normal admission %d: %v", challenge, err)
 		}
-		clock.at = clock.at.Add(301 * time.Second)
+		clock.at = clock.at.Add(admissionGap)
 	}
 	count, err := store.WeeklyChallengesTx(ctx, database, actor.PlayerID, clock.at)
 	if err != nil || count != 10 {

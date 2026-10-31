@@ -125,18 +125,17 @@ func TestTaskModeCatalogValidationAndAdmission(t *testing.T) {
 }
 
 func TestTaskModeExactCompiledCatalog(t *testing.T) {
-	path := os.Getenv("GXB_TOP_FLOOR_TASK_CATALOG")
-	if path == "" {
-		t.Skip("exact task-mode compiler output not supplied")
-	}
-	raw, err := os.ReadFile(path)
+	raw, err := os.ReadFile("../../content/builtin/generated/top_floor_catalog.json")
 	if err != nil {
 		t.Fatal(err)
 	}
-	var catalog TaskModeCatalog
-	if err = json.Unmarshal(raw, &catalog); err != nil {
+	var artifact struct {
+		TaskModes TaskModeCatalog `json:"task_modes"`
+	}
+	if err = json.Unmarshal(raw, &artifact); err != nil {
 		t.Fatal(err)
 	}
+	catalog := artifact.TaskModes
 	if err = catalog.Validate(); err != nil {
 		t.Fatal(err)
 	}

@@ -21,6 +21,12 @@ func TestI97BEnrollmentUsesImmutableSettlementNative(t *testing.T) {
 	service := arenaService(t, database)
 	first, _ := oneOnOnePlayer(t, database, rankingServer(t, database))
 	second, _ := oneOnOnePlayer(t, database, rankingServer(t, database))
+	catalog := arenaCatalog(t, database)
+	season := catalog.SeasonAt(time.Now()).Number
+	// Matchmaking and settlement span the whole season, so earlier tests' players would be offered instead of this pair.
+	exec(t, database, `UPDATE arena_players SET season=LEAST(season,$1-1),defense=jsonb_set(defense,'{heroes}','[]')`, season)
+	exec(t, database, `DELETE FROM arena_settlement_ranks WHERE season=$1`, season)
+	exec(t, database, `DELETE FROM arena_settlements WHERE season=$1`, season)
 	for _, actor := range []identity.ActorContext{first, second} {
 		transaction, err := database.Begin(ctx, tx.Options{})
 		if err != nil {
@@ -42,8 +48,6 @@ func TestI97BEnrollmentUsesImmutableSettlementNative(t *testing.T) {
 	}
 	arenaFight(t, service, first, second.PlayerID, false)
 	arenaFight(t, service, second, first.PlayerID, false)
-	catalog := arenaCatalog(t, database)
-	season := catalog.SeasonAt(time.Now()).Number
 	calendar, err := catalog.Tournament.Rules.Calendar(catalog.SeasonNumbered(season))
 	if err != nil {
 		t.Fatal(err)
