@@ -89,6 +89,17 @@ func TestGiftAwardsAndFormationRules(t *testing.T) {
 	}
 }
 
+func TestRoomPushesRespectAllAndActor(t *testing.T) {
+	state := d.RoomState{}
+	state.AddPush(2, 7001, true, map[string]any{"room_id": int64(5)})
+	state.AddPush(3, 7001, false, map[string]any{"player_id": int64(7001)})
+	seated := []PlayerBody{{Player: 7001}, {Player: 7002}}
+	pushes := roomPushes(state, seated)
+	if len(pushes) != 2 || len(pushes[0].Bodies) != 2 || len(pushes[1].Bodies) != 1 || pushes[1].Bodies[0].Player != 7002 {
+		t.Fatalf("pushes %+v", pushes)
+	}
+}
+
 func TestPVPBattleUsesOpponentDefenseOrRobotTeam(t *testing.T) {
 	actor := identity.ActorContext{PlayerID: identity.PlayerID(7001)}
 	request := FightRequest{Formation: []int64{11, 12}, PetID: 21}

@@ -12,9 +12,11 @@ import (
 	gen "gxb.local/backend/v2/internal/application/generation"
 	"gxb.local/backend/v2/internal/application/i5"
 	"gxb.local/backend/v2/internal/application/playerdirectory"
+	"gxb.local/backend/v2/internal/application/sharedroom"
 	"gxb.local/backend/v2/internal/domain/grant"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/domain/illusion"
+	"gxb.local/backend/v2/internal/domain/mail"
 	"gxb.local/backend/v2/internal/domain/player"
 	"gxb.local/backend/v2/internal/foundation/ids"
 	"gxb.local/backend/v2/internal/foundation/operation"
@@ -55,6 +57,11 @@ type Combat interface {
 	AttestSummaryTx(context.Context, tx.Tx, cb.SummaryRequest) (cb.SummaryAttested, error)
 	Resolve(context.Context, operation.Context, ids.UUID) (cb.Resolved, error)
 	TerminalTx(context.Context, tx.Tx, cb.TerminalRequest) (cb.Settled, error)
+	MonsterWaves(int64) ([][]cb.Participant, error)
+}
+
+type Mail interface {
+	DeliverTx(context.Context, tx.Tx, i5.SettlementMailRequest) (mail.Record, bool, error)
 }
 
 type Costs interface {
@@ -96,11 +103,15 @@ type Mode struct {
 	Grants    Grants
 	Opponents Opponents
 	Wake      Wake
+	Rooms     sharedroom.Service
+	RoomStore sharedroom.Store
+	Mail      Mail
 }
 
 func (s Mode) ready() bool {
 	return s.Timed.Binder.Time != nil && s.Timed.Runner.DB != nil && s.Fresh != nil && s.Store != nil && s.Content != nil &&
-		s.Functions != nil && s.Directory != nil && s.Heroes != nil && s.Combat != nil && s.Costs != nil && s.Grants != nil && s.Opponents != nil && s.Wake != nil
+		s.Functions != nil && s.Directory != nil && s.Heroes != nil && s.Combat != nil && s.Costs != nil && s.Grants != nil && s.Opponents != nil && s.Wake != nil &&
+		s.Rooms.Store != nil && s.RoomStore != nil && s.Mail != nil
 }
 
 type FightRequest struct {

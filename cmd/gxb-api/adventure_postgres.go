@@ -11,24 +11,27 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres/contentstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/i4store"
 	"gxb.local/backend/v2/internal/adapters/postgres/i5store"
+	"gxb.local/backend/v2/internal/adapters/postgres/sharedroomstore"
 	appadventure "gxb.local/backend/v2/internal/application/adventure"
 	apparena "gxb.local/backend/v2/internal/application/arena"
 	"gxb.local/backend/v2/internal/application/combat"
 	gen "gxb.local/backend/v2/internal/application/generation"
 	"gxb.local/backend/v2/internal/application/i5"
 	appwakeup "gxb.local/backend/v2/internal/application/realtimewakeup"
+	appsharedroom "gxb.local/backend/v2/internal/application/sharedroom"
 	apptopfloor "gxb.local/backend/v2/internal/application/topfloor"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
-func canonicalAdventure(p *pg.Pool, r tx.Runner, content contentstore.Store, values i5store.Store, owner i5.Service, fight combat.Service, opponents appadventure.Opponents) appadventure.Mode {
+func canonicalAdventure(p *pg.Pool, r tx.Runner, content contentstore.Store, values i5store.Store, owner i5.Service, fight combat.Service, opponents appadventure.Opponents, rooms appsharedroom.Service) appadventure.Mode {
 	return appadventure.Mode{
 		Timed: gen.TimedRunner{Binder: gen.Binder{Time: pg.AuthoritativeTime{Queryer: p}}, Runner: r},
 		Fresh: p, Store: adventurestore.Store{}, Content: content,
 		Functions: values, Directory: i4store.PlayerDirectoryReader{}, Heroes: fight.Inputs.Heroes, Combat: fight,
 		Costs: i5.MaterialCostDebiter{Store: values, Content: content}, Grants: owner,
 		Opponents: opponents, Wake: adventureWakeup{},
+		Rooms: rooms, RoomStore: sharedroomstore.Store{}, Mail: i5.SettlementMail{Store: values},
 	}
 }
 

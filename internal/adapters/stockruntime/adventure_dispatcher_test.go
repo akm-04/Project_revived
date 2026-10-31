@@ -18,6 +18,7 @@ type adventureStub struct {
 	tableID   int64
 	fight     app.FightRequest
 	result    app.ResultRequest
+	pick      app.PickRequest
 	duplicate bool
 }
 
@@ -47,6 +48,60 @@ func (s *adventureStub) StartSingle(_ context.Context, _ identity.ActorContext, 
 func (s *adventureStub) SettleSingle(_ context.Context, _ identity.ActorContext, request app.ResultRequest, _ operation.Context) (app.Response, error) {
 	s.result = request
 	return app.Response{Body: map[string]any{"awards": []any{}}, Duplicate: s.duplicate}, s.err
+}
+func (s *adventureStub) PrepareDefense(context.Context, identity.ActorContext, int64, operation.Context) (map[string]any, error) {
+	return map[string]any{}, s.err
+}
+func (s *adventureStub) StartDefense(_ context.Context, _ identity.ActorContext, request app.FightRequest, _ int64, _ operation.Context) (map[string]any, error) {
+	s.fight = request
+	return map[string]any{}, s.err
+}
+func (s *adventureStub) DefenseResult(_ context.Context, _ identity.ActorContext, request app.ResultRequest, _ int64, _ operation.Context) (app.Response, error) {
+	s.result = request
+	return app.Response{Body: map[string]any{}, Duplicate: s.duplicate}, s.err
+}
+func (s *adventureStub) QuitDefense(context.Context, identity.ActorContext, int64, operation.Context) (map[string]any, error) {
+	return map[string]any{}, s.err
+}
+func (s *adventureStub) EnterDefense(context.Context, identity.ActorContext, int64, operation.Context) (map[string]any, error) {
+	return map[string]any{}, s.err
+}
+func (s *adventureStub) InviteDefense(context.Context, identity.ActorContext, identity.PlayerID, operation.Context) (map[string]any, error) {
+	return map[string]any{}, s.err
+}
+func (s *adventureStub) KickDefense(context.Context, identity.ActorContext, identity.PlayerID, operation.Context) (map[string]any, error) {
+	return map[string]any{}, s.err
+}
+func (s *adventureStub) ExitDefense(context.Context, identity.ActorContext, operation.Context) (map[string]any, error) {
+	return map[string]any{}, s.err
+}
+func (s *adventureStub) CreateCoop(context.Context, identity.ActorContext, operation.Context) (map[string]any, error) {
+	return map[string]any{}, s.err
+}
+func (s *adventureStub) EnterCoop(context.Context, identity.ActorContext, int64, operation.Context) (map[string]any, error) {
+	return map[string]any{}, s.err
+}
+func (s *adventureStub) InviteCoop(context.Context, identity.ActorContext, identity.PlayerID, operation.Context) (map[string]any, error) {
+	return map[string]any{}, s.err
+}
+func (s *adventureStub) RemoveCoop(context.Context, identity.ActorContext, identity.PlayerID, operation.Context) (map[string]any, error) {
+	return map[string]any{}, s.err
+}
+func (s *adventureStub) ExitCoop(context.Context, identity.ActorContext, operation.Context) (map[string]any, error) {
+	return map[string]any{}, s.err
+}
+func (s *adventureStub) EnterTeamFight(context.Context, identity.ActorContext, operation.Context) (map[string]any, error) {
+	return map[string]any{}, s.err
+}
+func (s *adventureStub) SelectCoop(_ context.Context, _ identity.ActorContext, request app.PickRequest, _ operation.Context) (map[string]any, error) {
+	s.pick = request
+	return map[string]any{}, s.err
+}
+func (s *adventureStub) PrepareCoop(context.Context, identity.ActorContext, operation.Context) (map[string]any, error) {
+	return map[string]any{}, s.err
+}
+func (s *adventureStub) StartCoop(context.Context, identity.ActorContext, operation.Context) (map[string]any, error) {
+	return map[string]any{}, s.err
 }
 
 func adventureRequest(mid uint16, params map[string]any) httpedge.DispatchRequest {

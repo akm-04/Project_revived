@@ -6864,8 +6864,9 @@
    "family": "ADVENTURE",
    "disposition": "ACTIVE",
    "target": "I9-8",
-   "v2": "unimplemented",
-   "v1": null
+   "v2": "implemented",
+   "v1": null,
+   "implementation": "I9-8D working implementation; unqualified"
   },
   {
    "mid": 2411,
@@ -6873,8 +6874,9 @@
    "family": "ADVENTURE",
    "disposition": "ACTIVE",
    "target": "I9-8",
-   "v2": "unimplemented",
-   "v1": null
+   "v2": "implemented",
+   "v1": null,
+   "implementation": "I9-8D working implementation; unqualified"
   },
   {
    "mid": 2412,
@@ -6882,8 +6884,9 @@
    "family": "ADVENTURE",
    "disposition": "ACTIVE",
    "target": "I9-8",
-   "v2": "unimplemented",
-   "v1": null
+   "v2": "implemented",
+   "v1": null,
+   "implementation": "I9-8D working implementation; unqualified"
   },
   {
    "mid": 2413,
@@ -6891,8 +6894,9 @@
    "family": "ADVENTURE",
    "disposition": "ACTIVE",
    "target": "I9-8",
-   "v2": "unimplemented",
-   "v1": null
+   "v2": "implemented",
+   "v1": null,
+   "implementation": "I9-8D working implementation; unqualified"
   },
   {
    "mid": 2416,
@@ -6970,8 +6974,9 @@
    "family": "ADVENTURE",
    "disposition": "ACTIVE",
    "target": "I9-8",
-   "v2": "unimplemented",
-   "v1": null
+   "v2": "implemented",
+   "v1": null,
+   "implementation": "I9-8D working implementation; unqualified"
   },
   {
    "mid": 2424,
@@ -6979,8 +6984,9 @@
    "family": "ADVENTURE",
    "disposition": "ACTIVE",
    "target": "I9-8",
-   "v2": "unimplemented",
-   "v1": null
+   "v2": "implemented",
+   "v1": null,
+   "implementation": "I9-8D working implementation; unqualified"
   },
   {
    "mid": 2425,
@@ -6988,8 +6994,9 @@
    "family": "ADVENTURE",
    "disposition": "ACTIVE",
    "target": "I9-8",
-   "v2": "unimplemented",
-   "v1": null
+   "v2": "implemented",
+   "v1": null,
+   "implementation": "I9-8D working implementation; unqualified"
   },
   {
    "mid": 2426,
@@ -6997,8 +7004,9 @@
    "family": "ADVENTURE",
    "disposition": "ACTIVE",
    "target": "I9-8",
-   "v2": "unimplemented",
-   "v1": null
+   "v2": "implemented",
+   "v1": null,
+   "implementation": "I9-8D working implementation; unqualified"
   },
   {
    "mid": 2427,
@@ -7006,8 +7014,9 @@
    "family": "ADVENTURE",
    "disposition": "ACTIVE",
    "target": "I9-8",
-   "v2": "unimplemented",
-   "v1": null
+   "v2": "implemented",
+   "v1": null,
+   "implementation": "I9-8D working implementation; unqualified"
   },
   {
    "mid": 2428,
@@ -7015,8 +7024,9 @@
    "family": "ADVENTURE",
    "disposition": "ACTIVE",
    "target": "I9-8",
-   "v2": "unimplemented",
-   "v1": null
+   "v2": "implemented",
+   "v1": null,
+   "implementation": "I9-8D working implementation; unqualified"
   },
   {
    "mid": 2429,
@@ -7024,8 +7034,9 @@
    "family": "ADVENTURE",
    "disposition": "ACTIVE",
    "target": "I9-8",
-   "v2": "unimplemented",
-   "v1": null
+   "v2": "implemented",
+   "v1": null,
+   "implementation": "I9-8D working implementation; unqualified"
   },
   {
    "mid": 2430,
@@ -7033,8 +7044,9 @@
    "family": "ADVENTURE",
    "disposition": "ACTIVE",
    "target": "I9-8",
-   "v2": "unimplemented",
-   "v1": null
+   "v2": "implemented",
+   "v1": null,
+   "implementation": "I9-8D working implementation; unqualified"
   },
   {
    "mid": 2431,
@@ -7042,8 +7054,9 @@
    "family": "ADVENTURE",
    "disposition": "ACTIVE",
    "target": "I9-8",
-   "v2": "unimplemented",
-   "v1": null
+   "v2": "implemented",
+   "v1": null,
+   "implementation": "I9-8D working implementation; unqualified"
   },
   {
    "mid": 2432,

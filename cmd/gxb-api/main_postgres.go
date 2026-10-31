@@ -459,11 +459,11 @@ func main() {
 		for _, mid := range stockruntime.OccultMIDs {
 			mustRegister(mid, stockruntime.OccultDispatcher{Authority: authority, Service: occultMode})
 		}
-		adventureMode := canonicalAdventure(pool, runner, contentDB, i5db, i5svc, fight, adventureOpponents{Arena: arena, TopFloor: topFloor})
+		adventureMode := canonicalAdventure(pool, runner, contentDB, i5db, i5svc, fight, adventureOpponents{Arena: arena, TopFloor: topFloor}, sharedRooms)
 		for _, mid := range stockruntime.AdventureMIDs {
 			mustRegister(mid, stockruntime.AdventureDispatcher{Authority: authority, Service: adventureMode})
 		}
-		go runReconcile(ctx, pool, appsharedroom.Reconciler{Service: sharedRooms, Routes: map[string]string{appillusion.RoomFamily: appillusion.RoomNoticeRoute, appoccult.RoomFamily: appoccult.RoomNoticeRoute}})
+		go runReconcile(ctx, pool, appsharedroom.Reconciler{Service: sharedRooms, Routes: map[string]string{appillusion.RoomFamily: appillusion.RoomNoticeRoute, appoccult.RoomFamily: appoccult.RoomNoticeRoute, appadventure.RoomFamily: appadventure.RoomNoticeRoute}})
 		go runReconcile(ctx, pool, appillusion.Reconciler{Service: illusion})
 		go runReconcile(ctx, pool, appworldboss.Reconciler{Service: worldBoss})
 	} else {

@@ -208,6 +208,38 @@ func TestSoloClampAndWinRule(t *testing.T) {
 	}
 }
 
+func TestDefenseClampAndRoomState(t *testing.T) {
+	star, damage := ClampDefense(9, DefenseDamageCap+1)
+	if star != DefenseMaxStar || damage != DefenseDamageCap {
+		t.Fatalf("clamp %d/%d", star, damage)
+	}
+	if star, damage = ClampDefense(-1, -1); star != 0 || damage != 0 {
+		t.Fatalf("clamp negative %d/%d", star, damage)
+	}
+	var state RoomState
+	state.SetTries(7001, []int64{1, 0, 3})
+	if got := state.TriesOf(7001); got[0] != 1 || got[2] != 3 {
+		t.Fatalf("tries %v", got)
+	}
+	state.SetPick(7001, RoomPick{Heroes: []int64{11, 12}, PetID: 21})
+	state.AddPush(2, 7001, true, map[string]any{"room_id": int64(5)})
+	state.AddPush(3, 7001, false, map[string]any{"player_id": int64(7001)})
+	raw, err := state.Encode()
+	if err != nil {
+		t.Fatal(err)
+	}
+	loaded, err := LoadRoomState(raw)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if loaded.Pick(7001).PetID != 21 || len(loaded.Pushes) != 2 || loaded.Pushes[1].Sequence != 2 || loaded.Pushes[1].All {
+		t.Fatalf("room state %+v", loaded)
+	}
+	if loaded.Invited(7001) {
+		t.Fatal("no invite was added")
+	}
+}
+
 func TestGeneratedCatalogPricesAreRecomputed(t *testing.T) {
 	raw, err := os.ReadFile("../../content/builtin/generated/adventure_catalog.json")
 	if err != nil {

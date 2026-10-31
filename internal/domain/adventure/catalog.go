@@ -15,9 +15,10 @@ const (
 	PolicyID      = "I9_ADVENTURE_POLICY_V1"
 	PolicyVersion = 1
 
-	FunctionID       = 68
-	OpenAcademyLevel = 11
-	FantasyOpenLevel = 65
+	FunctionID        = 68
+	OpenAcademyLevel  = 11
+	FantasyFunctionID = 43
+	FantasyOpenLevel  = 65
 
 	EventDefense  int64 = 10001
 	EventFavor    int64 = 10002
@@ -263,6 +264,44 @@ func (c Catalog) ShopPrice(id int64) (int64, bool) {
 		return 0, false
 	}
 	return c.Shop[index].Price, true
+}
+
+// CampaignByID answers one defense campaign row.
+func (c Catalog) CampaignByID(id int64) (DefenseCampaign, bool) {
+	index := slices.IndexFunc(c.Campaigns, func(campaign DefenseCampaign) bool { return campaign.ID == id })
+	if index < 0 {
+		return DefenseCampaign{}, false
+	}
+	return c.Campaigns[index], true
+}
+
+// ClampDefense bounds the attested 2410 star and damage (C5).
+func ClampDefense(star, damage int64) (int64, int64) {
+	if star < 0 {
+		star = 0
+	}
+	if star > DefenseMaxStar {
+		star = DefenseMaxStar
+	}
+	if damage < 0 {
+		damage = 0
+	}
+	if damage > DefenseDamageCap {
+		damage = DefenseDamageCap
+	}
+	return star, damage
+}
+
+// CampaignForLevel picks the defense campaign row whose source level band
+// contains the room owner's level (C5).
+func (c Catalog) CampaignForLevel(level int64) (DefenseCampaign, bool) {
+	index := slices.IndexFunc(c.Campaigns, func(campaign DefenseCampaign) bool {
+		return level >= campaign.MinimumLevel && level <= campaign.MaximumLevel
+	})
+	if index < 0 {
+		return DefenseCampaign{}, false
+	}
+	return c.Campaigns[index], true
 }
 
 // Gift answers the source award vector of a gift row; awards are granted

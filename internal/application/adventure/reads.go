@@ -74,6 +74,9 @@ func (s Mode) Info(c context.Context, a identity.ActorContext, tableID int64, op
 	if _, known := d.Profile(tableID); !known {
 		return nil, d.ErrInvalid
 	}
+	if tableID == d.EventDefense {
+		return s.DefenseInfo(c, a, op)
+	}
 	op, err := s.pin(c, op)
 	if err != nil {
 		return nil, err
