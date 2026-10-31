@@ -1,6 +1,7 @@
 package occult
 
 import (
+	"bytes"
 	"context"
 	"crypto/sha256"
 	"encoding/hex"
@@ -88,6 +89,16 @@ func (s Mode) run(c context.Context, a identity.ActorContext, name string, reque
 		return nil, err
 	}
 	_, res, err := s.Timed.Run(c, op, profile(), tx.Options{Isolation: tx.Serializable}, retry(), timedReceipt{receipt.Resolver{Reader: s.ReceiptRead, Identity: id, Fingerprint: fingerprint}}, func(c context.Context, sc gen.TimedScope) error {
+		prior, found, err := s.ReceiptRead.Find(c, id)
+		if err != nil {
+			return err
+		}
+		if found {
+			if !bytes.Equal(prior.RequestFingerprint[:], fingerprint[:]) {
+				return &receipt.ConflictError{Identity: id}
+			}
+			return json.Unmarshal(prior.ResultPayload, &out)
+		}
 		catalog, err := s.readCatalog(c, sc.Tx, sc.Operation.Operation())
 		if err != nil {
 			return err

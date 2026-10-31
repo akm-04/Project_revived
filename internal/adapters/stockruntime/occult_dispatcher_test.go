@@ -15,17 +15,18 @@ import (
 )
 
 type occultStub struct {
-	err     error
-	created int64
-	teamed  int64
-	joined  int64
-	invited identity.PlayerID
-	kicked  identity.PlayerID
-	started bool
-	settled app.SettleRequest
-	accept  *bool
-	picked  app.FormationRequest
-	key     string
+	err       error
+	created   int64
+	teamed    int64
+	joined    int64
+	invited   identity.PlayerID
+	kicked    identity.PlayerID
+	started   bool
+	settled   app.SettleRequest
+	accept    *bool
+	picked    app.FormationRequest
+	key       string
+	duplicate bool
 }
 
 func (s *occultStub) reply() (map[string]any, error) { return map[string]any{}, s.err }
@@ -81,9 +82,10 @@ func (s *occultStub) QuitFight(context.Context, identity.ActorContext, operation
 func (s *occultStub) ChangePosition(context.Context, identity.ActorContext, int64, operation.Context) (map[string]any, error) {
 	return s.reply()
 }
-func (s *occultStub) Settle(_ context.Context, _ identity.ActorContext, request app.SettleRequest, _ operation.Context) (map[string]any, error) {
+func (s *occultStub) Settle(_ context.Context, _ identity.ActorContext, request app.SettleRequest, _ operation.Context) (app.SettleResponse, error) {
 	s.settled = request
-	return s.reply()
+	body, err := s.reply()
+	return app.SettleResponse{Body: body, Duplicate: s.duplicate}, err
 }
 func (s *occultStub) Sweep(context.Context, identity.ActorContext, int64, operation.Context) (map[string]any, error) {
 	return s.reply()
@@ -183,6 +185,16 @@ func TestOccultReadsSettleFields(t *testing.T) {
 	want := app.SettleRequest{CampaignID: 20011, SubID: 2, Star: 2, PetID: 5, Formation: []int64{11, 12}, Heroes: map[int64]d.HeroStatus{11: {HP: 90, MP: 40}}}
 	if stub.settled.CampaignID != want.CampaignID || stub.settled.SubID != 2 || stub.settled.Star != 2 || stub.settled.PetID != 5 || len(stub.settled.Formation) != 2 || stub.settled.Heroes[11] != want.Heroes[11] {
 		t.Fatalf("settled=%+v", stub.settled)
+	}
+}
+
+func TestOccultDuplicateTerminalAnswersFightExist(t *testing.T) {
+	now := time.Unix(100, 0).UTC()
+	duplicate := OccultDispatcher{Authority: httpAuthority{actor: actorForHTTP(t)}, Service: &occultStub{duplicate: true}}
+	params := map[string]any{"campaign_id": int64(20011), "sub_id": int64(1), "star": int64(3), "formation": "11", "hero_status": map[string]any{}}
+	got := duplicate.Dispatch(context.Background(), illusionRequest(2372, params, now))
+	if got.HTTPStatus != 200 || got.Body["error_code"] != int64(30005) {
+		t.Fatalf("duplicate %d %#v", got.HTTPStatus, got.Body)
 	}
 }
 

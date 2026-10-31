@@ -399,13 +399,22 @@ func (s Mode) ChangePosition(c context.Context, a identity.ActorContext, stayPos
 	})
 }
 
-// Settle answers 2372. The held stage is checked first, so a repeated result
-// finds no hold and is refused; the summary is attested and clamped.
-func (s Mode) Settle(c context.Context, a identity.ActorContext, request SettleRequest, op operation.Context) (map[string]any, error) {
+// SettleResponse is a 2372 reply; a stage that already fell answers the stored
+// state with the stock fight-exists code.
+type SettleResponse struct {
+	Body      map[string]any
+	Duplicate bool
+}
+
+// Settle answers 2372. The held stage is checked first, so a repeated result of
+// a stage that already fell answers fight-exists (30005) with the current state;
+// any other result without a hold is refused. The summary is attested, clamped.
+func (s Mode) Settle(c context.Context, a identity.ActorContext, request SettleRequest, op operation.Context) (SettleResponse, error) {
 	if request.Star < 0 || request.Star > d.MaxStar || len(request.Formation) < 1 || request.PetID < 0 {
-		return nil, d.ErrInvalid
+		return SettleResponse{}, d.ErrInvalid
 	}
-	return s.update(c, a, op, func(c context.Context, sc gen.TimedScope, view *roomView) (map[string]any, error) {
+	var duplicate bool
+	body, err := s.update(c, a, op, func(c context.Context, sc gen.TimedScope, view *roomView) (map[string]any, error) {
 		campaign, err := reachableCampaign(view, request.CampaignID)
 		if err != nil {
 			return nil, err
@@ -414,8 +423,13 @@ func (s Mode) Settle(c context.Context, a identity.ActorContext, request SettleR
 		if err != nil {
 			return nil, err
 		}
-		held := view.state.StagesOf(campaign.ID)[index].InBattle == int64(a.PlayerID)
-		if !held || view.state.FightExpired(view.at.Unix()) {
+		stage := view.state.StagesOf(campaign.ID)[index]
+		if stage.HP <= 0 && stage.InBattle == 0 {
+			duplicate = true
+			reply := map[string]any{"award_info": map[string]any{"awards": []map[string]any{}}}
+			return reply, s.fillState(c, sc, a, view, reply, 0)
+		}
+		if stage.InBattle != int64(a.PlayerID) || view.state.FightExpired(view.at.Unix()) {
 			return nil, fmt.Errorf("%w: no open fight on this stage", d.ErrRefused)
 		}
 		if err = s.attest(c, sc, a, view, campaign, request, index); err != nil {
@@ -439,6 +453,7 @@ func (s Mode) Settle(c context.Context, a identity.ActorContext, request SettleR
 		}
 		return body, s.fillState(c, sc, a, view, body, result.Score)
 	})
+	return SettleResponse{Body: body, Duplicate: duplicate}, err
 }
 
 func (s Mode) attest(c context.Context, sc gen.TimedScope, a identity.ActorContext, view *roomView, campaign d.Campaign, request SettleRequest, index int) error {

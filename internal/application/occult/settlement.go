@@ -73,14 +73,32 @@ func (s Mode) frozenFragment(c context.Context, sc gen.TimedScope, a identity.Ac
 	return &fragment, nil
 }
 
-func (s Mode) grantRewards(c context.Context, sc gen.TimedScope, a identity.ActorContext, operationName, businessKey string, rewards []d.Reward) error {
+// grantRewards pays the display rewards. A unique item already owned at its
+// catalog cap is skipped rather than failing the whole grant (re-pay on sweep
+// or a repeated clear); the reply lists only what was credited.
+func (s Mode) grantRewards(c context.Context, sc gen.TimedScope, a identity.ActorContext, operationName, businessKey string, rewards []d.Reward) ([]d.Reward, error) {
 	lines := make([]grant.Line, 0, len(rewards))
 	for _, reward := range rewards {
 		lines = append(lines, grant.Line{Kind: grant.StackItem, ItemID: reward.ItemID, Amount: reward.Quantity})
 	}
 	plan := grant.Plan{PlayerID: a.PlayerID, Source: grant.SourceIdentity{Domain: "occult", Operation: operationName, BusinessKey: businessKey, Occurrence: businessKey, PolicyVersion: d.PolicyID}, Lines: lines}
-	_, err := s.Values.SettleGrantTx(c, sc.Tx, a, plan, sc.Operation.Operation(), i5.GrantTxOptions{AllowOverflowMail: true})
-	return err
+	result, err := s.Values.SettleGrantTx(c, sc.Tx, a, plan, sc.Operation.Operation(), i5.GrantTxOptions{AllowOverflowMail: true, SkipCappedStacks: true})
+	if err != nil {
+		return nil, err
+	}
+	credited := map[int64]bool{}
+	for _, award := range result.Awards {
+		if award.ItemNum > 0 {
+			credited[award.TableID] = true
+		}
+	}
+	paid := make([]d.Reward, 0, len(rewards))
+	for _, reward := range rewards {
+		if credited[reward.ItemID] {
+			paid = append(paid, reward)
+		}
+	}
+	return paid, nil
 }
 
 func (s Mode) recordFact(c context.Context, sc gen.TimedScope, a identity.ActorContext, kind, businessKey string) error {
@@ -170,10 +188,11 @@ func (s Mode) payClear(c context.Context, sc gen.TimedScope, a identity.ActorCon
 		}
 	}
 	businessKey := fmt.Sprintf("%d:clear:%d", member, view.room.ID)
-	if err = s.grantRewards(c, sc, memberActor, "clear", businessKey, rewards); err != nil {
+	paid, err := s.grantRewards(c, sc, memberActor, "clear", businessKey, rewards)
+	if err != nil {
 		return nil, false, err
 	}
-	return rewards, true, s.recordFact(c, sc, memberActor, clearedFactKind, businessKey)
+	return paid, true, s.recordFact(c, sc, memberActor, clearedFactKind, businessKey)
 }
 
 // fillState completes a fight reply with the room state, tickets and the
@@ -195,7 +214,12 @@ func (s Mode) fillState(c context.Context, sc gen.TimedScope, a identity.ActorCo
 		closed = 1
 	}
 	body["hero_status"] = selfDispatch(view.state, int64(a.PlayerID))
-	body["award_detail"] = map[string]any{"extra_point": int64(0), "point": point, "is_close": closed, "close_time": view.at.Unix(), "start_time": view.state.StartedAt, "progress": tickets.Progress}
+	awardInfo, ok := body["award_info"].(map[string]any)
+	if !ok {
+		awardInfo = map[string]any{"awards": []map[string]any{}}
+		body["award_info"] = awardInfo
+	}
+	awardInfo["award_detail"] = map[string]any{"extra_point": int64(0), "point": point, "is_close": closed, "close_time": view.at.Unix(), "start_time": view.state.StartedAt, "progress": tickets.Progress}
 	piggyback(c, body)
 	return nil
 }
@@ -238,13 +262,14 @@ func (s Mode) Sweep(c context.Context, a identity.ActorContext, chapterID int64,
 			rewards = append(rewards, d.Reward{ItemID: drop.ItemID, Quantity: drop.Count})
 		}
 		businessKey := fmt.Sprintf("%d:sweep:%s", a.PlayerID, sc.Operation.Operation().ID)
-		if err = s.grantRewards(c, sc, a, "sweep", businessKey, rewards); err != nil {
+		paid, err := s.grantRewards(c, sc, a, "sweep", businessKey, rewards)
+		if err != nil {
 			return nil, err
 		}
 		if err = s.recordFact(c, sc, a, sweepFactKind, businessKey); err != nil {
 			return nil, err
 		}
-		body := map[string]any{"awards": rewardRows(rewards)}
+		body := map[string]any{"awards": rewardRows(paid)}
 		ticketBody(body, tickets)
 		return body, nil
 	})

@@ -121,7 +121,7 @@ func (s Service) ApplyStrictRestorationTx(ctx context.Context, t tx.Tx, prepared
 	} else if ok {
 		return GrantResult{}, ErrStrictRestorationAlreadySettled
 	}
-	out, err := s.applyPreparedGrantTx(ctx, t, prepared.actor, prepared.plan, prepared.op, prepared.allowOverflow, prepared.contentRevision, prepared.grantPreflight, prepared.grantIdentity, prepared.grantFingerprint)
+	out, err := s.applyPreparedGrantTx(ctx, t, prepared.actor, prepared.plan, prepared.op, GrantTxOptions{AllowOverflowMail: prepared.allowOverflow}, prepared.contentRevision, prepared.grantPreflight, prepared.grantIdentity, prepared.grantFingerprint)
 	if err != nil {
 		return GrantResult{}, err
 	}
@@ -387,7 +387,7 @@ func (s Service) ApplyHeroPromotionResourcesTx(ctx context.Context, t tx.Tx, pre
 	}
 	out := HeroPromotionResourceResult{Debit: debitResult}
 	if prepared.restoration != nil {
-		gr, err := s.applyPreparedGrantTx(ctx, t, prepared.restoration.actor, prepared.restoration.plan, prepared.restoration.op, prepared.restoration.allowOverflow, prepared.restoration.contentRevision, prepared.restoration.grantPreflight, prepared.restoration.grantIdentity, prepared.restoration.grantFingerprint)
+		gr, err := s.applyPreparedGrantTx(ctx, t, prepared.restoration.actor, prepared.restoration.plan, prepared.restoration.op, GrantTxOptions{AllowOverflowMail: prepared.restoration.allowOverflow}, prepared.restoration.contentRevision, prepared.restoration.grantPreflight, prepared.restoration.grantIdentity, prepared.restoration.grantFingerprint)
 		if err != nil {
 			return HeroPromotionResourceResult{}, err
 		}

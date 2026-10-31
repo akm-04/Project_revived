@@ -1,0 +1,30 @@
+{
+ "name": "i9_8c_occult",
+ "level": 100,
+ "heroes": [
+  10001002
+ ],
+ "occult_ticket_fixture": true,
+ "steps": [
+  "lua:local occ=xyd.ModelManager.get():loadModel(xyd.ModelType.OCCULT) occ:openOccultWindow()",
+  "wait:3",
+  "lua:local wm=xyd.WindowManager.get() if not wm:getWindow('occult') and not wm:getWindow('occult_sub_map') then error('vc-oc-enter-window') end local occ=xyd.ModelManager.get():loadModel(xyd.ModelType.OCCULT) if not occ.baseInfo or occ.baseInfo.room_id~=0 then error('vc-oc-enter-state') end if occ.selfPlayer.occultTicket~=2 then error('vc-oc-enter-ticket-'..tostring(occ.selfPlayer.occultTicket)) end",
+  "lua:local occ=xyd.ModelManager.get():loadModel(xyd.ModelType.OCCULT) occ:createRoom({chapter_id=2,campaign_type=xyd.OccultRoomType.SINGLE_PLAYER},function(code,reply) if code~=xyd.error.OK then __vc_occult_error='create:'..tostring(code) else __vc_occult_created=reply end end)",
+  "wait:3",
+  "lua:if __vc_occult_error then error(__vc_occult_error) end local reply=__vc_occult_created if not reply or not reply.base_info or type(reply.base_info.room_id)~='number' or reply.base_info.room_id<1 then error('vc-oc-create-room') end if reply.occult_ticket~=1 then error('vc-oc-create-ticket-'..tostring(reply.occult_ticket)) end local sp=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_PLAYER) local heroes=sp:getHeros() if not heroes then error('vc-oc-no-heroes') end local formation for _,h in ipairs(heroes) do formation=tostring(h:getHeroID()) break end if not formation then error('vc-oc-no-partner') end __vc_occult={index=0,done=false,error=nil,formation=formation,stages={{20011,1},{20012,1},{20012,2},{20013,1},{20013,2},{20013,3},{20014,1},{20015,1},{20016,1},{20017,1},{20018,1}}} function __vc_occult_advance() local o=__vc_occult if o.error or o.done then return end o.index=o.index+1 local sc=o.stages[o.index] local occ=xyd.ModelManager.get():loadModel(xyd.ModelType.OCCULT) if not sc then o.done=true occ:sweep({chapter_id=2},function(code,reply) if code~=xyd.error.OK then o.error='sweep:'..tostring(code) return end __vc_occult_swept=reply occ:getCampaignLogList({},function(c2,r2) if c2~=xyd.error.OK then o.error='log:'..tostring(c2) return end __vc_occult_logs=r2 end) end) return end occ:startSingleFight({campaign_id=sc[1],sub_id=sc[2]},function(code,reply) if code~=xyd.error.OK then o.error='start:'..sc[1]..':'..sc[2]..':'..tostring(code) return end occ:singleFight({campaign_id=sc[1],sub_id=sc[2],star=3,formation=o.formation,hero_status={},monster_status={}},function(c2,r2) if c2~=xyd.error.OK then o.error='settle:'..sc[1]..':'..sc[2]..':'..tostring(c2) return end occ:handleResponse(r2) __vc_occult_advance() end) end) end __vc_occult_advance()",
+  "wait:40",
+  "lua:local o=__vc_occult if not o then error('vc-oc-no-state') end if o.error then error(o.error) end if not o.done then error('vc-oc-fights-incomplete') end local swept=__vc_occult_swept if not swept or type(swept.awards)~='table' or #swept.awards<1 then error('vc-oc-sweep-missing') end if swept.occult_ticket~=0 then error('vc-oc-sweep-ticket-'..tostring(swept.occult_ticket)) end local logs=__vc_occult_logs if not logs or type(logs.log_list)~='table' or #logs.log_list<1 then error('vc-oc-log-missing') end if logs.log_list[1].log_id~=1 then error('vc-oc-log-type') end",
+  "lua:xyd.WindowManager.get():closeAllWindows() cc.Director:getInstance():popScene()"
+ ],
+ "settle_seconds": 2,
+ "expect_ok": [
+  2362,
+  2366,
+  2379,
+  2372,
+  2385,
+  2380
+ ],
+ "expect_lua_errors": [],
+ "note": "Drives the stock Occult model: enter 2362, create a chapter-2 solo room 2366, start and settle every stage 2379/2372 with the real owned hero, sweep 2385 and read the log 2380. The ticket balance comes from occult_ticket_fixture; 3000-energy accrual is proven by TestI9_8COccultTicketAccrualNative."
+}

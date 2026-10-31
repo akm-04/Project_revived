@@ -23,6 +23,9 @@ import (
 // (C1); 2374-2378, 2382 and 2383 are the co-op fight.
 var OccultMIDs = []uint16{2362, 2363, 2364, 2365, 2366, 2367, 2368, 2369, 2370, 2371, 2372, 2373, 2374, 2375, 2376, 2377, 2378, 2379, 2380, 2382, 2383, 2384, 2385}
 
+// occultFightExist is the stock duplicate-terminal code a repeated 2372 answers.
+const occultFightExist = 30005
+
 type OccultPort interface {
 	Info(context.Context, identity.ActorContext, operation.Context) (map[string]any, error)
 	CampaignInfo(context.Context, identity.ActorContext, int64, operation.Context) (map[string]any, error)
@@ -39,7 +42,7 @@ type OccultPort interface {
 	StartFight(context.Context, identity.ActorContext, int64, int64, operation.Context) (map[string]any, error)
 	QuitFight(context.Context, identity.ActorContext, operation.Context) (map[string]any, error)
 	ChangePosition(context.Context, identity.ActorContext, int64, operation.Context) (map[string]any, error)
-	Settle(context.Context, identity.ActorContext, app.SettleRequest, operation.Context) (map[string]any, error)
+	Settle(context.Context, identity.ActorContext, app.SettleRequest, operation.Context) (app.SettleResponse, error)
 	Sweep(context.Context, identity.ActorContext, int64, operation.Context) (map[string]any, error)
 	TeamInvite(context.Context, identity.ActorContext, int64, int64, operation.Context) (map[string]any, error)
 	TeamAccept(context.Context, identity.ActorContext, int64, int64, bool, operation.Context) (map[string]any, error)
@@ -137,7 +140,14 @@ func (o OccultDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReq
 		if !ok {
 			return bad
 		}
-		body, err = o.Service.Settle(ctx, a, request, op)
+		settled, err := o.Service.Settle(ctx, a, request, op)
+		if err != nil {
+			return failOccult(err)
+		}
+		if settled.Duplicate {
+			settled.Body["error_code"] = int64(occultFightExist)
+		}
+		return okI5(settled.Body)
 	case 2384:
 		position, ok := topFloorInteger(params, "stay_pos", true)
 		if !ok || position <= 0 || !onlyStockGameplayParams(params, "stay_pos") {

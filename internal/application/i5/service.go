@@ -221,6 +221,10 @@ func (s Service) SettleGrant(ctx context.Context, actor identity.ActorContext, p
 // canonical Grant contract. It never changes resource policy/content.
 type GrantTxOptions struct {
 	AllowOverflowMail bool
+	// SkipCappedStacks drops a stack line that would exceed a catalog cap with
+	// no mail overflow policy; a mode that re-pays display rewards uses it so a
+	// once-owned unique item cannot fail the whole grant.
+	SkipCappedStacks bool
 }
 
 // SettleGrantTx settles one semantic Grant inside a caller-owned Wave-A
@@ -237,7 +241,7 @@ func (s Service) SettleGrantTx(ctx context.Context, t tx.Tx, actor identity.Acto
 	if plan.PlayerID != actor.PlayerID {
 		return GrantResult{}, errors.New("grant actor/player mismatch")
 	}
-	return s.settleGrantTx(ctx, t, actor, plan, op, opts.AllowOverflowMail)
+	return s.settleGrantTx(ctx, t, actor, plan, op, opts)
 }
 
 func (s Service) runGrant(ctx context.Context, actor identity.ActorContext, plan grant.Plan, op operation.Context, fenceActor bool) (GrantResult, error) {
@@ -282,7 +286,8 @@ func (s Service) runGrant(ctx context.Context, actor identity.ActorContext, plan
 	return out, nil
 }
 
-func (s Service) settleGrantTx(ctx context.Context, t tx.Tx, actor identity.ActorContext, plan grant.Plan, op operation.Context, allowOverflowMail bool) (GrantResult, error) {
+func (s Service) settleGrantTx(ctx context.Context, t tx.Tx, actor identity.ActorContext, plan grant.Plan, op operation.Context, opts GrantTxOptions) (GrantResult, error) {
+	allowOverflowMail := opts.AllowOverflowMail
 	id, _, err := plan.ReceiptIdentities()
 	if err != nil {
 		return GrantResult{}, err
@@ -333,10 +338,11 @@ func (s Service) settleGrantTx(ctx context.Context, t tx.Tx, actor identity.Acto
 			}
 		}
 	}
-	return s.applyPreparedGrantTx(ctx, t, actor, plan, op, allowOverflowMail, contentRevision, pf, id, fp)
+	return s.applyPreparedGrantTx(ctx, t, actor, plan, op, opts, contentRevision, pf, id, fp)
 }
 
-func (s Service) applyPreparedGrantTx(ctx context.Context, t tx.Tx, actor identity.ActorContext, plan grant.Plan, op operation.Context, allowOverflowMail bool, contentRevision string, pf grantPreflight, id receipt.Identity, fp [32]byte) (GrantResult, error) {
+func (s Service) applyPreparedGrantTx(ctx context.Context, t tx.Tx, actor identity.ActorContext, plan grant.Plan, op operation.Context, opts GrantTxOptions, contentRevision string, pf grantPreflight, id receipt.Identity, fp [32]byte) (GrantResult, error) {
+	allowOverflowMail := opts.AllowOverflowMail
 	now := op.StartedAt.UTC()
 	materializations, err := s.materializePartnerEntityTx(ctx, t, pf, op)
 	if err != nil {
@@ -438,6 +444,9 @@ func (s Service) applyPreparedGrantTx(ctx context.Context, t tx.Tx, actor identi
 				st = economy.StackState{PlayerID: plan.PlayerID, ItemID: line.ItemID, Quantity: 0, StateVersion: 1, AcquiredAt: now, UpdatedAt: now}
 			}
 			cr, err := st.PlanCredit(line.Amount, *policy.Stack, now)
+			if errors.Is(err, economy.ErrStackCapacity) && opts.SkipCappedStacks {
+				continue
+			}
 			if err != nil {
 				return GrantResult{}, err
 			}
@@ -1485,7 +1494,7 @@ func (s Service) Redeem(ctx context.Context, actor identity.ActorContext, rawCod
 			if err := s.validatePartnerEntityLockedTx(txctx, scope.Tx, grantPF); err != nil {
 				return err
 			}
-			gr, err = s.applyPreparedGrantTx(txctx, scope.Tx, actor, rewardPlan, boundOp, true, contentRevision, grantPF, grantID, grantFP)
+			gr, err = s.applyPreparedGrantTx(txctx, scope.Tx, actor, rewardPlan, boundOp, GrantTxOptions{AllowOverflowMail: true}, contentRevision, grantPF, grantID, grantFP)
 			if err != nil {
 				return err
 			}
