@@ -1,5 +1,5 @@
 """Occult (Sorcery War) source tables; D367 values live in I9_OCCULT_POLICY_V1."""
-from decimal import Decimal
+from decimal import Decimal, ROUND_CEILING
 
 CHAPTER_IDS = [1, 2, 3, 4, 5, 6]
 CAMPAIGNS_PER_TYPE = 59
@@ -86,8 +86,29 @@ def build_occult(blobs, parse):
     if route_counts != ROUTES_PER_CHAPTER or len({route['mission_id'] for route in routes}) != sum(ROUTES_PER_CHAPTER.values()):
         raise ValueError('occult awakening route census drift')
 
+    from generate_combat_corpus import parse_monster
+    monster_keys, monster_rows = parse_monster(blobs['data/tables/monster.lua'].data)
+    battles = {row['fight_id']: row for row in table('battle')}
+
+    def stage_total_hp(fight_id):
+        battle = battles.get(str(fight_id))
+        if battle is None:
+            raise ValueError('occult battle missing ' + str(fight_id))
+        total = 0
+        for wave in ('fight_1', 'fight_2', 'fight_3'):
+            for monster_id in _pipe_ints(battle[wave]):
+                row = monster_rows.get(monster_id)
+                if row is None:
+                    raise ValueError('occult monster missing ' + str(monster_id))
+                # The client posts ceil(hp); sum the same ceil per monster.
+                total += int(Decimal(row[monster_keys['total_hp'] - 1]).to_integral_value(rounding=ROUND_CEILING))
+        if total <= 0:
+            raise ValueError('occult stage has no monster HP ' + str(fight_id))
+        return total
+
     campaigns = []
     for row in table('creats_campaign'):
+        fight_ids = _pipe_ints(row['fight_ids'])
         campaigns.append(dict(
             id=int(row['campaign_id']),
             campaign_type=int(row['campaign_type']),
@@ -96,7 +117,8 @@ def build_occult(blobs, parse):
             description=row['campaign_des'],
             start_point=int(row['is_start_point']) != 0,
             unlock_ids=_pipe_ints(row['unlock_id']),
-            fight_ids=_pipe_ints(row['fight_ids']),
+            fight_ids=fight_ids,
+            stage_total_hp=[stage_total_hp(fight_id) for fight_id in fight_ids],
             event_id=int(row['event_id']),
             dialogue=row['creat_dialogue'],
             x=row['x'],

@@ -108,14 +108,13 @@ func (Store) SaveRoomTx(ctx context.Context, t tx.Tx, room d.Room) error {
 	return writeSeats(ctx, t, room)
 }
 
-// ExpiredRoomIDsTx lists expired open rooms, oldest first; a zero server means
-// every logical server.
+// ExpiredRoomIDsTx lists expired open rooms, oldest first. A zero server scans
+// every logical server; only a reconciler that explicitly opted into the
+// cross-server batch passes one.
 func (Store) ExpiredRoomIDsTx(ctx context.Context, q tx.Queryer, server identity.LogicalServerID, at time.Time, limit int) ([]int64, error) {
 	if limit < 1 || limit > gen.MaxReconcileBatch {
 		return nil, d.ErrInvalid
 	}
-	// A zero server reconciles every logical server, matching the other
-	// process-wide reconcile providers.
 	if server.Valid() {
 		return expiredRoomIDs(ctx, q, `SELECT COALESCE(jsonb_agg(room_id),'[]'::jsonb)::text FROM (SELECT room_id FROM shared_rooms WHERE logical_server_id=$1 AND status='OPEN' AND expires_at<=$2 ORDER BY expires_at,room_id LIMIT $3) due`, int32(server), at, limit)
 	}

@@ -225,7 +225,15 @@ func (s Mode) updateRoom(c context.Context, a identity.ActorContext, op operatio
 			if err != nil {
 				return err
 			}
-			return room.SetPayload(encoded, view.at)
+			if err = room.SetPayload(encoded, view.at); err != nil {
+				return err
+			}
+			// A cleared chapter ends the run; the client's sub-map close reads
+			// the next 2362 as no held room instead of looping on progress 1.
+			if view.state.ClearSettled {
+				room.Close(view.at)
+			}
+			return nil
 		}}, op)
 	return body, err
 }

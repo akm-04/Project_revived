@@ -12,13 +12,17 @@ import (
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
-// Reconciler closes expired rooms of one logical server in bounded batches.
-// Routes supplies each family's wakeup route; a family without one still has
-// its authoritative read MID, so the close proceeds without a push.
+// Reconciler closes expired rooms in bounded batches, either of one logical
+// server or, when AllServers is set, across the database. Each room is read and
+// closed under its own server's roots, so the cross-server scan settles every
+// due room independently. Routes supplies each family's wakeup route; a family
+// without one still has its authoritative read MID, so the close proceeds
+// without a push.
 type Reconciler struct {
-	Service Service
-	Server  identity.LogicalServerID
-	Routes  map[string]string
+	Service    Service
+	Server     identity.LogicalServerID
+	AllServers bool
+	Routes     map[string]string
 }
 
 func (r Reconciler) Name() string { return "shared-room" }
@@ -29,7 +33,14 @@ func (r Reconciler) Reconcile(c context.Context, timed gen.TimedOperation, limit
 	if !s.ready() || limit < 1 || limit > gen.MaxReconcileBatch {
 		return out, ErrUnavailable
 	}
-	roomIDs, err := s.Store.ExpiredRoomIDsTx(c, s.Fresh, r.Server, timed.DecisionAt(), limit)
+	if !r.AllServers && !r.Server.Valid() {
+		return out, ErrUnavailable
+	}
+	server := r.Server
+	if r.AllServers {
+		server = 0
+	}
+	roomIDs, err := s.Store.ExpiredRoomIDsTx(c, s.Fresh, server, timed.DecisionAt(), limit)
 	if err != nil {
 		return out, err
 	}

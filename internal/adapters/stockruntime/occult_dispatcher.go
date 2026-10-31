@@ -239,19 +239,20 @@ func occultFormation(params map[string]any) (app.FormationRequest, bool) {
 	return request, allowed && stageOK && partnerOK && positionOK && petOK
 }
 
-// occultSettle reads BattleCreate:occultResult's 2372. monster_status is
-// accepted and ignored: the room owns monster HP.
+// occultSettle reads BattleCreate:occultResult's 2372. Monster HP is the
+// absolute value the client posts; the server bounds it by the catalog maximum.
 func occultSettle(params map[string]any) (app.SettleRequest, bool) {
 	campaign, sub, stageOK := occultStage(params)
 	star, starOK := topFloorInteger(params, "star", true)
 	pet, petOK := topFloorInteger(params, "pet_id", false)
 	formation, formationOK := topFloorFormation(params["formation"])
 	heroes, heroesOK := occultHeroStatus(params["hero_status"])
+	monsters, monstersOK := occultMonsterStatus(params["monster_status"])
 	allowed := onlyStockGameplayParams(params, "campaign_id", "sub_id", "star", "pet_id", "formation", "hero_status", "monster_status")
-	if !allowed || !stageOK || !starOK || !petOK || !formationOK || !heroesOK || star > d.MaxStar || len(formation) > 6 {
+	if !allowed || !stageOK || !starOK || !petOK || !formationOK || !heroesOK || !monstersOK || star > d.MaxStar || len(formation) > 6 {
 		return app.SettleRequest{}, false
 	}
-	return app.SettleRequest{CampaignID: campaign, SubID: sub, Star: star, PetID: pet, Formation: formation, Heroes: heroes}, true
+	return app.SettleRequest{CampaignID: campaign, SubID: sub, Star: star, PetID: pet, Formation: formation, Heroes: heroes, Monsters: monsters}, true
 }
 
 func occultHeroStatus(raw any) (map[int64]d.HeroStatus, bool) {
@@ -274,6 +275,32 @@ func occultHeroStatus(raw any) (map[int64]d.HeroStatus, bool) {
 		heroes[heroID] = d.HeroStatus{HP: hp, MP: mp}
 	}
 	return heroes, true
+}
+
+func occultMonsterStatus(raw any) (map[int64]int64, bool) {
+	// A client that carries no monster row is treated as reporting none; the
+	// stage keeps the HP it had.
+	if raw == nil {
+		return map[int64]int64{}, true
+	}
+	rows, ok := raw.(map[string]any)
+	if !ok {
+		return nil, false
+	}
+	monsters := make(map[int64]int64, len(rows))
+	for key, row := range rows {
+		monsterID, err := strconv.ParseInt(key, 10, 64)
+		fields, isMap := row.(map[string]any)
+		if err != nil || monsterID <= 0 || !isMap {
+			return nil, false
+		}
+		hp, hpOK := topFloorInteger(fields, "hp", true)
+		if !hpOK {
+			return nil, false
+		}
+		monsters[monsterID] = hp
+	}
+	return monsters, true
 }
 
 func failOccult(err error) httpedge.Response {

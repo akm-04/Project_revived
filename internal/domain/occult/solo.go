@@ -16,13 +16,14 @@ type SoloResult struct {
 	Score int64
 }
 
-func clampPercent(reported, authority int64) int64 {
-	return max(min(reported, authority), 0)
+func clamp(value, low, high int64) int64 {
+	return max(min(value, high), low)
 }
 
 // ApplySolo clamps a reported result, writes hero_status as the next stage's
-// HP authority and, on a win, empties the stage. The player must hold the stage.
-func (s *RunState) ApplySolo(playerID, campaignID int64, index int, report SoloReport) (SoloResult, error) {
+// absolute HP authority and, on a win, empties the stage. A loss stores the
+// monster HP the client reported. The player must hold the stage.
+func (s *RunState) ApplySolo(playerID, campaignID int64, index int, report SoloReport, heroLimits map[int64]int64, monsterRemaining int64, monsterReported bool) (SoloResult, error) {
 	stage, err := s.stage(campaignID, index)
 	if err != nil {
 		return SoloResult{}, err
@@ -36,9 +37,16 @@ func (s *RunState) ApplySolo(playerID, campaignID int64, index int, report SoloR
 	}
 	slices.Sort(heroIDs)
 	for _, heroID := range heroIDs {
-		authority := s.Status(playerID, heroID)
+		limit, known := heroLimits[heroID]
+		if !known || limit <= 0 {
+			return SoloResult{}, ErrInvalid
+		}
 		reported := report.Heroes[heroID]
-		clamped := HeroStatus{HP: clampPercent(reported.HP, authority.HP), MP: clampPercent(reported.MP, authority.MP)}
+		hpCeiling, mpCeiling := limit, int64(MaxEnergy)
+		if prior, recorded := s.Status(playerID, heroID); recorded {
+			hpCeiling, mpCeiling = min(prior.HP, limit), min(prior.MP, int64(MaxEnergy))
+		}
+		clamped := HeroStatus{HP: clamp(reported.HP, 0, hpCeiling), MP: clamp(reported.MP, 0, mpCeiling), LimitHP: limit}
 		if err := s.setStatus(playerID, heroID, clamped); err != nil {
 			return SoloResult{}, err
 		}
@@ -48,6 +56,9 @@ func (s *RunState) ApplySolo(playerID, campaignID int64, index int, report SoloR
 	if result.Won {
 		stage.HP = 0
 		s.Points += result.Score
+	}
+	if !result.Won && monsterReported && monsterRemaining > 0 {
+		stage.HP = min(stage.HP, clamp(monsterRemaining, 1, stage.TotalHP))
 	}
 	stage.InBattle = 0
 	return result, nil

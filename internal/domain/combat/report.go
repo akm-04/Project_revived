@@ -158,14 +158,23 @@ func (p ReportPolicy) judgeStatuses(statuses []ActorStatus, frozen func(ActorSta
 	return VerdictAccepted, ""
 }
 
-// frozenHP is the actor's frozen HP attribute; an actor without battle totals
-// (a template) is bounded by the family's absolute cap only.
-func frozenHP(a Actor) float64 {
+// FrozenHP is the actor's frozen HP attribute when the battle totals carry one.
+func FrozenHP(battleTotals json.RawMessage) (float64, bool) {
 	var totals struct {
 		Total []float64 `json:"total"`
 	}
-	if json.Unmarshal(a.BattleTotals, &totals) != nil || len(totals.Total) <= stockHPAttribute {
+	if json.Unmarshal(battleTotals, &totals) != nil || len(totals.Total) <= stockHPAttribute {
+		return 0, false
+	}
+	return totals.Total[stockHPAttribute], true
+}
+
+// frozenHP is the actor's frozen HP attribute; an actor without battle totals
+// (a template) is bounded by the family's absolute cap only.
+func frozenHP(a Actor) float64 {
+	value, ok := FrozenHP(a.BattleTotals)
+	if !ok {
 		return math.Inf(1)
 	}
-	return totals.Total[stockHPAttribute]
+	return value
 }

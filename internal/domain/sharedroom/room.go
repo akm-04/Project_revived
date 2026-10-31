@@ -298,6 +298,15 @@ func (r *Room) ExtendLease(expiresAt, at time.Time) error {
 	return nil
 }
 
+// Close ends an open room before its lease for the family's own reason.
+func (r *Room) Close(at time.Time) bool {
+	if r.Status != StatusOpen {
+		return false
+	}
+	r.close(at)
+	return true
+}
+
 // Expire closes an open room whose lease has ended and reports the close.
 func (r *Room) Expire(at time.Time) bool {
 	if r.Status != StatusOpen || at.Before(r.ExpiresAt) {

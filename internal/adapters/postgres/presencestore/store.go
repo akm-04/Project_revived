@@ -293,6 +293,20 @@ func (s Store) ReadManyAt(ctx context.Context, playerIDs []identity.PlayerID, ob
 	return out, nil
 }
 
+// OnlineAt reports the live connection state of the players at one observation
+// instant; a player without a presence row is offline.
+func (s Store) OnlineAt(ctx context.Context, playerIDs []identity.PlayerID, observedAt time.Time) (map[identity.PlayerID]bool, error) {
+	observations, err := s.ReadManyAt(ctx, playerIDs, observedAt)
+	if err != nil {
+		return nil, err
+	}
+	states := make(map[identity.PlayerID]bool, len(observations))
+	for player, observation := range observations {
+		states[player] = observation.IsOnline
+	}
+	return states, nil
+}
+
 const expiredPlayersSQL = `
 SELECT COALESCE(jsonb_agg(player_id ORDER BY player_id),'[]'::jsonb)::text
 FROM (

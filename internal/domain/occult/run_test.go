@@ -153,30 +153,34 @@ func TestStagesInBattleArePlayerIDs(t *testing.T) {
 func TestSoloResultClampsAndHeroStatusIsAuthority(t *testing.T) {
 	run := NewRun(2, SingleCampaignType)
 	_ = run.BindStages(20002, []int64{500})
-	if _, err := run.ApplySolo(11, 20002, 0, SoloReport{Star: 3}); !errors.Is(err, ErrRefused) {
+	if _, err := run.ApplySolo(11, 20002, 0, SoloReport{Star: 3}, nil, 0, false); !errors.Is(err, ErrRefused) {
 		t.Fatalf("a player who never entered cannot report: %v", err)
 	}
 	_ = run.Enter(20002, 0, 11)
-	first, err := run.ApplySolo(11, 20002, 0, SoloReport{Star: 9, Score: -5, Heroes: map[int64]HeroStatus{1: {HP: 40, MP: 400}, 2: {HP: -3, MP: 10}}})
+	limits := map[int64]int64{1: 200, 2: 200}
+	first, err := run.ApplySolo(11, 20002, 0, SoloReport{Star: 9, Score: -5, Heroes: map[int64]HeroStatus{1: {HP: 40, MP: 400}, 2: {HP: -3, MP: 10}}}, limits, 0, false)
 	if err != nil || first != (SoloResult{Won: true, Star: 3, Score: 0}) {
 		t.Fatalf("first=%+v err=%v", first, err)
 	}
 	if !run.Cleared(20002) || run.Stages["20002"][0].InBattle != 0 {
 		t.Fatal("a win empties the stage and releases the player")
 	}
-	if got := run.Status(11, 1); got != (HeroStatus{HP: 40, MP: 100}) {
+	if got, _ := run.Status(11, 1); got != (HeroStatus{HP: 40, MP: 400, LimitHP: 200}) {
 		t.Fatalf("hero 1=%+v", got)
 	}
-	if got := run.Status(11, 2); got != (HeroStatus{HP: 0, MP: 10}) {
+	if got, _ := run.Status(11, 2); got != (HeroStatus{HP: 0, MP: 10, LimitHP: 200}) {
 		t.Fatalf("hero 2=%+v", got)
 	}
 	_ = run.BindStages(20003, []int64{500})
 	_ = run.Enter(20003, 0, 11)
-	if _, err := run.ApplySolo(11, 20003, 0, SoloReport{Star: 0, Heroes: map[int64]HeroStatus{1: {HP: 90, MP: 5}}}); err != nil {
+	if _, err := run.ApplySolo(11, 20003, 0, SoloReport{Star: 0, Heroes: map[int64]HeroStatus{1: {HP: 90, MP: 5}}}, limits, 250, true); err != nil {
 		t.Fatal(err)
 	}
-	if got := run.Status(11, 1); got != (HeroStatus{HP: 40, MP: 5}) || run.Cleared(20003) {
+	if got, _ := run.Status(11, 1); got != (HeroStatus{HP: 40, MP: 5, LimitHP: 200}) || run.Cleared(20003) {
 		t.Fatalf("a result cannot heal and a loss keeps the stage: %+v", got)
+	}
+	if run.Stages["20003"][0].HP != 250 {
+		t.Fatalf("a loss stores the absolute monster HP: %d", run.Stages["20003"][0].HP)
 	}
 }
 
@@ -185,7 +189,7 @@ func TestSoloRefusesMoreHeroesThanDispatchLimit(t *testing.T) {
 	run.DispatchLimit = 1
 	_ = run.BindStages(20002, []int64{500})
 	_ = run.Enter(20002, 0, 11)
-	_, err := run.ApplySolo(11, 20002, 0, SoloReport{Star: 1, Heroes: map[int64]HeroStatus{1: {HP: 1, MP: 1}, 2: {HP: 1, MP: 1}}})
+	_, err := run.ApplySolo(11, 20002, 0, SoloReport{Star: 1, Heroes: map[int64]HeroStatus{1: {HP: 1, MP: 1}, 2: {HP: 1, MP: 1}}}, map[int64]int64{1: 10, 2: 10}, 0, false)
 	if !errors.Is(err, ErrRefused) {
 		t.Fatalf("err=%v", err)
 	}
@@ -196,7 +200,7 @@ func TestEventsApplyInServerOrder(t *testing.T) {
 	run := NewRun(2, MultiCampaignType)
 	_ = run.BindStages(20003, []int64{500, 500})
 	_ = run.Enter(20003, 0, 11)
-	run.HeroStatus = map[string]map[string]HeroStatus{"11": {"1": {HP: 50, MP: 90}, "2": {HP: 0, MP: 0}}}
+	run.HeroStatus = map[string]map[string]HeroStatus{"11": {"1": {HP: 50, MP: 90, LimitHP: 100}, "2": {HP: 0, MP: 0, LimitHP: 100}}}
 	outcomes := run.ApplyEvents(catalog, 20003, []int64{5, 4, 3, 2, 2, 6, 0})
 	order := []EventType{}
 	for _, outcome := range outcomes {
@@ -205,10 +209,10 @@ func TestEventsApplyInServerOrder(t *testing.T) {
 	if len(order) != 4 || order[0] != EventRecoverHP || order[1] != EventRecoverMP || order[2] != EventReviveHero || order[3] != EventIncreaseDispatch {
 		t.Fatalf("order=%v", order)
 	}
-	if got := run.Status(11, 1); got != (HeroStatus{HP: 80, MP: 100}) {
+	if got, _ := run.Status(11, 1); got != (HeroStatus{HP: 80, MP: 390, LimitHP: 100}) {
 		t.Fatalf("hero 1=%+v", got)
 	}
-	if got := run.Status(11, 2); got != (HeroStatus{HP: 30, MP: 30}) {
+	if got, _ := run.Status(11, 2); got != (HeroStatus{HP: 30, MP: 300, LimitHP: 100}) {
 		t.Fatalf("revived hero 2=%+v", got)
 	}
 	if run.DispatchLimit != DispatchLimit+3 || outcomes[3].DispatchLimit != DispatchLimit+3 {

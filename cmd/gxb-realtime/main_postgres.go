@@ -287,7 +287,7 @@ func run() error {
 	if err != nil {
 		log.Fatal(err)
 	}
-	occultRooms := stockruntime.OccultRoomNoticeHandler{Service: appoccult.NoticeReader{Rooms: sharedroomstore.Store{}, Content: contentstore.Store{}, Directory: i4store.PlayerDirectoryReader{},
+	occultRooms := stockruntime.OccultRoomNoticeHandler{Service: appoccult.NoticeReader{Rooms: sharedroomstore.Store{}, Content: contentstore.Store{}, Directory: i4store.PlayerDirectoryReader{}, Presence: presenceStore,
 		Scores: occultstore.Store{}, Tickets: appi5.Service{Store: i5store.Store{}}, Queryer: pool},
 		Delivery: stockruntime.RoomDelivery{Registry: connectionsRegistry, Publisher: stockruntime.RealtimePublisher{Registry: occultEvents, Limits: limits.Default()}, Authority: authority,
 			Time: postgres.AuthoritativeTime{Queryer: pool}, MaxHandles: runtimePolicy.MaxConnections, OnDeliveryError: func(err error) { log.Printf("occult room notice degraded: %v", err) }},

@@ -62,6 +62,9 @@ type Campaign struct {
 	StartPoint   bool    `json:"start_point"`
 	UnlockIDs    []int64 `json:"unlock_ids"`
 	FightIDs     []int64 `json:"fight_ids"`
+	// StageTotalHP is the maximum aggregate monster HP of each fight. Absolute
+	// HP, compiled from the campaign's battle data.
+	StageTotalHP []int64 `json:"stage_total_hp"`
 	EventID      int64   `json:"event_id"`
 	Dialogue     string  `json:"dialogue"`
 	X            string  `json:"x"`
@@ -125,6 +128,14 @@ func (c Catalog) Validate() error {
 	for _, campaign := range c.Campaigns {
 		if _, ok := c.Chapter(campaign.ChapterID); !ok || (campaign.CampaignType != MultiCampaignType && campaign.CampaignType != SingleCampaignType) {
 			return ErrUnavailable
+		}
+		if len(campaign.StageTotalHP) != len(campaign.FightIDs) {
+			return ErrUnavailable
+		}
+		for index, total := range campaign.StageTotalHP {
+			if campaign.FightIDs[index] > 0 && total <= 0 {
+				return ErrUnavailable
+			}
 		}
 	}
 	for _, route := range c.AwakeningRoutes {

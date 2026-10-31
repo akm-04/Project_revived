@@ -101,11 +101,13 @@ func (s Mode) grantRewards(c context.Context, sc gen.TimedScope, a identity.Acto
 	return paid, nil
 }
 
-func (s Mode) recordFact(c context.Context, sc gen.TimedScope, a identity.ActorContext, kind, businessKey string) error {
-	prepared, err := s.Facts.PrepareTx(c, sc.Tx, a.PlayerID, sc.Operation)
-	if err != nil {
-		return err
-	}
+// prepareFact locks the player's mission root before any I5 value lock, so the
+// grant can never run ahead of the fact's own lock suffix.
+func (s Mode) prepareFact(c context.Context, sc gen.TimedScope, a identity.ActorContext) (context.Context, error) {
+	return s.Facts.PrepareTx(c, sc.Tx, a.PlayerID, sc.Operation)
+}
+
+func (s Mode) recordFact(prepared context.Context, sc gen.TimedScope, a identity.ActorContext, kind, businessKey string) error {
 	return s.Facts.RecordTx(prepared, sc.Tx, sc.Operation.Operation(), objective.Fact{PlayerID: a.PlayerID, SourceDomain: "occult", SourceBusinessKey: businessKey, Kind: kind, Delta: 1})
 }
 
@@ -167,6 +169,10 @@ func (s Mode) payClear(c context.Context, sc gen.TimedScope, a identity.ActorCon
 			return nil, false, err
 		}
 	}
+	prepared, err := s.prepareFact(c, sc, memberActor)
+	if err != nil {
+		return nil, false, err
+	}
 	state := &view.state
 	rewards, err := view.catalog.ClearRewards(state.ChapterID)
 	if err != nil {
@@ -192,7 +198,7 @@ func (s Mode) payClear(c context.Context, sc gen.TimedScope, a identity.ActorCon
 	if err != nil {
 		return nil, false, err
 	}
-	return paid, true, s.recordFact(c, sc, memberActor, clearedFactKind, businessKey)
+	return paid, true, s.recordFact(prepared, sc, memberActor, clearedFactKind, businessKey)
 }
 
 // fillState completes a fight reply with the room state, tickets and the
@@ -209,17 +215,14 @@ func (s Mode) fillState(c context.Context, sc gen.TimedScope, a identity.ActorCo
 	for key, value := range state {
 		body[key] = value
 	}
-	closed := int64(0)
-	if view.state.ClearSettled {
-		closed = 1
-	}
+	closed := chapterFraction(view.state, view.catalog)
 	body["hero_status"] = selfDispatch(view.state, int64(a.PlayerID))
 	awardInfo, ok := body["award_info"].(map[string]any)
 	if !ok {
 		awardInfo = map[string]any{"awards": []map[string]any{}}
 		body["award_info"] = awardInfo
 	}
-	awardInfo["award_detail"] = map[string]any{"extra_point": int64(0), "point": point, "is_close": closed, "close_time": view.at.Unix(), "start_time": view.state.StartedAt, "progress": tickets.Progress}
+	awardInfo["award_detail"] = map[string]any{"extra_point": int64(0), "point": point, "is_close": closed, "close_time": view.at.Unix(), "start_time": view.state.StartedAt, "progress": closed}
 	piggyback(c, body)
 	return nil
 }
@@ -250,6 +253,10 @@ func (s Mode) Sweep(c context.Context, a identity.ActorContext, chapterID int64,
 		if !scores.SweepUnlocked(chapterID) {
 			return nil, fmt.Errorf("%w: chapter %d has no best score", d.ErrRefused, chapterID)
 		}
+		prepared, err := s.prepareFact(c, sc, a)
+		if err != nil {
+			return nil, err
+		}
 		tickets, err := s.Tickets.DebitOccultTicketTx(c, sc.Tx, a.PlayerID, sc.Operation.Operation())
 		if err != nil {
 			return nil, err
@@ -266,11 +273,13 @@ func (s Mode) Sweep(c context.Context, a identity.ActorContext, chapterID int64,
 		if err != nil {
 			return nil, err
 		}
-		if err = s.recordFact(c, sc, a, sweepFactKind, businessKey); err != nil {
+		if err = s.recordFact(prepared, sc, a, sweepFactKind, businessKey); err != nil {
 			return nil, err
 		}
-		body := map[string]any{"awards": rewardRows(paid)}
-		ticketBody(body, tickets)
-		return body, nil
+		progress := int64(0)
+		if scores.SweepUnlocked(chapterID) {
+			progress = 1
+		}
+		return map[string]any{"awards": rewardRows(paid), "occult_ticket": tickets.Tickets, "progress": progress}, nil
 	})
 }

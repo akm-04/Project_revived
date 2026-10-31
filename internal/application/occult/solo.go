@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"math"
 	"time"
 
 	ca "gxb.local/backend/v2/internal/application/characterasset"
@@ -34,6 +35,7 @@ type SettleRequest struct {
 	PetID      int64
 	Formation  []int64
 	Heroes     map[int64]d.HeroStatus
+	Monsters   map[int64]int64
 }
 
 type snapshot struct {
@@ -152,7 +154,7 @@ func (s Mode) MemberStat(c context.Context, a identity.ActorContext, memberID id
 			continue
 		}
 		dispatched = append(dispatched, row)
-		status[heroKey] = map[string]any{"hp": recorded.HP, "total_hp": int64(d.FullStatus), "mp": recorded.MP}
+		status[heroKey] = map[string]any{"hp": recorded.HP, "total_hp": recorded.LimitHP, "mp": recorded.MP}
 	}
 	return map[string]any{"player_id": int64(memberID), "dispatch_heroes": dispatched, "undispatch_heroes": undispatched, "dispatch_status": status}, nil
 }
@@ -234,7 +236,10 @@ func (s Mode) CreateSolo(c context.Context, a identity.ActorContext, chapterID i
 		return s.startRun(c, sc, a, view)
 	})
 	if err != nil {
-		_, _ = s.Rooms.Leave(c, a, RoomFamilyRef(), op)
+		var unknown *tx.UnknownCommitError
+		if !errors.As(err, &unknown) {
+			_, _ = s.Rooms.Leave(c, a, RoomFamilyRef(), op)
+		}
 		return nil, err
 	}
 	return body, nil
@@ -432,10 +437,15 @@ func (s Mode) Settle(c context.Context, a identity.ActorContext, request SettleR
 		if stage.InBattle != int64(a.PlayerID) || view.state.FightExpired(view.at.Unix()) {
 			return nil, fmt.Errorf("%w: no open fight on this stage", d.ErrRefused)
 		}
-		if err = s.attest(c, sc, a, view, campaign, request, index); err != nil {
+		heroLimits, err := s.attest(c, sc, a, view, campaign, request, index)
+		if err != nil {
 			return nil, err
 		}
-		result, err := view.state.ApplySolo(int64(a.PlayerID), campaign.ID, index, d.SoloReport{Star: request.Star, Score: request.Star, Heroes: request.Heroes})
+		monsterRemaining, monsterReported, err := s.stageMonsterRemaining(campaign, index, request.Monsters)
+		if err != nil {
+			return nil, err
+		}
+		result, err := view.state.ApplySolo(int64(a.PlayerID), campaign.ID, index, d.SoloReport{Star: request.Star, Score: request.Star, Heroes: request.Heroes}, heroLimits, monsterRemaining, monsterReported)
 		if err != nil {
 			return nil, err
 		}
@@ -456,12 +466,14 @@ func (s Mode) Settle(c context.Context, a identity.ActorContext, request SettleR
 	return SettleResponse{Body: body, Duplicate: duplicate}, err
 }
 
-func (s Mode) attest(c context.Context, sc gen.TimedScope, a identity.ActorContext, view *roomView, campaign d.Campaign, request SettleRequest, index int) error {
+// attest freezes and judges the client summary and returns the real HP limit of
+// every hero the frozen battle carries, in the client's absolute HP units.
+func (s Mode) attest(c context.Context, sc gen.TimedScope, a identity.ActorContext, view *roomView, campaign d.Campaign, request SettleRequest, index int) (map[int64]int64, error) {
 	op := sc.Operation.Operation()
 	revision, _ := op.Policies.Get("content")
 	scope, err := ca.NewCoherentReadScope(tx.Scope{Tx: sc.Tx, Operation: op, Attempt: sc.Attempt, Options: sc.Options}, revision, view.at)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	reference := generationRef(view.room.ID, campaign.ID, index+1)
 	battle := cb.BattleRequest{CampaignType: combatCampaignType, BattleID: campaign.FightIDs[index], Formation: request.Formation}
@@ -474,17 +486,54 @@ func (s Mode) attest(c context.Context, sc gen.TimedScope, a identity.ActorConte
 	// shortcut: stock 2379 carries no formation and ClientSummaryAttested needs a
 	// frozen one, so Combat starts and attests inside 2372; the 150 s fight timer
 	// is the room's own, checked above.
-	if _, err = s.Combat.StartTx(c, sc.Tx, scope, cb.StartRequest{Actor: a, Locator: locator(a), GenerationRef: reference, StartFingerprint: startFingerprint(a, reference, op),
-		ResultDeadline: view.at.Add(d.FightSeconds * time.Second), Battle: battle, TrustProfile: cd.ClientSummaryAttested, Replay: cd.ReplaySpec{Response: cd.ReplayOK}}); err != nil {
-		return err
+	started, err := s.Combat.StartTx(c, sc.Tx, scope, cb.StartRequest{Actor: a, Locator: locator(a), GenerationRef: reference, StartFingerprint: startFingerprint(a, reference, op),
+		ResultDeadline: view.at.Add(d.FightSeconds * time.Second), Battle: battle, TrustProfile: cd.ClientSummaryAttested, Replay: cd.ReplaySpec{Response: cd.ReplayOK}})
+	if err != nil {
+		return nil, err
 	}
 	attested, err := s.Combat.AttestSummaryTx(c, sc.Tx, cb.SummaryRequest{Locator: locator(a), GenerationRef: reference, TerminalKind: "OCCULT_RESULT", At: view.at, Policy: summaryPolicy,
 		Summary: cd.Summary{Star: request.Star, Win: request.Star > 0, Formation: request.Formation, Pet: request.PetID}})
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if attested.Drained || attested.Attestation.Verdict == cd.VerdictRejected {
-		return fmt.Errorf("%w: summary drained or rejected", d.ErrRefused)
+		return nil, fmt.Errorf("%w: summary drained or rejected", d.ErrRefused)
 	}
-	return nil
+	snapshot, err := s.Combat.SnapshotTx(c, sc.Tx, started.Attempt.ID)
+	if err != nil {
+		return nil, err
+	}
+	limits := map[int64]int64{}
+	for _, actor := range snapshot.Battle.TeamA {
+		if actor.Kind != cd.HeroActor {
+			continue
+		}
+		limit, known := cd.FrozenHP(actor.BattleTotals)
+		if !known || limit <= 0 {
+			continue
+		}
+		limits[actor.Identity] = int64(math.Ceil(limit))
+	}
+	return limits, nil
+}
+
+// stageMonsterRemaining sums the absolute HP the client posted for the stage's
+// monsters. It reports false when no posted monster belongs to the stage.
+func (s Mode) stageMonsterRemaining(campaign d.Campaign, index int, posted map[int64]int64) (int64, bool, error) {
+	waves, err := s.Combat.MonsterWaves(campaign.FightIDs[index])
+	if err != nil {
+		return 0, false, err
+	}
+	total, matched := int64(0), false
+	for _, wave := range waves {
+		for _, monster := range wave {
+			hp, present := posted[monster.Identity]
+			if !present {
+				continue
+			}
+			total += max(hp, 0)
+			matched = true
+		}
+	}
+	return total, matched, nil
 }

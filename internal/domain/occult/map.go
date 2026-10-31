@@ -17,18 +17,20 @@ func (c Catalog) RoomCampaigns(chapterID, campaignType int64) []Campaign {
 func (c Campaign) Final() bool { return !c.StartPoint && len(c.UnlockIDs) == 0 }
 
 // BindRoom creates the monster stages of every fight campaign of the room.
-// shortcut: stage HP is percent of the stage, 100 per fight, because a solo
-// fight is simulated by the client and the server holds no monster stats.
+// Stage HP is the aggregate absolute HP of the stage's monsters, compiled into
+// the catalog from the campaign's battle data.
+// shortcut: the room state keeps one HP per stage (C5), so each monster of a
+// stage is drawn from the same aggregate fraction; split per monster when a
+// source maximum for each wave member is required.
 func (s *RunState) BindRoom(catalog Catalog) error {
 	for _, campaign := range catalog.RoomCampaigns(s.ChapterID, s.CampaignType) {
 		if len(campaign.FightIDs) == 0 {
 			continue
 		}
-		totals := make([]int64, len(campaign.FightIDs))
-		for index := range totals {
-			totals[index] = FullStatus
+		if len(campaign.StageTotalHP) != len(campaign.FightIDs) {
+			return ErrUnavailable
 		}
-		if err := s.BindStages(campaign.ID, totals); err != nil {
+		if err := s.BindStages(campaign.ID, campaign.StageTotalHP); err != nil {
 			return err
 		}
 	}

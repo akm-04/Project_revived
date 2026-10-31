@@ -13,6 +13,7 @@ import (
 	"gxb.local/backend/v2/internal/application/playerdirectory"
 	"gxb.local/backend/v2/internal/application/playerroot"
 	"gxb.local/backend/v2/internal/application/sharedroom"
+	cd "gxb.local/backend/v2/internal/domain/combat"
 	"gxb.local/backend/v2/internal/domain/grant"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/domain/objective"
@@ -37,6 +38,7 @@ type Store interface {
 	ReadReportTx(context.Context, tx.Queryer, string, int64, identity.PlayerID, time.Time) (string, bool, error)
 	InsertLogTx(context.Context, tx.Tx, int64, int64, int, identity.PlayerID, string, time.Time) error
 	ReadLogsTx(context.Context, tx.Queryer, int64, identity.PlayerID, int64) ([]json.RawMessage, error)
+	PurgeExpiredReportsTx(context.Context, tx.Tx, time.Time, int64) (int64, error)
 }
 
 type Content interface {
@@ -73,6 +75,13 @@ type Combat interface {
 	TerminalTx(context.Context, tx.Tx, cb.TerminalRequest) (cb.Settled, error)
 	SettleMemberTx(context.Context, tx.Tx, cb.MemberSettleRequest) (cb.MemberSettled, error)
 	MonsterWaves(int64) ([][]cb.Participant, error)
+	SnapshotTx(context.Context, tx.Queryer, ids.UUID) (cd.Snapshot, error)
+}
+
+// Presence answers which players have a live connection, observed at the
+// database instant of the read.
+type Presence interface {
+	OnlineAt(context.Context, []identity.PlayerID, time.Time) (map[identity.PlayerID]bool, error)
 }
 
 // Values settles rewards through I5; the mode never writes a stack itself.
@@ -97,6 +106,7 @@ type Mode struct {
 	Players     Players
 	Functions   Functions
 	Directory   Directory
+	Presence    Presence
 	Heroes      Heroes
 	Pets        Heroes
 	Rooms       sharedroom.Service
@@ -112,6 +122,6 @@ type Mode struct {
 
 func (s Mode) ready() bool {
 	return s.Timed.Binder.Time != nil && s.Fresh != nil && s.Store != nil && s.Content != nil && s.Fence != nil && s.Players != nil &&
-		s.Functions != nil && s.Directory != nil && s.Heroes != nil && s.Combat != nil && s.Tickets != nil && s.Values != nil &&
+		s.Functions != nil && s.Directory != nil && s.Presence != nil && s.Heroes != nil && s.Combat != nil && s.Tickets != nil && s.Values != nil &&
 		s.Awakening != nil && s.Facts != nil && s.Receipts != nil && s.ReceiptRead != nil && s.Rooms.Store != nil && s.RoomStore != nil
 }

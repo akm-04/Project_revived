@@ -49,21 +49,25 @@ func (s *RunState) applyEvent(catalog Catalog, campaignID int64, eventType Event
 	case EventRecoverHP:
 		s.eachHero(func(status *HeroStatus) {
 			if status.HP > 0 {
-				status.HP = min(status.HP+catalog.EventPercent, FullStatus)
+				status.HP = min(status.HP+percentOf(status.LimitHP, catalog.EventPercent), status.LimitHP)
 			}
 		})
 	case EventRecoverMP:
-		s.eachHero(func(status *HeroStatus) { status.MP = min(status.MP+catalog.EventPercent, FullStatus) })
+		s.eachHero(func(status *HeroStatus) {
+			status.MP = min(status.MP+percentOf(MaxEnergy, catalog.EventPercent), MaxEnergy)
+		})
 	case EventReviveHero:
 		s.eachHero(func(status *HeroStatus) {
 			if status.HP == 0 {
-				status.HP = catalog.EventPercent
+				status.HP = percentOf(status.LimitHP, catalog.EventPercent)
 			}
 		})
 	case EventIncreaseDispatch:
 		s.DispatchLimit += catalog.EventDispatch
 	}
 }
+
+func percentOf(limit, percent int64) int64 { return limit * percent / 100 }
 
 func (s *RunState) eachHero(change func(*HeroStatus)) {
 	for _, heroes := range s.HeroStatus {

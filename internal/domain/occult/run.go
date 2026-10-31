@@ -6,8 +6,9 @@ import (
 )
 
 const (
-	FullStatus = 100
-	MaxStar    = 3
+	// MaxEnergy is the client's absolute MP ceiling (ENERGY_DECIMAL_BASE).
+	MaxEnergy = 1000
+	MaxStar   = 3
 )
 
 // StageState is one sub-stage of a campaign. InBattle holds the player id
@@ -18,10 +19,12 @@ type StageState struct {
 	InBattle int64 `json:"in_battle"`
 }
 
-// HeroStatus is a hero's remaining HP and MP as percent of maximum.
+// HeroStatus is a hero's remaining status in the units the client posts and
+// draws: absolute HP with the hero's real HP limit, and MP in 0..MaxEnergy.
 type HeroStatus struct {
-	HP int64 `json:"hp"`
-	MP int64 `json:"mp"`
+	HP      int64 `json:"hp"`
+	MP      int64 `json:"mp"`
+	LimitHP int64 `json:"limit_hp,omitempty"`
 }
 
 // RunState is the Occult family payload of one shared room. StartedAt is zero
@@ -180,13 +183,11 @@ func (s RunState) Cleared(campaignID int64) bool {
 	return len(stages) > 0
 }
 
-// Status is the HP authority for one hero; an unrecorded hero is at full.
-func (s RunState) Status(playerID, heroID int64) HeroStatus {
+// Status is the recorded HP authority of one hero; ok is false before the
+// hero's first attested result.
+func (s RunState) Status(playerID, heroID int64) (HeroStatus, bool) {
 	status, recorded := s.HeroStatus[key(playerID)][key(heroID)]
-	if !recorded {
-		return HeroStatus{HP: FullStatus, MP: FullStatus}
-	}
-	return status
+	return status, recorded
 }
 
 func (s *RunState) setStatus(playerID, heroID int64, status HeroStatus) error {

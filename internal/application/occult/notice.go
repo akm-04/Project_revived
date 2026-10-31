@@ -45,6 +45,7 @@ type NoticeReader struct {
 	Rooms     sharedroom.Store
 	Content   Content
 	Directory Directory
+	Presence  Presence
 	Scores    interface {
 		ReadScoresTx(context.Context, tx.Queryer, identity.PlayerID) (d.Scores, error)
 	}
@@ -74,7 +75,7 @@ func (r NoticeReader) ReadRoomNotice(c context.Context, reference string) (RoomN
 		return RoomNotice{}, false, err
 	}
 	out := RoomNotice{RoomID: room.ID, Events: state.Events, Positions: map[identity.PlayerID]int64{}}
-	view := &roomView{room: room, state: state, catalog: catalog}
+	view := &roomView{room: room, state: state, catalog: catalog, at: room.UpdatedAt}
 	if room.Status == domainroom.StatusOpen {
 		out.Seated, err = r.seatedBodies(c, view)
 		if err != nil {
@@ -155,7 +156,7 @@ func (r NoticeReader) inviteBodies(c context.Context, view *roomView) ([]PlayerB
 // join request needs it.
 // shortcut: force is 0 because the player directory carries no battle power.
 func inviteParams(view *roomView, owner playerdirectory.Profile) map[string]any {
-	return map[string]any{"room_id": view.room.ID, "chapter_id": view.state.ChapterID, "force": int64(0), "player_info": playerInfo(owner)}
+	return map[string]any{"room_id": view.room.ID, "chapter_id": view.state.ChapterID, "force": int64(0), "player_info": playerInfo(owner, false)}
 }
 
 func (r NoticeReader) roomChange(c context.Context, player identity.PlayerID, catalog d.Catalog, view *roomView) (map[string]any, error) {
@@ -167,7 +168,7 @@ func (r NoticeReader) roomChange(c context.Context, player identity.PlayerID, ca
 	if err != nil {
 		return nil, err
 	}
-	body, err := Mode{Directory: r.Directory}.stateBody(c, r.Queryer, identity.ActorContext{PlayerID: player}, catalog, scores, tickets, view)
+	body, err := Mode{Directory: r.Directory, Presence: r.Presence}.stateBody(c, r.Queryer, identity.ActorContext{PlayerID: player}, catalog, scores, tickets, view)
 	if err != nil {
 		return nil, err
 	}
