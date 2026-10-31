@@ -1,0 +1,45 @@
+{
+  "policy_id": "I9_WORLD_BOSS_POLICY_V1",
+  "version": 1,
+  "classification": "PRIVATE_POLICY_NOT_RECOVERED_OFFICIAL_ALGORITHM",
+  "decisions": [
+    "D364"
+  ],
+  "activity_id": 1026,
+  "open_level": 48,
+  "attempts_per_day": 5,
+  "attempts_per_buy": 5,
+  "buy_cost_table": "refresh_cost.buy_boss_cost",
+  "buy_cap_table": "vip.num_boss",
+  "damage_cap": 10000000,
+  "attempt_clamp": "min(damage_cap, need_brave - courage)",
+  "courage_daily_increment": {
+    "base": 6666668,
+    "per_level_90_player": 100000,
+    "per_challenger": 10000,
+    "at_second_of_day": 79200
+  },
+  "sweep": {
+    "attempts": 1,
+    "per_day": 1,
+    "damage": "best_single_hit"
+  },
+  "rank": {
+    "key": "total_hurt",
+    "ties": "earlier_first_hit_time",
+    "reward_source": "dungeon_reward",
+    "delivery": "Commander mail at defeat"
+  },
+  "window": {
+    "closed_start_second": 79080,
+    "closed_end_second": 86400,
+    "applies_to": "new START only"
+  },
+  "reset": "modes.Day 05:00 GMT+8",
+  "cycle_restart_boss": 10011,
+  "incr_damage": "omitted",
+  "receipt": {
+    "policy_id": "policy_id",
+    "version": "policy_version"
+  }
+}

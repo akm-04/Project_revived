@@ -466,14 +466,22 @@
       "parser_version": "lua-generated-v18-guild-invite",
       "revision_id": "88e049813b349d539df386453c6db34f6859985e36b5ceae9b27a9ec14f3c960",
       "scope": "I9-7A-D content joined with the I9-6 close Memoir wave fix. No new source rows."
+    },
+    {
+      "ordinal": 64,
+      "stage": "I9-8A World Boss",
+      "compiler_version": "i9-8a-world-boss",
+      "parser_version": "lua-generated-v18-guild-invite",
+      "revision_id": "a1a88b08a9b82a106a652b9347b31642b2e200bb9c88f37a03a8a88dccf638e1",
+      "scope": "Dungeon campaign, rank reward, misc and translation source facts; D364 policy is separate. Unsealed working implementation."
     }
   ],
   "current": {
-    "ordinal": 63,
-    "stage": "I9-7 stage merge",
-    "compiler_version": "i9-7-stage-merge",
+    "ordinal": 64,
+    "stage": "I9-8A World Boss",
+    "compiler_version": "i9-8a-world-boss",
     "parser_version": "lua-generated-v18-guild-invite",
-    "revision_id": "88e049813b349d539df386453c6db34f6859985e36b5ceae9b27a9ec14f3c960",
-    "scope": "I9-7A-D content joined with the I9-6 close Memoir wave fix. No new source rows."
+    "revision_id": "a1a88b08a9b82a106a652b9347b31642b2e200bb9c88f37a03a8a88dccf638e1",
+    "scope": "Dungeon campaign, rank reward, misc and translation source facts; D364 policy is separate. Unsealed working implementation."
   }
 }

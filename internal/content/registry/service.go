@@ -246,6 +246,13 @@ func (s Service) EnsureBuiltinInstalled(ctx context.Context, op operation.Contex
 			if gotGodsTrial != 1 {
 				return errors.New("content registry gods trial count")
 			}
+			gotWorldBoss, err := s.Repo.InsertWorldBoss(tctx, scope.Tx, b)
+			if err != nil {
+				return err
+			}
+			if gotWorldBoss != 1 {
+				return errors.New("content registry world boss count")
+			}
 			gotMemoir, err := s.Repo.InsertMemoir(tctx, scope.Tx, b)
 			if err != nil {
 				return err

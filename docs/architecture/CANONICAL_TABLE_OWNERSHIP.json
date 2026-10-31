@@ -4511,6 +4511,76 @@
       ],
       "write_exceptions": [],
       "migration": "migrations/00098_i9_7c_friend_fight.sql"
+    },
+    "content_world_boss_catalogs": {
+      "owner": "content-registry",
+      "allowed_query_owners": [
+        "content-registry"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/contentstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/contentstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00099_i9_8a_world_boss.sql"
+    },
+    "worldboss_occurrences": {
+      "owner": "worldboss",
+      "allowed_query_owners": [
+        "worldboss"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/worldbossstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/worldbossstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00099_i9_8a_world_boss.sql"
+    },
+    "worldboss_players": {
+      "owner": "worldboss",
+      "allowed_query_owners": [
+        "worldboss"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/worldbossstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/worldbossstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00099_i9_8a_world_boss.sql"
+    },
+    "worldboss_player_totals": {
+      "owner": "worldboss",
+      "allowed_query_owners": [
+        "worldboss"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/worldbossstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/worldbossstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00099_i9_8a_world_boss.sql"
+    },
+    "worldboss_attempts": {
+      "owner": "worldboss",
+      "allowed_query_owners": [
+        "worldboss"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/worldbossstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/worldbossstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00099_i9_8a_world_boss.sql"
     }
   }
 }
