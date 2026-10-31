@@ -36,6 +36,10 @@ func TestI9_6AGodsTrialNative(t *testing.T) {
 	p := pool(t)
 	a, rev := bornActor(t, p), installed(t, p)
 	clock := &workplaceTime{at: time.Now().UTC().Add(time.Hour)}
+	// First-clear boxes of days 6 and 7 hold stack items, and this test proves spirit minting.
+	for d.Weekday(modes.Day(clock.at)) > 5 {
+		clock.at = clock.at.Add(24 * time.Hour)
+	}
 	s := godsTrialMode(t, p, clock)
 	if _, e := s.Info(ctx, a, op()); !errors.Is(e, d.ErrRefused) {
 		t.Fatal("gate", e)
