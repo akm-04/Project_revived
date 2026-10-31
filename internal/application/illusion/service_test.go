@@ -1,10 +1,12 @@
 package illusion
 
 import (
+	"encoding/json"
 	"testing"
 	"time"
 
 	"gxb.local/backend/v2/internal/application/playerdirectory"
+	"gxb.local/backend/v2/internal/content/builtin"
 	"gxb.local/backend/v2/internal/domain/identity"
 	d "gxb.local/backend/v2/internal/domain/illusion"
 	"gxb.local/backend/v2/internal/domain/modes"
@@ -87,15 +89,96 @@ func TestClampDamageBoundedByPoolAndCap(t *testing.T) {
 	}
 }
 
-func TestInfoCountZeroOnlyWhileOpen(t *testing.T) {
-	zone := time.FixedZone("GMT+8", 8*3600)
-	atOpen := time.Date(2026, 10, 31, 12, 0, 0, 0, zone)
-	open := d.NewOccurrence(1, d.FirstCampaignID, modes.Day(atOpen))
-	if got := infoBody(open, d.Player{Chances: 5}, 0, 0, atOpen)["paradise_info"].(map[string]any); got["count"] != int64(0) {
-		t.Fatalf("open count=%v", got["count"])
+func generatedCatalog(t *testing.T) d.Catalog {
+	t.Helper()
+	raw, err := builtin.GeneratedFile("illusion_catalog.json")
+	if err != nil {
+		t.Fatal(err)
 	}
-	atRest := atOpen.Add(24 * time.Hour)
-	if got := infoBody(open, d.Player{Chances: 5}, 0, 0, atRest)["paradise_info"].(map[string]any); got["count"] != int64(1) {
-		t.Fatalf("rest count=%v", got["count"])
+	var catalog d.Catalog
+	if err = json.Unmarshal(raw, &catalog); err != nil {
+		t.Fatal(err)
+	}
+	if err = catalog.Validate(); err != nil {
+		t.Fatal(err)
+	}
+	return catalog
+}
+
+// clientNextBoss mirrors IllusionCampaignTable.nextBoss; ok is false when the
+// client would spin forever on an unknown or terminal next id.
+func clientNextBoss(catalog d.Catalog, id, count int64) (int64, bool) {
+	if count == 0 {
+		return id, true
+	}
+	for steps := 0; steps <= len(catalog.Campaigns); steps++ {
+		campaign, found := catalog.Campaign(id)
+		if !found || campaign.NextID == 0 {
+			return 0, false
+		}
+		id = campaign.NextID
+		next, found := catalog.Campaign(id)
+		if found && !next.Hidden {
+			return id, true
+		}
+	}
+	return 0, false
+}
+
+func TestInfoBodyClientNextBossLandsOnThePhaseTarget(t *testing.T) {
+	catalog := generatedCatalog(t)
+	zone := time.FixedZone("GMT+8", 8*3600)
+	open := time.Date(2026, 10, 31, 12, 0, 0, 0, zone)
+	openDay := modes.Day(open)
+	for _, phase := range []struct {
+		name string
+		at   time.Time
+		want d.Phase
+	}{
+		{"waiting", open.Add(-24 * time.Hour), d.PhaseWaiting},
+		{"open", open, d.PhaseOpen},
+		{"closed", time.Date(2026, 10, 31, 21, 59, 0, 0, zone), d.PhaseClosed},
+		{"settlement", time.Date(2026, 10, 31, 22, 30, 0, 0, zone), d.PhaseSettlement},
+		{"rest", open.Add(24 * time.Hour), d.PhaseRest},
+	} {
+		for _, campaign := range catalog.Campaigns {
+			occurrence := d.NewOccurrence(1, campaign.ID, openDay)
+			if got := occurrence.PhaseAt(phase.at); got != phase.want {
+				t.Fatalf("%d %s: phase %s", campaign.ID, phase.name, got)
+			}
+			paradise := infoBody(catalog, occurrence, d.Player{Chances: 5}, 0, 0, phase.at)["paradise_info"].(map[string]any)
+			id, count := paradise["paradise_id"].(int64), paradise["count"].(int64)
+			target := campaign.ID
+			switch phase.want {
+			case d.PhaseOpen:
+				if id != campaign.ID || count != 0 {
+					t.Fatalf("%d open: %d/%d", campaign.ID, id, count)
+				}
+			case d.PhaseWaiting:
+				previous := catalog.PreviousCampaignID(campaign.ID)
+				if previous == 0 {
+					if id != campaign.ID || count != 0 {
+						t.Fatalf("%d waiting terminal: %d/%d", campaign.ID, id, count)
+					}
+				} else if id != previous || count != 1 {
+					t.Fatalf("%d waiting: %d/%d want %d/1", campaign.ID, id, count, previous)
+				}
+			default:
+				if campaign.NextID == 0 {
+					if id != campaign.ID || count != 0 {
+						t.Fatalf("%d %s terminal: %d/%d", campaign.ID, phase.name, id, count)
+					}
+				} else {
+					if id != campaign.ID || count != 1 {
+						t.Fatalf("%d %s: %d/%d", campaign.ID, phase.name, id, count)
+					}
+					target = catalog.NextCampaignID(campaign.ID)
+				}
+			}
+			landed, ok := clientNextBoss(catalog, id, count)
+			if !ok || landed != target {
+				t.Fatalf("%d %s: client lands %d/%v want %d", campaign.ID, phase.name, landed, ok, target)
+			}
+		}
 	}
 }

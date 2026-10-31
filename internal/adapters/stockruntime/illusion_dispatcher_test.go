@@ -70,11 +70,11 @@ func TestIllusionDuplicateTerminalIsFightExist(t *testing.T) {
 	}
 }
 
-func TestIllusionRefusalIsBareErrorCode(t *testing.T) {
+func TestIllusionRefusalIsConflictErrorCode(t *testing.T) {
 	now := time.Unix(100, 0).UTC()
 	dispatcher := IllusionDispatcher{Authority: httpAuthority{actor: actorForHTTP(t)}, Service: illusionStub{err: d.ErrRefused}}
 	got := dispatcher.Dispatch(context.Background(), illusionRequest(1344, map[string]any{}, now))
-	if got.HTTPStatus != 200 || len(got.Body) != 1 || got.Body["error_code"] != int64(1) {
+	if got.HTTPStatus != 409 || len(got.Body) != 1 || got.Body["error_code"] != int64(1) {
 		t.Fatalf("%d %#v", got.HTTPStatus, got.Body)
 	}
 }

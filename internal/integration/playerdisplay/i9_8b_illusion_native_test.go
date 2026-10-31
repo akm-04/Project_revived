@@ -449,3 +449,25 @@ func TestI9_8BIllusionInfoAnswersBelowUnlockNative(t *testing.T) {
 		t.Fatal("buy below unlock succeeded")
 	}
 }
+
+func TestI9_8BIllusionReportRetentionNative(t *testing.T) {
+	p := pool(t)
+	server := rankingServer(t, p)
+	clock := illusionTime(t)
+	s := illusionService(t, p, clock, illusionPrivileges{level: 3}, illusionGuildSource{})
+	installed(t, p)
+	at := clock.at
+	exec(t, p, `INSERT INTO illusion_reports(report_id,logical_server_id,open_day,campaign_id,content,created_at,expires_at)
+		VALUES('expired-illusion-report',$1,1,100001,'{}'::jsonb,$2,$2::timestamptz+interval '7 days')`, int64(server), at.Add(-8*24*time.Hour))
+	exec(t, p, `INSERT INTO illusion_reports(report_id,logical_server_id,open_day,campaign_id,content,created_at,expires_at)
+		VALUES('fresh-illusion-report',$1,1,100001,'{}'::jsonb,$2,$2::timestamptz+interval '7 days')`, int64(server), at)
+	if _, err := (il.Reconciler{Service: s}).Reconcile(ctx, mustTimed(t, op(), at), 100); err != nil {
+		t.Fatal(err)
+	}
+	if n := scalar(t, p, `SELECT count(*) FROM illusion_reports WHERE report_id='expired-illusion-report'`); n != 0 {
+		t.Fatal("expired illusion report survived", n)
+	}
+	if n := scalar(t, p, `SELECT count(*) FROM illusion_reports WHERE report_id='fresh-illusion-report'`); n != 1 {
+		t.Fatal("retained illusion report purged", n)
+	}
+}

@@ -178,6 +178,19 @@ func (c Catalog) NextCampaignID(id int64) int64 {
 	return campaign.NextID
 }
 
+// PreviousCampaignID follows the declared previous chain; an unknown row or a
+// zero link has no predecessor.
+func (c Catalog) PreviousCampaignID(id int64) int64 {
+	campaign, ok := c.Campaign(id)
+	if !ok || campaign.PreviousID == 0 {
+		return 0
+	}
+	if _, ok = c.Campaign(campaign.PreviousID); !ok {
+		return 0
+	}
+	return campaign.PreviousID
+}
+
 // PersonReward returns the first source bucket covering rank; rank 0 and ranks
 // above the last bucket earn nothing.
 func (c Catalog) PersonReward(rank int64) PersonReward {

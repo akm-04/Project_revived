@@ -221,13 +221,32 @@ func (s Mode) ownedHeroes(c context.Context, q tx.Queryer, a identity.ActorConte
 	return nil
 }
 
-func infoBody(occurrence d.Occurrence, player d.Player, hurt, rank int64, at time.Time) map[string]any {
-	count := int64(1)
-	if occurrence.CanStart(at) {
-		count = 0
+// displayCampaign is the (id, count) pair the client's nextBoss loop resolves.
+// count one advances once from id; count zero displays id as already open. A
+// terminal campaign never advances, because the client loops forever on it.
+func displayCampaign(catalog d.Catalog, occurrence d.Occurrence, at time.Time) (int64, int64) {
+	phase := occurrence.PhaseAt(at)
+	if phase == d.PhaseOpen {
+		return occurrence.CampaignID, 0
 	}
+	current, found := catalog.Campaign(occurrence.CampaignID)
+	if !found || current.NextID == 0 {
+		return occurrence.CampaignID, 0
+	}
+	if phase == d.PhaseWaiting {
+		previous := catalog.PreviousCampaignID(occurrence.CampaignID)
+		if previous == 0 {
+			return occurrence.CampaignID, 0
+		}
+		return previous, 1
+	}
+	return occurrence.CampaignID, 1
+}
+
+func infoBody(catalog d.Catalog, occurrence d.Occurrence, player d.Player, hurt, rank int64, at time.Time) map[string]any {
+	paradiseID, count := displayCampaign(catalog, occurrence, at)
 	return map[string]any{
-		"paradise_info":   map[string]any{"paradise_id": occurrence.CampaignID, "count": count},
+		"paradise_info":   map[string]any{"paradise_id": paradiseID, "count": count},
 		"challenge_times": player.Chances,
 		"buy_times":       player.Bought,
 		"hurt":            hurt,

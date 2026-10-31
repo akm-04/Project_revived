@@ -238,7 +238,7 @@ func TestOccultRoomRefusalsAreBareErrorCodes(t *testing.T) {
 	for _, refusal := range []error{sharedroom.ErrFull, sharedroom.ErrKicked, sharedroom.ErrNotOwner, sharedroom.ErrExpired, sr.ErrNotFound, economy.ErrInsufficientBalance} {
 		dispatcher := OccultDispatcher{Authority: httpAuthority{actor: actorForHTTP(t)}, Service: &occultStub{err: refusal}}
 		got := dispatcher.Dispatch(context.Background(), illusionRequest(2367, map[string]any{"room_id": int64(7)}, now))
-		if got.HTTPStatus != 200 || got.Body["error_code"] != int64(1) {
+		if got.HTTPStatus != 409 || got.Body["error_code"] != int64(1) {
 			t.Fatalf("%v: %d %#v", refusal, got.HTTPStatus, got.Body)
 		}
 	}
@@ -247,7 +247,7 @@ func TestOccultRoomRefusalsAreBareErrorCodes(t *testing.T) {
 func TestOccultRefusalIsBareErrorCodeAndFailureIs503(t *testing.T) {
 	now := time.Unix(100, 0).UTC()
 	refused := OccultDispatcher{Authority: httpAuthority{actor: actorForHTTP(t)}, Service: &occultStub{err: d.ErrRefused}}
-	if got := refused.Dispatch(context.Background(), illusionRequest(2362, map[string]any{}, now)); got.HTTPStatus != 200 || got.Body["error_code"] != int64(1) {
+	if got := refused.Dispatch(context.Background(), illusionRequest(2362, map[string]any{}, now)); got.HTTPStatus != 409 || got.Body["error_code"] != int64(1) {
 		t.Fatalf("%d %#v", got.HTTPStatus, got.Body)
 	}
 	failed := OccultDispatcher{Authority: httpAuthority{actor: actorForHTTP(t)}, Service: &occultStub{err: d.ErrUnavailable}}

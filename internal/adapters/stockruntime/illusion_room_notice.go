@@ -31,6 +31,7 @@ type IllusionRoomNotice struct {
 	RoomID        int64
 	Status        int64
 	Seated        []identity.PlayerID
+	Ready         map[identity.PlayerID]bool
 	Removed       []identity.PlayerID
 	TeamInfo      json.RawMessage
 	ReportID      string
@@ -64,7 +65,12 @@ func (r IllusionRoomNoticeReader) ReadRoomNotice(c context.Context, reference st
 		return out, false, d.ErrInvalid
 	}
 	out = IllusionRoomNotice{RoomID: room.ID, Status: illusionStage(room.Members()), TeamInfo: state.TeamInfo, ReportID: state.ReportID,
-		DamageResults: state.DamageResults, ParadiseID: state.ParadiseID}
+		DamageResults: state.DamageResults, ParadiseID: state.ParadiseID, Ready: map[identity.PlayerID]bool{}}
+	for _, seat := range room.Seats {
+		if seat.Stage == sharedroom.SeatSeated {
+			out.Ready[seat.Player] = seat.Ready
+		}
+	}
 	if room.Status == sharedroom.StatusClosed {
 		out.Removed = seatPlayers(room)
 	} else {
@@ -368,8 +374,17 @@ func (delivery RoomDelivery) Deliver(c context.Context, player identity.PlayerID
 	return nil
 }
 
-// illusionMessage decodes the cached teamInfo and patches membership and ready
-// flags from the authoritative seats, so a push stays usable after a leave.
+type illusionMessageSlot struct{ idName, infoName, prefix string }
+
+var illusionMessageSlots = []illusionMessageSlot{
+	{"master_id", "master_id_info", "master"},
+	{"mate_1", "mate_1_info", "mate_1"},
+	{"mate_2", "mate_2_info", "mate_2"},
+}
+
+// illusionMessage decodes the cached teamInfo and rebuilds each slot from the
+// authoritative seat order and ready flags. A player's cached row follows the
+// player, so a mate who changes seats keeps their own info and partners.
 func illusionMessage(view IllusionRoomNotice) (map[string]any, error) {
 	message := map[string]any{}
 	if len(view.TeamInfo) > 0 {
@@ -377,32 +392,58 @@ func illusionMessage(view IllusionRoomNotice) (map[string]any, error) {
 			return nil, err
 		}
 	}
-	if message["master_partner_detail"] == nil {
-		message["master_partner_detail"] = []any{}
+	cached := map[int64]map[string]any{}
+	for _, slot := range illusionMessageSlots {
+		id, err := feedbackInteger(message[slot.idName], 0, 9007199254740991)
+		if err != nil || id <= 0 {
+			continue
+		}
+		entry := map[string]any{"info": message[slot.infoName], "partner": message[slot.prefix+"_partner"],
+			"partner_detail": message[slot.prefix+"_partner_detail"]}
+		if slot.prefix == "master" {
+			entry["pet"] = message["master_pet"]
+			entry["pet_detail"] = message["master_pet_detail"]
+		}
+		cached[id] = entry
 	}
-	if message["master_pet_detail"] == nil {
-		message["master_pet_detail"] = map[string]any{}
-	}
-	slots := []struct{ idName, infoName, prefix string }{
-		{"master_id", "master_id_info", "master"}, {"mate_1", "mate_1_info", "mate_1"}, {"mate_2", "mate_2_info", "mate_2"}}
-	for index, slot := range slots {
-		id := int64(0)
-		status := int64(0)
+	for index, slot := range illusionMessageSlots {
+		id, status := int64(0), int64(0)
 		if index < len(view.Seated) {
 			id = int64(view.Seated[index])
-			status = view.Status
+			if view.Ready[view.Seated[index]] {
+				status = 1
+			}
 		}
 		message[slot.idName] = id
 		message[slot.prefix+"_status"] = status
-		if id == 0 {
+		entry := cached[id]
+		if id == 0 || entry == nil {
 			message[slot.infoName] = int64(0)
 			message[slot.prefix+"_partner"] = ""
 			message[slot.prefix+"_partner_detail"] = []any{}
+		} else {
+			message[slot.infoName] = entry["info"]
+			message[slot.prefix+"_partner"] = entry["partner"]
+			detail := entry["partner_detail"]
+			if detail == nil {
+				detail = []any{}
+			}
+			message[slot.prefix+"_partner_detail"] = detail
 		}
-		if index == 0 && id == 0 {
+		if index != 0 {
+			continue
+		}
+		if entry == nil {
 			message["master_pet"] = int64(0)
 			message["master_pet_detail"] = map[string]any{}
+			continue
 		}
+		message["master_pet"] = entry["pet"]
+		petDetail := entry["pet_detail"]
+		if petDetail == nil {
+			petDetail = map[string]any{}
+		}
+		message["master_pet_detail"] = petDetail
 	}
 	return message, nil
 }

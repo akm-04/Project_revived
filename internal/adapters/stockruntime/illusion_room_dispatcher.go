@@ -34,7 +34,7 @@ type IllusionRoomPort interface {
 	CancelPrepare(context.Context, identity.ActorContext, operation.Context) (map[string]any, error)
 	StartTeam(context.Context, identity.ActorContext, operation.Context) (map[string]any, error)
 	Invite(context.Context, identity.ActorContext, identity.PlayerID, operation.Context) (map[string]any, error)
-	GetReport(context.Context, string, operation.Context) (map[string]any, error)
+	GetReport(context.Context, identity.ActorContext, string, operation.Context) (map[string]any, error)
 }
 
 // RoomReportFallback reads a report owned by another room family; 1362 is a
@@ -159,7 +159,7 @@ func (o IllusionRoomDispatcher) Dispatch(ctx context.Context, req httpedge.Dispa
 		if !ok || !onlyStockGameplayParams(params, "report_id") {
 			return bad
 		}
-		body, err := o.Service.GetReport(ctx, reportID, op)
+		body, err := o.Service.GetReport(ctx, a, reportID, op)
 		if err != nil && o.ReportFallback != nil && errors.Is(err, d.ErrRefused) {
 			fallback, fallbackErr := o.ReportFallback.GetReport(ctx, a, reportID, op)
 			if fallbackErr != nil {

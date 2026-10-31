@@ -52,7 +52,7 @@ func (s Mode) StartTeam(c context.Context, a identity.ActorContext, op operation
 				return err
 			}
 			if state.ReportID != "" {
-				raw, found, err := s.Store.ReadReportTx(c, sc.Tx, state.ReportID, at)
+				raw, found, err := s.Store.ReadReportTx(c, sc.Tx, state.ReportID, int64(room.LogicalServerID), at)
 				if err != nil {
 					return err
 				}
@@ -129,7 +129,7 @@ func (s Mode) StartTeam(c context.Context, a identity.ActorContext, op operation
 				return err
 			}
 			if state.ReportID != "" {
-				raw, found, err := s.Store.ReadReportTx(c, sc.Tx, state.ReportID, at)
+				raw, found, err := s.Store.ReadReportTx(c, sc.Tx, state.ReportID, int64(room.LogicalServerID), at)
 				if err != nil {
 					return err
 				}
@@ -192,8 +192,8 @@ func (s Mode) StartTeam(c context.Context, a identity.ActorContext, op operation
 	return reportArray(report), nil
 }
 
-// GetReport answers 1362 from the stored team report.
-func (s Mode) GetReport(c context.Context, reportID string, _ operation.Context) (map[string]any, error) {
+// GetReport answers 1362 from the stored team report of the actor's server.
+func (s Mode) GetReport(c context.Context, a identity.ActorContext, reportID string, _ operation.Context) (map[string]any, error) {
 	if s.Store == nil || s.Timed.Binder.Time == nil || reportID == "" {
 		return nil, d.ErrUnavailable
 	}
@@ -201,7 +201,7 @@ func (s Mode) GetReport(c context.Context, reportID string, _ operation.Context)
 	if err != nil {
 		return nil, err
 	}
-	raw, found, err := s.Store.ReadReportTx(c, s.Fresh, reportID, at)
+	raw, found, err := s.Store.ReadReportTx(c, s.Fresh, reportID, int64(a.LogicalServerID), at)
 	if err != nil {
 		return nil, err
 	}

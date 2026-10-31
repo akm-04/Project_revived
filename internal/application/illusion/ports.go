@@ -13,6 +13,7 @@ import (
 	"gxb.local/backend/v2/internal/application/publicstats"
 	"gxb.local/backend/v2/internal/application/sharedroom"
 	"gxb.local/backend/v2/internal/domain/character"
+	cd "gxb.local/backend/v2/internal/domain/combat"
 	"gxb.local/backend/v2/internal/domain/identity"
 	d "gxb.local/backend/v2/internal/domain/illusion"
 	"gxb.local/backend/v2/internal/domain/mail"
@@ -38,10 +39,12 @@ type Store interface {
 	ReadRankTx(context.Context, tx.Queryer, int64, int64, int64) ([]d.Result, error)
 	ListOccurrencesTx(context.Context, tx.Queryer, int64) ([]d.Occurrence, error)
 	InsertAttemptTx(context.Context, tx.Tx, d.Attempt) error
+	FindAttemptTx(context.Context, tx.Queryer, identity.PlayerID, int64, int64, int64) (d.Attempt, bool, error)
 	FindLatestAttemptTx(context.Context, tx.Queryer, identity.PlayerID) (d.Attempt, bool, error)
 	SaveAttemptTx(context.Context, tx.Tx, d.Attempt) error
 	InsertReportTx(context.Context, tx.Tx, string, int64, int64, int64, string, time.Time) error
-	ReadReportTx(context.Context, tx.Queryer, string, time.Time) (string, bool, error)
+	ReadReportTx(context.Context, tx.Queryer, string, int64, time.Time) (string, bool, error)
+	PurgeExpiredReportsTx(context.Context, tx.Tx, time.Time, int64) (int64, error)
 }
 
 type Content interface {
@@ -78,6 +81,7 @@ type Combat interface {
 	Resolve(context.Context, operation.Context, ids.UUID) (cb.Resolved, error)
 	TerminalTx(context.Context, tx.Tx, cb.TerminalRequest) (cb.Settled, error)
 	SettleMemberTx(context.Context, tx.Tx, cb.MemberSettleRequest) (cb.MemberSettled, error)
+	SnapshotTx(context.Context, tx.Queryer, ids.UUID) (cd.Snapshot, error)
 	MonsterWaves(int64) ([][]cb.Participant, error)
 }
 

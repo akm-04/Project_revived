@@ -169,13 +169,25 @@ func (Store) InsertReportTx(ctx context.Context, t tx.Tx, reportID string, serve
 	return err
 }
 
-func (Store) ReadReportTx(ctx context.Context, q tx.Queryer, reportID string, at time.Time) (string, bool, error) {
+// ReadReportTx answers only a player of the report's logical server and only
+// before the retention window ends.
+func (Store) ReadReportTx(ctx context.Context, q tx.Queryer, reportID string, serverID int64, at time.Time) (string, bool, error) {
 	var content string
-	err := q.QueryRow(ctx, `SELECT content::text FROM illusion_reports WHERE report_id=$1 AND expires_at>$2`, reportID, at).Scan(&content)
+	err := q.QueryRow(ctx, `SELECT content::text FROM illusion_reports WHERE report_id=$1 AND logical_server_id=$2 AND expires_at>$3`, reportID, serverID, at).Scan(&content)
 	if errors.Is(err, kernelstore.ErrNoRows) {
 		return "", false, nil
 	}
 	return content, err == nil, err
+}
+
+// PurgeExpiredReportsTx deletes one bounded batch past retention; only the
+// reconciler calls it.
+func (Store) PurgeExpiredReportsTx(ctx context.Context, t tx.Tx, at time.Time, limit int64) (int64, error) {
+	if limit < 1 || limit > 10000 {
+		return 0, d.ErrInvalid
+	}
+	tag, err := t.Exec(ctx, `DELETE FROM illusion_reports WHERE report_id IN (SELECT report_id FROM illusion_reports WHERE expires_at<=$1 ORDER BY expires_at,report_id LIMIT $2)`, at, limit)
+	return tag.RowsAffected(), err
 }
 
 // SettleMemberTx inserts the member's settlement marker once; false means the

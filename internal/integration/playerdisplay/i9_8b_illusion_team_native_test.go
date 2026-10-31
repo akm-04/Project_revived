@@ -5,14 +5,21 @@ package playerdisplay_test
 import (
 	"context"
 	"encoding/json"
+	"errors"
+	"fmt"
 	"reflect"
 	"sync"
 	"testing"
 
 	pg "gxb.local/backend/v2/internal/adapters/postgres"
+	"gxb.local/backend/v2/internal/adapters/postgres/contentstore"
+	"gxb.local/backend/v2/internal/adapters/postgres/i4store"
+	"gxb.local/backend/v2/internal/adapters/postgres/sharedroomstore"
+	"gxb.local/backend/v2/internal/adapters/stockruntime"
 	cb "gxb.local/backend/v2/internal/application/combat"
 	il "gxb.local/backend/v2/internal/application/illusion"
 	appsharedroom "gxb.local/backend/v2/internal/application/sharedroom"
+	"gxb.local/backend/v2/internal/domain/grant"
 	"gxb.local/backend/v2/internal/domain/identity"
 	di "gxb.local/backend/v2/internal/domain/illusion"
 	"gxb.local/backend/v2/internal/foundation/tx"
@@ -143,9 +150,13 @@ func TestI9_8BIllusionTeamFightNative(t *testing.T) {
 			t.Fatalf("team replay settled member %d %d times", member.PlayerID, n)
 		}
 	}
-	report, err := s.GetReport(ctx, state.ReportID, op())
+	report, err := s.GetReport(ctx, a, state.ReportID, op())
 	if err != nil || !sameReport(t, reportContent(t, report), content) {
 		t.Fatalf("1362 replay %v", err)
+	}
+	other, _ := illusionOwner(t, p, rankingServer(t, p))
+	if _, err = s.GetReport(ctx, other, state.ReportID, op()); !errors.Is(err, di.ErrRefused) {
+		t.Fatalf("1362 crossed a logical server: %v", err)
 	}
 }
 
@@ -207,8 +218,20 @@ func TestI9_8BIllusionRoomPolicyNative(t *testing.T) {
 	if _, err = s.Prepare(ctx, b, op()); err != nil {
 		t.Fatal(err)
 	}
+	reader := stockruntime.IllusionRoomNoticeReader{Store: sharedroomstore.Store{}, Directory: i4store.PlayerDirectoryReader{}, Queryer: p}
+	notice, found, err := reader.ReadRoomNotice(ctx, fmt.Sprint(roomID))
+	if err != nil || !found {
+		t.Fatalf("518 read %v %v", found, err)
+	}
+	if !notice.Ready[b.PlayerID] || notice.Ready[a.PlayerID] || notice.Ready[c.PlayerID] {
+		t.Fatalf("518 ready flags %#v", notice.Ready)
+	}
 	if _, err = s.CancelPrepare(ctx, b, op()); err != nil {
 		t.Fatal(err)
+	}
+	notice, found, err = reader.ReadRoomNotice(ctx, fmt.Sprint(roomID))
+	if err != nil || !found || notice.Ready[b.PlayerID] {
+		t.Fatalf("518 stale ready %#v %v %v", notice.Ready, found, err)
 	}
 	if n := scalar(t, p, `SELECT count(*) FROM shared_room_seats WHERE room_id=$1 AND player_id=$2 AND ready`, roomID, int64(b.PlayerID)); n != 0 {
 		t.Fatal("1363 did not clear readiness")
@@ -296,18 +319,48 @@ func TestI9_8BIllusionRoomExpiryNative(t *testing.T) {
 func TestI9_8BIllusionMemberTeamNative(t *testing.T) {
 	p := pool(t)
 	server := rankingServer(t, p)
-	a, partner := illusionOwner(t, p, server)
+	member, picks := illusionTeamOwner(t, p, server, 10001002, 10001003)
+	other, _ := illusionOwner(t, p, rankingServer(t, p))
 	clock := illusionTime(t)
 	s := illusionService(t, p, clock, illusionPrivileges{level: 3}, illusionGuildSource{})
-	if _, err := s.Start(ctx, a, il.StartRequest{Formation: []int64{partner}}, op()); err != nil {
+
+	revision := installed(t, p)
+	content := contentstore.Store{Queryer: p}
+	definition, err := content.PetAcquisitionTx(ctx, p, revision, 10010001)
+	if err != nil {
 		t.Fatal(err)
 	}
-	body, err := s.MemberTeam(ctx, a, a.PlayerID, op())
+	grantGenuine(t, p, member, revision, "illusion rank pet", []grant.Line{
+		{Kind: grant.StackItem, ItemID: definition.EggItemID, Amount: 1},
+		{Kind: grant.ScalarCurrency, ResourceKey: "crystal", Amount: 10000}})
+	pets := genuinePetService(p)
+	ricky := must(pets.Summon(ctx, member, 10010001, op()))(t, "pet summon")
+	must(pets.CleanCD(ctx, member, ricky.PetID, op()))(t, "pet hatch")
+
+	if _, err = s.Start(ctx, member, il.StartRequest{Formation: []int64{picks[0]}, PetID: ricky.PetID}, op()); err != nil {
+		t.Fatal(err)
+	}
+	if _, err = s.Settle(ctx, member, il.ResultRequest{Star: 1, Damage: 100, CostTime: 5, Formation: []int64{picks[0]}, PetID: ricky.PetID}, op()); err != nil {
+		t.Fatal(err)
+	}
+	_, openDay, _, _ := illusionRemaining(t, p, server)
+	exec(t, p, `INSERT INTO illusion_attempts(attempt_id,player_id,logical_server_id,open_day,campaign_id,room_id,formation,frozen_at,resolved,damage)
+		VALUES('stale-illusion-attempt',$1,$2,$3,$4,NULL,$5,$6,true,0)`,
+		int64(member.PlayerID), int64(server), openDay-2, int64(di.FirstCampaignID), fmt.Sprint(picks[1]), clock.at.Unix())
+
+	body, err := s.MemberTeam(ctx, member, member.PlayerID, op())
 	if err != nil {
 		t.Fatal(err)
 	}
 	heroes, ok := body["heros"].([]map[string]any)
-	if !ok || len(heroes) != 1 {
-		t.Fatalf("1364 heroes %#v", body)
+	if !ok || len(heroes) != 1 || heroes[0]["partner_id"] != picks[0] {
+		t.Fatalf("1364 read the wrong occurrence %#v", body)
+	}
+	pet, ok := body["pet"].(map[string]any)
+	if !ok || pet["pet_id"] != ricky.PetID {
+		t.Fatalf("1364 pet %#v", body["pet"])
+	}
+	if _, err = s.MemberTeam(ctx, member, other.PlayerID, op()); !errors.Is(err, di.ErrRefused) {
+		t.Fatalf("1364 crossed a logical server: %v", err)
 	}
 }

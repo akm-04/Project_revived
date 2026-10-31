@@ -12,8 +12,10 @@ import (
 	cd "gxb.local/backend/v2/internal/domain/combat"
 	"gxb.local/backend/v2/internal/domain/identity"
 	d "gxb.local/backend/v2/internal/domain/illusion"
+	"gxb.local/backend/v2/internal/domain/logicalserver"
 	"gxb.local/backend/v2/internal/domain/modes"
 	"gxb.local/backend/v2/internal/domain/objective"
+	"gxb.local/backend/v2/internal/foundation/ids"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
@@ -52,7 +54,12 @@ func (s Mode) Info(c context.Context, a identity.ActorContext, op operation.Cont
 	if err != nil {
 		return nil, err
 	}
-	return infoBody(occurrence, player, hurt, rank, at), nil
+	revision, _ := op.Policies.Get("content")
+	catalog, err := s.Content.IllusionCatalogTx(c, s.Fresh, revision)
+	if err != nil {
+		return nil, err
+	}
+	return infoBody(catalog, occurrence, player, hurt, rank, at), nil
 }
 
 // Buy answers 1345: the next refresh_cost ladder entry, capped by
@@ -111,7 +118,7 @@ func (s Mode) Start(c context.Context, a identity.ActorContext, request StartReq
 		if err = st.player.ConsumeChance(); err != nil {
 			return Response{}, err
 		}
-		started, err := s.bind(c, sc, a, st.occurrence, campaign, request.Formation)
+		started, err := s.bind(c, sc, a, st.occurrence, campaign, request.Formation, request.PetID)
 		if err != nil {
 			return Response{}, err
 		}
@@ -128,7 +135,7 @@ func (s Mode) Start(c context.Context, a identity.ActorContext, request StartReq
 	return response.Body, err
 }
 
-func (s Mode) bind(c context.Context, sc gen.TimedScope, a identity.ActorContext, occurrence d.Occurrence, campaign d.Campaign, formation []int64) (cb.Started, error) {
+func (s Mode) bind(c context.Context, sc gen.TimedScope, a identity.ActorContext, occurrence d.Occurrence, campaign d.Campaign, formation []int64, petID int64) (cb.Started, error) {
 	op := sc.Operation.Operation()
 	revision, _ := op.Policies.Get("content")
 	scope, err := ca.NewCoherentReadScope(tx.Scope{Tx: sc.Tx, Operation: op, Attempt: sc.Attempt, Options: sc.Options}, revision, sc.Operation.DecisionAt())
@@ -139,8 +146,11 @@ func (s Mode) bind(c context.Context, sc gen.TimedScope, a identity.ActorContext
 	for _, id := range formation {
 		battle.TeamA = append(battle.TeamA, cb.Participant{Origin: cd.OwnedSelf, Kind: cd.HeroActor, Player: a.PlayerID, Identity: id})
 	}
+	if petID > 0 {
+		battle.PetsA = append(battle.PetsA, cb.Participant{Origin: cd.OwnedSelf, Kind: cd.PetActor, Player: a.PlayerID, Identity: petID})
+	}
 	return s.Combat.StartTx(c, sc.Tx, scope, cb.StartRequest{Actor: a, Locator: locator(a), GenerationRef: generationRef(occurrence),
-		StartFingerprint: startFingerprint(a, StartRequest{Formation: formation}, op), ResultDeadline: sc.Operation.DecisionAt().Add(attemptLimit),
+		StartFingerprint: startFingerprint(a, StartRequest{Formation: formation, PetID: petID}, op), ResultDeadline: sc.Operation.DecisionAt().Add(attemptLimit),
 		Battle: battle, TrustProfile: cd.ClientSummaryAttested, Replay: cd.ReplaySpec{Response: cd.ReplayOK}})
 }
 
@@ -171,7 +181,7 @@ func (s Mode) Settle(c context.Context, a identity.ActorContext, request ResultR
 			return Response{}, fmt.Errorf("%w: no open attempt", d.ErrRefused)
 		}
 		attested, err := s.Combat.AttestSummaryTx(c, sc.Tx, cb.SummaryRequest{Locator: locator(a), GenerationRef: generationRefForAttempt(attempt), TerminalKind: "ILLUSION_RESULT", At: at, Policy: summaryPolicy,
-			Summary: cd.Summary{Star: request.Star, Win: request.Star > 0 || request.Damage > 0, Damage: request.Damage, Formation: request.Formation}})
+			Summary: cd.Summary{Star: request.Star, Win: request.Star > 0 || request.Damage > 0, Damage: request.Damage, Formation: request.Formation, Pet: request.PetID}})
 		if err != nil {
 			return Response{}, err
 		}
@@ -272,7 +282,9 @@ func (s Mode) personalPlace(c context.Context, q tx.Queryer, occurrence d.Occurr
 }
 
 // MemberTeam answers 1364 with the member's frozen formation and current roster
-// rows, which the stock rank window populates as heroes.
+// rows, which the stock rank window populates as heroes. The target must belong
+// to the actor's logical server, and the formation is the attempt of the current
+// ranked occurrence.
 func (s Mode) MemberTeam(c context.Context, a identity.ActorContext, memberID identity.PlayerID, _ operation.Context) (map[string]any, error) {
 	if !s.ready() {
 		return nil, d.ErrUnavailable
@@ -284,6 +296,9 @@ func (s Mode) MemberTeam(c context.Context, a identity.ActorContext, memberID id
 	if err = s.eligible(c, s.Fresh, a, at); err != nil {
 		return nil, err
 	}
+	if logicalserver.PlayerRegion(memberID) != a.LogicalServerID {
+		return nil, fmt.Errorf("%w: target is on another logical server", d.ErrRefused)
+	}
 	profile, found, err := s.Directory.ProfileTx(c, s.Fresh, memberID)
 	if err != nil {
 		return nil, err
@@ -293,7 +308,11 @@ func (s Mode) MemberTeam(c context.Context, a identity.ActorContext, memberID id
 	}
 	out := map[string]any{"heros": []map[string]any{}, "book_shelf_lev": int64(0), "is_robot": false,
 		"conquer_lev": profile.ConquerLevel, "conquer_loop_id": profile.ConquerLoopID}
-	attempt, found, err := s.Store.FindLatestAttemptTx(c, s.Fresh, memberID)
+	occurrence, found, err := s.Store.ReadOccurrenceTx(c, s.Fresh, int64(a.LogicalServerID))
+	if err != nil || !found {
+		return out, err
+	}
+	attempt, found, err := s.Store.FindAttemptTx(c, s.Fresh, memberID, int64(a.LogicalServerID), occurrence.OpenDay, occurrence.CampaignID)
 	if err != nil || !found {
 		return out, err
 	}
@@ -319,5 +338,43 @@ func (s Mode) MemberTeam(c context.Context, a identity.ActorContext, memberID id
 		}
 	}
 	out["heros"] = heroes
+	pet, err := s.frozenPet(c, attempt, memberID, at)
+	if err != nil {
+		return nil, err
+	}
+	if pet != nil {
+		out["pet"] = pet
+	}
 	return out, nil
+}
+
+// frozenPet re-projects the pet the attempt froze into its combat snapshot.
+// shortcut: an unreadable snapshot omits the pet; the rank detail still renders.
+func (s Mode) frozenPet(c context.Context, attempt d.Attempt, memberID identity.PlayerID, at time.Time) (map[string]any, error) {
+	if s.Pets == nil {
+		return nil, nil
+	}
+	attemptID, err := ids.ParseUUID(attempt.ID)
+	if err != nil {
+		return nil, nil
+	}
+	snapshot, err := s.Combat.SnapshotTx(c, s.Fresh, attemptID)
+	if err != nil {
+		return nil, nil
+	}
+	petID := int64(0)
+	for _, actor := range snapshot.Battle.PetsA {
+		if int64(memberID) == actor.Player && actor.Kind == cd.PetActor && actor.Origin == cd.OwnedSelf {
+			petID = actor.Identity
+			break
+		}
+	}
+	if petID <= 0 {
+		return nil, nil
+	}
+	pets, err := s.petRows(c, s.Fresh, memberID, at)
+	if err != nil {
+		return nil, err
+	}
+	return pets[fmt.Sprint(petID)], nil
 }
