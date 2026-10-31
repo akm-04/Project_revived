@@ -10,6 +10,7 @@ import (
 	"time"
 
 	gen "gxb.local/backend/v2/internal/application/generation"
+	"gxb.local/backend/v2/internal/application/playerroot"
 	sr "gxb.local/backend/v2/internal/application/sharedroom"
 	cd "gxb.local/backend/v2/internal/domain/combat"
 	"gxb.local/backend/v2/internal/domain/identity"
@@ -188,7 +189,7 @@ func (s Mode) updateRoom(c context.Context, a identity.ActorContext, op operatio
 			if err = s.admit(c, t, a, catalog, at); err != nil {
 				return err
 			}
-			scores, err = s.Store.LockPlayerTx(c, t, int64(a.LogicalServerID), a.PlayerID, at)
+			scores, err = s.lockMembers(c, t, a, room, at)
 			return err
 		},
 		Apply: func(c context.Context, sc gen.TimedScope, room *sharedroom.Room) error {
@@ -208,10 +209,34 @@ func (s Mode) updateRoom(c context.Context, a identity.ActorContext, op operatio
 			if err != nil {
 				return err
 			}
-			room.Payload, err = view.state.Encode()
-			return err
+			*room = view.room
+			encoded, err := view.state.Encode()
+			if err != nil {
+				return err
+			}
+			return room.SetPayload(encoded, view.at)
 		}}, op)
 	return body, err
+}
+
+// lockMembers takes every member's player row ascending, so a command that
+// settles the whole room keeps the declared lock order; it returns the actor's.
+func (s Mode) lockMembers(c context.Context, t tx.Tx, a identity.ActorContext, room sharedroom.Room, at time.Time) (d.Scores, error) {
+	members, err := playerroot.CanonicalPlayerIDs(room.Members())
+	if err != nil {
+		return nil, err
+	}
+	var actorScores d.Scores
+	for _, member := range members {
+		scores, err := s.Store.LockPlayerTx(c, t, int64(a.LogicalServerID), member, at)
+		if err != nil {
+			return nil, err
+		}
+		if member == a.PlayerID {
+			actorScores = scores
+		}
+	}
+	return actorScores, nil
 }
 
 func locator(a identity.ActorContext) cd.Locator {

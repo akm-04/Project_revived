@@ -360,7 +360,10 @@ func main() {
 	if fightReady {
 		sharedRooms := appsharedroom.Service{Timed: appgeneration.TimedRunner{Binder: appgeneration.Binder{Time: postgres.AuthoritativeTime{Queryer: pool}}, Runner: runner},
 			Fresh: pool, Store: sharedroomstore.Store{}, Fence: i5db, Players: i4store.PlayerRootLocker{}}
-		fight.Inputs.Rooms = appsharedroom.AdmissionBinding{Store: sharedroomstore.Store{}, Family: appillusion.RoomFamily, Slot: appillusion.RoomSlot}
+		fight.Inputs.Rooms = appsharedroom.AdmissionRouter{
+			"ILLUSION": {Store: sharedroomstore.Store{}, Family: appillusion.RoomFamily, Slot: appillusion.RoomSlot},
+			"OCCULT":   {Store: sharedroomstore.Store{}, Family: appoccult.RoomFamily, Slot: appoccult.RoomSlot, ConvenerFirst: true},
+		}
 		worldBoss := canonicalWorldBoss(pool, runner, contentDB, i5db, i5svc, privileges, fight)
 		illusion := canonicalIllusion(pool, runner, contentDB, i5db, i5svc, privileges, fight, guildDB, sharedRooms)
 		ranking.Illusion = illusion

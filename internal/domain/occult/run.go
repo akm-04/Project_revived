@@ -45,6 +45,9 @@ type RunState struct {
 	Frozen             map[string]json.RawMessage       `json:"frozen,omitempty"`
 	ReportID           string                           `json:"report_id,omitempty"`
 	Events             []EventRecord                    `json:"events,omitempty"`
+	Team               *TeamFight                       `json:"team,omitempty"`
+	TeamRounds         int64                            `json:"team_rounds,omitempty"`
+	Notices            []NoticeRecord                   `json:"notices,omitempty"`
 }
 
 func NewRun(chapterID, campaignType int64) RunState {

@@ -3,14 +3,17 @@ package occult
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 
 	gen "gxb.local/backend/v2/internal/application/generation"
 	"gxb.local/backend/v2/internal/application/i5"
+	"gxb.local/backend/v2/internal/application/playerroot"
 	"gxb.local/backend/v2/internal/domain/grant"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/domain/objective"
 	d "gxb.local/backend/v2/internal/domain/occult"
+	"gxb.local/backend/v2/internal/foundation/changes"
 	"gxb.local/backend/v2/internal/foundation/operation"
 )
 
@@ -88,44 +91,89 @@ func (s Mode) recordFact(c context.Context, sc gen.TimedScope, a identity.ActorC
 	return s.Facts.RecordTx(prepared, sc.Tx, sc.Operation.Operation(), objective.Fact{PlayerID: a.PlayerID, SourceDomain: "occult", SourceBusinessKey: businessKey, Kind: kind, Delta: 1})
 }
 
-// settleIfCleared pays the chapter once, when its final campaign falls: the
-// displayed rewards, the awakening fragment of the pinned occurrence, the best
-// score that unlocks the sweep, and the clear fact.
+// settleIfCleared pays the chapter once, when its final campaign falls: to every
+// eligible member of the room the displayed rewards, the awakening fragment of
+// the pinned occurrence, the best score that unlocks the sweep, and the clear
+// fact. The acting player's rewards are also put in the reply.
 func (s Mode) settleIfCleared(c context.Context, sc gen.TimedScope, a identity.ActorContext, view *roomView, body map[string]any) error {
+	awards, err := s.settleCleared(c, sc, a, view)
+	if err != nil {
+		return err
+	}
+	if rewards, paid := awards[a.PlayerID]; paid {
+		body["award_info"] = map[string]any{"awards": rewardRows(rewards)}
+	}
+	return nil
+}
+
+// settleCleared returns what each paid member received; it is empty while the
+// chapter is not cleared and after it was paid once.
+func (s Mode) settleCleared(c context.Context, sc gen.TimedScope, a identity.ActorContext, view *roomView) (map[identity.PlayerID][]d.Reward, error) {
 	state := &view.state
 	if state.ClearSettled || !state.ChapterCleared(view.catalog) {
-		return nil
+		return nil, nil
 	}
 	state.ClearSettled = true
+	members, err := playerroot.CanonicalPlayerIDs(view.room.Members())
+	if err != nil {
+		return nil, err
+	}
+	awards := map[identity.PlayerID][]d.Reward{}
+	for _, member := range members {
+		rewards, paid, err := s.payClear(c, sc, a, member, view)
+		if err != nil {
+			return nil, err
+		}
+		if paid {
+			awards[member] = rewards
+		}
+	}
+	return awards, s.Store.FinishRunTx(c, sc.Tx, view.room.ID, view.at)
+}
+
+// payClear pays one member; a member who no longer passes the function gate is
+// skipped. Another member's writes are hidden from the acting player's reply.
+func (s Mode) payClear(c context.Context, sc gen.TimedScope, a identity.ActorContext, member identity.PlayerID, view *roomView) ([]d.Reward, bool, error) {
+	memberActor := identity.ActorContext{PlayerID: member, LogicalServerID: a.LogicalServerID}
+	scores := view.scores
+	if member != a.PlayerID {
+		c = changes.Detach(c)
+		if err := s.admit(c, sc.Tx, memberActor, view.catalog, view.at); err != nil {
+			if errors.Is(err, d.ErrRefused) {
+				return nil, false, nil
+			}
+			return nil, false, err
+		}
+		var err error
+		if scores, err = s.Store.LockPlayerTx(c, sc.Tx, int64(a.LogicalServerID), member, view.at); err != nil {
+			return nil, false, err
+		}
+	}
+	state := &view.state
 	rewards, err := view.catalog.ClearRewards(state.ChapterID)
 	if err != nil {
-		return err
+		return nil, false, err
 	}
-	fragment, err := s.frozenFragment(c, sc, a, view)
+	fragment, err := s.frozenFragment(c, sc, memberActor, view)
 	if err != nil {
-		return err
+		return nil, false, err
 	}
 	if fragment != nil {
 		rewards = append(rewards, *fragment)
 	}
-	if scores, improved := view.scores.Record(state.ChapterID, state.Points); improved {
-		view.scores = scores
-		if err = s.Store.SaveScoresTx(c, sc.Tx, a.PlayerID, scores, view.at); err != nil {
-			return err
+	if improved, changed := scores.Record(state.ChapterID, state.Points); changed {
+		if err = s.Store.SaveScoresTx(c, sc.Tx, member, improved, view.at); err != nil {
+			return nil, false, err
+		}
+		if member == a.PlayerID {
+			view.scores = improved
 		}
 	}
-	businessKey := fmt.Sprintf("%d:clear:%d", a.PlayerID, view.room.ID)
-	if err = s.grantRewards(c, sc, a, "clear", businessKey, rewards); err != nil {
-		return err
+	businessKey := fmt.Sprintf("%d:clear:%d", member, view.room.ID)
+	if err = s.grantRewards(c, sc, memberActor, "clear", businessKey, rewards); err != nil {
+		return nil, false, err
 	}
-	if err = s.recordFact(c, sc, a, clearedFactKind, businessKey); err != nil {
-		return err
-	}
-	if err = s.Store.FinishRunTx(c, sc.Tx, view.room.ID, view.at); err != nil {
-		return err
-	}
-	body["award_info"] = map[string]any{"awards": rewardRows(rewards)}
-	return nil
+	return rewards, true, s.recordFact(c, sc, memberActor, clearedFactKind, businessKey)
 }
 
 // fillState completes a fight reply with the room state, tickets and the

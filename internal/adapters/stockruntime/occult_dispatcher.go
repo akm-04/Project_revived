@@ -20,8 +20,8 @@ import (
 
 // OccultMIDs are the src_64 Occult model MIDs (mid.lua 755-778) of the solo
 // flow and the team room. 2381 has no sender in the stock UI and stays inactive
-// (C1); the co-op fight MIDs belong to the Occult team fight dispatcher.
-var OccultMIDs = []uint16{2362, 2363, 2364, 2365, 2366, 2367, 2368, 2369, 2370, 2371, 2372, 2373, 2379, 2380, 2384, 2385}
+// (C1); 2374-2378, 2382 and 2383 are the co-op fight.
+var OccultMIDs = []uint16{2362, 2363, 2364, 2365, 2366, 2367, 2368, 2369, 2370, 2371, 2372, 2373, 2374, 2375, 2376, 2377, 2378, 2379, 2380, 2382, 2383, 2384, 2385}
 
 type OccultPort interface {
 	Info(context.Context, identity.ActorContext, operation.Context) (map[string]any, error)
@@ -41,6 +41,13 @@ type OccultPort interface {
 	ChangePosition(context.Context, identity.ActorContext, int64, operation.Context) (map[string]any, error)
 	Settle(context.Context, identity.ActorContext, app.SettleRequest, operation.Context) (map[string]any, error)
 	Sweep(context.Context, identity.ActorContext, int64, operation.Context) (map[string]any, error)
+	TeamInvite(context.Context, identity.ActorContext, int64, int64, operation.Context) (map[string]any, error)
+	TeamAccept(context.Context, identity.ActorContext, int64, int64, bool, operation.Context) (map[string]any, error)
+	TeamQuit(context.Context, identity.ActorContext, int64, int64, operation.Context) (map[string]any, error)
+	TeamPrepare(context.Context, identity.ActorContext, int64, int64, operation.Context) (map[string]any, error)
+	StartTeamFight(context.Context, identity.ActorContext, int64, int64, operation.Context) (map[string]any, error)
+	TeamSelect(context.Context, identity.ActorContext, app.FormationRequest, operation.Context) (map[string]any, error)
+	TeamReport(context.Context, identity.ActorContext, string, operation.Context) (map[string]any, error)
 }
 
 type OccultDispatcher struct {
@@ -99,7 +106,27 @@ func (o OccultDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReq
 			return bad
 		}
 		body, err = o.Service.ExitRoom(ctx, a, room, op)
-	case 2371, 2379, 2373:
+	case 2375:
+		campaign, sub, ok := occultStage(params)
+		accept, acceptOK := topFloorInteger(params, "is_accept", true)
+		if !ok || !acceptOK || accept > 1 || !onlyStockGameplayParams(params, "campaign_id", "sub_id", "is_accept") {
+			return bad
+		}
+		body, err = o.Service.TeamAccept(ctx, a, campaign, sub, accept == 1, op)
+	case 2383:
+		request, ok := occultFormation(params)
+		if !ok {
+			return bad
+		}
+		body, err = o.Service.TeamSelect(ctx, a, request, op)
+	case 2382:
+		campaign, _, ok := occultStage(params)
+		key, keyOK := params["report_key"].(string)
+		if !ok || !keyOK || key == "" || campaign <= 0 || !onlyStockGameplayParams(params, "campaign_id", "sub_id", "report_key") {
+			return bad
+		}
+		body, err = o.Service.TeamReport(ctx, a, key, op)
+	case 2371, 2379, 2373, 2374, 2376, 2377, 2378:
 		campaign, sub, ok := occultStage(params)
 		if !ok || !onlyStockGameplayParams(params, "campaign_id", "sub_id") {
 			return bad
@@ -155,6 +182,14 @@ func (o OccultDispatcher) stageCommand(ctx context.Context, mid uint16, a identi
 		return o.Service.Prepare(ctx, a, campaign, sub, op)
 	case 2379:
 		return o.Service.StartFight(ctx, a, campaign, sub, op)
+	case 2374:
+		return o.Service.TeamInvite(ctx, a, campaign, sub, op)
+	case 2376:
+		return o.Service.TeamQuit(ctx, a, campaign, sub, op)
+	case 2377:
+		return o.Service.StartTeamFight(ctx, a, campaign, sub, op)
+	case 2378:
+		return o.Service.TeamPrepare(ctx, a, campaign, sub, op)
 	}
 	return o.Service.QuitFight(ctx, a, op)
 }
@@ -181,6 +216,17 @@ func occultStage(params map[string]any) (int64, int64, bool) {
 	campaign, campaignOK := topFloorInteger(params, "campaign_id", true)
 	sub, subOK := topFloorInteger(params, "sub_id", true)
 	return campaign, sub, campaignOK && subOK && campaign > 0 && sub > 0
+}
+
+// occultFormation reads OccultSelectHeroWindow's 2383: a hero at a position, or a pet.
+func occultFormation(params map[string]any) (app.FormationRequest, bool) {
+	campaign, sub, stageOK := occultStage(params)
+	partner, partnerOK := topFloorInteger(params, "partner_id", false)
+	position, positionOK := topFloorInteger(params, "pos", false)
+	pet, petOK := topFloorInteger(params, "pet_id", false)
+	allowed := onlyStockGameplayParams(params, "campaign_id", "sub_id", "partner_id", "pos", "pet_id")
+	request := app.FormationRequest{CampaignID: campaign, SubID: sub, PartnerID: partner, Position: position, PetID: pet}
+	return request, allowed && stageOK && partnerOK && positionOK && petOK
 }
 
 // occultSettle reads BattleCreate:occultResult's 2372. monster_status is

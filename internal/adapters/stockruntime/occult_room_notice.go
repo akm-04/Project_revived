@@ -125,7 +125,7 @@ func (h OccultRoomNoticeHandler) ReloadAndDeliver(c context.Context, reference s
 		seated = append(seated, member.Player)
 	}
 	h.Delivered.reseat(view.RoomID, occultRoomNoticeKey, seated)
-	steps := []func(context.Context, app.RoomNotice, []identity.PlayerID) error{h.deliverRemovals, h.deliverRoomChanges, h.deliverEvents, h.deliverPositions, h.deliverOnline, h.deliverInvites}
+	steps := []func(context.Context, app.RoomNotice, []identity.PlayerID) error{h.deliverRemovals, h.deliverRoomChanges, h.deliverEvents, h.deliverPushes, h.deliverPositions, h.deliverOnline, h.deliverInvites}
 	for _, step := range steps {
 		if err = step(c, view, seated); err != nil {
 			return err
@@ -188,6 +188,19 @@ func (h OccultRoomNoticeHandler) deliverEvents(c context.Context, view app.RoomN
 		}
 		for _, player := range seated {
 			if err = h.send(c, player, frame, nil); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+// deliverPushes sends each recorded team or fight-status push once, in server order.
+func (h OccultRoomNoticeHandler) deliverPushes(c context.Context, view app.RoomNotice, _ []identity.PlayerID) error {
+	for _, push := range h.Delivered.newPushes(view.RoomID, view.Pushes) {
+		for _, body := range push.Bodies {
+			frame, err := occultRoomFrame(push.Function, body.Body)
+			if err = h.send(c, body.Player, frame, err); err != nil {
 				return err
 			}
 		}

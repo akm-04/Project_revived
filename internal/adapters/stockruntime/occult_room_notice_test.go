@@ -3,6 +3,7 @@ package stockruntime
 import (
 	"testing"
 
+	app "gxb.local/backend/v2/internal/application/occult"
 	"gxb.local/backend/v2/internal/domain/identity"
 	d "gxb.local/backend/v2/internal/domain/occult"
 	"gxb.local/backend/v2/internal/protocol/amf3"
@@ -90,5 +91,21 @@ func TestOccultRemovalIsOneShotAndAReseatedPlayerCanBeRemovedAgain(t *testing.T)
 	ledger.reseat(7, occultRoomNoticeKey, players)
 	if len(ledger.undelivered(7, occultRoomNoticeKey, players)) != 1 {
 		t.Fatal("a player who rejoined can be told of a later departure")
+	}
+}
+
+func TestOccultTeamPushesAreSentOnceInServerOrder(t *testing.T) {
+	ledger := NewRoomNoticeLedger()
+	log := []app.RoomPush{{Sequence: 1, Function: 2}, {Sequence: 2, Function: 3}}
+	if fresh := ledger.newPushes(7, log); len(fresh) != 0 {
+		t.Fatalf("first sight must only record: %v", fresh)
+	}
+	log = append(log, app.RoomPush{Sequence: 3, Function: 5}, app.RoomPush{Sequence: 4, Function: 6})
+	fresh := ledger.newPushes(7, log)
+	if len(fresh) != 2 || fresh[0].Function != 5 || fresh[1].Function != 6 {
+		t.Fatalf("fresh pushes %v", fresh)
+	}
+	if again := ledger.newPushes(7, log); len(again) != 0 {
+		t.Fatalf("a push must not repeat on the next wakeup: %v", again)
 	}
 }

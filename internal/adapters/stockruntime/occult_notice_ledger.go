@@ -3,6 +3,7 @@ package stockruntime
 import (
 	"slices"
 
+	app "gxb.local/backend/v2/internal/application/occult"
 	"gxb.local/backend/v2/internal/domain/identity"
 	d "gxb.local/backend/v2/internal/domain/occult"
 )
@@ -14,6 +15,8 @@ import (
 // 2362 stays authoritative for the client.
 type roomObservation struct {
 	events    int64
+	pushes    int64
+	pushSeen  bool
 	positions map[identity.PlayerID]int64
 	online    map[identity.PlayerID]bool
 }
@@ -81,4 +84,22 @@ func (l *RoomNoticeLedger) changedOnline(room int64, states map[identity.PlayerI
 	}
 	slices.SortFunc(changed, func(left, right onlineChange) int { return int(left.Player - right.Player) })
 	return changed
+}
+
+// newPushes returns the room pushes not yet sent; the first sight of a room only
+// records the newest sequence.
+func (l *RoomNoticeLedger) newPushes(room int64, pushes []app.RoomPush) []app.RoomPush {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	seen, _ := l.observe(room)
+	known := seen.pushSeen
+	seen.pushSeen = true
+	var fresh []app.RoomPush
+	for _, push := range pushes {
+		if known && push.Sequence > seen.pushes {
+			fresh = append(fresh, push)
+		}
+		seen.pushes = max(seen.pushes, push.Sequence)
+	}
+	return fresh
 }

@@ -151,3 +151,9 @@ func RecordedMissions(ctx context.Context) map[string]any {
 	}
 	return set.MissionFields()
 }
+
+// Detach hides the request change set, so a write made for another player never
+// reaches the acting player's response.
+func Detach(ctx context.Context) context.Context {
+	return context.WithValue(ctx, contextKey{}, (*Set)(nil))
+}

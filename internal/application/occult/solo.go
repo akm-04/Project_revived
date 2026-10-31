@@ -330,16 +330,9 @@ func (s Mode) Prepare(c context.Context, a identity.ActorContext, campaignID, su
 		if _, err = stageOf(campaign, subID); err != nil {
 			return nil, err
 		}
-		outcomes := view.state.TriggerEvent(view.catalog, campaign)
-		view.state.RecordEvents(outcomes)
-		autoPass := false
-		for _, outcome := range outcomes {
-			autoPass = autoPass || outcome.Type == d.EventAutoPass
-		}
-		if len(outcomes) > 0 {
-			if err = s.Store.InsertLogTx(c, sc.Tx, int64(view.room.LogicalServerID), view.room.ID, eventLogType, a.PlayerID, mustJSON(logEntry(view.at, eventLogType, campaign.ID, a.PlayerID)), view.at); err != nil {
-				return nil, err
-			}
+		autoPass, err := s.fireCampaignEvent(c, sc, a, view, campaign)
+		if err != nil {
+			return nil, err
 		}
 		body := map[string]any{"is_auto_pass": autoPass}
 		if !autoPass {
@@ -347,6 +340,24 @@ func (s Mode) Prepare(c context.Context, a identity.ActorContext, campaignID, su
 		}
 		return body, s.settleIfCleared(c, sc, a, view, body)
 	})
+}
+
+// fireCampaignEvent applies the campaign's event once, logs it, and reports
+// whether the campaign passes without a fight.
+func (s Mode) fireCampaignEvent(c context.Context, sc gen.TimedScope, a identity.ActorContext, view *roomView, campaign d.Campaign) (bool, error) {
+	outcomes := view.state.TriggerEvent(view.catalog, campaign)
+	if len(outcomes) == 0 {
+		return false, nil
+	}
+	view.state.RecordEvents(outcomes)
+	if err := s.Store.InsertLogTx(c, sc.Tx, int64(view.room.LogicalServerID), view.room.ID, eventLogType, a.PlayerID, mustJSON(logEntry(view.at, eventLogType, campaign.ID, a.PlayerID)), view.at); err != nil {
+		return false, err
+	}
+	autoPass := false
+	for _, outcome := range outcomes {
+		autoPass = autoPass || outcome.Type == d.EventAutoPass
+	}
+	return autoPass, nil
 }
 
 // StartFight answers 2379: the stage is held by the player. A player holds one
@@ -361,11 +372,13 @@ func (s Mode) StartFight(c context.Context, a identity.ActorContext, campaignID,
 		if err != nil {
 			return nil, err
 		}
+		view.state.ExpireTeam(view.at.Unix())
 		view.state.Release(int64(a.PlayerID))
 		if err = view.state.Enter(campaign.ID, index, int64(a.PlayerID)); err != nil {
 			return nil, err
 		}
 		view.state.BeginFight(view.at.Unix())
+		view.state.AddNotice(d.NoticeRecord{Function: d.NoticeFightStatus, Actor: int64(a.PlayerID), CampaignID: campaign.ID})
 		return map[string]any{}, nil
 	})
 }
@@ -374,6 +387,7 @@ func (s Mode) StartFight(c context.Context, a identity.ActorContext, campaignID,
 func (s Mode) QuitFight(c context.Context, a identity.ActorContext, op operation.Context) (map[string]any, error) {
 	return s.update(c, a, op, func(_ context.Context, _ gen.TimedScope, view *roomView) (map[string]any, error) {
 		view.state.Release(int64(a.PlayerID))
+		view.state.AddNotice(d.NoticeRecord{Function: d.NoticeFightStatus, Actor: int64(a.PlayerID)})
 		return map[string]any{}, nil
 	})
 }
@@ -414,6 +428,8 @@ func (s Mode) Settle(c context.Context, a identity.ActorContext, request SettleR
 		if err = s.Store.InsertLogTx(c, sc.Tx, int64(view.room.LogicalServerID), view.room.ID, battleLogType, a.PlayerID, mustJSON(logEntry(view.at, battleLogType, campaign.ID, a.PlayerID)), view.at); err != nil {
 			return nil, err
 		}
+		view.state.AddNotice(d.NoticeRecord{Function: d.NoticeSingleFight, Actor: int64(a.PlayerID), CampaignID: campaign.ID})
+		view.state.AddNotice(d.NoticeRecord{Function: d.NoticeFightStatus, Actor: int64(a.PlayerID), CampaignID: campaign.ID})
 		body := map[string]any{"award_info": map[string]any{"awards": []map[string]any{}}}
 		if !result.Won {
 			return body, s.fillState(c, sc, a, view, body, result.Score)

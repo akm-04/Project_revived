@@ -431,3 +431,33 @@ func TestFamilyValidationAndUnavailableService(t *testing.T) {
 		t.Fatalf("unavailable %v", err)
 	}
 }
+
+func TestAdmissionRouterAndConvenerFirst(t *testing.T) {
+	store := newFakeStore()
+	service, _, _ := testService(store)
+	openRoom(t, service)
+	for _, player := range []identity.PlayerID{10, 11} {
+		if player == 11 {
+			if _, err := service.Join(context.Background(), actor(11), illusionFamily(), 1, testOperation(t)); err != nil {
+				t.Fatal(err)
+			}
+		}
+		if _, err := service.SetReady(context.Background(), actor(int64(player)), illusionFamily(), true, testOperation(t)); err != nil {
+			t.Fatal(err)
+		}
+	}
+	scope := admissionScope(t)
+	router := AdmissionRouter{"ILLUSION": {Store: store, Family: "ILLUSION", Slot: 3}, "OCCULT": {Store: store, Family: "ILLUSION", Slot: 3, ConvenerFirst: true}}
+	member := cb.Admission{Convener: 11, Members: []identity.PlayerID{11, 10}, Locator: cd.Locator{DomainKind: "OCCULT"}}
+	if err := router.AdmitTx(context.Background(), &testTx{}, scope, member); err != nil {
+		t.Fatalf("any seated convener may start a convener-first family: %v", err)
+	}
+	member.Locator.DomainKind = "ILLUSION"
+	if err := router.AdmitTx(context.Background(), &testTx{}, scope, member); !errors.Is(err, cd.ErrRoomRefused) {
+		t.Fatalf("seat order family must refuse: %v", err)
+	}
+	member.Locator.DomainKind = "UNKNOWN"
+	if err := router.AdmitTx(context.Background(), &testTx{}, scope, member); !errors.Is(err, cd.ErrRoomRefused) {
+		t.Fatalf("unknown domain must refuse: %v", err)
+	}
+}

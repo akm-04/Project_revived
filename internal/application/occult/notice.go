@@ -29,7 +29,15 @@ type RoomNotice struct {
 	Removed   []PlayerBody
 	Invites   []PlayerBody
 	Events    []d.EventRecord
+	Pushes    []RoomPush
 	Positions map[identity.PlayerID]int64
+}
+
+// RoomPush is one co-op or fight-status push with the body each addressee gets.
+type RoomPush struct {
+	Sequence int64
+	Function int64
+	Bodies   []PlayerBody
 }
 
 // NoticeReader reads a room for the realtime push; it never writes.
@@ -75,6 +83,10 @@ func (r NoticeReader) ReadRoomNotice(c context.Context, reference string) (RoomN
 	}
 	for _, member := range room.Members() {
 		out.Positions[member] = state.StayPosition(int64(member))
+	}
+	out.Pushes, err = r.pushes(c, view, out.Seated)
+	if err != nil {
+		return RoomNotice{}, false, err
 	}
 	out.Removed, err = r.removedBodies(c, view)
 	if err != nil {
@@ -161,4 +173,60 @@ func (r NoticeReader) roomChange(c context.Context, player identity.PlayerID, ca
 	}
 	body["function_type"] = int64(roomChangeFunction)
 	return body, nil
+}
+
+// pushes turn the room's recorded team notices into per-member bodies read from
+// the current room state. The seated members are the only addressees, so a
+// player who left never receives a stale one.
+func (r NoticeReader) pushes(c context.Context, view *roomView, seated []PlayerBody) ([]RoomPush, error) {
+	if len(seated) == 0 {
+		return nil, nil
+	}
+	reader := Mode{Directory: r.Directory}
+	var pushes []RoomPush
+	for _, record := range view.state.Notices {
+		params, everyone, err := reader.pushParams(c, r.Queryer, view.state, record, seated[0].Body["hero_stat"])
+		if err != nil {
+			return nil, err
+		}
+		push := RoomPush{Sequence: record.Sequence, Function: record.Function}
+		for _, member := range seated {
+			if everyone || int64(member.Player) != record.Actor {
+				push.Bodies = append(push.Bodies, PlayerBody{Player: member.Player, Body: params})
+			}
+		}
+		pushes = append(pushes, push)
+	}
+	return pushes, nil
+}
+
+// pushParams is the params of one push and whether the acting member gets it too.
+func (s Mode) pushParams(c context.Context, q tx.Queryer, state d.RunState, record d.NoticeRecord, heroStat any) (map[string]any, bool, error) {
+	name, err := s.playerName(c, q, record.Actor)
+	if err != nil {
+		return nil, false, err
+	}
+	info, err := s.subCampaignInfo(c, q, state)
+	if err != nil {
+		return nil, false, err
+	}
+	switch record.Function {
+	case d.NoticeTeamInvite:
+		return map[string]any{"campaign_id": record.CampaignID, "sub_id": record.SubID, "start_player": record.Actor, "start_player_name": name}, false, nil
+	case d.NoticeTeamAccept:
+		return map[string]any{"sub_campaign_info": info, "player_name": name}, true, nil
+	case d.NoticeTeamQuit:
+		return map[string]any{"player_name": name}, true, nil
+	case d.NoticeTeamSelect, d.NoticeTeamPrepare:
+		formation := map[string]any{}
+		if state.Team != nil {
+			formation = teamFightInfo(*state.Team, record.Actor)
+		}
+		return map[string]any{"player_id": record.Actor, "team_fight_info": formation}, true, nil
+	case d.NoticeTeamFight:
+		return map[string]any{"report_key": record.ReportKey, "hero_stat": heroStat}, false, nil
+	case d.NoticeSingleFight:
+		return map[string]any{"hero_stat": heroStat}, false, nil
+	}
+	return map[string]any{}, false, nil
 }

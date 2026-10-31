@@ -6662,8 +6662,9 @@
    "family": "OCCULT_SORCERY_WAR",
    "disposition": "ACTIVE",
    "target": "I9-8",
-   "v2": "unimplemented",
-   "v1": null
+   "v2": "implemented",
+   "v1": null,
+   "implementation": "I9-8C working implementation; unqualified"
   },
   {
    "mid": 2375,
@@ -6671,8 +6672,9 @@
    "family": "OCCULT_SORCERY_WAR",
    "disposition": "ACTIVE",
    "target": "I9-8",
-   "v2": "unimplemented",
-   "v1": null
+   "v2": "implemented",
+   "v1": null,
+   "implementation": "I9-8C working implementation; unqualified"
   },
   {
    "mid": 2376,
@@ -6680,8 +6682,9 @@
    "family": "OCCULT_SORCERY_WAR",
    "disposition": "ACTIVE",
    "target": "I9-8",
-   "v2": "unimplemented",
-   "v1": null
+   "v2": "implemented",
+   "v1": null,
+   "implementation": "I9-8C working implementation; unqualified"
   },
   {
    "mid": 2377,
@@ -6689,8 +6692,9 @@
    "family": "OCCULT_SORCERY_WAR",
    "disposition": "ACTIVE",
    "target": "I9-8",
-   "v2": "unimplemented",
-   "v1": null
+   "v2": "implemented",
+   "v1": null,
+   "implementation": "I9-8C working implementation; unqualified"
   },
   {
    "mid": 2378,
@@ -6698,8 +6702,9 @@
    "family": "OCCULT_SORCERY_WAR",
    "disposition": "ACTIVE",
    "target": "I9-8",
-   "v2": "unimplemented",
-   "v1": null
+   "v2": "implemented",
+   "v1": null,
+   "implementation": "I9-8C working implementation; unqualified"
   },
   {
    "mid": 2379,
@@ -6738,8 +6743,9 @@
    "family": "OCCULT_SORCERY_WAR",
    "disposition": "ACTIVE",
    "target": "I9-8",
-   "v2": "unimplemented",
-   "v1": null
+   "v2": "implemented",
+   "v1": null,
+   "implementation": "I9-8C working implementation; unqualified"
   },
   {
    "mid": 2383,
@@ -6747,8 +6753,9 @@
    "family": "OCCULT_SORCERY_WAR",
    "disposition": "ACTIVE",
    "target": "I9-8",
-   "v2": "unimplemented",
-   "v1": null
+   "v2": "implemented",
+   "v1": null,
+   "implementation": "I9-8C working implementation; unqualified"
   },
   {
    "mid": 2384,

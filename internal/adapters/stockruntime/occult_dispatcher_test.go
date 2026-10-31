@@ -23,6 +23,9 @@ type occultStub struct {
 	kicked  identity.PlayerID
 	started bool
 	settled app.SettleRequest
+	accept  *bool
+	picked  app.FormationRequest
+	key     string
 }
 
 func (s *occultStub) reply() (map[string]any, error) { return map[string]any{}, s.err }
@@ -86,6 +89,63 @@ func (s *occultStub) Sweep(context.Context, identity.ActorContext, int64, operat
 	return s.reply()
 }
 
+func (s *occultStub) TeamInvite(context.Context, identity.ActorContext, int64, int64, operation.Context) (map[string]any, error) {
+	return s.reply()
+}
+func (s *occultStub) TeamAccept(_ context.Context, _ identity.ActorContext, _, _ int64, accept bool, _ operation.Context) (map[string]any, error) {
+	s.accept = &accept
+	return s.reply()
+}
+func (s *occultStub) TeamQuit(context.Context, identity.ActorContext, int64, int64, operation.Context) (map[string]any, error) {
+	return s.reply()
+}
+func (s *occultStub) TeamPrepare(context.Context, identity.ActorContext, int64, int64, operation.Context) (map[string]any, error) {
+	return s.reply()
+}
+func (s *occultStub) StartTeamFight(context.Context, identity.ActorContext, int64, int64, operation.Context) (map[string]any, error) {
+	return s.reply()
+}
+func (s *occultStub) TeamSelect(_ context.Context, _ identity.ActorContext, request app.FormationRequest, _ operation.Context) (map[string]any, error) {
+	s.picked = request
+	return s.reply()
+}
+func (s *occultStub) TeamReport(_ context.Context, _ identity.ActorContext, key string, _ operation.Context) (map[string]any, error) {
+	s.key = key
+	return s.reply()
+}
+
+func TestOccultReadsTeamFightFields(t *testing.T) {
+	now := time.Unix(100, 0).UTC()
+	stub := &occultStub{}
+	dispatcher := OccultDispatcher{Authority: httpAuthority{actor: actorForHTTP(t)}, Service: stub}
+	send := func(mid uint16, params map[string]any) int {
+		return dispatcher.Dispatch(context.Background(), illusionRequest(mid, params, now)).HTTPStatus
+	}
+	stage := map[string]any{"campaign_id": int64(20011), "sub_id": int64(1)}
+	if send(2375, map[string]any{"campaign_id": int64(20011), "sub_id": int64(1), "is_accept": int64(0)}) != 200 || stub.accept == nil || *stub.accept {
+		t.Fatalf("refusal not read: %v", stub.accept)
+	}
+	if send(2383, map[string]any{"campaign_id": int64(20011), "sub_id": int64(1), "partner_id": int64(7), "pos": int64(2)}) != 200 || stub.picked.PartnerID != 7 || stub.picked.Position != 2 {
+		t.Fatalf("hero pick %+v", stub.picked)
+	}
+	if send(2382, map[string]any{"campaign_id": int64(20011), "sub_id": int64(1), "report_key": "abc"}) != 200 || stub.key != "abc" {
+		t.Fatalf("report key %q", stub.key)
+	}
+	for name, status := range map[string]int{
+		"accept flag out of range": send(2375, map[string]any{"campaign_id": int64(1), "sub_id": int64(1), "is_accept": int64(2)}),
+		"report key not text":      send(2382, map[string]any{"campaign_id": int64(1), "sub_id": int64(1), "report_key": int64(5)}),
+		"extra key on start":       send(2377, map[string]any{"campaign_id": int64(1), "sub_id": int64(1), "cheat": int64(1)}),
+		"stage missing":            send(2374, map[string]any{"campaign_id": int64(1)}),
+	} {
+		if status != 400 {
+			t.Fatalf("%s: %d", name, status)
+		}
+	}
+	if send(2377, stage) != 200 {
+		t.Fatal("start refused")
+	}
+}
+
 func TestOccultEveryRoomMIDRoutes(t *testing.T) {
 	now := time.Unix(100, 0).UTC()
 	dispatcher := OccultDispatcher{Authority: httpAuthority{actor: actorForHTTP(t)}, Service: &occultStub{}}
@@ -95,6 +155,10 @@ func TestOccultEveryRoomMIDRoutes(t *testing.T) {
 		2366: {"chapter_id": int64(2), "campaign_type": int64(2)}, 2368: {"room_id": int64(7)}, 2371: stage(), 2373: stage(), 2379: stage(), 2380: {},
 		2372: {"campaign_id": int64(20011), "sub_id": int64(1), "star": int64(3), "formation": "11|12", "hero_status": map[string]any{"11": map[string]any{"hp": float64(90), "mp": float64(40), "is_reborn": float64(0)}}, "monster_status": map[string]any{}},
 		2384: {"stay_pos": int64(20010)}, 2385: {"chapter_id": int64(2)},
+		2374: stage(), 2376: stage(), 2377: stage(), 2378: stage(),
+		2375: {"campaign_id": int64(20011), "sub_id": int64(1), "is_accept": int64(1)},
+		2382: {"campaign_id": int64(20011), "sub_id": int64(1), "report_key": "k"},
+		2383: {"campaign_id": int64(20011), "sub_id": int64(1), "pet_id": int64(9)},
 	}
 	if len(requests) != len(OccultMIDs) {
 		t.Fatalf("OccultMIDs %v are not all exercised", OccultMIDs)

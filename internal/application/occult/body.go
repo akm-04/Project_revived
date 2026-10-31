@@ -2,6 +2,7 @@ package occult
 
 import (
 	"context"
+	"encoding/json"
 	"sort"
 	"time"
 
@@ -62,6 +63,13 @@ func (s Mode) stateBody(c context.Context, q tx.Queryer, a identity.ActorContext
 		return body, nil
 	}
 	body["open_campaigns"] = openCampaigns(catalog, state)
+	if state.Team != nil && !state.Team.Settled() {
+		info, err := s.subCampaignInfo(c, q, state)
+		if err != nil {
+			return nil, err
+		}
+		body["sub_campaign_info"] = info
+	}
 	body["self_dispatch"] = selfDispatch(state, int64(a.PlayerID))
 	return body, nil
 }
@@ -119,3 +127,57 @@ func logEntry(at time.Time, logType int, campaignID int64, players ...identity.P
 }
 
 func subIndex(subID int64) int { return int(subID) - 1 }
+
+func rowObject(raw json.RawMessage) map[string]any {
+	var row map[string]any
+	if json.Unmarshal(raw, &row) != nil || row == nil {
+		return map[string]any{}
+	}
+	return row
+}
+
+// teamFightInfo is one member's formation as the team window draws it: a row per
+// position, the pet row and the readiness flag.
+func teamFightInfo(team d.TeamFight, playerID int64) map[string]any {
+	pick := team.Pick(playerID)
+	formation := make([]any, 0, len(pick.Rows))
+	for _, row := range pick.Rows {
+		formation = append(formation, rowObject(row))
+	}
+	prepared := int64(0)
+	if team.IsPrepared(playerID) {
+		prepared = 1
+	}
+	return map[string]any{"formation": formation, "pet": rowObject(pick.PetRow), "is_prepare": prepared}
+}
+
+// subCampaignInfo is the live team fight: who started it, who accepted, and once
+// everyone did, every member's formation.
+func (s Mode) subCampaignInfo(c context.Context, q tx.Queryer, state d.RunState) (map[string]any, error) {
+	team := state.Team
+	if team == nil || team.Settled() {
+		return map[string]any{}, nil
+	}
+	name, err := s.playerName(c, q, team.StartPlayer)
+	if err != nil {
+		return nil, err
+	}
+	info := map[string]any{"campaign_id": team.CampaignID, "sub_id": team.SubID, "start_player": team.StartPlayer, "start_player_name": name, "accept_players": team.Accepted}
+	if !team.Selecting() {
+		return info, nil
+	}
+	formations := map[string]any{}
+	for _, player := range team.Accepted {
+		formations[numberKey(player)] = teamFightInfo(*team, player)
+	}
+	info["team_fight_infos"] = formations
+	return info, nil
+}
+
+func (s Mode) playerName(c context.Context, q tx.Queryer, playerID int64) (string, error) {
+	record, found, err := s.Directory.ProfileTx(c, q, identity.PlayerID(playerID))
+	if err != nil || !found {
+		return "", err
+	}
+	return record.Name, nil
+}

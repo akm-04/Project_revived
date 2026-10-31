@@ -18,6 +18,7 @@ import (
 	"gxb.local/backend/v2/internal/domain/objective"
 	d "gxb.local/backend/v2/internal/domain/occult"
 	"gxb.local/backend/v2/internal/domain/player"
+	"gxb.local/backend/v2/internal/foundation/ids"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/receipt"
 	"gxb.local/backend/v2/internal/foundation/tx"
@@ -32,6 +33,8 @@ type Store interface {
 	SaveScoresTx(context.Context, tx.Tx, identity.PlayerID, d.Scores, time.Time) error
 	InsertRunTx(context.Context, tx.Tx, int64, int64, int64, int64, time.Time) error
 	FinishRunTx(context.Context, tx.Tx, int64, time.Time) error
+	InsertReportTx(context.Context, tx.Tx, string, int64, int64, []int64, string, time.Time) error
+	ReadReportTx(context.Context, tx.Queryer, string, int64, identity.PlayerID, time.Time) (string, bool, error)
 	InsertLogTx(context.Context, tx.Tx, int64, int64, int, identity.PlayerID, string, time.Time) error
 	ReadLogsTx(context.Context, tx.Queryer, int64, identity.PlayerID, int64) ([]json.RawMessage, error)
 }
@@ -66,6 +69,9 @@ type Heroes interface {
 type Combat interface {
 	StartTx(context.Context, tx.Tx, ca.CoherentReadScope, cb.StartRequest) (cb.Started, error)
 	AttestSummaryTx(context.Context, tx.Tx, cb.SummaryRequest) (cb.SummaryAttested, error)
+	Resolve(context.Context, operation.Context, ids.UUID) (cb.Resolved, error)
+	TerminalTx(context.Context, tx.Tx, cb.TerminalRequest) (cb.Settled, error)
+	SettleMemberTx(context.Context, tx.Tx, cb.MemberSettleRequest) (cb.MemberSettled, error)
 	MonsterWaves(int64) ([][]cb.Participant, error)
 }
 
@@ -92,6 +98,7 @@ type Mode struct {
 	Functions   Functions
 	Directory   Directory
 	Heroes      Heroes
+	Pets        Heroes
 	Rooms       sharedroom.Service
 	RoomStore   sharedroom.Store
 	Combat      Combat
