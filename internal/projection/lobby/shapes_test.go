@@ -89,7 +89,7 @@ func TestCriticalWaveSShapes(t *testing.T) {
 	}
 }
 func TestExplicitSourceShapes(t *testing.T) {
-	for _, mid := range []uint16{56, 612, 780, 1056, 176, 1302, 1344, 2754, 2784, 8193} {
+	for _, mid := range []uint16{56, 612, 780, 1056, 176, 1302, 2754, 2784, 8193} {
 		if _, ok := Explicit(mid, view(t)); !ok {
 			t.Fatalf("missing %d", mid)
 		}

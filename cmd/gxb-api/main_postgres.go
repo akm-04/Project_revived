@@ -355,6 +355,8 @@ func main() {
 	ranking := stockruntime.RankingDispatcher{Authority: authority, Service: boardRanking, Trophy: achievements}
 	if fightReady {
 		worldBoss := canonicalWorldBoss(pool, runner, contentDB, i5db, i5svc, privileges, fight)
+		illusion := canonicalIllusion(pool, runner, contentDB, i5db, i5svc, privileges, fight, guildDB)
+		ranking.Illusion = illusion
 		topFloor := canonicalTopFloor(pool, runner, contentDB, i5db, i5svc, privileges, fight, owners)
 		memoir := canonicalMemoir(pool, runner, contentDB, i5db, i5svc, heroSvc, fight, topFloor)
 		for _, mid := range stockruntime.MemoirMIDs {
@@ -435,6 +437,9 @@ func main() {
 		for _, mid := range stockruntime.WorldBossMIDs {
 			mustRegister(mid, stockruntime.WorldBossDispatcher{Authority: authority, Service: worldBoss})
 		}
+		for _, mid := range stockruntime.IllusionMIDs {
+			mustRegister(mid, stockruntime.IllusionDispatcher{Authority: authority, Service: illusion})
+		}
 		go runReconcile(ctx, pool, appworldboss.Reconciler{Service: worldBoss})
 	} else {
 		log.Print("I7C-5B/5C/5D/5E/5F Top Floor, 1 on 1, Arena, Conquer School and Champions League routes not registered: GXB_COMBAT_ENTROPY_KEYS is unset")
@@ -442,9 +447,7 @@ func main() {
 	mustRegister(301, ranking)
 	mustRegister(121, stockruntime.OperationLogDispatcher{Authority: authority})
 	lobbyD := stockruntime.LobbyDispatcher{Authority: authority, Tracker: tracker}
-	for _, mid := range []uint16{1344, 2754} {
-		mustRegister(mid, lobbyD)
-	}
+	mustRegister(2754, lobbyD)
 	for _, mid := range stockruntime.SummonMIDs {
 		mustRegister(mid, stockruntime.SummonDispatcher{Authority: authority, Service: vending})
 	}

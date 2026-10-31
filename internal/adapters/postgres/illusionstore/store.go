@@ -127,6 +127,17 @@ func (Store) FindAttemptTx(ctx context.Context, q tx.Queryer, playerID identity.
 	return attempt, err == nil, err
 }
 
+// FindLatestAttemptTx returns the player's open attempt first, otherwise the
+// newest resolved one, so a late result can still credit its frozen occurrence.
+func (Store) FindLatestAttemptTx(ctx context.Context, q tx.Queryer, playerID identity.PlayerID) (d.Attempt, bool, error) {
+	var attempt d.Attempt
+	err := q.QueryRow(ctx, `SELECT attempt_id,player_id,logical_server_id,open_day,campaign_id,COALESCE(room_id,0),formation,frozen_at,resolved,damage FROM illusion_attempts WHERE player_id=$1 ORDER BY resolved,attempt_sequence DESC LIMIT 1`, int64(playerID)).Scan(&attempt.ID, &attempt.PlayerID, &attempt.LogicalServerID, &attempt.OpenDay, &attempt.CampaignID, &attempt.RoomID, &attempt.Formation, &attempt.FrozenAt, &attempt.Resolved, &attempt.Damage)
+	if errors.Is(err, kernelstore.ErrNoRows) {
+		return d.Attempt{}, false, nil
+	}
+	return attempt, err == nil, err
+}
+
 func (Store) SaveAttemptTx(ctx context.Context, t tx.Tx, attempt d.Attempt) error {
 	tag, err := t.Exec(ctx, `UPDATE illusion_attempts SET resolved=$2,damage=$3 WHERE attempt_id=$1`, attempt.ID, attempt.Resolved, attempt.Damage)
 	if err == nil && tag.RowsAffected() != 1 {

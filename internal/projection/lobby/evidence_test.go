@@ -46,7 +46,7 @@ func recordServerS0(t *testing.T, api, rt *BootTracker, base time.Time) {
 			t.Fatal(err)
 		}
 	}
-	for _, mid := range []uint16{2784, 56, 1344, 176, 2754, 1302} {
+	for _, mid := range []uint16{2784, 56, 176, 2754, 1302} {
 		if err := api.Record(corr(api, BootEvent{MID: mid, Kind: BootExplicitHTTP, Phase: PhaseClientRequestObserved, At: base})); err != nil {
 			t.Fatal(err)
 		}

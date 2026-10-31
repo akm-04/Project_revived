@@ -37,8 +37,12 @@ type ArenaRanks interface {
 type PetCampaignRanks interface {
 	RankList(context.Context, identity.ActorContext, operation.Context) (map[string]any, error)
 }
+type IllusionRanks interface {
+	RankList(context.Context, identity.ActorContext, int64, operation.Context) (map[string]any, error)
+}
 type RankingDispatcher struct {
 	PetCampaign PetCampaignRanks
+	Illusion    IllusionRanks
 	Authority   realtimeauth.GameplayAuthorityPort
 	Service     BoardRankingReads
 	TopFloor    TopFloorRanks
@@ -74,6 +78,15 @@ func (d RankingDispatcher) Dispatch(c context.Context, r httpedge.DispatchReques
 	if e != nil {
 		return fail(http.StatusBadRequest)
 	}
+	if subtype >= 24 && subtype <= 27 && d.Illusion != nil {
+		body, e := d.Illusion.RankList(c, a, subtype, r.Envelope.Operation)
+		if e != nil {
+			return fail(http.StatusServiceUnavailable)
+		}
+		body["error_code"] = int64(0)
+		return okI5(body)
+	}
+
 	if subtype == 22 && d.PetCampaign != nil {
 		body, e := d.PetCampaign.RankList(c, a, r.Envelope.Operation)
 		if e != nil {

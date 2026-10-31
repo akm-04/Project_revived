@@ -63,8 +63,6 @@ func Explicit(mid uint16, v BootstrapView) (any, bool) {
 			"point_level": int64(1), "total_points": int64(0), "rank": int64(0),
 			"award_status": []any{int64(-1), int64(-1)},
 		}}, true
-	case 1344:
-		return map[string]any{"paradise_info": map[string]any{"paradise_id": int64(1), "count": int64(0)}, "challenge_times": int64(0), "buy_times": int64(0), "hurt": int64(0), "rank": int64(0)}, true
 	case 2754:
 		return map[string]any{}, true // source callback ignores response fields
 	case 2784:

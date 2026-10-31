@@ -4393,7 +4393,8 @@
    "disposition": "ACTIVE",
    "target": "I9-8",
    "v2": "implemented",
-   "v1": "STATE_BACKED"
+   "v1": "STATE_BACKED",
+   "implementation": "I9-8B working implementation; unqualified"
   },
   {
    "mid": 1345,
@@ -4401,8 +4402,9 @@
    "family": "ILLUSION_FANTASY",
    "disposition": "ACTIVE",
    "target": "I9-8",
-   "v2": "unimplemented",
-   "v1": null
+   "v2": "implemented",
+   "v1": null,
+   "implementation": "I9-8B working implementation; unqualified"
   },
   {
    "mid": 1346,
@@ -4410,8 +4412,9 @@
    "family": "ILLUSION_FANTASY",
    "disposition": "ACTIVE",
    "target": "I9-8",
-   "v2": "unimplemented",
-   "v1": null
+   "v2": "implemented",
+   "v1": null,
+   "implementation": "I9-8B working implementation; unqualified"
   },
   {
    "mid": 1347,
@@ -4419,8 +4422,9 @@
    "family": "ILLUSION_FANTASY",
    "disposition": "ACTIVE",
    "target": "I9-8",
-   "v2": "unimplemented",
-   "v1": null
+   "v2": "implemented",
+   "v1": null,
+   "implementation": "I9-8B working implementation; unqualified"
   },
   {
    "mid": 1348,
@@ -4572,8 +4576,9 @@
    "family": "ILLUSION_FANTASY",
    "disposition": "ACTIVE",
    "target": "I9-8",
-   "v2": "unimplemented",
-   "v1": null
+   "v2": "implemented",
+   "v1": null,
+   "implementation": "I9-8B working implementation; unqualified"
   },
   {
    "mid": 1376,

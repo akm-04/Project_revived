@@ -13,6 +13,7 @@ const (
 	PolicyVersion = 1
 
 	OpenLevel      = 65
+	FunctionID     = 43
 	FreeChances    = 5
 	ChancesPerBuy  = 5
 	DamageCap      = 12000000
@@ -37,6 +38,11 @@ const (
 const (
 	FirstCampaignID = 100001
 	LastCampaignID  = 100012
+
+	RankPersonal  int64 = 24
+	RankCommunity int64 = 25
+	RankGuild     int64 = 26
+	RankTeam      int64 = 27
 )
 
 var (
