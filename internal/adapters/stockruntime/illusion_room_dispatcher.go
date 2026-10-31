@@ -223,7 +223,7 @@ func failIllusionRoom(err error) httpedge.Response {
 		errors.Is(err, sharedroom.ErrClosed) || errors.Is(err, sharedroom.ErrExpired) || errors.Is(err, sharedroom.ErrFull) ||
 		errors.Is(err, sharedroom.ErrKicked) || errors.Is(err, sharedroom.ErrNotOwner) || errors.Is(err, sharedroom.ErrNotSeated) ||
 		errors.Is(err, sharedroom.ErrNotFound) {
-		return okI5(map[string]any{"error_code": int64(1)})
+		return conflictRefusal(1)
 	}
 	return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: err, Body: map[string]any{"error": "illusion_unavailable"}}
 }

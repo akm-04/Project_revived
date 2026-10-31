@@ -310,7 +310,7 @@ func failOccult(err error) httpedge.Response {
 	}
 	for _, refusal := range occultRefusals {
 		if errors.Is(err, refusal) {
-			return okI5(map[string]any{"error_code": int64(1)})
+			return conflictRefusal(1)
 		}
 	}
 	return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: err, Body: map[string]any{"error": "occult_unavailable"}}

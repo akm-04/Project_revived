@@ -291,13 +291,13 @@ func failAdventure(err error) httpedge.Response {
 		return badAdventure()
 	}
 	if errors.Is(err, d.ErrExpired) {
-		return okI5(map[string]any{"error_code": int64(adventureExpired)})
+		return conflictRefusal(adventureExpired)
 	}
 	if errors.Is(err, d.ErrRefused) || errors.Is(err, economy.ErrInsufficientBalance) ||
 		errors.Is(err, sr.ErrNotInRoom) || errors.Is(err, sr.ErrAlreadyInRoom) || errors.Is(err, sr.ErrNotFound) ||
 		errors.Is(err, room.ErrFull) || errors.Is(err, room.ErrKicked) ||
 		errors.Is(err, room.ErrExpired) || errors.Is(err, room.ErrClosed) || errors.Is(err, room.ErrNotOwner) || errors.Is(err, room.ErrNotSeated) {
-		return okI5(map[string]any{"error_code": int64(1)})
+		return conflictRefusal(1)
 	}
 	// Server failures (including d.ErrUnavailable and economy.ErrUnknownResource)
 	// are F4 503 answers, never a stock refusal body.

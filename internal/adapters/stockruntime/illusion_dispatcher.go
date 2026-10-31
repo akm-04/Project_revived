@@ -166,7 +166,7 @@ func failIllusion(err error) httpedge.Response {
 		return badHero("illusion_invalid_parameter")
 	}
 	if errors.Is(err, d.ErrRefused) || errors.Is(err, economy.ErrInsufficientBalance) {
-		return okI5(map[string]any{"error_code": int64(1)})
+		return conflictRefusal(1)
 	}
 	return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: err, Body: map[string]any{"error": "illusion_unavailable"}}
 }

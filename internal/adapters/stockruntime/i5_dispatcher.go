@@ -418,6 +418,13 @@ func applySettlementProjection(body map[string]any, p appi5.SettlementProjection
 	}
 }
 
+// conflictRefusal answers a refusal on a mode whose success callbacks index nested
+// reply tables. Backend.lua hands a 200 body to the callback as OK, which crashes
+// them; on any other status the callback gets ERROR and the toast still shows.
+func conflictRefusal(code int64) httpedge.Response {
+	return httpedge.Response{HTTPStatus: http.StatusConflict, Body: map[string]any{"error_code": code}}
+}
+
 func okI5(body map[string]any) httpedge.Response {
 	return httpedge.Response{HTTPStatus: http.StatusOK, Body: body}
 }

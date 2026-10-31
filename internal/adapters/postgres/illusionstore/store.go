@@ -112,7 +112,7 @@ func (Store) ListOccurrencesTx(ctx context.Context, q tx.Queryer, limit int64) (
 		return nil, d.ErrInvalid
 	}
 	var raw string
-	err := q.QueryRow(ctx, `SELECT COALESCE(jsonb_agg(jsonb_build_object('logical_server_id',logical_server_id,'campaign_id',campaign_id,'pool_hp',pool_hp,'pool_hurt',pool_hurt,'open_day',open_day,'settled_open_day',settled_open_day) ORDER BY logical_server_id),'[]'::jsonb)::text FROM (SELECT * FROM illusion_occurrences ORDER BY logical_server_id LIMIT $1) occurrence`, limit).Scan(&raw)
+	err := q.QueryRow(ctx, `SELECT COALESCE(jsonb_agg(jsonb_build_object('logical_server_id',logical_server_id,'campaign_id',campaign_id,'pool_hp',pool_hp,'pool_hurt',pool_hurt,'open_day',open_day,'settled_open_day',settled_open_day) ORDER BY logical_server_id),'[]'::jsonb)::text FROM (SELECT * FROM illusion_occurrences ORDER BY open_day,logical_server_id LIMIT $1) occurrence`, limit).Scan(&raw)
 	if err != nil {
 		return nil, err
 	}
