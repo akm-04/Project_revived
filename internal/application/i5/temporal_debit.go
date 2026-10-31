@@ -23,6 +23,23 @@ func (s Service) DebitTemporalTx(ctx context.Context, t tx.Tx, pid identity.Play
 	if amount <= 0 {
 		return economy.TemporalState{}, errors.New("invalid temporal debit")
 	}
+	if key != EnergyKey {
+		return s.debitTemporalTx(ctx, t, pid, key, amount, op)
+	}
+	// Occult tickets accrue from every energy debit and only from here; the
+	// scalar rows (720) lock before the energy row (721).
+	ledger, err := s.lockOccultLedgerTx(ctx, t, pid, op)
+	if err != nil {
+		return economy.TemporalState{}, err
+	}
+	next, err := s.debitTemporalTx(ctx, t, pid, key, amount, op)
+	if err != nil {
+		return economy.TemporalState{}, err
+	}
+	return next, s.saveOccultLedgerTx(ctx, t, ledger, amount, op.StartedAt.UTC())
+}
+
+func (s Service) debitTemporalTx(ctx context.Context, t tx.Tx, pid identity.PlayerID, key string, amount int64, op operation.Context) (economy.TemporalState, error) {
 	state, policy, now, err := s.lockTemporalTx(ctx, t, pid, key, op)
 	if err != nil {
 		return economy.TemporalState{}, err

@@ -482,14 +482,21 @@
       "parser_version": "lua-generated-v18-guild-invite",
       "revision_id": "349bae5b49d1ed1a8c95654b080f66c4e45a9a0bc79a0c5af327854c732586cf",
       "scope": "Paradise campaign, personal and community reward, misc window/attempt profile and vip/refresh-cost purchase inputs; D366 policy is separate. Shared room payloads unchanged. Unsealed working implementation."
+    },
+    {
+      "ordinal": 66,
+      "stage": "I9-8C Occult",
+      "compiler_version": "i9-8c-occult",
+      "parser_version": "lua-generated-v18-guild-invite",
+      "revision_id": "f59ef0a2e2b15adf8287b5844dd53aed6b4d13c21ed062182db9e72b18c0de0e",
+      "scope": "Creats chapter select (reward display, awakening routes by mission id), campaign graph and misc room, timer, ticket and event profile; D367 policy is separate. Unsealed working implementation."
     }
   ],
   "current": {
-    "ordinal": 65,
-    "stage": "I9-8B Illusion",
-    "compiler_version": "i9-8b-illusion",
+    "stage": "I9-8C Occult",
+    "compiler_version": "i9-8c-occult",
     "parser_version": "lua-generated-v18-guild-invite",
-    "revision_id": "349bae5b49d1ed1a8c95654b080f66c4e45a9a0bc79a0c5af327854c732586cf",
-    "scope": "Paradise campaign, personal and community reward, misc window/attempt profile and vip/refresh-cost purchase inputs; D366 policy is separate. Shared room payloads unchanged. Unsealed working implementation."
+    "revision_id": "f59ef0a2e2b15adf8287b5844dd53aed6b4d13c21ed062182db9e72b18c0de0e",
+    "scope": "Creats chapter select (reward display, awakening routes by mission id), campaign graph and misc room, timer, ticket and event profile; D367 policy is separate. Unsealed working implementation."
   }
 }

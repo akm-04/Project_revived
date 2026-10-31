@@ -4707,6 +4707,76 @@
       ],
       "write_exceptions": [],
       "migration": "migrations/00100_i9_8b_shared_room_illusion.sql"
+    },
+    "content_occult_catalogs": {
+      "owner": "content-registry",
+      "allowed_query_owners": [
+        "content-registry"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/contentstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/contentstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00101_i9_8c_occult.sql"
+    },
+    "occult_players": {
+      "owner": "occult",
+      "allowed_query_owners": [
+        "occult"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/occultstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/occultstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00101_i9_8c_occult.sql"
+    },
+    "occult_runs": {
+      "owner": "occult",
+      "allowed_query_owners": [
+        "occult"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/occultstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/occultstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00101_i9_8c_occult.sql"
+    },
+    "occult_reports": {
+      "owner": "occult",
+      "allowed_query_owners": [
+        "occult"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/occultstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/occultstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00101_i9_8c_occult.sql"
+    },
+    "occult_logs": {
+      "owner": "occult",
+      "allowed_query_owners": [
+        "occult"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/occultstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/occultstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00101_i9_8c_occult.sql"
     }
   }
 }

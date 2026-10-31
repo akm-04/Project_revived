@@ -21,7 +21,7 @@ from pathlib import Path
 from typing import Any, Iterable
 
 SCHEMA_VERSION = 1
-COMPILER_VERSION = "i9-8b-illusion"
+COMPILER_VERSION = "i9-8c-occult"
 PARSER_VERSION = "lua-generated-v18-guild-invite"
 EXPECTED_SOURCE_ARCHIVE_SHA256 = "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
 SOURCE_PREFIX = "app-assets/output/assets/src_64/"
@@ -280,7 +280,7 @@ ENABLED_CAPABILITIES = [
     "SCALAR_MARCH_COIN_I9_4A", "MISSION_ACTIVITY_I9_4B", "MONTHLY_SIGNIN_I9_4C", "AWAKENING_MISSIONS_I9_4D", "SCALAR_GUILD_COIN_I9_4B", "DODGE_TICKET_STACK_I9_4B",
     "SUMMON_GACHA_I9_3E",
     "CAMPAIGN_MODE_I9_3A",
-    "CHAMPION_MARCH_I9_5A", "WORKPLACE_I9_5B", "PET_CAMPAIGN_I9_5C", "GODS_TRIAL_I9_6A","DODGEBALL_I9_6B", "MEMOIR_I9_6C", "WORLD_BOSS_I9_8A", "ILLUSION_I9_8B",
+    "CHAMPION_MARCH_I9_5A", "WORKPLACE_I9_5B", "PET_CAMPAIGN_I9_5C", "GODS_TRIAL_I9_6A","DODGEBALL_I9_6B", "MEMOIR_I9_6C", "WORLD_BOSS_I9_8A", "ILLUSION_I9_8B", "OCCULT_I9_8C",
     "COSMETIC_TITLE_CONDITION_I7C6",
     "ACHIEVEMENT_CATALOG_I7C4FA",
     "CHAMPIONS_LEAGUE_I7C5F",
@@ -504,6 +504,9 @@ SOURCE_MANIFEST.append(('data/tables/paradise_campaign.lua', '1d278f9cdb169e002f
 SOURCE_MANIFEST.append(('data/tables/paradise_person_reward.lua', 'ebbff86a1b3d37b4eb66b214072ed9043838ee3ab5df45a05dff23a0b9b9720f', 'I9_8B_ILLUSION_SOURCE_BOUNDARY'))
 SOURCE_MANIFEST.append(('data/tables/paradise_community_reward.lua', '79001034492ec5a06af1249c025cbd3609d767960841e76c4a85cf8638780104', 'I9_8B_ILLUSION_SOURCE_BOUNDARY'))
 from illusion_content import build_illusion
+SOURCE_MANIFEST.append(('data/tables/creats_chapter_select.lua', 'c4134b5ee3a9861d75f76f6c704e16345c0cb61d6b49adefcdf1f90549d26e3d', 'I9_8C_OCCULT_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/creats_campaign.lua', '63be4a760e765d77f7e04d1f77a725737f91ab467a1929cdc00a0d59b7bd3275', 'I9_8C_OCCULT_SOURCE_BOUNDARY'))
+from occult_content import build_occult
 from dodgeball_content import build_dodgeball
 from memoir_content import build_memoir
 from march_content import build_march
@@ -2335,6 +2338,7 @@ def build_artifacts(blobs: dict[str, SourceBlob], archive_sha256: str) -> dict[s
         "gods_trial_catalog.json":build_godstrial(blobs,parse_generated_lua_table,items),
         "world_boss_catalog.json":build_world_boss(blobs,parse_generated_lua_table),
         "illusion_catalog.json":build_illusion(blobs,parse_generated_lua_table),
+        "occult_catalog.json":build_occult(blobs,parse_generated_lua_table),
         "dodgeball_catalog.json":build_dodgeball(blobs,parse_generated_lua_table,items,hero_artifact),
         "memoir_catalog.json":build_memoir(blobs,parse_generated_lua_table,items,hero_artifact),
         "workplace_catalog.json":build_workplace(blobs,parse_generated_lua_table,parse_base64_indexed_lua_table,indexed_field,resources),
