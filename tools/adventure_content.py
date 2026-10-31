@@ -18,6 +18,7 @@ SHOP_PRICES = [20, 20, 20, 50, 50, 50, 300]
 CARD_IDS = list(range(100001, 100073))
 CARD_PRICE_COUNTS = {88: 16, 388: 56}
 CAMPAIGN_IDS = list(range(100001, 100020))
+GIFT_IDS = list(range(90030001, 90030020)) + [90030021, 90030022]
 FIRST_CAMPAIGN_LEVEL = 9
 LAST_CAMPAIGN_LEVEL = 100
 EXPECTED_MISC = {
@@ -125,6 +126,20 @@ def build_adventure(blobs, parse):
         if campaign['gift'] != 90030001 + offset or min(campaign['battle_ids'] + campaign['models']) <= 0:
             raise ValueError('adventure campaign gift/identity drift')
 
+    gifts = []
+    for row in table('gift'):
+        gift_id = int(row['id'])
+        if gift_id not in GIFT_IDS:
+            continue
+        items = _pipe_ints(row['items'])
+        item_nums = _pipe_ints(row['item_nums'])
+        if not items or len(items) != len(item_nums) or min(items) <= 0 or min(item_nums) <= 0:
+            raise ValueError('adventure gift shape drift ' + row['id'])
+        gifts.append(dict(id=gift_id, items=items, item_nums=item_nums))
+    gifts.sort(key=lambda gift: gift['id'])
+    if [gift['id'] for gift in gifts] != GIFT_IDS:
+        raise ValueError('adventure gift census drift')
+
     misc = {row['key']: row['value'] for row in table('misc')}
     for key, value in EXPECTED_MISC.items():
         if misc.get(key) != value:
@@ -141,6 +156,7 @@ def build_adventure(blobs, parse):
         shop=shop,
         cards=cards,
         campaigns=campaigns,
+        gifts=gifts,
         limits=dict(
             defense_tries_per_position=int(misc['adventure_monster_challenge_times_limit']),
             defense_level_band=int(misc['adventure_level_limit']),

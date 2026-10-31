@@ -29,7 +29,7 @@ func canonicalIllusion(p *pg.Pool, r tx.Runner, content contentstore.Store, valu
 		Fence: values, Players: i4store.PlayerRootLocker{}, Functions: values, Directory: i4store.PlayerDirectoryReader{}, Heroes: fight.Inputs.Heroes,
 		Pets: fight.Inputs.Pets, Stats: fight.Inputs.Stats, Rooms: rooms, RoomStore: sharedroomstore.Store{},
 		Combat: fight, Privileges: privileges, Costs: appi5.MaterialCostDebiter{Store: values, Content: content},
-		Facts: appi5.ObjectiveFacts{Owner: owner, Open: values, Observer: appadventure.Observer{Store: adventurestore.Store{}}}, Guilds: illusionGuilds{Store: guilds}, Mail: appi5.SettlementMail{Store: values},
+		Facts: appi5.ObjectiveFacts{Owner: owner, Open: values, Observer: appadventure.Observer{Store: adventurestore.Store{}, Wake: adventureWakeup{}}}, Guilds: illusionGuilds{Store: guilds}, Mail: appi5.SettlementMail{Store: values},
 		Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}}
 }
 

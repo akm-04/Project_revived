@@ -121,6 +121,12 @@ type CardItem struct {
 	Rate  int64 `json:"rate"`
 }
 
+type Gift struct {
+	ID       int64   `json:"id"`
+	Items    []int64 `json:"items"`
+	ItemNums []int64 `json:"item_nums"`
+}
+
 type DefenseCampaign struct {
 	ID           int64   `json:"id"`
 	MinimumLevel int64   `json:"minimum_level"`
@@ -166,6 +172,7 @@ type Catalog struct {
 	Shop             []ShopItem        `json:"shop"`
 	Cards            []CardItem        `json:"cards"`
 	Campaigns        []DefenseCampaign `json:"campaigns"`
+	Gifts            []Gift            `json:"gifts"`
 	Limits           Limits            `json:"limits"`
 }
 
@@ -176,7 +183,7 @@ func (c Catalog) Validate() error {
 	if c.OpenAcademyLevel != OpenAcademyLevel || c.FantasyOpenLevel != FantasyOpenLevel {
 		return ErrUnavailable
 	}
-	if len(c.Events) != len(sourceEvents) || len(c.Shop) != 7 || len(c.Cards) != 72 || len(c.Campaigns) != 19 {
+	if len(c.Events) != len(sourceEvents) || len(c.Shop) != 7 || len(c.Cards) != 72 || len(c.Campaigns) != 19 || len(c.Gifts) != 21 {
 		return ErrUnavailable
 	}
 	for index, event := range c.Events {
@@ -196,6 +203,11 @@ func (c Catalog) Validate() error {
 	}
 	for _, campaign := range c.Campaigns {
 		if campaign.ID <= 0 || campaign.MinimumLevel > campaign.MaximumLevel || len(campaign.BattleIDs) != DefenseMonsterCount || len(campaign.Models) != DefenseMonsterCount || campaign.Gift <= 0 {
+			return ErrUnavailable
+		}
+	}
+	for _, gift := range c.Gifts {
+		if gift.ID <= 0 || len(gift.Items) == 0 || len(gift.Items) != len(gift.ItemNums) {
 			return ErrUnavailable
 		}
 	}
@@ -224,6 +236,25 @@ func (l Limits) matchesSource() bool {
 	return true
 }
 
+// ShopEntry answers one adventure_shop row; a client price is never an input
+// (C8).
+func (c Catalog) ShopEntry(id int64) (ShopItem, bool) {
+	index := slices.IndexFunc(c.Shop, func(item ShopItem) bool { return item.ID == id })
+	if index < 0 {
+		return ShopItem{}, false
+	}
+	return c.Shop[index], true
+}
+
+// CardEntry answers one adventure_cards_dropbox row (C8).
+func (c Catalog) CardEntry(id int64) (CardItem, bool) {
+	index := slices.IndexFunc(c.Cards, func(card CardItem) bool { return card.ID == id })
+	if index < 0 {
+		return CardItem{}, false
+	}
+	return c.Cards[index], true
+}
+
 // ShopPrice is the server price of an adventure_shop id; a client number is
 // never an input (C8).
 func (c Catalog) ShopPrice(id int64) (int64, bool) {
@@ -232,6 +263,16 @@ func (c Catalog) ShopPrice(id int64) (int64, bool) {
 		return 0, false
 	}
 	return c.Shop[index].Price, true
+}
+
+// Gift answers the source award vector of a gift row; awards are granted
+// through I5, never written by this family.
+func (c Catalog) Gift(id int64) (Gift, bool) {
+	index := slices.IndexFunc(c.Gifts, func(gift Gift) bool { return gift.ID == id })
+	if index < 0 {
+		return Gift{}, false
+	}
+	return c.Gifts[index], true
 }
 
 // CardPrice is the server price of an adventure_cards_dropbox id (C8).

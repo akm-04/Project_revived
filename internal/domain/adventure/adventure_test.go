@@ -127,6 +127,34 @@ func TestOccurrenceLifetimeAndOneActivePerType(t *testing.T) {
 	if types := ActiveTypes(occurrences, at.Add(time.Second)); len(types) != 1 {
 		t.Fatalf("active types %v", types)
 	}
+	if !occurrence.Finish(at.Add(time.Minute)) {
+		t.Fatal("first finish must change the occurrence")
+	}
+	if occurrence.Finish(at.Add(2 * time.Minute)) {
+		t.Fatal("second finish must be a no-op")
+	}
+	if occurrence.Active(at.Add(time.Second)) {
+		t.Fatal("a finished occurrence must not stay active")
+	}
+}
+
+func TestOccurrenceSpecialData(t *testing.T) {
+	at := time.Unix(1700000000, 0).UTC()
+	cases := map[int64]func(int64) bool{
+		EventShop:     func(id int64) bool { return id >= 1001 && id <= 1007 },
+		EventSummon:   func(id int64) bool { return id >= 100001 && id <= 100072 },
+		EventIllusion: func(id int64) bool { return id == IllusionHiddenBoss },
+		EventDefense:  func(id int64) bool { return id == 0 },
+	}
+	for eventType, valid := range cases {
+		occurrence, err := NewOccurrence("fact/"+fmt.Sprint(eventType), testPlayer(), fixedEvent(t, eventType), at)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if !valid(occurrence.SpecialData) {
+			t.Fatalf("event %d special data %d", eventType, occurrence.SpecialData)
+		}
+	}
 }
 
 func TestDefenseTriesPerPosition(t *testing.T) {
@@ -206,6 +234,13 @@ func TestGeneratedCatalogPricesAreRecomputed(t *testing.T) {
 	}
 	if price, ok := catalog.CardPrice(1); ok || price != 0 {
 		t.Fatal("unknown card id must refuse")
+	}
+	gift, ok := catalog.Gift(90030021)
+	if !ok || len(gift.Items) != 4 || gift.Items[0] != 50001002 || gift.ItemNums[0] != 10 {
+		t.Fatalf("gift %+v %v", gift, ok)
+	}
+	if _, ok := catalog.Gift(1); ok {
+		t.Fatal("unknown gift id must refuse")
 	}
 	drift := catalog
 	drift.Events = append([]Event(nil), catalog.Events...)

@@ -24,6 +24,7 @@ type TriggerStore interface {
 // locks another family's row (D369).
 type Observer struct {
 	Store TriggerStore
+	Wake  Wake
 }
 
 func (o Observer) ObserveTx(ctx context.Context, transaction tx.Tx, op operation.Context, facts ...objective.Fact) error {
@@ -72,6 +73,11 @@ func (o Observer) ObserveTx(ctx context.Context, transaction tx.Tx, op operation
 		}
 		if inserted {
 			types[event.ID] = struct{}{}
+			if o.Wake != nil {
+				if err = o.Wake.WakeAdventureNotice(ctx, transaction, fact.PlayerID); err != nil {
+					return err
+				}
+			}
 		}
 	}
 	return nil

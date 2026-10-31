@@ -49,6 +49,9 @@ class AdventureCompilerTests(unittest.TestCase):
             models=[10001001, 10001012, 10001028],
         ))
         self.assertEqual(catalog['campaigns'][-1]['maximum_level'], 100)
+        self.assertEqual(len(catalog['gifts']), 21)
+        self.assertEqual(catalog['gifts'][0], dict(id=90030001, items=[50001002, 50001003, 50001010, 50001014], item_nums=[10, 10, 4, 5]))
+        self.assertEqual(catalog['gifts'][-1]['id'], 90030022)
         self.assertEqual(catalog['limits']['defense_tries_per_position'], 3)
         self.assertEqual(catalog['limits']['defense_room_capacity'], 6)
         self.assertEqual(catalog['limits']['defense_level_band'], 5)
@@ -89,6 +92,17 @@ class AdventureCompilerTests(unittest.TestCase):
         rows[1]['level_condition'] = '16|20'
         with self.assertRaises(ValueError):
             build_adventure(self.blobs, self.parse_with('adventure_campaign', rows))
+
+    def test_gift_drift_refused(self):
+        rows = copy.deepcopy(gen.parse_generated_lua_table(self.blobs['data/tables/gift.lua'].data))
+        next(row for row in rows if row['id'] == '90030021')['item_nums'] = '10|10|4'
+        with self.assertRaises(ValueError):
+            build_adventure(self.blobs, self.parse_with('gift', rows))
+
+        rows = copy.deepcopy(gen.parse_generated_lua_table(self.blobs['data/tables/gift.lua'].data))
+        rows = [row for row in rows if row['id'] != '90030022']
+        with self.assertRaises(ValueError):
+            build_adventure(self.blobs, self.parse_with('gift', rows))
 
     def test_misc_drift_refused(self):
         misc = copy.deepcopy(gen.parse_generated_lua_table(self.blobs['data/tables/misc.lua'].data))

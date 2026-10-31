@@ -496,15 +496,15 @@
       "stage": "I9-8D Adventure",
       "compiler_version": "i9-8d-adventure",
       "parser_version": "lua-generated-v18-guild-invite",
-      "revision_id": "3ae85dd4579854514bdefe8f0e808939df6ebb614c81d9b542850c401d1fb5bd",
-      "scope": "Adventure event rows, shop, card dropbox, defense campaign bands and the trigger/timer/room misc profile; D368 policy is separate. Unsealed working implementation."
+      "revision_id": "ef9fa9208f4dec9f8cb0914f941760e4432a04d423f992da21b5675929a36d3e",
+      "scope": "Adventure event rows, shop, card dropbox, gift vectors, defense campaign bands and the trigger/timer/room misc profile; D368 policy is separate. Unsealed working implementation."
     }
   ],
   "current": {
     "stage": "I9-8D Adventure",
     "compiler_version": "i9-8d-adventure",
     "parser_version": "lua-generated-v18-guild-invite",
-    "revision_id": "3ae85dd4579854514bdefe8f0e808939df6ebb614c81d9b542850c401d1fb5bd",
-    "scope": "Adventure event rows, shop, card dropbox, defense campaign bands and the trigger/timer/room misc profile; D368 policy is separate. Unsealed working implementation."
+    "revision_id": "ef9fa9208f4dec9f8cb0914f941760e4432a04d423f992da21b5675929a36d3e",
+    "scope": "Adventure event rows, shop, card dropbox, gift vectors, defense campaign bands and the trigger/timer/room misc profile; D368 policy is separate. Unsealed working implementation."
   }
 }
