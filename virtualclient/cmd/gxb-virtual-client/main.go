@@ -81,6 +81,9 @@ type scenario struct {
 	// OccultTicketFixture declares prior energy-to-ticket conversions so the stock
 	// create-room button is enabled; real accrual is proven natively.
 	OccultTicketFixture bool `json:"occult_ticket_fixture"`
+	// AdventureEventFixture declares live 10001/10006 occurrences so one client
+	// can read the defense and co-op room replies; it is not trigger proof.
+	AdventureEventFixture bool `json:"adventure_event_fixture"`
 	// KeepFunctionNotice leaves the stock function_show popup that the provisioned summons earn for the scenario to handle itself.
 	KeepFunctionNotice bool `json:"keep_function_notice"`
 	// Steps: "tap:<node path or XxY>", "window:<stock window>[ <json params>]", "lua:<chunk>", "wait:<seconds>", "relogin" (same account/device, fresh Lua VM),
@@ -162,7 +165,7 @@ func (run run) play() ([]string, error) {
 		Report   client.Report      `json:"report"`
 		Failures []string           `json:"failures"`
 	}{Account: session.AccountID, Scenario: run.scenario.Name, Failures: []string{}}
-	progressed := run.scenario.FriendFixture || run.scenario.AwakeningFixture || run.scenario.PetAwakeningFixture || run.scenario.SignInBonusFixture || run.scenario.ChallengeFixture || run.scenario.WorldBossFixture || run.scenario.OccultTicketFixture || run.scenario.Level > 0 || len(run.scenario.Heroes) > 0 || run.scenario.VIP > 0 || len(run.scenario.Grants) > 0
+	progressed := run.scenario.FriendFixture || run.scenario.AwakeningFixture || run.scenario.PetAwakeningFixture || run.scenario.SignInBonusFixture || run.scenario.ChallengeFixture || run.scenario.WorldBossFixture || run.scenario.OccultTicketFixture || run.scenario.AdventureEventFixture || run.scenario.Level > 0 || len(run.scenario.Heroes) > 0 || run.scenario.VIP > 0 || len(run.scenario.Grants) > 0
 	if progressed {
 		// A returning player: the first boot lets stock MID1 birth the player, the harness progresses it, the second boot loads it.
 		birth, err := run.boot(session)
@@ -222,6 +225,11 @@ func (run run) play() ([]string, error) {
 	}
 	if run.scenario.OccultTicketFixture {
 		if err := provision.OccultTicketFixture(ctx, run.databaseURL, session.AccountID, 2); err != nil {
+			return nil, err
+		}
+	}
+	if run.scenario.AdventureEventFixture {
+		if err := provision.AdventureEventFixture(ctx, run.databaseURL, session.AccountID); err != nil {
 			return nil, err
 		}
 	}

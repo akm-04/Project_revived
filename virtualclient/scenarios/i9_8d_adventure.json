@@ -1,5 +1,6 @@
 {
  "name": "i9_8d_adventure",
+ "adventure_event_fixture": true,
  "level": 100,
  "heroes": [
   10001001
@@ -255,12 +256,17 @@
   "lua:local p=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_PLAYER) p:summonHero({summon_type=2,summon_index=1},function() end)",
   "wait:1",
   "wait:3",
-  "lua:local ae=xyd.ModelManager.get():loadModel(xyd.ModelType.ADVENTURE_EVENT) ae:reloadAdventureEventInfo(function(code,reply) if code~=xyd.error.OK then error('vc-adv-list-'..tostring(code)) end local found=nil for _,row in pairs(ae.adventureEventInfo) do local info=row.event_info if info and info.event_info then info=info.event_info end if tonumber(row.id)==10005 and info and tonumber(info.table_id)==10005 then found=info end end if not found then error('vc-adv-no-event') end __vc_adv=found end)",
+  "lua:local ae=xyd.ModelManager.get():loadModel(xyd.ModelType.ADVENTURE_EVENT) ae:reloadAdventureEventInfo(function(code,reply) if code~=xyd.error.OK then error('vc-adv-list-'..tostring(code)) end local found=nil for _,row in pairs(ae.adventureEventInfo) do local info=row.event_info if tonumber(row.id)==10005 and info and tonumber(info.table_id)==10005 and info.end_time then found=info end end if not found then error('vc-adv-no-event') end __vc_adv=found end)",
   "wait:3",
   "lua:if not __vc_adv or not __vc_adv.special_data or __vc_adv.special_data<100001 then error('vc-adv-special') end local ae=xyd.ModelManager.get():loadModel(xyd.ModelType.ADVENTURE_EVENT) ae:getAdventureEventInfo({table_id=10005},function(code,reply) if code~=xyd.error.OK then error('vc-adv-info-'..tostring(code)) end __vc_adv_info=reply end)",
   "wait:3",
   "lua:if not __vc_adv_info or type(__vc_adv_info.detail)~='table' then error('vc-adv-detail') end local ae=xyd.ModelManager.get():loadModel(xyd.ModelType.ADVENTURE_EVENT) ae:buyAdventureCard({table_id=__vc_adv.special_data},function(code,reply) if code~=xyd.error.OK then error('vc-adv-buy-'..tostring(code)) end if type(reply.awards)~='table' or #reply.awards<1 then error('vc-adv-awards') end __vc_adv_bought=true end)",
   "wait:3",
+  "lua:local ae=xyd.ModelManager.get():loadModel(xyd.ModelType.ADVENTURE_EVENT) ae:getAdventureEventInfo({table_id=10001},function(code,reply) if code~=xyd.error.OK then error('vc-adv-defense-'..tostring(code)) end local d=reply.detail if not d or type(d.room_info)~='table' or d.room_info.table_id~=10001 or type(d.pos_statuses)~='table' or type(d.monster_statuses)~='table' or type(d.challenge_times)~='table' or #d.pos_statuses~=3 or #d.monster_statuses~=3 or #d.challenge_times~=3 or type(d.room_info.members)~='table' then error('vc-adv-defense-shape') end ae:updateDefenseTeamInfo(d) if not ae.teamDefenseInfo.room_info or type(ae.teamDefenseInfo.pos_statuses)~='table' or type(ae.teamDefenseInfo.challenge_times)~='table' then error('vc-adv-defense-model') end local wm=xyd.WindowManager.get() wm:openWindow('adventure_defense',{event_info={table_id=10001,detail=d}}) if not wm:getWindow('adventure_defense') then error('vc-adv-defense-window') end end)",
+  "wait:3",
+  "lua:local ae=xyd.ModelManager.get():loadModel(xyd.ModelType.ADVENTURE_EVENT) ae:createTeamRoom({table_id=10006},function(code,reply) if code~=xyd.error.OK then error('vc-adv-coop-'..tostring(code)) end if type(reply.room_info)~='table' or type(reply.room_info.room_id)~='number' or reply.room_info.room_id<1 then error('vc-adv-coop-shape') end if not ae.teamInfo or ae.teamInfo.room_id~=reply.room_info.room_id then error('vc-adv-coop-model') end local wm=xyd.WindowManager.get() wm:openWindow('adventure_illusion_prepare',{table_id=10006}) if not wm:getWindow('adventure_illusion_prepare') then error('vc-adv-coop-window') end end)",
+  "wait:3",
+  "lua:local wm=xyd.WindowManager.get() if wm:getWindow('adventure_defense') then wm:closeWindow('adventure_defense') end if wm:getWindow('adventure_illusion_prepare') then wm:closeWindow('adventure_illusion_prepare') end",
   "lua:if not __vc_adv_bought then error('vc-adv-not-bought') end"
  ],
  "settle_seconds": 5,
@@ -268,7 +274,8 @@
   50,
   2416,
   2417,
-  2420
+  2420,
+  2423
  ],
  "expect_lua_errors": [],
  "note": "Reaches level 100 (above the level-11 Adventure gate; a level-11 Illusion-info client bug is unrelated), triggers Adventure 10005 through 120 genuine crystal vends (MID 50), reads 2416/2417, buys the card with 2420 and checks the awards."

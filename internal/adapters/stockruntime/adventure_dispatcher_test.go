@@ -6,7 +6,9 @@ import (
 	"time"
 
 	app "gxb.local/backend/v2/internal/application/adventure"
+	sr "gxb.local/backend/v2/internal/application/sharedroom"
 	d "gxb.local/backend/v2/internal/domain/adventure"
+	"gxb.local/backend/v2/internal/domain/economy"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/protocol/httpedge"
@@ -187,5 +189,23 @@ func TestAdventureDispatcherMapsExpiredAndInvalid(t *testing.T) {
 	response = dispatcher.Dispatch(context.Background(), adventureRequest(2416, map[string]any{"unexpected": int64(1)}))
 	if response.HTTPStatus != 400 {
 		t.Fatalf("params %+v", response)
+	}
+	stub.err = sr.ErrAlreadyInRoom
+	response = dispatcher.Dispatch(context.Background(), adventureRequest(2417, map[string]any{"table_id": int64(10004)}))
+	if response.HTTPStatus != 200 || response.Body["error_code"] != int64(1) {
+		t.Fatalf("already in room %+v", response)
+	}
+	for _, serverError := range []error{economy.ErrUnknownResource, d.ErrUnavailable} {
+		stub.err = serverError
+		response = dispatcher.Dispatch(context.Background(), adventureRequest(2417, map[string]any{"table_id": int64(10004)}))
+		if response.HTTPStatus != 503 {
+			t.Fatalf("server failure %v -> %+v", serverError, response)
+		}
+	}
+	stub.err = nil
+	stub.duplicate = true
+	response = dispatcher.Dispatch(context.Background(), adventureRequest(2422, map[string]any{"star": int64(1), "total_damage": int64(50), "formation": "11"}))
+	if response.HTTPStatus != 200 || response.Body["error_code"] != int64(30005) {
+		t.Fatalf("2422 duplicate %+v", response)
 	}
 }

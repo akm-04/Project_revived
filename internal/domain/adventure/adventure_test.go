@@ -20,7 +20,7 @@ func testContext() operation.Context {
 	return operation.Context{StartedAt: time.Unix(1700000000, 0).UTC(), EntropySeed: seed}
 }
 
-func testPlayer() identity.PlayerID { return identity.PlayerID(7001) }
+func testPlayer() identity.PlayerID { return identity.PlayerID(170001) }
 
 func fixedEvent(t *testing.T, id int64) Event {
 	t.Helper()

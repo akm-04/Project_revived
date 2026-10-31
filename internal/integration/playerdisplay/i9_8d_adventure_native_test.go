@@ -15,6 +15,7 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres/i4store"
 	"gxb.local/backend/v2/internal/adapters/postgres/i5store"
 	"gxb.local/backend/v2/internal/adapters/postgres/sharedroomstore"
+	"gxb.local/backend/v2/internal/adapters/stockruntime"
 	appadventure "gxb.local/backend/v2/internal/application/adventure"
 	cb "gxb.local/backend/v2/internal/application/combat"
 	gen "gxb.local/backend/v2/internal/application/generation"
@@ -58,10 +59,8 @@ func adventureTestMode(t *testing.T, p *pg.Pool, clock gen.TimeAuthority, oppone
 	content := contentstore.Store{Queryer: p}
 	timed := gen.TimedRunner{Binder: gen.Binder{Time: clock}, Runner: tx.Runner{DB: p}}
 	rooms := appsharedroom.Service{Timed: timed, Fresh: p, Store: sharedroomstore.Store{}, Fence: values, Players: i4store.PlayerRootLocker{}}
-	fight.Inputs.Rooms = appsharedroom.AdmissionRouter{
-		"ADVENTURE_ILLUSION": {Store: sharedroomstore.Store{}, Family: appadventure.RoomFamily, Slot: appadventure.IllusionSlot, ConvenerFirst: true},
-		"ADVENTURE_DEFENSE":  {Store: sharedroomstore.Store{}, Family: appadventure.RoomFamily, Slot: appadventure.DefenseSlot},
-	}
+	// The exact production router, not a test-local approximation.
+	fight.Inputs.Rooms = stockruntime.NewAdmissionRouter()
 	owner := occultI5(p)
 	return appadventure.Mode{Timed: timed, Fresh: p, Store: adventurestore.Store{}, Content: content,
 		Functions: values, Directory: i4store.PlayerDirectoryReader{}, Heroes: fight.Inputs.Heroes, Combat: fight,
@@ -106,8 +105,8 @@ func adventureOwner(t *testing.T, p *pg.Pool, server identity.LogicalServerID, l
 
 func putAdventureOccurrence(t *testing.T, p *pg.Pool, player identity.PlayerID, eventType, specialData int64, occurred, end time.Time, key string) {
 	t.Helper()
-	exec(t, p, `INSERT INTO adventure_occurrences(player_id,event_type,occurred_at,end_time,special_data,source_key)
-		VALUES($1,$2,$3,$4,$5,$6) ON CONFLICT DO NOTHING`, int64(player), eventType, occurred.UTC(), end.UTC(), specialData, key)
+	exec(t, p, `INSERT INTO adventure_occurrences(player_id,logical_server_id,event_type,occurred_at,end_time,special_data,source_key)
+		VALUES($1,($1::bigint/100000)::int,$2,$3,$4,$5,$6) ON CONFLICT DO NOTHING`, int64(player), eventType, occurred.UTC(), end.UTC(), specialData, key)
 }
 
 // triggeringFact finds one fact business key whose Derive roll fires the event.
@@ -184,6 +183,13 @@ func TestI9_8DAdventureTriggerReadsAndExpiryNative(t *testing.T) {
 	if len(list) != 6 {
 		t.Fatalf("list %#v", list)
 	}
+	defenseEntry, ok := list["10001"].(map[string]any)
+	if !ok || defenseEntry["table_id"] != int64(d.EventDefense) || defenseEntry["end_time"] == nil {
+		t.Fatalf("2416 list entry is not the event body: %#v", list["10001"])
+	}
+	if _, doubleWrapped := defenseEntry["event_info"]; doubleWrapped {
+		t.Fatal("2416 list entry is double-wrapped")
+	}
 	info, err := mode.Info(ctx, a, d.EventDefense, opContext)
 	if err != nil {
 		t.Fatal(err)
@@ -253,6 +259,24 @@ func TestI9_8DAdventureShopPvpRobotNative(t *testing.T) {
 		t.Fatal("shop replay", err, response)
 	}
 
+	// 2420 replies the acquired hero/fragment rows as an array.
+	catalog, err := mode.Content.AdventureCatalogTx(ctx, p, installed(t, p))
+	if err != nil {
+		t.Fatal(err)
+	}
+	card := catalog.Cards[0]
+	putAdventureOccurrence(t, p, a.PlayerID, d.EventSummon, card.ID, now, now.Add(time.Hour), "card-1")
+	bought, err := mode.BuyCard(ctx, a, card.ID, opContext)
+	if err != nil {
+		t.Fatal("buy card", err)
+	}
+	if awards, ok := bought.Body["awards"].([]any); !ok || len(awards) != 1 {
+		t.Fatalf("2420 awards shape %#v", bought.Body)
+	}
+	if replay, err := mode.BuyCard(ctx, a, card.ID, opContext); err != nil || !replay.Duplicate {
+		t.Fatalf("2420 replay %+v %v", replay, err)
+	}
+
 	// Refusal: no crystals.
 	exec(t, p, `UPDATE player_currency_balances SET amount=0 WHERE player_id=$1 AND resource_key='crystal'`, int64(a.PlayerID))
 	putAdventureOccurrence(t, p, a.PlayerID, d.EventShop, 1002, now.Add(time.Minute), now.Add(time.Hour), "shop-2")
@@ -263,6 +287,15 @@ func TestI9_8DAdventureShopPvpRobotNative(t *testing.T) {
 
 	// PVP against a real Arena-shaped defense: server report and is_win.
 	putAdventureOccurrence(t, p, a.PlayerID, d.EventBattle, 0, now, now.Add(2*time.Hour), "pvp-1")
+	battleInfo, err := mode.Info(ctx, a, d.EventBattle, opContext)
+	if err != nil {
+		t.Fatal("battle info", err)
+	}
+	enemy := battleInfo["detail"].(map[string]any)["enemy_infos"].(map[string]any)
+	enemyHeroes, _ := enemy["heroes"].([]any)
+	if enemy["player_id"] != int64(defender.PlayerID) || enemy["player_name"] == "" || enemy["is_robot"] != int64(0) || len(enemyHeroes) != 1 {
+		t.Fatalf("2417 enemy_infos is not one object: %#v", enemy)
+	}
 	response, err = mode.Fight(ctx, a, appadventure.FightRequest{Formation: []int64{picks[0]}}, opContext)
 	if err != nil {
 		t.Fatal("pvp fight", err)
@@ -273,6 +306,9 @@ func TestI9_8DAdventureShopPvpRobotNative(t *testing.T) {
 	}
 	if win, ok := response.Body["is_win"].(int64); !ok || (win != 0 && win != 1) {
 		t.Fatalf("is_win %#v", response.Body["is_win"])
+	}
+	if _, ok := response.Body["awards"].([]any); !ok {
+		t.Fatalf("2419 awards shape %#v", response.Body["awards"])
 	}
 
 	// Robot fallback: no Arena opponent, a template team resolves.
@@ -309,6 +345,19 @@ func TestI9_8DAdventureRoomsNative(t *testing.T) {
 		t.Fatal(err)
 	}
 	roomID := adventureRoomID(t, info)
+	defenseDetail := info["detail"].(map[string]any)
+	positions, ok := defenseDetail["pos_statuses"].([]any)
+	if !ok || len(positions) != d.DefenseMonsterCount {
+		t.Fatalf("2417 pos_statuses sibling %#v", defenseDetail)
+	}
+	monsters, ok := defenseDetail["monster_statuses"].([]any)
+	if !ok || len(monsters) != d.DefenseMonsterCount || monsters[0] != "" {
+		t.Fatalf("2417 monster_statuses sibling %#v", defenseDetail)
+	}
+	challenges, ok := defenseDetail["challenge_times"].([]any)
+	if !ok || len(challenges) != d.DefenseMonsterCount {
+		t.Fatalf("2417 challenge_times sibling %#v", defenseDetail)
+	}
 	putAdventureOccurrence(t, p, b.PlayerID, d.EventDefense, 0, now, now.Add(time.Hour), "defense-room-b")
 	if _, err = mode.EnterDefense(ctx, b, roomID, opContext); err != nil {
 		t.Fatal("defense join", err)
@@ -335,8 +384,19 @@ func TestI9_8DAdventureRoomsNative(t *testing.T) {
 	if _, err = mode.StartDefense(ctx, b, appadventure.FightRequest{Formation: []int64{bPicks[0]}}, 1, opContext); err != nil {
 		t.Fatal("second member start", err)
 	}
-	if _, err = mode.DefenseResult(ctx, b, appadventure.ResultRequest{Star: 3, Damage: 100, Formation: []int64{bPicks[0]}}, 1, opContext); err != nil {
+	if _, err = mode.DefenseResult(ctx, a, appadventure.ResultRequest{Star: 3, Damage: 100, Formation: []int64{aPicks[0]}}, 1, opContext); !errors.Is(err, d.ErrRefused) {
+		t.Fatalf("a member settled another member's position: %v", err)
+	}
+	defenseResult, err := mode.DefenseResult(ctx, b, appadventure.ResultRequest{Star: 3, Damage: 100, Formation: []int64{bPicks[0]}}, 1, opContext)
+	if err != nil {
 		t.Fatal("second member result", err)
+	}
+	if _, ok := defenseResult.Body["exps"].([]any); !ok {
+		t.Fatalf("2410 exps must be an array: %#v", defenseResult.Body)
+	}
+	awards, _ := defenseResult.Body["awards"].(map[string]any)
+	if _, ok := awards["awards"].([]any); !ok {
+		t.Fatalf("2410 awards.awards must be an array: %#v", defenseResult.Body)
 	}
 	var raw string
 	if err = p.QueryRow(ctx, `SELECT payload::text FROM shared_rooms WHERE room_id=$1`, roomID).Scan(&raw); err != nil {
@@ -361,6 +421,21 @@ func TestI9_8DAdventureRoomsNative(t *testing.T) {
 		t.Fatal("create coop", err)
 	}
 	coopID := adventureRoomIDFrom(created)
+	if _, ok := created["room_info"].(map[string]any); !ok {
+		t.Fatalf("2423 reply lacks the room_info wrapper: %#v", created)
+	}
+	if _, err = mode.InviteCoop(ctx, a, b.PlayerID, opContext); err != nil {
+		t.Fatal("coop invite", err)
+	}
+	inviteNotice, found, err := mode.ReadRoomNotice(ctx, fmt.Sprint(coopID))
+	if err != nil || !found || len(inviteNotice.Invites) != 1 {
+		t.Fatalf("2427 invite notice %+v %v", inviteNotice.Invites, err)
+	}
+	inviteBody := inviteNotice.Invites[0].Body
+	inviteProfile, _ := inviteBody["player_info"].(map[string]any)
+	if inviteBody["notice_id"] == nil || inviteBody["room_id"] != int64(coopID) || inviteProfile["lev"] == nil {
+		t.Fatalf("friend notice 8/9 fields %#v", inviteBody)
+	}
 	if _, err = mode.CreateCoop(ctx, a, opContext); !errors.Is(err, appsharedroom.ErrAlreadyInRoom) {
 		t.Fatalf("second room %v", err)
 	}
@@ -406,6 +481,57 @@ func TestI9_8DAdventureRoomsNative(t *testing.T) {
 	if mails := scalar(t, p, `SELECT count(*) FROM mail_records WHERE source_kind='ADVENTURE_ILLUSION' AND source_key=$1`, state.ReportID); mails != 3 {
 		t.Fatalf("coop mail %d", mails)
 	}
+	notice, found, err := mode.ReadRoomNotice(ctx, fmt.Sprint(coopID))
+	if err != nil || !found {
+		t.Fatal("room notice", found, err)
+	}
+	checkedFormation := false
+	for _, push := range notice.Pushes {
+		for _, body := range push.Bodies {
+			var info map[string]any
+			if push.Function == 2 {
+				infos := body.Body["self_infos"].(map[string]any)
+				for _, raw := range infos {
+					info = raw.(map[string]any)
+				}
+			}
+			if push.Function == 3 || push.Function == 4 {
+				info = body.Body["self_info"].(map[string]any)
+			}
+			if info == nil {
+				continue
+			}
+			formation, ok := info["formation"].([]any)
+			if !ok {
+				t.Fatalf("push %d formation is not a row array: %#v", push.Function, info)
+			}
+			if push.Function == 3 || push.Function == 4 {
+				if len(formation) == 0 || formation[0].(map[string]any)["table_id"] == nil {
+					t.Fatalf("push %d formation is not the stock row array: %#v", push.Function, info)
+				}
+			}
+			if _, hasPet := info["pet"]; hasPet {
+				t.Fatalf("push %d carries a pet row without a pet: %#v", push.Function, info)
+			}
+			checkedFormation = true
+		}
+	}
+	if !checkedFormation {
+		t.Fatal("no co-op formation push carried a row array")
+	}
+	other := rankingServer(t, p)
+	dPlayer, _ := adventureOwner(t, p, other, 100, 10001007, 10001008)
+	served, err := mode.GetReport(ctx, b, state.ReportID, opContext)
+	if err != nil {
+		t.Fatal("1362 member read", err)
+	}
+	envelope, ok := served["report"].([]map[string]any)
+	if !ok || len(envelope) != 1 || envelope[0]["content"] != report["battle_report"] {
+		t.Fatalf("1362 envelope %#v", served)
+	}
+	if _, err = mode.GetReport(ctx, dPlayer, state.ReportID, opContext); !errors.Is(err, d.ErrRefused) {
+		t.Fatalf("another server read the co-op report: %v", err)
+	}
 	if replay, err := mode.StartCoop(ctx, a, opContext); err != nil {
 		t.Fatal("coop replay", err)
 	} else if text, _ := replay["battle_report"].(string); text == "" {
@@ -416,8 +542,6 @@ func TestI9_8DAdventureRoomsNative(t *testing.T) {
 	}
 
 	// Logical servers stay isolated: another server's room is not this player's.
-	other := rankingServer(t, p)
-	dPlayer, _ := adventureOwner(t, p, other, 100, 10001007, 10001008)
 	putAdventureOccurrence(t, p, dPlayer.PlayerID, d.EventIllusion, d.IllusionHiddenBoss, now, now.Add(2*time.Hour), "coop-other")
 	if _, err = mode.CreateCoop(ctx, dPlayer, opContext); err != nil {
 		t.Fatal("other server room", err)
@@ -425,6 +549,24 @@ func TestI9_8DAdventureRoomsNative(t *testing.T) {
 	roomA, found, err := mode.RoomStore.ReadPlayerRoomTx(ctx, p, a.PlayerID, appadventure.RoomFamily, appadventure.IllusionSlot)
 	if err != nil || !found || roomA.ID != coopID {
 		t.Fatal("server isolation", roomA, found, err)
+	}
+
+	exec(t, p, `UPDATE shared_rooms SET status='CLOSED',closed_at=clock_timestamp() WHERE room_id=$1`, coopID)
+	if _, err = mode.GetReport(ctx, c, state.ReportID, opContext); err != nil {
+		t.Fatalf("a member read the report after the room closed: %v", err)
+	}
+	exec(t, p, `INSERT INTO adventure_reports(report_id,logical_server_id,room_id,member_ids,content,created_at,expires_at)
+		VALUES('adv-expired-report',$1,$2,ARRAY[$3]::bigint[],'{}',$4,$4::timestamptz+interval '7 days')`,
+		int64(server), coopID, int64(a.PlayerID), clock.at.Add(-8*24*time.Hour))
+	reconciler := appadventure.Reconciler{Service: mode}
+	if result, reconcileErr := reconciler.Reconcile(ctx, mustTimed(t, op(), clock.at), 100); reconcileErr != nil || result.Scanned < 1 {
+		t.Fatalf("adventure reconcile %+v %v", result, reconcileErr)
+	}
+	if scalar(t, p, `SELECT count(*) FROM adventure_reports WHERE report_id='adv-expired-report'`) != 0 {
+		t.Fatal("the expired co-op report was not purged")
+	}
+	if scalar(t, p, `SELECT count(*) FROM adventure_reports WHERE report_id=$1`, state.ReportID) != 1 {
+		t.Fatal("a live co-op report was purged")
 	}
 }
 
@@ -436,6 +578,9 @@ func adventureRoomID(t *testing.T, info map[string]any) int64 {
 }
 
 func adventureRoomIDFrom(body map[string]any) int64 {
+	if info, ok := body["room_info"].(map[string]any); ok {
+		body = info
+	}
 	roomID, _ := body["room_id"].(int64)
 	return roomID
 }
