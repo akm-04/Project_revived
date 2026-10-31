@@ -14,7 +14,6 @@ import (
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/domain/logicalserver"
 	"gxb.local/backend/v2/internal/foundation/tx"
-	"os"
 	"sync"
 	"testing"
 	"time"
@@ -275,15 +274,4 @@ func TestI97CFriendFightLifecycleNative(t *testing.T) {
 			t.Fatal("invalid race state", err)
 		}
 	})
-}
-
-func TestPrepareI97CFriendPeer(t *testing.T) {
-	if os.Getenv("GXB_I97C_PREPARE_PEER") != "1" {
-		t.Skip("explicit VC fixture only")
-	}
-	database := pool(t)
-	defer database.Close()
-	actor, revision := bornActor(t, database), installed(t, database)
-	compositeLevel(t, database, actor, revision, 55)
-	t.Log("friend peer", actor.PlayerID)
 }

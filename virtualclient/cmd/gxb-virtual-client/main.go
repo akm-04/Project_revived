@@ -76,6 +76,8 @@ type scenario struct {
 	AwakeningFixture bool `json:"awakening_fixture"`
 	// PetAwakeningFixture declares one prior hatched level-90 pet; never mission completion.
 	PetAwakeningFixture bool `json:"pet_awakening_fixture"`
+	// KeepFunctionNotice leaves the stock function_show popup that the provisioned summons earn for the scenario to handle itself.
+	KeepFunctionNotice bool `json:"keep_function_notice"`
 	// Steps: "tap:<node path or XxY>", "window:<stock window>[ <json params>]", "lua:<chunk>", "wait:<seconds>", "relogin" (same account/device, fresh Lua VM),
 	// "relogin-after:<file>" (a relogin that first waits in wall time until <file> exists, so an operator can move the host clock).
 	// "fixture:top_floor_task_rank" (moves the player to rank 150 of the normal ladder, which must already exist).
@@ -94,6 +96,8 @@ type scenario struct {
 	ExpectClientLog       []string `json:"expect_client_log"`
 	ExpectClientLogAbsent []string `json:"expect_client_log_absent"`
 }
+
+const closeFunctionNotice = "lua:local m=xyd.WindowManager.get() if m:getWindow('function_show') then m:closeWindow('function_show') end"
 
 type run struct {
 	source, assets, updateTree, device, origin, databaseURL, reportPath string
@@ -207,7 +211,11 @@ func (run run) play() ([]string, error) {
 		}
 	}
 	if run.scenario.FriendFixture {
-		if err := provision.FriendFixture(ctx, run.databaseURL, session.AccountID); err != nil {
+		peer, err := run.bornPeer(ctx, secret)
+		if err != nil {
+			return nil, fmt.Errorf("friend peer: %w", err)
+		}
+		if err := provision.FriendFixture(ctx, run.databaseURL, session.AccountID, peer); err != nil {
 			return nil, err
 		}
 	}
@@ -307,11 +315,35 @@ func (run run) boot(session provision.Session) (*client.Client, error) {
 	return virtual, virtual.Run(run.limit-time.Duration(len(run.taps))*run.wait, inMainScene)
 }
 
+// bornPeer births a second player through stock MID1 at the scenario level and returns its account.
+func (run run) bornPeer(ctx context.Context, secret string) (string, error) {
+	peer, err := provision.Account(ctx, run.databaseURL, []byte(secret))
+	if err != nil {
+		return "", err
+	}
+	birth, err := run.boot(peer)
+	if err != nil {
+		return "", err
+	}
+	reached := birth.InScene("MainScene")
+	birth.Close()
+	if !reached {
+		return "", fmt.Errorf("birth boot never reached MainScene")
+	}
+	if _, err := provision.Progress(ctx, run.databaseURL, peer.AccountID, run.scenario.Level, nil, false); err != nil {
+		return "", err
+	}
+	return peer.AccountID, nil
+}
+
 // steps plays the hero summons provisioning granted, then the scenario steps, then the settle time.
 func (run run) steps(virtual *client.Client, summons []provision.Summon) error {
 	var steps []string
 	for _, summon := range summons {
 		steps = append(steps, fmt.Sprintf("lua:xyd.selfPlayer:stoneSummonHero({table_id=%d, stone=%d, stone_num=%d})", summon.TableID, summon.Stone, summon.StoneNum))
+	}
+	if run.scenario.Level > 0 && !run.scenario.KeepFunctionNotice {
+		steps = append(steps, closeFunctionNotice)
 	}
 	for _, step := range append(steps, run.scenario.Steps...) {
 		if err := virtual.Run(run.wait, nil); err != nil {

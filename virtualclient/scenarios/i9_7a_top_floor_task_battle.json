@@ -20,7 +20,6 @@
   "settle_seconds": 10,
   "steps": [
     "wait:60",
-    "lua:local m=xyd.WindowManager.get() if m:getWindow('function_show') then m:closeWindow('function_show') end",
     "wait:5",
     "window:sub_arena",
     "tap:arena_node",

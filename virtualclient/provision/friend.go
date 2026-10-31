@@ -13,8 +13,8 @@ import (
 	"time"
 )
 
-// FriendFixture declares a prior friendship with the single separately prepared peer; it proves no friend acquisition.
-func FriendFixture(requestContext context.Context, databaseURL, accountID string) error {
+// FriendFixture declares a prior friendship between two already born players; it proves no friend acquisition.
+func FriendFixture(requestContext context.Context, databaseURL, accountID, peerAccountID string) error {
 	pool, err := postgres.Open(requestContext, databaseURL, postgres.PoolSettings{MaxConns: 2, MaxConnLifetime: time.Minute, MaxConnIdleTime: time.Minute, HealthCheckPeriod: time.Minute, ApplicationName: "vc-friend-fixture"})
 	if err != nil {
 		return err
@@ -24,11 +24,8 @@ func FriendFixture(requestContext context.Context, databaseURL, accountID string
 	if err := pool.QueryRow(requestContext, `SELECT player_id FROM players WHERE account_id=$1`, accountID).Scan(&first); err != nil {
 		return err
 	}
-	if err := pool.QueryRow(requestContext, `SELECT CASE WHEN count(*)=1 THEN min(player_id) ELSE 0 END FROM players WHERE account_id<>$1`, accountID).Scan(&second); err != nil {
+	if err := pool.QueryRow(requestContext, `SELECT player_id FROM players WHERE account_id=$1`, peerAccountID).Scan(&second); err != nil {
 		return err
-	}
-	if first < 1 || second < 1 {
-		return fmt.Errorf("friend fixture needs exactly one prepared peer")
 	}
 	players := []identity.PlayerID{identity.PlayerID(first), identity.PlayerID(second)}
 	slices.Sort(players)
