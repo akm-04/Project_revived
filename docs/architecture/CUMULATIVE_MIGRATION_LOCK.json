@@ -1,5 +1,5 @@
 {
-  "highest_migration": "00099_i9_8a_world_boss.sql",
+  "highest_migration": "00100_i9_8b_shared_room_illusion.sql",
   "migrations": {
     "00001_kernel_receipts.sql": "fab5b35f4ca5eee53c62b0b924ec448327e1aa31205015c22e24ee0f2b710fd8",
     "00002_identity_logicalserver_bootstrap.sql": "adff86d27dd1c02e4da0dec6b1aa21f33aaafd4d410849abc76bfeec58a5cd5f",
@@ -99,9 +99,10 @@
     "00096_i9_7a_top_floor_task.sql": "74b1e3538b955f9292bc3155017c97db48bbeb0436e1a1f01655e360a61f16b4",
     "00097_i9_7b_tournament_casual.sql": "1cdc40c12d9106e9354f43a50abe26d347112edab02b29b005ee10f3f48dca16",
     "00098_i9_7c_friend_fight.sql": "9423988f327ba5343a35504f4a9c2366993034b61d349a8b1cbca8d5455c1fde",
-    "00099_i9_8a_world_boss.sql": "0037acefe7eeae300045ba3e7ea894b87e91af60157f14188eb96fbaa30dd775"
+    "00099_i9_8a_world_boss.sql": "0037acefe7eeae300045ba3e7ea894b87e91af60157f14188eb96fbaa30dd775",
+    "00100_i9_8b_shared_room_illusion.sql": "39cb9af12d65d23c4078c35013ee03577e1ea3db194b248eb2ede0fdcf3a26f8"
   },
   "rule": "All listed migration bytes are immutable for this cumulative candidate. Historical phase validators remain snapshot-specific; forward schema changes require a new migration. I7A-4A allocates forward-only 00033 for SocialRelation/SocialInbox durable foundations and an I4-owned non-unique discovery index; it performs no Social backfill and activates no stock routes.",
   "schema_version": 1,
-  "status": "CUMULATIVE_MIGRATION_LOCK_I9_7C"
+  "status": "CUMULATIVE_MIGRATION_LOCK_I9_8B"
 }

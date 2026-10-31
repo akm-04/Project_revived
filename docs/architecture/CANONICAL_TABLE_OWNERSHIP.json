@@ -4581,6 +4581,34 @@
       ],
       "write_exceptions": [],
       "migration": "migrations/00099_i9_8a_world_boss.sql"
+    },
+    "shared_rooms": {
+      "owner": "sharedroom",
+      "allowed_query_owners": [
+        "sharedroom"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/sharedroomstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/sharedroomstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00100_i9_8b_shared_room_illusion.sql"
+    },
+    "shared_room_seats": {
+      "owner": "sharedroom",
+      "allowed_query_owners": [
+        "sharedroom"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/sharedroomstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/sharedroomstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00100_i9_8b_shared_room_illusion.sql"
     }
   }
 }
