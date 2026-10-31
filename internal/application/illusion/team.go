@@ -323,7 +323,6 @@ func (s Mode) currentOccurrence(c context.Context, q tx.Queryer, a identity.Acto
 	if !found {
 		occurrence = d.NewOccurrence(int64(a.LogicalServerID), d.FirstCampaignID, modes.Day(at))
 	}
-	occurrence.Roll(catalog, at)
 	return occurrence, catalog, nil
 }
 

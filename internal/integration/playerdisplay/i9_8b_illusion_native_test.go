@@ -397,3 +397,36 @@ func mustTimed(t *testing.T, op operation.Context, at time.Time) gen.TimedOperat
 	}
 	return timed
 }
+
+// Downtime past the next opening delays the settlement; it neither skips the
+// rewards nor lets anyone fight the stale boss meanwhile.
+func TestI9_8BIllusionSettlementSurvivesDowntimeNative(t *testing.T) {
+	p := pool(t)
+	server := rankingServer(t, p)
+	a, partner := illusionOwner(t, p, server)
+	clock := illusionTime(t)
+	s := illusionService(t, p, clock, illusionPrivileges{level: 3}, illusionGuildSource{})
+	formation := []int64{partner}
+	if _, err := s.Start(ctx, a, il.StartRequest{Formation: formation}, op()); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := s.Settle(ctx, a, il.ResultRequest{Star: 1, Damage: 1000, CostTime: 10, Formation: formation}, op()); err != nil {
+		t.Fatal(err)
+	}
+	_, openDay, _, _ := illusionRemaining(t, p, server)
+	clock.Set(modes.DayBegins(openDay + 3).Add(4 * time.Hour))
+	exec(t, p, `UPDATE account_sessions SET absolute_expires_at=$2,idle_timeout_seconds=NULL WHERE session_id=$1`, a.SessionID.UUID().String(), clock.at.Add(24*time.Hour))
+	if _, err := s.Start(ctx, a, il.StartRequest{Formation: formation}, op()); err == nil {
+		t.Fatal("a start reached the unsettled occurrence")
+	}
+	timed := mustTimed(t, op(), clock.at)
+	if _, err := (il.Reconciler{Service: s}).Reconcile(ctx, timed, 100); err != nil {
+		t.Fatal(err)
+	}
+	if n := scalar(t, p, `SELECT count(*) FROM mail_records WHERE source_kind='ILLUSION_SETTLEMENT' AND recipient_player_id=$1`, int64(a.PlayerID)); n != 1 {
+		t.Fatal("downtime lost the settlement", n)
+	}
+	if campaign, next, _, _ := illusionRemaining(t, p, server); campaign != d.FirstCampaignID+1 || next != openDay+d.CycleDays {
+		t.Fatalf("occurrence did not advance campaign=%d day=%d", campaign, next)
+	}
+}

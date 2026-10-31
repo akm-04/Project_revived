@@ -83,6 +83,9 @@ xyd.STAGE_WIDTH = xyd.tables.misc.designWidth
 xyd.STAGE_HEIGHT = xyd.tables.misc.designHeight
 xyd.UNLIMIT_STAGE_WIDTH = xyd.STAGE_WIDTH / 0.6
 xyd.UNLIMIT_STAGE_HEIGHT = xyd.STAGE_HEIGHT / 0.6
+-- The server-branch FighterModel never builds a header view, yet stock
+-- ElementBoss.updateHpBar hides its bar unguarded and the next-wave path sets its count.
+Node.headerView_ = { hpProgress_ = Node.new(), setCount = function() end }
 local function node()
 	local n = Node.new()
 	function n:align(_, x, y)

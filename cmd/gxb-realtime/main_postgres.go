@@ -273,7 +273,7 @@ func run() error {
 	}
 	illusionRooms := stockruntime.IllusionRoomNoticeHandler{Service: stockruntime.IllusionRoomNoticeReader{Store: sharedroomstore.Store{}, Directory: i4store.PlayerDirectoryReader{}, Queryer: pool},
 		Registry: connectionsRegistry, Publisher: stockruntime.RealtimePublisher{Registry: illusionEvents, Limits: limits.Default()}, Authority: authority,
-		Time: postgres.AuthoritativeTime{Queryer: pool}, MaxHandles: runtimePolicy.MaxConnections,
+		Time: postgres.AuthoritativeTime{Queryer: pool}, MaxHandles: runtimePolicy.MaxConnections, Delivered: stockruntime.NewIllusionNoticeLedger(),
 		OnDeliveryError: func(err error) { log.Printf("illusion room notice degraded: %v", err) }}
 	wakeups, err := realtimewakeup.NewRegistry(realtimewakeup.Registration{Route: apparena.FriendFightNoticeRoute, Handler: friendNotices}, realtimewakeup.Registration{Route: apparena.TournamentNoticeRoute, Handler: tournamentNotices}, realtimewakeup.Registration{Route: postgres.SocialReloadRoute, Handler: socialHandler}, realtimewakeup.Registration{Route: frienddm.WakeupRoute, Handler: friendReconcile}, realtimewakeup.Registration{Route: generaldm.WakeupRoute, Handler: generalReconcile}, realtimewakeup.Registration{Route: achievement.NoticeRoute, Handler: achievementNotices}, realtimewakeup.Registration{Route: appillusion.RoomNoticeRoute, Handler: illusionRooms})
 	if err != nil {

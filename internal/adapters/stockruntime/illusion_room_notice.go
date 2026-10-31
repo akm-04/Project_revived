@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"strconv"
+	"sync"
 	"time"
 
 	"gxb.local/backend/v2/internal/adapters/postgres/i4store"
@@ -187,11 +188,66 @@ type IllusionRoomNoticeHandler struct {
 	Authority       realtimeauth.GameplayLivenessPort
 	Time            SocialDeliveryTime
 	MaxHandles      int
+	Delivered       *IllusionNoticeLedger
 	OnDeliveryError func(error)
 }
 
+// IllusionNoticeLedger remembers each room's one-shot removal and invite notices:
+// the wakeup carries only the room, and the room keeps departed seats and invites.
+// shortcut: in memory, so a realtime restart repeats them once for a live room;
+// persist delivery if that repeat ever reaches a player seated elsewhere.
+type IllusionNoticeLedger struct {
+	mu    sync.Mutex
+	rooms map[int64]map[illusionOneShot]bool
+}
+
+type illusionOneShot struct {
+	mid    uint16
+	player identity.PlayerID
+}
+
+func NewIllusionNoticeLedger() *IllusionNoticeLedger {
+	return &IllusionNoticeLedger{rooms: map[int64]map[illusionOneShot]bool{}}
+}
+
+func (l *IllusionNoticeLedger) undelivered(room int64, mid uint16, players []identity.PlayerID) []identity.PlayerID {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	out := make([]identity.PlayerID, 0, len(players))
+	for _, player := range players {
+		if !l.rooms[room][illusionOneShot{mid, player}] {
+			out = append(out, player)
+		}
+	}
+	return out
+}
+
+func (l *IllusionNoticeLedger) markDelivered(room int64, mid uint16, player identity.PlayerID) {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	if l.rooms[room] == nil {
+		l.rooms[room] = map[illusionOneShot]bool{}
+	}
+	l.rooms[room][illusionOneShot{mid, player}] = true
+}
+
+// reseat lets a player who rejoined be told of a later departure again.
+func (l *IllusionNoticeLedger) reseat(room int64, mid uint16, players []identity.PlayerID) {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	for _, player := range players {
+		delete(l.rooms[room], illusionOneShot{mid, player})
+	}
+}
+
+func (l *IllusionNoticeLedger) forget(room int64) {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	delete(l.rooms, room)
+}
+
 func (h IllusionRoomNoticeHandler) ReloadAndDeliver(c context.Context, reference string) error {
-	if h.Service == nil || h.Registry == nil || h.Authority == nil || h.Time == nil || h.MaxHandles < 1 {
+	if h.Service == nil || h.Registry == nil || h.Authority == nil || h.Delivered == nil || h.Time == nil || h.MaxHandles < 1 {
 		return errors.New("illusion room notice unavailable")
 	}
 	c, cancel := context.WithTimeout(c, 2*time.Second)
@@ -200,16 +256,17 @@ func (h IllusionRoomNoticeHandler) ReloadAndDeliver(c context.Context, reference
 	if err != nil || !found {
 		return err
 	}
-	if len(view.Removed) > 0 {
-		removed := map[string]any{"room_id": int64(0)}
-		frame, err := illusionFrame(removed)
+	h.Delivered.reseat(view.RoomID, mids.MIDIllusionNotice, view.Seated)
+	if removed := h.Delivered.undelivered(view.RoomID, mids.MIDIllusionNotice, view.Removed); len(removed) > 0 {
+		frame, err := illusionFrame(map[string]any{"room_id": int64(0)})
 		if err != nil {
 			return err
 		}
-		for _, player := range view.Removed {
+		for _, player := range removed {
 			if err := h.deliver(c, player, mids.MIDIllusionNotice, frame); err != nil {
 				return err
 			}
+			h.Delivered.markDelivered(view.RoomID, mids.MIDIllusionNotice, player)
 		}
 	}
 	if len(view.Seated) > 0 {
@@ -241,10 +298,14 @@ func (h IllusionRoomNoticeHandler) ReloadAndDeliver(c context.Context, reference
 			}
 		}
 	}
-	for _, player := range view.Invites {
+	for _, player := range h.Delivered.undelivered(view.RoomID, mids.MIDPlayerNotice, view.Invites) {
 		if err := h.deliverInvite(c, view, player); err != nil {
 			return err
 		}
+		h.Delivered.markDelivered(view.RoomID, mids.MIDPlayerNotice, player)
+	}
+	if len(view.Seated) == 0 {
+		h.Delivered.forget(view.RoomID)
 	}
 	return nil
 }

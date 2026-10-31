@@ -106,3 +106,25 @@ func TestIllusionConflictMapsToBadRequest(t *testing.T) {
 		t.Fatalf("%d %#v", got.HTTPStatus, got.Body)
 	}
 }
+
+func TestIllusionOneShotNoticesDeliverOnce(t *testing.T) {
+	ledger := NewIllusionNoticeLedger()
+	const room, mid = int64(9), uint16(518)
+	players := []identity.PlayerID{1, 2}
+	if got := ledger.undelivered(room, mid, players); len(got) != 2 {
+		t.Fatal(got)
+	}
+	ledger.markDelivered(room, mid, 1)
+	if got := ledger.undelivered(room, mid, players); len(got) != 1 || got[0] != 2 {
+		t.Fatal("a delivered notice repeated", got)
+	}
+	ledger.reseat(room, mid, []identity.PlayerID{1})
+	if got := ledger.undelivered(room, mid, players); len(got) != 2 {
+		t.Fatal("a rejoined player keeps a stale delivery", got)
+	}
+	ledger.markDelivered(room, mid, 1)
+	ledger.forget(room)
+	if got := ledger.undelivered(room, mid, players); len(got) != 2 {
+		t.Fatal("a closed room kept its ledger", got)
+	}
+}

@@ -22,26 +22,12 @@ func (s Mode) RankList(c context.Context, a identity.ActorContext, subtype int64
 	if !s.ready() {
 		return nil, d.ErrUnavailable
 	}
-	op, err := s.pin(c, op)
-	if err != nil {
-		return nil, err
-	}
-	at, err := s.Timed.Binder.Time.Now(c)
-	if err != nil {
-		return nil, err
-	}
-	revision, _ := op.Policies.Get("content")
-	catalog, err := s.Content.IllusionCatalogTx(c, s.Fresh, revision)
-	if err != nil {
-		return nil, err
-	}
 	occurrence, found, err := s.Store.ReadOccurrenceTx(c, s.Fresh, int64(a.LogicalServerID))
 	if err != nil {
 		return nil, err
 	}
 	results := []d.Result{}
 	if found {
-		occurrence.Roll(catalog, at)
 		if results, err = s.Store.ReadRankTx(c, s.Fresh, occurrence.LogicalServerID, occurrence.OpenDay, rankLimit); err != nil {
 			return nil, err
 		}

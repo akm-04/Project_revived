@@ -34,11 +34,6 @@ func (s Mode) Info(c context.Context, a identity.ActorContext, op operation.Cont
 	if err = s.eligible(c, s.Fresh, a, at); err != nil {
 		return nil, err
 	}
-	revision, _ := op.Policies.Get("content")
-	catalog, err := s.Content.IllusionCatalogTx(c, s.Fresh, revision)
-	if err != nil {
-		return nil, err
-	}
 	occurrence, found, err := s.Store.ReadOccurrenceTx(c, s.Fresh, int64(a.LogicalServerID))
 	if err != nil {
 		return nil, err
@@ -46,7 +41,6 @@ func (s Mode) Info(c context.Context, a identity.ActorContext, op operation.Cont
 	if !found {
 		occurrence = d.NewOccurrence(int64(a.LogicalServerID), d.FirstCampaignID, modes.Day(at))
 	}
-	occurrence.Roll(catalog, at)
 	player, found, err := s.Store.ReadPlayerTx(c, s.Fresh, a.PlayerID)
 	if err != nil {
 		return nil, err

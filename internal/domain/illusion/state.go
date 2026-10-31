@@ -86,40 +86,11 @@ func (o Occurrence) CanStart(at time.Time) bool {
 	return o.PhaseAt(at) == PhaseOpen
 }
 
-// Settle marks the occurrence settled once. A late read after midnight still
-// settles the occurrence it missed.
-func (o *Occurrence) Settle(at time.Time) bool {
-	if o.SettledOpenDay == o.OpenDay {
-		return false
-	}
-	day := modes.Day(at)
-	if day < o.OpenDay || day == o.OpenDay && SecondOfDay(at) < SettleSecond {
-		return false
-	}
-	o.SettledOpenDay = o.OpenDay
-	return true
-}
-
-// SettlementDue reports whether the 22:00 settlement of OpenDay is owed. A
-// missed settlement is still owed during the rest day and until the next
-// occurrence's 08:00 opening, after which Roll has moved the row on.
-// shortcut: a settlement missed past that opening is lost with the single
-// occurrence row, add occurrence history only if servers may be down two days.
+// SettlementDue reports whether the 22:00 settlement of OpenDay is owed. Only
+// the settlement advances the row, so downtime delays rewards and never skips them.
 func (o Occurrence) SettlementDue(at time.Time) bool {
-	if o.SettledOpenDay == o.OpenDay {
-		return false
-	}
-	day, second := modes.Day(at), SecondOfDay(at)
-	switch {
-	case day < o.OpenDay:
-		return false
-	case day == o.OpenDay:
-		return second >= SettleSecond
-	case day < o.OpenDay+CycleDays:
-		return true
-	default:
-		return day == o.OpenDay+CycleDays && second < OpenSecond
-	}
+	day := modes.Day(at)
+	return day > o.OpenDay || day == o.OpenDay && SecondOfDay(at) >= SettleSecond
 }
 
 // Advance moves a settled occurrence to the next campaign after its rest day.
@@ -136,29 +107,6 @@ func (o *Occurrence) Advance(c Catalog) bool {
 	o.PoolHurt = 0
 	o.OpenDay += CycleDays
 	return true
-}
-
-// Roll advances a missed cycle: the next campaign opens at 08:00 two days after
-// the previous occurrence day, after one rest day.
-func (o *Occurrence) Roll(c Catalog, at time.Time) bool {
-	changed := false
-	for {
-		day := modes.Day(at)
-		second := SecondOfDay(at)
-		if day < o.OpenDay+CycleDays || day == o.OpenDay+CycleDays && second < OpenSecond {
-			return changed
-		}
-		next := c.NextCampaignID(o.CampaignID)
-		if next == 0 {
-			return changed
-		}
-		o.CampaignID = next
-		o.PoolHP = DefaultPoolHP
-		o.PoolHurt = 0
-		o.OpenDay += CycleDays
-		o.SettledOpenDay = 0
-		changed = true
-	}
 }
 
 type Player struct {

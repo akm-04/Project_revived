@@ -169,3 +169,22 @@ func TestMultiWaveLineupRefused(t *testing.T) {
 		t.Fatal("multi-wave lineup must be refused", err)
 	}
 }
+
+// Each Illusion boss is an ElementBoss, whose stock HP bar update reaches a
+// header view the server-branch model never builds. Fights 115001-115012 are
+// the campaign chain's battle rows.
+func TestElementBossFightsResolve(t *testing.T) {
+	corpus, err := combatcorpus.Load()
+	if err != nil {
+		t.Fatal(err)
+	}
+	for fight := int64(115001); fight <= 115012; fight++ {
+		result, err := Resolve(corpus, lineupGenuine(t, fight), sha256.Sum256([]byte("i9-8b-element-boss")))
+		if err != nil {
+			t.Fatal(fight, err)
+		}
+		if result.Outcome.Frames <= 0 {
+			t.Fatal("element boss fight did not run", fight, result.Outcome)
+		}
+	}
+}

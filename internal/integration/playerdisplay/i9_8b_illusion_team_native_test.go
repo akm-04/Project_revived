@@ -15,36 +15,29 @@ import (
 	appsharedroom "gxb.local/backend/v2/internal/application/sharedroom"
 	"gxb.local/backend/v2/internal/domain/identity"
 	di "gxb.local/backend/v2/internal/domain/illusion"
-	"gxb.local/backend/v2/internal/foundation/ids"
-	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
-// illusionTeamCombat keeps the real START/admission path but replaces the
-// deterministic ElementBoss worker crash with a canned report and counts the
-// per-member settlement fan-out the mode performs.
+// illusionTeamCombat runs the real worker and counts the per-member settlement
+// fan-out the mode performs.
 type illusionTeamCombat struct {
 	cb.Service
 	mu          sync.Mutex
 	settlements map[identity.PlayerID]int
 }
 
-func (c *illusionTeamCombat) Resolve(context.Context, operation.Context, ids.UUID) (cb.Resolved, error) {
-	return cb.Resolved{}, nil
-}
-
-func (c *illusionTeamCombat) TerminalTx(context.Context, tx.Tx, cb.TerminalRequest) (cb.Settled, error) {
-	return cb.Settled{Resolved: cb.Resolved{Report: []byte(`{"star":1,"fighter":{"A_1":{"harms":100},"B_1":{"harms":0}}}`)}}, nil
-}
-
-func (c *illusionTeamCombat) SettleMemberTx(_ context.Context, _ tx.Tx, request cb.MemberSettleRequest) (cb.MemberSettled, error) {
+func (c *illusionTeamCombat) SettleMemberTx(ctx context.Context, t tx.Tx, request cb.MemberSettleRequest) (cb.MemberSettled, error) {
+	settled, err := c.Service.SettleMemberTx(ctx, t, request)
+	if err != nil {
+		return settled, err
+	}
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	if c.settlements == nil {
 		c.settlements = map[identity.PlayerID]int{}
 	}
 	c.settlements[request.Member]++
-	return cb.MemberSettled{}, nil
+	return settled, nil
 }
 
 func (c *illusionTeamCombat) settlementCount(member identity.PlayerID) int {

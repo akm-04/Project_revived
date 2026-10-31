@@ -125,7 +125,7 @@ func (s Mode) run(c context.Context, a identity.ActorContext, name string, reque
 }
 
 // open applies F6 actor, function, level, root, player and occurrence admission
-// in the declared lock order, then advances a missed cycle.
+// in the declared lock order.
 func (s Mode) open(c context.Context, sc gen.TimedScope, a identity.ActorContext, catalog d.Catalog) (session, error) {
 	at := sc.Operation.DecisionAt()
 	if err := s.Fence.FenceActorTx(c, sc.Tx, a, at); err != nil {
@@ -153,11 +153,6 @@ func (s Mode) open(c context.Context, sc gen.TimedScope, a identity.ActorContext
 	occurrence, err := s.Store.LockOccurrenceTx(c, sc.Tx, int64(a.LogicalServerID), at)
 	if err != nil {
 		return session{}, err
-	}
-	if occurrence.Roll(catalog, at) {
-		if err = s.Store.SaveOccurrenceTx(c, sc.Tx, occurrence, at); err != nil {
-			return session{}, err
-		}
 	}
 	return session{occurrence: occurrence, player: player, day: day}, nil
 }

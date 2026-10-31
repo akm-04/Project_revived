@@ -113,17 +113,14 @@ func (s Mode) StartTeam(c context.Context, a identity.ActorContext, op operation
 	}
 	_, err = s.Rooms.Update(c, a, sr.UpdateRequest{Family: RoomFamilyRef(),
 		Before: func(c context.Context, t tx.Tx, room sharedroom.Room, at time.Time) error {
-			var err error
-			occurrence, _, err = s.lockOccurrence(c, t, room.LogicalServerID, at)
-			if err != nil {
-				return err
-			}
 			for _, member := range room.Members() {
 				if _, err := s.Store.LockPlayerTx(c, t, int64(room.LogicalServerID), member, at); err != nil {
 					return err
 				}
 			}
-			return nil
+			var err error
+			occurrence, _, err = s.lockOccurrence(c, t, room.LogicalServerID, at)
+			return err
 		},
 		Apply: func(c context.Context, sc gen.TimedScope, room *sharedroom.Room) error {
 			at := sc.Operation.DecisionAt()
@@ -226,11 +223,6 @@ func (s Mode) lockOccurrence(c context.Context, t tx.Tx, server identity.Logical
 	occurrence, err := s.Store.LockOccurrenceTx(c, t, int64(server), at)
 	if err != nil {
 		return d.Occurrence{}, d.Catalog{}, err
-	}
-	if occurrence.Roll(catalog, at) {
-		if err := s.Store.SaveOccurrenceTx(c, t, occurrence, at); err != nil {
-			return d.Occurrence{}, d.Catalog{}, err
-		}
 	}
 	return occurrence, catalog, nil
 }

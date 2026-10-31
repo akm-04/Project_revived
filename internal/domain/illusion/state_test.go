@@ -133,53 +133,19 @@ func TestCyclePhaseSettlementAndRestDay(t *testing.T) {
 	if occurrence.PhaseAt(settle) != PhaseSettlement {
 		t.Fatal("22:00 settlement")
 	}
-	if occurrence.Settle(closed.Add(-time.Second)) {
-		t.Fatal("21:57:59 cannot settle")
-	}
-	if occurrence.SettledOpenDay != 0 {
-		t.Fatal("premature settlement marker")
-	}
-	if !occurrence.Settle(settle) || occurrence.SettledOpenDay != openDay {
-		t.Fatal("first settlement")
-	}
-	if occurrence.Settle(settle) || occurrence.Settle(settle.Add(2*time.Hour)) {
-		t.Fatal("settlement repeats")
-	}
 	rest := open.Add(24 * time.Hour)
-	if occurrence.PhaseAt(rest) != PhaseRest || occurrence.CanStart(rest) || occurrence.Roll(sourceCatalog(t), rest) {
+	if occurrence.PhaseAt(rest) != PhaseRest || occurrence.CanStart(rest) {
 		t.Fatal("rest day must not restart")
 	}
 }
 
-func TestRollAdvancesChainAfterRestDay(t *testing.T) {
-	zone := time.FixedZone("GMT+8", 8*3600)
-	open := time.Date(2026, 10, 31, 8, 0, 0, 0, zone)
-	openDay := modes.Day(open)
+func TestAdvanceFollowsChainAndWraps(t *testing.T) {
 	catalog := sourceCatalog(t)
-	occurrence := NewOccurrence(1, 100001, openDay)
-	occurrence.PoolHurt = 120000000
-	if occurrence.Roll(catalog, open.Add(24*time.Hour)) {
-		t.Fatal("rest day must not roll")
-	}
-	if occurrence.Roll(catalog, open.Add(48*time.Hour-time.Second)) {
-		t.Fatal("before 08:00 must not roll")
-	}
-	if !occurrence.Roll(catalog, open.Add(48*time.Hour)) {
-		t.Fatal("next cycle must roll at 08:00")
-	}
-	if occurrence.CampaignID != 100002 || occurrence.PoolHurt != 0 || occurrence.PoolHP != DefaultPoolHP || occurrence.OpenDay != openDay+CycleDays || occurrence.SettledOpenDay != 0 {
-		t.Fatal(occurrence)
-	}
-	occurrence.CampaignID = 100011
-	occurrence.OpenDay = openDay
-	occurrence.PoolHurt = 1
-	if !occurrence.Roll(catalog, open.Add(48*time.Hour)) || occurrence.CampaignID != 100001 {
-		t.Fatal("terminal campaign must restart at the head", occurrence)
-	}
-	occurrence.CampaignID = 100012
-	occurrence.OpenDay = openDay
-	if !occurrence.Roll(catalog, open.Add(48*time.Hour)) || occurrence.CampaignID != 100001 {
-		t.Fatal("cycle tail must restart at the head", occurrence)
+	for _, step := range []struct{ from, to int64 }{{100001, 100002}, {100011, 100001}, {100012, 100001}} {
+		occurrence := NewOccurrence(1, step.from, 7)
+		if !occurrence.Advance(catalog) || occurrence.CampaignID != step.to || occurrence.OpenDay != 7+CycleDays {
+			t.Fatal(step, occurrence)
+		}
 	}
 }
 
@@ -195,11 +161,10 @@ func TestSettlementDueAndAdvance(t *testing.T) {
 	if !occurrence.SettlementDue(open.Add(14 * time.Hour)) {
 		t.Fatal("22:00 is due")
 	}
-	if !occurrence.SettlementDue(open.Add(24 * time.Hour)) {
-		t.Fatal("a missed settlement is still due on the rest day")
-	}
-	if occurrence.SettlementDue(open.Add(48 * time.Hour)) {
-		t.Fatal("the next occurrence is not due at its 08:00 opening")
+	for _, late := range []time.Duration{24 * time.Hour, 48 * time.Hour, 30 * 24 * time.Hour} {
+		if !occurrence.SettlementDue(open.Add(late)) {
+			t.Fatal("a missed settlement stays due", late)
+		}
 	}
 	if !occurrence.Advance(sourceCatalog(t)) || occurrence.CampaignID != 100002 || occurrence.OpenDay != openDay+CycleDays ||
 		occurrence.SettledOpenDay != openDay || occurrence.PoolHurt != 0 || occurrence.PoolHP != DefaultPoolHP {
