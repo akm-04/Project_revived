@@ -78,6 +78,7 @@ type scenario struct {
 	PetAwakeningFixture bool `json:"pet_awakening_fixture"`
 	// Steps: "tap:<node path or XxY>", "window:<stock window>[ <json params>]", "lua:<chunk>", "wait:<seconds>", "relogin" (same account/device, fresh Lua VM),
 	// "relogin-after:<file>" (a relogin that first waits in wall time until <file> exists, so an operator can move the host clock).
+	// "fixture:top_floor_task_rank" (moves the player to rank 150 of the normal ladder, which must already exist).
 	Steps []string `json:"steps"`
 	// Settle is virtual seconds run after the last step (stock ErrorLogPoster uploads every 30 s).
 	Settle float64 `json:"settle_seconds"`
@@ -99,6 +100,7 @@ type run struct {
 	region                                                              int
 	taps                                                                []string
 	scenario                                                            scenario
+	account                                                             string
 }
 
 // expandTaps reads the -taps list, where "target*N" stands for N taps on target.
@@ -139,6 +141,7 @@ func (run run) play() ([]string, error) {
 	if err != nil {
 		return nil, fmt.Errorf("provision: %w", err)
 	}
+	run.account = session.AccountID
 	output := struct {
 		Account  string             `json:"account_id"`
 		Scenario string             `json:"scenario,omitempty"`
@@ -333,6 +336,11 @@ func (run run) step(virtual *client.Client, step string) error {
 			parameters = "{}"
 		}
 		return virtual.Call(fmt.Sprintf("xyd.WindowManager.get():openWindow(%q, json.decode(%q))", name, parameters))
+	case "fixture":
+		if argument != "top_floor_task_rank" {
+			return fmt.Errorf("unknown fixture %q", argument)
+		}
+		return provision.TopFloorTaskRankFixture(context.Background(), run.databaseURL, run.account)
 	case "wait":
 		seconds, err := strconv.ParseFloat(argument, 64)
 		if err != nil {
