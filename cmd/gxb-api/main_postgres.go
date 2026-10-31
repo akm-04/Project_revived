@@ -31,6 +31,7 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres"
 	"gxb.local/backend/v2/internal/adapters/postgres/achievementstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/activitystore"
+	"gxb.local/backend/v2/internal/adapters/postgres/adventurestore"
 	"gxb.local/backend/v2/internal/adapters/postgres/bookstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/campaignstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/characterbirth"
@@ -67,6 +68,7 @@ import (
 	"gxb.local/backend/v2/internal/adapters/stockruntime"
 	appachievement "gxb.local/backend/v2/internal/application/achievement"
 	appactivity "gxb.local/backend/v2/internal/application/activitydirectory"
+	appadventure "gxb.local/backend/v2/internal/application/adventure"
 	appbook "gxb.local/backend/v2/internal/application/bookskill"
 	appboot "gxb.local/backend/v2/internal/application/bootstrap"
 	appcampaign "gxb.local/backend/v2/internal/application/campaign"
@@ -288,7 +290,7 @@ func main() {
 	}
 	guildView := guildviewread.Reader{Runner: runner}
 	vending := appsummon.Mode{Timed: appgeneration.TimedRunner{Binder: appgeneration.Binder{Time: postgres.AuthoritativeTime{Queryer: pool}}, Runner: runner}, Fresh: pool, Store: summonstore.Store{}, Content: contentDB, Fence: i5db,
-		Heroes: heroSvc, HeroWire: heroproj.StockHero, Grants: i5svc, Costs: heroMaterialCosts, Facts: appi5.ObjectiveFacts{Owner: i5svc, Open: i5db}, Privileges: privileges, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: pool}}
+		Heroes: heroSvc, HeroWire: heroproj.StockHero, Grants: i5svc, Costs: heroMaterialCosts, Facts: appi5.ObjectiveFacts{Owner: i5svc, Open: i5db, Observer: appadventure.Observer{Store: adventurestore.Store{}}}, Privileges: privileges, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: pool}}
 	bootstrap := i4store.BootstrapService{
 		Runner: runner, Receipts: receipts, ReceiptReader: kernelstore.Reader{Queryer: pool},
 		DigestSecret: digestSecret, BearerSecret: bearerSecret, DerivationKeyID: keyID, BearerKeys: bearerKeys,

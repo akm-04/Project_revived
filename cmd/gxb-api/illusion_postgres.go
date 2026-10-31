@@ -6,6 +6,7 @@ import (
 	"context"
 
 	pg "gxb.local/backend/v2/internal/adapters/postgres"
+	"gxb.local/backend/v2/internal/adapters/postgres/adventurestore"
 	"gxb.local/backend/v2/internal/adapters/postgres/contentstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/guildstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/i4store"
@@ -13,6 +14,7 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres/illusionstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/kernelstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/sharedroomstore"
+	appadventure "gxb.local/backend/v2/internal/application/adventure"
 	"gxb.local/backend/v2/internal/application/combat"
 	gen "gxb.local/backend/v2/internal/application/generation"
 	appi5 "gxb.local/backend/v2/internal/application/i5"
@@ -27,7 +29,7 @@ func canonicalIllusion(p *pg.Pool, r tx.Runner, content contentstore.Store, valu
 		Fence: values, Players: i4store.PlayerRootLocker{}, Functions: values, Directory: i4store.PlayerDirectoryReader{}, Heroes: fight.Inputs.Heroes,
 		Pets: fight.Inputs.Pets, Stats: fight.Inputs.Stats, Rooms: rooms, RoomStore: sharedroomstore.Store{},
 		Combat: fight, Privileges: privileges, Costs: appi5.MaterialCostDebiter{Store: values, Content: content},
-		Facts: appi5.ObjectiveFacts{Owner: owner, Open: values}, Guilds: illusionGuilds{Store: guilds}, Mail: appi5.SettlementMail{Store: values},
+		Facts: appi5.ObjectiveFacts{Owner: owner, Open: values, Observer: appadventure.Observer{Store: adventurestore.Store{}}}, Guilds: illusionGuilds{Store: guilds}, Mail: appi5.SettlementMail{Store: values},
 		Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}}
 }
 

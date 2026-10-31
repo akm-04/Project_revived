@@ -1,0 +1,68 @@
+{
+  "policy_id": "I9_ADVENTURE_POLICY_V1",
+  "version": 1,
+  "classification": "PRIVATE_POLICY_NOT_RECOVERED_OFFICIAL_ALGORITHM",
+  "decisions": [
+    "D368",
+    "D369"
+  ],
+  "function": {
+    "id": 68,
+    "open_academy_level": 11,
+    "fantasy_function_id": 43,
+    "fantasy_open_level": 65
+  },
+  "triggers": {
+    "roll": "operation.Context.Derive per fact business key, modulo 100, below the adventure_event rate",
+    "rate_unit": "percent",
+    "duration": "occurrence time plus adventure_event.time_limit",
+    "one_active_per_type": true,
+    "fact_kinds": {
+      "CAMPAIGN_SWEEP": 10001,
+      "PVP_FIGHT": 10004,
+      "SUMMON": 10005,
+      "FANTASY": 10006
+    },
+    "never_before_producer": {
+      "10002": "I9-10 ADD_FAVOR 840",
+      "10003": "I9-11 shop debit"
+    },
+    "obligations": [
+      "I9-8-ADVENTURE-FAVOR",
+      "I9-8-ADVENTURE-STORE"
+    ]
+  },
+  "raid_ticket": {
+    "means": "campaign sweep today",
+    "item_use_owner": "I9-11; does not widen unless the ticket has another use"
+  },
+  "defense": {
+    "creation": "first GET_ADVENTURE_INFO of the occurrence owner",
+    "seats": 6,
+    "level_band": 5,
+    "monsters": 3,
+    "tries_per_position_per_occurrence": 3,
+    "result": "attested and clamped"
+  },
+  "pvp": {
+    "opponent": "Arena standings",
+    "ranking_section": 3,
+    "fallback": "robot",
+    "report": "server",
+    "is_win": "star>0"
+  },
+  "rooms": {
+    "owner_leave": "closes the room and pushes room_id 0",
+    "second_room_for_slot": 35029
+  },
+  "shop_and_card": {
+    "price": "recomputed from adventure_shop and adventure_cards_dropbox",
+    "settlement": "debit and grant through I5",
+    "shop_delta": "2418 piggyback delta"
+  },
+  "notices": {
+    "occur": 33,
+    "finish": 34,
+    "room": 32
+  }
+}

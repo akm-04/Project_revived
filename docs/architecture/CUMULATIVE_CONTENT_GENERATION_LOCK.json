@@ -490,13 +490,21 @@
       "parser_version": "lua-generated-v18-guild-invite",
       "revision_id": "f59ef0a2e2b15adf8287b5844dd53aed6b4d13c21ed062182db9e72b18c0de0e",
       "scope": "Creats chapter select (reward display, awakening routes by mission id), campaign graph and misc room, timer, ticket and event profile; D367 policy is separate. Unsealed working implementation."
+    },
+    {
+      "ordinal": 67,
+      "stage": "I9-8D Adventure",
+      "compiler_version": "i9-8d-adventure",
+      "parser_version": "lua-generated-v18-guild-invite",
+      "revision_id": "3ae85dd4579854514bdefe8f0e808939df6ebb614c81d9b542850c401d1fb5bd",
+      "scope": "Adventure event rows, shop, card dropbox, defense campaign bands and the trigger/timer/room misc profile; D368 policy is separate. Unsealed working implementation."
     }
   ],
   "current": {
-    "stage": "I9-8C Occult",
-    "compiler_version": "i9-8c-occult",
+    "stage": "I9-8D Adventure",
+    "compiler_version": "i9-8d-adventure",
     "parser_version": "lua-generated-v18-guild-invite",
-    "revision_id": "f59ef0a2e2b15adf8287b5844dd53aed6b4d13c21ed062182db9e72b18c0de0e",
-    "scope": "Creats chapter select (reward display, awakening routes by mission id), campaign graph and misc room, timer, ticket and event profile; D367 policy is separate. Unsealed working implementation."
+    "revision_id": "3ae85dd4579854514bdefe8f0e808939df6ebb614c81d9b542850c401d1fb5bd",
+    "scope": "Adventure event rows, shop, card dropbox, defense campaign bands and the trigger/timer/room misc profile; D368 policy is separate. Unsealed working implementation."
   }
 }

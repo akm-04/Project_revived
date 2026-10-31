@@ -108,6 +108,9 @@ func (s Mode) Sweep(c context.Context, a identity.ActorContext, q Sweep, op oper
 		if err = s.Store.SaveTx(c, sc.Tx, a.PlayerID, r, []int64{n.ID}, sc.Operation.DecisionAt()); err != nil {
 			return nil, err
 		}
+		if err = s.Facts.RecordTx(c, sc.Tx, current, objective.Fact{PlayerID: a.PlayerID, SourceDomain: "campaign", SourceBusinessKey: current.ID.String() + "/sweep", Kind: objective.CampaignSweepKind, Delta: q.Count}); err != nil {
+			return nil, err
+		}
 		for i := int64(0); i < q.Count; i++ {
 			if err = s.Facts.RecordTx(c, sc.Tx, current, objective.Fact{PlayerID: a.PlayerID, SourceDomain: "campaign", SourceBusinessKey: fmt.Sprintf("%s/%d", current.ID, i), Kind: kind, Delta: 1}); err != nil {
 				return nil, err

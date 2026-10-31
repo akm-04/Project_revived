@@ -4777,6 +4777,34 @@
       ],
       "write_exceptions": [],
       "migration": "migrations/00101_i9_8c_occult.sql"
+    },
+    "content_adventure_catalogs": {
+      "owner": "content-registry",
+      "allowed_query_owners": [
+        "content-registry"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/contentstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/contentstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00102_i9_8d_adventure.sql"
+    },
+    "adventure_occurrences": {
+      "owner": "adventure",
+      "allowed_query_owners": [
+        "adventure"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/adventurestore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/adventurestore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00102_i9_8d_adventure.sql"
     }
   }
 }

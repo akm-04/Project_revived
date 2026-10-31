@@ -15,11 +15,18 @@ type OpenObjectiveLocker interface {
 	LockOpenObjectivesTx(context.Context, tx.Tx, identity.PlayerID) ([]objective.Instance, []ObjectiveDefinition, error)
 }
 
+// FactObserver converts recorded facts into a family's own side state. It runs
+// in the same transaction, after objectives, and sees the whole fact batch.
+type FactObserver interface {
+	ObserveTx(context.Context, tx.Tx, operation.Context, ...objective.Fact) error
+}
+
 // ObjectiveFacts is the objective fact port (I9_MODE_FRAMEWORK_V1 F11, I9_MODE_FOUNDATION_V1 MF3): a mode owner reports what
 // it settled inside its own transaction, and every open objective accepting the fact kind advances once per fact identity.
 type ObjectiveFacts struct {
-	Owner Service
-	Open  OpenObjectiveLocker
+	Owner    Service
+	Open     OpenObjectiveLocker
+	Observer FactObserver
 }
 
 func (f ObjectiveFacts) RecordTx(ctx context.Context, t tx.Tx, op operation.Context, facts ...objective.Fact) error {
@@ -39,7 +46,10 @@ func (f ObjectiveFacts) RecordTx(ctx context.Context, t tx.Tx, op operation.Cont
 			return err
 		}
 	}
-	return nil
+	if f.Observer == nil {
+		return nil
+	}
+	return f.Observer.ObserveTx(ctx, t, op, facts...)
 }
 
 func (f ObjectiveFacts) record(ctx context.Context, t tx.Tx, op operation.Context, fact objective.Fact) error {

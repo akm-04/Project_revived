@@ -267,6 +267,13 @@ func (s Service) EnsureBuiltinInstalled(ctx context.Context, op operation.Contex
 			if gotOccult != 1 {
 				return errors.New("content registry occult count")
 			}
+			gotAdventure, err := s.Repo.InsertAdventure(tctx, scope.Tx, b)
+			if err != nil {
+				return err
+			}
+			if gotAdventure != 1 {
+				return errors.New("content registry adventure count")
+			}
 			gotMemoir, err := s.Repo.InsertMemoir(tctx, scope.Tx, b)
 			if err != nil {
 				return err

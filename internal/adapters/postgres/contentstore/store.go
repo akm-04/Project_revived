@@ -267,6 +267,12 @@ func (Store) VerifyRevision(ctx context.Context, q tx.Queryer, b registry.Bundle
 		return registry.Verification{}, err
 	}
 	v.Exact = v.Exact && occultExact
+	var adventureExact bool
+	err = q.QueryRow(ctx, verifyAdventureSQL, b.RevisionID(), string(b.AdventureJSON())).Scan(&adventureExact, &v.AdventureCount)
+	if err != nil {
+		return registry.Verification{}, err
+	}
+	v.Exact = v.Exact && adventureExact
 	var memoirExact bool
 	err = q.QueryRow(ctx, verifyMemoirSQL, b.RevisionID(), string(b.MemoirJSON())).Scan(&memoirExact, &v.MemoirCount)
 	if err != nil {

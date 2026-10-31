@@ -6,6 +6,7 @@ import (
 
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/domain/objective"
+	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
@@ -16,6 +17,32 @@ type openObjectives struct {
 
 func (o *openObjectives) LockOpenObjectivesTx(context.Context, tx.Tx, identity.PlayerID) ([]objective.Instance, []ObjectiveDefinition, error) {
 	return o.instances, o.definitions, nil
+}
+
+type recordingObserver struct {
+	calls int
+	facts []objective.Fact
+}
+
+func (o *recordingObserver) ObserveTx(_ context.Context, _ tx.Tx, _ operation.Context, facts ...objective.Fact) error {
+	o.calls++
+	o.facts = append(o.facts, facts...)
+	return nil
+}
+
+func TestObjectiveFactsRunTriggerObserverOncePerBatch(t *testing.T) {
+	actor := testActor(t)
+	store := &testStore{}
+	receipts := newMemoryReceipts()
+	observer := &recordingObserver{}
+	port := ObjectiveFacts{Owner: Service{Store: store, Receipts: receipts, ReceiptRead: receipts}, Open: &openObjectives{}, Observer: observer}
+	fact := objective.Fact{PlayerID: actor.PlayerID, SourceDomain: "campaign", SourceBusinessKey: "sweep-1", Kind: objective.CampaignSweepKind, Delta: 1}
+	if err := port.RecordTx(context.Background(), &testTx{}, testOperation(90), fact); err != nil {
+		t.Fatal(err)
+	}
+	if observer.calls != 1 || len(observer.facts) != 1 || observer.facts[0].Kind != objective.CampaignSweepKind {
+		t.Fatalf("observer calls=%d facts=%+v", observer.calls, observer.facts)
+	}
 }
 
 // Wave-I fixture 53: a duplicated objective fact advances progress once.

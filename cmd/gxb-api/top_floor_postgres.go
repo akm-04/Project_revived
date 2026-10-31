@@ -15,6 +15,7 @@ import (
 	"gxb.local/backend/v2/internal/adapters/combatworker"
 	"gxb.local/backend/v2/internal/adapters/postgres"
 	"gxb.local/backend/v2/internal/adapters/postgres/achievementstore"
+	"gxb.local/backend/v2/internal/adapters/postgres/adventurestore"
 	"gxb.local/backend/v2/internal/adapters/postgres/arenastore"
 	"gxb.local/backend/v2/internal/adapters/postgres/campaignstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/characterstore"
@@ -30,6 +31,7 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres/socialrelationstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/topfloorstore"
 	appachievement "gxb.local/backend/v2/internal/application/achievement"
+	appadventure "gxb.local/backend/v2/internal/application/adventure"
 	apparena "gxb.local/backend/v2/internal/application/arena"
 	appbook "gxb.local/backend/v2/internal/application/bookskill"
 	appcampaign "gxb.local/backend/v2/internal/application/campaign"
@@ -131,14 +133,14 @@ func canonicalOneOnOne(p *postgres.Pool, r tx.Runner, content contentstore.Store
 	return apponeonone.Service{Timed: appgeneration.TimedRunner{Binder: appgeneration.Binder{Time: postgres.AuthoritativeTime{Queryer: p}}, Runner: r}, Fresh: p, Store: oneononestore.Store{}, Content: content,
 		Fence: i5db, Privileges: privileges, Costs: appi5.MaterialCostDebiter{Store: i5db, Content: content}, Mail: appi5.SettlementMail{Store: i5db},
 		Achievements: appachievement.Service{Store: achievementstore.Store{}, Content: content, Population: o.library}, Combat: fight,
-		Heroes: fight.Inputs.Heroes, Pets: fight.Inputs.Pets, Directory: i4store.PlayerDirectoryReader{}, Entitlements: i5db, Facts: appi5.ObjectiveFacts{Owner: i5svc, Open: i5db}, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}}
+		Heroes: fight.Inputs.Heroes, Pets: fight.Inputs.Pets, Directory: i4store.PlayerDirectoryReader{}, Entitlements: i5db, Facts: appi5.ObjectiveFacts{Owner: i5svc, Open: i5db, Observer: appadventure.Observer{Store: adventurestore.Store{}}}, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}}
 }
 
 func canonicalArena(p *postgres.Pool, r tx.Runner, content contentstore.Store, i5db i5store.Store, i5svc appi5.Service, fight combat.Service, o topFloorOwners) apparena.Service {
 	return apparena.Service{Players: i4store.PlayerRootLocker{}, Friendships: socialrelation.FriendFightPrivacyProvider{Store: socialrelationstore.Store{}}, Timed: appgeneration.TimedRunner{Binder: appgeneration.Binder{Time: postgres.AuthoritativeTime{Queryer: p}}, Runner: r}, Fresh: p, Store: arenastore.Store{}, Content: content,
 		Fence: i5db, Costs: appi5.MaterialCostDebiter{Store: i5db, Content: content}, Grants: i5svc, Values: i5db, Mail: appi5.SettlementMail{Store: i5db},
 		Achievements: appachievement.Service{Store: achievementstore.Store{}, Content: content, Population: o.library}, Combat: fight, Heroes: fight.Inputs.Heroes, Pets: fight.Inputs.Pets,
-		Directory: i4store.PlayerDirectoryReader{}, Guilds: guildstore.Store{}, Servers: i4store.ServerNames{}, Facts: appi5.ObjectiveFacts{Owner: i5svc, Open: i5db}, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}}
+		Directory: i4store.PlayerDirectoryReader{}, Guilds: guildstore.Store{}, Servers: i4store.ServerNames{}, Facts: appi5.ObjectiveFacts{Owner: i5svc, Open: i5db, Observer: appadventure.Observer{Store: adventurestore.Store{}}}, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}}
 }
 
 // canonicalConquer is the Conquer School mode (client-attested Combat attempt, I8-5D).
@@ -153,14 +155,14 @@ func canonicalCampaign(p *postgres.Pool, r tx.Runner, content contentstore.Store
 	return appcampaign.Mode{PetAwakening: i5svc, Awakening: i5svc, Daily: dailyconsume.Service{Store: dailyconsumestore.Store{}, Costs: appi5.MaterialCostDebiter{Store: i5db, Content: content}}, Timed: appgeneration.TimedRunner{Binder: appgeneration.Binder{Time: postgres.AuthoritativeTime{Queryer: p}}, Runner: r}, Fresh: p, Store: campaignstore.Store{}, Content: content,
 		Fence: i5db, Functions: i5db, Directory: i4store.PlayerDirectoryReader{}, Heroes: characterstore.CampaignHeroPort{Store: characterstore.Store{Queryer: p}}, HeroExp: heroes, Combat: fight,
 		Privileges: i5svc.Privileges, Costs: appi5.MaterialCostDebiter{Store: i5db, Content: content}, Progression: i5db,
-		Energy: i5svc, Grants: i5svc, Stages: i5svc, Facts: appi5.ObjectiveFacts{Owner: i5svc, Open: i5db}, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}}
+		Energy: i5svc, Grants: i5svc, Stages: i5svc, Facts: appi5.ObjectiveFacts{Owner: i5svc, Open: i5db, Observer: appadventure.Observer{Store: adventurestore.Store{}}}, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}}
 }
 
 func canonicalTopFloor(p *postgres.Pool, r tx.Runner, content contentstore.Store, i5db i5store.Store, i5svc appi5.Service, privileges commerceprivilege.Provider, fight combat.Service, o topFloorOwners) apptopfloor.Service {
 	return apptopfloor.Service{Timed: appgeneration.TimedRunner{Binder: appgeneration.Binder{Time: postgres.AuthoritativeTime{Queryer: p}}, Runner: r}, Fresh: p, Store: topfloorstore.Store{}, Content: content,
 		Fence: i5db, Functions: i5db, Privileges: privileges, Costs: appi5.MaterialCostDebiter{Store: i5db, Content: content}, Mail: appi5.SettlementMail{Store: i5db},
 		Achievements: appachievement.Service{Store: achievementstore.Store{}, Content: content, Population: o.library}, Combat: fight,
-		Heroes: fight.Inputs.Heroes, Pets: fight.Inputs.Pets, Directory: i4store.PlayerDirectoryReader{}, Guilds: guildstore.Store{}, Facts: appi5.ObjectiveFacts{Owner: i5svc, Open: i5db}, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}}
+		Heroes: fight.Inputs.Heroes, Pets: fight.Inputs.Pets, Directory: i4store.PlayerDirectoryReader{}, Guilds: guildstore.Store{}, Facts: appi5.ObjectiveFacts{Owner: i5svc, Open: i5db, Observer: appadventure.Observer{Store: adventurestore.Store{}}}, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}}
 }
 
 // runReconcile runs one mode's owed settlements and abandoned matches every 30 s (in-process reconcile provider).
@@ -190,5 +192,5 @@ func runReconcile(ctx context.Context, p *postgres.Pool, provider appgeneration.
 
 // canonicalLeague reuses the full qualified owned Combat roster/stats pipeline.
 func canonicalLeague(p *postgres.Pool, r tx.Runner, content contentstore.Store, i5db i5store.Store, i5svc appi5.Service, fight combat.Service, o topFloorOwners, display playerdisplay.Service) appleague.Service {
-	return appleague.Service{Timed: appgeneration.TimedRunner{Binder: appgeneration.Binder{Time: postgres.AuthoritativeTime{Queryer: p}}, Runner: r}, Fresh: p, Store: leaguestore.Store{}, Content: content, Fence: i5db, Heroes: fight.Inputs.Heroes, Pets: fight.Inputs.Pets, Directory: i4store.PlayerDirectoryReader{}, Guilds: guildstore.Store{}, Progression: i5db, Combat: fight, Grants: i5svc, Mail: appi5.SettlementMail{Store: i5db}, Achievements: appachievement.Service{Store: achievementstore.Store{}, Content: content, Population: o.library}, Players: i4store.PlayerRootLocker{}, Recipient: display, Entitlements: i5db, Facts: appi5.ObjectiveFacts{Owner: i5svc, Open: i5db}, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}}
+	return appleague.Service{Timed: appgeneration.TimedRunner{Binder: appgeneration.Binder{Time: postgres.AuthoritativeTime{Queryer: p}}, Runner: r}, Fresh: p, Store: leaguestore.Store{}, Content: content, Fence: i5db, Heroes: fight.Inputs.Heroes, Pets: fight.Inputs.Pets, Directory: i4store.PlayerDirectoryReader{}, Guilds: guildstore.Store{}, Progression: i5db, Combat: fight, Grants: i5svc, Mail: appi5.SettlementMail{Store: i5db}, Achievements: appachievement.Service{Store: achievementstore.Store{}, Content: content, Population: o.library}, Players: i4store.PlayerRootLocker{}, Recipient: display, Entitlements: i5db, Facts: appi5.ObjectiveFacts{Owner: i5svc, Open: i5db, Observer: appadventure.Observer{Store: adventurestore.Store{}}}, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}}
 }

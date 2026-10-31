@@ -21,7 +21,7 @@ from pathlib import Path
 from typing import Any, Iterable
 
 SCHEMA_VERSION = 1
-COMPILER_VERSION = "i9-8c-occult"
+COMPILER_VERSION = "i9-8d-adventure"
 PARSER_VERSION = "lua-generated-v18-guild-invite"
 EXPECTED_SOURCE_ARCHIVE_SHA256 = "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
 SOURCE_PREFIX = "app-assets/output/assets/src_64/"
@@ -280,7 +280,7 @@ ENABLED_CAPABILITIES = [
     "SCALAR_MARCH_COIN_I9_4A", "MISSION_ACTIVITY_I9_4B", "MONTHLY_SIGNIN_I9_4C", "AWAKENING_MISSIONS_I9_4D", "SCALAR_GUILD_COIN_I9_4B", "DODGE_TICKET_STACK_I9_4B",
     "SUMMON_GACHA_I9_3E",
     "CAMPAIGN_MODE_I9_3A",
-    "CHAMPION_MARCH_I9_5A", "WORKPLACE_I9_5B", "PET_CAMPAIGN_I9_5C", "GODS_TRIAL_I9_6A","DODGEBALL_I9_6B", "MEMOIR_I9_6C", "WORLD_BOSS_I9_8A", "ILLUSION_I9_8B", "OCCULT_I9_8C",
+    "CHAMPION_MARCH_I9_5A", "WORKPLACE_I9_5B", "PET_CAMPAIGN_I9_5C", "GODS_TRIAL_I9_6A","DODGEBALL_I9_6B", "MEMOIR_I9_6C", "WORLD_BOSS_I9_8A", "ILLUSION_I9_8B", "OCCULT_I9_8C", "ADVENTURE_I9_8D",
     "COSMETIC_TITLE_CONDITION_I7C6",
     "ACHIEVEMENT_CATALOG_I7C4FA",
     "CHAMPIONS_LEAGUE_I7C5F",
@@ -507,6 +507,11 @@ from illusion_content import build_illusion
 SOURCE_MANIFEST.append(('data/tables/creats_chapter_select.lua', 'c4134b5ee3a9861d75f76f6c704e16345c0cb61d6b49adefcdf1f90549d26e3d', 'I9_8C_OCCULT_SOURCE_BOUNDARY'))
 SOURCE_MANIFEST.append(('data/tables/creats_campaign.lua', '63be4a760e765d77f7e04d1f77a725737f91ab467a1929cdc00a0d59b7bd3275', 'I9_8C_OCCULT_SOURCE_BOUNDARY'))
 from occult_content import build_occult
+SOURCE_MANIFEST.append(('data/tables/adventure_event.lua', 'f45db938bd87f17a20fcced1b0942c09ae18c549e0309d107c97805292f627e7', 'I9_8D_ADVENTURE_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/adventure_shop.lua', 'dc2763d25dd0b4401808c891750cc6d88c884f27cd1aa55faa31632494f70a8e', 'I9_8D_ADVENTURE_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/adventure_cards_dropbox.lua', 'cc232b84af76f1bce36f397752a2d12a8936f3efc7704431f04d415c3643878f', 'I9_8D_ADVENTURE_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/adventure_campaign.lua', 'ec0e7462ef98b975c029ad0a5a34b70d96d400835e9cb5177ca109fc3ebd0e41', 'I9_8D_ADVENTURE_SOURCE_BOUNDARY'))
+from adventure_content import build_adventure
 from dodgeball_content import build_dodgeball
 from memoir_content import build_memoir
 from march_content import build_march
@@ -2339,6 +2344,7 @@ def build_artifacts(blobs: dict[str, SourceBlob], archive_sha256: str) -> dict[s
         "world_boss_catalog.json":build_world_boss(blobs,parse_generated_lua_table),
         "illusion_catalog.json":build_illusion(blobs,parse_generated_lua_table),
         "occult_catalog.json":build_occult(blobs,parse_generated_lua_table),
+        "adventure_catalog.json":build_adventure(blobs,parse_generated_lua_table),
         "dodgeball_catalog.json":build_dodgeball(blobs,parse_generated_lua_table,items,hero_artifact),
         "memoir_catalog.json":build_memoir(blobs,parse_generated_lua_table,items,hero_artifact),
         "workplace_catalog.json":build_workplace(blobs,parse_generated_lua_table,parse_base64_indexed_lua_table,indexed_field,resources),
