@@ -17,47 +17,16 @@ import (
 	app "gxb.local/backend/v2/internal/application/guildcampaign"
 	"gxb.local/backend/v2/internal/application/i5"
 	appwakeup "gxb.local/backend/v2/internal/application/realtimewakeup"
-	"gxb.local/backend/v2/internal/content/guildcampaigncatalog"
 	"gxb.local/backend/v2/internal/content/guildcampaignpolicy"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
-// guildCampaignSettings maps the immutable policy and misc tables to the owner.
-func guildCampaignSettings(p guildcampaignpolicy.Policy, c guildcampaigncatalog.Settings) app.Settings {
-	return app.Settings{
-		AttemptsPerChapterDay: p.AttemptsPerChapterDay,
-		PrepareSeconds:        p.PrepareSeconds,
-		BattleSeconds:         p.BattleSeconds,
-		RestSecondsOfDay:      p.RestSecondsOfDay,
-		ApplicationsPerDay:    p.ApplicationsPerDay,
-		BossRankFactor:        p.BossDamageRankFactor,
-		RetentionDays:         p.GuildLogRetentionDays,
-		RewardHurtRank:        c.RewardHurtRank,
-		DistRewardTime:        c.DistRewardTime,
-		RewardParamPerMille:   c.RewardParamPerMile,
-		RewardTimeLimitSecond: c.RewardTimeLimit,
-		RecordRewardCrystal:   c.FirstRewardDiamond,
-		RecordRewardBadge:     c.FirstRewardCoin,
-		LastStrikeCoin:        p.LastStrikeCoin,
-		MaxFightDamage:        p.MaxFightDamage,
-	}
-}
-
-func guildCampaignTables(catalog guildcampaigncontent.Catalog) map[int64]app.ChapterInfo {
-	out := map[int64]app.ChapterInfo{}
-	for _, chapter := range catalog.Installed.Chapters {
-		info, _ := catalog.ChapterInfo(chapter.ChapterID)
-		out[chapter.ChapterID] = info
-	}
-	return out
-}
-
 // canonicalGuildCampaign builds the one Guild Campaign owner of I9-9C.
 func canonicalGuildCampaign(p *pg.Pool, runner tx.Runner, guildDB guildstore.Store, i5db i5store.Store, i5svc i5.Service,
 	catalog guildcampaigncontent.Catalog, policy guildcampaignpolicy.Policy, combatService combat.Service) (app.Mode, app.Payout) {
-	settings := guildCampaignSettings(policy, catalog.Installed.Settings)
-	tables := guildCampaignTables(catalog)
+	settings := guildcampaigncontent.Settings(policy, catalog.Installed.Settings)
+	tables := catalog.ChapterInfos()
 	store := guildcampaignstore.Store{}
 	payout := app.Payout{Store: store, Mail: i5.SettlementMail{Store: i5db}, Settings: settings, Tables: tables}
 	mode := app.Mode{

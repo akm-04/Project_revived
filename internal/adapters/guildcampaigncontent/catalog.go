@@ -9,10 +9,42 @@ import (
 
 	"gxb.local/backend/v2/internal/application/guildcampaign"
 	"gxb.local/backend/v2/internal/content/guildcampaigncatalog"
+	"gxb.local/backend/v2/internal/content/guildcampaignpolicy"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
 type Catalog struct{ Installed guildcampaigncatalog.Catalog }
+
+// Settings maps the immutable policy and misc tables to the application owner.
+func Settings(policy guildcampaignpolicy.Policy, settings guildcampaigncatalog.Settings) guildcampaign.Settings {
+	return guildcampaign.Settings{
+		AttemptsPerChapterDay: policy.AttemptsPerChapterDay,
+		PrepareSeconds:        policy.PrepareSeconds,
+		BattleSeconds:         policy.BattleSeconds,
+		RestSecondsOfDay:      policy.RestSecondsOfDay,
+		ApplicationsPerDay:    policy.ApplicationsPerDay,
+		BossRankFactor:        policy.BossDamageRankFactor,
+		RetentionDays:         policy.GuildLogRetentionDays,
+		RewardHurtRank:        settings.RewardHurtRank,
+		DistRewardTime:        settings.DistRewardTime,
+		RewardParamPerMille:   settings.RewardParamPerMile,
+		RewardTimeLimitSecond: settings.RewardTimeLimit,
+		RecordRewardCrystal:   settings.FirstRewardDiamond,
+		RecordRewardBadge:     settings.FirstRewardCoin,
+		LastStrikeCoin:        policy.LastStrikeCoin,
+		MaxFightDamage:        policy.MaxFightDamage,
+	}
+}
+
+// ChapterInfos returns every chapter's application view keyed by id.
+func (c Catalog) ChapterInfos() map[int64]guildcampaign.ChapterInfo {
+	out := map[int64]guildcampaign.ChapterInfo{}
+	for _, chapter := range c.Installed.Chapters {
+		info, _ := c.ChapterInfo(chapter.ChapterID)
+		out[chapter.ChapterID] = info
+	}
+	return out
+}
 
 var _ guildcampaign.Catalog = Catalog{}
 var _ guildcampaign.Content = Catalog{}

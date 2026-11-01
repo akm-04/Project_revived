@@ -40,6 +40,7 @@ type campaignFixture struct {
 	mode     app.Mode
 	settings app.Settings
 	tables   map[int64]app.ChapterInfo
+	at       time.Time
 }
 
 func newCampaignFixture(t *testing.T) campaignFixture {
@@ -54,18 +55,13 @@ func newCampaignFixture(t *testing.T) campaignFixture {
 	installed := must(guildcampaigncatalog.LoadBuiltin())(t, "catalog").Catalog
 	catalog := guildcampaigncontent.Catalog{Installed: installed}
 	policy := must(guildcampaignpolicy.LoadBuiltin())(t, "policy").Policy
-	f.settings = app.Settings{AttemptsPerChapterDay: policy.AttemptsPerChapterDay, PrepareSeconds: policy.PrepareSeconds,
-		BattleSeconds: policy.BattleSeconds, RestSecondsOfDay: policy.RestSecondsOfDay, ApplicationsPerDay: policy.ApplicationsPerDay,
-		BossRankFactor: policy.BossDamageRankFactor, RetentionDays: policy.GuildLogRetentionDays, RewardHurtRank: installed.RewardHurtRank,
-		DistRewardTime:      installed.DistRewardTime,
-		RewardParamPerMille: installed.RewardParamPerMile, RewardTimeLimitSecond: installed.RewardTimeLimit,
-		RecordRewardCrystal: installed.FirstRewardDiamond, RecordRewardBadge: installed.FirstRewardCoin,
-		LastStrikeCoin: policy.LastStrikeCoin, MaxFightDamage: policy.MaxFightDamage}
-	f.tables = map[int64]app.ChapterInfo{}
-	for _, chapter := range installed.Chapters {
-		info, _ := catalog.ChapterInfo(chapter.ChapterID)
-		f.tables[chapter.ChapterID] = info
+	f.settings = guildcampaigncontent.Settings(policy, installed.Settings)
+	f.tables = catalog.ChapterInfos()
+	now, err := (postgres.AuthoritativeTime{Queryer: p}).Now(ctx)
+	if err != nil {
+		t.Fatal(err)
 	}
+	f.at = campaignSafeTime(now, f.settings.RestSecondsOfDay)
 	store := guildcampaignstore.Store{}
 	mail := appi5.SettlementMail{Store: i5store.Store{Queryer: p}}
 	payout := app.Payout{Store: store, Mail: mail, Settings: f.settings, Tables: f.tables}
@@ -103,7 +99,23 @@ func modesDay(at time.Time) int64 {
 	return (at.Unix() + 8*3600 - 5*3600) / 86400
 }
 
-func (f campaignFixture) op() operation.Context { return opPinned(f.rev) }
+// campaignSafeTime moves a rest-window instant forward inside the same game
+// day, so the native fixture is not tied to the UTC hour it runs in.
+func campaignSafeTime(at time.Time, rest [2]int64) time.Time {
+	seconds := (at.Unix() + 8*3600) % 86400
+	if seconds >= rest[0] && seconds < rest[1] {
+		return at.Add(4 * time.Hour)
+	}
+	return at
+}
+
+func (f campaignFixture) op() operation.Context { return f.opAt(f.at) }
+
+func (f campaignFixture) opAt(at time.Time) operation.Context {
+	pinned := opPinned(f.rev)
+	pinned.StartedAt = at.UTC()
+	return pinned
+}
 
 func (f campaignFixture) chapter(t *testing.T) app.ChapterInfo {
 	t.Helper()
@@ -207,7 +219,8 @@ func TestI9_9CFightClaimCarryAttemptsLateAndDuplicate(t *testing.T) {
 	heroThird := f.hero(t, f.third)
 	started := f.start(t, f.third, chapterID, copyID, heroThird)
 	loss := f.waveEnemies(t, started, 0, 1234, 77)
-	if _, err := f.mode.Settle(ctx, f.third, loss, f.op()); err != nil {
+	settledLoss, err := f.mode.Settle(ctx, f.third, loss, f.op())
+	if err != nil {
 		t.Fatal("settle loss", err)
 	}
 	if clears := f.memberClears(t, f.third, chapterID); clears != 0 {
@@ -220,9 +233,24 @@ func TestI9_9CFightClaimCarryAttemptsLateAndDuplicate(t *testing.T) {
 	if detail.CurrentIndex != 1 || detail.Waves[1][0].HP != 77 {
 		t.Fatalf("HP did not carry: %+v", detail.Waves[1][0])
 	}
-	// A duplicate of a settled loss inside the window gets 30021, not 30005.
-	if _, err := f.mode.Settle(ctx, f.third, loss, f.op()); !errors.Is(err, app.ErrLate) {
-		t.Fatal("duplicate loss", err)
+	// A retry of the settled loss replays the stored body as 30005 and writes
+	// nothing: the wave keeps its HP, no clear, no second grant.
+	goldBefore := f.balance(t, f.third, "mana")
+	duplicateLoss, err := f.mode.Settle(ctx, f.third, loss, f.op())
+	if err != nil || !duplicateLoss.Duplicate || duplicateLoss.Body["error_code"] != int64(30005) {
+		t.Fatalf("duplicate loss %+v err=%v", duplicateLoss, err)
+	}
+	replayedAward := duplicateLoss.Body["rank_award"].(map[string]any)
+	storedAward := settledLoss.Body["rank_award"].(map[string]any)
+	if duplicateLoss.Body["coin_award"] != float64(settledLoss.Body["coin_award"].(int64)) ||
+		replayedAward["crystal"] != float64(storedAward["crystal"].(int64)) || replayedAward["guild_coin"] != float64(storedAward["guild_coin"].(int64)) {
+		t.Fatalf("duplicate loss body %+v vs %+v", duplicateLoss.Body, settledLoss.Body)
+	}
+	if goldAfter := f.balance(t, f.third, "mana"); goldAfter != goldBefore {
+		t.Fatalf("duplicate loss paid again: %d -> %d", goldBefore, goldAfter)
+	}
+	if detail, err = f.mode.MapDetail(ctx, f.third, copyID, f.op()); err != nil || detail.CurrentIndex != 1 || detail.Waves[1][0].HP != 77 {
+		t.Fatalf("duplicate loss wrote the copy: %+v err=%v", detail, err)
 	}
 	// The second member starts the same wave and clears it.
 	if _, err := f.mode.Claim(ctx, f.second, copyID, f.op()); err != nil {
@@ -265,21 +293,35 @@ func TestI9_9CAttemptCapAndRegistrationForfeit(t *testing.T) {
 		t.Fatal("open", err)
 	}
 	chapterID, copyID := f.copyID(t)
-	if err := f.removeMember(t, f.second); err != nil {
-		t.Fatal("forfeit", err)
+	core := guildCoreService(t, f.pool)
+	core.Campaign = f.mode.Service
+	if _, err := core.Leave(ctx, f.second, op()); err != nil {
+		t.Fatal("leave", err)
 	}
 	if registered := f.registered(t, chapterID, f.second); registered {
 		t.Fatal("leaver still registered")
 	}
-	exec(t, f.pool, `DELETE FROM guild_memberships WHERE player_id=$1 AND guild_id=$2`, int64(f.second.PlayerID), int64(f.guild))
-	exec(t, f.pool, `INSERT INTO guild_memberships(player_id,guild_id,role,joined_at,membership_version,state_version,updated_at)VALUES($1,$2,0,clock_timestamp(),1,1,clock_timestamp())`, int64(f.second.PlayerID), int64(f.guild))
+	// Guildcore refuses a same-guild rejoin for 2 days, so the fixture uses the
+	// guild owner's membership insert rather than raw SQL for the rejoin.
+	tr, err := f.pool.Begin(ctx, tx.Options{Isolation: tx.Serializable})
+	if err != nil {
+		t.Fatal(err)
+	}
+	rejoin := guild.Membership{PlayerID: f.second.PlayerID, GuildID: f.guild, Role: guild.Member, JoinedAt: f.at, MembershipVersion: 1, StateVersion: 1, UpdatedAt: f.at}
+	if err := (guildstore.Store{Queryer: f.pool}).InsertMembershipTx(ctx, tr, rejoin); err != nil {
+		tr.Rollback(ctx)
+		t.Fatal("rejoin", err)
+	}
+	if err := tr.Commit(ctx); err != nil {
+		t.Fatal(err)
+	}
 	if registered := f.registered(t, chapterID, f.second); registered {
 		t.Fatal("rejoining restored registration before reset")
 	}
 	if _, err := f.mode.Start(ctx, f.second, app.Fight{ChapterID: chapterID, CopyID: copyID, CampaignType: 7, Formation: "1"}, f.op()); !errors.Is(err, d.ErrRefused) {
 		t.Fatal("unregistered member started", err)
 	}
-	tr := f.openTx(t)
+	tr = f.openTx(t)
 	if err := f.mode.CloseGuildTx(ctx, tr, f.guild); err != nil {
 		t.Fatal("dissolve", err)
 	}
@@ -333,19 +375,6 @@ func TestI9_9CPayoutOncePerRunAndAwardSlot(t *testing.T) {
 	}
 }
 
-func (f campaignFixture) removeMember(t *testing.T, a identity.ActorContext) error {
-	t.Helper()
-	tr, err := f.pool.Begin(ctx, tx.Options{Isolation: tx.Serializable})
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer tr.Rollback(ctx)
-	if err := f.mode.RemoveMemberTx(ctx, tr, f.guild, a.PlayerID); err != nil {
-		return err
-	}
-	return tr.Commit(ctx)
-}
-
 func (f campaignFixture) openTx(t *testing.T) tx.Tx {
 	t.Helper()
 	tr, err := f.pool.Begin(ctx, tx.Options{Isolation: tx.Serializable})
@@ -358,20 +387,21 @@ func (f campaignFixture) openTx(t *testing.T) tx.Tx {
 
 func (f campaignFixture) expireClaim(t *testing.T, copyID int64) {
 	t.Helper()
-	exec(t, f.pool, `UPDATE guild_campaign_copies SET last_fight_time=clock_timestamp()-interval '10 minutes', start_fight_time=clock_timestamp()-interval '10 minutes' WHERE guild_id=$1 AND copy_id=$2`, int64(f.guild), copyID)
+	exec(t, f.pool, `UPDATE guild_campaign_copies SET last_fight_time=$3, start_fight_time=$3 WHERE guild_id=$1 AND copy_id=$2`, int64(f.guild), copyID, f.at.Add(-10*time.Minute))
 }
 
 func (f campaignFixture) memberClears(t *testing.T, a identity.ActorContext, chapterID int64) int64 {
 	t.Helper()
-	now, err := (postgres.AuthoritativeTime{Queryer: f.pool}).Now(ctx)
-	if err != nil {
-		t.Fatal(err)
-	}
-	clears, err := (guildcampaignstore.Store{}).MemberClearsTx(ctx, f.pool, a.PlayerID, chapterID, modesDay(now))
+	clears, err := (guildcampaignstore.Store{}).MemberClearsTx(ctx, f.pool, a.PlayerID, chapterID, modesDay(f.at))
 	if err != nil {
 		t.Fatal(err)
 	}
 	return clears
+}
+
+func (f campaignFixture) balance(t *testing.T, a identity.ActorContext, resource string) int64 {
+	t.Helper()
+	return scalar(t, f.pool, `SELECT COALESCE((SELECT amount FROM player_currency_balances WHERE player_id=$1 AND resource_key=$2),0)`, int64(a.PlayerID), resource)
 }
 
 func (f campaignFixture) copyIndex(t *testing.T, copyID int64) int64 {
