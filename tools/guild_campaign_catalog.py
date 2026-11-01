@@ -116,6 +116,7 @@ def build(archive: Path) -> dict:
         copies.setdefault(chapter, []).append({
             'copy_id': int(row['campaign_id']),
             'fight_id': int(row['fight_id']),
+            'boss_fight': int(row.get('boss_fight') or 0),
             'waves': {str(wave): wave_enemies(row, wave) for wave in (1, 2, 3)},
         })
 

@@ -474,6 +474,17 @@ func (f campaignFixture) beginSingleCopy(t *testing.T) (int64, int64) {
 	return chapterID, copyID
 }
 
+func (f campaignFixture) bossCopy(t *testing.T, chapterID int64) int64 {
+	t.Helper()
+	for _, id := range f.tables[chapterID].Copies {
+		if info, known := f.mode.Content.CopyInfo(chapterID, id); known && info.BossFight {
+			return id
+		}
+	}
+	t.Fatalf("chapter %d has no boss copy", chapterID)
+	return 0
+}
+
 func (f campaignFixture) mutateCopy(t *testing.T, chapterID, copyID int64, change func(*d.Copy, map[int64][]app.EnemyRow)) {
 	t.Helper()
 	tr := f.openTx(t)
@@ -627,22 +638,28 @@ func (f campaignFixture) awardMails(t *testing.T, player identity.ActorContext) 
 }
 
 func TestI9_9CReplayLastStrikeAndChapterClear(t *testing.T) {
-	t.Skip("blocked: finishCopy's last_strike_coin grant uses team_dungeon_coin, which gxb_content_resource_definitions does not class; Settle fails with economy.ErrUnknownResource (unknown or wrong-class resource)")
 	f := newCampaignFixture(t)
 	f.seedActivity(t, 40)
 	if _, err := f.mode.Open(ctx, f.leader, 7, f.op()); err != nil {
 		t.Fatal("open", err)
 	}
-	chapterID, copyID := f.copyID(t)
-	f.mutateCopy(t, chapterID, copyID, func(copy *d.Copy, waves map[int64][]app.EnemyRow) {
-		copy.CurrentIndex = 3
-		copy.Percent = 2.0 / 3
-		killWaves(waves, 1, 2)
-	})
+	chapterID, plainCopy := f.copyID(t)
+	copyID := f.bossCopy(t, chapterID)
+	for _, id := range []int64{plainCopy, copyID} {
+		f.mutateCopy(t, chapterID, id, func(copy *d.Copy, waves map[int64][]app.EnemyRow) {
+			copy.CurrentIndex = 3
+			copy.Percent = 2.0 / 3
+			killWaves(waves, 1, 2)
+		})
+	}
 	if logs := f.logCount(t, int64(d.LogFinalHit)); logs != 0 {
 		t.Fatalf("log 7 before any clear: %d", logs)
 	}
 	beforeCoin := f.balance(t, f.leader, "team_dungeon_coin")
+	f.fight(t, f.second, chapterID, plainCopy, f.secondHero, 4000, 3, 0, f.at)
+	if got := f.balance(t, f.second, "team_dungeon_coin"); got != 0 {
+		t.Fatalf("last strike paid on a copy without the boss: %d", got)
+	}
 	won := f.fight(t, f.leader, chapterID, copyID, f.leaderHero, 4000, 3, 0, f.at)
 	if got := f.balance(t, f.leader, "team_dungeon_coin") - beforeCoin; got != f.settings.LastStrikeCoin {
 		t.Fatalf("last strike coin %d, want %d", got, f.settings.LastStrikeCoin)
@@ -650,8 +667,7 @@ func TestI9_9CReplayLastStrikeAndChapterClear(t *testing.T) {
 	if logs := f.logCount(t, int64(d.LogFinalHit)); logs != 0 {
 		t.Fatalf("log 7 on a copy clear that did not win the chapter: %d", logs)
 	}
-	started := f.startAt(t, f.leader, chapterID, copyID, f.leaderHero, f.at.Add(time.Minute))
-	retry, err := f.mode.Settle(ctx, f.leader, resultFor(chapterID, started, 4000, 3, 0), f.opAt(f.at.Add(time.Minute)))
+	retry, err := f.mode.Settle(ctx, f.leader, resultFor(chapterID, app.Started{CopyID: copyID, CurrentIndex: 3}, 4000, 3, 0), f.opAt(f.at.Add(time.Minute)))
 	if err != nil || !retry.Duplicate || retry.Body["error_code"] != int64(30005) {
 		t.Fatalf("copy win retry %+v err=%v", retry, err)
 	}
@@ -667,7 +683,6 @@ func TestI9_9CReplayLastStrikeAndChapterClear(t *testing.T) {
 }
 
 func TestI9_9CChapterClearPayoutOnceAndLateReset(t *testing.T) {
-	t.Skip("blocked: a copy win grants last_strike_coin through team_dungeon_coin, absent from gxb_content_resource_definitions; economy.ErrUnknownResource aborts the chapter clear before payout")
 	f := newCampaignFixture(t)
 	f.seedActivity(t, 40)
 	if _, err := f.mode.Open(ctx, f.leader, 7, f.op()); err != nil {
@@ -683,9 +698,8 @@ func TestI9_9CChapterClearPayoutOnceAndLateReset(t *testing.T) {
 	if logs := f.logCount(t, int64(d.LogFinalHit)); logs != 1 {
 		t.Fatalf("chapter clear log 7 = %d", logs)
 	}
-	started := f.startAt(t, f.leader, chapterID, copyID, f.leaderHero, f.at.Add(time.Minute))
 	latest := f.at.Add(time.Minute)
-	retry, err := f.mode.Settle(ctx, f.leader, resultFor(chapterID, started, 4000, 3, 0), f.opAt(latest))
+	retry, err := f.mode.Settle(ctx, f.leader, resultFor(chapterID, app.Started{CopyID: copyID, CurrentIndex: 3}, 4000, 3, 0), f.opAt(latest))
 	if err != nil || !retry.Duplicate || retry.Body["error_code"] != int64(30005) {
 		t.Fatalf("final hit retry %+v err=%v", retry, err)
 	}
@@ -710,8 +724,7 @@ func TestI9_9CChapterClearPayoutOnceAndLateReset(t *testing.T) {
 }
 
 // TestI9_9CAwardQueue applies through 606 and drives the real reconciler. The
-// won chapter is seeded through the campaign owner because a real clear is
-// blocked on the last_strike_coin resource (see the skipped clear tests).
+// won chapter is seeded through the campaign owner.
 func TestI9_9CAwardQueue(t *testing.T) {
 	f := newCampaignFixture(t)
 	f.seedActivity(t, 40)
@@ -807,10 +820,14 @@ func TestI9_9CRankTieBossDoubleAndRecordReward(t *testing.T) {
 	}
 	chapterID, _ := f.copyID(t)
 	info := f.chapter(t)
-	bossCopy, tieCopy, recordCopy := info.Copies[0], info.Copies[1], info.Copies[2]
-	f.mutateCopy(t, chapterID, bossCopy, func(copy *d.Copy, waves map[int64][]app.EnemyRow) {
-		waves[1][0].Boss = 1
-	})
+	bossCopy := f.bossCopy(t, chapterID)
+	plain := make([]int64, 0, len(info.Copies))
+	for _, id := range info.Copies {
+		if id != bossCopy {
+			plain = append(plain, id)
+		}
+	}
+	tieCopy, recordCopy := plain[0], plain[1]
 	bossSettled := f.fight(t, f.second, chapterID, bossCopy, f.secondHero, 1000, 0, 50, f.at)
 	if got := f.damage(t, f.second.PlayerID, chapterID); got != 2000 {
 		t.Fatalf("boss wave rank damage %d, want 2000", got)

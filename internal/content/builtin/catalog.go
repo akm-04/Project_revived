@@ -1070,7 +1070,7 @@ func validateManifest(raw []byte, manifest *Manifest) error {
 	if manifest.CompilerVersion == "i9-8c-occult" {
 		expectedSources, expectedArtifacts = 391, 53
 	}
-	if manifest.CompilerVersion == "i9-8d-adventure" || manifest.CompilerVersion == "i9-9a-guild-tea" {
+	if manifest.CompilerVersion == "i9-8d-adventure" || manifest.CompilerVersion == "i9-9a-guild-tea" || manifest.CompilerVersion == "i9-9c-guild-campaign" {
 		expectedSources, expectedArtifacts = 395, 54
 	}
 	if len(manifest.Sources) != expectedSources {

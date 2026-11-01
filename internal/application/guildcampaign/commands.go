@@ -552,8 +552,11 @@ func (m Mode) applyResult(c context.Context, t tx.Tx, a identity.ActorContext, o
 			return Settled{}, err
 		}
 	}
+	// shortcut: the whole fight counts double on the boss copy because the server
+	// holds no enemy maximum HP to isolate the boss's share; upgrade if the catalog
+	// ever carries HP.
 	rankDamage := damage
-	if waveHasBoss(waves[index]) {
+	if info.BossFight {
 		rankDamage = damage * m.Settings.BossRankFactor
 	}
 	if err := m.ModeStore.UpsertDamageTx(c, t, guildID, request.ChapterID, chapter.Run, int64(a.PlayerID), rankDamage, at); err != nil {
@@ -622,20 +625,6 @@ func openRow(rows []EnemyRow, taken []bool, tableID int64) int {
 	return -1
 }
 
-// waveHasBoss is rule 13's trigger.
-//
-// shortcut: the whole fight's damage counts double on a boss wave because the
-// server holds no enemy maximum HP to isolate the boss's share; upgrade if the
-// catalog ever carries HP.
-func waveHasBoss(wave []EnemyRow) bool {
-	for _, row := range wave {
-		if row.Boss != 0 {
-			return true
-		}
-	}
-	return false
-}
-
 // finishCopy writes the chapter progress, the clear payout and awards, and the
 // per-challenge grants and fact, in C2's remaining order.
 func (m Mode) finishCopy(c context.Context, t tx.Tx, a identity.ActorContext, op operation.Context, guildID int64, chapter d.Chapter, chapterInfo ChapterInfo, copy d.Copy, info CopyInfo, damage int64, brokeRecord bool, at time.Time) (Settled, error) {
@@ -688,7 +677,7 @@ func (m Mode) finishCopy(c context.Context, t tx.Tx, a identity.ActorContext, op
 	if gold > 0 {
 		lines = append(lines, grant.Line{Kind: grant.ScalarCurrency, ResourceKey: goldResource, Amount: gold})
 	}
-	if copy.Win && m.Settings.LastStrikeCoin > 0 {
+	if copy.Win && info.BossFight && m.Settings.LastStrikeCoin > 0 {
 		lines = append(lines, grant.Line{Kind: grant.ScalarCurrency, ResourceKey: dungeonCoinResource, Amount: m.Settings.LastStrikeCoin})
 	}
 	recordCrystal, recordBadge := int64(0), int64(0)

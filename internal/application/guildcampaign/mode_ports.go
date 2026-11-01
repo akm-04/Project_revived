@@ -102,7 +102,6 @@ type EnemyRow struct {
 	Health  int64 `json:"health"`
 	HP      int64 `json:"hp,omitempty"`
 	Reborn  int64 `json:"is_reborn,omitempty"`
-	Boss    int64 `json:"boss,omitempty"`
 }
 
 // GuildLogRow is one 609 log entry.
@@ -290,9 +289,10 @@ type ChapterInfo struct {
 
 // CopyInfo is one copy's fight and seeded waves.
 type CopyInfo struct {
-	CopyID  int64
-	FightID int64
-	Waves   map[int64][]EnemyRow
+	CopyID    int64
+	FightID   int64
+	BossFight bool
+	Waves     map[int64][]EnemyRow
 }
 
 // Content is the immutable catalog surface the 604/613/601 paths read.

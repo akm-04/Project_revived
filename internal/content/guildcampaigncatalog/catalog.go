@@ -26,9 +26,10 @@ type Enemy struct {
 
 // Copy is one mission of a chapter; Waves is keyed "1".."3".
 type Copy struct {
-	CopyID  int64              `json:"copy_id"`
-	FightID int64              `json:"fight_id"`
-	Waves   map[string][]Enemy `json:"waves"`
+	CopyID    int64              `json:"copy_id"`
+	FightID   int64              `json:"fight_id"`
+	BossFight int64              `json:"boss_fight"`
+	Waves     map[string][]Enemy `json:"waves"`
 }
 
 type Chapter struct {

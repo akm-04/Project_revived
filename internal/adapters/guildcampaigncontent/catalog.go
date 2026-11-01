@@ -86,7 +86,7 @@ func (c Catalog) CopyInfo(chapterID, copyID int64) (guildcampaign.CopyInfo, bool
 	if !known {
 		return guildcampaign.CopyInfo{}, false
 	}
-	info := guildcampaign.CopyInfo{CopyID: copy.CopyID, FightID: copy.FightID, Waves: map[int64][]guildcampaign.EnemyRow{}}
+	info := guildcampaign.CopyInfo{CopyID: copy.CopyID, FightID: copy.FightID, BossFight: copy.BossFight != 0, Waves: map[int64][]guildcampaign.EnemyRow{}}
 	for wave, enemies := range copy.Waves {
 		number := int64(0)
 		for index := 0; index < len(wave); index++ {

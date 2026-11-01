@@ -506,13 +506,21 @@
       "parser_version": "lua-generated-v18-guild-invite",
       "revision_id": "2ed041dba4e2f23428014f9746b465e1556c0612a20bc2197e02e37f8234bf25",
       "scope": "Exactly one named-scalar resource row for friend_medal (I9_GUILD_ACTIVITY_V1 C14 donor reward); every other payload byte-identical."
+    },
+    {
+      "ordinal": 69,
+      "stage": "I9-9C Guild Campaign",
+      "compiler_version": "i9-9c-guild-campaign",
+      "parser_version": "lua-generated-v18-guild-invite",
+      "revision_id": "414a5de9a6af42b55948fe77e40a25d764c6bb9b3d2cab14d8bb1a5b670d537b",
+      "scope": "Exactly one named-scalar resource row for team_dungeon_coin (I9_GUILD_CAMPAIGN_V1 rules 11, 14); every other payload byte-identical."
     }
   ],
   "current": {
-    "stage": "I9-9A Guild Tea Party",
-    "compiler_version": "i9-9a-guild-tea",
+    "stage": "I9-9C Guild Campaign",
+    "compiler_version": "i9-9c-guild-campaign",
     "parser_version": "lua-generated-v18-guild-invite",
-    "revision_id": "2ed041dba4e2f23428014f9746b465e1556c0612a20bc2197e02e37f8234bf25",
-    "scope": "Exactly one named-scalar resource row for friend_medal (I9_GUILD_ACTIVITY_V1 C14 donor reward); every other payload byte-identical."
+    "revision_id": "414a5de9a6af42b55948fe77e40a25d764c6bb9b3d2cab14d8bb1a5b670d537b",
+    "scope": "Exactly one named-scalar resource row for team_dungeon_coin (I9_GUILD_CAMPAIGN_V1 rules 11, 14); every other payload byte-identical."
   }
 }
