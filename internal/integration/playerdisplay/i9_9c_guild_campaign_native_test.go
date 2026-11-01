@@ -57,9 +57,10 @@ func newCampaignFixture(t *testing.T) campaignFixture {
 	f.settings = app.Settings{AttemptsPerChapterDay: policy.AttemptsPerChapterDay, PrepareSeconds: policy.PrepareSeconds,
 		BattleSeconds: policy.BattleSeconds, RestSecondsOfDay: policy.RestSecondsOfDay, ApplicationsPerDay: policy.ApplicationsPerDay,
 		BossRankFactor: policy.BossDamageRankFactor, RetentionDays: policy.GuildLogRetentionDays, RewardHurtRank: installed.RewardHurtRank,
-		RankThresholds: installed.RankThresholds, RankPercents: installed.RankPercents, DistRewardTime: installed.DistRewardTime,
+		DistRewardTime:      installed.DistRewardTime,
 		RewardParamPerMille: installed.RewardParamPerMile, RewardTimeLimitSecond: installed.RewardTimeLimit,
-		FirstRewardDiamond: installed.FirstRewardDiamond, FirstRewardCoin: installed.FirstRewardCoin}
+		RecordRewardCrystal: installed.FirstRewardDiamond, RecordRewardBadge: installed.FirstRewardCoin,
+		LastStrikeCoin: policy.LastStrikeCoin, MaxFightDamage: policy.MaxFightDamage}
 	f.tables = map[int64]app.ChapterInfo{}
 	for _, chapter := range installed.Chapters {
 		info, _ := catalog.ChapterInfo(chapter.ChapterID)

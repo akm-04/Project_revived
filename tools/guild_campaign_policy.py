@@ -76,6 +76,8 @@ def build(archive: Path) -> dict:
         'rest_seconds_of_day': campaign['rest_seconds_of_day'],
         'applications_per_day': campaign['applications_per_day'],
         'boss_damage_rank_multiplier': campaign['boss_damage_rank_multiplier'],
+        'last_strike_coin': campaign['last_strike_coin'],
+        'max_fight_damage': campaign['max_fight_damage'],
         'notice_mail': {
             'enabled': notice['enabled'],
             'open_title': notice['open_title'],

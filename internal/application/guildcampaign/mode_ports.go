@@ -24,7 +24,6 @@ import (
 var (
 	ErrUnavailable = errors.New("guild campaign unavailable")
 	ErrLate        = errors.New("guild campaign result past its window")
-	ErrDuplicate   = errors.New("guild campaign duplicate result")
 	ErrHolder      = errors.New("guild campaign copy held by another member")
 )
 
@@ -33,8 +32,8 @@ const (
 	goldResource        = "mana"
 	guildCoinResource   = "guild_coin"
 	dungeonCoinResource = "team_dungeon_coin"
-	goldSource          = "GUILD_CAMPAIGN_GOLD"
-	lastStrikeSource    = "GUILD_CAMPAIGN_LAST_STRIKE"
+	crystalResource     = "crystal"
+	duplicateResultCode = 30005
 	factKind            = "GUILD_ACTIVITY"
 	payoutSource        = "GUILD_CAMPAIGN_PAYOUT"
 	awardSource         = "GUILD_CAMPAIGN_AWARD"
@@ -50,13 +49,13 @@ type Settings struct {
 	BossRankFactor        int64
 	RetentionDays         int64
 	RewardHurtRank        []int64
-	RankThresholds        []int64
-	RankPercents          []int64
 	DistRewardTime        []int64
 	RewardParamPerMille   int64
 	RewardTimeLimitSecond int64
-	FirstRewardDiamond    int64
-	FirstRewardCoin       int64
+	RecordRewardCrystal   int64
+	RecordRewardBadge     int64
+	LastStrikeCoin        int64
+	MaxFightDamage        int64
 }
 
 func (s Settings) InRestWindow(secondsOfDay int64) bool {
@@ -103,6 +102,7 @@ type EnemyRow struct {
 	Health  int64 `json:"health"`
 	HP      int64 `json:"hp,omitempty"`
 	Reborn  int64 `json:"is_reborn,omitempty"`
+	Boss    int64 `json:"boss,omitempty"`
 }
 
 // GuildLogRow is one 609 log entry.
@@ -138,11 +138,10 @@ type Started struct {
 	Waves        map[int64][]EnemyRow
 }
 
-// Settled is the 610 answer; Duplicate carries a rebuilt full body with 30005.
+// Settled is the 610 answer; Duplicate replays the stored body with 30005.
 type Settled struct {
 	Body      map[string]any
 	Duplicate bool
-	Late      bool
 }
 
 // ModeStore is the guildcampaignstore surface this leaf adds.
@@ -153,12 +152,13 @@ type ModeStore interface {
 	SaveCopyTx(context.Context, tx.Tx, d.Copy) error
 	ListCopiesTx(context.Context, tx.Queryer, int64, int64) ([]CopyRow, error)
 	MemberClearsTx(context.Context, tx.Queryer, identity.PlayerID, int64, int64) (int64, error)
+	LockMemberDayTx(context.Context, tx.Tx, identity.PlayerID, int64, int64) (int64, error)
 	BumpMemberClearsTx(context.Context, tx.Tx, identity.PlayerID, int64, int64) error
-	DeleteOldMemberDaysTx(context.Context, tx.Tx, identity.PlayerID, int64, int64) error
 	SaveChapterProgressTx(context.Context, tx.Tx, int64, int64, int64, float64, bool, *time.Time) error
 	UpsertDamageTx(context.Context, tx.Tx, int64, int64, int64, int64, int64, time.Time) error
 	ListDamageTx(context.Context, tx.Queryer, int64, int64, int64, int) ([]DamageRow, error)
 	UpsertServerRecordTx(context.Context, tx.Tx, identity.LogicalServerID, int64, int64, int64, int64, []byte, time.Time) error
+	TopServerDamageTx(context.Context, tx.Queryer, identity.LogicalServerID, int64) (int64, error)
 	ListServerRecordsTx(context.Context, tx.Queryer, identity.LogicalServerID, int64, int) ([]ServerRecord, error)
 	ServerKillTx(context.Context, tx.Tx, identity.LogicalServerID, int64, int64, int64, time.Time, int64) (ServerKill, bool, error)
 	ServerKillReadTx(context.Context, tx.Queryer, identity.LogicalServerID, int64) (ServerKill, bool, error)

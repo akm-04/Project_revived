@@ -31,6 +31,8 @@ type Policy struct {
 	RestSecondsOfDay      [2]int64   `json:"rest_seconds_of_day"`
 	ApplicationsPerDay    int64      `json:"applications_per_day"`
 	BossDamageRankFactor  int64      `json:"boss_damage_rank_multiplier"`
+	LastStrikeCoin        int64      `json:"last_strike_coin"`
+	MaxFightDamage        int64      `json:"max_fight_damage"`
 	NoticeMail            NoticeMail `json:"notice_mail"`
 	GuildLogRetentionDays int64      `json:"guild_log_retention_days"`
 	SourceMiscSHA256      string     `json:"source_misc_sha256"`
@@ -63,7 +65,7 @@ func (p Policy) Validate() error {
 	if p.RestSecondsOfDay[0] < 0 || p.RestSecondsOfDay[0] >= p.RestSecondsOfDay[1] || p.RestSecondsOfDay[1] > 86400 {
 		return errors.New("guild campaign policy rest window")
 	}
-	if p.BossDamageRankFactor != 2 || p.GuildLogRetentionDays <= 0 || p.SourceMiscSHA256 == "" {
+	if p.BossDamageRankFactor != 2 || p.LastStrikeCoin < 0 || p.MaxFightDamage <= 0 || p.GuildLogRetentionDays <= 0 || p.SourceMiscSHA256 == "" {
 		return errors.New("guild campaign policy profile")
 	}
 	if p.NoticeMail.Enabled && (p.NoticeMail.OpenTitle == "" || p.NoticeMail.OpenBody == "" || p.NoticeMail.ResetTitle == "" || p.NoticeMail.ResetBody == "") {

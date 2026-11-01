@@ -34,13 +34,13 @@ func guildCampaignSettings(p guildcampaignpolicy.Policy, c guildcampaigncatalog.
 		BossRankFactor:        p.BossDamageRankFactor,
 		RetentionDays:         p.GuildLogRetentionDays,
 		RewardHurtRank:        c.RewardHurtRank,
-		RankThresholds:        c.RankThresholds,
-		RankPercents:          c.RankPercents,
 		DistRewardTime:        c.DistRewardTime,
 		RewardParamPerMille:   c.RewardParamPerMile,
 		RewardTimeLimitSecond: c.RewardTimeLimit,
-		FirstRewardDiamond:    c.FirstRewardDiamond,
-		FirstRewardCoin:       c.FirstRewardCoin,
+		RecordRewardCrystal:   c.FirstRewardDiamond,
+		RecordRewardBadge:     c.FirstRewardCoin,
+		LastStrikeCoin:        p.LastStrikeCoin,
+		MaxFightDamage:        p.MaxFightDamage,
 	}
 }
 

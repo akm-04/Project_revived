@@ -75,17 +75,19 @@ func (m Mode) ApplyReward(c context.Context, a identity.ActorContext, chapterID,
 	if !m.ready() || chapterID <= 0 || awardID <= 0 {
 		return AwardBody{}, ErrUnavailable
 	}
+	guildID, err := m.guildOf(c, a)
+	if err != nil {
+		return AwardBody{}, ErrUnavailable
+	}
 	var out AwardBody
-	_, err := m.Runner.Run(c, op, i5.DefaultProfile(), tx.Options{Isolation: tx.Serializable}, retry(), nil, func(c context.Context, sc tx.Scope) error {
+	_, err = m.Runner.Run(c, op, i5.DefaultProfile(), tx.Options{Isolation: tx.Serializable}, retry(), nil, func(c context.Context, sc tx.Scope) error {
 		at := op.StartedAt.UTC()
-		membership, joined, err := m.Service.Guilds.ReadMembership(c, a.PlayerID)
-		if err != nil {
+		if err := m.Fence.FenceActorTx(c, sc.Tx, a, at); err != nil {
 			return err
 		}
-		if !joined {
-			return ErrUnavailable
+		if _, err := m.Players.LockPlayerRootsTx(c, sc.Tx, a.LogicalServerID, []identity.PlayerID{a.PlayerID}); err != nil {
+			return err
 		}
-		guildID := int64(membership.GuildID)
 		chapter, open, err := m.Service.Store.LockChapterTx(c, sc.Tx, guildID, chapterID)
 		if err != nil {
 			return err

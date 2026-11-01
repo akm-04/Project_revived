@@ -24,12 +24,25 @@ import (
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
-// summaryPolicy is C8's versioned bound. The absolute damage ceiling is only a
-// sanity bound; settlement clamps against the frozen copy waves.
-//
-// shortcut: the attestation policy is family-wide, not per-copy, so the frozen
-// wave clamp runs in applyResult; a per-copy bound waits for a policy field.
-var summaryPolicy = cd.SummaryPolicy{ID: "GUILD_CAMPAIGN_SUMMARY_V1", Version: 1, MaxStar: 3, WinFromStar: true, MaxDamage: 1 << 60}
+// summaryPolicy is C8's versioned bound on one fight's reported damage. The
+// server holds no enemy maximum HP, so this ceiling is the only damage clamp.
+func (m Mode) summaryPolicy() cd.SummaryPolicy {
+	return cd.SummaryPolicy{ID: "GUILD_CAMPAIGN_SUMMARY_V1", Version: 1, MaxStar: 3, WinFromStar: true, MaxDamage: m.Settings.MaxFightDamage}
+}
+
+// guildOf reads the actor's guild before the transaction opens, so a settling
+// transaction never waits on a second pool connection; registration under the
+// transaction is what decides.
+func (m Mode) guildOf(c context.Context, a identity.ActorContext) (int64, error) {
+	membership, joined, err := m.Service.Guilds.ReadMembership(c, a.PlayerID)
+	if err != nil {
+		return 0, err
+	}
+	if !joined {
+		return 0, d.ErrRefused
+	}
+	return int64(membership.GuildID), nil
+}
 
 // Fight is the 604 request as the wire decoded it.
 type Fight struct {
@@ -154,9 +167,12 @@ func (m Mode) Claim(c context.Context, a identity.ActorContext, copyID int64, op
 	if !known {
 		return ClaimView{}, d.ErrRefused
 	}
+	guildID, err := m.guildOf(c, a)
+	if err != nil {
+		return ClaimView{}, err
+	}
 	var out ClaimView
-	var guildID int64
-	_, err := m.Runner.Run(c, op, i5.DefaultProfile(), tx.Options{Isolation: tx.Serializable}, retry(), nil, func(c context.Context, sc tx.Scope) error {
+	_, err = m.Runner.Run(c, op, i5.DefaultProfile(), tx.Options{Isolation: tx.Serializable}, retry(), nil, func(c context.Context, sc tx.Scope) error {
 		at := op.StartedAt.UTC()
 		if err := m.Fence.FenceActorTx(c, sc.Tx, a, at); err != nil {
 			return err
@@ -164,14 +180,6 @@ func (m Mode) Claim(c context.Context, a identity.ActorContext, copyID int64, op
 		if _, err := m.Players.LockPlayerRootsTx(c, sc.Tx, a.LogicalServerID, []identity.PlayerID{a.PlayerID}); err != nil {
 			return err
 		}
-		membership, joined, err := m.Service.Guilds.ReadMembership(c, a.PlayerID)
-		if err != nil {
-			return err
-		}
-		if !joined {
-			return d.ErrRefused
-		}
-		guildID = int64(membership.GuildID)
 		registered, err := m.ModeStore.IsRegisteredTx(c, sc.Tx, guildID, chapterID, a.PlayerID)
 		if err != nil {
 			return err
@@ -232,8 +240,11 @@ func (m Mode) Start(c context.Context, a identity.ActorContext, request Fight, o
 	if !known {
 		return Started{}, d.ErrRefused
 	}
+	guildID, err := m.guildOf(c, a)
+	if err != nil {
+		return Started{}, err
+	}
 	var out Started
-	var guildID int64
 	_, err = m.Runner.Run(c, op, i5.DefaultProfile(), tx.Options{Isolation: tx.Serializable}, retry(), nil, func(c context.Context, sc tx.Scope) error {
 		at := op.StartedAt.UTC()
 		if m.Settings.InRestWindow(secondsOfDay(at)) {
@@ -245,22 +256,13 @@ func (m Mode) Start(c context.Context, a identity.ActorContext, request Fight, o
 		if _, err := m.Players.LockPlayerRootsTx(c, sc.Tx, a.LogicalServerID, []identity.PlayerID{a.PlayerID}); err != nil {
 			return err
 		}
-		day := modes.Day(at)
-		clears, err := m.ModeStore.MemberClearsTx(c, sc.Tx, a.PlayerID, request.ChapterID, day)
+		clears, err := m.ModeStore.LockMemberDayTx(c, sc.Tx, a.PlayerID, request.ChapterID, modes.Day(at))
 		if err != nil {
 			return err
 		}
 		if clears >= m.Settings.AttemptsPerChapterDay {
 			return d.ErrRefused
 		}
-		membership, joined, err := m.Service.Guilds.ReadMembership(c, a.PlayerID)
-		if err != nil {
-			return err
-		}
-		if !joined {
-			return d.ErrRefused
-		}
-		guildID = int64(membership.GuildID)
 		registered, err := m.ModeStore.IsRegisteredTx(c, sc.Tx, guildID, request.ChapterID, a.PlayerID)
 		if err != nil {
 			return err
@@ -305,7 +307,11 @@ func (m Mode) Start(c context.Context, a identity.ActorContext, request Fight, o
 		if err := m.ModeStore.SaveCopyTx(c, sc.Tx, locked); err != nil {
 			return err
 		}
-		out = Started{CopyID: request.CopyID, CurrentIndex: currentIndex(locked), Waves: wavesOf(info)}
+		waves, err := decodeWaves(locked.Waves)
+		if err != nil {
+			return err
+		}
+		out = Started{CopyID: request.CopyID, CurrentIndex: currentIndex(locked), Waves: waves}
 		return nil
 	})
 	if err != nil {
@@ -343,14 +349,6 @@ func battleRequest(a identity.ActorContext, info CopyInfo, formation []int64, re
 	return battle
 }
 
-func wavesOf(info CopyInfo) map[int64][]EnemyRow {
-	out := map[int64][]EnemyRow{}
-	for wave := int64(1); wave <= 3; wave++ {
-		out[wave] = info.Waves[wave]
-	}
-	return out
-}
-
 // Settle is 610 (C1, C8, C9, C10, C11) in C2's order: member day 605, chapter
 // 606, copy 607, server records 608, Combat 609, payout mail 610, grants 700+,
 // then the fact.
@@ -370,8 +368,11 @@ func (m Mode) Settle(c context.Context, a identity.ActorContext, request Result,
 	if !known {
 		return Settled{}, d.ErrRefused
 	}
+	guildID, err := m.guildOf(c, a)
+	if err != nil {
+		return Settled{}, err
+	}
 	var out Settled
-	var guildID int64
 	_, err = m.Runner.Run(c, op, i5.DefaultProfile(), tx.Options{Isolation: tx.Serializable}, retry(), nil, func(c context.Context, sc tx.Scope) error {
 		at := op.StartedAt.UTC()
 		if err := m.Fence.FenceActorTx(c, sc.Tx, a, at); err != nil {
@@ -380,16 +381,9 @@ func (m Mode) Settle(c context.Context, a identity.ActorContext, request Result,
 		if _, err := m.Players.LockPlayerRootsTx(c, sc.Tx, a.LogicalServerID, []identity.PlayerID{a.PlayerID}); err != nil {
 			return err
 		}
-		membership, joined, err := m.Service.Guilds.ReadMembership(c, a.PlayerID)
-		if err != nil {
-			return err
-		}
-		if !joined {
-			return d.ErrRefused
-		}
-		guildID = int64(membership.GuildID)
 		day := modes.Day(at)
-		if _, err := m.ModeStore.MemberClearsTx(c, sc.Tx, a.PlayerID, request.ChapterID, day); err != nil {
+		clears, err := m.ModeStore.LockMemberDayTx(c, sc.Tx, a.PlayerID, request.ChapterID, day)
+		if err != nil {
 			return err
 		}
 		registered, err := m.ModeStore.IsRegisteredTx(c, sc.Tx, guildID, request.ChapterID, a.PlayerID)
@@ -403,7 +397,7 @@ func (m Mode) Settle(c context.Context, a identity.ActorContext, request Result,
 		if err != nil {
 			return err
 		}
-		if !open || chapter.Win {
+		if !open {
 			return ErrLate
 		}
 		copy, found, err := m.ModeStore.LockCopyTx(c, sc.Tx, guildID, request.ChapterID, request.CopyID)
@@ -413,23 +407,25 @@ func (m Mode) Settle(c context.Context, a identity.ActorContext, request Result,
 		if !found {
 			return ErrLate
 		}
-		if copy.HolderID == 0 && copy.AttemptGeneration != "" && (copy.Win || request.CurrentIndex < currentIndex(copy)) {
-			out = duplicateBody()
-			return nil
+		if isRetry(copy, a.PlayerID, request.CurrentIndex) {
+			out, err = replayBody(copy.SettledBody)
+			return err
 		}
-		if !holderLive(copy, m.Settings, at) || copy.HolderID != int64(a.PlayerID) || copy.HolderStage != d.StageFight {
+		if chapter.Win || !holderLive(copy, m.Settings, at) || copy.HolderID != int64(a.PlayerID) || copy.HolderStage != d.StageFight {
 			return ErrLate
+		}
+		if request.Star > 0 && clears >= m.Settings.AttemptsPerChapterDay {
+			return d.ErrRefused
 		}
 		summary := cd.Summary{Star: clampStar(request.Star), Win: request.Star > 0, Damage: maxDamage(request.TotalDamage), Alive: int64(len(nonZero(formation))),
 			Formation: formation, Pet: request.PetID, Enemies: summaryEnemies(request.Enemies)}
 		attested, err := m.Combat.AttestSummaryTx(c, sc.Tx, combat.SummaryRequest{Locator: locator(a), GenerationRef: generationRef(request.ChapterID, request.CopyID),
-			TerminalKind: combatKind, At: at, Policy: summaryPolicy, Summary: summary})
+			TerminalKind: combatKind, At: at, Policy: m.summaryPolicy(), Summary: summary})
 		if err != nil {
 			return err
 		}
 		if attested.Drained {
-			out = duplicateBody()
-			return nil
+			return ErrLate
 		}
 		if attested.Attempt.TerminalKind == cd.RejectedKind {
 			return d.ErrRefused
@@ -444,7 +440,7 @@ func (m Mode) Settle(c context.Context, a identity.ActorContext, request Result,
 	if err != nil {
 		return Settled{}, err
 	}
-	if m.Notifier != nil && !out.Duplicate && !out.Late {
+	if m.Notifier != nil && !out.Duplicate {
 		_ = m.Notifier.Notify(c, guildID, request.ChapterID, request.CopyID, a.PlayerID)
 	}
 	return out, nil
@@ -485,12 +481,20 @@ func summaryEnemies(enemies []ResultEnemy) []cd.EnemyStatus {
 	return out
 }
 
-func duplicateBody() Settled {
-	return Settled{Duplicate: true, Body: map[string]any{
-		"error_code":  int64(30005),
-		"rank_award":  map[string]any{"crystal": int64(0), "guild_coin": int64(0)},
-		"normal_drop": []any{}, "guild_drop": []any{}, "coin_award": int64(0), "exps": []any{},
-	}}
+// isRetry is C8's duplicate: the copy's last settled result is this member's at
+// this wave and nobody holds the copy since. A loss leaves the index unchanged,
+// so the settled index is compared rather than the current one.
+func isRetry(copy d.Copy, player identity.PlayerID, index int64) bool {
+	return copy.HolderID == 0 && copy.SettledBy == int64(player) && copy.SettledIndex == index
+}
+
+func replayBody(stored []byte) (Settled, error) {
+	body := map[string]any{}
+	if err := json.Unmarshal(stored, &body); err != nil {
+		return Settled{}, err
+	}
+	body["error_code"] = int64(duplicateResultCode)
+	return Settled{Duplicate: true, Body: body}, nil
 }
 
 func decodeWaves(raw []byte) (map[int64][]EnemyRow, error) {
@@ -517,8 +521,12 @@ func (m Mode) applyResult(c context.Context, t tx.Tx, a identity.ActorContext, o
 	}
 	cleared := request.Star > 0
 	index := currentIndex(copy)
-	waves, damage := clampWaves(waves, info, index, request.Enemies, cleared)
-	copy.Waves, _ = encodeWaves(waves)
+	damage := maxDamage(request.TotalDamage)
+	waves = clampWaves(waves, index, request.Enemies, cleared)
+	copy.Waves, err = encodeWaves(waves)
+	if err != nil {
+		return Settled{}, err
+	}
 	if cleared {
 		copy.CurrentIndex = index + 1
 		if copy.CurrentIndex > 3 {
@@ -534,23 +542,25 @@ func (m Mode) applyResult(c context.Context, t tx.Tx, a identity.ActorContext, o
 	copy.HolderStage = d.StageFree
 	copy.LastFightTime = &at
 	copy.StartFightTime = nil
+	copy.SettledBy = int64(a.PlayerID)
+	copy.SettledIndex = index
 	if err := m.ModeStore.SaveCopyTx(c, t, copy); err != nil {
 		return Settled{}, err
 	}
-	day := modes.Day(at)
 	if cleared {
-		if err := m.ModeStore.DeleteOldMemberDaysTx(c, t, a.PlayerID, request.ChapterID, day); err != nil {
-			return Settled{}, err
-		}
-		if err := m.ModeStore.BumpMemberClearsTx(c, t, a.PlayerID, request.ChapterID, day); err != nil {
+		if err := m.ModeStore.BumpMemberClearsTx(c, t, a.PlayerID, request.ChapterID, modes.Day(at)); err != nil {
 			return Settled{}, err
 		}
 	}
 	rankDamage := damage
-	if cleared && lastEnemyDead(waves[index]) {
+	if waveHasBoss(waves[index]) {
 		rankDamage = damage * m.Settings.BossRankFactor
 	}
 	if err := m.ModeStore.UpsertDamageTx(c, t, guildID, request.ChapterID, chapter.Run, int64(a.PlayerID), rankDamage, at); err != nil {
+		return Settled{}, err
+	}
+	serverRecord, err := m.ModeStore.TopServerDamageTx(c, t, a.LogicalServerID, request.CopyID)
+	if err != nil {
 		return Settled{}, err
 	}
 	if err := m.ModeStore.UpsertServerRecordTx(c, t, a.LogicalServerID, request.CopyID, int64(a.PlayerID), guildID, damage, []byte("[]"), at); err != nil {
@@ -562,43 +572,35 @@ func (m Mode) applyResult(c context.Context, t tx.Tx, a identity.ActorContext, o
 			return Settled{}, err
 		}
 	}
-	return m.finishCopy(c, t, a, op, guildID, chapter, chapterInfo, copy, info, damage, at)
+	return m.finishCopy(c, t, a, op, guildID, chapter, chapterInfo, copy, info, damage, damage > serverRecord, at)
 }
 
-// clampWaves applies the client's enemy HP to the current wave only. Cleared
-// waves keep their stored state, and a stored partial HP never rises.
-func clampWaves(waves map[int64][]EnemyRow, info CopyInfo, index int64, enemies []ResultEnemy, cleared bool) (map[int64][]EnemyRow, int64) {
-	damage := int64(0)
-	if len(waves) == 0 {
-		for wave := int64(1); wave <= 3; wave++ {
-			waves[wave] = append([]EnemyRow(nil), info.Waves[wave]...)
-		}
-	}
+// clampWaves applies the client's enemy HP to the current wave only. Each row
+// takes one reported enemy, a dead row stays dead, a known HP never rises, and
+// a hero id outside the wave is ignored.
+func clampWaves(waves map[int64][]EnemyRow, index int64, enemies []ResultEnemy, cleared bool) map[int64][]EnemyRow {
 	current := waves[index]
+	taken := make([]bool, len(current))
 	for _, enemy := range enemies {
 		if enemy.Index != index {
 			continue
 		}
-		if enemy.HP > 0 {
-			damage += enemy.HP
+		position := openRow(current, taken, enemy.HeroID)
+		if position < 0 {
+			continue
 		}
-		for position := range current {
-			if current[position].TableID != enemy.HeroID {
-				continue
-			}
-			hp := enemy.HP
-			if hp < 0 {
-				hp = 0
-			}
-			if current[position].HP > 0 && hp > current[position].HP {
-				hp = current[position].HP
-			}
-			current[position].HP = hp
-			current[position].Reborn = enemy.IsReborn
-			if hp == 0 {
-				current[position].Health = 1
-			}
-			break
+		taken[position] = true
+		if current[position].Health != 0 {
+			continue
+		}
+		hp := max(enemy.HP, 0)
+		if current[position].HP > 0 {
+			hp = min(hp, current[position].HP)
+		}
+		current[position].HP = hp
+		current[position].Reborn = enemy.IsReborn
+		if hp == 0 {
+			current[position].Health = 1
 		}
 	}
 	if cleared {
@@ -608,20 +610,35 @@ func clampWaves(waves map[int64][]EnemyRow, info CopyInfo, index int64, enemies 
 		}
 	}
 	waves[index] = current
-	return waves, damage
+	return waves
 }
 
-func lastEnemyDead(wave []EnemyRow) bool {
-	if len(wave) == 0 {
-		return false
+func openRow(rows []EnemyRow, taken []bool, tableID int64) int {
+	for position, row := range rows {
+		if row.TableID == tableID && !taken[position] {
+			return position
+		}
 	}
-	last := wave[len(wave)-1]
-	return last.Health != 0 || last.HP == 0
+	return -1
+}
+
+// waveHasBoss is rule 13's trigger.
+//
+// shortcut: the whole fight's damage counts double on a boss wave because the
+// server holds no enemy maximum HP to isolate the boss's share; upgrade if the
+// catalog ever carries HP.
+func waveHasBoss(wave []EnemyRow) bool {
+	for _, row := range wave {
+		if row.Boss != 0 {
+			return true
+		}
+	}
+	return false
 }
 
 // finishCopy writes the chapter progress, the clear payout and awards, and the
 // per-challenge grants and fact, in C2's remaining order.
-func (m Mode) finishCopy(c context.Context, t tx.Tx, a identity.ActorContext, op operation.Context, guildID int64, chapter d.Chapter, chapterInfo ChapterInfo, copy d.Copy, info CopyInfo, damage int64, at time.Time) (Settled, error) {
+func (m Mode) finishCopy(c context.Context, t tx.Tx, a identity.ActorContext, op operation.Context, guildID int64, chapter d.Chapter, chapterInfo ChapterInfo, copy d.Copy, info CopyInfo, damage int64, brokeRecord bool, at time.Time) (Settled, error) {
 	copies, err := m.ModeStore.ListCopiesTx(c, t, guildID, chapter.ChapterID)
 	if err != nil {
 		return Settled{}, err
@@ -671,8 +688,14 @@ func (m Mode) finishCopy(c context.Context, t tx.Tx, a identity.ActorContext, op
 	if gold > 0 {
 		lines = append(lines, grant.Line{Kind: grant.ScalarCurrency, ResourceKey: goldResource, Amount: gold})
 	}
-	if chapterWon && m.Settings.FirstRewardCoin > 0 {
-		lines = append(lines, grant.Line{Kind: grant.ScalarCurrency, ResourceKey: dungeonCoinResource, Amount: m.Settings.FirstRewardCoin})
+	if copy.Win && m.Settings.LastStrikeCoin > 0 {
+		lines = append(lines, grant.Line{Kind: grant.ScalarCurrency, ResourceKey: dungeonCoinResource, Amount: m.Settings.LastStrikeCoin})
+	}
+	recordCrystal, recordBadge := int64(0), int64(0)
+	if brokeRecord {
+		recordCrystal, recordBadge = m.Settings.RecordRewardCrystal, m.Settings.RecordRewardBadge
+		lines = append(lines, grant.Line{Kind: grant.ScalarCurrency, ResourceKey: crystalResource, Amount: recordCrystal},
+			grant.Line{Kind: grant.ScalarCurrency, ResourceKey: guildCoinResource, Amount: recordBadge})
 	}
 	timed, err := gen.NewTimedOperation(op, at)
 	if err != nil {
@@ -698,10 +721,18 @@ func (m Mode) finishCopy(c context.Context, t tx.Tx, a identity.ActorContext, op
 	if err := m.Facts.RecordTx(prepared, t, timed.Operation(), fact); err != nil {
 		return Settled{}, err
 	}
-	return Settled{Body: map[string]any{
-		"rank_award":  map[string]any{"crystal": int64(0), "guild_coin": int64(0)},
+	body := map[string]any{
+		"rank_award":  map[string]any{"crystal": recordCrystal, "guild_coin": recordBadge},
 		"normal_drop": []any{}, "guild_drop": []any{}, "coin_award": gold, "exps": []any{},
-	}}, nil
+	}
+	copy.SettledBody, err = json.Marshal(body)
+	if err != nil {
+		return Settled{}, err
+	}
+	if err := m.ModeStore.SaveCopyTx(c, t, copy); err != nil {
+		return Settled{}, err
+	}
+	return Settled{Body: body}, nil
 }
 
 func (m Mode) seedAwards(c context.Context, t tx.Tx, guildID, chapterID, run int64, chapterInfo ChapterInfo, copies int, at time.Time) error {

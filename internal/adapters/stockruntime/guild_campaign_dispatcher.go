@@ -3,6 +3,8 @@ package stockruntime
 import (
 	"context"
 	"errors"
+	"fmt"
+	"math"
 	"net/http"
 	"strconv"
 
@@ -229,11 +231,11 @@ func guildCampaignFight(p map[string]any) (guildcampaign.Fight, bool) {
 }
 
 func guildCampaignResult(p map[string]any) (guildcampaign.Result, bool) {
-	if !onlyStockGameplayParams(p, "total_damage", "star", "chapter_id", "copy_id", "current_index", "formation", "pet_id", "enemy_status") {
+	if !onlyStockGameplayParams(p, "total_damage", "star", "chapter_id", "copy_id", "current_index", "formation", "pet_id", "enemy_status", "rent_formation", "rent_player_id") {
 		return guildcampaign.Result{}, false
 	}
-	total, err := requiredInt64(p, "total_damage")
-	if err != nil || total < 0 {
+	total, ok := campaignAmount(p["total_damage"])
+	if !ok {
 		return guildcampaign.Result{}, false
 	}
 	star, err := requiredInt64(p, "star")
@@ -267,14 +269,25 @@ func guildCampaignResult(p map[string]any) (guildcampaign.Result, bool) {
 		if !ok {
 			return guildcampaign.Result{}, false
 		}
-		enemy := guildcampaign.ResultEnemy{HeroID: optionalInt64(fields, "hero_id"), HP: optionalInt64(fields, "hp"),
+		hp, ok := campaignAmount(fields["hp"])
+		enemy := guildcampaign.ResultEnemy{HeroID: optionalInt64(fields, "hero_id"), HP: hp,
 			IsReborn: optionalInt64(fields, "is_reborn"), Index: optionalInt64(fields, "index")}
-		if enemy.HeroID <= 0 {
+		if !ok || enemy.HeroID <= 0 {
 			return guildcampaign.Result{}, false
 		}
 		request.Enemies = append(request.Enemies, enemy)
 	}
 	return request, true
+}
+
+// campaignAmount reads a damage or HP the battle may report as a fraction,
+// which the stock client sums as Lua numbers.
+func campaignAmount(raw any) (int64, bool) {
+	value, err := strconv.ParseFloat(fmt.Sprint(raw), 64)
+	if err != nil || math.IsNaN(value) || math.IsInf(value, 0) || value < 0 || value > math.MaxInt64/2 {
+		return 0, false
+	}
+	return int64(value), true
 }
 
 func optionalInt64(m map[string]any, key string) int64 {
@@ -322,9 +335,12 @@ func copyList(rows []guildcampaign.CopyRowView) map[string]any {
 	return out
 }
 
-func enemyStatus(waves map[int64][]guildcampaign.EnemyRow) map[string]any {
-	out := map[string]any{}
-	for wave, enemies := range waves {
+// enemyStatus is an array by wave: the client indexes it with a number
+// (SelectTeamNewWindow.lua:6819, GuildMapDetailWindow.lua:30).
+func enemyStatus(waves map[int64][]guildcampaign.EnemyRow) []any {
+	out := make([]any, 0, len(waves))
+	for wave := int64(1); wave <= int64(len(waves)); wave++ {
+		enemies := waves[wave]
 		rows := make([]any, 0, len(enemies))
 		for _, enemy := range enemies {
 			row := map[string]any{"table_id": enemy.TableID, "lev": enemy.Lev, "star": enemy.Star, "color": enemy.Color, "health": enemy.Health}
@@ -336,7 +352,7 @@ func enemyStatus(waves map[int64][]guildcampaign.EnemyRow) map[string]any {
 			}
 			rows = append(rows, row)
 		}
-		out[strconv.FormatInt(wave, 10)] = rows
+		out = append(out, rows)
 	}
 	return out
 }

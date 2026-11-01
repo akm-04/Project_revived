@@ -35,28 +35,29 @@ func (Store) LockCopyTx(ctx context.Context, t tx.Tx, guildID, chapterID, copyID
 }
 
 func readCopy(ctx context.Context, q tx.Queryer, guildID, chapterID, copyID int64, lock bool) (d.Copy, bool, error) {
-	query := `SELECT run,waves::text,current_index,is_win,percent,COALESCE(holder_id,0),holder_stage,last_fight_time,start_fight_time,COALESCE(attempt_generation,'')
+	query := `SELECT run,waves::text,current_index,is_win,percent,COALESCE(holder_id,0),holder_stage,last_fight_time,start_fight_time,COALESCE(attempt_generation,''),COALESCE(settled_by,0),settled_index,COALESCE(settled_body::text,'')
 		FROM guild_campaign_copies WHERE guild_id=$1 AND chapter_id=$2 AND copy_id=$3`
 	if lock {
 		query += ` FOR UPDATE`
 	}
-	var waves string
+	var waves, settledBody string
 	copy := d.Copy{GuildID: guildID, ChapterID: chapterID, CopyID: copyID}
 	err := q.QueryRow(ctx, query, guildID, chapterID, copyID).
-		Scan(&copy.Run, &waves, &copy.CurrentIndex, &copy.Win, &copy.Percent, &copy.HolderID, &copy.HolderStage, &copy.LastFightTime, &copy.StartFightTime, &copy.AttemptGeneration)
+		Scan(&copy.Run, &waves, &copy.CurrentIndex, &copy.Win, &copy.Percent, &copy.HolderID, &copy.HolderStage, &copy.LastFightTime, &copy.StartFightTime, &copy.AttemptGeneration, &copy.SettledBy, &copy.SettledIndex, &settledBody)
 	if errors.Is(err, kernelstore.ErrNoRows) {
 		return d.Copy{}, false, nil
 	}
-	copy.Waves = []byte(waves)
+	copy.Waves, copy.SettledBody = []byte(waves), []byte(settledBody)
 	return copy, err == nil, err
 }
 
 func (Store) SaveCopyTx(ctx context.Context, t tx.Tx, copy d.Copy) error {
 	_, err := t.Exec(ctx, `UPDATE guild_campaign_copies SET waves=$4::jsonb,current_index=$5,is_win=$6,percent=$7,
-		holder_id=NULLIF($8,0),holder_stage=$9,last_fight_time=$10,start_fight_time=$11,attempt_generation=$12
+		holder_id=NULLIF($8,0),holder_stage=$9,last_fight_time=$10,start_fight_time=$11,attempt_generation=$12,
+		settled_by=NULLIF($13,0),settled_index=$14,settled_body=NULLIF($15,'')::jsonb
 		WHERE guild_id=$1 AND chapter_id=$2 AND copy_id=$3`,
 		copy.GuildID, copy.ChapterID, copy.CopyID, string(copy.Waves), copy.CurrentIndex, copy.Win, copy.Percent,
-		copy.HolderID, copy.HolderStage, copy.LastFightTime, copy.StartFightTime, copy.AttemptGeneration)
+		copy.HolderID, copy.HolderStage, copy.LastFightTime, copy.StartFightTime, copy.AttemptGeneration, copy.SettledBy, copy.SettledIndex, string(copy.SettledBody))
 	return err
 }
 
@@ -117,14 +118,23 @@ func (Store) MemberClearsTx(ctx context.Context, q tx.Queryer, player identity.P
 	return clears, err
 }
 
+// LockMemberDayTx takes the member's chapter day row at rank 605, creating it
+// and dropping the member's older days for that chapter.
+func (Store) LockMemberDayTx(ctx context.Context, t tx.Tx, player identity.PlayerID, chapterID, day int64) (int64, error) {
+	if _, err := t.Exec(ctx, `DELETE FROM guild_campaign_member_days WHERE player_id=$1 AND chapter_id=$2 AND game_day<$3`, int64(player), chapterID, day); err != nil {
+		return 0, err
+	}
+	if _, err := t.Exec(ctx, `INSERT INTO guild_campaign_member_days(player_id,chapter_id,game_day,clears) VALUES($1,$2,$3,0) ON CONFLICT DO NOTHING`, int64(player), chapterID, day); err != nil {
+		return 0, err
+	}
+	var clears int64
+	err := t.QueryRow(ctx, `SELECT clears FROM guild_campaign_member_days WHERE player_id=$1 AND chapter_id=$2 AND game_day=$3 FOR UPDATE`, int64(player), chapterID, day).Scan(&clears)
+	return clears, err
+}
+
 func (Store) BumpMemberClearsTx(ctx context.Context, t tx.Tx, player identity.PlayerID, chapterID, day int64) error {
 	_, err := t.Exec(ctx, `INSERT INTO guild_campaign_member_days(player_id,chapter_id,game_day,clears) VALUES($1,$2,$3,1)
 		ON CONFLICT(player_id,chapter_id,game_day) DO UPDATE SET clears=guild_campaign_member_days.clears+1`, int64(player), chapterID, day)
-	return err
-}
-
-func (Store) DeleteOldMemberDaysTx(ctx context.Context, t tx.Tx, player identity.PlayerID, chapterID, day int64) error {
-	_, err := t.Exec(ctx, `DELETE FROM guild_campaign_member_days WHERE player_id=$1 AND chapter_id=$2 AND game_day<$3`, int64(player), chapterID, day)
 	return err
 }
 
@@ -171,6 +181,13 @@ func (Store) UpsertServerRecordTx(ctx context.Context, t tx.Tx, server identity.
 		partners=EXCLUDED.partners,guild_id=EXCLUDED.guild_id,hit_at=EXCLUDED.hit_at WHERE EXCLUDED.damage>guild_campaign_server_records.damage`,
 		int64(server), copyID, player, guildID, damage, string(partners), at)
 	return err
+}
+
+// TopServerDamageTx is the copy's all-server record before this fight's upsert.
+func (Store) TopServerDamageTx(ctx context.Context, q tx.Queryer, server identity.LogicalServerID, copyID int64) (int64, error) {
+	var damage int64
+	err := q.QueryRow(ctx, `SELECT COALESCE(MAX(damage),0) FROM guild_campaign_server_records WHERE logical_server_id=$1 AND copy_id=$2`, int64(server), copyID).Scan(&damage)
+	return damage, err
 }
 
 func (Store) ListServerRecordsTx(ctx context.Context, q tx.Queryer, server identity.LogicalServerID, copyID int64, limit int) ([]app.ServerRecord, error) {

@@ -39,6 +39,9 @@ CREATE TABLE guild_campaign_copies (
  last_fight_time timestamptz,
  start_fight_time timestamptz,
  attempt_generation text,
+ settled_by bigint,
+ settled_index bigint NOT NULL DEFAULT 0,
+ settled_body jsonb,
  PRIMARY KEY(guild_id, chapter_id, copy_id),
  FOREIGN KEY(guild_id, chapter_id) REFERENCES guild_campaign_chapters(guild_id, chapter_id) ON DELETE CASCADE
 );

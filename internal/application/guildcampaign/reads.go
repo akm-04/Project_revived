@@ -135,7 +135,7 @@ func (m Mode) lists(c context.Context, a identity.ActorContext, op operation.Con
 			}
 			row := ChapterRow{ChapterID: info.ChapterID, OpenCost: info.OpenCost, ChapterVersion: 1}
 			if open {
-				row.IsOpen = !chapter.Win
+				row.IsOpen = true
 				row.IsWin = chapter.Win
 				row.HaveWin = chapter.Win
 				row.Percent = chapter.Percent

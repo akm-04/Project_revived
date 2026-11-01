@@ -45,7 +45,7 @@ func (p Payout) PayRunTx(c context.Context, t tx.Tx, chapter d.Chapter, register
 	for index, row := range rows {
 		rank[identity.PlayerID(row.PlayerID)] = index + 1
 	}
-	withinLimit := chapter.Win && chapter.EndTime != nil && at.Sub(chapter.StartTime) <= time.Duration(p.Settings.RewardTimeLimitSecond)*time.Second
+	withinLimit := chapter.Win && chapter.EndTime != nil && chapter.EndTime.Sub(chapter.StartTime) <= time.Duration(p.Settings.RewardTimeLimitSecond)*time.Second
 	for _, member := range registered {
 		lines := p.lines(info, chapter, rank[member], withinLimit)
 		if len(lines) == 0 {
@@ -82,7 +82,7 @@ func (p Payout) lines(info ChapterInfo, chapter d.Chapter, rank int, withinLimit
 		badge += info.AdditionReward
 	}
 	if chapter.Win && rank > 0 && rank <= len(p.Settings.RewardHurtRank) {
-		badge += p.Settings.RewardHurtRank[rank-1]
+		coin += p.Settings.RewardHurtRank[rank-1]
 	}
 	lines := []grant.Line{}
 	if coin > 0 {
