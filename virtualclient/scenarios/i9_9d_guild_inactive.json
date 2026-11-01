@@ -1,0 +1,16 @@
+{
+  "name": "i9_9d_guild_inactive",
+  "steps": [
+    "wait:5",
+    "lua:local g=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_GUILD) g:loadGuildWarRedPointInfo(function(code) __vc_1152=code if code~=xyd.error.OK then error('vc-war-1152-'..tostring(code)) end if g.isEnrollWar~=false then error('vc-war-1152-enroll') end end)",
+    "wait:3",
+    "lua:if __vc_1152==nil then error('vc-war-1152-no-reply') end",
+    "lua:local backend=xyd.Backend.get() for _,mid in ipairs({xyd.mid.LOAD_DRINK_INFO,xyd.mid.GUILD_WAR_INFO}) do backend:request(mid,{},function(code) __vc_inactive=(__vc_inactive or 0)+1 end) end",
+    "wait:3",
+    "lua:if __vc_inactive~=2 then error('vc-war-inactive-'..tostring(__vc_inactive)) end"
+  ],
+  "settle_seconds": 10,
+  "expect_ok": [1152],
+  "expect_lua_errors": [],
+  "note": "D403 and D404: the clock-fired red point stays live with the MID1 value; Drink and Guild War reach the inactive dispatcher."
+}

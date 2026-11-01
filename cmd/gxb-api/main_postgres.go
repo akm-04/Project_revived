@@ -658,6 +658,7 @@ func main() {
 	for _, mid := range stockruntime.GuildTeaMIDs {
 		mustRegister(mid, teaD)
 	}
+	mustRegister(stockruntime.GuildWarRedPointMID, stockruntime.GuildWarRedPointDispatcher{Authority: authority})
 	rentalD := stockruntime.GuildRentalDispatcher{Authority: authority, Service: rentalRuntime}
 	for _, mid := range stockruntime.GuildRentalMIDs {
 		mustRegister(mid, rentalD)

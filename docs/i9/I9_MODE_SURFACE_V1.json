@@ -20,9 +20,9 @@
  "counts": {
   "by_disposition": {
    "DELIVERED": 185,
-   "ACTIVE": 433,
+   "ACTIVE": 415,
    "LATER": 503,
-   "INACTIVE_SUPERSEDED": 41,
+   "INACTIVE_SUPERSEDED": 59,
    "INACTIVE_D79": 21
   },
   "active_by_stage": {
@@ -34,7 +34,7 @@
    "I9-7": 42,
    "I9-5": 24,
    "I9-8": 71,
-   "I9-9": 46,
+   "I9-9": 28,
    "I9-6": 30
   }
  },
@@ -2360,28 +2360,34 @@
    "mid": 590,
    "name": "LOAD_DRINK_INFO",
    "family": "GUILD_DRINK_TEA",
-   "disposition": "ACTIVE",
+   "disposition": "INACTIVE_SUPERSEDED",
    "target": "I9-9",
-   "v2": "unimplemented",
-   "v1": "LITERAL_STUB"
+   "v2": "INACTIVE_SUPERSEDED",
+   "v1": "LITERAL_STUB",
+   "decision": "D403",
+   "note": "Afternoon Tea: drink_self, drink_others and exchange_drink open only from team_tea, which has no opener in the selected client; the guild screen's button opens Tea Party. Reopen only if the user chooses a client path."
   },
   {
    "mid": 591,
    "name": "BUY_DRINK",
    "family": "GUILD_DRINK_TEA",
-   "disposition": "ACTIVE",
+   "disposition": "INACTIVE_SUPERSEDED",
    "target": "I9-9",
-   "v2": "unimplemented",
-   "v1": "STATE_BACKED"
+   "v2": "INACTIVE_SUPERSEDED",
+   "v1": "STATE_BACKED",
+   "decision": "D403",
+   "note": "Afternoon Tea: drink_self, drink_others and exchange_drink open only from team_tea, which has no opener in the selected client; the guild screen's button opens Tea Party. Reopen only if the user chooses a client path."
   },
   {
    "mid": 592,
    "name": "DO_DRINK",
    "family": "GUILD_DRINK_TEA",
-   "disposition": "ACTIVE",
+   "disposition": "INACTIVE_SUPERSEDED",
    "target": "I9-9",
-   "v2": "unimplemented",
-   "v1": "STATE_BACKED"
+   "v2": "INACTIVE_SUPERSEDED",
+   "v1": "STATE_BACKED",
+   "decision": "D403",
+   "note": "Afternoon Tea: drink_self, drink_others and exchange_drink open only from team_tea, which has no opener in the selected client; the guild screen's button opens Tea Party. Reopen only if the user chooses a client path."
   },
   {
    "mid": 593,
@@ -2414,10 +2420,12 @@
    "mid": 596,
    "name": "LOAD_ALL_TEAM_HEROS",
    "family": "GUILD_RENTAL",
-   "disposition": "ACTIVE",
+   "disposition": "INACTIVE_SUPERSEDED",
    "target": "I9-9",
-   "v2": "unimplemented",
-   "v1": null
+   "v2": "INACTIVE_SUPERSEDED",
+   "v1": null,
+   "decision": "D404",
+   "note": "No client sender in the selected client."
   },
   {
    "mid": 598,
@@ -2585,10 +2593,12 @@
    "mid": 617,
    "name": "EXCHANGE_DRINK",
    "family": "GUILD_DRINK_TEA",
-   "disposition": "ACTIVE",
+   "disposition": "INACTIVE_SUPERSEDED",
    "target": "I9-9",
-   "v2": "unimplemented",
-   "v1": "STATE_BACKED"
+   "v2": "INACTIVE_SUPERSEDED",
+   "v1": "STATE_BACKED",
+   "decision": "D403",
+   "note": "Afternoon Tea: drink_self, drink_others and exchange_drink open only from team_tea, which has no opener in the selected client; the guild screen's button opens Tea Party. Reopen only if the user chooses a client path."
   },
   {
    "mid": 618,
@@ -2630,10 +2640,12 @@
    "mid": 622,
    "name": "RENT_MEMBERS_PET",
    "family": "GUILD_RENTAL",
-   "disposition": "ACTIVE",
+   "disposition": "INACTIVE_SUPERSEDED",
    "target": "I9-9",
-   "v2": "unimplemented",
-   "v1": null
+   "v2": "INACTIVE_SUPERSEDED",
+   "v1": null,
+   "decision": "D404",
+   "note": "No client sender in the selected client."
   },
   {
    "mid": 623,
@@ -3923,91 +3935,111 @@
    "mid": 1136,
    "name": "GUILD_WAR_INFO",
    "family": "GUILD_WAR",
-   "disposition": "ACTIVE",
+   "disposition": "INACTIVE_SUPERSEDED",
    "target": "I9-9",
-   "v2": "unimplemented",
-   "v1": null
+   "v2": "INACTIVE_SUPERSEDED",
+   "v1": null,
+   "decision": "D404",
+   "note": "Guild War: the client hides the entry (TeamWindow.lua:357-380); closed by the user, last feature if ever built. 1152 stays live."
   },
   {
    "mid": 1137,
    "name": "GUILD_WAR_ENROLL",
    "family": "GUILD_WAR",
-   "disposition": "ACTIVE",
+   "disposition": "INACTIVE_SUPERSEDED",
    "target": "I9-9",
-   "v2": "unimplemented",
-   "v1": null
+   "v2": "INACTIVE_SUPERSEDED",
+   "v1": null,
+   "decision": "D404",
+   "note": "Guild War: the client hides the entry (TeamWindow.lua:357-380); closed by the user, last feature if ever built. 1152 stays live."
   },
   {
    "mid": 1138,
    "name": "GUILD_WAR_ADD_TEAM",
    "family": "GUILD_WAR",
-   "disposition": "ACTIVE",
+   "disposition": "INACTIVE_SUPERSEDED",
    "target": "I9-9",
-   "v2": "unimplemented",
-   "v1": null
+   "v2": "INACTIVE_SUPERSEDED",
+   "v1": null,
+   "decision": "D404",
+   "note": "Guild War: the client hides the entry (TeamWindow.lua:357-380); closed by the user, last feature if ever built. 1152 stays live."
   },
   {
    "mid": 1139,
    "name": "GUILD_WAR_NOTICE",
    "family": "GUILD_WAR",
-   "disposition": "ACTIVE",
+   "disposition": "INACTIVE_SUPERSEDED",
    "target": "I9-9",
-   "v2": "unimplemented",
-   "v1": null
+   "v2": "INACTIVE_SUPERSEDED",
+   "v1": null,
+   "decision": "D404",
+   "note": "Guild War: the client hides the entry (TeamWindow.lua:357-380); closed by the user, last feature if ever built. 1152 stays live."
   },
   {
    "mid": 1140,
    "name": "GUILD_WAR_FIGHT_LIST",
    "family": "GUILD_WAR",
-   "disposition": "ACTIVE",
+   "disposition": "INACTIVE_SUPERSEDED",
    "target": "I9-9",
-   "v2": "unimplemented",
-   "v1": null
+   "v2": "INACTIVE_SUPERSEDED",
+   "v1": null,
+   "decision": "D404",
+   "note": "Guild War: the client hides the entry (TeamWindow.lua:357-380); closed by the user, last feature if ever built. 1152 stays live."
   },
   {
    "mid": 1141,
    "name": "GUILD_WAR_CHANGE_PATH",
    "family": "GUILD_WAR",
-   "disposition": "ACTIVE",
+   "disposition": "INACTIVE_SUPERSEDED",
    "target": "I9-9",
-   "v2": "unimplemented",
-   "v1": null
+   "v2": "INACTIVE_SUPERSEDED",
+   "v1": null,
+   "decision": "D404",
+   "note": "Guild War: the client hides the entry (TeamWindow.lua:357-380); closed by the user, last feature if ever built. 1152 stays live."
   },
   {
    "mid": 1142,
    "name": "GUILD_WAR_LOAD_PATH",
    "family": "GUILD_WAR",
-   "disposition": "ACTIVE",
+   "disposition": "INACTIVE_SUPERSEDED",
    "target": "I9-9",
-   "v2": "unimplemented",
-   "v1": null
+   "v2": "INACTIVE_SUPERSEDED",
+   "v1": null,
+   "decision": "D404",
+   "note": "Guild War: the client hides the entry (TeamWindow.lua:357-380); closed by the user, last feature if ever built. 1152 stays live."
   },
   {
    "mid": 1143,
    "name": "GUILD_WAR_LOAD_TROOP",
    "family": "GUILD_WAR",
-   "disposition": "ACTIVE",
+   "disposition": "INACTIVE_SUPERSEDED",
    "target": "I9-9",
-   "v2": "unimplemented",
-   "v1": null
+   "v2": "INACTIVE_SUPERSEDED",
+   "v1": null,
+   "decision": "D404",
+   "note": "Guild War: the client hides the entry (TeamWindow.lua:357-380); closed by the user, last feature if ever built. 1152 stays live."
   },
   {
    "mid": 1144,
    "name": "GUILD_WAR_REPLAY",
    "family": "GUILD_WAR",
-   "disposition": "ACTIVE",
+   "disposition": "INACTIVE_SUPERSEDED",
    "target": "I9-9",
-   "v2": "unimplemented",
-   "v1": null
+   "v2": "INACTIVE_SUPERSEDED",
+   "v1": null,
+   "decision": "D404",
+   "note": "Guild War: the client hides the entry (TeamWindow.lua:357-380); closed by the user, last feature if ever built. 1152 stays live."
   },
   {
    "mid": 1145,
    "name": "GUILD_WAR_RANK",
    "family": "GUILD_WAR",
-   "disposition": "ACTIVE",
+   "disposition": "INACTIVE_SUPERSEDED",
    "target": "I9-9",
-   "v2": "unimplemented",
-   "v1": null
+   "v2": "INACTIVE_SUPERSEDED",
+   "v1": null,
+   "decision": "D404",
+   "note": "Guild War: the client hides the entry (TeamWindow.lua:357-380); closed by the user, last feature if ever built. 1152 stays live."
   },
   {
    "mid": 1152,
@@ -4015,26 +4047,32 @@
    "family": "GUILD_WAR",
    "disposition": "ACTIVE",
    "target": "I9-9",
-   "v2": "unimplemented",
-   "v1": "STATE_BACKED"
+   "v2": "implemented",
+   "v1": "STATE_BACKED",
+   "decision": "D404",
+   "note": "Answers {is_enroll:false}, the MID1 value, because the client fires it on a clock (ServerTime.lua:151)."
   },
   {
    "mid": 1153,
    "name": "GUILD_WAR_UPDATE_FORCE",
    "family": "GUILD_WAR",
-   "disposition": "ACTIVE",
+   "disposition": "INACTIVE_SUPERSEDED",
    "target": "I9-9",
-   "v2": "unimplemented",
-   "v1": null
+   "v2": "INACTIVE_SUPERSEDED",
+   "v1": null,
+   "decision": "D404",
+   "note": "Guild War: the client hides the entry (TeamWindow.lua:357-380); closed by the user, last feature if ever built. 1152 stays live."
   },
   {
    "mid": 1154,
    "name": "GUILD_WAR_ADD_BUFF",
    "family": "GUILD_WAR",
-   "disposition": "ACTIVE",
+   "disposition": "INACTIVE_SUPERSEDED",
    "target": "I9-9",
-   "v2": "unimplemented",
-   "v1": null
+   "v2": "INACTIVE_SUPERSEDED",
+   "v1": null,
+   "decision": "D404",
+   "note": "Guild War: the client hides the entry (TeamWindow.lua:357-380); closed by the user, last feature if ever built. 1152 stays live."
   },
   {
    "mid": 1168,
