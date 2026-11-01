@@ -411,6 +411,8 @@ func (run run) step(virtual *client.Client, step string) error {
 			return provision.GuildRentalLenderFixture(context.Background(), run.databaseURL, run.account, run.peerAccount)
 		case "guild_campaign_activity":
 			return provision.GuildCampaignFixture(context.Background(), run.databaseURL, run.account)
+		case "guild_campaign_last_wave":
+			return provision.GuildCampaignLastWaveFixture(context.Background(), run.databaseURL, run.account)
 		}
 		return fmt.Errorf("unknown fixture %q", argument)
 	case "wait":
