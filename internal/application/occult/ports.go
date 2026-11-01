@@ -12,6 +12,7 @@ import (
 	"gxb.local/backend/v2/internal/application/i5"
 	"gxb.local/backend/v2/internal/application/playerdirectory"
 	"gxb.local/backend/v2/internal/application/playerroot"
+	"gxb.local/backend/v2/internal/application/roominvite"
 	"gxb.local/backend/v2/internal/application/sharedroom"
 	cd "gxb.local/backend/v2/internal/domain/combat"
 	"gxb.local/backend/v2/internal/domain/grant"
@@ -111,6 +112,7 @@ type Mode struct {
 	Pets        Heroes
 	Rooms       sharedroom.Service
 	RoomStore   sharedroom.Store
+	Invites     roominvite.Materializer
 	Combat      Combat
 	Tickets     i5.OccultTicketPort
 	Values      Values

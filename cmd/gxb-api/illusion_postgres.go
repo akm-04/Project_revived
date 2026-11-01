@@ -19,15 +19,16 @@ import (
 	gen "gxb.local/backend/v2/internal/application/generation"
 	appi5 "gxb.local/backend/v2/internal/application/i5"
 	"gxb.local/backend/v2/internal/application/illusion"
+	"gxb.local/backend/v2/internal/application/roominvite"
 	appsharedroom "gxb.local/backend/v2/internal/application/sharedroom"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
-func canonicalIllusion(p *pg.Pool, r tx.Runner, content contentstore.Store, values i5store.Store, owner appi5.Service, privileges appi5.PrivilegeSnapshotProvider, fight combat.Service, guilds guildstore.Store, rooms appsharedroom.Service) illusion.Mode {
+func canonicalIllusion(p *pg.Pool, r tx.Runner, content contentstore.Store, values i5store.Store, owner appi5.Service, privileges appi5.PrivilegeSnapshotProvider, fight combat.Service, guilds guildstore.Store, rooms appsharedroom.Service, invites roominvite.Materializer) illusion.Mode {
 	return illusion.Mode{Timed: gen.TimedRunner{Binder: gen.Binder{Time: pg.AuthoritativeTime{Queryer: p}}, Runner: r}, Fresh: p, Store: illusionstore.Store{}, Content: content,
 		Fence: values, Players: i4store.PlayerRootLocker{}, Functions: values, Directory: i4store.PlayerDirectoryReader{}, Heroes: fight.Inputs.Heroes,
-		Pets: fight.Inputs.Pets, Stats: fight.Inputs.Stats, Rooms: rooms, RoomStore: sharedroomstore.Store{},
+		Pets: fight.Inputs.Pets, Stats: fight.Inputs.Stats, Rooms: rooms, RoomStore: sharedroomstore.Store{}, Invites: invites,
 		Combat: fight, Privileges: privileges, Costs: appi5.MaterialCostDebiter{Store: values, Content: content},
 		Facts: appi5.ObjectiveFacts{Owner: owner, Open: values, Observer: appadventure.Observer{Store: adventurestore.Store{}, Wake: adventureWakeup{}}}, Guilds: illusionGuilds{Store: guilds}, Mail: appi5.SettlementMail{Store: values},
 		Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}}

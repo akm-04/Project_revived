@@ -29,7 +29,6 @@ type RoomNotice struct {
 	Seated   []PlayerBody
 	Removed  []PlayerBody
 	Pushes   []RoomPush
-	Invites  []PlayerBody
 }
 
 // ReadRoomNotice reads a room for the realtime route; it never writes.
@@ -55,10 +54,6 @@ func (s Mode) ReadRoomNotice(c context.Context, reference string) (RoomNotice, b
 		out.Seated = seated
 	}
 	out.Removed, err = s.removedBodies(c, room, state)
-	if err != nil {
-		return RoomNotice{}, false, err
-	}
-	out.Invites, err = s.inviteBodies(c, room, state)
 	if err != nil {
 		return RoomNotice{}, false, err
 	}
@@ -95,24 +90,6 @@ func (s Mode) roomChangeBody(c context.Context, room sharedroom.Room, state d.Ro
 	}
 	return map[string]any{"room_id": room.ID, "room_type": state.RoomType, "room_info": info,
 		"self_info": map[string]any{"room_id": room.ID}}, nil
-}
-
-// inviteBodies are the owner's recorded invites, delivered once per invitee as
-// the stock friend notices 8 and 9.
-func (s Mode) inviteBodies(c context.Context, room sharedroom.Room, state d.RoomState) ([]PlayerBody, error) {
-	if room.Status != sharedroom.StatusOpen || len(state.Invites) == 0 {
-		return nil, nil
-	}
-	info, err := s.memberInfo(c, s.Fresh, room.Owner)
-	if err != nil {
-		return nil, err
-	}
-	bodies := make([]PlayerBody, 0, len(state.Invites))
-	for _, invitee := range state.Invites {
-		bodies = append(bodies, PlayerBody{Player: identity.PlayerID(invitee), Body: map[string]any{
-			"notice_id": room.ID, "room_id": room.ID, "player_info": info}})
-	}
-	return bodies, nil
 }
 
 // removedBodies are the room_id 0 changes of seats that no longer sit here. A

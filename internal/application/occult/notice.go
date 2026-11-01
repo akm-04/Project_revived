@@ -4,7 +4,6 @@ import (
 	"context"
 	"strconv"
 
-	"gxb.local/backend/v2/internal/application/playerdirectory"
 	"gxb.local/backend/v2/internal/application/sharedroom"
 	"gxb.local/backend/v2/internal/domain/identity"
 	d "gxb.local/backend/v2/internal/domain/occult"
@@ -21,13 +20,12 @@ type PlayerBody struct {
 }
 
 // RoomNotice is the canonical room a wakeup projects: each seated member's
-// ROOM_CHANGE, the departures and invites that are delivered once, the run's
-// applied events and the members' map positions.
+// ROOM_CHANGE, the departures that are delivered once, the run's applied events
+// and the members' map positions.
 type RoomNotice struct {
 	RoomID    int64
 	Seated    []PlayerBody
 	Removed   []PlayerBody
-	Invites   []PlayerBody
 	Events    []d.EventRecord
 	Pushes    []RoomPush
 	Positions map[identity.PlayerID]int64
@@ -93,10 +91,6 @@ func (r NoticeReader) ReadRoomNotice(c context.Context, reference string) (RoomN
 	if err != nil {
 		return RoomNotice{}, false, err
 	}
-	out.Invites, err = r.inviteBodies(c, view)
-	if err != nil {
-		return RoomNotice{}, false, err
-	}
 	return out, true, nil
 }
 
@@ -135,28 +129,6 @@ func (r NoticeReader) removedBodies(c context.Context, view *roomView) ([]Player
 		bodies = append(bodies, PlayerBody{Player: seat.Player, Body: body})
 	}
 	return bodies, nil
-}
-
-func (r NoticeReader) inviteBodies(c context.Context, view *roomView) ([]PlayerBody, error) {
-	if view.room.Status != domainroom.StatusOpen || len(view.state.Invites) == 0 {
-		return nil, nil
-	}
-	owner, found, err := r.Directory.ProfileTx(c, r.Queryer, view.room.Owner)
-	if err != nil || !found {
-		return nil, err
-	}
-	var bodies []PlayerBody
-	for _, invitee := range view.state.Invites {
-		bodies = append(bodies, PlayerBody{Player: identity.PlayerID(invitee), Body: inviteParams(view, owner)})
-	}
-	return bodies, nil
-}
-
-// inviteParams is the friend notice type 7 payload; room_id is added because the
-// join request needs it.
-// shortcut: force is 0 because the player directory carries no battle power.
-func inviteParams(view *roomView, owner playerdirectory.Profile) map[string]any {
-	return map[string]any{"room_id": view.room.ID, "chapter_id": view.state.ChapterID, "force": int64(0), "player_info": playerInfo(owner, false)}
 }
 
 func (r NoticeReader) roomChange(c context.Context, player identity.PlayerID, catalog d.Catalog, view *roomView) (map[string]any, error) {

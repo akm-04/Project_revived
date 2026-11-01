@@ -258,6 +258,10 @@ func (s Service) completeClaim(c context.Context, q tx.Queryer, v ClaimOperation
 			if _, e = s.Invites.ReadImmutableInviteNoticeTx(c, q, n); e != nil {
 				return Result{}, false, e
 			}
+		} else if socialinbox.RoomInviteFamily(n.Source) {
+			if socialinbox.ValidateRoomInviteLifecycle(n) != nil {
+				return Result{}, false, ErrConflict
+			}
 		} else if !socialinbox.RelationFamily(n.Source) || socialinbox.ValidateRelationLifecycle(n) != nil {
 			return Result{}, false, ErrConflict
 		}
@@ -516,6 +520,14 @@ func (s Service) Claim(c context.Context, actor identity.ActorContext, input []s
 				}
 				if _, e = s.Invites.ReadImmutableInviteNoticeTx(c, sc.Tx, n); e != nil {
 					return e
+				}
+				if n.Active && socialinbox.PreflightConsumption(n, at) != nil {
+					return ErrClock
+				}
+				notices[id] = n
+			case socialinbox.RoomInviteFamily(n.Source):
+				if socialinbox.ValidateRoomInviteLifecycle(n) != nil {
+					return ErrConflict
 				}
 				if n.Active && socialinbox.PreflightConsumption(n, at) != nil {
 					return ErrClock

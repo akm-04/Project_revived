@@ -133,6 +133,7 @@ var familyNoticeRoutes = []string{
 	"realtimewakeup.Registration{Route: appoccult.RoomNoticeRoute, Handler: occultRooms}",
 	"realtimewakeup.Registration{Route: appadventure.NoticeRoute, Handler: adventureNotices}",
 	"realtimewakeup.Registration{Route: appadventure.RoomNoticeRoute, Handler: adventureRooms}",
+	"realtimewakeup.Registration{Route: roominvite.NoticeListRoute, Handler: roomInviteNotices}",
 }
 
 var familyNoticeSchemas = map[string]bool{

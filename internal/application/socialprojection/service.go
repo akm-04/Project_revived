@@ -223,7 +223,7 @@ func (s Service) loadTx(c context.Context, t tx.Tx, a identity.ActorContext, k L
 		return Result{}, ErrInvalidRead
 	}
 	for i, n := range notices {
-		if !n.NoticeID.WireSafe() || n.Validate() != nil || (n.Source.Kind != socialinbox.GiftSourceKind && !socialinbox.InviteFamily(n.Source) && socialinbox.ValidateRelationDescriptor(n) != nil) || n.RecipientPlayerID != a.PlayerID || !n.Active || !n.RelatedPlayerID.Valid() {
+		if !n.NoticeID.WireSafe() || n.Validate() != nil || (n.Source.Kind != socialinbox.GiftSourceKind && !socialinbox.InviteFamily(n.Source) && !socialinbox.RoomInviteFamily(n.Source) && socialinbox.ValidateRelationDescriptor(n) != nil) || n.RecipientPlayerID != a.PlayerID || !n.Active || !n.RelatedPlayerID.Valid() {
 			return Result{}, ErrInvalidRead
 		}
 		if i > 0 && (n.NoticeTime.After(notices[i-1].NoticeTime) || n.NoticeTime.Equal(notices[i-1].NoticeTime) && n.NoticeID >= notices[i-1].NoticeID) {
@@ -283,6 +283,13 @@ func (s Service) loadTx(c context.Context, t tx.Tx, a identity.ActorContext, k L
 		if snap, ok := prepared.invites[n.NoticeID]; ok {
 			value.GuildID = int64(snap.Issue.Tuple.GuildID)
 			value.GuildName = snap.Issue.GuildName
+		}
+		if socialinbox.RoomInviteFamily(n.Source) {
+			invite, err := socialinbox.RoomInviteTuple(n)
+			if err != nil {
+				return Result{}, err
+			}
+			value.RoomID, value.ParadiseID, value.ChapterID, value.Force = invite.RoomID, invite.ParadiseID, invite.ChapterID, invite.Force
 		}
 		out.Notices = append(out.Notices, value)
 	}

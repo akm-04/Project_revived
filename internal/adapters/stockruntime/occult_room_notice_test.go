@@ -34,17 +34,6 @@ func TestOccultRoomFrameCarriesFunctionAndRoomType(t *testing.T) {
 	}
 }
 
-func TestOccultInviteNoticeNeedsRoomChapterAndInviter(t *testing.T) {
-	good, err := occultNotice(OccultInviteNoticeType, map[string]any{"room_id": int64(4), "chapter_id": int64(2), "force": int64(0), "player_info": map[string]any{"player_id": int64(1)}})
-	if err != nil || ValidateOccultInviteNotice(good) != nil {
-		t.Fatalf("invite must validate: %v", err)
-	}
-	bad, err := occultNotice(OccultInviteNoticeType, map[string]any{"room_id": int64(0), "chapter_id": int64(2), "player_info": map[string]any{}})
-	if err != nil || ValidateOccultInviteNotice(bad) == nil {
-		t.Fatalf("room 0 must be refused: %v", err)
-	}
-}
-
 func TestOccultLedgerPushesOnlyChangesAfterTheFirstSight(t *testing.T) {
 	ledger := NewRoomNoticeLedger()
 	events := []d.EventRecord{{Sequence: 1, Type: 5, DispatchLimit: 33}}

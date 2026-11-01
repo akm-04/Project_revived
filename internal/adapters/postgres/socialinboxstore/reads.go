@@ -3,6 +3,7 @@ package socialinboxstore
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"gxb.local/backend/v2/internal/application/socialinbox"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/tx"
@@ -54,8 +55,10 @@ func (Store) RelationWindowTx(c context.Context, t tx.Tx, p identity.PlayerID) (
 
 var _ socialinbox.RelationWindowReader = Store{}
 
-const noticePageSQL = `SELECT COALESCE(jsonb_agg(to_jsonb(n) ORDER BY notice_time DESC,notice_id DESC),'[]'::jsonb)::text FROM (SELECT * FROM social_notices WHERE recipient_player_id=$1 AND ($2::timestamptz IS NULL OR (notice_time,notice_id)<($2,$3)) ORDER BY notice_time DESC,notice_id DESC LIMIT $4) n`
+const noticePageSQL = `SELECT COALESCE(jsonb_agg(to_jsonb(n) ORDER BY notice_time DESC,notice_id DESC),'[]'::jsonb)::text FROM (SELECT * FROM social_notices WHERE recipient_player_id=$1 AND ($2::timestamptz IS NULL OR (notice_time,notice_id)<($2,$3)) AND NOT (source_kind=$5 AND notice_time < now()-$6::interval) ORDER BY notice_time DESC,notice_id DESC LIMIT $4) n`
 
+// shortcut: a room invite row for a closed room stays visible up to the
+// retention window; tapping it gets the join refusal toast.
 func (Store) NoticePageTx(c context.Context, t tx.Tx, p identity.PlayerID, after socialinbox.NoticeCursor, limit int) ([]socialinbox.Notice, error) {
 	if t == nil || !p.Valid() || limit < 1 || limit > 128 || after.At.IsZero() != (after.ID == 0) {
 		return nil, socialinbox.ErrInvalidNotice
@@ -65,7 +68,7 @@ func (Store) NoticePageTx(c context.Context, t tx.Tx, p identity.PlayerID, after
 		at = after.At.UTC()
 	}
 	var raw string
-	if e := t.QueryRow(c, noticePageSQL, int64(p), at, int64(after.ID), limit).Scan(&raw); e != nil {
+	if e := t.QueryRow(c, noticePageSQL, int64(p), at, int64(after.ID), limit, socialinbox.RoomInviteSourceKind, fmt.Sprintf("%d seconds", int64(socialinbox.RoomInviteRetention/time.Second))).Scan(&raw); e != nil {
 		return nil, e
 	}
 	var rows []noticeRow

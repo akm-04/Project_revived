@@ -60,12 +60,16 @@ type Requested struct {
 	At      time.Time
 }
 type Notified struct {
-	GuildID   int64
-	GuildName string
-	Player    Player
-	ID        int64
-	Type      int16
-	At        time.Time
+	GuildID    int64
+	GuildName  string
+	RoomID     int64
+	ParadiseID int64
+	ChapterID  int64
+	Force      int64
+	Player     Player
+	ID         int64
+	Type       int16
+	At         time.Time
 }
 type Result struct {
 	ObservedAt               time.Time

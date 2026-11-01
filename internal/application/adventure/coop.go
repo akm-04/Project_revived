@@ -15,6 +15,7 @@ import (
 	gen "gxb.local/backend/v2/internal/application/generation"
 	"gxb.local/backend/v2/internal/application/i5"
 	sr "gxb.local/backend/v2/internal/application/sharedroom"
+	"gxb.local/backend/v2/internal/application/socialinbox"
 	d "gxb.local/backend/v2/internal/domain/adventure"
 	cd "gxb.local/backend/v2/internal/domain/combat"
 	"gxb.local/backend/v2/internal/domain/identity"
@@ -138,6 +139,7 @@ func (s Mode) InviteCoop(c context.Context, a identity.ActorContext, target iden
 	if !target.Valid() || target == a.PlayerID {
 		return nil, d.ErrInvalid
 	}
+	inviteRoomID := int64(0)
 	_, err := s.Rooms.Update(c, a, sr.UpdateRequest{Family: IllusionFamily(), Before: s.admissionBefore(a, op), Apply: func(c context.Context, sc gen.TimedScope, room *sharedroom.Room) error {
 		if room.Owner != a.PlayerID {
 			return fmt.Errorf("%w: only the master invites", d.ErrRefused)
@@ -156,10 +158,17 @@ func (s Mode) InviteCoop(c context.Context, a identity.ActorContext, target iden
 		if !state.Invited(int64(target)) {
 			state.Invites = append(state.Invites, int64(target))
 		}
+		inviteRoomID = room.ID
 		return s.restoreRoom(sc, room, state)
 	}}, op)
 	if err != nil {
 		return nil, err
+	}
+	if s.Invites != nil {
+		invite := socialinbox.RoomInvite{Recipient: target, NoticeType: socialinbox.RoomInviteCoopNoticeType, RoomID: inviteRoomID}
+		if err := s.Invites.Materialize(c, a, invite, op); err != nil {
+			return nil, err
+		}
 	}
 	return map[string]any{}, nil
 }

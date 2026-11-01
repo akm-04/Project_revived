@@ -80,10 +80,10 @@ func (s Service) Dismiss(ctx context.Context, a identity.ActorContext, ids []soc
 			if n.RecipientPlayerID != a.PlayerID || n.NoticeID != id {
 				return socialinbox.ErrInvalidNotice
 			}
-			if !socialinbox.RelationFamily(n.Source) {
+			if !socialinbox.RelationFamily(n.Source) && !socialinbox.RoomInviteFamily(n.Source) {
 				continue
 			}
-			if socialinbox.ValidateRelationLifecycle(n) != nil {
+			if socialinbox.ValidateRelationLifecycle(n) != nil && socialinbox.ValidateRoomInviteLifecycle(n) != nil {
 				return socialinbox.ErrInvalidNotice
 			}
 			accepted[id] = true

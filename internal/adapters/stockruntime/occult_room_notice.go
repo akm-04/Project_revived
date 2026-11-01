@@ -17,9 +17,7 @@ const (
 	// OccultRoomNoticeType is the stock NoticeType.ROOM_NOTICE; room_type 1 routes
 	// the params to Occult:handleRoomNotice.
 	OccultRoomNoticeType int64 = 32
-	// OccultInviteNoticeType is the stock FriendNoticeType.OCCULT a 2369 invite creates.
-	OccultInviteNoticeType int64 = 7
-	occultRoomTypeMulti    int64 = 1
+	occultRoomTypeMulti  int64 = 1
 
 	occultFunctionRoomChange int64 = 1
 	occultFunctionChangePos  int64 = 8
@@ -45,7 +43,6 @@ type OccultRoomNoticeHandler struct {
 func NewOccultRoomNoticeRegistry() (rt.EventRegistry, error) {
 	return rt.NewEventRegistry(nil, []rt.NoticeRegistration{
 		{ParentMID: mids.MIDPlayerNotice, Namespace: rt.NoticeNamespaceGeneric, NoticeType: OccultRoomNoticeType, Roles: []rt.Role{rt.World}, Validate: ValidateOccultRoomNotice},
-		{ParentMID: mids.MIDPlayerNotice, Namespace: rt.NoticeNamespaceGeneric, NoticeType: OccultInviteNoticeType, Roles: []rt.Role{rt.World}, Validate: ValidateOccultInviteNotice},
 	})
 }
 
@@ -74,20 +71,6 @@ func ValidateOccultRoomNotice(value any) error {
 	function, functionOK := body["function_type"].(int64)
 	roomType, roomTypeOK := body["room_type"].(int64)
 	if !functionOK || function < occultFunctionRoomChange || function > occultFunctionLast || !roomTypeOK || roomType != occultRoomTypeMulti {
-		return rt.ErrInvalidS2CPayload
-	}
-	return nil
-}
-
-func ValidateOccultInviteNotice(value any) error {
-	body, ok := noticeParams(value)
-	if !ok {
-		return rt.ErrInvalidS2CPayload
-	}
-	room, roomOK := body["room_id"].(int64)
-	chapter, chapterOK := body["chapter_id"].(int64)
-	player, playerOK := body["player_info"].(*amf3.Object)
-	if !roomOK || room <= 0 || !chapterOK || chapter <= 0 || !playerOK || player == nil {
 		return rt.ErrInvalidS2CPayload
 	}
 	return nil
@@ -125,7 +108,7 @@ func (h OccultRoomNoticeHandler) ReloadAndDeliver(c context.Context, reference s
 		seated = append(seated, member.Player)
 	}
 	h.Delivered.reseat(view.RoomID, occultRoomNoticeKey, seated)
-	steps := []func(context.Context, app.RoomNotice, []identity.PlayerID) error{h.deliverRemovals, h.deliverRoomChanges, h.deliverEvents, h.deliverPushes, h.deliverPositions, h.deliverOnline, h.deliverInvites}
+	steps := []func(context.Context, app.RoomNotice, []identity.PlayerID) error{h.deliverRemovals, h.deliverRoomChanges, h.deliverEvents, h.deliverPushes, h.deliverPositions, h.deliverOnline}
 	for _, step := range steps {
 		if err = step(c, view, seated); err != nil {
 			return err
@@ -137,10 +120,7 @@ func (h OccultRoomNoticeHandler) ReloadAndDeliver(c context.Context, reference s
 	return nil
 }
 
-const (
-	occultRoomNoticeKey   = uint16(OccultRoomNoticeType)
-	occultInviteNoticeKey = uint16(OccultInviteNoticeType)
-)
+const occultRoomNoticeKey = uint16(OccultRoomNoticeType)
 
 func (h OccultRoomNoticeHandler) send(c context.Context, player identity.PlayerID, frame *amf3.Object, err error) error {
 	if err != nil {
@@ -252,20 +232,6 @@ func (h OccultRoomNoticeHandler) deliverOnline(c context.Context, view app.RoomN
 				return err
 			}
 		}
-	}
-	return nil
-}
-
-func (h OccultRoomNoticeHandler) deliverInvites(c context.Context, view app.RoomNotice, _ []identity.PlayerID) error {
-	for _, invite := range view.Invites {
-		if len(h.Delivered.undelivered(view.RoomID, occultInviteNoticeKey, []identity.PlayerID{invite.Player})) == 0 {
-			continue
-		}
-		frame, err := occultNotice(OccultInviteNoticeType, invite.Body)
-		if err = h.send(c, invite.Player, frame, err); err != nil {
-			return err
-		}
-		h.Delivered.markDelivered(view.RoomID, occultInviteNoticeKey, invite.Player)
 	}
 	return nil
 }

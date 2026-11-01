@@ -60,11 +60,13 @@ func illusionService(t *testing.T, p *pg.Pool, clock gen.TimeAuthority, privileg
 	timed := gen.TimedRunner{Binder: gen.Binder{Time: clock}, Runner: runner}
 	rooms := appsharedroom.Service{Timed: timed, Fresh: p, Store: sharedroomstore.Store{}, Fence: values, Players: i4store.PlayerRootLocker{}}
 	fight.Inputs.Rooms = appsharedroom.AdmissionBinding{Store: sharedroomstore.Store{}, Family: il.RoomFamily, Slot: il.RoomSlot}
-	return il.Mode{Timed: timed, Fresh: p, Store: illusionstore.Store{}, Content: content, Fence: values, Players: i4store.PlayerRootLocker{},
+	mode := il.Mode{Timed: timed, Fresh: p, Store: illusionstore.Store{}, Content: content, Fence: values, Players: i4store.PlayerRootLocker{},
 		Functions: values, Directory: i4store.PlayerDirectoryReader{}, Heroes: fight.Inputs.Heroes, Pets: fight.Inputs.Pets, Stats: illusionStatInputs{},
 		Rooms: rooms, RoomStore: sharedroomstore.Store{}, Combat: fight, Privileges: privileges,
 		Costs: i5.MaterialCostDebiter{Store: values, Content: content}, Facts: i5.ObjectiveFacts{Owner: compositeI5(p), Open: values},
 		Guilds: guilds, Mail: i5.SettlementMail{Store: values}, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}}
+	mode.Invites = roomInviteMaterializer(t, p)
+	return mode
 }
 
 // illusionOwner is a level-100 genuine combat owner with function 43 open and a

@@ -12,6 +12,7 @@ import (
 	gen "gxb.local/backend/v2/internal/application/generation"
 	"gxb.local/backend/v2/internal/application/i5"
 	"gxb.local/backend/v2/internal/application/playerdirectory"
+	"gxb.local/backend/v2/internal/application/roominvite"
 	"gxb.local/backend/v2/internal/application/sharedroom"
 	"gxb.local/backend/v2/internal/domain/character"
 	"gxb.local/backend/v2/internal/domain/grant"
@@ -121,6 +122,7 @@ type Mode struct {
 	Wake      Wake
 	Rooms     sharedroom.Service
 	RoomStore sharedroom.Store
+	Invites   roominvite.Materializer
 	Mail      Mail
 	Partners  Partners
 	HeroWire  HeroWire

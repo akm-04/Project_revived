@@ -9,6 +9,7 @@ import (
 	"gxb.local/backend/v2/internal/application/i5"
 	"gxb.local/backend/v2/internal/application/playerroot"
 	sr "gxb.local/backend/v2/internal/application/sharedroom"
+	"gxb.local/backend/v2/internal/application/socialinbox"
 	"gxb.local/backend/v2/internal/domain/identity"
 	d "gxb.local/backend/v2/internal/domain/occult"
 	"gxb.local/backend/v2/internal/domain/sharedroom"
@@ -110,6 +111,7 @@ func (s Mode) Invite(c context.Context, a identity.ActorContext, target identity
 	if err != nil {
 		return nil, err
 	}
+	inviteRoomID, chapterID := int64(0), int64(0)
 	_, err = s.updateRoom(c, a, op, false, func(c context.Context, sc gen.TimedScope, view *roomView) (map[string]any, error) {
 		if view.room.Owner != a.PlayerID || view.state.CampaignType != d.MultiCampaignType || view.state.Started() {
 			return nil, fmt.Errorf("%w: only the owner invites to an unstarted team room", d.ErrRefused)
@@ -118,10 +120,17 @@ func (s Mode) Invite(c context.Context, a identity.ActorContext, target identity
 			return nil, err
 		}
 		view.state.Invite(int64(target))
+		inviteRoomID, chapterID = view.room.ID, view.state.ChapterID
 		return nil, nil
 	})
 	if err != nil {
 		return nil, err
+	}
+	if s.Invites != nil {
+		invite := socialinbox.RoomInvite{Recipient: target, NoticeType: socialinbox.RoomInviteOccultNoticeType, RoomID: inviteRoomID, ChapterID: chapterID}
+		if err := s.Invites.Materialize(c, a, invite, op); err != nil {
+			return nil, err
+		}
 	}
 	return map[string]any{}, nil
 }

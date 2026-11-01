@@ -51,6 +51,11 @@ func (s Service) qualifiedWindow(c context.Context, t tx.Tx, p identity.PlayerID
 			switch n.Source.Kind {
 			case socialinbox.GiftSourceKind:
 				eligible = valid[n.NoticeID]
+			case socialinbox.RoomInviteSourceKind:
+				if socialinbox.ValidateRoomInviteLifecycle(n) != nil {
+					return nil, ErrInvalidRead
+				}
+				eligible = n.Active
 			case "social-relation.request.v1", "social-relation.friendship.v1":
 				if socialinbox.ValidateRelationLifecycle(n) != nil {
 					return nil, ErrInvalidRead

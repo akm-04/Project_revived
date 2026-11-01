@@ -15,12 +15,9 @@ import (
 )
 
 // AdventureRoomNoticeType is the stock ROOM_NOTICE; room_type 2 routes the
-// defense room and 3 the illusion co-op room. The invite notices are the stock
-// FriendNoticeType 8 (illusion co-op) and 9 (defense).
+// defense room and 3 the illusion co-op room.
 const (
-	AdventureRoomNoticeType       int64 = 32
-	AdventureIllusionInviteNotice int64 = 8
-	AdventureDefenseInviteNotice  int64 = 9
+	AdventureRoomNoticeType int64 = 32
 )
 
 const (
@@ -38,33 +35,9 @@ type AdventureRoomNoticeSource interface {
 	ReadRoomNotice(context.Context, string) (app.RoomNotice, bool, error)
 }
 
-func ValidateAdventureInviteNotice(value any) error {
-	body, ok := noticeParams(value)
-	if !ok {
-		return rt.ErrInvalidS2CPayload
-	}
-	noticeID, noticeOK := body["notice_id"].(int64)
-	roomID, roomOK := body["room_id"].(int64)
-	player, playerOK := body["player_info"].(*amf3.Object)
-	if !noticeOK || noticeID <= 0 || !roomOK || roomID <= 0 || !playerOK || player == nil {
-		return rt.ErrInvalidS2CPayload
-	}
-	profile, err := player.StrictMap()
-	if err != nil {
-		return rt.ErrInvalidS2CPayload
-	}
-	level, levelOK := profile["lev"].(int64)
-	if !levelOK || level <= 0 {
-		return rt.ErrInvalidS2CPayload
-	}
-	return nil
-}
-
 func NewAdventureRoomNoticeRegistry() (rt.EventRegistry, error) {
 	return rt.NewEventRegistry(nil, []rt.NoticeRegistration{
 		{ParentMID: mids.MIDPlayerNotice, Namespace: rt.NoticeNamespaceGeneric, NoticeType: AdventureRoomNoticeType, Roles: []rt.Role{rt.World}, Validate: ValidateAdventureRoomNotice},
-		{ParentMID: mids.MIDPlayerNotice, Namespace: rt.NoticeNamespaceGeneric, NoticeType: AdventureIllusionInviteNotice, Roles: []rt.Role{rt.World}, Validate: ValidateAdventureInviteNotice},
-		{ParentMID: mids.MIDPlayerNotice, Namespace: rt.NoticeNamespaceGeneric, NoticeType: AdventureDefenseInviteNotice, Roles: []rt.Role{rt.World}, Validate: ValidateAdventureInviteNotice},
 	})
 }
 
@@ -79,14 +52,6 @@ func ValidateAdventureRoomNotice(value any) error {
 		return rt.ErrInvalidS2CPayload
 	}
 	return nil
-}
-
-func adventureInviteFrame(noticeType int64, body map[string]any) (*amf3.Object, error) {
-	converted, err := amfFromValue(body)
-	if err != nil {
-		return nil, err
-	}
-	return &amf3.Object{Properties: []amf3.Property{{Name: "notice_type", Value: noticeType}, {Name: "params", Value: converted}}}, nil
 }
 
 func adventureRoomFrame(function, roomType int64, body map[string]any) (*amf3.Object, error) {
@@ -176,23 +141,6 @@ func (h AdventureRoomNoticeHandler) ReloadAndDeliver(c context.Context, referenc
 		if err = h.Delivery.Deliver(c, member.Player, mids.MIDPlayerNotice, frame); err != nil {
 			return err
 		}
-	}
-	noticeType := AdventureDefenseInviteNotice
-	if view.RoomType == d.RoomTypeIllusion {
-		noticeType = AdventureIllusionInviteNotice
-	}
-	for _, invite := range view.Invites {
-		if len(h.Delivered.undelivered(view.RoomID, uint16(noticeType), []identity.PlayerID{invite.Player})) == 0 {
-			continue
-		}
-		frame, err := adventureInviteFrame(noticeType, invite.Body)
-		if err != nil {
-			return err
-		}
-		if err = h.Delivery.Deliver(c, invite.Player, mids.MIDPlayerNotice, frame); err != nil {
-			return err
-		}
-		h.Delivered.markDelivered(view.RoomID, uint16(noticeType), invite.Player)
 	}
 	for _, push := range h.Pushes.newPushes(view.RoomID, view.Pushes) {
 		for _, body := range push.Bodies {

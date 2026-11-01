@@ -34,26 +34,6 @@ func TestAdventureRoomNoticeValidation(t *testing.T) {
 	}
 }
 
-func TestAdventureInviteNoticeValidation(t *testing.T) {
-	frame := &amf3.Object{Properties: []amf3.Property{
-		{Name: "notice_type", Value: AdventureIllusionInviteNotice},
-		{Name: "params", Value: &amf3.Object{Properties: []amf3.Property{
-			{Name: "notice_id", Value: int64(9)}, {Name: "room_id", Value: int64(9)},
-			{Name: "player_info", Value: &amf3.Object{Properties: []amf3.Property{{Name: "lev", Value: int64(100)}}}},
-		}}},
-	}}
-	if err := ValidateAdventureInviteNotice(frame); err != nil {
-		t.Fatal(err)
-	}
-	empty := &amf3.Object{Properties: []amf3.Property{
-		{Name: "notice_type", Value: AdventureDefenseInviteNotice},
-		{Name: "params", Value: &amf3.Object{Properties: []amf3.Property{{Name: "room_id", Value: int64(9)}}}},
-	}}
-	if err := ValidateAdventureInviteNotice(empty); err == nil {
-		t.Fatal("an invite without notice_id or player_info must refuse")
-	}
-}
-
 func TestAdventurePushLedgerSendsOnlyNewSequences(t *testing.T) {
 	ledger := NewAdventurePushLedger()
 	pushes := []app.RoomPush{{Sequence: 1}, {Sequence: 2}}

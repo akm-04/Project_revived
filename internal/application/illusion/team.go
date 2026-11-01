@@ -13,6 +13,7 @@ import (
 	"gxb.local/backend/v2/internal/application/playerdirectory"
 	"gxb.local/backend/v2/internal/application/publicstats"
 	sr "gxb.local/backend/v2/internal/application/sharedroom"
+	"gxb.local/backend/v2/internal/application/socialinbox"
 	"gxb.local/backend/v2/internal/domain/character"
 	"gxb.local/backend/v2/internal/domain/identity"
 	d "gxb.local/backend/v2/internal/domain/illusion"
@@ -274,6 +275,7 @@ func (s Mode) Invite(c context.Context, a identity.ActorContext, target identity
 	if err := s.roomReady(); err != nil {
 		return nil, err
 	}
+	inviteRoomID, paradiseID := int64(0), int64(0)
 	if _, err := s.Rooms.Update(c, a, sr.UpdateRequest{Family: RoomFamilyRef(), Apply: func(c context.Context, sc gen.TimedScope, room *sharedroom.Room) error {
 		if room.Owner != a.PlayerID {
 			return fmt.Errorf("%w: only the master invites", d.ErrRefused)
@@ -293,6 +295,7 @@ func (s Mode) Invite(c context.Context, a identity.ActorContext, target identity
 			return fmt.Errorf("%w: level band", d.ErrRefused)
 		}
 		if state.Invited(int64(target)) {
+			inviteRoomID, paradiseID = room.ID, state.ParadiseID
 			return nil
 		}
 		state.Invites = append(state.Invites, int64(target))
@@ -300,9 +303,16 @@ func (s Mode) Invite(c context.Context, a identity.ActorContext, target identity
 		if err != nil {
 			return err
 		}
+		inviteRoomID, paradiseID = room.ID, state.ParadiseID
 		return room.SetPayload(payload, sc.Operation.DecisionAt())
 	}}, op); err != nil {
 		return nil, err
+	}
+	if s.Invites != nil {
+		invite := socialinbox.RoomInvite{Recipient: target, NoticeType: socialinbox.RoomInviteIllusionNoticeType, RoomID: inviteRoomID, ParadiseID: paradiseID}
+		if err := s.Invites.Materialize(c, a, invite, op); err != nil {
+			return nil, err
+		}
 	}
 	return map[string]any{}, nil
 }

@@ -11,6 +11,7 @@ import (
 	"gxb.local/backend/v2/internal/application/playerdirectory"
 	"gxb.local/backend/v2/internal/application/playerroot"
 	"gxb.local/backend/v2/internal/application/publicstats"
+	"gxb.local/backend/v2/internal/application/roominvite"
 	"gxb.local/backend/v2/internal/application/sharedroom"
 	"gxb.local/backend/v2/internal/domain/character"
 	cd "gxb.local/backend/v2/internal/domain/combat"
@@ -136,6 +137,7 @@ type Mode struct {
 	Stats       Stats
 	Rooms       sharedroom.Service
 	RoomStore   sharedroom.Store
+	Invites     roominvite.Materializer
 	Combat      Combat
 	Privileges  i5.PrivilegeSnapshotProvider
 	Costs       Costs

@@ -11,7 +11,7 @@ import (
 )
 
 func (Store) DismissNoticeTx(ctx context.Context, t tx.Tx, n socialinbox.Notice, at time.Time) error {
-	if t == nil || !n.Active || socialinbox.ValidateRelationLifecycle(n) != nil || at.Before(n.UpdatedAt) || at.Before(n.NoticeTime) {
+	if t == nil || !n.Active || (socialinbox.ValidateRelationLifecycle(n) != nil && socialinbox.ValidateRoomInviteLifecycle(n) != nil) || at.Before(n.UpdatedAt) || at.Before(n.NoticeTime) {
 		return socialinbox.ErrInvalidNotice
 	}
 	tag, e := t.Exec(ctx, `UPDATE social_notices SET active=false,dismissed_at=$4,updated_at=$4,state_version=state_version+1 WHERE recipient_player_id=$1 AND notice_id=$2 AND state_version=$3 AND active`, int64(n.RecipientPlayerID), int64(n.NoticeID), n.StateVersion, at.UTC())

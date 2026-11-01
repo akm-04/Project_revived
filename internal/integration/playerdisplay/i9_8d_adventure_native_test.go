@@ -62,11 +62,13 @@ func adventureTestMode(t *testing.T, p *pg.Pool, clock gen.TimeAuthority, oppone
 	// The exact production router, not a test-local approximation.
 	fight.Inputs.Rooms = stockruntime.NewAdmissionRouter()
 	owner := occultI5(p)
-	return appadventure.Mode{Timed: timed, Fresh: p, Store: adventurestore.Store{}, Content: content,
+	mode := appadventure.Mode{Timed: timed, Fresh: p, Store: adventurestore.Store{}, Content: content,
 		Functions: values, Directory: i4store.PlayerDirectoryReader{}, Heroes: fight.Inputs.Heroes, Combat: fight,
 		Costs: i5.MaterialCostDebiter{Store: values, Content: content}, Grants: owner, Opponents: opponents, Wake: adventureWake{},
 		Rooms: rooms, RoomStore: sharedroomstore.Store{}, Mail: i5.SettlementMail{Store: values},
 		Partners: ownerSummoner(p), HeroWire: heroproj.StockHero}
+	mode.Invites = roomInviteMaterializer(t, p)
+	return mode
 }
 
 func adventureFacts(p *pg.Pool) i5.ObjectiveFacts {
@@ -427,14 +429,8 @@ func TestI9_8DAdventureRoomsNative(t *testing.T) {
 	if _, err = mode.InviteCoop(ctx, a, b.PlayerID, opContext); err != nil {
 		t.Fatal("coop invite", err)
 	}
-	inviteNotice, found, err := mode.ReadRoomNotice(ctx, fmt.Sprint(coopID))
-	if err != nil || !found || len(inviteNotice.Invites) != 1 {
-		t.Fatalf("2427 invite notice %+v %v", inviteNotice.Invites, err)
-	}
-	inviteBody := inviteNotice.Invites[0].Body
-	inviteProfile, _ := inviteBody["player_info"].(map[string]any)
-	if inviteBody["notice_id"] == nil || inviteBody["room_id"] != int64(coopID) || inviteProfile["lev"] == nil {
-		t.Fatalf("friend notice 8/9 fields %#v", inviteBody)
+	if n := scalar(t, p, `SELECT count(*) FROM social_notices WHERE recipient_player_id=$1 AND notice_type=8 AND source_kind='social-room-invite.v1' AND active`, int64(b.PlayerID)); n != 1 {
+		t.Fatalf("2427 co-op invite notice rows %d", n)
 	}
 	if _, err = mode.CreateCoop(ctx, a, opContext); !errors.Is(err, appsharedroom.ErrAlreadyInRoom) {
 		t.Fatalf("second room %v", err)

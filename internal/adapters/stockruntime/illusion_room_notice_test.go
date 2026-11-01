@@ -54,4 +54,21 @@ func TestIllusionMessageFollowsPlayerSeatsAndReady(t *testing.T) {
 	if message["master_pet"] != float64(55) {
 		t.Fatalf("master pet lost %#v", message["master_pet"])
 	}
+	var cached map[string]any
+	if err = json.Unmarshal(teamInfo, &cached); err != nil {
+		t.Fatal(err)
+	}
+	delete(cached, "master_pet")
+	withoutPet, err := json.Marshal(cached)
+	if err != nil {
+		t.Fatal(err)
+	}
+	view.TeamInfo = withoutPet
+	message, err = illusionMessage(view)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if message["master_pet"] != int64(0) {
+		t.Fatalf("a mate promoted to master sent a null pet %#v", message["master_pet"])
+	}
 }

@@ -48,6 +48,7 @@ import (
 	appoccult "gxb.local/backend/v2/internal/application/occult"
 	apprealtime "gxb.local/backend/v2/internal/application/realtimeauth"
 	"gxb.local/backend/v2/internal/application/realtimewakeup"
+	"gxb.local/backend/v2/internal/application/roominvite"
 	"gxb.local/backend/v2/internal/application/socialgift"
 	"gxb.local/backend/v2/internal/application/socialpresence"
 	"gxb.local/backend/v2/internal/application/socialrelation"
@@ -310,8 +311,12 @@ func run() error {
 			Authority: authority, Time: postgres.AuthoritativeTime{Queryer: pool}, MaxHandles: runtimePolicy.MaxConnections,
 			OnDeliveryError: func(err error) { log.Printf("adventure room notice degraded: %v", err) }},
 		Delivered: stockruntime.NewRoomNoticeLedger(), Pushes: stockruntime.NewAdventurePushLedger()}
+	roomInviteNotices := stockruntime.RoomInviteNoticeListHandler{Delivery: stockruntime.RoomDelivery{Registry: connectionsRegistry, Publisher: stockruntime.RealtimePublisher{Registry: socialEvents, Limits: limits.Default()},
+		Authority: authority, Time: postgres.AuthoritativeTime{Queryer: pool}, MaxHandles: runtimePolicy.MaxConnections,
+		OnDeliveryError: func(err error) { log.Printf("room invite notice list degraded: %v", err) }}}
 	wakeups, err := realtimewakeup.NewRegistry(realtimewakeup.Registration{Route: apparena.FriendFightNoticeRoute, Handler: friendNotices}, realtimewakeup.Registration{Route: apparena.TournamentNoticeRoute, Handler: tournamentNotices}, realtimewakeup.Registration{Route: postgres.SocialReloadRoute, Handler: socialHandler}, realtimewakeup.Registration{Route: frienddm.WakeupRoute, Handler: friendReconcile}, realtimewakeup.Registration{Route: generaldm.WakeupRoute, Handler: generalReconcile}, realtimewakeup.Registration{Route: achievement.NoticeRoute, Handler: achievementNotices}, realtimewakeup.Registration{Route: appillusion.RoomNoticeRoute, Handler: illusionRooms}, realtimewakeup.Registration{Route: appoccult.RoomNoticeRoute, Handler: occultRooms}, realtimewakeup.Registration{Route: appadventure.NoticeRoute, Handler: adventureNotices},
-		realtimewakeup.Registration{Route: appadventure.RoomNoticeRoute, Handler: adventureRooms})
+		realtimewakeup.Registration{Route: appadventure.RoomNoticeRoute, Handler: adventureRooms},
+		realtimewakeup.Registration{Route: roominvite.NoticeListRoute, Handler: roomInviteNotices})
 	if err != nil {
 		log.Fatal(err)
 	}

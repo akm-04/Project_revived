@@ -23,9 +23,6 @@ import (
 	rt "gxb.local/backend/v2/internal/protocol/realtime"
 )
 
-// IllusionInviteNoticeType is the stock friend notice a 1360 invite creates.
-const IllusionInviteNoticeType int64 = 6
-
 // IllusionRoomNotice is the canonical room state a 518 push projects.
 type IllusionRoomNotice struct {
 	RoomID        int64
@@ -36,7 +33,6 @@ type IllusionRoomNotice struct {
 	TeamInfo      json.RawMessage
 	ReportID      string
 	DamageResults map[string]json.RawMessage
-	Invites       []identity.PlayerID
 	ParadiseID    int64
 	Master        playerdirectory.Profile
 }
@@ -80,9 +76,6 @@ func (r IllusionRoomNoticeReader) ReadRoomNotice(c context.Context, reference st
 				out.Removed = append(out.Removed, seat.Player)
 			}
 		}
-	}
-	for _, id := range state.Invites {
-		out.Invites = append(out.Invites, identity.PlayerID(id))
 	}
 	profile, found, err := r.Directory.ProfileTx(c, r.Queryer, room.Owner)
 	if err != nil {
@@ -140,46 +133,10 @@ func ValidateIllusionRoomNotice(value any) error {
 	return nil
 }
 
-func ValidateIllusionInviteNotice(value any) error {
-	object, ok := value.(*amf3.Object)
-	if !ok || object == nil {
-		return rt.ErrInvalidS2CPayload
-	}
-	fields, err := object.StrictMap()
-	if err != nil || len(fields) != 2 || fields["notice_type"] != IllusionInviteNoticeType {
-		return rt.ErrInvalidS2CPayload
-	}
-	params, ok := fields["params"].(*amf3.Object)
-	if !ok || params == nil {
-		return rt.ErrInvalidS2CPayload
-	}
-	body, err := params.StrictMap()
-	if err != nil {
-		return rt.ErrInvalidS2CPayload
-	}
-	paradise, paradiseOK := body["paradise_id"].(int64)
-	roomID, roomOK := body["room_id"].(int64)
-	player, playerOK := body["player_info"].(*amf3.Object)
-	if !paradiseOK || paradise <= 0 || !roomOK || roomID <= 0 || !playerOK || player == nil {
-		return rt.ErrInvalidS2CPayload
-	}
-	profile, err := player.StrictMap()
-	if err != nil {
-		return rt.ErrInvalidS2CPayload
-	}
-	id, idOK := profile["player_id"].(int64)
-	name, nameOK := profile["player_name"].(string)
-	level, levelOK := profile["lev"].(int64)
-	if !idOK || id <= 0 || !nameOK || name == "" || !levelOK || level <= 0 {
-		return rt.ErrInvalidS2CPayload
-	}
-	return nil
-}
-
 func NewIllusionRoomNoticeRegistry() (rt.EventRegistry, error) {
 	return rt.NewEventRegistry(
 		[]rt.DirectRegistration{{MID: mids.MIDIllusionNotice, Roles: []rt.Role{rt.World}, Validate: ValidateIllusionRoomNotice}},
-		[]rt.NoticeRegistration{{ParentMID: mids.MIDPlayerNotice, Namespace: rt.NoticeNamespaceGeneric, NoticeType: IllusionInviteNoticeType, Roles: []rt.Role{rt.World}, Validate: ValidateIllusionInviteNotice}},
+		nil,
 	)
 }
 
@@ -306,28 +263,10 @@ func (h IllusionRoomNoticeHandler) ReloadAndDeliver(c context.Context, reference
 			}
 		}
 	}
-	for _, player := range h.Delivered.undelivered(view.RoomID, mids.MIDPlayerNotice, view.Invites) {
-		if err := h.deliverInvite(c, view, player); err != nil {
-			return err
-		}
-		h.Delivered.markDelivered(view.RoomID, mids.MIDPlayerNotice, player)
-	}
 	if len(view.Seated) == 0 {
 		h.Delivered.forget(view.RoomID)
 	}
 	return nil
-}
-
-func (h IllusionRoomNoticeHandler) deliverInvite(c context.Context, view IllusionRoomNotice, player identity.PlayerID) error {
-	params := map[string]any{"paradise_id": view.ParadiseID, "room_id": view.RoomID,
-		"player_info": map[string]any{"player_id": int64(view.Master.PlayerID), "player_name": view.Master.Name, "lev": view.Master.Level,
-			"avatar_id": view.Master.AvatarID, "avatar_frame_id": view.Master.AvatarFrameID}}
-	converted, err := tournamentAMF(params)
-	if err != nil {
-		return err
-	}
-	frame := &amf3.Object{Properties: []amf3.Property{{Name: "notice_type", Value: IllusionInviteNoticeType}, {Name: "params", Value: converted}}}
-	return h.deliver(c, player, mids.MIDPlayerNotice, frame)
 }
 
 func (h IllusionRoomNoticeHandler) deliver(c context.Context, player identity.PlayerID, mid uint16, frame *amf3.Object) error {
@@ -362,7 +301,7 @@ func (delivery RoomDelivery) Deliver(c context.Context, player identity.PlayerID
 		if delivery.Authority.ValidateActor(c, actor, at) != nil {
 			continue
 		}
-		if mid == mids.MIDIllusionNotice {
+		if mid == mids.MIDIllusionNotice || mid == mids.MIDForceReload {
 			err = delivery.Publisher.PublishDirect(c, handle, mid, frame)
 		} else {
 			err = delivery.Publisher.PublishNotice(c, handle, mid, rt.NoticeNamespaceGeneric, frame)
@@ -438,7 +377,11 @@ func illusionMessage(view IllusionRoomNotice) (map[string]any, error) {
 			message["master_pet_detail"] = map[string]any{}
 			continue
 		}
-		message["master_pet"] = entry["pet"]
+		pet := entry["pet"]
+		if pet == nil {
+			pet = int64(0)
+		}
+		message["master_pet"] = pet
 		petDetail := entry["pet_detail"]
 		if petDetail == nil {
 			petDetail = map[string]any{}
