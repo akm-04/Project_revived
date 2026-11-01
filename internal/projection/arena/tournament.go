@@ -225,22 +225,3 @@ func CasualInfo(view d.CasualView) map[string]any {
 	}
 	return map[string]any{"match_time": matchTime, "is_matching": matching, "is_open": flag(view.Period.Open(view.At)), "start_time": view.Period.OpensAt.Unix(), "end_time": view.Period.ClosesAt.Unix()}
 }
-
-func CasualRanks(view d.CasualView) map[string]any {
-	rows := []map[string]any{}
-	rank := int64(0)
-	point := int64(0)
-	for index, standing := range view.Standings {
-		if index < rankRowsForCasual {
-			row := tournamentFace(view.Faces[standing.PlayerID])
-			row["rank"], row["point"], row["damage"] = index+1, standing.Points, standing.Points
-			rows = append(rows, row)
-		}
-		if standing.PlayerID == view.Viewer {
-			rank, point = int64(index+1), standing.Points
-		}
-	}
-	return map[string]any{"rank_list": rows, "my_rank": rank, "my_point": point}
-}
-
-const rankRowsForCasual = 50

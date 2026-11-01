@@ -407,6 +407,12 @@ func (s Service) Present(c context.Context, a identity.ActorContext, receiver id
 		} else if !advanced {
 			return ErrWishFull
 		}
+		if err := s.Store.DeleteExpiredWishesTx(c, t, donor.GuildID, day); err != nil {
+			return err
+		}
+		if err := s.Store.DeleteExpiredGiftsForPlayerTx(c, t, a.PlayerID, day); err != nil {
+			return err
+		}
 		revision, err := s.Content.ActiveRevision(c, t)
 		if err != nil {
 			return err
@@ -425,12 +431,6 @@ func (s Service) Present(c context.Context, a identity.ActorContext, receiver id
 			return err
 		}
 		if err := s.Facts.RecordTx(c, t, bound, objective.Fact{PlayerID: a.PlayerID, SourceDomain: "guildtea", SourceBusinessKey: presentation, Kind: "TEA_PARTY_DONATED", Delta: 1}); err != nil {
-			return err
-		}
-		if err := s.Store.DeleteExpiredWishesTx(c, t, donor.GuildID, day); err != nil {
-			return err
-		}
-		if err := s.Store.DeleteExpiredGiftsForPlayerTx(c, t, a.PlayerID, day); err != nil {
 			return err
 		}
 		out, err = s.stateTx(c, t, a, day, false)
@@ -458,6 +458,18 @@ func (s Service) Confirm(c context.Context, a identity.ActorContext, op operatio
 		if !found {
 			return ErrNoWish
 		}
+		member, memberFound, err := s.Store.ReadMembershipTx(c, t, a.PlayerID)
+		if err != nil {
+			return err
+		}
+		if memberFound {
+			if err := s.Store.DeleteExpiredWishesTx(c, t, member.GuildID, day); err != nil {
+				return err
+			}
+		}
+		if err := s.Store.DeleteExpiredGiftsForPlayerTx(c, t, a.PlayerID, day); err != nil {
+			return err
+		}
 		gifts, err := s.Store.ListUnclaimedGiftsTx(c, t, a.PlayerID, day)
 		if err != nil {
 			return err
@@ -482,18 +494,6 @@ func (s Service) Confirm(c context.Context, a identity.ActorContext, op operatio
 				}
 				out.Award = &Award{ItemID: wish.ItemID, Num: claimed}
 			}
-		}
-		member, memberFound, err := s.Store.ReadMembershipTx(c, t, a.PlayerID)
-		if err != nil {
-			return err
-		}
-		if memberFound {
-			if err := s.Store.DeleteExpiredWishesTx(c, t, member.GuildID, day); err != nil {
-				return err
-			}
-		}
-		if err := s.Store.DeleteExpiredGiftsForPlayerTx(c, t, a.PlayerID, day); err != nil {
-			return err
 		}
 		state, err := s.stateTx(c, t, a, day, false)
 		if err != nil {

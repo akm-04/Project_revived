@@ -259,13 +259,9 @@ func (dispatcher TournamentDispatcher) Dispatch(requestContext context.Context, 
 			return failArena(err)
 		}
 		if request.Envelope.MID == 276 {
-			// The stock callback indexes arenaList when leisure_arena_rank carries
-			// any rank_list (Arena.lua:324-338); V1 sends an empty array there.
-			casual := projection.CasualRanks(view)
-			body := map[string]any{"leisure_arena_rank": casual}
-			if len(casual["rank_list"].([]map[string]any)) == 0 {
-				body["leisure_arena_rank"] = []any{}
-			}
+			// Any rank_list reaches table.insert(arenaList.subList, ...) with arenaList
+			// undefined in the stock client (Arena.lua:324-338), so 276 never carries one.
+			body := map[string]any{"leisure_arena_rank": []any{}}
 			if dispatcher.WorldBoss != nil {
 				boards, err := dispatcher.WorldBoss.BossRank(requestContext, actor, operationContext)
 				if err != nil {
