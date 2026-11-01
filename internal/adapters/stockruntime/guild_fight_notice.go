@@ -27,3 +27,9 @@ func ValidateGuildFightNotice(value any) error {
 func NewGuildFightNoticeRegistration() rt.DirectRegistration {
 	return rt.DirectRegistration{MID: mids.MIDGuildFightNotice, Roles: []rt.Role{rt.World}, Validate: ValidateGuildFightNotice}
 }
+
+// NewGuildFightEventRegistry is the 36853 event registry. Keeping the direct
+// registration here leaves the realtime composition free of schema literals.
+func NewGuildFightEventRegistry() (rt.EventRegistry, error) {
+	return rt.NewEventRegistry([]rt.DirectRegistration{NewGuildFightNoticeRegistration()}, nil)
+}

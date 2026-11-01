@@ -26,6 +26,7 @@ import (
 	"time"
 
 	"gxb.local/backend/v2/internal/adapters/generaldmbindings"
+	"gxb.local/backend/v2/internal/adapters/guildcampaigncontent"
 	"gxb.local/backend/v2/internal/adapters/guildpolicybridge"
 	"gxb.local/backend/v2/internal/adapters/guildviewread"
 	"gxb.local/backend/v2/internal/adapters/postgres"
@@ -86,6 +87,7 @@ import (
 	"gxb.local/backend/v2/internal/application/generaldm"
 	appgeneration "gxb.local/backend/v2/internal/application/generation"
 	appgodstrial "gxb.local/backend/v2/internal/application/godstrial"
+	appguildcampaign "gxb.local/backend/v2/internal/application/guildcampaign"
 	"gxb.local/backend/v2/internal/application/guildcore"
 	appguildtea "gxb.local/backend/v2/internal/application/guildtea"
 	appevolution "gxb.local/backend/v2/internal/application/heroevolution"
@@ -113,6 +115,8 @@ import (
 	appspirit "gxb.local/backend/v2/internal/application/spirit"
 	appsummon "gxb.local/backend/v2/internal/application/summon"
 	appworldboss "gxb.local/backend/v2/internal/application/worldboss"
+	"gxb.local/backend/v2/internal/content/guildcampaigncatalog"
+	"gxb.local/backend/v2/internal/content/guildcampaignpolicy"
 	"gxb.local/backend/v2/internal/content/guildpolicy"
 	"gxb.local/backend/v2/internal/content/guildrentalpolicy"
 	"gxb.local/backend/v2/internal/content/guildteapolicy"
@@ -377,6 +381,23 @@ func main() {
 		log.Fatalf("I7C-5B Combat composition: %v", err)
 	}
 	rentalRuntime := guildRentalRuntime{Service: rentalSvc, Reads: rentalReads}
+	campaignCatalog, err := guildcampaigncatalog.LoadBuiltin()
+	if err != nil {
+		log.Fatalf("I9-9C Guild Campaign catalog: %v", err)
+	}
+	campaignPolicy, err := guildcampaignpolicy.LoadBuiltin()
+	if err != nil {
+		log.Fatalf("I9-9C Guild Campaign policy: %v", err)
+	}
+	if fightReady {
+		campaignMode, _ := canonicalGuildCampaign(pool, runner, guildDB, i5db, i5svc, guildcampaigncontent.Catalog{Installed: campaignCatalog.Catalog}, campaignPolicy.Policy, fight)
+		guildSvc.Campaign = campaignMode
+		campaignD := stockruntime.GuildCampaignDispatcher{Authority: authority, Service: campaignMode}
+		for _, mid := range stockruntime.GuildCampaignMIDs {
+			mustRegister(mid, campaignD)
+		}
+		go runReconcile(ctx, pool, appguildcampaign.Reconciler{Mode: campaignMode})
+	}
 	ranking := stockruntime.RankingDispatcher{Authority: authority, Service: boardRanking, Trophy: achievements, Guilds: guildView}
 	if fightReady {
 		sharedRooms := appsharedroom.Service{Timed: appgeneration.TimedRunner{Binder: appgeneration.Binder{Time: postgres.AuthoritativeTime{Queryer: pool}}, Runner: runner},

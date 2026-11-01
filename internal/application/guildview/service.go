@@ -34,10 +34,16 @@ type PresenceReader interface {
 	ReadMany(context.Context, []identity.PlayerID) (map[identity.PlayerID]socialpresence.Observation, error)
 }
 
+// CampaignChallenges is the Guild Campaign member-day read (I9-9C C15).
+type CampaignChallenges interface {
+	CopyChallengeTimes(context.Context, []identity.PlayerID, int64) (map[identity.PlayerID]int64, error)
+}
+
 type Service struct {
 	Store     Store
 	Directory playerdirectory.Reader
 	Presence  PresenceReader
+	Campaign  CampaignChallenges
 	// Day is the caller's game day (modes.Day). Activity reads are day-scoped.
 	Day func(context.Context) (int64, error)
 }
@@ -239,6 +245,12 @@ func (s Service) Members(ctx context.Context, actor identity.ActorContext) (Guil
 	if err != nil {
 		return GuildInfo{}, nil, err
 	}
+	challenges := map[identity.PlayerID]int64{}
+	if s.Campaign != nil {
+		if challenges, err = s.Campaign.CopyChallengeTimes(ctx, playerIDs, day); err != nil {
+			return GuildInfo{}, nil, err
+		}
+	}
 	out := make([]Member, 0, len(ms))
 	for _, m := range ms {
 		p, err := s.profile(ctx, m.PlayerID)
@@ -255,7 +267,7 @@ func (s Service) Members(ctx context.Context, actor identity.ActorContext) (Guil
 		} else if obs.LastSeenAt != nil {
 			lastTime = obs.LastSeenAt.Unix()
 		}
-		out = append(out, Member{PlayerID: int64(m.PlayerID), Name: p.Name, Level: p.Level, AvatarID: p.AvatarID, AvatarFrameID: p.AvatarFrameID, ConquerLevel: p.ConquerLevel, ConquerLoopID: p.ConquerLoopID, Role: int16(m.Role), JoinTime: m.JoinedAt.Unix(), LastTime: lastTime, SevenVitality: sevenDay[m.PlayerID], CopyChallengeTime: 0})
+		out = append(out, Member{PlayerID: int64(m.PlayerID), Name: p.Name, Level: p.Level, AvatarID: p.AvatarID, AvatarFrameID: p.AvatarFrameID, ConquerLevel: p.ConquerLevel, ConquerLoopID: p.ConquerLoopID, Role: int16(m.Role), JoinTime: m.JoinedAt.Unix(), LastTime: lastTime, SevenVitality: sevenDay[m.PlayerID], CopyChallengeTime: challenges[m.PlayerID]})
 	}
 	sort.Slice(out, func(i, j int) bool { return out[i].PlayerID < out[j].PlayerID })
 	return self.GuildInfo, out, nil
