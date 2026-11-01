@@ -1,0 +1,56 @@
+{
+ "schema_version": 1,
+ "contract_id": "I9_GUILD_CAMPAIGN_V1",
+ "node": "ROOT/I9/I9-9/I9-9C",
+ "status": "WORKING_RESEARCH_DESIGN_NOT_STAGE_ACCEPTED",
+ "owner": "GuildCampaign chapter 606, copy 607, member day 605; Guild keeps role and balance; Combat, I5 and Mail keep their ownership",
+ "extends": [
+  "I9_PARENT_CONTRACT_V1",
+  "I9_MODE_FRAMEWORK_V1",
+  "I9_MODE_FOUNDATION_V3",
+  "I9_GUILD_ACTIVITY_V1",
+  "I9_GUILD_RENTAL_V1"
+ ],
+ "mids": [
+  601,
+  602,
+  603,
+  604,
+  605,
+  606,
+  607,
+  608,
+  609,
+  610,
+  611,
+  613,
+  614,
+  615
+ ],
+ "shared_mids": [
+  1,
+  612,
+  "push 36853"
+ ],
+ "policy": "I9_GUILD_POLICY_V1 / D414-D419",
+ "design": "stages/I9-9/PLAN.md, fleet_research/03-9c-guild-campaign.md",
+ "clauses": [
+  "C1 Reply shapes per fleet_research/03 ledger, reopened against Lua. copy_list is an object keyed by campaign-id string; enemy_status and monster_status are arrays by wave because the client indexes them with a number (SelectTeamNewWindow.lua:6819, GuildMapDetailWindow.lua:30). 610 bodies always carry rank_award.crystal and rank_award.guild_coin as numbers; only 30005 (full body) is a 200 refusal. 30021 is HTTP 409 with error_code 30021, because any 200 is OK to Backend.lua:562-566 and BattleCreate.lua:3099 would index a missing rank_award; every other 610 refusal is 409 (BattleCreate.lua:3098-3126). Other refusals 409 per F4/D370. 601 sends is_open 1 with is_win 1 for a won chapter that is still open (MapWindow.lua:761-768).",
+  "C2 Lock order. Open and reset: fence 315, guild 310, root, membership 320, chapter 606, copies 607, mail 610 (run payout, notice), then the fold at 723 last, so a short balance rolls the mail back. Start and settle: fence 315, root, member day 605, chapter 606, copy 607, server records 608, Combat 609, 609b for a loan, I5 610+, with run payout mail (610) before the settling member's own grants (700+). Leave and kick: guild 310, membership 320, chapters 606, rental 609b, mail 610, activity 723. Dissolve: guild 310, chapters 606, copies 607, rental 609b, mail 610. No path takes a guild lock after 605.",
+  "C3 Open 611 and reset 602: leader or deputy (rule 3); open needs previous chapter won; cost dungeon_open(chapter) from C4 balance after fold, refused if short; guild log type 8 or 9 in the same transaction; registration is every current member at that moment (rule 17; user).",
+  "C4 Registration: list fixed at open or reset. Unregistered cannot fight or be rewarded. A leaver is removed and forfeits; rejoining does not restore until the next reset.",
+  "C5 Rest window 05:00-08:00 GMT+8 (team_time_limit 18000|28800, 21:00-24:00 UTC): 604 refused inside. A fight already started may settle.",
+  "C6 One attacker per copy. 614 claims stage 1 for team_timeout1 60 s; the holder's 604 moves to stage 2 for team_timeout2 180 s, with no reset on a new wave (rule 5). Other members see the holder. Expiry is judged lazily from stored times; only a command writes.",
+  "C7 Enemy HP lives in copy rows and carries over; no regen (rule 4). A loser's damage stays. The 604 reply sends the stored wave state, and the one holder keeps those rows fixed until the fight settles or expires.",
+  "C8 Trust CLIENT_SUMMARY_ATTESTED_V1. The server holds no enemy maximum HP, so damage is the client total_damage bounded by policy max_fight_damage. Settle applies per-enemy HP only to the current wave, each row once: a known HP never rises, a dead enemy stays dead, an id outside the wave is ignored; up to 3 stars. A result past the holder's window returns 30021 and writes nothing to the copy. A retry of the member's last settled result at that wave, win or loss, replays 30005 with the stored body and writes nothing.",
+  "C9 Attempts: 2 per member, chapter and modes.Day, consumed only when that member's fight clears the stage (rule 5). Zero left refuses 604, and a clearing 610 is refused if concurrent fights already used them; the member day row is locked at 605 on both.",
+  "C10 Every settled challenge, win or lose, records fact 117 amount 1 (user).",
+  "C11 Damage rank per chapter run per member best hit, ties earlier hit. A fight on the Campaign Boss copy (team_campaign boss_fight 1, one per chapter) counts double for rank (rule 13; whole fight, since no maximum HP isolates the boss share). Gold by damage (rule 12). The member who clears the boss copy gets last_strike_coin Guild Coin (rule 11, PRIVATE_POLICY amount). A fight whose damage beats the copy's all-server record gets team_frist_reward_diamond crystal and team_frist_reward_cost badges, returned as rank_award (GuildTopDamageAwardWindow, BREAK_ALLSERVER_RECORD). Guild log 7. Grants through I5 grant plan with a source key from attempt id.",
+  "C12 Clear and reset pay registered members through SettlementMail by policy tables: Guild Coin by progress (rule 14) plus rank bonus from reward_hurt_rank (rules 10, 15), badge by progress with the 7-day addition judged from the clear time (rules 9, 16). Each exactly once per chapter run by source key.",
+  "C13 Open and reset mail registered members a plain notice with no attachment (user's memory; PRIVATE_POLICY text). Whether it sends and its title and body come only from I9_GUILD_POLICY_V1 guild_campaign.notice_mail, never from code, so the I11 operator tool can change them (obligation I9-9-OPERATOR-GUILD-MAIL).",
+  "C14 Award queue 605/606 for chapter_version 1 only; 4 applications per member per day; distributed at dist_reward_time slots in damage rank order by the family reconciler with a production caller; downtime delays and never skips. 615 logs each. Automatic slots are inference (no client reader).",
+  "C15 608 all-server records are scoped to the logical server, bounded; 607 and 615 bounded per chapter run; 609 bounded by retention in policy.",
+  "C16 Push 36853 {copy_id, chapter_id, player_id} registered in s2c_registry; sent to registered online members on claim, start and settle after commit; a lost push is repaired by 603 or 613.",
+  "C17 Borrowing allowed through I9_GUILD_RENTAL_V1 on 604, one borrowed girl per fight; no star cap effect beyond rule text since stars are cosmetic here."
+ ]
+}
