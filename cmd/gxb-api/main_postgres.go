@@ -544,6 +544,8 @@ func main() {
 	if giftReadinessErr == nil {
 		socialDispatcher = enabledGiftDispatcher
 	} else {
+		// shortcut: this degraded window lists relation rows only, so room and guild
+		// invites stay unseen until the content owner activates the gift group.
 		legacyReads := socialReads
 		legacyReads.Invites = nil
 		legacyReads.PresentationAt = nil

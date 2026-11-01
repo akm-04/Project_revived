@@ -155,8 +155,8 @@ type IllusionRoomNoticeHandler struct {
 	OnDeliveryError func(error)
 }
 
-// RoomNoticeLedger remembers each room's one-shot removal and invite notices:
-// the wakeup carries only the room, and the room keeps departed seats and invites.
+// RoomNoticeLedger remembers each room's one-shot removal notices: the wakeup
+// carries only the room, and the room keeps departed seats.
 // shortcut: in memory, so a realtime restart repeats them once for a live room;
 // persist delivery if that repeat ever reaches a player seated elsewhere.
 type RoomNoticeLedger struct {

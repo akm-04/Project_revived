@@ -3,12 +3,14 @@
 package playerdisplay_test
 
 import (
+	"context"
 	"testing"
 	"time"
 
 	pg "gxb.local/backend/v2/internal/adapters/postgres"
 	"gxb.local/backend/v2/internal/adapters/postgres/contentstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/i4store"
+	"gxb.local/backend/v2/internal/adapters/postgres/i5store"
 	"gxb.local/backend/v2/internal/adapters/postgres/socialgiftstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/socialinboxstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/socialrelationstore"
@@ -50,6 +52,31 @@ func socialNoticePage(t *testing.T, p *pg.Pool, recipient identity.ActorContext)
 	return page.([]socialview.Notice)
 }
 
+// guildBundleReads is the read service once a guild bundle is installed
+// (cmd/gxb-api/guild_invite_river.go): room rows then pass prepareInviteWindow.
+func guildBundleReads(p *pg.Pool) sp.Service {
+	return sp.Service{Runner: tx.Runner{DB: p}, PlayerRoots: i4store.PlayerRootLocker{}, Relations: socialrelationstore.Store{}, Inbox: socialinboxstore.Store{}, NoticePages: socialinboxstore.Store{},
+		Directory: i4store.TransactionDiscoveryReader{}, Presentation: socialpresentation.TransactionReader{}, Observer: socialpresentation.TransactionReader{},
+		Gifts:   socialgift.Service{Store: socialgiftstore.Store{}, Content: contentstore.Store{Queryer: p}},
+		Invites: refusingInviteReader{}, PresentationAt: socialpresentation.TransactionReader{}}
+}
+
+type refusingInviteReader struct{ socialinbox.InviteNoticeReader }
+
+type acceptingAdmission struct{}
+
+func (acceptingAdmission) ValidateActor(context.Context, identity.ActorContext, time.Time) error {
+	return nil
+}
+
+// roomInviteClaimService is the production READ_NOTICE owner while gifts are active.
+func roomInviteClaimService(p *pg.Pool) socialgift.Service {
+	relations := socialrelationstore.Store{}
+	return socialgift.Service{Timed: gen.TimedRunner{Binder: gen.Binder{Time: pg.AuthoritativeTime{Queryer: p}}, Runner: tx.Runner{DB: p}}, Reads: tx.Runner{DB: p}, Store: socialgiftstore.Store{}, Content: contentstore.Store{Queryer: p},
+		Players: i4store.PlayerRootLocker{}, Relations: relations, Privacy: socialrelation.FriendDMPrivacyProvider{Store: relations}, Inbox: socialinbox.GiftService{Store: socialinboxstore.Store{}},
+		NoticeEvidence: socialinboxstore.Store{}, Grants: compositeI5(p), Admission: acceptingAdmission{}, Fence: i5store.Store{Queryer: p}}
+}
+
 func noticeOfType(page []socialview.Notice, noticeType int16) (socialview.Notice, bool) {
 	for _, row := range page {
 		if row.Type == noticeType {
@@ -80,7 +107,7 @@ func requireRoomInviteFields(t *testing.T, row socialview.Notice, inviter identi
 	if row.Type == socialinbox.RoomInviteIllusionNoticeType && (row.ParadiseID == nil || *row.ParadiseID != paradise) {
 		t.Fatalf("paradise_id %+v", row.ParadiseID)
 	}
-	if row.Type == socialinbox.RoomInviteOccultNoticeType && (row.ChapterID == nil || *row.ChapterID != chapter || row.Force == nil) {
+	if row.Type == socialinbox.RoomInviteOccultNoticeType && (row.ChapterID == nil || *row.ChapterID != chapter || row.Force == nil || *row.Force <= 0) {
 		t.Fatalf("occult fields %+v", row)
 	}
 }
@@ -110,6 +137,35 @@ func TestI9_8ERoomInviteIllusionNative(t *testing.T) {
 	dismissRoomInvite(t, p, target, row.ID)
 	if _, found = noticeOfType(socialNoticePage(t, p, target), socialinbox.RoomInviteIllusionNoticeType); found {
 		t.Fatal("READ_NOTICE did not remove the illusion invite")
+	}
+
+	// With gifts active READ_NOTICE is the gift Claim, and a guild bundle reads
+	// through the invite window.
+	if _, err = mode.Invite(ctx, owner, target.PlayerID, op()); err != nil {
+		t.Fatal("re-invite before claim", err)
+	}
+	bundled, err := guildBundleReads(p).LoadList(ctx, target, sp.Notice, op())
+	if err != nil {
+		t.Fatal("invite window read", err)
+	}
+	bundledPage, err := socialpresentation.MapList(bundled, sp.Notice)
+	if err != nil {
+		t.Fatal("invite window wire", err)
+	}
+	row, found = noticeOfType(bundledPage.([]socialview.Notice), socialinbox.RoomInviteIllusionNoticeType)
+	if !found {
+		t.Fatal("illusion invite missing from the invite window")
+	}
+	requireRoomInviteFields(t, row, owner.PlayerID, roomID, int64(di.FirstCampaignID), 0)
+	claimed, err := roomInviteClaimService(p).Claim(ctx, target, []socialinbox.NoticeID{socialinbox.NoticeID(row.ID)}, op())
+	if err != nil {
+		t.Fatal("READ_NOTICE claim", err)
+	}
+	if len(claimed.NoticeIDs) != 1 || int64(claimed.NoticeIDs[0]) != row.ID || claimed.Amount != 0 {
+		t.Fatalf("READ_NOTICE claim result %+v", claimed)
+	}
+	if _, found = noticeOfType(socialNoticePage(t, p, target), socialinbox.RoomInviteIllusionNoticeType); found {
+		t.Fatal("the gift Claim did not remove the illusion invite")
 	}
 	if _, err = mode.Invite(ctx, owner, target.PlayerID, op()); err != nil {
 		t.Fatal("re-invite", err)
@@ -143,9 +199,10 @@ func TestI9_8ERoomInviteIllusionNative(t *testing.T) {
 func TestI9_8ERoomInviteOccultNative(t *testing.T) {
 	p := pool(t)
 	server := rankingServer(t, p)
-	mode, _ := occultTestMode(t, p)
+	mode, clock := occultTestMode(t, p)
 	owner, _ := occultOwner(t, p, server, 2)
 	target, _ := occultOwner(t, p, server, 2)
+	clock.at = time.Now().UTC()
 	created, err := mode.CreateTeam(ctx, owner, 2, op())
 	if err != nil {
 		t.Fatal(err)
@@ -208,6 +265,10 @@ func TestI9_8ERoomInviteCoopNative(t *testing.T) {
 	if _, found = noticeOfType(socialNoticePage(t, p, target), socialinbox.RoomInviteCoopNoticeType); !found {
 		t.Fatal("co-op re-invite did not reappear")
 	}
+	other, _ := adventureOwner(t, p, rankingServer(t, p), 100, 10001001)
+	if _, err = mode.InviteCoop(ctx, owner, other.PlayerID, opContext); err == nil {
+		t.Fatal("a recipient on another logical server was accepted")
+	}
 }
 
 func TestI9_8ERoomInviteDefenseNative(t *testing.T) {
@@ -242,5 +303,9 @@ func TestI9_8ERoomInviteDefenseNative(t *testing.T) {
 	}
 	if _, found = noticeOfType(socialNoticePage(t, p, target), socialinbox.RoomInviteDefenseNoticeType); !found {
 		t.Fatal("defense re-invite did not reappear")
+	}
+	other, _ := adventureOwner(t, p, rankingServer(t, p), 11, 10001001)
+	if _, err = mode.InviteDefense(ctx, owner, other.PlayerID, opContext); err == nil {
+		t.Fatal("a recipient on another logical server was accepted")
 	}
 }

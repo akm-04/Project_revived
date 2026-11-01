@@ -12,8 +12,10 @@ import (
 	"gxb.local/backend/v2/internal/application/i5"
 	"gxb.local/backend/v2/internal/application/playerdirectory"
 	"gxb.local/backend/v2/internal/application/playerroot"
+	"gxb.local/backend/v2/internal/application/publicstats"
 	"gxb.local/backend/v2/internal/application/roominvite"
 	"gxb.local/backend/v2/internal/application/sharedroom"
+	"gxb.local/backend/v2/internal/domain/character"
 	cd "gxb.local/backend/v2/internal/domain/combat"
 	"gxb.local/backend/v2/internal/domain/grant"
 	"gxb.local/backend/v2/internal/domain/identity"
@@ -69,6 +71,11 @@ type Heroes interface {
 	OverlayMID1(context.Context, tx.Queryer, identity.ActorContext, bool, time.Time, map[string]any) error
 }
 
+// Stats reads the qualified public force the invite row displays.
+type Stats interface {
+	HeroTx(context.Context, ca.CoherentReadScope, character.HeroRef, publicstats.View) (publicstats.Result, error)
+}
+
 type Combat interface {
 	StartTx(context.Context, tx.Tx, ca.CoherentReadScope, cb.StartRequest) (cb.Started, error)
 	AttestSummaryTx(context.Context, tx.Tx, cb.SummaryRequest) (cb.SummaryAttested, error)
@@ -110,6 +117,7 @@ type Mode struct {
 	Presence    Presence
 	Heroes      Heroes
 	Pets        Heroes
+	Stats       Stats
 	Rooms       sharedroom.Service
 	RoomStore   sharedroom.Store
 	Invites     roominvite.Materializer

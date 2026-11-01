@@ -3,19 +3,27 @@ package occult
 import (
 	"context"
 	"fmt"
+	"math"
+	"slices"
+	"strconv"
 	"time"
 
+	ca "gxb.local/backend/v2/internal/application/characterasset"
 	gen "gxb.local/backend/v2/internal/application/generation"
 	"gxb.local/backend/v2/internal/application/i5"
 	"gxb.local/backend/v2/internal/application/playerroot"
+	"gxb.local/backend/v2/internal/application/publicstats"
 	sr "gxb.local/backend/v2/internal/application/sharedroom"
 	"gxb.local/backend/v2/internal/application/socialinbox"
+	"gxb.local/backend/v2/internal/domain/character"
 	"gxb.local/backend/v2/internal/domain/identity"
 	d "gxb.local/backend/v2/internal/domain/occult"
 	"gxb.local/backend/v2/internal/domain/sharedroom"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
+
+const inviteForceHeroes = 15
 
 // CreateTeam answers 2366 with campaign_type 1: an unstarted three-seat room.
 // No ticket is spent until the owner starts the challenge. A repeated create of
@@ -111,7 +119,7 @@ func (s Mode) Invite(c context.Context, a identity.ActorContext, target identity
 	if err != nil {
 		return nil, err
 	}
-	inviteRoomID, chapterID := int64(0), int64(0)
+	inviteRoomID, chapterID, force := int64(0), int64(0), int64(0)
 	_, err = s.updateRoom(c, a, op, false, func(c context.Context, sc gen.TimedScope, view *roomView) (map[string]any, error) {
 		if view.room.Owner != a.PlayerID || view.state.CampaignType != d.MultiCampaignType || view.state.Started() {
 			return nil, fmt.Errorf("%w: only the owner invites to an unstarted team room", d.ErrRefused)
@@ -121,18 +129,55 @@ func (s Mode) Invite(c context.Context, a identity.ActorContext, target identity
 		}
 		view.state.Invite(int64(target))
 		inviteRoomID, chapterID = view.room.ID, view.state.ChapterID
-		return nil, nil
+		force, err = s.bestForce(c, sc, a.PlayerID, view.at)
+		return nil, err
 	})
 	if err != nil {
 		return nil, err
 	}
 	if s.Invites != nil {
-		invite := socialinbox.RoomInvite{Recipient: target, NoticeType: socialinbox.RoomInviteOccultNoticeType, RoomID: inviteRoomID, ChapterID: chapterID}
+		invite := socialinbox.RoomInvite{Recipient: target, NoticeType: socialinbox.RoomInviteOccultNoticeType, RoomID: inviteRoomID, ChapterID: chapterID, Force: force}
 		if err := s.Invites.Materialize(c, a, invite, op); err != nil {
 			return nil, err
 		}
 	}
 	return map[string]any{}, nil
+}
+
+// bestForce is the inviter's "best 15 AP" the client shows on the invite row
+// (CREATS_TIPS_13). A power change makes a new row, because force is part of the
+// notice source; the old row ages out with the retention window.
+func (s Mode) bestForce(c context.Context, sc gen.TimedScope, player identity.PlayerID, at time.Time) (int64, error) {
+	roster, err := s.rosterRows(c, sc.Tx, s.Heroes, player, at, "49", "heros")
+	if err != nil {
+		return 0, err
+	}
+	revision, err := s.Content.ActiveRevision(c, sc.Tx)
+	if err != nil {
+		return 0, err
+	}
+	scope, err := ca.NewCoherentReadScope(tx.Scope{Tx: sc.Tx, Operation: sc.Operation.Operation(), Attempt: sc.Attempt, Options: sc.Options}, revision, at)
+	if err != nil {
+		return 0, err
+	}
+	forces := make([]int64, 0, len(roster))
+	for key := range roster {
+		id, err := strconv.ParseInt(key, 10, 64)
+		if err != nil {
+			return 0, err
+		}
+		result, err := s.Stats.HeroTx(c, scope, character.HeroRef{PlayerID: player, PartnerID: id}, publicstats.View{Kind: publicstats.Self, Viewer: player})
+		if err != nil {
+			return 0, err
+		}
+		forces = append(forces, int64(math.Round(result.Stats.Force)))
+	}
+	slices.Sort(forces)
+	total := int64(0)
+	for _, force := range forces[max(0, len(forces)-inviteForceHeroes):] {
+		total += force
+	}
+	return total, nil
 }
 
 // Kick answers 2370: the owner removes a member for the life of the room and the

@@ -1,4 +1,4 @@
-// Package socialdismiss coordinates relation-only Inbox dismissal through typed
+// Package socialdismiss coordinates relation and room invite Inbox dismissal through typed
 // owner ports. It owns no tables and never calls a delivery or grant provider.
 package socialdismiss
 

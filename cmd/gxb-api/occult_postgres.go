@@ -22,7 +22,7 @@ import (
 
 func canonicalOccult(p *pg.Pool, r tx.Runner, content contentstore.Store, values i5store.Store, owner i5.Service, fight combat.Service, rooms appsharedroom.Service, invites roominvite.Materializer) occult.Mode {
 	return occult.Mode{Timed: gen.TimedRunner{Binder: gen.Binder{Time: pg.AuthoritativeTime{Queryer: p}}, Runner: r}, Fresh: p, Store: occultstore.Store{}, Content: content,
-		Fence: values, Players: i4store.PlayerRootLocker{}, Functions: values, Directory: i4store.PlayerDirectoryReader{}, Presence: presencestore.Store{Queryer: p}, Heroes: fight.Inputs.Heroes, Pets: fight.Inputs.Pets,
+		Fence: values, Players: i4store.PlayerRootLocker{}, Functions: values, Directory: i4store.PlayerDirectoryReader{}, Presence: presencestore.Store{Queryer: p}, Heroes: fight.Inputs.Heroes, Pets: fight.Inputs.Pets, Stats: fight.Inputs.Stats,
 		Rooms: rooms, RoomStore: sharedroomstore.Store{}, Invites: invites, Combat: fight, Tickets: owner, Values: owner, Awakening: owner,
 		Facts: i5.ObjectiveFacts{Owner: owner, Open: values}, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}}
 }

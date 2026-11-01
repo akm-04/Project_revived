@@ -527,7 +527,9 @@ func TestI9_8AProphecyFactNative(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	day := modes.Day(time.Now().UTC())
+	// The bound clock must stay ahead of the rows the fixture just wrote, so the
+	// search starts tomorrow: today's day begin is already in the past.
+	day := modes.Day(time.Now().UTC()) + 1
 	timeTravel, timeTravelOK := catalog.Group(14)
 	for !timeTravelOK || !timeTravel.Scheduled(catalog, day) {
 		day++
