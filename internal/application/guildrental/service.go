@@ -11,6 +11,7 @@ import (
 
 	ca "gxb.local/backend/v2/internal/application/characterasset"
 	"gxb.local/backend/v2/internal/application/combat"
+	"gxb.local/backend/v2/internal/application/generation"
 	"gxb.local/backend/v2/internal/application/i5"
 	"gxb.local/backend/v2/internal/application/playerroot"
 	d "gxb.local/backend/v2/internal/domain/combat"
@@ -117,6 +118,7 @@ type Costs interface {
 }
 
 type Facts interface {
+	PrepareTx(context.Context, tx.Tx, identity.PlayerID, generation.TimedOperation) (context.Context, error)
 	RecordTx(context.Context, tx.Tx, operation.Context, ...objective.Fact) error
 }
 
@@ -282,12 +284,21 @@ func (s Service) LendTx(c context.Context, t tx.Tx, scope ca.CoherentReadScope, 
 	if err != nil {
 		return nil, err
 	}
+	// Mission rows precede the economy debit (C16 records Fact 116 in START).
+	timed, err := generation.NewTimedOperation(bound, scope.ObservedAt)
+	if err != nil {
+		return nil, err
+	}
+	prepared, err := s.Facts.PrepareTx(c, t, borrower, timed)
+	if err != nil {
+		return nil, err
+	}
 	if _, err := s.Costs.DebitMaterialCostTx(c, t, borrower, i5.MaterialCost{Scalars: []i5.ScalarMaterialCost{{ResourceKey: manaResource, Amount: total}}}, bound); err != nil {
 		return nil, fmt.Errorf("%w: %w", d.ErrLoanRefused, err)
 	}
 	for _, loan := range paid {
 		key := fmt.Sprintf("rental:%d:%d:%d", int64(borrower), int64(loan.Lender), day)
-		if err := s.Facts.RecordTx(c, t, bound, objective.Fact{PlayerID: borrower, SourceDomain: "guildrental", SourceBusinessKey: key, Kind: "HERO_LENT", Delta: 1}); err != nil {
+		if err := s.Facts.RecordTx(prepared, t, bound, objective.Fact{PlayerID: borrower, SourceDomain: "guildrental", SourceBusinessKey: key, Kind: "HERO_LENT", Delta: 1}); err != nil {
 			return nil, err
 		}
 	}

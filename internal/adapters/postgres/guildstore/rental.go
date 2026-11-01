@@ -12,6 +12,10 @@ import (
 
 const rentalOfferColumns = `lender_id,kind,unit_id,guild_id,force,rent_award,rent_time`
 
+// rentalUseDayLimit stays above the guild member cap (50), so one borrower's
+// day of uses is never truncated.
+const rentalUseDayLimit = 200
+
 func scanRentalOffer(row tx.Row) (guild.RentalOffer, error) {
 	var offer guild.RentalOffer
 	var lender, gid int64
@@ -86,7 +90,8 @@ func (Store) ReadRentalUsesDayTx(ctx context.Context, q tx.Queryer, borrower ide
 	err := q.QueryRow(ctx, `SELECT COALESCE(jsonb_agg(jsonb_build_object(
 		'Borrower',borrower_id,'Lender',lender_id,'GameDay',game_day,'Kind',kind,'Unit',unit_id,
 		'CampaignType',campaign_type,'CostMana',cost_mana,'UsedAt',used_at) ORDER BY lender_id),'[]')::text
-		FROM guild_rental_uses WHERE borrower_id=$1 AND game_day=$2`, int64(borrower), day).Scan(&raw)
+		FROM (SELECT borrower_id,lender_id,game_day,kind,unit_id,campaign_type,cost_mana,used_at
+		FROM guild_rental_uses WHERE borrower_id=$1 AND game_day=$2 ORDER BY lender_id LIMIT $3) rows`, int64(borrower), day, rentalUseDayLimit).Scan(&raw)
 	if err != nil {
 		return nil, err
 	}

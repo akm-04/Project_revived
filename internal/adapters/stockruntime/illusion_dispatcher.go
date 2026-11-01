@@ -10,6 +10,7 @@ import (
 
 	app "gxb.local/backend/v2/internal/application/illusion"
 	rt "gxb.local/backend/v2/internal/application/realtimeauth"
+	cd "gxb.local/backend/v2/internal/domain/combat"
 	"gxb.local/backend/v2/internal/domain/economy"
 	"gxb.local/backend/v2/internal/domain/identity"
 	d "gxb.local/backend/v2/internal/domain/illusion"
@@ -156,7 +157,7 @@ func failIllusion(err error) httpedge.Response {
 	if errors.Is(err, d.ErrInvalid) || errors.As(err, &conflict) {
 		return badHero("illusion_invalid_parameter")
 	}
-	if errors.Is(err, d.ErrRefused) || errors.Is(err, economy.ErrInsufficientBalance) {
+	if errors.Is(err, d.ErrRefused) || errors.Is(err, cd.ErrLoanRefused) || errors.Is(err, economy.ErrInsufficientBalance) {
 		return conflictRefusal(1)
 	}
 	return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: err, Body: map[string]any{"error": "illusion_unavailable"}}

@@ -397,10 +397,18 @@ func (s Snapshot) formationValid() bool {
 			occupied = append(occupied, identity)
 		}
 	}
-	if len(occupied) != len(s.Battle.TeamA) {
+	// A BORROWED actor is appended by the server from the rent fields and is
+	// never named by the client's formation (handleRentParams keeps it apart).
+	deployed := []Actor{}
+	for _, a := range s.Battle.TeamA {
+		if a.Origin != Borrowed {
+			deployed = append(deployed, a)
+		}
+	}
+	if len(occupied) != len(deployed) {
 		return false
 	}
-	for i, a := range s.Battle.TeamA {
+	for i, a := range deployed {
 		if a.Identity != occupied[i] {
 			return false
 		}

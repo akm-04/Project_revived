@@ -250,7 +250,7 @@ func (s Mode) Start(c context.Context, a identity.ActorContext, q Fight, op oper
 			}
 			battle.TeamA = append(battle.TeamA, appcombat.Participant{Origin: cd.Borrowed, Kind: cd.HeroActor, Player: identity.PlayerID(r.Loan.Player), Identity: r.Loan.Unit, LoanHeld: true})
 		} else if q.RentUnit > 0 && q.RentPlayer > 0 {
-			r.Loan = &d.Loan{Player: q.RentPlayer, Unit: q.RentUnit}
+			r.Loan = &d.Loan{Player: q.RentPlayer, Unit: q.RentUnit, Health: 1}
 			battle.TeamA = append(battle.TeamA, appcombat.Participant{Origin: cd.Borrowed, Kind: cd.HeroActor, Player: identity.PlayerID(q.RentPlayer), Identity: q.RentUnit})
 		}
 		enemies := []appcombat.Participant{}

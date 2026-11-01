@@ -44,8 +44,16 @@ func TestMarchReportStockVariantsAndNumericBoundary(t *testing.T) {
 			}
 		})
 	}
-	if marchFailure(d.ErrRefused).HTTPStatus != http.StatusOK || marchFailure(d.ErrInvalid).HTTPStatus != http.StatusBadRequest || marchFailure(&receipt.ConflictError{}).HTTPStatus != http.StatusBadRequest {
+	if marchFailure(336, d.ErrRefused).HTTPStatus != http.StatusOK || marchFailure(336, d.ErrInvalid).HTTPStatus != http.StatusBadRequest || marchFailure(336, &receipt.ConflictError{}).HTTPStatus != http.StatusBadRequest {
 		t.Fatal("F4 status shape")
+	}
+	for _, mid := range []uint16{340, 342} {
+		if ref := marchFailure(mid, d.ErrRefused); ref.HTTPStatus != http.StatusConflict || ref.Body["error_code"] != int64(1) {
+			t.Fatalf("MID %d refusal reached the OK callback", mid)
+		}
+	}
+	if ref := marchFailure(336, d.ErrRefused); ref.HTTPStatus != http.StatusOK || ref.Body["error_code"] != 1 {
+		t.Fatal("other MIDs keep the stock refusal body")
 	}
 }
 

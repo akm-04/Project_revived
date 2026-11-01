@@ -40,7 +40,7 @@ func (m MarchDispatcher) Dispatch(c context.Context, r httpedge.DispatchRequest)
 		return *fail
 	}
 	if m.Service == nil {
-		return marchFailure(d.ErrUnavailable)
+		return marchFailure(r.Envelope.MID, d.ErrUnavailable)
 	}
 	p, op := r.Envelope.Params, r.Envelope.Operation
 	bad := badHero("march_invalid_parameter")
@@ -101,7 +101,7 @@ func (m MarchDispatcher) Dispatch(c context.Context, r httpedge.DispatchRequest)
 		return bad
 	}
 	if err != nil {
-		return marchFailure(err)
+		return marchFailure(r.Envelope.MID, err)
 	}
 	return okI5(body)
 }
@@ -186,12 +186,20 @@ func marchNumber(raw any) (float64, bool) {
 	value, err := strconv.ParseFloat(fmt.Sprint(raw), 64)
 	return value, err == nil && !math.IsNaN(value) && !math.IsInf(value, 0) && value >= 0
 }
-func marchFailure(err error) httpedge.Response {
+func marchFailure(mid uint16, err error) httpedge.Response {
 	var conflict *receipt.ConflictError
 	if errors.Is(err, d.ErrInvalid) || errors.As(err, &conflict) {
 		return badHero("march_invalid_parameter")
 	}
+	if errors.Is(err, cd.ErrLoanRefused) {
+		return conflictRefusal(1)
+	}
 	if errors.Is(err, d.ErrRefused) || errors.Is(err, cd.ErrStartConflict) {
+		// 340's and 342's callbacks treat any 200 as success: 340 pushes a battle
+		// the server never froze and 342 indexes power_drink (MarchSweepWindow.lua:159).
+		if mid == 340 || mid == 342 {
+			return conflictRefusal(1)
+		}
 		return httpedge.Response{HTTPStatus: http.StatusOK, Body: map[string]any{"error_code": 1}}
 	}
 	return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: err, Body: map[string]any{"error": "march_operation_failed"}}

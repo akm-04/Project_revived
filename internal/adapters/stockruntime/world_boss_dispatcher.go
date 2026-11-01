@@ -10,6 +10,7 @@ import (
 
 	rt "gxb.local/backend/v2/internal/application/realtimeauth"
 	app "gxb.local/backend/v2/internal/application/worldboss"
+	cd "gxb.local/backend/v2/internal/domain/combat"
 	"gxb.local/backend/v2/internal/domain/economy"
 	"gxb.local/backend/v2/internal/domain/identity"
 	d "gxb.local/backend/v2/internal/domain/worldboss"
@@ -166,6 +167,9 @@ func failWorldBoss(err error) httpedge.Response {
 	var conflict *receipt.ConflictError
 	if errors.Is(err, d.ErrInvalid) || errors.As(err, &conflict) {
 		return badHero("world_boss_invalid_parameter")
+	}
+	if errors.Is(err, cd.ErrLoanRefused) {
+		return conflictRefusal(1)
 	}
 	if errors.Is(err, d.ErrRefused) || errors.Is(err, economy.ErrInsufficientBalance) {
 		return okI5(map[string]any{"error_code": int64(1)})

@@ -61,8 +61,10 @@ func main() {
 
 // scenario is one I8.5-5 scenario (D55): a provisioned player (D56), steps after MainScene and what the run must show.
 type scenario struct {
-	FriendFixture bool   `json:"friend_fixture"`
-	Name          string `json:"name"`
+	FriendFixture bool `json:"friend_fixture"`
+	// GuildRentalFixture births the peer that joins the guild and lends one girl.
+	GuildRentalFixture bool   `json:"guild_rental_fixture"`
+	Name               string `json:"name"`
 	// Level and Heroes progress the player stock MID1 births; the stock client then summons each hero through MID59.
 	Level  int64        `json:"level"`
 	VIP    int64        `json:"vip"`
@@ -115,6 +117,7 @@ type run struct {
 	taps                                                                []string
 	scenario                                                            scenario
 	account                                                             string
+	peerAccount                                                         string
 }
 
 // expandTaps reads the -taps list, where "target*N" stands for N taps on target.
@@ -234,13 +237,16 @@ func (run run) play() ([]string, error) {
 			return nil, err
 		}
 	}
-	if run.scenario.FriendFixture {
+	if run.scenario.FriendFixture || run.scenario.GuildRentalFixture {
 		peer, err := run.bornPeer(ctx, secret)
 		if err != nil {
-			return nil, fmt.Errorf("friend peer: %w", err)
+			return nil, fmt.Errorf("peer: %w", err)
 		}
-		if err := provision.FriendFixture(ctx, run.databaseURL, session.AccountID, peer); err != nil {
-			return nil, err
+		run.peerAccount = peer
+		if run.scenario.FriendFixture {
+			if err := provision.FriendFixture(ctx, run.databaseURL, session.AccountID, peer); err != nil {
+				return nil, err
+			}
 		}
 	}
 	groups, resumeFiles := [][]string{{}}, []string{""}
@@ -401,6 +407,8 @@ func (run run) step(virtual *client.Client, step string) error {
 			return provision.OneOnOneCoolingFixture(context.Background(), run.databaseURL, run.account)
 		case "strong_team":
 			return provision.StrongTeamFixture(context.Background(), run.databaseURL, run.account)
+		case "guild_rental_lender":
+			return provision.GuildRentalLenderFixture(context.Background(), run.databaseURL, run.account, run.peerAccount)
 		}
 		return fmt.Errorf("unknown fixture %q", argument)
 	case "wait":

@@ -8,6 +8,7 @@ import (
 	app "gxb.local/backend/v2/internal/application/campaign"
 	rt "gxb.local/backend/v2/internal/application/realtimeauth"
 	d "gxb.local/backend/v2/internal/domain/campaign"
+	cd "gxb.local/backend/v2/internal/domain/combat"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/receipt"
@@ -225,6 +226,9 @@ func failCampaign(err error) httpedge.Response {
 	var conflict *receipt.ConflictError
 	if errors.Is(err, d.ErrInvalid) || errors.As(err, &conflict) {
 		return badHero("campaign_invalid_parameter")
+	}
+	if errors.Is(err, cd.ErrLoanRefused) {
+		return conflictRefusal(1)
 	}
 	if errors.Is(err, d.ErrRefused) {
 		return httpedge.Response{HTTPStatus: http.StatusOK, Body: map[string]any{"error_code": int64(1)}}

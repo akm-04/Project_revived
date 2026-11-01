@@ -90,6 +90,10 @@ func (f *freezer) freeze(ctx context.Context, locator d.Locator, request BattleR
 	if battle.TeamA, err = f.actors(ctx, locator, request.TeamA, d.HeroActor); err != nil {
 		return d.Snapshot{}, err
 	}
+	// C11 rule 12: a borrowed girl cannot share a table with a deployed girl.
+	if borrowedTableCollision(battle.TeamA) {
+		return d.Snapshot{}, d.ErrLoanRefused
+	}
 	if battle.PetsA, err = f.actors(ctx, locator, request.PetsA, d.PetActor); err != nil {
 		return d.Snapshot{}, err
 	}
@@ -117,6 +121,21 @@ func (f *freezer) freeze(ctx context.Context, locator d.Locator, request BattleR
 		snapshot.ProducerProfile = d.ProducerProfileID
 	}
 	return snapshot, snapshot.Validate()
+}
+
+func borrowedTableCollision(actors []d.Actor) bool {
+	deployed := map[int64]bool{}
+	for _, actor := range actors {
+		if actor.Origin != d.Borrowed {
+			deployed[actor.TableID] = true
+		}
+	}
+	for _, actor := range actors {
+		if actor.Origin == d.Borrowed && deployed[actor.TableID] {
+			return true
+		}
+	}
+	return false
 }
 
 func battlePlayer(request BattleRequest, pid identity.PlayerID) bool {

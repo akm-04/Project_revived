@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"gxb.local/backend/v2/internal/adapters/postgres/characterstore"
+	"gxb.local/backend/v2/internal/adapters/postgres/contentstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/i4store"
 	"gxb.local/backend/v2/internal/adapters/postgres/i5store"
 	"gxb.local/backend/v2/internal/adapters/postgres/kernelstore"
@@ -144,7 +145,17 @@ func (Characters) HeroTx(c context.Context, q tx.Queryer, pid identity.PlayerID,
 	if errors.Is(err, kernelstore.ErrNoRows) {
 		return character.Hero{}, false, nil
 	}
-	return h, err == nil, err
+	if err != nil {
+		return character.Hero{}, false, err
+	}
+	// The hero row carries no Kind; the stock projector validates it against the
+	// hero's own creating content revision.
+	kind, err := (contentstore.Store{}).HeroKindTx(c, q, h.CreationContentRevision, h.TableID)
+	if err != nil {
+		return character.Hero{}, false, err
+	}
+	h.Kind = kind
+	return h, true, nil
 }
 
 func (Characters) PetTx(c context.Context, q tx.Queryer, pid identity.PlayerID, petID int64) (character.Pet, bool, error) {

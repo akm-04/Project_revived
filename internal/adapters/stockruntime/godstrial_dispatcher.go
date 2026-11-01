@@ -6,6 +6,7 @@ import (
 	pet "gxb.local/backend/v2/internal/application/characterpet"
 	app "gxb.local/backend/v2/internal/application/godstrial"
 	rt "gxb.local/backend/v2/internal/application/realtimeauth"
+	cd "gxb.local/backend/v2/internal/domain/combat"
 	"gxb.local/backend/v2/internal/domain/economy"
 	d "gxb.local/backend/v2/internal/domain/godstrial"
 	"gxb.local/backend/v2/internal/domain/identity"
@@ -106,6 +107,9 @@ func (m GodsTrialDispatcher) Dispatch(c context.Context, r httpedge.DispatchRequ
 		var conflict *receipt.ConflictError
 		if errors.Is(e, d.ErrInvalid) || errors.As(e, &conflict) {
 			return bad
+		}
+		if errors.Is(e, cd.ErrLoanRefused) {
+			return conflictRefusal(1)
 		}
 		if errors.Is(e, d.ErrRefused) || errors.Is(e, economy.ErrInsufficientBalance) || errors.Is(e, pet.ErrPetNotFound) {
 			return okI5(map[string]any{"error_code": int64(1)})

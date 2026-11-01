@@ -47,8 +47,11 @@ type Enemy struct {
 
 // Loan is the one borrowed girl a run holds to its end (I9_GUILD_RENTAL_V1 C12).
 type Loan struct {
-	Player int64 `json:"player_id"`
-	Unit   int64 `json:"unit_id"`
+	Player int64   `json:"player_id"`
+	Unit   int64   `json:"unit_id"`
+	Health int64   `json:"health"`
+	HP     float64 `json:"hp"`
+	MP     float64 `json:"mp"`
 }
 
 type Run struct {
@@ -139,6 +142,12 @@ func (r *Run) ApplyReport(report cd.Report, drinks int64) error {
 		if s.HP <= 0 {
 			health = 2
 		}
+		// Partner ids are per-player, so the borrowed girl's status cannot live in
+		// r.Heroes: it may collide with one of the borrower's own partner ids.
+		if r.Loan != nil && s.Player == r.Loan.Player && s.Identity == r.Loan.Unit {
+			r.Loan.Health, r.Loan.HP, r.Loan.MP = health, s.HP, s.MP
+			continue
+		}
 		r.Heroes[strconv.FormatInt(s.Identity, 10)] = Status{Hero: s.Identity, Player: s.Player, Health: health, HP: s.HP, MP: s.MP, Reborn: s.Reborn}
 	}
 	if int64(len(r.Enemies)) < r.NextStage() {
@@ -226,11 +235,7 @@ func (r Run) rentList() map[string]any {
 	if r.Loan == nil {
 		return map[string]any{}
 	}
-	status, ok := r.Heroes[strconv.FormatInt(r.Loan.Unit, 10)]
-	if !ok {
-		return map[string]any{}
-	}
-	return map[string]any{"health": status.Health, "hp": status.HP, "mp": status.MP}
+	return map[string]any{strconv.FormatInt(r.Loan.Unit, 10): map[string]any{"health": r.Loan.Health, "hp": r.Loan.HP, "mp": r.Loan.MP}}
 }
 
 // Stock indexes heroes numerically in both MarchTeamInfo and result merges.
