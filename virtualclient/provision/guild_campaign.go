@@ -27,10 +27,6 @@ func GuildCampaignFixture(requestContext context.Context, databaseURL, accountID
 	if _, err := pool.Raw().Exec(requestContext, `UPDATE player_directory_profiles SET lev=GREATEST(lev,41),updated_at=clock_timestamp() WHERE player_id=$1`, player); err != nil {
 		return err
 	}
-	if _, err := pool.Raw().Exec(requestContext, `INSERT INTO guild_memberships(player_id,guild_id,role,joined_at,membership_version,state_version,updated_at)
-		SELECT $1,m.guild_id,1,clock_timestamp(),1,1,clock_timestamp() FROM guild_memberships m WHERE m.player_id=$1 LIMIT 1`, player); err != nil {
-		return err
-	}
 	day := (time.Now().Unix() + 8*3600 - 5*3600) / 86400
 	for offset := int64(0); offset < 40; offset++ {
 		if _, err := pool.Raw().Exec(requestContext, `INSERT INTO player_guild_activity_days(player_id,game_day,amount)VALUES($1,$2,1000)
