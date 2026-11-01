@@ -2,6 +2,8 @@ package occult
 
 import (
 	"encoding/json"
+	"fmt"
+	"math"
 	"slices"
 )
 
@@ -217,8 +219,57 @@ func (s *RunState) Conclude(reportKey string) {
 	s.Team.ReportKey = reportKey
 }
 
-// ApplyTeamResult empties the stage and adds the score on a win.
-func (s *RunState) ApplyTeamResult(star int64) (SoloResult, error) {
+// TeamHeroStatus is one girl's end state in a server-resolved team fight.
+type TeamHeroStatus struct {
+	PlayerID, HeroID int64
+	HP, MP           float64
+	LimitHP          int64
+}
+
+// RecordTeamHeroes saves the girls' end states (client rule 6). CanField bounds
+// the dispatch limit at selection, so a resolved fight always records.
+func (s *RunState) RecordTeamHeroes(heroes []TeamHeroStatus) {
+	for _, hero := range heroes {
+		hp := int64(math.Ceil(max(hero.HP, 0)))
+		status := HeroStatus{HP: hp, MP: clamp(int64(hero.MP), 0, MaxEnergy), LimitHP: max(hero.LimitHP, hp)}
+		if s.HeroStatus == nil {
+			s.HeroStatus = map[string]map[string]HeroStatus{}
+		}
+		if s.HeroStatus[key(hero.PlayerID)] == nil {
+			s.HeroStatus[key(hero.PlayerID)] = map[string]HeroStatus{}
+		}
+		s.HeroStatus[key(hero.PlayerID)][key(hero.HeroID)] = status
+	}
+}
+
+// CanField refuses a dead girl, and a pick that would take the player past the
+// dispatch limit (Occult.checkIsDispatchFull). position is 1-based.
+func (s RunState) CanField(playerID, heroID int64, position int, picked []int64) error {
+	if status, recorded := s.Status(playerID, heroID); recorded && status.HP <= 0 {
+		return fmt.Errorf("%w: hero %d is dead", ErrRefused, heroID)
+	}
+	fresh := map[int64]bool{}
+	for index, other := range picked {
+		if index != position-1 && other != 0 {
+			fresh[other] = true
+		}
+	}
+	fresh[heroID] = true
+	for id := range fresh {
+		if _, recorded := s.Status(playerID, id); recorded {
+			delete(fresh, id)
+		}
+	}
+	if int64(len(fresh)+len(s.HeroStatus[key(playerID)])) > s.DispatchLimit {
+		return fmt.Errorf("%w: dispatch limit", ErrRefused)
+	}
+	return nil
+}
+
+// ApplyTeamResult empties the stage and adds the score on a win. A loss keeps
+// the monsters' end states; without any (an attempt started before the carry
+// existed) the stage stays as it was.
+func (s *RunState) ApplyTeamResult(star int64, enemies map[string]EnemyStatus) (SoloResult, error) {
 	index := int(s.Team.SubID) - 1
 	stage, err := s.stage(s.Team.CampaignID, index)
 	if err != nil {
@@ -229,7 +280,18 @@ func (s *RunState) ApplyTeamResult(star int64) (SoloResult, error) {
 	result.Won = result.Star > 0
 	if result.Won {
 		stage.HP = 0
+		stage.Enemies = nil
 		s.Points += result.Score
+		return result, nil
 	}
+	if len(enemies) == 0 {
+		return result, nil
+	}
+	remaining := 0.0
+	for _, enemy := range enemies {
+		remaining += enemy.HP
+	}
+	stage.Enemies = enemies
+	stage.HP = clamp(int64(remaining), 1, stage.TotalHP)
 	return result, nil
 }

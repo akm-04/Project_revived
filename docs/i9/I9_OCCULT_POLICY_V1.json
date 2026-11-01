@@ -55,11 +55,18 @@
     "ranks": false
   },
   "awakening_fragment": {
-    "quantity": 1,
+    "quantity": 30,
+    "quantity_source": "creats_chapter_select.awaken_nums, every route; user confirms constant",
     "per": "clear_or_sweep",
     "gate": "matching stage-1 ordinary awakening mission active",
-    "table_quantity_30": "display_only",
     "obligation": "I9-AWAKEN-OCCULT-ORIGINS"
+  },
+  "team_fight_carry": {
+    "source": "client rule 6, translation.lua:25889; user correction 2026-11-01",
+    "enemies": "every monster keeps its end HP and MP after a loss or timeout; a win clears them",
+    "girls": "every fielded girl keeps her end HP and MP; a dead girl cannot be selected; the dispatch limit applies",
+    "pets": "energy recalculated each battle",
+    "mechanism": "MEMOIR_CARRY_V1 enemy_status and member_status"
   },
   "reports": {
     "retention_days": 7,

@@ -116,7 +116,7 @@ func openCampaigns(catalog d.Catalog, state d.RunState) map[string]any {
 func selfDispatch(state d.RunState, playerID int64) map[string]any {
 	dispatch := map[string]any{}
 	for heroKey, status := range state.HeroStatus[numberKey(playerID)] {
-		dispatch[heroKey] = map[string]any{"hp": status.HP, "mp": status.MP}
+		dispatch[heroKey] = map[string]any{"hp": status.HP, "total_hp": status.LimitHP, "mp": status.MP}
 	}
 	return dispatch
 }

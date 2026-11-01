@@ -316,6 +316,122 @@ func TestI9_8COccultTeamFightNative(t *testing.T) {
 	}
 }
 
+// A lost team fight saves the enemies' and the girls' end states (client rule 6,
+// the user's memory of the original server): the next battle starts from them and
+// a dead girl cannot be sent again.
+func TestI9_8COccultTeamLossKeepsStatusNative(t *testing.T) {
+	p := pool(t)
+	server := rankingServer(t, p)
+	a, aPicks := occultTeamOwner(t, p, server, 2, 10001002, 10001005)
+	b, bPicks := occultTeamOwner(t, p, server, 2, 10001003, 10001006)
+	c, cPicks := occultTeamOwner(t, p, server, 2, 10001004, 10001007)
+	s, clock := occultTestMode(t, p)
+	created, err := s.CreateTeam(ctx, a, 2, op())
+	if err != nil {
+		t.Fatal(err)
+	}
+	roomID := occultRoomID(t, created)
+	for _, member := range []identity.ActorContext{b, c} {
+		if _, err = s.JoinRoom(ctx, member, roomID, op()); err != nil {
+			t.Fatal("join", err)
+		}
+	}
+	if _, err = s.StartChallenge(ctx, a, op()); err != nil {
+		t.Fatal("challenge", err)
+	}
+	type fighterRow struct {
+		Initial map[string]any `json:"health_status"`
+		Hero    struct {
+			TableID int64 `json:"table_id"`
+		} `json:"hero"`
+	}
+	type reportBody struct {
+		Star    int64                 `json:"star"`
+		Fighter map[string]fighterRow `json:"fighter"`
+	}
+	members := []identity.ActorContext{a, b, c}
+	picks := [][]int64{aPicks, bPicks, cPicks}
+	invite := func() {
+		t.Helper()
+		clock.Set(clock.at.Add(2 * time.Second))
+		if _, err := s.TeamInvite(ctx, a, 20002, 1, op()); err != nil {
+			t.Fatal("invite fight", err)
+		}
+		for _, member := range members[1:] {
+			if _, err := s.TeamAccept(ctx, member, 20002, 1, true, op()); err != nil {
+				t.Fatal("accept", err)
+			}
+		}
+	}
+	fight := func(pick int) reportBody {
+		t.Helper()
+		invite()
+		for index, member := range members {
+			request := oc.FormationRequest{CampaignID: 20002, SubID: 1, PartnerID: picks[index][pick], Position: 1}
+			if _, err := s.TeamSelect(ctx, member, request, op()); err != nil {
+				t.Fatal("select", err)
+			}
+			if _, err := s.TeamPrepare(ctx, member, 20002, 1, op()); err != nil {
+				t.Fatal("prepare", err)
+			}
+		}
+		body, err := s.StartTeamFight(ctx, a, 20002, 1, op())
+		if err != nil {
+			t.Fatal("start team fight", err)
+		}
+		var report reportBody
+		if err = json.Unmarshal([]byte(occultTeamReport(t, body)), &report); err != nil {
+			t.Fatal(err)
+		}
+		return report
+	}
+	enemies := func() map[string]d.EnemyStatus {
+		t.Helper()
+		return occultRoomState(t, p, roomID).Stages[keyOf(20002)][0].Enemies
+	}
+	if first := fight(0); first.Star != 0 {
+		t.Fatalf("three level-one girls must lose this stage: star %d", first.Star)
+	}
+	lost := enemies()
+	if len(lost) != 5 {
+		t.Fatalf("a loss saves every monster: %+v", lost)
+	}
+	state := occultRoomState(t, p, roomID)
+	for index, member := range members {
+		status, recorded := state.Status(int64(member.PlayerID), picks[index][0])
+		if !recorded || status.HP != 0 || status.LimitHP <= 0 {
+			t.Fatalf("member %d girl %+v recorded %v", index, status, recorded)
+		}
+	}
+	invite()
+	if _, err = s.TeamSelect(ctx, a, oc.FormationRequest{CampaignID: 20002, SubID: 1, PartnerID: aPicks[0], Position: 1}, op()); !errors.Is(err, d.ErrRefused) {
+		t.Fatal("a dead girl was sent again", err)
+	}
+	if _, err = s.TeamQuit(ctx, a, 20002, 1, op()); err != nil {
+		t.Fatal("quit", err)
+	}
+	second := fight(1)
+	carried := 0
+	for key, row := range second.Fighter {
+		saved, isSaved := lost[keyOf(row.Hero.TableID)]
+		if key[0] != 'B' || !isSaved {
+			continue
+		}
+		if row.Initial["hp"] != saved.HP || row.Initial["mp"] != saved.MP {
+			t.Fatalf("monster %s started at %v, saved %+v", key, row.Initial, saved)
+		}
+		carried++
+	}
+	if carried != 5 {
+		t.Fatalf("carried %d monsters of 5: %+v", carried, lost)
+	}
+	for table, after := range enemies() {
+		if after.HP > lost[table].HP {
+			t.Fatalf("monster %s healed %v -> %v", table, lost[table].HP, after.HP)
+		}
+	}
+}
+
 func TestI9_8COccultTeamConcurrentJoinNative(t *testing.T) {
 	p := pool(t)
 	server := rankingServer(t, p)

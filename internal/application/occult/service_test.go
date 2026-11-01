@@ -98,7 +98,7 @@ func TestFragmentIsFrozenOnlyForAnActiveRouteAndRevalidatedAtSettle(t *testing.T
 		t.Fatalf("freeze: %v %v", err, view.state.Frozen)
 	}
 	fragment, err := pinned.frozenFragment(context.Background(), scope, actor(), view)
-	if err != nil || fragment == nil || *fragment != (d.Reward{ItemID: 60001170, Quantity: 1}) {
+	if err != nil || fragment == nil || *fragment != (d.Reward{ItemID: 60001170, Quantity: 30}) {
 		t.Fatalf("fragment=%v err=%v", fragment, err)
 	}
 

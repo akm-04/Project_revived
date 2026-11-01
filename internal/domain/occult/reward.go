@@ -32,11 +32,11 @@ func (c Catalog) SweepRewards(chapterID int64) ([]Reward, error) {
 	return rewards, nil
 }
 
-// FragmentReward is the single awakening fragment of an active route.
+// FragmentReward is the awakening fragment grant of an active route.
 func (c Catalog) FragmentReward(missionID, chapterID int64) (Reward, bool) {
 	route, ok := c.RouteFor(missionID, chapterID)
 	if !ok {
 		return Reward{}, false
 	}
-	return Reward{ItemID: route.FragmentItem, Quantity: 1}, true
+	return Reward{ItemID: route.FragmentItem, Quantity: FragmentQuantity}, true
 }

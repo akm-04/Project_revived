@@ -81,6 +81,15 @@ func (o Occurrence) PhaseAt(at time.Time) Phase {
 	}
 }
 
+// BoardDay is the day the rank board shows: the settled board stays frozen until
+// the next occurrence opens and clears it.
+func (o Occurrence) BoardDay(at time.Time) int64 {
+	if o.SettledOpenDay > 0 && o.PhaseAt(at) == PhaseWaiting {
+		return o.SettledOpenDay
+	}
+	return o.OpenDay
+}
+
 // CanStart refuses new chances and buys outside the open window.
 func (o Occurrence) CanStart(at time.Time) bool {
 	return o.PhaseAt(at) == PhaseOpen

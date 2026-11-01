@@ -133,8 +133,14 @@ func TestKickBlocksRejoinForThisRoomOnly(t *testing.T) {
 	if err := room.Join(11, testStart); !errors.Is(err, ErrKicked) {
 		t.Fatalf("kicked rejoin %v", err)
 	}
+	if err := room.Join(11, testStart.Add(KickCooldown-time.Second)); !errors.Is(err, ErrKicked) {
+		t.Fatalf("rejoin inside the cooldown %v", err)
+	}
 	if err := room.Kick(10, 11, testStart); !errors.Is(err, ErrNotSeated) {
 		t.Fatalf("repeat kick %v", err)
+	}
+	if err := room.Join(11, testStart.Add(KickCooldown)); err != nil || len(room.Members()) != 2 {
+		t.Fatalf("rejoin after the cooldown %v %v", err, room.Members())
 	}
 	other, err := NewRoom(7, "ILLUSION", 4, 3, 10, testStart.Add(time.Hour), json.RawMessage(`{}`), testStart)
 	if err != nil {

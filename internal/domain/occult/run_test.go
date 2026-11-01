@@ -36,7 +36,7 @@ func TestGeneratedCatalogRoutesAndRewards(t *testing.T) {
 		t.Fatal("chapter 1 has no routes")
 	}
 	fragment, _ := catalog.FragmentReward(1171001, 2)
-	if fragment != (Reward{ItemID: 60001170, Quantity: 1}) {
+	if fragment != (Reward{ItemID: 60001170, Quantity: 30}) {
 		t.Fatalf("fragment=%+v", fragment)
 	}
 	clear, err := catalog.ClearRewards(2)

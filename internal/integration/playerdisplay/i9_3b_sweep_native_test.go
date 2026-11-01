@@ -124,7 +124,7 @@ func TestI9_3BSweepReceiptCostsAndResetNative(t *testing.T) {
 	multi, e := s.Sweep(tracked, a, tooMany, op())
 	err = e
 	expectedCards = expectedCards - 10 + rewards(multi)
-	if err != nil || read(cardsSQL) != expectedCards || len(facts.keys) != 10 {
+	if err != nil || read(cardsSQL) != expectedCards || len(facts.keys) != 11 {
 		t.Fatal("multi item", err, len(facts.keys))
 	}
 	crystalBefore := read(crystalSQL)

@@ -6,8 +6,10 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"math"
 	"slices"
 	"strconv"
+	"strings"
 	"time"
 
 	ca "gxb.local/backend/v2/internal/application/characterasset"
@@ -198,6 +200,9 @@ func (s Mode) pickHero(c context.Context, q tx.Queryer, view *roomView, team *d.
 	}
 	if used[tableIDOf(row, request.PartnerID)] {
 		return fmt.Errorf("%w: duplicate hero", d.ErrRefused)
+	}
+	if err = view.state.CanField(int64(player), request.PartnerID, int(request.Position), team.Pick(int64(player)).Heroes); err != nil {
+		return err
 	}
 	raw, err := json.Marshal(row)
 	if err != nil {
@@ -405,8 +410,17 @@ func (s Mode) startTeamAttempt(c context.Context, sc gen.TimedScope, a identity.
 	if err != nil {
 		return cb.Started{}, err
 	}
-	battle := cb.BattleRequest{CampaignType: teamCombatCampaignType, BattleID: campaign.FightIDs[index], WavesB: waves}
+	carried := view.state.StagesOf(team.CampaignID)[index].Enemies
+	if carried == nil {
+		carried = map[string]d.EnemyStatus{}
+	}
 	roster := teamRoster(view, team.StartPlayer)
+	parameters, err := cd.CanonicalJSON(map[string]any{"enemy_status": carried, "member_status": memberStatuses(view.state, team, roster)})
+	if err != nil {
+		return cb.Started{}, err
+	}
+	battle := cb.BattleRequest{CampaignType: teamCombatCampaignType, BattleID: campaign.FightIDs[index], WavesB: waves,
+		Context: &cd.BattleContext{Transform: "MEMOIR_CARRY_V1", Parameters: parameters}}
 	for position, member := range roster {
 		origin := cd.OwnedSelf
 		if position > 0 {
@@ -448,9 +462,16 @@ func (s Mode) settleAttempt(c context.Context, sc gen.TimedScope, a identity.Act
 			return nil, err
 		}
 	}
-	// shortcut: the server holds no monster stats, so a lost fight leaves the stage
-	// HP and the hero status untouched; only a win empties the stage.
-	result, err := view.state.ApplyTeamResult(terminal.Resolution.Outcome.Star)
+	snapshot, err := s.Combat.SnapshotTx(c, sc.Tx, attempt)
+	if err != nil {
+		return nil, err
+	}
+	enemies, members, err := teamEndStates(terminal.Report, snapshot)
+	if err != nil {
+		return nil, err
+	}
+	view.state.RecordTeamHeroes(members)
+	result, err := view.state.ApplyTeamResult(terminal.Resolution.Outcome.Star, enemies)
 	if err != nil {
 		return nil, err
 	}
@@ -490,6 +511,68 @@ func (s Mode) unreadyAll(view *roomView) error {
 		}
 	}
 	return nil
+}
+
+// memberStatuses is each fielded girl's saved status, keyed as MEMOIR_CARRY_V1
+// looks it up. A girl with no saved status starts full.
+func memberStatuses(state d.RunState, team d.TeamFight, roster []identity.PlayerID) map[string]any {
+	statuses := map[string]any{}
+	for _, member := range roster {
+		for _, heroID := range team.Pick(int64(member)).Fielded() {
+			status, recorded := state.Status(int64(member), heroID)
+			if !recorded {
+				continue
+			}
+			statuses[memberStatusKey(int64(member), heroID)] = map[string]any{"hp": status.HP, "mp": status.MP, "is_reborn": 0}
+		}
+	}
+	return statuses
+}
+
+func memberStatusKey(playerID, heroID int64) string {
+	return strconv.FormatInt(playerID, 10) + ":" + strconv.FormatInt(heroID, 10)
+}
+
+// teamEndStates reads MEMOIR_CARRY_V1's end state of each fighter. Monsters are
+// keyed by table id (Occult fights list no monster twice); the girls get their
+// HP limit from the frozen battle.
+func teamEndStates(report []byte, snapshot cd.Snapshot) (map[string]d.EnemyStatus, []d.TeamHeroStatus, error) {
+	var parsed struct {
+		Fighter map[string]struct {
+			Summon int `json:"summon_type"`
+			Hero   struct {
+				TableID   int64 `json:"table_id"`
+				PartnerID int64 `json:"partner_id"`
+				PlayerID  int64 `json:"player_id"`
+			} `json:"hero"`
+			Final *d.EnemyStatus `json:"memoir_final_status"`
+		} `json:"fighter"`
+	}
+	if err := json.Unmarshal(report, &parsed); err != nil {
+		return nil, nil, fmt.Errorf("%w: team report", d.ErrUnavailable)
+	}
+	limits := map[string]int64{}
+	for _, actor := range snapshot.Battle.TeamA {
+		limit, known := cd.FrozenHP(actor.BattleTotals)
+		if actor.Kind == cd.HeroActor && known {
+			limits[memberStatusKey(actor.Player, actor.Identity)] = int64(math.Ceil(limit))
+		}
+	}
+	enemies := map[string]d.EnemyStatus{}
+	members := []d.TeamHeroStatus{}
+	for key, fighter := range parsed.Fighter {
+		if fighter.Summon != 0 || fighter.Final == nil {
+			continue
+		}
+		if strings.HasPrefix(key, "B|") && fighter.Hero.TableID > 0 {
+			enemies[strconv.FormatInt(fighter.Hero.TableID, 10)] = *fighter.Final
+		}
+		if strings.HasPrefix(key, "A|") && fighter.Hero.PartnerID > 0 {
+			members = append(members, d.TeamHeroStatus{PlayerID: fighter.Hero.PlayerID, HeroID: fighter.Hero.PartnerID, HP: fighter.Final.HP, MP: fighter.Final.MP,
+				LimitHP: limits[memberStatusKey(fighter.Hero.PlayerID, fighter.Hero.PartnerID)]})
+		}
+	}
+	return enemies, members, nil
 }
 
 // withStar makes sure the report carries the star the replay window reads.

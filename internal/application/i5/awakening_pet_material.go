@@ -68,7 +68,7 @@ func (s Service) freezeAwakeningMaterialTx(c context.Context, q tx.Queryer, p id
 	}
 	for _, r := range routes {
 		if r.Mission == a.Mission {
-			if r.Item <= 0 || r.Count != 1 {
+			if r.Item <= 0 || !materialCountAllowed(kind, r.Count) {
 				return nil, objective.ErrAwakeningRefused
 			}
 			return &objective.AwakeFrozenDrop{Occurrence: a, ItemID: r.Item, Rate: 10000, Count: r.Count}, nil
@@ -77,8 +77,17 @@ func (s Service) freezeAwakeningMaterialTx(c context.Context, q tx.Queryer, p id
 	return nil, nil
 }
 
+// materialCountAllowed keeps the pet route at its single item; the ordinary
+// route's quantity is the Occult catalog's.
+func materialCountAllowed(kind, count int64) bool {
+	if kind == petAwakeningKind {
+		return count == 1
+	}
+	return count > 0
+}
+
 func (s Service) checkAwakeningMaterialTx(c context.Context, q tx.Queryer, p identity.PlayerID, kind int64, drop objective.AwakeFrozenDrop) (bool, error) {
-	if drop.Occurrence.Validate() != nil || drop.Occurrence.Type != kind || drop.ItemID <= 0 || drop.Count != 1 || drop.Rate != 10000 {
+	if drop.Occurrence.Validate() != nil || drop.Occurrence.Type != kind || drop.ItemID <= 0 || !materialCountAllowed(kind, drop.Count) || drop.Rate != 10000 {
 		return false, objective.ErrAwakeningRefused
 	}
 	root, e := s.Awakening.Store.ReadAwakeningTx(c, q, p)

@@ -332,6 +332,47 @@ func TestI9_8BIllusionSettlementOnceTwoServersNative(t *testing.T) {
 	}
 }
 
+func TestI9_8BIllusionBoardFrozenUntilNextOpeningNative(t *testing.T) {
+	p := pool(t)
+	server := rankingServer(t, p)
+	a, partner := illusionOwner(t, p, server)
+	clock := illusionTime(t)
+	s := illusionService(t, p, clock, illusionPrivileges{level: 3}, illusionGuildSource{})
+	if _, err := s.Start(ctx, a, il.StartRequest{Formation: []int64{partner}}, op()); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := s.Settle(ctx, a, il.ResultRequest{Star: 1, Damage: 1000, CostTime: 10, Formation: []int64{partner}}, op()); err != nil {
+		t.Fatal(err)
+	}
+	board := func() map[string]any {
+		t.Helper()
+		body, err := s.RankList(ctx, a, d.RankPersonal, op())
+		if err != nil {
+			t.Fatal(err)
+		}
+		return body["rank_list"].([]map[string]any)[0]["rank_info"].(map[string]any)["my_rank"].(map[string]any)
+	}
+	if board()["hurt"] != int64(1000) {
+		t.Fatal("open board", board())
+	}
+	settleDay := modes.Day(clock.at)
+	clock.Set(modes.DayBegins(settleDay).Add(17 * time.Hour))
+	if _, err := (il.Reconciler{Service: s}).Reconcile(ctx, mustTimed(t, op(), clock.at), 100); err != nil {
+		t.Fatal(err)
+	}
+	if board()["hurt"] != int64(1000) {
+		t.Fatal("the settled board was cleared at settlement", board())
+	}
+	clock.Set(modes.DayBegins(settleDay + 1).Add(time.Hour))
+	if board()["hurt"] != int64(1000) {
+		t.Fatal("the settled board was cleared on the rest day", board())
+	}
+	clock.Set(modes.DayBegins(settleDay + d.CycleDays).Add(3 * time.Hour))
+	if len(board()) != 0 {
+		t.Fatal("the next opening did not clear the board", board())
+	}
+}
+
 func TestI9_8BIllusionSettlementCommunityBandNative(t *testing.T) {
 	p := pool(t)
 	server := rankingServer(t, p)

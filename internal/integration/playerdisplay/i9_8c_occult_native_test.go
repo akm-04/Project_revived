@@ -483,7 +483,7 @@ func TestI9_8COccultAwakeningFragmentNative(t *testing.T) {
 		t.Fatalf("pinned %s %v", frozen, err)
 	}
 	occultClearChapterTwoSolo(t, p, s, a, []int64{partner})
-	if got := occultItemQuantity(t, p, a.PlayerID, 60001170); got != 1 {
+	if got := occultItemQuantity(t, p, a.PlayerID, 60001170); got != 30 {
 		t.Fatalf("fragment quantity %d", got)
 	}
 	// A relog is a fresh mode instance over the same player rows.
@@ -491,7 +491,7 @@ func TestI9_8COccultAwakeningFragmentNative(t *testing.T) {
 	if _, err = relogged.Info(ctx, a, op()); err != nil {
 		t.Fatal("relog info", err)
 	}
-	if got := occultItemQuantity(t, p, a.PlayerID, 60001170); got != 1 {
+	if got := occultItemQuantity(t, p, a.PlayerID, 60001170); got != 30 {
 		t.Fatalf("fragment after relog %d", got)
 	}
 }

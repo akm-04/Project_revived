@@ -173,6 +173,13 @@ func TestSettlementDueAndAdvance(t *testing.T) {
 	if occurrence.SettlementDue(open.Add(48 * time.Hour)) {
 		t.Fatal("an advanced occurrence settles early")
 	}
+	nextOpen := open.Add(CycleDays * 24 * time.Hour)
+	if occurrence.BoardDay(open.Add(14*time.Hour)) != openDay || occurrence.BoardDay(nextOpen.Add(-time.Second)) != openDay {
+		t.Fatal("the settled board stays until the next opening")
+	}
+	if occurrence.BoardDay(nextOpen) != occurrence.OpenDay {
+		t.Fatal("the next opening clears the board")
+	}
 }
 
 func TestPlayerChancesBuysAndBestHit(t *testing.T) {

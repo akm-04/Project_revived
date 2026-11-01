@@ -28,7 +28,11 @@ func (s Mode) RankList(c context.Context, a identity.ActorContext, subtype int64
 	}
 	results := []d.Result{}
 	if found {
-		if results, err = s.Store.ReadRankTx(c, s.Fresh, occurrence.LogicalServerID, occurrence.OpenDay, rankLimit); err != nil {
+		at, err := s.Timed.Binder.Time.Now(c)
+		if err != nil {
+			return nil, err
+		}
+		if results, err = s.Store.ReadRankTx(c, s.Fresh, occurrence.LogicalServerID, occurrence.BoardDay(at), rankLimit); err != nil {
 			return nil, err
 		}
 	}

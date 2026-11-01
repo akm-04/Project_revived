@@ -48,8 +48,12 @@ const (
 	SeatKicked SeatStage = "KICKED"
 )
 
-// Seat is one ordered slot of a room. A left or kicked player keeps their row,
-// so a kick stays durable for the lifetime of the room.
+// KickCooldown is how long a kicked player stays out of that room. PRIVATE_POLICY:
+// the user recalls 2-3 minutes on the original server.
+const KickCooldown = 3 * time.Minute
+
+// Seat is one ordered slot of a room. A left or kicked player keeps their row.
+// On a kicked seat JoinedAt holds the kick time.
 type Seat struct {
 	Index    int
 	Player   identity.PlayerID
@@ -167,7 +171,7 @@ func (r Room) Members() []identity.PlayerID {
 }
 
 // Join seats a player in the lowest free slot. Rejoining an already seated
-// player is idempotent; a player kicked from this room can never rejoin it.
+// player is idempotent; a kicked player waits out KickCooldown.
 func (r *Room) Join(player identity.PlayerID, at time.Time) error {
 	if err := r.enter(at); err != nil {
 		return err
@@ -180,7 +184,9 @@ func (r *Room) Join(player identity.PlayerID, at time.Time) error {
 		case SeatSeated:
 			return nil
 		case SeatKicked:
-			return ErrKicked
+			if at.Before(r.Seats[index].JoinedAt.Add(KickCooldown)) {
+				return ErrKicked
+			}
 		}
 		if r.activeCount() >= int(r.Capacity) {
 			return ErrFull
@@ -234,8 +240,7 @@ func (r *Room) Leave(player identity.PlayerID, at time.Time) error {
 	return nil
 }
 
-// Kick removes a seated player on the owner's order and blocks that player from
-// rejoining this room.
+// Kick removes a seated player on the owner's order and starts their cooldown.
 func (r *Room) Kick(actor, target identity.PlayerID, at time.Time) error {
 	if err := r.enter(at); err != nil {
 		return err
@@ -250,7 +255,7 @@ func (r *Room) Kick(actor, target identity.PlayerID, at time.Time) error {
 	if index < 0 || r.Seats[index].Stage != SeatSeated {
 		return ErrNotSeated
 	}
-	r.Seats[index].Stage, r.Seats[index].Ready = SeatKicked, false
+	r.Seats[index].Stage, r.Seats[index].Ready, r.Seats[index].JoinedAt = SeatKicked, false, at
 	r.touch(at)
 	return nil
 }

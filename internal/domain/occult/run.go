@@ -9,6 +9,9 @@ const (
 	// MaxEnergy is the client's absolute MP ceiling (ENERGY_DECIMAL_BASE).
 	MaxEnergy = 1000
 	MaxStar   = 3
+	// FragmentQuantity is every creats_chapter_select.awaken_nums value; the user
+	// recalls 30 per raid as constant on the original server.
+	FragmentQuantity = 30
 )
 
 // StageState is one sub-stage of a campaign. InBattle holds the player id
@@ -17,6 +20,16 @@ type StageState struct {
 	HP       int64 `json:"hp"`
 	TotalHP  int64 `json:"total_hp"`
 	InBattle int64 `json:"in_battle"`
+	// Enemies is each monster's end state after a lost team fight, the next
+	// server battle's starting state.
+	Enemies map[string]EnemyStatus `json:"enemies,omitempty"`
+}
+
+// EnemyStatus has the field names MEMOIR_CARRY_V1 reads.
+type EnemyStatus struct {
+	HP     float64 `json:"hp"`
+	MP     float64 `json:"mp"`
+	Reborn int64   `json:"is_reborn"`
 }
 
 // HeroStatus is a hero's remaining status in the units the client posts and

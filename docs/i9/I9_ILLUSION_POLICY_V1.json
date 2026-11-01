@@ -29,7 +29,8 @@
   "rank": {
     "key": "best_single_hit",
     "ties": "shorter_cost_time",
-    "guild": "sum_current_members_daily_best"
+    "guild": "sum_current_members_daily_best",
+    "board_after_settlement": "frozen until the next occurrence opens, which clears it"
   },
   "team": {
     "seats": 3,

@@ -28,7 +28,7 @@ func materialRoutes(catalog d.Catalog, chapterID int64) []i5.MaterialRoute {
 	routes := catalog.RoutesOf(chapterID)
 	out := make([]i5.MaterialRoute, 0, len(routes))
 	for _, route := range routes {
-		out = append(out, i5.MaterialRoute{Mission: route.MissionID, Item: route.FragmentItem, Count: 1})
+		out = append(out, i5.MaterialRoute{Mission: route.MissionID, Item: route.FragmentItem, Count: d.FragmentQuantity})
 	}
 	return out
 }
