@@ -58,14 +58,17 @@ func (d GuildDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRequ
 	if fail != nil {
 		return *fail
 	}
+	// GUILD_RANK answers before any view dependency: the client reads no field
+	// and only checks transport success; refusing suppresses the World Boss
+	// board (I9_GUILD_ACTIVITY_V1 C11).
+	if req.Envelope.MID == 616 {
+		return okGuild(map[string]any{})
+	}
 	if d.View == nil {
 		return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Body: map[string]any{"error": "guild_view_unavailable"}}
 	}
 
 	switch req.Envelope.MID {
-	case 616: // GUILD_RANK: the client reads no field and only checks transport success;
-		// refusing suppresses the World Boss board (I9_GUILD_ACTIVITY_V1 C11).
-		return okGuild(map[string]any{})
 	case 576: // LOAD_ALL_TEAMS
 		rows, err := d.View.Guilds(ctx, actor, 200)
 		if err != nil {

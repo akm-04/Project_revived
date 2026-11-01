@@ -193,7 +193,7 @@ func TestGuildDispatcher616AlwaysAnswersEmptySuccess(t *testing.T) {
 	if r.HTTPStatus != 200 || len(r.Body) != 0 {
 		t.Fatalf("616=%+v", r)
 	}
-	guildless := GuildDispatcher{Authority: httpAuthority{actor}, View: fakeGuildView{}}
+	guildless := GuildDispatcher{Authority: httpAuthority{actor}}
 	if got := guildless.Dispatch(context.Background(), env(616, nil, now)); got.HTTPStatus != 200 || len(got.Body) != 0 {
 		t.Fatalf("616 guildless=%+v", got)
 	}

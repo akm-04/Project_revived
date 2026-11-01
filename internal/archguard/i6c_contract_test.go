@@ -5,6 +5,7 @@ import (
 	"go/token"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strconv"
 	"strings"
 	"testing"
@@ -49,15 +50,30 @@ func TestI6CGuildApplicationKeepsMechanismsAndForeignSQLOut(t *testing.T) {
 
 func TestI6CGuildStoreDoesNotReachIntoI5OwnedTables(t *testing.T) {
 	root := repoRoot(t)
-	b, err := os.ReadFile(filepath.Join(root, "internal", "adapters", "postgres", "guildstore", "store.go"))
+	base := filepath.Join(root, "internal", "adapters", "postgres", "guildstore")
+	foreignTables := []string{"player_currency_balances", "player_progression", "player_temporal_resources", "player_item_stacks", "player_economy_owners", "logical_servers", "players", "gameplay_contexts", "account_sessions"}
+	patterns := make([]*regexp.Regexp, 0, len(foreignTables))
+	for _, table := range foreignTables {
+		patterns = append(patterns, regexp.MustCompile(`(?i)\b(from|join|into|update|delete\s+from)\s+`+table+`\b`))
+	}
+	err := filepath.WalkDir(base, func(path string, d os.DirEntry, err error) error {
+		if err != nil || d.IsDir() || !strings.HasSuffix(path, ".go") {
+			return err
+		}
+		b, readErr := os.ReadFile(path)
+		if readErr != nil {
+			return readErr
+		}
+		relPath, _ := filepath.Rel(root, path)
+		for index, pattern := range patterns {
+			if pattern.Match(b) {
+				t.Errorf("Guild store %s references foreign I5-owned table %q", filepath.ToSlash(relPath), foreignTables[index])
+			}
+		}
+		return nil
+	})
 	if err != nil {
 		t.Fatal(err)
-	}
-	s := string(b)
-	for _, bad := range []string{"player_currency_balances", "player_progression", "player_temporal_resources", "player_item_stacks", "player_economy_owners", "logical_servers", "players", "gameplay_contexts", "account_sessions"} {
-		if strings.Contains(s, bad) {
-			t.Fatalf("Guild store contains foreign I5-owned table %q", bad)
-		}
 	}
 }
 

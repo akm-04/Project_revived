@@ -21,7 +21,7 @@ from pathlib import Path
 from typing import Any, Iterable
 
 SCHEMA_VERSION = 1
-COMPILER_VERSION = "i9-8d-adventure"
+COMPILER_VERSION = "i9-9a-guild-tea"
 PARSER_VERSION = "lua-generated-v18-guild-invite"
 EXPECTED_SOURCE_ARCHIVE_SHA256 = "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
 SOURCE_PREFIX = "app-assets/output/assets/src_64/"
@@ -1044,6 +1044,14 @@ def build_artifacts(blobs: dict[str, SourceBlob], archive_sha256: str) -> dict[s
     resources.append({"catalog_status":"QUALIFIED","class":"SCALAR_CURRENCY",
         "definition_key":"scalar_currency:friendship_coin","resource_key":"friendship_coin",
         "settlement_activation":"ENABLED_R4"})
+    # Tea Party pays friend_medal as a player scalar (SelfPlayer.lua:143,1159,
+    # misc.lua guild_donate_scroll_reward); it has no asset.lua row, so pin a
+    # synthetic negative identity outside the source asset range.
+    if "friend_medal" in asset_by_name:
+        raise CompileError("Tea Party friend_medal named scalar identity drift")
+    resources.append({"catalog_status":"QUALIFIED","class":"SCALAR_CURRENCY",
+        "definition_key":"scalar_currency:friend_medal","resource_key":"friend_medal",
+        "settlement_activation":"ENABLED_R4","source_asset_id":-18})
     # Named Workshop balances are scalar I5 facts, not asset-ID or PlayerEXP identities.
     # Current enums.ECONOMY and SelfPlayer scalar hydration plus source Book costs qualify these four.
     for key in ('magic_dust','magic_liquid','magic_energy','magic_exp','degree_cer','graduate_cer','patent_cer'):

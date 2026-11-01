@@ -4,12 +4,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"time"
 
-	"gxb.local/backend/v2/internal/domain/economy"
 	"gxb.local/backend/v2/internal/domain/grant"
 	"gxb.local/backend/v2/internal/domain/identity"
-	"gxb.local/backend/v2/internal/foundation/lockkey"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/receipt"
 	"gxb.local/backend/v2/internal/foundation/tx"
@@ -32,24 +29,9 @@ var (
 // Restoration is deliberately restricted to stack-item Grant lines. Character
 // owners keep durable transition authority; I5 owns all fungible debit/credit
 // truth and overflow-to-Mail behavior.
-// MaterialCredit is an I5-owned named-scalar credit paid in the same union as a
-// material cost when immutable content defines no resource row for it (the Tea
-// Party friend_medal reward, I9_GUILD_ACTIVITY_V1 C14). The amount is the
-// caller's policy, never content.
-type MaterialCredit struct {
-	ResourceKey string
-	Amount      int64
-}
-
-type preparedMaterialCredit struct {
-	next   economy.ScalarBalance
-	exists bool
-}
-
 type MaterialExchangeRequest struct {
 	Cost              MaterialCost
 	Restoration       grant.Plan
-	Credits           []MaterialCredit
 	AllowOverflowMail bool
 }
 
@@ -72,7 +54,6 @@ type PreparedMaterialExchange struct {
 	grantIdentity    receipt.Identity
 	grantFingerprint [32]byte
 	preparedDebit    MaterialDebitResult
-	preparedCredits  []preparedMaterialCredit
 }
 
 // TxMaterialExchange is the I5-owned Prepare/Apply seam introduced by CA4-1.
@@ -93,35 +74,6 @@ func validateStackOnlyRestoration(plan grant.Plan) error {
 		if line.Kind != grant.StackItem {
 			return fmt.Errorf("material exchange restoration line %d is not stack item", i)
 		}
-	}
-	return nil
-}
-
-// validateExchangeRestoration keeps the CA4-1 stack-only shape and adds the
-// scalar credits a caller-owned mixed cost needs (I9-9A Tea Party pays a
-// friend-medal scalar for a stack debit). Other destinations stay refused.
-func validateExchangeRestoration(plan grant.Plan) error {
-	if err := plan.Validate(); err != nil {
-		return err
-	}
-	for i, line := range plan.Lines {
-		if line.Kind != grant.StackItem && line.Kind != grant.ScalarCurrency {
-			return fmt.Errorf("material exchange restoration line %d is not a supported credit", i)
-		}
-	}
-	return nil
-}
-
-func validateMaterialCredits(credits []MaterialCredit) error {
-	seen := make(map[string]struct{}, len(credits))
-	for _, credit := range credits {
-		if credit.ResourceKey == "" || credit.Amount <= 0 {
-			return errors.New("invalid material credit")
-		}
-		if _, exists := seen[credit.ResourceKey]; exists {
-			return errors.New("duplicate material credit")
-		}
-		seen[credit.ResourceKey] = struct{}{}
 	}
 	return nil
 }
@@ -149,26 +101,17 @@ func (s Service) PrepareMaterialExchangeTx(ctx context.Context, t tx.Tx, actor i
 	if t == nil || !actor.PlayerID.Valid() {
 		return nil, errors.New("material exchange transaction/actor required")
 	}
-	if req.Restoration.PlayerID != 0 && req.Restoration.PlayerID != actor.PlayerID {
+	if req.Restoration.PlayerID != actor.PlayerID {
 		return nil, errors.New("material exchange actor/player mismatch")
 	}
 	if err := req.Cost.validate(); err != nil {
 		return nil, err
 	}
-	if err := validateMaterialCredits(req.Credits); err != nil {
+	if err := validateStackOnlyRestoration(req.Restoration); err != nil {
 		return nil, err
 	}
-	hasRestoration := req.Restoration.PlayerID != 0
-	if !hasRestoration && len(req.Credits) == 0 {
-		return nil, errors.New("material exchange has no restoration or credit")
-	}
-	if hasRestoration {
-		if err := validateExchangeRestoration(req.Restoration); err != nil {
-			return nil, err
-		}
-		if err := rejectMaterialExchangeCollisions(req.Cost, req.Restoration); err != nil {
-			return nil, err
-		}
+	if err := rejectMaterialExchangeCollisions(req.Cost, req.Restoration); err != nil {
+		return nil, err
 	}
 
 	contentRevision, err := requireContentRevision(op)
@@ -180,24 +123,21 @@ func (s Service) PrepareMaterialExchangeTx(ctx context.Context, t tx.Tx, actor i
 		return nil, errors.New("material exchange requires operation time")
 	}
 
-	var grantID receipt.Identity
-	var grantFP [32]byte
-	if hasRestoration {
-		grantID, _, err = req.Restoration.ReceiptIdentities()
-		if err != nil {
-			return nil, err
-		}
-		grantFP, err = receiptFingerprintForGrant(req.Restoration)
-		if err != nil {
-			return nil, err
-		}
-		// Fail before acquiring debit locks when the nested entitlement already has
-		// terminal evidence. I5 must never "skip grant but still debit".
-		if _, ok, err := s.findGrantReceiptTx(ctx, t, req.Restoration, grantFP); err != nil {
-			return nil, err
-		} else if ok {
-			return nil, ErrMaterialExchangeGrantAlreadySettled
-		}
+	grantID, _, err := req.Restoration.ReceiptIdentities()
+	if err != nil {
+		return nil, err
+	}
+	grantFP, err := receiptFingerprintForGrant(req.Restoration)
+	if err != nil {
+		return nil, err
+	}
+	// Fail before acquiring debit locks when the nested entitlement already has
+	// terminal evidence. The outer Character caller decides how to reconcile its
+	// own receipt/state; I5 must never "skip grant but still debit".
+	if _, ok, err := s.findGrantReceiptTx(ctx, t, req.Restoration, grantFP); err != nil {
+		return nil, err
+	} else if ok {
+		return nil, ErrMaterialExchangeGrantAlreadySettled
 	}
 
 	debiter := MaterialCostDebiter{Store: s.Store, Content: s.Content}
@@ -205,26 +145,13 @@ func (s Service) PrepareMaterialExchangeTx(ctx context.Context, t tx.Tx, actor i
 	if err != nil {
 		return nil, err
 	}
-	var grantPF grantPreflight
-	if hasRestoration {
-		grantPF, err = s.preflightGrantTx(ctx, t, req.Restoration, contentRevision, grantPreflightOptions{AllowOverflowMail: req.AllowOverflowMail}, now)
-		if err != nil {
-			return nil, err
-		}
+	grantPF, err := s.preflightGrantTx(ctx, t, req.Restoration, contentRevision, grantPreflightOptions{AllowOverflowMail: req.AllowOverflowMail}, now)
+	if err != nil {
+		return nil, err
 	}
-	union := make([]grantLockRequirement, 0, len(costPF.Locks)+len(grantPF.Locks)+len(req.Credits)+1)
+	union := make([]grantLockRequirement, 0, len(costPF.Locks)+len(grantPF.Locks))
 	union = append(union, costPF.Locks...)
 	union = append(union, grantPF.Locks...)
-	if len(req.Credits) > 0 {
-		if err := appendGrantLock(&union, grantLockRankEconomyOwner, "i5.economy-owner", lockkey.Int64(int64(actor.PlayerID)), grantLockEconomyOwner, "", 0, 0); err != nil {
-			return nil, err
-		}
-		for _, credit := range req.Credits {
-			if err := appendGrantLock(&union, grantLockRankScalar, "i5.scalar", grantChildIdentity(actor.PlayerID, credit.ResourceKey), grantLockScalar, credit.ResourceKey, 0, 0); err != nil {
-				return nil, err
-			}
-		}
-	}
 	union, err = canonicalGrantLockRequirements(union)
 	if err != nil {
 		return nil, err
@@ -239,18 +166,12 @@ func (s Service) PrepareMaterialExchangeTx(ctx context.Context, t tx.Tx, actor i
 	}
 	// A waiter may have observed no receipt before blocking and resume after a
 	// winning transaction commits. Recheck while the complete union is held.
-	if hasRestoration {
-		if _, ok, err := s.findGrantReceiptTx(ctx, t, req.Restoration, grantFP); err != nil {
-			return nil, err
-		} else if ok {
-			return nil, ErrMaterialExchangeGrantAlreadySettled
-		}
+	if _, ok, err := s.findGrantReceiptTx(ctx, t, req.Restoration, grantFP); err != nil {
+		return nil, err
+	} else if ok {
+		return nil, ErrMaterialExchangeGrantAlreadySettled
 	}
 	preparedDebit, err := debiter.prepareMaterialDebitStateTx(ctx, t, actor.PlayerID, costPF)
-	if err != nil {
-		return nil, err
-	}
-	preparedCredits, err := s.prepareMaterialCreditsTx(ctx, t, actor.PlayerID, req.Credits, now)
 	if err != nil {
 		return nil, err
 	}
@@ -265,34 +186,7 @@ func (s Service) PrepareMaterialExchangeTx(ctx context.Context, t tx.Tx, actor i
 		grantIdentity:    grantID,
 		grantFingerprint: grantFP,
 		preparedDebit:    preparedDebit,
-		preparedCredits:  preparedCredits,
 	}, nil
-}
-
-// prepareMaterialCreditsTx computes named-scalar credits on locks already held
-// by Prepare; it writes nothing and acquires nothing.
-func (s Service) prepareMaterialCreditsTx(ctx context.Context, t tx.Tx, pid identity.PlayerID, credits []MaterialCredit, now time.Time) ([]preparedMaterialCredit, error) {
-	out := make([]preparedMaterialCredit, 0, len(credits))
-	for _, credit := range credits {
-		current, exists, err := s.Store.LockScalarTx(ctx, t, pid, credit.ResourceKey, now)
-		if err != nil {
-			return nil, err
-		}
-		if !exists {
-			current = economy.ScalarBalance{PlayerID: pid, ResourceKey: credit.ResourceKey, Amount: credit.Amount, StateVersion: 1, UpdatedAt: now}
-			if err := current.Validate(); err != nil {
-				return nil, err
-			}
-			out = append(out, preparedMaterialCredit{next: current, exists: false})
-			continue
-		}
-		next, err := current.Credit(credit.Amount, now)
-		if err != nil {
-			return nil, err
-		}
-		out = append(out, preparedMaterialCredit{next: next, exists: true})
-	}
-	return out, nil
 }
 
 // ApplyMaterialExchangeTx applies only the identities/effects closed by
@@ -305,33 +199,20 @@ func (s Service) ApplyMaterialExchangeTx(ctx context.Context, t tx.Tx, prepared 
 	if t == nil || prepared == nil || !prepared.playerID.Valid() {
 		return MaterialExchangeResult{}, errors.New("prepared material exchange required")
 	}
-	if prepared.request.Restoration.PlayerID != 0 {
-		// Defensive same-transaction replay check before the first write.
-		if _, ok, err := s.findGrantReceiptTx(ctx, t, prepared.request.Restoration, prepared.grantFingerprint); err != nil {
-			return MaterialExchangeResult{}, err
-		} else if ok {
-			return MaterialExchangeResult{}, ErrMaterialExchangeGrantAlreadySettled
-		}
+	// Defensive same-transaction replay check before the first write.
+	if _, ok, err := s.findGrantReceiptTx(ctx, t, prepared.request.Restoration, prepared.grantFingerprint); err != nil {
+		return MaterialExchangeResult{}, err
+	} else if ok {
+		return MaterialExchangeResult{}, ErrMaterialExchangeGrantAlreadySettled
 	}
 
 	debiter := MaterialCostDebiter{Store: s.Store, Content: s.Content}
 	if err := debiter.applyPreparedMaterialDebitTx(ctx, t, prepared.preparedDebit); err != nil {
 		return MaterialExchangeResult{}, err
 	}
-	var gr GrantResult
-	if prepared.request.Restoration.PlayerID != 0 {
-		var err error
-		gr, err = s.applyPreparedGrantTx(ctx, t, prepared.actor, prepared.request.Restoration, prepared.op, GrantTxOptions{AllowOverflowMail: prepared.request.AllowOverflowMail}, prepared.contentRevision, prepared.grantPreflight, prepared.grantIdentity, prepared.grantFingerprint)
-		if err != nil {
-			return MaterialExchangeResult{}, err
-		}
-	}
-	// Named-scalar credits are prepared under the union locks; Apply only saves
-	// the frozen states and acquires nothing.
-	for _, credit := range prepared.preparedCredits {
-		if err := s.Store.SaveScalarTx(ctx, t, credit.next, credit.exists); err != nil {
-			return MaterialExchangeResult{}, err
-		}
+	gr, err := s.applyPreparedGrantTx(ctx, t, prepared.actor, prepared.request.Restoration, prepared.op, GrantTxOptions{AllowOverflowMail: prepared.request.AllowOverflowMail}, prepared.contentRevision, prepared.grantPreflight, prepared.grantIdentity, prepared.grantFingerprint)
+	if err != nil {
+		return MaterialExchangeResult{}, err
 	}
 	return MaterialExchangeResult{Debit: prepared.preparedDebit, Restoration: gr}, nil
 }

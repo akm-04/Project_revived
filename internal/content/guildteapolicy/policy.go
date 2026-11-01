@@ -3,7 +3,9 @@
 package guildteapolicy
 
 import (
+	"crypto/sha256"
 	_ "embed"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 )
@@ -18,14 +20,24 @@ type Policy struct {
 	NormalNeed                int64  `json:"normal_need"`
 	SXNeed                    int64  `json:"sx_need"`
 	DonorFriendMedalPerScroll int64  `json:"donor_friend_medal_per_scroll"`
+	SourceMiscSHA256          string `json:"source_misc_sha256"`
 }
 
-func LoadBuiltin() (Policy, error) {
+type Builtin struct {
+	Policy   Policy
+	Revision string
+}
+
+func LoadBuiltin() (Builtin, error) {
 	var p Policy
 	if err := json.Unmarshal(builtinJSON, &p); err != nil {
-		return Policy{}, err
+		return Builtin{}, err
 	}
-	return p, p.Validate()
+	if err := p.Validate(); err != nil {
+		return Builtin{}, err
+	}
+	sum := sha256.Sum256(builtinJSON)
+	return Builtin{Policy: p, Revision: hex.EncodeToString(sum[:])}, nil
 }
 
 func (p Policy) Validate() error {
@@ -35,7 +47,7 @@ func (p Policy) Validate() error {
 	if p.RequestsPerDay != 1 || p.NormalNeed != 3 || p.SXNeed != 2 {
 		return errors.New("guild tea policy request profile")
 	}
-	if p.DonorFriendMedalPerScroll <= 0 {
+	if p.DonorFriendMedalPerScroll <= 0 || p.SourceMiscSHA256 == "" {
 		return errors.New("guild tea policy donor reward")
 	}
 	return nil

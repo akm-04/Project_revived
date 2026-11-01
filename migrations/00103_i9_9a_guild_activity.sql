@@ -16,7 +16,8 @@ CREATE TABLE player_guild_activity_totals (
 );
 
 CREATE TABLE guild_activity_awards (
- guild_id bigint NOT NULL REFERENCES guilds(guild_id) ON DELETE CASCADE,
+ -- No FK: it would take a key-share lock on guild 310 inside a settlement (C9).
+ guild_id bigint NOT NULL,
  source_key text NOT NULL CHECK(source_key <> ''),
  amount bigint NOT NULL CHECK(amount > 0),
  folded boolean NOT NULL DEFAULT false,

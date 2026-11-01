@@ -130,13 +130,12 @@ type Inventory interface {
 	ListStacksTx(context.Context, tx.Queryer, identity.PlayerID) ([]economy.StackState, error)
 }
 
-type Exchange interface {
-	PrepareMaterialExchangeTx(context.Context, tx.Tx, identity.ActorContext, i5.MaterialExchangeRequest, operation.Context) (*i5.PreparedMaterialExchange, error)
-	ApplyMaterialExchangeTx(context.Context, tx.Tx, *i5.PreparedMaterialExchange) (i5.MaterialExchangeResult, error)
-}
-
 type Values interface {
 	SettleGrantTx(context.Context, tx.Tx, identity.ActorContext, grant.Plan, operation.Context, i5.GrantTxOptions) (i5.GrantResult, error)
+}
+
+type Costs interface {
+	DebitMaterialCostTx(context.Context, tx.Tx, identity.PlayerID, i5.MaterialCost, operation.Context) (i5.MaterialDebitResult, error)
 }
 
 type Facts interface {
@@ -154,8 +153,8 @@ type Service struct {
 	Content   Content
 	Heroes    Heroes
 	Inventory Inventory
-	Exchange  Exchange
 	Values    Values
+	Costs     Costs
 	Facts     Facts
 	Fence     Fence
 	Players   playerroot.TxLocker
@@ -163,7 +162,7 @@ type Service struct {
 }
 
 func (s Service) validate() error {
-	if s.Runner.DB == nil || s.Store == nil || s.Directory == nil || s.Content == nil || s.Heroes == nil || s.Inventory == nil || s.Exchange == nil || s.Values == nil || s.Facts == nil || s.Fence == nil || s.Players == nil {
+	if s.Runner.DB == nil || s.Store == nil || s.Directory == nil || s.Content == nil || s.Heroes == nil || s.Inventory == nil || s.Values == nil || s.Costs == nil || s.Facts == nil || s.Fence == nil || s.Players == nil {
 		return ErrUnavailable
 	}
 	if err := s.Policy.Validate(); err != nil {
@@ -416,14 +415,19 @@ func (s Service) Present(c context.Context, a identity.ActorContext, receiver id
 		if err != nil {
 			return err
 		}
-		if err := s.Facts.RecordTx(c, t, bound, objective.Fact{PlayerID: a.PlayerID, SourceDomain: "guildtea", SourceBusinessKey: fmt.Sprintf("tea:%d:%d:%d", int64(receiver), int64(a.PlayerID), day), Kind: "TEA_PARTY_DONATED", Delta: 1}); err != nil {
+		presentation := fmt.Sprintf("tea:%d:%d:%d", int64(receiver), int64(a.PlayerID), day)
+		plan := grant.Plan{PlayerID: a.PlayerID, Source: grant.SourceIdentity{Domain: "guildtea", Operation: "present", BusinessKey: presentation, Occurrence: op.ID.String(), PolicyVersion: policyVersion},
+			Lines: []grant.Line{{Kind: grant.ScalarCurrency, ResourceKey: "friend_medal", Amount: s.Policy.DonorFriendMedalPerScroll}}}
+		if _, err := s.Values.SettleGrantTx(c, t, a, plan, bound, i5.GrantTxOptions{AllowOverflowMail: false}); err != nil {
 			return err
 		}
-		prepared, err := s.Exchange.PrepareMaterialExchangeTx(c, t, a, i5.MaterialExchangeRequest{Cost: i5.MaterialCost{Stacks: []i5.StackMaterialCost{{ItemID: wish.ItemID, Amount: 1}}}, Credits: []i5.MaterialCredit{{ResourceKey: "friend_medal", Amount: s.Policy.DonorFriendMedalPerScroll}}}, bound)
-		if err != nil {
+		if _, err := s.Costs.DebitMaterialCostTx(c, t, a.PlayerID, i5.MaterialCost{Stacks: []i5.StackMaterialCost{{ItemID: wish.ItemID, Amount: 1}}}, bound); err != nil {
 			return err
 		}
-		if _, err := s.Exchange.ApplyMaterialExchangeTx(c, t, prepared); err != nil {
+		if err := s.Facts.RecordTx(c, t, bound, objective.Fact{PlayerID: a.PlayerID, SourceDomain: "guildtea", SourceBusinessKey: presentation, Kind: "TEA_PARTY_DONATED", Delta: 1}); err != nil {
+			return err
+		}
+		if err := s.Store.DeleteExpiredWishesTx(c, t, donor.GuildID, day); err != nil {
 			return err
 		}
 		if err := s.Store.DeleteExpiredGiftsForPlayerTx(c, t, a.PlayerID, day); err != nil {
@@ -477,6 +481,15 @@ func (s Service) Confirm(c context.Context, a identity.ActorContext, op operatio
 					return err
 				}
 				out.Award = &Award{ItemID: wish.ItemID, Num: claimed}
+			}
+		}
+		member, memberFound, err := s.Store.ReadMembershipTx(c, t, a.PlayerID)
+		if err != nil {
+			return err
+		}
+		if memberFound {
+			if err := s.Store.DeleteExpiredWishesTx(c, t, member.GuildID, day); err != nil {
+				return err
 			}
 		}
 		if err := s.Store.DeleteExpiredGiftsForPlayerTx(c, t, a.PlayerID, day); err != nil {

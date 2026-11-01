@@ -9,6 +9,7 @@ import (
 
 	pg "gxb.local/backend/v2/internal/adapters/postgres"
 	"gxb.local/backend/v2/internal/adapters/postgres/contentstore"
+	"gxb.local/backend/v2/internal/adapters/postgres/guildstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/i4store"
 	"gxb.local/backend/v2/internal/adapters/postgres/i5store"
 	"gxb.local/backend/v2/internal/adapters/postgres/illusionstore"
@@ -64,7 +65,7 @@ func illusionService(t *testing.T, p *pg.Pool, clock gen.TimeAuthority, privileg
 		Functions: values, Directory: i4store.PlayerDirectoryReader{}, Heroes: fight.Inputs.Heroes, Pets: fight.Inputs.Pets, Stats: illusionStatInputs{},
 		Rooms: rooms, RoomStore: sharedroomstore.Store{}, Combat: fight, Privileges: privileges,
 		Costs: i5.MaterialCostDebiter{Store: values, Content: content}, Facts: i5.ObjectiveFacts{Owner: compositeI5(p), Open: values},
-		Guilds: guilds, Mail: i5.SettlementMail{Store: values}, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}}
+		Guilds: guilds, GuildActivity: guildstore.Store{Queryer: p}, Mail: i5.SettlementMail{Store: values}, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}}
 	mode.Invites = roomInviteMaterializer(t, p)
 	return mode
 }

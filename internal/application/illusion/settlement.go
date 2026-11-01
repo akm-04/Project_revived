@@ -128,12 +128,18 @@ func (s Mode) settle(c context.Context, sc gen.TimedScope, occurrence d.Occurren
 	// C9); source_key makes one occurrence credit each guild once.
 	for index, score := range guildScores(guilds, ranks) {
 		band := catalog.CommunityReward(int64(index + 1))
-		if band.Coin <= 0 {
-			continue
+		// The person coin pays every member and the guild coin credits the guild
+		// owner; one band may carry either or both (C9).
+		if band.PersonCoin > 0 {
+			for _, member := range score.Guild.Members {
+				rewards[member] = append(rewards[member], grant.Line{Kind: grant.ScalarCurrency, ResourceKey: "guild_coin", Amount: band.PersonCoin})
+			}
 		}
-		key := fmt.Sprintf("%s:guild:%d", occurrenceKey, score.Guild.ID)
-		if err := s.GuildActivity.CreditActivityAwardTx(c, sc.Tx, score.Guild.ID, key, band.Coin); err != nil {
-			return err
+		if band.Coin > 0 {
+			key := fmt.Sprintf("%s:guild:%d", occurrenceKey, score.Guild.ID)
+			if err := s.GuildActivity.CreditActivityAwardTx(c, sc.Tx, score.Guild.ID, key, band.Coin); err != nil {
+				return err
+			}
 		}
 	}
 	recipients := make([]identity.PlayerID, 0, len(rewards))
