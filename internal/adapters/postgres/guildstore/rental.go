@@ -3,6 +3,7 @@ package guildstore
 import (
 	"context"
 	"encoding/json"
+	"errors"
 
 	"gxb.local/backend/v2/internal/domain/guild"
 	"gxb.local/backend/v2/internal/domain/identity"
@@ -40,6 +41,57 @@ func (Store) LockLenderRentalOffersTx(ctx context.Context, t tx.Tx, lender ident
 	}
 	offers := []guild.RentalOffer{}
 	return offers, json.Unmarshal([]byte(raw), &offers)
+}
+
+const rentalOfferJSON = `jsonb_build_object('Lender',lender_id,'Kind',kind,'Unit',unit_id,'Guild',guild_id,'Force',force,'RentAward',rent_award,'RentTime',rent_time)`
+
+// ListRentalOffersByGuildTx is the bounded read of one guild's live offers.
+func (Store) ListRentalOffersByGuildTx(ctx context.Context, q tx.Queryer, guildID guild.ID, kind guild.RentalKind, limit int) ([]guild.RentalOffer, error) {
+	if q == nil || guildID <= 0 || limit <= 0 {
+		return nil, errors.New("guildstore: invalid rental offer list")
+	}
+	var raw string
+	err := q.QueryRow(ctx, `SELECT COALESCE(jsonb_agg(`+rentalOfferJSON+` ORDER BY lender_id,unit_id),'[]')::text FROM (
+		SELECT `+rentalOfferColumns+` FROM guild_rental_offers WHERE guild_id=$1 AND kind=$2 ORDER BY lender_id,unit_id LIMIT $3
+	) rows`, int64(guildID), string(kind), limit).Scan(&raw)
+	if err != nil {
+		return nil, err
+	}
+	offers := []guild.RentalOffer{}
+	return offers, json.Unmarshal([]byte(raw), &offers)
+}
+
+// ListLenderRentalOffersTx is the bounded read of one lender's live offers.
+func (Store) ListLenderRentalOffersTx(ctx context.Context, q tx.Queryer, lender identity.PlayerID, kind guild.RentalKind, limit int) ([]guild.RentalOffer, error) {
+	if q == nil || !lender.Valid() || limit <= 0 {
+		return nil, errors.New("guildstore: invalid lender rental offer list")
+	}
+	var raw string
+	err := q.QueryRow(ctx, `SELECT COALESCE(jsonb_agg(`+rentalOfferJSON+` ORDER BY kind,unit_id),'[]')::text FROM (
+		SELECT `+rentalOfferColumns+` FROM guild_rental_offers WHERE lender_id=$1 AND kind=$2 ORDER BY kind,unit_id LIMIT $3
+	) rows`, int64(lender), string(kind), limit).Scan(&raw)
+	if err != nil {
+		return nil, err
+	}
+	offers := []guild.RentalOffer{}
+	return offers, json.Unmarshal([]byte(raw), &offers)
+}
+
+// ReadRentalUsesDayTx is the bounded read of a borrower's uses for one day.
+func (Store) ReadRentalUsesDayTx(ctx context.Context, q tx.Queryer, borrower identity.PlayerID, day int64) ([]guild.RentalUse, error) {
+	if q == nil || !borrower.Valid() || day <= 0 {
+		return nil, errors.New("guildstore: invalid rental use read")
+	}
+	var raw string
+	err := q.QueryRow(ctx, `SELECT COALESCE(jsonb_agg(jsonb_build_object(
+		'Borrower',borrower_id,'Lender',lender_id,'GameDay',game_day,'Kind',kind,'Unit',unit_id,
+		'CampaignType',campaign_type,'CostMana',cost_mana,'UsedAt',used_at) ORDER BY lender_id),'[]')::text
+		FROM guild_rental_uses WHERE borrower_id=$1 AND game_day=$2`, int64(borrower), day).Scan(&raw)
+	if err != nil {
+		return nil, err
+	}
+	uses := []guild.RentalUse{}
+	return uses, json.Unmarshal([]byte(raw), &uses)
 }
 
 func (Store) InsertRentalOfferTx(ctx context.Context, t tx.Tx, offer guild.RentalOffer) error {

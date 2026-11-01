@@ -48,6 +48,23 @@ func topFloorInteger(p map[string]any, key string, required bool) (int64, bool) 
 	return n, err == nil
 }
 
+// topFloorIdentifier reads a single rent id, which the client sends as
+// tostring(getHeroID()) or tostring(getPetID()).
+func topFloorIdentifier(raw any, required bool) (int64, bool) {
+	if raw == nil {
+		return 0, !required
+	}
+	if text, ok := raw.(string); ok {
+		if text == "" {
+			return 0, !required
+		}
+		n, err := strconv.ParseInt(text, 10, 64)
+		return n, err == nil && n >= 0
+	}
+	n, err := feedbackInteger(raw, 0, 9007199254740991)
+	return n, err == nil
+}
+
 // topFloorFormation reads getFormationStr's "id|id|..." (a single hero may arrive as a number).
 func topFloorFormation(raw any) ([]int64, bool) {
 	text, ok := raw.(string)

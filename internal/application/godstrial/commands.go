@@ -58,7 +58,7 @@ func (s Mode) Start(c context.Context, a identity.ActorContext, q Fight, op oper
 		if e != nil {
 			return nil, e
 		}
-		same := d.SameFight(r.Fight, q.Campaign, q.Pet, q.Formation) && sc.Operation.DecisionAt().Unix() < r.Fight.Deadline
+		same := d.SameFight(r.Fight, q.Campaign, q.Pet, q.Formation) && r.Fight.RentPlayer == q.RentPlayer && r.Fight.RentUnit == q.RentUnit && r.Fight.RentPetPlayer == q.RentPetPlayer && r.Fight.RentPetUnit == q.RentPetUnit && sc.Operation.DecisionAt().Unix() < r.Fight.Deadline
 		id := fmt.Sprintf("%d:%d", a.PlayerID, r.Sequence+1)
 		if same {
 			id = r.Fight.ID
@@ -82,6 +82,12 @@ func (s Mode) Start(c context.Context, a identity.ActorContext, q Fight, op oper
 		}
 		if q.Pet > 0 {
 			battle.PetsA = []cb.Participant{{Origin: cd.OwnedSelf, Kind: cd.PetActor, Player: a.PlayerID, Identity: q.Pet}}
+		}
+		if q.RentUnit > 0 && q.RentPlayer > 0 {
+			battle.TeamA = append(battle.TeamA, cb.Participant{Origin: cd.Borrowed, Kind: cd.HeroActor, Player: identity.PlayerID(q.RentPlayer), Identity: q.RentUnit})
+		}
+		if q.RentPetUnit > 0 && q.RentPetPlayer > 0 {
+			battle.PetsA = append(battle.PetsA, cb.Participant{Origin: cd.Borrowed, Kind: cd.PetActor, Player: identity.PlayerID(q.RentPetPlayer), Identity: q.RentPetUnit})
 		}
 		fp, e := receipt.FingerprintRequest(q)
 		if e != nil {
@@ -114,7 +120,7 @@ func (s Mode) Start(c context.Context, a identity.ActorContext, q Fight, op oper
 			if e = json.Unmarshal(started.Package.Canonical, &lines); e != nil {
 				return nil, e
 			}
-			r.Fight = &d.Fight{ID: id, Revision: v.revision, Provider: s.Spirit.ProviderRevision(), Campaign: q.Campaign, Pet: q.Pet, Deadline: deadline.Unix(), Formation: append([]int64{}, q.Formation...), Lines: lines}
+			r.Fight = &d.Fight{ID: id, Revision: v.revision, Provider: s.Spirit.ProviderRevision(), Campaign: q.Campaign, Pet: q.Pet, Deadline: deadline.Unix(), Formation: append([]int64{}, q.Formation...), RentPlayer: q.RentPlayer, RentUnit: q.RentUnit, RentPetPlayer: q.RentPetPlayer, RentPetUnit: q.RentPetUnit, Lines: lines}
 			r.LastResult = nil
 			r.LastFight = nil
 		}
@@ -136,7 +142,7 @@ func (s Mode) Result(c context.Context, a identity.ActorContext, q Result, op op
 	return s.run(c, a, "result", q, nil, 0, op, func(c context.Context, sc gen.TimedScope, v view, r *d.State) (map[string]any, error) {
 		p := r.Fight
 		if p == nil {
-			if r.LastResult != nil && d.SameFight(r.LastFight, q.Campaign, q.Pet, q.Formation) && r.LastStar == q.Star {
+			if r.LastResult != nil && r.LastFight != nil && d.SameFight(r.LastFight, q.Campaign, q.Pet, q.Formation) && r.LastStar == q.Star {
 				return copiedReplay(r.LastResult), nil
 			}
 			return nil, d.ErrRefused

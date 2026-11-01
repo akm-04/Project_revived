@@ -180,11 +180,15 @@ func campaignFight(p map[string]any) (app.Fight, bool) {
 		pets, petOK = topFloorFormation(p["pet_formation"])
 	}
 	rentHero, rentHeroOK := topFloorInteger(p, "rent_player_id", false)
+	rentHeroID, rentHeroIDOK := topFloorIdentifier(p["rent_formation"], false)
 	rentPet, rentPetOK := topFloorInteger(p, "rent_pet_player_id", false)
+	rentPetID, rentPetIDOK := topFloorIdentifier(p["rent_pet_id"], false)
 	allowed := onlyStockGameplayParams(p, "campaign_id", "campaign_type", "formation", "pet_id", "rent_player_id", "rent_formation", "rent_pet_player_id", "rent_pet_id", "pet_formation")
-	// shortcut: borrowed heroes and pets (I8-6A) are refused as malformed; route them through Combat Borrowed when friend rent lands.
-	rented := rentHero != 0 || rentPet != 0
-	if !allowed || !idOK || !kindOK || !petOK || !formationOK || !rentHeroOK || !rentPetOK || rented {
+	if !allowed || !idOK || !kindOK || !petOK || !formationOK || !rentHeroOK || !rentHeroIDOK || !rentPetOK || !rentPetIDOK {
+		return app.Fight{}, false
+	}
+	// The client sends each borrowed unit as a player and a formation id pair.
+	if (rentHero == 0) != (rentHeroID == 0) || (rentPet == 0) != (rentPetID == 0) {
 		return app.Fight{}, false
 	}
 	if d.Cloud(kind) {
@@ -192,7 +196,8 @@ func campaignFight(p map[string]any) (app.Fight, bool) {
 	} else if _, present := p["pet_formation"]; present {
 		return app.Fight{}, false
 	}
-	return app.Fight{CampaignID: id, Type: kind, Formation: formation, Pet: pet, PetFormation: pets}, true
+	return app.Fight{CampaignID: id, Type: kind, Formation: formation, Pet: pet, PetFormation: pets,
+		RentPlayer: rentHero, RentFormation: rentHeroID, RentPetPlayer: rentPet, RentPetID: rentPetID}, true
 }
 
 // campaignResult reads BattleCreate.campaignResult's 114.

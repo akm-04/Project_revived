@@ -164,8 +164,12 @@ func (s Mode) ready() bool {
 
 // StartRequest is the stock 1346 request; a mate's pet is never sent by stock.
 type StartRequest struct {
-	Formation []int64
-	PetID     int64
+	Formation     []int64
+	PetID         int64
+	RentPlayer    int64
+	RentUnit      int64
+	RentPetPlayer int64
+	RentPetUnit   int64
 }
 
 // ResultRequest is the stock 1347 client summary.

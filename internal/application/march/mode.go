@@ -25,8 +25,10 @@ import (
 
 type lockedHeroesKey struct{}
 type Fight struct {
-	Formation []int64 `json:"formation"`
-	Force     int64   `json:"force"`
+	Formation  []int64 `json:"formation"`
+	Force      int64   `json:"force"`
+	RentPlayer int64   `json:"rent_player_id"`
+	RentUnit   int64   `json:"rent_formation"`
 }
 type Result struct {
 	Report    cd.Report `json:"report"`
@@ -242,6 +244,15 @@ func (s Mode) Start(c context.Context, a identity.ActorContext, q Fight, op oper
 				battle.TeamA = append(battle.TeamA, appcombat.Participant{Origin: cd.OwnedSelf, Kind: cd.HeroActor, Player: a.PlayerID, Identity: id})
 			}
 		}
+		if r.Loan != nil {
+			if q.RentUnit > 0 && (q.RentUnit != r.Loan.Unit || q.RentPlayer != r.Loan.Player) {
+				return nil, d.ErrRefused
+			}
+			battle.TeamA = append(battle.TeamA, appcombat.Participant{Origin: cd.Borrowed, Kind: cd.HeroActor, Player: identity.PlayerID(r.Loan.Player), Identity: r.Loan.Unit, LoanHeld: true})
+		} else if q.RentUnit > 0 && q.RentPlayer > 0 {
+			r.Loan = &d.Loan{Player: q.RentPlayer, Unit: q.RentUnit}
+			battle.TeamA = append(battle.TeamA, appcombat.Participant{Origin: cd.Borrowed, Kind: cd.HeroActor, Player: identity.PlayerID(q.RentPlayer), Identity: q.RentUnit})
+		}
 		enemies := []appcombat.Participant{}
 		enemy := r.Enemies[r.Passed]
 		keys := make([]string, 0, len(enemy.Heroes))
@@ -274,7 +285,8 @@ func (s Mode) Start(c context.Context, a identity.ActorContext, q Fight, op oper
 		if err != nil {
 			return nil, err
 		}
-		fp, err := receipt.FingerprintRequest(map[string]any{"generation": r.Pending, "formation": q.Formation})
+		fp, err := receipt.FingerprintRequest(map[string]any{"generation": r.Pending, "formation": q.Formation,
+			"rent_player": q.RentPlayer, "rent_unit": q.RentUnit})
 		if err != nil {
 			return nil, err
 		}

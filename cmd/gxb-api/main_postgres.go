@@ -114,6 +114,7 @@ import (
 	appsummon "gxb.local/backend/v2/internal/application/summon"
 	appworldboss "gxb.local/backend/v2/internal/application/worldboss"
 	"gxb.local/backend/v2/internal/content/guildpolicy"
+	"gxb.local/backend/v2/internal/content/guildrentalpolicy"
 	"gxb.local/backend/v2/internal/content/guildteapolicy"
 	"gxb.local/backend/v2/internal/content/registry"
 	domainspirit "gxb.local/backend/v2/internal/domain/spirit"
@@ -364,10 +365,18 @@ func main() {
 	var profileHistory apppublicprofile.HistoryReader
 	// The title origin route copied above never reads metrics.
 	boardRanking.Metrics = profileMetrics
-	fight, fightReady, err := canonicalCombat(pool, runner, contentDB, owners)
+	rentalPolicy, err := guildrentalpolicy.LoadBuiltin()
+	if err != nil {
+		log.Fatalf("I9-9B Guild rental policy: %v", err)
+	}
+	rentalBinding := rentalPolicyBinding(rentalPolicy.Policy)
+	rentalSvc, rentalReads := canonicalGuildRental(pool, runner, contentDB, guildDB, i5db, i5svc, privileges, publicStats, heroMaterialCosts, rentalBinding)
+	guildSvc.Rental = rentalSvc
+	fight, fightReady, err := canonicalCombat(pool, runner, contentDB, owners, rentalSvc)
 	if err != nil {
 		log.Fatalf("I7C-5B Combat composition: %v", err)
 	}
+	rentalRuntime := guildRentalRuntime{Service: rentalSvc, Reads: rentalReads}
 	ranking := stockruntime.RankingDispatcher{Authority: authority, Service: boardRanking, Trophy: achievements, Guilds: guildView}
 	if fightReady {
 		sharedRooms := appsharedroom.Service{Timed: appgeneration.TimedRunner{Binder: appgeneration.Binder{Time: postgres.AuthoritativeTime{Queryer: pool}}, Runner: runner},
@@ -398,7 +407,7 @@ func main() {
 		for _, mid := range stockruntime.PetCampaignMIDs {
 			mustRegister(mid, stockruntime.PetCampaignDispatcher{Authority: authority, Service: petCampaign})
 		}
-		workplace := canonicalWorkplace(pool, runner, contentDB, i5db, i5svc, heroSvc, fight, topFloor)
+		workplace := canonicalWorkplace(pool, runner, contentDB, i5db, i5svc, heroSvc, fight, topFloor, rentalReads)
 		for _, mid := range stockruntime.WorkplaceMIDs {
 			mustRegister(mid, observing(authority, achievements, "Hero", stockruntime.WorkplaceDispatcher{Authority: authority, Service: workplace}))
 		}
@@ -445,6 +454,7 @@ func main() {
 		go runReconcile(ctx, pool, appleague.Reconciler{Service: league})
 		conquer := canonicalConquer(pool, runner, contentDB, i5db, i5svc, privileges, fight)
 		campaign := canonicalCampaign(pool, runner, contentDB, i5db, i5svc, heroSvc, fight)
+		campaign.StarCaps = rentalStarCaps(rentalPolicy.Policy)
 		blood := appawakeningbattle.Mode{Timed: heroSvc.Timed, Fresh: pool, Content: contentDB, Fence: i5db, Heroes: heroSvc, Missions: i5svc, Combat: fight, Receipts: receipts, ReceiptRead: kernelstore.Reader{Queryer: pool}}
 		for _, mid := range []uint16{866, 867} {
 			mustRegister(mid, stockruntime.AwakeningBloodDispatcher{Authority: authority, Service: blood})
@@ -626,6 +636,10 @@ func main() {
 	teaD := stockruntime.GuildTeaDispatcher{Authority: authority, Service: guildTeaSvc}
 	for _, mid := range stockruntime.GuildTeaMIDs {
 		mustRegister(mid, teaD)
+	}
+	rentalD := stockruntime.GuildRentalDispatcher{Authority: authority, Service: rentalRuntime}
+	for _, mid := range stockruntime.GuildRentalMIDs {
+		mustRegister(mid, rentalD)
 	}
 	if e := registerGuildBroadcast(ctx, pool, runner, authority, guildDB, i5db, receipts, contentDB, router); e != nil {
 		log.Fatalf("Guild broadcast group: %v", e)

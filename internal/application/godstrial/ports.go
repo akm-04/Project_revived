@@ -86,9 +86,13 @@ type Mode struct {
 	ReceiptRead receipt.Reader
 }
 type Fight struct {
-	Campaign  int64
-	Formation []int64
-	Pet       int64
+	Campaign      int64
+	Formation     []int64
+	Pet           int64
+	RentPlayer    int64
+	RentUnit      int64
+	RentPetPlayer int64
+	RentPetUnit   int64
 }
 type Result struct {
 	Campaign, Star, Pet int64

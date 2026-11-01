@@ -128,6 +128,15 @@ func (s Mode) run(c context.Context, a identity.ActorContext, name string, reque
 			if e != nil {
 				return e
 			}
+			if s.Rental != nil {
+				offered, e := s.Rental.HeroOfferedTx(c, sc.Tx, a.PlayerID, pid)
+				if e != nil {
+					return e
+				}
+				if offered {
+					return d.ErrRefused
+				}
+			}
 			h.Kind, e = s.Content.HeroKindTx(c, sc.Tx, h.CreationContentRevision, h.TableID)
 			if e != nil {
 				return e

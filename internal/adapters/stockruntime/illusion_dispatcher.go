@@ -104,11 +104,16 @@ func (o IllusionDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchR
 func illusionStart(params map[string]any) (app.StartRequest, bool) {
 	formation, ok := topFloorFormation(params["formation"])
 	pet, petOK := topFloorInteger(params, "pet_id", false)
+	rentPlayer, rentPlayerOK := topFloorInteger(params, "rent_player_id", false)
+	rentUnit, rentUnitOK := topFloorIdentifier(params["rent_formation"], false)
+	rentPetPlayer, rentPetPlayerOK := topFloorInteger(params, "rent_pet_player_id", false)
+	rentPetUnit, rentPetUnitOK := topFloorIdentifier(params["rent_pet_id"], false)
 	allowed := onlyStockGameplayParams(params, "formation", "pet_id", "rent_player_id", "rent_formation", "rent_pet_player_id", "rent_pet_id", "tutor_rent_hero", "rent_hero_player", "rent_hero_id")
-	if !allowed || !ok || !petOK || illusionRented(params) {
+	if !allowed || !ok || !petOK || !rentPlayerOK || !rentUnitOK || !rentPetPlayerOK || !rentPetUnitOK ||
+		(rentPlayer == 0) != (rentUnit == 0) || (rentPetPlayer == 0) != (rentPetUnit == 0) {
 		return app.StartRequest{}, false
 	}
-	return app.StartRequest{Formation: formation, PetID: pet}, true
+	return app.StartRequest{Formation: formation, PetID: pet, RentPlayer: rentPlayer, RentUnit: rentUnit, RentPetPlayer: rentPetPlayer, RentPetUnit: rentPetUnit}, true
 }
 
 // illusionResult reads BattleCreate's 1347 client summary.
@@ -119,24 +124,10 @@ func illusionResult(params map[string]any) (app.ResultRequest, bool) {
 	costTime, costOK := topFloorInteger(params, "cost_time", true)
 	pet, petOK := topFloorInteger(params, "pet_id", false)
 	allowed := onlyStockGameplayParams(params, "star", "total_damage", "formation", "cost_time", "pet_id", "rent_formation", "rent_player_id")
-	if !allowed || !starOK || !damageOK || !formationOK || !costOK || !petOK || star > 1 || illusionRented(params) {
+	if !allowed || !starOK || !damageOK || !formationOK || !costOK || !petOK || star > 1 {
 		return app.ResultRequest{}, false
 	}
 	return app.ResultRequest{Star: star, Damage: damage, CostTime: costTime, PetID: pet, Formation: formation}, true
-}
-
-func illusionRented(params map[string]any) bool {
-	for _, key := range []string{"rent_player_id", "rent_formation", "rent_pet_player_id", "rent_pet_id", "tutor_rent_hero", "rent_hero_player", "rent_hero_id"} {
-		raw, present := params[key]
-		if !present || raw == nil {
-			continue
-		}
-		text := fmt.Sprint(raw)
-		if text != "" && text != "0" {
-			return true
-		}
-	}
-	return false
 }
 
 func illusionDamage(raw any) (int64, bool) {

@@ -87,4 +87,10 @@ type Mode struct {
 	Facts       Facts
 	Receipts    receipt.Store
 	ReceiptRead receipt.Reader
+	Rental      RentalOffers
+}
+
+// RentalOffers is the guild rental admission read (I9_GUILD_RENTAL_V1 C14).
+type RentalOffers interface {
+	HeroOfferedTx(context.Context, tx.Queryer, identity.PlayerID, int64) (bool, error)
 }

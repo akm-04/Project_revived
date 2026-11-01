@@ -45,6 +45,12 @@ type Enemy struct {
 	Force        int64                     `json:"force"`
 }
 
+// Loan is the one borrowed girl a run holds to its end (I9_GUILD_RENTAL_V1 C12).
+type Loan struct {
+	Player int64 `json:"player_id"`
+	Unit   int64 `json:"unit_id"`
+}
+
 type Run struct {
 	Revision       string            `json:"revision"`
 	Occurrence     string            `json:"occurrence"`
@@ -58,6 +64,7 @@ type Run struct {
 	HasFight       bool              `json:"has_fight"`
 	Advanced       bool              `json:"advanced"`
 	Heroes         map[string]Status `json:"heroes"`
+	Loan           *Loan             `json:"loan,omitempty"`
 	Enemies        []Enemy           `json:"enemies"`
 	Rewards        map[string][]any  `json:"rewards"`
 	RecommendDay   int64             `json:"recommend_day"`
@@ -211,7 +218,19 @@ func (r Run) Projection() map[string]any {
 	for _, enemy := range r.Enemies {
 		enemies = append(enemies, enemy.Wire())
 	}
-	return map[string]any{"map_info": map[string]any{"is_reborn": 0, "is_external_award": extra, "stage_done": won, "passed_stage": r.Passed, "resets_left": resets, "has_fight": fought, "power_drink": r.Drinks, "recommend_partners": recommended}, "hero_status": map[string]any{"self_list": statuses, "rent_list": map[string]any{}}, "enemies": enemies, "rewards": rewards}
+	return map[string]any{"map_info": map[string]any{"is_reborn": 0, "is_external_award": extra, "stage_done": won, "passed_stage": r.Passed, "resets_left": resets, "has_fight": fought, "power_drink": r.Drinks, "recommend_partners": recommended}, "hero_status": map[string]any{"self_list": statuses, "rent_list": r.rentList()}, "enemies": enemies, "rewards": rewards}
+}
+
+// rentList is the one borrowed girl's run-local health the team window shows.
+func (r Run) rentList() map[string]any {
+	if r.Loan == nil {
+		return map[string]any{}
+	}
+	status, ok := r.Heroes[strconv.FormatInt(r.Loan.Unit, 10)]
+	if !ok {
+		return map[string]any{}
+	}
+	return map[string]any{"health": status.Health, "hp": status.HP, "mp": status.MP}
 }
 
 // Stock indexes heroes numerically in both MarchTeamInfo and result merges.

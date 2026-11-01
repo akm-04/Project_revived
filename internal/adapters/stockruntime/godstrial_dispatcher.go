@@ -79,12 +79,15 @@ func (m GodsTrialDispatcher) Dispatch(c context.Context, r httpedge.DispatchRequ
 			if !valid || len(ids) < 1 || len(ids) > 5 {
 				return bad
 			}
-			for _, k := range []string{"rent_player_id", "rent_formation", "rent_pet_player_id", "rent_pet_id"} {
-				if v, has := p[k]; has && v != nil && v != "" && v != "0" && v != int64(0) && v != float64(0) {
-					return bad
-				}
+			rentPlayer, rentPlayerOK := topFloorInteger(p, "rent_player_id", false)
+			rentUnit, rentUnitOK := topFloorIdentifier(p["rent_formation"], false)
+			rentPetPlayer, rentPetPlayerOK := topFloorInteger(p, "rent_pet_player_id", false)
+			rentPetUnit, rentPetUnitOK := topFloorIdentifier(p["rent_pet_id"], false)
+			if !rentPlayerOK || !rentUnitOK || !rentPetPlayerOK || !rentPetUnitOK ||
+				(rentPlayer == 0) != (rentUnit == 0) || (rentPetPlayer == 0) != (rentPetUnit == 0) {
+				return bad
 			}
-			out, e = m.Service.Start(c, a, app.Fight{Campaign: id, Pet: pet, Formation: ids}, op)
+			out, e = m.Service.Start(c, a, app.Fight{Campaign: id, Pet: pet, Formation: ids, RentPlayer: rentPlayer, RentUnit: rentUnit, RentPetPlayer: rentPetPlayer, RentPetUnit: rentPetUnit}, op)
 		} else {
 			if !onlyStockGameplayParams(p, "campaign_id", "campaign_type", "star", "partner_ids", "pet_id") {
 				return bad

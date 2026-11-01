@@ -105,6 +105,8 @@ func (s Mode) ready() bool {
 type StartRequest struct {
 	CampaignID int64
 	Formation  []int64
+	RentPlayer int64
+	RentUnit   int64
 }
 
 // ResultRequest is the stock 627 request; damage was already bounded by the wire.

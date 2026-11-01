@@ -56,15 +56,17 @@ type Mode struct {
 	Pets         Pets
 	MaxColor     i5.MaxHeroColorPolicyProvider
 	Combat       Combat
-	Energy       i5.TxTemporalDebiter
-	Grants       Grants
-	Privileges   i5.PrivilegeSnapshotProvider
-	Costs        i5.TxMaterialCostDebiter
-	Progression  Progression
-	Stages       Stages
-	Facts        Facts
-	Receipts     receipt.Store
-	ReceiptRead  receipt.Reader
+	// StarCaps clamps a winning fight that froze a BORROWED attacker (C13).
+	StarCaps    map[int64]int64
+	Energy      i5.TxTemporalDebiter
+	Grants      Grants
+	Privileges  i5.PrivilegeSnapshotProvider
+	Costs       i5.TxMaterialCostDebiter
+	Progression Progression
+	Stages      Stages
+	Facts       Facts
+	Receipts    receipt.Store
+	ReceiptRead receipt.Reader
 }
 
 type Progression interface {
@@ -109,6 +111,8 @@ type HeroExp interface {
 type Combat interface {
 	StartTx(context.Context, tx.Tx, ca.CoherentReadScope, combat.StartRequest) (combat.Started, error)
 	AttestSummaryTx(context.Context, tx.Tx, combat.SummaryRequest) (combat.SummaryAttested, error)
+	// BorrowedTx reports whether the open attempt froze a BORROWED attacker.
+	BorrowedTx(context.Context, tx.Tx, cd.Locator) (bool, error)
 }
 
 type Grants interface {
@@ -125,13 +129,18 @@ type Facts interface {
 	RecordTx(context.Context, tx.Tx, operation.Context, ...objective.Fact) error
 }
 
-// Fight is a 113 request; rented heroes and pets are refused by the dispatcher.
+// Fight is a 113 request. Rent fields name another member's unit frozen as a
+// BORROWED participant; the owned formation never contains it.
 type Fight struct {
-	PetFormation []int64
-	CampaignID   int64
-	Type         int64
-	Formation    []int64
-	Pet          int64
+	PetFormation  []int64
+	CampaignID    int64
+	Type          int64
+	Formation     []int64
+	Pet           int64
+	RentPlayer    int64
+	RentFormation int64
+	RentPetPlayer int64
+	RentPetID     int64
 }
 
 // Result is a 114 request; the client-computed star is the whole summary (D82).
@@ -176,8 +185,9 @@ func generation(kind, id int64) string {
 // fingerprint keys START replay on the stage and team, not the operation: a
 // retransmitted 113 replays, a changed team supersedes so Combat judges the 114
 // team against the one frozen last (the row keeps the stage's drops either way).
-func fingerprint(a identity.ActorContext, kind, id int64, formation []int64, pet int64, pets []int64) string {
-	fields := map[string]any{"policy": d.ContractID, "player": int64(a.PlayerID), "type": kind, "campaign": id, "formation": formation, "pet": pet}
+func fingerprint(a identity.ActorContext, kind, id int64, formation []int64, pet int64, pets []int64, rent Fight) string {
+	fields := map[string]any{"policy": d.ContractID, "player": int64(a.PlayerID), "type": kind, "campaign": id, "formation": formation, "pet": pet,
+		"rent_player": rent.RentPlayer, "rent_formation": rent.RentFormation, "rent_pet_player": rent.RentPetPlayer, "rent_pet_id": rent.RentPetID}
 	if d.Cloud(kind) {
 		fields["pet_formation"] = pets
 	}
@@ -486,6 +496,12 @@ func (s Mode) start(c context.Context, sc gen.TimedScope, a identity.ActorContex
 	if request.Pet > 0 {
 		battle.PetsA = append(battle.PetsA, combat.Participant{Origin: cd.OwnedSelf, Kind: cd.PetActor, Player: a.PlayerID, Identity: request.Pet})
 	}
+	if request.RentFormation > 0 && request.RentPlayer > 0 {
+		battle.TeamA = append(battle.TeamA, combat.Participant{Origin: cd.Borrowed, Kind: cd.HeroActor, Player: identity.PlayerID(request.RentPlayer), Identity: request.RentFormation})
+	}
+	if request.RentPetID > 0 && request.RentPetPlayer > 0 {
+		battle.PetsA = append(battle.PetsA, combat.Participant{Origin: cd.Borrowed, Kind: cd.PetActor, Player: identity.PlayerID(request.RentPetPlayer), Identity: request.RentPetID})
+	}
 	if d.Cloud(node.Type) {
 		battle.Formation = append([]int64{}, node.SelfTeam...)
 		for _, id := range node.SelfTeam {
@@ -536,7 +552,7 @@ func (s Mode) start(c context.Context, sc gen.TimedScope, a identity.ActorContex
 	}
 	window := time.Duration(v.catalog.PrivatePolicy.ResultWindowSeconds) * time.Second
 	return s.Combat.StartTx(c, sc.Tx, scope, combat.StartRequest{Actor: a, Locator: locator(a), GenerationRef: generation(node.Type, node.ID),
-		StartFingerprint: fingerprint(a, node.Type, node.ID, request.Formation, request.Pet, request.PetFormation), ResultDeadline: at.Add(window), Battle: battle,
+		StartFingerprint: fingerprint(a, node.Type, node.ID, request.Formation, request.Pet, request.PetFormation, request), ResultDeadline: at.Add(window), Battle: battle,
 		TrustProfile: cd.ClientSummaryAttested, Replay: cd.ReplaySpec{Response: cd.ReplayOK}, Package: drops})
 }
 
@@ -642,6 +658,15 @@ func (s Mode) settle(c context.Context, sc gen.TimedScope, a identity.ActorConte
 	record, err := s.Store.LockTx(c, sc.Tx, a.PlayerID, at)
 	if err != nil {
 		return Settled{}, false, err
+	}
+	if cap := s.StarCaps[request.Type]; cap > 0 && request.Star > cap {
+		borrowed, err := s.Combat.BorrowedTx(c, sc.Tx, locator(a))
+		if err != nil {
+			return Settled{}, false, err
+		}
+		if borrowed {
+			request.Star = cap
+		}
 	}
 	stage := generation(request.Type, request.CampaignID)
 	summary := cd.Summary{Star: request.Star, Win: request.Star > 0, Formation: request.Formation, Pet: request.Pet}

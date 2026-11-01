@@ -7,10 +7,12 @@ import (
 )
 
 type Fight struct {
-	ID, Revision, Provider  string
-	Campaign, Pet, Deadline int64
-	Formation               []int64
-	Lines                   []grant.Line
+	ID, Revision, Provider     string
+	Campaign, Pet, Deadline    int64
+	Formation                  []int64
+	RentPlayer, RentUnit       int64
+	RentPetPlayer, RentPetUnit int64
+	Lines                      []grant.Line
 }
 type Auto struct {
 	ID, Revision, Provider      string

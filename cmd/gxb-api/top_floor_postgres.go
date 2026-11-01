@@ -84,7 +84,7 @@ func (o topFloorOwners) roster(content contentstore.Store) characterstore.HeroBo
 
 // canonicalCombat is the first production Combat composition. It stays
 // unavailable (false) until an entropy key ring is configured.
-func canonicalCombat(p *postgres.Pool, r tx.Runner, content contentstore.Store, o topFloorOwners) (combat.Service, bool, error) {
+func canonicalCombat(p *postgres.Pool, r tx.Runner, content contentstore.Store, o topFloorOwners, lending combat.Lending) (combat.Service, bool, error) {
 	spec := os.Getenv("GXB_COMBAT_ENTROPY_KEYS")
 	if spec == "" {
 		return combat.Service{}, false, nil
@@ -112,7 +112,7 @@ func canonicalCombat(p *postgres.Pool, r tx.Runner, content contentstore.Store, 
 	// so three live workers bound memory; a busy pool refuses after five seconds.
 	worker := combatworker.New(limits, 3, 5*time.Second)
 	return combat.Service{Rules: corpus, Keys: keys, Worker: worker, Store: combatstore.Store{}, Content: content, Runner: r, Fresh: p,
-		Inputs: combat.Inputs{Heroes: o.roster(content), Pets: characterstore.PetBootstrapProjection{Content: content}, Stats: stats, Awakening: stats.Awakening, Collection: o.library, Conquer: conquer, Stacks: i5store.Store{Queryer: p}}}, true, nil
+		Inputs: combat.Inputs{Heroes: o.roster(content), Pets: characterstore.PetBootstrapProjection{Content: content}, Stats: stats, Awakening: stats.Awakening, Collection: o.library, Conquer: conquer, Stacks: i5store.Store{Queryer: p}, Lending: lending}}, true, nil
 }
 
 func canonicalPublicStats(p *postgres.Pool, content contentstore.Store, o topFloorOwners) publicstats.Service {

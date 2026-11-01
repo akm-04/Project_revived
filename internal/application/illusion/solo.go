@@ -118,7 +118,7 @@ func (s Mode) Start(c context.Context, a identity.ActorContext, request StartReq
 		if err = st.player.ConsumeChance(); err != nil {
 			return Response{}, err
 		}
-		started, err := s.bind(c, sc, a, st.occurrence, campaign, request.Formation, request.PetID)
+		started, err := s.bind(c, sc, a, st.occurrence, campaign, request)
 		if err != nil {
 			return Response{}, err
 		}
@@ -135,7 +135,8 @@ func (s Mode) Start(c context.Context, a identity.ActorContext, request StartReq
 	return response.Body, err
 }
 
-func (s Mode) bind(c context.Context, sc gen.TimedScope, a identity.ActorContext, occurrence d.Occurrence, campaign d.Campaign, formation []int64, petID int64) (cb.Started, error) {
+func (s Mode) bind(c context.Context, sc gen.TimedScope, a identity.ActorContext, occurrence d.Occurrence, campaign d.Campaign, request StartRequest) (cb.Started, error) {
+	formation, petID := request.Formation, request.PetID
 	op := sc.Operation.Operation()
 	revision, _ := op.Policies.Get("content")
 	scope, err := ca.NewCoherentReadScope(tx.Scope{Tx: sc.Tx, Operation: op, Attempt: sc.Attempt, Options: sc.Options}, revision, sc.Operation.DecisionAt())
@@ -149,8 +150,14 @@ func (s Mode) bind(c context.Context, sc gen.TimedScope, a identity.ActorContext
 	if petID > 0 {
 		battle.PetsA = append(battle.PetsA, cb.Participant{Origin: cd.OwnedSelf, Kind: cd.PetActor, Player: a.PlayerID, Identity: petID})
 	}
+	if request.RentUnit > 0 && request.RentPlayer > 0 {
+		battle.TeamA = append(battle.TeamA, cb.Participant{Origin: cd.Borrowed, Kind: cd.HeroActor, Player: identity.PlayerID(request.RentPlayer), Identity: request.RentUnit})
+	}
+	if request.RentPetUnit > 0 && request.RentPetPlayer > 0 {
+		battle.PetsA = append(battle.PetsA, cb.Participant{Origin: cd.Borrowed, Kind: cd.PetActor, Player: identity.PlayerID(request.RentPetPlayer), Identity: request.RentPetUnit})
+	}
 	return s.Combat.StartTx(c, sc.Tx, scope, cb.StartRequest{Actor: a, Locator: locator(a), GenerationRef: generationRef(occurrence),
-		StartFingerprint: startFingerprint(a, StartRequest{Formation: formation, PetID: petID}, op), ResultDeadline: sc.Operation.DecisionAt().Add(attemptLimit),
+		StartFingerprint: startFingerprint(a, request, op), ResultDeadline: sc.Operation.DecisionAt().Add(attemptLimit),
 		Battle: battle, TrustProfile: cd.ClientSummaryAttested, Replay: cd.ReplaySpec{Response: cd.ReplayOK}})
 }
 

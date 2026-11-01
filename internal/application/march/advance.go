@@ -17,6 +17,9 @@ func (s Mode) Advance(c context.Context, a identity.ActorContext, q Fight, op op
 		if v.level < 65 || r.HasFight || r.Advanced || r.Passed != 0 || r.Pending != "" {
 			return nil, d.ErrRefused
 		}
+		if q.RentUnit > 0 && (r.Loan == nil || r.Loan.Unit != q.RentUnit || r.Loan.Player != q.RentPlayer) {
+			return nil, d.ErrRefused
+		}
 		if err := s.admitFormation(c, sc, a, *r, q.Formation, true); err != nil {
 			return nil, err
 		}

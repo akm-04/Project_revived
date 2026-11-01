@@ -99,18 +99,19 @@ func (o WorldBossDispatcher) Dispatch(ctx context.Context, req httpedge.Dispatch
 	return bad
 }
 
-// worldBossStart reads SelectTeamNewWindow's 626. Borrowed lineups stay
-// unsupported until the I8-6A BORROWED route lands for this family.
-//
-// shortcut: rent fields are refused as malformed, wire Combat Borrowed when friend rent lands.
+// worldBossStart reads SelectTeamNewWindow's 626. A borrowed hero is frozen as
+// a BORROWED participant and admitted by Combat's lending capability.
 func worldBossStart(params map[string]any) (app.StartRequest, bool) {
 	campaign, campaignOK := topFloorInteger(params, "campaign_id", true)
 	formation, formationOK := topFloorFormation(params["formation"])
+	rentPlayer, rentPlayerOK := topFloorInteger(params, "rent_player_id", false)
+	rentUnit, rentUnitOK := topFloorIdentifier(params["rent_formation"], false)
 	allowed := onlyStockGameplayParams(params, "campaign_id", "formation", "rent_player_id", "rent_formation", "tutor_rent_hero", "rent_hero_player", "rent_hero_id")
-	if !allowed || !campaignOK || !formationOK || campaign < d.FirstBossID || campaign > d.LastBossID || worldBossRented(params) {
+	if !allowed || !campaignOK || !formationOK || !rentPlayerOK || !rentUnitOK || campaign < d.FirstBossID || campaign > d.LastBossID ||
+		(rentPlayer == 0) != (rentUnit == 0) {
 		return app.StartRequest{}, false
 	}
-	return app.StartRequest{CampaignID: campaign, Formation: formation}, true
+	return app.StartRequest{CampaignID: campaign, Formation: formation, RentPlayer: rentPlayer, RentUnit: rentUnit}, true
 }
 
 // worldBossResult reads BattleCreate.elementResult's 627.
@@ -120,7 +121,7 @@ func worldBossResult(params map[string]any) (app.ResultRequest, bool) {
 	formation, formationOK := topFloorFormation(params["formation"])
 	damage, damageOK := worldBossDamage(params["total_damage"])
 	allowed := onlyStockGameplayParams(params, "campaign_id", "campaign_type", "total_damage", "formation", "rent_formation", "rent_player_id")
-	if !allowed || !campaignOK || !kindOK || !formationOK || !damageOK || campaign < d.FirstBossID || campaign > d.LastBossID || kind != 8 || worldBossRented(params) {
+	if !allowed || !campaignOK || !kindOK || !formationOK || !damageOK || campaign < d.FirstBossID || campaign > d.LastBossID || kind != 8 {
 		return app.ResultRequest{}, false
 	}
 	return app.ResultRequest{CampaignID: campaign, Damage: damage, Formation: formation}, true

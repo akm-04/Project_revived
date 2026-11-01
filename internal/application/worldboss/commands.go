@@ -115,7 +115,7 @@ func (s Mode) Start(c context.Context, a identity.ActorContext, request StartReq
 		if err = s.purpleHeroes(c, sc.Tx, a, at, request.Formation); err != nil {
 			return Response{}, err
 		}
-		started, err := s.bind(c, sc, a, st.occurrence, boss, request.Formation)
+		started, err := s.bind(c, sc, a, st.occurrence, boss, request)
 		if err != nil {
 			return Response{}, err
 		}
@@ -134,7 +134,8 @@ func (s Mode) Start(c context.Context, a identity.ActorContext, request StartReq
 	return response.Body, err
 }
 
-func (s Mode) bind(c context.Context, sc gen.TimedScope, a identity.ActorContext, occurrence d.Occurrence, boss d.Boss, formation []int64) (cb.Started, error) {
+func (s Mode) bind(c context.Context, sc gen.TimedScope, a identity.ActorContext, occurrence d.Occurrence, boss d.Boss, request StartRequest) (cb.Started, error) {
+	formation := request.Formation
 	op := sc.Operation.Operation()
 	revision, _ := op.Policies.Get("content")
 	scope, err := ca.NewCoherentReadScope(tx.Scope{Tx: sc.Tx, Operation: op, Attempt: sc.Attempt, Options: sc.Options}, revision, sc.Operation.DecisionAt())
@@ -145,8 +146,11 @@ func (s Mode) bind(c context.Context, sc gen.TimedScope, a identity.ActorContext
 	for _, id := range formation {
 		battle.TeamA = append(battle.TeamA, cb.Participant{Origin: cd.OwnedSelf, Kind: cd.HeroActor, Player: a.PlayerID, Identity: id})
 	}
+	if request.RentUnit > 0 && request.RentPlayer > 0 {
+		battle.TeamA = append(battle.TeamA, cb.Participant{Origin: cd.Borrowed, Kind: cd.HeroActor, Player: identity.PlayerID(request.RentPlayer), Identity: request.RentUnit})
+	}
 	return s.Combat.StartTx(c, sc.Tx, scope, cb.StartRequest{Actor: a, Locator: locator(a), GenerationRef: generationRef(occurrence.Board()),
-		StartFingerprint: startFingerprint(a, StartRequest{CampaignID: boss.ID, Formation: formation}, op), ResultDeadline: sc.Operation.DecisionAt().Add(attemptLimit),
+		StartFingerprint: startFingerprint(a, StartRequest{CampaignID: boss.ID, Formation: formation, RentPlayer: request.RentPlayer, RentUnit: request.RentUnit}, op), ResultDeadline: sc.Operation.DecisionAt().Add(attemptLimit),
 		Battle: battle, TrustProfile: cd.ClientSummaryAttested, Replay: cd.ReplaySpec{Response: cd.ReplayOK}})
 }
 

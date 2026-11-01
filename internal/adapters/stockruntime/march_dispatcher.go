@@ -80,14 +80,12 @@ func (m MarchDispatcher) Dispatch(c context.Context, r httpedge.DispatchRequest)
 		if !ok {
 			return bad
 		}
-		// Lending is the named I9-9 integration, never an owned-hero alias.
-		if _, rent := p["rent_formation"]; rent {
-			return marchFailure(d.ErrRefused)
+		rentPlayer, rentPlayerOK := topFloorInteger(p, "rent_player_id", false)
+		rentUnit, rentUnitOK := topFloorIdentifier(p["rent_formation"], false)
+		if !rentPlayerOK || !rentUnitOK || (rentPlayer == 0) != (rentUnit == 0) {
+			return bad
 		}
-		if _, rent := p["rent_player_id"]; rent {
-			return marchFailure(d.ErrRefused)
-		}
-		q := app.Fight{Formation: formation, Force: force}
+		q := app.Fight{Formation: formation, Force: force, RentPlayer: rentPlayer, RentUnit: rentUnit}
 		if r.Envelope.MID == 340 {
 			body, err = m.Service.Start(c, actor, q, op)
 		} else {
