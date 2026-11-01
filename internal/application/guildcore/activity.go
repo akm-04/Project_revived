@@ -1,0 +1,30 @@
+package guildcore
+
+import (
+	"context"
+	"time"
+
+	"gxb.local/backend/v2/internal/domain/guild"
+	"gxb.local/backend/v2/internal/domain/identity"
+	"gxb.local/backend/v2/internal/foundation/tx"
+)
+
+// settleDepartureActivityTx leaves the departing member's unfolded credit with
+// the old guild and halves their lifetime contribution (I9_GUILD_ACTIVITY_V1 C5, C7).
+// It takes rank 723, so it runs after anything else the flow locks.
+func (s Service) settleDepartureActivityTx(ctx context.Context, t tx.Tx, g guild.Guild, player identity.PlayerID, at time.Time) error {
+	credited, err := s.Store.FoldActivityTx(ctx, t, []identity.PlayerID{player})
+	if err != nil {
+		return err
+	}
+	if credited > 0 {
+		old := g.StateVersion
+		g.Vitality = guild.ActivityBalance(g.Vitality, credited)
+		g.StateVersion++
+		g.UpdatedAt = at
+		if err := s.Store.SaveGuildTx(ctx, t, g, old); err != nil {
+			return err
+		}
+	}
+	return s.Store.ForfeitActivityLifetimeTx(ctx, t, player)
+}

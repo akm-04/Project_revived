@@ -359,6 +359,9 @@ func (s *testStore) LockTemporalTx(_ context.Context, _ tx.Tx, pid identity.Play
 	}
 	return st, true, nil
 }
+func (s *testStore) AppendGuildActivityDayTx(context.Context, tx.Tx, identity.PlayerID, time.Time, int64) error {
+	return nil
+}
 func (s *testStore) SaveTemporalTx(_ context.Context, _ tx.Tx, st economy.TemporalState) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()

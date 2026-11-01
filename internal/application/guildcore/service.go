@@ -300,6 +300,9 @@ func (s Service) Create(ctx context.Context, actor identity.ActorContext, req Cr
 			}
 			return err
 		}
+		if err := s.Store.MarkActivityFoldedTx(txctx, scope.Tx, actor.PlayerID); err != nil {
+			return err
+		}
 		out = CreateResult{GuildID: int64(gid), Role: int16(guild.Leader)}
 		raw, _ := json.Marshal(out)
 		rr, err := receipt.New(bound, rid, "I6C_GUILD", "gxb.i6c.guild.create.v1", raw, fp)
@@ -522,6 +525,9 @@ func (s Service) ApplyOrJoin(ctx context.Context, actor identity.ActorContext, g
 			}
 			if level < g.MinAllowLevel {
 				return ErrLevelTooLow
+			}
+			if err := s.Store.MarkActivityFoldedTx(txctx, scope.Tx, actor.PlayerID); err != nil {
+				return err
 			}
 			out = ApplyResult{GuildID: int64(gid), Joined: true}
 			raw, _ := json.Marshal(out)

@@ -419,6 +419,9 @@ func (s Service) AcceptApplication(ctx context.Context, actor identity.ActorCont
 		if level < g.MinAllowLevel {
 			return ErrLevelTooLow
 		}
+		if err := s.Store.MarkActivityFoldedTx(txctx, scope.Tx, target); err != nil {
+			return err
+		}
 		out = AckResult{GuildID: int64(gid)}
 		rr, err := s.putAckReceiptReturning(txctx, scope.Tx, bound, string(actor.AccountUID), actor.ContextID.UUID(), rid, fp, "gxb.i6c.guild.accept_application.v1", out)
 		if err != nil {
@@ -484,7 +487,7 @@ func (s Service) removeSelf(ctx context.Context, actor identity.ActorContext, gi
 		if err := s.Fencer.FenceActorTx(txctx, scope.Tx, actor, at); err != nil {
 			return err
 		}
-		_, m, err := s.lockGuildActorTx(txctx, scope.Tx, actor, gid)
+		g, m, err := s.lockGuildActorTx(txctx, scope.Tx, actor, gid)
 		if err != nil {
 			if errors.Is(err, ErrNotGuildMember) {
 				out = AckResult{GuildID: int64(gid), Replayed: true}
@@ -515,6 +518,9 @@ func (s Service) removeSelf(ctx context.Context, actor identity.ActorContext, gi
 			return err
 		}
 		if err := s.Store.AppendAuditTx(txctx, scope.Tx, gid, "LEAVE", actor.PlayerID, actor.PlayerID, at, s.Policy.Revision, bound.ID, "{}"); err != nil {
+			return err
+		}
+		if err := s.settleDepartureActivityTx(txctx, scope.Tx, g, actor.PlayerID, at); err != nil {
 			return err
 		}
 		out = AckResult{GuildID: int64(gid)}
@@ -809,7 +815,7 @@ func (s Service) Kick(ctx context.Context, actor identity.ActorContext, target i
 		if err := s.Fencer.FenceActorTx(txctx, scope.Tx, actor, at); err != nil {
 			return err
 		}
-		_, am, tm, tok, err := s.lockGuildActorTargetTx(txctx, scope.Tx, actor, gid, target)
+		g, am, tm, tok, err := s.lockGuildActorTargetTx(txctx, scope.Tx, actor, gid, target)
 		if err != nil {
 			return err
 		}
@@ -844,6 +850,9 @@ func (s Service) Kick(ctx context.Context, actor identity.ActorContext, target i
 			return err
 		}
 		if err := s.Store.AppendAuditTx(txctx, scope.Tx, gid, "KICK", actor.PlayerID, target, at, s.Policy.Revision, bound.ID, "{}"); err != nil {
+			return err
+		}
+		if err := s.settleDepartureActivityTx(txctx, scope.Tx, g, target, at); err != nil {
 			return err
 		}
 		out = AckResult{GuildID: int64(gid)}
@@ -1195,6 +1204,9 @@ func (s Service) AcceptInvite(ctx context.Context, actor identity.ActorContext, 
 		}
 		if level < g.MinAllowLevel {
 			return ErrLevelTooLow
+		}
+		if err := s.Store.MarkActivityFoldedTx(txctx, scope.Tx, actor.PlayerID); err != nil {
+			return err
 		}
 		out = AckResult{GuildID: int64(gid)}
 		rr, err := s.putAckReceiptReturning(txctx, scope.Tx, bound, string(actor.AccountUID), actor.ContextID.UUID(), rid, fp, "gxb.i6c.guild.accept_invite.v1", out)

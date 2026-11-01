@@ -36,7 +36,11 @@ func (s Service) DebitTemporalTx(ctx context.Context, t tx.Tx, pid identity.Play
 	if err != nil {
 		return economy.TemporalState{}, err
 	}
-	return next, s.saveOccultLedgerTx(ctx, t, ledger, amount, op.StartedAt.UTC())
+	if err := s.saveOccultLedgerTx(ctx, t, ledger, amount, op.StartedAt.UTC()); err != nil {
+		return economy.TemporalState{}, err
+	}
+	// Rank 723: only this seam credits guild activity (I9_GUILD_ACTIVITY_V1 C1, C2).
+	return next, s.Store.AppendGuildActivityDayTx(ctx, t, pid, op.StartedAt.UTC(), amount)
 }
 
 func (s Service) debitTemporalTx(ctx context.Context, t tx.Tx, pid identity.PlayerID, key string, amount int64, op operation.Context) (economy.TemporalState, error) {

@@ -18,6 +18,7 @@ var (
 
 type Store interface {
 	ReadGuild(context.Context, guild.ID) (guild.Guild, bool, error)
+	ReadUnfoldedActivity(context.Context, guild.ID) (int64, error)
 	ReadMembership(context.Context, identity.PlayerID) (guild.Membership, bool, error)
 	ListMemberships(context.Context, guild.ID) ([]guild.Membership, error)
 	ListGuilds(context.Context, identity.LogicalServerID, int) ([]guild.Guild, error)
@@ -115,7 +116,11 @@ func (s Service) profile(ctx context.Context, pid identity.PlayerID) (playerdire
 	return p, nil
 }
 func (s Service) guildInfo(ctx context.Context, g guild.Guild, members []guild.Membership) (GuildInfo, error) {
-	out := GuildInfo{GuildID: int64(g.ID), Icon: g.Icon, IconFrame: g.IconFrame, Name: g.Name, Description: g.Description, ApplyType: int16(g.ApplyType), MinAllowLevel: g.MinAllowLevel, Vitality: g.Vitality, MemberNum: int64(len(members))}
+	unfolded, err := s.Store.ReadUnfoldedActivity(ctx, g.ID)
+	if err != nil {
+		return GuildInfo{}, err
+	}
+	out := GuildInfo{GuildID: int64(g.ID), Icon: g.Icon, IconFrame: g.IconFrame, Name: g.Name, Description: g.Description, ApplyType: int16(g.ApplyType), MinAllowLevel: g.MinAllowLevel, Vitality: guild.ActivityBalance(g.Vitality, unfolded), MemberNum: int64(len(members))}
 	for _, m := range members {
 		if m.Role == guild.Leader {
 			p, err := s.profile(ctx, m.PlayerID)

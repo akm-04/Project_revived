@@ -178,6 +178,7 @@ type Store interface {
 	SaveScalarTx(context.Context, tx.Tx, economy.ScalarBalance, bool) error
 	LockTemporalTx(context.Context, tx.Tx, identity.PlayerID, string) (economy.TemporalState, bool, error)
 	SaveTemporalTx(context.Context, tx.Tx, economy.TemporalState) error
+	AppendGuildActivityDayTx(context.Context, tx.Tx, identity.PlayerID, time.Time, int64) error
 	RebindTemporalTx(context.Context, tx.Tx, economy.TemporalState, int64) error
 	LockStackTx(context.Context, tx.Tx, identity.PlayerID, int64, time.Time) (economy.StackState, bool, error)
 	SaveStackTx(context.Context, tx.Tx, economy.StackState, bool) error

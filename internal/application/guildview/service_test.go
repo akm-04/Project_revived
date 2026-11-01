@@ -23,6 +23,7 @@ func (s viewStore) ReadGuild(context.Context, guild.ID) (guild.Guild, bool, erro
 	}
 	return s.g, true, nil
 }
+func (s viewStore) ReadUnfoldedActivity(context.Context, guild.ID) (int64, error) { return 0, nil }
 func (s viewStore) ReadMembership(_ context.Context, p identity.PlayerID) (guild.Membership, bool, error) {
 	m, ok := s.memberships[p]
 	return m, ok, nil

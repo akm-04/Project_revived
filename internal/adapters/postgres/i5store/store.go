@@ -271,6 +271,12 @@ func (Store) SaveScalarTx(ctx context.Context, t tx.Tx, b economy.ScalarBalance,
 
 const crystalKey = "crystal"
 
+func (Store) AppendGuildActivityDayTx(ctx context.Context, t tx.Tx, pid identity.PlayerID, at time.Time, amount int64) error {
+	_, err := t.Exec(ctx, `INSERT INTO player_guild_activity_days(player_id,game_day,amount) VALUES($1,$2,$3)
+		ON CONFLICT(player_id,game_day) DO UPDATE SET amount=player_guild_activity_days.amount+excluded.amount`, int64(pid), modes.Day(at), amount)
+	return err
+}
+
 // CrystalSpentOnDayTx is the crystal total spent on a game day (I9_MODE_FOUNDATION_V1 MF4), read by daily missions 126/127.
 func (Store) CrystalSpentOnDayTx(ctx context.Context, t tx.Queryer, pid identity.PlayerID, day int64) (int64, error) {
 	var spent int64
