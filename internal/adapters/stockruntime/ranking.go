@@ -65,10 +65,8 @@ func (d RankingDispatcher) Dispatch(c context.Context, r httpedge.DispatchReques
 	if r.Envelope.MID != 301 {
 		return fail(http.StatusNotImplemented)
 	}
-	for k := range r.Envelope.Params {
-		if k != "mid" && k != "token" && k != "region" && k != "rank_types" {
-			return fail(http.StatusBadRequest)
-		}
+	if !onlyStockGameplayParams(r.Envelope.Params, "rank_types") {
+		return fail(http.StatusBadRequest)
 	}
 	types, ok := r.Envelope.Params["rank_types"].([]any)
 	if !ok || len(types) != 1 {
@@ -152,7 +150,9 @@ func (d RankingDispatcher) Dispatch(c context.Context, r httpedge.DispatchReques
 	}
 	snapshot, e := d.Service.ReadBoard(c, board, a, r.Envelope.Operation)
 	if e != nil {
-		return fail(http.StatusServiceUnavailable)
+		failure := fail(http.StatusServiceUnavailable)
+		failure.Cause = e
+		return failure
 	}
 	body, e := projection.BoardList(snapshot, a.PlayerID)
 	if e != nil {

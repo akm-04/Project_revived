@@ -24,3 +24,21 @@ func AwakeningFixture(ctx context.Context, dsn, account string) error {
 	}
 	return nil
 }
+
+// StrongTeamFixture declares prior progression of every owned girl, so a stage whose
+// strength depends on the weekday can be won whatever day the scenario runs.
+func StrongTeamFixture(ctx context.Context, dsn, account string) error {
+	p, err := postgres.Open(ctx, dsn, postgres.PoolSettings{MaxConns: 2, MaxConnLifetime: time.Minute, MaxConnIdleTime: time.Minute, HealthCheckPeriod: time.Minute, ApplicationName: "vc-strong-team-fixture"})
+	if err != nil {
+		return err
+	}
+	defer p.Close()
+	result, err := p.Raw().Exec(ctx, `UPDATE player_heroes h SET level=90,color=15,state_version=h.state_version+1,updated_at=clock_timestamp() FROM players p WHERE h.player_id=p.player_id AND p.account_id=$1`, account)
+	if err != nil {
+		return err
+	}
+	if result.RowsAffected() == 0 {
+		return fmt.Errorf("strong team fixture requires owned girls")
+	}
+	return nil
+}

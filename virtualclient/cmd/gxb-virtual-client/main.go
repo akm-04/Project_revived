@@ -90,6 +90,7 @@ type scenario struct {
 	// "relogin-after:<file>" (a relogin that first waits in wall time until <file> exists, so an operator can move the host clock).
 	// "fixture:top_floor_task_rank" (moves the player to rank 150 of the normal ladder, which must already exist).
 	// "fixture:one_on_one_cooling" (starts the cooldown of a player that already loaded 1on1).
+	// "fixture:strong_team" (declares prior progression of every girl the player owns by then; relogin afterwards).
 	Steps []string `json:"steps"`
 	// Settle is virtual seconds run after the last step (stock ErrorLogPoster uploads every 30 s).
 	Settle float64 `json:"settle_seconds"`
@@ -398,6 +399,8 @@ func (run run) step(virtual *client.Client, step string) error {
 			return provision.TopFloorTaskRankFixture(context.Background(), run.databaseURL, run.account)
 		case "one_on_one_cooling":
 			return provision.OneOnOneCoolingFixture(context.Background(), run.databaseURL, run.account)
+		case "strong_team":
+			return provision.StrongTeamFixture(context.Background(), run.databaseURL, run.account)
 		}
 		return fmt.Errorf("unknown fixture %q", argument)
 	case "wait":

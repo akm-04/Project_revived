@@ -79,6 +79,18 @@ func (taskRankingFixture) TaskRankList(context.Context, identity.ActorContext) (
 
 type unusedBoardRankingFixture struct{ BoardRankingReads }
 
+func TestRankingAcceptsStockClientFieldsAndRefusesForgedOnes(t *testing.T) {
+	dispatcher := RankingDispatcher{Authority: httpAuthority{actorForHTTP(t)}, Service: unusedBoardRankingFixture{}, TopFloor: taskRankingFixture{}}
+	stock := heroReq(t, 301, map[string]any{"rank_types": []any{json.Number("2")}, "v_": "1.631.0", "app_v": "1.631.0", "platform": int64(3)})
+	if result := dispatcher.Dispatch(context.Background(), stock); result.HTTPStatus != 200 {
+		t.Fatal(result)
+	}
+	forged := heroReq(t, 301, map[string]any{"rank_types": []any{json.Number("2")}, "player_id": int64(1)})
+	if result := dispatcher.Dispatch(context.Background(), forged); result.HTTPStatus != 400 {
+		t.Fatal(result)
+	}
+}
+
 func TestI97ATaskRankingSubtype(t *testing.T) {
 	dispatcher := RankingDispatcher{Authority: httpAuthority{actorForHTTP(t)}, Service: unusedBoardRankingFixture{}, TopFloor: taskRankingFixture{}}
 	result := dispatcher.Dispatch(context.Background(), heroReq(t, 301, map[string]any{"rank_types": []any{json.Number("2")}}))

@@ -1,6 +1,7 @@
 {
  "name": "i9_8b_illusion",
  "level": 100,
+ "vip": 5,
  "heroes": [
   10001062,
   10001009,
@@ -38,7 +39,7 @@
   "lua:local il=xyd.ModelManager.get():loadModel(xyd.ModelType.ILLUSION) il:buyTimes(function(code) if code~=xyd.error.OK then error('vc-il-buy-'..tostring(code)) end end)",
   "wait:3",
   "lua:local il=xyd.ModelManager.get():loadModel(xyd.ModelType.ILLUSION) if il.times~=10 or il.buyPre~=1 then error('vc-il-buy-state-'..tostring(il.times)..'/'..tostring(il.buyPre)) end",
-  "lua:local il=xyd.ModelManager.get():loadModel(xyd.ModelType.ILLUSION) xyd.WindowManager.get():openWindow(xyd.WindowName.SelectTeamWnd,{type=xyd.SelectTeamType.ILLUSION,isMercenary=false,allTeamHeros={},campaignID=il.id,campaignType=xyd.CampaignType.ELEMENT})",
+  "lua:local il=xyd.ModelManager.get():loadModel(xyd.ModelType.ILLUSION) xyd.WindowManager.get():openWindow(xyd.WindowName.SelectTeamWnd,{type=xyd.SelectTeamType.ILLUSION,isMercenary=false,allTeamHeros={},campaignID=il.id,campaignType=xyd.CampaignType.ILLUSION})",
   "wait:3",
   "lua:local w=xyd.WindowManager.get():getWindow('battle_select_team') if not w then error('vc-il-no-team') end local cards={} local function walk(n) if not n:isVisible() then return end if n:getName()=='layout' then table.insert(cards,n) return end for _,c in ipairs(n:getChildren()) do walk(c) end end walk(w:nodeByName('list_layer')) for _,n in ipairs(cards) do local b=n:getCascadeBoundingBox() __vc.tap(b.x+b.width/2,b.y+b.height/2) end",
   "wait:1",
@@ -62,7 +63,7 @@
   "lua:local rl=xyd.ModelManager.get():loadModel(xyd.ModelType.RANK_LIST) rl:loadRankList({24},true,function(code) if code~=xyd.error.OK then error('vc-il-board-'..tostring(code)) end end)",
   "wait:3",
   "lua:if not __vc_il_rank or not __vc_il_rank.rank_list or #__vc_il_rank.rank_list~=1 then error('vc-il-board-missing') end local row=__vc_il_rank.rank_list[1] if row.rank_type~=24 or type(row.rank_info)~='table' or type(row.rank_info.my_rank)~='table' then error('vc-il-board-shape') end",
-  "lua:local il=xyd.ModelManager.get():loadModel(xyd.ModelType.ILLUSION) il:createHouse(function(code,reply) if code~=xyd.error.OK then error('vc-il-room-'..tostring(code)) end end)",
+  "lua:local il=xyd.ModelManager.get():loadModel(xyd.ModelType.ILLUSION) il:createHouse({},function(code,reply) if code~=xyd.error.OK then error('vc-il-room-'..tostring(code)) end end)",
   "wait:3",
   "lua:local il=xyd.ModelManager.get():loadModel(xyd.ModelType.ILLUSION) local room=__vc_il_room and __vc_il_room.reply if not room or type(room.room_id)~='number' or room.room_id<1 then error('vc-il-room-missing') end if il:getRoomID()~=room.room_id or not il:checkIsMaster(il.selfPlayer.playerID) then error('vc-il-room-state') end"
  ],
