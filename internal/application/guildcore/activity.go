@@ -9,6 +9,14 @@ import (
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
+// closeRentalsTx runs before anything at rank 723.
+func (s Service) closeRentalsTx(ctx context.Context, t tx.Tx, lender identity.PlayerID, at time.Time) error {
+	if s.Rental == nil {
+		return nil
+	}
+	return s.Rental.CloseLenderOffersTx(ctx, t, lender, at)
+}
+
 // settleDepartureActivityTx leaves the departing member's unfolded credit with
 // the old guild and halves their lifetime contribution (I9_GUILD_ACTIVITY_V1 C5, C7).
 // It takes rank 723, so it runs after anything else the flow locks.

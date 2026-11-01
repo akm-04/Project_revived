@@ -13,6 +13,12 @@ import (
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
+// RentalClosure ends a departing lender's rental offers and mails their payouts,
+// at rank 609b and 610, inside the departure transaction (I9_GUILD_RENTAL_V1 C15).
+type RentalClosure interface {
+	CloseLenderOffersTx(context.Context, tx.Tx, identity.PlayerID, time.Time) error
+}
+
 type ActorFencer interface {
 	FenceActorTx(context.Context, tx.Tx, identity.ActorContext, time.Time) error
 }

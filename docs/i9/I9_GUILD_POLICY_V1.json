@@ -28,7 +28,97 @@
   "maximum_duration": null,
   "recall_minimum_seconds": 1800,
   "level_up_ceiling": 5,
-  "note": "tunable; numbers have no source"
+  "note": "tunable; numbers have no source",
+  "vip_limits": [
+   {
+    "vip": 0,
+    "lend": 2,
+    "level_up": 0
+   },
+   {
+    "vip": 1,
+    "lend": 2,
+    "level_up": 0
+   },
+   {
+    "vip": 2,
+    "lend": 2,
+    "level_up": 0
+   },
+   {
+    "vip": 3,
+    "lend": 2,
+    "level_up": 0
+   },
+   {
+    "vip": 4,
+    "lend": 2,
+    "level_up": 1
+   },
+   {
+    "vip": 5,
+    "lend": 2,
+    "level_up": 2
+   },
+   {
+    "vip": 6,
+    "lend": 2,
+    "level_up": 3
+   },
+   {
+    "vip": 7,
+    "lend": 2,
+    "level_up": 4
+   },
+   {
+    "vip": 8,
+    "lend": 2,
+    "level_up": 5
+   },
+   {
+    "vip": 9,
+    "lend": 2,
+    "level_up": 5
+   },
+   {
+    "vip": 10,
+    "lend": 2,
+    "level_up": 5
+   },
+   {
+    "vip": 11,
+    "lend": 2,
+    "level_up": 5
+   },
+   {
+    "vip": 12,
+    "lend": 3,
+    "level_up": 5
+   },
+   {
+    "vip": 13,
+    "lend": 3,
+    "level_up": 5
+   },
+   {
+    "vip": 14,
+    "lend": 4,
+    "level_up": 5
+   },
+   {
+    "vip": 15,
+    "lend": 4,
+    "level_up": 5
+   }
+  ],
+  "vip_limits_source": "client data/tables/vip.lua num_mercenary, rent_level_up",
+  "departure_mail": {
+   "sender": "Guild",
+   "title": "Lent unit returned",
+   "body": "You are no longer in the guild, so your lent unit has come back. Your earnings are attached.",
+   "source": "PRIVATE_POLICY D412",
+   "operator_tunable": "I11"
+  }
  },
  "borrow_modes": [
   {
@@ -110,11 +200,11 @@
   {
    "key": "fate",
    "campaign_types": [
-    "ELEMENT"
+    8
    ],
    "enabled": false,
    "star_cap": null,
-   "source": "not in rule 10; tweakable"
+   "source": "not in rule 10; tweakable; CampaignType ELEMENT, domain/worldboss/catalog.go:119"
   }
  ],
  "guild_campaign": {

@@ -71,6 +71,7 @@ type Service struct {
 	Policy           PolicyBinding
 	Profile          tx.Profile
 	InviteProjection *appinvite.SourceService
+	Rental           RentalClosure
 }
 
 func DefaultProfile() tx.Profile {

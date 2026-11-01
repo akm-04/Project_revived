@@ -21,10 +21,12 @@ import (
 // Participant names one actor. Owned actors are read from their owners at the
 // decision instant; TEMPLATE actors carry a mode-versioned source params row.
 type Participant struct {
-	Origin         d.Origin
-	Kind           d.ActorKind
-	Player         identity.PlayerID
-	Identity       int64
+	Origin   d.Origin
+	Kind     d.ActorKind
+	Player   identity.PlayerID
+	Identity int64
+	// LoanHeld marks a BORROWED actor the mode already holds on loan.
+	LoanHeld       bool
 	TemplateParams map[string]any
 	// Transform is the actor's parameter object for the battle's registered
 	// mode transform (Arena season awards); it never enters populate params.
@@ -58,6 +60,13 @@ type freezer struct {
 	players map[identity.PlayerID]*playerInputs
 	// members are the admitted co-members of the current START (not the convener).
 	members map[identity.PlayerID]bool
+	loans   map[loanKey]d.Provenance
+}
+
+type loanKey struct {
+	lender   identity.PlayerID
+	kind     d.ActorKind
+	identity int64
 }
 
 type playerInputs struct {
@@ -74,6 +83,9 @@ func (s Service) newFreezer(t tx.Tx, scope ca.CoherentReadScope, actor identity.
 func (f *freezer) freeze(ctx context.Context, locator d.Locator, request BattleRequest, challenge *d.Challenge, profile d.TrustProfile) (d.Snapshot, error) {
 	s, scope := f.service, f.scope
 	battle := d.Battle{CampaignType: request.CampaignType, BattleID: request.BattleID, PetsA: []d.Actor{}, PetsB: []d.Actor{}, Context: request.Context, Formation: request.Formation}
+	if err := f.lend(ctx, locator, request); err != nil {
+		return d.Snapshot{}, err
+	}
 	var err error
 	if battle.TeamA, err = f.actors(ctx, locator, request.TeamA, d.HeroActor); err != nil {
 		return d.Snapshot{}, err
@@ -146,9 +158,9 @@ func (f *freezer) actor(ctx context.Context, locator d.Locator, p Participant) (
 	}
 	var provenance *d.Provenance
 	if borrowed {
-		loan, err := f.lend(ctx, locator, p)
-		if err != nil {
-			return d.Actor{}, err
+		loan, lent := f.loans[loanKey{p.Player, p.Kind, p.Identity}]
+		if !lent {
+			return d.Actor{}, d.ErrInvalid
 		}
 		provenance = &loan
 	}
@@ -189,20 +201,41 @@ func (f *freezer) actor(ctx context.Context, locator d.Locator, p Participant) (
 	return a, nil
 }
 
-// lend asks the lending capability before any lender read, so a refused loan
-// (H-40) touches no owner state.
-func (f *freezer) lend(ctx context.Context, locator d.Locator, p Participant) (d.Provenance, error) {
+// lend asks the lending capability for all of the battle's loans before any
+// lender read, so a refused loan (H-40) touches no owner state.
+func (f *freezer) lend(ctx context.Context, locator d.Locator, request BattleRequest) error {
+	loans := []Loan{}
+	for _, side := range []struct {
+		participants []Participant
+		kind         d.ActorKind
+	}{{request.TeamA, d.HeroActor}, {request.PetsA, d.PetActor}} {
+		for _, p := range side.participants {
+			if p.Origin == d.Borrowed && p.Kind == side.kind && p.Player != f.starter && p.Player.Valid() && p.Identity > 0 {
+				loans = append(loans, Loan{Borrower: f.starter, Lender: p.Player, Kind: p.Kind, Identity: p.Identity, Locator: locator, CampaignType: request.CampaignType, Held: p.LoanHeld})
+			}
+		}
+	}
+	if len(loans) == 0 {
+		return nil
+	}
 	if f.service.Inputs.Lending == nil {
-		return d.Provenance{}, fmt.Errorf("%w: no lending capability", d.ErrProviderUnavailable)
+		return fmt.Errorf("%w: no lending capability", d.ErrProviderUnavailable)
 	}
-	provenance, err := f.service.Inputs.Lending.LendTx(ctx, f.t, f.scope, Loan{Borrower: f.starter, Lender: p.Player, Kind: p.Kind, Identity: p.Identity, Locator: locator})
+	provenances, err := f.service.Inputs.Lending.LendTx(ctx, f.t, f.scope, loans)
 	if err != nil {
-		return d.Provenance{}, err
+		return err
 	}
-	if !provenance.Valid() {
-		return d.Provenance{}, fmt.Errorf("%w: lending provenance", d.ErrProviderUnavailable)
+	if len(provenances) != len(loans) {
+		return fmt.Errorf("%w: lending provenance", d.ErrProviderUnavailable)
 	}
-	return provenance, nil
+	f.loans = make(map[loanKey]d.Provenance, len(loans))
+	for index, loan := range loans {
+		if !provenances[index].Valid() {
+			return fmt.Errorf("%w: lending provenance", d.ErrProviderUnavailable)
+		}
+		f.loans[loanKey{loan.Lender, loan.Kind, loan.Identity}] = provenances[index]
+	}
+	return nil
 }
 
 // template freezes a TEMPLATE or TRIAL actor from its source params with no
