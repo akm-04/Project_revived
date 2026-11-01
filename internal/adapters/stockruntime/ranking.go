@@ -6,6 +6,8 @@ import (
 	arenaprojection "gxb.local/backend/v2/internal/projection/arena"
 	"net/http"
 
+	"gxb.local/backend/v2/internal/adapters/guildwire"
+	guildview "gxb.local/backend/v2/internal/application/guildview"
 	"gxb.local/backend/v2/internal/application/realtimeauth"
 	"gxb.local/backend/v2/internal/application/topfloor"
 	"gxb.local/backend/v2/internal/domain/achievement"
@@ -40,6 +42,13 @@ type PetCampaignRanks interface {
 type IllusionRanks interface {
 	RankList(context.Context, identity.ActorContext, int64, operation.Context) (map[string]any, error)
 }
+
+// GuildRanks is the guild owner's read port for LOAD_RANK_LIST type 4
+// (I9_GUILD_ACTIVITY_V1 C12). The player ranking owner keeps no guild state.
+type GuildRanks interface {
+	ActivityRankList(context.Context, identity.ActorContext, int64) ([]guildview.GuildRank, int64, error)
+}
+
 type RankingDispatcher struct {
 	PetCampaign PetCampaignRanks
 	Illusion    IllusionRanks
@@ -49,6 +58,7 @@ type RankingDispatcher struct {
 	OneOnOne    OneOnOneRanks
 	Arena       ArenaRanks
 	Trophy      TrophyRanks
+	Guilds      GuildRanks
 }
 
 func (d RankingDispatcher) Dispatch(c context.Context, r httpedge.DispatchRequest) httpedge.Response {
@@ -144,6 +154,16 @@ func (d RankingDispatcher) Dispatch(c context.Context, r httpedge.DispatchReques
 		body["error_code"] = int64(0)
 		return httpedge.Response{HTTPStatus: http.StatusOK, Body: body}
 	}
+	if (subtype == 11 || subtype == 39) && d.Guilds != nil {
+		rows, mine, err := d.Guilds.ActivityRankList(c, a, 50)
+		if err != nil {
+			return fail(http.StatusServiceUnavailable)
+		}
+		body := guildwire.GuildRankList(subtype, rows, mine)
+		body["error_code"] = int64(0)
+		return okI5(body)
+	}
+
 	board, known := rankingdomain.BoardOfSubType(subtype)
 	if !known {
 		return fail(http.StatusNotImplemented)

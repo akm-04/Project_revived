@@ -184,3 +184,17 @@ func TestFailGuildKeepsUnknownErrorsOpaque(t *testing.T) {
 		t.Fatalf("%+v", r)
 	}
 }
+
+func TestGuildDispatcher616AlwaysAnswersEmptySuccess(t *testing.T) {
+	actor := actorForHTTP(t)
+	now := time.Unix(100, 0).UTC()
+	d := GuildDispatcher{Authority: httpAuthority{actor}, View: fakeGuildView{}}
+	r := d.Dispatch(context.Background(), env(616, nil, now))
+	if r.HTTPStatus != 200 || len(r.Body) != 0 {
+		t.Fatalf("616=%+v", r)
+	}
+	guildless := GuildDispatcher{Authority: httpAuthority{actor}, View: fakeGuildView{}}
+	if got := guildless.Dispatch(context.Background(), env(616, nil, now)); got.HTTPStatus != 200 || len(got.Body) != 0 {
+		t.Fatalf("616 guildless=%+v", got)
+	}
+}

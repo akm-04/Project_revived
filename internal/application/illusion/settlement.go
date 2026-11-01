@@ -123,16 +123,17 @@ func (s Mode) settle(c context.Context, sc gen.TimedScope, occurrence d.Occurren
 	if err != nil {
 		return err
 	}
-	// shortcut: times_paradise (the guild-level community band) is the guild
-	// active points owed to I9-9 (I9-8-ILLUSION-GUILD-ACTIVITY); upgrade when
-	// the guild activity owner lands.
+	occurrenceKey := fmt.Sprintf("%d:%d:%d", occurrence.LogicalServerID, occurrence.OpenDay, occurrence.CampaignID)
+	// The guild-level community band is guild active points (I9_GUILD_ACTIVITY_V1
+	// C9); source_key makes one occurrence credit each guild once.
 	for index, score := range guildScores(guilds, ranks) {
 		band := catalog.CommunityReward(int64(index + 1))
-		if band.PersonCoin <= 0 {
+		if band.Coin <= 0 {
 			continue
 		}
-		for _, member := range score.Guild.Members {
-			rewards[member] = append(rewards[member], grant.Line{Kind: grant.ScalarCurrency, ResourceKey: "guild_coin", Amount: band.PersonCoin})
+		key := fmt.Sprintf("%s:guild:%d", occurrenceKey, score.Guild.ID)
+		if err := s.GuildActivity.CreditActivityAwardTx(c, sc.Tx, score.Guild.ID, key, band.Coin); err != nil {
+			return err
 		}
 	}
 	recipients := make([]identity.PlayerID, 0, len(rewards))
@@ -142,7 +143,7 @@ func (s Mode) settle(c context.Context, sc gen.TimedScope, occurrence d.Occurren
 		}
 	}
 	slices.Sort(recipients)
-	sourceKey := fmt.Sprintf("%d:%d:%d", occurrence.LogicalServerID, occurrence.OpenDay, occurrence.CampaignID)
+	sourceKey := occurrenceKey
 	for _, recipient := range recipients {
 		request := i5.SettlementMailRequest{Recipient: recipient, SourceKind: settlementMailKind, SourceKey: sourceKey,
 			Title: settlementTitle, Sender: settlementSender,

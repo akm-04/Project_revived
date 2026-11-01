@@ -198,7 +198,7 @@
   "lua:local p=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_PLAYER) for _,h in pairs(p:getHeros()) do if h:getTableID()==10001062 then h:oneKeyPowerUp(function(code) if code~=xyd.error.OK then error('vc-purple-promotion-'..tostring(code)) end end) break end end",
   "wait:1",
   "lua:local p=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_PLAYER) local found=false for _,h in pairs(p:getHeros()) do if h:getTableID()==10001062 and h.color_>=xyd.EquipQuality.PURPLE then found=true end end if not found then error('vc-no-real-purple') end",
-  "lua:local backend=xyd.Backend.get() local original=backend.request backend.request=function(self,mid,params,cb,showError,skip,showLoading) return original(self,mid,params,function(code,reply) if mid==xyd.mid.WORLD_BOSS_FIGHT_RESULT then __vc_wb_result={code=code,reply=reply} end if mid==xyd.mid.WORLD_BOSS then __vc_wb_info=reply end if mid==xyd.mid.LOAD_ARENA_RANK then __vc_wb_ranks=reply end if cb then cb(code,reply) end end,showError,skip,showLoading) end",
+  "lua:local backend=xyd.Backend.get() local original=backend.request backend.request=function(self,mid,params,cb,showError,skip,showLoading) return original(self,mid,params,function(code,reply) if mid==xyd.mid.WORLD_BOSS_FIGHT_RESULT then __vc_wb_result={code=code,reply=reply} end if mid==xyd.mid.WORLD_BOSS then __vc_wb_info=reply end if mid==xyd.mid.LOAD_ARENA_RANK then __vc_wb_ranks=reply end if mid==xyd.mid.GUILD_RANK then __vc_wb_guild_rank=code end if cb then cb(code,reply) end end,showError,skip,showLoading) end",
   "lua:local wb=xyd.ModelManager.get():loadModel(xyd.ModelType.WORLD_BOSS) wb:loadWorldBoss(function(code) if code~=xyd.error.OK then error('vc-wb-enter-'..tostring(code)) end end,true)",
   "wait:3",
   "lua:if not __vc_wb_info or __vc_wb_info.challenge_times~=1 or __vc_wb_info.boss_info.current_boss~=10011 then error('vc-wb-enter-state') end",
@@ -266,8 +266,9 @@
   "lua:local wb=xyd.ModelManager.get():loadModel(xyd.ModelType.WORLD_BOSS) wb:doSweep({campaign_id=wb.boss_id},function(code) if code~=xyd.error.OK then error('vc-wb-sweep-'..tostring(code)) end end)",
   "wait:3",
   "lua:local wb=xyd.ModelManager.get():loadModel(xyd.ModelType.WORLD_BOSS) if wb.challenge_times~=4 then error('vc-wb-sweep-attempts-'..tostring(wb.challenge_times)) end if not wb.the_damage or wb.the_damage<=0 then error('vc-wb-sweep-damage') end if not wb.total_damage or wb.total_damage<wb.the_damage then error('vc-wb-sweep-total') end",
-  "lua:local arena=xyd.ModelManager.get():loadModel(xyd.ModelType.ARENA) arena:loadRankInfo(function() end)",
+  "lua:local arena=xyd.ModelManager.get():loadModel(xyd.ModelType.ARENA) arena:loadRankInfo(function() __vc_wb_rank_done=true end)",
   "wait:3",
+  "lua:if __vc_wb_guild_rank~=xyd.error.OK then error('vc-wb-616-'..tostring(__vc_wb_guild_rank)) end if not __vc_wb_rank_done then error('vc-wb-board-callback') end",
   "lua:if not __vc_wb_ranks then error('vc-wb-board-missing') end if not __vc_wb_ranks.boss_rank or #__vc_wb_ranks.boss_rank~=5 then error('vc-wb-board-count') end for _,b in ipairs(__vc_wb_ranks.boss_rank) do if type(b.boss_id)~='number' or b.boss_id<10011 or b.boss_id>10015 or type(b.infos)~='table' or type(b.my_rank)~='number' then error('vc-wb-board-shape') end end"
  ],
  "settle_seconds": 10,
@@ -277,8 +278,9 @@
   626,
   627,
   628,
-  276
+  276,
+  616
  ],
  "expect_lua_errors": [],
- "note": "World Boss window assets (windows/worldBoss/* and windows/activities/world_boss.csb) are absent from the supplied client assets, so enter/buy/sweep/board drive the stock WorldBoss.lua and Arena.lua model methods those windows call, and the fight opens the same stock SelectTeamWnd the battle_pre play button opens. MID 616 GUILD_RANK is not implemented, so the stock rank window cannot render; the shared 276 boss_rank reply is asserted from the stock request."
+ "note": "World Boss window assets (windows/worldBoss/* and windows/activities/world_boss.csb) are absent from the supplied client assets, so enter/buy/sweep/board drive the stock WorldBoss.lua and Arena.lua model methods those windows call, and the fight opens the same stock SelectTeamWnd the battle_pre play button opens. MID 616 GUILD_RANK now answers 200 {} (I9_GUILD_ACTIVITY_V1 C11); this run asserts the stock getGuildRank callback is reached and the arena rank callback completes, so the board opens."
 }

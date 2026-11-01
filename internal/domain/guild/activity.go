@@ -17,3 +17,25 @@ func ActivityBalance(vitality, unfolded int64) int64 {
 func LifetimeAfterLeaving(lifetime int64) int64 {
 	return lifetime / 2
 }
+
+// PlayerActivity is one member's own activity as the stock client reads it:
+// today_huoyue, the lifetime huoyue_num net of forfeits, and the seven-day
+// activity shown on a roster row (I9_GUILD_ACTIVITY_V1 C3, C10).
+type PlayerActivity struct {
+	Today    int64
+	Lifetime int64
+	SevenDay int64
+}
+
+// ActivityBoardRow is one guild's row on LOAD_RANK_LIST type 4
+// (I9_GUILD_ACTIVITY_V1 C12). ThreeDay is the 3-day active points the client
+// displays and orders by (rank.lua:120-137).
+type ActivityBoardRow struct {
+	GuildID       int64
+	Name          string
+	Icon          int64
+	Description   string
+	MinAllowLevel int64
+	MemberNum     int64
+	ThreeDay      int64
+}

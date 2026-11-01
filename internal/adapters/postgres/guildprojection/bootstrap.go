@@ -12,6 +12,7 @@ import (
 	appboot "gxb.local/backend/v2/internal/application/bootstrap"
 	"gxb.local/backend/v2/internal/application/guildview"
 	"gxb.local/backend/v2/internal/domain/identity"
+	"gxb.local/backend/v2/internal/domain/modes"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
@@ -38,6 +39,7 @@ func (BootstrapProjection) OverlayMID1(ctx context.Context, q tx.Queryer, actor 
 	view := guildview.Service{
 		Store:     guildstore.Store{Queryer: q},
 		Directory: publicpresentation.Reader{Queryer: q, Revision: rev, ObservedAt: observedAt},
+		Day:       func(context.Context) (int64, error) { return modes.Day(observedAt), nil },
 	}
 	self, member, err := view.Self(ctx, actor)
 	if err != nil {

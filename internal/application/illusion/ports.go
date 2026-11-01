@@ -117,6 +117,13 @@ type Guilds interface {
 	GuildSummaries(context.Context, identity.LogicalServerID) ([]GuildSummary, error)
 }
 
+// GuildActivity credits a community band's active points to the guild owner in
+// the settlement transaction, once per source key, taking no guild lock
+// (I9_GUILD_ACTIVITY_V1 C9).
+type GuildActivity interface {
+	CreditActivityAwardTx(context.Context, tx.Tx, int64, string, int64) error
+}
+
 // Mail is the I5 settlement-mail seam; the source key makes one occurrence's
 // reward idempotent for every recipient.
 type Mail interface {
@@ -124,28 +131,29 @@ type Mail interface {
 }
 
 type Mode struct {
-	Timed       gen.TimedRunner
-	Fresh       tx.Queryer
-	Store       Store
-	Content     Content
-	Fence       Fence
-	Players     Players
-	Functions   Functions
-	Directory   Directory
-	Heroes      Heroes
-	Pets        Heroes
-	Stats       Stats
-	Rooms       sharedroom.Service
-	RoomStore   sharedroom.Store
-	Invites     roominvite.Materializer
-	Combat      Combat
-	Privileges  i5.PrivilegeSnapshotProvider
-	Costs       Costs
-	Facts       Facts
-	Guilds      Guilds
-	Mail        Mail
-	Receipts    receipt.Store
-	ReceiptRead receipt.Reader
+	Timed         gen.TimedRunner
+	Fresh         tx.Queryer
+	Store         Store
+	Content       Content
+	Fence         Fence
+	Players       Players
+	Functions     Functions
+	Directory     Directory
+	Heroes        Heroes
+	Pets          Heroes
+	Stats         Stats
+	Rooms         sharedroom.Service
+	RoomStore     sharedroom.Store
+	Invites       roominvite.Materializer
+	Combat        Combat
+	Privileges    i5.PrivilegeSnapshotProvider
+	Costs         Costs
+	Facts         Facts
+	Guilds        Guilds
+	GuildActivity GuildActivity
+	Mail          Mail
+	Receipts      receipt.Store
+	ReceiptRead   receipt.Reader
 }
 
 func (s Mode) ready() bool {

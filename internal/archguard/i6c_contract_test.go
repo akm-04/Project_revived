@@ -68,7 +68,7 @@ func TestI6CProductionMIDOwnershipAndDeferredSurfaces(t *testing.T) {
 		t.Fatal(err)
 	}
 	s := string(b)
-	want := "[]uint16{576, 577, 578, 579, 580, 581, 582, 583, 584, 585, 586, 587, 589, 598, 599, 612, 2563, 2564, 2565}"
+	want := "[]uint16{576, 577, 578, 579, 580, 581, 582, 583, 584, 585, 586, 587, 589, 598, 599, 612, 616, 2563, 2564, 2565}"
 	if !strings.Contains(s, want) {
 		t.Fatal("I6C Guild MID composition missing or drifted")
 	}

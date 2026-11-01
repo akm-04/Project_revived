@@ -63,6 +63,9 @@ func (d GuildDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRequ
 	}
 
 	switch req.Envelope.MID {
+	case 616: // GUILD_RANK: the client reads no field and only checks transport success;
+		// refusing suppresses the World Boss board (I9_GUILD_ACTIVITY_V1 C11).
+		return okGuild(map[string]any{})
 	case 576: // LOAD_ALL_TEAMS
 		rows, err := d.View.Guilds(ctx, actor, 200)
 		if err != nil {

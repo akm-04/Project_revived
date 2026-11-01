@@ -19,6 +19,10 @@ var (
 type Store interface {
 	ReadGuild(context.Context, guild.ID) (guild.Guild, bool, error)
 	ReadUnfoldedActivity(context.Context, guild.ID) (int64, error)
+	ReadPlayerActivity(context.Context, identity.PlayerID, int64) (guild.PlayerActivity, error)
+	ReadSevenDayActivity(context.Context, []identity.PlayerID, int64) (map[identity.PlayerID]int64, error)
+	ReadGuildThreeDayActivity(context.Context, guild.ID, int64) (int64, error)
+	ListActivityBoard(context.Context, identity.LogicalServerID, int64, int64) ([]guild.ActivityBoardRow, error)
 	ReadMembership(context.Context, identity.PlayerID) (guild.Membership, bool, error)
 	ListMemberships(context.Context, guild.ID) ([]guild.Membership, error)
 	ListGuilds(context.Context, identity.LogicalServerID, int) ([]guild.Guild, error)
@@ -34,6 +38,8 @@ type Service struct {
 	Store     Store
 	Directory playerdirectory.Reader
 	Presence  PresenceReader
+	// Day is the caller's game day (modes.Day). Activity reads are day-scoped.
+	Day func(context.Context) (int64, error)
 }
 
 func (s Service) validateStore() error {
@@ -71,6 +77,7 @@ type GuildInfo struct {
 	ApplyType       int16
 	MinAllowLevel   int64
 	Vitality        int64
+	ThreeHuoyue     int64
 	MemberNum       int64
 	GuildLeader     int64
 	GuildLeaderName string
@@ -99,10 +106,12 @@ type Applicant struct {
 	ConquerLoopID int64
 }
 type SelfGuild struct {
-	GuildInfo GuildInfo
-	SelfRole  int16
-	JoinTime  int64
-	MemberNum int64
+	GuildInfo   GuildInfo
+	SelfRole    int16
+	JoinTime    int64
+	MemberNum   int64
+	TodayHuoyue int64
+	HuoyueNum   int64
 }
 
 func (s Service) profile(ctx context.Context, pid identity.PlayerID) (playerdirectory.Profile, error) {
@@ -115,12 +124,26 @@ func (s Service) profile(ctx context.Context, pid identity.PlayerID) (playerdire
 	}
 	return p, nil
 }
+func (s Service) day(ctx context.Context) (int64, error) {
+	if s.Day == nil {
+		return 0, ErrUnavailable
+	}
+	return s.Day(ctx)
+}
 func (s Service) guildInfo(ctx context.Context, g guild.Guild, members []guild.Membership) (GuildInfo, error) {
 	unfolded, err := s.Store.ReadUnfoldedActivity(ctx, g.ID)
 	if err != nil {
 		return GuildInfo{}, err
 	}
-	out := GuildInfo{GuildID: int64(g.ID), Icon: g.Icon, IconFrame: g.IconFrame, Name: g.Name, Description: g.Description, ApplyType: int16(g.ApplyType), MinAllowLevel: g.MinAllowLevel, Vitality: guild.ActivityBalance(g.Vitality, unfolded), MemberNum: int64(len(members))}
+	day, err := s.day(ctx)
+	if err != nil {
+		return GuildInfo{}, err
+	}
+	threeDay, err := s.Store.ReadGuildThreeDayActivity(ctx, g.ID, day)
+	if err != nil {
+		return GuildInfo{}, err
+	}
+	out := GuildInfo{GuildID: int64(g.ID), Icon: g.Icon, IconFrame: g.IconFrame, Name: g.Name, Description: g.Description, ApplyType: int16(g.ApplyType), MinAllowLevel: g.MinAllowLevel, Vitality: guild.ActivityBalance(g.Vitality, unfolded), ThreeHuoyue: threeDay, MemberNum: int64(len(members))}
 	for _, m := range members {
 		if m.Role == guild.Leader {
 			p, err := s.profile(ctx, m.PlayerID)
@@ -175,7 +198,15 @@ func (s Service) Self(ctx context.Context, actor identity.ActorContext) (SelfGui
 	if err != nil {
 		return SelfGuild{}, false, err
 	}
-	return SelfGuild{GuildInfo: info, SelfRole: int16(m.Role), JoinTime: m.JoinedAt.Unix(), MemberNum: int64(len(ms))}, true, nil
+	day, err := s.day(ctx)
+	if err != nil {
+		return SelfGuild{}, false, err
+	}
+	activity, err := s.Store.ReadPlayerActivity(ctx, actor.PlayerID, day)
+	if err != nil {
+		return SelfGuild{}, false, err
+	}
+	return SelfGuild{GuildInfo: info, SelfRole: int16(m.Role), JoinTime: m.JoinedAt.Unix(), MemberNum: int64(len(ms)), TodayHuoyue: activity.Today, HuoyueNum: activity.Lifetime}, true, nil
 }
 func (s Service) Members(ctx context.Context, actor identity.ActorContext) (GuildInfo, []Member, error) {
 	if err := s.validateMembers(); err != nil {
@@ -200,6 +231,14 @@ func (s Service) Members(ctx context.Context, actor identity.ActorContext) (Guil
 	if err != nil {
 		return GuildInfo{}, nil, err
 	}
+	day, err := s.day(ctx)
+	if err != nil {
+		return GuildInfo{}, nil, err
+	}
+	sevenDay, err := s.Store.ReadSevenDayActivity(ctx, playerIDs, day)
+	if err != nil {
+		return GuildInfo{}, nil, err
+	}
 	out := make([]Member, 0, len(ms))
 	for _, m := range ms {
 		p, err := s.profile(ctx, m.PlayerID)
@@ -216,7 +255,7 @@ func (s Service) Members(ctx context.Context, actor identity.ActorContext) (Guil
 		} else if obs.LastSeenAt != nil {
 			lastTime = obs.LastSeenAt.Unix()
 		}
-		out = append(out, Member{PlayerID: int64(m.PlayerID), Name: p.Name, Level: p.Level, AvatarID: p.AvatarID, AvatarFrameID: p.AvatarFrameID, ConquerLevel: p.ConquerLevel, ConquerLoopID: p.ConquerLoopID, Role: int16(m.Role), JoinTime: m.JoinedAt.Unix(), LastTime: lastTime, SevenVitality: 0, CopyChallengeTime: 0})
+		out = append(out, Member{PlayerID: int64(m.PlayerID), Name: p.Name, Level: p.Level, AvatarID: p.AvatarID, AvatarFrameID: p.AvatarFrameID, ConquerLevel: p.ConquerLevel, ConquerLoopID: p.ConquerLoopID, Role: int16(m.Role), JoinTime: m.JoinedAt.Unix(), LastTime: lastTime, SevenVitality: sevenDay[m.PlayerID], CopyChallengeTime: 0})
 	}
 	sort.Slice(out, func(i, j int) bool { return out[i].PlayerID < out[j].PlayerID })
 	return self.GuildInfo, out, nil
@@ -330,4 +369,59 @@ func (s Service) GuildRoom(ctx context.Context, actor identity.ActorContext) (in
 		return 0, false, nil
 	}
 	return int64(g.ID), true, nil
+}
+
+// GuildRank is one guild on the LOAD_RANK_LIST type 4 board (C12).
+type GuildRank struct {
+	Rank   int64
+	Guild  guild.ActivityBoardRow
+	Leader string
+}
+
+// ActivityRankList is the guild activity board, derived on read and bounded by
+// limit. The player ranking owner is never extended with guild state.
+func (s Service) ActivityRankList(ctx context.Context, actor identity.ActorContext, limit int64) ([]GuildRank, int64, error) {
+	if err := s.validateDirectory(); err != nil {
+		return nil, 0, err
+	}
+	day, err := s.day(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+	if limit <= 0 || limit > 50 {
+		limit = 50
+	}
+	rows, err := s.Store.ListActivityBoard(ctx, actor.LogicalServerID, day, limit)
+	if err != nil {
+		return nil, 0, err
+	}
+	own, ownMember, err := s.Store.ReadMembership(ctx, actor.PlayerID)
+	if err != nil {
+		return nil, 0, err
+	}
+	out := make([]GuildRank, 0, len(rows))
+	var mine int64
+	for index, row := range rows {
+		ms, err := s.Store.ListMemberships(ctx, guild.ID(row.GuildID))
+		if err != nil {
+			return nil, 0, err
+		}
+		var leaderName string
+		for _, m := range ms {
+			if m.Role != guild.Leader {
+				continue
+			}
+			p, err := s.profile(ctx, m.PlayerID)
+			if err != nil {
+				return nil, 0, err
+			}
+			leaderName = p.Name
+			break
+		}
+		out = append(out, GuildRank{Rank: int64(index + 1), Guild: row, Leader: leaderName})
+		if ownMember && own.GuildID == guild.ID(row.GuildID) {
+			mine = int64(index + 1)
+		}
+	}
+	return out, mine, nil
 }

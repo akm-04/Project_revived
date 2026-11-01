@@ -1,0 +1,22 @@
+{
+  "policy_id": "I9_GUILD_POLICY_V1",
+  "version": 1,
+  "classification": "PRIVATE_POLICY unless a row cites a source",
+  "decisions": ["D400", "D401", "D402", "D403", "D406"],
+  "activity": {
+    "personal_daily_cap": 1000,
+    "guild_cap": 280000,
+    "initial_vitality": 20000,
+    "leave_lifetime_multiplier": 0.5,
+    "spirit_energy_credits": false,
+    "source": "misc.lua:1528-1540, guild_core_policy.json"
+  },
+  "tea": {
+    "requests_per_day": 1,
+    "normal_need": 3,
+    "sx_need": 2,
+    "donor_friend_medal_per_scroll": 5,
+    "gift_expiry": "modes.Day boundary",
+    "source": "misc.lua:3418-3426; donor coin PRIVATE_POLICY"
+  }
+}

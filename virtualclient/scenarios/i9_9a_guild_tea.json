@@ -1,0 +1,65 @@
+{
+ "name": "i9_9a_guild_tea",
+ "level": 100,
+ "heroes": [
+  10001001
+ ],
+ "grants": [
+  {
+   "Kind": "SCALAR_CURRENCY",
+   "ResourceKey": "crystal",
+   "Amount": 1000
+  },
+  {
+   "Kind": "STACK_ITEM",
+   "ItemID": 40001001,
+   "Amount": 1
+  }
+ ],
+ "steps": [
+  "wait:5",
+  "lua:local backend=xyd.Backend.get() local original=backend.request backend.request=function(self,mid,params,cb,showError,skip,showLoading) return original(self,mid,params,function(code,reply) if mid==xyd.mid.GET_TEA_TALK_INFO then __vc_tea_info={code=code,reply=reply} end if mid==xyd.mid.TEA_TALK_QUEST then __vc_tea_quest={code=code,reply=reply} end if mid==xyd.mid.TEA_TALK_PRESENT then __vc_tea_present={code=code,reply=reply} end if mid==xyd.mid.TEA_TALK_CONFIRM_GIFT then __vc_tea_confirm={code=code,reply=reply} end if cb then cb(code,reply) end end,showError,skip,showLoading) end",
+  "lua:local g=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_GUILD) g:createTeam({name='vctea',icon=20010001,icon_frame=0},function(code) if code~=xyd.error.OK then error('vc-tea-create-'..tostring(code)) end end)",
+  "wait:3",
+  "lua:local g=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_GUILD) g:loadSelfGuild(function(code) if code~=xyd.error.OK then error('vc-tea-load-'..tostring(code)) end end)",
+  "wait:3",
+  "lua:local g=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_GUILD) if not g.guild_id or g.guild_id==0 then error('vc-tea-no-guild') end",
+  "lua:local g=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_GUILD) g:getTeaTalkInfo(function(code) if code~=xyd.error.OK then error('vc-tea-info-'..tostring(code)) end end,{is_self=1})",
+  "wait:3",
+  "lua:if not __vc_tea_info or __vc_tea_info.code~=xyd.error.OK then error('vc-tea-info-missing') end if type(__vc_tea_info.reply.self_wish_info)~='table' then error('vc-tea-self-wish-shape') end",
+  "lua:local g=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_GUILD) g:teaTalkRequest({item_id=40001001},function(code) if code~=xyd.error.OK then error('vc-tea-request-'..tostring(code)) end end)",
+  "wait:3",
+  "lua:if not __vc_tea_quest or __vc_tea_quest.code~=xyd.error.OK then error('vc-tea-quest-missing') end local w=__vc_tea_quest.reply.self_wish_info if type(w)~='table' or w.item_id~=40001001 or w.need_num~=3 or w.current_num~=0 then error('vc-tea-wish-shape') end",
+  "lua:local g=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_GUILD) g:teaTalkRequest({item_id=40001001},function(code) if code==xyd.error.OK then error('vc-tea-second-wish-allowed') end end)",
+  "wait:3",
+  "lua:if not __vc_tea_quest or __vc_tea_quest.code~=xyd.error.ERROR then error('vc-tea-second-wish-code-'..tostring(__vc_tea_quest and __vc_tea_quest.code)) end",
+  "lua:local p=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_PLAYER) local g=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_GUILD) g:teaTalkPresent({player_id=p.playerID},function(code) if code==xyd.error.OK then error('vc-tea-self-donation-allowed') end end)",
+  "wait:3",
+  "lua:if not __vc_tea_present or __vc_tea_present.code==xyd.error.OK then error('vc-tea-self-donation-reply') end",
+  "lua:local g=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_GUILD) g:getTeaTalkInfo(function(code) if code~=xyd.error.OK then error('vc-tea-full-'..tostring(code)) end end)",
+  "wait:3",
+  "lua:if __vc_tea_info.reply.guild_wish_flag~=1 then error('vc-tea-flag-'..tostring(__vc_tea_info.reply.guild_wish_flag)) end if type(__vc_tea_info.reply.gift_list)~='table' or #__vc_tea_info.reply.gift_list~=0 then error('vc-tea-gift-list') end if type(__vc_tea_info.reply.wish_list)~='table' or #__vc_tea_info.reply.wish_list~=1 then error('vc-tea-wish-list-'..tostring(type(__vc_tea_info.reply.wish_list)=='table' and #__vc_tea_info.reply.wish_list or -1)) end local row=__vc_tea_info.reply.wish_list[1] if type(row.wish_info)~='table' or row.wish_info.item_id~=40001001 or type(row.player_info)~='table' or row.player_info.player_id~=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_PLAYER).playerID or row.can_present_gift~=false then error('vc-tea-wish-row') end",
+  "lua:local g=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_GUILD) g:teaTalkConfirm(function(code) if code~=xyd.error.OK then error('vc-tea-confirm-'..tostring(code)) end end)",
+  "wait:3",
+  "lua:if not __vc_tea_confirm or __vc_tea_confirm.code~=xyd.error.OK then error('vc-tea-confirm-missing') end if __vc_tea_confirm.reply.award then error('vc-tea-empty-claim-paid') end if type(__vc_tea_confirm.reply.self_wish_info)~='table' or __vc_tea_confirm.reply.self_wish_info.item_id~=40001001 then error('vc-tea-confirm-shape') end",
+  "lua:local g=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_GUILD) g:teaTalkConfirm(function(code) if code~=xyd.error.OK then error('vc-tea-reconfirm-'..tostring(code)) end end)",
+  "wait:3",
+  "lua:if __vc_tea_confirm.reply.award then error('vc-tea-confirm-not-idempotent') end",
+  "lua:xyd.WindowManager.get():openWindow('team_tea_talk')",
+  "wait:3",
+  "lua:local w=xyd.WindowManager.get():getWindow('team_tea_talk') if not w then error('vc-tea-window-missing') end if xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_GUILD).teaTalkOnceFlay~=1 then error('vc-tea-window-flag') end",
+  "lua:xyd.WindowManager.get():openWindow('tea_talk_quest')",
+  "wait:3",
+  "lua:if not xyd.WindowManager.get():getWindow('tea_talk_quest') then error('vc-tea-quest-window-missing') end",
+  "lua:xyd.WindowManager.get():closeAllWindows()"
+ ],
+ "settle_seconds": 15,
+ "expect_ok": [
+  612,
+  1808,
+  1809,
+  1811
+ ],
+ "expect_lua_errors": [],
+ "note": "Tea Party 1808/1809/1811 drive the stock SelfGuild model callbacks and open the stock team_tea_talk and tea_talk_quest windows. One VC session owns one guild, so a real 1810 donation needs a second member and is proven natively; this run asserts the self-donation refusal, the once-per-day wish refusal, and an empty idempotent claim."
+}
