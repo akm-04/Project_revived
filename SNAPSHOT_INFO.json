@@ -1059,7 +1059,7 @@
   "stage": "I9-7D",
   "status": "WORKING_IMPLEMENTATION_NOT_STAGE_ACCEPTED",
   "toolbox_archive_sha256": "e4e194c9627929299577364b953b2468d6118fac4283fd8030f10b5a27456c2b",
-  "version": "v0.163.2",
+  "version": "v0.163.3",
   "version_role": "I9-7D working implementation; Claude owns stage qualification and acceptance.",
   "w2_claimed": false,
   "i9_7b": {
