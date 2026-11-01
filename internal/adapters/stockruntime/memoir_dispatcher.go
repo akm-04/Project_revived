@@ -139,7 +139,7 @@ func memoirFailure(err error) httpedge.Response {
 		return badHero("memoir_invalid_parameter")
 	}
 	if errors.Is(err, domain.ErrRefused) || errors.Is(err, economy.ErrInsufficientBalance) || errors.Is(err, combat.ErrStartConflict) {
-		return okI5(map[string]any{"error_code": int64(1)})
+		return conflictRefusal(1)
 	}
 	return httpedge.Response{HTTPStatus: 503, Body: map[string]any{"error_code": int64(1), "error": "memoir_failed"}, Cause: err}
 }

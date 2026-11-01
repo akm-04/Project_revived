@@ -2,7 +2,6 @@ package guildcampaign
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"gxb.local/backend/v2/internal/application/i5"
@@ -337,24 +336,4 @@ func (m Mode) MapDetail(c context.Context, a identity.ActorContext, copyID int64
 		return nil
 	})
 	return out, err
-}
-
-// WavesJSON is 613's monster_status object as the client reads it.
-func WavesJSON(waves map[int64][]EnemyRow) map[string]any {
-	out := map[string]any{}
-	for wave, enemies := range waves {
-		rows := make([]any, 0, len(enemies))
-		for _, enemy := range enemies {
-			row := map[string]any{"table_id": enemy.TableID, "lev": enemy.Lev, "star": enemy.Star, "color": enemy.Color, "health": enemy.Health}
-			if enemy.HP > 0 {
-				row["hp"] = enemy.HP
-			}
-			if enemy.Reborn != 0 {
-				row["is_reborn"] = enemy.Reborn
-			}
-			rows = append(rows, row)
-		}
-		out[fmt.Sprintf("%d", wave)] = rows
-	}
-	return out
 }

@@ -134,6 +134,10 @@ func TestI9_9AEnergyDebitCreditsActivityCapsAndGuildlessJoin(t *testing.T) {
 	if err != nil || activity.Today != 1 || activity.Lifetime != 1 {
 		t.Fatalf("energy debit activity %+v %v", activity, err)
 	}
+	seven, err := store.ReadSevenDayActivity(ctx, []identity.PlayerID{a.PlayerID}, day)
+	if err != nil || seven[a.PlayerID] != 1 {
+		t.Fatalf("seven day activity %v %v", seven, err)
+	}
 
 	appendActivity(t, pool, a, day, 1200)
 	activity, err = store.ReadPlayerActivity(ctx, a.PlayerID, day)

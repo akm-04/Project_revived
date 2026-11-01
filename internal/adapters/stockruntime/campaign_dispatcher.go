@@ -231,7 +231,7 @@ func failCampaign(err error) httpedge.Response {
 		return conflictRefusal(1)
 	}
 	if errors.Is(err, d.ErrRefused) {
-		return httpedge.Response{HTTPStatus: http.StatusOK, Body: map[string]any{"error_code": int64(1)}}
+		return conflictRefusal(1)
 	}
 	return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: err, Body: map[string]any{"error": "campaign_unavailable"}}
 }

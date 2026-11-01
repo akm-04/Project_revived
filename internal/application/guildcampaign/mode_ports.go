@@ -10,7 +10,6 @@ import (
 	gen "gxb.local/backend/v2/internal/application/generation"
 	"gxb.local/backend/v2/internal/application/i5"
 	"gxb.local/backend/v2/internal/application/playerdirectory"
-	"gxb.local/backend/v2/internal/application/playerroot"
 	dcombat "gxb.local/backend/v2/internal/domain/combat"
 	"gxb.local/backend/v2/internal/domain/grant"
 	d "gxb.local/backend/v2/internal/domain/guildcampaign"
@@ -258,11 +257,6 @@ type Mailer interface {
 	DeliverTx(context.Context, tx.Tx, i5.SettlementMailRequest) (mail.Record, bool, error)
 }
 
-// NoticeMailer is C13's notice seam.
-type NoticeMailer interface {
-	DeliverNoticeTx(context.Context, tx.Tx, i5.SettlementMailRequest) (mail.Record, bool, error)
-}
-
 // Notifier publishes push 36853 after commit. A nil notifier is a no-op.
 type Notifier interface {
 	Notify(context.Context, int64, int64, int64, identity.PlayerID) error
@@ -306,21 +300,18 @@ type Content interface {
 // reset and departure paths; Mode adds claim, fight, settle, awards and reads.
 type Mode struct {
 	Service
-	ModeStore  ModeStore
-	Content    Content
-	Tables     map[int64]ChapterInfo
-	Settings   Settings
-	Combat     ModeCombat
-	Grants     Grants
-	Facts      Facts
-	Directory  Directory
-	Mail       Mailer
-	NoticeMail NoticeMailer
-	Notifier   Notifier
-	Fence      Fence
-	Players    playerroot.TxLocker
-	Timed      gen.TimedRunner
-	Fresh      tx.Queryer
+	ModeStore ModeStore
+	Content   Content
+	Tables    map[int64]ChapterInfo
+	Settings  Settings
+	Combat    ModeCombat
+	Grants    Grants
+	Facts     Facts
+	Directory Directory
+	Mail      Mailer
+	Notifier  Notifier
+	Timed     gen.TimedRunner
+	Fresh     tx.Queryer
 }
 
 func (m Mode) ready() bool {

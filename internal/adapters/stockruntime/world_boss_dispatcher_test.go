@@ -53,7 +53,7 @@ func TestWorldBossRefusalIsBareErrorCode(t *testing.T) {
 	now := time.Unix(100, 0).UTC()
 	dispatcher := WorldBossDispatcher{Authority: httpAuthority{actor: actorForHTTP(t)}, Service: worldBossStub{err: d.ErrRefused}}
 	got := dispatcher.Dispatch(context.Background(), worldBossRequest(628, map[string]any{"campaign_id": int64(10011)}, now))
-	if got.HTTPStatus != 200 || len(got.Body) != 1 || got.Body["error_code"] != int64(1) {
+	if got.HTTPStatus != 409 || len(got.Body) != 1 || got.Body["error_code"] != int64(1) {
 		t.Fatalf("%d %#v", got.HTTPStatus, got.Body)
 	}
 	if _, exists := got.Body["error_msg"]; exists {

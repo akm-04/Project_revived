@@ -180,7 +180,7 @@ func TestI7C2JActualAPIFreshConquerAtomicityAndInactiveMode(t *testing.T) {
 		}
 	}
 	// I9-4D activated TASK_AWAKE_OPEN: an unknown awakening mission is a stock refusal, not 501.
-	if code, out := post(2738, map[string]any{"mission_id": 1, "awake_type": 2}); code != 200 || out.(map[string]any)["error_code"] == float64(0) || out.(map[string]any)["error_code"] == nil {
+	if code, out := post(2738, map[string]any{"mission_id": 1, "awake_type": 2}); code != 409 || out.(map[string]any)["error_code"] == float64(0) || out.(map[string]any)["error_code"] == nil {
 		t.Fatal("MID2738", code, out)
 	}
 	code, inventory := post(81, map[string]any{})

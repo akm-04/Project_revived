@@ -38,11 +38,10 @@ func canonicalGuildCampaign(p *pg.Pool, runner tx.Runner, guildDB guildstore.Sto
 		},
 		ModeStore: store, Content: catalog, Tables: tables, Settings: settings,
 		Combat: combatService, Grants: i5svc, Facts: i5.ObjectiveFacts{Owner: i5svc, Open: i5db},
-		Directory: i4store.PlayerDirectoryReader{}, Mail: i5.SettlementMail{Store: i5db}, NoticeMail: i5.SettlementMail{Store: i5db},
+		Directory: i4store.PlayerDirectoryReader{}, Mail: i5.SettlementMail{Store: i5db},
 		Notifier: guildCampaignNotifier{Execer: pg.AutocommitExecer(p)},
-		Fence:    i5db, Players: i4store.PlayerRootLocker{},
-		Timed: gen.TimedRunner{Binder: gen.Binder{Time: pg.AuthoritativeTime{Queryer: p}}, Runner: runner},
-		Fresh: p,
+		Timed:    gen.TimedRunner{Binder: gen.Binder{Time: pg.AuthoritativeTime{Queryer: p}}, Runner: runner},
+		Fresh:    p,
 	}
 	return mode, payout
 }

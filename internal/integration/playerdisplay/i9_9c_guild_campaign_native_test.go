@@ -95,7 +95,7 @@ func newCampaignFixture(t *testing.T) campaignFixture {
 				ResetTitle: policy.NoticeMail.ResetTitle, ResetBody: policy.NoticeMail.ResetBody, Sender: "Guild"}},
 		ModeStore: store, Content: catalog, Tables: f.tables, Settings: f.settings,
 		Combat: combatService, Grants: genuineGrants(p), Facts: appi5.ObjectiveFacts{Owner: missionOwner, Open: i5store.Store{Queryer: p}},
-		Directory: i4store.PlayerDirectoryReader{}, Mail: mail, NoticeMail: mail, Fence: i5store.Store{Queryer: p}, Players: i4store.PlayerRootLocker{},
+		Directory: i4store.PlayerDirectoryReader{}, Mail: mail,
 		Timed: gen.TimedRunner{Binder: gen.Binder{Time: postgres.AuthoritativeTime{Queryer: p}}, Runner: tx.Runner{DB: p}}, Fresh: p,
 	}
 	f.leaderHero = bornHero(t, p, f.leader, f.rev, genuineHeroTable, 1).PartnerID

@@ -106,7 +106,7 @@ func failSummon(err error) httpedge.Response {
 		return badHero("summon_invalid_parameter")
 	}
 	if errors.Is(err, d.ErrRefused) || errors.Is(err, apphero.ErrHeroCapacityExceeded) {
-		return httpedge.Response{HTTPStatus: http.StatusOK, Body: map[string]any{"error_code": int64(1), "result": []any{}}}
+		return conflictRefusal(1)
 	}
 	return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: err, Body: map[string]any{"error": "summon_unavailable"}}
 }

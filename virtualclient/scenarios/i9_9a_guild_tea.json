@@ -24,6 +24,9 @@
   "lua:local g=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_GUILD) g:loadSelfGuild(function(code) if code~=xyd.error.OK then error('vc-tea-load-'..tostring(code)) end end)",
   "wait:3",
   "lua:local g=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_GUILD) if not g.guild_id or g.guild_id==0 then error('vc-tea-no-guild') end",
+  "lua:local g=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_GUILD) g:loadTeam(function(code,reply) if code~=xyd.error.OK then error('vc-tea-roster-'..tostring(code)) end if type(reply.members)~='table' or type(reply.members[1].seven_huoyue)~='number' then error('vc-tea-roster-shape') end __vc_roster=true end)",
+  "wait:3",
+  "lua:if not __vc_roster then error('vc-tea-roster-no-reply') end",
   "lua:local g=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_GUILD) g:getTeaTalkInfo(function(code) if code~=xyd.error.OK then error('vc-tea-info-'..tostring(code)) end end,{is_self=1})",
   "wait:3",
   "lua:if not __vc_tea_info or __vc_tea_info.code~=xyd.error.OK then error('vc-tea-info-missing') end if type(__vc_tea_info.reply.self_wish_info)~='table' then error('vc-tea-self-wish-shape') end",
@@ -55,6 +58,7 @@
  ],
  "settle_seconds": 15,
  "expect_ok": [
+  579,
   612,
   1808,
   1809,

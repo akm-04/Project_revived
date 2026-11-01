@@ -199,7 +199,7 @@ func (d I5Dispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRequest
 		}
 		index, err := requiredInt64(req.Envelope.Params, "index")
 		if err != nil {
-			return okI5(map[string]any{"error_code": int64(1)})
+			return conflictRefusal(1)
 		}
 		period := "DAY"
 		if req.Envelope.MID == 170 {
@@ -433,11 +433,11 @@ func badI5(code string) httpedge.Response {
 }
 func failI5(err error) httpedge.Response {
 	if errors.Is(err, objective.ErrSignRefused) || errors.Is(err, objective.ErrAwakeningRefused) {
-		return okI5(map[string]any{"error_code": int64(1)})
+		return conflictRefusal(1)
 	}
 	switch {
 	case errors.Is(err, appi5.ErrMissionRefused):
-		return okI5(map[string]any{"error_code": int64(1)})
+		return conflictRefusal(1)
 	case errors.Is(err, appi5.ErrRedeemInvalid):
 		return httpedge.Response{HTTPStatus: http.StatusBadRequest, Body: map[string]any{"error": "invalid_redeem"}}
 	case errors.Is(err, appi5.ErrMailStackFull):

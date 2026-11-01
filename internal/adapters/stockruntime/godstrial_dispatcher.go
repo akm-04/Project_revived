@@ -112,7 +112,7 @@ func (m GodsTrialDispatcher) Dispatch(c context.Context, r httpedge.DispatchRequ
 			return conflictRefusal(1)
 		}
 		if errors.Is(e, d.ErrRefused) || errors.Is(e, economy.ErrInsufficientBalance) || errors.Is(e, pet.ErrPetNotFound) {
-			return okI5(map[string]any{"error_code": int64(1)})
+			return conflictRefusal(1)
 		}
 		return httpedge.Response{HTTPStatus: 503, Body: map[string]any{"error_code": int64(1), "error": "gods_trial_failed"}}
 	}

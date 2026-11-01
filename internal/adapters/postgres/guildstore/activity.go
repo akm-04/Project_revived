@@ -106,7 +106,7 @@ func (s Store) ReadSevenDayActivity(ctx context.Context, players []identity.Play
 		return out, nil
 	}
 	var raw string
-	err := s.Queryer.QueryRow(ctx, `SELECT COALESCE(jsonb_agg(jsonb_build_object('player',player_id,'total',total)),'[]'::jsonb)::text FROM (
+	err := s.Queryer.QueryRow(ctx, `SELECT COALESCE(jsonb_agg(jsonb_build_object('player',player,'total',total)),'[]'::jsonb)::text FROM (
 		SELECT player_id AS player,COALESCE(SUM(LEAST($3,amount)),0)::bigint AS total FROM player_guild_activity_days
 		WHERE player_id=ANY($1) AND game_day BETWEEN $2-6 AND $2 GROUP BY player_id) rows`, playerInt64s(players), day, guild.ActivityDailyCap).Scan(&raw)
 	if err != nil {

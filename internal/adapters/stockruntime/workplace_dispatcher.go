@@ -100,7 +100,7 @@ func workplaceFailure(err error) httpedge.Response {
 		return badHero("workplace_invalid_parameter")
 	}
 	if errors.Is(err, d.ErrRefused) || errors.Is(err, economy.ErrInsufficientBalance) {
-		return okI5(map[string]any{"error_code": 1})
+		return conflictRefusal(1)
 	}
 	return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Body: map[string]any{"error": "workplace_unavailable"}}
 }

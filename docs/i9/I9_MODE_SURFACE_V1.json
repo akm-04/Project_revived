@@ -2395,7 +2395,7 @@
    "family": "GUILD_RENTAL",
    "disposition": "ACTIVE",
    "target": "I9-9",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": "LITERAL_STUB"
   },
   {
@@ -2404,7 +2404,7 @@
    "family": "GUILD_RENTAL",
    "disposition": "ACTIVE",
    "target": "I9-9",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": "LITERAL_STUB"
   },
   {
@@ -2413,7 +2413,7 @@
    "family": "GUILD_RENTAL",
    "disposition": "ACTIVE",
    "target": "I9-9",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": "LITERAL_STUB"
   },
   {
@@ -2451,7 +2451,7 @@
    "family": "GUILD_CAMPAIGN",
    "disposition": "ACTIVE",
    "target": "I9-9",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": "LITERAL_STUB"
   },
   {
@@ -2460,7 +2460,7 @@
    "family": "GUILD_CAMPAIGN",
    "disposition": "ACTIVE",
    "target": "I9-9",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": "LITERAL_STUB"
   },
   {
@@ -2469,7 +2469,7 @@
    "family": "GUILD_CAMPAIGN",
    "disposition": "ACTIVE",
    "target": "I9-9",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": "LITERAL_STUB"
   },
   {
@@ -2478,7 +2478,7 @@
    "family": "GUILD_CAMPAIGN",
    "disposition": "ACTIVE",
    "target": "I9-9",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": null
   },
   {
@@ -2487,7 +2487,7 @@
    "family": "GUILD_CAMPAIGN",
    "disposition": "ACTIVE",
    "target": "I9-9",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": "LITERAL_STUB"
   },
   {
@@ -2496,7 +2496,7 @@
    "family": "GUILD_CAMPAIGN",
    "disposition": "ACTIVE",
    "target": "I9-9",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": "LITERAL_STUB"
   },
   {
@@ -2505,7 +2505,7 @@
    "family": "GUILD_CAMPAIGN",
    "disposition": "ACTIVE",
    "target": "I9-9",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": "LITERAL_STUB"
   },
   {
@@ -2514,7 +2514,7 @@
    "family": "GUILD_CAMPAIGN",
    "disposition": "ACTIVE",
    "target": "I9-9",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": "LITERAL_STUB"
   },
   {
@@ -2523,7 +2523,7 @@
    "family": "GUILD_CAMPAIGN",
    "disposition": "ACTIVE",
    "target": "I9-9",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": "LITERAL_STUB"
   },
   {
@@ -2532,7 +2532,7 @@
    "family": "GUILD_CAMPAIGN",
    "disposition": "ACTIVE",
    "target": "I9-9",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": null
   },
   {
@@ -2541,7 +2541,7 @@
    "family": "GUILD_CAMPAIGN",
    "disposition": "ACTIVE",
    "target": "I9-9",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": "LITERAL_STUB"
   },
   {
@@ -2559,7 +2559,7 @@
    "family": "GUILD_CAMPAIGN",
    "disposition": "ACTIVE",
    "target": "I9-9",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": "LITERAL_STUB"
   },
   {
@@ -2568,7 +2568,7 @@
    "family": "GUILD_CAMPAIGN",
    "disposition": "ACTIVE",
    "target": "I9-9",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": "LITERAL_STUB"
   },
   {
@@ -2577,7 +2577,7 @@
    "family": "GUILD_CAMPAIGN",
    "disposition": "ACTIVE",
    "target": "I9-9",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": "LITERAL_STUB"
   },
   {
@@ -2586,7 +2586,7 @@
    "family": "GUILD_CAMPAIGN",
    "disposition": "ACTIVE",
    "target": "I9-9",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": "LITERAL_STUB"
   },
   {
@@ -2606,7 +2606,7 @@
    "family": "GUILD_RENTAL",
    "disposition": "ACTIVE",
    "target": "I9-9",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": "LITERAL_STUB"
   },
   {
@@ -2615,7 +2615,7 @@
    "family": "GUILD_RENTAL",
    "disposition": "ACTIVE",
    "target": "I9-9",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": "LITERAL_STUB"
   },
   {
@@ -2624,7 +2624,7 @@
    "family": "GUILD_RENTAL",
    "disposition": "ACTIVE",
    "target": "I9-9",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": "LITERAL_STUB"
   },
   {
@@ -2633,7 +2633,7 @@
    "family": "GUILD_RENTAL",
    "disposition": "ACTIVE",
    "target": "I9-9",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": "LITERAL_STUB"
   },
   {
@@ -5260,7 +5260,7 @@
    "family": "GUILD_DRINK_TEA",
    "disposition": "ACTIVE",
    "target": "I9-9",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": "STATE_BACKED"
   },
   {
@@ -5269,7 +5269,7 @@
    "family": "GUILD_DRINK_TEA",
    "disposition": "ACTIVE",
    "target": "I9-9",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": null
   },
   {
@@ -5278,7 +5278,7 @@
    "family": "GUILD_DRINK_TEA",
    "disposition": "ACTIVE",
    "target": "I9-9",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": null
   },
   {
@@ -5287,7 +5287,7 @@
    "family": "GUILD_DRINK_TEA",
    "disposition": "ACTIVE",
    "target": "I9-9",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": null
   },
   {
@@ -8911,7 +8911,7 @@
    "family": "GUILD_RENTAL",
    "disposition": "ACTIVE",
    "target": "I9-9",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": "LITERAL_STUB"
   },
   {

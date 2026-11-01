@@ -39,7 +39,7 @@ func TestSignInStockWireAndRefusal(t *testing.T) {
 	}
 	f.err = objective.ErrSignRefused
 	got := d.Dispatch(context.Background(), i5Req(353, map[string]any{}, at))
-	if got.HTTPStatus != 200 || got.Body["error_code"] != int64(1) {
+	if got.HTTPStatus != 409 || got.Body["error_code"] != int64(1) {
 		t.Fatal(got)
 	}
 }

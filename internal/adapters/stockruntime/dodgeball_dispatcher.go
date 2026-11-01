@@ -88,7 +88,7 @@ func (dispatcher DodgeballDispatcher) Dispatch(ctx context.Context, request http
 			return invalid
 		}
 		if errors.Is(err, domain.ErrRefused) || errors.Is(err, economy.ErrInsufficientBalance) {
-			return okI5(map[string]any{"error_code": int64(1)})
+			return conflictRefusal(1)
 		}
 		return httpedge.Response{HTTPStatus: 503, Body: map[string]any{"error_code": int64(1), "error": "dodgeball_failed"}, Cause: err}
 	}
