@@ -15,7 +15,7 @@ func TestUpdateScenePlaneMIDsAreKnownHTTPOrdinary(t *testing.T) {
 }
 
 func TestI7A2SourceProvenRealtimePushDescriptorOverrides(t *testing.T) {
-	for _, mid := range []uint16{MIDChatFromPlayer, MIDChatFromFriend, MIDChatMessage, MIDWorldNotice, MIDPlayerNotice, MIDForceReload, MIDGuildBroadcast} {
+	for _, mid := range []uint16{MIDChatFromPlayer, MIDChatFromFriend, MIDChatMessage, MIDWorldNotice, MIDPlayerNotice, MIDForceReload, MIDGuildBroadcast, MIDGuildFightNotice} {
 		d, ok := Lookup(mid)
 		if !ok || d.Transport != TCP || d.Direction != S2C || d.Encoding != AMF3 || d.Status != ResearchedUnimplemented {
 			t.Fatalf("mid=%d descriptor=%+v ok=%v", mid, d, ok)

@@ -107,7 +107,7 @@ func NewEventRegistry(direct []DirectRegistration, notices []NoticeRegistration)
 func SourceDirectRoles(mid uint16) ([]Role, bool) {
 	var roles []Role
 	switch mid {
-	case mids.MIDChatFromPlayer, mids.MIDChatFromFriend, mids.MIDForceReload, mids.MIDIllusionNotice:
+	case mids.MIDChatFromPlayer, mids.MIDChatFromFriend, mids.MIDForceReload, mids.MIDIllusionNotice, mids.MIDGuildFightNotice:
 		roles = []Role{World}
 	case mids.MIDChatMessage:
 		roles = []Role{World, Guild, Service}

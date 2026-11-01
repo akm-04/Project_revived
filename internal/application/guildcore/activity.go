@@ -9,6 +9,21 @@ import (
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
+// forfeitCampaignTx runs before the rental closure's 609b and 610.
+func (s Service) forfeitCampaignTx(ctx context.Context, t tx.Tx, id guild.ID, player identity.PlayerID) error {
+	if s.Campaign == nil {
+		return nil
+	}
+	return s.Campaign.RemoveMemberTx(ctx, t, id, player)
+}
+
+func (s Service) closeCampaignTx(ctx context.Context, t tx.Tx, id guild.ID) error {
+	if s.Campaign == nil {
+		return nil
+	}
+	return s.Campaign.CloseGuildTx(ctx, t, id)
+}
+
 // closeRentalsTx runs before anything at rank 723.
 func (s Service) closeRentalsTx(ctx context.Context, t tx.Tx, lender identity.PlayerID, at time.Time) error {
 	if s.Rental == nil {

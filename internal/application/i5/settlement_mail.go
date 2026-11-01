@@ -51,6 +51,14 @@ func (m SettlementMail) DeliverTx(ctx context.Context, t tx.Tx, r SettlementMail
 	return m.deliverTx(ctx, t, r, false)
 }
 
+// DeliverNoticeTx sends one mail with no attachment (I9_GUILD_CAMPAIGN_V1 C13).
+func (m SettlementMail) DeliverNoticeTx(ctx context.Context, t tx.Tx, r SettlementMailRequest) (mail.Record, bool, error) {
+	if len(r.Lines) != 0 {
+		return mail.Record{}, false, errors.New("i5: a notice carries no attachment")
+	}
+	return m.deliverTx(ctx, t, r, true)
+}
+
 func (m SettlementMail) DeliverLeagueTitleNoticeTx(ctx context.Context, t tx.Tx, r SettlementMailRequest, titleID int64) (mail.Record, bool, error) {
 	if titleID < 100078 || titleID > 100080 || r.SourceKind != "CHAMPIONS_LEAGUE_LEGACY_TITLE" || r.SourceKey != strconv.FormatInt(titleID, 10) || len(r.Lines) != 0 {
 		return mail.Record{}, false, errors.New("invalid League title notice")

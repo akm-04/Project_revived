@@ -36,9 +36,11 @@ const (
 	MIDSendChatMessage uint16 = 32782
 	MIDChatMessage     uint16 = 32783
 	MIDWorldNotice     uint16 = 32784
-	MIDPlayerNotice    uint16 = 36854
-	MIDForceReload     uint16 = 36855
-	MIDGuildBroadcast  uint16 = 36863
+	// MIDGuildFightNotice is the stock Guild Campaign push (I9_GUILD_CAMPAIGN_V1 C16).
+	MIDGuildFightNotice uint16 = 36853
+	MIDPlayerNotice     uint16 = 36854
+	MIDForceReload      uint16 = 36855
+	MIDGuildBroadcast   uint16 = 36863
 
 	MIDTCPLogin          uint16 = 32771
 	MIDChatRoomEntered   uint16 = 32779
@@ -115,7 +117,7 @@ func Lookup(mid uint16) (Descriptor, bool) {
 		d.Encoding = AMF3
 		d.Direction = S2C
 		d.Status = ResearchedUnimplemented
-	case MIDChatMessage, MIDWorldNotice, MIDPlayerNotice, MIDForceReload, MIDGuildBroadcast:
+	case MIDChatMessage, MIDWorldNotice, MIDPlayerNotice, MIDForceReload, MIDGuildBroadcast, MIDGuildFightNotice:
 		d.Transport = TCP
 		d.Encoding = AMF3
 		d.Direction = S2C

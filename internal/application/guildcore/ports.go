@@ -19,6 +19,13 @@ type RentalClosure interface {
 	CloseLenderOffersTx(context.Context, tx.Tx, identity.PlayerID, time.Time) error
 }
 
+// CampaignClosure forfeits a leaver's Guild Campaign places, or ends a dissolved
+// guild's chapters, at rank 606 and 607 inside the departure transaction (I9_GUILD_CAMPAIGN_V1 C2, C4).
+type CampaignClosure interface {
+	RemoveMemberTx(context.Context, tx.Tx, guild.ID, identity.PlayerID) error
+	CloseGuildTx(context.Context, tx.Tx, guild.ID) error
+}
+
 type ActorFencer interface {
 	FenceActorTx(context.Context, tx.Tx, identity.ActorContext, time.Time) error
 }

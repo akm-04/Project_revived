@@ -520,6 +520,9 @@ func (s Service) removeSelf(ctx context.Context, actor identity.ActorContext, gi
 		if err := s.Store.AppendAuditTx(txctx, scope.Tx, gid, "LEAVE", actor.PlayerID, actor.PlayerID, at, s.Policy.Revision, bound.ID, "{}"); err != nil {
 			return err
 		}
+		if err := s.forfeitCampaignTx(txctx, scope.Tx, gid, actor.PlayerID); err != nil {
+			return err
+		}
 		if err := s.closeRentalsTx(txctx, scope.Tx, actor.PlayerID, at); err != nil {
 			return err
 		}
@@ -629,6 +632,9 @@ func (s Service) Dissolve(ctx context.Context, actor identity.ActorContext, op o
 		ev := guild.MembershipEvent{PlayerID: actor.PlayerID, GuildID: gid, Kind: guild.EventDissolve, OccurredAt: at, ActorPlayerID: actor.PlayerID, PolicyRevision: s.Policy.Revision}
 		ev, err = s.appendProjectionEventTx(txctx, scope.Tx, ev, bound.ID, projected)
 		if err != nil {
+			return err
+		}
+		if err := s.closeCampaignTx(txctx, scope.Tx, gid); err != nil {
 			return err
 		}
 		if err := s.closeRentalsTx(txctx, scope.Tx, actor.PlayerID, at); err != nil {
@@ -856,6 +862,9 @@ func (s Service) Kick(ctx context.Context, actor identity.ActorContext, target i
 			return err
 		}
 		if err := s.Store.AppendAuditTx(txctx, scope.Tx, gid, "KICK", actor.PlayerID, target, at, s.Policy.Revision, bound.ID, "{}"); err != nil {
+			return err
+		}
+		if err := s.forfeitCampaignTx(txctx, scope.Tx, gid, target); err != nil {
 			return err
 		}
 		if err := s.closeRentalsTx(txctx, scope.Tx, target, at); err != nil {

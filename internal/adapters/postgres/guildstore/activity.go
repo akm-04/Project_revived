@@ -32,6 +32,15 @@ func (Store) FoldActivityTx(ctx context.Context, t tx.Tx, players []identity.Pla
 	return credited, err
 }
 
+// FoldActivityAwardsTx marks the guild's unfolded awards folded and returns the amount. Rank 723.
+func (Store) FoldActivityAwardsTx(ctx context.Context, t tx.Tx, id guild.ID) (int64, error) {
+	var credited int64
+	err := t.QueryRow(ctx, `WITH moved AS (
+		UPDATE guild_activity_awards SET folded=true WHERE guild_id=$1 AND NOT folded RETURNING amount
+	) SELECT COALESCE(SUM(amount),0)::bigint FROM moved`, int64(id)).Scan(&credited)
+	return credited, err
+}
+
 // MarkActivityFoldedTx marks everything the joiner earned before joining as spent,
 // so it credits nothing to the new guild (I9_GUILD_ACTIVITY_V1 C6).
 func (Store) MarkActivityFoldedTx(ctx context.Context, t tx.Tx, player identity.PlayerID) error {

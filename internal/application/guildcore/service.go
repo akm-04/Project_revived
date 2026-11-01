@@ -72,6 +72,7 @@ type Service struct {
 	Profile          tx.Profile
 	InviteProjection *appinvite.SourceService
 	Rental           RentalClosure
+	Campaign         CampaignClosure
 }
 
 func DefaultProfile() tx.Profile {
