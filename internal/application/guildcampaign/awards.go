@@ -61,7 +61,7 @@ func (m Mode) AwardRead(c context.Context, a identity.ActorContext, chapterID in
 		return AwardBody{}, ErrUnavailable
 	}
 	var out AwardBody
-	_, err = m.Runner.Run(c, op, i5.DefaultProfile(), tx.Options{Isolation: tx.ReadCommitted}, tx.RetryPolicy{}, nil, func(c context.Context, sc tx.Scope) error {
+	_, err = m.Runner.Run(c, op, i5.DefaultProfile(), tx.Options{Isolation: tx.ReadCommitted}, tx.RetryPolicy{MaxAttempts: 1}, nil, func(c context.Context, sc tx.Scope) error {
 		at := op.StartedAt.UTC()
 		body, err := m.awardBody(c, sc.Tx, int64(membership.GuildID), chapterID, a.PlayerID, at)
 		out = body
@@ -210,7 +210,7 @@ func (m Mode) DistributeRecord(c context.Context, a identity.ActorContext, op op
 		return nil, ErrUnavailable
 	}
 	var out []Distribution
-	_, err = m.Runner.Run(c, op, i5.DefaultProfile(), tx.Options{Isolation: tx.ReadCommitted}, tx.RetryPolicy{}, nil, func(c context.Context, sc tx.Scope) error {
+	_, err = m.Runner.Run(c, op, i5.DefaultProfile(), tx.Options{Isolation: tx.ReadCommitted}, tx.RetryPolicy{MaxAttempts: 1}, nil, func(c context.Context, sc tx.Scope) error {
 		rows, err := m.ModeStore.ListDistributionsTx(c, sc.Tx, int64(membership.GuildID), 100)
 		if err != nil {
 			return err
