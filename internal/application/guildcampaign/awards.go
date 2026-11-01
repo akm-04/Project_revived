@@ -53,16 +53,16 @@ func (m Mode) AwardRead(c context.Context, a identity.ActorContext, chapterID in
 	if !m.ready() || chapterID <= 0 {
 		return AwardBody{}, ErrUnavailable
 	}
+	membership, joined, err := m.Service.Guilds.ReadMembership(c, a.PlayerID)
+	if err != nil {
+		return AwardBody{}, err
+	}
+	if !joined {
+		return AwardBody{}, ErrUnavailable
+	}
 	var out AwardBody
-	_, err := m.Runner.Run(c, op, i5.DefaultProfile(), tx.Options{Isolation: tx.ReadCommitted}, tx.RetryPolicy{}, nil, func(c context.Context, sc tx.Scope) error {
+	_, err = m.Runner.Run(c, op, i5.DefaultProfile(), tx.Options{Isolation: tx.ReadCommitted}, tx.RetryPolicy{}, nil, func(c context.Context, sc tx.Scope) error {
 		at := op.StartedAt.UTC()
-		membership, joined, err := m.Service.Guilds.ReadMembership(c, a.PlayerID)
-		if err != nil {
-			return err
-		}
-		if !joined {
-			return ErrUnavailable
-		}
 		body, err := m.awardBody(c, sc.Tx, int64(membership.GuildID), chapterID, a.PlayerID, at)
 		out = body
 		return err
@@ -202,15 +202,15 @@ func (m Mode) DistributeRecord(c context.Context, a identity.ActorContext, op op
 	if !m.ready() {
 		return nil, ErrUnavailable
 	}
+	membership, joined, err := m.Service.Guilds.ReadMembership(c, a.PlayerID)
+	if err != nil {
+		return nil, err
+	}
+	if !joined {
+		return nil, ErrUnavailable
+	}
 	var out []Distribution
-	_, err := m.Runner.Run(c, op, i5.DefaultProfile(), tx.Options{Isolation: tx.ReadCommitted}, tx.RetryPolicy{}, nil, func(c context.Context, sc tx.Scope) error {
-		membership, joined, err := m.Service.Guilds.ReadMembership(c, a.PlayerID)
-		if err != nil {
-			return err
-		}
-		if !joined {
-			return ErrUnavailable
-		}
+	_, err = m.Runner.Run(c, op, i5.DefaultProfile(), tx.Options{Isolation: tx.ReadCommitted}, tx.RetryPolicy{}, nil, func(c context.Context, sc tx.Scope) error {
 		rows, err := m.ModeStore.ListDistributionsTx(c, sc.Tx, int64(membership.GuildID), 100)
 		if err != nil {
 			return err

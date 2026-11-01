@@ -117,16 +117,16 @@ func (m Mode) lists(c context.Context, a identity.ActorContext, op operation.Con
 	if !m.ready() {
 		return Lists{}, ErrUnavailable
 	}
+	membership, joined, err := m.Service.Guilds.ReadMembership(c, a.PlayerID)
+	if err != nil {
+		return Lists{}, err
+	}
+	if !joined {
+		return Lists{}, nil
+	}
 	var out Lists
-	_, err := m.Runner.Run(c, op, i5.DefaultProfile(), tx.Options{Isolation: tx.ReadCommitted}, tx.RetryPolicy{MaxAttempts: 1}, nil, func(c context.Context, sc tx.Scope) error {
+	_, err = m.Runner.Run(c, op, i5.DefaultProfile(), tx.Options{Isolation: tx.ReadCommitted}, tx.RetryPolicy{MaxAttempts: 1}, nil, func(c context.Context, sc tx.Scope) error {
 		at := op.StartedAt.UTC()
-		membership, joined, err := m.Service.Guilds.ReadMembership(c, a.PlayerID)
-		if err != nil {
-			return err
-		}
-		if !joined {
-			return nil
-		}
 		guildID := int64(membership.GuildID)
 		for _, info := range sortedChapters(m.Tables) {
 			chapter, open, err := m.ModeStore.ReadChapterTx(c, sc.Tx, guildID, info.ChapterID)
@@ -183,15 +183,15 @@ func (m Mode) DamageRank(c context.Context, a identity.ActorContext, chapterID i
 	if !m.ready() || chapterID <= 0 {
 		return nil, ErrUnavailable
 	}
+	membership, joined, err := m.Service.Guilds.ReadMembership(c, a.PlayerID)
+	if err != nil {
+		return nil, err
+	}
+	if !joined {
+		return nil, nil
+	}
 	var out []RankRow
-	_, err := m.Runner.Run(c, op, i5.DefaultProfile(), tx.Options{Isolation: tx.ReadCommitted}, tx.RetryPolicy{MaxAttempts: 1}, nil, func(c context.Context, sc tx.Scope) error {
-		membership, joined, err := m.Service.Guilds.ReadMembership(c, a.PlayerID)
-		if err != nil {
-			return err
-		}
-		if !joined {
-			return nil
-		}
+	_, err = m.Runner.Run(c, op, i5.DefaultProfile(), tx.Options{Isolation: tx.ReadCommitted}, tx.RetryPolicy{MaxAttempts: 1}, nil, func(c context.Context, sc tx.Scope) error {
 		guildID := int64(membership.GuildID)
 		chapter, open, err := m.ModeStore.ReadChapterTx(c, sc.Tx, guildID, chapterID)
 		if err != nil {
@@ -255,15 +255,15 @@ func (m Mode) GuildLog(c context.Context, a identity.ActorContext, op operation.
 	if !m.ready() {
 		return nil, ErrUnavailable
 	}
+	membership, joined, err := m.Service.Guilds.ReadMembership(c, a.PlayerID)
+	if err != nil {
+		return nil, err
+	}
+	if !joined {
+		return nil, nil
+	}
 	var out []LogRow
-	_, err := m.Runner.Run(c, op, i5.DefaultProfile(), tx.Options{Isolation: tx.ReadCommitted}, tx.RetryPolicy{MaxAttempts: 1}, nil, func(c context.Context, sc tx.Scope) error {
-		membership, joined, err := m.Service.Guilds.ReadMembership(c, a.PlayerID)
-		if err != nil {
-			return err
-		}
-		if !joined {
-			return nil
-		}
+	_, err = m.Runner.Run(c, op, i5.DefaultProfile(), tx.Options{Isolation: tx.ReadCommitted}, tx.RetryPolicy{MaxAttempts: 1}, nil, func(c context.Context, sc tx.Scope) error {
 		guildID := int64(membership.GuildID)
 		roles := map[identity.PlayerID]int64{}
 		memberships, err := m.Service.Guilds.ListMembershipsTx(c, sc.Tx, guild.ID(guildID))
@@ -298,16 +298,16 @@ func (m Mode) MapDetail(c context.Context, a identity.ActorContext, copyID int64
 	if !known {
 		return DetailView{}, d.ErrRefused
 	}
+	membership, joined, err := m.Service.Guilds.ReadMembership(c, a.PlayerID)
+	if err != nil {
+		return DetailView{}, err
+	}
+	if !joined {
+		return DetailView{}, nil
+	}
 	var out DetailView
-	_, err := m.Runner.Run(c, op, i5.DefaultProfile(), tx.Options{Isolation: tx.ReadCommitted}, tx.RetryPolicy{MaxAttempts: 1}, nil, func(c context.Context, sc tx.Scope) error {
+	_, err = m.Runner.Run(c, op, i5.DefaultProfile(), tx.Options{Isolation: tx.ReadCommitted}, tx.RetryPolicy{MaxAttempts: 1}, nil, func(c context.Context, sc tx.Scope) error {
 		at := op.StartedAt.UTC()
-		membership, joined, err := m.Service.Guilds.ReadMembership(c, a.PlayerID)
-		if err != nil {
-			return err
-		}
-		if !joined {
-			return nil
-		}
 		guildID := int64(membership.GuildID)
 		chapter, open, err := m.ModeStore.ReadChapterTx(c, sc.Tx, guildID, chapterID)
 		if err != nil {

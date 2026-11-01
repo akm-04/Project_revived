@@ -137,17 +137,11 @@ def build(archive: Path) -> dict:
     if [chapter['chapter_id'] for chapter in chapters] != list(range(7, 23)):
         raise SystemExit('chapter census drift')
 
-    rank_thresholds = pipe(misc['team_dungeon_rank'])
-    rank_percents = pipe(misc['team_dungeon_rank_reward'])
-    if len(rank_thresholds) != 13 or len(rank_percents) != 13:
-        raise SystemExit('guild rank table width drift')
     return {
         'schema_version': 1,
         'campaign_type': GUILD_CAMPAIGN_TYPE,
         'chapters': chapters,
         'reward_hurt_rank': pipe(misc['reward_hurt_rank']),
-        'rank_thresholds': rank_thresholds,
-        'rank_percents': rank_percents,
         'dist_reward_time': pipe(misc['dist_reward_time']),
         'reward_param_per_mille': int(round(float(misc['reward_param']) * 1000)),
         'reward_time_limit_seconds': int(misc['reward_time_limit']),

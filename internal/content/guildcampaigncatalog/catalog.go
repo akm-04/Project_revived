@@ -44,8 +44,6 @@ type Chapter struct {
 // Settings are the server-only reward and schedule tables of misc.lua.
 type Settings struct {
 	RewardHurtRank       []int64 `json:"reward_hurt_rank"`
-	RankThresholds       []int64 `json:"rank_thresholds"`
-	RankPercents         []int64 `json:"rank_percents"`
 	DistRewardTime       []int64 `json:"dist_reward_time"`
 	RewardParamPerMile   int64   `json:"reward_param_per_mille"`
 	RewardTimeLimit      int64   `json:"reward_time_limit_seconds"`
@@ -121,7 +119,7 @@ func (c Catalog) Validate() error {
 			}
 		}
 	}
-	if len(c.RewardHurtRank) == 0 || len(c.RankThresholds) != len(c.RankPercents) || len(c.RankThresholds) == 0 || len(c.DistRewardTime) != 14 {
+	if len(c.RewardHurtRank) == 0 || len(c.DistRewardTime) != 14 {
 		return errors.New("guild campaign settings")
 	}
 	for index := 1; index < len(c.DistRewardTime); index++ {
