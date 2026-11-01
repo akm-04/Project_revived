@@ -54,6 +54,11 @@ type Loan struct {
 	MP     float64 `json:"mp"`
 }
 
+// Fights reports whether a later START may bring this girl: the run's own, still alive.
+func (l Loan) Fights(player, unit int64) bool {
+	return l.Player == player && l.Unit == unit && l.Health != 2
+}
+
 type Run struct {
 	Revision       string            `json:"revision"`
 	Occurrence     string            `json:"occurrence"`
@@ -235,7 +240,8 @@ func (r Run) rentList() map[string]any {
 	if r.Loan == nil {
 		return map[string]any{}
 	}
-	return map[string]any{strconv.FormatInt(r.Loan.Unit, 10): map[string]any{"health": r.Loan.Health, "hp": r.Loan.HP, "mp": r.Loan.MP}}
+	// SelectTeamWindow.lua:1259 reads rent_list.health flat; only self_list is keyed by id.
+	return map[string]any{"health": r.Loan.Health, "hp": r.Loan.HP, "mp": r.Loan.MP}
 }
 
 // Stock indexes heroes numerically in both MarchTeamInfo and result merges.

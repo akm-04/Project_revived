@@ -84,3 +84,18 @@ func TestStockProjectionHasListEnemiesAndNestedOwnCarry(t *testing.T) {
 		t.Fatal("stock numeric enemy index", rows)
 	}
 }
+
+func TestLoanRendersFlatAndDeadLoanCannotFight(t *testing.T) {
+	loan := Loan{Player: 7, Unit: 9}
+	if !loan.Fights(7, 9) || loan.Fights(7, 8) || loan.Fights(6, 9) {
+		t.Fatal("loan identity")
+	}
+	rent := Run{Loan: &loan}.rentList()
+	if rent["health"] != int64(0) {
+		t.Fatal("a loan that has not fought renders at full health", rent)
+	}
+	loan.Health = 2
+	if loan.Fights(7, 9) {
+		t.Fatal("dead loan fights")
+	}
+}

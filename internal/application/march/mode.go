@@ -244,14 +244,15 @@ func (s Mode) Start(c context.Context, a identity.ActorContext, q Fight, op oper
 				battle.TeamA = append(battle.TeamA, appcombat.Participant{Origin: cd.OwnedSelf, Kind: cd.HeroActor, Player: a.PlayerID, Identity: id})
 			}
 		}
-		if r.Loan != nil {
-			if q.RentUnit > 0 && (q.RentUnit != r.Loan.Unit || q.RentPlayer != r.Loan.Player) {
-				return nil, d.ErrRefused
-			}
-			battle.TeamA = append(battle.TeamA, appcombat.Participant{Origin: cd.Borrowed, Kind: cd.HeroActor, Player: identity.PlayerID(r.Loan.Player), Identity: r.Loan.Unit, LoanHeld: true})
-		} else if q.RentUnit > 0 && q.RentPlayer > 0 {
-			r.Loan = &d.Loan{Player: q.RentPlayer, Unit: q.RentUnit, Health: 1}
+		switch {
+		case q.RentUnit == 0:
+		case r.Loan == nil:
+			r.Loan = &d.Loan{Player: q.RentPlayer, Unit: q.RentUnit}
 			battle.TeamA = append(battle.TeamA, appcombat.Participant{Origin: cd.Borrowed, Kind: cd.HeroActor, Player: identity.PlayerID(q.RentPlayer), Identity: q.RentUnit})
+		case !r.Loan.Fights(q.RentPlayer, q.RentUnit):
+			return nil, d.ErrRefused
+		default:
+			battle.TeamA = append(battle.TeamA, appcombat.Participant{Origin: cd.Borrowed, Kind: cd.HeroActor, Player: identity.PlayerID(r.Loan.Player), Identity: r.Loan.Unit, LoanHeld: true})
 		}
 		enemies := []appcombat.Participant{}
 		enemy := r.Enemies[r.Passed]
