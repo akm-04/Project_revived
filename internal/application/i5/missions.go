@@ -7,6 +7,7 @@ import (
 	"slices"
 	"time"
 
+	"gxb.local/backend/v2/internal/domain/character"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/domain/objective"
 	"gxb.local/backend/v2/internal/foundation/tx"
@@ -39,8 +40,8 @@ type MissionObservation struct {
 
 // MissionObservations composes owning read ports; it never reads another owner's tables directly.
 type MissionObservations interface {
-	MissionPartnerTemplatesTx(context.Context, tx.Queryer, MissionScope) ([]int64, error)
-	ObserveMissionTx(context.Context, tx.Queryer, MissionScope, objective.MissionDefinition, int64) (MissionObservation, error)
+	MissionRosterTx(context.Context, tx.Queryer, MissionScope) ([]character.Hero, error)
+	ObserveMissionTx(context.Context, tx.Queryer, MissionScope, []character.Hero, objective.MissionDefinition, int64) (MissionObservation, error)
 }
 
 type MissionMaterializer struct {
@@ -101,11 +102,14 @@ func (m MissionMaterializer) MaterializeTx(ctx context.Context, t tx.Tx, scope M
 	for _, instance := range instances {
 		byOccurrence[missionOccurrence(instance.ObjectiveID, instance.GenerationID)] = instance
 	}
-	heroes, err := m.Observations.MissionPartnerTemplatesTx(ctx, t, scope)
+	roster, err := m.Observations.MissionRosterTx(ctx, t, scope)
 	if err != nil {
 		return MissionView{}, err
 	}
-	heroes = slices.Clone(heroes)
+	heroes := make([]int64, 0, len(roster))
+	for _, hero := range roster {
+		heroes = append(heroes, hero.OriginTableID)
+	}
 	slices.Sort(heroes)
 	heroes = slices.Compact(heroes)
 	for _, definition := range definitions {
@@ -120,7 +124,7 @@ func (m MissionMaterializer) MaterializeTx(ctx context.Context, t tx.Tx, scope M
 			if definition.Family == objective.Partner && hero <= 0 {
 				return MissionView{}, errors.New("invalid partner mission template identity")
 			}
-			instance, exists, err := m.materializeOne(ctx, t, scope, definition, hero, byOccurrence, catalogs)
+			instance, exists, err := m.materializeOne(ctx, t, scope, definition, hero, roster, byOccurrence, catalogs)
 			if err != nil {
 				return MissionView{}, err
 			}
@@ -164,7 +168,7 @@ func missionOccurrence(id int64, generation string) string {
 	return fmt.Sprintf("%d:%s", id, generation)
 }
 
-func (m MissionMaterializer) materializeOne(ctx context.Context, t tx.Tx, scope MissionScope, definition objective.MissionDefinition, hero int64, instances map[string]objective.Instance, catalogs map[string][]objective.MissionDefinition) (objective.Instance, bool, error) {
+func (m MissionMaterializer) materializeOne(ctx context.Context, t tx.Tx, scope MissionScope, definition objective.MissionDefinition, hero int64, roster []character.Hero, instances map[string]objective.Instance, catalogs map[string][]objective.MissionDefinition) (objective.Instance, bool, error) {
 	generation, err := definition.MissionGeneration(scope.DecisionAt, hero)
 	if err != nil {
 		return objective.Instance{}, false, err
@@ -200,7 +204,7 @@ func (m MissionMaterializer) materializeOne(ctx context.Context, t tx.Tx, scope 
 	if previous := definition.Prerequisite.Previous; !exists && previous != 0 && instances[missionOccurrence(previous, generation)].ClaimState != objective.Claimed {
 		return objective.Instance{}, false, nil
 	}
-	observation, err := m.Observations.ObserveMissionTx(ctx, t, scope, definition, hero)
+	observation, err := m.Observations.ObserveMissionTx(ctx, t, scope, roster, definition, hero)
 	if err != nil {
 		return objective.Instance{}, false, err
 	}

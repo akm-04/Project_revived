@@ -41,23 +41,15 @@ type Reader struct {
 	Privileges  i5.PrivilegeSnapshotProvider
 }
 
-func (r Reader) MissionPartnerTemplatesTx(ctx context.Context, q tx.Queryer, scope i5.MissionScope) ([]int64, error) {
+func (r Reader) MissionRosterTx(ctx context.Context, q tx.Queryer, scope i5.MissionScope) ([]character.Hero, error) {
 	if r.Heroes == nil {
 		return nil, errors.New("mission hero reader unavailable")
 	}
-	heroes, err := r.Heroes.ListHeroesTx(ctx, q, scope.PlayerID)
-	if err != nil {
-		return nil, err
-	}
-	ids := make([]int64, 0, len(heroes))
-	for _, hero := range heroes {
-		ids = append(ids, hero.OriginTableID)
-	}
-	return ids, nil
+	return r.Heroes.ListHeroesTx(ctx, q, scope.PlayerID)
 }
 
-func (r Reader) ObserveMissionTx(ctx context.Context, q tx.Queryer, scope i5.MissionScope, definition objective.MissionDefinition, boundHero int64) (i5.MissionObservation, error) {
-	passed, err := r.gate(ctx, q, scope, definition, boundHero)
+func (r Reader) ObserveMissionTx(ctx context.Context, q tx.Queryer, scope i5.MissionScope, roster []character.Hero, definition objective.MissionDefinition, boundHero int64) (i5.MissionObservation, error) {
+	passed, err := r.gate(ctx, q, scope, roster, definition, boundHero)
 	if err != nil || !passed {
 		return i5.MissionObservation{}, err
 	}
@@ -94,13 +86,6 @@ func (r Reader) ObserveMissionTx(ctx context.Context, q tx.Queryer, scope i5.Mis
 		}
 		out.Value = state.Level
 	case kind >= 3 && kind <= 14 || kind == 23 || kind == 24 || kind == 18 || kind == 21 || kind == 22:
-		if r.Heroes == nil {
-			return out, errors.New("mission hero reader unavailable")
-		}
-		heroes, err := r.Heroes.ListHeroesTx(ctx, q, scope.PlayerID)
-		if err != nil {
-			return out, err
-		}
 		threshold := kind
 		if kind == 23 {
 			threshold = 15
@@ -108,7 +93,7 @@ func (r Reader) ObserveMissionTx(ctx context.Context, q tx.Queryer, scope i5.Mis
 		if kind == 24 {
 			threshold = 16
 		}
-		for _, hero := range heroes {
+		for _, hero := range roster {
 			switch kind {
 			case 18:
 				target := parameters[0]
@@ -181,7 +166,7 @@ func (r Reader) ObserveMissionTx(ctx context.Context, q tx.Queryer, scope i5.Mis
 	return out, nil
 }
 
-func (r Reader) gate(ctx context.Context, q tx.Queryer, scope i5.MissionScope, definition objective.MissionDefinition, boundHero int64) (bool, error) {
+func (r Reader) gate(ctx context.Context, q tx.Queryer, scope i5.MissionScope, roster []character.Hero, definition objective.MissionDefinition, boundHero int64) (bool, error) {
 	if err := definition.Validate(); err != nil {
 		return false, err
 	}
@@ -211,14 +196,7 @@ func (r Reader) gate(ctx context.Context, q tx.Queryer, scope i5.MissionScope, d
 		state, err := r.Privileges.SnapshotTx(ctx, q, scope.PlayerID, scope.DecisionAt)
 		return state.VIPLevel >= gate[1], err
 	case 9:
-		if r.Heroes == nil {
-			return false, errors.New("mission hero reader unavailable")
-		}
-		heroes, err := r.Heroes.ListHeroesTx(ctx, q, scope.PlayerID)
-		if err != nil {
-			return false, err
-		}
-		for _, hero := range heroes {
+		for _, hero := range roster {
 			if hero.OriginTableID == boundHero {
 				return true, nil
 			}
