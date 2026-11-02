@@ -11,11 +11,18 @@ import (
 	dorm "gxb.local/backend/v2/internal/domain/dormhouse"
 	"gxb.local/backend/v2/internal/foundation/tx"
 	"io"
+	"sync"
 )
 
 // DormCatalogTx reads only the caller-pinned immutable revision. Registration
 // and controlled deployment/backfill must complete before activation.
+var dormCatalogs sync.Map
+
 func (s Store) DormCatalogTx(ctx context.Context, q tx.Queryer, revision string) (dorm.Catalog, error) {
+	return memoCatalog(&dormCatalogs, revision, func() (dorm.Catalog, error) { return s.dormCatalogTx(ctx, q, revision) })
+}
+
+func (s Store) dormCatalogTx(ctx context.Context, q tx.Queryer, revision string) (dorm.Catalog, error) {
 	var out dorm.Catalog
 	if q == nil || len(revision) != 64 {
 		return out, dorm.ErrUnqualified

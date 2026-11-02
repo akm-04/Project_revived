@@ -11,11 +11,18 @@ import (
 	course "gxb.local/backend/v2/internal/domain/course"
 	"gxb.local/backend/v2/internal/foundation/tx"
 	"io"
+	"sync"
 )
 
 // CourseCatalogTx reads only the caller-pinned immutable revision. Registration
 // and controlled deployment/backfill must complete before activation.
+var courseCatalogs sync.Map
+
 func (s Store) CourseCatalogTx(ctx context.Context, q tx.Queryer, revision string) (course.Catalog, error) {
+	return memoCatalog(&courseCatalogs, revision, func() (course.Catalog, error) { return s.courseCatalogTx(ctx, q, revision) })
+}
+
+func (s Store) courseCatalogTx(ctx context.Context, q tx.Queryer, revision string) (course.Catalog, error) {
 	var out course.Catalog
 	if q == nil || len(revision) != 64 {
 		return out, course.ErrUnqualified

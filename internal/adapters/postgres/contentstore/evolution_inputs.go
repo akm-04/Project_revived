@@ -11,11 +11,18 @@ import (
 	heroevolution "gxb.local/backend/v2/internal/domain/heroevolution"
 	"gxb.local/backend/v2/internal/foundation/tx"
 	"io"
+	"sync"
 )
 
 // EvolutionCatalogTx reads only the caller-pinned immutable revision. Registration
 // and controlled deployment/backfill must complete before activation.
+var evolutionCatalogs sync.Map
+
 func (s Store) EvolutionCatalogTx(ctx context.Context, q tx.Queryer, revision string) (heroevolution.Catalog, error) {
+	return memoCatalog(&evolutionCatalogs, revision, func() (heroevolution.Catalog, error) { return s.evolutionCatalogTx(ctx, q, revision) })
+}
+
+func (s Store) evolutionCatalogTx(ctx context.Context, q tx.Queryer, revision string) (heroevolution.Catalog, error) {
 	var out heroevolution.Catalog
 	if q == nil || len(revision) != 64 {
 		return out, heroevolution.ErrUnqualified

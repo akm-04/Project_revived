@@ -7,6 +7,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"io"
+	"sync"
 
 	"gxb.local/backend/v2/internal/content/builtin"
 	"gxb.local/backend/v2/internal/content/registry"
@@ -38,7 +39,13 @@ func (s Store) LibraryInputsActive(ctx context.Context) (string, bool, error) {
 
 // LibraryCatalogTx resolves exact captured content through the caller's queryer.
 // It neither discovers current time/activation nor opens another transaction.
+var libraryCatalogs sync.Map
+
 func (s Store) LibraryCatalogTx(ctx context.Context, q tx.Queryer, revision string) (library.Catalog, error) {
+	return memoCatalog(&libraryCatalogs, revision, func() (library.Catalog, error) { return s.libraryCatalogTx(ctx, q, revision) })
+}
+
+func (s Store) libraryCatalogTx(ctx context.Context, q tx.Queryer, revision string) (library.Catalog, error) {
 	var out library.Catalog
 	if q == nil || !library.ValidRevision(revision) {
 		return out, library.ErrUnqualified

@@ -22,6 +22,7 @@ import (
 	rules "gxb.local/backend/v2/internal/domain/statrules"
 	"gxb.local/backend/v2/internal/foundation/tx"
 	"math/big"
+	"sync"
 	"time"
 )
 
@@ -120,9 +121,17 @@ func scopeValid(s ca.CoherentReadScope) bool {
 	p, ok := s.Operation.Policies.Get("content")
 	return ok && p == s.ContentRevision
 }
+
+// Installed revisions are immutable and a Materializer is read-only after New,
+// so one per revision is shared; building one costs about 60 ms per hero read.
+var materializers sync.Map
+
 func (s Service) materializer(c context.Context, sc ca.CoherentReadScope) (*n.Materializer, error) {
 	if !scopeValid(sc) || s.Content == nil || s.Owned == nil {
 		return nil, ErrUnqualified
+	}
+	if cached, ok := materializers.Load(sc.ContentRevision); ok {
+		return cached.(*n.Materializer), nil
 	}
 	r, e := s.Content.StatCatalogTx(c, sc.Queryer(), sc.ContentRevision)
 	if e != nil {
@@ -132,7 +141,12 @@ func (s Service) materializer(c context.Context, sc ca.CoherentReadScope) (*n.Ma
 	if e != nil {
 		return nil, e
 	}
-	return n.New(sc.ContentRevision, i, r)
+	m, e := n.New(sc.ContentRevision, i, r)
+	if e != nil {
+		return nil, e
+	}
+	materializers.Store(sc.ContentRevision, m)
+	return m, nil
 }
 func pinned(rev string, at time.Time, sc ca.CoherentReadScope) bool {
 	return rev == sc.ContentRevision && at.Equal(sc.ObservedAt)
