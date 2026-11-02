@@ -11,7 +11,6 @@ import (
 )
 
 var missionDefinitionCatalogs sync.Map
-var missionActivityCatalogs sync.Map
 
 func (s Store) MissionDefinitionsTx(ctx context.Context, q tx.Queryer, revision string) ([]objective.MissionDefinition, error) {
 	return memoCatalog(&missionDefinitionCatalogs, revision, func() ([]objective.MissionDefinition, error) { return s.missionDefinitionsTx(ctx, q, revision) })
@@ -42,11 +41,7 @@ FROM gxb_content_objective_definitions d WHERE revision_id=$1 AND definition_rev
 	return definitions, nil
 }
 
-func (s Store) MissionActivityCatalogTx(ctx context.Context, q tx.Queryer, revision string) (*objective.ActivityCatalog, error) {
-	return memoCatalog(&missionActivityCatalogs, revision, func() (*objective.ActivityCatalog, error) { return s.missionActivityCatalogTx(ctx, q, revision) })
-}
-
-func (s Store) missionActivityCatalogTx(ctx context.Context, q tx.Queryer, revision string) (*objective.ActivityCatalog, error) {
+func (Store) MissionActivityCatalogTx(ctx context.Context, q tx.Queryer, revision string) (*objective.ActivityCatalog, error) {
 	if q == nil || len(revision) != 64 {
 		return nil, errors.New("content store: activity revision/queryer required")
 	}
